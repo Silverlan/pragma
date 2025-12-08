@@ -32,7 +32,7 @@ void pragma::networking::NWMActiveServer::OnPacketSent(const NWMEndpoint &ep, co
 	nwm::Server::OnPacketSent(ep, packet);
 #if DEBUG_SERVER_VERBOSE == 1
 	auto id = packet.GetMessageID();
-	auto *clMap = GetClientMessageMap();
+	auto *clMap = get_client_message_map();
 	util::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 	auto it = std::find_if(clMsgs->begin(), clMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
@@ -46,7 +46,7 @@ void pragma::networking::NWMActiveServer::OnPacketReceived(const NWMEndpoint &ep
 {
 	nwm::Server::OnPacketReceived(ep, cl, id, packet);
 #if DEBUG_SERVER_VERBOSE == 1
-	auto *svMap = GetServerMessageMap();
+	auto *svMap = get_server_message_map();
 	util::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 	auto it = std::find_if(svMsgs->begin(), svMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
@@ -58,8 +58,8 @@ void pragma::networking::NWMActiveServer::OnPacketReceived(const NWMEndpoint &ep
 
 bool pragma::networking::NWMActiveServer::HandleAsyncPacket(const NWMEndpoint &ep, NWMSession *session, uint32_t id, NetPacket &packet)
 {
-	switch(static_cast<WVQuery>(id)) {
-	case WVQuery::PING:
+	switch(static_cast<ServerQuery>(id)) {
+	case ServerQuery::Ping:
 		{
 			NetPacket pong {id};
 			auto *epPtr = ep.get();
@@ -113,7 +113,7 @@ void pragma::networking::NWMActiveServer::OnClientDropped(nwm::ServerClient *cl,
 	if(it == m_nwmToPragmaClient.end())
 		return;
 	auto *prCl = it->second;
-	auto *pl = ServerState::Get()->GetPlayer(*prCl);
+	auto *pl = pragma::ServerState::Get()->GetPlayer(*prCl);
 	if(pl)
 		pl->GetEntity().RemoveSafely();
 #if DEBUG_SERVER_VERBOSE == 1
@@ -149,7 +149,7 @@ void pragma::networking::NWMActiveServer::Heartbeat()
 {
 	if(m_dispatcher == nullptr || !ServerState::Get()->IsGameActive())
 		return;
-	auto &data = ServerState::Get()->GetServerData();
+	auto &data = pragma::ServerState::Get()->GetServerData();
 	util::DataStream body;
 	data.Write(body);
 
@@ -220,11 +220,11 @@ bool pragma::networking::StandardServerClient::SendPacket(pragma::networking::Pr
 void pragma::networking::StandardServerClient::SetNWMClient(nwm::ServerClient *cl) { m_nwmClient = cl; }
 nwm::ServerClient &pragma::networking::StandardServerClient::GetNWMClient() const { return *m_nwmClient; }
 
-static void sv_timeout_duration_callback(NetworkState *, const ConVar &, float, float val)
+static void sv_timeout_duration_callback(pragma::NetworkState *, const pragma::console::ConVar &, float, float val)
 {
-	if(ServerState::Get() == nullptr)
+	if(pragma::ServerState::Get() == nullptr)
 		return;
-	auto *sv = ServerState::Get()->GetServer();
+	auto *sv = pragma::ServerState::Get()->GetServer();
 	if(sv == nullptr)
 		return;
 	sv->SetTimeoutDuration(GET_TIMEOUT_DURATION(val));

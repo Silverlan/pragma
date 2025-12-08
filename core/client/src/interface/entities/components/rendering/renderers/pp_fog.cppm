@@ -17,6 +17,6 @@ export namespace pragma {
 		virtual std::string GetIdentifier() const override { return "fog"; }
 		virtual uint32_t GetPostProcessingWeight() const override { return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::Fog); }
 	  private:
-		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) override;
+		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) override;
 	};
 };

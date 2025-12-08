@@ -15,8 +15,8 @@ choreography::Channel::Channel(uts::TimelineScene &scene, const std::string &nam
 choreography::Channel::~Channel() {}
 choreography::Event::Event(uts::Channel &channel) : uts::Event(channel) {}
 choreography::Event::~Event() {}
-CBaseEntity *choreography::Event::GetActor() const { return static_cast<CBaseEntity *>(m_actor.get()); }
-void choreography::Event::SetActor(CBaseEntity &actor) { m_actor = actor.GetHandle(); }
+pragma::ecs::CBaseEntity *choreography::Event::GetActor() const { return static_cast<pragma::ecs::CBaseEntity *>(m_actor.get()); }
+void choreography::Event::SetActor(pragma::ecs::CBaseEntity &actor) { m_actor = actor.GetHandle(); }
 void choreography::Event::ClearActor() { m_actor = EntityHandle {}; }
 
 choreography::AudioEvent::AudioEvent(uts::Channel &channel, const std::string &snd) : Event(channel), m_soundSource(snd) {}

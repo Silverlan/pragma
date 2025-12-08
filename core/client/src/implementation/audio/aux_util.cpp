@@ -9,7 +9,7 @@ import :audio.aux_util;
 import :engine;
 
 static uint32_t s_globalEffectId = std::numeric_limits<uint32_t>::max();
-static void debug_audio_aux_effect(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_audio_aux_effect(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr) {

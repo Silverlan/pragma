@@ -6,12 +6,12 @@ module pragma.shared;
 
 import :networking.velocity_correction;
 
-void nwm::VelocityCorrection::SetLinearCorrectionVelocity(const Vector3 &v) { m_linearCorrectionVel = v; }
-const Vector3 &nwm::VelocityCorrection::GetLinearCorrectionVelocity() const { return m_linearCorrectionVel; }
-void nwm::VelocityCorrection::ResetLinearCorrectionVelocity() { SetLinearCorrectionVelocity({}); }
-void nwm::VelocityCorrection::CorrectLinearVelocity(Vector3 &vel) { vel += GetLinearCorrectionVelocity(); }
+void pragma::networking::VelocityCorrection::SetLinearCorrectionVelocity(const Vector3 &v) { m_linearCorrectionVel = v; }
+const Vector3 &pragma::networking::VelocityCorrection::GetLinearCorrectionVelocity() const { return m_linearCorrectionVel; }
+void pragma::networking::VelocityCorrection::ResetLinearCorrectionVelocity() { SetLinearCorrectionVelocity({}); }
+void pragma::networking::VelocityCorrection::CorrectLinearVelocity(Vector3 &vel) { vel += GetLinearCorrectionVelocity(); }
 
-void nwm::VelocityCorrection::SetAngularCorrectionVelocity(const Vector3 &v) { m_angularCorrectionVel = v; }
-const Vector3 &nwm::VelocityCorrection::GetAngularCorrectionVelocity() const { return m_angularCorrectionVel; }
-void nwm::VelocityCorrection::ResetAngularCorrectionVelocity() { SetAngularCorrectionVelocity({}); }
-void nwm::VelocityCorrection::CorrectAngularVelocity(Vector3 &vel) { vel += GetAngularCorrectionVelocity(); }
+void pragma::networking::VelocityCorrection::SetAngularCorrectionVelocity(const Vector3 &v) { m_angularCorrectionVel = v; }
+const Vector3 &pragma::networking::VelocityCorrection::GetAngularCorrectionVelocity() const { return m_angularCorrectionVel; }
+void pragma::networking::VelocityCorrection::ResetAngularCorrectionVelocity() { SetAngularCorrectionVelocity({}); }
+void pragma::networking::VelocityCorrection::CorrectAngularVelocity(Vector3 &vel) { vel += GetAngularCorrectionVelocity(); }

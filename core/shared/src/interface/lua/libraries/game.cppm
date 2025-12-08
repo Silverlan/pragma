@@ -22,7 +22,7 @@ export {
 
 			DLLNETWORK opt<type<CallbackHandle>> add_callback(lua::State *l, const std::string &identifier, const func<void> &function);
 			DLLNETWORK void clear_callbacks(lua::State *l, const std::string &identifier);
-			DLLNETWORK bool register_ammo_type(lua::State *l, const std::string &name, int32_t damage = 10, float force = 200.f, DAMAGETYPE damageType = DAMAGETYPE::BULLET);
+			DLLNETWORK bool register_ammo_type(lua::State *l, const std::string &name, int32_t damage = 10, float force = 200.f, DamageType damageType = DamageType::Bullet);
 			DLLNETWORK opt<uint32_t> get_ammo_type_id(lua::State *l, const std::string &name);
 			DLLNETWORK opt<std::string> get_ammo_type_name(lua::State *l, uint32_t typeId);
 			DLLNETWORK opt<type<pragma::BaseGamemodeComponent>> get_game_mode(lua::State *l);
@@ -31,7 +31,7 @@ export {
 			DLLNETWORK float get_time_scale(lua::State *l);
 			DLLNETWORK void set_time_scale(lua::State *l, float timeScale);
 			DLLNETWORK bool is_game_mode_initialized(lua::State *l);
-			DLLNETWORK bool raycast(lua::State *l, const ::TraceData &data);
+			DLLNETWORK bool raycast(lua::State *l, const pragma::physics::TraceData &data);
 			;
 			DLLNETWORK opt<std::shared_ptr<pragma::nav::Mesh>> get_nav_mesh(lua::State *l);
 			DLLNETWORK bool load_nav_mesh(lua::State *l, bool reload = false);

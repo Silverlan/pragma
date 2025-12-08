@@ -47,7 +47,7 @@ void SWheelComponent::SendSnapshotData(NetPacket &packet, pragma::BasePlayerComp
 void SWheelComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SWheelComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
-	nwm::write_entity(packet, m_vehicle.valid() ? &m_vehicle->GetEntity() : nullptr);
+	pragma::networking::write_entity(packet, m_vehicle.valid() ? &m_vehicle->GetEntity() : nullptr);
 	packet->Write<UChar>(m_wheelId);
 #if 0
 	packet->Write<Bool>(m_wheelInfo.bFrontWheel);
@@ -80,7 +80,7 @@ void SWheelComponent::Attach(BaseEntity *ent,UChar wheelId)
 	if(!entThis.IsShared())
 		return;
 	NetPacket p;
-	nwm::write_entity(p,ent);
+	pragma::networking::write_entity(p,ent);
 	p->Write<UChar>(wheelId);
 	entThis.SendNetEvent(m_netEvAttach,p,pragma::networking::Protocol::SlowReliable);
 }

@@ -772,7 +772,7 @@ void PanimaComponent::ReloadAnimation()
 }
 void PanimaComponent::Save(udm::LinkedPropertyWrapperArg udm) {}
 void PanimaComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) {}
-void PanimaComponent::ResetAnimation(const std::shared_ptr<pragma::Model> &mdl) {}
+void PanimaComponent::ResetAnimation(const std::shared_ptr<pragma::asset::Model> &mdl) {}
 
 /////////////////
 

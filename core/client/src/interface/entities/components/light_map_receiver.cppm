@@ -18,7 +18,7 @@ export namespace pragma {
 	class DLLCLIENT CLightMapReceiverComponent final : public BaseEntityComponent {
 	  public:
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-		static void SetupLightMapUvData(CBaseEntity &ent, LightmapDataCache *cache = nullptr);
+		static void SetupLightMapUvData(ecs::CBaseEntity &ent, rendering::LightmapDataCache *cache = nullptr);
 		enum class StateFlags : uint8_t { None = 0, IsModelBakedWithLightMaps = 1u, RenderMeshBufferIndexTableDirty = IsModelBakedWithLightMaps << 1u };
 		using MeshIdx = uint32_t;
 		using BufferIdx = uint32_t;
@@ -30,23 +30,23 @@ export namespace pragma {
 		void UpdateLightMapUvData();
 		const std::unordered_map<MeshIdx, std::vector<Vector2>> &GetMeshLightMapUvData() const;
 		void AssignBufferIndex(MeshIdx meshIdx, BufferIdx bufIdx);
-		std::optional<BufferIdx> FindBufferIndex(CModelSubMesh &mesh) const;
+		std::optional<BufferIdx> FindBufferIndex(pragma::geometry::CModelSubMesh &mesh) const;
 		std::optional<BufferIdx> GetBufferIndex(RenderMeshIndex meshIdx) const;
 
 		void UpdateMeshLightmapUvBuffers(CLightMapComponent &lightMapC);
 
-		const LightmapDataCache *GetLightmapDataCache() const;
-		void SetLightmapDataCache(LightmapDataCache *cache);
+		const rendering::LightmapDataCache *GetLightmapDataCache() const;
+		void SetLightmapDataCache(rendering::LightmapDataCache *cache);
 	  protected:
-		const std::vector<Vector2> *FindLightmapUvSet(pragma::ModelSubMesh &mesh) const;
+		const std::vector<Vector2> *FindLightmapUvSet(pragma::geometry::ModelSubMesh &mesh) const;
 		void UpdateModelMeshes();
 		void UpdateRenderMeshBufferList();
 
-		std::shared_ptr<LightmapDataCache> m_lightmapDataCache;
+		std::shared_ptr<rendering::LightmapDataCache> m_lightmapDataCache;
 		std::unordered_map<MeshIdx, std::vector<Vector2>> m_uvDataPerMesh {};
-		std::unordered_map<MeshIdx, std::shared_ptr<pragma::ModelSubMesh>> m_meshes {};
-		std::unordered_map<CModelSubMesh *, MeshIdx> m_meshToMeshIdx {};
-		std::unordered_map<CModelSubMesh *, BufferIdx> m_meshToBufIdx {};
+		std::unordered_map<MeshIdx, std::shared_ptr<pragma::geometry::ModelSubMesh>> m_meshes {};
+		std::unordered_map<pragma::geometry::CModelSubMesh *, MeshIdx> m_meshToMeshIdx {};
+		std::unordered_map<pragma::geometry::CModelSubMesh *, BufferIdx> m_meshToBufIdx {};
 
 		// Matches the render meshes from the model component (for faster lookup)
 		std::vector<BufferIdx> m_meshBufferIndices;

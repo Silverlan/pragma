@@ -45,7 +45,7 @@ export namespace pragma {
 		bool IsGameReady() const;
 		void SetGameReady(bool b);
 		bool SendResource(const std::string &fileName) const;
-		virtual void PrintMessage(std::string message, MESSAGE type) override;
+		virtual void PrintMessage(std::string message, pragma::console::MESSAGE type) override;
 
 		virtual void SetViewRotation(const Quat &rot) override;
 
@@ -59,7 +59,7 @@ export namespace pragma {
 		bool m_bAuthed;
 		std::vector<InputAction> m_keyStack;
 		void InitializeFlashlight();
-		void OnTakeDamage(DamageInfo &info);
+		void OnTakeDamage(game::DamageInfo &info);
 		void OnSetSlopeLimit(float limit);
 		void OnSetStepOffset(float offset);
 		virtual void Initialize() override;

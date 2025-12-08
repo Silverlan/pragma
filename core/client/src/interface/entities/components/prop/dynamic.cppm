@@ -21,7 +21,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CPropDynamic : public CBaseEntity {
+	class DLLCLIENT CPropDynamic : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

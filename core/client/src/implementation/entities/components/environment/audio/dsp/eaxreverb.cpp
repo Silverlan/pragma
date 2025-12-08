@@ -23,10 +23,10 @@ void CSoundDspEAXReverbComponent::ReceiveData(NetPacket &packet)
 	m_kvDecayHFLimit = packet->Read<int>();
 	m_kvReflectionsGain = packet->Read<float>();
 	m_kvReflectionsDelay = packet->Read<float>();
-	m_kvReflectionsPan = nwm::read_vector(packet);
+	m_kvReflectionsPan = networking::read_vector(packet);
 	m_kvLateGain = packet->Read<float>();
 	m_kvLateDelay = packet->Read<float>();
-	m_kvLatePan = nwm::read_vector(packet);
+	m_kvLatePan = networking::read_vector(packet);
 	m_kvEchoTime = packet->Read<float>();
 	m_kvEchoDepth = packet->Read<float>();
 	m_kvModTime = packet->Read<float>();

@@ -32,7 +32,7 @@ void CLiquidSurfaceComponent::Initialize()
 			auto renderTargetC = GetEntity().FindComponent("render_target");
 			if(!renderTargetC.valid())
 				return;
-			auto *drawSceneInfo = renderTargetC->CallLuaMethod<util::DrawSceneInfo *>("GetDrawSceneInfo");
+			auto *drawSceneInfo = renderTargetC->CallLuaMethod<pragma::rendering::DrawSceneInfo *>("GetDrawSceneInfo");
 			if(drawSceneInfo) {
 				auto maskWater = pragma::get_cgame()->GetRenderMask("water");
 				if(maskWater.has_value())
@@ -99,7 +99,7 @@ void CLiquidSurfaceComponent::OnEntitySpawn()
 					if(data.arguments.size() > 0) {
 						auto &arg = data.arguments[0];
 						try {
-							auto *drawSceneInfo = luabind::object_cast_nothrow<util::DrawSceneInfo *>(arg, static_cast<util::DrawSceneInfo *>(nullptr));
+							auto *drawSceneInfo = luabind::object_cast_nothrow<pragma::rendering::DrawSceneInfo *>(arg, static_cast<pragma::rendering::DrawSceneInfo *>(nullptr));
 							if(drawSceneInfo) {
 								auto maskWater = pragma::get_cgame()->GetRenderMask("water");
 								if(maskWater.has_value())
@@ -268,8 +268,8 @@ static void is_camera_submerged(const pragma::CCameraComponent &cam, const Vecto
 	camCenterPlaneSide = umath::geometry::PlaneSide::Front;
 }
 
-static auto cvReflectionQuality = GetClientConVar("cl_render_reflection_quality");
-static auto cvDrawWater = GetClientConVar("render_draw_water");
+static auto cvReflectionQuality = pragma::console::get_client_con_var("cl_render_reflection_quality");
+static auto cvDrawWater = pragma::console::get_client_con_var("render_draw_water");
 void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos, const Vector3 &planeNormal, const Vector3 &waterAabbMin, const Vector3 &waterAabbMax)
 {
 	pragma::get_cengine()->GetShaderManager().GetShader("water"); // Make sure water shader is loaded
@@ -416,14 +416,14 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos, const 
 
 void CLiquidSurfaceComponent::InitializeRenderer(pragma::CRendererComponent &component)
 {
-	auto handle = component.AddPostProcessingEffect("pp_water_overlay", [this](const util::DrawSceneInfo &drawSceneInfo) { RenderPostProcessingOverlay(drawSceneInfo); }, 380'000);
+	auto handle = component.AddPostProcessingEffect("pp_water_overlay", [this](const pragma::rendering::DrawSceneInfo &drawSceneInfo) { RenderPostProcessingOverlay(drawSceneInfo); }, 380'000);
 	m_waterScene->hPostProcessing.push_back(handle);
 }
 
-void CLiquidSurfaceComponent::RenderPostProcessingOverlay(const util::DrawSceneInfo &drawSceneInfo)
+void CLiquidSurfaceComponent::RenderPostProcessingOverlay(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	auto renderFlags = drawSceneInfo.renderFlags;
-	if(cvDrawWater->GetBool() == false || (renderFlags & RenderFlags::Water) == RenderFlags::None)
+	if(cvDrawWater->GetBool() == false || (renderFlags & rendering::RenderFlags::Water) == rendering::RenderFlags::None)
 		return;
 	if(pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>() != pragma::get_cgame()->GetScene<pragma::CSceneComponent>())
 		return;

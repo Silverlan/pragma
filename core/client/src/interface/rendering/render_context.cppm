@@ -14,7 +14,7 @@ export import pragma.prosper;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-namespace pragma {
+namespace pragma::rendering {
 	class DLLCLIENT RenderContext {
 	  public:
 		enum class StateFlags : uint8_t {
@@ -71,6 +71,6 @@ namespace pragma {
 	using namespace umath::scoped_enum::bitwise;
 }
 export {
-	REGISTER_ENUM_FLAGS(pragma::RenderContext::StateFlags)
+	REGISTER_ENUM_FLAGS(pragma::rendering::RenderContext::StateFlags)
 };
 #pragma warning(pop)

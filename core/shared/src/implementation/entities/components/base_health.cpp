@@ -72,7 +72,7 @@ util::EventReply BaseHealthComponent::HandleEvent(ComponentEventId eventId, Comp
 	return util::EventReply::Unhandled;
 }
 
-void BaseHealthComponent::OnTakeDamage(DamageInfo &info)
+void BaseHealthComponent::OnTakeDamage(game::DamageInfo &info)
 {
 	auto health = GetHealth();
 	unsigned short dmg = info.GetDamage();
@@ -125,10 +125,10 @@ void BaseHealthComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t versi
 
 //////////////
 
-CEOnTakenDamage::CEOnTakenDamage(DamageInfo &damageInfo, uint16_t oldHealth, uint16_t newHealth) : damageInfo {damageInfo}, oldHealth(oldHealth), newHealth(newHealth) {}
+CEOnTakenDamage::CEOnTakenDamage(game::DamageInfo &damageInfo, uint16_t oldHealth, uint16_t newHealth) : damageInfo {damageInfo}, oldHealth(oldHealth), newHealth(newHealth) {}
 void CEOnTakenDamage::PushArguments(lua::State *l)
 {
-	Lua::Push<DamageInfo *>(l, &damageInfo);
+	Lua::Push<game::DamageInfo *>(l, &damageInfo);
 	Lua::PushInt(l, oldHealth);
 	Lua::PushInt(l, newHealth);
 }

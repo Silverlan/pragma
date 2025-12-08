@@ -8,56 +8,56 @@ export module pragma.client:entities.debug;
 
 export import :entities.base_entity;
 
-export class DLLCLIENT CEntDebugText : public CBaseEntity {
+export class DLLCLIENT CEntDebugText : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-export class DLLCLIENT CEntDebugPoint : public CBaseEntity {
+export class DLLCLIENT CEntDebugPoint : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-export class DLLCLIENT CEntDebugLine : public CBaseEntity {
+export class DLLCLIENT CEntDebugLine : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-export class DLLCLIENT CEntDebugBox : public CBaseEntity {
+export class DLLCLIENT CEntDebugBox : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-export class DLLCLIENT CEntDebugSphere : public CBaseEntity {
+export class DLLCLIENT CEntDebugSphere : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-export class DLLCLIENT CEntDebugCone : public CBaseEntity {
+export class DLLCLIENT CEntDebugCone : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-export class DLLCLIENT CEntDebugCylinder : public CBaseEntity {
+export class DLLCLIENT CEntDebugCylinder : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-export class DLLCLIENT CEntDebugPlane : public CBaseEntity {
+export class DLLCLIENT CEntDebugPlane : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

@@ -13,33 +13,33 @@ import pragma.shared;
 
 #undef GetMessage
 
-bool ServerState::HandlePacket(pragma::networking::IServerClient &session, NetPacket &packet)
+bool pragma::ServerState::HandlePacket(pragma::networking::IServerClient &session, NetPacket &packet)
 {
 	unsigned int ID = packet.GetMessageID();
-	SVNetMessage *msg = GetNetMessage(ID);
+	networking::SVNetMessage *msg = GetNetMessage(ID);
 	if(msg == nullptr)
 		return false;
-	msg->handler(static_cast<ServerClientHandle>(&session), packet);
+	msg->handler(static_cast<networking::ServerClientHandle>(&session), packet);
 	return true;
 }
 
-pragma::networking::IServer *ServerState::GetServer() { return m_server.get(); }
-pragma::networking::MasterServerRegistration *ServerState::GetMasterServerRegistration() { return m_serverReg.get(); }
-bool ServerState::IsServerRunning() const { return m_server && m_server->IsRunning(); }
-unsigned int ServerState::GetClientMessageID(std::string identifier)
+pragma::networking::IServer *pragma::ServerState::GetServer() { return m_server.get(); }
+pragma::networking::MasterServerRegistration *pragma::ServerState::GetMasterServerRegistration() { return m_serverReg.get(); }
+bool pragma::ServerState::IsServerRunning() const { return m_server && m_server->IsRunning(); }
+unsigned int pragma::ServerState::GetClientMessageID(std::string identifier)
 {
-	auto *map = GetClientMessageMap();
+	auto *map = networking::get_client_message_map();
 	return map->GetNetMessageID(identifier);
 }
 
-pragma::networking::ServerMessageMap *ServerState::GetNetMessageMap() { return GetServerMessageMap(); }
-SVNetMessage *ServerState::GetNetMessage(unsigned int ID)
+pragma::networking::ServerMessageMap *pragma::ServerState::GetNetMessageMap() { return networking::get_server_message_map(); }
+pragma::networking::SVNetMessage *pragma::ServerState::GetNetMessage(unsigned int ID)
 {
 	auto *map = GetNetMessageMap();
 	return map->GetNetMessage(ID);
 }
 
-void ServerState::UpdatePlayerScore(pragma::SPlayerComponent &pl, int32_t score)
+void pragma::ServerState::UpdatePlayerScore(pragma::SPlayerComponent &pl, int32_t score)
 {
 	auto *reg = GetMasterServerRegistration();
 	auto *session = pl.GetClientSession();
@@ -48,7 +48,7 @@ void ServerState::UpdatePlayerScore(pragma::SPlayerComponent &pl, int32_t score)
 	reg->SetClientScore(session->GetSteamId(), score);
 }
 
-void ServerState::UpdatePlayerName(pragma::SPlayerComponent &pl, const std::string &name)
+void pragma::ServerState::UpdatePlayerName(pragma::SPlayerComponent &pl, const std::string &name)
 {
 	auto *reg = GetMasterServerRegistration();
 	auto *session = pl.GetClientSession();
@@ -57,7 +57,7 @@ void ServerState::UpdatePlayerName(pragma::SPlayerComponent &pl, const std::stri
 	reg->SetClientName(session->GetSteamId(), name);
 }
 
-void ServerState::DropClient(pragma::networking::IServerClient &session, pragma::networking::DropReason reason)
+void pragma::ServerState::DropClient(pragma::networking::IServerClient &session, pragma::networking::DropReason reason)
 {
 	auto *pl = session.GetPlayer();
 	session.ClearResourceTransfer();
@@ -78,9 +78,9 @@ void ServerState::DropClient(pragma::networking::IServerClient &session, pragma:
 	game->RemoveEntity(&ent);
 	// SendPacket("playerdisconnect", packet, pragma::networking::Protocol::SlowReliable);
 }
-pragma::networking::IServerClient *ServerState::GetLocalClient() { return m_localClient.get(); }
+pragma::networking::IServerClient *pragma::ServerState::GetLocalClient() { return m_localClient.get(); }
 
-void ServerState::HandleLuaNetPacket(pragma::networking::IServerClient &session, NetPacket &packet)
+void pragma::ServerState::HandleLuaNetPacket(pragma::networking::IServerClient &session, NetPacket &packet)
 {
 	if(!IsGameActive())
 		return;
@@ -98,7 +98,7 @@ static bool check_message_id(uint32_t id, const std::string &name)
 	return true;
 }
 
-void ServerState::SendPacket(const std::string &name, NetPacket &packet, pragma::networking::Protocol protocol, const pragma::networking::ClientRecipientFilter &rf)
+void pragma::ServerState::SendPacket(const std::string &name, NetPacket &packet, pragma::networking::Protocol protocol, const pragma::networking::ClientRecipientFilter &rf)
 {
 	auto ID = GetClientMessageID(name);
 	if(check_message_id(ID, name) == false || m_server == nullptr)
@@ -110,9 +110,9 @@ void ServerState::SendPacket(const std::string &name, NetPacket &packet, pragma:
 		return;
 	Con::cwar << "Unable to broadcast packet " << ID << ": " << err.GetMessage() << Con::endl;
 }
-void ServerState::SendPacket(const std::string &name, NetPacket &packet, pragma::networking::Protocol protocol) { SendPacket(name, packet, protocol, pragma::networking::ClientRecipientFilter {}); }
-void ServerState::SendPacket(const std::string &name, NetPacket &packet) { SendPacket(name, packet, pragma::networking::Protocol::FastUnreliable); }
-void ServerState::SendPacket(const std::string &name, pragma::networking::Protocol protocol)
+void pragma::ServerState::SendPacket(const std::string &name, NetPacket &packet, pragma::networking::Protocol protocol) { SendPacket(name, packet, protocol, pragma::networking::ClientRecipientFilter {}); }
+void pragma::ServerState::SendPacket(const std::string &name, NetPacket &packet) { SendPacket(name, packet, pragma::networking::Protocol::FastUnreliable); }
+void pragma::ServerState::SendPacket(const std::string &name, pragma::networking::Protocol protocol)
 {
 	NetPacket packet {};
 	SendPacket(name, packet, protocol);

@@ -48,7 +48,7 @@ void BaseFuncPhysicsComponent::OnEntitySpawn()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr) {
 		pPhysComponent->DestroyPhysicsObject();
-		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::PHYSICS);
+		pPhysComponent->SetMoveType(pragma::physics::MoveType::Physics);
 	}
 	auto *phys = InitializePhysics();
 	if(phys != nullptr) {
@@ -63,5 +63,5 @@ pragma::physics::PhysObj *BaseFuncPhysicsComponent::InitializePhysics()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return nullptr;
-	return pPhysComponent->InitializePhysics((m_kvMass > 0) ? pragma::physics::PHYSICSTYPE::DYNAMIC : pragma::physics::PHYSICSTYPE::STATIC);
+	return pPhysComponent->InitializePhysics((m_kvMass > 0) ? pragma::physics::PhysicsType::Dynamic : pragma::physics::PhysicsType::Static);
 }

@@ -12,7 +12,7 @@ export namespace pragma {
 	namespace cPhysicsComponent {
 		using namespace basePhysicsComponent;
 	}
-	class DLLCLIENT CPhysicsComponent final : public BasePhysicsComponent, public CBaseNetComponent, public nwm::VelocityCorrection {
+	class DLLCLIENT CPhysicsComponent final : public BasePhysicsComponent, public CBaseNetComponent, public networking::VelocityCorrection {
 	  public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		CPhysicsComponent(pragma::ecs::BaseEntity &ent) : BasePhysicsComponent(ent) {}

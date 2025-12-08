@@ -15,7 +15,7 @@ using namespace pragma;
 
 CShadowCSMComponent::TextureSet::TextureSet() {}
 
-static CVar cvDynamicShadows = GetClientConVar("cl_render_shadow_dynamic");
+static auto cvDynamicShadows = pragma::console::get_client_con_var("cl_render_shadow_dynamic");
 
 void CShadowCSMComponent::DestroyTextures()
 {
@@ -36,7 +36,7 @@ void CShadowCSMComponent::InitializeDepthTextures(uint32_t size)
 	}
 }
 
-static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
+static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
 void CShadowCSMComponent::ReloadDepthTextures()
 {
 	for(auto &t : m_textureSets)

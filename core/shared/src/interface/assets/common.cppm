@@ -47,7 +47,7 @@ export namespace pragma::asset {
 	DLLNETWORK std::string get_normalized_path(const std::string &name, Type type);
 	DLLNETWORK std::optional<std::string> find_file(const std::string &name, Type type, std::string *optOutFormat = nullptr);
 	DLLNETWORK bool remove_asset(const std::string &name, Type type);
-	DLLNETWORK bool is_loaded(NetworkState &nw, const std::string &name, Type type);
+	DLLNETWORK bool is_loaded(pragma::NetworkState &nw, const std::string &name, Type type);
 	DLLNETWORK const std::vector<std::string> &get_supported_extensions(Type type, FormatType formatType = FormatType::Native);
 	DLLNETWORK void update_extension_cache(Type type);
 	DLLNETWORK void update_extension_cache();
@@ -89,10 +89,10 @@ export namespace pragma::asset {
 
 	struct DLLNETWORK ModelAssetWrapper : public IAssetWrapper {
 		virtual Type GetType() const override { return Type::Model; }
-		void SetModel(pragma::Model &model);
-		pragma::Model *GetModel() const;
+		void SetModel(pragma::asset::Model &model);
+		pragma::asset::Model *GetModel() const;
 	  private:
-		std::shared_ptr<pragma::Model> m_model = nullptr;
+		std::shared_ptr<pragma::asset::Model> m_model = nullptr;
 	};
 
 	struct DLLNETWORK MaterialAssetWrapper : public IAssetWrapper {

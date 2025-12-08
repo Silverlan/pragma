@@ -10,16 +10,18 @@ export module pragma.client:particle_system.modifier_time;
 export import :particle_system.particle;
 export import pragma.util;
 
-export class DLLCLIENT CParticleModifierComponentTime {
-  protected:
-	CParticleModifierComponentTime() = default;
-	void Initialize(const std::string &prefix, const std::unordered_map<std::string, std::string> &values);
-	float GetTime(float t, CParticle &p) const;
-  private:
-	bool m_bLifetimeFraction = false;
-};
+export namespace pragma::pts {
+	class DLLCLIENT CParticleModifierComponentTime {
+	protected:
+		CParticleModifierComponentTime() = default;
+		void Initialize(const std::string &prefix, const std::unordered_map<std::string, std::string> &values);
+		float GetTime(float t, CParticle &p) const;
+	private:
+		bool m_bLifetimeFraction = false;
+	};
+}
 
-void CParticleModifierComponentTime::Initialize(const std::string &prefix, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleModifierComponentTime::Initialize(const std::string &prefix, const std::unordered_map<std::string, std::string> &values)
 {
 	std::string identifier = "lifetime_fraction";
 	if(prefix.empty() == false)
@@ -31,7 +33,7 @@ void CParticleModifierComponentTime::Initialize(const std::string &prefix, const
 			m_bLifetimeFraction = util::to_boolean(it->second);
 	}
 }
-float CParticleModifierComponentTime::GetTime(float t, CParticle &p) const
+float pragma::pts::CParticleModifierComponentTime::GetTime(float t, CParticle &p) const
 {
 	if(m_bLifetimeFraction == false) {
 		if(t < 0.f)

@@ -33,7 +33,7 @@ void CAttachmentComponent::ReceiveData(NetPacket &packet)
 		}
 
 		auto hThis = GetHandle();
-		nwm::read_unique_entity(packet, [this, hThis, att, bone, flags, offset, rot, bBoneMapping, boneMapping](pragma::ecs::BaseEntity *ent) {
+		pragma::networking::read_unique_entity(packet, [this, hThis, att, bone, flags, offset, rot, bBoneMapping, boneMapping](pragma::ecs::BaseEntity *ent) {
 			if(hThis.expired())
 				return;
 			if(m_attachment == nullptr)

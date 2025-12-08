@@ -18,21 +18,21 @@ export import :map.map_info;
 export import :types;
 export import :util.resource_watcher;
 
-export {
-	class DLLNETWORK NetworkState : public util::CallbackHandler, public CVarHandler {
+export namespace pragma {
+	class DLLNETWORK NetworkState : public util::CallbackHandler, public console::CVarHandler {
 		// For internal use only! Not to be used directly!
 	  protected:
-		static ConVarHandle GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar);
+		static console::ConVarHandle GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &ptrs, std::string scvar);
 	  public:
-		virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs() = 0;
+		virtual std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() = 0;
 	  public:
 		// Internal
 		std::vector<CallbackHandle> &GetLuaEnumRegisterCallbacks();
 		void TerminateLuaModules(lua::State *l);
 		void DeregisterLuaModules(void *l, const std::string &identifier);
-		virtual bool ShouldRemoveSound(ALSound &snd);
+		virtual bool ShouldRemoveSound(pragma::audio::ALSound &snd);
 
-		virtual NwStateType GetType() const = 0;
+		virtual pragma::NwStateType GetType() const = 0;
 
 		// Assets
 		const pragma::asset::ModelManager &GetModelManager() const;
@@ -79,9 +79,9 @@ export {
 		std::unordered_map<std::string, unsigned int> &GetConCommandIDs();
 
 		// Sound
-		std::vector<ALSoundRef> m_sounds;
-		std::unordered_map<std::string, std::shared_ptr<SoundCacheInfo>> m_soundsPrecached;
-		void UpdateSounds(std::vector<std::shared_ptr<ALSound>> &sounds);
+		std::vector<pragma::audio::ALSoundRef> m_sounds;
+		std::unordered_map<std::string, std::shared_ptr<pragma::audio::SoundCacheInfo>> m_soundsPrecached;
+		void UpdateSounds(std::vector<std::shared_ptr<pragma::audio::ALSound>> &sounds);
 	  public:
 		NetworkState();
 		virtual ~NetworkState();
@@ -91,8 +91,8 @@ export {
 		virtual bool IsSinglePlayer() const = 0;
 		bool CheatsEnabled() const;
 		virtual msys::MaterialManager &GetMaterialManager() = 0;
-		virtual pragma::ModelSubMesh *CreateSubMesh() const = 0;
-		virtual ModelMesh *CreateMesh() const = 0;
+		virtual geometry::ModelSubMesh *CreateSubMesh() const = 0;
+		virtual geometry::ModelMesh *CreateMesh() const = 0;
 		virtual util::FileAssetManager *GetAssetManager(pragma::asset::Type type);
 
 		void TranslateConsoleCommand(std::string &cmd);
@@ -110,31 +110,31 @@ export {
 
 		// Sound
 		float GetSoundDuration(std::string snd);
-		virtual std::shared_ptr<ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) = 0;
+		virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) = 0;
 		virtual void UpdateSounds() = 0;
-		virtual bool PrecacheSound(std::string snd, ALChannel mode = ALChannel::Auto) = 0;
+		virtual bool PrecacheSound(std::string snd, pragma::audio::ALChannel mode = pragma::audio::ALChannel::Auto) = 0;
 		virtual void StopSounds() = 0;
-		virtual void StopSound(std::shared_ptr<ALSound> pSnd) = 0;
-		virtual std::shared_ptr<ALSound> GetSoundByIndex(unsigned int idx) = 0;
-		const std::vector<ALSoundRef> &GetSounds() const;
-		std::vector<ALSoundRef> &GetSounds();
+		virtual void StopSound(std::shared_ptr<pragma::audio::ALSound> pSnd) = 0;
+		virtual std::shared_ptr<pragma::audio::ALSound> GetSoundByIndex(unsigned int idx) = 0;
+		const std::vector<pragma::audio::ALSoundRef> &GetSounds() const;
+		std::vector<pragma::audio::ALSoundRef> &GetSounds();
 
-		SoundScriptManager *GetSoundScriptManager();
-		SoundScript *FindSoundScript(const char *name);
+		pragma::audio::SoundScriptManager *GetSoundScriptManager();
+		pragma::audio::SoundScript *FindSoundScript(const char *name);
 		virtual bool LoadSoundScripts(const char *file, bool bPrecache = false);
 		Bool IsSoundPrecached(const std::string &snd) const;
 
 		// ConVars
-		virtual ConVarMap *GetConVarMap() override;
-		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr);
-		virtual ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
+		virtual console::ConVarMap *GetConVarMap() override;
+		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
+		virtual console::ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
 
 		void CallOnNextTick(const std::function<void()> &f);
 
-		ConVar *CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help = "");
-		ConVar *RegisterConVar(const std::string &scmd, const std::shared_ptr<ConVar> &cvar);
+		console::ConVar *CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help = "");
+		console::ConVar *RegisterConVar(const std::string &scmd, const std::shared_ptr<console::ConVar> &cvar);
 		void UnregisterConVar(const std::string &scmd);
-		virtual ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None, const std::string &help = "");
+		virtual console::ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None, const std::string &help = "");
 	  protected:
 		virtual msys::Material *LoadMaterial(const std::string &path, bool precache, bool bReload);
 
@@ -153,7 +153,7 @@ export {
 
 		std::unique_ptr<pragma::Game, void (*)(pragma::Game *)> m_game = std::unique_ptr<pragma::Game, void (*)(pragma::Game *)> {nullptr, [](pragma::Game *) {}};
 		std::shared_ptr<pragma::asset::ModelManager> m_modelManager = nullptr;
-		std::unique_ptr<SoundScriptManager> m_soundScriptManager;
+		std::unique_ptr<pragma::audio::SoundScriptManager> m_soundScriptManager;
 		std::unordered_set<std::string> m_missingSoundCache;
 		std::vector<CallbackHandle> m_thinkCallbacks;
 		std::vector<CallbackHandle> m_tickCallbacks;
@@ -184,5 +184,5 @@ export {
 		virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const override;
 	};
 
-	DLLNETWORK bool check_cheats(const std::string &scmd, NetworkState *state);
+	DLLNETWORK bool check_cheats(const std::string &scmd, pragma::NetworkState *state);
 };

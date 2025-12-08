@@ -12,12 +12,12 @@ void CPointConstraintDoFComponent::ReceiveData(NetPacket &packet)
 {
 	m_kvSource = packet->ReadString();
 	m_kvTarget = packet->ReadString();
-	m_posTarget = nwm::read_vector(packet);
+	m_posTarget = networking::read_vector(packet);
 
-	m_kvLimLinLower = nwm::read_vector(packet);
-	m_kvLimLinUpper = nwm::read_vector(packet);
-	m_kvLimAngLower = nwm::read_vector(packet);
-	m_kvLimAngUpper = nwm::read_vector(packet);
+	m_kvLimLinLower = networking::read_vector(packet);
+	m_kvLimLinUpper = networking::read_vector(packet);
+	m_kvLimAngLower = networking::read_vector(packet);
+	m_kvLimAngUpper = networking::read_vector(packet);
 }
 void CPointConstraintDoFComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

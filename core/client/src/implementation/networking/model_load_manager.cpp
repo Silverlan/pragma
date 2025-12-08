@@ -16,7 +16,7 @@ ModelLoadManager &ModelLoadManager::Initialize()
 	return *s_manager;
 }
 
-void ModelLoadManager::AddQuery(const NetPacket &packet, const std::shared_ptr<pragma::Model> &mdl, const std::string &fileName)
+void ModelLoadManager::AddQuery(const NetPacket &packet, const std::shared_ptr<pragma::asset::Model> &mdl, const std::string &fileName)
 {
 	auto query = std::shared_ptr<ModelLoadQuery>(new ModelLoadQuery());
 	query->packet = packet;
@@ -56,7 +56,7 @@ ModelLoadManager::ModelLoadManager()
 		}
 		m_completeMutex.unlock();
 	}));
-	m_hCbOnGameEnd = pragma::get_cgame()->AddCallback("OnGameEnd", FunctionCallback<void, CGame *>::Create([](CGame *) { s_manager = nullptr; }));
+	m_hCbOnGameEnd = pragma::get_cgame()->AddCallback("OnGameEnd", FunctionCallback<void, pragma::CGame *>::Create([](pragma::CGame *) { s_manager = nullptr; }));
 }
 
 ModelLoadManager::~ModelLoadManager()
@@ -171,7 +171,7 @@ void ModelLoadManager::Update()
 		auto &packet = query->packet;
 
 		auto group = mdl->AddMeshGroup("reference");
-		auto mesh = ::util::make_shared<CModelMesh>();
+		auto mesh = ::util::make_shared<pragma::geometry::CModelMesh>();
 
 		auto type = packet->Read<uint8_t>();
 		auto numMeshes = packet->Read<uint32_t>();
@@ -179,7 +179,7 @@ void ModelLoadManager::Update()
 		Con::ccl << "[ResourceManager] Received " << numMeshes << " meshes" << Con::endl;
 		//#endif
 		for(auto i = decltype(numMeshes) {0}; i < numMeshes; ++i) {
-			auto subMesh = ::util::make_shared<CModelSubMesh>();
+			auto subMesh = ::util::make_shared<pragma::geometry::CModelSubMesh>();
 			auto colMesh = pragma::physics::CollisionMesh::Create(pragma::get_cgame());
 
 			Vector3 origin {};
@@ -257,7 +257,7 @@ void ModelLoadManager::Update()
 			mdl->AddCollisionMesh(colMesh);
 		}
 		group->AddMesh(mesh);
-		mdl->Update(pragma::model::ModelUpdateFlags::All);
+		mdl->Update(pragma::asset::ModelUpdateFlags::All);
 
 		m_completeMutex.lock();
 		m_completeQueries.push(query);

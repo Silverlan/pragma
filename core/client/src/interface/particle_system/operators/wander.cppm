@@ -12,23 +12,25 @@ export import :particle_system.operator_world_base;
 
 import :engine;
 
-export class DLLCLIENT CParticleOperatorWander : public CParticleOperatorWorldBase {
-  public:
-	CParticleOperatorWander() = default;
-	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
-	virtual void Simulate(double tDelta) override;
-	virtual void OnParticleCreated(CParticle &particle) override;
-  protected:
-	std::vector<int32_t> m_hashCodes;
-	float m_fFrequency = 2.f;
-	float m_fStrength = 0.05f;
+export namespace pragma::pts {
+	class DLLCLIENT CParticleOperatorWander : public CParticleOperatorWorldBase {
+	public:
+		CParticleOperatorWander() = default;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Simulate(pragma::pts::CParticle &particle, double tDelta, float strength) override;
+		virtual void Simulate(double tDelta) override;
+		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+	protected:
+		std::vector<int32_t> m_hashCodes;
+		float m_fFrequency = 2.f;
+		float m_fStrength = 0.05f;
 
-	float m_dtTime = 0.f;
-	float m_dtStrength = 0.f;
-};
+		float m_dtTime = 0.f;
+		float m_dtStrength = 0.f;
+	};
+}
 
-void CParticleOperatorWander::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorWander::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperatorWorldBase::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -42,15 +44,15 @@ void CParticleOperatorWander::Initialize(pragma::BaseEnvParticleSystemComponent 
 
 	m_hashCodes.resize(static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount());
 }
-void CParticleOperatorWander::OnParticleCreated(CParticle &particle) { m_hashCodes.at(particle.GetIndex()) = umath::random(1, std::numeric_limits<int32_t>::max()); }
-void CParticleOperatorWander::Simulate(double tDelta)
+void pragma::pts::CParticleOperatorWander::OnParticleCreated(pragma::pts::CParticle &particle) { m_hashCodes.at(particle.GetIndex()) = umath::random(1, std::numeric_limits<int32_t>::max()); }
+void pragma::pts::CParticleOperatorWander::Simulate(double tDelta)
 {
 	CParticleOperatorWorldBase::Simulate(tDelta);
 
 	m_dtTime += tDelta * m_fFrequency;
 	m_dtStrength = m_fStrength * tDelta * 60.f;
 }
-void CParticleOperatorWander::Simulate(CParticle &particle, double tDelta, float strength)
+void pragma::pts::CParticleOperatorWander::Simulate(pragma::pts::CParticle &particle, double tDelta, float strength)
 {
 	CParticleOperatorWorldBase::Simulate(particle, tDelta, strength);
 

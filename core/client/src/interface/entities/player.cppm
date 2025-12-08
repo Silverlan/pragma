@@ -9,7 +9,7 @@ export module pragma.client:entities.player;
 export import :entities.components;
 export import pragma.shared;
 
-export class DLLCLIENT CPlayer : public CBaseEntity, public BasePlayer {
+export class DLLCLIENT CPlayer : public pragma::ecs::CBaseEntity, public BasePlayer {
   public:
 	virtual void Initialize() override;
 };

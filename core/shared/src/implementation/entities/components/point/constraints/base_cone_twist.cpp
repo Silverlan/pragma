@@ -40,13 +40,13 @@ void BasePointConstraintConeTwistComponent::InitializeConstraint(pragma::ecs::Ba
 	auto *physEnv = game->GetPhysicsEnvironment();
 
 	auto pPhysComponentSrc = src->GetPhysicsComponent();
-	auto *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	auto *physSrc = pPhysComponentSrc ? dynamic_cast<pragma::physics::RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
-	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
+	auto *physTgt = pPhysComponentTgt ? dynamic_cast<pragma::physics::RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
 	if(physSrc == nullptr || physTgt == nullptr || !physSrc->IsRigid() || !physTgt->IsRigid())
 		return;
-	auto *rigidSrc = static_cast<RigidPhysObj *>(physSrc)->GetRigidBody();
-	auto *rigidTgt = static_cast<RigidPhysObj *>(physTgt)->GetRigidBody();
+	auto *rigidSrc = static_cast<pragma::physics::RigidPhysObj *>(physSrc)->GetRigidBody();
+	auto *rigidTgt = static_cast<pragma::physics::RigidPhysObj *>(physTgt)->GetRigidBody();
 	if(rigidSrc == nullptr || rigidTgt == nullptr)
 		return;
 

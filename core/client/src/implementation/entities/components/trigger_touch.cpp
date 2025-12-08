@@ -14,13 +14,13 @@ void CTouchComponent::Initialize() { BaseTouchComponent::Initialize(); }
 void CTouchComponent::OnEntitySpawn()
 {
 	BaseTouchComponent::OnEntitySpawn();
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	if(ent.IsClientsideOnly() == true) {
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		if(pPhysComponent != nullptr)
-			pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::STATIC);
+			pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Static);
 	}
-	auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
+	auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
 		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
 }

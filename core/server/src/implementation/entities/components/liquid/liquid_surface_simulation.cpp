@@ -15,7 +15,7 @@ using namespace pragma;
 static std::vector<SLiquidSurfaceSimulationComponent *> s_waterEntities = {};
 namespace {
 	auto _ = pragma::console::server::register_variable_listener<float>(
-	  "sv_water_surface_simulation_shared", +[](NetworkState *, const ConVar &, float, float val) {
+	  "sv_water_surface_simulation_shared", +[](pragma::NetworkState *, const pragma::console::ConVar &, float, float val) {
 		  for(auto *entWater : s_waterEntities)
 			  entWater->UpdateSurfaceSimulator();
 	  });
@@ -42,14 +42,14 @@ void SLiquidSurfaceSimulationComponent::InitializeLuaObject(lua::State *l) { ret
 
 void SLiquidSurfaceSimulationComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->Write<float>(m_kvMaxWaveHeight); }
 
-static auto cvSimShared = GetServerConVar("sv_water_surface_simulation_shared");
+static auto cvSimShared = pragma::console::get_server_con_var("sv_water_surface_simulation_shared");
 bool SLiquidSurfaceSimulationComponent::ShouldSimulateSurface() const { return (BaseLiquidSurfaceSimulationComponent::ShouldSimulateSurface() == true && (cvSimShared->GetBool() == true || static_cast<const SBaseEntity &>(GetEntity()).GetClientsideEntity() == nullptr)) ? true : false; }
 
 void SLiquidSurfaceSimulationComponent::OnTick(double dt)
 {
 	if(m_bUsingClientsideSimulation == true || m_physSurfaceSim == nullptr)
 		return;
-	auto *sim = static_cast<PhysWaterSurfaceSimulator *>(m_physSurfaceSim.get());
+	auto *sim = static_cast<physics::PhysWaterSurfaceSimulator *>(m_physSurfaceSim.get());
 	if(sim == nullptr)
 		return;
 	sim->Simulate(0.01); // TODO

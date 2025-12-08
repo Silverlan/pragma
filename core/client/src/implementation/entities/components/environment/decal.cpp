@@ -108,7 +108,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, s
 	for(auto &meshData : meshDatas) {
 		auto effectivePose = GetPose().GetInverse() * meshData.pose;
 		for(auto *subMesh : meshData.subMeshes) {
-			if(subMesh->GetGeometryType() != pragma::ModelSubMesh::GeometryType::Triangles)
+			if(subMesh->GetGeometryType() != pragma::geometry::ModelSubMesh::GeometryType::Triangles)
 				continue;
 			auto &verts = subMesh->GetVertices();
 
@@ -210,7 +210,7 @@ void DecalProjector::DebugDraw(float duration) const
 	auto &pose = GetPose();
 	for(auto &l : lines)
 		l = pose * (l * prismSize);
-	::DebugRenderer::DrawLines(lines, {colors::White, duration});
+	pragma::debug::DebugRenderer::DrawLines(lines, {colors::White, duration});
 
 	lines.clear();
 	auto &prismPos = pose.GetOrigin();
@@ -227,7 +227,7 @@ void DecalProjector::DebugDraw(float duration) const
 	lines.push_back(points.at(4));
 	for(auto &l : lines)
 		l = pose * (l * prismSize);
-	::DebugRenderer::DrawLines(lines, {colors::Black, duration});
+	pragma::debug::DebugRenderer::DrawLines(lines, {colors::Black, duration});
 }
 
 /////////
@@ -237,10 +237,10 @@ void CDecalComponent::Initialize()
 	BaseEnvDecalComponent::Initialize();
 	auto renderC = GetEntity().AddComponent<pragma::CRenderComponent>();
 	renderC->SetCastShadows(false);
-	/*auto &ent = static_cast<CBaseEntity&>(GetEntity());
+	/*auto &ent = static_cast<pragma::ecs::CBaseEntity&>(GetEntity());
 	auto pSpriteComponent = ent.AddComponent<pragma::CSpriteComponent>();
 	if(pSpriteComponent.valid())
-		pSpriteComponent->SetOrientationType(pragma::ecs::ParticleOrientationType::World);*/
+		pSpriteComponent->SetOrientationType(pragma::pts::ParticleOrientationType::World);*/
 }
 
 void CDecalComponent::OnEntitySpawn()
@@ -340,7 +340,7 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector, const std::vector<De
 	meshGroup->AddMesh(mesh);
 	mdl->AddMaterial(0, mat);
 
-	mdl->Update(pragma::model::ModelUpdateFlags::All | pragma::model::ModelUpdateFlags::UpdateChildren);
+	mdl->Update(pragma::asset::ModelUpdateFlags::All | pragma::asset::ModelUpdateFlags::UpdateChildren);
 
 	//decalRenderC->SetDepthBias(-1'000.f,0.f,-2.f);
 	// TODO
@@ -359,7 +359,7 @@ bool CDecalComponent::ApplyDecal()
 	auto *mat = pragma::get_client_state()->LoadMaterial(GetMaterial());
 	if(mat == nullptr)
 		return false;
-	std::vector<CBaseEntity *> targetEnts {};
+	std::vector<ecs::CBaseEntity *> targetEnts {};
 
 	auto projector = GetProjector();
 	auto projectorAABB = projector.GetAABB();
@@ -371,7 +371,7 @@ bool CDecalComponent::ApplyDecal()
 
 	pragma::PrimitiveIntersectionInfo bvhIntersectInfo {};
 	std::vector<DecalProjector::MeshData> meshDatas {};
-	std::unordered_set<pragma::ModelSubMesh *> coveredMeshes;
+	std::unordered_set<pragma::geometry::ModelSubMesh *> coveredMeshes;
 	auto findIntersectionMeshes = [&projectorAABB, &bvhIntersectInfo, &meshDatas, &coveredMeshes](const pragma::BaseBvhComponent &bvhC) {
 		if(!bvhC.IntersectionTestAabb(projectorAABB.first, projectorAABB.second, bvhIntersectInfo)) {
 			bvhIntersectInfo.primitives.clear();

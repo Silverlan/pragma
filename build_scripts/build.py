@@ -739,14 +739,14 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="e241b0612549459dd065372d5b2d0ea78091ddc4",
+		commitSha="78f215699e3d143c0f07143800a68a5887fcdc10",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
 if with_common_modules:
 	add_pragma_module(
 		name="pr_bullet",
-		commitSha="34249e0a45e72f0d8287e62032b12db5e8dc2931",
+		commitSha="6a226413dae0e6cb1bd7fe9076cbd27c537e1df1",
 		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
 	)
 	add_pragma_module(
@@ -780,22 +780,22 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="e9a5a19de36ef5ead806661bd4d24f0ec8757300",
+			commitSha="183ac38fb41f0f35dc3408cc475db2b75c91e5c9",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="d32398acfc20e7a9e8adb1c3c4baf2adc4854070",
+			commitSha="2c9c094d41f04ab830e68d12b26a453a49a0f3ea",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
 			name="pr_xatlas",
-			commitSha="acfb77d5e7bde285f040befe0620f14166324c5a",
+			commitSha="58e3805db3fa3b7f29788ed492704d75af63ede7",
 			repositoryUrl="https://github.com/Silverlan/pr_xatlas.git"
 		)
 		add_pragma_module(
 			name="pr_davinci",
-			commitSha="df776e73168b10c9a7bda58cc2d753664e4f2aa9",
+			commitSha="e1233976c4ae135eff00031e027bcfbbfe69ed98",
 			repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
 		)
 		add_pragma_module(
@@ -814,14 +814,14 @@ if with_pfm:
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="8a71791ee83652fe73a2a120d3cbc19b097c8d7e",
+		commitSha="3bdd226bf3215e560dde302e0ba26b4afa925336",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="5c2328aa0664deaa3fd080442911802bd468f482",
+		commitSha="608af4a97cdbc110e774295871ab6619a3985174",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)

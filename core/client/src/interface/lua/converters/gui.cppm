@@ -30,7 +30,7 @@ export namespace luabind {
 	};
 
 	template<typename T>
-	concept is_gui_element = std::derived_from<util::base_type<T>, WIBase> || std::is_same_v<util::base_type<T>, WIHandle>;
+	concept is_gui_element = std::derived_from<util::base_type<T>, pragma::gui::types::WIBase> || std::is_same_v<util::base_type<T>, pragma::gui::WIHandle>;
 
 	template<typename T>
 	    requires(is_gui_element<T> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)
@@ -57,12 +57,12 @@ export namespace luabind {
 	template<typename T, typename TConverter>
 	void gui_element_converter<T, TConverter>::to_lua(lua::State *L, T x)
 	{
-		if constexpr(std::is_same_v<T, WIHandle>) {
+		if constexpr(std::is_same_v<T, pragma::gui::WIHandle>) {
 			if(x.expired())
 				lua::push_nil(L);
 			else {
 				auto &el = *x;
-				auto o = WGUILuaInterface::GetLuaObject(L, const_cast<std::remove_cvref_t<decltype(el)> &>(el));
+				auto o = pragma::gui::WGUILuaInterface::GetLuaObject(L, const_cast<std::remove_cvref_t<decltype(el)> &>(el));
 				o.push(L);
 			}
 		}
@@ -70,12 +70,12 @@ export namespace luabind {
 			if(!x)
 				lua::push_nil(L);
 			else {
-				auto o = WGUILuaInterface::GetLuaObject(L, *const_cast<T>(x));
+				auto o = pragma::gui::WGUILuaInterface::GetLuaObject(L, *const_cast<T>(x));
 				o.push(L);
 			}
 		}
 		else {
-			auto o = WGUILuaInterface::GetLuaObject(L, const_cast<T &>(x));
+			auto o = pragma::gui::WGUILuaInterface::GetLuaObject(L, const_cast<T &>(x));
 			o.push(L);
 		}
 	}

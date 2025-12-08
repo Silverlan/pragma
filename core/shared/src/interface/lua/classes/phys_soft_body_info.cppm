@@ -11,6 +11,6 @@ export import pragma.lua;
 
 export namespace Lua {
 	namespace PhysSoftBodyInfo {
-		DLLNETWORK void register_class(lua::State *l, luabind::class_<::PhysSoftBodyInfo> &classDef);
+		DLLNETWORK void register_class(lua::State *l, luabind::class_<pragma::physics::PhysSoftBodyInfo> &classDef);
 	};
 };

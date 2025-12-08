@@ -59,7 +59,7 @@ void SCharacterComponent::SetActiveWeapon(pragma::ecs::BaseEntity *ent)
 	auto &entThis = static_cast<SBaseEntity &>(GetEntity());
 	if(entThis.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, ent);
+		pragma::networking::write_entity(p, ent);
 		entThis.SendNetEvent(m_netEvSetActiveWeapon, p, pragma::networking::Protocol::SlowReliable);
 	}
 }

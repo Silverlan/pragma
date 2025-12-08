@@ -12,7 +12,7 @@ export import pragma.gui;
 namespace pragma {
 	class JSValue;
 };
-export {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIChromiumPage {
 	  public:
 		WIChromiumPage(WIBase *parent);
@@ -31,7 +31,7 @@ export {
 		void ExecJavascript(const std::string &js);
 
 		bool m_bEntered = false;
-		WIHandle m_hWeb;
+		pragma::gui::WIHandle m_hWeb;
 		std::string m_initialURL;
 	  private:
 		WIBase *m_parent = nullptr;

@@ -35,7 +35,7 @@ void CBaseSoundDspComponent::OnTick(double dt)
 		auto &snd = rsnd.get();
 		if(snd.IsPlaying() == false)
 			continue;
-		auto &alSnd = *static_cast<al::SoundSource *>(static_cast<CALSound *>(&snd));
+		auto &alSnd = *static_cast<al::SoundSource *>(static_cast<pragma::audio::CALSound *>(&snd));
 		if(m_bAllSounds == false && (m_bAllWorldSounds == false || snd.IsRelative() == true) && (snd.GetType() & m_types) == pragma::audio::ALSoundType::Generic) {
 			DetachSoundSource(alSnd);
 			continue;
@@ -165,7 +165,7 @@ void CBaseSoundDspComponent::DetachAllSoundSources()
 	for(auto &pair : m_affectedSounds) {
 		if(pair.first.IsValid() == false)
 			continue;
-		auto &src = *static_cast<al::SoundSource *>(static_cast<CALSound *>(pair.first.get()));
+		auto &src = *static_cast<al::SoundSource *>(static_cast<pragma::audio::CALSound *>(pair.first.get()));
 		src->RemoveEffect(pair.second);
 	}
 	m_affectedSounds.clear();

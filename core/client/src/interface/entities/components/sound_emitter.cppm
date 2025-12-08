@@ -15,9 +15,9 @@ export namespace pragma {
 
 		CSoundEmitterComponent(pragma::ecs::BaseEntity &ent) : BaseSoundEmitterComponent(ent) {}
 		// Sounds
-		virtual std::shared_ptr<ALSound> CreateSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {}) override;
-		virtual std::shared_ptr<ALSound> EmitSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {}) override;
-		void AddSound(std::shared_ptr<ALSound> snd); // Only to be used from netmessage
+		virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {}) override;
+		virtual std::shared_ptr<pragma::audio::ALSound> EmitSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {}) override;
+		void AddSound(std::shared_ptr<pragma::audio::ALSound> snd); // Only to be used from netmessage
 
 		virtual void PrecacheSounds() override;
 		virtual void ReceiveData(NetPacket &packet) override;
@@ -25,6 +25,6 @@ export namespace pragma {
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
 		virtual void MaintainSounds() override;
-		virtual bool ShouldRemoveSound(ALSound &snd) const override;
+		virtual bool ShouldRemoveSound(audio::ALSound &snd) const override;
 	};
 };

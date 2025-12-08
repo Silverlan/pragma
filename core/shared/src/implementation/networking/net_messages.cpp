@@ -178,8 +178,8 @@ static void register_client_net_messages(pragma::networking::IBaseNetMessageMap 
 	netMessageMap.RegisterNetMessage(client::DEBUG_DRAWCYLINDER);
 }
 
-void register_net_messages()
+void pragma::networking::register_net_messages()
 {
-	register_server_net_messages(*GetServerMessageMap());
-	register_client_net_messages(*GetClientMessageMap());
+	register_server_net_messages(*get_server_message_map());
+	register_client_net_messages(*get_client_message_map());
 }

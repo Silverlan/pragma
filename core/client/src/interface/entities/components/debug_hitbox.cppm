@@ -23,7 +23,7 @@ export namespace pragma {
 	  protected:
 		void InitializeDebugObjects();
 		void ClearDebugObjects();
-		std::vector<std::shared_ptr<DebugRenderer::BaseObject>> m_debugObjects;
+		std::vector<std::shared_ptr<debug::DebugRenderer::BaseObject>> m_debugObjects;
 		std::unordered_map<animation::BoneId, Color> m_hitboxColors;
 		bool m_dirty = false;
 	};

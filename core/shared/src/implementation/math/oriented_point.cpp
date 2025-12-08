@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :math.oriented_point;
 
-OrientedPoint::OrientedPoint() {}
-OrientedPoint::OrientedPoint(Vector3 &position) : pos(position) {}
-OrientedPoint::OrientedPoint(Quat &orientation) : rot(orientation) {}
-OrientedPoint::OrientedPoint(Vector3 &position, Quat &orientation) : pos(position), rot(orientation) {}
+pragma::math::OrientedPoint::OrientedPoint() {}
+pragma::math::OrientedPoint::OrientedPoint(Vector3 &position) : pos(position) {}
+pragma::math::OrientedPoint::OrientedPoint(Quat &orientation) : rot(orientation) {}
+pragma::math::OrientedPoint::OrientedPoint(Vector3 &position, Quat &orientation) : pos(position), rot(orientation) {}

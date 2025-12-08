@@ -27,9 +27,9 @@ export {
 			uint32_t skinId;
 		};
 		struct DLLNETWORK CEOnModelChanged : public ComponentEvent {
-			CEOnModelChanged(const std::shared_ptr<pragma::Model> &model);
+			CEOnModelChanged(const std::shared_ptr<pragma::asset::Model> &model);
 			virtual void PushArguments(lua::State *l) override;
-			std::shared_ptr<pragma::Model> model;
+			std::shared_ptr<pragma::asset::Model> model;
 		};
 		namespace baseModelComponent {
 			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_MODEL_CHANGED;
@@ -56,8 +56,8 @@ export {
 			void OnModelMaterialsLoaded();
 			bool HasModelMaterialsLoaded() const;
 			void SetModel(const std::string &mdl);
-			virtual void SetModel(const std::shared_ptr<pragma::Model> &mdl);
-			const std::shared_ptr<pragma::Model> &GetModel() const;
+			virtual void SetModel(const std::shared_ptr<pragma::asset::Model> &mdl);
+			const std::shared_ptr<pragma::asset::Model> &GetModel() const;
 			std::string GetModelName() const;
 			void SetModelName(const std::string &name);
 			bool HasModel() const;
@@ -99,9 +99,9 @@ export {
 		  protected:
 			BaseModelComponent(pragma::ecs::BaseEntity &ent);
 			virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
-			virtual void OnModelChanged(const std::shared_ptr<pragma::Model> &model);
+			virtual void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model);
 			virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
-			std::shared_ptr<pragma::Model> m_model = nullptr;
+			std::shared_ptr<pragma::asset::Model> m_model = nullptr;
 
 			BaseBvhComponent *m_bvhComponent = nullptr;
 			IntersectionHandlerComponent *m_intersectionHandlerComponent = nullptr;

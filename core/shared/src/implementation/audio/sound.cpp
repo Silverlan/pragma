@@ -18,29 +18,29 @@ module pragma.shared;
 
 import :audio.sound;
 
-SoundEffectParams::SoundEffectParams(float pgain, float pgainHF, float pgainLF) : gain(pgain), gainHF(pgainHF), gainLF(pgainLF) {}
+pragma::audio::SoundEffectParams::SoundEffectParams(float pgain, float pgainHF, float pgainLF) : gain(pgain), gainHF(pgainHF), gainLF(pgainLF) {}
 
-ALSound::ALSound(NetworkState *nw) : util::inheritable_enable_shared_from_this<ALSound>(), util::CallbackHandler(), LuaCallbackHandler(), m_type(pragma::audio::ALSoundType::Generic), m_networkState(nw)
+pragma::audio::ALSound::ALSound(pragma::NetworkState *nw) : util::inheritable_enable_shared_from_this<pragma::audio::ALSound>(), util::CallbackHandler(), LuaCallbackHandler(), m_type(pragma::audio::ALSoundType::Generic), m_networkState(nw)
 {
 	RegisterCallback<void>("OnDestroyed");
 	RegisterCallback<void, ALState, ALState>("OnStateChanged");
 }
 
-ALSound::~ALSound() {}
+pragma::audio::ALSound::~ALSound() {}
 
-void ALSound::OnRelease() { CallCallbacks<void>("OnDestroyed"); }
+void pragma::audio::ALSound::OnRelease() { CallCallbacks<void>("OnDestroyed"); }
 
-void ALSound::SetRange(float start, float end) { m_range = std::make_unique<std::pair<float, float>>(std::pair<float, float> {start, end}); }
-void ALSound::ClearRange() { m_range = nullptr; }
-bool ALSound::HasRange() const { return (m_range != nullptr) ? true : false; }
-void ALSound::SetIndex(unsigned int idx) { m_index = idx; }
-std::pair<float, float> ALSound::GetRange() const
+void pragma::audio::ALSound::SetRange(float start, float end) { m_range = std::make_unique<std::pair<float, float>>(std::pair<float, float> {start, end}); }
+void pragma::audio::ALSound::ClearRange() { m_range = nullptr; }
+bool pragma::audio::ALSound::HasRange() const { return (m_range != nullptr) ? true : false; }
+void pragma::audio::ALSound::SetIndex(unsigned int idx) { m_index = idx; }
+std::pair<float, float> pragma::audio::ALSound::GetRange() const
 {
 	if(HasRange() == true)
 		return *m_range;
 	return {0.f, GetDuration()};
 }
-std::pair<float, float> ALSound::GetRangeOffsets() const
+std::pair<float, float> pragma::audio::ALSound::GetRangeOffsets() const
 {
 	if(HasRange() == false)
 		return {0.f, 1.f};
@@ -55,13 +55,13 @@ std::pair<float, float> ALSound::GetRangeOffsets() const
 	return range;
 }
 
-bool ALSound::IsSoundScript() const { return false; }
-NetworkState *ALSound::GetNetworkState() const { return m_networkState; }
+bool pragma::audio::ALSound::IsSoundScript() const { return false; }
+pragma::NetworkState *pragma::audio::ALSound::GetNetworkState() const { return m_networkState; }
 
-void ALSound::SetSource(pragma::ecs::BaseEntity *ent) { m_hSourceEntity = (ent != nullptr) ? ent->GetHandle() : EntityHandle {}; }
-pragma::ecs::BaseEntity *ALSound::GetSource() const { return const_cast<pragma::ecs::BaseEntity *>(m_hSourceEntity.get()); }
+void pragma::audio::ALSound::SetSource(pragma::ecs::BaseEntity *ent) { m_hSourceEntity = (ent != nullptr) ? ent->GetHandle() : EntityHandle {}; }
+pragma::ecs::BaseEntity *pragma::audio::ALSound::GetSource() const { return const_cast<pragma::ecs::BaseEntity *>(m_hSourceEntity.get()); }
 
-float ALSound::GetSoundIntensity(const Vector3 &pos) const
+float pragma::audio::ALSound::GetSoundIntensity(const Vector3 &pos) const
 {
 	if(IsPlaying() == false)
 		return 0.f;
@@ -83,12 +83,12 @@ float ALSound::GetSoundIntensity(const Vector3 &pos) const
 	return 1.f - d;
 }
 
-float ALSound::GetLastOffset() const { return m_lastOffset; }
-float ALSound::GetDeltaOffset() const { return GetOffset() - m_lastOffset; }
-float ALSound::GetLastTimeOffset() const { return m_lastSecOffset; }
-float ALSound::GetDeltaTimeOffset() const { return GetTimeOffset() - m_lastSecOffset; }
+float pragma::audio::ALSound::GetLastOffset() const { return m_lastOffset; }
+float pragma::audio::ALSound::GetDeltaOffset() const { return GetOffset() - m_lastOffset; }
+float pragma::audio::ALSound::GetLastTimeOffset() const { return m_lastSecOffset; }
+float pragma::audio::ALSound::GetDeltaTimeOffset() const { return GetTimeOffset() - m_lastSecOffset; }
 
-float ALSound::GetMaxAudibleDistance() const
+float pragma::audio::ALSound::GetMaxAudibleDistance() const
 {
 	float rolloff = GetRolloffFactor();
 	if(rolloff == 0.f)
@@ -96,12 +96,12 @@ float ALSound::GetMaxAudibleDistance() const
 	return (GetMaxDistance() - GetReferenceDistance()) * (1.f / rolloff) + GetReferenceDistance();
 }
 
-unsigned int ALSound::GetFlags() const { return m_flags; }
-void ALSound::SetFlags(unsigned int flags) { m_flags = flags; }
-void ALSound::AddFlags(unsigned int flags) { SetFlags(GetFlags() | flags); }
-void ALSound::RemoveFlags(unsigned int flags) { SetFlags(GetFlags() & ~flags); }
+unsigned int pragma::audio::ALSound::GetFlags() const { return m_flags; }
+void pragma::audio::ALSound::SetFlags(unsigned int flags) { m_flags = flags; }
+void pragma::audio::ALSound::AddFlags(unsigned int flags) { SetFlags(GetFlags() | flags); }
+void pragma::audio::ALSound::RemoveFlags(unsigned int flags) { SetFlags(GetFlags() & ~flags); }
 
-void ALSound::PostUpdate()
+void pragma::audio::ALSound::PostUpdate()
 {
 	UpdateOffset();
 	if(IsPlaying() == false || m_fade != nullptr || m_tFadeOut == 0.f)
@@ -114,7 +114,7 @@ void ALSound::PostUpdate()
 	FadeOut(timeUntilEnd);
 }
 
-void ALSound::CheckStateChange(ALState old)
+void pragma::audio::ALSound::CheckStateChange(ALState old)
 {
 	auto state = GetState();
 	if(state != old) {
@@ -125,20 +125,20 @@ void ALSound::CheckStateChange(ALState old)
 			auto *game = nw->GetGameState();
 			if(game != nullptr) {
 				game->CallCallbacks<void, ALSound *, ALState, ALState>("OnSoundStateChanged", this, old, state);
-				game->CallLuaCallbacks<void, std::shared_ptr<ALSound>, int32_t, int32_t>("OnSoundStateChanged", shared_from_this(), umath::to_integral(old), umath::to_integral(state));
+				game->CallLuaCallbacks<void, std::shared_ptr<pragma::audio::ALSound>, int32_t, int32_t>("OnSoundStateChanged", shared_from_this(), umath::to_integral(old), umath::to_integral(state));
 			}
 		}
 	}
 }
 
-unsigned int ALSound::GetIndex() const { return m_index; }
+unsigned int pragma::audio::ALSound::GetIndex() const { return m_index; }
 
-void ALSound::SetFadeInDuration(float t) { m_tFadeIn = t; }
-void ALSound::SetFadeOutDuration(float t) { m_tFadeOut = t; }
-float ALSound::GetFadeInDuration() const { return m_tFadeIn; }
-float ALSound::GetFadeOutDuration() const { return m_tFadeOut; }
+void pragma::audio::ALSound::SetFadeInDuration(float t) { m_tFadeIn = t; }
+void pragma::audio::ALSound::SetFadeOutDuration(float t) { m_tFadeOut = t; }
+float pragma::audio::ALSound::GetFadeInDuration() const { return m_tFadeIn; }
+float pragma::audio::ALSound::GetFadeOutDuration() const { return m_tFadeOut; }
 
-void ALSound::InitRange()
+void pragma::audio::ALSound::InitRange()
 {
 	if(HasRange() == false)
 		return;
@@ -146,7 +146,7 @@ void ALSound::InitRange()
 	SetOffset(range.first);
 }
 
-void ALSound::UpdateOffset()
+void pragma::audio::ALSound::UpdateOffset()
 {
 	m_lastOffset = GetOffset();
 	m_lastSecOffset = GetTimeOffset();
@@ -161,7 +161,7 @@ void ALSound::UpdateOffset()
 	}
 }
 
-void ALSound::CancelFade()
+void pragma::audio::ALSound::CancelFade()
 {
 	if(m_fade == nullptr)
 		return;
@@ -174,59 +174,59 @@ void ALSound::CancelFade()
 		Pause();
 }
 
-void ALSound::SetType(pragma::audio::ALSoundType type) { m_type = type; }
-void ALSound::AddType(pragma::audio::ALSoundType type)
+void pragma::audio::ALSound::SetType(pragma::audio::ALSoundType type) { m_type = type; }
+void pragma::audio::ALSound::AddType(pragma::audio::ALSoundType type)
 {
 	type = static_cast<pragma::audio::ALSoundType>(CUInt32(m_type) | CUInt32(type));
 	SetType(type);
 }
-pragma::audio::ALSoundType ALSound::GetType() const { return m_type; }
-ALState ALSound::GetState() const { return ALState::Initial; }
+pragma::audio::ALSoundType pragma::audio::ALSound::GetType() const { return m_type; }
+pragma::audio::ALState pragma::audio::ALSound::GetState() const { return ALState::Initial; }
 
-void ALSound::UpdateState() {}
-void ALSound::Initialize() {}
+void pragma::audio::ALSound::UpdateState() {}
+void pragma::audio::ALSound::Initialize() {}
 
-void ALSound::SetGainRange(float minGain, float maxGain)
+void pragma::audio::ALSound::SetGainRange(float minGain, float maxGain)
 {
 	SetMinGain(minGain);
 	SetMaxGain(maxGain);
 }
-std::pair<float, float> ALSound::GetGainRange() const { return {GetMinGain(), GetMaxGain()}; }
-void ALSound::SetDistanceRange(float refDist, float maxDist)
+std::pair<float, float> pragma::audio::ALSound::GetGainRange() const { return {GetMinGain(), GetMaxGain()}; }
+void pragma::audio::ALSound::SetDistanceRange(float refDist, float maxDist)
 {
 	SetReferenceDistance(refDist);
 	SetMaxDistance(maxDist);
 }
-std::pair<float, float> ALSound::GetDistanceRange() const { return {GetReferenceDistance(), GetMaxDistance()}; }
-void ALSound::SetConeAngles(float inner, float outer)
+std::pair<float, float> pragma::audio::ALSound::GetDistanceRange() const { return {GetReferenceDistance(), GetMaxDistance()}; }
+void pragma::audio::ALSound::SetConeAngles(float inner, float outer)
 {
 	SetInnerConeAngle(inner);
 	SetOuterConeAngle(outer);
 }
-std::pair<float, float> ALSound::GetConeAngles() const { return {GetInnerConeAngle(), GetOuterConeAngle()}; }
-std::pair<float, float> ALSound::GetOuterConeGains() const { return {GetOuterConeGain(), GetOuterConeGainHF()}; }
-void ALSound::SetStereoAngles(float leftAngle, float rightAngle)
+std::pair<float, float> pragma::audio::ALSound::GetConeAngles() const { return {GetInnerConeAngle(), GetOuterConeAngle()}; }
+std::pair<float, float> pragma::audio::ALSound::GetOuterConeGains() const { return {GetOuterConeGain(), GetOuterConeGainHF()}; }
+void pragma::audio::ALSound::SetStereoAngles(float leftAngle, float rightAngle)
 {
 	SetLeftStereoAngle(leftAngle);
 	SetRightStereoAngle(rightAngle);
 }
-std::pair<float, float> ALSound::GetStereoAngles() const { return {GetLeftStereoAngle(), GetRightStereoAngle()}; }
-void ALSound::SetOuterConeGains(float gain, float gainHF)
+std::pair<float, float> pragma::audio::ALSound::GetStereoAngles() const { return {GetLeftStereoAngle(), GetRightStereoAngle()}; }
+void pragma::audio::ALSound::SetOuterConeGains(float gain, float gainHF)
 {
 	SetOuterConeGain(gain);
 	SetOuterConeGainHF(gainHF);
 }
-bool ALSound::GetDirectGainHFAuto() const { return std::get<0>(GetGainAuto()); }
-bool ALSound::GetSendGainAuto() const { return std::get<1>(GetGainAuto()); }
-bool ALSound::GetSendGainHFAuto() const { return std::get<2>(GetGainAuto()); }
-std::pair<float, float> ALSound::GetRolloffFactors() const { return {GetRolloffFactor(), GetRoomRolloffFactor()}; }
-void ALSound::SetRolloffFactors(float factor, float roomFactor)
+bool pragma::audio::ALSound::GetDirectGainHFAuto() const { return std::get<0>(GetGainAuto()); }
+bool pragma::audio::ALSound::GetSendGainAuto() const { return std::get<1>(GetGainAuto()); }
+bool pragma::audio::ALSound::GetSendGainHFAuto() const { return std::get<2>(GetGainAuto()); }
+std::pair<float, float> pragma::audio::ALSound::GetRolloffFactors() const { return {GetRolloffFactor(), GetRoomRolloffFactor()}; }
+void pragma::audio::ALSound::SetRolloffFactors(float factor, float roomFactor)
 {
 	SetRolloffFactor(factor);
 	SetRoomRolloffFactor(roomFactor);
 }
-void ALSound::SetEffectGain(const std::string &effectName, float gain) { SetEffectParameters(effectName, {gain}); }
-void ALSound::SetTimeOffset(float offset)
+void pragma::audio::ALSound::SetEffectGain(const std::string &effectName, float gain) { SetEffectParameters(effectName, {gain}); }
+void pragma::audio::ALSound::SetTimeOffset(float offset)
 {
 	auto dur = GetDuration();
 	if(dur == 0.f) {
@@ -235,4 +235,4 @@ void ALSound::SetTimeOffset(float offset)
 	}
 	SetOffset(offset / dur);
 }
-float ALSound::GetTimeOffset() const { return GetOffset() * GetDuration(); }
+float pragma::audio::ALSound::GetTimeOffset() const { return GetOffset() * GetDuration(); }

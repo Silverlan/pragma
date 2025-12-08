@@ -10,7 +10,7 @@ export module pragma.client:particle_system.operator_pause_emission;
 export import :entities.components.particle_system;
 export import :particle_system.modifier;
 
-export {
+export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorPauseEmissionBase : public CParticleOperator {
 	  public:
 		virtual void Simulate(double tDelta) override;
@@ -47,7 +47,7 @@ export {
 	};
 };
 
-void CParticleOperatorPauseEmissionBase::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorPauseEmissionBase::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &pair : values) {
@@ -60,12 +60,12 @@ void CParticleOperatorPauseEmissionBase::Initialize(pragma::BaseEnvParticleSyste
 	}
 	static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).SetAlwaysSimulate(true); // Required, otherwise Simulate() might not get called
 }
-void CParticleOperatorPauseEmissionBase::OnParticleSystemStarted()
+void pragma::pts::CParticleOperatorPauseEmissionBase::OnParticleSystemStarted()
 {
 	CParticleOperator::OnParticleSystemStarted();
 	Simulate(0.0);
 }
-void CParticleOperatorPauseEmissionBase::Simulate(double tDelta)
+void pragma::pts::CParticleOperatorPauseEmissionBase::Simulate(double tDelta)
 {
 	CParticleOperator::Simulate(tDelta);
 	auto *ps = GetTargetParticleSystem();
@@ -95,14 +95,14 @@ void CParticleOperatorPauseEmissionBase::Simulate(double tDelta)
 
 /////////////////////
 
-void CParticleOperatorPauseEmission::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) { CParticleOperatorPauseEmissionBase::Initialize(pSystem, values); }
-pragma::ecs::CParticleSystemComponent *CParticleOperatorPauseEmission::GetTargetParticleSystem() { return &GetParticleSystem(); }
+void pragma::pts::CParticleOperatorPauseEmission::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) { pragma::pts::CParticleOperatorPauseEmissionBase::Initialize(pSystem, values); }
+pragma::ecs::CParticleSystemComponent *pragma::pts::CParticleOperatorPauseEmission::GetTargetParticleSystem() { return &GetParticleSystem(); }
 
 /////////////////////
 
-void CParticleOperatorPauseChildEmission::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorPauseChildEmission::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperatorPauseEmissionBase::Initialize(pSystem, values);
+	pragma::pts::CParticleOperatorPauseEmissionBase::Initialize(pSystem, values);
 	std::string childName;
 	for(auto &pair : values) {
 		auto key = pair.first;
@@ -116,4 +116,4 @@ void CParticleOperatorPauseChildEmission::Initialize(pragma::BaseEnvParticleSyst
 		return;
 	m_hChildSystem = it->child;
 }
-pragma::ecs::CParticleSystemComponent *CParticleOperatorPauseChildEmission::GetTargetParticleSystem() { return m_hChildSystem.get(); }
+pragma::ecs::CParticleSystemComponent *pragma::pts::CParticleOperatorPauseChildEmission::GetTargetParticleSystem() { return m_hChildSystem.get(); }

@@ -194,7 +194,7 @@ void SNetworkedComponent::OnNetworkedVariableCreated(NetworkedVariable &nwVar)
 				NetPacket packet {};
 				packet->Write<NetworkedVariable::Id>(id);
 				packet->Write<NetworkedVariable::Type>(NetworkedVariable::Type::Entity);
-				nwm::write_entity(packet, val);
+				pragma::networking::write_entity(packet, val);
 				static_cast<SBaseEntity &>(GetEntity()).SendNetEventTCP(m_netEvSetVar, packet);
 			});
 			break;

@@ -14,9 +14,9 @@ import :scripting.lua.classes.physics;
 
 namespace Lua {
 	namespace physenv {
-		static Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> raycast(lua::State *l, pragma::Game &game, const ::TraceData &traceData);
-		static Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> sweep(lua::State *l, pragma::Game &game, const ::TraceData &traceData);
-		static Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> overlap(lua::State *l, pragma::Game &game, const ::TraceData &traceData);
+		static Lua::var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> raycast(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData);
+		static Lua::var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> sweep(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData);
+		static Lua::var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> overlap(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData);
 		static ::util::TSharedHandle<pragma::physics::IRigidBody> create_rigid_body(pragma::physics::IEnvironment *env, pragma::physics::IShape &shape, bool dynamic = true);
 		static std::shared_ptr<pragma::physics::IConvexHullShape> create_convex_hull_shape(pragma::physics::IEnvironment *env, pragma::physics::IMaterial &material);
 
@@ -40,13 +40,13 @@ namespace Lua {
 		static ::util::TSharedHandle<pragma::physics::IDoFConstraint> create_DoF_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB);
 		static ::util::TSharedHandle<pragma::physics::IDoFSpringConstraint> create_dof_spring_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB,
 		  const Quat &rotB);
-		static SurfaceMaterial *create_surface_material(pragma::Game &game, const std::string &name, float friction, float restitution);
+		static pragma::physics::SurfaceMaterial *create_surface_material(pragma::Game &game, const std::string &name, float friction, float restitution);
 
 		static ::util::TSharedHandle<pragma::physics::IController> create_box_controller(pragma::physics::IEnvironment *env, const Vector3 &halfExtents, float stepHeight, float slopeLimit = 45.f, const umath::Transform &startTransform = {});
 		static ::util::TSharedHandle<pragma::physics::IController> create_capsule_controller(pragma::physics::IEnvironment *env, float halfWidth, float halfHeight, float stepHeight, float slopeLimit = 45.f, const umath::Transform &startTransform = {});
 
 		static std::shared_ptr<pragma::physics::IMaterial> create_material(pragma::physics::IEnvironment *env, float staticFriction, float dynamicFriction, float restitution);
-		static luabind::tableT<SurfaceMaterial> get_surface_materials(lua::State *l, pragma::Game &game);
+		static luabind::tableT<pragma::physics::SurfaceMaterial> get_surface_materials(lua::State *l, pragma::Game &game);
 
 		static void create_character_controller(lua::State *);
 
@@ -104,7 +104,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			      return nullptr;
 		      return env->CreateVehicle(vhcCreateInfo);
 	      })),
-	  luabind::def("get_surface_material", static_cast<SurfaceMaterial *(pragma::Game::*)(const std::string &)>(&pragma::Game::GetSurfaceMaterial)), luabind::def("get_surface_material", static_cast<SurfaceMaterial *(pragma::Game::*)(uint32_t)>(&pragma::Game::GetSurfaceMaterial)),
+	  luabind::def("get_surface_material", static_cast<pragma::physics::SurfaceMaterial *(pragma::Game::*)(const std::string &)>(&pragma::Game::GetSurfaceMaterial)), luabind::def("get_surface_material", static_cast<pragma::physics::SurfaceMaterial *(pragma::Game::*)(uint32_t)>(&pragma::Game::GetSurfaceMaterial)),
 	  luabind::def("get_surface_materials", get_surface_materials), luabind::def("get_generic_material", static_cast<pragma::physics::IMaterial *(*)(pragma::physics::IEnvironment *)>([](pragma::physics::IEnvironment *env) -> pragma::physics::IMaterial * {
 		  if(env == nullptr)
 			  return nullptr;
@@ -121,8 +121,8 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	    {"ACTIVATION_STATE_COUNT", umath::to_integral(pragma::physics::ICollisionObject::ActivationState::Count)}});
 
 	Lua::RegisterLibraryEnums(l, libName,
-	  {{"TYPE_NONE", umath::to_integral(pragma::physics::PHYSICSTYPE::NONE)}, {"TYPE_DYNAMIC", umath::to_integral(pragma::physics::PHYSICSTYPE::DYNAMIC)}, {"TYPE_STATIC", umath::to_integral(pragma::physics::PHYSICSTYPE::STATIC)},
-	    {"TYPE_BOXCONTROLLER", umath::to_integral(pragma::physics::PHYSICSTYPE::BOXCONTROLLER)}, {"TYPE_CAPSULECONTROLLER", umath::to_integral(pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER)}, {"TYPE_SOFTBODY", umath::to_integral(pragma::physics::PHYSICSTYPE::SOFTBODY)},
+	  {{"TYPE_NONE", umath::to_integral(pragma::physics::PhysicsType::None)}, {"TYPE_DYNAMIC", umath::to_integral(pragma::physics::PhysicsType::Dynamic)}, {"TYPE_STATIC", umath::to_integral(pragma::physics::PhysicsType::Static)},
+	    {"TYPE_BOXCONTROLLER", umath::to_integral(pragma::physics::PhysicsType::BoxController)}, {"TYPE_CAPSULECONTROLLER", umath::to_integral(pragma::physics::PhysicsType::CapsuleController)}, {"TYPE_SOFTBODY", umath::to_integral(pragma::physics::PhysicsType::SoftBody)},
 
 	    {"COLLISIONMASK_NONE", umath::to_integral(pragma::physics::CollisionMask::None)}, {"COLLISIONMASK_STATIC", umath::to_integral(pragma::physics::CollisionMask::Static)}, {"COLLISIONMASK_DYNAMIC", umath::to_integral(pragma::physics::CollisionMask::Dynamic)},
 	    {"COLLISIONMASK_GENERIC", umath::to_integral(pragma::physics::CollisionMask::Generic)}, {"COLLISIONMASK_PLAYER", umath::to_integral(pragma::physics::CollisionMask::Player)}, {"COLLISIONMASK_NPC", umath::to_integral(pragma::physics::CollisionMask::NPC)},
@@ -264,10 +264,10 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classMat.def("GetSurfaceMaterial", &pragma::physics::IMaterial::GetSurfaceMaterial);
 	physMod[classMat];
 
-	auto classDefRayCastData = luabind::class_<::TraceData>("RayCastData");
+	auto classDefRayCastData = luabind::class_<pragma::physics::TraceData>("RayCastData");
 	classDefRayCastData.def(luabind::constructor<>());
 	classDefRayCastData.def(
-	  "__tostring", +[](const ::TraceData &data) -> std::string {
+	  "__tostring", +[](const pragma::physics::TraceData &data) -> std::string {
 		  std::stringstream ss;
 		  ss << "RayCastData[Flags:" << magic_enum::enum_name(data.GetFlags()) << "]";
 		  auto &src = data.GetSource();
@@ -278,14 +278,14 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		  ss << "[FilterMask:" << magic_enum::enum_name(data.GetCollisionFilterMask()) << "]";
 		  return ss.str();
 	  });
-	classDefRayCastData.def("SetShape", static_cast<void (*)(lua::State *, ::TraceData &, const pragma::physics::IConvexShape &)>(&Lua::TraceData::SetSource));
-	classDefRayCastData.def("SetSource", static_cast<void (::TraceData::*)(const Vector3 &)>(&::TraceData::SetSource));
-	classDefRayCastData.def("SetSourceRotation", &::TraceData::SetSourceRotation);
-	classDefRayCastData.def("SetSource", static_cast<void (::TraceData::*)(const umath::Transform &)>(&::TraceData::SetSource));
-	classDefRayCastData.def("SetTarget", static_cast<void (::TraceData::*)(const Vector3 &)>(&::TraceData::SetTarget));
-	classDefRayCastData.def("SetTargetRotation", &::TraceData::SetTargetRotation);
-	classDefRayCastData.def("SetTarget", static_cast<void (::TraceData::*)(const umath::Transform &)>(&::TraceData::SetTarget));
-	classDefRayCastData.def("SetRotation", &::TraceData::SetRotation);
+	classDefRayCastData.def("SetShape", static_cast<void (*)(lua::State *, pragma::physics::TraceData &, const pragma::physics::IConvexShape &)>(&Lua::TraceData::SetSource));
+	classDefRayCastData.def("SetSource", static_cast<void (pragma::physics::TraceData::*)(const Vector3 &)>(&pragma::physics::TraceData::SetSource));
+	classDefRayCastData.def("SetSourceRotation", &pragma::physics::TraceData::SetSourceRotation);
+	classDefRayCastData.def("SetSource", static_cast<void (pragma::physics::TraceData::*)(const umath::Transform &)>(&pragma::physics::TraceData::SetSource));
+	classDefRayCastData.def("SetTarget", static_cast<void (pragma::physics::TraceData::*)(const Vector3 &)>(&pragma::physics::TraceData::SetTarget));
+	classDefRayCastData.def("SetTargetRotation", &pragma::physics::TraceData::SetTargetRotation);
+	classDefRayCastData.def("SetTarget", static_cast<void (pragma::physics::TraceData::*)(const umath::Transform &)>(&pragma::physics::TraceData::SetTarget));
+	classDefRayCastData.def("SetRotation", &pragma::physics::TraceData::SetRotation);
 	classDefRayCastData.def("SetFlags", &Lua::TraceData::SetFlags);
 	classDefRayCastData.def("SetFilter", &Lua::TraceData::SetFilter);
 	classDefRayCastData.def("SetCollisionFilterMask", &Lua::TraceData::SetCollisionFilterMask);
@@ -300,9 +300,9 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefRayCastData.def("GetDirection", &Lua::TraceData::GetDirection);
 	physMod[classDefRayCastData];
 
-	auto classDefRayCastResult = luabind::class_<TraceResult>("RayCastResult");
+	auto classDefRayCastResult = luabind::class_<pragma::physics::TraceResult>("RayCastResult");
 	classDefRayCastResult.def(
-	  "__tostring", +[](const ::TraceResult &res) -> std::string {
+	  "__tostring", +[](const pragma::physics::TraceResult &res) -> std::string {
 		  std::stringstream ss;
 		  ss << "RayCastResult";
 		  ss << "[HitType:" << magic_enum::enum_name(res.hitType) << "]";
@@ -317,7 +317,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		  ss << "]";
 
 		  ss << "[HitMat:";
-		  auto *mat = const_cast<::TraceResult &>(res).GetMaterial();
+		  auto *mat = const_cast<pragma::physics::TraceResult &>(res).GetMaterial();
 		  if(mat)
 			  ss << mat->GetName();
 		  else
@@ -331,37 +331,37 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefRayCastResult.add_static_constant("HIT_TYPE_BLOCK", umath::to_integral(pragma::physics::RayCastHitType::Block));
 	classDefRayCastResult.add_static_constant("HIT_TYPE_TOUCH", umath::to_integral(pragma::physics::RayCastHitType::Touch));
 	classDefRayCastResult.add_static_constant("HIT_TYPE_NONE", umath::to_integral(pragma::physics::RayCastHitType::None));
-	classDefRayCastResult.def_readonly("hitType", reinterpret_cast<std::underlying_type_t<decltype(TraceResult::hitType)> TraceResult::*>(&TraceResult::hitType));
-	classDefRayCastResult.property("entity", static_cast<void (*)(lua::State *, TraceResult &)>([](lua::State *l, TraceResult &tr) {
+	classDefRayCastResult.def_readonly("hitType", reinterpret_cast<std::underlying_type_t<decltype(pragma::physics::TraceResult::hitType)> pragma::physics::TraceResult::*>(&pragma::physics::TraceResult::hitType));
+	classDefRayCastResult.property("entity", static_cast<void (*)(lua::State *, pragma::physics::TraceResult &)>([](lua::State *l, pragma::physics::TraceResult &tr) {
 		if(tr.entity.valid() == false)
 			return;
 		tr.entity->GetLuaObject().push(l);
 	}));
-	classDefRayCastResult.def_readonly("physObj", &TraceResult::physObj);
-	classDefRayCastResult.def_readonly("fraction", &TraceResult::fraction);
-	classDefRayCastResult.def_readonly("distance", &TraceResult::distance);
-	classDefRayCastResult.def_readonly("normal", &TraceResult::normal);
-	classDefRayCastResult.def_readonly("position", &TraceResult::position);
-	classDefRayCastResult.def_readonly("startPosition", &TraceResult::startPosition);
-	classDefRayCastResult.property("colObj", static_cast<pragma::physics::ICollisionObject *(*)(lua::State *, TraceResult &)>([](lua::State *l, TraceResult &tr) -> pragma::physics::ICollisionObject * { return tr.collisionObj.Get(); }));
-	classDefRayCastResult.property("mesh", static_cast<std::shared_ptr<::ModelMesh> (*)(lua::State *, TraceResult &)>([](lua::State *l, TraceResult &tr) -> std::shared_ptr<::ModelMesh> {
-		::ModelMesh *mesh = nullptr;
-		pragma::ModelSubMesh *subMesh = nullptr;
+	classDefRayCastResult.def_readonly("physObj", &pragma::physics::TraceResult::physObj);
+	classDefRayCastResult.def_readonly("fraction", &pragma::physics::TraceResult::fraction);
+	classDefRayCastResult.def_readonly("distance", &pragma::physics::TraceResult::distance);
+	classDefRayCastResult.def_readonly("normal", &pragma::physics::TraceResult::normal);
+	classDefRayCastResult.def_readonly("position", &pragma::physics::TraceResult::position);
+	classDefRayCastResult.def_readonly("startPosition", &pragma::physics::TraceResult::startPosition);
+	classDefRayCastResult.property("colObj", static_cast<pragma::physics::ICollisionObject *(*)(lua::State *, pragma::physics::TraceResult &)>([](lua::State *l, pragma::physics::TraceResult &tr) -> pragma::physics::ICollisionObject * { return tr.collisionObj.Get(); }));
+	classDefRayCastResult.property("mesh", static_cast<std::shared_ptr<pragma::geometry::ModelMesh> (*)(lua::State *, pragma::physics::TraceResult &)>([](lua::State *l, pragma::physics::TraceResult &tr) -> std::shared_ptr<pragma::geometry::ModelMesh> {
+		pragma::geometry::ModelMesh *mesh = nullptr;
+		pragma::geometry::ModelSubMesh *subMesh = nullptr;
 		tr.GetMeshes(&mesh, &subMesh);
 		if(mesh == nullptr)
 			return nullptr;
 		return mesh->shared_from_this();
 	}));
-	classDefRayCastResult.property("subMesh", static_cast<std::shared_ptr<pragma::ModelSubMesh> (*)(lua::State *, TraceResult &)>([](lua::State *l, TraceResult &tr) -> std::shared_ptr<pragma::ModelSubMesh> {
-		::ModelMesh *mesh = nullptr;
-		pragma::ModelSubMesh *subMesh = nullptr;
+	classDefRayCastResult.property("subMesh", static_cast<std::shared_ptr<pragma::geometry::ModelSubMesh> (*)(lua::State *, pragma::physics::TraceResult &)>([](lua::State *l, pragma::physics::TraceResult &tr) -> std::shared_ptr<pragma::geometry::ModelSubMesh> {
+		pragma::geometry::ModelMesh *mesh = nullptr;
+		pragma::geometry::ModelSubMesh *subMesh = nullptr;
 		tr.GetMeshes(&mesh, &subMesh);
 		if(subMesh == nullptr)
 			return nullptr;
 		return subMesh->shared_from_this();
 	}));
-	classDefRayCastResult.property("material", static_cast<msys::Material *(TraceResult::*)()>(&TraceResult::GetMaterial));
-	classDefRayCastResult.property("materialName", static_cast<std::optional<std::string> (*)(lua::State *, TraceResult &)>([](lua::State *l, TraceResult &tr) -> std::optional<std::string> {
+	classDefRayCastResult.property("material", static_cast<msys::Material *(pragma::physics::TraceResult::*)()>(&pragma::physics::TraceResult::GetMaterial));
+	classDefRayCastResult.property("materialName", static_cast<std::optional<std::string> (*)(lua::State *, pragma::physics::TraceResult &)>([](lua::State *l, pragma::physics::TraceResult &tr) -> std::optional<std::string> {
 		std::string mat;
 		if(tr.GetMaterial(mat) == false)
 			return {};
@@ -746,7 +746,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classIkController.add_static_constant("METHOD_DEFAULT", umath::to_integral(::util::ik::Method::Default));
 	physMod[classIkController];
 
-	auto classDef = luabind::class_<::PhysSoftBodyInfo>("SoftBodyInfo");
+	auto classDef = luabind::class_<pragma::physics::PhysSoftBodyInfo>("SoftBodyInfo");
 	Lua::PhysSoftBodyInfo::register_class(l, classDef);
 	physMod[classDef];
 
@@ -756,40 +756,40 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	Lua::PhysContact::register_class(l, physMod);
 	Lua::PhysShape::register_class(l, physMod);
 }
-Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> Lua::physenv::raycast(lua::State *l, pragma::Game &game, const ::TraceData &traceData)
+Lua::var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> Lua::physenv::raycast(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData)
 {
-	std::vector<TraceResult> res;
+	std::vector<pragma::physics::TraceResult> res;
 	auto r = game.RayCast(traceData, &res);
 	if(res.empty() || (r == false && (traceData.HasFlag(pragma::physics::RayCastFlags::ReportAllResults) == false || res.size() == 1)))
 		return luabind::object {l, r};
 	if(!traceData.HasFlag(pragma::physics::RayCastFlags::ReportAllResults))
-		return luabind::object {l, static_cast<TraceResult>(res.back())};
+		return luabind::object {l, static_cast<pragma::physics::TraceResult>(res.back())};
 	auto table = luabind::newtable(l);
 	for(size_t i = 0; i < res.size(); i++)
 		table[i + 1] = res[i];
 	return table;
 }
-Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> Lua::physenv::sweep(lua::State *l, pragma::Game &game, const ::TraceData &traceData)
+Lua::var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> Lua::physenv::sweep(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData)
 {
-	std::vector<TraceResult> res;
+	std::vector<pragma::physics::TraceResult> res;
 	auto r = game.Sweep(traceData, &res);
 	if(res.empty() || (r == false && (traceData.HasFlag(pragma::physics::RayCastFlags::ReportAllResults) == false || res.size() == 1)))
 		return luabind::object {l, r};
 	if(!traceData.HasFlag(pragma::physics::RayCastFlags::ReportAllResults))
-		return luabind::object {l, static_cast<TraceResult>(res.back())};
+		return luabind::object {l, static_cast<pragma::physics::TraceResult>(res.back())};
 	auto table = luabind::newtable(l);
 	for(size_t i = 0; i < res.size(); i++)
 		table[i + 1] = res[i];
 	return table;
 }
-Lua::var<bool, luabind::tableT<TraceResult>, TraceResult> Lua::physenv::overlap(lua::State *l, pragma::Game &game, const ::TraceData &traceData)
+Lua::var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> Lua::physenv::overlap(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData)
 {
-	std::vector<TraceResult> res;
+	std::vector<pragma::physics::TraceResult> res;
 	auto r = game.Overlap(traceData, &res);
 	if(res.empty() || (r == false && (traceData.HasFlag(pragma::physics::RayCastFlags::ReportAllResults) == false || res.size() == 1)))
 		return luabind::object {l, r};
 	if(!traceData.HasFlag(pragma::physics::RayCastFlags::ReportAllResults))
-		return luabind::object {l, static_cast<TraceResult>(res.back())};
+		return luabind::object {l, static_cast<pragma::physics::TraceResult>(res.back())};
 	auto table = luabind::newtable(l);
 	for(size_t i = 0; i < res.size(); i++)
 		table[i + 1] = res[i];
@@ -960,7 +960,7 @@ std::shared_ptr<pragma::physics::IShape> Lua::physenv::create_heightfield_terrai
 	return env->CreateDoFSpringConstraint(bodyA, pivotA, rotA, bodyB, pivotB, rotB);
 }
 
-SurfaceMaterial *Lua::physenv::create_surface_material(pragma::Game &game, const std::string &name, float friction, float restitution) { return &game.CreateSurfaceMaterial(name, friction, restitution); }
+pragma::physics::SurfaceMaterial *Lua::physenv::create_surface_material(pragma::Game &game, const std::string &name, float friction, float restitution) { return &game.CreateSurfaceMaterial(name, friction, restitution); }
 
 ::util::TSharedHandle<pragma::physics::IController> Lua::physenv::create_box_controller(pragma::physics::IEnvironment *env, const Vector3 &halfExtents, float stepHeight, float slopeLimit, const umath::Transform &startTransform)
 {
@@ -981,7 +981,7 @@ std::shared_ptr<pragma::physics::IMaterial> Lua::physenv::create_material(pragma
 		return nullptr;
 	return env->CreateMaterial(staticFriction, dynamicFriction, restitution);
 }
-luabind::tableT<SurfaceMaterial> Lua::physenv::get_surface_materials(lua::State *l, pragma::Game &game)
+luabind::tableT<pragma::physics::SurfaceMaterial> Lua::physenv::get_surface_materials(lua::State *l, pragma::Game &game)
 {
 	auto *mats = game.GetSurfaceMaterials();
 	auto t = luabind::newtable(l);
@@ -995,7 +995,7 @@ luabind::tableT<SurfaceMaterial> Lua::physenv::get_surface_materials(lua::State 
 void Lua::physenv::create_character_controller(lua::State *)
 {
 	/*
-	NetworkState *state = Engine::Get()->GetNetworkState(l);
+	auto *state = Engine::Get()->GetNetworkState(l);
 	Game *game = state->GetGameState();
 	btTransform startTransform;
 	startTransform.setIdentity();

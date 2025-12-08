@@ -13,7 +13,7 @@ import :model;
 
 using namespace pragma;
 
-decltype(ShaderSkybox::VERTEX_BINDING_VERTEX) ShaderSkybox::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(VertexBufferData)};
+decltype(ShaderSkybox::VERTEX_BINDING_VERTEX) ShaderSkybox::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(pragma::rendering::VertexBufferData)};
 decltype(ShaderSkybox::VERTEX_ATTRIBUTE_POSITION) ShaderSkybox::VERTEX_ATTRIBUTE_POSITION = {ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_POSITION, VERTEX_BINDING_VERTEX};
 decltype(ShaderSkybox::DESCRIPTOR_SET_INSTANCE) ShaderSkybox::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderSkybox::DESCRIPTOR_SET_SCENE) ShaderSkybox::DESCRIPTOR_SET_SCENE = {&ShaderEntity::DESCRIPTOR_SET_SCENE};
@@ -26,7 +26,7 @@ ShaderSkybox::ShaderSkybox(prosper::IPrContext &context, const std::string &iden
 	m_shaderMaterialName = "skybox";
 }
 
-bool ShaderSkybox::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
+bool ShaderSkybox::GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
 {
 	auto &sceneMesh = mesh.GetSceneMesh();
 	if(sceneMesh == nullptr)
@@ -35,7 +35,7 @@ bool ShaderSkybox::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipeline
 	if(indexBuffer) {
 		outIndexBufferInfo = prosper::IndexBufferInfo {};
 		outIndexBufferInfo->buffer = indexBuffer;
-		outIndexBufferInfo->indexType = (mesh.GetIndexType() == pragma::model::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
+		outIndexBufferInfo->indexType = (mesh.GetIndexType() == pragma::geometry::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
 		outIndexBufferInfo->offset = 0;
 	}
 

@@ -76,8 +76,8 @@ export namespace pragma {
 		void UpdateLightmapUvBuffers();
 		std::shared_ptr<prosper::IDynamicResizableBuffer> GetGlobalLightMapUvBuffer() const;
 
-		const LightmapDataCache *GetLightmapDataCache() const;
-		void SetLightmapDataCache(LightmapDataCache *cache);
+		const rendering::LightmapDataCache *GetLightmapDataCache() const;
+		void SetLightmapDataCache(rendering::LightmapDataCache *cache);
 
 		const std::shared_ptr<prosper::Texture> &GetTexture(Texture tex) const;
 		void SetLightMapMaterial(const std::string &matName);
@@ -90,7 +90,7 @@ export namespace pragma {
 		std::array<std::shared_ptr<prosper::Texture>, umath::to_integral(Texture::Count)> m_textures;
 
 		util::PFloatProperty m_lightMapExposure = nullptr;
-		std::shared_ptr<LightmapDataCache> m_lightmapDataCache;
+		std::shared_ptr<rendering::LightmapDataCache> m_lightmapDataCache;
 
 		// Contains the light map uv-buffer for each mesh of the world in the same order
 		// they are in the model's mesh group

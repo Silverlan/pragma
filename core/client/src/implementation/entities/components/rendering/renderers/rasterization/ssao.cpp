@@ -11,7 +11,7 @@ import :rendering.shaders;
 
 using namespace pragma::rendering;
 
-void pragma::CRasterizationRendererComponent::RenderSSAO(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RenderSSAO(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	auto &ssaoInfo = GetSSAOInfo();
 	auto *shaderSSAO = static_cast<pragma::ShaderSSAO *>(ssaoInfo.GetSSAOShader());

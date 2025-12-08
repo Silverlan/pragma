@@ -35,15 +35,15 @@ export namespace pragma {
 		bool IsInFirstPersonMode() const;
 
 		virtual void ApplyViewRotationOffset(const EulerAngles &ang, float dur = 0.5f) override;
-		virtual void PrintMessage(std::string message, MESSAGE type) override;
+		virtual void PrintMessage(std::string message, pragma::console::MESSAGE type) override;
 
 		void UpdateViewModelTransform();
 		void UpdateViewFOV();
 	  protected:
 		CallbackHandle m_cbCalcOrientationView = {};
-		std::unique_ptr<DeltaOffset> m_crouchViewOffset = nullptr;
-		std::unique_ptr<DeltaTransform> m_upDirOffset = nullptr;
-		std::shared_ptr<ALSound> m_sndUnderwater = nullptr;
+		std::unique_ptr<math::DeltaOffset> m_crouchViewOffset = nullptr;
+		std::unique_ptr<math::DeltaTransform> m_upDirOffset = nullptr;
+		std::shared_ptr<pragma::audio::ALSound> m_sndUnderwater = nullptr;
 		EntityHandle m_cbUnderwaterDsp = {};
 		void OnWaterSubmerged();
 		void OnWaterEmerged();

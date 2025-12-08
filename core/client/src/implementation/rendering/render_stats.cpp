@@ -8,7 +8,7 @@ module pragma.client;
 import :rendering.render_stats;
 import :engine;
 
-RenderStats::RenderStats()
+pragma::rendering::RenderStats::RenderStats()
 {
 	auto numTimers = umath::to_integral(RenderStage::GpuCount) + umath::to_integral(RenderPassStats::Timer::GpuCount) * passes.size();
 	queryPool = pragma::get_cengine()->GetRenderContext().CreateQueryPool(prosper::QueryType::Timestamp, numTimers * 2);
@@ -26,7 +26,7 @@ RenderStats::RenderStats()
 	}
 }
 
-RenderStats::~RenderStats()
+pragma::rendering::RenderStats::~RenderStats()
 {
 	if(queryPool)
 		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(queryPool);

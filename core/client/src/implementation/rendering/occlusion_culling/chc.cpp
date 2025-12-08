@@ -175,7 +175,7 @@ void CHC::DebugRender()
 		auto &info = m_renderMeshes[i];
 		if(info.hEntity.IsValid())
 		{
-			CBaseEntity *ent = static_cast<CBaseEntity*>(info.hEntity.get());
+			CBaseEntity *ent = static_cast<pragma::ecs::CBaseEntity*>(info.hEntity.get());
 			Vector3 &origin = ent->GetPosition();
 			Vector3 min;
 			Vector3 max;
@@ -363,7 +363,7 @@ void CHC::Render(CHCNode *cNode)
 	for(unsigned int i=0;i<meshes.size();i++)
 	{
 		NodeMeshInfo *info = meshes[i];
-		m_renderMeshes.push_back(pragma::OcclusionMeshInfo(info->GetEntity(),static_cast<CModelMesh*>(info->GetMesh())));
+		m_renderMeshes.push_back(pragma::OcclusionMeshInfo(info->GetEntity(),static_cast<pragma::geometry::CModelMesh*>(info->GetMesh())));
 	}*/ // TODO
 }
 
@@ -494,7 +494,7 @@ void CHC::IssueMultiQueries()
 #endif
 }
 
-static CVar cvCulling = GetClientConVar("cl_render_occlusion_culling");
+static auto cvCulling = pragma::console::get_client_con_var("cl_render_occlusion_culling");
 bool CHC::InsideViewFrustum(CHCNode *cNode)
 {
 	if(cvCulling->GetInt() == 0)

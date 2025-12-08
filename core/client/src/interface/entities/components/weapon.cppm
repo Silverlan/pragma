@@ -70,7 +70,7 @@ export namespace pragma {
 		CallbackHandle m_cbOnOwnerObserverModeChanged = {};
 		CallbackHandle m_cbOnObserverChanged {};
 		virtual pragma::Activity TranslateViewActivity(pragma::Activity act);
-		virtual void OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin = nullptr) override;
+		virtual void OnFireBullets(const game::BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin = nullptr) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		void UpdateViewModel();
 		void UpdateWorldModel();

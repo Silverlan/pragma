@@ -47,15 +47,15 @@ void BaseLiquidSurfaceSimulationComponent::SetSpacing(uint32_t spacing) { m_spac
 bool BaseLiquidSurfaceSimulationComponent::ShouldSimulateSurface() const { return ((GetEntity().GetSpawnFlags() & umath::to_integral(SpawnFlags::SurfaceSimulation)) != 0) ? true : false; }
 void BaseLiquidSurfaceSimulationComponent::SetMaxWaveHeight(float height) { m_kvMaxWaveHeight = height; }
 
-const PhysWaterSurfaceSimulator *BaseLiquidSurfaceSimulationComponent::GetSurfaceSimulator() const { return const_cast<BaseLiquidSurfaceSimulationComponent *>(this)->GetSurfaceSimulator(); }
-PhysWaterSurfaceSimulator *BaseLiquidSurfaceSimulationComponent::GetSurfaceSimulator() { return m_physSurfaceSim.get(); }
+const pragma::physics::PhysWaterSurfaceSimulator *BaseLiquidSurfaceSimulationComponent::GetSurfaceSimulator() const { return const_cast<BaseLiquidSurfaceSimulationComponent *>(this)->GetSurfaceSimulator(); }
+pragma::physics::PhysWaterSurfaceSimulator *BaseLiquidSurfaceSimulationComponent::GetSurfaceSimulator() { return m_physSurfaceSim.get(); }
 
-std::shared_ptr<PhysWaterSurfaceSimulator> BaseLiquidSurfaceSimulationComponent::InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY)
+std::shared_ptr<pragma::physics::PhysWaterSurfaceSimulator> BaseLiquidSurfaceSimulationComponent::InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY)
 {
 	auto *controlC = static_cast<BaseLiquidControlComponent *>(GetEntity().FindComponent("liquid_control").get());
 	if(!controlC)
 		return nullptr;
-	return ::util::make_shared<PhysWaterSurfaceSimulator>(min, max, originY, GetSpacing(), controlC->GetStiffness(), controlC->GetPropagation());
+	return ::util::make_shared<pragma::physics::PhysWaterSurfaceSimulator>(min, max, originY, GetSpacing(), controlC->GetStiffness(), controlC->GetPropagation());
 }
 
 void BaseLiquidSurfaceSimulationComponent::ClearSurfaceSimulator()

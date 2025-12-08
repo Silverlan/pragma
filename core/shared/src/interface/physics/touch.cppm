@@ -11,9 +11,11 @@ export import :entities.base_entity_handle;
 export namespace pragma::ecs {
 	class BaseEntity;
 }
-export struct DLLNETWORK PhysTouch {
-	PhysTouch(pragma::ecs::BaseEntity *ent, CallbackHandle onRemove);
-	~PhysTouch();
-	EntityHandle entity;
-	CallbackHandle onRemoveCallback;
-};
+export namespace pragma::physics {
+	struct DLLNETWORK PhysTouch {
+		PhysTouch(pragma::ecs::BaseEntity *ent, CallbackHandle onRemove);
+		~PhysTouch();
+		EntityHandle entity;
+		CallbackHandle onRemoveCallback;
+	};
+}

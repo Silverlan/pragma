@@ -32,7 +32,7 @@ void CWaterSurfaceComponent::Initialize()
 	//		UpdateSurfaceMesh();
 	//});
 
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent)
 		pRenderComponent->SetCastShadows(false);
@@ -44,24 +44,24 @@ void CWaterSurfaceComponent::UpdateSurfaceMesh()
 {
 	if(m_hFuncWater.expired() || m_waterSurfaceMesh.expired() == true)
 		return;
-	auto *entWater = static_cast<CBaseEntity *>(&m_hFuncWater->GetEntity());
+	auto *entWater = static_cast<pragma::ecs::CBaseEntity *>(&m_hFuncWater->GetEntity());
 	auto *svEntWater = entWater->GetServersideEntity();
-	CPhysWaterSurfaceSimulator *sim = nullptr;
+	pragma::physics::CPhysWaterSurfaceSimulator *sim = nullptr;
 	if(svEntWater != nullptr) {
 		auto *pWaterComponent = static_cast<pragma::BaseLiquidSurfaceSimulationComponent *>(svEntWater->FindComponent("liquid_surface_simulation").get());
 		if(pWaterComponent != nullptr)
-			sim = const_cast<CPhysWaterSurfaceSimulator *>(static_cast<const CPhysWaterSurfaceSimulator *>(pWaterComponent->GetSurfaceSimulator()));
+			sim = const_cast<pragma::physics::CPhysWaterSurfaceSimulator *>(static_cast<const pragma::physics::CPhysWaterSurfaceSimulator *>(pWaterComponent->GetSurfaceSimulator()));
 	}
 	auto *pWaterComponent = static_cast<pragma::BaseLiquidSurfaceSimulationComponent *>(entWater->FindComponent("liquid_surface_simulation").get());
 	if(sim == nullptr && pWaterComponent != nullptr)
-		sim = const_cast<CPhysWaterSurfaceSimulator *>(static_cast<const CPhysWaterSurfaceSimulator *>(pWaterComponent->GetSurfaceSimulator()));
+		sim = const_cast<pragma::physics::CPhysWaterSurfaceSimulator *>(static_cast<const pragma::physics::CPhysWaterSurfaceSimulator *>(pWaterComponent->GetSurfaceSimulator()));
 
 	if(sim == nullptr)
 		return;
 	auto drawCmd = pragma::get_cgame()->GetCurrentDrawCommandBuffer();
 	if(drawCmd == nullptr)
 		return;
-	auto *cmesh = static_cast<CModelSubMesh *>(m_waterSurfaceMesh.lock().get());
+	auto *cmesh = static_cast<pragma::geometry::CModelSubMesh *>(m_waterSurfaceMesh.lock().get());
 	sim->Draw(drawCmd, *cmesh);
 }
 
@@ -80,14 +80,14 @@ msys::CMaterial *CWaterSurfaceComponent::GetWaterMaterial() const
 	                //return (pFuncWaterComponent != nullptr) ? pFuncWaterComponent->GetWaterMaterial() : nullptr;
 }
 
-CModelSubMesh *CWaterSurfaceComponent::GetWaterSurfaceMesh() const
+pragma::geometry::CModelSubMesh *CWaterSurfaceComponent::GetWaterSurfaceMesh() const
 {
 	if(m_waterSurfaceMesh.expired() == true)
 		return nullptr;
 	return m_waterSurfaceMesh.lock().get();
 }
 
-void CWaterSurfaceComponent::SetSurfaceSimulator(const std::shared_ptr<PhysWaterSurfaceSimulator> &simulator)
+void CWaterSurfaceComponent::SetSurfaceSimulator(const std::shared_ptr<pragma::physics::PhysWaterSurfaceSimulator> &simulator)
 {
 	m_surfaceSimulator = simulator;
 	if(GetEntity().IsSpawned() == true)
@@ -104,17 +104,17 @@ void CWaterSurfaceComponent::InitializeSurface()
 {
 	if(m_surfaceSimulator == nullptr)
 		return;
-	auto &sim = *static_cast<CPhysWaterSurfaceSimulator *>(m_surfaceSimulator.get());
+	auto &sim = *static_cast<pragma::physics::CPhysWaterSurfaceSimulator *>(m_surfaceSimulator.get());
 	auto &simTriangles = sim.GetTriangleIndices();
 	if(simTriangles.empty() == true)
 		return;
 	auto mdl = pragma::get_cgame()->CreateModel();
 	auto meshGroup = mdl->GetMeshGroup(0);
 
-	auto subMesh = ::util::make_shared<CModelSubMesh>();
+	auto subMesh = ::util::make_shared<pragma::geometry::CModelSubMesh>();
 	// Initialize surface
 	auto &verts = subMesh->GetVertices();
-	subMesh->SetIndexType(pragma::model::IndexType::UInt16);
+	subMesh->SetIndexType(pragma::geometry::IndexType::UInt16);
 	subMesh->SetIndices(simTriangles);
 
 	sim.LockParticleHeights();
@@ -134,10 +134,10 @@ void CWaterSurfaceComponent::InitializeSurface()
 	}
 	subMesh->SetSkinTextureIndex(0);
 
-	auto mesh = ::util::make_shared<CModelMesh>();
+	auto mesh = ::util::make_shared<pragma::geometry::CModelMesh>();
 	mesh->AddSubMesh(subMesh);
 	meshGroup->AddMesh(mesh);
-	mdl->Update(pragma::model::ModelUpdateFlags::All); // TODO: Don't update vertex and index buffers
+	mdl->Update(pragma::asset::ModelUpdateFlags::All); // TODO: Don't update vertex and index buffers
 	auto mdlComponent = GetEntity().GetModelComponent();
 	if(mdlComponent)
 		mdlComponent->SetModel(mdl);
@@ -155,7 +155,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 
 	auto &vkMesh = subMesh->GetSceneMesh();
 	vkMesh->SetVertexBuffer(vertBuffer); //sim.GetPositionBuffer());
-	vkMesh->SetIndexBuffer(indexBuffer, pragma::model::IndexType::UInt16);
+	vkMesh->SetIndexBuffer(indexBuffer, pragma::geometry::IndexType::UInt16);
 	//
 
 	m_waterSurfaceMesh = subMesh;
@@ -163,7 +163,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	m_cbRenderSurface = pragma::get_cgame()->AddCallback("PreRenderScenes", FunctionCallback<void>::Create([this]() {
 		if(m_surfaceSimulator == nullptr)
 			return;
-		auto *sim = static_cast<CPhysWaterSurfaceSimulator *>(m_surfaceSimulator.get());
+		auto *sim = static_cast<pragma::physics::CPhysWaterSurfaceSimulator *>(m_surfaceSimulator.get());
 		if(sim == nullptr)
 			return;
 		sim->Simulate(0.01); //m_entity->GetNetworkState()->GetGameState()->DeltaTime()); // TODO

@@ -118,7 +118,7 @@ void pragma::scripting::lua_core::util::get_lua_doc_info(std::stringstream &outM
 	if(cause.empty() == false)
 		Lua::doc::print_documentation(cause, outMsg);
 
-	outMsg << ::util::get_ansi_color_code(::pragma::console::ConsoleColorFlags::Reset);
+	outMsg << pragma::console::get_ansi_color_code(::pragma::console::ConsoleColorFlags::Reset);
 	outMsg << "You can use the console command 'lua_help <name>' to get more information about a specific function/library/etc.\n";
 	outMsg << "\n";
 }

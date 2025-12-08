@@ -13,7 +13,7 @@ using namespace pragma;
 void CKinematicComponent::Initialize()
 {
 	BaseFuncKinematicComponent::Initialize();
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent)
 		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);

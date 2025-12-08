@@ -8,8 +8,11 @@ export module pragma.shared:console.cvar_handler;
 
 export import :console.convar_handle;
 
-export {
+export namespace pragma {
 	class NetworkState;
+}
+
+export namespace pragma::console {
 #pragma warning(push)
 #pragma warning(disable : 4251)
 	class DLLNETWORK CVarHandler {
@@ -20,7 +23,7 @@ export {
 		virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs() = 0;
 		//
 	  protected:
-		std::map<std::string, std::shared_ptr<ConConf>> m_conVars;
+		std::map<std::string, std::shared_ptr<pragma::console::ConConf>> m_conVars;
 		std::unordered_map<std::string, std::vector<CvarCallback>> m_cvarCallbacks; // Engine-Level Callbacks only
 		std::unordered_map<std::string, unsigned int> m_conCommandIDs;
 		struct SimilarCmdInfo {
@@ -29,8 +32,8 @@ export {
 		};
 
 		template<typename T>
-		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, T, T)> &function);
-		void FindSimilarConVars(const std::string &input, const std::map<std::string, std::shared_ptr<ConConf>> &cvars, std::vector<SimilarCmdInfo> &similarCmds) const;
+		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, T, T)> &function);
+		void FindSimilarConVars(const std::string &input, const std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &cvars, std::vector<SimilarCmdInfo> &similarCmds) const;
 		virtual void Initialize();
 	  public:
 		CVarHandler();
@@ -60,8 +63,8 @@ export {
 		bool GetConVarFlags(std::string scmd, pragma::console::ConVarFlags &outVal);
 
 		virtual ConVarMap *GetConVarMap();
-		std::map<std::string, std::shared_ptr<ConConf>> &GetConVars();
-		const std::map<std::string, std::shared_ptr<ConConf>> &GetConVars() const;
+		std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &GetConVars();
+		const std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &GetConVars() const;
 		unsigned int GetConVarID(std::string scmd);
 		virtual ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false);
 		std::vector<std::string> FindSimilarConVars(const std::string &input, std::size_t maxCount = 10) const;
@@ -70,12 +73,12 @@ export {
 		// These should be avoided, because convars and commands registered this way
 		// cannot be synchronized between server and client
 		std::shared_ptr<ConVar> RegisterConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help = "");
-		std::shared_ptr<ConCommand> RegisterConCommand(const std::string &scmd, const std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None,
+		std::shared_ptr<pragma::console::ConCommand> RegisterConCommand(const std::string &scmd, const std::function<void(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None,
 		  const std::string &help = "");
-		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, int, int)> &function);
-		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, std::string, std::string)> &function);
-		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, float, float)> &function);
-		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, bool, bool)> &function);
+		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, int, int)> &function);
+		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, std::string, std::string)> &function);
+		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, float, float)> &function);
+		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> &function);
 
 		virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const;
 	};

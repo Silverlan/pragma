@@ -19,11 +19,11 @@ import :model;
 static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
-static std::unique_ptr<DebugRenderFilter> g_debugRenderFilter = nullptr;
+static std::unique_ptr<pragma::debug::DebugRenderFilter> g_debugRenderFilter = nullptr;
 
-void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter) { g_debugRenderFilter = std::move(filter); }
+void set_debug_render_filter(std::unique_ptr<pragma::debug::DebugRenderFilter> filter) { g_debugRenderFilter = std::move(filter); }
 static std::string nanoseconds_to_ms(std::chrono::nanoseconds t) { return std::to_string(static_cast<long double>(t.count()) / static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds {1}).count())) + "ms"; }
-static void print_pass_stats(const RenderPassStats &stats, bool full)
+static void print_pass_stats(const pragma::rendering::RenderPassStats &stats, bool full)
 {
 	auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 	struct EntityData {
@@ -85,26 +85,26 @@ static void print_pass_stats(const RenderPassStats &stats, bool full)
 		Con::cout << hShader->GetIdentifier() << Con::endl;
 	}
 
-	std::unordered_set<CBaseEntity *> uniqueEntities;
+	std::unordered_set<pragma::ecs::CBaseEntity *> uniqueEntities;
 	for(auto &entData : entities)
-		uniqueEntities.insert(static_cast<CBaseEntity *>(entData.hEntity.get()));
+		uniqueEntities.insert(static_cast<pragma::ecs::CBaseEntity *>(entData.hEntity.get()));
 
 	Con::cout << "\nUnique meshes: " << stats.meshes.size() << Con::endl;
-	auto n = umath::to_integral(RenderPassStats::Counter::Count);
+	auto n = umath::to_integral(pragma::rendering::RenderPassStats::Counter::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i)
-		Con::cout << magic_enum::enum_name(static_cast<RenderPassStats::Counter>(i)) << ": " << stats->GetCount(static_cast<RenderPassStats::Counter>(i)) << Con::endl;
+		Con::cout << magic_enum::enum_name(static_cast<pragma::rendering::RenderPassStats::Counter>(i)) << ": " << stats->GetCount(static_cast<pragma::rendering::RenderPassStats::Counter>(i)) << Con::endl;
 
-	n = umath::to_integral(RenderPassStats::Timer::Count);
+	n = umath::to_integral(pragma::rendering::RenderPassStats::Timer::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i)
-		Con::cout << magic_enum::enum_name(static_cast<RenderPassStats::Timer>(i)) << ": " << nanoseconds_to_ms(stats->GetTime(static_cast<RenderPassStats::Timer>(i))) << Con::endl;
+		Con::cout << magic_enum::enum_name(static_cast<pragma::rendering::RenderPassStats::Timer>(i)) << ": " << nanoseconds_to_ms(stats->GetTime(static_cast<pragma::rendering::RenderPassStats::Timer>(i))) << Con::endl;
 }
-DLLCLIENT void print_debug_render_stats(const RenderStats &renderStats, bool full)
+DLLCLIENT void print_debug_render_stats(const pragma::rendering::RenderStats &renderStats, bool full)
 {
 	g_collectRenderStats = false;
 
-	auto n = umath::to_integral(RenderStats::RenderStage::Count);
+	auto n = umath::to_integral(pragma::rendering::RenderStats::RenderStage::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i)
-		Con::cout << magic_enum::enum_name(static_cast<RenderStats::RenderStage>(i)) << ": " << nanoseconds_to_ms(renderStats->GetTime(static_cast<RenderStats::RenderStage>(i))) << Con::endl;
+		Con::cout << magic_enum::enum_name(static_cast<pragma::rendering::RenderStats::RenderStage>(i)) << ": " << nanoseconds_to_ms(renderStats->GetTime(static_cast<pragma::rendering::RenderStats::RenderStage>(i))) << Con::endl;
 
 	/*auto t = renderStats.lightingPass.cpuExecutionTime +renderStats.lightingPassTranslucent.cpuExecutionTime +renderStats.prepass.cpuExecutionTime +renderStats.shadowPass.cpuExecutionTime;
 	Con::cout<<"Total CPU Execution time: "<<nanoseconds_to_ms(t)<<Con::endl;
@@ -115,28 +115,28 @@ DLLCLIENT void print_debug_render_stats(const RenderStats &renderStats, bool ful
 	Con::cout<<"Render buffer update time: "<<nanoseconds_to_ms(renderStats.updateRenderBufferTime)<<Con::endl;*/
 
 	Con::cout << "\n----- Render queue builder stats: -----" << Con::endl;
-	n = umath::to_integral(RenderQueueBuilderStats::Timer::Count);
+	n = umath::to_integral(pragma::rendering::RenderQueueBuilderStats::Timer::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i)
-		Con::cout << magic_enum::enum_name(static_cast<RenderQueueBuilderStats::Timer>(i)) << ": " << nanoseconds_to_ms(renderStats.renderQueueBuilderStats->GetTime(static_cast<RenderQueueBuilderStats::Timer>(i))) << Con::endl;
+		Con::cout << magic_enum::enum_name(static_cast<pragma::rendering::RenderQueueBuilderStats::Timer>(i)) << ": " << nanoseconds_to_ms(renderStats.renderQueueBuilderStats->GetTime(static_cast<pragma::rendering::RenderQueueBuilderStats::Timer>(i))) << Con::endl;
 
 	Con::cout << "Workers:" << Con::endl;
 	uint32_t workerId = 0;
 	for(auto &workerStats : renderStats.renderQueueBuilderStats.workerStats)
 		Con::cout << "Worker #" << workerId++ << ": " << workerStats.numJobs << " jobs with total execution time of " << nanoseconds_to_ms(workerStats.totalExecutionTime) << Con::endl;
 
-	n = umath::to_integral(RenderStats::RenderPass::Count);
+	n = umath::to_integral(pragma::rendering::RenderStats::RenderPass::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i) {
-		Con::cout << "\n----- " << magic_enum::enum_name(static_cast<RenderStats::RenderPass>(i)) << ": -----" << Con::endl;
-		print_pass_stats(renderStats.GetPassStats(static_cast<RenderStats::RenderPass>(i)), full);
+		Con::cout << "\n----- " << magic_enum::enum_name(static_cast<pragma::rendering::RenderStats::RenderPass>(i)) << ": -----" << Con::endl;
+		print_pass_stats(renderStats.GetPassStats(static_cast<pragma::rendering::RenderStats::RenderPass>(i)), full);
 	}
 }
 struct SceneStats {
-	std::shared_ptr<RenderStats> stats;
+	std::shared_ptr<pragma::rendering::RenderStats> stats;
 	std::string sceneName;
 };
 struct FrameRenderStats {
 	std::vector<SceneStats> stats;
-	RenderStats GetAccumulated() const;
+	pragma::rendering::RenderStats GetAccumulated() const;
 	void Print(bool full);
 	bool Available() const
 	{
@@ -149,9 +149,9 @@ struct FrameRenderStats {
 		return true;
 	}
 };
-RenderStats FrameRenderStats::GetAccumulated() const
+pragma::rendering::RenderStats FrameRenderStats::GetAccumulated() const
 {
-	RenderStats accumulated {};
+	pragma::rendering::RenderStats accumulated {};
 	for(auto &renderStats : stats) {
 		auto &stats = *renderStats.stats;
 		accumulated += stats;
@@ -163,22 +163,24 @@ void FrameRenderStats::Print(bool full)
 	Con::cout << stats.size() << " scenes have been rendered:" << Con::endl;
 	auto accumulated = GetAccumulated();
 	for(auto &renderStats : stats) {
-		util::set_console_color(pragma::console::ConsoleColorFlags::BackgroundGreen);
+		pragma::console::set_console_color(pragma::console::ConsoleColorFlags::BackgroundGreen);
 		Con::cout << "########### " << renderStats.sceneName << ": ###########" << Con::endl;
-		util::reset_console_color();
+		pragma::console::reset_console_color();
 		print_debug_render_stats(*renderStats.stats, full);
 	}
 
 	if(stats.size() > 1) {
-		util::set_console_color(pragma::console::ConsoleColorFlags::BackgroundGreen);
+		pragma::console::set_console_color(pragma::console::ConsoleColorFlags::BackgroundGreen);
 		Con::cout << "\n----- Accumulated: -----" << Con::endl;
-		util::reset_console_color();
+		pragma::console::reset_console_color();
 		print_debug_render_stats(accumulated, full);
 	}
 }
-struct RenderStatsQueue {
-	std::vector<std::queue<FrameRenderStats>> frameStats;
-};
+namespace pragma::rendering {
+	struct RenderStatsQueue {
+		std::vector<std::queue<FrameRenderStats>> frameStats;
+	};
+}
 DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous)
 {
 	if(g_cbPreRenderScene.IsValid())
@@ -188,7 +190,7 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 	g_collectRenderStats = enabled;
 	if(enabled == false)
 		return;
-	auto stats = ::util::make_shared<RenderStatsQueue>();
+	auto stats = ::util::make_shared<pragma::rendering::RenderStatsQueue>();
 	auto first = true;
 	g_cbPreRenderScene = pragma::get_cgame()->AddCallback("OnRenderScenes", FunctionCallback<void>::Create([stats, first, full, print]() mutable {
 		auto swapchainIdx = pragma::get_cengine()->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
@@ -204,10 +206,10 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 				auto *l = pragma::get_cgame()->GetLuaState();
 				auto t = luabind::newtable(l);
 				auto tTimes = luabind::newtable(l);
-				tTimes["gui"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::GUI).count() / static_cast<long double>(1'000'000.0);
-				tTimes["scene"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::Scene).count() / static_cast<long double>(1'000'000.0);
-				tTimes["frame"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::Frame).count() / static_cast<long double>(1'000'000.0);
-				tTimes["present"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, CEngine::GPUTimer::Present).count() / static_cast<long double>(1'000'000.0);
+				tTimes["gui"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, pragma::CEngine::GPUTimer::GUI).count() / static_cast<long double>(1'000'000.0);
+				tTimes["scene"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, pragma::CEngine::GPUTimer::Scene).count() / static_cast<long double>(1'000'000.0);
+				tTimes["frame"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, pragma::CEngine::GPUTimer::Frame).count() / static_cast<long double>(1'000'000.0);
+				tTimes["present"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, pragma::CEngine::GPUTimer::Present).count() / static_cast<long double>(1'000'000.0);
 				t["numberOfScenes"] = frameStats.stats.size();
 				t["times"] = tTimes;
 				auto tStats = luabind::newtable(l);
@@ -219,7 +221,7 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 					td["scene"] = stats.sceneName;
 					tStats[i++] = td;
 				}
-				RenderStats accumulated;
+				pragma::rendering::RenderStats accumulated;
 				if(frameStats.stats.size() > 1) {
 					accumulated = frameStats.GetAccumulated();
 					auto td = luabind::newtable(l);
@@ -243,7 +245,7 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 		}
 		first = false;
 		for(auto &drawSceneInfo : pragma::get_cgame()->GetQueuedRenderScenes()) {
-			drawSceneInfo.renderStats = std::make_unique<RenderStats>();
+			drawSceneInfo.renderStats = std::make_unique<pragma::rendering::RenderStats>();
 			drawSceneInfo.renderStats->swapchainImageIndex = swapchainIdx;
 		}
 	}));
@@ -267,8 +269,8 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 	}));
 }
 
-pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin)
-    : m_drawSceneInfo {drawSceneInfo}, m_drawOrigin {drawOrigin}, m_shaderProcessor {*drawSceneInfo.commandBuffer, umath::is_flag_set(drawSceneInfo.drawSceneInfo.flags, util::DrawSceneInfo::Flags::Reflection) ? PassType::Reflection : PassType::Generic}
+pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const pragma::rendering::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin)
+    : m_drawSceneInfo {drawSceneInfo}, m_drawOrigin {drawOrigin}, m_shaderProcessor {*drawSceneInfo.commandBuffer, umath::is_flag_set(drawSceneInfo.drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::Reflection) ? PassType::Reflection : PassType::Generic}
 {
 	auto &scene = drawSceneInfo.drawSceneInfo.scene;
 	auto *renderer = scene->GetRenderer<pragma::CRendererComponent>();
@@ -452,7 +454,7 @@ bool pragma::rendering::BaseRenderProcessor::BindMaterial(msys::CMaterial &mat)
 	m_curMaterialIndex = mat.GetIndex();
 	return true;
 }
-bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
+bool pragma::rendering::BaseRenderProcessor::BindEntity(pragma::ecs::CBaseEntity &ent)
 {
 	if(&ent == m_curEntity)
 		return umath::is_flag_set(m_stateFlags, StateFlags::EntityBound);
@@ -513,7 +515,7 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 
 pragma::ShaderGameWorld *pragma::rendering::BaseRenderProcessor::GetCurrentShader() { return umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) ? m_shaderScene : nullptr; }
 
-bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet)
+bool pragma::rendering::BaseRenderProcessor::Render(pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet)
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false || m_curRenderC == nullptr)
 		return false;
@@ -560,7 +562,7 @@ bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh, pragma:
 		m_stats->numDrawnMeshes += instanceCount;
 		m_stats->numDrawnVertices += mesh.GetVertexCount() *instanceCount;
 		m_stats->numDrawnTrianges += mesh.GetTriangleCount() *instanceCount;
-		m_stats->meshes.push_back(std::static_pointer_cast<CModelSubMesh>(mesh.shared_from_this()));
+		m_stats->meshes.push_back(std::static_pointer_cast<pragma::geometry::CModelSubMesh>(mesh.shared_from_this()));
 
 		++m_stats->numDrawCalls;
 	}
@@ -615,7 +617,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	}
 
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
-	auto &referenceShader = isDepthPass ? pragma::get_cgame()->GetGameShader(CGame::GameShader::Prepass) : pragma::get_cgame()->GetGameShader(CGame::GameShader::Pbr);
+	auto &referenceShader = isDepthPass ? pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Prepass) : pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Pbr);
 	auto view = (m_camType == CameraType::View) ? true : false;
 	if(referenceShader.expired())
 		return 0;
@@ -720,7 +722,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				}
 				// TODO: If we're instancing, there's technically no need to bind
 				// the entity (except for resetting the clip plane, etc.)
-				BindEntity(static_cast<CBaseEntity &>(*ent));
+				BindEntity(static_cast<pragma::ecs::CBaseEntity &>(*ent));
 				if(m_stats && umath::is_flag_set(m_stateFlags, StateFlags::EntityBound)) {
 					if(item.instanceSetIndex == RenderQueueItem::UNIQUE)
 						(*m_stats)->Increment(RenderPassStats::Counter::EntitiesWithoutInstancing);
@@ -743,7 +745,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 		}
 		if(optStats)
 			ttmp = std::chrono::steady_clock::now();
-		auto &mesh = static_cast<CModelSubMesh &>(*m_curEntityMeshList->at(item.mesh));
+		auto &mesh = static_cast<pragma::geometry::CModelSubMesh &>(*m_curEntityMeshList->at(item.mesh));
 		if(BaseRenderProcessor::Render(mesh, item.mesh, curInstanceSet))
 			++numShaderInvocations;
 		if(optStats)
@@ -766,7 +768,7 @@ uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const pragma::r
 	return BaseRenderProcessor::Render(renderQueue, RenderPass::Lighting, optStats, worldRenderQueueIndex);
 }
 
-pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin) : BaseRenderProcessor {drawSceneInfo, drawOrigin} { SetCountNonOpaqueMaterialsOnly(true); }
+pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const pragma::rendering::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin) : BaseRenderProcessor {drawSceneInfo, drawOrigin} { SetCountNonOpaqueMaterialsOnly(true); }
 uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue, RenderPass renderPass, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)
 {
 	return BaseRenderProcessor::Render(renderQueue, renderPass, optStats, worldRenderQueueIndex);

@@ -19,14 +19,14 @@ import :physics;
 import :rendering.shaders;
 import :scripting.lua;
 
-static void CVAR_CALLBACK_render_vsync_enabled(NetworkState *, const ConVar &, int, int val) { pragma::platform::set_swap_interval((val == 0) ? 0 : 1); }
+static void CVAR_CALLBACK_render_vsync_enabled(pragma::NetworkState *, const pragma::console::ConVar &, int, int val) { pragma::platform::set_swap_interval((val == 0) ? 0 : 1); }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("render_vsync_enabled", &CVAR_CALLBACK_render_vsync_enabled);
 }
 
 static CallbackHandle cbDrawPhysics;
 static CallbackHandle cbDrawPhysicsEnd;
-static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, const ConVar &, int, int val, bool serverside)
+static void CVAR_CALLBACK_debug_physics_draw(pragma::NetworkState *, const pragma::console::ConVar &, int, int val, bool serverside)
 {
 	if(cbDrawPhysics.IsValid())
 		cbDrawPhysics.Remove();
@@ -49,7 +49,7 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, const ConVar &, int
 		physEnv->SetVisualDebugger(nullptr);
 		return;
 	}
-	auto visDebugger = std::make_unique<CPhysVisualDebugger>();
+	auto visDebugger = std::make_unique<pragma::physics::CPhysVisualDebugger>();
 	physEnv->SetVisualDebugger(std::move(visDebugger));
 	/*if(val == 0)
 	{
@@ -103,13 +103,13 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, const ConVar &, int
 	visDebugger->SetDebugMode(mode);
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<int>("debug_physics_draw", +[](NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, false); });
+	auto UVN = pragma::console::client::register_variable_listener<int>("debug_physics_draw", +[](pragma::NetworkState *nw, const pragma::console::ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, false); });
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<int>("sv_debug_physics_draw", +[](NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, true); });
+	auto UVN = pragma::console::client::register_variable_listener<int>("sv_debug_physics_draw", +[](pragma::NetworkState *nw, const pragma::console::ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, true); });
 }
 
-static void debug_render_validation_error_enabled(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_render_validation_error_enabled(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
 		Con::cwar << "No validation error id specified!" << Con::endl;
@@ -202,7 +202,7 @@ static void print_component_properties(const pragma::ComponentMemberInfo &member
 	});
 	Con::cout << Con::endl << Con::endl;
 }
-static void debug_dump_component_properties(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_dump_component_properties(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto &ent = pl->GetEntity();
 	if(ent.IsCharacter() == false)
@@ -210,7 +210,7 @@ static void debug_dump_component_properties(NetworkState *state, pragma::BasePla
 	auto charComponent = ent.GetCharacterComponent();
 	if(charComponent.expired())
 		return;
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	if(ents.empty())
 		return;
 	auto *entTgt = ents.front();
@@ -242,7 +242,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_dump_component_properties", &debug_dump_component_properties, pragma::console::ConVarFlags::None, "Dumps entity component property values to the console.");
 }
 
-static void debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_render_depth_buffer(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	pragma::get_cengine()->GetRenderContext().WaitIdle();
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
@@ -254,7 +254,7 @@ static void debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerCom
 	if(ent.IsCharacter() == false)
 		return;
 	auto charComponent = ent.GetCharacterComponent();
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	EntityHandle hEnt {};
 	if(ents.empty() == false)
 		hEnt = ents.front()->GetHandle();
@@ -264,7 +264,7 @@ static void debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerCom
 			auto sceneC = hEnt.get()->GetComponent<pragma::CSceneComponent>();
 			if(sceneC.expired()) {
 				Con::cwar << "Scene not found!" << Con::endl;
-				return WIHandle {};
+				return pragma::gui::WIHandle {};
 			}
 			scene = sceneC.get();
 		}
@@ -273,10 +273,10 @@ static void debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerCom
 		auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 		if(raster.expired())
-			return WIHandle {};
-		auto &wgui = WGUI::GetInstance();
+			return pragma::gui::WIHandle {};
+		auto &wgui = pragma::gui::WGUI::GetInstance();
 
-		auto r = wgui.Create<WIDebugDepthTexture>();
+		auto r = wgui.Create<pragma::gui::types::WIDebugDepthTexture>();
 		r->SetTexture(*raster->GetPrepass().textureDepth, {prosper::PipelineStageFlags::LateFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit},
 		  {prosper::PipelineStageFlags::EarlyFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit});
 		r->SetShouldResolveImage(true);
@@ -285,26 +285,26 @@ static void debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerCom
 		return r->GetHandle();
 	});
 	auto *d = dbg.get();
-	dbg->AddCallback("PostRenderScene", FunctionCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>::Create([d](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
+	dbg->AddCallback("PostRenderScene", FunctionCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>::Create([d](std::reference_wrapper<const pragma::rendering::DrawSceneInfo> drawSceneInfo) {
 		auto *el = d->GetGUIElement();
 		if(el == nullptr)
 			return;
-		static_cast<WIDebugDepthTexture *>(el)->Update();
+		static_cast<pragma::gui::types::WIDebugDepthTexture *>(el)->Update();
 	}));
 }
 namespace {
 	auto UVN = pragma::console::client::register_command("debug_render_depth_buffer", &debug_render_depth_buffer, pragma::console::ConVarFlags::None, "Draws the scene depth buffer to screen.");
 }
 
-static CVar cvDrawScene = GetClientConVar("render_draw_scene");
-static CVar cvDrawWorld = GetClientConVar("render_draw_world");
-static CVar cvDrawStatic = GetClientConVar("render_draw_static");
-static CVar cvDrawDynamic = GetClientConVar("render_draw_dynamic");
-static CVar cvDrawTranslucent = GetClientConVar("render_draw_translucent");
-static CVar cvClearScene = GetClientConVar("render_clear_scene");
-static CVar cvClearSceneColor = GetClientConVar("render_clear_scene_color");
-static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
-void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
+static auto cvDrawScene = pragma::console::get_client_con_var("render_draw_scene");
+static auto cvDrawWorld = pragma::console::get_client_con_var("render_draw_world");
+static auto cvDrawStatic = pragma::console::get_client_con_var("render_draw_static");
+static auto cvDrawDynamic = pragma::console::get_client_con_var("render_draw_dynamic");
+static auto cvDrawTranslucent = pragma::console::get_client_con_var("render_draw_translucent");
+static auto cvClearScene = pragma::console::get_client_con_var("render_clear_scene");
+static auto cvClearSceneColor = pragma::console::get_client_con_var("render_clear_scene_color");
+static auto cvParticleQuality = pragma::console::get_client_con_var("cl_render_particle_quality");
+void pragma::CGame::RenderScenes(pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 #ifdef PRAGMA_ENABLE_SHADER_DEBUG_PRINT
 	GetGlobalRenderSettingsBufferData().EvaluateDebugPrint();
@@ -313,7 +313,7 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	auto &inputDataManager = GetGlobalShaderInputDataManager();
 	inputDataManager.UpdateBufferData(*drawSceneInfo.commandBuffer);
 
-	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("UpdateRenderBuffers", std::ref(drawSceneInfo));
+	CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("UpdateRenderBuffers", std::ref(drawSceneInfo));
 
 	StartProfilingStage("RenderScenes");
 	util::ScopeGuard sg {[this]() {
@@ -373,12 +373,12 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		return;
 	}
 	StartProfilingStage("PreRenderScenesCallbacks");
-	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes", std::ref(drawSceneInfo));
-	CallLuaCallbacks<void, util::DrawSceneInfo *>("PreRenderScenes", &drawSceneInfo);
+	CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("PreRenderScenes", std::ref(drawSceneInfo));
+	CallLuaCallbacks<void, pragma::rendering::DrawSceneInfo *>("PreRenderScenes", &drawSceneInfo);
 	StopProfilingStage(); // PreRenderScenesCallbacks
 
 	StartProfilingStage("RenderScenesCallbacks");
-	CallLuaCallbacks<void, util::DrawSceneInfo *>("RenderScenes", &drawSceneInfo);
+	CallLuaCallbacks<void, pragma::rendering::DrawSceneInfo *>("RenderScenes", &drawSceneInfo);
 	StopProfilingStage(); // RenderScenesCallbacks
 
 	if(IsDefaultGameRenderEnabled()) {
@@ -408,7 +408,7 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	m_sceneRenderQueue.clear();
 }
 
-void CGame::GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask, ::pragma::rendering::RenderMask &exclusionMask) const
+void pragma::CGame::GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask, ::pragma::rendering::RenderMask &exclusionMask) const
 {
 	auto *lp = m_plLocal.get();
 	if(lp && lp->IsInFirstPersonMode()) {
@@ -427,7 +427,7 @@ void CGame::GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusio
 	}
 }
 
-static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
+static void debug_dump_render_queues(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	std::stringstream ss;
 	ss << "Scene Info:\n";
@@ -460,13 +460,13 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 			if(item.material != curMaterial) {
 				curMaterial = item.material;
 				auto *mat = item.GetMaterial();
-				ss << util::get_true_color_code(colors::Lime) << "Material" << util::get_reset_color_code() << ": " << (mat ? mat->GetName() : "NULL") << "\n";
+				ss << pragma::console::get_true_color_code(colors::Lime) << "Material" << pragma::console::get_reset_color_code() << ": " << (mat ? mat->GetName() : "NULL") << "\n";
 			}
 			if(item.pipelineId != curPipeline) {
 				curPipeline = item.pipelineId;
 				uint32_t pipelineIdx;
 				auto *shader = item.GetShader(pipelineIdx);
-				ss << util::get_true_color_code(colors::Aqua) << "Shader" << util::get_reset_color_code() << ": ";
+				ss << pragma::console::get_true_color_code(colors::Aqua) << "Shader" << pragma::console::get_reset_color_code() << ": ";
 				if(shader)
 					ss << shader->GetIdentifier() << " (" << pipelineIdx << ")\n";
 				else
@@ -475,10 +475,10 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 			if(item.entity != curEntity) {
 				curEntity = item.entity;
 				auto *ent = item.GetEntity();
-				ss << util::get_true_color_code(colors::Orange) << "Entity" << util::get_reset_color_code() << ": " << (ent ? ent->ToString() : "NULL") << "\n";
+				ss << pragma::console::get_true_color_code(colors::Orange) << "Entity" << pragma::console::get_reset_color_code() << ": " << (ent ? ent->ToString() : "NULL") << "\n";
 			}
 			auto *mesh = item.GetMesh();
-			ss << util::get_true_color_code(colors::White) << "Mesh" << util::get_reset_color_code() << ": ";
+			ss << pragma::console::get_true_color_code(colors::White) << "Mesh" << pragma::console::get_reset_color_code() << ": ";
 			if(!mesh)
 				ss << "NULL\n";
 			else
@@ -502,7 +502,7 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 			queue->WaitForCompletion();
 			if(queue->queue.empty())
 				continue;
-			ss << "\n" << util::get_true_color_code(colors::Magenta) << "Scene pass" << util::get_reset_color_code() << ": " << magic_enum::enum_name(static_cast<pragma::rendering::SceneRenderPass>(i));
+			ss << "\n" << pragma::console::get_true_color_code(colors::Magenta) << "Scene pass" << pragma::console::get_reset_color_code() << ": " << magic_enum::enum_name(static_cast<pragma::rendering::SceneRenderPass>(i));
 			if(translucent)
 				ss << " (translucent)\n";
 			else
@@ -513,27 +513,27 @@ static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
 
 	Con::cout << ss.str() << Con::endl;
 }
-static void debug_dump_render_queues(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
+static void debug_dump_render_queues(const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos)
 {
 	Con::cout << "Dumping render queues..." << Con::endl;
 	uint32_t i = 0;
 	for(auto &drawSceneInfo : drawSceneInfos) {
-		Con::cout << util::get_true_color_code(colors::Red) << "Scene #" << (i++) << util::get_reset_color_code() << Con::endl;
+		Con::cout << pragma::console::get_true_color_code(colors::Red) << "Scene #" << (i++) << pragma::console::get_reset_color_code() << Con::endl;
 		debug_dump_render_queues(drawSceneInfo);
 	}
 }
 
 bool g_dumpRenderQueues = false;
-void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
+void pragma::CGame::RenderScenes(const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos)
 {
 	if(cvDrawScene->GetBool() == false)
 		return;
 	auto drawWorld = cvDrawWorld->GetInt();
 
-	std::function<void(const std::vector<util::DrawSceneInfo> &)> buildRenderQueues = nullptr;
-	buildRenderQueues = [&buildRenderQueues, drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
+	std::function<void(const std::vector<pragma::rendering::DrawSceneInfo> &)> buildRenderQueues = nullptr;
+	buildRenderQueues = [&buildRenderQueues, drawWorld](const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos) {
 		for(auto &cdrawSceneInfo : drawSceneInfos) {
-			auto &drawSceneInfo = const_cast<util::DrawSceneInfo &>(cdrawSceneInfo);
+			auto &drawSceneInfo = const_cast<pragma::rendering::DrawSceneInfo &>(cdrawSceneInfo);
 			if(drawSceneInfo.scene.expired())
 				continue;
 
@@ -543,19 +543,19 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 			}
 
 			if(drawWorld == 2)
-				drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows);
+				drawSceneInfo.renderFlags &= ~(rendering::RenderFlags::Shadows);
 			else if(drawWorld == 0)
-				drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows | RenderFlags::View | RenderFlags::World | RenderFlags::Skybox);
+				drawSceneInfo.renderFlags &= ~(rendering::RenderFlags::Shadows | rendering::RenderFlags::View | rendering::RenderFlags::World | rendering::RenderFlags::Skybox);
 
 			if(cvDrawStatic->GetBool() == false)
-				drawSceneInfo.renderFlags &= ~RenderFlags::Static;
+				drawSceneInfo.renderFlags &= ~rendering::RenderFlags::Static;
 			if(cvDrawDynamic->GetBool() == false)
-				drawSceneInfo.renderFlags &= ~RenderFlags::Dynamic;
+				drawSceneInfo.renderFlags &= ~rendering::RenderFlags::Dynamic;
 			if(cvDrawTranslucent->GetBool() == false)
-				drawSceneInfo.renderFlags &= ~RenderFlags::Translucent;
+				drawSceneInfo.renderFlags &= ~rendering::RenderFlags::Translucent;
 
 			if(cvParticleQuality->GetInt() <= 0)
-				drawSceneInfo.renderFlags &= ~RenderFlags::Particles;
+				drawSceneInfo.renderFlags &= ~rendering::RenderFlags::Particles;
 
 			if(drawSceneInfo.commandBuffer == nullptr)
 				drawSceneInfo.commandBuffer = pragma::get_cengine()->GetRenderContext().GetWindow().GetDrawCommandBuffer();
@@ -563,11 +563,11 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 			auto &renderFlags = drawSceneInfo.renderFlags;
 			auto drawWorld = cvDrawWorld->GetBool();
 			if(drawWorld == false)
-				umath::set_flag(renderFlags, RenderFlags::World, false);
+				umath::set_flag(renderFlags, rendering::RenderFlags::World, false);
 
 			auto *pl = pragma::get_cgame()->GetLocalPlayer();
 			if(pl == nullptr || pl->IsInFirstPersonMode() == false)
-				umath::set_flag(renderFlags, RenderFlags::View, false);
+				umath::set_flag(renderFlags, rendering::RenderFlags::View, false);
 
 			drawSceneInfo.scene->BuildRenderQueues(drawSceneInfo);
 		}
@@ -590,11 +590,11 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 	// Initiate the command buffer build threads for all queued scenes.
 	// If we have multiple scenes to render (e.g. left eye and right eye for VR),
 	// the command buffers can all be built in parallel.
-	std::function<void(const std::vector<util::DrawSceneInfo> &)> buildCommandBuffers = nullptr;
-	buildCommandBuffers = [&buildCommandBuffers, drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
+	std::function<void(const std::vector<pragma::rendering::DrawSceneInfo> &)> buildCommandBuffers = nullptr;
+	buildCommandBuffers = [&buildCommandBuffers, drawWorld](const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos) {
 		for(auto &cdrawSceneInfo : drawSceneInfos) {
-			auto &drawSceneInfo = const_cast<util::DrawSceneInfo &>(cdrawSceneInfo);
-			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags, util::DrawSceneInfo::Flags::DisableRender))
+			auto &drawSceneInfo = const_cast<pragma::rendering::DrawSceneInfo &>(cdrawSceneInfo);
+			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisableRender))
 				continue;
 			if(drawSceneInfo.subPasses) {
 				// This scene has sub-scenes we have to consider first!
@@ -606,11 +606,11 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 	buildCommandBuffers(drawSceneInfos);
 
 	// Render the scenes
-	std::function<void(const std::vector<util::DrawSceneInfo> &)> renderScenes = nullptr;
-	renderScenes = [this, &renderScenes, drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
+	std::function<void(const std::vector<pragma::rendering::DrawSceneInfo> &)> renderScenes = nullptr;
+	renderScenes = [this, &renderScenes, drawWorld](const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos) {
 		for(auto &cdrawSceneInfo : drawSceneInfos) {
-			auto &drawSceneInfo = const_cast<util::DrawSceneInfo &>(cdrawSceneInfo);
-			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags, util::DrawSceneInfo::Flags::DisableRender))
+			auto &drawSceneInfo = const_cast<pragma::rendering::DrawSceneInfo &>(cdrawSceneInfo);
+			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisableRender))
 				continue;
 
 			if(drawSceneInfo.subPasses) {
@@ -650,14 +650,14 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 			m_bMainRenderPass = false;
 
 			auto bSkipScene = CallCallbacksWithOptionalReturn<
-				bool,std::reference_wrapper<const util::DrawSceneInfo>
+				bool,std::reference_wrapper<const pragma::rendering::DrawSceneInfo>
 			>("DrawScene",ret,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue;
 			m_bMainRenderPass = true;
 			if(bSkipScene == true && ret == true)
 				return;
 			m_bMainRenderPass = false;
 			if(CallLuaCallbacks<
-				bool,std::reference_wrapper<const util::DrawSceneInfo>
+				bool,std::reference_wrapper<const pragma::rendering::DrawSceneInfo>
 			>("DrawScene",&bSkipScene,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue && bSkipScene == true)
 			{
 				CallCallbacks("PostRenderScenes");
@@ -684,4 +684,4 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 	// to have completed their work for this frame. The scene is now safe for writing again.
 }
 
-bool CGame::IsInMainRenderPass() const { return m_bMainRenderPass; }
+bool pragma::CGame::IsInMainRenderPass() const { return m_bMainRenderPass; }

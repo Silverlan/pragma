@@ -34,7 +34,7 @@ void pragma::nav::CMesh::UpdateDebugPath(Vector3 &start, Vector3 &end)
 		res->GetNode(i, pathPoint, nextPoint);
 		lineVerts.push_back(pathPoint + lineOffset);
 	}
-	m_dbgNavPath = DebugRenderer::DrawLines(lineVerts, colors::Yellow);
+	m_dbgNavPath = debug::DebugRenderer::DrawLines(lineVerts, colors::Yellow);
 
 	m_numPath = static_cast<uint32_t>(lineVerts.size());
 }
@@ -42,9 +42,9 @@ void pragma::nav::CMesh::UpdateDebugPath(Vector3 &start, Vector3 &end)
 void pragma::nav::CMesh::UpdateDepthPathTargets()
 {
 	if(m_dbgPathStart != nullptr)
-		m_dbgPointLines[0] = DebugRenderer::DrawLine(*m_dbgPathStart, *m_dbgPathStart + Vector3(0.f, 32.f, 0.f), colors::Magenta);
+		m_dbgPointLines[0] = debug::DebugRenderer::DrawLine(*m_dbgPathStart, *m_dbgPathStart + Vector3(0.f, 32.f, 0.f), colors::Magenta);
 	if(m_dbgPathEnd != nullptr)
-		m_dbgPointLines[0] = DebugRenderer::DrawLine(*m_dbgPathEnd, *m_dbgPathEnd + Vector3(0.f, 32.f, 0.f), colors::Magenta);
+		m_dbgPointLines[0] = debug::DebugRenderer::DrawLine(*m_dbgPathEnd, *m_dbgPathEnd + Vector3(0.f, 32.f, 0.f), colors::Magenta);
 }
 
 void pragma::nav::CMesh::SetDebugPathStart(Vector3 &start)
@@ -191,7 +191,7 @@ void pragma::nav::CMesh::ShowNavMeshes(bool b)
 	}*/
 	auto col = colors::Aqua;
 	col.a = 32;
-	m_dbgNavMesh = DebugRenderer::DrawMesh(triangleVerts, {col, colors::Maroon});
+	m_dbgNavMesh = debug::DebugRenderer::DrawMesh(triangleVerts, {col, colors::Maroon});
 }
 
 void pragma::nav::CMesh::Clear()
@@ -205,10 +205,10 @@ void pragma::nav::CMesh::Clear()
 	m_dbgPathEnd = nullptr;
 }
 
-static auto cvShowNavMeshes = GetClientConVar("debug_nav_show_meshes");
+static auto cvShowNavMeshes = pragma::console::get_client_con_var("debug_nav_show_meshes");
 namespace {
 	auto _ = pragma::console::client::register_variable_listener<bool>(
-	  "debug_nav_show_meshes", +[](NetworkState *, const ConVar &, bool, bool val) {
+	  "debug_nav_show_meshes", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val) {
 		  if(pragma::get_cgame() == nullptr || pragma::get_cgame()->LoadNavMesh() == false)
 			  return;
 		  auto &navMesh = pragma::get_cgame()->GetNavMesh();
@@ -220,7 +220,7 @@ namespace {
 
 ////////////////////////////////////
 
-void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
+void CMD_debug_nav_path_start(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(!check_cheats("debug_nav_path_start", state))
 		return;
@@ -237,7 +237,7 @@ void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *
 	auto origin = charComponent.valid() ? charComponent->GetEyePosition() : pTrComponent->GetPosition();
 	auto dir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent->GetForward();
 
-	TraceData data {};
+	pragma::physics::TraceData data {};
 	data.SetFilter(ent);
 	data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
 	data.SetSource(origin);
@@ -248,7 +248,7 @@ void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *
 	static_cast<pragma::nav::CMesh &>(*navMesh).SetDebugPathStart(r.position);
 }
 
-void CMD_debug_nav_path_end(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
+void CMD_debug_nav_path_end(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(!check_cheats("debug_nav_path_end", state))
 		return;
@@ -265,7 +265,7 @@ void CMD_debug_nav_path_end(NetworkState *state, pragma::BasePlayerComponent *pl
 	auto origin = charComponent.valid() ? charComponent->GetEyePosition() : pTrComponent->GetPosition();
 	auto dir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent->GetForward();
 
-	TraceData data {};
+	pragma::physics::TraceData data {};
 	data.SetFilter(ent);
 	data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
 	data.SetSource(origin);

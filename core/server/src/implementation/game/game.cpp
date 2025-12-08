@@ -27,9 +27,9 @@ DLLSERVER pragma::physics::IEnvironment *s_physEnv = nullptr;
 
 #undef CopyFile
 
-static SGame *g_game = nullptr;
-SGame *SGame::Get() { return g_game; }
-SGame::SGame(NetworkState *state) : pragma::Game(state)
+static pragma::SGame *g_game = nullptr;
+pragma::SGame *pragma::SGame::Get() { return g_game; }
+pragma::SGame::SGame(pragma::NetworkState *state) : pragma::Game(state)
 {
 	g_game = this;
 
@@ -67,15 +67,15 @@ SGame::SGame(NetworkState *state) : pragma::Game(state)
 	});
 }
 
-SGame::~SGame() { g_game = nullptr; }
+pragma::SGame::~SGame() { g_game = nullptr; }
 
-void SGame::GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const
+void pragma::SGame::GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const
 {
 	server_entities::ServerEntityRegistry::Instance().GetRegisteredClassNames(classes);
 	GetLuaRegisteredEntities(luaClasses);
 }
 
-void SGame::OnRemove()
+void pragma::SGame::OnRemove()
 {
 	m_flags |= GameFlags::ClosingGame;
 	CallCallbacks<void, SGame *>("OnGameEnd", this);
@@ -94,27 +94,27 @@ void SGame::OnRemove()
 	pragma::Game::OnRemove();
 }
 
-bool SGame::RunLua(const std::string &lua) { return pragma::Game::RunLua(lua, "lua_run"); }
+bool pragma::SGame::RunLua(const std::string &lua) { return pragma::Game::RunLua(lua, "lua_run"); }
 
-void SGame::OnEntityCreated(pragma::ecs::BaseEntity *ent) { pragma::Game::OnEntityCreated(ent); }
+void pragma::SGame::OnEntityCreated(pragma::ecs::BaseEntity *ent) { pragma::Game::OnEntityCreated(ent); }
 
-static CVar cvTimescale = GetServerConVar("host_timescale");
-float SGame::GetTimeScale() { return cvTimescale->GetFloat(); }
+static auto cvTimescale = pragma::console::get_server_con_var("host_timescale");
+float pragma::SGame::GetTimeScale() { return cvTimescale->GetFloat(); }
 
-void SGame::SetTimeScale(float t)
+void pragma::SGame::SetTimeScale(float t)
 {
 	pragma::Game::SetTimeScale(t);
 	NetPacket p;
 	p->Write<float>(t);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::GAME_TIMESCALE, p, pragma::networking::Protocol::SlowReliable);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::GAME_TIMESCALE, p, pragma::networking::Protocol::SlowReliable);
 }
 
-static void CVAR_CALLBACK_host_timescale(NetworkState *, const ConVar &, float, float val) { SGame::Get()->SetTimeScale(val); }
+static void CVAR_CALLBACK_host_timescale(pragma::NetworkState *, const pragma::console::ConVar &, float, float val) { pragma::SGame::Get()->SetTimeScale(val); }
 namespace {
 	auto _ = pragma::console::server::register_variable_listener<float>("host_timescale", &CVAR_CALLBACK_host_timescale);
 }
 
-void SGame::Initialize()
+void pragma::SGame::Initialize()
 {
 	pragma::Game::Initialize();
 
@@ -135,7 +135,7 @@ void SGame::Initialize()
 		gmC->OnGameInitialized();
 }
 
-void SGame::SetUp()
+void pragma::SGame::SetUp()
 {
 	pragma::Game::SetUp();
 	auto *entGame = CreateEntity("game");
@@ -148,15 +148,15 @@ void SGame::SetUp()
 	entGame->Spawn();
 }
 
-std::shared_ptr<ModelMesh> SGame::CreateModelMesh() const { return ::util::make_shared<ModelMesh>(); }
-std::shared_ptr<pragma::ModelSubMesh> SGame::CreateModelSubMesh() const { return ::util::make_shared<pragma::ModelSubMesh>(); }
+std::shared_ptr<pragma::geometry::ModelMesh> pragma::SGame::CreateModelMesh() const { return ::util::make_shared<pragma::geometry::ModelMesh>(); }
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::SGame::CreateModelSubMesh() const { return ::util::make_shared<pragma::geometry::ModelSubMesh>(); }
 
-bool SGame::LoadMap(const std::string &map, const Vector3 &origin, std::vector<EntityHandle> *entities)
+bool pragma::SGame::LoadMap(const std::string &map, const Vector3 &origin, std::vector<EntityHandle> *entities)
 {
 	bool b = pragma::Game::LoadMap(map, origin, entities);
 	if(b == false)
 		return false;
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::MAP_READY, pragma::networking::Protocol::SlowReliable);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::MAP_READY, pragma::networking::Protocol::SlowReliable);
 	LoadNavMesh();
 
 	m_flags |= GameFlags::MapLoaded;
@@ -168,14 +168,14 @@ bool SGame::LoadMap(const std::string &map, const Vector3 &origin, std::vector<E
 	return true;
 }
 
-static CVar cvSimEnabled = GetServerConVar("sv_physics_simulation_enabled");
-bool SGame::IsPhysicsSimulationEnabled() const { return cvSimEnabled->GetBool(); }
+static auto cvSimEnabled = pragma::console::get_server_con_var("sv_physics_simulation_enabled");
+bool pragma::SGame::IsPhysicsSimulationEnabled() const { return cvSimEnabled->GetBool(); }
 
-std::shared_ptr<pragma::EntityComponentManager> SGame::InitializeEntityComponentManager() { return ::util::make_shared<pragma::SEntityComponentManager>(); }
+std::shared_ptr<pragma::EntityComponentManager> pragma::SGame::InitializeEntityComponentManager() { return ::util::make_shared<pragma::SEntityComponentManager>(); }
 
-pragma::ai::TaskManager &SGame::GetAITaskManager() const { return *m_taskManager; }
+pragma::ai::TaskManager &pragma::SGame::GetAITaskManager() const { return *m_taskManager; }
 
-void SGame::Think()
+void pragma::SGame::Think()
 {
 	pragma::Game::Think();
 	CallCallbacks<void>("Think");
@@ -183,13 +183,13 @@ void SGame::Think()
 	PostThink();
 }
 
-void SGame::ChangeLevel(const std::string &mapName, const std::string &landmarkName) { m_changeLevelInfo = {mapName, landmarkName}; }
+void pragma::SGame::ChangeLevel(const std::string &mapName, const std::string &landmarkName) { m_changeLevelInfo = {mapName, landmarkName}; }
 
-pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *SGame::GetProfilingStageManager() { return m_profilingStageManager.get(); }
-bool SGame::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
-bool SGame::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *pragma::SGame::GetProfilingStageManager() { return m_profilingStageManager.get(); }
+bool pragma::SGame::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
+bool pragma::SGame::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
 
-void SGame::Tick()
+void pragma::SGame::Tick()
 {
 	pragma::Game::Tick();
 
@@ -231,15 +231,15 @@ void SGame::Tick()
 		auto srcLandmarkPos = (entLandmark != nullptr) ? entLandmark->GetPosition() : Vector3 {};
 
 		auto mapName = m_changeLevelInfo->map;
-		ServerState::Get()->EndGame();
-		ServerState::Get()->StartGame(true); // TODO: Keep the current state (i.e. if in multiplayer, stay in multiplayer)
+		pragma::ServerState::Get()->EndGame();
+		pragma::ServerState::Get()->StartGame(true); // TODO: Keep the current state (i.e. if in multiplayer, stay in multiplayer)
 
 		// Note: 'this' is no longer valid at this point, since the game state has changed
-		auto *game = ServerState::Get()->GetGameState();
+		auto *game = pragma::ServerState::Get()->GetGameState();
 		game->m_flags |= GameFlags::LevelTransition; // Level transition flag has to be set before the map was loaded to make sure it's transmitted to the client(s)
 		game->m_preTransitionWorldState = worldState;
 
-		ServerState::Get()->ChangeLevel(mapName);
+		pragma::ServerState::Get()->ChangeLevel(mapName);
 
 		if(game != nullptr) {
 			auto entItLandmark = pragma::ecs::EntityIterator {*game};
@@ -263,29 +263,29 @@ void SGame::Tick()
 	}
 }
 
-bool SGame::IsServer() { return true; }
-bool SGame::IsClient() { return false; }
+bool pragma::SGame::IsServer() { return true; }
+bool pragma::SGame::IsClient() { return false; }
 
-bool SGame::RegisterNetMessage(std::string name)
+bool pragma::SGame::RegisterNetMessage(std::string name)
 {
 	if(!pragma::Game::RegisterNetMessage(name))
 		return false;
 	NetPacket packet;
 	packet->WriteString(name);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::LUANET_REG, packet, pragma::networking::Protocol::SlowReliable);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::LUANET_REG, packet, pragma::networking::Protocol::SlowReliable);
 	return true;
 }
 
-void SGame::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_unique<SLuaDirectoryWatcherManager>(this); }
+void pragma::SGame::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_unique<SLuaDirectoryWatcherManager>(this); }
 
-void SGame::RegisterGameResource(const std::string &fileName)
+void pragma::SGame::RegisterGameResource(const std::string &fileName)
 {
 	//Con::csv<<"RegisterGameResource: "<<fileName<<Con::endl;
 	auto fName = FileManager::GetCanonicalizedPath(fileName);
 	if(IsValidGameResource(fileName) == true)
 		return;
 	m_gameResources.push_back(fName);
-	auto *sv = ServerState::Get()->GetServer();
+	auto *sv = pragma::ServerState::Get()->GetServer();
 	if(sv == nullptr)
 		return;
 
@@ -295,26 +295,26 @@ void SGame::RegisterGameResource(const std::string &fileName)
 		auto it = std::find(clResources.begin(), clResources.end(), fileName);
 		if(it == clResources.end())
 			continue;
-		ServerState::Get()->SendResourceFile(fileName, {client.get()});
+		pragma::ServerState::Get()->SendResourceFile(fileName, {client.get()});
 		clResources.erase(it);
 	}
 }
 
-void SGame::CreateGiblet(const GibletCreateInfo &info)
+void pragma::SGame::CreateGiblet(const GibletCreateInfo &info)
 {
 	NetPacket packet {};
 	packet->Write<GibletCreateInfo>(info);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CREATE_GIBLET, packet, pragma::networking::Protocol::FastUnreliable);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CREATE_GIBLET, packet, pragma::networking::Protocol::FastUnreliable);
 }
 
-bool SGame::IsValidGameResource(const std::string &fileName)
+bool pragma::SGame::IsValidGameResource(const std::string &fileName)
 {
 	auto fName = FileManager::GetCanonicalizedPath(fileName);
 	auto it = std::find(m_gameResources.begin(), m_gameResources.end(), fName);
 	return (it != m_gameResources.end()) ? true : false;
 }
 
-void SGame::UpdateLuaCache(const std::string &fName)
+void pragma::SGame::UpdateLuaCache(const std::string &fName)
 {
 	auto *l = GetLuaState();
 	auto dstPath = "cache\\" + fName;
@@ -333,9 +333,9 @@ void SGame::UpdateLuaCache(const std::string &fName)
 	}
 }
 
-void SGame::GenerateLuaCache()
+void pragma::SGame::GenerateLuaCache()
 {
-	auto &resources = ResourceManager::GetResources();
+	auto &resources = networking::ResourceManager::GetResources();
 	filemanager::create_path("cache/" + Lua::SCRIPT_DIRECTORY);
 	Con::csv << "Generating lua cache..." << Con::endl;
 	for(auto &res : resources) {
@@ -346,7 +346,7 @@ void SGame::GenerateLuaCache()
 	}
 }
 
-bool SGame::InitializeGameMode()
+bool pragma::SGame::InitializeGameMode()
 {
 	if(pragma::Game::InitializeGameMode() == false)
 		return false;
@@ -374,62 +374,62 @@ bool SGame::InitializeGameMode()
 		transferFiles.at(i) = pathClient + '\\' + transferFiles.at(i);
 
 	for(auto &fname : transferFiles)
-		ResourceManager::AddResource(fname);
+		networking::ResourceManager::AddResource(fname);
 	return true;
 }
 
-CacheInfo *SGame::GetLuaCacheInfo() { return m_luaCache.get(); }
+CacheInfo *pragma::SGame::GetLuaCacheInfo() { return m_luaCache.get(); }
 
-void SGame::CreateExplosion(const Vector3 &origin, Float radius, DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
+void pragma::SGame::CreateExplosion(const Vector3 &origin, Float radius, game::DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback)
 {
 	SplashDamage(origin, radius, dmg, callback);
 
 	NetPacket p;
 	p->Write<Vector3>(origin);
 	p->Write<float>(radius);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CREATE_EXPLOSION, p, pragma::networking::Protocol::SlowReliable);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CREATE_EXPLOSION, p, pragma::networking::Protocol::SlowReliable);
 }
-void SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
+void pragma::SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback)
 {
-	DamageInfo info;
+	game::DamageInfo info;
 	info.SetForce(Vector3(force, 0.f, 0.f));
 	info.SetAttacker(attacker);
 	info.SetInflictor(inflictor);
 	info.SetDamage(CUInt16(damage));
-	info.SetDamageType(DAMAGETYPE::EXPLOSION);
+	info.SetDamageType(DamageType::Explosion);
 	CreateExplosion(origin, radius, info, callback);
 }
-void SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force, const EntityHandle &attacker, const EntityHandle &inflictor, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
+void pragma::SGame::CreateExplosion(const Vector3 &origin, Float radius, UInt32 damage, Float force, const EntityHandle &attacker, const EntityHandle &inflictor, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback)
 {
 	CreateExplosion(origin, radius, damage, force, const_cast<pragma::ecs::BaseEntity *>(attacker.get()), const_cast<pragma::ecs::BaseEntity *>(inflictor.get()), callback);
 }
-void SGame::OnClientDropped(pragma::networking::IServerClient &client, pragma::networking::DropReason reason)
+void pragma::SGame::OnClientDropped(pragma::networking::IServerClient &client, pragma::networking::DropReason reason)
 {
-	auto *pl = ServerState::Get()->GetPlayer(client);
+	auto *pl = pragma::ServerState::Get()->GetPlayer(client);
 	if(pl == nullptr)
 		return;
 	auto &ent = pl->GetEntity();
 	NetPacket p;
-	nwm::write_player(p, pl);
+	networking::write_player(p, pl);
 	p->Write<int32_t>(umath::to_integral(reason));
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CLIENT_DROPPED, p, pragma::networking::Protocol::SlowReliable, {client, pragma::networking::ClientRecipientFilter::FilterType::Exclude});
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CLIENT_DROPPED, p, pragma::networking::Protocol::SlowReliable, {client, pragma::networking::ClientRecipientFilter::FilterType::Exclude});
 	OnPlayerDropped(*pl, reason);
 	ent.RemoveSafely();
 }
 
-void SGame::ReceiveGameReady(pragma::networking::IServerClient &session, NetPacket &)
+void pragma::SGame::ReceiveGameReady(pragma::networking::IServerClient &session, NetPacket &)
 {
 	auto *pl = GetPlayer(session);
 	if(pl == nullptr)
 		return;
 	pl->SetGameReady(true);
 	NetPacket p;
-	nwm::write_player(p, pl);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CLIENT_READY, p, pragma::networking::Protocol::SlowReliable);
+	networking::write_player(p, pl);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CLIENT_READY, p, pragma::networking::Protocol::SlowReliable);
 	OnPlayerReady(*pl);
 }
 
-void SGame::WriteEntityData(NetPacket &packet, SBaseEntity **ents, uint32_t entCount, pragma::networking::ClientRecipientFilter &rp)
+void pragma::SGame::WriteEntityData(NetPacket &packet, SBaseEntity **ents, uint32_t entCount, pragma::networking::ClientRecipientFilter &rp)
 {
 	unsigned int numEnts = 0;
 	auto posNumEnts = packet->GetSize();
@@ -464,29 +464,29 @@ void SGame::WriteEntityData(NetPacket &packet, SBaseEntity **ents, uint32_t entC
 	packet->Write<unsigned int>(numEnts, &posNumEnts);
 }
 
-void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacket &packet)
+void pragma::SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacket &packet)
 {
 	auto *pl = GetPlayer(session);
 	if(pl != nullptr)
 		return;
 	auto plVersion = packet->Read<util::Version>();
-	auto version = get_engine_version();
+	auto version = pragma::get_engine_version();
 	if(version != plVersion) {
 		Con::csv << "Client " << session.GetIdentifier() << " has a different engine version (" << plVersion.ToString() << ") from server's. Dropping client..." << Con::endl;
-		ServerState::Get()->DropClient(session, pragma::networking::DropReason::Kicked);
+		pragma::ServerState::Get()->DropClient(session, pragma::networking::DropReason::Kicked);
 		return;
 	}
 
 	auto *plEnt = CreateEntity<Player>();
 	if(plEnt == nullptr) {
 		Con::csv << "Unable to create player entity for client " << session.GetIdentifier() << ". Dropping client..." << Con::endl;
-		ServerState::Get()->DropClient(session, pragma::networking::DropReason::Kicked);
+		pragma::ServerState::Get()->DropClient(session, pragma::networking::DropReason::Kicked);
 		return;
 	}
 	if(plEnt->IsPlayer() == false) {
 		Con::csv << "Unable to create player component for client " << session.GetIdentifier() << ". Dropping client..." << Con::endl;
 		plEnt->RemoveSafely();
-		ServerState::Get()->DropClient(session, pragma::networking::DropReason::Kicked);
+		pragma::ServerState::Get()->DropClient(session, pragma::networking::DropReason::Kicked);
 		return;
 	}
 	pl = static_cast<pragma::SPlayerComponent *>(plEnt->GetPlayerComponent().get());
@@ -495,7 +495,7 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacke
 	session.SetPlayer(*pl);
 	pl->SetClientSession(session);
 	NetPacket p;
-	nwm::write_player(p, pl);
+	networking::write_player(p, pl);
 	if(packet->Read<unsigned char>() == 1) // Does the player have UDP available?
 	{
 		unsigned short portUDP = packet->Read<unsigned short>();
@@ -528,14 +528,14 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacke
 
 	NetPacket packetInf;
 	// Write replicated ConVars
-	auto &conVars = ServerState::Get()->GetConVars();
+	auto &conVars = pragma::ServerState::Get()->GetConVars();
 	uint32_t numReplicated = 0;
 	auto offsetNumReplicated = packetInf->GetSize();
 	packetInf->Write<uint32_t>(static_cast<uint32_t>(0));
 	for(auto &pair : conVars) {
 		auto &cf = pair.second;
-		if(cf->GetType() == ConType::Var) {
-			auto *cv = static_cast<ConVar *>(cf.get());
+		if(cf->GetType() == pragma::console::ConType::Var) {
+			auto *cv = static_cast<pragma::console::ConVar *>(cf.get());
 			if((cv->GetFlags() & pragma::console::ConVarFlags::Replicated) != pragma::console::ConVarFlags::None && cv->GetString() != cv->GetDefault()) {
 				auto id = cv->GetID();
 				packetInf->Write<uint32_t>(id);
@@ -563,7 +563,7 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacke
 	for(auto &name : netEventIds)
 		packetInf->WriteString(name);
 
-	std::unordered_map<std::string, unsigned int> &conCommandIds = ServerState::Get()->GetConCommandIDs();
+	std::unordered_map<std::string, unsigned int> &conCommandIds = pragma::ServerState::Get()->GetConCommandIDs();
 	packetInf->Write<unsigned int>(CUInt32(conCommandIds.size()));
 	std::unordered_map<std::string, unsigned int>::iterator it;
 	for(it = conCommandIds.begin(); it != conCommandIds.end(); it++) {
@@ -601,55 +601,55 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacke
 	WriteEntityData(packetInf, m_ents.data(), m_ents.size(), rp);
 
 	auto *ptrWorld = GetWorld();
-	nwm::write_entity(packetInf, (ptrWorld != nullptr) ? &ptrWorld->GetEntity() : nullptr);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::GAMEINFO, packetInf, pragma::networking::Protocol::SlowReliable, rp);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_LOCAL, p, pragma::networking::Protocol::SlowReliable, session);
+	pragma::networking::write_entity(packetInf, (ptrWorld != nullptr) ? &ptrWorld->GetEntity() : nullptr);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::GAMEINFO, packetInf, pragma::networking::Protocol::SlowReliable, rp);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_LOCAL, p, pragma::networking::Protocol::SlowReliable, session);
 	NetPacket tmp {};
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::GAME_READY, tmp, pragma::networking::Protocol::SlowReliable, rp);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::GAME_READY, tmp, pragma::networking::Protocol::SlowReliable, rp);
 
 	NetPacket pJoinedInfo;
-	nwm::write_player(pJoinedInfo, pl);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CLIENT_JOINED, pJoinedInfo, pragma::networking::Protocol::SlowReliable);
+	networking::write_player(pJoinedInfo, pl);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CLIENT_JOINED, pJoinedInfo, pragma::networking::Protocol::SlowReliable);
 
 	if(IsMapInitialized() == true)
 		SpawnPlayer(*pl);
 	OnPlayerJoined(*pl);
 
 	// Send sound sources
-	auto &sounds = ServerState::Get()->GetSounds();
+	auto &sounds = pragma::ServerState::Get()->GetSounds();
 	for(auto &sndRef : sounds) {
-		auto *snd = dynamic_cast<SALSound *>(&sndRef.get());
+		auto *snd = dynamic_cast<pragma::audio::SALSound *>(&sndRef.get());
 		if(snd == nullptr || umath::is_flag_set(snd->GetCreateFlags(), pragma::audio::ALCreateFlags::DontTransmit))
 			continue;
-		ServerState::Get()->SendSoundSourceToClient(*snd, true, &rp);
+		pragma::ServerState::Get()->SendSoundSourceToClient(*snd, true, &rp);
 	}
 }
 
-pragma::NetEventId SGame::RegisterNetEvent(const std::string &name)
+pragma::NetEventId pragma::SGame::RegisterNetEvent(const std::string &name)
 {
 	auto id = m_entNetEventManager.RegisterNetEvent(name);
 	NetPacket packet;
 	packet->WriteString(name);
 	packet->Write<pragma::NetEventId>(id);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::REGISTER_NET_EVENT, packet, pragma::networking::Protocol::SlowReliable);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::REGISTER_NET_EVENT, packet, pragma::networking::Protocol::SlowReliable);
 	return id;
 }
 
-pragma::NetEventId SGame::FindNetEvent(const std::string &name) const { return m_entNetEventManager.FindNetEvent(name); }
-pragma::NetEventId SGame::SetupNetEvent(const std::string &name) { return RegisterNetEvent(name); }
-const pragma::NetEventManager &SGame::GetEntityNetEventManager() const { return const_cast<SGame *>(this)->GetEntityNetEventManager(); }
-pragma::NetEventManager &SGame::GetEntityNetEventManager() { return m_entNetEventManager; }
-const std::vector<std::string> &SGame::GetNetEventIds() const { return const_cast<SGame *>(this)->GetNetEventIds(); }
-std::vector<std::string> &SGame::GetNetEventIds() { return m_entNetEventManager.GetNetEventIds(); }
+pragma::NetEventId pragma::SGame::FindNetEvent(const std::string &name) const { return m_entNetEventManager.FindNetEvent(name); }
+pragma::NetEventId pragma::SGame::SetupNetEvent(const std::string &name) { return RegisterNetEvent(name); }
+const pragma::NetEventManager &pragma::SGame::GetEntityNetEventManager() const { return const_cast<SGame *>(this)->GetEntityNetEventManager(); }
+pragma::NetEventManager &pragma::SGame::GetEntityNetEventManager() { return m_entNetEventManager; }
+const std::vector<std::string> &pragma::SGame::GetNetEventIds() const { return const_cast<SGame *>(this)->GetNetEventIds(); }
+std::vector<std::string> &pragma::SGame::GetNetEventIds() { return m_entNetEventManager.GetNetEventIds(); }
 
-void SGame::SpawnPlayer(pragma::BasePlayerComponent &pl)
+void pragma::SGame::SpawnPlayer(pragma::BasePlayerComponent &pl)
 {
 	auto charComponent = pl.GetEntity().GetComponent<pragma::SCharacterComponent>();
 	if(charComponent.expired() == false)
 		charComponent.get()->Respawn();
 }
 
-void SGame::OnClientConVarChanged(pragma::BasePlayerComponent &pl, std::string cvar, std::string value)
+void pragma::SGame::OnClientConVarChanged(pragma::BasePlayerComponent &pl, std::string cvar, std::string value)
 {
 	if(cvar == "playername") {
 		value = value.substr(0, 20);
@@ -657,29 +657,29 @@ void SGame::OnClientConVarChanged(pragma::BasePlayerComponent &pl, std::string c
 		if(nameC.valid())
 			nameC->SetName(value);
 		NetPacket p;
-		nwm::write_player(p, &pl);
+		networking::write_player(p, &pl);
 		p->WriteString(value);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_CHANGEDNAME, p, pragma::networking::Protocol::SlowReliable);
+		pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_CHANGEDNAME, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
-void SGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { SDebugRenderer::DrawLine(start, end, color, duration); }
-void SGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration)
+void pragma::SGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { debug::SDebugRenderer::DrawLine(start, end, color, duration); }
+void pragma::SGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration)
 {
 	if(fillColor)
-		SDebugRenderer::DrawBox(start, end, ang, *fillColor, colorOutline, duration);
+		debug::SDebugRenderer::DrawBox(start, end, ang, *fillColor, colorOutline, duration);
 	else
-		SDebugRenderer::DrawBox(start, end, ang, colorOutline, duration);
+		debug::SDebugRenderer::DrawBox(start, end, ang, colorOutline, duration);
 }
-void SGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { SDebugRenderer::DrawPlane(n, dist, color, duration); }
-void SGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { SDebugRenderer::DrawMesh(meshVerts, color, colorOutline, duration); }
+void pragma::SGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { debug::SDebugRenderer::DrawPlane(n, dist, color, duration); }
+void pragma::SGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { debug::SDebugRenderer::DrawMesh(meshVerts, color, colorOutline, duration); }
 
-static CVar cvFriction = GetServerConVar("sv_friction");
-Float SGame::GetFrictionScale() const { return cvFriction->GetFloat(); }
-static CVar cvRestitution = GetServerConVar("sv_restitution");
-Float SGame::GetRestitutionScale() const { return cvRestitution->GetFloat(); }
+static auto cvFriction = pragma::console::get_server_con_var("sv_friction");
+Float pragma::SGame::GetFrictionScale() const { return cvFriction->GetFloat(); }
+static auto cvRestitution = pragma::console::get_server_con_var("sv_restitution");
+Float pragma::SGame::GetRestitutionScale() const { return cvRestitution->GetFloat(); }
 
-void SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session, ::NetPacket &packet)
+void pragma::SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session, ::NetPacket &packet)
 {
 	unsigned int ID = packet->Read<unsigned int>();
 	if(ID == 0)

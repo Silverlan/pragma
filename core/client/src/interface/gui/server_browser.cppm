@@ -25,7 +25,9 @@ export {
 			std::unique_ptr<UDPMessageDispatcher> m_dispatcher;
 		};
 	};
+}
 
+export namespace pragma::gui::types {
 	class DLLCLIENT WIServerBrowser : public WIFrame {
 	  public:
 		WIServerBrowser();
@@ -37,12 +39,12 @@ export {
 	  protected:
 		struct ServerData {
 			pragma::networking::MasterServerQueryResult queryResult;
-			WIHandle row = {};
+			pragma::gui::WIHandle row = {};
 		};
 		std::vector<ServerData> m_servers;
-		WIHandle m_hServerList;
-		WIHandle m_hRefresh;
-		WIHandle m_hConnect;
+		pragma::gui::WIHandle m_hServerList;
+		pragma::gui::WIHandle m_hRefresh;
+		pragma::gui::WIHandle m_hConnect;
 		bool m_bRefreshScheduled;
 		std::unique_ptr<pragma::networking::IMasterServerQueryDispatcher, void (*)(pragma::networking::IMasterServerQueryDispatcher *)> m_msQueryDispatcher = {nullptr, [](pragma::networking::IMasterServerQueryDispatcher *) {}};
 		void AddServer(const pragma::networking::MasterServerQueryResult &queryResult);

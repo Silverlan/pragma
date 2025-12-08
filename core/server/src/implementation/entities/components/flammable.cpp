@@ -33,10 +33,10 @@ void SFlammableComponent::ApplyIgnitionDamage()
 	if(pTrComponent == nullptr || pDamageableComponent.expired())
 		return;
 	auto pos = ent.GetCenter();
-	DamageInfo info {};
+	game::DamageInfo info {};
 	info.SetAttacker(m_igniteInfo.hAttacker.get());
 	info.SetInflictor(m_igniteInfo.hInflictor.get());
-	info.SetDamageType(DAMAGETYPE::IGNITE);
+	info.SetDamageType(DamageType::Ignite);
 	info.SetHitPosition(pos);
 	info.SetSource(pos);
 	info.SetDamage(5);
@@ -49,8 +49,8 @@ util::EventReply SFlammableComponent::Ignite(float duration, pragma::ecs::BaseEn
 		return util::EventReply::Handled;
 	NetPacket p {};
 	p->Write<float>(duration);
-	nwm::write_entity(p, attacker);
-	nwm::write_entity(p, inflictor);
+	pragma::networking::write_entity(p, attacker);
+	pragma::networking::write_entity(p, inflictor);
 	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvIgnite, p, pragma::networking::Protocol::SlowReliable);
 
 	auto reps = static_cast<uint32_t>(umath::floor(duration / 0.5f));
@@ -94,7 +94,7 @@ void SFlammableComponent::SendData(NetPacket &packet, networking::ClientRecipien
 	if(*m_bIsOnFire == true) {
 		auto dur = (m_igniteInfo.damageTimer->IsValid()) ? m_igniteInfo.damageTimer->GetTimer()->GetTimeLeft() : 0.f;
 		packet->Write<float>(dur);
-		nwm::write_entity(packet, m_igniteInfo.hAttacker.get());
-		nwm::write_entity(packet, m_igniteInfo.hInflictor.get());
+		pragma::networking::write_entity(packet, m_igniteInfo.hAttacker.get());
+		pragma::networking::write_entity(packet, m_igniteInfo.hInflictor.get());
 	}
 }

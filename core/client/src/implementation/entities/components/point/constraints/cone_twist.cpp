@@ -12,7 +12,7 @@ void CPointConstraintConeTwistComponent::ReceiveData(NetPacket &packet)
 {
 	m_kvSource = packet->ReadString();
 	m_kvTarget = packet->ReadString();
-	m_posTarget = nwm::read_vector(packet);
+	m_posTarget = networking::read_vector(packet);
 
 	m_kvSwingSpan1 = packet->Read<float>();
 	m_kvSwingSpan2 = packet->Read<float>();

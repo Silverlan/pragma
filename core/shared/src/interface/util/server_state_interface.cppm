@@ -8,8 +8,8 @@ export module pragma.shared:util.server_state_interface;
 
 export import pragma.util;
 
-export class NetworkState;
 export namespace pragma {
+	class NetworkState;
 	struct DLLNETWORK IServerState final {
 		void Initialize(::util::Library &lib);
 		IServerState() = default;

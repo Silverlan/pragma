@@ -12,12 +12,14 @@ export import :rendering.entity_instance_data;
 export import :rendering.shaders.base_3d;
 export import :rendering.shaders.textured_base;
 
-export class CModelSubMesh;
 export namespace pragma {
 	class CLightComponent;
 	class CRasterizationRendererComponent;
 	class CRenderComponent;
 	class CSceneComponent;
+	namespace geometry {
+		class CModelSubMesh;
+	}
 	namespace rendering {
 		class ShaderProcessor;
 		enum class PassType : uint32_t;
@@ -165,10 +167,10 @@ export namespace pragma {
 			Count
 		};
 
-		virtual bool GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const;
+		virtual bool GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const = 0;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const = 0;
-		std::shared_ptr<prosper::IRenderBuffer> CreateRenderBuffer(CModelSubMesh &mesh, uint32_t pipelineIdx) const;
+		std::shared_ptr<prosper::IRenderBuffer> CreateRenderBuffer(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx) const;
 	  protected:
 		ShaderEntity(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader = "");
 	};
@@ -230,7 +232,7 @@ export namespace pragma {
 		virtual void RecordDrawOrigin(rendering::ShaderProcessor &shaderProcessor, const Vector4 &drawOrigin) const;
 		virtual void RecordDepthBias(rendering::ShaderProcessor &shaderProcessor, const Vector2 &depthBias) const;
 		virtual void RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor, uint32_t vertexAnimationOffset) const;
-		virtual bool OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor, CModelSubMesh &mesh) const { return true; }
+		virtual bool OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor, pragma::geometry::CModelSubMesh &mesh) const { return true; }
 		virtual bool IsUsingLightmaps() const { return false; }
 		virtual uint32_t GetPassPipelineIndexStartOffset(rendering::PassType passType) const { return 0; }
 	  protected:

@@ -103,7 +103,7 @@ double pragma::physics::WaterBuoyancySimulator::CalcBuoyancy(const Quat &rorigin
 }
 
 template<class TIterator>
-static void calc_surface_plane(const PhysWaterSurfaceSimulator *surfaceSim, const Vector3 &pos, const Quat &rot, TIterator itVertBegin, TIterator itVertEnd, Vector3 &waterPlane, double &waterPlaneDist, Vector3 &waterPlaneRelObj, double &waterPlaneDistRelObj)
+static void calc_surface_plane(const pragma::physics::PhysWaterSurfaceSimulator *surfaceSim, const Vector3 &pos, const Quat &rot, TIterator itVertBegin, TIterator itVertEnd, Vector3 &waterPlane, double &waterPlaneDist, Vector3 &waterPlaneRelObj, double &waterPlaneDistRelObj)
 {
 	if(surfaceSim == nullptr || itVertBegin == itVertEnd)
 		return;
@@ -175,7 +175,7 @@ static void calc_surface_plane(const PhysWaterSurfaceSimulator *surfaceSim, cons
 		auto mat = umat::calc_covariance_matrix(surfaceIntersectionPoints, avg);
 		auto oldPlane = waterPlaneRelObj;
 
-		umath::calc_best_fitting_plane(mat, avg, waterPlaneRelObj, waterPlaneDistRelObj);
+		pragma::math::calc_best_fitting_plane(mat, avg, waterPlaneRelObj, waterPlaneDistRelObj);
 
 		// Plane might be pointing in the wrong direction; Flip it if it is
 		if(umath::abs(uvec::dot(oldPlane, waterPlaneRelObj) - 1.0) > 1.0) {
@@ -202,7 +202,7 @@ static void calc_surface_plane(const PhysWaterSurfaceSimulator *surfaceSim, cons
 void pragma::physics::WaterBuoyancySimulator::Simulate(pragma::ecs::BaseEntity &entWater, const PhysLiquid &liquid, pragma::ecs::BaseEntity &ent, Vector3 waterPlane, double waterPlaneDist, const Vector3 &waterVelocity, const PhysWaterSurfaceSimulator *surfaceSim) const
 {
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto physType = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsType() : pragma::physics::PHYSICSTYPE::NONE;
+	auto physType = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsType() : pragma::physics::PhysicsType::None;
 	auto *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(physObj == nullptr)
 		return;
@@ -211,8 +211,8 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(pragma::ecs::BaseEntity &
 
 	auto totalVolume = 0.0;
 	auto totalSubmerged = 0.0;
-	if(physType == pragma::physics::PHYSICSTYPE::BOXCONTROLLER || physType == pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER) {
-		if(pPhysComponent->GetMoveType() == pragma::physics::MOVETYPE::NOCLIP)
+	if(physType == pragma::physics::PhysicsType::BoxController || physType == pragma::physics::PhysicsType::CapsuleController) {
+		if(pPhysComponent->GetMoveType() == pragma::physics::MoveType::Noclip)
 			return;
 		const auto mass = 10.0;
 		const auto dragCoefficient = 2.0;

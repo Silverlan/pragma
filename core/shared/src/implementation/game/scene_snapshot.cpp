@@ -8,9 +8,9 @@ import :game.scene_snapshot;
 
 using namespace pragma;
 
-std::shared_ptr<SceneSnapshot> SceneSnapshot::Create() { return std::shared_ptr<SceneSnapshot> {new SceneSnapshot {}}; }
+std::shared_ptr<pragma::game::SceneSnapshot> pragma::game::SceneSnapshot::Create() { return std::shared_ptr<pragma::game::SceneSnapshot> {new pragma::game::SceneSnapshot {}}; }
 
-void SceneSnapshot::AddMaterial(msys::Material &mat)
+void pragma::game::SceneSnapshot::AddMaterial(msys::Material &mat)
 {
 	auto it = std::find_if(m_materials.begin(), m_materials.end(), [&mat](const msys::MaterialHandle &hMat) { return hMat.get() == &mat; });
 	if(it != m_materials.end())
@@ -18,7 +18,7 @@ void SceneSnapshot::AddMaterial(msys::Material &mat)
 	m_materials.push_back(mat.GetHandle());
 }
 
-void SceneSnapshot::AddModel(pragma::Model &mdl, uint32_t skin)
+void pragma::game::SceneSnapshot::AddModel(pragma::asset::Model &mdl, uint32_t skin)
 {
 	for(auto &meshGroup : mdl.GetMeshGroups()) {
 		for(auto &mesh : meshGroup->GetMeshes()) {
@@ -56,7 +56,7 @@ void SceneSnapshot::AddModel(pragma::Model &mdl, uint32_t skin)
 	}
 }
 
-void SceneSnapshot::MergeMeshesByMaterial()
+void pragma::game::SceneSnapshot::MergeMeshesByMaterial()
 {
 	// Group meshes by material
 	std::unordered_map<msys::Material *, std::vector<Mesh *>> matMeshes {};
@@ -98,9 +98,9 @@ void SceneSnapshot::MergeMeshesByMaterial()
 	}
 }
 
-const std::vector<std::shared_ptr<SceneSnapshot::Mesh>> &SceneSnapshot::GetMeshes() const { return const_cast<SceneSnapshot *>(this)->GetMeshes(); }
-std::vector<std::shared_ptr<SceneSnapshot::Mesh>> &SceneSnapshot::GetMeshes() { return m_meshes; }
-const std::vector<std::shared_ptr<SceneSnapshot::Object>> &SceneSnapshot::GetObjects() const { return const_cast<SceneSnapshot *>(this)->GetObjects(); }
-std::vector<std::shared_ptr<SceneSnapshot::Object>> &SceneSnapshot::GetObjects() { return m_objects; }
-const std::vector<msys::MaterialHandle> &SceneSnapshot::GetMaterials() const { return const_cast<SceneSnapshot *>(this)->GetMaterials(); }
-std::vector<msys::MaterialHandle> &SceneSnapshot::GetMaterials() { return m_materials; }
+const std::vector<std::shared_ptr<pragma::game::SceneSnapshot::Mesh>> &pragma::game::SceneSnapshot::GetMeshes() const { return const_cast<pragma::game::SceneSnapshot *>(this)->GetMeshes(); }
+std::vector<std::shared_ptr<pragma::game::SceneSnapshot::Mesh>> &pragma::game::SceneSnapshot::GetMeshes() { return m_meshes; }
+const std::vector<std::shared_ptr<pragma::game::SceneSnapshot::Object>> &pragma::game::SceneSnapshot::GetObjects() const { return const_cast<pragma::game::SceneSnapshot *>(this)->GetObjects(); }
+std::vector<std::shared_ptr<pragma::game::SceneSnapshot::Object>> &pragma::game::SceneSnapshot::GetObjects() { return m_objects; }
+const std::vector<msys::MaterialHandle> &pragma::game::SceneSnapshot::GetMaterials() const { return const_cast<pragma::game::SceneSnapshot *>(this)->GetMaterials(); }
+std::vector<msys::MaterialHandle> &pragma::game::SceneSnapshot::GetMaterials() { return m_materials; }

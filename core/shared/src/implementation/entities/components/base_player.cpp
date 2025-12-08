@@ -12,7 +12,7 @@ using namespace pragma;
 
 void BasePlayerComponent::SetStandHeight(float height) { m_standHeight = height; }
 void BasePlayerComponent::SetCrouchHeight(float height) { m_crouchHeight = height; }
-void BasePlayerComponent::OnTakenDamage(DamageInfo &info, unsigned short oldHealth, unsigned short newHealth)
+void BasePlayerComponent::OnTakenDamage(game::DamageInfo &info, unsigned short oldHealth, unsigned short newHealth)
 {
 	if(oldHealth == 0 || newHealth != 0)
 		return;
@@ -20,7 +20,7 @@ void BasePlayerComponent::OnTakenDamage(DamageInfo &info, unsigned short oldHeal
 	if(charComponent.valid())
 		charComponent->Kill(&info);
 }
-void BasePlayerComponent::OnKilled(DamageInfo *dmgInfo)
+void BasePlayerComponent::OnKilled(game::DamageInfo *dmgInfo)
 {
 	auto observerC = GetEntity().FindComponent("observer");
 	if(observerC.valid())
@@ -29,7 +29,7 @@ void BasePlayerComponent::OnKilled(DamageInfo *dmgInfo)
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
 
-	game->CallCallbacks<void, BasePlayerComponent *, DamageInfo *>("OnPlayerDeath", this, dmgInfo);
+	game->CallCallbacks<void, BasePlayerComponent *, game::DamageInfo *>("OnPlayerDeath", this, dmgInfo);
 	for(auto *gmC : game->GetGamemodeComponents())
 		gmC->OnPlayerDeath(*this, dmgInfo);
 
@@ -103,16 +103,16 @@ void BasePlayerComponent::OnTick(double tDelta)
 		if((!m_actionController || m_actionController->GetActionInput(pragma::Action::Crouch) == false) && m_crouchTransition != CrouchTransition::Uncrouching)
 			UnCrouch();
 		else if(m_crouchTransition != CrouchTransition::None) {
-			NetworkState *state = ent.GetNetworkState();
+			auto *state = ent.GetNetworkState();
 			pragma::Game *game = state->GetGameState();
 			if(game->CurTime() >= m_tCrouch) {
 				m_tCrouch = 0.f;
 				if(m_crouchTransition == CrouchTransition::Crouching) {
 					m_bCrouching = true;
 					if(phys != nullptr && phys->IsController()) {
-						auto *controller = static_cast<ControllerPhysObj *>(phys);
+						auto *controller = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 						if(controller->IsCapsule()) {
-							auto *capsule = static_cast<CapsuleControllerPhysObj *>(controller);
+							auto *capsule = static_cast<pragma::physics::CapsuleControllerPhysObj *>(controller);
 							capsule->SetHeight(m_crouchHeight);
 						}
 						OnFullyCrouched();
@@ -121,9 +121,9 @@ void BasePlayerComponent::OnTick(double tDelta)
 				else {
 					m_bCrouching = false;
 					if(phys != nullptr && phys->IsController()) {
-						auto *controller = static_cast<ControllerPhysObj *>(phys);
+						auto *controller = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 						if(controller->IsCapsule()) {
-							auto *capsule = static_cast<CapsuleControllerPhysObj *>(controller);
+							auto *capsule = static_cast<pragma::physics::CapsuleControllerPhysObj *>(controller);
 							capsule->SetHeight(m_standHeight);
 						}
 						OnFullyUnCrouched();
@@ -408,7 +408,7 @@ void BasePlayerComponent::OnPhysicsInitialized()
 pragma::ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
 {
 	auto &ent = GetEntity();
-	NetworkState *state = ent.GetNetworkState();
+	auto *state = ent.GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -444,7 +444,7 @@ pragma::ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
 				uvec::normalize(&dir);
 				auto dot = uvec::dot(viewDir, dir);
 				if(dot >= dotMin && ((dot - dotClosest) >= 0.2f || (distClosest - dist) >= 20.f)) {
-					TraceData data;
+					pragma::physics::TraceData data;
 					data.SetSource(origin);
 					data.SetTarget(origin + dir * dist);
 					data.SetFilter(*entOther);
@@ -497,7 +497,7 @@ Vector2 BasePlayerComponent::CalcMovementSpeed() const
 {
 	float speed;
 	auto physComponent = GetEntity().GetPhysicsComponent();
-	if(physComponent && physComponent->GetMoveType() == pragma::physics::MOVETYPE::NOCLIP) {
+	if(physComponent && physComponent->GetMoveType() == pragma::physics::MoveType::Noclip) {
 		speed = GetEntity().GetNetworkState()->GetGameState()->GetConVarFloat("sv_noclip_speed");
 		if(IsWalking())
 			speed *= 0.5f;
@@ -536,7 +536,7 @@ void BasePlayerComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 
 	auto &ent = GetEntity();
-	NetworkState *state = ent.GetNetworkState();
+	auto *state = ent.GetNetworkState();
 	m_timeConnected = state->RealTime();
 
 	auto pPhysComponent = ent.GetPhysicsComponent();
@@ -636,10 +636,10 @@ void BasePlayerComponent::Crouch()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	m_shapeStand = nullptr;
-	NetworkState *state = ent.GetNetworkState();
+	auto *state = ent.GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	if(phys != nullptr && phys->IsController()) {
-		auto *controllerPhys = static_cast<ControllerPhysObj *>(phys);
+		auto *controllerPhys = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 		assert(controllerPhys->IsCapsule());
 		if(!controllerPhys->IsCapsule())
 			spdlog::warn("Box-controller crouching not implemented!");
@@ -671,7 +671,7 @@ void BasePlayerComponent::UnCrouch(bool bForce)
 	m_shapeStand = nullptr;
 	m_crouchTransition = CrouchTransition::Uncrouching;
 	auto &ent = GetEntity();
-	NetworkState *state = ent.GetNetworkState();
+	auto *state = ent.GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	m_bForceAnimationUpdate = true;
 	m_tCrouch = CFloat(game->CurTime()) + 0.4f;
@@ -729,4 +729,4 @@ float BasePlayerComponent::GetCrouchedWalkSpeed() const
 }
 void BasePlayerComponent::SetCrouchedWalkSpeed(float speed) { m_speedCrouchWalk = speed; }
 
-void BasePlayerComponent::PrintMessage(std::string message, MESSAGE) {}
+void BasePlayerComponent::PrintMessage(std::string message, pragma::console::MESSAGE) {}

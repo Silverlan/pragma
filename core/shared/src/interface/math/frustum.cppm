@@ -6,9 +6,9 @@ export module pragma.shared:math.frustum;
 
 export import std.compat;
 
-export {
+export namespace pragma::math {
 	enum class FrustumPlane : uint32_t {
-		Left,
+		Left = 0,
 		Right,
 		Top,
 		Bottom,

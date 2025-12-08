@@ -35,7 +35,7 @@ export namespace Lua {
 		DLLNETWORK void SetSoftBody(lua::State *l, pragma::physics::CollisionMesh &mesh, bool bSoftBody);
 		DLLNETWORK void IsSoftBody(lua::State *l, pragma::physics::CollisionMesh &mesh);
 		DLLNETWORK void GetSoftBodyMesh(lua::State *l, pragma::physics::CollisionMesh &mesh);
-		DLLNETWORK void SetSoftBodyMesh(lua::State *l, pragma::physics::CollisionMesh &mesh, const std::shared_ptr<pragma::ModelSubMesh> &subMesh);
+		DLLNETWORK void SetSoftBodyMesh(lua::State *l, pragma::physics::CollisionMesh &mesh, const std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh);
 		DLLNETWORK void GetSoftBodyInfo(lua::State *l, pragma::physics::CollisionMesh &mesh);
 		DLLNETWORK luabind::optional<luabind::tableT<uint32_t>> GetSoftBodyTriangles(lua::State *l, pragma::physics::CollisionMesh &mesh);
 		DLLNETWORK void SetSoftBodyTriangles(lua::State *l, pragma::physics::CollisionMesh &mesh, const luabind::tableT<uint32_t> &o);

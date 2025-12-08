@@ -19,14 +19,14 @@ void SLightSpotVolComponent::Initialize()
 void SLightSpotVolComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_coneStartOffset);
-	nwm::write_unique_entity(packet, m_hSpotlightTarget.get());
+	pragma::networking::write_unique_entity(packet, m_hSpotlightTarget.get());
 }
 
 void SLightSpotVolComponent::SetSpotlightTarget(pragma::ecs::BaseEntity &ent)
 {
 	BaseEnvLightSpotVolComponent::SetSpotlightTarget(ent);
 	NetPacket p {};
-	nwm::write_entity(p, &ent);
+	pragma::networking::write_entity(p, &ent);
 	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetSpotlightTarget, p, pragma::networking::Protocol::SlowReliable);
 }
 

@@ -56,7 +56,7 @@ ai::BehaviorNode::Result ai::TaskDebugDrawText::Start(const Schedule *sched, pra
 	if(pPhysComponent == nullptr)
 		pPhysComponent->GetCollisionBounds(&min, &max);
 	pos.y += max.y;
-	SDebugRenderer::DrawText(msg, pos, 0.5f, colors::White, 1.f);
+	debug::SDebugRenderer::DrawText(msg, pos, 0.5f, colors::White, 1.f);
 	return Result::Succeeded;
 }
 void ai::TaskDebugDrawText::SetMessage(const std::string &msg) { SetParameter(umath::to_integral(Parameter::Message), msg); }

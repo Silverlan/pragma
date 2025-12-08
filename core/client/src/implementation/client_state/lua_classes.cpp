@@ -359,10 +359,10 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 	oGraph["CATEGORY_UTILITY"] = pragma::shadergraph::CATEGORY_UTILITY;
 }
 
-void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
+void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 {
 	auto &modEngine = lua.RegisterLibrary("engine");
-	auto defFontInfo = luabind::class_<FontInfo>("FontInfo");
+	auto defFontInfo = luabind::class_<pragma::gui::FontInfo>("FontInfo");
 	modEngine[defFontInfo];
 
 	auto &modUtil = lua.RegisterLibrary("util");
@@ -768,7 +768,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	}))];
 	modShader[defShaderGraphics];
 
-	auto defShaderGUITextured = luabind::class_<wgui::ShaderTextured, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("GUITextured");
+	auto defShaderGUITextured = luabind::class_<pragma::gui::shaders::ShaderTextured, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("GUITextured");
 	modShader[defShaderGUITextured];
 
 	auto defShaderScene = luabind::class_<pragma::ShaderScene, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("Scene3D");
@@ -1027,7 +1027,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	auto defShaderGUIBase = luabind::class_<pragma::LuaShaderWrapperGUI, luabind::bases<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>>("BaseGUI");
 	defShaderGUIBase.def(luabind::constructor<>());
 	defShaderGUIBase.def(
-	  "RecordBeginDraw", +[](pragma::LuaShaderWrapperGUI &shader, prosper::ShaderBindState &bindState, wgui::DrawState &drawState, uint32_t width, uint32_t height, wgui::StencilPipeline pipelineIdx, bool msaa, uint32_t testStencilLevel) -> bool {
+	  "RecordBeginDraw", +[](pragma::LuaShaderWrapperGUI &shader, prosper::ShaderBindState &bindState, pragma::gui::DrawState &drawState, uint32_t width, uint32_t height, pragma::gui::StencilPipeline pipelineIdx, bool msaa, uint32_t testStencilLevel) -> bool {
 		  return static_cast<pragma::LShaderGui *>(&shader.GetShader())->RecordBeginDraw(bindState, drawState, width, height, pipelineIdx, msaa, testStencilLevel);
 	  });
 	defShaderGUIBase.def(
@@ -1039,8 +1039,8 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 				    return false;
 			    auto &shader = *static_cast<pragma::LShaderGui *>(hShader.get());
 			    recordState.shaderBindState = std::make_unique<prosper::ShaderBindState>(recordState.commandBuffer);
-			    auto &drawState = recordState.userData.Get<wgui::DrawState>(ustring::string_switch::hash("guiDrawState"));
-			    return shader.RecordBeginDraw(*recordState.shaderBindState, drawState, recordState.GetArgument<uint32_t>(0), recordState.GetArgument<uint32_t>(1), static_cast<wgui::StencilPipeline>(recordState.GetArgument<std::underlying_type_t<wgui::StencilPipeline>>(2)),
+			    auto &drawState = recordState.userData.Get<pragma::gui::DrawState>(ustring::string_switch::hash("guiDrawState"));
+			    return shader.RecordBeginDraw(*recordState.shaderBindState, drawState, recordState.GetArgument<uint32_t>(0), recordState.GetArgument<uint32_t>(1), static_cast<pragma::gui::StencilPipeline>(recordState.GetArgument<std::underlying_type_t<pragma::gui::StencilPipeline>>(2)),
 			      recordState.GetArgument<bool>(3), recordState.GetArgument<uint32_t>(4));
 		    },
 		    util::make_vector<PcbArg>(PcbArg {"w"}, PcbArg {"h"}, PcbArg {"stencilPipeline"}, PcbArg {"msaa"}, PcbArg {"testStencilLevel"}));
@@ -1063,7 +1063,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET", sizeof(pragma::ShaderParticle2DBase::PushConstants));
 	defShaderParticleBase.def(
 	  "RecordBeginDraw", +[](lua::State *l, pragma::LuaShaderWrapperParticle2D &shader, prosper::ShaderBindState &bindState, pragma::ecs::CParticleSystemComponent &ps, uint32_t renderFlags) {
-		  return static_cast<pragma::LShaderParticle2D *>(&shader.GetShader())->RecordBeginDraw(bindState, ps, static_cast<pragma::ecs::ParticleRenderFlags>(renderFlags));
+		  return static_cast<pragma::LShaderParticle2D *>(&shader.GetShader())->RecordBeginDraw(bindState, ps, static_cast<pragma::pts::ParticleRenderFlags>(renderFlags));
 	  });
 
 	modShader[defShaderParticleBase];
@@ -1125,178 +1125,178 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	modShader[defShaderPbr];
 }
 
-void CGame::RegisterLuaClasses()
+void pragma::CGame::RegisterLuaClasses()
 {
 	pragma::Game::RegisterLuaClasses();
-	ClientState::RegisterSharedLuaClasses(GetLuaInterface());
+	pragma::ClientState::RegisterSharedLuaClasses(GetLuaInterface());
 
 	auto debugMod = luabind::module(GetLuaState(), "debug");
-	auto defDebugRendererObject = luabind::class_<DebugRenderer::BaseObject>("RendererObject");
-	defDebugRendererObject.def("Remove", &::DebugRenderer::BaseObject::Remove);
-	defDebugRendererObject.def("IsValid", &::DebugRenderer::BaseObject::IsValid);
-	defDebugRendererObject.def("SetPos", &::DebugRenderer::BaseObject::SetPos);
-	defDebugRendererObject.def("GetPos", &::DebugRenderer::BaseObject::GetPos, luabind::copy_policy<0> {});
-	defDebugRendererObject.def("SetRotation", &::DebugRenderer::BaseObject::SetRotation);
-	defDebugRendererObject.def("GetRotation", &::DebugRenderer::BaseObject::GetRotation, luabind::copy_policy<0> {});
-	defDebugRendererObject.def("SetAngles", &::DebugRenderer::BaseObject::SetAngles);
-	defDebugRendererObject.def("GetAngles", &::DebugRenderer::BaseObject::GetAngles);
-	defDebugRendererObject.def("IsVisible", &::DebugRenderer::BaseObject::IsVisible);
-	defDebugRendererObject.def("SetVisible", &::DebugRenderer::BaseObject::SetVisible);
-	defDebugRendererObject.def("ShouldIgnoreDepth", &::DebugRenderer::BaseObject::ShouldIgnoreDepth);
-	defDebugRendererObject.def("SetIgnoreDepth", &::DebugRenderer::BaseObject::SetIgnoreDepth);
-	defDebugRendererObject.def("SetScale", &::DebugRenderer::BaseObject::SetScale);
-	defDebugRendererObject.def("GetScale", &::DebugRenderer::BaseObject::GetScale, luabind::copy_policy<0> {});
-	defDebugRendererObject.def("SetPose", &::DebugRenderer::BaseObject::SetPose);
+	auto defDebugRendererObject = luabind::class_<pragma::debug::DebugRenderer::BaseObject>("RendererObject");
+	defDebugRendererObject.def("Remove", &pragma::debug::DebugRenderer::BaseObject::Remove);
+	defDebugRendererObject.def("IsValid", &pragma::debug::DebugRenderer::BaseObject::IsValid);
+	defDebugRendererObject.def("SetPos", &pragma::debug::DebugRenderer::BaseObject::SetPos);
+	defDebugRendererObject.def("GetPos", &pragma::debug::DebugRenderer::BaseObject::GetPos, luabind::copy_policy<0> {});
+	defDebugRendererObject.def("SetRotation", &pragma::debug::DebugRenderer::BaseObject::SetRotation);
+	defDebugRendererObject.def("GetRotation", &pragma::debug::DebugRenderer::BaseObject::GetRotation, luabind::copy_policy<0> {});
+	defDebugRendererObject.def("SetAngles", &pragma::debug::DebugRenderer::BaseObject::SetAngles);
+	defDebugRendererObject.def("GetAngles", &pragma::debug::DebugRenderer::BaseObject::GetAngles);
+	defDebugRendererObject.def("IsVisible", &pragma::debug::DebugRenderer::BaseObject::IsVisible);
+	defDebugRendererObject.def("SetVisible", &pragma::debug::DebugRenderer::BaseObject::SetVisible);
+	defDebugRendererObject.def("ShouldIgnoreDepth", &pragma::debug::DebugRenderer::BaseObject::ShouldIgnoreDepth);
+	defDebugRendererObject.def("SetIgnoreDepth", &pragma::debug::DebugRenderer::BaseObject::SetIgnoreDepth);
+	defDebugRendererObject.def("SetScale", &pragma::debug::DebugRenderer::BaseObject::SetScale);
+	defDebugRendererObject.def("GetScale", &pragma::debug::DebugRenderer::BaseObject::GetScale, luabind::copy_policy<0> {});
+	defDebugRendererObject.def("SetPose", &pragma::debug::DebugRenderer::BaseObject::SetPose);
 	defDebugRendererObject.def(
-	  "GetVertexCount", +[](DebugRenderer::BaseObject &bo) -> size_t {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "GetVertexCount", +[](pragma::debug::DebugRenderer::BaseObject &bo) -> size_t {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return 0;
 		  return o->GetVertexCount();
 	  });
 	defDebugRendererObject.def(
-	  "GetVertexPosition", +[](DebugRenderer::BaseObject &bo, size_t index) -> std::optional<Vector3> {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "GetVertexPosition", +[](pragma::debug::DebugRenderer::BaseObject &bo, size_t index) -> std::optional<Vector3> {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return {};
 		  return o->GetVertexPosition(index);
 	  });
 	defDebugRendererObject.def(
-	  "SetVertexPosition", +[](DebugRenderer::BaseObject &bo, size_t index, const Vector3 &pos) {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "SetVertexPosition", +[](pragma::debug::DebugRenderer::BaseObject &bo, size_t index, const Vector3 &pos) {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return;
 		  o->SetVertexPosition(index, pos);
 	  });
 	defDebugRendererObject.def(
-	  "UpdateVertexBuffer", +[](DebugRenderer::BaseObject &bo) {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "UpdateVertexBuffer", +[](pragma::debug::DebugRenderer::BaseObject &bo) {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return;
 		  o->UpdateVertexBuffer();
 	  });
 	defDebugRendererObject.def(
-	  "SetColor", +[](DebugRenderer::BaseObject &bo, const Vector4 &color) {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "SetColor", +[](pragma::debug::DebugRenderer::BaseObject &bo, const Vector4 &color) {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return;
 		  o->SetColor(color);
 	  });
 	defDebugRendererObject.def(
-	  "GetColor", +[](DebugRenderer::BaseObject &bo, const Vector4 &color) -> std::optional<Vector4> {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "GetColor", +[](pragma::debug::DebugRenderer::BaseObject &bo, const Vector4 &color) -> std::optional<Vector4> {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return {};
 		  return o->GetColor();
 	  });
 	defDebugRendererObject.def(
-	  "SetOutlineColor", +[](DebugRenderer::BaseObject &bo, const Vector4 &color) {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "SetOutlineColor", +[](pragma::debug::DebugRenderer::BaseObject &bo, const Vector4 &color) {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return;
 		  o->SetOutlineColor(color);
 	  });
 	defDebugRendererObject.def(
-	  "GetOutlineColor", +[](DebugRenderer::BaseObject &bo, const Vector4 &color) -> std::optional<Vector4> {
-		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+	  "GetOutlineColor", +[](pragma::debug::DebugRenderer::BaseObject &bo, const Vector4 &color) -> std::optional<Vector4> {
+		  auto *o = dynamic_cast<pragma::debug::DebugRenderer::WorldObject *>(&bo);
 		  if(!o)
 			  return {};
 		  return o->GetOutlineColor();
 	  });
-	defDebugRendererObject.def("GetPose", static_cast<const umath::ScaledTransform &(::DebugRenderer::BaseObject::*)() const>(&::DebugRenderer::BaseObject::GetPose), luabind::copy_policy<0> {});
+	defDebugRendererObject.def("GetPose", static_cast<const umath::ScaledTransform &(pragma::debug::DebugRenderer::BaseObject::*)() const>(&pragma::debug::DebugRenderer::BaseObject::GetPose), luabind::copy_policy<0> {});
 	debugMod[defDebugRendererObject];
 
 	auto &modGame = GetLuaInterface().RegisterLibrary("game");
-	auto defRenderPassStats = luabind::class_<RenderPassStats>("RenderPassStats");
+	auto defRenderPassStats = luabind::class_<rendering::RenderPassStats>("RenderPassStats");
 	defRenderPassStats.def(luabind::constructor<>());
 	defRenderPassStats.def(luabind::self + luabind::const_self);
-	defRenderPassStats.add_static_constant("COUNTER_SHADER_STATE_CHANGES", umath::to_integral(RenderPassStats::Counter::ShaderStateChanges));
-	defRenderPassStats.add_static_constant("COUNTER_MATERIAL_STATE_CHANGES", umath::to_integral(RenderPassStats::Counter::MaterialStateChanges));
-	defRenderPassStats.add_static_constant("COUNTER_ENTITY_STATE_CHANGES", umath::to_integral(RenderPassStats::Counter::EntityStateChanges));
-	defRenderPassStats.add_static_constant("COUNTER_DRAW_CALLS", umath::to_integral(RenderPassStats::Counter::DrawCalls));
-	defRenderPassStats.add_static_constant("COUNTER_DRAWN_MESHES", umath::to_integral(RenderPassStats::Counter::DrawnMeshes));
-	defRenderPassStats.add_static_constant("COUNTER_DRAWN_VERTICES", umath::to_integral(RenderPassStats::Counter::DrawnVertices));
-	defRenderPassStats.add_static_constant("COUNTER_DRAWN_TRIANGLES", umath::to_integral(RenderPassStats::Counter::DrawnTriangles));
-	defRenderPassStats.add_static_constant("COUNTER_ENTITY_BUFFER_UPDATES", umath::to_integral(RenderPassStats::Counter::EntityBufferUpdates));
-	defRenderPassStats.add_static_constant("COUNTER_INSTANCE_SETS", umath::to_integral(RenderPassStats::Counter::InstanceSets));
-	defRenderPassStats.add_static_constant("COUNTER_INSTANCE_SET_MESHES", umath::to_integral(RenderPassStats::Counter::InstanceSetMeshes));
-	defRenderPassStats.add_static_constant("COUNTER_INSTANCED_MESHES", umath::to_integral(RenderPassStats::Counter::InstancedMeshes));
-	defRenderPassStats.add_static_constant("COUNTER_INSTANCED_SKIPPED_RENDER_ITEMS", umath::to_integral(RenderPassStats::Counter::InstancedSkippedRenderItems));
-	defRenderPassStats.add_static_constant("COUNTER_ENTITIES_WITHOUT_INSTANCING", umath::to_integral(RenderPassStats::Counter::EntitiesWithoutInstancing));
-	defRenderPassStats.add_static_constant("COUNTER_COUNT", umath::to_integral(RenderPassStats::Counter::Count));
-	static_assert(umath::to_integral(RenderPassStats::Counter::Count) == 13);
+	defRenderPassStats.add_static_constant("COUNTER_SHADER_STATE_CHANGES", umath::to_integral(rendering::RenderPassStats::Counter::ShaderStateChanges));
+	defRenderPassStats.add_static_constant("COUNTER_MATERIAL_STATE_CHANGES", umath::to_integral(rendering::RenderPassStats::Counter::MaterialStateChanges));
+	defRenderPassStats.add_static_constant("COUNTER_ENTITY_STATE_CHANGES", umath::to_integral(rendering::RenderPassStats::Counter::EntityStateChanges));
+	defRenderPassStats.add_static_constant("COUNTER_DRAW_CALLS", umath::to_integral(rendering::RenderPassStats::Counter::DrawCalls));
+	defRenderPassStats.add_static_constant("COUNTER_DRAWN_MESHES", umath::to_integral(rendering::RenderPassStats::Counter::DrawnMeshes));
+	defRenderPassStats.add_static_constant("COUNTER_DRAWN_VERTICES", umath::to_integral(rendering::RenderPassStats::Counter::DrawnVertices));
+	defRenderPassStats.add_static_constant("COUNTER_DRAWN_TRIANGLES", umath::to_integral(rendering::RenderPassStats::Counter::DrawnTriangles));
+	defRenderPassStats.add_static_constant("COUNTER_ENTITY_BUFFER_UPDATES", umath::to_integral(rendering::RenderPassStats::Counter::EntityBufferUpdates));
+	defRenderPassStats.add_static_constant("COUNTER_INSTANCE_SETS", umath::to_integral(rendering::RenderPassStats::Counter::InstanceSets));
+	defRenderPassStats.add_static_constant("COUNTER_INSTANCE_SET_MESHES", umath::to_integral(rendering::RenderPassStats::Counter::InstanceSetMeshes));
+	defRenderPassStats.add_static_constant("COUNTER_INSTANCED_MESHES", umath::to_integral(rendering::RenderPassStats::Counter::InstancedMeshes));
+	defRenderPassStats.add_static_constant("COUNTER_INSTANCED_SKIPPED_RENDER_ITEMS", umath::to_integral(rendering::RenderPassStats::Counter::InstancedSkippedRenderItems));
+	defRenderPassStats.add_static_constant("COUNTER_ENTITIES_WITHOUT_INSTANCING", umath::to_integral(rendering::RenderPassStats::Counter::EntitiesWithoutInstancing));
+	defRenderPassStats.add_static_constant("COUNTER_COUNT", umath::to_integral(rendering::RenderPassStats::Counter::Count));
+	static_assert(umath::to_integral(rendering::RenderPassStats::Counter::Count) == 13);
 
-	defRenderPassStats.add_static_constant("TIMER_GPU_EXECUTION", umath::to_integral(RenderPassStats::Timer::GpuExecution));
-	defRenderPassStats.add_static_constant("TIMER_RENDER_THREAD_WAIT", umath::to_integral(RenderPassStats::Timer::RenderThreadWait));
-	defRenderPassStats.add_static_constant("TIMER_CPU_EXECUTION", umath::to_integral(RenderPassStats::Timer::CpuExecution));
-	defRenderPassStats.add_static_constant("TIMER_MATERIAL_BIND", umath::to_integral(RenderPassStats::Timer::MaterialBind));
-	defRenderPassStats.add_static_constant("TIMER_ENTITY_BIND", umath::to_integral(RenderPassStats::Timer::EntityBind));
-	defRenderPassStats.add_static_constant("TIMER_DRAW_CALL", umath::to_integral(RenderPassStats::Timer::DrawCall));
-	defRenderPassStats.add_static_constant("TIMER_SHADER_BIND", umath::to_integral(RenderPassStats::Timer::ShaderBind));
-	defRenderPassStats.add_static_constant("TIMER_COUNT", umath::to_integral(RenderPassStats::Timer::Count));
-	defRenderPassStats.add_static_constant("TIMER_GPU_START", umath::to_integral(RenderPassStats::Timer::GpuStart));
-	defRenderPassStats.add_static_constant("TIMER_GPU_END", umath::to_integral(RenderPassStats::Timer::GpuEnd));
-	defRenderPassStats.add_static_constant("TIMER_CPU_START", umath::to_integral(RenderPassStats::Timer::CpuStart));
-	defRenderPassStats.add_static_constant("TIMER_CPU_END", umath::to_integral(RenderPassStats::Timer::CpuEnd));
-	defRenderPassStats.add_static_constant("TIMER_GPU_COUNT", umath::to_integral(RenderPassStats::Timer::GpuCount));
-	defRenderPassStats.add_static_constant("TIMER_CPU_COUNT", umath::to_integral(RenderPassStats::Timer::CpuCount));
-	static_assert(umath::to_integral(RenderPassStats::Timer::Count) == 7);
-	defRenderPassStats.def("Copy", static_cast<RenderPassStats (*)(lua::State *, RenderPassStats &)>([](lua::State *l, RenderPassStats &renderStats) -> RenderPassStats { return renderStats; }));
-	defRenderPassStats.def("GetCount", static_cast<uint32_t (*)(lua::State *, RenderPassStats &, RenderPassStats::Counter)>([](lua::State *l, RenderPassStats &renderStats, RenderPassStats::Counter counter) -> uint32_t { return renderStats->GetCount(counter); }));
+	defRenderPassStats.add_static_constant("TIMER_GPU_EXECUTION", umath::to_integral(rendering::RenderPassStats::Timer::GpuExecution));
+	defRenderPassStats.add_static_constant("TIMER_RENDER_THREAD_WAIT", umath::to_integral(rendering::RenderPassStats::Timer::RenderThreadWait));
+	defRenderPassStats.add_static_constant("TIMER_CPU_EXECUTION", umath::to_integral(rendering::RenderPassStats::Timer::CpuExecution));
+	defRenderPassStats.add_static_constant("TIMER_MATERIAL_BIND", umath::to_integral(rendering::RenderPassStats::Timer::MaterialBind));
+	defRenderPassStats.add_static_constant("TIMER_ENTITY_BIND", umath::to_integral(rendering::RenderPassStats::Timer::EntityBind));
+	defRenderPassStats.add_static_constant("TIMER_DRAW_CALL", umath::to_integral(rendering::RenderPassStats::Timer::DrawCall));
+	defRenderPassStats.add_static_constant("TIMER_SHADER_BIND", umath::to_integral(rendering::RenderPassStats::Timer::ShaderBind));
+	defRenderPassStats.add_static_constant("TIMER_COUNT", umath::to_integral(rendering::RenderPassStats::Timer::Count));
+	defRenderPassStats.add_static_constant("TIMER_GPU_START", umath::to_integral(rendering::RenderPassStats::Timer::GpuStart));
+	defRenderPassStats.add_static_constant("TIMER_GPU_END", umath::to_integral(rendering::RenderPassStats::Timer::GpuEnd));
+	defRenderPassStats.add_static_constant("TIMER_CPU_START", umath::to_integral(rendering::RenderPassStats::Timer::CpuStart));
+	defRenderPassStats.add_static_constant("TIMER_CPU_END", umath::to_integral(rendering::RenderPassStats::Timer::CpuEnd));
+	defRenderPassStats.add_static_constant("TIMER_GPU_COUNT", umath::to_integral(rendering::RenderPassStats::Timer::GpuCount));
+	defRenderPassStats.add_static_constant("TIMER_CPU_COUNT", umath::to_integral(rendering::RenderPassStats::Timer::CpuCount));
+	static_assert(umath::to_integral(rendering::RenderPassStats::Timer::Count) == 7);
+	defRenderPassStats.def("Copy", static_cast<rendering::RenderPassStats (*)(lua::State *, rendering::RenderPassStats &)>([](lua::State *l, rendering::RenderPassStats &renderStats) -> rendering::RenderPassStats { return renderStats; }));
+	defRenderPassStats.def("GetCount", static_cast<uint32_t (*)(lua::State *, rendering::RenderPassStats &, rendering::RenderPassStats::Counter)>([](lua::State *l, rendering::RenderPassStats &renderStats, rendering::RenderPassStats::Counter counter) -> uint32_t { return renderStats->GetCount(counter); }));
 	defRenderPassStats.def("GetTime",
-	  static_cast<long double (*)(lua::State *, RenderPassStats &, RenderPassStats::Timer)>([](lua::State *l, RenderPassStats &renderStats, RenderPassStats::Timer timer) -> long double { return renderStats->GetTime(timer).count() / static_cast<long double>(1'000'000.0); }));
+	  static_cast<long double (*)(lua::State *, rendering::RenderPassStats &, rendering::RenderPassStats::Timer)>([](lua::State *l, rendering::RenderPassStats &renderStats, rendering::RenderPassStats::Timer timer) -> long double { return renderStats->GetTime(timer).count() / static_cast<long double>(1'000'000.0); }));
 	modGame[defRenderPassStats];
 
-	auto defRenderStats = luabind::class_<RenderStats>("RenderStats");
+	auto defRenderStats = luabind::class_<rendering::RenderStats>("RenderStats");
 	defRenderStats.def(luabind::constructor<>());
 	defRenderStats.def(luabind::self + luabind::const_self);
-	defRenderStats.add_static_constant("RENDER_PASS_LIGHTING_PASS", umath::to_integral(RenderStats::RenderPass::LightingPass));
-	defRenderStats.add_static_constant("RENDER_PASS_LIGHTING_PASS_TRANSLUCENT", umath::to_integral(RenderStats::RenderPass::LightingPassTranslucent));
-	defRenderStats.add_static_constant("RENDER_PASS_PREPASS", umath::to_integral(RenderStats::RenderPass::Prepass));
-	defRenderStats.add_static_constant("RENDER_PASS_SHADOW_PASS", umath::to_integral(RenderStats::RenderPass::ShadowPass));
-	defRenderStats.add_static_constant("RENDER_PASS_GLOW_PASS", umath::to_integral(RenderStats::RenderPass::GlowPass));
-	defRenderStats.add_static_constant("RENDER_PASS_COUNT", umath::to_integral(RenderStats::RenderPass::Count));
-	static_assert(umath::to_integral(RenderStats::RenderPass::Count) == 5);
+	defRenderStats.add_static_constant("RENDER_PASS_LIGHTING_PASS", umath::to_integral(rendering::RenderStats::RenderPass::LightingPass));
+	defRenderStats.add_static_constant("RENDER_PASS_LIGHTING_PASS_TRANSLUCENT", umath::to_integral(rendering::RenderStats::RenderPass::LightingPassTranslucent));
+	defRenderStats.add_static_constant("RENDER_PASS_PREPASS", umath::to_integral(rendering::RenderStats::RenderPass::Prepass));
+	defRenderStats.add_static_constant("RENDER_PASS_SHADOW_PASS", umath::to_integral(rendering::RenderStats::RenderPass::ShadowPass));
+	defRenderStats.add_static_constant("RENDER_PASS_GLOW_PASS", umath::to_integral(rendering::RenderStats::RenderPass::GlowPass));
+	defRenderStats.add_static_constant("RENDER_PASS_COUNT", umath::to_integral(rendering::RenderStats::RenderPass::Count));
+	static_assert(umath::to_integral(rendering::RenderStats::RenderPass::Count) == 5);
 
-	defRenderStats.add_static_constant("TIMER_LIGHT_CULLING_GPU", umath::to_integral(RenderStats::RenderStage::LightCullingGpu));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU", umath::to_integral(RenderStats::RenderStage::PostProcessingGpu));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FOG", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuFog));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_DOF", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuDoF));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_BLOOM", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuBloom));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_GLOW", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuGlow));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_TONE_MAPPING", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuToneMapping));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FXAA", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuFxaa));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_SSAO", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuSsao));
-	defRenderStats.add_static_constant("TIMER_RENDER_SCENE_GPU", umath::to_integral(RenderStats::RenderStage::RenderSceneGpu));
-	defRenderStats.add_static_constant("TIMER_RENDERER_GPU", umath::to_integral(RenderStats::RenderStage::RendererGpu));
-	defRenderStats.add_static_constant("TIMER_UPDATE_RENDER_BUFFERS_GPU", umath::to_integral(RenderStats::RenderStage::UpdateRenderBuffersGpu));
-	defRenderStats.add_static_constant("TIMER_UPDATE_PREPASS_RENDER_BUFFERS_GPU", umath::to_integral(RenderStats::RenderStage::UpdatePrepassRenderBuffersGpu));
-	defRenderStats.add_static_constant("TIMER_RENDER_SHADOWS_GPU", umath::to_integral(RenderStats::RenderStage::RenderShadowsGpu));
-	defRenderStats.add_static_constant("TIMER_RENDER_PARTICLES_GPU", umath::to_integral(RenderStats::RenderStage::RenderParticlesGpu));
+	defRenderStats.add_static_constant("TIMER_LIGHT_CULLING_GPU", umath::to_integral(rendering::RenderStats::RenderStage::LightCullingGpu));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpu));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FOG", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuFog));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_DOF", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuDoF));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_BLOOM", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuBloom));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_GLOW", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuGlow));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_TONE_MAPPING", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuToneMapping));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FXAA", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuFxaa));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_SSAO", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuSsao));
+	defRenderStats.add_static_constant("TIMER_RENDER_SCENE_GPU", umath::to_integral(rendering::RenderStats::RenderStage::RenderSceneGpu));
+	defRenderStats.add_static_constant("TIMER_RENDERER_GPU", umath::to_integral(rendering::RenderStats::RenderStage::RendererGpu));
+	defRenderStats.add_static_constant("TIMER_UPDATE_RENDER_BUFFERS_GPU", umath::to_integral(rendering::RenderStats::RenderStage::UpdateRenderBuffersGpu));
+	defRenderStats.add_static_constant("TIMER_UPDATE_PREPASS_RENDER_BUFFERS_GPU", umath::to_integral(rendering::RenderStats::RenderStage::UpdatePrepassRenderBuffersGpu));
+	defRenderStats.add_static_constant("TIMER_RENDER_SHADOWS_GPU", umath::to_integral(rendering::RenderStats::RenderStage::RenderShadowsGpu));
+	defRenderStats.add_static_constant("TIMER_RENDER_PARTICLES_GPU", umath::to_integral(rendering::RenderStats::RenderStage::RenderParticlesGpu));
 
-	defRenderStats.add_static_constant("TIMER_LIGHT_CULLING_CPU", umath::to_integral(RenderStats::RenderStage::LightCullingCpu));
-	defRenderStats.add_static_constant("TIMER_PREPASS_EXECUTION_CPU", umath::to_integral(RenderStats::RenderStage::PrepassExecutionCpu));
-	defRenderStats.add_static_constant("TIMER_LIGHTING_PASS_EXECUTION_CPU", umath::to_integral(RenderStats::RenderStage::LightingPassExecutionCpu));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_EXECUTION_CPU", umath::to_integral(RenderStats::RenderStage::PostProcessingExecutionCpu));
-	defRenderStats.add_static_constant("TIMER_UPDATE_RENDER_BUFFERS_CPU", umath::to_integral(RenderStats::RenderStage::UpdateRenderBuffersCpu));
-	defRenderStats.add_static_constant("TIMER_RENDER_SCENE_CPU", umath::to_integral(RenderStats::RenderStage::RenderSceneCpu));
-	defRenderStats.add_static_constant("TIMER_COUNT", umath::to_integral(RenderStats::RenderStage::Count));
-	static_assert(umath::to_integral(RenderStats::RenderStage::Count) == 21);
-	defRenderStats.def("Copy", static_cast<RenderStats (*)(lua::State *, RenderStats &)>([](lua::State *l, RenderStats &renderStats) -> RenderStats { return renderStats; }));
-	defRenderStats.def("GetPassStats", static_cast<RenderPassStats *(*)(lua::State *, RenderStats &, RenderStats::RenderPass)>([](lua::State *l, RenderStats &renderStats, RenderStats::RenderPass pass) -> RenderPassStats * { return &renderStats.GetPassStats(pass); }));
+	defRenderStats.add_static_constant("TIMER_LIGHT_CULLING_CPU", umath::to_integral(rendering::RenderStats::RenderStage::LightCullingCpu));
+	defRenderStats.add_static_constant("TIMER_PREPASS_EXECUTION_CPU", umath::to_integral(rendering::RenderStats::RenderStage::PrepassExecutionCpu));
+	defRenderStats.add_static_constant("TIMER_LIGHTING_PASS_EXECUTION_CPU", umath::to_integral(rendering::RenderStats::RenderStage::LightingPassExecutionCpu));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_EXECUTION_CPU", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingExecutionCpu));
+	defRenderStats.add_static_constant("TIMER_UPDATE_RENDER_BUFFERS_CPU", umath::to_integral(rendering::RenderStats::RenderStage::UpdateRenderBuffersCpu));
+	defRenderStats.add_static_constant("TIMER_RENDER_SCENE_CPU", umath::to_integral(rendering::RenderStats::RenderStage::RenderSceneCpu));
+	defRenderStats.add_static_constant("TIMER_COUNT", umath::to_integral(rendering::RenderStats::RenderStage::Count));
+	static_assert(umath::to_integral(rendering::RenderStats::RenderStage::Count) == 21);
+	defRenderStats.def("Copy", static_cast<rendering::RenderStats (*)(lua::State *, rendering::RenderStats &)>([](lua::State *l, rendering::RenderStats &renderStats) -> rendering::RenderStats { return renderStats; }));
+	defRenderStats.def("GetPassStats", static_cast<rendering::RenderPassStats *(*)(lua::State *, rendering::RenderStats &, rendering::RenderStats::RenderPass)>([](lua::State *l, rendering::RenderStats &renderStats, rendering::RenderStats::RenderPass pass) -> rendering::RenderPassStats * { return &renderStats.GetPassStats(pass); }));
 	defRenderStats.def("GetTime",
-	  static_cast<long double (*)(lua::State *, RenderStats &, RenderStats::RenderStage)>([](lua::State *l, RenderStats &renderStats, RenderStats::RenderStage timer) -> long double { return renderStats->GetTime(timer).count() / static_cast<long double>(1'000'000.0); }));
+	  static_cast<long double (*)(lua::State *, rendering::RenderStats &, rendering::RenderStats::RenderStage)>([](lua::State *l, rendering::RenderStats &renderStats, rendering::RenderStats::RenderStage timer) -> long double { return renderStats->GetTime(timer).count() / static_cast<long double>(1'000'000.0); }));
 	modGame[defRenderStats];
 
-	auto defDrawSceneInfo = luabind::class_<::util::DrawSceneInfo>("DrawSceneInfo");
-	defDrawSceneInfo.add_static_constant("FLAG_FLIP_VERTICALLY_BIT", umath::to_integral(::util::DrawSceneInfo::Flags::FlipVertically));
-	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_RENDER_BIT", umath::to_integral(::util::DrawSceneInfo::Flags::DisableRender));
-	defDrawSceneInfo.add_static_constant("FLAG_REFLECTION_BIT", umath::to_integral(::util::DrawSceneInfo::Flags::Reflection));
-	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_PREPASS_BIT", umath::to_integral(::util::DrawSceneInfo::Flags::DisablePrepass));
-	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_LIGHTING_PASS_BIT", umath::to_integral(::util::DrawSceneInfo::Flags::DisableLightingPass));
+	auto defDrawSceneInfo = luabind::class_<::pragma::rendering::DrawSceneInfo>("DrawSceneInfo");
+	defDrawSceneInfo.add_static_constant("FLAG_FLIP_VERTICALLY_BIT", umath::to_integral(::pragma::rendering::DrawSceneInfo::Flags::FlipVertically));
+	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_RENDER_BIT", umath::to_integral(::pragma::rendering::DrawSceneInfo::Flags::DisableRender));
+	defDrawSceneInfo.add_static_constant("FLAG_REFLECTION_BIT", umath::to_integral(::pragma::rendering::DrawSceneInfo::Flags::Reflection));
+	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_PREPASS_BIT", umath::to_integral(::pragma::rendering::DrawSceneInfo::Flags::DisablePrepass));
+	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_LIGHTING_PASS_BIT", umath::to_integral(::pragma::rendering::DrawSceneInfo::Flags::DisableLightingPass));
 	defDrawSceneInfo.def(luabind::constructor<>());
-	defDrawSceneInfo.property("scene", static_cast<luabind::object (*)(const ::util::DrawSceneInfo &)>([](const ::util::DrawSceneInfo &drawSceneInfo) -> luabind::object { return drawSceneInfo.scene.valid() ? drawSceneInfo.scene->GetLuaObject() : luabind::object {}; }),
-	  static_cast<void (*)(lua::State *, ::util::DrawSceneInfo &, luabind::object)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo, luabind::object o) {
+	defDrawSceneInfo.property("scene", static_cast<luabind::object (*)(const ::pragma::rendering::DrawSceneInfo &)>([](const ::pragma::rendering::DrawSceneInfo &drawSceneInfo) -> luabind::object { return drawSceneInfo.scene.valid() ? drawSceneInfo.scene->GetLuaObject() : luabind::object {}; }),
+	  static_cast<void (*)(lua::State *, ::pragma::rendering::DrawSceneInfo &, luabind::object)>([](lua::State *l, ::pragma::rendering::DrawSceneInfo &drawSceneInfo, luabind::object o) {
 		  if(Lua::IsSet(l, 2) == false) {
 			  drawSceneInfo.scene = decltype(drawSceneInfo.scene) {};
 			  return;
@@ -1304,62 +1304,62 @@ void CGame::RegisterLuaClasses()
 		  auto &scene = Lua::Check<pragma::CSceneComponent>(l, 2);
 		  drawSceneInfo.scene = scene.GetHandle<pragma::CSceneComponent>();
 	  }));
-	defDrawSceneInfo.property("toneMapping", static_cast<luabind::object (*)(lua::State *, ::util::DrawSceneInfo &)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
+	defDrawSceneInfo.property("toneMapping", static_cast<luabind::object (*)(lua::State *, ::pragma::rendering::DrawSceneInfo &)>([](lua::State *l, ::pragma::rendering::DrawSceneInfo &drawSceneInfo) -> luabind::object {
 		return drawSceneInfo.toneMapping.has_value() ? luabind::object {l, umath::to_integral(*drawSceneInfo.toneMapping)} : luabind::object {};
 	}),
-	  static_cast<void (*)(lua::State *, ::util::DrawSceneInfo &, luabind::object)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo, luabind::object o) {
+	  static_cast<void (*)(lua::State *, ::pragma::rendering::DrawSceneInfo &, luabind::object)>([](lua::State *l, ::pragma::rendering::DrawSceneInfo &drawSceneInfo, luabind::object o) {
 		  if(Lua::IsSet(l, 2) == false) {
 			  drawSceneInfo.toneMapping = {};
 			  return;
 		  }
 		  drawSceneInfo.toneMapping = static_cast<pragma::rendering::ToneMapping>(Lua::CheckInt(l, 2));
 	  }));
-	defDrawSceneInfo.property("commandBuffer", static_cast<std::shared_ptr<Lua::Vulkan::CommandBuffer> (*)(::util::DrawSceneInfo &)>([](::util::DrawSceneInfo &drawSceneInfo) -> std::shared_ptr<Lua::Vulkan::CommandBuffer> { return drawSceneInfo.commandBuffer; }),
-	  static_cast<void (*)(::util::DrawSceneInfo &, Lua::Vulkan::CommandBuffer &)>([](::util::DrawSceneInfo &drawSceneInfo, Lua::Vulkan::CommandBuffer &commandBuffer) {
+	defDrawSceneInfo.property("commandBuffer", static_cast<std::shared_ptr<Lua::Vulkan::CommandBuffer> (*)(::pragma::rendering::DrawSceneInfo &)>([](::pragma::rendering::DrawSceneInfo &drawSceneInfo) -> std::shared_ptr<Lua::Vulkan::CommandBuffer> { return drawSceneInfo.commandBuffer; }),
+	  static_cast<void (*)(::pragma::rendering::DrawSceneInfo &, Lua::Vulkan::CommandBuffer &)>([](::pragma::rendering::DrawSceneInfo &drawSceneInfo, Lua::Vulkan::CommandBuffer &commandBuffer) {
 		  if(commandBuffer.IsPrimary() == false)
 			  return;
 		  drawSceneInfo.commandBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(commandBuffer.shared_from_this());
 	  }));
-	static_assert(sizeof(::util::DrawSceneInfo::flags) == sizeof(uint8_t));
-	defDrawSceneInfo.def_readwrite("flags", reinterpret_cast<uint8_t util::DrawSceneInfo::*>(&::util::DrawSceneInfo::flags));
-	static_assert(sizeof(::util::DrawSceneInfo::renderFlags) == sizeof(uint32_t));
-	defDrawSceneInfo.def_readwrite("renderFlags", reinterpret_cast<uint32_t util::DrawSceneInfo::*>(&::util::DrawSceneInfo::renderFlags));
-	defDrawSceneInfo.def_readwrite("renderTarget", &::util::DrawSceneInfo::renderTarget);
-	defDrawSceneInfo.def_readwrite("exclusionMask", &::util::DrawSceneInfo::exclusionMask);
-	defDrawSceneInfo.def_readwrite("inclusionMask", &::util::DrawSceneInfo::inclusionMask);
-	defDrawSceneInfo.def_readwrite("outputImage", &::util::DrawSceneInfo::outputImage);
-	static_assert(sizeof(::util::DrawSceneInfo::outputLayerId) == sizeof(uint32_t));
-	defDrawSceneInfo.def_readwrite("outputLayerId", reinterpret_cast<uint32_t util::DrawSceneInfo::*>(&::util::DrawSceneInfo::outputLayerId));
-	defDrawSceneInfo.property("clearColor", static_cast<Color (*)(::util::DrawSceneInfo &)>([](::util::DrawSceneInfo &drawSceneInfo) -> Color { return *drawSceneInfo.clearColor; }),
-	  static_cast<void (*)(lua::State *, ::util::DrawSceneInfo &, const luabind::object &)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo, const luabind::object &color) {
+	static_assert(sizeof(::pragma::rendering::DrawSceneInfo::flags) == sizeof(uint8_t));
+	defDrawSceneInfo.def_readwrite("flags", reinterpret_cast<uint8_t pragma::rendering::DrawSceneInfo::*>(&::pragma::rendering::DrawSceneInfo::flags));
+	static_assert(sizeof(::pragma::rendering::DrawSceneInfo::renderFlags) == sizeof(uint32_t));
+	defDrawSceneInfo.def_readwrite("renderFlags", reinterpret_cast<uint32_t pragma::rendering::DrawSceneInfo::*>(&::pragma::rendering::DrawSceneInfo::renderFlags));
+	defDrawSceneInfo.def_readwrite("renderTarget", &::pragma::rendering::DrawSceneInfo::renderTarget);
+	defDrawSceneInfo.def_readwrite("exclusionMask", &::pragma::rendering::DrawSceneInfo::exclusionMask);
+	defDrawSceneInfo.def_readwrite("inclusionMask", &::pragma::rendering::DrawSceneInfo::inclusionMask);
+	defDrawSceneInfo.def_readwrite("outputImage", &::pragma::rendering::DrawSceneInfo::outputImage);
+	static_assert(sizeof(::pragma::rendering::DrawSceneInfo::outputLayerId) == sizeof(uint32_t));
+	defDrawSceneInfo.def_readwrite("outputLayerId", reinterpret_cast<uint32_t pragma::rendering::DrawSceneInfo::*>(&::pragma::rendering::DrawSceneInfo::outputLayerId));
+	defDrawSceneInfo.property("clearColor", static_cast<Color (*)(::pragma::rendering::DrawSceneInfo &)>([](::pragma::rendering::DrawSceneInfo &drawSceneInfo) -> Color { return *drawSceneInfo.clearColor; }),
+	  static_cast<void (*)(lua::State *, ::pragma::rendering::DrawSceneInfo &, const luabind::object &)>([](lua::State *l, ::pragma::rendering::DrawSceneInfo &drawSceneInfo, const luabind::object &color) {
 		  if(static_cast<Lua::Type>(luabind::type(color)) == Lua::Type::Nil)
 			  drawSceneInfo.clearColor = {};
 		  else
 			  drawSceneInfo.clearColor = Lua::Check<Color>(l, 2);
 	  }));
-	defDrawSceneInfo.property("clipPlane", static_cast<Vector4 (*)(::util::DrawSceneInfo &)>([](::util::DrawSceneInfo &drawSceneInfo) -> Vector4 { return *drawSceneInfo.clipPlane; }),
-	  static_cast<void (*)(lua::State *, ::util::DrawSceneInfo &, const luabind::object &)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo, const luabind::object &clipPlane) {
+	defDrawSceneInfo.property("clipPlane", static_cast<Vector4 (*)(::pragma::rendering::DrawSceneInfo &)>([](::pragma::rendering::DrawSceneInfo &drawSceneInfo) -> Vector4 { return *drawSceneInfo.clipPlane; }),
+	  static_cast<void (*)(lua::State *, ::pragma::rendering::DrawSceneInfo &, const luabind::object &)>([](lua::State *l, ::pragma::rendering::DrawSceneInfo &drawSceneInfo, const luabind::object &clipPlane) {
 		  if(static_cast<Lua::Type>(luabind::type(clipPlane)) == Lua::Type::Nil)
 			  drawSceneInfo.clipPlane = {};
 		  else
 			  drawSceneInfo.clipPlane = Lua::Check<Vector4>(l, 2);
 	  }));
-	defDrawSceneInfo.property("pvsOrigin", static_cast<Vector3 (*)(::util::DrawSceneInfo &)>([](::util::DrawSceneInfo &drawSceneInfo) -> Vector3 { return *drawSceneInfo.pvsOrigin; }),
-	  static_cast<void (*)(lua::State *, ::util::DrawSceneInfo &, const luabind::object &)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo, const luabind::object &pvsOrigin) {
+	defDrawSceneInfo.property("pvsOrigin", static_cast<Vector3 (*)(::pragma::rendering::DrawSceneInfo &)>([](::pragma::rendering::DrawSceneInfo &drawSceneInfo) -> Vector3 { return *drawSceneInfo.pvsOrigin; }),
+	  static_cast<void (*)(lua::State *, ::pragma::rendering::DrawSceneInfo &, const luabind::object &)>([](lua::State *l, ::pragma::rendering::DrawSceneInfo &drawSceneInfo, const luabind::object &pvsOrigin) {
 		  if(static_cast<Lua::Type>(luabind::type(pvsOrigin)) == Lua::Type::Nil)
 			  drawSceneInfo.pvsOrigin = {};
 		  else
 			  drawSceneInfo.pvsOrigin = Lua::Check<Vector3>(l, 2);
 	  }));
-	defDrawSceneInfo.property("renderStats", static_cast<luabind::object (*)(lua::State *, ::util::DrawSceneInfo &)>([](lua::State *l, ::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
+	defDrawSceneInfo.property("renderStats", static_cast<luabind::object (*)(lua::State *, ::pragma::rendering::DrawSceneInfo &)>([](lua::State *l, ::pragma::rendering::DrawSceneInfo &drawSceneInfo) -> luabind::object {
 		if(drawSceneInfo.renderStats == nullptr)
 			return {};
 		return luabind::object {l, drawSceneInfo.renderStats.get()};
 	}));
-	defDrawSceneInfo.def("AddSubPass", &::util::DrawSceneInfo::AddSubPass);
-	defDrawSceneInfo.def("SetEntityRenderFilter", static_cast<void (*)(lua::State *, util::DrawSceneInfo &, luabind::object)>([](lua::State *l, util::DrawSceneInfo &drawSceneInfo, luabind::object f) {
+	defDrawSceneInfo.def("AddSubPass", &::pragma::rendering::DrawSceneInfo::AddSubPass);
+	defDrawSceneInfo.def("SetEntityRenderFilter", static_cast<void (*)(lua::State *, pragma::rendering::DrawSceneInfo &, luabind::object)>([](lua::State *l, pragma::rendering::DrawSceneInfo &drawSceneInfo, luabind::object f) {
 		Lua::CheckFunction(l, 2);
-		drawSceneInfo.renderFilter = [f, l](CBaseEntity &ent) -> bool {
+		drawSceneInfo.renderFilter = [f, l](ecs::CBaseEntity &ent) -> bool {
 			auto r = Lua::CallFunction(
 			  l,
 			  [&f, &ent](lua::State *l) {
@@ -1376,9 +1376,9 @@ void CGame::RegisterLuaClasses()
 			return true;
 		};
 	}));
-	defDrawSceneInfo.def("SetEntityPrepassFilter", static_cast<void (*)(lua::State *, util::DrawSceneInfo &, luabind::object)>([](lua::State *l, util::DrawSceneInfo &drawSceneInfo, luabind::object f) {
+	defDrawSceneInfo.def("SetEntityPrepassFilter", static_cast<void (*)(lua::State *, pragma::rendering::DrawSceneInfo &, luabind::object)>([](lua::State *l, pragma::rendering::DrawSceneInfo &drawSceneInfo, luabind::object f) {
 		Lua::CheckFunction(l, 2);
-		drawSceneInfo.prepassFilter = [f, l](CBaseEntity &ent) -> bool {
+		drawSceneInfo.prepassFilter = [f, l](ecs::CBaseEntity &ent) -> bool {
 			auto r = Lua::CallFunction(
 			  l,
 			  [&f, &ent](lua::State *l) {
@@ -1424,11 +1424,11 @@ void CGame::RegisterLuaClasses()
 	    [](lua::State *l, pragma::rendering::LightingStageRenderProcessor &processor, const pragma::rendering::RenderQueue &renderQueue) { processor.Render(renderQueue); }));
 	modGame[defLightingStageRenderProcessor];
 
-	auto modelMeshClassDef = luabind::class_<ModelMesh>("Mesh");
+	auto modelMeshClassDef = luabind::class_<pragma::geometry::ModelMesh>("Mesh");
 	Lua::ModelMesh::register_class(modelMeshClassDef);
 	modelMeshClassDef.scope[luabind::def("Create", &Lua::ModelMesh::Client::Create)];
 
-	auto subModelMeshClassDef = luabind::class_<pragma::ModelSubMesh>("Sub");
+	auto subModelMeshClassDef = luabind::class_<pragma::geometry::ModelSubMesh>("Sub");
 	Lua::ModelSubMesh::register_class(subModelMeshClassDef);
 	subModelMeshClassDef.def("GetTangents", &Lua::ModelSubMesh::Client::GetTangents);
 	subModelMeshClassDef.def("GetBiTangents", &Lua::ModelSubMesh::Client::GetBiTangents);
@@ -1437,10 +1437,10 @@ void CGame::RegisterLuaClasses()
 	subModelMeshClassDef.def("GetAlphaBuffer", &Lua::ModelSubMesh::Client::GetAlphaBuffer);
 	subModelMeshClassDef.def("GetIndexBuffer", &Lua::ModelSubMesh::Client::GetIndexBuffer);
 	subModelMeshClassDef.def("GetSceneMesh", &Lua::ModelSubMesh::Client::GetVkMesh);
-	subModelMeshClassDef.def("GetExtensionData", &pragma::ModelSubMesh::GetExtensionData);
+	subModelMeshClassDef.def("GetExtensionData", &pragma::geometry::ModelSubMesh::GetExtensionData);
 	subModelMeshClassDef.scope[luabind::def("create", &Lua::ModelSubMesh::Client::Create)];
 
-	auto modelClassDef = luabind::class_<pragma::Model>("Model");
+	auto modelClassDef = luabind::class_<pragma::asset::Model>("Model");
 
 	auto defMdlExportInfo = luabind::class_<pragma::asset::ModelExportInfo>("ExportInfo");
 	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_PNG", umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::PNG));
@@ -1489,33 +1489,33 @@ void CGame::RegisterLuaClasses()
 
 	Lua::Model::register_class(GetLuaState(), modelClassDef, modelMeshClassDef, subModelMeshClassDef);
 	modelClassDef.scope[luabind::def(
-	  "create_quad", +[](pragma::Game &game, const pragma::model::QuadCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
-		  auto mesh = pragma::model::create_quad(game, createInfo);
+	  "create_quad", +[](pragma::Game &game, const pragma::geometry::QuadCreateInfo &createInfo) -> std::shared_ptr<pragma::asset::Model> {
+		  auto mesh = pragma::geometry::create_quad(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_sphere", +[](pragma::Game &game, const pragma::model::SphereCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
-		  auto mesh = pragma::model::create_sphere(game, createInfo);
+	  "create_sphere", +[](pragma::Game &game, const pragma::geometry::SphereCreateInfo &createInfo) -> std::shared_ptr<pragma::asset::Model> {
+		  auto mesh = pragma::geometry::create_sphere(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_cylinder", +[](pragma::Game &game, const pragma::model::CylinderCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
-		  auto mesh = pragma::model::create_cylinder(game, createInfo);
+	  "create_cylinder", +[](pragma::Game &game, const pragma::geometry::CylinderCreateInfo &createInfo) -> std::shared_ptr<pragma::asset::Model> {
+		  auto mesh = pragma::geometry::create_cylinder(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_cone", +[](pragma::Game &game, const pragma::model::ConeCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
-		  auto mesh = pragma::model::create_cone(game, createInfo);
+	  "create_cone", +[](pragma::Game &game, const pragma::geometry::ConeCreateInfo &createInfo) -> std::shared_ptr<pragma::asset::Model> {
+		  auto mesh = pragma::geometry::create_cone(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_circle", +[](pragma::Game &game, const pragma::model::CircleCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
-		  auto mesh = pragma::model::create_circle(game, createInfo);
+	  "create_circle", +[](pragma::Game &game, const pragma::geometry::CircleCreateInfo &createInfo) -> std::shared_ptr<pragma::asset::Model> {
+		  auto mesh = pragma::geometry::create_circle(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.scope[luabind::def(
-	  "create_ring", +[](pragma::Game &game, const pragma::model::RingCreateInfo &createInfo) -> std::shared_ptr<pragma::Model> {
-		  auto mesh = pragma::model::create_ring(game, createInfo);
+	  "create_ring", +[](pragma::Game &game, const pragma::geometry::RingCreateInfo &createInfo) -> std::shared_ptr<pragma::asset::Model> {
+		  auto mesh = pragma::geometry::create_ring(game, createInfo);
 		  return Lua::Model::Client::create_generic_model(game, *mesh);
 	  })];
 	modelClassDef.def("AddMaterial", &Lua::Model::Client::AddMaterial);
@@ -1624,7 +1624,7 @@ void CGame::RegisterLuaClasses()
 	_G["Entity"] = _G["ents"]["Entity"];
 	_G["BaseEntity"] = _G["ents"]["BaseEntity"];
 
-	auto worldEnvClassDef = luabind::class_<::WorldEnvironment>("WorldEnvironment");
+	auto worldEnvClassDef = luabind::class_<pragma::rendering::WorldEnvironment>("WorldEnvironment");
 	Lua::WorldEnvironment::register_class(worldEnvClassDef);
 	modGame[worldEnvClassDef];
 }

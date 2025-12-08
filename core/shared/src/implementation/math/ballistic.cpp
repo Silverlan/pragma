@@ -8,9 +8,9 @@ module pragma.shared;
 
 import :math.ballistic;
 
-Vector3 umath::calc_ballistic_position(const Vector3 &start, const Vector3 &vel, float gravity, float t) { return start + vel * t + 0.5f * Vector3 {0.f, -gravity, 0.f} * t * t; }
+Vector3 pragma::math::calc_ballistic_position(const Vector3 &start, const Vector3 &vel, float gravity, float t) { return start + vel * t + 0.5f * Vector3 {0.f, -gravity, 0.f} * t * t; }
 
-bool umath::calc_ballistic_velocity(const Vector3 &start, const Vector3 &end, float angle, float gravity, Vector3 &vel)
+bool pragma::math::calc_ballistic_velocity(const Vector3 &start, const Vector3 &end, float angle, float gravity, Vector3 &vel)
 {
 	// Source: http://www.theappguruz.com/blog/hit-target-using-ballistic-trajectory
 	auto dir = end - start;
@@ -32,7 +32,7 @@ bool umath::calc_ballistic_velocity(const Vector3 &start, const Vector3 &end, fl
 	return true;
 }
 
-float umath::calc_ballistic_time_of_flight(const Vector3 &start, float launchAngle, float velocity, float gravity)
+float pragma::math::calc_ballistic_time_of_flight(const Vector3 &start, float launchAngle, float velocity, float gravity)
 {
 	// Source: https://en.wikipedia.org/wiki/Trajectory_of_a_projectile
 	launchAngle = launchAngle;
@@ -40,16 +40,16 @@ float umath::calc_ballistic_time_of_flight(const Vector3 &start, float launchAng
 	auto y0 = start.y;
 	return (velocity * s + sqrtf((velocity * s) * (velocity * s) + 2.f * gravity * y0)) / gravity;
 }
-float umath::calc_ballistic_time_of_flight(const Vector3 &start, const Vector3 &vel, float gravity)
+float pragma::math::calc_ballistic_time_of_flight(const Vector3 &start, const Vector3 &vel, float gravity)
 {
 	auto l = uvec::length(vel);
 	auto ang = uvec::to_angle(vel / l);
 	return calc_ballistic_time_of_flight(start, -ang.p, l, gravity);
 }
-float umath::calc_ballistic_time_of_flight(const Vector3 &start, const Vector3 &end, float launchAngle, float velocity, float gravity) { return calc_ballistic_time_of_flight(start - end, launchAngle, velocity, gravity); }
-float umath::calc_ballistic_time_of_flight(const Vector3 &start, const Vector3 &end, const Vector3 &vel, float gravity) { return calc_ballistic_time_of_flight(start - end, vel, gravity); }
+float pragma::math::calc_ballistic_time_of_flight(const Vector3 &start, const Vector3 &end, float launchAngle, float velocity, float gravity) { return calc_ballistic_time_of_flight(start - end, launchAngle, velocity, gravity); }
+float pragma::math::calc_ballistic_time_of_flight(const Vector3 &start, const Vector3 &end, const Vector3 &vel, float gravity) { return calc_ballistic_time_of_flight(start - end, vel, gravity); }
 
-float umath::calc_ballistic_angle_of_reach(const Vector3 &start, float distance, float initialVelocity, float gravity)
+float pragma::math::calc_ballistic_angle_of_reach(const Vector3 &start, float distance, float initialVelocity, float gravity)
 {
 	// Source: https://en.wikipedia.org/wiki/Trajectory_of_a_projectile
 	return 0.5f * umath::asin((gravity * distance) / (initialVelocity * initialVelocity));
@@ -66,7 +66,7 @@ float umath::calc_ballistic_angle_of_reach(const Vector3 &start, float distance,
 // initial_height (float): distance above flat terrain
 //
 // return (float): maximum range
-float umath::calc_ballistic_range(float speed, float gravity, float initialHeight)
+float pragma::math::calc_ballistic_range(float speed, float gravity, float initialHeight)
 {
 	// Handling these cases is up to your project's coding standards
 	assert(speed > 0.f && gravity > 0.f && initialHeight >= 0.f);
@@ -94,7 +94,7 @@ float umath::calc_ballistic_range(float speed, float gravity, float initialHeigh
 // s1 (out Vector3): firing solution (high angle)
 //
 // return (int): number of unique solutions found: 0, 1, or 2.
-int32_t umath::solve_ballistic_arc(const Vector3 &projPos, float projSpeed, const Vector3 &target, float gravity, std::array<Vector3, 2> &s)
+int32_t pragma::math::solve_ballistic_arc(const Vector3 &projPos, float projSpeed, const Vector3 &target, float gravity, std::array<Vector3, 2> &s)
 {
 	// Handling these cases is up to your project's coding standards
 	assert(projPos != target && projSpeed > 0.f && gravity > 0.f);
@@ -162,7 +162,7 @@ int32_t umath::solve_ballistic_arc(const Vector3 &projPos, float projSpeed, cons
 // s3 (out Vector3): firing solution (next impact)
 //
 // return (int): number of unique solutions found: 0, 1, 2, 3, or 4.
-int32_t umath::solve_ballistic_arc(const Vector3 &projPos, float projSpeed, const Vector3 &targetPos, const Vector3 &targetVelocity, float gravity, std::array<Vector3, 2> &s)
+int32_t pragma::math::solve_ballistic_arc(const Vector3 &projPos, float projSpeed, const Vector3 &targetPos, const Vector3 &targetVelocity, float gravity, std::array<Vector3, 2> &s)
 {
 	// Initialize output parameters
 	s[0] = uvec::ORIGIN;
@@ -216,7 +216,7 @@ int32_t umath::solve_ballistic_arc(const Vector3 &projPos, float projSpeed, cons
 
 	// Solve quartic
 	std::array<double, 4> times;
-	auto numTimes = solve_quartic(c, times);
+	auto numTimes = umath::solve_quartic(c, times);
 
 	// Sort so faster collision is found first
 	std::sort(times.begin(), times.end());
@@ -257,7 +257,7 @@ int32_t umath::solve_ballistic_arc(const Vector3 &projPos, float projSpeed, cons
 // gravity (out float): gravity necessary to projectile to hit precisely max_height
 //
 // return (bool): true if a valid solution was found
-bool umath::solve_ballistic_arc_lateral(const Vector3 &projPos, float lateralSpeed, const Vector3 &targetPos, float maxHeight, Vector3 &fireVelocity, float &gravity)
+bool pragma::math::solve_ballistic_arc_lateral(const Vector3 &projPos, float lateralSpeed, const Vector3 &targetPos, float maxHeight, Vector3 &fireVelocity, float &gravity)
 {
 	// Handling these cases is up to your project's coding standards
 	assert(projPos != targetPos && lateralSpeed > 0.f && maxHeight > projPos.y);
@@ -303,7 +303,7 @@ bool umath::solve_ballistic_arc_lateral(const Vector3 &projPos, float lateralSpe
 // impact_point (out Vector3): point where moving target will be hit
 //
 // return (bool): true if a valid solution was found
-bool umath::solve_ballistic_arc_lateral(const Vector3 &projPos, float lateralSpeed, const Vector3 &target, const Vector3 &targetVelocity, float maxHeightOffset, Vector3 &fireVelocity, float &gravity, Vector3 &impactPoint)
+bool pragma::math::solve_ballistic_arc_lateral(const Vector3 &projPos, float lateralSpeed, const Vector3 &target, const Vector3 &targetVelocity, float maxHeightOffset, Vector3 &fireVelocity, float &gravity, Vector3 &impactPoint)
 {
 	// Handling these cases is up to your project's coding standards
 	assert(projPos != target && lateralSpeed > 0.f);
@@ -326,7 +326,7 @@ bool umath::solve_ballistic_arc_lateral(const Vector3 &projPos, float lateralSpe
 	std::array<double, 3> c = {uvec::dot(targetVelXZ, targetVelXZ) - lateralSpeed * lateralSpeed, 2.f * uvec::dot(diffXZ, targetVelXZ), uvec::dot(diffXZ, diffXZ)};
 
 	std::array<double, 2> t;
-	auto n = solve_quadric(c, t);
+	auto n = umath::solve_quadric(c, t);
 
 	// pick smallest, positive time
 	auto valid0 = (n > 0) && t[0] > 0;

@@ -21,8 +21,8 @@ export namespace pragma {
 		  public:
 			bool Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags sampleCount, bool bExtended);
 			pragma::ShaderPrepassBase &GetShader() const;
-			prosper::RenderTarget &BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *optRenderPass = nullptr, bool secondaryCommandBuffers = false);
-			void EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
+			prosper::RenderTarget &BeginRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *optRenderPass = nullptr, bool secondaryCommandBuffers = false);
+			void EndRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 			// Required for SSAO
 			std::shared_ptr<prosper::Texture> textureNormals = nullptr;
 

@@ -9,7 +9,7 @@ export module pragma.client:rendering.render_stats;
 
 export import :model.mesh;
 
-export {
+export namespace pragma::rendering {
 	template<typename TCounter>
 	struct BaseSceneStatsCounterList {
 		void Increment(TCounter counter, uint32_t n = 1) { counters[umath::to_integral(counter)] += n; }
@@ -171,7 +171,7 @@ export {
 		std::vector<EntityHandle> entities;
 		std::vector<msys::MaterialHandle> materials;
 		std::vector<util::WeakHandle<prosper::Shader>> shaders;
-		std::vector<std::shared_ptr<const CModelSubMesh>> meshes;
+		std::vector<std::shared_ptr<const pragma::geometry::CModelSubMesh>> meshes;
 
 		std::unordered_set<EntityIndex> instancedEntities;
 

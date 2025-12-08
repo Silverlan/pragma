@@ -43,7 +43,7 @@ export {
 				Event eventType;
 			};
 			struct TouchInfo {
-				PhysTouch touch;
+				pragma::physics::PhysTouch touch;
 				bool triggered;
 			};
 
@@ -88,11 +88,11 @@ export {
 			BaseTouchComponent(pragma::ecs::BaseEntity &ent);
 			void OnPhysicsInitialized();
 			void UpdateTouch();
-			void StartTouch(const PhysTouch &touch);
+			void StartTouch(const pragma::physics::PhysTouch &touch);
 			void FireStartTouchEvents(TouchInfo &touch, bool isFirstTouch);
 			void FireEndTouchEvents(TouchInfo &touch, bool isLastTouch);
 			void OnContact(physics::ContactInfo &contact);
-			virtual void OnTouch(PhysTouch &touch);
+			virtual void OnTouch(pragma::physics::PhysTouch &touch);
 			virtual bool IsTouchEnabled() const;
 		};
 		using namespace umath::scoped_enum::bitwise;

@@ -9,7 +9,7 @@ export module pragma.client:gui.table;
 
 export import :gui.container;
 
-export {
+export namespace pragma::gui::types {
 	class WITableRow;
 	class DLLCLIENT WITableCell : public WIContainer {
 	  private:
@@ -63,13 +63,13 @@ export {
 		// Removes all rows except for the first one, if it's a header row (Unless bAll is set to true)
 		void Clear(bool bAll = false);
 		WITableRow *GetRow(unsigned int id) const;
-		const std::vector<WIHandle> &GetSelectedRows() const;
-		WIHandle GetFirstSelectedRow() const;
+		const std::vector<pragma::gui::WIHandle> &GetSelectedRows() const;
+		pragma::gui::WIHandle GetFirstSelectedRow() const;
 		virtual void SizeToContents(bool x = true, bool y = true) override;
 	  protected:
 		struct SortData {
 			SortData(WITable *t, bool bAsc, unsigned int col);
-			bool operator()(const WIHandle &a, const WIHandle &b);
+			bool operator()(const pragma::gui::WIHandle &a, const pragma::gui::WIHandle &b);
 			WITable *table;
 			bool ascending;
 			unsigned int column;
@@ -81,16 +81,16 @@ export {
 		std::function<bool(const WITableRow &, const WITableRow &, uint32_t, bool)> m_sortFunction;
 		unsigned int m_sortColumn;
 		bool m_bSortAsc;
-		WIHandle m_hSortArrow;
-		WIHandle m_hScrollContainer;
+		pragma::gui::WIHandle m_hSortArrow;
+		pragma::gui::WIHandle m_hScrollContainer;
 		bool m_bScrollable;
 		std::vector<CallbackHandle> m_sortCallbacks;
-		WIHandle m_hRowHeader;
-		std::vector<WIHandle> m_rows;
+		pragma::gui::WIHandle m_hRowHeader;
+		std::vector<pragma::gui::WIHandle> m_rows;
 		void UpdateTableBounds();
 		void OnRowSelected(WITableRow *row);
-		std::vector<WIHandle> m_selectedRows;
-		static bool SortRows(bool bAsc, unsigned int col, const WIHandle &a, const WIHandle &b);
+		std::vector<pragma::gui::WIHandle> m_selectedRows;
+		static bool SortRows(bool bAsc, unsigned int col, const pragma::gui::WIHandle &a, const pragma::gui::WIHandle &b);
 		void Sort(bool bAsc, unsigned int col = 0);
 		virtual void DoUpdate() override;
 		WITableRow *GetHeaderRow();
@@ -108,7 +108,7 @@ export {
 			WIBase *parent = this;
 			if(m_bScrollable == true && m_hScrollContainer.IsValid())
 				parent = m_hScrollContainer.get();
-			auto *pRow = WGUI::GetInstance().Create<TRow>(parent);
+			auto *pRow = pragma::gui::WGUI::GetInstance().Create<TRow>(parent);
 			auto hRow = pRow->GetHandle();
 			pRow->AddStyleClass("table_row");
 			m_rows.push_back(hRow);
@@ -122,7 +122,7 @@ export {
 	class WITableCell;
 	class DLLCLIENT WITableRow : public WIContainer {
 	  protected:
-		std::vector<WIHandle> m_cells;
+		std::vector<pragma::gui::WIHandle> m_cells;
 		bool m_bSelected;
 		std::unordered_map<unsigned int, int> m_cellWidths;
 		void SetCellCount(unsigned int numCells);
@@ -137,11 +137,11 @@ export {
 		virtual void SetSize(int x, int y) override;
 		virtual void OnChildAdded(WIBase *child) override;
 		void SetCellWidth(unsigned int col, int width);
-		WIHandle SetValue(unsigned int col, std::string val);
+		pragma::gui::WIHandle SetValue(unsigned int col, std::string val);
 		std::string GetValue(uint32_t col) const;
 		bool GetValue(uint32_t col, std::string &val) const;
 		WITableCell *InsertElement(unsigned int col, WIBase *el);
-		WITableCell *InsertElement(unsigned int col, WIHandle hElement);
+		WITableCell *InsertElement(unsigned int col, pragma::gui::WIHandle hElement);
 		virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 		void Select();
 		void Deselect();

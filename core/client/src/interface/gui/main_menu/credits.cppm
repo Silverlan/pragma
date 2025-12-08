@@ -8,7 +8,7 @@ export module pragma.client:gui.main_menu_credits;
 
 export import :gui.main_menu_base;
 
-export {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIMainMenuCredits : public WIMainMenuBase {
 	  public:
 		WIMainMenuCredits();
@@ -23,6 +23,6 @@ export {
 		WIText &AddText(const std::string &header, const std::string &styleClass);
 		WIBase &AddGap(uint32_t size);
 		void AddCreditsElement(WIBase &el);
-		WIHandle m_creditsContainer = {};
+		pragma::gui::WIHandle m_creditsContainer = {};
 	};
 };

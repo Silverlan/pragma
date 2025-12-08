@@ -36,7 +36,7 @@ void SLuaEntity::DoSpawn()
 		auto pMapComponent = GetComponent<pragma::MapComponent>();
 		p->Write<unsigned int>(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
 		SendData(p, rf);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_CREATE_LUA, p, pragma::networking::Protocol::SlowReliable, rf);
+		pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_CREATE_LUA, p, pragma::networking::Protocol::SlowReliable, rf);
 	}
 }
 void SLuaEntity::Remove()
@@ -44,8 +44,8 @@ void SLuaEntity::Remove()
 	if(IsSpawned()) {
 		// TODO: Do we need this? (If so, why?)
 		NetPacket p;
-		nwm::write_entity(p, this);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_REMOVE, p, pragma::networking::Protocol::SlowReliable);
+		pragma::networking::write_entity(p, this);
+		pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_REMOVE, p, pragma::networking::Protocol::SlowReliable);
 	}
 	SBaseEntity::Remove();
 }

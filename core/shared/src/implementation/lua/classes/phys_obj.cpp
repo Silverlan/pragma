@@ -88,35 +88,35 @@ void Lua::PhysObj::register_class(lua::State *l, luabind::module_ &mod)
 	classDef.def("IsGroundWalkable", static_cast<bool (*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) {
 		if(physObj.IsController() == false)
 			return false;
-		return static_cast<ControllerPhysObj &>(physObj).IsGroundWalkable();
+		return static_cast<pragma::physics::ControllerPhysObj &>(physObj).IsGroundWalkable();
 	}));
 	classDef.def("GetGroundEntity", static_cast<pragma::ecs::BaseEntity *(*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) -> pragma::ecs::BaseEntity * {
 		if(physObj.IsController() == false)
 			return nullptr;
-		return static_cast<ControllerPhysObj &>(physObj).GetGroundEntity();
+		return static_cast<pragma::physics::ControllerPhysObj &>(physObj).GetGroundEntity();
 	}));
 	classDef.def("GetGroundPhysObject", static_cast<pragma::physics::PhysObj *(*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) -> pragma::physics::PhysObj * {
 		if(physObj.IsController() == false)
 			return nullptr;
-		return static_cast<ControllerPhysObj *>(&physObj)->GetGroundPhysObject();
+		return static_cast<pragma::physics::ControllerPhysObj *>(&physObj)->GetGroundPhysObject();
 	}));
 	classDef.def("GetGroundPhysCollisionObject", static_cast<pragma::physics::ICollisionObject *(*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) -> pragma::physics::ICollisionObject * {
 		if(physObj.IsController() == false)
 			return nullptr;
-		return static_cast<ControllerPhysObj *>(&physObj)->GetGroundPhysCollisionObject();
+		return static_cast<pragma::physics::ControllerPhysObj *>(&physObj)->GetGroundPhysCollisionObject();
 	}));
 	classDef.def("GetGroundSurfaceMaterial", static_cast<int32_t (*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) {
 		if(physObj.IsController() == false)
 			return -1;
-		return static_cast<ControllerPhysObj &>(physObj).GetGroundSurfaceMaterial();
+		return static_cast<pragma::physics::ControllerPhysObj &>(physObj).GetGroundSurfaceMaterial();
 	}));
 	classDef.def("GetGroundVelocity", static_cast<Vector3 (*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) -> Vector3 {
 		if(physObj.IsController() == false)
 			return {};
-		return static_cast<ControllerPhysObj &>(physObj).GetGroundVelocity();
+		return static_cast<pragma::physics::ControllerPhysObj &>(physObj).GetGroundVelocity();
 	}));
 	classDef.def("GetGroundFriction", static_cast<float (*)(lua::State *, pragma::physics::PhysObj &)>([](lua::State *l, pragma::physics::PhysObj &physObj) {
-		auto *physMat = physObj.IsController() ? static_cast<ControllerPhysObj &>(physObj).GetController()->GetGroundMaterial() : nullptr;
+		auto *physMat = physObj.IsController() ? static_cast<pragma::physics::ControllerPhysObj &>(physObj).GetController()->GetGroundMaterial() : nullptr;
 		if(physMat == nullptr)
 			return 1.f;
 		return physMat->GetDynamicFriction();
@@ -143,5 +143,5 @@ bool Lua::PhysObj::IsOnGround(lua::State *l, pragma::physics::PhysObj &physObj)
 
 	if(physObj.IsController() == false)
 		return false;
-	return static_cast<ControllerPhysObj &>(physObj).IsOnGround();
+	return static_cast<pragma::physics::ControllerPhysObj &>(physObj).IsOnGround();
 }

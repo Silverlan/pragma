@@ -201,7 +201,7 @@ void CRenderComponent::OnEntitySpawn()
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
 	for(auto *ent : entIt) {
 		auto occlusionCullerC = ent->GetComponent<pragma::COcclusionCullerComponent>();
-		occlusionCullerC->AddEntity(static_cast<CBaseEntity &>(GetEntity()));
+		occlusionCullerC->AddEntity(static_cast<pragma::ecs::CBaseEntity &>(GetEntity()));
 	}
 
 	InitializeRenderBuffers();
@@ -217,21 +217,21 @@ void CRenderComponent::UpdateAbsoluteRenderBounds()
 void CRenderComponent::UpdateAbsoluteSphereRenderBounds() { m_absoluteRenderSphere = CalcAbsoluteRenderSphere(); }
 void CRenderComponent::UpdateAbsoluteAABBRenderBounds() { m_absoluteRenderBounds = CalcAbsoluteRenderBounds(); }
 const bounding_volume::AABB &CRenderComponent::GetLocalRenderBounds() const { return m_localRenderBounds; }
-const Sphere &CRenderComponent::GetLocalRenderSphere() const { return m_localRenderSphere; }
+const pragma::math::Sphere &CRenderComponent::GetLocalRenderSphere() const { return m_localRenderSphere; }
 
 const bounding_volume::AABB &CRenderComponent::GetUpdatedAbsoluteRenderBounds() const
 {
 	const_cast<CRenderComponent *>(this)->UpdateAbsoluteRenderBounds();
 	return GetAbsoluteRenderBounds();
 }
-const Sphere &CRenderComponent::GetUpdatedAbsoluteRenderSphere() const
+const pragma::math::Sphere &CRenderComponent::GetUpdatedAbsoluteRenderSphere() const
 {
 	const_cast<CRenderComponent *>(this)->UpdateAbsoluteRenderBounds();
 	return GetAbsoluteRenderSphere();
 }
 
 const bounding_volume::AABB &CRenderComponent::GetAbsoluteRenderBounds() const { return m_absoluteRenderBounds; }
-const Sphere &CRenderComponent::GetAbsoluteRenderSphere() const { return m_absoluteRenderSphere; }
+const pragma::math::Sphere &CRenderComponent::GetAbsoluteRenderSphere() const { return m_absoluteRenderSphere; }
 
 bounding_volume::AABB CRenderComponent::CalcAbsoluteRenderBounds() const
 {
@@ -244,13 +244,13 @@ bounding_volume::AABB CRenderComponent::CalcAbsoluteRenderBounds() const
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent) {
 		auto physType = pPhysComponent->GetPhysicsType();
-		if(physType == pragma::physics::PHYSICSTYPE::DYNAMIC || physType == pragma::physics::PHYSICSTYPE::STATIC)
+		if(physType == pragma::physics::PhysicsType::Dynamic || physType == pragma::physics::PhysicsType::Static)
 			pose.SetOrigin(pose.GetOrigin() + pPhysComponent->GetLocalOrigin());
 	}
 	absBounds = absBounds.Transform(pose);
 	return absBounds;
 }
-Sphere CRenderComponent::CalcAbsoluteRenderSphere() const
+pragma::math::Sphere CRenderComponent::CalcAbsoluteRenderSphere() const
 {
 	auto r = m_localRenderSphere;
 
@@ -259,7 +259,7 @@ Sphere CRenderComponent::CalcAbsoluteRenderSphere() const
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent) {
 		auto physType = pPhysComponent->GetPhysicsType();
-		if(physType == pragma::physics::PHYSICSTYPE::DYNAMIC || physType == pragma::physics::PHYSICSTYPE::STATIC)
+		if(physType == pragma::physics::PhysicsType::Dynamic || physType == pragma::physics::PhysicsType::Static)
 			pose.SetOrigin(pose.GetOrigin() + pPhysComponent->GetLocalOrigin());
 	}
 	auto &scale = pose.GetScale();
@@ -306,7 +306,7 @@ void CRenderComponent::UpdateRenderBounds()
 {
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
 	auto *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
-	if(phys == nullptr || pPhysComponent->GetPhysicsType() != pragma::physics::PHYSICSTYPE::SOFTBODY || !phys->IsSoftBody())
+	if(phys == nullptr || pPhysComponent->GetPhysicsType() != pragma::physics::PhysicsType::SoftBody || !phys->IsSoftBody())
 		AABB::GetRotatedBounds(m_renderMin,m_renderMax,Mat4{m_renderPose.GetRotation()},&m_renderMinRot,&m_renderMaxRot); // TODO: Use orientation
 	else
 	{
@@ -435,7 +435,7 @@ void CRenderComponent::UpdateMatrices()
 	auto orientation = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	umath::ScaledTransform pose {};
-	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsType() != pragma::physics::PHYSICSTYPE::SOFTBODY) {
+	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsType() != pragma::physics::PhysicsType::SoftBody) {
 		pose.SetOrigin(pPhysComponent != nullptr ? pPhysComponent->GetOrigin() : pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {});
 		pose.SetRotation(orientation);
 	}
@@ -453,7 +453,7 @@ void CRenderComponent::SetLastRenderFrame(unsigned long long &t) { m_lastRender 
 
 void CRenderComponent::UpdateRenderMeshes()
 {
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	if(!ent.IsSpawned())
 		return;
 	pragma::get_cgame()->UpdateEntityModel(&ent);
@@ -467,7 +467,7 @@ void CRenderComponent::UpdateRenderMeshes()
 #endif
 }
 void CRenderComponent::ReceiveData(NetPacket &packet) { m_renderFlags = packet->Read<decltype(m_renderFlags)>(); }
-std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise) const
+std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise) const
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("render_component_calc_ray_intersection");
@@ -504,12 +504,12 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 		auto res = intersectionHandlerC->IntersectionTest(lstart, n, umath::CoordinateSpace::Object, 0.f, d);
 		if(!res.has_value())
 			return {};
-		Intersection::LineMeshResult result {};
+		pragma::math::intersection::LineMeshResult result {};
 		result.hitPos = start + uvec::get_normal(dir) * res->distance;
 		result.hitValue = res->distance;
 		result.result = umath::intersection::Result::Intersect;
 		if(precise) {
-			result.precise = ::util::make_shared<Intersection::LineMeshResult::Precise>();
+			result.precise = ::util::make_shared<pragma::math::intersection::LineMeshResult::Precise>();
 			result.precise->subMesh = res->mesh;
 			result.precise->triIdx = res->primitiveIndex;
 			result.precise->u = res->u;
@@ -524,7 +524,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 		auto &hitboxes = mdl->GetHitboxes();
 		if(hitboxes.empty() == false) {
 			// We'll assume that there are enough hitboxes to cover the entire model
-			Hitbox *closestHitbox = nullptr;
+			pragma::physics::Hitbox *closestHitbox = nullptr;
 			auto closestHitboxDistance = std::numeric_limits<float>::max();
 			uint32_t closestHitboxBoneId = std::numeric_limits<uint32_t>::max();
 			for(auto &hb : hitboxes) {
@@ -542,7 +542,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 			if(closestHitbox == nullptr)
 				return {};
 			if(precise == false) {
-				Intersection::LineMeshResult result {};
+				pragma::math::intersection::LineMeshResult result {};
 				result.hitPos = start + dir * closestHitboxDistance;
 				result.hitValue = closestHitboxDistance;
 				result.result = umath::intersection::Result::Intersect;
@@ -553,7 +553,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 		}
 	}
 
-	std::optional<Intersection::LineMeshResult> bestResult = {};
+	std::optional<pragma::math::intersection::LineMeshResult> bestResult = {};
 	for(auto &mesh : lodMeshes) {
 		Vector3 min, max;
 		mesh->GetBounds(min, max);
@@ -563,8 +563,8 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 			subMesh->GetBounds(min, max);
 			if(umath::intersection::line_aabb(lstart, n, min, max, &dIntersect) == umath::intersection::Result::NoIntersection || dIntersect > d)
 				continue;
-			Intersection::LineMeshResult result;
-			if(Intersection::LineMesh(lstart, ldir, *subMesh, result, true) == false)
+			pragma::math::intersection::LineMeshResult result;
+			if(pragma::math::intersection::line_with_mesh(lstart, ldir, *subMesh, result, true) == false)
 				continue;
 			// Confirm that this is the best result so far
 			if(bestResult.has_value() && result.hitValue > bestResult->hitValue)
@@ -653,7 +653,7 @@ void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CC
 
 	UpdateAbsoluteRenderBounds();
 
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto *mdlC = GetModelComponent();
 	if(mdlC)
 		mdlC->UpdateLOD(scene, cam, vp); // TODO: Don't update this every frame for every entity!
@@ -671,7 +671,7 @@ void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CC
 
 bool CRenderComponent::AddToRenderGroup(const std::string &name)
 {
-	auto mask = static_cast<CGame *>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
+	auto mask = static_cast<pragma::CGame *>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
 	if(!mask.has_value())
 		return false;
 	AddToRenderGroup(*mask);
@@ -777,7 +777,7 @@ bool CRenderComponent::IsInRenderGroup(pragma::rendering::RenderGroup group) con
 void CRenderComponent::AddToRenderGroup(pragma::rendering::RenderGroup group) { SetRenderGroups(GetRenderGroups() | group); }
 bool CRenderComponent::RemoveFromRenderGroup(const std::string &name)
 {
-	auto mask = static_cast<CGame *>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
+	auto mask = static_cast<pragma::CGame *>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
 	if(!mask.has_value())
 		return false;
 	RemoveFromRenderGroup(*mask);
@@ -847,32 +847,32 @@ bool CRenderComponent::ShouldDrawShadow() const
 	return m_renderBuffer && umath::is_flag_set(m_stateFlags, StateFlags::ShouldDrawShadow) && !umath::is_flag_set(m_stateFlags, StateFlags::DisableShadows) && GetCastShadows();
 }
 
-RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)
+pragma::rendering::RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)
 {
 	auto *pMdlComponent = GetModelComponent();
 	if(!pMdlComponent) {
-		static RenderMeshGroup meshes {};
+		static rendering::RenderMeshGroup meshes {};
 		return meshes;
 	}
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetLodRenderMeshGroup(lod);
 }
-const RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodRenderMeshGroup(lod); }
-RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod)
+const pragma::rendering::RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodRenderMeshGroup(lod); }
+pragma::rendering::RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod)
 {
 	auto *pMdlComponent = GetModelComponent();
 	if(!pMdlComponent) {
-		static RenderMeshGroup meshes {};
+		static rendering::RenderMeshGroup meshes {};
 		return meshes;
 	}
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetLodMeshGroup(lod);
 }
-const RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodMeshGroup(lod); }
-const std::vector<std::shared_ptr<pragma::ModelSubMesh>> &CRenderComponent::GetRenderMeshes() const { return const_cast<CRenderComponent *>(this)->GetRenderMeshes(); }
-std::vector<std::shared_ptr<pragma::ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
+const pragma::rendering::RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodMeshGroup(lod); }
+const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CRenderComponent::GetRenderMeshes() const { return const_cast<CRenderComponent *>(this)->GetRenderMeshes(); }
+std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
 {
 	auto *pMdlComponent = GetModelComponent();
 	if(!pMdlComponent) {
-		static std::vector<std::shared_ptr<pragma::ModelSubMesh>> meshes {};
+		static std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> meshes {};
 		return meshes;
 	}
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetRenderMeshes();
@@ -886,13 +886,13 @@ std::vector<rendering::RenderBufferData> &CRenderComponent::GetRenderBufferData(
 	}
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetRenderBufferData();
 }
-const std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes() const { return const_cast<CRenderComponent *>(this)->GetLODMeshes(); }
-std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
+const std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CRenderComponent::GetLODMeshes() const { return const_cast<CRenderComponent *>(this)->GetLODMeshes(); }
+std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CRenderComponent::GetLODMeshes()
 {
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto pSoftBodyComponent = ent.GetComponent<pragma::CSoftBodyComponent>();
 	if(pSoftBodyComponent.valid()) {
-		static std::vector<std::shared_ptr<ModelMesh>> meshes {};
+		static std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes {};
 		return meshes;
 		// TODO
 		//auto *pSoftBodyData = pSoftBodyComponent->GetSoftBodyData();
@@ -901,7 +901,7 @@ std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
 	}
 	auto *pMdlComponent = GetModelComponent();
 	if(!pMdlComponent) {
-		static std::vector<std::shared_ptr<ModelMesh>> meshes {};
+		static std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes {};
 		return meshes;
 	}
 	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetLODMeshes();
@@ -970,7 +970,7 @@ void CEOnUpdateRenderBuffers::PushArguments(lua::State *l) {}
 
 /////////////////
 
-CEOnRenderBoundsChanged::CEOnRenderBoundsChanged(const Vector3 &min, const Vector3 &max, const Sphere &sphere) : min {min}, max {max}, sphere {sphere} {}
+CEOnRenderBoundsChanged::CEOnRenderBoundsChanged(const Vector3 &min, const Vector3 &max, const math::Sphere &sphere) : min {min}, max {max}, sphere {sphere} {}
 void CEOnRenderBoundsChanged::PushArguments(lua::State *l)
 {
 	Lua::Push<Vector3>(l, min);
@@ -987,12 +987,12 @@ bool pragma::rendering::RenderBufferData::IsDepthPrepassEnabled() const { return
 void pragma::rendering::RenderBufferData::SetGlowPassEnabled(bool enabled) { umath::set_flag(stateFlags, StateFlags::EnableGlowPass, enabled); }
 bool pragma::rendering::RenderBufferData::IsGlowPassEnabled() const { return umath::is_flag_set(stateFlags, StateFlags::EnableGlowPass); }
 
-static void debug_entity_render_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_entity_render_buffer(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
 		return;
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	if(ents.empty()) {
 		Con::cwar << "No target entity found!" << Con::endl;
 		return;

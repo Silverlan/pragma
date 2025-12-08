@@ -8,7 +8,7 @@ module pragma.client;
 import :engine;
 import pragma.string.unicode;
 
-void CEngine::SaveClientConfig()
+void pragma::CEngine::SaveClientConfig()
 {
 	FileManager::CreatePath("cfg");
 	std::string path = "cfg\\client.cfg";
@@ -20,7 +20,7 @@ void CEngine::SaveClientConfig()
 	WriteClientConfig(f);
 }
 
-void CEngine::WriteClientConfig(VFilePtrReal f)
+void pragma::CEngine::WriteClientConfig(VFilePtrReal f)
 {
 	f->WriteString("unbindall\n");
 	auto inputLayer = GetCoreInputBindingLayer();
@@ -51,15 +51,15 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 	if(stateCl != nullptr) {
 		auto &cvars = stateCl->GetConVars();
 
-		auto &cfg = GetConVarConfig(NwStateType::Client);
+		auto &cfg = GetConVarConfig(pragma::NwStateType::Client);
 		if(cfg)
 			RestoreConVarsForUnknownCommands(f, *cfg, cvars);
 
 		for(auto &pair : cvars) {
 			if(stateSv == nullptr || stateSv->GetConVar(pair.first) == nullptr) {
 				auto &cf = pair.second;
-				if(cf->GetType() == ConType::Var) {
-					auto *cv = static_cast<ConVar *>(cf.get());
+				if(cf->GetType() == pragma::console::ConType::Var) {
+					auto *cv = static_cast<pragma::console::ConVar *>(cf.get());
 					if((cv->GetFlags() & pragma::console::ConVarFlags::Archive) == pragma::console::ConVarFlags::Archive && cv->GetString() != cv->GetDefault()) {
 						std::string l = pair.first + " \"" + cv->GetString() + "\"\n";
 						f->WriteString(l.c_str());
@@ -70,25 +70,25 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 	}
 }
 
-void CEngine::LoadConfig()
+void pragma::CEngine::LoadConfig()
 {
 	pragma::Engine::LoadConfig();
-	PreloadConfig(NwStateType::Client, "client.cfg");
+	PreloadConfig(pragma::NwStateType::Client, "client.cfg");
 }
 
-void CEngine::LoadClientConfig()
+void pragma::CEngine::LoadClientConfig()
 {
-	auto &cfg = GetConVarConfig(NwStateType::Client);
+	auto &cfg = GetConVarConfig(pragma::NwStateType::Client);
 	if(cfg)
 		ExecCommands(*cfg);
 }
 
-void CEngine::PreloadConfig(NwStateType type, const std::string &configName)
+void pragma::CEngine::PreloadConfig(pragma::NwStateType type, const std::string &configName)
 {
 	pragma::Engine::PreloadConfig(type, configName);
-	if(type != NwStateType::Client)
+	if(type != pragma::NwStateType::Client)
 		return;
-	auto &cfg = GetConVarConfig(NwStateType::Client);
+	auto &cfg = GetConVarConfig(pragma::NwStateType::Client);
 	if(!cfg)
 		return;
 	std::string lan = pragma::locale::determine_system_language();

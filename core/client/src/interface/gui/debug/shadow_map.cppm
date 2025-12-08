@@ -10,7 +10,7 @@ export module pragma.client:gui.debug_shadow_map;
 export import :entities.components.lights.light;
 export import pragma.gui;
 
-export {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIDebugShadowMap : public WIBase {
 	  public:
 		WIDebugShadowMap();
@@ -24,7 +24,7 @@ export {
 		void SetShadowMapType(pragma::rendering::ShadowMapType type);
 	  private:
 		virtual void DoUpdate() override;
-		std::vector<WIHandle> m_shadowMapImages = {};
+		std::vector<pragma::gui::WIHandle> m_shadowMapImages = {};
 		util::TWeakSharedHandle<pragma::CLightComponent> m_lightHandle = {};
 		Vector2i m_shadowMapSize = {256, 256};
 		float m_contrastFactor = 1.f;

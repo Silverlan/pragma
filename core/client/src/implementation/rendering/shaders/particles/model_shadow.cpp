@@ -36,7 +36,7 @@ void ParticleModelShadow::BindInstanceDescriptorSet(Vulkan::CommandBufferObject 
 	BindDepthMatrix(cmdBuffer,depthMvp);
 }
 
-void ParticleModelShadow::DrawTest(CModelSubMesh *mesh,uint32_t instanceCount)
+void ParticleModelShadow::DrawTest(pragma::geometry::CModelSubMesh *mesh,uint32_t instanceCount)
 {
 	auto &context = pragma::get_cengine()->GetRenderContext();
 	Shadow::DrawTest(context.GetDrawCmd(),mesh,[instanceCount](const Vulkan::CommandBufferObject *drawCmd,uint32_t triangleVertexCount) {

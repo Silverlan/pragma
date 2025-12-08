@@ -12,8 +12,8 @@ export import pragma.prosper;
 
 #undef DrawText
 
-export {
-	class DLLCLIENT CPhysVisualDebugger : public pragma::physics::IVisualDebugger {
+export namespace pragma::physics {
+	class DLLCLIENT CPhysVisualDebugger : public IVisualDebugger {
 	  public:
 		static constexpr uint32_t MAX_LINES = 250'000;
 		static constexpr uint32_t LINE_SIZE = sizeof(Vector3) * 2;

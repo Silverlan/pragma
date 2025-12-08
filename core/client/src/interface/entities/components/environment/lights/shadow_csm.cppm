@@ -80,14 +80,14 @@ export namespace pragma {
 
 		struct EntityInfo {
 			EntityInfo() = default;
-			EntityInfo(CBaseEntity *ent) : hEntity(ent->GetHandle()) {}
+			EntityInfo(ecs::CBaseEntity *ent) : hEntity(ent->GetHandle()) {}
 			EntityHandle hEntity = {};
-			std::queue<std::weak_ptr<ModelMesh>> meshes;
+			std::queue<std::weak_ptr<pragma::geometry::ModelMesh>> meshes;
 			bool bAlreadyPassed = false;
 		};
 		struct TranslucentEntityInfo {
 			EntityHandle hEntity = {};
-			std::queue<std::weak_ptr<pragma::ModelSubMesh>> subMeshes;
+			std::queue<std::weak_ptr<pragma::geometry::ModelSubMesh>> subMeshes;
 			;
 		};
 		struct CascadeMeshInfo {

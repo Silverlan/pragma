@@ -82,7 +82,7 @@ static void clip_triangle(const std::function<void(uint32_t)> &fAddTriangleIndex
 	}
 }
 
-void pragma::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d, pragma::ModelSubMesh &clippedMesh, const std::vector<Mat4> *boneMatrices, pragma::ModelSubMesh *clippedCoverMesh)
+void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d, pragma::geometry::ModelSubMesh &clippedMesh, const std::vector<Mat4> *boneMatrices, pragma::geometry::ModelSubMesh *clippedCoverMesh)
 {
 	const auto &verts = GetVertices();
 	const auto &alphas = GetAlphas();
@@ -399,7 +399,7 @@ void pragma::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d, pragma::
 	//
 }
 
-void pragma::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d, pragma::ModelSubMesh &clippedMeshA, pragma::ModelSubMesh &clippedMeshB, const std::vector<Mat4> *boneMatrices, pragma::ModelSubMesh *clippedCoverMeshA, pragma::ModelSubMesh *clippedCoverMeshB)
+void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d, pragma::geometry::ModelSubMesh &clippedMeshA, pragma::geometry::ModelSubMesh &clippedMeshB, const std::vector<Mat4> *boneMatrices, pragma::geometry::ModelSubMesh *clippedCoverMeshA, pragma::geometry::ModelSubMesh *clippedCoverMeshB)
 {
 	ClipAgainstPlane(n, d, clippedMeshA, boneMatrices, clippedCoverMeshA);
 	ClipAgainstPlane(-n, -d, clippedMeshB, boneMatrices, clippedCoverMeshB);

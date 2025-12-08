@@ -20,7 +20,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CPointConstraintHinge : public CBaseEntity {
+	class DLLCLIENT CPointConstraintHinge : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

@@ -25,14 +25,14 @@ DLLNETWORK Con::c_crit Con::crit;
 DLLNETWORK Con::c_csv Con::csv;
 DLLNETWORK Con::c_ccl Con::ccl;
 
-const std::string Con::COLOR_WARNING = util::get_true_color_code(Color {254, 228, 64}, {}, pragma::console::ConsoleDecoratorFlags::Bold);
-const std::string Con::COLOR_ERROR = util::get_true_color_code(Color {233, 25, 15}, {}, pragma::console::ConsoleDecoratorFlags::Bold);
-const std::string Con::COLOR_CRITICAL = util::get_true_color_code(Color {233, 25, 15}, Color {254, 250, 224}, pragma::console::ConsoleDecoratorFlags::Bold);
-const std::string Con::COLOR_SERVER = util::get_true_color_code(Color {0, 245, 212});
-const std::string Con::COLOR_CLIENT = util::get_true_color_code(Color {255, 73, 158});
-const std::string Con::COLOR_LUA = util::get_true_color_code(Color {73, 182, 255});
-const std::string Con::COLOR_GUI = util::get_true_color_code(Color {181, 23, 158});
-const std::string Con::COLOR_RESET = util::get_reset_color_code();
+const std::string Con::COLOR_WARNING = pragma::console::get_true_color_code(Color {254, 228, 64}, {}, pragma::console::ConsoleDecoratorFlags::Bold);
+const std::string Con::COLOR_ERROR = pragma::console::get_true_color_code(Color {233, 25, 15}, {}, pragma::console::ConsoleDecoratorFlags::Bold);
+const std::string Con::COLOR_CRITICAL = pragma::console::get_true_color_code(Color {233, 25, 15}, Color {254, 250, 224}, pragma::console::ConsoleDecoratorFlags::Bold);
+const std::string Con::COLOR_SERVER = pragma::console::get_true_color_code(Color {0, 245, 212});
+const std::string Con::COLOR_CLIENT = pragma::console::get_true_color_code(Color {255, 73, 158});
+const std::string Con::COLOR_LUA = pragma::console::get_true_color_code(Color {73, 182, 255});
+const std::string Con::COLOR_GUI = pragma::console::get_true_color_code(Color {181, 23, 158});
+const std::string Con::COLOR_RESET = pragma::console::get_reset_color_code();
 
 std::string Con::PREFIX_WARNING = Con::COLOR_RESET + "[" + Con::COLOR_WARNING + "warning" + Con::COLOR_RESET + "] ";
 std::string Con::PREFIX_ERROR = Con::COLOR_RESET + "[" + Con::COLOR_ERROR + "error" + Con::COLOR_RESET + "] ";
@@ -42,7 +42,7 @@ std::string Con::PREFIX_CLIENT = Con::COLOR_RESET + "[" + Con::COLOR_CLIENT + "c
 std::string Con::PREFIX_LUA = Con::COLOR_RESET + "[" + Con::COLOR_LUA + "lua" + Con::COLOR_RESET + "] ";
 std::string Con::PREFIX_GUI = Con::COLOR_RESET + "[" + Con::COLOR_GUI + "gui" + Con::COLOR_RESET + "] ";
 
-static CVar cvLog = GetConVar("log_enabled");
+static auto cvLog = pragma::console::get_con_var("log_enabled");
 
 void Con::disable_ansi_color_codes()
 {
@@ -76,11 +76,11 @@ void Con::WriteToLog(std::string str)
 	pragma::Engine::Get()->WriteToLog(str);
 }
 
-void Con::set_output_callback(const std::function<void(const std::string_view &, MessageFlags, const ::Color *)> &callback) { detail::outputCallback = callback; }
-const std::function<void(const std::string_view &, Con::MessageFlags, const Color *)> &Con::get_output_callback() { return detail::outputCallback; }
-void Con::print(const std::string_view &sv, const ::Color &color, MessageFlags flags)
+void Con::set_output_callback(const std::function<void(const std::string_view &, pragma::console::MessageFlags, const ::Color *)> &callback) { detail::outputCallback = callback; }
+const std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> &Con::get_output_callback() { return detail::outputCallback; }
+void Con::print(const std::string_view &sv, const ::Color &color, pragma::console::MessageFlags flags)
 {
-	util::set_console_color(util::color_to_console_color_flags(color));
+	pragma::console::set_console_color(pragma::console::color_to_console_color_flags(color));
 	std::cout << sv;
 	Con::flush();
 	auto &outputCallback = Con::get_output_callback();
@@ -88,7 +88,7 @@ void Con::print(const std::string_view &sv, const ::Color &color, MessageFlags f
 		return;
 	outputCallback(sv, flags, &color);
 }
-void Con::print(const std::string_view &sv, MessageFlags flags)
+void Con::print(const std::string_view &sv, pragma::console::MessageFlags flags)
 {
 	std::cout << sv;
 	Con::flush();
@@ -127,7 +127,7 @@ namespace pragma::logging::detail {
 
 namespace Con::detail {
 	DLLNETWORK std::atomic<util::LogSeverity> currentLevel = util::LogSeverity::Disabled;
-	DLLNETWORK std::function<void(const std::string_view &, Con::MessageFlags, const Color *)> outputCallback = nullptr;
+	DLLNETWORK std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> outputCallback = nullptr;
 };
 
 static void log_output()
@@ -162,42 +162,42 @@ static void log_output()
 Con::c_cout &operator<<(Con::c_cout &con, conmanipulator manipulator)
 {
 	std::cout << manipulator;
-	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, Con::MessageFlags::Generic);
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, pragma::console::MessageFlags::Generic);
 	return con;
 }
 
 Con::c_cwar &operator<<(Con::c_cwar &con, conmanipulator manipulator)
 {
 	std::cout << manipulator;
-	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, Con::MessageFlags::Warning);
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, pragma::console::MessageFlags::Warning);
 	return con;
 }
 
 Con::c_cerr &operator<<(Con::c_cerr &con, conmanipulator manipulator)
 {
 	std::cout << manipulator;
-	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, Con::MessageFlags::Error);
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, pragma::console::MessageFlags::Error);
 	return con;
 }
 
 Con::c_crit &operator<<(Con::c_crit &con, conmanipulator manipulator)
 {
 	std::cout << manipulator;
-	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, Con::MessageFlags::Critical);
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, pragma::console::MessageFlags::Critical);
 	return con;
 }
 
 Con::c_csv &operator<<(Con::c_csv &con, conmanipulator manipulator)
 {
 	std::cout << manipulator;
-	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, Con::MessageFlags::ServerSide);
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, pragma::console::MessageFlags::ServerSide);
 	return con;
 }
 
 Con::c_ccl &operator<<(Con::c_ccl &con, conmanipulator manipulator)
 {
 	std::cout << manipulator;
-	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, Con::MessageFlags::ClientSide);
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator, pragma::console::MessageFlags::ClientSide);
 	return con;
 }
 

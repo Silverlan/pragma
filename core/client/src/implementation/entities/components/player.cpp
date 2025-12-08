@@ -193,13 +193,13 @@ void CPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang, float dur
 bool CPlayerComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvApplyViewRotationOffset) {
-		auto ang = nwm::read_angles(packet);
+		auto ang = pragma::networking::read_angles(packet);
 		auto dur = packet->Read<float>();
 		ApplyViewRotationOffset(ang, dur);
 	}
 	else if(eventId == m_netEvPrintMessage) {
 		auto msg = packet->ReadString();
-		auto type = static_cast<MESSAGE>(packet->Read<std::underlying_type_t<MESSAGE>>());
+		auto type = static_cast<pragma::console::MESSAGE>(packet->Read<std::underlying_type_t<pragma::console::MESSAGE>>());
 		PrintMessage(msg, type);
 	}
 	else if(eventId == m_netEvRespawn) {
@@ -235,11 +235,11 @@ void CPlayerComponent::Initialize()
 	});
 	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUpdateMatrices(static_cast<CEOnUpdateRenderMatrices &>(evData.get()).transformation); });
 
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
-		pPhysComponent->SetCollisionType(pragma::physics::COLLISIONTYPE::AABB);
+		pPhysComponent->SetCollisionType(pragma::physics::CollisionType::AABB);
 
 	GetEntity().AddComponent<CObservableComponent>();
 	if(m_observableComponent)
@@ -381,7 +381,7 @@ bool CPlayerComponent::ShouldDraw() const
 
 bool CPlayerComponent::ShouldDrawShadow() const
 {
-	auto pRenderComponent = static_cast<const CBaseEntity &>(GetEntity()).GetRenderComponent();
+	auto pRenderComponent = static_cast<const ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 	return pRenderComponent ? pRenderComponent->GetCastShadows() : false;
 }
 
@@ -390,7 +390,7 @@ void CPlayerComponent::OnTick(double tDelta)
 	BasePlayerComponent::OnTick(tDelta);
 
 	if(m_crouchViewOffset != nullptr) {
-		DeltaOffset &doffset = *m_crouchViewOffset;
+		pragma::math::DeltaOffset &doffset = *m_crouchViewOffset;
 		if(doffset.time <= 0)
 			m_crouchViewOffset = nullptr;
 		else {
@@ -407,7 +407,7 @@ void CPlayerComponent::OnTick(double tDelta)
 		}
 	}
 	if(m_upDirOffset != nullptr) {
-		DeltaTransform &dtrans = *m_upDirOffset;
+		pragma::math::DeltaTransform &dtrans = *m_upDirOffset;
 		if(dtrans.time <= 0)
 			m_upDirOffset = nullptr;
 		else {
@@ -431,21 +431,21 @@ void CPlayerComponent::OnCrouch()
 	Vector3 viewOffset {};
 	if(m_observableComponent)
 		viewOffset = m_observableComponent->GetViewOffset();
-	m_crouchViewOffset = std::make_unique<DeltaOffset>(Vector3(0, m_crouchEyeLevel - viewOffset.y, 0), 0.2f);
+	m_crouchViewOffset = std::make_unique<pragma::math::DeltaOffset>(Vector3(0, m_crouchEyeLevel - viewOffset.y, 0), 0.2f);
 }
 void CPlayerComponent::OnUnCrouch()
 {
 	Vector3 viewOffset {};
 	if(m_observableComponent)
 		viewOffset = m_observableComponent->GetViewOffset();
-	m_crouchViewOffset = std::make_unique<DeltaOffset>(Vector3(0, m_standEyeLevel - viewOffset.y, 0), 0.4f);
+	m_crouchViewOffset = std::make_unique<pragma::math::DeltaOffset>(Vector3(0, m_standEyeLevel - viewOffset.y, 0), 0.4f);
 }
 void CPlayerComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BasePlayerComponent)); }
 void CPlayerComponent::ReceiveData(NetPacket &packet)
 {
 	m_timeConnected = packet->Read<double>();
 	auto hThis = GetHandle();
-	nwm::read_unique_entity(packet, [hThis, this](pragma::ecs::BaseEntity *ent) {
+	pragma::networking::read_unique_entity(packet, [hThis, this](pragma::ecs::BaseEntity *ent) {
 		if(ent == nullptr || hThis.expired())
 			return;
 		m_entFlashlight = ent->GetHandle();
@@ -466,13 +466,13 @@ void CPlayerComponent::ReceiveData(NetPacket &packet)
 	});
 }
 
-void CPlayerComponent::PrintMessage(std::string message, MESSAGE type)
+void CPlayerComponent::PrintMessage(std::string message, pragma::console::MESSAGE type)
 {
 	switch(type) {
-	case MESSAGE::PRINTCONSOLE:
+	case pragma::console::MESSAGE::PRINTCONSOLE:
 		Con::cout << message << Con::endl;
 		break;
-	case MESSAGE::PRINTCHAT:
+	case pragma::console::MESSAGE::PRINTCHAT:
 		{
 			// TODO
 			//auto *l = client->GetLuaState();

@@ -98,9 +98,9 @@ bool CEyeComponent::FindEyeballIndex(uint32_t skinMatIdx, uint32_t &outEyeballIn
 	outEyeballIndex = it->second;
 	return true;
 }
-bool CEyeComponent::FindEyeballIndex(CModelSubMesh &subMesh, uint32_t &outEyeballIndex) const { return FindEyeballIndex(subMesh.GetSkinTextureIndex(), outEyeballIndex); }
+bool CEyeComponent::FindEyeballIndex(pragma::geometry::CModelSubMesh &subMesh, uint32_t &outEyeballIndex) const { return FindEyeballIndex(subMesh.GetSkinTextureIndex(), outEyeballIndex); }
 
-void CEyeComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &mdl)
+void CEyeComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl)
 {
 	m_eyeballData.clear();
 	m_blinkFlexController = std::numeric_limits<uint32_t>::max();

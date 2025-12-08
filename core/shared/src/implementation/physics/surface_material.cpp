@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :physics.surface_material;
 
-SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &env) : m_physEnv {env}
+pragma::physics::SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &env) : m_physEnv {env}
 {
 	auto &genericPhysMat = env.GetGenericMaterial();
 	m_materials.push_back(SurfaceMaterial {m_physEnv, "generic", m_materials.size(), genericPhysMat});
@@ -19,7 +19,7 @@ SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &en
 	genericPhysMat.SetSurfaceMaterial(surfMat);
 }
 
-bool SurfaceMaterialManager::Load(const std::string &path)
+bool pragma::physics::SurfaceMaterialManager::Load(const std::string &path)
 {
 	std::string err;
 	auto udmData = util::load_udm_asset(path, &err);
@@ -34,7 +34,7 @@ bool SurfaceMaterialManager::Load(const std::string &path)
 	}
 	return true;
 }
-SurfaceMaterial &SurfaceMaterialManager::Create(const std::string &identifier, Float staticFriction, Float dynamicFriction, Float restitution)
+pragma::physics::SurfaceMaterial &pragma::physics::SurfaceMaterialManager::Create(const std::string &identifier, Float staticFriction, Float dynamicFriction, Float restitution)
 {
 	auto *mat = GetMaterial(identifier);
 	if(mat == nullptr) {
@@ -46,19 +46,19 @@ SurfaceMaterial &SurfaceMaterialManager::Create(const std::string &identifier, F
 	}
 	return *mat;
 }
-SurfaceMaterial &SurfaceMaterialManager::Create(const std::string &identifier, Float friction, Float restitution) { return Create(identifier, friction, friction, restitution); }
-SurfaceMaterial *SurfaceMaterialManager::GetMaterial(const std::string &id)
+pragma::physics::SurfaceMaterial &pragma::physics::SurfaceMaterialManager::Create(const std::string &identifier, Float friction, Float restitution) { return Create(identifier, friction, friction, restitution); }
+pragma::physics::SurfaceMaterial *pragma::physics::SurfaceMaterialManager::GetMaterial(const std::string &id)
 {
 	auto it = std::find_if(m_materials.begin(), m_materials.end(), [&id](const SurfaceMaterial &mat) { return (mat.GetIdentifier() == id) ? true : false; });
 	if(it == m_materials.end())
 		return nullptr;
 	return &(*it);
 }
-std::vector<SurfaceMaterial> &SurfaceMaterialManager::GetMaterials() { return m_materials; }
+std::vector<pragma::physics::SurfaceMaterial> &pragma::physics::SurfaceMaterialManager::GetMaterials() { return m_materials; }
 
 ////////////////////////////////////
 
-SurfaceMaterial::SurfaceMaterial(const SurfaceMaterial &other) : m_physEnv {other.m_physEnv}, m_navigationFlags(pragma::nav::PolyFlags::Walk)
+pragma::physics::SurfaceMaterial::SurfaceMaterial(const SurfaceMaterial &other) : m_physEnv {other.m_physEnv}, m_navigationFlags(pragma::nav::PolyFlags::Walk)
 {
 	m_index = other.m_index;
 	m_identifier = other.m_identifier;
@@ -78,84 +78,84 @@ SurfaceMaterial::SurfaceMaterial(const SurfaceMaterial &other) : m_physEnv {othe
 	m_pbrInfo = other.m_pbrInfo;
 }
 
-SurfaceMaterial::SurfaceMaterial(pragma::physics::IEnvironment &env, const std::string &identifier, UInt idx, pragma::physics::IMaterial &physMat)
+pragma::physics::SurfaceMaterial::SurfaceMaterial(pragma::physics::IEnvironment &env, const std::string &identifier, UInt idx, pragma::physics::IMaterial &physMat)
     : m_physEnv {env}, m_physMaterial {std::static_pointer_cast<pragma::physics::IMaterial>(physMat.shared_from_this())}, m_index(idx), m_identifier(identifier), m_footstepType("fx.fst_concrete")
 {
 	physMat.SetSurfaceMaterial(*this);
 }
 
-void SurfaceMaterial::SetSoftImpactSound(const std::string &snd) { m_softImpactSound = snd; }
-const std::string &SurfaceMaterial::GetSoftImpactSound() const { return m_softImpactSound; }
-void SurfaceMaterial::SetHardImpactSound(const std::string &snd) { m_hardImpactSound = snd; }
-const std::string &SurfaceMaterial::GetHardImpactSound() const { return m_hardImpactSound; }
-void SurfaceMaterial::SetBulletImpactSound(const std::string &snd) { m_bulletImpactSound = snd; }
-const std::string &SurfaceMaterial::GetBulletImpactSound() const { return m_bulletImpactSound; }
-void SurfaceMaterial::SetImpactParticleEffect(const std::string &particle) { m_impactParticle = particle; }
-const std::string &SurfaceMaterial::GetImpactParticleEffect() const { return m_impactParticle; }
+void pragma::physics::SurfaceMaterial::SetSoftImpactSound(const std::string &snd) { m_softImpactSound = snd; }
+const std::string &pragma::physics::SurfaceMaterial::GetSoftImpactSound() const { return m_softImpactSound; }
+void pragma::physics::SurfaceMaterial::SetHardImpactSound(const std::string &snd) { m_hardImpactSound = snd; }
+const std::string &pragma::physics::SurfaceMaterial::GetHardImpactSound() const { return m_hardImpactSound; }
+void pragma::physics::SurfaceMaterial::SetBulletImpactSound(const std::string &snd) { m_bulletImpactSound = snd; }
+const std::string &pragma::physics::SurfaceMaterial::GetBulletImpactSound() const { return m_bulletImpactSound; }
+void pragma::physics::SurfaceMaterial::SetImpactParticleEffect(const std::string &particle) { m_impactParticle = particle; }
+const std::string &pragma::physics::SurfaceMaterial::GetImpactParticleEffect() const { return m_impactParticle; }
 
-PhysLiquid &SurfaceMaterial::InitializeLiquid()
+pragma::physics::PhysLiquid &pragma::physics::SurfaceMaterial::InitializeLiquid()
 {
 	if(m_liquidInfo == nullptr)
 		m_liquidInfo = std::make_unique<PhysLiquid>();
 	return *m_liquidInfo;
 }
-void SurfaceMaterial::SetDensity(float density) { InitializeLiquid().density = density; }
-float SurfaceMaterial::GetDensity() const
+void pragma::physics::SurfaceMaterial::SetDensity(float density) { InitializeLiquid().density = density; }
+float pragma::physics::SurfaceMaterial::GetDensity() const
 {
 	if(m_liquidInfo == nullptr)
 		return PHYS_LIQUID_DEFAULT_DENSITY;
 	return m_liquidInfo->density;
 }
-void SurfaceMaterial::SetLinearDragCoefficient(float coefficient) { InitializeLiquid().linearDragCoefficient = coefficient; }
-float SurfaceMaterial::GetLinearDragCoefficient() const
+void pragma::physics::SurfaceMaterial::SetLinearDragCoefficient(float coefficient) { InitializeLiquid().linearDragCoefficient = coefficient; }
+float pragma::physics::SurfaceMaterial::GetLinearDragCoefficient() const
 {
 	if(m_liquidInfo == nullptr)
 		return PHYS_LIQUID_DEFAULT_LINEAR_DRAG_COEFFICIENT;
 	return m_liquidInfo->linearDragCoefficient;
 }
-void SurfaceMaterial::SetTorqueDragCoefficient(float coefficient) { InitializeLiquid().torqueDragCoefficient = coefficient; }
-float SurfaceMaterial::GetTorqueDragCoefficient() const
+void pragma::physics::SurfaceMaterial::SetTorqueDragCoefficient(float coefficient) { InitializeLiquid().torqueDragCoefficient = coefficient; }
+float pragma::physics::SurfaceMaterial::GetTorqueDragCoefficient() const
 {
 	if(m_liquidInfo == nullptr)
 		return PHYS_LIQUID_DEFAULT_TORQUE_DRAG_COEFFICIENT;
 	return m_liquidInfo->torqueDragCoefficient;
 }
-void SurfaceMaterial::SetWaveStiffness(float stiffness) { InitializeLiquid().stiffness = stiffness; }
-float SurfaceMaterial::GetWaveStiffness() const
+void pragma::physics::SurfaceMaterial::SetWaveStiffness(float stiffness) { InitializeLiquid().stiffness = stiffness; }
+float pragma::physics::SurfaceMaterial::GetWaveStiffness() const
 {
 	if(m_liquidInfo == nullptr)
 		return PHYS_LIQUID_DEFAULT_STIFFNESS;
 	return m_liquidInfo->stiffness;
 }
-void SurfaceMaterial::SetWavePropagation(float propagation) { InitializeLiquid().propagation = propagation; }
-float SurfaceMaterial::GetWavePropagation() const
+void pragma::physics::SurfaceMaterial::SetWavePropagation(float propagation) { InitializeLiquid().propagation = propagation; }
+float pragma::physics::SurfaceMaterial::GetWavePropagation() const
 {
 	if(m_liquidInfo == nullptr)
 		return PHYS_LIQUID_DEFAULT_PROPAGATION;
 	return m_liquidInfo->propagation;
 }
 
-const SurfaceMaterial::PBRInfo &SurfaceMaterial::GetPBRInfo() const { return const_cast<SurfaceMaterial *>(this)->GetPBRInfo(); }
-SurfaceMaterial::PBRInfo &SurfaceMaterial::GetPBRInfo() { return m_pbrInfo; }
-void SurfaceMaterial::SetPBRInfo(const PBRInfo &pbrInfo) { m_pbrInfo = pbrInfo; }
-const SurfaceMaterial::AudioInfo &SurfaceMaterial::GetAudioInfo() const { return m_audioInfo; }
-void SurfaceMaterial::SetAudioInfo(const AudioInfo &info) { m_audioInfo = info; }
-void SurfaceMaterial::SetAudioLowFrequencyAbsorption(float absp) { m_audioInfo.lowFreqAbsorption = absp; }
-float SurfaceMaterial::GetAudioLowFrequencyAbsorption() const { return m_audioInfo.lowFreqAbsorption; }
-void SurfaceMaterial::SetAudioMidFrequencyAbsorption(float absp) { m_audioInfo.midFreqAbsorption = absp; }
-float SurfaceMaterial::GetAudioMidFrequencyAbsorption() const { return m_audioInfo.midFreqAbsorption; }
-void SurfaceMaterial::SetAudioHighFrequencyAbsorption(float absp) { m_audioInfo.highFreqAbsorption = absp; }
-float SurfaceMaterial::GetAudioHighFrequencyAbsorption() const { return m_audioInfo.highFreqAbsorption; }
-void SurfaceMaterial::SetAudioScattering(float scattering) { m_audioInfo.scattering = scattering; }
-float SurfaceMaterial::GetAudioScattering() const { return m_audioInfo.scattering; }
-void SurfaceMaterial::SetAudioLowFrequencyTransmission(float transmission) { m_audioInfo.lowFreqTransmission = transmission; }
-float SurfaceMaterial::GetAudioLowFrequencyTransmission() const { return m_audioInfo.lowFreqTransmission; }
-void SurfaceMaterial::SetAudioMidFrequencyTransmission(float transmission) { m_audioInfo.midFreqTransmission = transmission; }
-float SurfaceMaterial::GetAudioMidFrequencyTransmission() const { return m_audioInfo.midFreqTransmission; }
-void SurfaceMaterial::SetAudioHighFrequencyTransmission(float transmission) { m_audioInfo.highFreqTransmission = transmission; }
-float SurfaceMaterial::GetAudioHighFrequencyTransmission() const { return m_audioInfo.highFreqTransmission; }
+const pragma::physics::SurfaceMaterial::PBRInfo &pragma::physics::SurfaceMaterial::GetPBRInfo() const { return const_cast<SurfaceMaterial *>(this)->GetPBRInfo(); }
+pragma::physics::SurfaceMaterial::PBRInfo &pragma::physics::SurfaceMaterial::GetPBRInfo() { return m_pbrInfo; }
+void pragma::physics::SurfaceMaterial::SetPBRInfo(const PBRInfo &pbrInfo) { m_pbrInfo = pbrInfo; }
+const pragma::physics::SurfaceMaterial::AudioInfo &pragma::physics::SurfaceMaterial::GetAudioInfo() const { return m_audioInfo; }
+void pragma::physics::SurfaceMaterial::SetAudioInfo(const AudioInfo &info) { m_audioInfo = info; }
+void pragma::physics::SurfaceMaterial::SetAudioLowFrequencyAbsorption(float absp) { m_audioInfo.lowFreqAbsorption = absp; }
+float pragma::physics::SurfaceMaterial::GetAudioLowFrequencyAbsorption() const { return m_audioInfo.lowFreqAbsorption; }
+void pragma::physics::SurfaceMaterial::SetAudioMidFrequencyAbsorption(float absp) { m_audioInfo.midFreqAbsorption = absp; }
+float pragma::physics::SurfaceMaterial::GetAudioMidFrequencyAbsorption() const { return m_audioInfo.midFreqAbsorption; }
+void pragma::physics::SurfaceMaterial::SetAudioHighFrequencyAbsorption(float absp) { m_audioInfo.highFreqAbsorption = absp; }
+float pragma::physics::SurfaceMaterial::GetAudioHighFrequencyAbsorption() const { return m_audioInfo.highFreqAbsorption; }
+void pragma::physics::SurfaceMaterial::SetAudioScattering(float scattering) { m_audioInfo.scattering = scattering; }
+float pragma::physics::SurfaceMaterial::GetAudioScattering() const { return m_audioInfo.scattering; }
+void pragma::physics::SurfaceMaterial::SetAudioLowFrequencyTransmission(float transmission) { m_audioInfo.lowFreqTransmission = transmission; }
+float pragma::physics::SurfaceMaterial::GetAudioLowFrequencyTransmission() const { return m_audioInfo.lowFreqTransmission; }
+void pragma::physics::SurfaceMaterial::SetAudioMidFrequencyTransmission(float transmission) { m_audioInfo.midFreqTransmission = transmission; }
+float pragma::physics::SurfaceMaterial::GetAudioMidFrequencyTransmission() const { return m_audioInfo.midFreqTransmission; }
+void pragma::physics::SurfaceMaterial::SetAudioHighFrequencyTransmission(float transmission) { m_audioInfo.highFreqTransmission = transmission; }
+float pragma::physics::SurfaceMaterial::GetAudioHighFrequencyTransmission() const { return m_audioInfo.highFreqTransmission; }
 
-void SurfaceMaterial::Load(udm::LinkedPropertyWrapper &prop)
+void pragma::physics::SurfaceMaterial::Load(udm::LinkedPropertyWrapper &prop)
 {
 	if(prop["navigation_flags"]) {
 		auto flags = pragma::nav::PolyFlags::None;
@@ -243,7 +243,7 @@ void SurfaceMaterial::Load(udm::LinkedPropertyWrapper &prop)
 	}
 }
 
-void SurfaceMaterial::Reset()
+void pragma::physics::SurfaceMaterial::Reset()
 {
 	m_footstepType = "generic";
 
@@ -254,33 +254,33 @@ void SurfaceMaterial::Reset()
 	m_physMaterial->SetRestitution(0.5f);
 }
 
-pragma::physics::IMaterial &SurfaceMaterial::GetPhysicsMaterial() const { return *m_physMaterial; }
-pragma::physics::SurfaceType *SurfaceMaterial::GetSurfaceType() const { return m_surfaceType.Get(); }
-void SurfaceMaterial::SetSurfaceType(const std::string &surfaceType) { m_surfaceType = m_physEnv.GetSurfaceTypeManager().RegisterType(surfaceType); }
-const std::string &SurfaceMaterial::GetIdentifier() const { return m_identifier; }
-void SurfaceMaterial::SetFriction(Float friction)
+pragma::physics::IMaterial &pragma::physics::SurfaceMaterial::GetPhysicsMaterial() const { return *m_physMaterial; }
+pragma::physics::SurfaceType *pragma::physics::SurfaceMaterial::GetSurfaceType() const { return m_surfaceType.Get(); }
+void pragma::physics::SurfaceMaterial::SetSurfaceType(const std::string &surfaceType) { m_surfaceType = m_physEnv.GetSurfaceTypeManager().RegisterType(surfaceType); }
+const std::string &pragma::physics::SurfaceMaterial::GetIdentifier() const { return m_identifier; }
+void pragma::physics::SurfaceMaterial::SetFriction(Float friction)
 {
 	SetStaticFriction(friction);
 	SetDynamicFriction(friction);
 }
-const std::optional<float> &SurfaceMaterial::GetIOR() const { return m_ior; }
-void SurfaceMaterial::SetIOR(float ior) { m_ior = ior; }
-void SurfaceMaterial::ClearIOR() { m_ior = {}; }
-Float SurfaceMaterial::GetRestitution() const { return m_physMaterial->GetRestitution(); }
-void SurfaceMaterial::SetRestitution(Float restitution) { m_physMaterial->SetRestitution(restitution); }
-float SurfaceMaterial::GetStaticFriction() const { return m_physMaterial->GetStaticFriction(); }
-void SurfaceMaterial::SetStaticFriction(float friction) { m_physMaterial->SetStaticFriction(friction); }
-float SurfaceMaterial::GetDynamicFriction() const { return m_physMaterial->GetDynamicFriction(); }
-void SurfaceMaterial::SetDynamicFriction(float friction) { m_physMaterial->SetDynamicFriction(friction); }
-UInt SurfaceMaterial::GetIndex() const { return m_index; }
+const std::optional<float> &pragma::physics::SurfaceMaterial::GetIOR() const { return m_ior; }
+void pragma::physics::SurfaceMaterial::SetIOR(float ior) { m_ior = ior; }
+void pragma::physics::SurfaceMaterial::ClearIOR() { m_ior = {}; }
+Float pragma::physics::SurfaceMaterial::GetRestitution() const { return m_physMaterial->GetRestitution(); }
+void pragma::physics::SurfaceMaterial::SetRestitution(Float restitution) { m_physMaterial->SetRestitution(restitution); }
+float pragma::physics::SurfaceMaterial::GetStaticFriction() const { return m_physMaterial->GetStaticFriction(); }
+void pragma::physics::SurfaceMaterial::SetStaticFriction(float friction) { m_physMaterial->SetStaticFriction(friction); }
+float pragma::physics::SurfaceMaterial::GetDynamicFriction() const { return m_physMaterial->GetDynamicFriction(); }
+void pragma::physics::SurfaceMaterial::SetDynamicFriction(float friction) { m_physMaterial->SetDynamicFriction(friction); }
+UInt pragma::physics::SurfaceMaterial::GetIndex() const { return m_index; }
 
-const std::string &SurfaceMaterial::GetFootstepType() const { return m_footstepType; }
-void SurfaceMaterial::SetFootstepType(const std::string &type) { m_footstepType = type; }
+const std::string &pragma::physics::SurfaceMaterial::GetFootstepType() const { return m_footstepType; }
+void pragma::physics::SurfaceMaterial::SetFootstepType(const std::string &type) { m_footstepType = type; }
 
-void SurfaceMaterial::SetNavigationFlags(pragma::nav::PolyFlags flags) { m_navigationFlags = flags; }
-pragma::nav::PolyFlags SurfaceMaterial::GetNavigationFlags() const { return m_navigationFlags; }
+void pragma::physics::SurfaceMaterial::SetNavigationFlags(pragma::nav::PolyFlags flags) { m_navigationFlags = flags; }
+pragma::nav::PolyFlags pragma::physics::SurfaceMaterial::GetNavigationFlags() const { return m_navigationFlags; }
 
-std::ostream &operator<<(std::ostream &out, const SurfaceMaterial &surfaceMaterial)
+std::ostream &operator<<(std::ostream &out, const pragma::physics::SurfaceMaterial &surfaceMaterial)
 {
 	out << "SurfaceMaterial[" << surfaceMaterial.GetIndex() << "][" << surfaceMaterial.GetIdentifier() << "]";
 	return out;

@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :game.game;
 
-void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
+void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, game::DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback)
 {
 	auto &force = dmg.GetForce();
 	auto forceLen = uvec::length(force);
@@ -76,7 +76,7 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, DamageInfo 
 			if(l != 0.f)
 				dir /= l;
 
-			TraceData data;
+			pragma::physics::TraceData data;
 			data.SetSource(origin);
 			data.SetTarget(pos);
 			data.SetFilter(traceFilter);
@@ -107,12 +107,12 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, DamageInfo 
 				auto pDamageableComponent = ent->GetComponent<pragma::DamageableComponent>();
 				if(pDamageableComponent.valid()) {
 					auto scale = (radius - c.distance) / radius;
-					DamageInfo dmgEnt;
+					game::DamageInfo dmgEnt;
 					dmgEnt.SetAttacker(dmg.GetAttacker());
 					dmgEnt.SetInflictor(dmg.GetInflictor());
 					dmgEnt.SetDamage(CUInt16(CFloat(damage) * scale));
 					dmgEnt.SetSource(const_cast<Vector3 &>(origin));
-					dmgEnt.SetDamageType(static_cast<DAMAGETYPE>(dmg.GetDamageTypes()));
+					dmgEnt.SetDamageType(static_cast<DamageType>(dmg.GetDamageTypes()));
 					dmgEnt.SetForce(dir * (forceLen * scale));
 					if(callback == nullptr || callback(ent, dmgEnt) == true)
 						pDamageableComponent->TakeDamage(dmgEnt);
@@ -121,17 +121,17 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, DamageInfo 
 		}
 	}
 }
-void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
+void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback)
 {
-	DamageInfo info;
+	game::DamageInfo info;
 	info.SetForce(Vector3(force, 0.f, 0.f));
 	info.SetAttacker(attacker);
 	info.SetInflictor(inflictor);
 	info.SetDamage(CUInt16(damage));
-	info.SetDamageType(DAMAGETYPE::EXPLOSION);
+	info.SetDamageType(DamageType::Explosion);
 	SplashDamage(origin, radius, info, callback);
 }
-void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force, const EntityHandle &attacker, const EntityHandle &inflictor, const std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> &callback)
+void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force, const EntityHandle &attacker, const EntityHandle &inflictor, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback)
 {
 	SplashDamage(origin, radius, damage, force, const_cast<pragma::ecs::BaseEntity *>(attacker.get()), const_cast<pragma::ecs::BaseEntity *>(inflictor.get()), callback);
 }

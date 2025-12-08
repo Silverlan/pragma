@@ -8,7 +8,7 @@ export module pragma.shared:game.game_mode_manager;
 
 export import pragma.util;
 
-export {
+export namespace pragma::game {
 	struct DLLNETWORK GameModeInfo {
 		std::string id;
 		std::string name;

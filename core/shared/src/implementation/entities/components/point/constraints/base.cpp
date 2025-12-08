@@ -78,7 +78,7 @@ void BasePointConstraintComponent::InitializeConstraint()
 	std::vector<pragma::ecs::BaseEntity *> entsTgt;
 	GetTargetEntities(entsTgt);
 	auto pPhysComponentSrc = entSrc->GetPhysicsComponent();
-	RigidPhysObj *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	auto *physSrc = pPhysComponentSrc ? dynamic_cast<pragma::physics::RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	if(physSrc == nullptr)
 		return;
 	auto *bodySrc = physSrc->GetRigidBody();
@@ -132,7 +132,7 @@ bool BasePointConstraintComponent::SetKeyValue(std::string key, std::string val)
 void BasePointConstraintComponent::GetTargetEntities(std::vector<pragma::ecs::BaseEntity *> &entsTgt)
 {
 	pragma::ecs::BaseEntity &ent = GetEntity();
-	NetworkState *state = ent.GetNetworkState();
+	auto *state = ent.GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	if(m_kvTarget.empty())
 		return;
@@ -148,7 +148,7 @@ void BasePointConstraintComponent::GetTargetEntities(std::vector<pragma::ecs::Ba
 pragma::ecs::BaseEntity *BasePointConstraintComponent::GetSourceEntity()
 {
 	pragma::ecs::BaseEntity &entThis = GetEntity();
-	NetworkState *state = entThis.GetNetworkState();
+	auto *state = entThis.GetNetworkState();
 	pragma::Game *game = state->GetGameState();
 	if(m_kvSource.empty()) {
 		auto *pWorld = game->GetWorld();

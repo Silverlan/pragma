@@ -13,7 +13,7 @@ export import pragma.gui;
 export import pragma.platform;
 export import pragma.string.unicode;
 
-export {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIFrame : public WITransformable {
 	  public:
 		WIFrame();
@@ -33,12 +33,12 @@ export {
 		void Reattach();
 		bool IsDetached() const;
 	  protected:
-		WIHandle m_hBg;
-		WIHandle m_hTitle;
-		WIHandle m_hTitleBar;
-		WIHandle m_hClose;
-		WIHandle m_hDetachButton;
-		WIHandle m_hContents;
+		pragma::gui::WIHandle m_hBg;
+		pragma::gui::WIHandle m_hTitle;
+		pragma::gui::WIHandle m_hTitleBar;
+		pragma::gui::WIHandle m_hClose;
+		pragma::gui::WIHandle m_hDetachButton;
+		pragma::gui::WIHandle m_hContents;
 		void OnDetachButtonPressed();
 	};
 };

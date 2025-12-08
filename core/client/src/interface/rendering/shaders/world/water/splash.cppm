@@ -17,7 +17,7 @@ export namespace pragma {
 		enum class WaterEffectBinding : uint32_t { WaterParticles = 0u, WaterPositions };
 
 		ShaderWaterSplash(prosper::IPrContext &context, const std::string &identifier);
-		bool RecordCompute(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descParticles, const PhysWaterSurfaceSimulator::SplashInfo &info) const;
+		bool RecordCompute(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descParticles, const physics::PhysWaterSurfaceSimulator::SplashInfo &info) const;
 	  protected:
 		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;

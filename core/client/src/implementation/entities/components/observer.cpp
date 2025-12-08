@@ -40,7 +40,7 @@ Bool CObserverComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &
 	if(eventId == m_netEvSetObserverMode)
 		SetObserverMode(packet->Read<ObserverMode>());
 	else if(eventId == m_netEvSetObserverTarget) {
-		auto *ent = nwm::read_entity(packet);
+		auto *ent = pragma::networking::read_entity(packet);
 		auto pObsComponent = ent->GetComponent<pragma::CObservableComponent>();
 		SetObserverTarget(pObsComponent.get());
 	}
@@ -51,7 +51,7 @@ Bool CObserverComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &
 
 void CObserverComponent::ReceiveData(NetPacket &packet)
 {
-	auto *ent = nwm::read_entity(packet);
+	auto *ent = pragma::networking::read_entity(packet);
 	if(!ent)
 		SetObserverTarget(nullptr);
 	else {
@@ -70,14 +70,14 @@ void CObserverComponent::DoSetObserverMode(ObserverMode mode) { BaseObserverComp
 void CObserverComponent::SetObserverMode(ObserverMode mode)
 {
 	BaseObserverComponent::SetObserverMode(mode);
-	auto *renderC = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
+	auto *renderC = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(renderC)
 		renderC->UpdateShouldDrawState();
 }
 
-static CVar cvSpeed = GetClientConVar("cl_mouse_sensitivity");
-static CVar cvYaw = GetClientConVar("cl_mouse_yaw");
-static CVar cvPitch = GetClientConVar("cl_mouse_pitch");
+static auto cvSpeed = pragma::console::get_client_con_var("cl_mouse_sensitivity");
+static auto cvYaw = pragma::console::get_client_con_var("cl_mouse_yaw");
+static auto cvPitch = pragma::console::get_client_con_var("cl_mouse_pitch");
 void CObserverComponent::UpdateCharacterViewOrientationFromMouseMovement()
 {
 	auto *target = GetObserverTarget();
@@ -117,7 +117,7 @@ void CObserverComponent::UpdateCharacterViewOrientationFromMouseMovement()
 	const Vector3 right(-1, 0, 0);
 	const Vector3 up(0, 1, 0);
 
-	auto *gameC = static_cast<CGame &>(GetGame()).GetGameComponent<CGameComponent>();
+	auto *gameC = static_cast<pragma::CGame &>(GetGame()).GetGameComponent<pragma::CGameComponent>();
 	float xDelta = 0.f;
 	float yDelta = 0.f;
 	if(gameC) {
@@ -225,7 +225,7 @@ void CObserverComponent::ApplyCameraObservationMode(Vector3 &pos, Quat &rot, Qua
 		camPos += uquat::forward(rotPos) * (*obsCamData->offset)->z + uquat::up(rotPos) * (*obsCamData->offset)->y - uquat::right(rotPos) * (*obsCamData->offset)->x;
 
 	if(obsCamData != nullptr && uvec::length_sqr(*obsCamData->offset) > 0.f) {
-		TraceData data {};
+		pragma::physics::TraceData data {};
 		data.SetSource(camLookAtPos);
 		data.SetTarget(camPos);
 		data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);

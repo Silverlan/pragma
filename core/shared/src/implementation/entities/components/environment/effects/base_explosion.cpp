@@ -48,10 +48,10 @@ void BaseEnvExplosionComponent::Explode()
 		float d = glm::distance(origin, r);
 		if(d <= radius) {
 			// TODO: Raytrace
-			DamageInfo dmg;
+			game::DamageInfo dmg;
 			dmg.SetAttacker(&ent);
 			dmg.SetDamage(damage);
-			dmg.SetDamageType(DAMAGETYPE::EXPLOSION);
+			dmg.SetDamageType(DamageType::Explosion);
 			dmg.SetForce(force);
 			dmg.SetHitPosition(r);
 			dmg.SetInflictor(&ent);

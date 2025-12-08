@@ -12,22 +12,22 @@ import :game;
 import :rendering.shaders;
 import pragma.string.unicode;
 
-namespace DebugRenderer {
+namespace pragma::debug::DebugRenderer {
 	struct RuntimeObject {
-		RuntimeObject(const std::shared_ptr<DebugRenderer::BaseObject> &o, float duration);
-		std::shared_ptr<DebugRenderer::BaseObject> obj;
+		RuntimeObject(const std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> &o, float duration);
+		std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> obj;
 		double time;
 	};
-	RuntimeObject::RuntimeObject(const std::shared_ptr<DebugRenderer::BaseObject> &o, float duration) : obj(o), time(pragma::get_client_state()->RealTime() + duration) {}
+	RuntimeObject::RuntimeObject(const std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> &o, float duration) : obj(o), time(pragma::get_client_state()->RealTime() + duration) {}
 }
 
-static void init_debug_object(DebugRenderer::BaseObject &o, const DebugRenderInfo &renderInfo) { o.SetIgnoreDepth(renderInfo.ignoreDepthBuffer); }
+static void init_debug_object(pragma::debug::DebugRenderer::BaseObject &o, const pragma::debug::DebugRenderInfo &renderInfo) { o.SetIgnoreDepth(renderInfo.ignoreDepthBuffer); }
 
 static constexpr uint32_t s_maxDebugObjectCount = 100'000;
-static std::unordered_map<DebugRenderer::Type, std::vector<DebugRenderer::RuntimeObject>> s_debugObjects {{DebugRenderer::Type::Triangles, {}}, {DebugRenderer::Type::Lines, {}}, {DebugRenderer::Type::LinesStrip, {}}, {DebugRenderer::Type::Points, {}},
-  {DebugRenderer::Type::PointsVertex, {}}, {DebugRenderer::Type::Other, {}}};
+static std::unordered_map<pragma::debug::DebugRenderer::Type, std::vector<pragma::debug::DebugRenderer::RuntimeObject>> s_debugObjects {{pragma::debug::DebugRenderer::Type::Triangles, {}}, {pragma::debug::DebugRenderer::Type::Lines, {}}, {pragma::debug::DebugRenderer::Type::LinesStrip, {}}, {pragma::debug::DebugRenderer::Type::Points, {}},
+  {pragma::debug::DebugRenderer::Type::PointsVertex, {}}, {pragma::debug::DebugRenderer::Type::Other, {}}};
 
-static bool is_obj_valid(DebugRenderer::RuntimeObject &o, double t) { return o.obj != nullptr && o.obj->IsValid() && (t <= o.time || o.obj.use_count() != 1); }
+static bool is_obj_valid(pragma::debug::DebugRenderer::RuntimeObject &o, double t) { return o.obj != nullptr && o.obj->IsValid() && (t <= o.time || o.obj.use_count() != 1); }
 
 static void cleanup()
 {
@@ -51,127 +51,127 @@ static void cleanup()
 	}
 }
 
-DebugRenderer::BaseObject::BaseObject() { umath::set_flag(m_flags, Flags::Valid); }
-bool DebugRenderer::BaseObject::IsValid() const { return umath::is_flag_set(m_flags, Flags::Valid); }
-void DebugRenderer::BaseObject::Remove() { umath::set_flag(m_flags, Flags::Valid, false); }
-const umath::ScaledTransform &DebugRenderer::BaseObject::GetPose() const { return const_cast<BaseObject *>(this)->GetPose(); }
-umath::ScaledTransform &DebugRenderer::BaseObject::GetPose() { return m_pose; }
-void DebugRenderer::BaseObject::SetPose(const umath::ScaledTransform &pose)
+pragma::debug::DebugRenderer::BaseObject::BaseObject() { umath::set_flag(m_flags, Flags::Valid); }
+bool pragma::debug::DebugRenderer::BaseObject::IsValid() const { return umath::is_flag_set(m_flags, Flags::Valid); }
+void pragma::debug::DebugRenderer::BaseObject::Remove() { umath::set_flag(m_flags, Flags::Valid, false); }
+const umath::ScaledTransform &pragma::debug::DebugRenderer::BaseObject::GetPose() const { return const_cast<BaseObject *>(this)->GetPose(); }
+umath::ScaledTransform &pragma::debug::DebugRenderer::BaseObject::GetPose() { return m_pose; }
+void pragma::debug::DebugRenderer::BaseObject::SetPose(const umath::ScaledTransform &pose)
 {
 	m_pose = pose;
 	UpdateModelMatrix();
 }
-const Vector3 &DebugRenderer::BaseObject::GetPos() const { return m_pose.GetOrigin(); }
-void DebugRenderer::BaseObject::SetPos(const Vector3 &pos)
+const Vector3 &pragma::debug::DebugRenderer::BaseObject::GetPos() const { return m_pose.GetOrigin(); }
+void pragma::debug::DebugRenderer::BaseObject::SetPos(const Vector3 &pos)
 {
 	m_pose.SetOrigin(pos);
 	UpdateModelMatrix();
 }
-const Quat &DebugRenderer::BaseObject::GetRotation() const { return m_pose.GetRotation(); }
-void DebugRenderer::BaseObject::SetRotation(const Quat &rot)
+const Quat &pragma::debug::DebugRenderer::BaseObject::GetRotation() const { return m_pose.GetRotation(); }
+void pragma::debug::DebugRenderer::BaseObject::SetRotation(const Quat &rot)
 {
 	m_pose.SetRotation(rot);
 	UpdateModelMatrix();
 }
-EulerAngles DebugRenderer::BaseObject::GetAngles() const { return EulerAngles(m_pose.GetRotation()); }
-void DebugRenderer::BaseObject::SetAngles(const EulerAngles &ang) { SetRotation(uquat::create(ang)); }
-const Vector3 &DebugRenderer::BaseObject::GetScale() const { return m_pose.GetScale(); }
-void DebugRenderer::BaseObject::SetScale(const Vector3 &scale)
+EulerAngles pragma::debug::DebugRenderer::BaseObject::GetAngles() const { return EulerAngles(m_pose.GetRotation()); }
+void pragma::debug::DebugRenderer::BaseObject::SetAngles(const EulerAngles &ang) { SetRotation(uquat::create(ang)); }
+const Vector3 &pragma::debug::DebugRenderer::BaseObject::GetScale() const { return m_pose.GetScale(); }
+void pragma::debug::DebugRenderer::BaseObject::SetScale(const Vector3 &scale)
 {
 	m_pose.SetScale(scale);
 	UpdateModelMatrix();
 }
-const Mat4 &DebugRenderer::BaseObject::GetModelMatrix() const { return m_modelMatrix; }
-bool DebugRenderer::BaseObject::IsVisible() const { return umath::is_flag_set(m_flags, Flags::Visible); }
-void DebugRenderer::BaseObject::SetVisible(bool b) { umath::set_flag(m_flags, Flags::Visible, b); }
-bool DebugRenderer::BaseObject::ShouldIgnoreDepth() const { return umath::is_flag_set(m_flags, Flags::IgnoreDepth); }
-void DebugRenderer::BaseObject::SetIgnoreDepth(bool b) { umath::set_flag(m_flags, Flags::IgnoreDepth, b); }
-void DebugRenderer::BaseObject::UpdateModelMatrix() { m_modelMatrix = m_pose.::umath::Transform::ToMatrix() * glm::gtc::scale(glm::mat4 {1.f}, GetScale()); }
+const Mat4 &pragma::debug::DebugRenderer::BaseObject::GetModelMatrix() const { return m_modelMatrix; }
+bool pragma::debug::DebugRenderer::BaseObject::IsVisible() const { return umath::is_flag_set(m_flags, Flags::Visible); }
+void pragma::debug::DebugRenderer::BaseObject::SetVisible(bool b) { umath::set_flag(m_flags, Flags::Visible, b); }
+bool pragma::debug::DebugRenderer::BaseObject::ShouldIgnoreDepth() const { return umath::is_flag_set(m_flags, Flags::IgnoreDepth); }
+void pragma::debug::DebugRenderer::BaseObject::SetIgnoreDepth(bool b) { umath::set_flag(m_flags, Flags::IgnoreDepth, b); }
+void pragma::debug::DebugRenderer::BaseObject::UpdateModelMatrix() { m_modelMatrix = m_pose.::umath::Transform::ToMatrix() * glm::gtc::scale(glm::mat4 {1.f}, GetScale()); }
 
 ///////////////////////////
 
-DebugRenderer::CollectionObject::CollectionObject(const std::vector<std::shared_ptr<BaseObject>> &objs) : BaseObject(), m_objects(objs) {}
-void DebugRenderer::CollectionObject::AddObject(const std::shared_ptr<BaseObject> &o) { m_objects.push_back(o); }
-void DebugRenderer::CollectionObject::SetPos(const Vector3 &pos)
+pragma::debug::DebugRenderer::CollectionObject::CollectionObject(const std::vector<std::shared_ptr<BaseObject>> &objs) : BaseObject(), m_objects(objs) {}
+void pragma::debug::DebugRenderer::CollectionObject::AddObject(const std::shared_ptr<BaseObject> &o) { m_objects.push_back(o); }
+void pragma::debug::DebugRenderer::CollectionObject::SetPos(const Vector3 &pos)
 {
 	BaseObject::SetPos(pos);
 	for(auto &o : m_objects)
 		o->SetPos(pos);
 }
-void DebugRenderer::CollectionObject::SetRotation(const Quat &rot)
+void pragma::debug::DebugRenderer::CollectionObject::SetRotation(const Quat &rot)
 {
 	BaseObject::SetRotation(rot);
 	for(auto &o : m_objects)
 		o->SetRotation(rot);
 }
-void DebugRenderer::CollectionObject::SetAngles(const EulerAngles &ang)
+void pragma::debug::DebugRenderer::CollectionObject::SetAngles(const EulerAngles &ang)
 {
 	BaseObject::SetAngles(ang);
 	for(auto &o : m_objects)
 		o->SetAngles(ang);
 }
-void DebugRenderer::CollectionObject::Remove()
+void pragma::debug::DebugRenderer::CollectionObject::Remove()
 {
 	BaseObject::Remove();
 	for(auto &o : m_objects)
 		o->Remove();
 }
-void DebugRenderer::CollectionObject::SetScale(const Vector3 &scale)
+void pragma::debug::DebugRenderer::CollectionObject::SetScale(const Vector3 &scale)
 {
 	BaseObject::SetScale(scale);
 	for(auto &o : m_objects)
 		o->SetScale(scale);
 }
-DebugRenderer::ObjectType DebugRenderer::CollectionObject::GetType() const { return ObjectType::Collection; }
+pragma::debug::DebugRenderer::ObjectType pragma::debug::DebugRenderer::CollectionObject::GetType() const { return ObjectType::Collection; }
 
 ///////////////////////////
 
-DebugRenderer::WorldObject::WorldObject() : BaseObject(), m_vertexBuffer(nullptr), m_colorBuffer(nullptr), m_color {0.f, 0.f, 0.f, 1.f} {}
+pragma::debug::DebugRenderer::WorldObject::WorldObject() : BaseObject(), m_vertexBuffer(nullptr), m_colorBuffer(nullptr), m_color {0.f, 0.f, 0.f, 1.f} {}
 
-DebugRenderer::WorldObject::WorldObject(const Vector4 &color) : BaseObject(), m_vertexBuffer(nullptr), m_colorBuffer(nullptr), m_color(color) {}
-DebugRenderer::WorldObject::~WorldObject()
+pragma::debug::DebugRenderer::WorldObject::WorldObject(const Vector4 &color) : BaseObject(), m_vertexBuffer(nullptr), m_colorBuffer(nullptr), m_color(color) {}
+pragma::debug::DebugRenderer::WorldObject::~WorldObject()
 {
 	if(m_vertexBuffer != nullptr)
 		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexBuffer);
 	if(m_colorBuffer != nullptr)
 		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_colorBuffer);
 }
-DebugRenderer::ObjectType DebugRenderer::WorldObject::GetType() const { return ObjectType::World; }
-const Vector4 &DebugRenderer::WorldObject::GetColor() const { return m_color; }
-const Vector4 &DebugRenderer::WorldObject::GetOutlineColor() const { return m_outlineColor; }
-void DebugRenderer::WorldObject::SetColor(const Vector4 &col) { m_color = col; }
-void DebugRenderer::WorldObject::SetOutlineColor(const Vector4 &outlineColor)
+pragma::debug::DebugRenderer::ObjectType pragma::debug::DebugRenderer::WorldObject::GetType() const { return ObjectType::World; }
+const Vector4 &pragma::debug::DebugRenderer::WorldObject::GetColor() const { return m_color; }
+const Vector4 &pragma::debug::DebugRenderer::WorldObject::GetOutlineColor() const { return m_outlineColor; }
+void pragma::debug::DebugRenderer::WorldObject::SetColor(const Vector4 &col) { m_color = col; }
+void pragma::debug::DebugRenderer::WorldObject::SetOutlineColor(const Vector4 &outlineColor)
 {
 	m_bOutline = true;
 	m_outlineColor = outlineColor;
 }
-bool DebugRenderer::WorldObject::HasOutline() const { return m_bOutline; }
-const std::shared_ptr<prosper::IBuffer> &DebugRenderer::WorldObject::GetColorBuffer() const { return m_colorBuffer; }
-const std::shared_ptr<prosper::IBuffer> &DebugRenderer::WorldObject::GetVertexBuffer() const { return m_vertexBuffer; }
-uint32_t DebugRenderer::WorldObject::GetVertexCount() const { return (m_vertexCount != std::numeric_limits<uint32_t>::max()) ? m_vertexCount : m_vertices.size(); }
-void DebugRenderer::WorldObject::SetVertexPosition(uint32_t idx, const Vector3 &pos)
+bool pragma::debug::DebugRenderer::WorldObject::HasOutline() const { return m_bOutline; }
+const std::shared_ptr<prosper::IBuffer> &pragma::debug::DebugRenderer::WorldObject::GetColorBuffer() const { return m_colorBuffer; }
+const std::shared_ptr<prosper::IBuffer> &pragma::debug::DebugRenderer::WorldObject::GetVertexBuffer() const { return m_vertexBuffer; }
+uint32_t pragma::debug::DebugRenderer::WorldObject::GetVertexCount() const { return (m_vertexCount != std::numeric_limits<uint32_t>::max()) ? m_vertexCount : m_vertices.size(); }
+void pragma::debug::DebugRenderer::WorldObject::SetVertexPosition(uint32_t idx, const Vector3 &pos)
 {
 	if(idx >= m_vertices.size())
 		return;
 	m_vertices[idx] = pos;
 }
-std::optional<Vector3> DebugRenderer::WorldObject::GetVertexPosition(uint32_t idx) const
+std::optional<Vector3> pragma::debug::DebugRenderer::WorldObject::GetVertexPosition(uint32_t idx) const
 {
 	if(idx >= m_vertices.size())
 		return {};
 	return m_vertices[idx];
 }
-void DebugRenderer::WorldObject::AddVertex(const Vector3 &v) { m_vertices.push_back(v); }
-std::vector<Vector3> &DebugRenderer::WorldObject::GetVertices() { return m_vertices; }
-std::vector<Vector4> &DebugRenderer::WorldObject::GetColors() { return m_colors; }
-bool DebugRenderer::WorldObject::InitializeBuffers(const std::shared_ptr<prosper::IBuffer> &vertexBuffer, uint32_t vertexCount)
+void pragma::debug::DebugRenderer::WorldObject::AddVertex(const Vector3 &v) { m_vertices.push_back(v); }
+std::vector<Vector3> &pragma::debug::DebugRenderer::WorldObject::GetVertices() { return m_vertices; }
+std::vector<Vector4> &pragma::debug::DebugRenderer::WorldObject::GetColors() { return m_colors; }
+bool pragma::debug::DebugRenderer::WorldObject::InitializeBuffers(const std::shared_ptr<prosper::IBuffer> &vertexBuffer, uint32_t vertexCount)
 {
 	m_colorBuffer = nullptr;
 	m_vertexBuffer = vertexBuffer;
 	m_vertexCount = vertexCount;
 	return m_vertexBuffer != nullptr;
 }
-bool DebugRenderer::WorldObject::InitializeBuffers()
+bool pragma::debug::DebugRenderer::WorldObject::InitializeBuffers()
 {
 	m_colorBuffer = nullptr;
 	m_vertexBuffer = nullptr;
@@ -187,14 +187,14 @@ bool DebugRenderer::WorldObject::InitializeBuffers()
 	return true;
 }
 
-void DebugRenderer::WorldObject::UpdateVertexBuffer()
+void pragma::debug::DebugRenderer::WorldObject::UpdateVertexBuffer()
 {
 	if(m_vertexBuffer == nullptr)
 		return;
 	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_vertexBuffer, 0ull, m_vertices.size() * sizeof(m_vertices.front()), m_vertices.data());
 }
 
-void DebugRenderer::WorldObject::UpdateColorBuffer()
+void pragma::debug::DebugRenderer::WorldObject::UpdateColorBuffer()
 {
 	if(m_colorBuffer == nullptr)
 		return;
@@ -203,7 +203,7 @@ void DebugRenderer::WorldObject::UpdateColorBuffer()
 
 ///////////////////////////
 
-DebugRenderer::TextObject::TextObject(WIText *elText) : BaseObject(), m_hText(elText->GetHandle()), m_hCbRender()
+pragma::debug::DebugRenderer::TextObject::TextObject(pragma::gui::types::WIText *elText) : BaseObject(), m_hText(elText->GetHandle()), m_hCbRender()
 {
 	elText->AddCallback("OnTextRendered", FunctionCallback<void, std::reference_wrapper<const std::shared_ptr<prosper::RenderTarget>>>::Create([this](std::reference_wrapper<const std::shared_ptr<prosper::RenderTarget>> rt) {
 		if(pragma::ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE.IsValid() == false)
@@ -215,7 +215,7 @@ DebugRenderer::TextObject::TextObject(WIText *elText) : BaseObject(), m_hText(el
 		m_descSetGroupText->GetDescriptorSet()->SetBindingTexture(tex, 0u);
 	}));
 }
-DebugRenderer::TextObject::~TextObject()
+pragma::debug::DebugRenderer::TextObject::~TextObject()
 {
 	if(m_descSetGroupText != nullptr)
 		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_descSetGroupText);
@@ -224,78 +224,78 @@ DebugRenderer::TextObject::~TextObject()
 	if(m_hCbRender.IsValid())
 		m_hCbRender.Remove();
 }
-WIText *DebugRenderer::TextObject::GetTextElement() const { return static_cast<WIText *>(m_hText.get()); }
-void DebugRenderer::TextObject::Initialize(CallbackHandle &hCallback) { m_hCbRender = hCallback; }
-prosper::IDescriptorSet *DebugRenderer::TextObject::GetTextDescriptorSet() const { return (m_descSetGroupText != nullptr) ? m_descSetGroupText->GetDescriptorSet() : nullptr; }
-DebugRenderer::ObjectType DebugRenderer::TextObject::GetType() const { return ObjectType::Text; }
+pragma::gui::types::WIText *pragma::debug::DebugRenderer::TextObject::GetTextElement() const { return static_cast<pragma::gui::types::WIText *>(m_hText.get()); }
+void pragma::debug::DebugRenderer::TextObject::Initialize(CallbackHandle &hCallback) { m_hCbRender = hCallback; }
+prosper::IDescriptorSet *pragma::debug::DebugRenderer::TextObject::GetTextDescriptorSet() const { return (m_descSetGroupText != nullptr) ? m_descSetGroupText->GetDescriptorSet() : nullptr; }
+pragma::debug::DebugRenderer::ObjectType pragma::debug::DebugRenderer::TextObject::GetType() const { return ObjectType::Text; }
 
 ///////////////////////////
 
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::shared_ptr<prosper::IBuffer> &vertexBuffer, uint32_t vertexCount, const DebugRenderInfo &renderInfo)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawPoints(const std::shared_ptr<prosper::IBuffer> &vertexBuffer, uint32_t vertexCount, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	if(vertexCount == 0)
 		return nullptr;
-	auto o = ::util::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
+	auto o = ::util::make_shared<pragma::debug::DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
 	init_debug_object(*o, renderInfo);
 	if(o->InitializeBuffers(vertexBuffer, vertexCount) == false)
 		return nullptr;
 	cleanup();
-	auto &objs = s_debugObjects[DebugRenderer::Type::PointsVertex];
-	objs.push_back(DebugRenderer::RuntimeObject {o, renderInfo.duration});
+	auto &objs = s_debugObjects[pragma::debug::DebugRenderer::Type::PointsVertex];
+	objs.push_back(pragma::debug::DebugRenderer::RuntimeObject {o, renderInfo.duration});
 	return objs.back().obj;
 }
 
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::vector<Vector3> &points, const DebugRenderInfo &renderInfo)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawPoints(const std::vector<Vector3> &points, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	if(points.empty())
 		return nullptr;
-	auto o = ::util::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
+	auto o = ::util::make_shared<pragma::debug::DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
 	init_debug_object(*o, renderInfo);
 	auto &oVerts = o->GetVertices();
 	oVerts = points;
 	if(o->InitializeBuffers() == false)
 		return nullptr;
 	cleanup();
-	auto &objs = s_debugObjects[DebugRenderer::Type::Points];
-	objs.push_back(DebugRenderer::RuntimeObject {o, renderInfo.duration});
+	auto &objs = s_debugObjects[pragma::debug::DebugRenderer::Type::Points];
+	objs.push_back(pragma::debug::DebugRenderer::RuntimeObject {o, renderInfo.duration});
 	return objs.back().obj;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoint(const DebugRenderInfo &renderInfo)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawPoint(const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	auto r = DrawPoints(std::vector<Vector3> {Vector3 {0.f, 0.f, 0.f}}, renderInfo);
 	r->SetPos(renderInfo.pose.GetOrigin());
 	return r;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLines(const std::vector<Vector3> &lines, const DebugRenderInfo &renderInfo)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawLines(const std::vector<Vector3> &lines, const pragma::debug::DebugRenderInfo &renderInfo)
 {
-	auto o = ::util::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
+	auto o = ::util::make_shared<pragma::debug::DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
 	init_debug_object(*o, renderInfo);
 	auto &oVerts = o->GetVertices();
 	oVerts = lines;
 	if(o->InitializeBuffers() == false)
 		return nullptr;
 	cleanup();
-	auto &objs = s_debugObjects[DebugRenderer::Type::Lines];
-	objs.push_back(DebugRenderer::RuntimeObject {o, renderInfo.duration});
+	auto &objs = s_debugObjects[pragma::debug::DebugRenderer::Type::Lines];
+	objs.push_back(pragma::debug::DebugRenderer::RuntimeObject {o, renderInfo.duration});
 	return objs.back().obj;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLine(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo) { return DrawLines(std::vector<Vector3> {start, end}, renderInfo); }
-static std::shared_ptr<DebugRenderer::BaseObject> draw_box(const Vector3 &center, const Vector3 &min, const Vector3 &max, const DebugRenderInfo &renderInfo, const Color *outlineColor)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawLine(const Vector3 &start, const Vector3 &end, const pragma::debug::DebugRenderInfo &renderInfo) { return DrawLines(std::vector<Vector3> {start, end}, renderInfo); }
+static std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> draw_box(const Vector3 &center, const Vector3 &min, const Vector3 &max, const pragma::debug::DebugRenderInfo &renderInfo, const Color *outlineColor)
 {
-	auto r = ::util::make_shared<DebugRenderer::CollectionObject>();
+	auto r = ::util::make_shared<pragma::debug::DebugRenderer::CollectionObject>();
 	if(outlineColor != nullptr) {
-		DebugRenderInfo outlineDrawInfo {};
+		pragma::debug::DebugRenderInfo outlineDrawInfo {};
 		outlineDrawInfo.color = renderInfo.color;
 		outlineDrawInfo.duration = renderInfo.duration;
 		std::vector<Vector3> meshVerts = {min, {min.x, min.y, max.z}, {min.x, max.y, max.z}, {max.x, max.y, min.z}, min, {min.x, max.y, min.z}, {max.x, min.y, max.z}, min, {max.x, min.y, min.z}, {max.x, max.y, min.z}, {max.x, min.y, min.z}, min, min, {min.x, max.y, max.z},
 		  {min.x, max.y, min.z}, {max.x, min.y, max.z}, {min.x, min.y, max.z}, min, {min.x, max.y, max.z}, {min.x, min.y, max.z}, {max.x, min.y, max.z}, max, {max.x, min.y, min.z}, {max.x, max.y, min.z}, {max.x, min.y, min.z}, max, {max.x, min.y, max.z}, max, {max.x, max.y, min.z},
 		  {min.x, max.y, min.z}, max, {min.x, max.y, min.z}, {min.x, max.y, max.z}, max, {min.x, max.y, max.z}, {max.x, min.y, max.z}};
-		auto oMesh = DebugRenderer::DrawMesh(meshVerts, outlineDrawInfo);
+		auto oMesh = pragma::debug::DebugRenderer::DrawMesh(meshVerts, outlineDrawInfo);
 		if(oMesh != nullptr)
 			r->AddObject(oMesh);
 	}
 
-	auto oOutline = ::util::make_shared<DebugRenderer::WorldObject>(((outlineColor != nullptr) ? *outlineColor : renderInfo.color).ToVector4());
+	auto oOutline = ::util::make_shared<pragma::debug::DebugRenderer::WorldObject>(((outlineColor != nullptr) ? *outlineColor : renderInfo.color).ToVector4());
 	init_debug_object(*oOutline, renderInfo);
 	auto &verts = oOutline->GetVertices();
 	auto start = min;
@@ -306,22 +306,22 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_box(const Vector3 &center
 	if(oOutline->InitializeBuffers() == false)
 		return nullptr;
 	cleanup();
-	auto &objs = s_debugObjects[DebugRenderer::Type::Lines];
-	objs.push_back(DebugRenderer::RuntimeObject {oOutline, renderInfo.duration});
+	auto &objs = s_debugObjects[pragma::debug::DebugRenderer::Type::Lines];
+	objs.push_back(pragma::debug::DebugRenderer::RuntimeObject {oOutline, renderInfo.duration});
 	r->AddObject(oOutline);
 	r->SetPos(center);
 	r->SetAngles(renderInfo.pose.GetRotation());
 	return r;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawBox(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawBox(const Vector3 &start, const Vector3 &end, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	auto center = (end + start) * 0.5f;
 	auto *poutlineColor = renderInfo.outlineColor ? &*renderInfo.outlineColor : nullptr;
 	return draw_box(renderInfo.pose.GetOrigin() + center, start - center, end - center, renderInfo, poutlineColor);
 }
-static WIText *create_text_element(const std::string &text)
+static pragma::gui::types::WIText *create_text_element(const std::string &text)
 {
-	auto *el = static_cast<WIText *>(pragma::get_cgame()->CreateGUIElement("WIText"));
+	auto *el = static_cast<pragma::gui::types::WIText *>(pragma::get_cgame()->CreateGUIElement("WIText"));
 	if(el == nullptr)
 		return nullptr;
 	el->SetText(text);
@@ -330,14 +330,14 @@ static WIText *create_text_element(const std::string &text)
 	el->SetCacheEnabled(true);
 	return el;
 }
-static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el, const Vector3 &pos, const Vector2 &worldSize, float duration)
+static std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> draw_text(pragma::gui::types::WIText *el, const Vector3 &pos, const Vector2 &worldSize, float duration)
 {
 	auto &sz = el->GetSize();
 	if(sz.x <= 0 || sz.y <= 0)
 		return nullptr;
 	Vector2 szUnits {(worldSize.x / 2.f) /* /static_cast<float>(el->GetWidth())*/, (worldSize.y / 2.f) /* /static_cast<float>(el->GetHeight())*/};
 
-	auto o = ::util::make_shared<DebugRenderer::TextObject>(el);
+	auto o = ::util::make_shared<pragma::debug::DebugRenderer::TextObject>(el);
 	o->SetPos(pos);
 	auto *ptrO = o.get();
 	auto hEl = el->GetHandle();
@@ -345,7 +345,7 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el, const Ve
 		auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 		if(!hEl.IsValid() || cam == nullptr)
 			return;
-		auto *el = static_cast<const WIText *>(hEl.get());
+		auto *el = static_cast<const pragma::gui::types::WIText *>(hEl.get());
 		auto rot = cam->GetEntity().GetRotation();
 		ptrO->SetRotation(rot);
 
@@ -359,7 +359,7 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el, const Ve
 
 		auto *ds = ptrO->GetTextDescriptorSet();
 		if(ds != nullptr) {
-			auto *pShader = static_cast<pragma::ShaderDebugTexture *>(pragma::get_cgame()->GetGameShader(CGame::GameShader::DebugTexture).get());
+			auto *pShader = static_cast<pragma::ShaderDebugTexture *>(pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::DebugTexture).get());
 			if(pShader != nullptr) {
 				auto drawCmd = pragma::get_cgame()->GetCurrentDrawCommandBuffer();
 				prosper::ShaderBindState bindState {*drawCmd};
@@ -375,11 +375,11 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el, const Ve
 	}));
 	o->Initialize(cb);
 	cleanup();
-	auto &objs = s_debugObjects[DebugRenderer::Type::Other];
-	objs.push_back(DebugRenderer::RuntimeObject {o, duration});
+	auto &objs = s_debugObjects[pragma::debug::DebugRenderer::Type::Other];
+	objs.push_back(pragma::debug::DebugRenderer::RuntimeObject {o, duration});
 	return objs.back().obj;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const DebugRenderInfo &renderInfo, const std::string &text, const Vector2 &worldSize)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawText(const pragma::debug::DebugRenderInfo &renderInfo, const std::string &text, const Vector2 &worldSize)
 {
 	auto *pText = create_text_element(text);
 	if(!pText)
@@ -400,7 +400,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const DebugRe
 	}
 	return r;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const DebugRenderInfo &renderInfo, const std::string &text, float sizeScale)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawText(const pragma::debug::DebugRenderInfo &renderInfo, const std::string &text, float sizeScale)
 {
 	auto *pText = create_text_element(text);
 	if(!pText)
@@ -422,31 +422,31 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const DebugRe
 	}
 	return r;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawMesh(const std::vector<Vector3> &verts, const DebugRenderInfo &renderInfo)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawMesh(const std::vector<Vector3> &verts, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	if(verts.empty() == true)
 		return nullptr;
-	auto o = ::util::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
+	auto o = ::util::make_shared<pragma::debug::DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
 	init_debug_object(*o, renderInfo);
 	auto &oVerts = o->GetVertices();
 	oVerts = verts;
 	if(o->InitializeBuffers() == false)
 		return nullptr;
 	cleanup();
-	auto &triangleObjs = s_debugObjects[DebugRenderer::Type::Triangles];
-	triangleObjs.push_back(DebugRenderer::RuntimeObject {o, renderInfo.duration});
+	auto &triangleObjs = s_debugObjects[pragma::debug::DebugRenderer::Type::Triangles];
+	triangleObjs.push_back(pragma::debug::DebugRenderer::RuntimeObject {o, renderInfo.duration});
 	if(renderInfo.outlineColor)
 		static_cast<WorldObject *>(triangleObjs.back().obj.get())->SetOutlineColor(renderInfo.outlineColor->ToVector4());
 	return triangleObjs.back().obj;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawSphere(const DebugRenderInfo &renderInfo, float radius, uint32_t recursionLevel)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawSphere(const pragma::debug::DebugRenderInfo &renderInfo, float radius, uint32_t recursionLevel)
 {
 	std::vector<Vector3> verts;
-	IcoSphere::Create(Vector3 {0.f, 0.f, 0.f}, radius, verts, recursionLevel);
+	pragma::math::IcoSphere::Create(Vector3 {0.f, 0.f, 0.f}, radius, verts, recursionLevel);
 	auto r = DrawMesh(verts, renderInfo);
 	return r;
 }
-static std::shared_ptr<DebugRenderer::BaseObject> draw_truncated_cone(const DebugRenderInfo &renderInfo, float startRadius, const Vector3 &dir, float dist, float endRadius, uint32_t segmentCount)
+static std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> draw_truncated_cone(const pragma::debug::DebugRenderInfo &renderInfo, float startRadius, const Vector3 &dir, float dist, float endRadius, uint32_t segmentCount)
 {
 	auto rot = uquat::create_look_rotation(dir, uvec::get_perpendicular(dir));
 
@@ -459,21 +459,21 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_truncated_cone(const Debu
 	for(auto idx : triangles)
 		meshVerts.push_back(verts[idx]);
 
-	auto r = DebugRenderer::DrawMesh(meshVerts, renderInfo);
+	auto r = pragma::debug::DebugRenderer::DrawMesh(meshVerts, renderInfo);
 	return r;
 }
-static std::shared_ptr<DebugRenderer::BaseObject> draw_cone(const DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float angle, uint32_t segmentCount)
+static std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> draw_cone(const pragma::debug::DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float angle, uint32_t segmentCount)
 {
 	auto radius = dist * umath::tan(umath::deg_to_rad(angle));
 	return draw_truncated_cone(renderInfo, 0.f, dir, dist, radius, segmentCount);
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawCone(const DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float angle, uint32_t segmentCount) { return draw_cone(renderInfo, dir, dist, angle, segmentCount); }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawTruncatedCone(const DebugRenderInfo &renderInfo, float startRadius, const Vector3 &dir, float dist, float endRadius, uint32_t segmentCount)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawCone(const pragma::debug::DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float angle, uint32_t segmentCount) { return draw_cone(renderInfo, dir, dist, angle, segmentCount); }
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawTruncatedCone(const pragma::debug::DebugRenderInfo &renderInfo, float startRadius, const Vector3 &dir, float dist, float endRadius, uint32_t segmentCount)
 {
 	return draw_truncated_cone(renderInfo, startRadius, dir, dist, endRadius, segmentCount);
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawCylinder(const DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float radius, uint32_t segmentCount) { return draw_truncated_cone(renderInfo, radius, dir, dist, radius, segmentCount); }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPath(const std::vector<Vector3> &path, const DebugRenderInfo &renderInfo)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawCylinder(const pragma::debug::DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float radius, uint32_t segmentCount) { return draw_truncated_cone(renderInfo, radius, dir, dist, radius, segmentCount); }
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawPath(const std::vector<Vector3> &path, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	if(path.size() < 2)
 		return nullptr;
@@ -485,7 +485,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPath(const std::ve
 	}
 	return DrawLines(lines, renderInfo);
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawSpline(const std::vector<Vector3> &path, uint32_t segmentCount, float curvature, const DebugRenderInfo &renderInfo)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawSpline(const std::vector<Vector3> &path, uint32_t segmentCount, float curvature, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	if(path.size() < 2)
 		return nullptr;
@@ -497,11 +497,11 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawSpline(const std::
 		auto &p0 = (i > 0) ? path[i - 1] : p1;
 		auto &p2 = path[i + 1];
 		auto &p3 = (i < numPath - 2) ? path[i + 2] : p2;
-		util::calc_hermite_spline(p0, p1, p2, p3, segmentCount, splinePath, curvature);
+		pragma::math::calc_hermite_spline(p0, p1, p2, p3, segmentCount, splinePath, curvature);
 	}
 	return DrawPath(splinePath, renderInfo);
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const Vector3 &n, float dist, const DebugRenderInfo &renderInfo)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawPlane(const Vector3 &n, float dist, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	auto perp = uvec::get_perpendicular(n);
 	auto origin = n * dist;
@@ -528,8 +528,8 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const Vector
 		r->AddObject(rLines);
 	return r;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const umath::Plane &plane, const DebugRenderInfo &renderInfo) { return DrawPlane(const_cast<umath::Plane &>(plane).GetNormal(), plane.GetDistance(), renderInfo); }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std::vector<Vector3> &points, const DebugRenderInfo &renderInfo)
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawPlane(const umath::Plane &plane, const pragma::debug::DebugRenderInfo &renderInfo) { return DrawPlane(const_cast<umath::Plane &>(plane).GetNormal(), plane.GetDistance(), renderInfo); }
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> pragma::debug::DebugRenderer::DrawFrustum(const std::vector<Vector3> &points, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	if(points.size() < 8)
 		return nullptr;
@@ -539,48 +539,48 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std:
 	// Near
 	r->AddObject(DrawMesh(
 	  {
-	    points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
-	    points.at(umath::to_integral(FrustumPoint::NearBottomRight)),
-	    points.at(umath::to_integral(FrustumPoint::NearTopRight)),
+	    points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomLeft)),
+	    points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomRight)),
+	    points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopRight)),
 
-	    points.at(umath::to_integral(FrustumPoint::NearTopRight)),
-	    points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
-	    points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
+	    points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopRight)),
+	    points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopLeft)),
+	    points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomLeft)),
 	  },
 	  renderInfo));
 	// Far
 	col = Color(0, 255, 0, a);
-	r->AddObject(DrawMesh({points.at(umath::to_integral(FrustumPoint::FarBottomLeft)), points.at(umath::to_integral(FrustumPoint::FarTopLeft)), points.at(umath::to_integral(FrustumPoint::FarTopRight)),
+	r->AddObject(DrawMesh({points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopRight)),
 
-	                        points.at(umath::to_integral(FrustumPoint::FarTopRight)), points.at(umath::to_integral(FrustumPoint::FarBottomRight)), points.at(umath::to_integral(FrustumPoint::FarBottomLeft))},
+	                        points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomLeft))},
 	  renderInfo));
 	// Left
 	col = Color(0, 0, 255, a);
-	r->AddObject(DrawMesh({points.at(umath::to_integral(FrustumPoint::FarBottomLeft)), points.at(umath::to_integral(FrustumPoint::NearBottomLeft)), points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
+	r->AddObject(DrawMesh({points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopLeft)),
 
-	                        points.at(umath::to_integral(FrustumPoint::NearTopLeft)), points.at(umath::to_integral(FrustumPoint::FarTopLeft)), points.at(umath::to_integral(FrustumPoint::FarBottomLeft))},
+	                        points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomLeft))},
 	  renderInfo));
 	// Right
 	col = Color(255, 255, 0, a);
-	r->AddObject(DrawMesh({points.at(umath::to_integral(FrustumPoint::FarBottomRight)), points.at(umath::to_integral(FrustumPoint::FarTopRight)), points.at(umath::to_integral(FrustumPoint::NearTopRight)),
+	r->AddObject(DrawMesh({points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopRight)),
 
-	                        points.at(umath::to_integral(FrustumPoint::NearTopRight)), points.at(umath::to_integral(FrustumPoint::NearBottomRight)), points.at(umath::to_integral(FrustumPoint::FarBottomRight))},
+	                        points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomRight))},
 	  renderInfo));
 	// Top
 	col = Color(255, 0, 255, a);
-	r->AddObject(DrawMesh({points.at(umath::to_integral(FrustumPoint::NearTopLeft)), points.at(umath::to_integral(FrustumPoint::NearTopRight)), points.at(umath::to_integral(FrustumPoint::FarTopRight)),
+	r->AddObject(DrawMesh({points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopRight)),
 
-	                        points.at(umath::to_integral(FrustumPoint::FarTopRight)), points.at(umath::to_integral(FrustumPoint::FarTopLeft)), points.at(umath::to_integral(FrustumPoint::NearTopLeft))},
+	                        points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarTopLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearTopLeft))},
 	  renderInfo));
 	// Bottom
 	col = Color(0, 255, 255, a);
-	r->AddObject(DrawMesh({points.at(umath::to_integral(FrustumPoint::NearBottomLeft)), points.at(umath::to_integral(FrustumPoint::FarBottomLeft)), points.at(umath::to_integral(FrustumPoint::FarBottomRight)),
+	r->AddObject(DrawMesh({points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomLeft)), points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomRight)),
 
-	                        points.at(umath::to_integral(FrustumPoint::FarBottomRight)), points.at(umath::to_integral(FrustumPoint::NearBottomRight)), points.at(umath::to_integral(FrustumPoint::NearBottomLeft))},
+	                        points.at(umath::to_integral(pragma::math::FrustumPoint::FarBottomRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomRight)), points.at(umath::to_integral(pragma::math::FrustumPoint::NearBottomLeft))},
 	  renderInfo));
 	return r;
 }
-std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DebugRenderer::DrawAxis(const DebugRenderInfo &renderInfo, const Vector3 &x, const Vector3 &y, const Vector3 &z)
+std::array<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject>, 3> pragma::debug::DebugRenderer::DrawAxis(const pragma::debug::DebugRenderInfo &renderInfo, const Vector3 &x, const Vector3 &y, const Vector3 &z)
 {
 	const float distance = 16.f;
 	auto rx = x;
@@ -599,43 +599,43 @@ std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DebugRenderer::DrawAxi
 	auto o2 = DrawLine(origin, origin + rz * distance);
 	return {o0, o1, o2};
 }
-std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DebugRenderer::DrawAxis(const DebugRenderInfo &renderInfo)
+std::array<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject>, 3> pragma::debug::DebugRenderer::DrawAxis(const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	Vector3 x {1.f, 0.f, 0.f};
 	Vector3 y {0.f, 1.f, 0.f};
 	Vector3 z {0.f, 0.f, 1.f};
 	return DrawAxis(renderInfo, x, y, z);
 }
-void DebugRenderer::ClearObjects()
+void pragma::debug::DebugRenderer::ClearObjects()
 {
 	for(auto &it : s_debugObjects)
 		it.second.clear();
 }
-void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam)
+void pragma::debug::DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam)
 {
 	if(s_debugObjects.empty())
 		return;
-	auto &whDebugShader = pragma::get_cgame()->GetGameShader(CGame::GameShader::Debug);
-	auto &whDebugVertexShader = pragma::get_cgame()->GetGameShader(CGame::GameShader::DebugVertex);
+	auto &whDebugShader = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Debug);
+	auto &whDebugVertexShader = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::DebugVertex);
 	if(whDebugShader.expired() || whDebugVertexShader.expired())
 		return;
-	const std::unordered_map<DebugRenderer::Type, pragma::ShaderDebug::Pipeline> shaderPipeline = {
-	  {DebugRenderer::Type::Triangles, pragma::ShaderDebug::Pipeline::Triangle},
-	  {DebugRenderer::Type::Lines, pragma::ShaderDebug::Pipeline::Line},
-	  {DebugRenderer::Type::LinesStrip, pragma::ShaderDebug::Pipeline::LineStrip},
-	  {DebugRenderer::Type::Points, pragma::ShaderDebug::Pipeline::Point},
-	  {DebugRenderer::Type::PointsVertex, pragma::ShaderDebug::Pipeline::Vertex},
+	const std::unordered_map<pragma::debug::DebugRenderer::Type, pragma::ShaderDebug::Pipeline> shaderPipeline = {
+	  {pragma::debug::DebugRenderer::Type::Triangles, pragma::ShaderDebug::Pipeline::Triangle},
+	  {pragma::debug::DebugRenderer::Type::Lines, pragma::ShaderDebug::Pipeline::Line},
+	  {pragma::debug::DebugRenderer::Type::LinesStrip, pragma::ShaderDebug::Pipeline::LineStrip},
+	  {pragma::debug::DebugRenderer::Type::Points, pragma::ShaderDebug::Pipeline::Point},
+	  {pragma::debug::DebugRenderer::Type::PointsVertex, pragma::ShaderDebug::Pipeline::Vertex},
 	};
 	auto &t = pragma::get_client_state()->RealTime();
 
 	auto vp = cam.GetProjectionMatrix() * cam.GetViewMatrix();
 	auto *shader = static_cast<pragma::ShaderDebug *>(whDebugShader.get());
 	auto *shaderVertex = static_cast<pragma::ShaderDebugVertexColor *>(whDebugVertexShader.get());
-	std::queue<std::shared_ptr<DebugRenderer::BaseObject>> outlines;
+	std::queue<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject>> outlines;
 	static std::mutex g_renderDbgMutex;
 	g_renderDbgMutex.lock();
 	for(auto &[type, meshes] : s_debugObjects) {
-		if(type == DebugRenderer::Type::Other) {
+		if(type == pragma::debug::DebugRenderer::Type::Other) {
 			for(auto it = meshes.begin(); it != meshes.end();) {
 				auto &mesh = *it;
 				if(!mesh.obj->IsValid() || (t > mesh.time && mesh.obj.use_count() == 1))
@@ -673,8 +673,8 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pr
 			}
 
 			auto &o = mesh.obj;
-			if(o->IsVisible() == true && o->GetType() == DebugRenderer::ObjectType::World) {
-				auto *ptrO = static_cast<DebugRenderer::WorldObject *>(o.get());
+			if(o->IsVisible() == true && o->GetType() == pragma::debug::DebugRenderer::ObjectType::World) {
+				auto *ptrO = static_cast<pragma::debug::DebugRenderer::WorldObject *>(o.get());
 				auto &colBuffer = ptrO->GetColorBuffer();
 				auto mvp = vp * ptrO->GetModelMatrix();
 				if(colBuffer == nullptr)
@@ -695,7 +695,7 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pr
 	if(outlines.empty() || shader->RecordBeginDraw(bindState, pragma::ShaderDebug::Pipeline::Wireframe) == false)
 		return;
 	while(!outlines.empty()) {
-		auto &o = static_cast<DebugRenderer::WorldObject &>(*outlines.front());
+		auto &o = static_cast<pragma::debug::DebugRenderer::WorldObject &>(*outlines.front());
 		shader->RecordDraw(bindState, *o.GetVertexBuffer(), o.GetVertexCount(), vp * o.GetModelMatrix());
 		outlines.pop();
 	}

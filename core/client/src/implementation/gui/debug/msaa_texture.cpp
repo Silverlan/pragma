@@ -9,15 +9,15 @@ import :gui.debug_msaa_texture;
 
 import :engine;
 
-WIDebugMSAATexture::WIDebugMSAATexture() : WIBase() {}
+pragma::gui::types::WIDebugMSAATexture::WIDebugMSAATexture() : WIBase() {}
 
-void WIDebugMSAATexture::Initialize()
+void pragma::gui::types::WIDebugMSAATexture::Initialize()
 {
 	m_hTextureRect = CreateChild<WITexturedRect>();
 	m_hTextureRect->SetAutoAlignToParent(true);
 }
 
-void WIDebugMSAATexture::SetTexture(prosper::Texture &texture)
+void pragma::gui::types::WIDebugMSAATexture::SetTexture(prosper::Texture &texture)
 {
 	m_msaaTexture = texture.shared_from_this();
 	UpdateResolvedTexture();
@@ -25,7 +25,7 @@ void WIDebugMSAATexture::SetTexture(prosper::Texture &texture)
 		static_cast<WITexturedRect *>(m_hTextureRect.get())->SetTexture(*m_resolvedTexture);
 }
 
-void WIDebugMSAATexture::UpdateResolvedTexture()
+void pragma::gui::types::WIDebugMSAATexture::UpdateResolvedTexture()
 {
 	m_resolvedTexture = nullptr;
 	if(m_msaaTexture == nullptr)
@@ -55,7 +55,7 @@ void WIDebugMSAATexture::UpdateResolvedTexture()
 	m_resolvedTexture = context.CreateTexture({}, *resolvedImg, {}, resolvedSamplerCreateInfo);
 }
 
-void WIDebugMSAATexture::SetShouldResolveImage(bool b)
+void pragma::gui::types::WIDebugMSAATexture::SetShouldResolveImage(bool b)
 {
 	if(m_bShouldResolveImage == b)
 		return;
@@ -63,7 +63,7 @@ void WIDebugMSAATexture::SetShouldResolveImage(bool b)
 	UpdateResolvedTexture();
 }
 
-void WIDebugMSAATexture::DoUpdate()
+void pragma::gui::types::WIDebugMSAATexture::DoUpdate()
 {
 	WIBase::DoUpdate();
 	if(!m_hTextureRect.IsValid())

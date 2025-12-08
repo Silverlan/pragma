@@ -12,13 +12,13 @@ import :server_state;
 
 #undef FindResource
 
-ResourceManager::ResourceInfo::ResourceInfo(const std::string &_fileName, bool _stream) : fileName(_fileName), stream(_stream) {}
+pragma::networking::ResourceManager::ResourceInfo::ResourceInfo(const std::string &_fileName, bool _stream) : fileName(_fileName), stream(_stream) {}
 
-decltype(ResourceManager::m_resources) ResourceManager::m_resources;
+decltype(pragma::networking::ResourceManager::m_resources) pragma::networking::ResourceManager::m_resources;
 
-const std::vector<ResourceManager::ResourceInfo> &ResourceManager::GetResources() { return m_resources; }
+const std::vector<pragma::networking::ResourceManager::ResourceInfo> &pragma::networking::ResourceManager::GetResources() { return m_resources; }
 
-const ResourceManager::ResourceInfo *ResourceManager::FindResource(const std::string &fileName)
+const pragma::networking::ResourceManager::ResourceInfo *pragma::networking::ResourceManager::FindResource(const std::string &fileName)
 {
 	auto tgt = FileManager::GetCanonicalizedPath(fileName);
 	auto it = std::find_if(m_resources.begin(), m_resources.end(), [&tgt](const ResourceInfo &info) { return (info.fileName == tgt) ? true : false; });
@@ -27,7 +27,7 @@ const ResourceManager::ResourceInfo *ResourceManager::FindResource(const std::st
 		if(ustring::compare(fileName.c_str(), sndPath.c_str(), false, sndPath.length()) == true) {
 			std::string ext;
 			if(ufile::get_extension(fileName, &ext) == false) {
-				for(auto &ext : engine_info::get_supported_audio_formats()) {
+				for(auto &ext : pragma::engine_info::get_supported_audio_formats()) {
 					auto extPath = fileName + '.' + ext;
 					auto *r = FindResource(extPath);
 					if(r != nullptr)
@@ -40,9 +40,9 @@ const ResourceManager::ResourceInfo *ResourceManager::FindResource(const std::st
 	return &(*it);
 }
 
-bool ResourceManager::AddResource(std::string res, bool stream)
+bool pragma::networking::ResourceManager::AddResource(std::string res, bool stream)
 {
-	if(ServerState::Get()->IsSinglePlayer())
+	if(pragma::ServerState::Get()->IsSinglePlayer())
 		return false; // We don't need resources in SinglePlayer
 	res = FileManager::GetCanonicalizedPath(res);
 	auto checkName = res;
@@ -71,13 +71,13 @@ bool ResourceManager::AddResource(std::string res, bool stream)
 	m_resources.push_back({res, stream});
 
 	// Send resource to all connected clients
-	ServerState::Get()->SendResourceFile(res);
+	pragma::ServerState::Get()->SendResourceFile(res);
 	//
 	return true;
 }
 
-unsigned int ResourceManager::GetResourceCount() { return CUInt32(m_resources.size()); }
+unsigned int pragma::networking::ResourceManager::GetResourceCount() { return CUInt32(m_resources.size()); }
 
-bool ResourceManager::IsValidResource(std::string res) { return ::IsValidResource(res); }
+bool pragma::networking::ResourceManager::IsValidResource(std::string res) { return is_valid_resource(res); }
 
-void ResourceManager::ClearResources() { m_resources.clear(); }
+void pragma::networking::ResourceManager::ClearResources() { m_resources.clear(); }

@@ -91,7 +91,7 @@ void CWorldComponent::ReloadCHCController()
 	m_chcController = ::util::make_shared<CHC>(*cam);
 	m_chcController->Reset(m_meshTree);*/ // prosper TODO
 }
-void CWorldComponent::SetBSPTree(const std::shared_ptr<::util::BSPTree> &bspTree, const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster)
+void CWorldComponent::SetBSPTree(const std::shared_ptr<::util::BSPTree> &bspTree, const std::vector<std::vector<rendering::RenderMeshIndex>> &meshesPerCluster)
 {
 	m_bspTree = bspTree;
 	m_meshesPerCluster = meshesPerCluster;
@@ -102,11 +102,11 @@ void CWorldComponent::ReloadMeshCache()
 {
 	m_meshTree = nullptr;
 	m_chcController = nullptr;
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return;
-	m_meshTree = ::util::make_shared<OcclusionOctree<std::shared_ptr<ModelMesh>>>(256.f, 1'073'741'824.f, 4096.f, [](const std::weak_ptr<ModelMesh> ptrSubMesh, Vector3 &min, Vector3 &max) {
+	m_meshTree = ::util::make_shared<OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>>(256.f, 1'073'741'824.f, 4096.f, [](const std::weak_ptr<pragma::geometry::ModelMesh> ptrSubMesh, Vector3 &min, Vector3 &max) {
 		if(ptrSubMesh.expired() == true) {
 			min = {};
 			max = {};
@@ -117,7 +117,7 @@ void CWorldComponent::ReloadMeshCache()
 	});
 	m_meshTree->Initialize();
 	m_meshTree->SetSingleReferenceMode(true);
-	m_meshTree->SetToStringCallback([](std::weak_ptr<ModelMesh> ptrMesh) -> std::string {
+	m_meshTree->SetToStringCallback([](std::weak_ptr<pragma::geometry::ModelMesh> ptrMesh) -> std::string {
 		if(ptrMesh.expired() == true)
 			return "Expired";
 		auto subMesh = ptrMesh.lock();
@@ -140,7 +140,7 @@ void CWorldComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	if(typeid(component) == typeid(CModelComponent))
 		static_cast<CModelComponent &>(component).SetAutoLodEnabled(false);
 }
-std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> CWorldComponent::GetMeshTree() const { return m_meshTree; };
+std::shared_ptr<OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>> CWorldComponent::GetMeshTree() const { return m_meshTree; };
 std::shared_ptr<::CHC> CWorldComponent::GetCHCController() const { return m_chcController; }
 
 const pragma::rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(::util::BSPTree::ClusterIndex clusterIndex, bool translucent) const
@@ -198,7 +198,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 	auto &renderMeshes = renderC->GetRenderMeshes();
 	auto numClusters = m_bspTree->GetClusterCount();
 
-	std::unordered_map<pragma::ModelSubMesh *, ModelMesh *> subMeshToMesh;
+	std::unordered_map<pragma::geometry::ModelSubMesh *, pragma::geometry::ModelMesh *> subMeshToMesh;
 	auto &mdl = mdlC->GetModel();
 	if(!mdl)
 		return;
@@ -293,10 +293,10 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 					continue;
 				if(mat->GetAlphaMode() == AlphaMode::Blend || shader->IsTranslucentPipeline(pipelineIdx)) {
 					clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : pragma::rendering::RenderQueue::Create("world_translucent_cluster_" + std::to_string(clusterIdx));
-					clusterRenderTranslucentQueue->Add(static_cast<CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
+					clusterRenderTranslucentQueue->Add(static_cast<pragma::ecs::CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
 					continue;
 				}
-				clusterRenderQueue->Add(static_cast<CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
+				clusterRenderQueue->Add(static_cast<pragma::ecs::CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
 			}
 			clusterRenderTranslucentQueues[clusterIdx] = clusterRenderTranslucentQueue;
 			clusterRenderQueue->Sort();
@@ -314,7 +314,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 
 void CWorldComponent::UpdateRenderMeshes()
 {
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto mdl = ent.GetModel();
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(mdl == nullptr || !pRenderComponent)

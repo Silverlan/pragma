@@ -8,7 +8,7 @@ import :entities.components.bone_merge;
 
 using namespace pragma;
 
-bool BoneMergeComponent::can_merge(const pragma::Model &mdl, const pragma::Model &mdlParent, bool includeRootBones)
+bool BoneMergeComponent::can_merge(const pragma::asset::Model &mdl, const pragma::asset::Model &mdlParent, bool includeRootBones)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &skeletonParent = mdlParent.GetSkeleton();

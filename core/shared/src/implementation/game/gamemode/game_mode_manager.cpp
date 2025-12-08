@@ -6,8 +6,8 @@ module pragma.shared;
 
 import :game.game_mode_manager;
 
-std::unordered_map<std::string, GameModeInfo> GameModeManager::m_gameModes;
-void GameModeManager::Initialize()
+std::unordered_map<std::string, pragma::game::GameModeInfo> pragma::game::GameModeManager::m_gameModes;
+void pragma::game::GameModeManager::Initialize()
 {
 	std::vector<std::string> directories;
 	std::string dir = "lua/gamemodes/components/";
@@ -49,8 +49,8 @@ void GameModeManager::Initialize()
 	}
 }
 
-std::unordered_map<std::string, GameModeInfo> &GameModeManager::GetGameModes() { return m_gameModes; }
-GameModeInfo *GameModeManager::GetGameModeInfo(const std::string &id)
+std::unordered_map<std::string, pragma::game::GameModeInfo> &pragma::game::GameModeManager::GetGameModes() { return m_gameModes; }
+pragma::game::GameModeInfo *pragma::game::GameModeManager::GetGameModeInfo(const std::string &id)
 {
 	auto it = m_gameModes.find(id);
 	if(it == m_gameModes.end())

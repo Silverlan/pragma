@@ -9,9 +9,9 @@ module pragma.client;
 
 import :console.commands;
 
-void CMD_debug_hdr_bloom(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_debug_hdr_bloom(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
 	if(pragma::get_cgame() == nullptr || argv.empty() || pRoot == nullptr)
 		return;
@@ -25,7 +25,7 @@ void CMD_debug_hdr_bloom(NetworkState *, pragma::BasePlayerComponent *, std::vec
 	}
 	if(pEl != nullptr)
 		return;
-	pEl = wgui.Create<WIDebugHDRBloom>();
+	pEl = wgui.Create<pragma::gui::types::WIDebugHDRBloom>();
 	if(pEl == nullptr)
 		return;
 	pEl->SetName(name);

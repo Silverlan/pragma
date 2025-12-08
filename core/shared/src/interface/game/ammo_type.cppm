@@ -8,17 +8,17 @@ export module pragma.shared:game.ammo_type;
 
 import :game.enums;
 
-export {
+export namespace pragma::game {
 	class AmmoTypeManager;
 	struct DLLNETWORK AmmoType {
 	  public:
 		friend AmmoTypeManager;
 	  protected:
-		AmmoType(UInt32 id, const std::string &name, DAMAGETYPE dmgType, Int32 dmg, Float force);
+		AmmoType(UInt32 id, const std::string &name, DamageType dmgType, Int32 dmg, Float force);
 	  public:
 		std::string name;
 		UInt32 id;
-		DAMAGETYPE damageType;
+		DamageType damageType;
 		Int32 damage;
 		Float force;
 	};
@@ -28,7 +28,7 @@ export {
 		std::vector<std::unique_ptr<AmmoType>> m_ammoTypes;
 	  public:
 		AmmoTypeManager();
-		Bool RegisterAmmoType(const std::string &name, Int32 damage = 10, Float force = 200.f, DAMAGETYPE dmgType = DAMAGETYPE::BULLET, AmmoType **ammoOut = nullptr);
+		Bool RegisterAmmoType(const std::string &name, Int32 damage = 10, Float force = 200.f, DamageType dmgType = DamageType::Bullet, AmmoType **ammoOut = nullptr);
 		AmmoType *GetAmmoType(const std::string &name, UInt32 *ammoId = nullptr);
 		AmmoType *GetAmmoType(UInt32 ammoId);
 		AmmoTypeManager(AmmoTypeManager &) = delete;

@@ -50,7 +50,7 @@ Vector3 MovementComponent::GetLocalVelocity() const
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys != nullptr && phys->IsController()) {
-		auto *physController = static_cast<ControllerPhysObj *>(phys);
+		auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 		vel -= physController->GetGroundVelocity();
 	}
 	return vel;
@@ -78,8 +78,8 @@ float MovementComponent::GetMovementBlendScale() const
 bool MovementComponent::CanMove() const
 {
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	auto mvType = pPhysComponent ? pPhysComponent->GetMoveType() : pragma::physics::MOVETYPE::NONE;
-	if(!pPhysComponent || mvType == pragma::physics::MOVETYPE::NONE)
+	auto mvType = pPhysComponent ? pPhysComponent->GetMoveType() : pragma::physics::MoveType::None;
+	if(!pPhysComponent || mvType == pragma::physics::MoveType::None)
 		return false;
 	auto *pPhysObj = pPhysComponent->GetPhysicsObject();
 	return pPhysObj != nullptr && pPhysObj->IsController();
@@ -122,10 +122,10 @@ bool MovementComponent::UpdateMovement()
 	if(phys == nullptr || phys->IsController() == false)
 		return false;
 	auto mv = pPhysComponent->GetMoveType();
-	if(mv == pragma::physics::MOVETYPE::NONE || mv == pragma::physics::MOVETYPE::PHYSICS)
+	if(mv == pragma::physics::MoveType::None || mv == pragma::physics::MoveType::Physics)
 		return false;
 	InvokeEventCallbacks(movementComponent::EVENT_ON_UPDATE_MOVEMENT);
-	auto *physController = static_cast<ControllerPhysObj *>(phys);
+	auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 	auto pos = pTrComponent ? pTrComponent->GetPosition() : Vector3 {};
@@ -156,7 +156,7 @@ bool MovementComponent::UpdateMovement()
 
 	Vector3 forward = uquat::forward(rot);
 	Vector3 right = uquat::right(rot);
-	if(mv == pragma::physics::MOVETYPE::WALK && bSubmerged == false) {
+	if(mv == pragma::physics::MoveType::Walk && bSubmerged == false) {
 		// No movement on up-axis
 		auto upDir = uvec::UP;
 		if(m_orientationComponent)
@@ -231,11 +231,11 @@ bool MovementComponent::UpdateMovement()
 		}
 	}
 
-	if(pPhysComponent->IsGroundWalkable() || mv != pragma::physics::MOVETYPE::WALK || bSubmerged == true) {
+	if(pPhysComponent->IsGroundWalkable() || mv != pragma::physics::MoveType::Walk || bSubmerged == true) {
 		auto friction = 0.8f;
 		std::optional<Vector3> contactNormal = {};
 		if(phys != nullptr && phys->IsController()) {
-			auto *controller = static_cast<ControllerPhysObj *>(phys);
+			auto *controller = static_cast<pragma::physics::ControllerPhysObj *>(phys);
 			auto *surfMat = controller->GetGroundMaterial();
 			friction = surfMat ? surfMat->GetDynamicFriction() : 1.f;
 			contactNormal = controller->GetController()->GetGroundTouchNormal();
@@ -317,7 +317,7 @@ bool MovementComponent::UpdateMovement()
 	uvec::rotate(&localVel, viewRot);
 	auto contactNormal = physController->GetController()->GetGroundTouchNormal();
 	;
-	if(vel.y <= 0.1f && physController->IsGroundWalkable() && (contactNormal.has_value() && pGroundContactInfo->contactDistance >= threshold) && mv == pragma::physics::MOVETYPE::WALK) {
+	if(vel.y <= 0.1f && physController->IsGroundWalkable() && (contactNormal.has_value() && pGroundContactInfo->contactDistance >= threshold) && mv == pragma::physics::MoveType::Walk) {
 		auto &info = *pGroundContactInfo;
 		//auto pos = uvec::create((info.controllerIndex == 0u ? info.contactPoint.getPositionWorldOnA() : info.contactPoint.getPositionWorldOnB()) /PhysEnv::WORLD_SCALE);
 		auto n = -*contactNormal;

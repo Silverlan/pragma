@@ -21,9 +21,9 @@ Vector3 ShaderParticleSpriteTrail::DoCalcVertexPosition(const pragma::ecs::CPart
 	if(renderers.empty())
 		return camPos;
 	auto &renderer = renderers.front();
-	if(typeid(*renderer) != typeid(CParticleRendererSpriteTrail))
+	if(typeid(*renderer) != typeid(pragma::pts::CParticleRendererSpriteTrail))
 		return camPos;
-	auto &rendererSt = *static_cast<CParticleRendererSpriteTrail *>(renderer.get());
+	auto &rendererSt = *static_cast<pragma::pts::CParticleRendererSpriteTrail *>(renderer.get());
 	auto *pt = const_cast<pragma::ecs::CParticleSystemComponent &>(ptc).GetParticle(ptIdx);
 	auto &ptWorldPos = pt->GetPosition();
 	auto &ptPrevWorldPos = pt->GetPrevPos();
@@ -76,15 +76,15 @@ void ShaderParticleSpriteTrail::InitializeGfxPipeline(prosper::GraphicsPipelineC
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 }
 
-bool ShaderParticleSpriteTrail::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &r, const ecs::CParticleSystemComponent &ps, ecs::ParticleOrientationType orientationType, ecs::ParticleRenderFlags renderFlags)
+bool ShaderParticleSpriteTrail::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &r, const ecs::CParticleSystemComponent &ps, pts::ParticleOrientationType orientationType, pts::ParticleRenderFlags renderFlags)
 {
 	auto &renderers = ps.GetRenderers();
 	if(renderers.empty())
 		return false;
 	auto &renderer = renderers.front();
-	if(typeid(*renderer) != typeid(CParticleRendererSpriteTrail))
+	if(typeid(*renderer) != typeid(pragma::pts::CParticleRendererSpriteTrail))
 		return false;
-	auto &rendererSt = *static_cast<CParticleRendererSpriteTrail *>(renderer.get());
+	auto &rendererSt = *static_cast<pragma::pts::CParticleRendererSpriteTrail *>(renderer.get());
 
 	PushConstants pushConstants {};
 	pushConstants.minLength = rendererSt.GetMinLength();

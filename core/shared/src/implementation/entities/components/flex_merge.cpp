@@ -8,7 +8,7 @@ import :entities.components.flex_merge;
 
 using namespace pragma;
 
-bool FlexMergeComponent::can_merge(const pragma::Model &mdl, const pragma::Model &mdlParent)
+bool FlexMergeComponent::can_merge(const pragma::asset::Model &mdl, const pragma::asset::Model &mdlParent)
 {
 	auto &flexControllers = mdl.GetFlexControllers();
 	for(auto &flexCon : flexControllers) {

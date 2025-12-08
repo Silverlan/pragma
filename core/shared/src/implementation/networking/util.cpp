@@ -6,28 +6,28 @@ module pragma.shared;
 
 import :networking.util;
 
-void nwm::write_vector(NetPacket &packet, const Vector3 &v)
+void pragma::networking::write_vector(NetPacket &packet, const Vector3 &v)
 {
 	packet->Write<float>(v.x);
 	packet->Write<float>(v.y);
 	packet->Write<float>(v.z);
 }
-void nwm::write_angles(NetPacket &packet, const EulerAngles &ang)
+void pragma::networking::write_angles(NetPacket &packet, const EulerAngles &ang)
 {
 	packet->Write<float>(ang.p);
 	packet->Write<float>(ang.y);
 	packet->Write<float>(ang.r);
 }
-void nwm::write_quat(NetPacket &packet, const Quat &rot)
+void pragma::networking::write_quat(NetPacket &packet, const Quat &rot)
 {
 	packet->Write<float>(rot.w);
 	packet->Write<float>(rot.x);
 	packet->Write<float>(rot.y);
 	packet->Write<float>(rot.z);
 }
-void nwm::write_entity(NetPacket &packet, const pragma::ecs::BaseEntity *ent) { packet->Write<unsigned int>((ent != nullptr) ? ent->GetIndex() : (unsigned int)(-1)); }
-void nwm::write_entity(NetPacket &packet, const EntityHandle &hEnt) { write_entity(packet, hEnt.get()); }
-Vector3 nwm::read_vector(NetPacket &packet)
+void pragma::networking::write_entity(NetPacket &packet, const pragma::ecs::BaseEntity *ent) { packet->Write<unsigned int>((ent != nullptr) ? ent->GetIndex() : (unsigned int)(-1)); }
+void pragma::networking::write_entity(NetPacket &packet, const EntityHandle &hEnt) { write_entity(packet, hEnt.get()); }
+Vector3 pragma::networking::read_vector(NetPacket &packet)
 {
 	Vector3 r(0.f, 0.f, 0.f);
 	r.x = packet->Read<float>();
@@ -35,7 +35,7 @@ Vector3 nwm::read_vector(NetPacket &packet)
 	r.z = packet->Read<float>();
 	return r;
 }
-EulerAngles nwm::read_angles(NetPacket &packet)
+EulerAngles pragma::networking::read_angles(NetPacket &packet)
 {
 	EulerAngles ang(0.f, 0.f, 0.f);
 	ang.p = packet->Read<float>();
@@ -43,7 +43,7 @@ EulerAngles nwm::read_angles(NetPacket &packet)
 	ang.r = packet->Read<float>();
 	return ang;
 }
-Quat nwm::read_quat(NetPacket &packet)
+Quat pragma::networking::read_quat(NetPacket &packet)
 {
 	auto rot = uquat::identity();
 	rot.w = packet->Read<float>();
@@ -55,7 +55,7 @@ Quat nwm::read_quat(NetPacket &packet)
 
 static pragma::ecs::BaseEntity *read_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated = nullptr, CallbackHandle *hCallback = nullptr)
 {
-	NetworkState *state;
+	pragma::NetworkState *state;
 	if(!packet.IsClient())
 		state = pragma::Engine::Get()->GetServerNetworkState();
 	else
@@ -87,17 +87,17 @@ static pragma::ecs::BaseEntity *read_entity(NetPacket &packet, const std::functi
 	*hCallback = game->AddCallback("OnEntityCreated", cb);
 	return nullptr;
 }
-CallbackHandle nwm::read_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated)
+CallbackHandle pragma::networking::read_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated)
 {
 	CallbackHandle r;
 	::read_entity(packet, onCreated, &r);
 	return r;
 }
-pragma::ecs::BaseEntity *nwm::read_entity(NetPacket &packet) { return ::read_entity(packet); }
+pragma::ecs::BaseEntity *pragma::networking::read_entity(NetPacket &packet) { return ::read_entity(packet); }
 
-void nwm::write_player(NetPacket &packet, const pragma::ecs::BaseEntity *pl) { write_entity(packet, pl); }
-void nwm::write_player(NetPacket &packet, const pragma::BasePlayerComponent *plComponent) { write_entity(packet, (plComponent != nullptr) ? dynamic_cast<pragma::ecs::BaseEntity *>(plComponent->GetBasePlayer()) : nullptr); }
-pragma::BasePlayerComponent *nwm::read_player(NetPacket &packet)
+void pragma::networking::write_player(NetPacket &packet, const pragma::ecs::BaseEntity *pl) { write_entity(packet, pl); }
+void pragma::networking::write_player(NetPacket &packet, const pragma::BasePlayerComponent *plComponent) { write_entity(packet, (plComponent != nullptr) ? dynamic_cast<pragma::ecs::BaseEntity *>(plComponent->GetBasePlayer()) : nullptr); }
+pragma::BasePlayerComponent *pragma::networking::read_player(NetPacket &packet)
 {
 	auto *ent = dynamic_cast<BasePlayer *>(::read_entity(packet));
 	if(ent == nullptr)

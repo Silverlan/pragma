@@ -19,8 +19,8 @@ export {
 };
 
 struct DLLCLIENT CHCMeshInfo {
-	CHCMeshInfo(CBaseEntity &ent, CModelMesh &mesh);
-	CModelMesh *mesh;
+	CHCMeshInfo(pragma::ecs::CBaseEntity &ent, pragma::geometry::CModelMesh &mesh);
+	pragma::geometry::CModelMesh *mesh;
 	EntityHandle hEntity;
 };
 
@@ -83,7 +83,7 @@ export class DLLCLIENT CHC {
 	//
 	unsigned int m_debugMeshVertexBuffer;
 	bool m_bDrawDebugTexture;
-	WIHandle m_hGUIDebug;
+	pragma::gui::WIHandle m_hGUIDebug;
 	CallbackHandle m_debugCallback;
 	void DebugRender();
 	void DebugRender(CHCNode *node, bool bVisible = false);

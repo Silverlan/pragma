@@ -9,8 +9,8 @@ import :game;
 import :engine;
 import :entities.components;
 
-prosper::IDescriptorSet &CGame::GetGlobalRenderSettingsDescriptorSet() { return *m_globalRenderSettingsBufferData->descSetGroup->GetDescriptorSet(); }
-pragma::rendering::GlobalRenderSettingsBufferData &CGame::GetGlobalRenderSettingsBufferData() { return *m_globalRenderSettingsBufferData; }
+prosper::IDescriptorSet &pragma::CGame::GetGlobalRenderSettingsDescriptorSet() { return *m_globalRenderSettingsBufferData->descSetGroup->GetDescriptorSet(); }
+pragma::rendering::GlobalRenderSettingsBufferData &pragma::CGame::GetGlobalRenderSettingsBufferData() { return *m_globalRenderSettingsBufferData; }
 
 pragma::rendering::GlobalRenderSettingsBufferData::GlobalRenderSettingsBufferData()
 {

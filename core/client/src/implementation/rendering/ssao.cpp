@@ -14,7 +14,7 @@ import :game;
 import :gui;
 import :rendering.shaders;
 
-bool SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags samples, const std::shared_ptr<prosper::Texture> &texNorm, const std::shared_ptr<prosper::Texture> &texDepth)
+bool pragma::rendering::SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags samples, const std::shared_ptr<prosper::Texture> &texNorm, const std::shared_ptr<prosper::Texture> &texDepth)
 {
 	if(pragma::ShaderSSAO::DESCRIPTOR_SET_PREPASS.IsValid() == false || pragma::shaderSSAOBlur::DESCRIPTOR_SET_TEXTURE.IsValid() == false)
 		return false;
@@ -51,7 +51,7 @@ bool SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t
 	return true;
 }
 
-void SSAOInfo::Clear()
+void pragma::rendering::SSAOInfo::Clear()
 {
 	renderTarget = nullptr;
 	renderTargetBlur = nullptr;
@@ -59,12 +59,12 @@ void SSAOInfo::Clear()
 	descSetGroupOcclusion = nullptr;
 }
 
-prosper::Shader *SSAOInfo::GetSSAOShader() const { return shader.get(); }
-prosper::Shader *SSAOInfo::GetSSAOBlurShader() const { return shaderBlur.get(); }
+prosper::Shader *pragma::rendering::SSAOInfo::GetSSAOShader() const { return shader.get(); }
+prosper::Shader *pragma::rendering::SSAOInfo::GetSSAOBlurShader() const { return shaderBlur.get(); }
 
-static void debug_ssao(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_ssao(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
 	if(pragma::get_cgame() == nullptr || argv.empty() || pRoot == nullptr)
 		return;
@@ -78,7 +78,7 @@ static void debug_ssao(NetworkState *state, pragma::BasePlayerComponent *pl, std
 	}
 	if(pEl != nullptr)
 		return;
-	pEl = wgui.Create<WIBase>();
+	pEl = wgui.Create<pragma::gui::types::WIBase>();
 	if(pEl == nullptr)
 		return;
 	pEl->SetName(name);
@@ -94,7 +94,7 @@ static void debug_ssao(NetworkState *state, pragma::BasePlayerComponent *pl, std
 	auto bExtended = prepass.IsExtended();
 	auto xOffset = 0u;
 	if(bExtended == true) {
-		auto *pNormals = wgui.Create<WITexturedRect>(pEl);
+		auto *pNormals = wgui.Create<pragma::gui::types::WITexturedRect>(pEl);
 		if(pNormals != nullptr) {
 			pNormals->SetX(xOffset);
 			pNormals->SetSize(256, 256);
@@ -102,7 +102,7 @@ static void debug_ssao(NetworkState *state, pragma::BasePlayerComponent *pl, std
 			pNormals->Update();
 			xOffset += 256;
 		}
-		auto *pPrepassDepth = wgui.Create<WIDebugDepthTexture>(pEl);
+		auto *pPrepassDepth = wgui.Create<pragma::gui::types::WIDebugDepthTexture>(pEl);
 		if(pPrepassDepth != nullptr) {
 			pPrepassDepth->SetX(xOffset);
 			pPrepassDepth->SetSize(256, 256);
@@ -111,14 +111,14 @@ static void debug_ssao(NetworkState *state, pragma::BasePlayerComponent *pl, std
 			xOffset += 256;
 		}
 	}
-	auto *pSsao = wgui.Create<WIDebugSSAO>(pEl);
+	auto *pSsao = wgui.Create<pragma::gui::types::WIDebugSSAO>(pEl);
 	if(pSsao != nullptr) {
 		pSsao->SetX(xOffset);
 		pSsao->SetSize(256, 256);
 		pSsao->Update();
 		xOffset += 256;
 	}
-	auto *pSsaoBlur = wgui.Create<WIDebugSSAO>(pEl);
+	auto *pSsaoBlur = wgui.Create<pragma::gui::types::WIDebugSSAO>(pEl);
 	if(pSsaoBlur != nullptr) {
 		pSsaoBlur->SetX(xOffset);
 		pSsaoBlur->SetSize(256, 256);
@@ -133,7 +133,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_ssao", &debug_ssao, pragma::console::ConVarFlags::None, "Displays the ssao buffers to screen.");
 }
 
-static void cl_render_ssao_callback(NetworkState *, const ConVar &, bool, bool val)
+static void cl_render_ssao_callback(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val)
 {
 	auto *client = pragma::get_client_state();
 	if(client == nullptr)

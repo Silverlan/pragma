@@ -9,17 +9,19 @@ export module pragma.client:particle_system.operator_trail;
 export import :entities.components.particle_system;
 export import :particle_system.modifier;
 
-export class DLLCLIENT CParticleOperatorTrail : public CParticleOperator {
-  protected:
-	float m_travelTime = 1.f;
-	std::vector<uint32_t> m_particleNodes;
-  public:
-	CParticleOperatorTrail() = default;
-	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
-};
+export namespace pragma::pts {
+	class DLLCLIENT CParticleOperatorTrail : public CParticleOperator {
+	protected:
+		float m_travelTime = 1.f;
+		std::vector<uint32_t> m_particleNodes;
+	public:
+		CParticleOperatorTrail() = default;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Simulate(pragma::pts::CParticle &particle, double tDelta, float strength) override;
+	};
+}
 
-void CParticleOperatorTrail::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorTrail::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &it : values) {
@@ -30,7 +32,7 @@ void CParticleOperatorTrail::Initialize(pragma::BaseEnvParticleSystemComponent &
 	}
 	m_particleNodes.resize(static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount(), 0);
 }
-void CParticleOperatorTrail::Simulate(CParticle &particle, double, float strength)
+void pragma::pts::CParticleOperatorTrail::Simulate(pragma::pts::CParticle &particle, double, float strength)
 {
 	auto vel = particle.GetVelocity();
 	auto nodeIdx = particle.GetIndex();

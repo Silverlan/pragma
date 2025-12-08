@@ -25,7 +25,7 @@ export namespace pragma {
 #pragma pack(pop)
 
 		ShaderSkybox(prosper::IPrContext &context, const std::string &identifier);
-		virtual bool GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const override;
+		virtual bool GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const override;
 		virtual ShaderGameWorld::GameShaderType GetPassType() const override { return ShaderGameWorld::GameShaderType::SkyPass; }
 
 		//

@@ -10,7 +10,9 @@ export module pragma.client:rendering.cycles;
 
 export import pragma.shared;
 
-export class ClientState;
+export namespace pragma {
+	class ClientState;
+}
 export namespace pragma::rendering::cycles {
 	struct DLLCLIENT SceneInfo {
 		enum class DeviceType : uint8_t { CPU = 0, GPU };
@@ -52,10 +54,10 @@ export namespace pragma::rendering::cycles {
 		std::function<bool(pragma::ecs::BaseEntity &)> entityFilter = nullptr;
 		const std::vector<pragma::ecs::BaseEntity *> *entityList = nullptr;
 	};
-	util::ParallelJob<uimg::ImageLayerSet> render_image(ClientState &client, const SceneInfo &sceneInfo, const RenderImageInfo &renderImageInfo);
-	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(ClientState &client, const SceneInfo &sceneInfo, pragma::Model &mdl, uint32_t materialIndex);
-	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(ClientState &client, const SceneInfo &sceneInfo, pragma::ecs::BaseEntity &ent, uint32_t materialIndex);
-	util::ParallelJob<uimg::ImageLayerSet> bake_lightmaps(ClientState &client, const SceneInfo &sceneInfo);
+	util::ParallelJob<uimg::ImageLayerSet> render_image(pragma::ClientState &client, const SceneInfo &sceneInfo, const RenderImageInfo &renderImageInfo);
+	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(pragma::ClientState &client, const SceneInfo &sceneInfo, pragma::asset::Model &mdl, uint32_t materialIndex);
+	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(pragma::ClientState &client, const SceneInfo &sceneInfo, pragma::ecs::BaseEntity &ent, uint32_t materialIndex);
+	util::ParallelJob<uimg::ImageLayerSet> bake_lightmaps(pragma::ClientState &client, const SceneInfo &sceneInfo);
 	using namespace umath::scoped_enum::bitwise;
 };
 export {

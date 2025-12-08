@@ -4,7 +4,7 @@ module;
 
 export module pragma.shared:ai.enums;
 
-export {
+export namespace pragma::ai {
 	constexpr float MAX_NODE_DISTANCE = 100.f;
 	constexpr bool DEBUG_AI_MOVEMENT = true;
 };

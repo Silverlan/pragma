@@ -36,11 +36,11 @@ export namespace pragma {
 		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetSwapCommandBuffer() const;
 		const std::shared_ptr<prosper::RenderTarget> &GetRenderTarget() const;
 	  private:
-		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) override;
+		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) override;
 		void DoUpdatePoses(const CMotionBlurDataComponent &motionBlurDataC, const MotionBlurTemporalData &motionBlurData, prosper::IPrimaryCommandBuffer &cmd);
-		void RecordVelocityPass(const util::DrawSceneInfo &drawSceneInfo);
-		void ExecuteVelocityPass(const util::DrawSceneInfo &drawSceneInfo);
-		void RenderPostProcessing(const util::DrawSceneInfo &drawSceneInfo);
+		void RecordVelocityPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void ExecuteVelocityPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void RenderPostProcessing(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 		void ReloadVelocityTexture();
 		std::shared_ptr<prosper::ISwapCommandBufferGroup> m_swapCmd = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_velocityTexDsg;
@@ -49,7 +49,7 @@ export namespace pragma {
 		std::shared_ptr<prosper::IBuffer> m_motionBlurDataBuffer;
 		std::shared_ptr<prosper::RenderTarget> m_renderTarget;
 #if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
-		WIHandle m_debugTex;
+		pragma::gui::WIHandle m_debugTex;
 #endif
 		float m_motionBlurIntensityFactor = 4.f;
 		MotionBlurQuality m_motionBlurQuality = MotionBlurQuality::Low;

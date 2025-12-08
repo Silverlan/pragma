@@ -12,7 +12,7 @@ import :engine;
 import :entities.components.particle_system;
 import :game;
 
-std::shared_ptr<const FontInfo> Lua::engine::create_font(lua::State *l, const std::string &identifier, const std::string &fontSetName, pragma::FontSetFlag features, uint32_t size, bool reload)
+std::shared_ptr<const pragma::gui::FontInfo> Lua::engine::create_font(lua::State *l, const std::string &identifier, const std::string &fontSetName, pragma::FontSetFlag features, uint32_t size, bool reload)
 {
 	auto *fontSet = pragma::get_cengine()->FindFontSet(fontSetName);
 	if(!fontSet)
@@ -22,21 +22,21 @@ std::shared_ptr<const FontInfo> Lua::engine::create_font(lua::State *l, const st
 		return nullptr;
 	if(fontFileData->fontSizeAdjustment)
 		size += *fontFileData->fontSizeAdjustment;
-	FontSettings settings {};
+	pragma::gui::FontSettings settings {};
 	settings.fontSize = size;
-	return FontManager::LoadFont(identifier.c_str(), fontFileData->fileName, settings, reload);
+	return pragma::gui::FontManager::LoadFont(identifier.c_str(), fontFileData->fileName, settings, reload);
 }
-std::shared_ptr<const FontInfo> Lua::engine::create_font(lua::State *l, const std::string &identifier, const std::string &fontSetName, pragma::FontSetFlag features, uint32_t size) { return create_font(l, identifier, fontSetName, features, size, false); }
-std::shared_ptr<const FontInfo> Lua::engine::get_font(lua::State *l, const std::string &identifier) { return FontManager::GetFont(identifier); }
+std::shared_ptr<const pragma::gui::FontInfo> Lua::engine::create_font(lua::State *l, const std::string &identifier, const std::string &fontSetName, pragma::FontSetFlag features, uint32_t size) { return create_font(l, identifier, fontSetName, features, size, false); }
+std::shared_ptr<const pragma::gui::FontInfo> Lua::engine::get_font(lua::State *l, const std::string &identifier) { return pragma::gui::FontManager::GetFont(identifier); }
 
 void Lua::engine::register_library(lua::State *l)
 {
 	auto modEngine = luabind::module_(l, "engine");
-	modEngine[(luabind::def("create_font", static_cast<std::shared_ptr<const FontInfo> (*)(lua::State *, const std::string &, const std::string &, pragma::FontSetFlag, uint32_t, bool)>(Lua::engine::create_font)),
-	  luabind::def("create_font", static_cast<std::shared_ptr<const FontInfo> (*)(lua::State *, const std::string &, const std::string &, pragma::FontSetFlag, uint32_t)>(Lua::engine::create_font)), luabind::def("get_font", Lua::engine::get_font),
+	modEngine[(luabind::def("create_font", static_cast<std::shared_ptr<const pragma::gui::FontInfo> (*)(lua::State *, const std::string &, const std::string &, pragma::FontSetFlag, uint32_t, bool)>(Lua::engine::create_font)),
+	  luabind::def("create_font", static_cast<std::shared_ptr<const pragma::gui::FontInfo> (*)(lua::State *, const std::string &, const std::string &, pragma::FontSetFlag, uint32_t)>(Lua::engine::create_font)), luabind::def("get_font", Lua::engine::get_font),
 	  luabind::def("set_fixed_frame_delta_time_interpretation", Lua::engine::set_fixed_frame_delta_time_interpretation), luabind::def("clear_fixed_frame_delta_time_interpretation", Lua::engine::clear_fixed_frame_delta_time_interpretation),
 	  luabind::def("set_tick_delta_time_tied_to_frame_rate", Lua::engine::set_tick_delta_time_tied_to_frame_rate), luabind::def("get_window_resolution", Lua::engine::get_window_resolution), luabind::def("get_render_resolution", Lua::engine::get_render_resolution),
-	  luabind::def("get_staging_render_target", Lua::engine::get_staging_render_target), luabind::def("get_current_frame_index", &Lua::engine::get_current_frame_index), luabind::def("get_default_font_set_name", &CEngine::GetDefaultFontSetName),
+	  luabind::def("get_staging_render_target", Lua::engine::get_staging_render_target), luabind::def("get_current_frame_index", &Lua::engine::get_current_frame_index), luabind::def("get_default_font_set_name", &pragma::CEngine::GetDefaultFontSetName),
 	  luabind::def(
 	    "get_font_sets", +[]() -> std::vector<std::string> {
 		    std::vector<std::string> fontSets;
@@ -67,32 +67,32 @@ void Lua::engine::register_library(lua::State *l)
 
 Vector2i Lua::engine::get_text_size(lua::State *l, const std::string &text, const std::string &font)
 {
-	auto info = FontManager::GetFont(font);
+	auto info = pragma::gui::FontManager::GetFont(font);
 	if(info == nullptr)
 		return {0, 0};
 	int w = 0;
 	int h = 0;
-	FontManager::GetTextSize(text, 0u, info.get(), &w, &h);
+	pragma::gui::FontManager::GetTextSize(text, 0u, info.get(), &w, &h);
 	return ::Vector2i {w, h};
 }
 
-Vector2i Lua::engine::get_text_size(lua::State *l, const std::string &text, const FontInfo &font)
+Vector2i Lua::engine::get_text_size(lua::State *l, const std::string &text, const pragma::gui::FontInfo &font)
 {
 	int w = 0;
 	int h = 0;
-	FontManager::GetTextSize(text, 0u, &font, &w, &h);
+	pragma::gui::FontManager::GetTextSize(text, 0u, &font, &w, &h);
 	return ::Vector2i {w, h};
 }
 
 std::pair<size_t, size_t> Lua::engine::get_truncated_text_length(lua::State *l, const std::string &text, const std::string &font, uint32_t maxWidth)
 {
-	auto info = FontManager::GetFont(font);
+	auto info = pragma::gui::FontManager::GetFont(font);
 	if(info == nullptr)
 		return {0, 0};
 	return get_truncated_text_length(l, text, *info, maxWidth);
 }
 
-std::pair<size_t, size_t> Lua::engine::get_truncated_text_length(lua::State *l, const std::string &text, const FontInfo &font, uint32_t maxWidth)
+std::pair<size_t, size_t> Lua::engine::get_truncated_text_length(lua::State *l, const std::string &text, const pragma::gui::FontInfo &font, uint32_t maxWidth)
 {
 	pragma::string::Utf8String uText {text};
 	uint32_t offset = 0;
@@ -101,7 +101,7 @@ std::pair<size_t, size_t> Lua::engine::get_truncated_text_length(lua::State *l, 
 	for(auto it = uText.begin(); it != uText.end(); ++it) {
 		int w = 0;
 		int h = 0;
-		FontManager::GetTextSize(*it, idx, &font, &w, &h);
+		pragma::gui::FontManager::GetTextSize(*it, idx, &font, &w, &h);
 		if(offset + w > maxWidth) {
 			numChars = idx;
 			break;
@@ -403,14 +403,14 @@ int Lua::engine::save_particle_system(lua::State *l)
 		}
 	}
 
-	std::unordered_map<std::string, CParticleSystemData> particles;
+	std::unordered_map<std::string, pragma::asset::ParticleSystemData> particles;
 	Lua::PushValue(l, 2);
 	int tparticles = 2;
 	Lua::PushNil(l);
 	while(Lua::GetNextPair(l, tparticles) != 0) {
 		if(Lua::IsTable(l, -1)) {
 			Lua::PushValue(l, -2);
-			CParticleSystemData data {};
+			pragma::asset::ParticleSystemData data {};
 			std::string particle = Lua::ToString(l, -3);
 			Lua::RemoveValue(l, -3);
 			Lua::PushValue(l, -2);
@@ -437,8 +437,8 @@ int Lua::engine::save_particle_system(lua::State *l)
 							std::string opType = Lua::CheckString(l, -1);
 							Lua::Pop(l, 1);
 
-							std::vector<CParticleModifierData> modData;
-							modData.push_back(CParticleModifierData {opType});
+							std::vector<pragma::asset::ParticleModifierData> modData;
+							modData.push_back(pragma::asset::ParticleModifierData {opType});
 							int dataIdx = 0;
 							char dataType = -1;
 							Lua::PushNil(l);
@@ -459,7 +459,7 @@ int Lua::engine::save_particle_system(lua::State *l)
 								else if(dataType != 1) {
 									dataType = 0;
 									if(dataIdx > 0)
-										modData.push_back(CParticleModifierData {opType});
+										modData.push_back(pragma::asset::ParticleModifierData {opType});
 									dataIdx++;
 									int tModSubSettings = Lua::GetStackTop(l);
 									Lua::PushNil(l);
@@ -503,7 +503,7 @@ int Lua::engine::save_particle_system(lua::State *l)
 							Lua::CheckTable(l, -1);
 							auto tChild = Lua::GetStackTop(l);
 
-							CParticleChildData childData {};
+							pragma::asset::ParticleChildData childData {};
 
 							Lua::PushString(l, "childName");
 							Lua::GetTableValue(l, tChild);

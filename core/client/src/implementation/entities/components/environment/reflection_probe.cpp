@@ -27,7 +27,7 @@ struct RenderSettings {
 	float skyStrength = 0.3f;
 	float exposure = 50.f;
 } static g_renderSettings;
-static void map_build_reflection_probes(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void map_build_reflection_probes(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -186,7 +186,7 @@ static void build_next_reflection_probe()
 			CReflectionProbeComponent::get_logger<CReflectionProbeComponent>().warn("Unable to update reflection probe data for probe at position ({},{},{}). Probe will be unavailable!", pos.x, pos.y, pos.z);
 	}
 
-	/*auto &wgui = WGUI::GetInstance();
+	/*auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *p = dynamic_cast<WITexturedCubemap*>(wgui.GetBaseElement()->FindDescendantByName(GUI_EL_NAME));
 	if(p)
 	{
@@ -290,7 +290,7 @@ prosper::IDescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestP
 	auto dClosest = std::numeric_limits<float>::max();
 	pragma::ecs::BaseEntity *entClosest = nullptr;
 	for(auto *ent : entIt) {
-		if(static_cast<CBaseEntity *>(ent)->IsInScene(scene) == false)
+		if(static_cast<ecs::CBaseEntity *>(ent)->IsInScene(scene) == false)
 			continue;
 		auto posEnt = ent->GetPosition();
 		auto d = uvec::distance_sqr(origin, posEnt);
@@ -631,7 +631,7 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector
 		scene->UpdateBuffers(drawCmd); // TODO: Remove this?
 
 		// TODO: FRender::Reflection is required to flip the winding order, but why is this needed in the first place?
-		util::DrawSceneInfo drawSceneInfo {};
+		pragma::rendering::DrawSceneInfo drawSceneInfo {};
 		drawSceneInfo.commandBuffer = drawCmd;
 		drawSceneInfo.outputImage = img;
 		drawSceneInfo.renderFlags = (FRender::All | FRender::HDR | FRender::Reflection) &~(FRender::View | FRender::Dynamic);
@@ -682,7 +682,7 @@ bool CReflectionProbeComponent::FinalizeCubemap(prosper::IImage &imgCubemap)
 	auto success = (m_iblData && SaveIBLReflectionsToFile());
 	umath::set_flag(m_stateFlags, StateFlags::BakingFailed, !success);
 	build_next_reflection_probe();
-	/*auto &wgui = WGUI::GetInstance();
+	/*auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *p = dynamic_cast<WITexturedCubemap*>(wgui.GetBaseElement()->FindDescendantByName(GUI_EL_NAME));
 	if(p == nullptr)
 	{
@@ -906,12 +906,12 @@ void CEnvReflectionProbe::Initialize()
 
 ////////
 
-static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
 	const std::string name = "pbr_ibl_brdf";
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
 	auto *p = pRoot->FindDescendantByName(name);
 	if(p != nullptr) {
@@ -960,15 +960,15 @@ static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, 
 	auto &irradianceMap = iblData->irradianceMap;
 	auto &prefilterMap = iblData->prefilterMap;
 
-	auto *pElContainer = wgui.Create<WIBase>();
+	auto *pElContainer = wgui.Create<pragma::gui::types::WIBase>();
 	pElContainer->SetAutoAlignToParent(true);
 	pElContainer->SetName(name);
 	pElContainer->TrapFocus(true);
 	pElContainer->RequestFocus();
 
-	auto *pFrameBrdf = wgui.Create<WIFrame>(pElContainer);
+	auto *pFrameBrdf = wgui.Create<pragma::gui::types::WIFrame>(pElContainer);
 	pFrameBrdf->SetTitle("BRDF");
-	auto *pBrdf = wgui.Create<WITexturedRect>(pFrameBrdf);
+	auto *pBrdf = wgui.Create<pragma::gui::types::WITexturedRect>(pFrameBrdf);
 	pBrdf->SetSize(256, 256);
 	pBrdf->SetY(24);
 	pBrdf->SetTexture(*brdfMap);
@@ -977,7 +977,7 @@ static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, 
 
 	auto maxLod = brdfMap->GetImage().GetMipmapCount();
 	if(maxLod > 1) {
-		auto *pSlider = wgui.Create<WISlider>(pBrdf);
+		auto *pSlider = wgui.Create<pragma::gui::types::WISlider>(pBrdf);
 		pSlider->SetSize(pSlider->GetParent()->GetWidth(), 24);
 		pSlider->SetRange(0.f, maxLod, 0.01f);
 		pSlider->SetPostFix(" LOD");
@@ -985,17 +985,17 @@ static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, 
 		pSlider->AddCallback("OnChange", FunctionCallback<void, float, float>::Create([hBrdf](float oldVal, float newVal) mutable {
 			if(hBrdf.IsValid() == false)
 				return;
-			static_cast<WITexturedRect *>(hBrdf.get())->SetLOD(newVal);
+			static_cast<pragma::gui::types::WITexturedRect *>(hBrdf.get())->SetLOD(newVal);
 		}));
 		pSlider->SetAnchor(0.f, 0.f, 1.f, 0.f);
 	}
 
 	///
 
-	auto *pFrameIrradiance = wgui.Create<WIFrame>(pElContainer);
+	auto *pFrameIrradiance = wgui.Create<pragma::gui::types::WIFrame>(pElContainer);
 	pFrameIrradiance->SetTitle("Irradiance");
 	pFrameIrradiance->SetX(pFrameBrdf->GetRight());
-	auto *pIrradiance = wgui.Create<WITexturedCubemap>(pFrameIrradiance);
+	auto *pIrradiance = wgui.Create<pragma::gui::types::WITexturedCubemap>(pFrameIrradiance);
 	pIrradiance->SetY(24);
 	pIrradiance->SetTexture(*irradianceMap);
 	pFrameIrradiance->SizeToContents();
@@ -1003,7 +1003,7 @@ static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, 
 
 	maxLod = irradianceMap->GetImage().GetMipmapCount();
 	if(maxLod > 1) {
-		auto *pSlider = wgui.Create<WISlider>(pIrradiance);
+		auto *pSlider = wgui.Create<pragma::gui::types::WISlider>(pIrradiance);
 		pSlider->SetSize(pSlider->GetParent()->GetWidth(), 24);
 		pSlider->SetRange(0.f, maxLod, 0.01f);
 		pSlider->SetPostFix(" LOD");
@@ -1011,17 +1011,17 @@ static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, 
 		pSlider->AddCallback("OnChange", FunctionCallback<void, float, float>::Create([hIrradiance](float oldVal, float newVal) mutable {
 			if(hIrradiance.IsValid() == false)
 				return;
-			static_cast<WITexturedCubemap *>(hIrradiance.get())->SetLOD(newVal);
+			static_cast<pragma::gui::types::WITexturedCubemap *>(hIrradiance.get())->SetLOD(newVal);
 		}));
 		pSlider->SetAnchor(0.f, 0.f, 1.f, 0.f);
 	}
 
 	///
 
-	auto *pFramePrefilter = wgui.Create<WIFrame>(pElContainer);
+	auto *pFramePrefilter = wgui.Create<pragma::gui::types::WIFrame>(pElContainer);
 	pFramePrefilter->SetTitle("Prefilter");
 	pFramePrefilter->SetY(pFrameIrradiance->GetBottom());
-	auto *pPrefilter = wgui.Create<WITexturedCubemap>(pFramePrefilter);
+	auto *pPrefilter = wgui.Create<pragma::gui::types::WITexturedCubemap>(pFramePrefilter);
 	pPrefilter->SetY(24);
 	pPrefilter->SetTexture(*prefilterMap);
 	pFramePrefilter->SizeToContents();
@@ -1029,7 +1029,7 @@ static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, 
 
 	maxLod = prefilterMap->GetImage().GetMipmapCount();
 	if(maxLod > 1) {
-		auto *pSlider = wgui.Create<WISlider>(pPrefilter);
+		auto *pSlider = wgui.Create<pragma::gui::types::WISlider>(pPrefilter);
 		pSlider->SetSize(pSlider->GetParent()->GetWidth(), 24);
 		pSlider->SetRange(0.f, maxLod, 0.01f);
 		pSlider->SetPostFix(" LOD");
@@ -1037,7 +1037,7 @@ static void debug_pbr_ibl(NetworkState *state, pragma::BasePlayerComponent *pl, 
 		pSlider->AddCallback("OnChange", FunctionCallback<void, float, float>::Create([hPrefilter](float oldVal, float newVal) mutable {
 			if(hPrefilter.IsValid() == false)
 				return;
-			static_cast<WITexturedCubemap *>(hPrefilter.get())->SetLOD(newVal);
+			static_cast<pragma::gui::types::WITexturedCubemap *>(hPrefilter.get())->SetLOD(newVal);
 		}));
 		pSlider->SetAnchor(0.f, 0.f, 1.f, 0.f);
 	}

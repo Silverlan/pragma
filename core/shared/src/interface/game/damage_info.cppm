@@ -10,7 +10,7 @@ import :entities.base_entity_handle;
 import :game.enums;
 import :physics.hitbox;
 
-export {
+export namespace pragma::game {
 	class DLLNETWORK DamageInfo {
 	  protected:
 		unsigned short m_damage = 0u;
@@ -20,7 +20,7 @@ export {
 		Vector3 m_hitPosition = {};
 		EntityHandle m_attacker = {};
 		EntityHandle m_inflictor = {};
-		HitGroup m_hitGroup = HitGroup::Generic;
+		pragma::physics::HitGroup m_hitGroup = pragma::physics::HitGroup::Generic;
 	  public:
 		DamageInfo() = default;
 		~DamageInfo() = default;
@@ -35,19 +35,18 @@ export {
 		void SetInflictor(const pragma::ecs::BaseEntity *ent);
 		void SetInflictor(const EntityHandle &hnd);
 		unsigned int GetDamageTypes();
-		void SetDamageType(DAMAGETYPE type);
-		void AddDamageType(DAMAGETYPE type);
-		void RemoveDamageType(DAMAGETYPE type);
-		bool IsDamageType(DAMAGETYPE type);
+		void SetDamageType(DamageType type);
+		void AddDamageType(DamageType type);
+		void RemoveDamageType(DamageType type);
+		bool IsDamageType(DamageType type);
 		void SetSource(const Vector3 &origin);
 		Vector3 &GetSource();
 		void SetHitPosition(const Vector3 &pos);
 		Vector3 &GetHitPosition();
 		void SetForce(const Vector3 &force);
 		Vector3 &GetForce();
-		HitGroup GetHitGroup() const;
-		void SetHitGroup(HitGroup hitGroup);
+		pragma::physics::HitGroup GetHitGroup() const;
+		void SetHitGroup(pragma::physics::HitGroup hitGroup);
 	};
-
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const DamageInfo &o);
 };

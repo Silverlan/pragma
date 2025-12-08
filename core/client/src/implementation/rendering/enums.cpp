@@ -6,20 +6,20 @@ module;
 module pragma.client;
 
 import :rendering.enums;
-bool pragma::premultiply_alpha(Vector4 &color, pragma::ParticleAlphaMode alphaMode)
+bool pragma::rendering::premultiply_alpha(Vector4 &color, pragma::rendering::ParticleAlphaMode alphaMode)
 {
 	switch(alphaMode) {
-	case pragma::ParticleAlphaMode::Opaque:
+	case pragma::rendering::ParticleAlphaMode::Opaque:
 		color = {color.r * color.a, color.g * color.a, color.b * color.a, 1.f};
 		break;
-	case pragma::ParticleAlphaMode::Translucent:
+	case pragma::rendering::ParticleAlphaMode::Translucent:
 		color = {color.r * color.a, color.g * color.a, color.b * color.a, color.a};
 		break;
-	case pragma::ParticleAlphaMode::Additive:
-	case pragma::ParticleAlphaMode::AdditiveByColor:
+	case pragma::rendering::ParticleAlphaMode::Additive:
+	case pragma::rendering::ParticleAlphaMode::AdditiveByColor:
 		color = {color.r * color.a, color.g * color.a, color.b * color.a, 0.f};
 		break;
-	case pragma::ParticleAlphaMode::Premultiplied:
+	case pragma::rendering::ParticleAlphaMode::Premultiplied:
 		// No change
 		break;
 	default:
@@ -28,7 +28,7 @@ bool pragma::premultiply_alpha(Vector4 &color, pragma::ParticleAlphaMode alphaMo
 	return true;
 }
 
-int GetMaxMSAASampleCount()
+int pragma::rendering::GetMaxMSAASampleCount()
 {
 	auto props = pragma::get_cengine()->GetRenderContext().GetPhysicalDeviceImageFormatProperties(
 	  {prosper::ImageCreateFlags {}, prosper::Format::R16G16B16A16_SFloat, prosper::ImageType::e2D, prosper::ImageTiling::Optimal, prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit});
@@ -38,7 +38,7 @@ int GetMaxMSAASampleCount()
 	}
 	return umath::get_highest_bit(umath::to_integral(props->sampleCount));
 }
-unsigned char ClampMSAASampleCount(unsigned int *samples)
+unsigned char pragma::rendering::ClampMSAASampleCount(unsigned int *samples)
 {
 	auto maxSamples = CUInt32(GetMaxMSAASampleCount());
 	if(*samples > maxSamples) {

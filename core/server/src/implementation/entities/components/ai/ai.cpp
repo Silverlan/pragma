@@ -107,7 +107,7 @@ void SAIComponent::OnLookTargetChanged()
 			p->Write<Vector3>(m_neckInfo.lookTarget);
 			break;
 		case BaseAIComponent::LookTargetType::Entity:
-			nwm::write_entity(p, m_neckInfo.hEntityLookTarget);
+			pragma::networking::write_entity(p, m_neckInfo.hEntityLookTarget);
 			break;
 		}
 		ent.SendNetEvent(m_netEvSetLookTarget, p, pragma::networking::Protocol::SlowReliable);
@@ -213,7 +213,7 @@ void SAIComponent::OnEntitySpawn()
 
 bool SAIComponent::OnInput(std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, const std::string &data)
 {
-	if constexpr(DEBUG_AI_MOVEMENT) {
+	if constexpr(pragma::ai::DEBUG_AI_MOVEMENT) {
 		if(ustring::compare<std::string>(input, "dbg_move", false)) {
 			auto pTrComponentActivator = (activator != nullptr) ? activator->GetTransformComponent() : nullptr;
 			if(pTrComponentActivator) {
@@ -709,8 +709,8 @@ void CEOnControllerActionInput::PushArguments(lua::State *l)
 
 //////////////////
 
-CEOnSuspiciousSoundHeared::CEOnSuspiciousSoundHeared(const std::shared_ptr<ALSound> &sound) : sound {sound} {}
-void CEOnSuspiciousSoundHeared::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<ALSound>>(l, sound); }
+CEOnSuspiciousSoundHeared::CEOnSuspiciousSoundHeared(const std::shared_ptr<pragma::audio::ALSound> &sound) : sound {sound} {}
+void CEOnSuspiciousSoundHeared::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<pragma::audio::ALSound>>(l, sound); }
 
 //////////////////
 

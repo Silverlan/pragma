@@ -227,7 +227,7 @@ LuaFactionObject Lua::ai::find_faction_by_name(lua::State *l, const std::string 
 uint32_t Lua::ai::register_task(lua::State *l, const LuaClassObject &taskClass, ::pragma::ai::BehaviorNode::Type taskType, ::pragma::ai::SelectorType selectorType)
 {
 	Lua::CheckUserData(l, 1);
-	auto &taskManager = SGame::Get()->GetAITaskManager();
+	auto &taskManager = pragma::SGame::Get()->GetAITaskManager();
 	return taskManager.RegisterTask(std::bind(server::create_lua_task, l, taskClass, taskType, selectorType));
 }
 uint32_t Lua::ai::register_task(lua::State *l, const LuaClassObject &taskClass, ::pragma::ai::BehaviorNode::Type taskType) { return register_task(l, taskClass, taskType, ::pragma::ai::SelectorType::Sequential); }

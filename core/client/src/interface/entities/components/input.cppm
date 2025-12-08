@@ -24,7 +24,7 @@ export namespace pragma {
 	  private:
 		float m_mouseDeltaX = 0.f;
 		float m_mouseDeltaY = 0.f;
-		WIBase *m_lastFocusedElement = nullptr;
+		pragma::gui::Element *m_lastFocusedElement = nullptr;
 		bool m_initialFocus = true;
 	};
 };

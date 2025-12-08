@@ -8,17 +8,17 @@ module pragma.client;
 import :engine;
 import :client_state;
 
-ClientState *CEngine::OpenClientState()
+pragma::ClientState *pragma::CEngine::OpenClientState()
 {
 	CloseClientState();
-	m_clInstance->state = std::make_unique<ClientState>();
+	m_clInstance->state = std::make_unique<pragma::ClientState>();
 	auto *cl = GetClientState();
 	cl->Initialize();
 	UpdateAssetMultiThreadedLoadingEnabled();
-	return static_cast<ClientState *>(cl);
+	return static_cast<pragma::ClientState *>(cl);
 }
 
-void CEngine::CloseClientState()
+void pragma::CEngine::CloseClientState()
 {
 	auto *cl = GetClientState();
 	if(cl == nullptr)
@@ -30,9 +30,9 @@ void CEngine::CloseClientState()
 	m_clInstance->state = nullptr;
 }
 
-NetworkState *CEngine::GetClientState() const
+pragma::NetworkState *pragma::CEngine::GetClientState() const
 {
 	if(m_clInstance == nullptr)
 		return nullptr;
-	return static_cast<ClientState *>(m_clInstance->state.get());
+	return static_cast<pragma::ClientState *>(m_clInstance->state.get());
 }

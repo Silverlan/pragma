@@ -23,10 +23,10 @@ export namespace pragma {
 #pragma pack(pop)
 
 		ShaderPBRBlend(prosper::IPrContext &context, const std::string &identifier);
-		virtual bool GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const override;
+		virtual bool GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const override;
 	  protected:
 		virtual void InitializeGfxPipelinePushConstantRanges() override;
 		virtual void InitializeGfxPipelineVertexAttributes() override;
-		virtual bool OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor, CModelSubMesh &mesh) const override;
+		virtual bool OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor, pragma::geometry::CModelSubMesh &mesh) const override;
 	};
 };

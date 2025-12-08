@@ -14,7 +14,7 @@ using namespace pragma;
 
 using namespace ecs::baseShooterComponent;
 void ecs::CShooterComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vector3 &origin, const Vector3 &effectsOrigins, const std::vector<Vector3> &destPositions, bool bTransmitToServer, std::vector<TraceResult> &outHitTargets)
+void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, const Vector3 &origin, const Vector3 &effectsOrigins, const std::vector<Vector3> &destPositions, bool bTransmitToServer, std::vector<pragma::physics::TraceResult> &outHitTargets)
 {
 	auto *physEnv = pragma::get_cgame()->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
@@ -24,7 +24,7 @@ void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vec
 	NetPacket p {};
 	if(bTransmitToServer == true)
 		p->Write<uint32_t>(static_cast<uint32_t>(numBullets));
-	TraceData data;
+	pragma::physics::TraceData data;
 	GetBulletTraceData(bulletInfo, data);
 	outHitTargets.reserve(numBullets);
 	for(auto i = decltype(numBullets) {0}; i < numBullets; ++i) {
@@ -34,7 +34,7 @@ void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vec
 		auto offset = outHitTargets.size();
 		auto hit = physEnv->RayCast(data, &outHitTargets);
 		if(outHitTargets.size() == offset)
-			outHitTargets.push_back(TraceResult {data}); // Empty trace result
+			outHitTargets.push_back(pragma::physics::TraceResult {data}); // Empty trace result
 		for(auto j = offset; j < outHitTargets.size(); ++j) {
 			auto &result = outHitTargets.at(j);
 			auto &hitPos = result.position;
@@ -91,13 +91,13 @@ void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, const Vec
 		}
 	}
 	if(bTransmitToServer == true)
-		static_cast<CBaseEntity &>(GetEntity()).SendNetEventUDP(m_netEvFireBullets, p);
+		static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).SendNetEventUDP(m_netEvFireBullets, p);
 
 	events::CEOnBulletsFired evData {bulletInfo, outHitTargets};
 	BroadcastEvent(EVENT_ON_BULLETS_FIRED, evData);
 }
 
-void ecs::CShooterComponent::FireBullets(const BulletInfo &bulletInfo, std::vector<TraceResult> &outHitTargets, bool bMaster)
+void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, std::vector<pragma::physics::TraceResult> &outHitTargets, bool bMaster)
 {
 	Vector3 origin {};
 	Vector3 dir {};

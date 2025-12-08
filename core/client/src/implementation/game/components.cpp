@@ -10,10 +10,10 @@ module pragma.client;
 import :game;
 import :entities.components;
 
-void CGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
+void pragma::CGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {
 	pragma::Game::InitializeEntityComponents(componentManager);
-	CBaseEntity::RegisterEvents(componentManager);
+	ecs::CBaseEntity::RegisterEvents(componentManager);
 	constexpr auto hideInEditor = pragma::ComponentRegInfo::Flags::HideInEditor;
 	componentManager.RegisterComponentType<pragma::CAIComponent>("ai", {"ai", hideInEditor});
 	componentManager.RegisterComponentType<pragma::CCharacterComponent>("character", {"gameplay", hideInEditor});
@@ -169,4 +169,4 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 		componentManager.RegisterEvent(evName, typeid(pragma::ecs::BaseEntity), pragma::ComponentEventInfo::Type::Broadcast);
 }
 
-pragma::BaseEntityComponent *CGame::CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) { return pragma::Game::CreateLuaEntityComponent<pragma::CLuaBaseEntityComponent, pragma::LuaCore::CLuaBaseEntityComponentHolder>(ent, classname); }
+pragma::BaseEntityComponent *pragma::CGame::CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) { return pragma::Game::CreateLuaEntityComponent<pragma::CLuaBaseEntityComponent, pragma::LuaCore::CLuaBaseEntityComponentHolder>(ent, classname); }

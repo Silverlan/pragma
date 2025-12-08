@@ -39,7 +39,7 @@ void CSceneComponent::RegisterEvents(pragma::EntityComponentManager &componentMa
 static std::shared_ptr<rendering::EntityInstanceIndexBuffer> g_entityInstanceIndexBuffer = nullptr;
 const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &CSceneComponent::GetEntityInstanceIndexBuffer() { return g_entityInstanceIndexBuffer; }
 
-void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const rendering::RenderQueue &renderQueue, RenderPassStats *optStats)
+void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const rendering::RenderQueue &renderQueue, rendering::RenderPassStats *optStats)
 {
 	renderQueue.WaitForCompletion(optStats);
 	CSceneComponent::GetEntityInstanceIndexBuffer()->UpdateBufferData(renderQueue);
@@ -48,7 +48,7 @@ void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimar
 		if(item.entity == curEntity)
 			continue;
 		curEntity = item.entity;
-		auto *ent = static_cast<CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(item.entity));
+		auto *ent = static_cast<ecs::CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(item.entity));
 		assert(ent);
 		if(!ent) {
 			// TODO: This should be unreachable, but there are cases where the entity does
@@ -67,7 +67,7 @@ void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimar
 			continue;
 		}
 		if(optStats && umath::is_flag_set(renderC->GetStateFlags(), CRenderComponent::StateFlags::RenderBufferDirty))
-			(*optStats)->Increment(RenderPassStats::Counter::EntityBufferUpdates);
+			(*optStats)->Increment(rendering::RenderPassStats::Counter::EntityBufferUpdates);
 		auto *animC = renderC->GetAnimatedComponent();
 		if(animC && animC->AreSkeletonUpdateCallbacksEnabled())
 			animC->UpdateBoneMatricesMT();
@@ -132,7 +132,7 @@ void CSceneComponent::OnRemove()
 		g_scenes.at(sceneIndex) = nullptr;
 
 		// Clear all entities from this scene
-		std::vector<CBaseEntity *> *ents;
+		std::vector<pragma::ecs::CBaseEntity *> *ents;
 		pragma::get_cgame()->GetEntities(&ents);
 		for(auto *ent : *ents) {
 			if(ent == nullptr)
@@ -179,7 +179,7 @@ void CSceneComponent::Link(const CSceneComponent &other, bool linkCamera)
 
 	auto *occlusionCuller = const_cast<CSceneComponent &>(other).FindOcclusionCuller<COcclusionCullerComponent>();
 	if(occlusionCuller)
-		static_cast<CBaseEntity &>(occlusionCuller->GetEntity()).AddToScene(*this);
+		static_cast<pragma::ecs::CBaseEntity &>(occlusionCuller->GetEntity()).AddToScene(*this);
 
 	auto *worldEnv = other.GetWorldEnvironment();
 	if(worldEnv)
@@ -217,8 +217,8 @@ uint32_t CSceneComponent::GetSceneFlag(SceneIndex sceneIndex) { return 1 << scen
 
 CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex(uint32_t flag) { return umath::get_least_significant_set_bit_index(flag); }
 
-static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
-static CVar cvShaderQuality = GetClientConVar("cl_render_shader_quality");
+static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
+static auto cvShaderQuality = pragma::console::get_client_con_var("cl_render_shader_quality");
 void CSceneComponent::InitializeRenderSettingsBuffer()
 {
 	// Initialize Render Settings
@@ -279,7 +279,7 @@ TCPPM *CSceneComponent::FindOcclusionCuller()
 {
 	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
-	entIt.AttachFilter<EntityIteratorFilterUser>([this](pragma::ecs::BaseEntity &ent, std::size_t index) -> bool { return static_cast<CBaseEntity &>(ent).IsInScene(*this); });
+	entIt.AttachFilter<EntityIteratorFilterUser>([this](pragma::ecs::BaseEntity &ent, std::size_t index) -> bool { return static_cast<pragma::ecs::CBaseEntity &>(ent).IsInScene(*this); });
 	auto it = entIt.begin();
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
 	return ent ? ent->GetComponent<pragma::COcclusionCullerComponent>().get() : nullptr;
@@ -335,7 +335,7 @@ void CSceneComponent::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuff
 	if(m_renderer.valid())
 		static_cast<pragma::CRendererComponent *>(m_renderer.get())->UpdateRendererBuffer(drawCmd);
 }
-void CSceneComponent::RecordRenderCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
+void CSceneComponent::RecordRenderCommandBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	auto *renderer = GetRenderer<pragma::CRendererComponent>();
 	if(renderer == nullptr)
@@ -404,7 +404,7 @@ void CSceneComponent::SetExclusionRenderMask(::pragma::rendering::RenderMask ren
 void CSceneComponent::SetInclusionRenderMask(::pragma::rendering::RenderMask renderMask) { m_inclusionRenderMask = renderMask; }
 ::pragma::rendering::RenderMask CSceneComponent::GetInclusionRenderMask() const { return m_inclusionRenderMask; }
 
-void CSceneComponent::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
+void CSceneComponent::BuildRenderQueues(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	pragma::CEDrawSceneInfo evData {drawSceneInfo};
 	GetSceneRenderDesc().BuildRenderQueues(drawSceneInfo, [this, &drawSceneInfo, &evData]() {
@@ -425,8 +425,8 @@ void CSceneComponent::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 	});
 }
 
-WorldEnvironment *CSceneComponent::GetWorldEnvironment() const { return m_worldEnvironment.get(); }
-void CSceneComponent::SetWorldEnvironment(WorldEnvironment &env)
+pragma::rendering::WorldEnvironment *CSceneComponent::GetWorldEnvironment() const { return m_worldEnvironment.get(); }
+void CSceneComponent::SetWorldEnvironment(rendering::WorldEnvironment &env)
 {
 	ClearWorldEnvironment();
 
@@ -633,8 +633,8 @@ void CSceneComponent::SetActiveCamera()
 
 /////////////////
 
-CEDrawSceneInfo::CEDrawSceneInfo(const util::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
-void CEDrawSceneInfo::PushArguments(lua::State *l) { Lua::Push<const util::DrawSceneInfo *>(l, &drawSceneInfo); }
+CEDrawSceneInfo::CEDrawSceneInfo(const pragma::rendering::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
+void CEDrawSceneInfo::PushArguments(lua::State *l) { Lua::Push<const pragma::rendering::DrawSceneInfo *>(l, &drawSceneInfo); }
 
 ////////
 

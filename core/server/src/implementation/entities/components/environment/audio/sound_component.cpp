@@ -11,11 +11,11 @@ import :audio;
 using namespace pragma;
 
 void SSoundComponent::Initialize() { BaseEnvSoundComponent::Initialize(); }
-void SSoundComponent::OnSoundCreated(ALSound &snd)
+void SSoundComponent::OnSoundCreated(audio::ALSound &snd)
 {
 	BaseEnvSoundComponent::OnSoundCreated(snd);
 	auto pMapComponent = GetEntity().GetComponent<pragma::MapComponent>();
-	dynamic_cast<SALSound &>(snd).SetEntityMapIndex(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
+	dynamic_cast<audio::SALSound &>(snd).SetEntityMapIndex(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
 }
 void SSoundComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {

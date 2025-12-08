@@ -10,28 +10,30 @@ export import :particle_system.modifier_ease;
 import :particle_system.modifier_random_variable;
 export import :particle_system.modifier_time;
 
-export class DLLCLIENT CParticleModifierComponentGradualFade : public CParticleModifierComponentEase, public CParticleModifierComponentTime {
-  protected:
-	CParticleModifierComponentGradualFade() = default;
-	void Initialize(const std::unordered_map<std::string, std::string> &values);
+export namespace pragma::pts {
+	class DLLCLIENT CParticleModifierComponentGradualFade : public CParticleModifierComponentEase, public CParticleModifierComponentTime {
+	protected:
+		CParticleModifierComponentGradualFade() = default;
+		void Initialize(const std::unordered_map<std::string, std::string> &values);
 
-	float GetStartTime(CParticle &p) const;
-	float GetEndTime(CParticle &p) const;
-	// Returns a value in [0,1] representing the current fade position (0 = start, 1 = end)
-	float GetFadeFraction(CParticle &p) const;
-	bool GetFadeFraction(CParticle &p, float &outFraction) const;
+		float GetStartTime(pragma::pts::CParticle &p) const;
+		float GetEndTime(pragma::pts::CParticle &p) const;
+		// Returns a value in [0,1] representing the current fade position (0 = start, 1 = end)
+		float GetFadeFraction(pragma::pts::CParticle &p) const;
+		bool GetFadeFraction(pragma::pts::CParticle &p, float &outFraction) const;
 
-	// Returns the eased fade fraction
-	float GetEasedFadeFraction(CParticle &p) const;
-	bool GetEasedFadeFraction(CParticle &p, float &outFraction) const;
-  private:
-	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fStart;
-	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fEnd;
-	// If false, the start and end time will be in seconds (starting at the particle creation time)
-	// If true, the start and end time will be fractions of the particle's total lifetime
-};
+		// Returns the eased fade fraction
+		float GetEasedFadeFraction(pragma::pts::CParticle &p) const;
+		bool GetEasedFadeFraction(pragma::pts::CParticle &p, float &outFraction) const;
+	private:
+		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fStart;
+		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fEnd;
+		// If false, the start and end time will be in seconds (starting at the particle creation time)
+		// If true, the start and end time will be fractions of the particle's total lifetime
+	};
+}
 
-void CParticleModifierComponentGradualFade::Initialize(const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleModifierComponentGradualFade::Initialize(const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleModifierComponentTime::Initialize("fade", values);
 	CParticleModifierComponentEase::Initialize(values);
@@ -39,17 +41,17 @@ void CParticleModifierComponentGradualFade::Initialize(const std::unordered_map<
 	m_fEnd.Initialize("fade_end", values);
 }
 
-float CParticleModifierComponentGradualFade::GetStartTime(CParticle &p) const
+float pragma::pts::CParticleModifierComponentGradualFade::GetStartTime(pragma::pts::CParticle &p) const
 {
 	auto tStart = m_fStart.GetValue(p);
 	return GetTime(tStart, p);
 }
-float CParticleModifierComponentGradualFade::GetEndTime(CParticle &p) const
+float pragma::pts::CParticleModifierComponentGradualFade::GetEndTime(pragma::pts::CParticle &p) const
 {
 	auto tEnd = m_fEnd.GetValue(p);
 	return GetTime(tEnd, p);
 }
-bool CParticleModifierComponentGradualFade::GetFadeFraction(CParticle &p, float &outFraction) const
+bool pragma::pts::CParticleModifierComponentGradualFade::GetFadeFraction(pragma::pts::CParticle &p, float &outFraction) const
 {
 	auto tStart = GetStartTime(p);
 	auto t = p.GetTimeAlive();
@@ -62,20 +64,20 @@ bool CParticleModifierComponentGradualFade::GetFadeFraction(CParticle &p, float 
 	outFraction = (tDelta != 0.f) ? umath::clamp((t - tStart) / (tEnd - tStart), 0.f, 1.f) : 0.f;
 	return true;
 }
-float CParticleModifierComponentGradualFade::GetFadeFraction(CParticle &p) const
+float pragma::pts::CParticleModifierComponentGradualFade::GetFadeFraction(pragma::pts::CParticle &p) const
 {
 	auto fraction = 0.f;
 	GetFadeFraction(p, fraction);
 	return fraction;
 }
-bool CParticleModifierComponentGradualFade::GetEasedFadeFraction(CParticle &p, float &outFraction) const
+bool pragma::pts::CParticleModifierComponentGradualFade::GetEasedFadeFraction(pragma::pts::CParticle &p, float &outFraction) const
 {
 	if(GetFadeFraction(p, outFraction) == false)
 		return false;
 	outFraction = Ease(outFraction);
 	return true;
 }
-float CParticleModifierComponentGradualFade::GetEasedFadeFraction(CParticle &p) const
+float pragma::pts::CParticleModifierComponentGradualFade::GetEasedFadeFraction(pragma::pts::CParticle &p) const
 {
 	auto fraction = 0.f;
 	GetEasedFadeFraction(p, fraction);

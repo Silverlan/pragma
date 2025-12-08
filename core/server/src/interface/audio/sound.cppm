@@ -9,7 +9,7 @@ export module pragma.server:audio.sound;
 
 export import pragma.shared;
 
-export {
+export namespace pragma::audio {
 	class DLLSERVER SALSoundBase {
 	  protected:
 		bool m_bShared;
@@ -30,7 +30,7 @@ export {
 		void SendEvent(NetEvent evId, const std::function<void(NetPacket &)> &write = nullptr, bool bUDP = true) const;
 		uint32_t m_entityIndex = std::numeric_limits<uint32_t>::max();
 	  public:
-		SALSound(NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, pragma::audio::ALCreateFlags createFlags);
+		SALSound(pragma::NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, pragma::audio::ALCreateFlags createFlags);
 		virtual ~SALSound() override;
 		const std::string &GetSoundName() const;
 		pragma::audio::ALCreateFlags GetCreateFlags() const;

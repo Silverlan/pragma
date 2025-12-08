@@ -59,7 +59,7 @@ void CWeaponComponent::UpdateViewModel()
 	auto *vm = GetViewModel();
 	if(vm == nullptr)
 		return;
-	auto &vmEnt = static_cast<CBaseEntity &>(vm->GetEntity());
+	auto &vmEnt = static_cast<pragma::ecs::CBaseEntity &>(vm->GetEntity());
 	auto pRenderComponentVm = vmEnt.GetRenderComponent();
 	auto mdlComponentVm = vmEnt.GetModelComponent();
 	if(m_viewModel.has_value()) {
@@ -78,7 +78,7 @@ void CWeaponComponent::UpdateViewModel()
 	vm->SetViewFOV(GetViewFOV());
 }
 
-static auto cvViewFov = GetClientConVar("cl_fov_viewmodel");
+static auto cvViewFov = pragma::console::get_client_con_var("cl_fov_viewmodel");
 void CWeaponComponent::SetViewModelOffset(const Vector3 &offset)
 {
 	m_viewModelOffset = offset;
@@ -111,7 +111,7 @@ void CWeaponComponent::Initialize()
 
 	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &shouldDrawData = static_cast<CEShouldDraw &>(evData.get());
-		auto &ent = static_cast<CBaseEntity &>(GetEntity());
+		auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
 		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetSceneRenderPass() : pragma::rendering::SceneRenderPass::None;
 		if(renderMode != pragma::rendering::SceneRenderPass::None) {
@@ -163,12 +163,12 @@ void CWeaponComponent::Initialize()
 		}
 	});
 	BindEventUnhandled(cWeaponComponent::EVENT_ON_DEPLOY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto *renderC = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
+		auto *renderC = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(renderC)
 			renderC->UpdateShouldDrawState();
 	});
 	BindEventUnhandled(cWeaponComponent::EVENT_ON_HOLSTER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto *renderC = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
+		auto *renderC = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(renderC)
 			renderC->UpdateShouldDrawState();
 	});
@@ -193,7 +193,7 @@ bool CWeaponComponent::IsInFirstPersonMode() const
 
 void CWeaponComponent::UpdateWorldModel()
 {
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(!pRenderComponent)
 		return;
@@ -207,7 +207,7 @@ void CWeaponComponent::SetViewModel(const std::string &mdl)
 }
 const std::optional<std::string> &CWeaponComponent::GetViewModelName() const { return m_viewModel; }
 
-void CWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin)
+void CWeaponComponent::OnFireBullets(const game::BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin)
 {
 	BaseWeaponComponent::OnFireBullets(bulletInfo, bulletOrigin, bulletDir, effectsOrigin);
 	auto *owner = m_whOwnerComponent.valid() ? m_whOwnerComponent->GetOwner() : nullptr;

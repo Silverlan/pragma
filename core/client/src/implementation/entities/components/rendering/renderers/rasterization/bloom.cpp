@@ -12,14 +12,14 @@ import :game;
 
 using namespace pragma::rendering;
 
-void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RenderGlowObjects(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 #if 0
 	auto &glowInfo = GetGlowInfo();
 	if(glowInfo.bGlowScheduled == false || drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
-	pragma::get_cgame()->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
+	pragma::get_cgame()->StartProfilingStage(pragma::CGame::GPUProfilingPhase::PostProcessingGlow);
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	drawCmd->RecordBeginRenderPass(*glowInfo.renderTarget,{
 		prosper::ClearValue{prosper::ClearColorValue{std::array<float,4>{0.f,0.f,0.f,1.f}}},
@@ -59,7 +59,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::Draw
 	}
 
 	drawCmd->RecordImageBarrier(glowInfo.renderTarget->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
-	pragma::get_cgame()->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
+	pragma::get_cgame()->StopProfilingStage(pragma::CGame::GPUProfilingPhase::PostProcessingGlow);
 #endif
 }
 
@@ -96,7 +96,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<p
 }
 //
 //
-static void cmd_render_bloom_enabled(NetworkState *, const ConVar &, bool, bool enabled)
+static void cmd_render_bloom_enabled(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool enabled)
 {
 	auto *client = pragma::get_client_state();
 	if(client == nullptr)

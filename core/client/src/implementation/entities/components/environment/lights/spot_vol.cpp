@@ -111,7 +111,7 @@ bool CLightSpotVolComponent::UpdateMeshData()
 		m_subMeshes.clear();
 		m_subMeshes.reserve(coneSegments.size());
 		for(auto &segData : coneSegments) {
-			auto subMesh = ::util::make_shared<CModelSubMesh>();
+			auto subMesh = ::util::make_shared<pragma::geometry::CModelSubMesh>();
 			subMesh->SetIndexCount(segData.indices.size());
 			subMesh->GetVertices().resize(segData.verts.size());
 			subMesh->SetSkinTextureIndex(0);
@@ -136,7 +136,7 @@ bool CLightSpotVolComponent::UpdateMeshData()
 				throw std::runtime_error {"Volumetric mesh index data size mismatch!"};
 			memcpy(indexData, segData.indices.data(), util::size_of_container(segData.indices));
 		});
-		subMesh->Update(pragma::model::ModelUpdateFlags::UpdateVertexBuffer | pragma::model::ModelUpdateFlags::UpdateIndexBuffer);
+		subMesh->Update(pragma::asset::ModelUpdateFlags::UpdateVertexBuffer | pragma::asset::ModelUpdateFlags::UpdateIndexBuffer);
 		++idx;
 	}
 	return newMeshes;
@@ -145,7 +145,7 @@ bool CLightSpotVolComponent::UpdateMeshData()
 Bool CLightSpotVolComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetSpotlightTarget) {
-		auto *ent = nwm::read_entity(packet);
+		auto *ent = pragma::networking::read_entity(packet);
 		if(ent != nullptr)
 			SetSpotlightTarget(*ent);
 		else
@@ -160,7 +160,7 @@ void CLightSpotVolComponent::ReceiveData(NetPacket &packet)
 {
 	m_coneStartOffset = packet->Read<float>();
 	auto hEnt = GetHandle();
-	nwm::read_unique_entity(packet, [this, hEnt](pragma::ecs::BaseEntity *ent) {
+	pragma::networking::read_unique_entity(packet, [this, hEnt](pragma::ecs::BaseEntity *ent) {
 		if(hEnt.expired())
 			return;
 		if(ent != nullptr)
@@ -175,12 +175,12 @@ util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId, C
 	if(BaseEnvLightSpotVolComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON) {
-		auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
+		auto pRenderComponent = static_cast<ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
 			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
 	}
 	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF) {
-		auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
+		auto pRenderComponent = static_cast<ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
 			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::None);
 	}
@@ -209,13 +209,13 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	Lua::Material::Client::InitializeShaderData(nullptr, cmat, false);
 	m_material = mat->GetHandle();
 
-	auto mesh = ::util::make_shared<CModelMesh>();
+	auto mesh = ::util::make_shared<pragma::geometry::CModelMesh>();
 	for(auto &subMesh : m_subMeshes)
 		mesh->AddSubMesh(subMesh);
 	group->AddMesh(mesh);
 	mdl->AddMaterial(0, mat.get());
 
-	mdl->Update(pragma::model::ModelUpdateFlags::All);
+	mdl->Update(pragma::asset::ModelUpdateFlags::All);
 	mdlComponent->SetModel(mdl);
 	mdlComponent->SetDepthPrepassEnabled(false);
 	m_model = mdl;

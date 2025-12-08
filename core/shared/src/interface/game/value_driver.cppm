@@ -13,7 +13,7 @@ export import :entities.member_reference;
 export import pragma.lua;
 
 export {
-	namespace pragma {
+	namespace pragma::game {
 		struct DLLNETWORK ValueDriverDescriptor {
 			ValueDriverDescriptor() = default;
 			ValueDriverDescriptor(lua::State *l, std::string expression, std::unordered_map<std::string, std::string> variables, std::unordered_map<std::string, udm::PProperty> constants);
@@ -76,9 +76,9 @@ export {
 			StateFlags m_stateFlags = StateFlags::None;
 		};
 		using namespace umath::scoped_enum::bitwise;
-	};
-	REGISTER_ENUM_FLAGS(pragma::ValueDriver::StateFlags)
 
-	std::ostream &operator<<(std::ostream &out, const pragma::ValueDriverDescriptor &descriptor);
-	std::ostream &operator<<(std::ostream &out, const pragma::ValueDriver &driver);
+		std::ostream &operator<<(std::ostream &out, const pragma::game::ValueDriverDescriptor &descriptor);
+		std::ostream &operator<<(std::ostream &out, const pragma::game::ValueDriver &driver);
+	};
+	REGISTER_ENUM_FLAGS(pragma::game::ValueDriver::StateFlags)
 };

@@ -8,22 +8,22 @@ module pragma.shared;
 
 import :audio.sound_script_events;
 
-SoundScriptEventContainer::~SoundScriptEventContainer() { m_events.clear(); }
-SoundScriptEventContainer::SoundScriptEventContainer(SoundScriptManager *manager) : m_manager(manager) {}
-SoundScriptEvent *SoundScriptEventContainer::CreateEvent(std::string name)
+pragma::audio::SoundScriptEventContainer::~SoundScriptEventContainer() { m_events.clear(); }
+pragma::audio::SoundScriptEventContainer::SoundScriptEventContainer(SoundScriptManager *manager) : m_manager(manager) {}
+pragma::audio::SoundScriptEvent *pragma::audio::SoundScriptEventContainer::CreateEvent(std::string name)
 {
 	auto *ev = m_manager->CreateEvent(name);
 	m_events.push_back(std::shared_ptr<SoundScriptEvent>(ev));
 	return ev;
 }
-SoundScriptEvent *SoundScriptEventContainer::CreateEvent()
+pragma::audio::SoundScriptEvent *pragma::audio::SoundScriptEventContainer::CreateEvent()
 {
 	auto *ev = m_manager->CreateEvent();
 	m_events.push_back(std::shared_ptr<SoundScriptEvent>(ev));
 	return ev;
 }
-std::vector<std::shared_ptr<SoundScriptEvent>> &SoundScriptEventContainer::GetEvents() { return m_events; }
-void SoundScriptEventContainer::InitializeEvents(udm::LinkedPropertyWrapper &prop)
+std::vector<std::shared_ptr<pragma::audio::SoundScriptEvent>> &pragma::audio::SoundScriptEventContainer::GetEvents() { return m_events; }
+void pragma::audio::SoundScriptEventContainer::InitializeEvents(udm::LinkedPropertyWrapper &prop)
 {
 	for(auto udmEvent : prop["events"]) {
 		std::string type;
@@ -37,7 +37,7 @@ void SoundScriptEventContainer::InitializeEvents(udm::LinkedPropertyWrapper &pro
 		ev->Initialize(udmEvent);
 	}
 }
-void SoundScriptEventContainer::PrecacheSounds()
+void pragma::audio::SoundScriptEventContainer::PrecacheSounds()
 {
 	for(auto &ev : m_events)
 		ev->Precache();
@@ -45,35 +45,35 @@ void SoundScriptEventContainer::PrecacheSounds()
 
 //////////////////////////////
 
-SSEBase::SSEBase(SoundScriptEvent *ev, double tStart, float evOffset) : event(ev), timeCreated(tStart), eventOffset(evOffset) {}
+pragma::audio::SSEBase::SSEBase(SoundScriptEvent *ev, double tStart, float evOffset) : event(ev), timeCreated(tStart), eventOffset(evOffset) {}
 
-SSESound::SSESound(std::shared_ptr<ALSound> snd, SSEPlaySound *ev, double tStart, float eventOffset) : SSEBase(ev, tStart, eventOffset), sound(snd) {}
+pragma::audio::SSESound::SSESound(std::shared_ptr<pragma::audio::ALSound> snd, SSEPlaySound *ev, double tStart, float eventOffset) : SSEBase(ev, tStart, eventOffset), sound(snd) {}
 
-ALSound *SSESound::operator->() { return sound.get(); }
+pragma::audio::ALSound *pragma::audio::SSESound::operator->() { return sound.get(); }
 
 //////////////////////////////
 
-SoundScriptEvent::SoundScriptEvent(SoundScriptManager *manager, float off, bool bRepeat) : SoundScriptEventContainer(manager), eventOffset(off), repeat(bRepeat) {}
-SoundScriptEvent::~SoundScriptEvent() {}
-void SoundScriptEvent::Initialize(udm::LinkedPropertyWrapper &prop) { InitializeEvents(prop); }
-void SoundScriptEvent::Precache()
+pragma::audio::SoundScriptEvent::SoundScriptEvent(SoundScriptManager *manager, float off, bool bRepeat) : SoundScriptEventContainer(manager), eventOffset(off), repeat(bRepeat) {}
+pragma::audio::SoundScriptEvent::~SoundScriptEvent() {}
+void pragma::audio::SoundScriptEvent::Initialize(udm::LinkedPropertyWrapper &prop) { InitializeEvents(prop); }
+void pragma::audio::SoundScriptEvent::Precache()
 {
 	for(auto &ev : m_events)
 		ev->Precache();
 }
-SSEBase *SoundScriptEvent::CreateEvent(double tStart) { return new SSEBase(this, tStart, eventOffset.GetValue()); }
+pragma::audio::SSEBase *pragma::audio::SoundScriptEvent::CreateEvent(double tStart) { return new SSEBase(this, tStart, eventOffset.GetValue()); }
 
 //////////////////////////////
 
-ALChannel SSEPlaySound::GetChannel()
+pragma::audio::ALChannel pragma::audio::SSEPlaySound::GetChannel()
 {
 	auto channel = mode;
 	if(position != -1)
-		channel = ALChannel::Mono;
+		channel = pragma::audio::ALChannel::Mono;
 	return channel;
 }
 
-SSESound *SSEPlaySound::CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, pragma::audio::ALCreateFlags)> &createSound)
+pragma::audio::SSESound *pragma::audio::SSEPlaySound::CreateSound(double tStart, const std::function<std::shared_ptr<pragma::audio::ALSound>(const std::string &, ALChannel, pragma::audio::ALCreateFlags)> &createSound)
 {
 	int numSounds = static_cast<int>(sources.size());
 	if(numSounds == 0)
@@ -82,7 +82,7 @@ SSESound *SSEPlaySound::CreateSound(double tStart, const std::function<std::shar
 	auto createFlags = pragma::audio::ALCreateFlags::None;
 	if(stream == true)
 		createFlags |= pragma::audio::ALCreateFlags::Stream;
-	std::shared_ptr<ALSound> snd = createSound(sources[r].c_str(), GetChannel(), createFlags);
+	std::shared_ptr<pragma::audio::ALSound> snd = createSound(sources[r].c_str(), GetChannel(), createFlags);
 	if(snd.get() == nullptr)
 		return nullptr;
 	snd->SetMaxDistance(static_cast<float>(maxDistance));
@@ -116,17 +116,17 @@ SSESound *SSEPlaySound::CreateSound(double tStart, const std::function<std::shar
 	return new SSESound(snd, this, tStart, eventOffset.GetValue());
 }
 
-void SSEPlaySound::Precache()
+void pragma::audio::SSEPlaySound::Precache()
 {
-	SoundScriptEvent::Precache();
+	pragma::audio::SoundScriptEvent::Precache();
 	for(unsigned int i = 0; i < sources.size(); i++)
 		PrecacheSound(sources[i].c_str());
 }
 
-void SSEPlaySound::PrecacheSound(const char *name) { pragma::Engine::Get()->GetServerNetworkState()->PrecacheSound(name, GetChannel()); }
-void SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
+void pragma::audio::SSEPlaySound::PrecacheSound(const char *name) { pragma::Engine::Get()->GetServerNetworkState()->PrecacheSound(name, GetChannel()); }
+void pragma::audio::SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 {
-	SoundScriptEvent::Initialize(prop);
+	pragma::audio::SoundScriptEvent::Initialize(prop);
 	auto udmSources = prop["source"];
 	if(udmSources) {
 		udmSources.GetBlobData(sources);
@@ -140,30 +140,30 @@ void SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 	prop["global"](global);
 	prop["stream"](stream);
 
-	mode = ALChannel::Auto;
+	mode = pragma::audio::ALChannel::Auto;
 	std::string strMode;
 	prop["mode"](strMode);
 	if(strMode == "mono")
-		mode = ALChannel::Mono;
+		mode = pragma::audio::ALChannel::Mono;
 	else if(strMode == "both")
-		mode = ALChannel::Both;
+		mode = pragma::audio::ALChannel::Both;
 
 	position = -1;
 	std::string strPos;
 	prop["position"](strPos);
 	if(strPos == "random") {
 		position = -2;
-		if(mode == ALChannel::Auto)
-			mode = ALChannel::Mono;
+		if(mode == pragma::audio::ALChannel::Auto)
+			mode = pragma::audio::ALChannel::Mono;
 	}
 	if(position == -1 && prop["position"]) {
-		if(mode == ALChannel::Auto)
-			mode = ALChannel::Mono;
+		if(mode == pragma::audio::ALChannel::Auto)
+			mode = pragma::audio::ALChannel::Mono;
 		prop["position"](position);
 		if(position < 0)
 			position = -1;
 	}
-	if(mode == ALChannel::Mono) {
+	if(mode == pragma::audio::ALChannel::Mono) {
 		maxDistance = 2'048.f;
 		referenceDistance = 64.f;
 	}
@@ -194,14 +194,14 @@ void SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 
 //////////////////////////////
 
-SoundScriptValue::SoundScriptValue(float f) { Initialize(f); }
-SoundScriptValue::SoundScriptValue(float min, float max) { Initialize(min, max); }
-SoundScriptValue::SoundScriptValue(udm::LinkedPropertyWrapper &prop)
+pragma::audio::SoundScriptValue::SoundScriptValue(float f) { Initialize(f); }
+pragma::audio::SoundScriptValue::SoundScriptValue(float min, float max) { Initialize(min, max); }
+pragma::audio::SoundScriptValue::SoundScriptValue(udm::LinkedPropertyWrapper &prop)
 {
 	Initialize(0.f);
 	Load(prop);
 }
-bool SoundScriptValue::Load(const udm::LinkedPropertyWrapper &prop)
+bool pragma::audio::SoundScriptValue::Load(const udm::LinkedPropertyWrapper &prop)
 {
 	auto &udmVal = prop;
 	if(udmVal["min"] && udmVal["max"]) {
@@ -227,15 +227,15 @@ bool SoundScriptValue::Load(const udm::LinkedPropertyWrapper &prop)
 	}
 	return false;
 }
-void SoundScriptValue::Initialize(float f)
+void pragma::audio::SoundScriptValue::Initialize(float f)
 {
 	m_min = f;
 	m_max = f;
 }
-void SoundScriptValue::Initialize(float min, float max)
+void pragma::audio::SoundScriptValue::Initialize(float min, float max)
 {
 	m_min = min;
 	m_max = max;
 }
-float SoundScriptValue::GetValue() const { return umath::random(m_min, m_max); }
-bool SoundScriptValue::IsSet() const { return m_bIsSet; }
+float pragma::audio::SoundScriptValue::GetValue() const { return umath::random(m_min, m_max); }
+bool pragma::audio::SoundScriptValue::IsSet() const { return m_bIsSet; }

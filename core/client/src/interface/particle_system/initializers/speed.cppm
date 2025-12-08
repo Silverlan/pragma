@@ -12,16 +12,18 @@ export import :particle_system.modifier;
 export namespace pragma::ecs {
 	class CParticleSystemComponent;
 }
-export class DLLCLIENT CParticleInitializerSpeed : public CParticleInitializer {
-  public:
-	CParticleInitializerSpeed() = default;
-	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	virtual void OnParticleCreated(CParticle &particle) override;
-  private:
-	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fSpeed;
-};
+export namespace pragma::pts {
+	class DLLCLIENT CParticleInitializerSpeed : public CParticleInitializer {
+	public:
+		CParticleInitializerSpeed() = default;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+	private:
+		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fSpeed;
+	};
+}
 
-void CParticleInitializerSpeed::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleInitializerSpeed::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	m_fSpeed.Initialize("speed", values);
@@ -34,7 +36,7 @@ void CParticleInitializerSpeed::Initialize(pragma::BaseEnvParticleSystemComponen
 			m_fSpeed.SetMax(util::to_float(pair.second));
 	}
 }
-void CParticleInitializerSpeed::OnParticleCreated(CParticle &particle)
+void pragma::pts::CParticleInitializerSpeed::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	auto vel = particle.GetVelocity();
 	auto l = uvec::length(vel);

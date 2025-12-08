@@ -8,7 +8,7 @@ module pragma.client;
 
 import :game;
 
-void CGame::HandleLuaNetPacket(NetPacket &packet)
+void pragma::CGame::HandleLuaNetPacket(NetPacket &packet)
 {
 	unsigned int ID = packet->Read<unsigned int>();
 	std::unordered_map<std::string, int>::iterator j;

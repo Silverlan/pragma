@@ -967,12 +967,12 @@ void pragma::LuaCore::register_entity_component_classes(lua::State *l, luabind::
 	defBvh.def("DebugDraw", &pragma::BaseBvhComponent::DebugDraw);
 	defBvh.def("DebugDrawBvhTree", &pragma::BaseBvhComponent::DebugDrawBvhTree);
 	defBvh.def(
-	  "FindPrimitiveMeshInfo", +[](lua::State *l, const pragma::BaseBvhComponent &bvhC, size_t primIdx) -> std::optional<std::pair<EntityHandle, std::shared_ptr<pragma::ModelSubMesh>>> {
+	  "FindPrimitiveMeshInfo", +[](lua::State *l, const pragma::BaseBvhComponent &bvhC, size_t primIdx) -> std::optional<std::pair<EntityHandle, std::shared_ptr<pragma::geometry::ModelSubMesh>>> {
 		  auto *range = bvhC.FindPrimitiveMeshInfo(primIdx);
 		  if(!range)
-			  return std::optional<std::pair<EntityHandle, std::shared_ptr<pragma::ModelSubMesh>>> {};
+			  return std::optional<std::pair<EntityHandle, std::shared_ptr<pragma::geometry::ModelSubMesh>>> {};
 		  auto *ent = range->entity ? range->entity : &bvhC.GetEntity();
-		  return std::pair<EntityHandle, std::shared_ptr<pragma::ModelSubMesh>> {ent->GetHandle(), range->mesh};
+		  return std::pair<EntityHandle, std::shared_ptr<pragma::geometry::ModelSubMesh>> {ent->GetHandle(), range->mesh};
 	  });
 
 	/*auto defBvhIntersectionInfo = luabind::class_<pragma::BvhIntersectionInfo>("IntersectionInfo");
@@ -1468,9 +1468,9 @@ void pragma::LuaCore::base_animated_component::register_class(luabind::module_ &
 		  });
 	  }));
 
-	def.def("GetVertexTransformMatrix", static_cast<std::optional<Mat4> (pragma::BaseAnimatedComponent::*)(const pragma::ModelSubMesh &, uint32_t) const>(&pragma::BaseAnimatedComponent::GetVertexTransformMatrix));
+	def.def("GetVertexTransformMatrix", static_cast<std::optional<Mat4> (pragma::BaseAnimatedComponent::*)(const pragma::geometry::ModelSubMesh &, uint32_t) const>(&pragma::BaseAnimatedComponent::GetVertexTransformMatrix));
 	def.def(
-	  "GetLocalVertexPosition", +[](lua::State *l, pragma::BaseAnimatedComponent &hEnt, pragma::ModelSubMesh &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
+	  "GetLocalVertexPosition", +[](lua::State *l, pragma::BaseAnimatedComponent &hEnt, pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
 		  Vector3 pos, n;
 		  if(vertexId >= subMesh.GetVertexCount())
 			  return {};
@@ -1499,8 +1499,8 @@ void pragma::LuaCore::base_animated_component::register_class(luabind::module_ &
 		  return pos;
 	  });
 	def.def("GetVertexPosition",
-	  static_cast<std::optional<Vector3> (*)(lua::State *, pragma::BaseAnimatedComponent &, const std::shared_ptr<pragma::ModelSubMesh> &, uint32_t)>(
-	    [](lua::State *l, pragma::BaseAnimatedComponent &hEnt, const std::shared_ptr<pragma::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
+	  static_cast<std::optional<Vector3> (*)(lua::State *, pragma::BaseAnimatedComponent &, const std::shared_ptr<pragma::geometry::ModelSubMesh> &, uint32_t)>(
+	    [](lua::State *l, pragma::BaseAnimatedComponent &hEnt, const std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
 		    Vector3 pos;
 		    if(vertexId >= subMesh->GetVertexCount())
 			    return {};
@@ -2069,9 +2069,9 @@ void pragma::LuaCore::base_observable_component::register_class(luabind::module_
 namespace Lua::Shooter {
 	void FireBullets(lua::State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &, bool bHitReport, bool bMaster)
 	{
-		auto &bulletInfo = Lua::Check<BulletInfo>(l, 2);
+		auto &bulletInfo = Lua::Check<pragma::game::BulletInfo>(l, 2);
 
-		std::vector<TraceResult> results;
+		std::vector<pragma::physics::TraceResult> results;
 		hEnt.FireBullets(bulletInfo, results, bMaster);
 		if(bHitReport == false)
 			return;
@@ -2120,10 +2120,10 @@ void pragma::LuaCore::base_physics_component::register_class(luabind::module_ &m
 	def.def("GetCollisionExtents", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) { luabind::object(l, hEnt.GetCollisionExtents()).push(l); }));
 	def.def("GetCollisionCenter", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) { luabind::object(l, hEnt.GetCollisionCenter()).push(l); }));
 	def.def("GetMoveType", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) {
-		pragma::physics::MOVETYPE mt = hEnt.GetMoveType();
+		pragma::physics::MoveType mt = hEnt.GetMoveType();
 		Lua::PushInt(l, int(mt));
 	}));
-	def.def("SetMoveType", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, int)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, int moveType) { hEnt.SetMoveType(pragma::physics::MOVETYPE(moveType)); }));
+	def.def("SetMoveType", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, int)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, int moveType) { hEnt.SetMoveType(pragma::physics::MoveType(moveType)); }));
 	def.def("GetPhysicsObject", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) {
 		pragma::physics::PhysObj *phys = hEnt.GetPhysicsObject();
 		if(phys == nullptr)
@@ -2131,12 +2131,12 @@ void pragma::LuaCore::base_physics_component::register_class(luabind::module_ &m
 		luabind::object(l, phys->GetHandle()).push(l);
 	}));
 	def.def("InitializePhysics", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, uint32_t, uint32_t)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, uint32_t type, uint32_t physFlags) {
-		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PHYSICSTYPE(type), static_cast<pragma::BasePhysicsComponent::PhysFlags>(physFlags));
+		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PhysicsType(type), static_cast<pragma::BasePhysicsComponent::PhysFlags>(physFlags));
 		if(phys != nullptr)
 			luabind::object(l, phys->GetHandle()).push(l);
 	}));
 	def.def("InitializePhysics", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, uint32_t)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, uint32_t type) {
-		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PHYSICSTYPE(type));
+		pragma::physics::PhysObj *phys = hEnt.InitializePhysics(pragma::physics::PhysicsType(type));
 		if(phys != nullptr)
 			luabind::object(l, phys->GetHandle()).push(l);
 	}));
@@ -2209,7 +2209,7 @@ void pragma::LuaCore::base_physics_component::register_class(luabind::module_ &m
 	def.def("GetCollisionRadius", &pragma::BasePhysicsComponent::GetCollisionRadius);
 	def.def("IsPhysicsProp", static_cast<bool (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) {
 		auto physType = hEnt.GetPhysicsType();
-		return (physType != pragma::physics::PHYSICSTYPE::NONE && physType != pragma::physics::PHYSICSTYPE::STATIC && physType != pragma::physics::PHYSICSTYPE::BOXCONTROLLER && physType != pragma::physics::PHYSICSTYPE::CAPSULECONTROLLER) ? true : false;
+		return (physType != pragma::physics::PhysicsType::None && physType != pragma::physics::PhysicsType::Static && physType != pragma::physics::PhysicsType::BoxController && physType != pragma::physics::PhysicsType::CapsuleController) ? true : false;
 	}));
 
 	def.def("GetAABBDistance", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, const Vector3 &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, const Vector3 &p) { Lua::PushNumber(l, hEnt.GetAABBDistance(p)); }));
@@ -2237,12 +2237,12 @@ void pragma::LuaCore::base_physics_component::register_class(luabind::module_ &m
 	def.add_static_constant("EVENT_HANDLE_RAYCAST", pragma::basePhysicsComponent::EVENT_HANDLE_RAYCAST);
 	def.add_static_constant("EVENT_INITIALIZE_PHYSICS", pragma::basePhysicsComponent::EVENT_INITIALIZE_PHYSICS);
 
-	def.add_static_constant("MOVETYPE_NONE", umath::to_integral(pragma::physics::MOVETYPE::NONE));
-	def.add_static_constant("MOVETYPE_WALK", umath::to_integral(pragma::physics::MOVETYPE::WALK));
-	def.add_static_constant("MOVETYPE_NOCLIP", umath::to_integral(pragma::physics::MOVETYPE::NOCLIP));
-	def.add_static_constant("MOVETYPE_FLY", umath::to_integral(pragma::physics::MOVETYPE::FLY));
-	def.add_static_constant("MOVETYPE_FREE", umath::to_integral(pragma::physics::MOVETYPE::FREE));
-	def.add_static_constant("MOVETYPE_PHYSICS", umath::to_integral(pragma::physics::MOVETYPE::PHYSICS));
+	def.add_static_constant("MOVETYPE_NONE", umath::to_integral(pragma::physics::MoveType::None));
+	def.add_static_constant("MOVETYPE_WALK", umath::to_integral(pragma::physics::MoveType::Walk));
+	def.add_static_constant("MOVETYPE_NOCLIP", umath::to_integral(pragma::physics::MoveType::Noclip));
+	def.add_static_constant("MOVETYPE_FLY", umath::to_integral(pragma::physics::MoveType::Fly));
+	def.add_static_constant("MOVETYPE_FREE", umath::to_integral(pragma::physics::MoveType::Free));
+	def.add_static_constant("MOVETYPE_PHYSICS", umath::to_integral(pragma::physics::MoveType::Physics));
 }
 
 void pragma::LuaCore::base_render_component::register_class(luabind::module_ &mod)
@@ -2282,7 +2282,7 @@ void pragma::LuaCore::base_sound_emitter_component::register_class(luabind::modu
 	def.def("EmitSound", +[](pragma::BaseSoundEmitterComponent &c, std::string snd, pragma::audio::ALSoundType type) { return c.EmitSound(std::move(snd), type); });
 	def.def("StopSounds", &pragma::BaseSoundEmitterComponent::StopSounds);
 	def.def("GetSounds", static_cast<void (*)(lua::State *, pragma::BaseSoundEmitterComponent &)>([](lua::State *l, pragma::BaseSoundEmitterComponent &hEnt) {
-		std::vector<std::shared_ptr<ALSound>> *sounds;
+		std::vector<std::shared_ptr<pragma::audio::ALSound>> *sounds;
 		hEnt.GetSounds(&sounds);
 		Lua::CreateTable(l);
 		int top = Lua::GetStackTop(l);
@@ -2428,11 +2428,11 @@ void pragma::LuaCore::base_color_component::register_class(luabind::module_ &mod
 	def.add_static_constant("EVENT_ON_COLOR_CHANGED", pragma::baseColorComponent::EVENT_ON_COLOR_CHANGED);
 }
 
-static std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<pragma::ModelSubMesh>, msys::Material *>> FindAndAssignSurfaceMesh(pragma::BaseSurfaceComponent &c, luabind::object oFilter)
+static std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, msys::Material *>> FindAndAssignSurfaceMesh(pragma::BaseSurfaceComponent &c, luabind::object oFilter)
 {
-	std::function<int32_t(ModelMesh &, pragma::ModelSubMesh &, msys::Material &, const std::string &)> filter = nullptr;
+	std::function<int32_t(pragma::geometry::ModelMesh &, pragma::geometry::ModelSubMesh &, msys::Material &, const std::string &)> filter = nullptr;
 	if(oFilter) {
-		filter = [&oFilter](ModelMesh &mesh, pragma::ModelSubMesh &subMesh, msys::Material &mat, const std::string &shader) -> int32_t {
+		filter = [&oFilter](pragma::geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh, msys::Material &mat, const std::string &shader) -> int32_t {
 			auto res = oFilter(&mat, shader);
 			return luabind::object_cast<int32_t>(res);
 		};
@@ -2440,7 +2440,7 @@ static std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<prag
 	auto res = c.FindAndAssignMesh(filter);
 	if(!res.has_value())
 		return {};
-	return std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<pragma::ModelSubMesh>, msys::Material *> {res->mesh->shared_from_this(), res->subMesh->shared_from_this(), res->material};
+	return std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, msys::Material *> {res->mesh->shared_from_this(), res->subMesh->shared_from_this(), res->material};
 }
 
 void pragma::LuaCore::base_surface_component::register_class(luabind::module_ &mod)
@@ -2465,9 +2465,9 @@ void pragma::LuaCore::base_surface_component::register_class(luabind::module_ &m
 		  auto r = c.CalcLineSurfaceIntersection(lineOrigin, lineDir, &t);
 		  return std::pair<bool, double> {r, t};
 	  });
-	def.def("GetMesh", static_cast<pragma::ModelSubMesh *(pragma::BaseSurfaceComponent::*)()>(&pragma::BaseSurfaceComponent::GetMesh), luabind::shared_from_this_policy<0> {});
-	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c, luabind::object oFilter) -> std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<pragma::ModelSubMesh>, msys::Material *>> { return FindAndAssignSurfaceMesh(c, oFilter); });
-	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c) -> std::optional<std::tuple<std::shared_ptr<ModelMesh>, std::shared_ptr<pragma::ModelSubMesh>, msys::Material *>> { return FindAndAssignSurfaceMesh(c, Lua::nil); });
+	def.def("GetMesh", static_cast<pragma::geometry::ModelSubMesh *(pragma::BaseSurfaceComponent::*)()>(&pragma::BaseSurfaceComponent::GetMesh), luabind::shared_from_this_policy<0> {});
+	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c, luabind::object oFilter) -> std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, msys::Material *>> { return FindAndAssignSurfaceMesh(c, oFilter); });
+	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c) -> std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, msys::Material *>> { return FindAndAssignSurfaceMesh(c, Lua::nil); });
 	def.add_static_constant("EVENT_ON_SURFACE_PLANE_CHANGED", pragma::baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED);
 }
 
@@ -2598,8 +2598,8 @@ void pragma::LuaCore::base_env_camera_component::register_class(luabind::module_
 	def.def("GetFrustumNeighbors", static_cast<void (*)(lua::State *, pragma::BaseEnvCameraComponent &, int)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, int planeID) {
 		if(planeID < 0 || planeID > 5)
 			return;
-		FrustumPlane neighborIDs[4];
-		hComponent.GetFrustumNeighbors(FrustumPlane(planeID), &neighborIDs[0]);
+		math::FrustumPlane neighborIDs[4];
+		hComponent.GetFrustumNeighbors(math::FrustumPlane(planeID), &neighborIDs[0]);
 		int table = Lua::CreateTable(l);
 		for(unsigned int i = 0; i < 4; i++) {
 			Lua::PushInt(l, i + 1);
@@ -2611,8 +2611,8 @@ void pragma::LuaCore::base_env_camera_component::register_class(luabind::module_
 		if(planeA < 0 || planeB < 0 || planeA > 5 || planeB > 5)
 			return;
 
-		FrustumPoint cornerPoints[2];
-		hComponent.GetFrustumPlaneCornerPoints(FrustumPlane(planeA), FrustumPlane(planeB), &cornerPoints[0]);
+		math::FrustumPoint cornerPoints[2];
+		hComponent.GetFrustumPlaneCornerPoints(math::FrustumPlane(planeA), math::FrustumPlane(planeB), &cornerPoints[0]);
 
 		Lua::PushInt(l, static_cast<int>(cornerPoints[0]));
 		Lua::PushInt(l, static_cast<int>(cornerPoints[1]));
@@ -3090,8 +3090,8 @@ void pragma::LuaCore::base_character_component::register_class(luabind::module_ 
 	def.def("GetWeaponCount", static_cast<size_t (*)(lua::State *, pragma::BaseCharacterComponent &)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt) -> size_t { return hEnt.GetWeapons().size(); }));
 	def.def("GetActiveWeapon", &pragma::BaseCharacterComponent::GetActiveWeapon);
 	def.def("HasWeapon", &pragma::BaseCharacterComponent::HasWeapon);
-	def.def("GetAimRayData", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt) { Lua::Push<::TraceData>(l, hEnt.GetAimTraceData()); }));
-	def.def("GetAimRayData", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &, float)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt, float maxDist) { Lua::Push<::TraceData>(l, hEnt.GetAimTraceData(maxDist)); }));
+	def.def("GetAimRayData", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt) { Lua::Push<pragma::physics::TraceData>(l, hEnt.GetAimTraceData()); }));
+	def.def("GetAimRayData", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &, float)>([](lua::State *l, pragma::BaseCharacterComponent &hEnt, float maxDist) { Lua::Push<pragma::physics::TraceData>(l, hEnt.GetAimTraceData(maxDist)); }));
 	def.def("FootStep", &pragma::BaseCharacterComponent::FootStep);
 	def.def("IsMoving", &pragma::BaseCharacterComponent::IsMoving);
 	def.def("SetNeckControllers", &pragma::BaseCharacterComponent::SetNeckControllers);
@@ -3265,8 +3265,8 @@ void pragma::LuaCore::base_player_component::register_class(luabind::module_ &mo
 	def.def("ApplyViewRotationOffset", static_cast<void (*)(lua::State *, pragma::BasePlayerComponent &, EulerAngles &)>([](lua::State *l, pragma::BasePlayerComponent &hPl, EulerAngles &ang) { hPl.ApplyViewRotationOffset(ang); }));
 	def.def("PrintMessage", &pragma::BasePlayerComponent::PrintMessage);
 
-	def.add_static_constant("MESSAGE_TYPE_CONSOLE", umath::to_integral(MESSAGE::PRINTCONSOLE));
-	def.add_static_constant("MESSAGE_TYPE_CHAT", umath::to_integral(MESSAGE::PRINTCHAT));
+	def.add_static_constant("MESSAGE_TYPE_CONSOLE", umath::to_integral(pragma::console::MESSAGE::PRINTCONSOLE));
+	def.add_static_constant("MESSAGE_TYPE_CHAT", umath::to_integral(pragma::console::MESSAGE::PRINTCHAT));
 }
 
 void pragma::LuaCore::base_observer_component::register_class(luabind::module_ &mod)
@@ -3361,9 +3361,9 @@ void pragma::LuaCore::base_model_component::register_class(luabind::module_ &mod
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseModelComponent>("BaseModelComponent");
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("SetModel", static_cast<void (*)(lua::State *, pragma::BaseModelComponent &)>([](lua::State *l, pragma::BaseModelComponent &hModel) { hModel.SetModel(std::shared_ptr<pragma::Model> {nullptr}); }));
+	def.def("SetModel", static_cast<void (*)(lua::State *, pragma::BaseModelComponent &)>([](lua::State *l, pragma::BaseModelComponent &hModel) { hModel.SetModel(std::shared_ptr<pragma::asset::Model> {nullptr}); }));
 	def.def("SetModel", static_cast<void (pragma::BaseModelComponent::*)(const std::string &)>(&pragma::BaseModelComponent::SetModel));
-	def.def("SetModel", static_cast<void (pragma::BaseModelComponent::*)(const std::shared_ptr<pragma::Model> &)>(&pragma::BaseModelComponent::SetModel));
+	def.def("SetModel", static_cast<void (pragma::BaseModelComponent::*)(const std::shared_ptr<pragma::asset::Model> &)>(&pragma::BaseModelComponent::SetModel));
 	def.def("SetSkin", &pragma::BaseModelComponent::SetSkin);
 	def.def("GetSkin", &pragma::BaseModelComponent::GetSkin);
 	def.def("GetSkinProperty", &pragma::BaseModelComponent::GetSkinProperty);
@@ -3373,7 +3373,7 @@ void pragma::LuaCore::base_model_component::register_class(luabind::module_ &mod
 			return;
 		hModel.SetSkin(umath::random(0, umath::max(mdl->GetTextureGroups().size(), static_cast<size_t>(1)) - 1));
 	}));
-	def.def("GetModel", static_cast<luabind::optional<pragma::Model> (*)(lua::State *, pragma::BaseModelComponent &)>([](lua::State *l, pragma::BaseModelComponent &hModel) -> luabind::optional<pragma::Model> {
+	def.def("GetModel", static_cast<luabind::optional<pragma::asset::Model> (*)(lua::State *, pragma::BaseModelComponent &)>([](lua::State *l, pragma::BaseModelComponent &hModel) -> luabind::optional<pragma::asset::Model> {
 		auto mdl = hModel.GetModel();
 		if(mdl == nullptr)
 			return Lua::nil;

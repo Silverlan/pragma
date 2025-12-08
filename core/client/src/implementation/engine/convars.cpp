@@ -9,7 +9,7 @@ import :client_state;
 import :entities.components;
 import :engine;
 
-ConConf *CEngine::GetConVar(const std::string &cv)
+pragma::console::ConConf *pragma::CEngine::GetConVar(const std::string &cv)
 {
 	auto *cvar = pragma::Engine::GetConVar(cv);
 	if(cvar != nullptr)
@@ -18,13 +18,13 @@ ConConf *CEngine::GetConVar(const std::string &cv)
 	return (stateCl != nullptr) ? stateCl->GetConVar(cv) : nullptr;
 }
 
-bool CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
+bool pragma::CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(pragma::console::ConConf *, float &)> &callback)
 {
 	ustring::to_lower(cmd);
-	ClientState *stateCl = static_cast<ClientState *>(GetClientState());
+	auto *stateCl = static_cast<pragma::ClientState *>(GetClientState());
 	pragma::BasePlayerComponent *pl = nullptr;
 	if(stateCl != nullptr) {
-		CGame *game = stateCl->GetGameState();
+		auto *game = stateCl->GetGameState();
 		if(game != nullptr)
 			pl = game->GetLocalPlayer();
 	}

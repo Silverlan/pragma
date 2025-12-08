@@ -14,15 +14,15 @@ import :engine;
 import pragma.gui;
 import pragma.string.unicode;
 
-WIMainMenuNewGame::WIMainMenuNewGame() : WIMainMenuBase() {}
+pragma::gui::types::WIMainMenuNewGame::WIMainMenuNewGame() : WIMainMenuBase() {}
 
-WIMainMenuNewGame::~WIMainMenuNewGame()
+pragma::gui::types::WIMainMenuNewGame::~WIMainMenuNewGame()
 {
 	if(m_cbMapListReload.IsValid())
 		m_cbMapListReload.Remove();
 }
 
-void WIMainMenuNewGame::OnStartGame(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
+void pragma::gui::types::WIMainMenuNewGame::OnStartGame(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
 	if(button != pragma::platform::MouseButton::Left || state != pragma::platform::KeyState::Press)
 		return;
@@ -59,7 +59,7 @@ void WIMainMenuNewGame::OnStartGame(pragma::platform::MouseButton button, pragma
 	pragma::get_cengine()->StartDefaultGame(map, maxPlayers <= 1);
 }
 
-void WIMainMenuNewGame::Initialize()
+void pragma::gui::types::WIMainMenuNewGame::Initialize()
 {
 	WIMainMenuBase::Initialize();
 	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
@@ -73,7 +73,7 @@ void WIMainMenuNewGame::Initialize()
 	EnableThinking();
 }
 
-void WIMainMenuNewGame::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::types::WIMainMenuNewGame::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIMainMenuBase::Think(drawCmd);
 	DisableThinking();
@@ -84,12 +84,12 @@ void WIMainMenuNewGame::Think(const std::shared_ptr<prosper::IPrimaryCommandBuff
 	ReloadMapList();
 }
 
-void WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
+void pragma::gui::types::WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
 {
 	auto *pRow = pList->AddRow();
 	pRow->SetValue(0, "");
 
-	auto *buttonStart = WGUI::GetInstance().Create<WIButton>();
+	auto *buttonStart = pragma::gui::WGUI::GetInstance().Create<WIButton>();
 	buttonStart->SetText(pragma::locale::get_text("start_game"));
 	buttonStart->SizeToContents();
 	buttonStart->SetAutoCenterToParent(true);
@@ -104,7 +104,7 @@ void WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
 	WIMainMenuBase::InitializeOptionsList(pList);
 }
 
-void WIMainMenuNewGame::ReloadMapList()
+void pragma::gui::types::WIMainMenuNewGame::ReloadMapList()
 {
 	if(m_hMapList.IsValid() == false)
 		return;
@@ -208,7 +208,7 @@ void WIMainMenuNewGame::ReloadMapList()
 	fAddMaps(files, Color {200, 0, 0, 255});
 }
 
-void WIMainMenuNewGame::InitializeGameSettings()
+void pragma::gui::types::WIMainMenuNewGame::InitializeGameSettings()
 {
 	auto *pList = InitializeOptionsList();
 	auto title = pragma::locale::get_text("game_settings");
@@ -216,7 +216,7 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	pList->SetTitle(title);
 
 	// Game Mode
-	auto &gameModes = GameModeManager::GetGameModes();
+	auto &gameModes = game::GameModeManager::GetGameModes();
 	std::unordered_map<std::string, std::string> gameModeOptions;
 	for(auto it = gameModes.begin(); it != gameModes.end(); ++it) {
 		auto &info = it->second;
@@ -225,7 +225,7 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	auto *pGameMode = pList->AddDropDownMenu(pragma::locale::get_text("gamemode"), gameModeOptions, "sv_gamemode");
 	pGameMode->AddCallback("OnValueChanged", FunctionCallback<void>::Create([pGameMode, this]() {
 		auto val = pGameMode->GetOptionValue(pGameMode->GetSelectedOption());
-		auto &gameModes = GameModeManager::GetGameModes();
+		auto &gameModes = game::GameModeManager::GetGameModes();
 		auto it = gameModes.find(val);
 		if(it == gameModes.end())
 			return;

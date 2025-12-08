@@ -164,9 +164,9 @@ bool BaseBvhComponent::SetVertexData(const std::vector<pragma::bvh::Primitive> &
 	return SetVertexData(*m_bvhData, data);
 }
 
-bool BaseBvhComponent::ShouldConsiderMesh(const pragma::ModelSubMesh &mesh) { return mesh.GetGeometryType() == pragma::ModelSubMesh::GeometryType::Triangles; }
+bool BaseBvhComponent::ShouldConsiderMesh(const pragma::geometry::ModelSubMesh &mesh) { return mesh.GetGeometryType() == pragma::geometry::ModelSubMesh::GeometryType::Triangles; }
 
-std::shared_ptr<pragma::bvh::MeshBvhTree> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<pragma::ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices, pragma::ecs::BaseEntity *ent)
+std::shared_ptr<pragma::bvh::MeshBvhTree> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices, pragma::ecs::BaseEntity *ent)
 {
 	auto bvhData = std::make_unique<pragma::bvh::MeshBvhTree>();
 

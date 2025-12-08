@@ -6,6 +6,6 @@ export module pragma.shared:engine.enums;
 
 export import std.compat;
 
-export {
+export namespace pragma {
 	enum class NwStateType : uint8_t { Client = 0, Server, Count };
 };

@@ -29,8 +29,8 @@ export namespace pragma {
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		void ReloadDebugObject();
-		virtual void DoReloadDebugObject(class Color color, const Vector3 &pos, struct DebugRenderInfo renderInfo) = 0;
-		std::shared_ptr<DebugRenderer::BaseObject> m_debugObject = nullptr;
+		virtual void DoReloadDebugObject(class Color color, const Vector3 &pos, debug::DebugRenderInfo renderInfo) = 0;
+		std::shared_ptr<debug::DebugRenderer::BaseObject> m_debugObject = nullptr;
 		std::optional<Color> m_colorOverride {};
 		bool m_ignoreDepthBuffer = false;
 		CallbackHandle m_poseCallback = {};
@@ -145,7 +145,7 @@ export namespace pragma {
 		auto pos = Vector3 {};
 		if(pTrComponent.valid())
 			pos = pTrComponent->GetPosition();
-		DebugRenderInfo renderInfo {color};
+		debug::DebugRenderInfo renderInfo {color};
 		renderInfo.pose.SetOrigin(pos);
 		renderInfo.ignoreDepthBuffer = ShouldIgnoreDepthBuffer();
 		DoReloadDebugObject(color, pos, renderInfo);
@@ -163,7 +163,7 @@ export namespace pragma {
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
-		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, debug::DebugRenderInfo renderInfo) override;
 		std::string m_text = {};
 	};
 
@@ -184,7 +184,7 @@ export namespace pragma {
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
-		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, debug::DebugRenderInfo renderInfo) override;
 	};
 
 	////////////////
@@ -196,7 +196,7 @@ export namespace pragma {
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
-		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, debug::DebugRenderInfo renderInfo) override;
 	};
 
 	////////////////
@@ -210,7 +210,7 @@ export namespace pragma {
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
-		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, debug::DebugRenderInfo renderInfo) override;
 	};
 
 	////////////////
@@ -221,7 +221,7 @@ export namespace pragma {
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
-		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, debug::DebugRenderInfo renderInfo) override;
 	};
 
 	////////////////
@@ -236,7 +236,7 @@ export namespace pragma {
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
-		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, debug::DebugRenderInfo renderInfo) override;
 	};
 
 	////////////////
@@ -250,7 +250,7 @@ export namespace pragma {
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
-		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, debug::DebugRenderInfo renderInfo) override;
 	};
 
 	////////////////
@@ -262,6 +262,6 @@ export namespace pragma {
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
-		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, DebugRenderInfo renderInfo) override;
+		virtual void DoReloadDebugObject(Color color, const Vector3 &pos, debug::DebugRenderInfo renderInfo) override;
 	};
 };

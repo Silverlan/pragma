@@ -11,8 +11,8 @@ import :client_state;
 import :game;
 
 export namespace client_entities {
-	using Factory = std::function<CBaseEntity *(ClientState *)>;
-	using NetworkedFactory = std::function<CBaseEntity *(ClientState *, uint32_t)>;
+	using Factory = std::function<pragma::ecs::CBaseEntity *(pragma::ClientState *)>;
+	using NetworkedFactory = std::function<pragma::ecs::CBaseEntity *(pragma::ClientState *, uint32_t)>;
 	class ClientEntityRegistry {
 	  public:
 		static ClientEntityRegistry &Instance()
@@ -51,25 +51,25 @@ export namespace client_entities {
 	template<typename T>
 	void register_entity(const char *localName)
 	{
-		ClientEntityRegistry::Instance().RegisterEntity(std::string(localName), typeid(T), [](ClientState *client) -> CBaseEntity * {
+		ClientEntityRegistry::Instance().RegisterEntity(std::string(localName), typeid(T), [](pragma::ClientState *client) -> pragma::ecs::CBaseEntity * {
 			if(!client)
 				return nullptr;
-			CGame *game = client->GetGameState();
+			auto *game = client->GetGameState();
 			if(!game)
 				return nullptr;
 			auto *ent = game->template CreateEntity<T>();
-			return static_cast<CBaseEntity *>(ent);
+			return static_cast<pragma::ecs::CBaseEntity *>(ent);
 		});
 	}
 
 	template<typename T>
 	uint32_t register_networked_entity()
 	{
-		return ClientEntityRegistry::Instance().RegisterNetworkedEntity([](ClientState *client, uint32_t idx) -> CBaseEntity * {
-			CGame *game = client->GetGameState();
+		return ClientEntityRegistry::Instance().RegisterNetworkedEntity([](pragma::ClientState *client, uint32_t idx) -> pragma::ecs::CBaseEntity * {
+			auto *game = client->GetGameState();
 			if(game == nullptr)
 				return nullptr;
-			return static_cast<CBaseEntity *>(game->CreateEntity<T>(idx));
+			return static_cast<pragma::ecs::CBaseEntity *>(game->CreateEntity<T>(idx));
 		});
 	}
 

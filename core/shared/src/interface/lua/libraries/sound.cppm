@@ -20,16 +20,16 @@ export namespace Lua {
 		DLLNETWORK void register_enums(lua::State *l);
 		DLLNETWORK void register_library(luabind::module_ &soundMod);
 
-		DLLNETWORK std::shared_ptr<::ALSound> create(lua::State *l, const std::string &snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags);
-		DLLNETWORK std::shared_ptr<::ALSound> create(lua::State *l, const std::string &snd, pragma::audio::ALSoundType type);
-		DLLNETWORK std::shared_ptr<::ALSound> play(lua::State *l, const std::string &sndName, pragma::audio::ALSoundType type, const SoundPlayInfo &playInfo);
-		DLLNETWORK std::shared_ptr<::ALSound> play(lua::State *l, const std::string &sndName, pragma::audio::ALSoundType type);
+		DLLNETWORK std::shared_ptr<pragma::audio::ALSound> create(lua::State *l, const std::string &snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags);
+		DLLNETWORK std::shared_ptr<pragma::audio::ALSound> create(lua::State *l, const std::string &snd, pragma::audio::ALSoundType type);
+		DLLNETWORK std::shared_ptr<pragma::audio::ALSound> play(lua::State *l, const std::string &sndName, pragma::audio::ALSoundType type, const SoundPlayInfo &playInfo);
+		DLLNETWORK std::shared_ptr<pragma::audio::ALSound> play(lua::State *l, const std::string &sndName, pragma::audio::ALSoundType type);
 		DLLNETWORK bool is_music_playing(lua::State *l);
 		DLLNETWORK float get_duration(lua::State *l, const std::string &snd);
-		DLLNETWORK std::vector<std::shared_ptr<::ALSound>> get_all(lua::State *l);
-		DLLNETWORK std::vector<std::shared_ptr<::ALSound>> find_by_type(lua::State *l, pragma::audio::ALSoundType type, bool bExactMatch);
-		DLLNETWORK std::vector<std::shared_ptr<::ALSound>> find_by_type(lua::State *l, pragma::audio::ALSoundType type);
-		DLLNETWORK bool precache(lua::State *l, const std::string &snd, ALChannel mode);
+		DLLNETWORK std::vector<std::shared_ptr<pragma::audio::ALSound>> get_all(lua::State *l);
+		DLLNETWORK std::vector<std::shared_ptr<pragma::audio::ALSound>> find_by_type(lua::State *l, pragma::audio::ALSoundType type, bool bExactMatch);
+		DLLNETWORK std::vector<std::shared_ptr<pragma::audio::ALSound>> find_by_type(lua::State *l, pragma::audio::ALSoundType type);
+		DLLNETWORK bool precache(lua::State *l, const std::string &snd, pragma::audio::ALChannel mode);
 		DLLNETWORK bool precache(lua::State *l, const std::string &snd);
 		DLLNETWORK void stop_all(lua::State *l);
 		DLLNETWORK void load_scripts(lua::State *l, const std::string &file);

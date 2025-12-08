@@ -189,15 +189,15 @@ void BaseActorComponent::Ragdolize()
 	if(!pPhysComponent)
 		return;
 	auto *phys = pPhysComponent->GetPhysicsObject();
-	if(phys != nullptr && pPhysComponent->GetPhysicsType() == pragma::physics::PHYSICSTYPE::DYNAMIC)
+	if(phys != nullptr && pPhysComponent->GetPhysicsType() == pragma::physics::PhysicsType::Dynamic)
 		return;
-	pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::PHYSICS);
-	phys = pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::DYNAMIC);
+	pPhysComponent->SetMoveType(pragma::physics::MoveType::Physics);
+	phys = pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Dynamic);
 	if(phys == nullptr)
 		return;
 }
 
-void BaseActorComponent::OnDeath(DamageInfo *dmgInfo)
+void BaseActorComponent::OnDeath(game::DamageInfo *dmgInfo)
 {
 	auto evOnDeath = CEOnCharacterKilled {dmgInfo};
 	if(BroadcastEvent(baseActorComponent::EVENT_ON_DEATH, evOnDeath) == util::EventReply::Handled)
@@ -206,7 +206,7 @@ void BaseActorComponent::OnDeath(DamageInfo *dmgInfo)
 	Ragdolize();
 }
 
-void BaseActorComponent::Kill(DamageInfo *dmgInfo)
+void BaseActorComponent::Kill(game::DamageInfo *dmgInfo)
 {
 	if(!IsAlive())
 		return;
@@ -223,7 +223,7 @@ void BaseActorComponent::Respawn()
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent)
-		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::WALK);
+		pPhysComponent->SetMoveType(pragma::physics::MoveType::Walk);
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent)
 		pTrComponent->SetRotation(uquat::identity());
@@ -278,7 +278,7 @@ void BaseActorComponent::OnPhysicsInitialized()
 	m_physHitboxes->SetCollisionFilter(collisionMask, collisionMask); // Required for raytraces
 	m_physHitboxes->Spawn();
 }
-bool BaseActorComponent::FindHitgroup(const pragma::physics::ICollisionObject &phys, HitGroup &hitgroup) const
+bool BaseActorComponent::FindHitgroup(const pragma::physics::ICollisionObject &phys, pragma::physics::HitGroup &hitgroup) const
 {
 	if(m_physHitboxes == nullptr)
 		return false;
@@ -340,11 +340,11 @@ void BaseActorComponent::OnPhysicsDestroyed()
 
 ///////////////
 
-CEOnCharacterKilled::CEOnCharacterKilled(DamageInfo *damageInfo) : damageInfo(damageInfo) {}
+CEOnCharacterKilled::CEOnCharacterKilled(game::DamageInfo *damageInfo) : damageInfo(damageInfo) {}
 void CEOnCharacterKilled::PushArguments(lua::State *l)
 {
 	if(damageInfo != nullptr)
-		Lua::Push<DamageInfo *>(l, damageInfo);
+		Lua::Push<game::DamageInfo *>(l, damageInfo);
 	else
 		Lua::PushNil(l);
 }

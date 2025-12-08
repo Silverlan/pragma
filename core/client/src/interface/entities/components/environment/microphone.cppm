@@ -17,7 +17,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CEnvMicrophone : public CBaseEntity {
+	class DLLCLIENT CEnvMicrophone : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

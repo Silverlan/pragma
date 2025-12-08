@@ -12,7 +12,7 @@ import :server_state;
 #undef GetClassName
 
 export namespace server_entities {
-	using Factory = std::function<SBaseEntity *(ServerState *)>;
+	using Factory = std::function<SBaseEntity *(pragma::ServerState *)>;
 	class ServerEntityRegistry {
 	  public:
 		static ServerEntityRegistry &Instance()
@@ -50,10 +50,10 @@ export namespace server_entities {
 	template<typename T>
 	void register_entity(const char *localName)
 	{
-		ServerEntityRegistry::Instance().RegisterEntity(std::string(localName), typeid(T), [](ServerState *server) -> SBaseEntity * {
+		ServerEntityRegistry::Instance().RegisterEntity(std::string(localName), typeid(T), [](pragma::ServerState *server) -> SBaseEntity * {
 			if(!server)
 				return nullptr;
-			SGame *game = ServerState::Get()->GetGameState();
+			auto *game = pragma::ServerState::Get()->GetGameState();
 			if(!game)
 				return nullptr;
 			auto *ent = game->template CreateEntity<T>();

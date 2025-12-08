@@ -36,7 +36,7 @@ export namespace pragma {
 				Vector3 offset;
 			};
 			void Clear();
-			std::shared_ptr<ALSound> sound = nullptr;
+			std::shared_ptr<pragma::audio::ALSound> sound = nullptr;
 			std::vector<Particle> flameParticles;
 		} m_igniteInfo = {};
 	};

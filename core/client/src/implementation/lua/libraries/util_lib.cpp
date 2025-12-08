@@ -29,12 +29,12 @@ int Lua::util::Client::create_particle_tracer(lua::State *l)
 {
 	auto &start = Lua::Check<Vector3>(l, 1);
 	auto &end = Lua::Check<Vector3>(l, 2);
-	auto radius = Lua::IsSet(l, 3) ? Lua::CheckNumber(l, 3) : bulletInfo::DEFAULT_TRACER_RADIUS;
-	const auto &col = Lua::IsSet(l, 4) ? Lua::Check<::Color>(l, 4) : bulletInfo::DEFAULT_TRACER_COLOR;
-	auto length = Lua::IsSet(l, 5) ? Lua::CheckNumber(l, 5) : bulletInfo::DEFAULT_TRACER_LENGTH;
-	auto speed = Lua::IsSet(l, 6) ? Lua::CheckNumber(l, 6) : bulletInfo::DEFAULT_TRACER_SPEED;
-	std::string mat = Lua::IsSet(l, 7) ? Lua::CheckString(l, 7) : std::string {bulletInfo::DEFAULT_TRACER_MATERIAL};
-	auto bloomScale = Lua::IsSet(l, 8) ? Lua::CheckNumber(l, 8) : bulletInfo::DEFAULT_TRACER_BLOOM;
+	auto radius = Lua::IsSet(l, 3) ? Lua::CheckNumber(l, 3) : pragma::game::bulletInfo::DEFAULT_TRACER_RADIUS;
+	const auto &col = Lua::IsSet(l, 4) ? Lua::Check<::Color>(l, 4) : pragma::game::bulletInfo::DEFAULT_TRACER_COLOR;
+	auto length = Lua::IsSet(l, 5) ? Lua::CheckNumber(l, 5) : pragma::game::bulletInfo::DEFAULT_TRACER_LENGTH;
+	auto speed = Lua::IsSet(l, 6) ? Lua::CheckNumber(l, 6) : pragma::game::bulletInfo::DEFAULT_TRACER_SPEED;
+	std::string mat = Lua::IsSet(l, 7) ? Lua::CheckString(l, 7) : std::string {pragma::game::bulletInfo::DEFAULT_TRACER_MATERIAL};
+	auto bloomScale = Lua::IsSet(l, 8) ? Lua::CheckNumber(l, 8) : pragma::game::bulletInfo::DEFAULT_TRACER_BLOOM;
 
 	auto *particle = pragma::get_cgame()->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(start, end, static_cast<float>(radius), col, static_cast<float>(length), static_cast<float>(speed), mat, static_cast<float>(bloomScale));
 	if(particle == nullptr)
@@ -64,7 +64,7 @@ int Lua::util::Client::create_muzzle_flash(lua::State *l)
 		auto *pt = pragma::ecs::CParticleSystemComponent::Create(particleName);
 		if(pt == nullptr)
 			return 0;
-		auto pRenderComponent = static_cast<CBaseEntity *>(&ent)->GetRenderComponent();
+		auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity *>(&ent)->GetRenderComponent();
 		if(pRenderComponent)
 			pt->SetSceneRenderPass(pRenderComponent->GetSceneRenderPass());
 		pt->GetEntity().SetKeyValue("transform_with_emitter", "1");
@@ -163,7 +163,7 @@ int Lua::util::Client::import_model(lua::State *l)
 	if(Lua::IsSet(l, 3))
 		importAsSingleModel = Lua::CheckBool(l, 3);
 	std::string errMsg;
-	std::shared_ptr<pragma::Model> mdl = nullptr;
+	std::shared_ptr<pragma::asset::Model> mdl = nullptr;
 	if(f) {
 		mdl = pragma::asset::import_model(*f, errMsg, outputPath, importAsSingleModel);
 	}
@@ -286,8 +286,8 @@ int Lua::util::Client::export_material(lua::State *l)
 std::string Lua::util::Client::get_clipboard_string() { return pragma::get_cengine()->GetWindow()->GetClipboardString(); }
 void Lua::util::Client::set_clipboard_string(const std::string &str) { pragma::get_cengine()->GetWindow()->SetClipboardString(str); }
 
-::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::ModelSubMesh *> &meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
-  uint32_t height, ::pragma::LightmapDataCache *optLightmapDataCache)
+::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> &meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
+  uint32_t height, ::pragma::rendering::LightmapDataCache *optLightmapDataCache)
 {
 	return ::util::baking::bake_directional_lightmap_atlas(lights, meshes, entities, width, height, optLightmapDataCache);
 }

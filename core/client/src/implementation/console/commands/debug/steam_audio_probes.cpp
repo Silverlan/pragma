@@ -9,7 +9,7 @@ import :console.commands;
 
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1
 static std::unique_ptr<DebugGameGUI> dbgSoundProbeBoxes = nullptr;
-static void debug_steam_audio_probe_boxes(NetworkState *state, ConVar *, bool, bool val)
+static void debug_steam_audio_probe_boxes(pragma::NetworkState *state, ConVar *, bool, bool val)
 {
 	if(val == false) {
 		dbgSoundProbeBoxes = nullptr;
@@ -45,7 +45,7 @@ namespace {
 	auto _ = pragma::console::client::register_variable_listener<bool>("debug_steam_audio_probe_boxes", &debug_steam_audio_probe_boxes);
 }
 
-static void debug_steam_audio_dump_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_steam_audio_dump_scene(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto *sndSys = pragma::get_cengine()->GetSoundSystem();
 	if(sndSys == nullptr) {
@@ -59,7 +59,7 @@ static void debug_steam_audio_dump_scene(NetworkState *state, pragma::BasePlayer
 	}
 	std::string mapName = "unknown";
 	auto *client = pragma::get_cengine()->GetClientState();
-	auto *game = (pragma::get_client_state() != nullptr) ? static_cast<CGame *>(pragma::get_client_state()->GetGameState()) : nullptr;
+	auto *game = (pragma::get_client_state() != nullptr) ? static_cast<pragma::CGame *>(pragma::get_client_state()->GetGameState()) : nullptr;
 	if(game != nullptr)
 		mapName = game->GetMapName();
 
@@ -75,7 +75,7 @@ static void debug_steam_audio_dump_scene(NetworkState *state, pragma::BasePlayer
 }
 
 #else
-static void debug_steam_audio_dump_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { Con::cwar << "Steam audio is disabled! Scene cannot be dumped." << Con::endl; }
+static void debug_steam_audio_dump_scene(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { Con::cwar << "Steam audio is disabled! Scene cannot be dumped." << Con::endl; }
 #endif
 
 namespace {

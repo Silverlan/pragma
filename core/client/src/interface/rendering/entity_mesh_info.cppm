@@ -11,14 +11,18 @@ export import :model.mesh;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-export class CBaseEntity;
-export class DLLCLIENT EntityMeshInfo {
-  public:
-	EntityMeshInfo(CBaseEntity *ent) : entity(ent) {};
-	EntityMeshInfo(const EntityMeshInfo &) = delete;
-	EntityMeshInfo(EntityMeshInfo &&) = default;
-	EntityMeshInfo &operator=(const EntityMeshInfo &other) = delete;
-	CBaseEntity *entity;
-	std::vector<CModelSubMesh *> meshes;
-};
+export namespace pragma::ecs {
+	class CBaseEntity;
+}
+export namespace pragma::rendering {
+	class DLLCLIENT EntityMeshInfo {
+	public:
+		EntityMeshInfo(ecs::CBaseEntity *ent) : entity(ent) {};
+		EntityMeshInfo(const EntityMeshInfo &) = delete;
+		EntityMeshInfo(EntityMeshInfo &&) = default;
+		EntityMeshInfo &operator=(const EntityMeshInfo &other) = delete;
+		ecs::CBaseEntity *entity;
+		std::vector<pragma::geometry::CModelSubMesh *> meshes;
+	};
+}
 #pragma warning(pop)

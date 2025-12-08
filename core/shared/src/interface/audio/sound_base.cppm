@@ -9,7 +9,7 @@ export module pragma.shared:audio.sound_base;
 export import :audio.effect_params;
 export import :audio.enums;
 
-export {
+export namespace pragma::audio {
 #pragma warning(push)
 #pragma warning(disable : 4251)
 	class DLLNETWORK ALSoundBase {

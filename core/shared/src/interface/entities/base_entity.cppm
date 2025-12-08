@@ -126,15 +126,15 @@ export {
 			// These are quick-access functions for commonly used component functions.
 			// In some cases these may create the component, if it doesn't exist, and transmit
 			// it to the client if called serverside!
-			std::shared_ptr<ALSound> CreateSound(const std::string &snd, pragma::audio::ALSoundType type);
-			std::shared_ptr<ALSound> EmitSound(const std::string &snd, pragma::audio::ALSoundType type, float gain = 1.f, float pitch = 1.f);
+			std::shared_ptr<pragma::audio::ALSound> CreateSound(const std::string &snd, pragma::audio::ALSoundType type);
+			std::shared_ptr<pragma::audio::ALSound> EmitSound(const std::string &snd, pragma::audio::ALSoundType type, float gain = 1.f, float pitch = 1.f);
 
 			std::string GetName() const;
 			void SetName(const std::string &name);
 
 			void SetModel(const std::string &mdl);
-			void SetModel(const std::shared_ptr<pragma::Model> &mdl);
-			const std::shared_ptr<pragma::Model> &GetModel() const;
+			void SetModel(const std::shared_ptr<pragma::asset::Model> &mdl);
+			const std::shared_ptr<pragma::asset::Model> &GetModel() const;
 			std::string GetModelName() const;
 			std::optional<umath::Transform> GetAttachmentPose(uint32_t attId) const;
 			uint32_t GetSkin() const;
@@ -155,7 +155,7 @@ export {
 			bool IsParentOf(const pragma::ecs::BaseEntity &ent) const;
 
 			pragma::physics::PhysObj *GetPhysicsObject() const;
-			pragma::physics::PhysObj *InitializePhysics(pragma::physics::PHYSICSTYPE type);
+			pragma::physics::PhysObj *InitializePhysics(pragma::physics::PhysicsType type);
 			void DestroyPhysicsObject();
 			void DropToFloor();
 			std::pair<Vector3, Vector3> GetCollisionBounds() const;
@@ -199,7 +199,7 @@ export {
 			int32_t GetAnimation() const;
 			pragma::Activity GetActivity() const;
 
-			void TakeDamage(DamageInfo &info);
+			void TakeDamage(game::DamageInfo &info);
 			//
 
 			// Returns true if this entity is local to the current network state (i.e. clientside/serverside only)

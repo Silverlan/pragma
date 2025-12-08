@@ -15,13 +15,13 @@ using namespace pragma;
 void SModelComponent::Initialize() { BaseModelComponent::Initialize(); }
 void SModelComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void SModelComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &model)
+void SModelComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model)
 {
 	BaseModelComponent::OnModelChanged(model);
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->WriteString(GetModelName());
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_MODEL, p, pragma::networking::Protocol::SlowReliable);
 	}
@@ -53,7 +53,7 @@ void SModelComponent::SetSkin(unsigned int skin)
 	if(ent.IsShared() == false)
 		return;
 	NetPacket p;
-	nwm::write_entity(p, &ent);
+	pragma::networking::write_entity(p, &ent);
 	p->Write<unsigned int>(skin);
 	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SKIN, p, pragma::networking::Protocol::SlowReliable);
 }

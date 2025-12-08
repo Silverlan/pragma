@@ -437,11 +437,11 @@ void CEOnPoseChanged::PushArguments(lua::State *l) { Lua::PushInt(l, umath::to_i
 
 /////////////////
 
-TraceData util::get_entity_trace_data(BaseTransformComponent &component)
+pragma::physics::TraceData util::get_entity_trace_data(BaseTransformComponent &component)
 {
 	auto &origin = component.GetPosition();
 	auto dir = component.GetForward();
-	TraceData trData;
+	pragma::physics::TraceData trData;
 	trData.SetSource(origin);
 	trData.SetTarget(origin + dir * static_cast<float>(pragma::GameLimits::MaxRayCastRange));
 	trData.SetFilter(component.GetEntity());

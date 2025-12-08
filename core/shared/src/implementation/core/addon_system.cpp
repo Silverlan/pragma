@@ -12,10 +12,10 @@ import :core.addon_system;
 import pragma.uva;
 import pragma.pad;
 
-decltype(AddonSystem::m_addons) AddonSystem::m_addons;
-decltype(AddonSystem::m_addonWatcher) AddonSystem::m_addonWatcher = nullptr;
+decltype(pragma::AddonSystem::m_addons) pragma::AddonSystem::m_addons;
+decltype(pragma::AddonSystem::m_addonWatcher) pragma::AddonSystem::m_addonWatcher = nullptr;
 
-pragma::pad::PADPackage *AddonSystem::LoadPADPackage(const std::string &path)
+pragma::pad::PADPackage *pragma::AddonSystem::LoadPADPackage(const std::string &path)
 {
 	auto it = std::find_if(m_addons.begin(), m_addons.end(), [&path](const AddonInfo &addon) { return FileManager::ComparePath(addon.GetLocalPath(), path); });
 	if(it != m_addons.end())
@@ -65,10 +65,10 @@ static void load_autorun_scripts(const std::function<void(const std::string &, s
 	}
 }
 
-static bool is_addon_mounted(const std::string &addonPath, const std::vector<AddonInfo> &addons)
+static bool is_addon_mounted(const std::string &addonPath, const std::vector<pragma::AddonInfo> &addons)
 {
 	auto path = "addons\\" + addonPath;
-	auto it = std::find_if(addons.begin(), addons.end(), [&path](const AddonInfo &addonInfo) { return FileManager::ComparePath(addonInfo.GetLocalPath(), path); });
+	auto it = std::find_if(addons.begin(), addons.end(), [&path](const pragma::AddonInfo &addonInfo) { return FileManager::ComparePath(addonInfo.GetLocalPath(), path); });
 	return it != addons.end();
 }
 
@@ -95,9 +95,9 @@ static bool mount_linked_addon(const std::string &pathLink, std::vector<AddonInf
 }
 #endif
 
-DirectoryWatcherCallback *AddonSystem::GetAddonWatcher() { return m_addonWatcher.get(); }
+DirectoryWatcherCallback *pragma::AddonSystem::GetAddonWatcher() { return m_addonWatcher.get(); }
 
-bool AddonSystem::MountAddon(const std::string &paddonPath, std::vector<AddonInfo> &outAddons, bool silent)
+bool pragma::AddonSystem::MountAddon(const std::string &paddonPath, std::vector<AddonInfo> &outAddons, bool silent)
 {
 	// Valid addon paths are: addons/addonName, addons/addonName/addons/subAddonName, etc.
 	auto addonPath = paddonPath;
@@ -144,9 +144,9 @@ bool AddonSystem::MountAddon(const std::string &paddonPath, std::vector<AddonInf
 	}
 	return true;
 }
-bool AddonSystem::MountAddon(const std::string &addonPath) { return MountAddon(addonPath, m_addons); }
+bool pragma::AddonSystem::MountAddon(const std::string &addonPath) { return MountAddon(addonPath, m_addons); }
 
-void AddonSystem::MountAddons()
+void pragma::AddonSystem::MountAddons()
 {
 	std::vector<std::string> resFiles;
 	std::vector<std::string> resDirs;
@@ -221,14 +221,14 @@ void AddonSystem::MountAddons()
 	}
 }
 
-void AddonSystem::Poll()
+void pragma::AddonSystem::Poll()
 {
 	if(m_addonWatcher == nullptr)
 		return;
 	m_addonWatcher->Poll();
 }
 
-void AddonSystem::UnmountAddons()
+void pragma::AddonSystem::UnmountAddons()
 {
 	m_addonWatcher = nullptr;
 	FileManager::ClearCustomMountDirectories();
@@ -236,13 +236,13 @@ void AddonSystem::UnmountAddons()
 	m_addons.clear();
 }
 
-const std::vector<AddonInfo> &AddonSystem::GetMountedAddons() { return m_addons; }
+const std::vector<pragma::AddonInfo> &pragma::AddonSystem::GetMountedAddons() { return m_addons; }
 
 /////////////////////////////
 
-AddonInfo::AddonInfo(const std::string &path, const util::Version &version, const std::string &uniqueId) : m_path(path), m_version(version), m_uniqueId(uniqueId) {}
-const std::string &AddonInfo::GetLocalPath() const { return m_path; }
-std::string AddonInfo::GetAbsolutePath() const
+pragma::AddonInfo::AddonInfo(const std::string &path, const util::Version &version, const std::string &uniqueId) : m_path(path), m_version(version), m_uniqueId(uniqueId) {}
+const std::string &pragma::AddonInfo::GetLocalPath() const { return m_path; }
+std::string pragma::AddonInfo::GetAbsolutePath() const
 {
 	std::string absPath;
 	if(!filemanager::find_absolute_path(m_path, absPath))
@@ -264,5 +264,5 @@ std::string AddonInfo::GetAbsolutePath() const
 	return absPath;
 #endif
 }
-const std::string &AddonInfo::GetUniqueId() const { return m_uniqueId; }
-const util::Version &AddonInfo::GetVersion() const { return m_version; }
+const std::string &pragma::AddonInfo::GetUniqueId() const { return m_uniqueId; }
+const util::Version &pragma::AddonInfo::GetVersion() const { return m_version; }

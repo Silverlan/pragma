@@ -25,7 +25,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CFuncKinematic : public CBaseEntity {
+	class DLLCLIENT CFuncKinematic : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

@@ -10,17 +10,19 @@ export module pragma.client:particle_system.operator_world_base;
 export import :entities.components.particle_system;
 export import :particle_system.modifier;
 
-export class DLLCLIENT CParticleOperatorWorldBase : public CParticleOperator {
-  public:
-	bool ShouldRotateWithEmitter() const;
-  protected:
-	CParticleOperatorWorldBase() = default;
-	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-  private:
-	bool m_bRotateWithEmitter = false;
-};
+export namespace pragma::pts {
+	class DLLCLIENT CParticleOperatorWorldBase : public CParticleOperator {
+	public:
+		bool ShouldRotateWithEmitter() const;
+	protected:
+		CParticleOperatorWorldBase() = default;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	private:
+		bool m_bRotateWithEmitter = false;
+	};
+}
 
-void CParticleOperatorWorldBase::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorWorldBase::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -31,4 +33,4 @@ void CParticleOperatorWorldBase::Initialize(pragma::BaseEnvParticleSystemCompone
 	}
 }
 
-bool CParticleOperatorWorldBase::ShouldRotateWithEmitter() const { return m_bRotateWithEmitter; }
+bool pragma::pts::CParticleOperatorWorldBase::ShouldRotateWithEmitter() const { return m_bRotateWithEmitter; }

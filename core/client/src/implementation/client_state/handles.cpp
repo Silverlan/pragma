@@ -12,12 +12,12 @@ import :engine;
 import :entities.components.world;
 import :game;
 
-void ClientState::HandlePacket(NetPacket &packet)
+void pragma::ClientState::HandlePacket(NetPacket &packet)
 {
 	packet->SetClient(true);
 	CallCallbacks<void, std::reference_wrapper<NetPacket>>("OnReceivePacket", packet);
 	unsigned int ID = packet.GetMessageID();
-	CLNetMessage *msg = GetNetMessage(ID);
+	networking::CLNetMessage *msg = GetNetMessage(ID);
 	if(msg == nullptr) {
 		Con::cwar << "(CLIENT) Unhandled net message: " << ID << Con::endl;
 		return;
@@ -26,9 +26,9 @@ void ClientState::HandlePacket(NetPacket &packet)
 	msg->handler(packet);
 }
 
-void ClientState::HandleConnect() { RequestServerInfo(); }
+void pragma::ClientState::HandleConnect() { RequestServerInfo(); }
 
-void ClientState::RequestServerInfo()
+void pragma::ClientState::RequestServerInfo()
 {
 	Con::ccl << "Sending serverinfo request..." << Con::endl;
 	NetPacket packet;
@@ -36,7 +36,7 @@ void ClientState::RequestServerInfo()
 	SendPacket(pragma::networking::net_messages::server::SERVERINFO_REQUEST, packet, pragma::networking::Protocol::SlowReliable);
 }
 
-void ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
+void pragma::ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
 {
 	m_svInfo = std::make_unique<ServerInfo>();
 	if(IsConnected()) {
@@ -83,7 +83,7 @@ void ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
 	SendPacket(pragma::networking::net_messages::server::AUTHENTICATE, outAuthPacket, pragma::networking::Protocol::SlowReliable);
 }
 
-void ClientState::HandleClientStartResourceTransfer(NetPacket &packet)
+void pragma::ClientState::HandleClientStartResourceTransfer(NetPacket &packet)
 {
 	if(m_svInfo == nullptr) {
 		Disconnect();
@@ -104,7 +104,7 @@ void ClientState::HandleClientStartResourceTransfer(NetPacket &packet)
 	StartResourceTransfer();
 }
 
-void ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize)
+void pragma::ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize)
 {
 	throw std::runtime_error {"Not implemented."};
 #if 0
@@ -143,17 +143,17 @@ void ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize)
 #endif
 }
 
-extern CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
-extern CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
+extern pragma::ecs::CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
+extern pragma::ecs::CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false);
 
-void ClientState::ReadEntityData(NetPacket &packet)
+void pragma::ClientState::ReadEntityData(NetPacket &packet)
 {
 	unsigned int numEnts = packet->Read<unsigned int>();
 	std::vector<EntityHandle> ents;
 	ents.reserve(numEnts);
 	for(unsigned int i = 0; i < numEnts; i++) {
 		auto bScripted = packet->Read<Bool>();
-		CBaseEntity *ent = nullptr;
+		ecs::CBaseEntity *ent = nullptr;
 		if(bScripted == false)
 			ent = NET_cl_ENT_CREATE(packet, false, true);
 		else {
@@ -175,7 +175,7 @@ void ClientState::ReadEntityData(NetPacket &packet)
 	}
 }
 
-void ClientState::HandleReceiveGameInfo(NetPacket &packet)
+void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 {
 	if(IsGameActive())
 		EndGame();
@@ -199,8 +199,8 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 		if(bIdentifier == true) {
 			auto *cf = GetConVar(cvar);
 			if(cf != nullptr) {
-				if(cf->GetType() == ConType::Var) {
-					auto *cv = static_cast<ConVar *>(cf);
+				if(cf->GetType() == pragma::console::ConType::Var) {
+					auto *cv = static_cast<pragma::console::ConVar *>(cf);
 					if((cv->GetFlags() & pragma::console::ConVarFlags::Replicated) != pragma::console::ConVarFlags::None)
 						SetConVar(cvar, value);
 				}
@@ -210,11 +210,11 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 		}
 	}
 	//
-	GameModeManager::Initialize();
+	game::GameModeManager::Initialize();
 	//if(IsConnected())
 	if(IsGameActive() == false)
 		StartNewGame(GetConVarString("sv_gamemode"));
-	auto *game = static_cast<CGame *>(GetGameState());
+	auto *game = static_cast<pragma::CGame *>(GetGameState());
 	game->InitializeGame();
 
 	auto luaPath = m_svInfo->GetDownloadPath() + "lua";
@@ -291,7 +291,7 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 
 	ReadEntityData(packet);
 
-	pragma::ecs::BaseEntity *wrld = nwm::read_entity(packet);
+	pragma::ecs::BaseEntity *wrld = pragma::networking::read_entity(packet);
 	if(wrld != nullptr) {
 		auto pWorldComponent = wrld->GetComponent<pragma::CWorldComponent>();
 		game->SetWorld(pWorldComponent.get());
@@ -300,7 +300,7 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	game->ReloadSoundCache();
 }
 
-void ClientState::SetGameReady()
+void pragma::ClientState::SetGameReady()
 {
 	if(!m_game)
 		return;

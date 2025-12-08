@@ -16,7 +16,7 @@ export import pragma.string.unicode;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-export {
+export namespace pragma {
 	struct DLLCLIENT ServerInfo {
 	  private:
 		std::string m_downloadPath;
@@ -59,8 +59,8 @@ export {
 	class DLLCLIENT ClientState : public NetworkState {
 		// For internal use only! Not to be used directly!
 	  public:
-		virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs() override;
-		static ConVarHandle GetConVarHandle(std::string scvar);
+		virtual std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() override;
+		static console::ConVarHandle GetConVarHandle(std::string scvar);
 		//
 	  private:
 		std::unique_ptr<pragma::networking::IClient> m_client;
@@ -72,19 +72,19 @@ export {
 		bool GetServerConVarIdentifier(uint32_t id, std::string &cvar);
 
 		// Sound
-		void InitializeSound(CALSound &snd);
-		std::vector<std::shared_ptr<ALSound>> m_soundScripts; // 'Regular' sounds are already handled by sound engine, but we still have to take care of sound-scripts
+		void InitializeSound(pragma::audio::CALSound &snd);
+		std::vector<std::shared_ptr<pragma::audio::ALSound>> m_soundScripts; // 'Regular' sounds are already handled by sound engine, but we still have to take care of sound-scripts
 		float m_volMaster;
 		std::unordered_map<pragma::audio::ALSoundType, float> m_volTypes;
 
-		WIHandle m_hMainMenu;
-		WIHandle m_hFps;
+		pragma::gui::WIHandle m_hMainMenu;
+		pragma::gui::WIHandle m_hFps;
 		pragma::rendering::GameWorldShaderSettings m_worldShaderSettings {};
 		LastConnectionInfo m_lastConnection {};
 	  protected:
 		std::shared_ptr<Lua::Interface> m_luaGUI = nullptr;
 		void InitializeGUILua();
-		std::vector<std::function<luabind::object(lua::State *, WIBase &)>> m_guiLuaWrapperFactories;
+		std::vector<std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)>> m_guiLuaWrapperFactories;
 
 		virtual void InitializeResourceManager() override;
 		void StartResourceTransfer();
@@ -99,25 +99,25 @@ export {
 		virtual ~ClientState() override;
 		virtual bool IsClient() const override;
 	  public:
-		virtual bool ShouldRemoveSound(ALSound &snd) override;
+		virtual bool ShouldRemoveSound(pragma::audio::ALSound &snd) override;
 		msys::Material *LoadMaterial(const std::string &path, const std::function<void(msys::Material *)> &onLoaded, bool bReload, bool bLoadInstantly); // TODO
 		msys::MaterialHandle CreateMaterial(const std::string &path, const std::string &shader);
 		msys::MaterialHandle CreateMaterial(const std::string &shader);
 		bool LoadGUILuaFile(std::string f);
 		pragma::networking::IClient *GetClient();
-		virtual NwStateType GetType() const override;
+		virtual pragma::NwStateType GetType() const override;
 		virtual void Think() override;
 		virtual void Tick() override;
-		void Draw(util::DrawSceneInfo &drawSceneInfo);
-		void Render(util::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt);
+		void Draw(pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void Render(pragma::rendering::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt);
 		virtual void Close() override;
-		virtual ConVarMap *GetConVarMap() override;
+		virtual console::ConVarMap *GetConVarMap() override;
 		bool IsConnected() const;
-		void AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, WIBase &)> &f);
-		std::vector<std::function<luabind::object(lua::State *, WIBase &)>> &GetGUILuaWrapperFactories();
+		void AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)> &f);
+		std::vector<std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)>> &GetGUILuaWrapperFactories();
 		virtual msys::MaterialManager &GetMaterialManager() override;
-		virtual pragma::ModelSubMesh *CreateSubMesh() const override;
-		virtual ModelMesh *CreateMesh() const override;
+		virtual pragma::geometry::ModelSubMesh *CreateSubMesh() const override;
+		virtual pragma::geometry::ModelMesh *CreateMesh() const override;
 		virtual util::FileAssetManager *GetAssetManager(pragma::asset::Type type) override;
 		virtual void Initialize() override;
 		virtual std::string GetMessagePrefix() const override;
@@ -126,7 +126,7 @@ export {
 		const pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() const { return const_cast<ClientState *>(this)->GetGameWorldShaderSettings(); }
 		void UpdateGameWorldShaderSettings();
 
-		WIMainMenu *GetMainMenu();
+		gui::types::WIMainMenu *GetMainMenu();
 
 		lua::State *GetGUILuaState();
 		Lua::Interface &GetGUILuaInterface();
@@ -141,13 +141,13 @@ export {
 		static void RegisterVulkanLuaInterface(Lua::Interface &lua);
 		// CVars
 		void RegisterServerConVar(std::string scmd, unsigned int id);
-		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr) override;
-		virtual ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
+		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr) override;
+		virtual console::ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
 		// Sockets
-		void Connect(std::string ip, std::string port = sci::DEFAULT_PORT_TCP);
+		void Connect(std::string ip, std::string port = networking::DEFAULT_PORT_TCP);
 		// Peer-to-peer only!
 		void Connect(uint64_t steamId);
-		CLNetMessage *GetNetMessage(unsigned int ID);
+		networking::CLNetMessage *GetNetMessage(unsigned int ID);
 		pragma::networking::ClientMessageMap *GetNetMessageMap();
 		void SendUserInfo();
 
@@ -155,21 +155,21 @@ export {
 
 		// Sound
 		virtual void StopSounds() override;
-		virtual void StopSound(std::shared_ptr<ALSound> pSnd) override;
-		bool PrecacheSound(std::string snd, std::pair<al::ISoundBuffer *, al::ISoundBuffer *> *buffers, ALChannel mode = ALChannel::Auto, bool bLoadInstantly = false);
-		virtual bool PrecacheSound(std::string snd, ALChannel mode = ALChannel::Auto) override;
+		virtual void StopSound(std::shared_ptr<pragma::audio::ALSound> pSnd) override;
+		bool PrecacheSound(std::string snd, std::pair<al::ISoundBuffer *, al::ISoundBuffer *> *buffers, pragma::audio::ALChannel mode = pragma::audio::ALChannel::Auto, bool bLoadInstantly = false);
+		virtual bool PrecacheSound(std::string snd, pragma::audio::ALChannel mode = pragma::audio::ALChannel::Auto) override;
 		virtual bool LoadSoundScripts(const char *file, bool bPrecache = false) override;
-		virtual std::shared_ptr<ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) override;
-		std::shared_ptr<ALSound> CreateSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type);
-		std::shared_ptr<ALSound> CreateSound(al::Decoder &decoder, pragma::audio::ALSoundType type);
-		void IndexSound(std::shared_ptr<ALSound> snd, unsigned int idx);
-		std::shared_ptr<ALSound> PlaySound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None);
-		std::shared_ptr<ALSound> PlaySound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type);
-		std::shared_ptr<ALSound> PlaySound(al::Decoder &buffer, pragma::audio::ALSoundType type);
-		std::shared_ptr<ALSound> PlayWorldSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type, const Vector3 &pos);
-		std::shared_ptr<ALSound> PlayWorldSound(al::Decoder &buffer, pragma::audio::ALSoundType type, const Vector3 &pos);
-		std::shared_ptr<ALSound> PlayWorldSound(std::string snd, pragma::audio::ALSoundType type, const Vector3 &pos);
-		virtual std::shared_ptr<ALSound> GetSoundByIndex(unsigned int idx) override;
+		virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) override;
+		std::shared_ptr<pragma::audio::ALSound> CreateSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type);
+		std::shared_ptr<pragma::audio::ALSound> CreateSound(al::Decoder &decoder, pragma::audio::ALSoundType type);
+		void IndexSound(std::shared_ptr<pragma::audio::ALSound> snd, unsigned int idx);
+		std::shared_ptr<pragma::audio::ALSound> PlaySound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None);
+		std::shared_ptr<pragma::audio::ALSound> PlaySound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type);
+		std::shared_ptr<pragma::audio::ALSound> PlaySound(al::Decoder &buffer, pragma::audio::ALSoundType type);
+		std::shared_ptr<pragma::audio::ALSound> PlayWorldSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type, const Vector3 &pos);
+		std::shared_ptr<pragma::audio::ALSound> PlayWorldSound(al::Decoder &buffer, pragma::audio::ALSoundType type, const Vector3 &pos);
+		std::shared_ptr<pragma::audio::ALSound> PlayWorldSound(std::string snd, pragma::audio::ALSoundType type, const Vector3 &pos);
+		virtual std::shared_ptr<pragma::audio::ALSound> GetSoundByIndex(unsigned int idx) override;
 		virtual void UpdateSounds() override;
 		void SetMasterSoundVolume(float vol);
 		float GetMasterSoundVolume();
@@ -234,8 +234,6 @@ export {
 		void ReadEntityData(NetPacket &packet);
 	};
 
-	namespace pragma {
-		DLLCLIENT ClientState *get_client_state();
-	};
+	DLLCLIENT ClientState *get_client_state();
 };
 #pragma warning(pop)

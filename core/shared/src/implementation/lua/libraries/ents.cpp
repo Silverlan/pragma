@@ -587,7 +587,7 @@ void Lua::ents::register_library(lua::State *l)
 
 Lua::type<pragma::ecs::BaseEntity> Lua::ents::create(lua::State *l, const std::string &classname)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 
 	auto *ent = game->CreateEntity(classname);
@@ -598,7 +598,7 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::create(lua::State *l, const std::s
 
 Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_prop(lua::State *l, const std::string &mdl, const Vector3 *origin, const EulerAngles *angles, bool physicsProp = false)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 	auto *ent = game->CreateEntity(physicsProp ? "prop_physics" : "prop_dynamic");
 	if(ent == nullptr)
@@ -788,7 +788,7 @@ Lua::opt<uint32_t> Lua::ents::get_component_id(lua::State *l, const std::string 
 
 Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua::State *l)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 	std::vector<pragma::ecs::BaseEntity *> *ents;
 	game->GetEntities(&ents);
@@ -869,7 +869,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_all(lua::State *l, co
 
 Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_spawned(lua::State *l)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 	std::vector<pragma::ecs::BaseEntity *> ents;
 	game->GetSpawnedEntities(&ents);
@@ -920,7 +920,7 @@ Lua::tb<Lua::type<pragma::BaseVehicleComponent>> Lua::ents::get_vehicles(lua::St
 
 Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_world(lua::State *l)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 	auto *pWorld = game->GetWorld();
 	if(pWorld == nullptr)
@@ -931,7 +931,7 @@ Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_world(lua::State *l)
 
 Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_by_index(lua::State *l, uint32_t idx)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 	pragma::ecs::BaseEntity *ent = game->GetEntity(idx);
 	if(ent == nullptr)
@@ -941,7 +941,7 @@ Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_by_index(lua::State 
 
 Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_by_local_index(lua::State *l, uint32_t idx)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 	pragma::ecs::BaseEntity *ent = game->GetEntityByLocalIndex(idx);
 	if(ent == nullptr)
@@ -1019,7 +1019,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_filter(lua::State
 
 Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_class(lua::State *l, const std::string &className)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 
 	pragma::ecs::EntityIterator entIt {*game};
@@ -1029,7 +1029,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_class(lua::State 
 
 Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_name(lua::State *l, const std::string &name)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 
 	pragma::ecs::EntityIterator entIt {*game};
@@ -1054,7 +1054,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_aabb(lua::State *
 Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_sphere(lua::State *l, const Vector3 &origin, float radius)
 {
 	std::vector<pragma::ecs::BaseEntity *> ents;
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 
 	pragma::ecs::EntityIterator entIt {*state->GetGameState()};
 	entIt.AttachFilter<EntityIteratorFilterSphere>(origin, radius);
@@ -1064,7 +1064,7 @@ Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_sphere(lua::State
 Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_in_box(lua::State *l, const Vector3 &min, const Vector3 &max)
 {
 	std::vector<pragma::ecs::BaseEntity *> ents;
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	pragma::Game *game = state->GetGameState();
 
 	pragma::ecs::EntityIterator entIt {*game};

@@ -15,7 +15,6 @@ export import :rendering.enums;
 import :rendering.entity_instance_data;
 export import :rendering.model_render_buffer_data;
 
-export class CBaseEntity;
 export namespace pragma {
 	class CCameraComponent;
 	class CSceneComponent;
@@ -24,6 +23,9 @@ export namespace pragma {
 	class CAnimatedComponent;
 	class CLightMapReceiverComponent;
 	class CWorldComponent;
+	namespace ecs {
+		class CBaseEntity;
+	}
 };
 export namespace pragma {
 	namespace cRenderComponent {
@@ -76,17 +78,17 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual ~CRenderComponent() override;
 
-		std::vector<std::shared_ptr<pragma::ModelSubMesh>> &GetRenderMeshes();
-		const std::vector<std::shared_ptr<pragma::ModelSubMesh>> &GetRenderMeshes() const;
+		std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &GetRenderMeshes();
+		const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &GetRenderMeshes() const;
 		std::vector<rendering::RenderBufferData> &GetRenderBufferData();
 		const std::vector<rendering::RenderBufferData> &GetRenderBufferData() const { return const_cast<CRenderComponent *>(this)->GetRenderBufferData(); }
-		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
-		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
+		std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &GetLODMeshes();
+		const std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &GetLODMeshes() const;
 
-		RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
-		const RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;
-		RenderMeshGroup &GetLodMeshGroup(uint32_t lod);
-		const RenderMeshGroup &GetLodMeshGroup(uint32_t lod) const;
+		rendering::RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
+		const rendering::RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;
+		rendering::RenderMeshGroup &GetLodMeshGroup(uint32_t lod);
+		const rendering::RenderMeshGroup &GetLodMeshGroup(uint32_t lod) const;
 
 		uint64_t GetLastRenderFrame() const;
 		void SetLastRenderFrame(unsigned long long &t);
@@ -94,17 +96,17 @@ export namespace pragma {
 		void SetLocalRenderBounds(Vector3 min, Vector3 max);
 
 		const bounding_volume::AABB &GetLocalRenderBounds() const;
-		const Sphere &GetLocalRenderSphere() const;
+		const math::Sphere &GetLocalRenderSphere() const;
 
 		const bounding_volume::AABB &GetAbsoluteRenderBounds() const;
-		const Sphere &GetAbsoluteRenderSphere() const;
+		const math::Sphere &GetAbsoluteRenderSphere() const;
 
 		// Note: These mustn't be called during rendering!
 		const bounding_volume::AABB &GetUpdatedAbsoluteRenderBounds() const;
-		const Sphere &GetUpdatedAbsoluteRenderSphere() const;
+		const math::Sphere &GetUpdatedAbsoluteRenderSphere() const;
 
 		bounding_volume::AABB CalcAbsoluteRenderBounds() const;
-		Sphere CalcAbsoluteRenderSphere() const;
+		math::Sphere CalcAbsoluteRenderSphere() const;
 
 		pragma::rendering::SceneRenderPass GetSceneRenderPass() const;
 		void SetSceneRenderPass(pragma::rendering::SceneRenderPass pass);
@@ -162,7 +164,7 @@ export namespace pragma {
 
 		void SetRenderBufferDirty();
 		void SetRenderBoundsDirty();
-		std::optional<Intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise = false) const;
+		std::optional<math::intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise = false) const;
 
 		bool IsInstantiable() const;
 		void SetInstaniationEnabled(bool enabled);
@@ -219,10 +221,10 @@ export namespace pragma {
 		mutable CLightMapReceiverComponent *m_lightMapReceiverComponent = nullptr;
 
 		bounding_volume::AABB m_localRenderBounds {};
-		Sphere m_localRenderSphere {};
+		math::Sphere m_localRenderSphere {};
 
 		bounding_volume::AABB m_absoluteRenderBounds {};
-		Sphere m_absoluteRenderSphere {};
+		math::Sphere m_absoluteRenderSphere {};
 
 		std::optional<Vector4> m_renderClipPlane {};
 		std::optional<Vector2> m_depthBias {};
@@ -281,11 +283,11 @@ export namespace pragma {
 	};
 
 	struct DLLCLIENT CEOnRenderBoundsChanged : public ComponentEvent {
-		CEOnRenderBoundsChanged(const Vector3 &min, const Vector3 &max, const Sphere &sphere);
+		CEOnRenderBoundsChanged(const Vector3 &min, const Vector3 &max, const math::Sphere &sphere);
 		virtual void PushArguments(lua::State *l) override;
 		const Vector3 &min;
 		const Vector3 &max;
-		const Sphere &sphere;
+		const math::Sphere &sphere;
 	};
 	using namespace umath::scoped_enum::bitwise;
 };

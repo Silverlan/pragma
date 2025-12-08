@@ -9,7 +9,9 @@ export module pragma.shared:scripting.lua.libraries.lib_import;
 export import pragma.lua;
 
 export {
-	class NetworkState;
+	namespace pragma {
+		class NetworkState;
+	}
 	namespace Lua {
 		namespace import {
 			DLLNETWORK int import_wrci(lua::State *l);
@@ -18,7 +20,7 @@ export {
 			DLLNETWORK int import_smd(lua::State *l);
 			DLLNETWORK int import_obj(lua::State *l);
 			DLLNETWORK int import_model_asset(lua::State *l);
-			DLLNETWORK bool import_model_asset(NetworkState &nw, const std::string &outputPath, std::string &outFilePath, std::string &outErr);
+			DLLNETWORK bool import_model_asset(pragma::NetworkState &nw, const std::string &outputPath, std::string &outFilePath, std::string &outErr);
 
 			DLLNETWORK int export_model_asset(lua::State *l);
 		};

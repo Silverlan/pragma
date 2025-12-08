@@ -51,7 +51,7 @@ void SWeaponComponent::Drop()
 	pOwnerComponent->ClearOwner();
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent != nullptr ? pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::DYNAMIC) : nullptr;
+	auto *phys = pPhysComponent != nullptr ? pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Dynamic) : nullptr;
 	if(owner != nullptr && owner->IsPlayer()) {
 		auto &ent = GetEntity();
 		auto hEnt = ent.GetHandle();
@@ -118,7 +118,7 @@ void SWeaponComponent::OnEntitySpawn()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
-		pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::DYNAMIC);
+		pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Dynamic);
 }
 
 void SWeaponComponent::OnPhysicsInitialized() { BaseWeaponComponent::OnPhysicsInitialized(); }
@@ -142,7 +142,7 @@ void SWeaponComponent::Deploy()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_DEPLOY, p, pragma::networking::Protocol::FastUnreliable);
 	}
 }
@@ -153,7 +153,7 @@ void SWeaponComponent::Holster()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_HOLSTER, p, pragma::networking::Protocol::FastUnreliable);
 	}
 }
@@ -169,7 +169,7 @@ void SWeaponComponent::PrimaryAttack()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_PRIMARYATTACK, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
@@ -183,7 +183,7 @@ void SWeaponComponent::SecondaryAttack()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_SECONDARYATTACK, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
@@ -195,7 +195,7 @@ void SWeaponComponent::TertiaryAttack()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_ATTACK3, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
@@ -207,7 +207,7 @@ void SWeaponComponent::Attack4()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_ATTACK4, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
@@ -219,7 +219,7 @@ void SWeaponComponent::Reload()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_RELOAD, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
@@ -231,7 +231,7 @@ void SWeaponComponent::SetPrimaryClipSize(UInt16 size)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<UInt16>(*m_clipPrimary);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
@@ -244,7 +244,7 @@ void SWeaponComponent::SetSecondaryClipSize(UInt16 size)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<UInt16>(*m_clipSecondary);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
@@ -257,7 +257,7 @@ void SWeaponComponent::SetMaxPrimaryClipSize(UInt16 size)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<UInt16>(*m_maxPrimaryClipSize);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
@@ -270,7 +270,7 @@ void SWeaponComponent::SetMaxSecondaryClipSize(UInt16 size)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<UInt16>(*m_maxSecondaryClipSize);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
@@ -283,7 +283,7 @@ void SWeaponComponent::SetPrimaryAmmoType(UInt32 type)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<UInt32>(type);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
@@ -296,7 +296,7 @@ void SWeaponComponent::SetSecondaryAmmoType(UInt32 type)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<UInt32>(type);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);

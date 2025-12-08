@@ -114,15 +114,15 @@ bool ShaderParticleBlob::RecordBindScene(prosper::ICommandBuffer &cmd, const pro
 	return ShaderParticle2DBase::RecordBindScene(cmd, layout, scene, renderer, dsScene, dsRenderer, dsRenderSettings, dsShadows);
 }
 
-bool ShaderParticleBlob::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::ecs::CParticleSystemComponent &ps, pragma::ecs::ParticleOrientationType orientationType,
-  ecs::ParticleRenderFlags ptRenderFlags, prosper::IBuffer &blobIndexBuffer, prosper::IDescriptorSet &dsParticles, uint32_t particleBufferOffset)
+bool ShaderParticleBlob::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::ecs::CParticleSystemComponent &ps, pragma::pts::ParticleOrientationType orientationType,
+  pts::ParticleRenderFlags ptRenderFlags, prosper::IBuffer &blobIndexBuffer, prosper::IDescriptorSet &dsParticles, uint32_t particleBufferOffset)
 {
 	if(RecordParticleMaterial(bindState, renderer, ps) == false)
 		return false;
 	auto &cam = scene.GetActiveCamera();
 
 	auto colorFactor = scene.GetParticleSystemColorFactor();
-	if(umath::is_flag_set(ptRenderFlags, ecs::ParticleRenderFlags::Bloom)) {
+	if(umath::is_flag_set(ptRenderFlags, pts::ParticleRenderFlags::Bloom)) {
 		auto bloomColorFactor = ps.GetEffectiveBloomColorFactor();
 		if(bloomColorFactor.has_value())
 			colorFactor *= *bloomColorFactor;
@@ -162,7 +162,7 @@ bool ShaderParticleBlob::RecordDraw(prosper::ShaderBindState &bindState, pragma:
 		return false;
 	if(RecordBindDescriptorSet(bindState, dsParticles, DESCRIPTOR_SET_PARTICLE_DATA.setIndex, {particleBufferOffset}) == false)
 		return false;
-	auto &shaderPbr = pragma::get_cgame()->GetGameShader(CGame::GameShader::Pbr);
+	auto &shaderPbr = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Pbr);
 	assert(shaderPbr.valid());
 
 	float iblStrength = 1.f;

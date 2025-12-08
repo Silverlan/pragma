@@ -14,24 +14,24 @@ import pragma.gui;
 #define WIFRAME_DRAG_OFFSET_BORDER 5
 #define WIFRAME_RESIZE_OFFSET_BORDER 5
 
-WITransformable::WITransformable() : WIBase()
+pragma::gui::types::WITransformable::WITransformable() : WIBase()
 {
 	RegisterCallback<void>("OnClose");
 	RegisterCallback<void, std::reference_wrapper<Vector2i>, bool>("TranslateTransformPosition");
 	RegisterCallback<void>("OnDragStart");
 	RegisterCallback<void>("OnDragEnd");
 }
-WITransformable::~WITransformable()
+pragma::gui::types::WITransformable::~WITransformable()
 {
 	if(m_resizeMode != ResizeMode::none)
 		WGUI::GetInstance().SetCursor(pragma::platform::Cursor::Shape::Arrow, GetRootWindow());
 }
-void WITransformable::DoUpdate()
+void pragma::gui::types::WITransformable::DoUpdate()
 {
 	WIBase::DoUpdate();
 	Resize();
 }
-void WITransformable::SetResizeRatioLocked(bool bLocked)
+void pragma::gui::types::WITransformable::SetResizeRatioLocked(bool bLocked)
 {
 	if(bLocked == true && (GetWidth() == 0 || GetHeight() == 0)) {
 		SetResizeRatioLocked(false);
@@ -40,11 +40,11 @@ void WITransformable::SetResizeRatioLocked(bool bLocked)
 	umath::set_flag(m_stateFlags, StateFlags::ResizeRatioLocked, bLocked);
 	m_resizeRatio = GetWidth() / static_cast<float>(GetHeight());
 }
-bool WITransformable::IsResizeRatioLocked() const { return umath::is_flag_set(m_stateFlags, StateFlags::ResizeRatioLocked); }
-void WITransformable::SetMinWidth(int w) { SetMinSize(Vector2i(w, m_minSize.y)); }
-void WITransformable::SetMinHeight(int h) { SetMinSize(Vector2i(m_minSize.x, h)); }
-void WITransformable::SetMinSize(int w, int h) { SetMinSize(Vector2i(w, h)); }
-void WITransformable::SetMinSize(Vector2i size)
+bool pragma::gui::types::WITransformable::IsResizeRatioLocked() const { return umath::is_flag_set(m_stateFlags, StateFlags::ResizeRatioLocked); }
+void pragma::gui::types::WITransformable::SetMinWidth(int w) { SetMinSize(Vector2i(w, m_minSize.y)); }
+void pragma::gui::types::WITransformable::SetMinHeight(int h) { SetMinSize(Vector2i(m_minSize.x, h)); }
+void pragma::gui::types::WITransformable::SetMinSize(int w, int h) { SetMinSize(Vector2i(w, h)); }
+void pragma::gui::types::WITransformable::SetMinSize(Vector2i size)
 {
 	m_minSize = size;
 	if(size.x < 0)
@@ -60,13 +60,13 @@ void WITransformable::SetMinSize(Vector2i size)
 		SetSize(sz.x, sz.y);
 	}
 }
-int WITransformable::GetMinWidth() { return m_minSize.x; }
-int WITransformable::GetMinHeight() { return m_minSize.y; }
-const Vector2i &WITransformable::GetMinSize() const { return m_minSize; }
-void WITransformable::SetMaxWidth(int w) { SetMaxSize(Vector2i(w, m_maxSize.x)); }
-void WITransformable::SetMaxHeight(int h) { SetMaxSize(Vector2i(m_maxSize.x, h)); }
-void WITransformable::SetMaxSize(int w, int h) { SetMaxSize(Vector2i(w, h)); }
-void WITransformable::SetMaxSize(Vector2i size)
+int pragma::gui::types::WITransformable::GetMinWidth() { return m_minSize.x; }
+int pragma::gui::types::WITransformable::GetMinHeight() { return m_minSize.y; }
+const Vector2i &pragma::gui::types::WITransformable::GetMinSize() const { return m_minSize; }
+void pragma::gui::types::WITransformable::SetMaxWidth(int w) { SetMaxSize(Vector2i(w, m_maxSize.x)); }
+void pragma::gui::types::WITransformable::SetMaxHeight(int h) { SetMaxSize(Vector2i(m_maxSize.x, h)); }
+void pragma::gui::types::WITransformable::SetMaxSize(int w, int h) { SetMaxSize(Vector2i(w, h)); }
+void pragma::gui::types::WITransformable::SetMaxSize(Vector2i size)
 {
 	if(size.x < -1)
 		size.x = -1;
@@ -82,10 +82,10 @@ void WITransformable::SetMaxSize(Vector2i size)
 		SetSize(sz.x, sz.y);
 	}
 }
-int WITransformable::GetMaxWidth() { return m_maxSize.x; }
-int WITransformable::GetMaxHeight() { return m_maxSize.y; }
-const Vector2i &WITransformable::GetMaxSize() const { return m_maxSize; }
-void WITransformable::OnTitleBarMouseEvent(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+int pragma::gui::types::WITransformable::GetMaxWidth() { return m_maxSize.x; }
+int pragma::gui::types::WITransformable::GetMaxHeight() { return m_maxSize.y; }
+const Vector2i &pragma::gui::types::WITransformable::GetMaxSize() const { return m_maxSize; }
+void pragma::gui::types::WITransformable::OnTitleBarMouseEvent(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	MouseCallback(button, state, mods);
 	if(umath::is_flag_set(m_stateFlags, StateFlags::Draggable) == false)
@@ -99,7 +99,7 @@ void WITransformable::OnTitleBarMouseEvent(pragma::platform::MouseButton button,
 			EndDrag();
 	}
 }
-Vector2i WITransformable::GetConfinedMousePos()
+Vector2i pragma::gui::types::WITransformable::GetConfinedMousePos()
 {
 	Vector2i pos;
 	auto *window = GetRootWindow();
@@ -116,8 +116,8 @@ Vector2i WITransformable::GetConfinedMousePos()
 		pos.y = hViewport - WIFRAME_DRAG_OFFSET_BORDER;
 	return pos;
 }
-void WITransformable::AddSnapTarget(WISnapArea &target) { m_snapTargets.push_back(target.GetHandle()); }
-void WITransformable::StartDrag()
+void pragma::gui::types::WITransformable::AddSnapTarget(WISnapArea &target) { m_snapTargets.push_back(target.GetHandle()); }
+void pragma::gui::types::WITransformable::StartDrag()
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::Dragging) == true)
 		return;
@@ -125,7 +125,7 @@ void WITransformable::StartDrag()
 	umath::set_flag(m_stateFlags, StateFlags::Dragging, true);
 	CallCallbacks("OnDragStart");
 }
-void WITransformable::OnVisibilityChanged(bool bVisible)
+void pragma::gui::types::WITransformable::OnVisibilityChanged(bool bVisible)
 {
 	if(bVisible == false) {
 		if(m_resizeMode != ResizeMode::none) {
@@ -135,7 +135,7 @@ void WITransformable::OnVisibilityChanged(bool bVisible)
 		EndDrag();
 	}
 }
-void WITransformable::EndDrag()
+void pragma::gui::types::WITransformable::EndDrag()
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::Dragging) == false)
 		return;
@@ -143,7 +143,7 @@ void WITransformable::EndDrag()
 	umath::set_flag(m_stateFlags, StateFlags::WasDragged);
 	CallCallbacks("OnDragEnd");
 }
-void WITransformable::StartResizing()
+void pragma::gui::types::WITransformable::StartResizing()
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::Resizing) == true || IsResizable() == false)
 		return;
@@ -151,14 +151,14 @@ void WITransformable::StartResizing()
 	m_resizeLastPos = GetConfinedMousePos();
 	EnableThinking();
 }
-void WITransformable::EndResizing()
+void pragma::gui::types::WITransformable::EndResizing()
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::Resizing) == false)
 		return;
 	umath::set_flag(m_stateFlags, StateFlags::Resizing, false);
 	SetResizeMode(ResizeMode::none);
 }
-void WITransformable::SetResizeMode(ResizeMode mode)
+void pragma::gui::types::WITransformable::SetResizeMode(ResizeMode mode)
 {
 	if(m_resizeMode == mode || IsResizable() == false)
 		return;
@@ -181,9 +181,9 @@ void WITransformable::SetResizeMode(ResizeMode mode)
 	m_resizeMode = mode;
 	SetCursor(cursor);
 }
-void WITransformable::SetRemoveOnClose(bool remove) { m_bRemoveOnClose = remove; }
-void WITransformable::OnCloseButtonPressed() { Close(); }
-void WITransformable::Close()
+void pragma::gui::types::WITransformable::SetRemoveOnClose(bool remove) { m_bRemoveOnClose = remove; }
+void pragma::gui::types::WITransformable::OnCloseButtonPressed() { Close(); }
+void pragma::gui::types::WITransformable::Close()
 {
 	//SetVisible(false);
 	if(m_bRemoveOnClose)
@@ -192,8 +192,8 @@ void WITransformable::Close()
 		SetVisible(false);
 	CallCallbacks<void>("OnClose");
 }
-WIBase *WITransformable::GetDragArea() const { return const_cast<WIBase *>(m_hMoveRect.get()); }
-void WITransformable::Initialize()
+pragma::gui::types::WIBase *pragma::gui::types::WITransformable::GetDragArea() const { return const_cast<WIBase *>(m_hMoveRect.get()); }
+void pragma::gui::types::WITransformable::Initialize()
 {
 	WIBase::Initialize();
 	EnableThinking();
@@ -211,7 +211,7 @@ void WITransformable::Initialize()
 		    return CallbackReturnType::HasReturnValue;
 	    }));
 }
-util::EventReply WITransformable::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+util::EventReply pragma::gui::types::WITransformable::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(WIBase::MouseCallback(button, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;
@@ -225,13 +225,13 @@ util::EventReply WITransformable::MouseCallback(pragma::platform::MouseButton bu
 	}
 	return util::EventReply::Handled;
 }
-void WITransformable::OnCursorMoved(int x, int y)
+void pragma::gui::types::WITransformable::OnCursorMoved(int x, int y)
 {
 	WIBase::OnCursorMoved(x, y);
 	if(umath::is_flag_set(m_stateFlags, StateFlags::Resizing) == true || umath::is_flag_set(m_stateFlags, StateFlags::Dragging) == true)
 		return;
 	const auto fValidateCursorOverlap = [this]() {
-		auto &wgui = WGUI::GetInstance();
+		auto &wgui = pragma::gui::WGUI::GetInstance();
 		auto *pElCursor = wgui.GetCursorGUIElement(wgui.GetBaseElement(), [](WIBase *el) -> bool { return true; }, GetRootWindow());
 		if(pElCursor != nullptr && pElCursor != this && pElCursor->IsDescendantOf(this) == false) {
 			SetResizeMode(ResizeMode::none);
@@ -281,7 +281,7 @@ void WITransformable::OnCursorMoved(int x, int y)
 	else
 		SetResizeMode(ResizeMode::none);
 }
-WITransformable::ResizeMode WITransformable::InvertResizeAxis(ResizeMode mode, bool bXAxis, bool bYAxis) const
+pragma::gui::types::WITransformable::ResizeMode pragma::gui::types::WITransformable::InvertResizeAxis(ResizeMode mode, bool bXAxis, bool bYAxis) const
 {
 	if(bXAxis == false && bYAxis == false)
 		return mode;
@@ -306,7 +306,7 @@ WITransformable::ResizeMode WITransformable::InvertResizeAxis(ResizeMode mode, b
 		return ResizeMode::none;
 	};
 }
-void WITransformable::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::types::WITransformable::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIBase::Think(drawCmd);
 	if(umath::is_flag_set(m_stateFlags, StateFlags::Resizing) == true) {
@@ -420,7 +420,7 @@ void WITransformable::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer
 	auto bDragging = umath::is_flag_set(m_stateFlags, StateFlags::Dragging);
 	if(bDragging == false && umath::is_flag_set(m_stateFlags, StateFlags::WasDragged) == false)
 		return;
-	auto itSnapTarget = std::find_if(m_snapTargets.begin(), m_snapTargets.end(), [](const WIHandle &hSnapTarget) {
+	auto itSnapTarget = std::find_if(m_snapTargets.begin(), m_snapTargets.end(), [](const pragma::gui::WIHandle &hSnapTarget) {
 		if(hSnapTarget.IsValid() == false)
 			return false;
 		auto *pTriggerArea = const_cast<WISnapArea *>(static_cast<const WISnapArea *>(hSnapTarget.get()))->GetTriggerArea();
@@ -450,17 +450,17 @@ void WITransformable::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer
 	m_snapGhost->SetSize(sz);
 }
 
-void WITransformable::SnapToTarget(WIBase &el)
+void pragma::gui::types::WITransformable::SnapToTarget(WIBase &el)
 {
 	SetAbsolutePos(el.GetPos());
 	SetSize(el.GetSize());
 }
 
-void WITransformable::InitializeSnapTargetGhost(WISnapArea &snapArea)
+void pragma::gui::types::WITransformable::InitializeSnapTargetGhost(WISnapArea &snapArea)
 {
 	if(m_snapGhost.IsValid())
 		return;
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *pSnapGhost = wgui.Create<WIRect>();
 	m_snapGhost = pSnapGhost->GetHandle();
 	pSnapGhost->SetColor(Color {255, 255, 255, 100});
@@ -473,12 +473,12 @@ void WITransformable::InitializeSnapTargetGhost(WISnapArea &snapArea)
 	RemoveOnRemoval(pSnapGhost);
 	pSnapGhost->SetZPos(10'000);
 }
-void WITransformable::DestroySnapTargetGhost()
+void pragma::gui::types::WITransformable::DestroySnapTargetGhost()
 {
 	if(m_snapGhost.IsValid())
 		m_snapGhost->Remove();
 }
-void WITransformable::SetSize(int x, int y)
+void pragma::gui::types::WITransformable::SetSize(int x, int y)
 {
 	auto oldSize = GetSize();
 	WIBase::SetSize(x, y);
@@ -510,21 +510,21 @@ void WITransformable::SetSize(int x, int y)
 	}
 	UpdateResizeRect();
 }
-bool WITransformable::IsBeingDragged() const { return umath::is_flag_set(m_stateFlags, StateFlags::Dragging); }
-bool WITransformable::IsBeingResized() const { return umath::is_flag_set(m_stateFlags, StateFlags::Resizing); }
-void WITransformable::SetDragBounds(const Vector2i &min, const Vector2i &max)
+bool pragma::gui::types::WITransformable::IsBeingDragged() const { return umath::is_flag_set(m_stateFlags, StateFlags::Dragging); }
+bool pragma::gui::types::WITransformable::IsBeingResized() const { return umath::is_flag_set(m_stateFlags, StateFlags::Resizing); }
+void pragma::gui::types::WITransformable::SetDragBounds(const Vector2i &min, const Vector2i &max)
 {
 	m_minDrag = min;
 	m_maxDrag = max;
 }
-std::pair<Vector2i, Vector2i> WITransformable::GetDragBounds() const { return {m_minDrag, m_maxDrag}; }
-void WITransformable::SetPos(int x, int y)
+std::pair<Vector2i, Vector2i> pragma::gui::types::WITransformable::GetDragBounds() const { return {m_minDrag, m_maxDrag}; }
+void pragma::gui::types::WITransformable::SetPos(int x, int y)
 {
 	WIBase::SetPos(x, y);
 	UpdateResizeRectPos();
 }
 
-void WITransformable::SetDraggable(bool b)
+void pragma::gui::types::WITransformable::SetDraggable(bool b)
 {
 	umath::set_flag(m_stateFlags, StateFlags::Draggable, b);
 	if(b == false)
@@ -535,7 +535,7 @@ void WITransformable::SetDraggable(bool b)
 	SetMouseInputEnabled(bMouseInput);
 	SetMouseMovementCheckEnabled(bMouseInput);
 }
-void WITransformable::UpdateResizeRectPos()
+void pragma::gui::types::WITransformable::UpdateResizeRectPos()
 {
 	if(m_hResizeRect.IsValid() == false)
 		return;
@@ -543,7 +543,7 @@ void WITransformable::UpdateResizeRectPos()
 	auto &pos = GetPos();
 	pRect->SetPos(pos.x - WIFRAME_RESIZE_OFFSET_BORDER, pos.y - WIFRAME_RESIZE_OFFSET_BORDER);
 }
-void WITransformable::UpdateResizeRect()
+void pragma::gui::types::WITransformable::UpdateResizeRect()
 {
 	if(m_hResizeRect.IsValid() == false)
 		return;
@@ -553,25 +553,25 @@ void WITransformable::UpdateResizeRect()
 
 	UpdateResizeRectPos();
 }
-void WITransformable::SetParent(WIBase *base, std::optional<uint32_t> childIndex)
+void pragma::gui::types::WITransformable::SetParent(WIBase *base, std::optional<uint32_t> childIndex)
 {
 	if(m_hResizeRect.IsValid() == true)
 		m_hResizeRect->SetParent(base); // Resize element parent has to be set before us!
 	WIBase::SetParent(base, childIndex);
 }
-void WITransformable::SetZPos(int zpos)
+void pragma::gui::types::WITransformable::SetZPos(int zpos)
 {
 	if(m_hResizeRect.IsValid())
 		m_hResizeRect->SetZPos(zpos);
 	WIBase::SetZPos(zpos);
 }
-void WITransformable::SetVisible(bool b)
+void pragma::gui::types::WITransformable::SetVisible(bool b)
 {
 	WIBase::SetVisible(b);
 	if(m_hResizeRect.IsValid())
 		m_hResizeRect->SetVisible(b);
 }
-void WITransformable::SetResizable(bool b)
+void pragma::gui::types::WITransformable::SetResizable(bool b)
 {
 	umath::set_flag(m_stateFlags, StateFlags::Resizable, b);
 	if(b == false)
@@ -589,7 +589,7 @@ void WITransformable::SetResizable(bool b)
 	SetParent(nullptr);
 
 	auto hThis = GetHandle();
-	auto *resizeRect = WGUI::GetInstance().Create<WIBase>();
+	auto *resizeRect = pragma::gui::WGUI::GetInstance().Create<WIBase>();
 	resizeRect->SetMouseInputEnabled(true);
 	resizeRect->SetVisible(IsVisible());
 	resizeRect->SetZPos(GetZPos());
@@ -608,5 +608,5 @@ void WITransformable::SetResizable(bool b)
 	SetParent(pParent);
 	UpdateResizeRect();
 }
-bool WITransformable::IsDraggable() { return umath::is_flag_set(m_stateFlags, StateFlags::Draggable); }
-bool WITransformable::IsResizable() { return umath::is_flag_set(m_stateFlags, StateFlags::Resizable); }
+bool pragma::gui::types::WITransformable::IsDraggable() { return umath::is_flag_set(m_stateFlags, StateFlags::Draggable); }
+bool pragma::gui::types::WITransformable::IsResizable() { return umath::is_flag_set(m_stateFlags, StateFlags::Resizable); }

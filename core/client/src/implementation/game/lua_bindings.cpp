@@ -39,17 +39,17 @@ void Lua::register_shared_client_state(lua::State *l)
 	modLocale[luabind::def("parse", static_cast<Lua::opt<Lua::map<std::string, std::string>> (*)(lua::State *, const std::string &)>(Lua::Locale::parse))];
 }
 
-void CGame::RegisterLua()
+void pragma::CGame::RegisterLua()
 {
 	GetLuaInterface().SetIdentifier("cl");
 
 	Lua::engine::register_library(GetLuaState());
 	auto modEngine = luabind::module_(GetLuaState(), "engine");
 	modEngine[(luabind::def("get_text_size", static_cast<Vector2i (*)(lua::State *, const std::string &, const std::string &)>(Lua::engine::get_text_size)),
-	  luabind::def("get_text_size", static_cast<Vector2i (*)(lua::State *, const std::string &, const FontInfo &)>(Lua::engine::get_text_size)),
+	  luabind::def("get_text_size", static_cast<Vector2i (*)(lua::State *, const std::string &, const pragma::gui::FontInfo &)>(Lua::engine::get_text_size)),
 
 	  luabind::def("get_truncated_text_length", static_cast<std::pair<size_t, size_t> (*)(lua::State *, const std::string &, const std::string &, uint32_t)>(Lua::engine::get_truncated_text_length)),
-	  luabind::def("get_truncated_text_length", static_cast<std::pair<size_t, size_t> (*)(lua::State *, const std::string &, const FontInfo &, uint32_t)>(Lua::engine::get_truncated_text_length)),
+	  luabind::def("get_truncated_text_length", static_cast<std::pair<size_t, size_t> (*)(lua::State *, const std::string &, const pragma::gui::FontInfo &, uint32_t)>(Lua::engine::get_truncated_text_length)),
 
 	  luabind::def("poll_console_output", Lua::engine::poll_console_output), luabind::def("library_exists", Lua::engine::LibraryExists), luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("unload_library", Lua::engine::UnloadLibrary),
 	  luabind::def("is_library_loaded", Lua::engine::IsLibraryLoaded), luabind::def("get_info", Lua::engine::get_info), luabind::def("get_user_data_dir", util::get_user_data_dir), luabind::def("get_resource_dirs", util::get_resource_dirs),
@@ -172,11 +172,11 @@ void CGame::RegisterLua()
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua::State *, const LFile &, util::AssetLoadFlags)>(Lua::engine::load_texture)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua::State *, const LFile &)>(Lua::engine::load_texture)), luabind::def("precache_particle_system", static_cast<bool (*)(lua::State *, const std::string &, bool)>(Lua::engine::precache_particle_system)),
 	  luabind::def("precache_particle_system", static_cast<bool (*)(lua::State *, const std::string &)>(Lua::engine::precache_particle_system)), luabind::def("load_sound_scripts", static_cast<void (*)(lua::State *, const std::string &, bool)>(Lua::engine::LoadSoundScripts)),
-	  luabind::def("load_sound_scripts", static_cast<void (*)(lua::State *, const std::string &)>(Lua::engine::LoadSoundScripts)), luabind::def("get_model", Lua::engine::get_model), luabind::def("get_number_of_scenes_queued_for_rendering", &CGame::GetNumberOfScenesQueuedForRendering),
-	  luabind::def("get_queued_scene_render_info", &CGame::GetQueuedSceneRenderInfo),
+	  luabind::def("load_sound_scripts", static_cast<void (*)(lua::State *, const std::string &)>(Lua::engine::LoadSoundScripts)), luabind::def("get_model", Lua::engine::get_model), luabind::def("get_number_of_scenes_queued_for_rendering", &pragma::CGame::GetNumberOfScenesQueuedForRendering),
+	  luabind::def("get_queued_scene_render_info", &pragma::CGame::GetQueuedSceneRenderInfo),
 
-	  luabind::def("set_gameplay_control_camera", &CGame::SetGameplayControlCamera<pragma::CCameraComponent>), luabind::def("reset_gameplay_control_camera", &CGame::ResetGameplayControlCamera),
-	  luabind::def("get_gameplay_control_camera", &CGame::GetGameplayControlCamera<pragma::CCameraComponent>), luabind::def("clear_gameplay_control_camera", &CGame::ClearGameplayControlCamera),
+	  luabind::def("set_gameplay_control_camera", &pragma::CGame::SetGameplayControlCamera<pragma::CCameraComponent>), luabind::def("reset_gameplay_control_camera", &pragma::CGame::ResetGameplayControlCamera),
+	  luabind::def("get_gameplay_control_camera", &pragma::CGame::GetGameplayControlCamera<pragma::CCameraComponent>), luabind::def("clear_gameplay_control_camera", &pragma::CGame::ClearGameplayControlCamera),
 	  luabind::def(
 	    "get_primary_camera_render_mask", +[]() -> std::pair<::pragma::rendering::RenderMask, ::pragma::rendering::RenderMask> {
 		    auto inclusionMask = ::pragma::rendering::RenderMask::None;
@@ -206,14 +206,14 @@ void CGame::RegisterLua()
 	Lua::Entity::register_class(entityClassDef);
 	modEnts[entityClassDef];
 
-	auto cEntityClassDef = luabind::class_<CBaseEntity, pragma::ecs::BaseEntity>("Entity");
+	auto cEntityClassDef = luabind::class_<pragma::ecs::CBaseEntity, pragma::ecs::BaseEntity>("Entity");
 	Lua::Entity::Client::register_class(cEntityClassDef);
 	modEnts[cEntityClassDef];
 
 	//auto tmp = luabind::class_<EntityHandle>("EntityOld");
 	//modEnts[tmp];
 
-	auto classDefBase = luabind::class_<CLuaEntity, luabind::bases<CBaseEntity>, pragma::LuaCore::HandleHolder<CLuaEntity>>("BaseEntity");
+	auto classDefBase = luabind::class_<CLuaEntity, luabind::bases<pragma::ecs::CBaseEntity>, pragma::LuaCore::HandleHolder<CLuaEntity>>("BaseEntity");
 	classDefBase.def(luabind::constructor<>());
 	// classDefBase.def(luabind::tostring(luabind::self));
 	//classDefBase.def(luabind::constructor<>());
@@ -226,10 +226,10 @@ void CGame::RegisterLua()
 
 	auto netPacketClassDef = luabind::class_<NetPacket>("Packet");
 	Lua::NetPacket::Client::register_class(netPacketClassDef);
-	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, util::WeakHandle<pragma::CPlayerComponent> &)>([](lua::State *l, ::NetPacket &packet, util::WeakHandle<pragma::CPlayerComponent> &pl) { nwm::write_player(packet, pl.get()); }));
-	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, EntityHandle &)>([](lua::State *l, ::NetPacket &packet, EntityHandle &hEnt) { nwm::write_player(packet, hEnt.get()); }));
+	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, util::WeakHandle<pragma::CPlayerComponent> &)>([](lua::State *l, ::NetPacket &packet, util::WeakHandle<pragma::CPlayerComponent> &pl) { networking::write_player(packet, pl.get()); }));
+	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, EntityHandle &)>([](lua::State *l, ::NetPacket &packet, EntityHandle &hEnt) { networking::write_player(packet, hEnt.get()); }));
 	netPacketClassDef.def("ReadPlayer", static_cast<void (*)(lua::State *, ::NetPacket &)>([](lua::State *l, ::NetPacket &packet) {
-		auto *pl = static_cast<pragma::CPlayerComponent *>(nwm::read_player(packet));
+		auto *pl = static_cast<pragma::CPlayerComponent *>(pragma::networking::read_player(packet));
 		if(pl == nullptr)
 			return;
 		pl->PushLuaObject(l);
@@ -267,12 +267,12 @@ void CGame::RegisterLua()
 	Lua::RegisterLibraryEnums(GetLuaState(), "file", {{"SEARCH_RESOURCES", pragma::networking::FSYS_SEARCH_RESOURCES}});
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "geometry",
-	  {{"FrustumPlane_LEFT", umath::to_integral(FrustumPlane::Left)}, {"FrustumPlane_RIGHT", umath::to_integral(FrustumPlane::Right)}, {"FrustumPlane_TOP", umath::to_integral(FrustumPlane::Top)}, {"FrustumPlane_BOTTOM", umath::to_integral(FrustumPlane::Bottom)},
-	    {"FrustumPlane_NEAR", umath::to_integral(FrustumPlane::Near)}, {"FrustumPlane_FAR", umath::to_integral(FrustumPlane::Far)}, {"FrustumPlane_COUNT", umath::to_integral(FrustumPlane::Count)},
+	  {{"FrustumPlane_LEFT", umath::to_integral(pragma::math::FrustumPlane::Left)}, {"FrustumPlane_RIGHT", umath::to_integral(pragma::math::FrustumPlane::Right)}, {"FrustumPlane_TOP", umath::to_integral(pragma::math::FrustumPlane::Top)}, {"FrustumPlane_BOTTOM", umath::to_integral(pragma::math::FrustumPlane::Bottom)},
+	    {"FrustumPlane_NEAR", umath::to_integral(pragma::math::FrustumPlane::Near)}, {"FrustumPlane_FAR", umath::to_integral(pragma::math::FrustumPlane::Far)}, {"FrustumPlane_COUNT", umath::to_integral(pragma::math::FrustumPlane::Count)},
 
-	    {"FrustumPoint_FarBottomLeft", umath::to_integral(FrustumPoint::FarBottomLeft)}, {"FrustumPoint_FAR_TOP_LEFT", umath::to_integral(FrustumPoint::FarTopLeft)}, {"FrustumPoint_FAR_TOP_RIGHT", umath::to_integral(FrustumPoint::FarTopRight)},
-	    {"FrustumPoint_FAR_BOTTOM_RIGHT", umath::to_integral(FrustumPoint::FarBottomRight)}, {"FrustumPoint_NearBottomLeft", umath::to_integral(FrustumPoint::NearBottomLeft)}, {"FrustumPoint_NearTopLeft", umath::to_integral(FrustumPoint::NearTopLeft)},
-	    {"FrustumPoint_NearTopRight", umath::to_integral(FrustumPoint::NearTopRight)}, {"FrustumPoint_NearBottomRight", umath::to_integral(FrustumPoint::NearBottomRight)}});
+	    {"FrustumPoint_FarBottomLeft", umath::to_integral(pragma::math::FrustumPoint::FarBottomLeft)}, {"FrustumPoint_FAR_TOP_LEFT", umath::to_integral(pragma::math::FrustumPoint::FarTopLeft)}, {"FrustumPoint_FAR_TOP_RIGHT", umath::to_integral(pragma::math::FrustumPoint::FarTopRight)},
+	    {"FrustumPoint_FAR_BOTTOM_RIGHT", umath::to_integral(pragma::math::FrustumPoint::FarBottomRight)}, {"FrustumPoint_NearBottomLeft", umath::to_integral(pragma::math::FrustumPoint::NearBottomLeft)}, {"FrustumPoint_NearTopLeft", umath::to_integral(pragma::math::FrustumPoint::NearTopLeft)},
+	    {"FrustumPoint_NearTopRight", umath::to_integral(pragma::math::FrustumPoint::NearTopRight)}, {"FrustumPoint_NearBottomRight", umath::to_integral(pragma::math::FrustumPoint::NearBottomRight)}});
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "gui",
 	  {{"CURSOR_SHAPE_DEFAULT", umath::to_integral(pragma::platform::Cursor::Shape::Default)}, {"CURSOR_SHAPE_HIDDEN", umath::to_integral(pragma::platform::Cursor::Shape::Hidden)}, {"CURSOR_SHAPE_ARROW", umath::to_integral(pragma::platform::Cursor::Shape::Arrow)},
@@ -284,20 +284,20 @@ void CGame::RegisterLua()
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",
 	  {
 	    {"RENDER_FLAG_NONE", 0},
-	    {"RENDER_FLAG_BIT_WORLD", umath::to_integral(RenderFlags::World)},
-	    {"RENDER_FLAG_BIT_VIEW", umath::to_integral(RenderFlags::View)},
-	    {"RENDER_FLAG_BIT_SKYBOX", umath::to_integral(RenderFlags::Skybox)},
-	    {"RENDER_FLAG_BIT_SHADOWS", umath::to_integral(RenderFlags::Shadows)},
-	    {"RENDER_FLAG_BIT_PARTICLES", umath::to_integral(RenderFlags::Particles)},
-	    {"RENDER_FLAG_BIT_DEBUG", umath::to_integral(RenderFlags::Debug)},
-	    {"RENDER_FLAG_ALL", umath::to_integral(RenderFlags::All)},
-	    {"RENDER_FLAG_REFLECTION_BIT", umath::to_integral(RenderFlags::Reflection)},
-	    {"RENDER_FLAG_WATER_BIT", umath::to_integral(RenderFlags::Water)},
-	    {"RENDER_FLAG_STATIC_BIT", umath::to_integral(RenderFlags::Static)},
-	    {"RENDER_FLAG_DYNAMIC_BIT", umath::to_integral(RenderFlags::Dynamic)},
-	    {"RENDER_FLAG_TRANSLUCENT_BIT", umath::to_integral(RenderFlags::Translucent)},
-	    {"RENDER_FLAG_HDR_BIT", umath::to_integral(RenderFlags::HDR)},
-	    {"RENDER_FLAG_PARTICLE_DEPTH_BIT", umath::to_integral(RenderFlags::ParticleDepth)},
+	    {"RENDER_FLAG_BIT_WORLD", umath::to_integral(rendering::RenderFlags::World)},
+	    {"RENDER_FLAG_BIT_VIEW", umath::to_integral(rendering::RenderFlags::View)},
+	    {"RENDER_FLAG_BIT_SKYBOX", umath::to_integral(rendering::RenderFlags::Skybox)},
+	    {"RENDER_FLAG_BIT_SHADOWS", umath::to_integral(rendering::RenderFlags::Shadows)},
+	    {"RENDER_FLAG_BIT_PARTICLES", umath::to_integral(rendering::RenderFlags::Particles)},
+	    {"RENDER_FLAG_BIT_DEBUG", umath::to_integral(rendering::RenderFlags::Debug)},
+	    {"RENDER_FLAG_ALL", umath::to_integral(rendering::RenderFlags::All)},
+	    {"RENDER_FLAG_REFLECTION_BIT", umath::to_integral(rendering::RenderFlags::Reflection)},
+	    {"RENDER_FLAG_WATER_BIT", umath::to_integral(rendering::RenderFlags::Water)},
+	    {"RENDER_FLAG_STATIC_BIT", umath::to_integral(rendering::RenderFlags::Static)},
+	    {"RENDER_FLAG_DYNAMIC_BIT", umath::to_integral(rendering::RenderFlags::Dynamic)},
+	    {"RENDER_FLAG_TRANSLUCENT_BIT", umath::to_integral(rendering::RenderFlags::Translucent)},
+	    {"RENDER_FLAG_HDR_BIT", umath::to_integral(rendering::RenderFlags::HDR)},
+	    {"RENDER_FLAG_PARTICLE_DEPTH_BIT", umath::to_integral(rendering::RenderFlags::ParticleDepth)},
 
 	    {"ASSET_LOAD_FLAG_NONE", umath::to_integral(util::AssetLoadFlags::None)},
 	    {"ASSET_LOAD_FLAG_DONT_CACHE", umath::to_integral(util::AssetLoadFlags::DontCache)},
@@ -310,7 +310,7 @@ void CGame::RegisterLua()
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!
 	Lua::register_base_entity_component(modEnts);
 	auto defEntCmp = pragma::LuaCore::create_entity_component_class<pragma::CLuaBaseEntityComponent, luabind::bases<pragma::BaseLuaBaseEntityComponent, pragma::BaseEntityComponent>, pragma::LuaCore::CLuaBaseEntityComponentHolder>("BaseEntityComponent");
-	defEntCmp.def(luabind::constructor<CBaseEntity &>());
+	defEntCmp.def(luabind::constructor<pragma::ecs::CBaseEntity &>());
 	defEntCmp.def("ReceiveData", static_cast<void (*)(lua::State *, pragma::CLuaBaseEntityComponent &, NetPacket)>([](lua::State *l, pragma::CLuaBaseEntityComponent &hComponent, NetPacket packet) {
 
 	}));
@@ -513,13 +513,13 @@ void CGame::RegisterLua()
 	lua_registerglobalint(SHADER_NORMAL_BUFFER_LOCATION);*/ // Vulkan TODO
 }
 
-void CGame::InitializeLua()
+void pragma::CGame::InitializeLua()
 {
 	pragma::Game::InitializeLua();
 	CallCallbacks<void, lua::State *>("OnLuaInitialized", GetLuaState());
 }
 
-void CGame::SetupLua()
+void pragma::CGame::SetupLua()
 {
 	pragma::Game::SetupLua();
 	RunLuaFiles("autorun/");
@@ -531,7 +531,7 @@ void CGame::SetupLua()
 	LoadLuaShaders();
 }
 
-void CGame::LoadLuaShaders()
+void pragma::CGame::LoadLuaShaders()
 {
 	std::vector<std::string> files;
 	//FileManager::FindFiles(Lua::SCRIPT_DIRECTORY_SLASH +"shaders\\*.lua",&files,nullptr); // Deprecated; Shaders have to be explicitely included now
@@ -539,7 +539,7 @@ void CGame::LoadLuaShaders()
 		LoadLuaShader(files[i]);
 }
 
-void CGame::LoadLuaShader(std::string file)
+void pragma::CGame::LoadLuaShader(std::string file)
 {
 	ustring::to_lower(file);
 	std::string identifier = file.substr(0, file.length() - 4);
@@ -547,9 +547,9 @@ void CGame::LoadLuaShader(std::string file)
 	ExecuteLuaFile(file);
 }
 
-std::string CGame::GetLuaNetworkDirectoryName() const { return "client"; }
-std::string CGame::GetLuaNetworkFileName() const { return "cl_init" + Lua::DOT_FILE_EXTENSION; }
+std::string pragma::CGame::GetLuaNetworkDirectoryName() const { return "client"; }
+std::string pragma::CGame::GetLuaNetworkFileName() const { return "cl_init" + Lua::DOT_FILE_EXTENSION; }
 
 //////////////////////////////////////////////
 
-void ClientState::RegisterSharedLuaGlobals(Lua::Interface &lua) {}
+void pragma::ClientState::RegisterSharedLuaGlobals(Lua::Interface &lua) {}

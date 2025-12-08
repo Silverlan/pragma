@@ -282,7 +282,7 @@ void pragma::networking::register_client_net_messages()
 		return;
 	netMessagesRegistered = true;
 
-	register_net_messages(*GetClientMessageMap());
+	::register_net_messages(*get_client_message_map());
 }
 
 void NET_cl_RESOURCEINFO(NetPacket packet) { pragma::get_client_state()->HandleClientResource(packet); }
@@ -339,14 +339,14 @@ void NET_cl_REGISTER_NET_EVENT(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	static_cast<CGame *>(client->GetGameState())->OnReceivedRegisterNetEvent(packet);
+	static_cast<pragma::CGame *>(client->GetGameState())->OnReceivedRegisterNetEvent(packet);
 }
 
 void NET_cl_SND_PRECACHE(NetPacket packet)
 {
 	std::string snd = packet->ReadString();
 	auto mode = packet->Read<uint8_t>();
-	pragma::get_client_state()->PrecacheSound(snd, static_cast<ALChannel>(mode));
+	pragma::get_client_state()->PrecacheSound(snd, static_cast<pragma::audio::ALChannel>(mode));
 }
 
 void NET_cl_SND_CREATE(NetPacket packet)
@@ -364,7 +364,7 @@ void NET_cl_SND_CREATE(NetPacket packet)
 	auto fullUpdate = packet->Read<bool>();
 	if(fullUpdate == false)
 		return;
-	auto state = packet->Read<ALState>();
+	auto state = packet->Read<pragma::audio::ALState>();
 
 	as->SetOffset(packet->Read<float>());
 	as->SetPitch(packet->Read<float>());
@@ -417,24 +417,24 @@ void NET_cl_SND_CREATE(NetPacket packet)
 	auto gainLF = packet->Read<float>();
 	as->SetDirectFilter({gain, gainHF, gainLF});
 
-	std::weak_ptr<ALSound> wpSnd = as;
-	nwm::read_unique_entity(packet, [wpSnd](pragma::ecs::BaseEntity *ent) {
+	std::weak_ptr<pragma::audio::ALSound> wpSnd = as;
+	pragma::networking::read_unique_entity(packet, [wpSnd](pragma::ecs::BaseEntity *ent) {
 		if(ent == nullptr || wpSnd.expired())
 			return;
 		wpSnd.lock()->SetSource(ent);
 	});
 
 	switch(state) {
-	case ALState::Paused:
+	case pragma::audio::ALState::Paused:
 		as->Pause();
 		break;
-	case ALState::Playing:
+	case pragma::audio::ALState::Playing:
 		as->Play();
 		break;
-	case ALState::Stopped:
+	case pragma::audio::ALState::Stopped:
 		as->Stop();
 		break;
-	case ALState::Initial:
+	case pragma::audio::ALState::Initial:
 		break;
 	}
 }
@@ -443,228 +443,228 @@ void NET_cl_SND_EV(NetPacket packet)
 {
 	unsigned char ev = packet->Read<unsigned char>();
 	unsigned int idx = packet->Read<unsigned int>();
-	std::shared_ptr<ALSound> as = pragma::get_client_state()->GetSoundByIndex(idx);
+	std::shared_ptr<pragma::audio::ALSound> as = pragma::get_client_state()->GetSoundByIndex(idx);
 	if(as == nullptr)
 		return;
-	switch(static_cast<ALSound::NetEvent>(ev)) {
-	case ALSound::NetEvent::Play:
+	switch(static_cast<pragma::audio::ALSound::NetEvent>(ev)) {
+	case pragma::audio::ALSound::NetEvent::Play:
 		as->Play();
 		break;
-	case ALSound::NetEvent::Stop:
+	case pragma::audio::ALSound::NetEvent::Stop:
 		as->Stop();
 		break;
-	case ALSound::NetEvent::Pause:
+	case pragma::audio::ALSound::NetEvent::Pause:
 		as->Pause();
 		break;
-	case ALSound::NetEvent::Rewind:
+	case pragma::audio::ALSound::NetEvent::Rewind:
 		as->Rewind();
 		break;
-	case ALSound::NetEvent::SetOffset:
+	case pragma::audio::ALSound::NetEvent::SetOffset:
 		{
 			float offset = packet->Read<float>();
 			as->SetOffset(offset);
 			break;
 		}
-	case ALSound::NetEvent::SetPitch:
+	case pragma::audio::ALSound::NetEvent::SetPitch:
 		{
 			float pitch = packet->Read<float>();
 			as->SetPitch(pitch);
 			break;
 		}
-	case ALSound::NetEvent::SetLooping:
+	case pragma::audio::ALSound::NetEvent::SetLooping:
 		{
 			bool loop = packet->Read<bool>();
 			as->SetLooping(loop);
 			break;
 		}
-	case ALSound::NetEvent::SetGain:
+	case pragma::audio::ALSound::NetEvent::SetGain:
 		{
 			float gain = packet->Read<float>();
 			as->SetGain(gain);
 			break;
 		}
-	case ALSound::NetEvent::SetPos:
+	case pragma::audio::ALSound::NetEvent::SetPos:
 		{
-			Vector3 pos = nwm::read_vector(packet);
+			Vector3 pos = pragma::networking::read_vector(packet);
 			as->SetPosition(pos);
 			break;
 		}
-	case ALSound::NetEvent::SetVelocity:
+	case pragma::audio::ALSound::NetEvent::SetVelocity:
 		{
-			Vector3 vel = nwm::read_vector(packet);
+			Vector3 vel = pragma::networking::read_vector(packet);
 			as->SetVelocity(vel);
 			break;
 		}
-	case ALSound::NetEvent::SetDirection:
+	case pragma::audio::ALSound::NetEvent::SetDirection:
 		{
-			Vector3 dir = nwm::read_vector(packet);
+			Vector3 dir = pragma::networking::read_vector(packet);
 			as->SetDirection(dir);
 			break;
 		}
-	case ALSound::NetEvent::SetRelative:
+	case pragma::audio::ALSound::NetEvent::SetRelative:
 		{
 			bool relative = packet->Read<bool>();
 			as->SetRelative(relative);
 			break;
 		}
-	case ALSound::NetEvent::SetReferenceDistance:
+	case pragma::audio::ALSound::NetEvent::SetReferenceDistance:
 		{
 			float distRef = packet->Read<float>();
 			as->SetReferenceDistance(distRef);
 			break;
 		}
-	case ALSound::NetEvent::SetRolloffFactor:
+	case pragma::audio::ALSound::NetEvent::SetRolloffFactor:
 		{
 			float rolloff = packet->Read<float>();
 			as->SetRolloffFactor(rolloff);
 			break;
 		}
-	case ALSound::NetEvent::SetRoomRolloffFactor:
+	case pragma::audio::ALSound::NetEvent::SetRoomRolloffFactor:
 		{
 			auto roomRolloff = packet->Read<float>();
 			as->SetRoomRolloffFactor(roomRolloff);
 			break;
 		}
-	case ALSound::NetEvent::SetMaxDistance:
+	case pragma::audio::ALSound::NetEvent::SetMaxDistance:
 		{
 			float dist = packet->Read<float>();
 			as->SetMaxDistance(dist);
 			break;
 		}
-	case ALSound::NetEvent::SetMinGain:
+	case pragma::audio::ALSound::NetEvent::SetMinGain:
 		{
 			float gain = packet->Read<float>();
 			as->SetMinGain(gain);
 			break;
 		}
-	case ALSound::NetEvent::SetMaxGain:
+	case pragma::audio::ALSound::NetEvent::SetMaxGain:
 		{
 			float gain = packet->Read<float>();
 			as->SetMaxGain(gain);
 			break;
 		}
-	case ALSound::NetEvent::SetConeInnerAngle:
+	case pragma::audio::ALSound::NetEvent::SetConeInnerAngle:
 		{
 			float coneInnerAngle = packet->Read<float>();
 			as->SetInnerConeAngle(coneInnerAngle);
 			break;
 		}
-	case ALSound::NetEvent::SetConeOuterAngle:
+	case pragma::audio::ALSound::NetEvent::SetConeOuterAngle:
 		{
 			float coneOuterAngle = packet->Read<float>();
 			as->SetOuterConeAngle(coneOuterAngle);
 			break;
 		}
-	case ALSound::NetEvent::SetConeOuterGain:
+	case pragma::audio::ALSound::NetEvent::SetConeOuterGain:
 		{
 			float coneOuterGain = packet->Read<float>();
 			as->SetOuterConeGain(coneOuterGain);
 			break;
 		}
-	case ALSound::NetEvent::SetConeOuterGainHF:
+	case pragma::audio::ALSound::NetEvent::SetConeOuterGainHF:
 		{
 			float coneOuterGainHF = packet->Read<float>();
 			as->SetOuterConeGainHF(coneOuterGainHF);
 			break;
 		}
-	case ALSound::NetEvent::SetFlags:
+	case pragma::audio::ALSound::NetEvent::SetFlags:
 		{
 			unsigned int flags = packet->Read<unsigned int>();
 			as->SetFlags(flags);
 			break;
 		}
-	case ALSound::NetEvent::SetType:
+	case pragma::audio::ALSound::NetEvent::SetType:
 		{
 			auto type = packet->Read<pragma::audio::ALSoundType>();
 			as->SetType(type);
 			break;
 		}
-	case ALSound::NetEvent::SetSource:
+	case pragma::audio::ALSound::NetEvent::SetSource:
 		{
-			auto *ent = nwm::read_entity(packet);
+			auto *ent = pragma::networking::read_entity(packet);
 			as->SetSource(ent);
 			break;
 		}
-	case ALSound::NetEvent::SetRange:
+	case pragma::audio::ALSound::NetEvent::SetRange:
 		{
 			auto start = packet->Read<float>();
 			auto end = packet->Read<float>();
 			as->SetRange(start, end);
 			break;
 		}
-	case ALSound::NetEvent::ClearRange:
+	case pragma::audio::ALSound::NetEvent::ClearRange:
 		{
 			as->ClearRange();
 			break;
 		}
-	case ALSound::NetEvent::SetFadeInDuration:
+	case pragma::audio::ALSound::NetEvent::SetFadeInDuration:
 		{
 			auto t = packet->Read<float>();
 			as->SetFadeInDuration(t);
 			break;
 		}
-	case ALSound::NetEvent::SetFadeOutDuration:
+	case pragma::audio::ALSound::NetEvent::SetFadeOutDuration:
 		{
 			auto t = packet->Read<float>();
 			as->SetFadeOutDuration(t);
 			break;
 		}
-	case ALSound::NetEvent::FadeIn:
+	case pragma::audio::ALSound::NetEvent::FadeIn:
 		{
 			auto t = packet->Read<float>();
 			as->FadeIn(t);
 			break;
 		}
-	case ALSound::NetEvent::FadeOut:
+	case pragma::audio::ALSound::NetEvent::FadeOut:
 		{
 			auto t = packet->Read<float>();
 			as->FadeOut(t);
 			break;
 		}
-	case ALSound::NetEvent::SetIndex:
+	case pragma::audio::ALSound::NetEvent::SetIndex:
 		{
 			auto idx = packet->Read<uint32_t>();
-			CALSound::SetIndex(as.get(), idx);
+			pragma::audio::CALSound::SetIndex(as.get(), idx);
 			break;
 		}
-	case ALSound::NetEvent::SetPriority:
+	case pragma::audio::ALSound::NetEvent::SetPriority:
 		{
 			auto priority = packet->Read<uint32_t>();
 			as->SetPriority(priority);
 			break;
 		}
-	case ALSound::NetEvent::SetOrientation:
+	case pragma::audio::ALSound::NetEvent::SetOrientation:
 		{
 			auto at = packet->Read<Vector3>();
 			auto up = packet->Read<Vector3>();
 			as->SetOrientation(at, up);
 			break;
 		}
-	case ALSound::NetEvent::SetDopplerFactor:
+	case pragma::audio::ALSound::NetEvent::SetDopplerFactor:
 		{
 			auto factor = packet->Read<float>();
 			as->SetDopplerFactor(factor);
 			break;
 		}
-	case ALSound::NetEvent::SetLeftStereoAngle:
+	case pragma::audio::ALSound::NetEvent::SetLeftStereoAngle:
 		{
 			auto ang = packet->Read<float>();
 			as->SetLeftStereoAngle(ang);
 			break;
 		}
-	case ALSound::NetEvent::SetRightStereoAngle:
+	case pragma::audio::ALSound::NetEvent::SetRightStereoAngle:
 		{
 			auto ang = packet->Read<float>();
 			as->SetRightStereoAngle(ang);
 			break;
 		}
-	case ALSound::NetEvent::SetAirAbsorptionFactor:
+	case pragma::audio::ALSound::NetEvent::SetAirAbsorptionFactor:
 		{
 			auto factor = packet->Read<float>();
 			as->SetAirAbsorptionFactor(factor);
 			break;
 		}
-	case ALSound::NetEvent::SetGainAuto:
+	case pragma::audio::ALSound::NetEvent::SetGainAuto:
 		{
 			auto directHF = packet->Read<float>();
 			auto send = packet->Read<float>();
@@ -672,7 +672,7 @@ void NET_cl_SND_EV(NetPacket packet)
 			as->SetGainAuto(directHF, send, sendHF);
 			break;
 		}
-	case ALSound::NetEvent::SetDirectFilter:
+	case pragma::audio::ALSound::NetEvent::SetDirectFilter:
 		{
 			auto gain = packet->Read<float>();
 			auto gainHF = packet->Read<float>();
@@ -680,7 +680,7 @@ void NET_cl_SND_EV(NetPacket packet)
 			as->SetDirectFilter({gain, gainHF, gainLF});
 			break;
 		}
-	case ALSound::NetEvent::AddEffect:
+	case pragma::audio::ALSound::NetEvent::AddEffect:
 		{
 			auto effectName = packet->ReadString();
 			auto gain = packet->Read<float>();
@@ -689,13 +689,13 @@ void NET_cl_SND_EV(NetPacket packet)
 			as->AddEffect(effectName, {gain, gainHF, gainLF});
 			break;
 		}
-	case ALSound::NetEvent::RemoveEffect:
+	case pragma::audio::ALSound::NetEvent::RemoveEffect:
 		{
 			auto effectName = packet->ReadString();
 			as->RemoveEffect(effectName);
 			break;
 		}
-	case ALSound::NetEvent::SetEffectParameters:
+	case pragma::audio::ALSound::NetEvent::SetEffectParameters:
 		{
 			auto effectName = packet->ReadString();
 			auto gain = packet->Read<float>();
@@ -704,7 +704,7 @@ void NET_cl_SND_EV(NetPacket packet)
 			as->SetEffectParameters(effectName, {gain, gainHF, gainLF});
 			break;
 		}
-	case ALSound::NetEvent::SetEntityMapIndex:
+	case pragma::audio::ALSound::NetEvent::SetEntityMapIndex:
 		{
 			auto idx = packet->Read<uint32_t>();
 			//as->SetIdentifier("world_sound" +std::to_string(idx)); // Has to correspond to identifier in c_game_audio.cpp
@@ -718,12 +718,12 @@ void NET_cl_SND_EV(NetPacket packet)
 	}
 }
 
-CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false)
+pragma::ecs::CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return nullptr;
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	unsigned int factoryID = packet->Read<unsigned int>();
 	auto *factory = client_entities::ClientEntityRegistry::Instance().GetNetworkedFactory(factoryID);
 	if(factory == nullptr) {
@@ -732,7 +732,7 @@ CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool bIgnoreMapIn
 	}
 	unsigned int idx = packet->Read<unsigned int>();
 	unsigned int mapIdx = packet->Read<unsigned int>();
-	CBaseEntity *ent = (*factory)(client, idx);
+	pragma::ecs::CBaseEntity *ent = (*factory)(client, idx);
 	ent->ReceiveData(packet);
 	if(mapIdx == 0) {
 		if(bSpawn)
@@ -757,23 +757,23 @@ void NET_cl_ENT_REMOVE(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	ent->Remove();
 }
 
-CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false)
+pragma::ecs::CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, bool bIgnoreMapInit = false)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return nullptr;
 
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	std::string classname = packet->ReadString();
 	unsigned int idx = packet->Read<unsigned int>();
 	unsigned int mapIdx = packet->Read<unsigned int>();
-	CBaseEntity *ent = game->CreateLuaEntity(classname, idx, true);
+	pragma::ecs::CBaseEntity *ent = game->CreateLuaEntity(classname, idx, true);
 	if(ent == nullptr) {
 		Con::cwar << "Attempted to create unregistered entity '" << classname << "'!" << Con::endl;
 		return nullptr;
@@ -805,7 +805,7 @@ void NET_game_timescale(NetPacket packet)
 	if(!client->IsGameActive())
 		return;
 	float timeScale = packet->Read<float>();
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	game->SetTimeScale(timeScale);
 }
 
@@ -901,14 +901,14 @@ void NET_cl_ENT_SOUND(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	unsigned int sndID = packet->Read<unsigned int>();
-	std::shared_ptr<ALSound> snd = client->GetSoundByIndex(sndID);
+	std::shared_ptr<pragma::audio::ALSound> snd = client->GetSoundByIndex(sndID);
 	if(snd == nullptr)
 		return;
-	CBaseEntity *cent = static_cast<CBaseEntity *>(ent);
+	pragma::ecs::CBaseEntity *cent = static_cast<pragma::ecs::CBaseEntity *>(ent);
 	auto pSoundEmitterComponent = cent->GetComponent<pragma::CSoundEmitterComponent>();
 	if(pSoundEmitterComponent.valid())
 		pSoundEmitterComponent->AddSound(snd);
@@ -918,7 +918,7 @@ void NET_cl_ENT_SETUNLIT(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pRenderComponent = ent->GetRenderComponent();
@@ -932,7 +932,7 @@ void NET_cl_ENT_SETCASTSHADOWS(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pRenderComponent = ent->GetRenderComponent();
@@ -946,7 +946,7 @@ void NET_cl_ENT_SETHEALTH(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pHealthComponent = ent->GetComponent<pragma::CHealthComponent>();
@@ -960,7 +960,7 @@ void NET_cl_ENT_SETNAME(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pNameComponent = ent->GetComponent<pragma::CNameComponent>();
@@ -974,11 +974,11 @@ void NET_cl_ENT_MODEL(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	std::string mdl = packet->ReadString();
-	CBaseEntity *cent = static_cast<CBaseEntity *>(ent);
+	pragma::ecs::CBaseEntity *cent = static_cast<pragma::ecs::CBaseEntity *>(ent);
 	auto mdlComponent = cent->GetModelComponent();
 	if(mdlComponent)
 		mdlComponent->SetModel(mdl.c_str());
@@ -988,7 +988,7 @@ void NET_cl_ENT_SKIN(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	unsigned int skin = packet->Read<unsigned int>();
@@ -1001,7 +1001,7 @@ void NET_cl_ENT_ANIM_PLAY(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	int anim = packet->Read<int>();
@@ -1014,7 +1014,7 @@ void NET_cl_ENT_ANIM_GESTURE_PLAY(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	int slot = packet->Read<int>();
@@ -1028,7 +1028,7 @@ void NET_cl_ENT_ANIM_GESTURE_STOP(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	int slot = packet->Read<int>();
@@ -1041,10 +1041,10 @@ void NET_cl_ENT_SETPARENT(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
-	pragma::ecs::BaseEntity *parent = nwm::read_entity(packet);
+	pragma::ecs::BaseEntity *parent = pragma::networking::read_entity(packet);
 	if(parent == nullptr)
 		return;
 	auto flags = packet->Read<pragma::FAttachmentMode>();
@@ -1064,7 +1064,7 @@ void NET_cl_ENT_SETPARENTMODE(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto flags = packet->Read<pragma::FAttachmentMode>();
@@ -1077,21 +1077,21 @@ void NET_cl_ENT_PHYS_INIT(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
 	unsigned int type = packet->Read<unsigned int>();
-	pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE(type));
+	pPhysComponent->InitializePhysics(pragma::physics::PhysicsType(type));
 }
 
 void NET_cl_ENT_PHYS_DESTROY(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1105,7 +1105,7 @@ void NET_cl_ENT_EVENT(NetPacket packet)
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
 	packet->SetOffset(packet->GetDataSize() - sizeof(UInt32) - sizeof(unsigned int));
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto eventId = packet->Read<UInt32>();
@@ -1122,13 +1122,13 @@ void NET_cl_ENT_MOVETYPE(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	pragma::physics::MOVETYPE movetype = pragma::physics::MOVETYPE(packet->Read<unsigned char>());
+	pragma::physics::MoveType movetype = pragma::physics::MoveType(packet->Read<unsigned char>());
 	pPhysComponent->SetMoveType(movetype);
 }
 
@@ -1136,7 +1136,7 @@ void NET_cl_PL_TOGGLE_NOCLIP(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto bNoclip = packet->Read<bool>();
@@ -1144,11 +1144,11 @@ void NET_cl_PL_TOGGLE_NOCLIP(NetPacket packet)
 	if(pPhysComponent == nullptr)
 		return;
 	if(bNoclip == false) {
-		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::WALK);
+		pPhysComponent->SetMoveType(pragma::physics::MoveType::Walk);
 		pPhysComponent->SetCollisionFilterGroup(pragma::physics::CollisionMask::Player);
 	}
 	else {
-		pPhysComponent->SetMoveType(pragma::physics::MOVETYPE::NOCLIP);
+		pPhysComponent->SetMoveType(pragma::physics::MoveType::Noclip);
 		pPhysComponent->SetCollisionFilterGroup(pragma::physics::CollisionMask::NoCollision);
 		//pl->SetCollisionsEnabled(false); // Bugged due to CCD
 	}
@@ -1158,13 +1158,13 @@ void NET_cl_ENT_COLLISIONTYPE(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	pragma::physics::COLLISIONTYPE collisiontype = pragma::physics::COLLISIONTYPE(packet->Read<unsigned char>());
+	pragma::physics::CollisionType collisiontype = pragma::physics::CollisionType(packet->Read<unsigned char>());
 	pPhysComponent->SetCollisionType(collisiontype);
 }
 
@@ -1172,13 +1172,13 @@ void NET_cl_ENT_EYEOFFSET(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *ent = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto pTrComponent = ent->GetTransformComponent();
 	if(pTrComponent == nullptr)
 		return;
-	Vector3 offset = nwm::read_vector(packet);
+	Vector3 offset = pragma::networking::read_vector(packet);
 	pTrComponent->SetEyeOffset(offset);
 }
 
@@ -1190,7 +1190,7 @@ void NET_cl_GAME_START(NetPacket packet)
 	client->StartNewGame(gameMode);
 	if(!client->IsGameActive())
 		return;
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	game->SetTimeScale(timeScale);
 }
 
@@ -1200,7 +1200,7 @@ void NET_cl_GAME_TIMESCALE(NetPacket packet)
 	if(!client->IsGameActive())
 		return;
 	float timeScale = packet->Read<float>();
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	game->SetTimeScale(timeScale);
 }
 
@@ -1231,10 +1231,10 @@ void NET_cl_PL_LOCAL(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	auto *pl = static_cast<pragma::CPlayerComponent *>(nwm::read_player(packet));
+	auto *pl = static_cast<pragma::CPlayerComponent *>(pragma::networking::read_player(packet));
 	if(pl == nullptr)
 		return;
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	game->SetLocalPlayer(pl);
 }
 
@@ -1251,7 +1251,7 @@ void NET_cl_SNAPSHOT(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	CGame *game = client->GetGameState();
+	pragma::CGame *game = client->GetGameState();
 	game->ReceiveSnapshot(packet);
 }
 
@@ -1276,8 +1276,8 @@ void NET_cl_PLAYERINPUT(NetPacket packet)
 		pragma::get_cgame()->OnReceivedPlayerInputResponse(id);
 		return;
 	}
-	auto *pl = nwm::read_player(packet);
-	auto orientation = nwm::read_quat(packet);
+	auto *pl = pragma::networking::read_player(packet);
+	auto orientation = pragma::networking::read_quat(packet);
 	if(pl != nullptr) {
 		auto &ent = pl->GetEntity();
 		if(ent.IsCharacter())
@@ -1300,7 +1300,7 @@ void NET_cl_PLAYERINPUT(NetPacket packet)
 
 void NET_cl_PL_SPEED_WALK(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float speed = packet->Read<float>();
@@ -1309,7 +1309,7 @@ void NET_cl_PL_SPEED_WALK(NetPacket packet)
 
 void NET_cl_PL_SLOPELIMIT(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsCharacter() == false)
 		return;
 	float limit = packet->Read<float>();
@@ -1318,7 +1318,7 @@ void NET_cl_PL_SLOPELIMIT(NetPacket packet)
 
 void NET_cl_PL_STEPOFFSET(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsCharacter() == false)
 		return;
 	float offset = packet->Read<float>();
@@ -1327,7 +1327,7 @@ void NET_cl_PL_STEPOFFSET(NetPacket packet)
 
 void NET_cl_PL_SPEED_RUN(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float speed = packet->Read<float>();
@@ -1336,7 +1336,7 @@ void NET_cl_PL_SPEED_RUN(NetPacket packet)
 
 void NET_cl_PL_SPEED_SPRINT(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float speed = packet->Read<float>();
@@ -1345,7 +1345,7 @@ void NET_cl_PL_SPEED_SPRINT(NetPacket packet)
 
 void NET_cl_PL_SPEED_CROUCH_WALK(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float speed = packet->Read<float>();
@@ -1354,7 +1354,7 @@ void NET_cl_PL_SPEED_CROUCH_WALK(NetPacket packet)
 
 void NET_cl_PL_HEIGHT_STAND(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float height = packet->Read<float>();
@@ -1363,7 +1363,7 @@ void NET_cl_PL_HEIGHT_STAND(NetPacket packet)
 
 void NET_cl_PL_HEIGHT_CROUCH(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float height = packet->Read<float>();
@@ -1372,7 +1372,7 @@ void NET_cl_PL_HEIGHT_CROUCH(NetPacket packet)
 
 void NET_cl_PL_EYELEVEL_STAND(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float eyelevel = packet->Read<float>();
@@ -1381,7 +1381,7 @@ void NET_cl_PL_EYELEVEL_STAND(NetPacket packet)
 
 void NET_cl_PL_EYELEVEL_CROUCH(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsPlayer() == false)
 		return;
 	float eyelevel = packet->Read<float>();
@@ -1390,10 +1390,10 @@ void NET_cl_PL_EYELEVEL_CROUCH(NetPacket packet)
 
 void NET_cl_PL_UPDIRECTION(NetPacket packet)
 {
-	auto *pl = nwm::read_entity(packet);
+	auto *pl = pragma::networking::read_entity(packet);
 	if(pl == nullptr || pl->IsCharacter() == false)
 		return;
-	Vector3 direction = nwm::read_vector(packet);
+	Vector3 direction = pragma::networking::read_vector(packet);
 	auto charC = pl->GetCharacterComponent();
 	if(charC.valid()) {
 		auto *orientC = charC->GetOrientationComponent();
@@ -1404,7 +1404,7 @@ void NET_cl_PL_UPDIRECTION(NetPacket packet)
 
 void NET_cl_PL_CHANGEDNAME(NetPacket packet)
 {
-	auto *pl = nwm::read_player(packet);
+	auto *pl = pragma::networking::read_player(packet);
 	if(pl == nullptr)
 		return;
 	auto name = packet->ReadString();
@@ -1415,7 +1415,7 @@ void NET_cl_PL_CHANGEDNAME(NetPacket packet)
 
 void NET_cl_WEP_DEPLOY(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto wepComponent = wep->GetWeaponComponent();
@@ -1428,7 +1428,7 @@ void NET_cl_WEP_DEPLOY(NetPacket packet)
 
 void NET_cl_WEP_HOLSTER(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto wepComponent = wep->GetWeaponComponent();
@@ -1441,7 +1441,7 @@ void NET_cl_WEP_HOLSTER(NetPacket packet)
 
 void NET_cl_WEP_PRIMARYATTACK(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	wep->GetWeaponComponent()->PrimaryAttack();
@@ -1449,7 +1449,7 @@ void NET_cl_WEP_PRIMARYATTACK(NetPacket packet)
 
 void NET_cl_WEP_SECONDARYATTACK(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	wep->GetWeaponComponent()->SecondaryAttack();
@@ -1457,7 +1457,7 @@ void NET_cl_WEP_SECONDARYATTACK(NetPacket packet)
 
 void NET_cl_WEP_ATTACK3(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	wep->GetWeaponComponent()->TertiaryAttack();
@@ -1465,7 +1465,7 @@ void NET_cl_WEP_ATTACK3(NetPacket packet)
 
 void NET_cl_WEP_ATTACK4(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	wep->GetWeaponComponent()->Attack4();
@@ -1473,7 +1473,7 @@ void NET_cl_WEP_ATTACK4(NetPacket packet)
 
 void NET_cl_WEP_RELOAD(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	wep->GetWeaponComponent()->Reload();
@@ -1481,7 +1481,7 @@ void NET_cl_WEP_RELOAD(NetPacket packet)
 
 void NET_cl_WEP_PRIM_CLIP_SIZE(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto size = packet->Read<UInt16>();
@@ -1490,7 +1490,7 @@ void NET_cl_WEP_PRIM_CLIP_SIZE(NetPacket packet)
 
 void NET_cl_WEP_SEC_CLIP_SIZE(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto size = packet->Read<UInt16>();
@@ -1499,7 +1499,7 @@ void NET_cl_WEP_SEC_CLIP_SIZE(NetPacket packet)
 
 void NET_cl_WEP_PRIM_MAX_CLIP_SIZE(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto size = packet->Read<UInt16>();
@@ -1508,7 +1508,7 @@ void NET_cl_WEP_PRIM_MAX_CLIP_SIZE(NetPacket packet)
 
 void NET_cl_WEP_SEC_MAX_CLIP_SIZE(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto size = packet->Read<UInt16>();
@@ -1517,7 +1517,7 @@ void NET_cl_WEP_SEC_MAX_CLIP_SIZE(NetPacket packet)
 
 void NET_cl_WEP_PRIM_AMMO_TYPE(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto type = packet->Read<UInt32>();
@@ -1526,7 +1526,7 @@ void NET_cl_WEP_PRIM_AMMO_TYPE(NetPacket packet)
 
 void NET_cl_WEP_SEC_AMMO_TYPE(NetPacket packet)
 {
-	auto *wep = nwm::read_entity(packet);
+	auto *wep = pragma::networking::read_entity(packet);
 	if(wep == nullptr || wep->IsWeapon() == false)
 		return;
 	auto type = packet->Read<UInt32>();
@@ -1543,7 +1543,7 @@ void NET_cl_SV_SEND(NetPacket packet)
 
 void NET_cl_ENV_LIGHT_SPOT_OUTERCUTOFF_ANGLE(NetPacket packet)
 {
-	auto *light = nwm::read_entity(packet);
+	auto *light = pragma::networking::read_entity(packet);
 	auto pLightSpotComponent = (light != nullptr) ? light->GetComponent<pragma::CLightSpotComponent>() : pragma::ComponentHandle<pragma::CLightSpotComponent>();
 	if(pLightSpotComponent.expired())
 		return;
@@ -1553,7 +1553,7 @@ void NET_cl_ENV_LIGHT_SPOT_OUTERCUTOFF_ANGLE(NetPacket packet)
 
 void NET_cl_ENV_LIGHT_SPOT_INNERCUTOFF_ANGLE(NetPacket packet)
 {
-	auto *light = nwm::read_entity(packet);
+	auto *light = pragma::networking::read_entity(packet);
 	auto pLightSpotComponent = (light != nullptr) ? light->GetComponent<pragma::CLightSpotComponent>() : pragma::ComponentHandle<pragma::CLightSpotComponent>();
 	if(pLightSpotComponent.expired())
 		return;
@@ -1563,7 +1563,7 @@ void NET_cl_ENV_LIGHT_SPOT_INNERCUTOFF_ANGLE(NetPacket packet)
 
 void NET_cl_ENVLIGHT_SETSTATE(NetPacket packet)
 {
-	auto *light = nwm::read_entity(packet);
+	auto *light = pragma::networking::read_entity(packet);
 	auto *pToggleComponent = (light != nullptr) ? static_cast<pragma::BaseToggleComponent *>(light->FindComponent("toggle").get()) : nullptr;
 	if(pToggleComponent == nullptr)
 		return;
@@ -1576,7 +1576,7 @@ void NET_cl_ENVLIGHT_SETSTATE(NetPacket packet)
 
 void NET_cl_ENVEXPLOSION_EXPLODE(NetPacket packet)
 {
-	auto *exp = nwm::read_entity(packet);
+	auto *exp = pragma::networking::read_entity(packet);
 	auto *pExplosionComponent = (exp != nullptr) ? static_cast<pragma::CExplosionComponent *>(exp->FindComponent("explosion").get()) : nullptr;
 	if(pExplosionComponent == nullptr)
 		return;
@@ -1585,7 +1585,7 @@ void NET_cl_ENVEXPLOSION_EXPLODE(NetPacket packet)
 
 void NET_cl_ENT_TOGGLE(NetPacket packet)
 {
-	auto *ent = nwm::read_entity(packet);
+	auto *ent = pragma::networking::read_entity(packet);
 	if(ent == nullptr)
 		return;
 	bool bOn = packet->Read<bool>();
@@ -1600,7 +1600,7 @@ void NET_cl_ENT_TOGGLE(NetPacket packet)
 
 void NET_cl_ENT_SETCOLLISIONFILTER(NetPacket packet)
 {
-	auto *ent = nwm::read_entity(packet);
+	auto *ent = pragma::networking::read_entity(packet);
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1613,7 +1613,7 @@ void NET_cl_ENT_SETCOLLISIONFILTER(NetPacket packet)
 
 void NET_cl_ENT_SETKINEMATIC(NetPacket packet)
 {
-	auto *ent = nwm::read_entity(packet);
+	auto *ent = pragma::networking::read_entity(packet);
 	if(ent == nullptr)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1625,7 +1625,7 @@ void NET_cl_ENT_SETKINEMATIC(NetPacket packet)
 
 void NET_cl_ENV_FOGCON_SETSTARTDIST(NetPacket packet)
 {
-	auto *fog = nwm::read_entity(packet);
+	auto *fog = pragma::networking::read_entity(packet);
 	auto *pFogComponent = (fog != nullptr) ? static_cast<pragma::BaseEnvFogControllerComponent *>(fog->FindComponent("fog_controller").get()) : nullptr;
 	if(pFogComponent == nullptr)
 		return;
@@ -1634,7 +1634,7 @@ void NET_cl_ENV_FOGCON_SETSTARTDIST(NetPacket packet)
 
 void NET_cl_ENV_FOGCON_SETENDDIST(NetPacket packet)
 {
-	auto *fog = nwm::read_entity(packet);
+	auto *fog = pragma::networking::read_entity(packet);
 	auto *pFogComponent = (fog != nullptr) ? static_cast<pragma::BaseEnvFogControllerComponent *>(fog->FindComponent("fog_controller").get()) : nullptr;
 	if(pFogComponent == nullptr)
 		return;
@@ -1643,7 +1643,7 @@ void NET_cl_ENV_FOGCON_SETENDDIST(NetPacket packet)
 
 void NET_cl_ENV_FOGCON_SETMAXDENSITY(NetPacket packet)
 {
-	auto *fog = nwm::read_entity(packet);
+	auto *fog = pragma::networking::read_entity(packet);
 	auto *pFogComponent = (fog != nullptr) ? static_cast<pragma::BaseEnvFogControllerComponent *>(fog->FindComponent("fog_controller").get()) : nullptr;
 	if(pFogComponent == nullptr)
 		return;
@@ -1652,7 +1652,7 @@ void NET_cl_ENV_FOGCON_SETMAXDENSITY(NetPacket packet)
 
 void NET_cl_ENV_PRTSYS_SETCONTINUOUS(NetPacket packet)
 {
-	auto *prt = nwm::read_entity(packet);
+	auto *prt = pragma::networking::read_entity(packet);
 	auto *pParticleComponent = (prt != nullptr) ? static_cast<pragma::BaseEnvParticleSystemComponent *>(prt->FindComponent("particle_system").get()) : nullptr;
 	if(pParticleComponent == nullptr)
 		return;
@@ -1665,7 +1665,7 @@ void NET_cl_CLIENT_DROPPED(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	auto *pl = nwm::read_player(packet);
+	auto *pl = pragma::networking::read_player(packet);
 	if(pl == nullptr)
 		return;
 	auto reason = packet->Read<int32_t>();
@@ -1677,7 +1677,7 @@ void NET_cl_CLIENT_READY(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	auto *pl = nwm::read_player(packet);
+	auto *pl = pragma::networking::read_player(packet);
 	if(pl == nullptr)
 		return;
 	client->GetGameState()->OnPlayerReady(*pl);
@@ -1688,7 +1688,7 @@ void NET_cl_CLIENT_JOINED(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	auto *pl = nwm::read_player(packet);
+	auto *pl = pragma::networking::read_player(packet);
 	if(pl == nullptr)
 		return;
 	client->GetGameState()->OnPlayerJoined(*pl);
@@ -1740,7 +1740,7 @@ void NET_cl_CREATE_EXPLOSION(NetPacket packet)
 void NET_cl_ENT_TRIGGER_GRAVITY_ONSTARTTOUCH(NetPacket packet)
 {
 	using namespace pragma;
-	auto *ent = nwm::read_entity(packet);
+	auto *ent = pragma::networking::read_entity(packet);
 	if(ent == nullptr)
 		return;
 	auto netFlags = static_cast<pragma::Entity::TriggerGravity::NetFlags>(packet->Read<uint8_t>());
@@ -1757,24 +1757,24 @@ void NET_cl_ENT_TRIGGER_GRAVITY_ONSTARTTOUCH(NetPacket packet)
 }
 
 struct NavDebugInfo {
-	NavDebugInfo(const std::shared_ptr<DebugRenderer::BaseObject> &path = nullptr, const std::shared_ptr<DebugRenderer::BaseObject> &spline = nullptr, const std::shared_ptr<DebugRenderer::BaseObject> &node = nullptr) : dbgPath(path), dbgSpline(spline), dbgNode(node) {}
-	std::shared_ptr<DebugRenderer::BaseObject> dbgPath;
-	std::shared_ptr<DebugRenderer::BaseObject> dbgSpline;
-	std::shared_ptr<DebugRenderer::BaseObject> dbgNode;
+	NavDebugInfo(const std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> &path = nullptr, const std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> &spline = nullptr, const std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> &node = nullptr) : dbgPath(path), dbgSpline(spline), dbgNode(node) {}
+	std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> dbgPath;
+	std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> dbgSpline;
+	std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> dbgNode;
 };
-static std::unordered_map<const CBaseEntity *, NavDebugInfo> s_aiNavDebugObjects {};
+static std::unordered_map<const pragma::ecs::CBaseEntity *, NavDebugInfo> s_aiNavDebugObjects {};
 void NET_cl_DEBUG_AI_NAVIGATION(NetPacket packet)
 {
 	if(!pragma::get_client_state()->IsGameActive())
 		return;
-	auto *npc = static_cast<CBaseEntity *>(nwm::read_entity(packet));
+	auto *npc = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
 	if(npc == nullptr)
 		return;
 	std::vector<Vector3> points;
 	auto numNodes = packet->Read<uint32_t>();
 	auto currentNodeIdx = packet->Read<uint32_t>();
 	points.reserve(numNodes * 2 - 2);
-	std::shared_ptr<DebugRenderer::BaseObject> dbgNode = nullptr;
+	std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> dbgNode = nullptr;
 	Con::ccl << "New path for " << npc->GetClass() << ":" << Con::endl;
 	for(auto nodeId = decltype(numNodes) {0}; nodeId < numNodes; ++nodeId) {
 		auto pos = packet->Read<Vector3>() + Vector3(0.f, 20.f, 0.f);
@@ -1782,20 +1782,20 @@ void NET_cl_DEBUG_AI_NAVIGATION(NetPacket packet)
 		Con::ccl << "#" << (nodeId + 1) << ": " << pos << Con::endl;
 
 		if(nodeId == currentNodeIdx)
-			dbgNode = DebugRenderer::DrawLine(pos, pos + Vector3 {0.f, 100.f, 0.f}, colors::Lime);
+			dbgNode = pragma::debug::DebugRenderer::DrawLine(pos, pos + Vector3 {0.f, 100.f, 0.f}, colors::Lime);
 	}
 	Con::ccl << Con::endl;
 
 	auto pGenericComponent = npc->GetComponent<pragma::CGenericComponent>();
 	if(pGenericComponent.valid()) {
 		pGenericComponent->BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_REMOVE, [pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) {
-			auto it = s_aiNavDebugObjects.find(static_cast<const CBaseEntity *>(&pGenericComponent->GetEntity()));
+			auto it = s_aiNavDebugObjects.find(static_cast<const pragma::ecs::CBaseEntity *>(&pGenericComponent->GetEntity()));
 			if(it == s_aiNavDebugObjects.end())
 				return;
 			s_aiNavDebugObjects.erase(it);
 		});
 	}
-	s_aiNavDebugObjects[npc] = {DebugRenderer::DrawPath(points, colors::Yellow), DebugRenderer::DrawSpline(points, 10, 1.f, {colors::OrangeRed}), dbgNode};
+	s_aiNavDebugObjects[npc] = {pragma::debug::DebugRenderer::DrawPath(points, colors::Yellow), pragma::debug::DebugRenderer::DrawSpline(points, 10, 1.f, {colors::OrangeRed}), dbgNode};
 }
 
 void NET_cl_DEBUG_AI_SCHEDULE_PRINT(NetPacket packet)
@@ -1813,7 +1813,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_PRINT(NetPacket packet)
 }
 
 static std::unique_ptr<DebugGameGUI> dbgAiSchedule = nullptr;
-void CMD_debug_ai_schedule(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_debug_ai_schedule(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	dbgAiSchedule = nullptr;
 	if(!check_cheats("debug_ai_schedule", state))
@@ -1824,7 +1824,7 @@ void CMD_debug_ai_schedule(NetworkState *state, pragma::BasePlayerComponent *pl,
 	if(ent.IsCharacter() == false)
 		return;
 	auto charComponent = ent.GetCharacterComponent();
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	pragma::ecs::BaseEntity *npc = nullptr;
 	for(auto *ent : ents) {
 		if(ent->IsNPC() == false)
@@ -1838,11 +1838,11 @@ void CMD_debug_ai_schedule(NetworkState *state, pragma::BasePlayerComponent *pl,
 	}
 	Con::cout << "Querying schedule data for NPC " << *npc << "..." << Con::endl;
 	NetPacket p;
-	nwm::write_entity(p, npc);
+	pragma::networking::write_entity(p, npc);
 	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::DEBUG_AI_SCHEDULE_TREE, p, pragma::networking::Protocol::SlowReliable);
 }
 
-void CMD_debug_draw_line(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_debug_draw_line(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
 		Con::cwar << "No position has been specified!" << Con::endl;
@@ -1867,7 +1867,7 @@ void CMD_debug_draw_line(NetworkState *state, pragma::BasePlayerComponent *pl, s
 	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::FORWARD, colors::Blue, 12.f);
 }
 
-void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_debug_aim_info(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pl == nullptr)
 		return;
@@ -1875,7 +1875,7 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 	if(entPl.IsCharacter() == false)
 		return;
 	auto charComponent = entPl.GetCharacterComponent();
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	pragma::CCameraComponent *cam = nullptr;
 	if(ents.empty() == false) {
 		for(auto *ent : ents) {
@@ -1896,10 +1896,10 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 	trData.SetFlags(pragma::physics::RayCastFlags::InvertFilter);
 	trData.SetFilter(entPl);
 
-	TraceResult res {};
+	pragma::physics::TraceResult res {};
 	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
-	std::optional<Intersection::LineMeshResult> closestMesh {};
+	std::optional<pragma::math::intersection::LineMeshResult> closestMesh {};
 	pragma::ecs::BaseEntity *entClosest = nullptr;
 	for(auto *ent : entIt) {
 		if(ent == &entPl)
@@ -1920,7 +1920,7 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 		res.normal = {};
 		res.distance = uvec::distance(closestMesh->hitPos, trData.GetSourceOrigin());
 		if(closestMesh->precise) {
-			res.meshInfo = ::util::make_shared<TraceResult::MeshInfo>();
+			res.meshInfo = ::util::make_shared<pragma::physics::TraceResult::MeshInfo>();
 			res.meshInfo->mesh = closestMesh->precise->mesh.get();
 			res.meshInfo->subMesh = closestMesh->precise->subMesh.get();
 		}
@@ -1957,22 +1957,22 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 		return;
 	const auto bUseGraphicVisualization = true;
 	auto updateState = packet->Read<uint8_t>();
-	std::shared_ptr<DebugBehaviorTreeNode> dbgTree = nullptr;
+	std::shared_ptr<pragma::debug::DebugBehaviorTreeNode> dbgTree = nullptr;
 	pragma::ecs::BaseEntity *ent = nullptr;
 
-	static const auto fGetStateInfo = [](const DebugBehaviorTreeNode &node, Color &col, std::string &text) {
+	static const auto fGetStateInfo = [](const pragma::debug::DebugBehaviorTreeNode &node, Color &col, std::string &text) {
 		col = colors::White;
 		text = node.name + " (";
 		switch(node.state) {
-		case DebugBehaviorTreeNode::State::Pending:
+		case pragma::debug::DebugBehaviorTreeNode::State::Pending:
 			//text += "pending";
 			col = colors::Aqua;
 			break;
-		case DebugBehaviorTreeNode::State::Failed:
+		case pragma::debug::DebugBehaviorTreeNode::State::Failed:
 			//text += "failed";
 			col = colors::Maroon;
 			break;
-		case DebugBehaviorTreeNode::State::Initial:
+		case pragma::debug::DebugBehaviorTreeNode::State::Initial:
 			//text += "initial";
 			col = colors::Gray;
 			break;
@@ -1983,10 +1983,10 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 		}
 		//text += ", ";
 		switch(node.nodeType) {
-		case DebugBehaviorTreeNode::BehaviorNodeType::Selector:
+		case pragma::debug::DebugBehaviorTreeNode::BehaviorNodeType::Selector:
 			text += "selector";
 			break;
-		case DebugBehaviorTreeNode::BehaviorNodeType::Sequence:
+		case pragma::debug::DebugBehaviorTreeNode::BehaviorNodeType::Sequence:
 			text += "sequence";
 			break;
 		default:
@@ -1995,10 +1995,10 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 		}
 		text += ", ";
 		switch(node.selectorType) {
-		case DebugBehaviorTreeNode::SelectorType::Sequential:
+		case pragma::debug::DebugBehaviorTreeNode::SelectorType::Sequential:
 			text += "sequential";
 			break;
-		case DebugBehaviorTreeNode::SelectorType::RandomShuffle:
+		case pragma::debug::DebugBehaviorTreeNode::SelectorType::RandomShuffle:
 			text += "random shuffle";
 			break;
 		default:
@@ -2008,11 +2008,11 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 		text += ")";
 	};
 
-	const auto fUpdateGraphicalGUI = [](DebugBehaviorTreeNode &dbgTree, WILuaBase &pElLua) {
+	const auto fUpdateGraphicalGUI = [](pragma::debug::DebugBehaviorTreeNode &dbgTree, pragma::gui::types::WILuaBase &pElLua) {
 		auto *l = pragma::get_cgame()->GetLuaState();
 		auto t = Lua::CreateTable(l);
-		std::function<void(DebugBehaviorTreeNode &)> fPushNode = nullptr;
-		fPushNode = [l, &fPushNode](DebugBehaviorTreeNode &node) {
+		std::function<void(pragma::debug::DebugBehaviorTreeNode &)> fPushNode = nullptr;
+		fPushNode = [l, &fPushNode](pragma::debug::DebugBehaviorTreeNode &node) {
 			auto tNode = Lua::CreateTable(l);
 
 			Lua::PushString(l, "name");
@@ -2080,7 +2080,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 	if(dbgAiSchedule != nullptr && bUseGraphicVisualization == true && (updateState == 0 || updateState == 1)) {
 		auto *pEl = dbgAiSchedule->GetGUIElement();
 		if(pEl != nullptr) {
-			auto *pElLua = static_cast<WILuaBase *>(pEl);
+			auto *pElLua = static_cast<pragma::gui::types::WILuaBase *>(pEl);
 			auto *l = pragma::get_cgame()->GetLuaState();
 			auto o = pElLua->GetLuaObject();
 			o.push(l); /* 1 */
@@ -2105,24 +2105,24 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 	else if(updateState == 1) // Full update
 	{
 		dbgAiSchedule = nullptr;
-		ent = nwm::read_entity(packet);
+		ent = pragma::networking::read_entity(packet);
 		if(ent == nullptr)
 			return;
-		dbgTree = ::util::make_shared<DebugBehaviorTreeNode>();
-		std::function<void(NetPacket &, DebugBehaviorTreeNode &)> fReadTree = nullptr;
-		fReadTree = [&fReadTree](NetPacket &p, DebugBehaviorTreeNode &node) {
+		dbgTree = ::util::make_shared<pragma::debug::DebugBehaviorTreeNode>();
+		std::function<void(NetPacket &, pragma::debug::DebugBehaviorTreeNode &)> fReadTree = nullptr;
+		fReadTree = [&fReadTree](NetPacket &p, pragma::debug::DebugBehaviorTreeNode &node) {
 			node.name = p->ReadString();
-			node.nodeType = static_cast<DebugBehaviorTreeNode::BehaviorNodeType>(p->Read<uint32_t>());
-			node.selectorType = static_cast<DebugBehaviorTreeNode::SelectorType>(p->Read<uint32_t>());
+			node.nodeType = static_cast<pragma::debug::DebugBehaviorTreeNode::BehaviorNodeType>(p->Read<uint32_t>());
+			node.selectorType = static_cast<pragma::debug::DebugBehaviorTreeNode::SelectorType>(p->Read<uint32_t>());
 			node.lastStartTime = p->Read<float>();
 			node.lastEndTime = p->Read<float>();
 			node.executionIndex = p->Read<uint64_t>();
 			node.active = p->Read<bool>();
-			node.state = p->Read<DebugBehaviorTreeNode::State>();
+			node.state = p->Read<pragma::debug::DebugBehaviorTreeNode::State>();
 			auto numChildren = p->Read<uint32_t>();
 			node.children.reserve(numChildren);
 			for(auto i = decltype(numChildren) {0}; i < numChildren; ++i) {
-				node.children.push_back(::util::make_shared<DebugBehaviorTreeNode>());
+				node.children.push_back(::util::make_shared<pragma::debug::DebugBehaviorTreeNode>());
 				fReadTree(p, *node.children.back());
 			}
 		};
@@ -2134,7 +2134,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 		auto *pEl = dbgAiSchedule->GetGUIElement();
 		if(pEl == nullptr)
 			return;
-		dbgTree = std::static_pointer_cast<DebugBehaviorTreeNode>(dbgAiSchedule->GetUserData(0));
+		dbgTree = std::static_pointer_cast<pragma::debug::DebugBehaviorTreeNode>(dbgAiSchedule->GetUserData(0));
 		auto *hEnt = static_cast<EntityHandle *>(dbgAiSchedule->GetUserData(1).get());
 		if(dbgTree == nullptr || hEnt == nullptr || hEnt->valid() == false) {
 			dbgAiSchedule = nullptr;
@@ -2142,12 +2142,12 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 		}
 		ent = hEnt->get();
 
-		std::function<void(NetPacket &, DebugBehaviorTreeNode &, WITreeListElement *)> fReadUpdates = nullptr;
-		fReadUpdates = [&fReadUpdates, bUseGraphicVisualization](NetPacket &p, DebugBehaviorTreeNode &node, WITreeListElement *pEl) {
+		std::function<void(NetPacket &, pragma::debug::DebugBehaviorTreeNode &, pragma::gui::types::WITreeListElement *)> fReadUpdates = nullptr;
+		fReadUpdates = [&fReadUpdates, bUseGraphicVisualization](NetPacket &p, pragma::debug::DebugBehaviorTreeNode &node, pragma::gui::types::WITreeListElement *pEl) {
 			if(bUseGraphicVisualization == false && pEl == nullptr)
 				return;
-			auto state = p->Read<DebugBehaviorTreeNode::State>();
-			if(state == DebugBehaviorTreeNode::State::Invalid)
+			auto state = p->Read<pragma::debug::DebugBehaviorTreeNode::State>();
+			if(state == pragma::debug::DebugBehaviorTreeNode::State::Invalid)
 				return;
 			node.state = state;
 			node.active = p->Read<bool>();
@@ -2171,7 +2171,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 						break;
 					auto &child = node.children[i];
 					auto &guiChild = guiChildren[i];
-					fReadUpdates(p, *child, const_cast<WITreeListElement *>(static_cast<const WITreeListElement *>(guiChild.get())));
+					fReadUpdates(p, *child, const_cast<pragma::gui::types::WITreeListElement *>(static_cast<const pragma::gui::types::WITreeListElement *>(guiChild.get())));
 				}
 			}
 			else {
@@ -2179,7 +2179,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 					fReadUpdates(p, *child, nullptr);
 			}
 		};
-		auto *pRoot = (bUseGraphicVisualization == false) ? static_cast<WITreeList *>(pEl)->GetRootItem() : nullptr;
+		auto *pRoot = (bUseGraphicVisualization == false) ? static_cast<pragma::gui::types::WITreeList *>(pEl)->GetRootItem() : nullptr;
 		if(bUseGraphicVisualization == false && pRoot == nullptr)
 			return;
 		if(bUseGraphicVisualization == false) {
@@ -2187,25 +2187,25 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 				auto &children = pRoot->GetItems();
 				if(children.empty() || children.front().IsValid() == false)
 					return;
-				pRoot = const_cast<WITreeListElement *>(static_cast<const WITreeListElement *>(children.front().get()));
+				pRoot = const_cast<pragma::gui::types::WITreeListElement *>(static_cast<const pragma::gui::types::WITreeListElement *>(children.front().get()));
 			}
 		}
 
 		fReadUpdates(packet, *dbgTree, pRoot);
 		if(bUseGraphicVisualization == true)
-			fUpdateGraphicalGUI(*dbgTree, static_cast<WILuaBase &>(*pEl));
+			fUpdateGraphicalGUI(*dbgTree, static_cast<pragma::gui::types::WILuaBase &>(*pEl));
 		return;
 	}
 
-	WIBase *pEl = nullptr;
+	pragma::gui::types::WIBase *pEl = nullptr;
 	if(bUseGraphicVisualization == false) {
-		auto *pTreeList = WGUI::GetInstance().Create<WITreeList>();
+		auto *pTreeList = pragma::gui::WGUI::GetInstance().Create<pragma::gui::types::WITreeList>();
 		pEl = pTreeList;
 		if(pTreeList == nullptr)
 			return;
 		pTreeList->SetVisible(false);
-		std::function<void(const DebugBehaviorTreeNode &, WITreeListElement *)> fAddItems = nullptr;
-		fAddItems = [&fAddItems](const DebugBehaviorTreeNode &node, WITreeListElement *pEl) {
+		std::function<void(const pragma::debug::DebugBehaviorTreeNode &, pragma::gui::types::WITreeListElement *)> fAddItems = nullptr;
+		fAddItems = [&fAddItems](const pragma::debug::DebugBehaviorTreeNode &node, pragma::gui::types::WITreeListElement *pEl) {
 			Color col;
 			std::string text;
 			fGetStateInfo(node, col, text);
@@ -2226,7 +2226,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 		pTreeList->SetSize(1024, 1024); // TODO: Size to contents
 	}
 	else {
-		auto *pGraphics = dynamic_cast<WILuaBase *>(pragma::get_cgame()->CreateGUIElement("WIDebugBehaviorTree"));
+		auto *pGraphics = dynamic_cast<pragma::gui::types::WILuaBase *>(pragma::get_cgame()->CreateGUIElement("WIDebugBehaviorTree"));
 		if(pGraphics == nullptr)
 			return;
 		fUpdateGraphicalGUI(*dbgTree, *pGraphics);
@@ -2265,7 +2265,7 @@ void NET_cl_CMD_CALL_RESPONSE(NetPacket packet)
 
 void NET_cl_ADD_SHARED_COMPONENT(NetPacket packet)
 {
-	auto *ent = nwm::read_entity(packet);
+	auto *ent = pragma::networking::read_entity(packet);
 	if(ent == nullptr || pragma::get_cgame() == nullptr)
 		return;
 	auto componentId = packet->Read<pragma::ComponentId>();
@@ -2279,7 +2279,7 @@ void NET_cl_ADD_SHARED_COMPONENT(NetPacket packet)
 
 namespace {
 	auto _ = pragma::console::client::register_variable_listener<bool>(
-	  "debug_ai_navigation", +[](NetworkState *state, const ConVar &, bool, bool val) {
+	  "debug_ai_navigation", +[](pragma::NetworkState *state, const pragma::console::ConVar &, bool, bool val) {
 		  if(!check_cheats("debug_ai_navigation", state))
 			  return;
 		  if(pragma::get_cgame() == nullptr)
@@ -2297,11 +2297,11 @@ void NET_cl_DEBUG_DRAWPOINT(NetPacket packet)
 	auto pos = packet->Read<Vector3>();
 	auto col = packet->Read<Color>();
 	auto dur = packet->Read<float>();
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetOrigin(pos);
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(dur);
-	DebugRenderer::DrawPoint(renderInfo);
+	pragma::debug::DebugRenderer::DrawPoint(renderInfo);
 }
 void NET_cl_DEBUG_DRAWLINE(NetPacket packet)
 {
@@ -2309,10 +2309,10 @@ void NET_cl_DEBUG_DRAWLINE(NetPacket packet)
 	auto end = packet->Read<Vector3>();
 	auto col = packet->Read<Color>();
 	auto dur = packet->Read<float>();
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(dur);
-	DebugRenderer::DrawLine(start, end, renderInfo);
+	pragma::debug::DebugRenderer::DrawLine(start, end, renderInfo);
 }
 void NET_cl_DEBUG_DRAWBOX(NetPacket packet)
 {
@@ -2324,7 +2324,7 @@ void NET_cl_DEBUG_DRAWBOX(NetPacket packet)
 	auto bOutlineColor = packet->Read<bool>();
 	Color colOutline = {};
 	auto dur = packet->Read<float>();
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetOrigin(center);
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(dur);
@@ -2333,7 +2333,7 @@ void NET_cl_DEBUG_DRAWBOX(NetPacket packet)
 		colOutline = packet->Read<Color>();
 		renderInfo.SetOutlineColor(colOutline);
 	}
-	DebugRenderer::DrawBox(min, max, renderInfo);
+	pragma::debug::DebugRenderer::DrawBox(min, max, renderInfo);
 }
 void NET_cl_DEBUG_DRAWTEXT(NetPacket packet)
 {
@@ -2351,15 +2351,15 @@ void NET_cl_DEBUG_DRAWTEXT(NetPacket packet)
 	if(bColor == true)
 		col = packet->Read<Color>();
 	auto duration = packet->Read<float>();
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetOrigin(pos);
 	if(bColor == true)
 		renderInfo.SetColor(col);
 	renderInfo.SetDuration(duration);
 	if(bSize == true)
-		DebugRenderer::DrawText(renderInfo, text, size);
+		pragma::debug::DebugRenderer::DrawText(renderInfo, text, size);
 	else
-		DebugRenderer::DrawText(renderInfo, text, scale);
+		pragma::debug::DebugRenderer::DrawText(renderInfo, text, scale);
 }
 void NET_cl_DEBUG_DRAWSPHERE(NetPacket packet)
 {
@@ -2369,7 +2369,7 @@ void NET_cl_DEBUG_DRAWSPHERE(NetPacket packet)
 	auto dur = packet->Read<float>();
 	auto recursionLevel = packet->Read<uint32_t>();
 	auto bOutline = packet->Read<bool>();
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetOrigin(origin);
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(dur);
@@ -2377,7 +2377,7 @@ void NET_cl_DEBUG_DRAWSPHERE(NetPacket packet)
 		auto colOutline = packet->Read<Color>();
 		renderInfo.SetOutlineColor(colOutline);
 	}
-	DebugRenderer::DrawSphere(renderInfo, radius, recursionLevel);
+	pragma::debug::DebugRenderer::DrawSphere(renderInfo, radius, recursionLevel);
 }
 void NET_cl_DEBUG_DRAWCONE(NetPacket packet)
 {
@@ -2389,7 +2389,7 @@ void NET_cl_DEBUG_DRAWCONE(NetPacket packet)
 	auto duration = packet->Read<float>();
 	auto segmentCount = packet->Read<uint32_t>();
 	auto bOutline = packet->Read<bool>();
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetOrigin(origin);
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(duration);
@@ -2397,18 +2397,18 @@ void NET_cl_DEBUG_DRAWCONE(NetPacket packet)
 		auto colOutline = packet->Read<Color>();
 		renderInfo.SetOutlineColor(colOutline);
 	}
-	DebugRenderer::DrawCone(renderInfo, dir, dist, angle, segmentCount);
+	pragma::debug::DebugRenderer::DrawCone(renderInfo, dir, dist, angle, segmentCount);
 }
 void NET_cl_DEBUG_DRAWAXIS(NetPacket packet)
 {
 	auto origin = packet->Read<Vector3>();
 	auto ang = packet->Read<EulerAngles>();
 	auto dur = packet->Read<float>();
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetOrigin(origin);
 	renderInfo.SetRotation(uquat::create(ang));
 	renderInfo.SetDuration(dur);
-	DebugRenderer::DrawAxis(renderInfo);
+	pragma::debug::DebugRenderer::DrawAxis(renderInfo);
 }
 void NET_cl_DEBUG_DRAWPATH(NetPacket packet)
 {
@@ -2419,10 +2419,10 @@ void NET_cl_DEBUG_DRAWPATH(NetPacket packet)
 		path.push_back(packet->Read<Vector3>());
 	auto col = packet->Read<Color>();
 	auto duration = packet->Read<float>();
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(duration);
-	DebugRenderer::DrawPath(path, renderInfo);
+	pragma::debug::DebugRenderer::DrawPath(path, renderInfo);
 }
 void NET_cl_DEBUG_DRAWSPLINE(NetPacket packet)
 {
@@ -2435,10 +2435,10 @@ void NET_cl_DEBUG_DRAWSPLINE(NetPacket packet)
 	auto numSegments = packet->Read<uint32_t>();
 	auto curvature = packet->Read<float>();
 	auto duration = packet->Read<float>();
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(duration);
-	DebugRenderer::DrawSpline(path, numSegments, curvature, renderInfo);
+	pragma::debug::DebugRenderer::DrawSpline(path, numSegments, curvature, renderInfo);
 }
 void NET_cl_DEBUG_DRAWPLANE(NetPacket packet)
 {
@@ -2446,10 +2446,10 @@ void NET_cl_DEBUG_DRAWPLANE(NetPacket packet)
 	auto d = packet->Read<float>();
 	auto col = packet->Read<Color>();
 	auto dur = packet->Read<float>();
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(dur);
-	DebugRenderer::DrawPlane(n, d, renderInfo);
+	pragma::debug::DebugRenderer::DrawPlane(n, d, renderInfo);
 }
 void NET_cl_DEBUG_DRAW_MESH(NetPacket packet)
 {
@@ -2460,11 +2460,11 @@ void NET_cl_DEBUG_DRAW_MESH(NetPacket packet)
 	auto color = packet->Read<Color>();
 	auto colorOutline = packet->Read<Color>();
 	auto duration = packet->Read<float>();
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetColor(color);
 	renderInfo.SetOutlineColor(colorOutline);
 	renderInfo.SetDuration(duration);
-	DebugRenderer::DrawMesh(verts, renderInfo);
+	pragma::debug::DebugRenderer::DrawMesh(verts, renderInfo);
 }
 void NET_cl_DEBUG_DRAWTRUNCATEDCONE(NetPacket packet)
 {
@@ -2477,7 +2477,7 @@ void NET_cl_DEBUG_DRAWTRUNCATEDCONE(NetPacket packet)
 	auto dur = packet->Read<float>();
 	auto segmentCount = packet->Read<uint32_t>();
 	auto bOutline = packet->Read<bool>();
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetOrigin(origin);
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(dur);
@@ -2485,7 +2485,7 @@ void NET_cl_DEBUG_DRAWTRUNCATEDCONE(NetPacket packet)
 		auto colOutline = packet->Read<Color>();
 		renderInfo.SetOutlineColor(colOutline);
 	}
-	DebugRenderer::DrawTruncatedCone(renderInfo, startRadius, dir, dist, endRadius, segmentCount);
+	pragma::debug::DebugRenderer::DrawTruncatedCone(renderInfo, startRadius, dir, dist, endRadius, segmentCount);
 }
 void NET_cl_DEBUG_DRAWCYLINDER(NetPacket packet)
 {
@@ -2497,7 +2497,7 @@ void NET_cl_DEBUG_DRAWCYLINDER(NetPacket packet)
 	auto dur = packet->Read<float>();
 	auto segmentCount = packet->Read<uint32_t>();
 	auto bOutline = packet->Read<bool>();
-	DebugRenderInfo renderInfo {};
+	pragma::debug::DebugRenderInfo renderInfo {};
 	renderInfo.SetOrigin(origin);
 	renderInfo.SetColor(col);
 	renderInfo.SetDuration(dur);
@@ -2505,5 +2505,5 @@ void NET_cl_DEBUG_DRAWCYLINDER(NetPacket packet)
 		auto colOutline = packet->Read<Color>();
 		renderInfo.SetOutlineColor(colOutline);
 	}
-	DebugRenderer::DrawCylinder(renderInfo, dir, dist, radius, segmentCount);
+	pragma::debug::DebugRenderer::DrawCylinder(renderInfo, dir, dist, radius, segmentCount);
 }

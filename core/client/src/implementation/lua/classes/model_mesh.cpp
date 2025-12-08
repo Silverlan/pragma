@@ -8,10 +8,10 @@ module pragma.client;
 import :scripting.lua.classes.model_mesh;
 import :model;
 
-void Lua::ModelMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<::ModelMesh>>(l, ::util::make_shared<::CModelMesh>()); }
-void Lua::ModelSubMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::ModelSubMesh>>(l, ::util::make_shared<::CModelSubMesh>()); }
-void Lua::ModelSubMesh::Client::GetVkMesh(lua::State *l, pragma::ModelSubMesh &mesh) { Lua::Push<std::shared_ptr<::pragma::SceneMesh>>(l, static_cast<CModelSubMesh &>(mesh).GetSceneMesh()); }
-void Lua::ModelSubMesh::Client::GetTangents(lua::State *l, pragma::ModelSubMesh &mesh)
+void Lua::ModelMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::geometry::ModelMesh>>(l, ::util::make_shared<pragma::geometry::CModelMesh>()); }
+void Lua::ModelSubMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::geometry::ModelSubMesh>>(l, ::util::make_shared<pragma::geometry::CModelSubMesh>()); }
+void Lua::ModelSubMesh::Client::GetVkMesh(lua::State *l, pragma::geometry::ModelSubMesh &mesh) { Lua::Push<std::shared_ptr<::pragma::rendering::SceneMesh>>(l, static_cast<pragma::geometry::CModelSubMesh &>(mesh).GetSceneMesh()); }
+void Lua::ModelSubMesh::Client::GetTangents(lua::State *l, pragma::geometry::ModelSubMesh &mesh)
 {
 	auto &verts = mesh.GetVertices();
 
@@ -22,7 +22,7 @@ void Lua::ModelSubMesh::Client::GetTangents(lua::State *l, pragma::ModelSubMesh 
 		Lua::SetTableValue(l, tTangents);
 	}
 }
-void Lua::ModelSubMesh::Client::GetBiTangents(lua::State *l, pragma::ModelSubMesh &mesh)
+void Lua::ModelSubMesh::Client::GetBiTangents(lua::State *l, pragma::geometry::ModelSubMesh &mesh)
 {
 	auto &verts = mesh.GetVertices();
 
@@ -33,33 +33,33 @@ void Lua::ModelSubMesh::Client::GetBiTangents(lua::State *l, pragma::ModelSubMes
 		Lua::SetTableValue(l, tBiTangents);
 	}
 }
-void Lua::ModelSubMesh::Client::GetVertexBuffer(lua::State *l, pragma::ModelSubMesh &mesh)
+void Lua::ModelSubMesh::Client::GetVertexBuffer(lua::State *l, pragma::geometry::ModelSubMesh &mesh)
 {
-	auto &vkMesh = static_cast<CModelSubMesh &>(mesh).GetSceneMesh();
+	auto &vkMesh = static_cast<pragma::geometry::CModelSubMesh &>(mesh).GetSceneMesh();
 	auto &buf = vkMesh->GetVertexBuffer();
 	if(buf == nullptr)
 		return;
 	Lua::Push(l, buf);
 }
-void Lua::ModelSubMesh::Client::GetVertexWeightBuffer(lua::State *l, pragma::ModelSubMesh &mesh)
+void Lua::ModelSubMesh::Client::GetVertexWeightBuffer(lua::State *l, pragma::geometry::ModelSubMesh &mesh)
 {
-	auto &vkMesh = static_cast<CModelSubMesh &>(mesh).GetSceneMesh();
+	auto &vkMesh = static_cast<pragma::geometry::CModelSubMesh &>(mesh).GetSceneMesh();
 	auto &buf = vkMesh->GetVertexWeightBuffer();
 	if(buf == nullptr)
 		return;
 	Lua::Push(l, buf);
 }
-void Lua::ModelSubMesh::Client::GetAlphaBuffer(lua::State *l, pragma::ModelSubMesh &mesh)
+void Lua::ModelSubMesh::Client::GetAlphaBuffer(lua::State *l, pragma::geometry::ModelSubMesh &mesh)
 {
-	auto &vkMesh = static_cast<CModelSubMesh &>(mesh).GetSceneMesh();
+	auto &vkMesh = static_cast<pragma::geometry::CModelSubMesh &>(mesh).GetSceneMesh();
 	auto &buf = vkMesh->GetAlphaBuffer();
 	if(buf == nullptr)
 		return;
 	Lua::Push(l, buf);
 }
-void Lua::ModelSubMesh::Client::GetIndexBuffer(lua::State *l, pragma::ModelSubMesh &mesh)
+void Lua::ModelSubMesh::Client::GetIndexBuffer(lua::State *l, pragma::geometry::ModelSubMesh &mesh)
 {
-	auto &vkMesh = static_cast<CModelSubMesh &>(mesh).GetSceneMesh();
+	auto &vkMesh = static_cast<pragma::geometry::CModelSubMesh &>(mesh).GetSceneMesh();
 	auto &buf = vkMesh->GetIndexBuffer();
 	if(buf == nullptr)
 		return;

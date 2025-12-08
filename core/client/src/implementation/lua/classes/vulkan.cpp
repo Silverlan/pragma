@@ -687,7 +687,7 @@ static std::optional<std::vector<std::shared_ptr<prosper::IImage>>> create_indiv
 }
 
 void register_vulkan_lua_interface2(Lua::Interface &lua, luabind::module_ &prosperMod); // Registration is split up to avoid compiler errors
-void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
+void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 {
 	auto prosperMod = luabind::module_(lua.GetState(), "prosper");
 	prosperMod[(luabind::def("create_buffer", static_cast<std::shared_ptr<prosper::IBuffer> (*)(prosper::IPrContext &, prosper::util::BufferCreateInfo &, ::util::DataStream &)>(&Lua::Vulkan::create_buffer), luabind::render_context_policy<1> {}),

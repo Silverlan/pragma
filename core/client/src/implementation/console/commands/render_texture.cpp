@@ -37,7 +37,7 @@ static void get_filter_mode(UInt32 filter, prosper::Filter &minFilter, prosper::
 	}
 }
 
-static CVar cvTextureQuality = GetClientConVar("cl_render_texture_quality");
+static auto cvTextureQuality = pragma::console::get_client_con_var("cl_render_texture_quality");
 static uint32_t get_quality_lod_offset()
 {
 	auto v = cvTextureQuality->GetInt();
@@ -52,8 +52,8 @@ static uint32_t get_quality_lod_offset()
 	return 5;
 }
 
-static CVar cvTextureFiltering = GetClientConVar("cl_render_texture_filtering");
-static void CVAR_CALLBACK_cl_render_texture_quality(NetworkState *, const ConVar &, int, int)
+static auto cvTextureFiltering = pragma::console::get_client_con_var("cl_render_texture_filtering");
+static void CVAR_CALLBACK_cl_render_texture_quality(pragma::NetworkState *, const pragma::console::ConVar &, int, int)
 {
 	if(pragma::get_client_state() == nullptr)
 		return;

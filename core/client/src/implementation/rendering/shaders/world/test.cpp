@@ -45,7 +45,7 @@ bool ShaderTest::BeginDraw(
 }
 #endif
 void ShaderTest::InitializeGfxPipelinePushConstantRanges() { AttachPushConstantRange(0u, sizeof(Mat4), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit); }
-void ShaderTest::UpdateRenderFlags(CModelSubMesh &mesh, SceneFlags &inOutFlags)
+void ShaderTest::UpdateRenderFlags(pragma::geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags)
 {
 	ShaderGameWorldLightingPass::UpdateRenderFlags(mesh, inOutFlags);
 	inOutFlags |= m_extRenderFlags;

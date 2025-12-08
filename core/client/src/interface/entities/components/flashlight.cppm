@@ -19,7 +19,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CFlashlight : public CBaseEntity {
+	class DLLCLIENT CFlashlight : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

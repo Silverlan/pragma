@@ -8,14 +8,14 @@ import :audio.sound;
 
 import :server_state;
 
-SALSoundBase::SALSoundBase(bool bShared) : m_bShared(bShared) {}
-bool SALSoundBase::IsShared() const { return m_bShared; }
-void SALSoundBase::SetShared(bool b) { m_bShared = b; }
+pragma::audio::SALSoundBase::SALSoundBase(bool bShared) : m_bShared(bShared) {}
+bool pragma::audio::SALSoundBase::IsShared() const { return m_bShared; }
+void pragma::audio::SALSoundBase::SetShared(bool b) { m_bShared = b; }
 
-SALSoundBase *SALSound::GetBase(ALSound *snd) { return dynamic_cast<SALSoundBase *>(snd); } //(snd->IsSoundScript() == false) ? static_cast<SALSoundBase*>(static_cast<SALSound*>(snd)) : static_cast<SALSoundBase*>(static_cast<SALSoundScript*>(snd));}
+pragma::audio::SALSoundBase *pragma::audio::SALSound::GetBase(ALSound *snd) { return dynamic_cast<SALSoundBase *>(snd); } //(snd->IsSoundScript() == false) ? static_cast<SALSoundBase*>(static_cast<SALSound*>(snd)) : static_cast<SALSoundBase*>(static_cast<SALSoundScript*>(snd));}
 
 #pragma warning(disable : 4056)
-SALSound::SALSound(NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, pragma::audio::ALCreateFlags createFlags)
+pragma::audio::SALSound::SALSound(pragma::NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, pragma::audio::ALCreateFlags createFlags)
     : ALSound(nw), SALSoundBase(umath::is_flag_set(createFlags, pragma::audio::ALCreateFlags::DontTransmit) == false), m_soundName {soundName}, m_createFlags {createFlags}
 {
 	m_index = idx;
@@ -23,20 +23,20 @@ SALSound::SALSound(NetworkState *nw, unsigned int idx, float duration, const std
 }
 #pragma warning(default : 4056)
 
-SALSound::~SALSound()
+pragma::audio::SALSound::~SALSound()
 {
 	SendEvent(NetEvent::SetIndex, [](NetPacket &p) { p->Write<uint32_t>(static_cast<uint32_t>(0)); });
-	pragma::Game *game = ServerState::Get()->GetGameState();
+	pragma::Game *game = pragma::ServerState::Get()->GetGameState();
 	if(game == nullptr)
 		return;
 	//for(int i=0;i<m_luaCallbacks.size();i++)
 	//	lua_removereference(game->GetLuaState(),m_luaCallbacks[i]);
 }
 
-const std::string &SALSound::GetSoundName() const { return m_soundName; }
-pragma::audio::ALCreateFlags SALSound::GetCreateFlags() const { return m_createFlags; }
+const std::string &pragma::audio::SALSound::GetSoundName() const { return m_soundName; }
+pragma::audio::ALCreateFlags pragma::audio::SALSound::GetCreateFlags() const { return m_createFlags; }
 
-void SALSound::SendEvent(NetEvent evId, const std::function<void(NetPacket &)> &write, bool bUDP) const
+void pragma::audio::SALSound::SendEvent(NetEvent evId, const std::function<void(NetPacket &)> &write, bool bUDP) const
 {
 	if(IsShared() == false)
 		return;
@@ -51,7 +51,7 @@ void SALSound::SendEvent(NetEvent evId, const std::function<void(NetPacket &)> &
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SND_EV, p, pragma::networking::Protocol::SlowReliable);
 }
 
-void SALSound::SetState(ALState state)
+void pragma::audio::SALSound::SetState(ALState state)
 {
 	auto old = GetState();
 	if(state != old) {
@@ -61,35 +61,35 @@ void SALSound::SetState(ALState state)
 	ALSoundBase::SetState(state);
 }
 
-unsigned int SALSound::GetIndex() const { return m_index; }
+unsigned int pragma::audio::SALSound::GetIndex() const { return m_index; }
 
-void SALSound::FadeIn(float time)
+void pragma::audio::SALSound::FadeIn(float time)
 {
 	float gain = GetGain();
 	SetGain(0);
 	CancelFade();
 	if(!IsPlaying())
 		Play();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true, ServerState::Get()->RealTime(), time, gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true,pragma::ServerState::Get()->RealTime(), time, gain));
 
 	SendEvent(NetEvent::FadeIn, [&time](NetPacket &p) { p->Write<float>(time); });
 }
 
-void SALSound::FadeOut(float time)
+void pragma::audio::SALSound::FadeOut(float time)
 {
 	if(!IsPlaying())
 		return;
 	float gain = GetGain();
 	CancelFade();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false, ServerState::Get()->RealTime(), time, gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false,pragma::ServerState::Get()->RealTime(), time, gain));
 
 	SendEvent(NetEvent::FadeOut, [&time](NetPacket &p) { p->Write<float>(time); });
 }
 
-void SALSound::Update()
+void pragma::audio::SALSound::Update()
 {
 	if(GetState() == ALState::Playing) {
-		double t = ServerState::Get()->RealTime();
+		double t = pragma::ServerState::Get()->RealTime();
 		double tDelta = t - m_tLastUpdate;
 		tDelta *= GetPitch() / 1.f;
 		float dur = GetDuration();
@@ -106,9 +106,9 @@ void SALSound::Update()
 	}
 }
 
-void SALSound::PostUpdate() { ALSound::PostUpdate(); }
+void pragma::audio::SALSound::PostUpdate() { ALSound::PostUpdate(); }
 
-void SALSound::Play()
+void pragma::audio::SALSound::Play()
 {
 	if(GetState() != ALState::Paused) {
 		m_offset = 0;
@@ -116,46 +116,46 @@ void SALSound::Play()
 	}
 	SetState(ALState::Playing);
 	SendEvent(NetEvent::Play);
-	m_tLastUpdate = ServerState::Get()->RealTime();
+	m_tLastUpdate = pragma::ServerState::Get()->RealTime();
 	if(m_tFadeIn > 0.f)
 		FadeIn(m_tFadeIn);
 }
 
-void SALSound::Stop()
+void pragma::audio::SALSound::Stop()
 {
 	SetState(ALState::Stopped);
 	SendEvent(NetEvent::Stop);
 }
 
-void SALSound::Pause()
+void pragma::audio::SALSound::Pause()
 {
 	SetState(ALState::Paused);
 	SendEvent(NetEvent::Pause);
 }
 
-void SALSound::Rewind()
+void pragma::audio::SALSound::Rewind()
 {
 	m_offset = 0;
 	SetState(ALState::Initial);
 	SendEvent(NetEvent::Rewind);
 }
 
-void SALSound::SetOffset(float offset)
+void pragma::audio::SALSound::SetOffset(float offset)
 {
 	offset = std::min(offset, 1.f);
 	m_offset = offset;
 	SendEvent(NetEvent::SetOffset, [&offset](NetPacket &p) { p->Write<float>(offset); });
 }
 
-float SALSound::GetOffset() const { return m_offset; }
-void SALSound::SetPitch(float pitch)
+float pragma::audio::SALSound::GetOffset() const { return m_offset; }
+void pragma::audio::SALSound::SetPitch(float pitch)
 {
 	ALSoundBase::SetPitch(pitch);
 	SendEvent(NetEvent::SetPitch, [&pitch](NetPacket &p) { p->Write<float>(pitch); });
 }
 
-float SALSound::GetPitch() const { return ALSoundBase::GetPitch(); }
-void SALSound::SetRange(float start, float end)
+float pragma::audio::SALSound::GetPitch() const { return ALSoundBase::GetPitch(); }
+void pragma::audio::SALSound::SetRange(float start, float end)
 {
 	ALSound::SetRange(start, end);
 	SendEvent(NetEvent::SetRange, [&start, &end](NetPacket &p) {
@@ -163,40 +163,40 @@ void SALSound::SetRange(float start, float end)
 		p->Write<float>(end);
 	});
 }
-void SALSound::ClearRange()
+void pragma::audio::SALSound::ClearRange()
 {
 	ALSound::ClearRange();
 	SendEvent(NetEvent::ClearRange);
 }
-void SALSound::SetLooping(bool loop)
+void pragma::audio::SALSound::SetLooping(bool loop)
 {
 	ALSoundBase::SetLooping(loop);
 	SendEvent(NetEvent::SetLooping, [&loop](NetPacket &p) { p->Write<bool>(loop); });
 }
 
-ALState SALSound::GetState() const { return ALSoundBase::GetState(); }
+pragma::audio::ALState pragma::audio::SALSound::GetState() const { return ALSoundBase::GetState(); }
 
-bool SALSound::IsLooping() const { return ALSoundBase::IsLooping(); }
-bool SALSound::IsPlaying() const { return ALSoundBase::IsPlaying(); }
-bool SALSound::IsPaused() const { return ALSoundBase::IsPaused(); }
-bool SALSound::IsStopped() const { return ALSoundBase::IsStopped(); }
-void SALSound::SetGain(float gain)
+bool pragma::audio::SALSound::IsLooping() const { return ALSoundBase::IsLooping(); }
+bool pragma::audio::SALSound::IsPlaying() const { return ALSoundBase::IsPlaying(); }
+bool pragma::audio::SALSound::IsPaused() const { return ALSoundBase::IsPaused(); }
+bool pragma::audio::SALSound::IsStopped() const { return ALSoundBase::IsStopped(); }
+void pragma::audio::SALSound::SetGain(float gain)
 {
 	ALSoundBase::SetGain(gain);
 	SendEvent(NetEvent::SetGain, [&gain](NetPacket &p) { p->Write<float>(gain); });
 }
 
-float SALSound::GetGain() const { return ALSoundBase::GetGain(); }
-void SALSound::SetPosition(const Vector3 &pos, bool bDontTransmit)
+float pragma::audio::SALSound::GetGain() const { return ALSoundBase::GetGain(); }
+void pragma::audio::SALSound::SetPosition(const Vector3 &pos, bool bDontTransmit)
 {
 	ALSoundBase::SetPosition(pos);
 	if(bDontTransmit == true)
 		return;
-	SendEvent(NetEvent::SetPos, [&pos](NetPacket &p) { nwm::write_vector(p, pos); });
+	SendEvent(NetEvent::SetPos, [&pos](NetPacket &p) { pragma::networking::write_vector(p, pos); });
 }
-void SALSound::SetPosition(const Vector3 &pos) { SetPosition(pos, false); }
+void pragma::audio::SALSound::SetPosition(const Vector3 &pos) { SetPosition(pos, false); }
 
-Vector3 SALSound::GetPosition() const
+Vector3 pragma::audio::SALSound::GetPosition() const
 {
 	if(m_hSourceEntity.valid()) {
 		auto pTrComponent = m_hSourceEntity.get()->GetTransformComponent();
@@ -205,133 +205,133 @@ Vector3 SALSound::GetPosition() const
 	}
 	return ALSoundBase::GetPosition();
 }
-void SALSound::SetVelocity(const Vector3 &vel, bool bDontTransmit)
+void pragma::audio::SALSound::SetVelocity(const Vector3 &vel, bool bDontTransmit)
 {
 	ALSoundBase::SetVelocity(vel);
 	if(bDontTransmit == true)
 		return;
-	SendEvent(NetEvent::SetVelocity, [&vel](NetPacket &p) { nwm::write_vector(p, vel); });
+	SendEvent(NetEvent::SetVelocity, [&vel](NetPacket &p) { pragma::networking::write_vector(p, vel); });
 }
-void SALSound::SetVelocity(const Vector3 &vel) { SetVelocity(vel, false); }
+void pragma::audio::SALSound::SetVelocity(const Vector3 &vel) { SetVelocity(vel, false); }
 
-Vector3 SALSound::GetVelocity() const { return ALSoundBase::GetVelocity(); }
-void SALSound::SetDirection(const Vector3 &dir, bool bDontTransmit)
+Vector3 pragma::audio::SALSound::GetVelocity() const { return ALSoundBase::GetVelocity(); }
+void pragma::audio::SALSound::SetDirection(const Vector3 &dir, bool bDontTransmit)
 {
 	ALSoundBase::SetDirection(dir);
 	if(bDontTransmit == true)
 		return;
-	SendEvent(NetEvent::SetDirection, [&dir](NetPacket &p) { nwm::write_vector(p, dir); });
+	SendEvent(NetEvent::SetDirection, [&dir](NetPacket &p) { pragma::networking::write_vector(p, dir); });
 }
-void SALSound::SetDirection(const Vector3 &dir) { SetDirection(dir, false); }
+void pragma::audio::SALSound::SetDirection(const Vector3 &dir) { SetDirection(dir, false); }
 
-Vector3 SALSound::GetDirection() const { return ALSoundBase::GetDirection(); }
-void SALSound::SetRelative(bool b)
+Vector3 pragma::audio::SALSound::GetDirection() const { return ALSoundBase::GetDirection(); }
+void pragma::audio::SALSound::SetRelative(bool b)
 {
 	ALSoundBase::SetRelative(b);
 	SendEvent(NetEvent::SetRelative, [&b](NetPacket &p) { p->Write<bool>(b); });
 }
 
-bool SALSound::IsRelative() const { return ALSoundBase::IsRelative(); }
-float SALSound::GetDuration() const { return ALSoundBase::GetDuration(); }
-float SALSound::GetReferenceDistance() const { return ALSoundBase::GetReferenceDistance(); }
-void SALSound::SetReferenceDistance(float dist)
+bool pragma::audio::SALSound::IsRelative() const { return ALSoundBase::IsRelative(); }
+float pragma::audio::SALSound::GetDuration() const { return ALSoundBase::GetDuration(); }
+float pragma::audio::SALSound::GetReferenceDistance() const { return ALSoundBase::GetReferenceDistance(); }
+void pragma::audio::SALSound::SetReferenceDistance(float dist)
 {
 	ALSoundBase::SetReferenceDistance(dist);
 	SendEvent(NetEvent::SetReferenceDistance, [&dist](NetPacket &p) { p->Write<float>(dist); });
 }
 
-float SALSound::GetRolloffFactor() const { return ALSoundBase::GetRolloffFactor(); }
-void SALSound::SetRolloffFactor(float rolloff)
+float pragma::audio::SALSound::GetRolloffFactor() const { return ALSoundBase::GetRolloffFactor(); }
+void pragma::audio::SALSound::SetRolloffFactor(float rolloff)
 {
 	ALSoundBase::SetRolloffFactor(rolloff);
 	SendEvent(NetEvent::SetRolloffFactor, [&rolloff](NetPacket &p) { p->Write<float>(rolloff); });
 }
-float SALSound::GetRoomRolloffFactor() const { return ALSoundBase::GetRoomRolloffFactor(); }
-void SALSound::SetRoomRolloffFactor(float roomFactor)
+float pragma::audio::SALSound::GetRoomRolloffFactor() const { return ALSoundBase::GetRoomRolloffFactor(); }
+void pragma::audio::SALSound::SetRoomRolloffFactor(float roomFactor)
 {
 	ALSoundBase::SetRoomRolloffFactor(roomFactor);
 	SendEvent(NetEvent::SetRoomRolloffFactor, [&roomFactor](NetPacket &p) { p->Write<float>(roomFactor); });
 }
 
-float SALSound::GetMaxDistance() const { return ALSoundBase::GetMaxDistance(); }
-void SALSound::SetMaxDistance(float dist)
+float pragma::audio::SALSound::GetMaxDistance() const { return ALSoundBase::GetMaxDistance(); }
+void pragma::audio::SALSound::SetMaxDistance(float dist)
 {
 	ALSoundBase::SetMaxDistance(dist);
 	SendEvent(NetEvent::SetMaxDistance, [&dist](NetPacket &p) { p->Write<float>(dist); });
 }
 
-float SALSound::GetMinGain() const { return ALSoundBase::GetMinGain(); }
-void SALSound::SetMinGain(float gain)
+float pragma::audio::SALSound::GetMinGain() const { return ALSoundBase::GetMinGain(); }
+void pragma::audio::SALSound::SetMinGain(float gain)
 {
 	ALSoundBase::SetMinGain(gain);
 	SendEvent(NetEvent::SetMinGain, [&gain](NetPacket &p) { p->Write<float>(gain); });
 }
-float SALSound::GetMaxGain() const { return ALSoundBase::GetMaxGain(); }
-void SALSound::SetMaxGain(float gain)
+float pragma::audio::SALSound::GetMaxGain() const { return ALSoundBase::GetMaxGain(); }
+void pragma::audio::SALSound::SetMaxGain(float gain)
 {
 	ALSoundBase::SetMaxGain(gain);
 	SendEvent(NetEvent::SetMaxGain, [&gain](NetPacket &p) { p->Write<float>(gain); });
 }
-float SALSound::GetInnerConeAngle() const { return ALSoundBase::GetInnerConeAngle(); }
-void SALSound::SetInnerConeAngle(float ang)
+float pragma::audio::SALSound::GetInnerConeAngle() const { return ALSoundBase::GetInnerConeAngle(); }
+void pragma::audio::SALSound::SetInnerConeAngle(float ang)
 {
 	ALSoundBase::SetInnerConeAngle(ang);
 	SendEvent(NetEvent::SetConeInnerAngle, [&ang](NetPacket &p) { p->Write<float>(ang); });
 }
-float SALSound::GetOuterConeAngle() const { return ALSoundBase::GetOuterConeAngle(); }
-void SALSound::SetOuterConeAngle(float ang)
+float pragma::audio::SALSound::GetOuterConeAngle() const { return ALSoundBase::GetOuterConeAngle(); }
+void pragma::audio::SALSound::SetOuterConeAngle(float ang)
 {
 	ALSoundBase::SetOuterConeAngle(ang);
 	SendEvent(NetEvent::SetConeOuterAngle, [&ang](NetPacket &p) { p->Write<float>(ang); });
 }
-float SALSound::GetOuterConeGain() const { return ALSoundBase::GetOuterConeGain(); }
-void SALSound::SetOuterConeGain(float gain)
+float pragma::audio::SALSound::GetOuterConeGain() const { return ALSoundBase::GetOuterConeGain(); }
+void pragma::audio::SALSound::SetOuterConeGain(float gain)
 {
 	ALSoundBase::SetOuterConeGain(gain);
 	SendEvent(NetEvent::SetConeOuterGain, [&gain](NetPacket &p) { p->Write<float>(gain); });
 }
-float SALSound::GetOuterConeGainHF() const { return ALSoundBase::GetOuterConeGainHF(); }
-void SALSound::SetOuterConeGainHF(float gain)
+float pragma::audio::SALSound::GetOuterConeGainHF() const { return ALSoundBase::GetOuterConeGainHF(); }
+void pragma::audio::SALSound::SetOuterConeGainHF(float gain)
 {
 	ALSoundBase::SetOuterConeGainHF(gain);
 	SendEvent(NetEvent::SetConeOuterGainHF, [&gain](NetPacket &p) { p->Write<float>(gain); });
 }
-void SALSound::SetType(pragma::audio::ALSoundType type)
+void pragma::audio::SALSound::SetType(pragma::audio::ALSoundType type)
 {
 	ALSound::SetType(type);
 	SendEvent(NetEvent::SetType, [&type](NetPacket &p) { p->Write<pragma::audio::ALSoundType>(type); });
 }
 
-void SALSound::SetFlags(unsigned int flags)
+void pragma::audio::SALSound::SetFlags(unsigned int flags)
 {
 	ALSound::SetFlags(flags);
 	SendEvent(NetEvent::SetFlags, [&flags](NetPacket &p) { p->Write<unsigned int>(flags); });
 }
 
-void SALSound::SetSource(pragma::ecs::BaseEntity *ent)
+void pragma::audio::SALSound::SetSource(pragma::ecs::BaseEntity *ent)
 {
 	ALSound::SetSource(ent);
-	SendEvent(NetEvent::SetSource, [&ent](NetPacket &p) { nwm::write_entity(p, ent); });
+	SendEvent(NetEvent::SetSource, [&ent](NetPacket &p) { pragma::networking::write_entity(p, ent); });
 }
 
-void SALSound::SetFadeInDuration(float t)
+void pragma::audio::SALSound::SetFadeInDuration(float t)
 {
 	ALSound::SetFadeInDuration(t);
 	SendEvent(NetEvent::SetFadeInDuration, [&t](NetPacket &p) { p->Write<float>(t); });
 }
-void SALSound::SetFadeOutDuration(float t)
+void pragma::audio::SALSound::SetFadeOutDuration(float t)
 {
 	ALSound::SetFadeOutDuration(t);
 	SendEvent(NetEvent::SetFadeOutDuration, [&t](NetPacket &p) { p->Write<float>(t); });
 }
 
-uint32_t SALSound::GetPriority() { return ALSoundBase::GetPriority(); }
-void SALSound::SetPriority(uint32_t priority)
+uint32_t pragma::audio::SALSound::GetPriority() { return ALSoundBase::GetPriority(); }
+void pragma::audio::SALSound::SetPriority(uint32_t priority)
 {
 	ALSoundBase::SetPriority(priority);
 	SendEvent(NetEvent::SetPriority, [priority](NetPacket &p) { p->Write<uint32_t>(priority); });
 }
-void SALSound::SetOrientation(const Vector3 &at, const Vector3 &up)
+void pragma::audio::SALSound::SetOrientation(const Vector3 &at, const Vector3 &up)
 {
 	ALSoundBase::SetOrientation(at, up);
 	SendEvent(NetEvent::SetOrientation, [&at, &up](NetPacket &p) {
@@ -339,32 +339,32 @@ void SALSound::SetOrientation(const Vector3 &at, const Vector3 &up)
 		p->Write<Vector3>(up);
 	});
 }
-std::pair<Vector3, Vector3> SALSound::GetOrientation() const { return ALSoundBase::GetOrientation(); }
-void SALSound::SetDopplerFactor(float factor)
+std::pair<Vector3, Vector3> pragma::audio::SALSound::GetOrientation() const { return ALSoundBase::GetOrientation(); }
+void pragma::audio::SALSound::SetDopplerFactor(float factor)
 {
 	ALSoundBase::SetDopplerFactor(factor);
 	SendEvent(NetEvent::SetDopplerFactor, [factor](NetPacket &p) { p->Write<float>(factor); });
 }
-float SALSound::GetDopplerFactor() const { return ALSoundBase::GetDopplerFactor(); }
-void SALSound::SetLeftStereoAngle(float ang)
+float pragma::audio::SALSound::GetDopplerFactor() const { return ALSoundBase::GetDopplerFactor(); }
+void pragma::audio::SALSound::SetLeftStereoAngle(float ang)
 {
 	ALSoundBase::SetLeftStereoAngle(ang);
 	SendEvent(NetEvent::SetLeftStereoAngle, [ang](NetPacket &p) { p->Write<float>(ang); });
 }
-float SALSound::GetLeftStereoAngle() const { return ALSoundBase::GetLeftStereoAngle(); }
-void SALSound::SetRightStereoAngle(float ang)
+float pragma::audio::SALSound::GetLeftStereoAngle() const { return ALSoundBase::GetLeftStereoAngle(); }
+void pragma::audio::SALSound::SetRightStereoAngle(float ang)
 {
 	ALSoundBase::SetRightStereoAngle(ang);
 	SendEvent(NetEvent::SetRightStereoAngle, [ang](NetPacket &p) { p->Write<float>(ang); });
 }
-float SALSound::GetRightStereoAngle() const { return ALSoundBase::GetRightStereoAngle(); }
-void SALSound::SetAirAbsorptionFactor(float factor)
+float pragma::audio::SALSound::GetRightStereoAngle() const { return ALSoundBase::GetRightStereoAngle(); }
+void pragma::audio::SALSound::SetAirAbsorptionFactor(float factor)
 {
 	ALSoundBase::SetAirAbsorptionFactor(factor);
 	SendEvent(NetEvent::SetAirAbsorptionFactor, [factor](NetPacket &p) { p->Write<float>(factor); });
 }
-float SALSound::GetAirAbsorptionFactor() const { return ALSoundBase::GetAirAbsorptionFactor(); }
-void SALSound::SetGainAuto(bool directHF, bool send, bool sendHF)
+float pragma::audio::SALSound::GetAirAbsorptionFactor() const { return ALSoundBase::GetAirAbsorptionFactor(); }
+void pragma::audio::SALSound::SetGainAuto(bool directHF, bool send, bool sendHF)
 {
 	ALSoundBase::SetGainAuto(directHF, send, sendHF);
 	SendEvent(NetEvent::SetAirAbsorptionFactor, [directHF, send, sendHF](NetPacket &p) {
@@ -373,8 +373,8 @@ void SALSound::SetGainAuto(bool directHF, bool send, bool sendHF)
 		p->Write<float>(sendHF);
 	});
 }
-std::tuple<bool, bool, bool> SALSound::GetGainAuto() const { return ALSoundBase::GetGainAuto(); }
-void SALSound::SetDirectFilter(const SoundEffectParams &params)
+std::tuple<bool, bool, bool> pragma::audio::SALSound::GetGainAuto() const { return ALSoundBase::GetGainAuto(); }
+void pragma::audio::SALSound::SetDirectFilter(const SoundEffectParams &params)
 {
 	ALSoundBase::SetDirectFilter(params);
 	SendEvent(NetEvent::SetAirAbsorptionFactor, [&params](NetPacket &p) {
@@ -383,8 +383,8 @@ void SALSound::SetDirectFilter(const SoundEffectParams &params)
 		p->Write<float>(params.gainLF);
 	});
 }
-const SoundEffectParams &SALSound::GetDirectFilter() const { return ALSoundBase::GetDirectFilter(); }
-bool SALSound::AddEffect(const std::string &effectName, const SoundEffectParams &params)
+const pragma::audio::SoundEffectParams &pragma::audio::SALSound::GetDirectFilter() const { return ALSoundBase::GetDirectFilter(); }
+bool pragma::audio::SALSound::AddEffect(const std::string &effectName, const SoundEffectParams &params)
 {
 	SendEvent(NetEvent::AddEffect, [&effectName, &params](NetPacket &p) {
 		p->WriteString(effectName);
@@ -394,11 +394,11 @@ bool SALSound::AddEffect(const std::string &effectName, const SoundEffectParams 
 	});
 	return true;
 }
-void SALSound::RemoveEffect(const std::string &effectName)
+void pragma::audio::SALSound::RemoveEffect(const std::string &effectName)
 {
 	SendEvent(NetEvent::RemoveEffect, [&effectName](NetPacket &p) { p->WriteString(effectName); });
 }
-void SALSound::SetEffectParameters(const std::string &effectName, const SoundEffectParams &params)
+void pragma::audio::SALSound::SetEffectParameters(const std::string &effectName, const SoundEffectParams &params)
 {
 	SendEvent(NetEvent::SetEffectParameters, [&effectName, &params](NetPacket &p) {
 		p->WriteString(effectName);
@@ -408,7 +408,7 @@ void SALSound::SetEffectParameters(const std::string &effectName, const SoundEff
 	});
 }
 
-void SALSound::SetEntityMapIndex(uint32_t idx)
+void pragma::audio::SALSound::SetEntityMapIndex(uint32_t idx)
 {
 	SendEvent(NetEvent::SetEntityMapIndex, [&idx](NetPacket &p) { p->Write<uint32_t>(idx); });
 }

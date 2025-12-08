@@ -52,9 +52,9 @@ export {
 			bool pressed;
 		};
 		struct DLLSERVER CEOnSuspiciousSoundHeared : public ComponentEvent {
-			CEOnSuspiciousSoundHeared(const std::shared_ptr<ALSound> &sound);
+			CEOnSuspiciousSoundHeared(const std::shared_ptr<pragma::audio::ALSound> &sound);
 			virtual void PushArguments(lua::State *l) override;
-			std::shared_ptr<ALSound> sound;
+			std::shared_ptr<pragma::audio::ALSound> sound;
 		};
 		struct DLLSERVER CEOnStartControl : public ComponentEvent {
 			CEOnStartControl(pragma::SPlayerComponent &player);
@@ -95,7 +95,7 @@ export {
 		class DLLSERVER SAIComponent final : public BaseAIComponent, public SBaseSnapshotComponent {
 		  public:
 			void _debugSendNavInfo(pragma::SPlayerComponent &pl);
-			void _debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::shared_ptr<DebugBehaviorTreeNode> &dbgTree, std::shared_ptr<ai::Schedule> &aiSchedule, float &tLastSchedUpdate);
+			void _debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::shared_ptr<pragma::debug::DebugBehaviorTreeNode> &dbgTree, std::shared_ptr<ai::Schedule> &aiSchedule, float &tLastSchedUpdate);
 			static std::vector<ComponentHandle<pragma::SPlayerComponent>> s_plDebugAiNav;
 		  private:
 			static std::vector<SAIComponent *> s_npcs;
@@ -292,7 +292,7 @@ export {
 			virtual void OnMemoryGained(const ai::Memory::Fragment &memFragment);
 			virtual void OnMemoryLost(const ai::Memory::Fragment &memFragment);
 			virtual void OnTargetAcquired(pragma::ecs::BaseEntity *ent, float dist, bool bFirst);
-			virtual bool OnSuspiciousSoundHeared(std::shared_ptr<ALSound> &snd);
+			virtual bool OnSuspiciousSoundHeared(std::shared_ptr<pragma::audio::ALSound> &snd);
 			virtual void OnControllerActionInput(pragma::Action action, bool b);
 			virtual void OnStartControl(pragma::SPlayerComponent &pl);
 			virtual void OnEndControl();
@@ -300,11 +300,11 @@ export {
 			virtual void OnLookTargetChanged() override;
 			virtual bool IsObstruction(const pragma::ecs::BaseEntity &ent) const override;
 			virtual void UpdateMovementProperties(MovementComponent &movementC) override;
-			void OnTakenDamage(DamageInfo &info, unsigned short oldHealth, unsigned short newHealth);
-			void OnTakeDamage(DamageInfo &info);
+			void OnTakenDamage(game::DamageInfo &info, unsigned short oldHealth, unsigned short newHealth);
+			void OnTakeDamage(game::DamageInfo &info);
 			void MaintainAnimationMovement(const Vector3 &disp);
 			bool OnInput(std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, const std::string &data);
-			void OnKilled(DamageInfo *damageInfo = nullptr);
+			void OnKilled(game::DamageInfo *damageInfo = nullptr);
 			bool HasCharacterNoTargetEnabled(const pragma::ecs::BaseEntity &ent) const;
 
 			// Animation

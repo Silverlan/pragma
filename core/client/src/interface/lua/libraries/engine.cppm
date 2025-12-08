@@ -35,13 +35,13 @@ export namespace Lua {
 		DLLCLIENT bool precache_particle_system(lua::State *l, const std::string &particle, bool reload);
 		DLLCLIENT bool precache_particle_system(lua::State *l, const std::string &particle);
 		DLLCLIENT int save_particle_system(lua::State *l);
-		DLLCLIENT std::shared_ptr<const FontInfo> create_font(lua::State *l, const std::string &identifier, const std::string &font, pragma::FontSetFlag features, uint32_t size, bool reload);
-		DLLCLIENT std::shared_ptr<const FontInfo> create_font(lua::State *l, const std::string &identifier, const std::string &font, pragma::FontSetFlag features, uint32_t size);
-		DLLCLIENT std::shared_ptr<const FontInfo> get_font(lua::State *l, const std::string &identifier);
+		DLLCLIENT std::shared_ptr<const pragma::gui::FontInfo> create_font(lua::State *l, const std::string &identifier, const std::string &font, pragma::FontSetFlag features, uint32_t size, bool reload);
+		DLLCLIENT std::shared_ptr<const pragma::gui::FontInfo> create_font(lua::State *l, const std::string &identifier, const std::string &font, pragma::FontSetFlag features, uint32_t size);
+		DLLCLIENT std::shared_ptr<const pragma::gui::FontInfo> get_font(lua::State *l, const std::string &identifier);
 		DLLCLIENT ::Vector2i get_text_size(lua::State *l, const std::string &text, const std::string &font);
-		DLLCLIENT ::Vector2i get_text_size(lua::State *l, const std::string &text, const FontInfo &font);
+		DLLCLIENT ::Vector2i get_text_size(lua::State *l, const std::string &text, const pragma::gui::FontInfo &font);
 		DLLCLIENT std::pair<size_t, size_t> get_truncated_text_length(lua::State *l, const std::string &text, const std::string &font, uint32_t maxWidth);
-		DLLCLIENT std::pair<size_t, size_t> get_truncated_text_length(lua::State *l, const std::string &text, const FontInfo &font, uint32_t maxWidth);
+		DLLCLIENT std::pair<size_t, size_t> get_truncated_text_length(lua::State *l, const std::string &text, const pragma::gui::FontInfo &font, uint32_t maxWidth);
 		DLLCLIENT std::shared_ptr<prosper::RenderTarget> get_staging_render_target();
 		DLLCLIENT void set_fixed_frame_delta_time_interpretation(uint16_t fps);
 		DLLCLIENT void clear_fixed_frame_delta_time_interpretation();

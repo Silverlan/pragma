@@ -15,8 +15,8 @@ export namespace pragma {
 		class Scene;
 	};
 	struct PBRAOBakeJob {
-		PBRAOBakeJob(pragma::Model &mdl, msys::Material &mat);
-		util::WeakHandle<pragma::Model> hModel = {};
+		PBRAOBakeJob(pragma::asset::Model &mdl, msys::Material &mat);
+		util::WeakHandle<pragma::asset::Model> hModel = {};
 		msys::MaterialHandle hMaterial = {};
 		EntityHandle hEntity = {};
 		util::ParallelJob<uimg::ImageLayerSet> job = {};
@@ -34,7 +34,7 @@ export namespace pragma {
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
 		virtual void OnTick(double dt) override;
-		void GenerateAmbientOcclusionMaps(pragma::Model &mdl, uint32_t w = 512, uint32_t h = 512, uint32_t samples = 512, bool rebuild = false);
+		void GenerateAmbientOcclusionMaps(pragma::asset::Model &mdl, uint32_t w = 512, uint32_t h = 512, uint32_t samples = 512, bool rebuild = false);
 		void GenerateAmbientOcclusionMaps(pragma::ecs::BaseEntity &ent, uint32_t w = 512, uint32_t h = 512, uint32_t samples = 512, bool rebuild = false);
 
 		bool ConvertToPBR(msys::CMaterial &matTraditional);
@@ -55,16 +55,16 @@ export namespace pragma {
 			bool updateMetalness = false;
 			std::optional<AmbientOcclusionInfo> updateAmbientOcclusion = {};
 		};
-		void ConvertMaterialsToPBR(pragma::Model &mdl);
-		void UpdateMetalness(pragma::Model &mdl);
-		void UpdateMetalness(pragma::Model &mdl, msys::CMaterial &mat);
-		void UpdateAmbientOcclusion(pragma::Model &mdl, const AmbientOcclusionInfo &aoInfo = {}, pragma::ecs::BaseEntity *optEnt = nullptr);
-		void UpdateModel(pragma::Model &mdl, ModelUpdateInfo &updateInfo, pragma::ecs::BaseEntity *optEnt = nullptr);
-		void ApplyMiscMaterialProperties(msys::CMaterial &mat, const SurfaceMaterial &surfMat, const std::string &surfMatName);
-		void ScheduleModelUpdate(pragma::Model &mdl, bool updateMetalness, std::optional<AmbientOcclusionInfo> updateAOInfo = {}, pragma::ecs::BaseEntity *optEnt = nullptr);
+		void ConvertMaterialsToPBR(pragma::asset::Model &mdl);
+		void UpdateMetalness(pragma::asset::Model &mdl);
+		void UpdateMetalness(pragma::asset::Model &mdl, msys::CMaterial &mat);
+		void UpdateAmbientOcclusion(pragma::asset::Model &mdl, const AmbientOcclusionInfo &aoInfo = {}, pragma::ecs::BaseEntity *optEnt = nullptr);
+		void UpdateModel(pragma::asset::Model &mdl, ModelUpdateInfo &updateInfo, pragma::ecs::BaseEntity *optEnt = nullptr);
+		void ApplyMiscMaterialProperties(msys::CMaterial &mat, const physics::SurfaceMaterial &surfMat, const std::string &surfMatName);
+		void ScheduleModelUpdate(pragma::asset::Model &mdl, bool updateMetalness, std::optional<AmbientOcclusionInfo> updateAOInfo = {}, pragma::ecs::BaseEntity *optEnt = nullptr);
 
 		void ProcessQueue();
-		void WriteAOMap(pragma::Model &mdl, msys::CMaterial &mat, uimg::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const;
+		void WriteAOMap(pragma::asset::Model &mdl, msys::CMaterial &mat, uimg::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const;
 		bool ShouldConvertMaterial(msys::CMaterial &mat) const;
 		bool IsPBR(msys::CMaterial &mat) const;
 		std::shared_ptr<prosper::Texture> ConvertSpecularMapToRoughness(prosper::Texture &specularMap);
@@ -74,11 +74,11 @@ export namespace pragma {
 
 		CallbackHandle m_cbOnModelLoaded = {};
 		CallbackHandle m_cbOnMaterialLoaded = {};
-		std::unordered_map<pragma::Model *, ModelUpdateInfo> m_scheduledModelUpdates = {};
+		std::unordered_map<pragma::asset::Model *, ModelUpdateInfo> m_scheduledModelUpdates = {};
 	};
 };
 
-export class DLLCLIENT CUtilPBRConverter : public CBaseEntity {
+export class DLLCLIENT CUtilPBRConverter : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

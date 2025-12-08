@@ -9,11 +9,11 @@ export module pragma.shared:core.engine_init;
 import :debug.crashdump;
 import :engine;
 
-export {
+export namespace pragma {
 	template<class T>
-	std::shared_ptr<T> InitializeEngine(int argc, char *argv[])
+	std::shared_ptr<T> initialize_engine(int argc, char *argv[])
 	{
-		auto exe = engine_info::get_executable_name();
+		auto exe = pragma::engine_info::get_executable_name();
 		pragma::debug::CrashHandler::Get().SetAppName(exe);
 		auto en = std::shared_ptr<T> {new T {argc, argv}, [](T *p) {
 #ifdef _WIN32
@@ -36,9 +36,9 @@ export {
 		return en;
 	}
 
-	inline DLLNETWORK std::shared_ptr<pragma::Engine> InitializeServer(int argc, char *argv[])
+	inline DLLNETWORK std::shared_ptr<pragma::Engine> initialize_server(int argc, char *argv[])
 	{
-		auto exe = engine_info::get_executable_name();
+		auto exe = pragma::engine_info::get_executable_name();
 		pragma::debug::CrashHandler::Get().SetAppName(exe);
 		auto en = std::shared_ptr<pragma::Engine> {new pragma::Engine {argc, argv}, [](pragma::Engine *p) {
 			                                           if(std::uncaught_exceptions() > 0) {

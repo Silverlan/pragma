@@ -21,7 +21,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CEnvTimescale : public CBaseEntity {
+	class DLLCLIENT CEnvTimescale : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

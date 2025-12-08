@@ -13,17 +13,17 @@ export namespace pragma {
 	class DLLCLIENT ShaderPPBloomBlurBase : public prosper::ShaderBlurBase {
 	  public:
 		static constexpr uint32_t MAX_SAMPLE_COUNT = 15;
-		static constexpr uint32_t DEFAULT_RADIUS = ControlledBlurSettings::DEFAULT_RADIUS;
-		static constexpr double DEFAULT_SIGMA = ControlledBlurSettings::DEFAULT_SIGMA;
+		static constexpr uint32_t DEFAULT_RADIUS = rendering::ControlledBlurSettings::DEFAULT_RADIUS;
+		static constexpr double DEFAULT_SIGMA = rendering::ControlledBlurSettings::DEFAULT_SIGMA;
 		ShaderPPBloomBlurBase(prosper::IPrContext &context, const std::string &identifier, const std::string &fsShader);
 
-		std::shared_ptr<BloomPipelineInfo> AddPipeline(uint32_t radius, double sigma);
+		std::shared_ptr<rendering::BloomPipelineInfo> AddPipeline(uint32_t radius, double sigma);
 	  protected:
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void OnInitializePipelines() override;
-		std::vector<std::weak_ptr<BloomPipelineInfo>> m_pipelineInfos;
-		std::shared_ptr<BloomPipelineInfo> m_defaultPipeline;
+		std::vector<std::weak_ptr<rendering::BloomPipelineInfo>> m_pipelineInfos;
+		std::shared_ptr<rendering::BloomPipelineInfo> m_defaultPipeline;
 	};
 
 	/////////////////////////

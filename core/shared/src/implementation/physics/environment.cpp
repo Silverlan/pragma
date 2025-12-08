@@ -15,7 +15,7 @@ std::vector<std::string> pragma::physics::IEnvironment::GetAvailablePhysicsEngin
 	return dirs;
 }
 std::string pragma::physics::IEnvironment::GetPhysicsEngineModuleLocation(const std::string &physEngine) { return "physics_engines/" + physEngine + "/pr_" + physEngine; }
-pragma::physics::IEnvironment::IEnvironment(NetworkState &state) : m_nwState {state}
+pragma::physics::IEnvironment::IEnvironment(pragma::NetworkState &state) : m_nwState {state}
 {
 	Con::cout << "Initializing physics environment..." << Con::endl;
 	for(auto i = 0; i < umath::to_integral(Event::Count); i++)
@@ -37,7 +37,7 @@ bool pragma::physics::IEnvironment::Initialize()
 	return m_genericMaterial != nullptr;
 }
 pragma::physics::IEnvironment::~IEnvironment() {}
-NetworkState &pragma::physics::IEnvironment::GetNetworkState() const { return m_nwState; }
+pragma::NetworkState &pragma::physics::IEnvironment::GetNetworkState() const { return m_nwState; }
 double pragma::physics::IEnvironment::GetTimeScale() const
 {
 	auto *game = m_nwState.GetGameState();
@@ -243,7 +243,7 @@ pragma::physics::IEnvironment::RemainingDeltaTime pragma::physics::IEnvironment:
 	return DoStepSimulation(timeStep, maxSubSteps, fixedTimeStep);
 }
 
-bool PhysSoftBodyInfo::operator==(const PhysSoftBodyInfo &other) const
+bool pragma::physics::PhysSoftBodyInfo::operator==(const PhysSoftBodyInfo &other) const
 {
 	return poseMatchingCoefficient == other.poseMatchingCoefficient && anchorsHardness == other.anchorsHardness && dragCoefficient == other.dragCoefficient && rigidContactsHardness == other.rigidContactsHardness && softContactsHardness == other.softContactsHardness
 	  && liftCoefficient == other.liftCoefficient && kineticContactsHardness == other.kineticContactsHardness && dynamicFrictionCoefficient == other.dynamicFrictionCoefficient && dampingCoefficient == other.dampingCoefficient

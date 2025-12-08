@@ -65,7 +65,7 @@ static int32_t exec(lua::State *l)
 	return numResults;
 }
 
-void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
+void pragma::NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 {
 	// To make sure Lua errors are handled properly, we need to use a regular Lua binding here
 	// without luabind
@@ -125,13 +125,13 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 	    {"COLOR_FLAG_BACKGROUND_BLACK", umath::to_integral(pragma::console::ConsoleColorFlags::BackgroundBlack)},
 	    {"COLOR_FLAG_RESET_BIT", umath::to_integral(pragma::console::ConsoleColorFlags::Reset)},
 
-	    {"MESSAGE_FLAG_NONE", umath::to_integral(Con::MessageFlags::None)},
-	    {"MESSAGE_FLAG_BIT_GENERIC", umath::to_integral(Con::MessageFlags::Generic)},
-	    {"MESSAGE_FLAG_BIT_WARNING", umath::to_integral(Con::MessageFlags::Warning)},
-	    {"MESSAGE_FLAG_BIT_ERROR", umath::to_integral(Con::MessageFlags::Error)},
-	    {"MESSAGE_FLAG_BIT_CRITICAL", umath::to_integral(Con::MessageFlags::Critical)},
-	    {"MESSAGE_FLAG_BIT_SERVER_SIDE", umath::to_integral(Con::MessageFlags::ServerSide)},
-	    {"MESSAGE_FLAG_BIT_CLIENT_SIDE", umath::to_integral(Con::MessageFlags::ClientSide)},
+	    {"MESSAGE_FLAG_NONE", umath::to_integral(pragma::console::MessageFlags::None)},
+	    {"MESSAGE_FLAG_BIT_GENERIC", umath::to_integral(pragma::console::MessageFlags::Generic)},
+	    {"MESSAGE_FLAG_BIT_WARNING", umath::to_integral(pragma::console::MessageFlags::Warning)},
+	    {"MESSAGE_FLAG_BIT_ERROR", umath::to_integral(pragma::console::MessageFlags::Error)},
+	    {"MESSAGE_FLAG_BIT_CRITICAL", umath::to_integral(pragma::console::MessageFlags::Critical)},
+	    {"MESSAGE_FLAG_BIT_SERVER_SIDE", umath::to_integral(pragma::console::MessageFlags::ServerSide)},
+	    {"MESSAGE_FLAG_BIT_CLIENT_SIDE", umath::to_integral(pragma::console::MessageFlags::ClientSide)},
 	  });
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "console",
@@ -163,11 +163,11 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 	    {"TYPE_ENVIRONMENT", umath::to_integral(pragma::audio::ALSoundType::Environment)},
 	    {"TYPE_GUI", umath::to_integral(pragma::audio::ALSoundType::GUI)},
 
-	    {"STATE_NO_ERROR", umath::to_integral(ALState::NoError)},
-	    {"STATE_INITIAL", umath::to_integral(ALState::Initial)},
-	    {"STATE_PLAYING", umath::to_integral(ALState::Playing)},
-	    {"STATE_PAUSED", umath::to_integral(ALState::Paused)},
-	    {"STATE_STOPPED", umath::to_integral(ALState::Stopped)},
+	    {"STATE_NO_ERROR", umath::to_integral(pragma::audio::ALState::NoError)},
+	    {"STATE_INITIAL", umath::to_integral(pragma::audio::ALState::Initial)},
+	    {"STATE_PLAYING", umath::to_integral(pragma::audio::ALState::Playing)},
+	    {"STATE_PAUSED", umath::to_integral(pragma::audio::ALState::Paused)},
+	    {"STATE_STOPPED", umath::to_integral(pragma::audio::ALState::Stopped)},
 	  });
 }
 
@@ -234,7 +234,7 @@ static pragma::ecs::BaseEntity *find_entity(lua::State *l, pragma::Game &game, l
 
 void pragma::Game::RegisterLuaGlobals()
 {
-	NetworkState::RegisterSharedLuaGlobals(GetLuaInterface());
+	pragma::NetworkState::RegisterSharedLuaGlobals(GetLuaInterface());
 
 	lua::register_function(GetLuaState(), "include_component", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		std::string componentName = Lua::CheckString(l, 1);
@@ -245,16 +245,16 @@ void pragma::Game::RegisterLuaGlobals()
 	}));
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",
 	  {
-	    {"DAMAGETYPE_GENERIC", umath::to_integral(DAMAGETYPE::GENERIC)},
-	    {"DAMAGETYPE_BULLET", umath::to_integral(DAMAGETYPE::BULLET)},
-	    {"DAMAGETYPE_EXPLOSION", umath::to_integral(DAMAGETYPE::EXPLOSION)},
-	    {"DAMAGETYPE_FIRE", umath::to_integral(DAMAGETYPE::FIRE)},
-	    {"DAMAGETYPE_PLASMA", umath::to_integral(DAMAGETYPE::PLASMA)},
-	    {"DAMAGETYPE_BASH", umath::to_integral(DAMAGETYPE::BASH)},
-	    {"DAMAGETYPE_CRUSH", umath::to_integral(DAMAGETYPE::CRUSH)},
-	    {"DAMAGETYPE_SLASH", umath::to_integral(DAMAGETYPE::SLASH)},
-	    {"DAMAGETYPE_ELECTRICITY", umath::to_integral(DAMAGETYPE::ELECTRICITY)},
-	    {"DAMAGETYPE_ENERGY", umath::to_integral(DAMAGETYPE::ENERGY)},
+	    {"DAMAGETYPE_GENERIC", umath::to_integral(DamageType::Generic)},
+	    {"DAMAGETYPE_BULLET", umath::to_integral(DamageType::Bullet)},
+	    {"DAMAGETYPE_EXPLOSION", umath::to_integral(DamageType::Explosion)},
+	    {"DAMAGETYPE_FIRE", umath::to_integral(DamageType::Fire)},
+	    {"DAMAGETYPE_PLASMA", umath::to_integral(DamageType::Plasma)},
+	    {"DAMAGETYPE_BASH", umath::to_integral(DamageType::Bash)},
+	    {"DAMAGETYPE_CRUSH", umath::to_integral(DamageType::Crush)},
+	    {"DAMAGETYPE_SLASH", umath::to_integral(DamageType::Slash)},
+	    {"DAMAGETYPE_ELECTRICITY", umath::to_integral(DamageType::Electricity)},
+	    {"DAMAGETYPE_ENERGY", umath::to_integral(DamageType::Energy)},
 
 	    {"STATE_FLAG_NONE", umath::to_integral(pragma::Game::GameFlags::None)},
 	    {"STATE_FLAG_BIT_MAP_INITIALIZED", umath::to_integral(pragma::Game::GameFlags::MapInitialized)},
@@ -289,9 +289,9 @@ void pragma::Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "sound",
 	  {
-	    {"CHANNEL_AUTO", umath::to_integral(ALChannel::Auto)},
-	    {"CHANNEL_MONO", umath::to_integral(ALChannel::Mono)},
-	    {"CHANNEL_BOTH", umath::to_integral(ALChannel::Both)},
+	    {"CHANNEL_AUTO", umath::to_integral(pragma::audio::ALChannel::Auto)},
+	    {"CHANNEL_MONO", umath::to_integral(pragma::audio::ALChannel::Mono)},
+	    {"CHANNEL_BOTH", umath::to_integral(pragma::audio::ALChannel::Both)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "intersect",
@@ -346,17 +346,17 @@ void pragma::Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",
 	  {
-	    {"HITGROUP_INVALID", umath::to_integral(HitGroup::Invalid)},
-	    {"HITGROUP_GENERIC", umath::to_integral(HitGroup::Generic)},
-	    {"HITGROUP_HEAD", umath::to_integral(HitGroup::Head)},
-	    {"HITGROUP_CHEST", umath::to_integral(HitGroup::Chest)},
-	    {"HITGROUP_STOMACH", umath::to_integral(HitGroup::Stomach)},
-	    {"HITGROUP_LEFT_ARM", umath::to_integral(HitGroup::LeftArm)},
-	    {"HITGROUP_RIGHT_ARM", umath::to_integral(HitGroup::RightArm)},
-	    {"HITGROUP_LEFT_LEG", umath::to_integral(HitGroup::LeftLeg)},
-	    {"HITGROUP_RIGHT_LEG", umath::to_integral(HitGroup::RightLeg)},
-	    {"HITGROUP_GEAR", umath::to_integral(HitGroup::Gear)},
-	    {"HITGROUP_TAIL", umath::to_integral(HitGroup::Tail)},
+	    {"HITGROUP_INVALID", umath::to_integral(physics::HitGroup::Invalid)},
+	    {"HITGROUP_GENERIC", umath::to_integral(physics::HitGroup::Generic)},
+	    {"HITGROUP_HEAD", umath::to_integral(physics::HitGroup::Head)},
+	    {"HITGROUP_CHEST", umath::to_integral(physics::HitGroup::Chest)},
+	    {"HITGROUP_STOMACH", umath::to_integral(physics::HitGroup::Stomach)},
+	    {"HITGROUP_LEFT_ARM", umath::to_integral(physics::HitGroup::LeftArm)},
+	    {"HITGROUP_RIGHT_ARM", umath::to_integral(physics::HitGroup::RightArm)},
+	    {"HITGROUP_LEFT_LEG", umath::to_integral(physics::HitGroup::LeftLeg)},
+	    {"HITGROUP_RIGHT_LEG", umath::to_integral(physics::HitGroup::RightLeg)},
+	    {"HITGROUP_GEAR", umath::to_integral(physics::HitGroup::Gear)},
+	    {"HITGROUP_TAIL", umath::to_integral(physics::HitGroup::Tail)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",

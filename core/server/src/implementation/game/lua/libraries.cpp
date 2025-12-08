@@ -10,7 +10,7 @@ import :scripting.lua;
 
 #undef DrawText
 
-void SGame::RegisterLuaLibraries()
+void pragma::SGame::RegisterLuaLibraries()
 {
 	Lua::util::register_library(GetLuaState());
 
@@ -19,7 +19,7 @@ void SGame::RegisterLuaLibraries()
 
 	auto utilMod = luabind::module(GetLuaState(), "util");
 	Lua::util::register_shared(GetLuaState(), utilMod);
-	utilMod[(luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, const BulletInfo &, bool)>(Lua::util::Server::fire_bullets)), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, const BulletInfo &)>(Lua::util::Server::fire_bullets)),
+	utilMod[(luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, const game::BulletInfo &, bool)>(Lua::util::Server::fire_bullets)), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, const game::BulletInfo &)>(Lua::util::Server::fire_bullets)),
 	  luabind::def("create_giblet", Lua::util::Server::create_giblet), luabind::def("create_explosion", Lua::util::Server::create_explosion), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates))];
 
 	pragma::Game::RegisterLuaLibraries();
@@ -46,7 +46,7 @@ void SGame::RegisterLuaLibraries()
 		            auto asset = manager->LoadAsset(ufile::get_file_from_filename(*fileName), std::move(fp), ext, std::move(loadInfo));
 		            switch(type) {
 		            case pragma::asset::Type::Model:
-			            return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
+			            return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
 		            case pragma::asset::Type::Material:
 			            return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		            }
@@ -62,7 +62,7 @@ void SGame::RegisterLuaLibraries()
 		    auto asset = manager->LoadAsset(name);
 		    switch(type) {
 		    case pragma::asset::Type::Model:
-			    return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
 		    case pragma::asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		    }
@@ -76,7 +76,7 @@ void SGame::RegisterLuaLibraries()
 		    auto asset = manager->ReloadAsset(name);
 		    switch(type) {
 		    case pragma::asset::Type::Model:
-			    return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
 		    case pragma::asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		    }
@@ -91,12 +91,12 @@ void SGame::RegisterLuaLibraries()
 
 	auto utilDebug = luabind::module(GetLuaState(), "debug");
 	utilDebug[(luabind::def("draw_point", Lua::DebugRenderer::Server::DrawPoint), luabind::def("draw_line", Lua::DebugRenderer::Server::DrawLine), luabind::def("draw_box", &Lua::DebugRenderer::Server::DrawBox),
-	  luabind::def("draw_sphere", static_cast<void (*)(float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSphere)), luabind::def("draw_sphere", static_cast<void (*)(float, const DebugRenderInfo &, uint32_t)>(Lua::DebugRenderer::Server::DrawSphere)),
+	  luabind::def("draw_sphere", static_cast<void (*)(float, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSphere)), luabind::def("draw_sphere", static_cast<void (*)(float, const pragma::debug::DebugRenderInfo &, uint32_t)>(Lua::DebugRenderer::Server::DrawSphere)),
 	  luabind::def("draw_cone", &Lua::DebugRenderer::Server::DrawCone), luabind::def("draw_truncated_cone", &Lua::DebugRenderer::Server::DrawTruncatedCone), luabind::def("draw_cylinder", &Lua::DebugRenderer::Server::DrawCylinder),
-	  luabind::def("draw_pose", &Lua::DebugRenderer::Server::DrawAxis), luabind::def("draw_text", static_cast<void (*)(const std::string &, const Vector2 &, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)),
-	  luabind::def("draw_text", static_cast<void (*)(const std::string &, float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Server::DrawPath),
-	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)),
-	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane), luabind::def("draw_mesh", &SGame::DrawMesh))];
+	  luabind::def("draw_pose", &Lua::DebugRenderer::Server::DrawAxis), luabind::def("draw_text", static_cast<void (*)(const std::string &, const Vector2 &, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)),
+	  luabind::def("draw_text", static_cast<void (*)(const std::string &, float, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Server::DrawPath),
+	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, float, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)),
+	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane), luabind::def("draw_mesh", &pragma::SGame::DrawMesh))];
 
 	Lua::ai::server::register_library(GetLuaInterface());
 
@@ -105,7 +105,7 @@ void SGame::RegisterLuaLibraries()
 	Lua::sound::register_library(soundMod);
 	Lua::sound::register_enums(GetLuaState());
 
-	auto alSoundClassDef = luabind::class_<ALSound>("Source");
+	auto alSoundClassDef = luabind::class_<pragma::audio::ALSound>("Source");
 	Lua::ALSound::register_class(alSoundClassDef);
 	soundMod[alSoundClassDef];
 

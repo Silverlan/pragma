@@ -8,17 +8,19 @@ export module pragma.client:model.vertex_animation;
 
 export import pragma.shared;
 
-export class DLLCLIENT CVertexAnimation : public VertexAnimation {
-  public:
-	static std::shared_ptr<CVertexAnimation> Create();
-	static std::shared_ptr<CVertexAnimation> Create(const CVertexAnimation &other);
-	static std::shared_ptr<CVertexAnimation> Create(const std::string &name);
+export namespace pragma::animation {
+	class DLLCLIENT CVertexAnimation : public VertexAnimation {
+	public:
+		static std::shared_ptr<CVertexAnimation> Create();
+		static std::shared_ptr<CVertexAnimation> Create(const CVertexAnimation &other);
+		static std::shared_ptr<CVertexAnimation> Create(const std::string &name);
 
-	virtual std::shared_ptr<VertexAnimation> Copy() const override;
+		virtual std::shared_ptr<pragma::animation::VertexAnimation> Copy() const override;
 
-	void UpdateBuffer();
-  protected:
-	CVertexAnimation();
-	CVertexAnimation(const CVertexAnimation &other);
-	CVertexAnimation(const std::string &name);
-};
+		void UpdateBuffer();
+	protected:
+		CVertexAnimation();
+		CVertexAnimation(const CVertexAnimation &other);
+		CVertexAnimation(const std::string &name);
+	};
+}

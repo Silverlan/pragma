@@ -9,11 +9,11 @@ module pragma.client;
 
 import :console.commands;
 
-static void CMD_bind_keys(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_bind(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_unbind(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_unbindall(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_keymappings(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_bind_keys(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_bind(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_unbind(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_unbindall(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_keymappings(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 namespace {
 	using namespace pragma::console::client;
 	auto UVN = register_command("bind_keys", &CMD_bind_keys, pragma::console::ConVarFlags::None, "Prints a list of all bindable keys to the console.");
@@ -25,13 +25,13 @@ namespace {
 
 ////////////////////////////
 
-void CMD_bind_keys(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void CMD_bind_keys(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	for(int i = 0; i < (sizeof(BIND_KEYS) / sizeof(BIND_KEYS[0])); i++)
 		Con::cout << BIND_KEYS[i] << Con::endl;
 }
 
-void CMD_bind(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_bind(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.size() <= 1)
 		return;
@@ -46,7 +46,7 @@ void CMD_bind(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::st
 	pragma::get_cengine()->SetInputBindingsDirty();
 }
 
-void CMD_unbind(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_unbind(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
@@ -61,7 +61,7 @@ void CMD_unbind(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::
 	pragma::get_cengine()->SetInputBindingsDirty();
 }
 
-void CMD_unbindall(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void CMD_unbindall(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto bindings = pragma::get_cengine()->GetCoreInputBindingLayer();
 	if(bindings)
@@ -69,7 +69,7 @@ void CMD_unbindall(NetworkState *, pragma::BasePlayerComponent *, std::vector<st
 	pragma::get_cengine()->SetInputBindingsDirty();
 }
 
-void CMD_keymappings(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void CMD_keymappings(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto &bindings = pragma::get_cengine()->GetEffectiveInputBindingLayer();
 	auto &mappings = bindings.GetKeyMappings();

@@ -15,7 +15,7 @@ import :client_state;
 import :entities.components;
 import :game;
 
-void CParticleRendererSprite::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleRendererSprite::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleRenderer::Initialize(pSystem, values);
 	auto bAlignVelocity = false;
@@ -30,12 +30,12 @@ void CParticleRendererSprite::Initialize(pragma::BaseEnvParticleSystemComponent 
 	m_shader = pragma::get_cengine()->GetShader(m_bPlanarRotation ? "particle" : "particle_rotational");
 	if(m_bPlanarRotation == true)
 		return;
-	m_rotationalBuffer = std::make_unique<CParticleRendererRotationalBuffer>();
+	m_rotationalBuffer = std::make_unique<pragma::pts::CParticleRendererRotationalBuffer>();
 	m_rotationalBuffer->Initialize(pSystem);
 	m_rotationalBuffer->SetRotationAlignVelocity(bAlignVelocity);
 }
 
-void CParticleRendererSprite::PostSimulate(double tDelta)
+void pragma::pts::CParticleRendererSprite::PostSimulate(double tDelta)
 {
 	CParticleRenderer::PostSimulate(tDelta);
 	if(m_shader.expired() || m_rotationalBuffer == nullptr)
@@ -43,9 +43,9 @@ void CParticleRendererSprite::PostSimulate(double tDelta)
 	m_rotationalBuffer->Update();
 }
 
-pragma::ShaderParticleBase *CParticleRendererSprite::GetShader() const { return static_cast<pragma::ShaderParticle2DBase *>(m_shader.get()); }
+pragma::ShaderParticleBase *pragma::pts::CParticleRendererSprite::GetShader() const { return static_cast<pragma::ShaderParticle2DBase *>(m_shader.get()); }
 
-void CParticleRendererSprite::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags)
+void pragma::pts::CParticleRendererSprite::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::pts::ParticleRenderFlags renderFlags)
 {
 	auto *shader = static_cast<pragma::ShaderParticle2DBase *>(m_shader.get());
 	prosper::ShaderBindState bindState {drawCmd};
@@ -61,12 +61,12 @@ void CParticleRendererSprite::RecordRender(prosper::ICommandBuffer &drawCmd, pra
 	auto &dsRenderSettings = pragma::get_cgame()->GetGlobalRenderSettingsDescriptorSet();
 	auto *dsShadows = pragma::CShadowComponent::GetDescriptorSet();
 	shader->RecordBindScene(bindState.commandBuffer, *layout, scene, renderer, *dsScene, *dsRenderer, dsRenderSettings, *dsShadows);
-	auto orientationType = (m_rotationalBuffer != nullptr && m_rotationalBuffer->ShouldRotationAlignVelocity()) ? pragma::ecs::ParticleOrientationType::Velocity : m_particleSystem->GetOrientationType();
+	auto orientationType = (m_rotationalBuffer != nullptr && m_rotationalBuffer->ShouldRotationAlignVelocity()) ? pragma::pts::ParticleOrientationType::Velocity : m_particleSystem->GetOrientationType();
 	shader->RecordDraw(bindState, scene, renderer, *m_particleSystem, orientationType, renderFlags);
 	shader->RecordEndDraw(bindState);
 }
 
-void CParticleRendererSprite::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
+void pragma::pts::CParticleRendererSprite::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
 {
 	/*static auto hShader = pragma::get_cengine()->GetShader("particleshadow");
 	if(!hShader.IsValid())

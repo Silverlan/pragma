@@ -13,7 +13,7 @@ import se_script;
 
 using namespace pragma;
 
-static auto cvFlexPhonemeDrag = GetClientConVar("cl_flex_phoneme_drag");
+static auto cvFlexPhonemeDrag = pragma::console::get_client_con_var("cl_flex_phoneme_drag");
 
 ComponentEventId cFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED = INVALID_COMPONENT_ID;
 void CFlexComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
@@ -80,7 +80,7 @@ bool CFlexComponent::HasFlexWeightOverride(uint32_t flexId) const
 	return m_flexOverrides.at(flexId).has_value();
 }
 
-void CFlexComponent::UpdateEyeFlexes(Eyeball &eyeball, uint32_t eyeballIdx)
+void CFlexComponent::UpdateEyeFlexes(asset::Eyeball &eyeball, uint32_t eyeballIdx)
 {
 	// TODO: Move this code to eye component
 	auto eyeC = GetEntity().GetComponent<CEyeComponent>();
@@ -136,7 +136,7 @@ void CFlexComponent::UpdateEyeFlexes()
 		UpdateEyeFlexes(eyeballs.at(eyeballIdx), eyeballIdx);
 }
 
-void CFlexComponent::OnModelChanged(const std::shared_ptr<pragma::Model> &mdl)
+void CFlexComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl)
 {
 	m_flexControllers.clear();
 	m_flexWeights.clear();
@@ -280,7 +280,7 @@ bool CFlexComponent::UpdateFlexWeight(uint32_t flexId, float &val, bool storeInC
 	}
 	return true;
 }
-void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
+void CFlexComponent::UpdateSoundPhonemes(pragma::audio::CALSound &snd)
 {
 	al::impl::BufferBase *buf = snd->GetBuffer();
 	if(buf == nullptr)

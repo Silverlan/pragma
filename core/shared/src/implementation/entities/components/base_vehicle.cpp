@@ -31,7 +31,7 @@ void BaseVehicleComponent::OnRemove()
 	}
 }
 
-void BaseVehicleComponent::InitializeVehiclePhysics(pragma::physics::PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags)
+void BaseVehicleComponent::InitializeVehiclePhysics(pragma::physics::PhysicsType type, BasePhysicsComponent::PhysFlags flags)
 {
 	auto &ent = GetEntity();
 	auto *nw = ent.GetNetworkState();
@@ -280,7 +280,7 @@ void BaseVehicleComponent::Initialize()
 		if(!pPhysComponent)
 			return util::EventReply::Unhandled;
 		auto &physInitData = static_cast<CEInitializePhysics &>(evData.get());
-		if(physInitData.physicsType != pragma::physics::PHYSICSTYPE::DYNAMIC)
+		if(physInitData.physicsType != pragma::physics::PhysicsType::Dynamic)
 			return util::EventReply::Unhandled;
 		InitializeVehiclePhysics(physInitData.physicsType, physInitData.flags);
 		return util::EventReply::Handled;

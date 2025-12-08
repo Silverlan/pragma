@@ -8,7 +8,7 @@ import :util.core;
 
 import pragma.oskit;
 
-util::ParallelJob<std::vector<Vector2> &> util::generate_lightmap_uvs(NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<umath::Vertex> &verts, const std::vector<uint32_t> &tris)
+util::ParallelJob<std::vector<Vector2> &> util::generate_lightmap_uvs(pragma::NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<umath::Vertex> &verts, const std::vector<uint32_t> &tris)
 {
 	auto lib = nwState.InitializeLibrary("pr_uvatlas");
 	if(lib == nullptr)
@@ -402,12 +402,12 @@ bool util::show_notification(const std::string &summary, const std::string &body
 	if(pragma::get_engine()->IsProgramInFocus())
 		return false;
 
-	auto iconPath = engine_info::get_icon_path();
+	auto iconPath = pragma::engine_info::get_icon_path();
 	std::string absIconPath;
 	filemanager::find_absolute_path(iconPath.GetString(), absIconPath);
 
 	pragma::oskit::NotificationInfo info {};
-	info.appName = engine_info::get_name();
+	info.appName = pragma::engine_info::get_name();
 	info.title = summary;
 	info.appIcon = absIconPath;
 	info.body = body;

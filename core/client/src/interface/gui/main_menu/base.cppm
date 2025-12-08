@@ -9,7 +9,7 @@ export module pragma.client:gui.main_menu_base;
 
 export import :gui.options_list;
 
-export {
+export namespace pragma::gui::types {
 	class WIMainMenuElement;
 	class DLLCLIENT WIMainMenuBase : public WIBase {
 	  public:
@@ -29,11 +29,11 @@ export {
 		void UpdateElements();
 		void UpdateElement(int i);
 	  protected:
-		std::vector<WIHandle> m_elements;
-		std::vector<WIHandle> m_optionLists = {};
-		WIHandle m_menuElementsContainer = {};
+		std::vector<pragma::gui::WIHandle> m_elements;
+		std::vector<pragma::gui::WIHandle> m_optionLists = {};
+		pragma::gui::WIHandle m_menuElementsContainer = {};
 		int m_selected;
-		WIHandle m_hControlSettings;
+		pragma::gui::WIHandle m_hControlSettings;
 		void OnGoBack(int button, int action, int mods);
 		virtual void InitializeOptionsList(WIOptionsList *pList);
 		WIOptionsList *InitializeOptionsList();
@@ -42,8 +42,8 @@ export {
 
 	class DLLCLIENT WIMainMenuElement : public WIBase {
 	  protected:
-		WIHandle m_hBackground;
-		WIHandle m_hText;
+		pragma::gui::WIHandle m_hBackground;
+		pragma::gui::WIHandle m_hText;
 		bool m_bSelected;
 	  public:
 		WIMainMenuElement();

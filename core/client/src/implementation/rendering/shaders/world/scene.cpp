@@ -130,12 +130,12 @@ decltype(ShaderEntity::VERTEX_BINDING_BONE_WEIGHT_EXT) ShaderEntity::VERTEX_BIND
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID = {VERTEX_BINDING_BONE_WEIGHT_EXT, prosper::Format::R32G32B32A32_SInt};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT = {VERTEX_BINDING_BONE_WEIGHT_EXT, prosper::Format::R32G32B32A32_SFloat};
 
-decltype(ShaderEntity::VERTEX_BINDING_VERTEX) ShaderEntity::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(VertexBufferData)};
+decltype(ShaderEntity::VERTEX_BINDING_VERTEX) ShaderEntity::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(pragma::rendering::VertexBufferData)};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_POSITION) ShaderEntity::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32_SFloat};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_UV) ShaderEntity::VERTEX_ATTRIBUTE_UV = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32_SFloat, offsetof(VertexBufferData, uv)};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_NORMAL) ShaderEntity::VERTEX_ATTRIBUTE_NORMAL = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32_SFloat, offsetof(VertexBufferData, normal)};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_TANGENT) ShaderEntity::VERTEX_ATTRIBUTE_TANGENT = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32_SFloat, offsetof(VertexBufferData, tangent)};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT) ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32_SFloat, offsetof(VertexBufferData, biTangent)};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_UV) ShaderEntity::VERTEX_ATTRIBUTE_UV = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32_SFloat, offsetof(pragma::rendering::VertexBufferData, uv)};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_NORMAL) ShaderEntity::VERTEX_ATTRIBUTE_NORMAL = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32_SFloat, offsetof(pragma::rendering::VertexBufferData, normal)};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_TANGENT) ShaderEntity::VERTEX_ATTRIBUTE_TANGENT = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32_SFloat, offsetof(pragma::rendering::VertexBufferData, tangent)};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT) ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32_SFloat, offsetof(pragma::rendering::VertexBufferData, biTangent)};
 
 decltype(ShaderEntity::VERTEX_BINDING_LIGHTMAP) ShaderEntity::VERTEX_BINDING_LIGHTMAP = {prosper::VertexInputRate::Vertex};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV) ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV = {VERTEX_BINDING_LIGHTMAP, prosper::Format::R32G32_SFloat};
@@ -148,7 +148,7 @@ decltype(ShaderEntity::DESCRIPTOR_SET_INSTANCE) ShaderEntity::DESCRIPTOR_SET_INS
 };
 ShaderEntity::ShaderEntity(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderSceneLit(context, identifier, vsShader, fsShader, gsShader) {}
 
-bool ShaderEntity::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
+bool ShaderEntity::GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
 {
 	auto &sceneMesh = mesh.GetSceneMesh();
 	if(sceneMesh == nullptr)
@@ -157,7 +157,7 @@ bool ShaderEntity::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipeline
 	if(indexBuffer) {
 		outIndexBufferInfo = prosper::IndexBufferInfo {};
 		outIndexBufferInfo->buffer = indexBuffer;
-		outIndexBufferInfo->indexType = (mesh.GetIndexType() == pragma::model::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
+		outIndexBufferInfo->indexType = (mesh.GetIndexType() == pragma::geometry::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
 		outIndexBufferInfo->offset = 0;
 	}
 
@@ -170,7 +170,7 @@ bool ShaderEntity::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipeline
 	outOffsets = {0ull, vertWeights.size() * sizeof(vertWeights.front()), 0ull};
 	return true;
 }
-std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(CModelSubMesh &mesh, uint32_t pipelineIdx) const
+std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx) const
 {
 	std::vector<prosper::IBuffer *> buffers;
 	std::vector<prosper::DeviceSize> offsets;

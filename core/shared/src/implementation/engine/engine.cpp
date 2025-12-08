@@ -55,19 +55,19 @@ decltype(pragma::Engine::DEFAULT_TICK_RATE) pragma::Engine::DEFAULT_TICK_RATE = 
 extern "C" {
 void DLLNETWORK RunEngine(int argc, char *argv[])
 {
-	auto en = InitializeServer(argc, argv);
+	auto en = pragma::initialize_server(argc, argv);
 	en = nullptr;
 }
 }
 
-static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &get_convar_ptrs()
+static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &get_convar_ptrs()
 {
-	static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> ptrs;
+	static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> ptrs;
 	return ptrs;
 }
 
-std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &pragma::Engine::GetConVarPtrs() { return get_convar_ptrs(); }
-ConVarHandle pragma::Engine::GetConVarHandle(std::string scvar)
+std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &pragma::Engine::GetConVarPtrs() { return get_convar_ptrs(); }
+pragma::console::ConVarHandle pragma::Engine::GetConVarHandle(std::string scvar)
 {
 	return CVarHandler::GetConVarHandle(get_convar_ptrs(), scvar);
 }
@@ -91,9 +91,9 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 		registeredGlobals = true;
 		ds::register_base_types();
 		ds::Texture::register_type();
-		register_shared_convars(*console_system::server::get_convar_map());
+		pragma::console::register_shared_convars(*pragma::console::server::get_convar_map());
 		register_launch_parameters(*GetLaunchParaMap());
-		register_net_messages();
+		pragma::networking::register_net_messages();
 	}
 
 #ifdef __linux__
@@ -344,7 +344,7 @@ void pragma::Engine::Close()
 #endif
 }
 
-static uint32_t clear_assets(NetworkState *state, pragma::asset::Type type, bool verbose)
+static uint32_t clear_assets(pragma::NetworkState *state, pragma::asset::Type type, bool verbose)
 {
 	if(!state)
 		return 0;
@@ -361,7 +361,7 @@ static uint32_t clear_assets(NetworkState *state, pragma::asset::Type type, bool
 			else {
 				auto &cache = mdlManager.GetCache();
 
-				std::unordered_map<pragma::Model *, std::string> oldCache;
+				std::unordered_map<pragma::asset::Model *, std::string> oldCache;
 				for(auto &pair : cache) {
 					auto asset = mdlManager.GetAsset(pair.second);
 					if(!asset)
@@ -371,7 +371,7 @@ static uint32_t clear_assets(NetworkState *state, pragma::asset::Type type, bool
 
 				n = mdlManager.ClearUnused();
 
-				std::unordered_map<pragma::Model *, std::string> newCache;
+				std::unordered_map<pragma::asset::Model *, std::string> newCache;
 				for(auto &pair : cache) {
 					auto asset = mdlManager.GetAsset(pair.second);
 					if(!asset)
@@ -506,7 +506,7 @@ void pragma::Engine::ClearCache()
 	Con::cout << "Cache cleared successfully! Please restart the Engine." << Con::endl;
 }
 
-NetworkState *pragma::Engine::GetServerNetworkState() const
+pragma::NetworkState *pragma::Engine::GetServerNetworkState() const
 {
 	if(m_svInstance == nullptr)
 		return nullptr;
@@ -608,14 +608,14 @@ void pragma::Engine::UpdateParallelJobs()
 	}
 }
 
-ConVarMap *pragma::Engine::GetConVarMap() { return console_system::engine::get_convar_map(); }
+pragma::console::ConVarMap *pragma::Engine::GetConVarMap() { return pragma::console::engine::get_convar_map(); }
 
 std::unique_ptr<pragma::Engine::ConVarInfoList> &pragma::Engine::GetConVarConfig(NwStateType type)
 {
 	assert(type == NwStateType::Server);
 	return m_svConfig;
 }
-pragma::Engine::StateInstance &pragma::Engine::GetStateInstance(NetworkState &nw)
+pragma::Engine::StateInstance &pragma::Engine::GetStateInstance(pragma::NetworkState &nw)
 {
 	assert(m_svInstance != nullptr);
 	return *m_svInstance;
@@ -732,7 +732,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	pragma::register_engine_animation_events();
 	pragma::register_engine_activities();
 
-	Con::set_output_callback([this](const std::string_view &output, Con::MessageFlags flags, const Color *color) {
+	Con::set_output_callback([this](const std::string_view &output, pragma::console::MessageFlags flags, const Color *color) {
 		if(m_bRecordConsoleOutput == false)
 			return;
 		m_consoleOutputMutex.lock();
@@ -759,7 +759,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	//
 
 	if(Lua::get_extended_lua_modules_enabled()) {
-		RegisterConCommand("l", [this](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run", argv); });
+		RegisterConCommand("l", [this](pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run", argv); });
 	}
 	if(!IsServerOnly())
 		LoadConfig();
@@ -893,7 +893,7 @@ Lua::Interface *pragma::Engine::GetLuaInterface(lua::State *l)
 	return nullptr;
 }
 
-NetworkState *pragma::Engine::GetNetworkState(lua::State *l)
+pragma::NetworkState *pragma::Engine::GetNetworkState(lua::State *l)
 {
 	auto *sv = GetServerNetworkState();
 	if(sv == nullptr)
@@ -963,12 +963,12 @@ std::optional<uint64_t> pragma::Engine::GetServerSteamId() const
 	return steamId;
 }
 
-static auto cvRemoteDebugging = GetConVar("sh_lua_remote_debugging");
+static auto cvRemoteDebugging = pragma::console::get_con_var("sh_lua_remote_debugging");
 int32_t pragma::Engine::GetRemoteDebugging() const { return cvRemoteDebugging->GetInt(); }
 
 extern std::string __lp_map;
 extern std::string __lp_gamemode;
-static auto cvMountExternalResources = GetConVar("sh_mount_external_game_resources");
+static auto cvMountExternalResources = pragma::console::get_con_var("sh_mount_external_game_resources");
 void pragma::Engine::Start()
 {
 	if(cvMountExternalResources->GetBool() == true)
@@ -1099,12 +1099,12 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 
 	add_zip_file(zip, "git_info.txt", "git_info.txt");
 
-	auto fWriteConvars = [&zip](const std::map<std::string, std::shared_ptr<ConConf>> &cvarMap, const std::string &fileName) {
+	auto fWriteConvars = [&zip](const std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &cvarMap, const std::string &fileName) {
 		std::stringstream convars;
 		for(auto &pair : cvarMap) {
-			if(pair.second->GetType() != ConType::Variable)
+			if(pair.second->GetType() != pragma::console::ConType::Variable)
 				continue;
-			auto *cv = static_cast<ConVar *>(pair.second.get());
+			auto *cv = static_cast<pragma::console::ConVar *>(pair.second.get());
 			if(umath::is_flag_set(cv->GetFlags(), pragma::console::ConVarFlags::Password))
 				continue; // Don't store potentially personal passwords in the crashdump
 			convars << pair.first << " \"" << cv->GetString() << "\"\n";
@@ -1151,7 +1151,7 @@ void pragma::Engine::Think()
 		sv->Think();
 }
 
-NetworkState *pragma::Engine::OpenServerState()
+pragma::NetworkState *pragma::Engine::OpenServerState()
 {
 	CloseServerState();
 	std::unique_ptr<NetworkState> svState;
@@ -1173,11 +1173,11 @@ void pragma::Engine::CloseServerState()
 	GetServerStateInterface().clear_server_state();
 }
 
-NetworkState *pragma::Engine::GetClientState() const { return nullptr; }
+pragma::NetworkState *pragma::Engine::GetClientState() const { return nullptr; }
 
-NetworkState *pragma::Engine::GetActiveState() { return GetServerNetworkState(); }
+pragma::NetworkState *pragma::Engine::GetActiveState() { return GetServerNetworkState(); }
 
-bool pragma::Engine::IsActiveState(NetworkState *state) { return state == GetActiveState(); }
+bool pragma::Engine::IsActiveState(pragma::NetworkState *state) { return state == GetActiveState(); }
 
 void pragma::Engine::AddLaunchConVar(std::string cvar, std::string val) { m_launchCommands.push_back({cvar, {val}}); }
 
@@ -1206,4 +1206,4 @@ pragma::Engine::~Engine()
 }
 
 pragma::Engine *pragma::get_engine() { return g_engine; }
-NetworkState *pragma::get_server_state() { return pragma::Engine::Get()->GetServerStateInterface().get_server_state(); }
+pragma::NetworkState *pragma::get_server_state() { return pragma::Engine::Get()->GetServerStateInterface().get_server_state(); }

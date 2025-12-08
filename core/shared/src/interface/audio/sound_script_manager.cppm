@@ -10,7 +10,7 @@ export module pragma.shared:audio.sound_script_manager;
 
 export import :audio.sound_script_events;
 
-export {
+export namespace pragma::audio {
 	class SoundScriptManager;
 	class DLLNETWORK SoundScript : public SoundScriptEventContainer {
 	  public:

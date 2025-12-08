@@ -51,11 +51,11 @@ void Lua_NetPacket_ReadLine(lua::State *l, NetPacket &packet)
 	Lua::PushString(l, r);
 }
 
-void Lua_NetPacket_WriteVector(lua::State *, NetPacket &packet, const Vector3 &v) { nwm::write_vector(packet, v); }
+void Lua_NetPacket_WriteVector(lua::State *, NetPacket &packet, const Vector3 &v) { pragma::networking::write_vector(packet, v); }
 
 void Lua_NetPacket_ReadVector(lua::State *l, NetPacket &packet)
 {
-	Vector3 v = nwm::read_vector(packet);
+	Vector3 v = pragma::networking::read_vector(packet);
 	luabind::object(l, v).push(l);
 }
 
@@ -89,27 +89,27 @@ void Lua_NetPacket_ReadVector4(lua::State *l, NetPacket &packet)
 	Lua::Push<Vector4>(l, {x, y, z, w});
 }
 
-DLLNETWORK void Lua_NetPacket_WriteAngles(lua::State *, NetPacket &packet, EulerAngles a) { nwm::write_angles(packet, a); }
+DLLNETWORK void Lua_NetPacket_WriteAngles(lua::State *, NetPacket &packet, EulerAngles a) { pragma::networking::write_angles(packet, a); }
 
 DLLNETWORK void Lua_NetPacket_ReadAngles(lua::State *l, NetPacket &packet)
 {
-	EulerAngles a = nwm::read_angles(packet);
+	EulerAngles a = pragma::networking::read_angles(packet);
 	luabind::object(l, a).push(l);
 }
 
 void Lua::NetPacket::WriteEntity(lua::State *l, ::NetPacket &packet, pragma::ecs::BaseEntity *hEnt)
 {
 	if(hEnt == nullptr)
-		nwm::write_entity(packet, static_cast<pragma::ecs::BaseEntity *>(nullptr));
+		pragma::networking::write_entity(packet, static_cast<pragma::ecs::BaseEntity *>(nullptr));
 	else
-		nwm::write_entity(packet, hEnt);
+		pragma::networking::write_entity(packet, hEnt);
 }
 
-void Lua::NetPacket::WriteEntity(lua::State *, ::NetPacket &packet) { nwm::write_entity(packet, nullptr); }
+void Lua::NetPacket::WriteEntity(lua::State *, ::NetPacket &packet) { pragma::networking::write_entity(packet, nullptr); }
 
 void Lua::NetPacket::ReadEntity(lua::State *l, ::NetPacket &packet)
 {
-	pragma::ecs::BaseEntity *ent = nwm::read_entity(packet);
+	pragma::ecs::BaseEntity *ent = pragma::networking::read_entity(packet);
 	if(ent == nullptr)
 		return;
 	ent->GetLuaObject().push(l);
@@ -118,8 +118,8 @@ void Lua::NetPacket::ReadEntity(lua::State *l, ::NetPacket &packet)
 void Lua::NetPacket::ReadALSound(lua::State *l, ::NetPacket &packet)
 {
 	unsigned int idx = packet->Read<unsigned int>();
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
-	std::shared_ptr<::ALSound> als = state->GetSoundByIndex(idx);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
+	std::shared_ptr<pragma::audio::ALSound> als = state->GetSoundByIndex(idx);
 	if(als == nullptr)
 		return;
 	luabind::object(l, als).push(l);

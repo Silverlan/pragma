@@ -15,9 +15,9 @@ export namespace pragma {
 		enum class SpawnFlags : uint32_t { DisableCollisions = 2'048, Static = DisableCollisions << 1 };
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
-		pragma::physics::PHYSICSTYPE UpdatePhysicsType(pragma::ecs::BaseEntity *ent);
-		void InitializePhysics(pragma::physics::PHYSICSTYPE physType);
-		void Setup(pragma::physics::PHYSICSTYPE physType, pragma::physics::MOVETYPE mvType);
+		pragma::physics::PhysicsType UpdatePhysicsType(pragma::ecs::BaseEntity *ent);
+		void InitializePhysics(pragma::physics::PhysicsType physType);
+		void Setup(pragma::physics::PhysicsType physType, pragma::physics::MoveType mvType);
 		virtual void OnEntitySpawn() override;
 	  protected:
 		void InitializePhysics();
@@ -26,7 +26,7 @@ export namespace pragma {
 		BasePropComponent(pragma::ecs::BaseEntity &ent);
 		bool SetKeyValue(std::string key, std::string val);
 
-		pragma::physics::PHYSICSTYPE m_physicsType = pragma::physics::PHYSICSTYPE::NONE;
-		pragma::physics::MOVETYPE m_moveType = pragma::physics::MOVETYPE::NONE;
+		pragma::physics::PhysicsType m_physicsType = pragma::physics::PhysicsType::None;
+		pragma::physics::MoveType m_moveType = pragma::physics::MoveType::None;
 	};
 };

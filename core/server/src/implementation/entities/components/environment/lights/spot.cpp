@@ -34,7 +34,7 @@ void SLightSpotComponent::SetOuterConeAngle(float ang)
 	if(!ent.IsSpawned())
 		return;
 	NetPacket p;
-	nwm::write_entity(p, &ent);
+	pragma::networking::write_entity(p, &ent);
 	p->Write<float>(ang);
 	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENV_LIGHT_SPOT_OUTERCUTOFF_ANGLE, p, pragma::networking::Protocol::SlowReliable);
 }
@@ -46,7 +46,7 @@ void SLightSpotComponent::SetBlendFraction(float ang)
 	if(!ent.IsSpawned())
 		return;
 	NetPacket p;
-	nwm::write_entity(p, &ent);
+	pragma::networking::write_entity(p, &ent);
 	p->Write<float>(ang);
 	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENV_LIGHT_SPOT_INNERCUTOFF_ANGLE, p, pragma::networking::Protocol::SlowReliable);
 }

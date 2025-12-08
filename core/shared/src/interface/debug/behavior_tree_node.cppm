@@ -8,7 +8,7 @@ export module pragma.shared:debug.behavior_tree_node;
 
 export import std.compat;
 
-export {
+export namespace pragma::debug {
 	struct DLLNETWORK DebugBehaviorTreeNode {
 		enum class DLLNETWORK State : uint32_t { Initial = std::numeric_limits<std::underlying_type_t<State>>::max(), Invalid = Initial - 1, Pending = 0, Failed, Succeeded };
 		enum class DLLNETWORK BehaviorNodeType : uint32_t { Selector = 0, Sequence };
@@ -24,7 +24,9 @@ export {
 		State state = State::Pending;
 		std::vector<std::shared_ptr<DebugBehaviorTreeNode>> children;
 	};
-
-	DLLNETWORK bool operator==(const DebugBehaviorTreeNode &a, const DebugBehaviorTreeNode &b);
-	DLLNETWORK bool operator!=(const DebugBehaviorTreeNode &a, const DebugBehaviorTreeNode &b);
 };
+
+export {
+	DLLNETWORK bool operator==(const pragma::debug::DebugBehaviorTreeNode &a, const pragma::debug::DebugBehaviorTreeNode &b);
+	DLLNETWORK bool operator!=(const pragma::debug::DebugBehaviorTreeNode &a, const pragma::debug::DebugBehaviorTreeNode &b);
+}

@@ -56,7 +56,7 @@ void CFogControllerComponent::ReceiveData(NetPacket &packet)
 	m_kvFogEnd = packet->Read<float>();
 	m_kvMaxDensity = packet->Read<float>();
 }
-WorldEnvironment::Fog &CFogControllerComponent::GetFog()
+pragma::rendering::WorldEnvironment::Fog &CFogControllerComponent::GetFog()
 {
 	auto &worldEnv = pragma::get_cgame()->GetWorldEnvironment();
 	return worldEnv.GetFogSettings();

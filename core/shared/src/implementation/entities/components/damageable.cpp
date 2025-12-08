@@ -20,14 +20,14 @@ void DamageableComponent::Initialize()
 
 void DamageableComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void DamageableComponent::OnTakeDamage(DamageInfo &info) {}
+void DamageableComponent::OnTakeDamage(game::DamageInfo &info) {}
 
-void DamageableComponent::TakeDamage(DamageInfo &info)
+void DamageableComponent::TakeDamage(game::DamageInfo &info)
 {
 	auto &ent = GetEntity();
 	auto *state = ent.GetNetworkState();
 	auto *game = state->GetGameState();
-	game->CallCallbacks<void, pragma::ecs::BaseEntity *, std::reference_wrapper<DamageInfo>>("OnEntityTakeDamage", &ent, std::ref<DamageInfo>(info));
+	game->CallCallbacks<void, pragma::ecs::BaseEntity *, std::reference_wrapper<game::DamageInfo>>("OnEntityTakeDamage", &ent, std::ref<game::DamageInfo>(info));
 	OnTakeDamage(info);
 
 	CEOnTakeDamage takeDmgInfo {info};
@@ -36,5 +36,5 @@ void DamageableComponent::TakeDamage(DamageInfo &info)
 
 //////////////
 
-CEOnTakeDamage::CEOnTakeDamage(DamageInfo &damageInfo) : damageInfo {damageInfo} {}
-void CEOnTakeDamage::PushArguments(lua::State *l) { Lua::Push<DamageInfo *>(l, &damageInfo); }
+CEOnTakeDamage::CEOnTakeDamage(game::DamageInfo &damageInfo) : damageInfo {damageInfo} {}
+void CEOnTakeDamage::PushArguments(lua::State *l) { Lua::Push<game::DamageInfo *>(l, &damageInfo); }

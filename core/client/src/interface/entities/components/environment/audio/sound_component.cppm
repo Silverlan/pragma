@@ -26,11 +26,11 @@ export namespace pragma {
 #endif
 	  protected:
 		float m_kvMaxDistance = 0.f;
-		std::weak_ptr<ALSound> m_wpSound = {};
+		std::weak_ptr<pragma::audio::ALSound> m_wpSound = {};
 	};
 };
 
-export class DLLCLIENT CEnvSound : public CBaseEntity {
+export class DLLCLIENT CEnvSound : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

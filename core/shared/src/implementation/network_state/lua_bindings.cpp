@@ -12,21 +12,21 @@ module pragma.shared;
 import :network_state;
 import pragma.string.unicode;
 
-std::ostream &operator<<(std::ostream &out, const ALSound &snd)
+std::ostream &operator<<(std::ostream &out, const pragma::audio::ALSound &snd)
 {
 	auto state = snd.GetState();
 	out << "ALSound[" << snd.GetIndex() << "][";
 	switch(state) {
-	case ALState::Initial:
+	case pragma::audio::ALState::Initial:
 		out << "Initial";
 		break;
-	case ALState::Playing:
+	case pragma::audio::ALState::Playing:
 		out << "Playing";
 		break;
-	case ALState::Paused:
+	case pragma::audio::ALState::Paused:
 		out << "Paused";
 		break;
-	case ALState::Stopped:
+	case pragma::audio::ALState::Stopped:
 		out << "Stopped";
 		break;
 	}
@@ -327,7 +327,7 @@ void glm_type_to_string(lua::State *l, const T &v) {
 	Lua::PushString(l, ss.str());
 }
 
-void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
+void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
 	auto modString = luabind::module_(lua.GetState(), "string");
 	register_utf8_string(lua.GetState(), modString);
@@ -942,18 +942,18 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	Lua::RegisterLibraryValues<umath::ScaledTransform>(lua.GetState(), "math.ScaledTransform", {std::pair<std::string, umath::ScaledTransform> {"IDENTITY", umath::ScaledTransform {}}});
 
 	// PID Controller
-	auto defPIDController = luabind::class_<util::PIDController>("PIDController");
+	auto defPIDController = luabind::class_<pragma::math::PIDController>("PIDController");
 	defPIDController.def(luabind::constructor<>());
 	defPIDController.def(luabind::constructor<float, float, float>());
 	defPIDController.def(luabind::constructor<float, float, float, float, float>());
-	defPIDController.def("SetProportionalTerm", &util::PIDController::SetProportionalTerm);
-	defPIDController.def("SetIntegralTerm", &util::PIDController::SetIntegralTerm);
-	defPIDController.def("SetDerivativeTerm", &util::PIDController::SetDerivativeTerm);
-	defPIDController.def("SetTerms", &util::PIDController::SetTerms);
-	defPIDController.def("GetProportionalTerm", &util::PIDController::GetProportionalTerm);
-	defPIDController.def("GetIntegralTerm", &util::PIDController::GetIntegralTerm);
-	defPIDController.def("GetDerivativeTerm", &util::PIDController::GetDerivativeTerm);
-	defPIDController.def("GetTerms", static_cast<void (*)(lua::State *, const util::PIDController &)>([](lua::State *l, const util::PIDController &pidController) {
+	defPIDController.def("SetProportionalTerm", &pragma::math::PIDController::SetProportionalTerm);
+	defPIDController.def("SetIntegralTerm", &pragma::math::PIDController::SetIntegralTerm);
+	defPIDController.def("SetDerivativeTerm", &pragma::math::PIDController::SetDerivativeTerm);
+	defPIDController.def("SetTerms", &pragma::math::PIDController::SetTerms);
+	defPIDController.def("GetProportionalTerm", &pragma::math::PIDController::GetProportionalTerm);
+	defPIDController.def("GetIntegralTerm", &pragma::math::PIDController::GetIntegralTerm);
+	defPIDController.def("GetDerivativeTerm", &pragma::math::PIDController::GetDerivativeTerm);
+	defPIDController.def("GetTerms", static_cast<void (*)(lua::State *, const pragma::math::PIDController &)>([](lua::State *l, const pragma::math::PIDController &pidController) {
 		auto p = 0.f;
 		auto i = 0.f;
 		auto d = 0.f;
@@ -962,17 +962,17 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushNumber(l, i);
 		Lua::PushNumber(l, d);
 	}));
-	defPIDController.def("SetRange", &util::PIDController::SetRange);
-	defPIDController.def("GetRange", static_cast<void (*)(lua::State *, const util::PIDController &)>([](lua::State *l, const util::PIDController &pidController) {
+	defPIDController.def("SetRange", &pragma::math::PIDController::SetRange);
+	defPIDController.def("GetRange", static_cast<void (*)(lua::State *, const pragma::math::PIDController &)>([](lua::State *l, const pragma::math::PIDController &pidController) {
 		auto range = pidController.GetRange();
 		Lua::PushNumber(l, range.first);
 		Lua::PushNumber(l, range.second);
 	}));
-	defPIDController.def("Calculate", &util::PIDController::Calculate);
-	defPIDController.def("Reset", &util::PIDController::Reset);
-	defPIDController.def("ClearRange", &util::PIDController::ClearRange);
-	defPIDController.def("SetMin", &util::PIDController::SetMin);
-	defPIDController.def("SetMax", &util::PIDController::SetMax);
+	defPIDController.def("Calculate", &pragma::math::PIDController::Calculate);
+	defPIDController.def("Reset", &pragma::math::PIDController::Reset);
+	defPIDController.def("ClearRange", &pragma::math::PIDController::ClearRange);
+	defPIDController.def("SetMin", &pragma::math::PIDController::SetMin);
+	defPIDController.def("SetMax", &pragma::math::PIDController::SetMax);
 	modMath[defPIDController];
 
 	// Noise
@@ -1466,7 +1466,7 @@ namespace pragma::LuaCore {
 
 void pragma::Game::RegisterLuaClasses()
 {
-	NetworkState::RegisterSharedLuaClasses(GetLuaInterface());
+	pragma::NetworkState::RegisterSharedLuaClasses(GetLuaInterface());
 
 	// Entity
 	auto &modUtil = GetLuaInterface().RegisterLibrary("util");
@@ -1488,7 +1488,7 @@ void pragma::Game::RegisterLuaClasses()
 	  static_cast<void (*)(lua::State *, util::SplashDamageInfo &, const Vector3 &, float)>([](lua::State *l, util::SplashDamageInfo &splashDamageInfo, const Vector3 &coneDirection, float coneAngle) { splashDamageInfo.cone = {{coneDirection, coneAngle}}; }));
 	defSplashDamageInfo.def("SetCallback", static_cast<void (*)(lua::State *, util::SplashDamageInfo &, luabind::object)>([](lua::State *l, util::SplashDamageInfo &splashDamageInfo, luabind::object oCallback) {
 		Lua::CheckFunction(l, 2);
-		splashDamageInfo.callback = [l, oCallback](pragma::ecs::BaseEntity *ent, DamageInfo &dmgInfo) -> bool {
+		splashDamageInfo.callback = [l, oCallback](pragma::ecs::BaseEntity *ent, game::DamageInfo &dmgInfo) -> bool {
 			auto r = Lua::CallFunction(
 			  l,
 			  [ent, &dmgInfo, &oCallback](lua::State *l) -> Lua::StatusCode {
@@ -1497,7 +1497,7 @@ void pragma::Game::RegisterLuaClasses()
 					  ent->GetLuaObject().push(l);
 				  else
 					  Lua::PushNil(l);
-				  Lua::Push<DamageInfo *>(l, &dmgInfo);
+				  Lua::Push<game::DamageInfo *>(l, &dmgInfo);
 				  return Lua::StatusCode::Ok;
 			  },
 			  1);
@@ -1815,67 +1815,67 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	    {"TICK_POLICY_WHEN_VISIBLE", umath::to_integral(pragma::TickPolicy::WhenVisible)},
 	  });
 
-	auto surfaceMatDef = pragma::LuaCore::register_class<SurfaceMaterial>(GetLuaState(), "SurfaceMaterial");
-	surfaceMatDef->def("GetName", &::SurfaceMaterial::GetIdentifier);
-	surfaceMatDef->def("GetIndex", &::SurfaceMaterial::GetIndex);
-	surfaceMatDef->def("SetFriction", &::SurfaceMaterial::SetFriction);
-	surfaceMatDef->def("SetStaticFriction", &::SurfaceMaterial::SetStaticFriction);
-	surfaceMatDef->def("SetDynamicFriction", &::SurfaceMaterial::SetDynamicFriction);
-	surfaceMatDef->def("GetStaticFriction", &::SurfaceMaterial::GetStaticFriction);
-	surfaceMatDef->def("GetDynamicFriction", &::SurfaceMaterial::GetDynamicFriction);
-	surfaceMatDef->def("GetRestitution", &::SurfaceMaterial::GetRestitution);
-	surfaceMatDef->def("SetRestitution", &::SurfaceMaterial::SetRestitution);
-	surfaceMatDef->def("GetFootstepSound", &::SurfaceMaterial::GetFootstepType);
-	surfaceMatDef->def("SetFootstepSound", &::SurfaceMaterial::SetFootstepType);
-	surfaceMatDef->def("SetImpactParticleEffect", &::SurfaceMaterial::SetImpactParticleEffect);
-	surfaceMatDef->def("GetImpactParticleEffect", &::SurfaceMaterial::GetImpactParticleEffect);
-	surfaceMatDef->def("GetBulletImpactSound", &::SurfaceMaterial::GetBulletImpactSound);
-	surfaceMatDef->def("SetBulletImpactSound", &::SurfaceMaterial::SetBulletImpactSound);
-	surfaceMatDef->def("SetHardImpactSound", &::SurfaceMaterial::SetHardImpactSound);
-	surfaceMatDef->def("GetHardImpactSound", &::SurfaceMaterial::GetHardImpactSound);
-	surfaceMatDef->def("SetSoftImpactSound", &::SurfaceMaterial::SetSoftImpactSound);
-	surfaceMatDef->def("GetSoftImpactSound", &::SurfaceMaterial::GetSoftImpactSound);
-	surfaceMatDef->def("GetIOR", &::SurfaceMaterial::GetIOR);
-	surfaceMatDef->def("SetIOR", &::SurfaceMaterial::SetIOR);
-	surfaceMatDef->def("ClearIOR", &::SurfaceMaterial::ClearIOR);
+	auto surfaceMatDef = pragma::LuaCore::register_class<pragma::physics::SurfaceMaterial>(GetLuaState(), "SurfaceMaterial");
+	surfaceMatDef->def("GetName", &pragma::physics::SurfaceMaterial::GetIdentifier);
+	surfaceMatDef->def("GetIndex", &pragma::physics::SurfaceMaterial::GetIndex);
+	surfaceMatDef->def("SetFriction", &pragma::physics::SurfaceMaterial::SetFriction);
+	surfaceMatDef->def("SetStaticFriction", &pragma::physics::SurfaceMaterial::SetStaticFriction);
+	surfaceMatDef->def("SetDynamicFriction", &pragma::physics::SurfaceMaterial::SetDynamicFriction);
+	surfaceMatDef->def("GetStaticFriction", &pragma::physics::SurfaceMaterial::GetStaticFriction);
+	surfaceMatDef->def("GetDynamicFriction", &pragma::physics::SurfaceMaterial::GetDynamicFriction);
+	surfaceMatDef->def("GetRestitution", &pragma::physics::SurfaceMaterial::GetRestitution);
+	surfaceMatDef->def("SetRestitution", &pragma::physics::SurfaceMaterial::SetRestitution);
+	surfaceMatDef->def("GetFootstepSound", &pragma::physics::SurfaceMaterial::GetFootstepType);
+	surfaceMatDef->def("SetFootstepSound", &pragma::physics::SurfaceMaterial::SetFootstepType);
+	surfaceMatDef->def("SetImpactParticleEffect", &pragma::physics::SurfaceMaterial::SetImpactParticleEffect);
+	surfaceMatDef->def("GetImpactParticleEffect", &pragma::physics::SurfaceMaterial::GetImpactParticleEffect);
+	surfaceMatDef->def("GetBulletImpactSound", &pragma::physics::SurfaceMaterial::GetBulletImpactSound);
+	surfaceMatDef->def("SetBulletImpactSound", &pragma::physics::SurfaceMaterial::SetBulletImpactSound);
+	surfaceMatDef->def("SetHardImpactSound", &pragma::physics::SurfaceMaterial::SetHardImpactSound);
+	surfaceMatDef->def("GetHardImpactSound", &pragma::physics::SurfaceMaterial::GetHardImpactSound);
+	surfaceMatDef->def("SetSoftImpactSound", &pragma::physics::SurfaceMaterial::SetSoftImpactSound);
+	surfaceMatDef->def("GetSoftImpactSound", &pragma::physics::SurfaceMaterial::GetSoftImpactSound);
+	surfaceMatDef->def("GetIOR", &pragma::physics::SurfaceMaterial::GetIOR);
+	surfaceMatDef->def("SetIOR", &pragma::physics::SurfaceMaterial::SetIOR);
+	surfaceMatDef->def("ClearIOR", &pragma::physics::SurfaceMaterial::ClearIOR);
 
-	surfaceMatDef->def("SetAudioLowFrequencyAbsorption", &::SurfaceMaterial::SetAudioLowFrequencyAbsorption);
-	surfaceMatDef->def("GetAudioLowFrequencyAbsorption", &::SurfaceMaterial::GetAudioLowFrequencyAbsorption);
-	surfaceMatDef->def("SetAudioMidFrequencyAbsorption", &::SurfaceMaterial::SetAudioMidFrequencyAbsorption);
-	surfaceMatDef->def("GetAudioMidFrequencyAbsorption", &::SurfaceMaterial::GetAudioMidFrequencyAbsorption);
-	surfaceMatDef->def("SetAudioHighFrequencyAbsorption", &::SurfaceMaterial::SetAudioHighFrequencyAbsorption);
-	surfaceMatDef->def("GetAudioHighFrequencyAbsorption", &::SurfaceMaterial::GetAudioHighFrequencyAbsorption);
-	surfaceMatDef->def("SetAudioScattering", &::SurfaceMaterial::SetAudioScattering);
-	surfaceMatDef->def("GetAudioScattering", &::SurfaceMaterial::GetAudioScattering);
-	surfaceMatDef->def("SetAudioLowFrequencyTransmission", &::SurfaceMaterial::SetAudioLowFrequencyTransmission);
-	surfaceMatDef->def("GetAudioLowFrequencyTransmission", &::SurfaceMaterial::GetAudioLowFrequencyTransmission);
-	surfaceMatDef->def("SetAudioMidFrequencyTransmission", &::SurfaceMaterial::SetAudioMidFrequencyTransmission);
-	surfaceMatDef->def("GetAudioMidFrequencyTransmission", &::SurfaceMaterial::GetAudioMidFrequencyTransmission);
-	surfaceMatDef->def("SetAudioHighFrequencyTransmission", &::SurfaceMaterial::SetAudioHighFrequencyTransmission);
-	surfaceMatDef->def("GetAudioHighFrequencyTransmission", &::SurfaceMaterial::GetAudioHighFrequencyTransmission);
+	surfaceMatDef->def("SetAudioLowFrequencyAbsorption", &pragma::physics::SurfaceMaterial::SetAudioLowFrequencyAbsorption);
+	surfaceMatDef->def("GetAudioLowFrequencyAbsorption", &pragma::physics::SurfaceMaterial::GetAudioLowFrequencyAbsorption);
+	surfaceMatDef->def("SetAudioMidFrequencyAbsorption", &pragma::physics::SurfaceMaterial::SetAudioMidFrequencyAbsorption);
+	surfaceMatDef->def("GetAudioMidFrequencyAbsorption", &pragma::physics::SurfaceMaterial::GetAudioMidFrequencyAbsorption);
+	surfaceMatDef->def("SetAudioHighFrequencyAbsorption", &pragma::physics::SurfaceMaterial::SetAudioHighFrequencyAbsorption);
+	surfaceMatDef->def("GetAudioHighFrequencyAbsorption", &pragma::physics::SurfaceMaterial::GetAudioHighFrequencyAbsorption);
+	surfaceMatDef->def("SetAudioScattering", &pragma::physics::SurfaceMaterial::SetAudioScattering);
+	surfaceMatDef->def("GetAudioScattering", &pragma::physics::SurfaceMaterial::GetAudioScattering);
+	surfaceMatDef->def("SetAudioLowFrequencyTransmission", &pragma::physics::SurfaceMaterial::SetAudioLowFrequencyTransmission);
+	surfaceMatDef->def("GetAudioLowFrequencyTransmission", &pragma::physics::SurfaceMaterial::GetAudioLowFrequencyTransmission);
+	surfaceMatDef->def("SetAudioMidFrequencyTransmission", &pragma::physics::SurfaceMaterial::SetAudioMidFrequencyTransmission);
+	surfaceMatDef->def("GetAudioMidFrequencyTransmission", &pragma::physics::SurfaceMaterial::GetAudioMidFrequencyTransmission);
+	surfaceMatDef->def("SetAudioHighFrequencyTransmission", &pragma::physics::SurfaceMaterial::SetAudioHighFrequencyTransmission);
+	surfaceMatDef->def("GetAudioHighFrequencyTransmission", &pragma::physics::SurfaceMaterial::GetAudioHighFrequencyTransmission);
 
-	surfaceMatDef->def("GetNavigationFlags", &::SurfaceMaterial::GetNavigationFlags);
-	surfaceMatDef->def("SetNavigationFlags", &::SurfaceMaterial::SetNavigationFlags);
-	surfaceMatDef->def("SetDensity", &::SurfaceMaterial::SetDensity);
-	surfaceMatDef->def("GetDensity", &::SurfaceMaterial::GetDensity);
-	surfaceMatDef->def("SetLinearDragCoefficient", &::SurfaceMaterial::SetLinearDragCoefficient);
-	surfaceMatDef->def("GetLinearDragCoefficient", &::SurfaceMaterial::GetLinearDragCoefficient);
-	surfaceMatDef->def("SetTorqueDragCoefficient", &::SurfaceMaterial::SetTorqueDragCoefficient);
-	surfaceMatDef->def("GetTorqueDragCoefficient", &::SurfaceMaterial::GetTorqueDragCoefficient);
-	surfaceMatDef->def("SetWaveStiffness", &::SurfaceMaterial::SetWaveStiffness);
-	surfaceMatDef->def("GetWaveStiffness", &::SurfaceMaterial::GetWaveStiffness);
-	surfaceMatDef->def("SetWavePropagation", &::SurfaceMaterial::SetWavePropagation);
-	surfaceMatDef->def("GetWavePropagation", &::SurfaceMaterial::GetWavePropagation);
-	surfaceMatDef->def("GetPBRMetalness", static_cast<float (*)(lua::State *, SurfaceMaterial &)>([](lua::State *l, SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().metalness; }));
-	surfaceMatDef->def("GetPBRRoughness", static_cast<float (*)(lua::State *, SurfaceMaterial &)>([](lua::State *l, SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().roughness; }));
-	surfaceMatDef->def("GetSubsurfaceFactor", static_cast<float (*)(lua::State *, SurfaceMaterial &)>([](lua::State *l, SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.factor; }));
-	surfaceMatDef->def("SetSubsurfaceFactor", static_cast<void (*)(lua::State *, SurfaceMaterial &, float)>([](lua::State *l, SurfaceMaterial &surfMat, float factor) { surfMat.GetPBRInfo().subsurface.factor = factor; }));
-	surfaceMatDef->def("GetSubsurfaceScatterColor", static_cast<Vector3 (*)(lua::State *, SurfaceMaterial &)>([](lua::State *l, SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.scatterColor; }));
-	surfaceMatDef->def("SetSubsurfaceScatterColor", static_cast<void (*)(lua::State *, SurfaceMaterial &, const Vector3 &)>([](lua::State *l, SurfaceMaterial &surfMat, const Vector3 &radiusRGB) { surfMat.GetPBRInfo().subsurface.scatterColor = radiusRGB; }));
-	surfaceMatDef->def("GetSubsurfaceRadiusMM", static_cast<Vector3 (*)(lua::State *, SurfaceMaterial &)>([](lua::State *l, SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.radiusMM; }));
-	surfaceMatDef->def("SetSubsurfaceRadiusMM", static_cast<void (*)(lua::State *, SurfaceMaterial &, const Vector3 &)>([](lua::State *l, SurfaceMaterial &surfMat, const Vector3 &radiusMM) { surfMat.GetPBRInfo().subsurface.radiusMM = radiusMM; }));
-	surfaceMatDef->def("GetSubsurfaceColor", static_cast<Color (*)(lua::State *, SurfaceMaterial &)>([](lua::State *l, SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.color; }));
-	surfaceMatDef->def("SetSubsurfaceColor", static_cast<void (*)(lua::State *, SurfaceMaterial &, const Color &)>([](lua::State *l, SurfaceMaterial &surfMat, const Color &color) { surfMat.GetPBRInfo().subsurface.color = color; }));
+	surfaceMatDef->def("GetNavigationFlags", &pragma::physics::SurfaceMaterial::GetNavigationFlags);
+	surfaceMatDef->def("SetNavigationFlags", &pragma::physics::SurfaceMaterial::SetNavigationFlags);
+	surfaceMatDef->def("SetDensity", &pragma::physics::SurfaceMaterial::SetDensity);
+	surfaceMatDef->def("GetDensity", &pragma::physics::SurfaceMaterial::GetDensity);
+	surfaceMatDef->def("SetLinearDragCoefficient", &pragma::physics::SurfaceMaterial::SetLinearDragCoefficient);
+	surfaceMatDef->def("GetLinearDragCoefficient", &pragma::physics::SurfaceMaterial::GetLinearDragCoefficient);
+	surfaceMatDef->def("SetTorqueDragCoefficient", &pragma::physics::SurfaceMaterial::SetTorqueDragCoefficient);
+	surfaceMatDef->def("GetTorqueDragCoefficient", &pragma::physics::SurfaceMaterial::GetTorqueDragCoefficient);
+	surfaceMatDef->def("SetWaveStiffness", &pragma::physics::SurfaceMaterial::SetWaveStiffness);
+	surfaceMatDef->def("GetWaveStiffness", &pragma::physics::SurfaceMaterial::GetWaveStiffness);
+	surfaceMatDef->def("SetWavePropagation", &pragma::physics::SurfaceMaterial::SetWavePropagation);
+	surfaceMatDef->def("GetWavePropagation", &pragma::physics::SurfaceMaterial::GetWavePropagation);
+	surfaceMatDef->def("GetPBRMetalness", static_cast<float (*)(lua::State *, pragma::physics::SurfaceMaterial &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().metalness; }));
+	surfaceMatDef->def("GetPBRRoughness", static_cast<float (*)(lua::State *, pragma::physics::SurfaceMaterial &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().roughness; }));
+	surfaceMatDef->def("GetSubsurfaceFactor", static_cast<float (*)(lua::State *, pragma::physics::SurfaceMaterial &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.factor; }));
+	surfaceMatDef->def("SetSubsurfaceFactor", static_cast<void (*)(lua::State *, pragma::physics::SurfaceMaterial &, float)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat, float factor) { surfMat.GetPBRInfo().subsurface.factor = factor; }));
+	surfaceMatDef->def("GetSubsurfaceScatterColor", static_cast<Vector3 (*)(lua::State *, pragma::physics::SurfaceMaterial &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.scatterColor; }));
+	surfaceMatDef->def("SetSubsurfaceScatterColor", static_cast<void (*)(lua::State *, pragma::physics::SurfaceMaterial &, const Vector3 &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat, const Vector3 &radiusRGB) { surfMat.GetPBRInfo().subsurface.scatterColor = radiusRGB; }));
+	surfaceMatDef->def("GetSubsurfaceRadiusMM", static_cast<Vector3 (*)(lua::State *, pragma::physics::SurfaceMaterial &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.radiusMM; }));
+	surfaceMatDef->def("SetSubsurfaceRadiusMM", static_cast<void (*)(lua::State *, pragma::physics::SurfaceMaterial &, const Vector3 &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat, const Vector3 &radiusMM) { surfMat.GetPBRInfo().subsurface.radiusMM = radiusMM; }));
+	surfaceMatDef->def("GetSubsurfaceColor", static_cast<Color (*)(lua::State *, pragma::physics::SurfaceMaterial &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.color; }));
+	surfaceMatDef->def("SetSubsurfaceColor", static_cast<void (*)(lua::State *, pragma::physics::SurfaceMaterial &, const Color &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat, const Color &color) { surfMat.GetPBRInfo().subsurface.color = color; }));
 	gameMod[*surfaceMatDef];
 
 	auto gibletCreateInfo = luabind::class_<GibletCreateInfo>("GibletCreateInfo");
@@ -1904,30 +1904,30 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 	Lua::register_bullet_info(gameMod);
 
-	auto classDefDamageInfo = luabind::class_<DamageInfo>("DamageInfo");
+	auto classDefDamageInfo = luabind::class_<game::DamageInfo>("DamageInfo");
 	classDefDamageInfo.def(luabind::constructor<>());
 	classDefDamageInfo.def(luabind::tostring(luabind::self));
-	classDefDamageInfo.def("SetDamage", &::DamageInfo::SetDamage);
-	classDefDamageInfo.def("AddDamage", &::DamageInfo::AddDamage);
-	classDefDamageInfo.def("ScaleDamage", &::DamageInfo::ScaleDamage);
-	classDefDamageInfo.def("GetDamage", &::DamageInfo::GetDamage);
-	classDefDamageInfo.def("GetAttacker", &::DamageInfo::GetAttacker);
-	classDefDamageInfo.def("SetAttacker", static_cast<void (::DamageInfo::*)(const pragma::ecs::BaseEntity *)>(&::DamageInfo::SetAttacker));
-	classDefDamageInfo.def("GetInflictor", &::DamageInfo::GetInflictor);
-	classDefDamageInfo.def("SetInflictor", static_cast<void (::DamageInfo::*)(const pragma::ecs::BaseEntity *)>(&::DamageInfo::SetInflictor));
-	classDefDamageInfo.def("GetDamageTypes", &::DamageInfo::GetDamageTypes);
-	classDefDamageInfo.def("SetDamageType", &::DamageInfo::SetDamageType);
-	classDefDamageInfo.def("AddDamageType", &::DamageInfo::AddDamageType);
-	classDefDamageInfo.def("RemoveDamageType", &::DamageInfo::RemoveDamageType);
-	classDefDamageInfo.def("IsDamageType", &::DamageInfo::IsDamageType);
-	classDefDamageInfo.def("SetSource", &::DamageInfo::SetSource);
-	classDefDamageInfo.def("GetSource", &::DamageInfo::GetSource, luabind::copy_policy<0> {});
-	classDefDamageInfo.def("SetHitPosition", &::DamageInfo::SetHitPosition);
-	classDefDamageInfo.def("GetHitPosition", &::DamageInfo::GetHitPosition, luabind::copy_policy<0> {});
-	classDefDamageInfo.def("SetForce", &::DamageInfo::SetForce);
-	classDefDamageInfo.def("GetForce", &::DamageInfo::GetForce, luabind::copy_policy<0> {});
-	classDefDamageInfo.def("GetHitGroup", &::DamageInfo::GetHitGroup);
-	classDefDamageInfo.def("SetHitGroup", &::DamageInfo::SetHitGroup);
+	classDefDamageInfo.def("SetDamage", &game::DamageInfo::SetDamage);
+	classDefDamageInfo.def("AddDamage", &game::DamageInfo::AddDamage);
+	classDefDamageInfo.def("ScaleDamage", &game::DamageInfo::ScaleDamage);
+	classDefDamageInfo.def("GetDamage", &game::DamageInfo::GetDamage);
+	classDefDamageInfo.def("GetAttacker", &game::DamageInfo::GetAttacker);
+	classDefDamageInfo.def("SetAttacker", static_cast<void (game::DamageInfo::*)(const pragma::ecs::BaseEntity *)>(&game::DamageInfo::SetAttacker));
+	classDefDamageInfo.def("GetInflictor", &game::DamageInfo::GetInflictor);
+	classDefDamageInfo.def("SetInflictor", static_cast<void (game::DamageInfo::*)(const pragma::ecs::BaseEntity *)>(&game::DamageInfo::SetInflictor));
+	classDefDamageInfo.def("GetDamageTypes", &game::DamageInfo::GetDamageTypes);
+	classDefDamageInfo.def("SetDamageType", &game::DamageInfo::SetDamageType);
+	classDefDamageInfo.def("AddDamageType", &game::DamageInfo::AddDamageType);
+	classDefDamageInfo.def("RemoveDamageType", &game::DamageInfo::RemoveDamageType);
+	classDefDamageInfo.def("IsDamageType", &game::DamageInfo::IsDamageType);
+	classDefDamageInfo.def("SetSource", &game::DamageInfo::SetSource);
+	classDefDamageInfo.def("GetSource", &game::DamageInfo::GetSource, luabind::copy_policy<0> {});
+	classDefDamageInfo.def("SetHitPosition", &game::DamageInfo::SetHitPosition);
+	classDefDamageInfo.def("GetHitPosition", &game::DamageInfo::GetHitPosition, luabind::copy_policy<0> {});
+	classDefDamageInfo.def("SetForce", &game::DamageInfo::SetForce);
+	classDefDamageInfo.def("GetForce", &game::DamageInfo::GetForce, luabind::copy_policy<0> {});
+	classDefDamageInfo.def("GetHitGroup", &game::DamageInfo::GetHitGroup);
+	classDefDamageInfo.def("SetHitGroup", &game::DamageInfo::SetHitGroup);
 	gameMod[classDefDamageInfo];
 }
 

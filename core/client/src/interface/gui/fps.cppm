@@ -8,10 +8,10 @@ export module pragma.client:gui.fps;
 
 export import pragma.gui;
 
-export {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIFPS : public WIBase {
 	  private:
-		WIHandle m_text;
+		pragma::gui::WIHandle m_text;
 		uint32_t m_fpsLast;
 		double m_tLastUpdate;
 	  public:

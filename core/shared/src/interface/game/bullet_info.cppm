@@ -9,7 +9,7 @@ export module pragma.shared:game.bullet_info;
 export import :entities.base_entity_handle;
 import :game.enums;
 
-export {
+export namespace pragma::game {
 	namespace bulletInfo {
 		CONSTEXPR_DLL_COMPAT float DEFAULT_TRACER_RADIUS = 1.f;
 		CONSTEXPR_DLL_COMPAT Color DEFAULT_TRACER_COLOR = Color(510, 510, 180, 510);
@@ -25,7 +25,7 @@ export {
 		Vector3 direction = {}; // Not used for Entity::FireBullets
 		Vector3 effectOrigin = {std::numeric_limits<float>::signaling_NaN(), std::numeric_limits<float>::signaling_NaN(), std::numeric_limits<float>::signaling_NaN()};
 		uint32_t damage = std::numeric_limits<uint32_t>::max();
-		DAMAGETYPE damageType = static_cast<DAMAGETYPE>(std::numeric_limits<std::underlying_type_t<DAMAGETYPE>>::max());
+		DamageType damageType = static_cast<DamageType>(std::numeric_limits<std::underlying_type_t<DamageType>>::max());
 		uint32_t bulletCount = 1;
 		EntityHandle hAttacker = {};
 		EntityHandle hInflictor = {};

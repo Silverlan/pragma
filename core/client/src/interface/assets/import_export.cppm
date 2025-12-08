@@ -67,12 +67,12 @@ export namespace pragma::asset {
 		bool greyScaleMap = false;
 	};
 
-	DLLCLIENT std::shared_ptr<pragma::Model> import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = true);
-	DLLCLIENT std::shared_ptr<pragma::Model> import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = true);
+	DLLCLIENT std::shared_ptr<pragma::asset::Model> import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = true);
+	DLLCLIENT std::shared_ptr<pragma::asset::Model> import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = true);
 
 	struct DLLCLIENT AssetImportResult {
 		std::vector<std::string> models;
-		std::vector<std::shared_ptr<pragma::Model>> modelObjects;
+		std::vector<std::shared_ptr<pragma::asset::Model>> modelObjects;
 		std::string mapName;
 	};
 	DLLCLIENT std::optional<AssetImportResult> import_gltf(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = false);
@@ -87,8 +87,8 @@ export namespace pragma::asset {
 
 	DLLCLIENT void assign_texture(msys::CMaterial &mat, const std::string &textureRootPath, const std::string &matIdentifier, const std::string &texName, prosper::IImage &img, bool greyScale, bool normalMap, AlphaMode alphaMode = AlphaMode::Opaque);
 
-	DLLCLIENT bool export_model(pragma::Model &model, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName = {}, std::string *optOutPath = nullptr);
-	DLLCLIENT bool export_animation(pragma::Model &model, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName = {});
+	DLLCLIENT bool export_model(pragma::asset::Model &model, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName = {}, std::string *optOutPath = nullptr);
+	DLLCLIENT bool export_animation(pragma::asset::Model &model, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName = {});
 	DLLCLIENT bool export_map(const std::string &mapName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<MapExportInfo> &mapExportInfo = {});
 	DLLCLIENT bool export_texture(uimg::ImageBuffer &imgBuf, ModelExportInfo::ImageFormat imageFormat, const std::string &outputPath, std::string &outErrMsg, bool normalMap = false, bool srgb = false, uimg::TextureInfo::AlphaMode alphaMode = uimg::TextureInfo::AlphaMode::Auto,
 	  std::string *optOutOutputPath = nullptr);
@@ -101,10 +101,10 @@ export namespace pragma::asset {
 		bool success = false;
 		std::string errMsg;
 	};
-	DLLCLIENT std::optional<util::ParallelJob<ModelAOWorkerResult>> generate_ambient_occlusion(pragma::Model &mdl, std::string &outErrMsg, bool forceRebuild = false, uint32_t aoResolution = 512, uint32_t aoSamples = 40,
+	DLLCLIENT std::optional<util::ParallelJob<ModelAOWorkerResult>> generate_ambient_occlusion(pragma::asset::Model &mdl, std::string &outErrMsg, bool forceRebuild = false, uint32_t aoResolution = 512, uint32_t aoSamples = 40,
 	  pragma::rendering::cycles::SceneInfo::DeviceType aoDevice = pragma::rendering::cycles::SceneInfo::DeviceType::CPU);
 	enum class AOResult : uint8_t { NoAOGenerationRequired = 0, FailedToCreateAOJob, AOJobReady };
-	DLLCLIENT AOResult generate_ambient_occlusion(pragma::Model &mdl, msys::Material &mat, util::ParallelJob<uimg::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild = false, uint32_t aoResolution = 512, uint32_t aoSamples = 40,
+	DLLCLIENT AOResult generate_ambient_occlusion(pragma::asset::Model &mdl, msys::Material &mat, util::ParallelJob<uimg::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild = false, uint32_t aoResolution = 512, uint32_t aoSamples = 40,
 	  pragma::rendering::cycles::SceneInfo::DeviceType aoDevice = pragma::rendering::cycles::SceneInfo::DeviceType::CPU);
 
 	DLLCLIENT std::optional<prosper::Format> vtf_format_to_prosper(VtfInfo::Format format);

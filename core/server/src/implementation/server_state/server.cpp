@@ -12,7 +12,7 @@ import :networking;
 
 #undef GetMessage
 
-void ServerState::OnMasterServerRegistered(bool b, std::string reason)
+void pragma::ServerState::OnMasterServerRegistered(bool b, std::string reason)
 {
 	if(b == false) {
 		m_tNextWMSConnect = std::chrono::steady_clock::now();
@@ -20,7 +20,7 @@ void ServerState::OnMasterServerRegistered(bool b, std::string reason)
 	}
 }
 
-void ServerState::RegisterServerInfo()
+void pragma::ServerState::RegisterServerInfo()
 {
 	if(m_server == nullptr || SGame::Get() == nullptr)
 		return;
@@ -37,7 +37,7 @@ void ServerState::RegisterServerInfo()
 	m_serverData.players = SGame::Get()->GetPlayerCount();
 	m_serverData.tcpPort = port.has_value() ? *port : 0;
 	m_serverData.udpPort = port.has_value() ? *port : 0;
-	m_serverData.engineVersion = get_engine_version();
+	m_serverData.engineVersion = pragma::get_engine_version();
 	m_serverData.maxPlayers = GetConVarInt("sv_maxplayers");
 	m_serverData.password = password.empty() == false;
 	//m_serverData.bots
@@ -52,14 +52,14 @@ void ServerState::RegisterServerInfo()
 	}
 }
 
-void ServerState::SetServerInterface(std::unique_ptr<pragma::networking::IServer> iserver)
+void pragma::ServerState::SetServerInterface(std::unique_ptr<pragma::networking::IServer> iserver)
 {
 	// TODO: Remove this file
 	//CloseServer();
 	//m_server = std::move(iserver);
 }
 
-void ServerState::StartServer(bool singlePlayer)
+void pragma::ServerState::StartServer(bool singlePlayer)
 {
 	CloseServer();
 	InitializeGameServer(singlePlayer);
@@ -70,7 +70,7 @@ void ServerState::StartServer(bool singlePlayer)
 		RegisterServerInfo();
 }
 
-void ServerState::CloseServer()
+void pragma::ServerState::CloseServer()
 {
 	if(m_server == nullptr)
 		return;

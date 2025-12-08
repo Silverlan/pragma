@@ -14,7 +14,7 @@ import :scripting.lua;
 
 #undef LoadLibrary
 
-void SGame::RegisterLua()
+void pragma::SGame::RegisterLua()
 {
 	GetLuaInterface().SetIdentifier("sv");
 
@@ -107,10 +107,10 @@ void SGame::RegisterLua()
 	  luabind::def("register", &Lua::net::server::register_net_message), luabind::def("register_event", &Lua::net::register_event))];
 	auto netPacketClassDef = luabind::class_<NetPacket>("Packet");
 	Lua::NetPacket::Server::register_class(netPacketClassDef);
-	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, util::WeakHandle<pragma::SPlayerComponent> &)>([](lua::State *l, ::NetPacket &packet, util::WeakHandle<pragma::SPlayerComponent> &pl) { nwm::write_player(packet, pl.get()); }));
-	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, EntityHandle &)>([](lua::State *l, ::NetPacket &packet, EntityHandle &hEnt) { nwm::write_player(packet, hEnt.get()); }));
+	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, util::WeakHandle<pragma::SPlayerComponent> &)>([](lua::State *l, ::NetPacket &packet, util::WeakHandle<pragma::SPlayerComponent> &pl) { networking::write_player(packet, pl.get()); }));
+	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, EntityHandle &)>([](lua::State *l, ::NetPacket &packet, EntityHandle &hEnt) { networking::write_player(packet, hEnt.get()); }));
 	netPacketClassDef.def("ReadPlayer", static_cast<void (*)(lua::State *, ::NetPacket &)>([](lua::State *l, ::NetPacket &packet) {
-		auto *pl = static_cast<pragma::SPlayerComponent *>(nwm::read_player(packet));
+		auto *pl = static_cast<pragma::SPlayerComponent *>(pragma::networking::read_player(packet));
 		if(pl == nullptr)
 			return;
 		pl->PushLuaObject(l);
@@ -133,7 +133,7 @@ void SGame::RegisterLua()
 
 	auto classDefClRp = luabind::class_<pragma::networking::ClientRecipientFilter>("ClientRecipientFilter");
 	classDefClRp.def("GetRecipients", static_cast<void (*)(lua::State *, pragma::networking::ClientRecipientFilter &)>([](lua::State *l, pragma::networking::ClientRecipientFilter &rp) {
-		auto *sv = ServerState::Get()->GetServer();
+		auto *sv = pragma::ServerState::Get()->GetServer();
 		if(sv == nullptr)
 			return;
 		auto t = Lua::CreateTable(l);
@@ -141,7 +141,7 @@ void SGame::RegisterLua()
 		for(auto &cl : sv->GetClients()) {
 			if(rp(*cl) == false)
 				continue;
-			auto *pl = ServerState::Get()->GetPlayer(*cl);
+			auto *pl = pragma::ServerState::Get()->GetPlayer(*cl);
 			if(pl == nullptr)
 				continue;
 			Lua::PushInt(l, idx++);
@@ -155,13 +155,13 @@ void SGame::RegisterLua()
 	pragma::Game::RegisterLua();
 }
 
-void SGame::InitializeLua()
+void pragma::SGame::InitializeLua()
 {
 	pragma::Game::InitializeLua();
 	CallCallbacks<void, lua::State *>("OnLuaInitialized", GetLuaState());
 }
 
-void SGame::SetupLua()
+void pragma::SGame::SetupLua()
 {
 	pragma::Game::SetupLua();
 	RunLuaFiles("autorun\\");
@@ -172,7 +172,7 @@ void SGame::SetupLua()
 	//	LoadLuaEntities(subDir);
 }
 
-bool SGame::LoadLuaComponent(const std::string &luaFilePath, const std::string &mainPath, const std::string &componentName)
+bool pragma::SGame::LoadLuaComponent(const std::string &luaFilePath, const std::string &mainPath, const std::string &componentName)
 {
 	auto r = pragma::Game::LoadLuaComponent(luaFilePath, mainPath, componentName);
 	if(r == false)
@@ -198,8 +198,8 @@ bool SGame::LoadLuaComponent(const std::string &luaFilePath, const std::string &
 		transferFiles.at(i) = componentPathClient + '\\' + transferFiles.at(i);
 
 	for(auto &fname : transferFiles)
-		ResourceManager::AddResource(fname);
+		pragma::networking::ResourceManager::AddResource(fname);
 	return r;
 }
-std::string SGame::GetLuaNetworkDirectoryName() const { return "server"; }
-std::string SGame::GetLuaNetworkFileName() const { return "init" + Lua::DOT_FILE_EXTENSION; }
+std::string pragma::SGame::GetLuaNetworkDirectoryName() const { return "server"; }
+std::string pragma::SGame::GetLuaNetworkFileName() const { return "init" + Lua::DOT_FILE_EXTENSION; }

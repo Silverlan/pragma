@@ -51,13 +51,13 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 {
 	auto modAsset = luabind::module_(lua.GetState(), "asset");
 	modAsset[(
-		luabind::def("clear_unused",+[](NetworkState &nw,pragma::asset::Type type) -> std::optional<uint32_t> {
+		luabind::def("clear_unused",+[](pragma::NetworkState &nw,pragma::asset::Type type) -> std::optional<uint32_t> {
 			auto *assetManager = nw.GetAssetManager(type);
 			if(!assetManager)
 				return {};
 			return assetManager->ClearUnused();
 		}),
-		luabind::def("clear_unused",+[](NetworkState &nw) -> std::optional<uint32_t> {
+		luabind::def("clear_unused",+[](pragma::NetworkState &nw) -> std::optional<uint32_t> {
 			auto num = umath::to_integral(pragma::asset::Type::Count);
 			uint32_t numCleared = 0;
 			for (decltype(num) i=0u;i<num;++i)
@@ -78,7 +78,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 			return nw->GetModelManager().ClearFlagged();
 		})),
-		luabind::def("flag_model_for_cache_removal",static_cast<void(*)(lua::State*,pragma::Model&)>([](lua::State *l,pragma::Model &mdl) {
+		luabind::def("flag_model_for_cache_removal",static_cast<void(*)(lua::State*,pragma::asset::Model&)>([](lua::State *l,pragma::asset::Model &mdl) {
 			auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 			nw->GetModelManager().FlagForRemoval(mdl);
 		})),

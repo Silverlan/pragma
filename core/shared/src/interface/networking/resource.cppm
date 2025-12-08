@@ -8,4 +8,6 @@ export module pragma.shared:networking.resource;
 
 export import std;
 
-export DLLNETWORK bool IsValidResource(std::string res);
+export namespace pragma::networking {
+    DLLNETWORK bool is_valid_resource(std::string res);
+}

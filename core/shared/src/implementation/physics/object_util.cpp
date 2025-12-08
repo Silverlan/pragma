@@ -6,10 +6,10 @@ module pragma.shared;
 
 import :physics.object;
 
-PhysObjKinematic::PhysObjKinematic() : m_bKinematic(false) {}
-void PhysObjKinematic::SetKinematic(bool b) { m_bKinematic = b; }
+pragma::physics::PhysObjKinematic::PhysObjKinematic() : m_bKinematic(false) {}
+void pragma::physics::PhysObjKinematic::SetKinematic(bool b) { m_bKinematic = b; }
 
-void PhysObjDynamic::PreSimulate()
+void pragma::physics::PhysObjDynamic::PreSimulate()
 {
 	auto *phys = dynamic_cast<pragma::physics::PhysObj *>(this);
 	for(auto &hObj : phys->GetCollisionObjects()) {
@@ -18,7 +18,7 @@ void PhysObjDynamic::PreSimulate()
 		hObj->GetRigidBody()->PreSimulate();
 	}
 }
-void PhysObjDynamic::PostSimulate()
+void pragma::physics::PhysObjDynamic::PostSimulate()
 {
 	auto *phys = dynamic_cast<pragma::physics::PhysObj *>(this);
 	for(auto &hObj : phys->GetCollisionObjects()) {
@@ -28,12 +28,12 @@ void PhysObjDynamic::PostSimulate()
 	}
 }
 
-bool PhysObjKinematic::IsKinematic() const { return false; }
+bool pragma::physics::PhysObjKinematic::IsKinematic() const { return false; }
 
 ////////////////////////////////////
 
 #if PHYS_KEEP_SIMULATION_TRANSFORM != 0
-void PhysObjDynamic::PreSimulate()
+void pragma::physics::PhysObjDynamic::PreSimulate()
 {
 	pragma::physics::PhysObj *phys = dynamic_cast<pragma::physics::PhysObj *>(this);
 	std::vector<PhysCollisionObject *> &objs = phys->GetCollisionObjects();
@@ -44,7 +44,7 @@ void PhysObjDynamic::PreSimulate()
 		m_offsets[i] = o->GetWorldTransform();
 	}
 }
-void PhysObjDynamic::PostSimulate()
+void pragma::physics::PhysObjDynamic::PostSimulate()
 {
 	/*PhysObj *phys = dynamic_cast<PhysObj*>(this);
 	std::vector<PhysCollisionObject*> &objs = phys->GetCollisionObjects();
@@ -60,14 +60,14 @@ void PhysObjDynamic::PostSimulate()
 		o->SetWorldTransform(tOffset);
 	}*/
 }
-Vector3 PhysObjDynamic::GetSimulationOffset(unsigned int idx)
+Vector3 pragma::physics::PhysObjDynamic::GetSimulationOffset(unsigned int idx)
 {
 	if(idx >= m_offsets.size())
 		return Vector3(0, 0, 0);
 	PhysTransform &t = m_offsets[idx];
 	return t.GetOrigin();
 }
-Quat PhysObjDynamic::GetSimulationRotation(unsigned int idx)
+Quat pragma::physics::PhysObjDynamic::GetSimulationRotation(unsigned int idx)
 {
 	if(idx >= m_offsets.size())
 		return uquat::identity();

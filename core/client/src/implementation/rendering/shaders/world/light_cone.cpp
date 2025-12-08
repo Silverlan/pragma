@@ -39,7 +39,7 @@ bool ShaderLightCone::RecordBindEntity(rendering::ShaderProcessor &shaderProcess
 }
 
 #if 0
-bool ShaderLightCone::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
+bool ShaderLightCone::Draw(pragma::geometry::CModelSubMesh &mesh,const std::optional<pragma::rendering::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
 {
 	return RecordPushConstants( // Light cone shader doesn't use lightmaps, so we hijack the lightmapFlags push constant for our own purposes
 		static_cast<uint32_t>(m_boundLightIndex),

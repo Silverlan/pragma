@@ -9,7 +9,7 @@ import :particle_system.renderer_rotational_buffer;
 
 import :client_state;
 
-void CParticleRendererRotationalBuffer::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem)
+void pragma::pts::CParticleRendererRotationalBuffer::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem)
 {
 	m_hParticleSystem = pSystem.GetHandle<pragma::ecs::CParticleSystemComponent>();
 
@@ -23,11 +23,11 @@ void CParticleRendererRotationalBuffer::Initialize(pragma::BaseEnvParticleSystem
 	m_rotBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, m_rotations.data());
 }
 
-void CParticleRendererRotationalBuffer::SetRotationAlignVelocity(bool b) { m_bAlignVelocity = b; }
-bool CParticleRendererRotationalBuffer::ShouldRotationAlignVelocity() const { return m_bAlignVelocity; }
-const std::shared_ptr<prosper::IBuffer> &CParticleRendererRotationalBuffer::GetBuffer() const { return m_rotBuffer; }
+void pragma::pts::CParticleRendererRotationalBuffer::SetRotationAlignVelocity(bool b) { m_bAlignVelocity = b; }
+bool pragma::pts::CParticleRendererRotationalBuffer::ShouldRotationAlignVelocity() const { return m_bAlignVelocity; }
+const std::shared_ptr<prosper::IBuffer> &pragma::pts::CParticleRendererRotationalBuffer::GetBuffer() const { return m_rotBuffer; }
 
-bool CParticleRendererRotationalBuffer::Update()
+bool pragma::pts::CParticleRendererRotationalBuffer::Update()
 {
 	//auto frameId = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
 	if(/*frameId == m_lastFrameUpdate || */ m_hParticleSystem.expired())

@@ -9,11 +9,11 @@ import :gui.main_menu_credits;
 
 import pragma.string.unicode;
 
-WIMainMenuCredits::WIMainMenuCredits() : WIMainMenuBase() {}
+pragma::gui::types::WIMainMenuCredits::WIMainMenuCredits() : WIMainMenuBase() {}
 
-WIMainMenuCredits::~WIMainMenuCredits() {}
+pragma::gui::types::WIMainMenuCredits::~WIMainMenuCredits() {}
 
-void WIMainMenuCredits::AddCreditsElement(WIBase &el)
+void pragma::gui::types::WIMainMenuCredits::AddCreditsElement(WIBase &el)
 {
 	auto hThis = GetHandle();
 	el.AddCallback("SetSize", FunctionCallback<void>::Create([hThis]() mutable {
@@ -23,10 +23,10 @@ void WIMainMenuCredits::AddCreditsElement(WIBase &el)
 	}));
 }
 
-WITexturedRect &WIMainMenuCredits::AddLogo(const std::string &material)
+pragma::gui::types::WITexturedRect &pragma::gui::types::WIMainMenuCredits::AddLogo(const std::string &material)
 {
 	AddGap(10);
-	auto *el = WGUI::GetInstance().Create<WITexturedRect>(m_creditsContainer.get());
+	auto *el = pragma::gui::WGUI::GetInstance().Create<WITexturedRect>(m_creditsContainer.get());
 	el->AddStyleClass("credits_logo");
 	el->SetMaterial(material);
 	el->SizeToTexture();
@@ -36,7 +36,7 @@ WITexturedRect &WIMainMenuCredits::AddLogo(const std::string &material)
 	return *el;
 }
 
-WIText &WIMainMenuCredits::AddHeader(const std::string &header, const std::string &headerStyle)
+pragma::gui::types::WIText &pragma::gui::types::WIMainMenuCredits::AddHeader(const std::string &header, const std::string &headerStyle)
 {
 	if(headerStyle != "header")
 		AddGap(30);
@@ -46,7 +46,7 @@ WIText &WIMainMenuCredits::AddHeader(const std::string &header, const std::strin
 	return pText;
 }
 
-WIText &WIMainMenuCredits::AddText(const std::string &header, const std::string &styleClass)
+pragma::gui::types::WIText &pragma::gui::types::WIMainMenuCredits::AddText(const std::string &header, const std::string &styleClass)
 {
 	auto *pText = static_cast<WIText *>(WGUI::GetInstance().Create<WIText>(m_creditsContainer.get()));
 	pText->SetText(header);
@@ -57,15 +57,15 @@ WIText &WIMainMenuCredits::AddText(const std::string &header, const std::string 
 	return *pText;
 }
 
-WIBase &WIMainMenuCredits::AddGap(uint32_t size)
+pragma::gui::types::WIBase &pragma::gui::types::WIMainMenuCredits::AddGap(uint32_t size)
 {
-	auto *p = WGUI::GetInstance().Create<WIBase>(m_creditsContainer.get());
+	auto *p = pragma::gui::WGUI::GetInstance().Create<WIBase>(m_creditsContainer.get());
 	p->SetSize(1, size);
 	AddCreditsElement(*p);
 	return *p;
 }
 
-void WIMainMenuCredits::Initialize()
+void pragma::gui::types::WIMainMenuCredits::Initialize()
 {
 	WIMainMenuBase::Initialize();
 	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
@@ -76,13 +76,13 @@ void WIMainMenuCredits::Initialize()
 	}));
 }
 
-void WIMainMenuCredits::SetSize(int x, int y)
+void pragma::gui::types::WIMainMenuCredits::SetSize(int x, int y)
 {
 	WIMainMenuBase::SetSize(x, y);
 	ScheduleUpdate();
 }
 
-void WIMainMenuCredits::DoUpdate()
+void pragma::gui::types::WIMainMenuCredits::DoUpdate()
 {
 	WIMainMenuBase::DoUpdate();
 	uint32_t y = 0u;
@@ -95,7 +95,7 @@ void WIMainMenuCredits::DoUpdate()
 	}
 }
 
-void WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
+void pragma::gui::types::WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
 {
 	WIMainMenuBase::OnVisibilityChanged(bVisible);
 

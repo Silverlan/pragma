@@ -33,7 +33,7 @@ static void write_offset(VFilePtrReal f, uint64_t offIndex)
 	f->Seek(cur);
 }
 
-static void to_vertex_list(ModelMesh &mesh, std::vector<umath::Vertex> &vertices, std::unordered_map<pragma::ModelSubMesh *, std::vector<uint32_t>> &vertexIds)
+static void to_vertex_list(pragma::geometry::ModelMesh &mesh, std::vector<umath::Vertex> &vertices, std::unordered_map<pragma::geometry::ModelSubMesh *, std::vector<uint32_t>> &vertexIds)
 {
 	vertices.reserve(mesh.GetVertexCount());
 	for(auto &subMesh : mesh.GetSubMeshes()) {
@@ -57,7 +57,7 @@ struct MeshBoneWeight {
 	uint64_t vertId;
 	float weight;
 };
-static void to_vertex_weight_list(ModelMesh &mesh, std::unordered_map<uint32_t, std::vector<MeshBoneWeight>> &boneWeights, const std::unordered_map<pragma::ModelSubMesh *, std::vector<uint32_t>> &vertexIds)
+static void to_vertex_weight_list(pragma::geometry::ModelMesh &mesh, std::unordered_map<uint32_t, std::vector<MeshBoneWeight>> &boneWeights, const std::unordered_map<pragma::geometry::ModelSubMesh *, std::vector<uint32_t>> &vertexIds)
 {
 	// TODO: Has to be the same order as 'to_vertex_list'!!
 	for(auto &subMesh : mesh.GetSubMeshes()) {
@@ -80,9 +80,9 @@ static void to_vertex_weight_list(ModelMesh &mesh, std::unordered_map<uint32_t, 
 	}
 }
 
-std::shared_ptr<pragma::Model> pragma::Model::Copy(pragma::Game *game, CopyFlags copyFlags) const
+std::shared_ptr<pragma::asset::Model> pragma::asset::Model::Copy(pragma::Game *game, CopyFlags copyFlags) const
 {
-	auto fCreateModel = static_cast<std::shared_ptr<pragma::Model> (pragma::Game::*)(bool) const>(&pragma::Game::CreateModel);
+	auto fCreateModel = static_cast<std::shared_ptr<pragma::asset::Model> (pragma::Game::*)(bool) const>(&pragma::Game::CreateModel);
 	auto mdl = (game->*fCreateModel)(false);
 	if(mdl == nullptr)
 		return nullptr;
@@ -126,13 +126,13 @@ std::shared_ptr<pragma::Model> pragma::Model::Copy(pragma::Game *game, CopyFlags
 	mdl->m_flexes = m_flexes;
 	for(auto &ikController : mdl->m_ikControllers)
 		ikController = ::util::make_shared<IKController>(*ikController);
-	std::unordered_map<ModelMesh *, ModelMesh *> oldMeshToNewMesh;
-	std::unordered_map<pragma::ModelSubMesh *, pragma::ModelSubMesh *> oldSubMeshToNewSubMesh;
+	std::unordered_map<pragma::geometry::ModelMesh *, pragma::geometry::ModelMesh *> oldMeshToNewMesh;
+	std::unordered_map<pragma::geometry::ModelSubMesh *, pragma::geometry::ModelSubMesh *> oldSubMeshToNewSubMesh;
 	if((copyFlags & CopyFlags::CopyMeshesBit) != CopyFlags::None) {
 		auto copyVertexData = umath::is_flag_set(copyFlags, CopyFlags::CopyVertexData);
 		for(auto &meshGroup : mdl->m_meshGroups) {
-			auto newMeshGroup = pragma::ModelMeshGroup::Create(meshGroup->GetName());
-			static_assert(pragma::ModelMeshGroup::layout_version == 1, "Update this function when making changes to this class!");
+			auto newMeshGroup = pragma::asset::ModelMeshGroup::Create(meshGroup->GetName());
+			static_assert(pragma::asset::ModelMeshGroup::layout_version == 1, "Update this function when making changes to this class!");
 			newMeshGroup->GetMeshes() = meshGroup->GetMeshes();
 			for(auto &mesh : newMeshGroup->GetMeshes()) {
 				auto newMesh = mesh->Copy();
@@ -155,7 +155,7 @@ std::shared_ptr<pragma::Model> pragma::Model::Copy(pragma::Game *game, CopyFlags
 	}
 	if((copyFlags & CopyFlags::CopyVertexAnimationsBit) != CopyFlags::None) {
 		for(auto &vertexAnim : mdl->m_vertexAnimations) {
-			vertexAnim = VertexAnimation::Create(*vertexAnim);
+			vertexAnim = pragma::animation::VertexAnimation::Create(*vertexAnim);
 			for(auto &meshAnim : vertexAnim->GetMeshAnimations()) {
 				auto *mesh = meshAnim->GetMesh();
 				auto *subMesh = meshAnim->GetSubMesh();
@@ -194,17 +194,17 @@ std::shared_ptr<pragma::Model> pragma::Model::Copy(pragma::Game *game, CopyFlags
 	mdl->m_extensions->Read(extStreamFileIn);
 	//
 
-	static_assert(pragma::Model::layout_version == 1, "Update this function when making changes to this class!");
+	static_assert(pragma::asset::Model::layout_version == 1, "Update this function when making changes to this class!");
 	return mdl;
 }
 
-bool pragma::Model::FindSubMeshIndex(const pragma::ModelMeshGroup *optMeshGroup, const ModelMesh *optMesh, const pragma::ModelSubMesh *optSubMesh, uint32_t &outGroupIdx, uint32_t &outMeshIdx, uint32_t &outSubMeshIdx) const
+bool pragma::asset::Model::FindSubMeshIndex(const pragma::asset::ModelMeshGroup *optMeshGroup, const pragma::geometry::ModelMesh *optMesh, const pragma::geometry::ModelSubMesh *optSubMesh, uint32_t &outGroupIdx, uint32_t &outMeshIdx, uint32_t &outSubMeshIdx) const
 {
 	auto &meshGroups = GetMeshGroups();
 	uint32_t mgStart = 0;
 	uint32_t mgEnd = meshGroups.size();
 	if(optMeshGroup) {
-		auto it = std::find_if(meshGroups.begin(), meshGroups.end(), [optMeshGroup](const std::shared_ptr<pragma::ModelMeshGroup> &mmg) { return mmg.get() == optMeshGroup; });
+		auto it = std::find_if(meshGroups.begin(), meshGroups.end(), [optMeshGroup](const std::shared_ptr<pragma::asset::ModelMeshGroup> &mmg) { return mmg.get() == optMeshGroup; });
 		if(it == meshGroups.end())
 			return false;
 		mgStart = (it - meshGroups.begin());
@@ -221,7 +221,7 @@ bool pragma::Model::FindSubMeshIndex(const pragma::ModelMeshGroup *optMeshGroup,
 		uint32_t meshStart = 0;
 		uint32_t meshEnd = meshes.size();
 		if(optMesh) {
-			auto it = std::find_if(meshes.begin(), meshes.end(), [optMesh](const std::shared_ptr<ModelMesh> &mesh) { return mesh.get() == optMesh; });
+			auto it = std::find_if(meshes.begin(), meshes.end(), [optMesh](const std::shared_ptr<pragma::geometry::ModelMesh> &mesh) { return mesh.get() == optMesh; });
 			if(it == meshes.end())
 				continue;
 			meshStart = (it - meshes.begin());
@@ -237,7 +237,7 @@ bool pragma::Model::FindSubMeshIndex(const pragma::ModelMeshGroup *optMeshGroup,
 		for(auto j = meshStart; j < meshEnd; ++j) {
 			auto &mesh = meshes[j];
 			auto &subMeshes = mesh->GetSubMeshes();
-			auto it = std::find_if(subMeshes.begin(), subMeshes.end(), [optSubMesh](const std::shared_ptr<pragma::ModelSubMesh> &subMesh) { return subMesh.get() == optSubMesh; });
+			auto it = std::find_if(subMeshes.begin(), subMeshes.end(), [optSubMesh](const std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh) { return subMesh.get() == optSubMesh; });
 			if(it == subMeshes.end())
 				continue;
 			outGroupIdx = i;
@@ -249,7 +249,7 @@ bool pragma::Model::FindSubMeshIndex(const pragma::ModelMeshGroup *optMeshGroup,
 	return false;
 }
 
-bool pragma::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &data, std::string &outErr)
+bool pragma::asset::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &data, std::string &outErr)
 {
 	if(data.GetAssetType() != PMDL_IDENTIFIER) {
 		outErr = "Incorrect format!";
@@ -302,17 +302,17 @@ bool pragma::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &
 		umath::set_flag(outFlags, flag, udmFlags[name](false));
 	};
 	auto &flags = GetMetaInfo().flags;
-	readFlag(udm, pragma::Model::Flags::Static, "static", flags);
-	readFlag(udm, pragma::Model::Flags::Inanimate, "inanimate", flags);
-	readFlag(udm, pragma::Model::Flags::DontPrecacheTextureGroups, "dontPrecacheSkins", flags);
-	readFlag(udm, pragma::Model::Flags::WorldGeometry, "worldGeometry", flags);
-	readFlag(udm, pragma::Model::Flags::GeneratedHitboxes, "generatedHitboxes", flags);
-	readFlag(udm, pragma::Model::Flags::GeneratedLODs, "generatedLODs", flags);
-	readFlag(udm, pragma::Model::Flags::GeneratedMetaRig, "generatedMetaRig", flags);
-	readFlag(udm, pragma::Model::Flags::GeneratedMetaBlendShapes, "generatedMetaBlendShapes", flags);
-	static_assert(umath::to_integral(pragma::Model::Flags::Count) == 13, "Update this list when new flags have been added!");
+	readFlag(udm, pragma::asset::Model::Flags::Static, "static", flags);
+	readFlag(udm, pragma::asset::Model::Flags::Inanimate, "inanimate", flags);
+	readFlag(udm, pragma::asset::Model::Flags::DontPrecacheTextureGroups, "dontPrecacheSkins", flags);
+	readFlag(udm, pragma::asset::Model::Flags::WorldGeometry, "worldGeometry", flags);
+	readFlag(udm, pragma::asset::Model::Flags::GeneratedHitboxes, "generatedHitboxes", flags);
+	readFlag(udm, pragma::asset::Model::Flags::GeneratedLODs, "generatedLODs", flags);
+	readFlag(udm, pragma::asset::Model::Flags::GeneratedMetaRig, "generatedMetaRig", flags);
+	readFlag(udm, pragma::asset::Model::Flags::GeneratedMetaBlendShapes, "generatedMetaBlendShapes", flags);
+	static_assert(umath::to_integral(pragma::asset::Model::Flags::Count) == 13, "Update this list when new flags have been added!");
 
-	auto isStatic = umath::is_flag_set(flags, pragma::Model::Flags::Static);
+	auto isStatic = umath::is_flag_set(flags, pragma::asset::Model::Flags::Static);
 	if(!isStatic) {
 		auto udmSkeleton = udm["skeleton"];
 		m_skeleton = pragma::animation::Skeleton::Load(udm::AssetData {udmSkeleton}, outErr);
@@ -365,9 +365,9 @@ bool pragma::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &
 		hitboxes.reserve(numHitboxes);
 		for(auto i = decltype(numHitboxes) {0u}; i < numHitboxes; ++i) {
 			auto udmHb = udmHitboxes[i];
-			Hitbox hb {};
+			pragma::physics::Hitbox hb {};
 
-			udm::to_enum_value<HitGroup>(udmHb["hitGroup"], hb.group);
+			udm::to_enum_value<pragma::physics::HitGroup>(udmHb["hitGroup"], hb.group);
 			udmHb["bounds"]["min"](hb.min);
 			udmHb["bounds"]["max"](hb.max);
 
@@ -435,7 +435,7 @@ bool pragma::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &
 		auto &joint = joints[i];
 		auto udmJoint = udmJoints[i];
 
-		udm::to_enum_value<JointType>(udmJoint["type"], joint.type);
+		udm::to_enum_value<pragma::physics::JointType>(udmJoint["type"], joint.type);
 		udmJoint["parentBone"](joint.parent);
 		udmJoint["childBone"](joint.child);
 		udmJoint["enableCollisions"](joint.collide);
@@ -446,7 +446,7 @@ bool pragma::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &
 	auto udmMeshGroups = udm["meshGroups"];
 	meshGroups.resize(udmMeshGroups.GetChildCount());
 	for(auto udmMeshGroup : udmMeshGroups.ElIt()) {
-		auto meshGroup = pragma::ModelMeshGroup::Create(std::string {udmMeshGroup.key});
+		auto meshGroup = pragma::asset::ModelMeshGroup::Create(std::string {udmMeshGroup.key});
 		uint32_t groupIdx = 0;
 		udmMeshGroup.property["index"](groupIdx);
 		if(groupIdx >= meshGroups.size()) {
@@ -461,7 +461,7 @@ bool pragma::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &
 		for(auto meshIdx = decltype(numMeshes) {0u}; meshIdx < numMeshes; ++meshIdx) {
 			auto &mesh = meshes[meshIdx];
 			auto udmMesh = udmMeshes[meshIdx];
-			mesh = ::util::make_shared<ModelMesh>();
+			mesh = ::util::make_shared<pragma::geometry::ModelMesh>();
 			auto referenceId = std::numeric_limits<uint32_t>::max();
 			udmMesh["referenceId"](referenceId);
 			mesh->SetReferenceId(referenceId);
@@ -555,7 +555,7 @@ bool pragma::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &
 		morphAnims.resize(numMorphTargetAnims);
 		for(auto udmMorphTargetAnim : udmMorphTargetAnims.ElIt()) {
 			udmMorphTargetAnim.property["index"](idx);
-			morphAnims[idx] = VertexAnimation::Load(*this, udm::AssetData {udmMorphTargetAnim.property}, outErr);
+			morphAnims[idx] = pragma::animation::VertexAnimation::Load(*this, udm::AssetData {udmMorphTargetAnim.property}, outErr);
 			if(morphAnims[idx] == nullptr) {
 				outErr = "Failed to load vertex animation " + std::string {udmMorphTargetAnim.key} + ": " + outErr;
 				return false;
@@ -591,7 +591,7 @@ bool pragma::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &
 			for(auto i = decltype(numOps) {0u}; i < numOps; ++i) {
 				auto &op = ops[i];
 				auto udmOp = udmOps[i];
-				udm::to_enum_value<Flex::Operation::Type>(udmOp["type"], op.type);
+				udm::to_enum_value<pragma::animation::Flex::Operation::Type>(udmOp["type"], op.type);
 				if(udmOp["value"])
 					udmOp["value"](op.d.value);
 				else if(udmOp["index"])
@@ -680,7 +680,7 @@ bool pragma::Model::LoadFromAssetData(pragma::Game &game, const udm::AssetData &
 	return true;
 }
 
-bool pragma::Model::Save(pragma::Game &game, const std::string &fileName, std::string &outErr)
+bool pragma::asset::Model::Save(pragma::Game &game, const std::string &fileName, std::string &outErr)
 {
 	auto udmData = udm::Data::Create();
 	auto result = Save(game, udmData->GetAssetData(), outErr);
@@ -703,7 +703,7 @@ bool pragma::Model::Save(pragma::Game &game, const std::string &fileName, std::s
 	pragma::get_engine()->PollResourceWatchers();
 	return true;
 }
-bool pragma::Model::Save(pragma::Game &game, std::string &outErr)
+bool pragma::asset::Model::Save(pragma::Game &game, std::string &outErr)
 {
 	auto mdlName = GetName();
 	ufile::remove_extension_from_filename(mdlName, pragma::asset::get_supported_extensions(pragma::asset::Type::Model));
@@ -721,7 +721,7 @@ bool pragma::Model::Save(pragma::Game &game, std::string &outErr)
 	return Save(game, absFileName, outErr);
 }
 
-bool pragma::Model::Save(pragma::Game &game, udm::AssetDataArg outData, std::string &outErr)
+bool pragma::asset::Model::Save(pragma::Game &game, udm::AssetDataArg outData, std::string &outErr)
 {
 	outData.SetAssetType(PMDL_IDENTIFIER);
 	outData.SetAssetVersion(PMDL_VERSION);
@@ -760,18 +760,18 @@ bool pragma::Model::Save(pragma::Game &game, udm::AssetDataArg outData, std::str
 			return;
 		udm["flags"][name] = true;
 	};
-	auto writeModelFlag = [&udm, flags, &writeFlag](pragma::Model::Flags flag, const std::string &name) { writeFlag(udm, flag, name, flags); };
-	writeModelFlag(pragma::Model::Flags::Static, "static");
-	writeModelFlag(pragma::Model::Flags::Inanimate, "inanimate");
-	writeModelFlag(pragma::Model::Flags::DontPrecacheTextureGroups, "dontPrecacheSkins");
-	writeModelFlag(pragma::Model::Flags::WorldGeometry, "worldGeometry");
-	writeModelFlag(pragma::Model::Flags::GeneratedHitboxes, "generatedHitboxes");
-	writeModelFlag(pragma::Model::Flags::GeneratedLODs, "generatedLODs");
-	writeModelFlag(pragma::Model::Flags::GeneratedMetaRig, "generatedMetaRig");
-	writeModelFlag(pragma::Model::Flags::GeneratedMetaBlendShapes, "generatedMetaBlendShapes");
-	static_assert(umath::to_integral(pragma::Model::Flags::Count) == 13, "Update this list when new flags have been added!");
+	auto writeModelFlag = [&udm, flags, &writeFlag](pragma::asset::Model::Flags flag, const std::string &name) { writeFlag(udm, flag, name, flags); };
+	writeModelFlag(pragma::asset::Model::Flags::Static, "static");
+	writeModelFlag(pragma::asset::Model::Flags::Inanimate, "inanimate");
+	writeModelFlag(pragma::asset::Model::Flags::DontPrecacheTextureGroups, "dontPrecacheSkins");
+	writeModelFlag(pragma::asset::Model::Flags::WorldGeometry, "worldGeometry");
+	writeModelFlag(pragma::asset::Model::Flags::GeneratedHitboxes, "generatedHitboxes");
+	writeModelFlag(pragma::asset::Model::Flags::GeneratedLODs, "generatedLODs");
+	writeModelFlag(pragma::asset::Model::Flags::GeneratedMetaRig, "generatedMetaRig");
+	writeModelFlag(pragma::asset::Model::Flags::GeneratedMetaBlendShapes, "generatedMetaBlendShapes");
+	static_assert(umath::to_integral(pragma::asset::Model::Flags::Count) == 13, "Update this list when new flags have been added!");
 
-	auto isStatic = umath::is_flag_set(flags, pragma::Model::Flags::Static);
+	auto isStatic = umath::is_flag_set(flags, pragma::asset::Model::Flags::Static);
 	if(!isStatic) {
 		auto udmSkeleton = udm["skeleton"];
 		auto &skeleton = GetSkeleton();
@@ -959,15 +959,15 @@ bool pragma::Model::Save(pragma::Game &game, udm::AssetDataArg outData, std::str
 				for(auto &op : ops) {
 					auto udmOp = udmOps[opIdx++];
 					udmOp["type"] = udm::enum_to_string(op.type);
-					auto valueType = Flex::Operation::GetOperationValueType(op.type);
+					auto valueType = pragma::animation::Flex::Operation::GetOperationValueType(op.type);
 					switch(valueType) {
-					case Flex::Operation::ValueType::Index:
+					case pragma::animation::Flex::Operation::ValueType::Index:
 						udmOp["index"] = op.d.index;
 						break;
-					case Flex::Operation::ValueType::Value:
+					case pragma::animation::Flex::Operation::ValueType::Value:
 						udmOp["value"] = op.d.value;
 						break;
-					case Flex::Operation::ValueType::None:
+					case pragma::animation::Flex::Operation::ValueType::None:
 						break;
 					}
 				}
@@ -1069,7 +1069,7 @@ bool pragma::Model::Save(pragma::Game &game, udm::AssetDataArg outData, std::str
 	return true;
 }
 
-bool pragma::Model::SaveLegacy(pragma::Game *game, const std::string &name, const std::string &rootPath) const
+bool pragma::asset::Model::SaveLegacy(pragma::Game *game, const std::string &name, const std::string &rootPath) const
 {
 	auto fname = pragma::asset::get_normalized_path(name, pragma::asset::Type::Model) + '.' + pragma::asset::FORMAT_MODEL_LEGACY;
 	fname = rootPath + "models\\" + fname;
@@ -1077,7 +1077,7 @@ bool pragma::Model::SaveLegacy(pragma::Game *game, const std::string &name, cons
 	auto f = FileManager::OpenFile<VFilePtrReal>(fname.c_str(), "wb");
 	if(f == nullptr)
 		return false;
-	auto &mdl = const_cast<pragma::Model &>(*this);
+	auto &mdl = const_cast<pragma::asset::Model &>(*this);
 	auto &skeleton = mdl.GetSkeleton();
 	auto &bones = skeleton.GetBones();
 	auto &refPose = mdl.GetReference();
@@ -1087,7 +1087,7 @@ bool pragma::Model::SaveLegacy(pragma::Game *game, const std::string &name, cons
 	auto &hitboxes = mdl.GetHitboxes();
 	auto &meta = mdl.GetMetaInfo();
 	auto flags = meta.flags;
-	auto bStatic = umath::is_flag_set(flags, pragma::Model::Flags::Static);
+	auto bStatic = umath::is_flag_set(flags, pragma::asset::Model::Flags::Static);
 
 	auto &texturePaths = meta.texturePaths;
 	assert(texturePaths.size() <= std::numeric_limits<uint8_t>::max());
@@ -1246,7 +1246,7 @@ bool pragma::Model::SaveLegacy(pragma::Game *game, const std::string &name, cons
 				f->Write<uint16_t>(static_cast<uint16_t>(subMesh->GetSkinTextureIndex()));
 
 				// Version 27
-				f->Write<pragma::ModelSubMesh::GeometryType>(subMesh->GetGeometryType());
+				f->Write<pragma::geometry::ModelSubMesh::GeometryType>(subMesh->GetGeometryType());
 				//
 				f->Write<uint32_t>(subMesh->GetReferenceId());
 
@@ -1304,7 +1304,7 @@ bool pragma::Model::SaveLegacy(pragma::Game *game, const std::string &name, cons
 				}
 				//
 
-				if(subMesh->GetIndexType() != pragma::model::IndexType::UInt16)
+				if(subMesh->GetIndexType() != pragma::geometry::IndexType::UInt16)
 					return false;
 				auto &indexData = subMesh->GetIndexData();
 				f->Write<uint32_t>(subMesh->GetIndexCount());
@@ -1355,7 +1355,7 @@ bool pragma::Model::SaveLegacy(pragma::Game *game, const std::string &name, cons
 	auto &joints = mdl.GetJoints();
 	f->Write<uint32_t>(joints.size());
 	for(auto &joint : joints) {
-		f->Write<JointType>(joint.type);
+		f->Write<pragma::physics::JointType>(joint.type);
 		f->Write<pragma::animation::BoneId>(joint.child);
 		f->Write<pragma::animation::BoneId>(joint.parent);
 		f->Write<bool>(joint.collide);
@@ -1391,7 +1391,7 @@ bool pragma::Model::SaveLegacy(pragma::Game *game, const std::string &name, cons
 			auto meshGroupId = std::numeric_limits<uint32_t>::max();
 			auto meshId = std::numeric_limits<uint32_t>::max();
 			auto subMeshId = std::numeric_limits<uint32_t>::max();
-			pragma::ModelSubMesh *subMesh = nullptr;
+			pragma::geometry::ModelSubMesh *subMesh = nullptr;
 			if(bSoftBody == true) {
 				auto bFound = false;
 				for(auto i = decltype(meshGroups.size()) {0}; i < meshGroups.size(); ++i) {
@@ -1538,14 +1538,14 @@ bool pragma::Model::SaveLegacy(pragma::Game *game, const std::string &name, cons
 				for(auto itMeshGroup = meshGroups.begin(); itMeshGroup != meshGroups.end(); ++itMeshGroup) {
 					auto &meshGroup = *itMeshGroup;
 					auto &meshes = meshGroup->GetMeshes();
-					auto itMesh = std::find_if(meshes.begin(), meshes.end(), [mesh](const std::shared_ptr<ModelMesh> &other) { return (other.get() == mesh) ? true : false; });
+					auto itMesh = std::find_if(meshes.begin(), meshes.end(), [mesh](const std::shared_ptr<pragma::geometry::ModelMesh> &other) { return (other.get() == mesh) ? true : false; });
 					if(itMesh == meshes.end())
 						continue;
 					auto &mesh = *itMesh;
 					auto &subMeshes = mesh->GetSubMeshes();
 					meshGroupId = itMeshGroup - meshGroups.begin();
 					meshId = itMesh - meshes.begin();
-					auto itSubMesh = std::find_if(subMeshes.begin(), subMeshes.end(), [subMesh](const std::shared_ptr<pragma::ModelSubMesh> &other) { return (other.get() == subMesh) ? true : false; });
+					auto itSubMesh = std::find_if(subMeshes.begin(), subMeshes.end(), [subMesh](const std::shared_ptr<pragma::geometry::ModelSubMesh> &other) { return (other.get() == subMesh) ? true : false; });
 					if(itSubMesh == subMeshes.end())
 						break;
 					subMeshId = itSubMesh - subMeshes.begin();
@@ -1566,7 +1566,7 @@ bool pragma::Model::SaveLegacy(pragma::Game *game, const std::string &name, cons
 					auto flags = frame->GetFlags();
 					auto offsetToEndOfFrameOffset = f->Tell();
 					f->Write<uint64_t>(0ull);
-					f->Write<pragma::MeshVertexFrame::Flags>(flags);
+					f->Write<pragma::animation::MeshVertexFrame::Flags>(flags);
 
 					struct Attribute {
 						Attribute(const std::string &name, const std::vector<std::array<uint16_t, 4>> &vertexData) : name {name}, vertexData {vertexData} {}
@@ -1575,7 +1575,7 @@ bool pragma::Model::SaveLegacy(pragma::Game *game, const std::string &name, cons
 					};
 					std::vector<Attribute> attributes {};
 					attributes.push_back({"position", frame->GetVertices()});
-					if(umath::is_flag_set(flags, pragma::MeshVertexFrame::Flags::HasNormals))
+					if(umath::is_flag_set(flags, pragma::animation::MeshVertexFrame::Flags::HasNormals))
 						attributes.push_back({"normal", frame->GetNormals()});
 					std::set<uint16_t> usedVertIndices {};
 					for(auto &attr : attributes) {

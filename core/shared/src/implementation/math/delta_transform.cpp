@@ -6,4 +6,4 @@ module pragma.shared;
 
 import :math.delta_transform;
 
-DeltaTransform::DeltaTransform(Vector3 poffset, Quat porientation, double ptime, double pdelta) : offset(poffset), orientation(porientation), time(ptime), delta(pdelta) {}
+pragma::math::DeltaTransform::DeltaTransform(Vector3 poffset, Quat porientation, double ptime, double pdelta) : offset(poffset), orientation(porientation), time(ptime), delta(pdelta) {}

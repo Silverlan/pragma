@@ -11,17 +11,19 @@ export import :particle_system.modifier;
 export namespace pragma::ecs {
 	class CParticleSystemComponent;
 }
-export class DLLCLIENT CParticleOperatorVelocity : public CParticleOperator {
-  private:
-	Vector3 m_velocity = {};
-  public:
-	CParticleOperatorVelocity() = default;
-	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
-	float GetSpeed() const;
-};
+export namespace pragma::pts {
+	class DLLCLIENT CParticleOperatorVelocity : public CParticleOperator {
+	private:
+		Vector3 m_velocity = {};
+	public:
+		CParticleOperatorVelocity() = default;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Simulate(pragma::pts::CParticle &particle, double tDelta, float strength) override;
+		float GetSpeed() const;
+	};
+}
 
-void CParticleOperatorVelocity::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorVelocity::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -31,10 +33,10 @@ void CParticleOperatorVelocity::Initialize(pragma::BaseEnvParticleSystemComponen
 			m_velocity = uvec::create(it->second);
 	}
 }
-void CParticleOperatorVelocity::Simulate(CParticle &particle, double tDelta, float strength)
+void pragma::pts::CParticleOperatorVelocity::Simulate(pragma::pts::CParticle &particle, double tDelta, float strength)
 {
 	Vector3 vel = particle.GetVelocity();
 	vel += m_velocity * (float)tDelta;
 	particle.SetVelocity(vel);
 }
-float CParticleOperatorVelocity::GetSpeed() const { return uvec::length(m_velocity); }
+float pragma::pts::CParticleOperatorVelocity::GetSpeed() const { return uvec::length(m_velocity); }

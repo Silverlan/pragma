@@ -39,7 +39,7 @@ static std::vector<std::string> &get_folders()
 	return folders;
 }
 
-DLLNETWORK bool IsValidResource(std::string res)
+bool pragma::networking::is_valid_resource(std::string res)
 {
 	auto &extensions = get_extensions();
 	if(!ufile::compare_extension(res, extensions))

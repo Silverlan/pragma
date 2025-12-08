@@ -31,7 +31,7 @@ void BaseWorldComponent::InitializePhysics()
 		return;
 	auto mdl = ent.GetModel();
 	if(mdl)
-		pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::STATIC);
+		pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Static);
 	else
 		pPhysComponent->DestroyPhysicsObject();
 }

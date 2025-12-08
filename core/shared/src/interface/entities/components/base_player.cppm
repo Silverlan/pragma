@@ -27,7 +27,7 @@ export {
 			virtual Con::c_cout &print(Con::c_cout &);
 			virtual std::ostream &print(std::ostream &);
 
-			virtual void OnTakenDamage(DamageInfo &info, unsigned short oldHealth, unsigned short newHealth);
+			virtual void OnTakenDamage(game::DamageInfo &info, unsigned short oldHealth, unsigned short newHealth);
 			// Same as PlayActivity, but doesn't automatically transmit to clients if called serverside
 			virtual bool PlaySharedActivity(pragma::Activity activity);
 
@@ -77,7 +77,7 @@ export {
 			virtual unsigned short GetClientPort();
 			double ConnectionTime() const;
 			double TimeConnected() const;
-			virtual void PrintMessage(std::string message, MESSAGE type) = 0;
+			virtual void PrintMessage(std::string message, pragma::console::MESSAGE type) = 0;
 			void GetConVars(std::unordered_map<std::string, std::string> **convars);
 			bool GetConVar(std::string cvar, std::string *val);
 			std::string GetConVarString(std::string cvar) const;
@@ -144,7 +144,7 @@ export {
 			Vector2 CalcMovementSpeed() const;
 			float CalcAirMovementModifier() const;
 			float CalcMovementAcceleration(float &optOutRampUpTime) const;
-			void OnKilled(DamageInfo *dmgInfo = nullptr);
+			void OnKilled(game::DamageInfo *dmgInfo = nullptr);
 
 			virtual void OnTick(double tDelta) override;
 			std::shared_ptr<pragma::physics::IConvexShape> m_shapeStand = nullptr;

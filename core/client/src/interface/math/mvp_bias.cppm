@@ -7,7 +7,7 @@ export module pragma.client:math.mvp_bias;
 
 export import pragma.math;
 
-export {
+export namespace pragma::math {
 	template<int i>
 	class MVPBase {
 	  protected:

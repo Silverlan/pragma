@@ -7,8 +7,8 @@ module pragma.shared;
 import :console.convar;
 import :console.cvar_handler;
 
-std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &CVarHandler::GetConVarPtrs() { throw std::runtime_error {"Not implemented!"}; }
-ConVarHandle CVarHandler::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar)
+std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &pragma::console::CVarHandler::GetConVarPtrs() { throw std::runtime_error {"Not implemented!"}; }
+pragma::console::ConVarHandle pragma::console::CVarHandler::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar)
 {
 	std::unordered_map<std::string, std::shared_ptr<PtrConVar>>::iterator i = ptrs.find(scvar);
 	if(i == ptrs.end()) {
@@ -20,31 +20,31 @@ ConVarHandle CVarHandler::GetConVarHandle(std::unordered_map<std::string, std::s
 	return ConVarHandle(i->second);
 }
 
-CVarHandler::CVarHandler() {}
+pragma::console::CVarHandler::CVarHandler() {}
 
-CVarHandler::~CVarHandler() { ClearCommands(); }
+pragma::console::CVarHandler::~CVarHandler() { ClearCommands(); }
 
-void CVarHandler::ClearCommands()
+void pragma::console::CVarHandler::ClearCommands()
 {
 	m_conCommandIDs.clear();
 	m_cvarCallbacks.clear();
 	m_conVars.clear();
 }
 
-void CVarHandler::Initialize()
+void pragma::console::CVarHandler::Initialize()
 {
 	ConVarMap *map = GetConVarMap();
 	if(map != nullptr) {
 		auto &cvars = map->GetConVars();
 		for(auto &pair : cvars) {
 			auto *cf = pair.second->Copy();
-			if(cf->GetType() == ConType::Var) {
+			if(cf->GetType() == pragma::console::ConType::Var) {
 				auto &conVarPtrs = GetConVarPtrs();
 				auto j = conVarPtrs.find(pair.first);
 				if(j != conVarPtrs.end())
 					j->second->set(static_cast<ConVar *>(cf));
 			}
-			m_conVars.insert(decltype(m_conVars)::value_type(pair.first, std::shared_ptr<ConConf>(cf)));
+			m_conVars.insert(decltype(m_conVars)::value_type(pair.first, std::shared_ptr<pragma::console::ConConf>(cf)));
 		}
 
 		auto &callbacks = map->GetConVarCallbacks();
@@ -58,11 +58,11 @@ void CVarHandler::Initialize()
 	}
 }
 
-std::shared_ptr<ConVar> CVarHandler::RegisterConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help)
+std::shared_ptr<pragma::console::ConVar> pragma::console::CVarHandler::RegisterConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto it = m_conVars.find(scmd);
 	if(it != m_conVars.end()) {
-		if(it->second->GetType() != ConType::Var)
+		if(it->second->GetType() != pragma::console::ConType::Var)
 			return nullptr;
 		return std::static_pointer_cast<ConVar>(it->second);
 	}
@@ -75,11 +75,11 @@ std::shared_ptr<ConVar> CVarHandler::RegisterConVar(const std::string &scmd, udm
 		return nullptr;
 	return std::static_pointer_cast<ConVar>(it->second);
 }
-std::shared_ptr<ConCommand> CVarHandler::RegisterConCommand(const std::string &scmd, const std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &fc, pragma::console::ConVarFlags flags, const std::string &help)
+std::shared_ptr<pragma::console::ConCommand> pragma::console::CVarHandler::RegisterConCommand(const std::string &scmd, const std::function<void(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &fc, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto it = m_conVars.find(scmd);
 	if(it != m_conVars.end()) {
-		if(it->second->GetType() != ConType::Cmd)
+		if(it->second->GetType() != pragma::console::ConType::Cmd)
 			return nullptr;
 		return std::static_pointer_cast<ConCommand>(it->second);
 	}
@@ -87,12 +87,12 @@ std::shared_ptr<ConCommand> CVarHandler::RegisterConCommand(const std::string &s
 	return std::static_pointer_cast<ConCommand>(it->second);
 }
 template<typename T>
-CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, T, T)> &function)
+CallbackHandle pragma::console::CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, T, T)> &function)
 {
 	auto it = m_cvarCallbacks.find(scvar);
 	if(it == m_cvarCallbacks.end())
 		it = m_cvarCallbacks.insert(decltype(m_cvarCallbacks)::value_type(scvar, {})).first;
-	auto f = [function](NetworkState *nw, const ConVar &cvar, const void *poldVal, const void *pnewVal) {
+	auto f = [function](pragma::NetworkState *nw, const ConVar &cvar, const void *poldVal, const void *pnewVal) {
 		udm::visit(cvar.GetVarType(), [poldVal, pnewVal, &function, &nw, &cvar](auto tag) {
 			using TCvar = typename decltype(tag)::type;
 			if constexpr(udm::is_convertible<TCvar, T>()) {
@@ -106,28 +106,28 @@ CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, con
 	callbacks.push_back(CvarCallback {f});
 	return callbacks.back().GetFunction();
 }
-CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, int, int)> &function) { return RegisterConVarCallback<int>(scvar, function); }
-CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, std::string, std::string)> &function) { return RegisterConVarCallback<std::string>(scvar, function); }
-CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, float, float)> &function) { return RegisterConVarCallback<float>(scvar, function); }
-CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, bool, bool)> &function) { return RegisterConVarCallback<bool>(scvar, function); }
+CallbackHandle pragma::console::CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, int, int)> &function) { return RegisterConVarCallback<int>(scvar, function); }
+CallbackHandle pragma::console::CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, std::string, std::string)> &function) { return RegisterConVarCallback<std::string>(scvar, function); }
+CallbackHandle pragma::console::CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, float, float)> &function) { return RegisterConVarCallback<float>(scvar, function); }
+CallbackHandle pragma::console::CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> &function) { return RegisterConVarCallback<bool>(scvar, function); }
 
-bool CVarHandler::InvokeConVarChangeCallbacks(const std::string &cvarName)
+bool pragma::console::CVarHandler::InvokeConVarChangeCallbacks(const std::string &cvarName)
 {
 	auto nCvarName = cvarName;
 	ustring::to_lower(nCvarName);
 	auto *cv = GetConVar(nCvarName);
-	if(cv == nullptr || cv->GetType() != ConType::Var)
+	if(cv == nullptr || cv->GetType() != pragma::console::ConType::Var)
 		return false;
 	SetConVar(nCvarName, static_cast<ConVar *>(cv)->GetString(), true);
 	return true;
 }
 
-ConVar *CVarHandler::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
+pragma::console::ConVar *pragma::console::CVarHandler::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
 {
 	ConConf *cv = GetConVar(scmd);
 	if(cv == nullptr)
 		return nullptr;
-	if(cv->GetType() != ConType::Var)
+	if(cv->GetType() != pragma::console::ConType::Var)
 		return nullptr;
 	ConVar *cvar = static_cast<ConVar *>(cv);
 	std::string prev = cvar->GetString();
@@ -156,7 +156,7 @@ ConVar *CVarHandler::SetConVar(std::string scmd, std::string value, bool bApplyI
 					itCb = it->second.erase(itCb);
 				else {
 					if(!ptrCb.IsLuaFunction())
-						fc.Call<void, NetworkState *, const ConVar &, const void *, const void *>(nullptr, *cvar, &prevVal, &newVal);
+						fc.Call<void, pragma::NetworkState *, const pragma::console::ConVar &, const void *, const void *>(nullptr, *cvar, &prevVal, &newVal);
 					++itCb;
 				}
 			}
@@ -165,7 +165,7 @@ ConVar *CVarHandler::SetConVar(std::string scmd, std::string value, bool bApplyI
 	return cvar;
 }
 
-ConConf *CVarHandler::GetConVar(std::string scmd)
+pragma::console::ConConf *pragma::console::CVarHandler::GetConVar(std::string scmd)
 {
 	ustring::to_lower(scmd);
 	auto it = m_conVars.find(scmd);
@@ -174,83 +174,83 @@ ConConf *CVarHandler::GetConVar(std::string scmd)
 	return it->second.get();
 }
 
-bool CVarHandler::GetConVarInt(std::string scmd, int32_t &outVal)
+bool pragma::console::CVarHandler::GetConVarInt(std::string scmd, int32_t &outVal)
 {
 	ConConf *cv = GetConVar(scmd);
-	if(cv == nullptr || cv->GetType() != ConType::Var)
+	if(cv == nullptr || cv->GetType() != pragma::console::ConType::Var)
 		return false;
 	ConVar *cvar = static_cast<ConVar *>(cv);
 	outVal = cvar->GetInt();
 	return true;
 }
-bool CVarHandler::GetConVarString(std::string scmd, std::string &outVal)
+bool pragma::console::CVarHandler::GetConVarString(std::string scmd, std::string &outVal)
 {
 	ConConf *cv = GetConVar(scmd);
-	if(cv == nullptr || cv->GetType() != ConType::Var)
+	if(cv == nullptr || cv->GetType() != pragma::console::ConType::Var)
 		return false;
 	ConVar *cvar = static_cast<ConVar *>(cv);
 	outVal = cvar->GetString();
 	return true;
 }
-bool CVarHandler::GetConVarFloat(std::string scmd, float &outVal)
+bool pragma::console::CVarHandler::GetConVarFloat(std::string scmd, float &outVal)
 {
 	ConConf *cv = GetConVar(scmd);
-	if(cv == nullptr || cv->GetType() != ConType::Var)
+	if(cv == nullptr || cv->GetType() != pragma::console::ConType::Var)
 		return false;
 	ConVar *cvar = static_cast<ConVar *>(cv);
 	outVal = cvar->GetFloat();
 	return true;
 }
-bool CVarHandler::GetConVarBool(std::string scmd, bool &outVal)
+bool pragma::console::CVarHandler::GetConVarBool(std::string scmd, bool &outVal)
 {
 	ConConf *cv = GetConVar(scmd);
-	if(cv == nullptr || cv->GetType() != ConType::Var)
+	if(cv == nullptr || cv->GetType() != pragma::console::ConType::Var)
 		return false;
 	ConVar *cvar = static_cast<ConVar *>(cv);
 	outVal = cvar->GetBool();
 	return true;
 }
-bool CVarHandler::GetConVarFlags(std::string scmd, pragma::console::ConVarFlags &outVal)
+bool pragma::console::CVarHandler::GetConVarFlags(std::string scmd, pragma::console::ConVarFlags &outVal)
 {
 	ConConf *cv = GetConVar(scmd);
-	if(cv == nullptr || cv->GetType() != ConType::Var)
+	if(cv == nullptr || cv->GetType() != pragma::console::ConType::Var)
 		return false;
 	ConVar *cvar = static_cast<ConVar *>(cv);
 	outVal = cvar->GetFlags();
 	return true;
 }
 
-int CVarHandler::GetConVarInt(std::string scmd)
+int pragma::console::CVarHandler::GetConVarInt(std::string scmd)
 {
 	auto val = 0;
 	GetConVarInt(scmd, val);
 	return val;
 }
-std::string CVarHandler::GetConVarString(std::string scmd)
+std::string pragma::console::CVarHandler::GetConVarString(std::string scmd)
 {
 	std::string val {};
 	GetConVarString(scmd, val);
 	return val;
 }
-float CVarHandler::GetConVarFloat(std::string scmd)
+float pragma::console::CVarHandler::GetConVarFloat(std::string scmd)
 {
 	auto val = 0.f;
 	GetConVarFloat(scmd, val);
 	return val;
 }
-bool CVarHandler::GetConVarBool(std::string scmd)
+bool pragma::console::CVarHandler::GetConVarBool(std::string scmd)
 {
 	auto val = false;
 	GetConVarBool(scmd, val);
 	return val;
 }
-pragma::console::ConVarFlags CVarHandler::GetConVarFlags(std::string scmd)
+pragma::console::ConVarFlags pragma::console::CVarHandler::GetConVarFlags(std::string scmd)
 {
 	auto val = pragma::console::ConVarFlags::None;
 	GetConVarFlags(scmd, val);
 	return val;
 }
-unsigned int CVarHandler::GetConVarID(std::string scmd)
+unsigned int pragma::console::CVarHandler::GetConVarID(std::string scmd)
 {
 	std::unordered_map<std::string, unsigned int>::iterator i = m_conCommandIDs.find(scmd);
 	if(i != m_conCommandIDs.end())
@@ -261,12 +261,12 @@ unsigned int CVarHandler::GetConVarID(std::string scmd)
 	return map->GetConVarID(scmd);
 }
 
-std::map<std::string, std::shared_ptr<ConConf>> &CVarHandler::GetConVars() { return m_conVars; }
-const std::map<std::string, std::shared_ptr<ConConf>> &CVarHandler::GetConVars() const { return const_cast<CVarHandler *>(this)->GetConVars(); }
+std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &pragma::console::CVarHandler::GetConVars() { return m_conVars; }
+const std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &pragma::console::CVarHandler::GetConVars() const { return const_cast<CVarHandler *>(this)->GetConVars(); }
 
-ConVarMap *CVarHandler::GetConVarMap() { return nullptr; }
+pragma::console::ConVarMap *pragma::console::CVarHandler::GetConVarMap() { return nullptr; }
 
-void CVarHandler::FindSimilarConVars(const std::string &input, const std::map<std::string, std::shared_ptr<ConConf>> &cvars, std::vector<SimilarCmdInfo> &similarCmds) const
+void pragma::console::CVarHandler::FindSimilarConVars(const std::string &input, const std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &cvars, std::vector<SimilarCmdInfo> &similarCmds) const
 {
 	auto bWasEmpty = similarCmds.empty();
 	for(auto &pair : cvars) {
@@ -286,9 +286,9 @@ void CVarHandler::FindSimilarConVars(const std::string &input, const std::map<st
 	}
 }
 
-void CVarHandler::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const { FindSimilarConVars(input, GetConVars(), similarCmds); }
+void pragma::console::CVarHandler::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const { FindSimilarConVars(input, GetConVars(), similarCmds); }
 
-std::vector<std::string> CVarHandler::FindSimilarConVars(const std::string &input, std::size_t maxCount) const
+std::vector<std::string> pragma::console::CVarHandler::FindSimilarConVars(const std::string &input, std::size_t maxCount) const
 {
 	std::vector<SimilarCmdInfo> similarCmds(maxCount);
 	implFindSimilarConVars(input, similarCmds);

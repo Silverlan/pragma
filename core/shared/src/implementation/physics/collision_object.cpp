@@ -193,7 +193,7 @@ void pragma::physics::IRigidBody::InitializeLuaObject(lua::State *lua) { IBase::
 //////////////////////////
 
 pragma::physics::ISoftBody::ISoftBody(IEnvironment &env, pragma::physics::IShape &shape, const std::vector<uint16_t> &meshVertIndicesToPhysIndices) : ICollisionObject {env, shape} {}
-pragma::ModelSubMesh *pragma::physics::ISoftBody::GetSubMesh() const { return m_subMesh.expired() ? nullptr : m_subMesh.lock().get(); }
+pragma::geometry::ModelSubMesh *pragma::physics::ISoftBody::GetSubMesh() const { return m_subMesh.expired() ? nullptr : m_subMesh.lock().get(); }
 
 bool pragma::physics::ISoftBody::IsSoftBody() const { return true; }
 

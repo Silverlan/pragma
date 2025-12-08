@@ -9,22 +9,22 @@ module pragma.client;
 
 import :console.commands;
 
-static WIHandle hGUIShadowmap;
+static pragma::gui::WIHandle hGUIShadowmap;
 static int numShadowmapTargets = 0;
 static int shadowmapTargetIdx = -1;
 static int shadowmapWidth;
 static int shadowmapHeight;
 static CallbackHandle cbRenderShadowMap;
 static CallbackHandle cbReleaseShadowMap;
-static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
-static bool get_shadow_map(NetworkState *nw, std::vector<std::string> &argv, pragma::CLightComponent **light, pragma::rendering::ShadowMapType smType)
+static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
+static bool get_shadow_map(pragma::NetworkState *nw, std::vector<std::string> &argv, pragma::CLightComponent **light, pragma::rendering::ShadowMapType smType)
 {
 	if(argv.empty())
 		return false;
-	auto ents = command::find_named_targets(nw, argv.front());
+	auto ents = pragma::console::find_named_targets(nw, argv.front());
 	if(ents.empty())
 		return false;
-	auto *ent = static_cast<CBaseEntity *>(ents.front());
+	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(ents.front());
 	auto *pLightComponent = static_cast<pragma::CLightComponent *>(ent->FindComponent("light").get());
 	if(pLightComponent == nullptr) {
 		Con::cwar << "Entity '" << ent->GetClass() << "'(" << argv.front() << ") is not a light!" << Con::endl;
@@ -43,9 +43,9 @@ static bool get_shadow_map(NetworkState *nw, std::vector<std::string> &argv, pra
 	return true;
 }
 
-void CMD_debug_light_shadowmap(NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_debug_light_shadowmap(pragma::NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
 	const std::string name = "debug_shadowmap";
 	auto *pEl = pRoot->FindDescendantByName(name);
@@ -62,7 +62,7 @@ void CMD_debug_light_shadowmap(NetworkState *nw, pragma::BasePlayerComponent *, 
 		return;
 	if(pragma::get_cgame() == nullptr || argv.empty() || pRoot == nullptr)
 		return;
-	auto *pElSm = wgui.Create<WIDebugShadowMap>();
+	auto *pElSm = wgui.Create<pragma::gui::types::WIDebugShadowMap>();
 	if(pElSm == nullptr)
 		return;
 	auto size = 256u;
@@ -77,7 +77,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_light_shadowmap", &CMD_debug_light_shadowmap, pragma::console::ConVarFlags::None,
 	  "Displays the depth map for the given light on screen. Call without arguments to turn the display off. Usage: debug_light_shadowmap <lightEntityIndex>");
 }
-static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(NetworkState *state, const ConVar &, int, int)
+static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(pragma::NetworkState *state, const pragma::console::ConVar &, int, int)
 {
 	if(shadowmapTargetIdx == -1)
 		return;

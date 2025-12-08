@@ -260,15 +260,15 @@ export namespace pragma {
 	};
 
 	class LuaShaderWrapperGUI;
-	struct DLLCLIENT LShaderGui : public TLShaderBase<wgui::Shader> {
+	struct DLLCLIENT LShaderGui : public TLShaderBase<pragma::gui::shaders::Shader> {
 	  public:
-		using TBaseShader = wgui::Shader;
+		using TBaseShader = pragma::gui::shaders::Shader;
 		LShaderGui();
 
-		virtual void SetIdentifier(const std::string &identifier) override { wgui::Shader::SetIdentifier(identifier); }
-		virtual void SetPipelineCount(uint32_t count) override { wgui::Shader::SetPipelineCount(count); }
+		virtual void SetIdentifier(const std::string &identifier) override { pragma::gui::shaders::Shader::SetIdentifier(identifier); }
+		virtual void SetPipelineCount(uint32_t count) override { pragma::gui::shaders::Shader::SetPipelineCount(count); }
 
-		bool RecordBeginDraw(prosper::ShaderBindState &bindState, wgui::DrawState &drawState, uint32_t width, uint32_t height, wgui::StencilPipeline pipelineIdx, bool msaa, uint32_t testStencilLevel) const;
+		bool RecordBeginDraw(prosper::ShaderBindState &bindState, pragma::gui::DrawState &drawState, uint32_t width, uint32_t height, pragma::gui::StencilPipeline pipelineIdx, bool msaa, uint32_t testStencilLevel) const;
 	  protected:
 		friend LuaShaderWrapperGUI;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
@@ -293,13 +293,13 @@ export namespace pragma {
 	};
 
 	class LuaShaderWrapperGUITextured;
-	struct DLLCLIENT LShaderGuiTextured : public TLShaderBase<wgui::ShaderTextured> {
+	struct DLLCLIENT LShaderGuiTextured : public TLShaderBase<pragma::gui::shaders::ShaderTextured> {
 	  public:
-		using TBaseShader = wgui::ShaderTextured;
+		using TBaseShader = pragma::gui::shaders::ShaderTextured;
 		LShaderGuiTextured();
 
-		virtual void SetIdentifier(const std::string &identifier) override { wgui::ShaderTextured::SetIdentifier(identifier); }
-		virtual void SetPipelineCount(uint32_t count) override { wgui::ShaderTextured::SetPipelineCount(count); }
+		virtual void SetIdentifier(const std::string &identifier) override { pragma::gui::shaders::ShaderTextured::SetIdentifier(identifier); }
+		virtual void SetPipelineCount(uint32_t count) override { pragma::gui::shaders::ShaderTextured::SetPipelineCount(count); }
 	  protected:
 		friend LuaShaderWrapperGUITextured;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { TBaseShader::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
@@ -497,8 +497,8 @@ export namespace pragma {
 		void Lua_OnBindMaterial(msys::Material &mat);
 		static void Lua_default_OnBindMaterial(lua::State *l, LuaShaderWrapperTextured3D &shader, msys::Material &mat) { shader.Lua_OnBindMaterial(mat); }
 
-		int32_t Lua_OnDraw(pragma::ModelSubMesh &mesh);
-		static int32_t Lua_default_OnDraw(lua::State *l, LuaShaderWrapperTextured3D &shader, pragma::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }
+		int32_t Lua_OnDraw(pragma::geometry::ModelSubMesh &mesh);
+		static int32_t Lua_default_OnDraw(lua::State *l, LuaShaderWrapperTextured3D &shader, pragma::geometry::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }
 
 		void Lua_OnBindEntity(EntityHandle &hEnt);
 		static void Lua_default_OnBindEntity(lua::State *l, LuaShaderWrapperTextured3D &shader, EntityHandle &hEnt) { shader.Lua_OnBindEntity(hEnt); }
@@ -572,8 +572,8 @@ export namespace pragma {
 		void Lua_OnBindMaterial(msys::Material &mat);
 		static void Lua_default_OnBindMaterial(lua::State *l, LuaShaderWrapperPbr &shader, msys::Material &mat) { shader.Lua_OnBindMaterial(mat); }
 
-		int32_t Lua_OnDraw(pragma::ModelSubMesh &mesh);
-		static int32_t Lua_default_OnDraw(lua::State *l, LuaShaderWrapperPbr &shader, pragma::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }
+		int32_t Lua_OnDraw(pragma::geometry::ModelSubMesh &mesh);
+		static int32_t Lua_default_OnDraw(lua::State *l, LuaShaderWrapperPbr &shader, pragma::geometry::ModelSubMesh &mesh) { return shader.Lua_OnDraw(mesh); }
 
 		void Lua_OnBindEntity(EntityHandle &hEnt);
 		static void Lua_default_OnBindEntity(lua::State *l, LuaShaderWrapperPbr &shader, EntityHandle &hEnt) { shader.Lua_OnBindEntity(hEnt); }

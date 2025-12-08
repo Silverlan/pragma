@@ -913,7 +913,7 @@ void pragma::animation::Animation::Scale(const Vector3 &scale)
 
 void pragma::animation::Animation::Mirror(pragma::Axis axis)
 {
-	auto transform = pragma::model::get_mirror_transform_vector(axis);
+	auto transform = pragma::asset::get_mirror_transform_vector(axis);
 	for(auto &frame : m_frames)
 		frame->Mirror(axis);
 
@@ -932,7 +932,7 @@ int32_t pragma::animation::Animation::LookupBone(uint32_t boneId) const
 	return it->second;
 }
 
-void pragma::animation::Animation::CalcRenderBounds(pragma::Model &mdl)
+void pragma::animation::Animation::CalcRenderBounds(pragma::asset::Model &mdl)
 {
 	m_renderBounds = {{std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()}, {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()}};
 	for(auto &frame : m_frames) {
@@ -975,13 +975,13 @@ void pragma::animation::Animation::Validate()
 	for(auto &frame : GetFrames())
 		frame->Validate();
 	for(auto &w : GetBoneWeights())
-		pragma::model::validate_value(w);
-	pragma::model::validate_value(GetDuration());
-	pragma::model::validate_value(GetFadeInTime());
-	pragma::model::validate_value(GetFadeOutTime());
+		pragma::asset::validate_value(w);
+	pragma::asset::validate_value(GetDuration());
+	pragma::asset::validate_value(GetFadeInTime());
+	pragma::asset::validate_value(GetFadeOutTime());
 	auto &[min, max] = GetRenderBounds();
-	pragma::model::validate_value(min);
-	pragma::model::validate_value(max);
+	pragma::asset::validate_value(min);
+	pragma::asset::validate_value(max);
 }
 float pragma::animation::Animation::GetFadeInTime()
 {

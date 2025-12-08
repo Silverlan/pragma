@@ -9,7 +9,7 @@ export module pragma.client:particle_system.particle;
 
 export import pragma.math;
 
-export {
+export namespace pragma::pts {
 #pragma warning(push)
 #pragma warning(disable : 4251)
 	class DLLCLIENT CParticleSystemBaseKeyValues {

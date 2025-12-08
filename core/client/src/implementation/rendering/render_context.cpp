@@ -14,11 +14,11 @@ using namespace pragma;
 static spdlog::logger &LOGGER = pragma::register_logger("prosper");
 static spdlog::logger &LOGGER_VALIDATION = pragma::register_logger("prosper_validation");
 
-RenderContext::RenderContext() : m_monitor(nullptr), m_renderAPI {"vulkan"} {}
-RenderContext::~RenderContext() {}
+pragma::rendering::RenderContext::RenderContext() : m_monitor(nullptr), m_renderAPI {"vulkan"} {}
+pragma::rendering::RenderContext::~RenderContext() {}
 std::optional<std::string> g_customTitle;
 extern bool g_cpuRendering;
-void RenderContext::InitializeRenderAPI()
+void pragma::rendering::RenderContext::InitializeRenderAPI()
 {
 	auto &renderAPI = GetRenderAPI();
 	auto getRenderApiPath = [](const std::string &renderAPI, std::string &outLocation, std::string &outModulePath) {
@@ -150,7 +150,7 @@ void RenderContext::InitializeRenderAPI()
 		SetValidationErrorDisabled("VUID-VkMappedMemoryRange-size-01390", true);
 	}
 }
-void RenderContext::Release()
+void pragma::rendering::RenderContext::Release()
 {
 	if(m_renderContext == nullptr)
 		return;
@@ -164,20 +164,20 @@ void RenderContext::Release()
 	}
 	m_graphicsAPILib = nullptr;
 }
-const prosper::IPrContext &RenderContext::GetRenderContext() const { return const_cast<RenderContext *>(this)->GetRenderContext(); }
-prosper::IPrContext &RenderContext::GetRenderContext() { return *m_renderContext; }
-prosper::ShaderManager &RenderContext::GetShaderManager() const { return GetRenderContext().GetShaderManager(); }
-void RenderContext::RegisterShader(const std::string &identifier, const std::function<prosper::Shader *(prosper::IPrContext &, const std::string &)> &fFactory) { GetRenderContext().RegisterShader(identifier, fFactory); }
-::util::WeakHandle<prosper::Shader> RenderContext::GetShader(const std::string &identifier) const { return GetRenderContext().GetShader(identifier); }
+const prosper::IPrContext &pragma::rendering::RenderContext::GetRenderContext() const { return const_cast<RenderContext *>(this)->GetRenderContext(); }
+prosper::IPrContext &pragma::rendering::RenderContext::GetRenderContext() { return *m_renderContext; }
+prosper::ShaderManager &pragma::rendering::RenderContext::GetShaderManager() const { return GetRenderContext().GetShaderManager(); }
+void pragma::rendering::RenderContext::RegisterShader(const std::string &identifier, const std::function<prosper::Shader *(prosper::IPrContext &, const std::string &)> &fFactory) { GetRenderContext().RegisterShader(identifier, fFactory); }
+::util::WeakHandle<prosper::Shader> pragma::rendering::RenderContext::GetShader(const std::string &identifier) const { return GetRenderContext().GetShader(identifier); }
 
-prosper::Window &RenderContext::GetWindow() { return GetRenderContext().GetWindow(); }
-pragma::platform::Window &RenderContext::GetGlfwWindow() { return *GetRenderContext().GetWindow(); }
-const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetSetupCommandBuffer() { return GetRenderContext().GetSetupCommandBuffer(); }
-const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetDrawCommandBuffer() const { return GetRenderContext().GetWindow().GetDrawCommandBuffer(); }
-const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetDrawCommandBuffer(uint32_t swapchainIdx) const { return GetRenderContext().GetWindow().GetDrawCommandBuffer(swapchainIdx); }
-void RenderContext::FlushSetupCommandBuffer() { GetRenderContext().FlushSetupCommandBuffer(); }
-prosper::WindowSettings &RenderContext::GetInitialWindowSettings() { return GetRenderContext().GetInitialWindowSettings(); }
-void RenderContext::SetValidationErrorDisabled(const std::string &id, bool disabled)
+prosper::Window &pragma::rendering::RenderContext::GetWindow() { return GetRenderContext().GetWindow(); }
+pragma::platform::Window &pragma::rendering::RenderContext::GetGlfwWindow() { return *GetRenderContext().GetWindow(); }
+const std::shared_ptr<prosper::IPrimaryCommandBuffer> &pragma::rendering::RenderContext::GetSetupCommandBuffer() { return GetRenderContext().GetSetupCommandBuffer(); }
+const std::shared_ptr<prosper::IPrimaryCommandBuffer> &pragma::rendering::RenderContext::GetDrawCommandBuffer() const { return GetRenderContext().GetWindow().GetDrawCommandBuffer(); }
+const std::shared_ptr<prosper::IPrimaryCommandBuffer> &pragma::rendering::RenderContext::GetDrawCommandBuffer(uint32_t swapchainIdx) const { return GetRenderContext().GetWindow().GetDrawCommandBuffer(swapchainIdx); }
+void pragma::rendering::RenderContext::FlushSetupCommandBuffer() { GetRenderContext().FlushSetupCommandBuffer(); }
+prosper::WindowSettings &pragma::rendering::RenderContext::GetInitialWindowSettings() { return GetRenderContext().GetInitialWindowSettings(); }
+void pragma::rendering::RenderContext::SetValidationErrorDisabled(const std::string &id, bool disabled)
 {
 	if(!disabled) {
 		auto it = m_disabledValidationErrors.find(id);
@@ -187,12 +187,12 @@ void RenderContext::SetValidationErrorDisabled(const std::string &id, bool disab
 	}
 	m_disabledValidationErrors.insert(id);
 }
-bool RenderContext::IsValidationErrorDisabled(const std::string &id) const
+bool pragma::rendering::RenderContext::IsValidationErrorDisabled(const std::string &id) const
 {
 	auto it = m_disabledValidationErrors.find(id);
 	return (it != m_disabledValidationErrors.end());
 }
-void RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severityFlags, const std::string &message)
+void pragma::rendering::RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severityFlags, const std::string &message)
 {
 	std::string strMsg = message;
 
@@ -231,26 +231,26 @@ void RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severi
 	pragma::flush_loggers();
 }
 
-void RenderContext::OnClose() {}
+void pragma::rendering::RenderContext::OnClose() {}
 
-void RenderContext::OnResolutionChanged(uint32_t w, uint32_t h) {}
-void RenderContext::DrawFrameCore() {}
-void RenderContext::OnWindowInitialized()
+void pragma::rendering::RenderContext::OnResolutionChanged(uint32_t w, uint32_t h) {}
+void pragma::rendering::RenderContext::DrawFrameCore() {}
+void pragma::rendering::RenderContext::OnWindowInitialized()
 {
 	// TODO: Remove this function
 }
 
-void RenderContext::DrawFrame() { GetRenderContext().DrawFrameCore(); }
+void pragma::rendering::RenderContext::DrawFrame() { GetRenderContext().DrawFrameCore(); }
 
-void RenderContext::SetGfxAPIValidationEnabled(bool b)
+void pragma::rendering::RenderContext::SetGfxAPIValidationEnabled(bool b)
 {
 	umath::set_flag(m_stateFlags, StateFlags::GfxAPIValidationEnabled, b);
 	if(b)
 		spdlog::flush_on(spdlog::level::info); // Immediately flush all messages
 }
-void RenderContext::SetGfxDiagnosticsModeEnabled(bool b) { umath::set_flag(m_stateFlags, StateFlags::GfxDiagnosticsModeEnabled, b); }
-bool RenderContext::IsGfxAPIValidationEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::GfxAPIValidationEnabled); }
-bool RenderContext::IsGfxDiagnosticsModeEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::GfxDiagnosticsModeEnabled); }
+void pragma::rendering::RenderContext::SetGfxDiagnosticsModeEnabled(bool b) { umath::set_flag(m_stateFlags, StateFlags::GfxDiagnosticsModeEnabled, b); }
+bool pragma::rendering::RenderContext::IsGfxAPIValidationEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::GfxAPIValidationEnabled); }
+bool pragma::rendering::RenderContext::IsGfxDiagnosticsModeEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::GfxDiagnosticsModeEnabled); }
 
-void RenderContext::SetRenderAPI(const std::string &renderAPI) { m_renderAPI = renderAPI; }
-const std::string &RenderContext::GetRenderAPI() const { return m_renderAPI; }
+void pragma::rendering::RenderContext::SetRenderAPI(const std::string &renderAPI) { m_renderAPI = renderAPI; }
+const std::string &pragma::rendering::RenderContext::GetRenderAPI() const { return m_renderAPI; }

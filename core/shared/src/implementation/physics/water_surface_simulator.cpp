@@ -10,25 +10,25 @@ import :physics.water_surface_simulator;
 
 // See http://www.randygaul.net/wp-content/uploads/2014/02/RigidBodies_WaterSurface.pdf for surface simulation algorithms
 
-PhysWaterSurfaceSimulator::SplashInfo::SplashInfo(const Vector3 &_origin, float _radius, float _force, uint32_t _width, uint32_t _length) : origin(_origin.x, _origin.y, _origin.z), radius(_radius), radiusSqr(umath::pow2(_radius)), force(_force), width(_width), length(_length) {}
+pragma::physics::PhysWaterSurfaceSimulator::SplashInfo::SplashInfo(const Vector3 &_origin, float _radius, float _force, uint32_t _width, uint32_t _length) : origin(_origin.x, _origin.y, _origin.z), radius(_radius), radiusSqr(umath::pow2(_radius)), force(_force), width(_width), length(_length) {}
 
-float PhysWaterSurfaceSimulator::Particle::GetHeight() const { return m_height; }
-void PhysWaterSurfaceSimulator::Particle::SetHeight(float height) { m_height = height; }
-float PhysWaterSurfaceSimulator::Particle::GetOldHeight() const { return m_oldHeight; }
-void PhysWaterSurfaceSimulator::Particle::SetOldHeight(float oldHeight) { m_oldHeight = oldHeight; }
-float PhysWaterSurfaceSimulator::Particle::GetTargetHeight() const { return m_targetHeight; }
-void PhysWaterSurfaceSimulator::Particle::SetTargetHeight(float height) { m_targetHeight = height; }
-float PhysWaterSurfaceSimulator::Particle::GetVelocity() const { return m_velocity; }
-void PhysWaterSurfaceSimulator::Particle::SetVelocity(float vel) { m_velocity = vel; }
-void PhysWaterSurfaceSimulator::Particle::SetNeighbor(std::size_t idx, uint32_t ptIdx)
+float pragma::physics::PhysWaterSurfaceSimulator::Particle::GetHeight() const { return m_height; }
+void pragma::physics::PhysWaterSurfaceSimulator::Particle::SetHeight(float height) { m_height = height; }
+float pragma::physics::PhysWaterSurfaceSimulator::Particle::GetOldHeight() const { return m_oldHeight; }
+void pragma::physics::PhysWaterSurfaceSimulator::Particle::SetOldHeight(float oldHeight) { m_oldHeight = oldHeight; }
+float pragma::physics::PhysWaterSurfaceSimulator::Particle::GetTargetHeight() const { return m_targetHeight; }
+void pragma::physics::PhysWaterSurfaceSimulator::Particle::SetTargetHeight(float height) { m_targetHeight = height; }
+float pragma::physics::PhysWaterSurfaceSimulator::Particle::GetVelocity() const { return m_velocity; }
+void pragma::physics::PhysWaterSurfaceSimulator::Particle::SetVelocity(float vel) { m_velocity = vel; }
+void pragma::physics::PhysWaterSurfaceSimulator::Particle::SetNeighbor(std::size_t idx, uint32_t ptIdx)
 {
 	if(idx >= m_neighbors.size())
 		return;
 	m_neighbors.at(idx) = ptIdx;
 }
-PhysWaterSurfaceSimulator::Edge::Edge(uint32_t idx0, uint32_t idx1) : index0(idx0), index1(idx1) {}
+pragma::physics::PhysWaterSurfaceSimulator::Edge::Edge(uint32_t idx0, uint32_t idx1) : index0(idx0), index1(idx1) {}
 
-PhysWaterSurfaceSimulator::PhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 aabbMax, float originY, uint32_t spacing, float stiffness, float propagation)
+pragma::physics::PhysWaterSurfaceSimulator::PhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 aabbMax, float originY, uint32_t spacing, float stiffness, float propagation)
 {
 	m_surfaceInfo.stiffness = stiffness;
 	m_surfaceInfo.propagation = propagation;
@@ -49,9 +49,9 @@ PhysWaterSurfaceSimulator::PhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 aa
 	m_surfaceInfo.length = (aabbMax.x - aabbMin.x) / spacing;
 	m_surfaceInfo.width = (aabbMax.y - aabbMin.y) / spacing;
 }
-PhysWaterSurfaceSimulator::~PhysWaterSurfaceSimulator() { JoinThread(); }
-const Vector3 &PhysWaterSurfaceSimulator::GetOrigin() const { return m_surfaceInfo.origin; }
-void PhysWaterSurfaceSimulator::InitializeSurface()
+pragma::physics::PhysWaterSurfaceSimulator::~PhysWaterSurfaceSimulator() { JoinThread(); }
+const Vector3 &pragma::physics::PhysWaterSurfaceSimulator::GetOrigin() const { return m_surfaceInfo.origin; }
+void pragma::physics::PhysWaterSurfaceSimulator::InitializeSurface()
 {
 	auto width = GetWidth();
 	auto length = GetLength();
@@ -94,7 +94,7 @@ void PhysWaterSurfaceSimulator::InitializeSurface()
 		}
 	}
 }
-void PhysWaterSurfaceSimulator::Initialize()
+void pragma::physics::PhysWaterSurfaceSimulator::Initialize()
 {
 	InitializeSurface();
 	if(m_particleField.empty() == true)
@@ -106,21 +106,21 @@ void PhysWaterSurfaceSimulator::Initialize()
 			SimulateWaves(0.01); // TODO: Delta?
 	});
 }
-uint32_t PhysWaterSurfaceSimulator::GetSpacing() const { return m_surfaceInfo.spacing; }
-uint32_t PhysWaterSurfaceSimulator::GetWidth() const { return m_surfaceInfo.width; }
-uint32_t PhysWaterSurfaceSimulator::GetLength() const { return m_surfaceInfo.length; }
-std::vector<PhysWaterSurfaceSimulator::Particle> &PhysWaterSurfaceSimulator::GetParticleField() { return m_particleField; }
-std::vector<PhysWaterSurfaceSimulator::Edge> &PhysWaterSurfaceSimulator::GetParticleEdges() { return m_particleEdges; }
-const std::vector<PhysWaterSurfaceSimulator::Particle> &PhysWaterSurfaceSimulator::GetParticleField() const { return const_cast<PhysWaterSurfaceSimulator *>(this)->GetParticleField(); }
-const std::vector<PhysWaterSurfaceSimulator::Edge> &PhysWaterSurfaceSimulator::GetParticleEdges() const { return const_cast<PhysWaterSurfaceSimulator *>(this)->GetParticleEdges(); }
-std::size_t PhysWaterSurfaceSimulator::GetParticleCount() const { return m_particleField.size(); }
-float PhysWaterSurfaceSimulator::GetStiffness() const { return m_surfaceInfo.stiffness; }
-void PhysWaterSurfaceSimulator::SetStiffness(float stiffness) { m_surfaceInfo.stiffness = stiffness; }
-float PhysWaterSurfaceSimulator::GetMaxWaveHeight() const { return m_surfaceInfo.maxHeight; }
-void PhysWaterSurfaceSimulator::SetMaxWaveHeight(float height) { m_surfaceInfo.maxHeight = height; }
-void PhysWaterSurfaceSimulator::SetPropagation(float propagation) { m_surfaceInfo.propagation = propagation; }
-float PhysWaterSurfaceSimulator::GetPropagation() const { return m_surfaceInfo.propagation; }
-void PhysWaterSurfaceSimulator::CreateSplash(const Vector3 &origin, float radius, float force)
+uint32_t pragma::physics::PhysWaterSurfaceSimulator::GetSpacing() const { return m_surfaceInfo.spacing; }
+uint32_t pragma::physics::PhysWaterSurfaceSimulator::GetWidth() const { return m_surfaceInfo.width; }
+uint32_t pragma::physics::PhysWaterSurfaceSimulator::GetLength() const { return m_surfaceInfo.length; }
+std::vector<pragma::physics::PhysWaterSurfaceSimulator::Particle> &pragma::physics::PhysWaterSurfaceSimulator::GetParticleField() { return m_particleField; }
+std::vector<pragma::physics::PhysWaterSurfaceSimulator::Edge> &pragma::physics::PhysWaterSurfaceSimulator::GetParticleEdges() { return m_particleEdges; }
+const std::vector<pragma::physics::PhysWaterSurfaceSimulator::Particle> &pragma::physics::PhysWaterSurfaceSimulator::GetParticleField() const { return const_cast<PhysWaterSurfaceSimulator *>(this)->GetParticleField(); }
+const std::vector<pragma::physics::PhysWaterSurfaceSimulator::Edge> &pragma::physics::PhysWaterSurfaceSimulator::GetParticleEdges() const { return const_cast<PhysWaterSurfaceSimulator *>(this)->GetParticleEdges(); }
+std::size_t pragma::physics::PhysWaterSurfaceSimulator::GetParticleCount() const { return m_particleField.size(); }
+float pragma::physics::PhysWaterSurfaceSimulator::GetStiffness() const { return m_surfaceInfo.stiffness; }
+void pragma::physics::PhysWaterSurfaceSimulator::SetStiffness(float stiffness) { m_surfaceInfo.stiffness = stiffness; }
+float pragma::physics::PhysWaterSurfaceSimulator::GetMaxWaveHeight() const { return m_surfaceInfo.maxHeight; }
+void pragma::physics::PhysWaterSurfaceSimulator::SetMaxWaveHeight(float height) { m_surfaceInfo.maxHeight = height; }
+void pragma::physics::PhysWaterSurfaceSimulator::SetPropagation(float propagation) { m_surfaceInfo.propagation = propagation; }
+float pragma::physics::PhysWaterSurfaceSimulator::GetPropagation() const { return m_surfaceInfo.propagation; }
+void pragma::physics::PhysWaterSurfaceSimulator::CreateSplash(const Vector3 &origin, float radius, float force)
 {
 	if(radius <= 0.f)
 		return;
@@ -128,17 +128,17 @@ void PhysWaterSurfaceSimulator::CreateSplash(const Vector3 &origin, float radius
 	m_splashQueue.push({origin, radius, force, GetWidth(), GetLength()});
 	m_splashMutex.unlock();
 }
-//const Vector3 &PhysWaterSurfaceSimulator::GetPosition() const {return m_position;}
-//void PhysWaterSurfaceSimulator::SetPosition(const Vector3 &pos) {m_position = pos;}
-//const Quat &PhysWaterSurfaceSimulator::GetRotation() const {return m_rotation;}
-//void PhysWaterSurfaceSimulator::SetRotation(const Quat &rot) {m_rotation = rot;} // TODO
-void PhysWaterSurfaceSimulator::Simulate(double dt)
+//const Vector3 &pragma::physics::PhysWaterSurfaceSimulator::GetPosition() const {return m_position;}
+//void pragma::physics::PhysWaterSurfaceSimulator::SetPosition(const Vector3 &pos) {m_position = pos;}
+//const Quat &pragma::physics::PhysWaterSurfaceSimulator::GetRotation() const {return m_rotation;}
+//void pragma::physics::PhysWaterSurfaceSimulator::SetRotation(const Quat &rot) {m_rotation = rot;} // TODO
+void pragma::physics::PhysWaterSurfaceSimulator::Simulate(double dt)
 {
 	if(m_bUseThread == true)
 		return;
 	SimulateWaves(dt);
 }
-void PhysWaterSurfaceSimulator::SimulateWaves(double dt)
+void pragma::physics::PhysWaterSurfaceSimulator::SimulateWaves(double dt)
 {
 	//if(dt <= 0.0) // TODO
 	//	return;
@@ -182,16 +182,16 @@ void PhysWaterSurfaceSimulator::SimulateWaves(double dt)
 	std::copy(m_threadParticleHeights.begin(), m_threadParticleHeights.end(), m_particleHeights.begin());
 	m_heightMutex.unlock();
 }
-uint8_t PhysWaterSurfaceSimulator::GetEdgeIterationCount() const { return pragma::Engine::Get()->GetServerNetworkState()->GetConVarInt("sv_water_surface_simulation_edge_iteration_count"); }
-Vector3 PhysWaterSurfaceSimulator::CalcParticlePosition(const SurfaceInfo &surfInfo, const std::vector<float> &heights, std::size_t ptIdx) const
+uint8_t pragma::physics::PhysWaterSurfaceSimulator::GetEdgeIterationCount() const { return pragma::Engine::Get()->GetServerNetworkState()->GetConVarInt("sv_water_surface_simulation_edge_iteration_count"); }
+Vector3 pragma::physics::PhysWaterSurfaceSimulator::CalcParticlePosition(const SurfaceInfo &surfInfo, const std::vector<float> &heights, std::size_t ptIdx) const
 {
 	auto c = GetParticleCoordinates(surfInfo, ptIdx);
 	return Vector3 {surfInfo.origin.x + c.first * surfInfo.spacing, surfInfo.origin.y + heights.at(ptIdx), surfInfo.origin.z + c.second * surfInfo.spacing};
 }
-Vector3 PhysWaterSurfaceSimulator::CalcParticlePosition(std::size_t ptIdx) const { return CalcParticlePosition(m_surfaceInfo, m_particleHeights, ptIdx); }
-void PhysWaterSurfaceSimulator::LockParticleHeights() { m_heightMutex.lock(); }
-void PhysWaterSurfaceSimulator::UnlockParticleHeights() { m_heightMutex.unlock(); }
-bool PhysWaterSurfaceSimulator::CalcPointSurfaceIntersection(const Vector3 &origin, Vector3 &intersection) const
+Vector3 pragma::physics::PhysWaterSurfaceSimulator::CalcParticlePosition(std::size_t ptIdx) const { return CalcParticlePosition(m_surfaceInfo, m_particleHeights, ptIdx); }
+void pragma::physics::PhysWaterSurfaceSimulator::LockParticleHeights() { m_heightMutex.lock(); }
+void pragma::physics::PhysWaterSurfaceSimulator::UnlockParticleHeights() { m_heightMutex.unlock(); }
+bool pragma::physics::PhysWaterSurfaceSimulator::CalcPointSurfaceIntersection(const Vector3 &origin, Vector3 &intersection) const
 {
 	auto posFirst = CalcParticlePosition(0);
 	auto posLast = CalcParticlePosition(m_particleField.size() - 1);

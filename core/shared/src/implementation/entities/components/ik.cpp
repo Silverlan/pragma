@@ -58,7 +58,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		IKJointInfo(uint32_t boneId) : boneId(boneId) {}
 		uint32_t boneId = std::numeric_limits<uint32_t>::max();
 		uint32_t jointId = std::numeric_limits<uint32_t>::max();
-		OrientedPoint referenceTransform = {};
+		math::OrientedPoint referenceTransform = {};
 
 		std::array<std::shared_ptr<Node>, 3> nodes = {};
 	};
@@ -91,7 +91,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	auto &joints = hMdl->GetJoints();
 	for(auto &ikJoint : ikJoints) {
 		auto boneId = ikJoint.boneId;
-		auto itJoint = std::find_if(joints.begin(), joints.end(), [boneId](const JointInfo &joint) { return joint.child == boneId && (joint.type == JointType::DOF || joint.type == JointType::ConeTwist); });
+		auto itJoint = std::find_if(joints.begin(), joints.end(), [boneId](const pragma::physics::JointInfo &joint) { return joint.child == boneId && (joint.type == pragma::physics::JointType::DOF || joint.type == pragma::physics::JointType::ConeTwist); });
 		if(itJoint == joints.end()) {
 			Con::cwar << "Unable to initialize ik controller for " << ikController->GetEffectorName() << ": Joint for bone " << ikJoint.boneId << " in chain does not have joint assigned to it!" << Con::endl;
 			return false; // All bones in chain need to have a valid joint assigned to them
@@ -112,7 +112,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		auto min = EulerAngles {};
 		auto max = EulerAngles {};
 		switch(joint.type) {
-		case JointType::DOF:
+		case pragma::physics::JointType::DOF:
 			{
 				auto itMin = joint.args.find("ang_limit_l");
 				if(itMin != joint.args.end())
@@ -122,7 +122,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 					max = EulerAngles(itMax->second);
 				break;
 			}
-		case JointType::ConeTwist:
+		case pragma::physics::JointType::ConeTwist:
 			{
 				auto itSp1l = joint.args.find("sp1l");
 				if(itSp1l != joint.args.end())

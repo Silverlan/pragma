@@ -63,7 +63,7 @@ void CRendererPpVolumetricComponent::Initialize()
 	if(GetEntity().IsSpawned())
 		ReloadRenderTarget();
 }
-void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererPpVolumetricComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired() || m_renderer.expired() || g_shader.expired() || !m_renderTarget)
 		return;
@@ -122,7 +122,7 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &d
 
 				auto &renderMeshes = mdlC->GetRenderMeshes();
 				for(auto &mesh : renderMeshes) {
-					auto &cmesh = static_cast<CModelSubMesh &>(*mesh);
+					auto &cmesh = static_cast<pragma::geometry::CModelSubMesh &>(*mesh);
 
 					// TODO: We only have to bind the instance and camera descriptor sets once per entity and not for every mesh
 					shaderLightCone.RecordDraw(bindState, cmesh, *hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(), *hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(), *dsInstance, *dsCam);

@@ -8,7 +8,7 @@ export module pragma.shared:model.flexes;
 
 import :model.animation.vertex_animation;
 
-export {
+export namespace pragma::animation {
 #pragma pack(push, 1)
 	struct DLLNETWORK FlexController {
 		std::string name = {};
@@ -95,7 +95,7 @@ export {
 	  private:
 		std::vector<Operation> m_operations;
 		std::string m_name;
-		mutable std::weak_ptr<VertexAnimation> m_vertexAnim = {};
+		mutable std::weak_ptr<pragma::animation::VertexAnimation> m_vertexAnim = {};
 		uint32_t m_frameIndex = 0;
 	};
 };

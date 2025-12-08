@@ -56,7 +56,7 @@ void BaseLiquidControlComponent::SetSurfaceMaterial(const std::string &mat)
 	SetSurfaceMaterial(game->GetSurfaceMaterial(mat));
 }
 
-void BaseLiquidControlComponent::SetSurfaceMaterial(const SurfaceMaterial *mat)
+void BaseLiquidControlComponent::SetSurfaceMaterial(const pragma::physics::SurfaceMaterial *mat)
 {
 	if(mat == nullptr)
 		return;
@@ -67,8 +67,8 @@ void BaseLiquidControlComponent::SetSurfaceMaterial(const SurfaceMaterial *mat)
 	SetPropagation(mat->GetWavePropagation());
 }
 
-const PhysLiquid &BaseLiquidControlComponent::GetLiquidDescription() const { return const_cast<BaseLiquidControlComponent *>(this)->GetLiquidDescription(); }
-PhysLiquid &BaseLiquidControlComponent::GetLiquidDescription() { return m_liquid; }
+const pragma::physics::PhysLiquid &BaseLiquidControlComponent::GetLiquidDescription() const { return const_cast<BaseLiquidControlComponent *>(this)->GetLiquidDescription(); }
+pragma::physics::PhysLiquid &BaseLiquidControlComponent::GetLiquidDescription() { return m_liquid; }
 
 double BaseLiquidControlComponent::GetDensity() const { return m_liquid.density; }
 void BaseLiquidControlComponent::SetDensity(double density)
@@ -119,7 +119,7 @@ void BaseLiquidControlComponent::CreateSplash(const Vector3 &origin, float radiu
 	BroadcastEvent(baseLiquidControlComponent::EVENT_ON_SPLASH, CEOnSplash {splashInfo});
 }
 
-bool BaseLiquidControlComponent::OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, pragma::physics::PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result)
+bool BaseLiquidControlComponent::OnBulletHit(const game::BulletInfo &bulletInfo, const pragma::physics::TraceData &data, pragma::physics::PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result)
 {
 	/*if(m_physSurfaceSim != nullptr)
 	{

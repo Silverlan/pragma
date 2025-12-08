@@ -21,7 +21,7 @@ SBaseEntity::SBaseEntity() : pragma::ecs::BaseEntity(), m_bShared(false), m_bSyn
 void SBaseEntity::DoSpawn()
 {
 	pragma::ecs::BaseEntity::DoSpawn();
-	pragma::Game *game = ServerState::Get()->GetGameState();
+	pragma::Game *game = pragma::ServerState::Get()->GetGameState();
 	game->SpawnEntity(this);
 }
 
@@ -101,7 +101,7 @@ void SBaseEntity::SendData(NetPacket &packet, pragma::networking::ClientRecipien
 	packet->Write<uint32_t>(GetSpawnFlags());
 	packet->Write(GetUuid());
 
-	auto &componentManager = SGame::Get()->GetEntityComponentManager();
+	auto &componentManager = pragma::SGame::Get()->GetEntityComponentManager();
 	auto &components = GetComponents();
 	auto offset = packet->GetOffset();
 	auto numComponents = umath::min(components.size(), static_cast<size_t>(std::numeric_limits<uint8_t>::max()));
@@ -132,26 +132,26 @@ void SBaseEntity::SendData(NetPacket &packet, pragma::networking::ClientRecipien
 
 void SBaseEntity::SendSnapshotData(NetPacket &, pragma::BasePlayerComponent &) {}
 
-pragma::NetEventId SBaseEntity::RegisterNetEvent(const std::string &name) const { return static_cast<SGame *>(GetNetworkState()->GetGameState())->RegisterNetEvent(name); }
+pragma::NetEventId SBaseEntity::RegisterNetEvent(const std::string &name) const { return static_cast<pragma::SGame *>(GetNetworkState()->GetGameState())->RegisterNetEvent(name); }
 
 void SBaseEntity::Remove()
 {
 	if(umath::is_flag_set(GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
 		return;
 	pragma::ecs::BaseEntity::Remove();
-	pragma::Game *game = ServerState::Get()->GetGameState();
+	pragma::Game *game = pragma::ServerState::Get()->GetGameState();
 	game->RemoveEntity(this);
 }
 
-NetworkState *SBaseEntity::GetNetworkState() const { return ServerState::Get(); }
+pragma::NetworkState *SBaseEntity::GetNetworkState() const { return pragma::ServerState::Get(); }
 
 void SBaseEntity::SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pragma::networking::Protocol protocol, const pragma::networking::ClientRecipientFilter &rf)
 {
 	if(!IsShared() || !IsSpawned())
 		return;
-	nwm::write_entity(packet, this);
+	pragma::networking::write_entity(packet, this);
 	packet->Write<UInt32>(eventId);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_EVENT, packet, protocol, rf);
+	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_EVENT, packet, protocol, rf);
 }
 void SBaseEntity::SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pragma::networking::Protocol protocol)
 {
@@ -241,8 +241,8 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> SBaseEntity::AddNetworkedCo
 		return c;
 	auto componentId = c->GetComponentId();
 	NetPacket packet {};
-	nwm::write_entity(packet, this);
+	pragma::networking::write_entity(packet, this);
 	packet->Write<pragma::ComponentId>(componentId);
-	static_cast<ServerState *>(GetNetworkState())->SendPacket(pragma::networking::net_messages::client::ADD_SHARED_COMPONENT, packet, pragma::networking::Protocol::SlowReliable);
+	static_cast<pragma::ServerState *>(GetNetworkState())->SendPacket(pragma::networking::net_messages::client::ADD_SHARED_COMPONENT, packet, pragma::networking::Protocol::SlowReliable);
 	return c;
 }

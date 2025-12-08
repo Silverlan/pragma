@@ -14,9 +14,9 @@ import pragma.shadergraph;
 decltype(ECResourceWatcherCallbackType::Shader) ECResourceWatcherCallbackType::Shader = ECResourceWatcherCallbackType {umath::to_integral(E::Shader)};
 decltype(ECResourceWatcherCallbackType::ParticleSystem) ECResourceWatcherCallbackType::ParticleSystem = ECResourceWatcherCallbackType {umath::to_integral(E::ParticleSystem)};
 decltype(ECResourceWatcherCallbackType::Count) ECResourceWatcherCallbackType::Count = ECResourceWatcherCallbackType {umath::to_integral(E::Count)};
-static auto cvMatStreaming = GetClientConVar("cl_material_streaming_enabled");
+static auto cvMatStreaming = pragma::console::get_client_con_var("cl_material_streaming_enabled");
 
-CResourceWatcherManager::CResourceWatcherManager(NetworkState *nw) : ResourceWatcherManager(nw) {}
+CResourceWatcherManager::CResourceWatcherManager(pragma::NetworkState *nw) : ResourceWatcherManager(nw) {}
 
 void CResourceWatcherManager::ReloadTexture(const std::string &path)
 {
@@ -86,7 +86,7 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 	texManager.LoadAsset(path, std::move(loadInfo));
 }
 
-void CResourceWatcherManager::OnMaterialReloaded(const std::string &path, const std::unordered_set<pragma::Model *> &modelMap)
+void CResourceWatcherManager::OnMaterialReloaded(const std::string &path, const std::unordered_set<pragma::asset::Model *> &modelMap)
 {
 	ResourceWatcherManager::OnMaterialReloaded(path, modelMap);
 	if(pragma::get_cgame() == nullptr)

@@ -13,19 +13,19 @@ using namespace pragma;
 
 ShadowRenderer::ShadowRenderer()
 {
-	m_shader = pragma::get_cgame()->GetGameShader(CGame::GameShader::Shadow);
-	m_shaderTransparent = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowTransparent);
-	m_shaderSpot = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowSpot);
-	m_shaderSpotTransparent = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowTransparentSpot);
-	m_shaderCSM = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowCSM);
-	m_shaderCSMTransparent = pragma::get_cgame()->GetGameShader(CGame::GameShader::ShadowCSMTransparent);
+	m_shader = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Shadow);
+	m_shaderTransparent = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowTransparent);
+	m_shaderSpot = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowSpot);
+	m_shaderSpotTransparent = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowTransparentSpot);
+	m_shaderCSM = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowCSM);
+	m_shaderCSMTransparent = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowCSMTransparent);
 
-	m_octreeCallbacks.nodeCallback = [this](const OcclusionOctree<std::shared_ptr<ModelMesh>>::Node &node) -> bool {
+	m_octreeCallbacks.nodeCallback = [this](const OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>::Node &node) -> bool {
 		auto &bounds = node.GetWorldBounds();
 		return umath::intersection::aabb_sphere(bounds.first, bounds.second, m_lightSourceData.position, m_lightSourceData.radius);
 	};
 
-	m_octreeCallbacks.entityCallback = [this](const CBaseEntity &ent, uint32_t renderFlags) {
+	m_octreeCallbacks.entityCallback = [this](const ecs::CBaseEntity &ent, uint32_t renderFlags) {
 		m_currentEntity = &ent;
 		m_currentModel = ent.GetModel().get();
 		m_currentRenderFlags = renderFlags;
@@ -45,24 +45,24 @@ ShadowRenderer::ShadowRenderer()
 		}
 	};
 
-	m_octreeCallbacks.meshCallback = [this](const std::shared_ptr<ModelMesh> &mesh) {
+	m_octreeCallbacks.meshCallback = [this](const std::shared_ptr<pragma::geometry::ModelMesh> &mesh) {
 		auto *ent = m_currentEntity;
-		if(m_lightSourceData.light->ShouldPass(*ent, *static_cast<CModelMesh *>(mesh.get()), m_currentRenderFlags) == false)
+		if(m_lightSourceData.light->ShouldPass(*ent, *static_cast<pragma::geometry::CModelMesh *>(mesh.get()), m_currentRenderFlags) == false)
 			return;
 		for(auto &subMesh : mesh->GetSubMeshes()) {
-			if(m_lightSourceData.light->ShouldPass(*m_currentModel, *static_cast<CModelSubMesh *>(subMesh.get())) == false)
+			if(m_lightSourceData.light->ShouldPass(*m_currentModel, *static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get())) == false)
 				continue;
 			auto matIdx = m_currentModel->GetMaterialIndex(*subMesh);
 			auto *mat = matIdx.has_value() ? m_currentModel->GetMaterial(*matIdx) : nullptr;
 			if(mat == nullptr || mat->GetShaderIdentifier() == "nodraw") // TODO: Do this properly
 				continue;
-			m_octreeCallbacks.subMeshCallback(*m_currentModel, *static_cast<CModelSubMesh *>(subMesh.get()), m_currentRenderFlags);
+			m_octreeCallbacks.subMeshCallback(*m_currentModel, *static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get()), m_currentRenderFlags);
 		}
 	};
 
-	m_octreeCallbacks.subMeshCallback = [this](const pragma::Model &mdl, const CModelSubMesh &subMesh, uint32_t renderFlags) {
+	m_octreeCallbacks.subMeshCallback = [this](const pragma::asset::Model &mdl, const pragma::geometry::CModelSubMesh &subMesh, uint32_t renderFlags) {
 		auto matIdx = mdl.GetMaterialIndex(subMesh);
-		auto *mat = matIdx.has_value() ? const_cast<pragma::Model &>(mdl).GetMaterial(*matIdx) : nullptr;
+		auto *mat = matIdx.has_value() ? const_cast<pragma::asset::Model &>(mdl).GetMaterial(*matIdx) : nullptr;
 		m_shadowCasters.push_back({});
 		auto &info = m_shadowCasters.back();
 		info.mesh = &subMesh;
@@ -79,7 +79,7 @@ void ShadowRenderer::UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryC
 	auto *pWorld = pragma::get_cgame()->GetWorld();
 	if(pWorld == nullptr)
 		return;
-	auto &entWorld = static_cast<CBaseEntity &>(pWorld->GetEntity());
+	auto &entWorld = static_cast<pragma::ecs::CBaseEntity &>(pWorld->GetEntity());
 	if(entWorld.IsInScene(*scene) == false)
 		return;
 	auto &mdl = entWorld.GetModel();
@@ -106,11 +106,11 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 	auto &octree = culler->GetOcclusionOctree();
 	// Iterate all entities in the scene and populate m_shadowCasters
 	octree.IterateObjects(
-	  [this](const OcclusionOctree<CBaseEntity *>::Node &node) -> bool {
+	  [this](const OcclusionOctree<ecs::CBaseEntity *>::Node &node) -> bool {
 		  auto &bounds = node.GetWorldBounds();
 		  return umath::intersection::aabb_sphere(bounds.first, bounds.second, m_lightSourceData.position, m_lightSourceData.radius);
 	  },
-	  [this, &light, &drawCmd, scene](const CBaseEntity *ent) {
+	  [this, &light, &drawCmd, scene](const ecs::CBaseEntity *ent) {
 		  auto pRenderComponent = ent->GetRenderComponent();
 		  if(!pRenderComponent || ent->IsInScene(*scene) == false || pRenderComponent->ShouldDrawShadow() == false || ent->IsWorld() == true)
 			  return;
@@ -122,17 +122,17 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 		  if(mdlComponent) {
 			  auto mdl = mdlComponent->GetModel();
 			  for(auto &mesh : static_cast<pragma::CModelComponent &>(*mdlComponent).GetLODMeshes()) {
-				  if(light.ShouldPass(*ent, *static_cast<CModelMesh *>(mesh.get()), renderFlags) == false)
+				  if(light.ShouldPass(*ent, *static_cast<pragma::geometry::CModelMesh *>(mesh.get()), renderFlags) == false)
 					  continue;
-				  //meshCallback(static_cast<CModelMesh*>(mesh.get()),renderFlags);
+				  //meshCallback(static_cast<pragma::geometry::CModelMesh*>(mesh.get()),renderFlags);
 				  for(auto &subMesh : mesh->GetSubMeshes()) {
-					  if(light.ShouldPass(*mdl, *static_cast<CModelSubMesh *>(subMesh.get())) == false)
+					  if(light.ShouldPass(*mdl, *static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get())) == false)
 						  continue;
 					  auto matIdx = mdl->GetMaterialIndex(*subMesh);
 					  auto *mat = matIdx.has_value() ? mdl->GetMaterial(*matIdx) : nullptr;
 					  if(mat == nullptr || mat->GetShaderIdentifier() == "nodraw") // TODO
 						  continue;
-					  m_octreeCallbacks.subMeshCallback(*mdl, *static_cast<CModelSubMesh *>(subMesh.get()), renderFlags);
+					  m_octreeCallbacks.subMeshCallback(*mdl, *static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get()), renderFlags);
 				  }
 			  }
 		  }
@@ -213,7 +213,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 			{
 				bProcessMeshes = ((info.renderFlags &layerFlag) != 0) ? true : false;
 				if(bProcessMeshes == true)
-					shader.BindEntity(*const_cast<CBaseEntity*>(info.entity),depthMVP);
+					shader.BindEntity(*const_cast<pragma::ecs::CBaseEntity*>(info.entity),depthMVP);
 			}
 			if(info.mesh != nullptr && bProcessMeshes == true)
 			{
@@ -224,7 +224,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 						auto &shaderTranslucent = static_cast<pragma::ShaderShadowTransparent&>(shader);
 						if(info.material == prevMat || shaderTranslucent.BindMaterial(static_cast<msys::CMaterial&>(*info.material)) == true)
 						{
-							shaderTranslucent.Draw(*const_cast<CModelSubMesh*>(info.mesh));
+							shaderTranslucent.Draw(*const_cast<pragma::geometry::CModelSubMesh*>(info.mesh));
 							prevMat = info.material;
 						}
 					}
@@ -232,7 +232,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 						hasTranslucents = true;
 				}
 				else if(bTranslucent == false)
-					shader.Draw(*const_cast<CModelSubMesh*>(info.mesh));
+					shader.Draw(*const_cast<pragma::geometry::CModelSubMesh*>(info.mesh));
 			}
 		}
 	}
@@ -242,7 +242,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 	return RenderResultFlags::None;
 }
 
-static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
+static auto cvParticleQuality = pragma::console::get_client_con_var("cl_render_particle_quality");
 void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::rendering::ShadowMapType smType, pragma::LightType type, bool drawParticleShadows)
 {
 	auto hShadowMap = light.GetShadowMap<pragma::CShadowComponent>(smType);

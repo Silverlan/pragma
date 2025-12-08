@@ -9,9 +9,9 @@ import :debug.game_ui;
 import :client_state;
 import :game;
 
-DebugGameGUI::DebugGameGUI(const std::function<WIHandle(void)> &guiFactory) : m_guiFactory(guiFactory)
+DebugGameGUI::DebugGameGUI(const std::function<pragma::gui::WIHandle(void)> &guiFactory) : m_guiFactory(guiFactory)
 {
-	m_initCallback = pragma::get_client_state()->AddCallback("OnGameStart", FunctionCallback<void, CGame *>::Create([this](CGame *) { Initialize(); }));
+	m_initCallback = pragma::get_client_state()->AddCallback("OnGameStart", FunctionCallback<void, pragma::CGame *>::Create([this](pragma::CGame *) { Initialize(); }));
 	Initialize();
 }
 
@@ -38,7 +38,7 @@ std::shared_ptr<void> DebugGameGUI::GetUserData(uint32_t idx) const
 	return it->second;
 }
 
-WIBase *DebugGameGUI::GetGUIElement() { return m_guiElement.get(); }
+pragma::gui::types::WIBase *DebugGameGUI::GetGUIElement() { return m_guiElement.get(); }
 
 void DebugGameGUI::Initialize()
 {
@@ -49,7 +49,7 @@ void DebugGameGUI::Initialize()
 	auto hEl = m_guiFactory();
 	AddCallback("OnGameEnd", FunctionCallback<>::Create([hEl]() {
 		if(hEl.IsValid())
-			const_cast<WIBase *>(hEl.get())->Remove();
+			const_cast<pragma::gui::types::WIBase *>(hEl.get())->Remove();
 	}));
 	m_guiElement = hEl;
 }

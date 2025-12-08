@@ -9,7 +9,7 @@ module pragma.shared;
 import :console;
 import :engine;
 
-void register_shared_convars(ConVarMap &map)
+void pragma::console::register_shared_convars(ConVarMap &map)
 {
 	map.RegisterConVar<udm::Boolean>("sv_cheats", false, pragma::console::ConVarFlags::Replicated | pragma::console::ConVarFlags::Notify, "Allows clients to run console commands which are marked as cheats if set to 1.");
 	map.RegisterConVar<udm::Float>("sv_player_air_move_scale", 0.05, pragma::console::ConVarFlags::Replicated | pragma::console::ConVarFlags::Archive,
@@ -21,7 +21,7 @@ void register_shared_convars(ConVarMap &map)
 	map.RegisterConVar<udm::Float>("sv_friction", 1, pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated | pragma::console::ConVarFlags::Notify, "Global friction scale.");
 	map.RegisterConVar<udm::Float>("sv_restitution", 1, pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated | pragma::console::ConVarFlags::Notify, "Global restitution scale.");
 	map.RegisterConVar<udm::String>("sv_gamemode", "zen", pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated, "Gamemode which should be used when starting a game.");
-	map.RegisterConVar<udm::String>("sv_servername", engine_info::get_name(), pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated, "The server name which will be displayed in the server browser.");
+	map.RegisterConVar<udm::String>("sv_servername", pragma::engine_info::get_name(), pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated, "The server name which will be displayed in the server browser.");
 	map.RegisterConVar<udm::Float>("sv_timeout_duration", 90, pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated, "Amount of time until a client is forcibly dropped if no data has been received.");
 	map.RegisterConVar<udm::Float>("sv_tickrate", ENGINE_DEFAULT_TICK_RATE, pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated,
 	  "Specifies the tickrate. A higher tickrate means smoother and more reliable physics, but also more data to transmit to clients. Higher values can result in more lag for clients.");

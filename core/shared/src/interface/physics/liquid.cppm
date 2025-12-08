@@ -6,7 +6,7 @@ module;
 
 export module pragma.shared:physics.liquid;
 
-export {
+export namespace pragma::physics {
 	const auto PHYS_LIQUID_DEFAULT_DENSITY = 1000.0;
 	const auto PHYS_LIQUID_DEFAULT_LINEAR_DRAG_COEFFICIENT = 2.0;
 	const auto PHYS_LIQUID_DEFAULT_TORQUE_DRAG_COEFFICIENT = 6.0;

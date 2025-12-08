@@ -43,7 +43,7 @@ void CSoundScapeComponent::OnTick(double dt)
 			auto charComponentEnt = ent.GetCharacterComponent();
 			auto pTrComponentEnt = ent.GetTransformComponent();
 			if(charComponentEnt.valid() || pTrComponentEnt) {
-				TraceData tr;
+				pragma::physics::TraceData tr;
 				tr.SetSource(charComponentEnt.valid() ? charComponentEnt->GetEyePosition() : pTrComponentEnt->GetPosition());
 				tr.SetTarget(pTrComponent->GetPosition());
 				tr.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::IgnoreDynamic);
@@ -71,12 +71,12 @@ void CSoundScapeComponent::OnEntitySpawn()
 	auto &ent = GetEntity();
 	auto pSoundEmitterComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 	if(pSoundEmitterComponent.valid()) {
-		std::shared_ptr<ALSound> snd = pSoundEmitterComponent->CreateSound(m_kvSoundScape, pragma::audio::ALSoundType::Environment);
+		std::shared_ptr<pragma::audio::ALSound> snd = pSoundEmitterComponent->CreateSound(m_kvSoundScape, pragma::audio::ALSoundType::Environment);
 		if(snd.get() == nullptr) {
 			Con::cwar << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
 			return;
 		}
-		ALSoundScript *al = dynamic_cast<ALSoundScript *>(snd.get());
+		pragma::audio::ALSoundScript *al = dynamic_cast<pragma::audio::ALSoundScript *>(snd.get());
 		if(al == nullptr) {
 			Con::cwar << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
 			return;
@@ -103,7 +103,7 @@ void CSoundScapeComponent::UpdateTargetPositions()
 {
 	if(m_sound.get() == nullptr)
 		return;
-	ALSoundScript *al = dynamic_cast<ALSoundScript *>(m_sound.get());
+	pragma::audio::ALSoundScript *al = dynamic_cast<pragma::audio::ALSoundScript *>(m_sound.get());
 	std::unordered_map<unsigned int, EntityHandle>::iterator it;
 	for(it = m_targets.begin(); it != m_targets.end(); it++) {
 		EntityHandle &hEnt = it->second;

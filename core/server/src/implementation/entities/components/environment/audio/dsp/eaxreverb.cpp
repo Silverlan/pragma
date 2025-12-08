@@ -76,10 +76,10 @@ void SSoundDspEAXReverbComponent::SendData(NetPacket &packet, networking::Client
 	packet->Write<int>(m_kvDecayHFLimit);
 	packet->Write<float>(m_kvReflectionsGain);
 	packet->Write<float>(m_kvReflectionsDelay);
-	nwm::write_vector(packet, m_kvReflectionsPan);
+	pragma::networking::write_vector(packet, m_kvReflectionsPan);
 	packet->Write<float>(m_kvLateGain);
 	packet->Write<float>(m_kvLateDelay);
-	nwm::write_vector(packet, m_kvLatePan);
+	pragma::networking::write_vector(packet, m_kvLatePan);
 	packet->Write<float>(m_kvEchoTime);
 	packet->Write<float>(m_kvEchoDepth);
 	packet->Write<float>(m_kvModTime);

@@ -23,7 +23,7 @@ export namespace pragma {
 		EntityHandle m_nextNode;
 		std::string m_kvFirstNode;
 		std::string m_kvStartSound;
-		std::shared_ptr<ALSound> m_startSound;
+		std::shared_ptr<audio::ALSound> m_startSound;
 
 		pragma::NetEventId m_netEvStartForward = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvStartBackward = pragma::INVALID_NET_EVENT;

@@ -11,8 +11,10 @@ export import :audio.enums;
 export import :entities.base_entity_handle;
 export import :scripting.lua.callback_handler;
 
-export {
+export namespace pragma {
 	class NetworkState;
+}
+export namespace pragma::audio {
 	struct DLLNETWORK SoundFade {
 		SoundFade(bool fadein, double start, double duration, float gain)
 		{
@@ -29,7 +31,7 @@ export {
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-	class DLLNETWORK ALSound : virtual public util::inheritable_enable_shared_from_this<ALSound>, virtual public util::CallbackHandler, public LuaCallbackHandler {
+	class DLLNETWORK ALSound : virtual public util::inheritable_enable_shared_from_this<pragma::audio::ALSound>, virtual public util::CallbackHandler, public LuaCallbackHandler {
 	  public:
 		enum class NetEvent : uint8_t {
 			Play = 0,
@@ -97,7 +99,7 @@ export {
 		void UpdateOffset();
 		void InitRange();
 	  public:
-		ALSound(NetworkState *nw);
+		ALSound(pragma::NetworkState *nw);
 		virtual ~ALSound();
 		virtual void Initialize();
 		virtual void OnRelease();

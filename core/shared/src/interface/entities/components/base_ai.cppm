@@ -94,7 +94,7 @@ export {
 
 			float GetMaxSpeed(bool bUseAnimSpeedIfAvailable = true) const;
 		  protected:
-			virtual void OnModelChanged(const std::shared_ptr<pragma::Model> &model);
+			virtual void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model);
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 			static std::atomic<uint32_t> s_npcCount;
 			static std::shared_ptr<ai::navigation::NavThread> s_navThread;

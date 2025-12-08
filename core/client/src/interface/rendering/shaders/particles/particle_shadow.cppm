@@ -45,7 +45,7 @@ namespace Shader
 	{
 	public:
 		ParticleShadow();
-		void Draw(CParticleSystem *particle,CLightBase *light,uint32_t layerId=0);
+		void Draw(pragma::pts::CParticleSystem *particle,CLightBase *light,uint32_t layerId=0);
 		virtual void InitializeShaderPipelines(const Vulkan::Context &context) override {ParticleShadowBase<ParticleBase>::InitializeShaderPipelines(context);}
 		virtual void InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants) override {ParticleShadowBase<ParticleBase>::InitializePipelineLayout(context,setLayouts,pushConstants);}
 		virtual uint32_t GetDescSet(ParticleBase::DescSet set) const override {return ParticleShadowBase<ParticleBase>::GetDescSet(set);}

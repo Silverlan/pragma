@@ -12,10 +12,10 @@ import :entities.components;
 import :game;
 import :rendering.shaders;
 
-CParticleRendererBeam::Node::Node(const Vector3 &o, const Color &) : origin(o), color(1.f, 0.f, 0.f, 1.f) //{c.r /255.f,c.g /255.f,c.b /255.f,c.a /255.f})
+pragma::pts::CParticleRendererBeam::Node::Node(const Vector3 &o, const Color &) : origin(o), color(1.f, 0.f, 0.f, 1.f) //{c.r /255.f,c.g /255.f,c.b /255.f,c.a /255.f})
 {
 }
-void CParticleRendererBeam::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleRendererBeam::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleRenderer::Initialize(pSystem, values);
 	m_shader = pragma::get_cengine()->GetShader("particlepolyboard");
@@ -58,14 +58,14 @@ void CParticleRendererBeam::Initialize(pragma::BaseEnvParticleSystemComponent &p
 	createInfo.size = sizeof(uint16_t) * indices.size();
 	m_indexBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, indices.data());
 }
-pragma::ShaderParticleBase *CParticleRendererBeam::GetShader() const { return static_cast<pragma::ShaderParticlePolyboard *>(m_shader.get()); }
-void CParticleRendererBeam::PostSimulate(double tDelta)
+pragma::ShaderParticleBase *pragma::pts::CParticleRendererBeam::GetShader() const { return static_cast<pragma::ShaderParticlePolyboard *>(m_shader.get()); }
+void pragma::pts::CParticleRendererBeam::PostSimulate(double tDelta)
 {
 	CParticleRenderer::PostSimulate(tDelta);
 	UpdateNodes();
 }
 
-void CParticleRendererBeam::UpdateNodes()
+void pragma::pts::CParticleRendererBeam::UpdateNodes()
 {
 	auto *p = GetParticleSystem().GetParticle(0);
 	auto *color = (p != nullptr) ? &p->GetColor() : nullptr;
@@ -78,7 +78,7 @@ void CParticleRendererBeam::UpdateNodes()
 	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_vertexBuffer, 0ull, m_vertexBuffer->GetSize(), m_nodeOrigins.data());
 }
 
-std::pair<Vector3, Vector3> CParticleRendererBeam::GetRenderBounds() const
+std::pair<Vector3, Vector3> pragma::pts::CParticleRendererBeam::GetRenderBounds() const
 {
 	if((m_startNode - 1) == m_endNode)
 		return {{}, {}};
@@ -93,7 +93,7 @@ std::pair<Vector3, Vector3> CParticleRendererBeam::GetRenderBounds() const
 	return bounds;
 }
 
-void CParticleRendererBeam::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags)
+void pragma::pts::CParticleRendererBeam::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::pts::ParticleRenderFlags renderFlags)
 {
 #if 0
 	if(m_shader.expired())
@@ -109,7 +109,7 @@ void CParticleRendererBeam::RecordRender(prosper::ICommandBuffer &drawCmd, pragm
 #endif
 }
 
-void CParticleRendererBeam::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
+void pragma::pts::CParticleRendererBeam::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
 {
 	/*static auto hShader = pragma::get_cengine()->GetShader("particlepolyboardshadow");
 	if(!hShader.IsValid())
@@ -122,4 +122,4 @@ void CParticleRendererBeam::RecordRenderShadow(prosper::ICommandBuffer &drawCmd,
 	shader.EndDraw();*/ // prosper TODO
 }
 
-void CParticleRendererBeam::OnParticleSystemStopped() { CParticleRenderer::OnParticleSystemStopped(); }
+void pragma::pts::CParticleRendererBeam::OnParticleSystemStopped() { CParticleRenderer::OnParticleSystemStopped(); }

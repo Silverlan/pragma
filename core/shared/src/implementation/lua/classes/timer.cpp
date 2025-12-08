@@ -19,7 +19,7 @@ import :scripting.lua.classes.timer;
 
 DLLNETWORK void Lua_Timer_Start(lua::State *l, TimerHandle &timer)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	lua_checktimer(l, timer);
 	timer.GetTimer()->Start(state->GetGameState());
 }
@@ -38,7 +38,7 @@ DLLNETWORK void Lua_Timer_Pause(lua::State *l, TimerHandle &timer)
 
 DLLNETWORK void Lua_Timer_Remove(lua::State *l, TimerHandle &timer)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	lua_checktimer(l, timer);
 	timer.GetTimer()->Remove(state->GetGameState());
 }
@@ -89,7 +89,7 @@ DLLNETWORK void Lua_Timer_IsPaused(lua::State *l, TimerHandle &timer)
 
 DLLNETWORK void Lua_Timer_Call(lua::State *l, TimerHandle &timer)
 {
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	lua_checktimer(l, timer);
 	timer.GetTimer()->Call(state->GetGameState());
 }
@@ -97,7 +97,7 @@ DLLNETWORK void Lua_Timer_Call(lua::State *l, TimerHandle &timer)
 DLLNETWORK void Lua_Timer_SetCall(lua::State *l, TimerHandle &timer, LuaFunctionObject o)
 {
 	lua_checktimer(l, timer);
-	NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	timer.GetTimer()->SetCall(state->GetGameState(), o);
 }
 

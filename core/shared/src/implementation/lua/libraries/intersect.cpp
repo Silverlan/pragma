@@ -18,7 +18,7 @@ luabind::object Lua::intersect::line_obb(lua::State *l, const Vector3 &rayStart,
 	return luabind::object {l, dist};
 }
 
-static bool get_line_mesh_result(lua::State *l, const Intersection::LineMeshResult &res, bool precise, luabind::object &r0, luabind::object &r1)
+static bool get_line_mesh_result(lua::State *l, const pragma::math::intersection::LineMeshResult &res, bool precise, luabind::object &r0, luabind::object &r1)
 {
 	if(precise == false) {
 		r0 = luabind::object {l, res.result == umath::intersection::Result::Intersect};
@@ -36,31 +36,31 @@ static bool get_line_mesh_result(lua::State *l, const Intersection::LineMeshResu
 	return true;
 }
 
-void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::geometry::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	auto &origin = meshPose.GetOrigin();
 	auto &rot = meshPose.GetRotation();
-	Intersection::LineMeshResult res {};
-	Intersection::LineMesh(rayStart, rayDir, mesh, res, precise, &origin, &rot);
+	pragma::math::intersection::LineMeshResult res {};
+	pragma::math::intersection::line_with_mesh(rayStart, rayDir, mesh, res, precise, &origin, &rot);
 	get_line_mesh_result(l, res, precise, r0, r1);
 }
 
-void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, ::ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::geometry::ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	auto &origin = meshPose.GetOrigin();
 	auto &rot = meshPose.GetRotation();
-	Intersection::LineMeshResult res {};
-	Intersection::LineMesh(rayStart, rayDir, mesh, res, precise, &origin, &rot);
+	pragma::math::intersection::LineMeshResult res {};
+	pragma::math::intersection::line_with_mesh(rayStart, rayDir, mesh, res, precise, &origin, &rot);
 	if(get_line_mesh_result(l, res, precise, r0, r1) == false)
 		return;
 	if(res.precise)
 		r1["subMeshIdx"] = res.precise->subMeshIdx;
 }
 
-void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::asset::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
-	Intersection::LineMeshResult res {};
-	Intersection::LineMesh(rayStart, rayDir, mdl, res, precise, nullptr, lod, meshPose.GetOrigin(), meshPose.GetRotation());
+	pragma::math::intersection::LineMeshResult res {};
+	pragma::math::intersection::line_with_mesh(rayStart, rayDir, mdl, res, precise, nullptr, lod, meshPose.GetOrigin(), meshPose.GetRotation());
 	if(get_line_mesh_result(l, res, precise, r0, r1) == false)
 		return;
 	if(res.precise) {
@@ -70,11 +70,11 @@ void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vec
 	}
 }
 
-void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::Model &mdl, luabind::table<> tBodyGroups, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
+void Lua::intersect::line_mesh(lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::asset::Model &mdl, luabind::table<> tBodyGroups, luabind::object &r0, luabind::object &r1, bool precise, const umath::Transform &meshPose)
 {
 	auto bodyGroups = Lua::table_to_vector<uint32_t>(l, tBodyGroups, 4);
-	Intersection::LineMeshResult res {};
-	Intersection::LineMesh(rayStart, rayDir, mdl, res, precise, &bodyGroups, 0, meshPose.GetOrigin(), meshPose.GetRotation());
+	pragma::math::intersection::LineMeshResult res {};
+	pragma::math::intersection::line_with_mesh(rayStart, rayDir, mdl, res, precise, &bodyGroups, 0, meshPose.GetOrigin(), meshPose.GetRotation());
 	if(get_line_mesh_result(l, res, precise, r0, r1) == false)
 		return;
 	if(res.precise) {

@@ -15,7 +15,7 @@ import :gui;
 import :rendering.light_data_buffer_manager;
 import :rendering.shaders;
 
-static void cmd_forwardplus_tile_size(NetworkState *, const ConVar &, int32_t, int32_t val)
+static void cmd_forwardplus_tile_size(pragma::NetworkState *, const pragma::console::ConVar &, int32_t, int32_t val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -37,7 +37,7 @@ namespace {
 	auto _ = pragma::console::client::register_variable_listener<int32_t>("render_forwardplus_tile_size", &cmd_forwardplus_tile_size);
 };
 
-static auto cvTileSize = GetClientConVar("render_forwardplus_tile_size");
+static auto cvTileSize = pragma::console::get_client_con_var("render_forwardplus_tile_size");
 std::pair<uint32_t, uint32_t> pragma::rendering::ForwardPlusInstance::CalcWorkGroupCount(uint32_t w, uint32_t h)
 {
 	const auto tileSize = cvTileSize->GetInt();

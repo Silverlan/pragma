@@ -27,6 +27,6 @@ void Lua::NetPacket::Client::ReadUniqueEntity(lua::State *l, ::NetPacket &packet
 		  },
 		  0);
 	});
-	nwm::read_unique_entity(packet, cb);
+	pragma::networking::read_unique_entity(packet, cb);
 	Lua::Push<CallbackHandle>(l, cb);
 }

@@ -14,16 +14,16 @@ import :rendering.shaders;
 using namespace pragma;
 
 CRendererPpFogComponent::CRendererPpFogComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
-void CRendererPpFogComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererPpFogComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.renderStats)
-		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
 	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingFog");
 
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
 		pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingFog
 		if(drawSceneInfo.renderStats)
-			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
+			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
 	}};
 
 	if(drawSceneInfo.scene.expired() || m_renderer.expired())
@@ -40,7 +40,7 @@ void CRendererPpFogComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 		}
 	}
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto hShaderFog = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPFog);
+	auto hShaderFog = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPFog);
 	if(descSetGroupFog == nullptr || hShaderFog.expired())
 		return;
 	auto &shaderFog = static_cast<pragma::ShaderPPFog &>(*hShaderFog.get());

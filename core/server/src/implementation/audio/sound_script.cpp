@@ -8,11 +8,11 @@ import :audio.sound_script;
 
 import :server_state;
 
-SALSoundScript::SALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, const std::string &soundName, pragma::audio::ALCreateFlags createFlags)
+pragma::audio::SALSoundScript::SALSoundScript(pragma::NetworkState *nw, unsigned int idx, SoundScript *script, pragma::NetworkState *state, const std::string &soundName, pragma::audio::ALCreateFlags createFlags)
     : ALSoundScript(nw, idx, script, state, umath::is_flag_set(createFlags, pragma::audio::ALCreateFlags::Stream)), SALSound(nw, idx, 0.f, soundName, createFlags), ALSound(nw)
 {
 }
-std::shared_ptr<ALSound> SALSoundScript::CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags)
+std::shared_ptr<pragma::audio::ALSound> pragma::audio::SALSoundScript::CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags)
 {
 	auto flags = pragma::audio::ALCreateFlags::None;
 	if(channel == ALChannel::Mono)
@@ -25,260 +25,260 @@ std::shared_ptr<ALSound> SALSoundScript::CreateSound(const std::string &name, AL
 	flags |= pragma::audio::ALCreateFlags::DontTransmit;
 
 	flags |= createFlags;
-	return ServerState::Get()->CreateSound(name, GetType(), flags);
+	return pragma::ServerState::Get()->CreateSound(name, GetType(), flags);
 }
 
-ALState SALSoundScript::GetState() const { return SALSound::GetState(); }
-unsigned int SALSoundScript::GetIndex() const { return SALSound::GetIndex(); }
-void SALSoundScript::FadeIn(float time)
+pragma::audio::ALState pragma::audio::SALSoundScript::GetState() const { return SALSound::GetState(); }
+unsigned int pragma::audio::SALSoundScript::GetIndex() const { return SALSound::GetIndex(); }
+void pragma::audio::SALSoundScript::FadeIn(float time)
 {
 	ALSoundScript::FadeIn(time);
 	SALSound::FadeIn(time);
 }
-void SALSoundScript::FadeOut(float time)
+void pragma::audio::SALSoundScript::FadeOut(float time)
 {
 	//ALSoundScript::FadeOut(time);
 	SALSound::FadeOut(time);
 }
-void SALSoundScript::Play()
+void pragma::audio::SALSoundScript::Play()
 {
 	ALSoundScript::Play();
 	SendEvent(NetEvent::Play);
 	//SALSound::Play();
 }
-void SALSoundScript::Stop()
+void pragma::audio::SALSoundScript::Stop()
 {
 	ALSoundScript::Stop();
 	SendEvent(NetEvent::Stop);
 	//SALSound::Stop();
 }
-void SALSoundScript::Pause()
+void pragma::audio::SALSoundScript::Pause()
 {
 	ALSoundScript::Pause();
 	SendEvent(NetEvent::Pause);
 	//SALSound::Pause();
 }
-void SALSoundScript::Rewind()
+void pragma::audio::SALSoundScript::Rewind()
 {
 	ALSoundScript::Rewind();
 	SendEvent(NetEvent::Rewind);
 	//SALSound::Rewind();
 }
-void SALSoundScript::SetOffset(float offset)
+void pragma::audio::SALSoundScript::SetOffset(float offset)
 {
 	ALSoundScript::SetOffset(offset);
 	SALSound::SetOffset(offset);
 }
-float SALSoundScript::GetOffset() const { return SALSound::GetOffset(); }
-void SALSoundScript::SetPitch(float pitch)
+float pragma::audio::SALSoundScript::GetOffset() const { return SALSound::GetOffset(); }
+void pragma::audio::SALSoundScript::SetPitch(float pitch)
 {
 	ALSoundScript::SetPitch(pitch);
 	SALSound::SetPitch(pitch);
 }
-float SALSoundScript::GetPitch() const { return SALSound::GetPitch(); }
-void SALSoundScript::SetLooping(bool loop)
+float pragma::audio::SALSoundScript::GetPitch() const { return SALSound::GetPitch(); }
+void pragma::audio::SALSoundScript::SetLooping(bool loop)
 {
 	ALSoundScript::SetLooping(loop);
 	SALSound::SetLooping(loop);
 }
-bool SALSoundScript::IsLooping() const { return SALSound::IsLooping(); }
-bool SALSoundScript::IsPlaying() const { return SALSound::IsPlaying(); }
-bool SALSoundScript::IsPaused() const { return SALSound::IsPaused(); }
-bool SALSoundScript::IsStopped() const { return SALSound::IsStopped(); }
-void SALSoundScript::SetGain(float gain)
+bool pragma::audio::SALSoundScript::IsLooping() const { return SALSound::IsLooping(); }
+bool pragma::audio::SALSoundScript::IsPlaying() const { return SALSound::IsPlaying(); }
+bool pragma::audio::SALSoundScript::IsPaused() const { return SALSound::IsPaused(); }
+bool pragma::audio::SALSoundScript::IsStopped() const { return SALSound::IsStopped(); }
+void pragma::audio::SALSoundScript::SetGain(float gain)
 {
 	ALSoundScript::SetGain(gain);
 	SALSound::SetGain(gain);
 }
-float SALSoundScript::GetGain() const { return SALSound::GetGain(); }
-void SALSoundScript::SetPosition(const Vector3 &pos)
+float pragma::audio::SALSoundScript::GetGain() const { return SALSound::GetGain(); }
+void pragma::audio::SALSoundScript::SetPosition(const Vector3 &pos)
 {
 	ALSoundScript::SetPosition(pos);
 	SALSound::SetPosition(pos);
 }
-Vector3 SALSoundScript::GetPosition() const { return SALSound::GetPosition(); }
-void SALSoundScript::SetVelocity(const Vector3 &vel)
+Vector3 pragma::audio::SALSoundScript::GetPosition() const { return SALSound::GetPosition(); }
+void pragma::audio::SALSoundScript::SetVelocity(const Vector3 &vel)
 {
 	ALSoundScript::SetVelocity(vel);
 	SALSound::SetVelocity(vel);
 }
-Vector3 SALSoundScript::GetVelocity() const { return SALSound::GetVelocity(); }
-void SALSoundScript::SetDirection(const Vector3 &dir)
+Vector3 pragma::audio::SALSoundScript::GetVelocity() const { return SALSound::GetVelocity(); }
+void pragma::audio::SALSoundScript::SetDirection(const Vector3 &dir)
 {
 	ALSoundScript::SetDirection(dir);
 	SALSound::SetDirection(dir);
 }
-Vector3 SALSoundScript::GetDirection() const { return SALSound::GetDirection(); }
-void SALSoundScript::SetRelative(bool b)
+Vector3 pragma::audio::SALSoundScript::GetDirection() const { return SALSound::GetDirection(); }
+void pragma::audio::SALSoundScript::SetRelative(bool b)
 {
 	ALSoundScript::SetRelative(b);
 	SALSound::SetRelative(b);
 }
-bool SALSoundScript::IsRelative() const { return SALSound::IsRelative(); }
-float SALSoundScript::GetDuration() const { return SALSound::GetDuration(); }
-float SALSoundScript::GetReferenceDistance() const { return SALSound::GetReferenceDistance(); }
-void SALSoundScript::SetReferenceDistance(float dist)
+bool pragma::audio::SALSoundScript::IsRelative() const { return SALSound::IsRelative(); }
+float pragma::audio::SALSoundScript::GetDuration() const { return SALSound::GetDuration(); }
+float pragma::audio::SALSoundScript::GetReferenceDistance() const { return SALSound::GetReferenceDistance(); }
+void pragma::audio::SALSoundScript::SetReferenceDistance(float dist)
 {
 	ALSoundScript::SetReferenceDistance(dist);
 	SALSound::SetReferenceDistance(dist);
 }
-void SALSoundScript::SetRoomRolloffFactor(float roomFactor)
+void pragma::audio::SALSoundScript::SetRoomRolloffFactor(float roomFactor)
 {
 	ALSoundScript::SetRoomRolloffFactor(roomFactor);
 	SALSound::SetRoomRolloffFactor(roomFactor);
 }
-float SALSoundScript::GetRolloffFactor() const { return SALSound::GetRolloffFactor(); }
-void SALSoundScript::SetRolloffFactor(float factor)
+float pragma::audio::SALSoundScript::GetRolloffFactor() const { return SALSound::GetRolloffFactor(); }
+void pragma::audio::SALSoundScript::SetRolloffFactor(float factor)
 {
 	ALSoundScript::SetRolloffFactor(factor);
 	SALSound::SetRolloffFactor(factor);
 }
-float SALSoundScript::GetRoomRolloffFactor() const { return SALSound::GetRoomRolloffFactor(); }
-float SALSoundScript::GetMaxDistance() const { return SALSound::GetMaxDistance(); }
-void SALSoundScript::SetMaxDistance(float dist)
+float pragma::audio::SALSoundScript::GetRoomRolloffFactor() const { return SALSound::GetRoomRolloffFactor(); }
+float pragma::audio::SALSoundScript::GetMaxDistance() const { return SALSound::GetMaxDistance(); }
+void pragma::audio::SALSoundScript::SetMaxDistance(float dist)
 {
 	ALSoundScript::SetMaxDistance(dist);
 	SALSound::SetMaxDistance(dist);
 }
-float SALSoundScript::GetMinGain() const { return SALSound::GetMinGain(); }
-void SALSoundScript::SetMinGain(float gain)
+float pragma::audio::SALSoundScript::GetMinGain() const { return SALSound::GetMinGain(); }
+void pragma::audio::SALSoundScript::SetMinGain(float gain)
 {
 	ALSoundScript::SetMinGain(gain);
 	SALSound::SetMinGain(gain);
 }
-float SALSoundScript::GetMaxGain() const { return SALSound::GetMaxGain(); }
-void SALSoundScript::SetMaxGain(float gain)
+float pragma::audio::SALSoundScript::GetMaxGain() const { return SALSound::GetMaxGain(); }
+void pragma::audio::SALSoundScript::SetMaxGain(float gain)
 {
 	ALSoundScript::SetMaxGain(gain);
 	SALSound::SetMaxGain(gain);
 }
-float SALSoundScript::GetInnerConeAngle() const { return SALSound::GetInnerConeAngle(); }
-void SALSoundScript::SetInnerConeAngle(float ang)
+float pragma::audio::SALSoundScript::GetInnerConeAngle() const { return SALSound::GetInnerConeAngle(); }
+void pragma::audio::SALSoundScript::SetInnerConeAngle(float ang)
 {
 	ALSoundScript::Update();
 	SALSound::Update();
 }
-float SALSoundScript::GetOuterConeAngle() const { return SALSound::GetOuterConeAngle(); }
-void SALSoundScript::SetOuterConeAngle(float ang)
+float pragma::audio::SALSoundScript::GetOuterConeAngle() const { return SALSound::GetOuterConeAngle(); }
+void pragma::audio::SALSoundScript::SetOuterConeAngle(float ang)
 {
 	ALSoundScript::SetOuterConeAngle(ang);
 	SALSound::SetOuterConeAngle(ang);
 }
-float SALSoundScript::GetOuterConeGain() const { return SALSound::GetOuterConeGain(); }
-float SALSoundScript::GetOuterConeGainHF() const { return SALSound::GetOuterConeGainHF(); }
-void SALSoundScript::SetOuterConeGain(float gain)
+float pragma::audio::SALSoundScript::GetOuterConeGain() const { return SALSound::GetOuterConeGain(); }
+float pragma::audio::SALSoundScript::GetOuterConeGainHF() const { return SALSound::GetOuterConeGainHF(); }
+void pragma::audio::SALSoundScript::SetOuterConeGain(float gain)
 {
 	ALSoundScript::SetOuterConeGain(gain);
 	SALSound::SetOuterConeGain(gain);
 }
-void SALSoundScript::SetOuterConeGainHF(float gain)
+void pragma::audio::SALSoundScript::SetOuterConeGainHF(float gain)
 {
 	ALSoundScript::SetOuterConeGainHF(gain);
 	SALSound::SetOuterConeGainHF(gain);
 }
-uint32_t SALSoundScript::GetPriority() { return SALSound::GetPriority(); }
-void SALSoundScript::SetPriority(uint32_t priority)
+uint32_t pragma::audio::SALSoundScript::GetPriority() { return SALSound::GetPriority(); }
+void pragma::audio::SALSoundScript::SetPriority(uint32_t priority)
 {
 	ALSoundScript::SetPriority(priority);
 	SALSound::SetPriority(priority);
 }
-void SALSoundScript::SetOrientation(const Vector3 &at, const Vector3 &up)
+void pragma::audio::SALSoundScript::SetOrientation(const Vector3 &at, const Vector3 &up)
 {
 	ALSoundScript::SetOrientation(at, up);
 	SALSound::SetOrientation(at, up);
 }
-std::pair<Vector3, Vector3> SALSoundScript::GetOrientation() const { return SALSound::GetOrientation(); }
-void SALSoundScript::SetDopplerFactor(float factor)
+std::pair<Vector3, Vector3> pragma::audio::SALSoundScript::GetOrientation() const { return SALSound::GetOrientation(); }
+void pragma::audio::SALSoundScript::SetDopplerFactor(float factor)
 {
 	ALSoundScript::SetDopplerFactor(factor);
 	SALSound::SetDopplerFactor(factor);
 }
-float SALSoundScript::GetDopplerFactor() const { return SALSound::GetDopplerFactor(); }
-void SALSoundScript::SetLeftStereoAngle(float ang)
+float pragma::audio::SALSoundScript::GetDopplerFactor() const { return SALSound::GetDopplerFactor(); }
+void pragma::audio::SALSoundScript::SetLeftStereoAngle(float ang)
 {
 	ALSoundScript::SetLeftStereoAngle(ang);
 	SALSound::SetLeftStereoAngle(ang);
 }
-float SALSoundScript::GetLeftStereoAngle() const { return SALSound::GetLeftStereoAngle(); }
-void SALSoundScript::SetRightStereoAngle(float ang)
+float pragma::audio::SALSoundScript::GetLeftStereoAngle() const { return SALSound::GetLeftStereoAngle(); }
+void pragma::audio::SALSoundScript::SetRightStereoAngle(float ang)
 {
 	ALSoundScript::SetRightStereoAngle(ang);
 	SALSound::SetRightStereoAngle(ang);
 }
-float SALSoundScript::GetRightStereoAngle() const { return SALSound::GetRightStereoAngle(); }
-void SALSoundScript::SetAirAbsorptionFactor(float factor)
+float pragma::audio::SALSoundScript::GetRightStereoAngle() const { return SALSound::GetRightStereoAngle(); }
+void pragma::audio::SALSoundScript::SetAirAbsorptionFactor(float factor)
 {
 	ALSoundScript::SetAirAbsorptionFactor(factor);
 	SALSound::SetAirAbsorptionFactor(factor);
 }
-float SALSoundScript::GetAirAbsorptionFactor() const { return SALSound::GetAirAbsorptionFactor(); }
-void SALSoundScript::SetGainAuto(bool directHF, bool send, bool sendHF)
+float pragma::audio::SALSoundScript::GetAirAbsorptionFactor() const { return SALSound::GetAirAbsorptionFactor(); }
+void pragma::audio::SALSoundScript::SetGainAuto(bool directHF, bool send, bool sendHF)
 {
 	ALSoundScript::SetGainAuto(directHF, send, sendHF);
 	SALSound::SetGainAuto(directHF, send, sendHF);
 }
-std::tuple<bool, bool, bool> SALSoundScript::GetGainAuto() const { return SALSound::GetGainAuto(); }
-void SALSoundScript::SetDirectFilter(const SoundEffectParams &params) { SALSound::SetDirectFilter(params); }
-const SoundEffectParams &SALSoundScript::GetDirectFilter() const { return SALSound::GetDirectFilter(); }
-bool SALSoundScript::AddEffect(const std::string &effectName, const SoundEffectParams &params)
+std::tuple<bool, bool, bool> pragma::audio::SALSoundScript::GetGainAuto() const { return SALSound::GetGainAuto(); }
+void pragma::audio::SALSoundScript::SetDirectFilter(const SoundEffectParams &params) { SALSound::SetDirectFilter(params); }
+const pragma::audio::SoundEffectParams &pragma::audio::SALSoundScript::GetDirectFilter() const { return SALSound::GetDirectFilter(); }
+bool pragma::audio::SALSoundScript::AddEffect(const std::string &effectName, const SoundEffectParams &params)
 {
 	ALSoundScript::AddEffect(effectName, params);
 	return SALSound::AddEffect(effectName, params);
 }
-void SALSoundScript::RemoveEffect(const std::string &effectName)
+void pragma::audio::SALSoundScript::RemoveEffect(const std::string &effectName)
 {
 	ALSoundScript::RemoveEffect(effectName);
 	SALSound::RemoveEffect(effectName);
 }
-void SALSoundScript::SetEffectParameters(const std::string &effectName, const SoundEffectParams &params)
+void pragma::audio::SALSoundScript::SetEffectParameters(const std::string &effectName, const SoundEffectParams &params)
 {
 	ALSoundScript::SetEffectParameters(effectName, params);
 	SALSound::SetEffectParameters(effectName, params);
 }
 
-void SALSoundScript::SetType(pragma::audio::ALSoundType type)
+void pragma::audio::SALSoundScript::SetType(pragma::audio::ALSoundType type)
 {
 	ALSoundScript::SetType(type);
 	SALSound::SetType(type);
 }
-void SALSoundScript::SetFlags(unsigned int flags)
+void pragma::audio::SALSoundScript::SetFlags(unsigned int flags)
 {
 	ALSoundScript::SetFlags(flags);
 	SALSound::SetFlags(flags);
 }
-void SALSoundScript::SetSource(pragma::ecs::BaseEntity *ent)
+void pragma::audio::SALSoundScript::SetSource(pragma::ecs::BaseEntity *ent)
 {
 	ALSoundScript::SetSource(ent);
 	SALSound::SetSource(ent);
 }
-void SALSoundScript::Update()
+void pragma::audio::SALSoundScript::Update()
 {
 	ALSoundScript::Update();
 	SALSound::Update();
 }
-void SALSoundScript::PostUpdate()
+void pragma::audio::SALSoundScript::PostUpdate()
 {
 	ALSoundScript::PostUpdate();
 	SALSound::PostUpdate();
 }
-void SALSoundScript::SetRange(float start, float end)
+void pragma::audio::SALSoundScript::SetRange(float start, float end)
 {
 	ALSoundScript::SetRange(start, end);
 	SALSound::SetRange(start, end);
 }
-void SALSoundScript::ClearRange()
+void pragma::audio::SALSoundScript::ClearRange()
 {
 	ALSoundScript::ClearRange();
 	SALSound::ClearRange();
 }
-void SALSoundScript::SetFadeInDuration(float t)
+void pragma::audio::SALSoundScript::SetFadeInDuration(float t)
 {
 	ALSoundScript::SetFadeInDuration(t);
 	SALSound::SetFadeInDuration(t);
 }
-void SALSoundScript::SetFadeOutDuration(float t)
+void pragma::audio::SALSoundScript::SetFadeOutDuration(float t)
 {
 	ALSoundScript::SetFadeOutDuration(t);
 	SALSound::SetFadeOutDuration(t);
 }
-void SALSoundScript::SetState(ALState state) { SALSound::SetState(state); }
+void pragma::audio::SALSoundScript::SetState(ALState state) { SALSound::SetState(state); }

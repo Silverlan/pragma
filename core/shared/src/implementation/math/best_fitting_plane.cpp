@@ -9,7 +9,7 @@ module pragma.shared;
 
 import :math.best_fitting_plane;
 
-void umath::calc_best_fitting_plane(const Mat3 &covarianceMatrix, const Vector3 &average, Vector3 &n, double &d)
+void pragma::math::calc_best_fitting_plane(const Mat3 &covarianceMatrix, const Vector3 &average, Vector3 &n, double &d)
 {
 	auto &A = reinterpret_cast<const Eigen::Matrix3f &>(covarianceMatrix);
 	Eigen::EigenSolver<Eigen::Matrix3f> es(A);

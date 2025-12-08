@@ -15,16 +15,16 @@ import :rendering.shaders;
 using namespace pragma;
 
 CRendererPpDoFComponent::CRendererPpDoFComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
-void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererPpDoFComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.renderStats)
-		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
 	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingDoF");
 
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
 		pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingDoF
 		if(drawSceneInfo.renderStats)
-			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
+			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
 	}};
 
 	if(drawSceneInfo.scene.expired() || m_renderer.expired())
@@ -33,7 +33,7 @@ void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 	auto &cam = scene.GetActiveCamera();
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto &hShaderDof = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPDoF);
+	auto &hShaderDof = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPDoF);
 	if(hShaderDof.expired() || cam.expired())
 		return;
 	auto opticalC = cam->GetEntity().GetComponent<pragma::COpticalCameraComponent>();

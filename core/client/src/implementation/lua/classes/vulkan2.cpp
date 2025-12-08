@@ -99,10 +99,10 @@ namespace prosper {
 	}
 };
 
-namespace pragma {
-	static bool operator==(const pragma::SceneMesh &a, const pragma::SceneMesh &b) { return &a == &b; }
+namespace pragma::rendering {
+	static bool operator==(const pragma::rendering::SceneMesh &a, const pragma::rendering::SceneMesh &b) { return &a == &b; }
 
-	static std::ostream &operator<<(std::ostream &out, const pragma::SceneMesh &)
+	static std::ostream &operator<<(std::ostream &out, const pragma::rendering::SceneMesh &)
 	{
 		out << "SceneMesh";
 		return out;
@@ -449,18 +449,18 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	defVkDescriptorSet.def("Update", +[](lua::State *l, Lua::Vulkan::DescriptorSet &ds) { return ds.GetDescriptorSet()->Update(); });
 	prosperMod[defVkDescriptorSet];
 
-	auto defVkMesh = luabind::class_<pragma::SceneMesh>("Mesh");
+	auto defVkMesh = luabind::class_<pragma::rendering::SceneMesh>("Mesh");
 	defVkMesh.def(luabind::tostring(luabind::self));
 	defVkMesh.def(luabind::const_self == luabind::const_self);
-	defVkMesh.def("GetVertexBuffer", &pragma::SceneMesh::GetVertexBuffer);
-	defVkMesh.def("GetVertexWeightBuffer", &pragma::SceneMesh::GetVertexWeightBuffer);
-	defVkMesh.def("GetAlphaBuffer", &pragma::SceneMesh::GetAlphaBuffer);
-	defVkMesh.def("GetIndexBuffer", &pragma::SceneMesh::GetIndexBuffer);
-	defVkMesh.def("SetVertexBuffer", &pragma::SceneMesh::SetVertexBuffer);
-	defVkMesh.def("SetVertexWeightBuffer", &pragma::SceneMesh::SetVertexWeightBuffer);
-	defVkMesh.def("SetAlphaBuffer", &pragma::SceneMesh::SetAlphaBuffer);
-	defVkMesh.def("SetIndexBuffer", &pragma::SceneMesh::SetIndexBuffer);
-	defVkMesh.def("ClearBuffers", static_cast<void (*)(lua::State *, pragma::SceneMesh &)>([](lua::State *l, pragma::SceneMesh &mesh) { mesh.ClearBuffers(); }));
+	defVkMesh.def("GetVertexBuffer", &pragma::rendering::SceneMesh::GetVertexBuffer);
+	defVkMesh.def("GetVertexWeightBuffer", &pragma::rendering::SceneMesh::GetVertexWeightBuffer);
+	defVkMesh.def("GetAlphaBuffer", &pragma::rendering::SceneMesh::GetAlphaBuffer);
+	defVkMesh.def("GetIndexBuffer", &pragma::rendering::SceneMesh::GetIndexBuffer);
+	defVkMesh.def("SetVertexBuffer", &pragma::rendering::SceneMesh::SetVertexBuffer);
+	defVkMesh.def("SetVertexWeightBuffer", &pragma::rendering::SceneMesh::SetVertexWeightBuffer);
+	defVkMesh.def("SetAlphaBuffer", &pragma::rendering::SceneMesh::SetAlphaBuffer);
+	defVkMesh.def("SetIndexBuffer", &pragma::rendering::SceneMesh::SetIndexBuffer);
+	defVkMesh.def("ClearBuffers", static_cast<void (*)(lua::State *, pragma::rendering::SceneMesh &)>([](lua::State *l, pragma::rendering::SceneMesh &mesh) { mesh.ClearBuffers(); }));
 	prosperMod[defVkMesh];
 
 	auto defPcb = luabind::class_<prosper::util::PreparedCommandBuffer>("PreparedCommandBuffer");

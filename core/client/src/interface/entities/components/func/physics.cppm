@@ -23,7 +23,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CFuncPhysics : public CBaseEntity {
+	class DLLCLIENT CFuncPhysics : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

@@ -14,7 +14,7 @@ import :client_state;
 import :entities.components;
 import :game;
 
-void CParticleRendererSpriteTrail::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleRendererSpriteTrail::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleRenderer::Initialize(pSystem, values);
 	auto bAlignVelocity = false;
@@ -33,9 +33,9 @@ void CParticleRendererSpriteTrail::Initialize(pragma::BaseEnvParticleSystemCompo
 	m_shader = pragma::get_cengine()->GetShader("pfm_particle_sprite_trail");
 }
 
-pragma::ShaderParticleBase *CParticleRendererSpriteTrail::GetShader() const { return static_cast<pragma::ShaderParticle2DBase *>(m_shader.get()); }
+pragma::ShaderParticleBase *pragma::pts::CParticleRendererSpriteTrail::GetShader() const { return static_cast<pragma::ShaderParticle2DBase *>(m_shader.get()); }
 
-void CParticleRendererSpriteTrail::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ecs::ParticleRenderFlags renderFlags)
+void pragma::pts::CParticleRendererSpriteTrail::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::pts::ParticleRenderFlags renderFlags)
 {
 	auto *shader = static_cast<pragma::ShaderParticle2DBase *>(m_shader.get());
 	prosper::ShaderBindState bindState {drawCmd};
@@ -55,7 +55,7 @@ void CParticleRendererSpriteTrail::RecordRender(prosper::ICommandBuffer &drawCmd
 	shader->RecordEndDraw(bindState);
 }
 
-void CParticleRendererSpriteTrail::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
+void pragma::pts::CParticleRendererSpriteTrail::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
 {
 	/*static auto hShader = pragma::get_cengine()->GetShader("particleshadow");
 	if(!hShader.IsValid())

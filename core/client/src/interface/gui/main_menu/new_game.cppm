@@ -8,14 +8,14 @@ export module pragma.client:gui.main_menu_new_game;
 
 export import :gui.main_menu_base;
 
-export {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIMainMenuNewGame : public WIMainMenuBase {
 	  protected:
-		WIHandle m_hMapList;
-		WIHandle m_hServerName;
-		WIHandle m_hGameMode;
-		WIHandle m_hRconPassword;
-		WIHandle m_hMaxPlayers;
+		pragma::gui::WIHandle m_hMapList;
+		pragma::gui::WIHandle m_hServerName;
+		pragma::gui::WIHandle m_hGameMode;
+		pragma::gui::WIHandle m_hRconPassword;
+		pragma::gui::WIHandle m_hMaxPlayers;
 		CallbackHandle m_cbMapListReload;
 		void OnStartGame(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
 		void InitializeGameSettings();

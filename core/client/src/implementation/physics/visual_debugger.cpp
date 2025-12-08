@@ -13,13 +13,13 @@ import :rendering.shaders;
 
 #undef DrawText
 
-CPhysVisualDebugger::CPhysVisualDebugger() { InitializeBuffers(); }
+pragma::physics::CPhysVisualDebugger::CPhysVisualDebugger() { InitializeBuffers(); }
 
-void CPhysVisualDebugger::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam)
+void pragma::physics::CPhysVisualDebugger::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam)
 {
 	auto vp = cam.GetProjectionMatrix() * cam.GetViewMatrix();
 	auto m = umat::identity();
-	auto &whDebugShader = pragma::get_cgame()->GetGameShader(CGame::GameShader::DebugVertex);
+	auto &whDebugShader = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::DebugVertex);
 	auto &shader = static_cast<pragma::ShaderDebugVertexColor &>(*whDebugShader.get());
 	prosper::ShaderBindState bindState {*drawCmd};
 	if(shader.RecordBeginDraw(bindState, pragma::ShaderDebugVertexColor::Pipeline::Line) == true) {
@@ -39,13 +39,13 @@ void CPhysVisualDebugger::Render(std::shared_ptr<prosper::ICommandBuffer> &drawC
 	}
 }
 
-void CPhysVisualDebugger::Reset()
+void pragma::physics::CPhysVisualDebugger::Reset()
 {
 	m_lineBuffer.Reset();
 	m_pointBuffer.Reset();
 	m_triangleBuffer.Reset();
 }
-void CPhysVisualDebugger::Flush()
+void pragma::physics::CPhysVisualDebugger::Flush()
 {
 	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_lineBuffer.buffer, 0, m_lineBuffer.GetDataSize(), m_lineBuffer.vertices.data());
 	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.buffer, 0, m_pointBuffer.GetDataSize(), m_pointBuffer.vertices.data());
@@ -55,7 +55,7 @@ void CPhysVisualDebugger::Flush()
 	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.colorBuffer, 0, m_pointBuffer.GetColorDataSize(), m_pointBuffer.vertexColors.data());
 	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_triangleBuffer.colorBuffer, 0, m_triangleBuffer.GetColorDataSize(), m_triangleBuffer.vertexColors.data());
 }
-void CPhysVisualDebugger::InitializeBuffers()
+void pragma::physics::CPhysVisualDebugger::InitializeBuffers()
 {
 	constexpr auto totalBufferSize = decltype(m_lineBuffer)::BUFFER_SIZE + decltype(m_pointBuffer)::BUFFER_SIZE + decltype(m_triangleBuffer)::BUFFER_SIZE;
 	constexpr auto totalBufferSizeMb = totalBufferSize / 1024 / 1024;
@@ -96,11 +96,11 @@ void CPhysVisualDebugger::InitializeBuffers()
 	colorOffset += decltype(m_triangleBuffer)::COLOR_BUFFER_SIZE;
 }
 
-void CPhysVisualDebugger::DrawLine(const Vector3 &from, const Vector3 &to, const Color &fromColor, const Color &toColor) { m_lineBuffer.AddInstance({from, to}, {fromColor.ToVector4(), toColor.ToVector4()}); }
-void CPhysVisualDebugger::DrawPoint(const Vector3 &pos, const Color &color) { m_pointBuffer.AddInstance({pos}, {color.ToVector4()}); }
-void CPhysVisualDebugger::DrawTriangle(const Vector3 &v0, const Vector3 &v1, const Vector3 &v2, const Color &c0, const Color &c1, const Color &c2) { m_triangleBuffer.AddInstance({v0, v1, v2}, {c0.ToVector4(), c1.ToVector4(), c2.ToVector4()}); }
-void CPhysVisualDebugger::ReportErrorWarning(const std::string &str) { Con::cwar << "[Phys] WARNING: " << str << Con::endl; }
-void CPhysVisualDebugger::DrawText(const std::string &str, const Vector3 &location, const Color &color, float size)
+void pragma::physics::CPhysVisualDebugger::DrawLine(const Vector3 &from, const Vector3 &to, const Color &fromColor, const Color &toColor) { m_lineBuffer.AddInstance({from, to}, {fromColor.ToVector4(), toColor.ToVector4()}); }
+void pragma::physics::CPhysVisualDebugger::DrawPoint(const Vector3 &pos, const Color &color) { m_pointBuffer.AddInstance({pos}, {color.ToVector4()}); }
+void pragma::physics::CPhysVisualDebugger::DrawTriangle(const Vector3 &v0, const Vector3 &v1, const Vector3 &v2, const Color &c0, const Color &c1, const Color &c2) { m_triangleBuffer.AddInstance({v0, v1, v2}, {c0.ToVector4(), c1.ToVector4(), c2.ToVector4()}); }
+void pragma::physics::CPhysVisualDebugger::ReportErrorWarning(const std::string &str) { Con::cwar << "[Phys] WARNING: " << str << Con::endl; }
+void pragma::physics::CPhysVisualDebugger::DrawText(const std::string &str, const Vector3 &location, const Color &color, float size)
 {
 	// TODO
 }

@@ -321,7 +321,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto snd = Lua::Check<std::shared_ptr<ALSound>>(l, -1);
+		auto snd = Lua::Check<std::shared_ptr<pragma::audio::ALSound>>(l, -1);
 		Lua::Pop(l, 1);
 
 		pragma::CEOnSoundCreated evData {snd};
@@ -362,7 +362,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::baseModelComponent::EVENT_ON_MODEL_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &model = Lua::Check<std::shared_ptr<pragma::Model>>(l, -1);
+		auto &model = Lua::Check<std::shared_ptr<pragma::asset::Model>>(l, -1);
 		Lua::Pop(l, 1);
 
 		pragma::CEOnModelChanged evData {model};
@@ -403,7 +403,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::baseModelComponent::EVENT_ON_MODEL_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto model = Lua::Check<std::shared_ptr<pragma::Model>>(l, -1);
+		auto model = Lua::Check<std::shared_ptr<pragma::asset::Model>>(l, -1);
 		Lua::Pop(l, 1);
 
 		pragma::CEOnModelChanged evData {model};
@@ -415,7 +415,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::baseActorComponent::EVENT_ON_KILLED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &pDamageInfo = Lua::Check<DamageInfo>(l, -1);
+		auto &pDamageInfo = Lua::Check<pragma::game::DamageInfo>(l, -1);
 		Lua::Pop(l, 1);
 		pragma::CEOnCharacterKilled evData {&pDamageInfo};
 		if(bInject)
@@ -464,7 +464,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
-		auto &surfMat = Lua::Check<SurfaceMaterial>(l, -1);
+		auto &surfMat = Lua::Check<pragma::physics::SurfaceMaterial>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 3);
@@ -545,7 +545,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::damageableComponent::EVENT_ON_TAKE_DAMAGE) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &damageInfo = Lua::Check<DamageInfo>(l, -1);
+		auto &damageInfo = Lua::Check<pragma::game::DamageInfo>(l, -1);
 		Lua::Pop(l, 1);
 		pragma::CEOnTakeDamage evData {damageInfo};
 		if(bInject)
@@ -556,7 +556,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &sound = Lua::Check<std::shared_ptr<ALSound>>(l, -1);
+		auto &sound = Lua::Check<std::shared_ptr<pragma::audio::ALSound>>(l, -1);
 		Lua::Pop(l, 1);
 		pragma::CEOnSoundCreated evData {sound};
 		if(bInject)
@@ -601,7 +601,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 	else if(eventId == pragma::baseHealthComponent::EVENT_ON_TAKEN_DAMAGE) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &damageInfo = Lua::Check<DamageInfo>(l, -1);
+		auto &damageInfo = Lua::Check<pragma::game::DamageInfo>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 2);

@@ -121,7 +121,7 @@ void pragma::rendering::ShaderProcessor::UpdateClipPlane()
 		m_boundClipPlane = clipPlane;
 	}
 }
-bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
+bool pragma::rendering::ShaderProcessor::RecordBindEntity(pragma::ecs::CBaseEntity &ent)
 {
 	auto *renderC = ent.GetRenderComponent();
 	assert(renderC);
@@ -159,7 +159,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 	m_vertexAnimC = nullptr;
 	m_modelC = renderC->GetModelComponent();
 	if(m_modelC) {
-		auto &vertAnimBuffer = static_cast<CModel &>(*m_modelC->GetModel()).GetVertexAnimationBuffer();
+		auto &vertAnimBuffer = static_cast<pragma::asset::CModel &>(*m_modelC->GetModel()).GetVertexAnimationBuffer();
 		if(vertAnimBuffer != nullptr)
 			m_vertexAnimC = ent.GetComponent<pragma::CVertexAnimatedComponent>().get();
 	}
@@ -183,7 +183,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 	// TODO: 3d sky
 	return true;
 }
-bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx, const pragma::rendering::RenderQueue::InstanceSet *instanceSet)
+bool pragma::rendering::ShaderProcessor::RecordDraw(pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx, const pragma::rendering::RenderQueue::InstanceSet *instanceSet)
 {
 	uint32_t vertexAnimationOffset = 0;
 	if(m_vertexAnimC) {
@@ -242,11 +242,11 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh, pragma:
 		(*m_stats)->Increment(RenderPassStats::Counter::DrawnMeshes, instanceCount);
 		(*m_stats)->Increment(RenderPassStats::Counter::DrawnVertices, mesh.GetVertexCount() * instanceCount);
 		(*m_stats)->Increment(RenderPassStats::Counter::DrawnTriangles, mesh.GetTriangleCount() * instanceCount);
-		m_stats->meshes.push_back(std::static_pointer_cast<CModelSubMesh>(mesh.shared_from_this()));
+		m_stats->meshes.push_back(std::static_pointer_cast<pragma::geometry::CModelSubMesh>(mesh.shared_from_this()));
 
 		(*m_stats)->Increment(RenderPassStats::Counter::DrawCalls);
 	}
 	return m_curShader->OnRecordDrawMesh(*this, mesh) && m_cmdBuffer.RecordDrawIndexed(mesh.GetIndexCount(), instanceCount);
 }
-CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const { return static_cast<CBaseEntity &>(m_modelC->GetEntity()); }
+pragma::ecs::CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const { return static_cast<pragma::ecs::CBaseEntity &>(m_modelC->GetEntity()); }
 const pragma::CSceneComponent &pragma::rendering::ShaderProcessor::GetCurrentScene() const { return *m_sceneC; }

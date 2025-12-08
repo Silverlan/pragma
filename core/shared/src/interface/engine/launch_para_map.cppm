@@ -8,7 +8,7 @@ export module pragma.shared:engine.launch_para_map;
 
 export import std.compat;
 
-export {
+export namespace pragma {
 #pragma warning(push)
 #pragma warning(disable : 4251)
 	using LaunchParameterFunc = void (*)(const std::vector<std::string> &);

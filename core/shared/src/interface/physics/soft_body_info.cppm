@@ -8,7 +8,7 @@ export module pragma.shared:physics.soft_body_info;
 
 export import std.compat;
 
-export {
+export namespace pragma::physics {
 #pragma pack(push, 1)
 	struct DLLNETWORK PhysSoftBodyInfo {
 		struct MaterialStiffnessCoefficient {

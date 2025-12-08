@@ -77,7 +77,7 @@ void pragma::physics::PhysObj::GetAABB(Vector3 &min, Vector3 &max) const
 }
 Vector3 pragma::physics::PhysObj::GetLinearVelocity() const { return m_velocity; }
 void pragma::physics::PhysObj::UpdateVelocity() {}
-NetworkState *pragma::physics::PhysObj::GetNetworkState() { return m_networkState; }
+pragma::NetworkState *pragma::physics::PhysObj::GetNetworkState() { return m_networkState; }
 float pragma::physics::PhysObj::GetMass() const { return 0.f; }
 void pragma::physics::PhysObj::SetMass(float) {}
 bool pragma::physics::PhysObj::IsDisabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::Disabled); }
@@ -128,7 +128,7 @@ pragma::physics::ICollisionObject *pragma::physics::PhysObj::GetCollisionObject(
 pragma::physics::PhysObj::~PhysObj()
 {
 	pragma::BaseLuaHandle::InvalidateHandle();
-	//NetworkState *state = m_networkState;
+	//auto *state = m_networkState;
 	for(unsigned int i = 0; i < m_collisionObjects.size(); i++) {
 		auto &o = m_collisionObjects[i];
 		if(o.IsValid())

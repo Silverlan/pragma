@@ -52,7 +52,7 @@ void CViewModelComponent::Initialize()
 			wepC->UpdateDeployState();
 	});
 
-	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 	ent.AddComponent<pragma::CTransformComponent>();
 	ent.AddComponent<pragma::LogicComponent>(); // Logic component is needed for animations
 	auto pRenderComponent = ent.AddComponent<pragma::CRenderComponent>();
@@ -67,7 +67,7 @@ void CViewModelComponent::Initialize()
 	ent.AddComponent<CAnimatedComponent>();
 }
 
-static auto cvViewFov = GetClientConVar("cl_fov_viewmodel");
+static auto cvViewFov = pragma::console::get_client_con_var("cl_fov_viewmodel");
 void CViewModelComponent::SetViewFOV(float fov)
 {
 	m_viewFov = fov;

@@ -12,11 +12,11 @@ import :client_state;
 
 using namespace pragma;
 
-pragma::BloomPipelineInfo::BloomPipelineInfo(uint32_t radius, double sigma) : radius(radius), sigma(sigma) {}
+pragma::rendering::BloomPipelineInfo::BloomPipelineInfo(uint32_t radius, double sigma) : radius(radius), sigma(sigma) {}
 
 ShaderPPBloomBlurBase::ShaderPPBloomBlurBase(prosper::IPrContext &context, const std::string &identifier, const std::string &fsShader) : prosper::ShaderBlurBase(context, identifier, fsShader), m_defaultPipeline {AddPipeline(DEFAULT_RADIUS, DEFAULT_SIGMA)} {}
 
-std::shared_ptr<BloomPipelineInfo> ShaderPPBloomBlurBase::AddPipeline(uint32_t radius, double sigma)
+std::shared_ptr<pragma::rendering::BloomPipelineInfo> ShaderPPBloomBlurBase::AddPipeline(uint32_t radius, double sigma)
 {
 	for(auto &info : m_pipelineInfos) {
 		if(info.expired())
@@ -25,7 +25,7 @@ std::shared_ptr<BloomPipelineInfo> ShaderPPBloomBlurBase::AddPipeline(uint32_t r
 		if(pInfo->radius == radius && pInfo->sigma == sigma)
 			return pInfo;
 	}
-	auto info = ::util::make_shared<BloomPipelineInfo>(radius, sigma);
+	auto info = ::util::make_shared<pragma::rendering::BloomPipelineInfo>(radius, sigma);
 	m_pipelineInfos.push_back(info);
 	return info;
 }

@@ -12,16 +12,16 @@ import :engine;
 import :entities.components;
 import :game;
 
-WIDebugHDRBloom::WIDebugHDRBloom() : WITexturedRect() {}
+pragma::gui::types::WIDebugHDRBloom::WIDebugHDRBloom() : WITexturedRect() {}
 
-WIDebugHDRBloom::~WIDebugHDRBloom()
+pragma::gui::types::WIDebugHDRBloom::~WIDebugHDRBloom()
 {
 	if(m_cbRenderHDRMap.IsValid())
 		m_cbRenderHDRMap.Remove();
 	m_renderTarget = nullptr;
 }
 
-void WIDebugHDRBloom::UpdateBloomImage()
+void pragma::gui::types::WIDebugHDRBloom::UpdateBloomImage()
 {
 	auto &drawCmd = pragma::get_cengine()->GetDrawCommandBuffer();
 	auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
@@ -42,7 +42,7 @@ void WIDebugHDRBloom::UpdateBloomImage()
 	drawCmd->RecordImageBarrier(imgDst, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 }
 
-void WIDebugHDRBloom::DoUpdate()
+void pragma::gui::types::WIDebugHDRBloom::DoUpdate()
 {
 	WITexturedRect::DoUpdate();
 	if(pragma::get_cgame() == nullptr)
@@ -62,6 +62,6 @@ void WIDebugHDRBloom::DoUpdate()
 	rpInfo.subPasses.push_back({prosper::util::RenderPassCreateInfo::SubPass {{0ull}}});
 	auto rp = pragma::get_cengine()->GetRenderContext().CreateRenderPass(rpInfo);
 	m_renderTarget = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({tex}, rp, {});
-	m_cbRenderHDRMap = pragma::get_cgame()->AddCallback("PostRenderScenes", FunctionCallback<>::Create(std::bind(&WIDebugHDRBloom::UpdateBloomImage, this)));
+	m_cbRenderHDRMap = pragma::get_cgame()->AddCallback("PostRenderScenes", FunctionCallback<>::Create(std::bind(&pragma::gui::types::WIDebugHDRBloom::UpdateBloomImage, this)));
 	SetTexture(m_renderTarget->GetTexture());
 }

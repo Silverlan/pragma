@@ -9,18 +9,18 @@ module pragma.client;
 
 import :console.commands;
 
-static void debug_font(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+static void debug_font(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
 		Con::cout << "Available fonts:" << Con::endl;
-		auto &fonts = FontManager::GetFonts();
+		auto &fonts = pragma::gui::FontManager::GetFonts();
 		for(auto &pair : fonts)
 			Con::cout << pair.first << Con::endl;
 		Con::cout << Con::endl;
 		return;
 	}
 	auto &fontName = argv.front();
-	auto font = FontManager::GetFont(fontName);
+	auto font = pragma::gui::FontManager::GetFont(fontName);
 	if(font == nullptr) {
 		Con::cout << "No font by that name found!" << Con::endl;
 		return;
@@ -45,8 +45,8 @@ static void debug_font(NetworkState *, pragma::BasePlayerComponent *, std::vecto
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	if(dbg == nullptr) {
 		dbg = std::make_unique<DebugGameGUI>([glyphMap, width, height]() {
-			auto &wgui = WGUI::GetInstance();
-			auto *r = wgui.Create<WIDebugMipMaps>();
+			auto &wgui = pragma::gui::WGUI::GetInstance();
+			auto *r = wgui.Create<pragma::gui::types::WIDebugMipMaps>();
 			r->SetSize(width, height);
 			r->SetTexture(glyphMap);
 			r->Update();
@@ -60,7 +60,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_font", &debug_font, pragma::console::ConVarFlags::None, "Displays the glyph map for the specified font. If no arguments are specified, all available fonts will be listed. Usage: debug_font <fontName>");
 }
 
-static void debug_texture_mipmaps(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+static void debug_texture_mipmaps(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
 		Con::cwar << "No texture given!" << Con::endl;
@@ -100,8 +100,8 @@ static void debug_texture_mipmaps(NetworkState *, pragma::BasePlayerComponent *,
 		if(type != msys::TextureType::Invalid)
 			Con::cout << "File image type: " << magic_enum::enum_name(type) << Con::endl;
 		dbg = std::make_unique<DebugGameGUI>([vkTexture]() {
-			auto &wgui = WGUI::GetInstance();
-			auto *r = wgui.Create<WIDebugMipMaps>();
+			auto &wgui = pragma::gui::WGUI::GetInstance();
+			auto *r = wgui.Create<pragma::gui::types::WIDebugMipMaps>();
 			r->SetTexture(vkTexture);
 			r->Update();
 			return r->GetHandle();

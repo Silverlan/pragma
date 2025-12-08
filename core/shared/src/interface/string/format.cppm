@@ -8,4 +8,6 @@ export module pragma.shared:string.format;
 
 export import std;
 
-export std::string DLLNETWORK FormatTime(double dtm);
+export namespace pragma::string {
+    std::string DLLNETWORK format_time(double dtm);
+}

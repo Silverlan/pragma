@@ -69,7 +69,7 @@ export namespace pragma {
 		void NormalizeViewOrientation(Quat &inOutRot);
 		const Quat &NormalizeViewOrientation();
 		virtual void Initialize() override;
-		TraceData GetAimTraceData(std::optional<float> maxDist = {}) const;
+		physics::TraceData GetAimTraceData(std::optional<float> maxDist = {}) const;
 		EulerAngles GetViewAngles() const;
 		void SetViewAngles(const EulerAngles &ang);
 		Vector3 GetViewForward() const;
@@ -185,17 +185,17 @@ export namespace pragma {
 		virtual void InitializePhysObj(pragma::physics::PhysObj *phys);
 
 		bool HandleAnimationEvent(const pragma::AnimationEvent &ev);
-		virtual void PlayFootStepSound(FootType foot, const SurfaceMaterial &surfMat, float scale);
+		virtual void PlayFootStepSound(FootType foot, const physics::SurfaceMaterial &surfMat, float scale);
 
 		void UpdateNeckControllers();
 
 		virtual void UpdateOrientation();
 	};
 	struct DLLNETWORK CEPlayFootstepSound : public ComponentEvent {
-		CEPlayFootstepSound(BaseCharacterComponent::FootType footType, const SurfaceMaterial &surfaceMaterial, float scale);
+		CEPlayFootstepSound(BaseCharacterComponent::FootType footType, const physics::SurfaceMaterial &surfaceMaterial, float scale);
 		virtual void PushArguments(lua::State *l) override;
 		BaseCharacterComponent::FootType footType;
-		const SurfaceMaterial &surfaceMaterial;
+		const physics::SurfaceMaterial &surfaceMaterial;
 		float scale;
 	};
 	struct DLLNETWORK CEOnFootStep : public ComponentEvent {

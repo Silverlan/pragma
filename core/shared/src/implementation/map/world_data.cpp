@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :map.world_data;
 
-pragma::asset::WorldData::WorldData(NetworkState &nw) : m_nw {nw}
+pragma::asset::WorldData::WorldData(pragma::NetworkState &nw) : m_nw {nw}
 {
 	SetMessageLogger(nullptr); // Don't output anything by default
 }
@@ -42,7 +42,7 @@ void pragma::asset::WorldData::SetLightMapExposure(float exp) { m_lightMapExposu
 float pragma::asset::WorldData::GetLightMapIntensity() const { return m_lightMapIntensity; }
 float pragma::asset::WorldData::GetLightMapExposure() const { return m_lightMapExposure; }
 
-NetworkState &pragma::asset::WorldData::GetNetworkState() const { return m_nw; }
+pragma::NetworkState &pragma::asset::WorldData::GetNetworkState() const { return m_nw; }
 
 std::vector<uint16_t> &pragma::asset::WorldData::GetStaticPropLeaves() { return m_staticPropLeaves; }
 const std::vector<std::shared_ptr<pragma::asset::EntityData>> &pragma::asset::WorldData::GetEntities() const { return m_entities; }
@@ -53,9 +53,9 @@ void pragma::asset::WorldData::SetMessageLogger(const std::function<void(const s
 {
 	m_messageLogger = msgLogger ? msgLogger : [](const std::string &) {};
 }
-std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::Create(NetworkState &nw) { return std::shared_ptr<WorldData> {new WorldData {nw}}; }
+std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::Create(pragma::NetworkState &nw) { return std::shared_ptr<WorldData> {new WorldData {nw}}; }
 
-std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::load(NetworkState &nw, const std::string &fileName, std::string &outErr, EntityData::Flags entMask)
+std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::load(pragma::NetworkState &nw, const std::string &fileName, std::string &outErr, EntityData::Flags entMask)
 {
 	auto nFileName = filemanager::find_available_file(fileName, get_supported_extensions());
 	std::shared_ptr<udm::Data> udmData = nullptr;
@@ -74,7 +74,7 @@ std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::load(Network
 	worldData->SetVersion(udmData->GetAssetVersion());
 	return worldData;
 }
-std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::load_from_udm_data(NetworkState &nw, udm::LinkedPropertyWrapper &prop, std::string &outErr, EntityData::Flags entMask)
+std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::load_from_udm_data(pragma::NetworkState &nw, udm::LinkedPropertyWrapper &prop, std::string &outErr, EntityData::Flags entMask)
 {
 	auto worldData = WorldData::Create(nw);
 	if(!worldData->LoadFromAssetData(prop, entMask, outErr))

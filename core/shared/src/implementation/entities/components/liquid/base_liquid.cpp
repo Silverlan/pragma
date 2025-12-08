@@ -87,7 +87,7 @@ void BaseFuncLiquidComponent::InitializeWaterSurface()
 		return;
 	if(m_surfaceC.expired())
 		return;
-	m_surfaceC->FindAndAssignMesh([](ModelMesh &mesh, pragma::ModelSubMesh &subMesh, msys::Material &mat, const std::string &shader) -> uint32_t { return (shader == "water") ? 1 : 0; });
+	m_surfaceC->FindAndAssignMesh([](pragma::geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh, msys::Material &mat, const std::string &shader) -> uint32_t { return (shader == "water") ? 1 : 0; });
 }
 
 void BaseFuncLiquidComponent::ClearWaterSurface()

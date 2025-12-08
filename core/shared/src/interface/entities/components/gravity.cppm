@@ -27,9 +27,9 @@ export namespace pragma {
 		float m_gravityScale = 1.f;
 		std::shared_ptr<Vector3> m_gravityDir = nullptr;
 		std::shared_ptr<float> m_gravity = nullptr;
-		Vector3 GetGravityForce(NetworkState *state) const;
-		Vector3 GetGravityDirection(NetworkState *state) const;
-		float GetGravity(NetworkState *state) const;
+		Vector3 GetGravityForce(pragma::NetworkState *state) const;
+		Vector3 GetGravityDirection(pragma::NetworkState *state) const;
+		float GetGravity(pragma::NetworkState *state) const;
 	};
 
 	class DLLNETWORK GravityComponent final : public BaseEntityComponent, public BaseGravity {

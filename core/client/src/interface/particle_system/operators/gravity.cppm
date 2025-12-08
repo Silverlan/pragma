@@ -11,21 +11,23 @@ export import :particle_system.operator_world_base;
 import :engine;
 import :game;
 
-export class DLLCLIENT CParticleOperatorGravity : public CParticleOperatorWorldBase {
-  public:
-	CParticleOperatorGravity() = default;
-	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
-	virtual void Simulate(double tDelta) override;
-  protected:
-	float m_gravityScale = 1.f;
-	Vector3 m_gravityForce = {0.f, -1.f, 0.f};
-	bool m_bUseCustomGravityForce = false;
+export namespace pragma::pts {
+	class DLLCLIENT CParticleOperatorGravity : public CParticleOperatorWorldBase {
+	public:
+		CParticleOperatorGravity() = default;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Simulate(pragma::pts::CParticle &particle, double tDelta, float strength) override;
+		virtual void Simulate(double tDelta) override;
+	protected:
+		float m_gravityScale = 1.f;
+		Vector3 m_gravityForce = {0.f, -1.f, 0.f};
+		bool m_bUseCustomGravityForce = false;
 
-	Vector3 m_dtGravity = {};
-};
+		Vector3 m_dtGravity = {};
+	};
+}
 
-void CParticleOperatorGravity::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorGravity::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperatorWorldBase::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
@@ -39,14 +41,14 @@ void CParticleOperatorGravity::Initialize(pragma::BaseEnvParticleSystemComponent
 		}
 	}
 }
-void CParticleOperatorGravity::Simulate(double tDelta)
+void pragma::pts::CParticleOperatorGravity::Simulate(double tDelta)
 {
 	CParticleOperatorWorldBase::Simulate(tDelta);
 	if(m_bUseCustomGravityForce == false)
 		return;
 	m_dtGravity = GetParticleSystem().DirectionToParticleSpace(m_gravityForce * static_cast<float>(tDelta), ShouldRotateWithEmitter());
 }
-void CParticleOperatorGravity::Simulate(CParticle &particle, double tDelta, float strength)
+void pragma::pts::CParticleOperatorGravity::Simulate(pragma::pts::CParticle &particle, double tDelta, float strength)
 {
 	CParticleOperatorWorldBase::Simulate(particle, tDelta, strength);
 	if(m_bUseCustomGravityForce) {

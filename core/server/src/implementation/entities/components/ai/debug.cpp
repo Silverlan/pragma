@@ -25,7 +25,7 @@ void SAIComponent::_debugSendNavInfo(pragma::SPlayerComponent &pl)
 		return;
 	auto nodePrev = pTrComponent->GetPosition();
 	NetPacket p {};
-	nwm::write_entity(p, &ent);
+	pragma::networking::write_entity(p, &ent);
 	p->Write<uint32_t>(path.pathCount);
 	p->Write<uint32_t>(m_navInfo.pathInfo->pathIdx);
 	for(auto i = decltype(path.pathCount) {0}; i < path.pathCount; ++i) {
@@ -39,7 +39,7 @@ void SAIComponent::_debugSendNavInfo(pragma::SPlayerComponent &pl)
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::DEBUG_AI_NAVIGATION, p, pragma::networking::Protocol::SlowReliable, *session);
 }
 
-void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::shared_ptr<DebugBehaviorTreeNode> &dbgTree, std::shared_ptr<::ai::Schedule> &aiSchedule, float &tLastSchedUpdate)
+void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::shared_ptr<debug::DebugBehaviorTreeNode> &dbgTree, std::shared_ptr<::ai::Schedule> &aiSchedule, float &tLastSchedUpdate)
 {
 	auto sched = GetCurrentSchedule();
 	if(sched == nullptr) {
@@ -63,8 +63,8 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 	auto bFullUpdate = (sched != aiSchedule) ? true : false;
 	if(bFullUpdate == false) {
 		auto tCur = static_cast<float>(SGame::Get()->CurTime());
-		std::function<int8_t(DebugBehaviorTreeNode &, const ai::BehaviorNode &, float)> fMarkChangedNodes = nullptr;
-		fMarkChangedNodes = [&fMarkChangedNodes](DebugBehaviorTreeNode &dbgNode, const ai::BehaviorNode &taskNode, float t) -> int8_t {
+		std::function<int8_t(debug::DebugBehaviorTreeNode &, const ai::BehaviorNode &, float)> fMarkChangedNodes = nullptr;
+		fMarkChangedNodes = [&fMarkChangedNodes](debug::DebugBehaviorTreeNode &dbgNode, const ai::BehaviorNode &taskNode, float t) -> int8_t {
 			auto &childTaskNodes = taskNode.GetNodes();
 			if(dbgNode.children.size() != childTaskNodes.size())
 				return -1;
@@ -77,8 +77,8 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 				if(rChild == 1)
 					r = 1;
 			}
-			if(dbgNode.state != static_cast<DebugBehaviorTreeNode::State>(dbgInfo.lastResult) || dbgNode.active != taskNode.IsActive() || dbgNode.lastStartTime != dbgInfo.lastStartTime || dbgNode.lastEndTime != dbgInfo.lastEndTime || dbgNode.executionIndex != dbgInfo.executionIndex) {
-				dbgNode.state = static_cast<DebugBehaviorTreeNode::State>(dbgInfo.lastResult);
+			if(dbgNode.state != static_cast<debug::DebugBehaviorTreeNode::State>(dbgInfo.lastResult) || dbgNode.active != taskNode.IsActive() || dbgNode.lastStartTime != dbgInfo.lastStartTime || dbgNode.lastEndTime != dbgInfo.lastEndTime || dbgNode.executionIndex != dbgInfo.executionIndex) {
+				dbgNode.state = static_cast<debug::DebugBehaviorTreeNode::State>(dbgInfo.lastResult);
 				dbgNode.active = taskNode.IsActive();
 				dbgNode.lastStartTime = dbgInfo.lastStartTime;
 				dbgNode.lastEndTime = dbgInfo.lastEndTime;
@@ -98,12 +98,12 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 				return;
 			p->Write<uint8_t>(2);
 
-			std::function<void(NetPacket &, DebugBehaviorTreeNode &, float)> fWriteChanges = nullptr;
-			fWriteChanges = [&fWriteChanges](NetPacket &p, DebugBehaviorTreeNode &dbgNode, float t) {
+			std::function<void(NetPacket &, debug::DebugBehaviorTreeNode &, float)> fWriteChanges = nullptr;
+			fWriteChanges = [&fWriteChanges](NetPacket &p, debug::DebugBehaviorTreeNode &dbgNode, float t) {
 				if(dbgNode.lastUpdate != t)
-					p->Write<DebugBehaviorTreeNode::State>(DebugBehaviorTreeNode::State::Invalid); // Keep old state; Skip entire branch
+					p->Write<debug::DebugBehaviorTreeNode::State>(debug::DebugBehaviorTreeNode::State::Invalid); // Keep old state; Skip entire branch
 				else {
-					p->Write<DebugBehaviorTreeNode::State>(dbgNode.state);
+					p->Write<debug::DebugBehaviorTreeNode::State>(dbgNode.state);
 					p->Write<bool>(dbgNode.active);
 					p->Write<float>(dbgNode.lastStartTime);
 					p->Write<float>(dbgNode.lastEndTime);
@@ -118,10 +118,10 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 	if(bFullUpdate == true) {
 		aiSchedule = sched;
 
-		std::function<std::shared_ptr<DebugBehaviorTreeNode>(const ai::BehaviorNode &)> fAddNode = nullptr;
+		std::function<std::shared_ptr<debug::DebugBehaviorTreeNode>(const ai::BehaviorNode &)> fAddNode = nullptr;
 		fAddNode = [&fAddNode, &sched](const ai::BehaviorNode &node) {
 			auto &dbgInfo = node.GetDebugInfo();
-			auto dbgChildNode = ::util::make_shared<DebugBehaviorTreeNode>();
+			auto dbgChildNode = ::util::make_shared<debug::DebugBehaviorTreeNode>();
 			auto *luaTask = dynamic_cast<const AILuaBehaviorNode *>(&node);
 			if(dbgInfo.debugName.empty() == false)
 				dbgChildNode->name = dbgInfo.debugName;
@@ -130,9 +130,9 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 				node.Print(sched.get(), ss);
 				dbgChildNode->name = ss.str();
 			}
-			dbgChildNode->nodeType = static_cast<DebugBehaviorTreeNode::BehaviorNodeType>(node.GetType());
-			dbgChildNode->selectorType = static_cast<DebugBehaviorTreeNode::SelectorType>(node.GetSelectorType());
-			dbgChildNode->state = static_cast<DebugBehaviorTreeNode::State>(dbgInfo.lastResult);
+			dbgChildNode->nodeType = static_cast<debug::DebugBehaviorTreeNode::BehaviorNodeType>(node.GetType());
+			dbgChildNode->selectorType = static_cast<debug::DebugBehaviorTreeNode::SelectorType>(node.GetSelectorType());
+			dbgChildNode->state = static_cast<debug::DebugBehaviorTreeNode::State>(dbgInfo.lastResult);
 			dbgChildNode->active = node.IsActive();
 			dbgChildNode->lastStartTime = dbgInfo.lastStartTime;
 			dbgChildNode->lastEndTime = dbgInfo.lastEndTime;
@@ -146,9 +146,9 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 
 		p->Write<uint8_t>(1);
 		*dbgTree = *dbgRootNode;
-		nwm::write_entity(p, &GetEntity());
-		std::function<void(NetPacket &, const DebugBehaviorTreeNode &)> fWriteTree = nullptr;
-		fWriteTree = [&fWriteTree](NetPacket &p, const DebugBehaviorTreeNode &node) {
+		pragma::networking::write_entity(p, &GetEntity());
+		std::function<void(NetPacket &, const debug::DebugBehaviorTreeNode &)> fWriteTree = nullptr;
+		fWriteTree = [&fWriteTree](NetPacket &p, const debug::DebugBehaviorTreeNode &node) {
 			p->WriteString(node.name);
 			p->Write<uint32_t>(umath::to_integral(node.nodeType));
 			p->Write<uint32_t>(umath::to_integral(node.selectorType));
@@ -156,7 +156,7 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 			p->Write<float>(node.lastEndTime);
 			p->Write<uint64_t>(node.executionIndex);
 			p->Write<bool>(node.active);
-			p->Write<DebugBehaviorTreeNode::State>(node.state);
+			p->Write<debug::DebugBehaviorTreeNode::State>(node.state);
 			p->Write<uint32_t>(node.children.size());
 			for(auto &child : node.children)
 				fWriteTree(p, *child);

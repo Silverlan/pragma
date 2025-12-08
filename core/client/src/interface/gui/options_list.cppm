@@ -11,16 +11,16 @@ export import :gui.choice_list;
 export import :gui.slider;
 export import :gui.table;
 
-export {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIOptionsList : public WIBase {
 	  private:
-		WIHandle m_hTable;
-		WIHandle m_hHeaderRow;
+		pragma::gui::WIHandle m_hTable;
+		pragma::gui::WIHandle m_hHeaderRow;
 		uint32_t m_maxHeight = 512;
 		std::unordered_map<std::string, std::string> m_updateCvars;
 		std::unordered_map<std::string, pragma::platform::Key> m_keyBindingsAdd[2];
 		std::unordered_map<std::string, pragma::platform::Key> m_keyBindingsErase[2];
-		std::unordered_map<std::string, WIHandle> m_rows;
+		std::unordered_map<std::string, pragma::gui::WIHandle> m_rows;
 		template<class T>
 		WIChoiceList *AddChoiceList(const std::string &name, T list, const std::string &cvarName, const std::function<void(WIChoiceList *)> &initializer, const std::optional<std::string> &optRowIdent = {});
 		template<class T>

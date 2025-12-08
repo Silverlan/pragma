@@ -7,7 +7,7 @@ module pragma.client;
 
 import :console.commands;
 
-static void debug_hitboxes(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_hitboxes(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	static auto g_debugOverlayEnabled = false;
 	if(g_debugOverlayEnabled) {
@@ -26,7 +26,7 @@ static void debug_hitboxes(NetworkState *state, pragma::BasePlayerComponent *pl,
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
 		return;
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	if(ents.empty()) {
 		Con::cwar << "No entity targets found!" << Con::endl;
 		return;

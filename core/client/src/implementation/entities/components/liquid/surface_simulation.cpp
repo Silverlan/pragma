@@ -18,7 +18,7 @@ using namespace pragma;
 static std::vector<CLiquidSurfaceSimulationComponent *> s_waterEntities = {};
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>(
-	  "cl_water_surface_simulation_spacing", +[](NetworkState *, const ConVar &, int, int val) {
+	  "cl_water_surface_simulation_spacing", +[](pragma::NetworkState *, const pragma::console::ConVar &, int, int val) {
 		  for(auto *entWater : s_waterEntities)
 			  entWater->ReloadSurfaceSimulator();
 	  });
@@ -26,7 +26,7 @@ namespace {
 
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>(
-	  "cl_water_surface_simulation_enable_gpu_acceleration", +[](NetworkState *, const ConVar &, bool, bool val) {
+	  "cl_water_surface_simulation_enable_gpu_acceleration", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val) {
 		  for(auto *entWater : s_waterEntities)
 			  entWater->ReloadSurfaceSimulator();
 	  });
@@ -48,7 +48,7 @@ void CLiquidSurfaceSimulationComponent::Initialize()
 	BindEventUnhandled(cLiquidControlComponent::EVENT_ON_SPLASH, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &splashInfo = static_cast<CEOnSplash &>(evData.get()).splashInfo;
 		if(m_physSurfaceSim)
-			static_cast<CPhysWaterSurfaceSimulator &>(*m_physSurfaceSim).CreateSplash(splashInfo.origin, splashInfo.radius, splashInfo.force);
+			static_cast<pragma::physics::CPhysWaterSurfaceSimulator &>(*m_physSurfaceSim).CreateSplash(splashInfo.origin, splashInfo.radius, splashInfo.force);
 	});
 	BindEventUnhandled(cLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &controlC = *GetEntity().GetComponent<CLiquidControlComponent>();
@@ -67,10 +67,10 @@ void CLiquidSurfaceSimulationComponent::ReceiveData(NetPacket &packet)
 	SetMaxWaveHeight(height);
 }
 
-std::shared_ptr<PhysWaterSurfaceSimulator> CLiquidSurfaceSimulationComponent::InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY)
+std::shared_ptr<pragma::physics::PhysWaterSurfaceSimulator> CLiquidSurfaceSimulationComponent::InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY)
 {
 	auto controlC = GetEntity().GetComponent<CLiquidControlComponent>();
-	return controlC.valid() ? ::util::make_shared<CPhysWaterSurfaceSimulator>(min, max, originY, GetSpacing(), controlC->GetStiffness(), controlC->GetPropagation()) : nullptr;
+	return controlC.valid() ? ::util::make_shared<pragma::physics::CPhysWaterSurfaceSimulator>(min, max, originY, GetSpacing(), controlC->GetStiffness(), controlC->GetPropagation()) : nullptr;
 }
 
 void CLiquidSurfaceSimulationComponent::OnEntitySpawn()

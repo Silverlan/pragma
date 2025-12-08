@@ -9,9 +9,9 @@ module pragma.client;
 
 import :client_state;
 
-ServerInfo::~ServerInfo() { SetDownloadPath(""); }
-const std::string &ServerInfo::GetDownloadPath() const { return m_downloadPath; }
-void ServerInfo::SetDownloadPath(const std::string &path)
+pragma::ServerInfo::~ServerInfo() { SetDownloadPath(""); }
+const std::string &pragma::ServerInfo::GetDownloadPath() const { return m_downloadPath; }
+void pragma::ServerInfo::SetDownloadPath(const std::string &path)
 {
 	assert(path.empty() || path.back() == '\\');
 	if(!m_downloadPath.empty())

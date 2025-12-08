@@ -20,7 +20,7 @@ export namespace pragma {
 
 		void SetApplyToHdrImage(bool applyToHdrImage);
 	  private:
-		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) override;
+		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) override;
 		bool m_applyToHdrImage = false;
 	};
 };

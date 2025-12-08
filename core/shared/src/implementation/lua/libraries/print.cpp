@@ -99,13 +99,13 @@ int Lua::console::msg(lua::State *l, int st)
 {
 	int argc = Lua::GetStackTop(l);
 	if(argc > 0) {
-		NetworkState *state = pragma::Engine::Get()->GetNetworkState(l);
+		auto *state = pragma::Engine::Get()->GetNetworkState(l);
 		if(state == nullptr)
-			::util::set_console_color(::pragma::console::ConsoleColorFlags::White | ::pragma::console::ConsoleColorFlags::Intensity);
+			pragma::console::set_console_color(::pragma::console::ConsoleColorFlags::White | ::pragma::console::ConsoleColorFlags::Intensity);
 		else if(state->IsServer())
-			::util::set_console_color(::pragma::console::ConsoleColorFlags::Cyan | ::pragma::console::ConsoleColorFlags::Intensity);
+			pragma::console::set_console_color(::pragma::console::ConsoleColorFlags::Cyan | ::pragma::console::ConsoleColorFlags::Intensity);
 		else
-			::util::set_console_color(::pragma::console::ConsoleColorFlags::Magenta | ::pragma::console::ConsoleColorFlags::Intensity);
+			pragma::console::set_console_color(::pragma::console::ConsoleColorFlags::Magenta | ::pragma::console::ConsoleColorFlags::Intensity);
 	}
 	for(int i = st; i <= argc; i++) {
 		auto status = -1;
@@ -124,7 +124,7 @@ int Lua::debug::print(lua::State *l)
 		flags |= ::pragma::console::ConsoleColorFlags::BackgroundMagenta;
 	else
 		flags |= ::pragma::console::ConsoleColorFlags::BackgroundCyan;
-	::util::set_console_color(flags | ::pragma::console::ConsoleColorFlags::BackgroundIntensity | ::pragma::console::ConsoleColorFlags::Black);
+	pragma::console::set_console_color(flags | ::pragma::console::ConsoleColorFlags::BackgroundIntensity | ::pragma::console::ConsoleColorFlags::Black);
 	int n = Lua::GetStackTop(l); /* number of arguments */
 	int i;
 	for(i = 1; i <= n; i++) {

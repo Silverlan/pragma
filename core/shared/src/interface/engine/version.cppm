@@ -8,7 +8,7 @@ export module pragma.shared:engine.version;
 
 export import pragma.util;
 
-export {
+export namespace pragma {
 	constexpr uint32_t ENGINE_VERSION_MAJOR = 1;
 	constexpr uint32_t ENGINE_VERSION_MINOR = 3;
 	constexpr uint32_t ENGINE_VERSION_REVISION = 0;

@@ -14,10 +14,10 @@ export namespace pragma::ecs {
 export namespace util {
 	struct DLLNETWORK SplashDamageInfo {
 		SplashDamageInfo();
-		DamageInfo damageInfo = {};
+		pragma::game::DamageInfo damageInfo = {};
 		Vector3 origin = {};
 		float radius = 0.f;
 		std::optional<std::pair<Vector3, float>> cone = {};
-		std::function<bool(pragma::ecs::BaseEntity *, DamageInfo &)> callback = nullptr;
+		std::function<bool(pragma::ecs::BaseEntity *, pragma::game::DamageInfo &)> callback = nullptr;
 	};
 };

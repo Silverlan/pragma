@@ -9,10 +9,10 @@ import :audio.sound_script;
 #undef CreateEvent
 
 #pragma warning(disable : 4056)
-ALSoundScript::ALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, bool bStream) : ALSound(nw), m_script(script), m_networkState(state), m_bStream(bStream) { m_index = idx; }
+pragma::audio::ALSoundScript::ALSoundScript(pragma::NetworkState *nw, unsigned int idx, SoundScript *script, pragma::NetworkState *state, bool bStream) : ALSound(nw), m_script(script), m_networkState(state), m_bStream(bStream) { m_index = idx; }
 #pragma warning(default : 4056)
 
-ALSoundScript::~ALSoundScript()
+pragma::audio::ALSoundScript::~ALSoundScript()
 {
 	for(unsigned int i = 0; i < m_events.size(); i++)
 		delete m_events[i];
@@ -20,7 +20,7 @@ ALSoundScript::~ALSoundScript()
 		delete m_sounds[i];
 }
 
-void ALSoundScript::SetTargetPosition(unsigned int id, Vector3 pos)
+void pragma::audio::ALSoundScript::SetTargetPosition(unsigned int id, Vector3 pos)
 {
 	std::unordered_map<unsigned int, Vector3>::iterator it = m_positions.find(id);
 	if(it != m_positions.end())
@@ -31,13 +31,13 @@ void ALSoundScript::SetTargetPosition(unsigned int id, Vector3 pos)
 		SSESound *snd = m_sounds[i];
 		SSEPlaySound *ev = static_cast<SSEPlaySound *>(snd->event);
 		if(ev->position == CInt32(id)) {
-			std::shared_ptr<ALSound> sound = snd->sound;
+			std::shared_ptr<pragma::audio::ALSound> sound = snd->sound;
 			sound->SetPosition(pos);
 		}
 	}
 }
 
-void ALSoundScript::FadeIn(float time)
+void pragma::audio::ALSoundScript::FadeIn(float time)
 {
 	//ALSound::FadeIn(time);
 	float gain = GetGain();
@@ -48,7 +48,7 @@ void ALSoundScript::FadeIn(float time)
 	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true, m_networkState->RealTime(), time, gain));
 }
 
-void ALSoundScript::FadeOut(float time)
+void pragma::audio::ALSoundScript::FadeOut(float time)
 {
 	//ALSound::FadeOut(time);
 	if(!IsPlaying())
@@ -58,12 +58,12 @@ void ALSoundScript::FadeOut(float time)
 	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false, m_networkState->RealTime(), time, gain));
 }
 
-void ALSoundScript::Initialize()
+void pragma::audio::ALSoundScript::Initialize()
 {
 	//ALSound::Initialize();
 }
 
-std::shared_ptr<ALSound> ALSoundScript::CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags)
+std::shared_ptr<pragma::audio::ALSound> pragma::audio::ALSoundScript::CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags)
 {
 	auto flags = pragma::audio::ALCreateFlags::None;
 	if(channel == ALChannel::Mono)
@@ -74,7 +74,7 @@ std::shared_ptr<ALSound> ALSoundScript::CreateSound(const std::string &name, ALC
 	return m_networkState->CreateSound(name, GetType(), flags);
 }
 
-void ALSoundScript::InitializeEvent(SoundScriptEvent *ev)
+void pragma::audio::ALSoundScript::InitializeEvent(SoundScriptEvent *ev)
 {
 	SSEPlaySound *ps = dynamic_cast<SSEPlaySound *>(ev);
 	if(ps != nullptr) {
@@ -174,7 +174,7 @@ void ALSoundScript::InitializeEvent(SoundScriptEvent *ev)
 	}
 }
 
-bool ALSoundScript::HandleEvents(SoundScriptEvent *ev, float eventOffset, float lastOffset, float newOffset)
+bool pragma::audio::ALSoundScript::HandleEvents(SoundScriptEvent *ev, float eventOffset, float lastOffset, float newOffset)
 {
 	if(eventOffset <= lastOffset || eventOffset > newOffset)
 		return false;
@@ -184,21 +184,21 @@ bool ALSoundScript::HandleEvents(SoundScriptEvent *ev, float eventOffset, float 
 	return true;
 }
 
-void ALSoundScript::SetState(ALState state)
+void pragma::audio::ALSoundScript::SetState(ALState state)
 {
 	auto old = GetState();
 	if(state != old)
 		CallCallbacks<void, ALState, ALState>("OnStateChanged", old, state);
 	ALSoundBase::SetState(state);
 }
-ALState ALSoundScript::GetState() const { return ALSoundBase::GetState(); }
+pragma::audio::ALState pragma::audio::ALSoundScript::GetState() const { return ALSoundBase::GetState(); }
 
-uint32_t ALSoundScript::GetSoundCount() const { return m_sounds.size(); }
-ALSound *ALSoundScript::GetSound(uint32_t idx) { return (idx < m_sounds.size()) ? m_sounds.at(idx)->sound.get() : nullptr; }
+uint32_t pragma::audio::ALSoundScript::GetSoundCount() const { return m_sounds.size(); }
+pragma::audio::ALSound *pragma::audio::ALSoundScript::GetSound(uint32_t idx) { return (idx < m_sounds.size()) ? m_sounds.at(idx)->sound.get() : nullptr; }
 
-bool ALSoundScript::IsSoundScript() const { return true; }
+bool pragma::audio::ALSoundScript::IsSoundScript() const { return true; }
 
-void ALSoundScript::Update()
+void pragma::audio::ALSoundScript::Update()
 {
 	//ALSound::Update();
 	auto old = GetState();
@@ -240,7 +240,7 @@ void ALSoundScript::Update()
 	}
 }
 
-void ALSoundScript::PostUpdate()
+void pragma::audio::ALSoundScript::PostUpdate()
 {
 	//double tLastUpdate = m_tLastUpdate;
 	double tPassed = m_tPassed;
@@ -287,7 +287,7 @@ void ALSoundScript::PostUpdate()
 	ALSound::PostUpdate();
 }
 
-void ALSoundScript::Play()
+void pragma::audio::ALSoundScript::Play()
 {
 	auto state = GetState();
 	if(state == ALState::Initial) {
@@ -302,34 +302,34 @@ void ALSoundScript::Play()
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->Play();
 }
-void ALSoundScript::Stop()
+void pragma::audio::ALSoundScript::Stop()
 {
 	SetState(ALState::Stopped);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->Stop();
 }
-void ALSoundScript::Pause()
+void pragma::audio::ALSoundScript::Pause()
 {
 	SetState(ALState::Paused);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->Pause();
 }
-void ALSoundScript::Rewind()
+void pragma::audio::ALSoundScript::Rewind()
 {
 	ALSoundBase::SetOffset(0.f);
 	SetState(ALState::Initial);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->Rewind();
 }
-void ALSoundScript::SetOffset(float offset)
+void pragma::audio::ALSoundScript::SetOffset(float offset)
 {
 	offset = std::min(offset, 1.f);
 	ALSoundBase::SetOffset(offset);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->SetOffset(offset);
 }
-float ALSoundScript::GetOffset() const { return ALSoundBase::GetOffset(); }
-void ALSoundScript::SetPitch(float pitch)
+float pragma::audio::ALSoundScript::GetOffset() const { return ALSoundBase::GetOffset(); }
+void pragma::audio::ALSoundScript::SetPitch(float pitch)
 {
 	float pitchPrev = GetPitch();
 	ALSoundBase::SetPitch(pitch);
@@ -341,14 +341,14 @@ void ALSoundScript::SetPitch(float pitch)
 			als->SetPitch((als->GetPitch() / pitchPrev) * pitch);
 	}
 }
-float ALSoundScript::GetPitch() const { return ALSoundBase::GetPitch(); }
-void ALSoundScript::SetLooping(bool loop)
+float pragma::audio::ALSoundScript::GetPitch() const { return ALSoundBase::GetPitch(); }
+void pragma::audio::ALSoundScript::SetLooping(bool loop)
 {
 	ALSoundBase::SetLooping(loop);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->SetLooping(loop);
 }
-bool ALSoundScript::IsLooping() const
+bool pragma::audio::ALSoundScript::IsLooping() const
 {
 	if(ALSoundBase::IsLooping() == true)
 		return true;
@@ -359,10 +359,10 @@ bool ALSoundScript::IsLooping() const
 	}
 	return false;
 }
-bool ALSoundScript::IsPlaying() const { return ALSoundBase::IsPlaying(); }
-bool ALSoundScript::IsPaused() const { return ALSoundBase::IsPaused(); }
-bool ALSoundScript::IsStopped() const { return ALSoundBase::IsStopped(); }
-void ALSoundScript::SetGain(float gain)
+bool pragma::audio::ALSoundScript::IsPlaying() const { return ALSoundBase::IsPlaying(); }
+bool pragma::audio::ALSoundScript::IsPaused() const { return ALSoundBase::IsPaused(); }
+bool pragma::audio::ALSoundScript::IsStopped() const { return ALSoundBase::IsStopped(); }
+void pragma::audio::ALSoundScript::SetGain(float gain)
 {
 	float gainPrev = GetGain();
 	ALSoundBase::SetGain(gain);
@@ -374,197 +374,197 @@ void ALSoundScript::SetGain(float gain)
 			als->SetGain((als->GetGain() / gainPrev) * gain);
 	}
 }
-float ALSoundScript::GetGain() const { return ALSoundBase::GetGain(); }
-void ALSoundScript::SetPosition(const Vector3 &pos)
+float pragma::audio::ALSoundScript::GetGain() const { return ALSoundBase::GetGain(); }
+void pragma::audio::ALSoundScript::SetPosition(const Vector3 &pos)
 {
 	ALSoundBase::SetPosition(pos);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->SetPosition(pos);
 }
-Vector3 ALSoundScript::GetPosition() const { return ALSoundBase::GetPosition(); }
-void ALSoundScript::SetVelocity(const Vector3 &vel)
+Vector3 pragma::audio::ALSoundScript::GetPosition() const { return ALSoundBase::GetPosition(); }
+void pragma::audio::ALSoundScript::SetVelocity(const Vector3 &vel)
 {
 	ALSoundBase::SetVelocity(vel);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->SetVelocity(vel);
 }
-Vector3 ALSoundScript::GetVelocity() const { return ALSoundBase::GetVelocity(); }
-void ALSoundScript::SetDirection(const Vector3 &dir)
+Vector3 pragma::audio::ALSoundScript::GetVelocity() const { return ALSoundBase::GetVelocity(); }
+void pragma::audio::ALSoundScript::SetDirection(const Vector3 &dir)
 {
 	ALSoundBase::SetDirection(dir);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->SetDirection(dir);
 }
-Vector3 ALSoundScript::GetDirection() const { return ALSoundBase::GetDirection(); }
-void ALSoundScript::SetRelative(bool b)
+Vector3 pragma::audio::ALSoundScript::GetDirection() const { return ALSoundBase::GetDirection(); }
+void pragma::audio::ALSoundScript::SetRelative(bool b)
 {
 	ALSoundBase::SetRelative(b);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->SetRelative(b);
 }
-bool ALSoundScript::IsRelative() const { return ALSoundBase::IsRelative(); }
-void ALSoundScript::SetTimeOffset(float sec)
+bool pragma::audio::ALSoundScript::IsRelative() const { return ALSoundBase::IsRelative(); }
+void pragma::audio::ALSoundScript::SetTimeOffset(float sec)
 {
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->SetTimeOffset(sec);
 }
-float ALSoundScript::GetTimeOffset() const
+float pragma::audio::ALSoundScript::GetTimeOffset() const
 {
 	if(m_sounds.empty())
 		return 0.f; //ALSound::GetTimeOffset();
 	return (*m_sounds.front())->GetTimeOffset();
 }
-float ALSoundScript::GetDuration() const { return ALSoundBase::GetDuration(); }
-float ALSoundScript::GetReferenceDistance() const { return ALSoundBase::GetReferenceDistance(); }
-void ALSoundScript::SetReferenceDistance(float dist)
+float pragma::audio::ALSoundScript::GetDuration() const { return ALSoundBase::GetDuration(); }
+float pragma::audio::ALSoundScript::GetReferenceDistance() const { return ALSoundBase::GetReferenceDistance(); }
+void pragma::audio::ALSoundScript::SetReferenceDistance(float dist)
 {
 	ALSoundBase::SetReferenceDistance(dist);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->SetReferenceDistance(dist);
 }
-void ALSoundScript::SetRoomRolloffFactor(float roomFactor)
+void pragma::audio::ALSoundScript::SetRoomRolloffFactor(float roomFactor)
 {
 	ALSoundBase::SetRoomRolloffFactor(roomFactor);
 	for(auto *snd : m_sounds)
 		(*snd)->SetRoomRolloffFactor(roomFactor);
 }
-float ALSoundScript::GetRolloffFactor() const { return ALSoundBase::GetRolloffFactor(); }
-void ALSoundScript::SetRolloffFactor(float factor)
+float pragma::audio::ALSoundScript::GetRolloffFactor() const { return ALSoundBase::GetRolloffFactor(); }
+void pragma::audio::ALSoundScript::SetRolloffFactor(float factor)
 {
 	ALSoundBase::SetRolloffFactor(factor);
 	for(auto *snd : m_sounds)
 		(*snd)->SetRolloffFactor(factor);
 }
-float ALSoundScript::GetRoomRolloffFactor() const { return ALSoundBase::GetRoomRolloffFactor(); }
-float ALSoundScript::GetMaxDistance() const { return ALSoundBase::GetMaxDistance(); }
-void ALSoundScript::SetMaxDistance(float dist)
+float pragma::audio::ALSoundScript::GetRoomRolloffFactor() const { return ALSoundBase::GetRoomRolloffFactor(); }
+float pragma::audio::ALSoundScript::GetMaxDistance() const { return ALSoundBase::GetMaxDistance(); }
+void pragma::audio::ALSoundScript::SetMaxDistance(float dist)
 {
 	ALSoundBase::SetMaxDistance(dist);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->SetMaxDistance(dist);
 }
-float ALSoundScript::GetMinGain() const { return ALSoundBase::GetMinGain(); }
-void ALSoundScript::SetMinGain(float gain)
+float pragma::audio::ALSoundScript::GetMinGain() const { return ALSoundBase::GetMinGain(); }
+void pragma::audio::ALSoundScript::SetMinGain(float gain)
 {
 	ALSoundBase::SetMinGain(gain);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->SetMinGain(gain);
 }
-float ALSoundScript::GetMaxGain() const { return ALSoundBase::GetMaxGain(); }
-void ALSoundScript::SetMaxGain(float gain)
+float pragma::audio::ALSoundScript::GetMaxGain() const { return ALSoundBase::GetMaxGain(); }
+void pragma::audio::ALSoundScript::SetMaxGain(float gain)
 {
 	ALSoundBase::SetMaxGain(gain);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->SetMaxGain(gain);
 }
-float ALSoundScript::GetInnerConeAngle() const { return ALSoundBase::GetInnerConeAngle(); }
-void ALSoundScript::SetInnerConeAngle(float ang)
+float pragma::audio::ALSoundScript::GetInnerConeAngle() const { return ALSoundBase::GetInnerConeAngle(); }
+void pragma::audio::ALSoundScript::SetInnerConeAngle(float ang)
 {
 	ALSoundBase::SetInnerConeAngle(ang);
 	for(auto *snd : m_sounds)
 		(*snd)->SetInnerConeAngle(ang);
 }
-float ALSoundScript::GetOuterConeAngle() const { return ALSoundBase::GetOuterConeAngle(); }
-void ALSoundScript::SetOuterConeAngle(float ang)
+float pragma::audio::ALSoundScript::GetOuterConeAngle() const { return ALSoundBase::GetOuterConeAngle(); }
+void pragma::audio::ALSoundScript::SetOuterConeAngle(float ang)
 {
 	ALSoundBase::SetOuterConeAngle(ang);
 	for(auto *snd : m_sounds)
 		(*snd)->SetOuterConeAngle(ang);
 }
-float ALSoundScript::GetOuterConeGain() const { return ALSoundBase::GetOuterConeGain(); }
-float ALSoundScript::GetOuterConeGainHF() const { return ALSoundBase::GetOuterConeGainHF(); }
-void ALSoundScript::SetOuterConeGain(float gain)
+float pragma::audio::ALSoundScript::GetOuterConeGain() const { return ALSoundBase::GetOuterConeGain(); }
+float pragma::audio::ALSoundScript::GetOuterConeGainHF() const { return ALSoundBase::GetOuterConeGainHF(); }
+void pragma::audio::ALSoundScript::SetOuterConeGain(float gain)
 {
 	ALSoundBase::SetOuterConeGain(gain);
 	for(auto *snd : m_sounds)
 		(*snd)->SetOuterConeGain(gain);
 }
-void ALSoundScript::SetOuterConeGainHF(float gain)
+void pragma::audio::ALSoundScript::SetOuterConeGainHF(float gain)
 {
 	ALSoundBase::SetOuterConeGainHF(gain);
 	for(auto *snd : m_sounds)
 		(*snd)->SetOuterConeGainHF(gain);
 }
 
-void ALSoundScript::SetFlags(unsigned int flags)
+void pragma::audio::ALSoundScript::SetFlags(unsigned int flags)
 {
 	ALSound::SetFlags(flags);
 	for(unsigned int i = 0; i < m_sounds.size(); i++)
 		(*m_sounds[i])->SetFlags(flags);
 }
-uint32_t ALSoundScript::GetPriority() { return ALSoundBase::GetPriority(); }
-void ALSoundScript::SetPriority(uint32_t priority)
+uint32_t pragma::audio::ALSoundScript::GetPriority() { return ALSoundBase::GetPriority(); }
+void pragma::audio::ALSoundScript::SetPriority(uint32_t priority)
 {
 	ALSoundBase::SetPriority(priority);
 	for(auto *snd : m_sounds)
 		(*snd)->SetPriority(priority);
 }
-void ALSoundScript::SetOrientation(const Vector3 &at, const Vector3 &up)
+void pragma::audio::ALSoundScript::SetOrientation(const Vector3 &at, const Vector3 &up)
 {
 	ALSoundBase::SetOrientation(at, up);
 	for(auto *snd : m_sounds)
 		(*snd)->SetOrientation(at, up);
 }
-std::pair<Vector3, Vector3> ALSoundScript::GetOrientation() const
+std::pair<Vector3, Vector3> pragma::audio::ALSoundScript::GetOrientation() const
 {
 	return ALSoundBase::GetOrientation();
 	;
 }
-void ALSoundScript::SetDopplerFactor(float factor)
+void pragma::audio::ALSoundScript::SetDopplerFactor(float factor)
 {
 	ALSoundBase::SetDopplerFactor(factor);
 	for(auto *snd : m_sounds)
 		(*snd)->SetDopplerFactor(factor);
 }
-float ALSoundScript::GetDopplerFactor() const { return ALSoundBase::GetDopplerFactor(); }
-void ALSoundScript::SetLeftStereoAngle(float ang)
+float pragma::audio::ALSoundScript::GetDopplerFactor() const { return ALSoundBase::GetDopplerFactor(); }
+void pragma::audio::ALSoundScript::SetLeftStereoAngle(float ang)
 {
 	ALSoundBase::SetLeftStereoAngle(ang);
 	for(auto *snd : m_sounds)
 		(*snd)->SetLeftStereoAngle(ang);
 }
-float ALSoundScript::GetLeftStereoAngle() const { return ALSoundBase::GetLeftStereoAngle(); }
-void ALSoundScript::SetRightStereoAngle(float ang)
+float pragma::audio::ALSoundScript::GetLeftStereoAngle() const { return ALSoundBase::GetLeftStereoAngle(); }
+void pragma::audio::ALSoundScript::SetRightStereoAngle(float ang)
 {
 	ALSoundBase::SetRightStereoAngle(ang);
 	for(auto *snd : m_sounds)
 		(*snd)->SetRightStereoAngle(ang);
 }
-float ALSoundScript::GetRightStereoAngle() const { return ALSoundBase::GetRightStereoAngle(); }
-void ALSoundScript::SetAirAbsorptionFactor(float factor)
+float pragma::audio::ALSoundScript::GetRightStereoAngle() const { return ALSoundBase::GetRightStereoAngle(); }
+void pragma::audio::ALSoundScript::SetAirAbsorptionFactor(float factor)
 {
 	ALSoundBase::SetAirAbsorptionFactor(factor);
 	for(auto *snd : m_sounds)
 		(*snd)->SetAirAbsorptionFactor(factor);
 }
-float ALSoundScript::GetAirAbsorptionFactor() const { return ALSoundBase::GetAirAbsorptionFactor(); }
-void ALSoundScript::SetGainAuto(bool directHF, bool send, bool sendHF)
+float pragma::audio::ALSoundScript::GetAirAbsorptionFactor() const { return ALSoundBase::GetAirAbsorptionFactor(); }
+void pragma::audio::ALSoundScript::SetGainAuto(bool directHF, bool send, bool sendHF)
 {
 	ALSoundBase::SetGainAuto(directHF, send, sendHF);
 	for(auto *snd : m_sounds)
 		(*snd)->SetGainAuto(directHF, send, sendHF);
 }
-std::tuple<bool, bool, bool> ALSoundScript::GetGainAuto() const { return ALSoundBase::GetGainAuto(); }
-void ALSoundScript::SetDirectFilter(const SoundEffectParams &params)
+std::tuple<bool, bool, bool> pragma::audio::ALSoundScript::GetGainAuto() const { return ALSoundBase::GetGainAuto(); }
+void pragma::audio::ALSoundScript::SetDirectFilter(const SoundEffectParams &params)
 {
 	ALSoundBase::SetDirectFilter(params);
 	for(auto *snd : m_sounds)
 		(*snd)->SetDirectFilter(params);
 }
-const SoundEffectParams &ALSoundScript::GetDirectFilter() const { return ALSoundBase::GetDirectFilter(); }
+const pragma::audio::SoundEffectParams &pragma::audio::ALSoundScript::GetDirectFilter() const { return ALSoundBase::GetDirectFilter(); }
 
-bool ALSoundScript::AddEffect(const std::string &effectName, const SoundEffectParams &params)
+bool pragma::audio::ALSoundScript::AddEffect(const std::string &effectName, const SoundEffectParams &params)
 {
 	for(auto *snd : m_sounds)
 		(*snd)->AddEffect(effectName, params);
 	return true;
 }
-void ALSoundScript::RemoveEffect(const std::string &effectName)
+void pragma::audio::ALSoundScript::RemoveEffect(const std::string &effectName)
 {
 	for(auto *snd : m_sounds)
 		(*snd)->RemoveEffect(effectName);
 }
-void ALSoundScript::SetEffectParameters(const std::string &effectName, const SoundEffectParams &params)
+void pragma::audio::ALSoundScript::SetEffectParameters(const std::string &effectName, const SoundEffectParams &params)
 {
 	for(auto *snd : m_sounds)
 		(*snd)->SetEffectParameters(effectName, params);

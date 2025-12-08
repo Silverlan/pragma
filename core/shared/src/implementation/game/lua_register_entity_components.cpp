@@ -69,7 +69,7 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, MultiEntityURef);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, MultiEntityUComponentRef);
 
 // DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ValueDriver);
+// DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::game, ValueDriver);
 #endif
 
 namespace pragma {
@@ -570,15 +570,15 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defDriverC.def("GetDrivenObject", &pragma::AnimationDriverComponent::GetDrivenObject);
 	defDriverC.def("AddConstant", static_cast<void (pragma::AnimationDriverComponent::*)(const std::string &, const udm::PProperty &)>(&pragma::AnimationDriverComponent::AddConstant));
 
-	auto defDriver = luabind::class_<pragma::ValueDriver>("Driver");
+	auto defDriver = luabind::class_<pragma::game::ValueDriver>("Driver");
 	defDriver.def(luabind::tostring(luabind::self));
-	defDriver.def("GetMemberReference", &pragma::ValueDriver::GetMemberReference);
-	defDriver.def("GetDescriptor", &pragma::ValueDriver::GetDescriptor);
+	defDriver.def("GetMemberReference", &pragma::game::ValueDriver::GetMemberReference);
+	defDriver.def("GetDescriptor", &pragma::game::ValueDriver::GetDescriptor);
 	defDriverC.scope[defDriver];
 	entsMod[defDriverC];
-	pragma::LuaCore::define_custom_constructor<pragma::ValueDriver,
-	  +[](pragma::ComponentId componentId, const std::string &memberRef, pragma::ValueDriverDescriptor descriptor, const std::string &self) -> pragma::ValueDriver { return pragma::ValueDriver {componentId, memberRef, descriptor, util::uuid_string_to_bytes(self)}; }, pragma::ComponentId,
-	  const std::string &, pragma::ValueDriverDescriptor, const std::string &>(GetLuaState());
+	pragma::LuaCore::define_custom_constructor<pragma::game::ValueDriver,
+	  +[](pragma::ComponentId componentId, const std::string &memberRef, pragma::game::ValueDriverDescriptor descriptor, const std::string &self) -> pragma::game::ValueDriver { return pragma::game::ValueDriver {componentId, memberRef, descriptor, util::uuid_string_to_bytes(self)}; }, pragma::ComponentId,
+	  const std::string &, pragma::game::ValueDriverDescriptor, const std::string &>(GetLuaState());
 
 	auto defIK = pragma::LuaCore::create_entity_component_class<pragma::IKComponent, pragma::BaseEntityComponent>("IKComponent");
 	defIK.def("SetIKControllerEnabled", &pragma::IKComponent::SetIKControllerEnabled);

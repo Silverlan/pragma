@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :math.approach_rotation;
 
-Quat uquat::approach_direction(const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const Vector2 &rotAmount, Vector2 *resRotAm, const Vector2 *pitchLimit, const Vector2 *yawLimit, const Quat *rotPivot, const EulerAngles *angOffset)
+Quat pragma::math::approach_direction(const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const Vector2 &rotAmount, Vector2 *resRotAm, const Vector2 *pitchLimit, const Vector2 *yawLimit, const Quat *rotPivot, const EulerAngles *angOffset)
 {
 	auto nup = up - uvec::project(up, targetDir);
 	uvec::normalize(&nup);

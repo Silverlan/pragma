@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :game.bullet_info;
 
-std::ostream &operator<<(std::ostream &out, const BulletInfo &o)
+std::ostream &pragma::game::operator<<(std::ostream &out, const pragma::game::BulletInfo &o)
 {
 	out << "BulletInfo";
 	out << "[Spread:" << o.spread << "]";

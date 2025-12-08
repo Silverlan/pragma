@@ -15,7 +15,7 @@ export import :types;
 
 export import pragma.materialsystem;
 
-export {
+export namespace pragma::physics {
 	class DLLNETWORK TraceData {
 	  public:
 		TraceData();
@@ -68,12 +68,12 @@ export {
 
 	struct DLLNETWORK TraceResult {
 		struct DLLNETWORK MeshInfo {
-			std::vector<std::shared_ptr<ModelMesh>> meshes;
-			ModelMesh *mesh = nullptr;
-			pragma::ModelSubMesh *subMesh = nullptr;
+			std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes;
+			geometry::ModelMesh *mesh = nullptr;
+			geometry::ModelSubMesh *subMesh = nullptr;
 		};
 		TraceResult() {}
-		TraceResult(const TraceData &data);
+		TraceResult(const pragma::physics::TraceData &data);
 		~TraceResult();
 		pragma::physics::RayCastHitType hitType = pragma::physics::RayCastHitType::None;
 		EntityHandle entity = {};
@@ -89,7 +89,7 @@ export {
 
 		std::shared_ptr<MeshInfo> meshInfo = nullptr;
 
-		void GetMeshes(ModelMesh **mesh, pragma::ModelSubMesh **subMesh);
+		void GetMeshes(pragma::geometry::ModelMesh **mesh, pragma::geometry::ModelSubMesh **subMesh);
 		msys::Material *GetMaterial();
 		bool GetMaterial(std::string &mat);
 	  private:

@@ -22,7 +22,7 @@ export {
 			Vector3 color;
 			Type type;
 		};
-		DLLCLIENT util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<pragma::ModelSubMesh *> meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
-		  uint32_t height, ::pragma::LightmapDataCache *optLightmapDataCache = nullptr);
+		DLLCLIENT util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
+		  uint32_t height, pragma::rendering::LightmapDataCache *optLightmapDataCache = nullptr);
 	};
 };

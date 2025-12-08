@@ -16,7 +16,7 @@ void CChildComponent::OnRemove() { BaseChildComponent::OnRemove(); }
 bool CChildComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetParent) {
-		auto *ent = nwm::read_entity(packet);
+		auto *ent = pragma::networking::read_entity(packet);
 		if(ent)
 			SetParent(*ent);
 		else
@@ -30,7 +30,7 @@ bool CChildComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &pac
 void CChildComponent::ReceiveData(NetPacket &packet)
 {
 	auto hThis = GetHandle();
-	nwm::read_unique_entity(packet, [this, hThis](pragma::ecs::BaseEntity *ent) {
+	pragma::networking::read_unique_entity(packet, [this, hThis](pragma::ecs::BaseEntity *ent) {
 		if(hThis.expired())
 			return;
 		if(ent)

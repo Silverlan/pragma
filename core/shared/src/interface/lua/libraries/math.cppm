@@ -32,9 +32,9 @@ export namespace Lua {
 		DLLNETWORK luabind::optional<luabind::mult<Vector3, double>> solve_ballistic_arc_lateral(lua::State *l, const Vector3 &projPos, double lateralSpeed, const Vector3 &tgt, double maxHeight);
 		DLLNETWORK int abs_max(lua::State *l);
 
-		DLLNETWORK float ease_in(float t, umath::EaseType type = umath::EaseType::Linear);
-		DLLNETWORK float ease_out(float t, umath::EaseType type = umath::EaseType::Linear);
-		DLLNETWORK float ease_in_out(float t, umath::EaseType type = umath::EaseType::Linear);
+		DLLNETWORK float ease_in(float t, pragma::math::EaseType type = pragma::math::EaseType::Linear);
+		DLLNETWORK float ease_out(float t, pragma::math::EaseType type = pragma::math::EaseType::Linear);
+		DLLNETWORK float ease_in_out(float t, pragma::math::EaseType type = pragma::math::EaseType::Linear);
 
 		DLLNETWORK double calc_horizontal_fov(double focalLengthInMM, double width, double height);
 		DLLNETWORK double calc_vertical_fov(double focalLengthInMM, double width, double height);

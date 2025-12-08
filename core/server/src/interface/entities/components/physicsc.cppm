@@ -31,8 +31,8 @@ export namespace pragma {
 
 		virtual void SetCollisionFilter(pragma::physics::CollisionMask filterGroup, pragma::physics::CollisionMask filterMask) override;
 
-		virtual void SetMoveType(pragma::physics::MOVETYPE movetype) override;
-		void SetCollisionType(pragma::physics::COLLISIONTYPE collisiontype) override;
+		virtual void SetMoveType(pragma::physics::MoveType movetype) override;
+		void SetCollisionType(pragma::physics::CollisionType collisiontype) override;
 
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua::State *l) override;

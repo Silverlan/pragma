@@ -13,11 +13,11 @@ import :engine;
 import pragma.gui;
 import pragma.string.unicode;
 
-WIOptionsList::WIOptionsList() : WIBase() {}
+pragma::gui::types::WIOptionsList::WIOptionsList() : WIBase() {}
 
-WIOptionsList::~WIOptionsList() {}
+pragma::gui::types::WIOptionsList::~WIOptionsList() {}
 
-void WIOptionsList::Initialize()
+void pragma::gui::types::WIOptionsList::Initialize()
 {
 	WIBase::Initialize();
 	m_hTable = CreateChild<WITable>();
@@ -30,7 +30,7 @@ void WIOptionsList::Initialize()
 	m_hHeaderRow = pRow->GetHandle();
 }
 
-WITableRow *WIOptionsList::AddHeaderRow()
+pragma::gui::types::WITableRow *pragma::gui::types::WIOptionsList::AddHeaderRow()
 {
 	if(!m_hTable.IsValid())
 		return nullptr;
@@ -39,9 +39,9 @@ WITableRow *WIOptionsList::AddHeaderRow()
 	return pRow;
 }
 
-void WIOptionsList::SetUpdateConVar(const std::string &cvar, const std::string &value) { m_updateCvars[cvar] = value; }
+void pragma::gui::types::WIOptionsList::SetUpdateConVar(const std::string &cvar, const std::string &value) { m_updateCvars[cvar] = value; }
 
-void WIOptionsList::SetTitle(const std::string &title)
+void pragma::gui::types::WIOptionsList::SetTitle(const std::string &title)
 {
 	if(!m_hHeaderRow.IsValid())
 		return;
@@ -49,7 +49,7 @@ void WIOptionsList::SetTitle(const std::string &title)
 	pRow->SetValue(0, title);
 }
 
-void WIOptionsList::SetSize(int x, int y)
+void pragma::gui::types::WIOptionsList::SetSize(int x, int y)
 {
 	WIBase::SetSize(x, y);
 	if(m_hTable.IsValid())
@@ -58,7 +58,7 @@ void WIOptionsList::SetSize(int x, int y)
 		ScheduleUpdate();
 }
 
-void WIOptionsList::DoUpdate()
+void pragma::gui::types::WIOptionsList::DoUpdate()
 {
 	WIBase::DoUpdate();
 	if(m_hTable.IsValid())
@@ -66,14 +66,14 @@ void WIOptionsList::DoUpdate()
 	SizeToContents();
 }
 
-void WIOptionsList::SetMaxHeight(uint32_t h)
+void pragma::gui::types::WIOptionsList::SetMaxHeight(uint32_t h)
 {
 	m_maxHeight = h;
 	if(GetHeight() > h)
 		SetHeight(h);
 }
 
-void WIOptionsList::SizeToContents(bool x, bool y)
+void pragma::gui::types::WIOptionsList::SizeToContents(bool x, bool y)
 {
 	if(m_hTable.IsValid()) {
 		auto *pTable = m_hTable.get<WITable>();
@@ -86,7 +86,7 @@ void WIOptionsList::SizeToContents(bool x, bool y)
 	}
 }
 
-WITableRow *WIOptionsList::AddRow(const std::optional<std::string> &identifier)
+pragma::gui::types::WITableRow *pragma::gui::types::WIOptionsList::AddRow(const std::optional<std::string> &identifier)
 {
 	if(!m_hTable.IsValid())
 		return nullptr;
@@ -96,13 +96,13 @@ WITableRow *WIOptionsList::AddRow(const std::optional<std::string> &identifier)
 	return row;
 }
 
-WITableRow *WIOptionsList::GetRow(const std::string &identifier) const
+pragma::gui::types::WITableRow *pragma::gui::types::WIOptionsList::GetRow(const std::string &identifier) const
 {
 	auto it = m_rows.find(identifier);
 	return (it != m_rows.end()) ? const_cast<WITableRow *>(dynamic_cast<const WITableRow *>(it->second.get())) : nullptr;
 }
 
-WICheckbox *WIOptionsList::AddToggleChoice(const std::string &name, const std::string &cvarName, const std::function<std::string(bool)> &translator, const std::function<bool(std::string)> &translator2)
+pragma::gui::types::WICheckbox *pragma::gui::types::WIOptionsList::AddToggleChoice(const std::string &name, const std::string &cvarName, const std::function<std::string(bool)> &translator, const std::function<bool(std::string)> &translator2)
 {
 	auto *row = AddRow(cvarName);
 	if(row == nullptr)
@@ -123,10 +123,10 @@ WICheckbox *WIOptionsList::AddToggleChoice(const std::string &name, const std::s
 	return pCheckbox;
 }
 
-WICheckbox *WIOptionsList::AddToggleChoice(const std::string &name, const std::string &cvarName) { return AddToggleChoice(name, cvarName, nullptr); }
+pragma::gui::types::WICheckbox *pragma::gui::types::WIOptionsList::AddToggleChoice(const std::string &name, const std::string &cvarName) { return AddToggleChoice(name, cvarName, nullptr); }
 
 template<class T>
-WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name, T list, const std::string &cvarName, const std::function<void(WIChoiceList *)> &initializer, const std::optional<std::string> &optRowIdent)
+pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceList(const std::string &name, T list, const std::string &cvarName, const std::function<void(WIChoiceList *)> &initializer, const std::optional<std::string> &optRowIdent)
 {
 	auto *row = AddRow(optRowIdent.has_value() ? *optRowIdent : cvarName);
 	if(row == nullptr)
@@ -152,16 +152,16 @@ WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name, T list, cons
 	row->InsertElement(1, pChoiceList);
 	return pChoiceList;
 }
-WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name, const std::vector<std::pair<std::string, std::string>> &list, const std::string &cvarName, const std::optional<std::string> &optRowIdent)
+pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceList(const std::string &name, const std::vector<std::pair<std::string, std::string>> &list, const std::string &cvarName, const std::optional<std::string> &optRowIdent)
 {
 	return AddChoiceList<const std::vector<std::pair<std::string, std::string>> &>(name, list, cvarName, nullptr, optRowIdent);
 }
-WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name, const std::vector<std::string> &list, const std::string &cvarName) { return AddChoiceList<const std::vector<std::string> &>(name, list, cvarName, nullptr); }
-WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name, const std::function<void(WIChoiceList *)> &initializer, const std::string &cvarName) { return AddChoiceList<const std::vector<std::string> &>(name, std::vector<std::string>({}), cvarName, initializer); }
-WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name, const std::string &cvarName) { return AddChoiceList(name, nullptr, cvarName); }
+pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceList(const std::string &name, const std::vector<std::string> &list, const std::string &cvarName) { return AddChoiceList<const std::vector<std::string> &>(name, list, cvarName, nullptr); }
+pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceList(const std::string &name, const std::function<void(WIChoiceList *)> &initializer, const std::string &cvarName) { return AddChoiceList<const std::vector<std::string> &>(name, std::vector<std::string>({}), cvarName, initializer); }
+pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceList(const std::string &name, const std::string &cvarName) { return AddChoiceList(name, nullptr, cvarName); }
 
 template<class T>
-WIDropDownMenu *WIOptionsList::AddDropDownMenu(const std::string &name, T list, const std::string &cvarName, const std::function<void(WIDropDownMenu *)> &initializer)
+pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDownMenu(const std::string &name, T list, const std::string &cvarName, const std::function<void(WIDropDownMenu *)> &initializer)
 {
 	auto *row = AddRow(cvarName);
 	if(row == nullptr)
@@ -187,13 +187,13 @@ WIDropDownMenu *WIOptionsList::AddDropDownMenu(const std::string &name, T list, 
 	row->InsertElement(1, pDropDownMenu);
 	return pDropDownMenu;
 }
-WIDropDownMenu *WIOptionsList::AddDropDownMenu(const std::string &name, const std::unordered_map<std::string, std::string> &list, const std::string &cvarName) { return AddDropDownMenu<const std::unordered_map<std::string, std::string> &>(name, list, cvarName, nullptr); }
-WIDropDownMenu *WIOptionsList::AddDropDownMenu(const std::string &name, const std::vector<std::string> &list, const std::string &cvarName) { return AddDropDownMenu<const std::vector<std::string> &>(name, list, cvarName, nullptr); }
-WIDropDownMenu *WIOptionsList::AddDropDownMenu(const std::string &name, const std::function<void(WIDropDownMenu *)> &initializer, const std::string &cvarName) { return AddDropDownMenu<const std::vector<std::string> &>(name, std::vector<std::string>({}), cvarName, initializer); }
-WIDropDownMenu *WIOptionsList::AddDropDownMenu(const std::string &name, const std::string &cvarName) { return AddDropDownMenu(name, nullptr, cvarName); }
+pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDownMenu(const std::string &name, const std::unordered_map<std::string, std::string> &list, const std::string &cvarName) { return AddDropDownMenu<const std::unordered_map<std::string, std::string> &>(name, list, cvarName, nullptr); }
+pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDownMenu(const std::string &name, const std::vector<std::string> &list, const std::string &cvarName) { return AddDropDownMenu<const std::vector<std::string> &>(name, list, cvarName, nullptr); }
+pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDownMenu(const std::string &name, const std::function<void(WIDropDownMenu *)> &initializer, const std::string &cvarName) { return AddDropDownMenu<const std::vector<std::string> &>(name, std::vector<std::string>({}), cvarName, initializer); }
+pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDownMenu(const std::string &name, const std::string &cvarName) { return AddDropDownMenu(name, nullptr, cvarName); }
 
-std::unordered_map<std::string, std::string> &WIOptionsList::GetUpdateConVars() { return m_updateCvars; }
-void WIOptionsList::RunUpdateConVars(bool bClear)
+std::unordered_map<std::string, std::string> &pragma::gui::types::WIOptionsList::GetUpdateConVars() { return m_updateCvars; }
+void pragma::gui::types::WIOptionsList::RunUpdateConVars(bool bClear)
 {
 	auto *client = pragma::get_client_state();
 	for(auto it = m_updateCvars.begin(); it != m_updateCvars.end(); ++it) {
@@ -219,7 +219,7 @@ void WIOptionsList::RunUpdateConVars(bool bClear)
 		m_keyBindingsAdd[i].clear();
 	}
 }
-WITextEntry *WIOptionsList::AddTextEntry(const std::string &name, const std::string &cvarName)
+pragma::gui::types::WITextEntry *pragma::gui::types::WIOptionsList::AddTextEntry(const std::string &name, const std::string &cvarName)
 {
 	auto *row = AddRow(cvarName);
 	if(row == nullptr)
@@ -242,7 +242,7 @@ WITextEntry *WIOptionsList::AddTextEntry(const std::string &name, const std::str
 	row->InsertElement(1, pTextEntry);
 	return pTextEntry;
 }
-WISlider *WIOptionsList::AddSlider(const std::string &name, const std::function<void(WISlider *)> &initializer, const std::string &cvarName)
+pragma::gui::types::WISlider *pragma::gui::types::WIOptionsList::AddSlider(const std::string &name, const std::function<void(WISlider *)> &initializer, const std::string &cvarName)
 {
 	auto *row = AddRow(cvarName);
 	if(row == nullptr)
@@ -267,7 +267,7 @@ WISlider *WIOptionsList::AddSlider(const std::string &name, const std::function<
 	row->InsertElement(1, pSlider);
 	return pSlider;
 }
-void WIOptionsList::AddKeyBinding(const std::string &keyName, const std::string &cvarName)
+void pragma::gui::types::WIOptionsList::AddKeyBinding(const std::string &keyName, const std::string &cvarName)
 {
 	auto *row = AddRow(cvarName);
 	if(row == nullptr)
@@ -277,8 +277,8 @@ void WIOptionsList::AddKeyBinding(const std::string &keyName, const std::string 
 	auto key1 = (mappedKeys.size() > 0) ? mappedKeys.at(0) : static_cast<pragma::platform::Key>(-1);
 	auto key2 = (mappedKeys.size() > 1) ? mappedKeys.at(1) : static_cast<pragma::platform::Key>(-1);
 	row->SetValue(0, keyName);
-	WIHandle hOptionsList = GetHandle();
-	auto callback = [hOptionsList, cvarName](int entryId, WIHandle hKeyOther, pragma::platform::Key oldKey, pragma::platform::Key newKey) mutable {
+	pragma::gui::WIHandle hOptionsList = GetHandle();
+	auto callback = [hOptionsList, cvarName](int entryId, pragma::gui::WIHandle hKeyOther, pragma::platform::Key oldKey, pragma::platform::Key newKey) mutable {
 		if(!hOptionsList.IsValid())
 			return;
 		auto *pOptionsList = hOptionsList.get<WIOptionsList>();
@@ -287,7 +287,7 @@ void WIOptionsList::AddKeyBinding(const std::string &keyName, const std::string 
 		pOptionsList->m_keyBindingsAdd[entryId][cvarName] = newKey;
 	};
 
-	auto &gui = WGUI::GetInstance();
+	auto &gui = pragma::gui::WGUI::GetInstance();
 	auto *pKey1 = gui.Create<WIKeyEntry>();
 	auto *pKey2 = gui.Create<WIKeyEntry>();
 	pKey1->SetKey(key1);

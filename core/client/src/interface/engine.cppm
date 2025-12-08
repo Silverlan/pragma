@@ -16,8 +16,8 @@ export import pragma.shared;
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-export {
-	class DLLCLIENT CEngine : public pragma::Engine, public pragma::RenderContext {
+export namespace pragma {
+	class DLLCLIENT CEngine : public pragma::Engine, public rendering::RenderContext {
 	  public:
 		CEngine(int argc, char *argv[]);
 		virtual ~CEngine() override;
@@ -55,7 +55,7 @@ export {
 			std::string fileName;
 		};
 
-		using pragma::RenderContext::DrawFrame;
+		using rendering::RenderContext::DrawFrame;
 		virtual void SetAssetMultiThreadedLoadingEnabled(bool enabled) override;
 
 		virtual bool IsProgramInFocus() const override;
@@ -76,7 +76,7 @@ export {
 		bool IsClosed() const;
 
 		virtual bool Initialize(int argc, char *argv[]) override;
-		virtual StateInstance &GetStateInstance(NetworkState &nw) override;
+		virtual StateInstance &GetStateInstance(pragma::NetworkState &nw) override;
 		StateInstance &GetClientStateInstance();
 		const std::string &GetDefaultFontSetName() const;
 		const FontSet &GetDefaultFontSet() const;
@@ -153,7 +153,7 @@ export {
 		}
 		std::shared_ptr<al::IEffect> GetAuxEffect(const std::string &name);
 		// Lua
-		virtual NetworkState *GetNetworkState(lua::State *l) override;
+		virtual pragma::NetworkState *GetNetworkState(lua::State *l) override;
 		virtual Lua::Interface *GetLuaInterface(lua::State *l) override;
 
 		float GetNearZ();
@@ -177,11 +177,11 @@ export {
 		// Util
 		virtual bool IsServerOnly() override;
 		// Convars
-		virtual ConConf *GetConVar(const std::string &cv) override;
-		virtual bool RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr) override;
+		virtual pragma::console::ConConf *GetConVar(const std::string &cv) override;
+		virtual bool RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(pragma::console::ConConf *, float &)> &callback = nullptr) override;
 		// ClientState
-		virtual NetworkState *GetClientState() const override;
-		ClientState *OpenClientState();
+		virtual pragma::NetworkState *GetClientState() const override;
+		pragma::ClientState *OpenClientState();
 		void CloseClientState();
 		void Connect(const std::string &ip, const std::string &port = "29150");
 		// Peer-to-peer only
@@ -228,7 +228,7 @@ export {
 		void SetGpuPerformanceTimersEnabled(bool enabled);
 		std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx, GPUTimer timer) const;
 
-		virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NwStateType type) override;
+		virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(pragma::NwStateType type) override;
 	  protected:
 		friend CoreInputBindingLayer;
 		void DrawScene(std::shared_ptr<prosper::RenderTarget> &rt);
@@ -248,7 +248,7 @@ export {
 		virtual void OnWindowInitialized() override;
 		virtual void LoadConfig() override;
 		virtual void InitializeExternalArchiveManager() override;
-		virtual void PreloadConfig(NwStateType type, const std::string &configName) override;
+		virtual void PreloadConfig(pragma::NwStateType type, const std::string &configName) override;
 
 		virtual void RegisterConsoleCommands() override;
 	  private:
@@ -302,12 +302,13 @@ export {
 		void Input(int key, pragma::platform::KeyState inputState, pragma::platform::KeyState pressState, pragma::platform::Modifier mods, float magnitude = 1.f);
 		void UpdateFPS(float t);
 	};
-	REGISTER_ENUM_FLAGS(CEngine::StateFlags)
 
-	namespace pragma {
-		DLLCLIENT CEngine *get_cengine();
-	};
+	DLLCLIENT CEngine *get_cengine();
 };
 #pragma warning(pop)
 
-void register_client_launch_parameters(LaunchParaMap &map);
+export {REGISTER_ENUM_FLAGS(pragma::CEngine::StateFlags)}
+
+namespace pragma {
+	void register_client_launch_parameters(LaunchParaMap &map);
+}

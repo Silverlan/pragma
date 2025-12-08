@@ -19,8 +19,8 @@ using namespace pragma::rendering;
 
 static const float EXPOSURE_FRAME_UPDATE = 0.25f; // Exposure will be updated every x seconds
 
-static CVar cvMaxExposure = GetClientConVar("render_hdr_max_exposure");
-static void CVAR_CALLBACK_render_hdr_max_exposure(NetworkState *, const ConVar &, float, float val)
+static auto cvMaxExposure = pragma::console::get_client_con_var("render_hdr_max_exposure");
+static void CVAR_CALLBACK_render_hdr_max_exposure(pragma::NetworkState *, const pragma::console::ConVar &, float, float val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -140,7 +140,7 @@ HDRData::~HDRData()
 	context.KeepResourceAliveUntilPresentationComplete(forwardPlusInstance.GetVisLightIndexBuffer());
 }
 
-bool HDRData::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass, bool secondaryCommandBuffers)
+bool HDRData::BeginRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass, bool secondaryCommandBuffers)
 {
 	auto &rt = GetRenderTarget(drawSceneInfo);
 	return drawSceneInfo.commandBuffer->RecordBeginRenderPass(rt,
@@ -150,7 +150,7 @@ bool HDRData::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper:
 	  },
 	  secondaryCommandBuffers ? prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers : prosper::IPrimaryCommandBuffer::RenderPassFlags::None, customRenderPass);
 }
-bool HDRData::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo) { return drawSceneInfo.commandBuffer->RecordEndRenderPass(); }
+bool HDRData::EndRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { return drawSceneInfo.commandBuffer->RecordEndRenderPass(); }
 
 prosper::util::SamplerCreateInfo HDRData::GetSamplerCreateInfo()
 {
@@ -183,14 +183,14 @@ void HDRData::ReloadPresentationRenderTarget(uint32_t width, uint32_t height, pr
 	auto postHdrImg = context.CreateImage(imgCreateInfo);
 	auto postHdrTex = context.CreateTexture(texCreateInfo, *postHdrImg, prosper::util::ImageViewCreateInfo {}, GetSamplerCreateInfo());
 
-	auto &hShaderTonemapping = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPTonemapping);
+	auto &hShaderTonemapping = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPTonemapping);
 	toneMappedRenderTarget = context.CreateRenderTarget({postHdrTex}, static_cast<prosper::ShaderGraphics *>(hShaderTonemapping.get())->GetRenderPass());
 	toneMappedRenderTarget->SetDebugName("scene_post_hdr_rt");
 
 	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*postHdrTex, umath::to_integral(pragma::ShaderPPFXAA::TextureBinding::SceneTexturePostToneMapping));
 }
 
-static auto cvBloomResolution = GetClientConVar("render_bloom_resolution");
+static auto cvBloomResolution = pragma::console::get_client_con_var("render_bloom_resolution");
 bool HDRData::Initialize(uint32_t width, uint32_t height, prosper::SampleCountFlags sampleCount, bool bEnableSSAO)
 {
 	// Initialize depth prepass
@@ -199,7 +199,7 @@ bool HDRData::Initialize(uint32_t width, uint32_t height, prosper::SampleCountFl
 		return false;
 
 	auto wpShader = pragma::get_cengine()->GetShader("pbr");
-	auto &hShaderTonemapping = pragma::get_cgame()->GetGameShader(CGame::GameShader::PPTonemapping);
+	auto &hShaderTonemapping = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPTonemapping);
 	if(wpShader.expired() || hShaderTonemapping.expired() || pragma::ShaderPPHDR::DESCRIPTOR_SET_TEXTURE.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_TEXTURE.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_DEPTH_BUFFER.IsValid() == false)
 		return false;
 
@@ -362,7 +362,7 @@ bool HDRData::ReloadBloomRenderTarget(uint32_t width)
 	return true;
 }
 
-bool HDRData::ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo) { return EndRenderPass(drawSceneInfo) && BeginRenderPass(drawSceneInfo, rpPostParticle.get()); }
+bool HDRData::ResolveRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { return EndRenderPass(drawSceneInfo) && BeginRenderPass(drawSceneInfo, rpPostParticle.get()); }
 
 bool HDRData::InitializeDescriptorSets()
 {
@@ -376,7 +376,7 @@ bool HDRData::InitializeDescriptorSets()
 	return true;
 }
 
-bool HDRData::BlitMainDepthBufferToSamplableDepthBuffer(const util::DrawSceneInfo &drawSceneInfo, std::function<void(prosper::ICommandBuffer &)> &fTransitionSampleImgToTransferDst)
+bool HDRData::BlitMainDepthBufferToSamplableDepthBuffer(const pragma::rendering::DrawSceneInfo &drawSceneInfo, std::function<void(prosper::ICommandBuffer &)> &fTransitionSampleImgToTransferDst)
 {
 #if 0
 	auto &srcDepthTex = *prepass.textureDepth;
@@ -402,9 +402,9 @@ bool HDRData::BlitMainDepthBufferToSamplableDepthBuffer(const util::DrawSceneInf
 	return false;
 }
 
-prosper::RenderTarget &HDRData::GetRenderTarget(const util::DrawSceneInfo &drawSceneInfo) { return drawSceneInfo.renderTarget ? *drawSceneInfo.renderTarget : *sceneRenderTarget; }
+prosper::RenderTarget &HDRData::GetRenderTarget(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { return drawSceneInfo.renderTarget ? *drawSceneInfo.renderTarget : *sceneRenderTarget; }
 
-bool HDRData::BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo, prosper::ImageLayout srcHdrLayout, prosper::ImageLayout dstHdrLayout)
+bool HDRData::BlitStagingRenderTargetToMainRenderTarget(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::ImageLayout srcHdrLayout, prosper::ImageLayout dstHdrLayout)
 {
 	auto &rt = GetRenderTarget(drawSceneInfo);
 	auto &hdrTex = rt.GetTexture();
@@ -440,9 +440,9 @@ void HDRData::UpdateExposure()
 	exposure = umath::lerp(exposure, 1.f, inc);
 }
 
-static auto cvAntiAliasing = GetClientConVar("cl_render_anti_aliasing");
-static auto cvMsaaSamples = GetClientConVar("cl_render_msaa_samples");
-static void CVAR_CALLBACK_render_msaa_enabled(NetworkState *, const ConVar &, int, int)
+static auto cvAntiAliasing = pragma::console::get_client_con_var("cl_render_anti_aliasing");
+static auto cvMsaaSamples = pragma::console::get_client_con_var("cl_render_msaa_samples");
+static void CVAR_CALLBACK_render_msaa_enabled(pragma::NetworkState *, const pragma::console::ConVar &, int, int)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -483,7 +483,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_msaa_samples", &CVAR_CALLBACK_render_msaa_enabled);
 }
 
-static void CVAR_CALLBACK_render_bloom_resolution(NetworkState *, const ConVar &, int, int width)
+static void CVAR_CALLBACK_render_bloom_resolution(pragma::NetworkState *, const pragma::console::ConVar &, int, int width)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -494,7 +494,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("render_bloom_resolution", &CVAR_CALLBACK_render_bloom_resolution);
 }
 
-static void debug_render_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_render_scene(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	if(dbg != nullptr) {
@@ -507,23 +507,23 @@ static void debug_render_scene(NetworkState *state, pragma::BasePlayerComponent 
 	auto size = 256u;
 	if(argv.empty() == false)
 		size = util::to_float(argv.front());
-	static WIHandle hTexture = {};
-	static WIHandle hBloomTexture = {};
+	static pragma::gui::WIHandle hTexture = {};
+	static pragma::gui::WIHandle hBloomTexture = {};
 	dbg = std::make_unique<DebugGameGUI>([size]() {
 		auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
 		auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
 		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 
 		if(raster.expired())
-			return WIHandle {};
+			return pragma::gui::WIHandle {};
 		auto &hdrInfo = raster->GetHDRInfo();
 
-		auto &wgui = WGUI::GetInstance();
-		auto *r = wgui.Create<WIBase>();
+		auto &wgui = pragma::gui::WGUI::GetInstance();
+		auto *r = wgui.Create<pragma::gui::types::WIBase>();
 
 		auto idx = 0u;
 		if(hdrInfo.sceneRenderTarget != nullptr) {
-			auto *pTexture = wgui.Create<WIDebugMSAATexture>(r);
+			auto *pTexture = wgui.Create<pragma::gui::types::WIDebugMSAATexture>(r);
 			pTexture->SetSize(size, size);
 			pTexture->SetX(size * idx++);
 			pTexture->SetTexture(hdrInfo.sceneRenderTarget->GetTexture());
@@ -532,7 +532,7 @@ static void debug_render_scene(NetworkState *state, pragma::BasePlayerComponent 
 			hTexture = pTexture->GetHandle();
 		}
 		if(hdrInfo.bloomBlurRenderTarget != nullptr) {
-			auto *pTexture = wgui.Create<WIDebugMSAATexture>(r);
+			auto *pTexture = wgui.Create<pragma::gui::types::WIDebugMSAATexture>(r);
 			pTexture->SetSize(size, size);
 			pTexture->SetX(size * idx++);
 			pTexture->SetTexture(hdrInfo.bloomBlurRenderTarget->GetTexture());
@@ -543,11 +543,11 @@ static void debug_render_scene(NetworkState *state, pragma::BasePlayerComponent 
 		r->SetSize(size * idx, size);
 		return r->GetHandle();
 	});
-	dbg->AddCallback("PostRenderScene", FunctionCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>::Create([](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
+	dbg->AddCallback("PostRenderScene", FunctionCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>::Create([](std::reference_wrapper<const pragma::rendering::DrawSceneInfo> drawSceneInfo) {
 		if(hTexture.IsValid() == true)
-			static_cast<WIDebugMSAATexture *>(hTexture.get())->Update();
+			static_cast<pragma::gui::types::WIDebugMSAATexture *>(hTexture.get())->Update();
 		if(hBloomTexture.IsValid() == true)
-			static_cast<WIDebugMSAATexture *>(hBloomTexture.get())->Update();
+			static_cast<pragma::gui::types::WIDebugMSAATexture *>(hBloomTexture.get())->Update();
 	}));
 }
 namespace {

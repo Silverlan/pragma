@@ -89,7 +89,7 @@ export {
 	};
 	REGISTER_ENUM_FLAGS(pragma::CReflectionProbeComponent::StateFlags)
 
-	class DLLCLIENT CEnvReflectionProbe : public CBaseEntity {
+	class DLLCLIENT CEnvReflectionProbe : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

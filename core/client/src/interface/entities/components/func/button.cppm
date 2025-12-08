@@ -18,7 +18,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CFuncButton : public CBaseEntity {
+	class DLLCLIENT CFuncButton : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

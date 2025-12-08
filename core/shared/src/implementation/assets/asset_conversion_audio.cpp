@@ -7,7 +7,7 @@ module pragma.shared;
 import :assets.conversion;
 import se_script;
 
-bool util::port_sound_script(NetworkState *nw, const std::string &path)
+bool util::port_sound_script(pragma::NetworkState *nw, const std::string &path)
 {
 	static auto *ptrOpenArchiveFile = reinterpret_cast<void (*)(const std::string &, VFilePtr &, const std::optional<std::string> &)>(util::impl::get_module_func(nw, "open_archive_file"));
 	if(ptrOpenArchiveFile == nullptr)

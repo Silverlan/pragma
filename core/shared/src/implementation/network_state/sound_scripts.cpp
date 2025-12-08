@@ -6,14 +6,14 @@ module pragma.shared;
 
 import :network_state;
 
-SoundScriptManager *NetworkState::GetSoundScriptManager() { return m_soundScriptManager.get(); }
-SoundScript *NetworkState::FindSoundScript(const char *name) { return m_soundScriptManager->FindScript(name); }
+pragma::audio::SoundScriptManager *pragma::NetworkState::GetSoundScriptManager() { return m_soundScriptManager.get(); }
+pragma::audio::SoundScript *pragma::NetworkState::FindSoundScript(const char *name) { return m_soundScriptManager->FindScript(name); }
 
-bool NetworkState::LoadSoundScripts(const char *file, bool bPrecache)
+bool pragma::NetworkState::LoadSoundScripts(const char *file, bool bPrecache)
 {
-	std::string path = SoundScriptManager::GetSoundScriptPath();
+	std::string path = pragma::audio::SoundScriptManager::GetSoundScriptPath();
 	path += file;
-	std::vector<std::shared_ptr<SoundScript>> scripts;
+	std::vector<std::shared_ptr<pragma::audio::SoundScript>> scripts;
 	if(m_soundScriptManager->Load(path.c_str(), &scripts) == false) {
 		static auto bSkipPort = false;
 		if(bSkipPort == false) {

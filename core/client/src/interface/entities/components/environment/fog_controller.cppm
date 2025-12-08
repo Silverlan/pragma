@@ -29,11 +29,11 @@ export {
 			virtual void OnEntitySpawn() override;
 		  protected:
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-			WorldEnvironment::Fog &GetFog();
+			rendering::WorldEnvironment::Fog &GetFog();
 		};
 	};
 
-	class DLLCLIENT CEnvFogController : public CBaseEntity {
+	class DLLCLIENT CEnvFogController : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

@@ -14,8 +14,8 @@ import :rendering.shaders;
 
 using namespace pragma::rendering;
 
-static auto cvDrawParticles = GetClientConVar("render_draw_particles");
-void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, bool depthPass, prosper::IPrimaryCommandBuffer *primCmdBuffer)
+static auto cvDrawParticles = pragma::console::get_client_con_var("render_draw_particles");
+void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandBuffer &cmd, const pragma::rendering::DrawSceneInfo &drawSceneInfo, bool depthPass, prosper::IPrimaryCommandBuffer *primCmdBuffer)
 {
 	assert(!depthPass || primCmdBuffer != nullptr);
 	// TODO: Only render particles if they're visible

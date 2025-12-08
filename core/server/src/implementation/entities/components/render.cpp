@@ -20,7 +20,7 @@ void SRenderComponent::SetUnlit(bool b)
 	if(!ent.IsShared())
 		return;
 	NetPacket p;
-	nwm::write_entity(p, &ent);
+	pragma::networking::write_entity(p, &ent);
 	p->Write<bool>(b);
 	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SETUNLIT, p, pragma::networking::Protocol::SlowReliable);
 }
@@ -31,7 +31,7 @@ void SRenderComponent::SetCastShadows(bool b)
 	if(!ent.IsShared())
 		return;
 	NetPacket p;
-	nwm::write_entity(p, &ent);
+	pragma::networking::write_entity(p, &ent);
 	p->Write<bool>(b);
 	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SETCASTSHADOWS, p, pragma::networking::Protocol::SlowReliable);
 }

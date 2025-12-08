@@ -11,7 +11,7 @@ import pragma.math;
 
 export {
 	namespace pragma::physics {
-		enum class MOVETYPE : int { NONE, WALK, FLY, NOCLIP, FREE, PHYSICS };
+		enum class MoveType : int32_t { None = 0, Walk, Fly, Noclip, Free, Physics };
 
 		enum class CollisionMask : uint32_t {
 			None = 0,
@@ -55,8 +55,8 @@ export {
 		};
 		using namespace umath::scoped_enum::bitwise;
 
-		enum class COLLISIONTYPE : int { NONE, AABB, OBB, BRUSH };
-		enum class PHYSICSTYPE : int { NONE, DYNAMIC, STATIC, SOFTBODY, BOXCONTROLLER, CAPSULECONTROLLER };
+		enum class CollisionType : int32_t { None = 0, AABB, OBB, Brush };
+		enum class PhysicsType : int32_t { None = 0, Dynamic, Static, SoftBody, BoxController, CapsuleController };
 		enum class RayCastHitType : uint8_t { None = 0, Touch, Block };
 	};
 	REGISTER_ENUM_FLAGS(pragma::physics::CollisionMask)

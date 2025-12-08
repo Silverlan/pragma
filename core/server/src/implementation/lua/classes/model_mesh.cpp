@@ -8,6 +8,6 @@ import :scripting.lua.classes.model_mesh;
 
 import pragma.shared;
 
-void Lua::ModelMesh::Server::Create(lua::State *l) { Lua::Push<std::shared_ptr<::ModelMesh>>(l, ::util::make_shared<::ModelMesh>()); }
+void Lua::ModelMesh::Server::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::geometry::ModelMesh>>(l, ::util::make_shared<pragma::geometry::ModelMesh>()); }
 
-void Lua::ModelSubMesh::Server::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::ModelSubMesh>>(l, ::util::make_shared<pragma::ModelSubMesh>()); }
+void Lua::ModelSubMesh::Server::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::geometry::ModelSubMesh>>(l, ::util::make_shared<pragma::geometry::ModelSubMesh>()); }

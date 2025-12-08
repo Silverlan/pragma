@@ -20,7 +20,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CPointConstraintConeTwist : public CBaseEntity {
+	class DLLCLIENT CPointConstraintConeTwist : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

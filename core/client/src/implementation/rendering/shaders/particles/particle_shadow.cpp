@@ -19,7 +19,7 @@ ParticleShadow::ParticleShadow()
 	: ParticleShadowBase<ParticleBase>("ParticleShadow","programs/particles/particle_shadow","programs/particles/particle_shadow")
 {}
 
-void ParticleShadow::Draw(CParticleSystem *particle,CLightBase *light,uint32_t layerId)
+void ParticleShadow::Draw(pragma::pts::CParticleSystem *particle,CLightBase *light,uint32_t layerId)
 {
 	auto *mat = particle->GetMaterial();
 	auto &descTexture = static_cast<msys::CMaterial*>(mat)->GetDescriptorSet();
@@ -78,6 +78,6 @@ void ParticleShadow::Draw(CParticleSystem *particle,CLightBase *light,uint32_t l
 		(bAnimated == true) ? *particle->GetAnimationStartBuffer() : pragma::get_cgame()->GetDummyVertexBuffer()
 	};
 	drawCmd->BindVertexBuffer(buffers);
-	drawCmd->Draw(CParticleSystem::VERTEX_COUNT,particle->GetRenderParticleCount());
+	drawCmd->Draw(pragma::pts::CParticleSystem::VERTEX_COUNT,particle->GetRenderParticleCount());
 }
 #endif

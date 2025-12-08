@@ -57,7 +57,7 @@ static void update_vehicle(Vehicle_Car *vhc)
 
 enum Method { IK_JACOB_TRANS = 0, IK_PURE_PSEUDO, IK_DLS, IK_SDLS, IK_DLS_SVD };
 
-static void get_local_bone_position(const std::function<Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
+static void get_local_bone_position(const std::function<umath::Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
 {
 	std::function<void(std::shared_ptr<pragma::animation::Bone> &, Vector3 *, Quat *, Vector3 *)> apply;
 	apply = [fGetTransform, &apply, fscale](std::shared_ptr<pragma::animation::Bone> &bone, Vector3 *pos, Quat *rot, Vector3 *scale) {
@@ -65,8 +65,8 @@ static void get_local_bone_position(const std::function<Transform(uint32_t)> &fG
 		if(parent != nullptr)
 			apply(parent, pos, rot, scale);
 		auto tParent = fGetTransform(bone->ID);
-		auto &posParent = tParent.GetPosition();
-		auto &rotParent = tParent.GetOrientation();
+		auto &posParent = tParent.GetOrigin();
+		auto &rotParent = tParent.GetRotation();
 		auto inv = uquat::get_inverse(rotParent);
 		if(pos != nullptr) {
 			*pos -= posParent * fscale;
@@ -79,7 +79,7 @@ static void get_local_bone_position(const std::function<Transform(uint32_t)> &fG
 	if(parent != nullptr)
 		apply(parent, pos, rot, scale);
 }
-static void get_local_bone_position(const std::shared_ptr<pragma::Model> &mdl, const std::function<Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr,
+static void get_local_bone_position(const std::shared_ptr<pragma::asset::Model> &mdl, const std::function<umath::Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr,
   Vector3 *scale = nullptr)
 {
 	get_local_bone_position(fGetTransform, bone, fscale, pos, rot, scale);
@@ -640,7 +640,7 @@ int Lua::game::Client::test(lua::State *l)
 										entIt.AttachFilter<EntityIteratorFilterClass>("prop_dynamic");
 										auto it = entIt.begin();
 										auto *ent = (it != entIt.end()) ? *it : nullptr;
-										static_cast<choreography::Event*>(ev.get())->SetActor(*static_cast<CBaseEntity*>(ent));
+										static_cast<choreography::Event*>(ev.get())->SetActor(*static_cast<pragma::ecs::CBaseEntity*>(ent));
 									}
 								}
 								else if(child->parameters.at(0) == "flexanimation")
@@ -714,7 +714,7 @@ int Lua::game::Client::test(lua::State *l)
 										auto it = entIt.begin();
 										auto *ent = (it != entIt.end()) ? *it : nullptr;
 
-										static_cast<choreography::Event*>(ev.get())->SetActor(*static_cast<CBaseEntity*>(ent));
+										static_cast<choreography::Event*>(ev.get())->SetActor(*static_cast<pragma::ecs::CBaseEntity*>(ent));
 										for(auto &pair : values)
 											static_cast<choreography::FacialFlexEvent*>(ev.get())->SetFlexControllerValues(pair.first,pair.second.values,(pair.second.stereo == true) ? &pair.second.lrDistribution : nullptr);
 									}
@@ -784,11 +784,11 @@ namespace pragma {
 int Lua::game::Client::open_dropped_file(lua::State *l)
 {
 	auto &droppedFiles = pragma::get_cengine()->GetDroppedFiles();
-	const CEngine::DroppedFile *pf = nullptr;
+	const pragma::CEngine::DroppedFile *pf = nullptr;
 	std::optional<std::string> fullPath {};
 	if(Lua::IsString(l, 1)) {
 		auto *fileName = Lua::CheckString(l, 1);
-		auto it = std::find_if(droppedFiles.begin(), droppedFiles.end(), [&fileName](const CEngine::DroppedFile &f) { return (f.fileName == fileName) ? true : false; });
+		auto it = std::find_if(droppedFiles.begin(), droppedFiles.end(), [&fileName](const pragma::CEngine::DroppedFile &f) { return (f.fileName == fileName) ? true : false; });
 		if(it == droppedFiles.end()) {
 			auto &gDroppedFiles = pragma::get_dropped_files();
 			auto npath = ::util::Path::CreateFile(fileName).GetString();
@@ -845,7 +845,7 @@ int Lua::game::Client::load_model(lua::State *l)
 }
 int Lua::game::Client::create_model(lua::State *l)
 {
-	std::shared_ptr<pragma::Model> mdl = nullptr;
+	std::shared_ptr<pragma::asset::Model> mdl = nullptr;
 	if(!Lua::IsSet(l, 1))
 		mdl = pragma::get_cgame()->CreateModel();
 	else {
@@ -880,27 +880,27 @@ int Lua::game::Client::set_action_input(lua::State *l)
 }
 int Lua::game::Client::update_render_buffers(lua::State *l)
 {
-	auto &drawSceneInfo = Lua::Check<const ::util::DrawSceneInfo>(l, 1);
+	auto &drawSceneInfo = Lua::Check<const ::pragma::rendering::DrawSceneInfo>(l, 1);
 	auto &renderQueue = Lua::Check<const pragma::rendering::RenderQueue>(l, 2);
 	pragma::CSceneComponent::UpdateRenderBuffers(drawSceneInfo.commandBuffer, renderQueue);
 	return 0;
 }
 int Lua::game::Client::render_scenes(lua::State *l)
 {
-	std::vector<::util::DrawSceneInfo> scenes {};
+	std::vector<::pragma::rendering::DrawSceneInfo> scenes {};
 	auto n = Lua::GetObjectLength(l, 1);
 	scenes.reserve(n);
 
 	auto t = luabind::object {luabind::from_stack(l, 1)};
 	for(luabind::iterator i {t}, end; i != end; ++i) {
 		auto val = *i;
-		auto *drawSceneInfo = luabind::object_cast<::util::DrawSceneInfo *>(val);
+		auto *drawSceneInfo = luabind::object_cast<::pragma::rendering::DrawSceneInfo *>(val);
 		scenes.push_back(*drawSceneInfo);
 	}
 	pragma::get_cgame()->RenderScenes(scenes);
 	return 0;
 }
-extern void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter);
+extern void set_debug_render_filter(std::unique_ptr<pragma::debug::DebugRenderFilter> filter);
 int Lua::game::Client::set_debug_render_filter(lua::State *l)
 {
 	if(Lua::IsSet(l, 1) == false) {
@@ -909,7 +909,7 @@ int Lua::game::Client::set_debug_render_filter(lua::State *l)
 	}
 	Lua::CheckTable(l, 1);
 	auto t = luabind::object {luabind::from_stack {l, 1}};
-	auto filter = std::make_unique<DebugRenderFilter>();
+	auto filter = std::make_unique<pragma::debug::DebugRenderFilter>();
 	if(t["shaderFilter"]) {
 		auto shaderFilter = luabind::object {t["shaderFilter"]};
 		filter->shaderFilter = [shaderFilter](pragma::ShaderGameWorld &shader) mutable -> bool {
@@ -926,7 +926,7 @@ int Lua::game::Client::set_debug_render_filter(lua::State *l)
 	}
 	if(t["entityFilter"]) {
 		auto entityFilter = luabind::object {t["entityFilter"]};
-		filter->entityFilter = [entityFilter](CBaseEntity &ent, msys::CMaterial &mat) mutable -> bool {
+		filter->entityFilter = [entityFilter](pragma::ecs::CBaseEntity &ent, msys::CMaterial &mat) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
 			auto r = entityFilter(oEnt, static_cast<msys::Material *>(&mat));
 			return luabind::object_cast<bool>(r);
@@ -934,18 +934,18 @@ int Lua::game::Client::set_debug_render_filter(lua::State *l)
 	}
 	if(t["meshFilter"]) {
 		auto meshFilter = luabind::object {t["meshFilter"]};
-		filter->meshFilter = [meshFilter](CBaseEntity &ent, msys::CMaterial *mat, CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx) mutable -> bool {
+		filter->meshFilter = [meshFilter](pragma::ecs::CBaseEntity &ent, msys::CMaterial *mat, pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
 			auto r = meshFilter(oEnt, mat ? static_cast<msys::Material *>(mat) : nullptr, mesh.shared_from_this(), meshIdx);
 			return luabind::object_cast<bool>(r);
 		};
 	}
-	set_debug_render_filter(std::move(filter));
+	::set_debug_render_filter(std::move(filter));
 	return 0;
 }
 int Lua::game::Client::queue_scene_for_rendering(lua::State *l)
 {
-	auto &drawSceneInfo = Lua::Check<::util::DrawSceneInfo>(l, 1);
+	auto &drawSceneInfo = Lua::Check<::pragma::rendering::DrawSceneInfo>(l, 1);
 	pragma::get_cgame()->QueueForRendering(drawSceneInfo);
 #if 0
 	auto scene = drawSceneInfo.scene.valid() ? drawSceneInfo.scene.get() : pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
@@ -988,7 +988,7 @@ int Lua::game::Client::get_queued_render_scenes(lua::State *l)
 	auto t = luabind::newtable(l);
 	int32_t i = 1;
 	for(auto &renderScene : renderScenes)
-		t[i++] = const_cast<::util::DrawSceneInfo &>(renderScene);
+		t[i++] = const_cast<::pragma::rendering::DrawSceneInfo &>(renderScene);
 	t.push(l);
 	return 1;
 }

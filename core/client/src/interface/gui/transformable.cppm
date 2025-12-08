@@ -9,7 +9,7 @@ export module pragma.client:gui.transformable;
 
 export import :gui.snap_area;
 
-export {
+export namespace pragma::gui::types {
 	class DLLCLIENT WITransformable : public WIBase {
 	  public:
 		enum class StateFlags : uint8_t { None = 0u, Draggable = 1u, Resizable = Draggable << 1u, Dragging = Resizable << 1u, Resizing = Dragging << 1u, ResizeRatioLocked = Resizing << 1u, WasDragged = ResizeRatioLocked << 1u };
@@ -65,15 +65,15 @@ export {
 	  protected:
 		virtual void DoUpdate() override;
 		enum class ResizeMode { none = -1, ew = 1, we = 2, ns = 3, sn = 4, nwse = 5, nesw = 6, senw = 7, swne = 8 };
-		WIHandle m_hMoveRect = {};
-		WIHandle m_hResizeRect = {};
+		pragma::gui::WIHandle m_hMoveRect = {};
+		pragma::gui::WIHandle m_hResizeRect = {};
 		StateFlags m_stateFlags = StateFlags::None;
 		ResizeMode m_resizeMode = ResizeMode::none;
-		WIHandle m_snapGhost = {};
+		pragma::gui::WIHandle m_snapGhost = {};
 		Vector2i m_resizeLastPos = {};
 		Vector2i m_dragCursorOffset = {};
 		bool m_bRemoveOnClose = true;
-		std::vector<WIHandle> m_snapTargets = {};
+		std::vector<pragma::gui::WIHandle> m_snapTargets = {};
 		void InitializeSnapTargetGhost(WISnapArea &snapArea);
 		void DestroySnapTargetGhost();
 		void SetResizeMode(ResizeMode mode);
@@ -94,5 +94,7 @@ export {
 		void UpdateResizeRect();
 		void UpdateResizeRectPos();
 	};
-	REGISTER_ENUM_FLAGS(WITransformable::StateFlags)
+	using namespace umath::scoped_enum::bitwise;
 };
+
+export {REGISTER_ENUM_FLAGS(pragma::gui::types::WITransformable::StateFlags)}

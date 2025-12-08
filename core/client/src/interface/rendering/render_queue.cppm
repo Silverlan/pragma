@@ -44,17 +44,17 @@ export namespace pragma::rendering {
 		static auto constexpr INSTANCED = std::numeric_limits<uint16_t>::max();
 		static auto constexpr UNIQUE = std::numeric_limits<uint16_t>::max() - 1;
 		RenderQueueItem() = default;
-		RenderQueueItem(CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const TranslucencyPassInfo *optTranslucencyPassInfo = nullptr);
+		RenderQueueItem(ecs::CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const TranslucencyPassInfo *optTranslucencyPassInfo = nullptr);
 
 		msys::CMaterial *GetMaterial() const;
-		CBaseEntity *GetEntity() const;
-		CModelSubMesh *GetMesh() const;
+		ecs::CBaseEntity *GetEntity() const;
+		pragma::geometry::CModelSubMesh *GetMesh() const;
 		prosper::ShaderGraphics *GetShader(uint32_t &outPipelineIndex) const;
 
 		msys::MaterialIndex material;
 		prosper::PipelineID pipelineId = std::numeric_limits<prosper::PipelineID>::max();
 		EntityIndex entity;
-		pragma::RenderMeshIndex mesh;
+		pragma::rendering::RenderMeshIndex mesh;
 		SortingKey sortingKey;
 		bool translucentKey;
 
@@ -81,7 +81,7 @@ export namespace pragma::rendering {
 		void Reserve();
 		void Add(const std::vector<RenderQueueItem> &items);
 		void Add(const RenderQueueItem &item);
-		void Add(CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam = nullptr);
+		void Add(ecs::CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam = nullptr);
 		void Sort();
 		void Merge(const RenderQueue &other);
 		const std::string &GetName() const { return m_name; }

@@ -21,7 +21,7 @@ void SParticleSystemComponent::SetContinuous(bool b)
 	BaseEnvParticleSystemComponent::SetContinuous(b);
 
 	NetPacket p;
-	nwm::write_entity(p, &GetEntity());
+	pragma::networking::write_entity(p, &GetEntity());
 	p->Write<bool>(b);
 	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENV_PRTSYS_SETCONTINUOUS, p, pragma::networking::Protocol::SlowReliable);
 }

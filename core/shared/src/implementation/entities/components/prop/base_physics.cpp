@@ -31,9 +31,9 @@ void BasePropPhysicsComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 	auto *pPropComponent = static_cast<pragma::BasePropComponent *>(GetEntity().FindComponent("prop").get());
-	auto physType = pragma::physics::PHYSICSTYPE::NONE;
+	auto physType = pragma::physics::PhysicsType::None;
 	if(pPropComponent == nullptr)
 		return;
 	physType = pPropComponent->UpdatePhysicsType(&GetEntity());
-	pPropComponent->Setup(physType, pragma::physics::MOVETYPE::PHYSICS);
+	pPropComponent->Setup(physType, pragma::physics::MoveType::Physics);
 }

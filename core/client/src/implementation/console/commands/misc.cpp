@@ -11,55 +11,55 @@ import :console.register_commands;
 
 #undef PlaySound
 
-static void CMD_entities_cl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
-static void CMD_setpos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
-static void CMD_getpos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_setcampos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_getcampos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_setang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_getang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_setcamang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_getcamang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_sound_play(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_sound_stop(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_status_cl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_screenshot(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_shader_reload(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_shader_list(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_shader_optimize(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_debug_ai_schedule_print(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_entities_cl(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
+static void CMD_setpos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &);
+static void CMD_getpos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_setcampos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_getcampos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_setang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_getang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_setcamang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_getcamang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_sound_play(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_sound_stop(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_status_cl(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_screenshot(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_shader_reload(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_shader_list(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_shader_optimize(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_debug_ai_schedule_print(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 
-static void CMD_thirdperson(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_flashlight_toggle(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_reloadmaterial(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_reloadmaterials(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_fps(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_thirdperson(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_flashlight_toggle(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_reloadmaterial(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_reloadmaterials(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_fps(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 #ifdef _DEBUG
-static void CMD_cl_dump_sounds(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_cl_dump_netmessages(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_cl_dump_sounds(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_cl_dump_netmessages(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 #endif
 
 namespace Console {
 	namespace commands {
-		static void cl_list(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-		static void cl_find(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+		static void cl_list(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+		static void cl_find(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 
-		static void vk_dump_limits(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-		static void vk_dump_features(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-		static void vk_dump_format_properties(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-		static void vk_dump_image_format_properties(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-		static void vk_dump_layers(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-		static void vk_dump_extensions(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-		static void vk_dump_memory_stats(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+		static void vk_dump_limits(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+		static void vk_dump_features(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+		static void vk_dump_format_properties(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+		static void vk_dump_image_format_properties(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+		static void vk_dump_layers(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+		static void vk_dump_extensions(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+		static void vk_dump_memory_stats(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 
-		static void vk_print_memory_stats(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+		static void vk_print_memory_stats(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 	};
 };
 
-static void CMD_lua_reload_entity(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_lua_reload_weapon(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_lua_reload_entities(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
-static void CMD_lua_reload_weapons(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_lua_reload_entity(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_lua_reload_weapon(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_lua_reload_entities(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void CMD_lua_reload_weapons(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 
 namespace {
 	using namespace pragma::console::client;
@@ -76,7 +76,7 @@ namespace {
 	auto UVN = register_command("sound_stop", &CMD_sound_stop, pragma::console::ConVarFlags::None, "Stops all sounds that are currently playing.");
 	auto UVN = register_command("status", &CMD_status_cl, pragma::console::ConVarFlags::None, "Prints information about the current connection to the console.");
 	auto UVN = register_command("screenshot", &CMD_screenshot, pragma::console::ConVarFlags::None,
-	  "Writes the contents of the screen into a .tga-file in 'screenshots/'. The name of the file will start with the map's name, or '" + engine_info::get_identifier()
+	  "Writes the contents of the screen into a .tga-file in 'screenshots/'. The name of the file will start with the map's name, or '" + pragma::engine_info::get_identifier()
 	    + "' if no map is loaded. After the name follows an ID which is incremented each time. You can use 'screenshot 1' to take a screenshot without the GUI (Ingame only).");
 	auto UVN = register_command("thirdperson", &CMD_thirdperson, pragma::console::ConVarFlags::None, "Toggles between first- and third-person mode.");
 	auto UVN = register_command("shader_reload", &CMD_shader_reload, pragma::console::ConVarFlags::None, "Reloads a specific shader, or all registered shaders if no arguments are given. Usage: shader_reload <shaderName>");
@@ -111,57 +111,57 @@ namespace {
 	auto UVN = register_command("lua_reload_weapons", &CMD_lua_reload_weapons, pragma::console::ConVarFlags::None, "Reloads the scripts for all registered lua weapon classes.");
 }
 
-void CMD_lua_reload_entity(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_lua_reload_entity(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	ClientState *cstate = static_cast<ClientState *>(state);
-	CGame *game = cstate->GetGameState();
+	auto *cstate = static_cast<pragma::ClientState *>(state);
+	auto *game = cstate->GetGameState();
 	if(game == nullptr)
 		return;
 	game->LoadLuaEntity("entities", argv[0]);
 }
 
-void CMD_lua_reload_weapon(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_lua_reload_weapon(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	ClientState *cstate = static_cast<ClientState *>(state);
-	CGame *game = cstate->GetGameState();
+	auto *cstate = static_cast<pragma::ClientState *>(state);
+	auto *game = cstate->GetGameState();
 	if(game == nullptr)
 		return;
 	game->LoadLuaEntity("weapons", argv[0]);
 }
 
-void CMD_lua_reload_entities(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void CMD_lua_reload_entities(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	NetworkState *server = pragma::get_cengine()->GetServerNetworkState();
+	auto *server = pragma::get_cengine()->GetServerNetworkState();
 	pragma::Game *sgame = server->GetGameState();
 	if(sgame != nullptr)
 		sgame->LoadLuaEntities("entities");
-	NetworkState *client = pragma::get_cengine()->GetClientState();
+	auto *client = pragma::get_cengine()->GetClientState();
 	pragma::Game *cgame = client->GetGameState();
 	if(cgame != nullptr)
 		cgame->LoadLuaEntities("entities");
 }
 
-void CMD_lua_reload_weapons(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void CMD_lua_reload_weapons(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
-	NetworkState *server = pragma::get_cengine()->GetServerNetworkState();
+	auto *server = pragma::get_cengine()->GetServerNetworkState();
 	pragma::Game *sgame = server->GetGameState();
 	if(sgame != nullptr)
 		sgame->LoadLuaEntities("weapons");
-	NetworkState *client = pragma::get_cengine()->GetClientState();
+	auto *client = pragma::get_cengine()->GetClientState();
 	pragma::Game *cgame = client->GetGameState();
 	if(cgame != nullptr)
 		cgame->LoadLuaEntities("weapons");
 }
 
-void CMD_entities_cl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_entities_cl(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
 		return;
-	auto sortedEnts = util::cmd::get_sorted_entities(*pragma::get_cgame(), pl);
+	auto sortedEnts = pragma::console::get_sorted_entities(*pragma::get_cgame(), pl);
 	std::optional<std::string> className = {};
 	if(argv.empty() == false)
 		className = '*' + argv.front() + '*';
@@ -177,7 +177,7 @@ void CMD_entities_cl(NetworkState *state, pragma::BasePlayerComponent *pl, std::
 	}
 }
 
-void CMD_thirdperson(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_thirdperson(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pl == nullptr)
 		return;
@@ -187,8 +187,8 @@ void CMD_thirdperson(NetworkState *state, pragma::BasePlayerComponent *pl, std::
 	auto *observer = observableC->GetObserver();
 	if(!observer)
 		return;
-	auto *cstate = static_cast<ClientState *>(state);
-	if(!check_cheats("thirdperson", cstate))
+	auto *cstate = static_cast<pragma::ClientState *>(state);
+	if(!pragma::check_cheats("thirdperson", cstate))
 		return;
 	auto bThirdPerson = false;
 	if(!argv.empty())
@@ -203,24 +203,24 @@ void CMD_thirdperson(NetworkState *state, pragma::BasePlayerComponent *pl, std::
 	observer->SetObserverMode((bThirdPerson == true) ? ObserverMode::ThirdPerson : ObserverMode::FirstPerson);
 }
 
-void CMD_setpos(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_setpos(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.size() < 3)
 		return;
-	ClientState *cstate = static_cast<ClientState *>(state);
-	if(!check_cheats("setpos", cstate))
+	auto *cstate = static_cast<pragma::ClientState *>(state);
+	if(!pragma::check_cheats("setpos", cstate))
 		return;
 	Vector3 pos(atof(argv[0].c_str()), atof(argv[1].c_str()), atof(argv[2].c_str()));
 	NetPacket p;
-	nwm::write_vector(p, pos);
+	pragma::networking::write_vector(p, pos);
 	cstate->SendPacket(pragma::networking::net_messages::server::CMD_SETPOS, p, pragma::networking::Protocol::SlowReliable);
 }
 
-void CMD_getpos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
+void CMD_getpos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	if(pl == nullptr) {
 		Con::cout << "0 0 0" << Con::endl;
 		return;
@@ -235,28 +235,28 @@ void CMD_getpos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vecto
 	Con::cout << pos.x << " " << pos.y << " " << pos.z << Con::endl;
 }
 
-void CMD_setcampos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_setcampos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
 		return;
 	if(argv.size() < 3)
 		return;
-	ClientState *cstate = static_cast<ClientState *>(state);
-	if(!check_cheats("setpos", cstate))
+	auto *cstate = static_cast<pragma::ClientState *>(state);
+	if(!pragma::check_cheats("setpos", cstate))
 		return;
 	Vector3 pos(atof(argv[0].c_str()), atof(argv[1].c_str()), atof(argv[2].c_str()));
-	auto *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera<pragma::CCameraComponent>();
 	if(pCam == nullptr)
 		return;
 	pCam->GetEntity().SetPosition(pos);
 }
 
-void CMD_getcampos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_getcampos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
 		return;
-	auto *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera<pragma::CCameraComponent>();
 	if(pCam == nullptr)
 		return;
@@ -264,16 +264,16 @@ void CMD_getcampos(NetworkState *state, pragma::BasePlayerComponent *pl, std::ve
 	Con::cout << pos.x << " " << pos.y << " " << pos.z << Con::endl;
 }
 
-void CMD_setang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_setang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.size() < 3)
 		return;
-	ClientState *cstate = static_cast<ClientState *>(state);
+	auto *cstate = static_cast<pragma::ClientState *>(state);
 	if(!cstate->IsGameActive())
 		return;
 	if(pl == nullptr)
 		return;
-	if(!check_cheats("setang", cstate))
+	if(!pragma::check_cheats("setang", cstate))
 		return;
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
@@ -282,7 +282,7 @@ void CMD_setang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vecto
 	charComponent->SetViewAngles(ang);
 }
 
-void CMD_getang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
+void CMD_getang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
@@ -297,28 +297,28 @@ void CMD_getang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vecto
 	Con::cout << ang.p << " " << ang.y << " " << ang.r << Con::endl;
 }
 
-void CMD_setcamang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_setcamang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
 		return;
 	if(argv.size() < 3)
 		return;
-	ClientState *cstate = static_cast<ClientState *>(state);
-	if(!check_cheats("setpos", cstate))
+	auto *cstate = static_cast<pragma::ClientState *>(state);
+	if(!pragma::check_cheats("setpos", cstate))
 		return;
 	EulerAngles ang(util::to_float(argv[0]), util::to_float(argv[1]), util::to_float(argv[2]));
-	auto *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera<pragma::CCameraComponent>();
 	if(pCam == nullptr)
 		return;
 	pCam->GetEntity().SetRotation(uquat::create(ang));
 }
 
-void CMD_getcamang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
+void CMD_getcamang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
-	auto *game = static_cast<CGame *>(state->GetGameState());
+	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera<pragma::CCameraComponent>();
 	if(pCam == nullptr)
 		return;
@@ -326,7 +326,7 @@ void CMD_getcamang(NetworkState *state, pragma::BasePlayerComponent *pl, std::ve
 	Con::cout << ang.p << " " << ang.y << " " << ang.r << Con::endl;
 }
 
-void CMD_sound_play(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_sound_play(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
@@ -336,9 +336,9 @@ void CMD_sound_play(NetworkState *, pragma::BasePlayerComponent *, std::vector<s
 	client->PlaySound(argv[0], pragma::audio::ALSoundType::GUI, pragma::audio::ALCreateFlags::None);
 }
 
-void CMD_sound_stop(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { pragma::get_client_state()->StopSounds(); }
+void CMD_sound_stop(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { pragma::get_client_state()->StopSounds(); }
 
-void CMD_status_cl(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void CMD_status_cl(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto &players = pragma::CPlayerComponent::GetAll();
 	auto *cl = pragma::get_client_state()->GetClient();
@@ -359,7 +359,7 @@ void CMD_status_cl(NetworkState *, pragma::BasePlayerComponent *, std::vector<st
 		auto nameC = plComponent->GetEntity().GetNameComponent();
 		Con::cout << "# \t" << i << "\t"
 		          << "\"" << (nameC.valid() ? nameC->GetName() : "") << "\""
-		          << "\t" << FormatTime(plComponent->TimeConnected()) << "     \t";
+		          << "\t" << pragma::string::format_time(plComponent->TimeConnected()) << "     \t";
 		if(plComponent->IsLocalPlayer() == true)
 			Con::cout << cl->GetLatency();
 		else
@@ -370,7 +370,7 @@ void CMD_status_cl(NetworkState *, pragma::BasePlayerComponent *, std::vector<st
 }
 
 #ifdef _DEBUG
-void CMD_cl_dump_sounds(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_cl_dump_sounds(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto &sounds = pragma::get_client_state()->GetSounds();
 	for(auto &sndInfo : sounds) {
@@ -415,7 +415,7 @@ void CMD_cl_dump_sounds(NetworkState *, pragma::BasePlayerComponent *, std::vect
 	}
 }
 
-void CMD_cl_dump_netmessages(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_cl_dump_netmessages(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto *map = GetClientMessageMap();
 	std::unordered_map<std::string, unsigned int> *netmessages;
@@ -436,7 +436,7 @@ void CMD_cl_dump_netmessages(NetworkState *, pragma::BasePlayerComponent *, std:
 }
 #endif
 
-void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_screenshot(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto *game = pragma::get_client_state()->GetGameState();
 	if(game == nullptr)
@@ -509,7 +509,7 @@ void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<s
 		Con::cout << "Saved screenshot as '" << *path << "'!" << Con::endl;
 }
 
-void CMD_shader_reload(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_shader_reload(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
 		auto &shaderManager = pragma::get_cengine()->GetShaderManager();
@@ -523,7 +523,7 @@ void CMD_shader_reload(NetworkState *, pragma::BasePlayerComponent *, std::vecto
 	pragma::get_cengine()->ReloadShader(argv.front());
 }
 
-void CMD_shader_optimize(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_shader_optimize(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	std::unordered_map<std::string, pragma::console::CommandOption> commandOptions {};
 	pragma::console::parse_command_options(argv, commandOptions);
@@ -591,7 +591,7 @@ void CMD_shader_optimize(NetworkState *state, pragma::BasePlayerComponent *pl, s
 	}
 }
 
-void CMD_shader_list(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void CMD_shader_list(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto &shaderManager = pragma::get_cengine()->GetShaderManager();
 	std::vector<std::shared_ptr<prosper::Shader>> shaderList;
@@ -616,9 +616,9 @@ void CMD_shader_list(NetworkState *, pragma::BasePlayerComponent *, std::vector<
 	}
 }
 
-void CMD_flashlight_toggle(NetworkState *, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
+void CMD_flashlight_toggle(pragma::NetworkState *, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
-	CGame *game = pragma::get_client_state()->GetGameState();
+	auto *game = pragma::get_client_state()->GetGameState();
 	if(game == nullptr)
 		return;
 	if(pl == nullptr)
@@ -626,7 +626,7 @@ void CMD_flashlight_toggle(NetworkState *, pragma::BasePlayerComponent *pl, std:
 	pl->ToggleFlashlight();
 }
 
-void CMD_debug_ai_schedule_print(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void CMD_debug_ai_schedule_print(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!check_cheats("debug_ai_schedule_print", state))
 		return;
@@ -635,7 +635,7 @@ void CMD_debug_ai_schedule_print(NetworkState *state, pragma::BasePlayerComponen
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
 		return;
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	pragma::ecs::BaseEntity *npc = nullptr;
 	for(auto *ent : ents) {
 		if(ent->IsNPC() == false)
@@ -649,11 +649,11 @@ void CMD_debug_ai_schedule_print(NetworkState *state, pragma::BasePlayerComponen
 	}
 	Con::cout << "Querying schedule data for NPC " << *npc << "..." << Con::endl;
 	NetPacket p;
-	nwm::write_entity(p, npc);
+	pragma::networking::write_entity(p, npc);
 	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::DEBUG_AI_SCHEDULE_PRINT, p, pragma::networking::Protocol::SlowReliable);
 }
 
-void CMD_reloadmaterial(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void CMD_reloadmaterial(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(!check_cheats("reloadmaterial", state))
 		return;
@@ -663,13 +663,13 @@ void CMD_reloadmaterial(NetworkState *state, pragma::BasePlayerComponent *, std:
 	pragma::get_client_state()->LoadMaterial(argv[0].c_str(), nullptr, true);
 }
 
-void CMD_reloadmaterials(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void CMD_reloadmaterials(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(!check_cheats("reloadmaterials", state))
 		return;
 }
 
-void Console::commands::cl_list(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void Console::commands::cl_list(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto &convars = state->GetConVars();
 	std::vector<std::string> cvars(convars.size());
@@ -684,7 +684,7 @@ void Console::commands::cl_list(NetworkState *state, pragma::BasePlayerComponent
 		Con::cout << *it << Con::endl;
 }
 
-void Console::commands::cl_find(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+void Console::commands::cl_find(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
 		Con::cwar << "No argument given!" << Con::endl;
@@ -700,7 +700,7 @@ void Console::commands::cl_find(NetworkState *state, pragma::BasePlayerComponent
 		Con::cout << "- " << name << Con::endl;
 }
 
-void CMD_fps(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Con::cout << "FPS: " << util::round_string(pragma::get_cengine()->GetFPS(), 0) << Con::endl << "Frame Time: " << util::round_string(pragma::get_cengine()->GetFrameTime(), 2) << "ms" << Con::endl; }
+void CMD_fps(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Con::cout << "FPS: " << util::round_string(pragma::get_cengine()->GetFPS(), 0) << Con::endl << "Frame Time: " << util::round_string(pragma::get_cengine()->GetFrameTime(), 2) << "ms" << Con::endl; }
 
 static void write_to_file(const std::string &fileName, const std::optional<std::string> &contents)
 {
@@ -714,32 +714,32 @@ static void write_to_file(const std::string &fileName, const std::optional<std::
 	}
 	Con::cout << "Dumped contents to '" << fileName << "'!" << Con::endl;
 }
-void Console::commands::vk_dump_limits(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void Console::commands::vk_dump_limits(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto limits = pragma::get_cengine()->GetRenderContext().DumpLimits();
 	write_to_file("vk_limits.txt", limits);
 }
-void Console::commands::vk_dump_features(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void Console::commands::vk_dump_features(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto limits = pragma::get_cengine()->GetRenderContext().DumpFeatures();
 	write_to_file("vk_features.txt", limits);
 }
-void Console::commands::vk_dump_format_properties(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void Console::commands::vk_dump_format_properties(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto limits = pragma::get_cengine()->GetRenderContext().DumpFormatProperties();
 	write_to_file("vk_format_properties.txt", limits);
 }
-void Console::commands::vk_dump_image_format_properties(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void Console::commands::vk_dump_image_format_properties(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto limits = pragma::get_cengine()->GetRenderContext().DumpImageFormatProperties();
 	write_to_file("vk_image_format_properties.txt", limits);
 }
-void Console::commands::vk_dump_layers(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void Console::commands::vk_dump_layers(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto limits = pragma::get_cengine()->GetRenderContext().DumpLayers();
 	write_to_file("vk_layers.txt", limits);
 }
-void Console::commands::vk_dump_extensions(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+void Console::commands::vk_dump_extensions(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto limits = pragma::get_cengine()->GetRenderContext().DumpExtensions();
 	write_to_file("vk_extensions.txt", limits);
@@ -760,7 +760,7 @@ void Console::commands::vk_dump_extensions(NetworkState *, pragma::BasePlayerCom
 		util::get_pretty_bytes(info.unusedRangeSizeMax)<<"\n";
 	ss<<"\n";
 }*/ // prosper TODO
-void Console::commands::vk_dump_memory_stats(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void Console::commands::vk_dump_memory_stats(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	/*auto &context = pragma::get_cengine()->GetRenderContext();
 	auto &memoryMan = context.GetMemoryManager();
@@ -788,7 +788,7 @@ void Console::commands::vk_dump_memory_stats(NetworkState *state, pragma::BasePl
 	f->WriteString(ss.str());*/ // prosper TODO
 }
 
-void Console::commands::vk_print_memory_stats(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+void Console::commands::vk_print_memory_stats(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 #if 0
 	//bool prosper::util::get_memory_stats(IPrContext &context,MemoryPropertyFlags memPropFlags,DeviceSize &outAvailableSize,DeviceSize &outAllocatedSize)
@@ -974,9 +974,9 @@ static void cvar_net_graph(bool val)
 		if(val == false)
 			return;
 		dbg = std::make_unique<DebugGameGUI>([]() {
-			auto &wgui = WGUI::GetInstance();
+			auto &wgui = pragma::gui::WGUI::GetInstance();
 			auto sz = wgui.GetContext().GetWindow()->GetSize();
-			auto el = wgui.Create<WINetGraph>();
+			auto el = wgui.Create<pragma::gui::types::WINetGraph>();
 			el->SetSize(540, 180);
 			el->SetPos(sz.x - el->GetWidth(), 0);
 			return el->GetHandle();
@@ -988,5 +988,5 @@ static void cvar_net_graph(bool val)
 	dbg = nullptr;
 }
 namespace {
-	auto _ = pragma::console::client::register_variable_listener<bool>("net_graph", +[](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { cvar_net_graph(newVal); });
+	auto _ = pragma::console::client::register_variable_listener<bool>("net_graph", +[](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool oldVal, bool newVal) -> void { cvar_net_graph(newVal); });
 }

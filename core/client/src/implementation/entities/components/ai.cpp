@@ -90,7 +90,7 @@ bool CAIComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet
 			}
 		case BaseAIComponent::LookTargetType::Entity:
 			{
-				auto *ent = nwm::read_entity(packet);
+				auto *ent = pragma::networking::read_entity(packet);
 				if(ent == nullptr)
 					ClearLookTarget();
 				else

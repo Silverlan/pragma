@@ -10,21 +10,21 @@ using namespace pragma;
 
 BasePropComponent::BasePropComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
-pragma::physics::PHYSICSTYPE BasePropComponent::UpdatePhysicsType(pragma::ecs::BaseEntity *ent)
+pragma::physics::PhysicsType BasePropComponent::UpdatePhysicsType(pragma::ecs::BaseEntity *ent)
 {
 	if(ent->GetSpawnFlags() & umath::to_integral(SpawnFlags::Static)) {
 		m_kvMass = 0.f;
-		return pragma::physics::PHYSICSTYPE::STATIC;
+		return pragma::physics::PhysicsType::Static;
 	}
 	auto &hMdl = ent->GetModel();
 	if(hMdl != nullptr) {
 		// TODO: Do this in a better way
 		for(auto &colMesh : hMdl->GetCollisionMeshes()) {
 			if(colMesh->IsSoftBody())
-				return pragma::physics::PHYSICSTYPE::SOFTBODY;
+				return pragma::physics::PhysicsType::SoftBody;
 		}
 	}
-	return pragma::physics::PHYSICSTYPE::DYNAMIC;
+	return pragma::physics::PhysicsType::Dynamic;
 }
 
 bool BasePropComponent::SetKeyValue(std::string key, std::string val)
@@ -48,13 +48,13 @@ bool BasePropComponent::SetKeyValue(std::string key, std::string val)
 	return true;
 }
 
-void BasePropComponent::InitializePhysics(pragma::physics::PHYSICSTYPE physType)
+void BasePropComponent::InitializePhysics(pragma::physics::PhysicsType physType)
 {
 	auto &ent = GetEntity();
 	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return;
-	if((ent.GetSpawnFlags() & umath::to_integral(SpawnFlags::DisableCollisions)) != 0 || physType == pragma::physics::PHYSICSTYPE::NONE)
+	if((ent.GetSpawnFlags() & umath::to_integral(SpawnFlags::DisableCollisions)) != 0 || physType == pragma::physics::PhysicsType::None)
 		return;
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
@@ -104,13 +104,13 @@ void BasePropComponent::InitializePhysics()
 	if(pPhysComponent == nullptr)
 		return;
 	auto &hMdl = ent.GetModel();
-	if(hMdl != nullptr && m_physicsType != pragma::physics::PHYSICSTYPE::NONE && m_physicsType != pPhysComponent->GetPhysicsType())
+	if(hMdl != nullptr && m_physicsType != pragma::physics::PhysicsType::None && m_physicsType != pPhysComponent->GetPhysicsType())
 		InitializePhysics(m_physicsType);
-	if(m_moveType != pragma::physics::MOVETYPE::NONE)
+	if(m_moveType != pragma::physics::MoveType::None)
 		pPhysComponent->SetMoveType(m_moveType);
 }
 
-void BasePropComponent::Setup(pragma::physics::PHYSICSTYPE physType, pragma::physics::MOVETYPE mvType)
+void BasePropComponent::Setup(pragma::physics::PhysicsType physType, pragma::physics::MoveType mvType)
 {
 	m_physicsType = physType;
 	m_moveType = mvType;

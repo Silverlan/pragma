@@ -10,7 +10,7 @@ export module pragma.client:gui.main_menu;
 export import pragma.gui;
 export import pragma.shared;
 
-export {
+export namespace pragma::gui::types {
 	class DLLCLIENT WIMainMenu : public WIBase {
 	  public:
 		WIMainMenu();
@@ -30,32 +30,32 @@ export {
 		void OpenLoadScreen();
 		void OpenMainMenu();
 	  protected:
-		WIHandle m_hMain;
-		WIHandle m_hNewGame;
-		WIHandle m_hLoad;
-		WIHandle m_hOptions;
-		WIHandle m_hLoadScreen;
-		WIHandle m_hBg;
-		WIHandle m_hBgSlideShow;
-		WIHandle m_hServerBrowser;
-		WIHandle m_hVersion;
-		WIHandle m_hPragmaLogo = {};
-		WIHandle m_hBuild = {};
-		WIHandle m_logoContainer = {};
-		WIHandle m_hVersionAttributes;
-		WIHandle m_hRenderAPI;
-		WIHandle m_hMods;
-		WIHandle m_hCredits;
+		pragma::gui::WIHandle m_hMain;
+		pragma::gui::WIHandle m_hNewGame;
+		pragma::gui::WIHandle m_hLoad;
+		pragma::gui::WIHandle m_hOptions;
+		pragma::gui::WIHandle m_hLoadScreen;
+		pragma::gui::WIHandle m_hBg;
+		pragma::gui::WIHandle m_hBgSlideShow;
+		pragma::gui::WIHandle m_hServerBrowser;
+		pragma::gui::WIHandle m_hVersion;
+		pragma::gui::WIHandle m_hPragmaLogo = {};
+		pragma::gui::WIHandle m_hBuild = {};
+		pragma::gui::WIHandle m_logoContainer = {};
+		pragma::gui::WIHandle m_hVersionAttributes;
+		pragma::gui::WIHandle m_hRenderAPI;
+		pragma::gui::WIHandle m_hMods;
+		pragma::gui::WIHandle m_hCredits;
 		CallbackHandle m_cbOnGameStart;
 		CallbackHandle m_cbOnGameEnd;
 
 		// Menu Tracks
 		CallbackHandle m_cbMenuTrack;
 		std::vector<std::string> m_menuTracks;
-		std::shared_ptr<ALSound> m_menuSound;
+		std::shared_ptr<pragma::audio::ALSound> m_menuSound;
 		//
 
-		WIHandle m_hActive;
+		pragma::gui::WIHandle m_hActive;
 		char m_menuType;
 		void SetActiveMenu(WIHandle &hMenu);
 		virtual void OnVisibilityChanged(bool bVisible) override;

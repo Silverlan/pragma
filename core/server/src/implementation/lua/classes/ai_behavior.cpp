@@ -408,7 +408,7 @@ static void create_task(lua::State *l, pragma::ai::BehaviorNode &task, luabind::
 	}
 	else {
 		auto taskId = Lua::CheckInt(l, aiTaskTypeParamOffset);
-		auto &taskManager = SGame::Get()->GetAITaskManager();
+		auto &taskManager = pragma::SGame::Get()->GetAITaskManager();
 		auto newTask = taskManager.CreateTask(static_cast<uint32_t>(taskId));
 
 		if(taskType != nullptr)
@@ -436,7 +436,7 @@ void Lua::AIBehaviorNode::CreateTask(lua::State *l, ai::TaskWrapper &task, luabi
 
 void Lua::AIBehaviorNode::CreateDecoratedTask(lua::State *l, ai::TaskWrapper &task, uint32_t decoratorType, luabind::object o, uint32_t taskType, uint32_t selectorType)
 {
-	auto &taskManager = SGame::Get()->GetAITaskManager();
+	auto &taskManager = pragma::SGame::Get()->GetAITaskManager();
 	auto newTask = taskManager.CreateTask(umath::to_integral(pragma::ai::Task::Decorator));
 	task->AddNode(newTask);
 	newTask->SetParameter(0, static_cast<int32_t>(decoratorType));
@@ -447,7 +447,7 @@ void Lua::AIBehaviorNode::CreateDecoratedTask(lua::State *l, ai::TaskWrapper &ta
 }
 void Lua::AIBehaviorNode::CreateDecoratedTask(lua::State *l, ai::TaskWrapper &task, uint32_t decoratorType, luabind::object o, uint32_t taskType)
 {
-	auto &taskManager = SGame::Get()->GetAITaskManager();
+	auto &taskManager = pragma::SGame::Get()->GetAITaskManager();
 	auto newTask = taskManager.CreateTask(umath::to_integral(pragma::ai::Task::Decorator));
 	task->AddNode(newTask);
 	newTask->SetParameter(0, static_cast<int32_t>(decoratorType));
@@ -457,7 +457,7 @@ void Lua::AIBehaviorNode::CreateDecoratedTask(lua::State *l, ai::TaskWrapper &ta
 }
 void Lua::AIBehaviorNode::CreateDecoratedTask(lua::State *l, ai::TaskWrapper &task, uint32_t decoratorType, luabind::object o)
 {
-	auto &taskManager = SGame::Get()->GetAITaskManager();
+	auto &taskManager = pragma::SGame::Get()->GetAITaskManager();
 	auto newTask = taskManager.CreateTask(umath::to_integral(pragma::ai::Task::Decorator));
 	task->AddNode(newTask);
 	newTask->SetParameter(0, static_cast<int32_t>(decoratorType));

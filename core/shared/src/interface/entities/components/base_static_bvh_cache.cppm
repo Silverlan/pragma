@@ -39,7 +39,7 @@ export namespace pragma {
 		void RemoveEntityFromBvh(const pragma::ecs::BaseEntity &ent);
 		void UpdateBuild();
 
-		void Build(std::vector<std::shared_ptr<pragma::ModelSubMesh>> &&meshes, std::vector<pragma::ecs::BaseEntity *> &&meshToEntity, std::vector<umath::ScaledTransform> &&meshPoses);
+		void Build(std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &&meshes, std::vector<pragma::ecs::BaseEntity *> &&meshToEntity, std::vector<umath::ScaledTransform> &&meshPoses);
 
 		virtual void TestRebuildBvh() = 0;
 		bool m_staticBvhDirty = false;

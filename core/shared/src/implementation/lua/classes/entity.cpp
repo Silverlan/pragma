@@ -312,16 +312,16 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	// Quick-access methods
 	classDef.def("CreateSound", &::pragma::ecs::BaseEntity::CreateSound);
 	classDef.def("EmitSound", &::pragma::ecs::BaseEntity::EmitSound);
-	classDef.def("EmitSound", static_cast<std::shared_ptr<::ALSound> (*)(::pragma::ecs::BaseEntity &, const std::string &, pragma::audio::ALSoundType, float)>([](::pragma::ecs::BaseEntity &ent, const std::string &sndname, pragma::audio::ALSoundType soundType, float gain) {
+	classDef.def("EmitSound", static_cast<std::shared_ptr<pragma::audio::ALSound> (*)(::pragma::ecs::BaseEntity &, const std::string &, pragma::audio::ALSoundType, float)>([](::pragma::ecs::BaseEntity &ent, const std::string &sndname, pragma::audio::ALSoundType soundType, float gain) {
 		return ent.EmitSound(sndname, soundType, gain);
 	}));
 	classDef.def("EmitSound",
-	  static_cast<std::shared_ptr<::ALSound> (*)(::pragma::ecs::BaseEntity &, const std::string &, pragma::audio::ALSoundType)>([](::pragma::ecs::BaseEntity &ent, const std::string &sndname, pragma::audio::ALSoundType soundType) { return ent.EmitSound(sndname, soundType); }));
+	  static_cast<std::shared_ptr<pragma::audio::ALSound> (*)(::pragma::ecs::BaseEntity &, const std::string &, pragma::audio::ALSoundType)>([](::pragma::ecs::BaseEntity &ent, const std::string &sndname, pragma::audio::ALSoundType soundType) { return ent.EmitSound(sndname, soundType); }));
 	classDef.def("GetName", &::pragma::ecs::BaseEntity::GetName);
 	classDef.def("SetName", &::pragma::ecs::BaseEntity::SetName);
 	classDef.def("SetModel", static_cast<void (::pragma::ecs::BaseEntity::*)(const std::string &)>(&::pragma::ecs::BaseEntity::SetModel));
-	classDef.def("SetModel", static_cast<void (::pragma::ecs::BaseEntity::*)(const std::shared_ptr<pragma::Model> &)>(&::pragma::ecs::BaseEntity::SetModel));
-	classDef.def("ClearModel", static_cast<void (*)(::pragma::ecs::BaseEntity &)>([](::pragma::ecs::BaseEntity &ent) { ent.SetModel(std::shared_ptr<pragma::Model> {nullptr}); }));
+	classDef.def("SetModel", static_cast<void (::pragma::ecs::BaseEntity::*)(const std::shared_ptr<pragma::asset::Model> &)>(&::pragma::ecs::BaseEntity::SetModel));
+	classDef.def("ClearModel", static_cast<void (*)(::pragma::ecs::BaseEntity &)>([](::pragma::ecs::BaseEntity &ent) { ent.SetModel(std::shared_ptr<pragma::asset::Model> {nullptr}); }));
 	classDef.def("GetModel", &::pragma::ecs::BaseEntity::GetModel);
 	classDef.def("GetModelName", &::pragma::ecs::BaseEntity::GetModelName);
 	classDef.def("GetAttachmentPose", &::pragma::ecs::BaseEntity::GetAttachmentPose);

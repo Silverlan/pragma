@@ -21,22 +21,22 @@ void COcclusionCullerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	m_occlusionOctree = ::util::make_shared<OcclusionOctree<CBaseEntity *>>(256.f, 1'073'741'824.f, 4096.f, [](const CBaseEntity *ent, Vector3 &min, Vector3 &max) {
+	m_occlusionOctree = ::util::make_shared<OcclusionOctree<ecs::CBaseEntity *>>(256.f, 1'073'741'824.f, 4096.f, [](const ecs::CBaseEntity *ent, Vector3 &min, Vector3 &max) {
 		auto &renderBounds = ent->GetAbsoluteRenderBounds();
 		min = renderBounds.min;
 		max = renderBounds.max;
 	});
 	m_occlusionOctree->Initialize();
 	m_occlusionOctree->SetSingleReferenceMode(true);
-	m_occlusionOctree->SetToStringCallback([](CBaseEntity *ent) -> std::string { return std::string {*ent->GetClass()} + " " + std::to_string(ent->GetIndex()); });
+	m_occlusionOctree->SetToStringCallback([](ecs::CBaseEntity *ent) -> std::string { return std::string {*ent->GetClass()} + " " + std::to_string(ent->GetIndex()); });
 
 	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	for(auto *ent : entIt)
-		AddEntity(static_cast<CBaseEntity &>(*ent));
+		AddEntity(static_cast<pragma::ecs::CBaseEntity &>(*ent));
 }
 
-void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
+void COcclusionCullerComponent::AddEntity(ecs::CBaseEntity &ent)
 {
 	// Add entity to octree
 	auto cbRenderMode = FunctionCallback<util::EventReply, std::reference_wrapper<ComponentEvent>>::Create(nullptr);
@@ -44,7 +44,7 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 	if(it == m_callbacks.end())
 		it = m_callbacks.insert(std::make_pair(&ent, std::vector<CallbackHandle> {})).first;
 	it->second.push_back(cbRenderMode); // Render mode callback has to be removed in the EVENT_ON_REMOVE event, otherwise the callback will cause the entity to be re-added to the tree AFTER it just has been removed
-	auto fInsertOctreeObject = [this](CBaseEntity *ent) {
+	auto fInsertOctreeObject = [this](ecs::CBaseEntity *ent) {
 		auto it = m_callbacks.find(ent);
 		if(it == m_callbacks.end())
 			return;
@@ -70,16 +70,16 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 		if(pGenericComponent.valid()) {
 			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::cModelComponent::EVENT_ON_MODEL_CHANGED, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
 				SceneRenderDesc::AssertRenderQueueThreadInactive();
-				auto *ent = static_cast<CBaseEntity *>(&pGenericComponent->GetEntity());
+				auto *ent = static_cast<ecs::CBaseEntity *>(&pGenericComponent->GetEntity());
 				m_occlusionOctree->UpdateObject(ent);
 			}));
 			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::cRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
 				SceneRenderDesc::AssertRenderQueueThreadInactive();
-				auto *ent = static_cast<CBaseEntity *>(&pGenericComponent->GetEntity());
+				auto *ent = static_cast<ecs::CBaseEntity *>(&pGenericComponent->GetEntity());
 				m_occlusionOctree->UpdateObject(ent);
 			}));
 			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_REMOVE, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
-				auto *ent = static_cast<CBaseEntity *>(&pGenericComponent->GetEntity());
+				auto *ent = static_cast<ecs::CBaseEntity *>(&pGenericComponent->GetEntity());
 				auto it = m_callbacks.find(ent);
 
 				// We need to copy the this pointer because removing the callback invalidates the captured variable
@@ -125,8 +125,8 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 	fInsertOctreeObject(&ent);
 }
 
-const OcclusionOctree<CBaseEntity *> &COcclusionCullerComponent::GetOcclusionOctree() const { return const_cast<COcclusionCullerComponent *>(this)->GetOcclusionOctree(); }
-OcclusionOctree<CBaseEntity *> &COcclusionCullerComponent::GetOcclusionOctree() { return *m_occlusionOctree; }
+const OcclusionOctree<pragma::ecs::CBaseEntity *> &COcclusionCullerComponent::GetOcclusionOctree() const { return const_cast<COcclusionCullerComponent *>(this)->GetOcclusionOctree(); }
+OcclusionOctree<pragma::ecs::CBaseEntity *> &COcclusionCullerComponent::GetOcclusionOctree() { return *m_occlusionOctree; }
 
 void COcclusionCullerComponent::OnRemove()
 {
@@ -150,7 +150,7 @@ void COcclusionCuller::Initialize()
 	AddComponent<COcclusionCullerComponent>();
 }
 
-DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+DLLCLIENT void CMD_debug_render_octree_static_print(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -167,7 +167,7 @@ DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState *, pragma::Base
 	meshTree->DebugPrint();
 }
 
-DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+DLLCLIENT void CMD_debug_render_octree_dynamic_print(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -179,7 +179,7 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState *state, pragma
 	octree.DebugPrint();
 }
 
-DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+DLLCLIENT void CMD_debug_render_octree_dynamic_find(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pragma::get_client_state() == nullptr || pl == nullptr)
 		return;
@@ -187,7 +187,7 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma:
 	if(entPl.IsCharacter() == false)
 		return;
 	auto charComponent = entPl.GetCharacterComponent();
-	auto ents = command::find_target_entity(state, *charComponent, argv);
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	if(ents.empty())
 		return;
 	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
@@ -198,8 +198,8 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma:
 	Con::cout << "Searching for entity '" << *entFind << "'..." << Con::endl;
 
 	auto &octree = culler->GetOcclusionOctree();
-	std::function<const OcclusionOctree<CBaseEntity *>::Node *(const OcclusionOctree<CBaseEntity *>::Node &node)> iterateTree = nullptr;
-	iterateTree = [&iterateTree, entFind](const OcclusionOctree<CBaseEntity *>::Node &node) -> const OcclusionOctree<CBaseEntity *>::Node * {
+	std::function<const OcclusionOctree<ecs::CBaseEntity *>::Node *(const OcclusionOctree<ecs::CBaseEntity *>::Node &node)> iterateTree = nullptr;
+	iterateTree = [&iterateTree, entFind](const OcclusionOctree<ecs::CBaseEntity *>::Node &node) -> const OcclusionOctree<ecs::CBaseEntity *>::Node * {
 		auto &nodeBounds = node.GetWorldBounds();
 		auto &objs = node.GetObjects();
 		auto it = std::find(objs.begin(), objs.end(), entFind);
@@ -209,7 +209,7 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma:
 		if(children == nullptr)
 			return nullptr;
 		for(auto &c : *children) {
-			auto *node = iterateTree(static_cast<OcclusionOctree<CBaseEntity *>::Node &>(*c));
+			auto *node = iterateTree(static_cast<OcclusionOctree<ecs::CBaseEntity *>::Node &>(*c));
 			if(node)
 				return node;
 		}
@@ -229,7 +229,7 @@ namespace {
 	auto UVN = pragma::console::client::register_command("debug_render_octree_dynamic_find", &CMD_debug_render_octree_dynamic_find, pragma::console::ConVarFlags::None, "Finds the specified entity in the octree for dynamic objects.");
 }
 
-static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState *, const ConVar &, bool, bool val)
+static void CVAR_CALLBACK_debug_render_octree_static_draw(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -265,7 +265,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>("debug_render_octree_static_draw", &CVAR_CALLBACK_debug_render_octree_static_draw);
 }
 
-static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState *, const ConVar &, bool, bool val)
+static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;

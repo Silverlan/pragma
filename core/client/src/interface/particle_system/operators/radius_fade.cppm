@@ -11,15 +11,15 @@ export import :entities.components.particle_system;
 export import :particle_system.modifier;
 import :particle_system.modifier_gradual_fade;
 
-export {
+export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorRadiusFadeBase : public CParticleOperator, public CParticleModifierComponentGradualFade {
 	  public:
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void Simulate(CParticle &particle, double, float strength) override;
-		virtual void OnParticleCreated(CParticle &particle) override;
+		virtual void Simulate(pragma::pts::CParticle &particle, double, float strength) override;
+		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
 	  protected:
 		CParticleOperatorRadiusFadeBase(const std::string &identifier);
-		virtual void ApplyRadius(CParticle &particle, float radius) const = 0;
+		virtual void ApplyRadius(pragma::pts::CParticle &particle, float radius) const = 0;
 	  private:
 		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fRadiusStart;
 		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fRadiusEnd;
@@ -33,7 +33,7 @@ export {
 	  public:
 		CParticleOperatorRadiusFade();
 	  protected:
-		virtual void ApplyRadius(CParticle &particle, float radius) const override;
+		virtual void ApplyRadius(pragma::pts::CParticle &particle, float radius) const override;
 	};
 
 	////////////////////////////
@@ -42,12 +42,12 @@ export {
 	  public:
 		CParticleOperatorLengthFade();
 	  protected:
-		virtual void ApplyRadius(CParticle &particle, float radius) const override;
+		virtual void ApplyRadius(pragma::pts::CParticle &particle, float radius) const override;
 	};
 };
 
-CParticleOperatorRadiusFadeBase::CParticleOperatorRadiusFadeBase(const std::string &identifier) : CParticleOperator {}, m_identifier {identifier} {}
-void CParticleOperatorRadiusFadeBase::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+pragma::pts::CParticleOperatorRadiusFadeBase::CParticleOperatorRadiusFadeBase(const std::string &identifier) : CParticleOperator {}, m_identifier {identifier} {}
+void pragma::pts::CParticleOperatorRadiusFadeBase::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	CParticleModifierComponentGradualFade::Initialize(values);
@@ -66,13 +66,13 @@ void CParticleOperatorRadiusFadeBase::Initialize(pragma::BaseEnvParticleSystemCo
 	if(m_fRadiusStart.IsSet() == false)
 		m_particleStartRadiuses = std::make_unique<std::vector<float>>(static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount(), std::numeric_limits<float>::max());
 }
-void CParticleOperatorRadiusFadeBase::OnParticleCreated(CParticle &particle)
+void pragma::pts::CParticleOperatorRadiusFadeBase::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	if(m_particleStartRadiuses == nullptr)
 		return;
 	m_particleStartRadiuses->at(particle.GetIndex()) = std::numeric_limits<float>::max();
 }
-void CParticleOperatorRadiusFadeBase::Simulate(CParticle &particle, double, float strength)
+void pragma::pts::CParticleOperatorRadiusFadeBase::Simulate(pragma::pts::CParticle &particle, double, float strength)
 {
 	auto tFade = 0.f;
 	if(GetEasedFadeFraction(particle, tFade) == false)
@@ -94,10 +94,10 @@ void CParticleOperatorRadiusFadeBase::Simulate(CParticle &particle, double, floa
 
 ////////////////////////////
 
-CParticleOperatorRadiusFade::CParticleOperatorRadiusFade() : CParticleOperatorRadiusFadeBase("radius") {}
-void CParticleOperatorRadiusFade::ApplyRadius(CParticle &particle, float radius) const { particle.SetRadius(radius); }
+pragma::pts::CParticleOperatorRadiusFade::CParticleOperatorRadiusFade() : CParticleOperatorRadiusFadeBase("radius") {}
+void pragma::pts::CParticleOperatorRadiusFade::ApplyRadius(pragma::pts::CParticle &particle, float radius) const { particle.SetRadius(radius); }
 
 ////////////////////////////
 
-CParticleOperatorLengthFade::CParticleOperatorLengthFade() : CParticleOperatorRadiusFadeBase("length") {}
-void CParticleOperatorLengthFade::ApplyRadius(CParticle &particle, float radius) const { particle.SetLength(radius); }
+pragma::pts::CParticleOperatorLengthFade::CParticleOperatorLengthFade() : CParticleOperatorRadiusFadeBase("length") {}
+void pragma::pts::CParticleOperatorLengthFade::ApplyRadius(pragma::pts::CParticle &particle, float radius) const { particle.SetLength(radius); }

@@ -118,17 +118,17 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload
 	subsequentRenderPass = pragma::get_cengine()->GetRenderContext().CreateRenderPass(rpInfo);
 }
 
-prosper::RenderTarget &pragma::rendering::Prepass::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *optRenderPass, bool secondaryCommandBuffers)
+prosper::RenderTarget &pragma::rendering::Prepass::BeginRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *optRenderPass, bool secondaryCommandBuffers)
 {
 	// prosper TODO: Barriers for imgDepth and imgNormals
 	drawSceneInfo.commandBuffer->RecordBeginRenderPass(*renderTarget, m_clearValues, secondaryCommandBuffers ? prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers : prosper::IPrimaryCommandBuffer::RenderPassFlags::None, optRenderPass);
 	return *renderTarget;
 }
-void pragma::rendering::Prepass::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo) { drawSceneInfo.commandBuffer->RecordEndRenderPass(); }
+void pragma::rendering::Prepass::EndRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { drawSceneInfo.commandBuffer->RecordEndRenderPass(); }
 
-static void debug_prepass(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_prepass(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	auto &wgui = WGUI::GetInstance();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
 	if(pragma::get_cgame() == nullptr || argv.empty() || pRoot == nullptr)
 		return;
@@ -142,7 +142,7 @@ static void debug_prepass(NetworkState *state, pragma::BasePlayerComponent *pl, 
 	}
 	if(pEl != nullptr)
 		return;
-	pEl = wgui.Create<WIBase>();
+	pEl = wgui.Create<pragma::gui::types::WIBase>();
 	if(pEl == nullptr)
 		return;
 	pEl->SetName(name);
@@ -158,7 +158,7 @@ static void debug_prepass(NetworkState *state, pragma::BasePlayerComponent *pl, 
 	auto bExtended = prepass.IsExtended();
 	auto xOffset = 0u;
 	if(prepass.textureNormals != nullptr) {
-		auto *pNormals = wgui.Create<WITexturedRect>(pEl);
+		auto *pNormals = wgui.Create<pragma::gui::types::WITexturedRect>(pEl);
 		if(pNormals != nullptr) {
 			pNormals->SetX(xOffset);
 			pNormals->SetSize(256, 256);
@@ -167,7 +167,7 @@ static void debug_prepass(NetworkState *state, pragma::BasePlayerComponent *pl, 
 			xOffset += 256;
 		}
 	}
-	auto *pPrepassDepth = wgui.Create<WIDebugDepthTexture>(pEl);
+	auto *pPrepassDepth = wgui.Create<pragma::gui::types::WIDebugDepthTexture>(pEl);
 	if(pPrepassDepth != nullptr) {
 		pPrepassDepth->SetX(xOffset);
 		pPrepassDepth->SetSize(256, 256);

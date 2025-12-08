@@ -21,11 +21,11 @@ void ShaderWaterSplash::InitializeShaderResources()
 {
 	prosper::ShaderCompute::InitializeShaderResources();
 
-	AttachPushConstantRange(0u, sizeof(PhysWaterSurfaceSimulator::SplashInfo), prosper::ShaderStageFlags::ComputeBit);
+	AttachPushConstantRange(0u, sizeof(pragma::physics::PhysWaterSurfaceSimulator::SplashInfo), prosper::ShaderStageFlags::ComputeBit);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_WATER_EFFECT);
 }
 
-bool ShaderWaterSplash::RecordCompute(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descParticles, const PhysWaterSurfaceSimulator::SplashInfo &info) const
+bool ShaderWaterSplash::RecordCompute(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descParticles, const pragma::physics::PhysWaterSurfaceSimulator::SplashInfo &info) const
 {
 	return RecordPushConstants(bindState, info) && RecordBindDescriptorSet(bindState, descParticles, DESCRIPTOR_SET_WATER_EFFECT.setIndex) && RecordDispatch(bindState, umath::ceil(info.width / 8.f), umath::ceil(info.length / 8.f), 1); //width,length); // TODO
 }

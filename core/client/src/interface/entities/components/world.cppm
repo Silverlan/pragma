@@ -19,13 +19,13 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 		void ReloadMeshCache();
-		std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> GetMeshTree() const;
+		std::shared_ptr<OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>> GetMeshTree() const;
 		std::shared_ptr<::CHC> GetCHCController() const;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnTick(double tDelta) override;
 
 		const rendering::RenderQueue *GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex, bool translucent = false) const;
-		void SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree, const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster);
+		void SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree, const std::vector<std::vector<rendering::RenderMeshIndex>> &meshesPerCluster);
 		const std::shared_ptr<util::BSPTree> &GetBSPTree() const;
 		void RebuildRenderQueues();
 	  protected:
@@ -37,18 +37,18 @@ export namespace pragma {
 		std::vector<std::shared_ptr<rendering::RenderQueue>> m_clusterRenderQueues;
 		std::vector<std::shared_ptr<rendering::RenderQueue>> m_clusterRenderTranslucentQueues;
 		std::unordered_map<uint32_t, bool> m_lodBaseMeshIds;
-		std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> m_meshTree;
+		std::shared_ptr<OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>> m_meshTree;
 		std::shared_ptr<::CHC> m_chcController;
 
 		std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
-		std::vector<std::vector<RenderMeshIndex>> m_meshesPerCluster;
+		std::vector<std::vector<rendering::RenderMeshIndex>> m_meshesPerCluster;
 
 		bool m_renderQueuesDirty = false;
 	};
 };
 #pragma warning(pop)
 
-export class DLLCLIENT CWorld : public CBaseEntity {
+export class DLLCLIENT CWorld : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

@@ -19,7 +19,7 @@ static std::optional<std::string> find_asset_file(const std::string &name, pragm
 	}
 	return find_file(name, type);
 }
-static bool is_asset_loaded(NetworkState &nw, const std::string &name, pragma::asset::Type type)
+static bool is_asset_loaded(pragma::NetworkState &nw, const std::string &name, pragma::asset::Type type)
 {
 	switch(type) {
 	case pragma::asset::Type::Texture:
@@ -221,7 +221,7 @@ static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::
 static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::State *l, uint32_t width, uint32_t height, uint32_t samples) { return capture_raytraced_screenshot(l, width, height, samples, false, true); }
 static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::State *l, uint32_t width, uint32_t height) { return capture_raytraced_screenshot(l, width, height, 1'024, false, true); }
 
-static bool asset_import(NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type)
+static bool asset_import(pragma::NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type)
 {
 	if(type == pragma::asset::Type::Map)
 		return util::port_hl2_map(&nw, name);
@@ -231,7 +231,7 @@ static bool asset_import(NetworkState &nw, const std::string &name, const std::s
 	return manager->Import(name, outputName);
 }
 
-void CGame::RegisterLuaLibraries()
+void pragma::CGame::RegisterLuaLibraries()
 {
 	Lua::util::register_library(GetLuaState());
 
@@ -251,7 +251,7 @@ void CGame::RegisterLuaLibraries()
 	utilMod[svgImageInfoDef];
 
 	utilMod[(luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::Client::calc_world_direction_from_2d_coordinates),
-	  luabind::def("create_particle_tracer", Lua::util::Client::create_particle_tracer), luabind::def("create_muzzle_flash", Lua::util::Client::create_muzzle_flash), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, BulletInfo &)>(Lua::util::fire_bullets)),
+	  luabind::def("create_particle_tracer", Lua::util::Client::create_particle_tracer), luabind::def("create_muzzle_flash", Lua::util::Client::create_muzzle_flash), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, game::BulletInfo &)>(Lua::util::fire_bullets)),
 	  luabind::def("save_image", static_cast<bool (*)(lua::State *, uimg::ImageBuffer &, std::string, uimg::TextureInfo &, bool)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua::State *, uimg::ImageBuffer &, std::string, uimg::TextureInfo &, bool)>(save_image), luabind::default_parameter_policy<5, false> {}),
 	  luabind::def(
@@ -377,7 +377,7 @@ void CGame::RegisterLuaLibraries()
 	Lua::ai::client::register_library(GetLuaInterface());
 
 	pragma::Game::RegisterLuaLibraries();
-	ClientState::RegisterSharedLuaLibraries(GetLuaInterface());
+	pragma::ClientState::RegisterSharedLuaLibraries(GetLuaInterface());
 
 	auto consoleMod = luabind::module(GetLuaState(), "console");
 	consoleMod[luabind::def("save_config", +[](CEngine &engine) { engine.SaveClientConfig(); })];
@@ -503,7 +503,7 @@ void CGame::RegisterLuaLibraries()
 		    auto asset = manager->LoadAsset(ufile::get_file_from_filename(*fileName), std::move(fp), ext, std::move(loadInfo));
 		    switch(type) {
 		    case pragma::asset::Type::Model:
-			    return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
 		    case pragma::asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		    case pragma::asset::Type::Texture:
@@ -521,7 +521,7 @@ void CGame::RegisterLuaLibraries()
 		    auto asset = manager->LoadAsset(name);
 		    switch(type) {
 		    case pragma::asset::Type::Model:
-			    return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
 		    case pragma::asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		    case pragma::asset::Type::Texture:
@@ -538,7 +538,7 @@ void CGame::RegisterLuaLibraries()
 		    auto asset = manager->ReloadAsset(name);
 		    switch(type) {
 		    case pragma::asset::Type::Model:
-			    return luabind::object {l, std::static_pointer_cast<pragma::Model>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
 		    case pragma::asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
 		    case pragma::asset::Type::Texture:
@@ -547,8 +547,8 @@ void CGame::RegisterLuaLibraries()
 		    return luabind::object {};
 	    }),
 	  luabind::def(
-	    "import", +[](NetworkState &nw, const std::string &name, pragma::asset::Type type) -> bool { return asset_import(nw, name, name, type); }),
-	  luabind::def("import", +[](NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type) -> bool { return asset_import(nw, name, outputName, type); }))];
+	    "import", +[](pragma::NetworkState &nw, const std::string &name, pragma::asset::Type type) -> bool { return asset_import(nw, name, name, type); }),
+	  luabind::def("import", +[](pragma::NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type) -> bool { return asset_import(nw, name, outputName, type); }))];
 	auto defMapExportInfo = luabind::class_<pragma::asset::MapExportInfo>("MapExportInfo");
 	defMapExportInfo.def(luabind::constructor<>());
 	defMapExportInfo.def_readwrite("includeMapLightSources", &pragma::asset::MapExportInfo::includeMapLightSources);
@@ -574,25 +574,25 @@ void CGame::RegisterLuaLibraries()
 
 	auto modDebug = luabind::module_(GetLuaState(), "debug");
 	modDebug[(luabind::def("draw_points", &Lua::DebugRenderer::Client::DrawPoints), luabind::def("draw_lines", &Lua::DebugRenderer::Client::DrawLines), luabind::def("draw_point", &Lua::DebugRenderer::Client::DrawPoint),
-	  luabind::def("draw_line", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const Vector3 &, const Vector3 &, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawLine)),
-	  luabind::def("draw_line", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const Vector3 &, const Vector3 &)>(&Lua::DebugRenderer::Client::DrawLine)), luabind::def("draw_box", &Lua::DebugRenderer::Client::DrawBox),
+	  luabind::def("draw_line", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const Vector3 &, const Vector3 &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawLine)),
+	  luabind::def("draw_line", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const Vector3 &, const Vector3 &)>(&Lua::DebugRenderer::Client::DrawLine)), luabind::def("draw_box", &Lua::DebugRenderer::Client::DrawBox),
 	  luabind::def("draw_mesh", &Lua::DebugRenderer::Client::DrawMeshes), luabind::def("draw_mesh", &Lua::DebugRenderer::Client::DrawMesh), luabind::def("draw_sphere", &Lua::DebugRenderer::Client::DrawSphere, luabind::default_parameter_policy<3, 1> {}),
 	  luabind::def("draw_sphere", &Lua::DebugRenderer::Client::DrawSphere), luabind::def("draw_truncated_cone", &Lua::DebugRenderer::Client::DrawTruncatedCone, luabind::default_parameter_policy<6, 12u> {}),
 	  luabind::def("draw_truncated_cone", &Lua::DebugRenderer::Client::DrawTruncatedCone), luabind::def("draw_cylinder", &Lua::DebugRenderer::Client::DrawCylinder, luabind::default_parameter_policy<5, 12u> {}), luabind::def("draw_cylinder", &Lua::DebugRenderer::Client::DrawCylinder),
 	  luabind::def("draw_cone", &Lua::DebugRenderer::Client::DrawCone, luabind::default_parameter_policy<5, 12u> {}), luabind::def("draw_cone", &Lua::DebugRenderer::Client::DrawCone), luabind::def("draw_pose", &Lua::DebugRenderer::Client::DrawAxis),
-	  luabind::def("draw_text", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const std::string &, const Vector2 &, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawText)),
-	  luabind::def("draw_text", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const std::string &, float, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawText)),
-	  luabind::def("draw_text", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const std::string &, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Client::DrawPath),
+	  luabind::def("draw_text", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const std::string &, const Vector2 &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawText)),
+	  luabind::def("draw_text", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const std::string &, float, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawText)),
+	  luabind::def("draw_text", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const std::string &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Client::DrawPath),
 #ifdef __clang__
 	  luabind::def("draw_spline", &Lua::DebugRenderer::Client::DrawSpline),
 	  luabind::def(
-	    "draw_spline", +[](const std::vector<Vector3> &path, uint32_t numSegments, const DebugRenderInfo &renderInfo) { return Lua::DebugRenderer::Client::DrawSpline(path, numSegments, renderInfo, 1.f); }),
+	    "draw_spline", +[](const std::vector<Vector3> &path, uint32_t numSegments, const pragma::debug::DebugRenderInfo &renderInfo) { return Lua::DebugRenderer::Client::DrawSpline(path, numSegments, renderInfo, 1.f); }),
 #else
 	  luabind::def("draw_spline", &Lua::DebugRenderer::Client::DrawSpline, luabind::default_parameter_policy<4, 1.f> {}),
 #endif
-	  luabind::def("draw_plane", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const umath::Plane &, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawPlane)),
-	  luabind::def("draw_plane", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const Vector3 &, float, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawPlane)),
-	  luabind::def("draw_frustum", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(pragma::CCameraComponent &, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
-	  luabind::def("draw_frustum", static_cast<std::shared_ptr<::DebugRenderer::BaseObject> (*)(const std::vector<Vector3> &, const DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
-	  luabind::def("create_collection", +[](const std::vector<std::shared_ptr<::DebugRenderer::BaseObject>> &objects) -> std::shared_ptr<::DebugRenderer::BaseObject> { return ::util::make_shared<::DebugRenderer::CollectionObject>(objects); }))];
+	  luabind::def("draw_plane", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const umath::Plane &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawPlane)),
+	  luabind::def("draw_plane", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const Vector3 &, float, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawPlane)),
+	  luabind::def("draw_frustum", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(pragma::CCameraComponent &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
+	  luabind::def("draw_frustum", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const std::vector<Vector3> &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
+	  luabind::def("create_collection", +[](const std::vector<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject>> &objects) -> std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> { return ::util::make_shared<pragma::debug::DebugRenderer::CollectionObject>(objects); }))];
 }

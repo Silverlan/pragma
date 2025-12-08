@@ -30,10 +30,10 @@ export namespace pragma::rendering {
 	  public:
 		ShaderProcessor(prosper::ICommandBuffer &cmdBuffer, PassType passType) : m_cmdBuffer {cmdBuffer}, m_passType {passType} {}
 		bool RecordBindShader(const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, bool view, ShaderGameWorld::SceneFlags sceneFlags, pragma::ShaderGameWorld &shader, uint32_t pipelineIdx = 0u);
-		bool RecordBindEntity(CBaseEntity &ent);
+		bool RecordBindEntity(ecs::CBaseEntity &ent);
 		bool RecordBindMaterial(msys::CMaterial &mat);
 		bool RecordBindLight(CLightComponent &light, uint32_t layerId);
-		bool RecordDraw(CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx, const pragma::rendering::RenderQueue::InstanceSet *instanceSet = nullptr);
+		bool RecordDraw(pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx, const pragma::rendering::RenderQueue::InstanceSet *instanceSet = nullptr);
 
 		void SetStats(RenderPassStats *stats) { m_stats = stats; }
 		void SetDrawOrigin(const Vector4 &drawOrigin);
@@ -41,7 +41,7 @@ export namespace pragma::rendering {
 
 		inline prosper::ICommandBuffer &GetCommandBuffer() const { return m_cmdBuffer; }
 		inline prosper::IShaderPipelineLayout &GetCurrentPipelineLayout() const { return *m_currentPipelineLayout; }
-		CBaseEntity &GetCurrentEntity() const;
+		ecs::CBaseEntity &GetCurrentEntity() const;
 		const pragma::CSceneComponent &GetCurrentScene() const;
 		PassType GetPassType() const { return m_passType; }
 	  private:
@@ -89,7 +89,7 @@ export namespace pragma::rendering {
 			CountNonOpaqueMaterialsOnly = EntityBound << 1u
 		};
 		enum class CameraType : uint8_t { World = 0, View };
-		BaseRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin);
+		BaseRenderProcessor(const pragma::rendering::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin);
 		~BaseRenderProcessor();
 		void SetCameraType(CameraType camType);
 		void Set3DSky(bool enabled);
@@ -97,15 +97,15 @@ export namespace pragma::rendering {
 		bool BindShader(prosper::PipelineID pipelineId);
 		virtual bool BindShader(prosper::Shader &shader, uint32_t pipelineIdx = 0u);
 		bool BindMaterial(msys::CMaterial &mat);
-		virtual bool BindEntity(CBaseEntity &ent);
+		virtual bool BindEntity(ecs::CBaseEntity &ent);
 		void SetDepthBias(float d, float delta);
-		bool Render(CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet = nullptr);
+		bool Render(pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet = nullptr);
 		pragma::ShaderGameWorld *GetCurrentShader();
 		void UnbindShader();
 		void SetCountNonOpaqueMaterialsOnly(bool b);
 		prosper::Extent2D GetExtents() const;
 		void RecordViewport();
-		const util::RenderPassDrawInfo &GetRenderPassDrawInfo() const { return m_drawSceneInfo; }
+		const pragma::rendering::RenderPassDrawInfo &GetRenderPassDrawInfo() const { return m_drawSceneInfo; }
 	  protected:
 		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue, RenderPass pass, RenderPassStats *optStats = nullptr, std::optional<uint32_t> worldRenderQueueIndex = {});
 		bool BindInstanceSet(pragma::ShaderGameWorld &shaderScene, const RenderQueue::InstanceSet *instanceSet = nullptr);
@@ -120,9 +120,9 @@ export namespace pragma::rendering {
 		prosper::PipelineID m_curPipeline = std::numeric_limits<prosper::PipelineID>::max();
 		pragma::ShaderGameWorld *m_shaderScene = nullptr;
 		msys::CMaterial *m_curMaterial = nullptr;
-		CBaseEntity *m_curEntity = nullptr;
+		ecs::CBaseEntity *m_curEntity = nullptr;
 		pragma::CRenderComponent *m_curRenderC = nullptr;
-		std::vector<std::shared_ptr<pragma::ModelSubMesh>> *m_curEntityMeshList = nullptr;
+		std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> *m_curEntityMeshList = nullptr;
 		const RenderQueue::InstanceSet *m_curInstanceSet = nullptr;
 		ShaderGameWorld::SceneFlags m_baseSceneFlags = ShaderGameWorld::SceneFlags::None;
 
@@ -132,7 +132,7 @@ export namespace pragma::rendering {
 		uint32_t TranslateBasePipelineIndexToPassPipelineIndex(prosper::Shader &shader, uint32_t pipelineIdx, PassType passType) const;
 
 		CameraType m_camType = CameraType::World;
-		const util::RenderPassDrawInfo &m_drawSceneInfo;
+		const pragma::rendering::RenderPassDrawInfo &m_drawSceneInfo;
 		Vector4 m_drawOrigin;
 		std::optional<Vector2> m_depthBias {};
 		RenderPassStats *m_stats = nullptr;
@@ -143,7 +143,7 @@ export namespace pragma::rendering {
 
 	class DLLCLIENT DepthStageRenderProcessor : public pragma::rendering::BaseRenderProcessor {
 	  public:
-		DepthStageRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin);
+		DepthStageRenderProcessor(const pragma::rendering::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin);
 		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue, RenderPass renderPass, RenderPassStats *optStats = nullptr, std::optional<uint32_t> worldRenderQueueIndex = {});
 		void BindLight(CLightComponent &light, uint32_t layerId);
 	};

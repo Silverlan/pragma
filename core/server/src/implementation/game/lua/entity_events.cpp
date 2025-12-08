@@ -9,7 +9,7 @@ import :game;
 import :ai;
 import :entities.components;
 
-bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
+bool pragma::SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
 {
 	if(pragma::Game::InvokeEntityEvent(component, eventId, argsIdx, bInject))
 		return true;
@@ -71,7 +71,7 @@ bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t e
 	else if(eventId == pragma::sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &sound = Lua::Check<std::shared_ptr<ALSound>>(l, -1);
+		auto &sound = Lua::Check<std::shared_ptr<pragma::audio::ALSound>>(l, -1);
 		Lua::Pop(l, 1);
 
 		pragma::CEOnSuspiciousSoundHeared evData {sound};

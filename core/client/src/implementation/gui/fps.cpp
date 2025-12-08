@@ -11,11 +11,11 @@ import :client_state;
 import :engine;
 import pragma.string.unicode;
 
-WIFPS::WIFPS() : WIBase(), m_text(), m_fpsLast(0), m_tLastUpdate(0.0) {}
+pragma::gui::types::WIFPS::WIFPS() : WIBase(), m_text(), m_fpsLast(0), m_tLastUpdate(0.0) {}
 
-WIFPS::~WIFPS() {}
+pragma::gui::types::WIFPS::~WIFPS() {}
 
-void WIFPS::Initialize()
+void pragma::gui::types::WIFPS::Initialize()
 {
 	WIBase::Initialize();
 	EnableThinking();
@@ -35,7 +35,7 @@ void WIFPS::Initialize()
 	}
 }
 
-void WIFPS::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void pragma::gui::types::WIFPS::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIBase::Think(drawCmd);
 	if(!m_text.IsValid())

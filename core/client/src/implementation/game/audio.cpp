@@ -10,7 +10,7 @@ import :client_state;
 import :engine;
 import :entities.components;
 
-void CGame::ClearSoundCache()
+void pragma::CGame::ClearSoundCache()
 {
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
@@ -50,13 +50,13 @@ static void steam_audio_finalized_callback()
 }
 #endif
 
-static auto cvSteamAudioEnabled = GetClientConVar("cl_steam_audio_enabled");
-static auto cvSteamAudioNumRays = GetClientConVar("cl_steam_audio_number_of_rays");
-static auto cvSteamAudioNumDiffuseSamples = GetClientConVar("cl_steam_audio_number_of_diffuse_samples");
-static auto cvSteamAudioNumBounces = GetClientConVar("cl_steam_audio_number_of_bounces");
-static auto cvSteamAudioIrDuration = GetClientConVar("cl_steam_audio_ir_duration");
-static auto cvSteamAudioAmbisonicsOrder = GetClientConVar("cl_steam_audio_ambisonics_order");
-void CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cacheFlags, float spacing)
+static auto cvSteamAudioEnabled = pragma::console::get_client_con_var("cl_steam_audio_enabled");
+static auto cvSteamAudioNumRays = pragma::console::get_client_con_var("cl_steam_audio_number_of_rays");
+static auto cvSteamAudioNumDiffuseSamples = pragma::console::get_client_con_var("cl_steam_audio_number_of_diffuse_samples");
+static auto cvSteamAudioNumBounces = pragma::console::get_client_con_var("cl_steam_audio_number_of_bounces");
+static auto cvSteamAudioIrDuration = pragma::console::get_client_con_var("cl_steam_audio_ir_duration");
+static auto cvSteamAudioAmbisonicsOrder = pragma::console::get_client_con_var("cl_steam_audio_ambisonics_order");
+void pragma::CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cacheFlags, float spacing)
 {
 	ClearSoundCache();
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1
@@ -78,9 +78,9 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cacheFlags,
 
 			auto info = ipl::Scene::FinalizeInfo {};
 			info.flags = ipl::Scene::InitializeFlags::None;
-			if((cacheFlags & CGame::SoundCacheFlags::BakeConvolution) != CGame::SoundCacheFlags::None)
+			if((cacheFlags & pragma::CGame::SoundCacheFlags::BakeConvolution) != pragma::CGame::SoundCacheFlags::None)
 				info.flags |= ipl::Scene::InitializeFlags::BakeConvolution;
-			if((cacheFlags & CGame::SoundCacheFlags::BakeParametric) != CGame::SoundCacheFlags::None)
+			if((cacheFlags & pragma::CGame::SoundCacheFlags::BakeParametric) != pragma::CGame::SoundCacheFlags::None)
 				info.flags |= ipl::Scene::InitializeFlags::BakeParametric;
 			info.defaultSpacing = spacing;
 
@@ -205,7 +205,7 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cacheFlags,
 				};
 				auto *pWorld = GetWorld();
 				if(pWorld != nullptr)
-					fAddEntityMeshes(&static_cast<CBaseEntity &>(pWorld->GetEntity()));
+					fAddEntityMeshes(&static_cast<pragma::ecs::CBaseEntity &>(pWorld->GetEntity()));
 
 				pragma::ecs::EntityIterator entIt {*this};
 				entIt.AttachFilter<EntityIteratorFilterClass>("func_brush");
@@ -261,7 +261,7 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cacheFlags,
 					}
 				}
 
-				auto bSaveProbeBoxes = (cacheFlags & CGame::SoundCacheFlags::SaveProbeBoxes) != CGame::SoundCacheFlags::None;
+				auto bSaveProbeBoxes = (cacheFlags & pragma::CGame::SoundCacheFlags::SaveProbeBoxes) != pragma::CGame::SoundCacheFlags::None;
 				iplScene->Finalize(
 				  info, steam_audio_message_callback,
 				  [iplScene, steamCachePath, bSaveProbeBoxes]() {

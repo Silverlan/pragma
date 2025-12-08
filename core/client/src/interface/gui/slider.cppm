@@ -9,7 +9,7 @@ export module pragma.client:gui.slider;
 
 export import :gui.progress_bar;
 
-export {
+export namespace pragma::gui::types {
 	class DLLCLIENT WISlider : public WIProgressBar {
 	  private:
 		bool m_bMoveSlider;

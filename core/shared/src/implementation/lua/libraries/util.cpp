@@ -163,7 +163,7 @@ void Lua::util::register_world_data(lua::State *l, luabind::module_ &mod)
 	auto defWorldData = luabind::class_<pragma::asset::WorldData>("WorldData");
 	defWorldData.def(luabind::tostring(luabind::self));
 	defWorldData.scope[luabind::def(
-	  "load", +[](NetworkState &nw, const std::string &fileName) -> std::pair<std::shared_ptr<pragma::asset::WorldData>, std::optional<std::string>> {
+	  "load", +[](pragma::NetworkState &nw, const std::string &fileName) -> std::pair<std::shared_ptr<pragma::asset::WorldData>, std::optional<std::string>> {
 		  std::string err;
 		  auto worldData = pragma::asset::WorldData::load(nw, fileName, err);
 		  if(!worldData)
@@ -171,7 +171,7 @@ void Lua::util::register_world_data(lua::State *l, luabind::module_ &mod)
 		  return {worldData, {}};
 	  })];
 	defWorldData.scope[luabind::def(
-	  "load_from_udm_data", +[](NetworkState &nw, ::udm::LinkedPropertyWrapper &prop) -> std::pair<std::shared_ptr<pragma::asset::WorldData>, std::optional<std::string>> {
+	  "load_from_udm_data", +[](pragma::NetworkState &nw, ::udm::LinkedPropertyWrapper &prop) -> std::pair<std::shared_ptr<pragma::asset::WorldData>, std::optional<std::string>> {
 		  std::string err;
 		  auto worldData = pragma::asset::WorldData::load_from_udm_data(nw, prop, err);
 		  if(!worldData)
@@ -264,7 +264,7 @@ void Lua::util::register_world_data(lua::State *l, luabind::module_ &mod)
 	mod[defWorldData];
 	pragma::LuaCore::define_custom_constructor<pragma::asset::ComponentData, +[]() -> std::shared_ptr<pragma::asset::ComponentData> { return pragma::asset::ComponentData::Create(); }>(l);
 	pragma::LuaCore::define_custom_constructor<pragma::asset::EntityData, +[]() -> std::shared_ptr<pragma::asset::EntityData> { return pragma::asset::EntityData::Create(); }>(l);
-	pragma::LuaCore::define_custom_constructor<pragma::asset::WorldData, +[](NetworkState &nw) -> std::shared_ptr<pragma::asset::WorldData> { return pragma::asset::WorldData::Create(nw); }, NetworkState &>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::asset::WorldData, +[](pragma::NetworkState &nw) -> std::shared_ptr<pragma::asset::WorldData> { return pragma::asset::WorldData::Create(nw); }, pragma::NetworkState &>(l);
 }
 void Lua::util::register_os(lua::State *l, luabind::module_ &mod)
 {
@@ -381,7 +381,7 @@ void Lua::util::register_shared_generic(lua::State *l, luabind::module_ &mod)
 	  luabind::def("world_space_direction_to_screen_space", Lua::util::world_space_direction_to_screen_space), luabind::def("calc_screen_space_distance_to_world_space_position", Lua::util::calc_screenspace_distance_to_worldspace_position),
 	  luabind::def("depth_to_distance", Lua::util::depth_to_distance), luabind::def("generate_hair_file", &generate_hair_file),
 	  luabind::def(
-	    "generate_hair_data", +[](float hairPerArea, const pragma::ModelSubMesh &mesh) {
+	    "generate_hair_data", +[](float hairPerArea, const pragma::geometry::ModelSubMesh &mesh) {
 		    struct MeshInterface : public ::util::HairGenerator::MeshInterface {
 			    virtual uint32_t GetTriangleCount() const override { return getTriangleCount(); }
 			    virtual uint32_t GetVertexCount() const override { return getVertexCount(); }
@@ -772,9 +772,9 @@ bool Lua::util::is_table(luabind::argument arg) { return static_cast<Lua::Type>(
 bool Lua::util::is_table() { return false; }
 std::string Lua::util::date_time(const std::string &format) { return pragma::Engine::Get()->GetDate(format); }
 std::string Lua::util::date_time() { return pragma::Engine::Get()->GetDate(); }
-luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, bool hitReport, const std::function<void(DamageInfo &, ::TraceData &, TraceResult &, uint32_t &)> &f)
+luabind::object Lua::util::fire_bullets(lua::State *l, pragma::game::BulletInfo &bulletInfo, bool hitReport, const std::function<void(pragma::game::DamageInfo &, pragma::physics::TraceData &, pragma::physics::TraceResult &, uint32_t &)> &f)
 {
-	DamageInfo dmg;
+	pragma::game::DamageInfo dmg;
 	dmg.SetDamage(umath::min(CUInt16(bulletInfo.damage), CUInt16(std::numeric_limits<UInt16>::max())));
 	dmg.SetDamageType(bulletInfo.damageType);
 	dmg.SetSource(bulletInfo.effectOrigin);
@@ -791,7 +791,7 @@ luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, b
 		auto randSpread = EulerAngles(umath::random(-bulletInfo.spread.p, bulletInfo.spread.p), umath::random(-bulletInfo.spread.y, bulletInfo.spread.y), 0);
 		auto bulletDir = bulletInfo.direction;
 		uvec::rotate(&bulletDir, randSpread);
-		::TraceData data;
+		pragma::physics::TraceData data;
 		data.SetSource(src);
 		data.SetTarget(src + bulletDir * bulletInfo.distance);
 		data.SetCollisionFilterMask(pragma::physics::CollisionMask::AllHitbox & ~pragma::physics::CollisionMask::Trigger); // Let everything pass (Except specific filters below)
@@ -818,12 +818,12 @@ luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, b
 		else
 			filterGroup = pragma::physics::CollisionMask::AllHitbox;
 		data.SetCollisionFilterGroup(filterGroup);
-		std::vector<TraceResult> results {};
+		std::vector<pragma::physics::TraceResult> results {};
 		if(game->RayCast(data, &results) && results.front().entity.valid()) {
 			auto &result = results.front();
 			auto pDamageableComponent = result.entity->GetComponent<pragma::DamageableComponent>();
 			if(pDamageableComponent.valid()) {
-				auto hitGroup = HitGroup::Generic;
+				auto hitGroup = pragma::physics::HitGroup::Generic;
 				if(result.collisionObj.IsValid()) {
 					auto charComponent = result.entity->GetCharacterComponent();
 					if(charComponent.valid())
@@ -837,7 +837,7 @@ luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, b
 		}
 		if(hitReport == true) {
 			if(results.empty())
-				t[tIdx++] = TraceResult {data};
+				t[tIdx++] = pragma::physics::TraceResult {data};
 			else {
 				for(auto &result : results)
 					t[tIdx++] = result;
@@ -845,7 +845,7 @@ luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, b
 		}
 		if(f != nullptr) {
 			if(results.empty()) {
-				TraceResult result {data};
+				pragma::physics::TraceResult result {data};
 				f(dmg, data, result, bulletInfo.tracerCount);
 			}
 			else {
@@ -856,8 +856,8 @@ luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, b
 	}
 	return t;
 }
-luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo, bool hitReport) { return fire_bullets(l, bulletInfo, hitReport, nullptr); }
-luabind::object Lua::util::fire_bullets(lua::State *l, BulletInfo &bulletInfo) { return fire_bullets(l, bulletInfo, false, nullptr); }
+luabind::object Lua::util::fire_bullets(lua::State *l, pragma::game::BulletInfo &bulletInfo, bool hitReport) { return fire_bullets(l, bulletInfo, hitReport, nullptr); }
+luabind::object Lua::util::fire_bullets(lua::State *l, pragma::game::BulletInfo &bulletInfo) { return fire_bullets(l, bulletInfo, false, nullptr); }
 static luabind::object register_class(lua::State *l, const std::string &pclassName, uint32_t idxBaseClassStart, const luabind::table<> *baseTable = nullptr)
 {
 	auto className = pclassName;
@@ -1023,7 +1023,7 @@ void Lua::util::splash_damage(lua::State *l, const ::util::SplashDamageInfo &spl
 		auto coneAngle = 1.f - (splashDamageInfo.cone->second / 180.f) * 2.f;
 		auto &forward = splashDamageInfo.cone->first;
 		auto posEnd = splashDamageInfo.origin + forward * static_cast<float>(splashDamageInfo.radius);
-		callback = [&splashDamageInfo, posEnd, forward, coneAngle](pragma::ecs::BaseEntity *ent, DamageInfo &dmgInfo) -> bool {
+		callback = [&splashDamageInfo, posEnd, forward, coneAngle](pragma::ecs::BaseEntity *ent, pragma::game::DamageInfo &dmgInfo) -> bool {
 			Vector3 min {};
 			Vector3 max {};
 			auto pPhysComponent = ent->GetPhysicsComponent();
@@ -1044,7 +1044,7 @@ void Lua::util::splash_damage(lua::State *l, const ::util::SplashDamageInfo &spl
 			return true;
 		};
 	}
-	game->SplashDamage(splashDamageInfo.origin, splashDamageInfo.radius, const_cast<DamageInfo &>(splashDamageInfo.damageInfo), splashDamageInfo.callback);
+	game->SplashDamage(splashDamageInfo.origin, splashDamageInfo.radius, const_cast<pragma::game::DamageInfo &>(splashDamageInfo.damageInfo), splashDamageInfo.callback);
 }
 luabind::object Lua::util::register_class(lua::State *l, const luabind::table<> &t, const std::string &className) { return ::register_class(l, className, 3, &t); }
 luabind::object Lua::util::register_class(lua::State *l, const luabind::table<> &t, const std::string &className, const luabind::object &oBase0) { return ::register_class(l, className, oBase0, 3, &t); }

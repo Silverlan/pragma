@@ -30,19 +30,19 @@ export namespace pragma::rendering {
 		void UpdateExposure();
 		bool Initialize(uint32_t width, uint32_t height, prosper::SampleCountFlags sampleCount, bool bEnableSSAO);
 		bool InitializeDescriptorSets();
-		prosper::RenderTarget &GetRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
+		prosper::RenderTarget &GetRenderTarget(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 
 		void SwapIOTextures();
 
-		bool BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass = nullptr, bool secondaryCommandBuffers = false);
-		bool EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
-		bool ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo);
+		bool BeginRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass = nullptr, bool secondaryCommandBuffers = false);
+		bool EndRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		bool ResolveRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 		void ReloadPresentationRenderTarget(uint32_t width, uint32_t height, prosper::SampleCountFlags sampleCount);
 		bool ReloadBloomRenderTarget(uint32_t width);
 
 		void ResetIOTextureIndex();
-		bool BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo, prosper::ImageLayout srcHdrLayout = prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout dstHdrLayout = prosper::ImageLayout::ColorAttachmentOptimal);
-		bool BlitMainDepthBufferToSamplableDepthBuffer(const util::DrawSceneInfo &drawSceneInfo, std::function<void(prosper::ICommandBuffer &)> &fTransitionSampleImgToTransferDst);
+		bool BlitStagingRenderTargetToMainRenderTarget(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::ImageLayout srcHdrLayout = prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout dstHdrLayout = prosper::ImageLayout::ColorAttachmentOptimal);
+		bool BlitMainDepthBufferToSamplableDepthBuffer(const pragma::rendering::DrawSceneInfo &drawSceneInfo, std::function<void(prosper::ICommandBuffer &)> &fTransitionSampleImgToTransferDst);
 
 		SSAOInfo ssaoInfo;
 		pragma::rendering::Prepass prepass;
@@ -242,7 +242,7 @@ export namespace pragma {
 		const rendering::HDRData &GetHDRInfo() const;
 		rendering::HDRData &GetHDRInfo();
 		// GlowData &GetGlowInfo();
-		SSAOInfo &GetSSAOInfo();
+		rendering::SSAOInfo &GetSSAOInfo();
 
 		void SetBloomThreshold(float threshold);
 		float GetBloomThreshold() const;
@@ -258,14 +258,14 @@ export namespace pragma {
 		prosper::SampleCountFlags GetSampleCount() const;
 		bool IsMultiSampled() const;
 
-		prosper::RenderTarget *BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass = nullptr, bool secondaryCommandBuffers = false);
-		bool EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
-		bool ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo);
+		prosper::RenderTarget *BeginRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass = nullptr, bool secondaryCommandBuffers = false);
+		bool EndRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		bool ResolveRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 
 		pragma::ShaderPrepassBase &GetPrepassShader() const;
 
 		// Render
-		void RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, const std::vector<pragma::ecs::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass, Bool bloom = false);
+		void RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const pragma::rendering::DrawSceneInfo &drawSceneInfo, const std::vector<pragma::ecs::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass, Bool bloom = false);
 
 		// Renders all meshes from m_glowInfo.tmpGlowMeshes, and clears the container when done
 		void RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const CSceneComponent &scene, pragma::rendering::SceneRenderPass renderMode);
@@ -288,16 +288,16 @@ export namespace pragma {
 		template<typename TCPPM>
 		const TCPPM *GetRendererComponent() const;
 
-		void StartPrepassRecording(const util::DrawSceneInfo &drawSceneInfo);
-		void StartLightingPassRecording(const util::DrawSceneInfo &drawSceneInfo);
+		void StartPrepassRecording(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void StartLightingPassRecording(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 
-		void RecordLightingPass(const util::DrawSceneInfo &drawSceneInfo);
-		void ExecuteLightingPass(const util::DrawSceneInfo &drawSceneInfo);
+		void RecordLightingPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void ExecuteLightingPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 
-		void UpdatePrepassRenderBuffers(const util::DrawSceneInfo &drawSceneInfo);
-		void UpdateLightingPassRenderBuffers(const util::DrawSceneInfo &drawSceneInfo);
-		void RecordPrepass(const util::DrawSceneInfo &drawSceneInfo);
-		void ExecutePrepass(const util::DrawSceneInfo &drawSceneInfo);
+		void UpdatePrepassRenderBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void UpdateLightingPassRenderBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void RecordPrepass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void ExecutePrepass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 
 		const std::vector<pragma::ecs::CParticleSystemComponent *> &GetCulledParticles() const { return m_culledParticles; }
 
@@ -309,24 +309,24 @@ export namespace pragma {
 		void UpdateRenderSettings();
 		bool ReloadRenderTarget(uint32_t width, uint32_t height);
 		void InitializeLightDescriptorSets();
-		void RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
-		void Render(const util::DrawSceneInfo &drawSceneInfo);
+		void RecordCommandBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void Render(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 
 		void EndRendering();
-		void BeginRendering(const util::DrawSceneInfo &drawSceneInfo);
+		void BeginRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 
-		prosper::RenderTarget *GetPrepassRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
-		prosper::RenderTarget *GetLightingPassRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
+		prosper::RenderTarget *GetPrepassRenderTarget(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		prosper::RenderTarget *GetLightingPassRenderTarget(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 
-		void RenderSSAO(const util::DrawSceneInfo &drawSceneInfo);
-		void CullLightSources(const util::DrawSceneInfo &drawSceneInfo);
-		void RenderShadows(const util::DrawSceneInfo &drawSceneInfo);
-		void RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo);
+		void RenderSSAO(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void CullLightSources(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void RenderShadows(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void RenderGlowObjects(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 
-		void RenderParticles(prosper::ICommandBuffer &cmdBuffer, const util::DrawSceneInfo &drawSceneInfo, bool depthPass, prosper::IPrimaryCommandBuffer *primCmdBuffer = nullptr);
+		void RenderParticles(prosper::ICommandBuffer &cmdBuffer, const pragma::rendering::DrawSceneInfo &drawSceneInfo, bool depthPass, prosper::IPrimaryCommandBuffer *primCmdBuffer = nullptr);
 
 		void InitializeCommandBufferGroups();
 
@@ -379,9 +379,9 @@ export namespace pragma {
 	};
 
 	struct DLLCLIENT CEUpdateRenderBuffers : public ComponentEvent {
-		CEUpdateRenderBuffers(const util::DrawSceneInfo &drawSceneInfo);
+		CEUpdateRenderBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
 		virtual void PushArguments(lua::State *l) override;
-		const util::DrawSceneInfo &drawSceneInfo;
+		const pragma::rendering::DrawSceneInfo &drawSceneInfo;
 	};
 	using namespace umath::scoped_enum::bitwise;
 };
@@ -389,7 +389,7 @@ export {
 	REGISTER_ENUM_FLAGS(pragma::CRasterizationRendererComponent::StateFlags)
 	REGISTER_ENUM_FLAGS(pragma::RendererData::Flags)
 
-	class DLLCLIENT CRasterizationRenderer : public CBaseEntity {
+	class DLLCLIENT CRasterizationRenderer : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

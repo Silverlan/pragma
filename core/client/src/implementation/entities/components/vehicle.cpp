@@ -82,10 +82,10 @@ void CVehicleComponent::ReadWheelInfo(NetPacket &packet)
 
 void CVehicleComponent::ReceiveData(NetPacket &packet)
 {
-	auto *entSteeringWheel = nwm::read_entity(packet);
+	auto *entSteeringWheel = pragma::networking::read_entity(packet);
 	m_steeringWheel = entSteeringWheel ? entSteeringWheel->GetHandle() : EntityHandle {};
 
-	auto *driver = nwm::read_entity(packet);
+	auto *driver = pragma::networking::read_entity(packet);
 	if(driver)
 		SetDriver(driver);
 	else
@@ -107,7 +107,7 @@ void CVehicleComponent::ClearDriver()
 			pragma::get_cgame()->EnableRenderMode(pragma::rendering::SceneRenderPass::View);
 			auto *vb = pragma::get_cgame()->GetViewBody<pragma::CViewBodyComponent>();
 			if(vb != nullptr) {
-				auto pRenderComponent = static_cast<CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
+				auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
 				if(pRenderComponent)
 					pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::View);
 			}
@@ -135,7 +135,7 @@ void CVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 	pragma::get_cgame()->DisableRenderMode(pragma::rendering::SceneRenderPass::View);
 	auto *vb = pragma::get_cgame()->GetViewBody<pragma::CViewBodyComponent>();
 	if(vb != nullptr) {
-		auto pRenderComponent = static_cast<CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
+		auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
 			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::None);
 	}
@@ -155,13 +155,13 @@ void CVehicleComponent::Initialize() { BaseVehicleComponent::Initialize(); }
 Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSteeringWheelModel) {
-		auto *ent = nwm::read_entity(packet);
+		auto *ent = pragma::networking::read_entity(packet);
 		m_steeringWheel = ent ? ent->GetHandle() : EntityHandle {};
 		m_maxSteeringWheelAngle = packet->Read<float>();
 		InitializeSteeringWheel();
 	}
 	else if(eventId == m_netEvSetDriver) {
-		auto *ent = nwm::read_entity(packet);
+		auto *ent = pragma::networking::read_entity(packet);
 		if(ent)
 			SetDriver(ent);
 		else

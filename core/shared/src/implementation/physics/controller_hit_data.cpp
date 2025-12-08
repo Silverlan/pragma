@@ -6,9 +6,9 @@ module pragma.shared;
 
 import :physics.controller_hit_data;
 
-ControllerHitData::ControllerHitData() : physObj(nullptr) { Clear(); }
+pragma::physics::ControllerHitData::ControllerHitData() : physObj(nullptr) { Clear(); }
 
-void ControllerHitData::Clear()
+void pragma::physics::ControllerHitData::Clear()
 {
 	if(physObj != nullptr) {
 		delete physObj;
@@ -16,4 +16,4 @@ void ControllerHitData::Clear()
 	}
 }
 
-ControllerHitData::~ControllerHitData() { Clear(); }
+pragma::physics::ControllerHitData::~ControllerHitData() { Clear(); }

@@ -13,7 +13,9 @@ export import pragma.image;
 import pragma.materialsystem;
 
 export {
-	class NetworkState;
+	namespace pragma {
+		class NetworkState;
+	}
 	namespace pragma::asset {
 		using WorldModelMeshIndex = uint32_t;
 		class DLLNETWORK WorldData {
@@ -30,11 +32,11 @@ export {
 
 			using Edge = std::array<uint16_t, 2>; // Vertex indices
 
-			static std::shared_ptr<WorldData> Create(NetworkState &nw);
+			static std::shared_ptr<WorldData> Create(pragma::NetworkState &nw);
 			static std::string GetLightmapAtlasTexturePath(const std::string &mapName);
 
-			static std::shared_ptr<WorldData> load(NetworkState &nw, const std::string &fileName, std::string &outErr, EntityData::Flags entMask = EntityData::Flags::None);
-			static std::shared_ptr<WorldData> load_from_udm_data(NetworkState &nw, udm::LinkedPropertyWrapper &prop, std::string &outErr, EntityData::Flags entMask = EntityData::Flags::None);
+			static std::shared_ptr<WorldData> load(pragma::NetworkState &nw, const std::string &fileName, std::string &outErr, EntityData::Flags entMask = EntityData::Flags::None);
+			static std::shared_ptr<WorldData> load_from_udm_data(pragma::NetworkState &nw, udm::LinkedPropertyWrapper &prop, std::string &outErr, EntityData::Flags entMask = EntityData::Flags::None);
 			static const std::vector<std::string> &get_supported_extensions();
 
 			bool Write(const std::string &fileName, std::string *optOutErrMsg = nullptr);
@@ -70,7 +72,7 @@ export {
 			bool Save(const std::string &fileName, const std::string &mapName, std::string &outErr);
 			bool LoadFromAssetData(udm::AssetDataArg data, EntityData::Flags entMask, std::string &outErr);
 		  private:
-			WorldData(NetworkState &nw);
+			WorldData(pragma::NetworkState &nw);
 			void WriteDataOffset(VFilePtrReal &f, uint64_t offsetToOffset);
 			void WriteMaterials(VFilePtrReal &f);
 			void WriteBSPTree(VFilePtrReal &f);

@@ -8,12 +8,12 @@ export module pragma.server:audio.sound_script;
 
 import :audio.sound;
 
-export {
+export namespace pragma::audio {
 	class DLLSERVER SALSoundScript : public ALSoundScript, virtual public SALSound {
 	  protected:
-		virtual std::shared_ptr<ALSound> CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags) override;
+		virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags) override;
 	  public:
-		SALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, const std::string &soundName, pragma::audio::ALCreateFlags createFlags);
+		SALSoundScript(pragma::NetworkState *nw, unsigned int idx, SoundScript *script, pragma::NetworkState *state, const std::string &soundName, pragma::audio::ALCreateFlags createFlags);
 		virtual ALState GetState() const override;
 		virtual unsigned int GetIndex() const override;
 		virtual void FadeIn(float time) override;

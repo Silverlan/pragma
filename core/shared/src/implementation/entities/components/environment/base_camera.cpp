@@ -227,44 +227,44 @@ void BaseEnvCameraComponent::GetFrustumPlanes(const std::vector<Vector3> &points
 	outPlanes.reserve(outPlanes.size() + 6u);
 	// Left Plane
 	outPlanes.push_back(umath::Plane {
-	  points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
-	  points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
-	  points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
+	  points.at(umath::to_integral(math::FrustumPoint::NearBottomLeft)),
+	  points.at(umath::to_integral(math::FrustumPoint::NearTopLeft)),
+	  points.at(umath::to_integral(math::FrustumPoint::FarBottomLeft)),
 	});
 
 	// Right Plane
 	outPlanes.push_back(umath::Plane {
-	  points.at(umath::to_integral(FrustumPoint::NearBottomRight)),
-	  points.at(umath::to_integral(FrustumPoint::FarBottomRight)),
-	  points.at(umath::to_integral(FrustumPoint::NearTopRight)),
+	  points.at(umath::to_integral(math::FrustumPoint::NearBottomRight)),
+	  points.at(umath::to_integral(math::FrustumPoint::FarBottomRight)),
+	  points.at(umath::to_integral(math::FrustumPoint::NearTopRight)),
 	});
 
 	// Top Plane
 	outPlanes.push_back(umath::Plane {
-	  points.at(umath::to_integral(FrustumPoint::NearBottomRight)),
-	  points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
-	  points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
+	  points.at(umath::to_integral(math::FrustumPoint::NearBottomRight)),
+	  points.at(umath::to_integral(math::FrustumPoint::NearBottomLeft)),
+	  points.at(umath::to_integral(math::FrustumPoint::FarBottomLeft)),
 	});
 
 	// Bottom Plane
 	outPlanes.push_back(umath::Plane {
-	  points.at(umath::to_integral(FrustumPoint::NearTopRight)),
-	  points.at(umath::to_integral(FrustumPoint::FarTopLeft)),
-	  points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
+	  points.at(umath::to_integral(math::FrustumPoint::NearTopRight)),
+	  points.at(umath::to_integral(math::FrustumPoint::FarTopLeft)),
+	  points.at(umath::to_integral(math::FrustumPoint::NearTopLeft)),
 	});
 
 	// Near Plane
 	outPlanes.push_back(umath::Plane {
-	  points.at(umath::to_integral(FrustumPoint::NearTopRight)),
-	  points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
-	  points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
+	  points.at(umath::to_integral(math::FrustumPoint::NearTopRight)),
+	  points.at(umath::to_integral(math::FrustumPoint::NearTopLeft)),
+	  points.at(umath::to_integral(math::FrustumPoint::NearBottomLeft)),
 	});
 
 	// Far Plane
 	outPlanes.push_back(umath::Plane {
-	  points.at(umath::to_integral(FrustumPoint::FarTopRight)),
-	  points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
-	  points.at(umath::to_integral(FrustumPoint::FarTopLeft)),
+	  points.at(umath::to_integral(math::FrustumPoint::FarTopRight)),
+	  points.at(umath::to_integral(math::FrustumPoint::FarBottomLeft)),
+	  points.at(umath::to_integral(math::FrustumPoint::FarTopLeft)),
 	});
 }
 void BaseEnvCameraComponent::GetFrustumPoints(std::vector<Vector3> &outPoints) const
@@ -476,121 +476,121 @@ void BaseEnvCameraComponent::GetFrustumPoints(std::vector<Vector3> &outPoints, f
 	outPoints.push_back(nc + up * near_height + right * near_width); // Top Right
 	outPoints.push_back(nc - up * near_height + right * near_width); // Bottom Right
 }
-void BaseEnvCameraComponent::GetFrustumNeighbors(FrustumPlane planeID, FrustumPlane *neighborIDs)
+void BaseEnvCameraComponent::GetFrustumNeighbors(math::FrustumPlane planeID, math::FrustumPlane *neighborIDs)
 {
-	static FrustumPlane neighbors[6][4] = {{// Left
-	                                         FrustumPlane::Top, FrustumPlane::Bottom, FrustumPlane::Near, FrustumPlane::Far},
+	static math::FrustumPlane neighbors[6][4] = {{// Left
+	                                         math::FrustumPlane::Top, math::FrustumPlane::Bottom, math::FrustumPlane::Near, math::FrustumPlane::Far},
 	  {// Right
-	    FrustumPlane::Top, FrustumPlane::Bottom, FrustumPlane::Near, FrustumPlane::Far},
+	    math::FrustumPlane::Top, math::FrustumPlane::Bottom, math::FrustumPlane::Near, math::FrustumPlane::Far},
 	  {// Top
-	    FrustumPlane::Left, FrustumPlane::Right, FrustumPlane::Near, FrustumPlane::Far},
+	    math::FrustumPlane::Left, math::FrustumPlane::Right, math::FrustumPlane::Near, math::FrustumPlane::Far},
 	  {// Bottom
-	    FrustumPlane::Left, FrustumPlane::Right, FrustumPlane::Near, FrustumPlane::Far},
+	    math::FrustumPlane::Left, math::FrustumPlane::Right, math::FrustumPlane::Near, math::FrustumPlane::Far},
 	  {// Near
-	    FrustumPlane::Left, FrustumPlane::Right, FrustumPlane::Top, FrustumPlane::Bottom},
+	    math::FrustumPlane::Left, math::FrustumPlane::Right, math::FrustumPlane::Top, math::FrustumPlane::Bottom},
 	  {// Far
-	    FrustumPlane::Left, FrustumPlane::Right, FrustumPlane::Top, FrustumPlane::Bottom}};
+	    math::FrustumPlane::Left, math::FrustumPlane::Right, math::FrustumPlane::Top, math::FrustumPlane::Bottom}};
 	for(unsigned int i = 0; i < 4; i++)
 		neighborIDs[i] = neighbors[static_cast<int>(planeID)][i];
 }
-void BaseEnvCameraComponent::GetFrustumPlaneCornerPoints(FrustumPlane planeA, FrustumPlane planeB, FrustumPoint *cornerPoints)
+void BaseEnvCameraComponent::GetFrustumPlaneCornerPoints(math::FrustumPlane planeA, math::FrustumPlane planeB, math::FrustumPoint *cornerPoints)
 {
-	static FrustumPoint points[6][6][2] = {{// Left
+	static math::FrustumPoint points[6][6][2] = {{// Left
 	                                         {
 	                                           // Left
-	                                           FrustumPoint::FarBottomLeft, FrustumPoint::FarBottomLeft // Invalid
+	                                           math::FrustumPoint::FarBottomLeft, math::FrustumPoint::FarBottomLeft // Invalid
 	                                         },
 	                                         {
 	                                           // Right
-	                                           FrustumPoint::FarBottomLeft, FrustumPoint::FarBottomLeft // Invalid
+	                                           math::FrustumPoint::FarBottomLeft, math::FrustumPoint::FarBottomLeft // Invalid
 	                                         },
 	                                         {// Top
-	                                           FrustumPoint::NearTopLeft, FrustumPoint::FarTopLeft},
+	                                           math::FrustumPoint::NearTopLeft, math::FrustumPoint::FarTopLeft},
 	                                         {// Bottom
-	                                           FrustumPoint::FarBottomLeft, FrustumPoint::NearBottomLeft},
+	                                           math::FrustumPoint::FarBottomLeft, math::FrustumPoint::NearBottomLeft},
 	                                         {// Near
-	                                           FrustumPoint::NearBottomLeft, FrustumPoint::NearTopLeft},
+	                                           math::FrustumPoint::NearBottomLeft, math::FrustumPoint::NearTopLeft},
 	                                         {// Far
-	                                           FrustumPoint::FarTopLeft, FrustumPoint::FarBottomLeft}},
+	                                           math::FrustumPoint::FarTopLeft, math::FrustumPoint::FarBottomLeft}},
 	  {// Right
 	    {
 	      // Left
-	      FrustumPoint::FarBottomRight, FrustumPoint::FarBottomRight // Invalid
+	      math::FrustumPoint::FarBottomRight, math::FrustumPoint::FarBottomRight // Invalid
 	    },
 	    {
 	      // Right
-	      FrustumPoint::FarBottomRight, FrustumPoint::FarBottomRight // Invalid
+	      math::FrustumPoint::FarBottomRight, math::FrustumPoint::FarBottomRight // Invalid
 	    },
 	    {// Top
-	      FrustumPoint::FarTopRight, FrustumPoint::NearTopRight},
+	      math::FrustumPoint::FarTopRight, math::FrustumPoint::NearTopRight},
 	    {// Bottom
-	      FrustumPoint::NearBottomRight, FrustumPoint::FarBottomRight},
+	      math::FrustumPoint::NearBottomRight, math::FrustumPoint::FarBottomRight},
 	    {// Near
-	      FrustumPoint::NearTopRight, FrustumPoint::NearBottomRight},
+	      math::FrustumPoint::NearTopRight, math::FrustumPoint::NearBottomRight},
 	    {// Far
-	      FrustumPoint::FarBottomRight, FrustumPoint::FarTopRight}},
+	      math::FrustumPoint::FarBottomRight, math::FrustumPoint::FarTopRight}},
 	  {  // Top
 	    {// Left
-	      FrustumPoint::FarTopLeft, FrustumPoint::NearTopLeft},
+	      math::FrustumPoint::FarTopLeft, math::FrustumPoint::NearTopLeft},
 	    {// Right
-	      FrustumPoint::NearTopRight, FrustumPoint::FarTopRight},
+	      math::FrustumPoint::NearTopRight, math::FrustumPoint::FarTopRight},
 	    {
 	      // Top
-	      FrustumPoint::NearTopLeft, FrustumPoint::FarTopLeft // Invalid
+	      math::FrustumPoint::NearTopLeft, math::FrustumPoint::FarTopLeft // Invalid
 	    },
 	    {
 	      // Bottom
-	      FrustumPoint::FarBottomLeft, FrustumPoint::NearBottomLeft // Invalid
+	      math::FrustumPoint::FarBottomLeft, math::FrustumPoint::NearBottomLeft // Invalid
 	    },
 	    {// Near
-	      FrustumPoint::NearTopLeft, FrustumPoint::NearTopRight},
+	      math::FrustumPoint::NearTopLeft, math::FrustumPoint::NearTopRight},
 	    {// Far
-	      FrustumPoint::FarTopRight, FrustumPoint::FarTopLeft}},
+	      math::FrustumPoint::FarTopRight, math::FrustumPoint::FarTopLeft}},
 	  {  // Bottom
 	    {// Left
-	      FrustumPoint::NearBottomLeft, FrustumPoint::FarBottomLeft},
+	      math::FrustumPoint::NearBottomLeft, math::FrustumPoint::FarBottomLeft},
 	    {// Right
-	      FrustumPoint::FarBottomRight, FrustumPoint::NearBottomRight},
+	      math::FrustumPoint::FarBottomRight, math::FrustumPoint::NearBottomRight},
 	    {
 	      // Top
-	      FrustumPoint::NearBottomLeft, FrustumPoint::FarBottomLeft // Invalid
+	      math::FrustumPoint::NearBottomLeft, math::FrustumPoint::FarBottomLeft // Invalid
 	    },
 	    {
 	      // Bottom
-	      FrustumPoint::FarBottomLeft, FrustumPoint::NearBottomLeft // Invalid
+	      math::FrustumPoint::FarBottomLeft, math::FrustumPoint::NearBottomLeft // Invalid
 	    },
 	    {// Near
-	      FrustumPoint::NearBottomRight, FrustumPoint::NearBottomLeft},
+	      math::FrustumPoint::NearBottomRight, math::FrustumPoint::NearBottomLeft},
 	    {// Far
-	      FrustumPoint::FarBottomLeft, FrustumPoint::FarBottomRight}},
+	      math::FrustumPoint::FarBottomLeft, math::FrustumPoint::FarBottomRight}},
 	  {
 	    // Near
 	    {// Left
-	      FrustumPoint::NearTopLeft, FrustumPoint::NearBottomLeft},
+	      math::FrustumPoint::NearTopLeft, math::FrustumPoint::NearBottomLeft},
 	    {// Right
-	      FrustumPoint::NearBottomRight, FrustumPoint::NearTopRight},
+	      math::FrustumPoint::NearBottomRight, math::FrustumPoint::NearTopRight},
 	    {// Top
-	      FrustumPoint::NearTopRight, FrustumPoint::NearTopLeft},
+	      math::FrustumPoint::NearTopRight, math::FrustumPoint::NearTopLeft},
 	    {// Bottom
-	      FrustumPoint::NearBottomLeft, FrustumPoint::NearBottomRight},
+	      math::FrustumPoint::NearBottomLeft, math::FrustumPoint::NearBottomRight},
 	    {// Near
-	      FrustumPoint::NearTopLeft, FrustumPoint::NearTopRight},
+	      math::FrustumPoint::NearTopLeft, math::FrustumPoint::NearTopRight},
 	    {// Far
-	      FrustumPoint::FarTopRight, FrustumPoint::FarTopLeft},
+	      math::FrustumPoint::FarTopRight, math::FrustumPoint::FarTopLeft},
 	  },
 	  {  // Far
 	    {// Left
-	      FrustumPoint::FarBottomLeft, FrustumPoint::FarTopLeft},
+	      math::FrustumPoint::FarBottomLeft, math::FrustumPoint::FarTopLeft},
 	    {// Right
-	      FrustumPoint::FarTopRight, FrustumPoint::FarBottomRight},
+	      math::FrustumPoint::FarTopRight, math::FrustumPoint::FarBottomRight},
 	    {// Top
-	      FrustumPoint::FarTopLeft, FrustumPoint::FarTopRight},
+	      math::FrustumPoint::FarTopLeft, math::FrustumPoint::FarTopRight},
 	    {// Bottom
-	      FrustumPoint::FarBottomRight, FrustumPoint::FarBottomLeft},
+	      math::FrustumPoint::FarBottomRight, math::FrustumPoint::FarBottomLeft},
 	    {// Near
-	      FrustumPoint::FarTopLeft, FrustumPoint::FarTopRight},
+	      math::FrustumPoint::FarTopLeft, math::FrustumPoint::FarTopRight},
 	    {// Far
-	      FrustumPoint::FarTopRight, FrustumPoint::FarTopLeft}}};
+	      math::FrustumPoint::FarTopRight, math::FrustumPoint::FarTopLeft}}};
 	cornerPoints[0] = points[static_cast<int>(planeA)][static_cast<int>(planeB)][0];
 	cornerPoints[1] = points[static_cast<int>(planeA)][static_cast<int>(planeB)][1];
 }
@@ -606,13 +606,13 @@ void BaseEnvCameraComponent::CreateFrustumKDop(const std::vector<umath::Plane> &
 	for(unsigned int i = 0; i < 6; i++) {
 		//const Plane &plane = planes[i];
 		if(fDir[i] <= EPSILON) {
-			FrustumPlane neighbors[4];
-			GetFrustumNeighbors(FrustumPlane(i), &neighbors[0]);
+			math::FrustumPlane neighbors[4];
+			GetFrustumNeighbors(math::FrustumPlane(i), &neighbors[0]);
 			for(unsigned j = 0; j < 4; j++) {
 				float fNDir = fDir[static_cast<int>(neighbors[j])];
 				if(fNDir > EPSILON) {
-					FrustumPoint corners[2];
-					GetFrustumPlaneCornerPoints(FrustumPlane(i), neighbors[j], &corners[0]);
+					math::FrustumPoint corners[2];
+					GetFrustumPlaneCornerPoints(math::FrustumPlane(i), neighbors[j], &corners[0]);
 					umath::Plane p(points[static_cast<int>(corners[0])], points[static_cast<int>(corners[1])], points[static_cast<int>(corners[0])] - dir);
 					kDop->push_back(p);
 				}

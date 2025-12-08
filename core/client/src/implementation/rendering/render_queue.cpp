@@ -47,7 +47,7 @@ void SortingKey::SetDistance(double distSqr, const CCameraComponent &cam)
 	translucent.distance = glm::floatBitsToUint(static_cast<float>(distSqr));
 }
 
-RenderQueueItem::RenderQueueItem(CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const TranslucencyPassInfo *optTranslucencyPassInfo)
+RenderQueueItem::RenderQueueItem(pragma::ecs::CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const TranslucencyPassInfo *optTranslucencyPassInfo)
     : material {mat.GetIndex()}, pipelineId {pipelineId}, entity {ent.GetLocalIndex()}, mesh {meshIdx}, translucentKey {optTranslucencyPassInfo ? true : false}
 {
 	instanceSetIndex = RenderQueueItem::UNIQUE;
@@ -79,15 +79,15 @@ RenderQueueItem::RenderQueueItem(CBaseEntity &ent, RenderMeshIndex meshIdx, msys
 }
 
 msys::CMaterial *RenderQueueItem::GetMaterial() const { return static_cast<msys::CMaterial *>(pragma::get_client_state()->GetMaterialManager().GetAsset(material)->assetObject.get()); }
-CBaseEntity *RenderQueueItem::GetEntity() const { return static_cast<CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(entity)); }
-CModelSubMesh *RenderQueueItem::GetMesh() const
+pragma::ecs::CBaseEntity *RenderQueueItem::GetEntity() const { return static_cast<pragma::ecs::CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(entity)); }
+pragma::geometry::CModelSubMesh *RenderQueueItem::GetMesh() const
 {
 	auto *ent = GetEntity();
 	auto *renderC = ent ? ent->GetRenderComponent() : nullptr;
 	if(!renderC)
 		return nullptr;
 	auto &renderMeshes = renderC->GetRenderMeshes();
-	return mesh < renderMeshes.size() ? static_cast<CModelSubMesh *>(renderMeshes[mesh].get()) : nullptr;
+	return mesh < renderMeshes.size() ? static_cast<pragma::geometry::CModelSubMesh *>(renderMeshes[mesh].get()) : nullptr;
 }
 prosper::ShaderGraphics *RenderQueueItem::GetShader(uint32_t &outPipelineIndex) const
 {
@@ -114,7 +114,7 @@ void RenderQueue::Clear()
 	queue.clear();
 	sortedItemIndices.clear();
 }
-void RenderQueue::Add(CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam)
+void RenderQueue::Add(pragma::ecs::CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam)
 {
 	if(optCam) {
 		RenderQueueItem::TranslucencyPassInfo translucencyPassInfo {*optCam};

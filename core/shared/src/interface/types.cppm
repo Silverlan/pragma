@@ -7,29 +7,41 @@ export module pragma.shared:types;
 export import std.compat;
 
 export {
-	class ALSound;
 	namespace pragma {
 		class BaseEntityComponent;
 		class BaseFilterComponent;
 		struct ComponentMemberInfo;
 		class Engine;
 		class Game;
-		class Model;
-		class ModelMeshGroup;
-		class ModelSubMesh;
 		class PanimaComponent;
+		class NetworkState;
+
+		namespace audio {
+			class ALSound;
+		}
 
 		namespace asset {
 			class ModelManager;
+			class Model;
+			class ModelMeshGroup;
 		}
 
 		namespace animation {
 			class Animation;
 		}
 
+		namespace geometry {
+			class ModelSubMesh;
+			class ModelMesh;
+		}
+
 		namespace ecs {
 			class BaseEntity;
 			class EntityIterator;
+		}
+
+		namespace game {
+			class DamageInfo;
 		}
 
 		class BaseTransformComponent;
@@ -52,15 +64,12 @@ export {
 			class IShape;
 			class PhysObj;
 
-			enum class PHYSICSTYPE : int;
+			enum class PhysicsType : int32_t;
 			enum class CollisionMask : uint32_t;
 			enum class RayCastFlags : uint32_t;
-			enum class COLLISIONTYPE : int;
-			enum class MOVETYPE : int;
+			enum class CollisionType : int32_t;
+			enum class MoveType : int32_t;
 			enum class RayCastHitType : uint8_t;
 		}
 	}
-	class DamageInfo;
-	class ModelMesh;
-	class NetworkState;
 }

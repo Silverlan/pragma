@@ -59,7 +59,7 @@ void BaseWeaponComponent::OnPhysicsInitialized()
 	pPhysComponent->SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter() | pragma::physics::CollisionMask::Item);
 }
 
-void BaseWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin)
+void BaseWeaponComponent::OnFireBullets(const game::BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin)
 {
 	auto *owner = m_whOwnerComponent.valid() ? m_whOwnerComponent->GetOwner() : nullptr;
 	if(owner != nullptr) {

@@ -25,10 +25,10 @@ export {
 		class PhysObj;
 	}
 	using PhysObjHandle = util::TWeakSharedHandle<pragma::physics::PhysObj>;
-	class NetworkState;
 
 	namespace pragma {
 		class BaseEntityComponent;
+		class NetworkState;
 	};
 	namespace pragma::physics {
 		class DLLNETWORK PhysObj : public pragma::BaseLuaHandle {
@@ -173,205 +173,207 @@ export {
 
 	////////////////////////////////////
 
-	class DLLNETWORK PhysObjDynamic {
-	  public:
-		friend pragma::physics::PhysObj;
-		virtual void PreSimulate();
-		virtual void PostSimulate();
-	  protected:
+	namespace pragma::physics {
+		class DLLNETWORK PhysObjDynamic {
+		public:
+			friend pragma::physics::PhysObj;
+			virtual void PreSimulate();
+			virtual void PostSimulate();
+		protected:
 #if PHYS_KEEP_SIMULATION_TRANSFORM != 0
-		std::vector<PhysTransform> m_offsets;
-	  public:
-		Vector3 GetSimulationOffset(unsigned int idx = 0);
-		Quat GetSimulationRotation(unsigned int idx = 0);
+			std::vector<PhysTransform> m_offsets;
+		public:
+			Vector3 GetSimulationOffset(unsigned int idx = 0);
+			Quat GetSimulationRotation(unsigned int idx = 0);
 #endif
-	};
+		};
 
-	////////////////////////////////////
+		////////////////////////////////////
 
-	class DLLNETWORK PhysObjKinematic {
-	  public:
-		virtual void SetKinematic(bool b) = 0;
-		bool IsKinematic() const;
-	  protected:
-		PhysObjKinematic();
-		bool m_bKinematic = false;
-	};
+		class DLLNETWORK PhysObjKinematic {
+		public:
+			virtual void SetKinematic(bool b) = 0;
+			bool IsKinematic() const;
+		protected:
+			PhysObjKinematic();
+			bool m_bKinematic = false;
+		};
 
-	////////////////////////////////////
+		////////////////////////////////////
 
-	class DLLNETWORK SoftBodyPhysObj : public pragma::physics::PhysObj, public PhysObjDynamic {
-	  public:
-		friend pragma::physics::PhysObj;
-		std::vector<util::TSharedHandle<pragma::physics::ISoftBody>> &GetSoftBodies();
-		const pragma::physics::ISoftBody *GetSoftBody() const;
-		pragma::physics::ISoftBody *GetSoftBody();
-		virtual bool IsStatic() const override;
-		virtual bool IsSoftBody() const override;
-		virtual void AddCollisionObject(pragma::physics::ICollisionObject &o) override;
-		virtual void SetLinearVelocity(const Vector3 &vel) override;
-		virtual pragma::BaseEntityComponent *GetOwner() override;
+		class DLLNETWORK SoftBodyPhysObj : public pragma::physics::PhysObj, public PhysObjDynamic {
+		public:
+			friend pragma::physics::PhysObj;
+			std::vector<util::TSharedHandle<pragma::physics::ISoftBody>> &GetSoftBodies();
+			const pragma::physics::ISoftBody *GetSoftBody() const;
+			pragma::physics::ISoftBody *GetSoftBody();
+			virtual bool IsStatic() const override;
+			virtual bool IsSoftBody() const override;
+			virtual void AddCollisionObject(pragma::physics::ICollisionObject &o) override;
+			virtual void SetLinearVelocity(const Vector3 &vel) override;
+			virtual pragma::BaseEntityComponent *GetOwner() override;
 
-		virtual float GetMass() const override;
-		virtual void SetMass(float mass) override;
-		virtual void Simulate(double tDelta, bool bIgnoreGravity = false) override;
-		virtual void PutToSleep() override;
-		virtual void WakeUp() override;
-		virtual bool IsSleeping() const override;
+			virtual float GetMass() const override;
+			virtual void SetMass(float mass) override;
+			virtual void Simulate(double tDelta, bool bIgnoreGravity = false) override;
+			virtual void PutToSleep() override;
+			virtual void WakeUp() override;
+			virtual bool IsSleeping() const override;
 
-		virtual void ApplyForce(const Vector3 &force) override;
-	  protected:
-		SoftBodyPhysObj(pragma::BaseEntityComponent *owner);
-		bool Initialize(pragma::physics::ISoftBody &body);
-		bool Initialize(const std::vector<pragma::physics::ISoftBody *> &bodies);
-		std::vector<util::TSharedHandle<pragma::physics::ISoftBody>> m_softBodies;
-	};
+			virtual void ApplyForce(const Vector3 &force) override;
+		protected:
+			SoftBodyPhysObj(pragma::BaseEntityComponent *owner);
+			bool Initialize(pragma::physics::ISoftBody &body);
+			bool Initialize(const std::vector<pragma::physics::ISoftBody *> &bodies);
+			std::vector<util::TSharedHandle<pragma::physics::ISoftBody>> m_softBodies;
+		};
 
-	////////////////////////////////////
+		////////////////////////////////////
 
-	class DLLNETWORK RigidPhysObj : public pragma::physics::PhysObj, public PhysObjKinematic, public PhysObjDynamic {
-	  public:
-		friend pragma::physics::PhysObj;
-		virtual ~RigidPhysObj() override;
-		std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> &GetRigidBodies();
-		virtual void UpdateVelocity() override;
-		virtual void AddCollisionObject(pragma::physics::ICollisionObject &o) override;
-		const pragma::physics::IRigidBody *GetRigidBody() const;
-		pragma::physics::IRigidBody *GetRigidBody();
-		virtual bool IsStatic() const override;
-		virtual void SetStatic(bool b) override;
-		virtual float GetMass() const override;
-		virtual void SetMass(float mass) override;
-		virtual bool IsRigid() const override;
-		virtual void SetKinematic(bool b) override;
-		virtual void Simulate(double tDelta, bool bIgnoreGravity = false) override;
-		virtual pragma::BaseEntityComponent *GetOwner() override;
+		class DLLNETWORK RigidPhysObj : public pragma::physics::PhysObj, public PhysObjKinematic, public PhysObjDynamic {
+		public:
+			friend pragma::physics::PhysObj;
+			virtual ~RigidPhysObj() override;
+			std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> &GetRigidBodies();
+			virtual void UpdateVelocity() override;
+			virtual void AddCollisionObject(pragma::physics::ICollisionObject &o) override;
+			const pragma::physics::IRigidBody *GetRigidBody() const;
+			pragma::physics::IRigidBody *GetRigidBody();
+			virtual bool IsStatic() const override;
+			virtual void SetStatic(bool b) override;
+			virtual float GetMass() const override;
+			virtual void SetMass(float mass) override;
+			virtual bool IsRigid() const override;
+			virtual void SetKinematic(bool b) override;
+			virtual void Simulate(double tDelta, bool bIgnoreGravity = false) override;
+			virtual pragma::BaseEntityComponent *GetOwner() override;
 
-		virtual Vector3 GetLinearVelocity() const override;
-		virtual void SetLinearVelocity(const Vector3 &vel) override;
-		virtual Vector3 GetAngularVelocity() const override;
-		virtual void SetAngularVelocity(const Vector3 &vel) override;
-		virtual void PutToSleep() override;
-		virtual void WakeUp() override;
-		virtual bool IsSleeping() const override;
-		virtual void OnSleep() override;
-		virtual void OnWake() override;
+			virtual Vector3 GetLinearVelocity() const override;
+			virtual void SetLinearVelocity(const Vector3 &vel) override;
+			virtual Vector3 GetAngularVelocity() const override;
+			virtual void SetAngularVelocity(const Vector3 &vel) override;
+			virtual void PutToSleep() override;
+			virtual void WakeUp() override;
+			virtual bool IsSleeping() const override;
+			virtual void OnSleep() override;
+			virtual void OnWake() override;
 
-		virtual void SetLinearFactor(const Vector3 &factor) override;
-		virtual void SetAngularFactor(const Vector3 &factor) override;
-		virtual Vector3 GetLinearFactor() const override;
-		virtual Vector3 GetAngularFactor() const override;
+			virtual void SetLinearFactor(const Vector3 &factor) override;
+			virtual void SetAngularFactor(const Vector3 &factor) override;
+			virtual Vector3 GetLinearFactor() const override;
+			virtual Vector3 GetAngularFactor() const override;
 
-		virtual void SetDamping(float linDamping, float angDamping) override;
-		virtual void SetLinearDamping(float damping) override;
-		virtual void SetAngularDamping(float damping) override;
-		virtual float GetLinearDamping() const override;
-		virtual float GetAngularDamping() const override;
+			virtual void SetDamping(float linDamping, float angDamping) override;
+			virtual void SetLinearDamping(float damping) override;
+			virtual void SetAngularDamping(float damping) override;
+			virtual float GetLinearDamping() const override;
+			virtual float GetAngularDamping() const override;
 
-		virtual void ApplyForce(const Vector3 &force) override;
-		virtual void ApplyForce(const Vector3 &force, const Vector3 &relPos) override;
-		virtual void ApplyImpulse(const Vector3 &impulse) override;
-		virtual void ApplyImpulse(const Vector3 &impulse, const Vector3 &relPos) override;
-		virtual void ApplyTorque(const Vector3 &torque) override;
-		virtual void ApplyTorqueImpulse(const Vector3 &torque) override;
-		virtual void ClearForces() override;
-		virtual Vector3 GetTotalForce() const override;
-		virtual Vector3 GetTotalTorque() const override;
+			virtual void ApplyForce(const Vector3 &force) override;
+			virtual void ApplyForce(const Vector3 &force, const Vector3 &relPos) override;
+			virtual void ApplyImpulse(const Vector3 &impulse) override;
+			virtual void ApplyImpulse(const Vector3 &impulse, const Vector3 &relPos) override;
+			virtual void ApplyTorque(const Vector3 &torque) override;
+			virtual void ApplyTorqueImpulse(const Vector3 &torque) override;
+			virtual void ClearForces() override;
+			virtual Vector3 GetTotalForce() const override;
+			virtual Vector3 GetTotalTorque() const override;
 
-		virtual void SetSleepingThresholds(float linear, float angular) override;
-		virtual float GetLinearSleepingThreshold() const override;
-		virtual float GetAngularSleepingThreshold() const override;
-	  protected:
-		RigidPhysObj(pragma::BaseEntityComponent *owner);
-		bool Initialize(pragma::physics::IRigidBody &body);
-		bool Initialize(const std::vector<pragma::physics::IRigidBody *> &bodies);
-		std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> m_rigidBodies;
-		float m_mass = 0.f;
-		bool m_bStatic = false;
-		void ApplyMass(float mass);
-	};
+			virtual void SetSleepingThresholds(float linear, float angular) override;
+			virtual float GetLinearSleepingThreshold() const override;
+			virtual float GetAngularSleepingThreshold() const override;
+		protected:
+			RigidPhysObj(pragma::BaseEntityComponent *owner);
+			bool Initialize(pragma::physics::IRigidBody &body);
+			bool Initialize(const std::vector<pragma::physics::IRigidBody *> &bodies);
+			std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> m_rigidBodies;
+			float m_mass = 0.f;
+			bool m_bStatic = false;
+			void ApplyMass(float mass);
+		};
 
-	////////////////////////////////////
+		////////////////////////////////////
 
-	class DLLNETWORK ControllerPhysObj : public pragma::physics::PhysObj, public PhysObjKinematic, public PhysObjDynamic {
-	  public:
-		friend pragma::physics::PhysObj;
-		virtual ~ControllerPhysObj() override;
-		pragma::physics::IController *GetController();
-		pragma::physics::ICollisionObject *GetCollisionObject();
-		virtual void PostSimulate() override;
-		float GetStepHeight() const;
-		virtual void SetKinematic(bool b) override;
-		virtual void SetLinearVelocity(const Vector3 &vel) override;
-		Vector3 &GetOffset();
-		void SetOffset(const Vector3 &offset);
-		void Simulate(double tDelta, bool bIgnoreGravity = false);
-		bool IsController() const;
-		virtual bool IsCapsule() const;
-		umath::Degree GetSlopeLimit() const;
-		void SetSlopeLimit(umath::Degree limit);
-		float GetStepOffset() const;
-		void SetStepOffset(float offset);
-		virtual void SetCollisionBounds(const Vector3 &min, const Vector3 &max);
-		virtual void GetCollisionBounds(Vector3 *min, Vector3 *max);
-		pragma::BaseEntityComponent *GetOwner();
-		virtual void SetOrientation(const Quat &q) override;
-		virtual void SetPosition(const Vector3 &pos) override;
-		virtual Vector3 GetPosition() const override;
-		virtual void UpdateVelocity() override;
-		unsigned int Move(const Vector3 &disp, float elapsedTime, float minDist = 0.1f);
-		ControllerHitData &GetControllerHitData();
+		class DLLNETWORK ControllerPhysObj : public pragma::physics::PhysObj, public PhysObjKinematic, public PhysObjDynamic {
+		public:
+			friend pragma::physics::PhysObj;
+			virtual ~ControllerPhysObj() override;
+			pragma::physics::IController *GetController();
+			pragma::physics::ICollisionObject *GetCollisionObject();
+			virtual void PostSimulate() override;
+			float GetStepHeight() const;
+			virtual void SetKinematic(bool b) override;
+			virtual void SetLinearVelocity(const Vector3 &vel) override;
+			Vector3 &GetOffset();
+			void SetOffset(const Vector3 &offset);
+			void Simulate(double tDelta, bool bIgnoreGravity = false);
+			bool IsController() const;
+			virtual bool IsCapsule() const;
+			umath::Degree GetSlopeLimit() const;
+			void SetSlopeLimit(umath::Degree limit);
+			float GetStepOffset() const;
+			void SetStepOffset(float offset);
+			virtual void SetCollisionBounds(const Vector3 &min, const Vector3 &max);
+			virtual void GetCollisionBounds(Vector3 *min, Vector3 *max);
+			pragma::BaseEntityComponent *GetOwner();
+			virtual void SetOrientation(const Quat &q) override;
+			virtual void SetPosition(const Vector3 &pos) override;
+			virtual Vector3 GetPosition() const override;
+			virtual void UpdateVelocity() override;
+			unsigned int Move(const Vector3 &disp, float elapsedTime, float minDist = 0.1f);
+			ControllerHitData &GetControllerHitData();
 
-		bool IsOnGround() const;
-		bool IsGroundWalkable() const;
-		pragma::ecs::BaseEntity *GetGroundEntity() const;
-		pragma::physics::PhysObj *GetGroundPhysObject() const;
-		int32_t GetGroundSurfaceMaterial() const;
-		pragma::physics::IMaterial *GetGroundMaterial() const;
-		const pragma::physics::ICollisionObject *GetGroundPhysCollisionObject() const;
-		pragma::physics::ICollisionObject *GetGroundPhysCollisionObject();
-		// The velocity affecting this controller originating from the ground object
-		Vector3 GetGroundVelocity() const;
+			bool IsOnGround() const;
+			bool IsGroundWalkable() const;
+			pragma::ecs::BaseEntity *GetGroundEntity() const;
+			pragma::physics::PhysObj *GetGroundPhysObject() const;
+			int32_t GetGroundSurfaceMaterial() const;
+			pragma::physics::IMaterial *GetGroundMaterial() const;
+			const pragma::physics::ICollisionObject *GetGroundPhysCollisionObject() const;
+			pragma::physics::ICollisionObject *GetGroundPhysCollisionObject();
+			// The velocity affecting this controller originating from the ground object
+			Vector3 GetGroundVelocity() const;
 
-		Vector3 GetDimensions() const;
-		void SetDimensions(const Vector3 &dimensions);
-	  protected:
-		ControllerHitData m_hitData = {};
-		Vector3 m_offset = {};
-		double m_tLastMove = 0.0;
+			Vector3 GetDimensions() const;
+			void SetDimensions(const Vector3 &dimensions);
+		protected:
+			ControllerHitData m_hitData = {};
+			Vector3 m_offset = {};
+			double m_tLastMove = 0.0;
 
-		util::TSharedHandle<pragma::physics::IController> m_controller = nullptr;
-		util::TSharedHandle<pragma::physics::ICollisionObject> m_collisionObject = nullptr;
-		Vector3 m_originLast = {0.f, 0.f, 0.f};
-		float m_stepHeight = 0.f;
-		ControllerPhysObj(pragma::BaseEntityComponent *owner);
-	};
+			util::TSharedHandle<pragma::physics::IController> m_controller = nullptr;
+			util::TSharedHandle<pragma::physics::ICollisionObject> m_collisionObject = nullptr;
+			Vector3 m_originLast = {0.f, 0.f, 0.f};
+			float m_stepHeight = 0.f;
+			ControllerPhysObj(pragma::BaseEntityComponent *owner);
+		};
 
-	class DLLNETWORK BoxControllerPhysObj : public ControllerPhysObj {
-	  public:
-		friend pragma::physics::PhysObj;
-		Vector3 &GetHalfExtents();
-		void SetCollisionBounds(const Vector3 &min, const Vector3 &max);
-		void GetCollisionBounds(Vector3 *min, Vector3 *max);
-	  protected:
-		BoxControllerPhysObj(pragma::BaseEntityComponent *owner);
-		bool Initialize(const Vector3 &halfExtents, unsigned int stepHeight, float maxSlopeDeg = 45.f);
-		Vector3 m_halfExtents = {};
-	};
+		class DLLNETWORK BoxControllerPhysObj : public ControllerPhysObj {
+		public:
+			friend pragma::physics::PhysObj;
+			Vector3 &GetHalfExtents();
+			void SetCollisionBounds(const Vector3 &min, const Vector3 &max);
+			void GetCollisionBounds(Vector3 *min, Vector3 *max);
+		protected:
+			BoxControllerPhysObj(pragma::BaseEntityComponent *owner);
+			bool Initialize(const Vector3 &halfExtents, unsigned int stepHeight, float maxSlopeDeg = 45.f);
+			Vector3 m_halfExtents = {};
+		};
 
-	class DLLNETWORK CapsuleControllerPhysObj : public ControllerPhysObj {
-	  public:
-		friend pragma::physics::PhysObj;
-		float GetWidth() const;
-		float GetHeight() const;
-		void SetHeight(float height);
-		virtual bool IsCapsule() const override;
-		void SetCollisionBounds(const Vector3 &min, const Vector3 &max);
-		void GetCollisionBounds(Vector3 *min, Vector3 *max);
-	  protected:
-		CapsuleControllerPhysObj(pragma::BaseEntityComponent *owner);
-		bool Initialize(unsigned int width, unsigned int height, unsigned int stepHeight, float maxSlopeDeg = 45.f);
-		float m_width = 0.f;
-		float m_height = 0.f;
-	};
+		class DLLNETWORK CapsuleControllerPhysObj : public ControllerPhysObj {
+		public:
+			friend pragma::physics::PhysObj;
+			float GetWidth() const;
+			float GetHeight() const;
+			void SetHeight(float height);
+			virtual bool IsCapsule() const override;
+			void SetCollisionBounds(const Vector3 &min, const Vector3 &max);
+			void GetCollisionBounds(Vector3 *min, Vector3 *max);
+		protected:
+			CapsuleControllerPhysObj(pragma::BaseEntityComponent *owner);
+			bool Initialize(unsigned int width, unsigned int height, unsigned int stepHeight, float maxSlopeDeg = 45.f);
+			float m_width = 0.f;
+			float m_height = 0.f;
+		};
+	}
 };

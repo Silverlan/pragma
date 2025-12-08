@@ -92,40 +92,40 @@ void CDebugHitboxComponent::InitializeDebugObjects()
 					col = it->second;
 				else {
 					switch(hb.group) {
-					case HitGroup::Head:
+					case pragma::physics::HitGroup::Head:
 						col = colors::Red;
 						break;
-					case HitGroup::Chest:
+					case pragma::physics::HitGroup::Chest:
 						col = colors::Lime;
 						break;
-					case HitGroup::Stomach:
+					case pragma::physics::HitGroup::Stomach:
 						col = colors::Blue;
 						break;
-					case HitGroup::LeftArm:
+					case pragma::physics::HitGroup::LeftArm:
 						col = colors::Yellow;
 						break;
-					case HitGroup::RightArm:
+					case pragma::physics::HitGroup::RightArm:
 						col = colors::Cyan;
 						break;
-					case HitGroup::LeftLeg:
+					case pragma::physics::HitGroup::LeftLeg:
 						col = colors::Magenta;
 						break;
-					case HitGroup::RightLeg:
+					case pragma::physics::HitGroup::RightLeg:
 						col = colors::OrangeRed;
 						break;
-					case HitGroup::Gear:
+					case pragma::physics::HitGroup::Gear:
 						col = colors::SpringGreen;
 						break;
-					case HitGroup::Tail:
+					case pragma::physics::HitGroup::Tail:
 						col = colors::Violet;
 						break;
 					}
 				}
 
-				DebugRenderInfo renderInfo {col};
+				debug::DebugRenderInfo renderInfo {col};
 				renderInfo.SetOrigin(origin);
 				renderInfo.SetRotation(rot);
-				m_debugObjects.push_back(::DebugRenderer::DrawBox(min, max, renderInfo));
+				m_debugObjects.push_back(pragma::debug::DebugRenderer::DrawBox(min, max, renderInfo));
 			}
 		}
 	}

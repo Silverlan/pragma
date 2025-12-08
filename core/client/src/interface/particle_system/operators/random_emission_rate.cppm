@@ -10,21 +10,23 @@ export module pragma.client:particle_system.operator_random_emission_rate;
 export import :entities.components.particle_system;
 export import :particle_system.modifier;
 
-export class DLLCLIENT CParticleOperatorRandomEmissionRate : public CParticleOperator {
-  public:
-	CParticleOperatorRandomEmissionRate() = default;
-	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	virtual void Simulate(double tDelta) override;
-	virtual void OnParticleSystemStarted() override;
-  private:
-	float GetInterval() const;
-	void Reset();
-	float m_fMinimum = 0.07f;
-	float m_fMaximum = 0.2f;
-	float m_fRemaining = 0.f;
-};
+export namespace pragma::pts {
+	class DLLCLIENT CParticleOperatorRandomEmissionRate : public CParticleOperator {
+	public:
+		CParticleOperatorRandomEmissionRate() = default;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Simulate(double tDelta) override;
+		virtual void OnParticleSystemStarted() override;
+	private:
+		float GetInterval() const;
+		void Reset();
+		float m_fMinimum = 0.07f;
+		float m_fMaximum = 0.2f;
+		float m_fRemaining = 0.f;
+	};
+}
 
-void CParticleOperatorRandomEmissionRate::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorRandomEmissionRate::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &pair : values) {
@@ -36,15 +38,15 @@ void CParticleOperatorRandomEmissionRate::Initialize(pragma::BaseEnvParticleSyst
 			m_fMaximum = util::to_float(pair.second);
 	}
 }
-void CParticleOperatorRandomEmissionRate::OnParticleSystemStarted()
+void pragma::pts::CParticleOperatorRandomEmissionRate::OnParticleSystemStarted()
 {
 	CParticleOperator::OnParticleSystemStarted();
 	Reset();
 	Simulate(0.f);
 }
-void CParticleOperatorRandomEmissionRate::Reset() { m_fRemaining = GetInterval(); }
-float CParticleOperatorRandomEmissionRate::GetInterval() const { return umath::max(0.f, umath::random(m_fMinimum, m_fMaximum)); }
-void CParticleOperatorRandomEmissionRate::Simulate(double tDelta)
+void pragma::pts::CParticleOperatorRandomEmissionRate::Reset() { m_fRemaining = GetInterval(); }
+float pragma::pts::CParticleOperatorRandomEmissionRate::GetInterval() const { return umath::max(0.f, umath::random(m_fMinimum, m_fMaximum)); }
+void pragma::pts::CParticleOperatorRandomEmissionRate::Simulate(double tDelta)
 {
 	CParticleOperator::Simulate(tDelta);
 

@@ -16,7 +16,7 @@ decltype(eResourceWatcherCallbackType::Map) eResourceWatcherCallbackType::Map = 
 decltype(eResourceWatcherCallbackType::SoundScript) eResourceWatcherCallbackType::SoundScript = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::SoundScript);
 decltype(eResourceWatcherCallbackType::Sound) eResourceWatcherCallbackType::Sound = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Sound);
 decltype(eResourceWatcherCallbackType::Count) eResourceWatcherCallbackType::Count = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Count);
-ResourceWatcherManager::ResourceWatcherManager(NetworkState *nw) : m_networkState(nw), m_watcherManager {filemanager::create_directory_watcher_manager()} {}
+ResourceWatcherManager::ResourceWatcherManager(pragma::NetworkState *nw) : m_networkState(nw), m_watcherManager {filemanager::create_directory_watcher_manager()} {}
 
 void ResourceWatcherManager::Poll()
 {
@@ -71,7 +71,7 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 			ufile::remove_extension_from_filename(fname);
 			auto &mdlManager = m_networkState->GetModelManager();
 			auto &models = mdlManager.GetCache();
-			std::unordered_set<pragma::Model *> modelMap;
+			std::unordered_set<pragma::asset::Model *> modelMap;
 			for(auto &pair : models) {
 				auto asset = mdlManager.GetAsset(pair.second);
 				if(!asset)
@@ -163,7 +163,7 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 #if RESOURCE_WATCHER_VERBOSE > 0
 							Con::cout << "[ResourceWatcher] Reloading model for entity " << ent->GetClass() << "..." << Con::endl;
 #endif
-							mdlComponent->SetModel(std::shared_ptr<pragma::Model>(nullptr));
+							mdlComponent->SetModel(std::shared_ptr<pragma::asset::Model>(nullptr));
 							mdlComponent->SetModel(strPath);
 						}
 					}
@@ -248,7 +248,7 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 				Con::cout << "[ResourceWatcher] Sound has changed: " << sndPath << ". Attempting to reload..." << Con::endl;
 #endif
 				// TODO: Reload sounds if they had been loaded previously
-				game->GetNetworkState()->PrecacheSound(strPath, ALChannel::Both); // TODO: Only precache whatever's been requested before?
+				game->GetNetworkState()->PrecacheSound(strPath, pragma::audio::ALChannel::Both); // TODO: Only precache whatever's been requested before?
 			}
 			CallChangeCallbacks(eResourceWatcherCallbackType::Sound, strPath, ext);
 		}

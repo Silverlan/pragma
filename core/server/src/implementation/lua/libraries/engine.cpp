@@ -8,5 +8,5 @@ import :scripting.lua.libraries.engine;
 
 import :server_state;
 
-msys::Material *Lua::engine::server::LoadMaterial(const std::string &mat, bool reload) { return ServerState::Get()->LoadMaterial(mat, reload); }
+msys::Material *Lua::engine::server::LoadMaterial(const std::string &mat, bool reload) { return pragma::ServerState::Get()->LoadMaterial(mat, reload); }
 msys::Material *Lua::engine::server::LoadMaterial(const std::string &mat) { return LoadMaterial(mat, false); }

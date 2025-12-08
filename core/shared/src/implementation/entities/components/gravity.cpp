@@ -40,7 +40,7 @@ bool BaseGravity::HasGravityDirectionOverride() const { return (m_gravityDir != 
 //~#PDOC f-ents-gravitycomponent-getgravityscale
 float BaseGravity::GetGravityScale() const { return m_gravityScale; }
 
-Vector3 BaseGravity::GetGravityDirection(NetworkState *state) const
+Vector3 BaseGravity::GetGravityDirection(pragma::NetworkState *state) const
 {
 	if(m_gravityDir != nullptr)
 		return *m_gravityDir;
@@ -49,7 +49,7 @@ Vector3 BaseGravity::GetGravityDirection(NetworkState *state) const
 	pragma::Game *game = state->GetGameState();
 	return glm::normalize(game->GetGravity());
 }
-float BaseGravity::GetGravity(NetworkState *state) const
+float BaseGravity::GetGravity(pragma::NetworkState *state) const
 {
 	if(m_gravity != nullptr)
 		return *m_gravity;
@@ -58,7 +58,7 @@ float BaseGravity::GetGravity(NetworkState *state) const
 	pragma::Game *game = state->GetGameState();
 	return glm::length(game->GetGravity());
 }
-Vector3 BaseGravity::GetGravityForce(NetworkState *state) const
+Vector3 BaseGravity::GetGravityForce(pragma::NetworkState *state) const
 {
 	if(state == nullptr)
 		return Vector3(0, 0, 0);
@@ -113,10 +113,10 @@ void GravityComponent::ApplyGravity(double dt)
 	if(pPhys == nullptr || pPhys->IsDisabled() == true)
 		return;
 	auto moveType = pPhysComponent->GetMoveType();
-	if(moveType != pragma::physics::MOVETYPE::WALK && moveType != pragma::physics::MOVETYPE::PHYSICS)
+	if(moveType != pragma::physics::MoveType::Walk && moveType != pragma::physics::MoveType::Physics)
 		return;
 	if(pPhys->IsRigid()) {
-		auto *pPhysRigid = static_cast<RigidPhysObj *>(pPhys);
+		auto *pPhysRigid = static_cast<pragma::physics::RigidPhysObj *>(pPhys);
 		if(pPhysRigid->IsKinematic() || pPhysRigid->IsStatic())
 			return;
 		auto f = GetGravityForce();
@@ -129,7 +129,7 @@ void GravityComponent::ApplyGravity(double dt)
 		}
 	}
 	else if(pPhys->IsController()) {
-		auto *pPhysObjController = static_cast<ControllerPhysObj *>(pPhys);
+		auto *pPhysObjController = static_cast<pragma::physics::ControllerPhysObj *>(pPhys);
 		auto *pCollisionObject = pPhysObjController->GetCollisionObject();
 		if(pCollisionObject == nullptr)
 			return;
@@ -188,7 +188,7 @@ void GravityComponent::ApplyGravity(double dt)
 #endif
 	}
 	else if(pPhys->IsSoftBody()) {
-		auto *pPhysObjSoftBody = static_cast<SoftBodyPhysObj *>(pPhys);
+		auto *pPhysObjSoftBody = static_cast<pragma::physics::SoftBodyPhysObj *>(pPhys);
 		auto f = GetGravityForce() * CFloat(dt);
 		for(auto &hSoftBody : pPhysObjSoftBody->GetSoftBodies()) {
 			if(hSoftBody.IsValid() == false)
@@ -211,7 +211,7 @@ void GravityComponent::SetGravityScale(float scale) { BaseGravity::SetGravitySca
 bool GravityComponent::CalcBallisticVelocity(const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw, Vector3 &vel) const
 {
 	auto gravity = -GetGravityForce().y;
-	auto b = umath::calc_ballistic_velocity(origin, destPos, fireAngle, gravity, vel);
+	auto b = math::calc_ballistic_velocity(origin, destPos, fireAngle, gravity, vel);
 	if(b == false)
 		return false;
 

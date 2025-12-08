@@ -14,14 +14,14 @@ const std::string OPENVR_MODULE_PATH = "openvr/pr_openvr";
 
 static std::string lastMessage = "";
 static Color lastColor = colors::White;
-static WIHandle hHmdViewMessage = {};
-static WIHandle hHmdViewText = {};
+static pragma::gui::WIHandle hHmdViewMessage = {};
+static pragma::gui::WIHandle hHmdViewText = {};
 static void update_text()
 {
 	if(hHmdViewText.IsValid() == false || hHmdViewMessage.IsValid() == false)
 		return;
 	auto *pBg = hHmdViewMessage.get();
-	auto *pText = static_cast<WIText *>(hHmdViewText.get());
+	auto *pText = static_cast<pragma::gui::types::WIText *>(hHmdViewText.get());
 	pText->SetText(lastMessage);
 	pText->SetColor(lastColor);
 	pText->SizeToContents();
@@ -35,14 +35,14 @@ static void show_hmd_message(bool bInit = false)
 	}
 	if(hHmdViewMessage.IsValid() == true || bInit == false)
 		return;
-	auto &wgui = WGUI::GetInstance();
-	auto *bg = wgui.Create<WIRect>();
+	auto &wgui = pragma::gui::WGUI::GetInstance();
+	auto *bg = wgui.Create<pragma::gui::types::WIRect>();
 	bg->SetAutoAlignToParent(true);
 	bg->SetColor(colors::Black);
 	//bg->SetVisible(false);
 	hHmdViewMessage = bg->GetHandle();
 
-	auto *pText = wgui.Create<WIText>(bg);
+	auto *pText = wgui.Create<pragma::gui::types::WIText>(bg);
 	hHmdViewText = pText->GetHandle();
 
 	update_text();
@@ -105,15 +105,15 @@ static void cl_render_vr_enabled(bool b)
 	}
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_vr_enabled", +[](NetworkState *, const ConVar &, bool, bool b) { cl_render_vr_enabled(b); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_vr_enabled", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool b) { cl_render_vr_enabled(b); });
 }
 
-/*REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_resolution,[](NetworkState*,ConVar*,std::string,std::string val) {
+/*REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_resolution,[](pragma::NetworkState*,ConVar*,std::string,std::string val) {
 	
 })*/
 
 #if 0
-static auto cvHmdViewEnabled = GetClientConVar("cl_vr_hmd_view_enabled");
+static auto cvHmdViewEnabled = pragma::console::get_client_con_var("cl_vr_hmd_view_enabled");
 static void draw_vr(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::RenderTarget &rt)
 {
 	if(pragma::get_cgame() == nullptr || hHmdViewMessage.IsValid() == false || pragma::get_cgame()->IsInMainRenderPass() == false)
@@ -198,7 +198,7 @@ static void cl_vr_hmd_view_enabled(bool val)
 	}
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_vr_hmd_view_enabled", +[](NetworkState *, const ConVar &, bool, bool val) { cl_vr_hmd_view_enabled(val); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_vr_hmd_view_enabled", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val) { cl_vr_hmd_view_enabled(val); });
 }
 #endif
 
@@ -213,5 +213,5 @@ static void cl_vr_mirror_window_enabled(bool val)
 	fSetMirrorWindowEnabled(val);
 }
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_vr_mirror_window_enabled", +[](NetworkState *, const ConVar &, bool, bool val) { cl_vr_mirror_window_enabled(val); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_vr_mirror_window_enabled", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val) { cl_vr_mirror_window_enabled(val); });
 }

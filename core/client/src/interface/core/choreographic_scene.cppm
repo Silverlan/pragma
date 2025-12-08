@@ -12,8 +12,8 @@ export namespace choreography {
 	class Event : public uts::Event {
 	  public:
 		virtual ~Event() override;
-		CBaseEntity *GetActor() const;
-		void SetActor(CBaseEntity &actor);
+		pragma::ecs::CBaseEntity *GetActor() const;
+		void SetActor(pragma::ecs::CBaseEntity &actor);
 		void ClearActor();
 	  protected:
 		Event(uts::Channel &channel);
@@ -31,7 +31,7 @@ export namespace choreography {
 		AudioEvent(uts::Channel &channel, const std::string &snd);
 		friend uts::Event;
 		virtual State HandleTick(double t, double dt) override;
-		std::shared_ptr<ALSound> m_sound = nullptr;
+		std::shared_ptr<pragma::audio::ALSound> m_sound = nullptr;
 		std::string m_soundSource;
 	};
 

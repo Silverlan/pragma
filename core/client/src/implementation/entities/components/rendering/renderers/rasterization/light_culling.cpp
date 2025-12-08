@@ -11,7 +11,7 @@ import :game;
 
 using namespace pragma::rendering;
 
-void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::CullLightSources(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	auto &shaderSettings = pragma::get_client_state()->GetGameWorldShaderSettings();
 	if(drawSceneInfo.scene.expired() || shaderSettings.dynamicLightingEnabled == false)
@@ -60,7 +60,7 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 						continue;
 					auto shadowIdx = i * numBits + j;
 					auto *l = pragma::CLightComponent::GetLightByShadowBufferIndex(shadowIdx);
-					if(l == nullptr || static_cast<CBaseEntity &>(l->GetEntity()).IsInScene(scene) == false)
+					if(l == nullptr || static_cast<pragma::ecs::CBaseEntity &>(l->GetEntity()).IsInScene(scene) == false)
 						continue;
 					m_visLightSources.push_back(l);
 
@@ -90,11 +90,11 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 			}
 
 			if(drawSceneInfo.renderStats)
-				(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::LightCullingCpu, std::chrono::steady_clock::now() - t);
+				(*drawSceneInfo.renderStats)->SetTime(rendering::RenderStats::RenderStage::LightCullingCpu, std::chrono::steady_clock::now() - t);
 		}
 	}
 }
-void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RenderShadows(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	auto &shaderSettings = pragma::get_client_state()->GetGameWorldShaderSettings();
 	if(drawSceneInfo.scene.expired() || shaderSettings.dynamicLightingEnabled == false)

@@ -36,7 +36,7 @@ pragma::bvh::ModelHitboxBvhCache *pragma::bvh::HitboxBvhCache::GetModelCache(con
 	auto it = m_modelBvhCache.find(normName);
 	return (it != m_modelBvhCache.end() && it->second->complete) ? it->second.get() : nullptr;
 }
-void pragma::bvh::HitboxBvhCache::PrepareModel(pragma::Model &mdl)
+void pragma::bvh::HitboxBvhCache::PrepareModel(pragma::asset::Model &mdl)
 {
 	auto t = std::chrono::steady_clock::now();
 	auto savingRequired = false;
@@ -50,7 +50,7 @@ void pragma::bvh::HitboxBvhCache::PrepareModel(pragma::Model &mdl)
 			LOGGER.warn("Failed to save model '{}': {}", mdl.GetName(), err);
 	}
 }
-void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(pragma::Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache)
+void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(pragma::asset::Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &boneCaches = mdlHbBvhCache.boneCache;
@@ -73,7 +73,7 @@ void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(pragma::Model &m
 		}
 	}
 }
-std::shared_future<void> pragma::bvh::HitboxBvhCache::GenerateModelCache(const ModelName &mdlName, pragma::Model &mdl)
+std::shared_future<void> pragma::bvh::HitboxBvhCache::GenerateModelCache(const ModelName &mdlName, pragma::asset::Model &mdl)
 {
 	auto normName = pragma::asset::get_normalized_path(mdlName, pragma::asset::Type::Model);
 	auto it = m_modelBvhCache.find(normName);
@@ -278,7 +278,7 @@ void CHitboxBvhComponent::InitializeHitboxMeshBvhs()
 	if(numLods == 0)
 		return;
 	auto &lastLod = mdl->GetLODs().back();
-	std::vector<std::shared_ptr<pragma::ModelSubMesh>> lodMeshes;
+	std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> lodMeshes;
 	mdl->GetBodyGroupMeshes(mdlC->GetBodyGroups(), lastLod.lod, lodMeshes);
 
 	std::unordered_set<std::string> renderMeshUuids;
@@ -310,14 +310,14 @@ static void draw_mesh(const pragma::bvh::MeshBvhTree &bvhTree, const umath::Scal
 		verts.push_back(pragma::bvh::from_bvh_vector(tri.p1));
 		verts.push_back(pragma::bvh::from_bvh_vector(tri.p2));
 	}
-	auto o = DebugRenderer::DrawMesh(verts, {color, outlineColor, duration});
+	auto o = pragma::debug::DebugRenderer::DrawMesh(verts, {color, outlineColor, duration});
 	if(o)
 		o->SetPose(pose);
 }
 
 bool CHitboxBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &max, IntersectionInfo *outIntersectionInfo) const
 {
-	auto &ent = static_cast<const CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<const ecs::CBaseEntity &>(GetEntity());
 	auto *renderC = ent.GetRenderComponent();
 	if(!renderC)
 		return false;
@@ -402,7 +402,7 @@ bool CHitboxBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3
 }
 bool CHitboxBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &planes, IntersectionInfo *outIntersectionInfo) const
 {
-	auto &ent = static_cast<const CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<const ecs::CBaseEntity &>(GetEntity());
 	auto *renderC = ent.GetRenderComponent();
 	if(!renderC)
 		return false;
@@ -508,7 +508,7 @@ bool CHitboxBvhComponent::UpdateHitboxMeshCache() const
 
 bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitInfo &outHitInfo, const bvh::DebugDrawInfo *debugDrawInfo) const
 {
-	auto &ent = static_cast<const CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<const ecs::CBaseEntity &>(GetEntity());
 	auto *renderC = ent.GetRenderComponent();
 	if(!renderC)
 		return false;
@@ -653,7 +653,7 @@ void CHitboxBvhComponent::DebugDrawHitboxMeshes(animation::BoneId boneId, float 
 			}
 		});
 
-		auto o = DebugRenderer::DrawMesh(dbgVerts, {col, colors::White, duration});
+		auto o = pragma::debug::DebugRenderer::DrawMesh(dbgVerts, {col, colors::White, duration});
 		if(o)
 			o->SetPose(pose);
 
@@ -679,10 +679,10 @@ void CHitboxBvhComponent::DebugDraw()
 			continue;
 		auto pose = hObb.GetPose(effectivePoses);
 		auto &pos = pose.GetOrigin();
-		DebugRenderInfo renderInfo {color, outlineColor, duration};
+		pragma::debug::DebugRenderInfo renderInfo {color, outlineColor, duration};
 		renderInfo.pose.SetOrigin(pos);
 		renderInfo.pose.SetRotation(pose.GetRotation());
-		::DebugRenderer::DrawBox(-hObb.halfExtents, hObb.halfExtents, renderInfo);
+		pragma::debug::DebugRenderer::DrawBox(-hObb.halfExtents, hObb.halfExtents, renderInfo);
 	}
 
 	auto &mdl = ent.GetModel();
@@ -710,7 +710,7 @@ void CHitboxBvhComponent::DebugDraw()
 				dbgMeshVerts.push_back(v2);
 			}
 		}
-		::DebugRenderer::DrawMesh(dbgMeshVerts, {color, outlineColor, duration});
+		pragma::debug::DebugRenderer::DrawMesh(dbgMeshVerts, {color, outlineColor, duration});
 	}
 }
 

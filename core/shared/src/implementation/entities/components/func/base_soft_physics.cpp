@@ -8,14 +8,14 @@ import :entities.components.func.base_soft_physics;
 
 using namespace pragma;
 
-PhysSoftBodyInfo *BaseFuncSoftPhysicsComponent::GetSoftBodyInfo() { return &m_softBodyInfo; }
+pragma::physics::PhysSoftBodyInfo *BaseFuncSoftPhysicsComponent::GetSoftBodyInfo() { return &m_softBodyInfo; }
 
 // TODO
 /*PhysObj *BaseFuncSoftPhysicsComponent::InitializePhysics()
 {
 	if(m_bClientsidePhysics == true)
 		return nullptr;
-	return Entity::InitializePhysics(pragma::physics::PHYSICSTYPE::SOFTBODY);
+	return Entity::InitializePhysics(pragma::physics::PhysicsType::SoftBody);
 }*/
 
 void BaseFuncSoftPhysicsComponent::Initialize()

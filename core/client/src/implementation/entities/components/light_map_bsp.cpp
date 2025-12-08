@@ -62,7 +62,7 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 	// imgBuf->Clear(colors::Red);
 
 	auto mapPath = "maps/" + pragma::get_cgame()->GetMapName() + ".bsp";
-	auto *convertLightmapDataToBspLuxelData = reinterpret_cast<bool (*)(NetworkState &, const std::string &, const uimg::ImageBuffer &, uint32_t, uint32_t, std::string &)>(::util::impl::get_module_func(pragma::get_client_state(), "convert_lightmap_data_to_bsp_luxel_data"));
+	auto *convertLightmapDataToBspLuxelData = reinterpret_cast<bool (*)(pragma::NetworkState &, const std::string &, const uimg::ImageBuffer &, uint32_t, uint32_t, std::string &)>(::util::impl::get_module_func(pragma::get_client_state(), "convert_lightmap_data_to_bsp_luxel_data"));
 	if(convertLightmapDataToBspLuxelData == nullptr)
 		return;
 	std::string errMsg;

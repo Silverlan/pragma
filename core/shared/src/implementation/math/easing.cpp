@@ -213,7 +213,7 @@ float ease::sine::ease_in(float p) { return sin((p - 1) * umath::pi_2) + 1; }
 float ease::sine::ease_out(float p) { return sin(p * umath::pi_2); }
 float ease::sine::ease_in_out(float p) { return 0.5 * (1 - cos(p * umath::pi)); }
 
-float umath::ease_in(float t, EaseType type)
+float pragma::math::ease_in(float t, EaseType type)
 {
 	switch(type) {
 	case EaseType::Back:
@@ -241,7 +241,7 @@ float umath::ease_in(float t, EaseType type)
 	}
 	return 0.f;
 }
-float umath::ease_out(float t, EaseType type)
+float pragma::math::ease_out(float t, EaseType type)
 {
 	switch(type) {
 	case EaseType::Back:
@@ -269,7 +269,7 @@ float umath::ease_out(float t, EaseType type)
 	}
 	return 0.f;
 }
-float umath::ease_in_out(float t, EaseType type)
+float pragma::math::ease_in_out(float t, EaseType type)
 {
 	switch(type) {
 	case EaseType::Back:

@@ -38,7 +38,7 @@ static void reload_all_shadow_maps()
 	}
 }
 
-static void cmd_render_shadow_quality(NetworkState *, const ConVar &, int, int quality)
+static void cmd_render_shadow_quality(pragma::NetworkState *, const pragma::console::ConVar &, int, int quality)
 {
 	reload_all_shadow_maps();
 	auto *client = pragma::get_client_state();
@@ -51,7 +51,7 @@ namespace {
 }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_shadow_dynamic", +[](NetworkState *, const ConVar &, bool, bool) { reload_all_shadow_maps(); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_shadow_dynamic", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool) { reload_all_shadow_maps(); });
 }
 
 prosper::IDescriptorSet *CShadowComponent::GetDescriptorSet()
@@ -95,8 +95,8 @@ void CShadowComponent::InitializeLuaObject(lua::State *l) { return BaseEntityCom
 LightShadowRenderer &CShadowComponent::GetRenderer() { return *m_lightShadowRenderer; }
 const LightShadowRenderer &CShadowComponent::GetRenderer() const { return const_cast<CShadowComponent *>(this)->GetRenderer(); }
 
-static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
-static CVar cvShadowQuality = GetClientConVar("render_shadow_quality");
+static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
+static auto cvShadowQuality = pragma::console::get_client_con_var("render_shadow_quality");
 void CShadowComponent::ReloadDepthTextures()
 {
 	//Scene::ClearLightCache();
@@ -167,7 +167,7 @@ bool CShadowComponent::HasRenderTarget() const { return m_hRt.valid(); }
 
 bool CShadowComponent::ShouldUpdateLayer(uint32_t) const { return true; }
 
-void CShadowComponent::RenderShadows(const util::DrawSceneInfo &drawSceneInfo)
+void CShadowComponent::RenderShadows(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_lightShadowRenderer == nullptr)
 		return;
@@ -178,7 +178,7 @@ void CShadowComponent::RenderShadows(const util::DrawSceneInfo &drawSceneInfo)
 
 LightShadowRenderer::LightShadowRenderer(CLightComponent &l) : m_hLight {l.GetHandle<CLightComponent>()}
 {
-	auto &ent = static_cast<CBaseEntity &>(l.GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(l.GetEntity());
 	m_cbPreRenderScenes = pragma::get_cgame()->AddCallback("PreRenderScenes", FunctionCallback<void>::Create([this]() {
 		m_requiresRenderQueueUpdate = true;
 		m_renderState = RenderState::RenderRequiredOnChange;
@@ -215,7 +215,7 @@ void LightShadowRenderer::UpdateSceneCallbacks()
 	}
 	m_sceneCallbacks.clear();
 #if 0
-	auto scenes = static_cast<CBaseEntity&>(m_hLight->GetEntity()).GetScenes();
+	auto scenes = static_cast<pragma::ecs::CBaseEntity&>(m_hLight->GetEntity()).GetScenes();
 	for(auto *scene : scenes)
 	{
 		scene->AddEventCallback(cSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
@@ -235,14 +235,14 @@ void LightShadowRenderer::UpdateSceneCallbacks()
 #endif
 }
 
-static auto cvLodBias = GetClientConVar("cl_render_shadow_lod_bias");
-static auto cvInstancingEnabled = GetClientConVar("render_instancing_enabled");
-void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
+static auto cvLodBias = pragma::console::get_client_con_var("cl_render_shadow_lod_bias");
+static auto cvInstancingEnabled = pragma::console::get_client_con_var("render_instancing_enabled");
+void LightShadowRenderer::BuildRenderQueues(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_hLight.expired())
 		return;
 	auto &light = *m_hLight;
-	auto &ent = static_cast<CBaseEntity &>(light.GetEntity());
+	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(light.GetEntity());
 	auto &scene = *drawSceneInfo.scene;
 	auto shadowC = m_hLight->GetShadowComponent<pragma::CShadowComponent>();
 	if(m_requiresRenderQueueUpdate == false || ent.IsInScene(scene) == false || shadowC == nullptr)
@@ -303,7 +303,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			  entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
 			  bspLeafNodes.reserve(entItWorld.GetCount());
 			  for(auto *entWorld : entItWorld) {
-				  if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity *>(entWorld), scene, drawSceneInfo.renderFlags, renderMask) == false)
+				  if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<ecs::CBaseEntity *>(entWorld), scene, drawSceneInfo.renderFlags, renderMask) == false)
 					  continue;
 				  auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
 				  auto &bspTree = worldC->GetBSPTree();
@@ -312,10 +312,10 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 					  continue;
 				  bspLeafNodes.push_back(node);
 
-				  if(umath::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::Static) == false)
+				  if(umath::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::Static) == false)
 					  continue;
 
-				  auto *renderC = static_cast<CBaseEntity &>(worldC->GetEntity()).GetRenderComponent();
+				  auto *renderC = static_cast<pragma::ecs::CBaseEntity &>(worldC->GetEntity()).GetRenderComponent();
 				  if(renderC->ShouldDrawShadow() == false)
 					  continue;
 				  renderC->UpdateRenderDataMT(scene, *hCam, vp);
@@ -343,7 +343,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 
 			  auto fGetRenderQueue = [&mainRenderQueue](pragma::rendering::SceneRenderPass renderMode, bool translucent) -> pragma::rendering::RenderQueue * { return (renderMode == pragma::rendering::SceneRenderPass::World) ? mainRenderQueue.get() : nullptr; };
 			  for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling()) {
-				  if(SceneRenderDesc::ShouldConsiderEntity(static_cast<CBaseEntity &>(pRenderComponent->GetEntity()), scene, drawSceneInfo.renderFlags, renderMask) == false || pRenderComponent->ShouldDrawShadow() == false)
+				  if(SceneRenderDesc::ShouldConsiderEntity(static_cast<pragma::ecs::CBaseEntity &>(pRenderComponent->GetEntity()), scene, drawSceneInfo.renderFlags, renderMask) == false || pRenderComponent->ShouldDrawShadow() == false)
 					  continue;
 				  SceneRenderDesc::AddRenderMeshesToRenderQueue(rasterizer, drawSceneInfo.renderFlags, *pRenderComponent, fGetRenderQueue, scene, *hCam, vp, nullptr);
 			  }
@@ -352,7 +352,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			  if(culler) {
 				  auto &dynOctree = culler->GetOcclusionOctree();
 				  SceneRenderDesc::CollectRenderMeshesFromOctree(rasterizer, drawSceneInfo.renderFlags, drawSceneInfo.clipPlane.has_value(), dynOctree, scene, *hCam, vp, renderMask, fGetRenderQueue, fShouldCull, nullptr, nullptr, lodBias,
-				    [](CBaseEntity &ent, const pragma::CSceneComponent &, RenderFlags) -> bool { return ent.GetRenderComponent()->ShouldDrawShadow(); });
+				    [](ecs::CBaseEntity &ent, const pragma::CSceneComponent &, rendering::RenderFlags) -> bool { return ent.GetRenderComponent()->ShouldDrawShadow(); });
 			  }
 		  }
 	  },
@@ -374,11 +374,11 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 					  renderQueue->sortedItemIndices = mainRenderQueue->sortedItemIndices;
 				  }
 
-				  auto &planes = lightPointC->GetFrustumPlanes(static_cast<CubeMapSide>(i));
+				  auto &planes = lightPointC->GetFrustumPlanes(static_cast<rendering::CubeMapSide>(i));
 				  auto fShouldCull = [&planes](const Vector3 &min, const Vector3 &max) -> bool { return umath::intersection::aabb_in_plane_mesh(min, max, planes.begin(), planes.end()) == umath::intersection::Intersect::Outside; };
 				  for(auto it = renderQueue->queue.begin(); it != renderQueue->queue.end();) {
 					  auto &item = *it;
-					  auto *ent = static_cast<CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(item.entity));
+					  auto *ent = static_cast<ecs::CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(item.entity));
 					  auto *renderC = ent->GetRenderComponent();
 					  if(SceneRenderDesc::ShouldCull(*renderC, fShouldCull) == false || SceneRenderDesc::ShouldCull(*renderC, item.mesh, fShouldCull) == false) {
 						  ++it;
@@ -419,7 +419,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 bool LightShadowRenderer::DoesRenderQueueRequireBuilding() const { return m_requiresRenderQueueUpdate; }
 bool LightShadowRenderer::IsRenderQueueComplete() const { return !m_requiresRenderQueueUpdate && m_renderQueuesComplete; }
 
-void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
+void LightShadowRenderer::Render(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_renderState == RenderState::NoRenderRequired || m_hLight.expired())
 		return;
@@ -465,11 +465,11 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	drawCmd->RecordImageBarrier(img, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
 	for(auto layerId = decltype(numLayers) {0}; layerId < numLayers; ++layerId)
-		CSceneComponent::UpdateRenderBuffers(drawCmd, *m_renderQueues.at(layerId), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::ShadowPass) : nullptr);
+		CSceneComponent::UpdateRenderBuffers(drawCmd, *m_renderQueues.at(layerId), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::ShadowPass) : nullptr);
 
 	auto pipeline = m_hLight->AreMorphTargetsInShadowsEnabled() ? ShaderShadow::Pipeline::WithMorphTargetAnimations : ShaderShadow::Pipeline::Default;
 
-	util::RenderPassDrawInfo rpDrawInfo {drawSceneInfo, *drawSceneInfo.commandBuffer};
+	pragma::rendering::RenderPassDrawInfo rpDrawInfo {drawSceneInfo, *drawSceneInfo.commandBuffer};
 	rendering::DepthStageRenderProcessor shadowRenderProcessor {rpDrawInfo, {}};
 	for(auto layerId = decltype(numLayers) {0}; layerId < numLayers; ++layerId) {
 		auto *framebuffer = shadowC->GetFramebuffer(layerId);
@@ -480,7 +480,7 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 
 		if(shadowRenderProcessor.BindShader(*shader, umath::to_integral(pipeline))) {
 			shadowRenderProcessor.BindLight(*m_hLight, layerId);
-			shadowRenderProcessor.Render(*m_renderQueues.at(layerId), pragma::rendering::RenderPass::Shadow, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::ShadowPass) : nullptr);
+			shadowRenderProcessor.Render(*m_renderQueues.at(layerId), pragma::rendering::RenderPass::Shadow, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::ShadowPass) : nullptr);
 
 			// TODO: Translucent render pass ?
 			shadowRenderProcessor.UnbindShader();

@@ -21,7 +21,7 @@ export namespace pragma {
 		virtual uint32_t GetPostProcessingWeight() const override { return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::Fog) - 20'000; }
 	  private:
 		void ReloadRenderTarget();
-		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) override;
+		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) override;
 		std::shared_ptr<prosper::RenderTarget> m_renderTarget;
 	};
 };

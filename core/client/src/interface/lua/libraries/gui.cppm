@@ -20,40 +20,40 @@ export namespace Lua {
 			std::shared_ptr<prosper::ICommandBuffer> commandBuffer = nullptr;
 		};
 
-		DLLCLIENT ::WIBase *create(CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y, uint32_t w, uint32_t h, float left, float top, float right, float bottom);
-		DLLCLIENT ::WIBase *create(CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y, uint32_t w, uint32_t h);
-		DLLCLIENT ::WIBase *create(CGame *game, const std::string &name, ::WIBase &parent, int32_t x, int32_t y);
-		DLLCLIENT ::WIBase *create(CGame *game, const std::string &name, ::WIBase *parent);
-		DLLCLIENT ::WIBase *create(CGame *game, const std::string &name);
+		DLLCLIENT pragma::gui::types::WIBase *create(pragma::CGame *game, const std::string &name, pragma::gui::types::WIBase &parent, int32_t x, int32_t y, uint32_t w, uint32_t h, float left, float top, float right, float bottom);
+		DLLCLIENT pragma::gui::types::WIBase *create(pragma::CGame *game, const std::string &name, pragma::gui::types::WIBase &parent, int32_t x, int32_t y, uint32_t w, uint32_t h);
+		DLLCLIENT pragma::gui::types::WIBase *create(pragma::CGame *game, const std::string &name, pragma::gui::types::WIBase &parent, int32_t x, int32_t y);
+		DLLCLIENT pragma::gui::types::WIBase *create(pragma::CGame *game, const std::string &name, pragma::gui::types::WIBase *parent);
+		DLLCLIENT pragma::gui::types::WIBase *create(pragma::CGame *game, const std::string &name);
 
-		DLLCLIENT ::WIBase *create_button(lua::State *l, const std::string &text);
-		DLLCLIENT ::WIBase *create_button(lua::State *l, const std::string &text, ::WIBase &parent);
-		DLLCLIENT ::WIBase *create_button(lua::State *l, const std::string &text, ::WIBase &parent, int32_t x, int32_t y);
+		DLLCLIENT pragma::gui::types::WIBase *create_button(lua::State *l, const std::string &text);
+		DLLCLIENT pragma::gui::types::WIBase *create_button(lua::State *l, const std::string &text, pragma::gui::types::WIBase &parent);
+		DLLCLIENT pragma::gui::types::WIBase *create_button(lua::State *l, const std::string &text, pragma::gui::types::WIBase &parent, int32_t x, int32_t y);
 
-		DLLCLIENT Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> create_checkbox(lua::State *l, const std::string &label, ::WIBase &parent);
-		DLLCLIENT Lua::opt<Lua::mult<Lua::type<::WIBase>, Lua::type<::WIBase>, Lua::type<::WIBase>>> create_checkbox(lua::State *l, const std::string &label);
+		DLLCLIENT Lua::opt<Lua::mult<Lua::type<pragma::gui::types::WIBase>, Lua::type<pragma::gui::types::WIBase>, Lua::type<pragma::gui::types::WIBase>>> create_checkbox(lua::State *l, const std::string &label, pragma::gui::types::WIBase &parent);
+		DLLCLIENT Lua::opt<Lua::mult<Lua::type<pragma::gui::types::WIBase>, Lua::type<pragma::gui::types::WIBase>, Lua::type<pragma::gui::types::WIBase>>> create_checkbox(lua::State *l, const std::string &label);
 
-		DLLCLIENT ::WIBase *create_label(lua::State *l, const std::string &str, ::WIBase &parent, int32_t x, int32_t y);
-		DLLCLIENT ::WIBase *create_label(lua::State *l, const std::string &str, ::WIBase &parent);
-		DLLCLIENT ::WIBase *create_label(lua::State *l, const std::string &str);
+		DLLCLIENT pragma::gui::types::WIBase *create_label(lua::State *l, const std::string &str, pragma::gui::types::WIBase &parent, int32_t x, int32_t y);
+		DLLCLIENT pragma::gui::types::WIBase *create_label(lua::State *l, const std::string &str, pragma::gui::types::WIBase &parent);
+		DLLCLIENT pragma::gui::types::WIBase *create_label(lua::State *l, const std::string &str);
 
 		DLLCLIENT void register_element(const std::string &className, const Lua::classObject &classData);
-		DLLCLIENT ::WIBase *get_base_element(const prosper::Window &window);
-		DLLCLIENT ::WIBase *get_base_element();
+		DLLCLIENT pragma::gui::types::WIBase *get_base_element(const prosper::Window &window);
+		DLLCLIENT pragma::gui::types::WIBase *get_base_element();
 
-		DLLCLIENT ::WIBase *get_element_at_position(lua::State *l);
-		DLLCLIENT ::WIBase *get_element_at_position(lua::State *l, prosper::Window *window);
-		DLLCLIENT ::WIBase *get_element_at_position(lua::State *l, prosper::Window *window, ::WIBase *baseElement);
-		DLLCLIENT ::WIBase *get_element_at_position(lua::State *l, prosper::Window *window, ::WIBase *baseElement, int32_t x, int32_t y);
-		DLLCLIENT ::WIBase *get_element_at_position(lua::State *l, prosper::Window *window, ::WIBase *baseElement, int32_t x, int32_t y, const Lua::func<bool, ::WIBase> &condition);
+		DLLCLIENT pragma::gui::types::WIBase *get_element_at_position(lua::State *l);
+		DLLCLIENT pragma::gui::types::WIBase *get_element_at_position(lua::State *l, prosper::Window *window);
+		DLLCLIENT pragma::gui::types::WIBase *get_element_at_position(lua::State *l, prosper::Window *window, pragma::gui::types::WIBase *baseElement);
+		DLLCLIENT pragma::gui::types::WIBase *get_element_at_position(lua::State *l, prosper::Window *window, pragma::gui::types::WIBase *baseElement, int32_t x, int32_t y);
+		DLLCLIENT pragma::gui::types::WIBase *get_element_at_position(lua::State *l, prosper::Window *window, pragma::gui::types::WIBase *baseElement, int32_t x, int32_t y, const Lua::func<bool, pragma::gui::types::WIBase> &condition);
 
-		DLLCLIENT ::WIBase *get_element_under_cursor(lua::State *l, ::WIBase &elRoot, const Lua::func<bool, ::WIBase> &condition);
-		DLLCLIENT ::WIBase *get_element_under_cursor(lua::State *l, const prosper::Window *window, const Lua::func<bool, ::WIBase> &condition);
-		DLLCLIENT ::WIBase *get_element_under_cursor(lua::State *l, const Lua::func<bool, ::WIBase> &condition);
-		DLLCLIENT ::WIBase *get_element_under_cursor(lua::State *l, const prosper::Window *window = nullptr);
-		DLLCLIENT ::WIBase *get_element_under_cursor(lua::State *l, ::WIBase &elRoot);
-		DLLCLIENT ::WIBase *get_focused_element(lua::State *l);
-		DLLCLIENT ::WIBase *get_focused_element(lua::State *l, prosper::Window &window);
+		DLLCLIENT pragma::gui::types::WIBase *get_element_under_cursor(lua::State *l, pragma::gui::types::WIBase &elRoot, const Lua::func<bool, pragma::gui::types::WIBase> &condition);
+		DLLCLIENT pragma::gui::types::WIBase *get_element_under_cursor(lua::State *l, const prosper::Window *window, const Lua::func<bool, pragma::gui::types::WIBase> &condition);
+		DLLCLIENT pragma::gui::types::WIBase *get_element_under_cursor(lua::State *l, const Lua::func<bool, pragma::gui::types::WIBase> &condition);
+		DLLCLIENT pragma::gui::types::WIBase *get_element_under_cursor(lua::State *l, const prosper::Window *window = nullptr);
+		DLLCLIENT pragma::gui::types::WIBase *get_element_under_cursor(lua::State *l, pragma::gui::types::WIBase &elRoot);
+		DLLCLIENT pragma::gui::types::WIBase *get_focused_element(lua::State *l);
+		DLLCLIENT pragma::gui::types::WIBase *get_focused_element(lua::State *l, prosper::Window &window);
 		DLLCLIENT bool register_skin(lua::State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData);
 		DLLCLIENT bool register_skin(lua::State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData, const std::string &baseName);
 		DLLCLIENT void register_default_skin(const std::string &vars, const std::string &skinData);

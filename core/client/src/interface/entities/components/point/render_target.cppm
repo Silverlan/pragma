@@ -53,7 +53,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CPointRenderTarget : public CBaseEntity {
+	class DLLCLIENT CPointRenderTarget : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

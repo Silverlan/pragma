@@ -28,20 +28,20 @@ void SPhysicsComponent::SetKinematic(bool b)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<bool>(b);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SETKINEMATIC, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
-void SPhysicsComponent::SetMoveType(pragma::physics::MOVETYPE movetype)
+void SPhysicsComponent::SetMoveType(pragma::physics::MoveType movetype)
 {
 	BasePhysicsComponent::SetMoveType(movetype);
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(!ent.IsShared())
 		return;
 	NetPacket p;
-	nwm::write_entity(p, &ent);
+	pragma::networking::write_entity(p, &ent);
 	p->Write<unsigned char>(static_cast<unsigned char>(movetype));
 	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_MOVETYPE, p, pragma::networking::Protocol::SlowReliable);
 }
@@ -51,7 +51,7 @@ void SPhysicsComponent::OnPhysicsInitialized()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<unsigned int>(static_cast<unsigned int>(m_physicsType));
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_PHYS_INIT, p, pragma::networking::Protocol::SlowReliable);
 	}
@@ -62,7 +62,7 @@ void SPhysicsComponent::OnPhysicsDestroyed()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_PHYS_DESTROY, p, pragma::networking::Protocol::SlowReliable);
 	}
 }
@@ -87,14 +87,14 @@ void SPhysicsComponent::SetSimulationEnabled(bool b)
 	p->Write<bool>(b);
 	ent.SendNetEvent(m_netEvSetSimEnabled, p, pragma::networking::Protocol::SlowReliable);
 }
-void SPhysicsComponent::SetCollisionType(pragma::physics::COLLISIONTYPE collisiontype)
+void SPhysicsComponent::SetCollisionType(pragma::physics::CollisionType collisiontype)
 {
 	BasePhysicsComponent::SetCollisionType(collisiontype);
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(!ent.IsShared())
 		return;
 	NetPacket p;
-	nwm::write_entity(p, &ent);
+	pragma::networking::write_entity(p, &ent);
 	p->Write<unsigned char>(static_cast<unsigned char>(collisiontype));
 	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_COLLISIONTYPE, p, pragma::networking::Protocol::SlowReliable);
 }
@@ -105,7 +105,7 @@ void SPhysicsComponent::SetCollisionFilter(pragma::physics::CollisionMask filter
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p, &ent);
+		pragma::networking::write_entity(p, &ent);
 		p->Write<unsigned int>(static_cast<unsigned int>(filterGroup));
 		p->Write<unsigned int>(static_cast<unsigned int>(filterMask));
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SETCOLLISIONFILTER, p, pragma::networking::Protocol::SlowReliable);
@@ -115,7 +115,7 @@ void SPhysicsComponent::SetCollisionFilter(pragma::physics::CollisionMask filter
 bool SPhysicsComponent::PostPhysicsSimulate()
 {
 	auto keepAwake = BasePhysicsComponent::PostPhysicsSimulate();
-	if(GetPhysicsType() != pragma::physics::PHYSICSTYPE::SOFTBODY)
+	if(GetPhysicsType() != pragma::physics::PhysicsType::SoftBody)
 		return keepAwake;
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());

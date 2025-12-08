@@ -46,7 +46,7 @@ void SAIComponent::SetHearingStrength(float strength) { m_hearingStrength = umat
 float SAIComponent::GetHearingStrength() const { return m_hearingStrength; }
 bool SAIComponent::CanHear() const { return (m_hearingStrength == 0.f) ? false : true; }
 
-bool SAIComponent::OnSuspiciousSoundHeared(std::shared_ptr<ALSound> &snd)
+bool SAIComponent::OnSuspiciousSoundHeared(std::shared_ptr<pragma::audio::ALSound> &snd)
 {
 	CEOnSuspiciousSoundHeared evData {snd};
 	return BroadcastEvent(sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED, evData) == util::EventReply::Handled;
@@ -72,7 +72,7 @@ void SAIComponent::Listen(std::vector<TargetInfo> &targets)
 		return;
 	auto hearingIntensity = 1.f - umath::clamp(GetHearingStrength(), 0.f, 1.f);
 	auto &pos = pTrComponent->GetPosition();
-	auto &sounds = ServerState::Get()->GetSounds();
+	auto &sounds = pragma::ServerState::Get()->GetSounds();
 	auto &t = SGame::Get()->CurTime();
 	for(auto &rsnd : sounds) {
 		auto &snd = rsnd.get();

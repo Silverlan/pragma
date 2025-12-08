@@ -30,7 +30,7 @@ Frustum::Frustum() : radius(0.f)
 	projection = umat::identity();
 }
 
-static void cmd_cl_render_shadow_pssm_split_count(NetworkState *, const ConVar &, int, int val)
+static void cmd_cl_render_shadow_pssm_split_count(pragma::NetworkState *, const pragma::console::ConVar &, int, int val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -48,7 +48,7 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_shadow_pssm_split_count", &cmd_cl_render_shadow_pssm_split_count);
 }
 
-static void cmd_render_csm_max_distance(NetworkState *, const ConVar &, float, float val)
+static void cmd_render_csm_max_distance(pragma::NetworkState *, const pragma::console::ConVar &, float, float val)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
@@ -65,8 +65,8 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<float>("render_csm_max_distance", &cmd_render_csm_max_distance);
 }
 
-static CVar cvCascadeCount = GetClientConVar("cl_render_shadow_pssm_split_count");
-static CVar cvRange = GetClientConVar("render_csm_max_distance");
+static auto cvCascadeCount = pragma::console::get_client_con_var("cl_render_shadow_pssm_split_count");
+static auto cvRange = pragma::console::get_client_con_var("render_csm_max_distance");
 CShadowCSMComponent::CShadowCSMComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_maxDistance {cvRange->GetFloat()}, m_layerUpdate {false}
 {
 	SetSplitCount(cvCascadeCount->GetInt());
@@ -144,9 +144,9 @@ uint32_t CShadowCSMComponent::GetLayerCount() const { return m_layerCount; }
 
 void CShadowCSMComponent::SetFrustumUpdateCallback(const std::function<void(void)> &f) { m_onFrustumUpdated = f; }
 
-static CVar cvUpdateFrequency = GetClientConVar("cl_render_shadow_update_frequency");
-static CVar cvUpdateFrequencyOffset = GetClientConVar("cl_render_shadow_pssm_update_frequency_offset");
-static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
+static auto cvUpdateFrequency = pragma::console::get_client_con_var("cl_render_shadow_update_frequency");
+static auto cvUpdateFrequencyOffset = pragma::console::get_client_con_var("cl_render_shadow_pssm_update_frequency_offset");
+static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
 void CShadowCSMComponent::UpdateFrustum(uint32_t splitId, pragma::CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir)
 {
 	auto &frustumSplit = m_frustums.at(splitId);
@@ -170,10 +170,10 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId, pragma::CCameraCompone
 	cam.SetNearZ(zNear);
 	cam.SetFarZ(zFar);
 
-	auto &ftr = frustumSplit.points[static_cast<int>(FrustumPoint::FarTopRight)];
-	auto &fbl = frustumSplit.points[static_cast<int>(FrustumPoint::FarBottomLeft)];
-	auto &nbl = frustumSplit.points[static_cast<int>(FrustumPoint::NearBottomLeft)];
-	auto &ntr = frustumSplit.points[static_cast<int>(FrustumPoint::NearTopRight)];
+	auto &ftr = frustumSplit.points[static_cast<int>(pragma::math::FrustumPoint::FarTopRight)];
+	auto &fbl = frustumSplit.points[static_cast<int>(pragma::math::FrustumPoint::FarBottomLeft)];
+	auto &nbl = frustumSplit.points[static_cast<int>(pragma::math::FrustumPoint::NearBottomLeft)];
+	auto &ntr = frustumSplit.points[static_cast<int>(pragma::math::FrustumPoint::NearTopRight)];
 
 	std::vector<Vector3> trapezoid = {ftr, fbl, nbl, ntr};
 	auto &center = frustumSplit.center;
@@ -315,7 +315,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 						it = meshesInfo.entityMeshes.erase(it);
 						continue;
 					}
-					auto *ent = static_cast<CBaseEntity*>(info.hEntity.get());
+					auto *ent = static_cast<pragma::ecs::CBaseEntity*>(info.hEntity.get());
 					auto &mdlComponent = ent->GetRenderComponent()->GetModelComponent();
 					auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 					if(mdl == nullptr)
@@ -334,12 +334,12 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 						{
 							uint32_t renderFlags = 0;
 							auto mesh = ptrMesh.lock();
-							if(info.bAlreadyPassed == true || pLightComponent->ShouldPass(*ent,*static_cast<CModelMesh*>(mesh.get()),renderFlags) == true && (renderFlags &layerFlag) != 0)
+							if(info.bAlreadyPassed == true || pLightComponent->ShouldPass(*ent,*static_cast<pragma::geometry::CModelMesh*>(mesh.get()),renderFlags) == true && (renderFlags &layerFlag) != 0)
 							{
 								for(auto &subMesh : mesh->GetSubMeshes())
 								{
 									uint32_t renderFlags = 0;
-									auto &cSubMesh = *static_cast<CModelSubMesh*>(subMesh.get());
+									auto &cSubMesh = *static_cast<pragma::geometry::CModelSubMesh*>(subMesh.get());
 									if(pLightComponent->ShouldPass(*mdl,cSubMesh) == true)
 									{
 										auto matIdx = mdl->GetMaterialIndex(cSubMesh);
@@ -381,7 +381,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 						{
 							if(meshInfo.hEntity.IsValid() == false)
 								continue;
-							auto *ent = static_cast<CBaseEntity*>(meshInfo.hEntity.get());
+							auto *ent = static_cast<pragma::ecs::CBaseEntity*>(meshInfo.hEntity.get());
 							if(ent != prevEntity)
 							{
 								shaderCsmTransparent->BindEntity(*ent,GetViewProjectionMatrix(layer));
@@ -394,7 +394,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 								auto &wpSubMesh = meshInfo.subMeshes.front();
 								if(wpSubMesh.expired() == false)
 								{
-									auto *cSubMesh = static_cast<CModelSubMesh*>(wpSubMesh.lock().get());
+									auto *cSubMesh = static_cast<pragma::geometry::CModelSubMesh*>(wpSubMesh.lock().get());
 									auto matIdx = mdl->GetMaterialIndex(*cSubMesh);
 									auto *mat = matIdx.has_value() ? mdl->GetMaterial(*matIdx) : nullptr;
 									if(mat != nullptr)
@@ -434,8 +434,8 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 		for(auto *ent : entIt)
 		{
-			auto pRenderComponent = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
-			if(ent->IsInert() == false || static_cast<CBaseEntity*>(ent)->IsInScene(*shadowScene) == false || pRenderComponent->ShouldDrawShadow(camPos) == false)
+			auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity*>(ent)->GetRenderComponent();
+			if(ent->IsInert() == false || static_cast<pragma::ecs::CBaseEntity*>(ent)->IsInScene(*shadowScene) == false || pRenderComponent->ShouldDrawShadow(camPos) == false)
 				continue;
 			if(ent->IsWorld())
 			{
@@ -443,7 +443,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 				continue;
 			}
 			uint32_t renderFlags = 0;
-			if(pLightComponent->ShouldPass(static_cast<CBaseEntity&>(*ent),renderFlags) == true)
+			if(pLightComponent->ShouldPass(static_cast<pragma::ecs::CBaseEntity&>(*ent),renderFlags) == true)
 			{
 				auto &info = meshes.entityMeshes.at(i++);
 				info.hEntity = ent->GetHandle();
@@ -465,10 +465,10 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 			auto meshTree = pWorldComponent.valid() ? pWorldComponent->GetMeshTree() : nullptr;
 			if(meshTree != nullptr)
 			{
-				meshTree->IterateObjects([layer,&light](const OcclusionOctree<std::shared_ptr<ModelMesh>>::Node &node) -> bool {
+				meshTree->IterateObjects([layer,&light](const OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>::Node &node) -> bool {
 					auto &bounds = node.GetWorldBounds();
 					return light.ShouldPass(layer,bounds.first,bounds.second);
-					},[layer,&light,&info](const std::shared_ptr<ModelMesh> &mesh) {
+					},[layer,&light,&info](const std::shared_ptr<pragma::geometry::ModelMesh> &mesh) {
 						Vector3 min,max;
 						mesh->GetBounds(min,max);
 						if(light.ShouldPass(layer,min,max) == false)

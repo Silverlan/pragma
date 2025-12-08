@@ -17,7 +17,7 @@ void pragma::console::commands::lua_run(lua::State *l, const std::string &chunkN
 	pragma::scripting::lua_core::run_string(l, lua, chunkName);
 }
 
-void pragma::console::commands::lua_run(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float)
+void pragma::console::commands::lua_run(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float)
 {
 	if(argv.empty()) {
 		Con::cwar << "No argument given to execute!" << Con::endl;
@@ -36,7 +36,7 @@ void pragma::console::commands::lua_run(NetworkState *state, pragma::BasePlayerC
 	state->GetGameState()->RunLua(lua);
 }
 
-void pragma::console::commands::lua_exec(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float)
+void pragma::console::commands::lua_exec(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float)
 {
 	if(argv.empty()) {
 		Con::cwar << "No argument given to execute!" << Con::endl;

@@ -6,11 +6,11 @@ module pragma.shared;
 
 import :game.ammo_type;
 
-AmmoType::AmmoType(UInt32 _id, const std::string &_name, DAMAGETYPE _dmgType, Int32 _dmg, Float _force) : id(_id), name(_name), damageType(_dmgType), damage(_dmg), force(_force) {}
+pragma::game::AmmoType::AmmoType(UInt32 _id, const std::string &_name, DamageType _dmgType, Int32 _dmg, Float _force) : id(_id), name(_name), damageType(_dmgType), damage(_dmg), force(_force) {}
 
-AmmoTypeManager::AmmoTypeManager() {}
+pragma::game::AmmoTypeManager::AmmoTypeManager() {}
 
-Bool AmmoTypeManager::RegisterAmmoType(const std::string &name, Int32 damage, Float force, DAMAGETYPE dmgType, AmmoType **ammoOut)
+Bool pragma::game::AmmoTypeManager::RegisterAmmoType(const std::string &name, Int32 damage, Float force, DamageType dmgType, AmmoType **ammoOut)
 {
 	auto *ammoType = GetAmmoType(name);
 	if(ammoType != nullptr) {
@@ -23,7 +23,7 @@ Bool AmmoTypeManager::RegisterAmmoType(const std::string &name, Int32 damage, Fl
 		*ammoOut = m_ammoTypes.back().get();
 	return true;
 }
-AmmoType *AmmoTypeManager::GetAmmoType(const std::string &name, UInt32 *ammoId)
+pragma::game::AmmoType *pragma::game::AmmoTypeManager::GetAmmoType(const std::string &name, UInt32 *ammoId)
 {
 	auto it = std::find_if(m_ammoTypes.begin(), m_ammoTypes.end(), [&name](std::unique_ptr<AmmoType> &ammoType) { return (name == ammoType->name) ? true : false; });
 	if(it == m_ammoTypes.end()) {
@@ -35,7 +35,7 @@ AmmoType *AmmoTypeManager::GetAmmoType(const std::string &name, UInt32 *ammoId)
 		*ammoId = (*it)->id;
 	return it->get();
 }
-AmmoType *AmmoTypeManager::GetAmmoType(UInt32 ammoId)
+pragma::game::AmmoType *pragma::game::AmmoTypeManager::GetAmmoType(UInt32 ammoId)
 {
 	if(ammoId == 0)
 		return nullptr;

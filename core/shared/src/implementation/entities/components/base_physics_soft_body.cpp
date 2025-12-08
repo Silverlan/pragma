@@ -38,7 +38,7 @@ util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::InitializeSo
 	auto *state = ent.GetNetworkState();
 	auto *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
-	util::TSharedHandle<SoftBodyPhysObj> phys = nullptr;
+	util::TSharedHandle<pragma::physics::SoftBodyPhysObj> phys = nullptr;
 	for(auto idx : softBodyMeshes) {
 		auto &colMesh = colMeshes.at(idx);
 		auto &sbInfo = *colMesh->GetSoftBodyInfo();
@@ -121,19 +121,19 @@ util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::InitializeSo
 			softBody->AppendAnchor(nodeIdx, *pRigid, (anchor.flags & pragma::physics::CollisionMesh::SoftBodyAnchor::Flags::DisableCollisions) != pragma::physics::CollisionMesh::SoftBodyAnchor::Flags::None, anchor.influence);
 		}
 		if(phys == nullptr)
-			phys = util::to_shared_handle<SoftBodyPhysObj>(pragma::physics::PhysObj::Create<SoftBodyPhysObj, pragma::physics::ISoftBody &>(*this, *softBody));
+			phys = util::to_shared_handle<pragma::physics::SoftBodyPhysObj>(pragma::physics::PhysObj::Create<pragma::physics::SoftBodyPhysObj, pragma::physics::ISoftBody &>(*this, *softBody));
 		else
 			phys->AddCollisionObject(*softBody);
 	}
 
 	if(phys == nullptr)
 		return {};
-	m_physObject = util::shared_handle_cast<SoftBodyPhysObj, pragma::physics::PhysObj>(phys);
+	m_physObject = util::shared_handle_cast<pragma::physics::SoftBodyPhysObj, pragma::physics::PhysObj>(phys);
 	m_physObject->Spawn();
 
-	m_physicsType = pragma::physics::PHYSICSTYPE::SOFTBODY;
+	m_physicsType = pragma::physics::PhysicsType::SoftBody;
 	SetCollisionFilter(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic, pragma::physics::CollisionMask::All);
-	SetMoveType(pragma::physics::MOVETYPE::PHYSICS);
+	SetMoveType(pragma::physics::MoveType::Physics);
 
 	InitializePhysObj();
 	OnPhysicsInitialized();

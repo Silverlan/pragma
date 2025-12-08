@@ -9,11 +9,11 @@ import :gui.silk_icon;
 
 import :client_state;
 
-WISilkIcon::WISilkIcon() : WIIcon() {}
+pragma::gui::types::WISilkIcon::WISilkIcon() : WIIcon() {}
 
-WISilkIcon::~WISilkIcon() {}
+pragma::gui::types::WISilkIcon::~WISilkIcon() {}
 
-void WISilkIcon::Initialize()
+void pragma::gui::types::WISilkIcon::Initialize()
 {
 	WIIcon::Initialize();
 	SetMaterial("wgui/silkicons");
@@ -151,7 +151,7 @@ static SilkIcon icons[] = {SilkIcon("accept", 0, 0), SilkIcon("add", 0, 1), Silk
   SilkIcon("webcam_delete", 7, 37), SilkIcon("webcam_error", 8, 36), SilkIcon("world", 9, 35), SilkIcon("world_add", 2, 42), SilkIcon("world_delete", 3, 41), SilkIcon("world_edit", 1, 43), SilkIcon("world_go", 0, 44), SilkIcon("world_link", 14, 30), SilkIcon("wrench", 12, 33),
   SilkIcon("wrench_orange", 13, 32), SilkIcon("xhtml", 14, 31), SilkIcon("xhtml_add", 4, 41), SilkIcon("xhtml_delete", 5, 40), SilkIcon("xhtml_go", 6, 39), SilkIcon("xhtml_valid", 7, 38), SilkIcon("zoom", 8, 37), SilkIcon("zoom_in", 9, 36), SilkIcon("zoom_out", 10, 35)};
 
-void WISilkIcon::SetIcon(std::string icon)
+void pragma::gui::types::WISilkIcon::SetIcon(std::string icon)
 {
 	ustring::to_lower(icon);
 	SilkIcon *info = nullptr;

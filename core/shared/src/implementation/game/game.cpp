@@ -132,14 +132,14 @@ void Lua::TableDump(lua::State *lua, int n)
 
 ////////////////
 
-pragma::Game::Game(NetworkState *state)
+pragma::Game::Game(pragma::NetworkState *state)
 {
 	m_stateNetwork = state;
 	m_mapInfo.name = "";
 	m_mapInfo.md5 = "";
 	m_luaNetMessageIndex.push_back("invalid");
 	m_luaEnts = std::make_unique<LuaEntityManager>();
-	m_ammoTypes = std::make_unique<AmmoTypeManager>();
+	m_ammoTypes = std::make_unique<pragma::game::AmmoTypeManager>();
 
 	RegisterCallback<void>("Tick");
 	RegisterCallback<void>("Think");
@@ -153,11 +153,11 @@ pragma::Game::Game(NetworkState *state)
 	RegisterCallback<void>("PostPhysicsSimulate");
 
 	RegisterCallback<void, pragma::ecs::BaseEntity *, uint16_t, uint16_t>("OnEntityHealthChanged");
-	RegisterCallback<void, pragma::ecs::BaseEntity *, std::reference_wrapper<DamageInfo>>("OnEntityTakeDamage");
-	RegisterCallback<void, pragma::ecs::BaseEntity *, std::reference_wrapper<DamageInfo>, uint16_t, uint16_t>("OnEntityTakenDamage");
-	RegisterCallback<void, pragma::BaseAIComponent *, DamageInfo *>("OnNPCDeath");
+	RegisterCallback<void, pragma::ecs::BaseEntity *, std::reference_wrapper<pragma::game::DamageInfo>>("OnEntityTakeDamage");
+	RegisterCallback<void, pragma::ecs::BaseEntity *, std::reference_wrapper<pragma::game::DamageInfo>, uint16_t, uint16_t>("OnEntityTakenDamage");
+	RegisterCallback<void, pragma::BaseAIComponent *, pragma::game::DamageInfo *>("OnNPCDeath");
 
-	RegisterCallback<void, pragma::BasePlayerComponent *, DamageInfo *>("OnPlayerDeath");
+	RegisterCallback<void, pragma::BasePlayerComponent *, pragma::game::DamageInfo *>("OnPlayerDeath");
 	RegisterCallback<void, pragma::BasePlayerComponent *>("OnPlayerSpawned");
 
 	RegisterCallbackWithOptionalReturn<bool, pragma::ActionInputControllerComponent *, pragma::Action, bool>("OnActionInput");
@@ -168,8 +168,8 @@ pragma::Game::Game(NetworkState *state)
 	RegisterCallback<void>("OnMapLoaded");
 	RegisterCallback<void>("OnPreLoadMap");
 	RegisterCallback<void>("OnGameReady");
-	RegisterCallback<void, ALSound *>("OnSoundCreated");
-	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<pragma::Model>>>("OnModelLoaded");
+	RegisterCallback<void, pragma::audio::ALSound *>("OnSoundCreated");
+	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<pragma::asset::Model>>>("OnModelLoaded");
 
 	RegisterCallback<void>("EndGame");
 
@@ -267,11 +267,11 @@ LuaEntityManager &pragma::Game::GetLuaEntityManager() { return *m_luaEnts.get();
 
 pragma::AnimationUpdateManager &pragma::Game::GetAnimationUpdateManager() { return *m_animUpdateManager; }
 
-const GameModeInfo *pragma::Game::GetGameMode() const { return const_cast<pragma::Game *>(this)->GetGameMode(); }
-GameModeInfo *pragma::Game::GetGameMode() { return m_gameMode; }
+const pragma::game::GameModeInfo *pragma::Game::GetGameMode() const { return const_cast<pragma::Game *>(this)->GetGameMode(); }
+pragma::game::GameModeInfo *pragma::Game::GetGameMode() { return m_gameMode; }
 void pragma::Game::SetGameMode(const std::string &gameMode)
 {
-	auto *info = GameModeManager::GetGameModeInfo(gameMode);
+	auto *info = pragma::game::GameModeManager::GetGameModeInfo(gameMode);
 	m_gameMode = info;
 
 	if(info) {
@@ -449,7 +449,7 @@ void pragma::Game::InitializeGame()
 	std::string err;
 	auto dllHandle = GetNetworkState()->InitializeLibrary(physEngineLibName, &err);
 	if(dllHandle) {
-		auto *fInitPhysicsEngine = dllHandle->FindSymbolAddress<void (*)(NetworkState &, std::unique_ptr<pragma::physics::IEnvironment, void (*)(pragma::physics::IEnvironment *)> &)>("initialize_physics_engine");
+		auto *fInitPhysicsEngine = dllHandle->FindSymbolAddress<void (*)(pragma::NetworkState &, std::unique_ptr<pragma::physics::IEnvironment, void (*)(pragma::physics::IEnvironment *)> &)>("initialize_physics_engine");
 		if(fInitPhysicsEngine != nullptr)
 			fInitPhysicsEngine(*GetNetworkState(), m_physEnvironment);
 		else
@@ -458,7 +458,7 @@ void pragma::Game::InitializeGame()
 	else
 		Con::cerr << "Unable to initialize physics engine '" << physEngineName << "': " << err << Con::endl;
 	if(m_physEnvironment) {
-		m_surfaceMaterialManager = std::make_unique<SurfaceMaterialManager>(*m_physEnvironment);
+		m_surfaceMaterialManager = std::make_unique<pragma::physics::SurfaceMaterialManager>(*m_physEnvironment);
 		m_physEnvironment->SetEventCallback(std::make_unique<PhysEventCallback>());
 
 		auto &tireTypeManager = m_physEnvironment->GetTireTypeManager();
@@ -510,7 +510,7 @@ void pragma::Game::GetSpawnedEntities(std::vector<pragma::ecs::BaseEntity *> *en
 	}
 }
 
-NetworkState *pragma::Game::GetNetworkState() { return m_stateNetwork; }
+pragma::NetworkState *pragma::Game::GetNetworkState() { return m_stateNetwork; }
 
 void pragma::Game::UpdateTime()
 {
@@ -591,13 +591,13 @@ void pragma::Game::Tick()
 
 	auto &awakePhysics = GetAwakePhysicsComponents();
 	for(auto &hPhysC : awakePhysics) {
-		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PHYSICSTYPE::NONE)
+		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PhysicsType::None)
 			continue;
 		hPhysC->PrePhysicsSimulate(); // Has to be called BEFORE PhysicsUpdate (This is where stuff like Character movement is handled)!
 	}
 
 	for(auto &hPhysC : awakePhysics) {
-		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PHYSICSTYPE::NONE)
+		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PhysicsType::None)
 			continue;
 		hPhysC->PhysicsUpdate(m_tDeltaTick); // Has to be called AFTER PrePhysicsSimulate (This is where physics objects are updated)!
 	}
@@ -615,7 +615,7 @@ void pragma::Game::Tick()
 
 	for(auto it = awakePhysics.begin(); it != awakePhysics.end();) {
 		auto &hPhysC = *it;
-		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PHYSICSTYPE::NONE) {
+		if(hPhysC.expired() || hPhysC->GetPhysicsType() == pragma::physics::PhysicsType::None) {
 			++it;
 			continue;
 		}
@@ -830,8 +830,8 @@ void pragma::Game::InitializeMapEntities(pragma::asset::WorldData &worldData, st
 	}
 }
 
-std::shared_ptr<pragma::Model> pragma::Game::CreateModel(const std::string &mdl) const { return m_stateNetwork->GetModelManager().CreateModel(mdl); }
-std::shared_ptr<pragma::Model> pragma::Game::CreateModel(bool bAddReference) const { return m_stateNetwork->GetModelManager().CreateModel("", bAddReference); }
+std::shared_ptr<pragma::asset::Model> pragma::Game::CreateModel(const std::string &mdl) const { return m_stateNetwork->GetModelManager().CreateModel(mdl); }
+std::shared_ptr<pragma::asset::Model> pragma::Game::CreateModel(bool bAddReference) const { return m_stateNetwork->GetModelManager().CreateModel("", bAddReference); }
 bool pragma::Game::PrecacheModel(const std::string &mdl)
 {
 	spdlog::info("Precaching model '{}'...", mdl);
@@ -841,13 +841,13 @@ bool pragma::Game::PrecacheModel(const std::string &mdl)
 	auto loadInfo = std::make_unique<pragma::asset::ModelLoadInfo>();
 	loadInfo->onLoaded = [this](util::Asset &asset) {
 		auto mdl = pragma::asset::ModelManager::GetAssetObject(asset);
-		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<pragma::Model>>>("OnModelLoaded", mdl);
-		CallLuaCallbacks<void, std::shared_ptr<pragma::Model>>("OnModelLoaded", mdl);
+		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<pragma::asset::Model>>>("OnModelLoaded", mdl);
+		CallLuaCallbacks<void, std::shared_ptr<pragma::asset::Model>>("OnModelLoaded", mdl);
 	};
 	auto r = GetNetworkState()->GetModelManager().PreloadAsset(mdl, std::move(loadInfo));
 	return r;
 }
-std::shared_ptr<pragma::Model> pragma::Game::LoadModel(const std::string &mdl, bool bReload)
+std::shared_ptr<pragma::asset::Model> pragma::Game::LoadModel(const std::string &mdl, bool bReload)
 {
 	if(mdl.empty())
 		return nullptr;
@@ -863,8 +863,8 @@ std::shared_ptr<pragma::Model> pragma::Game::LoadModel(const std::string &mdl, b
 	util::FileAssetManager::PreloadResult result;
 	auto r = bReload ? mdlMananger.ReloadAsset(mdl, nullptr, &result) : mdlMananger.LoadAsset(mdl, nullptr, &result);
 	if(r != nullptr) {
-		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<pragma::Model>>>("OnModelLoaded", r);
-		CallLuaCallbacks<void, std::shared_ptr<pragma::Model>>("OnModelLoaded", r);
+		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<pragma::asset::Model>>>("OnModelLoaded", r);
+		CallLuaCallbacks<void, std::shared_ptr<pragma::asset::Model>>("OnModelLoaded", r);
 	}
 	else {
 		std::string errMsg = result.errorMessage ? *result.errorMessage : "Unknown error";
@@ -903,9 +903,9 @@ std::vector<pragma::ComponentHandle<pragma::BasePhysicsComponent>> &pragma::Game
 const pragma::EntityComponentManager &pragma::Game::GetEntityComponentManager() const { return const_cast<pragma::Game *>(this)->GetEntityComponentManager(); }
 pragma::EntityComponentManager &pragma::Game::GetEntityComponentManager() { return *m_componentManager; }
 
-SurfaceMaterial &pragma::Game::CreateSurfaceMaterial(const std::string &identifier, Float friction, Float restitution) { return m_surfaceMaterialManager->Create(identifier, friction, restitution); }
-SurfaceMaterial *pragma::Game::GetSurfaceMaterial(const std::string &id) { return m_surfaceMaterialManager ? m_surfaceMaterialManager->GetMaterial(id) : nullptr; }
-SurfaceMaterial *pragma::Game::GetSurfaceMaterial(UInt32 id)
+pragma::physics::SurfaceMaterial &pragma::Game::CreateSurfaceMaterial(const std::string &identifier, Float friction, Float restitution) { return m_surfaceMaterialManager->Create(identifier, friction, restitution); }
+pragma::physics::SurfaceMaterial *pragma::Game::GetSurfaceMaterial(const std::string &id) { return m_surfaceMaterialManager ? m_surfaceMaterialManager->GetMaterial(id) : nullptr; }
+pragma::physics::SurfaceMaterial *pragma::Game::GetSurfaceMaterial(UInt32 id)
 {
 	if(m_surfaceMaterialManager == nullptr)
 		return nullptr;
@@ -914,7 +914,7 @@ SurfaceMaterial *pragma::Game::GetSurfaceMaterial(UInt32 id)
 		return nullptr;
 	return &materials[id];
 }
-std::vector<SurfaceMaterial> *pragma::Game::GetSurfaceMaterials() { return m_surfaceMaterialManager ? &m_surfaceMaterialManager->GetMaterials() : nullptr; }
+std::vector<pragma::physics::SurfaceMaterial> *pragma::Game::GetSurfaceMaterials() { return m_surfaceMaterialManager ? &m_surfaceMaterialManager->GetMaterials() : nullptr; }
 
 double &pragma::Game::RealTime() { return m_tReal; }
 double &pragma::Game::CurTime() { return m_tCur; }
@@ -928,7 +928,7 @@ double &pragma::Game::DeltaTickTime() { return m_tDeltaTick; }
 float pragma::Game::GetTimeScale() { return 1.f; }
 void pragma::Game::SetTimeScale(float t) { m_stateNetwork->SetConVar("host_timescale", std::to_string(t)); }
 
-ConConf *pragma::Game::GetConVar(const std::string &scmd) { return m_stateNetwork->GetConVar(scmd); }
+pragma::console::ConConf *pragma::Game::GetConVar(const std::string &scmd) { return m_stateNetwork->GetConVar(scmd); }
 int pragma::Game::GetConVarInt(const std::string &scmd) { return m_stateNetwork->GetConVarInt(scmd); }
 std::string pragma::Game::GetConVarString(const std::string &scmd) { return m_stateNetwork->GetConVarString(scmd); }
 float pragma::Game::GetConVarFloat(const std::string &scmd) { return m_stateNetwork->GetConVarFloat(scmd); }

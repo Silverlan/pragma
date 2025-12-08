@@ -40,7 +40,7 @@ export namespace pragma {
 #pragma pack(pop)
 
 		ShaderPPLightCone(prosper::IPrContext &context, const std::string &identifier);
-		bool RecordDraw(prosper::ShaderBindState &bindState, const CModelSubMesh &mesh, prosper::IDescriptorSet &descSetTex, prosper::IDescriptorSet &descSetDepth, prosper::IDescriptorSet &descSetInstance, prosper::IDescriptorSet &descSetCam) const;
+		bool RecordDraw(prosper::ShaderBindState &bindState, const pragma::geometry::CModelSubMesh &mesh, prosper::IDescriptorSet &descSetTex, prosper::IDescriptorSet &descSetDepth, prosper::IDescriptorSet &descSetInstance, prosper::IDescriptorSet &descSetCam) const;
 		bool RecordPushConstants(prosper::ShaderBindState &bindState, const PushConstants &pushConstants) const;
 	  protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;

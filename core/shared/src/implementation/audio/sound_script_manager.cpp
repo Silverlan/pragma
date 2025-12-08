@@ -8,32 +8,32 @@ import :audio.sound_script_manager;
 
 #undef CreateEvent
 
-SoundScript::SoundScript(SoundScriptManager *manager, const std::string &identifier) : SoundScriptEventContainer(manager), m_identifier(identifier) {}
+pragma::audio::SoundScript::SoundScript(SoundScriptManager *manager, const std::string &identifier) : SoundScriptEventContainer(manager), m_identifier(identifier) {}
 
-SoundScript::~SoundScript() {}
+pragma::audio::SoundScript::~SoundScript() {}
 
-const std::string &SoundScript::GetIdentifier() const { return m_identifier; }
+const std::string &pragma::audio::SoundScript::GetIdentifier() const { return m_identifier; }
 
 //////////////////////////////
 
-SoundScriptManager::SoundScriptManager() {}
+pragma::audio::SoundScriptManager::SoundScriptManager() {}
 
-SoundScriptManager::~SoundScriptManager() { Clear(); }
+pragma::audio::SoundScriptManager::~SoundScriptManager() { Clear(); }
 
-const std::string &SoundScriptManager::GetSoundScriptPath()
+const std::string &pragma::audio::SoundScriptManager::GetSoundScriptPath()
 {
 	static std::string r = "scripts\\sounds\\";
 	return r;
 }
 
-const std::unordered_map<std::string, std::shared_ptr<SoundScript>> &SoundScriptManager::GetScripts() const { return m_soundScripts; }
-const std::vector<std::string> &SoundScriptManager::GetSoundScriptFiles() const { return m_soundScriptFiles; }
+const std::unordered_map<std::string, std::shared_ptr<pragma::audio::SoundScript>> &pragma::audio::SoundScriptManager::GetScripts() const { return m_soundScripts; }
+const std::vector<std::string> &pragma::audio::SoundScriptManager::GetSoundScriptFiles() const { return m_soundScriptFiles; }
 
-void SoundScriptManager::Clear() { m_soundScripts.clear(); }
+void pragma::audio::SoundScriptManager::Clear() { m_soundScripts.clear(); }
 
-bool SoundScriptManager::Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts) { return Load<SoundScript>(fname, scripts); }
+bool pragma::audio::SoundScriptManager::Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts) { return Load<SoundScript>(fname, scripts); }
 
-SoundScript *SoundScriptManager::FindScript(const char *name)
+pragma::audio::SoundScript *pragma::audio::SoundScriptManager::FindScript(const char *name)
 {
 	std::string sname = name;
 	ustring::to_lower(sname);
@@ -43,7 +43,7 @@ SoundScript *SoundScriptManager::FindScript(const char *name)
 	return nullptr;
 }
 
-bool SoundScriptManager::Load(const char *fname, const std::function<std::shared_ptr<SoundScript>(const std::string &)> fCreateSoundScript, std::vector<std::shared_ptr<SoundScript>> *scripts)
+bool pragma::audio::SoundScriptManager::Load(const char *fname, const std::function<std::shared_ptr<SoundScript>(const std::string &)> fCreateSoundScript, std::vector<std::shared_ptr<SoundScript>> *scripts)
 {
 	std::string err;
 	auto udmData = util::load_udm_asset(fname, &err);
@@ -74,7 +74,7 @@ bool SoundScriptManager::Load(const char *fname, const std::function<std::shared
 	return true;
 }
 
-SoundScriptEvent *SoundScriptManager::CreateEvent(std::string name)
+pragma::audio::SoundScriptEvent *pragma::audio::SoundScriptManager::CreateEvent(std::string name)
 {
 	if(name == "playsound")
 		return new SSEPlaySound(this);
@@ -82,4 +82,4 @@ SoundScriptEvent *SoundScriptManager::CreateEvent(std::string name)
 		return new SSELua(this);
 	return new SoundScriptEvent(this);
 }
-SoundScriptEvent *SoundScriptManager::CreateEvent() { return CreateEvent(""); }
+pragma::audio::SoundScriptEvent *pragma::audio::SoundScriptManager::CreateEvent() { return CreateEvent(""); }

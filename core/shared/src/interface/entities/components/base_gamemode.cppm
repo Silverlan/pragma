@@ -35,7 +35,7 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 
-		virtual void OnPlayerDeath(BasePlayerComponent &pl, DamageInfo *dmgInfo);
+		virtual void OnPlayerDeath(BasePlayerComponent &pl, game::DamageInfo *dmgInfo);
 		virtual void OnPlayerSpawned(BasePlayerComponent &pl);
 		virtual void OnPlayerDropped(BasePlayerComponent &pl, pragma::networking::DropReason reason);
 		virtual void OnPlayerReady(BasePlayerComponent &pl);
@@ -44,8 +44,8 @@ export namespace pragma {
 		virtual void OnMapInitialized();
 		virtual void OnGameReady();
 
-		GameModeInfo *GetGameModeInfo();
-		const GameModeInfo *GetGameModeInfo() const { return const_cast<BaseGamemodeComponent *>(this)->GetGameModeInfo(); }
+		game::GameModeInfo *GetGameModeInfo();
+		const game::GameModeInfo *GetGameModeInfo() const { return const_cast<BaseGamemodeComponent *>(this)->GetGameModeInfo(); }
 		const std::string &GetName() const;
 		const std::string &GetIdentifier() const;
 		const std::string &GetComponentName() const;
@@ -55,10 +55,10 @@ export namespace pragma {
 		BaseGamemodeComponent(pragma::ecs::BaseEntity &ent);
 	};
 	struct DLLNETWORK CEPlayerDeath : public ComponentEvent {
-		CEPlayerDeath(BasePlayerComponent &pl, DamageInfo *dmgInfo);
+		CEPlayerDeath(BasePlayerComponent &pl, game::DamageInfo *dmgInfo);
 		virtual void PushArguments(lua::State *l) override;
 		BasePlayerComponent &player;
-		DamageInfo *dmgInfo = nullptr;
+		game::DamageInfo *dmgInfo = nullptr;
 	};
 	struct DLLNETWORK CEPlayerDropped : public ComponentEvent {
 		CEPlayerDropped(BasePlayerComponent &pl, pragma::networking::DropReason reason);

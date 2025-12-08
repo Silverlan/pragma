@@ -21,44 +21,44 @@ import :util;
 
 #undef GetMessage
 
-static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = nullptr;
-std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() { return *conVarPtrs; }
-ConVarHandle ClientState::GetConVarHandle(std::string scvar)
+static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> *conVarPtrs = nullptr;
+std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &pragma::ClientState::GetConVarPtrs() { return *conVarPtrs; }
+pragma::console::ConVarHandle pragma::ClientState::GetConVarHandle(std::string scvar)
 {
 	if(conVarPtrs == nullptr) {
-		static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> ptrs;
+		static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> ptrs;
 		conVarPtrs = &ptrs;
 	}
 	return NetworkState::GetConVarHandle(*conVarPtrs, scvar);
 }
 
-static ClientState *g_client = nullptr;
+static pragma::ClientState *g_client = nullptr;
 
-ClientState *pragma::get_client_state() { return g_client; }
+pragma::ClientState *pragma::get_client_state() { return g_client; }
 
 std::vector<std::string> &get_required_game_textures();
-ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr), m_resDownload(nullptr), m_volMaster(1.f), m_hMainMenu(), m_luaGUI(nullptr)
+pragma::ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr), m_resDownload(nullptr), m_volMaster(1.f), m_hMainMenu(), m_luaGUI(nullptr)
 {
 	g_client = this;
-	m_soundScriptManager = std::make_unique<CSoundScriptManager>();
+	m_soundScriptManager = std::make_unique<pragma::audio::CSoundScriptManager>();
 
 	m_modelManager = std::make_unique<pragma::asset::CModelManager>(*this);
 	// m_modelManager->SetVerbose(true);
 	pragma::get_cengine()->InitializeAssetManager(*m_modelManager);
 	pragma::asset::update_extension_cache(pragma::asset::Type::Model);
 
-	auto &gui = WGUI::GetInstance();
+	auto &gui = pragma::gui::WGUI::GetInstance();
 	// gui.SetCreateCallback(WGUILuaInterface::InitializeGUIElement);
 	//CVarHandler::Initialize();
 	FileManager::AddCustomMountDirectory("downloads", static_cast<fsys::SearchFlags>(pragma::networking::FSYS_SEARCH_RESOURCES));
 
-	RegisterCallback<void, CGame *>("OnGameStart");
-	RegisterCallback<void, CGame *>("EndGame");
+	RegisterCallback<void, pragma::CGame *>("OnGameStart");
+	RegisterCallback<void, pragma::CGame *>("EndGame");
 	RegisterCallback<void, msys::CMaterial *>("OnMaterialLoaded");
 
 	RegisterCallback<void>("Draw");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender");
-	RegisterCallback<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender");
+	RegisterCallback<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender");
 	RegisterCallback<void, std::reference_wrapper<NetPacket>>("OnReceivePacket");
 	RegisterCallback<void, std::reference_wrapper<NetPacket>>("OnSendPacketTCP");
 	RegisterCallback<void, std::reference_wrapper<NetPacket>>("OnSendPacketUDP");
@@ -68,7 +68,7 @@ ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr
 		texManager.PreloadAsset(tex);
 }
 
-ClientState::~ClientState()
+pragma::ClientState::~ClientState()
 {
 	Disconnect();
 	FileManager::RemoveCustomMountDirectory("downloads");
@@ -78,7 +78,7 @@ ClientState::~ClientState()
 	ClearCommands();
 }
 
-void ClientState::UpdateGameWorldShaderSettings()
+void pragma::ClientState::UpdateGameWorldShaderSettings()
 {
 	auto oldSettings = m_worldShaderSettings;
 	m_worldShaderSettings.shadowQuality = static_cast<pragma::rendering::GameWorldShaderSettings::ShadowQuality>(GetConVarInt("render_shadow_quality"));
@@ -94,10 +94,10 @@ void ClientState::UpdateGameWorldShaderSettings()
 
 	auto *game = GetGameState();
 	if(game)
-		static_cast<CGame *>(game)->OnGameWorldShaderSettingsChanged(m_worldShaderSettings, oldSettings);
+		static_cast<pragma::CGame *>(game)->OnGameWorldShaderSettingsChanged(m_worldShaderSettings, oldSettings);
 }
 
-void ClientState::InitializeGameClient(bool singlePlayerLocalGame)
+void pragma::ClientState::InitializeGameClient(bool singlePlayerLocalGame)
 {
 	DestroyClient();
 
@@ -114,7 +114,7 @@ void ClientState::InitializeGameClient(bool singlePlayerLocalGame)
 		std::string err;
 		auto dllHandle = InitializeLibrary(netModPath, &err);
 		if(dllHandle) {
-			auto *fInitNetLib = dllHandle->FindSymbolAddress<void (*)(NetworkState &, std::unique_ptr<pragma::networking::IClient> &)>("initialize_game_client");
+			auto *fInitNetLib = dllHandle->FindSymbolAddress<void (*)(pragma::NetworkState &, std::unique_ptr<pragma::networking::IClient> &)>("initialize_game_client");
 			if(fInitNetLib != nullptr)
 				fInitNetLib(*this, m_client);
 			else
@@ -130,14 +130,14 @@ void ClientState::InitializeGameClient(bool singlePlayerLocalGame)
 	if(m_client)
 		m_client->SetEventInterface(eventInterface);
 }
-void ClientState::ResetGameClient()
+void pragma::ClientState::ResetGameClient()
 {
 	//m_client = std::make_unique<pragma::networking::LocalClient>();
 }
 
-static auto cvSteamAudioEnabled = GetClientConVar("cl_steam_audio_enabled");
+static auto cvSteamAudioEnabled = pragma::console::get_client_con_var("cl_steam_audio_enabled");
 
-void ClientState::Initialize()
+void pragma::ClientState::Initialize()
 {
 	/*Con::cwar<<"Client NetMessages:"<<Con::endl;
 	auto *mapMsgs = GetNetMessageMap();
@@ -151,7 +151,7 @@ void ClientState::Initialize()
 	NetworkState::Initialize();
 
 	pragma::get_cengine()->GetSoundSystem()->SetOnReleaseSoundCallback([this](const al::SoundSource &snd) {
-		auto it = std::find_if(m_sounds.begin(), m_sounds.end(), [&snd](const ALSoundRef &sndOther) { return (static_cast<CALSound *>(&sndOther.get()) == &snd) ? true : false; });
+		auto it = std::find_if(m_sounds.begin(), m_sounds.end(), [&snd](const pragma::audio::ALSoundRef &sndOther) { return (static_cast<pragma::audio::CALSound *>(&sndOther.get()) == &snd) ? true : false; });
 		if(it == m_sounds.end())
 			return;
 		m_sounds.erase(it);
@@ -159,8 +159,8 @@ void ClientState::Initialize()
 
 	pragma::get_cengine()->LoadClientConfig();
 	InitializeGUILua();
-	auto &gui = WGUI::GetInstance();
-	m_hMainMenu = gui.Create<WIMainMenu>()->GetHandle();
+	auto &gui = pragma::gui::WGUI::GetInstance();
+	m_hMainMenu = gui.Create<pragma::gui::types::WIMainMenu>()->GetHandle();
 
 	UpdateGameWorldShaderSettings();
 
@@ -171,12 +171,12 @@ void ClientState::Initialize()
 #endif
 }
 
-void ClientState::ShowFPSCounter(bool b)
+void pragma::ClientState::ShowFPSCounter(bool b)
 {
 	if(b == true) {
 		if(m_hFps.IsValid())
 			return;
-		auto *pFps = WGUI::GetInstance().Create<WIFPS>();
+		auto *pFps = pragma::gui::WGUI::GetInstance().Create<pragma::gui::types::WIFPS>();
 		if(pFps == nullptr)
 			return;
 		pFps->SetPos(10, 10);
@@ -191,7 +191,7 @@ void ClientState::ShowFPSCounter(bool b)
 
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>(
-	  "cl_show_fps", +[](NetworkState *, const ConVar &, bool, bool val) {
+	  "cl_show_fps", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val) {
 		  auto *client = pragma::get_client_state();
 		  if(client == nullptr)
 			  return;
@@ -199,13 +199,13 @@ namespace {
 	  });
 }
 
-lua::State *ClientState::GetGUILuaState() { return (m_luaGUI != nullptr) ? m_luaGUI->GetState() : nullptr; }
-Lua::Interface &ClientState::GetGUILuaInterface() { return *m_luaGUI; }
+lua::State *pragma::ClientState::GetGUILuaState() { return (m_luaGUI != nullptr) ? m_luaGUI->GetState() : nullptr; }
+Lua::Interface &pragma::ClientState::GetGUILuaInterface() { return *m_luaGUI; }
 
 //__declspec(dllimport) void test_lua_policies(lua::State *l);
 std::optional<std::vector<std::string>> g_autoExecScripts {};
 
-void ClientState::InitializeGUILua()
+void pragma::ClientState::InitializeGUILua()
 {
 	m_luaGUI = ::util::make_shared<Lua::Interface>();
 	m_luaGUI->Open();
@@ -216,10 +216,10 @@ void ClientState::InitializeGUILua()
 	Lua::util::register_shared_generic(m_luaGUI->GetState(), utilMod);
 	NetworkState::RegisterSharedLuaClasses(GetGUILuaInterface());
 	NetworkState::RegisterSharedLuaLibraries(GetGUILuaInterface());
-	ClientState::RegisterSharedLuaClasses(*m_luaGUI, true);
-	ClientState::RegisterSharedLuaLibraries(*m_luaGUI, true);
+	pragma::ClientState::RegisterSharedLuaClasses(*m_luaGUI, true);
+	pragma::ClientState::RegisterSharedLuaLibraries(*m_luaGUI, true);
 	NetworkState::RegisterSharedLuaGlobals(GetGUILuaInterface());
-	ClientState::RegisterSharedLuaGlobals(*m_luaGUI);
+	pragma::ClientState::RegisterSharedLuaGlobals(*m_luaGUI);
 	Lua::register_shared_client_state(m_luaGUI->GetState());
 	Lua::udm::register_library(*m_luaGUI);
 	auto modAsset = luabind::module_(m_luaGUI->GetState(), "asset");
@@ -238,7 +238,7 @@ void ClientState::InitializeGUILua()
 		test_lua_policies(GetGUILuaState());
 
 		auto *l = m_luaGUI->GetState();
-		auto *el = WGUI::GetInstance().Create<WIRect>();
+		auto *el = pragma::gui::WGUI::GetInstance().Create<WIRect>();
 		auto hEl = el->GetHandle();
 		auto hElCast = util::weak_shared_handle_cast<WIBase,WIShape>(hEl);
 		auto o = luabind::object{l,hElCast};
@@ -262,7 +262,7 @@ void ClientState::InitializeGUILua()
 		Lua::RunString(l,"print(\"Valid: \",testObjectCast:IsValid())","test");
 	}*/
 
-	WGUILuaInterface::Initialize();
+	pragma::gui::WGUILuaInterface::Initialize();
 
 	pragma::scripting::lua_core::execute_files_in_directory(GetGUILuaState(), "autorun/gui/");
 	if(g_autoExecScripts.has_value()) {
@@ -271,42 +271,42 @@ void ClientState::InitializeGUILua()
 	}
 }
 
-void ClientState::AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, WIBase &)> &f) { m_guiLuaWrapperFactories.push_back(f); }
-std::vector<std::function<luabind::object(lua::State *, WIBase &)>> &ClientState::GetGUILuaWrapperFactories() { return m_guiLuaWrapperFactories; }
+void pragma::ClientState::AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)> &f) { m_guiLuaWrapperFactories.push_back(f); }
+std::vector<std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)>> &pragma::ClientState::GetGUILuaWrapperFactories() { return m_guiLuaWrapperFactories; }
 
-WIMainMenu *ClientState::GetMainMenu()
+pragma::gui::types::WIMainMenu *pragma::ClientState::GetMainMenu()
 {
 	if(!m_hMainMenu.IsValid())
 		return nullptr;
-	return m_hMainMenu.get<WIMainMenu>();
+	return m_hMainMenu.get<pragma::gui::types::WIMainMenu>();
 }
 
-bool ClientState::IsMainMenuOpen()
+bool pragma::ClientState::IsMainMenuOpen()
 {
-	WIMainMenu *menu = GetMainMenu();
+	pragma::gui::types::WIMainMenu *menu = GetMainMenu();
 	if(menu == nullptr)
 		return false;
 	return menu->IsVisible();
 }
-void ClientState::CloseMainMenu()
+void pragma::ClientState::CloseMainMenu()
 {
-	WIMainMenu *menu = GetMainMenu();
+	pragma::gui::types::WIMainMenu *menu = GetMainMenu();
 	if(menu == nullptr || !menu->IsVisible())
 		return;
 	menu->SetVisible(false);
 }
-void ClientState::OpenMainMenu()
+void pragma::ClientState::OpenMainMenu()
 {
-	WIMainMenu *menu = GetMainMenu();
+	pragma::gui::types::WIMainMenu *menu = GetMainMenu();
 	if(menu == nullptr)
 		return;
 	auto &window = pragma::get_cengine()->GetWindow();
 	window->SetCursorInputMode(pragma::platform::CursorMode::Normal);
 	menu->SetVisible(true);
 }
-void ClientState::ToggleMainMenu()
+void pragma::ClientState::ToggleMainMenu()
 {
-	WIMainMenu *menu = GetMainMenu();
+	pragma::gui::types::WIMainMenu *menu = GetMainMenu();
 	if(menu == nullptr)
 		return;
 	if(menu->IsVisible()) {
@@ -318,9 +318,9 @@ void ClientState::ToggleMainMenu()
 		OpenMainMenu();
 }
 
-NwStateType ClientState::GetType() const { return NwStateType::Client; }
+pragma::NwStateType pragma::ClientState::GetType() const { return pragma::NwStateType::Client; }
 
-void ClientState::Close()
+void pragma::ClientState::Close()
 {
 	pragma::get_cengine()->GetRenderContext().GetPipelineLoader().Stop();
 	pragma::get_cengine()->SaveClientConfig();
@@ -331,15 +331,15 @@ void ClientState::Close()
 
 	auto *state = m_luaGUI->GetState();
 	Lua::gui::clear_lua_callbacks(state);
-	auto *guiBaseEl = WGUI::GetInstance().GetBaseElement();
+	auto *guiBaseEl = pragma::gui::WGUI::GetInstance().GetBaseElement();
 	if(guiBaseEl != nullptr)
-		WGUILuaInterface::ClearGUILuaObjects(*guiBaseEl);
+		pragma::gui::WGUILuaInterface::ClearGUILuaObjects(*guiBaseEl);
 	auto identifier = m_luaGUI->GetIdentifier();
 	TerminateLuaModules(state);
 	m_luaGUI = nullptr;
 	DeregisterLuaModules(state, identifier); // Has to be called AFTER Lua instance has been released!
-	std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &conVarPtrs = GetConVarPtrs();
-	std::unordered_map<std::string, std::shared_ptr<PtrConVar>>::iterator itHandles;
+	std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &conVarPtrs = GetConVarPtrs();
+	std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>>::iterator itHandles;
 	for(itHandles = conVarPtrs.begin(); itHandles != conVarPtrs.end(); itHandles++)
 		itHandles->second->set(nullptr);
 	StopSounds();
@@ -349,18 +349,18 @@ void ClientState::Close()
 	pragma::ecs::CParticleSystemComponent::ClearCache();
 }
 
-void ClientState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const
+void pragma::ClientState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const
 {
 	NetworkState::implFindSimilarConVars(input, similarCmds);
 
-	auto *clMap = console_system::client::get_convar_map();
+	auto *clMap = pragma::console::client::get_convar_map();
 	NetworkState::FindSimilarConVars(input, clMap->GetConVars(), similarCmds);
 
-	auto *svMap = console_system::server::get_convar_map();
+	auto *svMap = pragma::console::server::get_convar_map();
 	NetworkState::FindSimilarConVars(input, svMap->GetConVars(), similarCmds);
 }
 
-void ClientState::RegisterServerConVar(std::string scmd, unsigned int id)
+void pragma::ClientState::RegisterServerConVar(std::string scmd, unsigned int id)
 {
 	std::unordered_map<std::string, unsigned int>::iterator i = m_conCommandIDs.find(scmd);
 	if(i != m_conCommandIDs.end())
@@ -368,13 +368,13 @@ void ClientState::RegisterServerConVar(std::string scmd, unsigned int id)
 	m_conCommandIDs.insert(std::unordered_map<std::string, unsigned int>::value_type(scmd, id));
 }
 
-bool ClientState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(ConConf *, float &)> &callback)
+bool pragma::ClientState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(pragma::console::ConConf *, float &)> &callback)
 {
-	auto *clMap = console_system::client::get_convar_map();
+	auto *clMap = pragma::console::client::get_convar_map();
 	auto conVarCl = clMap->GetConVar(scmd);
-	auto bUseClientside = (conVarCl != nullptr) ? (conVarCl->GetType() != ConType::Variable || argv.empty()) : false; // Console commands are ALWAYS executed clientside, if they exist clientside
+	auto bUseClientside = (conVarCl != nullptr) ? (conVarCl->GetType() != pragma::console::ConType::Variable || argv.empty()) : false; // Console commands are ALWAYS executed clientside, if they exist clientside
 	if(bUseClientside == false) {
-		auto *svMap = console_system::server::get_convar_map();
+		auto *svMap = pragma::console::server::get_convar_map();
 		auto conVarSv = svMap->GetConVar(scmd);
 		if(conVarSv == nullptr) {
 			auto it = m_conCommandIDs.find(scmd);
@@ -407,9 +407,9 @@ bool ClientState::RunConsoleCommand(std::string scmd, std::vector<std::string> &
 	return true;
 }
 
-ConVar *ClientState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
+pragma::console::ConVar *pragma::ClientState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
 {
-	ConVar *cvar = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
+	pragma::console::ConVar *cvar = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
 	if(cvar == nullptr)
 		return nullptr;
 	auto flags = cvar->GetFlags();
@@ -422,7 +422,7 @@ ConVar *ClientState::SetConVar(std::string scmd, std::string value, bool bApplyI
 	return cvar;
 }
 
-void ClientState::Draw(util::DrawSceneInfo &drawSceneInfo) //const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
+void pragma::ClientState::Draw(pragma::rendering::DrawSceneInfo &drawSceneInfo) //const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("draw_game_scenes");
@@ -445,27 +445,27 @@ void ClientState::Draw(util::DrawSceneInfo &drawSceneInfo) //const Vulkan::Rende
 #endif
 }
 
-void ClientState::Render(util::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt)
+void pragma::ClientState::Render(pragma::rendering::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt)
 {
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	drawSceneInfo.outputImage = rt->GetTexture().GetImage().shared_from_this();
-	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender", std::ref(drawSceneInfo), std::ref(rt));
+	CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender", std::ref(drawSceneInfo), std::ref(rt));
 	if(m_game != nullptr) {
 		auto &context = pragma::get_cengine()->GetRenderContext();
 		context.GetPipelineLoader().Flush(); // Make sure all shaders have been loaded and initialized
 
-		m_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender", std::ref(drawSceneInfo), std::ref(rt));
+		m_game->CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender", std::ref(drawSceneInfo), std::ref(rt));
 		m_game->CallLuaCallbacks("PreRender");
 	}
 	Draw(drawSceneInfo);
 	if(m_game != nullptr) {
-		m_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender", std::ref(drawSceneInfo), std::ref(rt));
+		m_game->CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender", std::ref(drawSceneInfo), std::ref(rt));
 		m_game->CallLuaCallbacks("PostRender");
 	}
-	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender", std::ref(drawSceneInfo), std::ref(rt));
+	CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PostRender", std::ref(drawSceneInfo), std::ref(rt));
 }
 
-void ClientState::Think()
+void pragma::ClientState::Think()
 {
 	NetworkState::Think();
 	if(m_client != nullptr && m_client->IsRunning()) {
@@ -476,13 +476,13 @@ void ClientState::Think()
 	}
 }
 
-void ClientState::Tick() { NetworkState::Tick(); }
+void pragma::ClientState::Tick() { NetworkState::Tick(); }
 
-void ClientState::EndGame()
+void pragma::ClientState::EndGame()
 {
 	if(!IsGameActive())
 		return;
-	CallCallbacks<void, CGame *>("EndGame", GetGameState());
+	CallCallbacks<void, pragma::CGame *>("EndGame", GetGameState());
 	m_game->CallCallbacks<void>("EndGame");
 
 	// Game::OnRemove requires that NetworkState::GetGameState returns
@@ -498,34 +498,34 @@ void ClientState::EndGame()
 	NetworkState::EndGame();
 	m_conCommandIDs.clear();
 	if(m_hMainMenu.IsValid()) {
-		WIMainMenu *menu = m_hMainMenu.get<WIMainMenu>();
+		pragma::gui::types::WIMainMenu *menu = m_hMainMenu.get<pragma::gui::types::WIMainMenu>();
 		menu->SetNewGameMenu();
 	}
 }
 
-bool ClientState::IsGameActive() { return m_game != nullptr; }
+bool pragma::ClientState::IsGameActive() { return m_game != nullptr; }
 
-CGame *ClientState::GetGameState() { return static_cast<CGame *>(NetworkState::GetGameState()); }
+pragma::CGame *pragma::ClientState::GetGameState() { return static_cast<pragma::CGame *>(pragma::NetworkState::GetGameState()); }
 
-void ClientState::HandleLuaNetPacket(NetPacket &packet)
+void pragma::ClientState::HandleLuaNetPacket(NetPacket &packet)
 {
 	if(!IsGameActive())
 		return;
-	CGame *game = static_cast<CGame *>(GetGameState());
+	CGame *game = static_cast<pragma::CGame *>(GetGameState());
 	game->HandleLuaNetPacket(packet);
 }
 
-bool ClientState::ShouldRemoveSound(ALSound &snd) { return (NetworkState::ShouldRemoveSound(snd) && snd.GetIndex() == 0) ? true : false; }
+bool pragma::ClientState::ShouldRemoveSound(pragma::audio::ALSound &snd) { return (pragma::NetworkState::ShouldRemoveSound(snd) && snd.GetIndex() == 0) ? true : false; }
 
-std::shared_ptr<ALSound> ClientState::GetSoundByIndex(unsigned int idx)
+std::shared_ptr<pragma::audio::ALSound> pragma::ClientState::GetSoundByIndex(unsigned int idx)
 {
-	auto *snd = CALSound::FindByServerIndex(idx);
+	auto *snd = pragma::audio::CALSound::FindByServerIndex(idx);
 	if(snd == nullptr)
 		return nullptr;
-	return snd->downcasted_shared_from_this<ALSound>();
+	return snd->downcasted_shared_from_this<pragma::audio::ALSound>();
 }
 
-void ClientState::Disconnect()
+void pragma::ClientState::Disconnect()
 {
 	if(m_client != nullptr) {
 		pragma::networking::Error err;
@@ -535,36 +535,36 @@ void ClientState::Disconnect()
 	}
 }
 
-void ClientState::DestroyClient()
+void pragma::ClientState::DestroyClient()
 {
 	m_client = nullptr;
 	m_svInfo = nullptr;
 }
 
-bool ClientState::IsConnected() const { return (m_client != nullptr) ? true : false; }
+bool pragma::ClientState::IsConnected() const { return (m_client != nullptr) ? true : false; }
 
-CLNetMessage *ClientState::GetNetMessage(unsigned int ID)
+pragma::networking::CLNetMessage *pragma::ClientState::GetNetMessage(unsigned int ID)
 {
-	auto *map = GetClientMessageMap();
+	auto *map = networking::get_client_message_map();
 	return map->GetNetMessage(ID);
 }
 
-pragma::networking::ClientMessageMap *ClientState::GetNetMessageMap() { return GetClientMessageMap(); }
+pragma::networking::ClientMessageMap *pragma::ClientState::GetNetMessageMap() { return networking::get_client_message_map(); }
 
-bool ClientState::IsClient() const { return true; }
+bool pragma::ClientState::IsClient() const { return true; }
 
-bool ClientState::LoadGUILuaFile(std::string f)
+bool pragma::ClientState::LoadGUILuaFile(std::string f)
 {
 	f = FileManager::GetNormalizedPath(f);
 	return (Lua::LoadFile(GetGUILuaState(), f) == Lua::StatusCode::Ok) ? true : false;
 }
 
-void ClientState::SendUserInfo()
+void pragma::ClientState::SendUserInfo()
 {
 	Con::ccl << "Sending user info..." << Con::endl;
 
 	NetPacket packet;
-	auto &version = get_engine_version();
+	auto &version = pragma::get_engine_version();
 	packet->Write<util::Version>(version);
 
 	auto udpPort = m_client->GetLocalUDPPort();
@@ -592,8 +592,8 @@ void ClientState::SendUserInfo()
 	packet->Write<unsigned int>((unsigned int)(0));
 	for(auto &pair : convars) {
 		auto &cv = pair.second;
-		if(cv->GetType() == ConType::Var) {
-			auto *cvar = static_cast<ConVar *>(cv.get());
+		if(cv->GetType() == pragma::console::ConType::Var) {
+			auto *cvar = static_cast<pragma::console::ConVar *>(cv.get());
 			if((cvar->GetFlags() & pragma::console::ConVarFlags::Userinfo) == pragma::console::ConVarFlags::Userinfo && cvar->GetString() != cvar->GetDefault()) {
 				packet->WriteString(pair.first);
 				packet->WriteString(cvar->GetString());
@@ -605,10 +605,10 @@ void ClientState::SendUserInfo()
 	client->SendPacket(pragma::networking::net_messages::server::CLIENTINFO, packet, pragma::networking::Protocol::SlowReliable);
 }
 
-std::string ClientState::GetMessagePrefix() const { return std::string {Con::PREFIX_CLIENT}; }
+std::string pragma::ClientState::GetMessagePrefix() const { return std::string {Con::PREFIX_CLIENT}; }
 
-void ClientState::StartGame(bool) { StartNewGame(""); }
-void ClientState::StartNewGame(const std::string &gameMode)
+void pragma::ClientState::StartGame(bool) { StartNewGame(""); }
+void pragma::ClientState::StartNewGame(const std::string &gameMode)
 {
 	EndGame();
 	m_game = {new CGame {this}, [](pragma::Game *game) {
@@ -616,29 +616,29 @@ void ClientState::StartNewGame(const std::string &gameMode)
 		          delete game;
 	          }};
 	m_game->SetGameMode(gameMode);
-	CallCallbacks<void, CGame *>("OnGameStart", GetGameState());
+	CallCallbacks<void, pragma::CGame *>("OnGameStart", GetGameState());
 	m_game->Initialize();
 	m_game->OnInitialized();
 	//if(!IsConnected())
 	//	RequestServerInfo(); // Deprecated; Now handled through NET_cl_map_ready
 	CloseMainMenu();
 	if(m_hMainMenu.IsValid()) {
-		WIMainMenu *menu = m_hMainMenu.get<WIMainMenu>();
+		pragma::gui::types::WIMainMenu *menu = m_hMainMenu.get<pragma::gui::types::WIMainMenu>();
 		menu->SetContinueMenu();
 	}
 }
 
-ConVarMap *ClientState::GetConVarMap() { return console_system::client::get_convar_map(); }
+pragma::console::ConVarMap *pragma::ClientState::GetConVarMap() { return pragma::console::client::get_convar_map(); }
 
-bool ClientState::IsMultiPlayer() const { return pragma::get_cengine()->IsMultiPlayer(); }
-bool ClientState::IsSinglePlayer() const { return pragma::get_cengine()->IsSinglePlayer(); }
+bool pragma::ClientState::IsMultiPlayer() const { return pragma::get_cengine()->IsMultiPlayer(); }
+bool pragma::ClientState::IsSinglePlayer() const { return pragma::get_cengine()->IsSinglePlayer(); }
 
-msys::MaterialManager &ClientState::GetMaterialManager() { return *pragma::get_cengine()->GetClientStateInstance().materialManager; }
-pragma::ModelSubMesh *ClientState::CreateSubMesh() const { return new CModelSubMesh; }
-ModelMesh *ClientState::CreateMesh() const { return new CModelMesh; }
+msys::MaterialManager &pragma::ClientState::GetMaterialManager() { return *pragma::get_cengine()->GetClientStateInstance().materialManager; }
+pragma::geometry::ModelSubMesh *pragma::ClientState::CreateSubMesh() const { return new pragma::geometry::CModelSubMesh; }
+pragma::geometry::ModelMesh *pragma::ClientState::CreateMesh() const { return new pragma::geometry::CModelMesh; }
 
-static auto cvMatStreaming = GetClientConVar("cl_material_streaming_enabled");
-msys::Material *ClientState::LoadMaterial(const std::string &path, bool precache, bool bReload)
+static auto cvMatStreaming = pragma::console::get_client_con_var("cl_material_streaming_enabled");
+msys::Material *pragma::ClientState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {
 	if(spdlog::get_level() <= spdlog::level::debug)
 		spdlog::debug("Loading material '{}'...", path);
@@ -655,7 +655,7 @@ static void init_shader(msys::Material *mat)
 		const_cast<util::ShaderInfo *>(info)->SetShader(::util::make_shared<::util::WeakHandle<prosper::Shader>>(shader));
 	}
 }
-msys::MaterialHandle ClientState::CreateMaterial(const std::string &path, const std::string &shader)
+msys::MaterialHandle pragma::ClientState::CreateMaterial(const std::string &path, const std::string &shader)
 {
 	auto settings = ds::create_data_settings({});
 	auto mat = GetMaterialManager().CreateMaterial(path, shader, ::util::make_shared<ds::Block>(*settings));
@@ -665,7 +665,7 @@ msys::MaterialHandle ClientState::CreateMaterial(const std::string &path, const 
 	return mat->GetHandle();
 }
 
-msys::MaterialHandle ClientState::CreateMaterial(const std::string &shader)
+msys::MaterialHandle pragma::ClientState::CreateMaterial(const std::string &shader)
 {
 	auto settings = ds::create_data_settings({});
 	auto mat = GetMaterialManager().CreateMaterial(shader, ::util::make_shared<ds::Block>(*settings));
@@ -675,7 +675,7 @@ msys::MaterialHandle ClientState::CreateMaterial(const std::string &shader)
 	return mat->GetHandle();
 }
 
-util::FileAssetManager *ClientState::GetAssetManager(pragma::asset::Type type)
+util::FileAssetManager *pragma::ClientState::GetAssetManager(pragma::asset::Type type)
 {
 	switch(type) {
 	case pragma::asset::Type::Texture:
@@ -687,7 +687,7 @@ util::FileAssetManager *ClientState::GetAssetManager(pragma::asset::Type type)
 	return NetworkState::GetAssetManager(type);
 }
 
-msys::Material *ClientState::LoadMaterial(const std::string &path, const std::function<void(msys::Material *)> &onLoaded, bool bReload, bool bLoadInstantly)
+msys::Material *pragma::ClientState::LoadMaterial(const std::string &path, const std::function<void(msys::Material *)> &onLoaded, bool bReload, bool bLoadInstantly)
 {
 	auto &matManager = GetMaterialManager();
 	auto success = true;
@@ -786,14 +786,14 @@ msys::Material *ClientState::LoadMaterial(const std::string &path, const std::fu
 		init_shader(mat);
 	return mat;
 }
-msys::Material *ClientState::LoadMaterial(const std::string &path) { return LoadMaterial(path, nullptr, false); }
-msys::Material *ClientState::LoadMaterial(const std::string &path, const std::function<void(msys::Material *)> &onLoaded, bool bReload) { return LoadMaterial(path, onLoaded, bReload, !cvMatStreaming->GetBool()); }
+msys::Material *pragma::ClientState::LoadMaterial(const std::string &path) { return LoadMaterial(path, nullptr, false); }
+msys::Material *pragma::ClientState::LoadMaterial(const std::string &path, const std::function<void(msys::Material *)> &onLoaded, bool bReload) { return LoadMaterial(path, onLoaded, bReload, !cvMatStreaming->GetBool()); }
 
-pragma::networking::IClient *ClientState::GetClient() { return m_client.get(); }
+pragma::networking::IClient *pragma::ClientState::GetClient() { return m_client.get(); }
 
-void ClientState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<CResourceWatcherManager>(this); }
+void pragma::ClientState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<CResourceWatcherManager>(this); }
 
-void ClientState::InitializeGUIModule()
+void pragma::ClientState::InitializeGUIModule()
 {
 #ifdef _WIN32
 	if(m_lastModuleHandle == nullptr)
@@ -807,21 +807,21 @@ void ClientState::InitializeGUIModule()
 #endif
 }
 
-unsigned int ClientState::GetServerMessageID(std::string identifier)
+unsigned int pragma::ClientState::GetServerMessageID(std::string identifier)
 {
-	auto *map = GetServerMessageMap();
+	auto *map = networking::get_server_message_map();
 	return map->GetNetMessageID(identifier);
 }
 
-unsigned int ClientState::GetServerConVarID(std::string scmd)
+unsigned int pragma::ClientState::GetServerConVarID(std::string scmd)
 {
-	ConVarMap *map = console_system::server::get_convar_map();
+	auto *map = pragma::console::server::get_convar_map();
 	return map->GetConVarID(scmd);
 }
 
-bool ClientState::GetServerConVarIdentifier(uint32_t id, std::string &cvar)
+bool pragma::ClientState::GetServerConVarIdentifier(uint32_t id, std::string &cvar)
 {
-	auto *map = console_system::server::get_convar_map();
+	auto *map = pragma::console::server::get_convar_map();
 	std::string *pCvar = nullptr;
 	auto r = map->GetConVarIdentifier(id, &pCvar);
 	if(r == true)
@@ -831,7 +831,7 @@ bool ClientState::GetServerConVarIdentifier(uint32_t id, std::string &cvar)
 
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>(
-	  "sv_tickrate", +[](NetworkState *, const ConVar &, int, int val) {
+	  "sv_tickrate", +[](pragma::NetworkState *, const pragma::console::ConVar &, int, int val) {
 		  if(val < 0)
 			  val = 0;
 		  pragma::get_cengine()->SetTickRate(val);

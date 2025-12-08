@@ -9,7 +9,7 @@ import :gui.tree_list;
 
 import pragma.gui;
 
-WITreeListElement::WITreeListElement() : WITableRow(), m_bCollapsed(false), m_pTreeParent {}, m_pArrow {}, m_pList {}, m_xOffset(0), m_depth(0)
+pragma::gui::types::WITreeListElement::WITreeListElement() : WITableRow(), m_bCollapsed(false), m_pTreeParent {}, m_pArrow {}, m_pList {}, m_xOffset(0), m_depth(0)
 {
 	RegisterCallback<void>("OnCollapse");
 	RegisterCallback<void>("OnTreeUpdate");
@@ -17,8 +17,8 @@ WITreeListElement::WITreeListElement() : WITableRow(), m_bCollapsed(false), m_pT
 	RegisterCallback<void>("OnTreeUpdate");
 }
 
-void WITreeListElement::Initialize() { WITableRow::Initialize(); }
-void WITreeListElement::OnRemove()
+void pragma::gui::types::WITreeListElement::Initialize() { WITableRow::Initialize(); }
+void pragma::gui::types::WITreeListElement::OnRemove()
 {
 	WITableRow::OnRemove();
 	for(auto &hItem : m_items) {
@@ -26,8 +26,8 @@ void WITreeListElement::OnRemove()
 			hItem->Remove();
 	}
 }
-uint32_t WITreeListElement::GetDepth() const { return m_depth; }
-void WITreeListElement::OnVisibilityChanged(bool bVisible)
+uint32_t pragma::gui::types::WITreeListElement::GetDepth() const { return m_depth; }
+void pragma::gui::types::WITreeListElement::OnVisibilityChanged(bool bVisible)
 {
 	WITableRow::OnVisibilityChanged(bVisible);
 	if(IsCollapsed() == true)
@@ -40,17 +40,17 @@ void WITreeListElement::OnVisibilityChanged(bool bVisible)
 	}
 }
 
-bool WITreeListElement::IsCollapsed() const { return m_bCollapsed; }
-void WITreeListElement::SetXOffset(uint32_t x) { m_xOffset = x; }
+bool pragma::gui::types::WITreeListElement::IsCollapsed() const { return m_bCollapsed; }
+void pragma::gui::types::WITreeListElement::SetXOffset(uint32_t x) { m_xOffset = x; }
 
-void WITreeListElement::Toggle(bool bAll)
+void pragma::gui::types::WITreeListElement::Toggle(bool bAll)
 {
 	if(IsCollapsed() == true)
 		Expand(bAll);
 	else
 		Collapse(bAll);
 }
-void WITreeListElement::Collapse(bool bAll)
+void pragma::gui::types::WITreeListElement::Collapse(bool bAll)
 {
 	if(m_bCollapsed == true)
 		return;
@@ -75,7 +75,7 @@ void WITreeListElement::Collapse(bool bAll)
 	CallCallbacks("OnCollapse");
 	CallCallbacks("OnTreeUpdate");
 }
-void WITreeListElement::Expand(bool bAll)
+void pragma::gui::types::WITreeListElement::Expand(bool bAll)
 {
 	if(m_bCollapsed == false)
 		return;
@@ -95,7 +95,7 @@ void WITreeListElement::Expand(bool bAll)
 	CallCallbacks("OnExpand");
 	CallCallbacks("OnTreeUpdate");
 }
-void WITreeListElement::Clear()
+void pragma::gui::types::WITreeListElement::Clear()
 {
 	for(auto &hItem : m_items) {
 		if(hItem.IsValid())
@@ -103,7 +103,7 @@ void WITreeListElement::Clear()
 	}
 	m_items.clear();
 }
-void WITreeListElement::SetTreeParent(WITreeListElement *pEl)
+void pragma::gui::types::WITreeListElement::SetTreeParent(WITreeListElement *pEl)
 {
 	if(pEl == nullptr) {
 		if(m_pArrow.IsValid())
@@ -115,7 +115,7 @@ void WITreeListElement::SetTreeParent(WITreeListElement *pEl)
 	m_pTreeParent = pEl->GetHandle();
 	m_depth = pEl->GetDepth() + 1;
 	if(m_pArrow.IsValid() == false) {
-		auto *pArrow = WGUI::GetInstance().Create<WIArrow>(this);
+		auto *pArrow = pragma::gui::WGUI::GetInstance().Create<WIArrow>(this);
 		m_pArrow = pArrow->GetHandle();
 		pArrow->SetName("arrow");
 		pArrow->SetSize(12, 12);
@@ -133,7 +133,7 @@ void WITreeListElement::SetTreeParent(WITreeListElement *pEl)
 		InsertElement(0, pArrow);
 	}
 }
-void WITreeListElement::SetList(WITreeList *pList)
+void pragma::gui::types::WITreeListElement::SetList(WITreeList *pList)
 {
 	if(pList == nullptr) {
 		m_pList = decltype(m_pList) {};
@@ -141,8 +141,8 @@ void WITreeListElement::SetList(WITreeList *pList)
 	}
 	m_pList = pList->GetHandle();
 }
-const std::vector<WIHandle> &WITreeListElement::GetItems() const { return m_items; }
-WITreeListElement *WITreeListElement::GetLastItem() const
+const std::vector<pragma::gui::WIHandle> &pragma::gui::types::WITreeListElement::GetItems() const { return m_items; }
+pragma::gui::types::WITreeListElement *pragma::gui::types::WITreeListElement::GetLastItem() const
 {
 	for(auto it = m_items.rbegin(); it != m_items.rend(); ++it) {
 		auto &hItem = *it;
@@ -151,17 +151,17 @@ WITreeListElement *WITreeListElement::GetLastItem() const
 	}
 	return const_cast<WITreeListElement *>(this);
 }
-void WITreeListElement::SetTextElement(WIText *pText)
+void pragma::gui::types::WITreeListElement::SetTextElement(WIText *pText)
 {
-	(pText != nullptr) ? m_hText = pText->GetHandle() : WIHandle {};
+	(pText != nullptr) ? m_hText = pText->GetHandle() : pragma::gui::WIHandle {};
 	if(pText) {
 		pText->SetName("text");
 		pText->AddStyleClass("tree_list_element_text");
 		pText->GetColorProperty()->Link(*GetColorProperty());
 	}
 }
-WIText *WITreeListElement::GetTextElement() const { return m_hText.IsValid() ? const_cast<WIText *>(static_cast<const WIText *>(m_hText.get())) : nullptr; }
-WITreeListElement *WITreeListElement::AddItem(const std::string &text, const std::function<void(WITreeListElement &)> &fPopulate)
+pragma::gui::types::WIText *pragma::gui::types::WITreeListElement::GetTextElement() const { return m_hText.IsValid() ? const_cast<WIText *>(static_cast<const WIText *>(m_hText.get())) : nullptr; }
+pragma::gui::types::WITreeListElement *pragma::gui::types::WITreeListElement::AddItem(const std::string &text, const std::function<void(WITreeListElement &)> &fPopulate)
 {
 	if(m_pList.IsValid() == false)
 		return nullptr;
@@ -194,13 +194,13 @@ WITreeListElement *WITreeListElement::AddItem(const std::string &text, const std
 
 ////////////
 
-WITreeList::WITreeList() : WITable(), m_pRoot {} {}
+pragma::gui::types::WITreeList::WITreeList() : WITable(), m_pRoot {} {}
 
-void WITreeList::Initialize()
+void pragma::gui::types::WITreeList::Initialize()
 {
 	WITable::Initialize();
 	SetRowHeight(18);
-	auto *pRoot = WGUI::GetInstance().Create<WITreeListElement>(this);
+	auto *pRoot = pragma::gui::WGUI::GetInstance().Create<WITreeListElement>(this);
 	m_pRoot = pRoot->GetHandle();
 	pRoot->SetList(this);
 	pRoot->SetAutoAlignToParent(true);
@@ -211,30 +211,30 @@ void WITreeList::Initialize()
 		Update();
 	}));
 }
-void WITreeList::DoUpdate() { WITable::DoUpdate(); }
-WITreeListElement *WITreeList::GetRootItem() const { return const_cast<WITreeListElement *>(static_cast<const WITreeListElement *>(m_pRoot.get())); }
-WITreeListElement *WITreeList::AddItem(const std::string &text, const std::function<void(WITreeListElement &)> &fPopulate)
+void pragma::gui::types::WITreeList::DoUpdate() { WITable::DoUpdate(); }
+pragma::gui::types::WITreeListElement *pragma::gui::types::WITreeList::GetRootItem() const { return const_cast<WITreeListElement *>(static_cast<const WITreeListElement *>(m_pRoot.get())); }
+pragma::gui::types::WITreeListElement *pragma::gui::types::WITreeList::AddItem(const std::string &text, const std::function<void(WITreeListElement &)> &fPopulate)
 {
 	if(m_pRoot.IsValid() == false)
 		return nullptr;
 	return static_cast<WITreeListElement *>(m_pRoot.get())->AddItem(text, fPopulate);
 }
-util::EventReply WITreeList::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+util::EventReply pragma::gui::types::WITreeList::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(WITable::MouseCallback(button, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	RequestFocus();
 	return util::EventReply::Handled;
 }
-void WITreeList::SetSize(int x, int y) { WITable::SetSize(x, y); }
-WITableRow *WITreeList::AddRow() { return WITable::AddRow<WITreeListElement>(); }
-void WITreeList::ExpandAll()
+void pragma::gui::types::WITreeList::SetSize(int x, int y) { WITable::SetSize(x, y); }
+pragma::gui::types::WITableRow *pragma::gui::types::WITreeList::AddRow() { return WITable::AddRow<WITreeListElement>(); }
+void pragma::gui::types::WITreeList::ExpandAll()
 {
 	if(m_pRoot.IsValid() == false)
 		return;
 	static_cast<WITreeListElement *>(m_pRoot.get())->Expand(true);
 }
-void WITreeList::CollapseAll()
+void pragma::gui::types::WITreeList::CollapseAll()
 {
 	if(m_pRoot.IsValid() == false)
 		return;

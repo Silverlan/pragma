@@ -13,7 +13,7 @@ using namespace pragma;
 void CPointAtTargetComponent::ReceiveData(NetPacket &packet)
 {
 	auto hEnt = GetHandle();
-	nwm::read_unique_entity(packet, [this, hEnt](pragma::ecs::BaseEntity *ent) {
+	pragma::networking::read_unique_entity(packet, [this, hEnt](pragma::ecs::BaseEntity *ent) {
 		if(hEnt.expired())
 			return;
 		SetPointAtTarget(ent);
@@ -24,7 +24,7 @@ void CPointAtTargetComponent::InitializeLuaObject(lua::State *l) { return BaseEn
 Bool CPointAtTargetComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetPointAtTarget) {
-		auto *ent = nwm::read_entity(packet);
+		auto *ent = pragma::networking::read_entity(packet);
 		SetPointAtTarget(ent);
 	}
 	else

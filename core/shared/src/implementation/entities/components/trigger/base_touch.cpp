@@ -92,7 +92,7 @@ void BaseTouchComponent::UpdatePhysics()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(!pPhysComponent)
 		return;
-	pPhysComponent->InitializePhysics(pragma::physics::PHYSICSTYPE::STATIC);
+	pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Static);
 }
 void BaseTouchComponent::OnEntitySpawn()
 {
@@ -157,7 +157,7 @@ void BaseTouchComponent::UpdateTouch()
 				if(IsTouching(*contactEvent.contactTarget.get()))
 					break;
 				auto *ent = contactEvent.contactTarget.get();
-				StartTouch(PhysTouch {ent, contactEvent.contactTarget->CallOnRemove(FunctionCallback<void, pragma::ecs::BaseEntity *>::Create([this](pragma::ecs::BaseEntity *ent) { EndTouch(*ent); }))});
+				StartTouch(pragma::physics::PhysTouch {ent, contactEvent.contactTarget->CallOnRemove(FunctionCallback<void, pragma::ecs::BaseEntity *>::Create([this](pragma::ecs::BaseEntity *ent) { EndTouch(*ent); }))});
 				break;
 			}
 		case ContactEvent::Event::EndTouch:
@@ -175,7 +175,7 @@ void BaseTouchComponent::UpdateTouch()
 	m_contactReport.clear();
 }
 
-void BaseTouchComponent::OnTouch(PhysTouch &) {}
+void BaseTouchComponent::OnTouch(pragma::physics::PhysTouch &) {}
 void BaseTouchComponent::OnContact(physics::ContactInfo &contact) {}
 bool BaseTouchComponent::IsTouchEnabled() const { return true; }
 void BaseTouchComponent::StartTouch(pragma::ecs::BaseEntity &entOther, pragma::physics::PhysObj &physOther, physics::ICollisionObject &objThis, physics::ICollisionObject &objOther)
@@ -284,7 +284,7 @@ void BaseTouchComponent::FireEndTouchEvents(TouchInfo &touch, bool isLastTouch)
 	}
 }
 
-void BaseTouchComponent::StartTouch(const PhysTouch &touch)
+void BaseTouchComponent::StartTouch(const pragma::physics::PhysTouch &touch)
 {
 	pragma::ecs::BaseEntity *ent = const_cast<pragma::ecs::BaseEntity *>(touch.entity.get());
 	if(ent == nullptr || IsTouching(*ent))
@@ -297,7 +297,7 @@ void BaseTouchComponent::StartTouch(pragma::ecs::BaseEntity &ent)
 {
 	if(!CanTrigger(ent) || IsTouching(ent))
 		return;
-	PhysTouch touch = PhysTouch(&ent, ent.CallOnRemove(FunctionCallback<void, pragma::ecs::BaseEntity *>::Create([this](pragma::ecs::BaseEntity *ent) { EndTouch(*ent); })));
+	auto touch = pragma::physics::PhysTouch(&ent, ent.CallOnRemove(FunctionCallback<void, pragma::ecs::BaseEntity *>::Create([this](pragma::ecs::BaseEntity *ent) { EndTouch(*ent); })));
 	StartTouch(touch);
 }
 void BaseTouchComponent::SetTriggerFlags(TriggerFlags flags) { m_triggerFlags = flags; }

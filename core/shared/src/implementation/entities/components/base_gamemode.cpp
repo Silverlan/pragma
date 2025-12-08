@@ -47,7 +47,7 @@ void BaseGamemodeComponent::Save(udm::LinkedPropertyWrapperArg udm) { BaseEntity
 
 void BaseGamemodeComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) { BaseEntityComponent::Load(udm, version); }
 
-void BaseGamemodeComponent::OnPlayerDeath(BasePlayerComponent &pl, DamageInfo *dmgInfo)
+void BaseGamemodeComponent::OnPlayerDeath(BasePlayerComponent &pl, game::DamageInfo *dmgInfo)
 {
 	CEPlayerDeath evData {pl, dmgInfo};
 	BroadcastEvent(baseGamemodeComponent::EVENT_ON_PLAYER_DEATH, evData);
@@ -76,7 +76,7 @@ void BaseGamemodeComponent::OnGameInitialized() { BroadcastEvent(baseGamemodeCom
 void BaseGamemodeComponent::OnMapInitialized() { BroadcastEvent(baseGamemodeComponent::EVENT_ON_MAP_INITIALIZED); }
 void BaseGamemodeComponent::OnGameReady() { BroadcastEvent(baseGamemodeComponent::EVENT_ON_GAME_READY); }
 
-GameModeInfo *BaseGamemodeComponent::GetGameModeInfo() { return GetEntity().GetNetworkState()->GetGameState()->GetGameMode(); }
+pragma::game::GameModeInfo *BaseGamemodeComponent::GetGameModeInfo() { return GetEntity().GetNetworkState()->GetGameState()->GetGameMode(); }
 static const std::string empty_string {};
 const std::string &BaseGamemodeComponent::GetName() const
 {
@@ -104,12 +104,12 @@ util::Version BaseGamemodeComponent::GetGamemodeVersion() const
 	return gmInfo ? gmInfo->version : util::Version {};
 }
 
-CEPlayerDeath::CEPlayerDeath(BasePlayerComponent &pl, DamageInfo *dmgInfo) : player {pl}, dmgInfo {dmgInfo} {}
+CEPlayerDeath::CEPlayerDeath(BasePlayerComponent &pl, game::DamageInfo *dmgInfo) : player {pl}, dmgInfo {dmgInfo} {}
 void CEPlayerDeath::PushArguments(lua::State *l)
 {
 	player.PushLuaObject(l);
 	if(dmgInfo)
-		Lua::Push<DamageInfo *>(l, dmgInfo);
+		Lua::Push<game::DamageInfo *>(l, dmgInfo);
 }
 
 CEPlayerDropped::CEPlayerDropped(BasePlayerComponent &pl, pragma::networking::DropReason reason) : player {pl}, reason {reason} {}

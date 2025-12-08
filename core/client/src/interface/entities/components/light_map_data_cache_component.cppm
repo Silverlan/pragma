@@ -19,13 +19,13 @@ export namespace pragma {
 
 		void SetLightMapDataCachePath(const std::string &cachePath);
 		const std::string &GetLightMapDataCachePath() const;
-		const std::shared_ptr<LightmapDataCache> &GetLightMapDataCache() const;
+		const std::shared_ptr<rendering::LightmapDataCache> &GetLightMapDataCache() const;
 		void ReloadCache();
 		void InitializeUvBuffers();
 
 		virtual void OnTick(double dt) override;
 	  protected:
-		std::shared_ptr<LightmapDataCache> m_lightmapDataCache = nullptr;
+		std::shared_ptr<rendering::LightmapDataCache> m_lightmapDataCache = nullptr;
 		std::string m_lightmapDataCacheFile;
 		bool m_lightmapDataCacheDirty = false;
 	};

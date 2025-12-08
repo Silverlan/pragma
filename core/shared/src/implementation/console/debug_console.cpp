@@ -15,11 +15,11 @@ module pragma.shared;
 
 import :console.debug_console;
 
-DebugConsole::DebugConsole() : _cinbuf(0), _coutbuf(0), _cerrbuf(0) {}
+pragma::console::DebugConsole::DebugConsole() : _cinbuf(0), _coutbuf(0), _cerrbuf(0) {}
 
-DebugConsole::~DebugConsole() {}
+pragma::console::DebugConsole::~DebugConsole() {}
 //TODO: Linux: Reroute pts to different terminal.
-void DebugConsole::open()
+void pragma::console::DebugConsole::open()
 {
 #ifdef _WIN32
 	if(util::get_subsystem() != util::SubSystem::Console) {
@@ -95,7 +95,7 @@ void DebugConsole::open()
 #endif
 }
 
-void DebugConsole::close()
+void pragma::console::DebugConsole::close()
 {
 #ifdef _WIN32
 	auto isConsoleSubSys = (util::get_subsystem() == util::SubSystem::Console);

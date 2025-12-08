@@ -12,16 +12,18 @@ export import :particle_system.modifier;
 export namespace pragma::ecs {
 	class CParticleSystemComponent;
 }
-export class DLLCLIENT CParticleOperatorAnimationPlayback : public CParticleOperator {
-  public:
-	CParticleOperatorAnimationPlayback() = default;
-	virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
-  private:
-	float m_playbackSpeed = 1.f;
-};
+export namespace pragma::pts {
+	class DLLCLIENT CParticleOperatorAnimationPlayback : public CParticleOperator {
+	public:
+		CParticleOperatorAnimationPlayback() = default;
+		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Simulate(pragma::pts::CParticle &particle, double tDelta, float strength) override;
+	private:
+		float m_playbackSpeed = 1.f;
+	};
+}
 
-void CParticleOperatorAnimationPlayback::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorAnimationPlayback::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &pair : values) {
@@ -31,7 +33,7 @@ void CParticleOperatorAnimationPlayback::Initialize(pragma::BaseEnvParticleSyste
 			m_playbackSpeed = util::to_float(pair.second);
 	}
 }
-void CParticleOperatorAnimationPlayback::Simulate(CParticle &particle, double tDelta, float strength)
+void pragma::pts::CParticleOperatorAnimationPlayback::Simulate(pragma::pts::CParticle &particle, double tDelta, float strength)
 {
 	CParticleOperator::Simulate(particle, tDelta, strength);
 	particle.SetFrameOffset(fmodf(particle.GetFrameOffset() + tDelta * m_playbackSpeed, 1.f));

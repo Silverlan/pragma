@@ -268,7 +268,7 @@ bool CRasterizationRendererComponent::ReloadRenderTarget(uint32_t width, uint32_
 }
 void CRasterizationRendererComponent::SetFrameDepthBufferSamplingRequired() { m_bFrameDepthBufferSamplingRequired = true; }
 void CRasterizationRendererComponent::EndRendering() {}
-void CRasterizationRendererComponent::BeginRendering(const util::DrawSceneInfo &drawSceneInfo) { umath::set_flag(m_stateFlags, StateFlags::DepthResolved | StateFlags::BloomResolved | StateFlags::RenderResolved, false); }
+void CRasterizationRendererComponent::BeginRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { umath::set_flag(m_stateFlags, StateFlags::DepthResolved | StateFlags::BloomResolved | StateFlags::RenderResolved, false); }
 
 void CRasterizationRendererComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
@@ -377,7 +377,7 @@ pragma::ShaderPrepassBase &CRasterizationRendererComponent::GetPrepassShader() c
 pragma::rendering::HDRData &CRasterizationRendererComponent::GetHDRInfo() { return m_hdrInfo; }
 const pragma::rendering::HDRData &CRasterizationRendererComponent::GetHDRInfo() const { return const_cast<CRasterizationRendererComponent *>(this)->GetHDRInfo(); }
 // GlowData &CRasterizationRendererComponent::GetGlowInfo() {return m_glowInfo;}
-SSAOInfo &CRasterizationRendererComponent::GetSSAOInfo() { return m_hdrInfo.ssaoInfo; }
+pragma::rendering::SSAOInfo &CRasterizationRendererComponent::GetSSAOInfo() { return m_hdrInfo.ssaoInfo; }
 pragma::rendering::Prepass &CRasterizationRendererComponent::GetPrepass() { return m_hdrInfo.prepass; }
 const pragma::rendering::ForwardPlusInstance &CRasterizationRendererComponent::GetForwardPlusInstance() const { return const_cast<CRasterizationRendererComponent *>(this)->GetForwardPlusInstance(); }
 pragma::rendering::ForwardPlusInstance &CRasterizationRendererComponent::GetForwardPlusInstance() { return m_hdrInfo.forwardPlusInstance; }
@@ -478,15 +478,15 @@ void CRasterizationRendererComponent::ReloadPresentationRenderTarget() { m_hdrIn
 prosper::SampleCountFlags CRasterizationRendererComponent::GetSampleCount() const { return const_cast<CRasterizationRendererComponent *>(this)->GetHDRInfo().sceneRenderTarget->GetTexture().GetImage().GetSampleCount(); }
 bool CRasterizationRendererComponent::IsMultiSampled() const { return GetSampleCount() != prosper::SampleCountFlags::e1Bit; }
 
-prosper::RenderTarget *CRasterizationRendererComponent::GetPrepassRenderTarget(const util::DrawSceneInfo &drawSceneInfo) { return GetPrepass().renderTarget.get(); }
-prosper::RenderTarget *CRasterizationRendererComponent::GetLightingPassRenderTarget(const util::DrawSceneInfo &drawSceneInfo)
+prosper::RenderTarget *CRasterizationRendererComponent::GetPrepassRenderTarget(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { return GetPrepass().renderTarget.get(); }
+prosper::RenderTarget *CRasterizationRendererComponent::GetLightingPassRenderTarget(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	auto &hdrInfo = GetHDRInfo();
 	auto &rt = hdrInfo.GetRenderTarget(drawSceneInfo);
 	return &rt;
 }
 
-prosper::RenderTarget *CRasterizationRendererComponent::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass, bool secondaryCommandBuffers)
+prosper::RenderTarget *CRasterizationRendererComponent::BeginRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass, bool secondaryCommandBuffers)
 {
 	auto *rt = GetLightingPassRenderTarget(drawSceneInfo);
 	if(rt == nullptr)
@@ -498,12 +498,12 @@ prosper::RenderTarget *CRasterizationRendererComponent::BeginRenderPass(const ut
 	return result ? rt : nullptr;
 	;
 }
-bool CRasterizationRendererComponent::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo)
+bool CRasterizationRendererComponent::EndRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	auto &hdrInfo = GetHDRInfo();
 	return hdrInfo.EndRenderPass(drawSceneInfo);
 }
-bool CRasterizationRendererComponent::ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo)
+bool CRasterizationRendererComponent::ResolveRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	auto &hdrInfo = GetHDRInfo();
 	return hdrInfo.ResolveRenderPass(drawSceneInfo);
@@ -523,7 +523,7 @@ void CEPrepassStageData::PushArguments(lua::State *l) {}
 
 ////////
 
-CEUpdateRenderBuffers::CEUpdateRenderBuffers(const util::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
+CEUpdateRenderBuffers::CEUpdateRenderBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
 void CEUpdateRenderBuffers::PushArguments(lua::State *l) {}
 
 ////////
@@ -534,7 +534,7 @@ void CRasterizationRenderer::Initialize()
 	AddComponent<CRasterizationRendererComponent>();
 }
 
-static void cl_render_ssao_callback(NetworkState *, const ConVar &, bool, bool enabled)
+static void cl_render_ssao_callback(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool enabled)
 {
 	if(pragma::get_cgame() == nullptr)
 		return;

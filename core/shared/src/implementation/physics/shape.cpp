@@ -44,7 +44,7 @@ int32_t pragma::physics::IShape::GetSurfaceMaterialIndex() const
 	auto *surfMat = GetSurfaceMaterial();
 	return surfMat ? surfMat->GetIndex() : -1;
 }
-SurfaceMaterial *pragma::physics::IShape::GetSurfaceMaterial() const { return m_material.valid() ? m_material->GetSurfaceMaterial() : nullptr; }
+pragma::physics::SurfaceMaterial *pragma::physics::IShape::GetSurfaceMaterial() const { return m_material.valid() ? m_material->GetSurfaceMaterial() : nullptr; }
 void pragma::physics::IShape::SetMaterial(const IMaterial &mat) { m_material = util::WeakHandle<IMaterial>(std::static_pointer_cast<IMaterial>(const_cast<IMaterial &>(mat).shared_from_this())); }
 pragma::physics::IMaterial *pragma::physics::IShape::GetMaterial() const { return m_material.get(); }
 

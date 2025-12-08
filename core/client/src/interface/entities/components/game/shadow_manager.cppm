@@ -13,8 +13,8 @@ import :rendering.shaders;
 export namespace pragma {
 	class CLightComponent;
 	struct ShadowRenderInfo {
-		const CBaseEntity *entity = nullptr;
-		const CModelSubMesh *mesh = nullptr;
+		const ecs::CBaseEntity *entity = nullptr;
+		const pragma::geometry::CModelSubMesh *mesh = nullptr;
 		uint32_t renderFlags = 0;
 		msys::Material *material = nullptr;
 	};
@@ -29,10 +29,10 @@ export namespace pragma {
 		void RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light);
 	  private:
 		struct OctreeCallbacks {
-			std::function<bool(const OcclusionOctree<std::shared_ptr<ModelMesh>>::Node &)> nodeCallback;
-			std::function<void(const CBaseEntity &, uint32_t)> entityCallback;
-			std::function<void(const std::shared_ptr<ModelMesh> &)> meshCallback;
-			std::function<void(const pragma::Model &, const CModelSubMesh &, uint32_t)> subMeshCallback;
+			std::function<bool(const OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>::Node &)> nodeCallback;
+			std::function<void(const ecs::CBaseEntity &, uint32_t)> entityCallback;
+			std::function<void(const std::shared_ptr<pragma::geometry::ModelMesh> &)> meshCallback;
+			std::function<void(const pragma::asset::Model &, const pragma::geometry::CModelSubMesh &, uint32_t)> subMeshCallback;
 		};
 		struct LightSourceData {
 			std::shared_ptr<prosper::IPrimaryCommandBuffer> drawCmd;
@@ -60,8 +60,8 @@ export namespace pragma {
 		util::WeakHandle<prosper::Shader> m_shaderCSMTransparent = {};
 
 		// Current entity when iterating entity meshes in an octree
-		const CBaseEntity *m_currentEntity = nullptr;
-		pragma::Model *m_currentModel = nullptr;
+		const ecs::CBaseEntity *m_currentEntity = nullptr;
+		pragma::asset::Model *m_currentModel = nullptr;
 		uint32_t m_currentRenderFlags = 0;
 	};
 
@@ -110,7 +110,7 @@ export namespace pragma {
 };
 export {REGISTER_ENUM_FLAGS(pragma::ShadowRenderer::RenderResultFlags)}
 
-export class DLLCLIENT CShadowManager : public CBaseEntity {
+export class DLLCLIENT CShadowManager : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

@@ -11,7 +11,7 @@ export import :physics.base;
 export import :physics.shape;
 
 export {
-	namespace pragma {
+	namespace pragma::geometry {
 		class ModelSubMesh;
 	}
 	namespace pragma::physics {
@@ -226,8 +226,8 @@ export {
 			virtual bool MeshVertexIndexToNodeIndex(uint16_t meshVertexIndex, uint16_t &nodeIndex) const = 0;
 			virtual bool NodeIndexToMeshVertexIndex(uint16_t nodeIndex, uint16_t &meshVertexIndex) const = 0;
 
-			virtual void SetSubMesh(const pragma::ModelSubMesh &subMesh, const std::vector<uint16_t> &meshVertexIndicesToLocalVertexIndices) = 0;
-			pragma::ModelSubMesh *GetSubMesh() const;
+			virtual void SetSubMesh(const pragma::geometry::ModelSubMesh &subMesh, const std::vector<uint16_t> &meshVertexIndicesToLocalVertexIndices) = 0;
+			pragma::geometry::ModelSubMesh *GetSubMesh() const;
 
 			virtual void UpdateLinearVelocity() = 0;
 
@@ -313,7 +313,7 @@ export {
 			virtual float GetMaterialVolumeStiffnessCoefficient(uint32_t matId) const = 0;
 		  protected:
 			ISoftBody(IEnvironment &env, pragma::physics::IShape &shape, const std::vector<uint16_t> &meshVertIndicesToPhysIndices);
-			std::weak_ptr<pragma::ModelSubMesh> m_subMesh = {};
+			std::weak_ptr<pragma::geometry::ModelSubMesh> m_subMesh = {};
 		};
 		using namespace umath::scoped_enum::bitwise;
 

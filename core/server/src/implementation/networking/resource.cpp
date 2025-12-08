@@ -6,18 +6,18 @@ module;
 module pragma.server;
 import :networking.resource;
 
-Resource::Resource(std::string name, bool bStream) : offset(0), stream(bStream)
+pragma::networking::Resource::Resource(std::string name, bool bStream) : offset(0), stream(bStream)
 {
 	this->name = FileManager::GetCanonicalizedPath(name);
 	file = nullptr;
 }
-Resource::~Resource()
+pragma::networking::Resource::~Resource()
 {
 	if(file == nullptr)
 		return;
 	file.reset();
 }
-bool Resource::Construct()
+bool pragma::networking::Resource::Construct()
 {
 	file = FileManager::OpenFile(name.c_str(), "rb");
 	if(file == nullptr)

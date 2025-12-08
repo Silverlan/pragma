@@ -36,7 +36,7 @@ export {
 		};
 	};
 
-	class DLLCLIENT CSkybox : public CBaseEntity {
+	class DLLCLIENT CSkybox : public pragma::ecs::CBaseEntity {
 	  public:
 		virtual void Initialize() override;
 	};

@@ -30,7 +30,7 @@ export namespace pragma {
 	};
 };
 
-export class DLLCLIENT CEnvSmokeTrail : public CBaseEntity {
+export class DLLCLIENT CEnvSmokeTrail : public pragma::ecs::CBaseEntity {
   public:
 	virtual void Initialize() override;
 };

@@ -12,12 +12,14 @@ export import :rendering.enums;
 import :rendering.render_stats;
 
 export {
-	class CBaseEntity;
 	namespace pragma {
 		class CSceneComponent;
+		namespace ecs {
+			class CBaseEntity;
+		}
 	};
 };
-export namespace util {
+export namespace pragma::rendering {
 	struct DLLCLIENT DrawSceneInfo {
 		enum class Flags : uint8_t {
 			None = 0u,
@@ -42,8 +44,8 @@ export namespace util {
 		::pragma::rendering::RenderMask exclusionMask = ::pragma::rendering::RenderMask::None;
 		::pragma::rendering::RenderMask inclusionMask = ::pragma::rendering::RenderMask::None;
 
-		std::function<bool(CBaseEntity &)> prepassFilter = nullptr;
-		std::function<bool(CBaseEntity &)> renderFilter = nullptr;
+		std::function<bool(pragma::ecs::CBaseEntity &)> prepassFilter = nullptr;
+		std::function<bool(pragma::ecs::CBaseEntity &)> renderFilter = nullptr;
 
 		std::shared_ptr<prosper::IImage> outputImage = nullptr;
 		uint32_t outputLayerId = 0u;
@@ -64,4 +66,4 @@ export namespace util {
 	};
 	using namespace umath::scoped_enum::bitwise;
 };
-export {REGISTER_ENUM_FLAGS(util::DrawSceneInfo::Flags)}
+export {REGISTER_ENUM_FLAGS(pragma::rendering::DrawSceneInfo::Flags)}

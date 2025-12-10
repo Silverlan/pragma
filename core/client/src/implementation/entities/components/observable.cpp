@@ -16,7 +16,7 @@ void CObservableComponent::ReceiveData(NetPacket &packet)
 	constexpr auto numTypes = umath::to_integral(CameraType::Count);
 	for(auto i = 0u; i < numTypes; ++i) {
 		auto &data = GetCameraData(static_cast<CameraType>(i));
-		//*data.enabled = packet->Read<bool>();
+		*data.enabled = packet->Read<bool>();
 
 		auto hasLocalOrigin = packet->Read<bool>();
 		if(hasLocalOrigin)

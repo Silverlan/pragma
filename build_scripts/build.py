@@ -739,7 +739,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="78f215699e3d143c0f07143800a68a5887fcdc10",
+		commitSha="ad622aaf07501eefdc535057732589deefd4dfe6",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -774,7 +774,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_dmx",
-			commitSha="3dad26b7942b48a9637017abead59fa60507523b",
+			commitSha="91c07dce691e145daf52ee5e258d75fe7963120e",
 			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
 		)
 	if with_all_pfm_modules:
@@ -785,7 +785,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="2c9c094d41f04ab830e68d12b26a453a49a0f3ea",
+			commitSha="dec1ac2297ceb64f2e246c39ec603a36500e7b56",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(

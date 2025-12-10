@@ -506,12 +506,12 @@ os.chdir(ispc_root)
 
 ########## ISPCTextureCompressor ##########
 os.chdir(deps_dir)
-commit_sha = "d35ab81a5c22924438a90969285b4dcd764bd706"
+commit_sha = "3ddf95796a5bfea1789ee685fc432d5d4529acb7"
 ispctc_root = normalize_path(os.getcwd() +"/ISPCTextureCompressor")
 if not check_repository_commit(ispctc_root, commit_sha, "ISPCTextureCompressor"): 
 	if not Path(ispctc_root).is_dir():
 		print_msg("ISPCTextureCompressor not found. Downloading...")
-		git_clone("https://github.com/sarc-acl/ISPCTextureCompressor.git")
+		git_clone("https://github.com/Silverlan/ISPCTextureCompressor.git")
 	os.chdir(ispctc_root)
 	reset_to_commit(commit_sha)
 

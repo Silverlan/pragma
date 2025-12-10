@@ -72,6 +72,7 @@ void register_game_shaders()
 	// shaderManager.RegisterShader("particle_rotational",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleRotational(context,identifier);});
 	// shaderManager.RegisterShader("particlemodel",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleModel(context,identifier);});
 	// shaderManager.RegisterShader("particlepolyboard",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticlePolyboard(context,identifier);});
+	shaderManager.RegisterShader("particle_simulation", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::rendering::shaders::ShaderParticleSimulation(context, identifier); });
 
 	shaderManager.RegisterShader("pfm_particle_animated_sprites", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderParticleAnimatedSprites(context, identifier); });
 	shaderManager.RegisterShader("pfm_particle_sprite_trail", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderParticleSpriteTrail(context, identifier); });

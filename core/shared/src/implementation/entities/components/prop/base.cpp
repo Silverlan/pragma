@@ -31,7 +31,7 @@ bool BasePropComponent::SetKeyValue(std::string key, std::string val)
 {
 	if(key == "scale") {
 		Vector3 scale {1.f, 1.f, 1.f};
-		auto n = ustring::string_to_array<float, double>(val, &scale.x, atof, 3);
+		auto n = ustring::string_to_array<float>(val, &scale.x, ustring::cstring_to_number<float>, 3);
 		if(n == 1) {
 			scale.y = scale.x;
 			scale.z = scale.x;

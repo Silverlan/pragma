@@ -236,24 +236,24 @@ PhysObjHandle BasePhysicsComponent::InitializePhysics(const physics::PhysObjCrea
 
 					auto sp1l = joint.args.find("sp1l");
 					if(sp1l != joint.args.end())
-						sp[0] = CFloat(atof(sp1l->second.c_str()));
+						sp[0] = CFloat(ustring::to_float(sp1l->second));
 					auto sp1u = joint.args.find("sp1u");
 					if(sp1u != joint.args.end())
-						sp[1] = CFloat(atof(sp1u->second.c_str()));
+						sp[1] = CFloat(ustring::to_float(sp1u->second));
 
 					auto sp2l = joint.args.find("sp2l");
 					if(sp2l != joint.args.end())
-						sp2[0] = CFloat(atof(sp2l->second.c_str()));
+						sp2[0] = CFloat(ustring::to_float(sp2l->second));
 					auto sp2u = joint.args.find("sp2u");
 					if(sp2u != joint.args.end())
-						sp2[1] = CFloat(atof(sp2u->second.c_str()));
+						sp2[1] = CFloat(ustring::to_float(sp2u->second));
 
 					auto tsl = joint.args.find("tsl");
 					if(tsl != joint.args.end())
-						ts[0] = CFloat(atof(tsl->second.c_str()));
+						ts[0] = CFloat(ustring::to_float(tsl->second));
 					auto tsu = joint.args.find("tsu");
 					if(tsu != joint.args.end())
-						ts[1] = CFloat(atof(tsu->second.c_str()));
+						ts[1] = CFloat(ustring::to_float(tsu->second));
 
 					// Notes:
 					// bodySrc is the parent collision object. The constraint origin is relative to this parent.
@@ -272,13 +272,13 @@ PhysObjHandle BasePhysicsComponent::InitializePhysics(const physics::PhysObjCrea
 
 					auto sftn = joint.args.find("sftn");
 					if(sftn != joint.args.end())
-						softness = CFloat(atof(sftn->second.c_str()));
+						softness = CFloat(ustring::to_float(sftn->second));
 					auto bias = joint.args.find("bias");
 					if(bias != joint.args.end())
-						biasFactor = CFloat(atof(bias->second.c_str()));
+						biasFactor = CFloat(ustring::to_float(bias->second));
 					auto rlx = joint.args.find("rlx");
 					if(rlx != joint.args.end())
-						relaxationFactor = CFloat(atof(rlx->second.c_str()));
+						relaxationFactor = CFloat(ustring::to_float(rlx->second));
 
 					auto swingSpan1 = (sp.y - sp.x) * 0.5f;
 					auto swingSpan2 = (sp2.y - sp2.x) * 0.5f;

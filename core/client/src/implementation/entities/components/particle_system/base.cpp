@@ -431,7 +431,7 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) * 2;
 		SetTextureScrollingEnabled(::util::to_boolean(value));
 	else if(ustring::compare<std::string>(key, "world_rotation")) {
 		std::array<float, 4> values;
-		ustring::string_to_array(value, values.data(), atof, values.size());
+		ustring::string_to_array(value, values.data(), ustring::cstring_to_number<float>, values.size());
 		m_particleRot.w = values.at(0);
 		m_particleRot.x = values.at(1);
 		m_particleRot.y = values.at(2);

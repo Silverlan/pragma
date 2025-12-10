@@ -58,7 +58,7 @@ void BaseColorComponent::Initialize()
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(ustring::compare<std::string>(kvData.key, "color", false)) {
 			Vector4 r;
-			auto n = ustring::string_to_array<glm::vec4::value_type, Double>(kvData.value, &r[0], atof, 4);
+			auto n = ustring::string_to_array<glm::vec4::value_type>(kvData.value, &r[0], ustring::cstring_to_number<float>, 4);
 			for(auto i = decltype(n) {0u}; i < n; ++i)
 				r[i] /= static_cast<float>(std::numeric_limits<uint8_t>::max());
 			if(n < 4)
@@ -73,7 +73,7 @@ void BaseColorComponent::Initialize()
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(ustring::compare<std::string>(inputData.input, "setcolor", false)) {
 			Vector4 r;
-			auto n = ustring::string_to_array<glm::vec4::value_type, Double>(inputData.data, &r[0], atof, 4);
+			auto n = ustring::string_to_array<glm::vec4::value_type>(inputData.data, &r[0], ustring::cstring_to_number<float>, 4);
 			for(auto i = decltype(n) {0u}; i < n; ++i)
 				r[i] /= static_cast<float>(std::numeric_limits<uint8_t>::max());
 			if(n < 4)

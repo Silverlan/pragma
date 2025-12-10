@@ -38,8 +38,8 @@ void pragma::gui::types::WIMainMenuOptions::ApplyWindowSize()
 	ustring::explode(std::string {text.cpp_str()}, "x", res);
 	if(res.size() < 2)
 		return;
-	int w = atoi(res[0].c_str());
-	int h = atoi(res[1].c_str());
+	int w = ustring::to_int(res[0]);
+	int h = ustring::to_int(res[1]);
 
 	pragma::get_cengine()->GetWindow().SetResolution(Vector2i(w, h));
 }

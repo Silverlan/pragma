@@ -569,7 +569,7 @@ int BasePlayerComponent::GetConVarInt(std::string cvar) const
 	std::unordered_map<std::string, std::string>::iterator i = const_cast<BasePlayerComponent *>(this)->m_conVars.find(cvar);
 	if(i == m_conVars.end())
 		return 0;
-	return atoi(i->second.c_str());
+	return ustring::to_int(i->second);
 }
 
 float BasePlayerComponent::GetConVarFloat(std::string cvar) const

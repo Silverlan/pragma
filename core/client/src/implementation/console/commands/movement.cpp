@@ -269,7 +269,7 @@ static void hurtme(pragma::NetworkState *state, pragma::BasePlayerComponent *, s
 {
 	if(!check_cheats("hurtme", state))
 		return;
-	auto dmg = !args.empty() ? atoi(args.front().c_str()) : 1;
+	auto dmg = !args.empty() ? ustring::to_int(args.front()) : 1;
 	NetPacket p;
 	p->Write<uint16_t>(static_cast<uint16_t>(dmg));
 	auto *client = static_cast<pragma::ClientState *>(state);

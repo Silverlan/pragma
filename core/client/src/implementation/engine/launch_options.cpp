@@ -25,7 +25,7 @@ static void LPARAM_refresh(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	int freq = atoi(argv[0].c_str());
+	int freq = ustring::to_int(argv[0]);
 	if(freq > 0)
 		g_launchParamRefreshRate = freq;
 }
@@ -36,14 +36,14 @@ static void LPARAM_w(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	g_launchParamWidth = atoi(argv[0].c_str());
+	g_launchParamWidth = ustring::to_int(argv[0]);
 }
 
 static void LPARAM_h(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	g_launchParamHeight = atoi(argv[0].c_str());
+	g_launchParamHeight = ustring::to_int(argv[0]);
 }
 
 static void LPARAM_fullbright(const std::vector<std::string> &argv) { pragma::get_cengine()->UseFullbrightShader(true); }

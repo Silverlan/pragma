@@ -224,7 +224,7 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 			std::string val;
 			prop[pair.first](val);
 			if(!val.empty())
-				ustring::string_to_array<float>(val, pair.second, atof, 3);
+				ustring::string_to_array<float>(val, pair.second, ustring::cstring_to_number<float>, 3);
 		}
 		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}

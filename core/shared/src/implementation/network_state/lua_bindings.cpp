@@ -160,7 +160,7 @@ static void register_string_to_vector_type_constructor(lua::State *l)
 	  +[](const std::string &str) -> T {
 		  T r;
 		  using ValueType = typename decltype(r)::value_type;
-		  ustring::string_to_array<ValueType, Double>(str, reinterpret_cast<ValueType *>(&r[0]), atof, decltype(r)::length());
+		  ustring::string_to_array<ValueType>(str, reinterpret_cast<ValueType *>(&r[0]), ustring::cstring_to_number<float>, decltype(r)::length());
 		  return r;
 	  },
 	  const std::string &>(l);

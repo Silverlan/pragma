@@ -107,7 +107,7 @@ void CMD_sv_dump_netmessages(pragma::NetworkState *, pragma::BasePlayerComponent
 	std::unordered_map<std::string, unsigned int> *netmessages;
 	map->GetNetMessages(&netmessages);
 	if(!argv.empty()) {
-		auto id = atoi(argv.front().c_str());
+		auto id = ustring::to_int(argv.front());
 		for(auto it = netmessages->begin(); it != netmessages->end(); ++it) {
 			if(it->second == id) {
 				Con::cout << "Message Identifier: " << it->first << Con::endl;
@@ -211,10 +211,10 @@ void CMD_sv_send(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vec
 		pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SV_SEND, packet, pragma::networking::Protocol::SlowReliable);
 	else {
 		/*ServerState::Get()->
-		ClientSession *cs = GetSessionByPlayerID(atoi(argv[0]));
+		ClientSession *cs = GetSessionByPlayerID(ustring::to_int(argv[0]));
 		if(!cs)
 		{
-			Con::cout<<"No player with ID "<<atoi(argv[0])<<" found!"<<Con::endl;
+			Con::cout<<"No player with ID "<<ustring::to_int(argv[0])<<" found!"<<Con::endl;
 			return;
 		}
 		ServerState::Get()->SendTCPMessage(pragma::networking::net_messages::client::SV_SEND, &packet,cs);*/
@@ -230,10 +230,10 @@ void CMD_sv_send_udp(pragma::NetworkState *, pragma::BasePlayerComponent *, std:
 	if(argv.size() == 1)
 		pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SV_SEND, packet, pragma::networking::Protocol::FastUnreliable);
 	else {
-		/*ClientSession *cs = GetSessionByPlayerID(atoi(argv[0]));
+		/*ClientSession *cs = GetSessionByPlayerID(ustring::to_int(argv[0]));
 		if(!cs)
 		{
-			Con::cout<<"No player with ID "<<atoi(argv[0])<<" found!"<<Con::endl;
+			Con::cout<<"No player with ID "<<ustring::to_int(argv[0])<<" found!"<<Con::endl;
 			return;
 		}
 		ServerState::Get()->SendUDPMessage(pragma::networking::net_messages::client::SV_SEND,&packet,cs);*/
@@ -291,7 +291,7 @@ void CMD_ent_scale(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 		return;
 	if(argv.size() >= 2) {
 		auto ents = pragma::console::find_named_targets(state, argv[0]);
-		auto scale = atof(argv[1].c_str());
+		auto scale = ustring::to_float(argv[1]);
 		for(auto *ent : ents) {
 			auto pTransformComponent = ent->GetTransformComponent();
 			if(pTransformComponent)
@@ -305,7 +305,7 @@ void CMD_ent_scale(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	if(ent.IsCharacter() == false)
 		return;
 	auto charComponent = ent.GetCharacterComponent();
-	auto scale = atof(argv.front().c_str());
+	auto scale = ustring::to_float(argv.front());
 	auto ents = pragma::console::find_trace_targets(state, *charComponent);
 	for(auto *ent : ents) {
 		auto pTransformComponent = ent->GetTransformComponent();

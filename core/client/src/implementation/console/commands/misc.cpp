@@ -192,7 +192,7 @@ void CMD_thirdperson(pragma::NetworkState *state, pragma::BasePlayerComponent *p
 		return;
 	auto bThirdPerson = false;
 	if(!argv.empty())
-		bThirdPerson = (atoi(argv.front().c_str()) != 0) ? true : false;
+		bThirdPerson = (ustring::to_int(argv.front()) != 0) ? true : false;
 	else
 		bThirdPerson = (observer->GetObserverMode() != ObserverMode::ThirdPerson) ? true : false;
 	auto obsTarget = observer->GetObserverTarget();
@@ -210,7 +210,11 @@ void CMD_setpos(pragma::NetworkState *state, pragma::BasePlayerComponent *, std:
 	auto *cstate = static_cast<pragma::ClientState *>(state);
 	if(!pragma::check_cheats("setpos", cstate))
 		return;
-	Vector3 pos(atof(argv[0].c_str()), atof(argv[1].c_str()), atof(argv[2].c_str()));
+    Vector3 pos {
+		ustring::to_float(argv[0]),
+		ustring::to_float(argv[1]),
+		ustring::to_float(argv[2])
+    };
 	NetPacket p;
 	pragma::networking::write_vector(p, pos);
 	cstate->SendPacket(pragma::networking::net_messages::server::CMD_SETPOS, p, pragma::networking::Protocol::SlowReliable);
@@ -244,7 +248,11 @@ void CMD_setcampos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	auto *cstate = static_cast<pragma::ClientState *>(state);
 	if(!pragma::check_cheats("setpos", cstate))
 		return;
-	Vector3 pos(atof(argv[0].c_str()), atof(argv[1].c_str()), atof(argv[2].c_str()));
+    Vector3 pos {
+		ustring::to_float(argv[0]),
+		ustring::to_float(argv[1]),
+		ustring::to_float(argv[2])
+    };
 	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera<pragma::CCameraComponent>();
 	if(pCam == nullptr)
@@ -421,7 +429,7 @@ void CMD_cl_dump_netmessages(pragma::NetworkState *, pragma::BasePlayerComponent
 	std::unordered_map<std::string, unsigned int> *netmessages;
 	map->GetNetMessages(&netmessages);
 	if(!argv.empty()) {
-		auto id = atoi(argv.front().c_str());
+		auto id = ustring::to_int(argv.front());
 		for(auto it = netmessages->begin(); it != netmessages->end(); ++it) {
 			if(it->second == id) {
 				Con::cout << "Message Identifier: " << it->first << Con::endl;

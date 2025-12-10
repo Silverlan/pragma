@@ -357,7 +357,7 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	vec3iDef.def("Link", static_cast<void (*)(lua::State *, LVector3iProperty &, LStringProperty &)>([](lua::State *l, LVector3iProperty &prop, LStringProperty &propOther) {
 		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Vector3i {
 			Vector3i r;
-			ustring::string_to_array<decltype(r)::value_type, int32_t>(v, &r[0], atoi, 3);
+			ustring::string_to_array<decltype(r)::value_type>(v, &r[0], ustring::cstring_to_number<int32_t>, 3);
 			return r;
 		});
 	}));
@@ -373,7 +373,7 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	vec2Def.def("Link", static_cast<void (*)(lua::State *, LVector2Property &, LStringProperty &)>([](lua::State *l, LVector2Property &prop, LStringProperty &propOther) {
 		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector2 {
 			::Vector2 r;
-			ustring::string_to_array<decltype(r)::value_type, Double>(v, &r[0], atof, 2);
+			ustring::string_to_array<decltype(r)::value_type>(v, &r[0], ustring::cstring_to_number<float>, 2);
 			return r;
 		});
 	}));
@@ -389,7 +389,7 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	vec2iDef.def("Link", static_cast<void (*)(lua::State *, LVector2iProperty &, LStringProperty &)>([](lua::State *l, LVector2iProperty &prop, LStringProperty &propOther) {
 		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector2i {
 			::Vector2i r;
-			ustring::string_to_array<decltype(r)::value_type, int32_t>(v, &r[0], atoi, 2);
+			ustring::string_to_array<decltype(r)::value_type>(v, &r[0], ustring::cstring_to_number<int32_t>, 2);
 			return r;
 		});
 	}));
@@ -405,7 +405,7 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	vec4Def.def("Link", static_cast<void (*)(lua::State *, LVector4Property &, LStringProperty &)>([](lua::State *l, LVector4Property &prop, LStringProperty &propOther) {
 		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector4 {
 			::Vector4 r;
-			ustring::string_to_array<decltype(r)::value_type, Double>(v, &r[0], atof, 4);
+			ustring::string_to_array<decltype(r)::value_type>(v, &r[0], ustring::cstring_to_number<float>, 4);
 			return r;
 		});
 	}));
@@ -421,7 +421,7 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	vec4iDef.def("Link", static_cast<void (*)(lua::State *, LVector4iProperty &, LStringProperty &)>([](lua::State *l, LVector4iProperty &prop, LStringProperty &propOther) {
 		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector4i {
 			::Vector4i r;
-			ustring::string_to_array<decltype(r)::value_type, int32_t>(v, &r[0], atoi, 4);
+			ustring::string_to_array<decltype(r)::value_type>(v, &r[0], ustring::cstring_to_number<int32_t>, 4);
 			return r;
 		});
 	}));

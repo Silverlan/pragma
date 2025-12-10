@@ -90,13 +90,13 @@ static std::any string_to_any(pragma::Game &game, const std::string &value, util
 	case util::VarType::Vector2:
 		{
 			Vector2 r;
-			ustring::string_to_array<Float, Double>(value, reinterpret_cast<float *>(&r), atof, 2);
+			ustring::string_to_array<Float>(value, reinterpret_cast<float *>(&r), ustring::cstring_to_number<float>, 2);
 			return r;
 		}
 	case util::VarType::Vector4:
 		{
 			Vector4 r;
-			ustring::string_to_array<Float, Double>(value, reinterpret_cast<float *>(&r), atof, 4);
+			ustring::string_to_array<Float>(value, reinterpret_cast<float *>(&r), ustring::cstring_to_number<float>, 4);
 			return r;
 		}
 	case util::VarType::Entity:
@@ -104,7 +104,7 @@ static std::any string_to_any(pragma::Game &game, const std::string &value, util
 	case util::VarType::Quaternion:
 		{
 			Quat r;
-			ustring::string_to_array<Float, Double>(value, reinterpret_cast<float *>(&r), atof, 4);
+			ustring::string_to_array<Float>(value, reinterpret_cast<float *>(&r), ustring::cstring_to_number<float>, 4);
 			return r;
 		}
 	case util::VarType::Transform:

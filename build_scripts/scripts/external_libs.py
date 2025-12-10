@@ -36,7 +36,7 @@ get_gh_submodule("util_vmf",                "Silverlan/util_vmf",               
 get_gh_submodule("util_zip",                "Silverlan/util_zip",               "248a62584fd9c220a084af043b63cb349da43b88")
 get_gh_submodule("util_shadergraph",        "Silverlan/util_shadergraph",       "79cb4eaefa7e24cc963db82ea170c91fed9a35da")
 get_gh_submodule("vfilesystem",             "Silverlan/vfilesystem",            "627158a544d0a257c8fdc42f96c0a44dd9aad49b")
-get_gh_submodule("wgui",                    "Silverlan/wgui",                   "3e4d276f639c73a0e69329b636de87a427c1bf50")
+get_gh_submodule("wgui",                    "Silverlan/wgui",                   "945b0cf0b8f93b28bf5a095b3206de4a1a6a9b60")
 get_gh_submodule("util_unicode",            "Silverlan/util_unicode",           "b86a01e981e4944a428be7955088dc3d39573b89")
 get_gh_submodule("cppbezierfit",            "Silverlan/cppbezierfit",           "63dbcaeddba39c80b885fd7eadbbbad560bc1791")
 

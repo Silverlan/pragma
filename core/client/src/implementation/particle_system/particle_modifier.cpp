@@ -201,32 +201,80 @@ std::pair<Vector3, Vector3> pragma::pts::CParticleRenderer::GetRenderBounds() co
 
 ///////////////////////
 
-DLLCLIENT pragma::pts::ParticleModifierMap *g_ParticleModifierFactories = nullptr;
+DLLCLIENT pragma::pts::ParticleModifierMap g_ParticleModifierFactories;
 DLLCLIENT void pragma::pts::LinkParticleInitializerToFactory(std::string name, const pragma::pts::TParticleModifierFactory<pragma::pts::CParticleInitializer> &fc)
 {
-	if(g_ParticleModifierFactories == nullptr) {
-		static pragma::pts::ParticleModifierMap map;
-		g_ParticleModifierFactories = &map;
-	}
-	g_ParticleModifierFactories->AddInitializer(name, fc);
+	g_ParticleModifierFactories.AddInitializer(name, fc);
 }
 DLLCLIENT void pragma::pts::LinkParticleOperatorToFactory(std::string name, const pragma::pts::TParticleModifierFactory<pragma::pts::CParticleOperator> &fc)
 {
-	if(g_ParticleModifierFactories == nullptr) {
-		static pragma::pts::ParticleModifierMap map;
-		g_ParticleModifierFactories = &map;
-	}
-	g_ParticleModifierFactories->AddOperator(name, fc);
+	g_ParticleModifierFactories.AddOperator(name, fc);
 }
 DLLCLIENT void pragma::pts::LinkParticleRendererToFactory(std::string name, const pragma::pts::TParticleModifierFactory<pragma::pts::CParticleRenderer> &fc)
 {
-	if(g_ParticleModifierFactories == nullptr) {
-		static pragma::pts::ParticleModifierMap map;
-		g_ParticleModifierFactories = &map;
-	}
-	g_ParticleModifierFactories->AddRenderer(name, fc);
+	g_ParticleModifierFactories.AddRenderer(name, fc);
 }
-DLLCLIENT pragma::pts::ParticleModifierMap *pragma::pts::GetParticleModifierMap() { return g_ParticleModifierFactories; }
+pragma::pts::ParticleModifierMap &pragma::pts::get_particle_modifier_map() { return g_ParticleModifierFactories; }
+
+template<class TModifier, class TBaseType>
+static std::unique_ptr<TBaseType, void (*)(TBaseType *)> create_modifier(pragma::ecs::CParticleSystemComponent &system, const std::unordered_map<std::string, std::string> &values) {
+	auto r = std::unique_ptr<TBaseType, void (*)(TBaseType *)>(new TModifier {}, [](TBaseType *p) { delete p; });
+	r->Initialize(system, values);
+	return r;
+}
+
+void pragma::pts::register_particle_operators()
+{
+	auto &map = get_particle_modifier_map();
+	map.AddInitializer("alpha_random", &create_modifier<CParticleInitializerAlphaRandom, CParticleInitializer>);
+	// TODO: Why do we have CParticleInitializerColorRandom *and* CParticleInitializerColor?
+	map.AddInitializer("color_random", &create_modifier<CParticleInitializerColorRandom, CParticleInitializer>);
+	// map.AddInitializer("color_random", &create_modifier<CParticleInitializerColor, CParticleInitializer>);
+	map.AddInitializer("initial_angular_velocity", &create_modifier<CParticleInitializerInitialAngularVelocity, CParticleInitializer>);
+	map.AddInitializer("initial_animation_frame", &create_modifier<CParticleInitializerInitialAnimationFrame, CParticleInitializer>);
+	map.AddInitializer("initial_velocity", &create_modifier<CParticleInitializerInitialVelocity, CParticleInitializer>);
+	map.AddInitializer("length_random", &create_modifier<CParticleInitializerLengthRandom, CParticleInitializer>);
+	map.AddInitializer("lifetime_random", &create_modifier<CParticleInitializerLifetimeRandom, CParticleInitializer>);
+	map.AddInitializer("position_random_box", &create_modifier<CParticleInitializerPositionRandomBox, CParticleInitializer>);
+	map.AddInitializer("position_random_circle", &create_modifier<CParticleInitializerPositionRandomCircle, CParticleInitializer>);
+	map.AddInitializer("position_random_sphere", &create_modifier<CParticleInitializerPositionRandomSphere, CParticleInitializer>);
+	map.AddInitializer("radius_random", &create_modifier<CParticleInitializerRadiusRandom, CParticleInitializer>);
+	map.AddInitializer("rotation_random", &create_modifier<CParticleInitializerRotationRandom, CParticleInitializer>);
+	map.AddInitializer("shoot_cone", &create_modifier<CParticleInitializerShootCone, CParticleInitializer>);
+	map.AddInitializer("shoot_outward", &create_modifier<CParticleInitializerShootOutward, CParticleInitializer>);
+	map.AddInitializer("speed", &create_modifier<CParticleInitializerSpeed, CParticleInitializer>);
+
+	map.AddOperator("angular_acceleration", &create_modifier<CParticleOperatorAngularAcceleration, CParticleOperator>);
+	map.AddOperator("animation_playback", &create_modifier<CParticleOperatorAnimationPlayback, CParticleOperator>);
+	map.AddOperator("color_fade", &create_modifier<CParticleOperatorColorFade, CParticleOperator>);
+	map.AddOperator("cylindrical_vortex", &create_modifier<CParticleOperatorCylindricalVortex, CParticleOperator>);
+	map.AddOperator("emission_rate_random", &create_modifier<CParticleOperatorRandomEmissionRate, CParticleOperator>);
+	map.AddOperator("gravity", &create_modifier<CParticleOperatorGravity, CParticleOperator>);
+	map.AddOperator("jitter", &create_modifier<CParticleOperatorJitter, CParticleOperator>);
+	map.AddOperator("length_fade", &create_modifier<CParticleOperatorLengthFade, CParticleOperator>);
+	map.AddOperator("linear_drag", &create_modifier<CParticleOperatorLinearDrag, CParticleOperator>);
+	map.AddOperator("pause_child_emission", &create_modifier<CParticleOperatorPauseChildEmission, CParticleOperator>);
+	map.AddOperator("pause_emission", &create_modifier<CParticleOperatorPauseEmission, CParticleOperator>);
+	map.AddOperator("physics_box", &create_modifier<CParticleOperatorPhysicsBox, CParticleOperator>);
+	map.AddOperator("physics_cylinder", &create_modifier<CParticleOperatorPhysicsCylinder, CParticleOperator>);
+	map.AddOperator("physics_model", &create_modifier<CParticleOperatorPhysicsModel, CParticleOperator>);
+	map.AddOperator("physics_sphere", &create_modifier<CParticleOperatorPhysicsSphere, CParticleOperator>);
+	map.AddOperator("quadratic_drag", &create_modifier<CParticleOperatorQuadraticDrag, CParticleOperator>);
+	map.AddOperator("radius_fade", &create_modifier<CParticleOperatorRadiusFade, CParticleOperator>);
+	map.AddOperator("texture_scrolling", &create_modifier<CParticleOperatorTextureScrolling, CParticleOperator>);
+	map.AddOperator("toroidal_vortex", &create_modifier<CParticleOperatorToroidalVortex, CParticleOperator>);
+	map.AddOperator("trail", &create_modifier<CParticleOperatorTrail, CParticleOperator>);
+	map.AddOperator("velocity", &create_modifier<CParticleOperatorVelocity, CParticleOperator>);
+	map.AddOperator("wander", &create_modifier<CParticleOperatorWander, CParticleOperator>);
+	map.AddOperator("wind", &create_modifier<CParticleOperatorWind, CParticleOperator>);
+
+	map.AddRenderer("beam", &create_modifier<CParticleRendererBeam, CParticleRenderer>);
+	map.AddRenderer("blob", &create_modifier<CParticleRendererBlob, CParticleRenderer>);
+	map.AddRenderer("model", &create_modifier<CParticleRendererModel, CParticleRenderer>);
+	map.AddRenderer("source_render_animated_sprites", &create_modifier<CParticleRendererAnimatedSprites, CParticleRenderer>);
+	map.AddRenderer("source_render_sprite_trail", &create_modifier<CParticleRendererSpriteTrail, CParticleRenderer>);
+	map.AddRenderer("sprite", &create_modifier<CParticleRendererSprite, CParticleRenderer>);
+}
 
 void pragma::pts::ParticleModifierMap::AddInitializer(std::string name, const pragma::pts::TParticleModifierFactory<pragma::pts::CParticleInitializer> &fc)
 {

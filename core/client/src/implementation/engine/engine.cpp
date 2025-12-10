@@ -65,6 +65,7 @@ pragma::CEngine::CEngine(int argc, char *argv[])
 		pragma::register_client_launch_parameters(*pragma::GetLaunchParaMap());
 		client_entities::register_entities();
 		pragma::networking::register_client_net_messages();
+		pts::register_particle_operators();
 	}
 
 	RegisterCallback<void, std::reference_wrapper<const pragma::platform::Joystick>, bool>("OnJoystickStateChanged");

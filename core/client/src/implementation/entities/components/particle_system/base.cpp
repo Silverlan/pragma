@@ -760,8 +760,8 @@ msys::Material *ecs::CParticleSystemComponent::GetMaterial() const { return cons
 pragma::pts::CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer(std::string identifier, const std::unordered_map<std::string, std::string> &values)
 {
 	ustring::to_lower(identifier);
-	auto *map = pragma::pts::GetParticleModifierMap();
-	auto factory = map->FindInitializer(identifier);
+	auto &map = pragma::pts::get_particle_modifier_map();
+	auto factory = map.FindInitializer(identifier);
 	if(factory == nullptr) {
 		Con::cwar << "Attempted to create unknown particle initializer '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
@@ -769,6 +769,7 @@ pragma::pts::CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer
 	auto initializer = factory(*this, values);
 	if(initializer == nullptr)
 		return nullptr;
+	initializer->SetName(identifier);
 	if(IsRecordingKeyValues())
 		initializer->RecordKeyValues(values);
 	m_initializers.push_back(std::move(initializer));
@@ -777,8 +778,8 @@ pragma::pts::CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer
 pragma::pts::CParticleOperator *ecs::CParticleSystemComponent::AddOperator(std::string identifier, const std::unordered_map<std::string, std::string> &values)
 {
 	ustring::to_lower(identifier);
-	auto *map = pragma::pts::GetParticleModifierMap();
-	auto factory = map->FindOperator(identifier);
+	auto &map = pragma::pts::get_particle_modifier_map();
+	auto factory = map.FindOperator(identifier);
 	if(factory == nullptr) {
 		Con::cwar << "Attempted to create unknown particle operator '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
@@ -786,6 +787,7 @@ pragma::pts::CParticleOperator *ecs::CParticleSystemComponent::AddOperator(std::
 	auto op = factory(*this, values);
 	if(op == nullptr)
 		return nullptr;
+	op->SetName(identifier);
 	if(IsRecordingKeyValues())
 		op->RecordKeyValues(values);
 	m_operators.push_back(std::move(op));
@@ -794,8 +796,8 @@ pragma::pts::CParticleOperator *ecs::CParticleSystemComponent::AddOperator(std::
 pragma::pts::CParticleRenderer *ecs::CParticleSystemComponent::AddRenderer(std::string identifier, const std::unordered_map<std::string, std::string> &values)
 {
 	ustring::to_lower(identifier);
-	auto *map = pragma::pts::GetParticleModifierMap();
-	auto factory = map->FindRenderer(identifier);
+	auto &map = pragma::pts::get_particle_modifier_map();
+	auto factory = map.FindRenderer(identifier);
 	if(factory == nullptr) {
 		Con::cwar << "Attempted to create unknown particle renderer '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
@@ -803,6 +805,7 @@ pragma::pts::CParticleRenderer *ecs::CParticleSystemComponent::AddRenderer(std::
 	auto op = factory(*this, values);
 	if(op == nullptr)
 		return nullptr;
+	op->SetName(identifier);
 	if(IsRecordingKeyValues())
 		op->RecordKeyValues(values);
 	m_renderers.push_back(std::move(op));

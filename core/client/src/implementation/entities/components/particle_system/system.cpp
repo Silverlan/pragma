@@ -306,12 +306,10 @@ static void register_particle_modifier(lua::State *l, pragma::pts::LuaParticleMo
 	if(particleModMan.RegisterModifier(type, name, oClass) == false)
 		return;
 
-	auto *map = pragma::pts::GetParticleModifierMap();
-	if(map == nullptr)
-		return;
+	auto &map = pragma::pts::get_particle_modifier_map();
 	switch(type) {
 	case pragma::pts::LuaParticleModifierManager::Type::Initializer:
-		map->AddInitializer(name, [name](pragma::ecs::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)> {
+		map.AddInitializer(name, [name](pragma::ecs::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)> {
 			auto &particleModMan = reinterpret_cast<pragma::pts::LuaParticleModifierManager &>(pragma::get_cgame()->GetLuaParticleModifierManager());
 			auto *modifier = dynamic_cast<pragma::pts::CParticleInitializer *>(particleModMan.CreateModifier(name));
 			if(modifier == nullptr)
@@ -322,7 +320,7 @@ static void register_particle_modifier(lua::State *l, pragma::pts::LuaParticleMo
 		});
 		break;
 	case pragma::pts::LuaParticleModifierManager::Type::Operator:
-		map->AddOperator(name, [name](pragma::ecs::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)> {
+		map.AddOperator(name, [name](pragma::ecs::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)> {
 			auto &particleModMan = reinterpret_cast<pragma::pts::LuaParticleModifierManager &>(pragma::get_cgame()->GetLuaParticleModifierManager());
 			auto *modifier = dynamic_cast<pragma::pts::CParticleOperator *>(particleModMan.CreateModifier(name));
 			if(modifier == nullptr)
@@ -333,7 +331,7 @@ static void register_particle_modifier(lua::State *l, pragma::pts::LuaParticleMo
 		});
 		break;
 	case pragma::pts::LuaParticleModifierManager::Type::Renderer:
-		map->AddRenderer(name, [name](pragma::ecs::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)> {
+		map.AddRenderer(name, [name](pragma::ecs::CParticleSystemComponent &psc, const std::unordered_map<std::string, std::string> &keyValues) -> std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)> {
 			auto &particleModMan = reinterpret_cast<pragma::pts::LuaParticleModifierManager &>(pragma::get_cgame()->GetLuaParticleModifierManager());
 			auto *modifier = dynamic_cast<pragma::pts::CParticleRenderer *>(particleModMan.CreateModifier(name));
 			if(modifier == nullptr)
@@ -1159,11 +1157,9 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 
 	defCParticleSystem.scope[luabind::def("get_registered_initializers", static_cast<void (*)(lua::State *)>([](lua::State *l) {
 		auto t = Lua::CreateTable(l);
-		auto *map = pragma::pts::GetParticleModifierMap();
-		if(map == nullptr)
-			return;
+		auto &map = pragma::pts::get_particle_modifier_map();
 		uint32_t idx = 1;
-		for(auto &pair : map->GetInitializers()) {
+		for(auto &pair : map.GetInitializers()) {
 			Lua::PushInt(l, idx++);
 			Lua::PushString(l, pair.first);
 			Lua::SetTableValue(l, t);
@@ -1171,11 +1167,9 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 	}))];
 	defCParticleSystem.scope[luabind::def("get_registered_operators", static_cast<void (*)(lua::State *)>([](lua::State *l) {
 		auto t = Lua::CreateTable(l);
-		auto *map = pragma::pts::GetParticleModifierMap();
-		if(map == nullptr)
-			return;
+		auto &map = pragma::pts::get_particle_modifier_map();
 		uint32_t idx = 1;
-		for(auto &pair : map->GetOperators()) {
+		for(auto &pair : map.GetOperators()) {
 			Lua::PushInt(l, idx++);
 			Lua::PushString(l, pair.first);
 			Lua::SetTableValue(l, t);
@@ -1183,11 +1177,9 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 	}))];
 	defCParticleSystem.scope[luabind::def("get_registered_renderers", static_cast<void (*)(lua::State *)>([](lua::State *l) {
 		auto t = Lua::CreateTable(l);
-		auto *map = pragma::pts::GetParticleModifierMap();
-		if(map == nullptr)
-			return;
+		auto &map = pragma::pts::get_particle_modifier_map();
 		uint32_t idx = 1;
-		for(auto &pair : map->GetRenderers()) {
+		for(auto &pair : map.GetRenderers()) {
 			Lua::PushInt(l, idx++);
 			Lua::PushString(l, pair.first);
 			Lua::SetTableValue(l, t);
@@ -1197,11 +1189,9 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 	// TODO
 	defCParticleSystem.scope[luabind::def("get_registered_emitters",static_cast<void(*)(lua::State*,const std::string&,luabind::object)>([](lua::State *l,const std::string &name,luabind::object oClass) {
 		auto t = Lua::CreateTable(l);
-		auto *map = pragma::pts::GetParticleModifierMap();
-		if(map == nullptr)
-			return;
+		auto &map = pragma::pts::get_particle_modifier_map();
 		uint32_t idx = 1;
-		for(auto &pair : map->GetEmitters())
+		for(auto &pair : map.GetEmitters())
 		{
 			Lua::PushInt(l,idx++);
 			Lua::PushString(l,pair.first);

@@ -113,25 +113,6 @@ namespace pragma::pts {
 	DLLCLIENT void LinkParticleOperatorToFactory(std::string name, const TParticleModifierFactory<pragma::pts::CParticleOperator> &fc);
 	DLLCLIENT void LinkParticleRendererToFactory(std::string name, const TParticleModifierFactory<pragma::pts::CParticleRenderer> &fc);
 
-	class DLLCLIENT __reg_particle_modifier {
-	  public:
-		__reg_particle_modifier(std::string name, const TParticleModifierFactory<pragma::pts::CParticleInitializer> &fc)
-		{
-			LinkParticleInitializerToFactory(name, fc);
-			delete this;
-		}
-		__reg_particle_modifier(std::string name, const TParticleModifierFactory<pragma::pts::CParticleOperator> &fc)
-		{
-			LinkParticleOperatorToFactory(name, fc);
-			delete this;
-		}
-		__reg_particle_modifier(std::string name, const TParticleModifierFactory<pragma::pts::CParticleRenderer> &fc)
-		{
-			LinkParticleRendererToFactory(name, fc);
-			delete this;
-		}
-	};
-
 #pragma warning(push)
 #pragma warning(disable : 4251)
 	class DLLCLIENT ParticleModifierMap {
@@ -153,5 +134,6 @@ namespace pragma::pts {
 	};
 #pragma warning(pop)
 
-	DLLCLIENT ParticleModifierMap *GetParticleModifierMap();
+	DLLCLIENT ParticleModifierMap &get_particle_modifier_map();
+	DLLCLIENT void register_particle_operators();
 };

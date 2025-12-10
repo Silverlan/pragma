@@ -192,6 +192,7 @@ bool util::to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info
 	auto copyCreateInfo = image.GetCreateInfo();
 	auto imgRead = image.shared_from_this();
 	auto isOrigImg = false;
+	auto srcLayout = prosper::ImageLayout::TransferDstOptimal;
 	if(info.stagingImage) {
 		imgRead = info.stagingImage->shared_from_this();
 		setupCmd->RecordImageBarrier(*imgRead, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::TransferDstOptimal);
@@ -208,8 +209,10 @@ bool util::to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info
 		imgRead = image.Copy(*setupCmd, copyCreateInfo);
 		setupCmd->RecordImageBarrier(image, prosper::ImageLayout::TransferSrcOptimal, info.inputImageLayout);
 	}
-	else
+	else {
 		isOrigImg = true;
+		srcLayout = info.inputImageLayout;
+	}
 
 	// Copy the image data to a buffer
 	uint64_t size = 0;
@@ -237,7 +240,7 @@ bool util::to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info
 		context.FlushSetupCommandBuffer();
 		return false; // Buffer allocation failed; Requested size too large?
 	}
-	setupCmd->RecordImageBarrier(*imgRead, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::TransferSrcOptimal);
+	setupCmd->RecordImageBarrier(*imgRead, srcLayout, prosper::ImageLayout::TransferSrcOptimal);
 
 	prosper::util::BufferImageCopyInfo copyInfo {};
 	copyInfo.dstImageLayout = prosper::ImageLayout::TransferSrcOptimal;

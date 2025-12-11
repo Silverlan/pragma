@@ -367,7 +367,7 @@ os.chdir(deps_dir)
 if platform == "win32":
 	os.environ["VCPKG_DEFAULT_TRIPLET"] = "x64-windows"
 vcpkg_root = deps_dir +"/vcpkg"
-commit_sha = "dd3097e" # v2025.07.25
+commit_sha = "74e6536215718009aae747d86d84b78376bf9e09" # v2025.10.17
 if not check_repository_commit(vcpkg_root, commit_sha, "vcpkg"):
 	if not Path(vcpkg_root).is_dir():
 		print_msg("vcpkg not found, downloading...")

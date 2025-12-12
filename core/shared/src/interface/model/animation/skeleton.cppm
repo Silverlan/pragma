@@ -28,11 +28,11 @@ export namespace pragma::animation {
 		std::unordered_map<pragma::animation::BoneId, std::shared_ptr<Bone>> &GetRootBones();
 		const std::vector<std::shared_ptr<Bone>> &GetBones() const;
 		std::vector<std::shared_ptr<Bone>> &GetBones();
-		std::vector<umath::ScaledTransform> &GetBonePoses() { return m_referencePoses; }
-		const std::vector<umath::ScaledTransform> &GetBonePoses() const { return const_cast<Skeleton *>(this)->GetBonePoses(); }
+		std::vector<pragma::math::ScaledTransform> &GetBonePoses() { return m_referencePoses; }
+		const std::vector<pragma::math::ScaledTransform> &GetBonePoses() const { return const_cast<Skeleton *>(this)->GetBonePoses(); }
 
-		bool TransformToParentSpace(const std::vector<umath::ScaledTransform> &gsPoses, std::vector<umath::ScaledTransform> &outPoses) const;
-		bool TransformToGlobalSpace(const std::vector<umath::ScaledTransform> &psPoses, std::vector<umath::ScaledTransform> &outPoses) const;
+		bool TransformToParentSpace(const std::vector<pragma::math::ScaledTransform> &gsPoses, std::vector<pragma::math::ScaledTransform> &outPoses) const;
+		bool TransformToGlobalSpace(const std::vector<pragma::math::ScaledTransform> &psPoses, std::vector<pragma::math::ScaledTransform> &outPoses) const;
 
 		void Merge(Skeleton &other);
 		bool Save(udm::AssetDataArg outData, std::string &outErr);
@@ -43,6 +43,6 @@ export namespace pragma::animation {
 		bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr);
 		std::vector<std::shared_ptr<Bone>> m_bones;
 		std::unordered_map<pragma::animation::BoneId, std::shared_ptr<Bone>> m_rootBones;
-		std::vector<umath::ScaledTransform> m_referencePoses;
+		std::vector<pragma::math::ScaledTransform> m_referencePoses;
 	};
 };

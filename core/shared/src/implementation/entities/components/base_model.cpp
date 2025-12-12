@@ -34,7 +34,7 @@ void BaseModelComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		auto memberInfo = create_component_member_info<T, TModel, [](const ComponentMemberInfo &info, T &component, const TModel &mdl) { component.SetModel(mdl); }, static_cast<TModel (T::*)() const>(&T::GetModelName)>("model", "", AttributeSpecializationType::File);
 		auto &metaData = memberInfo.AddMetaData();
 		metaData["assetType"] = "model";
-		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Model)).GetString();
+		metaData["rootPath"] = pragma::util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Model)).GetString();
 		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Model, pragma::asset::FormatType::All);
 		metaData["stripRootPath"] = true;
 		metaData["stripExtension"] = true;
@@ -43,7 +43,7 @@ void BaseModelComponent::RegisterMembers(pragma::EntityComponentManager &compone
 }
 BaseModelComponent::BaseModelComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent)
 {
-	m_skin = util::SimpleProperty<util::UInt32Property, uint32_t>::Create(0u);
+	m_skin = pragma::util::SimpleProperty<pragma::util::UInt32Property, uint32_t>::Create(0u);
 	m_skin->AddCallback([this](std::reference_wrapper<const uint32_t> oldVal, std::reference_wrapper<const uint32_t> newVal) { SetSkin(newVal.get()); });
 }
 
@@ -52,23 +52,23 @@ void BaseModelComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	m_netEvSetBodyGroup = SetupNetEvent("set_body_group");
 	m_netEvMaxDrawDist = SetupNetEvent("set_max_draw_distance");
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "model", false)) {
+		if(pragma::string::compare<std::string>(kvData.key, "model", false)) {
 			m_kvModel = kvData.value;
 			if(GetEntity().IsSpawned())
 				SetModel(m_kvModel);
 		}
-		else if(ustring::compare<std::string>(kvData.key, "skin", false)) {
-			m_kvSkin = util::to_int(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "skin", false)) {
+			m_kvSkin = pragma::util::to_int(kvData.value);
 			if(GetEntity().IsSpawned())
 				SetSkin(m_kvSkin);
 		}
-		else if(ustring::compare<std::string>(kvData.key, "maxvisibledist", false))
-			SetMaxDrawDistance(ustring::to_float(kvData.value));
+		else if(pragma::string::compare<std::string>(kvData.key, "maxvisibledist", false))
+			SetMaxDrawDistance(pragma::string::to_float(kvData.value));
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 }
 
@@ -115,16 +115,16 @@ bool BaseModelComponent::GetAttachment(unsigned int attID, Vector3 *pos, Quat *r
 	auto *att = mdl ? mdl->GetAttachment(attID) : nullptr;
 	if(att == nullptr)
 		return false;
-	umath::Transform pose {};
+	pragma::math::Transform pose {};
 	// ent.GetPose(pose);
 	auto animC = ent.GetAnimatedComponent();
 	if(animC.valid()) {
 		Quat rotBone;
 		Vector3 posBone;
-		if(animC->GetBonePose(att->bone, &posBone, &rotBone, nullptr, umath::CoordinateSpace::Object) == false)
+		if(animC->GetBonePose(att->bone, &posBone, &rotBone, nullptr, pragma::math::CoordinateSpace::Object) == false)
 			return false;
-		pose *= umath::Transform {posBone, rotBone};
-		pose *= umath::Transform {att->offset, uquat::create(att->angles)};
+		pose *= pragma::math::Transform {posBone, rotBone};
+		pose *= pragma::math::Transform {att->offset, uquat::create(att->angles)};
 	}
 	else {
 		auto attPose = mdl->CalcReferenceAttachmentPose(attID);
@@ -289,7 +289,7 @@ void BaseModelComponent::OnModelMaterialsLoaded()
 }
 const std::shared_ptr<pragma::asset::Model> &BaseModelComponent::GetModel() const { return m_model; }
 unsigned int BaseModelComponent::GetSkin() const { return *m_skin; }
-const std::shared_ptr<util::UInt32Property> &BaseModelComponent::GetSkinProperty() const { return m_skin; }
+const std::shared_ptr<pragma::util::UInt32Property> &BaseModelComponent::GetSkinProperty() const { return m_skin; }
 void BaseModelComponent::SetSkin(unsigned int skin)
 {
 	if(*m_skin == skin)
@@ -309,7 +309,7 @@ void BaseModelComponent::SetModel(const std::shared_ptr<pragma::asset::Model> &m
 
 	// If bodygroups have been specified before the entity was spawned, keep them.
 	// Otherwise they will be discarded.
-	auto keepBodygroups = umath::is_flag_set(GetEntity().GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::IsSpawning);
+	auto keepBodygroups = pragma::math::is_flag_set(GetEntity().GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::IsSpawning);
 
 	m_model = mdl;
 	if(!keepBodygroups)
@@ -406,7 +406,7 @@ const BaseBvhComponent *BaseModelComponent::GetBvhComponent() const { return con
 BaseBvhComponent *BaseModelComponent::GetBvhComponent() { return m_bvhComponent; }
 const IntersectionHandlerComponent *BaseModelComponent::GetIntersectionHandlerComponent() const { return const_cast<BaseModelComponent *>(this)->GetIntersectionHandlerComponent(); }
 IntersectionHandlerComponent *BaseModelComponent::GetIntersectionHandlerComponent() { return m_intersectionHandlerComponent; }
-bool BaseModelComponent::GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max, Vector3 &origin, Quat &rot, umath::CoordinateSpace space) const
+bool BaseModelComponent::GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max, Vector3 &origin, Quat &rot, pragma::math::CoordinateSpace space) const
 {
 	if(HasModel() == false) {
 		min = Vector3 {0.f, 0.f, 0.f};
@@ -422,13 +422,13 @@ bool BaseModelComponent::GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 
 	if(animComponent.expired() || boneId >= processedBones.size())
 		return false;
 	switch(space) {
-	case umath::CoordinateSpace::Local:
+	case pragma::math::CoordinateSpace::Local:
 		{
 			origin = uvec::ORIGIN;
 			rot = uquat::identity();
 			break;
 		}
-	case umath::CoordinateSpace::Object:
+	case pragma::math::CoordinateSpace::Object:
 		{
 			auto &pose = processedBones[boneId];
 			origin = pose.GetOrigin();
@@ -438,7 +438,7 @@ bool BaseModelComponent::GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 
 			max *= pose.GetScale();
 			break;
 		}
-	case umath::CoordinateSpace::World:
+	case pragma::math::CoordinateSpace::World:
 		{
 			auto pose = ent.GetPose() * processedBones[boneId];
 			origin = pose.GetOrigin();

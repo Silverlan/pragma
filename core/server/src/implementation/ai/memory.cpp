@@ -23,7 +23,7 @@ void ai::Memory::Fragment::Clear()
 	lastHeared = 0.f;
 }
 
-float ai::Memory::Fragment::GetLastTimeSensed() const { return umath::max(lastSeen, lastHeared); }
+float ai::Memory::Fragment::GetLastTimeSensed() const { return pragma::math::max(lastSeen, lastHeared); }
 
 void ai::Memory::Fragment::UpdateVisibility(float dist)
 {

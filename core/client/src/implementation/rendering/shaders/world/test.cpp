@@ -14,7 +14,7 @@ import :model;
 
 using namespace pragma;
 
-static_assert(umath::to_integral(ShaderTest::MaterialBinding::Count) == 9, "Number of bindings in material descriptor set does not match MaterialBinding enum count!");
+static_assert(pragma::math::to_integral(ShaderTest::MaterialBinding::Count) == 9, "Number of bindings in material descriptor set does not match MaterialBinding enum count!");
 
 decltype(ShaderTest::DESCRIPTOR_SET_PBR) ShaderTest::DESCRIPTOR_SET_PBR = {
   "PBR",
@@ -24,7 +24,7 @@ decltype(ShaderTest::DESCRIPTOR_SET_PBR) ShaderTest::DESCRIPTOR_SET_PBR = {
 };
 ShaderTest::ShaderTest(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGameWorldLightingPass {context, identifier, vsShader, fsShader, gsShader}
 {
-	//SetPipelineCount(umath::to_integral(Pipeline::Count));
+	//SetPipelineCount(pragma::math::to_integral(Pipeline::Count));
 }
 ShaderTest::ShaderTest(prosper::IPrContext &context, const std::string &identifier) : ShaderTest {context, identifier, "world/vs_test", "world/fs_test"} {}
 void ShaderTest::DrawTest(prosper::IBuffer &buf, prosper::IBuffer &ibuf, uint32_t count)
@@ -109,7 +109,7 @@ void ShaderTest::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 	//ShaderEntity::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	//ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
-	//if(pipelineIdx == umath::to_integral(ShaderGameWorldPipeline::Reflection))
+	//if(pipelineIdx == pragma::math::to_integral(ShaderGameWorldPipeline::Reflection))
 	//	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
 
 	//pipelineInfo.ToggleDepthWrites(false);

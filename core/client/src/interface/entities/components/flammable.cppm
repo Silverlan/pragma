@@ -16,7 +16,7 @@ export namespace pragma {
 	  public:
 		CFlammableComponent(pragma::ecs::BaseEntity &ent) : BaseFlammableComponent(ent) {}
 		virtual void Initialize() override;
-		virtual util::EventReply Ignite(float duration, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr) override;
+		virtual pragma::util::EventReply Ignite(float duration, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr) override;
 		virtual void Extinguish() override;
 		virtual void OnTick(double dt) override;
 		virtual void ReceiveData(NetPacket &packet) override;
@@ -31,7 +31,7 @@ export namespace pragma {
 			struct Particle {
 				Particle(pragma::ecs::CParticleSystemComponent &pt, uint32_t boneId = 0);
 				Particle(pragma::ecs::CParticleSystemComponent &pt, const Vector3 &offset);
-				util::WeakHandle<pragma::ecs::CParticleSystemComponent> hParticle;
+				pragma::util::WeakHandle<pragma::ecs::CParticleSystemComponent> hParticle;
 				uint32_t boneId;
 				Vector3 offset;
 			};

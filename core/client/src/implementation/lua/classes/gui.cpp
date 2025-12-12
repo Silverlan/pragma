@@ -71,13 +71,13 @@ static void record_render_ui(pragma::gui::types::WIBase &el, prosper::IImage &im
 
 	pragma::gui::DrawInfo drawInfo {drawCmd};
 	drawInfo.size = {el.GetWidth(), el.GetHeight()};
-	umath::set_flag(drawInfo.flags, pragma::gui::DrawInfo::Flags::UseScissor, false);
-	umath::set_flag(drawInfo.flags, pragma::gui::DrawInfo::Flags::UseStencil, info.useStencil);
-	umath::set_flag(drawInfo.flags, pragma::gui::DrawInfo::Flags::Msaa, useMsaa);
+	pragma::math::set_flag(drawInfo.flags, pragma::gui::DrawInfo::Flags::UseScissor, false);
+	pragma::math::set_flag(drawInfo.flags, pragma::gui::DrawInfo::Flags::UseStencil, info.useStencil);
+	pragma::math::set_flag(drawInfo.flags, pragma::gui::DrawInfo::Flags::Msaa, useMsaa);
 	std::optional<Mat4> rotMat = el.GetRotationMatrix() ? *el.GetRotationMatrix() : std::optional<Mat4> {};
 	if(rotMat.has_value()) {
 		el.ResetRotation(); // We'll temporarily disable the rotation for this element
-		umath::set_flag(drawInfo.flags, pragma::gui::DrawInfo::Flags::UseStencil, true);
+		pragma::math::set_flag(drawInfo.flags, pragma::gui::DrawInfo::Flags::UseStencil, true);
 	}
 	pragma::gui::DrawState drawState {};
 	drawState.SetScissor(0, 0, drawInfo.size.x, drawInfo.size.y);
@@ -89,7 +89,7 @@ static bool render_ui(pragma::gui::types::WIBase &el, prosper::RenderTarget &rt,
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("draw_ui_to_texture");
-	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
+	pragma::util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	auto &context = rt.GetContext();
 	auto drawCmd = info.commandBuffer;
@@ -181,7 +181,7 @@ static void debug_print_hierarchy(const pragma::gui::types::WIBase &el, const st
 
 static pragma::gui::types::WIBase *find_descendant_by_path(pragma::gui::types::WIBase &el, const std::string &strPath)
 {
-	auto path = util::DirPath(strPath);
+	auto path = pragma::util::DirPath(strPath);
 	auto *p = &el;
 	for(auto &name : path) {
 		auto *child = p->FindDescendantByName(std::string {name});
@@ -225,7 +225,7 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("UpdateAutoSizeToContents", +[](lua::State *l, pragma::gui::types::WIBase &hPanel) { hPanel.UpdateAutoSizeToContents(hPanel.ShouldAutoSizeToContentsX(), hPanel.ShouldAutoSizeToContentsY()); });
 	classDef.def(
 	  "FindAncestorByClass", +[](lua::State *l, pragma::gui::types::WIBase &hPanel, std::string className) -> pragma::gui::types::WIBase * {
-		  ustring::to_lower(className);
+		  pragma::string::to_lower(className);
 		  auto *parent = hPanel.GetParent();
 		  while(parent) {
 			  if(parent->GetClass() == className)
@@ -240,11 +240,11 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("IsStencilEnabled", &pragma::gui::types::WIBase::IsStencilEnabled);
 	classDef.def("ResetRotation", &pragma::gui::types::WIBase::ResetRotation);
 	classDef.def("GetRotationMatrix", &pragma::gui::types::WIBase::GetRotationMatrix, luabind::copy_policy<0> {});
-	classDef.def("SetRotation", static_cast<void (pragma::gui::types::WIBase::*)(umath::Degree, const ::Vector2 &)>(&pragma::gui::types::WIBase::SetRotation));
+	classDef.def("SetRotation", static_cast<void (pragma::gui::types::WIBase::*)(pragma::math::Degree, const ::Vector2 &)>(&pragma::gui::types::WIBase::SetRotation));
 	classDef.def("SetRotation", static_cast<void (pragma::gui::types::WIBase::*)(const ::Mat4 &)>(&pragma::gui::types::WIBase::SetRotation));
 	classDef.def("SetLocalRenderTransform", &pragma::gui::types::WIBase::SetLocalRenderTransform);
 	classDef.def("ClearLocalRenderTransform", &pragma::gui::types::WIBase::ClearLocalRenderTransform);
-	classDef.def("GetLocalRenderTransform", static_cast<const umath::ScaledTransform *(pragma::gui::types::WIBase::*)() const>(&pragma::gui::types::WIBase::GetLocalRenderTransform), luabind::copy_policy<0> {});
+	classDef.def("GetLocalRenderTransform", static_cast<const pragma::math::ScaledTransform *(pragma::gui::types::WIBase::*)() const>(&pragma::gui::types::WIBase::GetLocalRenderTransform), luabind::copy_policy<0> {});
 	classDef.def("GetMouseInputEnabled", &pragma::gui::types::WIBase::GetMouseInputEnabled);
 	classDef.def("SetMouseInputEnabled", &pragma::gui::types::WIBase::SetMouseInputEnabled);
 	classDef.def("GetKeyboardInputEnabled", &pragma::gui::types::WIBase::GetKeyboardInputEnabled);
@@ -366,18 +366,18 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 		  el.Think(primaryCmdBuffer);
 	  });
 	classDef.def("InjectMouseMoveInput", &InjectMouseMoveInput);
-	classDef.def("InjectMouseInput", static_cast<::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, const ::Vector2 &, int, int, int)>(&InjectMouseInput));
-	classDef.def("InjectMouseInput", static_cast<::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, const ::Vector2 &, int, int)>(&InjectMouseInput));
-	classDef.def("InjectMouseClick", static_cast<::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, const ::Vector2 &, int, int)>(&InjectMouseClick));
-	classDef.def("InjectMouseClick", static_cast<::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, const ::Vector2 &, int)>(&InjectMouseClick));
-	classDef.def("InjectKeyboardInput", static_cast<::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, int, int, int)>(&InjectKeyboardInput));
-	classDef.def("InjectKeyboardInput", static_cast<::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, int, int)>(&InjectKeyboardInput));
-	classDef.def("InjectKeyPress", static_cast<::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, int, int)>(&InjectKeyPress));
-	classDef.def("InjectKeyPress", static_cast<::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, int)>(&InjectKeyPress));
-	classDef.def("InjectCharInput", static_cast<::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, std::string, uint32_t)>(&InjectCharInput));
-	classDef.def("InjectCharInput", static_cast<::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, std::string)>(&InjectCharInput));
-	classDef.def("InjectScrollInput", static_cast<::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, const ::Vector2 &, const ::Vector2 &, bool)>(&InjectScrollInput));
-	classDef.def("InjectScrollInput", static_cast<::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, const ::Vector2 &, const ::Vector2 &)>(&InjectScrollInput));
+	classDef.def("InjectMouseInput", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, const ::Vector2 &, int, int, int)>(&InjectMouseInput));
+	classDef.def("InjectMouseInput", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, const ::Vector2 &, int, int)>(&InjectMouseInput));
+	classDef.def("InjectMouseClick", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, const ::Vector2 &, int, int)>(&InjectMouseClick));
+	classDef.def("InjectMouseClick", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, const ::Vector2 &, int)>(&InjectMouseClick));
+	classDef.def("InjectKeyboardInput", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, int, int, int)>(&InjectKeyboardInput));
+	classDef.def("InjectKeyboardInput", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, int, int)>(&InjectKeyboardInput));
+	classDef.def("InjectKeyPress", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, int, int)>(&InjectKeyPress));
+	classDef.def("InjectKeyPress", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, int)>(&InjectKeyPress));
+	classDef.def("InjectCharInput", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, std::string, uint32_t)>(&InjectCharInput));
+	classDef.def("InjectCharInput", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, std::string)>(&InjectCharInput));
+	classDef.def("InjectScrollInput", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, const ::Vector2 &, const ::Vector2 &, bool)>(&InjectScrollInput));
+	classDef.def("InjectScrollInput", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::gui::types::WIBase &, const ::Vector2 &, const ::Vector2 &)>(&InjectScrollInput));
 	classDef.def("IsDescendant", &pragma::gui::types::WIBase::IsDescendant);
 	classDef.def("IsDescendantOf", &pragma::gui::types::WIBase::IsDescendantOf);
 	classDef.def("IsAncestor", &pragma::gui::types::WIBase::IsAncestor);
@@ -521,11 +521,11 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetFileDropInputEnabled", &pragma::gui::types::WIBase::SetFileDropInputEnabled);
 
 	auto defDrawInfo = luabind::class_<::pragma::gui::DrawInfo>("DrawInfo");
-	defDrawInfo.add_static_constant("FLAG_NONE", umath::to_integral(::pragma::gui::DrawInfo::Flags::None));
-	defDrawInfo.add_static_constant("FLAG_USE_SCISSOR_BIT", umath::to_integral(::pragma::gui::DrawInfo::Flags::UseScissor));
-	defDrawInfo.add_static_constant("FLAG_USE_STENCIL_BIT", umath::to_integral(::pragma::gui::DrawInfo::Flags::UseStencil));
-	defDrawInfo.add_static_constant("FLAG_MSAA_BIT", umath::to_integral(::pragma::gui::DrawInfo::Flags::Msaa));
-	defDrawInfo.add_static_constant("FLAG_DONT_SKIP_IF_OUT_OF_BOUNDS_BIT", umath::to_integral(::pragma::gui::DrawInfo::Flags::DontSkipIfOutOfBounds));
+	defDrawInfo.add_static_constant("FLAG_NONE", pragma::math::to_integral(::pragma::gui::DrawInfo::Flags::None));
+	defDrawInfo.add_static_constant("FLAG_USE_SCISSOR_BIT", pragma::math::to_integral(::pragma::gui::DrawInfo::Flags::UseScissor));
+	defDrawInfo.add_static_constant("FLAG_USE_STENCIL_BIT", pragma::math::to_integral(::pragma::gui::DrawInfo::Flags::UseStencil));
+	defDrawInfo.add_static_constant("FLAG_MSAA_BIT", pragma::math::to_integral(::pragma::gui::DrawInfo::Flags::Msaa));
+	defDrawInfo.add_static_constant("FLAG_DONT_SKIP_IF_OUT_OF_BOUNDS_BIT", pragma::math::to_integral(::pragma::gui::DrawInfo::Flags::DontSkipIfOutOfBounds));
 	defDrawInfo.def(luabind::constructor<const std::shared_ptr<prosper::ICommandBuffer> &>());
 	defDrawInfo.def_readwrite("offset", &::pragma::gui::DrawInfo::offset);
 	defDrawInfo.def_readwrite("size", &::pragma::gui::DrawInfo::size);
@@ -585,8 +585,8 @@ void Lua::WIShape::register_class(luabind::class_<pragma::gui::types::WIShape, p
 	classDef.def("InvertVertexPositions", static_cast<void (*)(pragma::gui::types::WIShape &, bool)>([](pragma::gui::types::WIShape &el, bool x) { el.InvertVertexPositions(x); }));
 	classDef.def("InvertVertexPositions", static_cast<void (*)(pragma::gui::types::WIShape &)>([](pragma::gui::types::WIShape &el) { el.InvertVertexPositions(); }));
 	classDef.def("SetShape", &pragma::gui::types::WIShape::SetShape);
-	classDef.add_static_constant("SHAPE_RECTANGLE", umath::to_integral(pragma::gui::types::WIShape::BasicShape::Rectangle));
-	classDef.add_static_constant("SHAPE_CIRCLE", umath::to_integral(pragma::gui::types::WIShape::BasicShape::Circle));
+	classDef.add_static_constant("SHAPE_RECTANGLE", pragma::math::to_integral(pragma::gui::types::WIShape::BasicShape::Rectangle));
+	classDef.add_static_constant("SHAPE_CIRCLE", pragma::math::to_integral(pragma::gui::types::WIShape::BasicShape::Circle));
 }
 
 void Lua::WITexturedShape::register_class(luabind::class_<pragma::gui::types::WITexturedShape, luabind::bases<pragma::gui::types::WIShape, pragma::gui::types::WIBase>> &classDef)
@@ -612,10 +612,10 @@ void Lua::WITexturedShape::register_class(luabind::class_<pragma::gui::types::WI
 	classDef.def("SetAlphaMode", &pragma::gui::types::WITexturedShape::SetAlphaMode);
 	classDef.def("SetAlphaCutoff", &pragma::gui::types::WITexturedShape::SetAlphaCutoff);
 	classDef.def("GetAlphaCutoff", &pragma::gui::types::WITexturedShape::GetAlphaCutoff);
-	classDef.add_static_constant("CHANNEL_RED", umath::to_integral(::pragma::gui::shaders::ShaderTextured::Channel::Red));
-	classDef.add_static_constant("CHANNEL_GREEN", umath::to_integral(::pragma::gui::shaders::ShaderTextured::Channel::Green));
-	classDef.add_static_constant("CHANNEL_BLUE", umath::to_integral(::pragma::gui::shaders::ShaderTextured::Channel::Blue));
-	classDef.add_static_constant("CHANNEL_ALPHA", umath::to_integral(::pragma::gui::shaders::ShaderTextured::Channel::Alpha));
+	classDef.add_static_constant("CHANNEL_RED", pragma::math::to_integral(::pragma::gui::shaders::ShaderTextured::Channel::Red));
+	classDef.add_static_constant("CHANNEL_GREEN", pragma::math::to_integral(::pragma::gui::shaders::ShaderTextured::Channel::Green));
+	classDef.add_static_constant("CHANNEL_BLUE", pragma::math::to_integral(::pragma::gui::shaders::ShaderTextured::Channel::Blue));
+	classDef.add_static_constant("CHANNEL_ALPHA", pragma::math::to_integral(::pragma::gui::shaders::ShaderTextured::Channel::Alpha));
 }
 
 void Lua::WIIcon::register_class(luabind::class_<pragma::gui::types::WIIcon, luabind::bases<pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>> &classDef) { classDef.def("SetClipping", &pragma::gui::types::WIIcon::SetClipping); }
@@ -746,9 +746,9 @@ void Lua::WITable::register_class(luabind::class_<pragma::gui::types::WITable, l
 	classDef.def("MoveRow", static_cast<void (*)(pragma::gui::types::WITable &, pragma::gui::types::WITableRow &, pragma::gui::types::WITableRow &)>([](pragma::gui::types::WITable &el, pragma::gui::types::WITableRow &a, pragma::gui::types::WITableRow &pos) { el.MoveRow(&a, &pos); }));
 	classDef.def("SelectRow", &pragma::gui::types::WITable::SelectRow);
 	classDef.def("GetFirstSelectedRow", &pragma::gui::types::WITable::GetFirstSelectedRow);
-	classDef.add_static_constant("SELECTABLE_MODE_NONE", umath::to_integral(pragma::gui::types::WITable::SelectableMode::None));
-	classDef.add_static_constant("SELECTABLE_MODE_SINGLE", umath::to_integral(pragma::gui::types::WITable::SelectableMode::Single));
-	classDef.add_static_constant("SELECTABLE_MODE_MULTI", umath::to_integral(pragma::gui::types::WITable::SelectableMode::Multi));
+	classDef.add_static_constant("SELECTABLE_MODE_NONE", pragma::math::to_integral(pragma::gui::types::WITable::SelectableMode::None));
+	classDef.add_static_constant("SELECTABLE_MODE_SINGLE", pragma::math::to_integral(pragma::gui::types::WITable::SelectableMode::Single));
+	classDef.add_static_constant("SELECTABLE_MODE_MULTI", pragma::math::to_integral(pragma::gui::types::WITable::SelectableMode::Multi));
 }
 
 void Lua::WITableRow::register_class(luabind::class_<pragma::gui::types::WITableRow, luabind::bases<pragma::gui::types::WIContainer, pragma::gui::types::WIBase>> &classDef)
@@ -882,7 +882,7 @@ void Lua::WIText::register_class(luabind::class_<pragma::gui::types::WIText, pra
 		}
 		else if(Lua::IsFunction(l, 4)) {
 			auto f = luabind::object(luabind::from_stack(l, 4));
-			auto arg = FunctionCallback<::util::EventReply>::CreateWithOptionalReturn([f, l](::util::EventReply *reply) -> CallbackReturnType {
+			auto arg = FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([f, l](pragma::util::EventReply *reply) -> CallbackReturnType {
 				auto r = Lua::CallFunction(
 				  l,
 				  [&f](lua::State *l) {
@@ -892,10 +892,10 @@ void Lua::WIText::register_class(luabind::class_<pragma::gui::types::WIText, pra
 				  1);
 				if(r == Lua::StatusCode::Ok) {
 					if(Lua::IsSet(l, -1))
-						*reply = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
+						*reply = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
 					else
-						*reply = ::util::EventReply::Unhandled;
-					return (*reply != ::util::EventReply::Unhandled) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
+						*reply = pragma::util::EventReply::Unhandled;
+					return (*reply != pragma::util::EventReply::Unhandled) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
 				}
 				return CallbackReturnType::NoReturnValue;
 			});
@@ -907,12 +907,12 @@ void Lua::WIText::register_class(luabind::class_<pragma::gui::types::WIText, pra
 	classDef.def("AreTagsEnabled", &pragma::gui::types::WIText::AreTagsEnabled);
 	classDef.def("PopFrontLine", &pragma::gui::types::WIText::PopFrontLine);
 	classDef.def("PopBackLine", &pragma::gui::types::WIText::PopBackLine);
-	classDef.def("RemoveText", static_cast<bool (pragma::gui::types::WIBase::*)(::util::text::LineIndex, ::util::text::CharOffset, ::util::text::TextLength)>(&pragma::gui::types::WIText::RemoveText));
-	classDef.def("RemoveText", static_cast<bool (pragma::gui::types::WIBase::*)(::util::text::TextOffset, ::util::text::TextLength)>(&pragma::gui::types::WIText::RemoveText));
+	classDef.def("RemoveText", static_cast<bool (pragma::gui::types::WIBase::*)(pragma::string::LineIndex, pragma::string::CharOffset, pragma::string::TextLength)>(&pragma::gui::types::WIText::RemoveText));
+	classDef.def("RemoveText", static_cast<bool (pragma::gui::types::WIBase::*)(pragma::string::TextOffset, pragma::string::TextLength)>(&pragma::gui::types::WIText::RemoveText));
 	classDef.def("RemoveLine", &pragma::gui::types::WIText::RemoveLine);
-	classDef.def("InsertText", static_cast<bool (*)(pragma::gui::types::WIText &, const std::string &, ::util::text::LineIndex)>([](pragma::gui::types::WIText &hPanel, const std::string &text, ::util::text::LineIndex lineIdx) { return hPanel.InsertText(text, lineIdx); }));
+	classDef.def("InsertText", static_cast<bool (*)(pragma::gui::types::WIText &, const std::string &, pragma::string::LineIndex)>([](pragma::gui::types::WIText &hPanel, const std::string &text, pragma::string::LineIndex lineIdx) { return hPanel.InsertText(text, lineIdx); }));
 	classDef.def("InsertText",
-	  static_cast<bool (*)(pragma::gui::types::WIText &, const std::string &, ::util::text::LineIndex, ::util::text::CharOffset)>([](pragma::gui::types::WIText &hPanel, const std::string &text, ::util::text::LineIndex lineIdx, ::util::text::CharOffset charOffset) { return hPanel.InsertText(text, lineIdx, charOffset); }));
+	  static_cast<bool (*)(pragma::gui::types::WIText &, const std::string &, pragma::string::LineIndex, pragma::string::CharOffset)>([](pragma::gui::types::WIText &hPanel, const std::string &text, pragma::string::LineIndex lineIdx, pragma::string::CharOffset charOffset) { return hPanel.InsertText(text, lineIdx, charOffset); }));
 	classDef.def("SetMaxLineCount", +[](lua::State *l, pragma::gui::types::WIText &hPanel, uint32_t c) { hPanel.GetFormattedTextObject().SetMaxLineCount(c); });
 	classDef.def("GetMaxLineCount", +[](lua::State *l, pragma::gui::types::WIText &hPanel) { return hPanel.GetFormattedTextObject().GetMaxLineCount(); });
 	classDef.def("AppendText", +[](pragma::gui::types::WIText &el, const std::string &text) { return el.AppendText(text); });
@@ -921,10 +921,10 @@ void Lua::WIText::register_class(luabind::class_<pragma::gui::types::WIText, pra
 		Lua::PushBool(l, hPanel.MoveText(lineIdx, startOffset, len, targetLineIdx, targetCharOffset));
 	}));
 	classDef.def("Clear", &pragma::gui::types::WIText::Clear);
-	classDef.def("Substr", +[](pragma::gui::types::WIText &el, ::util::text::TextOffset startOffset, ::util::text::TextLength len) { return el.Substr(startOffset, len); });
-	classDef.add_static_constant("AUTO_BREAK_NONE", umath::to_integral(pragma::gui::types::WIText::AutoBreak::NONE));
-	classDef.add_static_constant("AUTO_BREAK_ANY", umath::to_integral(pragma::gui::types::WIText::AutoBreak::ANY));
-	classDef.add_static_constant("AUTO_BREAK_WHITESPACE", umath::to_integral(pragma::gui::types::WIText::AutoBreak::WHITESPACE));
+	classDef.def("Substr", +[](pragma::gui::types::WIText &el, pragma::string::TextOffset startOffset, pragma::string::TextLength len) { return el.Substr(startOffset, len); });
+	classDef.add_static_constant("AUTO_BREAK_NONE", pragma::math::to_integral(pragma::gui::types::WIText::AutoBreak::NONE));
+	classDef.add_static_constant("AUTO_BREAK_ANY", pragma::math::to_integral(pragma::gui::types::WIText::AutoBreak::ANY));
+	classDef.add_static_constant("AUTO_BREAK_WHITESPACE", pragma::math::to_integral(pragma::gui::types::WIText::AutoBreak::WHITESPACE));
 }
 
 void Lua::WITextEntry::register_class(luabind::class_<pragma::gui::types::WITextEntry, pragma::gui::types::WIBase> &classDef)
@@ -1161,18 +1161,18 @@ struct LuaCallbacks {
 	std::unordered_map<std::string, std::vector<CallbackInfo>> callbacks;
 };
 
-static std::unordered_map<util::Hash, Lua::gui::LUA_CALLBACK> g_uiCallbacks;
-static util::Hash get_gui_callback_hash(const std::string &className, const std::string &callbackName)
+static std::unordered_map<pragma::util::Hash, Lua::gui::LUA_CALLBACK> g_uiCallbacks;
+static pragma::util::Hash get_gui_callback_hash(const std::string &className, const std::string &callbackName)
 {
-	util::Hash hash = 0;
-	hash = util::hash_combine<size_t>(hash, std::hash<std::string> {}(className));
-	hash = util::hash_combine<size_t>(hash, std::hash<std::string> {}(callbackName));
+	pragma::util::Hash hash = 0;
+	hash = pragma::util::hash_combine<size_t>(hash, std::hash<std::string> {}(className));
+	hash = pragma::util::hash_combine<size_t>(hash, std::hash<std::string> {}(callbackName));
 	return hash;
 }
 void Lua::gui::register_lua_callback(std::string className, std::string callbackName, LUA_CALLBACK fCb)
 {
-	ustring::to_lower(className);
-	ustring::to_lower(callbackName);
+	pragma::string::to_lower(className);
+	pragma::string::to_lower(callbackName);
 	g_uiCallbacks[get_gui_callback_hash(className, callbackName)] = fCb;
 }
 
@@ -1215,7 +1215,7 @@ namespace Lua {
 			auto callbackPtr = std::static_pointer_cast<LuaCallbacks>(hPanel.GetUserData4());
 			if(callbackPtr == nullptr)
 				return;
-			ustring::to_lower(name);
+			pragma::string::to_lower(name);
 			auto itCallbacks = callbackPtr->callbacks.find(name);
 			if(itCallbacks == callbackPtr->callbacks.end())
 				return;
@@ -1288,11 +1288,11 @@ void Lua::WIBase::CallCallbacks(lua::State *l, pragma::gui::types::WIBase &hPane
 CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBase &panel, std::string name, Lua::func<void> o)
 {
 	CallbackHandle hCallback {};
-	ustring::to_lower(name);
+	pragma::string::to_lower(name);
 
 	auto callbackPtr = std::static_pointer_cast<LuaCallbacks>(panel.GetUserData4());
 	if(callbackPtr == nullptr) {
-		callbackPtr = ::util::make_shared<LuaCallbacks>();
+		callbackPtr = pragma::util::make_shared<LuaCallbacks>();
 		panel.SetUserData4(callbackPtr);
 	}
 	auto hPanel = panel.GetHandle();
@@ -1314,7 +1314,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		});
 	}
 	else if(name == "ontextchanged") {
-		if(ustring::compare(panel.GetClass(), std::string {"witext"}, false)) {
+		if(pragma::string::compare(panel.GetClass(), std::string {"witext"}, false)) {
 			hCallback = FunctionCallback<void, std::reference_wrapper<const pragma::string::Utf8String>>::Create([l, hPanel, o](std::reference_wrapper<const pragma::string::Utf8String> text) mutable {
 				if(!hPanel.IsValid())
 					return;
@@ -1351,7 +1351,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		}
 	}
 	else if(name == "handlelinktagaction") {
-		hCallback = FunctionCallback<::util::EventReply, std::string>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply, std::string arg) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<pragma::util::EventReply, std::string>::CreateWithOptionalReturn([l, hPanel, o](pragma::util::EventReply *reply, std::string arg) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
@@ -1372,7 +1372,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
 				}
-				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
+				auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
 				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
@@ -1398,7 +1398,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		});
 	}
 	else if(name == "oncharevent") {
-		hCallback = FunctionCallback<::util::EventReply, int, pragma::platform::Modifier>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply, int c, pragma::platform::Modifier mods) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<pragma::util::EventReply, int, pragma::platform::Modifier>::CreateWithOptionalReturn([l, hPanel, o](pragma::util::EventReply *reply, int c, pragma::platform::Modifier mods) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
@@ -1409,7 +1409,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 				     auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				     obj.push(l);
 				     Lua::PushString(l, std::string(1, static_cast<char>(c)));
-				     Lua::PushInt(l, umath::to_integral(mods));
+				     Lua::PushInt(l, pragma::math::to_integral(mods));
 				     return Lua::StatusCode::Ok;
 			     },
 			     1)
@@ -1418,7 +1418,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
 				}
-				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
+				auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
 				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
@@ -1427,8 +1427,8 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		});
 	}
 	else if(name == "onkeyevent") {
-		hCallback = FunctionCallback<::util::EventReply, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
-		  [l, hPanel, o](::util::EventReply *reply, pragma::platform::Key key, int, pragma::platform::KeyState action, pragma::platform::Modifier mods) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<pragma::util::EventReply, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
+		  [l, hPanel, o](pragma::util::EventReply *reply, pragma::platform::Key key, int, pragma::platform::KeyState action, pragma::platform::Modifier mods) mutable -> CallbackReturnType {
 			  if(!hPanel.IsValid())
 				  return CallbackReturnType::NoReturnValue;
 			  if(Lua::CallFunction(
@@ -1438,9 +1438,9 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 
 				       auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				       obj.push(l);
-				       Lua::PushInt(l, umath::to_integral(key));
-				       Lua::PushInt(l, umath::to_integral(action));
-				       Lua::PushInt(l, umath::to_integral(mods));
+				       Lua::PushInt(l, pragma::math::to_integral(key));
+				       Lua::PushInt(l, pragma::math::to_integral(action));
+				       Lua::PushInt(l, pragma::math::to_integral(mods));
 				       return Lua::StatusCode::Ok;
 			       },
 			       1)
@@ -1449,7 +1449,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 					  Lua::Pop(l, 1);
 					  return CallbackReturnType::NoReturnValue;
 				  }
-				  auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
+				  auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
 				  Lua::Pop(l, 1);
 				  *reply = result;
 				  return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
@@ -1458,8 +1458,8 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		  });
 	}
 	else if(name == "onmouseevent") {
-		hCallback = FunctionCallback<::util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
-		  [l, hPanel, o](::util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState action, pragma::platform::Modifier mods) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<pragma::util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
+		  [l, hPanel, o](pragma::util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState action, pragma::platform::Modifier mods) mutable -> CallbackReturnType {
 			  if(!hPanel.IsValid())
 				  return CallbackReturnType::NoReturnValue;
 			  if(Lua::CallFunction(
@@ -1469,9 +1469,9 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 
 				       auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				       obj.push(l);
-				       Lua::PushInt(l, umath::to_integral(button));
-				       Lua::PushInt(l, umath::to_integral(action));
-				       Lua::PushInt(l, umath::to_integral(mods));
+				       Lua::PushInt(l, pragma::math::to_integral(button));
+				       Lua::PushInt(l, pragma::math::to_integral(action));
+				       Lua::PushInt(l, pragma::math::to_integral(mods));
 				       return Lua::StatusCode::Ok;
 			       },
 			       1)
@@ -1480,7 +1480,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 					  Lua::Pop(l, 1);
 					  return CallbackReturnType::NoReturnValue;
 				  }
-				  auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
+				  auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
 				  Lua::Pop(l, 1);
 				  *reply = result;
 				  return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
@@ -1555,7 +1555,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		});
 	}
 	else if(name == "onmousepressed") {
-		hCallback = FunctionCallback<::util::EventReply>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([l, hPanel, o](pragma::util::EventReply *reply) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
@@ -1573,7 +1573,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
 				}
-				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
+				auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
 				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
@@ -1582,7 +1582,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		});
 	}
 	else if(name == "onmousereleased") {
-		hCallback = FunctionCallback<::util::EventReply>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([l, hPanel, o](pragma::util::EventReply *reply) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
@@ -1600,7 +1600,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
 				}
-				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
+				auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
 				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
@@ -1609,7 +1609,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		});
 	}
 	else if(name == "ondoubleclick") {
-		hCallback = FunctionCallback<::util::EventReply>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([l, hPanel, o](pragma::util::EventReply *reply) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
@@ -1627,7 +1627,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
 				}
-				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
+				auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
 				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
@@ -1636,8 +1636,8 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		});
 	}
 	else if(name == "onjoystickevent") {
-		hCallback = FunctionCallback<::util::EventReply, std::reference_wrapper<const pragma::platform::Joystick>, uint32_t, pragma::platform::KeyState>::CreateWithOptionalReturn(
-		  [l, hPanel, o](::util::EventReply *reply, std::reference_wrapper<const pragma::platform::Joystick> joystick, uint32_t key, pragma::platform::KeyState state) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<pragma::util::EventReply, std::reference_wrapper<const pragma::platform::Joystick>, uint32_t, pragma::platform::KeyState>::CreateWithOptionalReturn(
+		  [l, hPanel, o](pragma::util::EventReply *reply, std::reference_wrapper<const pragma::platform::Joystick> joystick, uint32_t key, pragma::platform::KeyState state) mutable -> CallbackReturnType {
 			  if(!hPanel.IsValid())
 				  return CallbackReturnType::NoReturnValue;
 			  if(Lua::CallFunction(
@@ -1648,7 +1648,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 				       auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				       obj.push(l);
 				       Lua::PushInt(l, key);
-				       Lua::PushInt(l, umath::to_integral(state));
+				       Lua::PushInt(l, pragma::math::to_integral(state));
 				       return Lua::StatusCode::Ok;
 			       },
 			       1)
@@ -1657,7 +1657,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 					  Lua::Pop(l, 1);
 					  return CallbackReturnType::NoReturnValue;
 				  }
-				  auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
+				  auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
 				  Lua::Pop(l, 1);
 				  *reply = result;
 				  return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
@@ -1666,7 +1666,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		  });
 	}
 	else if(name == "onscroll") {
-		hCallback = FunctionCallback<::util::EventReply, ::Vector2, bool>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply, ::Vector2 offset, bool offsetAsPixels) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<pragma::util::EventReply, ::Vector2, bool>::CreateWithOptionalReturn([l, hPanel, o](pragma::util::EventReply *reply, ::Vector2 offset, bool offsetAsPixels) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
@@ -1687,7 +1687,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
 				}
-				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
+				auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
 				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
@@ -1698,7 +1698,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 	else if(name == "onchange" && dynamic_cast<pragma::gui::types::WICheckbox *>(hPanel.get()) != nullptr) {
 		hCallback = FunctionCallback<void, bool>::Create([l, hPanel, o](bool bChecked) mutable {
 			if(!hPanel.IsValid())
-				return ::util::EventReply::Unhandled;
+				return pragma::util::EventReply::Unhandled;
 			if(Lua::CallFunction(
 			     l,
 			     [&o, hPanel, bChecked](lua::State *l) mutable {
@@ -1711,11 +1711,11 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				auto result = Lua::IsSet(l, -1) ? static_cast<::util::EventReply>(Lua::CheckInt(l, -1)) : ::util::EventReply::Unhandled;
+				auto result = Lua::IsSet(l, -1) ? static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1)) : pragma::util::EventReply::Unhandled;
 				Lua::Pop(l, 1);
 				return result;
 			}
-			return ::util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		});
 	}
 	else if(name == "onoptionselected") {
@@ -1869,66 +1869,66 @@ void Lua::WIBase::InjectMouseMoveInput(lua::State *l, pragma::gui::types::WIBase
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("inect_mouse_move_input");
-	::util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
+	pragma::util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
 #endif
 	auto *elRoot = hPanel.GetBaseRootElement();
 	auto absPos = hPanel.GetAbsolutePos();
 	auto origOverride = get_cursor_pos_override(elRoot);
 	if(elRoot)
 		elRoot->SetCursorPosOverride(::Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
-	::util::ScopeGuard sg {[elRoot, &origOverride]() { restore_cursor_pos_override(elRoot, origOverride); }};
+	pragma::util::ScopeGuard sg {[elRoot, &origOverride]() { restore_cursor_pos_override(elRoot, origOverride); }};
 	hPanel.InjectMouseMoveInput(mousePos.x, mousePos.y);
 }
-::util::EventReply Lua::WIBase::InjectMouseInput(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos, int button, int action, int mods)
+pragma::util::EventReply Lua::WIBase::InjectMouseInput(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos, int button, int action, int mods)
 {
 	auto *elRoot = hPanel.GetBaseRootElement();
 	auto absPos = hPanel.GetAbsolutePos();
 	auto origOverride = get_cursor_pos_override(elRoot);
 	if(elRoot)
 		elRoot->SetCursorPosOverride(::Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
-	::util::ScopeGuard sg {[elRoot, &origOverride]() { restore_cursor_pos_override(elRoot, origOverride); }};
+	pragma::util::ScopeGuard sg {[elRoot, &origOverride]() { restore_cursor_pos_override(elRoot, origOverride); }};
 	return hPanel.InjectMouseInput(pragma::platform::MouseButton(button), pragma::platform::KeyState(action), pragma::platform::Modifier(mods));
 }
-::util::EventReply Lua::WIBase::InjectMouseInput(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos, int button, int action) { return InjectMouseInput(l, hPanel, mousePos, button, action, 0); }
-::util::EventReply Lua::WIBase::InjectMouseClick(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos, int button, int mods)
+pragma::util::EventReply Lua::WIBase::InjectMouseInput(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos, int button, int action) { return InjectMouseInput(l, hPanel, mousePos, button, action, 0); }
+pragma::util::EventReply Lua::WIBase::InjectMouseClick(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos, int button, int mods)
 {
 	auto handled0 = InjectMouseInput(l, hPanel, mousePos, button, KEY_PRESS, mods);
 	auto handled1 = InjectMouseInput(l, hPanel, mousePos, button, KEY_RELEASE, mods);
-	if(handled1 == ::util::EventReply::Handled)
+	if(handled1 == pragma::util::EventReply::Handled)
 		handled0 = handled1;
 	return handled0;
 }
-::util::EventReply Lua::WIBase::InjectMouseClick(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos, int button) { return InjectMouseClick(l, hPanel, mousePos, button, 0); }
-::util::EventReply Lua::WIBase::InjectKeyboardInput(lua::State *l, pragma::gui::types::WIBase &hPanel, int key, int action, int mods)
+pragma::util::EventReply Lua::WIBase::InjectMouseClick(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos, int button) { return InjectMouseClick(l, hPanel, mousePos, button, 0); }
+pragma::util::EventReply Lua::WIBase::InjectKeyboardInput(lua::State *l, pragma::gui::types::WIBase &hPanel, int key, int action, int mods)
 {
 	return hPanel.InjectKeyboardInput(pragma::platform::Key(key), 0, pragma::platform::KeyState(action), pragma::platform::Modifier(mods));
 	// Vulkan TODO
 }
-::util::EventReply Lua::WIBase::InjectKeyboardInput(lua::State *l, pragma::gui::types::WIBase &hPanel, int key, int action) { return InjectKeyboardInput(l, hPanel, key, action, 0); }
-::util::EventReply Lua::WIBase::InjectKeyPress(lua::State *l, pragma::gui::types::WIBase &hPanel, int key, int mods)
+pragma::util::EventReply Lua::WIBase::InjectKeyboardInput(lua::State *l, pragma::gui::types::WIBase &hPanel, int key, int action) { return InjectKeyboardInput(l, hPanel, key, action, 0); }
+pragma::util::EventReply Lua::WIBase::InjectKeyPress(lua::State *l, pragma::gui::types::WIBase &hPanel, int key, int mods)
 {
 	auto handled0 = InjectKeyboardInput(l, hPanel, key, KEY_PRESS, mods);
 	auto handled1 = InjectKeyboardInput(l, hPanel, key, KEY_RELEASE, mods);
-	if(handled1 == ::util::EventReply::Handled)
+	if(handled1 == pragma::util::EventReply::Handled)
 		handled0 = handled1;
 	return handled0;
 }
-::util::EventReply Lua::WIBase::InjectKeyPress(lua::State *l, pragma::gui::types::WIBase &hPanel, int key) { return InjectKeyPress(l, hPanel, key, 0); }
-::util::EventReply Lua::WIBase::InjectCharInput(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string c, uint32_t mods)
+pragma::util::EventReply Lua::WIBase::InjectKeyPress(lua::State *l, pragma::gui::types::WIBase &hPanel, int key) { return InjectKeyPress(l, hPanel, key, 0); }
+pragma::util::EventReply Lua::WIBase::InjectCharInput(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string c, uint32_t mods)
 {
 	if(c.empty())
-		return ::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	const char *cStr = c.c_str();
 	return hPanel.InjectCharInput(cStr[0], static_cast<pragma::platform::Modifier>(mods));
 }
-::util::EventReply Lua::WIBase::InjectCharInput(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string c)
+pragma::util::EventReply Lua::WIBase::InjectCharInput(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string c)
 {
 	if(c.empty())
-		return ::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	const char *cStr = c.c_str();
 	return hPanel.InjectCharInput(cStr[0]);
 }
-::util::EventReply Lua::WIBase::InjectScrollInput(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos, const ::Vector2 &offset, bool offsetAsPixels)
+pragma::util::EventReply Lua::WIBase::InjectScrollInput(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos, const ::Vector2 &offset, bool offsetAsPixels)
 {
 	auto *elRoot = hPanel.GetBaseRootElement();
 	auto cursorPos = elRoot ? elRoot->GetCursorPos() : ::Vector2 {};
@@ -1941,7 +1941,7 @@ void Lua::WIBase::InjectMouseMoveInput(lua::State *l, pragma::gui::types::WIBase
 		restore_cursor_pos_override(elRoot, origOverride);
 	return result;
 }
-::util::EventReply Lua::WIBase::InjectScrollInput(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos, const ::Vector2 &offset) { return InjectScrollInput(l, hPanel, mousePos, offset, false); }
+pragma::util::EventReply Lua::WIBase::InjectScrollInput(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos, const ::Vector2 &offset) { return InjectScrollInput(l, hPanel, mousePos, offset, false); }
 void Lua::WIBase::FindChildByName(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string name)
 {
 	auto *el = hPanel.FindChildByName(name);

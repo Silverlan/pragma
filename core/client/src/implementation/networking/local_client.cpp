@@ -27,7 +27,7 @@ bool pragma::networking::LocalClient::Disconnect(Error &outErr)
 }
 bool pragma::networking::LocalClient::SendPacket(Protocol protocol, NetPacket &packet, Error &outErr)
 {
-	packet.SetTimeActivated(util::clock::to_int(util::clock::get_duration_since_start()));
+	packet.SetTimeActivated(pragma::util::clock::to_int(pragma::util::clock::get_duration_since_start()));
 	packet->SetOffset(0);
 	pragma::Engine::Get()->HandleLocalHostPlayerServerPacket(packet);
 	OnPacketSent(protocol, packet);

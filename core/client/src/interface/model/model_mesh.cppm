@@ -31,7 +31,7 @@ export namespace pragma::geometry {
 		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(pragma::ShaderEntity &shader, uint32_t pipelineIdx = 0u);
 
 		using VertexType = rendering::VertexBufferData;
-		using VertexWeightType = umath::VertexWeight;
+		using VertexWeightType = pragma::math::VertexWeight;
 		using AlphaType = Vector2;
 	private:
 		std::shared_ptr<pragma::rendering::SceneMesh> m_sceneMesh;

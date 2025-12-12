@@ -15,7 +15,7 @@ using namespace pragma;
 
 bool CBvhComponent::ShouldConsiderMesh(const pragma::geometry::ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData)
 {
-	return BaseBvhComponent::ShouldConsiderMesh(mesh) && !umath::is_flag_set(bufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::ExcludeFromAccelerationStructures);
+	return BaseBvhComponent::ShouldConsiderMesh(mesh) && !pragma::math::is_flag_set(bufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::ExcludeFromAccelerationStructures);
 }
 
 void CBvhComponent::InitializeLuaObject(lua::State *l) { return BaseBvhComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

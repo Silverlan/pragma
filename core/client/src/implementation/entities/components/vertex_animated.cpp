@@ -57,10 +57,10 @@ void CVertexAnimatedComponent::Initialize()
 	BindEventUnhandled(cRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) { InitializeVertexAnimationBuffer(); });
 	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateVertexAnimationDataMT(); });
 	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateVertexAnimationBuffer(static_cast<CEOnUpdateRenderBuffers &>(evData.get()).commandBuffer); });
-	BindEvent(cRenderComponent::EVENT_UPDATE_INSTANTIABILITY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cRenderComponent::EVENT_UPDATE_INSTANTIABILITY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		// TODO: Allow instantiability for vertex animated entities
 		static_cast<CEUpdateInstantiability &>(evData.get()).instantiable = false;
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
 	// TODO: We shouldn't need the animated component, but morph target animations appear broken if it's not there.
 	// Find out why and then remove this line!
@@ -100,8 +100,8 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 	}
 
 	auto &vertAnimBuffer = static_cast<asset::CModel &>(*mdl).GetVertexAnimationBuffer();
-	ds->SetBindingStorageBuffer(*m_vertexAnimationBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData));
-	ds->SetBindingStorageBuffer(*vertAnimBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimations));
+	ds->SetBindingStorageBuffer(*m_vertexAnimationBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData));
+	ds->SetBindingStorageBuffer(*vertAnimBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimations));
 	ds->Update();
 }
 
@@ -116,7 +116,7 @@ void CVertexAnimatedComponent::DestroyVertexAnimationBuffer()
 	auto whRenderComponent = ent.GetComponent<CRenderComponent>();
 	auto *pRenderDescSet = whRenderComponent.valid() ? whRenderComponent->GetRenderDescriptorSet() : nullptr;
 	if(pRenderDescSet) {
-		pRenderDescSet->SetBindingStorageBuffer(*pragma::get_cengine()->GetRenderContext().GetDummyBuffer(), umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData)); // Reset buffer
+		pRenderDescSet->SetBindingStorageBuffer(*pragma::get_cengine()->GetRenderContext().GetDummyBuffer(), pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData)); // Reset buffer
 		pRenderDescSet->Update();
 	}
 }
@@ -150,7 +150,7 @@ void CVertexAnimatedComponent::UpdateVertexAnimationDataMT()
 	auto &flexWeights = whFlexComponent->GetFlexWeights();
 	auto &flexes = mdl->GetFlexes();
 	assert(flexes.size() == flexWeights.size());
-	auto numFlexes = umath::min(flexes.size(), flexWeights.size());
+	auto numFlexes = pragma::math::min(flexes.size(), flexWeights.size());
 	for(auto flexId = decltype(numFlexes) {0u}; flexId < numFlexes; ++flexId) {
 		auto flexWeight = flexWeights.at(flexId);
 		if(flexWeight == 0.f)
@@ -180,7 +180,7 @@ void CVertexAnimatedComponent::UpdateVertexAnimationDataMT()
 				continue;
 			auto cycle = flexWeight * (frames.size() - 1);
 			auto fraction = fmodf(cycle, 1.f);
-			auto nextFrameId = umath::min(static_cast<uint32_t>(frameId + 1), static_cast<uint32_t>(frames.size() - 1));
+			auto nextFrameId = pragma::math::min(static_cast<uint32_t>(frameId + 1), static_cast<uint32_t>(frames.size() - 1));
 
 			uint64_t srcFrameOffset = 0ull;
 			uint64_t dstFrameOffset = 0ull;

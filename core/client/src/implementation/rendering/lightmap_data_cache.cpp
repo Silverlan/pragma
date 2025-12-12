@@ -7,22 +7,22 @@ module pragma.client;
 
 import :rendering.lightmap_data_cache;
 
-size_t pragma::rendering::LightmapDataCache::CalcPoseHash(const umath::Transform &pose)
+size_t pragma::rendering::LightmapDataCache::CalcPoseHash(const pragma::math::Transform &pose)
 {
 	auto ang = pose.GetAngles();
 	auto &pos = pose.GetOrigin();
 	auto floatToHash = [](float f) -> size_t {
 		f *= 10.f; // Objects have to be at least 0.1 units away from each other, otherwise they cannot be distinguished in the cache
-		auto n = static_cast<int64_t>(umath::round(f));
+		auto n = static_cast<int64_t>(pragma::math::round(f));
 		return std::hash<int64_t> {}(n);
 	};
-	util::Hash hash = 0;
-	hash = util::hash_combine<size_t>(hash, floatToHash(pos.x));
-	hash = util::hash_combine<size_t>(hash, floatToHash(pos.y));
-	hash = util::hash_combine<size_t>(hash, floatToHash(pos.z));
-	hash = util::hash_combine<size_t>(hash, floatToHash(ang.p));
-	hash = util::hash_combine<size_t>(hash, floatToHash(ang.y));
-	hash = util::hash_combine<size_t>(hash, floatToHash(ang.r));
+	pragma::util::Hash hash = 0;
+	hash = pragma::util::hash_combine<size_t>(hash, floatToHash(pos.x));
+	hash = pragma::util::hash_combine<size_t>(hash, floatToHash(pos.y));
+	hash = pragma::util::hash_combine<size_t>(hash, floatToHash(pos.z));
+	hash = pragma::util::hash_combine<size_t>(hash, floatToHash(ang.p));
+	hash = pragma::util::hash_combine<size_t>(hash, floatToHash(ang.y));
+	hash = pragma::util::hash_combine<size_t>(hash, floatToHash(ang.r));
 	return hash;
 }
 
@@ -72,7 +72,7 @@ bool pragma::rendering::LightmapDataCache::Save(udm::AssetDataArg outData, std::
 	outData.SetAssetType(PLMD_IDENTIFIER);
 	outData.SetAssetVersion(PLMD_VERSION);
 	auto udm = *outData;
-	udm["lightmapEntityId"] = util::uuid_to_string(lightmapEntityId);
+	udm["lightmapEntityId"] = pragma::util::uuid_to_string(lightmapEntityId);
 
 	auto udmCacheData = udm["cacheData"];
 	for(auto &pair : cacheData) {
@@ -102,7 +102,7 @@ bool pragma::rendering::LightmapDataCache::LoadFromAssetData(const udm::AssetDat
 
 	std::string uuid;
 	if(udm["lightmapEntityId"](uuid))
-		lightmapEntityId = util::uuid_string_to_bytes(uuid);
+		lightmapEntityId = pragma::util::uuid_string_to_bytes(uuid);
 
 	auto udmCacheData = udm["cacheData"];
 	cacheData.reserve(udmCacheData.GetChildCount());
@@ -123,7 +123,7 @@ bool pragma::rendering::LightmapDataCache::LoadFromAssetData(const udm::AssetDat
 	}
 	return true;
 }
-const std::vector<Vector2> *pragma::rendering::LightmapDataCache::FindLightmapUvs(const util::Uuid &entUuid, const util::Uuid &meshUuid) const
+const std::vector<Vector2> *pragma::rendering::LightmapDataCache::FindLightmapUvs(const pragma::util::Uuid &entUuid, const pragma::util::Uuid &meshUuid) const
 {
 	auto it = cacheData.find(LmUuid {entUuid});
 	if(it == cacheData.end())
@@ -134,7 +134,7 @@ const std::vector<Vector2> *pragma::rendering::LightmapDataCache::FindLightmapUv
 		return nullptr;
 	return &itInst->second.uvs;
 }
-void pragma::rendering::LightmapDataCache::AddInstanceData(const util::Uuid &entUuid, const std::string &model, const umath::Transform &pose, const util::Uuid &meshUuid, std::vector<Vector2> &&uvs)
+void pragma::rendering::LightmapDataCache::AddInstanceData(const pragma::util::Uuid &entUuid, const std::string &model, const pragma::math::Transform &pose, const pragma::util::Uuid &meshUuid, std::vector<Vector2> &&uvs)
 {
 	LmUuid lmEntUuid {entUuid};
 	auto it = cacheData.find(lmEntUuid);

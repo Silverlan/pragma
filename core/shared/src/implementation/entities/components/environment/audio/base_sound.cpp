@@ -16,7 +16,7 @@ void BaseEnvSoundComponent::RegisterMembers(pragma::EntityComponentManager &comp
 		auto memberInfo = create_component_member_info<T, TSound, [](const ComponentMemberInfo &info, T &component, const TSound &mdl) { component.SetSoundSource(mdl); }, static_cast<const TSound &(T::*)() const>(&T::GetSoundSource)>("sound", "", AttributeSpecializationType::File);
 		auto &metaData = memberInfo.AddMetaData();
 		metaData["assetType"] = "sound";
-		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Sound)).GetString();
+		metaData["rootPath"] = pragma::util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Sound)).GetString();
 		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Sound, pragma::asset::FormatType::All);
 		metaData["stripRootPath"] = true;
 		metaData["stripExtension"] = true;
@@ -62,46 +62,46 @@ void BaseEnvSoundComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "sound", false))
+		if(pragma::string::compare<std::string>(kvData.key, "sound", false))
 			m_kvSoundName = kvData.value;
-		else if(ustring::compare<std::string>(kvData.key, "pitch", false))
-			m_kvPitch = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "gain", false))
-			m_kvGain = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "rolloff", false))
-			m_kvRolloff = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "min_gain", false))
-			m_kvMinGain = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "max_gain", false))
-			m_kvMaxGain = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "inner_cone", false))
-			m_kvInnerCone = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "outer_cone", false))
-			m_kvOuterCone = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "offset", false))
-			m_kvOffset = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "reference_dist", false))
-			m_kvReferenceDist = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "max_dist", false))
-			m_kvMaxDist = util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "pitch", false))
+			m_kvPitch = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "gain", false))
+			m_kvGain = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "rolloff", false))
+			m_kvRolloff = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "min_gain", false))
+			m_kvMinGain = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "max_gain", false))
+			m_kvMaxGain = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "inner_cone", false))
+			m_kvInnerCone = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "outer_cone", false))
+			m_kvOuterCone = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "offset", false))
+			m_kvOffset = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "reference_dist", false))
+			m_kvReferenceDist = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "max_dist", false))
+			m_kvMaxDist = pragma::util::to_float(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		auto *snd = (m_sound != nullptr) ? m_sound.get() : nullptr;
-		if(ustring::compare<std::string>(inputData.input, "play", false)) {
+		if(pragma::string::compare<std::string>(inputData.input, "play", false)) {
 			if(snd != nullptr)
 				snd->Play();
 		}
-		else if(ustring::compare<std::string>(inputData.input, "stop", false)) {
+		else if(pragma::string::compare<std::string>(inputData.input, "stop", false)) {
 			if(snd != nullptr)
 				snd->Stop();
 		}
-		else if(ustring::compare<std::string>(inputData.input, "toggle", false)) {
+		else if(pragma::string::compare<std::string>(inputData.input, "toggle", false)) {
 			if(snd != nullptr) {
 				if(snd->IsPlaying())
 					snd->Pause();
@@ -109,90 +109,90 @@ void BaseEnvSoundComponent::Initialize()
 					snd->Play();
 			}
 		}
-		else if(ustring::compare<std::string>(inputData.input, "fadein", false)) {
+		else if(pragma::string::compare<std::string>(inputData.input, "fadein", false)) {
 			if(snd != nullptr) {
-				snd->FadeIn(util::to_float(inputData.data));
+				snd->FadeIn(pragma::util::to_float(inputData.data));
 			}
-			else if(ustring::compare<std::string>(inputData.input, "fadeout", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "fadeout", false)) {
 				if(snd != nullptr) {
-					snd->FadeOut(util::to_float(inputData.data));
+					snd->FadeOut(pragma::util::to_float(inputData.data));
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "rewind", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "rewind", false)) {
 				if(snd != nullptr) {
 					snd->Rewind();
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "pause", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "pause", false)) {
 				if(snd != nullptr) {
 					snd->Pause();
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "setpitch", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "setpitch", false)) {
 				if(snd != nullptr) {
-					snd->SetPitch(util::to_float(inputData.data));
+					snd->SetPitch(pragma::util::to_float(inputData.data));
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "setlooping", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "setlooping", false)) {
 				if(snd != nullptr) {
-					snd->SetLooping(util::to_boolean(inputData.data));
+					snd->SetLooping(pragma::util::to_boolean(inputData.data));
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "setgain", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "setgain", false)) {
 				if(snd != nullptr) {
-					snd->SetGain(util::to_float(inputData.data));
+					snd->SetGain(pragma::util::to_float(inputData.data));
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "setrelativetolistener", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "setrelativetolistener", false)) {
 				if(snd != nullptr) {
-					snd->SetRelative(util::to_boolean(inputData.data));
+					snd->SetRelative(pragma::util::to_boolean(inputData.data));
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "setoffset", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "setoffset", false)) {
 				if(snd != nullptr) {
-					snd->SetOffset(util::to_float(inputData.data));
+					snd->SetOffset(pragma::util::to_float(inputData.data));
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "setsecoffset", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "setsecoffset", false)) {
 				if(snd != nullptr) {
-					snd->SetTimeOffset(util::to_float(inputData.data));
+					snd->SetTimeOffset(pragma::util::to_float(inputData.data));
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "setrollofffactor", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "setrollofffactor", false)) {
 				if(snd != nullptr) {
-					snd->SetRolloffFactor(util::to_float(inputData.data));
+					snd->SetRolloffFactor(pragma::util::to_float(inputData.data));
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "setmaxdistance", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "setmaxdistance", false)) {
 				if(snd != nullptr) {
-					snd->SetMaxDistance(util::to_float(inputData.data));
+					snd->SetMaxDistance(pragma::util::to_float(inputData.data));
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "setmingain", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "setmingain", false)) {
 				if(snd != nullptr) {
-					snd->SetMinGain(util::to_float(inputData.data));
+					snd->SetMinGain(pragma::util::to_float(inputData.data));
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "setmaxgain", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "setmaxgain", false)) {
 				if(snd != nullptr) {
-					snd->SetMaxGain(util::to_float(inputData.data));
+					snd->SetMaxGain(pragma::util::to_float(inputData.data));
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "setconeinnerangle", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "setconeinnerangle", false)) {
 				if(snd != nullptr) {
-					snd->SetInnerConeAngle(util::to_float(inputData.data));
+					snd->SetInnerConeAngle(pragma::util::to_float(inputData.data));
 				}
 			}
-			else if(ustring::compare<std::string>(inputData.input, "setconeouterangle", false)) {
+			else if(pragma::string::compare<std::string>(inputData.input, "setconeouterangle", false)) {
 				if(snd != nullptr) {
-					snd->SetOuterConeAngle(util::to_float(inputData.data));
+					snd->SetOuterConeAngle(pragma::util::to_float(inputData.data));
 				}
 				else {
-					return util::EventReply::Unhandled;
+					return pragma::util::EventReply::Unhandled;
 				}
 			}
 		}
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
 	GetEntity().AddComponent("io");
 }
@@ -342,9 +342,9 @@ void BaseEnvSoundComponent::SetRelativeToListener(bool bRelative)
 	auto &ent = GetEntity();
 	auto spawnFlags = ent.GetSpawnFlags();
 	if(bRelative)
-		ent.SetSpawnFlags(spawnFlags | umath::to_integral(SpawnFlags::PlayEverywhere));
+		ent.SetSpawnFlags(spawnFlags | pragma::math::to_integral(SpawnFlags::PlayEverywhere));
 	else
-		ent.SetSpawnFlags(spawnFlags & ~umath::to_integral(SpawnFlags::PlayEverywhere));
+		ent.SetSpawnFlags(spawnFlags & ~pragma::math::to_integral(SpawnFlags::PlayEverywhere));
 	if(m_sound != nullptr)
 		m_sound->SetRelative(bRelative);
 }
@@ -353,25 +353,25 @@ void BaseEnvSoundComponent::SetPlayOnSpawn(bool bPlayOnSpawn)
 	auto &ent = GetEntity();
 	auto spawnFlags = ent.GetSpawnFlags();
 	if(bPlayOnSpawn)
-		ent.SetSpawnFlags(spawnFlags | umath::to_integral(SpawnFlags::PlayOnSpawn));
+		ent.SetSpawnFlags(spawnFlags | pragma::math::to_integral(SpawnFlags::PlayOnSpawn));
 	else
-		ent.SetSpawnFlags(spawnFlags & ~umath::to_integral(SpawnFlags::PlayOnSpawn));
+		ent.SetSpawnFlags(spawnFlags & ~pragma::math::to_integral(SpawnFlags::PlayOnSpawn));
 }
 void BaseEnvSoundComponent::SetLooping(bool bLoop)
 {
 	auto &ent = GetEntity();
 	auto spawnFlags = ent.GetSpawnFlags();
 	if(bLoop)
-		ent.SetSpawnFlags(spawnFlags | umath::to_integral(SpawnFlags::IsLooped));
+		ent.SetSpawnFlags(spawnFlags | pragma::math::to_integral(SpawnFlags::IsLooped));
 	else
-		ent.SetSpawnFlags(spawnFlags & ~umath::to_integral(SpawnFlags::IsLooped));
+		ent.SetSpawnFlags(spawnFlags & ~pragma::math::to_integral(SpawnFlags::IsLooped));
 	if(m_sound != nullptr)
 		m_sound->SetLooping(bLoop);
 }
 void BaseEnvSoundComponent::SetSoundType(pragma::audio::ALSoundType types)
 {
 	m_soundTypes = types;
-	GetEntity().SetSpawnFlags(GetEntity().GetSpawnFlags() & ~umath::to_integral(SpawnFlags::AllTypes));
+	GetEntity().SetSpawnFlags(GetEntity().GetSpawnFlags() & ~pragma::math::to_integral(SpawnFlags::AllTypes));
 	if(m_sound != nullptr)
 		m_sound->SetType(types);
 }

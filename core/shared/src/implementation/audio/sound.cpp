@@ -20,7 +20,7 @@ import :audio.sound;
 
 pragma::audio::SoundEffectParams::SoundEffectParams(float pgain, float pgainHF, float pgainLF) : gain(pgain), gainHF(pgainHF), gainLF(pgainLF) {}
 
-pragma::audio::ALSound::ALSound(pragma::NetworkState *nw) : util::inheritable_enable_shared_from_this<pragma::audio::ALSound>(), util::CallbackHandler(), LuaCallbackHandler(), m_type(pragma::audio::ALSoundType::Generic), m_networkState(nw)
+pragma::audio::ALSound::ALSound(pragma::NetworkState *nw) : pragma::util::inheritable_enable_shared_from_this<pragma::audio::ALSound>(), pragma::util::CallbackHandler(), LuaCallbackHandler(), m_type(pragma::audio::ALSoundType::Generic), m_networkState(nw)
 {
 	RegisterCallback<void>("OnDestroyed");
 	RegisterCallback<void, ALState, ALState>("OnStateChanged");
@@ -119,13 +119,13 @@ void pragma::audio::ALSound::CheckStateChange(ALState old)
 	auto state = GetState();
 	if(state != old) {
 		CallCallbacks<void, ALState, ALState>("OnStateChanged", old, state);
-		CallLuaCallbacks<void, int32_t, int32_t>("OnStateChanged", umath::to_integral(old), umath::to_integral(state));
+		CallLuaCallbacks<void, int32_t, int32_t>("OnStateChanged", pragma::math::to_integral(old), pragma::math::to_integral(state));
 		auto *nw = GetNetworkState();
 		if(nw != nullptr) {
 			auto *game = nw->GetGameState();
 			if(game != nullptr) {
 				game->CallCallbacks<void, ALSound *, ALState, ALState>("OnSoundStateChanged", this, old, state);
-				game->CallLuaCallbacks<void, std::shared_ptr<pragma::audio::ALSound>, int32_t, int32_t>("OnSoundStateChanged", shared_from_this(), umath::to_integral(old), umath::to_integral(state));
+				game->CallLuaCallbacks<void, std::shared_ptr<pragma::audio::ALSound>, int32_t, int32_t>("OnSoundStateChanged", shared_from_this(), pragma::math::to_integral(old), pragma::math::to_integral(state));
 			}
 		}
 	}

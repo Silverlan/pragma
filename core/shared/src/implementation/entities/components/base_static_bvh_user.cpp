@@ -27,10 +27,10 @@ void BaseStaticBvhUserComponent::Initialize()
 		auto &trC = *pTrComponent;
 		if(m_cbOnPoseChanged.IsValid())
 			m_cbOnPoseChanged.Remove();
-		m_cbOnPoseChanged = pTrComponent->AddEventCallback(baseTransformComponent::EVENT_ON_POSE_CHANGED, [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnPoseChanged = pTrComponent->AddEventCallback(baseTransformComponent::EVENT_ON_POSE_CHANGED, [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 			if(m_staticBvhComponent.valid())
 				m_staticBvhComponent->SetEntityDirty(GetEntity());
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		});
 	}
 }
@@ -92,7 +92,7 @@ void BaseStaticBvhUserComponent::OnEntityComponentRemoved(BaseEntityComponent &c
 	}
 }
 bool BaseStaticBvhUserComponent::IsActive() const { return m_isActive; }
-util::EventReply BaseStaticBvhUserComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply BaseStaticBvhUserComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
 	if(eventId == basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED || eventId == basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED)
 		UpdateBvhStatus();

@@ -21,11 +21,11 @@ void pragma::pts::CParticleRendererSprite::Initialize(pragma::BaseEnvParticleSys
 	auto bAlignVelocity = false;
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "planar_rotation")
-			m_bPlanarRotation = util::to_boolean(pair.second);
+			m_bPlanarRotation = pragma::util::to_boolean(pair.second);
 		else if(key == "align_velocity")
-			bAlignVelocity = util::to_boolean(pair.second);
+			bAlignVelocity = pragma::util::to_boolean(pair.second);
 	}
 	m_shader = pragma::get_cengine()->GetShader(m_bPlanarRotation ? "particle" : "particle_rotational");
 	if(m_bPlanarRotation == true)

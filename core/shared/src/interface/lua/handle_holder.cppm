@@ -14,10 +14,10 @@ export {
 		  public:
 			HandleHolder(T *ptr);
 			T *get() const;
-			void SetHandle(const util::TWeakSharedHandle<T> &handle);
+			void SetHandle(const pragma::util::TWeakSharedHandle<T> &handle);
 		  private:
 			mutable T *m_ptr = nullptr;
-			mutable util::TWeakSharedHandle<T> m_handle {};
+			mutable pragma::util::TWeakSharedHandle<T> m_handle {};
 			bool m_hasHandle = false;
 		};
 
@@ -44,7 +44,7 @@ export {
 			return m_ptr;
 		}
 		template<typename T>
-		void HandleHolder<T>::SetHandle(const util::TWeakSharedHandle<T> &handle)
+		void HandleHolder<T>::SetHandle(const pragma::util::TWeakSharedHandle<T> &handle)
 		{
 			m_hasHandle = true;
 			m_handle = handle;

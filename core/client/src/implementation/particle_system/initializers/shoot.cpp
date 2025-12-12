@@ -14,7 +14,7 @@ void pragma::pts::CParticleInitializerShootCone::Initialize(pragma::BaseEnvParti
 	m_fMaxAngle.Initialize("angle_max", values);
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "direction")
 			m_vDirection = uvec::create(pair.second);
 	}
@@ -24,12 +24,12 @@ void pragma::pts::CParticleInitializerShootCone::OnParticleCreated(pragma::pts::
 	auto rot = glm::gtx::rotation(Vector3(0.f, 1.f, 0.f), m_vDirection);
 
 	// pick an angle off the vertical based on the surface area distribution
-	auto cosa = umath::random(static_cast<float>(umath::cos(umath::deg_to_rad(m_fMinAngle.GetValue(particle)))), static_cast<float>(umath::cos(umath::deg_to_rad(m_fMaxAngle.GetValue(particle)))));
-	auto sina = umath::sqrt(1.f - umath::pow2(cosa));
-	auto theta = umath::random(0.f, umath::pi * 2.f);
+	auto cosa = pragma::math::random(static_cast<float>(pragma::math::cos(pragma::math::deg_to_rad(m_fMinAngle.GetValue(particle)))), static_cast<float>(pragma::math::cos(pragma::math::deg_to_rad(m_fMaxAngle.GetValue(particle)))));
+	auto sina = pragma::math::sqrt(1.f - pragma::math::pow2(cosa));
+	auto theta = pragma::math::random(0.f, pragma::math::pi * 2.f);
 
 	// set, transform
-	auto vel = Vector3(umath::cos(theta) * sina, cosa, -umath::sin(theta) * sina);
+	auto vel = Vector3(pragma::math::cos(theta) * sina, cosa, -pragma::math::sin(theta) * sina);
 	uvec::rotate(&vel, rot);
 	particle.SetVelocity(vel);
 }
@@ -41,7 +41,7 @@ void pragma::pts::CParticleInitializerShootOutward::Initialize(pragma::BaseEnvPa
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "bias")
 			m_vBias = uvec::create(pair.second);
 	}

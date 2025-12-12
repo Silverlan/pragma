@@ -9,15 +9,15 @@ import :networking.message_tracker;
 
 pragma::networking::MessageTracker::MessageTracker() { SetMemoryCount(10); }
 
-std::pair<const std::deque<pragma::networking::MessageTracker::MessageInfo> &, std::unique_ptr<const util::ScopeGuard>> pragma::networking::MessageTracker::GetTrackedMessages(MessageType mt) const
+std::pair<const std::deque<pragma::networking::MessageTracker::MessageInfo> &, std::unique_ptr<const pragma::util::ScopeGuard>> pragma::networking::MessageTracker::GetTrackedMessages(MessageType mt) const
 {
 	m_trackedMessageMutex.lock();
-	return {(mt == MessageType::Incoming) ? m_trackedMessagesIn : m_trackedMessagesOut, std::make_unique<util::ScopeGuard>([this]() { m_trackedMessageMutex.unlock(); })};
+	return {(mt == MessageType::Incoming) ? m_trackedMessagesIn : m_trackedMessagesOut, std::make_unique<pragma::util::ScopeGuard>([this]() { m_trackedMessageMutex.unlock(); })};
 }
-std::pair<std::deque<pragma::networking::MessageTracker::MessageInfo> &, std::unique_ptr<const util::ScopeGuard>> pragma::networking::MessageTracker::GetTrackedMessages(MessageType mt)
+std::pair<std::deque<pragma::networking::MessageTracker::MessageInfo> &, std::unique_ptr<const pragma::util::ScopeGuard>> pragma::networking::MessageTracker::GetTrackedMessages(MessageType mt)
 {
 	m_trackedMessageMutex.lock();
-	return {(mt == MessageType::Incoming) ? m_trackedMessagesIn : m_trackedMessagesOut, std::make_unique<util::ScopeGuard>([this]() { m_trackedMessageMutex.unlock(); })};
+	return {(mt == MessageType::Incoming) ? m_trackedMessagesIn : m_trackedMessagesOut, std::make_unique<pragma::util::ScopeGuard>([this]() { m_trackedMessageMutex.unlock(); })};
 }
 
 void pragma::networking::MessageTracker::MemorizeNetMessage(MessageType mt, uint32_t id, const NWMEndpoint &ep, const NetPacket &packet)
@@ -34,7 +34,7 @@ void pragma::networking::MessageTracker::MemorizeNetMessage(MessageType mt, uint
 	msgInfo.id = id;
 	msgInfo.endpoint = ep;
 	msgInfo.packet = packet;
-	msgInfo.tp = util::Clock::now();
+	msgInfo.tp = pragma::util::Clock::now();
 }
 
 void pragma::networking::MessageTracker::SetMemoryCount(uint32_t count)
@@ -48,7 +48,7 @@ void pragma::networking::MessageTracker::SetMemoryCount(uint32_t count)
 	m_trackedMessageMutex.unlock();
 }
 
-void pragma::networking::MessageTracker::DebugDump(const std::string &dumpFileName, const util::StringMap<uint32_t> &inMsgs, const util::StringMap<uint32_t> &outMsgs)
+void pragma::networking::MessageTracker::DebugDump(const std::string &dumpFileName, const pragma::util::StringMap<uint32_t> &inMsgs, const pragma::util::StringMap<uint32_t> &outMsgs)
 {
 	auto f = FileManager::OpenFile<VFilePtrReal>(dumpFileName.c_str(), "wb");
 	if(f == nullptr)
@@ -71,7 +71,7 @@ void pragma::networking::MessageTracker::DebugDump(const std::string &dumpFileNa
 			f->Write<uint32_t>(msg.id);
 			auto msgName = (it != regMsgs.end()) ? it->first : "Unknown";
 			f->WriteString(msgName);
-			f->Write<uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(util::clock::get_duration_since_start(msg.tp)).count());
+			f->Write<uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(pragma::util::clock::get_duration_since_start(msg.tp)).count());
 			f->WriteString(msg.endpoint.GetIP());
 			f->Write<uint64_t>(msg.packet->GetSize());
 			f->Write(msg.packet->GetData(), msg.packet->GetSize());
@@ -79,9 +79,9 @@ void pragma::networking::MessageTracker::DebugDump(const std::string &dumpFileNa
 	}
 }
 
-void pragma::networking::MessageTracker::DebugPrint(const util::StringMap<uint32_t> &inMsgs, const util::StringMap<uint32_t> &outMsgs)
+void pragma::networking::MessageTracker::DebugPrint(const pragma::util::StringMap<uint32_t> &inMsgs, const pragma::util::StringMap<uint32_t> &outMsgs)
 {
-	auto tNow = util::Clock::now();
+	auto tNow = pragma::util::Clock::now();
 	for(auto type : {MessageType::Incoming, MessageType::Outgoing}) {
 		auto pair = GetTrackedMessages(type);
 		auto &msgs = pair.first;

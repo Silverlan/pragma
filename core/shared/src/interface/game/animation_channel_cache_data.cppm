@@ -24,7 +24,7 @@ export {
 			State changed = State::Dirty;
 			std::array<float, 16> data;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::AnimationChannelCacheData::State);
 };

@@ -44,9 +44,9 @@ Bool CLuaBaseEntityComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPac
 		it->second.Call<void, std::reference_wrapper<NetPacket>>(std::reference_wrapper<NetPacket> {packet});
 		return true;
 	}
-	auto handled = static_cast<uint32_t>(util::EventReply::Unhandled);
+	auto handled = static_cast<uint32_t>(pragma::util::EventReply::Unhandled);
 	CallLuaMethod<uint32_t, uint32_t, NetPacket>("ReceiveNetEvent", &handled, eventId, packet);
-	return static_cast<util::EventReply>(handled) == util::EventReply::Handled;
+	return static_cast<pragma::util::EventReply>(handled) == pragma::util::EventReply::Handled;
 }
 void CLuaBaseEntityComponent::ReceiveSnapshotData(NetPacket &packet)
 {

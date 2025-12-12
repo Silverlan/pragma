@@ -9,13 +9,13 @@ export module pragma.shared:assets.conversion;
 export import :types;
 export import pragma.filesystem;
 
-export namespace util {
+export namespace pragma::util {
 	DLLNETWORK const std::string IMPORT_PATH = "addons/imported/";
 	DLLNETWORK const std::string CONVERT_PATH = "addons/converted/";
 	namespace impl {
 		DLLNETWORK void *get_module_func(pragma::NetworkState *nw, const std::string &name);
 	};
-	DLLNETWORK std::shared_ptr<util::Library> initialize_external_archive_manager(pragma::NetworkState *nw);
+	DLLNETWORK std::shared_ptr<pragma::util::Library> initialize_external_archive_manager(pragma::NetworkState *nw);
 	DLLNETWORK void close_mount_external_library();
 	DLLNETWORK void close_external_archive_manager();
 	DLLNETWORK std::optional<int32_t> get_mounted_game_priority(const std::string &game);

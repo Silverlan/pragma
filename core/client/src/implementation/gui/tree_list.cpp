@@ -123,8 +123,8 @@ void pragma::gui::types::WITreeListElement::SetTreeParent(WITreeListElement *pEl
 		pArrow->SetPos(m_xOffset, 3);
 		pArrow->SetDirection(WIArrow::Direction::Down);
 		auto hThis = GetHandle();
-		pArrow->AddCallback("OnMousePressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hThis](util::EventReply *reply) mutable -> CallbackReturnType {
-			*reply = util::EventReply::Handled;
+		pArrow->AddCallback("OnMousePressed", FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([hThis](pragma::util::EventReply *reply) mutable -> CallbackReturnType {
+			*reply = pragma::util::EventReply::Handled;
 			if(hThis.IsValid() == false)
 				return CallbackReturnType::HasReturnValue;
 			static_cast<WITreeListElement *>(hThis.get())->Toggle();
@@ -219,12 +219,12 @@ pragma::gui::types::WITreeListElement *pragma::gui::types::WITreeList::AddItem(c
 		return nullptr;
 	return static_cast<WITreeListElement *>(m_pRoot.get())->AddItem(text, fPopulate);
 }
-util::EventReply pragma::gui::types::WITreeList::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WITreeList::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
-	if(WITable::MouseCallback(button, state, mods) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(WITable::MouseCallback(button, state, mods) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	RequestFocus();
-	return util::EventReply::Handled;
+	return pragma::util::EventReply::Handled;
 }
 void pragma::gui::types::WITreeList::SetSize(int x, int y) { WITable::SetSize(x, y); }
 pragma::gui::types::WITableRow *pragma::gui::types::WITreeList::AddRow() { return WITable::AddRow<WITreeListElement>(); }

@@ -224,14 +224,14 @@ void Lua::GraphicsPipelineCreateInfo::GetMultisamplingProperties(lua::State *l, 
 	prosper::SampleCountFlags samples;
 	const prosper::SampleMask *sampleMask;
 	pipelineInfo.GetMultisamplingProperties(&samples, &sampleMask);
-	Lua::PushInt(l, umath::to_integral(samples));
+	Lua::PushInt(l, pragma::math::to_integral(samples));
 	Lua::PushInt(l, sampleMask ? static_cast<uint32_t>(*sampleMask) : 0u);
 }
 void Lua::GraphicsPipelineCreateInfo::GetSampleCount(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	prosper::SampleCountFlags samples;
 	pipelineInfo.GetMultisamplingProperties(&samples, nullptr);
-	Lua::PushInt(l, umath::to_integral(samples));
+	Lua::PushInt(l, pragma::math::to_integral(samples));
 }
 void Lua::GraphicsPipelineCreateInfo::GetMinSampleShading(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
@@ -406,7 +406,7 @@ void Lua::Shader::Graphics::AttachVertexAttribute(lua::State *l, pragma::LuaShad
 	auto vertexAttributes = Lua::get_table_values<pragma::LuaVertexAttribute>(l, 3u, [](lua::State *l, int32_t idx) { return Lua::Check<pragma::LuaVertexAttribute>(l, idx); });
 	shader.AttachVertexAttribute(binding, vertexAttributes);
 }
-void Lua::GraphicsPipelineCreateInfo::AddSpecializationConstant(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t shaderStage, uint32_t constantId, ::util::DataStream &ds)
+void Lua::GraphicsPipelineCreateInfo::AddSpecializationConstant(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t shaderStage, uint32_t constantId, pragma::util::DataStream &ds)
 {
 	Lua::PushBool(l, pipelineInfo.AddSpecializationConstant(static_cast<prosper::ShaderStage>(shaderStage), constantId, ds->GetSize(), ds->GetData()));
 }

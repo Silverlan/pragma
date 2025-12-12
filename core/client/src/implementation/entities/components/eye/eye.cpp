@@ -24,8 +24,8 @@ void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentMan
 	using T = CEyeComponent;
 
 	{
-		auto coordMetaData = ::util::make_shared<ents::CoordinateTypeMetaData>();
-		coordMetaData->space = umath::CoordinateSpace::Local;
+		auto coordMetaData = pragma::util::make_shared<ents::CoordinateTypeMetaData>();
+		coordMetaData->space = pragma::math::CoordinateSpace::Local;
 
 		using TViewTarget = Vector3;
 		auto memberInfo = create_component_member_info<T, TViewTarget, static_cast<void (T::*)(const Vector3 &)>(&T::SetViewTarget), [](const ComponentMemberInfo &, T &c, TViewTarget &value) { value = c.m_viewTarget; }>("viewTarget", Vector3 {});
@@ -87,8 +87,8 @@ void CEyeComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 void CEyeComponent::SetBlinkDuration(float dur) { m_blinkDuration = dur; }
 float CEyeComponent::GetBlinkDuration() const { return m_blinkDuration; }
 
-void CEyeComponent::SetBlinkingEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::BlinkingEnabled, enabled); };
-bool CEyeComponent::IsBlinkingEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::BlinkingEnabled); }
+void CEyeComponent::SetBlinkingEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::BlinkingEnabled, enabled); };
+bool CEyeComponent::IsBlinkingEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::BlinkingEnabled); }
 
 bool CEyeComponent::FindEyeballIndex(uint32_t skinMatIdx, uint32_t &outEyeballIndex) const
 {

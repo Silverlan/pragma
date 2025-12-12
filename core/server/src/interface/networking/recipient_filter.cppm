@@ -26,7 +26,7 @@ export namespace pragma::networking {
 	class DLLSERVER TargetRecipientFilter {
 	  public:
 		TargetRecipientFilter() = default;
-		const std::vector<util::WeakHandle<const IServerClient>> &GetRecipients() const;
+		const std::vector<pragma::util::WeakHandle<const IServerClient>> &GetRecipients() const;
 		void AddRecipient(const IServerClient &client);
 		void RemoveRecipient(const IServerClient &client);
 		bool HasRecipient(const IServerClient &client) const;
@@ -36,7 +36,7 @@ export namespace pragma::networking {
 
 		operator ClientRecipientFilter() const;
 	  private:
-		std::vector<util::WeakHandle<const IServerClient>> m_recipients = {};
+		std::vector<pragma::util::WeakHandle<const IServerClient>> m_recipients = {};
 		ClientRecipientFilter::FilterType m_filterType = ClientRecipientFilter::FilterType::Include;
 	};
 };

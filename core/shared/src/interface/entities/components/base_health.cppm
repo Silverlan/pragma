@@ -20,8 +20,8 @@ export namespace pragma {
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 
-		const util::PUInt16Property &GetHealthProperty() const;
-		const util::PUInt16Property &GetMaxHealthProperty() const;
+		const pragma::util::PUInt16Property &GetHealthProperty() const;
+		const pragma::util::PUInt16Property &GetMaxHealthProperty() const;
 		uint16_t GetHealth() const;
 		uint16_t GetMaxHealth() const;
 		virtual void SetHealth(uint16_t health);
@@ -30,13 +30,13 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 	  protected:
 		BaseHealthComponent(pragma::ecs::BaseEntity &ent);
 		virtual void OnTakeDamage(game::DamageInfo &info);
 
-		util::PUInt16Property m_health;
-		util::PUInt16Property m_maxHealth;
+		pragma::util::PUInt16Property m_health;
+		pragma::util::PUInt16Property m_maxHealth;
 	};
 	struct DLLNETWORK CEOnTakenDamage : public ComponentEvent {
 		CEOnTakenDamage(game::DamageInfo &damageInfo, uint16_t oldHealth, uint16_t newHealth);

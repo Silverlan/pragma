@@ -237,7 +237,7 @@ void CDebugPlaneComponent::DoReloadDebugObject(Color color, const Vector3 &pos, 
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent == nullptr)
 		return;
-	umath::Plane plane {pTrComponent->GetForward(), 0.0};
+	pragma::math::Plane plane {pTrComponent->GetForward(), 0.0};
 	plane.MoveToPos(pos);
 	m_debugObject = pragma::debug::DebugRenderer::DrawPlane(plane, color);
 }

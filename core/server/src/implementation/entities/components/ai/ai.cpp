@@ -142,11 +142,11 @@ void SAIComponent::Initialize()
 {
 	BaseAIComponent::Initialize();
 
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(OnInput(inputData.input, inputData.activator, inputData.caller, inputData.data))
-			return util::EventReply::Handled;
-		return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Handled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	BindEventUnhandled(damageableComponent::EVENT_ON_TAKE_DAMAGE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnTakeDamage(static_cast<CEOnTakeDamage &>(evData.get()).damageInfo); });
 	BindEventUnhandled(sHealthComponent::EVENT_ON_TAKEN_DAMAGE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
@@ -178,13 +178,13 @@ void SAIComponent::Initialize()
 			}
 		};*/ // TODO
 	});
-	BindEvent(baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
 		if(m_bSkipHandling == true)
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		AIAnimationInfo info {};
 		auto &animData = static_cast<CEOnPlayAnimation &>(evData.get());
 		PlayAnimation(animData.animation, info);
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	BindEventUnhandled(sAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { MaintainAnimationMovement(static_cast<CEMaintainAnimationMovement &>(evData.get()).displacement); });
@@ -214,7 +214,7 @@ void SAIComponent::OnEntitySpawn()
 bool SAIComponent::OnInput(std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, const std::string &data)
 {
 	if constexpr(pragma::ai::DEBUG_AI_MOVEMENT) {
-		if(ustring::compare<std::string>(input, "dbg_move", false)) {
+		if(pragma::string::compare<std::string>(input, "dbg_move", false)) {
 			auto pTrComponentActivator = (activator != nullptr) ? activator->GetTransformComponent() : nullptr;
 			if(pTrComponentActivator) {
 				pragma::SAIComponent::AIAnimationInfo info {};
@@ -278,7 +278,7 @@ void SAIComponent::SetSquad(std::string squadName)
 		m_squad = nullptr;
 		return;
 	}
-	ustring::to_lower(squadName);
+	pragma::string::to_lower(squadName);
 	auto &squads = AISquad::GetAll();
 	auto it = std::find_if(squads.begin(), squads.end(), [&squadName](const std::shared_ptr<AISquad> &squad) { return (squad->name == squadName) ? true : false; });
 	if(it != squads.end()) {
@@ -508,13 +508,13 @@ bool SAIComponent::IsObstruction(const pragma::ecs::BaseEntity &ent) const
 
 void SAIComponent::OnEntityComponentAdded(BaseEntityComponent &component) { BaseAIComponent::OnEntityComponentAdded(component); }
 
-util::EventReply SAIComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply SAIComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseAIComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseAIComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == sCharacterComponent::EVENT_ON_KILLED)
 		OnKilled(static_cast<const CEOnCharacterKilled &>(evData).damageInfo);
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 
 bool SAIComponent::HasCharacterNoTargetEnabled(const pragma::ecs::BaseEntity &ent) const
@@ -681,8 +681,8 @@ void CEMemoryData::PushArguments(lua::State *l)
 CEOnNPCStateChanged::CEOnNPCStateChanged(NPCSTATE oldState, NPCSTATE newState) : oldState {oldState}, newState {newState} {}
 void CEOnNPCStateChanged::PushArguments(lua::State *l)
 {
-	Lua::PushInt(l, umath::to_integral(oldState));
-	Lua::PushInt(l, umath::to_integral(newState));
+	Lua::PushInt(l, pragma::math::to_integral(oldState));
+	Lua::PushInt(l, pragma::math::to_integral(newState));
 }
 
 //////////////////
@@ -703,7 +703,7 @@ void CEOnTargetAcquired::PushArguments(lua::State *l)
 CEOnControllerActionInput::CEOnControllerActionInput(pragma::Action action, bool pressed) : action {action}, pressed {pressed} {}
 void CEOnControllerActionInput::PushArguments(lua::State *l)
 {
-	Lua::PushInt(l, umath::to_integral(action));
+	Lua::PushInt(l, pragma::math::to_integral(action));
 	Lua::PushBool(l, pressed);
 }
 
@@ -728,5 +728,5 @@ CEOnScheduleStateChanged::CEOnScheduleStateChanged(const std::shared_ptr<ai::Sch
 void CEOnScheduleStateChanged::PushArguments(lua::State *l)
 {
 	Lua::Push<std::shared_ptr<ai::Schedule>>(l, schedule);
-	Lua::PushInt(l, umath::to_integral(result));
+	Lua::PushInt(l, pragma::math::to_integral(result));
 }

@@ -16,8 +16,8 @@ export {
 	  public:
 		BasePlayer() = default;
 		virtual ~BasePlayer() = default;
-		util::WeakHandle<pragma::BasePlayerComponent> GetBasePlayerComponent();
+		pragma::util::WeakHandle<pragma::BasePlayerComponent> GetBasePlayerComponent();
 	  protected:
-		util::WeakHandle<pragma::BasePlayerComponent> m_basePlayerComponent = {};
+		pragma::util::WeakHandle<pragma::BasePlayerComponent> m_basePlayerComponent = {};
 	};
 };

@@ -11,25 +11,25 @@ import pragma.string.unicode;
 
 Bool pragma::CGame::RawMouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
-	if(m_inputCallbackHandler.CallLuaEvents<int, int, int>("OnMouseInput", static_cast<int>(button), static_cast<int>(state), static_cast<int>(mods)) == util::EventReply::Handled)
+	if(m_inputCallbackHandler.CallLuaEvents<int, int, int>("OnMouseInput", static_cast<int>(button), static_cast<int>(state), static_cast<int>(mods)) == pragma::util::EventReply::Handled)
 		return false;
 	return true;
 }
 Bool pragma::CGame::RawKeyboardInput(pragma::platform::Key key, int, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude)
 {
-	if(m_inputCallbackHandler.CallLuaEvents<int, int, int>("OnKeyboardInput", static_cast<int>(key), static_cast<int>(state), static_cast<int>(mods)) == util::EventReply::Handled)
+	if(m_inputCallbackHandler.CallLuaEvents<int, int, int>("OnKeyboardInput", static_cast<int>(key), static_cast<int>(state), static_cast<int>(mods)) == pragma::util::EventReply::Handled)
 		return false;
 	return true;
 }
 Bool pragma::CGame::RawCharInput(unsigned int c)
 {
-	if(m_inputCallbackHandler.CallLuaEvents<int>("OnCharInput", c) == util::EventReply::Handled)
+	if(m_inputCallbackHandler.CallLuaEvents<int>("OnCharInput", c) == pragma::util::EventReply::Handled)
 		return false;
 	return true;
 }
 Bool pragma::CGame::RawScrollInput(Vector2 offset)
 {
-	if(m_inputCallbackHandler.CallLuaEvents<float, float>("OnScrollInput", CFloat(offset.x), CFloat(offset.y)) == util::EventReply::Handled)
+	if(m_inputCallbackHandler.CallLuaEvents<float, float>("OnScrollInput", CFloat(offset.x), CFloat(offset.y)) == pragma::util::EventReply::Handled)
 		return false;
 	return true;
 }

@@ -19,8 +19,8 @@ void pragma::gui::types::WICommandLineEntry::Initialize()
 	if(m_hBase.IsValid()) {
 		auto hThis = GetHandle();
 		m_hBase->AddCallback("OnKeyEvent",
-		  FunctionCallback<util::EventReply, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
-		    [hThis, this](util::EventReply *reply, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+		  FunctionCallback<pragma::util::EventReply, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
+		    [hThis, this](pragma::util::EventReply *reply, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 			    if((state != pragma::platform::KeyState::Press && state != pragma::platform::KeyState::Repeat) || hThis.IsValid() == false)
 				    return CallbackReturnType::NoReturnValue;
 			    const auto fApplyText = [this](WIMenuItem *pItem) {
@@ -67,7 +67,7 @@ void pragma::gui::types::WICommandLineEntry::Initialize()
 			    default:
 				    return CallbackReturnType::NoReturnValue;
 			    }
-			    *reply = util::EventReply::Handled;
+			    *reply = pragma::util::EventReply::Handled;
 			    return CallbackReturnType::HasReturnValue;
 		    }));
 	}
@@ -106,7 +106,7 @@ void pragma::gui::types::WICommandLineEntry::InitializeAutoCompleteList()
 	std::vector<std::string> options {};
 	auto &text = pText->GetText();
 	if(text.empty()) {
-		auto numCmds = umath::min(static_cast<int32_t>(m_commandHistoryCount), static_cast<int32_t>(GetAutoCompleteEntryLimit()));
+		auto numCmds = pragma::math::min(static_cast<int32_t>(m_commandHistoryCount), static_cast<int32_t>(GetAutoCompleteEntryLimit()));
 		options.resize(numCmds);
 		for(auto i = 0; i < numCmds; ++i) {
 			auto idx = static_cast<int32_t>(m_nextCommandHistoryInsertPos) - 1 - i;
@@ -151,7 +151,7 @@ void pragma::gui::types::WICommandLineEntry::InitializeAutoCompleteList()
 	}
 	pContextMenu->Update();
 	auto *p = pContextMenu->GetParent();
-	if(p && p->IsInBounds(pContextMenu->GetX(), pContextMenu->GetY(), pContextMenu->GetWidth(), pContextMenu->GetHeight()) != umath::intersection::Intersect::Inside)
+	if(p && p->IsInBounds(pContextMenu->GetX(), pContextMenu->GetY(), pContextMenu->GetWidth(), pContextMenu->GetHeight()) != pragma::math::intersection::Intersect::Inside)
 		pContextMenu->SetY(pos.y - pContextMenu->GetHeight());
 	// pContextMenu->SetWidth(size.x);
 }
@@ -188,5 +188,5 @@ void pragma::gui::types::WICommandLineEntry::AddCommandHistoryEntry(const std::s
 {
 	m_commandHistory.at(m_nextCommandHistoryInsertPos) = std::string {entry};
 	m_nextCommandHistoryInsertPos = (m_nextCommandHistoryInsertPos + 1u) % m_commandHistory.size();
-	m_commandHistoryCount = umath::min(m_commandHistoryCount + 1u, static_cast<uint32_t>(m_commandHistory.size()));
+	m_commandHistoryCount = pragma::math::min(m_commandHistoryCount + 1u, static_cast<uint32_t>(m_commandHistory.size()));
 }

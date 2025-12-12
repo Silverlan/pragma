@@ -118,7 +118,7 @@ export {
 				Config m_config = {};
 			};
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::nav::PolyFlags)
 

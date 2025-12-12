@@ -25,7 +25,7 @@ void Lua::DataBlock::load(lua::State *l, LFile &f)
 void Lua::DataBlock::create(lua::State *l)
 {
 	auto settings = ds::create_data_settings({std::unordered_map<std::string, std::string> {}});
-	auto db = ::util::make_shared<ds::Block>(*settings);
+	auto db = pragma::util::make_shared<ds::Block>(*settings);
 	Lua::Push(l, db);
 }
 void Lua::DataBlock::GetInt(lua::State *l, ds::Block &data, const std::string &val, int32_t def) { Lua::PushInt(l, data.GetInt(val, def)); }

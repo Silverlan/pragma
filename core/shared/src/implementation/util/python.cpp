@@ -9,7 +9,7 @@ import :util.python;
 #undef CreateFile
 
 struct IPythonWrapper final {
-	IPythonWrapper(util::Library &lib);
+	IPythonWrapper(pragma::util::Library &lib);
 	IPythonWrapper() = default;
 
 	bool (*run)(const char *code) = nullptr;
@@ -23,7 +23,7 @@ struct IPythonWrapper final {
 };
 
 #define PR_PYTHON_FIND_SYMBOL(lib, sym) (sym = lib.FindSymbolAddress<decltype(sym)>("pr_py_" #sym)) != nullptr
-IPythonWrapper::IPythonWrapper(util::Library &lib) { m_bValid = PR_PYTHON_FIND_SYMBOL(lib, run) && PR_PYTHON_FIND_SYMBOL(lib, exec) && PR_PYTHON_FIND_SYMBOL(lib, get_last_error) && PR_PYTHON_FIND_SYMBOL(lib, reload); }
+IPythonWrapper::IPythonWrapper(pragma::util::Library &lib) { m_bValid = PR_PYTHON_FIND_SYMBOL(lib, run) && PR_PYTHON_FIND_SYMBOL(lib, exec) && PR_PYTHON_FIND_SYMBOL(lib, get_last_error) && PR_PYTHON_FIND_SYMBOL(lib, reload); }
 
 ////////////////
 
@@ -70,7 +70,7 @@ bool pragma::python::exec(std::string fileName, uint32_t argc, const char **argv
 	auto *wrapper = get_py_wrapper();
 	if(!wrapper)
 		return false;
-	auto path = util::Path::CreateFile(fileName);
+	auto path = pragma::util::Path::CreateFile(fileName);
 	path.Canonicalize();
 	std::string absPath;
 	if(!filemanager::find_absolute_path(path.GetString(), absPath))

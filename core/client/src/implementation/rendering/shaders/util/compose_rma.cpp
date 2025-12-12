@@ -62,9 +62,9 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(prosper::I
 
 	auto dsg = CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE.setIndex);
 	auto &ds = *dsg->GetDescriptorSet();
-	ds.SetBindingTexture(*roughnessMap, umath::to_integral(TextureBinding::RoughnessMap));
-	ds.SetBindingTexture(*metalnessMap, umath::to_integral(TextureBinding::MetalnessMap));
-	ds.SetBindingTexture(*aoMap, umath::to_integral(TextureBinding::AmbientOcclusionMap));
+	ds.SetBindingTexture(*roughnessMap, pragma::math::to_integral(TextureBinding::RoughnessMap));
+	ds.SetBindingTexture(*metalnessMap, pragma::math::to_integral(TextureBinding::MetalnessMap));
+	ds.SetBindingTexture(*aoMap, pragma::math::to_integral(TextureBinding::AmbientOcclusionMap));
 
 	auto &setupCmd = context.GetSetupCommandBuffer();
 	if(setupCmd->RecordBeginRenderPass(*rt)) {

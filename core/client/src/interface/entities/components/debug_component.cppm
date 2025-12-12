@@ -103,12 +103,12 @@ export namespace pragma {
 			if(m_poseCallback.IsValid())
 				m_poseCallback.Remove();
 			auto &trC = static_cast<CTransformComponent &>(component);
-			m_poseCallback = trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED, [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-				if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
-					return util::EventReply::Unhandled;
+			m_poseCallback = trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED, [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+				if(pragma::math::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
+					return pragma::util::EventReply::Unhandled;
 				if(m_debugObject != nullptr)
 					m_debugObject->SetPos(trC.GetPosition());
-				return util::EventReply::Unhandled;
+				return pragma::util::EventReply::Unhandled;
 			});
 		}
 	}

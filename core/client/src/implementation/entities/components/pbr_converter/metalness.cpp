@@ -34,7 +34,7 @@ void CPBRConverterComponent::UpdateMetalness(pragma::asset::Model &mdl, msys::CM
 	for(auto &colMesh : colMeshes) {
 		auto boneId = colMesh->GetBoneParent();
 		auto tBone = mdl.CalcReferenceBonePose(boneId);
-		umath::Transform t {};
+		pragma::math::Transform t {};
 		if(tBone.has_value())
 			t = *tBone;
 

@@ -37,7 +37,7 @@ bool set_member_value(lua::State *l, ::pragma::ecs::BaseEntity &ent, const std::
 }
 
 template<typename TValue, auto TSetValue>
-bool set_transform_member_value(::pragma::ecs::BaseEntity &ent, const std::string &uri, umath::CoordinateSpace space, const TValue &value)
+bool set_transform_member_value(::pragma::ecs::BaseEntity &ent, const std::string &uri, pragma::math::CoordinateSpace space, const TValue &value)
 {
 	auto path = pragma::PanimaComponent::ParseComponentChannelPath(panima::ChannelPath {uri});
 	if(!path.has_value())
@@ -53,7 +53,7 @@ bool set_transform_member_value(::pragma::ecs::BaseEntity &ent, const std::strin
 }
 
 template<typename TValue, auto TGetValue>
-std::optional<TValue> get_transform_member_value(::pragma::ecs::BaseEntity &ent, const std::string &uri, umath::CoordinateSpace space)
+std::optional<TValue> get_transform_member_value(::pragma::ecs::BaseEntity &ent, const std::string &uri, pragma::math::CoordinateSpace space)
 {
 	auto path = pragma::PanimaComponent::ParseComponentChannelPath(panima::ChannelPath {uri});
 	if(!path.has_value())
@@ -107,27 +107,27 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	classDef.def("RemoveEntityOnRemoval", static_cast<void (*)(::pragma::ecs::BaseEntity &, ::pragma::ecs::BaseEntity &)>(&RemoveEntityOnRemoval));
 	classDef.def("RemoveEntityOnRemoval", static_cast<void (*)(::pragma::ecs::BaseEntity &, ::pragma::ecs::BaseEntity &, Bool)>(&RemoveEntityOnRemoval));
 	classDef.def("GetSpawnFlags", &::pragma::ecs::BaseEntity::GetSpawnFlags);
-	classDef.def("GetPose", static_cast<const umath::ScaledTransform &(::pragma::ecs::BaseEntity::*)() const>(&::pragma::ecs::BaseEntity::GetPose), luabind::copy_policy<0> {});
-	classDef.def("GetPose", static_cast<umath::ScaledTransform (::pragma::ecs::BaseEntity::*)(pragma::CoordinateSpace) const>(&::pragma::ecs::BaseEntity::GetPose));
-	classDef.def("SetPose", static_cast<void (*)(::pragma::ecs::BaseEntity &, const umath::Transform &)>([](::pragma::ecs::BaseEntity &ent, const umath::Transform &t) {
+	classDef.def("GetPose", static_cast<const pragma::math::ScaledTransform &(::pragma::ecs::BaseEntity::*)() const>(&::pragma::ecs::BaseEntity::GetPose), luabind::copy_policy<0> {});
+	classDef.def("GetPose", static_cast<pragma::math::ScaledTransform (::pragma::ecs::BaseEntity::*)(pragma::CoordinateSpace) const>(&::pragma::ecs::BaseEntity::GetPose));
+	classDef.def("SetPose", static_cast<void (*)(::pragma::ecs::BaseEntity &, const pragma::math::Transform &)>([](::pragma::ecs::BaseEntity &ent, const pragma::math::Transform &t) {
 		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
 		ent.SetPose(t);
 	}));
-	classDef.def("SetPose", static_cast<void (*)(::pragma::ecs::BaseEntity &, const umath::Transform &, pragma::CoordinateSpace)>([](::pragma::ecs::BaseEntity &ent, const umath::Transform &t, pragma::CoordinateSpace space) {
+	classDef.def("SetPose", static_cast<void (*)(::pragma::ecs::BaseEntity &, const pragma::math::Transform &, pragma::CoordinateSpace)>([](::pragma::ecs::BaseEntity &ent, const pragma::math::Transform &t, pragma::CoordinateSpace space) {
 		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
 		ent.SetPose(t, space);
 	}));
-	classDef.def("SetPose", static_cast<void (*)(::pragma::ecs::BaseEntity &, const umath::ScaledTransform &)>([](::pragma::ecs::BaseEntity &ent, const umath::ScaledTransform &t) {
+	classDef.def("SetPose", static_cast<void (*)(::pragma::ecs::BaseEntity &, const pragma::math::ScaledTransform &)>([](::pragma::ecs::BaseEntity &ent, const pragma::math::ScaledTransform &t) {
 		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
 		ent.SetPose(t);
 	}));
-	classDef.def("SetPose", static_cast<void (*)(::pragma::ecs::BaseEntity &, const umath::ScaledTransform &, pragma::CoordinateSpace)>([](::pragma::ecs::BaseEntity &ent, const umath::ScaledTransform &t, pragma::CoordinateSpace space) {
+	classDef.def("SetPose", static_cast<void (*)(::pragma::ecs::BaseEntity &, const pragma::math::ScaledTransform &, pragma::CoordinateSpace)>([](::pragma::ecs::BaseEntity &ent, const pragma::math::ScaledTransform &t, pragma::CoordinateSpace space) {
 		auto *trComponent = static_cast<pragma::BaseTransformComponent *>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
@@ -291,13 +291,13 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	classDef.def("GetTransformMemberPos", &get_transform_member_value<Vector3, &pragma::BaseEntityComponent::GetTransformMemberPos>);
 	classDef.def("GetTransformMemberRot", &get_transform_member_value<Quat, &pragma::BaseEntityComponent::GetTransformMemberRot>);
 	classDef.def("GetTransformMemberScale", &get_transform_member_value<Vector3, &pragma::BaseEntityComponent::GetTransformMemberScale>);
-	classDef.def("GetTransformMemberPose", &get_transform_member_value<umath::ScaledTransform, &pragma::BaseEntityComponent::GetTransformMemberPose>);
+	classDef.def("GetTransformMemberPose", &get_transform_member_value<pragma::math::ScaledTransform, &pragma::BaseEntityComponent::GetTransformMemberPose>);
 	classDef.def("SetTransformMemberPos", &set_transform_member_value<Vector3, &pragma::BaseEntityComponent::SetTransformMemberPos>);
 	classDef.def("SetTransformMemberRot", &set_transform_member_value<Quat, &pragma::BaseEntityComponent::SetTransformMemberRot>);
 	classDef.def("SetTransformMemberScale", &set_transform_member_value<Vector3, &pragma::BaseEntityComponent::SetTransformMemberScale>);
-	classDef.def("SetTransformMemberPose", &set_transform_member_value<umath::ScaledTransform, &pragma::BaseEntityComponent::SetTransformMemberPose>);
-	classDef.def("GetUuid", static_cast<std::string (*)(::pragma::ecs::BaseEntity &)>([](::pragma::ecs::BaseEntity &ent) -> std::string { return ::util::uuid_to_string(ent.GetUuid()); }));
-	classDef.def("SetUuid", static_cast<void (*)(::pragma::ecs::BaseEntity &, const std::string &)>([](::pragma::ecs::BaseEntity &ent, const std::string &uuid) { ent.SetUuid(::util::uuid_string_to_bytes(uuid)); }));
+	classDef.def("SetTransformMemberPose", &set_transform_member_value<pragma::math::ScaledTransform, &pragma::BaseEntityComponent::SetTransformMemberPose>);
+	classDef.def("GetUuid", static_cast<std::string (*)(::pragma::ecs::BaseEntity &)>([](::pragma::ecs::BaseEntity &ent) -> std::string { return pragma::util::uuid_to_string(ent.GetUuid()); }));
+	classDef.def("SetUuid", static_cast<void (*)(::pragma::ecs::BaseEntity &, const std::string &)>([](::pragma::ecs::BaseEntity &ent, const std::string &uuid) { ent.SetUuid(pragma::util::uuid_string_to_bytes(uuid)); }));
 	classDef.def("SetUuid", +[](::pragma::ecs::BaseEntity &ent, const Lua::util::Uuid &uuid) { ent.SetUuid(uuid.value); }, luabind::const_ref_policy<2> {});
 
 	classDef.def("Save", &::pragma::ecs::BaseEntity::Save);
@@ -484,9 +484,9 @@ void Lua::Entity::register_class(luabind::class_<::pragma::ecs::BaseEntity> &cla
 	//
 
 	// Enums
-	classDef.add_static_constant("TYPE_DEFAULT", umath::to_integral(LuaEntityType::Default));
-	classDef.add_static_constant("TYPE_LOCAL", umath::to_integral(LuaEntityType::Default));
-	classDef.add_static_constant("TYPE_SHARED", umath::to_integral(LuaEntityType::Shared));
+	classDef.add_static_constant("TYPE_DEFAULT", pragma::math::to_integral(LuaEntityType::Default));
+	classDef.add_static_constant("TYPE_LOCAL", pragma::math::to_integral(LuaEntityType::Default));
+	classDef.add_static_constant("TYPE_SHARED", pragma::math::to_integral(LuaEntityType::Shared));
 
 	classDef.add_static_constant("EVENT_HANDLE_KEY_VALUE", ::pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE);
 	classDef.add_static_constant("EVENT_ON_SPAWN", ::pragma::ecs::baseEntity::EVENT_ON_SPAWN);

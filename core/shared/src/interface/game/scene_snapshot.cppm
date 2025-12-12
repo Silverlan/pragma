@@ -29,7 +29,7 @@ export {
 				msys::MaterialHandle material = {};
 			};
 			struct DLLNETWORK Object {
-				umath::Transform pose = {};
+				pragma::math::Transform pose = {};
 			};
 			static std::shared_ptr<SceneSnapshot> Create();
 			SceneSnapshot(const SceneSnapshot &) = delete;

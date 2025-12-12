@@ -11,7 +11,7 @@ export import :types;
 export import pragma.materialsystem;
 
 export {
-	class DLLNETWORK EResourceWatcherCallbackType : public util::ExtensibleEnum {
+	class DLLNETWORK EResourceWatcherCallbackType : public pragma::util::ExtensibleEnum {
 	  public:
 		// declare the enum first so it can be used in following declarations
 		enum class E : uint32_t { Model = 0u, Material, Texture, Map, SoundScript, Sound, Count };
@@ -21,7 +21,7 @@ export {
 	  protected:
 		// forwarding ctor that calls the base ctor (base ctor is protected)
 		// do NOT mark constexpr if the base ctor is not constexpr
-		explicit EResourceWatcherCallbackType(uint32_t v) noexcept : util::ExtensibleEnum(v) {}
+		explicit EResourceWatcherCallbackType(uint32_t v) noexcept : pragma::util::ExtensibleEnum(v) {}
 	};
 	namespace eResourceWatcherCallbackType {
 		CLASS_ENUM_COMPAT const EResourceWatcherCallbackType Model;
@@ -42,7 +42,7 @@ export {
 
 	class DLLNETWORK ResourceWatcherManager {
 	  public:
-		using TypeHandler = std::function<void(const util::Path &, const std::string &)>;
+		using TypeHandler = std::function<void(const pragma::util::Path &, const std::string &)>;
 		ResourceWatcherManager(pragma::NetworkState *nw);
 		bool MountDirectory(const std::string &path, bool bAbsolutePath = false);
 		void Poll();
@@ -52,7 +52,7 @@ export {
 		// times to resume watching
 		void Lock();
 		void Unlock();
-		util::ScopeGuard ScopeLock();
+		pragma::util::ScopeGuard ScopeLock();
 		bool IsLocked() const;
 		CallbackHandle AddChangeCallback(EResourceWatcherCallbackType type, const std::function<void(std::reference_wrapper<const std::string>, std::reference_wrapper<const std::string>)> &fcallback);
 		void RegisterTypeHandler(const std::string &ext, const TypeHandler &handler);
@@ -60,10 +60,10 @@ export {
 		pragma::NetworkState *m_networkState = nullptr;
 		uint32_t m_lockedCount = 0;
 		std::recursive_mutex m_watcherMutex;
-		void OnResourceChanged(const util::Path &rootPath, const util::Path &path);
+		void OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path);
 		void ReloadMaterial(const std::string &path);
 		virtual void OnMaterialReloaded(const std::string &path, const std::unordered_set<pragma::asset::Model *> &modelMap) {}
-		virtual void OnResourceChanged(const util::Path &rootPath, const util::Path &path, const std::string &ext);
+		virtual void OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path, const std::string &ext);
 		virtual void GetWatchPaths(std::vector<std::string> &paths);
 		virtual void ReloadTexture(const std::string &path);
 		void CallChangeCallbacks(EResourceWatcherCallbackType type, const std::string &path, const std::string &ext);

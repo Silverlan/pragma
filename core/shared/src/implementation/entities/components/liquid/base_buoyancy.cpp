@@ -54,10 +54,10 @@ void BaseBuoyancyComponent::OnEntityComponentAdded(BaseEntityComponent &componen
 		m_liquidControl = pLiquidControl->GetHandle<BaseLiquidControlComponent>();
 }
 
-util::EventReply BaseBuoyancyComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply BaseBuoyancyComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseTouchComponent::EVENT_CAN_TRIGGER) {
 		auto &triggerData = static_cast<CECanTriggerData &>(evData);
 		if(triggerData.entity != nullptr) {
@@ -65,9 +65,9 @@ util::EventReply BaseBuoyancyComponent::HandleEvent(ComponentEventId eventId, Co
 			if(pPhysComponent != nullptr && (pPhysComponent->GetCollisionFilterMask() & pragma::physics::CollisionMask::Water) == pragma::physics::CollisionMask::None)
 				triggerData.canTrigger = false;
 		}
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	}
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 
 void BaseBuoyancyComponent::OnEndTouch(pragma::ecs::BaseEntity *ent, pragma::physics::PhysObj *phys)

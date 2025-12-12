@@ -146,14 +146,14 @@ void COpticalCameraComponent::InitializeLuaObject(lua::State *l) { return BaseEn
 
 void COpticalCameraComponent::Initialize() { BaseEntityComponent::Initialize(); }
 
-void COpticalCameraComponent::SetDebugShowFocus(bool enabled) { umath::set_flag(m_flags, ShaderPPDoF::Flags::DebugShowFocus, enabled); }
-bool COpticalCameraComponent::GetDebugShowFocus() const { return umath::is_flag_set(m_flags, ShaderPPDoF::Flags::DebugShowFocus); }
-void COpticalCameraComponent::SetVignetteEnabled(bool enabled) { umath::set_flag(m_flags, ShaderPPDoF::Flags::EnableVignette, enabled); }
-bool COpticalCameraComponent::IsVignetteEnabled() const { return umath::is_flag_set(m_flags, ShaderPPDoF::Flags::EnableVignette); }
-void COpticalCameraComponent::SetPentagonBokehShape(bool pentagonShape) { umath::set_flag(m_flags, ShaderPPDoF::Flags::PentagonBokehShape, pentagonShape); }
-bool COpticalCameraComponent::GetPentagonBokehShape() const { return umath::is_flag_set(m_flags, ShaderPPDoF::Flags::PentagonBokehShape); }
-void COpticalCameraComponent::SetDebugShowDepth(bool debugShowDepth) { umath::set_flag(m_flags, ShaderPPDoF::Flags::DebugShowDepth, debugShowDepth); }
-bool COpticalCameraComponent::GetDebugShowDepth() const { return umath::is_flag_set(m_flags, ShaderPPDoF::Flags::DebugShowDepth); }
+void COpticalCameraComponent::SetDebugShowFocus(bool enabled) { pragma::math::set_flag(m_flags, ShaderPPDoF::Flags::DebugShowFocus, enabled); }
+bool COpticalCameraComponent::GetDebugShowFocus() const { return pragma::math::is_flag_set(m_flags, ShaderPPDoF::Flags::DebugShowFocus); }
+void COpticalCameraComponent::SetVignetteEnabled(bool enabled) { pragma::math::set_flag(m_flags, ShaderPPDoF::Flags::EnableVignette, enabled); }
+bool COpticalCameraComponent::IsVignetteEnabled() const { return pragma::math::is_flag_set(m_flags, ShaderPPDoF::Flags::EnableVignette); }
+void COpticalCameraComponent::SetPentagonBokehShape(bool pentagonShape) { pragma::math::set_flag(m_flags, ShaderPPDoF::Flags::PentagonBokehShape, pentagonShape); }
+bool COpticalCameraComponent::GetPentagonBokehShape() const { return pragma::math::is_flag_set(m_flags, ShaderPPDoF::Flags::PentagonBokehShape); }
+void COpticalCameraComponent::SetDebugShowDepth(bool debugShowDepth) { pragma::math::set_flag(m_flags, ShaderPPDoF::Flags::DebugShowDepth, debugShowDepth); }
+bool COpticalCameraComponent::GetDebugShowDepth() const { return pragma::math::is_flag_set(m_flags, ShaderPPDoF::Flags::DebugShowDepth); }
 
 void COpticalCameraComponent::SetFocalDistance(float dist) { m_focalDistance = dist; }
 float COpticalCameraComponent::GetFocalDistance() const { return m_focalDistance; }

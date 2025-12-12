@@ -12,7 +12,7 @@ using namespace pragma;
 
 void SDebugTextComponent::SetText(const std::string &text)
 {
-	if(ustring::compare(m_debugText, text) == true)
+	if(pragma::string::compare(m_debugText, text) == true)
 		return;
 	BaseDebugTextComponent::SetText(text);
 

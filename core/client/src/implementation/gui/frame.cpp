@@ -83,8 +83,8 @@ void pragma::gui::types::WIFrame::Initialize()
 			m_hDetachButton = gui.Create<WIButton>(pTitleBar)->GetHandle();
 			WIButton *pButton = static_cast<WIButton *>(m_hDetachButton.get());
 			pButton->SetText(".");
-			pButton->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this](util::EventReply *reply) -> CallbackReturnType {
-				*reply = util::EventReply::Handled;
+			pButton->AddCallback("OnPressed", FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([this](pragma::util::EventReply *reply) -> CallbackReturnType {
+				*reply = pragma::util::EventReply::Handled;
 				OnDetachButtonPressed();
 				return CallbackReturnType::HasReturnValue;
 			}));
@@ -95,8 +95,8 @@ void pragma::gui::types::WIFrame::Initialize()
 			m_hClose = gui.Create<WIButton>(pTitleBar)->GetHandle();
 			WIButton *pButton = static_cast<WIButton *>(m_hClose.get());
 			pButton->SetText("X");
-			pButton->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this](util::EventReply *reply) -> CallbackReturnType {
-				*reply = util::EventReply::Handled;
+			pButton->AddCallback("OnPressed", FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([this](pragma::util::EventReply *reply) -> CallbackReturnType {
+				*reply = pragma::util::EventReply::Handled;
 				OnCloseButtonPressed();
 				return CallbackReturnType::HasReturnValue;
 			}));
@@ -104,12 +104,12 @@ void pragma::gui::types::WIFrame::Initialize()
 		}
 	}
 }
-util::EventReply pragma::gui::types::WIFrame::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WIFrame::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
-	if(WITransformable::MouseCallback(button, state, mods) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(WITransformable::MouseCallback(button, state, mods) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	RequestFocus();
-	return util::EventReply::Handled;
+	return pragma::util::EventReply::Handled;
 }
 void pragma::gui::types::WIFrame::SetCloseButtonEnabled(bool b)
 {

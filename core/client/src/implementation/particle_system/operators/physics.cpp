@@ -17,15 +17,15 @@ void pragma::pts::CParticleOperatorPhysics::Initialize(pragma::BaseEnvParticleSy
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "mass")
-			m_mass = util::to_float(it->second);
+			m_mass = pragma::util::to_float(it->second);
 		else if(key == "linear_damping")
-			m_linearDamping = util::to_float(it->second);
+			m_linearDamping = pragma::util::to_float(it->second);
 		else if(key == "linear_factor")
 			m_linearFactor = uvec::create(it->second);
 		else if(key == "angular_damping")
-			m_angularDamping = util::to_float(it->second);
+			m_angularDamping = pragma::util::to_float(it->second);
 		else if(key == "angular_factor")
 			m_angularFactor = uvec::create(it->second);
 		else if(key == "rotation_offset") {
@@ -135,9 +135,9 @@ void pragma::pts::CParticleOperatorPhysicsSphere::Initialize(pragma::BaseEnvPart
 	pragma::pts::CParticleOperatorPhysics::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "radius")
-			m_radius = util::to_float(it->second);
+			m_radius = pragma::util::to_float(it->second);
 	}
 }
 
@@ -150,9 +150,9 @@ void pragma::pts::CParticleOperatorPhysicsBox::Initialize(pragma::BaseEnvParticl
 	pragma::pts::CParticleOperatorPhysics::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "extent")
-			m_extent = util::to_float(it->second);
+			m_extent = pragma::util::to_float(it->second);
 	}
 }
 
@@ -165,11 +165,11 @@ void pragma::pts::CParticleOperatorPhysicsCylinder::Initialize(pragma::BaseEnvPa
 	pragma::pts::CParticleOperatorPhysics::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "radius")
-			m_radius = util::to_float(it->second);
+			m_radius = pragma::util::to_float(it->second);
 		else if(key == "height")
-			m_height = util::to_float(it->second);
+			m_height = pragma::util::to_float(it->second);
 	}
 }
 
@@ -182,7 +182,7 @@ void pragma::pts::CParticleOperatorPhysicsModel::Initialize(pragma::BaseEnvParti
 	pragma::pts::CParticleOperatorPhysics::Initialize(pSystem, values);
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "model") {
 			m_model = pragma::get_cgame()->LoadModel(pair.second);
 			break;

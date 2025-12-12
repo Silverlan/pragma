@@ -14,7 +14,7 @@ pragma::ThreadPool::ThreadPool(uint32_t threadCount, const std::string &name, co
 	if(!name.empty())
 		fullName += '_' + name;
 	for(auto i = decltype(n) {0u}; i < n; ++i)
-		util::set_thread_name(m_pool.get_thread(i), fullName);
+		pragma::util::set_thread_name(m_pool.get_thread(i), fullName);
 }
 
 void pragma::ThreadPool::Stop(bool execRemainingQueue) { m_pool.stop(execRemainingQueue); }
@@ -34,7 +34,7 @@ void pragma::ThreadPool::BatchProcess(uint32_t numJobs, uint32_t numItemsPerJob,
 		++numBatches;
 	for(auto i = decltype(numBatches) {0u}; i < numBatches; ++i) {
 		auto offset = i * numItemsPerJob;
-		auto end = umath::min(offset + numItemsPerJob, numJobs);
+		auto end = pragma::math::min(offset + numItemsPerJob, numJobs);
 		AddTask([f, offset, end]() -> ResultHandler { return f(offset, end); });
 	}
 }

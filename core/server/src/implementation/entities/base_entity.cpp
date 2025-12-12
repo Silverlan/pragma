@@ -33,7 +33,7 @@ void SBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 	else if(typeid(component) == typeid(pragma::SPhysicsComponent))
 		m_physicsComponent = &static_cast<pragma::SPhysicsComponent &>(component);
 	else if(typeid(component) == typeid(pragma::SWorldComponent))
-		umath::set_flag(m_stateFlags, StateFlags::HasWorldComponent);
+		pragma::math::set_flag(m_stateFlags, StateFlags::HasWorldComponent);
 	else if(typeid(component) == typeid(pragma::SModelComponent))
 		m_modelComponent = &static_cast<pragma::SModelComponent &>(component);
 	else if(typeid(component) == typeid(pragma::SGenericComponent))
@@ -45,7 +45,7 @@ void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 {
 	pragma::ecs::BaseEntity::OnComponentRemoved(component);
 	if(typeid(component) == typeid(pragma::SWorldComponent))
-		umath::set_flag(m_stateFlags, StateFlags::HasWorldComponent, false);
+		pragma::math::set_flag(m_stateFlags, StateFlags::HasWorldComponent, false);
 	else if(typeid(component) == typeid(pragma::STransformComponent))
 		m_transformComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::SPhysicsComponent))
@@ -104,7 +104,7 @@ void SBaseEntity::SendData(NetPacket &packet, pragma::networking::ClientRecipien
 	auto &componentManager = pragma::SGame::Get()->GetEntityComponentManager();
 	auto &components = GetComponents();
 	auto offset = packet->GetOffset();
-	auto numComponents = umath::min(components.size(), static_cast<size_t>(std::numeric_limits<uint8_t>::max()));
+	auto numComponents = pragma::math::min(components.size(), static_cast<size_t>(std::numeric_limits<uint8_t>::max()));
 	packet->Write<uint8_t>(numComponents);
 	for(auto &pComponent : components) {
 		if(pComponent.expired() || pComponent->ShouldTransmitNetData() == false) {
@@ -136,7 +136,7 @@ pragma::NetEventId SBaseEntity::RegisterNetEvent(const std::string &name) const 
 
 void SBaseEntity::Remove()
 {
-	if(umath::is_flag_set(GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
+	if(pragma::math::is_flag_set(GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
 		return;
 	pragma::ecs::BaseEntity::Remove();
 	pragma::Game *game = pragma::ServerState::Get()->GetGameState();

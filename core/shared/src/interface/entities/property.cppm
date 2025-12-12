@@ -10,7 +10,7 @@ export import :entities.base_entity_handle;
 export import pragma.util;
 
 export namespace pragma {
-	class DLLNETWORK EntityProperty : public util::SimpleProperty<EntityProperty, EntityHandle> {
+	class DLLNETWORK EntityProperty : public pragma::util::SimpleProperty<EntityProperty, EntityHandle> {
 	  public:
 		EntityProperty();
 		EntityProperty(const EntityHandle &hEnt);

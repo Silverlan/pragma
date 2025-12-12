@@ -78,7 +78,7 @@ void CLightComponent::SetBaked(bool baked)
 	}
 	if(!m_renderBuffer && GetEntity().IsEnabled()) {
 		auto &flags = m_bufferData.flags;
-		umath::set_flag(flags, LightBufferData::BufferFlags::TurnedOn, true);
+		pragma::math::set_flag(flags, LightBufferData::BufferFlags::TurnedOn, true);
 		InitializeRenderBuffer();
 		UpdateBuffers();
 	}
@@ -86,7 +86,7 @@ void CLightComponent::SetBaked(bool baked)
 void CLightComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CLightComponent::InitializeRenderBuffer()
 {
-	if(m_renderBuffer != nullptr || umath::is_flag_set(m_lightFlags, LightFlags::BakedLightSource))
+	if(m_renderBuffer != nullptr || pragma::math::is_flag_set(m_lightFlags, LightFlags::BakedLightSource))
 		return;
 	m_renderBuffer = LightDataBufferManager::GetInstance().Request(*this, m_bufferData);
 }
@@ -106,7 +106,7 @@ void CLightComponent::DestroyRenderBuffer(bool freeBuffer)
 	if(m_renderBuffer == nullptr)
 		return;
 	auto flags = m_bufferData.flags;
-	umath::set_flag(flags, LightBufferData::BufferFlags::TurnedOn, false);
+	pragma::math::set_flag(flags, LightBufferData::BufferFlags::TurnedOn, false);
 	if(m_renderBuffer != nullptr)
 		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), flags);
 
@@ -139,7 +139,7 @@ bool CLightComponent::ShouldPass(const pragma::asset::Model &mdl, const pragma::
 		return false;
 	auto &mat = materials[*texId];
 	auto *info = mat.get()->GetShaderInfo();
-	if(info == nullptr || const_cast<util::ShaderInfo *>(info)->GetShader() == nullptr) // Ignore meshes with nodraw (Or invalid) shaders
+	if(info == nullptr || const_cast<pragma::util::ShaderInfo *>(info)->GetShader() == nullptr) // Ignore meshes with nodraw (Or invalid) shaders
 		return false;
 	CEShouldPassMesh evData {mdl, mesh};
 	InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_PASS_MESH, evData);
@@ -153,7 +153,7 @@ bool CLightComponent::ShouldPass(const ecs::CBaseEntity &ent, uint32_t &renderFl
 	if(ShouldCastShadows() == false)
 		return false;
 	CEShouldPassEntity evData {ent, renderFlags};
-	if(InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_PASS_ENTITY, evData) == util::EventReply::Handled)
+	if(InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_PASS_ENTITY, evData) == pragma::util::EventReply::Handled)
 		return evData.shouldPass;
 	return true;
 }
@@ -191,7 +191,7 @@ bool CLightComponent::IsInCone(const ecs::CBaseEntity &ent, const Vector3 &dir, 
 		return false;
 	auto &start = pTrComponentThis->GetPosition();
 	auto &sphere = pRenderComponent->GetUpdatedAbsoluteRenderSphere();
-	return umath::intersection::sphere_cone(pTrComponent->GetPosition() + sphere.pos, sphere.radius, start, dir, angle);
+	return pragma::math::intersection::sphere_cone(pTrComponent->GetPosition() + sphere.pos, sphere.radius, start, dir, angle);
 }
 void CLightComponent::SetLightIntensity(float intensity, LightIntensityType type)
 {
@@ -239,15 +239,15 @@ bool CLightComponent::IsInRange(const ecs::CBaseEntity &ent, const pragma::geome
 	mesh.GetBounds(min, max);
 	min += pos;
 	max += pos;
-	return umath::intersection::aabb_sphere(min, max, origin, radius);
+	return pragma::math::intersection::aabb_sphere(min, max, origin, radius);
 }
 
 bool CLightComponent::ShouldUpdateRenderPass(rendering::ShadowMapType smType) const
 {
 	CEShouldUpdateRenderPass evData {};
-	if(InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS, evData) == util::EventReply::Handled)
+	if(InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS, evData) == pragma::util::EventReply::Handled)
 		return evData.shouldUpdate;
-	return umath::is_flag_set(m_stateFlags, (smType == rendering::ShadowMapType::Static) ? StateFlags::StaticUpdateRequired : StateFlags::DynamicUpdateRequired);
+	return pragma::math::is_flag_set(m_stateFlags, (smType == rendering::ShadowMapType::Static) ? StateFlags::StaticUpdateRequired : StateFlags::DynamicUpdateRequired);
 }
 
 void CLightComponent::UpdateBuffers()
@@ -341,7 +341,7 @@ void CLightComponent::InitializeShadowMap()
 	if(GetEffectiveShadowType() == ShadowType::None)
 		return;
 	CEHandleShadowMap ceData {};
-	if(BroadcastEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, ceData) == util::EventReply::Unhandled)
+	if(BroadcastEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, ceData) == pragma::util::EventReply::Unhandled)
 		m_shadowMapStatic = GetEntity().AddComponent<CShadowComponent>(true)->GetHandle();
 	else if(ceData.resultShadow)
 		m_shadowMapStatic = ceData.resultShadow->GetHandle();
@@ -349,7 +349,7 @@ void CLightComponent::InitializeShadowMap()
 		InitializeShadowMap(*m_shadowMapStatic);
 	if(GetEffectiveShadowType() == ShadowType::Full) {
 		CEHandleShadowMap ceData {};
-		if(BroadcastEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, ceData) == util::EventReply::Unhandled)
+		if(BroadcastEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, ceData) == pragma::util::EventReply::Unhandled)
 			m_shadowMapDynamic = GetEntity().AddComponent<CShadowComponent>(true)->GetHandle();
 		else if(ceData.resultShadow)
 			m_shadowMapDynamic = ceData.resultShadow->GetHandle();
@@ -358,10 +358,10 @@ void CLightComponent::InitializeShadowMap()
 	}
 }
 
-void CLightComponent::SetStateFlag(StateFlags flag, bool enabled) { umath::set_flag(m_stateFlags, flag, enabled); }
+void CLightComponent::SetStateFlag(StateFlags flag, bool enabled) { pragma::math::set_flag(m_stateFlags, flag, enabled); }
 
 void CLightComponent::SetMorphTargetsInShadowsEnabled(bool enabled) { SetStateFlag(StateFlags::EnableMorphTargetsInShadows, enabled); }
-bool CLightComponent::AreMorphTargetsInShadowsEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::EnableMorphTargetsInShadows); }
+bool CLightComponent::AreMorphTargetsInShadowsEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableMorphTargetsInShadows); }
 
 void CLightComponent::Initialize()
 {
@@ -371,7 +371,7 @@ void CLightComponent::Initialize()
 	ent.AddComponent<CShadowComponent>();
 
 	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<ComponentEvent> evData) {
-		umath::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, true);
+		pragma::math::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, true);
 		if(m_renderBuffer != nullptr)
 			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
 		else
@@ -385,7 +385,7 @@ void CLightComponent::Initialize()
 		(pragma::TickPolicy::Never);
 	});
 	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<ComponentEvent> evData) {
-		umath::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, false);
+		pragma::math::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, false);
 		if(m_renderBuffer != nullptr)
 			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
 		m_tTurnedOff = pragma::get_cgame()->RealTime();
@@ -441,7 +441,7 @@ void CLightComponent::UpdatePos()
 		reinterpret_cast<Vector3 &>(m_bufferData.position) = pos;
 		if(m_renderBuffer)
 			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, position), m_bufferData.position);
-		umath::set_flag(m_stateFlags, StateFlags::FullUpdateRequired);
+		pragma::math::set_flag(m_stateFlags, StateFlags::FullUpdateRequired);
 	}
 }
 void CLightComponent::UpdateDir()
@@ -457,7 +457,7 @@ void CLightComponent::UpdateDir()
 				m_bufferData.direction.z = 1.f;
 			if(m_renderBuffer)
 				pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, direction), m_bufferData.direction);
-			umath::set_flag(m_stateFlags, StateFlags::FullUpdateRequired);
+			pragma::math::set_flag(m_stateFlags, StateFlags::FullUpdateRequired);
 		}
 	}
 }
@@ -472,11 +472,11 @@ void CLightComponent::UpdateColor()
 		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, color), m_bufferData.color);
 
 	if(color.a == 0 || (color.r == 0 && color.g == 0 && color.b == 0))
-		umath::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, false);
+		pragma::math::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, false);
 	else {
 		auto pToggleComponent = GetEntity().GetComponent<CToggleComponent>();
 		if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn() == true)
-			umath::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, true);
+			pragma::math::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, true);
 	}
 }
 void CLightComponent::UpdateRadius()
@@ -490,7 +490,7 @@ void CLightComponent::UpdateRadius()
 	m_bufferData.position.w = radius;
 	if(m_renderBuffer != nullptr)
 		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, position) + offsetof(Vector4, w), m_bufferData.position.w);
-	umath::set_flag(m_stateFlags, StateFlags::FullUpdateRequired);
+	pragma::math::set_flag(m_stateFlags, StateFlags::FullUpdateRequired);
 }
 void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
@@ -498,13 +498,13 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	if(typeid(component) == typeid(CTransformComponent)) {
 		auto &trC = static_cast<CTransformComponent &>(component);
 		FlagCallbackForRemoval(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
-		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			                         if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged))
+		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+			                         if(pragma::math::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged))
 				                         UpdatePos();
 
-			                         if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::RotationChanged))
+			                         if(pragma::math::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::RotationChanged))
 				                         UpdateDir();
-			                         return util::EventReply::Unhandled;
+			                         return pragma::util::EventReply::Unhandled;
 		                         }),
 		  CallbackType::Component, &component);
 	}
@@ -546,7 +546,7 @@ void CLightComponent::OnEntitySpawn()
 	CBaseLightComponent::OnEntitySpawn();
 	InitializeShadowMap();
 
-	if(umath::is_flag_set(m_lightFlags, LightFlags::BakedLightSource)) {
+	if(pragma::math::is_flag_set(m_lightFlags, LightFlags::BakedLightSource)) {
 		m_bufferData.flags |= LightBufferData::BufferFlags::BakedLightSource;
 		if(m_renderBuffer != nullptr)
 			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
@@ -668,10 +668,10 @@ static void debug_light_sources(pragma::NetworkState *state, pragma::BasePlayerC
 		Con::cout << "\t\tDirection: (" << data.direction.x << "," << data.direction.y << "," << data.direction.z << ")" << Con::endl;
 		Con::cout << "\t\tCone Start Offset: " << data.direction.w << Con::endl;
 		Con::cout << "\t\tDistance: " << data.position.w << Con::endl;
-		Con::cout << "\t\tOuter cone half-angle: " << umath::rad_to_deg(data.outerConeHalfAngle) << Con::endl;
-		Con::cout << "\t\tInner cone half-angle: " << umath::rad_to_deg(data.innerConeHalfAngle) << Con::endl;
+		Con::cout << "\t\tOuter cone half-angle: " << pragma::math::rad_to_deg(data.outerConeHalfAngle) << Con::endl;
+		Con::cout << "\t\tInner cone half-angle: " << pragma::math::rad_to_deg(data.innerConeHalfAngle) << Con::endl;
 		Con::cout << "\t\tAttenuation: " << data.attenuation << Con::endl;
-		Con::cout << "\t\tFlags: " << umath::to_integral(data.flags) << Con::endl;
+		Con::cout << "\t\tFlags: " << pragma::math::to_integral(data.flags) << Con::endl;
 		Con::cout << "\t\tTurned On: " << (((data.flags & LightBufferData::BufferFlags::TurnedOn) == LightBufferData::BufferFlags::TurnedOn) ? "Yes" : "No") << Con::endl;
 	};
 
@@ -694,9 +694,9 @@ static void debug_light_sources(pragma::NetworkState *state, pragma::BasePlayerC
 
 	auto *rawData = bufData.data();
 	for(auto i = decltype(numTotal) {0u}; i < numTotal; ++i) {
-		util::ScopeGuard sg {[&rawData, &buf]() { rawData += buf.GetStride(); }};
+		pragma::util::ScopeGuard sg {[&rawData, &buf]() { rawData += buf.GetStride(); }};
 		auto &data = *reinterpret_cast<LightBufferData *>(rawData);
-		if(!umath::is_flag_set(data.flags, LightBufferData::BufferFlags::TurnedOn))
+		if(!pragma::math::is_flag_set(data.flags, LightBufferData::BufferFlags::TurnedOn))
 			continue;
 		Con::cout << "Buffer Index: " << i << Con::endl;
 		printBufferData(data);

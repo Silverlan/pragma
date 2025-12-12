@@ -61,8 +61,8 @@ void Lua::engine::register_library(lua::State *l)
 	Lua::engine::register_shared_functions(l, modEngine);
 
 	Lua::RegisterLibraryEnums(l, "engine",
-	  {{"FONT_FEATURE_FLAG_NONE", umath::to_integral(pragma::FontSetFlag::None)}, {"FONT_FEATURE_FLAG_BOLD_BIT", umath::to_integral(pragma::FontSetFlag::Bold)}, {"FONT_FEATURE_FLAG_ITALIC_BIT", umath::to_integral(pragma::FontSetFlag::Italic)},
-	    {"FONT_FEATURE_FLAG_MONO_BIT", umath::to_integral(pragma::FontSetFlag::Mono)}, {"FONT_FEATURE_FLAG_SERIF_BIT", umath::to_integral(pragma::FontSetFlag::Serif)}, {"FONT_FEATURE_FLAG_SANS_BIT", umath::to_integral(pragma::FontSetFlag::Sans)}});
+	  {{"FONT_FEATURE_FLAG_NONE", pragma::math::to_integral(pragma::FontSetFlag::None)}, {"FONT_FEATURE_FLAG_BOLD_BIT", pragma::math::to_integral(pragma::FontSetFlag::Bold)}, {"FONT_FEATURE_FLAG_ITALIC_BIT", pragma::math::to_integral(pragma::FontSetFlag::Italic)},
+	    {"FONT_FEATURE_FLAG_MONO_BIT", pragma::math::to_integral(pragma::FontSetFlag::Mono)}, {"FONT_FEATURE_FLAG_SERIF_BIT", pragma::math::to_integral(pragma::FontSetFlag::Serif)}, {"FONT_FEATURE_FLAG_SANS_BIT", pragma::math::to_integral(pragma::FontSetFlag::Sans)}});
 }
 
 Vector2i Lua::engine::get_text_size(lua::State *l, const std::string &text, const std::string &font)
@@ -118,7 +118,7 @@ void Lua::engine::precache_material(lua::State *l, const std::string &mat) { pra
 
 void Lua::engine::precache_model(lua::State *l, const std::string &mdl) { pragma::get_cgame()->PrecacheModel(mdl); }
 
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const std::string &name, ::util::AssetLoadFlags loadFlags)
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const std::string &name, pragma::util::AssetLoadFlags loadFlags)
 {
 	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 	auto tex = texManager.LoadAsset(name, loadFlags);
@@ -126,7 +126,7 @@ std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const
 		return nullptr;
 	return std::static_pointer_cast<msys::Texture>(tex)->GetVkTexture();
 }
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const std::string &name) { return load_texture(l, name, ::util::AssetLoadFlags::None); }
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const std::string &name) { return load_texture(l, name, pragma::util::AssetLoadFlags::None); }
 
 static std::optional<std::string> get_extension(const LFile &file)
 {
@@ -139,7 +139,7 @@ static std::optional<std::string> get_extension(const LFile &file)
 	std::string ext;
 	return ufile::get_extension(*path, &ext) ? ext : std::optional<std::string> {};
 }
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const LFile &file, const std::string &cacheName, ::util::AssetLoadFlags loadFlags)
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const LFile &file, const std::string &cacheName, pragma::util::AssetLoadFlags loadFlags)
 {
 	auto &lf = Lua::Check<LFile>(l, 1);
 	auto ext = get_extension(file);
@@ -147,13 +147,13 @@ std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const
 		return nullptr;
 	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 	auto f = std::make_unique<ufile::FileWrapper>(const_cast<LFile &>(file).GetHandle());
-	auto tex = texManager.LoadAsset("", std::move(f), *ext, std::make_unique<msys::TextureLoadInfo>(loadFlags | ::util::AssetLoadFlags::DontCache));
+	auto tex = texManager.LoadAsset("", std::move(f), *ext, std::make_unique<msys::TextureLoadInfo>(loadFlags | pragma::util::AssetLoadFlags::DontCache));
 	if(tex == nullptr || std::static_pointer_cast<msys::Texture>(tex)->HasValidVkTexture() == false)
 		return nullptr;
 	return std::static_pointer_cast<msys::Texture>(tex)->GetVkTexture();
 }
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const LFile &file, const std::string &cacheName) { return load_texture(l, file, cacheName, ::util::AssetLoadFlags::None); }
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const LFile &file, ::util::AssetLoadFlags loadFlags)
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const LFile &file, const std::string &cacheName) { return load_texture(l, file, cacheName, pragma::util::AssetLoadFlags::None); }
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const LFile &file, pragma::util::AssetLoadFlags loadFlags)
 {
 	auto &lf = Lua::Check<LFile>(l, 1);
 	auto ext = get_extension(file);
@@ -166,7 +166,7 @@ std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const
 		return nullptr;
 	return std::static_pointer_cast<msys::Texture>(tex)->GetVkTexture();
 }
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const LFile &file) { return load_texture(l, file, ::util::AssetLoadFlags::None); }
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua::State *l, const LFile &file) { return load_texture(l, file, pragma::util::AssetLoadFlags::None); }
 
 msys::Material *Lua::engine::load_material(lua::State *l, const std::string &mat, bool reload, bool loadInstantly) { return pragma::get_client_state()->LoadMaterial(mat, nullptr, reload, loadInstantly); }
 msys::Material *Lua::engine::load_material(lua::State *l, const std::string &mat, bool reload) { return load_material(l, mat, reload, true); }
@@ -245,7 +245,7 @@ int Lua::engine::create_particle_system(lua::State *l)
 			std::string key = Lua::ToString(l, -3);
 			if(!Lua::IsTable(l, -2)) {
 				std::string val = Lua::ToString(l, -2);
-				ustring::to_lower(key);
+				pragma::string::to_lower(key);
 				values[key] = val;
 				Lua::RemoveValue(l, -3);
 				Lua::RemoveValue(l, -2);
@@ -281,7 +281,7 @@ int Lua::engine::create_particle_system(lua::State *l)
 				while(Lua::GetNextPair(l, tchildren) != 0) {
 					if(!Lua::IsTable(l, -1)) {
 						std::string child = Lua::ToString(l, -1);
-						ustring::to_lower(child);
+						pragma::string::to_lower(child);
 						children.push_back(child);
 						Lua::RemoveValue(l, -1);
 					}
@@ -353,7 +353,7 @@ int Lua::engine::save_particle_system(lua::State *l)
 
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, t);
-		auto bParticleSystem = Lua::IsType<::util::WeakHandle<pragma::ecs::CParticleSystemComponent>>(l, -1);
+		auto bParticleSystem = Lua::IsType<pragma::util::WeakHandle<pragma::ecs::CParticleSystemComponent>>(l, -1);
 		Lua::Pop(l, 1);
 		if(bParticleSystem) {
 			auto numParticleSystems = Lua::GetObjectLength(l, t);
@@ -420,7 +420,7 @@ int Lua::engine::save_particle_system(lua::State *l)
 				Lua::PushValue(l, -2);
 				std::string key = Lua::ToString(l, -3);
 				Lua::RemoveValue(l, -3);
-				ustring::to_lower(key);
+				pragma::string::to_lower(key);
 				if(key == "initializers" || key == "operators" || key == "renderers") {
 					if(Lua::IsTable(l, -2)) {
 						auto numOperators = Lua::GetObjectLength(l, -2);

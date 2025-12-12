@@ -16,7 +16,7 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void SetAmbientColor(const Color &color) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override;

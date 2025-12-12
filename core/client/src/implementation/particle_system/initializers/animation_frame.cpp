@@ -14,15 +14,15 @@ void pragma::pts::CParticleInitializerInitialAnimationFrame::Initialize(pragma::
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "frame_min")
-			m_minFrame = util::to_float(it->second);
+			m_minFrame = pragma::util::to_float(it->second);
 		else if(key == "frame_max")
-			m_maxFrame = util::to_float(it->second);
+			m_maxFrame = pragma::util::to_float(it->second);
 	}
 }
 void pragma::pts::CParticleInitializerInitialAnimationFrame::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	CParticleInitializer::OnParticleCreated(particle);
-	particle.SetFrameOffset(umath::random(m_minFrame, m_maxFrame));
+	particle.SetFrameOffset(pragma::math::random(m_minFrame, m_maxFrame));
 }

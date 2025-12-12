@@ -10,8 +10,8 @@ void Lua::TraceData::SetSource(lua::State *l, pragma::physics::TraceData &data, 
 void Lua::TraceData::SetFlags(lua::State *, pragma::physics::TraceData &data, unsigned int flags) { data.SetFlags(static_cast<pragma::physics::RayCastFlags>(flags)); }
 void Lua::TraceData::SetCollisionFilterMask(lua::State *, pragma::physics::TraceData &data, unsigned int mask) { data.SetCollisionFilterMask(static_cast<pragma::physics::CollisionMask>(mask)); }
 void Lua::TraceData::SetCollisionFilterGroup(lua::State *, pragma::physics::TraceData &data, unsigned int group) { data.SetCollisionFilterGroup(static_cast<pragma::physics::CollisionMask>(group)); }
-void Lua::TraceData::GetSourceTransform(lua::State *l, pragma::physics::TraceData &data) { Lua::Push<umath::Transform>(l, data.GetSource()); }
-void Lua::TraceData::GetTargetTransform(lua::State *l, pragma::physics::TraceData &data) { Lua::Push<umath::Transform>(l, data.GetTarget()); }
+void Lua::TraceData::GetSourceTransform(lua::State *l, pragma::physics::TraceData &data) { Lua::Push<pragma::math::Transform>(l, data.GetSource()); }
+void Lua::TraceData::GetTargetTransform(lua::State *l, pragma::physics::TraceData &data) { Lua::Push<pragma::math::Transform>(l, data.GetTarget()); }
 void Lua::TraceData::GetSourceOrigin(lua::State *l, pragma::physics::TraceData &data) { Lua::Push<Vector3>(l, data.GetSourceOrigin()); }
 void Lua::TraceData::GetTargetOrigin(lua::State *l, pragma::physics::TraceData &data) { Lua::Push<Vector3>(l, data.GetTargetOrigin()); }
 void Lua::TraceData::GetSourceRotation(lua::State *l, pragma::physics::TraceData &data) { Lua::Push<Quat>(l, data.GetSourceRotation()); }

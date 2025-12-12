@@ -39,7 +39,7 @@ void BasePointConstraintFixedComponent::InitializeConstraint(pragma::ecs::BaseEn
 			auto fixed = physEnv->CreateFixedConstraint(*bodyTgt, posTgt, uquat::identity(), *bodySrc, posSrc, uquat::identity());
 			if(fixed != nullptr) {
 				fixed->SetEntity(GetEntity());
-				m_constraints.push_back(util::shared_handle_cast<pragma::physics::IFixedConstraint, pragma::physics::IConstraint>(fixed));
+				m_constraints.push_back(pragma::util::shared_handle_cast<pragma::physics::IFixedConstraint, pragma::physics::IConstraint>(fixed));
 			}
 		}
 	}

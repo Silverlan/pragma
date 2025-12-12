@@ -70,7 +70,7 @@ pragma::CGame *pragma::get_client_game() { return g_game; }
 pragma::CGame *pragma::get_cgame() { return g_game; }
 
 pragma::CGame::CGame(pragma::NetworkState *state)
-    : pragma::Game(state), m_tServer(0), m_renderScene(util::TWeakSharedHandle<pragma::BaseEntityComponent> {}), m_matOverride(nullptr), m_colScale(1, 1, 1, 1),
+    : pragma::Game(state), m_tServer(0), m_renderScene(pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> {}), m_matOverride(nullptr), m_colScale(1, 1, 1, 1),
       //m_shaderOverride(nullptr), // prosper TODO
       m_matLoad(), m_scene(nullptr),
       /*m_dummyVertexBuffer(nullptr),*/ m_tLastClientUpdate(0.0), // prosper TODO
@@ -79,11 +79,11 @@ pragma::CGame::CGame(pragma::NetworkState *state)
 	std::fill(m_renderModesEnabled.begin(), m_renderModesEnabled.end(), true);
 	g_game = this;
 
-	m_luaShaderManager = ::util::make_shared<pragma::LuaShaderManager>();
-	m_luaParticleModifierManager = ::util::make_shared<pragma::pts::LuaParticleModifierManager>();
+	m_luaShaderManager = pragma::util::make_shared<pragma::LuaShaderManager>();
+	m_luaParticleModifierManager = pragma::util::make_shared<pragma::pts::LuaParticleModifierManager>();
 
-	umath::set_flag(m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired, false);
-	umath::set_flag(m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired, false);
+	pragma::math::set_flag(m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired, false);
+	pragma::math::set_flag(m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired, false);
 
 	RegisterRenderMask("water", true);
 	m_thirdPersonRenderMask = RegisterRenderMask("thirdperson", true);
@@ -190,7 +190,7 @@ pragma::CGame::CGame(pragma::NetworkState *state)
 	});
 
 	m_renderQueueBuilder = std::make_unique<pragma::rendering::RenderQueueBuilder>();
-	m_renderQueueWorkerManager = std::make_unique<pragma::rendering::RenderQueueWorkerManager>(umath::clamp(cvWorkerThreadCount->GetInt(), 1, 20));
+	m_renderQueueWorkerManager = std::make_unique<pragma::rendering::RenderQueueWorkerManager>(pragma::math::clamp(cvWorkerThreadCount->GetInt(), 1, 20));
 
 	m_globalShaderInputDataManager = std::make_unique<pragma::rendering::GlobalShaderInputDataManager>();
 
@@ -317,7 +317,7 @@ static void cmd_render_queue_worker_thread_count(pragma::NetworkState *, const p
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
-	val = umath::clamp(val, 1, 20);
+	val = pragma::math::clamp(val, 1, 20);
 	pragma::get_cgame()->GetRenderQueueWorkerManager().SetWorkerCount(val);
 }
 namespace {
@@ -328,7 +328,7 @@ static void cmd_render_queue_worker_jobs_per_batch(pragma::NetworkState *, const
 {
 	if(pragma::get_cgame() == nullptr)
 		return;
-	val = umath::max(val, 1);
+	val = pragma::math::max(val, 1);
 	pragma::get_cgame()->GetRenderQueueWorkerManager().SetJobsPerBatchCount(val);
 }
 namespace {
@@ -359,7 +359,7 @@ pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *pragma::CGa
 bool pragma::CGame::StartProfilingStage(const char *stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
 bool pragma::CGame::StopProfilingStage() { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(); }
 
-std::shared_ptr<pragma::EntityComponentManager> pragma::CGame::InitializeEntityComponentManager() { return ::util::make_shared<pragma::CEntityComponentManager>(); }
+std::shared_ptr<pragma::EntityComponentManager> pragma::CGame::InitializeEntityComponentManager() { return pragma::util::make_shared<pragma::CEntityComponentManager>(); }
 
 void pragma::CGame::OnReceivedRegisterNetEvent(NetPacket &packet)
 {
@@ -441,7 +441,7 @@ TCPPM *pragma::CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &
 		auto &tDelta = pragma::get_cgame()->DeltaTime();
 		cStart += dir * static_cast<float>(speed * tDelta);
 		auto dist = uvec::distance(cStart, end);
-		length = umath::min(static_cast<float>(length), dist);
+		length = pragma::math::min(static_cast<float>(length), dist);
 		if(length <= 0.f || dist > prevDist) {
 			hParticle->GetEntity().Remove();
 			cb.Remove();
@@ -458,10 +458,10 @@ TCPPM *pragma::CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &
 }
 template DLLCLIENT pragma::ecs::CParticleSystemComponent *pragma::CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius, const Color &col, float length, float speed, const std::string &material, float bloomScale);
 
-void pragma::CGame::SetRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode, bool bEnabled) { m_renderModesEnabled[umath::to_integral(renderMode)] = bEnabled; }
+void pragma::CGame::SetRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode, bool bEnabled) { m_renderModesEnabled[pragma::math::to_integral(renderMode)] = bEnabled; }
 void pragma::CGame::EnableRenderMode(pragma::rendering::SceneRenderPass renderMode) { SetRenderModeEnabled(renderMode, true); }
 void pragma::CGame::DisableRenderMode(pragma::rendering::SceneRenderPass renderMode) { SetRenderModeEnabled(renderMode, false); }
-bool pragma::CGame::IsRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode) const { return m_renderModesEnabled[umath::to_integral(renderMode)]; }
+bool pragma::CGame::IsRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode) const { return m_renderModesEnabled[pragma::math::to_integral(renderMode)]; }
 
 void pragma::CGame::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_unique<CLuaDirectoryWatcherManager>(this); }
 
@@ -581,15 +581,15 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int32_t>("render_debug_mode", &render_debug_mode);
 }
 
-static void CVAR_CALLBACK_render_unlit(pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool prev, bool val) { render_debug_mode(nw, cv, prev, umath::to_integral(pragma::SceneDebugMode::Unlit)); }
+static void CVAR_CALLBACK_render_unlit(pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool prev, bool val) { render_debug_mode(nw, cv, prev, pragma::math::to_integral(pragma::SceneDebugMode::Unlit)); }
 namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>("render_unlit", &CVAR_CALLBACK_render_unlit);
 }
 
 void pragma::CGame::SetViewModelFOV(float fov) { *m_viewFov = fov; }
-const util::PFloatProperty &pragma::CGame::GetViewModelFOVProperty() const { return m_viewFov; }
+const pragma::util::PFloatProperty &pragma::CGame::GetViewModelFOVProperty() const { return m_viewFov; }
 float pragma::CGame::GetViewModelFOV() const { return *m_viewFov; }
-float pragma::CGame::GetViewModelFOVRad() const { return umath::deg_to_rad(*m_viewFov); }
+float pragma::CGame::GetViewModelFOVRad() const { return pragma::math::deg_to_rad(*m_viewFov); }
 Mat4 pragma::CGame::GetViewModelProjectionMatrix() const
 {
 	auto *cam = GetPrimaryCamera<pragma::CCameraComponent>();
@@ -776,7 +776,7 @@ TCPPM *pragma::CGame::GetGameplayControlCamera()
 {
 	if(m_controlCamera.valid())
 		return static_cast<pragma::CCameraComponent *>(m_controlCamera.get());
-	if(umath::is_flag_set(m_stateFlags, StateFlags::DisableGamplayControlCamera))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::DisableGamplayControlCamera))
 		return nullptr;
 	return GetRenderCamera<TCPPM>();
 }
@@ -814,10 +814,10 @@ pragma::gui::types::WIBase *pragma::CGame::CreateGUIElement(std::string classNam
 			auto *elLua = luabind::object_cast<pragma::gui::types::WILuaBase *>(r);
 			auto *holder = luabind::object_cast<pragma::LuaCore::WILuaBaseHolder *>(r);
 			if(elLua && holder) {
-				ustring::to_lower(className);
+				pragma::string::to_lower(className);
 				elLua->SetupLua(r, className);
 				pragma::gui::WGUI::GetInstance().RegisterElement(*elLua, className, parent);
-				holder->SetHandle(util::weak_shared_handle_cast<pragma::gui::types::WIBase, pragma::gui::types::WILuaBase>(elLua->GetHandle()));
+				holder->SetHandle(pragma::util::weak_shared_handle_cast<pragma::gui::types::WIBase, pragma::gui::types::WILuaBase>(elLua->GetHandle()));
 				el = elLua;
 			}
 			else {
@@ -844,7 +844,7 @@ pragma::gui::types::WIBase *pragma::CGame::CreateGUIElement(std::string classNam
 		if(skipLuaFile == true)
 			return nullptr;
 		auto lclassName = className;
-		ustring::to_lower(lclassName);
+		pragma::string::to_lower(lclassName);
 		auto basePath = "gui/" + lclassName;
 		auto luaPath = Lua::find_script_file(basePath);
 		if(luaPath && ExecuteLuaFile(*luaPath)) {
@@ -927,7 +927,7 @@ void pragma::CGame::CreateGiblet(const GibletCreateInfo &info) { CreateGiblet<pr
 
 pragma::gui::types::WIBase *pragma::CGame::CreateGUIElement(std::string name, pragma::gui::WIHandle *hParent)
 {
-	ustring::to_lower(name);
+	pragma::string::to_lower(name);
 	pragma::gui::types::WIBase *pParent = nullptr;
 	if(hParent != nullptr && hParent->IsValid())
 		pParent = hParent->get();
@@ -992,7 +992,7 @@ static auto cvMsaaSamples = pragma::console::get_client_con_var("cl_render_msaa_
 uint32_t pragma::CGame::GetMSAASampleCount()
 {
 	auto bMsaaEnabled = static_cast<pragma::rendering::AntiAliasing>(cvAntiAliasing->GetInt()) == pragma::rendering::AntiAliasing::MSAA;
-	unsigned int numSamples = bMsaaEnabled ? umath::pow(2, cvMsaaSamples->GetInt()) : 0;
+	unsigned int numSamples = bMsaaEnabled ? pragma::math::pow(2, cvMsaaSamples->GetInt()) : 0;
 	rendering::ClampMSAASampleCount(&numSamples);
 	return numSamples;
 }
@@ -1045,17 +1045,17 @@ void pragma::CGame::Tick()
 
 void pragma::CGame::ReloadGameWorldShaderPipelines() const
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired))
 		return;
-	umath::set_flag(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired);
+	pragma::math::set_flag(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired);
 
 	auto cb = FunctionCallback<void>::Create(nullptr);
 	static_cast<Callback<void> *>(cb.get())->SetFunction([this, cb]() mutable {
 		cb.Remove();
 
-		if(!umath::is_flag_set(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired))
+		if(!pragma::math::is_flag_set(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired))
 			return;
-		umath::set_flag(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired, false);
+		pragma::math::set_flag(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::GameWorldShaderPipelineReloadRequired, false);
 		auto &shaderManager = pragma::get_cengine()->GetShaderManager();
 		for(auto &shader : shaderManager.GetShaders()) {
 			auto *gameWorldShader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(shader.get());
@@ -1069,15 +1069,15 @@ void pragma::CGame::ReloadGameWorldShaderPipelines() const
 }
 void pragma::CGame::ReloadPrepassShaderPipelines() const
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired))
 		return;
-	umath::set_flag(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired);
+	pragma::math::set_flag(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired);
 
 	auto cb = FunctionCallback<void>::Create(nullptr);
 	static_cast<Callback<void> *>(cb.get())->SetFunction([this, cb]() mutable {
 		cb.Remove();
 
-		umath::set_flag(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired, false);
+		pragma::math::set_flag(const_cast<pragma::CGame *>(this)->m_stateFlags, StateFlags::PrepassShaderPipelineReloadRequired, false);
 		auto &shader = GetGameShader(GameShader::Prepass);
 		if(shader.valid())
 			shader.get()->ReloadPipelines();
@@ -1088,12 +1088,12 @@ void pragma::CGame::ReloadPrepassShaderPipelines() const
 static auto cvSimEnabled = pragma::console::get_client_con_var("cl_physics_simulation_enabled");
 bool pragma::CGame::IsPhysicsSimulationEnabled() const { return cvSimEnabled->GetBool(); }
 
-const util::WeakHandle<prosper::Shader> &pragma::CGame::GetGameShader(GameShader shader) const { return m_gameShaders.at(umath::to_integral(shader)); }
+const pragma::util::WeakHandle<prosper::Shader> &pragma::CGame::GetGameShader(GameShader shader) const { return m_gameShaders.at(pragma::math::to_integral(shader)); }
 
 LuaCallbackHandler &pragma::CGame::GetInputCallbackHandler() { return m_inputCallbackHandler; }
 
-std::shared_ptr<pragma::geometry::ModelMesh> pragma::CGame::CreateModelMesh() const { return ::util::make_shared<pragma::geometry::CModelMesh>(); }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::CGame::CreateModelSubMesh() const { return ::util::make_shared<pragma::geometry::CModelSubMesh>(); }
+std::shared_ptr<pragma::geometry::ModelMesh> pragma::CGame::CreateModelMesh() const { return pragma::util::make_shared<pragma::geometry::CModelMesh>(); }
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::CGame::CreateModelSubMesh() const { return pragma::util::make_shared<pragma::geometry::CModelSubMesh>(); }
 
 Float pragma::CGame::GetHDRExposure() const
 {
@@ -1160,7 +1160,7 @@ void pragma::CGame::InitializeMapEntities(pragma::asset::WorldData &worldData, s
 		outEnts.push_back(it->second);
 		for(auto &[cType, cData] : entData->GetComponents()) {
 			auto flags = cData->GetFlags();
-			if(!umath::is_flag_set(flags, pragma::asset::ComponentData::Flags::ClientsideOnly))
+			if(!pragma::math::is_flag_set(flags, pragma::asset::ComponentData::Flags::ClientsideOnly))
 				continue;
 			CreateMapComponent(ent, cType, *cData);
 		}
@@ -1323,19 +1323,19 @@ uint16_t pragma::CGame::GetLatency() const
 
 pragma::rendering::RenderMask pragma::CGame::GetInclusiveRenderMasks() const { return m_inclusiveRenderMasks; }
 pragma::rendering::RenderMask pragma::CGame::GetExclusiveRenderMasks() const { return m_exclusiveRenderMasks; }
-bool pragma::CGame::IsInclusiveRenderMask(pragma::rendering::RenderMask mask) const { return umath::is_flag_set(m_inclusiveRenderMasks, mask); }
-bool pragma::CGame::IsExclusiveRenderMask(pragma::rendering::RenderMask mask) const { return umath::is_flag_set(m_exclusiveRenderMasks, mask); }
+bool pragma::CGame::IsInclusiveRenderMask(pragma::rendering::RenderMask mask) const { return pragma::math::is_flag_set(m_inclusiveRenderMasks, mask); }
+bool pragma::CGame::IsExclusiveRenderMask(pragma::rendering::RenderMask mask) const { return pragma::math::is_flag_set(m_exclusiveRenderMasks, mask); }
 pragma::rendering::RenderMask pragma::CGame::RegisterRenderMask(const std::string &name, bool inclusiveByDefault)
 {
 	constexpr auto highestAllowedMask = (static_cast<uint64_t>(1) << (sizeof(uint64_t) * 8 - 1));
-	if(umath::to_integral(m_nextCustomRenderMaskIndex) == highestAllowedMask)
+	if(pragma::math::to_integral(m_nextCustomRenderMaskIndex) == highestAllowedMask)
 		throw std::runtime_error {"Exceeded maximum allowed number of custom render masks!"};
 	auto mask = GetRenderMask(name);
 	if(mask.has_value())
 		return *mask;
 	auto id = m_nextCustomRenderMaskIndex;
 	m_customRenderMasks.insert(std::make_pair(name, id));
-	m_nextCustomRenderMaskIndex = static_cast<decltype(m_nextCustomRenderMaskIndex)>(umath::to_integral(m_nextCustomRenderMaskIndex) << 1);
+	m_nextCustomRenderMaskIndex = static_cast<decltype(m_nextCustomRenderMaskIndex)>(pragma::math::to_integral(m_nextCustomRenderMaskIndex) << 1);
 	if(inclusiveByDefault)
 		m_inclusiveRenderMasks |= id;
 	else
@@ -1378,7 +1378,7 @@ void pragma::CGame::SendUserInput()
 	auto bControllers = pragma::get_cengine()->GetControllersEnabled();
 	p->Write<bool>(bControllers);
 	if(bControllers == true) {
-		auto actionValues = umath::get_power_of_2_values(umath::to_integral(actions));
+		auto actionValues = pragma::math::get_power_of_2_values(pragma::math::to_integral(actions));
 		for(auto v : actionValues) {
 			auto magnitude = 0.f;
 			if(actionInputC)
@@ -1412,7 +1412,7 @@ void pragma::CGame::ReceiveSnapshot(NetPacket &packet)
 	//Con::ccl<<"Received snapshot.."<<Con::endl;
 	//auto tOld = m_tServer;
 	auto latency = GetLatency() / 2.f; // Latency is entire roundtrip; We need the time for one way
-	auto tActivated = (util::clock::to_int(util::clock::get_duration_since_start()) - packet.GetTimeActivated()) / 1'000'000.0;
+	auto tActivated = (pragma::util::clock::to_int(pragma::util::clock::get_duration_since_start()) - packet.GetTimeActivated()) / 1'000'000.0;
 	//Con::ccl<<"Snapshot delay: "<<+latency<<"+ "<<tActivated<<" = "<<(latency +tActivated)<<Con::endl;
 	auto tDelta = static_cast<float>((latency + tActivated) / 1'000.0);
 
@@ -1426,7 +1426,7 @@ void pragma::CGame::ReceiveSnapshot(NetPacket &packet)
 	m_snapshotTracker.CheckMessages(snapshotId, m_lostPackets, t);
 
 	//std::cout<<"Received snapshot with "<<(m_tServer -tOld)<<" time difference to last snapshot"<<std::endl;
-	const auto maxCorrectionDistance = umath::pow2(10.f);
+	const auto maxCorrectionDistance = pragma::math::pow2(10.f);
 	unsigned int numEnts = packet->Read<unsigned int>();
 	for(unsigned int i = 0; i < numEnts; i++) {
 		ecs::CBaseEntity *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::networking::read_entity(packet));
@@ -1438,7 +1438,7 @@ void pragma::CGame::ReceiveSnapshot(NetPacket &packet)
 		if(ent != nullptr) {
 			pos += vel * tDelta;
 			if(uvec::length_sqr(angVel) > 0.0)
-				orientation = uquat::create(EulerAngles(umath::rad_to_deg(angVel.x), umath::rad_to_deg(angVel.y), umath::rad_to_deg(angVel.z)) * tDelta) * orientation; // TODO: Check if this is correct
+				orientation = uquat::create(EulerAngles(pragma::math::rad_to_deg(angVel.x), pragma::math::rad_to_deg(angVel.y), pragma::math::rad_to_deg(angVel.z)) * tDelta) * orientation; // TODO: Check if this is correct
 
 			// Move the entity to the correct position without teleporting it.
 			// Teleporting can lead to odd physics glitches.
@@ -1502,7 +1502,7 @@ void pragma::CGame::ReceiveSnapshot(NetPacket &packet)
 								pos += vel * tDelta;
 								auto l = uvec::length_sqr(angVel);
 								if(l > 0.0)
-									rot = uquat::create(EulerAngles(umath::rad_to_deg(angVel.x), umath::rad_to_deg(angVel.y), umath::rad_to_deg(angVel.z)) * tDelta) * rot; // TODO: Check if this is correct
+									rot = uquat::create(EulerAngles(pragma::math::rad_to_deg(angVel.x), pragma::math::rad_to_deg(angVel.y), pragma::math::rad_to_deg(angVel.z)) * tDelta) * rot; // TODO: Check if this is correct
 								auto *o = hObj.Get();
 								o->SetRotation(rot);
 								if(o->IsRigid()) {
@@ -1671,7 +1671,7 @@ bool pragma::CGame::LoadAuxEffects(const std::string &fname)
 	path += fname;
 
 	std::string err;
-	auto udmData = util::load_udm_asset(fname, &err);
+	auto udmData = pragma::util::load_udm_asset(fname, &err);
 	if(udmData == nullptr)
 		return false;
 	auto &data = *udmData;
@@ -1680,7 +1680,7 @@ bool pragma::CGame::LoadAuxEffects(const std::string &fname)
 		return false;
 	for(auto pair : udm.ElIt()) {
 		std::string name = std::string {pair.key};
-		ustring::to_lower(name);
+		pragma::string::to_lower(name);
 		std::string type;
 		pair.property["type"](type);
 		al::create_aux_effect(name, type, pair.property);

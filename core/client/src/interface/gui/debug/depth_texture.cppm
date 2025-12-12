@@ -29,9 +29,9 @@ export namespace pragma::gui::types {
 		void UpdateResolvedTexture();
 		pragma::gui::WIHandle m_hTextureRect;
 
-		util::WeakHandle<prosper::Shader> m_whDepthToRgbShader = {};
-		util::WeakHandle<prosper::Shader> m_whCubeDepthToRgbShader = {};
-		util::WeakHandle<prosper::Shader> m_whCsmDepthToRgbShader = {};
+		pragma::util::WeakHandle<prosper::Shader> m_whDepthToRgbShader = {};
+		pragma::util::WeakHandle<prosper::Shader> m_whCubeDepthToRgbShader = {};
+		pragma::util::WeakHandle<prosper::Shader> m_whCsmDepthToRgbShader = {};
 		CallbackHandle m_depthToRgbCallback = {};
 		std::shared_ptr<prosper::Texture> m_srcDepthTex = nullptr;
 		std::shared_ptr<prosper::RenderTarget> m_renderTarget = nullptr;

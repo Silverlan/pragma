@@ -33,13 +33,13 @@ void pragma::pts::CParticleModifierComponentEase::Initialize(const std::unordere
 	auto bEaseOut = true;
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "ease")
-			m_type = static_cast<pragma::math::EaseType>(util::to_int(it->second));
+			m_type = static_cast<pragma::math::EaseType>(pragma::util::to_int(it->second));
 		else if(key == "ease_in")
-			bEaseIn = util::to_boolean(it->second);
+			bEaseIn = pragma::util::to_boolean(it->second);
 		else if(key == "ease_out")
-			bEaseOut = util::to_boolean(it->second);
+			bEaseOut = pragma::util::to_boolean(it->second);
 	}
 	m_easeFunc = (bEaseIn && bEaseOut) ? EaseFunc::InOut : bEaseIn ? EaseFunc::In : bEaseOut ? EaseFunc::Out : EaseFunc::None;
 }

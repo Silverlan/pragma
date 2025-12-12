@@ -19,7 +19,7 @@ export {
 		uint32_t animation = std::numeric_limits<uint32_t>::max();
 		float transition = 0.f;
 
-		bool operator==(const AnimationBlendControllerTransition &other) const { return animation == other.animation && umath::abs(transition - other.transition) < 0.001f; }
+		bool operator==(const AnimationBlendControllerTransition &other) const { return animation == other.animation && pragma::math::abs(transition - other.transition) < 0.001f; }
 		bool operator!=(const AnimationBlendControllerTransition &other) const { return !operator==(other); }
 	};
 
@@ -41,8 +41,8 @@ export {
 		class Animation;
 		class DLLNETWORK Animation : public std::enable_shared_from_this<Animation> {
 		  public:
-			static util::EnumRegister &GetActivityEnumRegister();
-			static util::EnumRegister &GetEventEnumRegister();
+			static pragma::util::EnumRegister &GetActivityEnumRegister();
+			static pragma::util::EnumRegister &GetEventEnumRegister();
 			static constexpr uint32_t PANIM_VERSION = 1;
 			static constexpr auto PANIM_IDENTIFIER = "PANI";
 			enum class DLLNETWORK ShareMode : uint32_t {
@@ -118,8 +118,8 @@ export {
 			bool operator==(const Animation &other) const;
 			bool operator!=(const Animation &other) const { return !operator==(other); }
 		  private:
-			static util::EnumRegister s_activityEnumRegister;
-			static util::EnumRegister s_eventEnumRegister;
+			static pragma::util::EnumRegister s_activityEnumRegister;
+			static pragma::util::EnumRegister s_eventEnumRegister;
 			bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr, const pragma::animation::Skeleton *optSkeleton = nullptr, const Frame *optReference = nullptr);
 			Animation();
 			Animation(const Animation &other, ShareMode share = ShareMode::None);
@@ -140,7 +140,7 @@ export {
 			std::unique_ptr<float> m_fadeIn;
 			std::unique_ptr<float> m_fadeOut;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::animation::Animation::ShareMode)
 };

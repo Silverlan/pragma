@@ -12,8 +12,8 @@ using namespace pragma;
 
 void CEyeComponent::Blink()
 {
-	m_tNextBlink = pragma::get_cgame()->CurTime() + umath::random(1.5f, 4.f);
-	umath::set_flag(m_stateFlags, StateFlags::BlinkToggle, !umath::is_flag_set(m_stateFlags, StateFlags::BlinkToggle));
+	m_tNextBlink = pragma::get_cgame()->CurTime() + pragma::math::random(1.5f, 4.f);
+	pragma::math::set_flag(m_stateFlags, StateFlags::BlinkToggle, !pragma::math::is_flag_set(m_stateFlags, StateFlags::BlinkToggle));
 }
 void CEyeComponent::UpdateBlinkMT()
 {
@@ -21,8 +21,8 @@ void CEyeComponent::UpdateBlinkMT()
 		return;
 
 	// check for blinking
-	if(umath::is_flag_set(m_stateFlags, StateFlags::BlinkToggle) != umath::is_flag_set(m_stateFlags, StateFlags::PrevBlinkToggle)) {
-		umath::set_flag(m_stateFlags, StateFlags::PrevBlinkToggle, umath::is_flag_set(m_stateFlags, StateFlags::BlinkToggle));
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::BlinkToggle) != pragma::math::is_flag_set(m_stateFlags, StateFlags::PrevBlinkToggle)) {
+		pragma::math::set_flag(m_stateFlags, StateFlags::PrevBlinkToggle, pragma::math::is_flag_set(m_stateFlags, StateFlags::BlinkToggle));
 
 		m_curBlinkTime = pragma::get_cgame()->CurTime() + GetBlinkDuration();
 		// BroadcastEvent(EVENT_ON_BLINK);
@@ -30,12 +30,12 @@ void CEyeComponent::UpdateBlinkMT()
 	auto blinkFlexControllerWeight = 0.f;
 
 	// blink the eyes
-	auto t = (m_curBlinkTime - pragma::get_cgame()->CurTime()) * umath::pi * 0.5f * (1.0 / m_blinkDuration);
+	auto t = (m_curBlinkTime - pragma::get_cgame()->CurTime()) * pragma::math::pi * 0.5f * (1.0 / m_blinkDuration);
 	if(t > 0) {
 		// do eyeblink falloff curve
-		t = umath::cos(t);
+		t = pragma::math::cos(t);
 		if(t > 0) {
-			blinkFlexControllerWeight = umath::sqrt(t) * 2.f;
+			blinkFlexControllerWeight = pragma::math::sqrt(t) * 2.f;
 			if(blinkFlexControllerWeight > 1)
 				blinkFlexControllerWeight = 2.f - blinkFlexControllerWeight;
 		}

@@ -269,14 +269,14 @@ void GUIDebugCursorManager::SetTargetGUIElement(pragma::gui::types::WIBase *optE
 	auto *parent = el.GetParent();
 	while(parent) {
 		auto endPos = parent->GetAbsolutePos() + Vector2 {parent->GetSize()};
-		constrainedEndPos.x = umath::min(constrainedEndPos.x, endPos.x);
-		constrainedEndPos.y = umath::min(constrainedEndPos.y, endPos.y);
+		constrainedEndPos.x = pragma::math::min(constrainedEndPos.x, endPos.x);
+		constrainedEndPos.y = pragma::math::min(constrainedEndPos.y, endPos.y);
 
 		parent = parent->GetParent();
 	}
 	auto constrainedSize = constrainedEndPos - pos;
-	constrainedSize.x = umath::max(constrainedSize.x, 0.f);
-	constrainedSize.y = umath::max(constrainedSize.y, 0.f);
+	constrainedSize.x = pragma::math::max(constrainedSize.x, 0.f);
+	constrainedSize.y = pragma::math::max(constrainedSize.y, 0.f);
 
 	auto fInitBorder = [](std::array<pragma::gui::WIHandle, 4> &elements, const Vector2i &pos, const Vector2i &size) {
 		auto *top = elements.at(0).get();
@@ -351,7 +351,7 @@ static void debug_gui_cursor(pragma::NetworkState *state, pragma::BasePlayerComp
 	}
 	if(!argv.empty()) {
 		auto &elName = argv.front();
-		auto *el = pragma::gui::WGUI::GetInstance().FindByFilter([&elName](pragma::gui::types::WIBase &el) -> bool { return ustring::compare(el.GetName(), elName, false); });
+		auto *el = pragma::gui::WGUI::GetInstance().FindByFilter([&elName](pragma::gui::types::WIBase &el) -> bool { return pragma::string::compare(el.GetName(), elName, false); });
 		if(!el) {
 			Con::cwar << "Unable to find element by name '" << elName << "'!" << Con::endl;
 			return;
@@ -421,7 +421,7 @@ static void debug_font_glyph_map(pragma::NetworkState *state, pragma::BasePlayer
 	auto &glyphImg = glyphMap->GetImage();
 	auto aspectRatio = glyphImg.GetWidth() / static_cast<float>(glyphImg.GetHeight());
 	auto w = pragma::get_cengine()->GetRenderResolution().x;
-	auto h = umath::round(w / aspectRatio);
+	auto h = pragma::math::round(w / aspectRatio);
 	auto scale = 5.f;
 	w *= scale;
 	h *= scale;

@@ -18,13 +18,13 @@ al::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
 	auto &audioAPI = GetAudioAPI();
 	auto getAudioApiPath = [](const std::string &audioAPI, std::string &outLocation, std::string &outModulePath) {
 		outLocation = pragma::audio::get_audio_api_module_location(audioAPI);
-		outModulePath = util::get_normalized_module_path(outLocation);
+		outModulePath = pragma::util::get_normalized_module_path(outLocation);
 	};
 	auto loadAudioApiModule = [this, &getAudioApiPath](const std::string &renderAPI, std::string &outErr) -> bool {
 		std::string location;
 		std::string modulePath;
 		getAudioApiPath(renderAPI, location, modulePath);
-		m_audioAPILib = util::load_library_module(modulePath, util::get_default_additional_library_search_directories(modulePath), {}, &outErr);
+		m_audioAPILib = pragma::util::load_library_module(modulePath, pragma::util::get_default_additional_library_search_directories(modulePath), {}, &outErr);
 		return (m_audioAPILib != nullptr);
 	};
 	std::string err;
@@ -71,7 +71,7 @@ al::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
 al::PEffect pragma::CEngine::GetAuxEffect(const std::string &name)
 {
 	auto lname = name;
-	ustring::to_lower(lname);
+	pragma::string::to_lower(lname);
 	auto it = m_auxEffects.find(lname);
 	if(it == m_auxEffects.end())
 		return nullptr;

@@ -37,7 +37,7 @@ export namespace pragma {
 		BaseStaticBvhUserComponent(pragma::ecs::BaseEntity &ent);
 		friend BaseStaticBvhCacheComponent;
 		void UpdateBvhStatus();
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		CallbackHandle m_cbOnPoseChanged;
 		pragma::ComponentHandle<BaseStaticBvhCacheComponent> m_staticBvhComponent {};
 		BaseBvhComponent *m_bvhComponent = nullptr;

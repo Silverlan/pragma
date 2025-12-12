@@ -18,6 +18,6 @@ export namespace pragma::pts {
 		virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
 		virtual pragma::ShaderParticleBase *GetShader() const override;
 	private:
-		::util::WeakHandle<prosper::Shader> m_shader = {};
+		pragma::util::WeakHandle<prosper::Shader> m_shader = {};
 	};
 }

@@ -107,7 +107,7 @@ void CMD_sv_dump_netmessages(pragma::NetworkState *, pragma::BasePlayerComponent
 	std::unordered_map<std::string, unsigned int> *netmessages;
 	map->GetNetMessages(&netmessages);
 	if(!argv.empty()) {
-		auto id = ustring::to_int(argv.front());
+		auto id = pragma::string::to_int(argv.front());
 		for(auto it = netmessages->begin(); it != netmessages->end(); ++it) {
 			if(it->second == id) {
 				Con::cout << "Message Identifier: " << it->first << Con::endl;
@@ -134,9 +134,9 @@ void CMD_entities_sv(pragma::NetworkState *state, pragma::BasePlayerComponent *p
 	if(argv.size() > 1)
 		modelName = '*' + argv[1] + '*';
 	for(auto &pair : sortedEnts) {
-		if(className.has_value() && ustring::match(pair.first->GetClass().c_str(), className->c_str()) == false)
+		if(className.has_value() && pragma::string::match(pair.first->GetClass().c_str(), className->c_str()) == false)
 			continue;
-		if(modelName.has_value() && ustring::match(pair.first->GetModelName().c_str(), modelName->c_str()) == false)
+		if(modelName.has_value() && pragma::string::match(pair.first->GetModelName().c_str(), modelName->c_str()) == false)
 			continue;
 		Con::cout << *pair.first << Con::endl;
 	}
@@ -211,10 +211,10 @@ void CMD_sv_send(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vec
 		pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SV_SEND, packet, pragma::networking::Protocol::SlowReliable);
 	else {
 		/*ServerState::Get()->
-		ClientSession *cs = GetSessionByPlayerID(ustring::to_int(argv[0]));
+		ClientSession *cs = GetSessionByPlayerID(pragma::string::to_int(argv[0]));
 		if(!cs)
 		{
-			Con::cout<<"No player with ID "<<ustring::to_int(argv[0])<<" found!"<<Con::endl;
+			Con::cout<<"No player with ID "<<pragma::string::to_int(argv[0])<<" found!"<<Con::endl;
 			return;
 		}
 		ServerState::Get()->SendTCPMessage(pragma::networking::net_messages::client::SV_SEND, &packet,cs);*/
@@ -230,10 +230,10 @@ void CMD_sv_send_udp(pragma::NetworkState *, pragma::BasePlayerComponent *, std:
 	if(argv.size() == 1)
 		pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SV_SEND, packet, pragma::networking::Protocol::FastUnreliable);
 	else {
-		/*ClientSession *cs = GetSessionByPlayerID(ustring::to_int(argv[0]));
+		/*ClientSession *cs = GetSessionByPlayerID(pragma::string::to_int(argv[0]));
 		if(!cs)
 		{
-			Con::cout<<"No player with ID "<<ustring::to_int(argv[0])<<" found!"<<Con::endl;
+			Con::cout<<"No player with ID "<<pragma::string::to_int(argv[0])<<" found!"<<Con::endl;
 			return;
 		}
 		ServerState::Get()->SendUDPMessage(pragma::networking::net_messages::client::SV_SEND,&packet,cs);*/
@@ -266,7 +266,7 @@ void CMD_ent_input(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	auto charComponent = activator->GetCharacterComponent();
 	auto ents = pragma::console::find_trace_targets(state, *charComponent);
 	std::vector<std::string> substrings;
-	ustring::explode_whitespace(argv.front(), substrings);
+	pragma::string::explode_whitespace(argv.front(), substrings);
 	if(substrings.empty() == true)
 		return;
 	auto input = substrings.front();
@@ -291,7 +291,7 @@ void CMD_ent_scale(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 		return;
 	if(argv.size() >= 2) {
 		auto ents = pragma::console::find_named_targets(state, argv[0]);
-		auto scale = ustring::to_float(argv[1]);
+		auto scale = pragma::string::to_float(argv[1]);
 		for(auto *ent : ents) {
 			auto pTransformComponent = ent->GetTransformComponent();
 			if(pTransformComponent)
@@ -305,7 +305,7 @@ void CMD_ent_scale(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	if(ent.IsCharacter() == false)
 		return;
 	auto charComponent = ent.GetCharacterComponent();
-	auto scale = ustring::to_float(argv.front());
+	auto scale = pragma::string::to_float(argv.front());
 	auto ents = pragma::console::find_trace_targets(state, *charComponent);
 	for(auto *ent : ents) {
 		auto pTransformComponent = ent->GetTransformComponent();
@@ -433,17 +433,17 @@ void CMD_sv_debug_netmessages(pragma::NetworkState *state, pragma::BasePlayerCom
 		return;
 	}
 	if(argv.size() > 0) {
-		auto numBacklog = ustring::to_int(argv.front());
+		auto numBacklog = pragma::string::to_int(argv.front());
 		sv->SetMemoryCount(numBacklog);
 		Con::cout << "Debug backlog has been set to " << numBacklog << Con::endl;
 		return;
 	}
 	auto *svMap = pragma::networking::get_server_message_map();
-	util::StringMap<uint32_t> *svMsgs;
+	pragma::util::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 
 	auto *clMap = pragma::networking::get_client_message_map();
-	util::StringMap<uint32_t> *clMsgs;
+	pragma::util::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 
 	sv->DebugPrint(*svMsgs, *clMsgs);

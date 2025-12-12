@@ -72,7 +72,7 @@ export namespace pragma::audio {
 		Count,
 		All = Effect | Music | Voice | Weapon | NPC | Player | Vehicle | Physics | Environment | GUI
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 
 export {

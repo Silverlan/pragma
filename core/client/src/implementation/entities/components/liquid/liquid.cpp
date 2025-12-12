@@ -20,14 +20,14 @@ void CLiquidComponent::Initialize()
 	BaseFuncLiquidComponent::Initialize();
 
 	GetEntity().AddComponent<CLiquidSurfaceComponent>();
-	/*BindEvent(CRenderComponent::EVENT_SHOULD_DRAW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	/*BindEvent(CRenderComponent::EVENT_SHOULD_DRAW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		// TODO: Run CRenderComponent::UpdateShouldDrawState when any of these change
 		if(!(m_hWaterSurface.valid() == false && (m_waterScene == nullptr || m_waterScene->descSetGroupTexEffects != nullptr)))
 		{
 			static_cast<CEShouldDraw&>(evData.get()).shouldDraw = false;
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(GetEntity().IsSpawned() == false)

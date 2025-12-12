@@ -90,23 +90,23 @@ Vector3 pragma::physics::ChassisCreateInfo::GetMomentOfInertia(const pragma::phy
 	GetAABB(body, min, max);
 
 	auto dims = (max - min) * 0.5f;
-	return Vector3 {(umath::pow2(dims.y) + umath::pow2(dims.z)) * mass / 12.0, (umath::pow2(dims.x) + umath::pow2(dims.z)) * 0.8 * mass / 12.0, (umath::pow2(dims.x) + umath::pow2(dims.y)) * mass / 12.0};
+	return Vector3 {(pragma::math::pow2(dims.y) + pragma::math::pow2(dims.z)) * mass / 12.0, (pragma::math::pow2(dims.x) + pragma::math::pow2(dims.z)) * 0.8 * mass / 12.0, (pragma::math::pow2(dims.x) + pragma::math::pow2(dims.y)) * mass / 12.0};
 }
 
 ///////////////
 
 pragma::physics::VehicleCreateInfo::Wheel pragma::physics::VehicleCreateInfo::GetWheelType(const WheelCreateInfo &wheelDesc)
 {
-	if(umath::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Front)) {
-		if(umath::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Left))
+	if(pragma::math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Front)) {
+		if(pragma::math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Left))
 			return Wheel::FrontLeft;
-		if(umath::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Right))
+		if(pragma::math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Right))
 			return Wheel::FrontRight;
 	}
-	if(umath::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Rear)) {
-		if(umath::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Left))
+	if(pragma::math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Rear)) {
+		if(pragma::math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Left))
 			return Wheel::RearLeft;
-		if(umath::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Right))
+		if(pragma::math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Right))
 			return Wheel::RearRight;
 	}
 	return Wheel::Dummy;
@@ -184,10 +184,10 @@ float pragma::physics::WheelCreateInfo::GetMomentOfInertia(const pragma::physics
 	if(pShape == nullptr)
 		return 0.f;
 	// MOI of a cylinder
-	return 0.5f * pShape->GetMass() * umath::pow2(GetRadius(body));
+	return 0.5f * pShape->GetMass() * pragma::math::pow2(GetRadius(body));
 }
 
-pragma::physics::IVehicle::IVehicle(IEnvironment &env, const util::TSharedHandle<ICollisionObject> &collisionObject) : IBase {env}, m_collisionObject {collisionObject} {}
+pragma::physics::IVehicle::IVehicle(IEnvironment &env, const pragma::util::TSharedHandle<ICollisionObject> &collisionObject) : IBase {env}, m_collisionObject {collisionObject} {}
 
 pragma::physics::ICollisionObject *pragma::physics::IVehicle::GetCollisionObject() { return m_collisionObject.Get(); }
 const pragma::physics::ICollisionObject *pragma::physics::IVehicle::GetCollisionObject() const { return const_cast<IVehicle *>(this)->GetCollisionObject(); }

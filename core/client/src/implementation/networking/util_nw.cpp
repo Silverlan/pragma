@@ -11,8 +11,8 @@ static pragma::ecs::CBaseEntity *read_unique_entity(NetPacket &packet, const std
 {
 	if(pragma::get_cgame() == nullptr)
 		return nullptr;
-	auto uuid = packet->Read<util::Uuid>();
-	if(uuid == util::Uuid {})
+	auto uuid = packet->Read<pragma::util::Uuid>();
+	if(uuid == pragma::util::Uuid {})
 		return nullptr;
 	std::vector<pragma::ecs::BaseEntity *> *ents;
 	pragma::get_cgame()->GetEntities(&ents);

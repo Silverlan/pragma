@@ -29,9 +29,9 @@ bool LuaBaseEntityIterator::operator!=(const LuaBaseEntityIterator &other) { ret
 
 ////////////
 
-LuaEntityIterator::LuaEntityIterator(lua::State *l, pragma::ecs::EntityIterator::FilterFlags filterFlags) : m_iterator(::util::make_shared<pragma::ecs::EntityIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), filterFlags)) {}
-LuaEntityIterator::LuaEntityIterator(lua::State *l, pragma::ComponentId componentId, pragma::ecs::EntityIterator::FilterFlags filterFlags) : m_iterator(::util::make_shared<pragma::ecs::EntityIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentId, filterFlags)) {}
-LuaEntityIterator::LuaEntityIterator(lua::State *l, const std::string &componentName, pragma::ecs::EntityIterator::FilterFlags filterFlags) : m_iterator(::util::make_shared<pragma::ecs::EntityIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentName, filterFlags))
+LuaEntityIterator::LuaEntityIterator(lua::State *l, pragma::ecs::EntityIterator::FilterFlags filterFlags) : m_iterator(pragma::util::make_shared<pragma::ecs::EntityIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), filterFlags)) {}
+LuaEntityIterator::LuaEntityIterator(lua::State *l, pragma::ComponentId componentId, pragma::ecs::EntityIterator::FilterFlags filterFlags) : m_iterator(pragma::util::make_shared<pragma::ecs::EntityIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentId, filterFlags)) {}
+LuaEntityIterator::LuaEntityIterator(lua::State *l, const std::string &componentName, pragma::ecs::EntityIterator::FilterFlags filterFlags) : m_iterator(pragma::util::make_shared<pragma::ecs::EntityIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentName, filterFlags))
 {
 }
 LuaBaseEntityIterator LuaEntityIterator::begin() const { return LuaBaseEntityIterator(m_iterator->begin()); }
@@ -78,7 +78,7 @@ void LuaEntityIteratorFilterModel::Attach(pragma::ecs::EntityIterator &iterator)
 ////////////
 
 LuaEntityIteratorFilterUuid::LuaEntityIteratorFilterUuid(const std::string &uuid) : m_uuid {uuid} {}
-void LuaEntityIteratorFilterUuid::Attach(pragma::ecs::EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterUuid>(util::uuid_string_to_bytes(m_uuid)); }
+void LuaEntityIteratorFilterUuid::Attach(pragma::ecs::EntityIterator &iterator) { iterator.AttachFilter<EntityIteratorFilterUuid>(pragma::util::uuid_string_to_bytes(m_uuid)); }
 
 ////////////
 
@@ -144,11 +144,11 @@ bool LuaBaseEntityComponentIterator::operator!=(const LuaBaseEntityComponentIter
 ////////////
 
 LuaEntityComponentIterator::LuaEntityComponentIterator(lua::State *l, pragma::ComponentId componentId, pragma::ecs::EntityIterator::FilterFlags filterFlags)
-    : m_iterator(::util::make_shared<CEntityComponentIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentId, filterFlags))
+    : m_iterator(pragma::util::make_shared<CEntityComponentIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentId, filterFlags))
 {
 }
 LuaEntityComponentIterator::LuaEntityComponentIterator(lua::State *l, const std::string &componentName, pragma::ecs::EntityIterator::FilterFlags filterFlags)
-    : m_iterator(::util::make_shared<CEntityComponentIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentName, filterFlags))
+    : m_iterator(pragma::util::make_shared<CEntityComponentIterator>(*pragma::Engine::Get()->GetNetworkState(l)->GetGameState(), componentName, filterFlags))
 {
 }
 LuaBaseEntityComponentIterator LuaEntityComponentIterator::begin() const { return LuaBaseEntityComponentIterator(m_iterator->begin()); }

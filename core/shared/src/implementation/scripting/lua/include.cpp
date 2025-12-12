@@ -8,8 +8,8 @@ module pragma.shared;
 
 import :scripting.lua.include;
 
-static pragma::scripting::lua_core::IncludeResult include_file(lua::State *l, const util::Path &fileName, pragma::scripting::lua_core::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr);
-static pragma::scripting::lua_core::IncludeResult include_directory(lua::State *l, const util::Path &fullLuaPath, const util::Path &relLuaPath, pragma::scripting::lua_core::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr)
+static pragma::scripting::lua_core::IncludeResult include_file(lua::State *l, const pragma::util::Path &fileName, pragma::scripting::lua_core::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr);
+static pragma::scripting::lua_core::IncludeResult include_directory(lua::State *l, const pragma::util::Path &fullLuaPath, const pragma::util::Path &relLuaPath, pragma::scripting::lua_core::IncludeFlags flags, Lua::IncludeCache *optIncludeCache = nullptr)
 {
 	// Note: relLuaPath is the path relative to the current Lua include path (see Lua::GetIncludePath)
 
@@ -21,13 +21,13 @@ static pragma::scripting::lua_core::IncludeResult include_directory(lua::State *
 		std::sort(luaFiles.begin(), luaFiles.end());
 
 		for(auto &fileName : luaFiles) {
-			auto hash = ustring::string_switch_ci::hash(fileName.substr(0, fileName.length() - ext.length()));
+			auto hash = pragma::string::string_switch_ci::hash(fileName.substr(0, fileName.length() - ext.length()));
 			auto it = traversed.find(hash);
 			if(it != traversed.end())
 				continue; // Already loaded
 
 			auto nStack = Lua::GetStackTop(l);
-			auto relFilePath = util::FilePath(relLuaPath, fileName);
+			auto relFilePath = pragma::util::FilePath(relLuaPath, fileName);
 			auto result = include_file(l, relFilePath.GetString(), flags, optIncludeCache);
 			auto nStackNew = Lua::GetStackTop(l);
 			if(nStackNew > nStack)
@@ -41,8 +41,8 @@ static pragma::scripting::lua_core::IncludeResult include_directory(lua::State *
 
 void pragma::scripting::lua_core::execute_files_in_directory(lua::State *l, const std::string &path)
 {
-	auto normPath = ::util::DirPath(path);
-	auto fullNormPath = ::util::DirPath(Lua::SCRIPT_DIRECTORY, normPath);
+	auto normPath = pragma::util::DirPath(path);
+	auto fullNormPath = pragma::util::DirPath(Lua::SCRIPT_DIRECTORY, normPath);
 
 	// If a pre-compiled and a raw file exist of the same script, only the pre-compiled version will be loaded.
 	std::unordered_set<uint32_t> traversed;
@@ -52,12 +52,12 @@ void pragma::scripting::lua_core::execute_files_in_directory(lua::State *l, cons
 		std::sort(luaFiles.begin(), luaFiles.end());
 
 		for(auto &fileName : luaFiles) {
-			auto hash = ustring::string_switch_ci::hash(fileName.substr(0, fileName.length() - ext.length()));
+			auto hash = pragma::string::string_switch_ci::hash(fileName.substr(0, fileName.length() - ext.length()));
 			auto it = traversed.find(hash);
 			if(it != traversed.end())
 				continue; // Already loaded
 
-			auto fullPath = ::util::FilePath(normPath, fileName);
+			auto fullPath = pragma::util::FilePath(normPath, fileName);
 			std::string errMsg;
 			auto statusCode = execute_file(l, fullPath.GetString(), &errMsg);
 			if(statusCode != Lua::StatusCode::Ok)
@@ -128,12 +128,12 @@ static Lua::StatusCode execute_file(lua::State *l, const std::string &path, std:
 
 Lua::StatusCode pragma::scripting::lua_core::execute_file(lua::State *l, const std::string &path, std::string *optOutErrMsg) { return ::execute_file<false>(l, path, optOutErrMsg); }
 
-pragma::scripting::lua_core::IncludeResult include_file(lua::State *l, const util::Path &fileName, pragma::scripting::lua_core::IncludeFlags flags, Lua::IncludeCache *optIncludeCache)
+pragma::scripting::lua_core::IncludeResult include_file(lua::State *l, const pragma::util::Path &fileName, pragma::scripting::lua_core::IncludeFlags flags, Lua::IncludeCache *optIncludeCache)
 {
 	auto includeFileName = Lua::GetIncludePath(fileName.GetString());
 
 	if(optIncludeCache) {
-		if(umath::is_flag_set(flags, pragma::scripting::lua_core::IncludeFlags::SkipIfCached) && optIncludeCache->Contains(includeFileName))
+		if(pragma::math::is_flag_set(flags, pragma::scripting::lua_core::IncludeFlags::SkipIfCached) && optIncludeCache->Contains(includeFileName))
 			return pragma::scripting::lua_core::IncludeResult {Lua::StatusCode::Ok};
 	}
 
@@ -144,7 +144,7 @@ pragma::scripting::lua_core::IncludeResult include_file(lua::State *l, const uti
 	auto callInfo = std::move(g_callInfoStack.top());
 	g_callInfoStack.pop();
 	if(statusCode == Lua::StatusCode::Ok) {
-		if(optIncludeCache && umath::is_flag_set(flags, pragma::scripting::lua_core::IncludeFlags::AddToCache))
+		if(optIncludeCache && pragma::math::is_flag_set(flags, pragma::scripting::lua_core::IncludeFlags::AddToCache))
 			optIncludeCache->Add(includeFileName);
 		return {Lua::StatusCode::Ok};
 	}
@@ -161,7 +161,7 @@ pragma::scripting::lua_core::IncludeResult pragma::scripting::lua_core::include(
 	static Lua::IncludeCache tmpCache;
 	static uint32_t recursionDepth = 0;
 	Lua::IncludeCache *includeCache = nullptr;
-	if(umath::is_flag_set(flags, IncludeFlags::IgnoreGlobalCache)) {
+	if(pragma::math::is_flag_set(flags, IncludeFlags::IgnoreGlobalCache)) {
 		flags |= IncludeFlags::AddToCache;
 		includeCache = &tmpCache;
 		++recursionDepth;
@@ -175,7 +175,7 @@ pragma::scripting::lua_core::IncludeResult pragma::scripting::lua_core::include(
 
 	auto nStack = Lua::GetStackTop(l);
 	IncludeResult result;
-	auto fullIncludeDirPath = ::util::DirPath(Lua::SCRIPT_DIRECTORY, Lua::GetIncludePath(path)).GetString();
+	auto fullIncludeDirPath = pragma::util::DirPath(Lua::SCRIPT_DIRECTORY, Lua::GetIncludePath(path)).GetString();
 	if(filemanager::is_dir(fullIncludeDirPath))
 		result = include_directory(l, fullIncludeDirPath, path, flags, includeCache);
 	else
@@ -186,7 +186,7 @@ pragma::scripting::lua_core::IncludeResult pragma::scripting::lua_core::include(
 	if(numResults < 0)
 		numResults = 0;
 
-	if(umath::is_flag_set(flags, IncludeFlags::IgnoreGlobalCache) && --recursionDepth == 0)
+	if(pragma::math::is_flag_set(flags, IncludeFlags::IgnoreGlobalCache) && --recursionDepth == 0)
 		tmpCache.Clear();
 
 	result.numResults = numResults;

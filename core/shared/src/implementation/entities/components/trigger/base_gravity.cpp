@@ -10,7 +10,7 @@ using namespace pragma;
 
 void pragma::Entity::TriggerGravity::apply_gravity(pragma::ecs::BaseEntity *ent, uint32_t flags, const Vector3 &gravityDir, const Vector3 &dirUp, bool bUseForce, float gravityForce, std::shared_ptr<Vector3> *upDir)
 {
-	if(flags & umath::to_integral(SpawnFlags::ChangeOrientation)) {
+	if(flags & pragma::math::to_integral(SpawnFlags::ChangeOrientation)) {
 		auto charComponent = ent->GetCharacterComponent();
 		if(charComponent.valid()) {
 			if(upDir != nullptr) {
@@ -23,7 +23,7 @@ void pragma::Entity::TriggerGravity::apply_gravity(pragma::ecs::BaseEntity *ent,
 	auto gravityComponent = ent->GetComponent<pragma::GravityComponent>();
 	if(gravityComponent.expired())
 		return;
-	if(flags & umath::to_integral(SpawnFlags::AffectDirection))
+	if(flags & pragma::math::to_integral(SpawnFlags::AffectDirection))
 		gravityComponent->SetGravityOverride(gravityDir);
 	if(bUseForce == true)
 		gravityComponent->SetGravityOverride(gravityForce);
@@ -38,14 +38,14 @@ void BaseEntityTriggerGravityComponent::Initialize()
 }
 void BaseEntityTriggerGravityComponent::OnStartTouch(pragma::ecs::BaseEntity *ent)
 {
-	auto &settings = m_gravityReset.insert(std::make_pair(::util::make_shared<EntityHandle>(ent->GetHandle()), GravitySettings {})).first->second;
+	auto &settings = m_gravityReset.insert(std::make_pair(pragma::util::make_shared<EntityHandle>(ent->GetHandle()), GravitySettings {})).first->second;
 	auto pEntGravityComponent = ent->GetComponent<pragma::GravityComponent>();
 	settings.scale = pEntGravityComponent.valid() ? pEntGravityComponent->GetGravityScale() : 1.f;
 	if(pEntGravityComponent.valid()) {
 		if(pEntGravityComponent->HasGravityForceOverride())
-			settings.force = ::util::make_shared<float>(pEntGravityComponent->GetGravity());
+			settings.force = pragma::util::make_shared<float>(pEntGravityComponent->GetGravity());
 		if(pEntGravityComponent->HasGravityDirectionOverride())
-			settings.dir = ::util::make_shared<Vector3>(pEntGravityComponent->GetGravityDirection());
+			settings.dir = pragma::util::make_shared<Vector3>(pEntGravityComponent->GetGravityDirection());
 	}
 
 	auto &entThis = GetEntity();
@@ -58,7 +58,7 @@ void BaseEntityTriggerGravityComponent::OnEndTouch(pragma::ecs::BaseEntity *ent)
 		auto &hEnt = *it->first;
 		if(hEnt.valid() && hEnt.get() == ent) {
 			auto &settings = it->second;
-			if(entThis.GetSpawnFlags() & umath::to_integral(pragma::Entity::TriggerGravity::SpawnFlags::ResetOnEndTouch)) {
+			if(entThis.GetSpawnFlags() & pragma::math::to_integral(pragma::Entity::TriggerGravity::SpawnFlags::ResetOnEndTouch)) {
 				auto pEntGravityComponent = ent->GetComponent<pragma::GravityComponent>();
 				if(pEntGravityComponent.valid())
 					pEntGravityComponent->SetGravityScale(settings.scale);
@@ -72,10 +72,10 @@ void BaseEntityTriggerGravityComponent::OnEndTouch(pragma::ecs::BaseEntity *ent)
 	}
 }
 void BaseEntityTriggerGravityComponent::OnResetGravity(pragma::ecs::BaseEntity *ent, GravitySettings &settings) {}
-util::EventReply BaseEntityTriggerGravityComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply BaseEntityTriggerGravityComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseTouchComponent::EVENT_ON_START_TOUCH) {
 		auto &touchData = static_cast<const pragma::CETouchData &>(evData);
 		OnStartTouch(touchData.entity);
@@ -84,5 +84,5 @@ util::EventReply BaseEntityTriggerGravityComponent::HandleEvent(ComponentEventId
 		auto &touchData = static_cast<const pragma::CETouchData &>(evData);
 		OnEndTouch(touchData.entity);
 	}
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }

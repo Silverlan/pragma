@@ -72,7 +72,7 @@ void KeyBind::Initialize()
 	if(type != Type::Regular)
 		return;
 	auto &bind = GetBind();
-	ustring::get_sequence_commands(bind, [this](std::string cmd, std::vector<std::string> &argv) {
+	pragma::string::get_sequence_commands(bind, [this](std::string cmd, std::vector<std::string> &argv) {
 		m_cmds.push_back({});
 		auto &info = m_cmds.back();
 		info.cmd = cmd;

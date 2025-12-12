@@ -32,7 +32,7 @@ static void get_filter_mode(UInt32 filter, prosper::Filter &minFilter, prosper::
 		mipmapMode = prosper::SamplerMipmapMode::Linear;
 		if(filter >= 3) {
 			filter -= 2;
-			anisotropy = umath::pow(static_cast<uint32_t>(2), filter);
+			anisotropy = pragma::math::pow(static_cast<uint32_t>(2), filter);
 		}
 	}
 }

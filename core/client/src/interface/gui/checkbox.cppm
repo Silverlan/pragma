@@ -21,7 +21,7 @@ export namespace pragma::gui::types {
 		void SetChecked(bool bChecked);
 		bool IsChecked();
 		void Toggle();
-		virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 		virtual void SetSize(int x, int y) override;
 	};
 };

@@ -26,14 +26,14 @@ void ParticleBlobShadow::InitializeVertexDescriptions(std::vector<vk::VertexInpu
 {
 	InitializeVertexDataDescriptions(vertexBindingDescriptions,vertexAttributeDescriptions);
 	vertexBindingDescriptions.push_back({
-		umath::to_integral(Binding::AdjacentBlobs),
+		pragma::math::to_integral(Binding::AdjacentBlobs),
 		sizeof(uint16_t) *MAX_BLOB_NEIGHBORS,
 		prosper::VertexInputRate::Instance
 	});
 
 	vertexAttributeDescriptions.push_back({
-		umath::to_integral(Location::AdjacentBlobs),
-		umath::to_integral(Binding::AdjacentBlobs),
+		pragma::math::to_integral(Location::AdjacentBlobs),
+		pragma::math::to_integral(Binding::AdjacentBlobs),
 		vk::Format::eR32G32B32A32Uint,0 // Each 4-byte uint actually packs two 2-byte uints
 	});
 }
@@ -67,7 +67,7 @@ bool ParticleBlobShadow::BeginDraw(Vulkan::CommandBufferObject *cmdBuffer,const 
 	auto &drawCmd = context.GetDrawCmd();
 
 	// Bind particle buffer
-	cmdBuffer->BindDescriptorSet(umath::to_integral(DescSet::ParticleData),layout,descSetParticles,offset);
+	cmdBuffer->BindDescriptorSet(pragma::math::to_integral(DescSet::ParticleData),layout,descSetParticles,offset);
 	return true;
 }
 
@@ -103,7 +103,7 @@ void ParticleBlobShadow::Draw(pragma::pts::CParticleSystem *particle,const Vulka
 		<<Vector4{posLight.x,posLight.y,posLight.z,(ranged != nullptr) ? static_cast<float>(ranged->GetDistance()) : 0.f};
 	drawCmd->PushConstants(layout,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,static_cast<uint32_t>(instance.GetCount()),instance.GetData());
 
-	//drawCmd->BindDescriptorSet(umath::to_integral(DescSet::LightData),layout,light->GetDescriptorSet());
+	//drawCmd->BindDescriptorSet(pragma::math::to_integral(DescSet::LightData),layout,light->GetDescriptorSet());
 
 	std::vector<Vulkan::BufferObject*> buffers = {
 		particle->GetVertexBuffer(),

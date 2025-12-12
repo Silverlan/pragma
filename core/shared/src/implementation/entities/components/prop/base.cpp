@@ -12,7 +12,7 @@ BasePropComponent::BasePropComponent(pragma::ecs::BaseEntity &ent) : BaseEntityC
 
 pragma::physics::PhysicsType BasePropComponent::UpdatePhysicsType(pragma::ecs::BaseEntity *ent)
 {
-	if(ent->GetSpawnFlags() & umath::to_integral(SpawnFlags::Static)) {
+	if(ent->GetSpawnFlags() & pragma::math::to_integral(SpawnFlags::Static)) {
 		m_kvMass = 0.f;
 		return pragma::physics::PhysicsType::Static;
 	}
@@ -31,7 +31,7 @@ bool BasePropComponent::SetKeyValue(std::string key, std::string val)
 {
 	if(key == "scale") {
 		Vector3 scale {1.f, 1.f, 1.f};
-		auto n = ustring::string_to_array<float>(val, &scale.x, ustring::cstring_to_number<float>, 3);
+		auto n = pragma::string::string_to_array<float>(val, &scale.x, pragma::string::cstring_to_number<float>, 3);
 		if(n == 1) {
 			scale.y = scale.x;
 			scale.z = scale.x;
@@ -39,9 +39,9 @@ bool BasePropComponent::SetKeyValue(std::string key, std::string val)
 		m_kvScale = scale;
 	}
 	else if(key == "mass") {
-		ustring::remove_whitespace(val);
+		pragma::string::remove_whitespace(val);
 		if(val.empty() == false)
-			m_kvMass = ustring::to_float(val);
+			m_kvMass = pragma::string::to_float(val);
 	}
 	else
 		return false;
@@ -54,7 +54,7 @@ void BasePropComponent::InitializePhysics(pragma::physics::PhysicsType physType)
 	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return;
-	if((ent.GetSpawnFlags() & umath::to_integral(SpawnFlags::DisableCollisions)) != 0 || physType == pragma::physics::PhysicsType::None)
+	if((ent.GetSpawnFlags() & pragma::math::to_integral(SpawnFlags::DisableCollisions)) != 0 || physType == pragma::physics::PhysicsType::None)
 		return;
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
@@ -71,9 +71,9 @@ void BasePropComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		return SetKeyValue(kvData.key, kvData.value) ? util::EventReply::Handled : util::EventReply::Unhandled;
+		return SetKeyValue(kvData.key, kvData.value) ? pragma::util::EventReply::Handled : pragma::util::EventReply::Unhandled;
 	});
 	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto physComponent = GetEntity().GetPhysicsComponent();

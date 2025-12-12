@@ -45,12 +45,12 @@ bool BaseStaticBvhCacheComponent::IntersectionTest(const Vector3 &origin, const 
 	return BaseBvhComponent::IntersectionTest(origin, dir, minDist, maxDist, outHitInfo);
 }
 
-void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &&meshes, std::vector<pragma::ecs::BaseEntity *> &&meshToEntity, std::vector<umath::ScaledTransform> &&meshPoses)
+void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &&meshes, std::vector<pragma::ecs::BaseEntity *> &&meshToEntity, std::vector<pragma::math::ScaledTransform> &&meshPoses)
 {
 	LOGGER.info("Building new static BVH cache...");
 	m_bvhInitialized = true;
 	if(!m_buildWorker) {
-		m_buildWorker = std::make_unique<util::FunctionalParallelWorker>(true);
+		m_buildWorker = std::make_unique<pragma::util::FunctionalParallelWorker>(true);
 		m_buildWorker->Start();
 	}
 	// m_bvhDataMutex.lock();
@@ -58,7 +58,7 @@ void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<pragma::geom
 	// m_bvhDataMutex.unlock();
 	m_buildWorker->CancelTask();
 	m_bvhPendingWorkerResult = std::unique_ptr<BvhPendingWorkerResult> {new BvhPendingWorkerResult {}};
-	m_buildWorker->ResetTask([this, meshes = std::move(meshes), meshPoses = std::move(meshPoses), meshToEntity = std::move(meshToEntity)](util::FunctionalParallelWorker &worker) {
+	m_buildWorker->ResetTask([this, meshes = std::move(meshes), meshPoses = std::move(meshPoses), meshToEntity = std::move(meshToEntity)](pragma::util::FunctionalParallelWorker &worker) {
 		std::vector<size_t> meshIndices;
 		BaseBvhComponent::BvhBuildInfo buildInfo {};
 		buildInfo.isCancelled = [this]() -> bool { return m_buildWorker->IsTaskCancelled(); };

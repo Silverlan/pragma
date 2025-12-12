@@ -16,10 +16,10 @@ export namespace pragma {
 	};
 	struct PBRAOBakeJob {
 		PBRAOBakeJob(pragma::asset::Model &mdl, msys::Material &mat);
-		util::WeakHandle<pragma::asset::Model> hModel = {};
+		pragma::util::WeakHandle<pragma::asset::Model> hModel = {};
 		msys::MaterialHandle hMaterial = {};
 		EntityHandle hEntity = {};
-		util::ParallelJob<uimg::ImageLayerSet> job = {};
+		pragma::util::ParallelJob<uimg::ImageLayerSet> job = {};
 		bool isRunning = false;
 		uint32_t width = 512;
 		uint32_t height = 512;

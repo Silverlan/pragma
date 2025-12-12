@@ -48,8 +48,8 @@ void BaseEnvLightComponent::RegisterMembers(pragma::EntityComponentManager &comp
 		registerMember(std::move(memberInfo));
 	}
 }
-bool BaseEnvLightComponent::IsBaked() const { return umath::is_flag_set(m_lightFlags, LightFlags::BakedLightSource); }
-void BaseEnvLightComponent::SetBaked(bool baked) { umath::set_flag(m_lightFlags, LightFlags::BakedLightSource, baked); }
+bool BaseEnvLightComponent::IsBaked() const { return pragma::math::is_flag_set(m_lightFlags, LightFlags::BakedLightSource); }
+void BaseEnvLightComponent::SetBaked(bool baked) { pragma::math::set_flag(m_lightFlags, LightFlags::BakedLightSource, baked); }
 std::string BaseEnvLightComponent::LightIntensityTypeToString(LightIntensityType type)
 {
 	switch(type) {
@@ -66,23 +66,23 @@ void BaseEnvLightComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "distance", false))
+		if(pragma::string::compare<std::string>(kvData.key, "distance", false))
 			GetEntity().SetKeyValue("radius", kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "lightcolor", false))
+		else if(pragma::string::compare<std::string>(kvData.key, "lightcolor", false))
 			GetEntity().SetKeyValue("color", kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "light_intensity", false))
-			SetLightIntensity(ustring::to_float(kvData.value));
-		else if(ustring::compare<std::string>(kvData.key, "light_intensity_type", false))
-			SetLightIntensityType(static_cast<LightIntensityType>(ustring::to_int(kvData.value)));
-		else if(ustring::compare<std::string>(kvData.key, "falloff_exponent", false))
-			SetFalloffExponent(util::to_float(kvData.value));
-		else if(ustring::compare<std::string>(kvData.key, "light_flags", false))
-			m_lightFlags = static_cast<LightFlags>(util::to_int(kvData.value));
+		else if(pragma::string::compare<std::string>(kvData.key, "light_intensity", false))
+			SetLightIntensity(pragma::string::to_float(kvData.value));
+		else if(pragma::string::compare<std::string>(kvData.key, "light_intensity_type", false))
+			SetLightIntensityType(static_cast<LightIntensityType>(pragma::string::to_int(kvData.value)));
+		else if(pragma::string::compare<std::string>(kvData.key, "falloff_exponent", false))
+			SetFalloffExponent(pragma::util::to_float(kvData.value));
+		else if(pragma::string::compare<std::string>(kvData.key, "light_flags", false))
+			m_lightFlags = static_cast<LightFlags>(pragma::util::to_int(kvData.value));
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -115,7 +115,7 @@ void BaseEnvLightComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 	auto flags = GetEntity().GetSpawnFlags();
-	if(flags & umath::to_integral(SpawnFlag::DontCastShadows))
+	if(flags & pragma::math::to_integral(SpawnFlag::DontCastShadows))
 		m_shadowType = ShadowType::None;
 }
 void BaseEnvLightComponent::SetLight(BaseEnvLightSpotComponent &light)
@@ -171,7 +171,7 @@ Candela BaseEnvLightComponent::GetLightIntensityCandela(float intensity, LightIn
 	case LightIntensityType::Lumen:
 		{
 			auto angle = outerConeAngle.has_value() ? *outerConeAngle : 360.f;
-			return ulighting::lumens_to_candela(intensity, umath::cos(umath::deg_to_rad(angle / 2.f)));
+			return ulighting::lumens_to_candela(intensity, pragma::math::cos(pragma::math::deg_to_rad(angle / 2.f)));
 		}
 	case LightIntensityType::Lux:
 		// TODO
@@ -187,7 +187,7 @@ Lumen BaseEnvLightComponent::GetLightIntensityLumen(float intensity, LightIntens
 	case LightIntensityType::Candela:
 		{
 			auto angle = outerConeAngle.has_value() ? *outerConeAngle : 360.f;
-			return ulighting::candela_to_lumens(intensity, umath::cos(umath::deg_to_rad(angle / 2.f)));
+			return ulighting::candela_to_lumens(intensity, pragma::math::cos(pragma::math::deg_to_rad(angle / 2.f)));
 		}
 	case LightIntensityType::Lux:
 		// TODO

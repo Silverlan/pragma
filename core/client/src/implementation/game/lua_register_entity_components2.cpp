@@ -73,12 +73,12 @@ void RegisterLuaEntityComponents2_cl(lua::State *l, luabind::module_ &entsMod)
 	auto defHitboxBvh = pragma::LuaCore::create_entity_component_class<pragma::CHitboxBvhComponent, pragma::BaseEntityComponent>("HitboxBvhComponent");
 
 	auto defDebugDrawInfo = luabind::class_<pragma::bvh::DebugDrawInfo>("DebugDrawInfo");
-	defDebugDrawInfo.add_static_constant("FLAG_NONE", umath::to_integral(pragma::bvh::DebugDrawInfo::Flags::None));
-	defDebugDrawInfo.add_static_constant("FLAG_DRAW_TRAVERSED_NODES_BIT", umath::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawTraversedNodesBit));
-	defDebugDrawInfo.add_static_constant("FLAG_DRAW_TRAVERSED_LEAVES_BIT", umath::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawTraversedLeavesBit));
-	defDebugDrawInfo.add_static_constant("FLAG_DRAW_HIT_LEAVES_BIT", umath::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawHitLeavesBit));
-	defDebugDrawInfo.add_static_constant("FLAG_DRAW_TRAVERSED_MESHES_BIT", umath::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawTraversedMeshesBit));
-	defDebugDrawInfo.add_static_constant("FLAG_DRAW_HIT_MESHES_BIT", umath::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawHitMeshesBit));
+	defDebugDrawInfo.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::bvh::DebugDrawInfo::Flags::None));
+	defDebugDrawInfo.add_static_constant("FLAG_DRAW_TRAVERSED_NODES_BIT", pragma::math::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawTraversedNodesBit));
+	defDebugDrawInfo.add_static_constant("FLAG_DRAW_TRAVERSED_LEAVES_BIT", pragma::math::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawTraversedLeavesBit));
+	defDebugDrawInfo.add_static_constant("FLAG_DRAW_HIT_LEAVES_BIT", pragma::math::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawHitLeavesBit));
+	defDebugDrawInfo.add_static_constant("FLAG_DRAW_TRAVERSED_MESHES_BIT", pragma::math::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawTraversedMeshesBit));
+	defDebugDrawInfo.add_static_constant("FLAG_DRAW_HIT_MESHES_BIT", pragma::math::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawHitMeshesBit));
 	defDebugDrawInfo.def(luabind::constructor<>());
 	defDebugDrawInfo.def_readwrite("flags", &pragma::bvh::DebugDrawInfo::flags);
 	defDebugDrawInfo.def_readwrite("pose", &pragma::bvh::DebugDrawInfo::basePose);
@@ -125,9 +125,9 @@ void RegisterLuaEntityComponents2_cl(lua::State *l, luabind::module_ &entsMod)
 	entsMod[defPpFxaa];
 
 	auto defPpMotionBlur = pragma::LuaCore::create_entity_component_class<pragma::CRendererPpMotionBlurComponent, pragma::BaseEntityComponent>("RendererPpMotionBlurComponent");
-	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_LOW", umath::to_integral(pragma::MotionBlurQuality::Low));
-	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_MEDIUM", umath::to_integral(pragma::MotionBlurQuality::Medium));
-	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_HIGH", umath::to_integral(pragma::MotionBlurQuality::High));
+	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_LOW", pragma::math::to_integral(pragma::MotionBlurQuality::Low));
+	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_MEDIUM", pragma::math::to_integral(pragma::MotionBlurQuality::Medium));
+	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_HIGH", pragma::math::to_integral(pragma::MotionBlurQuality::High));
 	defPpMotionBlur.def("SetAutoUpdateMotionData", &pragma::CRendererPpMotionBlurComponent::SetAutoUpdateMotionData);
 	defPpMotionBlur.def("SetMotionBlurIntensity", &pragma::CRendererPpMotionBlurComponent::SetMotionBlurIntensity);
 	defPpMotionBlur.def("GetMotionBlurIntensity", &pragma::CRendererPpMotionBlurComponent::GetMotionBlurIntensity);

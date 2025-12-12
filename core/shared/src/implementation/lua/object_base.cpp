@@ -14,9 +14,9 @@ LuaObjectBase::LuaObjectBase(const luabind::weak_ref &ref) { SetLuaObject(ref); 
 luabind::object LuaObjectBase::GetLuaObject() const { return (m_baseLuaObj != nullptr) ? *m_baseLuaObj.get() : ((m_weakRef != nullptr) ? Lua::WeakReferenceToObject(*m_weakRef) : luabind::object {}); }
 void LuaObjectBase::SetLuaObject(const luabind::object &o)
 {
-	m_baseLuaObj = ::util::make_shared<luabind::object>(o);
+	m_baseLuaObj = pragma::util::make_shared<luabind::object>(o);
 	if(o)
-		m_weakRef = ::util::make_shared<luabind::weak_ref>(Lua::CreateWeakReference(o));
+		m_weakRef = pragma::util::make_shared<luabind::weak_ref>(Lua::CreateWeakReference(o));
 	else
 		m_weakRef = nullptr;
 }
@@ -24,7 +24,7 @@ void LuaObjectBase::SetLuaObject(const luabind::weak_ref &ref)
 {
 	assert(false); // This function shouldn't be used anymore, it's unsafe!
 	m_baseLuaObj = nullptr;
-	m_weakRef = ::util::make_shared<luabind::weak_ref>(ref);
+	m_weakRef = pragma::util::make_shared<luabind::weak_ref>(ref);
 }
 
 std::string LuaObjectBase::ToString() const { return const_cast<LuaObjectBase *>(this)->CallLuaMember<const char *>("__tostring"); }

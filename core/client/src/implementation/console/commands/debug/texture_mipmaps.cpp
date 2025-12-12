@@ -34,9 +34,9 @@ static void debug_font(pragma::NetworkState *, pragma::BasePlayerComponent *, st
 	uint32_t height = glyphMap->GetImage().GetHeight();
 	std::cout << "Glyph map size: " << width << "x" << height << std::endl;
 	if(argv.size() > 1) {
-		width = util::to_int(argv[1]);
+		width = pragma::util::to_int(argv[1]);
 		if(argv.size() > 2)
-			height = util::to_int(argv[2]);
+			height = pragma::util::to_int(argv[2]);
 	}
 	if(width == 0 || height == 0) {
 		Con::cout << "Invalid resolution: " << width << "x" << height << Con::endl;

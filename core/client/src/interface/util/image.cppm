@@ -10,7 +10,7 @@ export module pragma.client:util.image;
 export import pragma.image;
 export import pragma.prosper;
 
-export namespace util {
+export namespace pragma::util {
 	struct ToImageBufferInfo {
 		bool includeLayers = false;
 		bool includeMipmaps = false;

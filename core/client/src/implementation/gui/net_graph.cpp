@@ -131,7 +131,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 				m_dataSizeIdx = 0;
 			if(m_txtIncoming.IsValid()) {
 				std::stringstream ss;
-				ss << "in: " << util::get_pretty_bytes(m_netData.dataIn) << "/s (" << m_netData.countIn << " packets)";
+				ss << "in: " << pragma::util::get_pretty_bytes(m_netData.dataIn) << "/s (" << m_netData.countIn << " packets)";
 
 				auto *pText = m_txtIncoming.get<WIText>();
 				pText->SetText(ss.str());
@@ -139,7 +139,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 			}
 			if(m_txtOutgoing.IsValid()) {
 				std::stringstream ss;
-				ss << "out: " << util::get_pretty_bytes(m_netData.dataOutUDP + m_netData.dataOutTCP) << "/s (" << (m_netData.countOutUDP + m_netData.countOutTCP) << " packets)";
+				ss << "out: " << pragma::util::get_pretty_bytes(m_netData.dataOutUDP + m_netData.dataOutTCP) << "/s (" << (m_netData.countOutUDP + m_netData.countOutTCP) << " packets)";
 
 				auto *pText = m_txtOutgoing.get<WIText>();
 				pText->SetText(ss.str());
@@ -163,7 +163,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 			}
 			std::sort(m_netData.messages.begin(), m_netData.messages.end(), [](const std::pair<uint32_t, NetData::MessageInfo> &a, const std::pair<uint32_t, NetData::MessageInfo> &b) { return a.second.size > b.second.size; });
 			auto *map = networking::get_client_message_map();
-			util::StringMap<unsigned int> *netmessages;
+			pragma::util::StringMap<unsigned int> *netmessages;
 			map->GetNetMessages(&netmessages);
 			uint32_t idx = 0;
 			for(auto &p : m_netData.messages) {
@@ -176,7 +176,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 					auto *pText = hLine.get<WIText>();
 					pText->SetVisible(true);
 					std::stringstream ss;
-					ss << "#" << (idx + 1) << ": " << name << ": " << util::get_pretty_bytes(info.size) << " (x" << info.count << ")";
+					ss << "#" << (idx + 1) << ": " << name << ": " << pragma::util::get_pretty_bytes(info.size) << " (x" << info.count << ")";
 					pText->SetText(ss.str());
 					pText->SizeToContents();
 				}

@@ -7,7 +7,7 @@ module pragma.shared;
 import :util.rgb_csv;
 
 // Source: https://stackoverflow.com/a/6930407/2482983
-util::HSV util::rgb_to_hsv(const Color &inC)
+pragma::util::HSV pragma::util::rgb_to_hsv(const Color &inC)
 {
 	auto in = inC.ToVector3();
 	HSV out;
@@ -50,7 +50,7 @@ util::HSV util::rgb_to_hsv(const Color &inC)
 
 	return out;
 }
-Color util::hsv_to_rgb(const HSV &in)
+Color pragma::util::hsv_to_rgb(const HSV &in)
 {
 	double hh, p, q, t, ff;
 	long i;
@@ -108,4 +108,4 @@ Color util::hsv_to_rgb(const HSV &in)
 	}
 	return out;
 }
-util::HSV util::lerp_hsv(const HSV &a, const HSV &b, float t) { return {umath::lerp(a.h, b.h, t), umath::lerp(a.s, b.s, t), umath::lerp(a.v, b.v, t)}; }
+pragma::util::HSV pragma::util::lerp_hsv(const HSV &a, const HSV &b, float t) { return {pragma::math::lerp(a.h, b.h, t), pragma::math::lerp(a.s, b.s, t), pragma::math::lerp(a.v, b.v, t)}; }

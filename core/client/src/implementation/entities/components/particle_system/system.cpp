@@ -25,21 +25,21 @@ void ecs::CParticleSystemComponent::Initialize()
 
 	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<ComponentEvent> evData) { Start(); });
 	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<ComponentEvent> evData) { Stop(); });
-	BindEvent(cIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &inputData = static_cast<pragma::CEInputData &>(evData.get());
-		if(ustring::compare<std::string>(inputData.input, "setcontinuous", false)) {
-			SetContinuous(util::to_boolean(inputData.data));
-			return util::EventReply::Handled;
+		if(pragma::string::compare<std::string>(inputData.input, "setcontinuous", false)) {
+			SetContinuous(pragma::util::to_boolean(inputData.data));
+			return pragma::util::EventReply::Handled;
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		return HandleKeyValue(kvData.key, kvData.value);
 	});
-	BindEvent(cAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
 		static_cast<CEShouldUpdateBones &>(evData.get()).shouldUpdate = IsActive();
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -47,9 +47,9 @@ void ecs::CParticleSystemComponent::Initialize()
 	if(pTrComponent != nullptr) {
 		auto &trC = *pTrComponent;
 		FlagCallbackForRemoval(pTrComponent->AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
-		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			                         if(IsActive() == false || umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
-				                         return util::EventReply::Unhandled;
+		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+			                         if(IsActive() == false || pragma::math::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
+				                         return pragma::util::EventReply::Unhandled;
 			                         for(auto it = m_childSystems.begin(); it != m_childSystems.end(); ++it) {
 				                         auto &hChild = *it;
 				                         if(hChild.child.valid()) {
@@ -58,7 +58,7 @@ void ecs::CParticleSystemComponent::Initialize()
 						                         pTrComponent->SetPosition(trC.GetPosition());
 				                         }
 			                         }
-			                         return util::EventReply::Unhandled;
+			                         return pragma::util::EventReply::Unhandled;
 		                         }),
 		  CallbackType::Entity);
 	}
@@ -68,12 +68,12 @@ void ecs::CParticleSystemComponent::OnEntitySpawn()
 	CreateParticle();
 	BaseEnvParticleSystemComponent::OnEntitySpawn();
 }
-util::EventReply ecs::CParticleSystemComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply ecs::CParticleSystemComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvParticleSystemComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEnvParticleSystemComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 void ecs::CParticleSystemComponent::ReceiveData(NetPacket &packet)
 {
@@ -118,7 +118,7 @@ void ecs::CParticleSystemComponent::Clear()
 	m_childSystems.clear();
 	m_state = State::Initial;
 
-	umath::set_flag(m_flags, Flags::Setup, false);
+	pragma::math::set_flag(m_flags, Flags::Setup, false);
 }
 
 std::shared_ptr<pragma::asset::Model> ecs::CParticleSystemComponent::GenerateModel(pragma::Game &game, const std::vector<const ecs::CParticleSystemComponent *> &particleSystems)
@@ -468,7 +468,7 @@ std::unordered_map<std::string, std::string> pragma::ecs::get_particle_key_value
 		auto key = luabind::object_cast<std::string>(i.key());
 		std::string val = get_key_value(l, *i);
 
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		values[key] = val;
 	}
 	return values;
@@ -477,29 +477,29 @@ std::unordered_map<std::string, std::string> pragma::ecs::get_particle_key_value
 static void register_particle_class(luabind::class_<pragma::ecs::CParticleSystemComponent, pragma::BaseEnvParticleSystemComponent> &defPtc)
 {
 	auto defPt = luabind::class_<pragma::pts::CParticle>("Particle");
-	defPt.add_static_constant("FIELD_ID_POS", umath::to_integral(pragma::pts::CParticle::FieldId::Pos));
-	defPt.add_static_constant("FIELD_ID_ROT", umath::to_integral(pragma::pts::CParticle::FieldId::Rot));
-	defPt.add_static_constant("FIELD_ID_ROT_YAW", umath::to_integral(pragma::pts::CParticle::FieldId::RotYaw));
-	defPt.add_static_constant("FIELD_ID_ORIGIN", umath::to_integral(pragma::pts::CParticle::FieldId::Origin));
-	defPt.add_static_constant("FIELD_ID_VELOCITY", umath::to_integral(pragma::pts::CParticle::FieldId::Velocity));
-	defPt.add_static_constant("FIELD_ID_ANGULAR_VELOCITY", umath::to_integral(pragma::pts::CParticle::FieldId::AngularVelocity));
-	defPt.add_static_constant("FIELD_ID_RADIUS", umath::to_integral(pragma::pts::CParticle::FieldId::Radius));
-	defPt.add_static_constant("FIELD_ID_LENGTH", umath::to_integral(pragma::pts::CParticle::FieldId::Length));
-	defPt.add_static_constant("FIELD_ID_LIFE", umath::to_integral(pragma::pts::CParticle::FieldId::Life));
-	defPt.add_static_constant("FIELD_ID_COLOR", umath::to_integral(pragma::pts::CParticle::FieldId::Color));
-	defPt.add_static_constant("FIELD_ID_ALPHA", umath::to_integral(pragma::pts::CParticle::FieldId::Alpha));
-	defPt.add_static_constant("FIELD_ID_SEQUENCE", umath::to_integral(pragma::pts::CParticle::FieldId::Sequence));
-	defPt.add_static_constant("FIELD_ID_CREATION_TIME", umath::to_integral(pragma::pts::CParticle::FieldId::CreationTime));
-	defPt.add_static_constant("FIELD_ID_INVALID", umath::to_integral(pragma::pts::CParticle::FieldId::Invalid));
-	defPt.add_static_constant("FIELD_ID_COUNT", umath::to_integral(pragma::pts::CParticle::FieldId::Count));
-	static_assert(umath::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
+	defPt.add_static_constant("FIELD_ID_POS", pragma::math::to_integral(pragma::pts::CParticle::FieldId::Pos));
+	defPt.add_static_constant("FIELD_ID_ROT", pragma::math::to_integral(pragma::pts::CParticle::FieldId::Rot));
+	defPt.add_static_constant("FIELD_ID_ROT_YAW", pragma::math::to_integral(pragma::pts::CParticle::FieldId::RotYaw));
+	defPt.add_static_constant("FIELD_ID_ORIGIN", pragma::math::to_integral(pragma::pts::CParticle::FieldId::Origin));
+	defPt.add_static_constant("FIELD_ID_VELOCITY", pragma::math::to_integral(pragma::pts::CParticle::FieldId::Velocity));
+	defPt.add_static_constant("FIELD_ID_ANGULAR_VELOCITY", pragma::math::to_integral(pragma::pts::CParticle::FieldId::AngularVelocity));
+	defPt.add_static_constant("FIELD_ID_RADIUS", pragma::math::to_integral(pragma::pts::CParticle::FieldId::Radius));
+	defPt.add_static_constant("FIELD_ID_LENGTH", pragma::math::to_integral(pragma::pts::CParticle::FieldId::Length));
+	defPt.add_static_constant("FIELD_ID_LIFE", pragma::math::to_integral(pragma::pts::CParticle::FieldId::Life));
+	defPt.add_static_constant("FIELD_ID_COLOR", pragma::math::to_integral(pragma::pts::CParticle::FieldId::Color));
+	defPt.add_static_constant("FIELD_ID_ALPHA", pragma::math::to_integral(pragma::pts::CParticle::FieldId::Alpha));
+	defPt.add_static_constant("FIELD_ID_SEQUENCE", pragma::math::to_integral(pragma::pts::CParticle::FieldId::Sequence));
+	defPt.add_static_constant("FIELD_ID_CREATION_TIME", pragma::math::to_integral(pragma::pts::CParticle::FieldId::CreationTime));
+	defPt.add_static_constant("FIELD_ID_INVALID", pragma::math::to_integral(pragma::pts::CParticle::FieldId::Invalid));
+	defPt.add_static_constant("FIELD_ID_COUNT", pragma::math::to_integral(pragma::pts::CParticle::FieldId::Count));
+	static_assert(pragma::math::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
 	defPt.scope[luabind::def("field_id_to_name", static_cast<void (*)(lua::State *, uint32_t)>([](lua::State *l, uint32_t id) {
 		auto name = pragma::pts::CParticle::field_id_to_name(static_cast<pragma::pts::CParticle::FieldId>(id));
 		Lua::PushString(l, name);
 	}))];
 	defPt.scope[luabind::def("name_to_field_id", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &name) {
 		auto id = pragma::pts::CParticle::name_to_field_id(name);
-		Lua::PushInt(l, umath::to_integral(id));
+		Lua::PushInt(l, pragma::math::to_integral(id));
 	}))];
 	defPt.def("SetField", static_cast<void (*)(lua::State *, pragma::pts::CParticle &, uint32_t, const Vector4 &)>([](lua::State *l, pragma::pts::CParticle &pt, uint32_t fieldId, const Vector4 &value) { pt.SetField(static_cast<pragma::pts::CParticle::FieldId>(fieldId), value); }));
 	defPt.def("SetField", static_cast<void (*)(lua::State *, pragma::pts::CParticle &, uint32_t, float)>([](lua::State *l, pragma::pts::CParticle &pt, uint32_t fieldId, float value) { pt.SetField(static_cast<pragma::pts::CParticle::FieldId>(fieldId), value); }));
@@ -680,26 +680,26 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 
 	defCParticleSystem.add_static_constant("SF_PARTICLE_SYSTEM_CONTINUOUS", SF_PARTICLE_SYSTEM_CONTINUOUS);
 
-	defCParticleSystem.add_static_constant("RENDER_FLAG_NONE", umath::to_integral(pragma::pts::ParticleRenderFlags::None));
-	defCParticleSystem.add_static_constant("RENDER_FLAG_BIT_BLOOM", umath::to_integral(pragma::pts::ParticleRenderFlags::Bloom));
-	defCParticleSystem.add_static_constant("RENDER_FLAG_BIT_DEPTH_ONLY", umath::to_integral(pragma::pts::ParticleRenderFlags::DepthOnly));
+	defCParticleSystem.add_static_constant("RENDER_FLAG_NONE", pragma::math::to_integral(pragma::pts::ParticleRenderFlags::None));
+	defCParticleSystem.add_static_constant("RENDER_FLAG_BIT_BLOOM", pragma::math::to_integral(pragma::pts::ParticleRenderFlags::Bloom));
+	defCParticleSystem.add_static_constant("RENDER_FLAG_BIT_DEPTH_ONLY", pragma::math::to_integral(pragma::pts::ParticleRenderFlags::DepthOnly));
 
-	defCParticleSystem.add_static_constant("FLAG_NONE", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::None));
-	defCParticleSystem.add_static_constant("FLAG_BIT_SOFT_PARTICLES", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::SoftParticles));
-	defCParticleSystem.add_static_constant("FLAG_BIT_TEXTURE_SCROLLING_ENABLED", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::TextureScrollingEnabled));
-	defCParticleSystem.add_static_constant("FLAG_BIT_RENDERER_BUFFER_UPDATE_REQUIRED", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::RendererBufferUpdateRequired));
-	defCParticleSystem.add_static_constant("FLAG_BIT_HAS_MOVING_PARTICLES", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::HasMovingParticles));
-	defCParticleSystem.add_static_constant("FLAG_BIT_MOVE_WITH_EMITTER", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::MoveWithEmitter));
-	defCParticleSystem.add_static_constant("FLAG_BIT_ROTATE_WITH_EMITTER", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::RotateWithEmitter));
-	defCParticleSystem.add_static_constant("FLAG_BIT_SORT_PARTICLES", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::SortParticles));
-	defCParticleSystem.add_static_constant("FLAG_BIT_DYING", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::Dying));
-	defCParticleSystem.add_static_constant("FLAG_BIT_RANDOM_START_FRAME", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::RandomStartFrame));
-	defCParticleSystem.add_static_constant("FLAG_BIT_PREMULTIPLY_ALPHA", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::PremultiplyAlpha));
-	defCParticleSystem.add_static_constant("FLAG_BIT_ALWAYS_SIMULATE", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::AlwaysSimulate));
-	defCParticleSystem.add_static_constant("FLAG_BIT_CAST_SHADOWS", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::CastShadows));
-	defCParticleSystem.add_static_constant("FLAG_BIT_SETUP", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::Setup));
-	defCParticleSystem.add_static_constant("FLAG_BIT_AUTO_SIMULATE", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::AutoSimulate));
-	defCParticleSystem.add_static_constant("FLAG_BIT_MATERIAL_DESCRIPT_SET_INITIALIZED", umath::to_integral(pragma::ecs::CParticleSystemComponent::Flags::MaterialDescriptorSetInitialized));
+	defCParticleSystem.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::None));
+	defCParticleSystem.add_static_constant("FLAG_BIT_SOFT_PARTICLES", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::SoftParticles));
+	defCParticleSystem.add_static_constant("FLAG_BIT_TEXTURE_SCROLLING_ENABLED", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::TextureScrollingEnabled));
+	defCParticleSystem.add_static_constant("FLAG_BIT_RENDERER_BUFFER_UPDATE_REQUIRED", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::RendererBufferUpdateRequired));
+	defCParticleSystem.add_static_constant("FLAG_BIT_HAS_MOVING_PARTICLES", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::HasMovingParticles));
+	defCParticleSystem.add_static_constant("FLAG_BIT_MOVE_WITH_EMITTER", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::MoveWithEmitter));
+	defCParticleSystem.add_static_constant("FLAG_BIT_ROTATE_WITH_EMITTER", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::RotateWithEmitter));
+	defCParticleSystem.add_static_constant("FLAG_BIT_SORT_PARTICLES", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::SortParticles));
+	defCParticleSystem.add_static_constant("FLAG_BIT_DYING", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::Dying));
+	defCParticleSystem.add_static_constant("FLAG_BIT_RANDOM_START_FRAME", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::RandomStartFrame));
+	defCParticleSystem.add_static_constant("FLAG_BIT_PREMULTIPLY_ALPHA", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::PremultiplyAlpha));
+	defCParticleSystem.add_static_constant("FLAG_BIT_ALWAYS_SIMULATE", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::AlwaysSimulate));
+	defCParticleSystem.add_static_constant("FLAG_BIT_CAST_SHADOWS", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::CastShadows));
+	defCParticleSystem.add_static_constant("FLAG_BIT_SETUP", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::Setup));
+	defCParticleSystem.add_static_constant("FLAG_BIT_AUTO_SIMULATE", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::AutoSimulate));
+	defCParticleSystem.add_static_constant("FLAG_BIT_MATERIAL_DESCRIPT_SET_INITIALIZED", pragma::math::to_integral(pragma::ecs::CParticleSystemComponent::Flags::MaterialDescriptorSetInitialized));
 
 	defCParticleSystem.def("Start", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { hComponent.Start(); }));
 	defCParticleSystem.def("Stop", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { ::Stop(l, hComponent, false); }));
@@ -764,42 +764,42 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 	}));
 	defCParticleSystem.def("FindInitializer", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
 		auto &initializers = hComponent.GetInitializers();
-		auto it = std::find_if(initializers.begin(), initializers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)> &initializer) { return ustring::compare(name, initializer->GetName(), false); });
+		auto it = std::find_if(initializers.begin(), initializers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)> &initializer) { return pragma::string::compare(name, initializer->GetName(), false); });
 		if(it == initializers.end())
 			return;
 		Lua::Push(l, it->get());
 	}));
 	defCParticleSystem.def("FindOperator", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
 		auto &operators = hComponent.GetOperators();
-		auto it = std::find_if(operators.begin(), operators.end(), [&name](const std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)> &op) { return ustring::compare(name, op->GetName(), false); });
+		auto it = std::find_if(operators.begin(), operators.end(), [&name](const std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)> &op) { return pragma::string::compare(name, op->GetName(), false); });
 		if(it == operators.end())
 			return;
 		Lua::Push(l, it->get());
 	}));
 	defCParticleSystem.def("FindRenderer", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
 		auto &renderers = hComponent.GetRenderers();
-		auto it = std::find_if(renderers.begin(), renderers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)> &renderer) { return ustring::compare(name, renderer->GetName(), false); });
+		auto it = std::find_if(renderers.begin(), renderers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)> &renderer) { return pragma::string::compare(name, renderer->GetName(), false); });
 		if(it == renderers.end())
 			return;
 		Lua::Push(l, it->get());
 	}));
 	defCParticleSystem.def("FindInitializerByType", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
 		auto &initializers = hComponent.GetInitializers();
-		auto it = std::find_if(initializers.begin(), initializers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)> &initializer) { return ustring::compare(name, initializer->GetType(), false); });
+		auto it = std::find_if(initializers.begin(), initializers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)> &initializer) { return pragma::string::compare(name, initializer->GetType(), false); });
 		if(it == initializers.end())
 			return;
 		Lua::Push(l, it->get());
 	}));
 	defCParticleSystem.def("FindOperatorByType", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
 		auto &operators = hComponent.GetOperators();
-		auto it = std::find_if(operators.begin(), operators.end(), [&name](const std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)> &op) { return ustring::compare(name, op->GetType(), false); });
+		auto it = std::find_if(operators.begin(), operators.end(), [&name](const std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)> &op) { return pragma::string::compare(name, op->GetType(), false); });
 		if(it == operators.end())
 			return;
 		Lua::Push(l, it->get());
 	}));
 	defCParticleSystem.def("FindRendererByType", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, const std::string &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, const std::string &name) {
 		auto &renderers = hComponent.GetRenderers();
-		auto it = std::find_if(renderers.begin(), renderers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)> &renderer) { return ustring::compare(name, renderer->GetType(), false); });
+		auto it = std::find_if(renderers.begin(), renderers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)> &renderer) { return pragma::string::compare(name, renderer->GetType(), false); });
 		if(it == renderers.end())
 			return;
 		Lua::Push(l, it->get());
@@ -852,7 +852,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 	defCParticleSystem.def("SetOrientationType", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t orientationType) {
 		hComponent.SetOrientationType(static_cast<pragma::pts::ParticleOrientationType>(orientationType));
 	}));
-	defCParticleSystem.def("GetOrientationType", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetOrientationType())); }));
+	defCParticleSystem.def("GetOrientationType", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, pragma::math::to_integral(hComponent.GetOrientationType())); }));
 	defCParticleSystem.def("IsContinuous", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.IsContinuous()); }));
 	defCParticleSystem.def("SetContinuous", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, bool)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, bool b) { hComponent.SetContinuous(b); }));
 	defCParticleSystem.def("GetRemoveOnComplete", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushBool(l, hComponent.GetRemoveOnComplete()); }));
@@ -908,8 +908,8 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defCParticleSystem.def("GetAlphaMode", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetAlphaMode())); }));
-	defCParticleSystem.def("GetEffectiveAlphaMode", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, umath::to_integral(hComponent.GetEffectiveAlphaMode())); }));
+	defCParticleSystem.def("GetAlphaMode", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, pragma::math::to_integral(hComponent.GetAlphaMode())); }));
+	defCParticleSystem.def("GetEffectiveAlphaMode", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, pragma::math::to_integral(hComponent.GetEffectiveAlphaMode())); }));
 	defCParticleSystem.def("SetAlphaMode",
 	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t alphaMode) { hComponent.SetAlphaMode(static_cast<pragma::rendering::ParticleAlphaMode>(alphaMode)); }));
 	defCParticleSystem.def("GetEmissionRate", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent) { Lua::PushInt(l, hComponent.GetEmissionRate()); }));
@@ -997,10 +997,10 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 	defCParticleSystem.def("SetControlPointRotation",
 	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const Quat &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const Quat &rot) { hComponent.SetControlPointRotation(cpIdx, rot); }));
 	defCParticleSystem.def("SetControlPointPose",
-	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const umath::Transform &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const umath::Transform &pose) { hComponent.SetControlPointPose(cpIdx, pose); }));
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const pragma::math::Transform &)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const pragma::math::Transform &pose) { hComponent.SetControlPointPose(cpIdx, pose); }));
 	defCParticleSystem.def("SetControlPointPose",
-	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const umath::Transform &, float)>(
-	    [](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const umath::Transform &pose, float timeStamp) { hComponent.SetControlPointPose(cpIdx, pose, &timeStamp); }));
+	  static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t, const pragma::math::Transform &, float)>(
+	    [](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx, const pragma::math::Transform &pose, float timeStamp) { hComponent.SetControlPointPose(cpIdx, pose, &timeStamp); }));
 	defCParticleSystem.def("GetControlPointEntity", static_cast<void (*)(lua::State *, pragma::ecs::CParticleSystemComponent &, uint32_t)>([](lua::State *l, pragma::ecs::CParticleSystemComponent &hComponent, uint32_t cpIdx) {
 		auto *ent = hComponent.GetControlPointEntity(cpIdx);
 		if(ent == nullptr)
@@ -1052,19 +1052,19 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 		Lua::PushInt(l,animData->fps);
 	}));
 #endif
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_ALIGNED", umath::to_integral(pragma::pts::ParticleOrientationType::Aligned));
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_UPRIGHT", umath::to_integral(pragma::pts::ParticleOrientationType::Upright));
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_STATIC", umath::to_integral(pragma::pts::ParticleOrientationType::Static));
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_WORLD", umath::to_integral(pragma::pts::ParticleOrientationType::World));
-	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_BILLBOARD", umath::to_integral(pragma::pts::ParticleOrientationType::Billboard));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_ALIGNED", pragma::math::to_integral(pragma::pts::ParticleOrientationType::Aligned));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_UPRIGHT", pragma::math::to_integral(pragma::pts::ParticleOrientationType::Upright));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_STATIC", pragma::math::to_integral(pragma::pts::ParticleOrientationType::Static));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_WORLD", pragma::math::to_integral(pragma::pts::ParticleOrientationType::World));
+	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_BILLBOARD", pragma::math::to_integral(pragma::pts::ParticleOrientationType::Billboard));
 
-	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE", umath::to_integral(pragma::rendering::ParticleAlphaMode::Additive));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE_BY_COLOR", umath::to_integral(pragma::rendering::ParticleAlphaMode::AdditiveByColor));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_OPAQUE", umath::to_integral(pragma::rendering::ParticleAlphaMode::Opaque));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_MASKED", umath::to_integral(pragma::rendering::ParticleAlphaMode::Masked));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_TRANSLUCENT", umath::to_integral(pragma::rendering::ParticleAlphaMode::Translucent));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_PREMULTIPLIED", umath::to_integral(pragma::rendering::ParticleAlphaMode::Premultiplied));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_COUNT", umath::to_integral(pragma::rendering::ParticleAlphaMode::Count));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE", pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Additive));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE_BY_COLOR", pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::AdditiveByColor));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_OPAQUE", pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Opaque));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_MASKED", pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Masked));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_TRANSLUCENT", pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Translucent));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_PREMULTIPLIED", pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Premultiplied));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_COUNT", pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Count));
 	register_particle_class(defCParticleSystem);
 	register_modifier_class(defCParticleSystem);
 	defCParticleSystem.scope[luabind::def("find_particle_system_file", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &ptSystemName) {
@@ -1085,7 +1085,7 @@ void ecs::CParticleSystemComponent::RegisterLuaBindings(lua::State *l, luabind::
 	}))];
 	defCParticleSystem.scope[luabind::def("get_particle_system_definition", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &ptSystemName) {
 		auto lPtSystemName = ptSystemName;
-		ustring::to_lower(lPtSystemName);
+		pragma::string::to_lower(lPtSystemName);
 		auto &ptSystemCache = pragma::ecs::CParticleSystemComponent::GetCachedParticleSystemData();
 		auto it = ptSystemCache.find(lPtSystemName);
 		if(it == ptSystemCache.end())

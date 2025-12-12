@@ -22,7 +22,7 @@ export namespace pragma {
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnRemove() override;
 		virtual std::string GetIdentifier() const override { return "motion_blur"; }
-		virtual uint32_t GetPostProcessingWeight() const override { return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::MotionBlur); }
+		virtual uint32_t GetPostProcessingWeight() const override { return pragma::math::to_integral(CRendererComponent::StandardPostProcessingWeight::MotionBlur); }
 
 		void SetAutoUpdateMotionData(bool updateMotionPerFrame);
 		void UpdateMotionBlurData();

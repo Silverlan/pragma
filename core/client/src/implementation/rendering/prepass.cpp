@@ -95,7 +95,7 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload
 		textureNormals = context.CreateTexture(texCreateInfo, *imgNormals, imgViewCreateInfo, samplerCreateInfo);
 
 		auto &imgDepth = textureDepth->GetImage();
-		renderTarget = context.CreateRenderTarget({textureNormals, textureDepth}, shaderPrepass->GetRenderPass()); //umath::to_integral(pipelineType)));
+		renderTarget = context.CreateRenderTarget({textureNormals, textureDepth}, shaderPrepass->GetRenderPass()); //pragma::math::to_integral(pipelineType)));
 		renderTarget->SetDebugName("prepass_depth_normal_rt");
 		m_clearValues = {
 		  prosper::ClearValue {prosper::ClearColorValue {}},             // Unused, but required
@@ -106,7 +106,7 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload
 	{
 		textureNormals = nullptr;
 
-		renderTarget = context.CreateRenderTarget({textureDepth},shaderPrepassDepth->GetRenderPass(umath::to_integral(pipelineType)));
+		renderTarget = context.CreateRenderTarget({textureDepth},shaderPrepassDepth->GetRenderPass(pragma::math::to_integral(pipelineType)));
 		renderTarget->SetDebugName("prepass_depth_rt");
 		m_clearValues = {
 			prosper::ClearValue{prosper::ClearDepthStencilValue{1.f,0}} // Clear depth
@@ -134,7 +134,7 @@ static void debug_prepass(pragma::NetworkState *state, pragma::BasePlayerCompone
 		return;
 	const std::string name = "debug_ssao";
 	auto *pEl = pRoot->FindDescendantByName(name);
-	auto v = util::to_int(argv.front());
+	auto v = pragma::util::to_int(argv.front());
 	if(v == 0) {
 		if(pEl != nullptr)
 			pEl->Remove();

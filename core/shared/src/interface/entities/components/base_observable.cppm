@@ -15,10 +15,10 @@ export namespace pragma {
 		ObserverCameraData();
 		ObserverCameraData(const ObserverCameraData &) = default;
 		ObserverCameraData &operator=(const ObserverCameraData &) = default;
-		util::PBoolProperty enabled;
+		pragma::util::PBoolProperty enabled;
 		// If not set, the entity's eye offset will be used as origin instead
 		std::optional<Vector3> localOrigin = {};
-		util::PVector3Property offset;
+		pragma::util::PVector3Property offset;
 		bool rotateWithObservee = false;
 		std::optional<std::pair<EulerAngles, EulerAngles>> angleLimits = {};
 	};
@@ -50,8 +50,8 @@ export namespace pragma {
 		void SetCameraEnabled(CameraType type, bool enabled);
 		bool IsCameraEnabled(CameraType type) const;
 
-		const util::PBoolProperty &GetCameraEnabledProperty(CameraType type) const;
-		const util::PVector3Property &GetCameraOffsetProperty(CameraType type) const;
+		const pragma::util::PBoolProperty &GetCameraEnabledProperty(CameraType type) const;
+		const pragma::util::PVector3Property &GetCameraOffsetProperty(CameraType type) const;
 
 		BaseObserverComponent *GetObserver();
 
@@ -70,7 +70,7 @@ export namespace pragma {
 		pragma::NetEventId m_netSetObserverOffset = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netSetObserverOrigin = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netSetViewOffset = pragma::INVALID_NET_EVENT;
-		std::array<ObserverCameraData, umath::to_integral(CameraType::Count)> m_cameraData = {};
+		std::array<ObserverCameraData, pragma::math::to_integral(CameraType::Count)> m_cameraData = {};
 		pragma::ComponentHandle<pragma::BaseObserverComponent> m_observer;
 		Vector3 m_viewOffset = {};
 	};

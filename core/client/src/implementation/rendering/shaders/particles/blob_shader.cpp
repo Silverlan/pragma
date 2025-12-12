@@ -122,7 +122,7 @@ bool ShaderParticleBlob::RecordDraw(prosper::ShaderBindState &bindState, pragma:
 	auto &cam = scene.GetActiveCamera();
 
 	auto colorFactor = scene.GetParticleSystemColorFactor();
-	if(umath::is_flag_set(ptRenderFlags, pts::ParticleRenderFlags::Bloom)) {
+	if(pragma::math::is_flag_set(ptRenderFlags, pts::ParticleRenderFlags::Bloom)) {
 		auto bloomColorFactor = ps.GetEffectiveBloomColorFactor();
 		if(bloomColorFactor.has_value())
 			colorFactor *= *bloomColorFactor;
@@ -147,10 +147,10 @@ bool ShaderParticleBlob::RecordDraw(prosper::ShaderBindState &bindState, pragma:
 	viewportSize <<= 16;
 	viewportSize |= height;
 	ShaderParticle2DBase::PushConstants pushConstants {colorFactor, Vector3 {}, /* camRightWs */
-	  umath::to_integral(orientationType), Vector3 {},                          /* camUpWs */
+	  pragma::math::to_integral(orientationType), Vector3 {},                          /* camUpWs */
 	  0.f,                                                                      /* nearZ */
 	  cam.valid() ? cam->GetEntity().GetPosition() : Vector3 {}, 0.f,           /* farZ */
-	  viewportSize, umath::to_integral(renderFlags), umath::to_integral(ps.GetAlphaMode()), ps.GetSimulationTime()};
+	  viewportSize, pragma::math::to_integral(renderFlags), pragma::math::to_integral(ps.GetAlphaMode()), ps.GetSimulationTime()};
 	Mat4 vp;
 	if(cam.valid()) {
 		auto &v = cam->GetViewMatrix();

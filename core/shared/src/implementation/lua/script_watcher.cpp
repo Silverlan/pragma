@@ -28,7 +28,7 @@ void LuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &fName)
 		return;
 	// Ignore include cache (= all include files are reloaded)
 	Lua::set_ignore_include_cache(true);
-	auto sg = util::ScopeGuard(std::bind(Lua::set_ignore_include_cache, false)); // Reset once we're done
+	auto sg = pragma::util::ScopeGuard(std::bind(Lua::set_ignore_include_cache, false)); // Reset once we're done
 
 	auto splitPath = ufile::split_path(fName);
 	if(splitPath.empty())
@@ -36,14 +36,14 @@ void LuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &fName)
 	if(splitPath.size() >= 2) {
 		auto nwStateDirName = m_game->GetLuaNetworkDirectoryName();
 		const auto fCheckType = [this, &splitPath, &fName, &nwStateDirName](const std::string &typeName) -> bool {
-			if(splitPath.size() < 2 || ustring::compare(splitPath.at(0), typeName, false) == false)
+			if(splitPath.size() < 2 || pragma::string::compare(splitPath.at(0), typeName, false) == false)
 				return false;
-			if(splitPath.size() == 2 || (splitPath.size() == 3 && ustring::compare(splitPath.at(1), nwStateDirName, false) == true)) {
+			if(splitPath.size() == 2 || (splitPath.size() == 3 && pragma::string::compare(splitPath.at(1), nwStateDirName, false) == true)) {
 				// This should be a Lua-entity defined in a single script, without its own directory
 				m_game->LoadLuaEntity(ufile::to_path(splitPath, 0, splitPath.size() - 1));
 				return true;
 			}
-			if(ustring::compare<std::string>(splitPath.at(1), "components", false)) {
+			if(pragma::string::compare<std::string>(splitPath.at(1), "components", false)) {
 				m_game->LoadLuaComponent(ufile::to_path(splitPath, 0, 2));
 				return true;
 			}
@@ -59,7 +59,7 @@ void LuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &fName)
 	// Game Mode
 	auto *info = m_game->GetGameMode();
 	if(info != nullptr && splitPath.at(0) == "gamemodes" && splitPath.size() >= 2) {
-		if(ustring::compare(splitPath.at(1), info->id, false)) // Is this the current gamemode?
+		if(pragma::string::compare(splitPath.at(1), info->id, false)) // Is this the current gamemode?
 		{
 			m_game->ReloadGameModeScripts();
 			return;
@@ -81,11 +81,11 @@ bool LuaDirectoryWatcherManager::MountDirectory(const std::string &path, bool st
 {
 	try {
 		auto watchFlags = DirectoryWatcherCallback::WatchFlags::WatchSubDirectories;
-		auto basePath = util::DirPath(path);
-		m_watchers.push_back(::util::make_shared<DirectoryWatcherCallback>(
+		auto basePath = pragma::util::DirPath(path);
+		m_watchers.push_back(pragma::util::make_shared<DirectoryWatcherCallback>(
 		  path,
 		  [this, basePath = std::move(basePath)](const std::string &fName) {
-			  auto relName = util::FilePath(fName);
+			  auto relName = pragma::util::FilePath(fName);
 			  relName.MakeRelative(basePath);
 			  OnLuaFileChanged(relName.GetString());
 		  },

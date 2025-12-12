@@ -28,7 +28,7 @@ export namespace pragma {
 
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual std::string GetIdentifier() const override { return "bloom"; }
-		virtual uint32_t GetPostProcessingWeight() const override { return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::Bloom); }
+		virtual uint32_t GetPostProcessingWeight() const override { return pragma::math::to_integral(CRendererComponent::StandardPostProcessingWeight::Bloom); }
 
 		virtual void OnTick(double dt) override;
 	  private:

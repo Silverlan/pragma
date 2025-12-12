@@ -266,7 +266,7 @@ int Lua::log::register_logger(lua::State *l)
 }
 int Lua::log::color(lua::State *l)
 {
-	auto level = static_cast<::util::LogSeverity>(Lua::CheckInt(l, 1));
+	auto level = static_cast<pragma::util::LogSeverity>(Lua::CheckInt(l, 1));
 	std::string c {};
 	switch(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level))) {
 	case spdlog::level::level_enum::warn:

@@ -56,8 +56,8 @@ using ComponentMemberReferencePolicy = luabind::generic_policy<N, pragma::Compon
 /*template<uint32_t N>
 	using UniversalReferencePolicy = luabind::generic_policy<N,util::Uuid,[](lua::State *l,int index) -> int {
 		return Lua::IsString(l,index) ? 0 : luabind::no_match;
-	},[](lua::State *l,int index) -> util::Uuid {
-		return util::uuid_string_to_bytes(Lua::CheckString(l,index));
+	},[](lua::State *l,int index) -> pragma::util::Uuid {
+		return pragma::util::uuid_string_to_bytes(Lua::CheckString(l,index));
 	}>;
 */
 
@@ -78,17 +78,17 @@ namespace pragma {
 		ReturnPrimitives = 1u,
 		ReturnMeshes = ReturnPrimitives << 1u,
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 }
 REGISTER_ENUM_FLAGS(pragma::BvhIntersectionFlags)
 using IntersectionTestResult = Lua::type<std::pair<bool, Lua::var<std::optional<std::vector<uint64_t>>, std::optional<std::vector<pragma::MeshIntersectionInfo::MeshInfo>>>>>;
 static IntersectionTestResult bvh_intersection_test(lua::State *l, const std::function<bool(pragma::IntersectionInfo *)> &fTest, pragma::BvhIntersectionFlags flags)
 {
-	if(!umath::is_flag_set(flags, pragma::BvhIntersectionFlags::ReturnPrimitives | pragma::BvhIntersectionFlags::ReturnMeshes)) {
+	if(!pragma::math::is_flag_set(flags, pragma::BvhIntersectionFlags::ReturnPrimitives | pragma::BvhIntersectionFlags::ReturnMeshes)) {
 		auto res = fTest(nullptr);
 		return luabind::object {l, std::pair<bool, std::optional<std::vector<uint64_t>>> {res, {}}};
 	}
-	if(umath::is_flag_set(flags, pragma::BvhIntersectionFlags::ReturnPrimitives)) {
+	if(pragma::math::is_flag_set(flags, pragma::BvhIntersectionFlags::ReturnPrimitives)) {
 		pragma::PrimitiveIntersectionInfo info {};
 		auto res = fTest(&info);
 		if(!res)
@@ -102,18 +102,18 @@ static IntersectionTestResult bvh_intersection_test(lua::State *l, const std::fu
 	return luabind::object {l, std::pair<bool, std::optional<std::vector<pragma::MeshIntersectionInfo::MeshInfo>>> {res, std::move(info.meshInfos)}};
 }
 
-template<typename TResult, bool (pragma::MetaRigComponent::*GetValue)(pragma::animation::MetaRigBoneType, TResult &, umath::CoordinateSpace) const>
-std::optional<TResult> get_meta_bone_value(const pragma::MetaRigComponent &metaC, pragma::animation::MetaRigBoneType bone, umath::CoordinateSpace space)
+template<typename TResult, bool (pragma::MetaRigComponent::*GetValue)(pragma::animation::MetaRigBoneType, TResult &, pragma::math::CoordinateSpace) const>
+std::optional<TResult> get_meta_bone_value(const pragma::MetaRigComponent &metaC, pragma::animation::MetaRigBoneType bone, pragma::math::CoordinateSpace space)
 {
 	TResult result;
 	if(!(metaC.*GetValue)(bone, result, space))
 		return {};
 	return result;
 }
-template<typename TResult, bool (pragma::MetaRigComponent::*GetValue)(pragma::animation::MetaRigBoneType, TResult &, umath::CoordinateSpace) const>
+template<typename TResult, bool (pragma::MetaRigComponent::*GetValue)(pragma::animation::MetaRigBoneType, TResult &, pragma::math::CoordinateSpace) const>
 std::optional<TResult> get_meta_bone_value_ls(const pragma::MetaRigComponent &metaC, pragma::animation::MetaRigBoneType bone)
 {
-	return get_meta_bone_value<TResult, GetValue>(metaC, bone, umath::CoordinateSpace::Local);
+	return get_meta_bone_value<TResult, GetValue>(metaC, bone, pragma::math::CoordinateSpace::Local);
 }
 
 void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
@@ -187,7 +187,7 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  std::string name = "pragma:game/entity/ec/" + std::string {*cInfo->name} + "/" + memberName;
 		  auto uuid = ref.GetUuid();
 		  if(uuid.has_value())
-			  name += "?entity_uuid=" + util::uuid_to_string(*uuid);
+			  name += "?entity_uuid=" + pragma::util::uuid_to_string(*uuid);
 		  return name;
 	  });
 	classDefMemRef.def(
@@ -247,20 +247,20 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defInputMovementC];
 
 	auto defMetaRig = pragma::LuaCore::create_entity_component_class<pragma::MetaRigComponent, pragma::BaseEntityComponent>("MetaRigComponent");
-	defMetaRig.def("GetBonePose", &get_meta_bone_value<umath::ScaledTransform, &pragma::MetaRigComponent::GetBonePose>);
+	defMetaRig.def("GetBonePose", &get_meta_bone_value<pragma::math::ScaledTransform, &pragma::MetaRigComponent::GetBonePose>);
 	defMetaRig.def("GetBonePos", &get_meta_bone_value<Vector3, &pragma::MetaRigComponent::GetBonePos>);
 	defMetaRig.def("GetBoneRot", &get_meta_bone_value<Quat, &pragma::MetaRigComponent::GetBoneRot>);
 	defMetaRig.def("GetBoneScale", &get_meta_bone_value<Vector3, &pragma::MetaRigComponent::GetBoneScale>);
 
-	defMetaRig.def("GetBonePose", &get_meta_bone_value_ls<umath::ScaledTransform, &pragma::MetaRigComponent::GetBonePose>);
+	defMetaRig.def("GetBonePose", &get_meta_bone_value_ls<pragma::math::ScaledTransform, &pragma::MetaRigComponent::GetBonePose>);
 	defMetaRig.def("GetBonePos", &get_meta_bone_value_ls<Vector3, &pragma::MetaRigComponent::GetBonePos>);
 	defMetaRig.def("GetBoneRot", &get_meta_bone_value_ls<Quat, &pragma::MetaRigComponent::GetBoneRot>);
 	defMetaRig.def("GetBoneScale", &get_meta_bone_value_ls<Vector3, &pragma::MetaRigComponent::GetBoneScale>);
 
-	defMetaRig.def("SetBonePose", &pragma::MetaRigComponent::SetBonePose, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
-	defMetaRig.def("SetBonePos", &pragma::MetaRigComponent::SetBonePos, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
-	defMetaRig.def("SetBoneRot", &pragma::MetaRigComponent::SetBoneRot, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
-	defMetaRig.def("SetBoneScale", &pragma::MetaRigComponent::SetBoneScale, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
+	defMetaRig.def("SetBonePose", &pragma::MetaRigComponent::SetBonePose, luabind::default_parameter_policy<4, pragma::math::CoordinateSpace::Local> {});
+	defMetaRig.def("SetBonePos", &pragma::MetaRigComponent::SetBonePos, luabind::default_parameter_policy<4, pragma::math::CoordinateSpace::Local> {});
+	defMetaRig.def("SetBoneRot", &pragma::MetaRigComponent::SetBoneRot, luabind::default_parameter_policy<4, pragma::math::CoordinateSpace::Local> {});
+	defMetaRig.def("SetBoneScale", &pragma::MetaRigComponent::SetBoneScale, luabind::default_parameter_policy<4, pragma::math::CoordinateSpace::Local> {});
 	entsMod[defMetaRig];
 
 	auto defBoneMerge = pragma::LuaCore::create_entity_component_class<pragma::BoneMergeComponent, pragma::BaseEntityComponent>("BoneMergeComponent");
@@ -282,7 +282,7 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defIntersectionHandler.def(
 	  "IntersectionTest2", +[](pragma::IntersectionHandlerComponent &c, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) {
 		  auto t = std::chrono::steady_clock::now();
-		  c.IntersectionTest(origin, dir, umath::CoordinateSpace::Object, minDist, maxDist);
+		  c.IntersectionTest(origin, dir, pragma::math::CoordinateSpace::Object, minDist, maxDist);
 		  auto dt = std::chrono::steady_clock::now() - t;
 		  std::cout << "Internal2: " << (dt.count() / 1'000'000.0) << "ms" << std::endl;
 	  });
@@ -293,21 +293,21 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  std::cout << "Lua Overhead: " << (dt / 1'000'000.0) << "ms" << std::endl;
 	  });
 	defIntersectionHandler.def(
-	  "IntersectionTest", +[](pragma::IntersectionHandlerComponent &c, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) -> std::optional<pragma::HitInfo> { return c.IntersectionTest(origin, dir, umath::CoordinateSpace::Object, minDist, maxDist); });
+	  "IntersectionTest", +[](pragma::IntersectionHandlerComponent &c, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) -> std::optional<pragma::HitInfo> { return c.IntersectionTest(origin, dir, pragma::math::CoordinateSpace::Object, minDist, maxDist); });
 	// defBvh.def("IntersectionTest", static_cast<std::optional<pragma::bvh::HitInfo> (pragma::IntersectionHandlerComponent::*)(const Vector3 &, const Vector3 &, float, float) const>(&pragma::IntersectionHandlerComponent::IntersectionTest));
 	defIntersectionHandler.def("IntersectionTestAabb", static_cast<bool (pragma::IntersectionHandlerComponent::*)(const Vector3 &, const Vector3 &) const>(&pragma::IntersectionHandlerComponent::IntersectionTestAabb));
 	defIntersectionHandler.def(
 	  "IntersectionTestAabb", +[](lua::State *l, const pragma::IntersectionHandlerComponent &bvhC, const Vector3 &min, const Vector3 &max, pragma::BvhIntersectionFlags flags) -> IntersectionTestResult {
 		  return bvh_intersection_test(l, [&bvhC, &min, &max](pragma::IntersectionInfo *info) { return info ? bvhC.IntersectionTestAabb(min, max, *info) : bvhC.IntersectionTestAabb(min, max); }, flags);
 	  });
-	defIntersectionHandler.def("IntersectionTestKDop", static_cast<bool (pragma::IntersectionHandlerComponent::*)(const std::vector<umath::Plane> &) const>(&pragma::IntersectionHandlerComponent::IntersectionTestKDop));
+	defIntersectionHandler.def("IntersectionTestKDop", static_cast<bool (pragma::IntersectionHandlerComponent::*)(const std::vector<pragma::math::Plane> &) const>(&pragma::IntersectionHandlerComponent::IntersectionTestKDop));
 	defIntersectionHandler.def(
-	  "IntersectionTestKDop", +[](lua::State *l, const pragma::IntersectionHandlerComponent &bvhC, const std::vector<umath::Plane> &planes, pragma::BvhIntersectionFlags flags) -> IntersectionTestResult {
+	  "IntersectionTestKDop", +[](lua::State *l, const pragma::IntersectionHandlerComponent &bvhC, const std::vector<pragma::math::Plane> &planes, pragma::BvhIntersectionFlags flags) -> IntersectionTestResult {
 		  return bvh_intersection_test(l, [&bvhC, &planes](pragma::IntersectionInfo *info) { return info ? bvhC.IntersectionTestKDop(planes, *info) : bvhC.IntersectionTestKDop(planes); }, flags);
 	  });
-	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_NONE", umath::to_integral(pragma::BvhIntersectionFlags::None));
-	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_PRIMITIVES", umath::to_integral(pragma::BvhIntersectionFlags::ReturnPrimitives));
-	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_MESHES", umath::to_integral(pragma::BvhIntersectionFlags::ReturnMeshes));
+	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_NONE", pragma::math::to_integral(pragma::BvhIntersectionFlags::None));
+	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_PRIMITIVES", pragma::math::to_integral(pragma::BvhIntersectionFlags::ReturnPrimitives));
+	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_MESHES", pragma::math::to_integral(pragma::BvhIntersectionFlags::ReturnMeshes));
 
 	auto defBvhHitInfo = luabind::class_<pragma::HitInfo>("HitInfo");
 	defBvhHitInfo.def_readonly("mesh", &pragma::HitInfo::mesh);
@@ -384,10 +384,10 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defMovement.def("SetDirectionMagnitude", &pragma::MovementComponent::SetDirectionMagnitude);
 	defMovement.def("GetDirectionMagnitude", &pragma::MovementComponent::GetDirectionMagnitude);
 	defMovement.add_static_constant("EVENT_ON_UPDATE_MOVEMENT", pragma::movementComponent::EVENT_ON_UPDATE_MOVEMENT);
-	defMovement.add_static_constant("MOVE_DIRECTION_FORWARD", umath::to_integral(pragma::MovementComponent::MoveDirection::Forward));
-	defMovement.add_static_constant("MOVE_DIRECTION_RIGHT", umath::to_integral(pragma::MovementComponent::MoveDirection::Right));
-	defMovement.add_static_constant("MOVE_DIRECTION_BACKWARD", umath::to_integral(pragma::MovementComponent::MoveDirection::Backward));
-	defMovement.add_static_constant("MOVE_DIRECTION_LEFT", umath::to_integral(pragma::MovementComponent::MoveDirection::Left));
+	defMovement.add_static_constant("MOVE_DIRECTION_FORWARD", pragma::math::to_integral(pragma::MovementComponent::MoveDirection::Forward));
+	defMovement.add_static_constant("MOVE_DIRECTION_RIGHT", pragma::math::to_integral(pragma::MovementComponent::MoveDirection::Right));
+	defMovement.add_static_constant("MOVE_DIRECTION_BACKWARD", pragma::math::to_integral(pragma::MovementComponent::MoveDirection::Backward));
+	defMovement.add_static_constant("MOVE_DIRECTION_LEFT", pragma::math::to_integral(pragma::MovementComponent::MoveDirection::Left));
 	entsMod[defMovement];
 
 	auto defOrientation = pragma::LuaCore::create_entity_component_class<pragma::OrientationComponent, pragma::BaseEntityComponent>("OrientationComponent");
@@ -577,7 +577,7 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defDriverC.scope[defDriver];
 	entsMod[defDriverC];
 	pragma::LuaCore::define_custom_constructor<pragma::game::ValueDriver,
-	  +[](pragma::ComponentId componentId, const std::string &memberRef, pragma::game::ValueDriverDescriptor descriptor, const std::string &self) -> pragma::game::ValueDriver { return pragma::game::ValueDriver {componentId, memberRef, descriptor, util::uuid_string_to_bytes(self)}; }, pragma::ComponentId,
+	  +[](pragma::ComponentId componentId, const std::string &memberRef, pragma::game::ValueDriverDescriptor descriptor, const std::string &self) -> pragma::game::ValueDriver { return pragma::game::ValueDriver {componentId, memberRef, descriptor, pragma::util::uuid_string_to_bytes(self)}; }, pragma::ComponentId,
 	  const std::string &, pragma::game::ValueDriverDescriptor, const std::string &>(GetLuaState());
 
 	auto defIK = pragma::LuaCore::create_entity_component_class<pragma::IKComponent, pragma::BaseEntityComponent>("IKComponent");
@@ -624,9 +624,9 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defConstraint];
 
 	auto defConstraintManager = pragma::LuaCore::create_entity_component_class<pragma::ConstraintManagerComponent, pragma::BaseEntityComponent>("ConstraintManagerComponent");
-	defConstraintManager.add_static_constant("COORDINATE_SPACE_WORLD", umath::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::World));
-	defConstraintManager.add_static_constant("COORDINATE_SPACE_LOCAL", umath::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::Local));
-	defConstraintManager.add_static_constant("COORDINATE_SPACE_OBJECT", umath::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::Object));
+	defConstraintManager.add_static_constant("COORDINATE_SPACE_WORLD", pragma::math::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::World));
+	defConstraintManager.add_static_constant("COORDINATE_SPACE_LOCAL", pragma::math::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::Local));
+	defConstraintManager.add_static_constant("COORDINATE_SPACE_OBJECT", pragma::math::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::Object));
 	defConstraintManager.add_static_constant("EVENT_APPLY_CONSTRAINT", pragma::constraintManagerComponent::EVENT_APPLY_CONSTRAINT);
 	entsMod[defConstraintManager];
 
@@ -659,12 +659,12 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defConstraintCopyScale];
 
 	auto defConstraintLookAtComponent = pragma::LuaCore::create_entity_component_class<pragma::ConstraintLookAtComponent, pragma::BaseEntityComponent>("ConstraintLookAtComponent");
-	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_X", umath::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::X));
-	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_Y", umath::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::Y));
-	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_Z", umath::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::Z));
-	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_X", umath::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::NegX));
-	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_Y", umath::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::NegY));
-	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_Z", umath::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::NegZ));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_X", pragma::math::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::X));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_Y", pragma::math::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::Y));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_Z", pragma::math::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::Z));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_X", pragma::math::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::NegX));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_Y", pragma::math::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::NegY));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_Z", pragma::math::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::NegZ));
 	defConstraintLookAtComponent.def("SetTrackAxis", &pragma::ConstraintLookAtComponent::SetTrackAxis);
 	defConstraintLookAtComponent.def("GetTrackAxis", &pragma::ConstraintLookAtComponent::GetTrackAxis);
 	defConstraintLookAtComponent.def("SetUpTarget", &pragma::ConstraintLookAtComponent::SetUpTarget);
@@ -685,9 +685,9 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defConstraintChildOfComponent];
 
 	auto defConstraintLimitDistance = pragma::LuaCore::create_entity_component_class<pragma::ConstraintLimitDistanceComponent, pragma::BaseEntityComponent>("ConstraintLimitDistanceComponent");
-	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_INSIDE", umath::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::Inside));
-	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_OUTSIDE", umath::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::Outside));
-	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_ON_SURFACE", umath::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::OnSurface));
+	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_INSIDE", pragma::math::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::Inside));
+	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_OUTSIDE", pragma::math::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::Outside));
+	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_ON_SURFACE", pragma::math::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::OnSurface));
 	defConstraintLimitDistance.def("SetClampRegion", &pragma::ConstraintLimitDistanceComponent::SetClampRegion);
 	defConstraintLimitDistance.def("GetClampRegion", &pragma::ConstraintLimitDistanceComponent::GetClampRegion);
 	defConstraintLimitDistance.def("SetDistance", &pragma::ConstraintLimitDistanceComponent::SetDistance);

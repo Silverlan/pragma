@@ -76,12 +76,12 @@ export namespace pragma::ecs {
 		using ControlPointIndex = uint32_t;
 		struct DLLCLIENT ControlPoint {
 			float simTimestamp = 0.f;
-			umath::Transform pose = {};
+			pragma::math::Transform pose = {};
 			EntityHandle hEntity = {};
 		};
 
 		struct DLLCLIENT ChildData {
-			::util::WeakHandle<pragma::ecs::CParticleSystemComponent> child {};
+			pragma::util::WeakHandle<pragma::ecs::CParticleSystemComponent> child {};
 			float delay = 0.f;
 		};
 
@@ -111,7 +111,7 @@ export namespace pragma::ecs {
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual ~CParticleSystemComponent() override;
-		virtual ::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void SetRemoveOnComplete(bool b) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
@@ -293,12 +293,12 @@ export namespace pragma::ecs {
 		void SetControlPointEntity(ControlPointIndex idx, CBaseEntity &ent);
 		void SetControlPointPosition(ControlPointIndex idx, const Vector3 &pos);
 		void SetControlPointRotation(ControlPointIndex idx, const Quat &rot);
-		void SetControlPointPose(ControlPointIndex idx, const umath::Transform &pose, float *optTimestamp = nullptr);
+		void SetControlPointPose(ControlPointIndex idx, const pragma::math::Transform &pose, float *optTimestamp = nullptr);
 
 		CBaseEntity *GetControlPointEntity(ControlPointIndex idx) const;
-		std::optional<umath::Transform> GetControlPointPose(ControlPointIndex idx, float *optOutTimestamp = nullptr) const;
-		std::optional<umath::Transform> GetPrevControlPointPose(ControlPointIndex idx, float *optOutTimestamp = nullptr) const;
-		std::optional<umath::Transform> GetControlPointPose(ControlPointIndex idx, float t) const;
+		std::optional<pragma::math::Transform> GetControlPointPose(ControlPointIndex idx, float *optOutTimestamp = nullptr) const;
+		std::optional<pragma::math::Transform> GetPrevControlPointPose(ControlPointIndex idx, float *optOutTimestamp = nullptr) const;
+		std::optional<pragma::math::Transform> GetControlPointPose(ControlPointIndex idx, float t) const;
 
 		const std::vector<std::unique_ptr<pts::CParticleInitializer, void (*)(pts::CParticleInitializer *)>> &GetInitializers() const;
 		const std::vector<std::unique_ptr<pts::CParticleOperator, void (*)(pts::CParticleOperator *)>> &GetOperators() const;
@@ -320,7 +320,7 @@ export namespace pragma::ecs {
 		void SetFlags(Flags flags) { m_flags = flags; }
 		void SetMaxParticleCount(uint32_t count);
 	  protected:
-		::util::EventReply HandleKeyValue(const std::string &key, const std::string &value);
+		pragma::util::EventReply HandleKeyValue(const std::string &key, const std::string &value);
 
 		virtual void CreateParticle();
 	  private:
@@ -337,7 +337,7 @@ export namespace pragma::ecs {
 		};
 		enum class State : uint32_t { Initial = 0u, Active, Complete, Paused };
 		std::vector<ChildData> m_childSystems;
-		::util::WeakHandle<pragma::ecs::CParticleSystemComponent> m_hParent = {};
+		pragma::util::WeakHandle<pragma::ecs::CParticleSystemComponent> m_hParent = {};
 		std::vector<Node> m_nodes;
 		std::vector<pts::CParticle> m_particles;
 		std::vector<std::size_t> m_sortedParticleIndices;
@@ -352,7 +352,7 @@ export namespace pragma::ecs {
 		uint32_t m_emissionRate = 0u;
 		uint32_t m_nextParticleEmissionCount = std::numeric_limits<uint32_t>::max();
 		Color m_initialColor = colors::White;
-		Flags m_flags = static_cast<Flags>(umath::to_integral(Flags::SoftParticles) | umath::to_integral(Flags::AutoSimulate));
+		Flags m_flags = static_cast<Flags>(pragma::math::to_integral(Flags::SoftParticles) | pragma::math::to_integral(Flags::AutoSimulate));
 		std::vector<CallbackHandle> m_renderCallbacks;
 		std::pair<Vector3, Vector3> m_renderBounds = {{}, {}};
 		uint32_t m_maxParticles = 0u;

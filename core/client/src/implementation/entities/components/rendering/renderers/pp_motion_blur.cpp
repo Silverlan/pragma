@@ -196,7 +196,7 @@ void CRendererPpMotionBlurComponent::RecordVelocityPass(const pragma::rendering:
 		pragma::rendering::RenderPassDrawInfo renderPassDrawInfo {drawSceneInfo, cmd};
 		VelocityStageRenderProcessor rsys {*velShader, renderPassDrawInfo, {} /* drawOrigin */, motionBlurTempData, *m_motionBlurDataDsg->GetDescriptorSet(), *m_genericBoneDsg->GetDescriptorSet()};
 
-		rsys.BindShader(*velShader, umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
+		rsys.BindShader(*velShader, pragma::math::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
 		// Render static world geometry
 		if((renderPassDrawInfo.drawSceneInfo.renderFlags & rendering::RenderFlags::World) != rendering::RenderFlags::None) {
 			std::chrono::steady_clock::time_point t;
@@ -217,7 +217,7 @@ void CRendererPpMotionBlurComponent::RecordVelocityPass(const pragma::rendering:
 			auto &queueTranslucent = *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, true /* translucent */);
 			queueTranslucent.WaitForCompletion();
 			if(queueTranslucent.queue.empty() == false) {
-				// rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::AlphaTest));
+				// rsys.BindShader(shaderPrepass,pragma::math::to_integral(pragma::ShaderPrepass::Pipeline::AlphaTest));
 				rsys.Render(queueTranslucent, pragma::rendering::RenderPass::Prepass);
 			}
 		}
@@ -312,7 +312,7 @@ void CRendererPpMotionBlurComponent::RenderPostProcessing(const pragma::renderin
 		if(shaderMotionBlur->RecordBeginDraw(bindState) == true) {
 			ShaderPPMotionBlur::PushConstants pushConstants {};
 			pushConstants.velocityScale = GetMotionBlurIntensity();
-			pushConstants.blurQuality = umath::to_integral(GetMotionBlurQuality());
+			pushConstants.blurQuality = pragma::math::to_integral(GetMotionBlurQuality());
 			shaderMotionBlur->RecordDraw(bindState, pushConstants, *hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(), *m_velocityTexDsg->GetDescriptorSet());
 			shaderMotionBlur->RecordEndDraw(bindState);
 		}

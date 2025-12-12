@@ -14,7 +14,7 @@ void pragma::pts::CParticleInitializerInitialAngularVelocity::Initialize(pragma:
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "velocity") {
 			auto velocity = uvec::create(pair.second);
 			m_speed = uvec::length(velocity);
@@ -42,7 +42,7 @@ void pragma::pts::CParticleInitializerInitialAngularVelocity::Initialize(pragma:
 void pragma::pts::CParticleInitializerInitialAngularVelocity::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	if(m_randomVelocity != nullptr) {
-		auto vel = Vector3(umath::random(m_randomVelocity->minVelocity.x, m_randomVelocity->maxVelocity.x), umath::random(m_randomVelocity->minVelocity.y, m_randomVelocity->maxVelocity.y), umath::random(m_randomVelocity->minVelocity.z, m_randomVelocity->maxVelocity.z));
+		auto vel = Vector3(pragma::math::random(m_randomVelocity->minVelocity.x, m_randomVelocity->maxVelocity.x), pragma::math::random(m_randomVelocity->minVelocity.y, m_randomVelocity->maxVelocity.y), pragma::math::random(m_randomVelocity->minVelocity.z, m_randomVelocity->maxVelocity.z));
 		particle.SetAngularVelocity(vel);
 		return;
 	}

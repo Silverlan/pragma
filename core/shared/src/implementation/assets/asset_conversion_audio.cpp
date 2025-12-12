@@ -7,9 +7,9 @@ module pragma.shared;
 import :assets.conversion;
 import se_script;
 
-bool util::port_sound_script(pragma::NetworkState *nw, const std::string &path)
+bool pragma::util::port_sound_script(pragma::NetworkState *nw, const std::string &path)
 {
-	static auto *ptrOpenArchiveFile = reinterpret_cast<void (*)(const std::string &, VFilePtr &, const std::optional<std::string> &)>(util::impl::get_module_func(nw, "open_archive_file"));
+	static auto *ptrOpenArchiveFile = reinterpret_cast<void (*)(const std::string &, VFilePtr &, const std::optional<std::string> &)>(pragma::util::impl::get_module_func(nw, "open_archive_file"));
 	if(ptrOpenArchiveFile == nullptr)
 		return false;
 	VFilePtr f = nullptr;
@@ -19,8 +19,8 @@ bool util::port_sound_script(pragma::NetworkState *nw, const std::string &path)
 	source_engine::script::ScriptBlock root {};
 	if(source_engine::script::read_script(f, root) != source_engine::script::ResultCode::Ok)
 		return false;
-	auto outPath = util::IMPORT_PATH + FileManager::GetCanonicalizedPath(path);
-	if(ustring::substr(outPath, 0, 8) == std::string("scripts") + FileManager::GetDirectorySeparator())
+	auto outPath = pragma::util::IMPORT_PATH + FileManager::GetCanonicalizedPath(path);
+	if(pragma::string::substr(outPath, 0, 8) == std::string("scripts") + FileManager::GetDirectorySeparator())
 		outPath = "scripts/sounds/" + outPath.substr(8);
 	ufile::remove_extension_from_filename(outPath, std::array<std::string, 1> {"txt"});
 	outPath += ".udm";
@@ -67,7 +67,7 @@ bool util::port_sound_script(pragma::NetworkState *nw, const std::string &path)
 				else if(outVal == "PITCH_HIGH")
 					outVal = "1.2";
 				else
-					outVal = std::to_string(util::to_float(outVal) / 100.f);
+					outVal = std::to_string(pragma::util::to_float(outVal) / 100.f);
 				udmEvent["pitch"] = outVal;
 			}
 			else if(val.identifier == "soundlevel") {
@@ -93,7 +93,7 @@ bool util::port_sound_script(pragma::NetworkState *nw, const std::string &path)
 		auto bStream = false;
 		if(sources.empty() == false) {
 			for(auto &src : sources) {
-				if(ustring::match(src, "*loop*") == true)
+				if(pragma::string::match(src, "*loop*") == true)
 					udmEvent["loop"] = true;
 
 				const std::string removePrefixes = "*#@><^()}$!?"; // Special prefixes that need to be removed

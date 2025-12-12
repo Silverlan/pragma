@@ -19,7 +19,7 @@ export {
 			Serif = Mono << 1u,
 			Sans = Serif << 1u,
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	}
 	REGISTER_ENUM_FLAGS(pragma::FontSetFlag)
 

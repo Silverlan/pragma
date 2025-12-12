@@ -21,7 +21,7 @@ export namespace Lua {
 		DLLNETWORK EulerAngles create_from_string(const std::string &str);
 	};
 	namespace util {
-		DLLNETWORK void splash_damage(lua::State *l, const ::util::SplashDamageInfo &splashDamageInfo);
+		DLLNETWORK void splash_damage(lua::State *l, const pragma::util::SplashDamageInfo &splashDamageInfo);
 
 		DLLNETWORK bool is_valid(lua::State *l);
 		DLLNETWORK bool is_valid(lua::State *l, const luabind::object &o);
@@ -103,12 +103,12 @@ export namespace Lua {
 		DLLNETWORK std::string round_string(lua::State *l, float value, uint32_t places);
 		DLLNETWORK std::string round_string(lua::State *l, float value);
 		DLLNETWORK std::string get_type_name(lua::State *l, const luabind::object &o);
-		DLLNETWORK std::string variable_type_to_string(::util::VarType varType);
+		DLLNETWORK std::string variable_type_to_string(pragma::util::VarType varType);
 		DLLNETWORK std::string get_addon_path(lua::State *l);
 		DLLNETWORK std::string get_addon_path(lua::State *l, const std::string &relPath);
 		DLLNETWORK std::string get_string_hash(const std::string &str);
 		DLLNETWORK luabind::object get_class_value(lua::State *l, const luabind::object &o, const std::string &key);
-		DLLNETWORK Lua::var<bool, ::util::ParallelJob<luabind::object>> pack_zip_archive(lua::State *l, pragma::Game &game, const std::string &zipFileName, const luabind::table<> &t);
+		DLLNETWORK Lua::var<bool, pragma::util::ParallelJob<luabind::object>> pack_zip_archive(lua::State *l, pragma::Game &game, const std::string &zipFileName, const luabind::table<> &t);
 
 		DLLNETWORK void register_std_vector_types(lua::State *l);
 
@@ -122,7 +122,7 @@ export namespace Lua {
 		DLLNETWORK bool start_debugger_server(lua::State *l);
 
 		struct DLLNETWORK Uuid {
-			::util::Uuid value;
+			pragma::util::Uuid value;
 		};
 	};
 };

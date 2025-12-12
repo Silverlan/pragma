@@ -19,14 +19,14 @@ import pragma.string;
 // These are directly copied from the sharedutils library.
 // We can't create a dependency to the sharedutils library directly because
 // the updater has to be able to remove the binary files during runtime.
-export namespace util {
+export namespace pragma::util {
 	std::unordered_map<std::string, std::string> get_launch_parameters(int argc, char *argv[])
 	{
 		std::unordered_map<std::string, std::string> out;
 		for(auto i = 0; i < argc; i++) {
 			char *arg = argv[i];
 			std::vector<std::string> sub;
-			ustring::explode(arg, "=", sub);
+			pragma::string::explode(arg, "=", sub);
 			if(!sub.empty()) {
 				if(sub.size() > 1)
 					out.insert(std::unordered_map<std::string, std::string>::value_type(sub[0], sub[1]));

@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :assets.conversion;
 
-bool util::port_source2_map(pragma::NetworkState *nw, const std::string &path)
+bool pragma::util::port_source2_map(pragma::NetworkState *nw, const std::string &path)
 {
 	static auto *ptrConvertMap = reinterpret_cast<bool (*)(pragma::Game &, const std::string &)>(impl::get_module_func(nw, "convert_source2_map"));
 	if(ptrConvertMap == nullptr)
@@ -15,7 +15,7 @@ bool util::port_source2_map(pragma::NetworkState *nw, const std::string &path)
 	return ptrConvertMap(*nw->GetGameState(), path);
 }
 
-bool util::port_hl2_map(pragma::NetworkState *nw, const std::string &path)
+bool pragma::util::port_hl2_map(pragma::NetworkState *nw, const std::string &path)
 {
 	static auto *ptrConvertMap = reinterpret_cast<bool (*)(pragma::Game &, const std::string &)>(impl::get_module_func(nw, "convert_hl2_map"));
 	if(ptrConvertMap == nullptr)

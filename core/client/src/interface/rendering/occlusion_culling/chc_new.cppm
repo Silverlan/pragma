@@ -15,7 +15,7 @@ export namespace pragma {
 #pragma warning(disable : 4251)
 	class CHC;
 	class CHCNode;
-	using WPCHCNode = util::WeakHandle<CHCNode>;
+	using WPCHCNode = pragma::util::WeakHandle<CHCNode>;
 	using PCHCNode = std::shared_ptr<CHCNode>;
 	class DLLCLIENT CHCNode : public std::enable_shared_from_this<CHCNode> {
 	  public:
@@ -56,9 +56,9 @@ export namespace pragma {
 		std::queue<PCHCQuery> m_queryQueue;
 		std::queue<WPCHCNode> m_visQueue;
 		std::queue<WPCHCNode> m_invisQueue;
-		std::vector<umath::Plane> m_frustumPlanes;
+		std::vector<pragma::math::Plane> m_frustumPlanes;
 		std::vector<PCHCNode> m_nodes;
-		util::WeakHandle<pragma::CCameraComponent> m_cam = {};
+		pragma::util::WeakHandle<pragma::CCameraComponent> m_cam = {};
 		void TraverseNode(CHCNode &cNode);
 		void PullUpVisibility(CHCNode &cNode);
 		void QueryPreviouslyInvisibleNode(CHCNode &cNode);

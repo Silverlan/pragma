@@ -22,7 +22,7 @@ export {
 		};
 		using BoneChannelMap = std::unordered_map<pragma::animation::BoneId, AnimBoneChannelDesc>;
 
-		util::EnumRegister &get_activity_enum_register();
+		pragma::util::EnumRegister &get_activity_enum_register();
 		pragma::Activity get_activity(const panima::Animation &anim);
 		void set_activity(panima::Animation &anim, pragma::Activity act);
 		uint8_t get_activity_weight(const panima::Animation &anim);

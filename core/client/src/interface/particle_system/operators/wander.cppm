@@ -35,16 +35,16 @@ void pragma::pts::CParticleOperatorWander::Initialize(pragma::BaseEnvParticleSys
 	CParticleOperatorWorldBase::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "strength")
-			m_fStrength = util::to_float(it->second);
+			m_fStrength = pragma::util::to_float(it->second);
 		else if(key == "frequency")
-			m_fFrequency = util::to_float(it->second);
+			m_fFrequency = pragma::util::to_float(it->second);
 	}
 
 	m_hashCodes.resize(static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount());
 }
-void pragma::pts::CParticleOperatorWander::OnParticleCreated(pragma::pts::CParticle &particle) { m_hashCodes.at(particle.GetIndex()) = umath::random(1, std::numeric_limits<int32_t>::max()); }
+void pragma::pts::CParticleOperatorWander::OnParticleCreated(pragma::pts::CParticle &particle) { m_hashCodes.at(particle.GetIndex()) = pragma::math::random(1, std::numeric_limits<int32_t>::max()); }
 void pragma::pts::CParticleOperatorWander::Simulate(double tDelta)
 {
 	CParticleOperatorWorldBase::Simulate(tDelta);
@@ -61,5 +61,5 @@ void pragma::pts::CParticleOperatorWander::Simulate(pragma::pts::CParticle &part
 	// (the noise function is always zero at integers)
 	auto pid = m_hashCodes.at(particle.GetIndex());
 	auto time = m_dtTime + (pid & 255) / 256.f;
-	particle.SetVelocity(particle.GetVelocity() + Vector3(util::noise::get_noise(time, pid) * m_dtStrength, util::noise::get_noise(time, pid + 1) * m_dtStrength, util::noise::get_noise(time, pid + 2) * m_dtStrength));
+	particle.SetVelocity(particle.GetVelocity() + Vector3(pragma::math::noise::get_noise(time, pid) * m_dtStrength, pragma::math::noise::get_noise(time, pid + 1) * m_dtStrength, pragma::math::noise::get_noise(time, pid + 2) * m_dtStrength));
 }

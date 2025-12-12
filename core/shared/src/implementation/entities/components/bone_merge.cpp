@@ -130,10 +130,10 @@ void BoneMergeComponent::MergeBonePoses()
 	for(auto &mapping : m_boneMappings) {
 		if(mapping.boneId >= poses.size() || mapping.parentBoneId >= posesParent.size())
 			continue;
-		umath::ScaledTransform pose;
-		if(!m_animCParent->GetBonePose(mapping.parentBoneId, pose, umath::CoordinateSpace::Object))
+		pragma::math::ScaledTransform pose;
+		if(!m_animCParent->GetBonePose(mapping.parentBoneId, pose, pragma::math::CoordinateSpace::Object))
 			continue;
-		m_animC->SetBonePose(mapping.boneId, pose, umath::CoordinateSpace::Object);
+		m_animC->SetBonePose(mapping.boneId, pose, pragma::math::CoordinateSpace::Object);
 	}
 	m_animC->SetAbsolutePosesDirty();
 }

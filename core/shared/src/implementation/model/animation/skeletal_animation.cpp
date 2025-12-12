@@ -118,9 +118,9 @@ void pragma::animation::skeletal::animation_slice_to_animated_pose(const BoneCha
 		++idx;
 	}
 }
-util::EnumRegister &pragma::animation::skeletal::get_activity_enum_register()
+pragma::util::EnumRegister &pragma::animation::skeletal::get_activity_enum_register()
 {
-	static util::EnumRegister g_reg {};
+	static pragma::util::EnumRegister g_reg {};
 	return g_reg;
 }
 bool pragma::animation::skeletal::is_bone_position_channel(const panima::Channel &channel)

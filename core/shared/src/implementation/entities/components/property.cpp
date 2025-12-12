@@ -8,5 +8,5 @@ import :entities.property;
 
 using namespace pragma;
 
-EntityProperty::EntityProperty() : util::SimpleProperty<EntityProperty, EntityHandle>() {}
-EntityProperty::EntityProperty(const EntityHandle &hEnt) : util::SimpleProperty<EntityProperty, EntityHandle>(hEnt) {}
+EntityProperty::EntityProperty() : pragma::util::SimpleProperty<EntityProperty, EntityHandle>() {}
+EntityProperty::EntityProperty(const EntityHandle &hEnt) : pragma::util::SimpleProperty<EntityProperty, EntityHandle>(hEnt) {}

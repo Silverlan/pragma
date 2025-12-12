@@ -67,7 +67,7 @@ template<class TBase>
 	Base::InitializeShaderPipelines(context);
 
 	auto &timeBuffer = *pragma::get_cgame()->GetUniformBlockSwapBuffer(UniformBinding::Time);
-	GetPipeline()->SetBuffer(umath::to_integral(DescSet::Time),timeBuffer,umath::to_integral(Binding::Time));
+	GetPipeline()->SetBuffer(pragma::math::to_integral(DescSet::Time),timeBuffer,pragma::math::to_integral(Binding::Time));
 }
 
 template<class TBase>
@@ -102,11 +102,11 @@ template<class TBase>
 	switch(set)
 	{
 		case ParticleBase::DescSet::ParticleMap:
-			return umath::to_integral(DescSet::ParticleMap);
+			return pragma::math::to_integral(DescSet::ParticleMap);
 		case ParticleBase::DescSet::Animation:
-			return umath::to_integral(DescSet::Animation);
+			return pragma::math::to_integral(DescSet::Animation);
 		case ParticleBase::DescSet::Time:
-			return umath::to_integral(DescSet::Time);
+			return pragma::math::to_integral(DescSet::Time);
 	}
 	return ParticleBase::GetDescSet(set);
 }

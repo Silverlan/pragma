@@ -61,15 +61,15 @@ void BaseAIComponent::LookAtStep(float tDelta)
 		auto valTgt = ang[i];
 
 		if(blendController != nullptr)
-			valTgt = umath::clamp_angle(valTgt, blendController->min, blendController->max);
+			valTgt = pragma::math::clamp_angle(valTgt, blendController->min, blendController->max);
 
-		auto angDiff = umath::get_angle_difference(val, valTgt);
+		auto angDiff = pragma::math::get_angle_difference(val, valTgt);
 		auto &turnSpeed = m_neckInfo.turnSpeed[i];
-		if((umath::abs(angDiff) / umath::abs(turnSpeed)) < fadeTime) // We'll have reached the turn target soon, slow down (TODO: This might cause jittering)
-			turnSpeed = umath::approach(m_neckInfo.turnSpeed[i], 0.f, turnAcceleration * tDelta);
+		if((pragma::math::abs(angDiff) / pragma::math::abs(turnSpeed)) < fadeTime) // We'll have reached the turn target soon, slow down (TODO: This might cause jittering)
+			turnSpeed = pragma::math::approach(m_neckInfo.turnSpeed[i], 0.f, turnAcceleration * tDelta);
 		else
-			turnSpeed = umath::approach(m_neckInfo.turnSpeed[i], maxTurnSpeed * static_cast<float>(umath::sign(valTgt)), turnAcceleration * tDelta);
-		val = umath::approach_angle(val, valTgt, tDelta * umath::abs(turnSpeed));
+			turnSpeed = pragma::math::approach(m_neckInfo.turnSpeed[i], maxTurnSpeed * static_cast<float>(pragma::math::sign(valTgt)), turnAcceleration * tDelta);
+		val = pragma::math::approach_angle(val, valTgt, tDelta * pragma::math::abs(turnSpeed));
 		animComponent->SetBlendController(blendControllers[i], val);
 		if(val != 0.f)
 			m_neckInfo.neckTurned = true;

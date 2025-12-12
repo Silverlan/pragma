@@ -13,7 +13,7 @@ module pragma.shared;
 
 import :engine;
 
-std::string pragma::Engine::GetDate(const std::string &format) { return util::get_date_time(format); }
+std::string pragma::Engine::GetDate(const std::string &format) { return pragma::util::get_date_time(format); }
 
 uint64_t pragma::Engine::GetTickCount() const { return CUInt64(m_ctTick.GetTime()); }
 double pragma::Engine::GetTickTime() const { return CDouble(m_ctTick()); }
@@ -27,6 +27,6 @@ void pragma::Engine::SetTickRate(UInt32 tickRate)
 	}
 	m_tickRate = tickRate;
 }
-bool pragma::Engine::IsRunning() { return umath::is_flag_set(m_stateFlags, StateFlags::Running); }
+bool pragma::Engine::IsRunning() { return pragma::math::is_flag_set(m_stateFlags, StateFlags::Running); }
 bool pragma::Engine::IsGameActive() { return GetServerNetworkState()->IsGameActive(); }
 bool pragma::Engine::IsServerOnly() { return true; }

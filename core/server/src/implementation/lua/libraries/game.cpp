@@ -53,8 +53,8 @@ int Lua::game::Server::create_model(lua::State *l)
 int Lua::game::Server::load_map(lua::State *l)
 {
 	std::vector<EntityHandle> ents;
-	auto hCb = ::util::make_shared<CallbackHandle>(pragma::SGame::Get()->AddCallback("OnEntityCreated", FunctionCallback<void, pragma::ecs::BaseEntity *>::Create([&ents](pragma::ecs::BaseEntity *ent) { ents.push_back(ent->GetHandle()); })));
-	::util::ScopeGuard sg([hCb]() {
+	auto hCb = pragma::util::make_shared<CallbackHandle>(pragma::SGame::Get()->AddCallback("OnEntityCreated", FunctionCallback<void, pragma::ecs::BaseEntity *>::Create([&ents](pragma::ecs::BaseEntity *ent) { ents.push_back(ent->GetHandle()); })));
+	pragma::util::ScopeGuard sg([hCb]() {
 		if(hCb->IsValid() == true)
 			hCb->Remove();
 	});

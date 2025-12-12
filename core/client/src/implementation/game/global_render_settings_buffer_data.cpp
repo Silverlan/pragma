@@ -41,11 +41,11 @@ pragma::rendering::GlobalRenderSettingsBufferData::GlobalRenderSettingsBufferDat
 		return;
 	descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDER_SETTINGS);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
-	descSet.SetBindingUniformBuffer(*debugBuffer, umath::to_integral(pragma::ShaderScene::RenderSettingsBinding::Debug));
-	descSet.SetBindingUniformBuffer(*timeBuffer, umath::to_integral(pragma::ShaderScene::RenderSettingsBinding::Time));
-	descSet.SetBindingUniformBuffer(*csmBuffer, umath::to_integral(pragma::ShaderScene::RenderSettingsBinding::CSMData));
+	descSet.SetBindingUniformBuffer(*debugBuffer, pragma::math::to_integral(pragma::ShaderScene::RenderSettingsBinding::Debug));
+	descSet.SetBindingUniformBuffer(*timeBuffer, pragma::math::to_integral(pragma::ShaderScene::RenderSettingsBinding::Time));
+	descSet.SetBindingUniformBuffer(*csmBuffer, pragma::math::to_integral(pragma::ShaderScene::RenderSettingsBinding::CSMData));
 	auto &entInstanceBuffer = *pragma::CRenderComponent::GetInstanceBuffer();
-	descSet.SetBindingStorageBuffer(entInstanceBuffer, umath::to_integral(pragma::ShaderScene::RenderSettingsBinding::GlobalInstance));
+	descSet.SetBindingStorageBuffer(entInstanceBuffer, pragma::math::to_integral(pragma::ShaderScene::RenderSettingsBinding::GlobalInstance));
 
 #ifdef PRAGMA_ENABLE_SHADER_DEBUG_PRINT
 	{
@@ -62,7 +62,7 @@ pragma::rendering::GlobalRenderSettingsBufferData::GlobalRenderSettingsBufferDat
 		debugPrintBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &initialDebugPrintData);
 		debugPrintBuffer->SetDebugName("render_settings_debug_print_buf");
 		debugPrintBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::ReadBit);
-		descSet.SetBindingStorageBuffer(*debugPrintBuffer, umath::to_integral(pragma::ShaderScene::RenderSettingsBinding::DebugPrint));
+		descSet.SetBindingStorageBuffer(*debugPrintBuffer, pragma::math::to_integral(pragma::ShaderScene::RenderSettingsBinding::DebugPrint));
 	}
 #endif
 }
@@ -90,7 +90,7 @@ std::optional<std::string> pragma::rendering::GlobalRenderSettingsBufferData::Ge
 		return "No data.";
 	if(data.type == GlslType::NotSet)
 		return {};
-	if(umath::to_integral(data.type) >= umath::to_integral(GlslType::Count))
+	if(pragma::math::to_integral(data.type) >= pragma::math::to_integral(GlslType::Count))
 		return "Invalid type.";
 	return udm::visit(glsl_type_to_udm(data.type), [&data](auto tag) -> std::string {
 		using T = typename decltype(tag)::type;

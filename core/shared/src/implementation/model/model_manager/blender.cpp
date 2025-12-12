@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :model.model_manager;
 
-pragma::asset::BlenderFormatHandler::BlenderFormatHandler(util::IAssetManager &assetManager, std::string ext) : util::IImportAssetFormatHandler {assetManager}, m_ext {std::move(ext)} {}
+pragma::asset::BlenderFormatHandler::BlenderFormatHandler(pragma::util::IAssetManager &assetManager, std::string ext) : pragma::util::IImportAssetFormatHandler {assetManager}, m_ext {std::move(ext)} {}
 bool pragma::asset::BlenderFormatHandler::Import(const std::string &outputPath, std::string &outFilePath)
 {
 	if(!pragma::python::init_blender()) {
@@ -22,7 +22,7 @@ bool pragma::asset::BlenderFormatHandler::Import(const std::string &outputPath, 
 
 	std::string glbMdlPath = "models/" + outputPath + ".glb";
 	auto glbPath = "addons/imported/" + glbMdlPath;
-	auto absGlbPath = util::Path::CreatePath(filemanager::get_program_write_path()) + util::Path::CreateFile(glbPath);
+	auto absGlbPath = pragma::util::Path::CreatePath(filemanager::get_program_write_path()) + pragma::util::Path::CreateFile(glbPath);
 	std::vector<const char *> argv {absPath.c_str()};
 	if(!pragma::python::exec("modules/blender/scripts/format_importers/" + m_ext + ".py", argv.size(), argv.data())) {
 		auto errMsg = pragma::python::get_last_error();
@@ -46,7 +46,7 @@ bool pragma::asset::BlenderFormatHandler::Import(const std::string &outputPath, 
 	filemanager::update_file_index_cache(absGlbPath.GetString(), true);
 
 	// Asset has been converted to glb, we can now redirect it to the gltf format handler
-	auto res = static_cast<util::FileAssetManager &>(GetAssetManager()).Import("models/" + outputPath + ".glb");
+	auto res = static_cast<pragma::util::FileAssetManager &>(GetAssetManager()).Import("models/" + outputPath + ".glb");
 	filemanager::remove_file(glbPath); // Don't need the glb anymore
 	outFilePath = outputPath;
 	return res;

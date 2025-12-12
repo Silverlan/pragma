@@ -12,12 +12,12 @@ import :game;
 using namespace pragma;
 
 void ai::TaskMoveRandom::Print(const Schedule *sched, std::ostream &o) const { o << "MoveRandom[" << GetMoveDistance(sched) << "]"; }
-void ai::TaskMoveRandom::SetMoveDistance(float dist) { SetParameter(umath::to_integral(Parameter::Distance), dist); }
-void ai::TaskMoveRandom::SetMoveActivity(pragma::Activity act) { SetParameter(umath::to_integral(Parameter::MoveActivity), umath::to_integral(act)); }
+void ai::TaskMoveRandom::SetMoveDistance(float dist) { SetParameter(pragma::math::to_integral(Parameter::Distance), dist); }
+void ai::TaskMoveRandom::SetMoveActivity(pragma::Activity act) { SetParameter(pragma::math::to_integral(Parameter::MoveActivity), pragma::math::to_integral(act)); }
 
 float ai::TaskMoveRandom::GetMoveDistance(const Schedule *sched) const
 {
-	auto *paramDist = GetParameter(sched, umath::to_integral(Parameter::Distance));
+	auto *paramDist = GetParameter(sched, pragma::math::to_integral(Parameter::Distance));
 	auto dist = 1'000.f;
 	if(paramDist != nullptr && paramDist->GetType() == ai::Schedule::Parameter::Type::Float)
 		dist = paramDist->GetFloat();
@@ -48,7 +48,7 @@ ai::BehaviorNode::Result ai::TaskMoveRandom::Think(const Schedule *sched, pragma
 	if(r != Result::Succeeded)
 		return r;
 	auto moveAct = pragma::Activity::Run;
-	auto *paramAct = GetParameter(sched, umath::to_integral(Parameter::MoveActivity));
+	auto *paramAct = GetParameter(sched, pragma::math::to_integral(Parameter::MoveActivity));
 	if(paramAct != nullptr && paramAct->GetType() == ai::Schedule::Parameter::Type::Int)
 		moveAct = static_cast<pragma::Activity>(paramAct->GetInt());
 

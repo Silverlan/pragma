@@ -38,17 +38,17 @@ void pragma::pts::CParticleOperatorToroidalVortex::Initialize(pragma::BaseEnvPar
 	CParticleOperatorWorldBase::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "axis")
 			m_vAxis = uvec::get_normal(uvec::create(it->second));
 		else if(key == "strength")
-			m_fStrength = util::to_float(it->second);
+			m_fStrength = pragma::util::to_float(it->second);
 		else if(key == "divergence")
-			m_fDivergence = util::to_float(it->second);
+			m_fDivergence = pragma::util::to_float(it->second);
 		else if(key == "height")
-			m_fHeight = util::to_float(it->second);
+			m_fHeight = pragma::util::to_float(it->second);
 		else if(key == "radius")
-			m_fRadius = util::to_float(it->second);
+			m_fRadius = pragma::util::to_float(it->second);
 	}
 }
 void pragma::pts::CParticleOperatorToroidalVortex::Simulate(double tDelta)

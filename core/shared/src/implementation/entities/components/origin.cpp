@@ -14,15 +14,15 @@ void OriginComponent::RegisterMembers(pragma::EntityComponentManager &componentM
 {
 	using T = OriginComponent;
 
-	using TPose = umath::Transform;
+	using TPose = pragma::math::Transform;
 	using TPos = Vector3;
 	using TRot = Quat;
 
 	constexpr auto *posePathName = "pose";
-	auto poseComponentMetaData = ::util::make_shared<ents::PoseComponentTypeMetaData>();
+	auto poseComponentMetaData = pragma::util::make_shared<ents::PoseComponentTypeMetaData>();
 	poseComponentMetaData->poseProperty = posePathName;
 
-	auto poseMetaData = ::util::make_shared<ents::PoseTypeMetaData>();
+	auto poseMetaData = pragma::util::make_shared<ents::PoseTypeMetaData>();
 	poseMetaData->posProperty = "pos";
 	poseMetaData->rotProperty = "rot";
 
@@ -43,7 +43,7 @@ OriginComponent::OriginComponent(pragma::ecs::BaseEntity &ent) : BaseEntityCompo
 void OriginComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void OriginComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void OriginComponent::SetOriginPose(const umath::Transform &pose)
+void OriginComponent::SetOriginPose(const pragma::math::Transform &pose)
 {
 	m_origin = pose;
 	BroadcastEvent(originComponent::EVENT_ON_ORIGIN_CHANGED);
@@ -59,6 +59,6 @@ void OriginComponent::SetOriginRot(const Quat &rot)
 	BroadcastEvent(originComponent::EVENT_ON_ORIGIN_CHANGED);
 }
 
-const umath::Transform &OriginComponent::GetOriginPose() const { return m_origin; }
+const pragma::math::Transform &OriginComponent::GetOriginPose() const { return m_origin; }
 const Vector3 &OriginComponent::GetOriginPos() const { return m_origin.GetOrigin(); }
 const Quat &OriginComponent::GetOriginRot() const { return m_origin.GetRotation(); }

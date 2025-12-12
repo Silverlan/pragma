@@ -88,7 +88,7 @@ void CWeaponComponent::SetViewModelOffset(const Vector3 &offset)
 	vm->SetViewModelOffset(offset);
 }
 const Vector3 &CWeaponComponent::GetViewModelOffset() const { return m_viewModelOffset; }
-void CWeaponComponent::SetViewFOV(umath::Degree fov)
+void CWeaponComponent::SetViewFOV(pragma::math::Degree fov)
 {
 	m_viewFov = fov;
 	auto *vm = GetViewModel();
@@ -109,7 +109,7 @@ void CWeaponComponent::Initialize()
 {
 	BaseWeaponComponent::Initialize();
 
-	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &shouldDrawData = static_cast<CEShouldDraw &>(evData.get());
 		auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
 		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
@@ -120,9 +120,9 @@ void CWeaponComponent::Initialize()
 				auto *plComponent = static_cast<CPlayerComponent *>(pl->GetEntity().GetPlayerComponent().get());
 				if(pl->IsInFirstPersonMode() == false) {
 					shouldDrawData.shouldDraw = false;
-					return util::EventReply::Handled;
+					return pragma::util::EventReply::Handled;
 				}
-				return util::EventReply::Unhandled;
+				return pragma::util::EventReply::Unhandled;
 			}
 			auto *owner = m_whOwnerComponent.valid() ? m_whOwnerComponent->GetOwner() : nullptr;
 			if(owner != nullptr) {
@@ -130,20 +130,20 @@ void CWeaponComponent::Initialize()
 				if(charComponent.valid()) {
 					if(charComponent->GetActiveWeapon() != &GetEntity()) {
 						shouldDrawData.shouldDraw = false;
-						return util::EventReply::Handled;
+						return pragma::util::EventReply::Handled;
 					}
-					return util::EventReply::Unhandled;
+					return pragma::util::EventReply::Unhandled;
 				}
 			}
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
-	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW_SHADOW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW_SHADOW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		if(m_bDeployed == false) {
 			static_cast<CEShouldDraw &>(evData.get()).shouldDraw = false;
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	BindEventUnhandled(cOwnableComponent::EVENT_ON_OWNER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		UpdateOwnerAttachment();
@@ -153,9 +153,9 @@ void CWeaponComponent::Initialize()
 			auto plComponent = ownerChangedData.newOwner->GetPlayerComponent();
 			auto *observableC = plComponent->GetObservableComponent();
 			if(observableC) {
-				m_cbOnObserverChanged = observableC->AddEventCallback(cObservableComponent::EVENT_ON_OBSERVER_CHANGED, [this, observableC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+				m_cbOnObserverChanged = observableC->AddEventCallback(cObservableComponent::EVENT_ON_OBSERVER_CHANGED, [this, observableC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 					UpdateObserver(observableC->GetObserver());
-					return util::EventReply::Unhandled;
+					return pragma::util::EventReply::Unhandled;
 				});
 				FlagCallbackForRemoval(m_cbOnObserverChanged, CallbackType::Component);
 				UpdateObserver(observableC->GetObserver());
@@ -173,7 +173,7 @@ void CWeaponComponent::Initialize()
 			renderC->UpdateShouldDrawState();
 	});
 }
-umath::Degree CWeaponComponent::GetViewFOV() const
+pragma::math::Degree CWeaponComponent::GetViewFOV() const
 {
 	if(m_viewFov.has_value() == false)
 		return cvViewFov->GetFloat();
@@ -197,7 +197,7 @@ void CWeaponComponent::UpdateWorldModel()
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(!pRenderComponent)
 		return;
-	pRenderComponent->SetSceneRenderPass(IsInFirstPersonMode() ? ((umath::is_flag_set(m_stateFlags, StateFlags::HideWorldModelInFirstPerson) == true) ? pragma::rendering::SceneRenderPass::None : pragma::rendering::SceneRenderPass::View) : pragma::rendering::SceneRenderPass::World);
+	pRenderComponent->SetSceneRenderPass(IsInFirstPersonMode() ? ((pragma::math::is_flag_set(m_stateFlags, StateFlags::HideWorldModelInFirstPerson) == true) ? pragma::rendering::SceneRenderPass::None : pragma::rendering::SceneRenderPass::View) : pragma::rendering::SceneRenderPass::World);
 }
 
 void CWeaponComponent::SetViewModel(const std::string &mdl)
@@ -269,7 +269,7 @@ void CWeaponComponent::UpdateOwnerAttachment()
 	}
 
 	CEAttachToOwner evData {*owner, cVm};
-	if(BroadcastEvent(cWeaponComponent::EVENT_ATTACH_TO_OWNER, evData) == util::EventReply::Unhandled) {
+	if(BroadcastEvent(cWeaponComponent::EVENT_ATTACH_TO_OWNER, evData) == pragma::util::EventReply::Unhandled) {
 		auto *parent = cVm ? &cVm->GetEntity() : owner;
 		auto pTransformComponent = ent.GetTransformComponent();
 		auto pTransformComponentParent = parent->GetTransformComponent();
@@ -302,20 +302,20 @@ void CWeaponComponent::UpdateOwnerAttachment()
 
 void CWeaponComponent::SetHideWorldModelInFirstPerson(bool b)
 {
-	umath::set_flag(m_stateFlags, StateFlags::HideWorldModelInFirstPerson, b);
+	pragma::math::set_flag(m_stateFlags, StateFlags::HideWorldModelInFirstPerson, b);
 	UpdateWorldModel();
 }
-bool CWeaponComponent::GetHideWorldModelInFirstPerson() const { return umath::is_flag_set(m_stateFlags, StateFlags::HideWorldModelInFirstPerson); }
+bool CWeaponComponent::GetHideWorldModelInFirstPerson() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::HideWorldModelInFirstPerson); }
 
 void CWeaponComponent::UpdateDeployState()
 {
 	if(IsDeployed() == false)
 		return;
 
-	if(umath::is_flag_set(m_stateFlags, StateFlags::UpdatingDeployState))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::UpdatingDeployState))
 		return; // Prevent infinite recursion
-	umath::set_flag(m_stateFlags, StateFlags::UpdatingDeployState);
-	util::ScopeGuard sg {[this]() { umath::set_flag(m_stateFlags, StateFlags::UpdatingDeployState, false); }};
+	pragma::math::set_flag(m_stateFlags, StateFlags::UpdatingDeployState);
+	pragma::util::ScopeGuard sg {[this]() { pragma::math::set_flag(m_stateFlags, StateFlags::UpdatingDeployState, false); }};
 
 	UpdateOwnerAttachment();
 	UpdateViewModel();

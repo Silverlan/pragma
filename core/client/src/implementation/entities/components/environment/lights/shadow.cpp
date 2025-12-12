@@ -100,7 +100,7 @@ static auto cvShadowQuality = pragma::console::get_client_con_var("render_shadow
 void CShadowComponent::ReloadDepthTextures()
 {
 	//Scene::ClearLightCache();
-	volatile util::ScopeGuard sg {[this]() {
+	volatile pragma::util::ScopeGuard sg {[this]() {
 		if(m_onTexturesReloaded == nullptr)
 			return;
 		m_onTexturesReloaded();
@@ -218,18 +218,18 @@ void LightShadowRenderer::UpdateSceneCallbacks()
 	auto scenes = static_cast<pragma::ecs::CBaseEntity&>(m_hLight->GetEntity()).GetScenes();
 	for(auto *scene : scenes)
 	{
-		scene->AddEventCallback(cSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		scene->AddEventCallback(cSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 			// TODO?
 			/// TODO: Only if in list of culled light sources
 			/// TODO: Seperate thread? (Or build AFTER prepass world)
 			//BuildRenderQueues(static_cast<CEDrawSceneInfo&>(evData.get()).drawSceneInfo);
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		});
-		scene->AddEventCallback(cSceneComponent::EVENT_POST_RENDER_PREPASS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		scene->AddEventCallback(cSceneComponent::EVENT_POST_RENDER_PREPASS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 			// TODO?
 			/// TODO: Only if in list of culled light sources
 			//Render(static_cast<CEDrawSceneInfo&>(evData.get()).drawSceneInfo);
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		});
 	}
 #endif
@@ -283,22 +283,22 @@ void LightShadowRenderer::BuildRenderQueues(const pragma::rendering::DrawSceneIn
 			  auto lightSpotC = ent.GetComponent<CLightSpotComponent>();
 			  if(lightSpotC.valid()) {
 				  auto coneDir = ent.GetForward();
-				  auto coneAngle = umath::deg_to_rad(lightSpotC->GetOuterConeAngle() / 2.f);
+				  auto coneAngle = pragma::math::deg_to_rad(lightSpotC->GetOuterConeAngle() / 2.f);
 				  fShouldCull = [&lightOrigin, lightRadius, coneDir, coneAngle](const Vector3 &min, const Vector3 &max) -> bool {
-					  if(umath::intersection::aabb_sphere(min, max, lightOrigin, lightRadius) == false)
+					  if(pragma::math::intersection::aabb_sphere(min, max, lightOrigin, lightRadius) == false)
 						  return true;
 					  auto center = (min + max) / 2.f;
 					  auto extents = (max - min) / 2.f;
 					  auto radius = uvec::length(extents);
-					  return !umath::intersection::sphere_cone(center, radius, lightOrigin, coneDir, coneAngle, lightRadius); // TODO: Frustum culling might be more efficient?
+					  return !pragma::math::intersection::sphere_cone(center, radius, lightOrigin, coneDir, coneAngle, lightRadius); // TODO: Frustum culling might be more efficient?
 				  };
 			  }
 			  else
-				  fShouldCull = [&lightOrigin, lightRadius](const Vector3 &min, const Vector3 &max) -> bool { return !umath::intersection::aabb_sphere(min, max, lightOrigin, lightRadius); };
+				  fShouldCull = [&lightOrigin, lightRadius](const Vector3 &min, const Vector3 &max) -> bool { return !pragma::math::intersection::aabb_sphere(min, max, lightOrigin, lightRadius); };
 
 			  auto &posCam = hCam->GetEntity().GetPosition();
 			  auto vp = hCam->GetProjectionMatrix() * hCam->GetViewMatrix();
-			  std::vector<util::BSPTree::Node *> bspLeafNodes;
+			  std::vector<pragma::util::BSPTree::Node *> bspLeafNodes;
 			  pragma::ecs::EntityIterator entItWorld {*pragma::get_cgame()};
 			  entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
 			  bspLeafNodes.reserve(entItWorld.GetCount());
@@ -312,7 +312,7 @@ void LightShadowRenderer::BuildRenderQueues(const pragma::rendering::DrawSceneIn
 					  continue;
 				  bspLeafNodes.push_back(node);
 
-				  if(umath::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::Static) == false)
+				  if(pragma::math::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::Static) == false)
 					  continue;
 
 				  auto *renderC = static_cast<pragma::ecs::CBaseEntity &>(worldC->GetEntity()).GetRenderComponent();
@@ -375,7 +375,7 @@ void LightShadowRenderer::BuildRenderQueues(const pragma::rendering::DrawSceneIn
 				  }
 
 				  auto &planes = lightPointC->GetFrustumPlanes(static_cast<rendering::CubeMapSide>(i));
-				  auto fShouldCull = [&planes](const Vector3 &min, const Vector3 &max) -> bool { return umath::intersection::aabb_in_plane_mesh(min, max, planes.begin(), planes.end()) == umath::intersection::Intersect::Outside; };
+				  auto fShouldCull = [&planes](const Vector3 &min, const Vector3 &max) -> bool { return pragma::math::intersection::aabb_in_plane_mesh(min, max, planes.begin(), planes.end()) == pragma::math::intersection::Intersect::Outside; };
 				  for(auto it = renderQueue->queue.begin(); it != renderQueue->queue.end();) {
 					  auto &item = *it;
 					  auto *ent = static_cast<ecs::CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(item.entity));
@@ -395,13 +395,13 @@ void LightShadowRenderer::BuildRenderQueues(const pragma::rendering::DrawSceneIn
 		// TODO: This could be done more efficiently!
 #if 0
 		// TODO: What if object orientation changed?
-		::util::DataStream ds {};
+		pragma::util::DataStream ds {};
 		ds->SetOffset(0);
 		auto &depthMVP = light.GetTransformationMatrix(0); // If first layer is the same as before, the others should be as well
 		ds<<depthMVP;
 		for(auto &item : m_renderQueue->sortedItemIndices)
 			ds<<item.second;
-		auto hash = util::murmur_hash3(ds->GetData(),ds->GetInternalSize(),0 /* seed */);
+		auto hash = pragma::util::murmur_hash3(ds->GetData(),ds->GetInternalSize(),0 /* seed */);
 #endif
 		  if(cvInstancingEnabled->GetBool()) {
 			  for(auto &renderQueue : m_renderQueues) {
@@ -478,7 +478,7 @@ void LightShadowRenderer::Render(const pragma::rendering::DrawSceneInfo &drawSce
 		if(drawCmd->RecordBeginRenderPass(*smRt, layerId, prosper::IPrimaryCommandBuffer::RenderPassFlags::None, &clearVal) == false)
 			continue;
 
-		if(shadowRenderProcessor.BindShader(*shader, umath::to_integral(pipeline))) {
+		if(shadowRenderProcessor.BindShader(*shader, pragma::math::to_integral(pipeline))) {
 			shadowRenderProcessor.BindLight(*m_hLight, layerId);
 			shadowRenderProcessor.Render(*m_renderQueues.at(layerId), pragma::rendering::RenderPass::Shadow, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::ShadowPass) : nullptr);
 

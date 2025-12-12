@@ -12,13 +12,13 @@ void BaseTriggerTeleportComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "target", false))
+		if(pragma::string::compare<std::string>(kvData.key, "target", false))
 			m_target = kvData.value;
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -26,13 +26,13 @@ void BaseTriggerTeleportComponent::Initialize()
 	ent.AddComponent("touch");
 }
 
-util::EventReply BaseTriggerTeleportComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply BaseTriggerTeleportComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseTouchComponent::EVENT_ON_START_TOUCH) {
 		if(m_target.empty())
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		auto &ent = GetEntity();
 		auto *game = ent.GetNetworkState()->GetGameState();
 		std::vector<pragma::ecs::BaseEntity *> targetCandidates;
@@ -43,15 +43,15 @@ util::EventReply BaseTriggerTeleportComponent::HandleEvent(ComponentEventId even
 			targetCandidates.push_back(ent);
 
 		if(targetCandidates.empty())
-			return util::EventReply::Unhandled;
-		auto *entTarget = targetCandidates[umath::random(0, targetCandidates.size() - 1)];
+			return pragma::util::EventReply::Unhandled;
+		auto *entTarget = targetCandidates[pragma::math::random(0, targetCandidates.size() - 1)];
 		auto ptrTrComponent = ent.GetTransformComponent();
 		auto ptrTrComponentTgt = entTarget->GetTransformComponent();
 		if(ptrTrComponent && ptrTrComponentTgt) {
 			ptrTrComponent->SetPosition(ptrTrComponentTgt->GetPosition());
-			if(ent.GetSpawnFlags() & umath::to_integral(SpawnFlags::FaceTargetDirectionOnTeleport))
+			if(ent.GetSpawnFlags() & pragma::math::to_integral(SpawnFlags::FaceTargetDirectionOnTeleport))
 				ptrTrComponent->SetAngles(ptrTrComponentTgt->GetAngles());
 		}
 	}
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }

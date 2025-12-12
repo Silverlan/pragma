@@ -17,14 +17,14 @@ export namespace pragma {
 		CLightPointComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
-		const std::array<std::vector<umath::Plane>, 6u> &GetFrustumPlanes() const;
-		const std::vector<umath::Plane> &GetFrustumPlanes(rendering::CubeMapSide side) const;
+		const std::array<std::vector<pragma::math::Plane>, 6u> &GetFrustumPlanes() const;
+		const std::vector<pragma::math::Plane> &GetFrustumPlanes(rendering::CubeMapSide side) const;
 	  protected:
 		void UpdateProjectionMatrix();
 		void UpdateFrustumPlanes();
 		bool m_bSkipMatrixUpdate = false;
 		// Frustum planes for each side of the cubemap
-		std::array<std::vector<umath::Plane>, 6u> m_frustumPlanes = {};
+		std::array<std::vector<pragma::math::Plane>, 6u> m_frustumPlanes = {};
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void UpdateTransformationMatrix(unsigned int j) override;
 		void SetShadowDirty();

@@ -32,9 +32,9 @@ void pragma::pts::CParticleOperatorGravity::Initialize(pragma::BaseEnvParticleSy
 	CParticleOperatorWorldBase::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "effective_scale")
-			m_gravityScale = util::to_float(it->second);
+			m_gravityScale = pragma::util::to_float(it->second);
 		else if(key == "acceleration") {
 			m_bUseCustomGravityForce = true;
 			m_gravityForce = uvec::create(it->second);

@@ -16,21 +16,21 @@ std::optional<std::string> pragma::asset::determine_format_from_data(ufile::IFil
 	f.Read(header.data(), header.size());
 	f.Seek(offset);
 
-	if(ustring::compare(header.data(), udm::HEADER_IDENTIFIER))
+	if(pragma::string::compare(header.data(), udm::HEADER_IDENTIFIER))
 		return get_binary_udm_extension(type);
-	else if(ustring::compare(header.data(), "WLD"))
+	else if(pragma::string::compare(header.data(), "WLD"))
 		return FORMAT_MAP_LEGACY;
-	else if(ustring::compare(header.data(), "WMD"))
+	else if(pragma::string::compare(header.data(), "WMD"))
 		return FORMAT_MODEL_LEGACY;
-	else if(ustring::compare(header.data(), "WPD"))
+	else if(pragma::string::compare(header.data(), "WPD"))
 		return FORMAT_PARTICLE_SYSTEM_LEGACY;
 	return get_ascii_udm_extension(type); // Assume it's the ASCII map format
 }
 std::optional<pragma::asset::Type> pragma::asset::determine_type_from_extension(const std::string_view &ext)
 {
 	std::string lext {ext};
-	ustring::to_lower(lext);
-	auto n = umath::to_integral(Type::Count);
+	pragma::string::to_lower(lext);
+	auto n = pragma::math::to_integral(Type::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i) {
 		auto type = static_cast<Type>(i);
 		auto supportedExtensions = get_supported_extensions(type);
@@ -46,20 +46,20 @@ std::optional<std::string> pragma::asset::determine_format_from_filename(const s
 	std::string ext;
 	if(ufile::get_extension(std::string {fileName}, &ext) == false)
 		return {};
-	ustring::to_lower(ext);
+	pragma::string::to_lower(ext);
 	auto supportedExtensions = get_supported_extensions(type);
 	auto it = std::find(supportedExtensions.begin(), supportedExtensions.end(), ext);
 	return (it != supportedExtensions.end()) ? *it : std::optional<std::string> {};
 }
-bool pragma::asset::matches_format(const std::string_view &format0, const std::string_view &format1) { return ustring::compare(format0.data(), format1.data(), false, umath::min(format0.length(), format1.length())); }
-util::Path pragma::asset::relative_path_to_absolute_path(const util::Path &relPath, Type type, const std::optional<std::string> &rootPath)
+bool pragma::asset::matches_format(const std::string_view &format0, const std::string_view &format1) { return pragma::string::compare(format0.data(), format1.data(), false, pragma::math::min(format0.length(), format1.length())); }
+pragma::util::Path pragma::asset::relative_path_to_absolute_path(const pragma::util::Path &relPath, Type type, const std::optional<std::string> &rootPath)
 {
 	auto r = (get_asset_root_directory(type) + std::string {'/'}) + relPath;
 	if(rootPath.has_value())
 		r = *rootPath + r;
 	return r;
 }
-util::Path pragma::asset::absolute_path_to_relative_path(const util::Path &absPath, Type type)
+pragma::util::Path pragma::asset::absolute_path_to_relative_path(const pragma::util::Path &absPath, Type type)
 {
 	auto path = absPath;
 	path.PopFront();
@@ -79,7 +79,7 @@ std::optional<std::string> pragma::asset::get_udm_format_extension(Type type, bo
 	case Type::ShaderGraph:
 		return binary ? FORMAT_SHADER_GRAPH_BINARY : FORMAT_SHADER_GRAPH_ASCII;
 	}
-	static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update get_udm_format_extension");
+	static_assert(pragma::math::to_integral(Type::Count) == 7, "New asset type added, please update get_udm_format_extension");
 	return {};
 }
 std::optional<std::string> pragma::asset::get_legacy_extension(Type type)
@@ -110,7 +110,7 @@ std::optional<std::string> pragma::asset::get_binary_udm_extension(Type type)
 	case Type::ShaderGraph:
 		return FORMAT_SHADER_GRAPH_BINARY;
 	}
-	static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update get_binary_udm_extension");
+	static_assert(pragma::math::to_integral(Type::Count) == 7, "New asset type added, please update get_binary_udm_extension");
 	return {};
 }
 std::optional<std::string> pragma::asset::get_ascii_udm_extension(Type type)
@@ -127,7 +127,7 @@ std::optional<std::string> pragma::asset::get_ascii_udm_extension(Type type)
 	case Type::ShaderGraph:
 		return FORMAT_SHADER_GRAPH_ASCII;
 	}
-	static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update get_ascii_udm_extension");
+	static_assert(pragma::math::to_integral(Type::Count) == 7, "New asset type added, please update get_ascii_udm_extension");
 	return {};
 }
 struct AssetFormatExtensionCache {
@@ -148,13 +148,13 @@ struct AssetFormatExtensionCache {
 			allExts.push_back(ext);
 		formatCache.nativeFormats = std::move(nativeExts);
 		formatCache.importFormats = std::move(importExts);
-		m_cache[umath::to_integral(type)] = std::move(formatCache);
+		m_cache[pragma::math::to_integral(type)] = std::move(formatCache);
 	}
 	const std::vector<std::string> *GetCache(pragma::asset::Type type, pragma::asset::FormatType formatType) const
 	{
-		if(umath::to_integral(type) >= m_cache.size() || m_cache[umath::to_integral(type)].has_value() == false)
+		if(pragma::math::to_integral(type) >= m_cache.size() || m_cache[pragma::math::to_integral(type)].has_value() == false)
 			return nullptr;
-		auto &cache = *m_cache[umath::to_integral(type)];
+		auto &cache = *m_cache[pragma::math::to_integral(type)];
 		switch(formatType) {
 		case pragma::asset::FormatType::Native:
 			return &cache.nativeFormats;
@@ -166,7 +166,7 @@ struct AssetFormatExtensionCache {
 		return nullptr;
 	}
   private:
-	std::array<std::optional<FormatCache>, umath::to_integral(pragma::asset::Type::Count)> m_cache;
+	std::array<std::optional<FormatCache>, pragma::math::to_integral(pragma::asset::Type::Count)> m_cache;
 };
 static AssetFormatExtensionCache g_extCache;
 void pragma::asset::update_extension_cache(Type type)
@@ -215,10 +215,10 @@ void pragma::asset::update_extension_cache(Type type)
 	importExts.reserve(exts.size());
 	for(auto &extInfo : exts) {
 		switch(extInfo.type) {
-		case util::IAssetManager::FormatExtensionInfo::Type::Native:
+		case pragma::util::IAssetManager::FormatExtensionInfo::Type::Native:
 			nativeExts.push_back(extInfo.extension);
 			break;
-		case util::IAssetManager::FormatExtensionInfo::Type::Import:
+		case pragma::util::IAssetManager::FormatExtensionInfo::Type::Import:
 			importExts.push_back(extInfo.extension);
 			break;
 		}
@@ -229,7 +229,7 @@ void pragma::asset::update_extension_cache(Type type)
 }
 void pragma::asset::update_extension_cache()
 {
-	auto n = umath::to_integral(Type::Count);
+	auto n = pragma::math::to_integral(Type::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i)
 		update_extension_cache(static_cast<Type>(i));
 }
@@ -244,7 +244,7 @@ const std::vector<std::string> &pragma::asset::get_supported_extensions(Type typ
 }
 std::string pragma::asset::get_normalized_path(const std::string &name, Type type)
 {
-	auto path = util::Path::CreateFile(name);
+	auto path = pragma::util::Path::CreateFile(name);
 	path.Canonicalize();
 	switch(type) {
 	case Type::Model:
@@ -258,10 +258,10 @@ std::string pragma::asset::get_normalized_path(const std::string &name, Type typ
 		path.RemoveFileExtension(get_supported_extensions(type));
 		break;
 	}
-	static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update get_normalized_path");
+	static_assert(pragma::math::to_integral(Type::Count) == 7, "New asset type added, please update get_normalized_path");
 	return path.GetString();
 }
-bool pragma::asset::matches(const std::string &name0, const std::string &name1, Type type) { return ustring::compare(get_normalized_path(name0, type), get_normalized_path(name1, type), false); }
+bool pragma::asset::matches(const std::string &name0, const std::string &name1, Type type) { return pragma::string::compare(get_normalized_path(name0, type), get_normalized_path(name1, type), false); }
 bool pragma::asset::remove_asset(const std::string &name, Type type)
 {
 	auto f = find_file(name, type);
@@ -307,7 +307,7 @@ std::optional<std::string> pragma::asset::find_file(const std::string &name, Typ
 			return nw ? nw->GetMaterialManager().FindAssetFilePath(name) : std::optional<std::string> {};
 		}
 	}
-	static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update find_file");
+	static_assert(pragma::math::to_integral(Type::Count) == 7, "New asset type added, please update find_file");
 	return {};
 }
 bool pragma::asset::is_loaded(pragma::NetworkState &nw, const std::string &name, Type type)
@@ -331,7 +331,7 @@ bool pragma::asset::is_loaded(pragma::NetworkState &nw, const std::string &name,
 	case Type::ShaderGraph:
 		return false; // Only client knows about shader graphs
 	}
-	static_assert(umath::to_integral(Type::Count) == 7, "New asset type added, please update is_loaded");
+	static_assert(pragma::math::to_integral(Type::Count) == 7, "New asset type added, please update is_loaded");
 	return false;
 }
 
@@ -348,14 +348,14 @@ void pragma::asset::AssetManager::RegisterImporter(const ImporterInfo &importerI
 	Importer importer {};
 	importer.info = importerInfo;
 	importer.handler = importHandler;
-	m_importers[umath::to_integral(type)].push_back(importer);
+	m_importers[pragma::math::to_integral(type)].push_back(importer);
 }
 void pragma::asset::AssetManager::RegisterExporter(const ExporterInfo &importerInfo, Type type, const ExportHandler &exportHandler)
 {
 	Exporter exporter {};
 	exporter.info = importerInfo;
 	exporter.handler = exportHandler;
-	m_exporters[umath::to_integral(type)].push_back(exporter);
+	m_exporters[pragma::math::to_integral(type)].push_back(exporter);
 }
 std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::ImportAsset(pragma::Game &game, Type type, ufile::IFile *f, const std::optional<std::string> &filePath, std::string *optOutErr) const
 {
@@ -363,7 +363,7 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 	if(f == nullptr && filePath.has_value()) {
 		auto filePathNoExt = pragma::asset::get_normalized_path(*filePath, type);
 		ufile::remove_extension_from_filename(filePathNoExt);
-		for(auto &importer : m_importers[umath::to_integral(type)]) {
+		for(auto &importer : m_importers[pragma::math::to_integral(type)]) {
 			for(auto &extInfo : importer.info.fileExtensions) {
 				auto filePathWithExt = filePathNoExt + '.' + extInfo.first;
 				auto f = FileManager::OpenFile(filePathWithExt.c_str(), extInfo.second ? "rb" : "r");
@@ -379,12 +379,12 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 						switch(type) {
 						case Type::Model:
 							{
-								auto path = util::Path::CreateFile(*filePath);
+								auto path = pragma::util::Path::CreateFile(*filePath);
 								path.PopFront();
 								auto *mdl = static_cast<pragma::asset::ModelAssetWrapper &>(*aw).GetModel();
 								if(mdl)
 									mdl->ApplyPostImportProcessing();
-								if(mdl && mdl->Save(game, ::util::CONVERT_PATH + "models/" + path.GetString(), err) == false)
+								if(mdl && mdl->Save(game, pragma::util::CONVERT_PATH + "models/" + path.GetString(), err) == false)
 									return nullptr;
 								break;
 							}
@@ -411,17 +411,17 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 
 	if(f) {
 		auto pos = f->Tell();
-		for(auto &importer : m_importers[umath::to_integral(type)]) {
+		for(auto &importer : m_importers[pragma::math::to_integral(type)]) {
 			std::string err;
 			f->Seek(pos);
 			auto aw = importer.handler(game, *f, fpath, err);
 			if(aw && aw->GetType() == type) {
-				auto path = util::Path::CreateFile(*filePath);
+				auto path = pragma::util::Path::CreateFile(*filePath);
 				// path.PopFront();
 				auto *mdl = static_cast<pragma::asset::ModelAssetWrapper &>(*aw).GetModel();
 				if(mdl)
 					mdl->ApplyPostImportProcessing();
-				if(mdl && mdl->Save(game, ::util::CONVERT_PATH + "models/" + path.GetString(), err) == false)
+				if(mdl && mdl->Save(game, pragma::util::CONVERT_PATH + "models/" + path.GetString(), err) == false)
 					return nullptr;
 				return aw;
 			}
@@ -433,7 +433,7 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 }
 bool pragma::asset::AssetManager::ExportAsset(pragma::Game &game, Type type, ufile::IFile &f, const IAssetWrapper &assetWrapper, std::string *optOutErr) const
 {
-	for(auto &exporter : m_exporters[umath::to_integral(type)]) {
+	for(auto &exporter : m_exporters[pragma::math::to_integral(type)]) {
 		std::string err;
 		if(exporter.handler(game, f, assetWrapper, err))
 			return true;

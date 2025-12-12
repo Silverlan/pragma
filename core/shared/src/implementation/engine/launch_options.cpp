@@ -31,7 +31,7 @@ void pragma::Engine::InitLaunchOptions(int argc, char *argv[])
 			launchCmdArgs.insert(launchCmdArgs.begin(), arg);
 			continue;
 		}
-		ustring::to_lower(arg);
+		pragma::string::to_lower(arg);
 		switch(token) {
 		case '-':
 			{
@@ -53,7 +53,7 @@ void pragma::Engine::InitLaunchOptions(int argc, char *argv[])
 		case '+':
 			{
 				std::vector<std::string> subArgs;
-				ustring::explode_whitespace(arg, subArgs);
+				pragma::string::explode_whitespace(arg, subArgs);
 				if(subArgs.empty() == false) {
 					arg = subArgs.front();
 					subArgs.erase(subArgs.begin());
@@ -77,12 +77,12 @@ void pragma::Engine::InitLaunchOptions(int argc, char *argv[])
 		f(lo.argv);
 	}
 
-	if(pragma::is_log_level_enabled(util::LogSeverity::Debug)) {
+	if(pragma::is_log_level_enabled(pragma::util::LogSeverity::Debug)) {
 		std::vector<std::string> gameCmds;
 		gameCmds.reserve(m_launchCommands.size());
 		for(auto &cmd : m_launchCommands)
 			gameCmds.push_back(cmd.command);
-		spdlog::debug("{} game commands have been queued: {}", m_launchCommands.size(), ustring::implode(gameCmds, ", "));
+		spdlog::debug("{} game commands have been queued: {}", m_launchCommands.size(), pragma::string::implode(gameCmds, ", "));
 	}
 }
 
@@ -93,9 +93,9 @@ DLLNETWORK void LPARAM_console(const std::vector<std::string> &argv)
 {
 	if(!argv.empty()) {
 		auto conType = pragma::Engine::ConsoleType::Terminal;
-		if(ustring::compare<std::string>(argv[0], "guid"))
+		if(pragma::string::compare<std::string>(argv[0], "guid"))
 			conType = pragma::Engine::ConsoleType::GUIDetached;
-		else if(ustring::compare<std::string>(argv[0], "gui"))
+		else if(pragma::string::compare<std::string>(argv[0], "gui"))
 			conType = pragma::Engine::ConsoleType::GUI;
 		pragma::Engine::Get()->SetConsoleType(conType);
 	}
@@ -113,16 +113,16 @@ DLLNETWORK void LPARAM_log_file(const std::vector<std::string> &argv)
 		g_lpLogFile = argv.front();
 }
 
-DLLNETWORK util::LogSeverity g_lpLogLevelCon = pragma::DEFAULT_CONSOLE_LOG_LEVEL;
-DLLNETWORK util::LogSeverity g_lpLogLevelFile = pragma::DEFAULT_FILE_LOG_LEVEL;
+DLLNETWORK pragma::util::LogSeverity g_lpLogLevelCon = pragma::DEFAULT_CONSOLE_LOG_LEVEL;
+DLLNETWORK pragma::util::LogSeverity g_lpLogLevelFile = pragma::DEFAULT_FILE_LOG_LEVEL;
 DLLNETWORK void LPARAM_log(const std::vector<std::string> &argv)
 {
 	auto logLevelCon = pragma::DEFAULT_CONSOLE_LOG_LEVEL;
 	auto logLevelFile = pragma::DEFAULT_FILE_LOG_LEVEL;
 	if(argv.size() > 0) {
-		logLevelCon = static_cast<util::LogSeverity>(util::to_int(argv[0]));
+		logLevelCon = static_cast<pragma::util::LogSeverity>(pragma::util::to_int(argv[0]));
 		if(argv.size() > 1)
-			logLevelFile = static_cast<util::LogSeverity>(util::to_int(argv[1]));
+			logLevelFile = static_cast<pragma::util::LogSeverity>(pragma::util::to_int(argv[1]));
 		else
 			logLevelFile = logLevelCon;
 	}
@@ -182,7 +182,7 @@ DLLNETWORK void LPARAM_connect(const std::vector<std::string> &argv)
 
 DLLNETWORK void LPARAM_USE_VKV_PARSER(const std::vector<std::string> &argv)
 {
-	if(argv.empty() || util::to_boolean(argv.front()))
+	if(argv.empty() || pragma::util::to_boolean(argv.front()))
 		msys::set_use_vkv_vmt_parser(true);
 }
 
@@ -202,11 +202,11 @@ static void LPARAM_title(const std::vector<std::string> &argv)
 		g_customTitle = argv.front();
 }
 
-DLLNETWORK util::Path g_programIcon {"materials/logo/pragma_window_icon.png"};
+DLLNETWORK pragma::util::Path g_programIcon {"materials/logo/pragma_window_icon.png"};
 static void LPARAM_icon(const std::vector<std::string> &argv)
 {
 	if(!argv.empty())
-		g_programIcon = util::FilePath(argv.front());
+		g_programIcon = pragma::util::FilePath(argv.front());
 }
 
 static void LPARAM_luaext(const std::vector<std::string> &argv)

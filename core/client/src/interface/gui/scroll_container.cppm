@@ -18,7 +18,7 @@ export namespace pragma::gui::types {
 		virtual ~WIScrollContainer() override;
 		virtual void Initialize() override;
 		virtual void SetSize(int x, int y) override;
-		virtual util::EventReply ScrollCallback(Vector2 offset, bool offsetAsPixels = false) override;
+		virtual pragma::util::EventReply ScrollCallback(Vector2 offset, bool offsetAsPixels = false) override;
 		virtual void SizeToContents(bool x = true, bool y = true) override;
 		WIScrollBar *GetHorizontalScrollBar();
 		WIScrollBar *GetVerticalScrollBar();
@@ -65,7 +65,7 @@ export namespace pragma::gui::types {
 		static void OnChildReleased(WIBase *child);
 		static void OnChildSetSize(WIBase *child);
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 
 export {REGISTER_ENUM_FLAGS(pragma::gui::types::WIScrollContainer::StateFlags)}

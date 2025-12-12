@@ -13,7 +13,7 @@ static std::optional<std::string> find_asset_file(const std::string &name, pragm
 		auto filePath = translate_image_path(name, type, nullptr, &found);
 		if(found == false)
 			return {};
-		::util::Path path {filePath};
+		pragma::util::Path path {filePath};
 		path.PopFront();
 		return path.GetString();
 	}
@@ -61,8 +61,8 @@ static std::vector<std::string> &get_image_file_extensions()
 {
 	static std::vector<std::string> exts;
 	if(exts.empty()) {
-		exts.reserve(umath::to_integral(uimg::ImageFormat::Count));
-		auto n = umath::to_integral(uimg::ImageFormat::Count);
+		exts.reserve(pragma::math::to_integral(uimg::ImageFormat::Count));
+		auto n = pragma::math::to_integral(uimg::ImageFormat::Count);
 		for(auto i = decltype(n) {0u}; i < n; ++i)
 			exts.push_back(uimg::get_file_extension(static_cast<uimg::ImageFormat>(i)));
 	}
@@ -108,8 +108,8 @@ static bool save_image(lua::State *l, luabind::table<> t, std::string fileName, 
 		auto val = *it;
 		auto *imgBuf = luabind::object_cast<uimg::ImageBuffer *>(val);
 		imgBufs.push_back(imgBuf->shared_from_this());
-		maxWidth = umath::max(maxWidth, imgBuf->GetWidth());
-		maxHeight = umath::max(maxHeight, imgBuf->GetHeight());
+		maxWidth = pragma::math::max(maxWidth, imgBuf->GetWidth());
+		maxHeight = pragma::math::max(maxHeight, imgBuf->GetHeight());
 	}
 	for(auto &imgBuf : imgBufs)
 		imgBuf->Resize(maxWidth, maxHeight);
@@ -151,11 +151,11 @@ static luabind::object load_image(lua::State *l, const std::string &fileName, bo
 	if(fp == nullptr)
 		return {};
 	auto pixelFormat = uimg::PixelFormat::LDR;
-	if(ustring::compare<std::string>(ext, "hdr"))
+	if(pragma::string::compare<std::string>(ext, "hdr"))
 		pixelFormat = uimg::PixelFormat::Float;
 
 	if(loadAsynch) {
-		class ImageLoadJob : public util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> {
+		class ImageLoadJob : public pragma::util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> {
 		  public:
 			ImageLoadJob(VFilePtr fp, uimg::PixelFormat pixelFormat, std::optional<uimg::Format> targetFormat)
 			{
@@ -163,7 +163,7 @@ static luabind::object load_image(lua::State *l, const std::string &fileName, bo
 					fsys::File f {fp};
 					m_imgBuffer = uimg::load_image(f, pixelFormat);
 					if(m_imgBuffer == nullptr) {
-						SetStatus(util::JobStatus::Failed, "Unable to open image!");
+						SetStatus(pragma::util::JobStatus::Failed, "Unable to open image!");
 						UpdateProgress(1.f);
 						return;
 					}
@@ -181,7 +181,7 @@ static luabind::object load_image(lua::State *l, const std::string &fileName, bo
 		  private:
 			std::shared_ptr<uimg::ImageBuffer> m_imgBuffer = nullptr;
 		};
-		return {l, util::create_parallel_job<ImageLoadJob>(fp, pixelFormat, targetFormat)};
+		return {l, pragma::util::create_parallel_job<ImageLoadJob>(fp, pixelFormat, targetFormat)};
 	}
 	fsys::File f {fp};
 	auto imgBuffer = uimg::load_image(f, pixelFormat);
@@ -198,7 +198,7 @@ static luabind::object load_image(lua::State *l, const std::string &fileName, bo
 
 static luabind::object load_image(lua::State *l, const std::string &fileName) { return load_image(l, fileName, false); }
 
-static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::State *l, uint32_t width, uint32_t height, uint32_t samples, bool hdrOutput, bool denoise)
+static pragma::util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::State *l, uint32_t width, uint32_t height, uint32_t samples, bool hdrOutput, bool denoise)
 {
 	pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
 	auto *pCam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
@@ -217,14 +217,14 @@ static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::
 	sceneInfo.hdrOutput = hdrOutput;
 	return pragma::rendering::cycles::render_image(*pragma::get_client_state(), sceneInfo, renderImgInfo);
 }
-static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::State *l, uint32_t width, uint32_t height, uint32_t samples, bool hdrOutput) { return capture_raytraced_screenshot(l, width, height, samples, hdrOutput, true); }
-static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::State *l, uint32_t width, uint32_t height, uint32_t samples) { return capture_raytraced_screenshot(l, width, height, samples, false, true); }
-static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::State *l, uint32_t width, uint32_t height) { return capture_raytraced_screenshot(l, width, height, 1'024, false, true); }
+static pragma::util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::State *l, uint32_t width, uint32_t height, uint32_t samples, bool hdrOutput) { return capture_raytraced_screenshot(l, width, height, samples, hdrOutput, true); }
+static pragma::util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::State *l, uint32_t width, uint32_t height, uint32_t samples) { return capture_raytraced_screenshot(l, width, height, samples, false, true); }
+static pragma::util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua::State *l, uint32_t width, uint32_t height) { return capture_raytraced_screenshot(l, width, height, 1'024, false, true); }
 
 static bool asset_import(pragma::NetworkState &nw, const std::string &name, const std::string &outputName, pragma::asset::Type type)
 {
 	if(type == pragma::asset::Type::Map)
-		return util::port_hl2_map(&nw, name);
+		return pragma::util::port_hl2_map(&nw, name);
 	auto *manager = nw.GetAssetManager(type);
 	if(!manager)
 		return false;
@@ -268,10 +268,10 @@ void pragma::CGame::RegisterLuaLibraries()
 	  luabind::def("load_svg", static_cast<std::shared_ptr<uimg::ImageBuffer> (*)(const std::string &, const uimg::SvgImageInfo &)>(&::uimg::load_svg)),
 	  luabind::def(
 	    "load_svg", +[](const std::string &fileName) -> std::shared_ptr<uimg::ImageBuffer> { return ::uimg::load_svg(fileName); }),
-	  luabind::def("screenshot", ::util::screenshot), luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua::State *, uint32_t, uint32_t, uint32_t, bool, bool)>(capture_raytraced_screenshot)),
-	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua::State *, uint32_t, uint32_t, uint32_t, bool)>(capture_raytraced_screenshot)),
-	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua::State *, uint32_t, uint32_t, uint32_t)>(capture_raytraced_screenshot)),
-	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua::State *, uint32_t, uint32_t)>(capture_raytraced_screenshot)),
+	  luabind::def("screenshot", pragma::util::screenshot), luabind::def("capture_raytraced_screenshot", static_cast<pragma::util::ParallelJob<uimg::ImageLayerSet> (*)(lua::State *, uint32_t, uint32_t, uint32_t, bool, bool)>(capture_raytraced_screenshot)),
+	  luabind::def("capture_raytraced_screenshot", static_cast<pragma::util::ParallelJob<uimg::ImageLayerSet> (*)(lua::State *, uint32_t, uint32_t, uint32_t, bool)>(capture_raytraced_screenshot)),
+	  luabind::def("capture_raytraced_screenshot", static_cast<pragma::util::ParallelJob<uimg::ImageLayerSet> (*)(lua::State *, uint32_t, uint32_t, uint32_t)>(capture_raytraced_screenshot)),
+	  luabind::def("capture_raytraced_screenshot", static_cast<pragma::util::ParallelJob<uimg::ImageLayerSet> (*)(lua::State *, uint32_t, uint32_t)>(capture_raytraced_screenshot)),
 	  luabind::def(
 	    "cubemap_to_equirectangular_texture",
 	    +[](lua::State *l, prosper::Texture &cubemap) -> luabind::
@@ -301,62 +301,62 @@ void pragma::CGame::RegisterLuaLibraries()
 
 	auto imgWriteInfoDef = luabind::class_<uimg::TextureInfo>("TextureInfo");
 	imgWriteInfoDef.def(luabind::constructor<>());
-	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_KEEP_INPUT_IMAGE_FORMAT", umath::to_integral(uimg::TextureInfo::InputFormat::KeepInputImageFormat));
-	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R16G16B16A16_FLOAT", umath::to_integral(uimg::TextureInfo::InputFormat::R16G16B16A16_Float));
-	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R32G32B32A32_FLOAT", umath::to_integral(uimg::TextureInfo::InputFormat::R32G32B32A32_Float));
-	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R32_FLOAT", umath::to_integral(uimg::TextureInfo::InputFormat::R32_Float));
-	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R8G8B8A8_UINT", umath::to_integral(uimg::TextureInfo::InputFormat::R8G8B8A8_UInt));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_KEEP_INPUT_IMAGE_FORMAT", pragma::math::to_integral(uimg::TextureInfo::InputFormat::KeepInputImageFormat));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R16G16B16A16_FLOAT", pragma::math::to_integral(uimg::TextureInfo::InputFormat::R16G16B16A16_Float));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R32G32B32A32_FLOAT", pragma::math::to_integral(uimg::TextureInfo::InputFormat::R32G32B32A32_Float));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R32_FLOAT", pragma::math::to_integral(uimg::TextureInfo::InputFormat::R32_Float));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R8G8B8A8_UINT", pragma::math::to_integral(uimg::TextureInfo::InputFormat::R8G8B8A8_UInt));
 
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_KEEP_INPUT_IMAGE_FORMAT", umath::to_integral(uimg::TextureInfo::OutputFormat::KeepInputImageFormat));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_RGB", umath::to_integral(uimg::TextureInfo::OutputFormat::RGB));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_RGBA", umath::to_integral(uimg::TextureInfo::OutputFormat::RGBA));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1", umath::to_integral(uimg::TextureInfo::OutputFormat::DXT1));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1A", umath::to_integral(uimg::TextureInfo::OutputFormat::DXT1a));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT3", umath::to_integral(uimg::TextureInfo::OutputFormat::DXT3));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT5", umath::to_integral(uimg::TextureInfo::OutputFormat::DXT5));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT5N", umath::to_integral(uimg::TextureInfo::OutputFormat::DXT5n));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC1", umath::to_integral(uimg::TextureInfo::OutputFormat::BC1));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC1A", umath::to_integral(uimg::TextureInfo::OutputFormat::BC1a));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC2", umath::to_integral(uimg::TextureInfo::OutputFormat::BC2));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3", umath::to_integral(uimg::TextureInfo::OutputFormat::BC3));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3N", umath::to_integral(uimg::TextureInfo::OutputFormat::BC3n));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC4", umath::to_integral(uimg::TextureInfo::OutputFormat::BC4));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC5", umath::to_integral(uimg::TextureInfo::OutputFormat::BC5));
-	// imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1N", umath::to_integral(uimg::TextureInfo::OutputFormat::DXT1n));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_CTX1", umath::to_integral(uimg::TextureInfo::OutputFormat::CTX1));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC6", umath::to_integral(uimg::TextureInfo::OutputFormat::BC6));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC7", umath::to_integral(uimg::TextureInfo::OutputFormat::BC7));
-	// imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3_RGBM", umath::to_integral(uimg::TextureInfo::OutputFormat::BC3_RGBM));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC1", umath::to_integral(uimg::TextureInfo::OutputFormat::ETC1));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_R", umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_R));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RG", umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RG));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGB", umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RGB));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGBA", umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RGBA));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGB_A1", umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RGB_A1));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGBM", umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RGBM));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_KEEP_INPUT_IMAGE_FORMAT", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::KeepInputImageFormat));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_RGB", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::RGB));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_RGBA", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::RGBA));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::DXT1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1A", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::DXT1a));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT3", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::DXT3));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT5", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::DXT5));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT5N", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::DXT5n));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC1", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::BC1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC1A", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::BC1a));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC2", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::BC2));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::BC3));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3N", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::BC3n));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC4", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::BC4));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC5", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::BC5));
+	// imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1N", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::DXT1n));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_CTX1", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::CTX1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC6", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::BC6));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC7", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::BC7));
+	// imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3_RGBM", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::BC3_RGBM));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC1", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::ETC1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_R", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::ETC2_R));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RG", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RG));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGB", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RGB));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGBA", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RGBA));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGB_A1", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RGB_A1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGBM", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RGBM));
 
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP", umath::to_integral(uimg::TextureInfo::OutputFormat::ColorMap));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_1BIT_ALPHA", umath::to_integral(uimg::TextureInfo::OutputFormat::ColorMap1BitAlpha));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_SHARP_ALPHA", umath::to_integral(uimg::TextureInfo::OutputFormat::ColorMapSharpAlpha));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_SMOOTH_ALPHA", umath::to_integral(uimg::TextureInfo::OutputFormat::ColorMapSmoothAlpha));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_NORMAL_MAP", umath::to_integral(uimg::TextureInfo::OutputFormat::NormalMap));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_HDR_COLOR_MAP", umath::to_integral(uimg::TextureInfo::OutputFormat::HDRColorMap));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_GRADIENT_MAP", umath::to_integral(uimg::TextureInfo::OutputFormat::GradientMap));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::ColorMap));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_1BIT_ALPHA", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::ColorMap1BitAlpha));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_SHARP_ALPHA", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::ColorMapSharpAlpha));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_SMOOTH_ALPHA", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::ColorMapSmoothAlpha));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_NORMAL_MAP", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::NormalMap));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_HDR_COLOR_MAP", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::HDRColorMap));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_GRADIENT_MAP", pragma::math::to_integral(uimg::TextureInfo::OutputFormat::GradientMap));
 
-	imgWriteInfoDef.add_static_constant("CONTAINER_FORMAT_DDS", umath::to_integral(uimg::TextureInfo::ContainerFormat::DDS));
-	imgWriteInfoDef.add_static_constant("CONTAINER_FORMAT_KTX", umath::to_integral(uimg::TextureInfo::ContainerFormat::KTX));
+	imgWriteInfoDef.add_static_constant("CONTAINER_FORMAT_DDS", pragma::math::to_integral(uimg::TextureInfo::ContainerFormat::DDS));
+	imgWriteInfoDef.add_static_constant("CONTAINER_FORMAT_KTX", pragma::math::to_integral(uimg::TextureInfo::ContainerFormat::KTX));
 
-	imgWriteInfoDef.add_static_constant("FLAG_NONE", umath::to_integral(uimg::TextureInfo::Flags::None));
-	imgWriteInfoDef.add_static_constant("FLAG_BIT_CONVERT_TO_NORMAL_MAP", umath::to_integral(uimg::TextureInfo::Flags::ConvertToNormalMap));
-	imgWriteInfoDef.add_static_constant("FLAG_BIT_SRGB", umath::to_integral(uimg::TextureInfo::Flags::SRGB));
-	imgWriteInfoDef.add_static_constant("FLAG_BIT_GENERATE_MIPMAPS", umath::to_integral(uimg::TextureInfo::Flags::GenerateMipmaps));
+	imgWriteInfoDef.add_static_constant("FLAG_NONE", pragma::math::to_integral(uimg::TextureInfo::Flags::None));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_CONVERT_TO_NORMAL_MAP", pragma::math::to_integral(uimg::TextureInfo::Flags::ConvertToNormalMap));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_SRGB", pragma::math::to_integral(uimg::TextureInfo::Flags::SRGB));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_GENERATE_MIPMAPS", pragma::math::to_integral(uimg::TextureInfo::Flags::GenerateMipmaps));
 
-	imgWriteInfoDef.add_static_constant("MIPMAP_FILTER_BOX", umath::to_integral(uimg::TextureInfo::MipmapFilter::Box));
-	imgWriteInfoDef.add_static_constant("MIPMAP_FILTER_KAISER", umath::to_integral(uimg::TextureInfo::MipmapFilter::Kaiser));
+	imgWriteInfoDef.add_static_constant("MIPMAP_FILTER_BOX", pragma::math::to_integral(uimg::TextureInfo::MipmapFilter::Box));
+	imgWriteInfoDef.add_static_constant("MIPMAP_FILTER_KAISER", pragma::math::to_integral(uimg::TextureInfo::MipmapFilter::Kaiser));
 
-	imgWriteInfoDef.add_static_constant("WRAP_MODE_CLAMP", umath::to_integral(uimg::TextureInfo::WrapMode::Clamp));
-	imgWriteInfoDef.add_static_constant("WRAP_MODE_REPEAT", umath::to_integral(uimg::TextureInfo::WrapMode::Repeat));
-	imgWriteInfoDef.add_static_constant("WRAP_MODE_MIRROR", umath::to_integral(uimg::TextureInfo::WrapMode::Mirror));
+	imgWriteInfoDef.add_static_constant("WRAP_MODE_CLAMP", pragma::math::to_integral(uimg::TextureInfo::WrapMode::Clamp));
+	imgWriteInfoDef.add_static_constant("WRAP_MODE_REPEAT", pragma::math::to_integral(uimg::TextureInfo::WrapMode::Repeat));
+	imgWriteInfoDef.add_static_constant("WRAP_MODE_MIRROR", pragma::math::to_integral(uimg::TextureInfo::WrapMode::Mirror));
 
 	imgWriteInfoDef.def_readwrite("inputFormat", reinterpret_cast<std::underlying_type_t<decltype(uimg::TextureInfo::inputFormat)> uimg::TextureInfo::*>(&uimg::TextureInfo::inputFormat));
 	imgWriteInfoDef.def_readwrite("outputFormat", reinterpret_cast<std::underlying_type_t<decltype(uimg::TextureInfo::outputFormat)> uimg::TextureInfo::*>(&uimg::TextureInfo::outputFormat));
@@ -369,10 +369,10 @@ void pragma::CGame::RegisterLuaLibraries()
 	utilMod[imgWriteInfoDef];
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "util",
-	  {{"IMAGE_FORMAT_PNG", umath::to_integral(uimg::ImageFormat::PNG)}, {"IMAGE_FORMAT_BMP", umath::to_integral(uimg::ImageFormat::BMP)}, {"IMAGE_FORMAT_TGA", umath::to_integral(uimg::ImageFormat::TGA)}, {"IMAGE_FORMAT_JPG", umath::to_integral(uimg::ImageFormat::JPG)},
-	    {"IMAGE_FORMAT_HDR", umath::to_integral(uimg::ImageFormat::HDR)}, {"IMAGE_FORMAT_COUNT", umath::to_integral(uimg::ImageFormat::Count)},
+	  {{"IMAGE_FORMAT_PNG", pragma::math::to_integral(uimg::ImageFormat::PNG)}, {"IMAGE_FORMAT_BMP", pragma::math::to_integral(uimg::ImageFormat::BMP)}, {"IMAGE_FORMAT_TGA", pragma::math::to_integral(uimg::ImageFormat::TGA)}, {"IMAGE_FORMAT_JPG", pragma::math::to_integral(uimg::ImageFormat::JPG)},
+	    {"IMAGE_FORMAT_HDR", pragma::math::to_integral(uimg::ImageFormat::HDR)}, {"IMAGE_FORMAT_COUNT", pragma::math::to_integral(uimg::ImageFormat::Count)},
 
-	    {"PIXEL_FORMAT_LDR", umath::to_integral(uimg::PixelFormat::LDR)}, {"PIXEL_FORMAT_HDR", umath::to_integral(uimg::PixelFormat::HDR)}, {"PIXEL_FORMAT_FLOAT", umath::to_integral(uimg::PixelFormat::Float)}});
+	    {"PIXEL_FORMAT_LDR", pragma::math::to_integral(uimg::PixelFormat::LDR)}, {"PIXEL_FORMAT_HDR", pragma::math::to_integral(uimg::PixelFormat::HDR)}, {"PIXEL_FORMAT_FLOAT", pragma::math::to_integral(uimg::PixelFormat::Float)}});
 
 	Lua::ai::client::register_library(GetLuaInterface());
 
@@ -420,9 +420,9 @@ void pragma::CGame::RegisterLuaLibraries()
 
 		     pragma::asset::VtfInfo vtfInfo {};
 		     vtfInfo.outputFormat = *vtfOutputFormat;
-		     umath::set_flag(vtfInfo.flags, pragma::asset::VtfInfo::Flags::Srgb, srgb);
-		     umath::set_flag(vtfInfo.flags, pragma::asset::VtfInfo::Flags::NormalMap, normalMap);
-		     umath::set_flag(vtfInfo.flags, pragma::asset::VtfInfo::Flags::GenerateMipmaps, generateMipmaps);
+		     pragma::math::set_flag(vtfInfo.flags, pragma::asset::VtfInfo::Flags::Srgb, srgb);
+		     pragma::math::set_flag(vtfInfo.flags, pragma::asset::VtfInfo::Flags::NormalMap, normalMap);
+		     pragma::math::set_flag(vtfInfo.flags, pragma::asset::VtfInfo::Flags::GenerateMipmaps, generateMipmaps);
 		     auto result = pragma::asset::export_texture_as_vtf(fileName, img, vtfInfo, nullptr, false);
 		     Lua::PushBool(l, result);
 		     return 1;
@@ -499,7 +499,7 @@ void pragma::CGame::RegisterLuaLibraries()
 		    if(ufile::get_extension(*fileName, &ext) == false)
 			    return luabind::object {l, false};
 		    auto loadInfo = manager->CreateDefaultLoadInfo();
-		    loadInfo->flags |= util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache;
+		    loadInfo->flags |= pragma::util::AssetLoadFlags::DontCache | pragma::util::AssetLoadFlags::IgnoreCache;
 		    auto asset = manager->LoadAsset(ufile::get_file_from_filename(*fileName), std::move(fp), ext, std::move(loadInfo));
 		    switch(type) {
 		    case pragma::asset::Type::Model:
@@ -567,8 +567,8 @@ void pragma::CGame::RegisterLuaLibraries()
 	modAsset[defTexImportInfo];
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "asset",
-	  {{"TEXTURE_LOAD_FLAG_NONE", umath::to_integral(msys::TextureLoadFlags::None)}, {"TEXTURE_LOAD_FLAG_LOAD_INSTANTLY_BIT", umath::to_integral(msys::TextureLoadFlags::LoadInstantly)}, {"TEXTURE_LOAD_FLAG_RELOAD_BIT", umath::to_integral(msys::TextureLoadFlags::Reload)},
-	    {"TEXTURE_LOAD_FLAG_DONT_CACHE_BIT", umath::to_integral(msys::TextureLoadFlags::DontCache)}});
+	  {{"TEXTURE_LOAD_FLAG_NONE", pragma::math::to_integral(msys::TextureLoadFlags::None)}, {"TEXTURE_LOAD_FLAG_LOAD_INSTANTLY_BIT", pragma::math::to_integral(msys::TextureLoadFlags::LoadInstantly)}, {"TEXTURE_LOAD_FLAG_RELOAD_BIT", pragma::math::to_integral(msys::TextureLoadFlags::Reload)},
+	    {"TEXTURE_LOAD_FLAG_DONT_CACHE_BIT", pragma::math::to_integral(msys::TextureLoadFlags::DontCache)}});
 
 	auto &utilImport = GetLuaInterface().RegisterLibrary("import", {{"export_scene", static_cast<int32_t (*)(lua::State *)>(Lua::lib_export::export_scene)}});
 
@@ -590,9 +590,9 @@ void pragma::CGame::RegisterLuaLibraries()
 #else
 	  luabind::def("draw_spline", &Lua::DebugRenderer::Client::DrawSpline, luabind::default_parameter_policy<4, 1.f> {}),
 #endif
-	  luabind::def("draw_plane", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const umath::Plane &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawPlane)),
+	  luabind::def("draw_plane", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const pragma::math::Plane &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawPlane)),
 	  luabind::def("draw_plane", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const Vector3 &, float, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawPlane)),
 	  luabind::def("draw_frustum", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(pragma::CCameraComponent &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
 	  luabind::def("draw_frustum", static_cast<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> (*)(const std::vector<Vector3> &, const pragma::debug::DebugRenderInfo &)>(&Lua::DebugRenderer::Client::DrawFrustum)),
-	  luabind::def("create_collection", +[](const std::vector<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject>> &objects) -> std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> { return ::util::make_shared<pragma::debug::DebugRenderer::CollectionObject>(objects); }))];
+	  luabind::def("create_collection", +[](const std::vector<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject>> &objects) -> std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> { return pragma::util::make_shared<pragma::debug::DebugRenderer::CollectionObject>(objects); }))];
 }

@@ -12,7 +12,7 @@ export namespace pragma::engine_info {
 	DLLNETWORK std::string get_identifier();
 	DLLNETWORK std::string get_name();
 	DLLNETWORK std::string get_program_title();
-	DLLNETWORK util::Path get_icon_path();
+	DLLNETWORK pragma::util::Path get_icon_path();
 	DLLNETWORK std::string get_executable_name();
 	DLLNETWORK std::string get_server_executable_name();
 	DLLNETWORK std::string get_author_mail_address();

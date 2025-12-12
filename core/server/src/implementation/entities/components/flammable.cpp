@@ -43,17 +43,17 @@ void SFlammableComponent::ApplyIgnitionDamage()
 	pDamageableComponent->TakeDamage(info);
 }
 void SFlammableComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-util::EventReply SFlammableComponent::Ignite(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor)
+pragma::util::EventReply SFlammableComponent::Ignite(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor)
 {
 	if(!IsIgnitable())
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	NetPacket p {};
 	p->Write<float>(duration);
 	pragma::networking::write_entity(p, attacker);
 	pragma::networking::write_entity(p, inflictor);
 	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvIgnite, p, pragma::networking::Protocol::SlowReliable);
 
-	auto reps = static_cast<uint32_t>(umath::floor(duration / 0.5f));
+	auto reps = static_cast<uint32_t>(pragma::math::floor(duration / 0.5f));
 	Timer *t = nullptr;
 	if(IsOnFire() && m_igniteInfo.damageTimer != nullptr && m_igniteInfo.damageTimer->IsValid())
 		t = m_igniteInfo.damageTimer->GetTimer();

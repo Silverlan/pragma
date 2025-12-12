@@ -20,7 +20,7 @@ import :engine;
 
 /////////////////////////
 
-pragma::gui::types::WIMainMenuMods::DownloadInfo::DownloadInfo(const std::string &_uniqueId) : uniqueId(_uniqueId), downloadProgress(::util::make_shared<std::atomic<float>>(0.f)) {}
+pragma::gui::types::WIMainMenuMods::DownloadInfo::DownloadInfo(const std::string &_uniqueId) : uniqueId(_uniqueId), downloadProgress(pragma::util::make_shared<std::atomic<float>>(0.f)) {}
 
 /////////////////////////
 
@@ -77,7 +77,7 @@ bool pragma::gui::types::WIMainMenuMods::SetAddonSubscription(const std::shared_
 	return true;
 }
 
-bool pragma::gui::types::WIMainMenuMods::SetAddonSubscription(const std::string &uniqueId, bool bSubscribe) { return SetAddonSubscription(::util::make_shared<pragma::AddonInfo>("", util::Version(0, 0, 0), uniqueId), bSubscribe); }
+bool pragma::gui::types::WIMainMenuMods::SetAddonSubscription(const std::string &uniqueId, bool bSubscribe) { return SetAddonSubscription(pragma::util::make_shared<pragma::AddonInfo>("", pragma::util::Version(0, 0, 0), uniqueId), bSubscribe); }
 
 void pragma::gui::types::WIMainMenuMods::OnFirstEntered()
 {
@@ -88,13 +88,13 @@ void pragma::gui::types::WIMainMenuMods::OnFirstEntered()
 
 	try {
 		auto &addons = pragma::AddonSystem::GetMountedAddons();
-		m_addonInstallManager = ::util::make_shared<pragma::AddonInstallManager>();
+		m_addonInstallManager = pragma::util::make_shared<pragma::AddonInstallManager>();
 
 		for(auto &addon : addons) {
 			auto &uniqueId = addon.GetUniqueId();
 			if(uniqueId.empty() == true)
 				continue;
-			SetAddonSubscription(::util::make_shared<pragma::AddonInfo>(addon), true);
+			SetAddonSubscription(pragma::util::make_shared<pragma::AddonInfo>(addon), true);
 		}
 	}
 	catch(const std::runtime_error &e) {
@@ -123,7 +123,7 @@ void pragma::gui::types::WIMainMenuMods::InitializeJavascript()
 	RegisterJavascriptFunction("set_addon_subscription", [hThis](const std::vector<pragma::JSValue> &args) -> std::unique_ptr<pragma::JSValue> {
 		auto r = std::make_unique<pragma::JSValue>();
 		r->type = pragma::JSValueType::Bool;
-		r->data = ::util::make_shared<bool>(false);
+		r->data = pragma::util::make_shared<bool>(false);
 		if(hThis.IsValid() == false || args.size() < 2 || args.at(0).type != pragma::JSValueType::String || args.at(1).type != pragma::JSValueType::Bool)
 			return r;
 		auto &uniqueId = *static_cast<std::string *>(args.at(0).data.get());
@@ -134,7 +134,7 @@ void pragma::gui::types::WIMainMenuMods::InitializeJavascript()
 	RegisterJavascriptFunction("is_subscribed_to_addon", [](const std::vector<pragma::JSValue> &args) -> std::unique_ptr<pragma::JSValue> {
 		auto r = std::make_unique<pragma::JSValue>();
 		r->type = pragma::JSValueType::Bool;
-		r->data = ::util::make_shared<bool>(false);
+		r->data = pragma::util::make_shared<bool>(false);
 		if(args.empty() == true || args.front().type != pragma::JSValueType::String)
 			return r;
 		auto &uniqueId = *static_cast<std::string *>(args.at(0).data.get());

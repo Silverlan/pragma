@@ -118,7 +118,7 @@ static void debug_render_validation_error_enabled(pragma::NetworkState *state, p
 	auto &id = argv.front();
 	auto enabled = true;
 	if(argv.size() > 1)
-		enabled = util::to_boolean(argv[1]);
+		enabled = pragma::util::to_boolean(argv[1]);
 	pragma::get_cengine()->SetValidationErrorDisabled(id, !enabled);
 }
 namespace {
@@ -316,7 +316,7 @@ void pragma::CGame::RenderScenes(pragma::rendering::DrawSceneInfo &drawSceneInfo
 	CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("UpdateRenderBuffers", std::ref(drawSceneInfo));
 
 	StartProfilingStage("RenderScenes");
-	util::ScopeGuard sg {[this]() {
+	pragma::util::ScopeGuard sg {[this]() {
 		StopProfilingStage(); // RenderScenes
 	}};
 
@@ -440,11 +440,11 @@ static void debug_dump_render_queues(const pragma::rendering::DrawSceneInfo &dra
 		ss << "Clip Plane: " << *drawSceneInfo.clipPlane << "\n";
 	if(drawSceneInfo.pvsOrigin)
 		ss << "PVS Origin: " << *drawSceneInfo.pvsOrigin << "\n";
-	ss << "Exclusion Mask: " << umath::to_integral(drawSceneInfo.exclusionMask) << "\n";
-	ss << "Inclusion Mask: " << umath::to_integral(drawSceneInfo.inclusionMask) << "\n";
+	ss << "Exclusion Mask: " << pragma::math::to_integral(drawSceneInfo.exclusionMask) << "\n";
+	ss << "Inclusion Mask: " << pragma::math::to_integral(drawSceneInfo.inclusionMask) << "\n";
 	if(drawSceneInfo.outputImage) {
 		auto &img = *drawSceneInfo.outputImage;
-		ss << "Output Image: " << umath::to_integral(img.GetFormat()) << ", " << img.GetWidth() << "x" << img.GetHeight() << "\n";
+		ss << "Output Image: " << pragma::math::to_integral(img.GetFormat()) << ", " << img.GetWidth() << "x" << img.GetHeight() << "\n";
 	}
 	ss << "Output Layer Id: " << drawSceneInfo.outputLayerId << "\n";
 	ss << "Flags: " << magic_enum::enum_flags_name(drawSceneInfo.flags) << "\n";
@@ -493,7 +493,7 @@ static void debug_dump_render_queues(const pragma::rendering::DrawSceneInfo &dra
 		fPrintQueue(*queue);
 	}
 
-	auto n = umath::to_integral(pragma::rendering::SceneRenderPass::Count);
+	auto n = pragma::math::to_integral(pragma::rendering::SceneRenderPass::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i) {
 		for(auto translucent : {false, true}) {
 			auto *queue = renderDesc.GetRenderQueue(static_cast<pragma::rendering::SceneRenderPass>(i), translucent);
@@ -563,11 +563,11 @@ void pragma::CGame::RenderScenes(const std::vector<pragma::rendering::DrawSceneI
 			auto &renderFlags = drawSceneInfo.renderFlags;
 			auto drawWorld = cvDrawWorld->GetBool();
 			if(drawWorld == false)
-				umath::set_flag(renderFlags, rendering::RenderFlags::World, false);
+				pragma::math::set_flag(renderFlags, rendering::RenderFlags::World, false);
 
 			auto *pl = pragma::get_cgame()->GetLocalPlayer();
 			if(pl == nullptr || pl->IsInFirstPersonMode() == false)
-				umath::set_flag(renderFlags, rendering::RenderFlags::View, false);
+				pragma::math::set_flag(renderFlags, rendering::RenderFlags::View, false);
 
 			drawSceneInfo.scene->BuildRenderQueues(drawSceneInfo);
 		}
@@ -594,7 +594,7 @@ void pragma::CGame::RenderScenes(const std::vector<pragma::rendering::DrawSceneI
 	buildCommandBuffers = [&buildCommandBuffers, drawWorld](const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos) {
 		for(auto &cdrawSceneInfo : drawSceneInfos) {
 			auto &drawSceneInfo = const_cast<pragma::rendering::DrawSceneInfo &>(cdrawSceneInfo);
-			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisableRender))
+			if(drawSceneInfo.scene.expired() || pragma::math::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisableRender))
 				continue;
 			if(drawSceneInfo.subPasses) {
 				// This scene has sub-scenes we have to consider first!
@@ -610,7 +610,7 @@ void pragma::CGame::RenderScenes(const std::vector<pragma::rendering::DrawSceneI
 	renderScenes = [this, &renderScenes, drawWorld](const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos) {
 		for(auto &cdrawSceneInfo : drawSceneInfos) {
 			auto &drawSceneInfo = const_cast<pragma::rendering::DrawSceneInfo &>(cdrawSceneInfo);
-			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisableRender))
+			if(drawSceneInfo.scene.expired() || pragma::math::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisableRender))
 				continue;
 
 			if(drawSceneInfo.subPasses) {

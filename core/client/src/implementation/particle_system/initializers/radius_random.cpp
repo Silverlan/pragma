@@ -13,14 +13,14 @@ void pragma::pts::CParticleInitializerRadiusRandomBase::Initialize(pragma::BaseE
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == m_identifier + "_min")
-			m_radiusMin = util::to_float(it->second);
+			m_radiusMin = pragma::util::to_float(it->second);
 		else if(key == m_identifier + "_max")
-			m_radiusMax = util::to_float(it->second);
+			m_radiusMax = pragma::util::to_float(it->second);
 	}
 }
-void pragma::pts::CParticleInitializerRadiusRandomBase::OnParticleCreated(pragma::pts::CParticle &particle) { ApplyRadius(particle, umath::random(m_radiusMin, m_radiusMax)); }
+void pragma::pts::CParticleInitializerRadiusRandomBase::OnParticleCreated(pragma::pts::CParticle &particle) { ApplyRadius(particle, pragma::math::random(m_radiusMin, m_radiusMax)); }
 float pragma::pts::CParticleInitializerRadiusRandomBase::GetMinRadius() const { return m_radiusMin; }
 float pragma::pts::CParticleInitializerRadiusRandomBase::GetMaxRadius() const { return m_radiusMax; }
 

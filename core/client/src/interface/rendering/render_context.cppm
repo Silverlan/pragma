@@ -31,7 +31,7 @@ namespace pragma::rendering {
 		prosper::IPrContext &GetRenderContext();
 		prosper::ShaderManager &GetShaderManager() const;
 		void RegisterShader(const std::string &identifier, const std::function<prosper::Shader *(prosper::IPrContext &, const std::string &)> &fFactory);
-		::util::WeakHandle<prosper::Shader> GetShader(const std::string &identifier) const;
+		pragma::util::WeakHandle<prosper::Shader> GetShader(const std::string &identifier) const;
 
 		prosper::Window &GetWindow();
 		pragma::platform::Window &GetGlfwWindow();
@@ -64,11 +64,11 @@ namespace pragma::rendering {
 		std::shared_ptr<prosper::IPrContext> m_renderContext = nullptr;
 		std::unordered_set<std::string> m_disabledValidationErrors;
 		StateFlags m_stateFlags = StateFlags::None;
-		std::shared_ptr<::util::Library> m_graphicsAPILib = nullptr;
+		std::shared_ptr<pragma::util::Library> m_graphicsAPILib = nullptr;
 		std::unique_ptr<pragma::platform::Monitor> m_monitor = nullptr;
 		std::string m_renderAPI;
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 }
 export {
 	REGISTER_ENUM_FLAGS(pragma::rendering::RenderContext::StateFlags)

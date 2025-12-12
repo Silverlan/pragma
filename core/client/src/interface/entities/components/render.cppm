@@ -110,7 +110,7 @@ export namespace pragma {
 
 		pragma::rendering::SceneRenderPass GetSceneRenderPass() const;
 		void SetSceneRenderPass(pragma::rendering::SceneRenderPass pass);
-		const util::PEnumProperty<pragma::rendering::SceneRenderPass> &GetSceneRenderPassProperty() const;
+		const pragma::util::PEnumProperty<pragma::rendering::SceneRenderPass> &GetSceneRenderPassProperty() const;
 
 		bool IsInRenderGroup(pragma::rendering::RenderGroup group) const;
 		bool AddToRenderGroup(const std::string &name);
@@ -119,10 +119,10 @@ export namespace pragma {
 		void RemoveFromRenderGroup(pragma::rendering::RenderGroup group);
 		void SetRenderGroups(pragma::rendering::RenderGroup group);
 		pragma::rendering::RenderGroup GetRenderGroups() const;
-		const util::PEnumProperty<pragma::rendering::RenderGroup> &GetRenderGroupsProperty() const;
+		const pragma::util::PEnumProperty<pragma::rendering::RenderGroup> &GetRenderGroupsProperty() const;
 
 		Mat4 &GetTransformationMatrix();
-		const umath::ScaledTransform &GetRenderPose() const;
+		const pragma::math::ScaledTransform &GetRenderPose() const;
 
 		virtual void ReceiveData(NetPacket &packet) override;
 
@@ -172,9 +172,9 @@ export namespace pragma {
 
 		void UpdateShouldDrawState();
 
-		void SetRenderOffsetTransform(const umath::ScaledTransform &t);
+		void SetRenderOffsetTransform(const pragma::math::ScaledTransform &t);
 		void ClearRenderOffsetTransform();
-		const umath::ScaledTransform *GetRenderOffsetTransform() const;
+		const pragma::math::ScaledTransform *GetRenderOffsetTransform() const;
 
 		bool IsInPvs(const Vector3 &camPos, const CWorldComponent &world) const;
 		bool IsInPvs(const Vector3 &camPos) const;
@@ -204,16 +204,16 @@ export namespace pragma {
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		void UpdateRenderMeshes();
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		void InitializeRenderBuffers();
 		void UpdateBoneBuffer();
 
-		std::optional<umath::ScaledTransform> m_renderOffset {};
-		umath::ScaledTransform m_renderPose {};
+		std::optional<pragma::math::ScaledTransform> m_renderOffset {};
+		pragma::math::ScaledTransform m_renderPose {};
 		Mat4 m_matTransformation = umat::identity();
-		util::PEnumProperty<pragma::rendering::RenderGroup> m_renderGroups = nullptr;
-		util::PEnumProperty<rendering::SceneRenderPass> m_renderPass = nullptr;
+		pragma::util::PEnumProperty<pragma::rendering::RenderGroup> m_renderGroups = nullptr;
+		pragma::util::PEnumProperty<rendering::SceneRenderPass> m_renderPass = nullptr;
 
 		// Used for quick access to avoid having to do a lookup on the entity's components
 		mutable CAttachmentComponent *m_attachmentComponent = nullptr;
@@ -230,7 +230,7 @@ export namespace pragma {
 		std::optional<Vector2> m_depthBias {};
 
 		StateFlags m_stateFlags
-		  = static_cast<StateFlags>(umath::to_integral(StateFlags::RenderBufferDirty) | umath::to_integral(StateFlags::EnableDepthPass) | umath::to_integral(StateFlags::RenderBoundsDirty) | umath::to_integral(StateFlags::ShouldDraw) | umath::to_integral(StateFlags::ShouldDrawShadow));
+		  = static_cast<StateFlags>(pragma::math::to_integral(StateFlags::RenderBufferDirty) | pragma::math::to_integral(StateFlags::EnableDepthPass) | pragma::math::to_integral(StateFlags::RenderBoundsDirty) | pragma::math::to_integral(StateFlags::ShouldDraw) | pragma::math::to_integral(StateFlags::ShouldDrawShadow));
 		std::atomic<uint64_t> m_lastRender = 0ull;
 		std::mutex m_renderDataMutex;
 		static std::vector<CRenderComponent *> s_ocExemptEntities;
@@ -263,11 +263,11 @@ export namespace pragma {
 	};
 
 	struct DLLCLIENT CEOnUpdateRenderMatrices : public ComponentEvent {
-		CEOnUpdateRenderMatrices(umath::ScaledTransform &pose, Mat4 &transformation);
+		CEOnUpdateRenderMatrices(pragma::math::ScaledTransform &pose, Mat4 &transformation);
 		virtual void PushArguments(lua::State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua::State *l) override;
-		umath::ScaledTransform &pose;
+		pragma::math::ScaledTransform &pose;
 		Mat4 &transformation;
 	};
 
@@ -289,6 +289,6 @@ export namespace pragma {
 		const Vector3 &max;
 		const math::Sphere &sphere;
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {REGISTER_ENUM_FLAGS(pragma::CRenderComponent::StateFlags)}

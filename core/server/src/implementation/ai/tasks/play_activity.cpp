@@ -20,14 +20,14 @@ int32_t ai::TaskPlayActivity::SelectAnimation(const Schedule *sched, pragma::Bas
 	return animComponent.valid() ? animComponent->SelectTranslatedAnimation(activity) : -1;
 }
 
-void ai::TaskPlayActivity::SetActivity(pragma::Activity activity) { SetParameter(umath::to_integral(Parameter::Activity), umath::to_integral(activity)); }
-void ai::TaskPlayActivity::SetFaceTarget(const Vector3 &target) { SetParameter(umath::to_integral(Parameter::FaceTarget), target); }
-void ai::TaskPlayActivity::SetFaceTarget(pragma::ecs::BaseEntity &target) { SetParameter(umath::to_integral(Parameter::FaceTarget), &target); }
+void ai::TaskPlayActivity::SetActivity(pragma::Activity activity) { SetParameter(pragma::math::to_integral(Parameter::Activity), pragma::math::to_integral(activity)); }
+void ai::TaskPlayActivity::SetFaceTarget(const Vector3 &target) { SetParameter(pragma::math::to_integral(Parameter::FaceTarget), target); }
+void ai::TaskPlayActivity::SetFaceTarget(pragma::ecs::BaseEntity &target) { SetParameter(pragma::math::to_integral(Parameter::FaceTarget), &target); }
 
 void ai::TaskPlayActivity::Print(const Schedule *sched, std::ostream &o) const
 {
 	o << "PlayActivity[";
-	auto *param = GetParameter(sched, umath::to_integral(Parameter::Activity));
+	auto *param = GetParameter(sched, pragma::math::to_integral(Parameter::Activity));
 	if(param == nullptr || param->GetType() != ai::Schedule::Parameter::Type::Int)
 		o << "Nothing";
 	else {
@@ -45,9 +45,9 @@ void ai::TaskPlayActivity::Print(const Schedule *sched, std::ostream &o) const
 
 void ai::TaskPlayLayeredActivity::Print(const Schedule *sched, std::ostream &o) const
 {
-	auto *pSlot = GetParameter(umath::to_integral(Parameter::AnimationSlot));
+	auto *pSlot = GetParameter(pragma::math::to_integral(Parameter::AnimationSlot));
 	o << "PlayLayeredActivity[";
-	auto *param = GetParameter(sched, umath::to_integral(Parameter::Activity));
+	auto *param = GetParameter(sched, pragma::math::to_integral(Parameter::Activity));
 	if(param == nullptr || param->GetType() != ai::Schedule::Parameter::Type::Int)
 		o << "Nothing";
 	else {
@@ -65,8 +65,8 @@ void ai::TaskPlayLayeredActivity::Print(const Schedule *sched, std::ostream &o) 
 		o << "NULL";
 	o << "]";
 }
-void ai::TaskPlayLayeredActivity::SetActivity(pragma::Activity activity) { SetParameter(umath::to_integral(Parameter::Activity), umath::to_integral(activity)); }
-void ai::TaskPlayLayeredActivity::SetAnimationSlot(int32_t animationSlot) { SetParameter(umath::to_integral(Parameter::AnimationSlot), animationSlot); }
+void ai::TaskPlayLayeredActivity::SetActivity(pragma::Activity activity) { SetParameter(pragma::math::to_integral(Parameter::Activity), pragma::math::to_integral(activity)); }
+void ai::TaskPlayLayeredActivity::SetAnimationSlot(int32_t animationSlot) { SetParameter(pragma::math::to_integral(Parameter::AnimationSlot), animationSlot); }
 int32_t ai::TaskPlayLayeredActivity::SelectAnimation(const Schedule *sched, pragma::BaseAIComponent &ent, uint8_t paramId)
 {
 	auto *param = GetParameter(sched, paramId);

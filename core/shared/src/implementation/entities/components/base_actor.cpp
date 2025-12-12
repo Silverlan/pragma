@@ -21,15 +21,15 @@ void BaseActorComponent::RegisterEvents(pragma::EntityComponentManager &componen
 	baseActorComponent::EVENT_ON_RESPAWN = registerEvent("ON_RESPAWN", ComponentEventInfo::Type::Broadcast);
 	baseActorComponent::EVENT_ON_DEATH = registerEvent("ON_DEATH", ComponentEventInfo::Type::Broadcast);
 }
-BaseActorComponent::BaseActorComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bAlive(true), m_bFrozen(util::BoolProperty::Create(false)) {}
+BaseActorComponent::BaseActorComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bAlive(true), m_bFrozen(pragma::util::BoolProperty::Create(false)) {}
 
 void BaseActorComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		InitializeMoveController();
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
 	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsDestroyed(); });
@@ -147,8 +147,8 @@ void BaseActorComponent::UpdateMoveController()
 			auto dir = pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
 			float yawMove = uvec::get_yaw(dirMove);
 			float yawDir = uvec::get_yaw(dir);
-			float yawOffset = umath::get_angle_difference(yawDir, yawMove);
-			yawOffset = umath::normalize_angle(yawOffset, 0);
+			float yawOffset = pragma::math::get_angle_difference(yawDir, yawMove);
+			yawOffset = pragma::math::normalize_angle(yawOffset, 0);
 			//float moveYaw = GetBlendController(blendController);
 			//yawOffset = Math::ApproachAngle(moveYaw,yawOffset,1.f);
 			animComponent->SetBlendController(m_moveController, CInt32(yawOffset));
@@ -176,7 +176,7 @@ void BaseActorComponent::UpdateMoveController()
 	}
 }
 
-const util::PBoolProperty &BaseActorComponent::GetFrozenProperty() const { return m_bFrozen; }
+const pragma::util::PBoolProperty &BaseActorComponent::GetFrozenProperty() const { return m_bFrozen; }
 bool BaseActorComponent::IsFrozen() const { return *m_bFrozen; }
 bool BaseActorComponent::IsAlive() const { return m_bAlive; }
 bool BaseActorComponent::IsDead() const { return !IsAlive(); }
@@ -200,7 +200,7 @@ void BaseActorComponent::Ragdolize()
 void BaseActorComponent::OnDeath(game::DamageInfo *dmgInfo)
 {
 	auto evOnDeath = CEOnCharacterKilled {dmgInfo};
-	if(BroadcastEvent(baseActorComponent::EVENT_ON_DEATH, evOnDeath) == util::EventReply::Handled)
+	if(BroadcastEvent(baseActorComponent::EVENT_ON_DEATH, evOnDeath) == pragma::util::EventReply::Handled)
 		return;
 
 	Ragdolize();
@@ -283,7 +283,7 @@ bool BaseActorComponent::FindHitgroup(const pragma::physics::ICollisionObject &p
 	if(m_physHitboxes == nullptr)
 		return false;
 	auto &colObjs = m_physHitboxes->GetCollisionObjects();
-	auto it = std::find_if(colObjs.begin(), colObjs.end(), [&phys](const util::TSharedHandle<pragma::physics::ICollisionObject> &hPhys) { return (hPhys.Get() == &phys) ? true : false; });
+	auto it = std::find_if(colObjs.begin(), colObjs.end(), [&phys](const pragma::util::TSharedHandle<pragma::physics::ICollisionObject> &hPhys) { return (hPhys.Get() == &phys) ? true : false; });
 	if(it == colObjs.end())
 		return false;
 	auto idx = it - colObjs.begin();

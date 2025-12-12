@@ -12,21 +12,21 @@ void BaseEnvSmokeTrailComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "speed", false))
-			m_speed = ustring::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "distance", false))
-			m_distance = ustring::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "min_sprite_size", false))
-			m_minSpriteSize = ustring::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "max_sprite_size", false))
-			m_maxSpriteSize = ustring::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "material", false))
+		if(pragma::string::compare<std::string>(kvData.key, "speed", false))
+			m_speed = pragma::string::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "distance", false))
+			m_distance = pragma::string::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "min_sprite_size", false))
+			m_minSpriteSize = pragma::string::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "max_sprite_size", false))
+			m_maxSpriteSize = pragma::string::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "material", false))
 			m_material = kvData.value;
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();

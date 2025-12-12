@@ -41,8 +41,8 @@ export {
 			void AddMoveVelocity(const Vector3 &vel);
 			const Vector3 &GetMoveVelocity() const;
 
-			virtual void SetSlopeLimit(umath::Degree slopeLimit) = 0;
-			virtual umath::Degree GetSlopeLimit() const = 0;
+			virtual void SetSlopeLimit(pragma::math::Degree slopeLimit) = 0;
+			virtual pragma::math::Degree GetSlopeLimit() const = 0;
 
 			virtual void SetStepHeight(float stepHeight) = 0;
 			virtual float GetStepHeight() const = 0;
@@ -62,13 +62,13 @@ export {
 			virtual void InitializeLuaObject(lua::State *lua) override;
 		  protected:
 			virtual void DoMove(Vector3 &disp) = 0;
-			IController(IEnvironment &env, const util::TSharedHandle<ICollisionObject> &collisionObject, const Vector3 &halfExtents, ShapeType shapeType);
-			util::TSharedHandle<ICollisionObject> m_collisionObject = nullptr;
+			IController(IEnvironment &env, const pragma::util::TSharedHandle<ICollisionObject> &collisionObject, const Vector3 &halfExtents, ShapeType shapeType);
+			pragma::util::TSharedHandle<ICollisionObject> m_collisionObject = nullptr;
 			Vector3 m_moveVelocity = {};
 			Vector3 m_halfExtents {};
 			ShapeType m_shapeType = ShapeType::Capsule;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::physics::IController::CollisionFlags)
 };

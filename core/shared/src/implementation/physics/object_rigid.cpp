@@ -67,7 +67,7 @@ float  pragma::physics::RigidPhysObj::GetAngularDamping() const
 		return pragma::physics::PhysObj::GetAngularDamping();
 	return body->GetAngularDamping();
 }
-std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> & pragma::physics::RigidPhysObj::GetRigidBodies() { return m_rigidBodies; }
+std::vector<pragma::util::TSharedHandle<pragma::physics::IRigidBody>> & pragma::physics::RigidPhysObj::GetRigidBodies() { return m_rigidBodies; }
 void  pragma::physics::RigidPhysObj::UpdateVelocity()
 {
 	auto *body = GetRigidBody();
@@ -269,7 +269,7 @@ void  pragma::physics::RigidPhysObj::AddCollisionObject(pragma::physics::ICollis
 	if(o.IsRigid() == false)
 		return;
 	pragma::physics::PhysObj::AddCollisionObject(o);
-	m_rigidBodies.push_back(util::shared_handle_cast<pragma::physics::IBase, pragma::physics::IRigidBody>(o.ClaimOwnership()));
+	m_rigidBodies.push_back(pragma::util::shared_handle_cast<pragma::physics::IBase, pragma::physics::IRigidBody>(o.ClaimOwnership()));
 }
 Vector3  pragma::physics::RigidPhysObj::GetLinearVelocity() const { return m_velocity; }
 void  pragma::physics::RigidPhysObj::SetLinearVelocity(const Vector3 &vel)

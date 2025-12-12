@@ -26,8 +26,8 @@ export namespace pragma::physics {
 		void DisableCollisions();
 		virtual pragma::physics::IRigidBody *GetSourceActor() = 0;
 		virtual pragma::physics::IRigidBody *GetTargetActor() = 0;
-		umath::Transform &GetSourceTransform();
-		umath::Transform &GetTargetTransform();
+		pragma::math::Transform &GetSourceTransform();
+		pragma::math::Transform &GetTargetTransform();
 		Vector3 GetSourcePosition();
 		Quat GetSourceRotation();
 		Vector3 GetTargetPosition();
@@ -55,8 +55,8 @@ export namespace pragma::physics {
 	  protected:
 		IConstraint(IEnvironment &env);
 		virtual void DoSetCollisionsEnabled(Bool b) = 0;
-		umath::Transform m_srcTransform;
-		umath::Transform m_tgtTransform;
+		pragma::math::Transform m_srcTransform;
+		pragma::math::Transform m_tgtTransform;
 		EntityHandle m_hEntity = {};
 	  private:
 		bool m_bCollisionsEnabled = true;
@@ -79,8 +79,8 @@ export namespace pragma::physics {
 	class DLLNETWORK IHingeConstraint : virtual public IConstraint {
 	  public:
 		virtual void InitializeLuaObject(lua::State *lua) override;
-		virtual void SetLimit(umath::Radian lowerLimit, umath::Radian upperLimit) = 0;
-		virtual std::pair<umath::Radian, umath::Radian> GetLimit() const = 0;
+		virtual void SetLimit(pragma::math::Radian lowerLimit, pragma::math::Radian upperLimit) = 0;
+		virtual std::pair<pragma::math::Radian, pragma::math::Radian> GetLimit() const = 0;
 		virtual void DisableLimit() = 0;
 	  protected:
 		using IConstraint::IConstraint;
@@ -182,15 +182,15 @@ export namespace pragma::physics {
 
 		virtual void InitializeLuaObject(lua::State *lua) override;
 		virtual void CalculateTransforms() = 0;
-		virtual void CalculateTransforms(const umath::Transform &frameA, const umath::Transform &frameB) = 0;
-		virtual umath::Transform GetCalculatedTransformA() const = 0;
-		virtual umath::Transform GetCalculatedTransformB() const = 0;
-		virtual umath::Transform GetFrameOffsetA() const = 0;
-		virtual umath::Transform GetFrameOffsetB() const = 0;
+		virtual void CalculateTransforms(const pragma::math::Transform &frameA, const pragma::math::Transform &frameB) = 0;
+		virtual pragma::math::Transform GetCalculatedTransformA() const = 0;
+		virtual pragma::math::Transform GetCalculatedTransformB() const = 0;
+		virtual pragma::math::Transform GetFrameOffsetA() const = 0;
+		virtual pragma::math::Transform GetFrameOffsetB() const = 0;
 		virtual Vector3 GetAxis(pragma::Axis axisIndex) const = 0;
 		virtual double GetAngle(pragma::Axis axisIndex) const = 0;
 		virtual double GetRelativePivotPosition(pragma::Axis axisIndex) const = 0;
-		virtual void SetFrames(const umath::Transform &frameA, const umath::Transform &frameB) = 0;
+		virtual void SetFrames(const pragma::math::Transform &frameA, const pragma::math::Transform &frameB) = 0;
 		virtual void SetLinearLowerLimit(const Vector3 &linearLower) = 0;
 		virtual Vector3 GetLinearLowerLimit() const = 0;
 		virtual void SetLinearUpperLimit(const Vector3 &linearUpper) = 0;

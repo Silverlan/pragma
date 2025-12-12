@@ -157,7 +157,7 @@ export {
 			{
 			}
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	}
 	REGISTER_ENUM_FLAGS(pragma::ecs::EntityIterator::FilterFlags)
 
@@ -184,10 +184,10 @@ export {
 	};
 
 	struct DLLNETWORK EntityIteratorFilterUuid : public IEntityIteratorFilter {
-		EntityIteratorFilterUuid(pragma::Game &game, const util::Uuid &uuid);
+		EntityIteratorFilterUuid(pragma::Game &game, const pragma::util::Uuid &uuid);
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
 	  private:
-		util::Uuid m_uuid;
+		pragma::util::Uuid m_uuid;
 	};
 
 	struct DLLNETWORK EntityIteratorFilterClass : public IEntityIteratorFilter {
@@ -212,7 +212,7 @@ export {
 		EntityIteratorFilterEntity(pragma::Game &game, const std::string &name);
 		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) override;
 	  private:
-		std::vector<util::WeakHandle<pragma::BaseFilterComponent>> m_filterEnts;
+		std::vector<pragma::util::WeakHandle<pragma::BaseFilterComponent>> m_filterEnts;
 		pragma::ComponentId m_filterNameComponentId = pragma::INVALID_COMPONENT_ID;
 		pragma::ComponentId m_filterClassComponentId = pragma::INVALID_COMPONENT_ID;
 		std::string m_name;

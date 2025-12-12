@@ -29,5 +29,5 @@ void pragma::pts::CParticleOperatorJitter::Simulate(pragma::pts::CParticle &part
 	// jitter is just like wander, except it directly influences the position
 	auto pid = m_hashCodes.at(particle.GetIndex());
 	auto time = m_dtTime + (pid & 255) / 256.f;
-	particle.SetPosition(particle.GetPosition() + Vector3(util::noise::get_noise(time, pid) * m_dtStrength, util::noise::get_noise(time, pid + 1) * m_dtStrength, util::noise::get_noise(time, pid + 2) * m_dtStrength));
+	particle.SetPosition(particle.GetPosition() + Vector3(pragma::math::noise::get_noise(time, pid) * m_dtStrength, pragma::math::noise::get_noise(time, pid + 1) * m_dtStrength, pragma::math::noise::get_noise(time, pid + 2) * m_dtStrength));
 }

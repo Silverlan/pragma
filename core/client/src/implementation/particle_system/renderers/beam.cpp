@@ -21,16 +21,16 @@ void pragma::pts::CParticleRendererBeam::Initialize(pragma::BaseEnvParticleSyste
 	m_shader = pragma::get_cengine()->GetShader("particlepolyboard");
 	for(auto &it : values) {
 		auto key = it.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "node_start")
-			m_startNode = util::to_int(it.second);
+			m_startNode = pragma::util::to_int(it.second);
 		else if(key == "node_end")
-			m_endNode = util::to_int(it.second);
+			m_endNode = pragma::util::to_int(it.second);
 		else if(key == "curvature")
-			m_curvature = util::to_float(it.second);
+			m_curvature = pragma::util::to_float(it.second);
 	}
-	m_startNode = umath::max(m_startNode, static_cast<uint32_t>(1));
-	m_endNode = umath::max(m_endNode, static_cast<uint32_t>(1));
+	m_startNode = pragma::math::max(m_startNode, static_cast<uint32_t>(1));
+	m_endNode = pragma::math::max(m_endNode, static_cast<uint32_t>(1));
 	m_nodeCount = (m_endNode - m_startNode) + 1;
 	// Generate Indices
 	std::vector<uint16_t> indices;

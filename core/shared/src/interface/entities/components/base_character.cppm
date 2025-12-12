@@ -98,10 +98,10 @@ export namespace pragma {
 		void SetTurnSpeed(float speed);
 		float GetSlopeLimit() const;
 		virtual void SetSlopeLimit(float limit);
-		const util::PFloatProperty &GetSlopeLimitProperty() const;
+		const pragma::util::PFloatProperty &GetSlopeLimitProperty() const;
 		float GetStepOffset() const;
 		virtual void SetStepOffset(float offset);
-		const util::PFloatProperty &GetStepOffsetProperty() const;
+		const pragma::util::PFloatProperty &GetStepOffsetProperty() const;
 		virtual bool IsCharacter() const;
 		virtual bool IsMoving() const;
 
@@ -142,7 +142,7 @@ export namespace pragma {
 		// Unsticks the character from ground (disabling friction and also making sure gravity is applied) for the specified duration.
 		void DetachFromGround(float duration = 0.1f);
 
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		MovementComponent *GetMovementComponent();
 		const MovementComponent *GetMovementComponent() const { return const_cast<BaseCharacterComponent *>(this)->GetMovementComponent(); }
@@ -152,7 +152,7 @@ export namespace pragma {
 		bool Jump();
 		bool Jump(const Vector3 &velocity);
 		float GetJumpPower() const;
-		const util::PFloatProperty &GetJumpPowerProperty() const;
+		const pragma::util::PFloatProperty &GetJumpPowerProperty() const;
 		void SetJumpPower(float power);
 		bool CanJump() const;
 	  protected:
@@ -164,11 +164,11 @@ export namespace pragma {
 
 		float m_turnSpeed = 300.f;
 		float m_tDetachFromGround = 0.f;
-		util::PFloatProperty m_jumpPower = nullptr;
+		pragma::util::PFloatProperty m_jumpPower = nullptr;
 		std::unique_ptr<float> m_turnYaw = nullptr;
 		Quat m_angView = uquat::identity();
-		util::PFloatProperty m_slopeLimit = nullptr;
-		util::PFloatProperty m_stepOffset = nullptr;
+		pragma::util::PFloatProperty m_slopeLimit = nullptr;
+		pragma::util::PFloatProperty m_stepOffset = nullptr;
 		std::vector<EntityHandle> m_weapons;
 		EntityHandle m_weaponActive;
 		std::unordered_map<UInt32, UInt16> m_ammoCount;

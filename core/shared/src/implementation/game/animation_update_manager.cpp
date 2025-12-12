@@ -25,11 +25,11 @@ pragma::AnimationUpdateManager::AnimationUpdateManager(pragma::Game &game) : gam
 void pragma::AnimationUpdateManager::UpdateEntityState(pragma::ecs::BaseEntity &ent)
 {
 	auto animC = ent.GetAnimatedComponent();
-	if(animC.valid() && umath::is_flag_set(animC->GetStateFlags(), BaseEntityComponent::StateFlags::Removed))
+	if(animC.valid() && pragma::math::is_flag_set(animC->GetStateFlags(), BaseEntityComponent::StateFlags::Removed))
 		animC = pragma::ComponentHandle<BaseAnimatedComponent> {};
 
 	auto panimaC = ent.GetComponent<PanimaComponent>();
-	if(panimaC.valid() && umath::is_flag_set(panimaC->GetStateFlags(), BaseEntityComponent::StateFlags::Removed))
+	if(panimaC.valid() && pragma::math::is_flag_set(panimaC->GetStateFlags(), BaseEntityComponent::StateFlags::Removed))
 		panimaC = pragma::ComponentHandle<PanimaComponent> {};
 
 	auto it = std::find_if(m_animatedEntities.begin(), m_animatedEntities.end(), [&ent](const AnimatedEntity &animEnt) { return animEnt.entity == &ent; });

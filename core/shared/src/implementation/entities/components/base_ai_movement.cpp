@@ -90,7 +90,7 @@ void BaseAIComponent::ResetPath()
 	m_navInfo.bTargetReached = false;
 	m_navInfo.pathState = PathResult::Updating;
 	if(s_navThread != nullptr) {
-		m_navInfo.queuedPath = ::util::make_shared<ai::navigation::PathQuery>(pTrComponent->GetPosition(), GetMoveTarget());
+		m_navInfo.queuedPath = pragma::util::make_shared<ai::navigation::PathQuery>(pTrComponent->GetPosition(), GetMoveTarget());
 		s_navThread->pendingQueueMutex.lock();
 		s_navThread->pendingQueue.push(m_navInfo.queuedPath);
 		s_navThread->pendingQueueMutex.unlock();
@@ -133,7 +133,7 @@ BaseAIComponent::MoveResult BaseAIComponent::MoveTo(const Vector3 &pos, const Mo
 	//auto &start = m_entity->GetPosition();
 	auto upDir = GetUpDirection();
 	auto d = uvec::planar_distance_sqr(m_moveInfo.moveTarget, m_navInfo.pathTarget, upDir);
-	if(d > umath::pow2(pragma::ai::MAX_NODE_DISTANCE)) // If the new move target is too far away from our old one, we'll probably need a new path
+	if(d > pragma::math::pow2(pragma::ai::MAX_NODE_DISTANCE)) // If the new move target is too far away from our old one, we'll probably need a new path
 	{
 		if(info.moveOnPath == false) // TODO Check if obstructed
 			return MoveResult::MovingToTarget;
@@ -214,7 +214,7 @@ bool BaseAIComponent::GetMoveSpeed(int32_t animId, float &speed) const
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent) {
 		auto &scale = pTrComponent->GetScale();
-		speed *= umath::abs_max(scale.x, scale.y, scale.z);
+		speed *= pragma::math::abs_max(scale.x, scale.y, scale.z);
 	}
 	return true;
 }
@@ -240,7 +240,7 @@ void BaseAIComponent::ClearMoveSpeed(const std::string &name)
 }
 pragma::Activity BaseAIComponent::GetMoveActivity() const { return m_moveInfo.moveActivity; }
 
-void BaseAIComponent::BlendAnimationMovementMT(std::vector<umath::Transform> &bonePoses, std::vector<Vector3> *boneScales)
+void BaseAIComponent::BlendAnimationMovementMT(std::vector<pragma::math::Transform> &bonePoses, std::vector<Vector3> *boneScales)
 {
 	if(m_seqIdle == -1)
 		return;
@@ -275,13 +275,13 @@ void BaseAIComponent::BlendAnimationMovementMT(std::vector<umath::Transform> &bo
 	if(m_lastMovementBlendScale == 0.f && speed < 0.5f) // Arbitrary limit; Don't blend animations if speed is below this value
 		return;
 	float scale = 0.f;
-	float speedMax = umath::abs(GetMaxSpeed());
+	float speedMax = pragma::math::abs(GetMaxSpeed());
 	if(speedMax > 0.f) {
 		scale = 1.f - (speed / speedMax);
 		if(scale < 0.f)
 			scale = 0.f;
 	}
-	m_lastMovementBlendScale = scale = umath::approach(m_lastMovementBlendScale, scale, 0.05f);
+	m_lastMovementBlendScale = scale = pragma::math::approach(m_lastMovementBlendScale, scale, 0.05f);
 	auto &dstBonePoses = frame->GetBoneTransforms();
 	auto &dstBoneScales = frame->GetBoneScales();
 	animComponent->BlendBonePoses(bonePoses, boneScales, dstBonePoses, &dstBoneScales, bonePoses, boneScales, *anim, scale);
@@ -340,8 +340,8 @@ void BaseAIComponent::PathStep(float)
 			bMoveOnPath = false;
 		else {
 			tgt.y = 0.f;
-			const auto pathNodeReachedDist = umath::pow2(10.f);
-			while(uvec::planar_distance_sqr(pos, tgt, upDir) <= umath::pow2(pathNodeReachedDist)) {
+			const auto pathNodeReachedDist = pragma::math::pow2(10.f);
+			while(uvec::planar_distance_sqr(pos, tgt, upDir) <= pragma::math::pow2(pathNodeReachedDist)) {
 				SetPathNodeIndex(m_navInfo.pathInfo->pathIdx + 1, tgt);
 				if(m_navInfo.pathInfo->pathIdx >= CUInt32(path.pathCount)) {
 					StopMoving();
@@ -394,9 +394,9 @@ void BaseAIComponent::PathStep(float)
 		game->DrawLine(moveTarget,moveTarget +Vector3(0,50,0),colors::Fuchsia,0.1f);
 
 		auto segDist = uvec::distance(*p1,*p2);
-		auto s = (segDist > 0.f) ? umath::min(uvec::distance(*p1,moveTarget) /segDist,1.f) : 0.f;
+		auto s = (segDist > 0.f) ? pragma::math::min(uvec::distance(*p1,moveTarget) /segDist,1.f) : 0.f;
 		//Con::cout<<"s: "<<s<<"; segDist: "<<segDist<<"; Distance to move target: "<<uvec::distance(*p1,moveTarget)<<Con::endl;
-		tgt = util::calc_hermite_spline_position(*p0,*p1,*p2,p3,s,1.f);//0.f);
+		tgt = pragma::util::calc_hermite_spline_position(*p0,*p1,*p2,p3,s,1.f);//0.f);
 
 		game->DrawLine(*p0,*p1,colors::Yellow,0.1f);
 		game->DrawLine(*p1,*p2,colors::Aqua,0.1f);
@@ -408,7 +408,7 @@ void BaseAIComponent::PathStep(float)
 	if(bMoveOnPath == false) // No navigation info available; Try to move to target in a straight line
 	{
 		tgt = m_moveInfo.moveTarget;
-		if(uvec::planar_distance_sqr(pos, tgt, upDir) <= umath::pow2(destReachDist)) {
+		if(uvec::planar_distance_sqr(pos, tgt, upDir) <= pragma::math::pow2(destReachDist)) {
 			StopMoving();
 			m_navInfo.bTargetReached = true;
 			OnPathDestinationReached();

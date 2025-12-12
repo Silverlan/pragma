@@ -18,13 +18,13 @@ export namespace pragma {
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		virtual ~BaseFlammableComponent() override;
 		virtual void Initialize() override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
-		const util::PBoolProperty &GetOnFireProperty() const;
-		const util::PBoolProperty &GetIgnitableProperty() const;
+		const pragma::util::PBoolProperty &GetOnFireProperty() const;
+		const pragma::util::PBoolProperty &GetIgnitableProperty() const;
 		bool IsOnFire() const;
 		bool IsIgnitable() const;
-		virtual util::EventReply Ignite(float duration, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr);
+		virtual pragma::util::EventReply Ignite(float duration, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr);
 		virtual void Extinguish();
 		virtual void SetIgnitable(bool b);
 		virtual void OnTick(double dt) override;
@@ -36,8 +36,8 @@ export namespace pragma {
 		pragma::NetEventId m_netEvIgnite = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvExtinguish = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvSetIgnitable = pragma::INVALID_NET_EVENT;
-		util::PBoolProperty m_bIsOnFire;
-		util::PBoolProperty m_bIgnitable;
+		pragma::util::PBoolProperty m_bIsOnFire;
+		pragma::util::PBoolProperty m_bIgnitable;
 		float m_tExtinguishTime = 0.f;
 	};
 	struct DLLNETWORK CEOnIgnited : public ComponentEvent {

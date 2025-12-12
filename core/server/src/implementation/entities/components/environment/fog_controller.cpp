@@ -35,10 +35,10 @@ void SFogControllerComponent::SetMaxDensity(float density)
 	p->Write<float>(m_kvMaxDensity);
 	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENV_FOGCON_SETMAXDENSITY, p, pragma::networking::Protocol::SlowReliable);
 }
-void SFogControllerComponent::SetFogType(util::FogType type) { BaseEnvFogControllerComponent::SetFogType(type); }
+void SFogControllerComponent::SetFogType(pragma::util::FogType type) { BaseEnvFogControllerComponent::SetFogType(type); }
 void SFogControllerComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
-	packet->Write<util::FogType>(m_kvFogType);
+	packet->Write<pragma::util::FogType>(m_kvFogType);
 	packet->Write<float>(m_kvFogStart);
 	packet->Write<float>(m_kvFogEnd);
 	packet->Write<float>(m_kvMaxDensity);

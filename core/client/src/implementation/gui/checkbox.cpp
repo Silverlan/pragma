@@ -41,13 +41,13 @@ void pragma::gui::types::WICheckbox::SetChecked(bool bChecked)
 }
 bool pragma::gui::types::WICheckbox::IsChecked() { return m_bChecked; }
 void pragma::gui::types::WICheckbox::Toggle() { SetChecked(!m_bChecked); }
-util::EventReply pragma::gui::types::WICheckbox::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WICheckbox::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
-	if(WIRect::MouseCallback(button, state, mods) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(WIRect::MouseCallback(button, state, mods) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(button == pragma::platform::MouseButton::Left && state == pragma::platform::KeyState::Press)
 		Toggle();
-	return util::EventReply::Handled;
+	return pragma::util::EventReply::Handled;
 }
 void pragma::gui::types::WICheckbox::SetSize(int x, int y)
 {

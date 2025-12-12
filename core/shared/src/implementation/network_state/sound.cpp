@@ -9,7 +9,7 @@ import :network_state;
 Bool pragma::NetworkState::IsSoundPrecached(const std::string &snd) const
 {
 	std::string lsnd = snd;
-	ustring::to_lower(lsnd);
+	pragma::string::to_lower(lsnd);
 	lsnd = FileManager::GetCanonicalizedPath(lsnd);
 	auto i = m_soundsPrecached.find(lsnd);
 	return (i != m_soundsPrecached.end()) ? true : false;

@@ -26,9 +26,9 @@ void pragma::pts::CParticleOperatorTrail::Initialize(pragma::BaseEnvParticleSyst
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &it : values) {
 		auto key = it.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "travel_time")
-			m_travelTime = util::to_float(it.second);
+			m_travelTime = pragma::util::to_float(it.second);
 	}
 	m_particleNodes.resize(static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount(), 0);
 }

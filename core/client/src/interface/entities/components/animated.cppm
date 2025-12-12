@@ -51,7 +51,7 @@ export namespace pragma {
 		void InitializeBoneBuffer();
 		std::optional<Mat4> GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset = nullptr, float *optOutDelta = nullptr) const;
 		virtual std::optional<Mat4> GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId) const override;
-		virtual bool GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const override;
+		virtual bool GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, pragma::math::ScaledTransform &outPose) const override;
 
 		uint32_t OnSkeletonUpdated();
 		bool MaintainAnimations(double dt) override;
@@ -84,7 +84,7 @@ export namespace pragma {
 		virtual void PushArguments(lua::State *l) override;
 		std::shared_ptr<prosper::IBuffer> buffer;
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {
 	REGISTER_ENUM_FLAGS(pragma::CAnimatedComponent::StateFlags)

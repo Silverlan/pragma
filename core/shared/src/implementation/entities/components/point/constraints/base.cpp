@@ -11,9 +11,9 @@ using namespace pragma;
 void BasePointConstraintComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		return SetKeyValue(kvData.key, kvData.value) ? util::EventReply::Handled : util::EventReply::Unhandled;
+		return SetKeyValue(kvData.key, kvData.value) ? pragma::util::EventReply::Handled : pragma::util::EventReply::Unhandled;
 	});
 	auto &ent = GetEntity();
 	ent.AddComponent("toggle");
@@ -39,17 +39,17 @@ void BasePointConstraintComponent::OnRemove()
 		m_cbGameLoaded.Remove();
 }
 
-std::vector<util::TSharedHandle<physics::IConstraint>> &BasePointConstraintComponent::GetConstraints() { return m_constraints; }
+std::vector<pragma::util::TSharedHandle<physics::IConstraint>> &BasePointConstraintComponent::GetConstraints() { return m_constraints; }
 
-util::EventReply BasePointConstraintComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply BasePointConstraintComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON)
 		OnTurnOn();
 	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		OnTurnOff();
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 
 void BasePointConstraintComponent::OnTurnOn()
@@ -116,11 +116,11 @@ bool BasePointConstraintComponent::SetKeyValue(std::string key, std::string val)
 {
 	if(key == "source") {
 		m_kvSource = val;
-		ustring::to_lower(m_kvSource);
+		pragma::string::to_lower(m_kvSource);
 	}
 	else if(key == "target") {
 		m_kvTarget = val;
-		ustring::to_lower(m_kvTarget);
+		pragma::string::to_lower(m_kvTarget);
 	}
 	else if(key == "target_origin")
 		m_posTarget = uvec::create(val);

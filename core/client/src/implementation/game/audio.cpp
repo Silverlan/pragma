@@ -70,11 +70,11 @@ void pragma::CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cac
 		auto *iplScene = soundSys->InitializeSteamAudioScene();
 		if(iplScene != nullptr) {
 			auto &simSettings = iplScene->GetSimulationSettings();
-			simSettings.numRays = umath::clamp(cvSteamAudioNumRays->GetInt(), 1'024, 131'072);
-			simSettings.numDiffuseSamples = umath::clamp(cvSteamAudioNumDiffuseSamples->GetInt(), 32, 4'096);
-			simSettings.numBounces = umath::clamp(cvSteamAudioNumBounces->GetInt(), 1, 32);
-			simSettings.irDuration = umath::clamp(cvSteamAudioIrDuration->GetFloat(), 0.5f, 4.f);
-			simSettings.ambisonicsOrder = umath::clamp(cvSteamAudioAmbisonicsOrder->GetInt(), 0, 3);
+			simSettings.numRays = pragma::math::clamp(cvSteamAudioNumRays->GetInt(), 1'024, 131'072);
+			simSettings.numDiffuseSamples = pragma::math::clamp(cvSteamAudioNumDiffuseSamples->GetInt(), 32, 4'096);
+			simSettings.numBounces = pragma::math::clamp(cvSteamAudioNumBounces->GetInt(), 1, 32);
+			simSettings.irDuration = pragma::math::clamp(cvSteamAudioIrDuration->GetFloat(), 0.5f, 4.f);
+			simSettings.ambisonicsOrder = pragma::math::clamp(cvSteamAudioAmbisonicsOrder->GetInt(), 0, 3);
 
 			auto info = ipl::Scene::FinalizeInfo {};
 			info.flags = ipl::Scene::InitializeFlags::None;

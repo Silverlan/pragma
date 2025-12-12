@@ -22,13 +22,13 @@ export namespace pragma {
 		virtual ~BaseScoreComponent() override;
 
 		Score GetScore() const;
-		const util::PInt32Property &GetScoreProperty() const;
+		const pragma::util::PInt32Property &GetScoreProperty() const;
 		void SetScore(Score score);
 		void AddScore(Score score);
 		void SubtractScore(Score score);
 	  protected:
 		BaseScoreComponent(pragma::ecs::BaseEntity &ent);
-		util::PInt32Property m_score;
+		pragma::util::PInt32Property m_score;
 		pragma::NetEventId m_netEvSetScore = pragma::INVALID_NET_EVENT;
 		CallbackHandle m_cbOnScoreChanged = {};
 	};

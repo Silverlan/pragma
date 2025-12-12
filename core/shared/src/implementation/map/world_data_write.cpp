@@ -11,7 +11,7 @@ import :map.world_data;
 void pragma::asset::Output::Write(VFilePtrReal &f)
 {
 	auto lname = name;
-	ustring::to_lower(lname);
+	pragma::string::to_lower(lname);
 	f->WriteString(lname);
 	f->WriteString(target);
 	f->WriteString(input);
@@ -35,7 +35,7 @@ bool pragma::asset::WorldData::Write(const std::string &fileName, std::string *o
 	auto nFileName = fileName;
 	ufile::remove_extension_from_filename(nFileName);
 	nFileName += ".wld";
-	auto fullPath = util::CONVERT_PATH + nFileName;
+	auto fullPath = pragma::util::CONVERT_PATH + nFileName;
 	auto pathNoFile = ufile::get_path_from_filename(fullPath);
 	if(FileManager::CreatePath(pathNoFile.c_str()) == false) {
 		if(optOutErrMsg)
@@ -52,7 +52,7 @@ bool pragma::asset::WorldData::Write(const std::string &fileName, std::string *o
 	return true;
 }
 
-static void preprocess_bsp_data(util::BSPTree &bspTree, std::vector<std::vector<size_t>> &outClusterNodes, std::vector<std::vector<uint16_t>> &outClusterToClusterVisibility)
+static void preprocess_bsp_data(pragma::util::BSPTree &bspTree, std::vector<std::vector<size_t>> &outClusterNodes, std::vector<std::vector<uint16_t>> &outClusterToClusterVisibility)
 {
 	auto numClusters = bspTree.GetClusterCount();
 	auto &bspNodes = bspTree.GetNodes();
@@ -126,7 +126,7 @@ bool pragma::asset::WorldData::LoadFromAssetData(udm::LinkedPropertyWrapper &udm
 		entData->m_mapIndex = entIdx + 1; // Map indices always start at 1!
 		entData->SetClassName(udmEnt["className"].ToValue<std::string>(""));
 
-		auto pose = udmEnt["pose"].ToValue<umath::ScaledTransform>(umath::ScaledTransform {});
+		auto pose = udmEnt["pose"].ToValue<pragma::math::ScaledTransform>(pragma::math::ScaledTransform {});
 		entData->SetPose(pose);
 
 		auto &keyValues = entData->GetKeyValues();
@@ -185,7 +185,7 @@ bool pragma::asset::WorldData::LoadFromAssetData(udm::LinkedPropertyWrapper &udm
 
 	auto udmBsp = udm["bsp"];
 	if(udmBsp) {
-		m_bspTree = util::BSPTree::Load(udm::AssetData {udmBsp["tree"]}, outErr);
+		m_bspTree = pragma::util::BSPTree::Load(udm::AssetData {udmBsp["tree"]}, outErr);
 		if(m_bspTree == nullptr)
 			return false;
 
@@ -244,8 +244,8 @@ bool pragma::asset::WorldData::Save(const std::string &fileName, const std::stri
 	if(!ext)
 		ext = PMAP_EXTENSION_BINARY;
 
-	auto asciiFormat = ustring::compare(*ext, std::string {PMAP_EXTENSION_ASCII}, false);
-	auto filePath = util::Path::CreateFile(fileName);
+	auto asciiFormat = pragma::string::compare(*ext, std::string {PMAP_EXTENSION_ASCII}, false);
+	auto filePath = pragma::util::Path::CreateFile(fileName);
 	auto fileMode = filemanager::FileMode::Write;
 	if(!asciiFormat)
 		fileMode |= filemanager::FileMode::Binary;
@@ -281,12 +281,12 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 	std::vector<std::string> normalizedMaterials;
 	normalizedMaterials.reserve(m_materialTable.size());
 	for(auto &str : m_materialTable) {
-		util::Path path {str};
-		if(ustring::compare<std::string_view>(path.GetFront(), "materials", false))
+		pragma::util::Path path {str};
+		if(pragma::string::compare<std::string_view>(path.GetFront(), "materials", false))
 			path.PopFront();
 
 		auto strPath = path.GetString();
-		ustring::to_lower(strPath);
+		pragma::string::to_lower(strPath);
 		normalizedMaterials.push_back(strPath);
 	}
 	udm["materials"] << normalizedMaterials;
@@ -301,7 +301,7 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 		if(version > 1)
 			udmEnt["flags"] << entData->GetFlags();
 		else {
-			if(umath::is_flag_set(entData->GetFlags(), EntityData::Flags::ClientsideOnly))
+			if(pragma::math::is_flag_set(entData->GetFlags(), EntityData::Flags::ClientsideOnly))
 				udmEnt["flags"]["clientsideOnly"] << true;
 		}
 
@@ -350,7 +350,7 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 	if(m_lightMapAtlasEnabled) {
 		auto strMapName = mapName;
 		ufile::remove_extension_from_filename(strMapName); // TODO: Specify extensions
-		ustring::to_lower(strMapName);
+		pragma::string::to_lower(strMapName);
 		SaveLightmapAtlas(strMapName);
 		udm["lightmap"]["intensity"] << m_lightMapIntensity;
 		udm["lightmap"]["exposure"] << m_lightMapExposure;
@@ -397,13 +397,13 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 
 void pragma::asset::WorldData::Write(VFilePtrReal &f)
 {
-	auto mapName = util::Path::CreateFile(f->GetPath());
-	while(ustring::compare<std::string_view>(mapName.GetFront(), "maps", false) == false)
+	auto mapName = pragma::util::Path::CreateFile(f->GetPath());
+	while(pragma::string::compare<std::string_view>(mapName.GetFront(), "maps", false) == false)
 		mapName.PopFront();
 	mapName.PopFront(); // Pop "maps"
 	auto strMapName = mapName.GetString();
 	ufile::remove_extension_from_filename(strMapName);
-	ustring::to_lower(strMapName);
+	pragma::string::to_lower(strMapName);
 
 	const std::array<char, 3> header = {'W', 'L', 'D'};
 	f->Write(header.data(), header.size());
@@ -478,12 +478,12 @@ void pragma::asset::WorldData::WriteMaterials(VFilePtrReal &f)
 {
 	f->Write<uint32_t>(m_materialTable.size());
 	for(auto &str : m_materialTable) {
-		util::Path path {str};
-		if(ustring::compare<std::string_view>(path.GetFront(), "materials", false))
+		pragma::util::Path path {str};
+		if(pragma::string::compare<std::string_view>(path.GetFront(), "materials", false))
 			path.PopFront();
 
 		auto strPath = path.GetString();
-		ustring::to_lower(strPath);
+		pragma::string::to_lower(strPath);
 		f->WriteString(strPath);
 	}
 }
@@ -498,8 +498,8 @@ void pragma::asset::WorldData::WriteBSPTree(VFilePtrReal &f)
 	auto &bspNodes = bspTree.GetNodes();
 	auto numClusters = bspTree.GetClusterCount();
 	auto &clusterVisibility = bspTree.GetClusterVisibility();
-	std::function<void(const util::BSPTree::Node &)> fWriteNode = nullptr;
-	fWriteNode = [&f, &fWriteNode, &clusterVisibility, &clusterToClusterVisibility, &bspNodes, &clusterNodes, &bspTree, numClusters](const util::BSPTree::Node &node) {
+	std::function<void(const pragma::util::BSPTree::Node &)> fWriteNode = nullptr;
+	fWriteNode = [&f, &fWriteNode, &clusterVisibility, &clusterToClusterVisibility, &bspNodes, &clusterNodes, &bspTree, numClusters](const pragma::util::BSPTree::Node &node) {
 		f->Write<bool>(node.leaf);
 		f->Write<Vector3>(node.min);
 		f->Write<Vector3>(node.max);
@@ -508,7 +508,7 @@ void pragma::asset::WorldData::WriteBSPTree(VFilePtrReal &f)
 		f->Write<int32_t>(node.originalNodeIndex);
 		if(node.leaf) {
 			f->Write<uint16_t>(node.cluster);
-			auto itNode = std::find_if(bspNodes.begin(), bspNodes.end(), [&node](const util::BSPTree::Node &nodeOther) { return &nodeOther == &node; });
+			auto itNode = std::find_if(bspNodes.begin(), bspNodes.end(), [&node](const pragma::util::BSPTree::Node &nodeOther) { return &nodeOther == &node; });
 			// Calculate AABB encompassing all nodes visible by this node
 			auto min = node.min;
 			auto max = node.max;
@@ -549,7 +549,7 @@ void pragma::asset::WorldData::WriteEntities(VFilePtrReal &f)
 		auto offsetEntityLeaves = f->Tell();
 		f->Write<uint64_t>(0u); // Offset to entity leaves
 
-		f->Write<uint64_t>(umath::to_integral(entData->GetFlags()));
+		f->Write<uint64_t>(pragma::math::to_integral(entData->GetFlags()));
 
 		f->WriteString(entData->GetClassName());
 		auto &pose = entData->GetPose();

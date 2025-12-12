@@ -32,7 +32,7 @@ export namespace luabind {
 	};
 
 	template<typename T>
-	concept is_shader = std::derived_from<util::base_type<T>, ::prosper::Shader>;
+	concept is_shader = std::derived_from<pragma::util::base_type<T>, ::prosper::Shader>;
 
 	template<typename T>
 	    requires(is_shader<T> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)

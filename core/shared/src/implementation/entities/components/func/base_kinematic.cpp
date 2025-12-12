@@ -12,27 +12,27 @@ void BaseFuncKinematicComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "first_node", false))
+		if(pragma::string::compare<std::string>(kvData.key, "first_node", false))
 			m_kvFirstNode = kvData.value;
-		else if(ustring::compare<std::string>(kvData.key, "move_speed", false))
-			m_kvMoveSpeed = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "start_sound", false))
+		else if(pragma::string::compare<std::string>(kvData.key, "move_speed", false))
+			m_kvMoveSpeed = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "start_sound", false))
 			m_kvStartSound = kvData.value;
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
-		if(ustring::compare<std::string>(inputData.input, "startforward", false))
+		if(pragma::string::compare<std::string>(inputData.input, "startforward", false))
 			StartForward();
-		else if(ustring::compare<std::string>(inputData.input, "startbackward", false))
+		else if(pragma::string::compare<std::string>(inputData.input, "startbackward", false))
 			StartBackward();
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();

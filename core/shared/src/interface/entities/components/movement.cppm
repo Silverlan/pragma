@@ -68,7 +68,7 @@ export namespace pragma {
 		float m_movementAcceleration = 0.f;
 		float m_accelerationRampUpTime = 0.f;
 		std::optional<Vector3> m_movementDirection {};
-		std::array<float, umath::to_integral(MoveDirection::Count)> m_directionMagnitude {0.f, 0.f, 0.f, 0.f};
+		std::array<float, pragma::math::to_integral(MoveDirection::Count)> m_directionMagnitude {0.f, 0.f, 0.f, 0.f};
 
 		Vector3 m_moveVelocity = {};
 		float m_timeSinceMovementStart = 0.f;

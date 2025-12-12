@@ -39,12 +39,12 @@ export namespace pragma {
 		void RemoveEntityFromBvh(const pragma::ecs::BaseEntity &ent);
 		void UpdateBuild();
 
-		void Build(std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &&meshes, std::vector<pragma::ecs::BaseEntity *> &&meshToEntity, std::vector<umath::ScaledTransform> &&meshPoses);
+		void Build(std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &&meshes, std::vector<pragma::ecs::BaseEntity *> &&meshToEntity, std::vector<pragma::math::ScaledTransform> &&meshPoses);
 
 		virtual void TestRebuildBvh() = 0;
 		bool m_staticBvhDirty = false;
 		bool m_bvhInitialized = false; // Was the bvh initialized at least once?
-		std::shared_ptr<util::FunctionalParallelWorker> m_buildWorker = nullptr;
+		std::shared_ptr<pragma::util::FunctionalParallelWorker> m_buildWorker = nullptr;
 		std::unordered_set<BaseStaticBvhUserComponent *> m_entities;
 		std::unique_ptr<BvhPendingWorkerResult> m_bvhPendingWorkerResult;
 		CallbackHandle m_onEndGame;

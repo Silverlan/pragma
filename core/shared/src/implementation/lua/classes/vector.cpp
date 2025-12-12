@@ -6,8 +6,8 @@ module pragma.shared;
 
 import :scripting.lua.classes.vector;
 
-umath::Vertex Lua::Vertex::Copy(umath::Vertex &v) { return v; }
-umath::VertexWeight Lua::VertexWeight::Copy(umath::VertexWeight &vw) { return vw; }
+pragma::math::Vertex Lua::Vertex::Copy(pragma::math::Vertex &v) { return v; }
+pragma::math::VertexWeight Lua::VertexWeight::Copy(pragma::math::VertexWeight &vw) { return vw; }
 ::Vector3i Lua::Vectori::Copy(::Vector3i &v) { return v; }
 ::Vector2i Lua::Vector2i::Copy(::Vector2i &v) { return v; }
 ::Vector4i Lua::Vector4i::Copy(::Vector4i &v) { return v; }
@@ -186,8 +186,8 @@ static void get_min_max(lua::State *l, luabind::table<> t, TVector &outMin, TVec
 	for(auto it = luabind::iterator {t}; it != luabind::iterator {}; ++it) {
 		auto val = luabind::object_cast_nothrow<TVector>(*it, TVector {});
 		for(auto i = decltype(outMin.length()) {0u}; i < outMin.length(); ++i) {
-			outMin[i] = umath::min(outMin[i], val[i]);
-			outMax[i] = umath::min(outMax[i], val[i]);
+			outMin[i] = pragma::math::min(outMin[i], val[i]);
+			outMax[i] = pragma::math::min(outMax[i], val[i]);
 		}
 	}
 }
@@ -198,7 +198,7 @@ void Lua::vector::get_min_max(lua::State *l, luabind::table<> t, ::Vector4 &outM
 
 ::Vector2 Lua::vector::random_2d()
 {
-	float azimuth = umath::random(0.f, 2.f) * static_cast<float>(umath::pi);
+	float azimuth = pragma::math::random(0.f, 2.f) * static_cast<float>(pragma::math::pi);
 	return ::Vector2(std::cos(azimuth), std::sin(azimuth));
 }
 

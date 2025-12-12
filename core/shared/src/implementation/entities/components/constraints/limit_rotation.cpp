@@ -80,11 +80,11 @@ void ConstraintLimitRotationComponent::OnEntityComponentAdded(BaseEntityComponen
 		m_constraintC->SetDriverEnabled(false);
 	}
 }
-void ConstraintLimitRotationComponent::SetLimit(pragma::Axis axis, const Vector2 &limit) { m_limits[umath::to_integral(axis)] = limit; }
-const Vector2 &ConstraintLimitRotationComponent::GetLimit(pragma::Axis axis) const { return m_limits[umath::to_integral(axis)]; }
+void ConstraintLimitRotationComponent::SetLimit(pragma::Axis axis, const Vector2 &limit) { m_limits[pragma::math::to_integral(axis)] = limit; }
+const Vector2 &ConstraintLimitRotationComponent::GetLimit(pragma::Axis axis) const { return m_limits[pragma::math::to_integral(axis)]; }
 
-void ConstraintLimitRotationComponent::SetLimitEnabled(pragma::Axis axis, bool enabled) { m_limitsEnabled[umath::to_integral(axis)] = enabled; }
-bool ConstraintLimitRotationComponent::IsLimitEnabled(pragma::Axis axis) const { return m_limitsEnabled[umath::to_integral(axis)]; }
+void ConstraintLimitRotationComponent::SetLimitEnabled(pragma::Axis axis, bool enabled) { m_limitsEnabled[pragma::math::to_integral(axis)] = enabled; }
+bool ConstraintLimitRotationComponent::IsLimitEnabled(pragma::Axis axis) const { return m_limitsEnabled[pragma::math::to_integral(axis)]; }
 void ConstraintLimitRotationComponent::ApplyConstraint()
 {
 	if(m_constraintC.expired())
@@ -94,23 +94,23 @@ void ConstraintLimitRotationComponent::ApplyConstraint()
 	if(!constraintInfo || influence == 0.f)
 		return;
 	Quat rot;
-	auto res = constraintInfo->drivenObjectC->GetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
+	auto res = constraintInfo->drivenObjectC->GetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driven object of constraint '{}'.", constraintInfo->drivenObjectPropIdx, GetEntity().ToString());
 		return;
 	}
 	auto ang = EulerAngles {rot};
 	auto origRot = rot;
-	constexpr auto numAxes = umath::to_integral(pragma::Axis::Count);
+	constexpr auto numAxes = pragma::math::to_integral(pragma::Axis::Count);
 	for(auto i = decltype(numAxes) {0u}; i < numAxes; ++i) {
 		auto axis = static_cast<pragma::Axis>(i);
 		if(!IsLimitEnabled(axis))
 			continue;
 		auto limit = GetLimit(axis);
-		ang[i] = umath::clamp(ang[i], limit.x, limit.y);
+		ang[i] = pragma::math::clamp(ang[i], limit.x, limit.y);
 	}
 	rot = uquat::create(ang);
 
 	rot = uquat::slerp(origRot, rot, influence);
-	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
 }

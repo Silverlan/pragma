@@ -60,22 +60,22 @@ void CShadowCSMComponent::FreeRenderTarget() {}
 
 prosper::IRenderPass *CShadowCSMComponent::GetRenderPass(pragma::rendering::ShadowMapType smType) const
 {
-	auto &set = m_textureSets.at(umath::to_integral(smType));
+	auto &set = m_textureSets.at(pragma::math::to_integral(smType));
 	return set.renderTarget ? &set.renderTarget->GetRenderPass() : nullptr;
 }
 prosper::Texture *CShadowCSMComponent::GetDepthTexture(pragma::rendering::ShadowMapType rp) const
 {
-	auto &set = m_textureSets.at(umath::to_integral(rp));
+	auto &set = m_textureSets.at(pragma::math::to_integral(rp));
 	return set.renderTarget ? &set.renderTarget->GetTexture() : nullptr;
 }
 prosper::Texture *CShadowCSMComponent::GetDepthTexture() const { return GetDepthTexture(pragma::rendering::ShadowMapType::Dynamic); }
-const std::shared_ptr<prosper::RenderTarget> &CShadowCSMComponent::GetRenderTarget(pragma::rendering::ShadowMapType smType) const { return m_textureSets.at(umath::to_integral(smType)).renderTarget; }
+const std::shared_ptr<prosper::RenderTarget> &CShadowCSMComponent::GetRenderTarget(pragma::rendering::ShadowMapType smType) const { return m_textureSets.at(pragma::math::to_integral(smType)).renderTarget; }
 const std::shared_ptr<prosper::RenderTarget> &CShadowCSMComponent::GetStaticPendingRenderTarget() const { return m_pendingInfo.staticTextureSet.renderTarget; }
 const Mat4 &CShadowCSMComponent::GetStaticPendingViewProjectionMatrix(uint32_t layer) const { return m_pendingInfo.prevVpMatrices[layer]; }
 
 std::shared_ptr<prosper::IFramebuffer> CShadowCSMComponent::GetFramebuffer(pragma::rendering::ShadowMapType smType, uint32_t layer) const
 {
-	auto &set = m_textureSets.at(umath::to_integral(smType));
+	auto &set = m_textureSets.at(pragma::math::to_integral(smType));
 	auto *fb = set.renderTarget->GetFramebuffer(layer);
 	assert(fb != nullptr);
 	return fb ? fb->shared_from_this() : nullptr;

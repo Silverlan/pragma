@@ -198,7 +198,7 @@ std::shared_ptr<pragma::rendering::shader_material::ShaderMaterial> ShaderGraph:
 	auto *graph = GetGraph();
 	if(!graph)
 		return nullptr;
-	auto sm = ::util::make_shared<pragma::rendering::shader_material::ShaderMaterial>(GetIdentifier());
+	auto sm = pragma::util::make_shared<pragma::rendering::shader_material::ShaderMaterial>(GetIdentifier());
 	struct ParamNodeInfo {
 		std::string name;
 		pragma::shadergraph::GraphNode *node;

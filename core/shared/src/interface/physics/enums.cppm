@@ -53,7 +53,7 @@ export {
 
 			Default = ReportHitPosition | ReportHitNormal | ReportHitUV
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 
 		enum class CollisionType : int32_t { None = 0, AABB, OBB, Brush };
 		enum class PhysicsType : int32_t { None = 0, Dynamic, Static, SoftBody, BoxController, CapsuleController };

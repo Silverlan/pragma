@@ -11,7 +11,7 @@ pragma::animation::Bone::Bone() : parent(), ID(0) {}
 pragma::animation::Bone::Bone(const Bone &other) : ID(other.ID), name {other.name}, parent {}
 {
 	for(auto &pair : other.children)
-		children[pair.first] = ::util::make_shared<Bone>(*pair.second);
+		children[pair.first] = pragma::util::make_shared<Bone>(*pair.second);
 #ifdef _MSC_VER
 	static_assert(sizeof(Bone) == 112, "Update this function when making changes to this class!");
 #endif

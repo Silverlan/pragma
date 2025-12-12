@@ -14,7 +14,7 @@ export import :types;
 
 export {
 	namespace pragma {
-		using EntityIdentifier = std::variant<util::Uuid, std::string>;
+		using EntityIdentifier = std::variant<pragma::util::Uuid, std::string>;
 		struct DLLNETWORK EntityURef {
 			EntityURef(const EntityURef &other);
 			EntityURef(EntityURef &&other);
@@ -29,7 +29,7 @@ export {
 			bool HasEntityReference() const;
 			static void AttachEntityFilter(pragma::ecs::EntityIterator &it, const EntityIdentifier &identifier);
 			const EntityIdentifier *GetIdentifier() const { return m_identifier.get(); }
-			std::optional<util::Uuid> GetUuid() const;
+			std::optional<pragma::util::Uuid> GetUuid() const;
 			std::optional<std::string> GetClassOrName() const;
 			std::string ToString() const;
 		  protected:

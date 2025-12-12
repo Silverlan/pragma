@@ -33,7 +33,7 @@ void pragma::gui::types::WILuaBase::Initialize()
 
 void pragma::gui::types::WILuaBase::OnSkinApplied()
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::SkinCallbacksEnabled))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::SkinCallbacksEnabled))
 		CallLuaMember("OnSkinApplied");
 }
 
@@ -55,49 +55,49 @@ void pragma::gui::types::WILuaBase::OnFirstThink()
 	CallLuaMember("OnFirstThink");
 }
 
-util::EventReply pragma::gui::types::WILuaBase::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WILuaBase::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	auto hThis = GetHandle();
-	if(WIBase::MouseCallback(button, state, mods) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(WIBase::MouseCallback(button, state, mods) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(!hThis.IsValid())
-		return util::EventReply::Unhandled;
-	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
+		return pragma::util::EventReply::Unhandled;
+	uint32_t reply = pragma::math::to_integral(pragma::util::EventReply::Unhandled);
 	CallLuaMember<uint32_t, int, int, int>("MouseCallback", &reply, static_cast<int>(button), static_cast<int>(state), static_cast<int>(mods));
-	return static_cast<util::EventReply>(reply);
+	return static_cast<pragma::util::EventReply>(reply);
 }
-util::EventReply pragma::gui::types::WILuaBase::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WILuaBase::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	auto hThis = GetHandle();
-	if(WIBase::KeyboardCallback(key, scanCode, state, mods) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(WIBase::KeyboardCallback(key, scanCode, state, mods) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(!hThis.IsValid())
-		return util::EventReply::Unhandled;
-	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
+		return pragma::util::EventReply::Unhandled;
+	uint32_t reply = pragma::math::to_integral(pragma::util::EventReply::Unhandled);
 	CallLuaMember<uint32_t, int, int, int, int>("KeyboardCallback", &reply, static_cast<int>(key), scanCode, static_cast<int>(state), static_cast<int>(mods));
-	return static_cast<util::EventReply>(reply);
+	return static_cast<pragma::util::EventReply>(reply);
 }
-util::EventReply pragma::gui::types::WILuaBase::CharCallback(unsigned int c, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WILuaBase::CharCallback(unsigned int c, pragma::platform::Modifier mods)
 {
 	auto hThis = GetHandle();
-	if(WIBase::CharCallback(c) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(WIBase::CharCallback(c) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(!hThis.IsValid())
-		return util::EventReply::Unhandled;
-	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
-	CallLuaMember<uint32_t, unsigned int, uint32_t>("CharCallback", &reply, c, umath::to_integral(mods));
-	return static_cast<util::EventReply>(reply);
+		return pragma::util::EventReply::Unhandled;
+	uint32_t reply = pragma::math::to_integral(pragma::util::EventReply::Unhandled);
+	CallLuaMember<uint32_t, unsigned int, uint32_t>("CharCallback", &reply, c, pragma::math::to_integral(mods));
+	return static_cast<pragma::util::EventReply>(reply);
 }
-util::EventReply pragma::gui::types::WILuaBase::ScrollCallback(Vector2 offset, bool offsetAsPixels)
+pragma::util::EventReply pragma::gui::types::WILuaBase::ScrollCallback(Vector2 offset, bool offsetAsPixels)
 {
 	auto hThis = GetHandle();
-	if(WIBase::ScrollCallback(offset, offsetAsPixels) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(WIBase::ScrollCallback(offset, offsetAsPixels) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(!hThis.IsValid())
-		return util::EventReply::Unhandled;
-	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
+		return pragma::util::EventReply::Unhandled;
+	uint32_t reply = pragma::math::to_integral(pragma::util::EventReply::Unhandled);
 	CallLuaMember<uint32_t, double, double, bool>("ScrollCallback", &reply, offset.x, offset.y, offsetAsPixels);
-	return static_cast<util::EventReply>(reply);
+	return static_cast<pragma::util::EventReply>(reply);
 }
 
 void pragma::gui::types::WILuaBase::SetSize(int x, int y)
@@ -139,10 +139,10 @@ void pragma::gui::types::WILuaBase::SetColor(float r, float g, float b, float a)
 }
 void pragma::gui::types::WILuaBase::SetAlpha(float alpha)
 {
-	if(umath::equals(alpha, GetAlpha()))
+	if(pragma::math::equals(alpha, GetAlpha()))
 		return;
 	WIBase::SetAlpha(alpha);
-	if(umath::equals(alpha, GetAlpha())) // See explanation in pragma::gui::types::WILuaBase::SetSize
+	if(pragma::math::equals(alpha, GetAlpha())) // See explanation in pragma::gui::types::WILuaBase::SetSize
 		CallLuaMember<void, float>("OnAlphaChanged", alpha);
 }
 bool pragma::gui::types::WILuaBase::DoPosInBounds(const Vector2i &pos) const
@@ -179,17 +179,17 @@ void pragma::gui::types::WILuaBase::Render(const DrawInfo &drawInfo, DrawState &
 		// with a mutex. Since the same UI element is usually not rendered multiple times in parallel,
 		// it's unlikely this will cause a significant negative performance impact.
 		std::scoped_lock lock {m_renderData->drawArgMutex};
-		drawArgs.SetArgumentValue(ustring::string_switch::hash("x"), drawInfo.offset.x);
-		drawArgs.SetArgumentValue(ustring::string_switch::hash("y"), drawInfo.offset.y);
-		drawArgs.SetArgumentValue(ustring::string_switch::hash("w"), drawInfo.size.x);
-		drawArgs.SetArgumentValue(ustring::string_switch::hash("h"), drawInfo.size.y);
-		drawArgs.SetArgumentValue(ustring::string_switch::hash("stencilPipeline"), umath::to_integral(stencilPipeline));
-		drawArgs.SetArgumentValue(ustring::string_switch::hash("testStencilLevel"), testStencilLevel);
-		drawArgs.SetArgumentValue(ustring::string_switch::hash("msaa"), umath::is_flag_set(drawInfo.flags, DrawInfo::Flags::Msaa));
-		drawArgs.SetArgumentValue(ustring::string_switch::hash("matDraw"), matDraw);
-		drawArgs.SetArgumentValue(ustring::string_switch::hash("scale"), scale);
-		drawArgs.SetArgumentValue(ustring::string_switch::hash("viewportSize"), ElementData::ToViewportSize(drawInfo.size));
-		m_renderData->userData.Set(ustring::string_switch::hash("guiDrawState"), drawState);
+		drawArgs.SetArgumentValue(pragma::string::string_switch::hash("x"), drawInfo.offset.x);
+		drawArgs.SetArgumentValue(pragma::string::string_switch::hash("y"), drawInfo.offset.y);
+		drawArgs.SetArgumentValue(pragma::string::string_switch::hash("w"), drawInfo.size.x);
+		drawArgs.SetArgumentValue(pragma::string::string_switch::hash("h"), drawInfo.size.y);
+		drawArgs.SetArgumentValue(pragma::string::string_switch::hash("stencilPipeline"), pragma::math::to_integral(stencilPipeline));
+		drawArgs.SetArgumentValue(pragma::string::string_switch::hash("testStencilLevel"), testStencilLevel);
+		drawArgs.SetArgumentValue(pragma::string::string_switch::hash("msaa"), pragma::math::is_flag_set(drawInfo.flags, DrawInfo::Flags::Msaa));
+		drawArgs.SetArgumentValue(pragma::string::string_switch::hash("matDraw"), matDraw);
+		drawArgs.SetArgumentValue(pragma::string::string_switch::hash("scale"), scale);
+		drawArgs.SetArgumentValue(pragma::string::string_switch::hash("viewportSize"), ElementData::ToViewportSize(drawInfo.size));
+		m_renderData->userData.Set(pragma::string::string_switch::hash("guiDrawState"), drawState);
 		m_renderData->renderCommandBuffer->RecordCommands(*drawInfo.commandBuffer, drawArgs, m_renderData->userData);
 	}
 }
@@ -213,12 +213,12 @@ void pragma::gui::types::WILuaBase::OnFileDragExited()
 	WIBase::OnFileDragExited();
 	CallLuaMember("OnFileDragExited");
 }
-util::EventReply pragma::gui::types::WILuaBase::OnFilesDropped(const std::vector<std::string> &files)
+pragma::util::EventReply pragma::gui::types::WILuaBase::OnFilesDropped(const std::vector<std::string> &files)
 {
 	WIBase::OnFilesDropped(files);
-	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
+	uint32_t reply = pragma::math::to_integral(pragma::util::EventReply::Unhandled);
 	CallLuaMember<uint32_t, std::vector<std::string>>("OnFilesDropped", &reply, files);
-	return static_cast<util::EventReply>(reply);
+	return static_cast<pragma::util::EventReply>(reply);
 }
 void pragma::gui::types::WILuaBase::OnFocusGained()
 {

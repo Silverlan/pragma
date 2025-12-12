@@ -18,19 +18,19 @@ export {
 			Vector3 normal;
 			Vector3 position;
 			float distance;
-			util::WeakHandle<IMaterial> material0;
-			util::WeakHandle<IMaterial> material1;
+			pragma::util::WeakHandle<IMaterial> material0;
+			pragma::util::WeakHandle<IMaterial> material1;
 		};
 		struct DLLNETWORK ContactInfo {
 			enum class Flags : uint32_t { None = 0u, StartTouch = 1u, EndTouch = StartTouch << 1u };
-			util::WeakHandle<IShape> shape0;
-			util::WeakHandle<IShape> shape1;
-			util::TWeakSharedHandle<ICollisionObject> collisionObj0;
-			util::TWeakSharedHandle<ICollisionObject> collisionObj1;
+			pragma::util::WeakHandle<IShape> shape0;
+			pragma::util::WeakHandle<IShape> shape1;
+			pragma::util::TWeakSharedHandle<ICollisionObject> collisionObj0;
+			pragma::util::TWeakSharedHandle<ICollisionObject> collisionObj1;
 			std::vector<ContactPoint> contactPoints;
 			Flags flags;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::physics::ContactInfo::Flags)
 };

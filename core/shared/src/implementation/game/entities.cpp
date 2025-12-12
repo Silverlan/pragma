@@ -7,7 +7,7 @@ module pragma.shared;
 import :game.game;
 
 pragma::BaseWorldComponent *pragma::Game::GetWorld() { return !m_worldComponents.empty() ? m_worldComponents[0].get() : nullptr; }
-const std::vector<util::TWeakSharedHandle<pragma::BaseWorldComponent>> &pragma::Game::GetWorldComponents() const { return m_worldComponents; }
+const std::vector<pragma::util::TWeakSharedHandle<pragma::BaseWorldComponent>> &pragma::Game::GetWorldComponents() const { return m_worldComponents; }
 unsigned int pragma::Game::GetEntityCount() { return 0; }
 void pragma::Game::RemoveEntity(pragma::ecs::BaseEntity *) {}
 pragma::ecs::BaseEntity *pragma::Game::CreateEntity() { return nullptr; }
@@ -16,15 +16,15 @@ void pragma::Game::SpawnEntity(pragma::ecs::BaseEntity *ent)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("spawn_entity");
-	util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
+	pragma::util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
 #endif
 	ent->OnSpawn();
 }
 pragma::ecs::BaseEntity *pragma::Game::GetEntity(unsigned int) { return nullptr; }
 pragma::ecs::BaseEntity *pragma::Game::GetEntityByLocalIndex(uint32_t idx) { return GetEntity(idx); }
-pragma::ecs::BaseEntity *pragma::Game::FindEntityByUniqueId(const util::Uuid &uuid)
+pragma::ecs::BaseEntity *pragma::Game::FindEntityByUniqueId(const pragma::util::Uuid &uuid)
 {
-	auto it = m_uuidToEnt.find(util::get_uuid_hash(uuid));
+	auto it = m_uuidToEnt.find(pragma::util::get_uuid_hash(uuid));
 	return (it != m_uuidToEnt.end()) ? it->second : nullptr;
 }
 
@@ -60,7 +60,7 @@ pragma::BaseEntityComponent *pragma::Game::CreateMapComponent(pragma::ecs::BaseE
 pragma::ecs::BaseEntity *pragma::Game::CreateMapEntity(pragma::asset::EntityData &entData)
 {
 	auto flags = entData.GetFlags();
-	if(umath::is_flag_set(flags, pragma::asset::EntityData::Flags::ClientsideOnly) && !IsClient())
+	if(pragma::math::is_flag_set(flags, pragma::asset::EntityData::Flags::ClientsideOnly) && !IsClient())
 		return nullptr;
 	auto *ent = CreateEntity(entData.GetClassName());
 	if(ent == nullptr)
@@ -71,7 +71,7 @@ pragma::ecs::BaseEntity *pragma::Game::CreateMapEntity(pragma::asset::EntityData
 
 	for(auto &[componentType, componentData] : entData.GetComponents()) {
 		auto flags = componentData->GetFlags();
-		if(umath::is_flag_set(flags, pragma::asset::ComponentData::Flags::ClientsideOnly) && !IsClient())
+		if(pragma::math::is_flag_set(flags, pragma::asset::ComponentData::Flags::ClientsideOnly) && !IsClient())
 			continue;
 		CreateMapComponent(*ent, componentType, *componentData);
 	}

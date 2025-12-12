@@ -12,7 +12,7 @@ bool EntityIteratorFilterName::ShouldPass(pragma::ecs::BaseEntity &ent, std::siz
 	auto pNameComponent = static_cast<pragma::BaseNameComponent *>(ent.FindComponent("name").get());
 	if(pNameComponent == nullptr)
 		return false;
-	return m_bExactMatch ? ustring::match(pNameComponent->GetName(), m_name, m_bCaseSensitive) : ustring::compare(pNameComponent->GetName(), m_name, m_bCaseSensitive);
+	return m_bExactMatch ? pragma::string::match(pNameComponent->GetName(), m_name, m_bCaseSensitive) : pragma::string::compare(pNameComponent->GetName(), m_name, m_bCaseSensitive);
 }
 
 /////////////////
@@ -28,23 +28,23 @@ bool EntityIteratorFilterModel::ShouldPass(pragma::ecs::BaseEntity &ent, std::si
 
 /////////////////
 
-EntityIteratorFilterUuid::EntityIteratorFilterUuid(pragma::Game &game, const util::Uuid &uuid) : m_uuid {uuid} {}
+EntityIteratorFilterUuid::EntityIteratorFilterUuid(pragma::Game &game, const pragma::util::Uuid &uuid) : m_uuid {uuid} {}
 bool EntityIteratorFilterUuid::ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) { return ent.GetUuid() == m_uuid; }
 
 /////////////////
 
 EntityIteratorFilterClass::EntityIteratorFilterClass(pragma::Game &game, const std::string &name, bool caseSensitive, bool exactMatch) : m_name(name), m_bCaseSensitive(caseSensitive), m_bExactMatch(exactMatch) {}
-bool EntityIteratorFilterClass::ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) { return m_bExactMatch ? ustring::match(*ent.GetClass(), m_name.c_str(), m_bCaseSensitive) : ustring::compare(ent.GetClass().c_str(), m_name.c_str(), m_bCaseSensitive); }
+bool EntityIteratorFilterClass::ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index) { return m_bExactMatch ? pragma::string::match(*ent.GetClass(), m_name.c_str(), m_bCaseSensitive) : pragma::string::compare(ent.GetClass().c_str(), m_name.c_str(), m_bCaseSensitive); }
 
 /////////////////
 
 EntityIteratorFilterNameOrClass::EntityIteratorFilterNameOrClass(pragma::Game &game, const std::string &name, bool caseSensitive, bool exactMatch) : m_name(name), m_bCaseSensitive(caseSensitive), m_bExactMatch(exactMatch) {}
 bool EntityIteratorFilterNameOrClass::ShouldPass(pragma::ecs::BaseEntity &ent, std::size_t index)
 {
-	if(m_bExactMatch ? ustring::match(*ent.GetClass(), m_name, m_bCaseSensitive) : ustring::compare(*ent.GetClass(), m_name.c_str(), m_bCaseSensitive))
+	if(m_bExactMatch ? pragma::string::match(*ent.GetClass(), m_name, m_bCaseSensitive) : pragma::string::compare(*ent.GetClass(), m_name.c_str(), m_bCaseSensitive))
 		return true;
 	auto pNameComponent = static_cast<pragma::BaseNameComponent *>(ent.FindComponent("name").get());
-	return pNameComponent != nullptr && (m_bExactMatch ? ustring::match(pNameComponent->GetName(), m_name, m_bCaseSensitive) : ustring::compare(pNameComponent->GetName(), m_name, m_bCaseSensitive));
+	return pNameComponent != nullptr && (m_bExactMatch ? pragma::string::match(pNameComponent->GetName(), m_name, m_bCaseSensitive) : pragma::string::compare(pNameComponent->GetName(), m_name, m_bCaseSensitive));
 }
 
 /////////////////
@@ -74,10 +74,10 @@ bool EntityIteratorFilterEntity::ShouldPass(pragma::ecs::BaseEntity &ent, std::s
 		if(hFilter->ShouldPass(ent))
 			return true;
 	}
-	if(ustring::compare(ent.GetClass().c_str(), m_name.c_str(), false))
+	if(pragma::string::compare(ent.GetClass().c_str(), m_name.c_str(), false))
 		return true;
 	auto pNameComponent = static_cast<pragma::BaseNameComponent *>(ent.FindComponent("name").get());
-	return pNameComponent != nullptr && ustring::compare(pNameComponent->GetName(), m_name, false);
+	return pNameComponent != nullptr && pragma::string::compare(pNameComponent->GetName(), m_name, false);
 }
 
 /////////////////
@@ -174,7 +174,7 @@ bool EntityIteratorFilterSphere::ShouldPass(pragma::ecs::BaseEntity &ent, std::s
 	Vector3 max {};
 	if(pPhysComponent != nullptr)
 		pPhysComponent->GetCollisionBounds(&min, &max);
-	umath::geometry::closest_point_on_aabb_to_point(min, max, m_origin - pos, &outClosestPointOnEntityBounds);
+	pragma::math::geometry::closest_point_on_aabb_to_point(min, max, m_origin - pos, &outClosestPointOnEntityBounds);
 	outDistToEntity = uvec::length(outClosestPointOnEntityBounds);
 	return outDistToEntity <= m_radius;
 }
@@ -200,13 +200,13 @@ bool EntityIteratorFilterBox::ShouldPass(pragma::ecs::BaseEntity &ent, std::size
 	Vector3 entMax {};
 	if(pPhysComponent != nullptr)
 		pPhysComponent->GetCollisionBounds(&entMin, &entMax);
-	return umath::intersection::aabb_aabb(m_min, m_max, entMin, entMax) != umath::intersection::Intersect::Outside;
+	return pragma::math::intersection::aabb_aabb(m_min, m_max, entMin, entMax) != pragma::math::intersection::Intersect::Outside;
 }
 
 /////////////////
 
 EntityIteratorFilterCone::EntityIteratorFilterCone(pragma::Game &game, const Vector3 &origin, const Vector3 &dir, float radius, float angle)
-    : EntityIteratorFilterSphere(game, origin, radius), m_direction(dir), m_angle(static_cast<float>(umath::cos(static_cast<float>(umath::deg_to_rad(angle)))))
+    : EntityIteratorFilterSphere(game, origin, radius), m_direction(dir), m_angle(static_cast<float>(pragma::math::cos(static_cast<float>(pragma::math::deg_to_rad(angle)))))
 {
 }
 

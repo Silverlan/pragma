@@ -16,25 +16,25 @@ void CBotComponent::Initialize()
 {
 	BaseBotComponent::Initialize();
 
-	BindEvent(cAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
 		switch(static_cast<CEHandleAnimationEvent &>(evData.get()).animationEvent.eventID) {
 		case AnimationEvent::Type::FootstepLeft:
 			OnFootStep(BaseCharacterComponent::FootType::Left);
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		case AnimationEvent::Type::FootstepRight:
 			OnFootStep(BaseCharacterComponent::FootType::Right);
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 }
-util::EventReply CBotComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply CBotComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseBotComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseBotComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseCharacterComponent::EVENT_ON_FOOT_STEP)
 		OnFootStep(static_cast<CEOnFootStep &>(evData).footType);
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 void CBotComponent::OnFootStep(BaseCharacterComponent::FootType footType)
 {

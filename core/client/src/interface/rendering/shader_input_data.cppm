@@ -123,7 +123,7 @@ export namespace pragma::rendering {
 	  private:
 		const ShaderInputDescriptor &m_inputDescriptor;
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {
 	REGISTER_ENUM_FLAGS(pragma::rendering::Property::Flags)

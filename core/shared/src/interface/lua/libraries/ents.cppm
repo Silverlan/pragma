@@ -72,7 +72,7 @@ export namespace Lua {
 		int register_component(lua::State *l)
 		{
 			std::string name = Lua::CheckString(l, 1);
-			ustring::to_lower(name);
+			pragma::string::to_lower(name);
 			auto idxClass = 2;
 			Lua::CheckUserData(l, idxClass);
 			auto o = luabind::object(luabind::from_stack(l, idxClass));
@@ -115,7 +115,7 @@ export namespace Lua {
 			pragma::ComponentRegInfo regInfo {categoryPath};
 			auto componentId = game->GetEntityComponentManager().RegisterComponentType(
 			  name,
-			  [o, game, name, firstCreation](pragma::ecs::BaseEntity &ent) mutable -> util::TSharedHandle<pragma::BaseEntityComponent> {
+			  [o, game, name, firstCreation](pragma::ecs::BaseEntity &ent) mutable -> pragma::util::TSharedHandle<pragma::BaseEntityComponent> {
 				  if(firstCreation) {
 					  firstCreation = false;
 
@@ -124,7 +124,7 @@ export namespace Lua {
 					  pragma::ComponentId componentId;
 					  if(componentManager.GetComponentTypeId(name, componentId)) {
 						  auto &componentInfo = *game.GetEntityComponentManager().GetComponentInfo(componentId);
-						  if(umath::is_flag_set(componentInfo.flags, pragma::ComponentFlags::Networked | pragma::ComponentFlags::MakeNetworked) == false) {
+						  if(pragma::math::is_flag_set(componentInfo.flags, pragma::ComponentFlags::Networked | pragma::ComponentFlags::MakeNetworked) == false) {
 							  // Component has not been marked as networked, check if it has any networked
 							  // methods to be sure.
 							  std::vector<std::string> networkedMethodNames {};
@@ -145,26 +145,26 @@ export namespace Lua {
 							  if(it != networkedMethodNames.end())
 								  componentInfo.flags |= pragma::ComponentFlags::MakeNetworked;
 						  }
-						  if(umath::is_flag_set(componentInfo.flags, pragma::ComponentFlags::MakeNetworked)) {
-							  umath::set_flag(componentInfo.flags, pragma::ComponentFlags::MakeNetworked, false);
+						  if(pragma::math::is_flag_set(componentInfo.flags, pragma::ComponentFlags::MakeNetworked)) {
+							  pragma::math::set_flag(componentInfo.flags, pragma::ComponentFlags::MakeNetworked, false);
 							  // Note: We could automatically set the component as networked here, but this has several disadvantages, so
 							  // we just print a warning instead and require the user to specify the networked-flag when registering the component.
 							  // If this behavior should be changed in the future, a 'register_entity_component' net-message will have to be sent
 							  // to all clients, in addition to setting the networked-flag below! (See SEntityComponentManager::OnComponentTypeRegistered)
-							  // umath::set_flag(componentInfo.flags,pragma::ComponentFlags::Networked);
+							  // pragma::math::set_flag(componentInfo.flags,pragma::ComponentFlags::Networked);
 							  Con::cwar << "Component '" << name
 							            << "' has networked methods or uses net-events, but was not registered as networked, this means networking will be disabled for this component! Set the 'ents.EntityComponent.FREGISTER_BIT_NETWORKED' flag when registering the component to fix this!"
 							            << Con::endl;
 						  }
 					  }
 				  }
-				  return util::to_shared_handle<pragma::BaseEntityComponent>(std::shared_ptr<TComponent> {static_cast<TComponent *>(game->CreateLuaEntityComponent(ent, name))});
+				  return pragma::util::to_shared_handle<pragma::BaseEntityComponent>(std::shared_ptr<TComponent> {static_cast<TComponent *>(game->CreateLuaEntityComponent(ent, name))});
 			  },
 			  regInfo, componentFlags);
 			manager.RegisterComponent(name, o, componentId);
 
 			luabind::object ents {luabind::globals(l)["ents"]};
-			ents["COMPONENT_" + ustring::get_upper(name)] = componentId;
+			ents["COMPONENT_" + pragma::string::get_upper(name)] = componentId;
 
 			Lua::PushInt(l, componentId);
 			return 1;

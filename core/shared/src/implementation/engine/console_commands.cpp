@@ -27,10 +27,10 @@ static std::optional<std::string> udm_convert(const std::string &fileName)
 	std::optional<std::string> newFileName {};
 	switch(*formatType) {
 	case ::udm::FormatType::Ascii:
-		newFileName = util::convert_udm_file_to_binary(fileName, err);
+		newFileName = pragma::util::convert_udm_file_to_binary(fileName, err);
 		break;
 	case ::udm::FormatType::Binary:
-		newFileName = util::convert_udm_file_to_ascii(fileName, err);
+		newFileName = pragma::util::convert_udm_file_to_ascii(fileName, err);
 		break;
 	}
 
@@ -88,7 +88,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(pragma::console::ConVarMap &m
 		  if(!rpath)
 			  return;
 		  auto absPath = *rpath;
-		  util::open_path_in_explorer(ufile::get_path_from_filename(absPath), ufile::get_file_from_filename(absPath));
+		  pragma::util::open_path_in_explorer(ufile::get_path_from_filename(absPath), ufile::get_file_from_filename(absPath));
 	  },
 	  pragma::console::ConVarFlags::None, "Converts a UDM file from binary to ASCII or the other way around.");
 	map.RegisterConCommand(
@@ -100,7 +100,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(pragma::console::ConVarMap &m
 		  }
 		  auto &fileName = argv.front();
 		  std::string err;
-		  auto udmData = util::load_udm_asset(fileName, &err);
+		  auto udmData = pragma::util::load_udm_asset(fileName, &err);
 		  if(udmData)
 			  Con::cout << "No validation errors found, file is a valid UDM file!" << Con::endl;
 		  else
@@ -111,7 +111,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(pragma::console::ConVarMap &m
 		auto physEngines = pragma::physics::IEnvironment::GetAvailablePhysicsEngines();
 		auto it = physEngines.begin();
 		std::vector<std::string_view> similarCandidates {};
-		ustring::gather_similar_elements(
+		pragma::string::gather_similar_elements(
 		  arg,
 		  [&it, &physEngines]() -> std::optional<std::string_view> {
 			  if(it == physEngines.end())
@@ -134,7 +134,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(pragma::console::ConVarMap &m
 		  auto netLibs = pragma::networking::GetAvailableNetworkingModules();
 		  auto it = netLibs.begin();
 		  std::vector<std::string_view> similarCandidates {};
-		  ustring::gather_similar_elements(
+		  pragma::string::gather_similar_elements(
 		    arg,
 		    [&it, &netLibs]() -> std::optional<std::string_view> {
 			    if(it == netLibs.end())
@@ -207,7 +207,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(pragma::console::ConVarMap &m
 
 static void compile_lua_file(lua::State *l, pragma::Game &game, std::string f)
 {
-	ustring::to_lower(f);
+	pragma::string::to_lower(f);
 	std::string subPath = ufile::get_path_from_filename(f);
 	std::string cur = "";
 	std::string path = cur + f;
@@ -253,9 +253,9 @@ static void debug_profiling_print(pragma::NetworkState *, pragma::BasePlayerComp
 						continue;
 					accDur += *childRes->duration;
 				}
-				auto tMsAcc = util::clock::to_milliseconds(accDur);
-				auto tMs = util::clock::to_milliseconds(*result->duration);
-				sTimeMs = util::round_string(tMs, 2) + "ms (" + util::round_string(tMsAcc, 2) + "ms)";
+				auto tMsAcc = pragma::util::clock::to_milliseconds(accDur);
+				auto tMs = pragma::util::clock::to_milliseconds(*result->duration);
+				sTimeMs = pragma::util::round_string(tMs, 2) + "ms (" + pragma::util::round_string(tMsAcc, 2) + "ms)";
 				sTimeNs = std::to_string(result->duration->count()) + "ns";
 				sCount = std::to_string(stage.GetCount());
 
@@ -386,13 +386,13 @@ void pragma::Engine::RegisterConsoleCommands()
 		  std::vector<std::string_view> similarCandidates {};
 		  if(exactPrefix) {
 			  for(auto &f : resFiles) {
-				  if(!ustring::compare(f.c_str(), arg.c_str(), false, arg.length()))
+				  if(!pragma::string::compare(f.c_str(), arg.c_str(), false, arg.length()))
 					  continue;
 				  similarCandidates.push_back(f);
 			  }
 		  }
 		  else {
-			  ustring::gather_similar_elements(
+			  pragma::string::gather_similar_elements(
 			    arg,
 			    [&it, &resFiles]() -> std::optional<std::string_view> {
 				    if(it == resFiles.end())
@@ -431,7 +431,7 @@ void pragma::Engine::RegisterConsoleCommands()
 			  Con::cwar << "Cannot create savegame: No active game!" << Con::endl;
 			  return;
 		  }
-		  auto path = "savegames/" + util::get_date_time("%Y-%m-%d_%H-%M-%S") + ".psav_b";
+		  auto path = "savegames/" + pragma::util::get_date_time("%Y-%m-%d_%H-%M-%S") + ".psav_b";
 		  FileManager::CreatePath(ufile::get_path_from_filename(path).c_str());
 		  std::string err;
 		  auto result = pragma::game::savegame::save(*game, path, err);
@@ -516,7 +516,7 @@ void pragma::Engine::RegisterConsoleCommands()
 			  auto &conVars = cvMap.GetConVars();
 			  auto it = conVars.begin();
 
-			  ustring::gather_similar_elements(
+			  pragma::string::gather_similar_elements(
 			    arg,
 			    [&it, &conVars, &iteratedCvars]() -> std::optional<std::string_view> {
 				    if(it == conVars.end())
@@ -570,7 +570,7 @@ void pragma::Engine::RegisterConsoleCommands()
 		  }
 		  std::vector<size_t> similarElements {};
 		  std::vector<float> similarities {};
-		  ustring::gather_similar_elements(argv.front(), baseTexts, similarElements, 6, &similarities);
+		  pragma::string::gather_similar_elements(argv.front(), baseTexts, similarElements, 6, &similarities);
 		  Con::cout << "Found " << similarElements.size() << " similar matches:" << Con::endl;
 		  for(auto idx : similarElements)
 			  Con::cout << ids[idx] << ": " << baseTexts[idx] << Con::endl;
@@ -586,7 +586,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  "asset_clear_unused",
 	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  std::vector<pragma::asset::Type> types;
-		  auto n = umath::to_integral(pragma::asset::Type::Count);
+		  auto n = pragma::math::to_integral(pragma::asset::Type::Count);
 		  types.reserve(n);
 		  for(auto i = decltype(n) {0u}; i < n; ++i)
 			  types.push_back(static_cast<pragma::asset::Type>(i));
@@ -626,7 +626,7 @@ void pragma::Engine::RegisterConsoleCommands()
 			  Con::cout << "Current console log level: " << magic_enum::enum_name(logLevel) << Con::endl;
 			  return;
 		  }
-		  pragma::set_console_log_level(static_cast<util::LogSeverity>(util::to_int(argv[0])));
+		  pragma::set_console_log_level(static_cast<pragma::util::LogSeverity>(pragma::util::to_int(argv[0])));
 	  },
 	  pragma::console::ConVarFlags::None, "Changes the console logging level. Usage: log_level_con <level>. Level can be: 0 = trace, 1 = debug, 2 = info, 3 = warning, 4 = error, 5 = critical, 6 = disabled.");
 	conVarMap.RegisterConCommand(
@@ -637,7 +637,7 @@ void pragma::Engine::RegisterConsoleCommands()
 			  Con::cout << "Current file log level: " << magic_enum::enum_name(logLevel) << Con::endl;
 			  return;
 		  }
-		  pragma::set_file_log_level(static_cast<util::LogSeverity>(util::to_int(argv[0])));
+		  pragma::set_file_log_level(static_cast<pragma::util::LogSeverity>(pragma::util::to_int(argv[0])));
 	  },
 	  pragma::console::ConVarFlags::None, "Changes the file logging level. Usage: log_level_file <level>. Level can be: 0 = trace, 1 = debug, 2 = info, 3 = warning, 4 = error, 5 = critical, 6 = disabled.");
 	conVarMap.RegisterConCommand(
@@ -680,7 +680,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	conVarMapEn.RegisterConVar<udm::Boolean>("lua_open_editor_on_error", true, pragma::console::ConVarFlags::Archive, "1 = Whenever there's a Lua error, the engine will attempt to automatically open a Lua IDE and open the file and line which caused the error.");
 	conVarMapEn.RegisterConVar<udm::Boolean>("steam_steamworks_enabled", true, pragma::console::ConVarFlags::Archive, "Enables or disables steamworks.");
 	conVarMapEn.RegisterConVarCallback("steam_steamworks_enabled", std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> {[](pragma::NetworkState *, const pragma::console::ConVar &, bool prev, bool val) {
-		static std::weak_ptr<util::Library> wpSteamworks = {};
+		static std::weak_ptr<pragma::util::Library> wpSteamworks = {};
 		static std::unique_ptr<ISteamworks> isteamworks = nullptr;
 		auto *nwSv = pragma::Engine::Get()->GetServerNetworkState();
 		auto *nwCl = pragma::Engine::Get()->GetClientState();
@@ -688,7 +688,7 @@ void pragma::Engine::RegisterConsoleCommands()
 			if(wpSteamworks.expired() == false && isteamworks != nullptr)
 				return;
 			const std::string libSteamworksPath {"steamworks/pr_steamworks"};
-			std::shared_ptr<util::Library> libSteamworks = nullptr;
+			std::shared_ptr<pragma::util::Library> libSteamworks = nullptr;
 			if(nwSv != nullptr)
 				libSteamworks = nwSv->InitializeLibrary(libSteamworksPath);
 			if(nwCl != nullptr) {
@@ -760,7 +760,7 @@ void pragma::Engine::RegisterConsoleCommands()
 				  FileManager::FindFiles((Lua::SCRIPT_DIRECTORY_SLASH + path + "/*").c_str(), &files, &dirs);
 				  for(auto &f : files) {
 					  std::string ext;
-					  if(ufile::get_extension(f, &ext) == false || ustring::compare<std::string>(ext, Lua::FILE_EXTENSION, false) == false)
+					  if(ufile::get_extension(f, &ext) == false || pragma::string::compare<std::string>(ext, Lua::FILE_EXTENSION, false) == false)
 						  continue;
 					  compile_lua_file(l, *game, path + '/' + f);
 				  }
@@ -836,7 +836,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	}});
 }
 
-class ModuleInstallJob : public util::ParallelWorker<bool> {
+class ModuleInstallJob : public pragma::util::ParallelWorker<bool> {
   public:
 	ModuleInstallJob(const std::string &module, const std::optional<std::string> &version) : m_module {module}, m_version {version}
 	{
@@ -847,7 +847,7 @@ class ModuleInstallJob : public util::ParallelWorker<bool> {
 	virtual void DoCancel(const std::string &resultMsg, std::optional<int32_t> resultCode) override { m_curl.CancelDownload(); }
 	void Install();
 	template<typename TJob, typename... TARGS>
-	friend util::ParallelJob<typename TJob::RESULT_TYPE> util::create_parallel_job(TARGS &&...args);
+	friend pragma::util::ParallelJob<typename TJob::RESULT_TYPE> pragma::util::create_parallel_job(TARGS &&...args);
 
 	std::atomic<bool> m_success = false;
 	std::chrono::steady_clock::time_point m_lastProgressTime;
@@ -875,9 +875,9 @@ void ModuleInstallJob::Install()
 		Con::cwar << "Automatic installation of binary modules using the 'install_module' console command is currently not supported on Linux! You will have to install the module manually." << Con::endl;
 		Con::cwar << "The download should automatically start through your browser. If not, you can download the module here: " << url << Con::endl;
 		Con::cwar << "Once downloaded, simply extract the archive over your Pragma installation." << Con::endl;
-		util::open_url_in_browser(url);
+		pragma::util::open_url_in_browser(url);
 		UpdateProgress(1.f);
-		SetStatus(util::JobStatus::Successful);
+		SetStatus(pragma::util::JobStatus::Successful);
 		return;
 	}
 #endif
@@ -897,7 +897,7 @@ void ModuleInstallJob::Install()
 			  return;
 		  m_lastProgressTime = t;
 		  auto fprogress = dlnow / static_cast<float>(dltotal);
-		  auto progress = util::round_string(fprogress * 100.f, 2);
+		  auto progress = pragma::util::round_string(fprogress * 100.f, 2);
 		  Con::cout << "Module download at " << progress << "%" << Con::endl;
 		  UpdateProgress(fprogress * 0.9f);
 	  },
@@ -909,7 +909,7 @@ void ModuleInstallJob::Install()
 			  if(!zip) {
 				  std::string msg = "Failed to open module archive '" + archivePath + "': " + err;
 				  Con::cwar << "" << msg << Con::endl;
-				  SetStatus(util::JobStatus::Failed, msg);
+				  SetStatus(pragma::util::JobStatus::Failed, msg);
 				  return;
 			  }
 
@@ -918,20 +918,20 @@ void ModuleInstallJob::Install()
 			  if(!zip->ExtractFiles(filemanager::get_program_write_path(), err)) {
 				  std::string msg = "Failed to extract module archive '" + archivePath + "'!";
 				  Con::cwar << "" << msg << Con::endl;
-				  SetStatus(util::JobStatus::Failed, msg);
+				  SetStatus(pragma::util::JobStatus::Failed, msg);
 				  return;
 			  }
 		  }
 		  else {
 			  std::string msg = "Failed to download module '" + m_module + "'!";
 			  Con::cwar << "" << msg << Con::endl;
-			  SetStatus(util::JobStatus::Failed, msg);
+			  SetStatus(pragma::util::JobStatus::Failed, msg);
 			  return;
 		  }
 		  filemanager::remove_file(archivePath);
 
 		  UpdateProgress(1.f);
-		  SetStatus(util::JobStatus::Successful);
+		  SetStatus(pragma::util::JobStatus::Successful);
 		  Con::cout << "Binary module '" << archivePath << "' has been installed successfully!" << Con::endl;
 	  });
 	m_curl.StartDownload();
@@ -941,7 +941,7 @@ void ModuleInstallJob::Install()
 
 void install_binary_module(const std::string &module, const std::optional<std::string> &version)
 {
-	auto job = util::create_parallel_job<ModuleInstallJob>(module, version);
+	auto job = pragma::util::create_parallel_job<ModuleInstallJob>(module, version);
 	job.Start();
 	pragma::get_engine()->AddParallelJob(job, "Install Binary Module '" + module + "'");
 }

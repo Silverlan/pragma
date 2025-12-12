@@ -38,9 +38,9 @@ void ToonModule::InitializeGfxPipelineDescriptorSets()
 		auto &dummyTex = context.GetDummyTexture();
 		auto &dummyCubemapTex = context.GetDummyCubemapTexture();
 		auto &ds = *g_defaultPbrDsg->GetDescriptorSet(0);
-		ds.SetBindingTexture(*dummyCubemapTex, umath::to_integral(PBRBinding::IrradianceMap));
-		ds.SetBindingTexture(*dummyCubemapTex, umath::to_integral(PBRBinding::PrefilterMap));
-		ds.SetBindingTexture(*dummyTex, umath::to_integral(PBRBinding::BRDFMap));
+		ds.SetBindingTexture(*dummyCubemapTex, pragma::math::to_integral(PBRBinding::IrradianceMap));
+		ds.SetBindingTexture(*dummyCubemapTex, pragma::math::to_integral(PBRBinding::PrefilterMap));
+		ds.SetBindingTexture(*dummyTex, pragma::math::to_integral(PBRBinding::BRDFMap));
 	}*/
 }
 void ToonModule::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const

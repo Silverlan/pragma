@@ -146,7 +146,7 @@ bool CPBRConverterComponent::ShouldConvertMaterial(msys::CMaterial &mat) const
 bool CPBRConverterComponent::IsPBR(msys::CMaterial &mat) const
 {
 	auto shader = mat.GetShaderIdentifier();
-	ustring::to_lower(shader);
+	pragma::string::to_lower(shader);
 	return shader == "pbr" || shader == "pbr_blend";
 }
 
@@ -278,7 +278,7 @@ bool CPBRConverterComponent::ConvertToPBR(msys::CMaterial &matTraditional)
 
 	// Overwrite old material with new PBR settings
 	std::string err;
-	auto savePath = pragma::asset::relative_path_to_absolute_path(matTraditional.GetName(), pragma::asset::Type::Material, util::CONVERT_PATH);
+	auto savePath = pragma::asset::relative_path_to_absolute_path(matTraditional.GetName(), pragma::asset::Type::Material, pragma::util::CONVERT_PATH);
 	auto *client = pragma::get_client_state();
 	if(matTraditional.Save(savePath.GetString(), err, true))
 		client->LoadMaterial(matName, nullptr, true, true); // Reload material immediately

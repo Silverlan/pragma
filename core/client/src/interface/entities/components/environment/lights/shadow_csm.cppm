@@ -21,7 +21,7 @@ export namespace pragma {
 		Frustum();
 		FrustumSplit split = {};
 		std::vector<Vector3> points;
-		std::vector<umath::Plane> planes;
+		std::vector<pragma::math::Plane> planes;
 		Vector3 bounds[2] = {{}, {}};
 		Mat4 projection = umat::identity();
 		Mat4 viewProjection = umat::identity();
@@ -106,8 +106,8 @@ export namespace pragma {
 			std::array<CascadeMeshInfo, MAX_CASCADE_COUNT> meshes;
 		} m_pendingInfo;
 
-		util::WeakHandle<prosper::Shader> m_whShaderCsm = {};
-		util::WeakHandle<prosper::Shader> m_whShaderCsmTransparent = {};
+		pragma::util::WeakHandle<prosper::Shader> m_whShaderCsm = {};
+		pragma::util::WeakHandle<prosper::Shader> m_whShaderCsmTransparent = {};
 		std::vector<Frustum> m_frustums = {};
 		std::vector<float> m_fard = {};
 		std::function<void(void)> m_onFrustumUpdated;

@@ -34,8 +34,8 @@ void BaseWeaponComponent::RegisterEvents(pragma::EntityComponentManager &compone
 	baseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED = registerEvent("ON_SECONDARY_CLIP_SIZE_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 BaseWeaponComponent::BaseWeaponComponent(pragma::ecs::BaseEntity &ent)
-    : BaseEntityComponent(ent), m_clipPrimary(util::UInt16Property::Create(0)), m_clipSecondary(util::UInt16Property::Create(0)), m_maxPrimaryClipSize(util::UInt16Property::Create(30)), m_maxSecondaryClipSize(util::UInt16Property::Create(10)),
-      m_ammoPrimary(util::UInt32Property::Create(0)), m_ammoSecondary(util::UInt32Property::Create(0))
+    : BaseEntityComponent(ent), m_clipPrimary(pragma::util::UInt16Property::Create(0)), m_clipSecondary(pragma::util::UInt16Property::Create(0)), m_maxPrimaryClipSize(pragma::util::UInt16Property::Create(30)), m_maxSecondaryClipSize(pragma::util::UInt16Property::Create(10)),
+      m_ammoPrimary(pragma::util::UInt32Property::Create(0)), m_ammoSecondary(pragma::util::UInt32Property::Create(0))
 {
 }
 

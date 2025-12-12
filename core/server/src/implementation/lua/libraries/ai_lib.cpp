@@ -40,19 +40,19 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 
 	auto *l = lua.GetState();
 	Lua::RegisterLibraryEnums(l, "ai",
-	  {{"DISPOSITION_HATE", umath::to_integral(DISPOSITION::HATE)}, {"DISPOSITION_FEAR", umath::to_integral(DISPOSITION::FEAR)}, {"DISPOSITION_NEUTRAL", umath::to_integral(DISPOSITION::NEUTRAL)}, {"DISPOSITION_LIKE", umath::to_integral(DISPOSITION::LIKE)},
+	  {{"DISPOSITION_HATE", pragma::math::to_integral(DISPOSITION::HATE)}, {"DISPOSITION_FEAR", pragma::math::to_integral(DISPOSITION::FEAR)}, {"DISPOSITION_NEUTRAL", pragma::math::to_integral(DISPOSITION::NEUTRAL)}, {"DISPOSITION_LIKE", pragma::math::to_integral(DISPOSITION::LIKE)},
 
-	    {"NPC_STATE_NONE", umath::to_integral(NPCSTATE::NONE)}, {"NPC_STATE_IDLE", umath::to_integral(NPCSTATE::IDLE)}, {"NPC_STATE_ALERT", umath::to_integral(NPCSTATE::ALERT)}, {"NPC_STATE_COMBAT", umath::to_integral(NPCSTATE::COMBAT)},
-	    {"NPC_STATE_SCRIPT", umath::to_integral(NPCSTATE::SCRIPT)},
+	    {"NPC_STATE_NONE", pragma::math::to_integral(NPCSTATE::NONE)}, {"NPC_STATE_IDLE", pragma::math::to_integral(NPCSTATE::IDLE)}, {"NPC_STATE_ALERT", pragma::math::to_integral(NPCSTATE::ALERT)}, {"NPC_STATE_COMBAT", pragma::math::to_integral(NPCSTATE::COMBAT)},
+	    {"NPC_STATE_SCRIPT", pragma::math::to_integral(NPCSTATE::SCRIPT)},
 
-	    {"TASK_MOVE_TO_TARGET", umath::to_integral(::pragma::ai::Task::MoveToTarget)}, {"TASK_PLAY_ANIMATION", umath::to_integral(::pragma::ai::Task::PlayAnimation)}, {"TASK_PLAY_ACTIVITY", umath::to_integral(::pragma::ai::Task::PlayActivity)},
-	    {"TASK_PLAY_LAYERED_ANIMATION", umath::to_integral(::pragma::ai::Task::PlayLayeredAnimation)}, {"TASK_PLAY_LAYERED_ACTIVITY", umath::to_integral(::pragma::ai::Task::PlayLayeredActivity)}, {"TASK_MOVE_RANDOM", umath::to_integral(::pragma::ai::Task::MoveRandom)},
-	    {"TASK_PLAY_SOUND", umath::to_integral(::pragma::ai::Task::PlaySound)}, {"TASK_DEBUG_PRINT", umath::to_integral(::pragma::ai::Task::DebugPrint)}, {"TASK_DEBUG_DRAW_TEXT", umath::to_integral(::pragma::ai::Task::DebugDrawText)},
-	    {"TASK_DECORATOR", umath::to_integral(::pragma::ai::Task::Decorator)}, {"TASK_WAIT", umath::to_integral(::pragma::ai::Task::Wait)}, {"TASK_TURN_TO_TARGET", umath::to_integral(::pragma::ai::Task::TurnToTarget)}, {"TASK_RANDOM", umath::to_integral(::pragma::ai::Task::Random)},
-	    {"TASK_LOOK_AT_TARGET", umath::to_integral(::pragma::ai::Task::LookAtTarget)}, {"TASK_EVENT", umath::to_integral(::pragma::ai::Task::Event)},
+	    {"TASK_MOVE_TO_TARGET", pragma::math::to_integral(::pragma::ai::Task::MoveToTarget)}, {"TASK_PLAY_ANIMATION", pragma::math::to_integral(::pragma::ai::Task::PlayAnimation)}, {"TASK_PLAY_ACTIVITY", pragma::math::to_integral(::pragma::ai::Task::PlayActivity)},
+	    {"TASK_PLAY_LAYERED_ANIMATION", pragma::math::to_integral(::pragma::ai::Task::PlayLayeredAnimation)}, {"TASK_PLAY_LAYERED_ACTIVITY", pragma::math::to_integral(::pragma::ai::Task::PlayLayeredActivity)}, {"TASK_MOVE_RANDOM", pragma::math::to_integral(::pragma::ai::Task::MoveRandom)},
+	    {"TASK_PLAY_SOUND", pragma::math::to_integral(::pragma::ai::Task::PlaySound)}, {"TASK_DEBUG_PRINT", pragma::math::to_integral(::pragma::ai::Task::DebugPrint)}, {"TASK_DEBUG_DRAW_TEXT", pragma::math::to_integral(::pragma::ai::Task::DebugDrawText)},
+	    {"TASK_DECORATOR", pragma::math::to_integral(::pragma::ai::Task::Decorator)}, {"TASK_WAIT", pragma::math::to_integral(::pragma::ai::Task::Wait)}, {"TASK_TURN_TO_TARGET", pragma::math::to_integral(::pragma::ai::Task::TurnToTarget)}, {"TASK_RANDOM", pragma::math::to_integral(::pragma::ai::Task::Random)},
+	    {"TASK_LOOK_AT_TARGET", pragma::math::to_integral(::pragma::ai::Task::LookAtTarget)}, {"TASK_EVENT", pragma::math::to_integral(::pragma::ai::Task::Event)},
 
-	    {"MOVE_STATE_TARGET_UNREACHABLE", umath::to_integral(pragma::SAIComponent::MoveResult::TargetUnreachable)}, {"MOVE_STATE_TARGET_REACHED", umath::to_integral(pragma::SAIComponent::MoveResult::TargetReached)},
-	    {"MOVE_STATE_WAITING_FOR_PATH", umath::to_integral(pragma::SAIComponent::MoveResult::WaitingForPath)}, {"MOVE_STATE_MOVING_TO_TARGET", umath::to_integral(pragma::SAIComponent::MoveResult::MovingToTarget)}});
+	    {"MOVE_STATE_TARGET_UNREACHABLE", pragma::math::to_integral(pragma::SAIComponent::MoveResult::TargetUnreachable)}, {"MOVE_STATE_TARGET_REACHED", pragma::math::to_integral(pragma::SAIComponent::MoveResult::TargetReached)},
+	    {"MOVE_STATE_WAITING_FOR_PATH", pragma::math::to_integral(pragma::SAIComponent::MoveResult::WaitingForPath)}, {"MOVE_STATE_MOVING_TO_TARGET", pragma::math::to_integral(pragma::SAIComponent::MoveResult::MovingToTarget)}});
 
 	Lua::AISquad::register_class(l, modAi);
 	Lua::AIMemory::register_class(l, modAi);
@@ -61,9 +61,9 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	Lua::AIBehaviorNode::register_class(l, modAi);
 
 	auto cdMoveToTarget = luabind::class_<TaskWrapperMoveToTarget, Lua::ai::TaskWrapper>("TaskMoveToTarget");
-	cdMoveToTarget.add_static_constant("PARAMETER_TARGET", umath::to_integral(pragma::ai::TaskMoveToTarget::Parameter::Target));
-	cdMoveToTarget.add_static_constant("PARAMETER_DISTANCE", umath::to_integral(pragma::ai::TaskMoveToTarget::Parameter::Distance));
-	cdMoveToTarget.add_static_constant("PARAMETER_MOVE_ACTIVITY", umath::to_integral(pragma::ai::TaskMoveToTarget::Parameter::MoveActivity));
+	cdMoveToTarget.add_static_constant("PARAMETER_TARGET", pragma::math::to_integral(pragma::ai::TaskMoveToTarget::Parameter::Target));
+	cdMoveToTarget.add_static_constant("PARAMETER_DISTANCE", pragma::math::to_integral(pragma::ai::TaskMoveToTarget::Parameter::Distance));
+	cdMoveToTarget.add_static_constant("PARAMETER_MOVE_ACTIVITY", pragma::math::to_integral(pragma::ai::TaskMoveToTarget::Parameter::MoveActivity));
 	cdMoveToTarget.def("SetMoveTarget", static_cast<void (*)(lua::State *, TaskWrapperMoveToTarget &, const Vector3 &)>([](lua::State *l, TaskWrapperMoveToTarget &task, const Vector3 &target) { task->SetTarget(target); }));
 	cdMoveToTarget.def("SetMoveTarget", static_cast<void (*)(lua::State *, TaskWrapperMoveToTarget &, pragma::ecs::BaseEntity &)>([](lua::State *l, TaskWrapperMoveToTarget &task, pragma::ecs::BaseEntity &ent) { task->SetTarget(ent.GetHandle()); }));
 	cdMoveToTarget.def("SetMoveDistance", static_cast<void (*)(lua::State *, TaskWrapperMoveToTarget &, float)>([](lua::State *l, TaskWrapperMoveToTarget &task, float dist) { task->SetMoveDistance(dist); }));
@@ -72,21 +72,21 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	modAi[cdMoveToTarget];
 
 	auto cdMoveRandom = luabind::class_<TaskWrapperMoveRandom, Lua::ai::TaskWrapper>("TaskMoveRandom");
-	cdMoveRandom.add_static_constant("PARAMETER_DISTANCE", umath::to_integral(pragma::ai::TaskMoveRandom::Parameter::Distance));
-	cdMoveRandom.add_static_constant("PARAMETER_MOVE_ACTIVITY", umath::to_integral(pragma::ai::TaskMoveRandom::Parameter::MoveActivity));
+	cdMoveRandom.add_static_constant("PARAMETER_DISTANCE", pragma::math::to_integral(pragma::ai::TaskMoveRandom::Parameter::Distance));
+	cdMoveRandom.add_static_constant("PARAMETER_MOVE_ACTIVITY", pragma::math::to_integral(pragma::ai::TaskMoveRandom::Parameter::MoveActivity));
 	cdMoveRandom.def("SetMoveDistance", static_cast<void (*)(lua::State *, TaskWrapperMoveRandom &, float)>([](lua::State *l, TaskWrapperMoveRandom &task, float dist) { task->SetMoveDistance(dist); }));
 	cdMoveRandom.def("SetMoveActivity",
 	  static_cast<void (*)(lua::State *, TaskWrapperMoveRandom &, std::underlying_type_t<pragma::Activity>)>([](lua::State *l, TaskWrapperMoveRandom &task, std::underlying_type_t<pragma::Activity> activity) { task->SetMoveActivity(static_cast<pragma::Activity>(activity)); }));
 	modAi[cdMoveRandom];
 
 	auto cdLookAtTarget = luabind::class_<TaskWrapperLookAtTarget, Lua::ai::TaskWrapper>("TaskLookAtTarget");
-	cdLookAtTarget.add_static_constant("PARAMETER_LOOK_DURATION", umath::to_integral(pragma::ai::TaskLookAtTarget::Parameter::LookDuration));
+	cdLookAtTarget.add_static_constant("PARAMETER_LOOK_DURATION", pragma::math::to_integral(pragma::ai::TaskLookAtTarget::Parameter::LookDuration));
 	cdLookAtTarget.def("SetLookDuration", static_cast<void (*)(lua::State *, TaskWrapperLookAtTarget &, float)>([](lua::State *l, TaskWrapperLookAtTarget &task, float duration) { task->SetLookDuration(duration); }));
 	modAi[cdLookAtTarget];
 
 	auto cdPlayAnimation = luabind::class_<TaskWrapperPlayAnimation, Lua::ai::TaskWrapper>("TaskPlayAnimation");
-	cdPlayAnimation.add_static_constant("PARAMETER_ANIMATION", umath::to_integral(pragma::ai::TaskPlayAnimation::Parameter::Animation));
-	cdPlayAnimation.add_static_constant("PARAMETER_FACE_TARGET", umath::to_integral(pragma::ai::TaskPlayAnimation::Parameter::FaceTarget));
+	cdPlayAnimation.add_static_constant("PARAMETER_ANIMATION", pragma::math::to_integral(pragma::ai::TaskPlayAnimation::Parameter::Animation));
+	cdPlayAnimation.add_static_constant("PARAMETER_FACE_TARGET", pragma::math::to_integral(pragma::ai::TaskPlayAnimation::Parameter::FaceTarget));
 	cdPlayAnimation.def("SetAnimation", static_cast<void (*)(lua::State *, TaskWrapperPlayAnimation &, int32_t)>([](lua::State *l, TaskWrapperPlayAnimation &task, int32_t animation) { task->SetAnimation(animation); }));
 	cdPlayAnimation.def("SetAnimation", static_cast<void (*)(lua::State *, TaskWrapperPlayAnimation &, const std::string &)>([](lua::State *l, TaskWrapperPlayAnimation &task, const std::string &animation) { task->SetAnimation(animation); }));
 	cdPlayAnimation.def("SetFaceTarget", static_cast<void (*)(lua::State *, TaskWrapperPlayAnimation &, const Vector3 &)>([](lua::State *l, TaskWrapperPlayAnimation &task, const Vector3 &target) { task->SetFaceTarget(target); }));
@@ -95,8 +95,8 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	modAi[cdPlayAnimation];
 
 	auto cdPlayActivity = luabind::class_<TaskWrapperPlayActivity, Lua::ai::TaskWrapper>("TaskPlayActivity");
-	cdPlayActivity.add_static_constant("PARAMETER_ACTIVITY", umath::to_integral(pragma::ai::TaskPlayActivity::Parameter::Activity));
-	cdPlayActivity.add_static_constant("PARAMETER_FACE_TARGET", umath::to_integral(pragma::ai::TaskPlayActivity::Parameter::FaceTarget));
+	cdPlayActivity.add_static_constant("PARAMETER_ACTIVITY", pragma::math::to_integral(pragma::ai::TaskPlayActivity::Parameter::Activity));
+	cdPlayActivity.add_static_constant("PARAMETER_FACE_TARGET", pragma::math::to_integral(pragma::ai::TaskPlayActivity::Parameter::FaceTarget));
 	cdPlayActivity.def("SetActivity",
 	  static_cast<void (*)(lua::State *, TaskWrapperPlayActivity &, std::underlying_type_t<pragma::Activity>)>([](lua::State *l, TaskWrapperPlayActivity &task, std::underlying_type_t<pragma::Activity> activity) { task->SetActivity(static_cast<pragma::Activity>(activity)); }));
 	cdPlayActivity.def("SetFaceTarget", static_cast<void (*)(lua::State *, TaskWrapperPlayActivity &, const Vector3 &)>([](lua::State *l, TaskWrapperPlayActivity &task, const Vector3 &target) { task->SetFaceTarget(target); }));
@@ -105,16 +105,16 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	modAi[cdPlayActivity];
 
 	auto cdPlayLayeredAnimation = luabind::class_<TaskWrapperPlayLayeredAnimation, Lua::ai::TaskWrapper>("TaskPlayLayeredAnimation");
-	cdPlayLayeredAnimation.add_static_constant("PARAMETER_ANIMATION", umath::to_integral(pragma::ai::TaskPlayLayeredAnimation::Parameter::Animation));
-	cdPlayLayeredAnimation.add_static_constant("PARAMETER_ANIMATION_SLOT", umath::to_integral(pragma::ai::TaskPlayLayeredAnimation::Parameter::AnimationSlot));
+	cdPlayLayeredAnimation.add_static_constant("PARAMETER_ANIMATION", pragma::math::to_integral(pragma::ai::TaskPlayLayeredAnimation::Parameter::Animation));
+	cdPlayLayeredAnimation.add_static_constant("PARAMETER_ANIMATION_SLOT", pragma::math::to_integral(pragma::ai::TaskPlayLayeredAnimation::Parameter::AnimationSlot));
 	cdPlayLayeredAnimation.def("SetAnimation", static_cast<void (*)(lua::State *, TaskWrapperPlayLayeredAnimation &, int32_t)>([](lua::State *l, TaskWrapperPlayLayeredAnimation &task, int32_t animation) { task->SetAnimation(animation); }));
 	cdPlayLayeredAnimation.def("SetAnimation", static_cast<void (*)(lua::State *, TaskWrapperPlayLayeredAnimation &, const std::string &)>([](lua::State *l, TaskWrapperPlayLayeredAnimation &task, const std::string &animation) { task->SetAnimation(animation); }));
 	cdPlayLayeredAnimation.def("SetAnimationSlot", static_cast<void (*)(lua::State *, TaskWrapperPlayLayeredAnimation &, int32_t)>([](lua::State *l, TaskWrapperPlayLayeredAnimation &task, int32_t animationSlot) { task->SetAnimationSlot(animationSlot); }));
 	modAi[cdPlayLayeredAnimation];
 
 	auto cdPlayLayeredActivity = luabind::class_<TaskWrapperPlayLayeredActivity, Lua::ai::TaskWrapper>("TaskPlayLayeredActivity");
-	cdPlayLayeredActivity.add_static_constant("PARAMETER_ACTIVITY", umath::to_integral(pragma::ai::TaskPlayLayeredActivity::Parameter::Activity));
-	cdPlayLayeredActivity.add_static_constant("PARAMETER_ANIMATION_SLOT", umath::to_integral(pragma::ai::TaskPlayLayeredActivity::Parameter::AnimationSlot));
+	cdPlayLayeredActivity.add_static_constant("PARAMETER_ACTIVITY", pragma::math::to_integral(pragma::ai::TaskPlayLayeredActivity::Parameter::Activity));
+	cdPlayLayeredActivity.add_static_constant("PARAMETER_ANIMATION_SLOT", pragma::math::to_integral(pragma::ai::TaskPlayLayeredActivity::Parameter::AnimationSlot));
 	cdPlayLayeredActivity.def("SetActivity", static_cast<void (*)(lua::State *, TaskWrapperPlayLayeredActivity &, std::underlying_type_t<pragma::Activity>)>([](lua::State *l, TaskWrapperPlayLayeredActivity &task, std::underlying_type_t<pragma::Activity> activity) {
 		task->SetActivity(static_cast<pragma::Activity>(activity));
 	}));
@@ -122,32 +122,32 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	modAi[cdPlayLayeredActivity];
 
 	auto cdPlaySound = luabind::class_<TaskWrapperPlaySound, Lua::ai::TaskWrapper>("TaskPlaySound");
-	cdPlaySound.add_static_constant("PARAMETER_SOUND_NAME", umath::to_integral(pragma::ai::TaskPlaySound::Parameter::SoundName));
-	cdPlaySound.add_static_constant("PARAMETER_GAIN", umath::to_integral(pragma::ai::TaskPlaySound::Parameter::Gain));
-	cdPlaySound.add_static_constant("PARAMETER_PITCH", umath::to_integral(pragma::ai::TaskPlaySound::Parameter::Pitch));
+	cdPlaySound.add_static_constant("PARAMETER_SOUND_NAME", pragma::math::to_integral(pragma::ai::TaskPlaySound::Parameter::SoundName));
+	cdPlaySound.add_static_constant("PARAMETER_GAIN", pragma::math::to_integral(pragma::ai::TaskPlaySound::Parameter::Gain));
+	cdPlaySound.add_static_constant("PARAMETER_PITCH", pragma::math::to_integral(pragma::ai::TaskPlaySound::Parameter::Pitch));
 	cdPlaySound.def("SetSoundName", static_cast<void (*)(lua::State *, TaskWrapperPlaySound &, const std::string &)>([](lua::State *l, TaskWrapperPlaySound &task, const std::string &sndName) { task->SetSoundName(sndName); }));
 	cdPlaySound.def("SetGain", static_cast<void (*)(lua::State *, TaskWrapperPlaySound &, float)>([](lua::State *l, TaskWrapperPlaySound &task, float gain) { task->SetGain(gain); }));
 	cdPlaySound.def("SetPitch", static_cast<void (*)(lua::State *, TaskWrapperPlaySound &, float)>([](lua::State *l, TaskWrapperPlaySound &task, float pitch) { task->SetPitch(pitch); }));
 	modAi[cdPlaySound];
 
 	auto cdRandom = luabind::class_<TaskWrapperRandom, Lua::ai::TaskWrapper>("TaskRandom");
-	cdRandom.add_static_constant("PARAMETER_CHANCE", umath::to_integral(pragma::ai::TaskRandom::Parameter::Chance));
+	cdRandom.add_static_constant("PARAMETER_CHANCE", pragma::math::to_integral(pragma::ai::TaskRandom::Parameter::Chance));
 	cdRandom.def("SetChance", static_cast<void (*)(lua::State *, TaskWrapperRandom &, float)>([](lua::State *l, TaskWrapperRandom &task, float chance) { task->SetChance(chance); }));
 	modAi[cdRandom];
 
 	auto cdDebugPrint = luabind::class_<TaskWrapperDebugPrint, Lua::ai::TaskWrapper>("TaskDebugPrint");
-	cdDebugPrint.add_static_constant("PARAMETER_MESSAGE", umath::to_integral(pragma::ai::TaskDebugPrint::Parameter::Message));
+	cdDebugPrint.add_static_constant("PARAMETER_MESSAGE", pragma::math::to_integral(pragma::ai::TaskDebugPrint::Parameter::Message));
 	cdDebugPrint.def("SetMessage", static_cast<void (*)(lua::State *, TaskWrapperDebugPrint &, const std::string &)>([](lua::State *l, TaskWrapperDebugPrint &task, const std::string &msg) { task->SetMessage(msg); }));
 	modAi[cdDebugPrint];
 
 	auto cdDebugDrawText = luabind::class_<TaskWrapperDebugDrawText, Lua::ai::TaskWrapper>("TaskDebugDrawText");
-	cdDebugDrawText.add_static_constant("PARAMETER_MESSAGE", umath::to_integral(pragma::ai::TaskDebugDrawText::Parameter::Message));
+	cdDebugDrawText.add_static_constant("PARAMETER_MESSAGE", pragma::math::to_integral(pragma::ai::TaskDebugDrawText::Parameter::Message));
 	cdDebugDrawText.def("SetMessage", static_cast<void (*)(lua::State *, TaskWrapperDebugDrawText &, const std::string &)>([](lua::State *l, TaskWrapperDebugDrawText &task, const std::string &msg) { task->SetMessage(msg); }));
 	modAi[cdDebugDrawText];
 
 	auto cdDecorator = luabind::class_<TaskWrapperDecorator, Lua::ai::TaskWrapper>("TaskDecorator");
-	cdDecorator.add_static_constant("PARAMETER_DECORATOR_TYPE", umath::to_integral(pragma::ai::TaskDecorator::Parameter::DecoratorType));
-	cdDecorator.add_static_constant("PARAMETER_LIMIT", umath::to_integral(pragma::ai::TaskDecorator::Parameter::Limit));
+	cdDecorator.add_static_constant("PARAMETER_DECORATOR_TYPE", pragma::math::to_integral(pragma::ai::TaskDecorator::Parameter::DecoratorType));
+	cdDecorator.add_static_constant("PARAMETER_LIMIT", pragma::math::to_integral(pragma::ai::TaskDecorator::Parameter::Limit));
 	cdDecorator.def("SetDecoratorType",
 	  static_cast<void (*)(lua::State *, TaskWrapperDecorator &, std::underlying_type_t<pragma::ai::TaskDecorator::DecoratorType>)>(
 	    [](lua::State *l, TaskWrapperDecorator &task, std::underlying_type_t<pragma::ai::TaskDecorator::DecoratorType> decoratorType) { task->SetDecoratorType(static_cast<pragma::ai::TaskDecorator::DecoratorType>(decoratorType)); }));
@@ -155,8 +155,8 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	modAi[cdDecorator];
 
 	auto cdEvent = luabind::class_<TaskWrapperEvent, Lua::ai::TaskWrapper>("TaskEvent");
-	cdEvent.add_static_constant("PARAMETER_EVENT_ID", umath::to_integral(pragma::ai::TaskEvent::Parameter::EventId));
-	cdEvent.add_static_constant("PARAMETER_EVENT_ARGS_START", umath::to_integral(pragma::ai::TaskEvent::Parameter::EventArgStart));
+	cdEvent.add_static_constant("PARAMETER_EVENT_ID", pragma::math::to_integral(pragma::ai::TaskEvent::Parameter::EventId));
+	cdEvent.add_static_constant("PARAMETER_EVENT_ARGS_START", pragma::math::to_integral(pragma::ai::TaskEvent::Parameter::EventArgStart));
 	cdEvent.def("SetEventId", static_cast<void (*)(lua::State *, TaskWrapperEvent &, std::underlying_type_t<pragma::AnimationEvent::Type>)>([](lua::State *l, TaskWrapperEvent &task, std::underlying_type_t<pragma::AnimationEvent::Type> eventId) {
 		task->SetEventId(static_cast<pragma::AnimationEvent::Type>(eventId));
 	}));
@@ -164,8 +164,8 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	modAi[cdEvent];
 
 	auto cdWait = luabind::class_<TaskWrapperWait, Lua::ai::TaskWrapper>("TaskWait");
-	cdWait.add_static_constant("PARAMETER_MIN_WAIT_TIME", umath::to_integral(pragma::ai::TaskWait::Parameter::MinWaitTime));
-	cdWait.add_static_constant("PARAMETER_MAX_WAIT_TIME", umath::to_integral(pragma::ai::TaskWait::Parameter::MaxWaitTime));
+	cdWait.add_static_constant("PARAMETER_MIN_WAIT_TIME", pragma::math::to_integral(pragma::ai::TaskWait::Parameter::MinWaitTime));
+	cdWait.add_static_constant("PARAMETER_MAX_WAIT_TIME", pragma::math::to_integral(pragma::ai::TaskWait::Parameter::MaxWaitTime));
 	cdWait.def("SetMinWaitTime", static_cast<void (*)(lua::State *, TaskWrapperWait &, float)>([](lua::State *l, TaskWrapperWait &task, float t) { task->SetMinWaitTime(t); }));
 	cdWait.def("SetMaxWaitTime", static_cast<void (*)(lua::State *, TaskWrapperWait &, float)>([](lua::State *l, TaskWrapperWait &task, float t) { task->SetMaxWaitTime(t); }));
 	cdWait.def("SetWaitTime", static_cast<void (*)(lua::State *, TaskWrapperWait &, float, float)>([](lua::State *l, TaskWrapperWait &task, float tMin, float tMax) { task->SetWaitTime(tMin, tMax); }));
@@ -179,7 +179,7 @@ std::shared_ptr<::pragma::ai::BehaviorNode> Lua::ai::server::create_lua_task(lua
 #ifndef LUABIND_NO_EXCEPTIONS
 	try {
 #endif
-		r = oClass(umath::to_integral(taskType), umath::to_integral(selectorType));
+		r = oClass(pragma::math::to_integral(taskType), pragma::math::to_integral(selectorType));
 #ifndef LUABIND_NO_EXCEPTIONS
 	}
 	catch(luabind::error &) {

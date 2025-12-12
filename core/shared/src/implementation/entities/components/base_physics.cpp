@@ -47,19 +47,19 @@ void BasePhysicsComponent::Initialize()
 	m_netEvSetCollisionsEnabled = SetupNetEvent("set_collisions_enabled");
 	m_netEvSetSimEnabled = SetupNetEvent("set_simulation_enabled");
 
-	BindEvent(baseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		if(IsRagdoll()) {
 			static_cast<CEShouldUpdateBones &>(evData.get()).shouldUpdate = true;
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &evDataTransform = static_cast<CEOnBoneTransformChanged &>(evData.get());
 		UpdateBoneCollisionObject(evDataTransform.boneId, evDataTransform.pos != nullptr, evDataTransform.rot != nullptr);
 	});
-	BindEvent(baseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		return IsRagdoll() ? util::EventReply::Handled : util::EventReply::Unhandled; // Don't process animations if we're in ragdoll mode
+	BindEvent(baseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+		return IsRagdoll() ? pragma::util::EventReply::Handled : pragma::util::EventReply::Unhandled; // Don't process animations if we're in ragdoll mode
 	});
 	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		uvec::zero(&m_colMin);
@@ -96,7 +96,7 @@ float BasePhysicsComponent::GetAABBDistance(const Vector3 &p) const
 	max += origin;
 
 	Vector3 r {};
-	umath::geometry::closest_point_on_aabb_to_point(min, max, p, &r);
+	pragma::math::geometry::closest_point_on_aabb_to_point(min, max, p, &r);
 	return uvec::distance(r, p);
 }
 float BasePhysicsComponent::GetAABBDistance(const pragma::ecs::BaseEntity &ent) const
@@ -121,10 +121,10 @@ float BasePhysicsComponent::GetAABBDistance(const pragma::ecs::BaseEntity &ent) 
 	max1 += origin1;
 
 	Vector3 r0 {};
-	umath::geometry::closest_point_on_aabb_to_point(min0, max0, origin1, &r0);
+	pragma::math::geometry::closest_point_on_aabb_to_point(min0, max0, origin1, &r0);
 
 	Vector3 r1 {};
-	umath::geometry::closest_point_on_aabb_to_point(min1, max1, origin0, &r1);
+	pragma::math::geometry::closest_point_on_aabb_to_point(min1, max1, origin0, &r1);
 
 	return uvec::distance(r0, r1);
 }
@@ -157,9 +157,9 @@ void BasePhysicsComponent::UpdatePhysicsData()
 			phys->SetLinearVelocity({});
 			linVel = {};
 		}
-		umath::set_flag(m_stateFlags, StateFlags::ApplyingLinearVelocity);
+		pragma::math::set_flag(m_stateFlags, StateFlags::ApplyingLinearVelocity);
 		pVelComponent->SetRawVelocity(linVel);
-		umath::set_flag(m_stateFlags, StateFlags::ApplyingLinearVelocity, false);
+		pragma::math::set_flag(m_stateFlags, StateFlags::ApplyingLinearVelocity, false);
 	}
 
 	bool bStatic = phys->IsStatic();
@@ -183,10 +183,10 @@ void BasePhysicsComponent::UpdatePhysicsData()
 				spdlog::error(ss.str());
 				throw std::runtime_error(ss.str());
 			}
-			umath::set_flag(m_stateFlags, StateFlags::ApplyingPhysicsRotation);
+			pragma::math::set_flag(m_stateFlags, StateFlags::ApplyingPhysicsRotation);
 			pTrComponent->SetRawRotation(rot);
 			transformChangeFlags |= TransformChangeFlags::RotationChanged;
-			umath::set_flag(m_stateFlags, StateFlags::ApplyingPhysicsRotation, false);
+			pragma::math::set_flag(m_stateFlags, StateFlags::ApplyingPhysicsRotation, false);
 
 			if(!bStatic && pVelComponent.valid()) {
 				auto angVel = phys->GetAngularVelocity();
@@ -197,9 +197,9 @@ void BasePhysicsComponent::UpdatePhysicsData()
 					spdlog::error(ss.str());
 					throw std::runtime_error(ss.str());
 				}
-				umath::set_flag(m_stateFlags, StateFlags::ApplyingAngularVelocity);
+				pragma::math::set_flag(m_stateFlags, StateFlags::ApplyingAngularVelocity);
 				pVelComponent->SetRawAngularVelocity(angVel);
-				umath::set_flag(m_stateFlags, StateFlags::ApplyingAngularVelocity, false);
+				pragma::math::set_flag(m_stateFlags, StateFlags::ApplyingAngularVelocity, false);
 			}
 		}
 	}
@@ -217,10 +217,10 @@ void BasePhysicsComponent::UpdatePhysicsData()
 				spdlog::error(ss.str());
 				throw std::runtime_error(ss.str());
 			}
-			umath::set_flag(m_stateFlags, StateFlags::ApplyingPhysicsPosition);
+			pragma::math::set_flag(m_stateFlags, StateFlags::ApplyingPhysicsPosition);
 			pTrComponent->SetRawPosition(pos);
 			transformChangeFlags |= TransformChangeFlags::PositionChanged;
-			umath::set_flag(m_stateFlags, StateFlags::ApplyingPhysicsPosition, false);
+			pragma::math::set_flag(m_stateFlags, StateFlags::ApplyingPhysicsPosition, false);
 		}
 	}
 	if(type == pragma::physics::PhysicsType::Dynamic) {
@@ -288,7 +288,7 @@ void BasePhysicsComponent::SetCollisionsEnabled(bool b)
 {
 	if(b == GetCollisionsEnabled())
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::CollisionsEnabled, b);
+	pragma::math::set_flag(m_stateFlags, StateFlags::CollisionsEnabled, b);
 	auto *phys = GetPhysicsObject();
 	if(phys == nullptr)
 		return;
@@ -299,12 +299,12 @@ void BasePhysicsComponent::SetCollisionsEnabled(bool b)
 		hCol->SetCollisionsEnabled(b);
 	}
 }
-bool BasePhysicsComponent::GetCollisionsEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::CollisionsEnabled); }
+bool BasePhysicsComponent::GetCollisionsEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::CollisionsEnabled); }
 void BasePhysicsComponent::SetSimulationEnabled(bool b)
 {
 	if(b == GetSimulationEnabled())
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::SimulationEnabled, b);
+	pragma::math::set_flag(m_stateFlags, StateFlags::SimulationEnabled, b);
 	auto *phys = GetPhysicsObject();
 	if(phys == nullptr)
 		return;
@@ -315,7 +315,7 @@ void BasePhysicsComponent::SetSimulationEnabled(bool b)
 		hCol->SetSimulationEnabled(b);
 	}
 }
-bool BasePhysicsComponent::GetSimulationEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::SimulationEnabled); }
+bool BasePhysicsComponent::GetSimulationEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::SimulationEnabled); }
 bool BasePhysicsComponent::IsTrigger() const
 {
 	pragma::physics::PhysObj *phys = GetPhysicsObject();
@@ -365,7 +365,7 @@ float BasePhysicsComponent::GetCollisionRadius(Vector3 *center) const
 	if(!pTrComponent)
 		return m_colRadius;
 	auto &scale = pTrComponent->GetScale();
-	return m_colRadius * umath::abs_max(scale.x, scale.y, scale.z);
+	return m_colRadius * pragma::math::abs_max(scale.x, scale.y, scale.z);
 }
 
 void BasePhysicsComponent::SetRayResultCallbackEnabled(bool b) { m_bRayResultCallbackEnabled = b; }
@@ -496,7 +496,7 @@ void BasePhysicsComponent::PrePhysicsSimulate()
 	dynamic_cast<pragma::physics::PhysObjDynamic *>(phys)->PreSimulate();
 }
 
-static void entity_space_to_bone_space(std::vector<umath::ScaledTransform> &transforms, pragma::animation::Bone &bone, Vector3 &pos, Quat &rot, Bool bSkip = true)
+static void entity_space_to_bone_space(std::vector<pragma::math::ScaledTransform> &transforms, pragma::animation::Bone &bone, Vector3 &pos, Quat &rot, Bool bSkip = true)
 {
 	auto parent = bone.parent.lock();
 	if(parent != nullptr)
@@ -650,7 +650,7 @@ void BasePhysicsComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t vers
 
 void BasePhysicsComponent::SetSleepReportEnabled(bool reportEnabled)
 {
-	umath::set_flag(m_stateFlags, StateFlags::SleepReportEnabled, reportEnabled);
+	pragma::math::set_flag(m_stateFlags, StateFlags::SleepReportEnabled, reportEnabled);
 	auto *physObj = GetPhysicsObject();
 	if(physObj == nullptr)
 		return;
@@ -660,15 +660,15 @@ void BasePhysicsComponent::SetSleepReportEnabled(bool reportEnabled)
 		hCol->SetSleepReportEnabled(reportEnabled);
 	}
 }
-bool BasePhysicsComponent::IsSleepReportEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::SleepReportEnabled); }
+bool BasePhysicsComponent::IsSleepReportEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::SleepReportEnabled); }
 void BasePhysicsComponent::OnWake() { InvokeEventCallbacks(basePhysicsComponent::EVENT_ON_WAKE); }
 void BasePhysicsComponent::OnSleep() { InvokeEventCallbacks(basePhysicsComponent::EVENT_ON_SLEEP); }
 
-bool BasePhysicsComponent::IsRagdoll() const { return umath::is_flag_set(m_stateFlags, StateFlags::Ragdoll); }
+bool BasePhysicsComponent::IsRagdoll() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::Ragdoll); }
 
 void BasePhysicsComponent::SetForcePhysicsAwakeCallbacksEnabled(bool enabled, bool apply, std::optional<bool> isAwakeOverride)
 {
-	umath::set_flag(m_stateFlags, StateFlags::ForcePhysicsAwakeCallbacksEnabled, enabled);
+	pragma::math::set_flag(m_stateFlags, StateFlags::ForcePhysicsAwakeCallbacksEnabled, enabled);
 	if(apply == false)
 		return;
 	if(enabled) {
@@ -678,7 +678,7 @@ void BasePhysicsComponent::SetForcePhysicsAwakeCallbacksEnabled(bool enabled, bo
 	else if(m_physObject->IsSleeping() || (isAwakeOverride.has_value() && !*isAwakeOverride))
 		OnPhysicsSleep(m_physObject.get());
 }
-bool BasePhysicsComponent::AreForcePhysicsAwakeCallbacksEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::ForcePhysicsAwakeCallbacksEnabled); }
+bool BasePhysicsComponent::AreForcePhysicsAwakeCallbacksEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::ForcePhysicsAwakeCallbacksEnabled); }
 
 void BasePhysicsComponent::UpdateRagdollPose()
 {
@@ -709,7 +709,7 @@ void BasePhysicsComponent::UpdateRagdollPose()
 		UpdatePhysicsBone(reference, physRootBone, invRot);
 
 	Vector3 posRoot;
-	animatedComponent->GetBonePos(physRootBoneId, posRoot, umath::CoordinateSpace::Object);
+	animatedComponent->GetBonePos(physRootBoneId, posRoot, pragma::math::CoordinateSpace::Object);
 
 	auto moveOffset = -posRoot;
 	PostPhysicsSimulate(reference, rootBones, moveOffset, invRot, physRootBoneId);
@@ -786,14 +786,14 @@ void BasePhysicsComponent::OnEntityComponentAdded(BaseEntityComponent &component
 	BaseEntityComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(pragma::VelocityComponent)) {
 		FlagCallbackForRemoval(static_cast<pragma::VelocityComponent &>(component).GetVelocityProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldVel, std::reference_wrapper<const Vector3> vel) {
-			if(umath::is_flag_set(m_stateFlags, StateFlags::ApplyingLinearVelocity))
+			if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ApplyingLinearVelocity))
 				return;
 			if(m_physObject)
 				m_physObject->SetLinearVelocity(vel);
 		}),
 		  CallbackType::Component, &component);
 		FlagCallbackForRemoval(static_cast<pragma::VelocityComponent &>(component).GetAngularVelocityProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldVel, std::reference_wrapper<const Vector3> vel) {
-			if(umath::is_flag_set(m_stateFlags, StateFlags::ApplyingAngularVelocity))
+			if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ApplyingAngularVelocity))
 				return;
 			if(m_physObject)
 				m_physObject->SetAngularVelocity(vel);
@@ -854,10 +854,10 @@ void BasePhysicsComponent::UpdateBoneCollisionObject(UInt32 boneId, Bool updateP
 		return;
 	Vector3 pos;
 	Quat rot;
-	animatedComponent->GetBonePose(boneId, &pos, &rot, nullptr, umath::CoordinateSpace::Object);
+	animatedComponent->GetBonePose(boneId, &pos, &rot, nullptr, pragma::math::CoordinateSpace::Object);
 	rot *= uquat::get_inverse(*rotRef);
 	Vector3 posRoot;
-	animatedComponent->GetBonePos(physRootBoneId, posRoot, umath::CoordinateSpace::Object);
+	animatedComponent->GetBonePos(physRootBoneId, posRoot, pragma::math::CoordinateSpace::Object);
 	auto offsetRoot = -(physRoot->GetOrigin() * physRoot->GetRotation()) - posRoot;
 	auto pTrComponent = ent.GetTransformComponent();
 	for(auto it = objs.begin(); it != objs.end(); ++it) {
@@ -903,8 +903,8 @@ void CEHandleRaycast::PushArguments(lua::State *l) {}
 CEInitializePhysics::CEInitializePhysics(pragma::physics::PhysicsType type, BasePhysicsComponent::PhysFlags flags) : physicsType {type}, flags {flags} {}
 void CEInitializePhysics::PushArguments(lua::State *l)
 {
-	Lua::PushInt(l, umath::to_integral(physicsType));
-	Lua::PushInt(l, umath::to_integral(flags));
+	Lua::PushInt(l, pragma::math::to_integral(physicsType));
+	Lua::PushInt(l, pragma::math::to_integral(flags));
 }
 
 ///////////////

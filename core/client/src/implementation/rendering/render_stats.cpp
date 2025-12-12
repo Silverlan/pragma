@@ -10,16 +10,16 @@ import :engine;
 
 pragma::rendering::RenderStats::RenderStats()
 {
-	auto numTimers = umath::to_integral(RenderStage::GpuCount) + umath::to_integral(RenderPassStats::Timer::GpuCount) * passes.size();
+	auto numTimers = pragma::math::to_integral(RenderStage::GpuCount) + pragma::math::to_integral(RenderPassStats::Timer::GpuCount) * passes.size();
 	queryPool = pragma::get_cengine()->GetRenderContext().CreateQueryPool(prosper::QueryType::Timestamp, numTimers * 2);
 	if(queryPool) {
 		stageTimes.SetGpuTimerStart(RenderStage::GpuStart);
-		stageTimes.gpuTimers.resize(umath::to_integral(RenderStage::GpuCount));
+		stageTimes.gpuTimers.resize(pragma::math::to_integral(RenderStage::GpuCount));
 		for(auto &timer : stageTimes.gpuTimers)
 			timer = queryPool->CreateTimerQuery(prosper::PipelineStageFlags::TopOfPipeBit, prosper::PipelineStageFlags::BottomOfPipeBit);
 		for(auto &pass : passes) {
 			pass->SetGpuTimerStart(RenderPassStats::Timer::GpuStart);
-			pass->gpuTimers.resize(umath::to_integral(RenderPassStats::Timer::GpuCount));
+			pass->gpuTimers.resize(pragma::math::to_integral(RenderPassStats::Timer::GpuCount));
 			for(auto &timer : pass->gpuTimers)
 				timer = queryPool->CreateTimerQuery(prosper::PipelineStageFlags::TopOfPipeBit, prosper::PipelineStageFlags::BottomOfPipeBit);
 		}

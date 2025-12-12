@@ -40,7 +40,7 @@ export namespace pragma {
 
 				UseNormalMap = RenderModeSkybox << 1u
 			};
-			static_assert(umath::to_integral(pragma::rendering::SceneRenderPass::Count) == 4);
+			static_assert(pragma::math::to_integral(pragma::rendering::SceneRenderPass::Count) == 4);
 			// Bounds for the sub-mesh. w-component is unused.
 			Vector4 aabbMin = {};
 			Vector4 aabbMax = {};
@@ -74,7 +74,7 @@ export namespace pragma {
 		CallbackHandle m_cbUpdateBuffers = {};
 		StateFlags m_stateFlags = StateFlags::None;
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {REGISTER_ENUM_FLAGS(pragma::CRaytracingComponent::StateFlags)}
 export {REGISTER_ENUM_FLAGS(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags)}

@@ -10,5 +10,5 @@ export {
 	namespace pragma::ecs {
 		class BaseEntity;
 	}
-	using EntityHandle = util::TWeakSharedHandle<pragma::ecs::BaseEntity>;
+	using EntityHandle = pragma::util::TWeakSharedHandle<pragma::ecs::BaseEntity>;
 };

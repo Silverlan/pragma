@@ -60,7 +60,7 @@ int Lua::util::Client::create_muzzle_flash(lua::State *l)
 			if(Lua::IsSet(l, 4))
 				relRot = Lua::Check<Quat>(l, 4);
 		}
-		std::string particleName = "muzzleflash0" + std::to_string(umath::random(1, 6));
+		std::string particleName = "muzzleflash0" + std::to_string(pragma::math::random(1, 6));
 		auto *pt = pragma::ecs::CParticleSystemComponent::Create(particleName);
 		if(pt == nullptr)
 			return 0;
@@ -87,7 +87,7 @@ int Lua::util::Client::create_muzzle_flash(lua::State *l)
 	}
 	auto &pos = Lua::Check<Vector3>(l, 1);
 	auto &rot = Lua::Check<Quat>(l, 2);
-	std::string particleName = "muzzleflash0" + std::to_string(umath::random(1, 6));
+	std::string particleName = "muzzleflash0" + std::to_string(pragma::math::random(1, 6));
 	auto *pt = pragma::ecs::CParticleSystemComponent::Create(particleName);
 	if(pt == nullptr)
 		return 0;
@@ -121,9 +121,9 @@ int Lua::util::Client::import_gltf(lua::State *l)
 		auto &lf = Lua::Check<LFile>(l, 1);
 		f = lf.GetHandle();
 	}
-	::util::Path outputPath {};
+	pragma::util::Path outputPath {};
 	if(Lua::IsSet(l, 2))
-		outputPath = ::util::Path::CreatePath(Lua::CheckString(l, 2));
+		outputPath = pragma::util::Path::CreatePath(Lua::CheckString(l, 2));
 	auto importAsSingleModel = false;
 	if(Lua::IsSet(l, 3))
 		importAsSingleModel = Lua::CheckBool(l, 3);
@@ -156,9 +156,9 @@ int Lua::util::Client::import_model(lua::State *l)
 		auto &lf = Lua::Check<LFile>(l, 1);
 		f = lf.GetHandle();
 	}
-	::util::Path outputPath {};
+	pragma::util::Path outputPath {};
 	if(Lua::IsSet(l, 2))
-		outputPath = ::util::Path::CreatePath(Lua::CheckString(l, 2));
+		outputPath = pragma::util::Path::CreatePath(Lua::CheckString(l, 2));
 	auto importAsSingleModel = true;
 	if(Lua::IsSet(l, 3))
 		importAsSingleModel = Lua::CheckBool(l, 3);
@@ -286,8 +286,8 @@ int Lua::util::Client::export_material(lua::State *l)
 std::string Lua::util::Client::get_clipboard_string() { return pragma::get_cengine()->GetWindow()->GetClipboardString(); }
 void Lua::util::Client::set_clipboard_string(const std::string &str) { pragma::get_cengine()->GetWindow()->SetClipboardString(str); }
 
-::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> &meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
+pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> &meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
   uint32_t height, ::pragma::rendering::LightmapDataCache *optLightmapDataCache)
 {
-	return ::util::baking::bake_directional_lightmap_atlas(lights, meshes, entities, width, height, optLightmapDataCache);
+	return pragma::util::baking::bake_directional_lightmap_atlas(lights, meshes, entities, width, height, optLightmapDataCache);
 }

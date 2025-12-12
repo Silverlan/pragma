@@ -23,9 +23,9 @@ std::optional<std::pair<std::string, int32_t>> pragma::scripting::lua_core::util
 		if(c1 == std::string::npos)
 			return {};
 		auto filename = err.substr(0, c0);
-		auto lineId = ::util::to_int(err.substr(c0 + 1, (c1 - c0) - 1));
+		auto lineId = pragma::util::to_int(err.substr(c0 + 1, (c1 - c0) - 1));
 		if(optOutStartMsgPos)
-			*optOutStartMsgPos = err.find_first_not_of(ustring::WHITESPACE, c1);
+			*optOutStartMsgPos = err.find_first_not_of(pragma::string::WHITESPACE, c1);
 		return std::pair<std::string, int32_t> {filename, lineId};
 	}
 
@@ -39,8 +39,8 @@ std::optional<std::pair<std::string, int32_t>> pragma::scripting::lua_core::util
 	if(cSt == std::string::npos || cEn == std::string::npos)
 		return {};
 	if(optOutStartMsgPos)
-		*optOutStartMsgPos = err.find_first_not_of(ustring::WHITESPACE, cEn);
-	auto lineId = ::util::to_int(err.substr(cSt + 1, cEn - cSt - 1));
+		*optOutStartMsgPos = err.find_first_not_of(pragma::string::WHITESPACE, cEn);
+	auto lineId = pragma::util::to_int(err.substr(cSt + 1, cEn - cSt - 1));
 	return std::pair<std::string, int32_t> {filename, lineId};
 }
 
@@ -48,7 +48,7 @@ std::string pragma::scripting::lua_core::util::make_clickable_lua_script_link(co
 {
 	auto absPath = fileName;
 	filemanager::find_absolute_path(absPath, absPath);
-	return ::util::make_clickable_link(absPath, lineIdx);
+	return pragma::util::make_clickable_link(absPath, lineIdx);
 }
 
 bool pragma::scripting::lua_core::util::get_code_snippet(std::stringstream &outMsg, const std::string &fileName, uint32_t lineId, const std::string &prefix)
@@ -70,7 +70,7 @@ bool pragma::scripting::lua_core::util::get_code_snippet(std::stringstream &outM
 	if(f != nullptr) {
 		char c = 0;
 		uint32_t curLineId = 1;
-		auto linePrint = static_cast<uint32_t>(umath::max(static_cast<int32_t>(lineId) - 2, static_cast<int32_t>(1)));
+		auto linePrint = static_cast<uint32_t>(pragma::math::max(static_cast<int32_t>(lineId) - 2, static_cast<int32_t>(1)));
 		auto lastLinePrint = lineId + 2;
 		while(!f->Eof() && curLineId < linePrint) {
 			f->Read(&c, 1);
@@ -107,13 +107,13 @@ void pragma::scripting::lua_core::util::get_lua_doc_info(std::stringstream &outM
 		auto posEnd = errMsg.find('(', posErrOverload + errMsgIdentifier.length());
 		auto pos = errMsg.rfind(' ', posEnd);
 		if(pos != std::string::npos && posEnd != std::string::npos)
-			cause = ustring::substr(errMsg, pos + 1, posEnd - pos - 1);
+			cause = pragma::string::substr(errMsg, pos + 1, posEnd - pos - 1);
 	}
 	else {
 		auto pos = errMsg.find('\'');
 		auto posEnd = errMsg.find('\'', pos + 1);
 		if(posEnd != std::string::npos)
-			cause = ustring::substr(errMsg, pos + 1, posEnd - pos - 1);
+			cause = pragma::string::substr(errMsg, pos + 1, posEnd - pos - 1);
 	}
 	if(cause.empty() == false)
 		Lua::doc::print_documentation(cause, outMsg);
@@ -158,7 +158,7 @@ std::string pragma::scripting::lua_core::format_error_message(lua::State *l, con
 						ssMsg << " " << formattedMsg.substr(startMsgPos);
 					else
 						ssMsg << " " << formattedMsg;
-					auto bNl = util::get_code_snippet(ssMsg, ::util::FilePath(Lua::SCRIPT_DIRECTORY, filename).GetString(), errInfo->second, ":");
+					auto bNl = util::get_code_snippet(ssMsg, pragma::util::FilePath(Lua::SCRIPT_DIRECTORY, filename).GetString(), errInfo->second, ":");
 					if(bNl == true)
 						ssMsg << "\n\n";
 					else

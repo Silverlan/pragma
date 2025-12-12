@@ -39,7 +39,7 @@ void pragma::locale::clear()
 }
 pragma::locale::LoadResult pragma::locale::load(const std::string &file, const std::string &lan, bool bReload)
 {
-	auto filePath = util::Path::CreateFile(file);
+	auto filePath = pragma::util::Path::CreateFile(file);
 	auto it = std::find(g_loadedFiles.begin(), g_loadedFiles.end(), filePath.GetString());
 	if(it != g_loadedFiles.end()) {
 		if(bReload == false)
@@ -60,9 +60,9 @@ pragma::locale::LoadResult pragma::locale::parse_file(const std::string &file, c
 			auto l = f->ReadLine();
 			std::string key;
 			std::string val;
-			if(ustring::get_key_value(l, key, val)) {
-				ustring::replace(val, "\\\"", "\"");
-				ustring::replace(val, "\\n", "\n");
+			if(pragma::string::get_key_value(l, key, val)) {
+				pragma::string::replace(val, "\\\"", "\"");
+				pragma::string::replace(val, "\\n", "\n");
 				outTexts[key] = val;
 			}
 		}
@@ -109,7 +109,7 @@ void pragma::locale::reload_files()
 void pragma::locale::set_language(std::string lan)
 {
 	LOGGER.debug("Changing global language to '{}'...", lan);
-	ustring::to_lower(lan);
+	pragma::string::to_lower(lan);
 	g_language = lan;
 
 	auto loadedFiles = g_loadedFiles;
@@ -119,7 +119,7 @@ void pragma::locale::set_language(std::string lan)
 
 	try {
 		g_locFileWatcher = std::make_unique<DirectoryWatcherCallback>(LOCALIZATION_ROOT_PATH + lan + '/', [](const std::string &str) {
-			auto filePath = util::Path::CreateFile(str);
+			auto filePath = pragma::util::Path::CreateFile(str);
 			auto it = std::find(g_loadedFiles.begin(), g_loadedFiles.end(), filePath.GetString());
 			if(it == g_loadedFiles.end())
 				return;
@@ -298,7 +298,7 @@ pragma::string::Utf8String pragma::locale::get_text_utf8(const std::string &id, 
 }
 std::string pragma::locale::determine_system_language()
 {
-	auto lan = util::get_system_language();
+	auto lan = pragma::util::get_system_language();
 	if(!lan)
 		lan = "en";
 	return *lan;
@@ -345,8 +345,8 @@ static bool save_localization(const pragma::locale::Localization &loc, const std
 			first = false;
 
 		auto val = loc.texts.find(key)->second;
-		ustring::replace<pragma::string::Utf8String>(val, "\"", "\\\"");
-		ustring::replace<pragma::string::Utf8String>(val, "\n", "\\n");
+		pragma::string::replace<pragma::string::Utf8String>(val, "\"", "\\\"");
+		pragma::string::replace<pragma::string::Utf8String>(val, "\n", "\\n");
 		out << key << " = \"" << val << "\"";
 	}
 
@@ -389,9 +389,9 @@ bool pragma::locale::localize(const std::string &identifier, const std::string &
 			auto filePathEn = get_file_location(fileName, "en");
 			std::string absPath;
 			if(FileManager::FindLocalPath(filePathEn, absPath)) {
-				ustring::replace(absPath, "\\", "/");
+				pragma::string::replace(absPath, "\\", "/");
 				auto newPath = absPath;
-				ustring::replace(newPath, "/en/", "/" + lan + "/");
+				pragma::string::replace(newPath, "/en/", "/" + lan + "/");
 				if(filemanager::create_path(ufile::get_path_from_filename(newPath)) && filemanager::write_file(newPath, ""))
 					success = (pragma::locale::load_file(fileName, lan, loc) != LoadResult::Failed); // Try again
 			}

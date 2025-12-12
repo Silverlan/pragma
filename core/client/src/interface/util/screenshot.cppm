@@ -9,7 +9,7 @@ export module pragma.client:util.screenshot;
 
 export import :game;
 
-export namespace util {
+export namespace pragma::util {
 	struct RtScreenshotSettings {
 		bool denoise = true;
 		float quality = 1.f;

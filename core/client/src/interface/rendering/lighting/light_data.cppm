@@ -22,8 +22,8 @@ export namespace pragma {
 		uint32_t sceneFlags = 0u;
 		uint32_t shadowIndex = 0u;
 
-		umath::Radian outerConeHalfAngle = 0.f;
-		umath::Radian innerConeHalfAngle = 0.f;
+		pragma::math::Radian outerConeHalfAngle = 0.f;
+		pragma::math::Radian innerConeHalfAngle = 0.f;
 		float attenuation = 0.f;
 		BufferFlags flags = BufferFlags::None;
 		uint32_t shadowMapIndexStatic = 0u;
@@ -38,7 +38,7 @@ export namespace pragma {
 		Mat4 projection = umat::identity();
 	};
 #pragma pack(pop)
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {
 	REGISTER_ENUM_FLAGS(pragma::LightBufferData::BufferFlags)

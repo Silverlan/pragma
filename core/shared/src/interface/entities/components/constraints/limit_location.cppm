@@ -33,9 +33,9 @@ export namespace pragma {
 		void ApplyConstraint();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		pragma::ComponentHandle<ConstraintComponent> m_constraintC;
-		std::array<float, umath::to_integral(pragma::Axis::Count)> m_minimum {0.f, 0.f, 0.f};
-		std::array<float, umath::to_integral(pragma::Axis::Count)> m_maximum {0.f, 0.f, 0.f};
-		std::array<bool, umath::to_integral(pragma::Axis::Count)> m_minimumEnabled {false, false, false};
-		std::array<bool, umath::to_integral(pragma::Axis::Count)> m_maximumEnabled {false, false, false};
+		std::array<float, pragma::math::to_integral(pragma::Axis::Count)> m_minimum {0.f, 0.f, 0.f};
+		std::array<float, pragma::math::to_integral(pragma::Axis::Count)> m_maximum {0.f, 0.f, 0.f};
+		std::array<bool, pragma::math::to_integral(pragma::Axis::Count)> m_minimumEnabled {false, false, false};
+		std::array<bool, pragma::math::to_integral(pragma::Axis::Count)> m_maximumEnabled {false, false, false};
 	};
 };

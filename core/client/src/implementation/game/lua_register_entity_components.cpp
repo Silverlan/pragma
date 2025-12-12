@@ -23,7 +23,7 @@ namespace Lua {
 		static void GenerateAmbientOcclusionMaps(lua::State *l, pragma::CPBRConverterComponent &hComponent, pragma::ecs::BaseEntity &ent) { hComponent.GenerateAmbientOcclusionMaps(ent); }
 	};
 	namespace Decal {
-		static void create_from_projection(lua::State *l, pragma::CDecalComponent &hComponent, luabind::object tMeshes, const umath::ScaledTransform &pose)
+		static void create_from_projection(lua::State *l, pragma::CDecalComponent &hComponent, luabind::object tMeshes, const pragma::math::ScaledTransform &pose)
 		{
 
 			int32_t t = 2;
@@ -42,7 +42,7 @@ namespace Lua {
 
 				Lua::PushString(l, "pose");       /* 2 */
 				Lua::GetTableValue(l, tMeshData); /* 2 */
-				meshData.pose = Lua::Check<umath::ScaledTransform>(l, -1);
+				meshData.pose = Lua::Check<pragma::math::ScaledTransform>(l, -1);
 				Lua::Pop(l, 1); /* 1 */
 
 				Lua::PushString(l, "subMeshes");  /* 2 */
@@ -87,14 +87,14 @@ static bool reflection_probe_capture_ibl_reflections_from_scene(lua::State *l, p
 
 static void bsp_register_class(lua::State *l, luabind::module_ &entsMod, luabind::class_<pragma::CWorldComponent, pragma::BaseWorldComponent> &defWorld)
 {
-	auto defBspTree = luabind::class_<::util::BSPTree>("BSPTree");
-	defBspTree.def("IsValid", static_cast<void (*)(lua::State *, ::util::BSPTree &)>([](lua::State *l, ::util::BSPTree &tree) { Lua::PushBool(l, tree.IsValid()); }));
-	defBspTree.def("IsClusterVisible", static_cast<void (*)(lua::State *, ::util::BSPTree &, uint32_t, uint32_t)>([](lua::State *l, ::util::BSPTree &tree, uint32_t clusterSrc, uint32_t clusterDst) { Lua::PushBool(l, tree.IsClusterVisible(clusterSrc, clusterDst)); }));
-	defBspTree.def("GetRootNode", static_cast<void (*)(lua::State *, ::util::BSPTree &)>([](lua::State *l, ::util::BSPTree &tree) {
+	auto defBspTree = luabind::class_<pragma::util::BSPTree>("BSPTree");
+	defBspTree.def("IsValid", static_cast<void (*)(lua::State *, pragma::util::BSPTree &)>([](lua::State *l, pragma::util::BSPTree &tree) { Lua::PushBool(l, tree.IsValid()); }));
+	defBspTree.def("IsClusterVisible", static_cast<void (*)(lua::State *, pragma::util::BSPTree &, uint32_t, uint32_t)>([](lua::State *l, pragma::util::BSPTree &tree, uint32_t clusterSrc, uint32_t clusterDst) { Lua::PushBool(l, tree.IsClusterVisible(clusterSrc, clusterDst)); }));
+	defBspTree.def("GetRootNode", static_cast<void (*)(lua::State *, pragma::util::BSPTree &)>([](lua::State *l, pragma::util::BSPTree &tree) {
 		auto &node = tree.GetRootNode();
 		Lua::Push(l, &node);
 	}));
-	defBspTree.def("GetNodes", static_cast<void (*)(lua::State *, ::util::BSPTree &)>([](lua::State *l, ::util::BSPTree &tree) {
+	defBspTree.def("GetNodes", static_cast<void (*)(lua::State *, pragma::util::BSPTree &)>([](lua::State *l, pragma::util::BSPTree &tree) {
 		auto &nodes = tree.GetNodes();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
@@ -104,7 +104,7 @@ static void bsp_register_class(lua::State *l, luabind::module_ &entsMod, luabind
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defBspTree.def("GetClusterVisibility", static_cast<void (*)(lua::State *, ::util::BSPTree &)>([](lua::State *l, ::util::BSPTree &tree) {
+	defBspTree.def("GetClusterVisibility", static_cast<void (*)(lua::State *, pragma::util::BSPTree &)>([](lua::State *l, pragma::util::BSPTree &tree) {
 		auto &clusterVisibility = tree.GetClusterVisibility();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
@@ -114,14 +114,14 @@ static void bsp_register_class(lua::State *l, luabind::module_ &entsMod, luabind
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defBspTree.def("GetClusterCount", static_cast<void (*)(lua::State *, ::util::BSPTree &)>([](lua::State *l, ::util::BSPTree &tree) { Lua::PushInt(l, tree.GetClusterCount()); }));
-	defBspTree.def("FindLeafNode", static_cast<void (*)(lua::State *, ::util::BSPTree &, const Vector3 &)>([](lua::State *l, ::util::BSPTree &tree, const Vector3 &origin) {
+	defBspTree.def("GetClusterCount", static_cast<void (*)(lua::State *, pragma::util::BSPTree &)>([](lua::State *l, pragma::util::BSPTree &tree) { Lua::PushInt(l, tree.GetClusterCount()); }));
+	defBspTree.def("FindLeafNode", static_cast<void (*)(lua::State *, pragma::util::BSPTree &, const Vector3 &)>([](lua::State *l, pragma::util::BSPTree &tree, const Vector3 &origin) {
 		auto *node = tree.FindLeafNode(origin);
 		if(node == nullptr)
 			return;
 		Lua::Push(l, &node);
 	}));
-	defBspTree.def("FindLeafNodesInAABB", static_cast<luabind::object (*)(lua::State *, ::util::BSPTree &, const Vector3 &, const Vector3 &)>([](lua::State *l, ::util::BSPTree &tree, const Vector3 &min, const Vector3 &max) -> luabind::object {
+	defBspTree.def("FindLeafNodesInAABB", static_cast<luabind::object (*)(lua::State *, pragma::util::BSPTree &, const Vector3 &, const Vector3 &)>([](lua::State *l, pragma::util::BSPTree &tree, const Vector3 &min, const Vector3 &max) -> luabind::object {
 		auto nodes = tree.FindLeafNodesInAabb(min, max);
 		auto t = luabind::newtable(l);
 		int32_t idx = 1;
@@ -130,14 +130,14 @@ static void bsp_register_class(lua::State *l, luabind::module_ &entsMod, luabind
 		return t;
 	}));
 
-	auto defBspNode = luabind::class_<::util::BSPTree::Node>("Node");
-	defBspNode.def("GetIndex", static_cast<::util::BSPTree::ChildIndex (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) -> ::util::BSPTree::ChildIndex { return node.index; }));
-	defBspNode.def("IsLeaf", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) { Lua::PushBool(l, node.leaf); }));
-	defBspNode.def("GetBounds", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) {
+	auto defBspNode = luabind::class_<pragma::util::BSPTree::Node>("Node");
+	defBspNode.def("GetIndex", static_cast<pragma::util::BSPTree::ChildIndex (*)(lua::State *, pragma::util::BSPTree::Node &)>([](lua::State *l, pragma::util::BSPTree::Node &node) -> pragma::util::BSPTree::ChildIndex { return node.index; }));
+	defBspNode.def("IsLeaf", static_cast<void (*)(lua::State *, pragma::util::BSPTree::Node &)>([](lua::State *l, pragma::util::BSPTree::Node &node) { Lua::PushBool(l, node.leaf); }));
+	defBspNode.def("GetBounds", static_cast<void (*)(lua::State *, pragma::util::BSPTree::Node &)>([](lua::State *l, pragma::util::BSPTree::Node &node) {
 		Lua::Push<Vector3>(l, node.min);
 		Lua::Push<Vector3>(l, node.max);
 	}));
-	defBspNode.def("GetChildren", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) {
+	defBspNode.def("GetChildren", static_cast<void (*)(lua::State *, pragma::util::BSPTree::Node &)>([](lua::State *l, pragma::util::BSPTree::Node &node) {
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
 		for(auto &child : node.children) {
@@ -145,14 +145,14 @@ static void bsp_register_class(lua::State *l, luabind::module_ &entsMod, luabind
 			Lua::Push(l, child);
 		}
 	}));
-	defBspNode.def("GetCluster", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) { Lua::PushInt(l, node.cluster); }));
-	defBspNode.def("GetVisibleLeafAreaBounds", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) {
+	defBspNode.def("GetCluster", static_cast<void (*)(lua::State *, pragma::util::BSPTree::Node &)>([](lua::State *l, pragma::util::BSPTree::Node &node) { Lua::PushInt(l, node.cluster); }));
+	defBspNode.def("GetVisibleLeafAreaBounds", static_cast<void (*)(lua::State *, pragma::util::BSPTree::Node &)>([](lua::State *l, pragma::util::BSPTree::Node &node) {
 		Lua::Push<Vector3>(l, node.minVisible);
 		Lua::Push<Vector3>(l, node.maxVisible);
 	}));
-	defBspNode.def("GetInternalNodePlane", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) { Lua::Push<umath::Plane>(l, node.plane); }));
-	defBspNode.def("GetInternalNodeFirstFaceIndex", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) { Lua::PushInt(l, node.firstFace); }));
-	defBspNode.def("GetInternalNodeFaceCount", static_cast<void (*)(lua::State *, ::util::BSPTree::Node &)>([](lua::State *l, ::util::BSPTree::Node &node) { Lua::PushInt(l, node.numFaces); }));
+	defBspNode.def("GetInternalNodePlane", static_cast<void (*)(lua::State *, pragma::util::BSPTree::Node &)>([](lua::State *l, pragma::util::BSPTree::Node &node) { Lua::Push<pragma::math::Plane>(l, node.plane); }));
+	defBspNode.def("GetInternalNodeFirstFaceIndex", static_cast<void (*)(lua::State *, pragma::util::BSPTree::Node &)>([](lua::State *l, pragma::util::BSPTree::Node &node) { Lua::PushInt(l, node.firstFace); }));
+	defBspNode.def("GetInternalNodeFaceCount", static_cast<void (*)(lua::State *, pragma::util::BSPTree::Node &)>([](lua::State *l, pragma::util::BSPTree::Node &node) { Lua::PushInt(l, node.numFaces); }));
 	defBspTree.scope[defBspNode];
 	defWorld.scope[defBspTree];
 }
@@ -267,8 +267,8 @@ void pragma::CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 			return {};
 		return config->dilation;
 	}));
-	defCEye.def("CalcEyeballPose", static_cast<std::pair<umath::Transform, umath::Transform> (*)(lua::State *, pragma::CEyeComponent &, uint32_t)>([](lua::State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> std::pair<umath::Transform, umath::Transform> {
-		umath::Transform bonePose;
+	defCEye.def("CalcEyeballPose", static_cast<std::pair<pragma::math::Transform, pragma::math::Transform> (*)(lua::State *, pragma::CEyeComponent &, uint32_t)>([](lua::State *l, pragma::CEyeComponent &hEye, uint32_t eyeIndex) -> std::pair<pragma::math::Transform, pragma::math::Transform> {
+		pragma::math::Transform bonePose;
 		auto pose = hEye.CalcEyeballPose(eyeIndex, &bonePose);
 		return {pose, bonePose};
 	}));
@@ -313,25 +313,25 @@ void pragma::CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	pragma::scripting::lua_core::bindings::register_renderers(l, entsMod);
 
 	auto defCScene = pragma::LuaCore::create_entity_component_class<pragma::CSceneComponent, pragma::BaseEntityComponent>("SceneComponent");
-	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_BRUTE_FORCE", umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::BruteForce));
-	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_CHC_PLUSPLUS", umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::CHCPP));
-	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_BSP", umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::BSP));
-	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_OCTREE", umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::Octree));
-	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_INERT", umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::Inert));
+	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_BRUTE_FORCE", pragma::math::to_integral(SceneRenderDesc::OcclusionCullingMethod::BruteForce));
+	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_CHC_PLUSPLUS", pragma::math::to_integral(SceneRenderDesc::OcclusionCullingMethod::CHCPP));
+	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_BSP", pragma::math::to_integral(SceneRenderDesc::OcclusionCullingMethod::BSP));
+	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_OCTREE", pragma::math::to_integral(SceneRenderDesc::OcclusionCullingMethod::Octree));
+	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_INERT", pragma::math::to_integral(SceneRenderDesc::OcclusionCullingMethod::Inert));
 	defCScene.add_static_constant("EVENT_ON_ACTIVE_CAMERA_CHANGED", pragma::cSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED);
 	defCScene.add_static_constant("EVENT_ON_RENDERER_CHANGED", pragma::cSceneComponent::EVENT_ON_RENDERER_CHANGED);
-	defCScene.add_static_constant("DEBUG_MODE_NONE", umath::to_integral(pragma::SceneDebugMode::None));
-	defCScene.add_static_constant("DEBUG_MODE_AMBIENT_OCCLUSION", umath::to_integral(pragma::SceneDebugMode::AmbientOcclusion));
-	defCScene.add_static_constant("DEBUG_MODE_ALBEDO", umath::to_integral(pragma::SceneDebugMode::Albedo));
-	defCScene.add_static_constant("DEBUG_MODE_METALNESS", umath::to_integral(pragma::SceneDebugMode::Metalness));
-	defCScene.add_static_constant("DEBUG_MODE_ROUGHNESS", umath::to_integral(pragma::SceneDebugMode::Roughness));
-	defCScene.add_static_constant("DEBUG_MODE_DIFFUSE_LIGHTING", umath::to_integral(pragma::SceneDebugMode::DiffuseLighting));
-	defCScene.add_static_constant("DEBUG_MODE_NORMAL", umath::to_integral(pragma::SceneDebugMode::Normal));
-	defCScene.add_static_constant("DEBUG_MODE_NORMAL_MAP", umath::to_integral(pragma::SceneDebugMode::NormalMap));
-	defCScene.add_static_constant("DEBUG_MODE_REFLECTANCE", umath::to_integral(pragma::SceneDebugMode::Reflectance));
-	defCScene.add_static_constant("DEBUG_MODE_IBL_PREFILTER", umath::to_integral(pragma::SceneDebugMode::IBLPrefilter));
-	defCScene.add_static_constant("DEBUG_MODE_IBL_IRRADIANCE", umath::to_integral(pragma::SceneDebugMode::IBLIrradiance));
-	defCScene.add_static_constant("DEBUG_MODE_EMISSION", umath::to_integral(pragma::SceneDebugMode::Emission));
+	defCScene.add_static_constant("DEBUG_MODE_NONE", pragma::math::to_integral(pragma::SceneDebugMode::None));
+	defCScene.add_static_constant("DEBUG_MODE_AMBIENT_OCCLUSION", pragma::math::to_integral(pragma::SceneDebugMode::AmbientOcclusion));
+	defCScene.add_static_constant("DEBUG_MODE_ALBEDO", pragma::math::to_integral(pragma::SceneDebugMode::Albedo));
+	defCScene.add_static_constant("DEBUG_MODE_METALNESS", pragma::math::to_integral(pragma::SceneDebugMode::Metalness));
+	defCScene.add_static_constant("DEBUG_MODE_ROUGHNESS", pragma::math::to_integral(pragma::SceneDebugMode::Roughness));
+	defCScene.add_static_constant("DEBUG_MODE_DIFFUSE_LIGHTING", pragma::math::to_integral(pragma::SceneDebugMode::DiffuseLighting));
+	defCScene.add_static_constant("DEBUG_MODE_NORMAL", pragma::math::to_integral(pragma::SceneDebugMode::Normal));
+	defCScene.add_static_constant("DEBUG_MODE_NORMAL_MAP", pragma::math::to_integral(pragma::SceneDebugMode::NormalMap));
+	defCScene.add_static_constant("DEBUG_MODE_REFLECTANCE", pragma::math::to_integral(pragma::SceneDebugMode::Reflectance));
+	defCScene.add_static_constant("DEBUG_MODE_IBL_PREFILTER", pragma::math::to_integral(pragma::SceneDebugMode::IBLPrefilter));
+	defCScene.add_static_constant("DEBUG_MODE_IBL_IRRADIANCE", pragma::math::to_integral(pragma::SceneDebugMode::IBLIrradiance));
+	defCScene.add_static_constant("DEBUG_MODE_EMISSION", pragma::math::to_integral(pragma::SceneDebugMode::Emission));
 	defCScene.def("GetActiveCamera", static_cast<pragma::ComponentHandle<pragma::CCameraComponent> &(pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::GetActiveCamera));
 	defCScene.def("SetActiveCamera", static_cast<void (pragma::CSceneComponent::*)(pragma::CCameraComponent &)>(&pragma::CSceneComponent::SetActiveCamera));
 	defCScene.def("SetActiveCamera", static_cast<void (pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::SetActiveCamera));
@@ -444,7 +444,7 @@ void pragma::CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCOccl];
 
 	auto defCDecal = pragma::LuaCore::create_entity_component_class<pragma::CDecalComponent, pragma::BaseEnvDecalComponent>("DecalComponent");
-	defCDecal.def("CreateFromProjection", static_cast<void (*)(lua::State *, pragma::CDecalComponent &, luabind::object, const umath::ScaledTransform &)>(&Lua::Decal::create_from_projection));
+	defCDecal.def("CreateFromProjection", static_cast<void (*)(lua::State *, pragma::CDecalComponent &, luabind::object, const pragma::math::ScaledTransform &)>(&Lua::Decal::create_from_projection));
 	defCDecal.def("CreateFromProjection", static_cast<void (*)(lua::State *, pragma::CDecalComponent &, luabind::object)>(&Lua::Decal::create_from_projection));
 	defCDecal.def("DebugDraw", &pragma::CDecalComponent::DebugDraw);
 	defCDecal.def("ApplyDecal", static_cast<bool (pragma::CDecalComponent::*)()>(&pragma::CDecalComponent::ApplyDecal));
@@ -466,9 +466,9 @@ void pragma::CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCLight.def("SetAddToGameScene", static_cast<void (*)(lua::State *, pragma::CLightComponent &, bool)>([](lua::State *l, pragma::CLightComponent &hComponent, bool b) { hComponent.SetStateFlag(pragma::CLightComponent::StateFlags::AddToGameScene, b); }));
 	defCLight.def("SetMorphTargetsInShadowsEnabled", &pragma::CLightComponent::SetMorphTargetsInShadowsEnabled);
 	defCLight.def("AreMorphTargetsInShadowsEnabled", &pragma::CLightComponent::AreMorphTargetsInShadowsEnabled);
-	defCLight.add_static_constant("SHADOW_TYPE_NONE", umath::to_integral(rendering::ShadowType::None));
-	defCLight.add_static_constant("SHADOW_TYPE_STATIC_ONLY", umath::to_integral(rendering::ShadowType::StaticOnly));
-	defCLight.add_static_constant("SHADOW_TYPE_FULL", umath::to_integral(rendering::ShadowType::Full));
+	defCLight.add_static_constant("SHADOW_TYPE_NONE", pragma::math::to_integral(rendering::ShadowType::None));
+	defCLight.add_static_constant("SHADOW_TYPE_STATIC_ONLY", pragma::math::to_integral(rendering::ShadowType::StaticOnly));
+	defCLight.add_static_constant("SHADOW_TYPE_FULL", pragma::math::to_integral(rendering::ShadowType::Full));
 
 	defCLight.add_static_constant("EVENT_SHOULD_PASS_ENTITY", pragma::cLightComponent::EVENT_SHOULD_PASS_ENTITY);
 	defCLight.add_static_constant("EVENT_SHOULD_PASS_ENTITY_MESH", pragma::cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH);

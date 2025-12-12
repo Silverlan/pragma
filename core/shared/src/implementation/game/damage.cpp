@@ -30,7 +30,7 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, game::Damag
 		if(pPhysComponent != nullptr)
 			pPhysComponent->GetCollisionBounds(&min, &max);
 		Vector3 pos;
-		umath::geometry::closest_point_on_aabb_to_point(min, max, origin - pTrComponent->GetPosition(), &pos);
+		pragma::math::geometry::closest_point_on_aabb_to_point(min, max, origin - pTrComponent->GetPosition(), &pos);
 		auto dist = uvec::length(pos);
 		ents.push_back(EntityCandidate(ent, pos, dist));
 	}
@@ -42,7 +42,7 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, game::Damag
 	auto *inflictor = dmg.GetInflictor();
 	if(inflictor != nullptr)
 		entsFilter.push_back(inflictor->GetHandle());
-	auto traceFilter = ::util::make_shared<::pragma::physics::MultiEntityRayCastFilterCallback>(std::move(entsFilter));
+	auto traceFilter = pragma::util::make_shared<::pragma::physics::MultiEntityRayCastFilterCallback>(std::move(entsFilter));
 
 	auto *entOrigin = (attacker != nullptr) ? attacker : inflictor;
 	for(auto it = ents.begin(); it != ents.end(); ++it) {

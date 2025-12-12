@@ -12,7 +12,7 @@ bool pragma::physics::SoftBodyPhysObj::Initialize(pragma::physics::ISoftBody &bo
 	if(pragma::physics::PhysObj::Initialize() == false)
 		return false;
 	AddCollisionObject(body);
-	m_softBodies.push_back(util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ISoftBody>(body.ClaimOwnership()));
+	m_softBodies.push_back(pragma::util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ISoftBody>(body.ClaimOwnership()));
 	return true;
 }
 bool pragma::physics::SoftBodyPhysObj::Initialize(const std::vector<pragma::physics::ISoftBody *> &bodies)
@@ -22,7 +22,7 @@ bool pragma::physics::SoftBodyPhysObj::Initialize(const std::vector<pragma::phys
 	m_softBodies.reserve(bodies.size());
 	for(auto *body : bodies) {
 		AddCollisionObject(*body);
-		m_softBodies.push_back(util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ISoftBody>(body->ClaimOwnership()));
+		m_softBodies.push_back(pragma::util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ISoftBody>(body->ClaimOwnership()));
 	}
 	return true;
 }
@@ -36,7 +36,7 @@ void pragma::physics::SoftBodyPhysObj::SetLinearVelocity(const Vector3 &vel)
 		}
 	}
 }
-std::vector<util::TSharedHandle<pragma::physics::ISoftBody>> &pragma::physics::SoftBodyPhysObj::GetSoftBodies() { return m_softBodies; }
+std::vector<pragma::util::TSharedHandle<pragma::physics::ISoftBody>> &pragma::physics::SoftBodyPhysObj::GetSoftBodies() { return m_softBodies; }
 const pragma::physics::ISoftBody *pragma::physics::SoftBodyPhysObj::GetSoftBody() const { return const_cast<SoftBodyPhysObj *>(this)->GetSoftBody(); }
 pragma::physics::ISoftBody *pragma::physics::SoftBodyPhysObj::GetSoftBody()
 {
@@ -55,7 +55,7 @@ void pragma::physics::SoftBodyPhysObj::AddCollisionObject(pragma::physics::IColl
 	if(body == nullptr)
 		return;
 	pragma::physics::PhysObj::AddCollisionObject(o);
-	m_softBodies.push_back(util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ISoftBody>(body->ClaimOwnership()));
+	m_softBodies.push_back(pragma::util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ISoftBody>(body->ClaimOwnership()));
 }
 
 float pragma::physics::SoftBodyPhysObj::GetMass() const

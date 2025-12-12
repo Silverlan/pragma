@@ -28,7 +28,7 @@ void pragma::pts::CParticleOperatorAngularAcceleration::Initialize(pragma::BaseE
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "acceleration")
 			m_vAcceleration = uvec::create(pair.second);
 	}

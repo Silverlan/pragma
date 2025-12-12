@@ -14,7 +14,7 @@ lua::State *pragma::Game::GetLuaState() { return (m_lua != nullptr) ? m_lua->Get
 void pragma::Game::InitializeLua()
 {
 	m_luaIncludeStack.clear();
-	m_lua = ::util::make_shared<Lua::Interface>();
+	m_lua = pragma::util::make_shared<Lua::Interface>();
 	m_lua->Open();
 
 	m_luaClassManager = std::make_unique<pragma::LuaCore::ClassManager>(*m_lua->GetState());
@@ -26,7 +26,7 @@ void pragma::Game::InitializeLua()
 	std::unordered_map<std::string, lua::Integer> componentIds;
 	for(auto &componentInfo : m_componentManager->GetRegisteredComponentTypes()) {
 		auto name = std::string {*componentInfo->name};
-		ustring::to_upper(name);
+		pragma::string::to_upper(name);
 		componentIds.insert(std::make_pair("COMPONENT_" + name, componentInfo->id));
 	}
 	Lua::RegisterLibraryEnums(GetLuaState(), "ents", componentIds);
@@ -149,7 +149,7 @@ bool pragma::Game::LoadLuaComponent(const std::string &mainPath, const std::stri
 bool pragma::Game::LoadLuaEntity(std::string path)
 {
 	std::string ext;
-	if(ufile::get_extension(path, &ext) == true && (ustring::compare<std::string>(ext, Lua::FILE_EXTENSION, false) == true || ustring::compare<std::string>(ext, Lua::FILE_EXTENSION_PRECOMPILED, false) == true))
+	if(ufile::get_extension(path, &ext) == true && (pragma::string::compare<std::string>(ext, Lua::FILE_EXTENSION, false) == true || pragma::string::compare<std::string>(ext, Lua::FILE_EXTENSION_PRECOMPILED, false) == true))
 		return ExecuteLuaFile(path);
 	path = Lua::SCRIPT_DIRECTORY + "\\" + path;
 
@@ -171,7 +171,7 @@ bool pragma::Game::LoadLuaEntity(std::string path)
 bool pragma::Game::LoadLuaComponent(std::string path)
 {
 	std::string ext;
-	if(ufile::get_extension(path, &ext) == true && (ustring::compare<std::string>(ext, Lua::FILE_EXTENSION, false) == true || ustring::compare<std::string>(ext, Lua::FILE_EXTENSION_PRECOMPILED, false) == true))
+	if(ufile::get_extension(path, &ext) == true && (pragma::string::compare<std::string>(ext, Lua::FILE_EXTENSION, false) == true || pragma::string::compare<std::string>(ext, Lua::FILE_EXTENSION_PRECOMPILED, false) == true))
 		return ExecuteLuaFile(path);
 	path = Lua::SCRIPT_DIRECTORY_SLASH + path;
 	auto nwStateDirName = GetLuaNetworkDirectoryName();
@@ -237,7 +237,7 @@ bool pragma::Game::LoadLuaComponentByName(const std::string &componentName)
 CallbackHandle pragma::Game::AddConVarCallback(const std::string &cvar, LuaFunction function)
 {
 	auto lcvar = cvar;
-	ustring::to_lower(lcvar);
+	pragma::string::to_lower(lcvar);
 	auto it = m_cvarCallbacks.find(lcvar);
 	if(it == m_cvarCallbacks.end())
 		it = m_cvarCallbacks.insert(std::make_pair(cvar, std::vector<console::CvarCallback> {})).first;

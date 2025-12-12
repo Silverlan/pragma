@@ -20,16 +20,16 @@ export namespace pragma {
 		OriginComponent(pragma::ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
-		void SetOriginPose(const umath::Transform &pose);
+		void SetOriginPose(const pragma::math::Transform &pose);
 		void SetOriginPos(const Vector3 &pos);
 		void SetOriginRot(const Quat &rot);
 
-		const umath::Transform &GetOriginPose() const;
+		const pragma::math::Transform &GetOriginPose() const;
 		const Vector3 &GetOriginPos() const;
 		const Quat &GetOriginRot() const;
 
 		virtual void InitializeLuaObject(lua::State *lua) override;
 	  protected:
-		umath::Transform m_origin;
+		pragma::math::Transform m_origin;
 	};
 };

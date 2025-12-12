@@ -207,7 +207,7 @@ std::optional<std::vector<std::string>> g_autoExecScripts {};
 
 void pragma::ClientState::InitializeGUILua()
 {
-	m_luaGUI = ::util::make_shared<Lua::Interface>();
+	m_luaGUI = pragma::util::make_shared<Lua::Interface>();
 	m_luaGUI->Open();
 	m_luaGUI->SetIdentifier("gui");
 	Lua::initialize_lua_state(GetGUILuaInterface());
@@ -240,10 +240,10 @@ void pragma::ClientState::InitializeGUILua()
 		auto *l = m_luaGUI->GetState();
 		auto *el = pragma::gui::WGUI::GetInstance().Create<WIRect>();
 		auto hEl = el->GetHandle();
-		auto hElCast = util::weak_shared_handle_cast<WIBase,WIShape>(hEl);
+		auto hElCast = pragma::util::weak_shared_handle_cast<WIBase,WIShape>(hEl);
 		auto o = luabind::object{l,hElCast};
 
-		auto *h1 = luabind::object_cast<util::TWeakSharedHandle<WIShape>*>(o);
+		auto *h1 = luabind::object_cast<pragma::util::TWeakSharedHandle<WIShape>*>(o);
 		auto *h2 = luabind::object_cast<WIShape*>(o);
 		auto *h3 = luabind::object_cast<WIBase*>(o);
 
@@ -253,7 +253,7 @@ void pragma::ClientState::InitializeGUILua()
 		Lua::RunString(l,"print(\"Valid: \",testObjectCast:IsValid())","test");
 
 		el->Remove();
-		h1 = luabind::object_cast<util::TWeakSharedHandle<WIShape>*>(o);
+		h1 = luabind::object_cast<pragma::util::TWeakSharedHandle<WIShape>*>(o);
 		h2 = luabind::object_cast<WIShape*>(o);
 		h3 = luabind::object_cast<WIBase*>(o);
 
@@ -565,7 +565,7 @@ void pragma::ClientState::SendUserInfo()
 
 	NetPacket packet;
 	auto &version = pragma::get_engine_version();
-	packet->Write<util::Version>(version);
+	packet->Write<pragma::util::Version>(version);
 
 	auto udpPort = m_client->GetLocalUDPPort();
 	if(IsConnected() && udpPort.has_value()) {
@@ -652,13 +652,13 @@ static void init_shader(msys::Material *mat)
 	auto *info = mat->GetShaderInfo();
 	if(info != nullptr) {
 		auto shader = pragma::get_cengine()->GetShader(info->GetIdentifier());
-		const_cast<util::ShaderInfo *>(info)->SetShader(::util::make_shared<::util::WeakHandle<prosper::Shader>>(shader));
+		const_cast<pragma::util::ShaderInfo *>(info)->SetShader(pragma::util::make_shared<pragma::util::WeakHandle<prosper::Shader>>(shader));
 	}
 }
 msys::MaterialHandle pragma::ClientState::CreateMaterial(const std::string &path, const std::string &shader)
 {
 	auto settings = ds::create_data_settings({});
-	auto mat = GetMaterialManager().CreateMaterial(path, shader, ::util::make_shared<ds::Block>(*settings));
+	auto mat = GetMaterialManager().CreateMaterial(path, shader, pragma::util::make_shared<ds::Block>(*settings));
 	if(mat == nullptr)
 		return {};
 	static_cast<msys::CMaterial *>(mat.get())->SetOnLoadedCallback(std::bind(init_shader, mat.get()));
@@ -668,14 +668,14 @@ msys::MaterialHandle pragma::ClientState::CreateMaterial(const std::string &path
 msys::MaterialHandle pragma::ClientState::CreateMaterial(const std::string &shader)
 {
 	auto settings = ds::create_data_settings({});
-	auto mat = GetMaterialManager().CreateMaterial(shader, ::util::make_shared<ds::Block>(*settings));
+	auto mat = GetMaterialManager().CreateMaterial(shader, pragma::util::make_shared<ds::Block>(*settings));
 	if(mat == nullptr)
 		return {};
 	static_cast<msys::CMaterial *>(mat.get())->SetOnLoadedCallback(std::bind(init_shader, mat.get()));
 	return mat->GetHandle();
 }
 
-util::FileAssetManager *pragma::ClientState::GetAssetManager(pragma::asset::Type type)
+pragma::util::FileAssetManager *pragma::ClientState::GetAssetManager(pragma::asset::Type type)
 {
 	switch(type) {
 	case pragma::asset::Type::Texture:
@@ -717,7 +717,7 @@ msys::Material *pragma::ClientState::LoadMaterial(const std::string &path, const
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 		debug::get_domain().BeginTask("load_material");
 #endif
-		util::FileAssetManager::PreloadResult result {};
+		pragma::util::FileAssetManager::PreloadResult result {};
 		auto asset = matManager.LoadAsset(path, nullptr, &result);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 		debug::get_domain().EndTask();
@@ -729,11 +729,11 @@ msys::Material *pragma::ClientState::LoadMaterial(const std::string &path, const
 	}
 
 	//bLoadInstantly = true;
-	auto bShaderInitialized = ::util::make_shared<bool>(false);
+	auto bShaderInitialized = pragma::util::make_shared<bool>(false);
 
 	bool bFirstTimeError;
 	auto loadInfo = std::make_unique<msys::MaterialLoadInfo>();
-	loadInfo->onLoaded = [this, bShaderInitialized, onLoaded](util::Asset &asset) mutable {
+	loadInfo->onLoaded = [this, bShaderInitialized, onLoaded](pragma::util::Asset &asset) mutable {
 		// TODO: bShaderInitialized should never be null, but for some reason is!
 		auto mat = msys::CMaterialManager::GetAssetObject(asset);
 		if(!mat)
@@ -747,14 +747,14 @@ msys::Material *pragma::ClientState::LoadMaterial(const std::string &path, const
 		// Material has been fully loaded!
 
 		std::string ext;
-		if(ustring::compare<std::string>(mat->GetShaderIdentifier(), "eye", false) && ufile::get_extension(mat->GetName(), &ext) && ustring::compare<std::string>(ext, "vmt", false)) {
+		if(pragma::string::compare<std::string>(mat->GetShaderIdentifier(), "eye", false) && ufile::get_extension(mat->GetName(), &ext) && pragma::string::compare<std::string>(ext, "vmt", false)) {
 			// Material was loaded from a VMT and uses the eye shader. In this case we have to save the material as WMI, otherwise
 			// we may run into a loop where the eye material would be loaded over and over again because it involves decomposing the eye
 			// textures, which triggers the resource watcher.
 			// This is a bit of a hack, but it'll do for now. TODO: Do this in a better way!
 			auto matName = mat->GetName();
 			ufile::remove_extension_from_filename(matName);
-			auto savePath = pragma::asset::relative_path_to_absolute_path(matName, pragma::asset::Type::Material, util::CONVERT_PATH);
+			auto savePath = pragma::asset::relative_path_to_absolute_path(matName, pragma::asset::Type::Material, pragma::util::CONVERT_PATH);
 			std::string err;
 			mat->Save(savePath.GetString(), err);
 		}

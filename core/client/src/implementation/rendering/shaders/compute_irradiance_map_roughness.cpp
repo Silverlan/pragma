@@ -105,7 +105,7 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 		for(uint8_t layerId = 0u; layerId < layerCount; ++layerId) {
 			for(uint32_t i = 0u; i < numVerts; i += 3) {
 				auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
-				util::ScopeGuard sgCmd {[this]() { GetContext().FlushSetupCommandBuffer(); }};
+				pragma::util::ScopeGuard sgCmd {[this]() { GetContext().FlushSetupCommandBuffer(); }};
 				setupCmd->RecordUpdateBuffer(*buf, 0, roughnessData);
 				setupCmd->RecordBufferBarrier(*buf, prosper::PipelineStageFlags::HostBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::HostWriteBit, prosper::AccessFlags::ShaderReadBit);
 

@@ -25,5 +25,5 @@ void ShaderWaterSurfaceSumEdges::InitializeShaderResources()
 }
 bool ShaderWaterSurfaceSumEdges::RecordCompute(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetSurfaceInfo, prosper::IDescriptorSet &descSetEdges, uint32_t width, uint32_t length) const
 {
-	return RecordBindDescriptorSets(bindState, {&descSetEdges, &descSetSurfaceInfo}, DESCRIPTOR_SET_WATER.setIndex) && RecordDispatch(bindState, umath::ceil(width / 8.f), umath::ceil(length / 8.f), 1);
+	return RecordBindDescriptorSets(bindState, {&descSetEdges, &descSetSurfaceInfo}, DESCRIPTOR_SET_WATER.setIndex) && RecordDispatch(bindState, pragma::math::ceil(width / 8.f), pragma::math::ceil(length / 8.f), 1);
 }

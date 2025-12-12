@@ -37,17 +37,17 @@ bool CRaytracingComponent::InitializeBuffers()
 	s_entityMeshInfoBuffer->SetDebugName("entity_mesh_info_buf");
 
 	s_gameSceneDsg = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE);
-	s_materialDescriptorArrayManager = prosper::DescriptorArrayManager::Create<MaterialDescriptorArrayManager>(s_gameSceneDsg, umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::TextureArray));
+	s_materialDescriptorArrayManager = prosper::DescriptorArrayManager::Create<MaterialDescriptorArrayManager>(s_gameSceneDsg, pragma::math::to_integral(pragma::ShaderRayTracing::GameSceneBinding::TextureArray));
 
 	auto &ds = *s_gameSceneDsg->GetDescriptorSet();
-	ds.SetBindingStorageBuffer(*s_materialDescriptorArrayManager->GetMaterialInfoBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::MaterialInfos));
-	ds.SetBindingStorageBuffer(*s_entityMeshInfoBuffer, umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::SubMeshInfos));
-	ds.SetBindingStorageBuffer(*CRenderComponent::GetInstanceBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::EntityInstanceData));
-	ds.SetBindingStorageBuffer(*pragma::get_instance_bone_buffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::BoneMatrices));
-	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalVertexBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::VertexBuffer));
-	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalIndexBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::IndexBuffer));
-	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalVertexWeightBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::VertexWeightBuffer));
-	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalAlphaBuffer(), umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::AlphaBuffer));
+	ds.SetBindingStorageBuffer(*s_materialDescriptorArrayManager->GetMaterialInfoBuffer(), pragma::math::to_integral(pragma::ShaderRayTracing::GameSceneBinding::MaterialInfos));
+	ds.SetBindingStorageBuffer(*s_entityMeshInfoBuffer, pragma::math::to_integral(pragma::ShaderRayTracing::GameSceneBinding::SubMeshInfos));
+	ds.SetBindingStorageBuffer(*CRenderComponent::GetInstanceBuffer(), pragma::math::to_integral(pragma::ShaderRayTracing::GameSceneBinding::EntityInstanceData));
+	ds.SetBindingStorageBuffer(*pragma::get_instance_bone_buffer(), pragma::math::to_integral(pragma::ShaderRayTracing::GameSceneBinding::BoneMatrices));
+	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalVertexBuffer(), pragma::math::to_integral(pragma::ShaderRayTracing::GameSceneBinding::VertexBuffer));
+	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalIndexBuffer(), pragma::math::to_integral(pragma::ShaderRayTracing::GameSceneBinding::IndexBuffer));
+	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalVertexWeightBuffer(), pragma::math::to_integral(pragma::ShaderRayTracing::GameSceneBinding::VertexWeightBuffer));
+	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalAlphaBuffer(), pragma::math::to_integral(pragma::ShaderRayTracing::GameSceneBinding::AlphaBuffer));
 
 	s_allResourcesInitialized = s_entityMeshInfoBuffer && s_materialDescriptorArrayManager && s_gameSceneDsg;
 	return s_allResourcesInitialized;
@@ -168,17 +168,17 @@ void CRaytracingComponent::UpdateBuffers(prosper::IPrimaryCommandBuffer &cmd)
 	auto whRenderComponent = GetEntity().GetComponent<CRenderComponent>();
 	if(whRenderComponent.expired())
 		return;
-	if(umath::is_flag_set(m_stateFlags, StateFlags::RenderBufferDirty)) {
-		umath::set_flag(m_stateFlags, StateFlags::RenderBufferDirty, false);
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderBufferDirty)) {
+		pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty, false);
 		auto &renderComponent = *whRenderComponent;
 		auto *renderBuffer = renderComponent.GetRenderBuffer();
 		auto index = renderBuffer->GetBaseIndex(); //wpRenderBuffer ? static_cast<prosper::IBuffer::SmallOffset>(wpRenderBuffer->GetBaseIndex()) : prosper::IBuffer::INVALID_SMALL_OFFSET;
 		for(auto &buf : m_subMeshBuffers)
 			cmd.RecordUpdateGenericShaderReadBuffer(*buf, offsetof(SubMeshRenderInfoBufferData, entityBufferIndex), sizeof(index), &index);
 	}
-	if(umath::is_flag_set(m_stateFlags, StateFlags::BoneBufferDirty)) {
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::BoneBufferDirty)) {
 		auto whAnimatedComponent = GetEntity().GetComponent<CAnimatedComponent>();
-		umath::set_flag(m_stateFlags, StateFlags::BoneBufferDirty, false);
+		pragma::math::set_flag(m_stateFlags, StateFlags::BoneBufferDirty, false);
 		auto wpBoneBuffer = whAnimatedComponent->GetBoneBuffer(); //whAnimatedComponent.valid() ? whAnimatedComponent->GetBoneBuffer() : std::weak_ptr<prosper::IBuffer>{};
 		auto index = wpBoneBuffer ? static_cast<prosper::IBuffer::SmallOffset>(wpBoneBuffer->GetBaseIndex()) : prosper::IBuffer::INVALID_SMALL_OFFSET;
 		for(auto &buf : m_subMeshBuffers)
@@ -189,12 +189,12 @@ void CRaytracingComponent::UpdateBuffers(prosper::IPrimaryCommandBuffer &cmd)
 }
 void CRaytracingComponent::SetRenderBufferDirty()
 {
-	umath::set_flag(m_stateFlags, StateFlags::RenderBufferDirty);
+	pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty);
 	InitializeBufferUpdateCallback();
 }
 void CRaytracingComponent::SetBoneBufferDirty()
 {
-	umath::set_flag(m_stateFlags, StateFlags::BoneBufferDirty);
+	pragma::math::set_flag(m_stateFlags, StateFlags::BoneBufferDirty);
 	InitializeBufferUpdateCallback();
 }
 void CRaytracingComponent::InitializeBufferUpdateCallback()

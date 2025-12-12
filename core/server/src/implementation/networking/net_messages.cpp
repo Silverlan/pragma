@@ -167,19 +167,19 @@ void NET_sv_QUERY_MODEL_TEXTURE(pragma::networking::IServerClient &session, NetP
 	if(mat == nullptr)
 		return;
 	std::vector<std::string> textures;
-	std::function<void(const util::Path &path)> fFindTextures = nullptr;
-	fFindTextures = [mat, &fFindTextures, &textures](const util::Path &path) {
+	std::function<void(const pragma::util::Path &path)> fFindTextures = nullptr;
+	fFindTextures = [mat, &fFindTextures, &textures](const pragma::util::Path &path) {
 		for(auto &name : msys::MaterialPropertyBlockView {*mat, path}) {
 			auto propType = mat->GetPropertyType(name);
 			switch(propType) {
 			case msys::PropertyType::Block:
-				fFindTextures(util::FilePath(path, name));
+				fFindTextures(pragma::util::FilePath(path, name));
 				break;
 			case msys::PropertyType::Texture:
 				{
 					std::string texName;
-					if(mat->GetProperty(util::FilePath(path, name).GetString(), &texName)) {
-						auto path = util::FilePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), texName).GetString();
+					if(mat->GetProperty(pragma::util::FilePath(path, name).GetString(), &texName)) {
+						auto path = pragma::util::FilePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), texName).GetString();
 						textures.push_back(path);
 					}
 					break;
@@ -589,7 +589,7 @@ void NET_sv_DEBUG_AI_SCHEDULE_TREE(pragma::networking::IServerClient &session, N
 	auto hPl = pl->GetHandle<pragma::SPlayerComponent>();
 	auto sAiComponent = ent->GetComponent<pragma::SAIComponent>();
 	auto hSAiComponent = (sAiComponent.expired() == false) ? sAiComponent.get()->GetHandle<pragma::SAIComponent>() : pragma::ComponentHandle<pragma::SAIComponent> {};
-	auto dbgTree = ::util::make_shared<pragma::debug::DebugBehaviorTreeNode>();
+	auto dbgTree = pragma::util::make_shared<pragma::debug::DebugBehaviorTreeNode>();
 	std::shared_ptr<pragma::ai::Schedule> aiSchedule = nullptr;
 	auto tLastScheduleUpdate = 0.f;
 	auto hCbTick = FunctionCallback<void>::Create(nullptr);

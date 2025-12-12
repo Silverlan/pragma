@@ -127,7 +127,7 @@ void BaseBvhComponent::GetVertexData(std::vector<pragma::bvh::Primitive> &outDat
 {
 	std::scoped_lock lock {m_bvhDataMutex};
 	outData.resize(m_bvhData->primitives.size());
-	memcpy(outData.data(), m_bvhData->primitives.data(), util::size_of_container(outData));
+	memcpy(outData.data(), m_bvhData->primitives.data(), pragma::util::size_of_container(outData));
 }
 
 void BaseBvhComponent::DeleteRange(pragma::bvh::MeshBvhTree &bvhData, size_t start, size_t end)
@@ -147,7 +147,7 @@ bool BaseBvhComponent::SetVertexData(pragma::bvh::MeshBvhTree &bvhData, const st
 {
 	if(bvhData.primitives.size() != data.size())
 		return false;
-	memcpy(bvhData.primitives.data(), data.data(), util::size_of_container(data));
+	memcpy(bvhData.primitives.data(), data.data(), pragma::util::size_of_container(data));
 	bvhData.SetDirty();
 	return true;
 }
@@ -274,7 +274,7 @@ bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &m
 #endif
 	return test_bvh_intersection_with_aabb(*bvhData, min, max);
 }
-bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &planes, IntersectionInfo &outIntersectionInfo) const
+bool BaseBvhComponent::IntersectionTestKDop(const std::vector<pragma::math::Plane> &planes, IntersectionInfo &outIntersectionInfo) const
 {
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
@@ -289,7 +289,7 @@ bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &pla
 #endif
 	return test_bvh_intersection_with_kdop(*bvhData, planes, 0u, &outIntersectionInfo);
 }
-bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &planes) const
+bool BaseBvhComponent::IntersectionTestKDop(const std::vector<pragma::math::Plane> &planes) const
 {
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
@@ -359,7 +359,7 @@ void BaseBvhComponent::Initialize()
 				return static_cast<BaseBvhComponent *>(userData)->IntersectionTestAabb(min, max, *outIntersectionInfo);
 			return static_cast<BaseBvhComponent *>(userData)->IntersectionTestAabb(min, max);
 		};
-		intersectionHandler.intersectionTestKDop = [](void *userData, const std::vector<umath::Plane> &planes, IntersectionInfo *outIntersectionInfo) -> bool {
+		intersectionHandler.intersectionTestKDop = [](void *userData, const std::vector<pragma::math::Plane> &planes, IntersectionInfo *outIntersectionInfo) -> bool {
 			if(outIntersectionInfo)
 				return static_cast<BaseBvhComponent *>(userData)->IntersectionTestKDop(planes, *outIntersectionInfo);
 			return static_cast<BaseBvhComponent *>(userData)->IntersectionTestKDop(planes);

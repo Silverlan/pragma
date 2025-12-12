@@ -26,14 +26,14 @@ std::string pragma::engine_info::get_program_title()
 std::string pragma::engine_info::get_identifier()
 {
 	auto name = get_name();
-	ustring::to_lower(name);
+	pragma::string::to_lower(name);
 	return name;
 }
 
 std::string pragma::engine_info::get_name() { return PRAGMA_ENGINE_NAME; }
 
-extern util::Path g_programIcon;
-util::Path pragma::engine_info::get_icon_path() { return g_programIcon; }
+extern pragma::util::Path g_programIcon;
+pragma::util::Path pragma::engine_info::get_icon_path() { return g_programIcon; }
 
 std::string pragma::engine_info::get_executable_name()
 {
@@ -67,14 +67,14 @@ std::optional<pragma::engine_info::GitInfo> pragma::engine_info::get_git_info()
 		return {};
 	GitInfo gitInfo {};
 	std::vector<std::string> lines;
-	ustring::explode(f->ReadString(), "\n", lines);
+	pragma::string::explode(f->ReadString(), "\n", lines);
 	for(auto &l : lines) {
 		auto sep = l.find(':');
 		if(sep == std::string::npos)
 			continue;
 		auto id = l.substr(0, sep);
 		auto val = l.substr(sep + 1);
-		ustring::remove_whitespace(val);
+		pragma::string::remove_whitespace(val);
 		if(id.empty() || val.empty())
 			continue;
 		if(id == "ref")

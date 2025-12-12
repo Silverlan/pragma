@@ -20,7 +20,7 @@ export namespace pragma {
 	struct DLLCLIENT MotionBlurTemporalData {
 		struct PoseData {
 			Mat4 matrix;
-			umath::Transform pose;
+			pragma::math::Transform pose;
 			std::shared_ptr<prosper::IBuffer> boneBuffer;
 			std::shared_ptr<prosper::IDescriptorSetGroup> boneDsg;
 		};

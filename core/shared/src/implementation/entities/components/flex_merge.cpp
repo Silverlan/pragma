@@ -103,22 +103,22 @@ void FlexMergeComponent::UpdateFlexControllerMappings()
 		m_cbOnFlexControllerChanged.Remove();
 	if(m_cbOnFlexControllerComponentRemoved.IsValid())
 		m_cbOnFlexControllerComponentRemoved.Remove();
-	m_cbOnFlexControllerChanged = m_flexCParent->AddEventCallback(baseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {
+	m_cbOnFlexControllerChanged = m_flexCParent->AddEventCallback(baseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> ev) -> pragma::util::EventReply {
 		auto &evFlex = static_cast<pragma::CEOnFlexControllerChanged &>(ev.get());
 		ApplyFlexController(evFlex.flexControllerId, evFlex.value);
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	auto flexCId = m_flexCParent->GetComponentId();
 	auto *genericC = entTgt->GetGenericComponent();
 	if(genericC) {
-		m_cbOnFlexControllerComponentRemoved = genericC->AddEventCallback(baseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED, [this, flexCId](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {
+		m_cbOnFlexControllerComponentRemoved = genericC->AddEventCallback(baseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED, [this, flexCId](std::reference_wrapper<pragma::ComponentEvent> ev) -> pragma::util::EventReply {
 			auto &evRemoved = static_cast<pragma::CEOnEntityComponentRemoved &>(ev.get());
 			if(evRemoved.component.GetComponentId() == flexCId) {
 				if(m_cbOnFlexControllerComponentRemoved.IsValid())
 					m_cbOnFlexControllerComponentRemoved.Remove();
 				SetTargetDirty(false);
 			}
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		});
 	}
 	MergeFlexControllers();

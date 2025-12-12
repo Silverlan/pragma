@@ -20,7 +20,7 @@ void CStaticBvhCacheComponent::TestRebuildBvh()
 {
 	std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> meshes;
 	std::vector<pragma::ecs::BaseEntity *> meshToEntity;
-	std::vector<umath::ScaledTransform> meshPoses;
+	std::vector<pragma::math::ScaledTransform> meshPoses;
 	for(auto *c : m_entities) {
 		auto &ent = c->GetEntity();
 		auto *mdlC = static_cast<CModelComponent *>(ent.GetModelComponent());

@@ -11,7 +11,7 @@ std::vector<std::shared_ptr<pragma::animation::VertexAnimation>> &pragma::asset:
 std::shared_ptr<pragma::animation::VertexAnimation> pragma::asset::Model::CreateVertexAnimation(const std::string &name) const { return pragma::animation::VertexAnimation::Create(name); }
 std::vector<std::shared_ptr<pragma::animation::VertexAnimation>>::iterator pragma::asset::Model::FindVertexAnimation(const std::string &name)
 {
-	return std::find_if(m_vertexAnimations.begin(), m_vertexAnimations.end(), [&name](const std::shared_ptr<pragma::animation::VertexAnimation> &anim) { return ustring::compare(name, anim->GetName(), false); });
+	return std::find_if(m_vertexAnimations.begin(), m_vertexAnimations.end(), [&name](const std::shared_ptr<pragma::animation::VertexAnimation> &anim) { return pragma::string::compare(name, anim->GetName(), false); });
 }
 std::vector<std::shared_ptr<pragma::animation::VertexAnimation>>::const_iterator pragma::asset::Model::FindVertexAnimation(const std::string &name) const { return const_cast<pragma::asset::Model *>(this)->FindVertexAnimation(name); }
 bool pragma::asset::Model::GetVertexAnimationId(const std::string &name, uint32_t &id) const

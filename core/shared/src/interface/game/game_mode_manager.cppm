@@ -15,7 +15,7 @@ export namespace pragma::game {
 		std::string component_name;
 		std::string author;
 		std::string initial_map;
-		util::Version version;
+		pragma::util::Version version;
 		std::unordered_map<std::string, int32_t> gameMountPriorities;
 	};
 

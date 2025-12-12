@@ -581,7 +581,7 @@ DLLNETWORK bool StringToKey(std::string key, short *c)
 {
 	if(key.length() == 0)
 		return false;
-	ustring::to_lower(key);
+	pragma::string::to_lower(key);
 	static const std::unordered_map<std::string, decltype(GLFW_KEY_SPACE)> keyMap
 	  = {{"space", GLFW_KEY_SPACE}, {"escape", GLFW_KEY_ESCAPE}, {"f1", GLFW_KEY_F1}, {"f2", GLFW_KEY_F2}, {"f3", GLFW_KEY_F3}, {"f4", GLFW_KEY_F4}, {"f5", GLFW_KEY_F5}, {"f6", GLFW_KEY_F6}, {"f7", GLFW_KEY_F7}, {"f8", GLFW_KEY_F8}, {"f9", GLFW_KEY_F9}, {"f10", GLFW_KEY_F10},
 	    {"f11", GLFW_KEY_F11}, {"f12", GLFW_KEY_F12}, {"f13", GLFW_KEY_F13}, {"f14", GLFW_KEY_F14}, {"f15", GLFW_KEY_F15}, {"f16", GLFW_KEY_F16}, {"f17", GLFW_KEY_F17}, {"f18", GLFW_KEY_F18}, {"f19", GLFW_KEY_F19}, {"f20", GLFW_KEY_F20}, {"f21", GLFW_KEY_F21}, {"f22", GLFW_KEY_F22},
@@ -599,17 +599,17 @@ DLLNETWORK bool StringToKey(std::string key, short *c)
 	}
 	if(key.length() > 1) {
 		auto fTranslateKey = [](const std::string &key, short *c, const std::string &id, uint32_t axisStart, uint32_t keyStart) -> bool {
-			if(ustring::substr(key, 0, 3) == id) {
+			if(pragma::string::substr(key, 0, 3) == id) {
 				const std::string numbers = "0123456789";
 				auto nEnd = key.find_first_not_of(numbers, 3);
 				if(nEnd != std::string::npos) {
-					auto controllerId = ustring::to_int(ustring::substr(key, 3, nEnd));
+					auto controllerId = pragma::string::to_int(pragma::string::substr(key, 3, nEnd));
 					auto btStart = key.find_first_of(numbers, nEnd);
 					if(btStart != std::string::npos) {
-						auto type = ustring::substr(key, nEnd, btStart - nEnd);
+						auto type = pragma::string::substr(key, nEnd, btStart - nEnd);
 						auto bAxis = (type == "axis") ? true : false;
 						if(bAxis == true || type == "bt") {
-							auto btId = ustring::to_int(ustring::substr(key, btStart));
+							auto btId = pragma::string::to_int(pragma::string::substr(key, btStart));
 							*c = ((bAxis == true) ? axisStart : keyStart) + btId;
 							*c += controllerId * GLFW_CUSTOM_KEY_JOYSTICK_CONTROL_COUNT;
 							return true;

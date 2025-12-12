@@ -11,7 +11,7 @@ import :engine;
 
 using namespace pragma;
 
-ShaderCubemapToEquirectangular::ShaderCubemapToEquirectangular(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing {context, identifier, "programs/util/cubemap_to_equirectangular"} { SetPipelineCount(umath::to_integral(Pipeline::Count)); }
+ShaderCubemapToEquirectangular::ShaderCubemapToEquirectangular(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing {context, identifier, "programs/util/cubemap_to_equirectangular"} { SetPipelineCount(pragma::math::to_integral(Pipeline::Count)); }
 
 void ShaderCubemapToEquirectangular::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {
@@ -62,7 +62,7 @@ std::shared_ptr<prosper::RenderTarget> ShaderCubemapToEquirectangular::CreateEqu
 	return rt;
 }
 
-std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquirectangularTexture(prosper::Texture &cubemap, uint32_t width, uint32_t height, umath::Degree range, prosper::ImageLayout cubemapLayout)
+std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquirectangularTexture(prosper::Texture &cubemap, uint32_t width, uint32_t height, pragma::math::Degree range, prosper::ImageLayout cubemapLayout)
 {
 	auto inputFormat = cubemap.GetImage().GetFormat();
 	// TODO: If compressed, check if compressed HDR format
@@ -96,7 +96,7 @@ std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquir
 		pushConstants.xFactor = range / 360.f;
 
 		prosper::ShaderBindState bindState {*setupCmd};
-		if(RecordBeginDraw(bindState, umath::to_integral(pipelineIdx)) == true) {
+		if(RecordBeginDraw(bindState, pragma::math::to_integral(pipelineIdx)) == true) {
 			success = RecordPushConstants(bindState, pushConstants) && RecordBindDescriptorSet(bindState, *dsg->GetDescriptorSet()) && RecordBindVertexBuffers(bindState, {vertBuffer.get(), uvBuffer.get()}) && prosper::ShaderGraphics::RecordDraw(bindState, numVerts);
 			RecordEndDraw(bindState);
 		}

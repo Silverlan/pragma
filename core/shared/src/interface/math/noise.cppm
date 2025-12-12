@@ -28,7 +28,7 @@ export module pragma.shared:math.noise;
 export import std.compat;
 
 // Source: https://github.com/threerings/clyde/blob/207d235ae1f7ba03ddcc6406febb6b7f306593bd/core/src/main/java/com/threerings/util/NoiseUtil.java
-export namespace util {
+export namespace pragma::math {
 	namespace noise {
 		// The number of permutation bits.
 		const int32_t PERMUTATION_BITS = 8;

@@ -21,7 +21,7 @@ export namespace pragma::gui::types {
 		void SetNewGameMenu();
 		virtual void OnFocusGained() override;
 		virtual void OnFocusKilled() override;
-		virtual util::EventReply KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual pragma::util::EventReply KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 
 		void OpenNewGameMenu();
 		void OpenLoadGameMenu();

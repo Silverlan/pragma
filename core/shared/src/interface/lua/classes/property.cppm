@@ -13,7 +13,7 @@ import :scripting.lua.core;
 export import pragma.lua;
 
 #define DEFINE_LUA_NUMBER_PROPERTY(TYPE, UNDERLYING_TYPE)                                                                                                                                                                                                                                        \
-	using L##TYPE##Property = TLNumberPropertyWrapper<util::TYPE##Property, UNDERLYING_TYPE>;                                                                                                                                                                                                    \
+	using L##TYPE##Property = TLNumberPropertyWrapper<pragma::util::TYPE##Property, UNDERLYING_TYPE>;                                                                                                                                                                                                    \
 	UNDERLYING_TYPE operator+(UNDERLYING_TYPE v, const L##TYPE##Property &prop) { return v + prop->GetValue(); }                                                                                                                                                                                 \
 	UNDERLYING_TYPE operator-(UNDERLYING_TYPE v, const L##TYPE##Property &prop) { return v - prop->GetValue(); }                                                                                                                                                                                 \
 	UNDERLYING_TYPE operator*(UNDERLYING_TYPE v, const L##TYPE##Property &prop) { return v * prop->GetValue(); }                                                                                                                                                                                 \
@@ -40,33 +40,33 @@ export {
 	//////////
 
 	// Bool
-	class LBoolPropertyWrapper : public LSimplePropertyWrapper<util::BoolProperty, bool> {
+	class LBoolPropertyWrapper : public LSimplePropertyWrapper<pragma::util::BoolProperty, bool> {
 	  public:
-		LBoolPropertyWrapper(const bool &v) : LSimplePropertyWrapper<util::BoolProperty, bool> {v} {}
-		LBoolPropertyWrapper(const std::shared_ptr<util::BoolProperty> &v) : LSimplePropertyWrapper<util::BoolProperty, bool> {v} {}
-		LBoolPropertyWrapper() : LSimplePropertyWrapper<util::BoolProperty, bool> {} {}
+		LBoolPropertyWrapper(const bool &v) : LSimplePropertyWrapper<pragma::util::BoolProperty, bool> {v} {}
+		LBoolPropertyWrapper(const std::shared_ptr<pragma::util::BoolProperty> &v) : LSimplePropertyWrapper<pragma::util::BoolProperty, bool> {v} {}
+		LBoolPropertyWrapper() : LSimplePropertyWrapper<pragma::util::BoolProperty, bool> {} {}
 
-		util::BoolProperty &operator*() { return GetProperty(); }
-		const util::BoolProperty &operator*() const { return const_cast<LBoolPropertyWrapper *>(this)->operator*(); }
-		util::BoolProperty *operator->() { return &GetProperty(); }
-		const util::BoolProperty *operator->() const { return const_cast<LBoolPropertyWrapper *>(this)->operator->(); }
+		pragma::util::BoolProperty &operator*() { return GetProperty(); }
+		const pragma::util::BoolProperty &operator*() const { return const_cast<LBoolPropertyWrapper *>(this)->operator*(); }
+		pragma::util::BoolProperty *operator->() { return &GetProperty(); }
+		const pragma::util::BoolProperty *operator->() const { return const_cast<LBoolPropertyWrapper *>(this)->operator->(); }
 
-		virtual util::BoolProperty &GetProperty() const override { return *static_cast<util::BoolProperty *>(prop.get()); }
+		virtual pragma::util::BoolProperty &GetProperty() const override { return *static_cast<pragma::util::BoolProperty *>(prop.get()); }
 	};
 	using LBoolProperty = LBoolPropertyWrapper;
 
 	// Color
-	class LColorPropertyWrapper : public LSimplePropertyWrapper<util::ColorProperty, Color> {
+	class LColorPropertyWrapper : public LSimplePropertyWrapper<pragma::util::ColorProperty, Color> {
 	  public:
-		util::ColorProperty &operator*() { return GetProperty(); }
-		const util::ColorProperty &operator*() const { return const_cast<LColorPropertyWrapper *>(this)->operator*(); }
-		util::ColorProperty *operator->() { return &GetProperty(); }
-		const util::ColorProperty *operator->() const { return const_cast<LColorPropertyWrapper *>(this)->operator->(); }
+		pragma::util::ColorProperty &operator*() { return GetProperty(); }
+		const pragma::util::ColorProperty &operator*() const { return const_cast<LColorPropertyWrapper *>(this)->operator*(); }
+		pragma::util::ColorProperty *operator->() { return &GetProperty(); }
+		const pragma::util::ColorProperty *operator->() const { return const_cast<LColorPropertyWrapper *>(this)->operator->(); }
 
-		virtual util::ColorProperty &GetProperty() const override { return *static_cast<util::ColorProperty *>(prop.get()); }
+		virtual pragma::util::ColorProperty &GetProperty() const override { return *static_cast<pragma::util::ColorProperty *>(prop.get()); }
 
 		LColorPropertyWrapper() : LSimplePropertyWrapper() {}
-		LColorPropertyWrapper(const std::shared_ptr<util::ColorProperty> &v) : LSimplePropertyWrapper(v) {}
+		LColorPropertyWrapper(const std::shared_ptr<pragma::util::ColorProperty> &v) : LSimplePropertyWrapper(v) {}
 		LColorPropertyWrapper(const Color &col) : LSimplePropertyWrapper(col) {}
 		LColorPropertyWrapper(Int16 r, Int16 g, Int16 b, Int16 a) : LSimplePropertyWrapper(Color {r, g, b, a}) {}
 		LColorPropertyWrapper(const std::string &str) : LSimplePropertyWrapper(Color {str}) {}
@@ -106,17 +106,17 @@ export {
 	using LColorProperty = LColorPropertyWrapper;
 
 	// Euler Angles
-	class LEulerAnglesPropertyWrapper : public LSimplePropertyWrapper<util::EulerAnglesProperty, EulerAngles> {
+	class LEulerAnglesPropertyWrapper : public LSimplePropertyWrapper<pragma::util::EulerAnglesProperty, EulerAngles> {
 	  public:
-		util::EulerAnglesProperty &operator*() { return GetProperty(); }
-		const util::EulerAnglesProperty &operator*() const { return const_cast<LEulerAnglesPropertyWrapper *>(this)->operator*(); }
-		util::EulerAnglesProperty *operator->() { return &GetProperty(); }
-		const util::EulerAnglesProperty *operator->() const { return const_cast<LEulerAnglesPropertyWrapper *>(this)->operator->(); }
+		pragma::util::EulerAnglesProperty &operator*() { return GetProperty(); }
+		const pragma::util::EulerAnglesProperty &operator*() const { return const_cast<LEulerAnglesPropertyWrapper *>(this)->operator*(); }
+		pragma::util::EulerAnglesProperty *operator->() { return &GetProperty(); }
+		const pragma::util::EulerAnglesProperty *operator->() const { return const_cast<LEulerAnglesPropertyWrapper *>(this)->operator->(); }
 
-		virtual util::EulerAnglesProperty &GetProperty() const override { return *static_cast<util::EulerAnglesProperty *>(prop.get()); }
+		virtual pragma::util::EulerAnglesProperty &GetProperty() const override { return *static_cast<pragma::util::EulerAnglesProperty *>(prop.get()); }
 
 		LEulerAnglesPropertyWrapper() : LSimplePropertyWrapper() {}
-		LEulerAnglesPropertyWrapper(const std::shared_ptr<util::EulerAnglesProperty> &v) : LSimplePropertyWrapper(v) {}
+		LEulerAnglesPropertyWrapper(const std::shared_ptr<pragma::util::EulerAnglesProperty> &v) : LSimplePropertyWrapper(v) {}
 		LEulerAnglesPropertyWrapper(const EulerAngles &col) : LSimplePropertyWrapper(col) {}
 		LEulerAnglesPropertyWrapper(float p, float y, float r) : LSimplePropertyWrapper(EulerAngles {p, y, r}) {}
 		LEulerAnglesPropertyWrapper(const std::string &str) : LSimplePropertyWrapper(EulerAngles {str}) {}
@@ -154,20 +154,20 @@ export {
 	using LEulerAnglesProperty = LEulerAnglesPropertyWrapper;
 
 	// Transform
-	class LTransformPropertyWrapper : public LSimplePropertyWrapper<util::TransformProperty, umath::Transform> {
+	class LTransformPropertyWrapper : public LSimplePropertyWrapper<pragma::util::TransformProperty, pragma::math::Transform> {
 	  public:
-		util::TransformProperty &operator*() { return GetProperty(); }
-		const util::TransformProperty &operator*() const { return const_cast<LTransformPropertyWrapper *>(this)->operator*(); }
-		util::TransformProperty *operator->() { return &GetProperty(); }
-		const util::TransformProperty *operator->() const { return const_cast<LTransformPropertyWrapper *>(this)->operator->(); }
+		pragma::util::TransformProperty &operator*() { return GetProperty(); }
+		const pragma::util::TransformProperty &operator*() const { return const_cast<LTransformPropertyWrapper *>(this)->operator*(); }
+		pragma::util::TransformProperty *operator->() { return &GetProperty(); }
+		const pragma::util::TransformProperty *operator->() const { return const_cast<LTransformPropertyWrapper *>(this)->operator->(); }
 
-		virtual util::TransformProperty &GetProperty() const override { return *static_cast<util::TransformProperty *>(prop.get()); }
+		virtual pragma::util::TransformProperty &GetProperty() const override { return *static_cast<pragma::util::TransformProperty *>(prop.get()); }
 
 		LTransformPropertyWrapper() : LSimplePropertyWrapper() {}
-		LTransformPropertyWrapper(const std::shared_ptr<util::TransformProperty> &v) : LSimplePropertyWrapper(v) {}
-		LTransformPropertyWrapper(const umath::Transform &col) : LSimplePropertyWrapper(col) {}
-		LTransformPropertyWrapper(const Vector3 &pos, const Quat &rot) : LSimplePropertyWrapper(umath::Transform {pos, rot}) {}
-		LTransformPropertyWrapper operator*(const umath::Transform &other)
+		LTransformPropertyWrapper(const std::shared_ptr<pragma::util::TransformProperty> &v) : LSimplePropertyWrapper(v) {}
+		LTransformPropertyWrapper(const pragma::math::Transform &col) : LSimplePropertyWrapper(col) {}
+		LTransformPropertyWrapper(const Vector3 &pos, const Quat &rot) : LSimplePropertyWrapper(pragma::math::Transform {pos, rot}) {}
+		LTransformPropertyWrapper operator*(const pragma::math::Transform &other)
 		{
 			GetProperty() *= other;
 			return *this;
@@ -180,20 +180,20 @@ export {
 	};
 	using LTransformProperty = LTransformPropertyWrapper;
 
-	class LScaledTransformPropertyWrapper : public LSimplePropertyWrapper<util::ScaledTransformProperty, umath::ScaledTransform> {
+	class LScaledTransformPropertyWrapper : public LSimplePropertyWrapper<pragma::util::ScaledTransformProperty, pragma::math::ScaledTransform> {
 	  public:
-		util::ScaledTransformProperty &operator*() { return GetProperty(); }
-		const util::ScaledTransformProperty &operator*() const { return const_cast<LScaledTransformPropertyWrapper *>(this)->operator*(); }
-		util::ScaledTransformProperty *operator->() { return &GetProperty(); }
-		const util::ScaledTransformProperty *operator->() const { return const_cast<LScaledTransformPropertyWrapper *>(this)->operator->(); }
+		pragma::util::ScaledTransformProperty &operator*() { return GetProperty(); }
+		const pragma::util::ScaledTransformProperty &operator*() const { return const_cast<LScaledTransformPropertyWrapper *>(this)->operator*(); }
+		pragma::util::ScaledTransformProperty *operator->() { return &GetProperty(); }
+		const pragma::util::ScaledTransformProperty *operator->() const { return const_cast<LScaledTransformPropertyWrapper *>(this)->operator->(); }
 
-		virtual util::ScaledTransformProperty &GetProperty() const override { return *static_cast<util::ScaledTransformProperty *>(prop.get()); }
+		virtual pragma::util::ScaledTransformProperty &GetProperty() const override { return *static_cast<pragma::util::ScaledTransformProperty *>(prop.get()); }
 
 		LScaledTransformPropertyWrapper() : LSimplePropertyWrapper() {}
-		LScaledTransformPropertyWrapper(const std::shared_ptr<util::ScaledTransformProperty> &v) : LSimplePropertyWrapper(v) {}
-		LScaledTransformPropertyWrapper(const umath::ScaledTransform &col) : LSimplePropertyWrapper(col) {}
-		LScaledTransformPropertyWrapper(const Vector3 &pos, const Quat &rot, const Vector3 &scale) : LSimplePropertyWrapper(umath::ScaledTransform {pos, rot, scale}) {}
-		LScaledTransformPropertyWrapper operator*(const umath::ScaledTransform &other)
+		LScaledTransformPropertyWrapper(const std::shared_ptr<pragma::util::ScaledTransformProperty> &v) : LSimplePropertyWrapper(v) {}
+		LScaledTransformPropertyWrapper(const pragma::math::ScaledTransform &col) : LSimplePropertyWrapper(col) {}
+		LScaledTransformPropertyWrapper(const Vector3 &pos, const Quat &rot, const Vector3 &scale) : LSimplePropertyWrapper(pragma::math::ScaledTransform {pos, rot, scale}) {}
+		LScaledTransformPropertyWrapper operator*(const pragma::math::ScaledTransform &other)
 		{
 			GetProperty() *= other;
 			return *this;
@@ -251,52 +251,52 @@ export {
 		}
 	};
 
-	class LVector2PropertyWrapper : public TLVectorPropertyWrapper<util::Vector2Property, Vector2> {
+	class LVector2PropertyWrapper : public TLVectorPropertyWrapper<pragma::util::Vector2Property, Vector2> {
 	  public:
-		LVector2PropertyWrapper() : TLVectorPropertyWrapper<util::Vector2Property, Vector2>() {}
-		LVector2PropertyWrapper(const Vector2 &v) : TLVectorPropertyWrapper<util::Vector2Property, Vector2>(v) {}
-		LVector2PropertyWrapper(float x, float y) : TLVectorPropertyWrapper<util::Vector2Property, Vector2>(Vector2 {x, y}) {}
-		LVector2PropertyWrapper(const std::shared_ptr<util::Vector2Property> &v) : TLVectorPropertyWrapper(v) {}
+		LVector2PropertyWrapper() : TLVectorPropertyWrapper<pragma::util::Vector2Property, Vector2>() {}
+		LVector2PropertyWrapper(const Vector2 &v) : TLVectorPropertyWrapper<pragma::util::Vector2Property, Vector2>(v) {}
+		LVector2PropertyWrapper(float x, float y) : TLVectorPropertyWrapper<pragma::util::Vector2Property, Vector2>(Vector2 {x, y}) {}
+		LVector2PropertyWrapper(const std::shared_ptr<pragma::util::Vector2Property> &v) : TLVectorPropertyWrapper(v) {}
 	};
 
-	class LVector2iPropertyWrapper : public TLVectorPropertyWrapper<util::Vector2iProperty, Vector2i> {
+	class LVector2iPropertyWrapper : public TLVectorPropertyWrapper<pragma::util::Vector2iProperty, Vector2i> {
 	  public:
-		LVector2iPropertyWrapper() : TLVectorPropertyWrapper<util::Vector2iProperty, Vector2i>() {}
-		LVector2iPropertyWrapper(const Vector2i &v) : TLVectorPropertyWrapper<util::Vector2iProperty, Vector2i>(v) {}
-		LVector2iPropertyWrapper(int32_t x, int32_t y) : TLVectorPropertyWrapper<util::Vector2iProperty, Vector2i>(Vector2i {x, y}) {}
-		LVector2iPropertyWrapper(const std::shared_ptr<util::Vector2iProperty> &v) : TLVectorPropertyWrapper(v) {}
+		LVector2iPropertyWrapper() : TLVectorPropertyWrapper<pragma::util::Vector2iProperty, Vector2i>() {}
+		LVector2iPropertyWrapper(const Vector2i &v) : TLVectorPropertyWrapper<pragma::util::Vector2iProperty, Vector2i>(v) {}
+		LVector2iPropertyWrapper(int32_t x, int32_t y) : TLVectorPropertyWrapper<pragma::util::Vector2iProperty, Vector2i>(Vector2i {x, y}) {}
+		LVector2iPropertyWrapper(const std::shared_ptr<pragma::util::Vector2iProperty> &v) : TLVectorPropertyWrapper(v) {}
 	};
 
-	class LVector3PropertyWrapper : public TLVectorPropertyWrapper<util::Vector3Property, Vector3> {
+	class LVector3PropertyWrapper : public TLVectorPropertyWrapper<pragma::util::Vector3Property, Vector3> {
 	  public:
-		LVector3PropertyWrapper() : TLVectorPropertyWrapper<util::Vector3Property, Vector3>() {}
-		LVector3PropertyWrapper(const Vector3 &v) : TLVectorPropertyWrapper<util::Vector3Property, Vector3>(v) {}
-		LVector3PropertyWrapper(float x, float y, float z) : TLVectorPropertyWrapper<util::Vector3Property, Vector3>(Vector3 {x, y, z}) {}
-		LVector3PropertyWrapper(const std::shared_ptr<util::Vector3Property> &v) : TLVectorPropertyWrapper(v) {}
+		LVector3PropertyWrapper() : TLVectorPropertyWrapper<pragma::util::Vector3Property, Vector3>() {}
+		LVector3PropertyWrapper(const Vector3 &v) : TLVectorPropertyWrapper<pragma::util::Vector3Property, Vector3>(v) {}
+		LVector3PropertyWrapper(float x, float y, float z) : TLVectorPropertyWrapper<pragma::util::Vector3Property, Vector3>(Vector3 {x, y, z}) {}
+		LVector3PropertyWrapper(const std::shared_ptr<pragma::util::Vector3Property> &v) : TLVectorPropertyWrapper(v) {}
 	};
 
-	class LVector3iPropertyWrapper : public TLVectorPropertyWrapper<util::Vector3iProperty, Vector3i> {
+	class LVector3iPropertyWrapper : public TLVectorPropertyWrapper<pragma::util::Vector3iProperty, Vector3i> {
 	  public:
-		LVector3iPropertyWrapper() : TLVectorPropertyWrapper<util::Vector3iProperty, Vector3i>() {}
-		LVector3iPropertyWrapper(const Vector3i &v) : TLVectorPropertyWrapper<util::Vector3iProperty, Vector3i>(v) {}
-		LVector3iPropertyWrapper(int32_t x, int32_t y, int32_t z) : TLVectorPropertyWrapper<util::Vector3iProperty, Vector3i>(Vector3i {x, y, z}) {}
-		LVector3iPropertyWrapper(const std::shared_ptr<util::Vector3iProperty> &v) : TLVectorPropertyWrapper(v) {}
+		LVector3iPropertyWrapper() : TLVectorPropertyWrapper<pragma::util::Vector3iProperty, Vector3i>() {}
+		LVector3iPropertyWrapper(const Vector3i &v) : TLVectorPropertyWrapper<pragma::util::Vector3iProperty, Vector3i>(v) {}
+		LVector3iPropertyWrapper(int32_t x, int32_t y, int32_t z) : TLVectorPropertyWrapper<pragma::util::Vector3iProperty, Vector3i>(Vector3i {x, y, z}) {}
+		LVector3iPropertyWrapper(const std::shared_ptr<pragma::util::Vector3iProperty> &v) : TLVectorPropertyWrapper(v) {}
 	};
 
-	class LVector4PropertyWrapper : public TLVectorPropertyWrapper<util::Vector4Property, Vector4> {
+	class LVector4PropertyWrapper : public TLVectorPropertyWrapper<pragma::util::Vector4Property, Vector4> {
 	  public:
-		LVector4PropertyWrapper() : TLVectorPropertyWrapper<util::Vector4Property, Vector4>() {}
-		LVector4PropertyWrapper(const Vector4 &v) : TLVectorPropertyWrapper<util::Vector4Property, Vector4>(v) {}
-		LVector4PropertyWrapper(float x, float y, float z, float w) : TLVectorPropertyWrapper<util::Vector4Property, Vector4>(Vector4 {x, y, z, w}) {}
-		LVector4PropertyWrapper(const std::shared_ptr<util::Vector4Property> &v) : TLVectorPropertyWrapper(v) {}
+		LVector4PropertyWrapper() : TLVectorPropertyWrapper<pragma::util::Vector4Property, Vector4>() {}
+		LVector4PropertyWrapper(const Vector4 &v) : TLVectorPropertyWrapper<pragma::util::Vector4Property, Vector4>(v) {}
+		LVector4PropertyWrapper(float x, float y, float z, float w) : TLVectorPropertyWrapper<pragma::util::Vector4Property, Vector4>(Vector4 {x, y, z, w}) {}
+		LVector4PropertyWrapper(const std::shared_ptr<pragma::util::Vector4Property> &v) : TLVectorPropertyWrapper(v) {}
 	};
 
-	class LVector4iPropertyWrapper : public TLVectorPropertyWrapper<util::Vector4iProperty, Vector4i> {
+	class LVector4iPropertyWrapper : public TLVectorPropertyWrapper<pragma::util::Vector4iProperty, Vector4i> {
 	  public:
-		LVector4iPropertyWrapper() : TLVectorPropertyWrapper<util::Vector4iProperty, Vector4i>() {}
-		LVector4iPropertyWrapper(const Vector4i &v) : TLVectorPropertyWrapper<util::Vector4iProperty, Vector4i>(v) {}
-		LVector4iPropertyWrapper(int32_t x, int32_t y, int32_t z, int32_t w) : TLVectorPropertyWrapper<util::Vector4iProperty, Vector4i>(Vector4i {x, y, z, w}) {}
-		LVector4iPropertyWrapper(const std::shared_ptr<util::Vector4iProperty> &v) : TLVectorPropertyWrapper(v) {}
+		LVector4iPropertyWrapper() : TLVectorPropertyWrapper<pragma::util::Vector4iProperty, Vector4i>() {}
+		LVector4iPropertyWrapper(const Vector4i &v) : TLVectorPropertyWrapper<pragma::util::Vector4iProperty, Vector4i>(v) {}
+		LVector4iPropertyWrapper(int32_t x, int32_t y, int32_t z, int32_t w) : TLVectorPropertyWrapper<pragma::util::Vector4iProperty, Vector4i>(Vector4i {x, y, z, w}) {}
+		LVector4iPropertyWrapper(const std::shared_ptr<pragma::util::Vector4iProperty> &v) : TLVectorPropertyWrapper(v) {}
 	};
 
 #define DEFINE_LUA_VECTOR_PROPERTY(TYPE, UNDERLYING_PROP_TYPE, UNDERLYING_TYPE)                                                                                                                                                                                                                  \
@@ -317,20 +317,20 @@ export {
 	DEFINE_LUA_VECTOR_PROPERTY(Vector4i, Vector4i, int32_t);
 
 	// Quaternion
-	class LQuatPropertyWrapper : public LSimplePropertyWrapper<util::QuatProperty, Quat> {
+	class LQuatPropertyWrapper : public LSimplePropertyWrapper<pragma::util::QuatProperty, Quat> {
 	  public:
-		util::QuatProperty &operator*() { return GetProperty(); }
-		const util::QuatProperty &operator*() const { return const_cast<LQuatPropertyWrapper *>(this)->operator*(); }
-		util::QuatProperty *operator->() { return &GetProperty(); }
-		const util::QuatProperty *operator->() const { return const_cast<LQuatPropertyWrapper *>(this)->operator->(); }
+		pragma::util::QuatProperty &operator*() { return GetProperty(); }
+		const pragma::util::QuatProperty &operator*() const { return const_cast<LQuatPropertyWrapper *>(this)->operator*(); }
+		pragma::util::QuatProperty *operator->() { return &GetProperty(); }
+		const pragma::util::QuatProperty *operator->() const { return const_cast<LQuatPropertyWrapper *>(this)->operator->(); }
 
-		virtual util::QuatProperty &GetProperty() const override { return *static_cast<util::QuatProperty *>(this->prop.get()); }
+		virtual pragma::util::QuatProperty &GetProperty() const override { return *static_cast<pragma::util::QuatProperty *>(this->prop.get()); }
 
-		LQuatPropertyWrapper() : LSimplePropertyWrapper<util::QuatProperty, Quat>(uquat::identity()) {}
-		LQuatPropertyWrapper(const Quat &v) : LSimplePropertyWrapper<util::QuatProperty, Quat>(v) {}
-		LQuatPropertyWrapper(float w, float x, float y, float z) : LSimplePropertyWrapper<util::QuatProperty, Quat>(Quat {w, x, y, z}) {}
-		LQuatPropertyWrapper(const std::string &str) : LSimplePropertyWrapper<util::QuatProperty, Quat>(uquat::create(str)) {}
-		LQuatPropertyWrapper(const std::shared_ptr<util::QuatProperty> &v) : LSimplePropertyWrapper(v) {}
+		LQuatPropertyWrapper() : LSimplePropertyWrapper<pragma::util::QuatProperty, Quat>(uquat::identity()) {}
+		LQuatPropertyWrapper(const Quat &v) : LSimplePropertyWrapper<pragma::util::QuatProperty, Quat>(v) {}
+		LQuatPropertyWrapper(float w, float x, float y, float z) : LSimplePropertyWrapper<pragma::util::QuatProperty, Quat>(Quat {w, x, y, z}) {}
+		LQuatPropertyWrapper(const std::string &str) : LSimplePropertyWrapper<pragma::util::QuatProperty, Quat>(uquat::create(str)) {}
+		LQuatPropertyWrapper(const std::shared_ptr<pragma::util::QuatProperty> &v) : LSimplePropertyWrapper(v) {}
 		LQuatPropertyWrapper operator/(float f)
 		{
 			GetProperty() /= f;
@@ -355,18 +355,18 @@ export {
 	using LQuatProperty = LQuatPropertyWrapper;
 
 	// String
-	class LStringPropertyWrapper : public LSimplePropertyWrapper<util::StringProperty, std::string> {
+	class LStringPropertyWrapper : public LSimplePropertyWrapper<pragma::util::StringProperty, std::string> {
 	  public:
-		util::StringProperty &operator*() { return GetProperty(); }
-		const util::StringProperty &operator*() const { return const_cast<LStringPropertyWrapper *>(this)->operator*(); }
-		util::StringProperty *operator->() { return &GetProperty(); }
-		const util::StringProperty *operator->() const { return const_cast<LStringPropertyWrapper *>(this)->operator->(); }
+		pragma::util::StringProperty &operator*() { return GetProperty(); }
+		const pragma::util::StringProperty &operator*() const { return const_cast<LStringPropertyWrapper *>(this)->operator*(); }
+		pragma::util::StringProperty *operator->() { return &GetProperty(); }
+		const pragma::util::StringProperty *operator->() const { return const_cast<LStringPropertyWrapper *>(this)->operator->(); }
 
-		virtual util::StringProperty &GetProperty() const override { return *static_cast<util::StringProperty *>(this->prop.get()); }
+		virtual pragma::util::StringProperty &GetProperty() const override { return *static_cast<pragma::util::StringProperty *>(this->prop.get()); }
 
-		LStringPropertyWrapper() : LSimplePropertyWrapper<util::StringProperty, std::string>() {}
-		LStringPropertyWrapper(const std::string &v) : LSimplePropertyWrapper<util::StringProperty, std::string>(v) {}
-		LStringPropertyWrapper(const std::shared_ptr<util::StringProperty> &v) : LSimplePropertyWrapper<util::StringProperty, std::string>(v) {}
+		LStringPropertyWrapper() : LSimplePropertyWrapper<pragma::util::StringProperty, std::string>() {}
+		LStringPropertyWrapper(const std::string &v) : LSimplePropertyWrapper<pragma::util::StringProperty, std::string>(v) {}
+		LStringPropertyWrapper(const std::shared_ptr<pragma::util::StringProperty> &v) : LSimplePropertyWrapper<pragma::util::StringProperty, std::string>(v) {}
 	};
 	using LStringProperty = LStringPropertyWrapper;
 
@@ -385,13 +385,13 @@ export {
 		TLMatrixPropertyWrapper(const T &v) : LSimplePropertyWrapper<TProperty, T>(v) {}
 		TLMatrixPropertyWrapper(const std::shared_ptr<TProperty> &v) : LSimplePropertyWrapper<TProperty, T>(v) {}
 	};
-	using LMatrix2PropertyWrapper = TLMatrixPropertyWrapper<util::Matrix2Property, Mat2>;
-	using LMatrix2x3PropertyWrapper = TLMatrixPropertyWrapper<util::Matrix2x3Property, Mat2x3>;
-	using LMatrix3x2PropertyWrapper = TLMatrixPropertyWrapper<util::Matrix3x2Property, Mat3x2>;
-	using LMatrix3PropertyWrapper = TLMatrixPropertyWrapper<util::Matrix3Property, Mat3>;
-	using LMatrix3x4PropertyWrapper = TLMatrixPropertyWrapper<util::Matrix3x4Property, Mat3x4>;
-	using LMatrix4x3PropertyWrapper = TLMatrixPropertyWrapper<util::Matrix4x3Property, Mat4x3>;
-	using LMatrix4PropertyWrapper = TLMatrixPropertyWrapper<util::Matrix4Property, Mat4>;
+	using LMatrix2PropertyWrapper = TLMatrixPropertyWrapper<pragma::util::Matrix2Property, Mat2>;
+	using LMatrix2x3PropertyWrapper = TLMatrixPropertyWrapper<pragma::util::Matrix2x3Property, Mat2x3>;
+	using LMatrix3x2PropertyWrapper = TLMatrixPropertyWrapper<pragma::util::Matrix3x2Property, Mat3x2>;
+	using LMatrix3PropertyWrapper = TLMatrixPropertyWrapper<pragma::util::Matrix3Property, Mat3>;
+	using LMatrix3x4PropertyWrapper = TLMatrixPropertyWrapper<pragma::util::Matrix3x4Property, Mat3x4>;
+	using LMatrix4x3PropertyWrapper = TLMatrixPropertyWrapper<pragma::util::Matrix4x3Property, Mat4x3>;
+	using LMatrix4PropertyWrapper = TLMatrixPropertyWrapper<pragma::util::Matrix4Property, Mat4>;
 	using LMatrix2Property = LMatrix2PropertyWrapper;
 	using LMatrix2x3Property = LMatrix2x3PropertyWrapper;
 	using LMatrix3x2Property = LMatrix3x2PropertyWrapper;
@@ -404,42 +404,42 @@ export {
 		namespace Property {
 			DLLNETWORK void register_classes(Lua::Interface &l);
 
-			DLLNETWORK void push(lua::State *l, ::util::Int8Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::UInt8Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Int16Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::UInt16Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Int32Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::UInt32Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Int64Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::UInt64Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::FloatProperty &prop);
-			DLLNETWORK void push(lua::State *l, ::util::DoubleProperty &prop);
-			DLLNETWORK void push(lua::State *l, ::util::LongDoubleProperty &prop);
-			DLLNETWORK void push(lua::State *l, ::util::BoolProperty &prop);
-			DLLNETWORK void push(lua::State *l, ::util::ColorProperty &prop);
-			DLLNETWORK void push(lua::State *l, ::util::EulerAnglesProperty &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Vector2Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Vector2iProperty &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Vector3Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Vector3iProperty &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Vector4Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Vector4iProperty &prop);
-			DLLNETWORK void push(lua::State *l, ::util::QuatProperty &prop);
-			DLLNETWORK void push(lua::State *l, ::util::StringProperty &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Int8Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::UInt8Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Int16Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::UInt16Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Int32Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::UInt32Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Int64Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::UInt64Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::FloatProperty &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::DoubleProperty &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::LongDoubleProperty &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::BoolProperty &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::ColorProperty &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::EulerAnglesProperty &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Vector2Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Vector2iProperty &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Vector3Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Vector3iProperty &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Vector4Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Vector4iProperty &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::QuatProperty &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::StringProperty &prop);
 			DLLNETWORK void push(lua::State *l, pragma::EntityProperty &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Matrix2Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Matrix2x3Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Matrix3x2Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Matrix3Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Matrix3x4Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Matrix4x3Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::Matrix4Property &prop);
-			DLLNETWORK void push(lua::State *l, ::util::BaseProperty &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Matrix2Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Matrix2x3Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Matrix3x2Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Matrix3Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Matrix3x4Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Matrix4x3Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::Matrix4Property &prop);
+			DLLNETWORK void push(lua::State *l, pragma::util::BaseProperty &prop);
 
 			template<typename TEnum>
-			void push(lua::State *l, ::util::TEnumProperty<TEnum> &prop)
+			void push(lua::State *l, pragma::util::TEnumProperty<TEnum> &prop)
 			{
-				Lua::Push<LGenericIntPropertyWrapper>(l, LGenericIntPropertyWrapper(std::static_pointer_cast<::util::TEnumProperty<TEnum>>(prop.shared_from_this())));
+				Lua::Push<LGenericIntPropertyWrapper>(l, LGenericIntPropertyWrapper(std::static_pointer_cast<pragma::util::TEnumProperty<TEnum>>(prop.shared_from_this())));
 			}
 			template<class TProperty, typename T>
 			void add_callback(lua::State *l, TProperty &prop, const luabind::object &oCallback)

@@ -18,7 +18,7 @@ void SSoundEmitterComponent::SendData(NetPacket &packet, networking::ClientRecip
 {
 	auto &sounds = m_sounds;
 	auto offset = packet->GetOffset();
-	auto numSounds = umath::min(sounds.size(), static_cast<size_t>(std::numeric_limits<uint8_t>::max()));
+	auto numSounds = pragma::math::min(sounds.size(), static_cast<size_t>(std::numeric_limits<uint8_t>::max()));
 	packet->Write<uint8_t>(numSounds);
 	auto numWritten = decltype(numSounds) {0};
 	for(auto &snd : sounds) {

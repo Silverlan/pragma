@@ -47,12 +47,12 @@ std::shared_ptr<CPUTimer> CPUTimer::Create() { return std::shared_ptr<CPUTimer> 
 bool CPUTimer::Start()
 {
 	Timer::Start();
-	m_startTime = util::Clock::now();
+	m_startTime = pragma::util::Clock::now();
 	return true;
 }
 bool CPUTimer::Stop()
 {
-	auto t = util::Clock::now();
+	auto t = pragma::util::Clock::now();
 	m_duration += (t - m_startTime);
 	return true;
 }

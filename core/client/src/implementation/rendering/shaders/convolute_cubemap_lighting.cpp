@@ -56,7 +56,7 @@ std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubem
 	for(uint8_t layerId = 0u; layerId < 6u; ++layerId) {
 		for(uint32_t i = 0u; i < numVerts; i += 3) {
 			auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
-			util::ScopeGuard sgCmd {[this]() { GetContext().FlushSetupCommandBuffer(); }};
+			pragma::util::ScopeGuard sgCmd {[this]() { GetContext().FlushSetupCommandBuffer(); }};
 			prosper::util::ImageSubresourceRange range {};
 			range.baseArrayLayer = layerId;
 			range.layerCount = 1u;

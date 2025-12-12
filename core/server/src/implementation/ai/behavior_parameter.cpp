@@ -11,14 +11,14 @@ import :ai.schedule.behavior_parameter;
 using namespace pragma;
 
 ai::BehaviorParameter::Type ai::BehaviorParameter::GetType() const { return m_type; }
-ai::BehaviorParameter::BehaviorParameter(bool b) : m_type(Type::Bool), m_data(::util::make_shared<decltype(b)>(b)) {}
-ai::BehaviorParameter::BehaviorParameter(int32_t i) : m_type(Type::Int), m_data(::util::make_shared<decltype(i)>(i)) {}
-ai::BehaviorParameter::BehaviorParameter(float f) : m_type(Type::Float), m_data(::util::make_shared<decltype(f)>(f)) {}
-ai::BehaviorParameter::BehaviorParameter(const std::string &s) : m_type(Type::String), m_data(::util::make_shared<std::string>(s)) {}
-ai::BehaviorParameter::BehaviorParameter(const pragma::ecs::BaseEntity *ent) : m_type(Type::Entity), m_data(::util::make_shared<EntityHandle>((ent != nullptr) ? const_cast<pragma::ecs::BaseEntity *>(ent)->GetHandle() : EntityHandle {})) {}
-ai::BehaviorParameter::BehaviorParameter(const Vector3 &vec) : m_type(Type::Vector), m_data(::util::make_shared<Vector3>(vec)) {}
-ai::BehaviorParameter::BehaviorParameter(const Quat &rot) : m_type(Type::Quaternion), m_data(::util::make_shared<Quat>(rot)) {}
-ai::BehaviorParameter::BehaviorParameter(const EulerAngles &ang) : m_type(Type::EulerAngles), m_data(::util::make_shared<EulerAngles>(ang)) {}
+ai::BehaviorParameter::BehaviorParameter(bool b) : m_type(Type::Bool), m_data(pragma::util::make_shared<decltype(b)>(b)) {}
+ai::BehaviorParameter::BehaviorParameter(int32_t i) : m_type(Type::Int), m_data(pragma::util::make_shared<decltype(i)>(i)) {}
+ai::BehaviorParameter::BehaviorParameter(float f) : m_type(Type::Float), m_data(pragma::util::make_shared<decltype(f)>(f)) {}
+ai::BehaviorParameter::BehaviorParameter(const std::string &s) : m_type(Type::String), m_data(pragma::util::make_shared<std::string>(s)) {}
+ai::BehaviorParameter::BehaviorParameter(const pragma::ecs::BaseEntity *ent) : m_type(Type::Entity), m_data(pragma::util::make_shared<EntityHandle>((ent != nullptr) ? const_cast<pragma::ecs::BaseEntity *>(ent)->GetHandle() : EntityHandle {})) {}
+ai::BehaviorParameter::BehaviorParameter(const Vector3 &vec) : m_type(Type::Vector), m_data(pragma::util::make_shared<Vector3>(vec)) {}
+ai::BehaviorParameter::BehaviorParameter(const Quat &rot) : m_type(Type::Quaternion), m_data(pragma::util::make_shared<Quat>(rot)) {}
+ai::BehaviorParameter::BehaviorParameter(const EulerAngles &ang) : m_type(Type::EulerAngles), m_data(pragma::util::make_shared<EulerAngles>(ang)) {}
 ai::BehaviorParameter *ai::BehaviorParameter::Copy() const
 {
 	switch(m_type) {

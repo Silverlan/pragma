@@ -13,7 +13,7 @@ static std::vector<std::string> &get_extensions()
 	static std::vector<std::string> exts;
 	if(exts.empty()) {
 		exts = {"cache", "txt", "gls", Lua::FILE_EXTENSION_PRECOMPILED};
-		for(uint32_t i = 0; i < umath::to_integral(pragma::asset::Type::Count); ++i) {
+		for(uint32_t i = 0; i < pragma::math::to_integral(pragma::asset::Type::Count); ++i) {
 			auto type = static_cast<pragma::asset::Type>(i);
 			auto typeExts = pragma::asset::get_supported_extensions(type);
 			exts.reserve(exts.size() + typeExts.size());
@@ -29,8 +29,8 @@ static std::vector<std::string> &get_folders()
 	static std::vector<std::string> folders;
 	if(folders.empty()) {
 		folders = {"cache", "shaders", "scripts", "data", Lua::SCRIPT_DIRECTORY};
-		folders.reserve(folders.size() + umath::to_integral(pragma::asset::Type::Count));
-		for(uint32_t i = 0; i < umath::to_integral(pragma::asset::Type::Count); ++i) {
+		folders.reserve(folders.size() + pragma::math::to_integral(pragma::asset::Type::Count));
+		for(uint32_t i = 0; i < pragma::math::to_integral(pragma::asset::Type::Count); ++i) {
 			auto type = static_cast<pragma::asset::Type>(i);
 			auto *rootDir = pragma::asset::get_asset_root_directory(type);
 			folders.push_back(rootDir);

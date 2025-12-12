@@ -13,9 +13,9 @@ export {
 		class BaseEntityComponent;
 	};
 	struct DLLNETWORK BaseEntityComponentHandleWrapper {
-		BaseEntityComponentHandleWrapper(const util::WeakHandle<pragma::BaseEntityComponent> &wh) : handle(wh) {}
+		BaseEntityComponentHandleWrapper(const pragma::util::WeakHandle<pragma::BaseEntityComponent> &wh) : handle(wh) {}
 		BaseEntityComponentHandleWrapper() = default;
-		util::WeakHandle<pragma::BaseEntityComponent> handle = {};
+		pragma::util::WeakHandle<pragma::BaseEntityComponent> handle = {};
 		bool expired() const { return handle.expired(); }
 
 		pragma::BaseEntityComponent *operator->() { return get(); }

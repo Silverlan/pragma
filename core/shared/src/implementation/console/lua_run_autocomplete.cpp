@@ -29,7 +29,7 @@ static Luaclass_rep &access_class_rep(luabind::detail::class_rep &rep) { return 
 static void check_autocomplete(const std::string &arg, std::vector<std::string> &autoCompleteOptions, const std::string_view &candidate)
 {
 	auto caseSensitive = true;
-	if(!ustring::compare(candidate.data(), arg.c_str(), caseSensitive, arg.length()))
+	if(!pragma::string::compare(candidate.data(), arg.c_str(), caseSensitive, arg.length()))
 		return;
 	autoCompleteOptions.push_back(std::string {candidate});
 }
@@ -190,7 +190,7 @@ void pragma::console::commands::lua_run_autocomplete(lua::State *l, const std::s
 					if(strKey.empty())
 						continue;
 					check_autocomplete(lastSegment.first, autoCompleteOptions, strKey);
-					//if (ustring::compare(strKey.c_str(), lastSegment.first.c_str(), false, lastSegment.first.length())) {
+					//if (pragma::string::compare(strKey.c_str(), lastSegment.first.c_str(), false, lastSegment.first.length())) {
 					//	autoCompleteOptions.push_back(arg.substr(0, lastSegment.second) +strKey);
 					//}
 				}
@@ -208,7 +208,7 @@ void pragma::console::commands::lua_run_autocomplete(lua::State *l, const std::s
 			auto strKey = luabind::object_cast_nothrow<std::string>(it.key(), std::string {});
 			if (strKey.empty())
 				continue;
-			if (ustring::compare(strKey.c_str(), lastSegment.first.c_str(), false, lastSegment.first.length())) {
+			if (pragma::string::compare(strKey.c_str(), lastSegment.first.c_str(), false, lastSegment.first.length())) {
 				autoCompleteOptions.push_back(arg.substr(0, lastSegment.second) +strKey);
 			}
 		}

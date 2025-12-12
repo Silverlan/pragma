@@ -52,9 +52,9 @@ EulerAngles Lua::Quaternion::ToEulerAngles(lua::State *l, Quat &q, uint32_t rota
 		glm::gtx::extractEulerAngleZXY(m, ang.r, ang.p, ang.y);
 		break;
 	}
-	ang.p = umath::rad_to_deg(ang.p);
-	ang.y = umath::rad_to_deg(ang.y);
-	ang.r = umath::rad_to_deg(ang.r);
+	ang.p = pragma::math::rad_to_deg(ang.p);
+	ang.y = pragma::math::rad_to_deg(ang.y);
+	ang.r = pragma::math::rad_to_deg(ang.r);
 	return ang;
 }
 

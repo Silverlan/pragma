@@ -8,7 +8,7 @@ export module pragma.shared:util.steam.vdf;
 
 export import pragma.util;
 
-export namespace util::steam::vdf {
+export namespace pragma::util::steam::vdf {
 	class DataBlock {
 	  public:
 		DataBlock() {}
@@ -22,6 +22,6 @@ export namespace util::steam::vdf {
 		DataBlock dataBlock = {};
 	};
 
-	DLLNETWORK util::MarkupFile::ResultCode read_vdf_block(util::MarkupFile &mf, util::steam::vdf::DataBlock &block, uint32_t depth = 0);
+	DLLNETWORK pragma::util::MarkupFile::ResultCode read_vdf_block(pragma::util::MarkupFile &mf, pragma::util::steam::vdf::DataBlock &block, uint32_t depth = 0);
 	DLLNETWORK bool get_external_steam_locations(const std::string &steamRootPath, std::vector<std::string> &outExtLocations);
 };

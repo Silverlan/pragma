@@ -33,5 +33,5 @@ void ai::TaskSelectorRandomShuffle::Reset(uint32_t taskCount)
 	m_tasks.resize(taskCount);
 	for(auto i = decltype(taskCount) {0}; i < taskCount; ++i)
 		m_tasks[i] = i;
-	std::shuffle(m_tasks.begin(), m_tasks.end(), std::default_random_engine(util::clock::to_int(util::clock::get_duration_since_start())));
+	std::shuffle(m_tasks.begin(), m_tasks.end(), std::default_random_engine(pragma::util::clock::to_int(pragma::util::clock::get_duration_since_start())));
 }

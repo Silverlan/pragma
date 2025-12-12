@@ -16,7 +16,7 @@ pragma::audio::SALSoundBase *pragma::audio::SALSound::GetBase(ALSound *snd) { re
 
 #pragma warning(disable : 4056)
 pragma::audio::SALSound::SALSound(pragma::NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, pragma::audio::ALCreateFlags createFlags)
-    : ALSound(nw), SALSoundBase(umath::is_flag_set(createFlags, pragma::audio::ALCreateFlags::DontTransmit) == false), m_soundName {soundName}, m_createFlags {createFlags}
+    : ALSound(nw), SALSoundBase(pragma::math::is_flag_set(createFlags, pragma::audio::ALCreateFlags::DontTransmit) == false), m_soundName {soundName}, m_createFlags {createFlags}
 {
 	m_index = idx;
 	m_duration = duration;
@@ -41,7 +41,7 @@ void pragma::audio::SALSound::SendEvent(NetEvent evId, const std::function<void(
 	if(IsShared() == false)
 		return;
 	NetPacket p;
-	p->Write<uint8_t>(umath::to_integral(evId));
+	p->Write<uint8_t>(pragma::math::to_integral(evId));
 	p->Write<unsigned int>(this->GetIndex());
 	if(write != nullptr)
 		write(p);
@@ -56,7 +56,7 @@ void pragma::audio::SALSound::SetState(ALState state)
 	auto old = GetState();
 	if(state != old) {
 		CallCallbacks<void, ALState, ALState>("OnStateChanged", old, state);
-		CallLuaCallbacks<void, int32_t, int32_t>("OnStateChanged", umath::to_integral(old), umath::to_integral(state));
+		CallLuaCallbacks<void, int32_t, int32_t>("OnStateChanged", pragma::math::to_integral(old), pragma::math::to_integral(state));
 	}
 	ALSoundBase::SetState(state);
 }

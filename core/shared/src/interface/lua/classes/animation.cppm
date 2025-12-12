@@ -74,8 +74,8 @@ export namespace Lua {
 		DLLNETWORK void GetLocalBoneTransform(lua::State *, ::Frame &frame, pragma::animation::Skeleton &skeleton, uint32_t boneId);
 		DLLNETWORK void GetBoneCount(lua::State *, ::Frame &frame);
 		DLLNETWORK void SetBoneCount(lua::State *, ::Frame &frame, uint32_t boneCount);
-		DLLNETWORK void SetBonePose(lua::State *, ::Frame &frame, uint32_t boneId, const umath::ScaledTransform &pose);
-		DLLNETWORK void SetBonePose(lua::State *, ::Frame &frame, uint32_t boneId, const umath::Transform &pose);
+		DLLNETWORK void SetBonePose(lua::State *, ::Frame &frame, uint32_t boneId, const pragma::math::ScaledTransform &pose);
+		DLLNETWORK void SetBonePose(lua::State *, ::Frame &frame, uint32_t boneId, const pragma::math::Transform &pose);
 		DLLNETWORK void GetBonePose(lua::State *, ::Frame &frame, uint32_t boneId);
 	};
 	namespace VertexAnimation {

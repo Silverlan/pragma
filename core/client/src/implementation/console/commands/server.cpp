@@ -72,14 +72,14 @@ void CMD_connect(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, s
 		auto &address = argv[0];
 		std::string ip;
 		std::string port;
-		ustring::remove_whitespace(address);
+		pragma::string::remove_whitespace(address);
 		if(!address.empty() && address[0] == '[') // IPv6
 		{
 			auto pos = address.find_first_of(']');
-			if(pos != ustring::NOT_FOUND) {
+			if(pos != pragma::string::NOT_FOUND) {
 				ip = address.substr(1, pos - 1);
 				auto posPort = address.find_first_of(':', pos + 1);
-				if(posPort != ustring::NOT_FOUND)
+				if(posPort != pragma::string::NOT_FOUND)
 					port = address.substr(posPort + 1, address.length());
 			}
 			else
@@ -87,13 +87,13 @@ void CMD_connect(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, s
 		}
 		else if(address.find('.') == std::string::npos) // SteamId
 		{
-			auto steamId = util::to_uint64(address);
+			auto steamId = pragma::util::to_uint64(address);
 			pragma::get_cengine()->Connect(steamId);
 			return;
 		}
 		else {
 			auto posPort = address.find_first_of(':');
-			if(posPort != ustring::NOT_FOUND) {
+			if(posPort != pragma::string::NOT_FOUND) {
 				auto posIpv6 = address.find_last_of(':');
 				if(posIpv6 != posPort) // IPv6
 				{
@@ -148,17 +148,17 @@ void CMD_cl_debug_netmessages(pragma::NetworkState *state, pragma::BasePlayerCom
 		return;
 	}
 	if(argv.size() > 0) {
-		auto numBacklog = ustring::to_int(argv.front());
+		auto numBacklog = pragma::string::to_int(argv.front());
 		cl->SetMemoryCount(numBacklog);
 		Con::cout << "Debug backlog has been set to " << numBacklog << Con::endl;
 		return;
 	}
 	auto *svMap = pragma::networking::get_server_message_map();
-	util::StringMap<uint32_t> *svMsgs;
+	pragma::util::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 
 	auto *clMap = pragma::networking::get_client_message_map();
-	util::StringMap<uint32_t> *clMsgs;
+	pragma::util::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 
 	cl->DebugPrint(*clMsgs, *svMsgs);

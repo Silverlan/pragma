@@ -19,19 +19,19 @@ void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &com
 {
 	using T = BaseTransformComponent;
 
-	auto poseMetaData = ::util::make_shared<ents::PoseTypeMetaData>();
+	auto poseMetaData = pragma::util::make_shared<ents::PoseTypeMetaData>();
 	poseMetaData->posProperty = "position";
 	poseMetaData->rotProperty = "rotation";
 	poseMetaData->scaleProperty = "scale";
 
-	using TPose = umath::ScaledTransform;
+	using TPose = pragma::math::ScaledTransform;
 	constexpr auto *posePathName = "pose";
 	auto memberInfoPose = create_component_member_info<T, TPose, static_cast<void (T::*)(const TPose &)>(&T::SetPose), static_cast<const TPose &(T::*)() const>(&T::GetPose)>(posePathName, TPose {});
 	memberInfoPose.SetFlag(pragma::ComponentMemberFlags::HideInInterface);
 	memberInfoPose.AddTypeMetaData(poseMetaData);
 	registerMember(std::move(memberInfoPose));
 
-	auto poseComponentMetaData = ::util::make_shared<ents::PoseComponentTypeMetaData>();
+	auto poseComponentMetaData = pragma::util::make_shared<ents::PoseComponentTypeMetaData>();
 	poseComponentMetaData->poseProperty = posePathName;
 
 	using TPosition = Vector3;
@@ -60,28 +60,28 @@ void BaseTransformComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	m_netEvSetScale = SetupNetEvent("set_scale");
 
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &mdl = static_cast<CEOnModelChanged &>(evData.get()).model;
 		if(mdl.get() == nullptr) {
 			SetEyeOffset({});
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		}
 		SetEyeOffset(mdl.get()->GetEyeOffset());
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		/*if(ustring::compare(kvData.key,"origin",false))
+		/*if(pragma::string::compare(kvData.key,"origin",false))
 			SetPosition(uvec::create(kvData.value));
 		else */
-		if(ustring::compare<std::string>(kvData.key, "angles", false)) {
+		if(pragma::string::compare<std::string>(kvData.key, "angles", false)) {
 			EulerAngles ang;
-			ustring::string_to_array<float>(kvData.value, &ang.p, ustring::cstring_to_number<float>, 3);
+			pragma::string::string_to_array<float>(kvData.value, &ang.p, pragma::string::cstring_to_number<float>, 3);
 			SetAngles(ang);
 		}
-		else if(ustring::compare<std::string>(kvData.key, "scale", false)) {
+		else if(pragma::string::compare<std::string>(kvData.key, "scale", false)) {
 			Vector3 scale {1.f, 1.f, 1.f};
-			auto n = ustring::string_to_array<float>(kvData.value, &scale.x, ustring::cstring_to_number<float>, 3);
+			auto n = pragma::string::string_to_array<float>(kvData.value, &scale.x, pragma::string::cstring_to_number<float>, 3);
 			if(n == 1) {
 				scale.y = scale.x;
 				scale.z = scale.x;
@@ -89,42 +89,42 @@ void BaseTransformComponent::Initialize()
 			SetScale(scale);
 		}
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 }
-void BaseTransformComponent::Teleport(const umath::Transform &targetPose)
+void BaseTransformComponent::Teleport(const pragma::math::Transform &targetPose)
 {
-	umath::Transform curPose = GetPose();
+	pragma::math::Transform curPose = GetPose();
 	auto deltaPose = targetPose * curPose.GetInverse();
 	CETeleport evData {curPose, targetPose, deltaPose};
-	if(BroadcastEvent(baseTransformComponent::EVENT_ON_TELEPORT, evData) == util::EventReply::Handled)
+	if(BroadcastEvent(baseTransformComponent::EVENT_ON_TELEPORT, evData) == pragma::util::EventReply::Handled)
 		return;
 	SetPose(targetPose);
 }
 void BaseTransformComponent::OnPoseChanged(TransformChangeFlags changeFlags, bool updatePhysics)
 {
 	auto &ent = GetEntity();
-	if(umath::is_flag_set(changeFlags, TransformChangeFlags::PositionChanged))
+	if(pragma::math::is_flag_set(changeFlags, TransformChangeFlags::PositionChanged))
 		ent.SetStateFlag(pragma::ecs::BaseEntity::StateFlags::PositionChanged);
-	if(umath::is_flag_set(changeFlags, TransformChangeFlags::RotationChanged))
+	if(pragma::math::is_flag_set(changeFlags, TransformChangeFlags::RotationChanged))
 		ent.SetStateFlag(pragma::ecs::BaseEntity::StateFlags::RotationChanged);
 	m_tLastMoved = ent.GetNetworkState()->GetGameState()->CurTime();
 	if(updatePhysics) {
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		auto *pPhys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 		if(pPhys) {
-			if(umath::is_flag_set(changeFlags, TransformChangeFlags::PositionChanged) && umath::is_flag_set(pPhysComponent->GetStateFlags(), BasePhysicsComponent::StateFlags::ApplyingPhysicsPosition) == false)
+			if(pragma::math::is_flag_set(changeFlags, TransformChangeFlags::PositionChanged) && pragma::math::is_flag_set(pPhysComponent->GetStateFlags(), BasePhysicsComponent::StateFlags::ApplyingPhysicsPosition) == false)
 				pPhys->SetPosition(GetPosition());
-			if(umath::is_flag_set(changeFlags, TransformChangeFlags::RotationChanged) && umath::is_flag_set(pPhysComponent->GetStateFlags(), BasePhysicsComponent::StateFlags::ApplyingPhysicsRotation) == false)
+			if(pragma::math::is_flag_set(changeFlags, TransformChangeFlags::RotationChanged) && pragma::math::is_flag_set(pPhysComponent->GetStateFlags(), BasePhysicsComponent::StateFlags::ApplyingPhysicsRotation) == false)
 				pPhys->SetOrientation(GetRotation());
 		}
 	}
 	InvokeEventCallbacks(baseTransformComponent::EVENT_ON_POSE_CHANGED, CEOnPoseChanged {changeFlags});
 }
-void BaseTransformComponent::SetPose(const umath::ScaledTransform &pose) { SetPose(pose, pragma::CoordinateSpace::World); }
-void BaseTransformComponent::SetPose(const umath::Transform &pose) { SetPose(pose, pragma::CoordinateSpace::World); }
-void BaseTransformComponent::SetPose(const umath::ScaledTransform &pose, pragma::CoordinateSpace space)
+void BaseTransformComponent::SetPose(const pragma::math::ScaledTransform &pose) { SetPose(pose, pragma::CoordinateSpace::World); }
+void BaseTransformComponent::SetPose(const pragma::math::Transform &pose) { SetPose(pose, pragma::CoordinateSpace::World); }
+void BaseTransformComponent::SetPose(const pragma::math::ScaledTransform &pose, pragma::CoordinateSpace space)
 {
 	if(space == pragma::CoordinateSpace::Local) {
 		auto *parent = GetEntity().GetParent();
@@ -136,7 +136,7 @@ void BaseTransformComponent::SetPose(const umath::ScaledTransform &pose, pragma:
 	m_pose = pose;
 	OnPoseChanged(TransformChangeFlags::PositionChanged | TransformChangeFlags::RotationChanged | TransformChangeFlags::ScaleChanged);
 }
-void BaseTransformComponent::SetPose(const umath::Transform &pose, pragma::CoordinateSpace space)
+void BaseTransformComponent::SetPose(const pragma::math::Transform &pose, pragma::CoordinateSpace space)
 {
 	if(space == pragma::CoordinateSpace::Local) {
 		auto *parent = GetEntity().GetParent();
@@ -149,8 +149,8 @@ void BaseTransformComponent::SetPose(const umath::Transform &pose, pragma::Coord
 	m_pose.SetRotation(pose.GetRotation());
 	OnPoseChanged(TransformChangeFlags::PositionChanged | TransformChangeFlags::RotationChanged);
 }
-const umath::ScaledTransform &BaseTransformComponent::GetPose() const { return m_pose; }
-umath::ScaledTransform BaseTransformComponent::GetPose(pragma::CoordinateSpace space) const
+const pragma::math::ScaledTransform &BaseTransformComponent::GetPose() const { return m_pose; }
+pragma::math::ScaledTransform BaseTransformComponent::GetPose(pragma::CoordinateSpace space) const
 {
 	if(space == pragma::CoordinateSpace::Local) {
 		auto *parent = GetEntity().GetParent();
@@ -176,13 +176,13 @@ float BaseTransformComponent::GetMaxAxisScale() const
 {
 	auto &scale = m_pose.GetScale();
 	auto r = scale.x;
-	if(umath::abs(scale.y) > umath::abs(r))
+	if(pragma::math::abs(scale.y) > pragma::math::abs(r))
 		r = scale.y;
-	if(umath::abs(scale.z) > umath::abs(r))
+	if(pragma::math::abs(scale.z) > pragma::math::abs(r))
 		r = scale.z;
 	return r;
 }
-float BaseTransformComponent::GetAbsMaxAxisScale() const { return umath::abs(GetMaxAxisScale()); }
+float BaseTransformComponent::GetAbsMaxAxisScale() const { return pragma::math::abs(GetMaxAxisScale()); }
 Vector3 BaseTransformComponent::GetScale(pragma::CoordinateSpace space) const { return GetPose(space).GetScale(); }
 const Vector3 &BaseTransformComponent::GetScale() const { return m_pose.GetScale(); }
 void BaseTransformComponent::SetScale(float scale) { SetScale({scale, scale, scale}); }
@@ -198,7 +198,7 @@ void BaseTransformComponent::SetScale(const Vector3 &scale, pragma::CoordinateSp
 		auto *parent = GetEntity().GetParent();
 		if(parent) {
 			{
-				umath::ScaledTransform worldPose {Vector3 {}, uquat::identity(), scale};
+				pragma::math::ScaledTransform worldPose {Vector3 {}, uquat::identity(), scale};
 				worldPose = parent->GetPose() * worldPose;
 				SetScale(worldPose.GetScale());
 				return;
@@ -385,7 +385,7 @@ void BaseTransformComponent::SetRawScale(const Vector3 &scale, pragma::Coordinat
 		auto *parent = GetEntity().GetParent();
 		if(parent) {
 			{
-				umath::ScaledTransform worldPose {Vector3 {}, uquat::identity(), scale};
+				pragma::math::ScaledTransform worldPose {Vector3 {}, uquat::identity(), scale};
 				worldPose = parent->GetPose() * worldPose;
 				SetRawScale(worldPose.GetScale());
 				return;
@@ -433,11 +433,11 @@ double BaseTransformComponent::GetLastMoveTime() const { return m_tLastMoved; }
 /////////////////
 
 CEOnPoseChanged::CEOnPoseChanged(TransformChangeFlags changeFlags) : changeFlags {changeFlags} {}
-void CEOnPoseChanged::PushArguments(lua::State *l) { Lua::PushInt(l, umath::to_integral(changeFlags)); }
+void CEOnPoseChanged::PushArguments(lua::State *l) { Lua::PushInt(l, pragma::math::to_integral(changeFlags)); }
 
 /////////////////
 
-pragma::physics::TraceData util::get_entity_trace_data(BaseTransformComponent &component)
+pragma::physics::TraceData pragma::util::get_entity_trace_data(BaseTransformComponent &component)
 {
 	auto &origin = component.GetPosition();
 	auto dir = component.GetForward();
@@ -454,7 +454,7 @@ pragma::physics::TraceData util::get_entity_trace_data(BaseTransformComponent &c
 	return trData;
 }
 
-CETeleport::CETeleport(const umath::Transform &originalPose, const umath::Transform &targetPose, const umath::Transform &deltaPose) : originalPose {originalPose}, targetPose {targetPose}, deltaPose {deltaPose} {}
+CETeleport::CETeleport(const pragma::math::Transform &originalPose, const pragma::math::Transform &targetPose, const pragma::math::Transform &deltaPose) : originalPose {originalPose}, targetPose {targetPose}, deltaPose {deltaPose} {}
 void CETeleport::PushArguments(lua::State *l)
 {
 	Lua::Push(l, originalPose);

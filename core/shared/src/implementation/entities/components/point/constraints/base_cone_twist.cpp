@@ -12,23 +12,23 @@ void BasePointConstraintConeTwistComponent::Initialize()
 {
 	BasePointConstraintComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "swingspan1", false))
-			m_kvSwingSpan1 = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "swingspan2", false))
-			m_kvSwingSpan2 = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "twistspan", false))
-			m_kvTwistSpan = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "softness", false))
-			m_kvSoftness = util::to_float(kvData.value);
-		// else if(ustring::compare<std::string>(kvData.key,"biasfactor",false))
-		// 	m_kvBiasFactor = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "relaxationfactor", false))
-			m_kvRelaxationFactor = util::to_float(kvData.value);
+		if(pragma::string::compare<std::string>(kvData.key, "swingspan1", false))
+			m_kvSwingSpan1 = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "swingspan2", false))
+			m_kvSwingSpan2 = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "twistspan", false))
+			m_kvTwistSpan = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "softness", false))
+			m_kvSoftness = pragma::util::to_float(kvData.value);
+		// else if(pragma::string::compare<std::string>(kvData.key,"biasfactor",false))
+		// 	m_kvBiasFactor = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "relaxationfactor", false))
+			m_kvRelaxationFactor = pragma::util::to_float(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 }
 
@@ -62,9 +62,9 @@ void BasePointConstraintConeTwistComponent::InitializeConstraint(pragma::ecs::Ba
 	originTgt = originConstraint - originTgt;
 	originConstraint -= pTrComponentSrc ? pTrComponentSrc->GetPosition() : Vector3 {};
 
-	auto swingSpan1 = CFloat(umath::deg_to_rad(m_kvSwingSpan1));
-	auto swingSpan2 = CFloat(umath::deg_to_rad(m_kvSwingSpan2));
-	auto twistSpan = CFloat(umath::deg_to_rad(m_kvTwistSpan));
+	auto swingSpan1 = CFloat(pragma::math::deg_to_rad(m_kvSwingSpan1));
+	auto swingSpan2 = CFloat(pragma::math::deg_to_rad(m_kvSwingSpan2));
+	auto twistSpan = CFloat(pragma::math::deg_to_rad(m_kvTwistSpan));
 
 	auto coneTwist = physEnv->CreateConeTwistConstraint(*rigidSrc, originConstraint, rotConstraint, *rigidTgt, originTgt, rotTgt);
 	if(coneTwist.IsValid()) {
@@ -72,6 +72,6 @@ void BasePointConstraintConeTwistComponent::InitializeConstraint(pragma::ecs::Ba
 		coneTwist->SetLimit(swingSpan1, swingSpan2, twistSpan);
 		coneTwist->SetSoftness(m_kvSoftness);
 		coneTwist->SetDamping(m_kvRelaxationFactor);
-		m_constraints.push_back(util::shared_handle_cast<physics::IConeTwistConstraint, physics::IConstraint>(coneTwist));
+		m_constraints.push_back(pragma::util::shared_handle_cast<physics::IConeTwistConstraint, physics::IConstraint>(coneTwist));
 	}
 }

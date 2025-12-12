@@ -62,7 +62,7 @@ export namespace pragma::ecs {
 		virtual uint32_t GetLocalIndex() const override;
 
 		uint32_t GetSceneFlags() const;
-		const util::PUInt32Property &GetSceneFlagsProperty() const;
+		const pragma::util::PUInt32Property &GetSceneFlagsProperty() const;
 		void AddToScene(pragma::CSceneComponent &scene);
 		void RemoveFromScene(pragma::CSceneComponent &scene);
 		void RemoveFromAllScenes();
@@ -89,7 +89,7 @@ export namespace pragma::ecs {
 
 		friend pragma::BaseEntityComponent;
 		uint32_t m_clientIdx = 0u;
-		util::PUInt32Property m_sceneFlags = nullptr;
+		pragma::util::PUInt32Property m_sceneFlags = nullptr;
 		pragma::CRenderComponent *m_renderComponent = nullptr;
 	};
 }

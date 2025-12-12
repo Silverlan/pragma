@@ -13,7 +13,7 @@ CObservableComponent::CObservableComponent(pragma::ecs::BaseEntity &ent) : BaseO
 void CObservableComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CObservableComponent::ReceiveData(NetPacket &packet)
 {
-	constexpr auto numTypes = umath::to_integral(CameraType::Count);
+	constexpr auto numTypes = pragma::math::to_integral(CameraType::Count);
 	for(auto i = 0u; i < numTypes; ++i) {
 		auto &data = GetCameraData(static_cast<CameraType>(i));
 		*data.enabled = packet->Read<bool>();

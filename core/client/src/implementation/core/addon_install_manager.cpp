@@ -30,7 +30,7 @@ std::string pragma::AddonInstallManager::AddonUpdateQuery::GetUpdateFilePath() c
 
 ////////////////////
 
-pragma::AddonInstallManager::AddonInstallManager() : m_curlQueryHandler(::util::make_shared<CurlQueryHandler>()) {}
+pragma::AddonInstallManager::AddonInstallManager() : m_curlQueryHandler(pragma::util::make_shared<CurlQueryHandler>()) {}
 
 void pragma::AddonInstallManager::CancelDownload() { m_curlQueryHandler->CancelDownload(); }
 
@@ -81,7 +81,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 						  if(addon->updateFile->ReOpen("rb") == true) {
 							  VFilePtr updateFile = addon->updateFile;
 							  updateFile->Seek(0);
-							  auto version = updateFile->Read<util::Version>();
+							  auto version = updateFile->Read<pragma::util::Version>();
 							  std::vector<uint32_t> newFileIds;
 							  while(updateFile->ReadChar() != std::char_traits<char>::eof()) {
 								  updateFile->Seek(updateFile->Tell() - 1);
@@ -90,7 +90,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 
 								  auto size = updateFile->Read<uint64_t>();
 								  auto sizeUncompressed = updateFile->Read<uint64_t>();
-								  auto data = ::util::make_shared<std::vector<uint8_t>>(size);
+								  auto data = pragma::util::make_shared<std::vector<uint8_t>>(size);
 								  updateFile->Read(data->data(), data->size());
 
 								  uint32_t idx = 0;
@@ -141,12 +141,12 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 
 void pragma::AddonInstallManager::QueryUpdateFileInfo(const std::shared_ptr<AddonUpdateQuery> &addon, const std::unordered_map<uint32_t, bool> &skipFileIds)
 {
-	auto addonVersion = util::Version {};
+	auto addonVersion = pragma::util::Version {};
 	m_curlQueryHandler->AddRequest(get_query_url() + "query_addon_update_file_headers.php", {{"addonid", addon->addonInfo->GetUniqueId()}, {"major", std::to_string(addonVersion.major)}, {"minor", std::to_string(addonVersion.minor)}, {"revision", std::to_string(addonVersion.revision)}},
 	  [this, addon, skipFileIds](int32_t code, const std::string &response) {
 		  if(m_curlQueryHandler->IsErrorCode(code) == false) {
 			  std::vector<std::string> fileHeaders;
-			  ustring::explode(response, "\n", fileHeaders);
+			  pragma::string::explode(response, "\n", fileHeaders);
 
 			  struct FileQuery {
 				  uint32_t fileId;
@@ -154,16 +154,16 @@ void pragma::AddonInstallManager::QueryUpdateFileInfo(const std::shared_ptr<Addo
 				  uint64_t fileSize;
 				  float progress = 0.f;
 			  };
-			  auto queries = ::util::make_shared<std::vector<FileQuery>>();
+			  auto queries = pragma::util::make_shared<std::vector<FileQuery>>();
 			  queries->reserve(fileHeaders.size());
 			  addon->fileIds.reserve(fileHeaders.size());
 			  uint64_t totalSize = 0;
 			  for(auto &line : fileHeaders) {
 				  std::vector<std::string> fh;
-				  ustring::explode(line, ";", fh);
+				  pragma::string::explode(line, ";", fh);
 				  if(fh.size() < 4)
 					  continue;
-				  auto fileId = ustring::to_int(fh.at(0));
+				  auto fileId = pragma::string::to_int(fh.at(0));
 				  auto it = skipFileIds.find(fileId);
 				  if(it != skipFileIds.end())
 					  continue; // Skip this file; We've already downloaded it!
@@ -171,8 +171,8 @@ void pragma::AddonInstallManager::QueryUpdateFileInfo(const std::shared_ptr<Addo
 				  FileQuery query {};
 				  query.fileId = fileId;
 				  query.filePath = fh.at(1);
-				  query.fileSize = ustring::to_int(fh.at(3));
-				  if(ustring::to_int(fh.at(2)) == 0)
+				  query.fileSize = pragma::string::to_int(fh.at(3));
+				  if(pragma::string::to_int(fh.at(2)) == 0)
 					  query.fileSize = 0;
 				  if(query.fileSize == 0)
 					  addon->removeFiles.push_back(query.filePath);
@@ -181,7 +181,7 @@ void pragma::AddonInstallManager::QueryUpdateFileInfo(const std::shared_ptr<Addo
 					  addon->fileIds.push_back(query.fileId);
 				  }
 
-				  totalSize += ustring::to_int(fh.at(2));
+				  totalSize += pragma::string::to_int(fh.at(2));
 			  }
 			  for(auto &query : *queries) {
 				  std::function<void(int64_t, int64_t, int64_t, int64_t)> fUpdateProgress = nullptr;
@@ -206,12 +206,12 @@ void pragma::AddonInstallManager::QueryUpdateFileInfo(const std::shared_ptr<Addo
 
 void pragma::AddonInstallManager::CheckForUpdates(const std::shared_ptr<AddonInfo> &addon, const std::shared_ptr<std::atomic<float>> &totalProgress)
 {
-	auto updateQuery = ::util::make_shared<AddonUpdateQuery>(addon);
+	auto updateQuery = pragma::util::make_shared<AddonUpdateQuery>(addon);
 	updateQuery->totalProgress = totalProgress;
 	m_curlQueryHandler->AddRequest(get_query_url() + "query_addon_version.php", {{"addonid", addon->GetUniqueId()}}, [this, updateQuery](int32_t code, const std::string &response) {
 		if(m_curlQueryHandler->IsErrorCode(code) == false) {
 			std::vector<std::string> subStrings;
-			ustring::explode(response, ";", subStrings);
+			pragma::string::explode(response, ";", subStrings);
 			if(subStrings.size() >= 2) {
 				updateQuery->addonPath = "addons\\" + subStrings.at(0);
 				auto &addonPath = updateQuery->addonInfo->GetLocalPath();
@@ -220,7 +220,7 @@ void pragma::AddonInstallManager::CheckForUpdates(const std::shared_ptr<AddonInf
 					if(FileManager::RenameFile(addonPath.c_str(), updateQuery->addonPath.c_str()) == false)
 						return; // TODO
 				}
-				auto webVersion = util::Version::FromString(subStrings.at(1));
+				auto webVersion = pragma::util::Version::FromString(subStrings.at(1));
 				auto &addonVersion = updateQuery->addonInfo->GetVersion();
 				if(webVersion > addonVersion) {
 					auto updateFilePath = updateQuery->GetUpdateFilePath();
@@ -228,7 +228,7 @@ void pragma::AddonInstallManager::CheckForUpdates(const std::shared_ptr<AddonInf
 					if(FileManager::Exists(updateFilePath, fsys::SearchFlags::Local) == true) {
 						auto fRead = FileManager::OpenFile(updateFilePath.c_str(), "rb");
 						if(fRead != nullptr) {
-							auto lastUpdateVersion = fRead->Read<util::Version>();
+							auto lastUpdateVersion = fRead->Read<pragma::util::Version>();
 							if(lastUpdateVersion == webVersion) {
 								while(fRead->ReadChar() != std::char_traits<char>::eof()) {
 									fRead->Seek(fRead->Tell() - 1);
@@ -247,9 +247,9 @@ void pragma::AddonInstallManager::CheckForUpdates(const std::shared_ptr<AddonInf
 					if(updateQuery->updateFile == nullptr)
 						return;
 					if(skipFileIds.empty() == true)
-						updateQuery->updateFile->Write<util::Version>(webVersion);
+						updateQuery->updateFile->Write<pragma::util::Version>(webVersion);
 					else
-						updateQuery->updateFile->Seek(sizeof(util::Version));
+						updateQuery->updateFile->Seek(sizeof(pragma::util::Version));
 					QueryUpdateFileInfo(updateQuery, skipFileIds);
 				}
 			}

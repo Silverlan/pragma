@@ -114,7 +114,7 @@ void ai::TaskPlayAnimationBase::OnStopped()
 ai::TaskPlayAnimation::TaskPlayAnimation(SelectorType selectorType) : TaskPlayAnimationBase(selectorType) {}
 bool ai::TaskPlayAnimation::GetFaceTarget(const Schedule *sched, pragma::BaseAIComponent &ent, Vector3 &tgt) const
 {
-	auto *param = GetParameter(sched, umath::to_integral(Parameter::FaceTarget));
+	auto *param = GetParameter(sched, pragma::math::to_integral(Parameter::FaceTarget));
 	if(param == nullptr)
 		return false;
 	auto type = param->GetType();
@@ -160,11 +160,11 @@ void ai::TaskPlayAnimation::PlayAnimation(pragma::BaseAIComponent &ent)
 	static_cast<SAIComponent &>(ent).PlayAnimation(m_animation, info);
 }
 
-void ai::TaskPlayAnimation::SetAnimation(int32_t animation) { SetParameter(umath::to_integral(Parameter::Animation), animation); }
-void ai::TaskPlayAnimation::SetAnimation(const std::string &animation) { SetParameter(umath::to_integral(Parameter::Animation), animation); }
-void ai::TaskPlayAnimation::SetFaceTarget(const Vector3 &target) { SetParameter(umath::to_integral(Parameter::FaceTarget), target); }
-void ai::TaskPlayAnimation::SetFaceTarget(pragma::ecs::BaseEntity &ent) { SetParameter(umath::to_integral(Parameter::FaceTarget), &ent); }
-void ai::TaskPlayAnimation::SetFacePrimaryTarget() { SetParameter(umath::to_integral(Parameter::FaceTarget), true); }
+void ai::TaskPlayAnimation::SetAnimation(int32_t animation) { SetParameter(pragma::math::to_integral(Parameter::Animation), animation); }
+void ai::TaskPlayAnimation::SetAnimation(const std::string &animation) { SetParameter(pragma::math::to_integral(Parameter::Animation), animation); }
+void ai::TaskPlayAnimation::SetFaceTarget(const Vector3 &target) { SetParameter(pragma::math::to_integral(Parameter::FaceTarget), target); }
+void ai::TaskPlayAnimation::SetFaceTarget(pragma::ecs::BaseEntity &ent) { SetParameter(pragma::math::to_integral(Parameter::FaceTarget), &ent); }
+void ai::TaskPlayAnimation::SetFacePrimaryTarget() { SetParameter(pragma::math::to_integral(Parameter::FaceTarget), true); }
 
 ai::BehaviorNode::Result ai::TaskPlayAnimation::Think(const Schedule *sched, pragma::BaseAIComponent &ent)
 {
@@ -184,15 +184,15 @@ ai::BehaviorNode::Result ai::TaskPlayAnimation::Start(const Schedule *sched, pra
 	auto pAnimComponent = ent.GetEntity().GetAnimatedComponent();
 	if(pAnimComponent.expired())
 		return Result::Failed;
-	m_cbOnAnimationComplete = pAnimComponent->AddEventCallback(pragma::sAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	m_cbOnAnimationComplete = pAnimComponent->AddEventCallback(pragma::sAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		m_resultState = (static_cast<pragma::CEOnAnimationComplete &>(evData.get()).animation == m_animation) ? Result::Succeeded : Result::Failed;
 		Clear();
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
-	m_cbOnPlayAnimation = pAnimComponent->AddEventCallback(pragma::sAnimatedComponent::EVENT_ON_PLAY_ANIMATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	m_cbOnPlayAnimation = pAnimComponent->AddEventCallback(pragma::sAnimatedComponent::EVENT_ON_PLAY_ANIMATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		m_resultState = Result::Failed;
 		Clear();
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	return Result::Pending;
 }
@@ -212,12 +212,12 @@ void ai::TaskPlayLayeredAnimation::PlayAnimation(pragma::BaseAIComponent &ent)
 		return;
 	animComponent->PlayLayeredAnimation(m_slot, m_animation);
 }
-void ai::TaskPlayLayeredAnimation::SetAnimation(int32_t animation) { SetParameter(umath::to_integral(Parameter::Animation), animation); }
-void ai::TaskPlayLayeredAnimation::SetAnimation(const std::string &animation) { SetParameter(umath::to_integral(Parameter::Animation), animation); }
-void ai::TaskPlayLayeredAnimation::SetAnimationSlot(int32_t animationSlot) { SetParameter(umath::to_integral(Parameter::AnimationSlot), animationSlot); }
+void ai::TaskPlayLayeredAnimation::SetAnimation(int32_t animation) { SetParameter(pragma::math::to_integral(Parameter::Animation), animation); }
+void ai::TaskPlayLayeredAnimation::SetAnimation(const std::string &animation) { SetParameter(pragma::math::to_integral(Parameter::Animation), animation); }
+void ai::TaskPlayLayeredAnimation::SetAnimationSlot(int32_t animationSlot) { SetParameter(pragma::math::to_integral(Parameter::AnimationSlot), animationSlot); }
 ai::BehaviorNode::Result ai::TaskPlayLayeredAnimation::Start(const ai::Schedule *sched, pragma::BaseAIComponent &ent)
 {
-	auto *param = GetParameter(sched, umath::to_integral(Parameter::AnimationSlot));
+	auto *param = GetParameter(sched, pragma::math::to_integral(Parameter::AnimationSlot));
 	if(param != nullptr && param->GetType() == ai::Schedule::Parameter::Type::Int)
 		m_slot = param->GetInt();
 
@@ -226,21 +226,21 @@ ai::BehaviorNode::Result ai::TaskPlayLayeredAnimation::Start(const ai::Schedule 
 	auto pAnimComponent = ent.GetEntity().GetAnimatedComponent();
 	if(pAnimComponent.expired())
 		return Result::Failed;
-	m_cbOnAnimationComplete = pAnimComponent->AddEventCallback(pragma::sAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	m_cbOnAnimationComplete = pAnimComponent->AddEventCallback(pragma::sAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &animInfo = static_cast<pragma::CELayeredAnimationInfo &>(evData.get());
 		if(animInfo.slot != m_slot)
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		m_resultState = (animInfo.animation == m_animation) ? Result::Succeeded : Result::Failed;
 		Clear();
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
-	m_cbOnPlayAnimation = pAnimComponent->AddEventCallback(pragma::sAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	m_cbOnPlayAnimation = pAnimComponent->AddEventCallback(pragma::sAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &animInfo = static_cast<pragma::CEOnPlayLayeredAnimation &>(evData.get());
 		if(animInfo.slot != m_slot)
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		m_resultState = Result::Failed;
 		Clear();
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	return Result::Pending;
 }

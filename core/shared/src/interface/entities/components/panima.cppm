@@ -45,12 +45,12 @@ export {
 			};
 
 			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-			static std::optional<std::pair<std::string, util::Path>> ParseComponentChannelPath(const panima::ChannelPath &path);
+			static std::optional<std::pair<std::string, pragma::util::Path>> ParseComponentChannelPath(const panima::ChannelPath &path);
 
 			PanimaComponent(pragma::ecs::BaseEntity &ent);
 			void SetPlaybackRate(float rate);
 			float GetPlaybackRate() const;
-			const util::PFloatProperty &GetPlaybackRateProperty() const;
+			const pragma::util::PFloatProperty &GetPlaybackRateProperty() const;
 
 			std::vector<std::shared_ptr<AnimationManagerData>> &GetAnimationManagers() { return m_animationManagers; }
 			const std::vector<std::shared_ptr<AnimationManagerData>> &GetAnimationManagers() const { return const_cast<PanimaComponent *>(this)->GetAnimationManagers(); }
@@ -106,7 +106,7 @@ export {
 			void InitializeAnimationChannelValueSubmitters();
 			void InitializeAnimationChannelValueSubmitters(AnimationManagerData &amData);
 			void ResetAnimation(const std::shared_ptr<pragma::asset::Model> &mdl);
-			util::PFloatProperty m_playbackRate = nullptr;
+			pragma::util::PFloatProperty m_playbackRate = nullptr;
 			std::vector<std::shared_ptr<AnimationManagerData>> m_animationManagers;
 			std::unordered_map<const char *, PropertyFlags> m_propertyFlags;
 		};
@@ -154,14 +154,14 @@ export {
 			double deltaTime;
 		};
 		struct DLLNETWORK CEAnim2InitializeChannelValueSubmitter : public ComponentEvent {
-			CEAnim2InitializeChannelValueSubmitter(util::Path &path);
+			CEAnim2InitializeChannelValueSubmitter(pragma::util::Path &path);
 			virtual void PushArguments(lua::State *l) override;
 			virtual uint32_t GetReturnCount() override;
 			virtual void HandleReturnValues(lua::State *l) override;
-			util::Path &path;
+			pragma::util::Path &path;
 			panima::ChannelValueSubmitter submitter {};
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::PanimaComponent::PropertyFlags)
 };

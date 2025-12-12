@@ -49,14 +49,14 @@ static std::ostream &operator<<(std::ostream &str, const LEulerAnglesPropertyWra
 
 //////////
 
-static umath::Transform operator*(umath::Transform v, const LTransformPropertyWrapper &prop) { return v * prop->GetValue(); }
-static bool operator==(umath::Transform v, const LTransformPropertyWrapper &prop) { return **prop == v; }
+static pragma::math::Transform operator*(pragma::math::Transform v, const LTransformPropertyWrapper &prop) { return v * prop->GetValue(); }
+static bool operator==(pragma::math::Transform v, const LTransformPropertyWrapper &prop) { return **prop == v; }
 static std::ostream &operator<<(std::ostream &str, const LTransformPropertyWrapper &v) { return str << **v; }
 
 //////////
 
-static umath::ScaledTransform operator*(umath::ScaledTransform v, const LScaledTransformPropertyWrapper &prop) { return v * prop->GetValue(); }
-static bool operator==(umath::ScaledTransform v, const LScaledTransformPropertyWrapper &prop) { return **prop == v; }
+static pragma::math::ScaledTransform operator*(pragma::math::ScaledTransform v, const LScaledTransformPropertyWrapper &prop) { return v * prop->GetValue(); }
+static bool operator==(pragma::math::ScaledTransform v, const LScaledTransformPropertyWrapper &prop) { return **prop == v; }
 // static std::ostream &operator<<(std::ostream &str, const LScaledTransformPropertyWrapper &v) { return str << **v; }
 
 //////////
@@ -255,7 +255,7 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	add_generic_methods<LBoolPropertyWrapper, bool, luabind::class_<LBoolPropertyWrapper, LBasePropertyWrapper>>(boolDef);
 	boolDef.def("Link", static_cast<void (*)(lua::State *, LBoolPropertyWrapper &, LBoolPropertyWrapper &)>([](lua::State *l, LBoolPropertyWrapper &prop, LBoolPropertyWrapper &propOther) { prop->Link(*propOther); }));
 	boolDef.def("Link", static_cast<void (*)(lua::State *, LBoolPropertyWrapper &, LStringProperty &)>([](lua::State *l, LBoolPropertyWrapper &prop, LStringProperty &propOther) {
-		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> bool { return ::util::to_boolean(v); });
+		prop->Link<pragma::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> bool { return pragma::util::to_boolean(v); });
 	}));
 	boolDef.def("Link", static_cast<void (*)(lua::State *, LBoolPropertyWrapper &, LGenericFloatPropertyWrapper &)>([](lua::State *l, LBoolPropertyWrapper &prop, LGenericFloatPropertyWrapper &propOther) { propOther->LinkOther(*prop); }));
 	boolDef.def("Link", static_cast<void (*)(lua::State *, LBoolPropertyWrapper &, LGenericIntPropertyWrapper &)>([](lua::State *l, LBoolPropertyWrapper &prop, LGenericIntPropertyWrapper &propOther) { propOther->LinkOther(*prop); }));
@@ -291,11 +291,11 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	add_generic_methods<LColorProperty, ::Color, luabind::class_<LColorProperty, LBasePropertyWrapper>>(colDef);
 	colDef.def("Link", static_cast<void (*)(lua::State *, LColorProperty &, LColorProperty &)>(link<LColorProperty, ::Color>));
 	colDef.def("Link", static_cast<void (*)(lua::State *, LColorProperty &, LStringProperty &)>([](lua::State *l, LColorProperty &prop, LStringProperty &propOther) { prop->Link(*propOther); }));
-	colDef.def("Link", static_cast<void (*)(lua::State *, LColorProperty &, LVector3Property &)>([](lua::State *l, LColorProperty &prop, LVector3Property &propOther) { prop->Link<::util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> ::Color { return ::Color {v}; }); }));
+	colDef.def("Link", static_cast<void (*)(lua::State *, LColorProperty &, LVector3Property &)>([](lua::State *l, LColorProperty &prop, LVector3Property &propOther) { prop->Link<pragma::util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> ::Color { return ::Color {v}; }); }));
 	colDef.def("Link",
-	  static_cast<void (*)(lua::State *, LColorProperty &, LVector4Property &)>([](lua::State *l, LColorProperty &prop, LVector4Property &propOther) { prop->Link<::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> ::Color { return ::Color {v}; }); }));
+	  static_cast<void (*)(lua::State *, LColorProperty &, LVector4Property &)>([](lua::State *l, LColorProperty &prop, LVector4Property &propOther) { prop->Link<pragma::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> ::Color { return ::Color {v}; }); }));
 	/*colDef.def("Link",static_cast<void(*)(lua::State*,LColorProperty&,LStringProperty&)>([](lua::State *l,LColorProperty &prop,LStringProperty &propOther) {
-		prop->Link<::util::StringProperty,std::string>(*propOther,[](const std::string &v) -> Color {
+		prop->Link<pragma::util::StringProperty,std::string>(*propOther,[](const std::string &v) -> Color {
 			return Color{v};
 		});
 	}));*/
@@ -330,7 +330,7 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	angDef.def("Link", static_cast<void (*)(lua::State *, LEulerAnglesProperty &, LEulerAnglesProperty &)>(link<LEulerAnglesProperty, EulerAngles>));
 	angDef.def("Link", static_cast<void (*)(lua::State *, LEulerAnglesProperty &, LStringProperty &)>([](lua::State *l, LEulerAnglesProperty &prop, LStringProperty &propOther) { prop->Link(*propOther); }));
 	/*angDef.def("Link",static_cast<void(*)(lua::State*,LEulerAnglesProperty&,LStringProperty&)>([](lua::State *l,LEulerAnglesProperty &prop,LStringProperty &propOther) {
-		prop->Link<::util::StringProperty,std::string>(*propOther,[](const std::string &v) -> EulerAngles {
+		prop->Link<pragma::util::StringProperty,std::string>(*propOther,[](const std::string &v) -> EulerAngles {
 			return EulerAngles{v};
 		});
 	}));*/
@@ -341,11 +341,11 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	add_generic_vector_methods<LVector3Property, Vector3, luabind::class_<LVector3Property, LBasePropertyWrapper>>(vec3Def);
 	vec3Def.def(luabind::constructor<float, float, float>());
 	vec3Def.def("Link", static_cast<void (*)(lua::State *, LVector3Property &, LVector3Property &)>(link<LVector3Property, Vector3>));
-	vec3Def.def("Link", static_cast<void (*)(lua::State *, LVector3Property &, LColorProperty &)>([](lua::State *l, LVector3Property &prop, LColorProperty &propOther) { prop->Link<::util::ColorProperty, ::Color>(*propOther, [](const ::Color &v) -> ::Vector3 { return v.ToVector3(); }); }));
+	vec3Def.def("Link", static_cast<void (*)(lua::State *, LVector3Property &, LColorProperty &)>([](lua::State *l, LVector3Property &prop, LColorProperty &propOther) { prop->Link<pragma::util::ColorProperty, ::Color>(*propOther, [](const ::Color &v) -> ::Vector3 { return v.ToVector3(); }); }));
 	vec3Def.def("Link",
-	  static_cast<void (*)(lua::State *, LVector3Property &, LVector3iProperty &)>([](lua::State *l, LVector3Property &prop, LVector3iProperty &propOther) { prop->Link<::util::Vector3iProperty, Vector3i>(*propOther, [](const Vector3i &v) -> Vector3 { return Vector3(v.x, v.y, v.z); }); }));
+	  static_cast<void (*)(lua::State *, LVector3Property &, LVector3iProperty &)>([](lua::State *l, LVector3Property &prop, LVector3iProperty &propOther) { prop->Link<pragma::util::Vector3iProperty, Vector3i>(*propOther, [](const Vector3i &v) -> Vector3 { return Vector3(v.x, v.y, v.z); }); }));
 	vec3Def.def("Link",
-	  static_cast<void (*)(lua::State *, LVector3Property &, LStringProperty &)>([](lua::State *l, LVector3Property &prop, LStringProperty &propOther) { prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Vector3 { return uvec::create(v); }); }));
+	  static_cast<void (*)(lua::State *, LVector3Property &, LStringProperty &)>([](lua::State *l, LVector3Property &prop, LStringProperty &propOther) { prop->Link<pragma::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Vector3 { return uvec::create(v); }); }));
 	modUtil[vec3Def];
 
 	auto vec3iDef = luabind::class_<LVector3iProperty, LBasePropertyWrapper>("VectoriProperty");
@@ -353,11 +353,11 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	vec3iDef.def(luabind::constructor<int32_t, int32_t, int32_t>());
 	vec3iDef.def("Link", static_cast<void (*)(lua::State *, LVector3iProperty &, LVector3iProperty &)>(link<LVector3iProperty, Vector3i>));
 	vec3iDef.def("Link",
-	  static_cast<void (*)(lua::State *, LVector3iProperty &, LVector3Property &)>([](lua::State *l, LVector3iProperty &prop, LVector3Property &propOther) { prop->Link<::util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> Vector3i { return Vector3i(v.x, v.y, v.z); }); }));
+	  static_cast<void (*)(lua::State *, LVector3iProperty &, LVector3Property &)>([](lua::State *l, LVector3iProperty &prop, LVector3Property &propOther) { prop->Link<pragma::util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> Vector3i { return Vector3i(v.x, v.y, v.z); }); }));
 	vec3iDef.def("Link", static_cast<void (*)(lua::State *, LVector3iProperty &, LStringProperty &)>([](lua::State *l, LVector3iProperty &prop, LStringProperty &propOther) {
-		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Vector3i {
+		prop->Link<pragma::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Vector3i {
 			Vector3i r;
-			ustring::string_to_array<decltype(r)::value_type>(v, &r[0], ustring::cstring_to_number<int32_t>, 3);
+			pragma::string::string_to_array<decltype(r)::value_type>(v, &r[0], pragma::string::cstring_to_number<int32_t>, 3);
 			return r;
 		});
 	}));
@@ -368,12 +368,12 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	vec2Def.def(luabind::constructor<float, float>());
 	vec2Def.def("Link", static_cast<void (*)(lua::State *, LVector2Property &, LVector2Property &)>(link<LVector2Property, ::Vector2>));
 	vec2Def.def("Link", static_cast<void (*)(lua::State *, LVector2Property &, LVector2iProperty &)>([](lua::State *l, LVector2Property &prop, LVector2iProperty &propOther) {
-		prop->Link<::util::Vector2iProperty, ::Vector2i>(*propOther, [](const ::Vector2i &v) -> ::Vector2 { return ::Vector2(v.x, v.y); });
+		prop->Link<pragma::util::Vector2iProperty, ::Vector2i>(*propOther, [](const ::Vector2i &v) -> ::Vector2 { return ::Vector2(v.x, v.y); });
 	}));
 	vec2Def.def("Link", static_cast<void (*)(lua::State *, LVector2Property &, LStringProperty &)>([](lua::State *l, LVector2Property &prop, LStringProperty &propOther) {
-		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector2 {
+		prop->Link<pragma::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector2 {
 			::Vector2 r;
-			ustring::string_to_array<decltype(r)::value_type>(v, &r[0], ustring::cstring_to_number<float>, 2);
+			pragma::string::string_to_array<decltype(r)::value_type>(v, &r[0], pragma::string::cstring_to_number<float>, 2);
 			return r;
 		});
 	}));
@@ -384,12 +384,12 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	vec2iDef.def(luabind::constructor<int32_t, int32_t>());
 	vec2iDef.def("Link", static_cast<void (*)(lua::State *, LVector2iProperty &, LVector2iProperty &)>(link<LVector2iProperty, ::Vector2i>));
 	vec2iDef.def("Link", static_cast<void (*)(lua::State *, LVector2iProperty &, LVector2Property &)>([](lua::State *l, LVector2iProperty &prop, LVector2Property &propOther) {
-		prop->Link<::util::Vector2Property, ::Vector2>(*propOther, [](const ::Vector2 &v) -> ::Vector2i { return ::Vector2i(v.x, v.y); });
+		prop->Link<pragma::util::Vector2Property, ::Vector2>(*propOther, [](const ::Vector2 &v) -> ::Vector2i { return ::Vector2i(v.x, v.y); });
 	}));
 	vec2iDef.def("Link", static_cast<void (*)(lua::State *, LVector2iProperty &, LStringProperty &)>([](lua::State *l, LVector2iProperty &prop, LStringProperty &propOther) {
-		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector2i {
+		prop->Link<pragma::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector2i {
 			::Vector2i r;
-			ustring::string_to_array<decltype(r)::value_type>(v, &r[0], ustring::cstring_to_number<int32_t>, 2);
+			pragma::string::string_to_array<decltype(r)::value_type>(v, &r[0], pragma::string::cstring_to_number<int32_t>, 2);
 			return r;
 		});
 	}));
@@ -400,12 +400,12 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	vec4Def.def(luabind::constructor<float, float, float, float>());
 	vec4Def.def("Link", static_cast<void (*)(lua::State *, LVector4Property &, LVector4Property &)>(link<LVector4Property, ::Vector4>));
 	vec4Def.def("Link", static_cast<void (*)(lua::State *, LVector4Property &, LVector4iProperty &)>([](lua::State *l, LVector4Property &prop, LVector4iProperty &propOther) {
-		prop->Link<::util::Vector4iProperty, ::Vector4i>(*propOther, [](const ::Vector4i &v) -> ::Vector4 { return ::Vector4(v.x, v.y, v.z, v.w); });
+		prop->Link<pragma::util::Vector4iProperty, ::Vector4i>(*propOther, [](const ::Vector4i &v) -> ::Vector4 { return ::Vector4(v.x, v.y, v.z, v.w); });
 	}));
 	vec4Def.def("Link", static_cast<void (*)(lua::State *, LVector4Property &, LStringProperty &)>([](lua::State *l, LVector4Property &prop, LStringProperty &propOther) {
-		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector4 {
+		prop->Link<pragma::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector4 {
 			::Vector4 r;
-			ustring::string_to_array<decltype(r)::value_type>(v, &r[0], ustring::cstring_to_number<float>, 4);
+			pragma::string::string_to_array<decltype(r)::value_type>(v, &r[0], pragma::string::cstring_to_number<float>, 4);
 			return r;
 		});
 	}));
@@ -416,12 +416,12 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	vec4iDef.def(luabind::constructor<int32_t, int32_t, int32_t, int32_t>());
 	vec4iDef.def("Link", static_cast<void (*)(lua::State *, LVector4iProperty &, LVector4iProperty &)>(link<LVector4iProperty, ::Vector4i>));
 	vec4iDef.def("Link", static_cast<void (*)(lua::State *, LVector4iProperty &, LVector4Property &)>([](lua::State *l, LVector4iProperty &prop, LVector4Property &propOther) {
-		prop->Link<::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> ::Vector4i { return ::Vector4i(v.x, v.y, v.z, v.w); });
+		prop->Link<pragma::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> ::Vector4i { return ::Vector4i(v.x, v.y, v.z, v.w); });
 	}));
 	vec4iDef.def("Link", static_cast<void (*)(lua::State *, LVector4iProperty &, LStringProperty &)>([](lua::State *l, LVector4iProperty &prop, LStringProperty &propOther) {
-		prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector4i {
+		prop->Link<pragma::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> ::Vector4i {
 			::Vector4i r;
-			ustring::string_to_array<decltype(r)::value_type>(v, &r[0], ustring::cstring_to_number<int32_t>, 4);
+			pragma::string::string_to_array<decltype(r)::value_type>(v, &r[0], pragma::string::cstring_to_number<int32_t>, 4);
 			return r;
 		});
 	}));
@@ -435,7 +435,7 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	quatDef.def(luabind::tostring(luabind::const_self));
 	quatDef.def("Link", static_cast<void (*)(lua::State *, LQuatProperty &, LQuatProperty &)>(link<LQuatProperty, Quat>));
 	quatDef.def("Link",
-	  static_cast<void (*)(lua::State *, LQuatProperty &, LStringProperty &)>([](lua::State *l, LQuatProperty &prop, LStringProperty &propOther) { prop->Link<::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Quat { return uquat::create(v); }); }));
+	  static_cast<void (*)(lua::State *, LQuatProperty &, LStringProperty &)>([](lua::State *l, LQuatProperty &prop, LStringProperty &propOther) { prop->Link<pragma::util::StringProperty, std::string>(*propOther, [](const std::string &v) -> Quat { return uquat::create(v); }); }));
 	modUtil[quatDef];
 
 	// String
@@ -445,35 +445,35 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	strDef.def(luabind::constructor<std::string>());
 	strDef.def(luabind::tostring(luabind::const_self));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LStringProperty &)>(link<LStringProperty, std::string>));
-	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LBoolProperty &)>([](lua::State *l, LStringProperty &prop, LBoolProperty &propOther) { prop->Link<::util::BoolProperty, bool>(*propOther, [](const bool &v) -> std::string { return v ? "true" : "false"; }); }));
+	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LBoolProperty &)>([](lua::State *l, LStringProperty &prop, LBoolProperty &propOther) { prop->Link<pragma::util::BoolProperty, bool>(*propOther, [](const bool &v) -> std::string { return v ? "true" : "false"; }); }));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LColorPropertyWrapper &)>([](lua::State *l, LStringProperty &prop, LColorPropertyWrapper &propOther) {
-		prop->Link<::util::ColorProperty, ::Color>(*propOther, [](const ::Color &v) -> std::string { return std::to_string(v.r) + " " + std::to_string(v.g) + " " + std::to_string(v.b) + " " + std::to_string(v.a); });
+		prop->Link<pragma::util::ColorProperty, ::Color>(*propOther, [](const ::Color &v) -> std::string { return std::to_string(v.r) + " " + std::to_string(v.g) + " " + std::to_string(v.b) + " " + std::to_string(v.a); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LGenericFloatPropertyWrapper &)>([](lua::State *l, LStringProperty &prop, LGenericFloatPropertyWrapper &propOther) { propOther->LinkOther(*prop); }));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LGenericIntPropertyWrapper &)>([](lua::State *l, LStringProperty &prop, LGenericIntPropertyWrapper &propOther) { propOther->LinkOther(*prop); }));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LVector2Property &)>([](lua::State *l, LStringProperty &prop, LVector2Property &propOther) {
-		prop->Link<::util::Vector2Property, ::Vector2>(*propOther, [](const ::Vector2 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y); });
+		prop->Link<pragma::util::Vector2Property, ::Vector2>(*propOther, [](const ::Vector2 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LVector2iProperty &)>([](lua::State *l, LStringProperty &prop, LVector2iProperty &propOther) {
-		prop->Link<::util::Vector2iProperty, ::Vector2i>(*propOther, [](const ::Vector2i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y); });
+		prop->Link<pragma::util::Vector2iProperty, ::Vector2i>(*propOther, [](const ::Vector2i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LVector3Property &)>([](lua::State *l, LStringProperty &prop, LVector3Property &propOther) {
-		prop->Link<::util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
+		prop->Link<pragma::util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LVector3iProperty &)>([](lua::State *l, LStringProperty &prop, LVector3iProperty &propOther) {
-		prop->Link<::util::Vector3iProperty, Vector3i>(*propOther, [](const Vector3i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
+		prop->Link<pragma::util::Vector3iProperty, Vector3i>(*propOther, [](const Vector3i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LVector4Property &)>([](lua::State *l, LStringProperty &prop, LVector4Property &propOther) {
-		prop->Link<::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z) + " " + std::to_string(v.w); });
+		prop->Link<pragma::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z) + " " + std::to_string(v.w); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LVector4iProperty &)>([](lua::State *l, LStringProperty &prop, LVector4iProperty &propOther) {
-		prop->Link<::util::Vector4iProperty, ::Vector4i>(*propOther, [](const ::Vector4i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z) + " " + std::to_string(v.w); });
+		prop->Link<pragma::util::Vector4iProperty, ::Vector4i>(*propOther, [](const ::Vector4i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z) + " " + std::to_string(v.w); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LQuatProperty &)>([](lua::State *l, LStringProperty &prop, LQuatProperty &propOther) {
-		prop->Link<::util::QuatProperty, Quat>(*propOther, [](const Quat &v) -> std::string { return std::to_string(v.w) + " " + std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
+		prop->Link<pragma::util::QuatProperty, Quat>(*propOther, [](const Quat &v) -> std::string { return std::to_string(v.w) + " " + std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LEulerAnglesProperty &)>([](lua::State *l, LStringProperty &prop, LEulerAnglesProperty &propOther) {
-		prop->Link<::util::EulerAnglesProperty, EulerAngles>(*propOther, [](const EulerAngles &v) -> std::string { return std::to_string(v.p) + " " + std::to_string(v.y) + " " + std::to_string(v.r); });
+		prop->Link<pragma::util::EulerAnglesProperty, EulerAngles>(*propOther, [](const EulerAngles &v) -> std::string { return std::to_string(v.p) + " " + std::to_string(v.y) + " " + std::to_string(v.r); });
 	}));
 	modUtil[strDef];
 
@@ -535,99 +535,99 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	modUtil[mat4Def];
 }
 
-void Lua::Property::push(lua::State *l, ::util::Int8Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::UInt8Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Int16Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::UInt16Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Int32Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::UInt32Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Int64Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::UInt64Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::FloatProperty &prop) { push_property<LGenericFloatPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::DoubleProperty &prop) { push_property<LGenericFloatPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::LongDoubleProperty &prop) { push_property<LGenericFloatPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::BoolProperty &prop) { push_property<LBoolPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::ColorProperty &prop) { push_property<LColorPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::EulerAnglesProperty &prop) { push_property<LEulerAnglesPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Vector2Property &prop) { push_property<LVector2PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Vector2iProperty &prop) { push_property<LVector2iPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Vector3Property &prop) { push_property<LVector3PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Vector3iProperty &prop) { push_property<LVector3iPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Vector4Property &prop) { push_property<LVector4PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Vector4iProperty &prop) { push_property<LVector4iPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::QuatProperty &prop) { push_property<LQuatPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::StringProperty &prop) { push_property<LStringPropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Matrix2Property &prop) { push_property<LMatrix2PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Matrix2x3Property &prop) { push_property<LMatrix2x3PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Matrix3x2Property &prop) { push_property<LMatrix3x2PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Matrix3Property &prop) { push_property<LMatrix3PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Matrix3x4Property &prop) { push_property<LMatrix3x4PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Matrix4x3Property &prop) { push_property<LMatrix4x3PropertyWrapper>(l, prop); }
-void Lua::Property::push(lua::State *l, ::util::Matrix4Property &prop) { push_property<LMatrix4PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Int8Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::UInt8Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Int16Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::UInt16Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Int32Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::UInt32Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Int64Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::UInt64Property &prop) { push_property<LGenericIntPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::FloatProperty &prop) { push_property<LGenericFloatPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::DoubleProperty &prop) { push_property<LGenericFloatPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::LongDoubleProperty &prop) { push_property<LGenericFloatPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::BoolProperty &prop) { push_property<LBoolPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::ColorProperty &prop) { push_property<LColorPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::EulerAnglesProperty &prop) { push_property<LEulerAnglesPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Vector2Property &prop) { push_property<LVector2PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Vector2iProperty &prop) { push_property<LVector2iPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Vector3Property &prop) { push_property<LVector3PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Vector3iProperty &prop) { push_property<LVector3iPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Vector4Property &prop) { push_property<LVector4PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Vector4iProperty &prop) { push_property<LVector4iPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::QuatProperty &prop) { push_property<LQuatPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::StringProperty &prop) { push_property<LStringPropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Matrix2Property &prop) { push_property<LMatrix2PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Matrix2x3Property &prop) { push_property<LMatrix2x3PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Matrix3x2Property &prop) { push_property<LMatrix3x2PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Matrix3Property &prop) { push_property<LMatrix3PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Matrix3x4Property &prop) { push_property<LMatrix3x4PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Matrix4x3Property &prop) { push_property<LMatrix4x3PropertyWrapper>(l, prop); }
+void Lua::Property::push(lua::State *l, pragma::util::Matrix4Property &prop) { push_property<LMatrix4PropertyWrapper>(l, prop); }
 
-void Lua::Property::push(lua::State *l, ::util::BaseProperty &prop)
+void Lua::Property::push(lua::State *l, pragma::util::BaseProperty &prop)
 {
 	auto typeIndex = std::type_index(typeid(prop));
-	if(typeIndex == std::type_index(typeid(::util::Int8Property)))
-		push(l, static_cast<::util::Int8Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::UInt8Property)))
-		push(l, static_cast<::util::UInt8Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Int16Property)))
-		push(l, static_cast<::util::Int16Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::UInt16Property)))
-		push(l, static_cast<::util::UInt16Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Int32Property)))
-		push(l, static_cast<::util::Int32Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::UInt32Property)))
-		push(l, static_cast<::util::UInt32Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Int64Property)))
-		push(l, static_cast<::util::Int64Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::UInt64Property)))
-		push(l, static_cast<::util::UInt64Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::FloatProperty)))
-		push(l, static_cast<::util::FloatProperty &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::DoubleProperty)))
-		push(l, static_cast<::util::DoubleProperty &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::LongDoubleProperty)))
-		push(l, static_cast<::util::LongDoubleProperty &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::BoolProperty)))
-		push(l, static_cast<::util::BoolProperty &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::ColorProperty)))
-		push(l, static_cast<::util::ColorProperty &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::EulerAnglesProperty)))
-		push(l, static_cast<::util::EulerAnglesProperty &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Vector2Property)))
-		push(l, static_cast<::util::Vector2Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Vector2iProperty)))
-		push(l, static_cast<::util::Vector2iProperty &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Vector3Property)))
-		push(l, static_cast<::util::Vector3Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Vector3iProperty)))
-		push(l, static_cast<::util::Vector3iProperty &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Vector4Property)))
-		push(l, static_cast<::util::Vector4Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Vector4iProperty)))
-		push(l, static_cast<::util::Vector4iProperty &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::QuatProperty)))
-		push(l, static_cast<::util::QuatProperty &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::StringProperty)))
-		push(l, static_cast<::util::StringProperty &>(prop));
+	if(typeIndex == std::type_index(typeid(pragma::util::Int8Property)))
+		push(l, static_cast<pragma::util::Int8Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::UInt8Property)))
+		push(l, static_cast<pragma::util::UInt8Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Int16Property)))
+		push(l, static_cast<pragma::util::Int16Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::UInt16Property)))
+		push(l, static_cast<pragma::util::UInt16Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Int32Property)))
+		push(l, static_cast<pragma::util::Int32Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::UInt32Property)))
+		push(l, static_cast<pragma::util::UInt32Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Int64Property)))
+		push(l, static_cast<pragma::util::Int64Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::UInt64Property)))
+		push(l, static_cast<pragma::util::UInt64Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::FloatProperty)))
+		push(l, static_cast<pragma::util::FloatProperty &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::DoubleProperty)))
+		push(l, static_cast<pragma::util::DoubleProperty &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::LongDoubleProperty)))
+		push(l, static_cast<pragma::util::LongDoubleProperty &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::BoolProperty)))
+		push(l, static_cast<pragma::util::BoolProperty &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::ColorProperty)))
+		push(l, static_cast<pragma::util::ColorProperty &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::EulerAnglesProperty)))
+		push(l, static_cast<pragma::util::EulerAnglesProperty &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Vector2Property)))
+		push(l, static_cast<pragma::util::Vector2Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Vector2iProperty)))
+		push(l, static_cast<pragma::util::Vector2iProperty &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Vector3Property)))
+		push(l, static_cast<pragma::util::Vector3Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Vector3iProperty)))
+		push(l, static_cast<pragma::util::Vector3iProperty &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Vector4Property)))
+		push(l, static_cast<pragma::util::Vector4Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Vector4iProperty)))
+		push(l, static_cast<pragma::util::Vector4iProperty &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::QuatProperty)))
+		push(l, static_cast<pragma::util::QuatProperty &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::StringProperty)))
+		push(l, static_cast<pragma::util::StringProperty &>(prop));
 	else if(typeIndex == std::type_index(typeid(pragma::EntityProperty)))
 		push(l, static_cast<pragma::EntityProperty &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Matrix2Property)))
-		push(l, static_cast<::util::Matrix2Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Matrix2x3Property)))
-		push(l, static_cast<::util::Matrix2x3Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Matrix3x2Property)))
-		push(l, static_cast<::util::Matrix3x2Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Matrix3Property)))
-		push(l, static_cast<::util::Matrix3Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Matrix3x4Property)))
-		push(l, static_cast<::util::Matrix3x4Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Matrix4x3Property)))
-		push(l, static_cast<::util::Matrix4x3Property &>(prop));
-	else if(typeIndex == std::type_index(typeid(::util::Matrix4Property)))
-		push(l, static_cast<::util::Matrix4Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Matrix2Property)))
+		push(l, static_cast<pragma::util::Matrix2Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Matrix2x3Property)))
+		push(l, static_cast<pragma::util::Matrix2x3Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Matrix3x2Property)))
+		push(l, static_cast<pragma::util::Matrix3x2Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Matrix3Property)))
+		push(l, static_cast<pragma::util::Matrix3Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Matrix3x4Property)))
+		push(l, static_cast<pragma::util::Matrix3x4Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Matrix4x3Property)))
+		push(l, static_cast<pragma::util::Matrix4x3Property &>(prop));
+	else if(typeIndex == std::type_index(typeid(pragma::util::Matrix4Property)))
+		push(l, static_cast<pragma::util::Matrix4Property &>(prop));
 	else
 		throw std::logic_error("Unregistered property type!");
 }

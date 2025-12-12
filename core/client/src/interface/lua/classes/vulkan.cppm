@@ -42,7 +42,7 @@ export namespace Lua {
 			bool RecordCopyImage(lua::State *l, CommandBuffer &hCommandBuffer, Image &imgSrc, Image &imgDst, const prosper::util::CopyInfo &copyInfo);
 			bool RecordCopyBufferToImage(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &bufSrc, Image &imgDst, const prosper::util::BufferImageCopyInfo &copyInfo);
 			bool RecordCopyBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &bufSrc, Buffer &bufDst, const prosper::util::BufferCopy &copyInfo);
-			bool RecordUpdateBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, ::util::DataStream &ds);
+			bool RecordUpdateBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, pragma::util::DataStream &ds);
 			bool RecordUpdateBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, ::udm::Type type, Lua::udm_ng value);
 			bool RecordBlitImage(lua::State *l, CommandBuffer &hCommandBuffer, Image &imgSrc, Image &imgDst, const prosper::util::BlitInfo &blitInfo);
 			bool RecordResolveImage(lua::State *l, CommandBuffer &hCommandBuffer, Image &imgSrc, Image &imgDst);
@@ -91,10 +91,10 @@ export namespace Lua {
 		};
 		namespace VKBuffer {
 			bool IsValid(lua::State *l, Buffer &hBuffer);
-			bool Write(lua::State *l, Buffer &hBuffer, uint32_t offset, ::util::DataStream &ds, uint32_t dsOffset, uint32_t dsSize);
+			bool Write(lua::State *l, Buffer &hBuffer, uint32_t offset, pragma::util::DataStream &ds, uint32_t dsOffset, uint32_t dsSize);
 			bool Write(lua::State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, Lua::udm_ng value);
-			Lua::opt<::util::DataStream> Read(lua::State *l, Buffer &hBuffer, uint32_t offset, uint32_t size);
-			bool Read(lua::State *l, Buffer &hBuffer, uint32_t offset, uint32_t size, ::util::DataStream &ds, uint32_t dsOffset);
+			Lua::opt<pragma::util::DataStream> Read(lua::State *l, Buffer &hBuffer, uint32_t offset, uint32_t size);
+			bool Read(lua::State *l, Buffer &hBuffer, uint32_t offset, uint32_t size, pragma::util::DataStream &ds, uint32_t dsOffset);
 			bool Read(lua::State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, Lua::udm_ng value);
 			bool Map(lua::State *l, Buffer &hBuffer, uint32_t offset, uint32_t size, Buffer::MapFlags mapFlags);
 		};

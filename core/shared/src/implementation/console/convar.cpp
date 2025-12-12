@@ -25,7 +25,7 @@ void pragma::console::ConConf::Print(const std::string &name)
 	if(type == pragma::console::ConType::Var) {
 		ConVar *cvar = static_cast<ConVar *>(this);
 		auto flags = cvar->GetFlags();
-		if(umath::is_flag_set(flags, pragma::console::ConVarFlags::Hidden) || umath::is_flag_set(flags, pragma::console::ConVarFlags::Password))
+		if(pragma::math::is_flag_set(flags, pragma::console::ConVarFlags::Hidden) || pragma::math::is_flag_set(flags, pragma::console::ConVarFlags::Password))
 			return;
 		Con::cout << "\"" << name << "\" = \"" << cvar->GetString() << "\" (Type: " << magic_enum::enum_name(cvar->GetVarType()) << ") (Default: " << cvar->GetDefault() << ")" << Con::endl;
 		if(flags > pragma::console::ConVarFlags::None) {
@@ -43,7 +43,7 @@ void pragma::console::ConConf::Print(const std::string &name)
 			if((flags & pragma::console::ConVarFlags::Notify) == pragma::console::ConVarFlags::Notify)
 				Con::cout << " notify";
 			Con::cout << Con::endl;
-			static_assert(umath::to_integral(pragma::console::ConVarFlags::Last) == 256);
+			static_assert(pragma::math::to_integral(pragma::console::ConVarFlags::Last) == 256);
 		}
 	}
 	else
@@ -301,7 +301,7 @@ std::shared_ptr<pragma::console::ConVar> pragma::console::ConVarMap::RegisterCon
   std::function<void(const std::string &, std::vector<std::string> &, bool)> autoCompleteFunction)
 {
 	auto lscmd = scmd;
-	ustring::to_lower(lscmd);
+	pragma::string::to_lower(lscmd);
 	if(m_conVars.find(lscmd) != m_conVars.end())
 		return nullptr;
 	std::string usageHelp;
@@ -338,7 +338,7 @@ static CallbackHandle register_convar_callback(const std::string &scvar, const s
 	};
 
 	auto lscvar = scvar;
-	ustring::to_lower(lscvar);
+	pragma::string::to_lower(lscvar);
 	auto it = callbacks.find(lscvar);
 	if(it == callbacks.end()) {
 		callbacks.insert(std::unordered_map<std::string, std::vector<pragma::console::CvarCallback>>::value_type(lscvar, std::vector<pragma::console::CvarCallback> {}));
@@ -369,10 +369,10 @@ CallbackHandle pragma::console::ConVarMap::RegisterConVarCallback(const std::str
 std::shared_ptr<pragma::console::ConCommand> pragma::console::ConVarMap::PreRegisterConCommand(const std::string &scmd, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto lscmd = scmd;
-	ustring::to_lower(lscmd);
+	pragma::string::to_lower(lscmd);
 	if(m_conVars.find(lscmd) != m_conVars.end())
 		return nullptr;
-	auto cmd = ::util::make_shared<ConCommand>(static_cast<void (*)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(nullptr), flags, help);
+	auto cmd = pragma::util::make_shared<ConCommand>(static_cast<void (*)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(nullptr), flags, help);
 	cmd->m_ID = m_conVarID;
 	m_conVars.insert(decltype(m_conVars)::value_type(lscmd, cmd));
 	m_conVarIDs.insert(decltype(m_conVarIDs)::value_type(lscmd, m_conVarID));
@@ -384,7 +384,7 @@ std::shared_ptr<pragma::console::ConCommand> pragma::console::ConVarMap::PreRegi
 void pragma::console::ConVarMap::PreRegisterConVarCallback(const std::string &scvar)
 {
 	auto lscvar = scvar;
-	ustring::to_lower(lscvar);
+	pragma::string::to_lower(lscvar);
 	auto it = m_conVarCallbacks.find(lscvar);
 	if(it == m_conVarCallbacks.end()) {
 		m_conVarCallbacks.insert(decltype(m_conVarCallbacks)::value_type(lscvar, std::vector<CvarCallback> {}));
@@ -397,7 +397,7 @@ std::shared_ptr<pragma::console::ConCommand> pragma::console::ConVarMap::Registe
   const std::function<void(const std::string &, std::vector<std::string> &, bool)> &autoCompleteCallback)
 {
 	auto lscmd = scmd;
-	ustring::to_lower(lscmd);
+	pragma::string::to_lower(lscmd);
 	auto it = m_conVars.find(lscmd);
 	if(it != m_conVars.end()) {
 		if(it->second->GetType() == pragma::console::ConType::Cmd) // C++ defined ConCommand
@@ -407,7 +407,7 @@ std::shared_ptr<pragma::console::ConCommand> pragma::console::ConVarMap::Registe
 		}
 		return nullptr;
 	}
-	auto cmd = ::util::make_shared<ConCommand>(fc, flags, help, autoCompleteCallback);
+	auto cmd = pragma::util::make_shared<ConCommand>(fc, flags, help, autoCompleteCallback);
 	cmd->m_ID = m_conVarID;
 	m_conVars.insert(decltype(m_conVars)::value_type(lscmd, cmd));
 	m_conVarIDs.insert(decltype(m_conVarIDs)::value_type(lscmd, m_conVarID));
@@ -427,7 +427,7 @@ std::shared_ptr<pragma::console::ConCommand> pragma::console::ConVarMap::Registe
 std::shared_ptr<pragma::console::ConConf> pragma::console::ConVarMap::GetConVar(const std::string &scmd)
 {
 	auto lscmd = scmd;
-	ustring::to_lower(lscmd);
+	pragma::string::to_lower(lscmd);
 	auto it = m_conVars.find(lscmd);
 	if(it == m_conVars.end())
 		return nullptr;
@@ -441,7 +441,7 @@ std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &pragma::consol
 unsigned int pragma::console::ConVarMap::GetConVarID(const std::string &scmd)
 {
 	auto lscmd = scmd;
-	ustring::to_lower(lscmd);
+	pragma::string::to_lower(lscmd);
 	auto it = m_conVarIDs.find(lscmd);
 	if(it == m_conVarIDs.end())
 		return 0;

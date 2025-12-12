@@ -269,7 +269,7 @@ static void hurtme(pragma::NetworkState *state, pragma::BasePlayerComponent *, s
 {
 	if(!check_cheats("hurtme", state))
 		return;
-	auto dmg = !args.empty() ? ustring::to_int(args.front()) : 1;
+	auto dmg = !args.empty() ? pragma::string::to_int(args.front()) : 1;
 	NetPacket p;
 	p->Write<uint16_t>(static_cast<uint16_t>(dmg));
 	auto *client = static_cast<pragma::ClientState *>(state);
@@ -316,7 +316,7 @@ static void give_ammo(pragma::NetworkState *state, pragma::BasePlayerComponent *
 	auto *client = pragma::get_client_state();
 	if(argv.empty() || !client->IsGameActive())
 		return;
-	uint32_t amount = (argv.size() > 1) ? util::to_int(argv[1]) : 50;
+	uint32_t amount = (argv.size() > 1) ? pragma::util::to_int(argv[1]) : 50;
 	if(!check_cheats("give_ammo", state))
 		return;
 	NetPacket p;
@@ -369,7 +369,7 @@ static void turn_left_in(pragma::NetworkState *, pragma::BasePlayerComponent *, 
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	turn_speeds.left = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
+	turn_speeds.left = (!argv.empty() ? pragma::string::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
 	update_turn_callbacks();
 }
 static void turn_left_out(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
@@ -385,7 +385,7 @@ static void turn_right_in(pragma::NetworkState *, pragma::BasePlayerComponent *,
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	turn_speeds.right = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
+	turn_speeds.right = (!argv.empty() ? pragma::string::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
 	update_turn_callbacks();
 }
 static void turn_right_out(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
@@ -401,7 +401,7 @@ static void turn_up_in(pragma::NetworkState *, pragma::BasePlayerComponent *, st
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	turn_speeds.up = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
+	turn_speeds.up = (!argv.empty() ? pragma::string::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
 	update_turn_callbacks();
 }
 static void turn_up_out(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
@@ -417,7 +417,7 @@ static void turn_down_in(pragma::NetworkState *, pragma::BasePlayerComponent *, 
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
-	turn_speeds.down = (!argv.empty() ? ustring::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
+	turn_speeds.down = (!argv.empty() ? pragma::string::to_float(argv.front()) : defaultTurnSpeed) * magnitude;
 	update_turn_callbacks();
 }
 static void turn_down_out(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)

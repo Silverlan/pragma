@@ -27,7 +27,7 @@ export namespace pragma::console {
 		  const std::string &help = "");
 
 		template<typename T>
-		    requires(util::is_of_type<T, int, float, bool, std::string>)
+		    requires(pragma::util::is_of_type<T, int, float, bool, std::string>)
 		DummyReturnValue register_variable_listener(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, T, T))
 		{
 			server::register_convar_callback(scvar, function);

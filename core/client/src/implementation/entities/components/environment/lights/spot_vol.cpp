@@ -50,7 +50,7 @@ float CLightSpotVolComponent::CalcEndRadius() const
 	auto pFieldAngleComponent = GetEntity().GetComponent<CFieldAngleComponent>();
 	auto maxDist = pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 100.f;
 	auto fieldAngle = pFieldAngleComponent.valid() ? pFieldAngleComponent->GetFieldAngle() : 0.f;
-	return maxDist * umath::tan(umath::deg_to_rad(fieldAngle / 2.f));
+	return maxDist * pragma::math::tan(pragma::math::deg_to_rad(fieldAngle / 2.f));
 }
 uint32_t CLightSpotVolComponent::CalcSegmentCount() const
 {
@@ -102,7 +102,7 @@ bool CLightSpotVolComponent::UpdateMeshData()
 		auto startPos = dir * maxDist * static_cast<float>(segStartRadius / endRadius);
 		auto endPos = dir * maxDist * static_cast<float>(segEndRadius / endRadius);
 		ConeSegment segment;
-		umath::geometry::generate_truncated_cone_mesh(startPos, static_cast<float>(segStartRadius), dir, uvec::distance(startPos, endPos), static_cast<float>(segEndRadius), segment.verts, &segment.indices, &segment.normals, coneDetail, false);
+		pragma::math::geometry::generate_truncated_cone_mesh(startPos, static_cast<float>(segStartRadius), dir, uvec::distance(startPos, endPos), static_cast<float>(segEndRadius), segment.verts, &segment.indices, &segment.normals, coneDetail, false);
 		coneSegments.push_back(std::move(segment));
 	}
 
@@ -111,7 +111,7 @@ bool CLightSpotVolComponent::UpdateMeshData()
 		m_subMeshes.clear();
 		m_subMeshes.reserve(coneSegments.size());
 		for(auto &segData : coneSegments) {
-			auto subMesh = ::util::make_shared<pragma::geometry::CModelSubMesh>();
+			auto subMesh = pragma::util::make_shared<pragma::geometry::CModelSubMesh>();
 			subMesh->SetIndexCount(segData.indices.size());
 			subMesh->GetVertices().resize(segData.verts.size());
 			subMesh->SetSkinTextureIndex(0);
@@ -129,12 +129,12 @@ bool CLightSpotVolComponent::UpdateMeshData()
 			return false;
 		}
 		for(auto i = decltype(segData.verts.size()) {0u}; i < segData.verts.size(); ++i)
-			verts[i] = umath::Vertex {segData.verts[i], segData.normals[i]};
+			verts[i] = pragma::math::Vertex {segData.verts[i], segData.normals[i]};
 		subMesh->VisitIndices([&segData](auto *indexData, uint32_t numIndices) {
-			assert(util::size_of_container(segData.indices) == sizeof(indexData[0]) * numIndices);
-			if(util::size_of_container(segData.indices) != sizeof(indexData[0]) * numIndices)
+			assert(pragma::util::size_of_container(segData.indices) == sizeof(indexData[0]) * numIndices);
+			if(pragma::util::size_of_container(segData.indices) != sizeof(indexData[0]) * numIndices)
 				throw std::runtime_error {"Volumetric mesh index data size mismatch!"};
-			memcpy(indexData, segData.indices.data(), util::size_of_container(segData.indices));
+			memcpy(indexData, segData.indices.data(), pragma::util::size_of_container(segData.indices));
 		});
 		subMesh->Update(pragma::asset::ModelUpdateFlags::UpdateVertexBuffer | pragma::asset::ModelUpdateFlags::UpdateIndexBuffer);
 		++idx;
@@ -170,10 +170,10 @@ void CLightSpotVolComponent::ReceiveData(NetPacket &packet)
 	});
 }
 
-util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvLightSpotVolComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEnvLightSpotVolComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON) {
 		auto pRenderComponent = static_cast<ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
@@ -184,7 +184,7 @@ util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId, C
 		if(pRenderComponent)
 			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::None);
 	}
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 
 void CLightSpotVolComponent::InitializeVolumetricLight()
@@ -209,7 +209,7 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	Lua::Material::Client::InitializeShaderData(nullptr, cmat, false);
 	m_material = mat->GetHandle();
 
-	auto mesh = ::util::make_shared<pragma::geometry::CModelMesh>();
+	auto mesh = pragma::util::make_shared<pragma::geometry::CModelMesh>();
 	for(auto &subMesh : m_subMeshes)
 		mesh->AddSubMesh(subMesh);
 	group->AddMesh(mesh);

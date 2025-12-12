@@ -59,7 +59,7 @@ msys::CMaterial *CMaterialPropertyOverrideComponent::GetRenderMaterial(uint32_t 
 	return static_cast<msys::CMaterial *>(m_materialOverrides[idx].material.get());
 }
 
-std::string CMaterialPropertyOverrideComponent::GetPropertyName(const msys::CMaterial &mat, const char *key, bool texture) { return util::FilePath("material", GetNormalizedMaterialName(mat), texture ? "textures" : "properties", key).GetString(); }
+std::string CMaterialPropertyOverrideComponent::GetPropertyName(const msys::CMaterial &mat, const char *key, bool texture) { return pragma::util::FilePath("material", GetNormalizedMaterialName(mat), texture ? "textures" : "properties", key).GetString(); }
 
 CMaterialPropertyOverrideComponent::PropertyInfo *CMaterialPropertyOverrideComponent::InitializeMaterialProperty(uint32_t matIdx, const char *key)
 {
@@ -164,7 +164,7 @@ udm::Property *CMaterialPropertyOverrideComponent::FindMaterialProperty(uint32_t
 	return info->property.get();
 }
 
-std::string CMaterialPropertyOverrideComponent::NormalizeTexturePath(const std::string &path) { return util::FilePath(pragma::asset::get_normalized_path(path, pragma::asset::Type::Texture)).GetString(); }
+std::string CMaterialPropertyOverrideComponent::NormalizeTexturePath(const std::string &path) { return pragma::util::FilePath(pragma::asset::get_normalized_path(path, pragma::asset::Type::Texture)).GetString(); }
 
 void CMaterialPropertyOverrideComponent::SetTextureProperty(uint32_t matIdx, const char *key, const std::string &tex) { SetMaterialProperty<std::string, true>(matIdx, key, NormalizeTexturePath(tex)); }
 std::string CMaterialPropertyOverrideComponent::GetTextureProperty(uint32_t matIdx, const char *key) const
@@ -300,7 +300,7 @@ void CMaterialPropertyOverrideComponent::UpdateRenderBuffers(prosper::IPrimaryCo
 
 std::string CMaterialPropertyOverrideComponent::GetNormalizedMaterialName(std::string name)
 {
-	ustring::to_lower(name);
+	pragma::string::to_lower(name);
 	return name;
 }
 std::string CMaterialPropertyOverrideComponent::GetNormalizedMaterialName(const msys::CMaterial &mat) { return GetNormalizedMaterialName(std::string {util::FilePath(const_cast<msys::CMaterial &>(mat).GetName()).GetBack()}); }
@@ -317,16 +317,16 @@ void CMaterialPropertyOverrideComponent::InitializeLuaObject(lua::State *l) { re
 void CMaterialPropertyOverrideComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEvent(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		m_materialOverrides.clear();
 		if(GetEntity().IsSpawned())
 			PopulateProperties();
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
-	BindEvent(cMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cMaterialOverrideComponent::EVENT_ON_MATERIAL_OVERRIDE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &evOc = static_cast<CEOnMaterialOverrideChanged &>(evData.get());
 		UpdateMaterialOverride(evOc.materialIndex, evOc.material);
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 
 	GetEntity().AddComponent<CMaterialOverrideComponent>();
@@ -670,7 +670,7 @@ void CMaterialPropertyOverrideComponent::ClearProperties(uint32_t matIdx)
 	std::string matTexPath = matPropName + "textures/";
 	size_t propIdx = 0;
 	for(auto &propInfo : m_shaderMaterialPropertyInfos) {
-		util::ScopeGuard sg {[&propIdx]() { ++propIdx; }};
+		pragma::util::ScopeGuard sg {[&propIdx]() { ++propIdx; }};
 		if(!propInfo.IsValid() || propInfo.materialIndex != matIdx)
 			continue;
 
@@ -690,7 +690,7 @@ void CMaterialPropertyOverrideComponent::PopulateProperties(std::string matName,
 	auto *shaderMat = GetShaderMaterial(mat);
 	if(!shaderMat)
 		return;
-	ustring::to_lower(matName);
+	pragma::string::to_lower(matName);
 	std::string matPropName = "material/" + matName + "/";
 
 	auto &propertyMap = shaderMat->GetPropertyMap();
@@ -708,7 +708,7 @@ void CMaterialPropertyOverrideComponent::PopulateProperties(std::string matName,
 
 		auto &metaData = memberInfo.AddMetaData();
 		metaData["assetType"] = "shader";
-		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::ShaderGraph)).GetString();
+		metaData["rootPath"] = pragma::util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::ShaderGraph)).GetString();
 		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::ShaderGraph, pragma::asset::FormatType::All);
 		metaData["stripRootPath"] = true;
 		metaData["stripExtension"] = true;
@@ -737,7 +737,7 @@ void CMaterialPropertyOverrideComponent::PopulateProperties(std::string matName,
 		if(index >= shaderMat->properties.size())
 			continue;
 		auto &prop = shaderMat->properties[index];
-		if(umath::is_flag_set(prop.propertyFlags, pragma::rendering::Property::Flags::HideInEditor))
+		if(pragma::math::is_flag_set(prop.propertyFlags, pragma::rendering::Property::Flags::HideInEditor))
 			continue;
 
 		/*auto it = sharedProps.find(name);
@@ -766,7 +766,7 @@ void CMaterialPropertyOverrideComponent::PopulateProperties()
 	ClearMembers();
 	m_shaderMaterialPropertyInfos.clear();
 	m_freePropertyInfoIndices = {};
-	util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
+	pragma::util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
 
 	auto &mdl = GetEntity().GetModel();
 	if(!mdl)

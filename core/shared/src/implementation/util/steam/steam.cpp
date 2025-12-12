@@ -12,27 +12,27 @@ module pragma.shared;
 
 import :util.steam;
 
-std::vector<util::Path> util::steam::find_steam_root_paths()
+std::vector<pragma::util::Path> pragma::util::steam::find_steam_root_paths()
 {
 	auto installationPath = find_steam_installation_path();
 	if(!installationPath)
 		return {};
-	std::vector<util::Path> paths;
-	paths.push_back(util::get_normalized_path(*installationPath));
+	std::vector<pragma::util::Path> paths;
+	paths.push_back(pragma::util::get_normalized_path(*installationPath));
 
 	std::vector<std::string> additionalSteamPaths {};
 	get_external_steam_locations(*installationPath, additionalSteamPaths);
 	paths.reserve(paths.size() + additionalSteamPaths.size());
 	for(auto &path : additionalSteamPaths)
-		paths.push_back(util::get_normalized_path(path));
+		paths.push_back(pragma::util::get_normalized_path(path));
 	return paths;
 }
 
-std::optional<std::string> util::steam::find_steam_installation_path()
+std::optional<std::string> pragma::util::steam::find_steam_installation_path()
 {
 	std::string rootSteamPath;
 #ifdef _WIN32
-	if(util::get_registry_key_value(util::HKey::CurrentUser, "SOFTWARE\\Valve\\Steam", "SteamPath", rootSteamPath) == false)
+	if(pragma::util::get_registry_key_value(pragma::util::HKey::CurrentUser, "SOFTWARE\\Valve\\Steam", "SteamPath", rootSteamPath) == false)
 		return {};
 #else
 	auto *pHomePath = getenv("HOME");
@@ -47,7 +47,7 @@ std::optional<std::string> util::steam::find_steam_installation_path()
 		rootSteamPath = rootSteamPathLink;
 	}
 	else {
-		auto snapPath = util::DirPath(std::string {pHomePath}) + "/snap/steam/common/.local/share/Steam/";
+		auto snapPath = pragma::util::DirPath(std::string {pHomePath}) + "/snap/steam/common/.local/share/Steam/";
 		if(filemanager::is_system_dir(snapPath.GetString()) == true)
 			rootSteamPath = snapPath.GetString();
 		else
@@ -59,7 +59,7 @@ std::optional<std::string> util::steam::find_steam_installation_path()
 	return rootSteamPath;
 }
 
-bool util::steam::get_external_steam_locations(const std::string &steamRootPath, std::vector<std::string> &outExtLocations)
+bool pragma::util::steam::get_external_steam_locations(const std::string &steamRootPath, std::vector<std::string> &outExtLocations)
 {
 	auto f = FileManager::OpenSystemFile((steamRootPath + "/steamapps/libraryfolders.vdf").c_str(), "r");
 	if(f == nullptr)
@@ -69,17 +69,17 @@ bool util::steam::get_external_steam_locations(const std::string &steamRootPath,
 	DataStream dsContents {static_cast<uint32_t>(lenContents)};
 	f->Read(dsContents->GetData(), lenContents);
 
-	util::MarkupFile mf {dsContents};
-	auto vdfData = ::util::make_shared<util::steam::vdf::Data>();
-	auto r = util::steam::vdf::read_vdf_block(mf, vdfData->dataBlock);
-	if(r != util::MarkupFile::ResultCode::Ok)
+	pragma::util::MarkupFile mf {dsContents};
+	auto vdfData = pragma::util::make_shared<pragma::util::steam::vdf::Data>();
+	auto r = pragma::util::steam::vdf::read_vdf_block(mf, vdfData->dataBlock);
+	if(r != pragma::util::MarkupFile::ResultCode::Ok)
 		return false;
 	auto it = vdfData->dataBlock.children.find("libraryfolders");
 	if(it == vdfData->dataBlock.children.end())
 		return false;
 	auto &libraryFolders = it->second;
 	auto fAddPath = [&outExtLocations](std::string path) {
-		ustring::replace(path, "\\\\", "/");
+		pragma::string::replace(path, "\\\\", "/");
 		if(path.empty() == false && path.back() == '/')
 			path.pop_back();
 		outExtLocations.push_back(path);

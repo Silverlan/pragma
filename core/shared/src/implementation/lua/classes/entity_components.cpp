@@ -378,7 +378,7 @@ bool pragma::LuaCore::set_member_value(lua::State *l, pragma::BaseEntityComponen
 		}
 	});
 }
-static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
+static_assert(pragma::math::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
 bool pragma::LuaCore::set_member_value(lua::State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::EntityURef &eref)
 {
 	if(memberInfo.type != pragma::ents::EntityMemberType::Entity)
@@ -418,12 +418,8 @@ static std::vector<pragma::ComponentMemberIndex> get_dynamic_member_ids(pragma::
 	return memberIndices;
 }
 
-#ifdef __linux__
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Path);
-#endif
-
 template<typename TMemberIdentifier, typename TValue, auto TSetValue>
-bool set_transform_member_value(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const TValue &value)
+bool set_transform_member_value(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const TValue &value)
 {
 	if constexpr(std::is_same_v<TMemberIdentifier, std::string>) {
 		auto idx = component.GetMemberIndex(memId);
@@ -437,31 +433,31 @@ bool set_transform_member_value(pragma::BaseEntityComponent &component, const TM
 }
 
 template<typename TMemberIdentifier>
-static bool set_transform_member_pos(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const Vector3 &value)
+static bool set_transform_member_pos(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const Vector3 &value)
 {
 	return set_transform_member_value<TMemberIdentifier, Vector3, &pragma::BaseEntityComponent::SetTransformMemberPos>(component, memId, space, value);
 }
 
 template<typename TMemberIdentifier>
-static bool set_transform_member_rot(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const Quat &value)
+static bool set_transform_member_rot(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const Quat &value)
 {
 	return set_transform_member_value<TMemberIdentifier, Quat, &pragma::BaseEntityComponent::SetTransformMemberRot>(component, memId, space, value);
 }
 
 template<typename TMemberIdentifier>
-static bool set_transform_member_scale(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const Vector3 &value)
+static bool set_transform_member_scale(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const Vector3 &value)
 {
 	return set_transform_member_value<TMemberIdentifier, Vector3, &pragma::BaseEntityComponent::SetTransformMemberScale>(component, memId, space, value);
 }
 
 template<typename TMemberIdentifier>
-static bool set_transform_member_pose(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const umath::ScaledTransform &value)
+static bool set_transform_member_pose(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const pragma::math::ScaledTransform &value)
 {
-	return set_transform_member_value<TMemberIdentifier, umath::ScaledTransform, &pragma::BaseEntityComponent::SetTransformMemberPose>(component, memId, space, value);
+	return set_transform_member_value<TMemberIdentifier, pragma::math::ScaledTransform, &pragma::BaseEntityComponent::SetTransformMemberPose>(component, memId, space, value);
 }
 
 template<typename TMemberIdentifier, typename TValue, auto TGetValue, auto TGetParentValue, bool parentSpaceOnly = false>
-std::optional<TValue> get_transform_member_value(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space)
+std::optional<TValue> get_transform_member_value(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space)
 {
 	if constexpr(std::is_same_v<TMemberIdentifier, std::string>) {
 		auto idx = component.GetMemberIndex(memId);
@@ -484,31 +480,31 @@ std::optional<TValue> get_transform_member_value(pragma::BaseEntityComponent &co
 }
 
 template<typename TMemberIdentifier, bool parentSpaceOnly = false>
-static std::optional<Vector3> get_transform_member_pos(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space)
+static std::optional<Vector3> get_transform_member_pos(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space)
 {
 	return get_transform_member_value<TMemberIdentifier, Vector3, &pragma::BaseEntityComponent::GetTransformMemberPos, &pragma::BaseEntityComponent::GetTransformMemberParentPos, parentSpaceOnly>(component, memId, space);
 }
 
 template<typename TMemberIdentifier, bool parentSpaceOnly = false>
-static std::optional<Quat> get_transform_member_rot(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space)
+static std::optional<Quat> get_transform_member_rot(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space)
 {
 	return get_transform_member_value<TMemberIdentifier, Quat, &pragma::BaseEntityComponent::GetTransformMemberRot, &pragma::BaseEntityComponent::GetTransformMemberParentRot, parentSpaceOnly>(component, memId, space);
 }
 
 template<typename TMemberIdentifier, bool parentSpaceOnly = false>
-static std::optional<Vector3> get_transform_member_scale(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space)
+static std::optional<Vector3> get_transform_member_scale(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space)
 {
 	return get_transform_member_value<TMemberIdentifier, Vector3, &pragma::BaseEntityComponent::GetTransformMemberScale, &pragma::BaseEntityComponent::GetTransformMemberParentScale, parentSpaceOnly>(component, memId, space);
 }
 
 template<typename TMemberIdentifier, bool parentSpaceOnly = false>
-static std::optional<umath::ScaledTransform> get_transform_member_pose(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space)
+static std::optional<pragma::math::ScaledTransform> get_transform_member_pose(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space)
 {
-	return get_transform_member_value<TMemberIdentifier, umath::ScaledTransform, &pragma::BaseEntityComponent::GetTransformMemberPose, &pragma::BaseEntityComponent::GetTransformMemberParentPose, parentSpaceOnly>(component, memId, space);
+	return get_transform_member_value<TMemberIdentifier, pragma::math::ScaledTransform, &pragma::BaseEntityComponent::GetTransformMemberPose, &pragma::BaseEntityComponent::GetTransformMemberParentPose, parentSpaceOnly>(component, memId, space);
 }
 
 template<typename TMemberIdentifier, typename TValue, auto TConvert>
-static std::optional<TValue> convert_transform_member_value_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const TValue &value)
+static std::optional<TValue> convert_transform_member_value_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const TValue &value)
 {
 	if constexpr(std::is_same_v<TMemberIdentifier, std::string>) {
 		auto idx = component.GetMemberIndex(memId);
@@ -525,28 +521,28 @@ static std::optional<TValue> convert_transform_member_value_to_target_space(prag
 }
 
 template<typename TMemberIdentifier>
-static std::optional<Vector3> convert_transform_member_pos_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const Vector3 &pos)
+static std::optional<Vector3> convert_transform_member_pos_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const Vector3 &pos)
 {
 	return convert_transform_member_value_to_target_space<TMemberIdentifier, Vector3, &pragma::BaseEntityComponent::ConvertTransformMemberPosToTargetSpace>(component, memId, space, pos);
 }
 template<typename TMemberIdentifier>
-static std::optional<Quat> convert_transform_member_rot_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const Quat &rot)
+static std::optional<Quat> convert_transform_member_rot_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const Quat &rot)
 {
 	return convert_transform_member_value_to_target_space<TMemberIdentifier, Quat, &pragma::BaseEntityComponent::ConvertTransformMemberRotToTargetSpace>(component, memId, space, rot);
 }
 template<typename TMemberIdentifier>
-static std::optional<Vector3> convert_transform_member_scale_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const Vector3 &scale)
+static std::optional<Vector3> convert_transform_member_scale_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const Vector3 &scale)
 {
 	return convert_transform_member_value_to_target_space<TMemberIdentifier, Vector3, &pragma::BaseEntityComponent::ConvertTransformMemberScaleToTargetSpace>(component, memId, space, scale);
 }
 template<typename TMemberIdentifier>
-static std::optional<umath::ScaledTransform> convert_transform_member_pose_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const umath::ScaledTransform &pose)
+static std::optional<pragma::math::ScaledTransform> convert_transform_member_pose_to_target_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const pragma::math::ScaledTransform &pose)
 {
-	return convert_transform_member_value_to_target_space<TMemberIdentifier, umath::ScaledTransform, &pragma::BaseEntityComponent::ConvertTransformMemberPoseToTargetSpace>(component, memId, space, pose);
+	return convert_transform_member_value_to_target_space<TMemberIdentifier, pragma::math::ScaledTransform, &pragma::BaseEntityComponent::ConvertTransformMemberPoseToTargetSpace>(component, memId, space, pose);
 }
 
 template<typename TMemberIdentifier, typename T, auto TConvert>
-static std::optional<std::pair<T, umath::CoordinateSpace>> convert_value_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const T &value)
+static std::optional<std::pair<T, pragma::math::CoordinateSpace>> convert_value_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const T &value)
 {
 	if constexpr(std::is_same_v<TMemberIdentifier, std::string>) {
 		auto idx = component.GetMemberIndex(memId);
@@ -555,31 +551,31 @@ static std::optional<std::pair<T, umath::CoordinateSpace>> convert_value_to_memb
 		return convert_value_to_member_space<pragma::ComponentMemberIndex, T, TConvert>(component, *idx, space, value);
 	}
 	else {
-		umath::CoordinateSpace memberSpace;
+		pragma::math::CoordinateSpace memberSpace;
 		T newValue = value;
 		if(!(component.*TConvert)(memId, space, newValue, &memberSpace))
 			return {};
-		return std::pair<T, umath::CoordinateSpace> {newValue, memberSpace};
+		return std::pair<T, pragma::math::CoordinateSpace> {newValue, memberSpace};
 	}
 	return {};
 }
 template<typename TMemberIdentifier, typename T>
-static std::optional<std::pair<T, umath::CoordinateSpace>> convert_pos_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const T &value)
+static std::optional<std::pair<T, pragma::math::CoordinateSpace>> convert_pos_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const T &value)
 {
 	return convert_value_to_member_space<TMemberIdentifier, T, &pragma::BaseEntityComponent::ConvertPosToMemberSpace>(component, memId, space, value);
 }
 template<typename TMemberIdentifier, typename T>
-static std::optional<std::pair<T, umath::CoordinateSpace>> convert_rot_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const T &value)
+static std::optional<std::pair<T, pragma::math::CoordinateSpace>> convert_rot_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const T &value)
 {
 	return convert_value_to_member_space<TMemberIdentifier, T, &pragma::BaseEntityComponent::ConvertRotToMemberSpace>(component, memId, space, value);
 }
 template<typename TMemberIdentifier, typename T>
-static std::optional<std::pair<T, umath::CoordinateSpace>> convert_scale_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const T &value)
+static std::optional<std::pair<T, pragma::math::CoordinateSpace>> convert_scale_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const T &value)
 {
 	return convert_value_to_member_space<TMemberIdentifier, T, &pragma::BaseEntityComponent::ConvertScaleToMemberSpace>(component, memId, space, value);
 }
 template<typename TMemberIdentifier, typename T>
-static std::optional<std::pair<T, umath::CoordinateSpace>> convert_pose_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, umath::CoordinateSpace space, const T &value)
+static std::optional<std::pair<T, pragma::math::CoordinateSpace>> convert_pose_to_member_space(pragma::BaseEntityComponent &component, const TMemberIdentifier &memId, pragma::math::CoordinateSpace space, const T &value)
 {
 	return convert_value_to_member_space<TMemberIdentifier, T, &pragma::BaseEntityComponent::ConvertPoseToMemberSpace>(component, memId, space, value);
 }
@@ -664,7 +660,7 @@ static int log(lua::State *l, spdlog::level::level_enum logLevel)
 
 static CallbackHandle add_event_callback(lua::State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const Lua::func<void> &function)
 {
-	auto hCb = hComponent.AddEventCallback(eventId, [l, function](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {
+	auto hCb = hComponent.AddEventCallback(eventId, [l, function](std::reference_wrapper<pragma::ComponentEvent> ev) -> pragma::util::EventReply {
 		// We need to create a copy of the lua-state pointer, since the callback can remove itself, which
 		// would also cause the std::function-object to be destroyed (and therefore the captured variables).
 		auto lTmp = l;
@@ -681,13 +677,13 @@ static CallbackHandle add_event_callback(lua::State *l, pragma::BaseEntityCompon
 		  lua::MultiReturn);
 		auto numRet = Lua::GetStackTop(l) - nstack;
 		if(c == Lua::StatusCode::Ok && numRet > 0 && Lua::IsNone(lTmp, -1) == false) {
-			auto result = Lua::IsNumber(lTmp, -numRet) ? static_cast<util::EventReply>(Lua::CheckInt(lTmp, -numRet)) : util::EventReply::Unhandled;
-			if(result == util::EventReply::Handled)
+			auto result = Lua::IsNumber(lTmp, -numRet) ? static_cast<pragma::util::EventReply>(Lua::CheckInt(lTmp, -numRet)) : pragma::util::EventReply::Unhandled;
+			if(result == pragma::util::EventReply::Handled)
 				ev.get().HandleReturnValues(l);
 			Lua::Pop(lTmp, numRet); // Pop result(s)
 			return result;
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	return hCb;
 }
@@ -714,14 +710,14 @@ void register_entity_component_transform_methods(luabind::class_<pragma::BaseEnt
 	entityComponentDef.def("ConvertPosToMemberSpace", &convert_pos_to_member_space<TMemberIdentifier, Vector3>);
 	entityComponentDef.def("ConvertRotToMemberSpace", &convert_rot_to_member_space<TMemberIdentifier, Quat>);
 	entityComponentDef.def("ConvertScaleToMemberSpace", &convert_scale_to_member_space<TMemberIdentifier, Vector3>);
-	entityComponentDef.def("ConvertPoseToMemberSpace", &convert_pose_to_member_space<TMemberIdentifier, umath::ScaledTransform>);
+	entityComponentDef.def("ConvertPoseToMemberSpace", &convert_pose_to_member_space<TMemberIdentifier, pragma::math::ScaledTransform>);
 }
 
 void pragma::LuaCore::register_entity_component_classes(lua::State *l, luabind::module_ &mod)
 {
 	auto entityComponentDef = pragma::LuaCore::create_entity_component_class<pragma::BaseEntityComponent>("EntityComponent");
-	entityComponentDef.def("BroadcastEvent", static_cast<util::EventReply (pragma::BaseEntityComponent::*)(pragma::ComponentEventId) const>(&pragma::BaseEntityComponent::BroadcastEvent));
-	entityComponentDef.def("BroadcastEvent", static_cast<util::EventReply (*)(lua::State *, pragma::BaseEntityComponent &, uint32_t, const luabind::tableT<void> &)>([](lua::State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const luabind::tableT<void> &eventArgs) {
+	entityComponentDef.def("BroadcastEvent", static_cast<pragma::util::EventReply (pragma::BaseEntityComponent::*)(pragma::ComponentEventId) const>(&pragma::BaseEntityComponent::BroadcastEvent));
+	entityComponentDef.def("BroadcastEvent", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::BaseEntityComponent &, uint32_t, const luabind::tableT<void> &)>([](lua::State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const luabind::tableT<void> &eventArgs) {
 		int32_t t = 3;
 		if(pragma::get_engine()->GetNetworkState(l)->GetGameState()->BroadcastEntityEvent(hComponent, eventId, t) == false) {
 			LuaComponentEvent luaEvent {};
@@ -737,10 +733,10 @@ void pragma::LuaCore::register_entity_component_classes(lua::State *l, luabind::
 			//hComponent->InvokeEventCallbacks(eventId,luaEvent);
 			return handled;
 		}
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	}));
-	entityComponentDef.def("InvokeEventCallbacks", static_cast<util::EventReply (pragma::BaseEntityComponent::*)(pragma::ComponentEventId) const>(&pragma::BaseEntityComponent::InvokeEventCallbacks));
-	entityComponentDef.def("InvokeEventCallbacks", static_cast<util::EventReply (*)(lua::State *, pragma::BaseEntityComponent &, uint32_t, const luabind::tableT<void> &)>([](lua::State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const luabind::tableT<void> &eventArgs) {
+	entityComponentDef.def("InvokeEventCallbacks", static_cast<pragma::util::EventReply (pragma::BaseEntityComponent::*)(pragma::ComponentEventId) const>(&pragma::BaseEntityComponent::InvokeEventCallbacks));
+	entityComponentDef.def("InvokeEventCallbacks", static_cast<pragma::util::EventReply (*)(lua::State *, pragma::BaseEntityComponent &, uint32_t, const luabind::tableT<void> &)>([](lua::State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const luabind::tableT<void> &eventArgs) {
 		int32_t t = 3;
 
 		LuaComponentEvent luaEvent {};
@@ -774,7 +770,7 @@ void pragma::LuaCore::register_entity_component_classes(lua::State *l, luabind::
 	register_entity_component_transform_methods<pragma::ComponentMemberIndex>(entityComponentDef);
 	register_entity_component_transform_methods<std::string>(entityComponentDef);
 	entityComponentDef.def(
-	  "GetTransformMemberSpace", +[](pragma::BaseEntityComponent &c, ComponentMemberIndex memberIndex) -> std::optional<umath::CoordinateSpace> {
+	  "GetTransformMemberSpace", +[](pragma::BaseEntityComponent &c, ComponentMemberIndex memberIndex) -> std::optional<pragma::math::CoordinateSpace> {
 		  auto *memberInfo = c.GetMemberInfo(memberIndex);
 		  if(!memberInfo)
 			  return {};
@@ -876,7 +872,7 @@ void pragma::LuaCore::register_entity_component_classes(lua::State *l, luabind::
 		  auto *nw = pragma::get_engine()->GetNetworkState(l);
 		  auto *game = nw->GetGameState();
 		  auto *componentInfo = game->GetEntityComponentManager().GetComponentInfo(hComponent.GetComponentId());
-		  if(componentInfo && umath::is_flag_set(componentInfo->flags, pragma::ComponentFlags::Networked) == false)
+		  if(componentInfo && pragma::math::is_flag_set(componentInfo->flags, pragma::ComponentFlags::Networked) == false)
 			  ::operator<<(::operator<<(::operator<<(::operator<<(Con::cwar, "WARNING: Component '"), componentInfo->name),
 			                 "' has uses net-events, but was not registered as networked, this means networking will be disabled for this component! Set the 'ents.EntityComponent.FREGISTER_BIT_NETWORKED' flag when registering the component to fix this!"),
 			    Con::endl);
@@ -891,7 +887,7 @@ void pragma::LuaCore::register_entity_component_classes(lua::State *l, luabind::
 	}));
 	entityComponentDef.def("AddEventCallback", &add_event_callback);
 	entityComponentDef.def("AddEventListener", &add_event_callback); // Alias
-	entityComponentDef.def("InjectEvent", static_cast<util::EventReply (pragma::BaseEntityComponent::*)(pragma::ComponentEventId)>(&pragma::BaseEntityComponent::InjectEvent));
+	entityComponentDef.def("InjectEvent", static_cast<pragma::util::EventReply (pragma::BaseEntityComponent::*)(pragma::ComponentEventId)>(&pragma::BaseEntityComponent::InjectEvent));
 	entityComponentDef.def("InjectEvent", static_cast<void (*)(lua::State *, pragma::BaseEntityComponent &, uint32_t, const luabind::tableT<void> &)>([](lua::State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const luabind::tableT<void> &eventArgs) {
 		int32_t t = 3;
 		if(pragma::get_engine()->GetNetworkState(l)->GetGameState()->InjectEntityEvent(hComponent, eventId, t) == false) {
@@ -931,17 +927,17 @@ void pragma::LuaCore::register_entity_component_classes(lua::State *l, luabind::
 	entityComponentDef.def("Log", static_cast<void (pragma::BaseEntityComponent::*)(const std::string &, pragma::BaseEntityComponent::LogSeverity) const>(&pragma::BaseEntityComponent::Log), luabind::default_parameter_policy<3, pragma::BaseEntityComponent::LogSeverity::Warning> {});
 	entityComponentDef.def("SetPropertyAnimated", &pragma::BaseEntityComponent::SetPropertyAnimated);
 	entityComponentDef.def("IsPropertyAnimated", &pragma::BaseEntityComponent::IsPropertyAnimated);
-	entityComponentDef.add_static_constant("FREGISTER_NONE", umath::to_integral(pragma::ComponentFlags::None));
-	entityComponentDef.add_static_constant("FREGISTER_BIT_NETWORKED", umath::to_integral(pragma::ComponentFlags::Networked));
-	entityComponentDef.add_static_constant("FREGISTER_BIT_HIDE_IN_EDITOR", umath::to_integral(pragma::ComponentFlags::HideInEditor));
+	entityComponentDef.add_static_constant("FREGISTER_NONE", pragma::math::to_integral(pragma::ComponentFlags::None));
+	entityComponentDef.add_static_constant("FREGISTER_BIT_NETWORKED", pragma::math::to_integral(pragma::ComponentFlags::Networked));
+	entityComponentDef.add_static_constant("FREGISTER_BIT_HIDE_IN_EDITOR", pragma::math::to_integral(pragma::ComponentFlags::HideInEditor));
 
-	entityComponentDef.add_static_constant("CALLBACK_TYPE_ENTITY", umath::to_integral(pragma::BaseEntityComponent::CallbackType::Entity));
-	entityComponentDef.add_static_constant("CALLBACK_TYPE_COMPONENT", umath::to_integral(pragma::BaseEntityComponent::CallbackType::Component));
-	entityComponentDef.add_static_constant("LOG_SEVERITY_NORMAL", umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Normal));
-	entityComponentDef.add_static_constant("LOG_SEVERITY_WARNING", umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Warning));
-	entityComponentDef.add_static_constant("LOG_SEVERITY_ERROR", umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Error));
-	entityComponentDef.add_static_constant("LOG_SEVERITY_CRITICAL", umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Critical));
-	entityComponentDef.add_static_constant("LOG_SEVERITY_DEBUG", umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Debug));
+	entityComponentDef.add_static_constant("CALLBACK_TYPE_ENTITY", pragma::math::to_integral(pragma::BaseEntityComponent::CallbackType::Entity));
+	entityComponentDef.add_static_constant("CALLBACK_TYPE_COMPONENT", pragma::math::to_integral(pragma::BaseEntityComponent::CallbackType::Component));
+	entityComponentDef.add_static_constant("LOG_SEVERITY_NORMAL", pragma::math::to_integral(pragma::BaseEntityComponent::LogSeverity::Normal));
+	entityComponentDef.add_static_constant("LOG_SEVERITY_WARNING", pragma::math::to_integral(pragma::BaseEntityComponent::LogSeverity::Warning));
+	entityComponentDef.add_static_constant("LOG_SEVERITY_ERROR", pragma::math::to_integral(pragma::BaseEntityComponent::LogSeverity::Error));
+	entityComponentDef.add_static_constant("LOG_SEVERITY_CRITICAL", pragma::math::to_integral(pragma::BaseEntityComponent::LogSeverity::Critical));
+	entityComponentDef.add_static_constant("LOG_SEVERITY_DEBUG", pragma::math::to_integral(pragma::BaseEntityComponent::LogSeverity::Debug));
 	mod[entityComponentDef];
 
 	luabind::object oLogger = luabind::globals(l)["ents"];
@@ -1104,7 +1100,7 @@ void pragma::LuaCore::base_child_component::register_class(luabind::module_ &mod
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseChildComponent>("BaseChildComponent");
 	def.add_static_constant("EVENT_ON_PARENT_CHANGED", pragma::baseChildComponent::EVENT_ON_PARENT_CHANGED);
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("ClearParent", &pragma::BaseChildComponent::ClearParent);
 	def.def("SetParent", &pragma::BaseChildComponent::SetParent);
 	def.def("GetParent", &pragma::BaseChildComponent::GetParent, luabind::copy_policy<0> {});
@@ -1114,7 +1110,7 @@ void pragma::LuaCore::base_child_component::register_class(luabind::module_ &mod
 void pragma::LuaCore::base_attachable_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseAttachmentComponent>("BaseAttachmentComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("AttachToEntity", &pragma::BaseAttachmentComponent::AttachToEntity, luabind::discard_result {});
 	def.def("AttachToEntity", static_cast<AttachmentData *(*)(pragma::BaseAttachmentComponent &, pragma::ecs::BaseEntity *)>([](pragma::BaseAttachmentComponent &component, pragma::ecs::BaseEntity *ent) { return component.AttachToEntity(ent); }), luabind::discard_result {});
 	//AttachmentData *AttachToEntity(BaseEntity *ent,const AttachmentInfo &attInfo={});
@@ -1165,15 +1161,15 @@ void pragma::LuaCore::base_attachable_component::register_class(luabind::module_
 
 	def.add_static_constant("EVENT_ON_ATTACHMENT_UPDATE", pragma::baseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE);
 
-	def.add_static_constant("FATTACHMENT_MODE_POSITION_ONLY", umath::to_integral(pragma::FAttachmentMode::PositionOnly));
-	def.add_static_constant("FATTACHMENT_MODE_BONEMERGE", umath::to_integral(pragma::FAttachmentMode::BoneMerge));
-	def.add_static_constant("FATTACHMENT_MODE_UPDATE_EACH_FRAME", umath::to_integral(pragma::FAttachmentMode::UpdateEachFrame));
-	def.add_static_constant("FATTACHMENT_MODE_PLAYER_VIEW", umath::to_integral(pragma::FAttachmentMode::PlayerView));
-	def.add_static_constant("FATTACHMENT_MODE_PLAYER_VIEW_YAW", umath::to_integral(pragma::FAttachmentMode::PlayerViewYaw));
-	def.add_static_constant("FATTACHMENT_MODE_SNAP_TO_ORIGIN", umath::to_integral(pragma::FAttachmentMode::SnapToOrigin));
-	def.add_static_constant("FATTACHMENT_MODE_FORCE_TRANSLATION_IN_PLACE", umath::to_integral(pragma::FAttachmentMode::ForceTranslationInPlace));
-	def.add_static_constant("FATTACHMENT_MODE_FORCE_ROTATION_IN_PLACE", umath::to_integral(pragma::FAttachmentMode::ForceRotationInPlace));
-	def.add_static_constant("FATTACHMENT_MODE_FORCE_IN_PLACE", umath::to_integral(pragma::FAttachmentMode::ForceInPlace));
+	def.add_static_constant("FATTACHMENT_MODE_POSITION_ONLY", pragma::math::to_integral(pragma::FAttachmentMode::PositionOnly));
+	def.add_static_constant("FATTACHMENT_MODE_BONEMERGE", pragma::math::to_integral(pragma::FAttachmentMode::BoneMerge));
+	def.add_static_constant("FATTACHMENT_MODE_UPDATE_EACH_FRAME", pragma::math::to_integral(pragma::FAttachmentMode::UpdateEachFrame));
+	def.add_static_constant("FATTACHMENT_MODE_PLAYER_VIEW", pragma::math::to_integral(pragma::FAttachmentMode::PlayerView));
+	def.add_static_constant("FATTACHMENT_MODE_PLAYER_VIEW_YAW", pragma::math::to_integral(pragma::FAttachmentMode::PlayerViewYaw));
+	def.add_static_constant("FATTACHMENT_MODE_SNAP_TO_ORIGIN", pragma::math::to_integral(pragma::FAttachmentMode::SnapToOrigin));
+	def.add_static_constant("FATTACHMENT_MODE_FORCE_TRANSLATION_IN_PLACE", pragma::math::to_integral(pragma::FAttachmentMode::ForceTranslationInPlace));
+	def.add_static_constant("FATTACHMENT_MODE_FORCE_ROTATION_IN_PLACE", pragma::math::to_integral(pragma::FAttachmentMode::ForceRotationInPlace));
+	def.add_static_constant("FATTACHMENT_MODE_FORCE_IN_PLACE", pragma::math::to_integral(pragma::FAttachmentMode::ForceInPlace));
 }
 
 namespace pragma {
@@ -1196,8 +1192,8 @@ namespace Lua {
 	};
 };
 
-template<typename TResult, typename TBoneIdentifier, bool (pragma::BaseAnimatedComponent::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
-std::optional<TResult> get_bone_value(const pragma::BaseAnimatedComponent &animC, TBoneIdentifier boneIdentifier, umath::CoordinateSpace space)
+template<typename TResult, typename TBoneIdentifier, bool (pragma::BaseAnimatedComponent::*GetValue)(pragma::animation::BoneId, TResult &, pragma::math::CoordinateSpace) const>
+std::optional<TResult> get_bone_value(const pragma::BaseAnimatedComponent &animC, TBoneIdentifier boneIdentifier, pragma::math::CoordinateSpace space)
 {
 	pragma::animation::BoneId boneId;
 	if constexpr(std::is_same_v<TBoneIdentifier, const std::string &>) {
@@ -1213,19 +1209,19 @@ std::optional<TResult> get_bone_value(const pragma::BaseAnimatedComponent &animC
 		return {};
 	return result;
 }
-template<typename TResult, typename TBoneIdentifier, bool (pragma::BaseAnimatedComponent::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
+template<typename TResult, typename TBoneIdentifier, bool (pragma::BaseAnimatedComponent::*GetValue)(pragma::animation::BoneId, TResult &, pragma::math::CoordinateSpace) const>
 std::optional<TResult> get_bone_value_os(const pragma::BaseAnimatedComponent &animC, TBoneIdentifier boneIdentifier)
 {
-	return get_bone_value<TResult, TBoneIdentifier, GetValue>(animC, boneIdentifier, umath::CoordinateSpace::Object);
+	return get_bone_value<TResult, TBoneIdentifier, GetValue>(animC, boneIdentifier, pragma::math::CoordinateSpace::Object);
 }
-template<typename TResult, typename TBoneIdentifier, bool (pragma::BaseAnimatedComponent::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
+template<typename TResult, typename TBoneIdentifier, bool (pragma::BaseAnimatedComponent::*GetValue)(pragma::animation::BoneId, TResult &, pragma::math::CoordinateSpace) const>
 std::optional<TResult> get_bone_value_ls(const pragma::BaseAnimatedComponent &animC, TBoneIdentifier boneIdentifier)
 {
-	return get_bone_value<TResult, TBoneIdentifier, GetValue>(animC, boneIdentifier, umath::CoordinateSpace::Local);
+	return get_bone_value<TResult, TBoneIdentifier, GetValue>(animC, boneIdentifier, pragma::math::CoordinateSpace::Local);
 }
 
-template<typename TValue, typename TBoneIdentifier, bool (pragma::BaseAnimatedComponent::*SetValue)(pragma::animation::BoneId, const TValue &, umath::CoordinateSpace)>
-bool set_bone_value(pragma::BaseAnimatedComponent &animC, TBoneIdentifier boneIdentifier, const TValue &value, umath::CoordinateSpace space)
+template<typename TValue, typename TBoneIdentifier, bool (pragma::BaseAnimatedComponent::*SetValue)(pragma::animation::BoneId, const TValue &, pragma::math::CoordinateSpace)>
+bool set_bone_value(pragma::BaseAnimatedComponent &animC, TBoneIdentifier boneIdentifier, const TValue &value, pragma::math::CoordinateSpace space)
 {
 	pragma::animation::BoneId boneId;
 	if constexpr(std::is_same_v<TBoneIdentifier, const std::string &>) {
@@ -1239,44 +1235,44 @@ bool set_bone_value(pragma::BaseAnimatedComponent &animC, TBoneIdentifier boneId
 	return (animC.*SetValue)(boneId, value, space);
 }
 
-template<typename TValue, typename TBoneIdentifier, bool (pragma::BaseAnimatedComponent::*SetValue)(pragma::animation::BoneId, const TValue &, umath::CoordinateSpace)>
+template<typename TValue, typename TBoneIdentifier, bool (pragma::BaseAnimatedComponent::*SetValue)(pragma::animation::BoneId, const TValue &, pragma::math::CoordinateSpace)>
 bool set_bone_value_ls(pragma::BaseAnimatedComponent &animC, TBoneIdentifier boneIdentifier, const TValue &value)
 {
-	return set_bone_value<TValue, TBoneIdentifier, SetValue>(animC, boneIdentifier, value, umath::CoordinateSpace::Local);
+	return set_bone_value<TValue, TBoneIdentifier, SetValue>(animC, boneIdentifier, value, pragma::math::CoordinateSpace::Local);
 }
 
 template<typename TBoneId>
 static void register_base_animated_component_bone_methods(luabind::class_<pragma::BaseAnimatedComponent, pragma::BaseEntityComponent> &classDef)
 {
 	// Note: luabind::default_parameter_policy would be a better choice here, but doesn't work for the CoordinateSpace parameter for some unknown reason
-	classDef.def("GetReferenceBonePose", &get_bone_value_os<umath::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBonePose>);
+	classDef.def("GetReferenceBonePose", &get_bone_value_os<pragma::math::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBonePose>);
 	classDef.def("GetReferenceBonePos", &get_bone_value_os<Vector3, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBonePos>);
 	classDef.def("GetReferenceBoneRot", &get_bone_value_os<Quat, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBoneRot>);
 	classDef.def("GetReferenceBoneScale", &get_bone_value_os<Vector3, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBoneScale>);
 
-	classDef.def("GetReferenceBonePose", &get_bone_value<umath::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBonePose>);
+	classDef.def("GetReferenceBonePose", &get_bone_value<pragma::math::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBonePose>);
 	classDef.def("GetReferenceBonePos", &get_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBonePos>);
 	classDef.def("GetReferenceBoneRot", &get_bone_value<Quat, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBoneRot>);
 	classDef.def("GetReferenceBoneScale", &get_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBoneScale>);
 
-	classDef.def("GetBonePose", &get_bone_value_ls<umath::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::GetBonePose>);
+	classDef.def("GetBonePose", &get_bone_value_ls<pragma::math::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::GetBonePose>);
 	classDef.def("GetBonePos", &get_bone_value_ls<Vector3, TBoneId, &pragma::BaseAnimatedComponent::GetBonePos>);
 	classDef.def("GetBoneRot", &get_bone_value_ls<Quat, TBoneId, &pragma::BaseAnimatedComponent::GetBoneRot>);
 	classDef.def("GetBoneScale", &get_bone_value_ls<Vector3, TBoneId, &pragma::BaseAnimatedComponent::GetBoneScale>);
 
-	classDef.def("GetBonePose", &get_bone_value<umath::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::GetBonePose>);
+	classDef.def("GetBonePose", &get_bone_value<pragma::math::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::GetBonePose>);
 	classDef.def("GetBonePos", &get_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::GetBonePos>);
 	classDef.def("GetBoneRot", &get_bone_value<Quat, TBoneId, &pragma::BaseAnimatedComponent::GetBoneRot>);
 	classDef.def("GetBoneScale", &get_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::GetBoneScale>);
 
-	classDef.def("SetBonePose", &set_bone_value_ls<umath::Transform, TBoneId, &pragma::BaseAnimatedComponent::SetBonePose>);
-	classDef.def("SetBonePose", &set_bone_value_ls<umath::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::SetBonePose>);
+	classDef.def("SetBonePose", &set_bone_value_ls<pragma::math::Transform, TBoneId, &pragma::BaseAnimatedComponent::SetBonePose>);
+	classDef.def("SetBonePose", &set_bone_value_ls<pragma::math::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::SetBonePose>);
 	classDef.def("SetBonePos", &set_bone_value_ls<Vector3, TBoneId, &pragma::BaseAnimatedComponent::SetBonePos>);
 	classDef.def("SetBoneRot", &set_bone_value_ls<Quat, TBoneId, &pragma::BaseAnimatedComponent::SetBoneRot>);
 	classDef.def("SetBoneScale", &set_bone_value_ls<Vector3, TBoneId, &pragma::BaseAnimatedComponent::SetBoneScale>);
 
-	classDef.def("SetBonePose", &set_bone_value<umath::Transform, TBoneId, &pragma::BaseAnimatedComponent::SetBonePose>);
-	classDef.def("SetBonePose", &set_bone_value<umath::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::SetBonePose>);
+	classDef.def("SetBonePose", &set_bone_value<pragma::math::Transform, TBoneId, &pragma::BaseAnimatedComponent::SetBonePose>);
+	classDef.def("SetBonePose", &set_bone_value<pragma::math::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::SetBonePose>);
 	classDef.def("SetBonePos", &set_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::SetBonePos>);
 	classDef.def("SetBoneRot", &set_bone_value<Quat, TBoneId, &pragma::BaseAnimatedComponent::SetBoneRot>);
 	classDef.def("SetBoneScale", &set_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::SetBoneScale>);
@@ -1296,7 +1292,7 @@ static void register_base_animated_component_bone_methods(luabind::class_<pragma
 	  });
 
 	classDef.def(
-	  "GetEffectiveBonePose", +[](const pragma::BaseAnimatedComponent &animC, TBoneId boneIdentifier) -> std::optional<umath::ScaledTransform> {
+	  "GetEffectiveBonePose", +[](const pragma::BaseAnimatedComponent &animC, TBoneId boneIdentifier) -> std::optional<pragma::math::ScaledTransform> {
 		  pragma::animation::BoneId boneId;
 		  if constexpr(std::is_same_v<TBoneId, const std::string &>) {
 			  auto &mdl = animC.GetEntity().GetModel();
@@ -1312,7 +1308,7 @@ static void register_base_animated_component_bone_methods(luabind::class_<pragma
 		  return transforms[boneId];
 	  });
 	classDef.def(
-	  "SetEffectiveBonePose", +[](pragma::BaseAnimatedComponent &animC, TBoneId boneIdentifier, const umath::ScaledTransform &pose) -> bool {
+	  "SetEffectiveBonePose", +[](pragma::BaseAnimatedComponent &animC, TBoneId boneIdentifier, const pragma::math::ScaledTransform &pose) -> bool {
 		  pragma::animation::BoneId boneId;
 		  if constexpr(std::is_same_v<TBoneId, const std::string &>) {
 			  auto &mdl = animC.GetEntity().GetModel();
@@ -1332,7 +1328,7 @@ static void register_base_animated_component_bone_methods(luabind::class_<pragma
 void pragma::LuaCore::base_animated_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseAnimatedComponent>("BaseAnimatedComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("PlayAnimation", static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, int, uint32_t)>([](lua::State *l, pragma::BaseAnimatedComponent &hAnim, int anim, uint32_t flags) { hAnim.PlayAnimation(anim, static_cast<pragma::FPlayAnim>(flags)); }));
 	def.def("PlayAnimation",
 	  static_cast<void (*)(lua::State *, pragma::BaseAnimatedComponent &, std::string, uint32_t)>([](lua::State *l, pragma::BaseAnimatedComponent &hAnim, std::string anim, uint32_t flags) { Lua::PushBool(l, hAnim.PlayAnimation(anim, static_cast<pragma::FPlayAnim>(flags))); }));
@@ -1362,7 +1358,7 @@ void pragma::LuaCore::base_animated_component::register_class(luabind::module_ &
 	def.def("SetPlaybackRate", &pragma::BaseAnimatedComponent::SetPlaybackRate);
 	def.def("GetPlaybackRate", &pragma::BaseAnimatedComponent::GetPlaybackRate);
 	def.def("GetPlaybackRateProperty", &pragma::BaseAnimatedComponent::GetPlaybackRateProperty);
-	def.def("GetEffectiveBonePoses", +[](pragma::BaseAnimatedComponent &animC) -> std::vector<umath::ScaledTransform> { return animC.GetProcessedBones(); });
+	def.def("GetEffectiveBonePoses", +[](pragma::BaseAnimatedComponent &animC) -> std::vector<pragma::math::ScaledTransform> { return animC.GetProcessedBones(); });
 
 	def.def("GetBoneMatrix", &pragma::BaseAnimatedComponent::GetBoneMatrix);
 	def.def(
@@ -1528,15 +1524,15 @@ void pragma::LuaCore::base_animated_component::register_class(luabind::module_ &
 	def.def("IsPostAnimationUpdateEnabled", &pragma::BaseAnimatedComponent::IsPostAnimationUpdateEnabled);
 	def.def("GetMetaBoneId", &pragma::BaseAnimatedComponent::GetMetaBoneId);
 	def.def(
-	  "GetMetaBonePose", +[](pragma::BaseAnimatedComponent &animC, animation::MetaRigBoneType boneType, umath::CoordinateSpace space) -> std::optional<umath::ScaledTransform> {
-		  umath::ScaledTransform pose;
+	  "GetMetaBonePose", +[](pragma::BaseAnimatedComponent &animC, animation::MetaRigBoneType boneType, pragma::math::CoordinateSpace space) -> std::optional<pragma::math::ScaledTransform> {
+		  pragma::math::ScaledTransform pose;
 		  if(!animC.GetMetaBonePose(boneType, pose, space))
 			  return {};
 		  return pose;
 	  });
-	def.def("SetMetaBonePose", static_cast<bool (pragma::BaseAnimatedComponent::*)(pragma::animation::MetaRigBoneType, const umath::ScaledTransform &, umath::CoordinateSpace)>(&pragma::BaseAnimatedComponent::SetMetaBonePose));
+	def.def("SetMetaBonePose", static_cast<bool (pragma::BaseAnimatedComponent::*)(pragma::animation::MetaRigBoneType, const pragma::math::ScaledTransform &, pragma::math::CoordinateSpace)>(&pragma::BaseAnimatedComponent::SetMetaBonePose));
 	def.def(
-	  "MetaBonePoseToSkeletal", +[](pragma::BaseAnimatedComponent &animC, animation::MetaRigBoneType boneType, const umath::ScaledTransform &pose) -> umath::ScaledTransform {
+	  "MetaBonePoseToSkeletal", +[](pragma::BaseAnimatedComponent &animC, animation::MetaRigBoneType boneType, const pragma::math::ScaledTransform &pose) -> pragma::math::ScaledTransform {
 		  auto newPose = pose;
 		  animC.MetaBonePoseToSkeletal(boneType, newPose);
 		  return newPose;
@@ -1585,12 +1581,12 @@ void pragma::LuaCore::base_animated_component::register_class(luabind::module_ &
 	def.add_static_constant("EVENT_POST_ANIMATION_UPDATE", pragma::baseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE);
 	def.add_static_constant("EVENT_ON_RESET_POSE", pragma::baseAnimatedComponent::EVENT_ON_RESET_POSE);
 
-	def.add_static_constant("FPLAYANIM_NONE", umath::to_integral(pragma::FPlayAnim::None));
-	def.add_static_constant("FPLAYANIM_RESET", umath::to_integral(pragma::FPlayAnim::Reset));
-	def.add_static_constant("FPLAYANIM_TRANSMIT", umath::to_integral(pragma::FPlayAnim::Transmit));
-	def.add_static_constant("FPLAYANIM_SNAP_TO", umath::to_integral(pragma::FPlayAnim::SnapTo));
-	def.add_static_constant("FPLAYANIM_DEFAULT", umath::to_integral(pragma::FPlayAnim::Default));
-	def.add_static_constant("FPLAYANIM_LOOP", umath::to_integral(pragma::FPlayAnim::Loop));
+	def.add_static_constant("FPLAYANIM_NONE", pragma::math::to_integral(pragma::FPlayAnim::None));
+	def.add_static_constant("FPLAYANIM_RESET", pragma::math::to_integral(pragma::FPlayAnim::Reset));
+	def.add_static_constant("FPLAYANIM_TRANSMIT", pragma::math::to_integral(pragma::FPlayAnim::Transmit));
+	def.add_static_constant("FPLAYANIM_SNAP_TO", pragma::math::to_integral(pragma::FPlayAnim::SnapTo));
+	def.add_static_constant("FPLAYANIM_DEFAULT", pragma::math::to_integral(pragma::FPlayAnim::Default));
+	def.add_static_constant("FPLAYANIM_LOOP", pragma::math::to_integral(pragma::FPlayAnim::Loop));
 }
 namespace Lua::FuncWater {
 	void CalcLineSurfaceIntersection(lua::State *l, pragma::BaseFuncLiquidComponent &hEnt, const Vector3 &lineOrigin, const Vector3 &lineDir, bool bCull)
@@ -1607,18 +1603,18 @@ void pragma::LuaCore::base_func_water_component::register_class(luabind::module_
 {
 	{
 		auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidSurfaceComponent>("BaseLiquidSurfaceComponent");
-		util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+		pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	}
 	{
 		auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidVolumeComponent>("BaseLiquidVolumeComponent");
-		util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+		pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	}
 	{
 		auto def = Lua::create_base_entity_component_class<pragma::BaseBuoyancyComponent>("BaseBuoyancyComponent");
-		util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+		pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	}
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncLiquidComponent>("BaseFuncLiquidComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("CalcLineSurfaceIntersection", static_cast<void (*)(lua::State *, pragma::BaseFuncLiquidComponent &, const Vector3 &, const Vector3 &)>([](lua::State *l, pragma::BaseFuncLiquidComponent &hEnt, const Vector3 &lineOrigin, const Vector3 &lineDir) {
 		Lua::FuncWater::CalcLineSurfaceIntersection(l, hEnt, lineOrigin, lineDir, false);
 	}));
@@ -1627,7 +1623,7 @@ void pragma::LuaCore::base_func_water_component::register_class(luabind::module_
 void pragma::LuaCore::base_toggle_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseToggleComponent>("BaseToggleComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("TurnOn", &pragma::BaseToggleComponent::TurnOn);
 	def.def("TurnOff", &pragma::BaseToggleComponent::TurnOff);
 	def.def("Toggle", &pragma::BaseToggleComponent::Toggle);
@@ -1638,12 +1634,12 @@ void pragma::LuaCore::base_toggle_component::register_class(luabind::module_ &mo
 	def.add_static_constant("EVENT_ON_TURN_ON", pragma::baseToggleComponent::EVENT_ON_TURN_ON);
 	def.add_static_constant("EVENT_ON_TURN_OFF", pragma::baseToggleComponent::EVENT_ON_TURN_OFF);
 
-	def.add_static_constant("SPAWN_FLAG_START_ON_BIT", umath::to_integral(pragma::BaseToggleComponent::SpawnFlags::StartOn));
+	def.add_static_constant("SPAWN_FLAG_START_ON_BIT", pragma::math::to_integral(pragma::BaseToggleComponent::SpawnFlags::StartOn));
 }
 void pragma::LuaCore::base_wheel_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseWheelComponent>("BaseWheelComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	// TODO
 }
 void pragma::LuaCore::base_decal_component::register_class(luabind::module_ &mod)
@@ -1651,12 +1647,12 @@ void pragma::LuaCore::base_decal_component::register_class(luabind::module_ &mod
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvDecalComponent>("BaseEnvDecalComponent");
 	def.def("SetSize", &pragma::BaseEnvDecalComponent::SetSize);
 	def.def("GetSize", &pragma::BaseEnvDecalComponent::GetSize);
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 void pragma::LuaCore::base_env_light_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightComponent>("BaseEnvLightComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("GetFalloffExponent", &pragma::BaseEnvLightComponent::GetFalloffExponent);
 	def.def("SetFalloffExponent", &pragma::BaseEnvLightComponent::SetFalloffExponent);
 	def.def("IsBaked", &pragma::BaseEnvLightComponent::IsBaked);
@@ -1681,17 +1677,17 @@ void pragma::LuaCore::base_env_light_component::register_class(luabind::module_ 
 	def.def("GetLightIntensityCandela", static_cast<Candela (pragma::BaseEnvLightComponent::*)() const>(&pragma::BaseEnvLightComponent::GetLightIntensityCandela));
 	def.def("CalcLightIntensityAtPoint", &pragma::BaseEnvLightComponent::CalcLightIntensityAtPoint);
 	def.def("CalcLightDirectionToPoint", &pragma::BaseEnvLightComponent::CalcLightDirectionToPoint);
-	def.add_static_constant("INTENSITY_TYPE_CANDELA", umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Candela));
-	def.add_static_constant("INTENSITY_TYPE_LUMEN", umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lumen));
-	def.add_static_constant("INTENSITY_TYPE_LUX", umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lux));
+	def.add_static_constant("INTENSITY_TYPE_CANDELA", pragma::math::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Candela));
+	def.add_static_constant("INTENSITY_TYPE_LUMEN", pragma::math::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lumen));
+	def.add_static_constant("INTENSITY_TYPE_LUX", pragma::math::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lux));
 
-	def.add_static_constant("LIGHT_FLAG_NONE", umath::to_integral(pragma::BaseEnvLightComponent::LightFlags::None));
-	def.add_static_constant("LIGHT_FLAG_BAKED_LIGHT_SOURCE_BIT", umath::to_integral(pragma::BaseEnvLightComponent::LightFlags::BakedLightSource));
+	def.add_static_constant("LIGHT_FLAG_NONE", pragma::math::to_integral(pragma::BaseEnvLightComponent::LightFlags::None));
+	def.add_static_constant("LIGHT_FLAG_BAKED_LIGHT_SOURCE_BIT", pragma::math::to_integral(pragma::BaseEnvLightComponent::LightFlags::BakedLightSource));
 }
 void pragma::LuaCore::base_env_light_spot_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightSpotComponent>("BaseEnvLightSpotComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetOuterConeAngle", &pragma::BaseEnvLightSpotComponent::SetOuterConeAngle);
 	def.def("GetOuterConeAngle", &pragma::BaseEnvLightSpotComponent::GetOuterConeAngle);
 	def.def("SetInnerConeAngle", &pragma::BaseEnvLightSpotComponent::SetInnerConeAngle);
@@ -1707,13 +1703,13 @@ void pragma::LuaCore::base_env_light_spot_component::register_class(luabind::mod
 void pragma::LuaCore::base_env_light_point_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightPointComponent>("BaseEnvLightPointComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("CalcDistanceFalloff", &pragma::BaseEnvLightPointComponent::CalcDistanceFalloff);
 }
 void pragma::LuaCore::base_env_light_directional_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightDirectionalComponent>("BaseEnvLightDirectionalComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("GetAmbientColor", &pragma::BaseEnvLightDirectionalComponent::GetAmbientColor, luabind::copy_policy<0> {});
 	def.def("GetAmbientColorProperty", &pragma::BaseEnvLightDirectionalComponent::GetAmbientColorProperty);
 	def.def("SetAmbientColor", &pragma::BaseEnvLightDirectionalComponent::SetAmbientColor);
@@ -1721,12 +1717,12 @@ void pragma::LuaCore::base_env_light_directional_component::register_class(luabi
 void pragma::LuaCore::base_env_particle_system_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvParticleSystemComponent>("BaseEnvParticleSystemComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 void pragma::LuaCore::base_flammable_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFlammableComponent>("BaseFlammableComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("Ignite",
 	  static_cast<void (*)(lua::State *, pragma::BaseFlammableComponent &, float, pragma::ecs::BaseEntity &, pragma::ecs::BaseEntity &)>(
 	    [](lua::State *l, pragma::BaseFlammableComponent &hEnt, float duration, pragma::ecs::BaseEntity &attacker, pragma::ecs::BaseEntity &inflictor) { hEnt.Ignite(duration, &attacker, &inflictor); }));
@@ -1746,7 +1742,7 @@ void pragma::LuaCore::base_flammable_component::register_class(luabind::module_ 
 void pragma::LuaCore::base_health_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseHealthComponent>("BaseHealthComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("GetHealth", static_cast<void (*)(lua::State *, pragma::BaseHealthComponent &)>([](lua::State *l, pragma::BaseHealthComponent &hEnt) {
 		unsigned short health = hEnt.GetHealth();
 		Lua::PushInt(l, health);
@@ -1763,7 +1759,7 @@ void pragma::LuaCore::base_health_component::register_class(luabind::module_ &mo
 void pragma::LuaCore::base_name_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseNameComponent>("BaseNameComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetName", static_cast<void (*)(lua::State *, pragma::BaseNameComponent &, std::string)>([](lua::State *l, pragma::BaseNameComponent &hEnt, std::string name) { hEnt.SetName(name); }));
 	def.def("GetName", static_cast<void (*)(lua::State *, pragma::BaseNameComponent &)>([](lua::State *l, pragma::BaseNameComponent &hEnt) { Lua::PushString(l, hEnt.GetName()); }));
 	def.def("GetNameProperty", &pragma::BaseNameComponent::GetNameProperty);
@@ -1772,7 +1768,7 @@ void pragma::LuaCore::base_name_component::register_class(luabind::module_ &mod)
 void pragma::LuaCore::base_networked_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseNetworkedComponent>("BaseNetworkedComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 #if NETWORKED_VARS_ENABLED != 0
 	def.def("GetNetVarProperty", static_cast<void (*)(lua::State *, THandle &, uint32_t)>([](lua::State *l, THandle &hEnt, uint32_t id) {
 		auto &prop = hEnt.GetNetworkedVariableProperty(id);
@@ -1919,58 +1915,58 @@ void pragma::LuaCore::base_networked_component::register_class(luabind::module_ 
 			return;
 		switch(type) {
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Bool:
-			Lua::PushBool(l, static_cast<::util::BoolProperty &>(*prop).GetValue());
+			Lua::PushBool(l, static_cast<pragma::util::BoolProperty &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Double:
-			Lua::PushNumber(l, static_cast<::util::DoubleProperty &>(*prop).GetValue());
+			Lua::PushNumber(l, static_cast<pragma::util::DoubleProperty &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Float:
-			Lua::PushNumber(l, static_cast<::util::FloatProperty &>(*prop).GetValue());
+			Lua::PushNumber(l, static_cast<pragma::util::FloatProperty &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Int8:
-			Lua::PushInt(l, static_cast<::util::Int8Property &>(*prop).GetValue());
+			Lua::PushInt(l, static_cast<pragma::util::Int8Property &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Int16:
-			Lua::PushInt(l, static_cast<::util::Int16Property &>(*prop).GetValue());
+			Lua::PushInt(l, static_cast<pragma::util::Int16Property &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Int32:
-			Lua::PushInt(l, static_cast<::util::Int32Property &>(*prop).GetValue());
+			Lua::PushInt(l, static_cast<pragma::util::Int32Property &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Int64:
-			Lua::PushInt(l, static_cast<::util::Int64Property &>(*prop).GetValue());
+			Lua::PushInt(l, static_cast<pragma::util::Int64Property &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::LongDouble:
-			Lua::PushNumber(l, static_cast<::util::LongDoubleProperty &>(*prop).GetValue());
+			Lua::PushNumber(l, static_cast<pragma::util::LongDoubleProperty &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::String:
-			Lua::PushString(l, static_cast<::util::StringProperty &>(*prop).GetValue());
+			Lua::PushString(l, static_cast<pragma::util::StringProperty &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::UInt8:
-			Lua::PushInt(l, static_cast<::util::UInt8Property &>(*prop).GetValue());
+			Lua::PushInt(l, static_cast<pragma::util::UInt8Property &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::UInt16:
-			Lua::PushInt(l, static_cast<::util::UInt16Property &>(*prop).GetValue());
+			Lua::PushInt(l, static_cast<pragma::util::UInt16Property &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::UInt32:
-			Lua::PushInt(l, static_cast<::util::UInt32Property &>(*prop).GetValue());
+			Lua::PushInt(l, static_cast<pragma::util::UInt32Property &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::UInt64:
-			Lua::PushInt(l, static_cast<::util::UInt64Property &>(*prop).GetValue());
+			Lua::PushInt(l, static_cast<pragma::util::UInt64Property &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::EulerAngles:
-			Lua::Push<EulerAngles>(l, static_cast<::util::EulerAnglesProperty &>(*prop).GetValue());
+			Lua::Push<EulerAngles>(l, static_cast<pragma::util::EulerAnglesProperty &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Color:
-			Lua::Push<Color>(l, static_cast<::util::ColorProperty &>(*prop).GetValue());
+			Lua::Push<Color>(l, static_cast<pragma::util::ColorProperty &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Vector:
-			Lua::Push<Vector3>(l, static_cast<::util::Vector3Property &>(*prop).GetValue());
+			Lua::Push<Vector3>(l, static_cast<pragma::util::Vector3Property &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Vector2:
-			Lua::Push<Vector2>(l, static_cast<::util::Vector2Property &>(*prop).GetValue());
+			Lua::Push<Vector2>(l, static_cast<pragma::util::Vector2Property &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Vector4:
-			Lua::Push<Vector4>(l, static_cast<::util::Vector4Property &>(*prop).GetValue());
+			Lua::Push<Vector4>(l, static_cast<pragma::util::Vector4Property &>(*prop).GetValue());
 			return;
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Entity:
 			{
@@ -1981,30 +1977,30 @@ void pragma::LuaCore::base_networked_component::register_class(luabind::module_ 
 				return;
 			}
 		case pragma::BaseNetworkedComponent::NetworkedVariable::Type::Quaternion:
-			Lua::Push<Quat>(l, static_cast<::util::QuatProperty &>(*prop).GetValue());
+			Lua::Push<Quat>(l, static_cast<pragma::util::QuatProperty &>(*prop).GetValue());
 			return;
 		}
 	}));
-	def.add_static_constant("NET_VAR_TYPE_BOOL", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Bool));
-	def.add_static_constant("NET_VAR_TYPE_DOUBLE", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Double));
-	def.add_static_constant("NET_VAR_TYPE_FLOAT", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Float));
-	def.add_static_constant("NET_VAR_TYPE_INT8", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Int8));
-	def.add_static_constant("NET_VAR_TYPE_INT16", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Int16));
-	def.add_static_constant("NET_VAR_TYPE_INT32", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Int32));
-	def.add_static_constant("NET_VAR_TYPE_INT64", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Int64));
-	def.add_static_constant("NET_VAR_TYPE_LONG_DOUBLE", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::LongDouble));
-	def.add_static_constant("NET_VAR_TYPE_STRING", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::String));
-	def.add_static_constant("NET_VAR_TYPE_UINT8", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::UInt8));
-	def.add_static_constant("NET_VAR_TYPE_UINT16", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::UInt16));
-	def.add_static_constant("NET_VAR_TYPE_UINT32", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::UInt32));
-	def.add_static_constant("NET_VAR_TYPE_UINT64", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::UInt64));
-	def.add_static_constant("NET_VAR_TYPE_EULER_ANGLES", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::EulerAngles));
-	def.add_static_constant("NET_VAR_TYPE_COLOR", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Color));
-	def.add_static_constant("NET_VAR_TYPE_VECTOR", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Vector));
-	def.add_static_constant("NET_VAR_TYPE_VECTOR2", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Vector2));
-	def.add_static_constant("NET_VAR_TYPE_VECTOR4", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Vector4));
-	def.add_static_constant("NET_VAR_TYPE_ENTITY", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Entity));
-	def.add_static_constant("NET_VAR_TYPE_QUATERNION", umath::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Quaternion));
+	def.add_static_constant("NET_VAR_TYPE_BOOL", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Bool));
+	def.add_static_constant("NET_VAR_TYPE_DOUBLE", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Double));
+	def.add_static_constant("NET_VAR_TYPE_FLOAT", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Float));
+	def.add_static_constant("NET_VAR_TYPE_INT8", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Int8));
+	def.add_static_constant("NET_VAR_TYPE_INT16", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Int16));
+	def.add_static_constant("NET_VAR_TYPE_INT32", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Int32));
+	def.add_static_constant("NET_VAR_TYPE_INT64", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Int64));
+	def.add_static_constant("NET_VAR_TYPE_LONG_DOUBLE", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::LongDouble));
+	def.add_static_constant("NET_VAR_TYPE_STRING", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::String));
+	def.add_static_constant("NET_VAR_TYPE_UINT8", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::UInt8));
+	def.add_static_constant("NET_VAR_TYPE_UINT16", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::UInt16));
+	def.add_static_constant("NET_VAR_TYPE_UINT32", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::UInt32));
+	def.add_static_constant("NET_VAR_TYPE_UINT64", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::UInt64));
+	def.add_static_constant("NET_VAR_TYPE_EULER_ANGLES", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::EulerAngles));
+	def.add_static_constant("NET_VAR_TYPE_COLOR", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Color));
+	def.add_static_constant("NET_VAR_TYPE_VECTOR", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Vector));
+	def.add_static_constant("NET_VAR_TYPE_VECTOR2", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Vector2));
+	def.add_static_constant("NET_VAR_TYPE_VECTOR4", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Vector4));
+	def.add_static_constant("NET_VAR_TYPE_ENTITY", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Entity));
+	def.add_static_constant("NET_VAR_TYPE_QUATERNION", pragma::math::to_integral(pragma::BaseNetworkedComponent::NetworkedVariable::Type::Quaternion));
 #endif
 }
 
@@ -2012,7 +2008,7 @@ void pragma::LuaCore::base_observable_component::register_class(luabind::module_
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseObservableComponent>("BaseObservableComponent");
 	def.add_static_constant("EVENT_ON_OBSERVER_CHANGED", pragma::baseObservableComponent::EVENT_ON_OBSERVER_CHANGED);
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetLocalCameraOrigin", static_cast<void (*)(lua::State *, pragma::BaseObservableComponent &, uint32_t, const Vector3 &)>([](lua::State *l, pragma::BaseObservableComponent &hEnt, uint32_t camType, const Vector3 &origin) {
 		hEnt.SetLocalCameraOrigin(static_cast<pragma::BaseObservableComponent::CameraType>(camType), origin);
 	}));
@@ -2039,8 +2035,8 @@ void pragma::LuaCore::base_observable_component::register_class(luabind::module_
 	  });
 	def.def("GetViewOffset", &pragma::BaseObservableComponent::GetViewOffset);
 	def.def("SetViewOffset", &pragma::BaseObservableComponent::SetViewOffset);
-	def.add_static_constant("CAMERA_TYPE_FIRST_PERSON", umath::to_integral(pragma::BaseObservableComponent::CameraType::FirstPerson));
-	def.add_static_constant("CAMERA_TYPE_THIRD_PERSON", umath::to_integral(pragma::BaseObservableComponent::CameraType::ThirdPerson));
+	def.add_static_constant("CAMERA_TYPE_FIRST_PERSON", pragma::math::to_integral(pragma::BaseObservableComponent::CameraType::FirstPerson));
+	def.add_static_constant("CAMERA_TYPE_THIRD_PERSON", pragma::math::to_integral(pragma::BaseObservableComponent::CameraType::ThirdPerson));
 
 	auto defObsCamData = luabind::class_<pragma::ObserverCameraData>("CameraData");
 	defObsCamData.def_readwrite("rotateWithObservee", &pragma::ObserverCameraData::rotateWithObservee);
@@ -2085,7 +2081,7 @@ namespace Lua::Shooter {
 void pragma::LuaCore::base_shooter_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::ecs::BaseShooterComponent>("BaseShooterComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("FireBullets", static_cast<void (*)(lua::State *, pragma::ecs::BaseShooterComponent &, const luabind::object &, bool, bool)>([](lua::State *l, pragma::ecs::BaseShooterComponent &hEnt, const luabind::object &o, bool bHitReport, bool bMaster) {
 		Lua::Shooter::FireBullets(l, hEnt, o, bHitReport, bMaster);
 	}));
@@ -2098,18 +2094,18 @@ void pragma::LuaCore::base_shooter_component::register_class(luabind::module_ &m
 }
 
 namespace Lua::Physics {
-	void InitializePhysics(lua::State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t flags)
+	void InitializePhysics(lua::State *l, pragma::BasePhysicsComponent &hEnt, pragma::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t flags)
 	{
 		auto *phys = hEnt.InitializePhysics(*shape, static_cast<pragma::BasePhysicsComponent::PhysFlags>(flags));
 		if(phys != nullptr)
 			luabind::object(l, phys->GetHandle()).push(l);
 	}
-	void InitializePhysics(lua::State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape) { InitializePhysics(l, hEnt, shape, umath::to_integral(pragma::BasePhysicsComponent::PhysFlags::None)); }
+	void InitializePhysics(lua::State *l, pragma::BasePhysicsComponent &hEnt, pragma::util::TSharedHandle<pragma::physics::IConvexShape> &shape) { InitializePhysics(l, hEnt, shape, pragma::math::to_integral(pragma::BasePhysicsComponent::PhysFlags::None)); }
 };
 void pragma::LuaCore::base_physics_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePhysicsComponent>("BasePhysicsComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetCollisionBounds", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, Vector3, Vector3)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, Vector3 min, Vector3 max) { hEnt.SetCollisionBounds(min, max); }));
 	def.def("GetCollisionBounds", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) {
 		Vector3 min, max;
@@ -2141,12 +2137,12 @@ void pragma::LuaCore::base_physics_component::register_class(luabind::module_ &m
 			luabind::object(l, phys->GetHandle()).push(l);
 	}));
 	def.def("InitializePhysics",
-	  static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, ::util::TSharedHandle<pragma::physics::IConvexShape> &, uint32_t)>(
-	    [](lua::State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t physFlags) { Lua::Physics::InitializePhysics(l, hEnt, shape, physFlags); }));
+	  static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, pragma::util::TSharedHandle<pragma::physics::IConvexShape> &, uint32_t)>(
+	    [](lua::State *l, pragma::BasePhysicsComponent &hEnt, pragma::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t physFlags) { Lua::Physics::InitializePhysics(l, hEnt, shape, physFlags); }));
 	def.def("InitializePhysics",
-	  static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, ::util::TSharedHandle<pragma::physics::IConvexShape> &, uint32_t)>(
-	    [](lua::State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t physFlags) { Lua::Physics::InitializePhysics(l, hEnt, shape, physFlags); }));
-	def.def("InitializePhysics", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, ::util::TSharedHandle<pragma::physics::IConvexShape> &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, ::util::TSharedHandle<pragma::physics::IConvexShape> &shape) {
+	  static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, pragma::util::TSharedHandle<pragma::physics::IConvexShape> &, uint32_t)>(
+	    [](lua::State *l, pragma::BasePhysicsComponent &hEnt, pragma::util::TSharedHandle<pragma::physics::IConvexShape> &shape, uint32_t physFlags) { Lua::Physics::InitializePhysics(l, hEnt, shape, physFlags); }));
+	def.def("InitializePhysics", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &, pragma::util::TSharedHandle<pragma::physics::IConvexShape> &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt, pragma::util::TSharedHandle<pragma::physics::IConvexShape> &shape) {
 		Lua::Physics::InitializePhysics(l, hEnt, shape, 0);
 	}));
 	def.def("DestroyPhysicsObject", static_cast<void (*)(lua::State *, pragma::BasePhysicsComponent &)>([](lua::State *l, pragma::BasePhysicsComponent &hEnt) { hEnt.DestroyPhysicsObject(); }));
@@ -2237,18 +2233,18 @@ void pragma::LuaCore::base_physics_component::register_class(luabind::module_ &m
 	def.add_static_constant("EVENT_HANDLE_RAYCAST", pragma::basePhysicsComponent::EVENT_HANDLE_RAYCAST);
 	def.add_static_constant("EVENT_INITIALIZE_PHYSICS", pragma::basePhysicsComponent::EVENT_INITIALIZE_PHYSICS);
 
-	def.add_static_constant("MOVETYPE_NONE", umath::to_integral(pragma::physics::MoveType::None));
-	def.add_static_constant("MOVETYPE_WALK", umath::to_integral(pragma::physics::MoveType::Walk));
-	def.add_static_constant("MOVETYPE_NOCLIP", umath::to_integral(pragma::physics::MoveType::Noclip));
-	def.add_static_constant("MOVETYPE_FLY", umath::to_integral(pragma::physics::MoveType::Fly));
-	def.add_static_constant("MOVETYPE_FREE", umath::to_integral(pragma::physics::MoveType::Free));
-	def.add_static_constant("MOVETYPE_PHYSICS", umath::to_integral(pragma::physics::MoveType::Physics));
+	def.add_static_constant("MOVETYPE_NONE", pragma::math::to_integral(pragma::physics::MoveType::None));
+	def.add_static_constant("MOVETYPE_WALK", pragma::math::to_integral(pragma::physics::MoveType::Walk));
+	def.add_static_constant("MOVETYPE_NOCLIP", pragma::math::to_integral(pragma::physics::MoveType::Noclip));
+	def.add_static_constant("MOVETYPE_FLY", pragma::math::to_integral(pragma::physics::MoveType::Fly));
+	def.add_static_constant("MOVETYPE_FREE", pragma::math::to_integral(pragma::physics::MoveType::Free));
+	def.add_static_constant("MOVETYPE_PHYSICS", pragma::math::to_integral(pragma::physics::MoveType::Physics));
 }
 
 void pragma::LuaCore::base_render_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseRenderComponent>("BaseRenderComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetCastShadows", &pragma::BaseRenderComponent::SetCastShadows);
 	def.def("GetCastShadows", &pragma::BaseRenderComponent::GetCastShadows);
 }
@@ -2256,7 +2252,7 @@ void pragma::LuaCore::base_render_component::register_class(luabind::module_ &mo
 void pragma::LuaCore::base_soft_body_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseSoftBodyComponent>("BaseSoftBodyComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 namespace Lua::SoundEmitter {
@@ -2275,7 +2271,7 @@ namespace Lua::SoundEmitter {
 void pragma::LuaCore::base_sound_emitter_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseSoundEmitterComponent>("BaseSoundEmitterComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("CreateSound", &pragma::BaseSoundEmitterComponent::CreateSound);
 	def.def("CreateSound", +[](pragma::BaseSoundEmitterComponent &c, std::string snd, pragma::audio::ALSoundType type) { return c.CreateSound(std::move(snd), type); });
 	def.def("EmitSound", &pragma::BaseSoundEmitterComponent::EmitSound);
@@ -2304,7 +2300,7 @@ namespace Lua::Transform {
 void pragma::LuaCore::base_transform_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTransformComponent>("BaseTransformComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("GetOrigin", &pragma::BaseTransformComponent::GetOrigin);
 	def.def("GetPos", static_cast<const Vector3 &(pragma::BaseTransformComponent::*)() const>(&pragma::BaseTransformComponent::GetPosition), luabind::copy_policy<0> {});
 	def.def("GetPos", static_cast<Vector3 (pragma::BaseTransformComponent::*)(pragma::CoordinateSpace) const>(&pragma::BaseTransformComponent::GetPosition));
@@ -2418,7 +2414,7 @@ void pragma::LuaCore::base_transform_component::register_class(luabind::module_ 
 void pragma::LuaCore::base_color_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseColorComponent>("BaseColorComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("GetColorProperty", &pragma::BaseColorComponent::GetColorProperty);
 
 	def.def("GetColor", &pragma::BaseColorComponent::GetColor, luabind::copy_policy<0> {});
@@ -2446,11 +2442,11 @@ static std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, st
 void pragma::LuaCore::base_surface_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseSurfaceComponent>("BaseSurfaceComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
-	def.def("SetPlane", static_cast<void (pragma::BaseSurfaceComponent::*)(const umath::Plane &)>(&pragma::BaseSurfaceComponent::SetPlane));
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	def.def("SetPlane", static_cast<void (pragma::BaseSurfaceComponent::*)(const pragma::math::Plane &)>(&pragma::BaseSurfaceComponent::SetPlane));
 	def.def("SetPlane", static_cast<void (pragma::BaseSurfaceComponent::*)(const Vector3 &, float)>(&pragma::BaseSurfaceComponent::SetPlane));
-	def.def("GetPlane", static_cast<const umath::Plane &(pragma::BaseSurfaceComponent::*)() const>(&pragma::BaseSurfaceComponent::GetPlane), luabind::copy_policy<0> {});
-	def.def("GetPlaneWs", static_cast<umath::Plane (pragma::BaseSurfaceComponent::*)() const>(&pragma::BaseSurfaceComponent::GetPlaneWs));
+	def.def("GetPlane", static_cast<const pragma::math::Plane &(pragma::BaseSurfaceComponent::*)() const>(&pragma::BaseSurfaceComponent::GetPlane), luabind::copy_policy<0> {});
+	def.def("GetPlaneWs", static_cast<pragma::math::Plane (pragma::BaseSurfaceComponent::*)() const>(&pragma::BaseSurfaceComponent::GetPlaneWs));
 	def.def("GetPlaneNormal", &pragma::BaseSurfaceComponent::GetPlaneNormal);
 	def.def("SetPlaneNormal", &pragma::BaseSurfaceComponent::SetPlaneNormal);
 	def.def("GetPlaneDistance", &pragma::BaseSurfaceComponent::GetPlaneDistance);
@@ -2474,7 +2470,7 @@ void pragma::LuaCore::base_surface_component::register_class(luabind::module_ &m
 void pragma::LuaCore::base_score_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseScoreComponent>("BaseScoreComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("GetScoreProperty", &pragma::BaseScoreComponent::GetScoreProperty);
 	def.def("GetScore", &pragma::BaseScoreComponent::GetScore);
 	def.def("SetScore", &pragma::BaseScoreComponent::SetScore);
@@ -2486,7 +2482,7 @@ void pragma::LuaCore::base_score_component::register_class(luabind::module_ &mod
 void pragma::LuaCore::base_radius_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseRadiusComponent>("BaseRadiusComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("GetRadiusProperty", &pragma::BaseRadiusComponent::GetRadiusProperty);
 	def.def("GetRadius", &pragma::BaseRadiusComponent::GetRadius);
 	def.def("SetRadius", &pragma::BaseRadiusComponent::SetRadius);
@@ -2496,7 +2492,7 @@ void pragma::LuaCore::base_radius_component::register_class(luabind::module_ &mo
 void pragma::LuaCore::base_field_angle_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFieldAngleComponent>("BaseFieldAngleComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("GetFieldAngleProperty", &pragma::BaseFieldAngleComponent::GetFieldAngleProperty);
 	def.def("GetFieldAngle", &pragma::BaseFieldAngleComponent::GetFieldAngle);
 	def.def("SetFieldAngle", &pragma::BaseFieldAngleComponent::SetFieldAngle);
@@ -2506,18 +2502,18 @@ void pragma::LuaCore::base_field_angle_component::register_class(luabind::module
 void pragma::LuaCore::base_env_sound_dsp_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSoundDspComponent>("BaseEnvSoundDspComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_env_camera_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvCameraComponent>("BaseEnvCameraComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.add_static_constant("DEFAULT_NEAR_Z", pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z);
 	def.add_static_constant("DEFAULT_FAR_Z", pragma::baseEnvCameraComponent::DEFAULT_FAR_Z);
 	def.add_static_constant("DEFAULT_FOV", pragma::baseEnvCameraComponent::DEFAULT_FOV);
 	def.add_static_constant("DEFAULT_VIEWMODEL_FOV", pragma::baseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV);
-	def.scope[luabind::def("calc_projection_matrix", +[](umath::Radian fov, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile) -> Mat4 { return pragma::BaseEnvCameraComponent::CalcProjectionMatrix(fov, aspectRatio, nearZ, farZ, optTile); })];
+	def.scope[luabind::def("calc_projection_matrix", +[](pragma::math::Radian fov, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile) -> Mat4 { return pragma::BaseEnvCameraComponent::CalcProjectionMatrix(fov, aspectRatio, nearZ, farZ, optTile); })];
 	def.def("GetProjectionMatrix", &pragma::BaseEnvCameraComponent::GetProjectionMatrix, luabind::copy_policy<0> {});
 	def.def("GetViewMatrix", &pragma::BaseEnvCameraComponent::GetViewMatrix, luabind::copy_policy<0> {});
 	def.def("LookAt", static_cast<void (*)(lua::State *, pragma::BaseEnvCameraComponent &, const Vector3 &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector3 &lookAtPos) {
@@ -2550,8 +2546,8 @@ void pragma::LuaCore::base_env_camera_component::register_class(luabind::module_
 	def.def("GetFocalDistanceProperty", &pragma::BaseEnvCameraComponent::GetFocalDistanceProperty);
 	def.def("GetFocalDistance", &pragma::BaseEnvCameraComponent::GetFocalDistance);
 	def.def("SetFocalDistance", &pragma::BaseEnvCameraComponent::SetFocalDistance);
-	def.def("GetFrustumPlanes", static_cast<std::vector<umath::Plane> (*)(lua::State *, pragma::BaseEnvCameraComponent &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent) {
-		std::vector<umath::Plane> planes;
+	def.def("GetFrustumPlanes", static_cast<std::vector<pragma::math::Plane> (*)(lua::State *, pragma::BaseEnvCameraComponent &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent) {
+		std::vector<pragma::math::Plane> planes;
 		hComponent.GetFrustumPlanes(planes);
 		return planes;
 	}));
@@ -2617,7 +2613,7 @@ void pragma::LuaCore::base_env_camera_component::register_class(luabind::module_
 		Lua::PushInt(l, static_cast<int>(cornerPoints[0]));
 		Lua::PushInt(l, static_cast<int>(cornerPoints[1]));
 	}));
-	def.def("CreateFrustumKDop", static_cast<void (pragma::BaseEnvCameraComponent::*)(const Vector2 &, const Vector2 &, std::vector<umath::Plane> &) const>(&pragma::BaseEnvCameraComponent::CreateFrustumKDop), luabind::out_value<4> {});
+	def.def("CreateFrustumKDop", static_cast<void (pragma::BaseEnvCameraComponent::*)(const Vector2 &, const Vector2 &, std::vector<pragma::math::Plane> &) const>(&pragma::BaseEnvCameraComponent::CreateFrustumKDop), luabind::out_value<4> {});
 	def.def("CreateFrustumMesh", static_cast<void (*)(lua::State *, pragma::BaseEnvCameraComponent &, const Vector2 &, const Vector2 &)>([](lua::State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector2 &uvStart, const Vector2 &uvEnd) {
 		std::vector<Vector3> verts;
 		std::vector<uint16_t> indices;
@@ -2664,19 +2660,19 @@ void pragma::LuaCore::base_env_camera_component::register_class(luabind::module_
 void pragma::LuaCore::base_env_explosion_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvExplosionComponent>("BaseEnvExplosionComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_env_fire_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvFireComponent>("BaseEnvFireComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_env_fog_controller_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvFogControllerComponent>("BaseEnvFogControllerComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_env_light_spot_vol_component::register_class(luabind::module_ &mod)
@@ -2684,31 +2680,31 @@ void pragma::LuaCore::base_env_light_spot_vol_component::register_class(luabind:
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightSpotVolComponent>("BaseEnvLightSpotVolComponent");
 	def.def("SetIntensity", &pragma::BaseEnvLightSpotVolComponent::SetIntensityFactor);
 	def.def("GetIntensity", &pragma::BaseEnvLightSpotVolComponent::GetIntensityFactor);
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_env_microphone_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvMicrophoneComponent>("BaseEnvMicrophoneComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_env_quake_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvQuakeComponent>("BaseEnvQuakeComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_env_smoke_trail_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSmokeTrailComponent>("BaseEnvSmokeTrailComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_env_sound_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSoundComponent>("BaseEnvSoundComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetSoundSource", &pragma::BaseEnvSoundComponent::SetSoundSource);
 	def.def("SetPitch", &pragma::BaseEnvSoundComponent::SetPitch);
 	def.def("SetGain", &pragma::BaseEnvSoundComponent::SetGain);
@@ -2738,37 +2734,37 @@ void pragma::LuaCore::base_env_sound_component::register_class(luabind::module_ 
 void pragma::LuaCore::base_env_soundscape_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSoundScapeComponent>("BaseEnvSoundScapeComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_env_sprite_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvSpriteComponent>("BaseEnvSpriteComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_env_timescale_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvTimescaleComponent>("BaseEnvTimescaleComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_env_weather_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvWeatherComponent>("BaseEnvWeatherComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_env_wind_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEnvWindComponent>("BaseEnvWindComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_env_filter_name_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFilterNameComponent>("BaseFilterNameComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("ShouldPass", &pragma::BaseFilterNameComponent::ShouldPass);
 	def.add_static_constant("EVENT_ON_NAME_CHANGED", pragma::baseNameComponent::EVENT_ON_NAME_CHANGED);
 }
@@ -2776,164 +2772,164 @@ void pragma::LuaCore::base_env_filter_name_component::register_class(luabind::mo
 void pragma::LuaCore::base_env_filter_class_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFilterClassComponent>("BaseFilterClassComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("ShouldPass", &pragma::BaseFilterClassComponent::ShouldPass);
 }
 
 void pragma::LuaCore::base_func_brush_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncBrushComponent>("BaseFuncBrushComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_func_button_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncButtonComponent>("BaseFuncButtonComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_func_kinematic_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncKinematicComponent>("BaseFuncKinematicComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_func_physics_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncPhysicsComponent>("BaseFuncPhysicsComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_func_portal_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncPortalComponent>("BaseFuncPortalComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_func_soft_physics_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncSoftPhysicsComponent>("BaseFuncSoftPhysicsComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_func_surface_material_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFuncSurfaceMaterialComponent>("BaseFuncSurfaceMaterialComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_logic_relay_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseLogicRelayComponent>("BaseLogicRelayComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_bot_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseBotComponent>("BaseBotComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_point_path_node_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointPathNodeComponent>("BasePointPathNodeComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_point_constraint_ball_socket_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintBallSocketComponent>("BasePointConstraintBallSocketComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_point_constraint_cone_twist_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintConeTwistComponent>("BasePointConstraintConeTwistComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_point_constraint_dof_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintDoFComponent>("BasePointConstraintDoFComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_point_constraint_fixed_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintFixedComponent>("BasePointConstraintFixedComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_point_constraint_hinge_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintHingeComponent>("BasePointConstraintHingeComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_point_constraint_slider_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointConstraintSliderComponent>("BasePointConstraintSliderComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_point_render_target_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointRenderTargetComponent>("BasePointRenderTargetComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_point_target_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointTargetComponent>("BasePointTargetComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_prop_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePropComponent>("BasePropComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_prop_dynamic_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePropDynamicComponent>("BasePropDynamicComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_prop_physics_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePropPhysicsComponent>("BasePropPhysicsComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_trigger_hurt_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTriggerHurtComponent>("BaseTriggerHurtComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_trigger_push_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTriggerPushComponent>("BaseTriggerPushComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_trigger_remove_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTriggerRemoveComponent>("BaseTriggerRemoveComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_trigger_teleport_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTriggerTeleportComponent>("BaseTriggerTeleportComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_touch_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTouchComponent>("BaseTouchComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetTriggerFlags", &pragma::BaseTouchComponent::SetTriggerFlags);
 	def.def("GetTriggerFlags", &pragma::BaseTouchComponent::GetTriggerFlags);
 	def.def("GetTouchingEntities", static_cast<luabind::object (*)(lua::State *, pragma::BaseTouchComponent &)>([](lua::State *l, pragma::BaseTouchComponent &hComponent) -> luabind::object {
@@ -2957,36 +2953,36 @@ void pragma::LuaCore::base_touch_component::register_class(luabind::module_ &mod
 	def.add_static_constant("EVENT_ON_TRIGGER", pragma::baseTouchComponent::EVENT_ON_TRIGGER);
 	def.add_static_constant("EVENT_ON_TRIGGER_INITIALIZED", pragma::baseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED);
 
-	def.add_static_constant("TRIGGER_FLAG_NONE", umath::to_integral(pragma::BaseTouchComponent::TriggerFlags::None));
-	def.add_static_constant("TRIGGER_FLAG_BIT_PLAYERS", umath::to_integral(pragma::BaseTouchComponent::TriggerFlags::Players));
-	def.add_static_constant("TRIGGER_FLAG_BIT_NPCS", umath::to_integral(pragma::BaseTouchComponent::TriggerFlags::NPCs));
-	def.add_static_constant("TRIGGER_FLAG_BIT_PHYSICS", umath::to_integral(pragma::BaseTouchComponent::TriggerFlags::Physics));
-	def.add_static_constant("TRIGGER_FLAG_EVERYTHING", umath::to_integral(pragma::BaseTouchComponent::TriggerFlags::Everything));
+	def.add_static_constant("TRIGGER_FLAG_NONE", pragma::math::to_integral(pragma::BaseTouchComponent::TriggerFlags::None));
+	def.add_static_constant("TRIGGER_FLAG_BIT_PLAYERS", pragma::math::to_integral(pragma::BaseTouchComponent::TriggerFlags::Players));
+	def.add_static_constant("TRIGGER_FLAG_BIT_NPCS", pragma::math::to_integral(pragma::BaseTouchComponent::TriggerFlags::NPCs));
+	def.add_static_constant("TRIGGER_FLAG_BIT_PHYSICS", pragma::math::to_integral(pragma::BaseTouchComponent::TriggerFlags::Physics));
+	def.add_static_constant("TRIGGER_FLAG_EVERYTHING", pragma::math::to_integral(pragma::BaseTouchComponent::TriggerFlags::Everything));
 }
 
 void pragma::LuaCore::base_trigger_gravity_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseEntityTriggerGravityComponent>("BaseEntityTriggerGravityComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_flashlight_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFlashlightComponent>("BaseFlashlightComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_flex_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFlexComponent>("BaseFlexComponent");
 	def.add_static_constant("EVENT_ON_FLEX_CONTROLLER_CHANGED", pragma::baseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED);
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_skybox_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseSkyboxComponent>("BaseSkyboxComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetSkyAngles", &pragma::BaseSkyboxComponent::SetSkyAngles);
 	def.def("GetSkyAngles", &pragma::BaseSkyboxComponent::GetSkyAngles, luabind::copy_policy<0> {});
 }
@@ -2994,7 +2990,7 @@ void pragma::LuaCore::base_skybox_component::register_class(luabind::module_ &mo
 void pragma::LuaCore::base_world_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseWorldComponent>("BaseWorldComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 namespace Lua::AI {
@@ -3007,7 +3003,7 @@ namespace Lua::AI {
 void pragma::LuaCore::base_ai_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseAIComponent>("BaseAIComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetMoveSpeed", static_cast<void (pragma::BaseAIComponent::*)(int32_t, float)>(&pragma::BaseAIComponent::SetMoveSpeed));
 	def.def("SetMoveSpeed", static_cast<void (pragma::BaseAIComponent::*)(const std::string &, float)>(&pragma::BaseAIComponent::SetMoveSpeed));
 	def.def("GetMoveSpeed", static_cast<void (*)(lua::State *, pragma::BaseAIComponent &, const std::string &)>([](lua::State *l, pragma::BaseAIComponent &hNPC, const std::string &anim) {
@@ -3033,7 +3029,7 @@ void pragma::LuaCore::base_ai_component::register_class(luabind::module_ &mod)
 void pragma::LuaCore::base_character_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseCharacterComponent>("BaseCharacterComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	// Actor
 	def.def("GetFrozenProperty", &pragma::BaseCharacterComponent::GetFrozenProperty);
 	def.add_static_constant("EVENT_ON_KILLED", pragma::baseActorComponent::EVENT_ON_KILLED);
@@ -3057,7 +3053,7 @@ void pragma::LuaCore::base_character_component::register_class(luabind::module_ 
 	def.def("GetViewRight", &pragma::BaseCharacterComponent::GetViewRight);
 	def.def("GetViewUp", &pragma::BaseCharacterComponent::GetViewUp);
 	def.def("Ragdolize", &pragma::BaseCharacterComponent::Ragdolize);
-	def.def("SetSlopeLimit", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &, float)>([](lua::State *l, pragma::BaseCharacterComponent &hEntity, float slopeLimit) { hEntity.SetSlopeLimit(umath::deg_to_rad(slopeLimit)); }));
+	def.def("SetSlopeLimit", static_cast<void (*)(lua::State *, pragma::BaseCharacterComponent &, float)>([](lua::State *l, pragma::BaseCharacterComponent &hEntity, float slopeLimit) { hEntity.SetSlopeLimit(pragma::math::deg_to_rad(slopeLimit)); }));
 	def.def("SetStepOffset", &pragma::BaseCharacterComponent::SetStepOffset);
 	def.def("SetTurnSpeed", &pragma::BaseCharacterComponent::SetTurnSpeed);
 	def.def("SetViewAngles", &pragma::BaseCharacterComponent::SetViewAngles);
@@ -3139,14 +3135,14 @@ void pragma::LuaCore::base_character_component::register_class(luabind::module_ 
 	def.add_static_constant("EVENT_HANDLE_VIEW_ROTATION", pragma::baseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION);
 	def.add_static_constant("EVENT_ON_JUMP", pragma::baseCharacterComponent::EVENT_ON_JUMP);
 
-	def.add_static_constant("FOOT_LEFT", umath::to_integral(pragma::BaseCharacterComponent::FootType::Left));
-	def.add_static_constant("FOOT_RIGHT", umath::to_integral(pragma::BaseCharacterComponent::FootType::Right));
+	def.add_static_constant("FOOT_LEFT", pragma::math::to_integral(pragma::BaseCharacterComponent::FootType::Left));
+	def.add_static_constant("FOOT_RIGHT", pragma::math::to_integral(pragma::BaseCharacterComponent::FootType::Right));
 }
 
 void pragma::LuaCore::base_vehicle_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseVehicleComponent>("BaseVehicleComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("GetSpeedKmh", &pragma::BaseVehicleComponent::GetSpeedKmh);
 	def.def("GetSteeringFactor", &pragma::BaseVehicleComponent::GetSteeringFactor);
 	def.def("GetSteeringWheel", &pragma::BaseVehicleComponent::GetSteeringWheel);
@@ -3181,7 +3177,7 @@ namespace Lua::Weapon {
 void pragma::LuaCore::base_weapon_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseWeaponComponent>("BaseWeaponComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetNextPrimaryAttack", &pragma::BaseWeaponComponent::SetNextPrimaryAttack);
 	def.def("SetNextSecondaryAttack", &pragma::BaseWeaponComponent::SetNextSecondaryAttack);
 	def.def("SetNextAttack", &pragma::BaseWeaponComponent::SetNextAttack);
@@ -3236,7 +3232,7 @@ void pragma::LuaCore::base_weapon_component::register_class(luabind::module_ &mo
 void pragma::LuaCore::base_player_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePlayerComponent>("BasePlayerComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("GetTimeConnected", &pragma::BasePlayerComponent::TimeConnected);
 	def.def("IsKeyDown", &pragma::BasePlayerComponent::IsKeyDown);
 	def.def("GetWalkSpeed", &pragma::BasePlayerComponent::GetWalkSpeed);
@@ -3265,14 +3261,14 @@ void pragma::LuaCore::base_player_component::register_class(luabind::module_ &mo
 	def.def("ApplyViewRotationOffset", static_cast<void (*)(lua::State *, pragma::BasePlayerComponent &, EulerAngles &)>([](lua::State *l, pragma::BasePlayerComponent &hPl, EulerAngles &ang) { hPl.ApplyViewRotationOffset(ang); }));
 	def.def("PrintMessage", &pragma::BasePlayerComponent::PrintMessage);
 
-	def.add_static_constant("MESSAGE_TYPE_CONSOLE", umath::to_integral(pragma::console::MESSAGE::PRINTCONSOLE));
-	def.add_static_constant("MESSAGE_TYPE_CHAT", umath::to_integral(pragma::console::MESSAGE::PRINTCHAT));
+	def.add_static_constant("MESSAGE_TYPE_CONSOLE", pragma::math::to_integral(pragma::console::MESSAGE::PRINTCONSOLE));
+	def.add_static_constant("MESSAGE_TYPE_CHAT", pragma::math::to_integral(pragma::console::MESSAGE::PRINTCHAT));
 }
 
 void pragma::LuaCore::base_observer_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseObserverComponent>("BaseObserverComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetObserverMode", &pragma::BaseObserverComponent::SetObserverMode);
 	def.def("GetObserverMode", &pragma::BaseObserverComponent::GetObserverMode);
 	def.def("GetObserverModeProperty", &pragma::BaseObserverComponent::GetObserverModeProperty);
@@ -3282,18 +3278,18 @@ void pragma::LuaCore::base_observer_component::register_class(luabind::module_ &
 	def.add_static_constant("EVENT_ON_OBSERVATION_MODE_CHANGED", pragma::baseObserverComponent::EVENT_ON_OBSERVATION_MODE_CHANGED);
 
 	// Enums
-	def.add_static_constant("OBSERVERMODE_NONE", umath::to_integral(ObserverMode::None));
-	def.add_static_constant("OBSERVERMODE_FIRSTPERSON", umath::to_integral(ObserverMode::FirstPerson));
-	def.add_static_constant("OBSERVERMODE_THIRDPERSON", umath::to_integral(ObserverMode::ThirdPerson));
-	def.add_static_constant("OBSERVERMODE_SHOULDER", umath::to_integral(ObserverMode::Shoulder));
-	def.add_static_constant("OBSERVERMODE_ROAMING", umath::to_integral(ObserverMode::Roaming));
-	static_assert(umath::to_integral(ObserverMode::Count) == 5, "Update this list when new modes are added!");
+	def.add_static_constant("OBSERVERMODE_NONE", pragma::math::to_integral(ObserverMode::None));
+	def.add_static_constant("OBSERVERMODE_FIRSTPERSON", pragma::math::to_integral(ObserverMode::FirstPerson));
+	def.add_static_constant("OBSERVERMODE_THIRDPERSON", pragma::math::to_integral(ObserverMode::ThirdPerson));
+	def.add_static_constant("OBSERVERMODE_SHOULDER", pragma::math::to_integral(ObserverMode::Shoulder));
+	def.add_static_constant("OBSERVERMODE_ROAMING", pragma::math::to_integral(ObserverMode::Roaming));
+	static_assert(pragma::math::to_integral(ObserverMode::Count) == 5, "Update this list when new modes are added!");
 }
 
 void pragma::LuaCore::base_gamemode_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseGamemodeComponent>("BaseGamemodeComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("GetName", &pragma::BaseGamemodeComponent::GetName);
 	def.def("GetIdentifier", &pragma::BaseGamemodeComponent::GetIdentifier);
 	def.def("GetComponentName", &pragma::BaseGamemodeComponent::GetComponentName);
@@ -3318,19 +3314,19 @@ void pragma::LuaCore::base_generic_component::register_class(luabind::module_ &m
 	def.add_static_constant("EVENT_ON_COMPONENT_REMOVED", pragma::baseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED);
 	def.add_static_constant("EVENT_ON_MEMBERS_CHANGED", pragma::baseGenericComponent::EVENT_ON_MEMBERS_CHANGED);
 	def.add_static_constant("EVENT_ON_ACTIVE_STATE_CHANGED", pragma::baseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED);
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_info_landmark_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseInfoLandmarkComponent>("BaseInfoLandmarkComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_io_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseIOComponent>("BaseIOComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("Input",
 	  static_cast<void (*)(lua::State *, pragma::BaseIOComponent &, std::string, pragma::ecs::BaseEntity &, pragma::ecs::BaseEntity &, std::string)>(
 	    [](lua::State *l, pragma::BaseIOComponent &hIo, std::string input, pragma::ecs::BaseEntity &activator, pragma::ecs::BaseEntity &caller, std::string data) { hIo.Input(input, &activator, &caller, data); }));
@@ -3353,14 +3349,14 @@ void pragma::LuaCore::base_io_component::register_class(luabind::module_ &mod)
 	def.def("FireOutput", &pragma::BaseIOComponent::TriggerOutput);
 	def.add_static_constant("EVENT_HANDLE_INPUT", pragma::baseIOComponent::EVENT_HANDLE_INPUT);
 
-	def.add_static_constant("IO_FLAG_NONE", umath::to_integral(pragma::BaseIOComponent::IoFlags::None));
-	def.add_static_constant("IO_FLAG_BIT_FORCE_DELAYED_FIRE", umath::to_integral(pragma::BaseIOComponent::IoFlags::ForceDelayedFire));
+	def.add_static_constant("IO_FLAG_NONE", pragma::math::to_integral(pragma::BaseIOComponent::IoFlags::None));
+	def.add_static_constant("IO_FLAG_BIT_FORCE_DELAYED_FIRE", pragma::math::to_integral(pragma::BaseIOComponent::IoFlags::ForceDelayedFire));
 }
 
 void pragma::LuaCore::base_model_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseModelComponent>("BaseModelComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetModel", static_cast<void (*)(lua::State *, pragma::BaseModelComponent &)>([](lua::State *l, pragma::BaseModelComponent &hModel) { hModel.SetModel(std::shared_ptr<pragma::asset::Model> {nullptr}); }));
 	def.def("SetModel", static_cast<void (pragma::BaseModelComponent::*)(const std::string &)>(&pragma::BaseModelComponent::SetModel));
 	def.def("SetModel", static_cast<void (pragma::BaseModelComponent::*)(const std::shared_ptr<pragma::asset::Model> &)>(&pragma::BaseModelComponent::SetModel));
@@ -3371,7 +3367,7 @@ void pragma::LuaCore::base_model_component::register_class(luabind::module_ &mod
 		auto &mdl = hModel.GetModel();
 		if(mdl == nullptr)
 			return;
-		hModel.SetSkin(umath::random(0, umath::max(mdl->GetTextureGroups().size(), static_cast<size_t>(1)) - 1));
+		hModel.SetSkin(pragma::math::random(0, pragma::math::max(mdl->GetTextureGroups().size(), static_cast<size_t>(1)) - 1));
 	}));
 	def.def("GetModel", static_cast<luabind::optional<pragma::asset::Model> (*)(lua::State *, pragma::BaseModelComponent &)>([](lua::State *l, pragma::BaseModelComponent &hModel) -> luabind::optional<pragma::asset::Model> {
 		auto mdl = hModel.GetModel();
@@ -3403,7 +3399,7 @@ void pragma::LuaCore::base_model_component::register_class(luabind::module_ &mod
 		  return std::tuple<Vector3, Vector3, Vector3, Quat> {min, max, origin, rot};
 	  });
 	def.def(
-	  "GetHitboxBounds", +[](lua::State *l, pragma::BaseModelComponent &hEnt, uint32_t boneId, umath::CoordinateSpace space) -> std::optional<std::tuple<Vector3, Vector3, Vector3, Quat>> {
+	  "GetHitboxBounds", +[](lua::State *l, pragma::BaseModelComponent &hEnt, uint32_t boneId, pragma::math::CoordinateSpace space) -> std::optional<std::tuple<Vector3, Vector3, Vector3, Quat>> {
 		  Vector3 min, max, origin;
 		  auto rot = uquat::identity();
 		  if(!hEnt.GetHitboxBounds(boneId, min, max, origin, rot, space))
@@ -3433,7 +3429,7 @@ void pragma::LuaCore::base_model_component::register_class(luabind::module_ &mod
 void pragma::LuaCore::base_time_scale_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseTimeScaleComponent>("BaseTimeScaleComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("GetTimeScale", &pragma::BaseTimeScaleComponent::GetTimeScale);
 	def.def("SetTimeScale", &pragma::BaseTimeScaleComponent::GetTimeScale);
 	def.def("GetEffectiveTimeScale", &pragma::BaseTimeScaleComponent::GetEffectiveTimeScale);
@@ -3442,7 +3438,7 @@ void pragma::LuaCore::base_time_scale_component::register_class(luabind::module_
 void pragma::LuaCore::base_ownable_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseOwnableComponent>("BaseOwnableComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetOwner", static_cast<void (*)(lua::State *, pragma::BaseOwnableComponent &, pragma::ecs::BaseEntity *)>([](lua::State *l, pragma::BaseOwnableComponent &hEnt, pragma::ecs::BaseEntity *owner) {
 		auto &ownerComponent = hEnt;
 		if(owner)
@@ -3458,20 +3454,20 @@ void pragma::LuaCore::base_ownable_component::register_class(luabind::module_ &m
 void pragma::LuaCore::base_debug_text_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugTextComponent>("BaseDebugTextComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetText", &pragma::BaseDebugTextComponent::SetText);
 }
 
 void pragma::LuaCore::base_debug_point_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugPointComponent>("BaseDebugPointComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_debug_line_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugLineComponent>("BaseDebugLineComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_debug_box_component::register_class(luabind::module_ &mod)
@@ -3479,37 +3475,37 @@ void pragma::LuaCore::base_debug_box_component::register_class(luabind::module_ 
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugBoxComponent>("BaseDebugBoxComponent");
 	def.def("SetBounds", &pragma::BaseDebugBoxComponent::SetBounds);
 	def.def("GetBounds", &pragma::BaseDebugBoxComponent::GetBounds);
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_debug_sphere_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugSphereComponent>("BaseDebugSphereComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_debug_cone_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugConeComponent>("BaseDebugConeComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_debug_cylinder_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugCylinderComponent>("BaseDebugCylinderComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_debug_plane_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugPlaneComponent>("BaseDebugPlaneComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 
 void pragma::LuaCore::base_point_at_target_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BasePointAtTargetComponent>("BasePointAtTargetComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("SetPointAtTarget", static_cast<void (*)(lua::State *, pragma::BasePointAtTargetComponent &, pragma::ecs::BaseEntity *)>([](lua::State *l, pragma::BasePointAtTargetComponent &hEnt, pragma::ecs::BaseEntity *target) {
 		if(target)
 			hEnt.SetPointAtTarget(*target);
@@ -3523,7 +3519,7 @@ void pragma::LuaCore::base_point_at_target_component::register_class(luabind::mo
 void pragma::LuaCore::base_liquid_control_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidControlComponent>("BaseLiquidControlComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.def("CreateSplash", &pragma::BaseLiquidControlComponent::CreateSplash);
 	def.def("GetStiffness", &pragma::BaseLiquidControlComponent::GetStiffness);
 	def.def("SetStiffness", &pragma::BaseLiquidControlComponent::SetStiffness);
@@ -3542,7 +3538,7 @@ void pragma::LuaCore::base_liquid_control_component::register_class(luabind::mod
 void pragma::LuaCore::base_liquid_surface_simulation_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidSurfaceSimulationComponent>("BaseLiquidSurfaceSimulationComponent");
-	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
+	pragma::util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 	def.add_static_constant("EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED", pragma::baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
 }
 

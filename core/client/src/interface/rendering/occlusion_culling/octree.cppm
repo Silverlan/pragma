@@ -287,7 +287,7 @@ export {
 			for(auto &p : entAabbPoints) {
 				Vector3 r;
 				auto &rootBounds = root.GetWorldBounds();
-				umath::geometry::closest_point_on_aabb_to_point(rootBounds.first, rootBounds.second, p, &r);
+				pragma::math::geometry::closest_point_on_aabb_to_point(rootBounds.first, rootBounds.second, p, &r);
 				auto d = uvec::length_sqr(p - r);
 				if(d > dFurthest) {
 					dFurthest = d;

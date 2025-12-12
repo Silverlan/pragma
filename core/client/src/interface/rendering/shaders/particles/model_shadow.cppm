@@ -22,12 +22,12 @@ namespace Shader
 		void DrawTest(pragma::geometry::CModelSubMesh *mesh,uint32_t instanceCount);
 		enum class DLLCLIENT Location : uint32_t
 		{
-			Xyzs = umath::to_integral(Shadow::Location::Vertex) +1,
+			Xyzs = pragma::math::to_integral(Shadow::Location::Vertex) +1,
 			Rotation = Xyzs +1
 		};
 		enum class DLLCLIENT Binding : uint32_t
 		{
-			Xyzs = umath::to_integral(Shadow::Binding::BoneWeight) +1,
+			Xyzs = pragma::math::to_integral(Shadow::Binding::BoneWeight) +1,
 			Rotation = Xyzs +1
 		};
 	protected:

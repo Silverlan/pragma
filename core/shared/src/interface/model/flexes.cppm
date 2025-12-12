@@ -15,7 +15,7 @@ export namespace pragma::animation {
 		float min = 0.f;
 		float max = 0.f;
 
-		bool operator==(const FlexController &other) const { return name == other.name && umath::abs(min - other.min) < 0.001f && umath::abs(max - other.max) < 0.001f; }
+		bool operator==(const FlexController &other) const { return name == other.name && pragma::math::abs(min - other.min) < 0.001f && pragma::math::abs(max - other.max) < 0.001f; }
 		bool operator!=(const FlexController &other) const { return !operator==(other); }
 	};
 #pragma pack(pop)

@@ -433,7 +433,7 @@ static bool compare_numeric_values(const Lua::udm_ng &ov0, const Lua::udm_ng &ov
 	if(::udm::is_numeric_type(type)) {
 		return ::udm::visit<true, false, false>(type, [&ov0, &ov1, epsilon](auto tag) {
 			using T = typename decltype(tag)::type;
-			return umath::abs(luabind::object_cast<T>(ov0) - luabind::object_cast<T>(ov1)) < epsilon;
+			return pragma::math::abs(luabind::object_cast<T>(ov0) - luabind::object_cast<T>(ov1)) < epsilon;
 		});
 	}
 	return ::udm::visit<false, true, false>(type, [&ov0, &ov1, epsilon](auto tag) {
@@ -446,7 +446,7 @@ static bool compare_numeric_values(const Lua::udm_ng &ov0, const Lua::udm_ng &ov
 			for(auto i = decltype(n) {0u}; i < n; ++i) {
 				auto f0 = ::get_numeric_component<T>(*v0, i);
 				auto f1 = ::get_numeric_component<T>(*v1, i);
-				if(umath::abs(f1 - f0) >= epsilon)
+				if(pragma::math::abs(f1 - f0) >= epsilon)
 					return false;
 			}
 		}
@@ -460,7 +460,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	modUdm[(
 		luabind::def("load",+[](lua::State *l,const std::string &fileName) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			std::string err;
-			auto udmData = ::util::load_udm_asset(fileName,&err);
+			auto udmData = pragma::util::load_udm_asset(fileName,&err);
 			if(udmData == nullptr)
 				return Lua::mult<bool,std::string>{l,false,std::move(err)};
 			return luabind::object{l,udmData};
@@ -469,7 +469,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			if(!file.GetHandle())
 				return Lua::mult<bool,std::string>{l,false,"Invalid file handle!"};
 			std::string err;
-			auto udmData = ::util::load_udm_asset(std::make_unique<ufile::FileWrapper>(file.GetHandle()),&err);
+			auto udmData = pragma::util::load_udm_asset(std::make_unique<ufile::FileWrapper>(file.GetHandle()),&err);
 			if(udmData == nullptr)
 				return Lua::mult<bool,std::string>{l,false,std::move(err)};
 			return luabind::object{l,udmData};
@@ -477,7 +477,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("parse",+[](lua::State *l,const std::string &udmStr) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			auto memFile = std::make_unique<ufile::MemoryFile>(reinterpret_cast<uint8_t*>(const_cast<char*>(udmStr.data())),udmStr.length());
 			std::string err;
-			auto udmData = ::util::load_udm_asset(std::move(memFile),&err);
+			auto udmData = pragma::util::load_udm_asset(std::move(memFile),&err);
 			if(udmData == nullptr)
 				return Lua::mult<bool,std::string>{l,false,std::move(err)};
 			return luabind::object{l,udmData};
@@ -524,7 +524,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("create_element",+[](lua::State *l) -> ::udm::PProperty {
 			return ::udm::Property::Create(::udm::Type::Element);
 		}),
-		luabind::def("compress_lz4",+[](lua::State *l,::util::DataStream ds) -> ::util::DataStream {
+		luabind::def("compress_lz4",+[](lua::State *l,pragma::util::DataStream ds) -> pragma::util::DataStream {
 			auto offset = ds->GetOffset();
 			ds->SetOffset(0);
 			auto lz4Blob = ::udm::compress_lz4_blob(ds->GetData(),ds->GetInternalSize());
@@ -532,21 +532,21 @@ void Lua::udm::register_library(Lua::Interface &lua)
 
 			auto t = luabind::newtable(l);
 			t[1] = lz4Blob.uncompressedSize;
-			::util::DataStream dsCompressed {static_cast<uint32_t>(lz4Blob.compressedData.size())};
+			pragma::util::DataStream dsCompressed {static_cast<uint32_t>(lz4Blob.compressedData.size())};
 			dsCompressed->Write(lz4Blob.compressedData.data(),lz4Blob.compressedData.size());
 			t[2] = dsCompressed;
 			return dsCompressed;
 		}),
-		luabind::def("decompress_lz4",+[](Lua::tb<void> t) -> ::util::DataStream {
+		luabind::def("decompress_lz4",+[](Lua::tb<void> t) -> pragma::util::DataStream {
 			uint64_t uncompressedSize = luabind::object_cast_nothrow<uint64_t>(t[1],uint64_t{});
-			::util::DataStream ds = luabind::object_cast_nothrow<::util::DataStream>(t[2],::util::DataStream{});
+			pragma::util::DataStream ds = luabind::object_cast_nothrow<pragma::util::DataStream>(t[2],pragma::util::DataStream{});
 
 			auto offset = ds->GetOffset();
 			ds->SetOffset(0);
 			auto blob = ::udm::decompress_lz4_blob(ds->GetData(),ds->GetInternalSize(),uncompressedSize);
 			ds->SetOffset(offset);
 
-			::util::DataStream dsDecompressed {static_cast<uint32_t>(blob.data.size())};
+			pragma::util::DataStream dsDecompressed {static_cast<uint32_t>(blob.data.size())};
 			dsDecompressed->Write(blob.data.data(),blob.data.size());
 			return dsDecompressed;
 		}),
@@ -673,7 +673,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			case ::udm::Type::Mat3x4:
 				return 3;
 			}
-			static_assert(umath::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
+			static_assert(pragma::math::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
 			return 0;
 		}),
 		luabind::def("get_matrix_column_count",+[](::udm::Type type) -> uint32_t {
@@ -684,7 +684,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			case ::udm::Type::Mat3x4:
 				return 4;
 			}
-			static_assert(umath::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
+			static_assert(pragma::math::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
 			return 0;
 		}),
 		luabind::def("type_to_string",+[](::udm::Type type) -> std::string {
@@ -728,7 +728,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			case ::udm::Type::Mat3x4:
 				return luabind::globals(l)["math"]["Mat3x4"];
 			}
-			static_assert(umath::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
+			static_assert(pragma::math::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
 			return Lua::nil;
 		}),
 		luabind::def("get_numeric_component",+[](lua::State *l,const luabind::object &value,int32_t idx) -> Lua::type<uint32_t> {
@@ -749,14 +749,14 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		}),
 		luabind::def("convert_udm_file_to_ascii",+[](lua::State *l,const std::string &fileName) -> Lua::var<std::string,Lua::mult<bool,std::string>> {
 			std::string err;
-			auto newFileName = ::util::convert_udm_file_to_ascii(fileName, err);
+			auto newFileName = pragma::util::convert_udm_file_to_ascii(fileName, err);
 		    if(!newFileName)
 				return luabind::object{l,std::pair<bool,std::string>{false,err}};
 			return luabind::object{l,*newFileName};
 		}),
 		luabind::def("convert_udm_file_to_binary",+[](lua::State *l,const std::string &fileName) -> Lua::var<std::string,Lua::mult<bool,std::string>> {
 			std::string err;
-			auto newFileName = ::util::convert_udm_file_to_binary(fileName, err);
+			auto newFileName = pragma::util::convert_udm_file_to_binary(fileName, err);
 		    if(!newFileName)
 				return luabind::object{l,std::pair<bool,std::string>{false,err}};
 			return luabind::object{l,*newFileName};
@@ -782,7 +782,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			return compare_numeric_values(ov0,ov1,type);
 		}),
 		luabind::def("is_animatable_type", +[](::udm::Type type) -> bool {
-			if(umath::to_integral(type) >= umath::to_integral(::udm::Type::Count))
+			if(pragma::math::to_integral(type) >= pragma::math::to_integral(::udm::Type::Count))
 				return false;
 			return panima::is_animatable_type(type);
 		})
@@ -791,61 +791,61 @@ void Lua::udm::register_library(Lua::Interface &lua)
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "udm",
 	  {
-	    {"TYPE_NIL", umath::to_integral(::udm::Type::Nil)},
-	    {"TYPE_STRING", umath::to_integral(::udm::Type::String)},
-	    {"TYPE_UTF8_STRING", umath::to_integral(::udm::Type::Utf8String)},
-	    {"TYPE_INT8", umath::to_integral(::udm::Type::Int8)},
-	    {"TYPE_UINT8", umath::to_integral(::udm::Type::UInt8)},
-	    {"TYPE_INT16", umath::to_integral(::udm::Type::Int16)},
-	    {"TYPE_UINT16", umath::to_integral(::udm::Type::UInt16)},
-	    {"TYPE_INT32", umath::to_integral(::udm::Type::Int32)},
-	    {"TYPE_UINT32", umath::to_integral(::udm::Type::UInt32)},
-	    {"TYPE_INT64", umath::to_integral(::udm::Type::Int64)},
-	    {"TYPE_UINT64", umath::to_integral(::udm::Type::UInt64)},
-	    {"TYPE_FLOAT", umath::to_integral(::udm::Type::Float)},
-	    {"TYPE_DOUBLE", umath::to_integral(::udm::Type::Double)},
-	    {"TYPE_BOOLEAN", umath::to_integral(::udm::Type::Boolean)},
-	    {"TYPE_VECTOR2", umath::to_integral(::udm::Type::Vector2)},
-	    {"TYPE_VECTOR2I", umath::to_integral(::udm::Type::Vector2i)},
-	    {"TYPE_VECTOR3", umath::to_integral(::udm::Type::Vector3)},
-	    {"TYPE_VECTOR3I", umath::to_integral(::udm::Type::Vector3i)},
-	    {"TYPE_VECTOR4", umath::to_integral(::udm::Type::Vector4)},
-	    {"TYPE_VECTOR4I", umath::to_integral(::udm::Type::Vector4i)},
-	    {"TYPE_QUATERNION", umath::to_integral(::udm::Type::Quaternion)},
-	    {"TYPE_EULER_ANGLES", umath::to_integral(::udm::Type::EulerAngles)},
-	    {"TYPE_SRGBA", umath::to_integral(::udm::Type::Srgba)},
-	    {"TYPE_HDR_COLOR", umath::to_integral(::udm::Type::HdrColor)},
-	    {"TYPE_TRANSFORM", umath::to_integral(::udm::Type::Transform)},
-	    {"TYPE_SCALED_TRANSFORM", umath::to_integral(::udm::Type::ScaledTransform)},
-	    {"TYPE_MAT4", umath::to_integral(::udm::Type::Mat4)},
-	    {"TYPE_MAT3X4", umath::to_integral(::udm::Type::Mat3x4)},
-	    {"TYPE_BLOB", umath::to_integral(::udm::Type::Blob)},
-	    {"TYPE_BLOB_LZ4", umath::to_integral(::udm::Type::BlobLz4)},
-	    {"TYPE_ELEMENT", umath::to_integral(::udm::Type::Element)},
-	    {"TYPE_ARRAY", umath::to_integral(::udm::Type::Array)},
-	    {"TYPE_ARRAY_LZ4", umath::to_integral(::udm::Type::ArrayLz4)},
-	    {"TYPE_REFERENCE", umath::to_integral(::udm::Type::Reference)},
-	    {"TYPE_STRUCT", umath::to_integral(::udm::Type::Struct)},
-	    {"TYPE_HALF", umath::to_integral(::udm::Type::Half)},
-	    {"TYPE_COUNT", umath::to_integral(::udm::Type::Count)},
-	    {"TYPE_INVALID", umath::to_integral(::udm::Type::Invalid)},
+	    {"TYPE_NIL", pragma::math::to_integral(::udm::Type::Nil)},
+	    {"TYPE_STRING", pragma::math::to_integral(::udm::Type::String)},
+	    {"TYPE_UTF8_STRING", pragma::math::to_integral(::udm::Type::Utf8String)},
+	    {"TYPE_INT8", pragma::math::to_integral(::udm::Type::Int8)},
+	    {"TYPE_UINT8", pragma::math::to_integral(::udm::Type::UInt8)},
+	    {"TYPE_INT16", pragma::math::to_integral(::udm::Type::Int16)},
+	    {"TYPE_UINT16", pragma::math::to_integral(::udm::Type::UInt16)},
+	    {"TYPE_INT32", pragma::math::to_integral(::udm::Type::Int32)},
+	    {"TYPE_UINT32", pragma::math::to_integral(::udm::Type::UInt32)},
+	    {"TYPE_INT64", pragma::math::to_integral(::udm::Type::Int64)},
+	    {"TYPE_UINT64", pragma::math::to_integral(::udm::Type::UInt64)},
+	    {"TYPE_FLOAT", pragma::math::to_integral(::udm::Type::Float)},
+	    {"TYPE_DOUBLE", pragma::math::to_integral(::udm::Type::Double)},
+	    {"TYPE_BOOLEAN", pragma::math::to_integral(::udm::Type::Boolean)},
+	    {"TYPE_VECTOR2", pragma::math::to_integral(::udm::Type::Vector2)},
+	    {"TYPE_VECTOR2I", pragma::math::to_integral(::udm::Type::Vector2i)},
+	    {"TYPE_VECTOR3", pragma::math::to_integral(::udm::Type::Vector3)},
+	    {"TYPE_VECTOR3I", pragma::math::to_integral(::udm::Type::Vector3i)},
+	    {"TYPE_VECTOR4", pragma::math::to_integral(::udm::Type::Vector4)},
+	    {"TYPE_VECTOR4I", pragma::math::to_integral(::udm::Type::Vector4i)},
+	    {"TYPE_QUATERNION", pragma::math::to_integral(::udm::Type::Quaternion)},
+	    {"TYPE_EULER_ANGLES", pragma::math::to_integral(::udm::Type::EulerAngles)},
+	    {"TYPE_SRGBA", pragma::math::to_integral(::udm::Type::Srgba)},
+	    {"TYPE_HDR_COLOR", pragma::math::to_integral(::udm::Type::HdrColor)},
+	    {"TYPE_TRANSFORM", pragma::math::to_integral(::udm::Type::Transform)},
+	    {"TYPE_SCALED_TRANSFORM", pragma::math::to_integral(::udm::Type::ScaledTransform)},
+	    {"TYPE_MAT4", pragma::math::to_integral(::udm::Type::Mat4)},
+	    {"TYPE_MAT3X4", pragma::math::to_integral(::udm::Type::Mat3x4)},
+	    {"TYPE_BLOB", pragma::math::to_integral(::udm::Type::Blob)},
+	    {"TYPE_BLOB_LZ4", pragma::math::to_integral(::udm::Type::BlobLz4)},
+	    {"TYPE_ELEMENT", pragma::math::to_integral(::udm::Type::Element)},
+	    {"TYPE_ARRAY", pragma::math::to_integral(::udm::Type::Array)},
+	    {"TYPE_ARRAY_LZ4", pragma::math::to_integral(::udm::Type::ArrayLz4)},
+	    {"TYPE_REFERENCE", pragma::math::to_integral(::udm::Type::Reference)},
+	    {"TYPE_STRUCT", pragma::math::to_integral(::udm::Type::Struct)},
+	    {"TYPE_HALF", pragma::math::to_integral(::udm::Type::Half)},
+	    {"TYPE_COUNT", pragma::math::to_integral(::udm::Type::Count)},
+	    {"TYPE_INVALID", pragma::math::to_integral(::udm::Type::Invalid)},
 
-	    {"ARRAY_TYPE_COMPRESSED", umath::to_integral(::udm::ArrayType::Compressed)},
-	    {"ARRAY_TYPE_RAW", umath::to_integral(::udm::ArrayType::Raw)},
+	    {"ARRAY_TYPE_COMPRESSED", pragma::math::to_integral(::udm::ArrayType::Compressed)},
+	    {"ARRAY_TYPE_RAW", pragma::math::to_integral(::udm::ArrayType::Raw)},
 
-	    {"MERGE_FLAG_NONE", umath::to_integral(::udm::MergeFlags::None)},
-	    {"MERGE_FLAG_BIT_OVERWRITE_EXISTING", umath::to_integral(::udm::MergeFlags::OverwriteExisting)},
-	    {"MERGE_FLAG_BIT_DEEP_COPY", umath::to_integral(::udm::MergeFlags::DeepCopy)},
+	    {"MERGE_FLAG_NONE", pragma::math::to_integral(::udm::MergeFlags::None)},
+	    {"MERGE_FLAG_BIT_OVERWRITE_EXISTING", pragma::math::to_integral(::udm::MergeFlags::OverwriteExisting)},
+	    {"MERGE_FLAG_BIT_DEEP_COPY", pragma::math::to_integral(::udm::MergeFlags::DeepCopy)},
 
-	    {"ASCII_SAVE_FLAG_NONE", umath::to_integral(::udm::AsciiSaveFlags::None)},
-	    {"ASCII_SAVE_FLAG_BIT_INCLUDE_HEADER", umath::to_integral(::udm::AsciiSaveFlags::IncludeHeader)},
-	    {"ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS", umath::to_integral(::udm::AsciiSaveFlags::DontCompressLz4Arrays)},
-	    {"ASCII_SAVE_FLAG_DEFAULT", umath::to_integral(::udm::AsciiSaveFlags::Default)},
+	    {"ASCII_SAVE_FLAG_NONE", pragma::math::to_integral(::udm::AsciiSaveFlags::None)},
+	    {"ASCII_SAVE_FLAG_BIT_INCLUDE_HEADER", pragma::math::to_integral(::udm::AsciiSaveFlags::IncludeHeader)},
+	    {"ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS", pragma::math::to_integral(::udm::AsciiSaveFlags::DontCompressLz4Arrays)},
+	    {"ASCII_SAVE_FLAG_DEFAULT", pragma::math::to_integral(::udm::AsciiSaveFlags::Default)},
 
-	    {"FORMAT_TYPE_BINARY", umath::to_integral(::udm::FormatType::Binary)},
-	    {"FORMAT_TYPE_ASCII", umath::to_integral(::udm::FormatType::Ascii)},
+	    {"FORMAT_TYPE_BINARY", pragma::math::to_integral(::udm::FormatType::Binary)},
+	    {"FORMAT_TYPE_ASCII", pragma::math::to_integral(::udm::FormatType::Ascii)},
 	  });
-	static_assert(umath::to_integral(::udm::Type::Count) == 36, "Update this list when types have been added or removed!");
+	static_assert(pragma::math::to_integral(::udm::Type::Count) == 36, "Update this list when types have been added or removed!");
 
 	register_types(lua, modUdm);
 }

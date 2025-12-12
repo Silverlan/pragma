@@ -18,97 +18,97 @@ export {
 	namespace pragma {
 		class BasePlayerComponent;
 		namespace detail {
-			constexpr ents::EntityMemberType util_type_to_member_type(util::VarType type)
+			constexpr ents::EntityMemberType util_type_to_member_type(pragma::util::VarType type)
 			{
 				switch(type) {
-				case util::VarType::Bool:
+				case pragma::util::VarType::Bool:
 					return ents::EntityMemberType::Boolean;
-				case util::VarType::Double:
+				case pragma::util::VarType::Double:
 					return ents::EntityMemberType::Double;
-				case util::VarType::Float:
+				case pragma::util::VarType::Float:
 					return ents::EntityMemberType::Float;
-				case util::VarType::Int8:
+				case pragma::util::VarType::Int8:
 					return ents::EntityMemberType::Int8;
-				case util::VarType::Int16:
+				case pragma::util::VarType::Int16:
 					return ents::EntityMemberType::Int16;
-				case util::VarType::Int32:
+				case pragma::util::VarType::Int32:
 					return ents::EntityMemberType::Int32;
-				case util::VarType::Int64:
+				case pragma::util::VarType::Int64:
 					return ents::EntityMemberType::Int64;
-				case util::VarType::String:
+				case pragma::util::VarType::String:
 					return ents::EntityMemberType::String;
-				case util::VarType::UInt8:
+				case pragma::util::VarType::UInt8:
 					return ents::EntityMemberType::UInt8;
-				case util::VarType::UInt16:
+				case pragma::util::VarType::UInt16:
 					return ents::EntityMemberType::UInt16;
-				case util::VarType::UInt32:
+				case pragma::util::VarType::UInt32:
 					return ents::EntityMemberType::UInt32;
-				case util::VarType::UInt64:
+				case pragma::util::VarType::UInt64:
 					return ents::EntityMemberType::UInt64;
-				case util::VarType::EulerAngles:
+				case pragma::util::VarType::EulerAngles:
 					return ents::EntityMemberType::EulerAngles;
-				case util::VarType::Vector:
+				case pragma::util::VarType::Vector:
 					return ents::EntityMemberType::Vector3;
-				case util::VarType::Vector2:
+				case pragma::util::VarType::Vector2:
 					return ents::EntityMemberType::Vector2;
-				case util::VarType::Vector4:
+				case pragma::util::VarType::Vector4:
 					return ents::EntityMemberType::Vector4;
-				case util::VarType::Quaternion:
+				case pragma::util::VarType::Quaternion:
 					return ents::EntityMemberType::Quaternion;
-				case util::VarType::Entity:
+				case pragma::util::VarType::Entity:
 					return ents::EntityMemberType::Entity;
-				case util::VarType::Transform:
+				case pragma::util::VarType::Transform:
 					return ents::EntityMemberType::Transform;
-				case util::VarType::ScaledTransform:
+				case pragma::util::VarType::ScaledTransform:
 					return ents::EntityMemberType::ScaledTransform;
 				}
 				return ents::EntityMemberType::Invalid;
 			}
-			constexpr util::VarType member_type_to_util_type(ents::EntityMemberType type)
+			constexpr pragma::util::VarType member_type_to_util_type(ents::EntityMemberType type)
 			{
 				switch(type) {
 				case ents::EntityMemberType::Boolean:
-					return util::VarType::Bool;
+					return pragma::util::VarType::Bool;
 				case ents::EntityMemberType::Double:
-					return util::VarType::Double;
+					return pragma::util::VarType::Double;
 				case ents::EntityMemberType::Float:
-					return util::VarType::Float;
+					return pragma::util::VarType::Float;
 				case ents::EntityMemberType::Int8:
-					return util::VarType::Int8;
+					return pragma::util::VarType::Int8;
 				case ents::EntityMemberType::Int16:
-					return util::VarType::Int16;
+					return pragma::util::VarType::Int16;
 				case ents::EntityMemberType::Int32:
-					return util::VarType::Int32;
+					return pragma::util::VarType::Int32;
 				case ents::EntityMemberType::Int64:
-					return util::VarType::Int64;
+					return pragma::util::VarType::Int64;
 				case ents::EntityMemberType::String:
-					return util::VarType::String;
+					return pragma::util::VarType::String;
 				case ents::EntityMemberType::UInt8:
-					return util::VarType::UInt8;
+					return pragma::util::VarType::UInt8;
 				case ents::EntityMemberType::UInt16:
-					return util::VarType::UInt16;
+					return pragma::util::VarType::UInt16;
 				case ents::EntityMemberType::UInt32:
-					return util::VarType::UInt32;
+					return pragma::util::VarType::UInt32;
 				case ents::EntityMemberType::UInt64:
-					return util::VarType::UInt64;
+					return pragma::util::VarType::UInt64;
 				case ents::EntityMemberType::EulerAngles:
-					return util::VarType::EulerAngles;
+					return pragma::util::VarType::EulerAngles;
 				case ents::EntityMemberType::Vector3:
-					return util::VarType::Vector;
+					return pragma::util::VarType::Vector;
 				case ents::EntityMemberType::Vector2:
-					return util::VarType::Vector2;
+					return pragma::util::VarType::Vector2;
 				case ents::EntityMemberType::Vector4:
-					return util::VarType::Vector4;
+					return pragma::util::VarType::Vector4;
 				case ents::EntityMemberType::Quaternion:
-					return util::VarType::Quaternion;
+					return pragma::util::VarType::Quaternion;
 				case ents::EntityMemberType::Entity:
-					return util::VarType::Entity;
+					return pragma::util::VarType::Entity;
 				case ents::EntityMemberType::Transform:
-					return util::VarType::Transform;
+					return pragma::util::VarType::Transform;
 				case ents::EntityMemberType::ScaledTransform:
-					return util::VarType::ScaledTransform;
+					return pragma::util::VarType::ScaledTransform;
 				}
-				return util::VarType::Invalid;
+				return pragma::util::VarType::Invalid;
 			}
 		};
 		class DLLNETWORK BaseLuaBaseEntityComponent : public pragma::BaseEntityComponent, public DynamicMemberRegister {
@@ -185,7 +185,7 @@ export {
 
 			virtual void OnMembersChanged() override { pragma::BaseEntityComponent::OnMembersChanged(); }
 			virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
-			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 			virtual void OnAttached(pragma::ecs::BaseEntity &ent) override;
 			virtual void OnDetached(pragma::ecs::BaseEntity &ent) override;
@@ -373,7 +373,7 @@ export {
 				def.def("OnMembersChanged", static_cast<void (T::*)()>(&T::OnMembersChanged));
 			}
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::BaseLuaBaseEntityComponent::MemberFlags)
 

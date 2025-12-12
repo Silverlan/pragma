@@ -29,11 +29,11 @@ void pragma::pts::CParticleInitializerSpeed::Initialize(pragma::BaseEnvParticleS
 	m_fSpeed.Initialize("speed", values);
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "speed_min")
-			m_fSpeed.SetMin(util::to_float(pair.second));
+			m_fSpeed.SetMin(pragma::util::to_float(pair.second));
 		else if(key == "speed_max")
-			m_fSpeed.SetMax(util::to_float(pair.second));
+			m_fSpeed.SetMax(pragma::util::to_float(pair.second));
 	}
 }
 void pragma::pts::CParticleInitializerSpeed::OnParticleCreated(pragma::pts::CParticle &particle)

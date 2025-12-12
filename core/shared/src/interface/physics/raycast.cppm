@@ -22,8 +22,8 @@ export namespace pragma::physics {
 		TraceData(const TraceData &other);
 		~TraceData();
 		pragma::physics::RayCastFlags GetFlags() const;
-		const umath::Transform &GetSource() const;
-		const umath::Transform &GetTarget() const;
+		const pragma::math::Transform &GetSource() const;
+		const pragma::math::Transform &GetTarget() const;
 		Vector3 GetSourceOrigin() const;
 		Quat GetSourceRotation() const;
 		Vector3 GetTargetOrigin() const;
@@ -36,10 +36,10 @@ export namespace pragma::physics {
 		const pragma::physics::IConvexShape *GetShape() const;
 		void SetSource(const Vector3 &origin);
 		void SetSourceRotation(const Quat &rot);
-		void SetSource(const umath::Transform &t);
+		void SetSource(const pragma::math::Transform &t);
 		void SetTarget(const Vector3 &target);
 		void SetTargetRotation(const Quat &rot);
-		void SetTarget(const umath::Transform &t);
+		void SetTarget(const pragma::math::Transform &t);
 		void SetRotation(const Quat &rot);
 		void SetFlags(pragma::physics::RayCastFlags flags);
 		void SetCollisionFilterMask(pragma::physics::CollisionMask mask);
@@ -55,15 +55,15 @@ export namespace pragma::physics {
 	  protected:
 		bool HasTarget() const;
 	  private:
-		umath::Transform m_tStart;
-		umath::Transform m_tEnd;
+		pragma::math::Transform m_tStart;
+		pragma::math::Transform m_tEnd;
 
 		pragma::physics::RayCastFlags m_flags;
 		bool m_bHasTarget = false;
 		pragma::physics::CollisionMask m_filterMask;
 		pragma::physics::CollisionMask m_filterGroup;
 		std::shared_ptr<pragma::physics::IRayCastFilterCallback> m_filter = nullptr;
-		util::WeakHandle<pragma::physics::IConvexShape> m_shape = {};
+		pragma::util::WeakHandle<pragma::physics::IConvexShape> m_shape = {};
 	};
 
 	struct DLLNETWORK TraceResult {
@@ -77,7 +77,7 @@ export namespace pragma::physics {
 		~TraceResult();
 		pragma::physics::RayCastHitType hitType = pragma::physics::RayCastHitType::None;
 		EntityHandle entity = {};
-		util::TWeakSharedHandle<pragma::physics::ICollisionObject> collisionObj = {};
+		pragma::util::TWeakSharedHandle<pragma::physics::ICollisionObject> collisionObj = {};
 		std::weak_ptr<pragma::physics::IShape> shape = {};
 		PhysObjHandle physObj = {};
 		float fraction = 0.f;

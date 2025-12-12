@@ -24,7 +24,7 @@ void SAIComponent::SetRelationship(pragma::ecs::BaseEntity *ent, DISPOSITION dis
 	if(ent == nullptr)
 		return;
 	ClearRelationship(ent);
-	m_entityRelationships[umath::to_integral(disp)].push_back(::util::make_shared<NPCRelationship>(std::shared_ptr<EntityHandle>(new EntityHandle(ent->GetHandle())), priority));
+	m_entityRelationships[pragma::math::to_integral(disp)].push_back(pragma::util::make_shared<NPCRelationship>(std::shared_ptr<EntityHandle>(new EntityHandle(ent->GetHandle())), priority));
 	if(revert == true && ent->IsNPC()) {
 		auto sAiComponent = ent->GetComponent<SAIComponent>();
 		if(sAiComponent.expired() == false)
@@ -39,18 +39,18 @@ void SAIComponent::SetRelationship(EntityHandle &hEnt, DISPOSITION disp, bool re
 }
 void SAIComponent::SetRelationship(std::string className, DISPOSITION disp, int priority)
 {
-	ustring::to_lower(className);
+	pragma::string::to_lower(className);
 	ClearRelationship(className);
-	m_classRelationships[umath::to_integral(disp)].push_back(::util::make_shared<NPCRelationship>(::util::make_shared<std::string>(className), priority));
+	m_classRelationships[pragma::math::to_integral(disp)].push_back(pragma::util::make_shared<NPCRelationship>(pragma::util::make_shared<std::string>(className), priority));
 }
 void SAIComponent::SetRelationship(Faction &faction, DISPOSITION disp, int priority)
 {
 	ClearRelationship(faction);
-	m_factionRelationships[static_cast<int>(disp)].push_back(::util::make_shared<NPCRelationship>(faction.shared_from_this(), priority));
+	m_factionRelationships[static_cast<int>(disp)].push_back(pragma::util::make_shared<NPCRelationship>(faction.shared_from_this(), priority));
 }
 void SAIComponent::ClearRelationships()
 {
-	auto num = umath::to_integral(DISPOSITION::COUNT);
+	auto num = pragma::math::to_integral(DISPOSITION::COUNT);
 	for(auto i = decltype(num) {0}; i < num; ++i) {
 		m_entityRelationships[i].clear();
 		m_classRelationships[i].clear();
@@ -78,7 +78,7 @@ void SAIComponent::ClearRelationship(EntityHandle &hEnt)
 }
 void SAIComponent::ClearRelationship(std::string className)
 {
-	ustring::to_lower(className);
+	pragma::string::to_lower(className);
 	for(auto &rels : m_entityRelationships) {
 		auto it = std::find_if(rels.begin(), rels.end(), [&className](const std::shared_ptr<NPCRelationship> &rel) {
 			auto ptrClassName = std::static_pointer_cast<std::string>(rel->data);
@@ -151,7 +151,7 @@ DISPOSITION SAIComponent::GetDisposition(pragma::ecs::BaseEntity *ent, int *prio
 }
 DISPOSITION SAIComponent::GetDisposition(std::string className, int *priority)
 {
-	ustring::to_lower(className);
+	pragma::string::to_lower(className);
 	auto *charComponent = static_cast<pragma::SCharacterComponent *>(GetEntity().GetCharacterComponent().get());
 	auto *factionThis = (charComponent != nullptr) ? charComponent->GetFaction() : nullptr;
 	auto bFoundFaction = false;

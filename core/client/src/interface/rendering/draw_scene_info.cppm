@@ -33,7 +33,7 @@ export namespace pragma::rendering {
 		DrawSceneInfo();
 		DrawSceneInfo(const DrawSceneInfo &other);
 		DrawSceneInfo &operator=(const DrawSceneInfo &other);
-		util::TWeakSharedHandle<::pragma::CSceneComponent> scene = util::TWeakSharedHandle<::pragma::CSceneComponent> {};
+		pragma::util::TWeakSharedHandle<::pragma::CSceneComponent> scene = pragma::util::TWeakSharedHandle<::pragma::CSceneComponent> {};
 		mutable std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer = nullptr;
 		std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
 		RenderFlags renderFlags = RenderFlags::All;
@@ -64,6 +64,6 @@ export namespace pragma::rendering {
 		const DrawSceneInfo &drawSceneInfo;
 		mutable std::shared_ptr<prosper::ICommandBuffer> commandBuffer = nullptr;
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {REGISTER_ENUM_FLAGS(pragma::rendering::DrawSceneInfo::Flags)}

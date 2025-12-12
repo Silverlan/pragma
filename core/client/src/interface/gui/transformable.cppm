@@ -29,7 +29,7 @@ export namespace pragma::gui::types {
 		bool IsDraggable();
 		bool IsResizable();
 		virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
-		virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 		virtual void OnCursorMoved(int x, int y) override;
 		void SetMinWidth(int w);
 		void SetMinHeight(int h);
@@ -94,7 +94,7 @@ export namespace pragma::gui::types {
 		void UpdateResizeRect();
 		void UpdateResizeRectPos();
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 
 export {REGISTER_ENUM_FLAGS(pragma::gui::types::WITransformable::StateFlags)}

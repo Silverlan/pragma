@@ -31,8 +31,8 @@ void BaseEnvFogControllerComponent::RegisterMembers(pragma::EntityComponentManag
 	}
 
 	{
-		using TType = util::FogType;
-		auto memberInfo = create_component_member_info<T, TType, static_cast<void (T::*)(TType)>(&T::SetFogType), static_cast<TType (T::*)() const>(&T::GetFogType)>("type", util::FogType::Linear);
+		using TType = pragma::util::FogType;
+		auto memberInfo = create_component_member_info<T, TType, static_cast<void (T::*)(TType)>(&T::SetFogType), static_cast<TType (T::*)() const>(&T::GetFogType)>("type", pragma::util::FogType::Linear);
 		registerMember(std::move(memberInfo));
 	}
 }
@@ -40,33 +40,33 @@ void BaseEnvFogControllerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "fogcolor", false))
+		if(pragma::string::compare<std::string>(kvData.key, "fogcolor", false))
 			GetEntity().SetKeyValue("color", kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "fogstart", false))
-			m_kvFogStart = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "fogend", false))
-			m_kvFogEnd = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "fogmaxdensity", false))
-			m_kvMaxDensity = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "fogtype", false))
-			m_kvFogType = static_cast<util::FogType>(util::to_int(kvData.value));
+		else if(pragma::string::compare<std::string>(kvData.key, "fogstart", false))
+			m_kvFogStart = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "fogend", false))
+			m_kvFogEnd = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "fogmaxdensity", false))
+			m_kvMaxDensity = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "fogtype", false))
+			m_kvFogType = static_cast<pragma::util::FogType>(pragma::util::to_int(kvData.value));
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
-		if(ustring::compare<std::string>(inputData.input, "setstartdist", false))
-			m_kvFogStart = util::to_float(inputData.data);
-		else if(ustring::compare<std::string>(inputData.input, "setenddist", false))
-			m_kvFogEnd = util::to_float(inputData.data);
-		else if(ustring::compare<std::string>(inputData.input, "setmaxdensity", false))
-			m_kvMaxDensity = util::to_float(inputData.data);
+		if(pragma::string::compare<std::string>(inputData.input, "setstartdist", false))
+			m_kvFogStart = pragma::util::to_float(inputData.data);
+		else if(pragma::string::compare<std::string>(inputData.input, "setenddist", false))
+			m_kvFogEnd = pragma::util::to_float(inputData.data);
+		else if(pragma::string::compare<std::string>(inputData.input, "setmaxdensity", false))
+			m_kvMaxDensity = pragma::util::to_float(inputData.data);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -78,4 +78,4 @@ void BaseEnvFogControllerComponent::Initialize()
 void BaseEnvFogControllerComponent::SetFogStart(float start) { m_kvFogStart = start; }
 void BaseEnvFogControllerComponent::SetFogEnd(float end) { m_kvFogEnd = end; }
 void BaseEnvFogControllerComponent::SetMaxDensity(float density) { m_kvMaxDensity = density; }
-void BaseEnvFogControllerComponent::SetFogType(util::FogType type) { m_kvFogType = type; }
+void BaseEnvFogControllerComponent::SetFogType(pragma::util::FogType type) { m_kvFogType = type; }

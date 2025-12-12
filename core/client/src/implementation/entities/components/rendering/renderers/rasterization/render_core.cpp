@@ -17,13 +17,13 @@ using namespace pragma::rendering;
 void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const pragma::rendering::DrawSceneInfo &drawSceneInfo, const std::vector<pragma::ecs::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass,
   Bool bloom)
 {
-	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::ParticleDepth);
+	auto depthOnly = pragma::math::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::ParticleDepth);
 	if((depthOnly && bloom) || drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
 	auto renderFlags = pts::ParticleRenderFlags::None;
-	umath::set_flag(renderFlags, pts::ParticleRenderFlags::DepthOnly, depthOnly || depthPass);
-	umath::set_flag(renderFlags, pts::ParticleRenderFlags::Bloom, bloom);
+	pragma::math::set_flag(renderFlags, pts::ParticleRenderFlags::DepthOnly, depthOnly || depthPass);
+	pragma::math::set_flag(renderFlags, pts::ParticleRenderFlags::Bloom, bloom);
 	for(auto *particle : particles) {
 		if(particle != nullptr && particle->IsActive() == true && particle->GetSceneRenderPass() == renderMode && particle->GetParent() == nullptr) {
 			if(bloom && !particle->IsBloomEnabled())
@@ -67,12 +67,12 @@ void pragma::CRasterizationRendererComponent::Render(const pragma::rendering::Dr
 {
 	if(drawSceneInfo.scene.expired())
 		return;
-	if(umath::is_flag_set(m_stateFlags, StateFlags::InitialRender)) {
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::InitialRender)) {
 		// HACK: For whatever reason the render code causes a crash on the very first frame when using OpenGL.
 		// If we skip the first frame, it doesn't crash, so we just skip the first frame for now.
 		// This is a workaround until the actual issue is found.
 		// Unfortunately the OpenGL debug output doesn't give any useful information.
-		umath::set_flag(m_stateFlags, StateFlags::InitialRender, false);
+		pragma::math::set_flag(m_stateFlags, StateFlags::InitialRender, false);
 		if(pragma::get_cengine()->GetRenderAPI() == "opengl")
 			return;
 	}
@@ -215,11 +215,11 @@ void pragma::CRasterizationRendererComponent::Render(const pragma::rendering::Dr
 
 	auto *renderer = scene.GetRenderer<pragma::CRendererComponent>();
 	auto &postProcessing = renderer->GetPostProcessingEffects();
-	auto applyToneMapped = !umath::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::HDR);
+	auto applyToneMapped = !pragma::math::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::HDR);
 	for(auto &pp : postProcessing) {
 		if(pp.render.IsValid()) {
 			auto flags = pp.getFlags ? pp.getFlags() : PostProcessingEffectData::Flags::None;
-			if(!applyToneMapped && umath::is_flag_set(flags, pragma::PostProcessingEffectData::Flags::ToneMapped))
+			if(!applyToneMapped && pragma::math::is_flag_set(flags, pragma::PostProcessingEffectData::Flags::ToneMapped))
 				break;
 			pp.render.Call<void, const pragma::rendering::DrawSceneInfo &>(drawSceneInfo);
 		}

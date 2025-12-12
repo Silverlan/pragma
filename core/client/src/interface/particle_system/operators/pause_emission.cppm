@@ -43,7 +43,7 @@ export namespace pragma::pts {
 		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual pragma::ecs::CParticleSystemComponent *GetTargetParticleSystem() override;
 	  private:
-		util::WeakHandle<pragma::ecs::CParticleSystemComponent> m_hChildSystem = {};
+		pragma::util::WeakHandle<pragma::ecs::CParticleSystemComponent> m_hChildSystem = {};
 	};
 };
 
@@ -52,11 +52,11 @@ void pragma::pts::CParticleOperatorPauseEmissionBase::Initialize(pragma::BaseEnv
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "pause_start")
-			m_fStart = util::to_float(pair.second);
+			m_fStart = pragma::util::to_float(pair.second);
 		else if(key == "pause_end")
-			m_fEnd = util::to_float(pair.second);
+			m_fEnd = pragma::util::to_float(pair.second);
 	}
 	static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).SetAlwaysSimulate(true); // Required, otherwise Simulate() might not get called
 }
@@ -106,12 +106,12 @@ void pragma::pts::CParticleOperatorPauseChildEmission::Initialize(pragma::BaseEn
 	std::string childName;
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "name")
 			childName = pair.second;
 	}
 	auto &children = GetParticleSystem().GetChildren();
-	auto it = std::find_if(children.begin(), children.end(), [&childName](const pragma::ecs::CParticleSystemComponent::ChildData &hSystem) { return hSystem.child.valid() && ustring::match(childName, hSystem.child.get()->GetParticleSystemName()); });
+	auto it = std::find_if(children.begin(), children.end(), [&childName](const pragma::ecs::CParticleSystemComponent::ChildData &hSystem) { return hSystem.child.valid() && pragma::string::match(childName, hSystem.child.get()->GetParticleSystemName()); });
 	if(it == children.end())
 		return;
 	m_hChildSystem = it->child;

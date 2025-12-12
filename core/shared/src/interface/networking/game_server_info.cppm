@@ -11,7 +11,7 @@ export import :engine.info;
 export namespace pragma::networking {
 	struct DLLNETWORK GameServerInfo {
 		uint16_t port = 0u;
-		util::Version version = {};
+		pragma::util::Version version = {};
 		std::string gameName = "";
 		std::string gameDirectory = "";
 		std::string gameMode = "";

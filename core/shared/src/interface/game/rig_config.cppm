@@ -27,7 +27,7 @@ export {
 			float radius = 0.25f;
 
 			// If not set, bone pose will be used instead
-			std::optional<umath::Transform> ikPose {};
+			std::optional<pragma::math::Transform> ikPose {};
 		};
 
 		struct DLLNETWORK RigConfigControl {
@@ -50,7 +50,7 @@ export {
 
 			pragma::GString poleTargetBaseBone;
 			pragma::GString poleTargetEffectorBone;
-			umath::Degree poleAngle = 0.f;
+			pragma::math::Degree poleAngle = 0.f;
 		};
 
 		struct DLLNETWORK RigConfigConstraint {
@@ -66,7 +66,7 @@ export {
 			SignedAxis axis = SignedAxis::Z;
 			EulerAngles minLimits;
 			EulerAngles maxLimits;
-			umath::ScaledTransform offsetPose {};
+			pragma::math::ScaledTransform offsetPose {};
 
 			float rigidity = 1'000.f;
 			float maxForce = -1.f;
@@ -90,7 +90,7 @@ export {
 			Type type = Type::BallSocketJoint;
 			std::optional<Vector3> axisA {};
 			std::optional<Vector3> axisB {};
-			std::optional<umath::Degree> maxAngle {};
+			std::optional<pragma::math::Degree> maxAngle {};
 			float rigidity = 1.f;
 			union {
 				std::optional<Vector3> anchorPosition {};
@@ -133,8 +133,8 @@ export {
 			void RemoveJoints(const pragma::GString &bone0, const pragma::GString &bone1);
 			void RemoveJoint(const RigConfigJoint &joint);
 			PRigConfigJoint AddBallSocketJoint(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &anchorPosition, float rigidity = 1.f);
-			PRigConfigJoint AddSwingLimit(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Degree maxAngle, float rigidity = 1.f);
-			PRigConfigJoint AddTwistLimit(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Degree maxAngle, float rigidity = 1.f, const std::optional<Vector3> &measurementAxisA = {});
+			PRigConfigJoint AddSwingLimit(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, pragma::math::Degree maxAngle, float rigidity = 1.f);
+			PRigConfigJoint AddTwistLimit(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, pragma::math::Degree maxAngle, float rigidity = 1.f, const std::optional<Vector3> &measurementAxisA = {});
 			PRigConfigJoint AddSwivelHingeJoint(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity = 1.f);
 			PRigConfigJoint AddTwistJoint(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity);
 			PRigConfigJoint AddDistanceJoint(const pragma::GString &bone0, const pragma::GString &bone1, float rigidity = 1.f);
@@ -147,7 +147,7 @@ export {
 			void RemoveControl(const RigConfigControl &control);
 			void RemoveBone(const RigConfigBone &bone);
 			PRigConfigConstraint AddFixedConstraint(const pragma::GString &bone0, const pragma::GString &bone1);
-			PRigConfigConstraint AddHingeConstraint(const pragma::GString &bone0, const pragma::GString &bone1, umath::Degree minAngle, umath::Degree maxAngle, const Quat &offsetRotation = uquat::identity());
+			PRigConfigConstraint AddHingeConstraint(const pragma::GString &bone0, const pragma::GString &bone1, pragma::math::Degree minAngle, pragma::math::Degree maxAngle, const Quat &offsetRotation = uquat::identity());
 			PRigConfigConstraint AddBallSocketConstraint(const pragma::GString &bone0, const pragma::GString &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, SignedAxis axis = SignedAxis::Z);
 
 			const std::vector<PRigConfigBone> &GetBones() const { return m_bones; }

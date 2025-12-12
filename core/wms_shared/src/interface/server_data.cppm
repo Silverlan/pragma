@@ -14,7 +14,7 @@ export {
 	#pragma warning(disable : 4251)
 	struct DLLWMSSHARED WMServerData {
 		WMServerData();
-		util::Version engineVersion;
+		pragma::util::Version engineVersion;
 		std::string ip;
 		unsigned short tcpPort;
 		unsigned short udpPort;
@@ -25,8 +25,8 @@ export {
 		std::string map;
 		std::string gameMode;
 		bool password;
-		void Write(util::DataStream &stream) const;
-		static void Read(util::DataStream &stream, WMServerData &data);
+		void Write(pragma::util::DataStream &stream) const;
+		static void Read(pragma::util::DataStream &stream, WMServerData &data);
 	};
 	DLLWMSSHARED std::ostream &operator<<(std::ostream &out, const WMServerData &data);
 	#pragma warning(pop)

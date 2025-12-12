@@ -6,8 +6,8 @@ module pragma.shared;
 
 import :physics.base;
 
-util::TWeakSharedHandle<pragma::physics::IBase> pragma::physics::IBase::GetHandle() const { return m_handle; }
-util::TSharedHandle<pragma::physics::IBase> pragma::physics::IBase::ClaimOwnership() const { return util::claim_shared_handle_ownership(m_handle); }
+pragma::util::TWeakSharedHandle<pragma::physics::IBase> pragma::physics::IBase::GetHandle() const { return m_handle; }
+pragma::util::TSharedHandle<pragma::physics::IBase> pragma::physics::IBase::ClaimOwnership() const { return pragma::util::claim_shared_handle_ownership(m_handle); }
 
 bool pragma::physics::IBase::IsConstraint() const { return false; }
 bool pragma::physics::IBase::IsCollisionObject() const { return false; }
@@ -40,7 +40,7 @@ void pragma::physics::IBase::OnRemove()
 void pragma::physics::IBase::InitializeLuaObject(lua::State *lua) { InitializeLuaObject<IBase>(lua); }
 
 pragma::physics::IBase::IBase(IEnvironment &env) : m_physEnv {env} {}
-void pragma::physics::IBase::InitializeLuaHandle(const util::TWeakSharedHandle<IBase> &handle) { m_handle = handle; }
+void pragma::physics::IBase::InitializeLuaHandle(const pragma::util::TWeakSharedHandle<IBase> &handle) { m_handle = handle; }
 
 bool pragma::physics::IWorldObject::IsSpawned() const { return m_bSpawned; }
 void pragma::physics::IWorldObject::Spawn()

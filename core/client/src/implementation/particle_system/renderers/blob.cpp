@@ -28,19 +28,19 @@ void pragma::pts::CParticleRendererBlob::Initialize(pragma::BaseEnvParticleSyste
 	auto shininess = 0.f;
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "specular_color")
 			m_specularColor = Color(it->second).ToVector4();
 		else if(key == "specular_shininess") {
-			shininess = util::to_float(it->second);
+			shininess = pragma::util::to_float(it->second);
 			bHasShininess = true;
 		}
 		else if(key == "reflection_intensity")
-			m_reflectionIntensity = util::to_float(it->second);
+			m_reflectionIntensity = pragma::util::to_float(it->second);
 		else if(key == "refraction_index_ratio")
-			m_refractionIndexRatio = util::to_float(it->second);
+			m_refractionIndexRatio = pragma::util::to_float(it->second);
 		else if(key == "debug_mode")
-			m_debugMode = static_cast<pragma::ShaderParticleBlob::DebugMode>(util::to_int(it->second));
+			m_debugMode = static_cast<pragma::ShaderParticleBlob::DebugMode>(pragma::util::to_int(it->second));
 	}
 	if(bHasShininess == true)
 		m_specularColor.w = shininess;
@@ -167,7 +167,7 @@ void pragma::pts::CParticleRendererBlob::OnParticleSystemStarted()
 	assert(maxParticleCount < (INVALID_BLOB_INDEX + 1));
 	m_adjacentParticleIds.resize(maxParticleCount);
 	prosper::util::BufferCreateInfo bufCreateInfo {};
-	bufCreateInfo.size = util::size_of_container(m_adjacentParticleIds);
+	bufCreateInfo.size = pragma::util::size_of_container(m_adjacentParticleIds);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	m_adjacentBlobBuffer = context.CreateBuffer(bufCreateInfo, m_adjacentParticleIds.data());
@@ -360,7 +360,7 @@ void pragma::pts::CParticleRendererBlob::UpdateAdjacentParticles(prosper::IComma
 					auto &p1 = particles[renderIdx1];
 					auto &pos1 = *reinterpret_cast<const Vector3 *>(&p1.position);
 					auto radius1 = p1.radius;
-					auto maxDistSqr = umath::pow2(radius0 + radius1);
+					auto maxDistSqr = pragma::math::pow2(radius0 + radius1);
 					auto distSqr = link.distSqr = uvec::length_sqr(pos1 - pos0);
 					bClearLink = (distSqr >= maxDistSqr) ? true : false;
 				}
@@ -418,7 +418,7 @@ void pragma::pts::CParticleRendererBlob::UpdateAdjacentParticles(prosper::IComma
 				auto &p1 = *it1;
 				auto &pos1 = *reinterpret_cast<const Vector3 *>(&p1.position);
 				auto radius1 = p1.radius;
-				auto maxDistSqr = umath::pow2(radius0 + radius1);
+				auto maxDistSqr = pragma::math::pow2(radius0 + radius1);
 				auto distSqr = uvec::length_sqr(pos1 - pos0);
 				if(distSqr < maxDistSqr) {
 					// Check if link already exists
@@ -447,7 +447,7 @@ void pragma::pts::CParticleRendererBlob::UpdateAdjacentParticles(prosper::IComma
 		auto renderIdx = it - particles.begin();
 		auto &particleIds = m_adjacentParticleIds[renderIdx];
 		auto offset = renderIdx * pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS * sizeof(particleIds.front());
-		cmd.RecordUpdateBuffer(blobIndexBuffer, offset, util::size_of_container(particleIds), particleIds.data());
+		cmd.RecordUpdateBuffer(blobIndexBuffer, offset, pragma::util::size_of_container(particleIds), particleIds.data());
 	}
 	//
 	UpdateDebugNeighborLinks();

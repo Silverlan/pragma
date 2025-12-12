@@ -11,7 +11,7 @@ export import pragma.util;
 export namespace pragma {
 	class NetworkState;
 	struct DLLNETWORK IServerState final {
-		void Initialize(::util::Library &lib);
+		void Initialize(pragma::util::Library &lib);
 		IServerState() = default;
 		void (*create_server_state)(std::unique_ptr<NetworkState> &) = nullptr;
 		void (*start_server)(bool) = nullptr;

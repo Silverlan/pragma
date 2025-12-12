@@ -42,10 +42,10 @@ pragma::gui::types::WIMainMenu::~WIMainMenu()
 		m_cbOnSteamworksShutdown.Remove();
 }
 
-util::EventReply pragma::gui::types::WIMainMenu::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WIMainMenu::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	if(!m_hActive.IsValid())
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	return m_hActive->KeyboardCallback(key, scanCode, state, mods);
 }
 
@@ -86,7 +86,7 @@ void pragma::gui::types::WIMainMenu::PlayNextMenuTrack(bool newRound)
 	}
 	if(m_menuTracks.empty())
 		return;
-	auto next = umath::random(0, CUInt32(m_menuTracks.size() - 1));
+	auto next = pragma::math::random(0, CUInt32(m_menuTracks.size() - 1));
 	auto it = m_menuTracks.begin() + next;
 	auto sound = *it;
 	m_menuTracks.erase(it);
@@ -179,7 +179,7 @@ void pragma::gui::types::WIMainMenu::Initialize()
 	/*menu->AddMenuItem(pragma::locale::get_text("menu_addons"), FunctionCallback<>::Create([this]() {
 		//SetActiveMenu(m_hMods);
 		//ShellExecute(0,0,engine_info::get_modding_hub_url().c_str(),0,0,SW_SHOW);
-		util::open_url_in_browser("steam://url/SteamWorkshopPage/" + std::to_string(engine_info::get_steam_app_id()));
+		pragma::util::open_url_in_browser("steam://url/SteamWorkshopPage/" + std::to_string(engine_info::get_steam_app_id()));
 	}));*/
 #ifdef _DEBUG
 	menu->AddMenuItem("Loadscreen", FunctionCallback<>::Create([this]() { SetActiveMenu(m_hLoadScreen); }));
@@ -227,7 +227,7 @@ void pragma::gui::types::WIMainMenu::Initialize()
 	auto version = pragma::get_pretty_engine_version();
 	auto gitInfo = pragma::engine_info::get_git_info();
 	if(gitInfo.has_value())
-		version += " [" + ustring::substr(gitInfo->commitSha, 0, 7) + "]";
+		version += " [" + pragma::string::substr(gitInfo->commitSha, 0, 7) + "]";
 	auto *pVersion = static_cast<WIText *>(m_hVersion.get());
 	pVersion->AddStyleClass("game_version");
 	pVersion->SetColor(1.f, 1.f, 1.f, 1.f);

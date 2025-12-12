@@ -34,11 +34,11 @@ void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, con
 	if(bCustomForce == true)
 		dmg.SetForce(Vector3(bulletInfo.force, 0, 0));
 
-	auto bCustomDamageType = (bulletInfo.damageType != util::declvalue(&game::BulletInfo::damageType)) ? true : false;
+	auto bCustomDamageType = (bulletInfo.damageType != pragma::util::declvalue(&game::BulletInfo::damageType)) ? true : false;
 	if(bCustomDamageType == true)
 		dmg.SetDamageType(bulletInfo.damageType);
 
-	auto bCustomDamage = (bulletInfo.damage != util::declvalue(&game::BulletInfo::damage)) ? true : false;
+	auto bCustomDamage = (bulletInfo.damage != pragma::util::declvalue(&game::BulletInfo::damage)) ? true : false;
 	if(bCustomDamage == true)
 		dmg.SetDamage(static_cast<uint16_t>(bulletInfo.damage));
 
@@ -75,7 +75,7 @@ void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, gam
 		m_nextBullet = std::unique_ptr<NextBulletInfo>(new NextBulletInfo);
 		m_nextBullet->destinations = GetBulletDestinations(origin, dir, bulletInfo);
 	}
-	util::ScopeGuard sg([this]() {
+	pragma::util::ScopeGuard sg([this]() {
 		m_nextBullet = nullptr; // We're done with this
 	});
 

@@ -123,34 +123,34 @@ void pragma::CGame::InitShaders()
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("load_shaders");
-	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
+	pragma::util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 
 	auto &shaderManager = pragma::get_cengine()->GetShaderManager();
 	pragma::ShaderScene::SetRenderPassSampleCount(static_cast<prosper::SampleCountFlags>(GetMSAASampleCount()));
 
-	m_gameShaders.at(umath::to_integral(GameShader::Debug)) = shaderManager.GetShader("debug");
-	m_gameShaders.at(umath::to_integral(GameShader::DebugTexture)) = shaderManager.GetShader("debug_texture");
-	m_gameShaders.at(umath::to_integral(GameShader::DebugVertex)) = shaderManager.GetShader("debug_vertex");
+	m_gameShaders.at(pragma::math::to_integral(GameShader::Debug)) = shaderManager.GetShader("debug");
+	m_gameShaders.at(pragma::math::to_integral(GameShader::DebugTexture)) = shaderManager.GetShader("debug_texture");
+	m_gameShaders.at(pragma::math::to_integral(GameShader::DebugVertex)) = shaderManager.GetShader("debug_vertex");
 
-	m_gameShaders.at(umath::to_integral(GameShader::Shadow)) = shaderManager.GetShader("shadow");
-	m_gameShaders.at(umath::to_integral(GameShader::ShadowCSM)) = shaderManager.GetShader("shadowcsm");
-	m_gameShaders.at(umath::to_integral(GameShader::ShadowSpot)) = shaderManager.GetShader("shadow_spot");
+	m_gameShaders.at(pragma::math::to_integral(GameShader::Shadow)) = shaderManager.GetShader("shadow");
+	m_gameShaders.at(pragma::math::to_integral(GameShader::ShadowCSM)) = shaderManager.GetShader("shadowcsm");
+	m_gameShaders.at(pragma::math::to_integral(GameShader::ShadowSpot)) = shaderManager.GetShader("shadow_spot");
 	// TODO: Transparent shaders
 	//shaderManager.RegisterShader("hdr",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderHDR(context,identifier);});
 
 	shaderManager.GetShader("copy_image");
-	m_gameShaders.at(umath::to_integral(GameShader::PPTonemapping)) = shaderManager.GetShader("pp_hdr");
-	m_gameShaders.at(umath::to_integral(GameShader::PPDoF)) = shaderManager.GetShader("pp_dof");
-	m_gameShaders.at(umath::to_integral(GameShader::PPFog)) = shaderManager.GetShader("pp_fog");
-	m_gameShaders.at(umath::to_integral(GameShader::PPFXAA)) = shaderManager.GetShader("pp_fxaa");
+	m_gameShaders.at(pragma::math::to_integral(GameShader::PPTonemapping)) = shaderManager.GetShader("pp_hdr");
+	m_gameShaders.at(pragma::math::to_integral(GameShader::PPDoF)) = shaderManager.GetShader("pp_dof");
+	m_gameShaders.at(pragma::math::to_integral(GameShader::PPFog)) = shaderManager.GetShader("pp_fog");
+	m_gameShaders.at(pragma::math::to_integral(GameShader::PPFXAA)) = shaderManager.GetShader("pp_fxaa");
 
 	// Make sure these are always loaded
-	m_gameShaders.at(umath::to_integral(GameShader::Pbr)) = shaderManager.GetShader("pbr");
+	m_gameShaders.at(pragma::math::to_integral(GameShader::Pbr)) = shaderManager.GetShader("pbr");
 	// shaderManager.GetShader("test");
 	shaderManager.GetShader("light_cone");
 	shaderManager.GetShader("forwardp_light_culling");
-	m_gameShaders.at(umath::to_integral(GameShader::Prepass)) = shaderManager.GetShader("prepass");
+	m_gameShaders.at(pragma::math::to_integral(GameShader::Prepass)) = shaderManager.GetShader("prepass");
 	shaderManager.GetShader("shadow");
 	shaderManager.GetShader("pp_fog");
 	shaderManager.GetShader("pp_dof");

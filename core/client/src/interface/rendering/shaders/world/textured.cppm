@@ -52,12 +52,12 @@ export namespace pragma {
 		bool AddSpecializationConstant(prosper::ShaderGraphics &shader, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx, prosper::ShaderStageFlags stageFlags, TSpecializationConstantFlag flag)
 		{
 			uint32_t isSet = static_cast<uint32_t>(IsSpecializationConstantSet(pipelineIdx, flag));
-			return shader.AddSpecializationConstant(pipelineInfo, stageFlags, umath::get_least_significant_set_bit_index(umath::to_integral(flag)), sizeof(uint32_t), &isSet);
+			return shader.AddSpecializationConstant(pipelineInfo, stageFlags, pragma::math::get_least_significant_set_bit_index(pragma::math::to_integral(flag)), sizeof(uint32_t), &isSet);
 		}
 	  private:
 		std::vector<SpecializationFlags> m_pipelineSpecializations;
 		struct PassTypeInfo {
-			std::array<uint32_t, umath::to_integral(GameShaderSpecializationConstantFlag::PermutationCount)> specializationToPipelineIdx;
+			std::array<uint32_t, pragma::math::to_integral(GameShaderSpecializationConstantFlag::PermutationCount)> specializationToPipelineIdx;
 			std::pair<uint32_t, uint32_t> pipelineIndexRange {0, 0};
 		};
 		PassTypeInfo &InitializePassTypeSpecializations(PassTypeIndex passType);
@@ -98,7 +98,7 @@ export namespace pragma {
 		static bool InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, msys::CMaterial &mat, const pragma::rendering::ShaderInputData &matData, uint32_t bindingIdx);
 		static std::unique_ptr<prosper::DescriptorSetInfo> CreateMaterialDescriptorSetInfo(const pragma::rendering::shader_material::ShaderMaterial &shaderMaterial);
 
-		enum class VertexBinding : uint32_t { LightmapUv = umath::to_integral(ShaderEntity::VertexBinding::Count) };
+		enum class VertexBinding : uint32_t { LightmapUv = pragma::math::to_integral(ShaderEntity::VertexBinding::Count) };
 
 		enum class MaterialBinding : uint32_t {
 			MaterialSettings = 0u,

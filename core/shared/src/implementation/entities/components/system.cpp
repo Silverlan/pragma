@@ -14,14 +14,14 @@ BaseEntityComponentSystem::~BaseEntityComponentSystem()
 {
 	if(!m_components.empty())
 		throw std::runtime_error {"m_components is not empty! Did you forget to call ClearComponents()?"};
-	if(umath::is_flag_set(m_stateFlags, StateFlags::ComponentCleanupRequired)) {
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ComponentCleanupRequired)) {
 		auto it = std::find(g_systemsScheduledForCleanup.begin(), g_systemsScheduledForCleanup.end(), this);
 		assert(it != g_systemsScheduledForCleanup.end());
 		if(it != g_systemsScheduledForCleanup.end())
 			g_systemsScheduledForCleanup.erase(it);
 	}
 }
-void BaseEntityComponentSystem::OnRemove() { umath::set_flag(m_stateFlags, StateFlags::IsBeingRemoved); }
+void BaseEntityComponentSystem::OnRemove() { pragma::math::set_flag(m_stateFlags, StateFlags::IsBeingRemoved); }
 void BaseEntityComponentSystem::Initialize(pragma::ecs::BaseEntity &ent, EntityComponentManager &componentManager)
 {
 	m_entity = &ent;
@@ -51,7 +51,7 @@ void BaseEntityComponentSystem::ClearComponents()
 	}
 	m_components.clear();
 }
-util::EventReply BaseEntityComponentSystem::BroadcastEvent(ComponentEventId ev, ComponentEvent &evData, const BaseEntityComponent *src) const
+pragma::util::EventReply BaseEntityComponentSystem::BroadcastEvent(ComponentEventId ev, ComponentEvent &evData, const BaseEntityComponent *src) const
 {
 	// Note: This function must only be called from one thread at a time.
 	// For this reason multi-threaded events should never be broadcasted, and should
@@ -67,17 +67,17 @@ util::EventReply BaseEntityComponentSystem::BroadcastEvent(ComponentEventId ev, 
 		if(component == nullptr || component.get() == src)
 			continue;
 		auto idx = (it - components.begin());
-		if(component->HandleEvent(ev, evData) == util::EventReply::Handled)
-			return util::EventReply::Handled;
+		if(component->HandleEvent(ev, evData) == pragma::util::EventReply::Handled)
+			return pragma::util::EventReply::Handled;
 		if(components.size() != numComponents) {
 			// Iterator has been invalidated. This can happen because a new component has been added.
 			it = components.begin() + idx;
 			numComponents = components.size();
 		}
 	}
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
-util::EventReply BaseEntityComponentSystem::BroadcastEvent(ComponentEventId eventId) const
+pragma::util::EventReply BaseEntityComponentSystem::BroadcastEvent(ComponentEventId eventId) const
 {
 	CEGenericComponentEvent ev {};
 	return BroadcastEvent(eventId, ev);
@@ -85,7 +85,7 @@ util::EventReply BaseEntityComponentSystem::BroadcastEvent(ComponentEventId even
 pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComponent(ComponentId componentId, bool bForceCreateNew)
 {
 	if(bForceCreateNew == false) {
-		auto it = std::find_if(m_components.begin(), m_components.end(), [componentId](const util::TSharedHandle<pragma::BaseEntityComponent> &ptrComponent) { return ptrComponent.valid() && ptrComponent->GetComponentId() == componentId; });
+		auto it = std::find_if(m_components.begin(), m_components.end(), [componentId](const pragma::util::TSharedHandle<pragma::BaseEntityComponent> &ptrComponent) { return ptrComponent.valid() && ptrComponent->GetComponentId() == componentId; });
 		if(it != m_components.end())
 			return {*it};
 	}
@@ -112,7 +112,7 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::
 
 	pragma::CEOnEntityComponentAdded evData {*ptrComponent};
 	auto *genericC = m_entity->GetGenericComponent();
-	if(BroadcastEvent(baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED, evData, ptrComponent.get()) != util::EventReply::Handled && genericC)
+	if(BroadcastEvent(baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED, evData, ptrComponent.get()) != pragma::util::EventReply::Handled && genericC)
 		genericC->InvokeEventCallbacks(baseGenericComponent::EVENT_ON_ENTITY_COMPONENT_ADDED, evData);
 
 	assert(numCurComponents <= m_components.size());
@@ -154,18 +154,18 @@ void BaseEntityComponentSystem::Cleanup()
 			}
 			it = sys->m_components.erase(it);
 		}
-		umath::set_flag(sys->m_stateFlags, StateFlags::ComponentCleanupRequired, false);
+		pragma::math::set_flag(sys->m_stateFlags, StateFlags::ComponentCleanupRequired, false);
 	}
 	g_systemsScheduledForCleanup.clear();
 }
 void BaseEntityComponentSystem::RemoveComponent(pragma::BaseEntityComponent &component)
 {
-	if(umath::is_flag_set(component.m_stateFlags, BaseEntityComponent::StateFlags::Removed))
+	if(pragma::math::is_flag_set(component.m_stateFlags, BaseEntityComponent::StateFlags::Removed))
 		return;
-	if(umath::is_flag_set(component.m_stateFlags, BaseEntityComponent::StateFlags::IsInitializing))
+	if(pragma::math::is_flag_set(component.m_stateFlags, BaseEntityComponent::StateFlags::IsInitializing))
 		throw std::runtime_error {"Attempted to remove component of type " + std::to_string(component.GetComponentId()) + " while it is being initialized. This is not allowed!"};
-	umath::set_flag(component.m_stateFlags, BaseEntityComponent::StateFlags::Removed);
-	auto it = std::find_if(m_components.begin(), m_components.end(), [&component](const util::TSharedHandle<BaseEntityComponent> &componentOther) { return componentOther.valid() && componentOther.get() == &component; });
+	pragma::math::set_flag(component.m_stateFlags, BaseEntityComponent::StateFlags::Removed);
+	auto it = std::find_if(m_components.begin(), m_components.end(), [&component](const pragma::util::TSharedHandle<BaseEntityComponent> &componentOther) { return componentOther.valid() && componentOther.get() == &component; });
 	if(it == m_components.end())
 		return;
 	auto idxComponent = (it - m_components.begin());
@@ -204,10 +204,10 @@ void BaseEntityComponentSystem::RemoveComponent(pragma::BaseEntityComponent &com
 	auto tmpHandle = *it;
 	// Clear the component. We can't erase it from m_components safely, so we just invalidate it
 	// for now. m_components will get cleaned up at a later date
-	*it = util::TSharedHandle<BaseEntityComponent> {};
-	if(!umath::is_flag_set(m_stateFlags, StateFlags::ComponentCleanupRequired)) {
-		if(!umath::is_flag_set(m_stateFlags, StateFlags::IsBeingRemoved)) { // No point for cleanup if we're already being removed
-			umath::set_flag(m_stateFlags, StateFlags::ComponentCleanupRequired, true);
+	*it = pragma::util::TSharedHandle<BaseEntityComponent> {};
+	if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::ComponentCleanupRequired)) {
+		if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::IsBeingRemoved)) { // No point for cleanup if we're already being removed
+			pragma::math::set_flag(m_stateFlags, StateFlags::ComponentCleanupRequired, true);
 			if(g_systemsScheduledForCleanup.size() == g_systemsScheduledForCleanup.capacity())
 				g_systemsScheduledForCleanup.reserve(g_systemsScheduledForCleanup.size() * 1.5 + 100);
 			g_systemsScheduledForCleanup.push_back(this);
@@ -225,12 +225,12 @@ void BaseEntityComponentSystem::RemoveComponent(pragma::BaseEntityComponent &com
 	component.CleanUp();
 
 	// Safe to free now
-	tmpHandle = util::TSharedHandle<BaseEntityComponent> {};
+	tmpHandle = pragma::util::TSharedHandle<BaseEntityComponent> {};
 
 	auto itType = m_componentLookupTable.find(componentId);
 	if(itType != m_componentLookupTable.end()) {
 		// Find a different component of the same type
-		auto it = std::find_if(m_components.begin(), m_components.end(), [componentId](const util::TSharedHandle<BaseEntityComponent> &ptrComponent) { return ptrComponent.valid() && ptrComponent->GetComponentId() == componentId; });
+		auto it = std::find_if(m_components.begin(), m_components.end(), [componentId](const pragma::util::TSharedHandle<BaseEntityComponent> &ptrComponent) { return ptrComponent.valid() && ptrComponent->GetComponentId() == componentId; });
 		if(it == m_components.end()) {
 			m_componentLookupTable.erase(itType);
 			return;
@@ -261,8 +261,8 @@ bool pragma::BaseEntityComponentSystem::HasComponent(ComponentId componentId) co
 	return it != m_componentLookupTable.end() && it->second.expired() == false;
 }
 
-const std::vector<util::TSharedHandle<BaseEntityComponent>> &BaseEntityComponentSystem::GetComponents() const { return const_cast<BaseEntityComponentSystem *>(this)->GetComponents(); }
-std::vector<util::TSharedHandle<BaseEntityComponent>> &BaseEntityComponentSystem::GetComponents() { return m_components; }
+const std::vector<pragma::util::TSharedHandle<BaseEntityComponent>> &BaseEntityComponentSystem::GetComponents() const { return const_cast<BaseEntityComponentSystem *>(this)->GetComponents(); }
+std::vector<pragma::util::TSharedHandle<BaseEntityComponent>> &BaseEntityComponentSystem::GetComponents() { return m_components; }
 
 pragma::ComponentHandle<BaseEntityComponent> BaseEntityComponentSystem::FindComponent(ComponentId componentId) const
 {

@@ -22,7 +22,7 @@ pragma::console::DebugConsole::~DebugConsole() {}
 void pragma::console::DebugConsole::open()
 {
 #ifdef _WIN32
-	if(util::get_subsystem() != util::SubSystem::Console) {
+	if(pragma::util::get_subsystem() != pragma::util::SubSystem::Console) {
 		spdlog::info("Allocating new console...");
 		AllocConsole();
 		AttachConsole(GetCurrentProcessId());
@@ -61,7 +61,7 @@ void pragma::console::DebugConsole::open()
 	/*if(handleOut) {
 		std::string fontPath;
 		if(filemanager::find_absolute_path("fonts/ubuntu/UbuntuMono-R.ttf", fontPath)) {
-			ustring::replace(fontPath, "/", "\\");
+			pragma::string::replace(fontPath, "/", "\\");
 			HANDLE m_stdOut = handleOut;
 			auto numFontsAdded = AddFontResourceEx(fontPath.c_str(), FR_NOT_ENUM, 0);
 			if(numFontsAdded > 0) {
@@ -77,7 +77,7 @@ void pragma::console::DebugConsole::open()
 				wcscpy(cfi.FaceName, L"Ubuntu Mono");
 				auto res = SetCurrentConsoleFontEx(handleOut, FALSE, &cfi);
 				if(res == 0) {
-					auto errMsg = util::get_last_system_error_string();
+					auto errMsg = pragma::util::get_last_system_error_string();
 					spdlog::warn("Failed to set console font: {}", errMsg);
 				}
 			}
@@ -98,7 +98,7 @@ void pragma::console::DebugConsole::open()
 void pragma::console::DebugConsole::close()
 {
 #ifdef _WIN32
-	auto isConsoleSubSys = (util::get_subsystem() == util::SubSystem::Console);
+	auto isConsoleSubSys = (pragma::util::get_subsystem() == pragma::util::SubSystem::Console);
 	if(!isConsoleSubSys) {
 		this->_console_cout.close();
 		std::cout.rdbuf(this->_coutbuf);

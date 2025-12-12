@@ -31,7 +31,7 @@ export namespace pragma {
 		virtual void OnCrouch() override;
 		virtual void OnUnCrouch() override;
 		virtual void SetLocalPlayer(bool b) override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		bool IsInFirstPersonMode() const;
 
 		virtual void ApplyViewRotationOffset(const EulerAngles &ang, float dur = 0.5f) override;

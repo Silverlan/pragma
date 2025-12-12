@@ -18,15 +18,15 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 
-		bool GetBonePose(animation::MetaRigBoneType bone, umath::ScaledTransform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
-		bool GetBonePos(animation::MetaRigBoneType bone, Vector3 &outPos, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
-		bool GetBoneRot(animation::MetaRigBoneType bone, Quat &outRot, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
-		bool GetBoneScale(animation::MetaRigBoneType bone, Vector3 &outScale, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
+		bool GetBonePose(animation::MetaRigBoneType bone, pragma::math::ScaledTransform &outPose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
+		bool GetBonePos(animation::MetaRigBoneType bone, Vector3 &outPos, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
+		bool GetBoneRot(animation::MetaRigBoneType bone, Quat &outRot, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
+		bool GetBoneScale(animation::MetaRigBoneType bone, Vector3 &outScale, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
 
-		bool SetBonePose(animation::MetaRigBoneType bone, const umath::ScaledTransform &pose, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
-		bool SetBonePos(animation::MetaRigBoneType bone, const Vector3 &pos, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
-		bool SetBoneRot(animation::MetaRigBoneType bone, const Quat &rot, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
-		bool SetBoneScale(animation::MetaRigBoneType bone, const Vector3 &scale, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
+		bool SetBonePose(animation::MetaRigBoneType bone, const pragma::math::ScaledTransform &pose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
+		bool SetBonePos(animation::MetaRigBoneType bone, const Vector3 &pos, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
+		bool SetBoneRot(animation::MetaRigBoneType bone, const Quat &rot, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
+		bool SetBoneScale(animation::MetaRigBoneType bone, const Vector3 &scale, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
 
 		virtual void InitializeLuaObject(lua::State *lua) override;
 	  private:
@@ -39,7 +39,7 @@ void pragma::MetaRigComponent::RegisterMembers(pragma::EntityComponentManager &c
 {
 	using T = MetaRigComponent;
 
-	for(size_t i = 0; i < umath::to_integral(animation::MetaRigBoneType::Count); ++i) {
+	for(size_t i = 0; i < pragma::math::to_integral(animation::MetaRigBoneType::Count); ++i) {
 		std::string name = animation::get_meta_rig_bone_type_name(static_cast<animation::MetaRigBoneType>(i));
 
 		std::string parentPathName;
@@ -48,7 +48,7 @@ void pragma::MetaRigComponent::RegisterMembers(pragma::EntityComponentManager &c
 			parentPathName = "bone/" + std::string {animation::get_meta_rig_bone_type_name(*parentType)} + "/pose";
 		std::shared_ptr<ents::ParentTypeMetaData> parentMetaData {};
 		if(!parentPathName.empty()) {
-			parentMetaData = ::util::make_shared<ents::ParentTypeMetaData>();
+			parentMetaData = pragma::util::make_shared<ents::ParentTypeMetaData>();
 			parentMetaData->parentProperty = parentPathName;
 		}
 
@@ -56,16 +56,16 @@ void pragma::MetaRigComponent::RegisterMembers(pragma::EntityComponentManager &c
 		auto posPathName = "bone/" + name + "/position";
 		auto rotPathName = "bone/" + name + "/rotation";
 		auto scalePathName = "bone/" + name + "/scale";
-		auto poseMetaData = ::util::make_shared<ents::PoseTypeMetaData>();
+		auto poseMetaData = pragma::util::make_shared<ents::PoseTypeMetaData>();
 		poseMetaData->posProperty = posPathName;
 		poseMetaData->rotProperty = rotPathName;
 		poseMetaData->scaleProperty = scalePathName;
 
-		auto poseComponentMetaData = ::util::make_shared<ents::PoseComponentTypeMetaData>();
+		auto poseComponentMetaData = pragma::util::make_shared<ents::PoseComponentTypeMetaData>();
 		poseComponentMetaData->poseProperty = posePathName;
 
-		auto coordMetaData = ::util::make_shared<ents::CoordinateTypeMetaData>();
-		coordMetaData->space = umath::CoordinateSpace::Local;
+		auto coordMetaData = pragma::util::make_shared<ents::CoordinateTypeMetaData>();
+		coordMetaData->space = pragma::math::CoordinateSpace::Local;
 		coordMetaData->parentProperty = parentPathName;
 
 		auto memberInfoPose = pragma::ComponentMemberInfo::CreateDummy();
@@ -78,15 +78,15 @@ void pragma::MetaRigComponent::RegisterMembers(pragma::EntityComponentManager &c
 		memberInfoPose.SetFlag(pragma::ComponentMemberFlags::HideInInterface);
 		memberInfoPose.AddTypeMetaData(coordMetaData);
 		memberInfoPose
-		  .SetGetterFunction<MetaRigComponent, umath::ScaledTransform, static_cast<void (*)(const pragma::ComponentMemberInfo &, MetaRigComponent &, umath::ScaledTransform &)>([](const pragma::ComponentMemberInfo &memberInfo, MetaRigComponent &component, umath::ScaledTransform &outValue) {
+		  .SetGetterFunction<MetaRigComponent, pragma::math::ScaledTransform, static_cast<void (*)(const pragma::ComponentMemberInfo &, MetaRigComponent &, pragma::math::ScaledTransform &)>([](const pragma::ComponentMemberInfo &memberInfo, MetaRigComponent &component, pragma::math::ScaledTransform &outValue) {
 			  if(!component.GetBonePose(static_cast<animation::MetaRigBoneType>(memberInfo.userIndex), outValue)) {
 				  outValue = {};
 				  return;
 			  }
 		  })>();
-		memberInfoPose.SetSetterFunction<MetaRigComponent, umath::ScaledTransform,
-		  static_cast<void (*)(const pragma::ComponentMemberInfo &, MetaRigComponent &, const umath::ScaledTransform &)>(
-		    [](const pragma::ComponentMemberInfo &memberInfo, MetaRigComponent &component, const umath::ScaledTransform &value) { component.SetBonePose(static_cast<animation::MetaRigBoneType>(memberInfo.userIndex), value); })>();
+		memberInfoPose.SetSetterFunction<MetaRigComponent, pragma::math::ScaledTransform,
+		  static_cast<void (*)(const pragma::ComponentMemberInfo &, MetaRigComponent &, const pragma::math::ScaledTransform &)>(
+		    [](const pragma::ComponentMemberInfo &memberInfo, MetaRigComponent &component, const pragma::math::ScaledTransform &value) { component.SetBonePose(static_cast<animation::MetaRigBoneType>(memberInfo.userIndex), value); })>();
 
 		auto memberInfoPos = pragma::ComponentMemberInfo::CreateDummy();
 		memberInfoPos.SetName("bone/" + name + "/position");
@@ -156,7 +156,7 @@ void pragma::MetaRigComponent::Initialize()
 void pragma::MetaRigComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void pragma::MetaRigComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 
-bool pragma::MetaRigComponent::GetBonePose(animation::MetaRigBoneType bone, umath::ScaledTransform &outPose, umath::CoordinateSpace space) const
+bool pragma::MetaRigComponent::GetBonePose(animation::MetaRigBoneType bone, pragma::math::ScaledTransform &outPose, pragma::math::CoordinateSpace space) const
 {
 	if(!m_animC || !m_metaRig)
 		return false;
@@ -164,7 +164,7 @@ bool pragma::MetaRigComponent::GetBonePose(animation::MetaRigBoneType bone, umat
 		return false;
 	return true;
 }
-bool pragma::MetaRigComponent::GetBonePos(animation::MetaRigBoneType bone, Vector3 &outPos, umath::CoordinateSpace space) const
+bool pragma::MetaRigComponent::GetBonePos(animation::MetaRigBoneType bone, Vector3 &outPos, pragma::math::CoordinateSpace space) const
 {
 	if(!m_animC || !m_metaRig)
 		return false;
@@ -172,7 +172,7 @@ bool pragma::MetaRigComponent::GetBonePos(animation::MetaRigBoneType bone, Vecto
 		return false;
 	return true;
 }
-bool pragma::MetaRigComponent::GetBoneRot(animation::MetaRigBoneType bone, Quat &outRot, umath::CoordinateSpace space) const
+bool pragma::MetaRigComponent::GetBoneRot(animation::MetaRigBoneType bone, Quat &outRot, pragma::math::CoordinateSpace space) const
 {
 	if(!m_animC || !m_metaRig)
 		return false;
@@ -180,7 +180,7 @@ bool pragma::MetaRigComponent::GetBoneRot(animation::MetaRigBoneType bone, Quat 
 		return false;
 	return true;
 }
-bool pragma::MetaRigComponent::GetBoneScale(animation::MetaRigBoneType bone, Vector3 &outScale, umath::CoordinateSpace space) const
+bool pragma::MetaRigComponent::GetBoneScale(animation::MetaRigBoneType bone, Vector3 &outScale, pragma::math::CoordinateSpace space) const
 {
 	if(!m_animC || !m_metaRig)
 		return false;
@@ -189,7 +189,7 @@ bool pragma::MetaRigComponent::GetBoneScale(animation::MetaRigBoneType bone, Vec
 	return true;
 }
 
-bool pragma::MetaRigComponent::SetBonePose(animation::MetaRigBoneType bone, const umath::ScaledTransform &pose, umath::CoordinateSpace space) const
+bool pragma::MetaRigComponent::SetBonePose(animation::MetaRigBoneType bone, const pragma::math::ScaledTransform &pose, pragma::math::CoordinateSpace space) const
 {
 	if(!m_animC || !m_metaRig)
 		return false;
@@ -197,7 +197,7 @@ bool pragma::MetaRigComponent::SetBonePose(animation::MetaRigBoneType bone, cons
 		return false;
 	return true;
 }
-bool pragma::MetaRigComponent::SetBonePos(animation::MetaRigBoneType bone, const Vector3 &pos, umath::CoordinateSpace space) const
+bool pragma::MetaRigComponent::SetBonePos(animation::MetaRigBoneType bone, const Vector3 &pos, pragma::math::CoordinateSpace space) const
 {
 	if(!m_animC || !m_metaRig)
 		return false;
@@ -205,7 +205,7 @@ bool pragma::MetaRigComponent::SetBonePos(animation::MetaRigBoneType bone, const
 		return false;
 	return true;
 }
-bool pragma::MetaRigComponent::SetBoneRot(animation::MetaRigBoneType bone, const Quat &rot, umath::CoordinateSpace space) const
+bool pragma::MetaRigComponent::SetBoneRot(animation::MetaRigBoneType bone, const Quat &rot, pragma::math::CoordinateSpace space) const
 {
 	if(!m_animC || !m_metaRig)
 		return false;
@@ -213,7 +213,7 @@ bool pragma::MetaRigComponent::SetBoneRot(animation::MetaRigBoneType bone, const
 		return false;
 	return true;
 }
-bool pragma::MetaRigComponent::SetBoneScale(animation::MetaRigBoneType bone, const Vector3 &scale, umath::CoordinateSpace space) const
+bool pragma::MetaRigComponent::SetBoneScale(animation::MetaRigBoneType bone, const Vector3 &scale, pragma::math::CoordinateSpace space) const
 {
 	if(!m_animC || !m_metaRig)
 		return false;

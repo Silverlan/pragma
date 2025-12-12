@@ -24,9 +24,9 @@ export namespace pragma {
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnTick(double tDelta) override;
 
-		const rendering::RenderQueue *GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex, bool translucent = false) const;
-		void SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree, const std::vector<std::vector<rendering::RenderMeshIndex>> &meshesPerCluster);
-		const std::shared_ptr<util::BSPTree> &GetBSPTree() const;
+		const rendering::RenderQueue *GetClusterRenderQueue(pragma::util::BSPTree::ClusterIndex clusterIndex, bool translucent = false) const;
+		void SetBSPTree(const std::shared_ptr<pragma::util::BSPTree> &bspTree, const std::vector<std::vector<rendering::RenderMeshIndex>> &meshesPerCluster);
+		const std::shared_ptr<pragma::util::BSPTree> &GetBSPTree() const;
 		void RebuildRenderQueues();
 	  protected:
 		void SetRenderQueuesDirty();
@@ -40,7 +40,7 @@ export namespace pragma {
 		std::shared_ptr<OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>> m_meshTree;
 		std::shared_ptr<::CHC> m_chcController;
 
-		std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
+		std::shared_ptr<pragma::util::BSPTree> m_bspTree = nullptr;
 		std::vector<std::vector<rendering::RenderMeshIndex>> m_meshesPerCluster;
 
 		bool m_renderQueuesDirty = false;

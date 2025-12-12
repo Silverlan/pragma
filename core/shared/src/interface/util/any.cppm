@@ -11,7 +11,7 @@ export import :types;
 export import pragma.lua;
 
 export {
-	namespace util {
+	namespace pragma::util {
 		enum class VarType : uint8_t {
 			Invalid = 0,
 			Bool,
@@ -43,15 +43,15 @@ export {
 	};
 
 	namespace Lua {
-		DLLNETWORK std::any GetAnyValue(lua::State *l, ::util::VarType varType, int32_t idx);
-		DLLNETWORK std::any GetAnyPropertyValue(lua::State *l, int32_t indexProperty, ::util::VarType varType);
-		DLLNETWORK void SetAnyPropertyValue(lua::State *l, int32_t indexProperty, ::util::VarType varType, const std::any &value);
-		DLLNETWORK void PushAny(lua::State *l, ::util::VarType varType, const std::any &value);
-		DLLNETWORK void PushNewAnyProperty(lua::State *l, ::util::VarType varType, const std::any &value);
+		DLLNETWORK std::any GetAnyValue(lua::State *l, pragma::util::VarType varType, int32_t idx);
+		DLLNETWORK std::any GetAnyPropertyValue(lua::State *l, int32_t indexProperty, pragma::util::VarType varType);
+		DLLNETWORK void SetAnyPropertyValue(lua::State *l, int32_t indexProperty, pragma::util::VarType varType, const std::any &value);
+		DLLNETWORK void PushAny(lua::State *l, pragma::util::VarType varType, const std::any &value);
+		DLLNETWORK void PushNewAnyProperty(lua::State *l, pragma::util::VarType varType, const std::any &value);
 
-		DLLNETWORK void WriteAny(util::DataStream &ds, ::util::VarType varType, const std::any &value, uint32_t *pos = nullptr);
-		DLLNETWORK void WriteAny(::NetPacket &ds, ::util::VarType varType, const std::any &value, uint32_t *pos = nullptr);
-		DLLNETWORK void ReadAny(pragma::Game &game, util::DataStream &ds, ::util::VarType varType, std::any &outValue);
-		DLLNETWORK void ReadAny(::NetPacket &ds, ::util::VarType varType, std::any &outValue);
+		DLLNETWORK void WriteAny(pragma::util::DataStream &ds, pragma::util::VarType varType, const std::any &value, uint32_t *pos = nullptr);
+		DLLNETWORK void WriteAny(::NetPacket &ds, pragma::util::VarType varType, const std::any &value, uint32_t *pos = nullptr);
+		DLLNETWORK void ReadAny(pragma::Game &game, pragma::util::DataStream &ds, pragma::util::VarType varType, std::any &outValue);
+		DLLNETWORK void ReadAny(::NetPacket &ds, pragma::util::VarType varType, std::any &outValue);
 	};
 };

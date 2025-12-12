@@ -108,9 +108,9 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		  return {l, pragma::nav::Mesh::Create(mesh, config)};
 	  })))];
 	Lua::RegisterLibraryEnums(lua.GetState(), "nav",
-	  {{"POLY_TYPE_BIT_NONE", umath::to_integral(pragma::nav::PolyFlags::None)}, {"POLY_TYPE_BIT_WALK", umath::to_integral(pragma::nav::PolyFlags::Walk)}, {"POLY_TYPE_BIT_SWIM", umath::to_integral(pragma::nav::PolyFlags::Swim)},
-	    {"POLY_TYPE_BIT_DOOR", umath::to_integral(pragma::nav::PolyFlags::Door)}, {"POLY_TYPE_BIT_JUMP", umath::to_integral(pragma::nav::PolyFlags::Jump)}, {"POLY_TYPE_BIT_DISABLED", umath::to_integral(pragma::nav::PolyFlags::Disabled)},
-	    {"POLY_TYPE_ALL", umath::to_integral(pragma::nav::PolyFlags::All)}});
+	  {{"POLY_TYPE_BIT_NONE", pragma::math::to_integral(pragma::nav::PolyFlags::None)}, {"POLY_TYPE_BIT_WALK", pragma::math::to_integral(pragma::nav::PolyFlags::Walk)}, {"POLY_TYPE_BIT_SWIM", pragma::math::to_integral(pragma::nav::PolyFlags::Swim)},
+	    {"POLY_TYPE_BIT_DOOR", pragma::math::to_integral(pragma::nav::PolyFlags::Door)}, {"POLY_TYPE_BIT_JUMP", pragma::math::to_integral(pragma::nav::PolyFlags::Jump)}, {"POLY_TYPE_BIT_DISABLED", pragma::math::to_integral(pragma::nav::PolyFlags::Disabled)},
+	    {"POLY_TYPE_ALL", pragma::math::to_integral(pragma::nav::PolyFlags::All)}});
 
 	auto classDefConfig = luabind::class_<pragma::nav::Config>("Config");
 	classDefConfig.def(luabind::constructor<float, float, float, float>());
@@ -129,9 +129,9 @@ void Lua::nav::register_library(Lua::Interface &lua)
 	classDefConfig.def_readwrite("sampleDetailDist", &pragma::nav::Config::sampleDetailDist);
 	classDefConfig.def_readwrite("sampleDetailMaxError", &pragma::nav::Config::sampleDetailMaxError);
 	classDefConfig.def_readwrite("samplePartitionType", reinterpret_cast<std::underlying_type_t<decltype(pragma::nav::Config::partitionType)> pragma::nav::Config::*>(&pragma::nav::Config::partitionType));
-	classDefConfig.add_static_constant("PARTITION_TYPE_WATERSHED", umath::to_integral(pragma::nav::Config::PartitionType::Watershed));
-	classDefConfig.add_static_constant("PARTITION_TYPE_MONOTONE", umath::to_integral(pragma::nav::Config::PartitionType::Monotone));
-	classDefConfig.add_static_constant("PARTITION_TYPE_LAYERS", umath::to_integral(pragma::nav::Config::PartitionType::Layers));
+	classDefConfig.add_static_constant("PARTITION_TYPE_WATERSHED", pragma::math::to_integral(pragma::nav::Config::PartitionType::Watershed));
+	classDefConfig.add_static_constant("PARTITION_TYPE_MONOTONE", pragma::math::to_integral(pragma::nav::Config::PartitionType::Monotone));
+	classDefConfig.add_static_constant("PARTITION_TYPE_LAYERS", pragma::math::to_integral(pragma::nav::Config::PartitionType::Layers));
 	modNav[classDefConfig];
 
 	auto classDefMesh = luabind::class_<pragma::nav::Mesh>("Mesh");

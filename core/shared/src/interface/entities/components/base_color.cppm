@@ -25,7 +25,7 @@ export namespace pragma {
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 		const Vector4 &GetColor() const;
-		const util::PVector4Property &GetColorProperty() const;
+		const pragma::util::PVector4Property &GetColorProperty() const;
 
 		virtual ~BaseColorComponent() override;
 		void SetColor(const Color &color);
@@ -36,7 +36,7 @@ export namespace pragma {
 	  protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 		BaseColorComponent(pragma::ecs::BaseEntity &ent);
-		util::PVector4Property m_color;
+		pragma::util::PVector4Property m_color;
 		CallbackHandle m_cbOnColorChanged = {};
 		pragma::NetEventId m_netEvSetColor = pragma::INVALID_NET_EVENT;
 	};

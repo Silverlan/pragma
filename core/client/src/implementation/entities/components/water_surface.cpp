@@ -111,7 +111,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	auto mdl = pragma::get_cgame()->CreateModel();
 	auto meshGroup = mdl->GetMeshGroup(0);
 
-	auto subMesh = ::util::make_shared<pragma::geometry::CModelSubMesh>();
+	auto subMesh = pragma::util::make_shared<pragma::geometry::CModelSubMesh>();
 	// Initialize surface
 	auto &verts = subMesh->GetVertices();
 	subMesh->SetIndexType(pragma::geometry::IndexType::UInt16);
@@ -122,7 +122,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	verts.reserve(numParticles);
 	for(auto i = decltype(numParticles) {0}; i < numParticles; ++i) {
 		auto pos = sim.CalcParticlePosition(i);
-		verts.push_back(umath::Vertex(pos, {pos.x / (10.f * sim.GetWidth()), pos.z / (10.f * sim.GetLength())}, {0.f, 1.f, 0.f})); // TODO
+		verts.push_back(pragma::math::Vertex(pos, {pos.x / (10.f * sim.GetWidth()), pos.z / (10.f * sim.GetLength())}, {0.f, 1.f, 0.f})); // TODO
 	}
 	sim.UnlockParticleHeights();
 
@@ -134,7 +134,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	}
 	subMesh->SetSkinTextureIndex(0);
 
-	auto mesh = ::util::make_shared<pragma::geometry::CModelMesh>();
+	auto mesh = pragma::util::make_shared<pragma::geometry::CModelMesh>();
 	mesh->AddSubMesh(subMesh);
 	meshGroup->AddMesh(mesh);
 	mdl->Update(pragma::asset::ModelUpdateFlags::All); // TODO: Don't update vertex and index buffers

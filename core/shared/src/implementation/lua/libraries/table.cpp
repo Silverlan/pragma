@@ -32,7 +32,7 @@ int Lua::table::random(lua::State *l)
 	auto n = Lua::GetObjectLength(l, 1);
 	if(n == 0)
 		return 0;
-	auto r = umath::random(1, static_cast<int32_t>(n));
+	auto r = pragma::math::random(1, static_cast<int32_t>(n));
 	Lua::PushInt(l, r);
 	Lua::GetTableValue(l, 1);
 	return 1;

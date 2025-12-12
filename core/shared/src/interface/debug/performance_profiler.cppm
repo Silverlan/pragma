@@ -136,8 +136,8 @@ export {
 				virtual std::unique_ptr<ProfilerResult> GetResult() const override;
 			  private:
 				CPUTimer() = default;
-				util::Clock::time_point m_startTime = {};
-				util::Clock::duration m_duration = {};
+				pragma::util::Clock::time_point m_startTime = {};
+				pragma::util::Clock::duration m_duration = {};
 			};
 
 			class DLLNETWORK CPUProfiler : public Profiler {
@@ -178,7 +178,7 @@ export {
 
 #if ENABLE_DEBUG_HISTORY == 1
 				std::string prefix(stageStack.size() * 2, ' ');
-				threadData.history.push_back({prefix + "Start " + std::string {name}, util::get_formatted_stack_backtrace_string()});
+				threadData.history.push_back({prefix + "Start " + std::string {name}, pragma::util::get_formatted_stack_backtrace_string()});
 				while(threadData.history.size() > 1000)
 					threadData.history.erase(threadData.history.begin());
 #endif
@@ -224,7 +224,7 @@ export {
 
 #if ENABLE_DEBUG_HISTORY == 1
 				std::string prefix((stageStack.size() - 1) * 2, ' ');
-				threadData.history.push_back({prefix + "Stop " + std::string {stageStack.top()}, util::get_formatted_stack_backtrace_string()});
+				threadData.history.push_back({prefix + "Stop " + std::string {stageStack.top()}, pragma::util::get_formatted_stack_backtrace_string()});
 #endif
 
 				auto &stage = GetProfilerStage(tid, stageStack.top());

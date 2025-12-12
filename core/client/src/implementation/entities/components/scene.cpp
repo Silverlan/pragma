@@ -66,7 +66,7 @@ void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimar
 			// which is not allowed.
 			continue;
 		}
-		if(optStats && umath::is_flag_set(renderC->GetStateFlags(), CRenderComponent::StateFlags::RenderBufferDirty))
+		if(optStats && pragma::math::is_flag_set(renderC->GetStateFlags(), CRenderComponent::StateFlags::RenderBufferDirty))
 			(*optStats)->Increment(rendering::RenderPassStats::Counter::EntityBufferUpdates);
 		auto *animC = renderC->GetAnimatedComponent();
 		if(animC && animC->AreSkeletonUpdateCallbacksEnabled())
@@ -104,7 +104,7 @@ CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo, CSceneCom
 	if(optParent == nullptr)
 		g_scenes.at(sceneIndex) = sceneC.get();
 	else
-		umath::set_flag(sceneC->m_stateFlags, StateFlags::HasParentScene);
+		pragma::math::set_flag(sceneC->m_stateFlags, StateFlags::HasParentScene);
 
 	scene->Spawn();
 	return sceneC.get();
@@ -128,7 +128,7 @@ void CSceneComponent::OnRemove()
 		return;
 	assert(g_sceneUseCount.size() > 0);
 	--g_sceneUseCount.at(sceneIndex);
-	if(umath::is_flag_set(m_stateFlags, StateFlags::HasParentScene) == false) {
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::HasParentScene) == false) {
 		g_scenes.at(sceneIndex) = nullptr;
 
 		// Clear all entities from this scene
@@ -161,7 +161,7 @@ void CSceneComponent::Setup(const CreateInfo &createInfo, SceneIndex sceneIndex)
 	InitializeShadowDescriptorSet();
 
 	if(g_entityInstanceIndexBuffer == nullptr)
-		g_entityInstanceIndexBuffer = ::util::make_shared<rendering::EntityInstanceIndexBuffer>();
+		g_entityInstanceIndexBuffer = pragma::util::make_shared<rendering::EntityInstanceIndexBuffer>();
 }
 
 void CSceneComponent::Link(const CSceneComponent &other, bool linkCamera)
@@ -189,13 +189,13 @@ void CSceneComponent::Link(const CSceneComponent &other, bool linkCamera)
 		m_cbLink.Remove();
 	if(linkCamera == false)
 		return;
-	m_cbLink = const_cast<CSceneComponent &>(other).AddEventCallback(cSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED, [this, &other](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	m_cbLink = const_cast<CSceneComponent &>(other).AddEventCallback(cSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED, [this, &other](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &hCam = other.GetActiveCamera();
 		if(hCam.valid())
 			SetActiveCamera(const_cast<pragma::CCameraComponent &>(*hCam.get()));
 		else
 			SetActiveCamera();
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 }
 
@@ -205,9 +205,9 @@ void CSceneComponent::InitializeShadowDescriptorSet()
 		auto &context = pragma::get_cengine()->GetRenderContext();
 		m_shadowDsg = context.CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SHADOWS);
 		auto &cubeTex = context.GetDummyCubemapTexture();
-		auto n = umath::to_integral(pragma::GameLimits::MaxActiveShadowCubeMaps);
+		auto n = pragma::math::to_integral(pragma::GameLimits::MaxActiveShadowCubeMaps);
 		for(auto i = decltype(n) {0u}; i < n; ++i)
-			m_shadowDsg->GetDescriptorSet()->SetBindingArrayTexture(*cubeTex, umath::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps), i);
+			m_shadowDsg->GetDescriptorSet()->SetBindingArrayTexture(*cubeTex, pragma::math::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps), i);
 	}
 }
 
@@ -215,7 +215,7 @@ pragma::CSceneComponent *CSceneComponent::GetByIndex(SceneIndex sceneIndex) { re
 
 uint32_t CSceneComponent::GetSceneFlag(SceneIndex sceneIndex) { return 1 << sceneIndex; }
 
-CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex(uint32_t flag) { return umath::get_least_significant_set_bit_index(flag); }
+CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex(uint32_t flag) { return pragma::math::get_least_significant_set_bit_index(flag); }
 
 static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
 static auto cvShaderQuality = pragma::console::get_client_con_var("cl_render_shader_quality");
@@ -228,7 +228,7 @@ void CSceneComponent::InitializeRenderSettingsBuffer()
 
 	m_renderSettings.posCam = Vector3(0.f, 0.f, 0.f);
 	m_renderSettings.fov = 0.f;
-	m_renderSettings.flags = umath::to_integral(FRenderSetting::None);
+	m_renderSettings.flags = pragma::math::to_integral(FRenderSetting::None);
 	m_renderSettings.shadowRatioX = 1.f / szShadowMap;
 	m_renderSettings.shadowRatioY = 1.f / szShadowMap;
 	m_renderSettings.shaderQuality = cvShaderQuality->GetInt();
@@ -361,18 +361,18 @@ void CSceneComponent::InitializeSwapDescriptorBuffers()
 		return;
 	m_camDescSetGroupGraphics = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
 	auto &descSetGraphics = *m_camDescSetGroupGraphics->GetDescriptorSet();
-	descSetGraphics.SetBindingUniformBuffer(*m_cameraBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::Camera));
-	descSetGraphics.SetBindingUniformBuffer(*m_renderSettingsBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::RenderSettings));
+	descSetGraphics.SetBindingUniformBuffer(*m_cameraBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::Camera));
+	descSetGraphics.SetBindingUniformBuffer(*m_renderSettingsBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::RenderSettings));
 
 	m_camDescSetGroupCompute = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE);
 	auto &descSetCompute = *m_camDescSetGroupCompute->GetDescriptorSet();
-	descSetCompute.SetBindingUniformBuffer(*m_cameraBuffer, umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::Camera));
-	descSetCompute.SetBindingUniformBuffer(*m_renderSettingsBuffer, umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::RenderSettings));
+	descSetCompute.SetBindingUniformBuffer(*m_cameraBuffer, pragma::math::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::Camera));
+	descSetCompute.SetBindingUniformBuffer(*m_renderSettingsBuffer, pragma::math::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::RenderSettings));
 
 	m_camViewDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
 	auto &descSetViewGraphics = *m_camViewDescSetGroup->GetDescriptorSet();
-	descSetViewGraphics.SetBindingUniformBuffer(*m_cameraViewBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::Camera));
-	descSetViewGraphics.SetBindingUniformBuffer(*m_renderSettingsBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::RenderSettings));
+	descSetViewGraphics.SetBindingUniformBuffer(*m_cameraViewBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::Camera));
+	descSetViewGraphics.SetBindingUniformBuffer(*m_renderSettingsBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::RenderSettings));
 
 	m_fogDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
 	m_fogDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*m_fogBuffer, 0u);
@@ -469,7 +469,7 @@ void CSceneComponent::SetWorldEnvironment(rendering::WorldEnvironment &env)
 	m_fogData.start = fog.GetStart();
 	m_fogData.end = fog.GetEnd();
 	m_fogData.density = fog.GetMaxDensity();
-	m_fogData.type = umath::to_integral(fog.GetType());
+	m_fogData.type = pragma::math::to_integral(fog.GetType());
 	m_fogData.flags = fog.IsEnabled();
 	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, 0ull, m_fogData);
 }
@@ -504,7 +504,7 @@ void CSceneComponent::UpdateRenderSettings()
 	auto flags = FRenderSetting::None;
 	if(unlitProperty->GetValue() == true)
 		flags |= FRenderSetting::Unlit;
-	m_renderSettings.flags = umath::to_integral(flags);
+	m_renderSettings.flags = pragma::math::to_integral(flags);
 	if(m_renderer.valid())
 		static_cast<pragma::CRendererComponent *>(m_renderer.get())->UpdateRenderSettings();
 }
@@ -588,11 +588,11 @@ const SceneRenderDesc &CSceneComponent::GetSceneRenderDesc() const { return cons
 void CSceneComponent::SetParticleSystemColorFactor(const Vector4 &colorFactor) { m_particleSystemColorFactor = colorFactor; }
 const Vector4 &CSceneComponent::GetParticleSystemColorFactor() const { return m_particleSystemColorFactor; }
 
-bool CSceneComponent::IsValid() const { return umath::is_flag_set(m_stateFlags, StateFlags::ValidRenderer); }
+bool CSceneComponent::IsValid() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::ValidRenderer); }
 
 CSceneComponent *CSceneComponent::GetParentScene()
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::HasParentScene) == false)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::HasParentScene) == false)
 		return nullptr;
 	return GetByIndex(GetSceneIndex());
 }
@@ -606,12 +606,12 @@ uint32_t CSceneComponent::GetHeight() const { return m_renderer.valid() ? static
 
 void CSceneComponent::ReloadRenderTarget(uint32_t width, uint32_t height)
 {
-	umath::set_flag(m_stateFlags, StateFlags::ValidRenderer, false);
+	pragma::math::set_flag(m_stateFlags, StateFlags::ValidRenderer, false);
 
 	if(m_renderer.expired() || static_cast<pragma::CRendererComponent *>(m_renderer.get())->ReloadRenderTarget(*this, width, height) == false)
 		return;
 
-	umath::set_flag(m_stateFlags, StateFlags::ValidRenderer, true);
+	pragma::math::set_flag(m_stateFlags, StateFlags::ValidRenderer, true);
 }
 
 const pragma::ComponentHandle<pragma::CCameraComponent> &CSceneComponent::GetActiveCamera() const { return const_cast<CSceneComponent *>(this)->GetActiveCamera(); }

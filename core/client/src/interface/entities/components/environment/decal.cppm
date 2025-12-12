@@ -16,16 +16,16 @@ export {
 		  public:
 			struct DLLCLIENT MeshData {
 				std::vector<pragma::geometry::ModelSubMesh *> subMeshes {};
-				umath::ScaledTransform pose = {};
+				pragma::math::ScaledTransform pose = {};
 			};
 			DecalProjector(const Vector3 &pos, const Quat &rot, float size);
 			const Vector3 &GetPos() const;
 			const Quat &GetRotation() const;
-			const umath::Transform &GetPose() const;
+			const pragma::math::Transform &GetPose() const;
 			float GetSize() const;
 			std::pair<Vector3, Vector3> GetAABB() const;
 
-			bool GenerateDecalMesh(const std::vector<MeshData> &meshDatas, std::vector<umath::Vertex> &outVerts, std::vector<uint16_t> &outTris);
+			bool GenerateDecalMesh(const std::vector<MeshData> &meshDatas, std::vector<pragma::math::Vertex> &outVerts, std::vector<uint16_t> &outTris);
 			void DebugDraw(float duration) const;
 		  private:
 			struct VertexInfo {
@@ -39,7 +39,7 @@ export {
 			std::pair<Vector3, Vector3> GetProjectorCubeBounds() const;
 			std::vector<VertexInfo> CropTriangleVertsByLine(const Vector3 &v0, const Vector3 &v1, const Vector3 &v2, const std::vector<VertexInfo> &verts, const Vector2 &lineStart, const Vector2 &lineEnd);
 
-			umath::Transform m_pose = {};
+			pragma::math::Transform m_pose = {};
 			float m_size = 0.f;
 		};
 

@@ -15,8 +15,8 @@ export namespace pragma::gui::types {
 	  public:
 		WIMainMenuBase();
 		virtual void Initialize() override;
-		virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
-		virtual util::EventReply KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual pragma::util::EventReply KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 		void SelectItem(int i);
 		void SelectNextItem();
 		void SelectPreviousItem();
@@ -52,7 +52,7 @@ export namespace pragma::gui::types {
 		void Select();
 		void Deselect();
 		void SetText(std::string &text);
-		virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 		virtual void OnCursorEntered() override;
 		virtual void OnCursorExited() override;
 		void Activate();

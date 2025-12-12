@@ -104,7 +104,7 @@ void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, std
 	Vector3 effectsOrigin {};
 	OnFireBullets(bulletInfo, origin, dir, &effectsOrigin);
 
-	util::ScopeGuard sg([this]() { m_nextBullet = nullptr; });
+	pragma::util::ScopeGuard sg([this]() { m_nextBullet = nullptr; });
 
 	auto bTransmit = true;
 	if(bMaster == false) // We weren't the trigger for the bullet shot; Most likely some other client

@@ -33,9 +33,9 @@ export {
 		const Vector3 *GetBonePosition(unsigned int boneID) const;
 		const Quat *GetBoneOrientation(unsigned int boneID) const;
 		const Vector3 *GetBoneScale(uint32_t boneId) const;
-		bool GetBonePose(uint32_t boneId, umath::ScaledTransform &outTransform) const;
-		void SetBonePose(uint32_t boneId, const umath::ScaledTransform &pose);
-		void SetBonePose(uint32_t boneId, const umath::Transform &pose);
+		bool GetBonePose(uint32_t boneId, pragma::math::ScaledTransform &outTransform) const;
+		void SetBonePose(uint32_t boneId, const pragma::math::ScaledTransform &pose);
+		void SetBonePose(uint32_t boneId, const pragma::math::Transform &pose);
 		bool GetBoneMatrix(unsigned int boneID, Mat4 *mat);
 		Vector2 *GetMoveOffset();
 		void GetMoveOffset(float *x, float *z);
@@ -65,12 +65,12 @@ export {
 
 		bool HasScaleTransforms() const;
 
-		const std::vector<umath::Transform> &GetBoneTransforms() const;
+		const std::vector<pragma::math::Transform> &GetBoneTransforms() const;
 		const std::vector<Vector3> &GetBoneScales() const;
-		std::vector<umath::Transform> &GetBoneTransforms();
+		std::vector<pragma::math::Transform> &GetBoneTransforms();
 		std::vector<Vector3> &GetBoneScales();
-		umath::Transform *GetBoneTransform(uint32_t idx);
-		const umath::Transform *GetBoneTransform(uint32_t idx) const;
+		pragma::math::Transform *GetBoneTransform(uint32_t idx);
+		const pragma::math::Transform *GetBoneTransform(uint32_t idx) const;
 		void Validate();
 
 		bool operator==(const Frame &other) const;
@@ -78,7 +78,7 @@ export {
 	  private:
 		Frame(unsigned int numBones);
 		Frame(const Frame &other);
-		std::vector<umath::Transform> m_bones;
+		std::vector<pragma::math::Transform> m_bones;
 		std::vector<Vector3> m_scales;
 		std::unique_ptr<Vector2> m_move;
 		FlexFrameData m_flexFrameData {};

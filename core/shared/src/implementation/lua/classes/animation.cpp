@@ -22,7 +22,7 @@ void Lua::Animation::Load(lua::State *l, LFile &f)
 	}
 	fptr->Seek(offset);
 	if(isUdmFormat) {
-		auto udmData = ::util::load_udm_asset(std::make_unique<ufile::FileWrapper>(fptr));
+		auto udmData = pragma::util::load_udm_asset(std::make_unique<ufile::FileWrapper>(fptr));
 		if(udmData == nullptr)
 			return;
 		std::string err;
@@ -504,11 +504,11 @@ void Lua::Frame::GetLocalBoneTransform(lua::State *l, ::Frame &frame, pragma::an
 }
 void Lua::Frame::GetBoneCount(lua::State *l, ::Frame &frame) { Lua::PushInt(l, frame.GetBoneCount()); }
 void Lua::Frame::SetBoneCount(lua::State *l, ::Frame &frame, uint32_t boneCount) { frame.SetBoneCount(boneCount); }
-void Lua::Frame::SetBonePose(lua::State *, ::Frame &frame, uint32_t boneId, const umath::ScaledTransform &pose) { frame.SetBonePose(boneId, pose); }
-void Lua::Frame::SetBonePose(lua::State *, ::Frame &frame, uint32_t boneId, const umath::Transform &pose) { frame.SetBonePose(boneId, pose); }
+void Lua::Frame::SetBonePose(lua::State *, ::Frame &frame, uint32_t boneId, const pragma::math::ScaledTransform &pose) { frame.SetBonePose(boneId, pose); }
+void Lua::Frame::SetBonePose(lua::State *, ::Frame &frame, uint32_t boneId, const pragma::math::Transform &pose) { frame.SetBonePose(boneId, pose); }
 void Lua::Frame::GetBonePose(lua::State *l, ::Frame &frame, uint32_t boneId)
 {
-	umath::ScaledTransform pose;
+	pragma::math::ScaledTransform pose;
 	if(frame.GetBonePose(boneId, pose) == false)
 		return;
 	Lua::Push(l, pose);
@@ -555,7 +555,7 @@ void Lua::MeshVertexFrame::GetVertices(lua::State *l, pragma::animation::MeshVer
 	auto vertIdx = 1u;
 	for(auto &v : verts) {
 		Lua::PushInt(l, vertIdx++);
-		Lua::Push<Vector3>(l, {umath::float16_to_float32(v.at(0)), umath::float16_to_float32(v.at(1)), umath::float16_to_float32(v.at(2))});
+		Lua::Push<Vector3>(l, {pragma::math::float16_to_float32(v.at(0)), pragma::math::float16_to_float32(v.at(1)), pragma::math::float16_to_float32(v.at(2))});
 		Lua::SetTableValue(l, t);
 	}
 }

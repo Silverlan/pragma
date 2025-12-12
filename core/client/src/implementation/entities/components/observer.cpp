@@ -142,13 +142,13 @@ void CObserverComponent::UpdateCharacterViewOrientationFromMouseMovement()
 			if(oldAng.p >= -90.f)
 				ang.p = -90.f;
 			else
-				ang.p = umath::max(ang.p, oldAng.p);
+				ang.p = pragma::math::max(ang.p, oldAng.p);
 		}
 		else if(ang.p > 90.f) {
 			if(oldAng.p <= 90.f)
 				ang.p = 90.f;
 			else
-				ang.p = umath::min(ang.p, oldAng.p);
+				ang.p = pragma::math::min(ang.p, oldAng.p);
 		}
 		orientation = uquat::create(ang);
 	}
@@ -188,7 +188,7 @@ void CObserverComponent::ApplyCameraObservationMode(Vector3 &pos, Quat &rot, Qua
 		// Instead, we'll use the "eyes" attachment as reference if available.
 		auto &mdl = obsC->GetEntity().GetModel();
 		auto eyeAtt = mdl ? mdl->LookupAttachment("eyes") : -1; // TODO: Cache the lookup
-		auto eyePose = (eyeAtt != -1) ? obsC->GetEntity().GetAttachmentPose(eyeAtt) : std::optional<umath::Transform> {};
+		auto eyePose = (eyeAtt != -1) ? obsC->GetEntity().GetAttachmentPose(eyeAtt) : std::optional<pragma::math::Transform> {};
 		if(eyePose.has_value()) {
 			eyePose->GetOrigin().x = 0;
 			eyePose->GetOrigin().z = 0;

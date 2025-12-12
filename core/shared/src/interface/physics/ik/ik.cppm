@@ -9,9 +9,9 @@ export module pragma.shared:physics.ik;
 
 export import pragma.math;
 
-export namespace util {
+export namespace pragma::util {
 	namespace ik {
-		DLLNETWORK void get_local_transform(const Node &node, umath::Transform &t);
+		DLLNETWORK void get_local_transform(const Node &node, pragma::math::Transform &t);
 		DLLNETWORK Quat get_rotation(const Node &node);
 	};
 };

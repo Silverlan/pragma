@@ -8,18 +8,18 @@ import :scripting.lua.libraries.math;
 
 double Lua::math::perlin_noise(const Vector3 &v)
 {
-	umath::PerlinNoise p;
+	pragma::math::PerlinNoise p;
 	return p.GetNoise(const_cast<Vector3 &>(v));
 }
 double Lua::math::perlin_noise(const Vector3 &v, uint32_t seed)
 {
-	umath::PerlinNoise p(seed);
+	pragma::math::PerlinNoise p(seed);
 	return p.GetNoise(const_cast<Vector3 &>(v));
 }
 
 float Lua::math::lerp(float a, float b, float f) { return a + f * (b - a); }
 
-static float round_by_multiple(float f, float multiple) { return (multiple != 0.f) ? (::umath::round(f / multiple) * multiple) : f; }
+static float round_by_multiple(float f, float multiple) { return (multiple != 0.f) ? (::pragma::math::round(f / multiple) * multiple) : f; }
 
 float Lua::math::round(float f, float multiple) { return round_by_multiple(f, multiple); }
 
@@ -51,9 +51,9 @@ int32_t solve_equation(lua::State *l, const std::function<int32_t(const std::arr
 	return n + 1;
 }
 
-int Lua::math::solve_quadric(lua::State *l) { return solve_equation<3, 2>(l, &umath::solve_quadric); }
-int Lua::math::solve_cubic(lua::State *l) { return solve_equation<4, 3>(l, &umath::solve_cubic); }
-int Lua::math::solve_quartic(lua::State *l) { return solve_equation<5, 4>(l, &umath::solve_quartic); }
+int Lua::math::solve_quadric(lua::State *l) { return solve_equation<3, 2>(l, &pragma::math::solve_quadric); }
+int Lua::math::solve_cubic(lua::State *l) { return solve_equation<4, 3>(l, &pragma::math::solve_cubic); }
+int Lua::math::solve_quartic(lua::State *l) { return solve_equation<5, 4>(l, &pragma::math::solve_quartic); }
 
 luabind::optional<Vector3> Lua::math::calc_ballistic_velocity(lua::State *l, const Vector3 &start, const Vector3 &end, float angle, float gravity)
 {
@@ -108,7 +108,7 @@ int Lua::math::abs_max(lua::State *l)
 	int32_t argIdx = 1;
 	while(Lua::IsSet(l, argIdx)) {
 		auto n = Lua::CheckNumber(l, argIdx++);
-		v = umath::abs_max(static_cast<float>(v), static_cast<float>(n));
+		v = pragma::math::abs_max(static_cast<float>(v), static_cast<float>(n));
 	}
 	Lua::PushNumber(l, v);
 	return 1;
@@ -117,24 +117,24 @@ float Lua::math::ease_in(float t, pragma::math::EaseType type) { return pragma::
 float Lua::math::ease_out(float t, pragma::math::EaseType type) { return pragma::math::ease_out(t, type); }
 float Lua::math::ease_in_out(float t, pragma::math::EaseType type) { return pragma::math::ease_in_out(t, type); }
 
-double Lua::math::calc_horizontal_fov(double focalLengthInMM, double width, double height) { return umath::rad_to_deg(::umath::calc_horizontal_fov(focalLengthInMM, width, height)); }
-double Lua::math::calc_vertical_fov(double focalLengthInMM, double width, double height) { return umath::rad_to_deg(::umath::calc_vertical_fov(focalLengthInMM, width, height)); }
-double Lua::math::calc_diagonal_fov(double focalLengthInMM, double width, double height) { return umath::rad_to_deg(::umath::calc_diagonal_fov(focalLengthInMM, width, height)); }
+double Lua::math::calc_horizontal_fov(double focalLengthInMM, double width, double height) { return pragma::math::rad_to_deg(::pragma::math::calc_horizontal_fov(focalLengthInMM, width, height)); }
+double Lua::math::calc_vertical_fov(double focalLengthInMM, double width, double height) { return pragma::math::rad_to_deg(::pragma::math::calc_vertical_fov(focalLengthInMM, width, height)); }
+double Lua::math::calc_diagonal_fov(double focalLengthInMM, double width, double height) { return pragma::math::rad_to_deg(::pragma::math::calc_diagonal_fov(focalLengthInMM, width, height)); }
 
-double Lua::math::horizontal_fov_to_vertical_fov(float fovDeg, float widthOrAspectRatio, float height) { return umath::rad_to_deg(::umath::horizontal_fov_to_vertical_fov(fovDeg, widthOrAspectRatio, height)); }
-int Lua::math::vertical_fov_to_horizontal_fov(float fovDeg, float widthOrAspectRatio, float height) { return umath::rad_to_deg(::umath::vertical_fov_to_horizontal_fov(fovDeg, widthOrAspectRatio, height)); }
-double Lua::math::diagonal_fov_to_vertical_fov(float diagonalFov, float aspectRatio) { return umath::rad_to_deg(::umath::diagonal_fov_to_vertical_fov(umath::deg_to_rad(diagonalFov), aspectRatio)); }
+double Lua::math::horizontal_fov_to_vertical_fov(float fovDeg, float widthOrAspectRatio, float height) { return pragma::math::rad_to_deg(::pragma::math::horizontal_fov_to_vertical_fov(fovDeg, widthOrAspectRatio, height)); }
+int Lua::math::vertical_fov_to_horizontal_fov(float fovDeg, float widthOrAspectRatio, float height) { return pragma::math::rad_to_deg(::pragma::math::vertical_fov_to_horizontal_fov(fovDeg, widthOrAspectRatio, height)); }
+double Lua::math::diagonal_fov_to_vertical_fov(float diagonalFov, float aspectRatio) { return pragma::math::rad_to_deg(::pragma::math::diagonal_fov_to_vertical_fov(pragma::math::deg_to_rad(diagonalFov), aspectRatio)); }
 
 luabind::mult<float, float> Lua::math::get_frustum_plane_size(lua::State *l, float fovRad, float aspectRatio, float z)
 {
 	float w, h;
-	::umath::frustum::get_plane_size(fovRad, z, aspectRatio, w, h);
+	::pragma::math::frustum::get_plane_size(fovRad, z, aspectRatio, w, h);
 	return {l, w, h};
 }
 luabind::mult<luabind::tableT<Vector3>, float, float> Lua::math::get_frustum_plane_boundaries(lua::State *l, const Vector3 &pos, const Vector3 &forward, const Vector3 &up, float fovRad, float aspectRatio, float z)
 {
 	float w, h;
-	auto boundaries = ::umath::frustum::get_plane_boundaries(pos, forward, up, fovRad, z, aspectRatio, &w, &h);
+	auto boundaries = ::pragma::math::frustum::get_plane_boundaries(pos, forward, up, fovRad, z, aspectRatio, &w, &h);
 	auto t = luabind::newtable(l);
 	for(auto i = decltype(boundaries.size()) {0u}; i < boundaries.size(); ++i)
 		t[i + 1] = boundaries[i];
@@ -142,5 +142,5 @@ luabind::mult<luabind::tableT<Vector3>, float, float> Lua::math::get_frustum_pla
 }
 Vector3 Lua::math::get_frustum_plane_point(lua::State *l, const Vector3 &pos, const Vector3 &forward, const Vector3 &right, const Vector3 &up, float fovRad, float aspectRatio, const ::Vector2 &uv, float z)
 {
-	return ::umath::frustum::get_plane_point(pos, forward, right, up, fovRad, z, aspectRatio, uv);
+	return ::pragma::math::frustum::get_plane_point(pos, forward, right, up, fovRad, z, aspectRatio, uv);
 }

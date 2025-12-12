@@ -50,7 +50,7 @@ export namespace pragma {
 		const std::string &GetIdentifier() const;
 		const std::string &GetComponentName() const;
 		const std::string &GetAuthor() const;
-		::util::Version GetGamemodeVersion() const;
+		pragma::util::Version GetGamemodeVersion() const;
 	  protected:
 		BaseGamemodeComponent(pragma::ecs::BaseEntity &ent);
 	};

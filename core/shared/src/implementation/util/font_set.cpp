@@ -9,10 +9,10 @@ import :util.font_set;
 bool FontSet::HasFeature(const std::string_view &feature) const { return std::find(features.begin(), features.end(), feature) != features.end(); }
 static uint32_t get_number_of_bits_set(pragma::FontSetFlag flags)
 {
-	auto numBytes = umath::to_integral(flags);
+	auto numBytes = pragma::math::to_integral(flags);
 	auto numBits = numBytes * 8;
 	for(auto i = decltype(numBits) {0u}; i < numBits; ++i) {
-		if((umath::to_integral(flags) & (i + 1)) != 0)
+		if((pragma::math::to_integral(flags) & (i + 1)) != 0)
 			++numBits;
 	}
 	return numBits;

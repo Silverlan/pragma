@@ -123,7 +123,7 @@ std::optional<ComponentMemberIndex> CMaterialOverrideComponent::DoGetMemberIndex
 void CMaterialOverrideComponent::PopulateProperties()
 {
 	ClearMembers();
-	util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
+	pragma::util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
 
 	auto &mdl = GetEntity().GetModel();
 	if(!mdl)
@@ -136,7 +136,7 @@ void CMaterialOverrideComponent::PopulateProperties()
 		if(!mat)
 			continue;
 		auto matName = std::string {util::FilePath(mat->GetName()).GetFileName()};
-		ustring::to_lower(matName);
+		pragma::string::to_lower(matName);
 
 		auto propName = matName;
 		auto *cPropName = pragma::register_global_string(propName);
@@ -145,7 +145,7 @@ void CMaterialOverrideComponent::PopulateProperties()
 
 		auto &metaData = memberInfo.AddMetaData();
 		metaData["assetType"] = "material";
-		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)).GetString();
+		metaData["rootPath"] = pragma::util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)).GetString();
 		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Material, pragma::asset::FormatType::All);
 		metaData["stripRootPath"] = true;
 		metaData["stripExtension"] = true;
@@ -163,7 +163,7 @@ void CMaterialOverrideComponent::PopulateProperties()
 				outValue = {};
 				return;
 			}
-			outValue = util::FilePath(matOverride->GetName()).GetFileName();
+			outValue = pragma::util::FilePath(matOverride->GetName()).GetFileName();
 		}>();
 		memberInfo.SetSetterFunction<TComponent, TValue, +[](const pragma::ComponentMemberInfo &memberInfo, TComponent &component, const TValue &value) {
 			if(value.empty()) {

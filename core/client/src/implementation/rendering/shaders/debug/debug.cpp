@@ -18,7 +18,7 @@ decltype(ShaderDebug::VERTEX_ATTRIBUTE_POSITION) ShaderDebug::VERTEX_ATTRIBUTE_P
 
 ShaderDebug::ShaderDebug(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader) : ShaderScene(context, identifier, vsShader, fsShader)
 {
-	SetPipelineCount(umath::to_integral(Pipeline::Count) * umath::to_integral(PipelineType::Count));
+	SetPipelineCount(pragma::math::to_integral(Pipeline::Count) * pragma::math::to_integral(PipelineType::Count));
 }
 ShaderDebug::ShaderDebug(prosper::IPrContext &context, const std::string &identifier) : ShaderDebug(context, identifier, "programs/debug/debug", "programs/debug/debug") {}
 
@@ -36,8 +36,8 @@ void ShaderDebug::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 {
 	ShaderScene::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	auto basePipelineIdx = pipelineIdx % umath::to_integral(Pipeline::Count);
-	auto pipelineType = static_cast<PipelineType>(pipelineIdx / umath::to_integral(Pipeline::Count));
+	auto basePipelineIdx = pipelineIdx % pragma::math::to_integral(Pipeline::Count);
+	auto pipelineType = static_cast<PipelineType>(pipelineIdx / pragma::math::to_integral(Pipeline::Count));
 
 	prosper::util::set_generic_alpha_color_blend_attachment_properties(pipelineInfo);
 	pipelineInfo.ToggleDepthBias(true, 1.f, 0.f, 0.f);
@@ -65,7 +65,7 @@ void ShaderDebug::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 		pipelineInfo.ToggleDynamicStates(true, {prosper::DynamicState::LineWidth});
 		break;
 	case Pipeline::Vertex:
-		VERTEX_BINDING_VERTEX.stride = sizeof(umath::Vertex);
+		VERTEX_BINDING_VERTEX.stride = sizeof(pragma::math::Vertex);
 	case Pipeline::Point:
 		prosper::util::set_graphics_pipeline_polygon_mode(pipelineInfo, prosper::PolygonMode::Point);
 		pipelineInfo.SetPrimitiveTopology(prosper::PrimitiveTopology::PointList);
@@ -73,13 +73,13 @@ void ShaderDebug::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 	}
 }
 
-bool ShaderDebug::RecordBeginDraw(prosper::ShaderBindState &bindState, Pipeline pipelineIdx) const { return ShaderGraphics::RecordBeginDraw(bindState, umath::to_integral(pipelineIdx)) == true && bindState.commandBuffer.RecordSetDepthBias(1.f, 0.f, 0.f); }
+bool ShaderDebug::RecordBeginDraw(prosper::ShaderBindState &bindState, Pipeline pipelineIdx) const { return ShaderGraphics::RecordBeginDraw(bindState, pragma::math::to_integral(pipelineIdx)) == true && bindState.commandBuffer.RecordSetDepthBias(1.f, 0.f, 0.f); }
 
 bool ShaderDebug::RecordDraw(prosper::ShaderBindState &bindState, const std::vector<prosper::IBuffer *> &buffers, uint32_t vertexCount, const Mat4 &mvp, const Vector4 &color) const
 {
-	assert(vertexCount <= umath::to_integral(pragma::GameLimits::MaxMeshVertices));
-	if(vertexCount > umath::to_integral(pragma::GameLimits::MaxMeshVertices)) {
-		spdlog::error("Attempted to draw debug mesh with more than maximum ({}) amount of vertices!", umath::to_integral(pragma::GameLimits::MaxMeshVertices));
+	assert(vertexCount <= pragma::math::to_integral(pragma::GameLimits::MaxMeshVertices));
+	if(vertexCount > pragma::math::to_integral(pragma::GameLimits::MaxMeshVertices)) {
+		spdlog::error("Attempted to draw debug mesh with more than maximum ({}) amount of vertices!", pragma::math::to_integral(pragma::GameLimits::MaxMeshVertices));
 		return false;
 	}
 

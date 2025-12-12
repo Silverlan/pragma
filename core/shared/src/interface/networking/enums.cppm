@@ -62,7 +62,7 @@ export namespace pragma::networking {
 export {
 	namespace pragma {
 		enum class SnapshotFlags : uint8_t { None = 0u, PhysicsData = 1u, ComponentData = PhysicsData << 1u };
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::SnapshotFlags)
 };

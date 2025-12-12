@@ -87,7 +87,7 @@ void pragma::asset::Model::Merge(const pragma::asset::Model &other, MergeFlags f
 			for(auto i = decltype(newBoneIndicesToOtherBoneIndices.size()) {0u}; i < newBoneIndicesToOtherBoneIndices.size(); ++i) {
 				auto boneIdx = numOldBones + i;
 				auto otherBoneIdx = newBoneIndicesToOtherBoneIndices.at(i);
-				umath::ScaledTransform t;
+				pragma::math::ScaledTransform t;
 				if(referenceOther.GetBonePose(otherBoneIdx, t))
 					reference.SetBonePose(boneIdx, t);
 			}
@@ -105,7 +105,7 @@ void pragma::asset::Model::Merge(const pragma::asset::Model &other, MergeFlags f
 				for(auto i = decltype(newBoneIndicesToOtherBoneIndices.size()) {0u}; i < newBoneIndicesToOtherBoneIndices.size(); ++i) {
 					auto boneIdx = numOldBones + i;
 					auto otherBoneIdx = newBoneIndicesToOtherBoneIndices.at(i);
-					umath::ScaledTransform t;
+					pragma::math::ScaledTransform t;
 					if(frameRefOther->GetBonePose(otherBoneIdx, t))
 						frameRef->SetBonePose(boneIdx, t);
 				}
@@ -118,7 +118,7 @@ void pragma::asset::Model::Merge(const pragma::asset::Model &other, MergeFlags f
 		auto &blendControllers = GetBlendControllers();
 		blendControllers.reserve(blendControllers.size() + blendControllersOther.size());
 		for(auto &blendController : blendControllersOther) {
-			auto it = std::find_if(blendControllers.begin(), blendControllers.end(), [&blendController](const BlendController &bc) { return ustring::compare(bc.name, blendController.name, false); });
+			auto it = std::find_if(blendControllers.begin(), blendControllers.end(), [&blendController](const BlendController &bc) { return pragma::string::compare(bc.name, blendController.name, false); });
 			if(it != blendControllers.end())
 				continue;
 			blendControllers.push_back(blendController);

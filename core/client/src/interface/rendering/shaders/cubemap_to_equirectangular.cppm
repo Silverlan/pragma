@@ -29,7 +29,7 @@ export namespace pragma {
 #pragma pack(pop)
 
 		ShaderCubemapToEquirectangular(prosper::IPrContext &context, const std::string &identifier);
-		std::shared_ptr<prosper::Texture> CubemapToEquirectangularTexture(prosper::Texture &cubemap, uint32_t width = 1'600, uint32_t height = 800, umath::Degree range = 360.f, prosper::ImageLayout cubemapLayout = prosper::ImageLayout::ShaderReadOnlyOptimal);
+		std::shared_ptr<prosper::Texture> CubemapToEquirectangularTexture(prosper::Texture &cubemap, uint32_t width = 1'600, uint32_t height = 800, pragma::math::Degree range = 360.f, prosper::ImageLayout cubemapLayout = prosper::ImageLayout::ShaderReadOnlyOptimal);
 	  protected:
 		std::shared_ptr<prosper::IImage> CreateEquirectangularMap(uint32_t width, uint32_t height, prosper::util::ImageCreateInfo::Flags flags, bool hdr) const;
 		std::shared_ptr<prosper::RenderTarget> CreateEquirectangularRenderTarget(uint32_t width, uint32_t height, prosper::util::ImageCreateInfo::Flags flags, bool hdr) const;

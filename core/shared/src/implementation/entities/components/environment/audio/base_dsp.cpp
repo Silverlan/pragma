@@ -12,11 +12,11 @@ void BaseEnvSoundDspComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(OnSetKeyValue(kvData.key, kvData.value) == true)
-			return util::EventReply::Handled;
-		return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Handled;
+		return pragma::util::EventReply::Unhandled;
 	});
 
 	auto &ent = GetEntity();
@@ -26,14 +26,14 @@ void BaseEnvSoundDspComponent::Initialize()
 
 bool BaseEnvSoundDspComponent::OnSetKeyValue(const std::string &key, const std::string &val)
 {
-	if(ustring::compare<std::string>(key, "dsp", false))
+	if(pragma::string::compare<std::string>(key, "dsp", false))
 		m_kvDsp = val;
-	else if(ustring::compare<std::string>(key, "inner_radius", false))
-		m_kvInnerRadius = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "outer_radius", false))
-		m_kvOuterRadius = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "intensity", false))
-		m_kvDspGain = util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "inner_radius", false))
+		m_kvInnerRadius = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "outer_radius", false))
+		m_kvOuterRadius = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "intensity", false))
+		m_kvDspGain = pragma::util::to_float(val);
 	else
 		return false;
 	return true;
@@ -56,7 +56,7 @@ void BaseEnvSoundDspComponent::SetGain(float gain) { m_kvDspGain = gain; }
 bool BaseEnvSoundDspComponent::Input(const std::string &input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, std::string data)
 {
 	if(input == "setgain")
-		SetGain(ustring::to_int(data));
+		SetGain(pragma::string::to_int(data));
 	else
 		return false;
 	return true;

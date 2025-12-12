@@ -52,12 +52,12 @@ export namespace pragma {
 
 		OctreeCallbacks m_octreeCallbacks = {};
 		LightSourceData m_lightSourceData = {};
-		util::WeakHandle<prosper::Shader> m_shader = {};
-		util::WeakHandle<prosper::Shader> m_shaderTransparent = {};
-		util::WeakHandle<prosper::Shader> m_shaderSpot = {};
-		util::WeakHandle<prosper::Shader> m_shaderSpotTransparent = {};
-		util::WeakHandle<prosper::Shader> m_shaderCSM = {};
-		util::WeakHandle<prosper::Shader> m_shaderCSMTransparent = {};
+		pragma::util::WeakHandle<prosper::Shader> m_shader = {};
+		pragma::util::WeakHandle<prosper::Shader> m_shaderTransparent = {};
+		pragma::util::WeakHandle<prosper::Shader> m_shaderSpot = {};
+		pragma::util::WeakHandle<prosper::Shader> m_shaderSpotTransparent = {};
+		pragma::util::WeakHandle<prosper::Shader> m_shaderCSM = {};
+		pragma::util::WeakHandle<prosper::Shader> m_shaderCSMTransparent = {};
 
 		// Current entity when iterating entity meshes in an octree
 		const ecs::CBaseEntity *m_currentEntity = nullptr;
@@ -79,7 +79,7 @@ export namespace pragma {
 			std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
 			uint32_t index = std::numeric_limits<uint32_t>::max();
 		};
-		using RtHandle = util::WeakHandle<std::weak_ptr<RenderTarget>>;
+		using RtHandle = pragma::util::WeakHandle<std::weak_ptr<RenderTarget>>;
 		using Priority = int64_t;
 		enum class Type : uint32_t { Generic = 0, Cube };
 		RtHandle RequestRenderTarget(Type type, uint32_t size, Priority priority = 0);
@@ -104,9 +104,9 @@ export namespace pragma {
 		BufferSet m_cubeSet = {};
 		ShadowRenderer m_renderer = {};
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroup = nullptr;
-		util::WeakHandle<prosper::Shader> m_whShadowShader = {};
+		pragma::util::WeakHandle<prosper::Shader> m_whShadowShader = {};
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {REGISTER_ENUM_FLAGS(pragma::ShadowRenderer::RenderResultFlags)}
 

@@ -20,7 +20,7 @@ void pragma::pts::CParticleRendererAnimatedSprites::Initialize(pragma::BaseEnvPa
 	auto bAlignVelocity = false;
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		// self.m_orientationType = tonumber(self:GetKeyValue("orientation_type") or "") or 0
 		// self.m_orientationControlPoint = tonumber(self:GetKeyValue("control_point_id") or "") or -1
 		// self.m_secondAnimationRate = tonumber(self:GetKeyValue("second_sequence_animation_rate") or "") or 0.0

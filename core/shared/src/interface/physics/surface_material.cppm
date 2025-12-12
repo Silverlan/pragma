@@ -132,7 +132,7 @@ export {
 			pragma::nav::PolyFlags m_navigationFlags;
 			std::unique_ptr<PhysLiquid> m_liquidInfo = nullptr;
 			std::shared_ptr<pragma::physics::IMaterial> m_physMaterial = nullptr;
-			mutable util::TWeakSharedHandle<pragma::physics::SurfaceType> m_surfaceType = {};
+			mutable pragma::util::TWeakSharedHandle<pragma::physics::SurfaceType> m_surfaceType = {};
 			AudioInfo m_audioInfo = {};
 			PBRInfo m_pbrInfo = {};
 			PhysLiquid &InitializeLiquid();

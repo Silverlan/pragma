@@ -26,7 +26,7 @@ void pragma::SGame::RegisterLua()
 
 	auto engineMod = luabind::module(GetLuaState(), "engine");
 	engineMod[(luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("unload_library", Lua::engine::UnloadLibrary), luabind::def("is_library_loaded", Lua::engine::IsLibraryLoaded), luabind::def("library_exists", Lua::engine::LibraryExists),
-	  luabind::def("get_info", Lua::engine::get_info), luabind::def("poll_console_output", Lua::engine::poll_console_output), luabind::def("get_user_data_dir", util::get_user_data_dir), luabind::def("get_resource_dirs", util::get_resource_dirs))];
+	  luabind::def("get_info", Lua::engine::get_info), luabind::def("poll_console_output", Lua::engine::poll_console_output), luabind::def("get_user_data_dir", pragma::util::get_user_data_dir), luabind::def("get_resource_dirs", pragma::util::get_resource_dirs))];
 	Lua::engine::register_shared_functions(GetLuaState(), engineMod);
 
 	Lua::RegisterLibrary(GetLuaState(), "game",
@@ -47,7 +47,7 @@ void pragma::SGame::RegisterLua()
 	entsMod[luabind::def("register_component_event", &Lua::ents::register_component_event)];
 	auto &modEnts = GetLuaInterface().RegisterLibrary("ents", {{"register_component", Lua::ents::register_component<pragma::SLuaBaseEntityComponent>}});
 
-	Lua::RegisterLibraryEnums(GetLuaState(), "ents", {{"COMPONENT_FLAG_NONE", umath::to_integral(pragma::ComponentFlags::None)}, {"COMPONENT_FLAG_BIT_NETWORKED", umath::to_integral(pragma::ComponentFlags::Networked)}});
+	Lua::RegisterLibraryEnums(GetLuaState(), "ents", {{"COMPONENT_FLAG_NONE", pragma::math::to_integral(pragma::ComponentFlags::None)}, {"COMPONENT_FLAG_BIT_NETWORKED", pragma::math::to_integral(pragma::ComponentFlags::Networked)}});
 
 	auto entityClassDef = luabind::class_<pragma::ecs::BaseEntity>("BaseEntityBase");
 	Lua::Entity::register_class(entityClassDef);
@@ -107,7 +107,7 @@ void pragma::SGame::RegisterLua()
 	  luabind::def("register", &Lua::net::server::register_net_message), luabind::def("register_event", &Lua::net::register_event))];
 	auto netPacketClassDef = luabind::class_<NetPacket>("Packet");
 	Lua::NetPacket::Server::register_class(netPacketClassDef);
-	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, util::WeakHandle<pragma::SPlayerComponent> &)>([](lua::State *l, ::NetPacket &packet, util::WeakHandle<pragma::SPlayerComponent> &pl) { networking::write_player(packet, pl.get()); }));
+	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, pragma::util::WeakHandle<pragma::SPlayerComponent> &)>([](lua::State *l, ::NetPacket &packet, pragma::util::WeakHandle<pragma::SPlayerComponent> &pl) { networking::write_player(packet, pl.get()); }));
 	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, ::NetPacket &, EntityHandle &)>([](lua::State *l, ::NetPacket &packet, EntityHandle &hEnt) { networking::write_player(packet, hEnt.get()); }));
 	netPacketClassDef.def("ReadPlayer", static_cast<void (*)(lua::State *, ::NetPacket &)>([](lua::State *l, ::NetPacket &packet) {
 		auto *pl = static_cast<pragma::SPlayerComponent *>(pragma::networking::read_player(packet));
@@ -124,11 +124,11 @@ void pragma::SGame::RegisterLua()
 	classDefRp.def("AddRecipient", &Lua::RecipientFilter::AddRecipient);
 	classDefRp.def("RemoveRecipient", &Lua::RecipientFilter::RemoveRecipient);
 	classDefRp.def("HasRecipient", &Lua::RecipientFilter::HasRecipient);
-	classDefRp.def("GetFilterType", static_cast<void (*)(lua::State *, pragma::networking::TargetRecipientFilter &)>([](lua::State *l, pragma::networking::TargetRecipientFilter &rp) { Lua::PushInt(l, umath::to_integral(rp.GetFilterType())); }));
+	classDefRp.def("GetFilterType", static_cast<void (*)(lua::State *, pragma::networking::TargetRecipientFilter &)>([](lua::State *l, pragma::networking::TargetRecipientFilter &rp) { Lua::PushInt(l, pragma::math::to_integral(rp.GetFilterType())); }));
 	classDefRp.def("SetFilterType",
 	  static_cast<void (*)(lua::State *, pragma::networking::TargetRecipientFilter &, uint32_t)>([](lua::State *l, pragma::networking::TargetRecipientFilter &rp, uint32_t filterType) { rp.SetFilterType(static_cast<pragma::networking::ClientRecipientFilter::FilterType>(filterType)); }));
-	classDefRp.add_static_constant("TYPE_INCLUDE", umath::to_integral(pragma::networking::ClientRecipientFilter::FilterType::Include));
-	classDefRp.add_static_constant("TYPE_EXCLUDE", umath::to_integral(pragma::networking::ClientRecipientFilter::FilterType::Exclude));
+	classDefRp.add_static_constant("TYPE_INCLUDE", pragma::math::to_integral(pragma::networking::ClientRecipientFilter::FilterType::Include));
+	classDefRp.add_static_constant("TYPE_EXCLUDE", pragma::math::to_integral(pragma::networking::ClientRecipientFilter::FilterType::Exclude));
 	modNet[classDefRp];
 
 	auto classDefClRp = luabind::class_<pragma::networking::ClientRecipientFilter>("ClientRecipientFilter");

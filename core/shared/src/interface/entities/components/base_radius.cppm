@@ -18,7 +18,7 @@ export namespace pragma {
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 		float GetRadius() const;
-		const util::PFloatProperty &GetRadiusProperty() const;
+		const pragma::util::PFloatProperty &GetRadiusProperty() const;
 		void SetRadius(float radius);
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
@@ -26,7 +26,7 @@ export namespace pragma {
 	  protected:
 		BaseRadiusComponent(pragma::ecs::BaseEntity &ent);
 		pragma::NetEventId m_netEvSetRadius = pragma::INVALID_NET_EVENT;
-		util::PFloatProperty m_radius;
+		pragma::util::PFloatProperty m_radius;
 	};
 	struct DLLNETWORK CEOnRadiusChanged : public ComponentEvent {
 		CEOnRadiusChanged(float oldRadius, float newRadius);

@@ -25,7 +25,7 @@ static void LPARAM_refresh(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	int freq = ustring::to_int(argv[0]);
+	int freq = pragma::string::to_int(argv[0]);
 	if(freq > 0)
 		g_launchParamRefreshRate = freq;
 }
@@ -36,14 +36,14 @@ static void LPARAM_w(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	g_launchParamWidth = ustring::to_int(argv[0]);
+	g_launchParamWidth = pragma::string::to_int(argv[0]);
 }
 
 static void LPARAM_h(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	g_launchParamHeight = ustring::to_int(argv[0]);
+	g_launchParamHeight = pragma::string::to_int(argv[0]);
 }
 
 static void LPARAM_fullbright(const std::vector<std::string> &argv) { pragma::get_cengine()->UseFullbrightShader(true); }
@@ -91,7 +91,7 @@ static void LPARAM_windowless(const std::vector<std::string> &argv)
 {
 	auto windowless = true;
 	if(!argv.empty())
-		windowless = util::to_boolean(argv.front());
+		windowless = pragma::util::to_boolean(argv.front());
 	g_windowless = windowless;
 }
 
@@ -115,14 +115,14 @@ static void LPARAM_border_bar_color(const std::vector<std::string> &argv)
 	g_borderColor = Color::CreateFromHexColor(strHex);
 }
 
-static void LPARAM_cpu_rendering(const std::vector<std::string> &argv) { g_cpuRendering = (argv.empty() || util::to_boolean(argv.front())); }
+static void LPARAM_cpu_rendering(const std::vector<std::string> &argv) { g_cpuRendering = (argv.empty() || pragma::util::to_boolean(argv.front())); }
 
 static void LPARAM_cli(const std::vector<std::string> &argv)
 {
 	g_cli = true;
 	LPARAM_cpu_rendering(argv);
 	LPARAM_windowless(argv);
-	if(argv.empty() || util::to_boolean(argv.front()))
+	if(argv.empty() || pragma::util::to_boolean(argv.front()))
 		LPARAM_audio_api({"dummy"});
 }
 

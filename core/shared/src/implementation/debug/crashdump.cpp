@@ -283,17 +283,17 @@ bool CrashHandler::GenerateCrashDump() const
 	auto *engine = pragma::get_engine();
 	auto shouldShowMsBox = !pragma::Engine::Get()->IsNonInteractiveMode();
 #ifdef _WIN32
-	shouldShowMsBox = (shouldShowMsBox && util::get_subsystem() == util::SubSystem::GUI);
+	shouldShowMsBox = (shouldShowMsBox && pragma::util::get_subsystem() == pragma::util::SubSystem::GUI);
 #endif
 	if(!shouldShowMsBox)
 		saveDump = true;
 	else {
 		LOGGER.debug("Displaying prompt message...");
 		auto msg = pragma::locale::get_text("prompt_crash");
-		auto res = util::debug::show_message_prompt(msg, util::debug::MessageBoxButtons::YesNo, m_appName);
+		auto res = pragma::debug::show_message_prompt(msg, pragma::debug::MessageBoxButtons::YesNo, m_appName);
 		// If res is nullopt, the message prompt most likely failed to show. In this case we'll assume yes as
 		// default answer.
-		saveDump = (res == std::nullopt || *res == util::debug::MessageBoxButton::Yes);
+		saveDump = (res == std::nullopt || *res == pragma::debug::MessageBoxButton::Yes);
 	}
 
 #ifdef __linux__
@@ -335,10 +335,10 @@ bool CrashHandler::GenerateCrashDump() const
 			if(minidumpPath) {
 				// Write Minidump
 				VFilePtrReal f = nullptr;
-				auto t = util::Clock::now();
+				auto t = pragma::util::Clock::now();
 				while(f == nullptr) // Wait until dump has been written
 				{
-					auto tNow = util::Clock::now();
+					auto tNow = pragma::util::Clock::now();
 					auto tDelta = std::chrono::duration_cast<std::chrono::seconds>(tNow - t).count();
 					if(tDelta >= 4) // Don't wait more than 4 seconds
 						break;
@@ -367,8 +367,8 @@ bool CrashHandler::GenerateCrashDump() const
 			szResult = pragma::locale::get_text("prompt_crash_dump_saved", std::vector<std::string> {zipFileName, "crashdumps@pragma-engine.com"});
 			std::string absPath;
 			if(filemanager::find_absolute_path(zipFileName, absPath)) {
-				auto path = util::FilePath(absPath);
-				util::open_path_in_explorer(std::string {path.GetPath()}, std::string {path.GetFileName()});
+				auto path = pragma::util::FilePath(absPath);
+				pragma::util::open_path_in_explorer(std::string {path.GetPath()}, std::string {path.GetFileName()});
 			}
 
 			success = true;
@@ -378,7 +378,7 @@ bool CrashHandler::GenerateCrashDump() const
 	}
 
 	if(!szResult.empty() && shouldShowMsBox)
-		util::debug::show_message_prompt(szResult, util::debug::MessageBoxButtons::Ok, m_appName);
+		pragma::debug::show_message_prompt(szResult, pragma::debug::MessageBoxButtons::Ok, m_appName);
 
 	auto crashInProsperModule = false;
 #ifdef _WIN32

@@ -32,7 +32,7 @@ std::ostream &operator<<(std::ostream &out, const pragma::audio::ALSound &snd)
 	}
 	out << "][";
 	auto type = snd.GetType();
-	auto values = umath::get_power_of_2_values(static_cast<uint64_t>(type));
+	auto values = pragma::math::get_power_of_2_values(static_cast<uint64_t>(type));
 	auto bStart = true;
 	for(auto v : values) {
 		if(bStart == false)
@@ -68,7 +68,7 @@ static void create_directory_change_listener(lua::State *l, const std::string &p
 {
 	Lua::CheckFunction(l, 2);
 	try {
-		auto listener = ::util::make_shared<DirectoryWatcherCallback>(path, [callback](const std::string &fileName) mutable { callback(fileName); }, flags);
+		auto listener = pragma::util::make_shared<DirectoryWatcherCallback>(path, [callback](const std::string &fileName) mutable { callback(fileName); }, flags);
 		Lua::Push(l, listener);
 	}
 	catch(const std::runtime_error &err) {
@@ -110,11 +110,11 @@ static void register_utf8_string(lua::State *l, luabind::module_ &modStr)
 static void register_directory_watcher(lua::State *l, luabind::module_ &modUtil)
 {
 	auto defListener = pragma::LuaCore::register_class<"DirectoryChangeListener", DirectoryWatcherCallback>(l);
-	defListener->add_static_constant("LISTENER_FLAG_NONE", umath::to_integral(DirectoryWatcherCallback::WatchFlags::None));
-	defListener->add_static_constant("LISTENER_FLAG_BIT_WATCH_SUB_DIRECTORIES", umath::to_integral(DirectoryWatcherCallback::WatchFlags::WatchSubDirectories));
-	defListener->add_static_constant("LISTENER_FLAG_ABSOLUTE_PATH", umath::to_integral(DirectoryWatcherCallback::WatchFlags::AbsolutePath));
-	defListener->add_static_constant("LISTENER_FLAG_START_DISABLED", umath::to_integral(DirectoryWatcherCallback::WatchFlags::StartDisabled));
-	defListener->add_static_constant("LISTENER_FLAG_WATCH_DIRECTORY_CHANGES", umath::to_integral(DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges));
+	defListener->add_static_constant("LISTENER_FLAG_NONE", pragma::math::to_integral(DirectoryWatcherCallback::WatchFlags::None));
+	defListener->add_static_constant("LISTENER_FLAG_BIT_WATCH_SUB_DIRECTORIES", pragma::math::to_integral(DirectoryWatcherCallback::WatchFlags::WatchSubDirectories));
+	defListener->add_static_constant("LISTENER_FLAG_ABSOLUTE_PATH", pragma::math::to_integral(DirectoryWatcherCallback::WatchFlags::AbsolutePath));
+	defListener->add_static_constant("LISTENER_FLAG_START_DISABLED", pragma::math::to_integral(DirectoryWatcherCallback::WatchFlags::StartDisabled));
+	defListener->add_static_constant("LISTENER_FLAG_WATCH_DIRECTORY_CHANGES", pragma::math::to_integral(DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges));
 	static_assert(magic_enum::enum_count<DirectoryWatcherCallback::WatchFlags>() == 4);
 	defListener
 	  ->scope[luabind::def("create", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &path, luabind::object callback) { create_directory_change_listener(l, path, callback, DirectoryWatcherCallback::WatchFlags::None); }))];
@@ -127,8 +127,8 @@ static void register_directory_watcher(lua::State *l, luabind::module_ &modUtil)
 	modUtil[*defListener];
 }
 
-namespace umath {
-	std::ostream &operator<<(std::ostream &out, const umath::Transform &t)
+namespace pragma::math {
+	std::ostream &operator<<(std::ostream &out, const pragma::math::Transform &t)
 	{
 		auto &origin = t.GetOrigin();
 		auto &rot = t.GetRotation();
@@ -136,7 +136,7 @@ namespace umath {
 		out << "Transform[" << origin.x << "," << origin.y << "," << origin.z << "][" << ang.p << "," << ang.y << "," << ang.r << "]";
 		return out;
 	}
-	std::ostream &operator<<(std::ostream &out, const umath::ScaledTransform &t)
+	std::ostream &operator<<(std::ostream &out, const pragma::math::ScaledTransform &t)
 	{
 		auto &origin = t.GetOrigin();
 		auto &rot = t.GetRotation();
@@ -160,7 +160,7 @@ static void register_string_to_vector_type_constructor(lua::State *l)
 	  +[](const std::string &str) -> T {
 		  T r;
 		  using ValueType = typename decltype(r)::value_type;
-		  ustring::string_to_array<ValueType>(str, reinterpret_cast<ValueType *>(&r[0]), ustring::cstring_to_number<float>, decltype(r)::length());
+		  pragma::string::string_to_array<ValueType>(str, reinterpret_cast<ValueType *>(&r[0]), pragma::string::cstring_to_number<float>, decltype(r)::length());
 		  return r;
 	  },
 	  const std::string &>(l);
@@ -171,10 +171,9 @@ static void register_string_to_vector_type_constructor(lua::State *l)
 // DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, ScaledTransform);
 
 #ifdef __linux__
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, BaseParallelJob);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::util, BaseParallelJob);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg, ImageBuffer);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Version);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, Path);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::util, Version);
 #endif
 // #ifdef __linux__
 // #endif
@@ -243,7 +242,7 @@ void pragma::LuaCore::detail::register_lua_debug_tostring(lua::State *l, const s
 
 static void add_task(lua::State *l, pragma::LuaCore::LuaWorker &worker, const luabind::object &o0, const luabind::object &o1, float taskProgress)
 {
-	using TNonLuaTask = std::shared_ptr<util::ParallelJob<luabind::object>>;
+	using TNonLuaTask = std::shared_ptr<pragma::util::ParallelJob<luabind::object>>;
 	auto *nonLuaTask = luabind::object_cast_nothrow<TNonLuaTask *>(o0, static_cast<TNonLuaTask *>(nullptr));
 	if(nonLuaTask) {
 		auto &onCompleteTask = o1;
@@ -265,28 +264,28 @@ static void add_task(lua::State *l, pragma::LuaCore::LuaWorker &worker, const lu
 	worker.AddTask(subJob, onCompleteTask, taskProgress);
 }
 
-static void add_task(pragma::LuaCore::LuaWorker &worker, const std::shared_ptr<util::ParallelJob<luabind::object>> &subJob, float taskProgress) { worker.AddLuaTask(subJob, taskProgress); }
+static void add_task(pragma::LuaCore::LuaWorker &worker, const std::shared_ptr<pragma::util::ParallelJob<luabind::object>> &subJob, float taskProgress) { worker.AddLuaTask(subJob, taskProgress); }
 
 static int util_file_path(lua::State *l)
 {
 	int n = Lua::GetStackTop(l); /* number of arguments */
 	int i;
-	std::vector<util::Path> args;
+	std::vector<pragma::util::Path> args;
 	args.reserve(n);
 	for(i = 1; i <= n; i++) {
-		if(Lua::IsType<util::Path>(l, i))
-			args.push_back(Lua::Check<util::Path>(l, i));
+		if(Lua::IsType<pragma::util::Path>(l, i))
+			args.push_back(Lua::Check<pragma::util::Path>(l, i));
 		else
 			args.push_back({Lua::CheckString(l, i)});
 	}
-	util::Path path {};
+	pragma::util::Path path {};
 	if(args.size() > 1) {
 		for(size_t i = 0; i < (args.size() - 1); ++i)
-			path = util::DirPath(path, args[i]);
-		path = util::FilePath(path, args.back());
+			path = pragma::util::DirPath(path, args[i]);
+		path = pragma::util::FilePath(path, args.back());
 	}
 	else if(args.size() == 1)
-		path = util::FilePath(args.back());
+		path = pragma::util::FilePath(args.back());
 
 	auto &str = path.GetString();
 	if(!str.empty() && str.front() == '/')
@@ -300,17 +299,17 @@ static int util_dir_path(lua::State *l)
 {
 	int n = Lua::GetStackTop(l); /* number of arguments */
 	int i;
-	std::vector<util::Path> args;
+	std::vector<pragma::util::Path> args;
 	args.reserve(n);
 	for(i = 1; i <= n; i++) {
-		if(Lua::IsType<util::Path>(l, i))
-			args.push_back(Lua::Check<util::Path>(l, i));
+		if(Lua::IsType<pragma::util::Path>(l, i))
+			args.push_back(Lua::Check<pragma::util::Path>(l, i));
 		else
 			args.push_back({Lua::CheckString(l, i)});
 	}
-	util::Path path {};
+	pragma::util::Path path {};
 	for(size_t i = 0; i < args.size(); ++i)
-		path = util::DirPath(path, args[i]);
+		path = pragma::util::DirPath(path, args[i]);
 
 	auto &str = path.GetString();
 	if(!str.empty() && str.front() == '/')
@@ -334,16 +333,16 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modString[(luabind::def("snake_case_to_camel_case", Lua::string::snake_case_to_camel_case), luabind::def("camel_case_to_snake_case", Lua::string::camel_case_to_snake_case), luabind::def("calc_levenshtein_distance", Lua::string::calc_levenshtein_distance),
 	  luabind::def("calc_levenshtein_similarity", Lua::string::calc_levenshtein_similarity),
 	  luabind::def("find_longest_common_substring", Lua::string::find_longest_common_substring, luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>, luabind::pure_out_value<5>>::type {}),
-	  luabind::def("find_similar_elements", Lua::string::find_similar_elements, luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}), luabind::def("is_integer", ustring::is_integer), luabind::def("is_number", ustring::is_number),
+	  luabind::def("find_similar_elements", Lua::string::find_similar_elements, luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}), luabind::def("is_integer", pragma::string::is_integer), luabind::def("is_number", pragma::string::is_number),
 	  luabind::def("split", Lua::string::split), luabind::def("join", static_cast<std::string (*)(lua::State *, luabind::table<>, const std::string &)>(Lua::string::join)),
 	  luabind::def("join", static_cast<std::string (*)(lua::State *, luabind::table<>)>([](lua::State *l, luabind::table<> values) { return Lua::string::join(l, values); })), luabind::def("remove_whitespace", Lua::string::remove_whitespace),
 	  luabind::def("remove_quotes", Lua::string::remove_quotes), luabind::def("replace", static_cast<std::string (*)(const std::string &, const std::string &, const std::string &)>([](const std::string &subject, const std::string &from, const std::string &to) -> std::string {
 		  auto tmp = subject;
-		  ustring::replace(tmp, from, to);
+		  pragma::string::replace(tmp, from, to);
 		  return tmp;
 	  })),
-	  luabind::def("fill_zeroes", ustring::fill_zeroes), luabind::def("compare", static_cast<bool (*)(const char *, const char *, bool, size_t)>(ustring::compare)), luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &, bool)>(ustring::compare)),
-	  luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &)>([](const std::string &a, const std::string &b) -> bool { return ustring::compare(a, b, true); })),
+	  luabind::def("fill_zeroes", pragma::string::fill_zeroes), luabind::def("compare", static_cast<bool (*)(const char *, const char *, bool, size_t)>(pragma::string::compare)), luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &, bool)>(pragma::string::compare)),
+	  luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &)>([](const std::string &a, const std::string &b) -> bool { return pragma::string::compare(a, b, true); })),
 	  luabind::def("hash", static_cast<std::string (*)(const std::string &)>([](const std::string &str) -> std::string { return std::to_string(std::hash<std::string> {}(str)); })))];
 
 	auto modLight = luabind::module_(lua.GetState(), "light");
@@ -390,88 +389,88 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	    }))];
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "light",
-	  {{"NATURAL_LIGHT_TYPE_MATCH_FLAME", umath::to_integral(ulighting::NaturalLightType::MatchFlame)}, {"NATURAL_LIGHT_TYPE_CANDLE", umath::to_integral(ulighting::NaturalLightType::Candle)}, {"NATURAL_LIGHT_TYPE_FLAME", umath::to_integral(ulighting::NaturalLightType::Flame)},
-	    {"NATURAL_LIGHT_TYPE_SUNSET", umath::to_integral(ulighting::NaturalLightType::Sunset)}, {"NATURAL_LIGHT_TYPE_SUNRISE", umath::to_integral(ulighting::NaturalLightType::Sunrise)},
-	    {"NATURAL_LIGHT_TYPE_HOUSEHOLD_TUNGSTEN_BULB", umath::to_integral(ulighting::NaturalLightType::HouseholdTungstenBulb)}, {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_500W_TO_1K", umath::to_integral(ulighting::NaturalLightType::TungstenLamp500WTo1K)},
-	    {"NATURAL_LIGHT_TYPE_INCANDESCENT_LAMP", umath::to_integral(ulighting::NaturalLightType::IncandescentLamp)}, {"NATURAL_LIGHT_TYPE_WARM_FLUORESCENT_LAMP", umath::to_integral(ulighting::NaturalLightType::WarmFluorescentLamp)},
-	    {"NATURAL_LIGHT_TYPE_LED_LAMP", umath::to_integral(ulighting::NaturalLightType::LEDLamp)}, {"NATURAL_LIGHT_TYPE_QUARTZ_LIGHT", umath::to_integral(ulighting::NaturalLightType::QuartzLight)},
-	    {"NATURAL_LIGHT_TYPE_STUDIO_LAMP", umath::to_integral(ulighting::NaturalLightType::StudioLamp)}, {"NATURAL_LIGHT_TYPE_FLOODLIGHT", umath::to_integral(ulighting::NaturalLightType::Floodlight)},
-	    {"NATURAL_LIGHT_TYPE_FLUORESCENT_LIGHT", umath::to_integral(ulighting::NaturalLightType::FluorescentLight)}, {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_2K", umath::to_integral(ulighting::NaturalLightType::TungstenLamp2K)},
-	    {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_5K", umath::to_integral(ulighting::NaturalLightType::TungstenLamp5K)}, {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_10K", umath::to_integral(ulighting::NaturalLightType::TungstenLamp10K)},
-	    {"NATURAL_LIGHT_TYPE_MOONLIGHT", umath::to_integral(ulighting::NaturalLightType::Moonlight)}, {"NATURAL_LIGHT_TYPE_HORIZON_DAYLIGHT", umath::to_integral(ulighting::NaturalLightType::HorizonDaylight)},
-	    {"NATURAL_LIGHT_TYPE_TUBULAR_FLUORESCENT_LAMP", umath::to_integral(ulighting::NaturalLightType::TubularFluorescentLamp)}, {"NATURAL_LIGHT_TYPE_VERTICAL_DAYLIGHT", umath::to_integral(ulighting::NaturalLightType::VerticalDaylight)},
-	    {"NATURAL_LIGHT_TYPE_SUN_AT_NOON", umath::to_integral(ulighting::NaturalLightType::SunAtNoon)}, {"NATURAL_LIGHT_TYPE_DAYLIGHT", umath::to_integral(ulighting::NaturalLightType::Daylight)},
-	    {"NATURAL_LIGHT_TYPE_SUN_THROUGH_CLOUDS", umath::to_integral(ulighting::NaturalLightType::SunThroughClouds)}, {"NATURAL_LIGHT_TYPE_OVERCAST", umath::to_integral(ulighting::NaturalLightType::Overcast)},
-	    {"NATURAL_LIGHT_TYPE_RGB_MONITOR_WHITE_POINT", umath::to_integral(ulighting::NaturalLightType::RGBMonitorWhitePoint)}, {"NATURAL_LIGHT_TYPE_OUTDOOR_SHADE", umath::to_integral(ulighting::NaturalLightType::OutdoorShade)},
-	    {"NATURAL_LIGHT_TYPE_PARTLY_CLOUDY", umath::to_integral(ulighting::NaturalLightType::PartlyCloudy)}, {"NATURAL_LIGHT_TYPE_CLEAR_BLUESKY", umath::to_integral(ulighting::NaturalLightType::ClearBlueSky)},
-	    {"NATURAL_LIGHT_TYPE_CLEAR_COUNT", umath::to_integral(ulighting::NaturalLightType::Count)},
+	  {{"NATURAL_LIGHT_TYPE_MATCH_FLAME", pragma::math::to_integral(ulighting::NaturalLightType::MatchFlame)}, {"NATURAL_LIGHT_TYPE_CANDLE", pragma::math::to_integral(ulighting::NaturalLightType::Candle)}, {"NATURAL_LIGHT_TYPE_FLAME", pragma::math::to_integral(ulighting::NaturalLightType::Flame)},
+	    {"NATURAL_LIGHT_TYPE_SUNSET", pragma::math::to_integral(ulighting::NaturalLightType::Sunset)}, {"NATURAL_LIGHT_TYPE_SUNRISE", pragma::math::to_integral(ulighting::NaturalLightType::Sunrise)},
+	    {"NATURAL_LIGHT_TYPE_HOUSEHOLD_TUNGSTEN_BULB", pragma::math::to_integral(ulighting::NaturalLightType::HouseholdTungstenBulb)}, {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_500W_TO_1K", pragma::math::to_integral(ulighting::NaturalLightType::TungstenLamp500WTo1K)},
+	    {"NATURAL_LIGHT_TYPE_INCANDESCENT_LAMP", pragma::math::to_integral(ulighting::NaturalLightType::IncandescentLamp)}, {"NATURAL_LIGHT_TYPE_WARM_FLUORESCENT_LAMP", pragma::math::to_integral(ulighting::NaturalLightType::WarmFluorescentLamp)},
+	    {"NATURAL_LIGHT_TYPE_LED_LAMP", pragma::math::to_integral(ulighting::NaturalLightType::LEDLamp)}, {"NATURAL_LIGHT_TYPE_QUARTZ_LIGHT", pragma::math::to_integral(ulighting::NaturalLightType::QuartzLight)},
+	    {"NATURAL_LIGHT_TYPE_STUDIO_LAMP", pragma::math::to_integral(ulighting::NaturalLightType::StudioLamp)}, {"NATURAL_LIGHT_TYPE_FLOODLIGHT", pragma::math::to_integral(ulighting::NaturalLightType::Floodlight)},
+	    {"NATURAL_LIGHT_TYPE_FLUORESCENT_LIGHT", pragma::math::to_integral(ulighting::NaturalLightType::FluorescentLight)}, {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_2K", pragma::math::to_integral(ulighting::NaturalLightType::TungstenLamp2K)},
+	    {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_5K", pragma::math::to_integral(ulighting::NaturalLightType::TungstenLamp5K)}, {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_10K", pragma::math::to_integral(ulighting::NaturalLightType::TungstenLamp10K)},
+	    {"NATURAL_LIGHT_TYPE_MOONLIGHT", pragma::math::to_integral(ulighting::NaturalLightType::Moonlight)}, {"NATURAL_LIGHT_TYPE_HORIZON_DAYLIGHT", pragma::math::to_integral(ulighting::NaturalLightType::HorizonDaylight)},
+	    {"NATURAL_LIGHT_TYPE_TUBULAR_FLUORESCENT_LAMP", pragma::math::to_integral(ulighting::NaturalLightType::TubularFluorescentLamp)}, {"NATURAL_LIGHT_TYPE_VERTICAL_DAYLIGHT", pragma::math::to_integral(ulighting::NaturalLightType::VerticalDaylight)},
+	    {"NATURAL_LIGHT_TYPE_SUN_AT_NOON", pragma::math::to_integral(ulighting::NaturalLightType::SunAtNoon)}, {"NATURAL_LIGHT_TYPE_DAYLIGHT", pragma::math::to_integral(ulighting::NaturalLightType::Daylight)},
+	    {"NATURAL_LIGHT_TYPE_SUN_THROUGH_CLOUDS", pragma::math::to_integral(ulighting::NaturalLightType::SunThroughClouds)}, {"NATURAL_LIGHT_TYPE_OVERCAST", pragma::math::to_integral(ulighting::NaturalLightType::Overcast)},
+	    {"NATURAL_LIGHT_TYPE_RGB_MONITOR_WHITE_POINT", pragma::math::to_integral(ulighting::NaturalLightType::RGBMonitorWhitePoint)}, {"NATURAL_LIGHT_TYPE_OUTDOOR_SHADE", pragma::math::to_integral(ulighting::NaturalLightType::OutdoorShade)},
+	    {"NATURAL_LIGHT_TYPE_PARTLY_CLOUDY", pragma::math::to_integral(ulighting::NaturalLightType::PartlyCloudy)}, {"NATURAL_LIGHT_TYPE_CLEAR_BLUESKY", pragma::math::to_integral(ulighting::NaturalLightType::ClearBlueSky)},
+	    {"NATURAL_LIGHT_TYPE_CLEAR_COUNT", pragma::math::to_integral(ulighting::NaturalLightType::Count)},
 
-	    {"LIGHT_SOURCE_TYPE_TUNGSTEN_INCANDESCENT_LIGHT_BULB", umath::to_integral(ulighting::LightSourceType::TungstenIncandescentLightBulb)}, {"LIGHT_SOURCE_TYPE_HALOGEN_LAMP", umath::to_integral(ulighting::LightSourceType::HalogenLamp)},
-	    {"LIGHT_SOURCE_TYPE_FLUORESCENT_LAMP", umath::to_integral(ulighting::LightSourceType::FluorescentLamp)}, {"LIGHT_SOURCE_TYPE_LED_LAMP", umath::to_integral(ulighting::LightSourceType::LEDLamp)},
-	    {"LIGHT_SOURCE_TYPE_METAL_HALIDE_LAMP", umath::to_integral(ulighting::LightSourceType::MetalHalideLamp)}, {"LIGHT_SOURCE_TYPE_HIGH_PRESSURE_SODIUM_VAPOR_LAMP", umath::to_integral(ulighting::LightSourceType::HighPressureSodiumVaporLamp)},
-	    {"LIGHT_SOURCE_TYPE_LOW_PRESSURE_SODIUM_VAPOR_LAMP", umath::to_integral(ulighting::LightSourceType::LowPressureSodiumVaporLamp)}, {"LIGHT_SOURCE_TYPE_MERCURY_VAPOR_LAMP", umath::to_integral(ulighting::LightSourceType::MercuryVaporLamp)},
-	    {"LIGHT_SOURCE_TYPE_D65_STANDARD_ILLUMINANT", umath::to_integral(ulighting::LightSourceType::D65StandardIlluminant)}});
+	    {"LIGHT_SOURCE_TYPE_TUNGSTEN_INCANDESCENT_LIGHT_BULB", pragma::math::to_integral(ulighting::LightSourceType::TungstenIncandescentLightBulb)}, {"LIGHT_SOURCE_TYPE_HALOGEN_LAMP", pragma::math::to_integral(ulighting::LightSourceType::HalogenLamp)},
+	    {"LIGHT_SOURCE_TYPE_FLUORESCENT_LAMP", pragma::math::to_integral(ulighting::LightSourceType::FluorescentLamp)}, {"LIGHT_SOURCE_TYPE_LED_LAMP", pragma::math::to_integral(ulighting::LightSourceType::LEDLamp)},
+	    {"LIGHT_SOURCE_TYPE_METAL_HALIDE_LAMP", pragma::math::to_integral(ulighting::LightSourceType::MetalHalideLamp)}, {"LIGHT_SOURCE_TYPE_HIGH_PRESSURE_SODIUM_VAPOR_LAMP", pragma::math::to_integral(ulighting::LightSourceType::HighPressureSodiumVaporLamp)},
+	    {"LIGHT_SOURCE_TYPE_LOW_PRESSURE_SODIUM_VAPOR_LAMP", pragma::math::to_integral(ulighting::LightSourceType::LowPressureSodiumVaporLamp)}, {"LIGHT_SOURCE_TYPE_MERCURY_VAPOR_LAMP", pragma::math::to_integral(ulighting::LightSourceType::MercuryVaporLamp)},
+	    {"LIGHT_SOURCE_TYPE_D65_STANDARD_ILLUMINANT", pragma::math::to_integral(ulighting::LightSourceType::D65StandardIlluminant)}});
 
 	auto &modUtil = lua.RegisterLibrary("util");
 	register_directory_watcher(lua.GetState(), modUtil);
 
-	auto defParallelJob = pragma::LuaCore::register_class<util::BaseParallelJob>(lua.GetState(), "ParallelJob");
-	defParallelJob->add_static_constant("JOB_STATUS_FAILED", umath::to_integral(util::JobStatus::Failed));
-	defParallelJob->add_static_constant("JOB_STATUS_SUCCESSFUL", umath::to_integral(util::JobStatus::Successful));
-	defParallelJob->add_static_constant("JOB_STATUS_INITIAL", umath::to_integral(util::JobStatus::Initial));
-	defParallelJob->add_static_constant("JOB_STATUS_CANCELLED", umath::to_integral(util::JobStatus::Cancelled));
-	defParallelJob->add_static_constant("JOB_STATUS_PENDING", umath::to_integral(util::JobStatus::Pending));
-	defParallelJob->add_static_constant("JOB_STATUS_INVALID", umath::to_integral(util::JobStatus::Invalid));
-	defParallelJob->def("Cancel", &util::BaseParallelJob::Cancel);
-	defParallelJob->def("Wait", &util::BaseParallelJob::Wait);
-	defParallelJob->def("Start", &util::BaseParallelJob::Start);
-	defParallelJob->def("IsComplete", &util::BaseParallelJob::IsComplete);
-	defParallelJob->def("IsPending", &util::BaseParallelJob::IsPending);
-	defParallelJob->def("IsCancelled", &util::BaseParallelJob::IsCancelled);
-	defParallelJob->def("IsSuccessful", &util::BaseParallelJob::IsSuccessful);
-	defParallelJob->def("IsThreadActive", &util::BaseParallelJob::IsThreadActive);
-	defParallelJob->def("GetProgress", &util::BaseParallelJob::GetProgress);
-	defParallelJob->def("GetStatus", &util::BaseParallelJob::GetStatus);
-	defParallelJob->def("GetResultMessage", &util::BaseParallelJob::GetResultMessage);
-	defParallelJob->def("GetResultCode", &util::BaseParallelJob::GetResultCode);
-	defParallelJob->def("IsValid", &util::BaseParallelJob::IsValid);
-	defParallelJob->def("Poll", &util::BaseParallelJob::Poll);
+	auto defParallelJob = pragma::LuaCore::register_class<pragma::util::BaseParallelJob>(lua.GetState(), "ParallelJob");
+	defParallelJob->add_static_constant("JOB_STATUS_FAILED", pragma::math::to_integral(pragma::util::JobStatus::Failed));
+	defParallelJob->add_static_constant("JOB_STATUS_SUCCESSFUL", pragma::math::to_integral(pragma::util::JobStatus::Successful));
+	defParallelJob->add_static_constant("JOB_STATUS_INITIAL", pragma::math::to_integral(pragma::util::JobStatus::Initial));
+	defParallelJob->add_static_constant("JOB_STATUS_CANCELLED", pragma::math::to_integral(pragma::util::JobStatus::Cancelled));
+	defParallelJob->add_static_constant("JOB_STATUS_PENDING", pragma::math::to_integral(pragma::util::JobStatus::Pending));
+	defParallelJob->add_static_constant("JOB_STATUS_INVALID", pragma::math::to_integral(pragma::util::JobStatus::Invalid));
+	defParallelJob->def("Cancel", &pragma::util::BaseParallelJob::Cancel);
+	defParallelJob->def("Wait", &pragma::util::BaseParallelJob::Wait);
+	defParallelJob->def("Start", &pragma::util::BaseParallelJob::Start);
+	defParallelJob->def("IsComplete", &pragma::util::BaseParallelJob::IsComplete);
+	defParallelJob->def("IsPending", &pragma::util::BaseParallelJob::IsPending);
+	defParallelJob->def("IsCancelled", &pragma::util::BaseParallelJob::IsCancelled);
+	defParallelJob->def("IsSuccessful", &pragma::util::BaseParallelJob::IsSuccessful);
+	defParallelJob->def("IsThreadActive", &pragma::util::BaseParallelJob::IsThreadActive);
+	defParallelJob->def("GetProgress", &pragma::util::BaseParallelJob::GetProgress);
+	defParallelJob->def("GetStatus", &pragma::util::BaseParallelJob::GetStatus);
+	defParallelJob->def("GetResultMessage", &pragma::util::BaseParallelJob::GetResultMessage);
+	defParallelJob->def("GetResultCode", &pragma::util::BaseParallelJob::GetResultCode);
+	defParallelJob->def("IsValid", &pragma::util::BaseParallelJob::IsValid);
+	defParallelJob->def("Poll", &pragma::util::BaseParallelJob::Poll);
 	modUtil[*defParallelJob];
 
 	auto defImageBuffer = pragma::LuaCore::register_class<uimg::ImageBuffer>(lua.GetState(), "ImageBuffer");
-	defImageBuffer->add_static_constant("FORMAT_NONE", umath::to_integral(uimg::Format::None));
-	defImageBuffer->add_static_constant("FORMAT_RGB8", umath::to_integral(uimg::Format::RGB8));
-	defImageBuffer->add_static_constant("FORMAT_RGBA8", umath::to_integral(uimg::Format::RGBA8));
-	defImageBuffer->add_static_constant("FORMAT_RGB16", umath::to_integral(uimg::Format::RGB16));
-	defImageBuffer->add_static_constant("FORMAT_RGBA16", umath::to_integral(uimg::Format::RGBA16));
-	defImageBuffer->add_static_constant("FORMAT_RGB32", umath::to_integral(uimg::Format::RGB32));
-	defImageBuffer->add_static_constant("FORMAT_RGBA32", umath::to_integral(uimg::Format::RGBA32));
-	defImageBuffer->add_static_constant("FORMAT_COUNT", umath::to_integral(uimg::Format::Count));
+	defImageBuffer->add_static_constant("FORMAT_NONE", pragma::math::to_integral(uimg::Format::None));
+	defImageBuffer->add_static_constant("FORMAT_RGB8", pragma::math::to_integral(uimg::Format::RGB8));
+	defImageBuffer->add_static_constant("FORMAT_RGBA8", pragma::math::to_integral(uimg::Format::RGBA8));
+	defImageBuffer->add_static_constant("FORMAT_RGB16", pragma::math::to_integral(uimg::Format::RGB16));
+	defImageBuffer->add_static_constant("FORMAT_RGBA16", pragma::math::to_integral(uimg::Format::RGBA16));
+	defImageBuffer->add_static_constant("FORMAT_RGB32", pragma::math::to_integral(uimg::Format::RGB32));
+	defImageBuffer->add_static_constant("FORMAT_RGBA32", pragma::math::to_integral(uimg::Format::RGBA32));
+	defImageBuffer->add_static_constant("FORMAT_COUNT", pragma::math::to_integral(uimg::Format::Count));
 
-	defImageBuffer->add_static_constant("FORMAT_RGB_LDR", umath::to_integral(uimg::Format::RGB_LDR));
-	defImageBuffer->add_static_constant("FORMAT_RGBA_LDR", umath::to_integral(uimg::Format::RGBA_LDR));
-	defImageBuffer->add_static_constant("FORMAT_RGB_HDR", umath::to_integral(uimg::Format::RGB_HDR));
-	defImageBuffer->add_static_constant("FORMAT_RGBA_HDR", umath::to_integral(uimg::Format::RGBA_HDR));
-	defImageBuffer->add_static_constant("FORMAT_RGB_FLOAT", umath::to_integral(uimg::Format::RGB_FLOAT));
-	defImageBuffer->add_static_constant("FORMAT_RGBA_FLOAT", umath::to_integral(uimg::Format::RGBA_FLOAT));
+	defImageBuffer->add_static_constant("FORMAT_RGB_LDR", pragma::math::to_integral(uimg::Format::RGB_LDR));
+	defImageBuffer->add_static_constant("FORMAT_RGBA_LDR", pragma::math::to_integral(uimg::Format::RGBA_LDR));
+	defImageBuffer->add_static_constant("FORMAT_RGB_HDR", pragma::math::to_integral(uimg::Format::RGB_HDR));
+	defImageBuffer->add_static_constant("FORMAT_RGBA_HDR", pragma::math::to_integral(uimg::Format::RGBA_HDR));
+	defImageBuffer->add_static_constant("FORMAT_RGB_FLOAT", pragma::math::to_integral(uimg::Format::RGB_FLOAT));
+	defImageBuffer->add_static_constant("FORMAT_RGBA_FLOAT", pragma::math::to_integral(uimg::Format::RGBA_FLOAT));
 
-	defImageBuffer->add_static_constant("CHANNEL_RED", umath::to_integral(uimg::Channel::Red));
-	defImageBuffer->add_static_constant("CHANNEL_GREEN", umath::to_integral(uimg::Channel::Green));
-	defImageBuffer->add_static_constant("CHANNEL_BLUE", umath::to_integral(uimg::Channel::Blue));
-	defImageBuffer->add_static_constant("CHANNEL_ALPHA", umath::to_integral(uimg::Channel::Alpha));
-	defImageBuffer->add_static_constant("CHANNEL_R", umath::to_integral(uimg::Channel::R));
-	defImageBuffer->add_static_constant("CHANNEL_G", umath::to_integral(uimg::Channel::G));
-	defImageBuffer->add_static_constant("CHANNEL_B", umath::to_integral(uimg::Channel::B));
-	defImageBuffer->add_static_constant("CHANNEL_A", umath::to_integral(uimg::Channel::A));
+	defImageBuffer->add_static_constant("CHANNEL_RED", pragma::math::to_integral(uimg::Channel::Red));
+	defImageBuffer->add_static_constant("CHANNEL_GREEN", pragma::math::to_integral(uimg::Channel::Green));
+	defImageBuffer->add_static_constant("CHANNEL_BLUE", pragma::math::to_integral(uimg::Channel::Blue));
+	defImageBuffer->add_static_constant("CHANNEL_ALPHA", pragma::math::to_integral(uimg::Channel::Alpha));
+	defImageBuffer->add_static_constant("CHANNEL_R", pragma::math::to_integral(uimg::Channel::R));
+	defImageBuffer->add_static_constant("CHANNEL_G", pragma::math::to_integral(uimg::Channel::G));
+	defImageBuffer->add_static_constant("CHANNEL_B", pragma::math::to_integral(uimg::Channel::B));
+	defImageBuffer->add_static_constant("CHANNEL_A", pragma::math::to_integral(uimg::Channel::A));
 
-	defImageBuffer->add_static_constant("TONE_MAPPING_GAMMA_CORRECTION", umath::to_integral(uimg::ToneMapping::GammaCorrection));
-	defImageBuffer->add_static_constant("TONE_MAPPING_REINHARD", umath::to_integral(uimg::ToneMapping::Reinhard));
-	defImageBuffer->add_static_constant("TONE_MAPPING_HEJIL_RICHARD", umath::to_integral(uimg::ToneMapping::HejilRichard));
-	defImageBuffer->add_static_constant("TONE_MAPPING_UNCHARTED", umath::to_integral(uimg::ToneMapping::Uncharted));
-	defImageBuffer->add_static_constant("TONE_MAPPING_ACES", umath::to_integral(uimg::ToneMapping::Aces));
-	defImageBuffer->add_static_constant("TONE_MAPPING_GRAN_TURISMO", umath::to_integral(uimg::ToneMapping::GranTurismo));
+	defImageBuffer->add_static_constant("TONE_MAPPING_GAMMA_CORRECTION", pragma::math::to_integral(uimg::ToneMapping::GammaCorrection));
+	defImageBuffer->add_static_constant("TONE_MAPPING_REINHARD", pragma::math::to_integral(uimg::ToneMapping::Reinhard));
+	defImageBuffer->add_static_constant("TONE_MAPPING_HEJIL_RICHARD", pragma::math::to_integral(uimg::ToneMapping::HejilRichard));
+	defImageBuffer->add_static_constant("TONE_MAPPING_UNCHARTED", pragma::math::to_integral(uimg::ToneMapping::Uncharted));
+	defImageBuffer->add_static_constant("TONE_MAPPING_ACES", pragma::math::to_integral(uimg::ToneMapping::Aces));
+	defImageBuffer->add_static_constant("TONE_MAPPING_GRAN_TURISMO", pragma::math::to_integral(uimg::ToneMapping::GranTurismo));
 
-	defImageBuffer->scope[luabind::def("Create", static_cast<void (*)(lua::State *, uint32_t, uint32_t, uint32_t, ::util::DataStream &)>([](lua::State *l, uint32_t width, uint32_t height, uint32_t format, ::util::DataStream &ds) {
+	defImageBuffer->scope[luabind::def("Create", static_cast<void (*)(lua::State *, uint32_t, uint32_t, uint32_t, pragma::util::DataStream &)>([](lua::State *l, uint32_t width, uint32_t height, uint32_t format, pragma::util::DataStream &ds) {
 		auto imgBuffer = uimg::ImageBuffer::Create(ds->GetData(), width, height, static_cast<uimg::Format>(format));
 		if(imgBuffer == nullptr)
 			return;
@@ -508,11 +507,11 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer->def("GetData", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) {
 		auto *data = imgBuffer.GetData();
 		auto dataSize = imgBuffer.GetSize();
-		::util::DataStream ds {data, static_cast<uint32_t>(dataSize)};
+		pragma::util::DataStream ds {data, static_cast<uint32_t>(dataSize)};
 		ds->SetOffset(0);
 		Lua::Push(l, ds);
 	}));
-	defImageBuffer->def("GetFormat", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushInt(l, umath::to_integral(imgBuffer.GetFormat())); }));
+	defImageBuffer->def("GetFormat", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushInt(l, pragma::math::to_integral(imgBuffer.GetFormat())); }));
 	defImageBuffer->def("GetWidth", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetWidth()); }));
 	defImageBuffer->def("GetHeight", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetHeight()); }));
 	defImageBuffer->def("GetChannelCount", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetChannelCount()); }));
@@ -550,7 +549,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer->def("Clear", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, const Color &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, const Color &color) { imgBuffer.Clear(color); }));
 	defImageBuffer->def("Clear", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, const Vector4 &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, const Vector4 &color) { imgBuffer.Clear(color); }));
 	defImageBuffer->def("ClearAlpha", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, float)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, float a) {
-		a = umath::clamp(a, 0.f, 1.f);
+		a = pragma::math::clamp(a, 0.f, 1.f);
 		imgBuffer.ClearAlpha(a * std::numeric_limits<uint8_t>::max());
 	}));
 	defImageBuffer->def("GetPixelIndex", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t, uint32_t)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t x, uint32_t y) { Lua::PushInt(l, imgBuffer.GetPixelIndex(x, y)); }));
@@ -624,15 +623,15 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modUtil[*defImageLayerSet];
 
 	auto defWorker = luabind::class_<pragma::LuaCore::LuaWorker>("Worker");
-	defWorker.add_static_constant("TASK_STATUS_PENDING", umath::to_integral(pragma::LuaCore::LuaWorker::TaskStatus::Pending));
-	defWorker.add_static_constant("TASK_STATUS_COMPLETE", umath::to_integral(pragma::LuaCore::LuaWorker::TaskStatus::Complete));
+	defWorker.add_static_constant("TASK_STATUS_PENDING", pragma::math::to_integral(pragma::LuaCore::LuaWorker::TaskStatus::Pending));
+	defWorker.add_static_constant("TASK_STATUS_COMPLETE", pragma::math::to_integral(pragma::LuaCore::LuaWorker::TaskStatus::Complete));
 	defWorker.def("GetResult", &pragma::LuaCore::LuaWorker::GetResult);
 	defWorker.def("SetResult", &pragma::LuaCore::LuaWorker::SetResult);
 	defWorker.def("SetStatus", &pragma::LuaCore::LuaWorker::SetStatus);
-	defWorker.def("SetStatus", +[](pragma::LuaCore::LuaWorker &worker, util::JobStatus jobStatus, const std::optional<std::string> &resultMsg) { worker.SetStatus(jobStatus, resultMsg); });
-	defWorker.def("SetStatus", +[](pragma::LuaCore::LuaWorker &worker, util::JobStatus jobStatus) { worker.SetStatus(jobStatus); });
+	defWorker.def("SetStatus", +[](pragma::LuaCore::LuaWorker &worker, pragma::util::JobStatus jobStatus, const std::optional<std::string> &resultMsg) { worker.SetStatus(jobStatus, resultMsg); });
+	defWorker.def("SetStatus", +[](pragma::LuaCore::LuaWorker &worker, pragma::util::JobStatus jobStatus) { worker.SetStatus(jobStatus); });
 	defWorker.def("UpdateProgress", &pragma::LuaCore::LuaWorker::UpdateProgress);
-	defWorker.def("AddTask", static_cast<void (*)(pragma::LuaCore::LuaWorker &, const std::shared_ptr<util::ParallelJob<luabind::object>> &, float)>(&add_task));
+	defWorker.def("AddTask", static_cast<void (*)(pragma::LuaCore::LuaWorker &, const std::shared_ptr<pragma::util::ParallelJob<luabind::object>> &, float)>(&add_task));
 	defWorker.def("AddTask", static_cast<void (*)(lua::State *, pragma::LuaCore::LuaWorker &, const luabind::object &, const luabind::object &, float)>(&add_task));
 	defWorker.def("SetProgressCallback", &pragma::LuaCore::LuaWorker::SetProgressCallback);
 	defWorker.def("Cancel", +[](pragma::LuaCore::LuaWorker &worker) { worker.Cancel(); });
@@ -648,41 +647,41 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defWorker.def("IsValid", +[](pragma::LuaCore::LuaWorker &worker) { return worker.IsValid(); });
 	modUtil[defWorker];
 
-	auto defLuaParallelJob = luabind::class_<util::ParallelJob<luabind::object>, util::BaseParallelJob>("ParallelJob");
-	defLuaParallelJob.def("GetResult", static_cast<luabind::object (*)(lua::State *, util::ParallelJob<luabind::object> &)>([](lua::State *l, util::ParallelJob<luabind::object> &job) -> luabind::object { return job.GetResult(); }));
-	defLuaParallelJob.def("CallOnComplete", +[](util::ParallelJob<luabind::object> &job, const Lua::func<void> &onComplete) { static_cast<pragma::LuaCore::LuaWorker &>(job.GetWorker()).CallOnComplete(onComplete); });
-	defLuaParallelJob.def("SetProgressCallback", +[](util::ParallelJob<luabind::object> &job, const Lua::func<float> &func) { static_cast<pragma::LuaCore::LuaWorker &>(job.GetWorker()).SetProgressCallback(func); });
+	auto defLuaParallelJob = luabind::class_<pragma::util::ParallelJob<luabind::object>, pragma::util::BaseParallelJob>("ParallelJob");
+	defLuaParallelJob.def("GetResult", static_cast<luabind::object (*)(lua::State *, pragma::util::ParallelJob<luabind::object> &)>([](lua::State *l, pragma::util::ParallelJob<luabind::object> &job) -> luabind::object { return job.GetResult(); }));
+	defLuaParallelJob.def("CallOnComplete", +[](pragma::util::ParallelJob<luabind::object> &job, const Lua::func<void> &onComplete) { static_cast<pragma::LuaCore::LuaWorker &>(job.GetWorker()).CallOnComplete(onComplete); });
+	defLuaParallelJob.def("SetProgressCallback", +[](pragma::util::ParallelJob<luabind::object> &job, const Lua::func<float> &func) { static_cast<pragma::LuaCore::LuaWorker &>(job.GetWorker()).SetProgressCallback(func); });
 	modUtil[defLuaParallelJob];
 	modUtil[luabind::def(
-	  "create_parallel_job", +[](pragma::Game &game, const std::string &name, const Lua::func<void> &func, const Lua::func<void> &cancelFunc) -> std::shared_ptr<util::ParallelJob<luabind::object>> {
-		  auto job = ::util::make_shared<util::ParallelJob<luabind::object>>(util::create_parallel_job<pragma::LuaCore::LuaWorker>(game, name));
+	  "create_parallel_job", +[](pragma::Game &game, const std::string &name, const Lua::func<void> &func, const Lua::func<void> &cancelFunc) -> std::shared_ptr<pragma::util::ParallelJob<luabind::object>> {
+		  auto job = pragma::util::make_shared<pragma::util::ParallelJob<luabind::object>>(pragma::util::create_parallel_job<pragma::LuaCore::LuaWorker>(game, name));
 		  static_cast<pragma::LuaCore::LuaWorker &>(job->GetWorker()).AddLuaTask(func, cancelFunc, 0.f);
 		  return job;
 	  })];
 
-	auto defGenericParallelJob = luabind::class_<util::ParallelJob<void>, util::BaseParallelJob>("ParallelJobGeneric");
+	auto defGenericParallelJob = luabind::class_<pragma::util::ParallelJob<void>, pragma::util::BaseParallelJob>("ParallelJobGeneric");
 	modUtil[defGenericParallelJob];
 
-	auto defImgParallelJob = luabind::class_<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>, util::BaseParallelJob>("ParallelJobImage");
-	defImgParallelJob.def("GetResult", static_cast<void (*)(lua::State *, util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &)>([](lua::State *l, util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &job) { Lua::Push(l, job.GetResult()); }));
+	auto defImgParallelJob = luabind::class_<pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>, pragma::util::BaseParallelJob>("ParallelJobImage");
+	defImgParallelJob.def("GetResult", static_cast<void (*)(lua::State *, pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &)>([](lua::State *l, pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &job) { Lua::Push(l, job.GetResult()); }));
 	modUtil[defImgParallelJob];
 
-	auto defImgLayerSetParallelJob = luabind::class_<util::ParallelJob<uimg::ImageLayerSet>, util::BaseParallelJob>("ParallelJobImageLayerSet");
-	defImgLayerSetParallelJob.def("GetResult", +[](lua::State *l, util::ParallelJob<uimg::ImageLayerSet> &job) { Lua::Push(l, job.GetResult()); });
+	auto defImgLayerSetParallelJob = luabind::class_<pragma::util::ParallelJob<uimg::ImageLayerSet>, pragma::util::BaseParallelJob>("ParallelJobImageLayerSet");
+	defImgLayerSetParallelJob.def("GetResult", +[](lua::State *l, pragma::util::ParallelJob<uimg::ImageLayerSet> &job) { Lua::Push(l, job.GetResult()); });
 	defImgLayerSetParallelJob.def(
-	  "GetImage", +[](lua::State *l, util::ParallelJob<uimg::ImageLayerSet> &job) -> std::shared_ptr<uimg::ImageBuffer> {
+	  "GetImage", +[](lua::State *l, pragma::util::ParallelJob<uimg::ImageLayerSet> &job) -> std::shared_ptr<uimg::ImageBuffer> {
 		  if(job.GetResult().images.empty())
 			  return nullptr;
 		  return job.GetResult().images.begin()->second;
 	  });
 	modUtil[defImgLayerSetParallelJob];
 
-	auto defStringParallelJob = luabind::class_<util::ParallelJob<const std::string &>, util::BaseParallelJob>("ParallelJobString");
-	defStringParallelJob.def("GetResult", static_cast<void (*)(lua::State *, util::ParallelJob<const std::string &> &)>([](lua::State *l, util::ParallelJob<const std::string &> &job) { Lua::Push(l, job.GetResult()); }));
+	auto defStringParallelJob = luabind::class_<pragma::util::ParallelJob<const std::string &>, pragma::util::BaseParallelJob>("ParallelJobString");
+	defStringParallelJob.def("GetResult", static_cast<void (*)(lua::State *, pragma::util::ParallelJob<const std::string &> &)>([](lua::State *l, pragma::util::ParallelJob<const std::string &> &job) { Lua::Push(l, job.GetResult()); }));
 	modUtil[defStringParallelJob];
 
-	auto defDataStreamJob = luabind::class_<util::ParallelJob<const ::util::DataStream &>, util::BaseParallelJob>("ParallelJobData");
-	defDataStreamJob.def("GetResult", static_cast<void (*)(lua::State *, util::ParallelJob<const ::util::DataStream &> &)>([](lua::State *l, util::ParallelJob<const ::util::DataStream &> &job) { Lua::Push(l, job.GetResult()); }));
+	auto defDataStreamJob = luabind::class_<pragma::util::ParallelJob<const pragma::util::DataStream &>, pragma::util::BaseParallelJob>("ParallelJobData");
+	defDataStreamJob.def("GetResult", static_cast<void (*)(lua::State *, pragma::util::ParallelJob<const pragma::util::DataStream &> &)>([](lua::State *l, pragma::util::ParallelJob<const pragma::util::DataStream &> &job) { Lua::Push(l, job.GetResult()); }));
 	modUtil[defDataStreamJob];
 
 	auto defDataBlock = luabind::class_<ds::Block>("DataBlock");
@@ -749,7 +748,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modUtil[defDataBlock];
 
 	// Version
-	auto defVersion = pragma::LuaCore::register_class<::util::Version>(lua.GetState(), "Version");
+	auto defVersion = pragma::LuaCore::register_class<pragma::util::Version>(lua.GetState(), "Version");
 	defVersion->def(luabind::constructor<>());
 	defVersion->def(luabind::constructor<uint32_t, uint32_t>());
 	defVersion->def(luabind::constructor<uint32_t, uint32_t, uint32_t>());
@@ -757,20 +756,20 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVersion->def(luabind::const_self == luabind::const_self);
 	defVersion->def(luabind::const_self < luabind::const_self);
 	defVersion->def(luabind::const_self <= luabind::const_self);
-	defVersion->def_readwrite("major", &::util::Version::major);
-	defVersion->def_readwrite("minor", &::util::Version::minor);
-	defVersion->def_readwrite("revision", &::util::Version::revision);
-	defVersion->def("Reset", &::util::Version::Reset);
-	defVersion->def("ToString", &::util::Version::ToString);
+	defVersion->def_readwrite("major", &pragma::util::Version::major);
+	defVersion->def_readwrite("minor", &pragma::util::Version::minor);
+	defVersion->def_readwrite("revision", &pragma::util::Version::revision);
+	defVersion->def("Reset", &pragma::util::Version::Reset);
+	defVersion->def("ToString", &pragma::util::Version::ToString);
 	modUtil[*defVersion];
 	//
 
 	// Path
-	auto defPath = pragma::LuaCore::register_class<util::Path>(lua.GetState(), "Path");
-	defPath->scope[luabind::def("CreateFilePath", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) { Lua::Push<util::Path>(l, util::Path::CreateFile(path)); }))];
-	defPath->scope[luabind::def("CreateFilePath", static_cast<void (*)(lua::State *, const util::Path &)>([](lua::State *l, const util::Path &path) { Lua::Push<util::Path>(l, util::Path::CreateFile(path.GetString())); }))];
-	defPath->scope[luabind::def("CreatePath", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) { Lua::Push<util::Path>(l, util::Path::CreatePath(path)); }))];
-	defPath->scope[luabind::def("CreatePath", static_cast<void (*)(lua::State *, const util::Path &)>([](lua::State *l, const util::Path &path) { Lua::Push<util::Path>(l, util::Path::CreatePath(path.GetString())); }))];
+	auto defPath = pragma::LuaCore::register_class<pragma::util::Path>(lua.GetState(), "Path");
+	defPath->scope[luabind::def("CreateFilePath", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) { Lua::Push<pragma::util::Path>(l, pragma::util::Path::CreateFile(path)); }))];
+	defPath->scope[luabind::def("CreateFilePath", static_cast<void (*)(lua::State *, const pragma::util::Path &)>([](lua::State *l, const pragma::util::Path &path) { Lua::Push<pragma::util::Path>(l, pragma::util::Path::CreateFile(path.GetString())); }))];
+	defPath->scope[luabind::def("CreatePath", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) { Lua::Push<pragma::util::Path>(l, pragma::util::Path::CreatePath(path)); }))];
+	defPath->scope[luabind::def("CreatePath", static_cast<void (*)(lua::State *, const pragma::util::Path &)>([](lua::State *l, const pragma::util::Path &path) { Lua::Push<pragma::util::Path>(l, pragma::util::Path::CreatePath(path.GetString())); }))];
 	defPath->scope[luabind::def("CreateFromComponents", static_cast<void (*)(lua::State *, luabind::object)>([](lua::State *l, luabind::object o) {
 		int32_t t = 1;
 		Lua::CheckTable(l, t);
@@ -784,10 +783,10 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 			Lua::Pop(l, 1);
 		}
-		Lua::Push<util::Path>(l, {components});
+		Lua::Push<pragma::util::Path>(l, {components});
 	}))];
 	defPath->def(luabind::constructor<>());
-	defPath->def(luabind::constructor<const util::Path &>());
+	defPath->def(luabind::constructor<const pragma::util::Path &>());
 	defPath->def(luabind::constructor<const std::string &>());
 
 	defPath->def(luabind::self + luabind::const_self);
@@ -796,8 +795,8 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defPath->def(luabind::const_self == luabind::const_self);
 	defPath->def(luabind::const_self == std::string {});
 
-	defPath->def("Copy", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::Push<util::Path>(l, p); }));
-	defPath->def("ToComponents", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) {
+	defPath->def("Copy", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::Push<pragma::util::Path>(l, p); }));
+	defPath->def("ToComponents", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) {
 		auto components = p.ToComponents();
 		auto t = Lua::CreateTable(l);
 		int32_t idx = 1;
@@ -807,37 +806,37 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defPath->def("GetString", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushString(l, p.GetString()); }));
-	defPath->def("GetPath", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushString(l, std::string {p.GetPath()}); }));
-	defPath->def("GetFileName", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushString(l, std::string {p.GetFileName()}); }));
-	defPath->def("GetFront", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushString(l, std::string {p.GetFront()}); }));
-	defPath->def("GetBack", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushString(l, std::string {p.GetBack()}); }));
-	defPath->def("MoveUp", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { p.MoveUp(); }));
-	defPath->def("PopFront", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { p.PopFront(); }));
-	defPath->def("PopBack", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { p.PopBack(); }));
-	defPath->def("Canonicalize", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { p.Canonicalize(); }));
-	defPath->def("IsFile", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushBool(l, p.IsFile()); }));
-	defPath->def("IsPath", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushBool(l, !p.IsFile()); }));
-	defPath->def("GetFileExtension", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) {
+	defPath->def("GetString", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushString(l, p.GetString()); }));
+	defPath->def("GetPath", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushString(l, std::string {p.GetPath()}); }));
+	defPath->def("GetFileName", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushString(l, std::string {p.GetFileName()}); }));
+	defPath->def("GetFront", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushString(l, std::string {p.GetFront()}); }));
+	defPath->def("GetBack", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushString(l, std::string {p.GetBack()}); }));
+	defPath->def("MoveUp", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { p.MoveUp(); }));
+	defPath->def("PopFront", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { p.PopFront(); }));
+	defPath->def("PopBack", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { p.PopBack(); }));
+	defPath->def("Canonicalize", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { p.Canonicalize(); }));
+	defPath->def("IsFile", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushBool(l, p.IsFile()); }));
+	defPath->def("IsPath", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushBool(l, !p.IsFile()); }));
+	defPath->def("GetFileExtension", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) {
 		auto ext = p.GetFileExtension();
 		if(ext.has_value() == false)
 			return;
 		Lua::PushString(l, *ext);
 	}));
-	defPath->def("RemoveFileExtension", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { p.RemoveFileExtension(); }));
-	defPath->def("RemoveFileExtension", +[](lua::State *l, util::Path &p, const std::vector<std::string> &extensions) { p.RemoveFileExtension(extensions); });
-	defPath->def("MakeRelative", +[](lua::State *l, util::Path &p, util::Path &pOther) { return p.MakeRelative(pOther); });
-	defPath->def("MakeRelative", +[](lua::State *l, util::Path &p, const std::string &other) { return p.MakeRelative(other); });
-	defPath->def("GetComponentCount", &util::Path::GetComponentCount);
+	defPath->def("RemoveFileExtension", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { p.RemoveFileExtension(); }));
+	defPath->def("RemoveFileExtension", +[](lua::State *l, pragma::util::Path &p, const std::vector<std::string> &extensions) { p.RemoveFileExtension(extensions); });
+	defPath->def("MakeRelative", +[](lua::State *l, pragma::util::Path &p, pragma::util::Path &pOther) { return p.MakeRelative(pOther); });
+	defPath->def("MakeRelative", +[](lua::State *l, pragma::util::Path &p, const std::string &other) { return p.MakeRelative(other); });
+	defPath->def("GetComponentCount", &pragma::util::Path::GetComponentCount);
 	defPath->def(
-	  "GetComponent", +[](util::Path &p, size_t offset) -> std::optional<std::pair<std::string_view, size_t>> {
+	  "GetComponent", +[](pragma::util::Path &p, size_t offset) -> std::optional<std::pair<std::string_view, size_t>> {
 		  if(offset >= p.GetString().size())
 			  return {};
 		  size_t nextOffset;
 		  auto sv = p.GetComponent(offset, &nextOffset);
 		  return std::pair<std::string_view, size_t> {sv, nextOffset};
 	  });
-	defPath->def("IsEmpty", &util::Path::IsEmpty);
+	defPath->def("IsEmpty", &pragma::util::Path::IsEmpty);
 	modUtil[*defPath];
 
 	Lua::SetTableCFunction(lua.GetState(), "util", "FilePath", util_file_path);
@@ -849,51 +848,51 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	auto &modMath = lua.RegisterLibrary("math");
 
 	// Transform
-	auto classDefTransform = luabind::class_<umath::Transform>("Transform");
+	auto classDefTransform = luabind::class_<pragma::math::Transform>("Transform");
 	classDefTransform.def(luabind::constructor<const Mat4 &>());
 	classDefTransform.def(luabind::constructor<const Vector3 &, const Quat &>());
 	classDefTransform.def(luabind::constructor<const Vector3 &>());
 	classDefTransform.def(luabind::constructor<const Quat &>());
-	classDefTransform.def(luabind::constructor<const umath::ScaledTransform &>());
+	classDefTransform.def(luabind::constructor<const pragma::math::ScaledTransform &>());
 	classDefTransform.def(luabind::constructor<>());
 	classDefTransform.def(luabind::const_self == luabind::const_self);
 	classDefTransform.def(luabind::tostring(luabind::self));
-	classDefTransform.def("Copy", static_cast<umath::Transform (*)(lua::State *, umath::Transform &)>([](lua::State *l, umath::Transform &t) -> umath::Transform { return t; }));
-	classDefTransform.property("x", static_cast<float (*)(lua::State *, umath::Transform &)>([](lua::State *l, umath::Transform &pose) { return pose.GetOrigin().x; }),
-	  static_cast<void (*)(lua::State *, umath::Transform &, float)>([](lua::State *l, umath::Transform &pose, float x) { pose.GetOrigin().x = x; }));
-	classDefTransform.property("y", static_cast<float (*)(lua::State *, umath::Transform &)>([](lua::State *l, umath::Transform &pose) { return pose.GetOrigin().y; }),
-	  static_cast<void (*)(lua::State *, umath::Transform &, float)>([](lua::State *l, umath::Transform &pose, float y) { pose.GetOrigin().y = y; }));
-	classDefTransform.property("z", static_cast<float (*)(lua::State *, umath::Transform &)>([](lua::State *l, umath::Transform &pose) { return pose.GetOrigin().z; }),
-	  static_cast<void (*)(lua::State *, umath::Transform &, float)>([](lua::State *l, umath::Transform &pose, float z) { pose.GetOrigin().z = z; }));
-	classDefTransform.property("pitch", static_cast<float (*)(lua::State *, umath::Transform &)>([](lua::State *l, umath::Transform &pose) { return pose.GetAngles().p; }));
-	classDefTransform.property("yaw", static_cast<float (*)(lua::State *, umath::Transform &)>([](lua::State *l, umath::Transform &pose) { return pose.GetAngles().y; }));
-	classDefTransform.property("roll", static_cast<float (*)(lua::State *, umath::Transform &)>([](lua::State *l, umath::Transform &pose) { return pose.GetAngles().r; }));
-	classDefTransform.def("ToPlane", &umath::Transform::ToPlane);
-	classDefTransform.def("GetAngles", &umath::Transform::GetAngles);
-	classDefTransform.def("SetAngles", &umath::Transform::SetAngles);
-	classDefTransform.def("GetForward", &umath::Transform::GetForward);
-	classDefTransform.def("GetRight", &umath::Transform::GetRight);
-	classDefTransform.def("GetUp", &umath::Transform::GetUp);
-	classDefTransform.def("Set", static_cast<void (*)(lua::State *, umath::Transform &, const umath::Transform &)>([](lua::State *l, umath::Transform &t, const umath::Transform &tOther) { t = tOther; }));
-	classDefTransform.def("GetOrigin", static_cast<Vector3 &(umath::Transform::*)()>(&umath::Transform::GetOrigin), luabind::copy_policy<0> {});
-	classDefTransform.def("GetRotation", static_cast<Quat &(umath::Transform::*)()>(&umath::Transform::GetRotation), luabind::copy_policy<0> {});
-	classDefTransform.def("SetOrigin", &umath::Transform::SetOrigin);
-	classDefTransform.def("SetRotation", &umath::Transform::SetRotation);
-	classDefTransform.def("SetIdentity", &umath::Transform::SetIdentity);
-	classDefTransform.def("IsIdentity", static_cast<bool (*)(lua::State *, umath::Transform &)>([](lua::State *l, umath::Transform &t) -> bool {
+	classDefTransform.def("Copy", static_cast<pragma::math::Transform (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &t) -> pragma::math::Transform { return t; }));
+	classDefTransform.property("x", static_cast<float (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &pose) { return pose.GetOrigin().x; }),
+	  static_cast<void (*)(lua::State *, pragma::math::Transform &, float)>([](lua::State *l, pragma::math::Transform &pose, float x) { pose.GetOrigin().x = x; }));
+	classDefTransform.property("y", static_cast<float (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &pose) { return pose.GetOrigin().y; }),
+	  static_cast<void (*)(lua::State *, pragma::math::Transform &, float)>([](lua::State *l, pragma::math::Transform &pose, float y) { pose.GetOrigin().y = y; }));
+	classDefTransform.property("z", static_cast<float (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &pose) { return pose.GetOrigin().z; }),
+	  static_cast<void (*)(lua::State *, pragma::math::Transform &, float)>([](lua::State *l, pragma::math::Transform &pose, float z) { pose.GetOrigin().z = z; }));
+	classDefTransform.property("pitch", static_cast<float (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &pose) { return pose.GetAngles().p; }));
+	classDefTransform.property("yaw", static_cast<float (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &pose) { return pose.GetAngles().y; }));
+	classDefTransform.property("roll", static_cast<float (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &pose) { return pose.GetAngles().r; }));
+	classDefTransform.def("ToPlane", &pragma::math::Transform::ToPlane);
+	classDefTransform.def("GetAngles", &pragma::math::Transform::GetAngles);
+	classDefTransform.def("SetAngles", &pragma::math::Transform::SetAngles);
+	classDefTransform.def("GetForward", &pragma::math::Transform::GetForward);
+	classDefTransform.def("GetRight", &pragma::math::Transform::GetRight);
+	classDefTransform.def("GetUp", &pragma::math::Transform::GetUp);
+	classDefTransform.def("Set", static_cast<void (*)(lua::State *, pragma::math::Transform &, const pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &t, const pragma::math::Transform &tOther) { t = tOther; }));
+	classDefTransform.def("GetOrigin", static_cast<Vector3 &(pragma::math::Transform::*)()>(&pragma::math::Transform::GetOrigin), luabind::copy_policy<0> {});
+	classDefTransform.def("GetRotation", static_cast<Quat &(pragma::math::Transform::*)()>(&pragma::math::Transform::GetRotation), luabind::copy_policy<0> {});
+	classDefTransform.def("SetOrigin", &pragma::math::Transform::SetOrigin);
+	classDefTransform.def("SetRotation", &pragma::math::Transform::SetRotation);
+	classDefTransform.def("SetIdentity", &pragma::math::Transform::SetIdentity);
+	classDefTransform.def("IsIdentity", static_cast<bool (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &t) -> bool {
 		auto &origin = t.GetOrigin();
 		auto &rotation = t.GetRotation();
-		return umath::abs(origin.x) < 0.001f && umath::abs(origin.y) < 0.001f && umath::abs(origin.z) < 0.001f && umath::abs(1.f - rotation.w) < 0.001f && umath::abs(rotation.x) < 0.001f && umath::abs(rotation.y) < 0.001f && umath::abs(rotation.z) < 0.001f;
+		return pragma::math::abs(origin.x) < 0.001f && pragma::math::abs(origin.y) < 0.001f && pragma::math::abs(origin.z) < 0.001f && pragma::math::abs(1.f - rotation.w) < 0.001f && pragma::math::abs(rotation.x) < 0.001f && pragma::math::abs(rotation.y) < 0.001f && pragma::math::abs(rotation.z) < 0.001f;
 	}));
-	classDefTransform.def("TranslateGlobal", &umath::Transform::TranslateGlobal);
-	classDefTransform.def("TranslateLocal", &umath::Transform::TranslateLocal);
-	classDefTransform.def("RotateGlobal", &umath::Transform::RotateGlobal);
-	classDefTransform.def("RotateLocal", &umath::Transform::RotateLocal);
-	classDefTransform.def("TransformGlobal", static_cast<void (*)(lua::State *, umath::Transform &, const umath::Transform &)>([](lua::State *l, umath::Transform &t, const umath::Transform &t2) { t = t2 * t; }));
-	classDefTransform.def("TransformLocal", static_cast<void (*)(lua::State *, umath::Transform &, const umath::Transform &)>([](lua::State *l, umath::Transform &t, const umath::Transform &t2) { t *= t2; }));
-	classDefTransform.def("GetInverse", &umath::Transform::GetInverse);
-	classDefTransform.def("ToMatrix", &umath::Transform::ToMatrix);
-	classDefTransform.def("SetMatrix", static_cast<void (*)(lua::State *, umath::Transform &, const Mat4 &)>([](lua::State *l, umath::Transform &t, const Mat4 &m) {
+	classDefTransform.def("TranslateGlobal", &pragma::math::Transform::TranslateGlobal);
+	classDefTransform.def("TranslateLocal", &pragma::math::Transform::TranslateLocal);
+	classDefTransform.def("RotateGlobal", &pragma::math::Transform::RotateGlobal);
+	classDefTransform.def("RotateLocal", &pragma::math::Transform::RotateLocal);
+	classDefTransform.def("TransformGlobal", static_cast<void (*)(lua::State *, pragma::math::Transform &, const pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &t, const pragma::math::Transform &t2) { t = t2 * t; }));
+	classDefTransform.def("TransformLocal", static_cast<void (*)(lua::State *, pragma::math::Transform &, const pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &t, const pragma::math::Transform &t2) { t *= t2; }));
+	classDefTransform.def("GetInverse", &pragma::math::Transform::GetInverse);
+	classDefTransform.def("ToMatrix", &pragma::math::Transform::ToMatrix);
+	classDefTransform.def("SetMatrix", static_cast<void (*)(lua::State *, pragma::math::Transform &, const Mat4 &)>([](lua::State *l, pragma::math::Transform &t, const Mat4 &m) {
 		Mat4 transformation;
 		Vector3 scale;
 		Quat rotation;
@@ -904,42 +903,42 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		t.SetOrigin(translation);
 		t.SetRotation(rotation);
 	}));
-	classDefTransform.def("Interpolate", &umath::Transform::Interpolate);
-	classDefTransform.def("InterpolateToIdentity", &umath::Transform::InterpolateToIdentity);
-	classDefTransform.def("Reflect", &umath::Transform::Reflect);
+	classDefTransform.def("Interpolate", &pragma::math::Transform::Interpolate);
+	classDefTransform.def("InterpolateToIdentity", &pragma::math::Transform::InterpolateToIdentity);
+	classDefTransform.def("Reflect", &pragma::math::Transform::Reflect);
 	classDefTransform.def(luabind::const_self * luabind::const_self);
-	classDefTransform.def(luabind::const_self * umath::ScaledTransform());
+	classDefTransform.def(luabind::const_self * pragma::math::ScaledTransform());
 	classDefTransform.def(luabind::const_self * Vector3());
 	classDefTransform.def(luabind::const_self * Quat());
-	classDefTransform.def(luabind::const_self * umath::Plane());
+	classDefTransform.def(luabind::const_self * pragma::math::Plane());
 
 	modMath[classDefTransform];
-	Lua::RegisterLibraryValues<umath::Transform>(lua.GetState(), "math.Transform", {std::pair<std::string, umath::Transform> {"IDENTITY", umath::Transform {}}});
+	Lua::RegisterLibraryValues<pragma::math::Transform>(lua.GetState(), "math.Transform", {std::pair<std::string, pragma::math::Transform> {"IDENTITY", pragma::math::Transform {}}});
 
-	auto classDefScaledTransform = luabind::class_<umath::ScaledTransform, umath::Transform>("ScaledTransform");
+	auto classDefScaledTransform = luabind::class_<pragma::math::ScaledTransform, pragma::math::Transform>("ScaledTransform");
 	classDefScaledTransform.def(luabind::constructor<const Mat4 &>());
 	classDefScaledTransform.def(luabind::constructor<const Vector3 &, const Quat &>());
 	classDefScaledTransform.def(luabind::constructor<const Vector3 &, const Quat &, const Vector3 &>());
-	classDefScaledTransform.def(luabind::constructor<const umath::Transform &, const Vector3 &>());
-	classDefScaledTransform.def(luabind::constructor<const umath::Transform &>());
+	classDefScaledTransform.def(luabind::constructor<const pragma::math::Transform &, const Vector3 &>());
+	classDefScaledTransform.def(luabind::constructor<const pragma::math::Transform &>());
 	classDefScaledTransform.def(luabind::constructor<>());
 	classDefScaledTransform.def(luabind::const_self == luabind::const_self);
 	classDefScaledTransform.def(luabind::tostring(luabind::self));
-	classDefScaledTransform.def("Copy", static_cast<umath::ScaledTransform (*)(lua::State *, umath::ScaledTransform &)>([](lua::State *l, umath::ScaledTransform &t) -> umath::ScaledTransform { return t; }));
-	classDefScaledTransform.def("Set", static_cast<void (*)(lua::State *, umath::ScaledTransform &, const umath::ScaledTransform &)>([](lua::State *l, umath::ScaledTransform &t, const umath::ScaledTransform &tOther) { t = tOther; }));
-	classDefScaledTransform.def("GetScale", static_cast<Vector3 &(umath::ScaledTransform::*)()>(&umath::ScaledTransform::GetScale), luabind::copy_policy<0> {});
-	classDefScaledTransform.def("SetScale", &umath::ScaledTransform::SetScale);
-	classDefScaledTransform.def("Scale", &umath::ScaledTransform::Scale);
-	classDefScaledTransform.def("GetInverse", &umath::ScaledTransform::GetInverse);
-	classDefScaledTransform.def("Interpolate", &umath::ScaledTransform::Interpolate);
-	classDefScaledTransform.def("InterpolateToIdentity", &umath::ScaledTransform::InterpolateToIdentity);
-	classDefScaledTransform.def(luabind::const_self * umath::Transform());
-	classDefScaledTransform.def(luabind::const_self * umath::ScaledTransform()); // Note: We use umath::ScaledTransform instead of luabind::const_self, because otherwise the overload of the base class ("Transform") would be used if two ScaledTransforms are multiplied
+	classDefScaledTransform.def("Copy", static_cast<pragma::math::ScaledTransform (*)(lua::State *, pragma::math::ScaledTransform &)>([](lua::State *l, pragma::math::ScaledTransform &t) -> pragma::math::ScaledTransform { return t; }));
+	classDefScaledTransform.def("Set", static_cast<void (*)(lua::State *, pragma::math::ScaledTransform &, const pragma::math::ScaledTransform &)>([](lua::State *l, pragma::math::ScaledTransform &t, const pragma::math::ScaledTransform &tOther) { t = tOther; }));
+	classDefScaledTransform.def("GetScale", static_cast<Vector3 &(pragma::math::ScaledTransform::*)()>(&pragma::math::ScaledTransform::GetScale), luabind::copy_policy<0> {});
+	classDefScaledTransform.def("SetScale", &pragma::math::ScaledTransform::SetScale);
+	classDefScaledTransform.def("Scale", &pragma::math::ScaledTransform::Scale);
+	classDefScaledTransform.def("GetInverse", &pragma::math::ScaledTransform::GetInverse);
+	classDefScaledTransform.def("Interpolate", &pragma::math::ScaledTransform::Interpolate);
+	classDefScaledTransform.def("InterpolateToIdentity", &pragma::math::ScaledTransform::InterpolateToIdentity);
+	classDefScaledTransform.def(luabind::const_self * pragma::math::Transform());
+	classDefScaledTransform.def(luabind::const_self * pragma::math::ScaledTransform()); // Note: We use pragma::math::ScaledTransform instead of luabind::const_self, because otherwise the overload of the base class ("Transform") would be used if two ScaledTransforms are multiplied
 	classDefScaledTransform.def(luabind::const_self * Vector3());
 	classDefScaledTransform.def(luabind::const_self * Quat());
-	classDefScaledTransform.def(luabind::const_self * umath::Plane());
+	classDefScaledTransform.def(luabind::const_self * pragma::math::Plane());
 	modMath[classDefScaledTransform];
-	Lua::RegisterLibraryValues<umath::ScaledTransform>(lua.GetState(), "math.ScaledTransform", {std::pair<std::string, umath::ScaledTransform> {"IDENTITY", umath::ScaledTransform {}}});
+	Lua::RegisterLibraryValues<pragma::math::ScaledTransform>(lua.GetState(), "math.ScaledTransform", {std::pair<std::string, pragma::math::ScaledTransform> {"IDENTITY", pragma::math::ScaledTransform {}}});
 
 	// PID Controller
 	auto defPIDController = luabind::class_<pragma::math::PIDController>("PIDController");
@@ -1186,10 +1185,10 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector->def(luabind::const_self - luabind::const_self);
 	defVector->def(luabind::const_self == luabind::const_self);
 	defVector->def(luabind::const_self * Quat());
-	//defVector->def(luabind::const_self *umath::Transform());
-	//defVector->def(luabind::const_self *umath::ScaledTransform());
-	defVector->def("Mul", static_cast<void (*)(lua::State *, const Vector3 &, const umath::Transform &)>([](lua::State *l, const Vector3 &a, const umath::Transform &b) { Lua::Push<Vector3>(l, a * b); }));
-	defVector->def("Mul", static_cast<void (*)(lua::State *, const Vector3 &, const umath::ScaledTransform &)>([](lua::State *l, const Vector3 &a, const umath::ScaledTransform &b) { Lua::Push<Vector3>(l, a * b); }));
+	//defVector->def(luabind::const_self *pragma::math::Transform());
+	//defVector->def(luabind::const_self *pragma::math::ScaledTransform());
+	defVector->def("Mul", static_cast<void (*)(lua::State *, const Vector3 &, const pragma::math::Transform &)>([](lua::State *l, const Vector3 &a, const pragma::math::Transform &b) { Lua::Push<Vector3>(l, a * b); }));
+	defVector->def("Mul", static_cast<void (*)(lua::State *, const Vector3 &, const pragma::math::ScaledTransform &)>([](lua::State *l, const Vector3 &a, const pragma::math::ScaledTransform &b) { Lua::Push<Vector3>(l, a * b); }));
 	defVector->def(float() / luabind::const_self);
 	defVector->def(float() * luabind::const_self);
 	defVector->def(Quat() * luabind::const_self);
@@ -1212,12 +1211,12 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector->def("Lerp", &Lua::Vector::Lerp);
 	defVector->def("Reflect", &uvec::reflect);
 	defVector->def("Equals",
-	  static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, float)>([](lua::State *l, const Vector3 &a, const Vector3 &b, float epsilon) { Lua::PushBool(l, umath::abs(a.x - b.x) <= epsilon && umath::abs(a.y - b.y) <= epsilon && umath::abs(a.z - b.z) <= epsilon); }));
+	  static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, float)>([](lua::State *l, const Vector3 &a, const Vector3 &b, float epsilon) { Lua::PushBool(l, pragma::math::abs(a.x - b.x) <= epsilon && pragma::math::abs(a.y - b.y) <= epsilon && pragma::math::abs(a.z - b.z) <= epsilon); }));
 	defVector->def("Equals", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &)>([](lua::State *l, const Vector3 &a, const Vector3 &b) {
 		float epsilon = 0.001f;
-		Lua::PushBool(l, umath::abs(a.x - b.x) <= epsilon && umath::abs(a.y - b.y) <= epsilon && umath::abs(a.z - b.z) <= epsilon);
+		Lua::PushBool(l, pragma::math::abs(a.x - b.x) <= epsilon && pragma::math::abs(a.y - b.y) <= epsilon && pragma::math::abs(a.z - b.z) <= epsilon);
 	}));
-	defVector->def("GetAngle", static_cast<float (*)(lua::State *, const Vector3 &, const Vector3 &)>([](lua::State *l, const Vector3 &a, const Vector3 &b) -> float { return umath::deg_to_rad(uvec::get_angle(a, b)); }));
+	defVector->def("GetAngle", static_cast<float (*)(lua::State *, const Vector3 &, const Vector3 &)>([](lua::State *l, const Vector3 &a, const Vector3 &b) -> float { return pragma::math::deg_to_rad(uvec::get_angle(a, b)); }));
 	defVector->def("Slerp", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, float)>([](lua::State *l, const Vector3 &a, const Vector3 &b, float factor) {
 		auto result = glm::gtc::slerp(a, b, factor);
 		Lua::Push<Vector3>(l, result);
@@ -1266,7 +1265,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector2->def("RotateAround", &Lua::Vector2::RotateAround);
 	defVector2->def("Lerp", &Lua::Vector2::Lerp);
 	defVector2->def("Copy", &Lua::Vector2::Copy);
-	defVector2->def("GetAngle", static_cast<float (*)(lua::State *, const Vector2 &, const Vector2 &)>([](lua::State *l, const Vector2 &a, const Vector2 &b) -> float { return umath::deg_to_rad(uvec::get_angle(Vector3 {a, 0.f}, Vector3 {b, 0.f})); }));
+	defVector2->def("GetAngle", static_cast<float (*)(lua::State *, const Vector2 &, const Vector2 &)>([](lua::State *l, const Vector2 &a, const Vector2 &b) -> float { return pragma::math::deg_to_rad(uvec::get_angle(Vector3 {a, 0.f}, Vector3 {b, 0.f})); }));
 	defVector2->def("Set", static_cast<void (*)(lua::State *, Vector2 &, const Vector2 &)>(&Lua::Vector2::Set));
 	defVector2->def("Set", static_cast<void (*)(lua::State *, Vector2 &, float, float)>(&Lua::Vector2::Set));
 	defVector2->def("Get", static_cast<void (*)(lua::State *, const Vector2 &, uint32_t)>([](lua::State *l, const Vector2 &v, uint32_t idx) { Lua::PushNumber(l, v[idx]); }));
@@ -1340,13 +1339,13 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defEulerAngles->def("ToMatrix", &EulerAngles::ToMatrix);
 	defEulerAngles->def("Copy", &Lua::Angle::Copy);
 	defEulerAngles->def("Equals",
-	  static_cast<bool (*)(lua::State *, const EulerAngles &, const EulerAngles &, float)>([](lua::State *l, const EulerAngles &a, const EulerAngles &b, float epsilon) { return umath::abs(a.p - b.p) <= epsilon && umath::abs(a.y - b.y) <= epsilon && umath::abs(a.r - b.r) <= epsilon; }));
+	  static_cast<bool (*)(lua::State *, const EulerAngles &, const EulerAngles &, float)>([](lua::State *l, const EulerAngles &a, const EulerAngles &b, float epsilon) { return pragma::math::abs(a.p - b.p) <= epsilon && pragma::math::abs(a.y - b.y) <= epsilon && pragma::math::abs(a.r - b.r) <= epsilon; }));
 	defEulerAngles->def("Equals", static_cast<bool (*)(lua::State *, const EulerAngles &, const EulerAngles &)>([](lua::State *l, const EulerAngles &a, const EulerAngles &b) {
 		float epsilon = 0.001f;
-		return umath::abs(a.p - b.p) <= epsilon && umath::abs(a.y - b.y) <= epsilon && umath::abs(a.r - b.r) <= epsilon;
+		return pragma::math::abs(a.p - b.p) <= epsilon && pragma::math::abs(a.y - b.y) <= epsilon && pragma::math::abs(a.r - b.r) <= epsilon;
 	}));
 	defEulerAngles->def("ToQuaternion", Lua::Angle::ToQuaternion);
-	defEulerAngles->def("ToQuaternion", static_cast<void (*)(lua::State *, const EulerAngles &)>([](lua::State *l, const EulerAngles &ang) { Lua::Angle::ToQuaternion(l, ang, umath::to_integral(pragma::RotationOrder::YXZ)); }));
+	defEulerAngles->def("ToQuaternion", static_cast<void (*)(lua::State *, const EulerAngles &)>([](lua::State *l, const EulerAngles &ang) { Lua::Angle::ToQuaternion(l, ang, pragma::math::to_integral(pragma::RotationOrder::YXZ)); }));
 	defEulerAngles->def("Set", static_cast<void (EulerAngles::*)(const EulerAngles &)>(&EulerAngles::Set));
 	defEulerAngles->def("Set", &Lua::Angle::Set);
 	defEulerAngles->def("Set", static_cast<void (*)(lua::State *, EulerAngles &, uint32_t, float value)>([](lua::State *l, EulerAngles &ang, uint32_t idx, float value) { ang[idx] = value; }));
@@ -1366,10 +1365,10 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat->def(luabind::const_self * Vector3());
 	defQuat->def(luabind::const_self * luabind::const_self);
 	defQuat->def(luabind::const_self == luabind::const_self);
-	//defQuat->def(luabind::const_self *umath::Transform());
-	//defQuat->def(luabind::const_self *umath::ScaledTransform());
-	defQuat->def("Mul", static_cast<Quat (*)(lua::State *, const Quat &, const umath::Transform &)>([](lua::State *l, const Quat &a, const umath::Transform &b) { return a * b; }));
-	defQuat->def("Mul", static_cast<Quat (*)(lua::State *, const Quat &, const umath::ScaledTransform &)>([](lua::State *l, const Quat &a, const umath::ScaledTransform &b) { return a * b; }));
+	//defQuat->def(luabind::const_self *pragma::math::Transform());
+	//defQuat->def(luabind::const_self *pragma::math::ScaledTransform());
+	defQuat->def("Mul", static_cast<Quat (*)(lua::State *, const Quat &, const pragma::math::Transform &)>([](lua::State *l, const Quat &a, const pragma::math::Transform &b) { return a * b; }));
+	defQuat->def("Mul", static_cast<Quat (*)(lua::State *, const Quat &, const pragma::math::ScaledTransform &)>([](lua::State *l, const Quat &a, const pragma::math::ScaledTransform &b) { return a * b; }));
 	defQuat->def(float() * luabind::const_self);
 	defQuat->def("MirrorAxis", &uquat::mirror_on_axis);
 	defQuat->def("GetForward", &uquat::forward);
@@ -1388,7 +1387,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat->def("Lerp", &uquat::lerp);
 	defQuat->def("Slerp", &uquat::slerp);
 	defQuat->def("ToEulerAngles", Lua::Quaternion::ToEulerAngles);
-	defQuat->def("ToEulerAngles", static_cast<EulerAngles (*)(lua::State *, Quat &)>([](lua::State *l, Quat &rot) { return Lua::Quaternion::ToEulerAngles(l, rot, umath::to_integral(pragma::RotationOrder::YXZ)); }));
+	defQuat->def("ToEulerAngles", static_cast<EulerAngles (*)(lua::State *, Quat &)>([](lua::State *l, Quat &rot) { return Lua::Quaternion::ToEulerAngles(l, rot, pragma::math::to_integral(pragma::RotationOrder::YXZ)); }));
 	defQuat->def("ToAxisAngle", &Lua::Quaternion::ToAxisAngle);
 	defQuat->def(
 	  "GetAxisVector", +[](const Quat &rot, pragma::SignedAxis axis) {
@@ -1421,11 +1420,11 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat->def("Distance", &uquat::distance);
 	defQuat->def("GetConjugate", static_cast<Quat (*)(const Quat &)>(&glm::gtc::conjugate));
 	defQuat->def("AlignToAxis", &uquat::align_rotation_to_axis);
-	defQuat->def("Equals", +[](const Quat &a, const Quat &b, float epsilon) { return umath::abs(a.x - b.x) <= epsilon && umath::abs(a.y - b.y) <= epsilon && umath::abs(a.z - b.z) <= epsilon && umath::abs(a.w - b.w) <= epsilon; });
+	defQuat->def("Equals", +[](const Quat &a, const Quat &b, float epsilon) { return pragma::math::abs(a.x - b.x) <= epsilon && pragma::math::abs(a.y - b.y) <= epsilon && pragma::math::abs(a.z - b.z) <= epsilon && pragma::math::abs(a.w - b.w) <= epsilon; });
 	defQuat->def(
 	  "Equals", +[](const Quat &a, const Quat &b) {
 		  float epsilon = 0.001f;
-		  return umath::abs(a.x - b.x) <= epsilon && umath::abs(a.y - b.y) <= epsilon && umath::abs(a.z - b.z) <= epsilon && umath::abs(a.w - b.w) <= epsilon;
+		  return pragma::math::abs(a.x - b.x) <= epsilon && pragma::math::abs(a.y - b.y) <= epsilon && pragma::math::abs(a.z - b.z) <= epsilon && pragma::math::abs(a.w - b.w) <= epsilon;
 	  });
 	modMath[*defQuat];
 	pragma::LuaCore::define_custom_constructor<Quat, &uquat::identity>(lua.GetState());
@@ -1479,14 +1478,14 @@ void pragma::Game::RegisterLuaClasses()
 	entDef.def("Link", static_cast<void (*)(lua::State *, LEntityProperty &, LEntityProperty &)>(&Lua::Property::link<LEntityProperty, EntityHandle>));
 	modUtil[entDef];
 
-	auto defSplashDamageInfo = luabind::class_<util::SplashDamageInfo>("SplashDamageInfo");
+	auto defSplashDamageInfo = luabind::class_<pragma::util::SplashDamageInfo>("SplashDamageInfo");
 	defSplashDamageInfo.def(luabind::constructor<>());
-	defSplashDamageInfo.def_readwrite("origin", &util::SplashDamageInfo::origin);
-	defSplashDamageInfo.def_readwrite("radius", &util::SplashDamageInfo::radius);
-	defSplashDamageInfo.def_readwrite("damageInfo", &util::SplashDamageInfo::damageInfo);
+	defSplashDamageInfo.def_readwrite("origin", &pragma::util::SplashDamageInfo::origin);
+	defSplashDamageInfo.def_readwrite("radius", &pragma::util::SplashDamageInfo::radius);
+	defSplashDamageInfo.def_readwrite("damageInfo", &pragma::util::SplashDamageInfo::damageInfo);
 	defSplashDamageInfo.def("SetCone",
-	  static_cast<void (*)(lua::State *, util::SplashDamageInfo &, const Vector3 &, float)>([](lua::State *l, util::SplashDamageInfo &splashDamageInfo, const Vector3 &coneDirection, float coneAngle) { splashDamageInfo.cone = {{coneDirection, coneAngle}}; }));
-	defSplashDamageInfo.def("SetCallback", static_cast<void (*)(lua::State *, util::SplashDamageInfo &, luabind::object)>([](lua::State *l, util::SplashDamageInfo &splashDamageInfo, luabind::object oCallback) {
+	  static_cast<void (*)(lua::State *, pragma::util::SplashDamageInfo &, const Vector3 &, float)>([](lua::State *l, pragma::util::SplashDamageInfo &splashDamageInfo, const Vector3 &coneDirection, float coneAngle) { splashDamageInfo.cone = {{coneDirection, coneAngle}}; }));
+	defSplashDamageInfo.def("SetCallback", static_cast<void (*)(lua::State *, pragma::util::SplashDamageInfo &, luabind::object)>([](lua::State *l, pragma::util::SplashDamageInfo &splashDamageInfo, luabind::object oCallback) {
 		Lua::CheckFunction(l, 2);
 		splashDamageInfo.callback = [l, oCallback](pragma::ecs::BaseEntity *ent, game::DamageInfo &dmgInfo) -> bool {
 			auto r = Lua::CallFunction(
@@ -1515,36 +1514,36 @@ void pragma::Game::RegisterLuaClasses()
 
 	Lua::RegisterLibraryEnums(m_lua->GetState(), "math",
 	  {
-	    {"COORDINATE_SPACE_LOCAL", umath::to_integral(umath::CoordinateSpace::Local)},
-	    {"COORDINATE_SPACE_WORLD", umath::to_integral(umath::CoordinateSpace::World)},
-	    {"COORDINATE_SPACE_OBJECT", umath::to_integral(umath::CoordinateSpace::Object)},
-	    {"COORDINATE_SPACE_VIEW", umath::to_integral(umath::CoordinateSpace::View)},
-	    {"COORDINATE_SPACE_SCREEN", umath::to_integral(umath::CoordinateSpace::Screen)},
+	    {"COORDINATE_SPACE_LOCAL", pragma::math::to_integral(pragma::math::CoordinateSpace::Local)},
+	    {"COORDINATE_SPACE_WORLD", pragma::math::to_integral(pragma::math::CoordinateSpace::World)},
+	    {"COORDINATE_SPACE_OBJECT", pragma::math::to_integral(pragma::math::CoordinateSpace::Object)},
+	    {"COORDINATE_SPACE_VIEW", pragma::math::to_integral(pragma::math::CoordinateSpace::View)},
+	    {"COORDINATE_SPACE_SCREEN", pragma::math::to_integral(pragma::math::CoordinateSpace::Screen)},
 	  });
-	modMath[luabind::def("coordinate_space_to_string", +[](umath::CoordinateSpace space) -> std::string { return std::string {magic_enum::enum_name(space)}; })];
-	modMath[luabind::def("string_to_coordinate_space", +[](const std::string &space) -> std::optional<umath::CoordinateSpace> { return magic_enum::enum_cast<umath::CoordinateSpace>(space); })];
+	modMath[luabind::def("coordinate_space_to_string", +[](pragma::math::CoordinateSpace space) -> std::string { return std::string {magic_enum::enum_name(space)}; })];
+	modMath[luabind::def("string_to_coordinate_space", +[](const std::string &space) -> std::optional<pragma::math::CoordinateSpace> { return magic_enum::enum_cast<pragma::math::CoordinateSpace>(space); })];
 
-	auto defPlane = luabind::class_<umath::Plane>("Plane");
+	auto defPlane = luabind::class_<pragma::math::Plane>("Plane");
 	defPlane.def(luabind::constructor<Vector3, Vector3, Vector3>());
 	defPlane.def(luabind::constructor<Vector3, Vector3>());
 	defPlane.def(luabind::constructor<Vector3, double>());
 	defPlane.def(
-	  "__tostring", +[](umath::Plane &plane) -> std::string {
+	  "__tostring", +[](pragma::math::Plane &plane) -> std::string {
 		  std::stringstream ss;
 		  ss << "Plane[" << plane.GetNormal() << "][" << plane.GetDistance() << "]";
 		  return ss.str();
 	  });
-	defPlane.def("Copy", static_cast<void (*)(lua::State *, umath::Plane &)>([](lua::State *l, umath::Plane &plane) { Lua::Push<umath::Plane>(l, umath::Plane {plane}); }));
-	defPlane.def("SetNormal", &umath::Plane::SetNormal);
-	defPlane.def("SetDistance", &umath::Plane::SetDistance);
-	defPlane.def("GetNormal", static_cast<const Vector3 &(umath::Plane::*)() const>(&umath::Plane::GetNormal), luabind::copy_policy<0> {});
-	defPlane.def("GetPos", static_cast<Vector3 (*)(const umath::Plane &)>([](const umath::Plane &plane) { return plane.GetPos(); }));
-	defPlane.def("GetDistance", static_cast<double (umath::Plane::*)() const>(&umath::Plane::GetDistance));
-	defPlane.def("GetDistance", static_cast<float (umath::Plane::*)(const Vector3 &) const>(&umath::Plane::GetDistance));
-	defPlane.def("MoveToPos", static_cast<void (*)(umath::Plane &, const Vector3 &pos)>([](umath::Plane &plane, const Vector3 &pos) { plane.MoveToPos(pos); }));
-	defPlane.def("Rotate", &umath::Plane::Rotate);
-	defPlane.def("GetCenterPos", static_cast<Vector3 (*)(const umath::Plane &)>([](const umath::Plane &plane) { return plane.GetCenterPos(); }));
-	defPlane.def("Transform", static_cast<void (*)(lua::State *, umath::Plane &, const Mat4 &)>([](lua::State *l, umath::Plane &plane, const Mat4 &transform) {
+	defPlane.def("Copy", static_cast<void (*)(lua::State *, pragma::math::Plane &)>([](lua::State *l, pragma::math::Plane &plane) { Lua::Push<pragma::math::Plane>(l, pragma::math::Plane {plane}); }));
+	defPlane.def("SetNormal", &pragma::math::Plane::SetNormal);
+	defPlane.def("SetDistance", &pragma::math::Plane::SetDistance);
+	defPlane.def("GetNormal", static_cast<const Vector3 &(pragma::math::Plane::*)() const>(&pragma::math::Plane::GetNormal), luabind::copy_policy<0> {});
+	defPlane.def("GetPos", static_cast<Vector3 (*)(const pragma::math::Plane &)>([](const pragma::math::Plane &plane) { return plane.GetPos(); }));
+	defPlane.def("GetDistance", static_cast<double (pragma::math::Plane::*)() const>(&pragma::math::Plane::GetDistance));
+	defPlane.def("GetDistance", static_cast<float (pragma::math::Plane::*)(const Vector3 &) const>(&pragma::math::Plane::GetDistance));
+	defPlane.def("MoveToPos", static_cast<void (*)(pragma::math::Plane &, const Vector3 &pos)>([](pragma::math::Plane &plane, const Vector3 &pos) { plane.MoveToPos(pos); }));
+	defPlane.def("Rotate", &pragma::math::Plane::Rotate);
+	defPlane.def("GetCenterPos", static_cast<Vector3 (*)(const pragma::math::Plane &)>([](const pragma::math::Plane &plane) { return plane.GetCenterPos(); }));
+	defPlane.def("Transform", static_cast<void (*)(lua::State *, pragma::math::Plane &, const Mat4 &)>([](lua::State *l, pragma::math::Plane &plane, const Mat4 &transform) {
 		const auto &n = plane.GetNormal();
 		auto p = n * static_cast<float>(plane.GetDistance());
 		auto n0 = uvec::get_perpendicular(n);
@@ -1556,7 +1555,7 @@ void pragma::Game::RegisterLuaClasses()
 		auto p14 = transform * Vector4 {p1.x, p1.y, p1.z, 1.f};
 		auto p2 = p + n1 * 10.f;
 		auto p24 = transform * Vector4 {p2.x, p2.y, p2.z, 1.f};
-		plane = umath::Plane {Vector3 {p04.x, p04.y, p04.z}, Vector3 {p14.x, p14.y, p14.z}, Vector3 {p24.x, p24.y, p24.z}};
+		plane = pragma::math::Plane {Vector3 {p04.x, p04.y, p04.z}, Vector3 {p14.x, p14.y, p14.z}, Vector3 {p24.x, p24.y, p24.z}};
 	}));
 	modMath[defPlane];
 }
@@ -1788,31 +1787,31 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "ents",
 	  {
-	    {"ITERATOR_FILTER_BIT_NONE", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::None)},
-	    {"ITERATOR_FILTER_BIT_SPAWNED", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Spawned)},
-	    {"ITERATOR_FILTER_BIT_PENDING", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Pending)},
-	    {"ITERATOR_FILTER_BIT_INCLUDE_SHARED", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::IncludeShared)},
-	    {"ITERATOR_FILTER_BIT_INCLUDE_NETWORK_LOCAL", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::IncludeNetworkLocal)},
+	    {"ITERATOR_FILTER_BIT_NONE", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::None)},
+	    {"ITERATOR_FILTER_BIT_SPAWNED", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Spawned)},
+	    {"ITERATOR_FILTER_BIT_PENDING", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Pending)},
+	    {"ITERATOR_FILTER_BIT_INCLUDE_SHARED", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::IncludeShared)},
+	    {"ITERATOR_FILTER_BIT_INCLUDE_NETWORK_LOCAL", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::IncludeNetworkLocal)},
 
-	    {"ITERATOR_FILTER_BIT_CHARACTER", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Character)},
-	    {"ITERATOR_FILTER_BIT_PLAYER", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Player)},
-	    {"ITERATOR_FILTER_BIT_WEAPON", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Weapon)},
-	    {"ITERATOR_FILTER_BIT_VEHICLE", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Vehicle)},
-	    {"ITERATOR_FILTER_BIT_NPC", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::NPC)},
-	    {"ITERATOR_FILTER_BIT_PHYSICAL", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Physical)},
-	    {"ITERATOR_FILTER_BIT_SCRIPTED", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Scripted)},
-	    {"ITERATOR_FILTER_BIT_MAP_ENTITY", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::MapEntity)},
+	    {"ITERATOR_FILTER_BIT_CHARACTER", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Character)},
+	    {"ITERATOR_FILTER_BIT_PLAYER", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Player)},
+	    {"ITERATOR_FILTER_BIT_WEAPON", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Weapon)},
+	    {"ITERATOR_FILTER_BIT_VEHICLE", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Vehicle)},
+	    {"ITERATOR_FILTER_BIT_NPC", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::NPC)},
+	    {"ITERATOR_FILTER_BIT_PHYSICAL", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Physical)},
+	    {"ITERATOR_FILTER_BIT_SCRIPTED", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Scripted)},
+	    {"ITERATOR_FILTER_BIT_MAP_ENTITY", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::MapEntity)},
 
-	    {"ITERATOR_FILTER_BIT_HAS_TRANSFORM", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::HasTransform)},
-	    {"ITERATOR_FILTER_BIT_HAS_MODEL", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::HasModel)},
+	    {"ITERATOR_FILTER_BIT_HAS_TRANSFORM", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::HasTransform)},
+	    {"ITERATOR_FILTER_BIT_HAS_MODEL", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::HasModel)},
 
-	    {"ITERATOR_FILTER_ANY_TYPE", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::AnyType)},
-	    {"ITERATOR_FILTER_ANY", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Any)},
-	    {"ITERATOR_FILTER_DEFAULT", umath::to_integral(pragma::ecs::EntityIterator::FilterFlags::Default)},
+	    {"ITERATOR_FILTER_ANY_TYPE", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::AnyType)},
+	    {"ITERATOR_FILTER_ANY", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Any)},
+	    {"ITERATOR_FILTER_DEFAULT", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Default)},
 
-	    {"TICK_POLICY_ALWAYS", umath::to_integral(pragma::TickPolicy::Always)},
-	    {"TICK_POLICY_NEVER", umath::to_integral(pragma::TickPolicy::Never)},
-	    {"TICK_POLICY_WHEN_VISIBLE", umath::to_integral(pragma::TickPolicy::WhenVisible)},
+	    {"TICK_POLICY_ALWAYS", pragma::math::to_integral(pragma::TickPolicy::Always)},
+	    {"TICK_POLICY_NEVER", pragma::math::to_integral(pragma::TickPolicy::Never)},
+	    {"TICK_POLICY_WHEN_VISIBLE", pragma::math::to_integral(pragma::TickPolicy::WhenVisible)},
 	  });
 
 	auto surfaceMatDef = pragma::LuaCore::register_class<pragma::physics::SurfaceMaterial>(GetLuaState(), "SurfaceMaterial");
@@ -1895,11 +1894,11 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	gibletCreateInfo.def_readwrite("physRadius", &GibletCreateInfo::physRadius);
 	gibletCreateInfo.def_readwrite("physHeight", &GibletCreateInfo::physHeight);
 	gibletCreateInfo.def_readwrite("physShape", reinterpret_cast<std::underlying_type_t<decltype(GibletCreateInfo::physShape)> GibletCreateInfo::*>(&GibletCreateInfo::physShape));
-	gibletCreateInfo.add_static_constant("PHYS_SHAPE_MODEL", umath::to_integral(GibletCreateInfo::PhysShape::Model));
-	gibletCreateInfo.add_static_constant("PHYS_SHAPE_NONE", umath::to_integral(GibletCreateInfo::PhysShape::None));
-	gibletCreateInfo.add_static_constant("PHYS_SHAPE_SPHERE", umath::to_integral(GibletCreateInfo::PhysShape::Sphere));
-	gibletCreateInfo.add_static_constant("PHYS_SHAPE_BOX", umath::to_integral(GibletCreateInfo::PhysShape::Box));
-	gibletCreateInfo.add_static_constant("PHYS_SHAPE_CYLINDER", umath::to_integral(GibletCreateInfo::PhysShape::Cylinder));
+	gibletCreateInfo.add_static_constant("PHYS_SHAPE_MODEL", pragma::math::to_integral(GibletCreateInfo::PhysShape::Model));
+	gibletCreateInfo.add_static_constant("PHYS_SHAPE_NONE", pragma::math::to_integral(GibletCreateInfo::PhysShape::None));
+	gibletCreateInfo.add_static_constant("PHYS_SHAPE_SPHERE", pragma::math::to_integral(GibletCreateInfo::PhysShape::Sphere));
+	gibletCreateInfo.add_static_constant("PHYS_SHAPE_BOX", pragma::math::to_integral(GibletCreateInfo::PhysShape::Box));
+	gibletCreateInfo.add_static_constant("PHYS_SHAPE_CYLINDER", pragma::math::to_integral(GibletCreateInfo::PhysShape::Cylinder));
 	gameMod[gibletCreateInfo];
 
 	Lua::register_bullet_info(gameMod);

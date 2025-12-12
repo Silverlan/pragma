@@ -77,13 +77,13 @@ Vector3 ecs::CParticleSystemComponent::GetParticlePosition(uint32_t ptIdx) const
 		pos += GetEntity().GetPosition();
 	return pos;
 }
-bool ecs::CParticleSystemComponent::IsStatic() const { return (m_operators.empty() && umath::is_flag_set(m_flags, Flags::HasMovingParticles) == false) ? true : false; }
-bool ecs::CParticleSystemComponent::IsRendererBufferUpdateRequired() const { return umath::is_flag_set(m_flags, Flags::RendererBufferUpdateRequired); }
+bool ecs::CParticleSystemComponent::IsStatic() const { return (m_operators.empty() && pragma::math::is_flag_set(m_flags, Flags::HasMovingParticles) == false) ? true : false; }
+bool ecs::CParticleSystemComponent::IsRendererBufferUpdateRequired() const { return pragma::math::is_flag_set(m_flags, Flags::RendererBufferUpdateRequired); }
 
 bool ecs::CParticleSystemComponent::IsParticleFilePrecached(const std::string &fname)
 {
 	auto fid = FileManager::GetCanonicalizedPath(fname);
-	ustring::to_lower(fid);
+	pragma::string::to_lower(fid);
 	ufile::remove_extension_from_filename(fid);
 	auto it = std::find(s_precached.begin(), s_precached.end(), fid);
 	return (it != s_precached.end()) ? true : false;
@@ -141,7 +141,7 @@ std::optional<ecs::ParticleSystemFileHeader> ecs::CParticleSystemComponent::Read
 static void to_cache_name(std::string &fname)
 {
 	fname = FileManager::GetCanonicalizedPath(fname);
-	ustring::to_lower(fname);
+	pragma::string::to_lower(fname);
 	ufile::remove_extension_from_filename(fname, pragma::asset::get_supported_extensions(pragma::asset::Type::ParticleSystem));
 }
 static std::unordered_map<std::string, std::vector<std::string>> s_particleFileToSystems {};
@@ -150,7 +150,7 @@ const std::unordered_map<std::string, std::unique_ptr<pragma::asset::ParticleSys
 std::optional<std::string> ecs::CParticleSystemComponent::FindParticleSystemFile(const std::string ptName)
 {
 	for(auto &pair : s_particleFileToSystems) {
-		auto it = std::find_if(pair.second.begin(), pair.second.end(), [&ptName](const std::string &ptNameOther) { return ustring::compare(ptNameOther, ptName, false); });
+		auto it = std::find_if(pair.second.begin(), pair.second.end(), [&ptName](const std::string &ptNameOther) { return pragma::string::compare(ptNameOther, ptName, false); });
 		if(it == pair.second.end())
 			continue;
 		return pair.first;
@@ -162,7 +162,7 @@ bool ecs::CParticleSystemComponent::Precache(std::string fname, bool bReload)
 {
 	to_cache_name(fname);
 	auto it = std::find(s_precached.begin(), s_precached.end(), fname);
-	util::ScopeGuard sgCache;
+	pragma::util::ScopeGuard sgCache;
 	if(it != s_precached.end()) {
 		if(bReload == false)
 			return true;
@@ -180,7 +180,7 @@ bool ecs::CParticleSystemComponent::Precache(std::string fname, bool bReload)
 		return PrecacheLegacy(fname, bReload);
 	}
 	std::string err;
-	auto udmData = util::load_udm_asset("particles/" + *ptFname, &err);
+	auto udmData = pragma::util::load_udm_asset("particles/" + *ptFname, &err);
 	if(udmData == nullptr)
 		return false;
 	auto &ptSystemNames = s_particleFileToSystems.insert(std::make_pair(fname, std::vector<std::string> {})).first->second;
@@ -307,7 +307,7 @@ void ecs::CParticleSystemComponent::ClearCache()
 bool ecs::CParticleSystemComponent::SetupParticleSystem(std::string fname, ecs::CParticleSystemComponent *parent, bool bRecordKeyValues)
 {
 	bRecordKeyValues = true; // TODO
-	if(umath::is_flag_set(m_flags, Flags::Setup))
+	if(pragma::math::is_flag_set(m_flags, Flags::Setup))
 		return true;
 	auto it = s_particleData.find(fname);
 	if(it == s_particleData.end()) {
@@ -347,9 +347,9 @@ const std::string &ecs::CParticleSystemComponent::GetParticleSystemName() const 
 
 bool ecs::CParticleSystemComponent::SetupParticleSystem(const std::unordered_map<std::string, std::string> &values, ecs::CParticleSystemComponent *parent, bool bRecordKeyValues)
 {
-	if(umath::is_flag_set(m_flags, Flags::Setup))
+	if(pragma::math::is_flag_set(m_flags, Flags::Setup))
 		return true;
-	umath::set_flag(m_flags, Flags::Setup);
+	pragma::math::set_flag(m_flags, Flags::Setup);
 
 	for(auto &kv : values)
 		GetEntity().SetKeyValue(kv.first, kv.second);
@@ -378,68 +378,68 @@ static std::shared_ptr<prosper::IDynamicResizableBuffer> s_animStartBuffer = nul
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_animBuffer = nullptr;
 const auto PARTICLE_BUFFER_INSTANCE_SIZE = sizeof(ecs::CParticleSystemComponent::ParticleData);
 const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) * 2;
-::util::EventReply ecs::CParticleSystemComponent::HandleKeyValue(const std::string &key, const std::string &value)
+pragma::util::EventReply ecs::CParticleSystemComponent::HandleKeyValue(const std::string &key, const std::string &value)
 {
 #pragma message("TODO: Calculate max particles automatically!")
-	if(ustring::compare<std::string>(key, "maxparticles", false)) {
+	if(pragma::string::compare<std::string>(key, "maxparticles", false)) {
 		if(m_state != State::Initial)
 			Con::cwar << "Attempted to change max particle count for particle system which has already been started! Ignoring..." << Con::endl;
 		else
-			m_maxParticles = ::util::to_int(value);
+			m_maxParticles = pragma::util::to_int(value);
 	}
-	else if(ustring::compare<std::string>(key, "limit_particle_count"))
-		m_particleLimit = ::util::to_int(value);
-	else if(ustring::compare<std::string>(key, "emission_rate"))
-		m_emissionRate = ::util::to_int(value);
-	else if(ustring::compare<std::string>(key, "cast_shadows"))
-		SetCastShadows(::util::to_boolean(value));
-	else if(ustring::compare<std::string>(key, "static_scale"))
-		m_worldScale = ::util::to_float(value);
-	else if(ustring::compare<std::string>(key, "random_start_frame"))
-		umath::set_flag(m_flags, Flags::RandomStartFrame, ::util::to_boolean(value));
-	else if(ustring::compare<std::string>(key, "material"))
+	else if(pragma::string::compare<std::string>(key, "limit_particle_count"))
+		m_particleLimit = pragma::util::to_int(value);
+	else if(pragma::string::compare<std::string>(key, "emission_rate"))
+		m_emissionRate = pragma::util::to_int(value);
+	else if(pragma::string::compare<std::string>(key, "cast_shadows"))
+		SetCastShadows(pragma::util::to_boolean(value));
+	else if(pragma::string::compare<std::string>(key, "static_scale"))
+		m_worldScale = pragma::util::to_float(value);
+	else if(pragma::string::compare<std::string>(key, "random_start_frame"))
+		pragma::math::set_flag(m_flags, Flags::RandomStartFrame, pragma::util::to_boolean(value));
+	else if(pragma::string::compare<std::string>(key, "material"))
 		SetMaterial(pragma::get_client_state()->LoadMaterial(value));
-	else if(ustring::compare<std::string>(key, "radius"))
-		SetRadius(::util::to_float(value));
-	else if(ustring::compare<std::string>(key, "extent"))
-		SetExtent(::util::to_float(value));
-	else if(ustring::compare<std::string>(key, "sort_particles"))
-		umath::set_flag(m_flags, Flags::SortParticles, ::util::to_boolean(value));
-	else if(ustring::compare<std::string>(key, "orientation_type"))
-		m_orientationType = static_cast<pts::ParticleOrientationType>(::util::to_int(value));
-	else if(ustring::compare<std::string>(key, "color"))
+	else if(pragma::string::compare<std::string>(key, "radius"))
+		SetRadius(pragma::util::to_float(value));
+	else if(pragma::string::compare<std::string>(key, "extent"))
+		SetExtent(pragma::util::to_float(value));
+	else if(pragma::string::compare<std::string>(key, "sort_particles"))
+		pragma::math::set_flag(m_flags, Flags::SortParticles, pragma::util::to_boolean(value));
+	else if(pragma::string::compare<std::string>(key, "orientation_type"))
+		m_orientationType = static_cast<pts::ParticleOrientationType>(pragma::util::to_int(value));
+	else if(pragma::string::compare<std::string>(key, "color"))
 		m_initialColor = Color(value);
-	else if(ustring::compare<std::string>(key, "loop"))
-		SetContinuous(::util::to_boolean(value));
-	else if(ustring::compare<std::string>(key, "origin"))
+	else if(pragma::string::compare<std::string>(key, "loop"))
+		SetContinuous(pragma::util::to_boolean(value));
+	else if(pragma::string::compare<std::string>(key, "origin"))
 		m_origin = uvec::create(value);
-	else if(ustring::compare<std::string>(key, "bloom_scale")) {
-		auto bloomFactor = ::util::to_float(value);
+	else if(pragma::string::compare<std::string>(key, "bloom_scale")) {
+		auto bloomFactor = pragma::util::to_float(value);
 		SetBloomColorFactor({bloomFactor, bloomFactor, bloomFactor, 1.f});
 	}
-	else if(ustring::compare<std::string>(key, "color_factor"))
+	else if(pragma::string::compare<std::string>(key, "color_factor"))
 		m_colorFactor = uvec::create_v4(value);
-	else if(ustring::compare<std::string>(key, "bloom_color_factor"))
+	else if(pragma::string::compare<std::string>(key, "bloom_color_factor"))
 		SetBloomColorFactor(uvec::create_v4(value));
-	else if(ustring::compare<std::string>(key, "max_node_count"))
-		m_maxNodes = ::util::to_int(value);
-	else if(ustring::compare<std::string>(key, "lifetime"))
-		m_lifeTime = ::util::to_float(value);
-	else if(ustring::compare<std::string>(key, "soft_particles"))
-		SetSoftParticles(::util::to_boolean(value));
-	else if(ustring::compare<std::string>(key, "texture_scrolling_enabled"))
-		SetTextureScrollingEnabled(::util::to_boolean(value));
-	else if(ustring::compare<std::string>(key, "world_rotation")) {
+	else if(pragma::string::compare<std::string>(key, "max_node_count"))
+		m_maxNodes = pragma::util::to_int(value);
+	else if(pragma::string::compare<std::string>(key, "lifetime"))
+		m_lifeTime = pragma::util::to_float(value);
+	else if(pragma::string::compare<std::string>(key, "soft_particles"))
+		SetSoftParticles(pragma::util::to_boolean(value));
+	else if(pragma::string::compare<std::string>(key, "texture_scrolling_enabled"))
+		SetTextureScrollingEnabled(pragma::util::to_boolean(value));
+	else if(pragma::string::compare<std::string>(key, "world_rotation")) {
 		std::array<float, 4> values;
-		ustring::string_to_array(value, values.data(), ustring::cstring_to_number<float>, values.size());
+		pragma::string::string_to_array(value, values.data(), pragma::string::cstring_to_number<float>, values.size());
 		m_particleRot.w = values.at(0);
 		m_particleRot.x = values.at(1);
 		m_particleRot.y = values.at(2);
 		m_particleRot.z = values.at(3);
 	}
-	else if(ustring::compare<std::string>(key, "alpha_mode")) {
+	else if(pragma::string::compare<std::string>(key, "alpha_mode")) {
 		auto alphaMode = value;
-		ustring::to_lower(alphaMode);
+		pragma::string::to_lower(alphaMode);
 		if(alphaMode == "additive_by_color" || alphaMode == "additive_full")
 			m_alphaMode = pragma::rendering::ParticleAlphaMode::AdditiveByColor;
 		else if(alphaMode == "opaque")
@@ -453,29 +453,29 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) * 2;
 		else if(alphaMode == "custom")
 			m_alphaMode = pragma::rendering::ParticleAlphaMode::Custom;
 	}
-	else if(ustring::compare<std::string>(key, "premultiply_alpha"))
-		SetAlphaPremultiplied(::util::to_boolean(value));
-	else if(ustring::compare<std::string>(key, "angles")) {
+	else if(pragma::string::compare<std::string>(key, "premultiply_alpha"))
+		SetAlphaPremultiplied(pragma::util::to_boolean(value));
+	else if(pragma::string::compare<std::string>(key, "angles")) {
 		auto ang = EulerAngles(value);
 		m_particleRot = uquat::create(ang);
 	}
-	else if(ustring::compare<std::string>(key, "black_to_alpha"))
+	else if(pragma::string::compare<std::string>(key, "black_to_alpha"))
 		m_alphaMode = pragma::rendering::ParticleAlphaMode::AdditiveByColor;
-	else if(ustring::compare<std::string>(key, "move_with_emitter"))
-		umath::set_flag(m_flags, Flags::MoveWithEmitter, ::util::to_boolean(value));
-	else if(ustring::compare<std::string>(key, "rotate_with_emitter"))
-		umath::set_flag(m_flags, Flags::RotateWithEmitter, ::util::to_boolean(value));
-	else if(ustring::compare<std::string>(key, "transform_with_emitter"))
-		umath::set_flag(m_flags, Flags::MoveWithEmitter | Flags::RotateWithEmitter, ::util::to_boolean(value));
-	else if(ustring::compare<std::string>(key, "auto_simulate"))
-		SetAutoSimulate(::util::to_boolean(value));
-	else if(ustring::compare<std::string>(key, "bounding_box_min"))
+	else if(pragma::string::compare<std::string>(key, "move_with_emitter"))
+		pragma::math::set_flag(m_flags, Flags::MoveWithEmitter, pragma::util::to_boolean(value));
+	else if(pragma::string::compare<std::string>(key, "rotate_with_emitter"))
+		pragma::math::set_flag(m_flags, Flags::RotateWithEmitter, pragma::util::to_boolean(value));
+	else if(pragma::string::compare<std::string>(key, "transform_with_emitter"))
+		pragma::math::set_flag(m_flags, Flags::MoveWithEmitter | Flags::RotateWithEmitter, pragma::util::to_boolean(value));
+	else if(pragma::string::compare<std::string>(key, "auto_simulate"))
+		SetAutoSimulate(pragma::util::to_boolean(value));
+	else if(pragma::string::compare<std::string>(key, "bounding_box_min"))
 		m_renderBounds.first = uvec::create(value);
-	else if(ustring::compare<std::string>(key, "bounding_box_max"))
+	else if(pragma::string::compare<std::string>(key, "bounding_box_max"))
 		m_renderBounds.second = uvec::create(value);
 	else
-		return ::util::EventReply::Unhandled;
-	return ::util::EventReply::Handled;
+		return pragma::util::EventReply::Unhandled;
+	return pragma::util::EventReply::Handled;
 }
 
 ecs::CParticleSystemComponent::~CParticleSystemComponent()
@@ -514,18 +514,18 @@ void ecs::CParticleSystemComponent::SetControlPointEntity(ControlPointIndex idx,
 void ecs::CParticleSystemComponent::SetControlPointPosition(ControlPointIndex idx, const Vector3 &pos)
 {
 	auto optPose = GetControlPointPose(idx);
-	auto pose = optPose.has_value() ? *optPose : umath::Transform {};
+	auto pose = optPose.has_value() ? *optPose : pragma::math::Transform {};
 	pose.SetOrigin(pos);
 	SetControlPointPose(idx, pose);
 }
 void ecs::CParticleSystemComponent::SetControlPointRotation(ControlPointIndex idx, const Quat &rot)
 {
 	auto optPose = GetControlPointPose(idx);
-	auto pose = optPose.has_value() ? *optPose : umath::Transform {};
+	auto pose = optPose.has_value() ? *optPose : pragma::math::Transform {};
 	pose.SetRotation(rot);
 	SetControlPointPose(idx, pose);
 }
-void ecs::CParticleSystemComponent::SetControlPointPose(ControlPointIndex idx, const umath::Transform &pose, float *optTimestamp)
+void ecs::CParticleSystemComponent::SetControlPointPose(ControlPointIndex idx, const pragma::math::Transform &pose, float *optTimestamp)
 {
 	InitializeControlPoint(idx);
 	auto t = optTimestamp ? *optTimestamp : m_simulationTime;
@@ -548,7 +548,7 @@ pragma::ecs::CBaseEntity *ecs::CParticleSystemComponent::GetControlPointEntity(C
 		return nullptr;
 	return static_cast<pragma::ecs::CBaseEntity *>(const_cast<pragma::ecs::BaseEntity *>(m_controlPoints.at(idx).hEntity.get()));
 }
-std::optional<umath::Transform> ecs::CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx, float *optOutTimestamp) const
+std::optional<pragma::math::Transform> ecs::CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx, float *optOutTimestamp) const
 {
 	if(idx >= m_controlPoints.size())
 		return {};
@@ -562,7 +562,7 @@ std::optional<umath::Transform> ecs::CParticleSystemComponent::GetControlPointPo
 		*optOutTimestamp = m_controlPoints.at(idx).simTimestamp;
 	return pose;
 }
-std::optional<umath::Transform> ecs::CParticleSystemComponent::GetPrevControlPointPose(ControlPointIndex idx, float *optOutTimestamp) const
+std::optional<pragma::math::Transform> ecs::CParticleSystemComponent::GetPrevControlPointPose(ControlPointIndex idx, float *optOutTimestamp) const
 {
 	if(idx >= m_controlPointsPrev.size())
 		return {};
@@ -576,16 +576,16 @@ std::optional<umath::Transform> ecs::CParticleSystemComponent::GetPrevControlPoi
 		*optOutTimestamp = m_controlPointsPrev.at(idx).simTimestamp;
 	return pose;
 }
-std::optional<umath::Transform> ecs::CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx, float t) const
+std::optional<pragma::math::Transform> ecs::CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx, float t) const
 {
 	if(idx >= m_controlPoints.size())
 		return {};
 	auto &cp = m_controlPoints.at(idx);
-	if(idx >= m_controlPointsPrev.size() || umath::abs(cp.simTimestamp - m_controlPointsPrev.at(idx).simTimestamp) < 0.001f)
+	if(idx >= m_controlPointsPrev.size() || pragma::math::abs(cp.simTimestamp - m_controlPointsPrev.at(idx).simTimestamp) < 0.001f)
 		return GetControlPointPose(idx);
 	auto &cpPrev = m_controlPointsPrev.at(idx);
 	t = (t - cpPrev.simTimestamp) / (cp.simTimestamp - cpPrev.simTimestamp);
-	t = umath::clamp(t, 0.f, 1.f);
+	t = pragma::math::clamp(t, 0.f, 1.f);
 	auto pose = *GetPrevControlPointPose(idx);
 	pose.Interpolate(*GetControlPointPose(idx), t);
 	return pose;
@@ -607,11 +607,11 @@ void ecs::CParticleSystemComponent::SetContinuous(bool b)
 	}
 }
 
-bool ecs::CParticleSystemComponent::ShouldParticlesRotateWithEmitter() const { return umath::is_flag_set(m_flags, Flags::RotateWithEmitter); }
-bool ecs::CParticleSystemComponent::ShouldParticlesMoveWithEmitter() const { return umath::is_flag_set(m_flags, Flags::MoveWithEmitter); }
+bool ecs::CParticleSystemComponent::ShouldParticlesRotateWithEmitter() const { return pragma::math::is_flag_set(m_flags, Flags::RotateWithEmitter); }
+bool ecs::CParticleSystemComponent::ShouldParticlesMoveWithEmitter() const { return pragma::math::is_flag_set(m_flags, Flags::MoveWithEmitter); }
 
-void ecs::CParticleSystemComponent::SetAutoSimulate(bool b) { umath::set_flag(m_flags, Flags::AutoSimulate, b); }
-bool ecs::CParticleSystemComponent::ShouldAutoSimulate() const { return umath::is_flag_set(m_flags, Flags::AutoSimulate); }
+void ecs::CParticleSystemComponent::SetAutoSimulate(bool b) { pragma::math::set_flag(m_flags, Flags::AutoSimulate, b); }
+bool ecs::CParticleSystemComponent::ShouldAutoSimulate() const { return pragma::math::is_flag_set(m_flags, Flags::AutoSimulate); }
 
 Vector3 ecs::CParticleSystemComponent::PointToParticleSpace(const Vector3 &p, bool bRotateWithEmitter) const
 {
@@ -685,15 +685,15 @@ void ecs::CParticleSystemComponent::ClearBuffers()
 }
 float ecs::CParticleSystemComponent::GetStaticWorldScale() const { return m_worldScale; }
 void ecs::CParticleSystemComponent::SetStaticWorldScale(float scale) { m_worldScale = scale; }
-void ecs::CParticleSystemComponent::SetSoftParticles(bool bSmooth) { umath::set_flag(m_flags, Flags::SoftParticles, bSmooth); }
-bool ecs::CParticleSystemComponent::GetSoftParticles() const { return umath::is_flag_set(m_flags, Flags::SoftParticles); }
-void ecs::CParticleSystemComponent::SetSortParticles(bool sort) { umath::set_flag(m_flags, Flags::SortParticles, sort); }
-bool ecs::CParticleSystemComponent::GetSortParticles() const { return umath::is_flag_set(m_flags, Flags::SortParticles); }
+void ecs::CParticleSystemComponent::SetSoftParticles(bool bSmooth) { pragma::math::set_flag(m_flags, Flags::SoftParticles, bSmooth); }
+bool ecs::CParticleSystemComponent::GetSoftParticles() const { return pragma::math::is_flag_set(m_flags, Flags::SoftParticles); }
+void ecs::CParticleSystemComponent::SetSortParticles(bool sort) { pragma::math::set_flag(m_flags, Flags::SortParticles, sort); }
+bool ecs::CParticleSystemComponent::GetSortParticles() const { return pragma::math::is_flag_set(m_flags, Flags::SortParticles); }
 const Color &ecs::CParticleSystemComponent::GetInitialColor() const { return m_initialColor; }
 void ecs::CParticleSystemComponent::SetInitialColor(const Color &col) { m_initialColor = col; }
 
-void ecs::CParticleSystemComponent::SetCastShadows(bool b) { umath::set_flag(m_flags, Flags::CastShadows, b); }
-bool ecs::CParticleSystemComponent::GetCastShadows() const { return umath::is_flag_set(m_flags, Flags::CastShadows); }
+void ecs::CParticleSystemComponent::SetCastShadows(bool b) { pragma::math::set_flag(m_flags, Flags::CastShadows, b); }
+bool ecs::CParticleSystemComponent::GetCastShadows() const { return pragma::math::is_flag_set(m_flags, Flags::CastShadows); }
 const Vector4 &ecs::CParticleSystemComponent::GetBloomColorFactor() const { return m_bloomColorFactor; }
 void ecs::CParticleSystemComponent::SetBloomColorFactor(const Vector4 &colorFactor) { m_bloomColorFactor = colorFactor; }
 std::optional<Vector4> ecs::CParticleSystemComponent::GetEffectiveBloomColorFactor() const
@@ -743,12 +743,12 @@ void ecs::CParticleSystemComponent::SetOrientationType(pts::ParticleOrientationT
 void ecs::CParticleSystemComponent::SetRadius(float r)
 {
 	m_radius = r;
-	m_extent = umath::sqrt(umath::pow2(r) * 2.f);
+	m_extent = pragma::math::sqrt(pragma::math::pow2(r) * 2.f);
 }
 void ecs::CParticleSystemComponent::SetExtent(float ext)
 {
 	m_extent = ext;
-	m_radius = umath::sqrt(umath::pow2(ext) / 2.f);
+	m_radius = pragma::math::sqrt(pragma::math::pow2(ext) / 2.f);
 }
 float ecs::CParticleSystemComponent::GetRadius() const { return m_radius; }
 float ecs::CParticleSystemComponent::GetExtent() const { return m_extent; }
@@ -759,7 +759,7 @@ msys::Material *ecs::CParticleSystemComponent::GetMaterial() const { return cons
 
 pragma::pts::CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer(std::string identifier, const std::unordered_map<std::string, std::string> &values)
 {
-	ustring::to_lower(identifier);
+	pragma::string::to_lower(identifier);
 	auto &map = pragma::pts::get_particle_modifier_map();
 	auto factory = map.FindInitializer(identifier);
 	if(factory == nullptr) {
@@ -777,7 +777,7 @@ pragma::pts::CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer
 }
 pragma::pts::CParticleOperator *ecs::CParticleSystemComponent::AddOperator(std::string identifier, const std::unordered_map<std::string, std::string> &values)
 {
-	ustring::to_lower(identifier);
+	pragma::string::to_lower(identifier);
 	auto &map = pragma::pts::get_particle_modifier_map();
 	auto factory = map.FindOperator(identifier);
 	if(factory == nullptr) {
@@ -795,7 +795,7 @@ pragma::pts::CParticleOperator *ecs::CParticleSystemComponent::AddOperator(std::
 }
 pragma::pts::CParticleRenderer *ecs::CParticleSystemComponent::AddRenderer(std::string identifier, const std::unordered_map<std::string, std::string> &values)
 {
-	ustring::to_lower(identifier);
+	pragma::string::to_lower(identifier);
 	auto &map = pragma::pts::get_particle_modifier_map();
 	auto factory = map.FindRenderer(identifier);
 	if(factory == nullptr) {
@@ -814,21 +814,21 @@ pragma::pts::CParticleRenderer *ecs::CParticleSystemComponent::AddRenderer(std::
 
 void ecs::CParticleSystemComponent::RemoveInitializer(const std::string &name)
 {
-	auto it = std::find_if(m_initializers.begin(), m_initializers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)> &initializer) { return ustring::compare(initializer->GetName(), name, false); });
+	auto it = std::find_if(m_initializers.begin(), m_initializers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)> &initializer) { return pragma::string::compare(initializer->GetName(), name, false); });
 	if(it == m_initializers.end())
 		return;
 	m_initializers.erase(it);
 }
 void ecs::CParticleSystemComponent::RemoveOperator(const std::string &name)
 {
-	auto it = std::find_if(m_operators.begin(), m_operators.end(), [&name](const std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)> &initializer) { return ustring::compare(initializer->GetName(), name, false); });
+	auto it = std::find_if(m_operators.begin(), m_operators.end(), [&name](const std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)> &initializer) { return pragma::string::compare(initializer->GetName(), name, false); });
 	if(it == m_operators.end())
 		return;
 	m_operators.erase(it);
 }
 void ecs::CParticleSystemComponent::RemoveRenderer(const std::string &name)
 {
-	auto it = std::find_if(m_renderers.begin(), m_renderers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)> &initializer) { return ustring::compare(initializer->GetName(), name, false); });
+	auto it = std::find_if(m_renderers.begin(), m_renderers.end(), [&name](const std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)> &initializer) { return pragma::string::compare(initializer->GetName(), name, false); });
 	if(it == m_renderers.end())
 		return;
 	m_renderers.erase(it);
@@ -837,7 +837,7 @@ void ecs::CParticleSystemComponent::RemoveInitializersByType(const std::string &
 {
 	for(auto it = m_initializers.begin(); it != m_initializers.end();) {
 		auto &initializer = *it;
-		if(ustring::compare(initializer->GetType(), type, false) == false) {
+		if(pragma::string::compare(initializer->GetType(), type, false) == false) {
 			++it;
 			continue;
 		}
@@ -848,7 +848,7 @@ void ecs::CParticleSystemComponent::RemoveOperatorsByType(const std::string &typ
 {
 	for(auto it = m_operators.begin(); it != m_operators.end();) {
 		auto &op = *it;
-		if(ustring::compare(op->GetType(), type, false) == false) {
+		if(pragma::string::compare(op->GetType(), type, false) == false) {
 			++it;
 			continue;
 		}
@@ -859,7 +859,7 @@ void ecs::CParticleSystemComponent::RemoveRenderersByType(const std::string &typ
 {
 	for(auto it = m_renderers.begin(); it != m_renderers.end();) {
 		auto &renderer = *it;
-		if(ustring::compare(renderer->GetType(), type, false) == false) {
+		if(pragma::string::compare(renderer->GetType(), type, false) == false) {
 			++it;
 			continue;
 		}
@@ -881,15 +881,15 @@ void ecs::CParticleSystemComponent::SetParent(ecs::CParticleSystemComponent *par
 		auto *parent = m_hParent.get();
 		if(parent == particle)
 			return;
-		m_hParent = ::util::WeakHandle<ecs::CParticleSystemComponent> {};
+		m_hParent = pragma::util::WeakHandle<ecs::CParticleSystemComponent> {};
 		if(parent != nullptr)
 			parent->RemoveChild(this);
 	}
 	if(particle == nullptr) {
-		m_hParent = ::util::WeakHandle<ecs::CParticleSystemComponent> {};
+		m_hParent = pragma::util::WeakHandle<ecs::CParticleSystemComponent> {};
 		return;
 	}
-	m_hParent = ::util::WeakHandle<ecs::CParticleSystemComponent> {std::static_pointer_cast<ecs::CParticleSystemComponent>(particle->shared_from_this())};
+	m_hParent = pragma::util::WeakHandle<ecs::CParticleSystemComponent> {std::static_pointer_cast<ecs::CParticleSystemComponent>(particle->shared_from_this())};
 	particle->AddChild(*this);
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	auto pTrComponentPt = particle->GetEntity().GetTransformComponent();
@@ -914,7 +914,7 @@ void ecs::CParticleSystemComponent::AddChild(ecs::CParticleSystemComponent &part
 	if(HasChild(particle))
 		return;
 	ChildData childData {};
-	childData.child = ::util::WeakHandle<ecs::CParticleSystemComponent> {std::static_pointer_cast<ecs::CParticleSystemComponent>(particle.shared_from_this())};
+	childData.child = pragma::util::WeakHandle<ecs::CParticleSystemComponent> {std::static_pointer_cast<ecs::CParticleSystemComponent>(particle.shared_from_this())};
 	childData.delay = delay;
 	m_childSystems.push_back(childData);
 	particle.SetParent(this);
@@ -955,7 +955,7 @@ bool ecs::CParticleSystemComponent::IsAnimated() const { return m_descSetGroupAn
 
 void ecs::CParticleSystemComponent::Start()
 {
-	if(!umath::is_flag_set(m_flags, pragma::ecs::CParticleSystemComponent::Flags::MaterialDescriptorSetInitialized)) {
+	if(!pragma::math::is_flag_set(m_flags, pragma::ecs::CParticleSystemComponent::Flags::MaterialDescriptorSetInitialized)) {
 		m_flags |= pragma::ecs::CParticleSystemComponent::Flags::MaterialDescriptorSetInitialized;
 		// Material descriptor set has to be initialized on main thread, before rendering
 		auto &renderers = GetRenderers();
@@ -972,7 +972,7 @@ void ecs::CParticleSystemComponent::Start()
 	CreateParticle();
 	if(IsActiveOrPaused())
 		Stop();
-	umath::remove_flag(m_flags, Flags::Dying);
+	pragma::math::remove_flag(m_flags, Flags::Dying);
 	for(auto &pt : m_particles)
 		pt.Resurrect();
 	m_state = State::Active;
@@ -1176,11 +1176,11 @@ void ecs::CParticleSystemComponent::OnRemove()
 	}
 }
 
-bool ecs::CParticleSystemComponent::IsDying() const { return umath::is_flag_set(m_flags, Flags::Dying); }
+bool ecs::CParticleSystemComponent::IsDying() const { return pragma::math::is_flag_set(m_flags, Flags::Dying); }
 
 void ecs::CParticleSystemComponent::Die(float maxRemainingLifetime)
 {
-	umath::add_flag(m_flags, Flags::Dying);
+	pragma::math::add_flag(m_flags, Flags::Dying);
 	for(auto &pt : m_particles) {
 		pt.Die();
 		if(pt.GetLife() > maxRemainingLifetime)
@@ -1194,7 +1194,7 @@ void ecs::CParticleSystemComponent::Die(float maxRemainingLifetime)
 
 bool ecs::CParticleSystemComponent::FindFreeParticle(uint32_t *idx)
 {
-	if(umath::is_flag_set(m_flags, Flags::Dying))
+	if(pragma::math::is_flag_set(m_flags, Flags::Dying))
 		return false;
 	for(auto i = m_idxLast; i < m_maxParticlesCur; ++i) {
 		auto &p = m_particles[i];
@@ -1284,11 +1284,11 @@ pragma::rendering::ParticleAlphaMode ecs::CParticleSystemComponent::GetEffective
 	return alphaMode;
 }
 void ecs::CParticleSystemComponent::SetAlphaMode(pragma::rendering::ParticleAlphaMode alphaMode) { m_alphaMode = alphaMode; }
-void ecs::CParticleSystemComponent::SetTextureScrollingEnabled(bool b) { umath::set_flag(m_flags, Flags::TextureScrollingEnabled, b); }
-bool ecs::CParticleSystemComponent::IsTextureScrollingEnabled() const { return umath::is_flag_set(m_flags, Flags::TextureScrollingEnabled); }
+void ecs::CParticleSystemComponent::SetTextureScrollingEnabled(bool b) { pragma::math::set_flag(m_flags, Flags::TextureScrollingEnabled, b); }
+bool ecs::CParticleSystemComponent::IsTextureScrollingEnabled() const { return pragma::math::is_flag_set(m_flags, Flags::TextureScrollingEnabled); }
 
-bool ecs::CParticleSystemComponent::IsAlphaPremultiplied() const { return umath::is_flag_set(m_flags, Flags::PremultiplyAlpha); }
-void ecs::CParticleSystemComponent::SetAlphaPremultiplied(bool b) { umath::set_flag(m_flags, Flags::PremultiplyAlpha, b); }
+bool ecs::CParticleSystemComponent::IsAlphaPremultiplied() const { return pragma::math::is_flag_set(m_flags, Flags::PremultiplyAlpha); }
+void ecs::CParticleSystemComponent::SetAlphaPremultiplied(bool b) { pragma::math::set_flag(m_flags, Flags::PremultiplyAlpha, b); }
 uint32_t ecs::CParticleSystemComponent::GetEmissionRate() const { return m_emissionRate; }
 void ecs::CParticleSystemComponent::SetEmissionRate(uint32_t emissionRate) { m_emissionRate = emissionRate; }
 void ecs::CParticleSystemComponent::SetNextParticleEmissionCount(uint32_t count) { m_nextParticleEmissionCount = count; }
@@ -1299,15 +1299,15 @@ void ecs::CParticleSystemComponent::ResumeEmission()
 		return;
 	m_state = State::Active;
 }
-void ecs::CParticleSystemComponent::SetAlwaysSimulate(bool b) { umath::set_flag(m_flags, Flags::AlwaysSimulate, b); }
+void ecs::CParticleSystemComponent::SetAlwaysSimulate(bool b) { pragma::math::set_flag(m_flags, Flags::AlwaysSimulate, b); }
 
 void ecs::CParticleSystemComponent::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pts::ParticleRenderFlags renderFlags)
 {
-	if(umath::is_flag_set(renderFlags, pts::ParticleRenderFlags::Bloom) && IsBloomEnabled() == false)
+	if(pragma::math::is_flag_set(renderFlags, pts::ParticleRenderFlags::Bloom) && IsBloomEnabled() == false)
 		return;
 	m_tLastEmission = pragma::get_cgame()->RealTime();
 	if(IsActiveOrPaused() == false) {
-		if(umath::is_flag_set(m_flags, Flags::Dying))
+		if(pragma::math::is_flag_set(m_flags, Flags::Dying))
 			Stop();
 		return;
 	}
@@ -1319,7 +1319,7 @@ void ecs::CParticleSystemComponent::RecordRender(prosper::ICommandBuffer &drawCm
 		hChild.child->RecordRender(drawCmd, scene, renderer, renderFlags);
 	}
 	if(numRenderParticles == 0) {
-		if(umath::is_flag_set(m_flags, Flags::Dying))
+		if(pragma::math::is_flag_set(m_flags, Flags::Dying))
 			Stop();
 		return;
 	}
@@ -1328,7 +1328,7 @@ void ecs::CParticleSystemComponent::RecordRender(prosper::ICommandBuffer &drawCm
 		for(auto &r : m_renderers)
 			r->RecordRender(drawCmd, scene, renderer, renderFlags);
 	}
-	umath::set_flag(m_flags, Flags::RendererBufferUpdateRequired, false);
+	pragma::math::set_flag(m_flags, Flags::RendererBufferUpdateRequired, false);
 }
 
 void ecs::CParticleSystemComponent::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent *light, uint32_t layerId)
@@ -1356,7 +1356,7 @@ pragma::pts::CParticle &ecs::CParticleSystemComponent::CreateParticle(uint32_t i
 	particle.SetRadius(m_radius);
 #if 0
 	auto pos = m_origin;
-	if(umath::is_flag_set(m_flags,Flags::MoveWithEmitter) == false) // If the particle is moving with the emitter, the position is added elsewhere!
+	if(pragma::math::is_flag_set(m_flags,Flags::MoveWithEmitter) == false) // If the particle is moving with the emitter, the position is added elsewhere!
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
 		if(pTrComponent != nullptr)
@@ -1364,7 +1364,7 @@ pragma::pts::CParticle &ecs::CParticleSystemComponent::CreateParticle(uint32_t i
 	}
 	particle.SetPosition(pos);
 	auto rot = m_particleRot;
-	if(umath::is_flag_set(m_flags,Flags::RotateWithEmitter) == false)
+	if(pragma::math::is_flag_set(m_flags,Flags::RotateWithEmitter) == false)
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
 		if(pTrComponent != nullptr)
@@ -1385,11 +1385,11 @@ pragma::pts::CParticle &ecs::CParticleSystemComponent::CreateParticle(uint32_t i
 				if(anim != nullptr && anim->IsBlock())
 				{
 					auto block = std::static_pointer_cast<ds::Block>(anim);
-					if(block->GetBool("start_random") == true || umath::is_flag_set(m_flags,Flags::RandomStartFrame) == true)
+					if(block->GetBool("start_random") == true || pragma::math::is_flag_set(m_flags,Flags::RandomStartFrame) == true)
 					{
 						auto frames = block->GetInt("frames");
 						auto fps = block->GetInt("fps");
-						auto frame = umath::random(0,frames -1);
+						auto frame = pragma::math::random(0,frames -1);
 						auto offset = 0.f;
 						if(fps > 0)
 							offset = static_cast<float>(frame) /static_cast<float>(fps);
@@ -1420,7 +1420,7 @@ uint32_t ecs::CParticleSystemComponent::CreateParticles(uint32_t count, double t
 {
 	auto bHasLimit = m_currentParticleLimit != std::numeric_limits<uint32_t>::max();
 	if(bHasLimit)
-		count = umath::min(count, m_currentParticleLimit);
+		count = pragma::math::min(count, m_currentParticleLimit);
 	auto t = tStart;
 	for(auto i = decltype(count) {0}; i < count; ++i) {
 		uint32_t idx;
@@ -1458,7 +1458,7 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(!IsActiveOrPaused() || cam == nullptr)
 		return;
-	util::ScopeGuard sg {[this, tDelta]() { m_simulationTime += tDelta; }}; // Increment simulation time once this tick is complete
+	pragma::util::ScopeGuard sg {[this, tDelta]() { m_simulationTime += tDelta; }}; // Increment simulation time once this tick is complete
 
 	auto pTsComponent = GetEntity().GetTimeScaleComponent();
 	if(pTsComponent.valid())
@@ -1491,15 +1491,15 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 	for(auto &op : m_operators)
 		op->Simulate(tDelta);
 	//unsigned int numRender = 0;
-	if(umath::is_flag_set(m_flags, Flags::MoveWithEmitter) || umath::is_flag_set(m_flags, Flags::RotateWithEmitter)) {
+	if(pragma::math::is_flag_set(m_flags, Flags::MoveWithEmitter) || pragma::math::is_flag_set(m_flags, Flags::RotateWithEmitter)) {
 		auto pAttComponent = GetEntity().GetComponent<pragma::CAttachmentComponent>();
 		if(pAttComponent.valid())
 			pAttComponent->UpdateAttachmentOffset();
 	}
 
 	auto bMoving
-	  = (umath::is_flag_set(m_flags, Flags::MoveWithEmitter) && GetEntity().HasStateFlag(pragma::ecs::BaseEntity::StateFlags::PositionChanged)) || (umath::is_flag_set(m_flags, Flags::RotateWithEmitter) && GetEntity().HasStateFlag(pragma::ecs::BaseEntity::StateFlags::RotationChanged));
-	umath::set_flag(m_flags, Flags::HasMovingParticles, bMoving);
+	  = (pragma::math::is_flag_set(m_flags, Flags::MoveWithEmitter) && GetEntity().HasStateFlag(pragma::ecs::BaseEntity::StateFlags::PositionChanged)) || (pragma::math::is_flag_set(m_flags, Flags::RotateWithEmitter) && GetEntity().HasStateFlag(pragma::ecs::BaseEntity::StateFlags::RotationChanged));
+	pragma::math::set_flag(m_flags, Flags::HasMovingParticles, bMoving);
 	auto &pose = GetEntity().GetPose();
 	auto &posCam = cam->GetEntity().GetPosition();
 	for(auto i = decltype(m_maxParticlesCur) {0}; i < m_maxParticlesCur; ++i) {
@@ -1518,11 +1518,11 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 				auto rotNew = glm::gtc::quat_cast(glm::gtx::eulerAngleYXZ(velAng.y, velAng.x, velAng.z)) * rotOld;
 				p.SetWorldRotation(rotNew);
 				if(rotOld.w != rotNew.w || rotOld.x != rotNew.x || rotOld.y != rotNew.y || rotOld.z != rotNew.z)
-					umath::set_flag(m_flags, Flags::HasMovingParticles, true);
+					pragma::math::set_flag(m_flags, Flags::HasMovingParticles, true);
 
 				// Update sprite rotation
 				auto rot = p.GetRotation();
-				rot += umath::rad_to_deg(velAng.y);
+				rot += pragma::math::rad_to_deg(velAng.y);
 				p.SetRotation(rot);
 			}
 
@@ -1530,12 +1530,12 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 			auto &vel = p.GetVelocity();
 			if(uvec::length(vel) > 0.f) {
 				auto velEffective = vel;
-				if(umath::is_flag_set(m_flags, Flags::RotateWithEmitter))
+				if(pragma::math::is_flag_set(m_flags, Flags::RotateWithEmitter))
 					uvec::rotate(&velEffective, pose.GetRotation());
 				pos += velEffective * static_cast<float>(tDelta);
 				p.SetPosition(pos);
-				if(umath::is_flag_set(m_flags, Flags::HasMovingParticles) == false && uvec::length_sqr(velEffective) > 0.f)
-					umath::set_flag(m_flags, Flags::HasMovingParticles, true);
+				if(pragma::math::is_flag_set(m_flags, Flags::HasMovingParticles) == false && uvec::length_sqr(velEffective) > 0.f)
+					pragma::math::set_flag(m_flags, Flags::HasMovingParticles, true);
 			}
 			p.SetCameraDistance(glm::gtx::length2(pos - posCam));
 			for(auto &op : m_operators)
@@ -1574,7 +1574,7 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 					tEmissionStart = (m_simulationTime + tDelta) + m_tNextEmission;
 					tEmissionRate = rate;
 
-					numCreate = umath::floor(-m_tNextEmission / rate);
+					numCreate = pragma::math::floor(-m_tNextEmission / rate);
 					if(numCreate == 0 && m_tLastEmission == 0.0 && rate > 0.f)
 						++numCreate; // Make sure at least one particle is created right away when the particle system was started
 					m_tNextEmission += numCreate * rate;
@@ -1583,7 +1583,7 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 		}
 		if(numCreate > numFill)
 			numCreate = numFill;
-		tEmissionStart = umath::clamp(tEmissionStart, 0.f, m_simulationTime + static_cast<float>(tDelta));
+		tEmissionStart = pragma::math::clamp(tEmissionStart, 0.f, m_simulationTime + static_cast<float>(tDelta));
 		numCreate = CreateParticles(numCreate, tDelta, tEmissionStart, tEmissionRate);
 		m_numParticles += numCreate;
 	}
@@ -1616,10 +1616,10 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 			return;
 		}
 		fSimulateChildren();
-		if(umath::is_flag_set(m_flags, Flags::AlwaysSimulate) == false)
+		if(pragma::math::is_flag_set(m_flags, Flags::AlwaysSimulate) == false)
 			return;
 	}
-	if(umath::is_flag_set(m_flags, Flags::SortParticles))
+	if(pragma::math::is_flag_set(m_flags, Flags::SortParticles))
 		SortParticles(); // TODO Sort every frame?
 	fSimulateChildren();
 
@@ -1654,7 +1654,7 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 			auto &pos = p.GetPosition();
 			auto &prevPos = p.GetPrevPos();
 			auto &vCol = p.GetColor();
-			if(umath::is_flag_set(m_flags, Flags::PremultiplyAlpha))
+			if(pragma::math::is_flag_set(m_flags, Flags::PremultiplyAlpha))
 				pragma::rendering::premultiply_alpha(vCol, alphaMode);
 			auto &col = data.color;
 			col = {static_cast<uint16_t>(vCol.x * 255.f), static_cast<uint16_t>(vCol.y * 255.f), static_cast<uint16_t>(vCol.z * 255.f), static_cast<uint16_t>(vCol.a * 255.f)};
@@ -1667,14 +1667,14 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 			data.radius = radius;
 			data.prevPos = Vector3 {prevPos.x + origin.x, prevPos.y + origin.y, prevPos.z + origin.z};
 			data.age = p.GetTimeAlive();
-			//if(umath::is_flag_set(m_flags,Flags::MoveWithEmitter))
+			//if(pragma::math::is_flag_set(m_flags,Flags::MoveWithEmitter))
 			{
 				for(auto i = 0u; i < 3u; ++i)
 					data.position[i] += psPos[i];
 			}
 			data.rotation = p.GetRotation();
-			data.rotationYaw = umath::float32_to_float16_glm(p.GetRotationYaw());
-			data.length = umath::float32_to_float16_glm(p.GetLength());
+			data.rotationYaw = pragma::math::float32_to_float16_glm(p.GetRotationYaw());
+			data.length = pragma::math::float32_to_float16_glm(p.GetLength());
 			m_particleIndicesToBufferIndices[sortedIdx] = m_numRenderParticles;
 			m_bufferIndicesToParticleIndices[m_numRenderParticles] = sortedIdx;
 
@@ -1720,7 +1720,7 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 	m_numPrevRenderParticles = m_numRenderParticles;
 	if(bufParticles != nullptr && bUpdateBuffers == true && m_numRenderParticles > 0u) {
 		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(bufParticles, 0ull, m_numRenderParticles * sizeof(ParticleData), m_instanceData.data());
-		umath::set_flag(m_flags, Flags::RendererBufferUpdateRequired, true);
+		pragma::math::set_flag(m_flags, Flags::RendererBufferUpdateRequired, true);
 	}
 	if(IsAnimated()) {
 		auto &particleAnimBuffer = GetParticleAnimationBuffer();

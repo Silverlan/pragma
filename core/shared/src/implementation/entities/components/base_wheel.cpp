@@ -111,7 +111,7 @@ void BaseWheelComponent::Attach(pragma::ecs::BaseEntity *ent,UChar wheelId)
 	info->m_suspensionStiffness = m_wheelInfo.suspensionStiffness;
 	info->m_wheelsDampingCompression = m_wheelInfo.wheelDampingCompression;
 	info->m_frictionSlip = m_wheelInfo.frictionSlip;
-	info->m_steering = umath::deg_to_rad(m_wheelInfo.steeringAngle);
+	info->m_steering = pragma::math::deg_to_rad(m_wheelInfo.steeringAngle);
 	info->m_rotation = m_wheelInfo.wheelRotation;
 	info->m_rollInfluence = m_wheelInfo.rollInfluence;
 #endif
@@ -138,7 +138,7 @@ void BaseWheelComponent::UpdateWheel()
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
-	m_wheelInfo.steeringAngle = CFloat(umath::rad_to_deg(info->m_steering));
+	m_wheelInfo.steeringAngle = CFloat(pragma::math::rad_to_deg(info->m_steering));
 	m_wheelInfo.wheelRotation = CFloat(info->m_rotation);
 	auto &t = info->m_worldTransform;
 	auto btOrigin = t.getOrigin() / PhysEnv::WORLD_SCALE;
@@ -181,7 +181,7 @@ void BaseWheelComponent::UpdatePose()
 	if(pose.has_value() == false)
 		return;
 	auto &entVhc = m_vehicle->GetEntity();
-	auto t = umath::Transform {entVhc.GetPosition(), entVhc.GetRotation()};
+	auto t = pragma::math::Transform {entVhc.GetPosition(), entVhc.GetRotation()};
 	t *= *pose;
 
 	auto &ent = GetEntity();
@@ -199,7 +199,7 @@ btWheelInfo *BaseWheelComponent::GetWheelInfo() const
 	return const_cast<BaseVehicleComponent*>(m_vehicle.get())->GetWheelInfo(m_wheelId);
 }
 #endif
-util::WeakHandle<pragma::BaseVehicleComponent> BaseWheelComponent::GetVehicle() {return m_vehicle;}
+pragma::util::WeakHandle<pragma::BaseVehicleComponent> BaseWheelComponent::GetVehicle() {return m_vehicle;}
 
 Bool BaseWheelComponent::IsFrontWheel() const {return m_wheelInfo.bFrontWheel;}
 void BaseWheelComponent::SetFrontWheel(Bool b)
@@ -330,7 +330,7 @@ void BaseWheelComponent::SetSteeringAngle(Float ang)
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
-	info->m_steering = umath::deg_to_rad(ang);
+	info->m_steering = pragma::math::deg_to_rad(ang);
 #endif
 }
 Float BaseWheelComponent::GetWheelRotation() const {return m_wheelInfo.wheelRotation;}

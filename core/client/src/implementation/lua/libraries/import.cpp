@@ -46,11 +46,11 @@ static Mat4 to_pragma_matrix(const aiMatrix4x4 &m)
 		mOut[i][0] *= -1.f;
 		mOut[i][1] *= -1.f;
 	}
-	return umat::create_from_axis_angle(Vector3{1.f,0.f,0.f},umath::rad_to_deg(90.f)) *mOut;
+	return umat::create_from_axis_angle(Vector3{1.f,0.f,0.f},pragma::math::rad_to_deg(90.f)) *mOut;
 }
 static aiMatrix4x4 to_assimp_matrix(const Mat4 &m)
 {
-	auto mOut = umat::create_from_axis_angle(Vector3{1.f,0.f,0.f},umath::rad_to_deg(-90.f)) *m;
+	auto mOut = umat::create_from_axis_angle(Vector3{1.f,0.f,0.f},pragma::math::rad_to_deg(-90.f)) *m;
 
 	// Invert rows 0 and 2, as well as columns 0 and 1
 	for(uint8_t i=0;i<4;++i)
@@ -75,7 +75,7 @@ static aiNode &add_node(aiNode &parentNode,uint32_t index,const std::string &nam
 	auto &t = ent.GetPose();
 
 	auto scale = static_cast<float>(pragma::units_to_metres(1.f));
-	umath::ScaledTransform tScaled = t;
+	pragma::math::ScaledTransform tScaled = t;
 	tScaled.Scale(Vector3{scale,scale,scale});
 
 	auto m = tScaled.ToMatrix();
@@ -146,14 +146,14 @@ int Lua::lib_export::export_scene(lua::State *l)
 		if(spotLightC.valid())
 		{
 			lightOut->mType = aiLightSourceType::aiLightSource_SPOT;
-			lightOut->mAngleInnerCone = umath::deg_to_rad(spotLightC->GetInnerCutoffAngle());
-			lightOut->mAngleOuterCone = umath::deg_to_rad(spotLightC->GetOuterCutoffAngle());
+			lightOut->mAngleInnerCone = pragma::math::deg_to_rad(spotLightC->GetInnerCutoffAngle());
+			lightOut->mAngleOuterCone = pragma::math::deg_to_rad(spotLightC->GetOuterCutoffAngle());
 			lightOut->mAttenuationLinear = radiusC.valid() ? radiusC->GetRadius() : 1.f;
 		}
 		else if(pointLightC.valid())
 		{
 			lightOut->mType = aiLightSourceType::aiLightSource_POINT;
-			lightOut->mAngleInnerCone = lightOut->mAngleOuterCone = umath::pi *2.0;
+			lightOut->mAngleInnerCone = lightOut->mAngleOuterCone = pragma::math::pi *2.0;
 			lightOut->mAttenuationLinear = radiusC.valid() ? radiusC->GetRadius() : 1.f;
 		}
 		else if(dirLightC.valid())
@@ -190,7 +190,7 @@ int Lua::lib_export::export_scene(lua::State *l)
 
 	if(outputPath.empty() || (outputPath.front() != '/' && outputPath.front() != '\\'))
 		outputPath = '/' +outputPath;
-	outputPath = util::FilePath(filemanager::get_program_write_path(), outputPath).GetString();
+	outputPath = pragma::util::FilePath(filemanager::get_program_write_path(), outputPath).GetString();
 	ufile::remove_extension_from_filename(outputPath);
 	// The assimp FBX exporter currently does not support lights or cameras!
 	outputPath += ".fbx";

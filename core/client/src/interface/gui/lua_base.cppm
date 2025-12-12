@@ -43,10 +43,10 @@ export namespace pragma::gui::types {
 		virtual void Initialize() override;
 		virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
 		virtual void OnFirstThink() override;
-		virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
-		virtual util::EventReply KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
-		virtual util::EventReply CharCallback(unsigned int c, pragma::platform::Modifier mods = pragma::platform::Modifier::None) override;
-		virtual util::EventReply ScrollCallback(Vector2 offset, bool offsetAsPixels = false) override;
+		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual pragma::util::EventReply KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual pragma::util::EventReply CharCallback(unsigned int c, pragma::platform::Modifier mods = pragma::platform::Modifier::None) override;
+		virtual pragma::util::EventReply ScrollCallback(Vector2 offset, bool offsetAsPixels = false) override;
 		virtual void SetSize(int x, int y) override;
 		virtual void OnVisibilityChanged(bool bVisible) override;
 		virtual void SetColor(float r, float g, float b, float a = 1.f) override;
@@ -56,7 +56,7 @@ export namespace pragma::gui::types {
 		virtual void OnCursorExited() override;
 		virtual void OnFileDragEntered() override;
 		virtual void OnFileDragExited() override;
-		virtual util::EventReply OnFilesDropped(const std::vector<std::string> &files) override;
+		virtual pragma::util::EventReply OnFilesDropped(const std::vector<std::string> &files) override;
 		virtual void OnFocusGained() override;
 		virtual void OnFocusKilled() override;
 		virtual void OnRemove() override;

@@ -96,7 +96,7 @@ export namespace pragma::console {
 		ClientSide = ServerSide << 1u
 	};
 
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 }
 export {
 	REGISTER_ENUM_FLAGS(pragma::console::ConVarFlags)

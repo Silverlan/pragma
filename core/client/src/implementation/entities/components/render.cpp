@@ -96,7 +96,7 @@ const prosper::IBuffer *CRenderComponent::GetRenderBuffer() const { return m_ren
 std::optional<RenderBufferIndex> CRenderComponent::GetRenderBufferIndex() const { return m_renderBuffer ? m_renderBuffer->GetBaseIndex() : std::optional<RenderBufferIndex> {}; }
 prosper::IDescriptorSet *CRenderComponent::GetRenderDescriptorSet() const { return (m_renderDescSetGroup != nullptr) ? m_renderDescSetGroup->GetDescriptorSet() : nullptr; }
 CRenderComponent::StateFlags CRenderComponent::GetStateFlags() const { return m_stateFlags; }
-util::EventReply CRenderComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply CRenderComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
 	if(eventId == baseChildComponent::EVENT_ON_PARENT_CHANGED) {
 		UpdateAncestorHiddenState();
@@ -104,8 +104,8 @@ util::EventReply CRenderComponent::HandleEvent(ComponentEventId eventId, Compone
 	}
 	return BaseRenderComponent::HandleEvent(eventId, evData);
 }
-void CRenderComponent::SetDepthPassEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::EnableDepthPass, enabled); }
-bool CRenderComponent::IsDepthPassEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::EnableDepthPass); }
+void CRenderComponent::SetDepthPassEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::EnableDepthPass, enabled); }
+bool CRenderComponent::IsDepthPassEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableDepthPass); }
 void CRenderComponent::SetRenderClipPlane(const Vector4 &plane)
 {
 	if(plane == m_renderClipPlane)
@@ -136,8 +136,8 @@ void CRenderComponent::ClearDepthBias()
 	BroadcastEvent(cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED);
 }
 const Vector2 *CRenderComponent::GetDepthBias() const { return m_depthBias.has_value() ? &*m_depthBias : nullptr; }
-void CRenderComponent::SetReceiveShadows(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::DisableShadows, !enabled); }
-bool CRenderComponent::IsReceivingShadows() const { return !umath::is_flag_set(m_stateFlags, StateFlags::DisableShadows); }
+void CRenderComponent::SetReceiveShadows(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::DisableShadows, !enabled); }
+bool CRenderComponent::IsReceivingShadows() const { return !pragma::math::is_flag_set(m_stateFlags, StateFlags::DisableShadows); }
 void CRenderComponent::Initialize()
 {
 	BaseRenderComponent::Initialize();
@@ -208,9 +208,9 @@ void CRenderComponent::OnEntitySpawn()
 }
 void CRenderComponent::UpdateAbsoluteRenderBounds()
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::RenderBoundsDirty) == false)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderBoundsDirty) == false)
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty, false);
+	pragma::math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty, false);
 	UpdateAbsoluteAABBRenderBounds();
 	UpdateAbsoluteSphereRenderBounds();
 }
@@ -263,7 +263,7 @@ pragma::math::Sphere CRenderComponent::CalcAbsoluteRenderSphere() const
 			pose.SetOrigin(pose.GetOrigin() + pPhysComponent->GetLocalOrigin());
 	}
 	auto &scale = pose.GetScale();
-	r.radius *= umath::abs_max(scale.x, scale.y, scale.z);
+	r.radius *= pragma::math::abs_max(scale.x, scale.y, scale.z);
 	r.pos = pose * r.pos;
 	return r;
 }
@@ -273,7 +273,7 @@ void CRenderComponent::SetLocalRenderBounds(Vector3 min, Vector3 max)
 
 	if(min == m_localRenderBounds.min && max == m_localRenderBounds.max)
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty);
+	pragma::math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty);
 	GetEntity().SetStateFlag(pragma::ecs::BaseEntity::StateFlags::RenderBoundsChanged);
 
 	if(uvec::distance_sqr(min, max) > 0.001f) {
@@ -318,16 +318,16 @@ void CRenderComponent::UpdateRenderBounds()
 #endif
 
 Mat4 &CRenderComponent::GetTransformationMatrix() { return m_matTransformation; }
-const umath::ScaledTransform &CRenderComponent::GetRenderPose() const { return m_renderPose; }
+const pragma::math::ScaledTransform &CRenderComponent::GetRenderPose() const { return m_renderPose; }
 void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseRenderComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(pragma::CTransformComponent)) {
 		FlagCallbackForRemoval(static_cast<pragma::CTransformComponent &>(component).AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
-		                         [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		                         [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 			                         SetRenderBufferDirty();
 			                         SetRenderBoundsDirty();
-			                         return util::EventReply::Unhandled;
+			                         return pragma::util::EventReply::Unhandled;
 		                         }),
 		  CallbackType::Component, &component);
 	}
@@ -352,26 +352,26 @@ void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 		m_lightMapReceiverComponent = nullptr;
 	}
 }
-bool CRenderComponent::IsInstantiable() const { return umath::is_flag_set(m_stateFlags, StateFlags::IsInstantiable); }
+bool CRenderComponent::IsInstantiable() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::IsInstantiable); }
 void CRenderComponent::SetInstaniationEnabled(bool enabled)
 {
-	umath::set_flag(m_stateFlags, StateFlags::InstantiationDisabled, !enabled);
+	pragma::math::set_flag(m_stateFlags, StateFlags::InstantiationDisabled, !enabled);
 	UpdateInstantiability();
 }
 void CRenderComponent::UpdateInstantiability()
 {
-	umath::set_flag(m_stateFlags, StateFlags::IsInstantiable, false);
-	if(m_renderBuffer == nullptr || umath::is_flag_set(m_stateFlags, StateFlags::InstantiationDisabled))
+	pragma::math::set_flag(m_stateFlags, StateFlags::IsInstantiable, false);
+	if(m_renderBuffer == nullptr || pragma::math::is_flag_set(m_stateFlags, StateFlags::InstantiationDisabled))
 		return;
 	auto instantiable = true;
 	BroadcastEvent(cRenderComponent::EVENT_UPDATE_INSTANTIABILITY, CEUpdateInstantiability {instantiable});
-	umath::set_flag(m_stateFlags, StateFlags::IsInstantiable, instantiable);
+	pragma::math::set_flag(m_stateFlags, StateFlags::IsInstantiable, instantiable);
 }
 void CRenderComponent::UpdateShouldDrawState()
 {
 	auto shouldDraw = true;
 	BroadcastEvent(cRenderComponent::EVENT_SHOULD_DRAW, CEShouldDraw {shouldDraw});
-	umath::set_flag(m_stateFlags, StateFlags::ShouldDraw, shouldDraw);
+	pragma::math::set_flag(m_stateFlags, StateFlags::ShouldDraw, shouldDraw);
 
 	UpdateShouldDrawShadowState();
 }
@@ -380,13 +380,13 @@ void CRenderComponent::UpdateShouldDrawShadowState()
 	auto shouldDraw = GetCastShadows();
 	if(shouldDraw)
 		BroadcastEvent(cRenderComponent::EVENT_SHOULD_DRAW_SHADOW, CEShouldDraw {shouldDraw});
-	umath::set_flag(m_stateFlags, StateFlags::ShouldDrawShadow, shouldDraw);
+	pragma::math::set_flag(m_stateFlags, StateFlags::ShouldDrawShadow, shouldDraw);
 }
 CModelComponent *CRenderComponent::GetModelComponent() const { return static_cast<CModelComponent *>(GetEntity().GetModelComponent()); }
 CAttachmentComponent *CRenderComponent::GetAttachmentComponent() const { return m_attachmentComponent; }
 CAnimatedComponent *CRenderComponent::GetAnimatedComponent() const { return m_animComponent; }
 CLightMapReceiverComponent *CRenderComponent::GetLightMapReceiverComponent() const { return m_lightMapReceiverComponent; }
-void CRenderComponent::SetRenderOffsetTransform(const umath::ScaledTransform &t)
+void CRenderComponent::SetRenderOffsetTransform(const pragma::math::ScaledTransform &t)
 {
 	m_renderOffset = t;
 	SetRenderBufferDirty();
@@ -396,7 +396,7 @@ void CRenderComponent::ClearRenderOffsetTransform()
 	m_renderOffset = {};
 	SetRenderBufferDirty();
 }
-const umath::ScaledTransform *CRenderComponent::GetRenderOffsetTransform() const { return m_renderOffset.has_value() ? &*m_renderOffset : nullptr; }
+const pragma::math::ScaledTransform *CRenderComponent::GetRenderOffsetTransform() const { return m_renderOffset.has_value() ? &*m_renderOffset : nullptr; }
 bool CRenderComponent::IsInPvs(const Vector3 &camPos) const
 {
 	for(auto &c : pragma::get_cgame()->GetWorldComponents()) {
@@ -434,7 +434,7 @@ void CRenderComponent::UpdateMatrices()
 	auto pTrComponent = ent.GetTransformComponent();
 	auto orientation = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	umath::ScaledTransform pose {};
+	pragma::math::ScaledTransform pose {};
 	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsType() != pragma::physics::PhysicsType::SoftBody) {
 		pose.SetOrigin(pPhysComponent != nullptr ? pPhysComponent->GetOrigin() : pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {});
 		pose.SetRotation(orientation);
@@ -471,7 +471,7 @@ std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::Calc
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("render_component_calc_ray_intersection");
-	util::ScopeGuard sg {[]() { ::debug::get_domain().EndTask(); }};
+	pragma::util::ScopeGuard sg {[]() { ::debug::get_domain().EndTask(); }};
 #endif
 	auto &lodMeshes = GetLODMeshes();
 	if(lodMeshes.empty())
@@ -495,21 +495,21 @@ std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::Calc
 	auto d = uvec::length(n);
 	n /= d;
 	float dIntersect;
-	if(umath::intersection::line_aabb(lstart, n, aabb.min, aabb.max, &dIntersect) == umath::intersection::Result::NoIntersection || dIntersect > d)
+	if(pragma::math::intersection::line_aabb(lstart, n, aabb.min, aabb.max, &dIntersect) == pragma::math::intersection::Result::NoIntersection || dIntersect > d)
 		return {};
 
 	auto *mdlC = GetModelComponent();
 	auto *intersectionHandlerC = mdlC ? mdlC->GetIntersectionHandlerComponent() : nullptr;
 	if(intersectionHandlerC) {
-		auto res = intersectionHandlerC->IntersectionTest(lstart, n, umath::CoordinateSpace::Object, 0.f, d);
+		auto res = intersectionHandlerC->IntersectionTest(lstart, n, pragma::math::CoordinateSpace::Object, 0.f, d);
 		if(!res.has_value())
 			return {};
 		pragma::math::intersection::LineMeshResult result {};
 		result.hitPos = start + uvec::get_normal(dir) * res->distance;
 		result.hitValue = res->distance;
-		result.result = umath::intersection::Result::Intersect;
+		result.result = pragma::math::intersection::Result::Intersect;
 		if(precise) {
-			result.precise = ::util::make_shared<pragma::math::intersection::LineMeshResult::Precise>();
+			result.precise = pragma::util::make_shared<pragma::math::intersection::LineMeshResult::Precise>();
 			result.precise->subMesh = res->mesh;
 			result.precise->triIdx = res->primitiveIndex;
 			result.precise->u = res->u;
@@ -533,7 +533,7 @@ std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::Calc
 				if(mdlC->GetHitboxBounds(hb.first, min, max, origin, rot) == false || uvec::length_sqr(min) < 0.001f || uvec::length_sqr(max) < 0.001f)
 					continue;
 				float dist;
-				if(umath::intersection::line_obb(start, dir, min, max, &dist, origin, rot) == false || dist >= closestHitboxDistance)
+				if(pragma::math::intersection::line_obb(start, dir, min, max, &dist, origin, rot) == false || dist >= closestHitboxDistance)
 					continue;
 				closestHitboxDistance = dist;
 				closestHitbox = &hb.second;
@@ -545,7 +545,7 @@ std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::Calc
 				pragma::math::intersection::LineMeshResult result {};
 				result.hitPos = start + dir * closestHitboxDistance;
 				result.hitValue = closestHitboxDistance;
-				result.result = umath::intersection::Result::Intersect;
+				result.result = pragma::math::intersection::Result::Intersect;
 				result.hitbox = closestHitbox;
 				result.boneId = closestHitboxBoneId;
 				return result;
@@ -557,11 +557,11 @@ std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::Calc
 	for(auto &mesh : lodMeshes) {
 		Vector3 min, max;
 		mesh->GetBounds(min, max);
-		if(umath::intersection::line_aabb(lstart, n, min, max, &dIntersect) == umath::intersection::Result::NoIntersection || dIntersect > d)
+		if(pragma::math::intersection::line_aabb(lstart, n, min, max, &dIntersect) == pragma::math::intersection::Result::NoIntersection || dIntersect > d)
 			continue;
 		for(auto &subMesh : mesh->GetSubMeshes()) {
 			subMesh->GetBounds(min, max);
-			if(umath::intersection::line_aabb(lstart, n, min, max, &dIntersect) == umath::intersection::Result::NoIntersection || dIntersect > d)
+			if(pragma::math::intersection::line_aabb(lstart, n, min, max, &dIntersect) == pragma::math::intersection::Result::NoIntersection || dIntersect > d)
 				continue;
 			pragma::math::intersection::LineMeshResult result;
 			if(pragma::math::intersection::line_with_mesh(lstart, ldir, *subMesh, result, true) == false)
@@ -582,7 +582,7 @@ std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::Calc
 }
 void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt)
 {
-	umath::set_flag(m_stateFlags, StateFlags::ExemptFromOcclusionCulling, exempt);
+	pragma::math::set_flag(m_stateFlags, StateFlags::ExemptFromOcclusionCulling, exempt);
 	auto it = std::find(s_ocExemptEntities.begin(), s_ocExemptEntities.end(), this);
 	if(exempt) {
 		if(it == s_ocExemptEntities.end())
@@ -591,17 +591,17 @@ void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt)
 	else if(it != s_ocExemptEntities.end())
 		s_ocExemptEntities.erase(it);
 }
-bool CRenderComponent::IsExemptFromOcclusionCulling() const { return umath::is_flag_set(m_stateFlags, StateFlags::ExemptFromOcclusionCulling); }
-void CRenderComponent::SetRenderBufferDirty() { umath::set_flag(m_stateFlags, StateFlags::RenderBufferDirty); }
-void CRenderComponent::SetRenderBoundsDirty() { umath::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty); }
+bool CRenderComponent::IsExemptFromOcclusionCulling() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::ExemptFromOcclusionCulling); }
+void CRenderComponent::SetRenderBufferDirty() { pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty); }
+void CRenderComponent::SetRenderBoundsDirty() { pragma::math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty); }
 void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, bool bForceBufferUpdate)
 {
 	// Commented because render buffers must not be initialized on a non-main thread
 	// InitializeRenderBuffers();
-	auto updateRenderBuffer = umath::is_flag_set(m_stateFlags, StateFlags::RenderBufferDirty) || bForceBufferUpdate;
+	auto updateRenderBuffer = pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderBufferDirty) || bForceBufferUpdate;
 	auto bufferDirty = false;
 	if(updateRenderBuffer) {
-		umath::set_flag(m_stateFlags, StateFlags::RenderBufferDirty, false);
+		pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty, false);
 		UpdateMatrices();
 
 		// Update Render Buffer
@@ -677,30 +677,30 @@ bool CRenderComponent::AddToRenderGroup(const std::string &name)
 	AddToRenderGroup(*mask);
 	return true;
 }
-const util::PEnumProperty<pragma::rendering::SceneRenderPass> &CRenderComponent::GetSceneRenderPassProperty() const { return m_renderPass; }
+const pragma::util::PEnumProperty<pragma::rendering::SceneRenderPass> &CRenderComponent::GetSceneRenderPassProperty() const { return m_renderPass; }
 pragma::rendering::SceneRenderPass CRenderComponent::GetSceneRenderPass() const { return *m_renderPass; }
 void CRenderComponent::SetHidden(bool hidden)
 {
 	if(hidden == IsHidden())
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::Hidden, hidden);
+	pragma::math::set_flag(m_stateFlags, StateFlags::Hidden, hidden);
 	PropagateHiddenState();
 	UpdateVisibility();
 }
 bool CRenderComponent::IsHidden() const
 {
 	if(ShouldIgnoreAncestorVisibility())
-		return umath::is_flag_set(m_stateFlags, StateFlags::Hidden);
-	return umath::is_flag_set(m_stateFlags, StateFlags::Hidden | StateFlags::AncestorHidden);
+		return pragma::math::is_flag_set(m_stateFlags, StateFlags::Hidden);
+	return pragma::math::is_flag_set(m_stateFlags, StateFlags::Hidden | StateFlags::AncestorHidden);
 }
 bool CRenderComponent::IsVisible() const { return !IsHidden() && *m_renderPass != pragma::rendering::SceneRenderPass::None; }
 void CRenderComponent::SetIgnoreAncestorVisibility(bool ignoreVisibility)
 {
-	umath::set_flag(m_stateFlags, StateFlags::IgnoreAncestorVisibility, ignoreVisibility);
+	pragma::math::set_flag(m_stateFlags, StateFlags::IgnoreAncestorVisibility, ignoreVisibility);
 	PropagateHiddenState();
 	UpdateVisibility();
 }
-bool CRenderComponent::ShouldIgnoreAncestorVisibility() const { return umath::is_flag_set(m_stateFlags, StateFlags::IgnoreAncestorVisibility); }
+bool CRenderComponent::ShouldIgnoreAncestorVisibility() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::IgnoreAncestorVisibility); }
 void CRenderComponent::UpdateAncestorHiddenState()
 {
 	auto parentHidden = false;
@@ -719,9 +719,9 @@ void CRenderComponent::UpdateAncestorHiddenState()
 			entParent = entParent->GetParent();
 		}
 	}
-	if(umath::is_flag_set(m_stateFlags, StateFlags::AncestorHidden) == parentHidden)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::AncestorHidden) == parentHidden)
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::AncestorHidden, parentHidden);
+	pragma::math::set_flag(m_stateFlags, StateFlags::AncestorHidden, parentHidden);
 	UpdateVisibility();
 }
 void CRenderComponent::PropagateHiddenState()
@@ -737,7 +737,7 @@ void CRenderComponent::PropagateHiddenState()
 				continue;
 			auto renderC = hChild->GetEntity().GetComponent<CRenderComponent>();
 			if(renderC.valid()) {
-				umath::set_flag(renderC->m_stateFlags, StateFlags::AncestorHidden, hidden);
+				pragma::math::set_flag(renderC->m_stateFlags, StateFlags::AncestorHidden, hidden);
 				renderC->UpdateVisibility();
 			}
 			propagate(hChild->GetEntity());
@@ -773,7 +773,7 @@ void CRenderComponent::SetSceneRenderPass(pragma::rendering::SceneRenderPass pas
 
 	UpdateVisibility();
 }
-bool CRenderComponent::IsInRenderGroup(pragma::rendering::RenderGroup group) const { return umath::is_flag_set(GetRenderGroups(), group); }
+bool CRenderComponent::IsInRenderGroup(pragma::rendering::RenderGroup group) const { return pragma::math::is_flag_set(GetRenderGroups(), group); }
 void CRenderComponent::AddToRenderGroup(pragma::rendering::RenderGroup group) { SetRenderGroups(GetRenderGroups() | group); }
 bool CRenderComponent::RemoveFromRenderGroup(const std::string &name)
 {
@@ -801,12 +801,12 @@ void CRenderComponent::InitializeRenderBuffers()
 		return;
 
 	pragma::get_cengine()->GetRenderContext().WaitIdle();
-	umath::set_flag(m_stateFlags, StateFlags::RenderBufferDirty);
+	pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty);
 	m_renderBuffer = s_instanceBuffer->AllocateBuffer();
 	if(!m_renderBuffer)
 		return;
 	m_renderDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
-	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*m_renderBuffer, umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::Instance));
+	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*m_renderBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::Instance));
 	UpdateBoneBuffer();
 	m_renderDescSetGroup->GetDescriptorSet()->Update();
 	UpdateInstantiability();
@@ -825,7 +825,7 @@ void CRenderComponent::UpdateBoneBuffer()
 	if(!buf)
 		return;
 	pragma::get_cengine()->GetRenderContext().WaitIdle();
-	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*buf), umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
+	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*buf), pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
 	m_renderDescSetGroup->GetDescriptorSet()->Update();
 }
 void CRenderComponent::ClearRenderBuffers()
@@ -839,12 +839,12 @@ void CRenderComponent::ClearRenderBuffers()
 	m_renderDescSetGroup = nullptr;
 }
 pragma::rendering::RenderGroup CRenderComponent::GetRenderGroups() const { return *m_renderGroups; }
-const util::PEnumProperty<pragma::rendering::RenderGroup> &CRenderComponent::GetRenderGroupsProperty() const { return m_renderGroups; }
-bool CRenderComponent::ShouldDraw() const { return m_renderBuffer && umath::is_flag_set(m_stateFlags, StateFlags::ShouldDraw); }
+const pragma::util::PEnumProperty<pragma::rendering::RenderGroup> &CRenderComponent::GetRenderGroupsProperty() const { return m_renderGroups; }
+bool CRenderComponent::ShouldDraw() const { return m_renderBuffer && pragma::math::is_flag_set(m_stateFlags, StateFlags::ShouldDraw); }
 bool CRenderComponent::ShouldDrawShadow() const
 {
 	// TODO: Streamline this! We only need one flag!
-	return m_renderBuffer && umath::is_flag_set(m_stateFlags, StateFlags::ShouldDrawShadow) && !umath::is_flag_set(m_stateFlags, StateFlags::DisableShadows) && GetCastShadows();
+	return m_renderBuffer && pragma::math::is_flag_set(m_stateFlags, StateFlags::ShouldDrawShadow) && !pragma::math::is_flag_set(m_stateFlags, StateFlags::DisableShadows) && GetCastShadows();
 }
 
 pragma::rendering::RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)
@@ -915,7 +915,7 @@ void CRenderComponent::ClearBuffers()
 	pragma::clear_vertex_animation_buffer();
 	CRaytracingComponent::ClearBuffers();
 }
-void CRenderComponent::SetTranslucencyPassDistanceOverride(double distance) { m_translucencyPassDistanceOverrideSqr = umath::pow2(distance); }
+void CRenderComponent::SetTranslucencyPassDistanceOverride(double distance) { m_translucencyPassDistanceOverrideSqr = pragma::math::pow2(distance); }
 void CRenderComponent::ClearTranslucencyPassDistanceOverride() { m_translucencyPassDistanceOverrideSqr = {}; }
 const std::optional<double> &CRenderComponent::GetTranslucencyPassDistanceOverrideSqr() const { return m_translucencyPassDistanceOverrideSqr; }
 
@@ -943,17 +943,17 @@ void CEShouldDraw::HandleReturnValues(lua::State *l)
 
 /////////////////
 
-CEOnUpdateRenderMatrices::CEOnUpdateRenderMatrices(umath::ScaledTransform &pose, Mat4 &transformation) : pose {pose}, transformation {transformation} {}
+CEOnUpdateRenderMatrices::CEOnUpdateRenderMatrices(pragma::math::ScaledTransform &pose, Mat4 &transformation) : pose {pose}, transformation {transformation} {}
 void CEOnUpdateRenderMatrices::PushArguments(lua::State *l)
 {
-	Lua::Push<umath::ScaledTransform>(l, pose);
+	Lua::Push<pragma::math::ScaledTransform>(l, pose);
 	Lua::Push<Mat4>(l, transformation);
 }
 uint32_t CEOnUpdateRenderMatrices::GetReturnCount() { return 3; }
 void CEOnUpdateRenderMatrices::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -2))
-		pose = Lua::Check<umath::ScaledTransform>(l, -2);
+		pose = Lua::Check<pragma::math::ScaledTransform>(l, -2);
 	if(Lua::IsSet(l, -1))
 		transformation = Lua::Check<::Mat4>(l, -1);
 }
@@ -981,11 +981,11 @@ void CEOnRenderBoundsChanged::PushArguments(lua::State *l)
 
 /////////////////
 
-void pragma::rendering::RenderBufferData::SetDepthPrepassEnabled(bool enabled) { umath::set_flag(stateFlags, StateFlags::EnableDepthPrepass, enabled); }
-bool pragma::rendering::RenderBufferData::IsDepthPrepassEnabled() const { return umath::is_flag_set(stateFlags, StateFlags::EnableDepthPrepass); }
+void pragma::rendering::RenderBufferData::SetDepthPrepassEnabled(bool enabled) { pragma::math::set_flag(stateFlags, StateFlags::EnableDepthPrepass, enabled); }
+bool pragma::rendering::RenderBufferData::IsDepthPrepassEnabled() const { return pragma::math::is_flag_set(stateFlags, StateFlags::EnableDepthPrepass); }
 
-void pragma::rendering::RenderBufferData::SetGlowPassEnabled(bool enabled) { umath::set_flag(stateFlags, StateFlags::EnableGlowPass, enabled); }
-bool pragma::rendering::RenderBufferData::IsGlowPassEnabled() const { return umath::is_flag_set(stateFlags, StateFlags::EnableGlowPass); }
+void pragma::rendering::RenderBufferData::SetGlowPassEnabled(bool enabled) { pragma::math::set_flag(stateFlags, StateFlags::EnableGlowPass, enabled); }
+bool pragma::rendering::RenderBufferData::IsGlowPassEnabled() const { return pragma::math::is_flag_set(stateFlags, StateFlags::EnableGlowPass); }
 
 static void debug_entity_render_buffer(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
@@ -1061,10 +1061,10 @@ namespace Lua::Render {
 
 		auto result = hComponent.CalcRayIntersection(start, dir, precise);
 		if(result.has_value() == false) {
-			Lua::PushInt(l, umath::to_integral(umath::intersection::Result::NoIntersection));
+			Lua::PushInt(l, pragma::math::to_integral(pragma::math::intersection::Result::NoIntersection));
 			return;
 		}
-		Lua::Push(l, umath::to_integral(result->result));
+		Lua::Push(l, pragma::math::to_integral(result->result));
 
 		auto t = Lua::CreateTable(l);
 
@@ -1254,7 +1254,7 @@ void CRenderComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modE
 	defCRender.def("SetDepthBias", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, float, float)>([](lua::State *l, pragma::CRenderComponent &hComponent, float d, float delta) { hComponent.SetDepthBias(d, delta); }));
 	defCRender.def("ClearDepthBias", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearDepthBias(); }));
 	defCRender.def("GetRenderPose", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { Lua::Push(l, hComponent.GetRenderPose()); }));
-	defCRender.def("SetRenderOffsetTransform", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, const umath::ScaledTransform &)>([](lua::State *l, pragma::CRenderComponent &hComponent, const umath::ScaledTransform &pose) { hComponent.SetRenderOffsetTransform(pose); }));
+	defCRender.def("SetRenderOffsetTransform", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, const pragma::math::ScaledTransform &)>([](lua::State *l, pragma::CRenderComponent &hComponent, const pragma::math::ScaledTransform &pose) { hComponent.SetRenderOffsetTransform(pose); }));
 	defCRender.def("ClearRenderOffsetTransform", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearRenderOffsetTransform(); }));
 	defCRender.def("GetRenderOffsetTransform", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) {
 		auto *t = hComponent.GetRenderOffsetTransform();

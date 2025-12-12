@@ -23,9 +23,9 @@ export namespace pragma::gui::types {
 		virtual ~WIKeyEntry() override;
 		virtual void Initialize() override;
 		virtual void SetSize(int x, int y) override;
-		virtual util::EventReply KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
-		virtual util::EventReply ScrollCallback(Vector2 offset, bool offsetAsPixels = false) override;
-		virtual util::EventReply CharCallback(unsigned int c, pragma::platform::Modifier mods = pragma::platform::Modifier::None) override;
+		virtual pragma::util::EventReply KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual pragma::util::EventReply ScrollCallback(Vector2 offset, bool offsetAsPixels = false) override;
+		virtual pragma::util::EventReply CharCallback(unsigned int c, pragma::platform::Modifier mods = pragma::platform::Modifier::None) override;
 		virtual void OnFocusGained() override;
 		virtual void OnFocusKilled() override;
 		void SetKey(pragma::platform::Key key);

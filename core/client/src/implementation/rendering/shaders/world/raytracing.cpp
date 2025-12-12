@@ -18,7 +18,7 @@ decltype(ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT) ShaderRayTracing::DESCRI
 decltype(ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE) ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE = {
   "SCENE",
   {
-    prosper::DescriptorSetInfo::Binding {"TEXTURES", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit, umath::to_integral(pragma::GameLimits::MaxImageArrayLayers)},
+    prosper::DescriptorSetInfo::Binding {"TEXTURES", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit, pragma::math::to_integral(pragma::GameLimits::MaxImageArrayLayers)},
     prosper::DescriptorSetInfo::Binding {"MATERIALS", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
     prosper::DescriptorSetInfo::Binding {"SUB_MESH_INFOS", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
     prosper::DescriptorSetInfo::Binding {"ENTITY_INSTANCE_DATA", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},

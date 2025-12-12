@@ -60,15 +60,15 @@ struct TestSharedFromThis
 	float x = 5.f;
 };
 
-static std::shared_ptr<TestSharedFromThis> g_shared_from_this = ::util::make_shared<TestSharedFromThis>();
+static std::shared_ptr<TestSharedFromThis> g_shared_from_this = pragma::util::make_shared<TestSharedFromThis>();
 static TestSharedFromThis *test_shared_from_this_policy_ret()
 {
 	return g_shared_from_this.get();
 }
 
-static util::PFloatProperty test_property_policy_ret()
+static pragma::util::PFloatProperty test_property_policy_ret()
 {
-	return util::FloatProperty::Create(111.f);
+	return pragma::util::FloatProperty::Create(111.f);
 }
 
 static std::optional<std::string> test_optional_policy_ret(int i)

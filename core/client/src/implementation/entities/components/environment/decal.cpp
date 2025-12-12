@@ -21,7 +21,7 @@ using namespace pragma;
 DecalProjector::DecalProjector(const Vector3 &pos, const Quat &rot, float size) : m_pose {pos, rot}, m_size {size} {}
 const Vector3 &DecalProjector::GetPos() const { return m_pose.GetOrigin(); }
 const Quat &DecalProjector::GetRotation() const { return m_pose.GetRotation(); }
-const umath::Transform &DecalProjector::GetPose() const { return m_pose; }
+const pragma::math::Transform &DecalProjector::GetPose() const { return m_pose; }
 float DecalProjector::GetSize() const { return m_size; }
 std::pair<Vector3, Vector3> DecalProjector::GetAABB() const
 {
@@ -62,8 +62,8 @@ std::vector<DecalProjector::VertexInfo> DecalProjector::CropTriangleVertsByLine(
 	pointsOutOfBounds.resize(verts.size());
 	for(auto i = decltype(verts.size()) {0u}; i < verts.size(); ++i) {
 		auto &vInfo = verts.at(i);
-		auto side = umath::geometry::get_side_of_point_to_line(lineStart, lineEnd, vInfo.position);
-		pointsOutOfBounds.at(i) = (side == umath::geometry::LineSide::Right);
+		auto side = pragma::math::geometry::get_side_of_point_to_line(lineStart, lineEnd, vInfo.position);
+		pointsOutOfBounds.at(i) = (side == pragma::math::geometry::LineSide::Right);
 	}
 
 	std::vector<VertexInfo> newVerts {};
@@ -77,17 +77,17 @@ std::vector<DecalProjector::VertexInfo> DecalProjector::CropTriangleVertsByLine(
 
 		// Check if the line to the next vertex crosses the bounds
 		if((pointsOutOfBounds.at(v0Idx) == true && pointsOutOfBounds.at(v1Idx) == false) || (pointsOutOfBounds.at(v0Idx) == false && pointsOutOfBounds.at(v1Idx) == true)) {
-			auto intersectionPos = umath::intersection::line_line(lineStart, lineEnd, verts.at(v0Idx).position, verts.at(v1Idx).position);
+			auto intersectionPos = pragma::math::intersection::line_line(lineStart, lineEnd, verts.at(v0Idx).position, verts.at(v1Idx).position);
 			if(intersectionPos.has_value()) {
 				float u, v;
-				if(umath::geometry::calc_barycentric_coordinates(v0, v1, v2, Vector3 {intersectionPos->x, intersectionPos->y, 0.f}, u, v))
+				if(pragma::math::geometry::calc_barycentric_coordinates(v0, v1, v2, Vector3 {intersectionPos->x, intersectionPos->y, 0.f}, u, v))
 					newVerts.push_back({*intersectionPos, std::numeric_limits<uint32_t>::max(), Vector2 {u, v}});
 			}
 		}
 	}
 	return newVerts;
 }
-bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, std::vector<umath::Vertex> &outVerts, std::vector<uint16_t> &outTris)
+bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, std::vector<pragma::math::Vertex> &outVerts, std::vector<uint16_t> &outTris)
 {
 	auto bounds = GetProjectorCubeBounds();
 
@@ -96,7 +96,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, s
 	auto &n = forward;
 	auto d = 0.f;
 
-	// umath::Plane p {n,d};
+	// pragma::math::Plane p {n,d};
 	// p = GetPose() *p;
 	// pragma::get_cgame()->DrawPlane(p.GetNormal(),p.GetDistance(),Color{0,0,255,64},12.f);
 
@@ -126,7 +126,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, s
 					auto p1 = effectivePose * v1.position;
 					auto p2 = effectivePose * v2.position;
 
-					if(umath::intersection::aabb_triangle(bounds.first, bounds.second, p0, p1, p2) == false)
+					if(pragma::math::intersection::aabb_triangle(bounds.first, bounds.second, p0, p1, p2) == false)
 						continue;
 					intersectingTris.push_back({indices, std::array<Vector3, 3> {p0, p1, p2}});
 				}
@@ -147,7 +147,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, s
 				auto &p2 = triInfo.vertices.at(2);
 
 				std::array<Vector3, 3> vertsPs = {uvec::project_to_plane(triInfo.vertices.at(0), n, d), uvec::project_to_plane(triInfo.vertices.at(1), n, d), uvec::project_to_plane(triInfo.vertices.at(2), n, d)};
-				auto area = umath::geometry::calc_triangle_area(vertsPs.at(0), vertsPs.at(1), vertsPs.at(2));
+				auto area = pragma::math::geometry::calc_triangle_area(vertsPs.at(0), vertsPs.at(1), vertsPs.at(2));
 				constexpr auto AREA_EPSILON = 0.004f;
 				if(area < AREA_EPSILON)
 					continue; // Points don't actually create a triangle; skip it; TODO: It would be cheaper to use dot products for this!
@@ -316,7 +316,7 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector, const std::vector<De
 	auto *mat = pragma::get_client_state()->LoadMaterial(GetMaterial());
 	if(mat == nullptr)
 		return false;
-	std::vector<umath::Vertex> verts;
+	std::vector<pragma::math::Vertex> verts;
 	std::vector<uint16_t> tris;
 	if(projector.GenerateDecalMesh(meshDatas, verts, tris) == false)
 		return false;

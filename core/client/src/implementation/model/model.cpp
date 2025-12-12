@@ -12,8 +12,8 @@ import :client_state;
 
 pragma::asset::CModel::CModel(pragma::NetworkState *nw, unsigned int numBones, const std::string &name) : pragma::asset::Model(nw, numBones, name) {}
 
-std::shared_ptr<pragma::geometry::ModelMesh> pragma::asset::CModel::CreateMesh() const { return ::util::make_shared<pragma::geometry::CModelMesh>(); }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::asset::CModel::CreateSubMesh() const { return ::util::make_shared<pragma::geometry::CModelSubMesh>(); }
+std::shared_ptr<pragma::geometry::ModelMesh> pragma::asset::CModel::CreateMesh() const { return pragma::util::make_shared<pragma::geometry::CModelMesh>(); }
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::asset::CModel::CreateSubMesh() const { return pragma::util::make_shared<pragma::geometry::CModelSubMesh>(); }
 
 void pragma::asset::CModel::PrecacheTextureGroup(uint32_t i) { pragma::asset::Model::PrecacheTextureGroup(i); }
 

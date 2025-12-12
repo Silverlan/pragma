@@ -30,8 +30,8 @@ export namespace pragma {
 		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitInfo &outHitInfo) const;
 		bool IntersectionTestAabb(const Vector3 &min, const Vector3 &max) const;
 		bool IntersectionTestAabb(const Vector3 &min, const Vector3 &max, IntersectionInfo &outIntersectionInfo) const;
-		bool IntersectionTestKDop(const std::vector<umath::Plane> &planes) const;
-		bool IntersectionTestKDop(const std::vector<umath::Plane> &planes, IntersectionInfo &outIntersectionInfo) const;
+		bool IntersectionTestKDop(const std::vector<pragma::math::Plane> &planes) const;
+		bool IntersectionTestKDop(const std::vector<pragma::math::Plane> &planes, IntersectionInfo &outIntersectionInfo) const;
 		void SetStaticCache(BaseStaticBvhCacheComponent *staticCache);
 		virtual bool IsStaticBvh() const { return false; }
 		const bvh::MeshRange *FindPrimitiveMeshInfo(size_t primIdx) const;
@@ -52,7 +52,7 @@ export namespace pragma {
 
 		// For internal use only
 		struct DLLNETWORK BvhBuildInfo {
-			const std::vector<umath::ScaledTransform> *poses = nullptr;
+			const std::vector<pragma::math::ScaledTransform> *poses = nullptr;
 			std::function<bool()> isCancelled = nullptr;
 			std::function<bool(const pragma::geometry::ModelSubMesh &, uint32_t)> shouldConsiderMesh = nullptr;
 		};

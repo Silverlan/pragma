@@ -8,15 +8,15 @@ import :util.core;
 
 import pragma.oskit;
 
-util::ParallelJob<std::vector<Vector2> &> util::generate_lightmap_uvs(pragma::NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<umath::Vertex> &verts, const std::vector<uint32_t> &tris)
+pragma::util::ParallelJob<std::vector<Vector2> &> pragma::util::generate_lightmap_uvs(pragma::NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<pragma::math::Vertex> &verts, const std::vector<uint32_t> &tris)
 {
 	auto lib = nwState.InitializeLibrary("pr_uvatlas");
 	if(lib == nullptr)
 		return {};
-	auto *fGenerateAtlasUvs = lib->FindSymbolAddress<void (*)(uint32_t, uint32_t, const std::vector<umath::Vertex> &, const std::vector<uint32_t> &, util::ParallelJob<std::vector<Vector2> &> &)>("pr_uvatlas_generate_atlas_uvs");
+	auto *fGenerateAtlasUvs = lib->FindSymbolAddress<void (*)(uint32_t, uint32_t, const std::vector<pragma::math::Vertex> &, const std::vector<uint32_t> &, pragma::util::ParallelJob<std::vector<Vector2> &> &)>("pr_uvatlas_generate_atlas_uvs");
 	if(fGenerateAtlasUvs == nullptr)
 		return {};
-	util::ParallelJob<std::vector<Vector2> &> job {};
+	pragma::util::ParallelJob<std::vector<Vector2> &> job {};
 	fGenerateAtlasUvs(atlastWidth, atlasHeight, verts, tris, job);
 	if(job.IsValid() == false)
 		return {};
@@ -77,7 +77,7 @@ static bool print_code_snippet(ufile::IFile &f, uint32_t lineIdx, uint32_t charI
 template<typename T>
 static std::shared_ptr<udm::Data> load_udm_asset(T &&f, std::string *optOutErr)
 {
-	using TBase = util::base_type<T>;
+	using TBase = pragma::util::base_type<T>;
 	VFilePtr fptr = nullptr;
 	try {
 		if constexpr(std::is_same_v<TBase, std::string>)
@@ -97,8 +97,8 @@ static std::shared_ptr<udm::Data> load_udm_asset(T &&f, std::string *optOutErr)
 		else {
 			auto *ptr = static_cast<VFilePtrInternalReal *>(fptr.get());
 			if(ptr) {
-				auto path = util::Path::CreateFile(ptr->GetPath());
-				path.MakeRelative(util::get_program_path());
+				auto path = pragma::util::Path::CreateFile(ptr->GetPath());
+				path.MakeRelative(pragma::util::get_program_path());
 				Con::cwar << " '" << path.GetString() << "'";
 			}
 		}
@@ -124,38 +124,38 @@ static std::shared_ptr<udm::Data> load_udm_asset(T &&f, std::string *optOutErr)
 	}
 	return nullptr;
 }
-std::shared_ptr<udm::Data> util::load_udm_asset(const std::string &fileName, std::string *optOutErr) { return ::load_udm_asset(fileName, optOutErr); }
-std::shared_ptr<udm::Data> util::load_udm_asset(std::unique_ptr<ufile::IFile> &&f, std::string *optOutErr) { return ::load_udm_asset(std::move(f), optOutErr); }
+std::shared_ptr<udm::Data> pragma::util::load_udm_asset(const std::string &fileName, std::string *optOutErr) { return ::load_udm_asset(fileName, optOutErr); }
+std::shared_ptr<udm::Data> pragma::util::load_udm_asset(std::unique_ptr<ufile::IFile> &&f, std::string *optOutErr) { return ::load_udm_asset(std::move(f), optOutErr); }
 
-void util::write_udm_entity(udm::LinkedPropertyWrapperArg udm, EntityHandle &hEnt)
+void pragma::util::write_udm_entity(udm::LinkedPropertyWrapperArg udm, EntityHandle &hEnt)
 {
 	if(hEnt.valid())
-		udm = util::uuid_to_string(hEnt->GetUuid());
+		udm = pragma::util::uuid_to_string(hEnt->GetUuid());
 }
-EntityHandle util::read_udm_entity(pragma::Game &game, udm::LinkedPropertyWrapperArg udm)
+EntityHandle pragma::util::read_udm_entity(pragma::Game &game, udm::LinkedPropertyWrapperArg udm)
 {
 	std::string uuid;
 	udm(uuid);
-	if(util::is_uuid(uuid)) {
+	if(pragma::util::is_uuid(uuid)) {
 		pragma::ecs::EntityIterator entIt {game, pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
-		entIt.AttachFilter<EntityIteratorFilterUuid>(util::uuid_string_to_bytes(uuid));
+		entIt.AttachFilter<EntityIteratorFilterUuid>(pragma::util::uuid_string_to_bytes(uuid));
 		auto it = entIt.begin();
 		auto *ent = (it != entIt.end()) ? *it : nullptr;
 		return ent ? ent->GetHandle() : EntityHandle {};
 	}
 	return EntityHandle {};
 }
-EntityHandle util::read_udm_entity(::pragma::BaseEntityComponent &c, udm::LinkedPropertyWrapperArg udm) { return read_udm_entity(*c.GetEntity().GetNetworkState()->GetGameState(), udm); }
+EntityHandle pragma::util::read_udm_entity(::pragma::BaseEntityComponent &c, udm::LinkedPropertyWrapperArg udm) { return read_udm_entity(*c.GetEntity().GetNetworkState()->GetGameState(), udm); }
 
-std::shared_ptr<util::HairFile> util::HairFile::Load(const udm::AssetData &data, std::string &outErr)
+std::shared_ptr<pragma::util::HairFile> pragma::util::HairFile::Load(const udm::AssetData &data, std::string &outErr)
 {
 	auto anim = Create();
 	if(anim->LoadFromAssetData(data, outErr) == false)
 		return nullptr;
 	return anim;
 }
-std::shared_ptr<util::HairFile> util::HairFile::Create() { return std::shared_ptr<HairFile> {new HairFile {}}; }
-bool util::HairFile::Save(udm::AssetData &outData, std::string &outErr) const
+std::shared_ptr<pragma::util::HairFile> pragma::util::HairFile::Create() { return std::shared_ptr<HairFile> {new HairFile {}}; }
+bool pragma::util::HairFile::Save(udm::AssetData &outData, std::string &outErr) const
 {
 	outData.SetAssetType(PHAIR_IDENTIFIER);
 	outData.SetAssetVersion(PHAIR_VERSION);
@@ -183,7 +183,7 @@ bool util::HairFile::Save(udm::AssetData &outData, std::string &outErr) const
 		udmData["barycentricCoords"] = udm::compress_lz4_blob(m_hairData.hairPointBarycentric);
 	return true;
 }
-bool util::HairFile::LoadFromAssetData(const udm::AssetData &data, std::string &outErr)
+bool pragma::util::HairFile::LoadFromAssetData(const udm::AssetData &data, std::string &outErr)
 {
 	if(data.GetAssetType() != PHAIR_IDENTIFIER) {
 		outErr = "Incorrect format!";
@@ -215,7 +215,7 @@ bool util::HairFile::LoadFromAssetData(const udm::AssetData &data, std::string &
 	return true;
 }
 
-std::optional<std::string> util::convert_udm_file_to_ascii(const std::string &fileName, std::string &outErr)
+std::optional<std::string> pragma::util::convert_udm_file_to_ascii(const std::string &fileName, std::string &outErr)
 {
 	auto formatType = udm::Data::GetFormatType(fileName, outErr);
 	if(formatType.has_value() == false) {
@@ -224,7 +224,7 @@ std::optional<std::string> util::convert_udm_file_to_ascii(const std::string &fi
 	}
 	if(*formatType == udm::FormatType::Ascii)
 		return fileName; // Already in ascii format
-	auto udmData = util::load_udm_asset(fileName, &outErr);
+	auto udmData = pragma::util::load_udm_asset(fileName, &outErr);
 	if(udmData == nullptr) {
 		outErr = "Unable to load UDM data: " + outErr;
 		return {};
@@ -234,8 +234,8 @@ std::optional<std::string> util::convert_udm_file_to_ascii(const std::string &fi
 		outErr = "Unable to locate UDM file on disk!";
 		return {};
 	}
-	auto path = util::Path::CreateFile(rpath);
-	path.MakeRelative(util::get_program_path());
+	auto path = pragma::util::Path::CreateFile(rpath);
+	path.MakeRelative(pragma::util::get_program_path());
 	auto outFileName = path.GetString();
 	std::string ext;
 	ufile::get_extension(outFileName, &ext);
@@ -259,7 +259,7 @@ std::optional<std::string> util::convert_udm_file_to_ascii(const std::string &fi
 	filemanager::remove_file(fileName);
 	return Lua::file::to_relative_path(outFileName);
 }
-std::optional<std::string> util::convert_udm_file_to_binary(const std::string &fileName, std::string &outErr)
+std::optional<std::string> pragma::util::convert_udm_file_to_binary(const std::string &fileName, std::string &outErr)
 {
 	auto formatType = udm::Data::GetFormatType(fileName, outErr);
 	if(formatType.has_value() == false) {
@@ -268,7 +268,7 @@ std::optional<std::string> util::convert_udm_file_to_binary(const std::string &f
 	}
 	if(*formatType == udm::FormatType::Binary)
 		return fileName; // Already in binary format
-	auto udmData = util::load_udm_asset(fileName, &outErr);
+	auto udmData = pragma::util::load_udm_asset(fileName, &outErr);
 	if(udmData == nullptr) {
 		outErr = "Unable to load UDM data: " + outErr;
 		return {};
@@ -278,8 +278,8 @@ std::optional<std::string> util::convert_udm_file_to_binary(const std::string &f
 		outErr = "Unable to locate UDM file on disk!";
 		return {};
 	}
-	auto path = util::Path::CreateFile(rpath);
-	path.MakeRelative(util::get_program_path());
+	auto path = pragma::util::Path::CreateFile(rpath);
+	path.MakeRelative(pragma::util::get_program_path());
 	auto outFileName = path.GetString();
 	std::string ext;
 	ufile::get_extension(outFileName, &ext);
@@ -367,7 +367,7 @@ static void generate_two_pass_gaussian_blur_coefficients(uint32_t uradius, doubl
 	}
 }
 
-std::pair<std::vector<double>, std::vector<double>> util::generate_two_pass_gaussian_blur_coefficients(uint32_t radius, double sigma, bool linear, bool correction)
+std::pair<std::vector<double>, std::vector<double>> pragma::util::generate_two_pass_gaussian_blur_coefficients(uint32_t radius, double sigma, bool linear, bool correction)
 {
 	std::vector<double> offsets;
 	std::vector<double> weights;
@@ -378,23 +378,23 @@ std::pair<std::vector<double>, std::vector<double>> util::generate_two_pass_gaus
 
 extern std::string g_lpUserDataDir;
 extern std::vector<std::string> g_lpResourceDirs;
-util::Path util::get_user_data_dir()
+pragma::util::Path pragma::util::get_user_data_dir()
 {
 	if(!g_lpUserDataDir.empty())
 		return g_lpUserDataDir;
-	return util::get_program_path();
+	return pragma::util::get_program_path();
 }
 
-std::vector<util::Path> util::get_resource_dirs()
+std::vector<pragma::util::Path> pragma::util::get_resource_dirs()
 {
-	std::vector<util::Path> paths;
+	std::vector<pragma::util::Path> paths;
 	paths.reserve(g_lpResourceDirs.size());
 	for(auto &path : g_lpResourceDirs)
 		paths.push_back(path);
 	return paths;
 }
 
-bool util::show_notification(const std::string &summary, const std::string &body)
+bool pragma::util::show_notification(const std::string &summary, const std::string &body)
 {
 	if(pragma::get_engine()->IsCLIOnly())
 		return false;

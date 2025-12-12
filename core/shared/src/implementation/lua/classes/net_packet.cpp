@@ -128,7 +128,7 @@ void Lua::NetPacket::ReadALSound(lua::State *l, ::NetPacket &packet)
 void Lua::NetPacket::GetTimeSinceTransmission(lua::State *l, ::NetPacket &packet)
 {
 	auto tActivated = packet.GetTimeActivated();
-	auto tCur = ::util::clock::to_int(::util::clock::get_duration_since_start());
+	auto tCur = pragma::util::clock::to_int(pragma::util::clock::get_duration_since_start());
 	auto t = (tCur - tActivated) / 1'000'000.0;
 	Lua::PushNumber(l, t);
 }

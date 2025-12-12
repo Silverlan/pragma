@@ -169,9 +169,9 @@ void CMD_entities_cl(pragma::NetworkState *state, pragma::BasePlayerComponent *p
 	if(argv.size() > 1)
 		modelName = '*' + argv[1] + '*';
 	for(auto &pair : sortedEnts) {
-		if(className.has_value() && ustring::match(pair.first->GetClass().c_str(), className->c_str()) == false)
+		if(className.has_value() && pragma::string::match(pair.first->GetClass().c_str(), className->c_str()) == false)
 			continue;
-		if(modelName.has_value() && ustring::match(pair.first->GetModelName().c_str(), modelName->c_str()) == false)
+		if(modelName.has_value() && pragma::string::match(pair.first->GetModelName().c_str(), modelName->c_str()) == false)
 			continue;
 		Con::cout << *pair.first << Con::endl;
 	}
@@ -192,7 +192,7 @@ void CMD_thirdperson(pragma::NetworkState *state, pragma::BasePlayerComponent *p
 		return;
 	auto bThirdPerson = false;
 	if(!argv.empty())
-		bThirdPerson = (ustring::to_int(argv.front()) != 0) ? true : false;
+		bThirdPerson = (pragma::string::to_int(argv.front()) != 0) ? true : false;
 	else
 		bThirdPerson = (observer->GetObserverMode() != ObserverMode::ThirdPerson) ? true : false;
 	auto obsTarget = observer->GetObserverTarget();
@@ -211,9 +211,9 @@ void CMD_setpos(pragma::NetworkState *state, pragma::BasePlayerComponent *, std:
 	if(!pragma::check_cheats("setpos", cstate))
 		return;
     Vector3 pos {
-		ustring::to_float(argv[0]),
-		ustring::to_float(argv[1]),
-		ustring::to_float(argv[2])
+		pragma::string::to_float(argv[0]),
+		pragma::string::to_float(argv[1]),
+		pragma::string::to_float(argv[2])
     };
 	NetPacket p;
 	pragma::networking::write_vector(p, pos);
@@ -249,9 +249,9 @@ void CMD_setcampos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	if(!pragma::check_cheats("setpos", cstate))
 		return;
     Vector3 pos {
-		ustring::to_float(argv[0]),
-		ustring::to_float(argv[1]),
-		ustring::to_float(argv[2])
+		pragma::string::to_float(argv[0]),
+		pragma::string::to_float(argv[1]),
+		pragma::string::to_float(argv[2])
     };
 	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera<pragma::CCameraComponent>();
@@ -286,7 +286,7 @@ void CMD_setang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, st
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
 		return;
-	EulerAngles ang(util::to_float(argv[0]), util::to_float(argv[1]), util::to_float(argv[2]));
+	EulerAngles ang(pragma::util::to_float(argv[0]), pragma::util::to_float(argv[1]), pragma::util::to_float(argv[2]));
 	charComponent->SetViewAngles(ang);
 }
 
@@ -314,7 +314,7 @@ void CMD_setcamang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	auto *cstate = static_cast<pragma::ClientState *>(state);
 	if(!pragma::check_cheats("setpos", cstate))
 		return;
-	EulerAngles ang(util::to_float(argv[0]), util::to_float(argv[1]), util::to_float(argv[2]));
+	EulerAngles ang(pragma::util::to_float(argv[0]), pragma::util::to_float(argv[1]), pragma::util::to_float(argv[2]));
 	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera<pragma::CCameraComponent>();
 	if(pCam == nullptr)
@@ -429,7 +429,7 @@ void CMD_cl_dump_netmessages(pragma::NetworkState *, pragma::BasePlayerComponent
 	std::unordered_map<std::string, unsigned int> *netmessages;
 	map->GetNetMessages(&netmessages);
 	if(!argv.empty()) {
-		auto id = ustring::to_int(argv.front());
+		auto id = pragma::string::to_int(argv.front());
 		for(auto it = netmessages->begin(); it != netmessages->end(); ++it) {
 			if(it->second == id) {
 				Con::cout << "Message Identifier: " << it->first << Con::endl;
@@ -454,10 +454,10 @@ void CMD_screenshot(pragma::NetworkState *, pragma::BasePlayerComponent *, std::
 	pragma::console::parse_command_options(argv, commandOptions);
 
 	auto mode = pragma::console::get_command_option_parameter_value(commandOptions, "mode");
-	if(ustring::compare<std::string>(mode, "raytracing", false)) {
+	if(pragma::string::compare<std::string>(mode, "raytracing", false)) {
 		auto resolution = pragma::get_cengine()->GetRenderResolution();
-		auto width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "width", std::to_string(resolution.x)));
-		auto height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "height", std::to_string(resolution.y)));
+		auto width = pragma::util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "width", std::to_string(resolution.x)));
+		auto height = pragma::util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "height", std::to_string(resolution.y)));
 
 		auto format = uimg::ImageFormat::PNG;
 		auto itFormat = commandOptions.find("format");
@@ -472,8 +472,8 @@ void CMD_screenshot(pragma::NetworkState *, pragma::BasePlayerComponent *, std::
 				Con::cwar << "Unsupported format '" << customFormat << "'! Using PNG instead..." << Con::endl;
 		}
 
-		util::RtScreenshotSettings settings {};
-		settings.samples = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "samples", "1024"));
+		pragma::util::RtScreenshotSettings settings {};
+		settings.samples = pragma::util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "samples", "1024"));
 		settings.denoise = true;
 		auto itDenoise = commandOptions.find("nodenoise");
 		if(itDenoise != commandOptions.end())
@@ -482,7 +482,7 @@ void CMD_screenshot(pragma::NetworkState *, pragma::BasePlayerComponent *, std::
 		auto quality = 1.f;
 		auto itQuality = commandOptions.find("quality");
 		if(itQuality != commandOptions.end() && itQuality->second.parameters.empty() == false)
-			quality = util::to_float(itQuality->second.parameters.front());
+			quality = pragma::util::to_float(itQuality->second.parameters.front());
 		settings.quality = quality;
 
 		auto toneMapping = uimg::ToneMapping::GammaCorrection;
@@ -502,17 +502,17 @@ void CMD_screenshot(pragma::NetworkState *, pragma::BasePlayerComponent *, std::
 
 		auto itSkyStrength = commandOptions.find("sky_strength");
 		if(itSkyStrength != commandOptions.end() && itSkyStrength->second.parameters.empty() == false)
-			settings.skyStrength = util::to_float(itSkyStrength->second.parameters.front());
+			settings.skyStrength = pragma::util::to_float(itSkyStrength->second.parameters.front());
 
 		auto itSkyAngles = commandOptions.find("sky_angles");
 		if(itSkyAngles != commandOptions.end() && itSkyAngles->second.parameters.empty() == false)
 			settings.skyAngles = EulerAngles {itSkyAngles->second.parameters.front()};
 
-		util::rt_screenshot(*game, width, height, settings, format);
+		pragma::util::rt_screenshot(*game, width, height, settings, format);
 		return;
 	}
 
-	auto path = util::screenshot(*game);
+	auto path = pragma::util::screenshot(*game);
 	if(path)
 		Con::cout << "Saved screenshot as '" << *path << "'!" << Con::endl;
 }
@@ -567,13 +567,13 @@ void CMD_shader_optimize(pragma::NetworkState *state, pragma::BasePlayerComponen
 		return;
 	}
 	auto validate = pragma::console::get_command_option_parameter_value(commandOptions, "validate", "0");
-	if(util::to_boolean(validate)) {
+	if(pragma::util::to_boolean(validate)) {
 		Con::cout << "Optimization complete!" << Con::endl;
 		return; // Don't save shaders
 	}
 	Con::cout << "Optimization complete! Saving optimized shader files..." << Con::endl;
 	std::string outputPath = "addons/vulkan/";
-	auto reload = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions, "reload", "0"));
+	auto reload = pragma::util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions, "reload", "0"));
 	for(auto &pair : *optimizedShaders) {
 		auto itSrc = shaderStages.find(pair.first);
 		if(itSrc == shaderStages.end())
@@ -708,7 +708,7 @@ void Console::commands::cl_find(pragma::NetworkState *state, pragma::BasePlayerC
 		Con::cout << "- " << name << Con::endl;
 }
 
-void CMD_fps(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Con::cout << "FPS: " << util::round_string(pragma::get_cengine()->GetFPS(), 0) << Con::endl << "Frame Time: " << util::round_string(pragma::get_cengine()->GetFrameTime(), 2) << "ms" << Con::endl; }
+void CMD_fps(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Con::cout << "FPS: " << pragma::util::round_string(pragma::get_cengine()->GetFPS(), 0) << Con::endl << "Frame Time: " << pragma::util::round_string(pragma::get_cengine()->GetFrameTime(), 2) << "ms" << Con::endl; }
 
 static void write_to_file(const std::string &fileName, const std::optional<std::string> &contents)
 {
@@ -756,16 +756,16 @@ void Console::commands::vk_dump_extensions(pragma::NetworkState *, pragma::BaseP
 {
 	ss<<"Number of allocations: "<<info.allocationCount<<"\n";
 	ss<<"Allocation size bounds (avg,min,max): "<<
-		util::get_pretty_bytes(info.allocationSizeAvg)<<","<<
-		util::get_pretty_bytes(info.allocationSizeMin)<<","<<
-		util::get_pretty_bytes(info.allocationSizeMax)<<",\n";
+		pragma::util::get_pretty_bytes(info.allocationSizeAvg)<<","<<
+		pragma::util::get_pretty_bytes(info.allocationSizeMin)<<","<<
+		pragma::util::get_pretty_bytes(info.allocationSizeMax)<<",\n";
 	ss<<"Block count: "<<info.blockCount<<"\n";
-	ss<<"Used data: "<<util::get_pretty_bytes(info.usedBytes)<<"\n";
-	ss<<"Unused data: "<<util::get_pretty_bytes(info.unusedBytes)<<"\n";
+	ss<<"Used data: "<<pragma::util::get_pretty_bytes(info.usedBytes)<<"\n";
+	ss<<"Unused data: "<<pragma::util::get_pretty_bytes(info.unusedBytes)<<"\n";
 	ss<<"Unused range (count,avg,min,max): "<<info.unusedRangeCount<<","<<
-		util::get_pretty_bytes(info.unusedRangeSizeAvg)<<","<<
-		util::get_pretty_bytes(info.unusedRangeSizeMin)<<","<<
-		util::get_pretty_bytes(info.unusedRangeSizeMax)<<"\n";
+		pragma::util::get_pretty_bytes(info.unusedRangeSizeAvg)<<","<<
+		pragma::util::get_pretty_bytes(info.unusedRangeSizeMin)<<","<<
+		pragma::util::get_pretty_bytes(info.unusedRangeSizeMax)<<"\n";
 	ss<<"\n";
 }*/ // prosper TODO
 void Console::commands::vk_dump_memory_stats(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -809,8 +809,8 @@ void Console::commands::vk_print_memory_stats(pragma::NetworkState *state, pragm
 		return;
 	}
 	std::stringstream ss;
-	ss<<"Total Available GPU Memory: "<<util::get_pretty_bytes(availableSize)<<"\n";
-	ss<<"Memory in use: "<<util::get_pretty_bytes(allocatedSize)<<" ("<<umath::round(allocatedSize /static_cast<double>(availableSize) *100.0,2)<<"%)\n";
+	ss<<"Total Available GPU Memory: "<<pragma::util::get_pretty_bytes(availableSize)<<"\n";
+	ss<<"Memory in use: "<<pragma::util::get_pretty_bytes(allocatedSize)<<" ("<<pragma::math::round(allocatedSize /static_cast<double>(availableSize) *100.0,2)<<"%)\n";
 	ss<<"Memory usage by resource type:\n";
 	const std::unordered_map<prosper::MemoryTracker::Resource::TypeFlags,std::string> types = {
 		{prosper::MemoryTracker::Resource::TypeFlags::StandAloneBufferBit,"Dedicated buffers"},
@@ -851,7 +851,7 @@ void Console::commands::vk_print_memory_stats(pragma::NetworkState *state, pragm
 			}
 			resourceSizes.push_back(size);
 		}
-		ss<<"\t"<<pair.second<<": "<<util::get_pretty_bytes(allocatedSizeOfType)<<" ("<<umath::round(allocatedSizeOfType /static_cast<double>(allocatedSize) *100.0,2)<<"%)\n";
+		ss<<"\t"<<pair.second<<": "<<pragma::util::get_pretty_bytes(allocatedSizeOfType)<<" ("<<pragma::math::round(allocatedSizeOfType /static_cast<double>(allocatedSize) *100.0,2)<<"%)\n";
 		ss<<"\tNumber of Resources: "<<resources.size()<<"\n";
 		std::sort(sortedIndices.begin(),sortedIndices.end(),[&resourceSizes](const size_t idx0,const size_t idx1) {
 			return resourceSizes.at(idx0) > resourceSizes.at(idx1);
@@ -869,7 +869,7 @@ void Console::commands::vk_print_memory_stats(pragma::NetworkState *state, pragm
 				ss<<"DynamicResizableBuffer: "<<static_cast<prosper::IDynamicResizableBuffer*>(res->resource)->GetDebugName();
 			else if((res->typeFlags &prosper::MemoryTracker::Resource::TypeFlags::ImageBit) != prosper::MemoryTracker::Resource::TypeFlags::None)
 				ss<<"Image: "<<static_cast<prosper::IImage*>(res->resource)->GetDebugName();
-			ss<<" "<<util::get_pretty_bytes(size)<<" ("<<umath::round(size /static_cast<double>(availableSize) *100.0,2)<<"%)\n";
+			ss<<" "<<pragma::util::get_pretty_bytes(size)<<" ("<<pragma::math::round(size /static_cast<double>(availableSize) *100.0,2)<<"%)\n";
 		}
 		ss<<"\n";
 	}
@@ -901,8 +901,8 @@ void Console::commands::vk_print_memory_stats(pragma::NetworkState *state, pragm
 			});
 			auto assignedMemory = uniBuf.GetAssignedMemory();
 			auto totalInstanceCount = uniBuf.GetTotalInstanceCount();
-			ss<<"\tInstances in use: "<<instanceCount<<" / "<<totalInstanceCount<<" ("<<umath::round(instanceCount /static_cast<double>(totalInstanceCount) *100.0,2)<<"%)\n";
-			ss<<"\tMemory in use: "<<util::get_pretty_bytes(assignedMemory)<<" / "<<util::get_pretty_bytes(uniBuf.GetSize())<<" ("<<umath::round(assignedMemory /static_cast<double>(uniBuf.GetSize()) *100.0,2)<<"%)\n";
+			ss<<"\tInstances in use: "<<instanceCount<<" / "<<totalInstanceCount<<" ("<<pragma::math::round(instanceCount /static_cast<double>(totalInstanceCount) *100.0,2)<<"%)\n";
+			ss<<"\tMemory in use: "<<pragma::util::get_pretty_bytes(assignedMemory)<<" / "<<pragma::util::get_pretty_bytes(uniBuf.GetSize())<<" ("<<pragma::math::round(assignedMemory /static_cast<double>(uniBuf.GetSize()) *100.0,2)<<"%)\n";
 		}
 	}
 
@@ -920,7 +920,7 @@ void Console::commands::vk_print_memory_stats(pragma::NetworkState *state, pragm
 			auto szFree = dynBuf.GetFreeSize();
 			auto assignedMemory = dynBuf.GetSize() -szFree;
 			ss<<"\tInstances: "<<instanceCount<<"\n";
-			ss<<"\tMemory in use: "<<util::get_pretty_bytes(assignedMemory)<<" / "<<util::get_pretty_bytes(dynBuf.GetSize())<<" ("<<umath::round(assignedMemory /static_cast<double>(dynBuf.GetSize()) *100.0,2)<<"%)\n";
+			ss<<"\tMemory in use: "<<pragma::util::get_pretty_bytes(assignedMemory)<<" / "<<pragma::util::get_pretty_bytes(dynBuf.GetSize())<<" ("<<pragma::math::round(assignedMemory /static_cast<double>(dynBuf.GetSize()) *100.0,2)<<"%)\n";
 			ss<<"\tFragmentation: "<<dynBuf.GetFragmentationPercent()<<"\n";
 		}
 	}
@@ -944,7 +944,7 @@ void Console::commands::vk_print_memory_stats(pragma::NetworkState *state, pragm
 			Con::cwar<<"Not enough arguments given!"<<Con::endl;
 			return;
 		}
-		auto id = util::to_int(argv.at(1));
+		auto id = pragma::util::to_int(argv.at(1));
 		if(argv.front() == "heap")
 		{
 			if(id >= stats.memoryHeap.size())

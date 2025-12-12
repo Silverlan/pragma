@@ -31,7 +31,7 @@ namespace Lua {
 		static void IsFogEnabled(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv);
 		static void SetFogDensity(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv, float density);
 		static void GetFogDensity(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv);
-		static void SetFogType(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv, ::util::FogType type);
+		static void SetFogType(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv, pragma::util::FogType type);
 		static void GetFogType(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv);
 		static void GetFogFarDistance(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv);
 	};
@@ -70,9 +70,9 @@ void Lua::WorldEnvironment::register_class(luabind::class_<pragma::rendering::Wo
 	classDef.def("GetFogTypeProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Lua::Property::push(l, *pEnv->GetFogSettings().GetTypeProperty()); }));
 	classDef.def("GetFogEnabledProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Lua::Property::push(l, *pEnv->GetFogSettings().GetEnabledProperty()); }));
 
-	classDef.add_static_constant("FOG_TYPE_LINEAR", umath::to_integral(::util::FogType::Linear));
-	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL", umath::to_integral(::util::FogType::Exponential));
-	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL2", umath::to_integral(::util::FogType::Exponential2));
+	classDef.add_static_constant("FOG_TYPE_LINEAR", pragma::math::to_integral(pragma::util::FogType::Linear));
+	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL", pragma::math::to_integral(pragma::util::FogType::Exponential));
+	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL2", pragma::math::to_integral(pragma::util::FogType::Exponential2));
 }
 
 ////////////////////////////////
@@ -127,7 +127,7 @@ void Lua::WorldEnvironment::GetFogDensity(lua::State *l, pragma::rendering::Worl
 	auto &fog = worldEnv.GetFogSettings();
 	Lua::PushNumber(l, fog.GetMaxDensity());
 }
-void Lua::WorldEnvironment::SetFogType(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv, ::util::FogType type)
+void Lua::WorldEnvironment::SetFogType(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv, pragma::util::FogType type)
 {
 	auto &fog = worldEnv.GetFogSettings();
 	fog.SetType(type);
@@ -135,7 +135,7 @@ void Lua::WorldEnvironment::SetFogType(lua::State *l, pragma::rendering::WorldEn
 void Lua::WorldEnvironment::GetFogType(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv)
 {
 	auto &fog = worldEnv.GetFogSettings();
-	Lua::PushInt(l, umath::to_integral(fog.GetType()));
+	Lua::PushInt(l, pragma::math::to_integral(fog.GetType()));
 }
 void Lua::WorldEnvironment::GetFogFarDistance(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv)
 {

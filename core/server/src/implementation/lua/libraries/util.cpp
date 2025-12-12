@@ -48,7 +48,7 @@ luabind::object Lua::util::Server::fire_bullets(lua::State *l, const pragma::gam
 		start = dmg.GetSource();
 		numTracer = tracerCount;
 	});
-	auto numHits = umath::min(hitPositions.size(), static_cast<std::size_t>(255));
+	auto numHits = pragma::math::min(hitPositions.size(), static_cast<std::size_t>(255));
 	packet->Write<uint8_t>(static_cast<uint8_t>(numTracer));
 	packet->Write<uint8_t>(tracerSettings);
 	if(tracerSettings & 1)
@@ -84,4 +84,4 @@ luabind::object Lua::util::Server::fire_bullets(lua::State *l, const pragma::gam
 
 void Lua::util::Server::create_giblet(lua::State *l, const GibletCreateInfo &gibletInfo) { pragma::SGame::Get()->CreateGiblet(gibletInfo); }
 
-void Lua::util::Server::create_explosion(lua::State *l, const ::util::SplashDamageInfo &splashDamageInfo) { Lua::util::splash_damage(l, splashDamageInfo); }
+void Lua::util::Server::create_explosion(lua::State *l, const pragma::util::SplashDamageInfo &splashDamageInfo) { Lua::util::splash_damage(l, splashDamageInfo); }

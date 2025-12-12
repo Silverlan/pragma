@@ -45,7 +45,7 @@ pragma::ecs::BaseEntity *BaseCharacterComponent::GetActiveWeapon()
 }
 pragma::ecs::BaseEntity *BaseCharacterComponent::GetWeapon(std::string className)
 {
-	ustring::to_lower(className);
+	pragma::string::to_lower(className);
 	auto it = std::find_if(m_weapons.begin(), m_weapons.end(), [&className](const EntityHandle &hEnt) { return (hEnt.valid() && hEnt.get()->GetClass() == className) ? true : false; });
 	return (it != m_weapons.end()) ? it->get() : nullptr;
 }
@@ -57,7 +57,7 @@ std::vector<pragma::ecs::BaseEntity *> BaseCharacterComponent::GetWeapons(std::s
 }
 void BaseCharacterComponent::GetWeapons(std::string className, std::vector<pragma::ecs::BaseEntity *> &weapons)
 {
-	ustring::to_lower(className);
+	pragma::string::to_lower(className);
 	for(auto &hEnt : m_weapons) {
 		if(hEnt.valid() && hEnt->GetClass() == className)
 			weapons.push_back(hEnt.get());
@@ -115,7 +115,7 @@ void BaseCharacterComponent::RemoveWeapon(std::string className)
 			it = m_weapons.erase(it);
 			continue;
 		}
-		if(ustring::compare(className.c_str(), hEnt->GetClass().c_str(), false)) {
+		if(pragma::string::compare(className.c_str(), hEnt->GetClass().c_str(), false)) {
 			it = RemoveWeapon(*it->get());
 			continue;
 		}
@@ -140,7 +140,7 @@ void BaseCharacterComponent::RemoveWeapons()
 }
 bool BaseCharacterComponent::HasWeapon(std::string className)
 {
-	ustring::to_lower(className);
+	pragma::string::to_lower(className);
 	auto it = std::find_if(m_weapons.begin(), m_weapons.end(), [&className](const EntityHandle &hEnt) { return (hEnt.valid() && hEnt.get()->GetClass() == className) ? true : false; });
 	return (it != m_weapons.end()) ? true : false;
 }

@@ -79,10 +79,10 @@ static bool mount_linked_addon(const std::string &pathLink, std::vector<AddonInf
 		return true;
 	std::string resolvedPath;
 	std::string lnkPath;
-	if(!filemanager::find_absolute_path(util::DirPath("addons", pathLink).GetString(), lnkPath))
+	if(!filemanager::find_absolute_path(pragma::util::DirPath("addons", pathLink).GetString(), lnkPath))
 		return false;
 	ufile::remove_extension_from_filename(lnkPath);
-	if(util::resolve_link(lnkPath, resolvedPath) == false) {
+	if(pragma::util::resolve_link(lnkPath, resolvedPath) == false) {
 		Con::cwar << "Unable to resolve link path for '" << lnkPath << "'! This addon will not be mounted." << Con::endl;
 		return false;
 	}
@@ -101,8 +101,8 @@ bool pragma::AddonSystem::MountAddon(const std::string &paddonPath, std::vector<
 {
 	// Valid addon paths are: addons/addonName, addons/addonName/addons/subAddonName, etc.
 	auto addonPath = paddonPath;
-	ustring::replace(addonPath, "/", "\\"); // TODO: We should be using forward slashes, not backward slashes for the normalized paths!
-	auto path = util::Path::CreatePath(addonPath);
+	pragma::string::replace(addonPath, "/", "\\"); // TODO: We should be using forward slashes, not backward slashes for the normalized paths!
+	auto path = pragma::util::Path::CreatePath(addonPath);
 	auto n = path.GetComponentCount();
 	if((n % 2) == 0)
 		return false;
@@ -180,12 +180,12 @@ void pragma::AddonSystem::MountAddons()
 
 	// Initialize watcher for new addons
 	try {
-		m_addonWatcher = ::util::make_shared<DirectoryWatcherCallback>(
+		m_addonWatcher = pragma::util::make_shared<DirectoryWatcherCallback>(
 		  "addons",
 		  [](const std::string &fName) {
 			  std::string ext;
 			  if(ufile::get_extension(fName, &ext) == true) {
-				  if(ustring::compare<std::string>(ext, "pad", false) == true) {
+				  if(pragma::string::compare<std::string>(ext, "pad", false) == true) {
 					  auto *pad = LoadPADPackage("addons\\" + fName);
 					  if(pad != nullptr) {
 						  auto *archFile = pad->GetArchiveFile();
@@ -205,7 +205,7 @@ void pragma::AddonSystem::MountAddons()
 					  }
 				  }
 #ifdef _WIN32
-				  else if(ustring::compare<std::string>(ext, "lnk", false) == true)
+				  else if(pragma::string::compare<std::string>(ext, "lnk", false) == true)
 					  mount_linked_addon(fName, m_addons, false);
 #endif
 			  }
@@ -240,13 +240,13 @@ const std::vector<pragma::AddonInfo> &pragma::AddonSystem::GetMountedAddons() { 
 
 /////////////////////////////
 
-pragma::AddonInfo::AddonInfo(const std::string &path, const util::Version &version, const std::string &uniqueId) : m_path(path), m_version(version), m_uniqueId(uniqueId) {}
+pragma::AddonInfo::AddonInfo(const std::string &path, const pragma::util::Version &version, const std::string &uniqueId) : m_path(path), m_version(version), m_uniqueId(uniqueId) {}
 const std::string &pragma::AddonInfo::GetLocalPath() const { return m_path; }
 std::string pragma::AddonInfo::GetAbsolutePath() const
 {
 	std::string absPath;
 	if(!filemanager::find_absolute_path(m_path, absPath))
-		return util::DirPath(filemanager::get_program_path(), m_path).GetString();
+		return pragma::util::DirPath(filemanager::get_program_path(), m_path).GetString();
 
 	std::string ext;
 	if(ufile::get_extension(absPath, &ext) == false)
@@ -255,7 +255,7 @@ std::string pragma::AddonInfo::GetAbsolutePath() const
 	std::string resolvedPath;
 	auto lnkPath = absPath;
 	ufile::remove_extension_from_filename(lnkPath);
-	auto r = util::resolve_link(lnkPath, resolvedPath);
+	auto r = pragma::util::resolve_link(lnkPath, resolvedPath);
 	if(r == false)
 		return absPath;
 	return resolvedPath;
@@ -265,4 +265,4 @@ std::string pragma::AddonInfo::GetAbsolutePath() const
 #endif
 }
 const std::string &pragma::AddonInfo::GetUniqueId() const { return m_uniqueId; }
-const util::Version &pragma::AddonInfo::GetVersion() const { return m_version; }
+const pragma::util::Version &pragma::AddonInfo::GetVersion() const { return m_version; }

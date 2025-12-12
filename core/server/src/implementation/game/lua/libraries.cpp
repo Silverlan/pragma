@@ -42,7 +42,7 @@ void pragma::SGame::RegisterLuaLibraries()
 		            if(ufile::get_extension(*fileName, &ext) == false)
 			            return luabind::object {l, false};
 		            auto loadInfo = manager->CreateDefaultLoadInfo();
-		            loadInfo->flags |= util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache;
+		            loadInfo->flags |= pragma::util::AssetLoadFlags::DontCache | pragma::util::AssetLoadFlags::IgnoreCache;
 		            auto asset = manager->LoadAsset(ufile::get_file_from_filename(*fileName), std::move(fp), ext, std::move(loadInfo));
 		            switch(type) {
 		            case pragma::asset::Type::Model:

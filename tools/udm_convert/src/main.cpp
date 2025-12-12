@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 
 	auto saveFlags = udm::AsciiSaveFlags::IncludeHeader;
 	if(argc > 2) {
-		auto launchParams = util::get_launch_parameters(argc, argv);
+		auto launchParams = pragma::util::get_launch_parameters(argc, argv);
 		auto itFileName = launchParams.find("-file");
 		if(itFileName != launchParams.end())
 			fileName = itFileName->second;
@@ -26,8 +26,8 @@ int main(int argc, char *argv[])
 			auto it = launchParams.find("-" + name);
 			if(it == launchParams.end())
 				return;
-			auto val = util::to_boolean(it->second);
-			umath::set_flag(saveFlags, flag, val);
+			auto val = pragma::util::to_boolean(it->second);
+			pragma::math::set_flag(saveFlags, flag, val);
 		};
 		checkOption("uncompressed", udm::AsciiSaveFlags::DontCompressLz4Arrays);
 		checkOption("include_header", udm::AsciiSaveFlags::IncludeHeader);
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	auto rootPath = ufile::get_path_from_filename(fileName);
 	filemanager::set_absolute_root_path(rootPath);
 
-	auto relFilePath = util::Path::CreateFile(fileName);
+	auto relFilePath = pragma::util::Path::CreateFile(fileName);
 	relFilePath.MakeRelative(rootPath);
 
 	fileName = relFilePath.GetString();
@@ -70,11 +70,11 @@ int main(int argc, char *argv[])
 	auto targetFormatType = (*formatType == udm::FormatType::Ascii) ? udm::FormatType::Binary : udm::FormatType::Ascii;
 	switch(targetFormatType) {
 	case udm::FormatType::Ascii:
-		if(ext->length() >= 2 && ustring::substr(*ext, ext->length() - 2) == "_b")
-			ext = ustring::substr(*ext, 0, ext->length() - 2);
+		if(ext->length() >= 2 && pragma::string::substr(*ext, ext->length() - 2) == "_b")
+			ext = pragma::string::substr(*ext, 0, ext->length() - 2);
 		break;
 	case udm::FormatType::Binary:
-		if(ext->length() < 2 || ustring::substr(*ext, ext->length() - 2) != "_b")
+		if(ext->length() < 2 || pragma::string::substr(*ext, ext->length() - 2) != "_b")
 			*ext += "_b";
 		break;
 	}

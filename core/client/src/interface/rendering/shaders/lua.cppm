@@ -20,7 +20,7 @@ export namespace pragma {
 	  private:
 		struct ShaderInfo {
 			luabind::object luaClassObject;
-			::util::WeakHandle<prosper::Shader> whShader;
+			pragma::util::WeakHandle<prosper::Shader> whShader;
 		};
 		std::unordered_map<std::string, ShaderInfo> m_shaders;
 	  public:
@@ -435,7 +435,7 @@ export namespace pragma {
 		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat) override;
 		virtual void InitializeMaterialData(const msys::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData) override;
-		void SetPushConstants(util::DataStream dsPushConstants);
+		void SetPushConstants(pragma::util::DataStream dsPushConstants);
 
 		void ResetPcb();
 		prosper::util::PreparedCommandBuffer &GetBindPcb() { return m_bindPcb; }
@@ -458,7 +458,7 @@ export namespace pragma {
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
 
-		util::DataStream m_pushConstants;
+		pragma::util::DataStream m_pushConstants;
 
 		prosper::util::PreparedCommandBuffer m_bindPcb;
 		mutable prosper::util::PreparedCommandBufferUserData m_bindUserData;
@@ -512,7 +512,7 @@ export namespace pragma {
 		void Lua_OnEndDraw();
 		static void Lua_default_OnEndDraw(lua::State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_OnEndDraw(); }
 
-		void SetPushConstants(util::DataStream dsPushConstants);
+		void SetPushConstants(pragma::util::DataStream dsPushConstants);
 		prosper::util::PreparedCommandBuffer &GetBindPcb();
 		void InitializeMaterialBuffer(prosper::IDescriptorSetGroup &descSet, msys::CMaterial &mat, const pragma::rendering::ShaderInputData &matData);
 

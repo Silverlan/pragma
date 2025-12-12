@@ -62,7 +62,7 @@ void Lua::CollisionMesh::register_class(luabind::class_<::pragma::physics::Colli
 		tris.clear();
 		Lua::table_to_vector(l, tTriangles, 2, tris);
 	}));
-	classDef.def("Copy", static_cast<std::shared_ptr<::pragma::physics::CollisionMesh> (*)(lua::State *, ::pragma::physics::CollisionMesh &)>([](lua::State *l, ::pragma::physics::CollisionMesh &mesh) { return ::util::make_shared<::pragma::physics::CollisionMesh>(mesh); }));
+	classDef.def("Copy", static_cast<std::shared_ptr<::pragma::physics::CollisionMesh> (*)(lua::State *, ::pragma::physics::CollisionMesh &)>([](lua::State *l, ::pragma::physics::CollisionMesh &mesh) { return pragma::util::make_shared<::pragma::physics::CollisionMesh>(mesh); }));
 
 	classDef.def("SetSoftBody", &::pragma::physics::CollisionMesh::SetSoftBody);
 	classDef.def("IsSoftBody", &::pragma::physics::CollisionMesh::IsSoftBody);
@@ -79,9 +79,9 @@ void Lua::CollisionMesh::register_class(luabind::class_<::pragma::physics::Colli
 	classDef.def("ClearSoftBodyAnchors", &::pragma::physics::CollisionMesh::ClearSoftBodyAnchors);
 	classDef.def("GetSoftBodyAnchors", &GetSoftBodyAnchors);
 
-	classDef.add_static_constant("FSOFTBODY_ANCHOR_NONE", umath::to_integral(::pragma::physics::CollisionMesh::SoftBodyAnchor::Flags::None));
-	classDef.add_static_constant("FSOFTBODY_ANCHOR_RIGID", umath::to_integral(::pragma::physics::CollisionMesh::SoftBodyAnchor::Flags::Rigid));
-	classDef.add_static_constant("FSOFTBODY_ANCHOR_DISABLE_COLLISIONS", umath::to_integral(::pragma::physics::CollisionMesh::SoftBodyAnchor::Flags::DisableCollisions));
+	classDef.add_static_constant("FSOFTBODY_ANCHOR_NONE", pragma::math::to_integral(::pragma::physics::CollisionMesh::SoftBodyAnchor::Flags::None));
+	classDef.add_static_constant("FSOFTBODY_ANCHOR_RIGID", pragma::math::to_integral(::pragma::physics::CollisionMesh::SoftBodyAnchor::Flags::Rigid));
+	classDef.add_static_constant("FSOFTBODY_ANCHOR_DISABLE_COLLISIONS", pragma::math::to_integral(::pragma::physics::CollisionMesh::SoftBodyAnchor::Flags::DisableCollisions));
 }
 std::shared_ptr<::pragma::physics::CollisionMesh> Lua::CollisionMesh::Create(lua::State *l) { return ::pragma::physics::CollisionMesh::Create(pragma::Engine::Get()->GetNetworkState(l)->GetGameState()); }
 std::shared_ptr<::pragma::physics::CollisionMesh> Lua::CollisionMesh::CreateBox(lua::State *l, const Vector3 &cmin, const Vector3 &cmax)
@@ -179,7 +179,7 @@ static luabind::object push_soft_body_anchor(lua::State *l, const ::pragma::phys
 	t["vertexIndex"] = anchor.vertexIndex;
 	t["boneId"] = anchor.boneId;
 	t["influence"] = anchor.influence;
-	t["flags"] = umath::to_integral(anchor.flags);
+	t["flags"] = pragma::math::to_integral(anchor.flags);
 	return t;
 }
 luabind::tableT<void> Lua::CollisionMesh::GetSoftBodyAnchors(lua::State *l, ::pragma::physics::CollisionMesh &mesh)

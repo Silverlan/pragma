@@ -101,7 +101,7 @@ export namespace pragma::bvh {
 	  pragma::IntersectionInfo *outIntersectionInfo = nullptr);
 	DLLNETWORK bool test_bvh_intersection_with_aabb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, pragma::IntersectionInfo *outIntersectionInfo = nullptr);
 	DLLNETWORK bool test_bvh_intersection_with_obb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, pragma::IntersectionInfo *outIntersectionInfo = nullptr);
-	DLLNETWORK bool test_bvh_intersection_with_kdop(const pragma::bvh::MeshBvhTree &bvhData, const std::vector<umath::Plane> &kdop, size_t nodeIdx = 0, pragma::IntersectionInfo *outIntersectionInfo = nullptr);
+	DLLNETWORK bool test_bvh_intersection_with_kdop(const pragma::bvh::MeshBvhTree &bvhData, const std::vector<pragma::math::Plane> &kdop, size_t nodeIdx = 0, pragma::IntersectionInfo *outIntersectionInfo = nullptr);
 
 	DLLNETWORK Ray get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist);
 	DLLNETWORK const ::pragma::bvh::Vec &to_bvh_vector(const Vector3 &v);
@@ -113,9 +113,9 @@ export namespace pragma::bvh {
 	namespace debug {
 		Color DEFAULT_NODE_COLOR = Color {0, 255, 0, 64};
 		DLLNETWORK void print_bvh_tree(pragma::bvh::Bvh &bvh);
-		DLLNETWORK void draw_bvh_tree(const pragma::Game &game, pragma::bvh::Bvh &bvh, const umath::ScaledTransform &pose = {}, float duration = 20.f);
-		DLLNETWORK void draw_node(const pragma::Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
-		DLLNETWORK void draw_node(const pragma::Game &game, const pragma::bvh::BBox &bbox, const umath::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
+		DLLNETWORK void draw_bvh_tree(const pragma::Game &game, pragma::bvh::Bvh &bvh, const pragma::math::ScaledTransform &pose = {}, float duration = 20.f);
+		DLLNETWORK void draw_node(const pragma::Game &game, const pragma::bvh::Node &node, const pragma::math::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
+		DLLNETWORK void draw_node(const pragma::Game &game, const pragma::bvh::BBox &bbox, const pragma::math::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
 	};
 };
 

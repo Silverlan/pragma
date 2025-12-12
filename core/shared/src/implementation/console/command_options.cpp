@@ -14,7 +14,7 @@ void pragma::console::parse_command_options(const std::vector<std::string> args,
 			continue;
 		if(arg.front() == '-') {
 			auto larg = arg.substr(1);
-			ustring::to_lower(larg);
+			pragma::string::to_lower(larg);
 			auto it = outOptions.insert(std::make_pair(larg, CommandOption {})).first;
 			itCurOption = it;
 		}

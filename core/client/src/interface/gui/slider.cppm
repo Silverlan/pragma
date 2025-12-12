@@ -18,7 +18,7 @@ export namespace pragma::gui::types {
 		virtual ~WISlider() override;
 		virtual void Initialize() override;
 		virtual void SetSize(int x, int y) override;
-		virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 		virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
 
 		bool IsBeingDragged() const;

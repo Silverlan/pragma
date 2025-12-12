@@ -83,7 +83,7 @@ void pragma::ServerState::SendSoundSourceToClient(pragma::audio::SALSound &sound
 }
 std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
 {
-	ustring::to_lower(snd);
+	pragma::string::to_lower(snd);
 	snd = FileManager::GetNormalizedPath(snd);
 	if(m_missingSoundCache.find(snd) != m_missingSoundCache.end())
 		return nullptr;
@@ -163,7 +163,7 @@ std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::CreateSound(std::st
 		game->CallCallbacks<void, pragma::audio::ALSound *>("OnSoundCreated", as);
 		game->CallLuaCallbacks<void, std::shared_ptr<pragma::audio::ALSound>>("OnSoundCreated", pAs);
 	}
-	if(umath::is_flag_set(flags, pragma::audio::ALCreateFlags::DontTransmit) == false)
+	if(pragma::math::is_flag_set(flags, pragma::audio::ALCreateFlags::DontTransmit) == false)
 		SendSoundSourceToClient(dynamic_cast<pragma::audio::SALSound &>(*pAs), false);
 	return pAs;
 }
@@ -180,7 +180,7 @@ void pragma::ServerState::StopSound(std::shared_ptr<pragma::audio::ALSound> pSnd
 
 bool pragma::ServerState::PrecacheSound(std::string snd, pragma::audio::ALChannel mode)
 {
-	ustring::to_lower(snd);
+	pragma::string::to_lower(snd);
 	snd = FileManager::GetCanonicalizedPath(snd);
 	pragma::audio::get_full_sound_path(snd, true);
 
@@ -204,12 +204,12 @@ bool pragma::ServerState::PrecacheSound(std::string snd, pragma::audio::ALChanne
 		auto bPort = false;
 		std::string ext;
 		if(ufile::get_extension(subPath, &ext) == true)
-			bPort = util::port_file(this, subPath);
+			bPort = pragma::util::port_file(this, subPath);
 		else {
 			auto audioFormats = pragma::engine_info::get_supported_audio_formats();
 			for(auto &extFormat : audioFormats) {
 				auto extPath = subPath + '.' + extFormat;
-				bPort = util::port_file(this, extPath);
+				bPort = pragma::util::port_file(this, extPath);
 				if(bPort == true)
 					break;
 			}
@@ -236,7 +236,7 @@ bool pragma::ServerState::PrecacheSound(std::string snd, pragma::audio::ALChanne
 		GetGameState()->RegisterGameResource(subPath);
 	NetPacket p;
 	p->WriteString(snd);
-	p->Write<uint8_t>(umath::to_integral(mode));
+	p->Write<uint8_t>(pragma::math::to_integral(mode));
 	SendPacket(pragma::networking::net_messages::client::SND_PRECACHE, p, pragma::networking::Protocol::SlowReliable);
 	return true;
 }

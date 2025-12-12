@@ -23,9 +23,9 @@ export import pragma.lua;
 		}                                                                                                                                                                                                                                                                                        \
 	};
 
-LUA_DEFINE_PTR_TYPE(util, util::TWeakSharedHandle, weak_shared_handle);
-LUA_DEFINE_PTR_TYPE(util, util::TSharedHandle, shared_handle);
-LUA_DEFINE_PTR_TYPE(util, util::WeakHandle, weak_handle);
+LUA_DEFINE_PTR_TYPE(pragma::util, pragma::util::TWeakSharedHandle, weak_shared_handle);
+LUA_DEFINE_PTR_TYPE(pragma::util, pragma::util::TSharedHandle, shared_handle);
+LUA_DEFINE_PTR_TYPE(pragma::util, pragma::util::WeakHandle, weak_handle);
 
 // Implementation similar to shared_ptr_converter.hpp
 #define LUA_DEFINE_PTR_TYPE_CONVERTER(TClass, CastFunc, enableToCpp)                                                                                                                                                                                                                             \
@@ -57,7 +57,7 @@ LUA_DEFINE_PTR_TYPE(util, util::WeakHandle, weak_handle);
 					}                                                                                                                                                                                                                                                                            \
 					else {                                                                                                                                                                                                                                                                       \
 						auto h = raw_ptr->GetHandle();                                                                                                                                                                                                                                           \
-						return util::CastFunc<typename decltype(h)::value_type, T>(h);                                                                                                                                                                                                           \
+						return pragma::util::CastFunc<typename decltype(h)::value_type, T>(h);                                                                                                                                                                                                           \
 					}                                                                                                                                                                                                                                                                            \
 				}                                                                                                                                                                                                                                                                                \
 			}                                                                                                                                                                                                                                                                                    \
@@ -71,5 +71,5 @@ LUA_DEFINE_PTR_TYPE(util, util::WeakHandle, weak_handle);
 		struct default_converter<TClass<T> const &> : default_converter<TClass<T>> {};                                                                                                                                                                                                           \
 	}
 
-LUA_DEFINE_PTR_TYPE_CONVERTER(util::TWeakSharedHandle, weak_shared_handle_cast, true);
-LUA_DEFINE_PTR_TYPE_CONVERTER(util::TSharedHandle, shared_handle_cast, false);
+LUA_DEFINE_PTR_TYPE_CONVERTER(pragma::util::TWeakSharedHandle, weak_shared_handle_cast, true);
+LUA_DEFINE_PTR_TYPE_CONVERTER(pragma::util::TSharedHandle, shared_handle_cast, false);

@@ -8,8 +8,8 @@ module pragma.shared;
 
 import :model.animation.pose;
 
-pragma::animation::Pose::Pose(const std::vector<umath::ScaledTransform> &transforms) : m_transforms {transforms} {}
-pragma::animation::Pose::Pose(std::vector<umath::ScaledTransform> &&transforms) : m_transforms {std::move(transforms)} {}
+pragma::animation::Pose::Pose(const std::vector<pragma::math::ScaledTransform> &transforms) : m_transforms {transforms} {}
+pragma::animation::Pose::Pose(std::vector<pragma::math::ScaledTransform> &&transforms) : m_transforms {std::move(transforms)} {}
 void pragma::animation::Pose::SetTransformCount(uint32_t c) { m_transforms.resize(c); }
 void pragma::animation::Pose::SetBoneIndex(uint32_t channelId, BoneId boneId)
 {
@@ -17,7 +17,7 @@ void pragma::animation::Pose::SetBoneIndex(uint32_t channelId, BoneId boneId)
 		m_boneIdToChannelId.resize(boneId + 1, std::numeric_limits<uint32_t>::max());
 	m_boneIdToChannelId[boneId] = channelId;
 }
-umath::ScaledTransform *pragma::animation::Pose::GetTransform(BoneId idx)
+pragma::math::ScaledTransform *pragma::animation::Pose::GetTransform(BoneId idx)
 {
 	if(idx >= m_boneIdToChannelId.size())
 		return nullptr;
@@ -26,7 +26,7 @@ umath::ScaledTransform *pragma::animation::Pose::GetTransform(BoneId idx)
 		return nullptr;
 	return &m_transforms[channelIdx];
 }
-void pragma::animation::Pose::SetTransform(BoneId idx, const umath::ScaledTransform &pose)
+void pragma::animation::Pose::SetTransform(BoneId idx, const pragma::math::ScaledTransform &pose)
 {
 	if(idx >= m_boneIdToChannelId.size())
 		return;

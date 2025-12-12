@@ -67,4 +67,4 @@ void Lua::DebugRenderer::Server::DrawSpline(lua::State *l, luabind::table<> poin
 	pragma::debug::SDebugRenderer::DrawSpline(path, renderInfo.color, segmentCount, curvature, renderInfo.duration);
 }
 void Lua::DebugRenderer::Server::DrawSpline(lua::State *l, luabind::table<> points, uint32_t segmentCount, const pragma::debug::DebugRenderInfo &renderInfo) { DrawSpline(l, points, segmentCount, 1.f, renderInfo); }
-void Lua::DebugRenderer::Server::DrawPlane(const pragma::debug::DebugRenderInfo &renderInfo) { pragma::debug::SDebugRenderer::DrawPlane(umath::Plane {uquat::forward(renderInfo.pose.GetRotation()), renderInfo.pose.GetOrigin()}, renderInfo.color, renderInfo.duration); }
+void Lua::DebugRenderer::Server::DrawPlane(const pragma::debug::DebugRenderInfo &renderInfo) { pragma::debug::SDebugRenderer::DrawPlane(pragma::math::Plane {uquat::forward(renderInfo.pose.GetRotation()), renderInfo.pose.GetOrigin()}, renderInfo.color, renderInfo.duration); }

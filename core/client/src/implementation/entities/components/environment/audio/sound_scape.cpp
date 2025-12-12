@@ -84,7 +84,7 @@ void CSoundScapeComponent::OnEntitySpawn()
 		snd->SetRelative(true);
 		m_sound = snd;
 	}
-	SetNextTick(pragma::get_cgame()->CurTime() + umath::random(0.f, 0.25f)); // Spread out think time between entities
+	SetNextTick(pragma::get_cgame()->CurTime() + pragma::math::random(0.f, 0.25f)); // Spread out think time between entities
 }
 
 void CSoundScapeComponent::ReceiveData(NetPacket &packet)

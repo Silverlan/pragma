@@ -205,7 +205,7 @@ void CGlobalShaderInputComponent::UpdateMembers()
 	std::unordered_set<std::string> newPropNames;
 	size_t propIdx = 0;
 	for(auto udmProp : *a) {
-		util::ScopeGuard idxGuard {[&propIdx] { ++propIdx; }};
+		pragma::util::ScopeGuard idxGuard {[&propIdx] { ++propIdx; }};
 
 		std::string name;
 		udmProp["name"] >> name;

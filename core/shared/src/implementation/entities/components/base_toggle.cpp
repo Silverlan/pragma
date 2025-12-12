@@ -25,30 +25,30 @@ void BaseToggleComponent::RegisterMembers(pragma::EntityComponentManager &compon
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseToggleComponent::BaseToggleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bTurnedOn(util::BoolProperty::Create(false)) {}
+BaseToggleComponent::BaseToggleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bTurnedOn(pragma::util::BoolProperty::Create(false)) {}
 void BaseToggleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "startdisabled", false))
-			m_bStartDisabled = util::to_boolean(kvData.value);
+		if(pragma::string::compare<std::string>(kvData.key, "startdisabled", false))
+			m_bStartDisabled = pragma::util::to_boolean(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
-		if(ustring::compare<std::string>(inputData.input, "enable", false) || ustring::compare<std::string>(inputData.input, "turnon", false))
+		if(pragma::string::compare<std::string>(inputData.input, "enable", false) || pragma::string::compare<std::string>(inputData.input, "turnon", false))
 			TurnOn();
-		else if(ustring::compare<std::string>(inputData.input, "disable", false) || ustring::compare<std::string>(inputData.input, "turnoff", false))
+		else if(pragma::string::compare<std::string>(inputData.input, "disable", false) || pragma::string::compare<std::string>(inputData.input, "turnoff", false))
 			TurnOff();
-		else if(ustring::compare<std::string>(inputData.input, "toggle", false))
+		else if(pragma::string::compare<std::string>(inputData.input, "toggle", false))
 			Toggle();
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 	m_netEvToggleState = SetupNetEvent("set_toggle_state");
 	GetEntity().AddComponent("io");
@@ -119,7 +119,7 @@ void BaseToggleComponent::Toggle()
 	}
 	TurnOn();
 }
-const util::PBoolProperty &BaseToggleComponent::GetTurnedOnProperty() const { return m_bTurnedOn; }
+const pragma::util::PBoolProperty &BaseToggleComponent::GetTurnedOnProperty() const { return m_bTurnedOn; }
 void BaseToggleComponent::SetTurnedOn(bool b)
 {
 	if(*m_bTurnedOn == b)

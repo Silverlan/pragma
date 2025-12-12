@@ -103,7 +103,7 @@ void pragma::SGame::RegisterLuaClasses()
 			//luabind::default_converter<EntityHandleT> x;
 			//x.to_cpp(nullptr,luabind::by_reference<EntityHandleT>{},0);
 
-		//	constexpr auto b  = util::is_specialization<EntityHandleT,util::TestHandle>::value;
+		//	constexpr auto b  = pragma::util::is_specialization<EntityHandleT,util::TestHandle>::value;
 			//constexpr auto c = luabind::is_type_or_derived<luabind::base_type<typename EntityHandleT::value_type>,BaseEntity>;
 
 			//luabind::default_converter<EntityHandleT> x{};
@@ -189,13 +189,13 @@ void pragma::SGame::RegisterLuaClasses()
 			Con::cout<<"File size: "<<f->GetSize()<<Con::endl;
 		})),
 
-		luabind::def("test_property_ret",static_cast<util::PFloatProperty(*)()>([]() {
+		luabind::def("test_property_ret",static_cast<pragma::util::PFloatProperty(*)()>([]() {
 			//util::PFloatProperty prop;
 			//Lua::Property::push(nullptr);
-			//luabind::default_converter<util::PFloatProperty> x;
-			//constexpr auto b = luabind::is_property<util::PFloatProperty> && !std::is_pointer_v<util::PFloatProperty> && !std::is_reference_v<util::PFloatProperty> && !std::is_const_v<std::remove_reference_t<util::PFloatProperty>>;
+			//luabind::default_converter<pragma::util::PFloatProperty> x;
+			//constexpr auto b = luabind::is_property<pragma::util::PFloatProperty> && !std::is_pointer_v<pragma::util::PFloatProperty> && !std::is_reference_v<pragma::util::PFloatProperty> && !std::is_const_v<std::remove_reference_t<pragma::util::PFloatProperty>>;
 			//x.to_cpp();
-			return util::FloatProperty::Create(3.f);
+			return pragma::util::FloatProperty::Create(3.f);
 		}))
 	];
 #endif

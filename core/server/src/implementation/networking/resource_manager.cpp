@@ -24,7 +24,7 @@ const pragma::networking::ResourceManager::ResourceInfo *pragma::networking::Res
 	auto it = std::find_if(m_resources.begin(), m_resources.end(), [&tgt](const ResourceInfo &info) { return (info.fileName == tgt) ? true : false; });
 	if(it == m_resources.end()) {
 		static const auto sndPath = std::string("sounds") + FileManager::GetDirectorySeparator();
-		if(ustring::compare(fileName.c_str(), sndPath.c_str(), false, sndPath.length()) == true) {
+		if(pragma::string::compare(fileName.c_str(), sndPath.c_str(), false, sndPath.length()) == true) {
 			std::string ext;
 			if(ufile::get_extension(fileName, &ext) == false) {
 				for(auto &ext : pragma::engine_info::get_supported_audio_formats()) {

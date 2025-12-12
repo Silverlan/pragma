@@ -31,13 +31,13 @@ export {
 
 	namespace pragma {
 		class NetworkState;
-		class DLLNETWORK Engine : public console::CVarHandler, public util::CallbackHandler {
+		class DLLNETWORK Engine : public console::CVarHandler, public pragma::util::CallbackHandler {
 		  public:
 			static const uint32_t DEFAULT_TICK_RATE;
 			// For internal use only! Not to be used directly!
 		  private:
 			// Note: m_libServer needs to be the first member, to ensure it's destroyed last!
-			mutable std::shared_ptr<util::Library> m_libServer = nullptr;
+			mutable std::shared_ptr<pragma::util::Library> m_libServer = nullptr;
 			mutable pragma::IServerState m_iServerState;
 		  public:
 			struct DLLNETWORK ConVarInfoList {
@@ -232,7 +232,7 @@ export {
 			std::optional<uint64_t> GetServerSteamId() const;
 
 			std::thread::id GetMainThreadId() const;
-			void InitializeAssetManager(util::FileAssetManager &assetManager) const;
+			void InitializeAssetManager(pragma::util::FileAssetManager &assetManager) const;
 
 			virtual void StartNewGame(const std::string &map, bool singlePlayer);
 
@@ -255,11 +255,11 @@ export {
 			int32_t GetRemoteDebugging() const;
 
 			void ShutDown();
-			void AddParallelJob(const util::ParallelJobWrapper &job, const std::string &jobName);
+			void AddParallelJob(const pragma::util::ParallelJobWrapper &job, const std::string &jobName);
 
 			void LockResourceWatchers();
 			void UnlockResourceWatchers();
-			util::ScopeGuard ScopeLockResourceWatchers();
+			pragma::util::ScopeGuard ScopeLockResourceWatchers();
 			void PollResourceWatchers();
 
 			pragma::asset::AssetManager &GetAssetManager();
@@ -318,7 +318,7 @@ export {
 			std::unique_ptr<pragma::asset::AssetManager> m_assetManager;
 
 			struct JobInfo {
-				util::ParallelJobWrapper job = {};
+				pragma::util::ParallelJobWrapper job = {};
 				std::string name = "";
 				float lastProgress = 0.f;
 				std::optional<float> timeRemaining = {};
@@ -345,7 +345,7 @@ export {
 			virtual void Think();
 			virtual void Tick();
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	}
 	REGISTER_ENUM_FLAGS(pragma::Engine::StateFlags)
 

@@ -12,8 +12,8 @@ export import :types;
 export import pragma.udm;
 
 export {
-	namespace util {
-		DLLNETWORK util::ParallelJob<std::vector<Vector2> &> generate_lightmap_uvs(pragma::NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<umath::Vertex> &verts, const std::vector<uint32_t> &tris);
+	namespace pragma::util {
+		DLLNETWORK pragma::util::ParallelJob<std::vector<Vector2> &> generate_lightmap_uvs(pragma::NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<pragma::math::Vertex> &verts, const std::vector<uint32_t> &tris);
 		DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(const std::string &fileName, std::string *optOutErr = nullptr);
 		DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(std::unique_ptr<ufile::IFile> &&f, std::string *optOutErr = nullptr);
 
@@ -30,7 +30,7 @@ export {
 			bool Save(udm::AssetData &outData, std::string &outErr) const;
 		  private:
 			bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr);
-			util::HairConfig m_hairConfig;
+			pragma::util::HairConfig m_hairConfig;
 			HairData m_hairData;
 		};
 
@@ -39,8 +39,8 @@ export {
 
 		DLLNETWORK std::pair<std::vector<double>, std::vector<double>> generate_two_pass_gaussian_blur_coefficients(uint32_t radius, double sigma, bool linear = true, bool correction = true);
 
-		DLLNETWORK util::Path get_user_data_dir();
-		DLLNETWORK std::vector<util::Path> get_resource_dirs();
+		DLLNETWORK pragma::util::Path get_user_data_dir();
+		DLLNETWORK std::vector<pragma::util::Path> get_resource_dirs();
 
 		DLLNETWORK bool show_notification(const std::string &summary, const std::string &body);
 	};

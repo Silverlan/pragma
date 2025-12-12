@@ -17,7 +17,7 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
 	  protected:
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 
 		Vector3 m_kvPushDir = {};

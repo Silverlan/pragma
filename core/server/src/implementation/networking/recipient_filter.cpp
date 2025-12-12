@@ -26,18 +26,18 @@ bool pragma::networking::ClientRecipientFilter::operator()(const IServerClient &
 
 /////////////////
 
-const std::vector<util::WeakHandle<const pragma::networking::IServerClient>> &pragma::networking::TargetRecipientFilter::GetRecipients() const { return m_recipients; }
+const std::vector<pragma::util::WeakHandle<const pragma::networking::IServerClient>> &pragma::networking::TargetRecipientFilter::GetRecipients() const { return m_recipients; }
 void pragma::networking::TargetRecipientFilter::AddRecipient(const IServerClient &client) { m_recipients.push_back(client.shared_from_this()); }
 void pragma::networking::TargetRecipientFilter::RemoveRecipient(const IServerClient &client)
 {
-	auto it = std::find_if(m_recipients.begin(), m_recipients.end(), [&client](const util::WeakHandle<const pragma::networking::IServerClient> &hClientOther) { return hClientOther.get() == &client; });
+	auto it = std::find_if(m_recipients.begin(), m_recipients.end(), [&client](const pragma::util::WeakHandle<const pragma::networking::IServerClient> &hClientOther) { return hClientOther.get() == &client; });
 	if(it == m_recipients.end())
 		return;
 	m_recipients.erase(it);
 }
 bool pragma::networking::TargetRecipientFilter::HasRecipient(const IServerClient &client) const
 {
-	return std::find_if(m_recipients.begin(), m_recipients.end(), [&client](const util::WeakHandle<const pragma::networking::IServerClient> &hClientOther) { return hClientOther.get() == &client; }) != m_recipients.end();
+	return std::find_if(m_recipients.begin(), m_recipients.end(), [&client](const pragma::util::WeakHandle<const pragma::networking::IServerClient> &hClientOther) { return hClientOther.get() == &client; }) != m_recipients.end();
 }
 
 void pragma::networking::TargetRecipientFilter::SetFilterType(ClientRecipientFilter::FilterType filterType) { m_filterType = filterType; }
@@ -48,7 +48,7 @@ pragma::networking::TargetRecipientFilter::operator pragma::networking::ClientRe
 	auto recipients = m_recipients;
 	auto filterType = m_filterType;
 	return ClientRecipientFilter {[recipients, filterType](const IServerClient &client) -> bool {
-		auto result = std::find_if(recipients.begin(), recipients.end(), [&client](const util::WeakHandle<const pragma::networking::IServerClient> &hClientOther) { return &client == hClientOther.get(); }) != recipients.end();
+		auto result = std::find_if(recipients.begin(), recipients.end(), [&client](const pragma::util::WeakHandle<const pragma::networking::IServerClient> &hClientOther) { return &client == hClientOther.get(); }) != recipients.end();
 		if(filterType == ClientRecipientFilter::FilterType::Include)
 			return result;
 		return !result;

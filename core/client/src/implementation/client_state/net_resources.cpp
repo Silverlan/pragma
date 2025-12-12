@@ -45,7 +45,7 @@ void pragma::ClientState::HandleClientResource(NetPacket &packet)
 
 	FileManager::CreatePath(fileDst.substr(0, fileDst.find_last_of('\\')).c_str());
 	auto size = packet->Read<UInt64>();
-	Con::ccl << "Downloading file '" << file << "' (" << util::get_pretty_bytes(size) << ")..." << Con::endl;
+	Con::ccl << "Downloading file '" << file << "' (" << pragma::util::get_pretty_bytes(size) << ")..." << Con::endl;
 	auto f = FileManager::OpenFile(file.c_str(), "rb"); //,fsys::SearchFlags::Local);
 	NetPacket response;
 	bool bSkip = false;

@@ -13,7 +13,7 @@ using namespace pragma;
 void ai::TaskMoveToTarget::Print(const Schedule *sched, std::ostream &o) const
 {
 	o << "MoveToTarget[";
-	auto *target = GetParameter(sched, umath::to_integral(TaskTarget::Parameter::Target));
+	auto *target = GetParameter(sched, pragma::math::to_integral(TaskTarget::Parameter::Target));
 	auto type = (target != nullptr) ? target->GetType() : ai::Schedule::Parameter::Type::None;
 	switch(type) {
 	case ai::Schedule::Parameter::Type::Entity:
@@ -61,12 +61,12 @@ ai::BehaviorNode::Result ai::TaskMoveToTarget::Think(const Schedule *sched, prag
 	auto moveDistance = MAX_NODE_DISTANCE;
 	if(GetTargetPosition(sched, ent, pos) == false)
 		return r;
-	auto *param = GetParameter(sched, umath::to_integral(Parameter::Target));
+	auto *param = GetParameter(sched, pragma::math::to_integral(Parameter::Target));
 	if(param != nullptr) {
 		if(param->GetType() == ai::Schedule::Parameter::Type::Float)
 			moveDistance = param->GetFloat();
 		else {
-			param = GetParameter(sched, umath::to_integral(Parameter::Distance));
+			param = GetParameter(sched, pragma::math::to_integral(Parameter::Distance));
 			if(param->GetType() == ai::Schedule::Parameter::Type::Float)
 				moveDistance = param->GetFloat();
 		}
@@ -101,7 +101,7 @@ ai::BehaviorNode::Result ai::TaskMoveToTarget::Think(const Schedule *sched, prag
 	}*/
 
 	auto moveAct = pragma::Activity::Run;
-	auto *paramAct = GetParameter(sched, umath::to_integral(Parameter::MoveActivity));
+	auto *paramAct = GetParameter(sched, pragma::math::to_integral(Parameter::MoveActivity));
 	if(paramAct != nullptr && paramAct->GetType() == ai::Schedule::Parameter::Type::Int)
 		moveAct = static_cast<pragma::Activity>(paramAct->GetInt());
 	ent.MoveTo(pos, moveAct);
@@ -112,5 +112,5 @@ ai::BehaviorNode::Result ai::TaskMoveToTarget::Think(const Schedule *sched, prag
 	return Result::Pending;
 }
 
-void ai::TaskMoveToTarget::SetMoveDistance(float dist) { SetParameter(umath::to_integral(Parameter::Distance), dist); }
-void ai::TaskMoveToTarget::SetMoveActivity(pragma::Activity act) { SetParameter(umath::to_integral(Parameter::MoveActivity), umath::to_integral(act)); }
+void ai::TaskMoveToTarget::SetMoveDistance(float dist) { SetParameter(pragma::math::to_integral(Parameter::Distance), dist); }
+void ai::TaskMoveToTarget::SetMoveActivity(pragma::Activity act) { SetParameter(pragma::math::to_integral(Parameter::MoveActivity), pragma::math::to_integral(act)); }

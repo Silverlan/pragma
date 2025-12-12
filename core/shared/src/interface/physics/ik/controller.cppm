@@ -8,10 +8,10 @@ export module pragma.shared:physics.ik.controller;
 
 export import :physics.ik.method;
 
-export {
+export namespace pragma::physics {
 	class DLLNETWORK IKController : public std::enable_shared_from_this<IKController> {
 	  public:
-		IKController(const std::string &effectorName, uint32_t chainLength, const std::string &type, util::ik::Method method = util::ik::Method::Default);
+		IKController(const std::string &effectorName, uint32_t chainLength, const std::string &type, ik::Method method = ik::Method::Default);
 		IKController(const IKController &other);
 
 		const std::string &GetEffectorName() const;
@@ -22,8 +22,8 @@ export {
 		void SetChainLength(uint32_t len);
 		void SetType(const std::string &type);
 
-		void SetMethod(util::ik::Method method);
-		util::ik::Method GetMethod() const;
+		void SetMethod(ik::Method method);
+		ik::Method GetMethod() const;
 
 		const std::unordered_map<std::string, std::string> &GetKeyValues() const;
 		std::unordered_map<std::string, std::string> &GetKeyValues();
@@ -34,7 +34,7 @@ export {
 		std::string m_effectorName;
 		std::string m_type;
 		uint32_t m_chainLength = 0u;
-		util::ik::Method m_method = util::ik::Method::Default;
+		ik::Method m_method = ik::Method::Default;
 
 		std::unordered_map<std::string, std::string> m_keyValues;
 	};

@@ -12,7 +12,7 @@ void pragma::pts::CParticleInitializerPositionRandomBox::Initialize(pragma::Base
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "min")
 			m_min = uvec::create(it->second);
 		else if(key == "max")
@@ -20,7 +20,7 @@ void pragma::pts::CParticleInitializerPositionRandomBox::Initialize(pragma::Base
 		else if(key == "origin")
 			m_origin = uvec::create(it->second);
 		else if(key == "on_sides")
-			m_bOnSides = util::to_boolean(it->second);
+			m_bOnSides = pragma::util::to_boolean(it->second);
 	}
 }
 void pragma::pts::CParticleInitializerPositionRandomBox::OnParticleCreated(pragma::pts::CParticle &particle)
@@ -29,12 +29,12 @@ void pragma::pts::CParticleInitializerPositionRandomBox::OnParticleCreated(pragm
 		// Find a random position on one of the sides of the box
 		auto dir = uvec::create_random_unit_vector();
 		float tMinRes, tMaxRes;
-		if(umath::intersection::line_aabb({}, dir, m_min, m_max, &tMinRes, &tMaxRes) != umath::intersection::Result::Intersect)
+		if(pragma::math::intersection::line_aabb({}, dir, m_min, m_max, &tMinRes, &tMaxRes) != pragma::math::intersection::Result::Intersect)
 			return;
 		particle.SetPosition(m_origin + dir * tMaxRes);
 		return;
 	}
-	Vector3 pos(umath::random(m_min.x, m_max.x), umath::random(m_min.y, m_max.y), umath::random(m_min.z, m_max.z));
+	Vector3 pos(pragma::math::random(m_min.x, m_max.x), pragma::math::random(m_min.y, m_max.y), pragma::math::random(m_min.z, m_max.z));
 	particle.SetPosition(m_origin + particle.GetPosition() + pos);
 }
 
@@ -45,11 +45,11 @@ void pragma::pts::CParticleInitializerPositionRandomSphere::Initialize(pragma::B
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "distance_min")
-			m_distMin = util::to_float(it->second);
+			m_distMin = pragma::util::to_float(it->second);
 		else if(key == "distance_max")
-			m_distMax = util::to_float(it->second);
+			m_distMax = pragma::util::to_float(it->second);
 		else if(key == "distance_bias")
 			distBias = uvec::create(it->second);
 		else if(key == "origin")
@@ -59,13 +59,13 @@ void pragma::pts::CParticleInitializerPositionRandomSphere::Initialize(pragma::B
 void pragma::pts::CParticleInitializerPositionRandomSphere::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	float offset = m_distMax - m_distMin;
-	float r = m_distMin + sqrtf(umath::random(0.f, offset * offset));
-	float x = umath::random(0.f, 1.f);
-	float y = umath::random(0.f, 1.f);
-	float theta = 2.f * CFloat(umath::pi) * x;
-	float phi = (1.f - sqrtf(y)) * CFloat(umath::pi) / 2.f;
+	float r = m_distMin + sqrtf(pragma::math::random(0.f, offset * offset));
+	float x = pragma::math::random(0.f, 1.f);
+	float y = pragma::math::random(0.f, 1.f);
+	float theta = 2.f * CFloat(pragma::math::pi) * x;
+	float phi = (1.f - sqrtf(y)) * CFloat(pragma::math::pi) / 2.f;
 	x = r * cosf(theta) * cosf(phi);
-	y = r * sinf(phi) * ((umath::random(0, 1) == 1) ? 1 : -1); // TODO: Avoid the additional call to Math::Random
+	y = r * sinf(phi) * ((pragma::math::random(0, 1) == 1) ? 1 : -1); // TODO: Avoid the additional call to Math::Random
 	float z = r * sinf(theta) * cosf(phi);
 
 	Vector3 pos(x, y, z);
@@ -87,13 +87,13 @@ void pragma::pts::CParticleInitializerPositionRandomCircle::Initialize(pragma::B
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "axis")
 			m_vAxis = uvec::create(pair.second);
 		else if(key == "distance_min")
-			m_fMinDist = util::to_float(pair.second);
+			m_fMinDist = pragma::util::to_float(pair.second);
 		else if(key == "distance_max")
-			m_fMaxDist = util::to_float(pair.second);
+			m_fMaxDist = pragma::util::to_float(pair.second);
 		else if(key == "origin")
 			m_origin = uvec::create(pair.second);
 	}
@@ -101,9 +101,9 @@ void pragma::pts::CParticleInitializerPositionRandomCircle::Initialize(pragma::B
 void pragma::pts::CParticleInitializerPositionRandomCircle::OnParticleCreated(pragma::pts::CParticle &particle)
 {
 	auto offset = m_fMaxDist - m_fMinDist;
-	auto r = m_fMinDist + sqrtf(umath::random(0.f, offset * offset));
-	auto ang = umath::random(0.f, 1.f) * umath::pi * 2.f;
-	auto pos = Vector3(umath::cos(ang) * r, 0.f, umath::sin(ang) * r);
+	auto r = m_fMinDist + sqrtf(pragma::math::random(0.f, offset * offset));
+	auto ang = pragma::math::random(0.f, 1.f) * pragma::math::pi * 2.f;
+	auto pos = Vector3(pragma::math::cos(ang) * r, 0.f, pragma::math::sin(ang) * r);
 	auto rot = glm::gtx::rotation(Vector3(0.f, 1.f, 0.f), m_vAxis);
 	uvec::rotate(&pos, rot);
 	particle.SetPosition(m_origin + particle.GetPosition() + pos);

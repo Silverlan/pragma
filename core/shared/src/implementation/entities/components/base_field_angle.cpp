@@ -21,26 +21,26 @@ void BaseFieldAngleComponent::RegisterMembers(pragma::EntityComponentManager &co
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseFieldAngleComponent::BaseFieldAngleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_fieldAngle(util::FloatProperty::Create(0.f)) {}
+BaseFieldAngleComponent::BaseFieldAngleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_fieldAngle(pragma::util::FloatProperty::Create(0.f)) {}
 void BaseFieldAngleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "coneAngle", false))
-			SetFieldAngle(util::to_float(kvData.value));
+		if(pragma::string::compare<std::string>(kvData.key, "coneAngle", false))
+			SetFieldAngle(pragma::util::to_float(kvData.value));
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
-		if(ustring::compare<std::string>(inputData.input, "setconeangle", false))
-			SetFieldAngle(util::to_float(inputData.data));
+		if(pragma::string::compare<std::string>(inputData.input, "setconeangle", false))
+			SetFieldAngle(pragma::util::to_float(inputData.data));
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -59,9 +59,9 @@ void BaseFieldAngleComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t v
 	udm["fieldAngle"](fieldAngle);
 	SetFieldAngle(fieldAngle);
 }
-umath::Degree BaseFieldAngleComponent::GetFieldAngle() const { return *m_fieldAngle; }
-const util::PFloatProperty &BaseFieldAngleComponent::GetFieldAngleProperty() const { return m_fieldAngle; }
-void BaseFieldAngleComponent::SetFieldAngle(umath::Degree coneAngle)
+pragma::math::Degree BaseFieldAngleComponent::GetFieldAngle() const { return *m_fieldAngle; }
+const pragma::util::PFloatProperty &BaseFieldAngleComponent::GetFieldAngleProperty() const { return m_fieldAngle; }
+void BaseFieldAngleComponent::SetFieldAngle(pragma::math::Degree coneAngle)
 {
 	auto oldFieldAngle = GetFieldAngle();
 	*m_fieldAngle = coneAngle;

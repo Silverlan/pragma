@@ -46,11 +46,11 @@ prosper::util::RenderPassCreateInfo::AttachmentInfo ShaderPrepassBase::get_depth
 
 ShaderPrepassBase::ShaderPrepassBase(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader) : ShaderGameWorld(context, identifier, vsShader, fsShader)
 {
-	//SetPipelineCount(umath::to_integral(Pipeline::Count));
+	//SetPipelineCount(pragma::math::to_integral(Pipeline::Count));
 }
 ShaderPrepassBase::ShaderPrepassBase(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorld(context, identifier, "programs/scene/prepass/prepass_depth", "")
 {
-	//SetPipelineCount(umath::to_integral(Pipeline::Count));
+	//SetPipelineCount(pragma::math::to_integral(Pipeline::Count));
 }
 
 void ShaderPrepassBase::OnPipelinesInitialized() { ShaderGameWorld::OnPipelinesInitialized(); }
@@ -68,7 +68,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPrepassBase::InitializeMater
 	auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 	mat.SetDescriptorSetGroup(*this, descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
-	descSet.SetBindingTexture(*diffuseTexture->GetVkTexture(), umath::to_integral(MaterialBinding::AlbedoMap));
+	descSet.SetBindingTexture(*diffuseTexture->GetVkTexture(), pragma::math::to_integral(MaterialBinding::AlbedoMap));
 	descSet.Update();
 	return descSetGroup;
 }
@@ -159,10 +159,10 @@ prosper::util::RenderPassCreateInfo::AttachmentInfo ShaderPrepass::get_normal_re
 ShaderPrepass::ShaderPrepass(prosper::IPrContext &context, const std::string &identifier) : ShaderPrepassBase(context, identifier, "programs/scene/prepass/prepass", "programs/scene/prepass/prepass")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
-	SetPipelineCount(umath::to_integral(Pipeline::Count) * umath::to_integral(rendering::PassType::Count));
+	SetPipelineCount(pragma::math::to_integral(Pipeline::Count) * pragma::math::to_integral(rendering::PassType::Count));
 }
 
-uint32_t ShaderPrepass::GetPassPipelineIndexStartOffset(rendering::PassType passType) const { return umath::to_integral(passType) * umath::to_integral(Pipeline::Count); }
+uint32_t ShaderPrepass::GetPassPipelineIndexStartOffset(rendering::PassType passType) const { return pragma::math::to_integral(passType) * pragma::math::to_integral(Pipeline::Count); }
 
 void ShaderPrepass::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {
@@ -180,7 +180,7 @@ void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 	auto enableAnimation = false;
 	auto enableMorphTargetAnimation = false;
 	auto extendedVertexWeights = false;
-	switch(static_cast<Pipeline>(pipelineIdx % umath::to_integral(Pipeline::Count))) {
+	switch(static_cast<Pipeline>(pipelineIdx % pragma::math::to_integral(Pipeline::Count))) {
 	case Pipeline::Opaque:
 		enableAnimation = true;
 		enableMorphTargetAnimation = true;
@@ -202,17 +202,17 @@ void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 		break;
 	}
 
-	auto isReflection = (static_cast<rendering::PassType>(pipelineIdx / umath::to_integral(Pipeline::Count)) == rendering::PassType::Reflection);
+	auto isReflection = (static_cast<rendering::PassType>(pipelineIdx / pragma::math::to_integral(Pipeline::Count)) == rendering::PassType::Reflection);
 	if(isReflection)
 		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo, prosper::CullModeFlags::FrontBit);
 
 	if(pragma::get_client_state()->GetGameWorldShaderSettings().ssaoEnabled)
 		enableNormalOutput = true;
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, umath::to_integral(SpecializationConstant::EnableAlphaTest), static_cast<uint32_t>(enableAlphaTest));
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, umath::to_integral(SpecializationConstant::EnableNormalOutput), static_cast<uint32_t>(enableNormalOutput));
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, umath::to_integral(SpecializationConstant::EnableAnimation), static_cast<uint32_t>(enableAnimation));
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, umath::to_integral(SpecializationConstant::EnableMorphTargetAnimation), static_cast<uint32_t>(enableMorphTargetAnimation));
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, umath::to_integral(SpecializationConstant::EnableExtendedVertexWeights), static_cast<uint32_t>(extendedVertexWeights));
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, pragma::math::to_integral(SpecializationConstant::EnableAlphaTest), static_cast<uint32_t>(enableAlphaTest));
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, pragma::math::to_integral(SpecializationConstant::EnableNormalOutput), static_cast<uint32_t>(enableNormalOutput));
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, pragma::math::to_integral(SpecializationConstant::EnableAnimation), static_cast<uint32_t>(enableAnimation));
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, pragma::math::to_integral(SpecializationConstant::EnableMorphTargetAnimation), static_cast<uint32_t>(enableMorphTargetAnimation));
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, pragma::math::to_integral(SpecializationConstant::EnableExtendedVertexWeights), static_cast<uint32_t>(extendedVertexWeights));
 }
 void ShaderPrepass::InitializeShaderResources()
 {

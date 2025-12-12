@@ -28,16 +28,16 @@ static void cl_steam_audio_reload_scene(pragma::NetworkState *state, pragma::Bas
 	auto info = ipl::Scene::FinalizeInfo {};
 	auto argIdx = 0u;
 	if(argv.size() > argIdx) {
-		if(util::to_int(argv.at(argIdx++)) == 0)
+		if(pragma::util::to_int(argv.at(argIdx++)) == 0)
 			cacheFlags &= ~CGame::SoundCacheFlags::BakeConvolution;
 		if(argv.size() > argIdx) {
-			if(util::to_int(argv.at(argIdx++)) == 0)
+			if(pragma::util::to_int(argv.at(argIdx++)) == 0)
 				cacheFlags &= ~CGame::SoundCacheFlags::BakeParametric;
 			if(argv.size() > argIdx) {
-				if(util::to_int(argv.at(argIdx++)) == 0)
+				if(pragma::util::to_int(argv.at(argIdx++)) == 0)
 					cacheFlags &= ~CGame::SoundCacheFlags::SaveProbeBoxes;
 				if(argv.size() > argIdx)
-					spacing = util::to_float(argv.at(argIdx++));
+					spacing = pragma::util::to_float(argv.at(argIdx++));
 			}
 		}
 	}
@@ -98,7 +98,7 @@ bool pragma::ClientState::PrecacheSound(std::string snd, std::pair<al::ISoundBuf
 		return false;
 	snd = FileManager::GetCanonicalizedPath(snd);
 	auto lsnd = snd;
-	ustring::to_lower(lsnd);
+	pragma::string::to_lower(lsnd);
 	auto *script = m_soundScriptManager->FindScript(lsnd.c_str());
 	if(script != nullptr)
 		return true;
@@ -109,12 +109,12 @@ bool pragma::ClientState::PrecacheSound(std::string snd, std::pair<al::ISoundBuf
 		auto bPort = false;
 		std::string ext;
 		if(ufile::get_extension(path, &ext) == true)
-			bPort = util::port_file(this, path);
+			bPort = pragma::util::port_file(this, path);
 		else {
 			auto audioFormats = pragma::engine_info::get_supported_audio_formats();
 			for(auto &extFormat : audioFormats) {
 				auto extPath = path + '.' + extFormat;
-				bPort = util::port_file(this, extPath);
+				bPort = pragma::util::port_file(this, extPath);
 				if(bPort == true)
 					break;
 			}
@@ -161,11 +161,11 @@ bool pragma::ClientState::PrecacheSound(std::string snd, std::pair<al::ISoundBuf
 		return false;
 	}
 	std::string ext;
-	if(ufile::get_extension(path, &ext) == true && ustring::compare<std::string>(ext, "wav", false) == true) {
+	if(ufile::get_extension(path, &ext) == true && pragma::string::compare<std::string>(ext, "wav", false) == true) {
 		auto f = FileManager::OpenFile(path.c_str(), "rb");
 		if(f != nullptr) {
-			auto phonemeData = ::util::make_shared<source_engine::script::SoundPhonemeData>();
-			if(source_engine::script::read_wav_phonemes(f, *phonemeData) == util::MarkupFile::ResultCode::Ok) {
+			auto phonemeData = pragma::util::make_shared<source_engine::script::SoundPhonemeData>();
+			if(source_engine::script::read_wav_phonemes(f, *phonemeData) == pragma::util::MarkupFile::ResultCode::Ok) {
 				if(tgtBuffers->first != nullptr)
 					tgtBuffers->first->SetUserData(phonemeData);
 				if(tgtBuffers->second != nullptr)
@@ -390,7 +390,7 @@ void pragma::ClientState::SetMasterSoundVolume(float vol)
 float pragma::ClientState::GetMasterSoundVolume() { return m_volMaster; }
 void pragma::ClientState::SetSoundVolume(pragma::audio::ALSoundType type, float vol)
 {
-	auto values = umath::get_power_of_2_values(CUInt64(type));
+	auto values = pragma::math::get_power_of_2_values(CUInt64(type));
 	for(auto it = values.begin(); it != values.end(); it++)
 		m_volTypes[static_cast<pragma::audio::ALSoundType>(*it)] = vol;
 	UpdateSoundVolume();

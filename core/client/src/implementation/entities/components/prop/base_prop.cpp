@@ -12,7 +12,7 @@ void CPropComponent::Initialize()
 {
 	BasePropComponent::Initialize();
 
-	/*BindEvent(CRenderComponent::EVENT_SHOULD_DRAW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	/*BindEvent(CRenderComponent::EVENT_SHOULD_DRAW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &shouldDrawData = static_cast<CEShouldDraw&>(evData.get());
 		auto &ent = GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
@@ -20,9 +20,9 @@ void CPropComponent::Initialize()
 		if((m_sqrMaxVisibleDist == 0.0 || static_cast<double>(uvec::length_sqr(shouldDrawData.camOrigin -pos)) <= m_sqrMaxVisibleDist) == false)
 		{
 			shouldDrawData.shouldDraw = CEShouldDraw::ShouldDraw::No;
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();

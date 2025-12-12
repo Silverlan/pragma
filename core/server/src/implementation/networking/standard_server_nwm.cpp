@@ -33,7 +33,7 @@ void pragma::networking::NWMActiveServer::OnPacketSent(const NWMEndpoint &ep, co
 #if DEBUG_SERVER_VERBOSE == 1
 	auto id = packet.GetMessageID();
 	auto *clMap = get_client_message_map();
-	util::StringMap<uint32_t> *clMsgs;
+	pragma::util::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 	auto it = std::find_if(clMsgs->begin(), clMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != clMsgs->end()) ? it->first : "Unknown";
@@ -47,7 +47,7 @@ void pragma::networking::NWMActiveServer::OnPacketReceived(const NWMEndpoint &ep
 	nwm::Server::OnPacketReceived(ep, cl, id, packet);
 #if DEBUG_SERVER_VERBOSE == 1
 	auto *svMap = get_server_message_map();
-	util::StringMap<uint32_t> *svMsgs;
+	pragma::util::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 	auto it = std::find_if(svMsgs->begin(), svMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != svMsgs->end()) ? it->first : "Unknown";
@@ -138,7 +138,7 @@ void pragma::networking::NWMActiveServer::PollEvents()
 	nwm::Server::PollEvents();
 	if(m_dispatcher != nullptr)
 		m_dispatcher->Poll();
-	auto t = util::Clock::now();
+	auto t = pragma::util::Clock::now();
 	auto tDelta = t - m_lastHeartBeat;
 	if(std::chrono::duration_cast<std::chrono::minutes>(tDelta).count() >= 5) {
 		m_lastHeartBeat = t;
@@ -150,12 +150,12 @@ void pragma::networking::NWMActiveServer::Heartbeat()
 	if(m_dispatcher == nullptr || !ServerState::Get()->IsGameActive())
 		return;
 	auto &data = pragma::ServerState::Get()->GetServerData();
-	util::DataStream body;
+	pragma::util::DataStream body;
 	data.Write(body);
 
 	auto msgHeader = WMSMessageHeader(CUInt32(WMSMessage::HEARTBEAT));
 	msgHeader.size = CUInt16(body->GetSize());
-	util::DataStream header;
+	pragma::util::DataStream header;
 	header->Write<WMSMessageHeader>(msgHeader);
 
 	m_dispatcher->Dispatch(header, GetMasterServerIP(), GetMasterServerPort(), [this, body](const nwm::ErrorCode err, UDPMessageDispatcher::Message *) mutable -> void {

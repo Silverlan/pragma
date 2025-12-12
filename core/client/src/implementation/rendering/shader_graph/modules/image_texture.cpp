@@ -28,7 +28,7 @@ void ImageTextureModule::InitializeGfxPipelineDescriptorSets()
 	bindings.reserve(m_nodes.size());
 	for(auto *node : m_nodes) {
 		auto texName = node->GetBaseVarName() + "_tex";
-		ustring::to_upper(texName);
+		pragma::string::to_upper(texName);
 		prosper::DescriptorSetInfo::Binding binding {pragma::register_global_string(texName), prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, prosper::PrDescriptorSetBindingFlags::None};
 		bindings.push_back(binding);
 	}

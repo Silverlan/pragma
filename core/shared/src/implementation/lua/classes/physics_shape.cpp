@@ -130,7 +130,7 @@ void Lua::PhysShape::register_class(lua::State *l, luabind::module_ &mod)
 			//world->GetWorld()->removeCollisionObject(colObj);
 			auto ptr = shape.GetSharedPointer();
 			hBody->SetCollisionShape(ptr);
-			//world->GetWorld()->addCollisionObject(colObj,umath::to_integral(hBody->GetCollisionFilterGroup()),umath::to_integral(hBody->GetCollisionFilterMask()));
+			//world->GetWorld()->addCollisionObject(colObj,pragma::math::to_integral(hBody->GetCollisionFilterGroup()),pragma::math::to_integral(hBody->GetCollisionFilterMask()));
 		}
 
 		auto &meshVerts = subMesh->GetVertices();

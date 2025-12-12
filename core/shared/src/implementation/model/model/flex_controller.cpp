@@ -9,7 +9,7 @@ import :model.model;
 std::vector<pragma::animation::FlexController>::const_iterator pragma::asset::Model::FindFlexController(const std::string &name) const { return const_cast<pragma::asset::Model *>(this)->FindFlexController(name); }
 std::vector<pragma::animation::FlexController>::iterator pragma::asset::Model::FindFlexController(const std::string &name)
 {
-	return std::find_if(m_flexControllers.begin(), m_flexControllers.end(), [&name](const pragma::animation::FlexController &fc) { return ustring::compare(fc.name, name, false); });
+	return std::find_if(m_flexControllers.begin(), m_flexControllers.end(), [&name](const pragma::animation::FlexController &fc) { return pragma::string::compare(fc.name, name, false); });
 }
 bool pragma::asset::Model::GetFlexControllerId(const std::string &name, uint32_t &id) const
 {
@@ -64,13 +64,13 @@ const std::string *pragma::asset::Model::GetFlexControllerName(uint32_t id) cons
 
 //////////////
 
-void pragma::asset::Model::SetMaxEyeDeflection(umath::Degree eyeDeflection) { m_maxEyeDeflection = eyeDeflection; }
-umath::Degree pragma::asset::Model::GetMaxEyeDeflection() const { return m_maxEyeDeflection; }
+void pragma::asset::Model::SetMaxEyeDeflection(pragma::math::Degree eyeDeflection) { m_maxEyeDeflection = eyeDeflection; }
+pragma::math::Degree pragma::asset::Model::GetMaxEyeDeflection() const { return m_maxEyeDeflection; }
 
 std::vector<pragma::animation::Flex>::const_iterator pragma::asset::Model::FindFlex(const std::string &name) const { return const_cast<pragma::asset::Model *>(this)->FindFlex(name); }
 std::vector<pragma::animation::Flex>::iterator pragma::asset::Model::FindFlex(const std::string &name)
 {
-	return std::find_if(m_flexes.begin(), m_flexes.end(), [&name](const pragma::animation::Flex &flex) { return ustring::compare(flex.GetName(), name, false); });
+	return std::find_if(m_flexes.begin(), m_flexes.end(), [&name](const pragma::animation::Flex &flex) { return pragma::string::compare(flex.GetName(), name, false); });
 }
 bool pragma::asset::Model::GetFlexId(const std::string &name, uint32_t &id) const
 {
@@ -289,7 +289,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 
 				auto &valueControllerIndex = opStack.top();
 				opStack.pop();
-				auto *flValueController = GetFlexController(ustring::to_int(valueControllerIndex.expression));
+				auto *flValueController = GetFlexController(pragma::string::to_int(valueControllerIndex.expression));
 				auto flValue = (flValueController != nullptr) ? flValueController->name : "invalid_flex_controller";
 
 				auto &filterRampW = opStack.top();
@@ -363,7 +363,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				auto closeLidIndex = opStack.top();
 				opStack.pop();
 
-				auto *pCloseLidController = GetFlexController(ustring::to_int(closeLidIndex.expression));
+				auto *pCloseLidController = GetFlexController(pragma::string::to_int(closeLidIndex.expression));
 				auto pCloseLid = (pCloseLidController != nullptr) ? pCloseLidController->name : "invalid_flex_controller";
 				auto flCloseLidMin = std::to_string((pCloseLidController != nullptr) ? pCloseLidController->min : 0.f);
 				auto flCloseLidMax = std::to_string((pCloseLidController != nullptr) ? pCloseLidController->max : 0.f);
@@ -373,7 +373,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 
 				auto eyeUpDownIndex = opStack.top();
 				opStack.pop();
-				auto *pEyeUpDownController = GetFlexController(ustring::to_int(eyeUpDownIndex.expression));
+				auto *pEyeUpDownController = GetFlexController(pragma::string::to_int(eyeUpDownIndex.expression));
 				auto pEyeUpDown = (pEyeUpDownController != nullptr) ? pEyeUpDownController->name : "invalid_flex_controller";
 				auto flEyeUpDownMin = std::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->min : 0.f);
 				auto flEyeUpDownMax = std::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->max : 0.f);
@@ -392,7 +392,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 
 				auto closeLidIndex = opStack.top();
 				opStack.pop();
-				auto *pCloseLidController = GetFlexController(ustring::to_int(closeLidIndex.expression));
+				auto *pCloseLidController = GetFlexController(pragma::string::to_int(closeLidIndex.expression));
 				auto pCloseLid = (pCloseLidController != nullptr) ? pCloseLidController->name : "invalid_flex_controller";
 				auto flCloseLidMin = std::to_string((pCloseLidController != nullptr) ? pCloseLidController->min : 0.f);
 				auto flCloseLidMax = std::to_string((pCloseLidController != nullptr) ? pCloseLidController->max : 0.f);
@@ -402,7 +402,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 
 				auto eyeUpDownIndex = opStack.top();
 				opStack.pop();
-				auto *pEyeUpDownController = GetFlexController(ustring::to_int(eyeUpDownIndex.expression));
+				auto *pEyeUpDownController = GetFlexController(pragma::string::to_int(eyeUpDownIndex.expression));
 				auto pEyeUpDown = (pEyeUpDownController != nullptr) ? pEyeUpDownController->name : "invalid_flex_controller";
 				auto flEyeUpDownMin = std::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->min : 0.f);
 				auto flEyeUpDownMax = std::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->max : 0.f);

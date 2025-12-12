@@ -19,7 +19,7 @@ export import :types;
 export import :util.resource_watcher;
 
 export namespace pragma {
-	class DLLNETWORK NetworkState : public util::CallbackHandler, public console::CVarHandler {
+	class DLLNETWORK NetworkState : public pragma::util::CallbackHandler, public console::CVarHandler {
 		// For internal use only! Not to be used directly!
 	  protected:
 		static console::ConVarHandle GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &ptrs, std::string scvar);
@@ -71,10 +71,10 @@ export namespace pragma {
 		void AddTickCallback(CallbackHandle callback);
 
 		void InitializeLuaModules(lua::State *l);
-		virtual std::shared_ptr<util::Library> InitializeLibrary(std::string library, std::string *err = nullptr, lua::State *l = nullptr);
+		virtual std::shared_ptr<pragma::util::Library> InitializeLibrary(std::string library, std::string *err = nullptr, lua::State *l = nullptr);
 		bool UnloadLibrary(const std::string &library);
-		std::shared_ptr<util::Library> LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories = {}, std::string *err = nullptr);
-		std::shared_ptr<util::Library> GetLibraryModule(const std::string &lib) const;
+		std::shared_ptr<pragma::util::Library> LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories = {}, std::string *err = nullptr);
+		std::shared_ptr<pragma::util::Library> GetLibraryModule(const std::string &lib) const;
 
 		std::unordered_map<std::string, unsigned int> &GetConCommandIDs();
 
@@ -93,7 +93,7 @@ export namespace pragma {
 		virtual msys::MaterialManager &GetMaterialManager() = 0;
 		virtual geometry::ModelSubMesh *CreateSubMesh() const = 0;
 		virtual geometry::ModelMesh *CreateMesh() const = 0;
-		virtual util::FileAssetManager *GetAssetManager(pragma::asset::Type type);
+		virtual pragma::util::FileAssetManager *GetAssetManager(pragma::asset::Type type);
 
 		void TranslateConsoleCommand(std::string &cmd);
 		void SetConsoleCommandOverride(const std::string &src, const std::string &dst);
@@ -166,18 +166,18 @@ export namespace pragma {
 		// the library (use count = 0 => not used in any network state => detach),
 		// but this doesn't work if shared_ptr instances exist outside of the
 		// network states.
-		std::vector<std::shared_ptr<std::shared_ptr<util::Library>>> m_libHandles;
-		std::shared_ptr<util::Library> m_lastModuleHandle = nullptr;
+		std::vector<std::shared_ptr<std::shared_ptr<pragma::util::Library>>> m_libHandles;
+		std::shared_ptr<pragma::util::Library> m_lastModuleHandle = nullptr;
 		struct DLLNETWORK LibraryInfo {
-			std::shared_ptr<std::shared_ptr<util::Library>> library;
+			std::shared_ptr<std::shared_ptr<pragma::util::Library>> library;
 			bool loadedServerside = false;
 			bool loadedClientside = false;
 			bool WasLoadedInState(const NetworkState &nw) const { return (nw.IsClient() && loadedClientside) || (!nw.IsClient() && loadedServerside); }
 		};
 		static std::unordered_map<std::string, LibraryInfo> s_loadedLibraries;
-		std::unordered_map<lua::State *, std::vector<std::shared_ptr<util::Library>>> m_initializedLibraries;
+		std::unordered_map<lua::State *, std::vector<std::shared_ptr<pragma::util::Library>>> m_initializedLibraries;
 
-		void InitializeDLLModule(lua::State *l, std::shared_ptr<util::Library> module);
+		void InitializeDLLModule(lua::State *l, std::shared_ptr<pragma::util::Library> module);
 
 		virtual void InitializeResourceManager();
 		void ClearGameConVars();

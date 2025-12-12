@@ -9,50 +9,50 @@ module pragma.shared;
 
 import :scripting.lua.classes.callback;
 
-namespace util {
-	static std::ostream &operator<<(std::ostream &out, const ::util::CallbackHandler &)
+namespace pragma::util {
+	static std::ostream &operator<<(std::ostream &out, const pragma::util::CallbackHandler &)
 	{
 		out << "CallbackHandler";
 		return out;
 	}
 
-	static bool operator==(const ::util::CallbackHandler &a, const ::util::CallbackHandler &b) { return (&a == &b) ? true : false; }
+	static bool operator==(const pragma::util::CallbackHandler &a, const pragma::util::CallbackHandler &b) { return (&a == &b) ? true : false; }
 }
-void Lua::CallbackHandler::register_class(luabind::class_<::util::CallbackHandler> &classDef)
+void Lua::CallbackHandler::register_class(luabind::class_<pragma::util::CallbackHandler> &classDef)
 {
 	classDef.def(luabind::constructor<>());
 	classDef.def(luabind::tostring(luabind::self));
 	classDef.def(luabind::const_self == luabind::const_self);
 	classDef.def("AddCallback", &AddCallback);
-	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
 
 	// Aliases
 	classDef.def("AddEventListener", &AddCallback);
-	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &)>(&CallCallbacks));
-	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
-	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, ::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua::State *, pragma::util::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
 }
 
 namespace Lua {
 	namespace CallbackHandler {
 		template<typename... TARGS>
-		void CallCallbacks(lua::State *l, ::util::CallbackHandler &cbHandler, std::string name, TARGS... args)
+		void CallCallbacks(lua::State *l, pragma::util::CallbackHandler &cbHandler, std::string name, TARGS... args)
 		{
-			ustring::to_lower(name);
+			pragma::string::to_lower(name);
 			auto *callbacks = cbHandler.GetCallbacks(name);
 			if(callbacks == nullptr)
 				return;
@@ -82,36 +82,36 @@ namespace Lua {
 		}
 	};
 };
-void Lua::CallbackHandler::CallCallbacks(lua::State *l, ::util::CallbackHandler &cbHandler, const std::string &name) { CallCallbacks<>(l, cbHandler, name); }
-void Lua::CallbackHandler::CallCallbacks(lua::State *l, ::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1) { CallCallbacks<luabind::object>(l, cbHandler, name, o1); }
-void Lua::CallbackHandler::CallCallbacks(lua::State *l, ::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2) { CallCallbacks<luabind::object, luabind::object>(l, cbHandler, name, o1, o2); }
-void Lua::CallbackHandler::CallCallbacks(lua::State *l, ::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2, luabind::object o3) { CallCallbacks<luabind::object, luabind::object, luabind::object>(l, cbHandler, name, o1, o2, o3); }
-void Lua::CallbackHandler::CallCallbacks(lua::State *l, ::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4)
+void Lua::CallbackHandler::CallCallbacks(lua::State *l, pragma::util::CallbackHandler &cbHandler, const std::string &name) { CallCallbacks<>(l, cbHandler, name); }
+void Lua::CallbackHandler::CallCallbacks(lua::State *l, pragma::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1) { CallCallbacks<luabind::object>(l, cbHandler, name, o1); }
+void Lua::CallbackHandler::CallCallbacks(lua::State *l, pragma::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2) { CallCallbacks<luabind::object, luabind::object>(l, cbHandler, name, o1, o2); }
+void Lua::CallbackHandler::CallCallbacks(lua::State *l, pragma::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2, luabind::object o3) { CallCallbacks<luabind::object, luabind::object, luabind::object>(l, cbHandler, name, o1, o2, o3); }
+void Lua::CallbackHandler::CallCallbacks(lua::State *l, pragma::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4)
 {
 	CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object>(l, cbHandler, name, o1, o2, o3, o4);
 }
-void Lua::CallbackHandler::CallCallbacks(lua::State *l, ::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5)
+void Lua::CallbackHandler::CallCallbacks(lua::State *l, pragma::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5)
 {
 	CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object, luabind::object>(l, cbHandler, name, o1, o2, o3, o4, o5);
 }
-void Lua::CallbackHandler::CallCallbacks(lua::State *l, ::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6)
+void Lua::CallbackHandler::CallCallbacks(lua::State *l, pragma::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6)
 {
 	CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object>(l, cbHandler, name, o1, o2, o3, o4, o5, o6);
 }
-void Lua::CallbackHandler::CallCallbacks(lua::State *l, ::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7)
+void Lua::CallbackHandler::CallCallbacks(lua::State *l, pragma::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7)
 {
 	CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object>(l, cbHandler, name, o1, o2, o3, o4, o5, o6, o7);
 }
-void Lua::CallbackHandler::CallCallbacks(lua::State *l, ::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7, luabind::object o8)
+void Lua::CallbackHandler::CallCallbacks(lua::State *l, pragma::util::CallbackHandler &cbHandler, const std::string &name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7, luabind::object o8)
 {
 	CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object>(l, cbHandler, name, o1, o2, o3, o4, o5, o6, o7, o8);
 }
 
-void Lua::CallbackHandler::AddCallback(lua::State *l, ::util::CallbackHandler &cbHandler, std::string name, luabind::object o)
+void Lua::CallbackHandler::AddCallback(lua::State *l, pragma::util::CallbackHandler &cbHandler, std::string name, luabind::object o)
 {
 	Lua::CheckFunction(l, 3);
 
-	ustring::to_lower(name);
+	pragma::string::to_lower(name);
 	auto hCallback = cbHandler.AddCallback(name, CallbackHandle {std::shared_ptr<TCallback>(new LuaCallback(o))});
 
 	Lua::Push<CallbackHandle>(l, hCallback);

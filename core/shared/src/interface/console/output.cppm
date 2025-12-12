@@ -37,7 +37,7 @@ export {
 
 	namespace Con {
 		namespace detail {
-			extern DLLNETWORK std::atomic<::util::LogSeverity> currentLevel;
+			extern DLLNETWORK std::atomic<pragma::util::LogSeverity> currentLevel;
 			extern DLLNETWORK std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> outputCallback;
 		};
 		class DLLNETWORK c_cout {};
@@ -100,7 +100,7 @@ export {
 		DLLNETWORK extern std::string PREFIX_CLIENT;
 		DLLNETWORK extern std::string PREFIX_LUA;
 		DLLNETWORK extern std::string PREFIX_GUI;
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::console::MessageFlags)
 
@@ -128,7 +128,7 @@ export {
 	template<class T>
 	inline Con::c_cout &operator<<(Con::c_cout &con, const T &t)
 	{
-		Con::detail::currentLevel = ::util::LogSeverity::Info;
+		Con::detail::currentLevel = pragma::util::LogSeverity::Info;
 		std::cout << t;
 		PRAGMA_DETAIL_LOG_OUTPUT(t, pragma::logging::detail::Type::Info)
 		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, pragma::console::MessageFlags::Generic);
@@ -142,8 +142,8 @@ export {
 	template<class T>
 	Con::c_cwar &operator<<(Con::c_cwar &con, const T &t)
 	{
-		if(Con::detail::currentLevel == ::util::LogSeverity::Disabled) {
-			Con::detail::currentLevel = ::util::LogSeverity::Warning;
+		if(Con::detail::currentLevel == pragma::util::LogSeverity::Disabled) {
+			Con::detail::currentLevel = pragma::util::LogSeverity::Warning;
 			std::cout << Con::PREFIX_WARNING << Con::prefix;
 		}
 
@@ -160,8 +160,8 @@ export {
 	template<class T>
 	Con::c_cerr &operator<<(Con::c_cerr &con, const T &t)
 	{
-		if(Con::detail::currentLevel == ::util::LogSeverity::Disabled) {
-			Con::detail::currentLevel = ::util::LogSeverity::Error;
+		if(Con::detail::currentLevel == pragma::util::LogSeverity::Disabled) {
+			Con::detail::currentLevel = pragma::util::LogSeverity::Error;
 			std::cout << Con::PREFIX_ERROR << Con::prefix;
 		}
 
@@ -179,8 +179,8 @@ export {
 	Con::c_crit &operator<<(Con::c_crit &con, const T &t)
 	{
 		Con::crit.m_bActivated = true;
-		if(Con::detail::currentLevel == ::util::LogSeverity::Disabled) {
-			Con::detail::currentLevel = ::util::LogSeverity::Critical;
+		if(Con::detail::currentLevel == pragma::util::LogSeverity::Disabled) {
+			Con::detail::currentLevel = pragma::util::LogSeverity::Critical;
 			std::cout << Con::PREFIX_CRITICAL << Con::prefix;
 		}
 
@@ -197,8 +197,8 @@ export {
 	template<class T>
 	Con::c_csv &operator<<(Con::c_csv &con, const T &t)
 	{
-		if(Con::detail::currentLevel == ::util::LogSeverity::Disabled) {
-			Con::detail::currentLevel = ::util::LogSeverity::Info;
+		if(Con::detail::currentLevel == pragma::util::LogSeverity::Disabled) {
+			Con::detail::currentLevel = pragma::util::LogSeverity::Info;
 			std::cout << Con::PREFIX_SERVER << Con::prefix;
 		}
 		std::cout << t;
@@ -221,8 +221,8 @@ export {
 	template<class T>
 	Con::c_ccl &operator<<(Con::c_ccl &con, const T &t)
 	{
-		if(Con::detail::currentLevel == ::util::LogSeverity::Disabled) {
-			Con::detail::currentLevel = ::util::LogSeverity::Info;
+		if(Con::detail::currentLevel == pragma::util::LogSeverity::Disabled) {
+			Con::detail::currentLevel = pragma::util::LogSeverity::Info;
 			std::cout << Con::PREFIX_CLIENT << Con::prefix;
 		}
 		std::cout << t;

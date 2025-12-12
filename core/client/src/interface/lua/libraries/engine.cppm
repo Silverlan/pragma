@@ -25,11 +25,11 @@ export namespace Lua {
 		DLLCLIENT msys::Material *load_material(lua::State *l, const std::string &mat, bool reload, bool loadInstantly);
 		DLLCLIENT msys::Material *load_material(lua::State *l, const std::string &mat, bool reload);
 		DLLCLIENT msys::Material *load_material(lua::State *l, const std::string &mat);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua::State *l, const std::string &name, ::util::AssetLoadFlags loadFlags);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua::State *l, const std::string &name, pragma::util::AssetLoadFlags loadFlags);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua::State *l, const std::string &name);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua::State *l, const LFile &file, const std::string &cacheName, ::util::AssetLoadFlags loadFlags);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua::State *l, const LFile &file, const std::string &cacheName, pragma::util::AssetLoadFlags loadFlags);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua::State *l, const LFile &file, const std::string &cacheName);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua::State *l, const LFile &file, ::util::AssetLoadFlags loadFlags);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua::State *l, const LFile &file, pragma::util::AssetLoadFlags loadFlags);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua::State *l, const LFile &file);
 		DLLCLIENT int create_particle_system(lua::State *l);
 		DLLCLIENT bool precache_particle_system(lua::State *l, const std::string &particle, bool reload);

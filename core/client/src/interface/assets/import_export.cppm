@@ -67,19 +67,19 @@ export namespace pragma::asset {
 		bool greyScaleMap = false;
 	};
 
-	DLLCLIENT std::shared_ptr<pragma::asset::Model> import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = true);
-	DLLCLIENT std::shared_ptr<pragma::asset::Model> import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = true);
+	DLLCLIENT std::shared_ptr<pragma::asset::Model> import_model(ufile::IFile &f, std::string &outErrMsg, const pragma::util::Path &outputPath = {}, bool importAsSingleModel = true);
+	DLLCLIENT std::shared_ptr<pragma::asset::Model> import_model(const std::string &fileName, std::string &outErrMsg, const pragma::util::Path &outputPath = {}, bool importAsSingleModel = true);
 
 	struct DLLCLIENT AssetImportResult {
 		std::vector<std::string> models;
 		std::vector<std::shared_ptr<pragma::asset::Model>> modelObjects;
 		std::string mapName;
 	};
-	DLLCLIENT std::optional<AssetImportResult> import_gltf(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = false);
-	DLLCLIENT std::optional<AssetImportResult> import_gltf(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = false);
+	DLLCLIENT std::optional<AssetImportResult> import_gltf(ufile::IFile &f, std::string &outErrMsg, const pragma::util::Path &outputPath = {}, bool importAsSingleModel = false);
+	DLLCLIENT std::optional<AssetImportResult> import_gltf(const std::string &fileName, std::string &outErrMsg, const pragma::util::Path &outputPath = {}, bool importAsSingleModel = false);
 
-	DLLCLIENT std::optional<AssetImportResult> import_fbx(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {});
-	DLLCLIENT std::optional<AssetImportResult> import_fbx(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {});
+	DLLCLIENT std::optional<AssetImportResult> import_fbx(ufile::IFile &f, std::string &outErrMsg, const pragma::util::Path &outputPath = {});
+	DLLCLIENT std::optional<AssetImportResult> import_fbx(const std::string &fileName, std::string &outErrMsg, const pragma::util::Path &outputPath = {});
 
 	DLLCLIENT bool import_texture(const std::string &fileName, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg);
 	DLLCLIENT bool import_texture(std::unique_ptr<ufile::IFile> &&f, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg);
@@ -101,10 +101,10 @@ export namespace pragma::asset {
 		bool success = false;
 		std::string errMsg;
 	};
-	DLLCLIENT std::optional<util::ParallelJob<ModelAOWorkerResult>> generate_ambient_occlusion(pragma::asset::Model &mdl, std::string &outErrMsg, bool forceRebuild = false, uint32_t aoResolution = 512, uint32_t aoSamples = 40,
+	DLLCLIENT std::optional<pragma::util::ParallelJob<ModelAOWorkerResult>> generate_ambient_occlusion(pragma::asset::Model &mdl, std::string &outErrMsg, bool forceRebuild = false, uint32_t aoResolution = 512, uint32_t aoSamples = 40,
 	  pragma::rendering::cycles::SceneInfo::DeviceType aoDevice = pragma::rendering::cycles::SceneInfo::DeviceType::CPU);
 	enum class AOResult : uint8_t { NoAOGenerationRequired = 0, FailedToCreateAOJob, AOJobReady };
-	DLLCLIENT AOResult generate_ambient_occlusion(pragma::asset::Model &mdl, msys::Material &mat, util::ParallelJob<uimg::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild = false, uint32_t aoResolution = 512, uint32_t aoSamples = 40,
+	DLLCLIENT AOResult generate_ambient_occlusion(pragma::asset::Model &mdl, msys::Material &mat, pragma::util::ParallelJob<uimg::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild = false, uint32_t aoResolution = 512, uint32_t aoSamples = 40,
 	  pragma::rendering::cycles::SceneInfo::DeviceType aoDevice = pragma::rendering::cycles::SceneInfo::DeviceType::CPU);
 
 	DLLCLIENT std::optional<prosper::Format> vtf_format_to_prosper(VtfInfo::Format format);

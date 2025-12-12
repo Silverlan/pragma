@@ -27,7 +27,7 @@ export namespace pragma::gui::types {
 		const pragma::string::Utf8String &GetTitle() const;
 		void SetCloseButtonEnabled(bool b);
 		void SetDetachButtonEnabled(bool b);
-		virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 
 		void Detach();
 		void Reattach();

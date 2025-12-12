@@ -24,7 +24,7 @@ export {
 	namespace pragma::physics {
 		class PhysObj;
 	}
-	using PhysObjHandle = util::TWeakSharedHandle<pragma::physics::PhysObj>;
+	using PhysObjHandle = pragma::util::TWeakSharedHandle<pragma::physics::PhysObj>;
 
 	namespace pragma {
 		class BaseEntityComponent;
@@ -73,8 +73,8 @@ export {
 			virtual void AddCollisionObject(pragma::physics::ICollisionObject &o);
 			const pragma::physics::ICollisionObject *GetCollisionObject() const;
 			pragma::physics::ICollisionObject *GetCollisionObject();
-			const std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &GetCollisionObjects() const;
-			std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &GetCollisionObjects();
+			const std::vector<pragma::util::TSharedHandle<pragma::physics::ICollisionObject>> &GetCollisionObjects() const;
+			std::vector<pragma::util::TSharedHandle<pragma::physics::ICollisionObject>> &GetCollisionObjects();
 
 			virtual Vector3 GetLinearVelocity() const;
 			virtual void SetLinearVelocity(const Vector3 &vel);
@@ -135,7 +135,7 @@ export {
 			void OnCollisionObjectRemoved(pragma::physics::ICollisionObject &o);
 
 			Vector3 m_velocity = {};
-			std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> m_collisionObjects;
+			std::vector<pragma::util::TSharedHandle<pragma::physics::ICollisionObject>> m_collisionObjects;
 
 			pragma::ComponentHandle<pragma::BaseEntityComponent> m_owner = {};
 			NetworkState *m_networkState;
@@ -165,7 +165,7 @@ export {
 			return physObj;
 		}
 
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	}
 	REGISTER_ENUM_FLAGS(pragma::physics::PhysObj::StateFlags)
 
@@ -204,7 +204,7 @@ export {
 		class DLLNETWORK SoftBodyPhysObj : public pragma::physics::PhysObj, public PhysObjDynamic {
 		public:
 			friend pragma::physics::PhysObj;
-			std::vector<util::TSharedHandle<pragma::physics::ISoftBody>> &GetSoftBodies();
+			std::vector<pragma::util::TSharedHandle<pragma::physics::ISoftBody>> &GetSoftBodies();
 			const pragma::physics::ISoftBody *GetSoftBody() const;
 			pragma::physics::ISoftBody *GetSoftBody();
 			virtual bool IsStatic() const override;
@@ -225,7 +225,7 @@ export {
 			SoftBodyPhysObj(pragma::BaseEntityComponent *owner);
 			bool Initialize(pragma::physics::ISoftBody &body);
 			bool Initialize(const std::vector<pragma::physics::ISoftBody *> &bodies);
-			std::vector<util::TSharedHandle<pragma::physics::ISoftBody>> m_softBodies;
+			std::vector<pragma::util::TSharedHandle<pragma::physics::ISoftBody>> m_softBodies;
 		};
 
 		////////////////////////////////////
@@ -234,7 +234,7 @@ export {
 		public:
 			friend pragma::physics::PhysObj;
 			virtual ~RigidPhysObj() override;
-			std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> &GetRigidBodies();
+			std::vector<pragma::util::TSharedHandle<pragma::physics::IRigidBody>> &GetRigidBodies();
 			virtual void UpdateVelocity() override;
 			virtual void AddCollisionObject(pragma::physics::ICollisionObject &o) override;
 			const pragma::physics::IRigidBody *GetRigidBody() const;
@@ -286,7 +286,7 @@ export {
 			RigidPhysObj(pragma::BaseEntityComponent *owner);
 			bool Initialize(pragma::physics::IRigidBody &body);
 			bool Initialize(const std::vector<pragma::physics::IRigidBody *> &bodies);
-			std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> m_rigidBodies;
+			std::vector<pragma::util::TSharedHandle<pragma::physics::IRigidBody>> m_rigidBodies;
 			float m_mass = 0.f;
 			bool m_bStatic = false;
 			void ApplyMass(float mass);
@@ -309,8 +309,8 @@ export {
 			void Simulate(double tDelta, bool bIgnoreGravity = false);
 			bool IsController() const;
 			virtual bool IsCapsule() const;
-			umath::Degree GetSlopeLimit() const;
-			void SetSlopeLimit(umath::Degree limit);
+			pragma::math::Degree GetSlopeLimit() const;
+			void SetSlopeLimit(pragma::math::Degree limit);
 			float GetStepOffset() const;
 			void SetStepOffset(float offset);
 			virtual void SetCollisionBounds(const Vector3 &min, const Vector3 &max);
@@ -341,8 +341,8 @@ export {
 			Vector3 m_offset = {};
 			double m_tLastMove = 0.0;
 
-			util::TSharedHandle<pragma::physics::IController> m_controller = nullptr;
-			util::TSharedHandle<pragma::physics::ICollisionObject> m_collisionObject = nullptr;
+			pragma::util::TSharedHandle<pragma::physics::IController> m_controller = nullptr;
+			pragma::util::TSharedHandle<pragma::physics::ICollisionObject> m_collisionObject = nullptr;
 			Vector3 m_originLast = {0.f, 0.f, 0.f};
 			float m_stepHeight = 0.f;
 			ControllerPhysObj(pragma::BaseEntityComponent *owner);

@@ -97,7 +97,7 @@ void pragma::audio::CALSound::UpdateVolume()
 		auto &volumes = client->GetSoundVolumes();
 		auto minGain = 1.f;
 		for(auto it = volumes.begin(); it != volumes.end(); ++it) {
-			if((umath::to_integral(m_type) & umath::to_integral(it->first)) != 0) {
+			if((pragma::math::to_integral(m_type) & pragma::math::to_integral(it->first)) != 0) {
 				if(it->second < minGain)
 					minGain = it->second;
 			}

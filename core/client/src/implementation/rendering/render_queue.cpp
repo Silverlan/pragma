@@ -32,14 +32,14 @@ void SortingKey::SetDistance(const Vector3 &origin, const CCameraComponent &cam)
 	auto &p1 = cam.GetEntity().GetPosition();
 	auto v = p1 - p0;
 	// Double precision since we're working with the square of the far plane
-	auto distSqr = std::max(umath::pow2(static_cast<double>(v.x)) + umath::pow2(static_cast<double>(v.y)) + umath::pow2(static_cast<double>(v.z)), 0.0);
+	auto distSqr = std::max(pragma::math::pow2(static_cast<double>(v.x)) + pragma::math::pow2(static_cast<double>(v.y)) + pragma::math::pow2(static_cast<double>(v.z)), 0.0);
 	SetDistance(distSqr, cam);
 }
 
 void SortingKey::SetDistance(double distSqr, const CCameraComponent &cam)
 {
-	auto nearZ = umath::pow2(static_cast<double>(cam.GetNearZ()));
-	auto farZ = umath::pow2(static_cast<double>(cam.GetFarZ()));
+	auto nearZ = pragma::math::pow2(static_cast<double>(cam.GetNearZ()));
+	auto farZ = pragma::math::pow2(static_cast<double>(cam.GetFarZ()));
 	// Map the distance to [0,1] and invert (since we want objects that are furthest away to be rendered first)
 	distSqr = 1.0 - std::clamp(distSqr / (farZ + nearZ), 0.0, 1.0);
 	// Note: 16 bit precision is not enough, but 24 bit might be. For now we'll use a 32 bit integer,
@@ -231,7 +231,7 @@ void RenderQueueBuilder::Exec()
 			worker();
 		}
 	}};
-	util::set_thread_name(m_thread, "render_queue_builder");
+	pragma::util::set_thread_name(m_thread, "render_queue_builder");
 }
 
 void RenderQueueBuilder::SetReadyForCompletion()

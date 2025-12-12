@@ -34,13 +34,13 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoPingServer(uint32
 	auto *queryResult = GetQueryResult(serverIdx);
 	if(queryResult == nullptr)
 		return;
-	::util::DataStream header;
+	pragma::util::DataStream header;
 	header->Write<uint16_t>(static_cast<uint16_t>(ServerQuery::Ping));
 	header->Write<uint16_t>(static_cast<uint16_t>(0)); // Body Size
 
 	m_dispatcher->Dispatch(header, queryResult->ip, queryResult->serverInfo.port, [this, serverIdx](nwm::ErrorCode err, UDPMessageDispatcher::Message *msg) mutable {
 		if(!err) {
-			msg->Receive(sizeof(WMSMessageHeader), [this, serverIdx](nwm::ErrorCode err, ::util::DataStream data) {
+			msg->Receive(sizeof(WMSMessageHeader), [this, serverIdx](nwm::ErrorCode err, pragma::util::DataStream data) {
 				if(!err)
 					OnServerPingResponse(serverIdx, true);
 				else {
@@ -68,15 +68,15 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoQueryServers(cons
 	// TODO: What if something's still on m_dispatchQueue or m_waitQueue
 	//if(m_hRefresh.IsValid())
 	//	m_hRefresh.get<WIButton>()->Set
-	::util::DataStream body;
+	pragma::util::DataStream body;
 	auto filterEnums = RequestFilter::AND;
-	if(umath::is_flag_set(filter.flags, IMasterServerQueryDispatcher::Filter::Flags::NotEmpty))
+	if(pragma::math::is_flag_set(filter.flags, IMasterServerQueryDispatcher::Filter::Flags::NotEmpty))
 		filterEnums |= RequestFilter::NOT_EMPTY;
-	if(umath::is_flag_set(filter.flags, IMasterServerQueryDispatcher::Filter::Flags::NotFull))
+	if(pragma::math::is_flag_set(filter.flags, IMasterServerQueryDispatcher::Filter::Flags::NotFull))
 		filterEnums |= RequestFilter::NOT_FULL;
-	if(umath::is_flag_set(filter.flags, IMasterServerQueryDispatcher::Filter::Flags::Empty))
+	if(pragma::math::is_flag_set(filter.flags, IMasterServerQueryDispatcher::Filter::Flags::Empty))
 		filterEnums |= RequestFilter::EMPTY;
-	if(umath::is_flag_set(filter.flags, IMasterServerQueryDispatcher::Filter::Flags::PasswordProtected) == false)
+	if(pragma::math::is_flag_set(filter.flags, IMasterServerQueryDispatcher::Filter::Flags::PasswordProtected) == false)
 		filterEnums |= RequestFilter::NO_PASSWORD;
 	body->Write<RequestFilter>(filterEnums);
 	std::unordered_map<std::string, std::string> filters;
@@ -93,17 +93,17 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoQueryServers(cons
 
 	auto msgHeader = WMSMessageHeader(static_cast<unsigned int>(WMSMessage::REQUEST_SERVERS));
 	msgHeader.size = CUInt16(body->GetSize());
-	::util::DataStream header;
+	pragma::util::DataStream header;
 	header->Write<WMSMessageHeader>(msgHeader);
 
 	m_dispatcher->Dispatch(header, GetMasterServerIP(), GetMasterServerPort(), [this, body](nwm::ErrorCode err, UDPMessageDispatcher::Message *) mutable {
 		if(!err) {
 			m_dispatcher->Dispatch(body, GetMasterServerIP(), GetMasterServerPort(), [this](nwm::ErrorCode err, UDPMessageDispatcher::Message *msg) {
 				if(!err) {
-					msg->Receive(sizeof(WMSMessageHeader), [this, msg](nwm::ErrorCode err, ::util::DataStream data) {
+					msg->Receive(sizeof(WMSMessageHeader), [this, msg](nwm::ErrorCode err, pragma::util::DataStream data) {
 						if(!err) {
 							auto header = data->Read<WMSMessageHeader>();
-							msg->Receive(header.size, [this](nwm::ErrorCode err, ::util::DataStream data) {
+							msg->Receive(header.size, [this](nwm::ErrorCode err, pragma::util::DataStream data) {
 								if(!err) {
 									auto numServers = data->Read<unsigned int>();
 									for(unsigned int i = 0; i < numServers; i++) {
@@ -261,8 +261,8 @@ void pragma::gui::types::WIServerBrowser::Initialize()
 	if(buttonRefresh != nullptr) {
 		buttonRefresh->SetText(pragma::locale::get_text("refresh"));
 		auto hServerBrowser = GetHandle();
-		buttonRefresh->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hServerBrowser](util::EventReply *reply) mutable -> CallbackReturnType {
-			*reply = util::EventReply::Handled;
+		buttonRefresh->AddCallback("OnPressed", FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([hServerBrowser](pragma::util::EventReply *reply) mutable -> CallbackReturnType {
+			*reply = pragma::util::EventReply::Handled;
 			if(!hServerBrowser.IsValid())
 				return CallbackReturnType::HasReturnValue;
 			auto *sb = hServerBrowser.get<WIServerBrowser>();
@@ -279,8 +279,8 @@ void pragma::gui::types::WIServerBrowser::Initialize()
 	if(buttonConnect != nullptr) {
 		buttonConnect->SetText(pragma::locale::get_text("connect"));
 		auto hServerBrowser = GetHandle();
-		buttonConnect->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this, hServerBrowser](util::EventReply *reply) mutable -> CallbackReturnType {
-			*reply = util::EventReply::Handled;
+		buttonConnect->AddCallback("OnPressed", FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([this, hServerBrowser](pragma::util::EventReply *reply) mutable -> CallbackReturnType {
+			*reply = pragma::util::EventReply::Handled;
 			if(!hServerBrowser.IsValid())
 				return CallbackReturnType::HasReturnValue;
 			auto *sb = hServerBrowser.get<WIServerBrowser>();
@@ -332,10 +332,10 @@ void pragma::gui::types::WIServerBrowser::AddServer(const pragma::networking::Ma
 		data.queryResult = queryResult;
 		data.row = row->GetHandle();
 		int idx = CInt32(m_servers.size() - 1);
-		row->SetUserData3(::util::make_shared<int32_t>(idx));
+		row->SetUserData3(pragma::util::make_shared<int32_t>(idx));
 		auto hTableRow = row->GetHandle();
-		row->AddCallback("OnDoubleClick", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this, hTableRow, idx](util::EventReply *reply) -> CallbackReturnType {
-			*reply = util::EventReply::Handled;
+		row->AddCallback("OnDoubleClick", FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([this, hTableRow, idx](pragma::util::EventReply *reply) -> CallbackReturnType {
+			*reply = pragma::util::EventReply::Handled;
 			if(!hTableRow.IsValid())
 				return CallbackReturnType::HasReturnValue;
 			OnServerDoubleClick(idx);

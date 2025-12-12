@@ -12,7 +12,7 @@ void Lua::engine::exit() { pragma::Engine::Get()->ShutDown(); }
 
 std::string Lua::engine::get_working_directory()
 {
-	auto path = ::util::Path::CreatePath(::util::get_program_path());
+	auto path = pragma::util::Path::CreatePath(pragma::util::get_program_path());
 	return path.GetString();
 }
 
@@ -70,7 +70,7 @@ void Lua::engine::LoadSoundScripts(lua::State *l, const std::string &fileName) {
 
 bool Lua::engine::LibraryExists(lua::State *l, const std::string &library)
 {
-	auto libAbs = ::util::get_normalized_module_path(library, pragma::Engine::Get()->GetNetworkState(l)->IsClient());
+	auto libAbs = pragma::util::get_normalized_module_path(library, pragma::Engine::Get()->GetNetworkState(l)->IsClient());
 	return FileManager::Exists(libAbs);
 }
 
@@ -114,7 +114,7 @@ void Lua::engine::register_shared_functions(lua::State *l, luabind::module_ &mod
 	  luabind::def(
 	    "mount_sub_addon",
 	    +[](lua::State *l, const std::string &subAddon) {
-		    auto path = ::util::Path::CreatePath(Lua::util::get_addon_path(l));
+		    auto path = pragma::util::Path::CreatePath(Lua::util::get_addon_path(l));
 		    path.PopFront();
 		    path = path + "addons/" + subAddon;
 		    return pragma::AddonSystem::MountAddon(path.GetString());

@@ -9,7 +9,7 @@ import :gui.progress_bar;
 
 import pragma.string.unicode;
 
-pragma::gui::types::WIProgressBar::WIProgressBar() : WIBase(), m_progress(::util::make_shared<util::FloatProperty>(0.f)), m_min(0.f), m_max(100.f), m_stepSize(1.f), m_numDecimals(0)
+pragma::gui::types::WIProgressBar::WIProgressBar() : WIBase(), m_progress(pragma::util::make_shared<pragma::util::FloatProperty>(0.f)), m_min(0.f), m_max(100.f), m_stepSize(1.f), m_numDecimals(0)
 {
 	RegisterCallback<void, float, float>("OnChange");
 	RegisterCallback<bool, float, std::reference_wrapper<std::string>>("TranslateValue");
@@ -65,7 +65,7 @@ void pragma::gui::types::WIProgressBar::SetSize(int x, int y)
 }
 
 float pragma::gui::types::WIProgressBar::GetProgress() const { return m_progress->GetValue(); }
-const util::PFloatProperty &pragma::gui::types::WIProgressBar::GetProgressProperty() const { return m_progress; }
+const pragma::util::PFloatProperty &pragma::gui::types::WIProgressBar::GetProgressProperty() const { return m_progress; }
 void pragma::gui::types::WIProgressBar::OnProgressChanged(float oldValue, float value)
 {
 	auto w = GetWidth();
@@ -95,7 +95,7 @@ void pragma::gui::types::WIProgressBar::SetRange(float min, float max, float ste
 	m_min = min;
 	m_max = max;
 	m_stepSize = stepSize;
-	m_numDecimals = (m_stepSize > 0.f) ? umath::get_number_of_decimals(m_stepSize) : 2;
+	m_numDecimals = (m_stepSize > 0.f) ? pragma::math::get_number_of_decimals(m_stepSize) : 2;
 	if(bEraseOptions == true)
 		m_options.clear();
 }
@@ -163,7 +163,7 @@ float pragma::gui::types::WIProgressBar::GetValue() const
 {
 	auto dt = m_max - m_min;
 	float val = (dt != 0.f) ? (m_min + *m_progress * dt) : 0.f;
-	return CFloat(umath::round(CDouble(val), m_numDecimals));
+	return CFloat(pragma::math::round(CDouble(val), m_numDecimals));
 }
-void pragma::gui::types::WIProgressBar::GetValue(std::string &str) { str = util::round_string(GetValue(), m_numDecimals); }
+void pragma::gui::types::WIProgressBar::GetValue(std::string &str) { str = pragma::util::round_string(GetValue(), m_numDecimals); }
 void pragma::gui::types::WIProgressBar::SetPostFix(const std::string &postfix) { m_postfix = postfix; }

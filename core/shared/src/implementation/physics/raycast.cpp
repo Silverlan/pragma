@@ -10,7 +10,7 @@ void pragma::physics::TraceResult::InitializeMeshes()
 {
 	if(meshInfo != nullptr)
 		return;
-	meshInfo = ::util::make_shared<MeshInfo>();
+	meshInfo = pragma::util::make_shared<MeshInfo>();
 	if(entity.valid() == false)
 		return;
 	auto mdlComponent = entity->GetModelComponent();
@@ -37,16 +37,16 @@ void pragma::physics::TraceResult::InitializeMeshes()
 	for(auto &mesh : meshInfo->meshes) {
 		Vector3 min, max;
 		mesh->GetBounds(min, max);
-		auto dist = umath::min(maxDist, static_cast<float>(res.hitValue));
+		auto dist = pragma::math::min(maxDist, static_cast<float>(res.hitValue));
 		auto t = 0.f;
-		if(!umath::intersection::point_in_aabb(startPosLocal, min, max) && (umath::intersection::line_aabb(startPosLocal, dir, min, max, &t) != umath::intersection::Result::Intersect || umath::abs(t) > (dist / maxDist)))
+		if(!pragma::math::intersection::point_in_aabb(startPosLocal, min, max) && (pragma::math::intersection::line_aabb(startPosLocal, dir, min, max, &t) != pragma::math::intersection::Result::Intersect || pragma::math::abs(t) > (dist / maxDist)))
 			continue;
 		auto &subMeshes = mesh->GetSubMeshes();
 		for(auto &subMesh : subMeshes) {
 			subMesh->GetBounds(min, max);
-			if(!umath::intersection::point_in_aabb(startPosLocal, min, max) && (umath::intersection::line_aabb(startPosLocal, dir, min, max, &t) != umath::intersection::Result::Intersect || umath::abs(t) > (dist / maxDist)))
+			if(!pragma::math::intersection::point_in_aabb(startPosLocal, min, max) && (pragma::math::intersection::line_aabb(startPosLocal, dir, min, max, &t) != pragma::math::intersection::Result::Intersect || pragma::math::abs(t) > (dist / maxDist)))
 				continue;
-			if(pragma::math::intersection::line_with_mesh(startPosLocal, dir, *subMesh, res, true, nullptr, nullptr) == false || umath::abs(res.hitValue) > (dist / maxDist))
+			if(pragma::math::intersection::line_with_mesh(startPosLocal, dir, *subMesh, res, true, nullptr, nullptr) == false || pragma::math::abs(res.hitValue) > (dist / maxDist))
 				continue;
 			meshInfo->mesh = mesh.get();
 			meshInfo->subMesh = subMesh.get();
@@ -122,13 +122,13 @@ Quat pragma::physics::TraceData::GetSourceRotation() const
 Vector3 pragma::physics::TraceData::GetTargetOrigin() const { return m_tEnd.GetOrigin(); }
 Quat pragma::physics::TraceData::GetTargetRotation() const { return m_tEnd.GetRotation(); }
 bool pragma::physics::TraceData::HasTarget() const { return m_bHasTarget; }
-const umath::Transform &pragma::physics::TraceData::GetSource() const { return m_tStart; }
-const umath::Transform &pragma::physics::TraceData::GetTarget() const { return m_tEnd; }
+const pragma::math::Transform &pragma::physics::TraceData::GetSource() const { return m_tStart; }
+const pragma::math::Transform &pragma::physics::TraceData::GetTarget() const { return m_tEnd; }
 pragma::physics::CollisionMask pragma::physics::TraceData::GetCollisionFilterMask() const { return m_filterMask; }
 pragma::physics::CollisionMask pragma::physics::TraceData::GetCollisionFilterGroup() const { return m_filterGroup; }
 void pragma::physics::TraceData::SetSource(const Vector3 &origin) { m_tStart.SetOrigin(origin); }
 void pragma::physics::TraceData::SetSourceRotation(const Quat &rot) { m_tStart.SetRotation(rot); }
-void pragma::physics::TraceData::SetSource(const umath::Transform &t) { m_tStart = t; }
+void pragma::physics::TraceData::SetSource(const pragma::math::Transform &t) { m_tStart = t; }
 void pragma::physics::TraceData::SetTarget(const Vector3 &target)
 {
 	m_tEnd.SetOrigin(target);
@@ -139,7 +139,7 @@ void pragma::physics::TraceData::SetTargetRotation(const Quat &rot)
 	m_tEnd.SetRotation(rot);
 	m_bHasTarget = true;
 }
-void pragma::physics::TraceData::SetTarget(const umath::Transform &t)
+void pragma::physics::TraceData::SetTarget(const pragma::math::Transform &t)
 {
 	m_tEnd = t;
 	m_bHasTarget = true;

@@ -19,7 +19,7 @@ export namespace pragma {
 	  protected:
 #if NETWORKED_VARS_ENABLED != 0
 		template<class TProperty>
-		void add_networked_variable_callback(NetworkedVariable::Id id, util::BaseProperty &prop);
+		void add_networked_variable_callback(NetworkedVariable::Id id, pragma::util::BaseProperty &prop);
 		template<typename T>
 		static NetworkedVariable::Type get_networked_variable_type();
 		virtual void OnNetworkedVariableCreated(NetworkedVariable &nwVar) override;

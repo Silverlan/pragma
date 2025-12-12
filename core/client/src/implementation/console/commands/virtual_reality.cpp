@@ -187,7 +187,7 @@ static void cl_vr_hmd_view_enabled(bool val)
 		if(val == true)
 		{
 			fSetControllerStateCallback([](uint32_t controllerId,uint32_t key,pragma::platform::KeyState state) {
-				//Con::cerr<<"Controller Key State: "<<controllerId<<","<<key<<","<<umath::to_integral(state)<<Con::endl;
+				//Con::cerr<<"Controller Key State: "<<controllerId<<","<<key<<","<<pragma::math::to_integral(state)<<Con::endl;
 				auto joystick = pragma::platform::Joystick::Create(controllerId +GLFW_MAX_JOYSTICK_COUNT); // TODO
 				auto keyOffset = GLFW_CUSTOM_KEY_JOYSTICK_0_KEY_START +joystick->GetJoystickId() *GLFW_CUSTOM_KEY_JOYSTICK_CONTROL_COUNT;
 				pragma::get_cengine()->JoystickButtonInput(pragma::get_cengine()->GetWindow(),*joystick,key +keyOffset,state);

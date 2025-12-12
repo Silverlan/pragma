@@ -27,20 +27,20 @@ void pragma::pts::CParticleRendererModel::Initialize(pragma::BaseEnvParticleSyst
 	std::string mdl;
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "model")
 			mdl = pair.second;
 		else if(key == "skin")
-			skin = util::to_int(pair.second);
+			skin = pragma::util::to_int(pair.second);
 		else if(key == "animation") {
 			if(pair.second.empty() == false)
 				m_animation = pair.second;
 		}
 		else {
-			auto sub = ustring::substr(key, 0, 9);
+			auto sub = pragma::string::substr(key, 0, 9);
 			if(sub == "bodygroup") {
-				auto id = util::to_int(ustring::substr(key, 9));
-				bodyGroups.at(id) = util::to_int(pair.second);
+				auto id = pragma::util::to_int(pragma::string::substr(key, 9));
+				bodyGroups.at(id) = pragma::util::to_int(pair.second);
 			}
 		}
 	}
@@ -79,7 +79,7 @@ void pragma::pts::CParticleRendererModel::Initialize(pragma::BaseEnvParticleSyst
 				// If we are animated, we have to create a unique descriptor set
 				ptComponent.instanceDescSetGroupAnimated = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
 				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(*s_instanceBufferAnimated, 0u);
-				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*wpBoneBuffer), umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
+				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*wpBoneBuffer), pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
 			}
 		}
 	}
@@ -146,7 +146,7 @@ bool pragma::pts::CParticleRendererModel::Update()
 	auto &posCam = cam->GetEntity().GetPosition();
 	auto &renderBounds = GetParticleSystem().GetRenderBounds();
 	Vector3 p;
-	umath::geometry::closest_point_on_aabb_to_point(renderBounds.first, renderBounds.second, posCam, &p);
+	pragma::math::geometry::closest_point_on_aabb_to_point(renderBounds.first, renderBounds.second, posCam, &p);
 	auto dist = uvec::distance(posCam, p);
 
 	auto bSuccessful = true;

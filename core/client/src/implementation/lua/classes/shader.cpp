@@ -89,22 +89,22 @@ void Lua::Shader::GetEntrypointName(lua::State *l, prosper::Shader &shader, uint
 	if(ep == nullptr || ep->shader_module_ptr == nullptr)
 		return;
 	switch(shaderStage) {
-	case umath::to_integral(prosper::ShaderStageFlags::FragmentBit):
+	case pragma::math::to_integral(prosper::ShaderStageFlags::FragmentBit):
 		Lua::PushString(l, ep->shader_module_ptr->GetFSEntrypointName());
 		break;
-	case umath::to_integral(prosper::ShaderStageFlags::VertexBit):
+	case pragma::math::to_integral(prosper::ShaderStageFlags::VertexBit):
 		Lua::PushString(l, ep->shader_module_ptr->GetVSEntrypointName());
 		break;
-	case umath::to_integral(prosper::ShaderStageFlags::GeometryBit):
+	case pragma::math::to_integral(prosper::ShaderStageFlags::GeometryBit):
 		Lua::PushString(l, ep->shader_module_ptr->GetGSEntrypointName());
 		break;
-	case umath::to_integral(prosper::ShaderStageFlags::TessellationControlBit):
+	case pragma::math::to_integral(prosper::ShaderStageFlags::TessellationControlBit):
 		Lua::PushString(l, ep->shader_module_ptr->GetTCEntrypointName());
 		break;
-	case umath::to_integral(prosper::ShaderStageFlags::TessellationEvaluationBit):
+	case pragma::math::to_integral(prosper::ShaderStageFlags::TessellationEvaluationBit):
 		Lua::PushString(l, ep->shader_module_ptr->GetTEEntrypointName());
 		break;
-	case umath::to_integral(prosper::ShaderStageFlags::ComputeBit):
+	case pragma::math::to_integral(prosper::ShaderStageFlags::ComputeBit):
 		Lua::PushString(l, ep->shader_module_ptr->GetCSEntrypointName());
 		break;
 	}
@@ -150,9 +150,9 @@ void Lua::Shader::RecordPushConstants(lua::State *l, prosper::Shader &shader, pr
 			  return shader.RecordPushConstants(*recordState.shaderBindState, sizeof(value), &value, offset);
 		  });
 	  },
-	  ::util::make_vector<prosper::util::PreparedCommand::Argument>(Lua::Vulkan::make_pcb_arg(value, type)));
+	  pragma::util::make_vector<prosper::util::PreparedCommand::Argument>(Lua::Vulkan::make_pcb_arg(value, type)));
 }
-void Lua::Shader::RecordPushConstants(lua::State *l, prosper::Shader &shader, const LuaShaderRecordTarget &recordTarget, ::util::DataStream &ds, uint32_t offset)
+void Lua::Shader::RecordPushConstants(lua::State *l, prosper::Shader &shader, const LuaShaderRecordTarget &recordTarget, pragma::util::DataStream &ds, uint32_t offset)
 {
 	auto *bindState = recordTarget.GetBindState();
 	if(bindState) {

@@ -30,12 +30,12 @@ pragma::CPlayerComponent *pragma::CGame::GetLocalPlayer()
 
 pragma::ecs::CBaseEntity *pragma::CGame::CreateEntity(std::string classname)
 {
-	if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
+	if(pragma::math::is_flag_set(m_flags, GameFlags::ClosingGame))
 		return nullptr;
-	ustring::to_lower(classname);
+	pragma::string::to_lower(classname);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("create_entity");
-	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
+	pragma::util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	pragma::ecs::CBaseEntity *entlua = CreateLuaEntity(classname);
 	if(entlua != nullptr)
@@ -57,7 +57,7 @@ pragma::ecs::CBaseEntity *pragma::CGame::CreateEntity(std::string classname)
 
 void pragma::CGame::RemoveEntity(pragma::ecs::BaseEntity *ent)
 {
-	if(umath::is_flag_set(ent->GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
+	if(pragma::math::is_flag_set(ent->GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
 		return;
 	ent->SetStateFlag(pragma::ecs::BaseEntity::StateFlags::Removed);
 	if(ent->IsPlayer())
@@ -124,7 +124,7 @@ pragma::ecs::CBaseEntity *pragma::CGame::CreateLuaEntity(std::string classname, 
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("create_lua_entity");
-	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
+	pragma::util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	luabind::object oClass {};
 	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(pragma::Game::CreateLuaEntity<CLuaEntity, pragma::LuaCore::HandleHolder<CLuaEntity>>(classname, oClass, bLoadIfNotExists));

@@ -19,11 +19,11 @@ void CBaseLightComponent::Initialize() { BaseEnvLightComponent::Initialize(); }
 
 void CBaseLightComponent::OnEntityComponentAdded(BaseEntityComponent &component) { BaseEnvLightComponent::OnEntityComponentAdded(component); }
 
-util::EventReply CBaseLightComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply CBaseLightComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvLightComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
-	return util::EventReply::Unhandled;
+	if(BaseEnvLightComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
+	return pragma::util::EventReply::Unhandled;
 }
 
 void CBaseLightComponent::ReceiveData(NetPacket &packet)

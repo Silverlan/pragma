@@ -108,9 +108,9 @@ export namespace pragma::scripting::lua_core::bindings {
 		defRaster.def("GetLightingPassCommandBufferRecorder", &pragma::CRasterizationRendererComponent::GetLightingPassCommandBufferRecorder, luabind::copy_policy<0> {});
 		defRaster.def("UpdatePrepassRenderBuffers", &pragma::CRasterizationRendererComponent::UpdatePrepassRenderBuffers);
 		defRaster.def("UpdateLightingPassRenderBuffers", &pragma::CRasterizationRendererComponent::UpdateLightingPassRenderBuffers);
-		defRaster.add_static_constant("PREPASS_MODE_DISABLED", umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::NoPrepass));
-		defRaster.add_static_constant("PREPASS_MODE_DEPTH_ONLY", umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::DepthOnly));
-		defRaster.add_static_constant("PREPASS_MODE_EXTENDED", umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::Extended));
+		defRaster.add_static_constant("PREPASS_MODE_DISABLED", pragma::math::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::NoPrepass));
+		defRaster.add_static_constant("PREPASS_MODE_DEPTH_ONLY", pragma::math::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::DepthOnly));
+		defRaster.add_static_constant("PREPASS_MODE_EXTENDED", pragma::math::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::Extended));
 		entsMod[defRaster];
 
 		auto defRaytracing = pragma::LuaCore::create_entity_component_class<pragma::CRaytracingComponent, pragma::BaseEntityComponent>("RaytracingRendererComponent");

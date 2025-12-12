@@ -84,7 +84,7 @@ double pragma::physics::WaterBuoyancySimulator::CalcBuoyancy(const Quat &rorigin
 
 	if(force || torque) {
 		// Liquid density is specified in kg/m^3, we'll have to convert it to Pragma's scale
-		constexpr auto scale = umath::pow3(pragma::units_to_metres(1.0));
+		constexpr auto scale = pragma::math::pow3(pragma::units_to_metres(1.0));
 		auto density = liquid.density * scale;
 		if(force != nullptr) {
 			*force = CalcBuoyancy(density, submergedVolume, gravity, waterPlane);
@@ -178,7 +178,7 @@ static void calc_surface_plane(const pragma::physics::PhysWaterSurfaceSimulator 
 		pragma::math::calc_best_fitting_plane(mat, avg, waterPlaneRelObj, waterPlaneDistRelObj);
 
 		// Plane might be pointing in the wrong direction; Flip it if it is
-		if(umath::abs(uvec::dot(oldPlane, waterPlaneRelObj) - 1.0) > 1.0) {
+		if(pragma::math::abs(uvec::dot(oldPlane, waterPlaneRelObj) - 1.0) > 1.0) {
 			waterPlaneRelObj = -waterPlaneRelObj;
 			waterPlaneDistRelObj = -waterPlaneDistRelObj;
 		}
@@ -233,7 +233,7 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(pragma::ecs::BaseEntity &
 		// Move water plane to collision object coordinate system
 		auto pose = pTrComponent->GetPose();
 		pose.SetRotation(uquat::identity()); // No rotation; TODO: Why?
-		auto relPlane = pose.GetInverse() * umath::Plane {waterPlane, waterPlaneDist};
+		auto relPlane = pose.GetInverse() * pragma::math::Plane {waterPlane, waterPlaneDist};
 		auto &waterPlaneRelObj = relPlane.GetNormal();
 		auto waterPlaneDistRelObj = relPlane.GetDistance();
 		calc_surface_plane(surfaceSim, pose.GetOrigin(), rot, verts.begin(), verts.end(), waterPlane, waterPlaneDist, waterPlaneRelObj, waterPlaneDistRelObj);
@@ -315,7 +315,7 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(pragma::ecs::BaseEntity &
 					totalVolume += volume;
 
 					// Move water plane to collision object coordinate system
-					auto relPlane = pose.GetInverse() * umath::Plane {waterPlane, waterPlaneDist};
+					auto relPlane = pose.GetInverse() * pragma::math::Plane {waterPlane, waterPlaneDist};
 					auto &waterPlaneRelObj = relPlane.GetNormal();
 					auto waterPlaneDistRelObj = relPlane.GetDistance();
 #if ENABLE_DEBUG_DRAW == 1
@@ -561,5 +561,5 @@ Vector3 pragma::physics::WaterBuoyancySimulator::CalcCattoDragLinearForceApproxi
 
 Vector3 pragma::physics::WaterBuoyancySimulator::CalcCattoDragTorqueForceApproximation(double dragCoefficientHz, double mass, double submergedLiquidVolume, double volume, double lenPolyhedron, const Vector3 &bodyAngularVelocity) const
 {
-	return static_cast<float>(dragCoefficientHz * mass * (submergedLiquidVolume / volume) * umath::pow2(lenPolyhedron)) * -bodyAngularVelocity;
+	return static_cast<float>(dragCoefficientHz * mass * (submergedLiquidVolume / volume) * pragma::math::pow2(lenPolyhedron)) * -bodyAngularVelocity;
 }

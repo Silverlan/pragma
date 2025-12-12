@@ -65,7 +65,7 @@ void ConstraintManagerComponent::AddConstraint(ConstraintComponent &constraint)
 {
 	auto &constraints = GetConstraints();
 	assert(FindConstraint(constraint) == constraints.end());
-	util::insert_sorted(constraints, ConstraintInfo {&constraint}, [](const ConstraintInfo &a, const ConstraintInfo &b) { return a->GetOrderIndex() < b->GetOrderIndex(); });
+	pragma::util::insert_sorted(constraints, ConstraintInfo {&constraint}, [](const ConstraintInfo &a, const ConstraintInfo &b) { return a->GetOrderIndex() < b->GetOrderIndex(); });
 	m_ownConstraints.push_back(&constraint);
 }
 std::vector<ConstraintManagerComponent::ConstraintInfo>::iterator ConstraintManagerComponent::FindConstraint(ConstraintComponent &constraint)

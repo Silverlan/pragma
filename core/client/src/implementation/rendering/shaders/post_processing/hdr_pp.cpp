@@ -20,7 +20,7 @@ decltype(ShaderPPHDR::RENDER_PASS_FORMAT_HDR) ShaderPPHDR::RENDER_PASS_FORMAT_HD
 ShaderPPHDR::ShaderPPHDR(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBase(context, identifier, "programs/post_processing/hdr")
 {
 	SetBaseShader<prosper::ShaderCopyImage>();
-	SetPipelineCount(umath::to_integral(Pipeline::Count));
+	SetPipelineCount(pragma::math::to_integral(Pipeline::Count));
 }
 
 void ShaderPPHDR::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)

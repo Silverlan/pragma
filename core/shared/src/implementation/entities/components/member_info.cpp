@@ -25,13 +25,13 @@ size_t pragma::get_component_member_name_hash(const char *name) { return get_com
 size_t pragma::get_component_member_name_hash(const std::string &name)
 {
 	auto lname = name;
-	// ustring::to_lower(lname);
+	// pragma::string::to_lower(lname);
 	return std::hash<std::string> {}(lname);
 }
 std::string pragma::get_normalized_component_member_name(const std::string &name)
 {
 	auto lname = name;
-	// ustring::to_lower(lname);
+	// pragma::string::to_lower(lname);
 	return lname;
 }
 ComponentMemberInfo::ComponentMemberInfo() : m_specializationType {AttributeSpecializationType::None} {}
@@ -165,8 +165,8 @@ void ComponentMemberInfo::ResetToDefault(BaseEntityComponent &component)
 }
 void ComponentMemberInfo::SetFlags(ComponentMemberFlags flags) { m_flags = flags; }
 ComponentMemberFlags ComponentMemberInfo::GetFlags() const { return m_flags; }
-bool ComponentMemberInfo::HasFlag(ComponentMemberFlags flag) const { return umath::is_flag_set(m_flags, flag); }
-void ComponentMemberInfo::SetFlag(ComponentMemberFlags flag, bool set) { umath::set_flag(m_flags, flag, set); }
+bool ComponentMemberInfo::HasFlag(ComponentMemberFlags flag) const { return pragma::math::is_flag_set(m_flags, flag); }
+void ComponentMemberInfo::SetFlag(ComponentMemberFlags flag, bool set) { pragma::math::set_flag(m_flags, flag, set); }
 void ComponentMemberInfo::SetName(const pragma::GString &name)
 {
 	m_name = name;
@@ -222,7 +222,7 @@ std::optional<ComponentMemberIndex> ComponentInfo::FindMember(const std::string 
 
 //////////////
 
-util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent(ComponentId componentId, pragma::ecs::BaseEntity &ent) const
+pragma::util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent(ComponentId componentId, pragma::ecs::BaseEntity &ent) const
 {
 	if(componentId >= m_componentInfos.size() || m_componentInfos[componentId]->id == INVALID_COMPONENT_ID) {
 		// Component has been pre-registered, but its script has not yet been loaded!
@@ -264,7 +264,7 @@ util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent
 	}
 	return r;
 }
-util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent(const std::string &name, pragma::ecs::BaseEntity &ent) const
+pragma::util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent(const std::string &name, pragma::ecs::BaseEntity &ent) const
 {
 	auto componentId = pragma::INVALID_COMPONENT_ID;
 	// Try to find the component as Lua component and load it (if the component hasn't been registered yet)
@@ -282,7 +282,7 @@ ComponentId EntityComponentManager::PreRegisterComponentType(const std::string &
 		return componentId;
 	m_preRegistered.push_back(std::make_unique<ComponentInfo>());
 	std::string lname = name;
-	ustring::to_lower(lname);
+	pragma::string::to_lower(lname);
 	auto &componentInfo = *m_preRegistered.back();
 	componentInfo.name = lname;
 	componentInfo.id = m_nextComponentId++;
@@ -293,11 +293,11 @@ ComponentId EntityComponentManager::PreRegisterComponentType(const std::string &
 	m_components.push_back({});
 	return componentInfo.id;
 }
-ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<util::TSharedHandle<BaseEntityComponent>(pragma::ecs::BaseEntity &)> &factory, const ComponentRegInfo &regInfo, ComponentFlags flags, std::type_index typeIndex)
+ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<pragma::util::TSharedHandle<BaseEntityComponent>(pragma::ecs::BaseEntity &)> &factory, const ComponentRegInfo &regInfo, ComponentFlags flags, std::type_index typeIndex)
 {
 	return RegisterComponentType(name, factory, regInfo, flags, &typeIndex);
 }
-ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<util::TSharedHandle<BaseEntityComponent>(pragma::ecs::BaseEntity &)> &factory, const ComponentRegInfo &regInfo, ComponentFlags flags)
+ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<pragma::util::TSharedHandle<BaseEntityComponent>(pragma::ecs::BaseEntity &)> &factory, const ComponentRegInfo &regInfo, ComponentFlags flags)
 {
 	return RegisterComponentType(name, factory, regInfo, flags, nullptr);
 }
@@ -337,7 +337,7 @@ CallbackHandle EntityComponentManager::AddCreationCallback(const std::string &co
 		id = PreRegisterComponentType(componentName);
 	return AddCreationCallback(id, onCreate);
 }
-ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<util::TSharedHandle<BaseEntityComponent>(pragma::ecs::BaseEntity &)> &factory, const ComponentRegInfo &regInfo, ComponentFlags flags, const std::type_index *typeIndex)
+ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<pragma::util::TSharedHandle<BaseEntityComponent>(pragma::ecs::BaseEntity &)> &factory, const ComponentRegInfo &regInfo, ComponentFlags flags, const std::type_index *typeIndex)
 {
 	if(typeIndex != nullptr) {
 		auto it = m_typeIndexToComponentId.find(*typeIndex);
@@ -354,7 +354,7 @@ ComponentId EntityComponentManager::RegisterComponentType(const std::string &nam
 		return componentId;
 	}
 	auto idx = PreRegisterComponentType(name);
-	auto itPre = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [&name](const std::unique_ptr<ComponentInfo> &componentInfo) { return ustring::compare(name.c_str(), componentInfo->name.c_str(), false); });
+	auto itPre = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [&name](const std::unique_ptr<ComponentInfo> &componentInfo) { return pragma::string::compare(name.c_str(), componentInfo->name.c_str(), false); });
 	if(itPre == m_preRegistered.end())
 		throw std::logic_error("Error when attempting to pre-register component " + name + "!");
 	auto &preReg = *itPre;
@@ -372,11 +372,11 @@ ComponentId EntityComponentManager::RegisterComponentType(const std::string &nam
 		m_typeIndexToComponentId.insert(std::make_pair(*typeIndex, componentId));
 		if(componentId >= m_componentIdToTypeIndex.size())
 			m_componentIdToTypeIndex.resize(componentId + 1u, nullptr);
-		m_componentIdToTypeIndex.at(componentId) = ::util::make_shared<std::type_index>(*typeIndex);
+		m_componentIdToTypeIndex.at(componentId) = pragma::util::make_shared<std::type_index>(*typeIndex);
 	}
 	m_preRegistered.erase(itPre);
 
-	if(umath::is_flag_set(regInfo.flags, ComponentRegInfo::Flags::HideInEditor))
+	if(pragma::math::is_flag_set(regInfo.flags, ComponentRegInfo::Flags::HideInEditor))
 		flags |= ComponentFlags::HideInEditor;
 
 	componentInfo->factory = factory;
@@ -406,13 +406,13 @@ bool EntityComponentManager::GetComponentId(std::type_index typeIndex, Component
 bool EntityComponentManager::GetComponentTypeId(const std::string &name, ComponentId &outId, bool bIncludePreregistered) const
 {
 	if(bIncludePreregistered == true) {
-		auto itPre = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [&name](const std::unique_ptr<ComponentInfo> &componentInfo) { return ustring::compare(name.c_str(), componentInfo->name.c_str()); });
+		auto itPre = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [&name](const std::unique_ptr<ComponentInfo> &componentInfo) { return pragma::string::compare(name.c_str(), componentInfo->name.c_str()); });
 		if(itPre != m_preRegistered.end()) {
 			outId = (*itPre)->id;
 			return true;
 		}
 	}
-	auto it = std::find_if(m_componentInfos.begin(), m_componentInfos.end(), [&name](const std::unique_ptr<ComponentInfo> &componentInfo) { return ustring::compare(name.c_str(), componentInfo->name.c_str(), false); });
+	auto it = std::find_if(m_componentInfos.begin(), m_componentInfos.end(), [&name](const std::unique_ptr<ComponentInfo> &componentInfo) { return pragma::string::compare(name.c_str(), componentInfo->name.c_str(), false); });
 	if(it == m_componentInfos.end())
 		return false;
 	outId = (*it)->id;
@@ -428,7 +428,7 @@ ComponentInfo *EntityComponentManager::GetComponentInfo(ComponentId id)
 ComponentMemberIndex EntityComponentManager::RegisterMember(ComponentInfo &componentInfo, ComponentMemberInfo &&memberInfo)
 {
 	std::string lname = memberInfo.GetName();
-	ustring::to_lower(lname);
+	pragma::string::to_lower(lname);
 	componentInfo.members.push_back(std::move(memberInfo));
 	auto idx = componentInfo.members.size() - 1;
 	componentInfo.memberNameToIndex[lname] = idx;
@@ -551,7 +551,7 @@ void EntityComponentManager::ComponentContainerInfo::Push(BaseEntityComponent &c
 		return;
 	}
 	if(m_count == m_components.capacity())
-		m_components.reserve(umath::max(umath::ceil(m_components.capacity() * 1.4f), 50)); // Increase capacity to 140% of current capacity
+		m_components.reserve(pragma::math::max(pragma::math::ceil(m_components.capacity() * 1.4f), 50)); // Increase capacity to 140% of current capacity
 	if(m_count < m_components.size()) {
 		m_components.at(m_count++) = &component;
 		return;

@@ -21,7 +21,7 @@ void pragma::asset::Output::Read(VFilePtr &f)
 bool pragma::asset::WorldData::Read(VFilePtr &f, EntityData::Flags entMask, std::string *errMsg)
 {
 	auto header = f->Read<std::array<char, 3>>();
-	if(ustring::compare(header.data(), "WLD", true, 3) == false) {
+	if(pragma::string::compare(header.data(), "WLD", true, 3) == false) {
 		if(errMsg)
 			*errMsg = "Invalid file format!";
 		return false;
@@ -45,9 +45,9 @@ bool pragma::asset::WorldData::Read(VFilePtr &f, EntityData::Flags entMask, std:
 	auto headerData = f->Read<HeaderData>();
 
 	auto materials = ReadMaterials(f);
-	if(umath::is_flag_set(headerData.flags, DataFlags::HasBSPTree))
+	if(pragma::math::is_flag_set(headerData.flags, DataFlags::HasBSPTree))
 		ReadBSPTree(f, version);
-	if(umath::is_flag_set(headerData.flags, DataFlags::HasLightmapAtlas)) {
+	if(pragma::math::is_flag_set(headerData.flags, DataFlags::HasLightmapAtlas)) {
 		m_lightMapIntensity = f->Read<float>();
 		m_lightMapExposure = f->Read<float>();
 	}
@@ -69,10 +69,10 @@ std::vector<msys::MaterialHandle> pragma::asset::WorldData::ReadMaterials(VFileP
 }
 void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f, uint32_t version)
 {
-	m_bspTree = util::BSPTree::Create();
+	m_bspTree = pragma::util::BSPTree::Create();
 	auto &nodes = m_bspTree->GetNodes();
-	std::function<void(util::BSPTree::Node &)> fReadNode = nullptr;
-	fReadNode = [this, &fReadNode, &nodes, &f](util::BSPTree::Node &node) {
+	std::function<void(pragma::util::BSPTree::Node &)> fReadNode = nullptr;
+	fReadNode = [this, &fReadNode, &nodes, &f](pragma::util::BSPTree::Node &node) {
 		node.leaf = f->Read<bool>();
 		node.min = f->Read<Vector3>();
 		node.max = f->Read<Vector3>();
@@ -87,7 +87,7 @@ void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f, uint32_t version)
 		}
 		auto normal = f->Read<Vector3>();
 		auto d = f->Read<float>();
-		node.plane = umath::Plane {normal, static_cast<double>(d)};
+		node.plane = pragma::math::Plane {normal, static_cast<double>(d)};
 
 		auto idx = node.index;
 		m_bspTree->GetNodes().reserve(m_bspTree->GetNodes().size() + 2); // Note: This may invalidate 'node'!
@@ -101,7 +101,7 @@ void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f, uint32_t version)
 	fReadNode(m_bspTree->GetRootNode());
 
 	auto numClusters = f->Read<uint64_t>();
-	auto numCompressedClusters = umath::pow2(numClusters);
+	auto numCompressedClusters = pragma::math::pow2(numClusters);
 	numCompressedClusters = numCompressedClusters / 8u + ((numCompressedClusters % 8u) > 0u ? 1u : 0u);
 	auto &compressedClusterData = m_bspTree->GetClusterVisibility();
 	compressedClusterData.resize(numCompressedClusters);
@@ -144,7 +144,7 @@ void pragma::asset::WorldData::ReadEntities(VFilePtr &f, const std::vector<msys:
 		m_entities.push_back(entData);
 		entData->m_mapIndex = i + 1; // Map indices always start at 1!
 		entData->SetClassName(f->ReadString());
-		auto pose = umath::ScaledTransform();
+		auto pose = pragma::math::ScaledTransform();
 		pose.SetOrigin(f->Read<Vector3>());
 		entData->SetPose(pose);
 

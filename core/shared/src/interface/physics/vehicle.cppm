@@ -65,7 +65,7 @@ export {
 			// for this wheel. -1 means no shape is associated with
 			// the wheel.
 			int32_t shapeIndex = -1;
-			umath::Degree maxSteeringAngle = 0.f;
+			pragma::math::Degree maxSteeringAngle = 0.f;
 			Vector3 chassisOffset = {};
 			SuspensionInfo suspension = {};
 			// Has to match one of the tire types defined in
@@ -117,11 +117,11 @@ export {
 			WheelDrive wheelDrive = WheelDrive::Four;
 			std::vector<AntiRollBar> antiRollBars = {};
 			float maxEngineTorque = 500.f;
-			umath::Radian maxEngineRotationSpeed = 600.f;
+			pragma::math::Radian maxEngineRotationSpeed = 600.f;
 			float gearSwitchTime = 0.5f;
 			float clutchStrength = 10.f;
 			float gravityFactor = 1.f; // TODO
-			mutable util::TSharedHandle<IRigidBody> actor = nullptr;
+			mutable pragma::util::TSharedHandle<IRigidBody> actor = nullptr;
 		};
 
 		class DLLNETWORK IVehicle : public IBase, public IWorldObject {
@@ -187,34 +187,34 @@ export {
 
 			virtual bool ShouldUseAutoGears() const = 0;
 			virtual Gear GetCurrentGear() const = 0;
-			virtual umath::Radian GetEngineRotationSpeed() const = 0;
-			virtual void SetEngineRotationSpeed(umath::Radian speed) const = 0;
+			virtual pragma::math::Radian GetEngineRotationSpeed() const = 0;
+			virtual void SetEngineRotationSpeed(pragma::math::Radian speed) const = 0;
 
 			virtual void SetRestState() = 0;
 
 			virtual void ResetControls() = 0;
 
-			virtual void SetWheelRotationAngle(WheelIndex wheel, umath::Radian angle) = 0;
-			virtual void SetWheelRotationSpeed(WheelIndex wheel, umath::Radian speed) = 0;
+			virtual void SetWheelRotationAngle(WheelIndex wheel, pragma::math::Radian angle) = 0;
+			virtual void SetWheelRotationSpeed(WheelIndex wheel, pragma::math::Radian speed) = 0;
 
 			virtual bool IsInAir() const = 0;
 
-			virtual std::optional<umath::Transform> GetLocalWheelPose(WheelIndex wheelIndex) const = 0;
+			virtual std::optional<pragma::math::Transform> GetLocalWheelPose(WheelIndex wheelIndex) const = 0;
 			virtual uint32_t GetWheelCount() const = 0;
 			virtual float GetSteerFactor() const = 0;
-			virtual umath::Radian GetWheelYawAngle(WheelIndex wheel) const = 0;
-			virtual umath::Radian GetWheelRollAngle(WheelIndex wheel) const = 0;
+			virtual pragma::math::Radian GetWheelYawAngle(WheelIndex wheel) const = 0;
+			virtual pragma::math::Radian GetWheelRollAngle(WheelIndex wheel) const = 0;
 			virtual float GetForwardSpeed() const = 0;
 			virtual float GetSidewaysSpeed() const = 0;
 
 			virtual float GetBrakeFactor() const = 0;
 			virtual float GetHandbrakeFactor() const = 0;
 			virtual float GetAccelerationFactor() const = 0;
-			virtual umath::Radian GetWheelRotationSpeed(WheelIndex wheel) const = 0;
+			virtual pragma::math::Radian GetWheelRotationSpeed(WheelIndex wheel) const = 0;
 		  protected:
-			IVehicle(IEnvironment &env, const util::TSharedHandle<ICollisionObject> &collisionObject);
+			IVehicle(IEnvironment &env, const pragma::util::TSharedHandle<ICollisionObject> &collisionObject);
 			virtual bool ShouldUseDigitalInputs() const = 0;
-			util::TSharedHandle<ICollisionObject> m_collisionObject = nullptr;
+			pragma::util::TSharedHandle<ICollisionObject> m_collisionObject = nullptr;
 		};
 
 		class DLLNETWORK IWheel : public IBase {
@@ -222,7 +222,7 @@ export {
 		  protected:
 			IWheel(IEnvironment &env);
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::physics::WheelCreateInfo::Flags)
 };

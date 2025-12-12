@@ -36,15 +36,15 @@ void pragma::gui::types::WISlider::Think(const std::shared_ptr<prosper::IPrimary
 
 bool pragma::gui::types::WISlider::IsBeingDragged() const { return m_bMoveSlider; }
 
-util::EventReply pragma::gui::types::WISlider::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WISlider::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
-	if(WIProgressBar::MouseCallback(button, state, mods) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(WIProgressBar::MouseCallback(button, state, mods) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(button == pragma::platform::MouseButton::Left) {
 		if(state == pragma::platform::KeyState::Press)
 			m_bMoveSlider = true;
 		else
 			m_bMoveSlider = false;
 	}
-	return util::EventReply::Handled;
+	return pragma::util::EventReply::Handled;
 }

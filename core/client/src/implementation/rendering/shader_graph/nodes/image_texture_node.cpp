@@ -64,7 +64,7 @@ std::string ImageTextureNodeBase::DoEvaluateResourceDeclarations(const pragma::s
 	std::ostringstream code;
 	//auto texName = GetTextureVariableName(gn);
 	//auto upperTexName = texName;
-	//ustring::to_upper(upperTexName);
+	//pragma::string::to_upper(upperTexName);
 	//code << "layout(LAYOUT_ID(TEST, " << upperTexName << ")) uniform sampler2D " << texName << ";\n";
 	return code.str();
 }

@@ -12,7 +12,7 @@ export import pragma.lua;
 export {
 	namespace pragma {
 		enum class FileOpenMode : uint32_t { None = 0u, Read = 1u, Write = Read << 1u, Append = Write << 1u, Update = Append << 1u, Binary = Update << 1u };
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	}
 	REGISTER_ENUM_FLAGS(pragma::FileOpenMode)
 
@@ -97,9 +97,9 @@ export {
 	DLLNETWORK void Lua_LFile_IgnoreComments(lua::State *l, LFile &f, std::string start);
 	DLLNETWORK void Lua_LFile_IgnoreComments(lua::State *l, LFile &f, std::string start, std::string end);
 	DLLNETWORK void Lua_LFile_Read(lua::State *l, LFile &f, uint32_t size);
-	DLLNETWORK void Lua_LFile_Read(lua::State *l, LFile &f, util::DataStream &ds, uint32_t size);
-	DLLNETWORK void Lua_LFile_Write(lua::State *l, LFile &f, util::DataStream &ds);
-	DLLNETWORK void Lua_LFile_Write(lua::State *l, LFile &f, util::DataStream &ds, uint32_t size);
+	DLLNETWORK void Lua_LFile_Read(lua::State *l, LFile &f, pragma::util::DataStream &ds, uint32_t size);
+	DLLNETWORK void Lua_LFile_Write(lua::State *l, LFile &f, pragma::util::DataStream &ds);
+	DLLNETWORK void Lua_LFile_Write(lua::State *l, LFile &f, pragma::util::DataStream &ds, uint32_t size);
 	DLLNETWORK void Lua_LFile_GetPath(lua::State *l, LFile &f);
 
 	////////////////////////////////////

@@ -11,7 +11,7 @@ using namespace pragma;
 ComponentEventId baseObserverComponent::EVENT_ON_OBSERVATION_MODE_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseObserverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseObserverComponent::EVENT_ON_OBSERVATION_MODE_CHANGED = registerEvent("ON_OBSERVATION_MODE_CHANGED", ComponentEventInfo::Type::Broadcast); }
 
-BaseObserverComponent::BaseObserverComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_obsMode(util::TEnumProperty<ObserverMode>::Create(ObserverMode::FirstPerson)) {}
+BaseObserverComponent::BaseObserverComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_obsMode(pragma::util::TEnumProperty<ObserverMode>::Create(ObserverMode::FirstPerson)) {}
 
 BaseObserverComponent::~BaseObserverComponent() {}
 
@@ -38,7 +38,7 @@ void BaseObserverComponent::SetObserverMode(ObserverMode mode)
 	BroadcastEvent(baseObserverComponent::EVENT_ON_OBSERVATION_MODE_CHANGED);
 }
 ObserverMode BaseObserverComponent::GetObserverMode() const { return *m_obsMode; }
-const util::PEnumProperty<ObserverMode> &BaseObserverComponent::GetObserverModeProperty() const { return m_obsMode; }
+const pragma::util::PEnumProperty<ObserverMode> &BaseObserverComponent::GetObserverModeProperty() const { return m_obsMode; }
 void BaseObserverComponent::ClearObserverTarget()
 {
 	if(m_observerTarget.expired())

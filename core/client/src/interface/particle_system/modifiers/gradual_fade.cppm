@@ -61,7 +61,7 @@ bool pragma::pts::CParticleModifierComponentGradualFade::GetFadeFraction(pragma:
 	}
 	auto tEnd = GetEndTime(p);
 	auto tDelta = tEnd - tStart;
-	outFraction = (tDelta != 0.f) ? umath::clamp((t - tStart) / (tEnd - tStart), 0.f, 1.f) : 0.f;
+	outFraction = (tDelta != 0.f) ? pragma::math::clamp((t - tStart) / (tEnd - tStart), 0.f, 1.f) : 0.f;
 	return true;
 }
 float pragma::pts::CParticleModifierComponentGradualFade::GetFadeFraction(pragma::pts::CParticle &p) const

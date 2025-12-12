@@ -21,14 +21,14 @@ namespace pragma::pts {
 			CParticleInitializer::Initialize(pSystem, values);
 			for(auto it = values.begin(); it != values.end(); it++) {
 				std::string key = it->first;
-				ustring::to_lower(key);
+				pragma::string::to_lower(key);
 				if(key == "lifetime_min")
-					m_lifeMin = util::to_float(it->second);
+					m_lifeMin = pragma::util::to_float(it->second);
 				else if(key == "lifetime_max")
-					m_lifeMax = util::to_float(it->second);
+					m_lifeMax = pragma::util::to_float(it->second);
 			}
 		}
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override { particle.SetLife(umath::random(m_lifeMin, m_lifeMax)); }
+		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override { particle.SetLife(pragma::math::random(m_lifeMin, m_lifeMax)); }
 	};
 
 	class DLLCLIENT CParticleInitializerColorRandom : public CParticleInitializer {
@@ -43,7 +43,7 @@ namespace pragma::pts {
 			CParticleInitializer::Initialize(pSystem, values);
 			for(auto it = values.begin(); it != values.end(); it++) {
 				std::string key = it->first;
-				ustring::to_lower(key);
+				pragma::string::to_lower(key);
 				if(key == "color1")
 					m_colorA = Color(it->second);
 				else if(key == "color2")
@@ -54,9 +54,9 @@ namespace pragma::pts {
 		}
 		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override
 		{
-			auto col = m_colorA.Lerp(m_colorB, umath::random(0.f, 1.f));
+			auto col = m_colorA.Lerp(m_colorB, pragma::math::random(0.f, 1.f));
 			if(m_colorC != nullptr)
-				col = col.Lerp(*m_colorC, umath::random(0.f, 1.f));
+				col = col.Lerp(*m_colorC, pragma::math::random(0.f, 1.f));
 			particle.SetColor(col);
 		}
 	};
@@ -72,17 +72,17 @@ namespace pragma::pts {
 			CParticleInitializer::Initialize(pSystem, values);
 			for(auto it = values.begin(); it != values.end(); it++) {
 				std::string key = it->first;
-				ustring::to_lower(key);
+				pragma::string::to_lower(key);
 				if(key == "alpha_min")
-					m_alphaMin = util::to_float(it->second);
+					m_alphaMin = pragma::util::to_float(it->second);
 				else if(key == "alpha_max")
-					m_alphaMax = util::to_float(it->second);
+					m_alphaMax = pragma::util::to_float(it->second);
 			}
 		}
 		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override
 		{
 			auto &col = particle.GetColor();
-			col.a = umath::random(m_alphaMin, m_alphaMax) / 255.f;
+			col.a = pragma::math::random(m_alphaMin, m_alphaMax) / 255.f;
 		}
 	};
 
@@ -101,18 +101,18 @@ namespace pragma::pts {
 			CParticleInitializer::Initialize(pSystem, values);
 			for(auto it = values.begin(); it != values.end(); it++) {
 				std::string key = it->first;
-				ustring::to_lower(key);
+				pragma::string::to_lower(key);
 				if(key == "rotation_quat") {
 					m_rot = uquat::create(it->second);
 					m_bUseQuaternionRotation = true;
 				}
 				else if(key == "rotation_min") {
 					m_rotMin = EulerAngles(it->second);
-					m_planarRotMin = util::to_float(it->second);
+					m_planarRotMin = pragma::util::to_float(it->second);
 				}
 				else if(key == "rotation_max") {
 					m_rotMax = EulerAngles(it->second);
-					m_planarRotMax = util::to_float(it->second);
+					m_planarRotMax = pragma::util::to_float(it->second);
 				}
 			}
 		}
@@ -122,8 +122,8 @@ namespace pragma::pts {
 				particle.SetWorldRotation(m_rot);
 				return;
 			}
-			particle.SetWorldRotation(uquat::create(EulerAngles(umath::random(m_rotMin.p, m_rotMax.p), umath::random(m_rotMin.y, m_rotMax.y), umath::random(m_rotMin.r, m_rotMax.r))));
-			particle.SetRotation(umath::random(m_planarRotMin, m_planarRotMax));
+			particle.SetWorldRotation(uquat::create(EulerAngles(pragma::math::random(m_rotMin.p, m_rotMax.p), pragma::math::random(m_rotMin.y, m_rotMax.y), pragma::math::random(m_rotMin.r, m_rotMax.r))));
+			particle.SetRotation(pragma::math::random(m_planarRotMin, m_planarRotMax));
 		}
 	};
 }
@@ -156,16 +156,16 @@ void pragma::pts::CParticleOperator::Initialize(pragma::BaseEnvParticleSystemCom
 {
 	pragma::pts::CParticleModifier::Initialize(pSystem, values);
 	for(auto &pair : values) {
-		if(ustring::compare<std::string>(pair.first, "op_start_fadein"))
-			m_opStartFadein = util::to_float(pair.second);
-		else if(ustring::compare<std::string>(pair.first, "op_start_fadeout"))
-			m_opStartFadeout = util::to_float(pair.second);
-		else if(ustring::compare<std::string>(pair.first, "op_end_fadein"))
-			m_opEndFadein = util::to_float(pair.second);
-		else if(ustring::compare<std::string>(pair.first, "op_end_fadeout"))
-			m_opEndFadeout = util::to_float(pair.second);
-		else if(ustring::compare<std::string>(pair.first, "op_fade_oscillate_period"))
-			m_opFadeOscillate = util::to_float(pair.second);
+		if(pragma::string::compare<std::string>(pair.first, "op_start_fadein"))
+			m_opStartFadein = pragma::util::to_float(pair.second);
+		else if(pragma::string::compare<std::string>(pair.first, "op_start_fadeout"))
+			m_opStartFadeout = pragma::util::to_float(pair.second);
+		else if(pragma::string::compare<std::string>(pair.first, "op_end_fadein"))
+			m_opEndFadein = pragma::util::to_float(pair.second);
+		else if(pragma::string::compare<std::string>(pair.first, "op_end_fadeout"))
+			m_opEndFadeout = pragma::util::to_float(pair.second);
+		else if(pragma::string::compare<std::string>(pair.first, "op_fade_oscillate_period"))
+			m_opFadeOscillate = pragma::util::to_float(pair.second);
 	}
 }
 float pragma::pts::CParticleOperator::CalcStrength(float curTime) const
@@ -173,7 +173,7 @@ float pragma::pts::CParticleOperator::CalcStrength(float curTime) const
 	auto flTime = curTime;
 	if(m_opFadeOscillate > 0.f)
 		flTime = fmodf(curTime * (1.0 / m_opFadeOscillate), 1.f);
-	return umath::fade_in_out(m_opStartFadein, m_opEndFadein, m_opStartFadeout, m_opEndFadeout, flTime);
+	return pragma::math::fade_in_out(m_opStartFadein, m_opEndFadein, m_opStartFadeout, m_opEndFadeout, flTime);
 }
 void pragma::pts::CParticleOperator::Simulate(double) {}
 
@@ -278,7 +278,7 @@ void pragma::pts::register_particle_operators()
 
 void pragma::pts::ParticleModifierMap::AddInitializer(std::string name, const pragma::pts::TParticleModifierFactory<pragma::pts::CParticleInitializer> &fc)
 {
-	ustring::to_lower(name);
+	pragma::string::to_lower(name);
 	m_initializers.insert(std::make_pair(name, pragma::pts::TParticleModifierFactory<pragma::pts::CParticleInitializer> {[fc, name](pragma::ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)> {
 		auto initializer = fc(c, keyvalues);
 		if(initializer)
@@ -288,7 +288,7 @@ void pragma::pts::ParticleModifierMap::AddInitializer(std::string name, const pr
 }
 void pragma::pts::ParticleModifierMap::AddOperator(std::string name, const pragma::pts::TParticleModifierFactory<pragma::pts::CParticleOperator> &fc)
 {
-	ustring::to_lower(name);
+	pragma::string::to_lower(name);
 	m_operators.insert(std::make_pair(name, pragma::pts::TParticleModifierFactory<pragma::pts::CParticleOperator> {[fc, name](pragma::ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)> {
 		auto op = fc(c, keyvalues);
 		if(op)
@@ -298,7 +298,7 @@ void pragma::pts::ParticleModifierMap::AddOperator(std::string name, const pragm
 }
 void pragma::pts::ParticleModifierMap::AddRenderer(std::string name, const pragma::pts::TParticleModifierFactory<pragma::pts::CParticleRenderer> &fc)
 {
-	ustring::to_lower(name);
+	pragma::string::to_lower(name);
 	m_renderers.insert(std::make_pair(name, pragma::pts::TParticleModifierFactory<pragma::pts::CParticleRenderer> {[fc, name](pragma::ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)> {
 		auto renderer = fc(c, keyvalues);
 		if(renderer)

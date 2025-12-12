@@ -27,9 +27,9 @@ void pragma::pts::CParticleOperatorWorldBase::Initialize(pragma::BaseEnvParticle
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "rotate_with_emitter")
-			m_bRotateWithEmitter = util::to_boolean(it->second);
+			m_bRotateWithEmitter = pragma::util::to_boolean(it->second);
 	}
 }
 

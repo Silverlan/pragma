@@ -36,7 +36,7 @@ void CLightMapComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		    "lightmapMaterial", "", AttributeSpecializationType::File);
 		auto &metaData = memberInfo.AddMetaData();
 		metaData["assetType"] = "material";
-		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)).GetString();
+		metaData["rootPath"] = pragma::util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)).GetString();
 		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Material, pragma::asset::FormatType::All);
 		metaData["stripRootPath"] = true;
 		metaData["stripExtension"] = true;
@@ -52,8 +52,8 @@ void CLightMapComponent::InitializeLightMapData(const std::shared_ptr<prosper::T
   const std::shared_ptr<prosper::Texture> &directionalLightmap, bool keepCurrentTextures)
 {
 	if(!keepCurrentTextures) {
-		m_textures[umath::to_integral(Texture::DiffuseMap)] = lightMap;
-		m_textures[umath::to_integral(Texture::DominantDirectionMap)] = directionalLightmap;
+		m_textures[pragma::math::to_integral(Texture::DiffuseMap)] = lightMap;
+		m_textures[pragma::math::to_integral(Texture::DominantDirectionMap)] = directionalLightmap;
 	}
 	m_meshLightMapUvBuffer = lightMapUvBuffer;
 	m_meshLightMapUvBuffers = meshUvBuffers;
@@ -73,7 +73,7 @@ void CLightMapComponent::InitializeLightMapData(const std::shared_ptr<prosper::T
 	CRasterizationRendererComponent::UpdateLightmap(*this);
 }
 
-const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetTexture(Texture tex) const { return m_textures[umath::to_integral(tex)]; }
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetTexture(Texture tex) const { return m_textures[pragma::math::to_integral(tex)]; }
 
 void CLightMapComponent::InitializeFromMaterial()
 {
@@ -100,10 +100,10 @@ void CLightMapComponent::InitializeFromMaterial()
 		auto *tex = static_cast<msys::Texture *>(map->texture.get());
 		return tex->GetVkTexture();
 	};
-	m_textures[umath::to_integral(Texture::DiffuseMap)] = getTexture("diffuse_map");
-	m_textures[umath::to_integral(Texture::DiffuseDirectMap)] = getTexture("diffuse_direct_map");
-	m_textures[umath::to_integral(Texture::DiffuseIndirectMap)] = getTexture("diffuse_indirect_map");
-	m_textures[umath::to_integral(Texture::DominantDirectionMap)] = getTexture("dominant_direction_map");
+	m_textures[pragma::math::to_integral(Texture::DiffuseMap)] = getTexture("diffuse_map");
+	m_textures[pragma::math::to_integral(Texture::DiffuseDirectMap)] = getTexture("diffuse_direct_map");
+	m_textures[pragma::math::to_integral(Texture::DiffuseIndirectMap)] = getTexture("diffuse_indirect_map");
+	m_textures[pragma::math::to_integral(Texture::DominantDirectionMap)] = getTexture("dominant_direction_map");
 
 	for(auto i = decltype(m_textures.size()) {0u}; i < m_textures.size(); ++i) {
 		auto e = static_cast<Texture>(i);
@@ -116,22 +116,22 @@ void CLightMapComponent::InitializeFromMaterial()
 
 void CLightMapComponent::SetLightMapAtlas(const std::shared_ptr<prosper::Texture> &lightMap)
 {
-	m_textures[umath::to_integral(Texture::DiffuseMap)] = lightMap;
+	m_textures[pragma::math::to_integral(Texture::DiffuseMap)] = lightMap;
 
 	// TODO: This method only allows one lightmap atlas globally; Implement this in a way that allows multiple (maybe add to entity descriptor set?)!
 	pragma::CRasterizationRendererComponent::UpdateLightmap(*this);
 }
-const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMapAtlas() const { return m_textures[umath::to_integral(Texture::DiffuseMap)]; }
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMapAtlas() const { return m_textures[pragma::math::to_integral(Texture::DiffuseMap)]; }
 void CLightMapComponent::SetDirectionalLightMapAtlas(const std::shared_ptr<prosper::Texture> &lightMap)
 {
-	m_textures[umath::to_integral(Texture::DominantDirectionMap)] = lightMap;
+	m_textures[pragma::math::to_integral(Texture::DominantDirectionMap)] = lightMap;
 
 	// TODO: This method only allows one lightmap atlas globally; Implement this in a way that allows multiple (maybe add to entity descriptor set?)!
 	pragma::CRasterizationRendererComponent::UpdateLightmap(*this);
 }
-const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetDirectionalLightMapAtlas() const { return m_textures[umath::to_integral(Texture::DominantDirectionMap)]; }
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetDirectionalLightMapAtlas() const { return m_textures[pragma::math::to_integral(Texture::DominantDirectionMap)]; }
 
-bool CLightMapComponent::HasValidLightMap() const { return m_textures[umath::to_integral(Texture::DiffuseMap)] != nullptr || m_textures[umath::to_integral(Texture::DiffuseDirectMap)]; }
+bool CLightMapComponent::HasValidLightMap() const { return m_textures[pragma::math::to_integral(Texture::DiffuseMap)] != nullptr || m_textures[pragma::math::to_integral(Texture::DiffuseDirectMap)]; }
 
 void CLightMapComponent::SetLightMapMaterial(const std::string &matName)
 {
@@ -157,8 +157,8 @@ void CLightMapComponent::ReloadLightMapData()
 	UpdateLightmapUvBuffers();
 }
 
-const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMap() const { return m_textures[umath::to_integral(Texture::DiffuseMap)]; }
-const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetDirectionalLightMap() const { return m_textures[umath::to_integral(Texture::DominantDirectionMap)]; }
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMap() const { return m_textures[pragma::math::to_integral(Texture::DiffuseMap)]; }
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetDirectionalLightMap() const { return m_textures[pragma::math::to_integral(Texture::DominantDirectionMap)]; }
 
 prosper::IBuffer *CLightMapComponent::GetMeshLightMapUvBuffer(uint32_t meshIdx) const
 {
@@ -173,7 +173,7 @@ std::vector<std::shared_ptr<prosper::IBuffer>> &CLightMapComponent::GetMeshLight
 
 void CLightMapComponent::SetLightMapExposure(float exp) { *m_lightMapExposure = exp; }
 float CLightMapComponent::GetLightMapExposure() const { return *m_lightMapExposure; }
-float CLightMapComponent::CalcLightMapPowExposurePow() const { return umath::pow(2.0, static_cast<double>(GetLightMapExposure())); }
+float CLightMapComponent::CalcLightMapPowExposurePow() const { return pragma::math::pow(2.0, static_cast<double>(GetLightMapExposure())); }
 void CLightMapComponent::UpdateLightmapUvBuffers()
 {
 	// TODO: Move this function to light map receiver component?
@@ -328,7 +328,7 @@ static void generate_lightmap_uv_atlas(pragma::ecs::BaseEntity &ent, uint32_t wi
 	}
 
 	// Populate data vectors
-	std::vector<umath::Vertex> verts {};
+	std::vector<pragma::math::Vertex> verts {};
 	std::vector<uint32_t> tris {};
 	verts.reserve(numVerts);
 	tris.reserve(numTris * 3);
@@ -349,13 +349,13 @@ static void generate_lightmap_uv_atlas(pragma::ecs::BaseEntity &ent, uint32_t wi
 
 	std::vector<Vector2> newLightmapUvs {};
 	newLightmapUvs.reserve(numVerts);
-	auto job = util::generate_lightmap_uvs(*pragma::get_client_state(), width, height, verts, tris);
+	auto job = pragma::util::generate_lightmap_uvs(*pragma::get_client_state(), width, height, verts, tris);
 	if(job.IsValid() == false) {
 		callback(false);
 		return;
 	}
 	auto hEnt = ent.GetHandle();
-	job.SetCompletionHandler([hEnt, callback](util::ParallelWorker<std::vector<Vector2> &> &worker) {
+	job.SetCompletionHandler([hEnt, callback](pragma::util::ParallelWorker<std::vector<Vector2> &> &worker) {
 		if(worker.IsSuccessful() == false) {
 			Con::cwar << "Atlas generation failed: " << worker.GetResultMessage() << Con::endl;
 			callback(false);
@@ -464,7 +464,7 @@ static void generate_lightmaps(uint32_t width, uint32_t height, uint32_t sampleC
 		Con::cwar << "Unable to initialize cycles scene for lightmap baking!" << Con::endl;
 		return;
 	}
-	job.SetCompletionHandler([hdrOutput](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
+	job.SetCompletionHandler([hdrOutput](pragma::util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false) {
 			Con::cwar << "Unable to bake lightmaps: " << worker.GetResultMessage() << Con::endl;
 			return;
@@ -543,15 +543,15 @@ static void map_rebuild_lightmaps(pragma::NetworkState *state, pragma::BasePlaye
 	auto height = pragma::console::get_command_option_parameter_value(commandOptions, "height", "");
 	LightmapBakeSettings bakeSettings {};
 	if(width.empty() == false)
-		bakeSettings.width = util::to_uint(width);
+		bakeSettings.width = pragma::util::to_uint(width);
 	if(height.empty() == false)
-		bakeSettings.height = util::to_uint(height);
-	bakeSettings.exposure = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "exposure", "50"));
-	bakeSettings.skyStrength = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "sky_strength", "0.3"));
-	bakeSettings.samples = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "samples", "1225"));
-	bakeSettings.denoise = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions, "denoise", "1"));
-	bakeSettings.createAsRenderJob = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions, "render_job", "0"));
-	bakeSettings.globalLightIntensityFactor = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "light_intensity_factor", "1"));
+		bakeSettings.height = pragma::util::to_uint(height);
+	bakeSettings.exposure = pragma::util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "exposure", "50"));
+	bakeSettings.skyStrength = pragma::util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "sky_strength", "0.3"));
+	bakeSettings.samples = pragma::util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "samples", "1225"));
+	bakeSettings.denoise = pragma::util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions, "denoise", "1"));
+	bakeSettings.createAsRenderJob = pragma::util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions, "render_job", "0"));
+	bakeSettings.globalLightIntensityFactor = pragma::util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "light_intensity_factor", "1"));
 	auto itRebuildUvAtlas = commandOptions.find("rebuild_uv_atlas");
 	bakeSettings.rebuildUvAtlas = (itRebuildUvAtlas != commandOptions.end());
 	bakeSettings.colorTransform = pragma::rendering::cycles::SceneInfo::ColorTransform {};
@@ -586,11 +586,11 @@ static void set_lightmap_texture(lua::State *l, pragma::CLightMapComponent &hLig
 void CLightMapComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	auto defCLightMap = pragma::LuaCore::create_entity_component_class<pragma::CLightMapComponent, pragma::BaseEntityComponent>("LightMapComponent");
-	defCLightMap.add_static_constant("TEXTURE_DIFFUSE", umath::to_integral(pragma::CLightMapComponent::Texture::DiffuseMap));
-	defCLightMap.add_static_constant("TEXTURE_DIFFUSE_DIRECT", umath::to_integral(pragma::CLightMapComponent::Texture::DiffuseDirectMap));
-	defCLightMap.add_static_constant("TEXTURE_DIFFUSE_INDIRECT", umath::to_integral(pragma::CLightMapComponent::Texture::DiffuseIndirectMap));
-	defCLightMap.add_static_constant("TEXTURE_DOMINANT_DIRECTION", umath::to_integral(pragma::CLightMapComponent::Texture::DominantDirectionMap));
-	defCLightMap.add_static_constant("TEXTURE_COUNT", umath::to_integral(pragma::CLightMapComponent::Texture::Count));
+	defCLightMap.add_static_constant("TEXTURE_DIFFUSE", pragma::math::to_integral(pragma::CLightMapComponent::Texture::DiffuseMap));
+	defCLightMap.add_static_constant("TEXTURE_DIFFUSE_DIRECT", pragma::math::to_integral(pragma::CLightMapComponent::Texture::DiffuseDirectMap));
+	defCLightMap.add_static_constant("TEXTURE_DIFFUSE_INDIRECT", pragma::math::to_integral(pragma::CLightMapComponent::Texture::DiffuseIndirectMap));
+	defCLightMap.add_static_constant("TEXTURE_DOMINANT_DIRECTION", pragma::math::to_integral(pragma::CLightMapComponent::Texture::DominantDirectionMap));
+	defCLightMap.add_static_constant("TEXTURE_COUNT", pragma::math::to_integral(pragma::CLightMapComponent::Texture::Count));
 
 	defCLightMap.scope[luabind::def("bake_lightmaps", &pragma::CLightMapComponent::BakeLightmaps)];
 	defCLightMap.scope[luabind::def("import_lightmap_atlas", static_cast<bool (*)(const std::string &)>(&pragma::CLightMapComponent::ImportLightmapAtlas))];
@@ -662,27 +662,27 @@ void CLightMapComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &mo
 	auto defCache = luabind::class_<pragma::rendering::LightmapDataCache>("DataCache");
 	defCache.scope[luabind::def(
 	  "load", +[](lua::State *l, const std::string &path) -> Lua::var<pragma::rendering::LightmapDataCache, std::pair<bool, std::string>> {
-		  auto cache = ::util::make_shared<pragma::rendering::LightmapDataCache>();
+		  auto cache = pragma::util::make_shared<pragma::rendering::LightmapDataCache>();
 		  std::string err;
 		  if(!pragma::rendering::LightmapDataCache::Load(path, *cache, err))
 			  return luabind::object {l, std::pair<bool, std::string> {false, err}};
 		  return luabind::object {l, cache};
 	  })];
 	defCache.def(
-	  "AddInstanceData", +[](pragma::rendering::LightmapDataCache &cache, const std::string &entUuid, const std::string &model, const umath::Transform &pose, const std::string &meshUuid, const std::vector<Vector2> &uvs) {
+	  "AddInstanceData", +[](pragma::rendering::LightmapDataCache &cache, const std::string &entUuid, const std::string &model, const pragma::math::Transform &pose, const std::string &meshUuid, const std::vector<Vector2> &uvs) {
 		  auto tmpUvs = uvs;
-		  cache.AddInstanceData(util::uuid_string_to_bytes(entUuid), model, pose, util::uuid_string_to_bytes(meshUuid), std::move(tmpUvs));
+		  cache.AddInstanceData(pragma::util::uuid_string_to_bytes(entUuid), model, pose, pragma::util::uuid_string_to_bytes(meshUuid), std::move(tmpUvs));
 	  });
 	defCache.def(
 	  "GetInstanceIds", +[](pragma::rendering::LightmapDataCache &cache) -> std::vector<std::string> {
 		  std::vector<std::string> uuids;
 		  uuids.reserve(cache.cacheData.size());
 		  for(auto &pair : cache.cacheData)
-			  uuids.push_back(util::uuid_to_string(pair.first.uuid));
+			  uuids.push_back(pragma::util::uuid_to_string(pair.first.uuid));
 		  return uuids;
 	  });
 	defCache.def(
-	  "GetInstancePose", +[](pragma::rendering::LightmapDataCache &cache, const std::string &uuid) -> std::optional<umath::Transform> {
+	  "GetInstancePose", +[](pragma::rendering::LightmapDataCache &cache, const std::string &uuid) -> std::optional<pragma::math::Transform> {
 		  auto it = cache.cacheData.find(pragma::rendering::LmUuid {util::uuid_string_to_bytes(uuid)});
 		  if(it == cache.cacheData.end())
 			  return {};
@@ -690,7 +690,7 @@ void CLightMapComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &mo
 	  });
 	defCache.def(
 	  "FindLightmapUvs", +[](pragma::rendering::LightmapDataCache &cache, const std::string &entUuid, const std::string &meshUuid) -> std::optional<std::vector<Vector2>> {
-		  auto *uvs = cache.FindLightmapUvs(util::uuid_string_to_bytes(entUuid), util::uuid_string_to_bytes(meshUuid));
+		  auto *uvs = cache.FindLightmapUvs(pragma::util::uuid_string_to_bytes(entUuid), pragma::util::uuid_string_to_bytes(meshUuid));
 		  if(!uvs)
 			  return {};
 		  return *uvs;
@@ -703,11 +703,11 @@ void CLightMapComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &mo
 			  return luabind::object {l, res};
 		  return luabind::object {l, std::pair<bool, std::string> {res, err}};
 	  });
-	defCache.def("SetLightmapEntity", +[](lua::State *l, pragma::rendering::LightmapDataCache &cache, const std::string &uuid) { cache.lightmapEntityId = util::uuid_string_to_bytes(uuid); });
-	defCache.def("GetLightmapEntity", +[](lua::State *l, pragma::rendering::LightmapDataCache &cache) -> std::string { return util::uuid_to_string(cache.lightmapEntityId); });
+	defCache.def("SetLightmapEntity", +[](lua::State *l, pragma::rendering::LightmapDataCache &cache, const std::string &uuid) { cache.lightmapEntityId = pragma::util::uuid_string_to_bytes(uuid); });
+	defCache.def("GetLightmapEntity", +[](lua::State *l, pragma::rendering::LightmapDataCache &cache) -> std::string { return pragma::util::uuid_to_string(cache.lightmapEntityId); });
 	defCLightMap.scope[defCache];
 	modEnts[defCLightMap];
-	pragma::LuaCore::define_custom_constructor<pragma::rendering::LightmapDataCache, +[]() -> std::shared_ptr<pragma::rendering::LightmapDataCache> { return ::util::make_shared<pragma::rendering::LightmapDataCache>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::rendering::LightmapDataCache, +[]() -> std::shared_ptr<pragma::rendering::LightmapDataCache> { return pragma::util::make_shared<pragma::rendering::LightmapDataCache>(); }>(l);
 
 	auto defCLightMapReceiver = pragma::LuaCore::create_entity_component_class<pragma::CLightMapReceiverComponent, pragma::BaseEntityComponent>("LightMapReceiverComponent");
 	defCLightMapReceiver.def("UpdateLightmapUvData", &pragma::CLightMapReceiverComponent::UpdateLightMapUvData);

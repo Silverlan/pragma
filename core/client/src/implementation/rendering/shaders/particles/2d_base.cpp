@@ -103,11 +103,11 @@ void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 std::optional<uint32_t> ShaderParticle2DBase::RecordBeginDraw(prosper::ShaderBindState &bindState, pragma::ecs::CParticleSystemComponent &pSys, pts::ParticleRenderFlags renderFlags, RecordFlags recordFlags)
 {
 	uint32_t pipelineIdx;
-	if(umath::is_flag_set(renderFlags, pts::ParticleRenderFlags::DepthOnly))
+	if(pragma::math::is_flag_set(renderFlags, pts::ParticleRenderFlags::DepthOnly))
 		pipelineIdx = GetDepthPipelineIndex();
 	else {
 		auto alphaMode = GetRenderAlphaMode(pSys);
-		pipelineIdx = /*umath::to_integral(pipeline) *umath::to_integral(pragma::rendering::ParticleAlphaMode::Count) +*/ umath::to_integral(alphaMode);
+		pipelineIdx = /*pragma::math::to_integral(pipeline) *pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Count) +*/ pragma::math::to_integral(alphaMode);
 	}
 	if(!ShaderSceneLit::RecordBeginDraw(bindState, pipelineIdx, recordFlags))
 		return {};
@@ -256,7 +256,7 @@ bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, pragm
 	auto &cam = scene.GetActiveCamera();
 
 	auto colorFactor = scene.GetParticleSystemColorFactor();
-	if(umath::is_flag_set(ptRenderFlags, pts::ParticleRenderFlags::Bloom)) {
+	if(pragma::math::is_flag_set(ptRenderFlags, pts::ParticleRenderFlags::Bloom)) {
 		auto bloomColorFactor = ps.GetEffectiveBloomColorFactor();
 		if(bloomColorFactor.has_value())
 			colorFactor *= *bloomColorFactor;
@@ -281,10 +281,10 @@ bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, pragm
 	viewportSize <<= 16;
 	viewportSize |= height;
 	PushConstants pushConstants {colorFactor, Vector3 {},             /* camRightWs */
-	  umath::to_integral(orientationType), Vector3 {},                /* camUpWs */
+	  pragma::math::to_integral(orientationType), Vector3 {},                /* camUpWs */
 	  0.f,                                                            /* nearZ */
 	  cam.valid() ? cam->GetEntity().GetPosition() : Vector3 {}, 0.f, /* farZ */
-	  viewportSize, umath::to_integral(renderFlags), umath::to_integral(ps.GetAlphaMode()), ps.GetSimulationTime()};
+	  viewportSize, pragma::math::to_integral(renderFlags), pragma::math::to_integral(ps.GetAlphaMode()), ps.GetSimulationTime()};
 	Mat4 vp;
 	if(cam.valid()) {
 		auto &v = cam->GetViewMatrix();
@@ -306,7 +306,7 @@ bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, pragm
 	auto &cam = scene.GetActiveCamera();
 
 	auto colorFactor = scene.GetParticleSystemColorFactor();
-	if(umath::is_flag_set(ptRenderFlags,pts::ParticleRenderFlags::Bloom))
+	if(pragma::math::is_flag_set(ptRenderFlags,pts::ParticleRenderFlags::Bloom))
 	{
 		auto bloomColorFactor = ps.GetEffectiveBloomColorFactor();
 		if(bloomColorFactor.has_value())
@@ -340,14 +340,14 @@ bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, pragm
 	PushConstants pushConstants {
 		colorFactor,
 		Vector3 {}, /* camRightWs */
-		umath::to_integral(orientationType),
+		pragma::math::to_integral(orientationType),
 		Vector3{}, /* camUpWs */
 		0.f, /* nearZ */
 		cam.valid() ? cam->GetEntity().GetPosition() : Vector3{},
 		0.f, /* farZ */
 		viewportSize,
-		umath::to_integral(renderFlags),
-		umath::to_integral(ps.GetAlphaMode()),
+		pragma::math::to_integral(renderFlags),
+		pragma::math::to_integral(ps.GetAlphaMode()),
 		ps.GetSimulationTime()
 	};
 	Mat4 vp;
@@ -371,7 +371,7 @@ bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, pragm
 	return false;
 }
 
-static float get_particle_extent(float radius) { return sqrt(umath::pow2(radius) * 2.0); }
+static float get_particle_extent(float radius) { return sqrt(pragma::math::pow2(radius) * 2.0); }
 static Mat4 get_rotation_matrix(Vector3 axis, float angle)
 {
 	uvec::normalize(&axis);
@@ -384,8 +384,8 @@ static Mat4 get_rotation_matrix(Vector3 axis, float angle)
 
 static Mat3 get_rotation_matrix(Vector4 q)
 {
-	return Mat3(1.0 - 2.0 * umath::pow2(q.y) - 2.0 * umath::pow2(q.z), 2.0 * q.x * q.y + 2.0 * q.z * q.w, 2.0 * q.x * q.z - 2.0 * q.y * q.w, 2.0 * q.x * q.y - 2.0 * q.z * q.w, 1.0 - 2.0 * umath::pow2(q.x) - 2.0 * umath::pow2(q.z), 2.0 * q.y * q.z + 2.0 * q.x * q.w,
-	  2.0 * q.x * q.z + 2.0 * q.y * q.w, 2.0 * q.y * q.z - 2.0 * q.x * q.w, 1.0 - 2.0 * umath::pow2(q.x) - 2.0 * umath::pow2(q.y));
+	return Mat3(1.0 - 2.0 * pragma::math::pow2(q.y) - 2.0 * pragma::math::pow2(q.z), 2.0 * q.x * q.y + 2.0 * q.z * q.w, 2.0 * q.x * q.z - 2.0 * q.y * q.w, 2.0 * q.x * q.y - 2.0 * q.z * q.w, 1.0 - 2.0 * pragma::math::pow2(q.x) - 2.0 * pragma::math::pow2(q.z), 2.0 * q.y * q.z + 2.0 * q.x * q.w,
+	  2.0 * q.x * q.z + 2.0 * q.y * q.w, 2.0 * q.y * q.z - 2.0 * q.x * q.w, 1.0 - 2.0 * pragma::math::pow2(q.x) - 2.0 * pragma::math::pow2(q.y));
 }
 
 static Vector2 get_vertex_quad_pos(uint32_t localVertIdx)
@@ -425,7 +425,7 @@ Vector3 ShaderParticle2DBase::DoCalcVertexPosition(const pragma::ecs::CParticleS
 		right = camRightWs;
 		up = camUpWs;
 	}
-	auto sv = get_rotation_matrix(Vector3 {0.f, 0.f, 1.f}, umath::deg_to_rad(pt.rotation)) * Vector4 {squareVert.x, squareVert.y, squareVert.z, 1};
+	auto sv = get_rotation_matrix(Vector3 {0.f, 0.f, 1.f}, pragma::math::deg_to_rad(pt.rotation)) * Vector4 {squareVert.x, squareVert.y, squareVert.z, 1};
 	squareVert = {sv.x, sv.y, sv.z};
 	return right * squareVert.x * vsize.x + up * squareVert.y * vsize.y;
 }

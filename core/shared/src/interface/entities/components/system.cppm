@@ -28,8 +28,8 @@ export {
 				IsBeingRemoved = ComponentCleanupRequired << 1u
 			};
 			virtual ~BaseEntityComponentSystem();
-			util::EventReply BroadcastEvent(ComponentEventId ev, ComponentEvent &evData, const BaseEntityComponent *src = nullptr) const;
-			util::EventReply BroadcastEvent(ComponentEventId ev) const;
+			pragma::util::EventReply BroadcastEvent(ComponentEventId ev, ComponentEvent &evData, const BaseEntityComponent *src = nullptr) const;
+			pragma::util::EventReply BroadcastEvent(ComponentEventId ev) const;
 
 			ComponentHandle<pragma::BaseEntityComponent> AddComponent(const std::string &name, bool bForceCreateNew = false);
 			ComponentHandle<pragma::BaseEntityComponent> AddComponent(ComponentId componentId, bool bForceCreateNew = false);
@@ -47,8 +47,8 @@ export {
 			void ClearComponents();
 
 			// Note: TSharedHandle should never be stored outside of this object type
-			const std::vector<util::TSharedHandle<BaseEntityComponent>> &GetComponents() const;
-			std::vector<util::TSharedHandle<BaseEntityComponent>> &GetComponents();
+			const std::vector<pragma::util::TSharedHandle<BaseEntityComponent>> &GetComponents() const;
+			std::vector<pragma::util::TSharedHandle<BaseEntityComponent>> &GetComponents();
 
 			template<class TComponent, typename = std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent, TComponent>::value>>
 			ComponentHandle<TComponent> GetComponent() const;
@@ -74,12 +74,12 @@ export {
 			virtual void OnComponentRemoved(BaseEntityComponent &component);
 		  private:
 			std::unordered_map<ComponentId, ComponentHandle<BaseEntityComponent>> m_componentLookupTable; // Only contains one (the first) component per type; Used for fast lookups
-			std::vector<util::TSharedHandle<BaseEntityComponent>> m_components;
+			std::vector<pragma::util::TSharedHandle<BaseEntityComponent>> m_components;
 			EntityComponentManager *m_componentManager;
 			pragma::ecs::BaseEntity *m_entity;
 			mutable StateFlags m_stateFlags = StateFlags::None;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::BaseEntityComponentSystem::StateFlags)
 

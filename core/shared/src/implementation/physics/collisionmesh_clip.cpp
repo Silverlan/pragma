@@ -134,7 +134,7 @@ void pragma::physics::CollisionMesh::ClipAgainstPlane(const Vector3 &n, double d
 		clippedMesh.m_vertices = verts;
 		auto bAllProjected = true;
 		for(auto &v : clippedMesh.m_vertices) {
-			if(umath::geometry::get_side_of_point_to_plane(n, d, v) != umath::geometry::PlaneSide::Back)
+			if(pragma::math::geometry::get_side_of_point_to_plane(n, d, v) != pragma::math::geometry::PlaneSide::Back)
 				v = uvec::project_to_plane(v, n, d);
 			else
 				bAllProjected = false;

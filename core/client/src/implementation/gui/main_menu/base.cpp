@@ -38,29 +38,29 @@ void pragma::gui::types::WIMainMenuBase::DoUpdate()
 	WIBase::DoUpdate();
 	UpdateElements();
 }
-util::EventReply pragma::gui::types::WIMainMenuBase::MouseCallback(pragma::platform::MouseButton, pragma::platform::KeyState state, pragma::platform::Modifier)
+pragma::util::EventReply pragma::gui::types::WIMainMenuBase::MouseCallback(pragma::platform::MouseButton, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
 	if(state != pragma::platform::KeyState::Press)
-		return util::EventReply::Handled;
-	return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
+	return pragma::util::EventReply::Handled;
 }
-util::EventReply pragma::gui::types::WIMainMenuBase::KeyboardCallback(pragma::platform::Key key, int, pragma::platform::KeyState state, pragma::platform::Modifier)
+pragma::util::EventReply pragma::gui::types::WIMainMenuBase::KeyboardCallback(pragma::platform::Key key, int, pragma::platform::KeyState state, pragma::platform::Modifier)
 {
 	if(key == pragma::platform::Key::Enter) {
 		WIMainMenuElement *el = GetSelectedElement();
 		if(el == nullptr)
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		if(state == pragma::platform::KeyState::Press)
 			el->Activate();
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	}
 	if(state != pragma::platform::KeyState::Press)
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	if(key == pragma::platform::Key::S || key == pragma::platform::Key::Down)
 		SelectNextItem();
 	else if(key == pragma::platform::Key::W || key == pragma::platform::Key::Up)
 		SelectPreviousItem();
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 void pragma::gui::types::WIMainMenuBase::SelectItem(int i)
 {
@@ -284,13 +284,13 @@ void pragma::gui::types::WIMainMenuElement::Activate()
 	onActivated(this);
 }
 
-util::EventReply pragma::gui::types::WIMainMenuElement::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WIMainMenuElement::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
 	WIBase::MouseCallback(button, state, mods);
 	if(state != pragma::platform::KeyState::Press)
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	Activate();
-	return util::EventReply::Handled;
+	return pragma::util::EventReply::Handled;
 }
 
 void pragma::gui::types::WIMainMenuElement::OnCursorEntered() { Select(); }

@@ -15,8 +15,8 @@ export namespace pragma::rendering {
 		RenderQueueInstancer(pragma::rendering::RenderQueue &renderQueue);
 		void Process();
 	  private:
-		util::Hash CalcNextEntityHash(uint32_t &outNumMeshes, EntityIndex &entIndex);
-		void ProcessInstantiableList(uint32_t endIndex, uint32_t numMeshes, util::Hash hash);
+		pragma::util::Hash CalcNextEntityHash(uint32_t &outNumMeshes, EntityIndex &entIndex);
+		void ProcessInstantiableList(uint32_t endIndex, uint32_t numMeshes, pragma::util::Hash hash);
 
 		pragma::rendering::RenderQueue &m_renderQueue;
 		uint32_t m_curIndex = 0;

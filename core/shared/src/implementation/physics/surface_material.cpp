@@ -22,7 +22,7 @@ pragma::physics::SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics:
 bool pragma::physics::SurfaceMaterialManager::Load(const std::string &path)
 {
 	std::string err;
-	auto udmData = util::load_udm_asset(path, &err);
+	auto udmData = pragma::util::load_udm_asset(path, &err);
 	if(udmData == nullptr)
 		return false;
 	auto &data = *udmData;

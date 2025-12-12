@@ -65,7 +65,7 @@ export {
 			virtual void OnTrigger(pragma::ecs::BaseEntity &ent);
 			virtual void OnStartTouch(pragma::ecs::BaseEntity &ent);
 			virtual void OnEndTouch(pragma::ecs::BaseEntity &ent);
-			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 			void SetTriggerFlags(TriggerFlags flags);
 			TriggerFlags GetTriggerFlags() const;
@@ -95,7 +95,7 @@ export {
 			virtual void OnTouch(pragma::physics::PhysTouch &touch);
 			virtual bool IsTouchEnabled() const;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::BaseTouchComponent::TriggerFlags)
 };

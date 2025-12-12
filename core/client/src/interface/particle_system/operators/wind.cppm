@@ -30,13 +30,13 @@ void pragma::pts::CParticleOperatorWind::Initialize(pragma::BaseEnvParticleSyste
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "strength")
-			m_fStrength = util::to_float(it->second);
+			m_fStrength = pragma::util::to_float(it->second);
 		else if(key == "direction")
 			m_vDirection = uvec::create(it->second);
 		else if(key == "rotate_with_emitter")
-			m_bRotateWithEmitter = util::to_boolean(it->second);
+			m_bRotateWithEmitter = pragma::util::to_boolean(it->second);
 	}
 }
 void pragma::pts::CParticleOperatorWind::Simulate(double tDelta)

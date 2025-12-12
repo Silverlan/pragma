@@ -12,13 +12,13 @@ void BaseEnvExplosionComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
-		if(ustring::compare<std::string>(inputData.input, "explode", false))
+		if(pragma::string::compare<std::string>(inputData.input, "explode", false))
 			Explode();
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 	GetEntity().AddComponent("io");
 }
@@ -44,7 +44,7 @@ void BaseEnvExplosionComponent::Explode()
 		if(pPhysComponentOther)
 			pPhysComponentOther->GetCollisionBounds(&min, &max);
 		Vector3 r;
-		umath::geometry::closest_point_on_aabb_to_point((min + pos), (max + pos), origin, &r);
+		pragma::math::geometry::closest_point_on_aabb_to_point((min + pos), (max + pos), origin, &r);
 		float d = glm::distance(origin, r);
 		if(d <= radius) {
 			// TODO: Raytrace

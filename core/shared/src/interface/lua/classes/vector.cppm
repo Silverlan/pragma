@@ -11,10 +11,10 @@ export import pragma.math;
 
 export namespace Lua {
 	namespace Vertex {
-		DLLNETWORK umath::Vertex Copy(umath::Vertex &v);
+		DLLNETWORK pragma::math::Vertex Copy(pragma::math::Vertex &v);
 	};
 	namespace VertexWeight {
-		DLLNETWORK umath::VertexWeight Copy(umath::VertexWeight &vw);
+		DLLNETWORK pragma::math::VertexWeight Copy(pragma::math::VertexWeight &vw);
 	};
 	namespace Vectori {
 		DLLNETWORK ::Vector3i Copy(::Vector3i &v);

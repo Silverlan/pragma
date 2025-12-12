@@ -17,7 +17,7 @@ static constexpr uint64_t GLOBAL_MESH_ALPHA_BUFFER_SIZE = MEGABYTE * 16;        
 static constexpr uint64_t GLOBAL_MESH_INDEX_BUFFER_SIZE = MEGABYTE * 32;         // 524'288 instances per MiB
 
 pragma::geometry::CModelMesh::CModelMesh() : pragma::geometry::ModelMesh() {}
-std::shared_ptr<pragma::geometry::ModelMesh> pragma::geometry::CModelMesh::Copy() const { return ::util::make_shared<pragma::geometry::CModelMesh>(*this); }
+std::shared_ptr<pragma::geometry::ModelMesh> pragma::geometry::CModelMesh::Copy() const { return pragma::util::make_shared<pragma::geometry::CModelMesh>(*this); }
 
 void pragma::geometry::CModelMesh::AddSubMesh(const std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh)
 {
@@ -34,16 +34,16 @@ static std::shared_ptr<prosper::IDynamicResizableBuffer> s_vertexBuffer = nullpt
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_vertexWeightBuffer = nullptr;
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_alphaBuffer = nullptr;
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_indexBuffer = nullptr;
-pragma::geometry::CModelSubMesh::CModelSubMesh() : pragma::geometry::ModelSubMesh(), m_sceneMesh(::util::make_shared<pragma::rendering::SceneMesh>()) {}
+pragma::geometry::CModelSubMesh::CModelSubMesh() : pragma::geometry::ModelSubMesh(), m_sceneMesh(pragma::util::make_shared<pragma::rendering::SceneMesh>()) {}
 
-pragma::geometry::CModelSubMesh::CModelSubMesh(const pragma::geometry::CModelSubMesh &other) : pragma::geometry::ModelSubMesh(other), m_sceneMesh(::util::make_shared<pragma::rendering::SceneMesh>(*other.m_sceneMesh)) {}
+pragma::geometry::CModelSubMesh::CModelSubMesh(const pragma::geometry::CModelSubMesh &other) : pragma::geometry::ModelSubMesh(other), m_sceneMesh(pragma::util::make_shared<pragma::rendering::SceneMesh>(*other.m_sceneMesh)) {}
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &pragma::geometry::CModelSubMesh::GetGlobalVertexBuffer() { return s_vertexBuffer; }
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &pragma::geometry::CModelSubMesh::GetGlobalVertexWeightBuffer() { return s_vertexWeightBuffer; }
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &pragma::geometry::CModelSubMesh::GetGlobalAlphaBuffer() { return s_alphaBuffer; }
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &pragma::geometry::CModelSubMesh::GetGlobalIndexBuffer() { return s_indexBuffer; }
 std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::CModelSubMesh::Copy(bool fullCopy) const
 {
-	auto cpy = ::util::make_shared<pragma::geometry::CModelSubMesh>(*this);
+	auto cpy = pragma::util::make_shared<pragma::geometry::CModelSubMesh>(*this);
 	pragma::geometry::ModelSubMesh::Copy(*cpy, fullCopy);
 	return cpy;
 }
@@ -161,7 +161,7 @@ void pragma::geometry::CModelSubMesh::Update(pragma::asset::ModelUpdateFlags fla
 			auto alignedSize = prosper::util::get_aligned_size(indexData.size(), size_of_index(GetIndexType()));
 			if(alignedSize == indexBuffer->GetSize()) {
 				newBuffer = false;
-				indexBuffer->Write(0ull, util::size_of_container(indexData), indexData.data());
+				indexBuffer->Write(0ull, pragma::util::size_of_container(indexData), indexData.data());
 			}
 		}
 		if(newBuffer) {
@@ -186,7 +186,7 @@ void pragma::geometry::CModelSubMesh::Update(pragma::asset::ModelUpdateFlags fla
 		}
 		else {
 			auto numVertWeights = m_vertexWeights->size() + m_extendedVertexWeights->size();
-			std::vector<umath::VertexWeight> vertWeights {};
+			std::vector<pragma::math::VertexWeight> vertWeights {};
 			vertWeights.resize(numVertWeights);
 			memcpy(vertWeights.data(), m_vertexWeights->data(), m_vertexWeights->size() * sizeof(m_vertexWeights->front()));
 			memcpy(vertWeights.data() + m_vertexWeights->size(), m_extendedVertexWeights->data(), m_extendedVertexWeights->size() * sizeof(m_extendedVertexWeights->front()));

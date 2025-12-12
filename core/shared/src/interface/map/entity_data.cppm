@@ -44,9 +44,9 @@ export {
 			std::vector<uint16_t> &GetLeaves();
 			void GetLeafData(uint32_t &outFirstLeaf, uint32_t &outNumLeaves) const;
 
-			const std::optional<umath::ScaledTransform> &GetPose() const;
-			umath::ScaledTransform GetEffectivePose() const;
-			void SetPose(const umath::ScaledTransform &pose);
+			const std::optional<pragma::math::ScaledTransform> &GetPose() const;
+			pragma::math::ScaledTransform GetEffectivePose() const;
+			void SetPose(const pragma::math::ScaledTransform &pose);
 			void ClearPose();
 		  private:
 			friend WorldData;
@@ -56,14 +56,14 @@ export {
 			std::unordered_map<std::string, std::string> m_keyValues;
 			std::vector<Output> m_outputs;
 			uint32_t m_mapIndex = 0u;
-			std::optional<umath::ScaledTransform> m_pose {};
+			std::optional<pragma::math::ScaledTransform> m_pose {};
 			std::vector<uint16_t> m_leaves = {};
 			Flags m_flags = Flags::None;
 
 			uint32_t m_firstLeaf = 0u;
 			uint32_t m_numLeaves = 0u;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::asset::EntityData &entityData);
 	REGISTER_ENUM_FLAGS(pragma::asset::EntityData::Flags)

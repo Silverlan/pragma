@@ -65,7 +65,7 @@ export {
 			virtual void SetTrigger(bool bTrigger) = 0;
 			virtual bool IsTrigger() const = 0;
 
-			virtual void TransformLocalPose(const umath::Transform &t) = 0;
+			virtual void TransformLocalPose(const pragma::math::Transform &t) = 0;
 
 			virtual void SetActivationState(ActivationState state) = 0;
 			virtual ActivationState GetActivationState() const = 0;
@@ -80,10 +80,10 @@ export {
 			virtual void SetPos(const Vector3 &pos) = 0;
 			virtual Quat GetRotation() const = 0;
 			virtual void SetRotation(const Quat &rot) = 0;
-			virtual umath::Transform GetBaseTransform() = 0;
-			virtual void SetBaseTransform(const umath::Transform &t) = 0;
-			virtual umath::Transform GetWorldTransform() = 0;
-			virtual void SetWorldTransform(const umath::Transform &t) = 0;
+			virtual pragma::math::Transform GetBaseTransform() = 0;
+			virtual void SetBaseTransform(const pragma::math::Transform &t) = 0;
+			virtual pragma::math::Transform GetWorldTransform() = 0;
+			virtual void SetWorldTransform(const pragma::math::Transform &t) = 0;
 			virtual void WakeUp(bool forceActivation = false) = 0;
 			virtual void PutToSleep() = 0;
 			bool IsAsleep() const;
@@ -127,7 +127,7 @@ export {
 			virtual IGhostObject *GetGhostObject();
 			const IGhostObject *GetGhostObject() const;
 
-			virtual void InitializeLuaHandle(const util::TWeakSharedHandle<IBase> &handle) override;
+			virtual void InitializeLuaHandle(const pragma::util::TWeakSharedHandle<IBase> &handle) override;
 		  protected:
 			ICollisionObject(pragma::physics::IEnvironment &env, pragma::physics::IShape &shape);
 			virtual void ApplyCollisionShape(pragma::physics::IShape *optShape) = 0;
@@ -315,7 +315,7 @@ export {
 			ISoftBody(IEnvironment &env, pragma::physics::IShape &shape, const std::vector<uint16_t> &meshVertIndicesToPhysIndices);
 			std::weak_ptr<pragma::geometry::ModelSubMesh> m_subMesh = {};
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 
 		DLLNETWORK std::ostream &operator<<(std::ostream &out, const ICollisionObject &o);
 		DLLNETWORK std::ostream &operator<<(std::ostream &out, const IGhostObject &o);

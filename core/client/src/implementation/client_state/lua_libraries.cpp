@@ -93,7 +93,7 @@ static pragma::LuaInputBindingLayerRegister &get_input_binding_layer_register() 
 static std::shared_ptr<InputBindingLayer> create_input_binding_layer()
 {
 	auto layer = std::shared_ptr<InputBindingLayer> {new InputBindingLayer {}, [](InputBindingLayer *layer) {
-		                                                 if(!umath::is_flag_set(pragma::get_cgame()->GetGameFlags(), pragma::Game::GameFlags::ClosingGame))
+		                                                 if(!pragma::math::is_flag_set(pragma::get_cgame()->GetGameFlags(), pragma::Game::GameFlags::ClosingGame))
 			                                                 get_input_binding_layer_register().Remove(*layer);
 		                                                 delete layer;
 	                                                 }};
@@ -195,7 +195,7 @@ static void register_gui(Lua::Interface &lua)
 		  uint32_t idx = 1;
 		  std::function<void(pragma::gui::types::WIBase &)> fIterateChildren = nullptr;
 		  fIterateChildren = [l, &fIterateChildren, &className, &t, &idx](pragma::gui::types::WIBase &el) mutable {
-			  if(ustring::compare(el.GetClass(), className, false))
+			  if(pragma::string::compare(el.GetClass(), className, false))
 				  t[idx++] = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
 			  for(auto &hChild : *el.GetChildren()) {
 				  if(hChild.IsValid() == false)
@@ -678,12 +678,12 @@ void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool b
 	  })];
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "sound",
-	  {{"GLOBAL_EFFECT_FLAG_NONE", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::None)}, {"GLOBAL_EFFECT_FLAG_BIT_RELATIVE", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::RelativeSounds)},
-	    {"GLOBAL_EFFECT_FLAG_BIT_WORLD", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::WorldSounds)}, {"GLOBAL_EFFECT_FLAG_ALL", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::All)},
+	  {{"GLOBAL_EFFECT_FLAG_NONE", pragma::math::to_integral(al::ISoundSystem::GlobalEffectFlag::None)}, {"GLOBAL_EFFECT_FLAG_BIT_RELATIVE", pragma::math::to_integral(al::ISoundSystem::GlobalEffectFlag::RelativeSounds)},
+	    {"GLOBAL_EFFECT_FLAG_BIT_WORLD", pragma::math::to_integral(al::ISoundSystem::GlobalEffectFlag::WorldSounds)}, {"GLOBAL_EFFECT_FLAG_ALL", pragma::math::to_integral(al::ISoundSystem::GlobalEffectFlag::All)},
 
-	    {"DISTANCE_MODEL_NONE", umath::to_integral(al::DistanceModel::None)}, {"DISTANCE_MODEL_INVERSE_CLAMPED", umath::to_integral(al::DistanceModel::InverseClamped)}, {"DISTANCE_MODEL_LINEAR_CLAMPED", umath::to_integral(al::DistanceModel::LinearClamped)},
-	    {"DISTANCE_MODEL_EXPONENT_CLAMPED", umath::to_integral(al::DistanceModel::ExponentClamped)}, {"DISTANCE_MODEL_INVERSE", umath::to_integral(al::DistanceModel::Inverse)}, {"DISTANCE_MODEL_LINEAR", umath::to_integral(al::DistanceModel::Linear)},
-	    {"DISTANCE_MODEL_EXPONENT", umath::to_integral(al::DistanceModel::Exponent)}});
+	    {"DISTANCE_MODEL_NONE", pragma::math::to_integral(al::DistanceModel::None)}, {"DISTANCE_MODEL_INVERSE_CLAMPED", pragma::math::to_integral(al::DistanceModel::InverseClamped)}, {"DISTANCE_MODEL_LINEAR_CLAMPED", pragma::math::to_integral(al::DistanceModel::LinearClamped)},
+	    {"DISTANCE_MODEL_EXPONENT_CLAMPED", pragma::math::to_integral(al::DistanceModel::ExponentClamped)}, {"DISTANCE_MODEL_INVERSE", pragma::math::to_integral(al::DistanceModel::Inverse)}, {"DISTANCE_MODEL_LINEAR", pragma::math::to_integral(al::DistanceModel::Linear)},
+	    {"DISTANCE_MODEL_EXPONENT", pragma::math::to_integral(al::DistanceModel::Exponent)}});
 	Lua::sound::register_enums(lua.GetState());
 
 	auto defInLay = luabind::class_<InputBindingLayer>("InputBindingLayer");
@@ -735,7 +735,7 @@ void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool b
 		  for(auto &pair : layer.GetKeyMappings()) {
 			  if(pair.second.GetType() != KeyBind::Type::Regular)
 				  continue;
-			  if(ustring::compare(pair.second.GetBind(), cmd) == false)
+			  if(pragma::string::compare(pair.second.GetBind(), cmd) == false)
 				  continue;
 			  std::string str;
 			  if(!KeyToString(pair.first, &str))

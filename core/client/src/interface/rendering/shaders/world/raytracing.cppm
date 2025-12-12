@@ -34,10 +34,10 @@ export namespace pragma {
 
 		enum class RenderFlags : uint32_t {
 			None = 0u,
-			RenderWorld = umath::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeWorld),
-			RenderView = umath::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeView),
-			RenderSkybox = umath::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeSkybox),
-			// RenderWater = umath::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeWater),
+			RenderWorld = pragma::math::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeWorld),
+			RenderView = pragma::math::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeView),
+			RenderSkybox = pragma::math::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeSkybox),
+			// RenderWater = pragma::math::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeWater),
 			NoIBL = RenderSkybox << 1u
 		};
 
@@ -60,7 +60,7 @@ export namespace pragma {
 		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {
 	REGISTER_ENUM_FLAGS(pragma::ShaderRayTracing::RenderFlags)

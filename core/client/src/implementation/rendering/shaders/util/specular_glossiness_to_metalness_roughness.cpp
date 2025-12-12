@@ -65,9 +65,9 @@ std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRou
 
 	auto dsg = CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE.setIndex);
 	auto &ds = *dsg->GetDescriptorSet();
-	ds.SetBindingTexture(*diffuseMap, umath::to_integral(TextureBinding::DiffuseMap));
-	ds.SetBindingTexture(*specularGlossinessMap, umath::to_integral(TextureBinding::SpecularGlossinessMap));
-	ds.SetBindingTexture(*aoMap, umath::to_integral(TextureBinding::AmbientOcclusionMap));
+	ds.SetBindingTexture(*diffuseMap, pragma::math::to_integral(TextureBinding::DiffuseMap));
+	ds.SetBindingTexture(*specularGlossinessMap, pragma::math::to_integral(TextureBinding::SpecularGlossinessMap));
+	ds.SetBindingTexture(*aoMap, pragma::math::to_integral(TextureBinding::AmbientOcclusionMap));
 
 	auto setupCmd = context.GetSetupCommandBuffer();
 	auto pushConstants = pushConstantData;

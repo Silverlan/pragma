@@ -27,7 +27,7 @@ std::optional<std::type_index> type_meta_data_to_type_index(TypeMetaData eType)
 	case TypeMetaData::Parent:
 		return typeid(pragma::ents::ParentTypeMetaData);
 	}
-	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
+	static_assert(pragma::math::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
 	return {};
 }
 luabind::object meta_data_type_to_lua_object(lua::State *l, const pragma::ents::TypeMetaData &metaData, TypeMetaData eType)
@@ -48,7 +48,7 @@ luabind::object meta_data_type_to_lua_object(lua::State *l, const pragma::ents::
 	case TypeMetaData::Parent:
 		return luabind::object {l, static_cast<const pragma::ents::ParentTypeMetaData *>(&metaData)};
 	}
-	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
+	static_assert(pragma::math::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
 	return Lua::nil;
 }
 
@@ -236,7 +236,7 @@ void Lua::ents::register_library(lua::State *l)
 			return ref;
 		}),
 		luabind::def("create_uri",+[](const Lua::util::Uuid &uuid,const std::string &propName) -> std::string {
-			return "pragma:game/entity/" +propName +"?entity_uuid=" +::util::uuid_to_string(uuid.value);
+			return "pragma:game/entity/" +propName +"?entity_uuid=" +pragma::util::uuid_to_string(uuid.value);
 		}),
 		luabind::def("create_uri",+[](const std::string &uuid,const std::string &propName) -> std::string {
 			return "pragma:game/entity/" +propName +"?entity_uuid=" +uuid;
@@ -245,10 +245,10 @@ void Lua::ents::register_library(lua::State *l)
 			return "pragma:game/entity/" +propName;
 		}),
 		luabind::def("create_entity_uri",+[](const Lua::util::Uuid &uuid) -> std::string {
-			return "pragma:game/entity?entity_uuid=" +::util::uuid_to_string(uuid.value);
+			return "pragma:game/entity?entity_uuid=" +pragma::util::uuid_to_string(uuid.value);
 		}),
 		luabind::def("create_component_uri",+[](const Lua::util::Uuid &uuid,const std::string &component) -> std::string {
-			return "pragma:game/entity/ec/" +component +"?entity_uuid=" +::util::uuid_to_string(uuid.value);
+			return "pragma:game/entity/ec/" +component +"?entity_uuid=" +pragma::util::uuid_to_string(uuid.value);
 		}),
 		luabind::def("is_member_type_animatable",static_cast<bool(*)(pragma::ents::EntityMemberType)>(&pragma::is_animatable_type)),
 		luabind::def("is_member_type_udm_type",&pragma::ents::is_udm_member_type),
@@ -259,43 +259,43 @@ void Lua::ents::register_library(lua::State *l)
 			return magic_enum::enum_cast<pragma::ents::EntityMemberType>(memberType);
 			})
 	)];
-	static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
+	static_assert(pragma::math::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
 	Lua::RegisterLibraryEnums(l, "ents",
 	  {
-	    {"MEMBER_TYPE_STRING", umath::to_integral(pragma::ents::EntityMemberType::String)},
-	    {"MEMBER_TYPE_INT8", umath::to_integral(pragma::ents::EntityMemberType::Int8)},
-	    {"MEMBER_TYPE_UINT8", umath::to_integral(pragma::ents::EntityMemberType::UInt8)},
-	    {"MEMBER_TYPE_INT16", umath::to_integral(pragma::ents::EntityMemberType::Int16)},
-	    {"MEMBER_TYPE_UINT16", umath::to_integral(pragma::ents::EntityMemberType::UInt16)},
-	    {"MEMBER_TYPE_INT32", umath::to_integral(pragma::ents::EntityMemberType::Int32)},
-	    {"MEMBER_TYPE_UINT32", umath::to_integral(pragma::ents::EntityMemberType::UInt32)},
-	    {"MEMBER_TYPE_INT64", umath::to_integral(pragma::ents::EntityMemberType::Int64)},
-	    {"MEMBER_TYPE_UINT64", umath::to_integral(pragma::ents::EntityMemberType::UInt64)},
-	    {"MEMBER_TYPE_FLOAT", umath::to_integral(pragma::ents::EntityMemberType::Float)},
-	    {"MEMBER_TYPE_DOUBLE", umath::to_integral(pragma::ents::EntityMemberType::Double)},
-	    {"MEMBER_TYPE_BOOLEAN", umath::to_integral(pragma::ents::EntityMemberType::Boolean)},
-	    {"MEMBER_TYPE_VECTOR2", umath::to_integral(pragma::ents::EntityMemberType::Vector2)},
-	    {"MEMBER_TYPE_VECTOR3", umath::to_integral(pragma::ents::EntityMemberType::Vector3)},
-	    {"MEMBER_TYPE_VECTOR4", umath::to_integral(pragma::ents::EntityMemberType::Vector4)},
-	    {"MEMBER_TYPE_QUATERNION", umath::to_integral(pragma::ents::EntityMemberType::Quaternion)},
-	    {"MEMBER_TYPE_EULER_ANGLES", umath::to_integral(pragma::ents::EntityMemberType::EulerAngles)},
-	    {"MEMBER_TYPE_SRGBA", umath::to_integral(pragma::ents::EntityMemberType::Srgba)},
-	    {"MEMBER_TYPE_HDR_COLOR", umath::to_integral(pragma::ents::EntityMemberType::HdrColor)},
-	    {"MEMBER_TYPE_TRANSFORM", umath::to_integral(pragma::ents::EntityMemberType::Transform)},
-	    {"MEMBER_TYPE_SCALED_TRANSFORM", umath::to_integral(pragma::ents::EntityMemberType::ScaledTransform)},
-	    {"MEMBER_TYPE_MAT4", umath::to_integral(pragma::ents::EntityMemberType::Mat4)},
-	    {"MEMBER_TYPE_MAT3X4", umath::to_integral(pragma::ents::EntityMemberType::Mat3x4)},
-	    {"MEMBER_TYPE_HALF", umath::to_integral(pragma::ents::EntityMemberType::Half)},
-	    {"MEMBER_TYPE_VECTOR2I", umath::to_integral(pragma::ents::EntityMemberType::Vector2i)},
-	    {"MEMBER_TYPE_VECTOR3I", umath::to_integral(pragma::ents::EntityMemberType::Vector3i)},
-	    {"MEMBER_TYPE_VECTOR4I", umath::to_integral(pragma::ents::EntityMemberType::Vector4i)},
-	    {"MEMBER_TYPE_ELEMENT", umath::to_integral(pragma::ents::EntityMemberType::Element)},
-	    {"MEMBER_TYPE_ENTITY", umath::to_integral(pragma::ents::EntityMemberType::Entity)},
-	    {"MEMBER_TYPE_MULTI_ENTITY", umath::to_integral(pragma::ents::EntityMemberType::MultiEntity)},
-	    {"MEMBER_TYPE_COMPONENT_PROPERTY", umath::to_integral(pragma::ents::EntityMemberType::ComponentProperty)},
-	    {"MEMBER_TYPE_COUNT", umath::to_integral(pragma::ents::EntityMemberType::Count)},
-	    {"MEMBER_TYPE_LAST", umath::to_integral(pragma::ents::EntityMemberType::Last)},
-	    {"MEMBER_TYPE_INVALID", umath::to_integral(pragma::ents::EntityMemberType::Invalid)},
+	    {"MEMBER_TYPE_STRING", pragma::math::to_integral(pragma::ents::EntityMemberType::String)},
+	    {"MEMBER_TYPE_INT8", pragma::math::to_integral(pragma::ents::EntityMemberType::Int8)},
+	    {"MEMBER_TYPE_UINT8", pragma::math::to_integral(pragma::ents::EntityMemberType::UInt8)},
+	    {"MEMBER_TYPE_INT16", pragma::math::to_integral(pragma::ents::EntityMemberType::Int16)},
+	    {"MEMBER_TYPE_UINT16", pragma::math::to_integral(pragma::ents::EntityMemberType::UInt16)},
+	    {"MEMBER_TYPE_INT32", pragma::math::to_integral(pragma::ents::EntityMemberType::Int32)},
+	    {"MEMBER_TYPE_UINT32", pragma::math::to_integral(pragma::ents::EntityMemberType::UInt32)},
+	    {"MEMBER_TYPE_INT64", pragma::math::to_integral(pragma::ents::EntityMemberType::Int64)},
+	    {"MEMBER_TYPE_UINT64", pragma::math::to_integral(pragma::ents::EntityMemberType::UInt64)},
+	    {"MEMBER_TYPE_FLOAT", pragma::math::to_integral(pragma::ents::EntityMemberType::Float)},
+	    {"MEMBER_TYPE_DOUBLE", pragma::math::to_integral(pragma::ents::EntityMemberType::Double)},
+	    {"MEMBER_TYPE_BOOLEAN", pragma::math::to_integral(pragma::ents::EntityMemberType::Boolean)},
+	    {"MEMBER_TYPE_VECTOR2", pragma::math::to_integral(pragma::ents::EntityMemberType::Vector2)},
+	    {"MEMBER_TYPE_VECTOR3", pragma::math::to_integral(pragma::ents::EntityMemberType::Vector3)},
+	    {"MEMBER_TYPE_VECTOR4", pragma::math::to_integral(pragma::ents::EntityMemberType::Vector4)},
+	    {"MEMBER_TYPE_QUATERNION", pragma::math::to_integral(pragma::ents::EntityMemberType::Quaternion)},
+	    {"MEMBER_TYPE_EULER_ANGLES", pragma::math::to_integral(pragma::ents::EntityMemberType::EulerAngles)},
+	    {"MEMBER_TYPE_SRGBA", pragma::math::to_integral(pragma::ents::EntityMemberType::Srgba)},
+	    {"MEMBER_TYPE_HDR_COLOR", pragma::math::to_integral(pragma::ents::EntityMemberType::HdrColor)},
+	    {"MEMBER_TYPE_TRANSFORM", pragma::math::to_integral(pragma::ents::EntityMemberType::Transform)},
+	    {"MEMBER_TYPE_SCALED_TRANSFORM", pragma::math::to_integral(pragma::ents::EntityMemberType::ScaledTransform)},
+	    {"MEMBER_TYPE_MAT4", pragma::math::to_integral(pragma::ents::EntityMemberType::Mat4)},
+	    {"MEMBER_TYPE_MAT3X4", pragma::math::to_integral(pragma::ents::EntityMemberType::Mat3x4)},
+	    {"MEMBER_TYPE_HALF", pragma::math::to_integral(pragma::ents::EntityMemberType::Half)},
+	    {"MEMBER_TYPE_VECTOR2I", pragma::math::to_integral(pragma::ents::EntityMemberType::Vector2i)},
+	    {"MEMBER_TYPE_VECTOR3I", pragma::math::to_integral(pragma::ents::EntityMemberType::Vector3i)},
+	    {"MEMBER_TYPE_VECTOR4I", pragma::math::to_integral(pragma::ents::EntityMemberType::Vector4i)},
+	    {"MEMBER_TYPE_ELEMENT", pragma::math::to_integral(pragma::ents::EntityMemberType::Element)},
+	    {"MEMBER_TYPE_ENTITY", pragma::math::to_integral(pragma::ents::EntityMemberType::Entity)},
+	    {"MEMBER_TYPE_MULTI_ENTITY", pragma::math::to_integral(pragma::ents::EntityMemberType::MultiEntity)},
+	    {"MEMBER_TYPE_COMPONENT_PROPERTY", pragma::math::to_integral(pragma::ents::EntityMemberType::ComponentProperty)},
+	    {"MEMBER_TYPE_COUNT", pragma::math::to_integral(pragma::ents::EntityMemberType::Count)},
+	    {"MEMBER_TYPE_LAST", pragma::math::to_integral(pragma::ents::EntityMemberType::Last)},
+	    {"MEMBER_TYPE_INVALID", pragma::math::to_integral(pragma::ents::EntityMemberType::Invalid)},
 
 	    {"INVALID_COMPONENT_ID", pragma::INVALID_COMPONENT_ID},
 	    {"INVALID_COMPONENT_MEMBER_INDEX", pragma::INVALID_COMPONENT_MEMBER_INDEX},
@@ -333,7 +333,7 @@ void Lua::ents::register_library(lua::State *l)
 	componentInfoDef.def(
 	  "GetMemberInfo", +[](pragma::Game &game, const pragma::ComponentInfo &componentInfo, const std::string &name) -> const pragma::ComponentMemberInfo * {
 		  auto lname = name;
-		  if(umath::is_flag_set(componentInfo.flags, pragma::ComponentFlags::LuaBased)) {
+		  if(pragma::math::is_flag_set(componentInfo.flags, pragma::ComponentFlags::LuaBased)) {
 			  auto &manager = game.GetLuaEntityManager();
 			  auto *o = manager.GetClassObject(componentInfo.name);
 			  if(!o)
@@ -346,7 +346,7 @@ void Lua::ents::register_library(lua::State *l)
 				  return nullptr;
 			  return &*it->componentMemberInfo;
 		  }
-		  ustring::to_lower(lname);
+		  pragma::string::to_lower(lname);
 		  auto it = componentInfo.memberNameToIndex.find(lname);
 		  if(it == componentInfo.memberNameToIndex.end())
 			  return nullptr;
@@ -357,14 +357,14 @@ void Lua::ents::register_library(lua::State *l)
 	  });
 
 	auto memberInfoDef = luabind::class_<pragma::ComponentMemberInfo>("MemberInfo");
-	memberInfoDef.add_static_constant("TYPE_META_DATA_RANGE", umath::to_integral(TypeMetaData::Range));
-	memberInfoDef.add_static_constant("TYPE_META_DATA_COORDINATE", umath::to_integral(TypeMetaData::Coordinate));
-	memberInfoDef.add_static_constant("TYPE_META_DATA_POSE", umath::to_integral(TypeMetaData::Pose));
-	memberInfoDef.add_static_constant("TYPE_META_DATA_POSE_COMPONENT", umath::to_integral(TypeMetaData::PoseComponent));
-	memberInfoDef.add_static_constant("TYPE_META_DATA_OPTIONAL", umath::to_integral(TypeMetaData::Optional));
-	memberInfoDef.add_static_constant("TYPE_META_DATA_ENABLER", umath::to_integral(TypeMetaData::Enabler));
-	memberInfoDef.add_static_constant("TYPE_META_DATA_PARENT", umath::to_integral(TypeMetaData::Parent));
-	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
+	memberInfoDef.add_static_constant("TYPE_META_DATA_RANGE", pragma::math::to_integral(TypeMetaData::Range));
+	memberInfoDef.add_static_constant("TYPE_META_DATA_COORDINATE", pragma::math::to_integral(TypeMetaData::Coordinate));
+	memberInfoDef.add_static_constant("TYPE_META_DATA_POSE", pragma::math::to_integral(TypeMetaData::Pose));
+	memberInfoDef.add_static_constant("TYPE_META_DATA_POSE_COMPONENT", pragma::math::to_integral(TypeMetaData::PoseComponent));
+	memberInfoDef.add_static_constant("TYPE_META_DATA_OPTIONAL", pragma::math::to_integral(TypeMetaData::Optional));
+	memberInfoDef.add_static_constant("TYPE_META_DATA_ENABLER", pragma::math::to_integral(TypeMetaData::Enabler));
+	memberInfoDef.add_static_constant("TYPE_META_DATA_PARENT", pragma::math::to_integral(TypeMetaData::Parent));
+	static_assert(pragma::math::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
 
 	auto typeMetaDataDef = luabind::class_<pragma::ents::TypeMetaData>("TypeMetaData");
 	memberInfoDef.scope[typeMetaDataDef];
@@ -408,14 +408,14 @@ void Lua::ents::register_library(lua::State *l)
 	  "targetProperty", +[](lua::State *l, const pragma::ents::EnablerTypeMetaData &metaData) { Lua::PushString(l, metaData.targetProperty.c_str()); }, +[](lua::State *l, pragma::ents::EnablerTypeMetaData &metaData, const std::string &prop) { metaData.targetProperty = prop; });
 	memberInfoDef.scope[enablerTypeMetaDataDef];
 
-	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update these bindings when adding news types!");
+	static_assert(pragma::math::to_integral(TypeMetaData::Count) == 7, "Update these bindings when adding news types!");
 
-	memberInfoDef.add_static_constant("FLAG_NONE", umath::to_integral(pragma::ComponentMemberFlags::None));
-	memberInfoDef.add_static_constant("FLAG_HIDE_IN_INTERFACE_BIT", umath::to_integral(pragma::ComponentMemberFlags::HideInInterface));
-	memberInfoDef.add_static_constant("FLAG_CONTROLLER_BIT", umath::to_integral(pragma::ComponentMemberFlags::Controller));
-	memberInfoDef.add_static_constant("FLAG_WORLD_SPACE_BIT", umath::to_integral(pragma::ComponentMemberFlags::WorldSpace));
-	memberInfoDef.add_static_constant("FLAG_OBJECT_SPACE_BIT", umath::to_integral(pragma::ComponentMemberFlags::ObjectSpace));
-	memberInfoDef.add_static_constant("FLAG_READ_ONLY_BIT", umath::to_integral(pragma::ComponentMemberFlags::ReadOnly));
+	memberInfoDef.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::ComponentMemberFlags::None));
+	memberInfoDef.add_static_constant("FLAG_HIDE_IN_INTERFACE_BIT", pragma::math::to_integral(pragma::ComponentMemberFlags::HideInInterface));
+	memberInfoDef.add_static_constant("FLAG_CONTROLLER_BIT", pragma::math::to_integral(pragma::ComponentMemberFlags::Controller));
+	memberInfoDef.add_static_constant("FLAG_WORLD_SPACE_BIT", pragma::math::to_integral(pragma::ComponentMemberFlags::WorldSpace));
+	memberInfoDef.add_static_constant("FLAG_OBJECT_SPACE_BIT", pragma::math::to_integral(pragma::ComponentMemberFlags::ObjectSpace));
+	memberInfoDef.add_static_constant("FLAG_READ_ONLY_BIT", pragma::math::to_integral(pragma::ComponentMemberFlags::ReadOnly));
 	memberInfoDef.def(
 	  "__tostring", +[](const pragma::ComponentMemberInfo &memberInfo) -> std::string {
 		  std::stringstream ss;
@@ -500,23 +500,23 @@ void Lua::ents::register_library(lua::State *l)
 				  return nil;
 		  });
 	  });
-	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_NONE", umath::to_integral(pragma::AttributeSpecializationType::None));
-	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_COLOR", umath::to_integral(pragma::AttributeSpecializationType::Color));
-	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_DISTANCE", umath::to_integral(pragma::AttributeSpecializationType::Distance));
-	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_LIGHT_INTENSITY", umath::to_integral(pragma::AttributeSpecializationType::LightIntensity));
-	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_CUSTOM", umath::to_integral(pragma::AttributeSpecializationType::Custom));
-	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_ANGLE", umath::to_integral(pragma::AttributeSpecializationType::Angle));
-	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_FILE", umath::to_integral(pragma::AttributeSpecializationType::File));
-	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_DIRECTORY", umath::to_integral(pragma::AttributeSpecializationType::Directory));
-	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_PLANE", umath::to_integral(pragma::AttributeSpecializationType::Plane));
-	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_NORMAL", umath::to_integral(pragma::AttributeSpecializationType::Normal));
-	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_FRACTION", umath::to_integral(pragma::AttributeSpecializationType::Fraction));
-	static_assert(umath::to_integral(pragma::AttributeSpecializationType::Count) == 11u);
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_NONE", pragma::math::to_integral(pragma::AttributeSpecializationType::None));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_COLOR", pragma::math::to_integral(pragma::AttributeSpecializationType::Color));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_DISTANCE", pragma::math::to_integral(pragma::AttributeSpecializationType::Distance));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_LIGHT_INTENSITY", pragma::math::to_integral(pragma::AttributeSpecializationType::LightIntensity));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_CUSTOM", pragma::math::to_integral(pragma::AttributeSpecializationType::Custom));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_ANGLE", pragma::math::to_integral(pragma::AttributeSpecializationType::Angle));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_FILE", pragma::math::to_integral(pragma::AttributeSpecializationType::File));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_DIRECTORY", pragma::math::to_integral(pragma::AttributeSpecializationType::Directory));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_PLANE", pragma::math::to_integral(pragma::AttributeSpecializationType::Plane));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_NORMAL", pragma::math::to_integral(pragma::AttributeSpecializationType::Normal));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_FRACTION", pragma::math::to_integral(pragma::AttributeSpecializationType::Fraction));
+	static_assert(pragma::math::to_integral(pragma::AttributeSpecializationType::Count) == 11u);
 	componentInfoDef.scope[memberInfoDef];
 
 	entsMod[componentInfoDef];
 
-	pragma::LuaCore::define_custom_constructor<pragma::ents::RangeTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::RangeTypeMetaData> { return ::util::make_shared<pragma::ents::RangeTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::RangeTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::RangeTypeMetaData> { return pragma::util::make_shared<pragma::ents::RangeTypeMetaData>(); }>(l);
 	pragma::LuaCore::define_custom_constructor<pragma::ents::RangeTypeMetaData,
 	  +[](std::optional<float> min, std::optional<float> max, std::optional<float> stepSize) -> std::shared_ptr<pragma::ents::RangeTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::RangeTypeMetaData> {new pragma::ents::RangeTypeMetaData {}};
@@ -527,17 +527,17 @@ void Lua::ents::register_library(lua::State *l)
 	  },
 	  std::optional<float>, std::optional<float>, std::optional<float>>(l);
 
-	pragma::LuaCore::define_custom_constructor<pragma::ents::CoordinateTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::CoordinateTypeMetaData> { return ::util::make_shared<pragma::ents::CoordinateTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::CoordinateTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::CoordinateTypeMetaData> { return pragma::util::make_shared<pragma::ents::CoordinateTypeMetaData>(); }>(l);
 	pragma::LuaCore::define_custom_constructor<pragma::ents::CoordinateTypeMetaData,
-	  +[](umath::CoordinateSpace space, const std::string &parentProperty) -> std::shared_ptr<pragma::ents::CoordinateTypeMetaData> {
+	  +[](pragma::math::CoordinateSpace space, const std::string &parentProperty) -> std::shared_ptr<pragma::ents::CoordinateTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::CoordinateTypeMetaData> {new pragma::ents::CoordinateTypeMetaData {}};
 		  metaData->space = space;
 		  metaData->parentProperty = parentProperty;
 		  return metaData;
 	  },
-	  umath::CoordinateSpace, const std::string &>(l);
+	  pragma::math::CoordinateSpace, const std::string &>(l);
 
-	pragma::LuaCore::define_custom_constructor<pragma::ents::PoseTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::PoseTypeMetaData> { return ::util::make_shared<pragma::ents::PoseTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::PoseTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::PoseTypeMetaData> { return pragma::util::make_shared<pragma::ents::PoseTypeMetaData>(); }>(l);
 	pragma::LuaCore::define_custom_constructor<pragma::ents::PoseTypeMetaData,
 	  +[](const std::string &posProperty, const std::string &rotProperty, const std::string &scaleProperty) -> std::shared_ptr<pragma::ents::PoseTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::PoseTypeMetaData> {new pragma::ents::PoseTypeMetaData {}};
@@ -548,7 +548,7 @@ void Lua::ents::register_library(lua::State *l)
 	  },
 	  const std::string &, const std::string &, const std::string &>(l);
 
-	pragma::LuaCore::define_custom_constructor<pragma::ents::PoseComponentTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::PoseComponentTypeMetaData> { return ::util::make_shared<pragma::ents::PoseComponentTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::PoseComponentTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::PoseComponentTypeMetaData> { return pragma::util::make_shared<pragma::ents::PoseComponentTypeMetaData>(); }>(l);
 	pragma::LuaCore::define_custom_constructor<pragma::ents::PoseComponentTypeMetaData,
 	  +[](const std::string &poseProperty) -> std::shared_ptr<pragma::ents::PoseComponentTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::PoseComponentTypeMetaData> {new pragma::ents::PoseComponentTypeMetaData {}};
@@ -557,7 +557,7 @@ void Lua::ents::register_library(lua::State *l)
 	  },
 	  const std::string &>(l);
 
-	pragma::LuaCore::define_custom_constructor<pragma::ents::OptionalTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::OptionalTypeMetaData> { return ::util::make_shared<pragma::ents::OptionalTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::OptionalTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::OptionalTypeMetaData> { return pragma::util::make_shared<pragma::ents::OptionalTypeMetaData>(); }>(l);
 	pragma::LuaCore::define_custom_constructor<pragma::ents::OptionalTypeMetaData,
 	  +[](const std::string &enabledProperty) -> std::shared_ptr<pragma::ents::OptionalTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::OptionalTypeMetaData> {new pragma::ents::OptionalTypeMetaData {}};
@@ -565,7 +565,7 @@ void Lua::ents::register_library(lua::State *l)
 		  return metaData;
 	  },
 	  const std::string &>(l);
-	pragma::LuaCore::define_custom_constructor<pragma::ents::EnablerTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::EnablerTypeMetaData> { return ::util::make_shared<pragma::ents::EnablerTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::EnablerTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::EnablerTypeMetaData> { return pragma::util::make_shared<pragma::ents::EnablerTypeMetaData>(); }>(l);
 	pragma::LuaCore::define_custom_constructor<pragma::ents::EnablerTypeMetaData,
 	  +[](const std::string &targetProperty) -> std::shared_ptr<pragma::ents::EnablerTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::EnablerTypeMetaData> {new pragma::ents::EnablerTypeMetaData {}};
@@ -573,7 +573,7 @@ void Lua::ents::register_library(lua::State *l)
 		  return metaData;
 	  },
 	  const std::string &>(l);
-	pragma::LuaCore::define_custom_constructor<pragma::ents::ParentTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::ParentTypeMetaData> { return ::util::make_shared<pragma::ents::ParentTypeMetaData>(); }>(l);
+	pragma::LuaCore::define_custom_constructor<pragma::ents::ParentTypeMetaData, +[]() -> std::shared_ptr<pragma::ents::ParentTypeMetaData> { return pragma::util::make_shared<pragma::ents::ParentTypeMetaData>(); }>(l);
 	pragma::LuaCore::define_custom_constructor<pragma::ents::ParentTypeMetaData,
 	  +[](const std::string &parentProperty) -> std::shared_ptr<pragma::ents::ParentTypeMetaData> {
 		  auto metaData = std::shared_ptr<pragma::ents::ParentTypeMetaData> {new pragma::ents::ParentTypeMetaData {}};
@@ -582,7 +582,7 @@ void Lua::ents::register_library(lua::State *l)
 	  },
 	  const std::string &>(l);
 
-	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
+	static_assert(pragma::math::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
 }
 
 Lua::type<pragma::ecs::BaseEntity> Lua::ents::create(lua::State *l, const std::string &classname)
@@ -766,7 +766,7 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::get_random(lua::State *l)
 	iterate_entities(l, [&ents](pragma::ecs::BaseEntity *ent) { ents.push_back(ent); });
 	if(ents.empty())
 		return nil;
-	auto r = umath::random(0, ents.size() - 1);
+	auto r = pragma::math::random(0, ents.size() - 1);
 	auto *ent = ents.at(r);
 	return ent->GetLuaObject();
 }
@@ -951,10 +951,10 @@ Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_by_local_index(lua::
 
 Lua::opt<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::find_by_unique_index(lua::State *l, const std::string &uuid)
 {
-	auto uniqueIndex = ::util::uuid_string_to_bytes(uuid);
+	auto uniqueIndex = pragma::util::uuid_string_to_bytes(uuid);
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
-	auto *ent = game->FindEntityByUniqueId(::util::uuid_string_to_bytes(uuid));
+	auto *ent = game->FindEntityByUniqueId(pragma::util::uuid_string_to_bytes(uuid));
 	if(!ent)
 		return nil;
 	return ent->GetLuaObject();
@@ -1140,7 +1140,7 @@ void Lua::ents::register_class(lua::State *l, const std::string &className, cons
 	if(r == Lua::StatusCode::Ok) {
 		auto o = luabind::object(luabind::globals(l)[cLuaClassName]);
 		if(o) {
-			o["Type"] = umath::to_integral(type);
+			o["Type"] = pragma::math::to_integral(type);
 
 			auto &manager = game->GetLuaEntityManager();
 			manager.RegisterEntity(className, o, components);

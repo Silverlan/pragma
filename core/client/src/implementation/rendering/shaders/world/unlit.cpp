@@ -15,5 +15,5 @@ using namespace pragma;
 ShaderUnlit::ShaderUnlit(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass {context, identifier, "programs/scene/textured", "programs/scene/unlit"}
 {
 	m_shaderMaterialName = "albedo";
-	// SetPipelineCount(umath::to_integral(Pipeline::Count));
+	// SetPipelineCount(pragma::math::to_integral(Pipeline::Count));
 }

@@ -22,7 +22,7 @@ namespace Shader
 	public:
 		enum class DLLCLIENT Location : std::underlying_type_t<ParticleBase::Location>
 		{
-			AdjacentBlobs = umath::to_integral(ParticleBase::Location::Xyzs) +1
+			AdjacentBlobs = pragma::math::to_integral(ParticleBase::Location::Xyzs) +1
 		};
 		enum class DLLCLIENT DescSet : std::underlying_type_t<ParticleBase::DescSet>
 		{
@@ -35,7 +35,7 @@ namespace Shader
 			ParticleData = 0,
 			LightData = 0,
 
-			AdjacentBlobs = umath::to_integral(ParticleBase::Binding::Xyzs) +1
+			AdjacentBlobs = pragma::math::to_integral(ParticleBase::Binding::Xyzs) +1
 		};
 		static const uint32_t MAX_BLOB_NEIGHBORS = 8;
 	protected:

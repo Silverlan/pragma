@@ -41,7 +41,7 @@ void CVehicleComponent::ReceiveSnapshotData(NetPacket &packet)
 	auto brakeFactor = packet->Read<float>();
 	auto handbrakeFactor = packet->Read<float>();
 	auto accFactor = packet->Read<float>();
-	auto engineRotSpeed = packet->Read<umath::Radian>();
+	auto engineRotSpeed = packet->Read<pragma::math::Radian>();
 	if(physVehicle) {
 		physVehicle->SetSteerFactor(steerFactor);
 		physVehicle->SetGear(gear);

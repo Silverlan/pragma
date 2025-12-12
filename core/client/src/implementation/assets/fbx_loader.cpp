@@ -24,13 +24,13 @@ static std::string_view to_string_view(ofbx::DataView data) { return std::string
 
 static std::shared_ptr<prosper::Texture> load_texture_image(const std::string &mdlPath, const std::string &mdlName, const std::string &texPath, bool isAbsPath)
 {
-	auto fullTexFilePath = util::FilePath(texPath);
+	auto fullTexFilePath = pragma::util::FilePath(texPath);
 	if(!isAbsPath)
 		fullTexFilePath = mdlPath + fullTexFilePath;
 	auto ext = fullTexFilePath.GetFileExtension();
 	if(ext && (*ext == "dds" || *ext == "ktx")) {
 		auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
-		auto tex = texManager.LoadAsset(fullTexFilePath.GetString(), util::AssetLoadFlags::AbsolutePath | util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache);
+		auto tex = texManager.LoadAsset(fullTexFilePath.GetString(), pragma::util::AssetLoadFlags::AbsolutePath | pragma::util::AssetLoadFlags::DontCache | pragma::util::AssetLoadFlags::IgnoreCache);
 		if(!tex)
 			return nullptr;
 		return tex->GetVkTexture();
@@ -54,13 +54,13 @@ static std::shared_ptr<prosper::Texture> load_texture_image(const std::string &m
 
 static std::optional<std::string> import_texture(const std::string &mdlPath, const std::string &mdlName, const std::string &texPath, bool isAbsPath)
 {
-	auto fullTexFilePath = util::FilePath(texPath);
+	auto fullTexFilePath = pragma::util::FilePath(texPath);
 	if(!isAbsPath)
 		fullTexFilePath = mdlPath + fullTexFilePath;
-	std::string convertPath = util::CONVERT_PATH;
-	auto matPath = util::DirPath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), "models");
+	std::string convertPath = pragma::util::CONVERT_PATH;
+	auto matPath = pragma::util::DirPath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), "models");
 	auto texFileName = ufile::get_file_from_filename(texPath);
-	auto fullOutputPath = util::DirPath(convertPath, matPath);
+	auto fullOutputPath = pragma::util::DirPath(convertPath, matPath);
 	auto ext = fullTexFilePath.GetFileExtension();
 	if(ext && (*ext == "dds" || *ext == "ktx")) {
 		auto srcPath = fullTexFilePath.GetString();
@@ -90,7 +90,7 @@ static std::optional<std::string> import_texture(const std::string &mdlPath, con
 	auto texInfo = pragma::asset::get_texture_info(greyScale, normalMap, alphaMode);
 
 	const auto &importExtensions = pragma::asset::get_supported_extensions(pragma::asset::Type::Texture, pragma::asset::FormatType::All);
-	fullOutputPath += util::DirPath(mdlName);
+	fullOutputPath += pragma::util::DirPath(mdlName);
 	auto outputFilePath = fullOutputPath + texFileName;
 	outputFilePath.RemoveFileExtension(importExtensions);
 	auto res = pragma::get_cgame()->SaveImage(*img, outputFilePath.GetString(), texInfo);
@@ -159,7 +159,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 			filename = tex->getFileName();
 			isAbsPath = true;
 		}
-		auto path = util::FilePath(std::string {to_string_view(filename)});
+		auto path = pragma::util::FilePath(std::string {to_string_view(filename)});
 		return ::import_texture(m_mdlPath, m_mdlName, path.GetString(), isAbsPath);
 	};
 	auto loadTexture = [this, &fbxMat](ofbx::Texture::TextureType etex) -> std::shared_ptr<prosper::Texture> {
@@ -172,11 +172,11 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 			filename = tex->getFileName();
 			isAbsPath = true;
 		}
-		auto path = util::FilePath(std::string {to_string_view(filename)});
+		auto path = pragma::util::FilePath(std::string {to_string_view(filename)});
 		return ::load_texture_image(m_mdlPath, m_mdlName, path.GetString(), isAbsPath);
 	};
 
-	auto matFilePath = util::DirPath(::util::CONVERT_PATH, pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), "models", m_mdlName);
+	auto matFilePath = pragma::util::DirPath(pragma::util::CONVERT_PATH, pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), "models", m_mdlName);
 	std::string fbxMatName = fbxMat.name;
 	if(!fbxMatName.empty())
 		matFilePath += fbxMatName;
@@ -184,7 +184,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 		matFilePath += "material" + std::to_string(partitionIdx);
 
 	auto relMatPath = matFilePath;
-	relMatPath.MakeRelative(util::CONVERT_PATH);
+	relMatPath.MakeRelative(pragma::util::CONVERT_PATH);
 	relMatPath.MakeRelative(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)});
 	auto mat = pragma::get_client_state()->CreateMaterial(relMatPath.GetString(), "pbr");
 	auto *cmat = static_cast<msys::CMaterial *>(mat.get());
@@ -193,8 +193,8 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 		auto texPath = importTexture(etex);
 		if(!texPath)
 			return {};
-		auto relTexPath = util::FilePath(*texPath);
-		relTexPath.MakeRelative(util::CONVERT_PATH);
+		auto relTexPath = pragma::util::FilePath(*texPath);
+		relTexPath.MakeRelative(pragma::util::CONVERT_PATH);
 		relTexPath.MakeRelative(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)});
 		cmat->SetTexture(matIdentifier, relTexPath.GetString());
 		return texPath;
@@ -206,7 +206,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 	auto applyColorFactor = [&fbxMat, mat](const ofbx::Color &fbxColor, double factor, const std::string &matProp) mutable {
 		Vector3 colorFactor {fbxColor.r, fbxColor.g, fbxColor.b};
 		colorFactor *= factor;
-		if(umath::abs(1.f - colorFactor.x) > 0.001f || umath::abs(1.f - colorFactor.y) > 0.001f || umath::abs(1.f - colorFactor.z) > 0.001f)
+		if(pragma::math::abs(1.f - colorFactor.x) > 0.001f || pragma::math::abs(1.f - colorFactor.y) > 0.001f || pragma::math::abs(1.f - colorFactor.z) > 0.001f)
 			mat->SetProperty(matProp, colorFactor);
 	};
 	applyColorFactor(fbxMat.getDiffuseColor(), fbxMat.getDiffuseFactor(), "color_factor");
@@ -235,15 +235,15 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 
 				auto &context = pragma::get_cengine()->GetRenderContext();
 				pragma::ShaderCombineImageChannels::PushConstants pushConstants {};
-				pushConstants.alphaChannel = umath::to_integral(uimg::Channel::Red);
+				pushConstants.alphaChannel = pragma::math::to_integral(uimg::Channel::Red);
 				auto specularGlossinessMap = combine->CombineImageChannels(context, *specularMap, *specularMap, *specularMap, *shininessMap, pushConstants);
 				if(specularGlossinessMap) {
 					pragma::ShaderSpecularGlossinessToMetalnessRoughness::PushConstants pushConstants {};
 					auto metallicRoughnessSet = rma->ConvertToMetalnessRoughness(pragma::get_cengine()->GetRenderContext(), nullptr, specularGlossinessMap.get(), pushConstants, ambientMap.get());
 					if(metallicRoughnessSet.has_value()) {
 						auto texPath = matFilePath;
-						texPath.MakeRelative(util::CONVERT_PATH);
-						pragma::asset::assign_texture(*cmat, ::util::CONVERT_PATH, msys::material::RMA_MAP_IDENTIFIER, texPath.GetString() + "_rma", *metallicRoughnessSet->rmaMap, false, false, ambientMap ? AlphaMode::Blend : AlphaMode::Opaque);
+						texPath.MakeRelative(pragma::util::CONVERT_PATH);
+						pragma::asset::assign_texture(*cmat, pragma::util::CONVERT_PATH, msys::material::RMA_MAP_IDENTIFIER, texPath.GetString() + "_rma", *metallicRoughnessSet->rmaMap, false, false, ambientMap ? AlphaMode::Blend : AlphaMode::Opaque);
 					}
 				}
 			}
@@ -262,7 +262,7 @@ std::optional<std::string> FbxImporter::Finalize(std::string &outErr)
 {
 	m_model->Update(pragma::asset::ModelUpdateFlags::All);
 	std::string mdlPath = m_mdlName;
-	auto fullMdlPath = util::FilePath(::util::CONVERT_PATH, pragma::asset::get_asset_root_directory(pragma::asset::Type::Model), m_outputPath, mdlPath);
+	auto fullMdlPath = pragma::util::FilePath(pragma::util::CONVERT_PATH, pragma::asset::get_asset_root_directory(pragma::asset::Type::Model), m_outputPath, mdlPath);
 	if(!m_model->Save(*pragma::get_cgame(), fullMdlPath.GetString(), outErr)) {
 		Con::cerr << "Error saving model: " << outErr << Con::endl;
 		return {};
@@ -346,7 +346,7 @@ int FbxImporter::DetectMeshLOD(const FbxImporter::FbxMeshInfo &mesh)
 
 	lod_str += stringLength("_LOD");
 
-	auto lod = ustring::to_int(lod_str);
+	auto lod = pragma::string::to_int(lod_str);
 	return lod;
 }
 
@@ -473,9 +473,9 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 			}
 		}
 
-		std::vector<umath::VertexWeight> vertWeights {};
-		std::vector<umath::VertexWeight> extendedVertWeights {};
-		auto initVertexWeights = [&positions](std::vector<umath::VertexWeight> &vws) {
+		std::vector<pragma::math::VertexWeight> vertWeights {};
+		std::vector<pragma::math::VertexWeight> extendedVertWeights {};
+		auto initVertexWeights = [&positions](std::vector<pragma::math::VertexWeight> &vws) {
 			if(!vws.empty())
 				return;
 			vws.resize(positions.values_count);
@@ -490,7 +490,7 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 
 		auto geoMatrix = to_pragma_matrix(fbxMesh.getGeometricMatrix());
 		auto transformMatrix = to_pragma_matrix(fbxMesh.getGlobalTransform()) * geoMatrix;
-		umath::ScaledTransform pose {transformMatrix};
+		pragma::math::ScaledTransform pose {transformMatrix};
 		auto scale = pose.GetScale();
 		pose.SetScale(uvec::IDENTITY_SCALE);
 		auto mesh = pragma::get_cgame()->CreateModelMesh();
@@ -519,7 +519,7 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 				auto startIdx = subMesh->GetVertexCount();
 				for(size_t i = 0; i < numIndices; ++i) {
 					auto idx = triIndices[i];
-					umath::Vertex v {};
+					pragma::math::Vertex v {};
 					ofbx::Vec3 pos = positions.get(idx);
 					v.position = {pos.x, pos.y, pos.z};
 					if(normals.values != nullptr) {
@@ -546,7 +546,7 @@ bool FbxImporter::LoadMeshes(std::string &outErr)
 					subMesh->AddTriangle(startIdx + i, startIdx + i + 1, startIdx + i + 2);
 			}
 
-			//if(pose != umath::ScaledTransform {}) {
+			//if(pose != pragma::math::ScaledTransform {}) {
 			for(auto &v : subMesh->GetVertices()) {
 				v.position *= scale;
 				v.position = pose * v.position;
@@ -613,7 +613,7 @@ static void convert(const ofbx::DMatrix &mtx, Vector3 &pos, Quat &rot)
 {
 	auto m = to_pragma_matrix(mtx);
 	normalizeScale(m);
-	umath::Transform pose {m};
+	pragma::math::Transform pose {m};
 	pos = pose.GetOrigin();
 	rot = pose.GetRotation();
 }
@@ -818,7 +818,7 @@ bool FbxImporter::LoadAnimations(std::string &outErr)
 			}
 			if(name.empty() && take_info->filename.begin != take_info->filename.end) {
 				auto tmp = to_string_view(take_info->filename);
-				name = util::DirPath(tmp).GetFileName();
+				name = pragma::util::DirPath(tmp).GetFileName();
 			}
 			if(name.empty())
 				name = "anim";
@@ -873,7 +873,7 @@ bool FbxImporter::LoadAnimations(std::string &outErr)
 				pos = fix_orientation(pos, m_upVector);
 				rot = fix_orientation(rot, m_upVector);
 
-				umath::Transform pose {pos, rot};
+				pragma::math::Transform pose {pos, rot};
 				frame->SetBonePose(fbxBoneId, pose);
 			}
 			++fbxBoneId;
@@ -883,7 +883,7 @@ bool FbxImporter::LoadAnimations(std::string &outErr)
 		m_model->AddAnimation(name, anim);
 
 #if 0
-		auto panim = ::util::make_shared<panima::Animation>();
+		auto panim = pragma::util::make_shared<panima::Animation>();
 		bool data_found = false;
 		for(int k = 0; anim_layer->getCurveNode(k); ++k) {
 			const ofbx::AnimationCurveNode *node = anim_layer->getCurveNode(k);
@@ -948,7 +948,7 @@ bool FbxImporter::LoadAnimations(std::string &outErr)
 								auto t1 = *itNext;
 								if(t0 == t1) {
 									// TODO: Check panima epsilon
-									// if(umath::abs(t1 - t0) < 0.001f) {
+									// if(pragma::math::abs(t1 - t0) < 0.001f) {
 									it = times.erase(it);
 									continue;
 								}
@@ -968,10 +968,10 @@ bool FbxImporter::LoadAnimations(std::string &outErr)
 							ofbx::DVec3 v {v0, v1, v2};
 							fbxValues.push_back(v);
 							ftimes.push_back(fbxTimeToSeconds(t));
-							duration = umath::max(duration, ftimes.back());
+							duration = pragma::math::max(duration, ftimes.back());
 						}
 
-						auto channel = ::util::make_shared<panima::Channel>();
+						auto channel = pragma::util::make_shared<panima::Channel>();
 						std::string basePath = "ec/animated/bone/" + std::string {bone->name} + "/";
 						if(isBoneTranslation || isBoneScaling) {
 							std::vector<Vector3> values;
@@ -1000,7 +1000,7 @@ bool FbxImporter::LoadAnimations(std::string &outErr)
 							channel->InsertValues<Quat>(ftimes.size(), ftimes.data(), values.data());
 							channel->targetPath = panima::ChannelPath {basePath + "rotation"};
 						}
-						panim->SetDuration(umath::max(panim->GetDuration(), duration));
+						panim->SetDuration(pragma::math::max(panim->GetDuration(), duration));
 						panim->AddChannel(*channel);
 					}
 				}
@@ -1013,7 +1013,7 @@ bool FbxImporter::LoadAnimations(std::string &outErr)
 			for(auto &frame : anim->GetFrames()) {
 				auto numTransforms = frame->GetBoneCount();
 				for(size_t i = 0; i < numTransforms; ++i) {
-					umath::ScaledTransform pose;
+					pragma::math::ScaledTransform pose;
 					if(!frame->GetBonePose(i, pose))
 						continue;
 					auto origin = pose.GetOrigin();
@@ -1058,9 +1058,9 @@ Quat FbxImporter::GetRotation(const ofbx::DVec3 &o, RotationOrder order)
 	order = RotationOrder::Yxz;
 	EulerAngles ang {static_cast<float>(o.x), static_cast<float>(o.y), static_cast<float>(o.z)};
 	Mat4 m;
-	auto p = umath::deg_to_rad(ang.p);
-	auto y = umath::deg_to_rad(ang.y);
-	auto r = umath::deg_to_rad(ang.r);
+	auto p = pragma::math::deg_to_rad(ang.p);
+	auto y = pragma::math::deg_to_rad(ang.y);
+	auto r = pragma::math::deg_to_rad(ang.r);
 	switch(order) {
 	case RotationOrder::Xyz:
 		m = glm::gtx::eulerAngleXYZ(p, y, r);
@@ -1082,25 +1082,25 @@ Quat FbxImporter::GetRotation(const ofbx::DVec3 &o, RotationOrder order)
 		break;
 	}
 	return glm::quat_cast(m);
-	//return glm::quat_cast(glm::eulerAngleYXZ(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r)));
+	//return glm::quat_cast(glm::eulerAngleYXZ(pragma::math::deg_to_rad(ang.y), pragma::math::deg_to_rad(ang.p), pragma::math::deg_to_rad(ang.r)));
 	//return uquat::create(ang);
 }
 Vector3 FbxImporter::GetScale(const ofbx::DVec3 &o)
 {
 	Vector3 scale {o.x, o.y, o.z};
 	for(size_t i = 0; i < 3; ++i) {
-		if(umath::abs(scale[i] - 1.f) < 0.0001f)
+		if(pragma::math::abs(scale[i] - 1.f) < 0.0001f)
 			scale[i] = 1.f;
 	}
 	return scale;
 }
-umath::ScaledTransform FbxImporter::GetPose(const ofbx::Object &o)
+pragma::math::ScaledTransform FbxImporter::GetPose(const ofbx::Object &o)
 {
 	auto fbxTrans = o.getLocalTranslation();
 	auto fbxRot = o.getLocalRotation();
 	auto fbxScale = o.getLocalScaling();
 
-	umath::ScaledTransform pose {};
+	pragma::math::ScaledTransform pose {};
 	pose.SetOrigin(GetTranslation(fbxTrans));
 	pose.SetRotation(GetRotation(fbxRot, static_cast<RotationOrder>(o.getRotationOrder())));
 	pose.SetScale(GetScale(fbxScale));
@@ -1122,7 +1122,7 @@ std::shared_ptr<pragma::animation::Bone> FbxImporter::AddBone(const ofbx::Object
 
 	ref.SetBoneCount(skel.GetBoneCount());
 	auto m = to_pragma_matrix(o.getGlobalTransform());
-	umath::ScaledTransform pose {m};
+	pragma::math::ScaledTransform pose {m};
 	auto scale = pose.GetScale();
 	pose.SetScale(uvec::IDENTITY_SCALE);
 	auto origin = pose.GetOrigin();
@@ -1141,7 +1141,7 @@ std::shared_ptr<pragma::animation::Bone> FbxImporter::AddBone(const ofbx::Object
 		skel.GetRootBones()[boneId] = skel.GetBone(boneId).lock();
 	return skel.GetBone(boneId).lock();
 }
-void FbxImporter::FillSkinInfo(std::vector<umath::VertexWeight> &skinning, const ofbx::Mesh *mesh, int32_t boneId)
+void FbxImporter::FillSkinInfo(std::vector<pragma::math::VertexWeight> &skinning, const ofbx::Mesh *mesh, int32_t boneId)
 {
 	const ofbx::Skin *fbx_skin = mesh->getSkin();
 	const ofbx::GeometryData &geom = mesh->getGeometryData();
@@ -1160,7 +1160,7 @@ void FbxImporter::FillSkinInfo(std::vector<umath::VertexWeight> &skinning, const
 		}
 		return;
 	}
-	auto getWeightCount = [](const umath::VertexWeight &vw) {
+	auto getWeightCount = [](const pragma::math::VertexWeight &vw) {
 		size_t count = 0;
 		for(size_t i = 0; i < 4; ++i) {
 			if(vw.boneIds[i] == -1)
@@ -1214,7 +1214,7 @@ void FbxImporter::FillSkinInfo(std::vector<umath::VertexWeight> &skinning, const
 	}
 }
 
-std::optional<pragma::asset::AssetImportResult> pragma::asset::import_fbx(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath)
+std::optional<pragma::asset::AssetImportResult> pragma::asset::import_fbx(ufile::IFile &f, std::string &outErrMsg, const pragma::util::Path &outputPath)
 {
 	auto fileName = f.GetFileName();
 	if(!fileName) {
@@ -1238,7 +1238,7 @@ std::optional<pragma::asset::AssetImportResult> pragma::asset::import_fbx(ufile:
 	return importer.Load(outErrMsg);
 }
 
-std::optional<pragma::asset::AssetImportResult> pragma::asset::import_fbx(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath)
+std::optional<pragma::asset::AssetImportResult> pragma::asset::import_fbx(const std::string &fileName, std::string &outErrMsg, const pragma::util::Path &outputPath)
 {
 	auto f = filemanager::open_file(fileName, filemanager::FileMode::Read | filemanager::FileMode::Binary);
 	if(!f) {

@@ -25,7 +25,7 @@ export namespace pragma::gui::types {
 	  private:
 		virtual void DoUpdate() override;
 		std::vector<pragma::gui::WIHandle> m_shadowMapImages = {};
-		util::TWeakSharedHandle<pragma::CLightComponent> m_lightHandle = {};
+		pragma::util::TWeakSharedHandle<pragma::CLightComponent> m_lightHandle = {};
 		Vector2i m_shadowMapSize = {256, 256};
 		float m_contrastFactor = 1.f;
 		pragma::rendering::ShadowMapType m_shadowMapType = pragma::rendering::ShadowMapType::Static;

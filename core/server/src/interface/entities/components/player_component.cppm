@@ -17,7 +17,7 @@ export namespace pragma {
 		virtual bool PlaySharedActivity(pragma::Activity activity) override;
 		static unsigned int GetPlayerCount();
 		static const std::vector<SPlayerComponent *> &GetAll();
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		// Same as SetViewOrientation, but doesn't transmit anything to the client
 		void UpdateViewOrientation(const Quat &rot);
 		void Kick(const std::string &reason);
@@ -54,7 +54,7 @@ export namespace pragma {
 		virtual bool ShouldTransmitNetData() const override { return true; };
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
-		mutable util::WeakHandle<networking::IServerClient> m_session = {};
+		mutable pragma::util::WeakHandle<networking::IServerClient> m_session = {};
 		bool m_bGameReady;
 		bool m_bAuthed;
 		std::vector<InputAction> m_keyStack;

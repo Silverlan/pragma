@@ -35,11 +35,11 @@ static void map_build_reflection_probes(pragma::NetworkState *state, pragma::Bas
 	pragma::console::parse_command_options(argv, commandOptions);
 	auto rebuild = commandOptions.contains("rebuild");
 	auto closest = commandOptions.contains("closest");
-	g_renderSettings.renderer = pragma::console::get_command_option_parameter_value(commandOptions, "renderer", util::declvalue(&::RenderSettings::renderer));
-	g_renderSettings.sky = pragma::console::get_command_option_parameter_value(commandOptions, "sky", util::declvalue(&::RenderSettings::sky));
-	g_renderSettings.skyStrength = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "sky_strength", std::to_string(util::declvalue(&::RenderSettings::skyStrength))));
-	g_renderSettings.exposure = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "exposure", std::to_string(util::declvalue(&::RenderSettings::exposure))));
-	auto defAngles = util::declvalue(&::RenderSettings::skyAngles);
+	g_renderSettings.renderer = pragma::console::get_command_option_parameter_value(commandOptions, "renderer", pragma::util::declvalue(&::RenderSettings::renderer));
+	g_renderSettings.sky = pragma::console::get_command_option_parameter_value(commandOptions, "sky", pragma::util::declvalue(&::RenderSettings::sky));
+	g_renderSettings.skyStrength = pragma::util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "sky_strength", std::to_string(pragma::util::declvalue(&::RenderSettings::skyStrength))));
+	g_renderSettings.exposure = pragma::util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "exposure", std::to_string(pragma::util::declvalue(&::RenderSettings::exposure))));
+	auto defAngles = pragma::util::declvalue(&::RenderSettings::skyAngles);
 	g_renderSettings.skyAngles = EulerAngles {pragma::console::get_command_option_parameter_value(commandOptions, "sky_angles", std::to_string(defAngles.p) + ' ' + std::to_string(defAngles.y) + ' ' + std::to_string(defAngles.r))};
 	if(closest) {
 		pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
@@ -72,7 +72,7 @@ namespace {
 }
 static void print_status(const uint32_t i, const uint32_t count)
 {
-	auto percent = umath::ceil((count > 0u) ? (i / static_cast<float>(count) * 100.f) : 100.f);
+	auto percent = pragma::math::ceil((count > 0u) ? (i / static_cast<float>(count) * 100.f) : 100.f);
 	CReflectionProbeComponent::get_logger<CReflectionProbeComponent>().info("Reflection probe update at %{}", percent);
 }
 
@@ -89,7 +89,7 @@ CReflectionProbeComponent::RaytracingJobManager::~RaytracingJobManager()
 void CReflectionProbeComponent::RaytracingJobManager::StartNextJob()
 {
 	auto preprocessCompletionHandler = job.GetCompletionHandler();
-	job.SetCompletionHandler([this, preprocessCompletionHandler](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
+	job.SetCompletionHandler([this, preprocessCompletionHandler](pragma::util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false) {
 			CReflectionProbeComponent::get_logger<CReflectionProbeComponent>().warn("Raytracing scene for reflection probe has failed: {}", worker.GetResultMessage());
 			probe.m_raytracingJobManager = nullptr;
@@ -215,13 +215,13 @@ void CReflectionProbeComponent::RegisterMembers(pragma::EntityComponentManager &
 			  component.LoadIBLReflectionsFromFile();
 		  },
 		  [](const ComponentMemberInfo &info, T &component, TMaterial &value) {
-			  auto path = util::Path::CreateFile(component.GetCubemapIBLMaterialFilePath());
+			  auto path = pragma::util::Path::CreateFile(component.GetCubemapIBLMaterialFilePath());
 			  path.PopFront();
 			  value = path.GetString();
 		  }>("iblMaterial", "", AttributeSpecializationType::File);
 		auto &metaData = memberInfo.AddMetaData();
 		metaData["assetType"] = "material";
-		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)).GetString();
+		metaData["rootPath"] = pragma::util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)).GetString();
 		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Material, pragma::asset::FormatType::All);
 		metaData["stripRootPath"] = true;
 		metaData["stripExtension"] = true;
@@ -248,7 +248,7 @@ void CReflectionProbeComponent::BuildReflectionProbes(pragma::Game &game, std::v
 			probe->m_stateFlags |= StateFlags::RequiresRebuild;
 			if(probe->m_iblMat.empty() == false)
 				continue;
-			auto path = util::Path {probe->GetCubemapIBLMaterialFilePath()};
+			auto path = pragma::util::Path {probe->GetCubemapIBLMaterialFilePath()};
 			path.PopFront();
 			path.RemoveFileExtension(pragma::asset::get_supported_extensions(pragma::asset::Type::Material));
 			auto identifier = probe->GetCubemapIdentifier();
@@ -323,17 +323,17 @@ void CReflectionProbeComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent<CTransformComponent>();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "env_map", false))
+		if(pragma::string::compare<std::string>(kvData.key, "env_map", false))
 			m_srcEnvMap = kvData.value;
-		else if(ustring::compare<std::string>(kvData.key, "ibl_material", false))
+		else if(pragma::string::compare<std::string>(kvData.key, "ibl_material", false))
 			m_iblMat = kvData.value;
-		else if(ustring::compare<std::string>(kvData.key, "ibl_strength", false))
-			m_strength = kvData.value.empty() ? std::optional<float> {} : util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "ibl_strength", false))
+			m_strength = kvData.value.empty() ? std::optional<float> {} : pragma::util::to_float(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 }
 
@@ -363,9 +363,9 @@ void CReflectionProbeComponent::SetCubemapIBLMaterialFilePath(const std::string 
 
 bool CReflectionProbeComponent::RequiresRebuild() const
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::BakingFailed))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::BakingFailed))
 		return false; // We've already tried baking the probe and it failed; don't try again!
-	return umath::is_flag_set(m_stateFlags, StateFlags::RequiresRebuild);
+	return pragma::math::is_flag_set(m_stateFlags, StateFlags::RequiresRebuild);
 }
 
 CReflectionProbeComponent::UpdateStatus CReflectionProbeComponent::UpdateIBLData(bool rebuild)
@@ -439,7 +439,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	mat->SetTextureProperty("irradiance", relPath + prefix + "irradiance");
 	mat->SetTextureProperty("brdf", "env/brdf");
 	mat->SetProperty("generated", true);
-	auto rpath = util::Path::CreateFile(relPath + identifier + "." + pragma::asset::FORMAT_MATERIAL_ASCII);
+	auto rpath = pragma::util::Path::CreateFile(relPath + identifier + "." + pragma::asset::FORMAT_MATERIAL_ASCII);
 	auto apath = pragma::asset::relative_path_to_absolute_path(rpath, pragma::asset::Type::Material);
 	std::string err;
 	apath.PopFront();
@@ -449,7 +449,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	return result;
 }
 
-util::ParallelJob<uimg::ImageLayerSet> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, umath::Degree fov, float exposure,
+pragma::util::ParallelJob<uimg::ImageLayerSet> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, pragma::math::Degree fov, float exposure,
   const std::vector<pragma::ecs::BaseEntity *> *optEntityList, bool renderJob)
 {
 	rendering::cycles::SceneInfo sceneInfo {};
@@ -483,7 +483,7 @@ util::ParallelJob<uimg::ImageLayerSet> CReflectionProbeComponent::CaptureRaytrac
 	sceneInfo.samples = RAYTRACING_SAMPLE_COUNT;
 	sceneInfo.denoise = true;
 	sceneInfo.hdrOutput = true;
-	umath::set_flag(sceneInfo.sceneFlags, rendering::cycles::SceneInfo::SceneFlags::CullObjectsOutsideCameraFrustum, false);
+	pragma::math::set_flag(sceneInfo.sceneFlags, rendering::cycles::SceneInfo::SceneFlags::CullObjectsOutsideCameraFrustum, false);
 
 	std::shared_ptr<uimg::ImageBuffer> imgBuffer = nullptr;
 	if(optEntityList)
@@ -494,7 +494,7 @@ util::ParallelJob<uimg::ImageLayerSet> CReflectionProbeComponent::CaptureRaytrac
 	auto job = rendering::cycles::render_image(*pragma::get_client_state(), sceneInfo, renderImgInfo);
 	if(job.IsValid() == false)
 		return {};
-	job.SetCompletionHandler([](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
+	job.SetCompletionHandler([](pragma::util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false) {
 			CReflectionProbeComponent::get_logger<CReflectionProbeComponent>().warn("Raytracing scene for IBL reflections has failed: {}", worker.GetResultMessage());
 			return;
@@ -521,7 +521,7 @@ std::shared_ptr<prosper::IImage> CReflectionProbeComponent::CreateCubemapImage()
 
 bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector<pragma::ecs::BaseEntity *> *optEntityList, bool renderJob)
 {
-	umath::set_flag(m_stateFlags, StateFlags::BakingFailed, true); // Mark as failed until complete
+	pragma::math::set_flag(m_stateFlags, StateFlags::BakingFailed, true); // Mark as failed until complete
 	auto pos = GetEntity().GetPosition();
 	LogInfo("Capturing reflection probe IBL reflections for probe at position ({},{},{})...", pos.x, pos.y, pos.z);
 
@@ -680,7 +680,7 @@ bool CReflectionProbeComponent::FinalizeCubemap(prosper::IImage &imgCubemap)
 	}
 
 	auto success = (m_iblData && SaveIBLReflectionsToFile());
-	umath::set_flag(m_stateFlags, StateFlags::BakingFailed, !success);
+	pragma::math::set_flag(m_stateFlags, StateFlags::BakingFailed, !success);
 	build_next_reflection_probe();
 	/*auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *p = dynamic_cast<WITexturedCubemap*>(wgui.GetBaseElement()->FindDescendantByName(GUI_EL_NAME));
@@ -754,7 +754,7 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromEnvMap(const std::stri
 msys::Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
 {
 	outIsDefault = false;
-	auto matPath = util::Path {GetCubemapIBLMaterialFilePath()};
+	auto matPath = pragma::util::Path {GetCubemapIBLMaterialFilePath()};
 	matPath.PopFront();
 	if(pragma::asset::exists(matPath.GetString(), pragma::asset::Type::Material) == false) {
 		outIsDefault = true;
@@ -841,7 +841,7 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 
 	InitializeDescriptorSet();
 	if(isDefaultMaterial == false)
-		umath::set_flag(m_stateFlags, StateFlags::RequiresRebuild, false);
+		pragma::math::set_flag(m_stateFlags, StateFlags::RequiresRebuild, false);
 	LogInfo("Loaded IBL reflection resources for cubemap {}!", GetCubemapIdentifier());
 	return true;
 }
@@ -859,9 +859,9 @@ void CReflectionProbeComponent::InitializeDescriptorSet()
 	auto &context = pragma::get_cengine()->GetRenderContext();
 	m_iblDsg = context.CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
 	auto &ds = *m_iblDsg->GetDescriptorSet();
-	ds.SetBindingTexture(*m_iblData->irradianceMap, umath::to_integral(pragma::ShaderPBR::PBRBinding::IrradianceMap));
-	ds.SetBindingTexture(*m_iblData->prefilterMap, umath::to_integral(pragma::ShaderPBR::PBRBinding::PrefilterMap));
-	ds.SetBindingTexture(*m_iblData->brdfMap, umath::to_integral(pragma::ShaderPBR::PBRBinding::BRDFMap));
+	ds.SetBindingTexture(*m_iblData->irradianceMap, pragma::math::to_integral(pragma::ShaderPBR::PBRBinding::IrradianceMap));
+	ds.SetBindingTexture(*m_iblData->prefilterMap, pragma::math::to_integral(pragma::ShaderPBR::PBRBinding::PrefilterMap));
+	ds.SetBindingTexture(*m_iblData->brdfMap, pragma::math::to_integral(pragma::ShaderPBR::PBRBinding::BRDFMap));
 
 	m_iblDsg->GetDescriptorSet()->Update();
 }

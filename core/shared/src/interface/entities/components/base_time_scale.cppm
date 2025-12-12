@@ -17,7 +17,7 @@ export namespace pragma {
 
 		virtual void SetTimeScale(float timeScale);
 		float GetTimeScale() const;
-		const util::PFloatProperty &GetTimeScaleProperty() const;
+		const pragma::util::PFloatProperty &GetTimeScaleProperty() const;
 		float GetEffectiveTimeScale() const;
 
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
@@ -27,6 +27,6 @@ export namespace pragma {
 	  protected:
 		BaseTimeScaleComponent(pragma::ecs::BaseEntity &ent);
 		pragma::NetEventId m_netEvSetTimeScale = pragma::INVALID_NET_EVENT;
-		util::PFloatProperty m_timeScale = nullptr;
+		pragma::util::PFloatProperty m_timeScale = nullptr;
 	};
 };

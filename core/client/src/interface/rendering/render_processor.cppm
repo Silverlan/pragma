@@ -153,6 +153,6 @@ export namespace pragma::rendering {
 		using pragma::rendering::BaseRenderProcessor::BaseRenderProcessor;
 		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue, RenderPassStats *optStats = nullptr, std::optional<uint32_t> worldRenderQueueIndex = {});
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {REGISTER_ENUM_FLAGS(pragma::rendering::BaseRenderProcessor::StateFlags)}

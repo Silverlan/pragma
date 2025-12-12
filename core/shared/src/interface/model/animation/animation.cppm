@@ -20,6 +20,6 @@ export import :model.animation.skeletal_animation;
 export import :model.animation.skeleton;
 export import :model.animation.vertex_animation;
 
-export namespace util {
+export namespace pragma::math {
 	DLLNETWORK Vector3 angular_velocity_to_linear(const Vector3 &refPos, const Vector3 &angVel, const Vector3 &tgtPos);
 };

@@ -18,15 +18,15 @@ export namespace pragma {
 		BasePointConstraintComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
-		std::vector<util::TSharedHandle<physics::IConstraint>> &GetConstraints();
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		std::vector<pragma::util::TSharedHandle<physics::IConstraint>> &GetConstraints();
 		virtual void OnRemove() override;
 	  protected:
 		std::string m_kvSource;
 		std::string m_kvTarget;
 		CallbackHandle m_cbGameLoaded = {};
 		Vector3 m_posTarget = {0.f, 0.f, 0.f};
-		std::vector<util::TSharedHandle<physics::IConstraint>> m_constraints;
+		std::vector<pragma::util::TSharedHandle<physics::IConstraint>> m_constraints;
 		bool SetKeyValue(std::string key, std::string val);
 		pragma::ecs::BaseEntity *GetSourceEntity();
 		void GetTargetEntities(std::vector<pragma::ecs::BaseEntity *> &entsTgt);

@@ -65,9 +65,9 @@ Bool SLuaBaseEntityComponent::ReceiveNetEvent(pragma::BasePlayerComponent &pl, p
 		return true;
 	}
 
-	auto handled = static_cast<uint32_t>(util::EventReply::Unhandled);
+	auto handled = static_cast<uint32_t>(pragma::util::EventReply::Unhandled);
 	CallLuaMethod<uint32_t, luabind::object, uint32_t, NetPacket>("ReceiveNetEvent", &handled, pl.GetLuaObject(), evId, packet);
-	return static_cast<util::EventReply>(handled) == util::EventReply::Handled;
+	return static_cast<pragma::util::EventReply>(handled) == pragma::util::EventReply::Handled;
 }
 void SLuaBaseEntityComponent::SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl)
 {

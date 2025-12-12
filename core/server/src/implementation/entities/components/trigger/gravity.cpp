@@ -15,19 +15,19 @@ void STriggerGravityComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "gravity_dir", false)) {
+		if(pragma::string::compare<std::string>(kvData.key, "gravity_dir", false)) {
 			EulerAngles ang(kvData.value);
 			m_kvGravityDir = ang.Forward();
 		}
-		else if(ustring::compare<std::string>(kvData.key, "gravity_force", false))
-			m_kvGravityForce = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "use_force", false))
-			m_kvUseForce = util::to_boolean(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "gravity_force", false))
+			m_kvGravityForce = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "use_force", false))
+			m_kvUseForce = pragma::util::to_boolean(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 }
 
@@ -37,7 +37,7 @@ void STriggerGravityComponent::OnResetGravity(pragma::ecs::BaseEntity *ent, Grav
 	auto &entThis = GetEntity();
 	NetPacket p {};
 	pragma::networking::write_entity(p, ent);
-	p->Write<uint8_t>(umath::to_integral(pragma::Entity::TriggerGravity::NetFlags::None));
+	p->Write<uint8_t>(pragma::math::to_integral(pragma::Entity::TriggerGravity::NetFlags::None));
 	p->Write<uint32_t>(entThis.GetSpawnFlags());
 	p->Write<Vector3>((settings.dir != nullptr) ? *settings.dir : Vector3 {});
 	p->Write<float>((settings.force != nullptr) ? *settings.force : 0.f);
@@ -54,7 +54,7 @@ void STriggerGravityComponent::OnStartTouch(pragma::ecs::BaseEntity *ent)
 	auto &entThis = GetEntity();
 	NetPacket p {};
 	pragma::networking::write_entity(p, ent);
-	p->Write<uint8_t>(umath::to_integral(netFlags));
+	p->Write<uint8_t>(pragma::math::to_integral(netFlags));
 	p->Write<uint32_t>(entThis.GetSpawnFlags());
 	p->Write<Vector3>(m_kvGravityDir);
 	p->Write<float>(m_kvGravityForce);

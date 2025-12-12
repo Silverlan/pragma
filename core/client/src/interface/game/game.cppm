@@ -25,7 +25,7 @@ export import pragma.string.unicode;
 
 export {
 	inline constexpr auto LOD_SWAP_DISTANCE = 500.f;
-	inline constexpr auto LOD_SWAP_DISTANCE_SQR = umath::pow2(LOD_SWAP_DISTANCE);
+	inline constexpr auto LOD_SWAP_DISTANCE_SQR = pragma::math::pow2(LOD_SWAP_DISTANCE);
 
 	struct DLLCLIENT KeyAction {
 		KeyAction(int key, int action)
@@ -191,14 +191,14 @@ export namespace pragma {
 		template<class T>
 		T *CreateEntity()
 		{
-			if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
+			if(pragma::math::is_flag_set(m_flags, GameFlags::ClosingGame))
 				return nullptr;
 			return CreateEntity<T>(GetFreeEntityIndex());
 		}
 		template<class T>
 		T *CreateEntity(unsigned int idx)
 		{
-			if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
+			if(pragma::math::is_flag_set(m_flags, GameFlags::ClosingGame))
 				return nullptr;
 			T *ent = new T();
 			SetupEntity(ent, idx);
@@ -332,13 +332,13 @@ export namespace pragma {
 		virtual void InitializeGame() override;
 
 		void SetViewModelFOV(float fov);
-		const util::PFloatProperty &GetViewModelFOVProperty() const;
+		const pragma::util::PFloatProperty &GetViewModelFOVProperty() const;
 		float GetViewModelFOV() const;
 		float GetViewModelFOVRad() const;
 		Mat4 GetViewModelProjectionMatrix() const;
 
 		// Shaders
-		const util::WeakHandle<prosper::Shader> &GetGameShader(GameShader shader) const;
+		const pragma::util::WeakHandle<prosper::Shader> &GetGameShader(GameShader shader) const;
 
 		// Lights
 		pragma::BaseEnvLightDirectionalComponent *GetEnvironmentLightSource() const;
@@ -417,7 +417,7 @@ export namespace pragma {
 	private:
 		std::queue<pragma::gui::WIHandle> m_luaGUIObjects = {};
 		double m_tLastClientUpdate = 0.0;
-		std::array<bool, umath::to_integral(pragma::rendering::SceneRenderPass::Count)> m_renderModesEnabled;
+		std::array<bool, pragma::math::to_integral(pragma::rendering::SceneRenderPass::Count)> m_renderModesEnabled;
 		CallbackHandle m_hCbDrawFrame = {};
 
 		struct {
@@ -463,7 +463,7 @@ export namespace pragma {
 		msys::MaterialHandle m_matLoad = {};
 
 		// FOV used for view-models
-		util::PFloatProperty m_viewFov = nullptr;
+		pragma::util::PFloatProperty m_viewFov = nullptr;
 
 		// Sound
 		bool LoadAuxEffects(const std::string &fname);
@@ -481,14 +481,14 @@ export namespace pragma {
 		std::weak_ptr<prosper::IPrimaryCommandBuffer> m_currentDrawCmd = {};
 		pragma::ComponentHandle<pragma::BaseEntityComponent> m_controlCamera {};
 
-		std::array<util::WeakHandle<prosper::Shader>, umath::to_integral(GameShader::Count)> m_gameShaders = {};
+		std::array<pragma::util::WeakHandle<prosper::Shader>, pragma::math::to_integral(GameShader::Count)> m_gameShaders = {};
 		StateFlags m_stateFlags = StateFlags::None;
 		void RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, prosper::Texture &texPostHdr, prosper::IImage *optOutImage, uint32_t layerId = 0u);
 
 		std::unique_ptr<pragma::rendering::GlobalRenderSettingsBufferData> m_globalRenderSettingsBufferData;
 
 		// Scene
-		util::TWeakSharedHandle<pragma::BaseEntityComponent> m_scene = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
+		pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> m_scene = pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
 		std::shared_ptr<rendering::WorldEnvironment> m_worldEnvironment = nullptr;
 
 		void OnEnvironmentLightSourceChanged(pragma::BaseEnvLightDirectionalComponent *oldSource, pragma::BaseEnvLightDirectionalComponent *newSource);
@@ -508,14 +508,14 @@ export namespace pragma {
 		std::vector<ecs::CBaseEntity *> m_shEnts;
 		std::vector<ecs::CBaseEntity *> m_entsOccluded;
 		std::vector<pragma::ecs::BaseEntity *> m_shBaseEnts;
-		util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> m_hEnvLight = util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> {};
-		util::TWeakSharedHandle<pragma::BaseEntityComponent> m_listener = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
-		util::TWeakSharedHandle<pragma::CPlayerComponent> m_plLocal = util::TWeakSharedHandle<pragma::CPlayerComponent> {};
-		util::TWeakSharedHandle<pragma::BaseEntityComponent> m_viewModel = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
-		util::TWeakSharedHandle<pragma::BaseEntityComponent> m_viewBody = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
-		util::TWeakSharedHandle<pragma::BaseEntityComponent> m_primaryCamera = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
+		pragma::util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> m_hEnvLight = pragma::util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> {};
+		pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> m_listener = pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
+		pragma::util::TWeakSharedHandle<pragma::CPlayerComponent> m_plLocal = pragma::util::TWeakSharedHandle<pragma::CPlayerComponent> {};
+		pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> m_viewModel = pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
+		pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> m_viewBody = pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
+		pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> m_primaryCamera = pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
 
-		util::TWeakSharedHandle<pragma::BaseEntityComponent> m_renderScene = util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
+		pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> m_renderScene = pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
 
 		// Map
 		virtual std::shared_ptr<pragma::nav::Mesh> LoadNavMesh(const std::string &fname) override;

@@ -61,7 +61,7 @@ export {
 			void InitializeDescriptorSet();
 			void ClearDescriptorSet();
 			void ClearIblData();
-			util::ParallelJob<uimg::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, umath::Degree fov, float exposure,
+			pragma::util::ParallelJob<uimg::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, pragma::math::Degree fov, float exposure,
 			  const std::vector<pragma::ecs::BaseEntity *> *optEntityList = nullptr, bool renderJob = false);
 			bool FinalizeCubemap(prosper::IImage &imgCubemap);
 			std::string GetCubemapIBLMaterialPath() const;
@@ -72,7 +72,7 @@ export {
 			struct RaytracingJobManager {
 				RaytracingJobManager(CReflectionProbeComponent &probe);
 				~RaytracingJobManager();
-				util::ParallelJob<uimg::ImageLayerSet> job = {};
+				pragma::util::ParallelJob<uimg::ImageLayerSet> job = {};
 				std::shared_ptr<uimg::ImageBuffer> m_equirectImageBuffer = nullptr;
 				CReflectionProbeComponent &probe;
 				void StartNextJob();
@@ -85,7 +85,7 @@ export {
 			std::string m_iblMat = "";
 			std::optional<float> m_strength = {};
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::CReflectionProbeComponent::StateFlags)
 

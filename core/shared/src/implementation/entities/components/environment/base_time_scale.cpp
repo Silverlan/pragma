@@ -12,16 +12,16 @@ void BaseEnvTimescaleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "timescale", false))
-			m_kvTimescale = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "inner_radius", false))
-			m_kvInnerRadius = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "outer_radius", false))
-			m_kvOuterRadius = util::to_float(kvData.value);
+		if(pragma::string::compare<std::string>(kvData.key, "timescale", false))
+			m_kvTimescale = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "inner_radius", false))
+			m_kvInnerRadius = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "outer_radius", false))
+			m_kvOuterRadius = pragma::util::to_float(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 }

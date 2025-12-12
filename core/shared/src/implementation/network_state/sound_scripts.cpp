@@ -17,7 +17,7 @@ bool pragma::NetworkState::LoadSoundScripts(const char *file, bool bPrecache)
 	if(m_soundScriptManager->Load(path.c_str(), &scripts) == false) {
 		static auto bSkipPort = false;
 		if(bSkipPort == false) {
-			if(util::port_sound_script(this, "scripts\\" + std::string(file)) == true) {
+			if(pragma::util::port_sound_script(this, "scripts\\" + std::string(file)) == true) {
 				bSkipPort = true;
 				auto r = LoadSoundScripts(file, bPrecache);
 				bSkipPort = false;

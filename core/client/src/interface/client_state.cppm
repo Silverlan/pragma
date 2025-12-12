@@ -118,7 +118,7 @@ export namespace pragma {
 		virtual msys::MaterialManager &GetMaterialManager() override;
 		virtual pragma::geometry::ModelSubMesh *CreateSubMesh() const override;
 		virtual pragma::geometry::ModelMesh *CreateMesh() const override;
-		virtual util::FileAssetManager *GetAssetManager(pragma::asset::Type type) override;
+		virtual pragma::util::FileAssetManager *GetAssetManager(pragma::asset::Type type) override;
 		virtual void Initialize() override;
 		virtual std::string GetMessagePrefix() const override;
 

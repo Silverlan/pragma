@@ -28,9 +28,9 @@ void pragma::pts::CParticleModifierComponentTime::Initialize(const std::string &
 		identifier = prefix + "_" + identifier;
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == identifier)
-			m_bLifetimeFraction = util::to_boolean(it->second);
+			m_bLifetimeFraction = pragma::util::to_boolean(it->second);
 	}
 }
 float pragma::pts::CParticleModifierComponentTime::GetTime(float t, CParticle &p) const

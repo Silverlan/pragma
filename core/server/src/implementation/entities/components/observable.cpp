@@ -45,7 +45,7 @@ void SObservableComponent::SetViewOffset(const Vector3 &offset)
 void SObservableComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SObservableComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
-	constexpr auto numTypes = umath::to_integral(CameraType::Count);
+	constexpr auto numTypes = pragma::math::to_integral(CameraType::Count);
 	for(auto i = 0u; i < numTypes; ++i) {
 		auto &data = GetCameraData(static_cast<CameraType>(i));
 		packet->Write<bool>(*data.enabled);

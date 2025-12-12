@@ -23,8 +23,8 @@ std::vector<pragma::bvh::MeshRange> &pragma::bvh::get_bvh_mesh_ranges(pragma::bv
 static void get_bvh_bounds(const pragma::bvh::BBox &bb, Vector3 &outMin, Vector3 &outMax)
 {
 	constexpr auto epsilon = 0.001f;
-	outMin = Vector3 {umath::min(bb.min.values[0], bb.max.values[0]) - epsilon, umath::min(bb.min.values[1], bb.max.values[1]) - epsilon, umath::min(bb.min.values[2], bb.max.values[2]) - epsilon};
-	outMax = Vector3 {umath::max(bb.min.values[0], bb.max.values[0]) + epsilon, umath::max(bb.min.values[1], bb.max.values[1]) + epsilon, umath::max(bb.min.values[2], bb.max.values[2]) + epsilon};
+	outMin = Vector3 {pragma::math::min(bb.min.values[0], bb.max.values[0]) - epsilon, pragma::math::min(bb.min.values[1], bb.max.values[1]) - epsilon, pragma::math::min(bb.min.values[2], bb.max.values[2]) - epsilon};
+	outMax = Vector3 {pragma::math::max(bb.min.values[0], bb.max.values[0]) + epsilon, pragma::math::max(bb.min.values[1], bb.max.values[1]) + epsilon, pragma::math::max(bb.min.values[2], bb.max.values[2]) + epsilon};
 }
 std::tuple<bool, bool, bool> pragma::bvh::test_node_aabb_intersection(const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const pragma::bvh::Node &left, const pragma::bvh::Node &right)
 {
@@ -93,7 +93,7 @@ bool pragma::bvh::test_bvh_intersection(const pragma::bvh::MeshBvhTree &bvhData,
 						  if(meshRange) {
 							  intersectionCache->meshRanges.push_back({*meshRange});
 
-							  auto hash = util::hash_combine<uint64_t>(util::hash_combine<uint64_t>(0, reinterpret_cast<uint64_t>(meshRange->mesh.get())), reinterpret_cast<uint64_t>(meshRange->entity));
+							  auto hash = pragma::util::hash_combine<uint64_t>(pragma::util::hash_combine<uint64_t>(0, reinterpret_cast<uint64_t>(meshRange->mesh.get())), reinterpret_cast<uint64_t>(meshRange->entity));
 							  auto it = intersectionCache->meshes.find(hash);
 							  if(it != intersectionCache->meshes.end())
 								  addPrim = false;
@@ -127,31 +127,31 @@ bool pragma::bvh::test_bvh_intersection(const pragma::bvh::MeshBvhTree &bvhData,
 }
 bool pragma::bvh::test_bvh_intersection_with_obb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
 {
-	auto planes = umath::geometry::get_obb_planes(origin, rot, min, max);
+	auto planes = pragma::math::geometry::get_obb_planes(origin, rot, min, max);
 	return test_bvh_intersection(
-	  bvhData, [&origin, &rot, &min, &max, &planes](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return umath::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, planes.begin(), planes.end()) != umath::intersection::Intersect::Outside; },
+	  bvhData, [&origin, &rot, &min, &max, &planes](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return pragma::math::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, planes.begin(), planes.end()) != pragma::math::intersection::Intersect::Outside; },
 	  [&min, &max, &origin, &rot](
-	    const pragma::bvh::Primitive &prim) -> bool { return umath::intersection::obb_triangle(min, max, origin, rot, *reinterpret_cast<const Vector3 *>(&prim.p0.values), *reinterpret_cast<const Vector3 *>(&prim.p1.values), *reinterpret_cast<const Vector3 *>(&prim.p2.values)); },
+	    const pragma::bvh::Primitive &prim) -> bool { return pragma::math::intersection::obb_triangle(min, max, origin, rot, *reinterpret_cast<const Vector3 *>(&prim.p0.values), *reinterpret_cast<const Vector3 *>(&prim.p1.values), *reinterpret_cast<const Vector3 *>(&prim.p2.values)); },
 	  nodeIdx, outIntersectionInfo);
 }
 bool pragma::bvh::test_bvh_intersection_with_aabb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
 {
 	return test_bvh_intersection(
-	  bvhData, [&min, &max](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return umath::intersection::aabb_aabb(min, max, aabbMin, aabbMax) != umath::intersection::Intersect::Outside; },
-	  [&min, &max](const pragma::bvh::Primitive &prim) -> bool { return umath::intersection::aabb_triangle(min, max, *reinterpret_cast<const Vector3 *>(&prim.p0.values), *reinterpret_cast<const Vector3 *>(&prim.p1.values), *reinterpret_cast<const Vector3 *>(&prim.p2.values)); }, nodeIdx,
+	  bvhData, [&min, &max](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return pragma::math::intersection::aabb_aabb(min, max, aabbMin, aabbMax) != pragma::math::intersection::Intersect::Outside; },
+	  [&min, &max](const pragma::bvh::Primitive &prim) -> bool { return pragma::math::intersection::aabb_triangle(min, max, *reinterpret_cast<const Vector3 *>(&prim.p0.values), *reinterpret_cast<const Vector3 *>(&prim.p1.values), *reinterpret_cast<const Vector3 *>(&prim.p2.values)); }, nodeIdx,
 	  outIntersectionInfo);
 }
-bool pragma::bvh::test_bvh_intersection_with_kdop(const pragma::bvh::MeshBvhTree &bvhData, const std::vector<umath::Plane> &kdop, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
+bool pragma::bvh::test_bvh_intersection_with_kdop(const pragma::bvh::MeshBvhTree &bvhData, const std::vector<pragma::math::Plane> &kdop, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
 {
 	return test_bvh_intersection(
-	  bvhData, [&kdop](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return umath::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, kdop.begin(), kdop.end()) != umath::intersection::Intersect::Outside; },
+	  bvhData, [&kdop](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return pragma::math::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, kdop.begin(), kdop.end()) != pragma::math::intersection::Intersect::Outside; },
 	  [&kdop](const pragma::bvh::Primitive &prim) -> bool {
-		  // TODO: Use umath::intersection::triangle_in_plane_mesh() once it's implemented
+		  // TODO: Use pragma::math::intersection::triangle_in_plane_mesh() once it's implemented
 
 		  // Use AABB approximation for intersection check
 		  Vector3 v0, v1;
 		  get_bvh_bounds(prim.get_bbox(), v0, v1);
-		  return umath::intersection::aabb_in_plane_mesh(v0, v1, kdop.begin(), kdop.end()) != umath::intersection::Intersect::Outside;
+		  return pragma::math::intersection::aabb_in_plane_mesh(v0, v1, kdop.begin(), kdop.end()) != pragma::math::intersection::Intersect::Outside;
 	  },
 	  nodeIdx, outIntersectionInfo);
 }
@@ -229,7 +229,7 @@ void pragma::bvh::MeshBvhTree::Deserialize(const std::vector<uint8_t> &data, std
 			if(m_readPos >= m_data.size())
 				return 0;
 			auto remaining = m_data.size() - m_readPos;
-			auto szRead = umath::min(remaining, sz);
+			auto szRead = pragma::math::min(remaining, sz);
 			memcpy(data, m_data.data() + m_readPos, szRead);
 			m_readPos += szRead;
 			return szRead;
@@ -365,7 +365,7 @@ void pragma::bvh::debug::print_bvh_tree(pragma::bvh::Bvh &bvh)
 	Con::cout << "BVH Tree:" << ss.str() << Con::endl;
 }
 
-void pragma::bvh::debug::draw_bvh_tree(const pragma::Game &game, pragma::bvh::Bvh &bvh, const umath::ScaledTransform &pose, float duration)
+void pragma::bvh::debug::draw_bvh_tree(const pragma::Game &game, pragma::bvh::Bvh &bvh, const pragma::math::ScaledTransform &pose, float duration)
 {
 	constexpr size_t stack_size = 64;
 	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
@@ -391,13 +391,13 @@ restart:
 		}
 	}
 }
-void pragma::bvh::debug::draw_node(const pragma::Game &game, const pragma::bvh::BBox &bbox, const umath::ScaledTransform &pose, const Color &col, float duration)
+void pragma::bvh::debug::draw_node(const pragma::Game &game, const pragma::bvh::BBox &bbox, const pragma::math::ScaledTransform &pose, const Color &col, float duration)
 {
 	auto vstart = from_bvh_vector(bbox.min);
 	auto vend = from_bvh_vector(bbox.max);
 	const_cast<pragma::Game &>(game).DrawBox(pose.GetOrigin(), vstart, vend, pose.GetRotation(), colors::White, col, duration);
 }
-void pragma::bvh::debug::draw_node(const pragma::Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose, const Color &col, float duration)
+void pragma::bvh::debug::draw_node(const pragma::Game &game, const pragma::bvh::Node &node, const pragma::math::ScaledTransform &pose, const Color &col, float duration)
 {
 	auto bbox = node.get_bbox();
 	draw_node(game, bbox, pose, col, duration);

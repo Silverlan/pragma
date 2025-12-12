@@ -45,7 +45,7 @@ export namespace pragma {
 		  private:
 			bool m_bExtended = false;
 			std::vector<prosper::ClearValue> m_clearValues = {};
-			util::WeakHandle<prosper::Shader> m_shaderPrepass = {};
+			pragma::util::WeakHandle<prosper::Shader> m_shaderPrepass = {};
 		};
 	};
 };

@@ -40,9 +40,9 @@ Vector3 ShaderParticleSpriteTrail::DoCalcVertexPosition(const pragma::ecs::CPart
 	l = logf(l + 2) * 12;        //GCC stl: It still smells.
 	if(l <= 0.0)
 		return camPos;
-	l = umath::clamp(l, rendererSt.GetMinLength(), rendererSt.GetMaxLength());
+	l = pragma::math::clamp(l, rendererSt.GetMinLength(), rendererSt.GetMaxLength());
 
-	auto rad = umath::min(pt->GetRadius(), l);
+	auto rad = pragma::math::min(pt->GetRadius(), l);
 	dtPosWs = dtPosWs * l;
 
 	auto dirToBeam = ptWorldPos - camPos;

@@ -13,13 +13,13 @@ void BaseNetworkedComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "networkflags", false))
-			m_networkFlags = static_cast<NetworkFlags>(util::to_int(kvData.value));
+		if(pragma::string::compare<std::string>(kvData.key, "networkflags", false))
+			m_networkFlags = static_cast<NetworkFlags>(pragma::util::to_int(kvData.value));
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 #if NETWORKED_VARS_ENABLED != 0

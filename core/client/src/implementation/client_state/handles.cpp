@@ -90,9 +90,9 @@ void pragma::ClientState::HandleClientStartResourceTransfer(NetPacket &packet)
 		return;
 	}
 	auto svPath = m_svInfo->address;
-	ustring::replace(svPath, ":", "_");
-	ustring::replace(svPath, "[", "");
-	ustring::replace(svPath, "]", "");
+	pragma::string::replace(svPath, ":", "_");
+	pragma::string::replace(svPath, "[", "");
+	pragma::string::replace(svPath, "]", "");
 	m_svInfo->SetDownloadPath("downloads\\" + svPath + '\\');
 
 	auto luaPath = m_svInfo->GetDownloadPath() + "lua";
@@ -124,11 +124,11 @@ void pragma::ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize
 	if(err == BZ_OK) {
 		unsigned int offset = 0;
 		while(offset < cacheSize) {
-			std::string path = ustring::read_until_etx(offset + dest);
+			std::string path = pragma::string::read_until_etx(offset + dest);
 			offset += CUInt32(path.size()) + 1;
-			std::string content = ustring::read_until_etx(dest + offset);
+			std::string content = pragma::string::read_until_etx(dest + offset);
 			offset += CUInt32(content.length()) + 1;
-			auto data = ::util::make_shared<std::vector<uint8_t>>();
+			auto data = pragma::util::make_shared<std::vector<uint8_t>>();
 			data->resize(content.length() + 1);
 			memcpy(data->data(), content.c_str(), content.length() + 1);
 			FileManager::AddVirtualFile((Lua::SCRIPT_DIRECTORY_SLASH + path).c_str(), data);

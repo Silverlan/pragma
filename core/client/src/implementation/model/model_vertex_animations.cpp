@@ -66,7 +66,7 @@ void pragma::asset::CModel::UpdateVertexAnimationBuffer()
 							n = normals.at(vertIdx);
 						else {
 							auto &dir = uvec::FORWARD;
-							n = {static_cast<uint16_t>(umath::float32_to_float16_glm(dir.x)), static_cast<uint16_t>(umath::float32_to_float16_glm(dir.y)), static_cast<uint16_t>(umath::float32_to_float16_glm(dir.z)), 0};
+							n = {static_cast<uint16_t>(pragma::math::float32_to_float16_glm(dir.x)), static_cast<uint16_t>(pragma::math::float32_to_float16_glm(dir.y)), static_cast<uint16_t>(pragma::math::float32_to_float16_glm(dir.z)), 0};
 						}
 						vdata.at(2) = (n.at(0) << 16) | n.at(1);
 						vdata.at(3) = (n.at(2) << 16) | n.at(3);

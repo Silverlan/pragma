@@ -27,7 +27,7 @@ export namespace pragma {
 
 		virtual void InitializeLuaObject(lua::State *lua) override;
 	  protected:
-		std::array<bool, umath::to_integral(pragma::Axis::Count)> m_axisEnabled {};
-		std::array<bool, umath::to_integral(pragma::Axis::Count)> m_axisInverted {};
+		std::array<bool, pragma::math::to_integral(pragma::Axis::Count)> m_axisEnabled {};
+		std::array<bool, pragma::math::to_integral(pragma::Axis::Count)> m_axisInverted {};
 	};
 };

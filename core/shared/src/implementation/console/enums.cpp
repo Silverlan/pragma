@@ -15,7 +15,7 @@ import :console.enums;
 static pragma::console::ConsoleColorFlags s_activeConsoleColorFlags = pragma::console::ConsoleColorFlags::None;
 std::string pragma::console::get_ansi_color_code(pragma::console::ConsoleColorFlags flags)
 {
-	if(umath::is_flag_set(flags, pragma::console::ConsoleColorFlags::Reset))
+	if(pragma::math::is_flag_set(flags, pragma::console::ConsoleColorFlags::Reset))
 		return "\u001b[0m";
 	auto colorCode = 0u;
 	auto colorFlags = flags & pragma::console::ConsoleColorFlags::White;
@@ -158,7 +158,7 @@ pragma::console::ConsoleColorFlags pragma::console::color_to_console_color_flags
 	auto bestCandidate = pragma::console::ConsoleColorFlags::None;
 	for(auto &pair : colorMap) {
 		auto &colOther = pair.second;
-		auto diff = static_cast<uint16_t>(umath::abs(color.r - colOther.r) + umath::abs(color.g - colOther.g) + umath::abs(color.b - colOther.b));
+		auto diff = static_cast<uint16_t>(pragma::math::abs(color.r - colOther.r) + pragma::math::abs(color.g - colOther.g) + pragma::math::abs(color.b - colOther.b));
 		if(diff > smallestDiff)
 			continue;
 		smallestDiff = diff;

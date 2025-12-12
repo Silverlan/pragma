@@ -33,7 +33,7 @@ void pragma::CEyeComponent::SetEyeballConfig(const EyeballConfig &eyeballConfig)
 const pragma::CEyeComponent::EyeballData *pragma::CEyeComponent::GetEyeballData(uint32_t eyeballIndex) const { return const_cast<CEyeComponent *>(this)->GetEyeballData(eyeballIndex); }
 pragma::CEyeComponent::EyeballData *pragma::CEyeComponent::GetEyeballData(uint32_t eyeballIndex) { return (eyeballIndex < m_eyeballData.size()) ? &m_eyeballData.at(eyeballIndex) : nullptr; }
 
-std::optional<umath::Transform> pragma::CEyeComponent::GetEyePose() const
+std::optional<pragma::math::Transform> pragma::CEyeComponent::GetEyePose() const
 {
 	auto &ent = GetEntity();
 	if(m_eyeAttachmentIndex == std::numeric_limits<uint32_t>::max())
@@ -47,7 +47,7 @@ std::optional<umath::Transform> pragma::CEyeComponent::GetEyePose() const
 		return {};
 	// attRot = uquat::identity();
 	auto attPose = ent.GetPose();
-	attPose *= umath::Transform {attPos, attRot};
+	attPose *= pragma::math::Transform {attPos, attRot};
 	return attPose;
 }
 
@@ -73,8 +73,8 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 	// Test
 	/*auto t = std::fmodf(pragma::get_cgame()->RealTime(),6.0) /6.0;
 	auto t2 = std::fmodf(pragma::get_cgame()->RealTime(),3.0) /3.0;
-	auto s = umath::sin(t *umath::pi *2);
-	auto s2 = umath::sin(t2 *umath::pi *2);
+	auto s = pragma::math::sin(t *pragma::math::pi *2);
+	auto s2 = pragma::math::sin(t2 *pragma::math::pi *2);
 	auto f = 1.0;
 	flexC->SetFlexController("eyes_updown",f *(s *90 -45));
 	flexC->SetFlexController("eyes_rightleft",f *(s2 *90 -45));*/
@@ -86,7 +86,7 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 		mdlC->GetAttachment(m_eyeAttachmentIndex, &pos, &rot);
 
 		auto attPose = GetEntity().GetPose();
-		attPose *= umath::Transform {pos, rot};
+		attPose *= pragma::math::Transform {pos, rot};
 		auto invPose = attPose.GetInverse();
 
 		auto posAbs = invPose * tmp;
@@ -109,8 +109,8 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 		if(m_eyeLeftRightFlexController != std::numeric_limits<uint32_t>::max())
 			flexC->GetFlexController(m_eyeLeftRightFlexController, eyeAng.y);
 
-		umath::negate(eyeAng.p);
-		umath::negate(eyeAng.y);
+		pragma::math::negate(eyeAng.p);
+		pragma::math::negate(eyeAng.y);
 		eyeDeflect = eyeAng.Forward();
 		eyeDeflect.z = 0;
 
@@ -119,7 +119,7 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 		localPos = localPos + eyeDeflect;
 		uvec::normalize(&localPos);
 
-		auto maxEyeDeflection = umath::cos(umath::deg_to_rad(mdl->GetMaxEyeDeflection()));
+		auto maxEyeDeflection = pragma::math::cos(pragma::math::deg_to_rad(mdl->GetMaxEyeDeflection()));
 		static auto testDeflection = true;
 		if(testDeflection) {
 			if(localPos.z < maxEyeDeflection) {
@@ -127,7 +127,7 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 				localPos.z = 0;
 				auto d = uvec::length_sqr(localPos);
 				if(d > 0.0) {
-					d = umath::sqrt((1.0 - maxEyeDeflection * maxEyeDeflection) / (localPos.y * localPos.y + localPos.x * localPos.x));
+					d = pragma::math::sqrt((1.0 - maxEyeDeflection * maxEyeDeflection) / (localPos.y * localPos.y + localPos.x * localPos.x));
 					localPos.z = maxEyeDeflection;
 					localPos.y = localPos.y * d;
 					localPos.x = localPos.x * d;
@@ -149,7 +149,7 @@ void pragma::CEyeComponent::SetViewTarget(const Vector3 &viewTarget)
 	//if(clamp)
 	//	m_viewTarget = ClampViewTarget(viewTarget);
 }
-umath::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeballIndex, umath::Transform *optOutBonePose) const
+pragma::math::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeballIndex, pragma::math::Transform *optOutBonePose) const
 {
 	if(m_animC.expired())
 		return {};
@@ -159,22 +159,22 @@ umath::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeballIndex, u
 	if(eyeballData == nullptr || eyeball == nullptr) {
 		if(optOutBonePose)
 			*optOutBonePose = {};
-		return umath::Transform {};
+		return pragma::math::Transform {};
 	}
 	auto &config = eyeballData->config;
 	auto tmp = eyeball->origin;
-	tmp.x = tmp.x + config.eyeShift.x * umath::sign(tmp.x);
-	tmp.y = tmp.y + config.eyeShift.y * umath::sign(tmp.y);
-	tmp.z = tmp.z + config.eyeShift.z * umath::sign(tmp.z);
+	tmp.x = tmp.x + config.eyeShift.x * pragma::math::sign(tmp.x);
+	tmp.y = tmp.y + config.eyeShift.y * pragma::math::sign(tmp.y);
+	tmp.z = tmp.z + config.eyeShift.z * pragma::math::sign(tmp.z);
 	tmp *= GetEntity().GetScale();
 
 	Vector3 bonePos;
 	Quat boneRot;
-	m_animC->GetBonePose(eyeball->boneIndex, &bonePos, &boneRot, nullptr, umath::CoordinateSpace::World);
-	umath::Transform bonePose {bonePos, boneRot};
+	m_animC->GetBonePose(eyeball->boneIndex, &bonePos, &boneRot, nullptr, pragma::math::CoordinateSpace::World);
+	pragma::math::Transform bonePose {bonePos, boneRot};
 	if(optOutBonePose)
 		*optOutBonePose = bonePose;
-	return bonePose * umath::Transform {tmp, uquat::identity()};
+	return bonePose * pragma::math::Transform {tmp, uquat::identity()};
 }
 bool pragma::CEyeComponent::GetEyeballProjectionVectors(uint32_t eyeballIndex, Vector4 &outProjU, Vector4 &outProjV) const
 {
@@ -192,7 +192,7 @@ void pragma::CEyeComponent::UpdateEyeMaterialData()
 		data.config.irisScale = 1.f;
 		data.config.irisUvClampRange = {0.f, 1.f};
 	}
-	auto numEyeballs = umath::min(mdl->GetEyeballCount(), static_cast<uint32_t>(m_eyeballData.size()));
+	auto numEyeballs = pragma::math::min(mdl->GetEyeballCount(), static_cast<uint32_t>(m_eyeballData.size()));
 	for(auto eyeballIndex = decltype(numEyeballs) {0u}; eyeballIndex < numEyeballs; ++eyeballIndex) {
 		auto &eyeball = *mdl->GetEyeball(eyeballIndex);
 		auto *mat = mdl->GetMaterial(0, eyeball.irisMaterialIndex);
@@ -216,7 +216,7 @@ void pragma::CEyeComponent::UpdateEyeballMT(const asset::Eyeball &eyeball, uint3
 	auto viewTarget = GetViewTarget();
 
 	// To world space
-	umath::Transform bonePose {};
+	pragma::math::Transform bonePose {};
 	state.origin = CalcEyeballPose(eyeballIndex, &bonePose).GetOrigin();
 	state.up = eyeball.up;
 	uvec::rotate(&state.up, bonePose.GetRotation());
@@ -235,8 +235,8 @@ void pragma::CEyeComponent::UpdateEyeballMT(const asset::Eyeball &eyeball, uint3
 	state.forward = state.forward + (eyeball.zOffset * 2.f) * state.right;
 
 	// Jitter
-	state.forward += umath::random(-config.jitter.x, config.jitter.x) * state.right;
-	state.forward += umath::random(-config.jitter.y, config.jitter.y) * state.up;
+	state.forward += pragma::math::random(-config.jitter.x, config.jitter.x) * state.right;
+	state.forward += pragma::math::random(-config.jitter.y, config.jitter.y) * state.up;
 
 	uvec::normalize(&state.forward);
 

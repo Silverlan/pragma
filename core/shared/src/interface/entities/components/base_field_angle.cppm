@@ -17,21 +17,21 @@ export namespace pragma {
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
-		umath::Degree GetFieldAngle() const;
-		const util::PFloatProperty &GetFieldAngleProperty() const;
-		void SetFieldAngle(umath::Degree coneAngle);
+		pragma::math::Degree GetFieldAngle() const;
+		const pragma::util::PFloatProperty &GetFieldAngleProperty() const;
+		void SetFieldAngle(pragma::math::Degree coneAngle);
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
 		BaseFieldAngleComponent(pragma::ecs::BaseEntity &ent);
 		pragma::NetEventId m_netEvSetFieldAngle = pragma::INVALID_NET_EVENT;
-		util::PFloatProperty m_fieldAngle;
+		pragma::util::PFloatProperty m_fieldAngle;
 	};
 	struct DLLNETWORK CEOnFieldAngleChanged : public ComponentEvent {
 		CEOnFieldAngleChanged(float oldRadius, float newRadius);
 		virtual void PushArguments(lua::State *l) override;
-		umath::Degree oldFieldAngle;
-		umath::Degree newFieldAngle;
+		pragma::math::Degree oldFieldAngle;
+		pragma::math::Degree newFieldAngle;
 	};
 };

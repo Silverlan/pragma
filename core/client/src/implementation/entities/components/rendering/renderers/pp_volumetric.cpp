@@ -26,7 +26,7 @@ CRendererPpVolumetricComponent::CRendererPpVolumetricComponent(pragma::ecs::Base
 		pragma::get_cengine()->GetShaderManager().RegisterShader("pp_light_cone", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPLightCone(context, identifier); });
 	}
 }
-static util::WeakHandle<prosper::Shader> g_shader {};
+static pragma::util::WeakHandle<prosper::Shader> g_shader {};
 void CRendererPpVolumetricComponent::OnEntitySpawn()
 {
 	CRendererPpBaseComponent::OnEntitySpawn();

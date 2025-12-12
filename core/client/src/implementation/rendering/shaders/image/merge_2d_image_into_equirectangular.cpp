@@ -29,7 +29,7 @@ void ShaderMerge2dImageIntoEquirectangular::InitializeShaderResources()
 	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE_2D);
 }
 
-bool ShaderMerge2dImageIntoEquirectangular::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTextureEquirect, prosper::IDescriptorSet &descSetTexture2d, CubeFace cubeFace, umath::Degree range)
+bool ShaderMerge2dImageIntoEquirectangular::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTextureEquirect, prosper::IDescriptorSet &descSetTexture2d, CubeFace cubeFace, pragma::math::Degree range)
 {
 	PushConstants pushConstants {};
 	pushConstants.xFactor = range / 360.f;

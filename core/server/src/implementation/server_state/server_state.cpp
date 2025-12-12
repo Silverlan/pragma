@@ -176,7 +176,7 @@ bool pragma::ServerState::ConnectLocalHostPlayerClient()
 {
 	if(m_server == nullptr)
 		return false;
-	m_localClient = ::util::make_shared<pragma::networking::LocalServerClient>();
+	m_localClient = pragma::util::make_shared<pragma::networking::LocalServerClient>();
 	m_server->AddClient(m_localClient);
 	return true;
 }
@@ -184,7 +184,7 @@ void pragma::ServerState::ResetGameServer()
 {
 	m_server = std::make_unique<pragma::networking::LocalServer>();
 	//if(m_localClient == nullptr)
-	//	m_localClient = ::util::make_shared<pragma::networking::LocalServerClient>();
+	//	m_localClient = pragma::util::make_shared<pragma::networking::LocalServerClient>();
 	//m_server->AddClient(m_localClient);
 }
 
@@ -378,7 +378,7 @@ bool pragma::ServerState::IsClientAuthenticationRequired() const { return IsMult
 pragma::console::ConCommand *pragma::ServerState::CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto lscmd = scmd;
-	ustring::to_lower(lscmd);
+	pragma::string::to_lower(lscmd);
 	auto *cmd = NetworkState::CreateConCommand(scmd, fc, flags, help);
 	if(cmd == nullptr)
 		return nullptr;
@@ -412,7 +412,7 @@ msys::Material *pragma::ServerState::LoadMaterial(const std::string &path, bool 
 		mat = asset.get();
 	}
 	else {
-		util::FileAssetManager::PreloadResult result {};
+		pragma::util::FileAssetManager::PreloadResult result {};
 		auto asset = matManager.LoadAsset(path, nullptr, &result);
 		success = (asset != nullptr);
 		mat = asset.get();

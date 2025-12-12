@@ -121,7 +121,7 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 		std::function<std::shared_ptr<debug::DebugBehaviorTreeNode>(const ai::BehaviorNode &)> fAddNode = nullptr;
 		fAddNode = [&fAddNode, &sched](const ai::BehaviorNode &node) {
 			auto &dbgInfo = node.GetDebugInfo();
-			auto dbgChildNode = ::util::make_shared<debug::DebugBehaviorTreeNode>();
+			auto dbgChildNode = pragma::util::make_shared<debug::DebugBehaviorTreeNode>();
 			auto *luaTask = dynamic_cast<const AILuaBehaviorNode *>(&node);
 			if(dbgInfo.debugName.empty() == false)
 				dbgChildNode->name = dbgInfo.debugName;
@@ -150,8 +150,8 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 		std::function<void(NetPacket &, const debug::DebugBehaviorTreeNode &)> fWriteTree = nullptr;
 		fWriteTree = [&fWriteTree](NetPacket &p, const debug::DebugBehaviorTreeNode &node) {
 			p->WriteString(node.name);
-			p->Write<uint32_t>(umath::to_integral(node.nodeType));
-			p->Write<uint32_t>(umath::to_integral(node.selectorType));
+			p->Write<uint32_t>(pragma::math::to_integral(node.nodeType));
+			p->Write<uint32_t>(pragma::math::to_integral(node.selectorType));
 			p->Write<float>(node.lastStartTime);
 			p->Write<float>(node.lastEndTime);
 			p->Write<uint64_t>(node.executionIndex);

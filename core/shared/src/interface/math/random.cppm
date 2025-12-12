@@ -8,7 +8,7 @@ export module pragma.shared:math.random;
 
 export import std.compat;
 
-export namespace util {
+export namespace pragma::math {
 	DLLNETWORK void to_random_float(const std::string &s, float &outF0, float &outF1);
 	DLLNETWORK std::uniform_real_distribution<float> to_random_float(const std::string &s);
 	DLLNETWORK void to_random_int(const std::string &s, int32_t &outI0, int32_t &outI1);

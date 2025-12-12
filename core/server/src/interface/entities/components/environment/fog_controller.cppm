@@ -18,7 +18,7 @@ export {
 			virtual void SetFogStart(float start) override;
 			virtual void SetFogEnd(float end) override;
 			virtual void SetMaxDensity(float density) override;
-			virtual void SetFogType(util::FogType type) override;
+			virtual void SetFogType(pragma::util::FogType type) override;
 
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }

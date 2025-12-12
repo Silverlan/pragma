@@ -27,8 +27,8 @@ void pragma::asset::WorldData::AddEntity(EntityData &ent, bool isWorld)
 		m_entities.push_back(ent.shared_from_this());
 	ent.m_mapIndex = m_entities.size();
 }
-void pragma::asset::WorldData::SetBSPTree(util::BSPTree &bspTree) { m_bspTree = bspTree.shared_from_this(); }
-util::BSPTree *pragma::asset::WorldData::GetBSPTree() { return m_bspTree.get(); }
+void pragma::asset::WorldData::SetBSPTree(pragma::util::BSPTree &bspTree) { m_bspTree = bspTree.shared_from_this(); }
+pragma::util::BSPTree *pragma::asset::WorldData::GetBSPTree() { return m_bspTree.get(); }
 
 void pragma::asset::WorldData::SetLightMapAtlas(uimg::ImageBuffer &imgAtlas)
 {
@@ -100,11 +100,11 @@ void pragma::asset::ComponentData::SetFlags(Flags flags) { m_flags = flags; }
 std::shared_ptr<pragma::asset::EntityData> pragma::asset::EntityData::Create() { return std::shared_ptr<EntityData> {new EntityData {}}; }
 bool pragma::asset::EntityData::IsWorld() const { return m_className == "world"; }
 bool pragma::asset::EntityData::IsSkybox() const { return m_className == "skybox"; }
-bool pragma::asset::EntityData::IsClientSideOnly() const { return umath::is_flag_set(m_flags, Flags::ClientsideOnly); }
+bool pragma::asset::EntityData::IsClientSideOnly() const { return pragma::math::is_flag_set(m_flags, Flags::ClientsideOnly); }
 void pragma::asset::EntityData::SetClassName(const std::string &className)
 {
 	m_className = className;
-	ustring::to_lower(m_className);
+	pragma::string::to_lower(m_className);
 }
 void pragma::asset::EntityData::SetKeyValue(const std::string &key, const std::string &value) { m_keyValues[key] = value; }
 void pragma::asset::EntityData::AddOutput(const Output &output)
@@ -151,9 +151,9 @@ std::string pragma::asset::EntityData::GetKeyValue(const std::string &key, const
 	return val.has_value() ? *val : def;
 }
 
-umath::ScaledTransform pragma::asset::EntityData::GetEffectivePose() const
+pragma::math::ScaledTransform pragma::asset::EntityData::GetEffectivePose() const
 {
-	umath::ScaledTransform pose {};
+	pragma::math::ScaledTransform pose {};
 	if(m_pose)
 		pose = *m_pose;
 	auto kvOrigin = GetKeyValue("origin");
@@ -170,8 +170,8 @@ umath::ScaledTransform pragma::asset::EntityData::GetEffectivePose() const
 	return pose;
 }
 
-const std::optional<umath::ScaledTransform> &pragma::asset::EntityData::GetPose() const { return m_pose; }
-void pragma::asset::EntityData::SetPose(const umath::ScaledTransform &pose) { m_pose = pose; }
+const std::optional<pragma::math::ScaledTransform> &pragma::asset::EntityData::GetPose() const { return m_pose; }
+void pragma::asset::EntityData::SetPose(const pragma::math::ScaledTransform &pose) { m_pose = pose; }
 void pragma::asset::EntityData::ClearPose() { m_pose = {}; }
 
 void pragma::asset::EntityData::GetLeafData(uint32_t &outFirstLeaf, uint32_t &outNumLeaves) const

@@ -42,14 +42,14 @@ bool SAIComponent::IsInViewCone(pragma::ecs::BaseEntity *ent, float *dist)
 }
 
 bool SAIComponent::CanSee() const { return (GetMaxViewDistance() > 0 && GetMaxViewAngle() > 0) ? true : false; }
-void SAIComponent::SetHearingStrength(float strength) { m_hearingStrength = umath::clamp(strength, 0.f, 1.f); }
+void SAIComponent::SetHearingStrength(float strength) { m_hearingStrength = pragma::math::clamp(strength, 0.f, 1.f); }
 float SAIComponent::GetHearingStrength() const { return m_hearingStrength; }
 bool SAIComponent::CanHear() const { return (m_hearingStrength == 0.f) ? false : true; }
 
 bool SAIComponent::OnSuspiciousSoundHeared(std::shared_ptr<pragma::audio::ALSound> &snd)
 {
 	CEOnSuspiciousSoundHeared evData {snd};
-	return BroadcastEvent(sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED, evData) == util::EventReply::Handled;
+	return BroadcastEvent(sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED, evData) == pragma::util::EventReply::Handled;
 }
 
 float SAIComponent::GetMaxViewDistance() const { return m_maxViewDist; }
@@ -70,7 +70,7 @@ void SAIComponent::Listen(std::vector<TargetInfo> &targets)
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent == nullptr)
 		return;
-	auto hearingIntensity = 1.f - umath::clamp(GetHearingStrength(), 0.f, 1.f);
+	auto hearingIntensity = 1.f - pragma::math::clamp(GetHearingStrength(), 0.f, 1.f);
 	auto &pos = pTrComponent->GetPosition();
 	auto &sounds = pragma::ServerState::Get()->GetSounds();
 	auto &t = SGame::Get()->CurTime();

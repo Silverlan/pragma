@@ -111,7 +111,7 @@ export {
 
 			SAIComponent(pragma::ecs::BaseEntity &ent);
 			virtual ~SAIComponent() override;
-			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 			const ai::Memory::Fragment *GetPrimaryTarget() const;
 			float GetMaxViewDistance() const;
 			void SetMaxViewDistance(float dist);
@@ -238,7 +238,7 @@ export {
 			struct ControlInfo {
 				ControlInfo();
 				void Clear();
-				util::WeakHandle<pragma::SPlayerComponent> hController = {};
+				pragma::util::WeakHandle<pragma::SPlayerComponent> hController = {};
 				CallbackHandle hCbOnRemove = {};
 				CallbackHandle hCbOnKilled = {};
 				CallbackHandle hCbOnActionInput = {};
@@ -269,9 +269,9 @@ export {
 			DISPOSITION GetDefaultDisposition();
 			std::shared_ptr<ai::Schedule> m_schedule = nullptr;
 			Vector3 m_posMove = {0, 0, 0};
-			std::array<std::vector<std::shared_ptr<NPCRelationship>>, umath::to_integral(DISPOSITION::COUNT)> m_classRelationships;
-			std::array<std::vector<std::shared_ptr<NPCRelationship>>, umath::to_integral(DISPOSITION::COUNT)> m_entityRelationships;
-			std::array<std::vector<std::shared_ptr<NPCRelationship>>, umath::to_integral(DISPOSITION::COUNT)> m_factionRelationships;
+			std::array<std::vector<std::shared_ptr<NPCRelationship>>, pragma::math::to_integral(DISPOSITION::COUNT)> m_classRelationships;
+			std::array<std::vector<std::shared_ptr<NPCRelationship>>, pragma::math::to_integral(DISPOSITION::COUNT)> m_entityRelationships;
+			std::array<std::vector<std::shared_ptr<NPCRelationship>>, pragma::math::to_integral(DISPOSITION::COUNT)> m_factionRelationships;
 			void ClearRelationships();
 			virtual void OnRemove() override;
 			virtual void RunSchedule();
@@ -311,7 +311,7 @@ export {
 			bool PlayAnimation(const AIAnimationInfo &info);
 			bool m_bSkipHandling = false;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::SAIComponent::AIAnimationInfo::AIAnimFlags)
 };

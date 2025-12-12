@@ -70,19 +70,19 @@ void BaseSurfaceComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t vers
 	udm["plane"](plane);
 	m_plane = {plane};
 }
-void BaseSurfaceComponent::SetPlane(const umath::Plane &plane)
+void BaseSurfaceComponent::SetPlane(const pragma::math::Plane &plane)
 {
 	m_plane = plane;
 	BroadcastEvent(baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED);
 }
-const umath::Plane &BaseSurfaceComponent::GetPlane() const { return m_plane; }
-umath::Plane BaseSurfaceComponent::GetPlaneWs() const
+const pragma::math::Plane &BaseSurfaceComponent::GetPlane() const { return m_plane; }
+pragma::math::Plane BaseSurfaceComponent::GetPlaneWs() const
 {
 	auto &plane = GetPlane();
 	auto n = plane.GetNormal();
 	auto d = plane.GetDistance();
-	umath::geometry::local_plane_to_world_space(n, d, GetEntity().GetPosition(), GetEntity().GetRotation());
-	return umath::Plane {n, d};
+	pragma::math::geometry::local_plane_to_world_space(n, d, GetEntity().GetPosition(), GetEntity().GetRotation());
+	return pragma::math::Plane {n, d};
 }
 
 void BaseSurfaceComponent::SetPlane(const Vector3 &n, float d) { SetPlane({n, d}); }
@@ -141,7 +141,7 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 	uint32_t highestPriority = 0;
 
 	// Find best plane candidate
-	umath::Plane plane;
+	pragma::math::Plane plane;
 	std::optional<MeshInfo> meshInfo {};
 	for(auto &mesh : meshes) {
 		for(auto &subMesh : mesh->GetSubMeshes()) {
@@ -152,8 +152,8 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 			if(!hMat)
 				continue;
 			auto shaderName = hMat->GetShaderIdentifier();
-			ustring::to_lower(shaderName);
-			ustring::substr(shaderName, 0, 5);
+			pragma::string::to_lower(shaderName);
+			pragma::string::substr(shaderName, 0, 5);
 
 			auto prio = filter ? filter(*mesh, *subMesh, *hMat.get(), shaderName) : 0;
 			if(prio < 0)
@@ -169,8 +169,8 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 			auto &v1 = verts.at(1);
 			auto &v2 = verts.at(2);
 
-			umath::Plane p {v0.position, v1.position, v2.position};
-			auto dot = umath::abs(uvec::dot(dir, p.GetNormal()) - 1.f);
+			pragma::math::Plane p {v0.position, v1.position, v2.position};
+			auto dot = pragma::math::abs(uvec::dot(dir, p.GetNormal()) - 1.f);
 			if(dot >= minDot)
 				continue;
 			minDot = dot;
@@ -195,14 +195,14 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 	return {};
 }
 
-bool BaseSurfaceComponent::IsPointBelowSurface(const Vector3 &p) const { return umath::geometry::get_side_of_point_to_plane(m_plane.GetNormal(), m_plane.GetDistance(), p) == umath::geometry::PlaneSide::Back; }
+bool BaseSurfaceComponent::IsPointBelowSurface(const Vector3 &p) const { return pragma::math::geometry::get_side_of_point_to_plane(m_plane.GetNormal(), m_plane.GetDistance(), p) == pragma::math::geometry::PlaneSide::Back; }
 
 Quat BaseSurfaceComponent::GetPlaneRotation() const
 {
 	auto plane = GetPlaneWs();
 	auto up = uvec::UP;
 	auto &n = plane.GetNormal();
-	if(umath::abs(uvec::dot(n, up)) > 0.99f)
+	if(pragma::math::abs(uvec::dot(n, up)) > 0.99f)
 		up = uvec::FORWARD;
 	up = up - uvec::project(up, n);
 	uvec::normalize(&up);
@@ -215,10 +215,10 @@ bool BaseSurfaceComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrigin
 	float d;
 	GetPlaneWs(n, d);
 	auto t = 0.f;
-	auto r = umath::intersection::line_plane(lineOrigin, lineDir, n, d, &t);
+	auto r = pragma::math::intersection::line_plane(lineOrigin, lineDir, n, d, &t);
 	if(outT != nullptr)
 		*outT = t;
-	return r == umath::intersection::Result::Intersect;
+	return r == pragma::math::intersection::Result::Intersect;
 }
 
 /////////////////////////////////

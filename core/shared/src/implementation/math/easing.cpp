@@ -76,21 +76,21 @@ namespace ease {
 	};
 };
 
-float ease::back::ease_in(float p) { return p * p * p - p * sin(p * umath::pi); }
+float ease::back::ease_in(float p) { return p * p * p - p * sin(p * pragma::math::pi); }
 float ease::back::ease_out(float p)
 {
 	float f = (1 - p);
-	return 1 - (f * f * f - f * sin(f * umath::pi));
+	return 1 - (f * f * f - f * sin(f * pragma::math::pi));
 }
 float ease::back::ease_in_out(float p)
 {
 	if(p < 0.5) {
 		float f = 2 * p;
-		return 0.5 * (f * f * f - f * sin(f * umath::pi));
+		return 0.5 * (f * f * f - f * sin(f * pragma::math::pi));
 	}
 	else {
 		float f = (1 - (2 * p - 1));
-		return 0.5 * (1 - (f * f * f - f * sin(f * umath::pi))) + 0.5;
+		return 0.5 * (1 - (f * f * f - f * sin(f * pragma::math::pi))) + 0.5;
 	}
 }
 
@@ -140,14 +140,14 @@ float ease::cubic::ease_in_out(float p)
 	}
 }
 
-float ease::elastic::ease_in(float p) { return sin(13 * umath::pi_2 * p) * pow(2, 10 * (p - 1)); }
-float ease::elastic::ease_out(float p) { return sin(-13 * umath::pi_2 * (p + 1)) * pow(2, -10 * p) + 1; }
+float ease::elastic::ease_in(float p) { return sin(13 * pragma::math::pi_2 * p) * pow(2, 10 * (p - 1)); }
+float ease::elastic::ease_out(float p) { return sin(-13 * pragma::math::pi_2 * (p + 1)) * pow(2, -10 * p) + 1; }
 float ease::elastic::ease_in_out(float p)
 {
 	if(p < 0.5)
-		return 0.5 * sin(13 * umath::pi_2 * (2 * p)) * pow(2, 10 * ((2 * p) - 1));
+		return 0.5 * sin(13 * pragma::math::pi_2 * (2 * p)) * pow(2, 10 * ((2 * p) - 1));
 	else
-		return 0.5 * (sin(-13 * umath::pi_2 * ((2 * p - 1) + 1)) * pow(2, -10 * (2 * p - 1)) + 2);
+		return 0.5 * (sin(-13 * pragma::math::pi_2 * ((2 * p - 1) + 1)) * pow(2, -10 * (2 * p - 1)) + 2);
 }
 
 float ease::exponential::ease_in(float p) { return (p == 0.0) ? p : pow(2, 10 * (p - 1)); }
@@ -209,9 +209,9 @@ float ease::quintic::ease_in_out(float p)
 	}
 }
 
-float ease::sine::ease_in(float p) { return sin((p - 1) * umath::pi_2) + 1; }
-float ease::sine::ease_out(float p) { return sin(p * umath::pi_2); }
-float ease::sine::ease_in_out(float p) { return 0.5 * (1 - cos(p * umath::pi)); }
+float ease::sine::ease_in(float p) { return sin((p - 1) * pragma::math::pi_2) + 1; }
+float ease::sine::ease_out(float p) { return sin(p * pragma::math::pi_2); }
+float ease::sine::ease_in_out(float p) { return 0.5 * (1 - cos(p * pragma::math::pi)); }
 
 float pragma::math::ease_in(float t, EaseType type)
 {

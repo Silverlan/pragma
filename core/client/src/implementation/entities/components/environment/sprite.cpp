@@ -47,15 +47,15 @@ void CSpriteComponent::UpdateColor()
 
 void CSpriteComponent::SetOrientationType(pragma::pts::ParticleOrientationType orientationType) { m_orientationType = orientationType; }
 
-util::EventReply CSpriteComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply CSpriteComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvSpriteComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEnvSpriteComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON)
 		StartParticle();
 	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		StopParticle();
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 
 void CSpriteComponent::StopParticle()
@@ -89,12 +89,12 @@ void CSpriteComponent::StartParticle()
 	auto &ent = GetEntity();
 	StopParticle();
 	auto startAlpha = (m_tFadeIn == 0.f) ? m_color.a : 0;
-	std::unordered_map<std::string, std::string> values = {{"maxparticles", "1"}, {"emission_rate", std::to_string(std::numeric_limits<uint16_t>::max())}, {"material", m_spritePath}, {"sort_particles", "0"}, {"orientation_type", std::to_string(umath::to_integral(m_orientationType))},
+	std::unordered_map<std::string, std::string> values = {{"maxparticles", "1"}, {"emission_rate", std::to_string(std::numeric_limits<uint16_t>::max())}, {"material", m_spritePath}, {"sort_particles", "0"}, {"orientation_type", std::to_string(pragma::math::to_integral(m_orientationType))},
 	  {"cast_shadows", "0"}, {"static_scale", std::to_string(m_size)}, {"color", std::to_string(m_color.r) + " " + std::to_string(m_color.g) + " " + std::to_string(m_color.b) + " " + std::to_string(startAlpha)}, {"bloom_scale", std::to_string(m_bloomScale)}, {"move_with_emitter", "1"}};
 	auto spawnFlags = ent.GetSpawnFlags();
-	if(spawnFlags & umath::to_integral(SpawnFlags::BlackToAlpha))
+	if(spawnFlags & pragma::math::to_integral(SpawnFlags::BlackToAlpha))
 		values.insert(std::make_pair("black_to_alpha", "1"));
-	if(spawnFlags & umath::to_integral(SpawnFlags::NoSoftParticles))
+	if(spawnFlags & pragma::math::to_integral(SpawnFlags::NoSoftParticles))
 		values.insert(std::make_pair("soft_particles", "0"));
 	auto *pt = pragma::ecs::CParticleSystemComponent::Create(values);
 	if(pt == nullptr)

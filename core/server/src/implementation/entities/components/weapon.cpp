@@ -98,11 +98,11 @@ void SWeaponComponent::Initialize()
 {
 	BaseWeaponComponent::Initialize();
 
-	BindEvent(usableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(usableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &bCanUse = static_cast<CECanUseData &>(evData.get()).canUse;
 		auto *pOwnerComponent = GetOwnerComponent();
 		bCanUse = (pOwnerComponent == nullptr || pOwnerComponent->GetOwner() == nullptr);
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
 	BindEventUnhandled(usableComponent::EVENT_ON_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUse(static_cast<CEOnUseData &>(evData.get()).entity); });
 
@@ -303,8 +303,8 @@ void SWeaponComponent::SetSecondaryAmmoType(UInt32 type)
 		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_SEC_AMMO_TYPE, p, pragma::networking::Protocol::FastUnreliable);
 	}
 }
-void SWeaponComponent::AddPrimaryClip(UInt16 num) { SetPrimaryClipSize(umath::limit<UInt16>(CUInt32(GetPrimaryClipSize()) + CUInt32(num))); }
-void SWeaponComponent::AddSecondaryClip(UInt16 num) { SetSecondaryClipSize(umath::limit<UInt16>(CUInt32(GetSecondaryClipSize()) + CUInt32(num))); }
+void SWeaponComponent::AddPrimaryClip(UInt16 num) { SetPrimaryClipSize(pragma::math::limit<UInt16>(CUInt32(GetPrimaryClipSize()) + CUInt32(num))); }
+void SWeaponComponent::AddSecondaryClip(UInt16 num) { SetSecondaryClipSize(pragma::math::limit<UInt16>(CUInt32(GetSecondaryClipSize()) + CUInt32(num))); }
 void SWeaponComponent::RefillPrimaryClip(UInt16 num)
 {
 	auto *owner = m_whOwnerComponent.valid() ? m_whOwnerComponent->GetOwner() : nullptr;

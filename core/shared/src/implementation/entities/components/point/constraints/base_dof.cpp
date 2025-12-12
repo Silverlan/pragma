@@ -12,19 +12,19 @@ void BasePointConstraintDoFComponent::Initialize()
 {
 	BasePointConstraintComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "limit_lin_lower", false))
+		if(pragma::string::compare<std::string>(kvData.key, "limit_lin_lower", false))
 			m_kvLimLinLower = uvec::create(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "limit_lin_upper", false))
+		else if(pragma::string::compare<std::string>(kvData.key, "limit_lin_upper", false))
 			m_kvLimLinUpper = uvec::create(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "limit_ang_lower", false))
+		else if(pragma::string::compare<std::string>(kvData.key, "limit_ang_lower", false))
 			m_kvLimAngLower = uvec::create(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "limit_ang_upper", false))
+		else if(pragma::string::compare<std::string>(kvData.key, "limit_ang_upper", false))
 			m_kvLimAngUpper = uvec::create(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 }
 
@@ -61,7 +61,7 @@ void BasePointConstraintDoFComponent::InitializeConstraint(pragma::ecs::BaseEnti
 				dof->SetAngularLimit(EulerAngles(180, 180, 180), EulerAngles(-180, -180, -180));
 				//dof->SetLinearLimit(m_kvLimLinLower,m_kvLimLinUpper);
 				//dof->SetAngularLimit(m_kvLimAngLower,m_kvLimAngUpper);
-				m_constraints.push_back(util::shared_handle_cast<pragma::physics::IDoFConstraint, pragma::physics::IConstraint>(dof));
+				m_constraints.push_back(pragma::util::shared_handle_cast<pragma::physics::IDoFConstraint, pragma::physics::IConstraint>(dof));
 			}
 		}
 	}

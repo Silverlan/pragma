@@ -31,8 +31,8 @@ std::vector<pragma::ecs::BaseEntity *> pragma::console::find_named_targets(pragm
 		return {};
 	std::vector<pragma::ecs::BaseEntity *> ents;
 	{
-		auto uuid = util::uuid_string_to_bytes(targetName);
-		if(uuid != util::Uuid {}) {
+		auto uuid = pragma::util::uuid_string_to_bytes(targetName);
+		if(uuid != pragma::util::Uuid {}) {
 			// Check for UUID
 			pragma::ecs::EntityIterator entIt {*game, pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 			entIt.AttachFilter<EntityIteratorFilterUuid>(uuid);
@@ -49,7 +49,7 @@ std::vector<pragma::ecs::BaseEntity *> pragma::console::find_named_targets(pragm
 			ents.push_back(ent);
 	}
 	if(ents.empty()) {
-		auto index = ustring::to_int(targetName);
+		auto index = pragma::string::to_int(targetName);
 		auto *ent = game->GetEntityByLocalIndex(index);
 		if(ent != nullptr)
 			ents.push_back(ent);

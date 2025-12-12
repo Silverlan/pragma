@@ -6,4 +6,4 @@ module pragma.shared;
 
 import :scripting.lua.classes.data_stream;
 
-void Lua::DataStream::register_class(luabind::class_<::util::DataStream> &classDef) { register_class<::util::DataStream>(classDef); }
+void Lua::DataStream::register_class(luabind::class_<pragma::util::DataStream> &classDef) { register_class<pragma::util::DataStream>(classDef); }

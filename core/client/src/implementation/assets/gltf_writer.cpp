@@ -256,12 +256,12 @@ void pragma::asset::GLTFWriter::GenerateUniqueModelExportList()
 	uint64_t vertCount = 0;
 }
 
-void pragma::asset::GLTFWriter::ToGLTFPose(const umath::Transform &pose, std::vector<double> &outPos, std::vector<double> &outRot) const
+void pragma::asset::GLTFWriter::ToGLTFPose(const pragma::math::Transform &pose, std::vector<double> &outPos, std::vector<double> &outRot) const
 {
 	auto pos = pose.GetOrigin() * m_exportInfo.scale;
 	auto rot = pose.GetRotation();
-	uquat::rotate_z(rot, umath::deg_to_rad(180.f));
-	uquat::rotate_x(rot, umath::deg_to_rad(180.f));
+	uquat::rotate_z(rot, pragma::math::deg_to_rad(180.f));
+	uquat::rotate_x(rot, pragma::math::deg_to_rad(180.f));
 	outPos = {pos.x, pos.y, pos.z};
 	outRot = {rot.x, rot.y, rot.z, rot.w};
 }
@@ -274,7 +274,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 	pragma::get_client_state()->GetResourceWatcher().Poll();
 
 	auto name = outputFileName;
-	::util::Path exportPath {name};
+	pragma::util::Path exportPath {name};
 	exportPath.Canonicalize();
 	auto exportPathStr = exportPath.GetString();
 	auto outputPath = ufile::get_path_from_filename(exportPathStr) + ufile::get_file_from_filename(exportPathStr);
@@ -388,7 +388,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 		for(auto &exportData : m_uniqueModelExportList) {
 			uint32_t meshIdx = 0;
 			for(auto &mesh : exportData.exportMeshes) {
-				util::ScopeGuard sg {[&meshIdx]() { ++meshIdx; }};
+				pragma::util::ScopeGuard sg {[&meshIdx]() { ++meshIdx; }};
 				auto *gltfIndexData = indexData.data() + indexOffset * sizeof(uint32_t);
 				mesh->VisitIndices([gltfIndexData](auto *indexData, uint32_t numIndices) {
 					for(auto i = decltype(numIndices) {0u}; i < numIndices; ++i) {
@@ -540,8 +540,8 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 			mesh->VisitIndices([&minIndex, &maxIndex](auto *indexData, uint32_t numIndices) {
 				for(auto i = decltype(numIndices) {0u}; i < numIndices; ++i) {
 					auto idx = indexData[i];
-					minIndex = umath::min(minIndex, static_cast<int64_t>(idx));
-					maxIndex = umath::max(maxIndex, static_cast<int64_t>(idx));
+					minIndex = pragma::math::min(minIndex, static_cast<int64_t>(idx));
+					maxIndex = pragma::math::max(maxIndex, static_cast<int64_t>(idx));
 				}
 			});
 			gltfMdl.accessors.at(indicesAccessor).minValues = {static_cast<double>(minIndex)};
@@ -645,7 +645,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 				// However when importing the glTF into Blender, the FOV only matches ours if we're using horizontal FOV here.
 				// The reason for this is currently unknown, either Blender (v2.9) interprets the glTF FOV as horizontal by mistake,
 				// or something is wrong on this side. TODO: Compare the behavior with another application that supports glTF assets with camera data.
-				camData.perspective.yfov = umath::deg_to_rad(cam.vFov);
+				camData.perspective.yfov = pragma::math::deg_to_rad(cam.vFov);
 
 				camData.perspective.znear = pragma::units_to_metres(cam.zNear);
 				camData.perspective.zfar = pragma::units_to_metres(cam.zFar);
@@ -670,7 +670,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 					}
 					Con::cwar << "WARNING Spot light has outer cone angle of " << outerConeAngle << ", which is smaller or equal to inner cone angle of " << innerConeAngle << "! This is not allowed! Clamping..." << Con::endl;
 					outerConeAngle = innerConeAngle;
-					innerConeAngle = umath::max(innerConeAngle - 10.f, 0.1f);
+					innerConeAngle = pragma::math::max(innerConeAngle - 10.f, 0.1f);
 					if(outerConeAngle <= innerConeAngle) {
 						Con::cwar << "WARNING Spot light has cone angle of near 0! Skipping..." << Con::endl;
 						continue;
@@ -706,7 +706,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 			// TODO: Add an option to change this via a parameter?
 			auto color = lightSource.color.ToVector3();
 			auto intensity = lightSource.luminousIntensity;
-			auto colMax = umath::max(color.r, color.g, color.b);
+			auto colMax = pragma::math::max(color.r, color.g, color.b);
 			if(colMax > 1.f) {
 				color /= colMax;
 				intensity *= colMax;
@@ -725,7 +725,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 			if(lightSource.range.has_value() && (lightSource.type == LightSource::Type::Point || lightSource.type == LightSource::Type::Spot))
 				light["range"] = tinygltf::Value {*lightSource.range};
 			if(lightSource.type == LightSource::Type::Spot) {
-				light["spot"] = tinygltf::Value {tinygltf::Value::Object {{"innerConeAngle", tinygltf::Value {umath::deg_to_rad(innerConeAngle)}}, {"outerConeAngle", tinygltf::Value {umath::deg_to_rad(outerConeAngle)}}}};
+				light["spot"] = tinygltf::Value {tinygltf::Value::Object {{"innerConeAngle", tinygltf::Value {pragma::math::deg_to_rad(innerConeAngle)}}, {"outerConeAngle", tinygltf::Value {pragma::math::deg_to_rad(outerConeAngle)}}}};
 			}
 			lights.push_back(tinygltf::Value {light});
 		}
@@ -764,7 +764,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 
 	auto fileName = ufile::get_file_from_filename(name) + '.' + ext;
 
-	auto writePath = util::FilePath(filemanager::get_program_write_path(), outputPath, fileName).GetString();
+	auto writePath = pragma::util::FilePath(filemanager::get_program_write_path(), outputPath, fileName).GetString();
 	if(optOutPath)
 		*optOutPath = outputPath + fileName;
 	tinygltf::TinyGLTF writer {};
@@ -862,9 +862,9 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 		// Transform pose to relative
 		auto referenceRelative = Frame::Create(mdl.GetReference());
 		inverseBindPoseMatrices.resize(skeleton.GetBoneCount());
-		std::function<void(pragma::animation::Bone &, const umath::Transform &)> fToRelativeTransforms = nullptr;
-		fToRelativeTransforms = [this, &fToRelativeTransforms, &referenceRelative, &inverseBindPoseMatrices](pragma::animation::Bone &bone, const umath::Transform &parentPose) {
-			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : umath::Transform {};
+		std::function<void(pragma::animation::Bone &, const pragma::math::Transform &)> fToRelativeTransforms = nullptr;
+		fToRelativeTransforms = [this, &fToRelativeTransforms, &referenceRelative, &inverseBindPoseMatrices](pragma::animation::Bone &bone, const pragma::math::Transform &parentPose) {
+			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : pragma::math::Transform {};
 
 			auto scaledPose = pose;
 			scaledPose.SetOrigin(TransformPos(scaledPose.GetOrigin()));
@@ -876,7 +876,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 				fToRelativeTransforms(*pair.second, pose);
 		};
 		for(auto &pair : skeleton.GetRootBones())
-			fToRelativeTransforms(*pair.second, umath::Transform {});
+			fToRelativeTransforms(*pair.second, pragma::math::Transform {});
 
 		auto &bones = skeleton.GetBones();
 
@@ -901,7 +901,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 			traversedJoints.insert(nodeIdx);
 			auto &node = m_gltfMdl.nodes.at(nodeIdx);
 
-			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : umath::Transform {};
+			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : pragma::math::Transform {};
 			auto pos = TransformPos(pose.GetOrigin());
 			auto &rot = pose.GetRotation();
 			auto *scale = referenceRelative->GetBoneScale(bone.ID);
@@ -978,7 +978,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 			auto &vertWeights = mesh->GetVertexWeights();
 			auto numVerts = mesh->GetVertexCount();
 			for(auto i = decltype(numVerts) {0u}; i < numVerts; ++i) {
-				auto vw = (i < vertWeights.size()) ? vertWeights.at(i) : umath::VertexWeight {};
+				auto vw = (i < vertWeights.size()) ? vertWeights.at(i) : pragma::math::VertexWeight {};
 				auto *gltfVwData = skinData.data() + vertWeightOffset * sizeof(GLTFVertexWeight);
 				GLTFVertexWeight gltfVw {};
 				auto weightSum = 0.f;
@@ -1031,7 +1031,7 @@ void pragma::asset::GLTFWriter::WriteAnimations(pragma::asset::Model &mdl)
 		auto &anim = anims.at(i);
 		auto animName = mdl.GetAnimationName(i);
 
-		if(m_animName.has_value() && ustring::compare(animName, *m_animName, false) == false)
+		if(m_animName.has_value() && pragma::string::compare(animName, *m_animName, false) == false)
 			continue;
 		if(animList && std::find(animList->begin(), animList->end(), animName) == animList->end())
 			continue;
@@ -1066,7 +1066,7 @@ void pragma::asset::GLTFWriter::WriteAnimations(pragma::asset::Model &mdl)
 			// Check if there are any actual meaningful scales
 			auto it = std::find_if(scales.begin(), scales.end(), [](const Vector3 &scale) {
 				constexpr auto EPSILON = 0.001f;
-				return umath::abs(1.f - scale.x) > EPSILON || umath::abs(1.f - scale.y) > EPSILON || umath::abs(1.f - scale.z) > EPSILON;
+				return pragma::math::abs(1.f - scale.x) > EPSILON || pragma::math::abs(1.f - scale.y) > EPSILON || pragma::math::abs(1.f - scale.z) > EPSILON;
 			});
 			if(it == scales.end())
 				continue;
@@ -1080,7 +1080,7 @@ void pragma::asset::GLTFWriter::WriteAnimations(pragma::asset::Model &mdl)
 		auto tMax = std::numeric_limits<float>::lowest();
 		for(auto i = decltype(frames.size()) {0u}; i < frames.size(); ++i) {
 			times.push_back((fps > 0) ? (i / static_cast<float>(fps)) : 0.f);
-			tMax = umath::max(tMax, times.back());
+			tMax = pragma::math::max(tMax, times.back());
 		}
 
 		uint32_t animBufferIdx;
@@ -1100,8 +1100,8 @@ void pragma::asset::GLTFWriter::WriteAnimations(pragma::asset::Model &mdl)
 
 		// Setup frame buffers
 		uint64_t dataOffset = times.size() * sizeof(times.front());
-		gltfAnim.channels.reserve(numFrames * numBones * umath::to_integral(Channel::Count));
-		gltfAnim.samplers.reserve(numFrames * umath::to_integral(Channel::Count));
+		gltfAnim.channels.reserve(numFrames * numBones * pragma::math::to_integral(Channel::Count));
+		gltfAnim.samplers.reserve(numFrames * pragma::math::to_integral(Channel::Count));
 
 		for(auto i = decltype(numBones) {0u}; i < numBones; ++i) {
 			auto boneId = boneList.at(i);
@@ -1115,7 +1115,7 @@ void pragma::asset::GLTFWriter::WriteAnimations(pragma::asset::Model &mdl)
 				scales.reserve(numFrames);
 
 			for(auto &frame : frames) {
-				auto pose = frame->GetBoneTransform(i) ? *frame->GetBoneTransform(i) : umath::Transform {};
+				auto pose = frame->GetBoneTransform(i) ? *frame->GetBoneTransform(i) : pragma::math::Transform {};
 
 				auto pos = TransformPos(pose.GetOrigin());
 				translations.push_back(pos);

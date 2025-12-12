@@ -83,7 +83,7 @@ std::shared_ptr<pragma::console::ConCommand> pragma::console::CVarHandler::Regis
 			return nullptr;
 		return std::static_pointer_cast<ConCommand>(it->second);
 	}
-	it = m_conVars.insert(decltype(m_conVars)::value_type(scmd, ::util::make_shared<ConCommand>(fc, flags, help))).first;
+	it = m_conVars.insert(decltype(m_conVars)::value_type(scmd, pragma::util::make_shared<ConCommand>(fc, flags, help))).first;
 	return std::static_pointer_cast<ConCommand>(it->second);
 }
 template<typename T>
@@ -114,7 +114,7 @@ CallbackHandle pragma::console::CVarHandler::RegisterConVarCallback(const std::s
 bool pragma::console::CVarHandler::InvokeConVarChangeCallbacks(const std::string &cvarName)
 {
 	auto nCvarName = cvarName;
-	ustring::to_lower(nCvarName);
+	pragma::string::to_lower(nCvarName);
 	auto *cv = GetConVar(nCvarName);
 	if(cv == nullptr || cv->GetType() != pragma::console::ConType::Var)
 		return false;
@@ -167,7 +167,7 @@ pragma::console::ConVar *pragma::console::CVarHandler::SetConVar(std::string scm
 
 pragma::console::ConConf *pragma::console::CVarHandler::GetConVar(std::string scmd)
 {
-	ustring::to_lower(scmd);
+	pragma::string::to_lower(scmd);
 	auto it = m_conVars.find(scmd);
 	if(it == m_conVars.end())
 		return nullptr;
@@ -270,7 +270,7 @@ void pragma::console::CVarHandler::FindSimilarConVars(const std::string &input, 
 {
 	auto bWasEmpty = similarCmds.empty();
 	for(auto &pair : cvars) {
-		auto len = ustring::longest_common_substring(input, pair.first);
+		auto len = pragma::string::longest_common_substring(input, pair.first);
 		auto percentage = len / static_cast<float>(input.length());
 		if(percentage < 0.45f) // Only accept results with at least 45% similarity
 			continue;

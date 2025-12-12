@@ -11,18 +11,18 @@ import :entities.components.lights.light;
 export import :rendering.lightmap_data_cache;
 
 export {
-	namespace util::baking {
+	namespace pragma::util::baking {
 		struct DLLCLIENT LightSource {
 			enum class Type : uint8_t { Point = 0, Spot, Directional };
 			Vector3 position;
 			Vector3 direction;
-			umath::Degree innerConeAngle;
-			umath::Degree outerConeAngle;
+			pragma::math::Degree innerConeAngle;
+			pragma::math::Degree outerConeAngle;
 			Candela intensity;
 			Vector3 color;
 			Type type;
 		};
-		DLLCLIENT util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
+		DLLCLIENT pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
 		  uint32_t height, pragma::rendering::LightmapDataCache *optLightmapDataCache = nullptr);
 	};
 };

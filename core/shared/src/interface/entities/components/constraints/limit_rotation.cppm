@@ -29,7 +29,7 @@ export namespace pragma {
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		pragma::ComponentHandle<ConstraintComponent> m_constraintC;
 
-		std::array<Vector2, umath::to_integral(pragma::Axis::Count)> m_limits {Vector2 {}, Vector2 {}, Vector2 {}};
-		std::array<bool, umath::to_integral(pragma::Axis::Count)> m_limitsEnabled {false, false, false};
+		std::array<Vector2, pragma::math::to_integral(pragma::Axis::Count)> m_limits {Vector2 {}, Vector2 {}, Vector2 {}};
+		std::array<bool, pragma::math::to_integral(pragma::Axis::Count)> m_limitsEnabled {false, false, false};
 	};
 };

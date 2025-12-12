@@ -33,9 +33,9 @@ bool pragma::CEngine::RemoveInputBindingLayer(const std::string &name)
 }
 void pragma::CEngine::UpdateDirtyInputBindings()
 {
-	if(!umath::is_flag_set(m_stateFlags, StateFlags::InputBindingsDirty))
+	if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::InputBindingsDirty))
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::InputBindingsDirty, false);
+	pragma::math::set_flag(m_stateFlags, StateFlags::InputBindingsDirty, false);
 	auto &keybinds = m_coreInputBindingLayer->GetKeyMappings();
 	keybinds.clear();
 	for(auto &layer : m_inputBindingLayers) {
@@ -46,7 +46,7 @@ void pragma::CEngine::UpdateDirtyInputBindings()
 	}
 }
 
-void pragma::CEngine::SetInputBindingsDirty() { umath::set_flag(m_stateFlags, StateFlags::InputBindingsDirty); }
+void pragma::CEngine::SetInputBindingsDirty() { pragma::math::set_flag(m_stateFlags, StateFlags::InputBindingsDirty); }
 
 const InputBindingLayer &pragma::CEngine::GetEffectiveInputBindingLayer() { return *m_coreInputBindingLayer; }
 

@@ -14,7 +14,7 @@ export namespace pragma {
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_ALPHA;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ALPHA;
 
-		enum class MaterialBinding : uint32_t { AlbedoMap2 = umath::to_integral(ShaderPBR::MaterialBinding::Count), AlbedoMap3 };
+		enum class MaterialBinding : uint32_t { AlbedoMap2 = pragma::math::to_integral(ShaderPBR::MaterialBinding::Count), AlbedoMap3 };
 
 #pragma pack(push, 1)
 		struct PushConstants {

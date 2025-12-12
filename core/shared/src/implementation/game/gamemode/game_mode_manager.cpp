@@ -17,7 +17,7 @@ void pragma::game::GameModeManager::Initialize()
 		path += *it;
 		path += "/info.udm";
 		std::string err;
-		auto udmData = ::util::load_udm_asset(path, &err);
+		auto udmData = pragma::util::load_udm_asset(path, &err);
 		if(udmData == nullptr)
 			continue;
 		auto udm = udmData->GetAssetData().GetData();
@@ -28,7 +28,7 @@ void pragma::game::GameModeManager::Initialize()
 			if(udmGm["hidden"].ToValue(false))
 				continue;
 			std::string id {pair.key};
-			ustring::to_lower(id);
+			pragma::string::to_lower(id);
 			auto it = m_gameModes.find(id);
 			if(it != m_gameModes.end())
 				continue;
@@ -43,7 +43,7 @@ void pragma::game::GameModeManager::Initialize()
 
 			std::string version {};
 			udmGm["version"](version);
-			gmInfo.version = util::string_to_version(version);
+			gmInfo.version = pragma::util::string_to_version(version);
 			m_gameModes[id] = std::move(gmInfo);
 		}
 	}

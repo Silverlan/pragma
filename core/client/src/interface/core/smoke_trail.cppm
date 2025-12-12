@@ -12,6 +12,6 @@ export import std;
 export namespace pragma::ecs {
 	class CParticleSystemComponent;
 }
-export namespace util {
+export namespace pragma::util {
 	DLLCLIENT ::pragma::ecs::CParticleSystemComponent *create_smoke_trail_particle(float distance, float speed, float minSpriteSize, float maxSpriteSize, const std::string &material = "particles/smoke_sprites_dense");
 };

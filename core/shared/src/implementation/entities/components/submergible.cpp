@@ -19,7 +19,7 @@ void SubmergibleComponent::RegisterEvents(pragma::EntityComponentManager &compon
 	submergibleComponent::EVENT_ON_WATER_ENTERED = registerEvent("ON_WATER_ENTERED", ComponentEventInfo::Type::Broadcast);
 	submergibleComponent::EVENT_ON_WATER_EXITED = registerEvent("ON_WATER_EXITED", ComponentEventInfo::Type::Broadcast);
 }
-SubmergibleComponent::SubmergibleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_submergedFraction(util::FloatProperty::Create(0.f)) {}
+SubmergibleComponent::SubmergibleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_submergedFraction(pragma::util::FloatProperty::Create(0.f)) {}
 void SubmergibleComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void SubmergibleComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 bool SubmergibleComponent::IsSubmerged() const { return (GetSubmergedFraction() >= 0.6f) ? true : false; }
@@ -64,7 +64,7 @@ void SubmergibleComponent::OnWaterEmerged() { BroadcastEvent(submergibleComponen
 void SubmergibleComponent::OnWaterEntered() { BroadcastEvent(submergibleComponent::EVENT_ON_WATER_ENTERED); }
 void SubmergibleComponent::OnWaterExited() { BroadcastEvent(submergibleComponent::EVENT_ON_WATER_EXITED); }
 
-const util::PFloatProperty &SubmergibleComponent::GetSubmergedFractionProperty() const { return m_submergedFraction; }
+const pragma::util::PFloatProperty &SubmergibleComponent::GetSubmergedFractionProperty() const { return m_submergedFraction; }
 
 pragma::ecs::BaseEntity *SubmergibleComponent::GetWaterEntity() { return m_waterEntity.get(); }
 const pragma::ecs::BaseEntity *SubmergibleComponent::GetWaterEntity() const { return const_cast<SubmergibleComponent *>(this)->GetWaterEntity(); }

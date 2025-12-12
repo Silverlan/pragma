@@ -13,5 +13,5 @@ void Player::Initialize()
 	SBaseEntity::Initialize();
 	auto whPlComponent = AddComponent<pragma::SPlayerComponent>();
 	if(whPlComponent.expired() == false)
-		m_basePlayerComponent = util::WeakHandle<pragma::BasePlayerComponent>(std::static_pointer_cast<pragma::BasePlayerComponent>(whPlComponent.get()->shared_from_this()));
+		m_basePlayerComponent = pragma::util::WeakHandle<pragma::BasePlayerComponent>(std::static_pointer_cast<pragma::BasePlayerComponent>(whPlComponent.get()->shared_from_this()));
 }

@@ -19,17 +19,17 @@ void CEnvSoundProbeComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "spacing", false))
-			m_spacing = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "height_above_floor", false))
-			m_heightAboveFloor = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "radius", false))
-			m_radius = util::to_float(kvData.value);
+		if(pragma::string::compare<std::string>(kvData.key, "spacing", false))
+			m_spacing = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "height_above_floor", false))
+			m_heightAboveFloor = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "radius", false))
+			m_radius = pragma::util::to_float(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 }
 void CEnvSoundProbeComponent::OnEntitySpawn()

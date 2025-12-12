@@ -16,7 +16,7 @@ export namespace pragma::rendering {
 	DLLCLIENT bool VERBOSE_RENDER_OUTPUT_ENABLED = false;
 
 	enum class ShadowMapType : uint8_t { Static = 0, Dynamic };
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 
 	enum class RenderFlags : uint32_t {
 		None = 0,

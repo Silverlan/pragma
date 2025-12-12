@@ -23,19 +23,19 @@ void BaseEnvLightSpotVolComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "cone_height", false))
+		if(pragma::string::compare<std::string>(kvData.key, "cone_height", false))
 			GetEntity().SetKeyValue("radius", kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "cone_color", false))
+		else if(pragma::string::compare<std::string>(kvData.key, "cone_color", false))
 			GetEntity().SetKeyValue("color", kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "cone_start_offset", false))
-			m_coneStartOffset = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "spotlight_target", false))
+		else if(pragma::string::compare<std::string>(kvData.key, "cone_start_offset", false))
+			m_coneStartOffset = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "spotlight_target", false))
 			m_kvSpotlightTargetName = kvData.value;
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -55,14 +55,14 @@ void BaseEnvLightSpotVolComponent::Save(udm::LinkedPropertyWrapperArg udm)
 	BaseEntityComponent::Save(udm);
 	udm["coneStartOffset"] = m_coneStartOffset;
 	udm["spotlightTargetName"] = m_kvSpotlightTargetName;
-	util::write_udm_entity(udm["spotlightTarget"], m_hSpotlightTarget);
+	pragma::util::write_udm_entity(udm["spotlightTarget"], m_hSpotlightTarget);
 }
 void BaseEnvLightSpotVolComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version)
 {
 	BaseEntityComponent::Load(udm, version);
 	udm["coneStartOffset"](m_coneStartOffset);
 	udm["spotlightTargetName"](m_kvSpotlightTargetName);
-	m_hSpotlightTarget = util::read_udm_entity(*this, udm["spotlightTarget"]);
+	m_hSpotlightTarget = pragma::util::read_udm_entity(*this, udm["spotlightTarget"]);
 }
 
 void BaseEnvLightSpotVolComponent::SetIntensityFactor(float intensityFactor) { m_intensityFactor = intensityFactor; }

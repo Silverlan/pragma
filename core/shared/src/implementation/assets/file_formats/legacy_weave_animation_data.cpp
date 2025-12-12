@@ -26,7 +26,7 @@ std::shared_ptr<pragma::animation::Animation> FWAD::ReadData(unsigned short mdlV
 	if(mdlVersion >= 0x0013) {
 		auto activityName = f.ReadString();
 		auto id = pragma::animation::Animation::GetActivityEnumRegister().RegisterEnum(activityName);
-		activity = (id != util::INVALID_ENUM) ? static_cast<pragma::Activity>(id) : pragma::Activity::Invalid;
+		activity = (id != pragma::util::INVALID_ENUM) ? static_cast<pragma::Activity>(id) : pragma::Activity::Invalid;
 	}
 	else
 		activity = static_cast<pragma::Activity>(f.Read<unsigned short>());
@@ -134,7 +134,7 @@ std::shared_ptr<pragma::animation::Animation> FWAD::ReadData(unsigned short mdlV
 			if(mdlVersion >= 0x0013) {
 				auto name = f.ReadString();
 				auto id = pragma::animation::Animation::GetEventEnumRegister().RegisterEnum(name);
-				ev->eventID = (id != util::INVALID_ENUM) ? static_cast<pragma::AnimationEvent::Type>(id) : pragma::AnimationEvent::Type::Invalid;
+				ev->eventID = (id != pragma::util::INVALID_ENUM) ? static_cast<pragma::AnimationEvent::Type>(id) : pragma::AnimationEvent::Type::Invalid;
 			}
 			else
 				ev->eventID = static_cast<pragma::AnimationEvent::Type>(f.Read<unsigned short>());
@@ -164,7 +164,7 @@ std::shared_ptr<pragma::animation::Animation> FWAD::ReadData(unsigned short mdlV
 std::shared_ptr<pragma::animation::Animation> FWAD::Load(unsigned short version, const char *animation)
 {
 	std::string pathCache(animation);
-	ustring::to_lower(pathCache);
+	pragma::string::to_lower(pathCache);
 
 	std::string path = "models\\";
 	path += animation;

@@ -14,7 +14,7 @@ export {
 		  public:
 			CFlashlightComponent(pragma::ecs::BaseEntity &ent) : BaseFlashlightComponent(ent) {}
 			virtual void Initialize() override;
-			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

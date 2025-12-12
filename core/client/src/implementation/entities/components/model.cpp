@@ -40,11 +40,11 @@ void CModelComponent::Initialize()
 	BindEventUnhandled(cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
 	BindEventUnhandled(cColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
 	BindEventUnhandled(baseModelComponent::EVENT_ON_SKIN_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		umath::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
+		pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
 		SetTickPolicy(TickPolicy::Always);
 	});
 	BindEventUnhandled(baseModelComponent::EVENT_ON_BODY_GROUP_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
+		pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
 		SetTickPolicy(TickPolicy::Always);
 	});
 }
@@ -59,11 +59,11 @@ void CModelComponent::UpdateBaseShaderSpecializationFlags()
 		clipPlane = renderC->GetRenderClipPlane();
 		depthBias = renderC->GetDepthBias();
 	}
-	// umath::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableClippingBit, clipPlane);
-	// umath::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableDepthBias, depthBias);
+	// pragma::math::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableClippingBit, clipPlane);
+	// pragma::math::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableDepthBias, depthBias);
 
 	auto colorC = ent.GetComponent<CColorComponent>();
-	umath::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableTranslucencyBit, colorC.valid() && colorC->GetColor().a < 1.f);
+	pragma::math::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableTranslucencyBit, colorC.valid() && colorC->GetColor().a < 1.f);
 
 	m_baseShaderSpecializationConstantFlags |= m_staticShaderSpecializationConstantFlags;
 
@@ -149,7 +149,7 @@ void CModelComponent::ReloadRenderBufferList(bool immediate)
 	if(immediate)
 		UpdateRenderBufferList();
 	else
-		umath::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
+		pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
 }
 
 void CModelComponent::SetLightmapUvBuffer(const pragma::geometry::CModelSubMesh &mesh, const std::shared_ptr<prosper::IBuffer> &buffer) { m_lightmapUvBuffers[&mesh] = buffer; }
@@ -159,8 +159,8 @@ std::shared_ptr<prosper::IBuffer> CModelComponent::GetLightmapUvBuffer(const pra
 	return (it != m_lightmapUvBuffers.end()) ? it->second : nullptr;
 }
 
-bool CModelComponent::IsDepthPrepassEnabled() const { return !umath::is_flag_set(m_stateFlags, StateFlags::DepthPrepassDisabled); }
-void CModelComponent::SetDepthPrepassEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::DepthPrepassDisabled, !enabled); }
+bool CModelComponent::IsDepthPrepassEnabled() const { return !pragma::math::is_flag_set(m_stateFlags, StateFlags::DepthPrepassDisabled); }
+void CModelComponent::SetDepthPrepassEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::DepthPrepassDisabled, !enabled); }
 
 void CModelComponent::SetRenderBufferData(const std::vector<rendering::RenderBufferData> &renderBufferData) { m_lodMeshRenderBufferData = renderBufferData; }
 
@@ -180,7 +180,7 @@ void CModelComponent::AddRenderMesh(pragma::geometry::CModelSubMesh &mesh, msys:
 	auto insertIdx = lodGroup.first + lodGroup.second;
 
 	if(!shader || !shader->IsDepthPrepassEnabled())
-		umath::set_flag(stateFlags, pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass, false);
+		pragma::math::set_flag(stateFlags, pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass, false);
 
 	pragma::rendering::RenderBufferData renderBufferData {};
 	renderBufferData.material = mat.GetHandle();
@@ -202,7 +202,7 @@ void CModelComponent::UpdateRenderBufferList()
 		Con::cwar << "Attempted to update render meshes from non-main thread, this is illegal!" << Con::endl;
 		return;
 	}
-	umath::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired, false);
+	pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired, false);
 	for(auto &bufData : m_lodMeshRenderBufferData)
 		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(bufData.renderBuffer);
 	m_lodMeshRenderBufferData.clear();
@@ -225,7 +225,7 @@ void CModelComponent::UpdateRenderBufferList()
 				for(auto &buffer : buffers)
 					newBuffers.push_back(buffer.get());
 				auto *indexBuffer = renderBuffer->GetIndexBufferInfo();
-				auto lightmapUvIndex = umath::to_integral(pragma::ShaderGameWorldLightingPass::VertexBinding::LightmapUv);
+				auto lightmapUvIndex = pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::VertexBinding::LightmapUv);
 				if(lightmapUvIndex < newBuffers.size()) {
 					newBuffers[lightmapUvIndex] = uvBuffer.get();
 					renderBuffer = pragma::get_cengine()->GetRenderContext().CreateRenderBuffer(renderBuffer->GetPipelineCreateInfo(), newBuffers, renderBuffer->GetOffsets(), indexBuffer ? std::optional<prosper::IndexBufferInfo> {*indexBuffer} : std::optional<prosper::IndexBufferInfo> {});
@@ -245,35 +245,35 @@ void CModelComponent::UpdateRenderBufferList()
 		auto &renderBufferData = m_lodMeshRenderBufferData.back();
 		renderBufferData.renderBuffer = renderBuffer;
 		renderBufferData.material = mat ? mat->GetHandle() : msys::MaterialHandle {};
-		umath::set_flag(renderBufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass, depthPrepassEnabled && shader && shader->IsDepthPrepassEnabled());
+		pragma::math::set_flag(renderBufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass, depthPrepassEnabled && shader && shader->IsDepthPrepassEnabled());
 		if(mat == nullptr || shader == nullptr)
 			continue;
 		renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(*mat);
 		if(mat->GetProperty("test_glow", false))
-			umath::set_flag(renderBufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::EnableGlowPass);
+			pragma::math::set_flag(renderBufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::EnableGlowPass);
 	}
 }
 
-void CModelComponent::SetBaseShaderSpecializationFlag(pragma::GameShaderSpecializationConstantFlag flag, bool enabled) { umath::set_flag(m_baseShaderSpecializationConstantFlags, flag, enabled); }
+void CModelComponent::SetBaseShaderSpecializationFlag(pragma::GameShaderSpecializationConstantFlag flag, bool enabled) { pragma::math::set_flag(m_baseShaderSpecializationConstantFlags, flag, enabled); }
 
 void CModelComponent::UpdateRenderMeshes(bool requireBoundingVolumeUpdate)
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired | StateFlags::RenderBufferListUpdateRequired) == false)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired | StateFlags::RenderBufferListUpdateRequired) == false)
 		return;
 	if(std::this_thread::get_id() != pragma::get_cengine()->GetMainThreadId()) {
 		Con::cwar << "Attempted to update render meshes from non-main thread, this is illegal!" << Con::endl;
 		return;
 	}
 	auto renderMeshesUpdated = false;
-	if(umath::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired)) {
-		umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, false);
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired)) {
+		pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, false);
 		m_lodRenderMeshes.clear();
 		m_lodMeshes.clear();
 		m_lodMeshGroups.clear();
 		m_lodRenderMeshGroups.clear();
 
 		auto &mdl = GetModel();
-		auto numLods = umath::max(mdl ? mdl->GetLODCount() : 1u, static_cast<uint32_t>(1));
+		auto numLods = pragma::math::max(mdl ? mdl->GetLODCount() : 1u, static_cast<uint32_t>(1));
 		m_lodRenderMeshGroups.resize(numLods);
 		m_lodMeshGroups.resize(numLods);
 		if(mdl != nullptr) {
@@ -318,8 +318,8 @@ void CModelComponent::UpdateLOD(UInt32 lod)
 
 void CModelComponent::SetLOD(uint32_t lod) { m_lod = lod; }
 
-void CModelComponent::SetAutoLodEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::AutoLodDisabled, !enabled); }
-bool CModelComponent::IsAutoLodEnabled() const { return !umath::is_flag_set(m_stateFlags, StateFlags::AutoLodDisabled); }
+void CModelComponent::SetAutoLodEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::AutoLodDisabled, !enabled); }
+bool CModelComponent::IsAutoLodEnabled() const { return !pragma::math::is_flag_set(m_stateFlags, StateFlags::AutoLodDisabled); }
 
 void CModelComponent::UpdateLOD(const CSceneComponent &scene, const CCameraComponent &cam, const Mat4 &vp)
 {
@@ -340,12 +340,12 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene, const CCameraCompo
 	// We'll use random time intervals to lower the risk of a bunch of objects updating at the same time.
 	// TODO: This doesn't really work if the object is being rendered from multiple perspectives with different distances in the same frame!
 	// Also, changing LODs should occur via a fade-effect (both meshes could be added to render queue with alpha modifier)
-	m_tNextLodUpdate = t + umath::random(0.2f, 0.6f);
+	m_tNextLodUpdate = t + pragma::math::random(0.2f, 0.6f);
 
 	auto &pos = GetEntity().GetPosition();
 	auto d = uvec::distance(pos, cam.GetEntity().GetPosition());
 	constexpr auto LOD_CAMERA_DISTANCE_THRESHOLD = 20.f;
-	if(umath::abs(d - m_lastLodCamDistance) < LOD_CAMERA_DISTANCE_THRESHOLD)
+	if(pragma::math::abs(d - m_lastLodCamDistance) < LOD_CAMERA_DISTANCE_THRESHOLD)
 		return; // Don't bother updating if the distance to the camera hasn't changed much. TODO: This also doesn't work well with different perspectives in the same frame!
 
 	if(m_maxDrawDistance > 0.f && d >= m_maxDrawDistance) {
@@ -365,7 +365,7 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene, const CCameraCompo
 	auto posOffset = pos + cam.GetEntity().GetUp() * 1.f;
 	auto uvMin = umat::to_screen_uv(pos, vp);
 	auto uvMax = umat::to_screen_uv(posOffset, vp);
-	auto extents = umath::max(uvMin.y, uvMax.y) - umath::min(uvMin.y, uvMax.y);
+	auto extents = pragma::math::max(uvMin.y, uvMax.y) - pragma::math::min(uvMin.y, uvMax.y);
 	extents *= h;
 	extents *= 2.f; // TODO: Why?
 
@@ -398,7 +398,7 @@ pragma::rendering::RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lo
 		return emptyGroup; // TODO: This should only be returned as const!
 	}
 	UpdateRenderMeshes();
-	lod = umath::min(lod, static_cast<uint32_t>(m_lodMeshGroups.size() - 1));
+	lod = pragma::math::min(lod, static_cast<uint32_t>(m_lodMeshGroups.size() - 1));
 	assert(lod < m_lodMeshGroups.size());
 	return m_lodMeshGroups[lod];
 }
@@ -410,7 +410,7 @@ pragma::rendering::RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint3
 		return emptyGroup; // TODO: This should only be returned as const!
 	}
 	UpdateRenderMeshes();
-	lod = umath::min(lod, static_cast<uint32_t>(m_lodRenderMeshGroups.size() - 1));
+	lod = pragma::math::min(lod, static_cast<uint32_t>(m_lodRenderMeshGroups.size() - 1));
 	assert(lod < m_lodRenderMeshGroups.size());
 	if(lod >= m_lodRenderMeshGroups.size()) {
 		static rendering::RenderMeshGroup emptyGroup {};
@@ -427,7 +427,7 @@ void CModelComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		m_bvhComponent = static_cast<CBvhComponent *>(&component);
 	else if(typeid(component) == typeid(CMaterialOverrideComponent)) {
 		m_materialOverrideComponent = static_cast<CMaterialOverrideComponent *>(&component);
-		umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, true);
+		pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, true);
 		SetTickPolicy(TickPolicy::Always);
 	}
 }
@@ -438,20 +438,20 @@ void CModelComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 		m_bvhComponent = nullptr;
 	else if(typeid(component) == typeid(CMaterialOverrideComponent)) {
 		m_materialOverrideComponent = nullptr;
-		umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, true);
+		pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, true);
 		SetTickPolicy(TickPolicy::Always);
 	}
 }
 
 void CModelComponent::FlushRenderData()
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired))
 		UpdateRenderMeshes();
-	if(umath::is_flag_set(m_stateFlags, StateFlags::RenderBufferListUpdateRequired))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderBufferListUpdateRequired))
 		UpdateRenderBufferList();
 }
 
-void CModelComponent::SetRenderBufferListUpdateRequired() { umath::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired); }
+void CModelComponent::SetRenderBufferListUpdateRequired() { pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired); }
 
 void CModelComponent::OnTick(double tDelta)
 {
@@ -464,13 +464,13 @@ bool CModelComponent::SetBodyGroup(UInt32 groupId, UInt32 id)
 	auto r = BaseModelComponent::SetBodyGroup(groupId, id);
 	if(r == false)
 		return r;
-	umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
+	pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
 	SetTickPolicy(TickPolicy::Always);
 	// UpdateLOD(m_lod); // Update our active meshes
 	return true;
 }
 
-void CModelComponent::SetRenderMeshesDirty() { umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired); }
+void CModelComponent::SetRenderMeshesDirty() { pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired); }
 
 void CModelComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model)
 {
@@ -547,10 +547,10 @@ void CModelComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEn
 	defCModel.def("SetStaticShaderSpecializationFlags", &pragma::CModelComponent::SetStaticShaderSpecializationFlags);
 
 	auto defRenderBufferData = luabind::class_<pragma::rendering::RenderBufferData>("RenderBufferData");
-	defRenderBufferData.add_static_constant("STATE_FLAG_NONE", umath::to_integral(pragma::rendering::RenderBufferData::StateFlags::None));
-	defRenderBufferData.add_static_constant("STATE_FLAG_ENABLE_DEPTH_PREPASS_BIT", umath::to_integral(pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass));
-	defRenderBufferData.add_static_constant("STATE_FLAG_ENABLE_GLOW_PASS_BIT", umath::to_integral(pragma::rendering::RenderBufferData::StateFlags::EnableGlowPass));
-	defRenderBufferData.add_static_constant("STATE_FLAG_EXCLUDE_FROM_ACCELERATION_STRUCTURES_BIT", umath::to_integral(pragma::rendering::RenderBufferData::StateFlags::ExcludeFromAccelerationStructures));
+	defRenderBufferData.add_static_constant("STATE_FLAG_NONE", pragma::math::to_integral(pragma::rendering::RenderBufferData::StateFlags::None));
+	defRenderBufferData.add_static_constant("STATE_FLAG_ENABLE_DEPTH_PREPASS_BIT", pragma::math::to_integral(pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass));
+	defRenderBufferData.add_static_constant("STATE_FLAG_ENABLE_GLOW_PASS_BIT", pragma::math::to_integral(pragma::rendering::RenderBufferData::StateFlags::EnableGlowPass));
+	defRenderBufferData.add_static_constant("STATE_FLAG_EXCLUDE_FROM_ACCELERATION_STRUCTURES_BIT", pragma::math::to_integral(pragma::rendering::RenderBufferData::StateFlags::ExcludeFromAccelerationStructures));
 	defRenderBufferData.def(luabind::constructor<>());
 	defRenderBufferData.def_readwrite("stateFlags", &pragma::rendering::RenderBufferData::stateFlags);
 	defRenderBufferData.def_readwrite("pipelineSpecializationFlags", &pragma::rendering::RenderBufferData::pipelineSpecializationFlags);

@@ -12,21 +12,21 @@ void BasePointConstraintHingeComponent::Initialize()
 {
 	BasePointConstraintComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "limit_low", false))
-			m_kvLimitLow = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "limit_high", false))
-			m_kvLimitHigh = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "softness", false))
-			m_kvLimitSoftness = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "biasfactor", false))
-			m_kvLimitBiasFactor = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "relaxationfactor", false))
-			m_kvLimitRelaxationFactor = util::to_float(kvData.value);
+		if(pragma::string::compare<std::string>(kvData.key, "limit_low", false))
+			m_kvLimitLow = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "limit_high", false))
+			m_kvLimitHigh = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "softness", false))
+			m_kvLimitSoftness = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "biasfactor", false))
+			m_kvLimitBiasFactor = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "relaxationfactor", false))
+			m_kvLimitRelaxationFactor = pragma::util::to_float(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 }
 
@@ -60,7 +60,7 @@ void BasePointConstraintHingeComponent::InitializeConstraint(pragma::ecs::BaseEn
 			auto hinge = physEnv->CreateHingeConstraint(*bodyTgt, posThis - posTgt, *bodySrc, posThis, axis);
 			if(hinge != nullptr) {
 				hinge->SetEntity(GetEntity());
-				m_constraints.push_back(util::shared_handle_cast<pragma::physics::IHingeConstraint, pragma::physics::IConstraint>(hinge));
+				m_constraints.push_back(pragma::util::shared_handle_cast<pragma::physics::IHingeConstraint, pragma::physics::IConstraint>(hinge));
 			}
 		}
 	}

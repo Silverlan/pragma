@@ -24,9 +24,9 @@ export {
 		DLLNETWORK void PushObject(lua::State *l, BaseLuaObj *o);
 
 		template<class TType>
-		bool CheckHandle(lua::State *l, const util::TSharedHandle<TType> &handle);
+		bool CheckHandle(lua::State *l, const pragma::util::TSharedHandle<TType> &handle);
 		template<class TType>
-		bool CheckHandle(lua::State *l, const util::TWeakSharedHandle<TType> &handle);
+		bool CheckHandle(lua::State *l, const pragma::util::TWeakSharedHandle<TType> &handle);
 		template<class TType>
 		bool CheckHandle(lua::State *l, const TType *value);
 		template<class TType>
@@ -34,7 +34,7 @@ export {
 	};
 
 	template<class TType>
-	bool Lua::CheckHandle(lua::State *l, const util::TSharedHandle<TType> &handle)
+	bool Lua::CheckHandle(lua::State *l, const pragma::util::TSharedHandle<TType> &handle)
 	{
 		if(handle.IsExpired()) {
 			Lua::PushString(l, "Attempted to use a NULL handle");
@@ -45,7 +45,7 @@ export {
 	}
 
 	template<class TType>
-	bool Lua::CheckHandle(lua::State *l, const util::TWeakSharedHandle<TType> &handle)
+	bool Lua::CheckHandle(lua::State *l, const pragma::util::TWeakSharedHandle<TType> &handle)
 	{
 		if(handle.IsExpired()) {
 			Lua::PushString(l, "Attempted to use a NULL handle");
@@ -156,7 +156,7 @@ export {
 
 	namespace Lua {
 		template<typename T>
-		concept is_trivial_type = std::is_same_v<T, bool> || std::is_arithmetic_v<T> || util::is_string<T>::value;
+		concept is_trivial_type = std::is_same_v<T, bool> || std::is_arithmetic_v<T> || pragma::util::is_string<T>::value;
 		template<typename T, typename = std::enable_if_t<is_trivial_type<T>>>
 		T Check(lua::State *l, int32_t n)
 		{
@@ -166,7 +166,7 @@ export {
 				return Lua::CheckInt(l, n);
 			else if constexpr(std::is_arithmetic_v<T>)
 				return Lua::CheckNumber(l, n);
-			else // if constexpr(util::is_string<T>::value)
+			else // if constexpr(pragma::util::is_string<T>::value)
 				return Lua::CheckString(l, n);
 		}
 		template<typename T, typename = std::enable_if_t<!is_trivial_type<T>>>
@@ -198,7 +198,7 @@ export {
 				return Lua::IsBool(l, n);
 			else if constexpr(std::is_arithmetic_v<T>)
 				return Lua::IsNumber(l, n);
-			else if constexpr(util::is_string<T>::value)
+			else if constexpr(pragma::util::is_string<T>::value)
 				return Lua::IsString(l, n);
 			else {
 				if(!Lua::IsUserData(l, n))

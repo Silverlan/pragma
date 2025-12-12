@@ -27,7 +27,7 @@ export namespace pragma {
 		virtual ~CAIComponent() override;
 		virtual void Initialize() override;
 		virtual void UpdateMovementProperties(MovementComponent &movementC) override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual bool ShouldTransmitNetData() const override { return false; }
 		virtual void ReceiveSnapshotData(NetPacket &packet) override;
 	};

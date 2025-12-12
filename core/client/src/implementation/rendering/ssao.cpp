@@ -43,8 +43,8 @@ bool pragma::rendering::SSAOInfo::Initialize(prosper::IPrContext &context, uint3
 	renderTargetBlur->SetDebugName("ssao_blur_rt");
 	descSetGroupPrepass = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderSSAO::DESCRIPTOR_SET_PREPASS);
 	auto &descSetPrepass = *descSetGroupPrepass->GetDescriptorSet();
-	descSetPrepass.SetBindingTexture(*texNorm, umath::to_integral(pragma::ShaderSSAO::PrepassBinding::NormalBuffer));
-	descSetPrepass.SetBindingTexture(*texDepth, umath::to_integral(pragma::ShaderSSAO::PrepassBinding::DepthBuffer));
+	descSetPrepass.SetBindingTexture(*texNorm, pragma::math::to_integral(pragma::ShaderSSAO::PrepassBinding::NormalBuffer));
+	descSetPrepass.SetBindingTexture(*texDepth, pragma::math::to_integral(pragma::ShaderSSAO::PrepassBinding::DepthBuffer));
 
 	descSetGroupOcclusion = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::shaderSSAOBlur::DESCRIPTOR_SET_TEXTURE);
 	descSetGroupOcclusion->GetDescriptorSet()->SetBindingTexture(renderTarget->GetTexture(), 0u);
@@ -70,7 +70,7 @@ static void debug_ssao(pragma::NetworkState *state, pragma::BasePlayerComponent 
 		return;
 	const std::string name = "debug_ssao";
 	auto *pEl = pRoot->FindDescendantByName(name);
-	auto v = util::to_int(argv.front());
+	auto v = pragma::util::to_int(argv.front());
 	if(v == 0) {
 		if(pEl != nullptr)
 			pEl->Remove();

@@ -53,7 +53,7 @@ void CPBRConverterComponent::ProcessQueue()
 		return;
 	auto hMat = item.hMaterial;
 	auto hMdl = item.hModel;
-	item.job.SetCompletionHandler([this, hMat, hMdl](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
+	item.job.SetCompletionHandler([this, hMat, hMdl](pragma::util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false) {
 			Con::cwar << "Generating ambient occlusion map failed: " << worker.GetResultMessage() << Con::endl;
 			return;
@@ -108,7 +108,7 @@ void CPBRConverterComponent::WriteAOMap(pragma::asset::Model &mdl, msys::CMateri
 	auto rmaName = texInfoRMA->name;
 	ufile::remove_extension_from_filename(rmaName);
 
-	auto outPath = util::Path {rmaName};
+	auto outPath = pragma::util::Path {rmaName};
 	auto requiresSave = false;
 	if(outPath.GetFront() == "pbr") {
 		// We don't want to overwrite the default pbr materials, so we'll use a different rma path

@@ -73,7 +73,7 @@ export {
 			void ClearViewTarget();
 			Vector3 GetViewTarget() const;
 			void SetViewTarget(const Vector3 &viewTarget);
-			std::optional<umath::Transform> GetEyePose() const;
+			std::optional<pragma::math::Transform> GetEyePose() const;
 
 			void SetBlinkDuration(float dur);
 			float GetBlinkDuration() const;
@@ -86,7 +86,7 @@ export {
 			void SetLocalViewTargetFactor(float f);
 			float GetLocalViewTargetFactor() const;
 
-			umath::Transform CalcEyeballPose(uint32_t eyeballIndex, umath::Transform *optOutBonePose = nullptr) const;
+			pragma::math::Transform CalcEyeballPose(uint32_t eyeballIndex, pragma::math::Transform *optOutBonePose = nullptr) const;
 
 			void UpdateEyeballsMT();
 		  protected:
@@ -115,7 +115,7 @@ export {
 			float m_tNextBlink = 0.f;
 			uint32_t m_blinkFlexController = std::numeric_limits<uint32_t>::max();
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::CEyeComponent::StateFlags)
 };

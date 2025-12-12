@@ -12,7 +12,7 @@ import :engine;
 using namespace pragma;
 
 // +1 for depth pass
-uint32_t ShaderParticleBase::PIPELINE_COUNT = umath::to_integral(pragma::rendering::ParticleAlphaMode::Count) + 1;
+uint32_t ShaderParticleBase::PIPELINE_COUNT = pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Count) + 1;
 decltype(ShaderParticleBase::DESCRIPTOR_SET_ANIMATION) ShaderParticleBase::DESCRIPTOR_SET_ANIMATION = {
   "ANIMATION",
   {
@@ -42,43 +42,43 @@ struct CustomAlphaBlendMode {
 
 static prosper::BlendFactor name_to_blend_factor(const std::string &name)
 {
-	if(ustring::compare<std::string>(name, "zero", false))
+	if(pragma::string::compare<std::string>(name, "zero", false))
 		return prosper::BlendFactor::Zero;
-	else if(ustring::compare<std::string>(name, "one", false))
+	else if(pragma::string::compare<std::string>(name, "one", false))
 		return prosper::BlendFactor::One;
-	else if(ustring::compare<std::string>(name, "src_color", false))
+	else if(pragma::string::compare<std::string>(name, "src_color", false))
 		return prosper::BlendFactor::SrcColor;
-	else if(ustring::compare<std::string>(name, "one_minus_src_color", false))
+	else if(pragma::string::compare<std::string>(name, "one_minus_src_color", false))
 		return prosper::BlendFactor::OneMinusSrcColor;
-	else if(ustring::compare<std::string>(name, "dst_color", false))
+	else if(pragma::string::compare<std::string>(name, "dst_color", false))
 		return prosper::BlendFactor::DstColor;
-	else if(ustring::compare<std::string>(name, "one_minus_dst_color", false))
+	else if(pragma::string::compare<std::string>(name, "one_minus_dst_color", false))
 		return prosper::BlendFactor::OneMinusDstColor;
-	else if(ustring::compare<std::string>(name, "src_alpha", false))
+	else if(pragma::string::compare<std::string>(name, "src_alpha", false))
 		return prosper::BlendFactor::SrcAlpha;
-	else if(ustring::compare<std::string>(name, "one_minus_src_alpha", false))
+	else if(pragma::string::compare<std::string>(name, "one_minus_src_alpha", false))
 		return prosper::BlendFactor::OneMinusSrcAlpha;
-	else if(ustring::compare<std::string>(name, "dst_alpha", false))
+	else if(pragma::string::compare<std::string>(name, "dst_alpha", false))
 		return prosper::BlendFactor::DstAlpha;
-	else if(ustring::compare<std::string>(name, "one_minus_dst_alpha", false))
+	else if(pragma::string::compare<std::string>(name, "one_minus_dst_alpha", false))
 		return prosper::BlendFactor::OneMinusDstAlpha;
-	else if(ustring::compare<std::string>(name, "constant_color", false))
+	else if(pragma::string::compare<std::string>(name, "constant_color", false))
 		return prosper::BlendFactor::ConstantColor;
-	else if(ustring::compare<std::string>(name, "one_minus_constant_color", false))
+	else if(pragma::string::compare<std::string>(name, "one_minus_constant_color", false))
 		return prosper::BlendFactor::OneMinusConstantColor;
-	else if(ustring::compare<std::string>(name, "constant_alpha", false))
+	else if(pragma::string::compare<std::string>(name, "constant_alpha", false))
 		return prosper::BlendFactor::ConstantAlpha;
-	else if(ustring::compare<std::string>(name, "one_minus_constant_alpha", false))
+	else if(pragma::string::compare<std::string>(name, "one_minus_constant_alpha", false))
 		return prosper::BlendFactor::OneMinusConstantAlpha;
-	else if(ustring::compare<std::string>(name, "src_alpha_saturate", false))
+	else if(pragma::string::compare<std::string>(name, "src_alpha_saturate", false))
 		return prosper::BlendFactor::SrcAlphaSaturate;
-	else if(ustring::compare<std::string>(name, "src1_color", false))
+	else if(pragma::string::compare<std::string>(name, "src1_color", false))
 		return prosper::BlendFactor::Src1Color;
-	else if(ustring::compare<std::string>(name, "one_minus_src1_color", false))
+	else if(pragma::string::compare<std::string>(name, "one_minus_src1_color", false))
 		return prosper::BlendFactor::OneMinusSrc1Color;
-	else if(ustring::compare<std::string>(name, "src1_alpha", false))
+	else if(pragma::string::compare<std::string>(name, "src1_alpha", false))
 		return prosper::BlendFactor::Src1Alpha;
-	else if(ustring::compare<std::string>(name, "one_minus_src1_alpha", false))
+	else if(pragma::string::compare<std::string>(name, "one_minus_src1_alpha", false))
 		return prosper::BlendFactor::OneMinusSrc1Alpha;
 	Con::cwar << "Invalid blend factor type '" << name << "'!" << Con::endl;
 	return prosper::BlendFactor::One;
@@ -86,15 +86,15 @@ static prosper::BlendFactor name_to_blend_factor(const std::string &name)
 
 static prosper::BlendOp name_to_blend_op(const std::string &name)
 {
-	if(ustring::compare<std::string>(name, "add", false))
+	if(pragma::string::compare<std::string>(name, "add", false))
 		return prosper::BlendOp::Add;
-	else if(ustring::compare<std::string>(name, "subtract", false))
+	else if(pragma::string::compare<std::string>(name, "subtract", false))
 		return prosper::BlendOp::Subtract;
-	else if(ustring::compare<std::string>(name, "reverse_subtract", false))
+	else if(pragma::string::compare<std::string>(name, "reverse_subtract", false))
 		return prosper::BlendOp::ReverseSubtract;
-	else if(ustring::compare<std::string>(name, "min", false))
+	else if(pragma::string::compare<std::string>(name, "min", false))
 		return prosper::BlendOp::Min;
-	else if(ustring::compare<std::string>(name, "max", false))
+	else if(pragma::string::compare<std::string>(name, "max", false))
 		return prosper::BlendOp::Max;
 	Con::cwar << "Invalid blend operation '" << name << "'!" << Con::endl;
 	return prosper::BlendOp::Add;
@@ -193,7 +193,7 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 		  g_customAlphaBlendMode.dstAlphaBlendFactor, colorComponents);
 		break;
 	default:
-		throw std::invalid_argument("Unknown alpha mode " + std::to_string(umath::to_integral(alphaMode)) + "!");
+		throw std::invalid_argument("Unknown alpha mode " + std::to_string(pragma::math::to_integral(alphaMode)) + "!");
 	}
 }
 static auto cvParticleQuality = pragma::console::get_client_con_var("cl_render_particle_quality");
@@ -210,12 +210,12 @@ ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma:
 	if(particle.GetEffectiveAlphaMode() == pragma::rendering::ParticleAlphaMode::AdditiveByColor)
 		renderFlags |= RenderFlags::AdditiveBlendByColor;
 
-	if(umath::is_flag_set(ptRenderFlags, pts::ParticleRenderFlags::DepthOnly))
+	if(pragma::math::is_flag_set(ptRenderFlags, pts::ParticleRenderFlags::DepthOnly))
 		renderFlags |= RenderFlags::DepthPass;
 	return renderFlags;
 }
-uint32_t ShaderParticleBase::GetBasePipelineIndex(uint32_t pipelineIdx) const { return pipelineIdx / umath::to_integral(pragma::rendering::ParticleAlphaMode::Count); }
-pragma::rendering::ParticleAlphaMode ShaderParticleBase::GetAlphaMode(uint32_t pipelineIdx) const { return static_cast<pragma::rendering::ParticleAlphaMode>(pipelineIdx % umath::to_integral(pragma::rendering::ParticleAlphaMode::Count)); }
+uint32_t ShaderParticleBase::GetBasePipelineIndex(uint32_t pipelineIdx) const { return pipelineIdx / pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Count); }
+pragma::rendering::ParticleAlphaMode ShaderParticleBase::GetAlphaMode(uint32_t pipelineIdx) const { return static_cast<pragma::rendering::ParticleAlphaMode>(pipelineIdx % pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Count)); }
 pragma::rendering::ParticleAlphaMode ShaderParticleBase::GetRenderAlphaMode(const pragma::ecs::CParticleSystemComponent &particle) const
 {
 	if(particle.IsAlphaPremultiplied())

@@ -31,7 +31,7 @@ void pragma::pts::CParticleRendererLua::RecordRender(prosper::ICommandBuffer &dr
 {
 	// No longer supported
 	//CallLuaMember<void,std::reference_wrapper<prosper::ICommandBuffer>,luabind::object,luabind::object,uint32_t>(
-	//	"Render",std::ref(*drawCmd),scene.GetLuaObject(),renderer.GetLuaObject(),umath::to_integral(renderFlags)
+	//	"Render",std::ref(*drawCmd),scene.GetLuaObject(),renderer.GetLuaObject(),pragma::math::to_integral(renderFlags)
 	//);
 }
 void pragma::pts::CParticleRendererLua::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)

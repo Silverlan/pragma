@@ -8,7 +8,7 @@ import :scripting.lua.callback_handler;
 
 CallbackHandle LuaCallbackHandler::AddLuaCallback(std::string identifier, const luabind::object &o)
 {
-	ustring::to_lower(identifier);
+	pragma::string::to_lower(identifier);
 	if(m_callDepth > 0u) {
 		// m_luaCallbacks is currently being iterated on, so we have to delay adding the new callback
 		auto hCallback = CallbackHandle {std::shared_ptr<TCallback>(new LuaCallback(o))};
@@ -24,7 +24,7 @@ CallbackHandle LuaCallbackHandler::AddLuaCallback(std::string identifier, const 
 
 std::vector<CallbackHandle> *LuaCallbackHandler::GetLuaCallbacks(std::string identifier)
 {
-	ustring::to_lower(identifier);
+	pragma::string::to_lower(identifier);
 	auto it = m_luaCallbacks.find(identifier);
 	if(it == m_luaCallbacks.end())
 		return nullptr;

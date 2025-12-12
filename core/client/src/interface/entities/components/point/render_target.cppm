@@ -49,7 +49,7 @@ export {
 			float m_refreshRate = 0.f;
 			double m_tLastRefresh;
 			unsigned int m_curDepth = 0u;
-			util::WeakHandle<pragma::CCameraComponent> m_cam = {};
+			pragma::util::WeakHandle<pragma::CCameraComponent> m_cam = {};
 		};
 	};
 

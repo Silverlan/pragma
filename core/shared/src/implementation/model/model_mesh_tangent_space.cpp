@@ -10,7 +10,7 @@ module pragma.shared;
 import :model.model_mesh;
 
 template<typename TIndex>
-void umath::compute_tangent_basis(std::vector<Vertex> &verts, const TIndex *indices, uint32_t numIndices)
+void pragma::math::compute_tangent_basis(std::vector<Vertex> &verts, const TIndex *indices, uint32_t numIndices)
 {
 	if(numIndices == 0)
 		return;
@@ -58,5 +58,5 @@ void umath::compute_tangent_basis(std::vector<Vertex> &verts, const TIndex *indi
 	if(result == false)
 		Con::cwar << "Unable to calculate mesh tangents!" << Con::endl;
 }
-template DLLNETWORK void umath::compute_tangent_basis<uint16_t>(std::vector<Vertex> &verts, const uint16_t *indices, uint32_t numIndices);
-template DLLNETWORK void umath::compute_tangent_basis<uint32_t>(std::vector<Vertex> &verts, const uint32_t *indices, uint32_t numIndices);
+template DLLNETWORK void pragma::math::compute_tangent_basis<uint16_t>(std::vector<Vertex> &verts, const uint16_t *indices, uint32_t numIndices);
+template DLLNETWORK void pragma::math::compute_tangent_basis<uint32_t>(std::vector<Vertex> &verts, const uint32_t *indices, uint32_t numIndices);

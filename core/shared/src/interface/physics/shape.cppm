@@ -52,8 +52,8 @@ export {
 			void SetMaterial(const IMaterial &mat);
 			IMaterial *GetMaterial() const;
 
-			virtual void SetLocalPose(const umath::Transform &localPose) = 0;
-			virtual umath::Transform GetLocalPose() const = 0;
+			virtual void SetLocalPose(const pragma::math::Transform &localPose) = 0;
+			virtual pragma::math::Transform GetLocalPose() const = 0;
 
 			virtual void SetDensity(float density);
 			float GetDensity() const;
@@ -65,7 +65,7 @@ export {
 		  protected:
 			IShape(IEnvironment &env);
 			float m_density = 1.f;
-			util::WeakHandle<IMaterial> m_material = {};
+			pragma::util::WeakHandle<IMaterial> m_material = {};
 		};
 
 		class DLLNETWORK IConvexShape : virtual public IShape {
@@ -130,10 +130,10 @@ export {
 		  public:
 			struct DLLNETWORK ShapeInfo {
 				std::shared_ptr<pragma::physics::IShape> shape;
-				umath::Transform localPose;
+				pragma::math::Transform localPose;
 			};
 			virtual void InitializeLuaObject(lua::State *lua) override;
-			void AddShape(pragma::physics::IShape &shape, const umath::Transform &localPose = {});
+			void AddShape(pragma::physics::IShape &shape, const pragma::math::Transform &localPose = {});
 			virtual void GetAABB(Vector3 &min, Vector3 &max) const override;
 
 			virtual void SetMass(float mass) override;

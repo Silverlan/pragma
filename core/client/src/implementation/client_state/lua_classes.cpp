@@ -49,7 +49,7 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 {
 	modShader[luabind::def(
 	  "get_test_node_register", +[]() -> std::shared_ptr<pragma::shadergraph::NodeRegistry> {
-		  auto reg = ::util::make_shared<pragma::shadergraph::NodeRegistry>();
+		  auto reg = pragma::util::make_shared<pragma::shadergraph::NodeRegistry>();
 		  reg->RegisterNode<pragma::shadergraph::MathNode>("math");
 		  return reg;
 	  })];
@@ -65,7 +65,7 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 			  LOGGER_SG.error("Failed to load shader graph of type '{}' with name '{}' - no registry found!", type, name);
 			  return {std::shared_ptr<pragma::shadergraph::Graph> {}, std::optional<std::string> {}};
 		  }
-		  auto graph = ::util::make_shared<pragma::shadergraph::Graph>(reg);
+		  auto graph = pragma::util::make_shared<pragma::shadergraph::Graph>(reg);
 		  std::string err;
 		  auto result = graph->Load(filePath, err);
 		  if(!result)
@@ -74,7 +74,7 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 	  })];
 	defGraph.scope[luabind::def(
 	  "load", +[](udm::AssetData &assetData, const std::shared_ptr<pragma::shadergraph::NodeRegistry> &nodeReg) -> std::pair<std::shared_ptr<pragma::shadergraph::Graph>, std::optional<std::string>> {
-		  auto graph = ::util::make_shared<pragma::shadergraph::Graph>(nodeReg);
+		  auto graph = pragma::util::make_shared<pragma::shadergraph::Graph>(nodeReg);
 		  std::string err;
 		  auto data = assetData.GetData();
 		  auto result = graph->Load(data, err);
@@ -101,7 +101,7 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 	  });
 	defGraph.def(
 	  "Copy", +[](const pragma::shadergraph::Graph &graph) -> std::shared_ptr<pragma::shadergraph::Graph> {
-		  auto cpy = ::util::make_shared<pragma::shadergraph::Graph>(graph.GetNodeRegistry());
+		  auto cpy = pragma::util::make_shared<pragma::shadergraph::Graph>(graph.GetNodeRegistry());
 		  cpy->Merge(graph);
 		  return cpy;
 	  });
@@ -197,21 +197,21 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 	modShader[defParameter];
 
 	auto defSocket = luabind::class_<pragma::shadergraph::Socket>("Socket");
-	defSocket.add_static_constant("FLAG_NONE", umath::to_integral(pragma::shadergraph::Socket::Flags::None));
-	defSocket.add_static_constant("FLAG_LINKABLE", umath::to_integral(pragma::shadergraph::Socket::Flags::Linkable));
-	defSocket.add_static_constant("TYPE_BOOLEAN", umath::to_integral(pragma::shadergraph::DataType::Boolean));
-	defSocket.add_static_constant("TYPE_INT", umath::to_integral(pragma::shadergraph::DataType::Int));
-	defSocket.add_static_constant("TYPE_UINT", umath::to_integral(pragma::shadergraph::DataType::UInt));
-	defSocket.add_static_constant("TYPE_FLOAT", umath::to_integral(pragma::shadergraph::DataType::Float));
-	defSocket.add_static_constant("TYPE_COLOR", umath::to_integral(pragma::shadergraph::DataType::Color));
-	defSocket.add_static_constant("TYPE_VECTOR", umath::to_integral(pragma::shadergraph::DataType::Vector));
-	defSocket.add_static_constant("TYPE_POINT", umath::to_integral(pragma::shadergraph::DataType::Point));
-	defSocket.add_static_constant("TYPE_NORMAL", umath::to_integral(pragma::shadergraph::DataType::Normal));
-	defSocket.add_static_constant("TYPE_POINT2", umath::to_integral(pragma::shadergraph::DataType::Point2));
-	defSocket.add_static_constant("TYPE_STRING", umath::to_integral(pragma::shadergraph::DataType::String));
-	defSocket.add_static_constant("TYPE_TRANSFORM", umath::to_integral(pragma::shadergraph::DataType::Transform));
-	defSocket.add_static_constant("TYPE_ENUM", umath::to_integral(pragma::shadergraph::DataType::Enum));
-	defSocket.add_static_constant("TYPE_INVALID", umath::to_integral(pragma::shadergraph::DataType::Invalid));
+	defSocket.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::shadergraph::Socket::Flags::None));
+	defSocket.add_static_constant("FLAG_LINKABLE", pragma::math::to_integral(pragma::shadergraph::Socket::Flags::Linkable));
+	defSocket.add_static_constant("TYPE_BOOLEAN", pragma::math::to_integral(pragma::shadergraph::DataType::Boolean));
+	defSocket.add_static_constant("TYPE_INT", pragma::math::to_integral(pragma::shadergraph::DataType::Int));
+	defSocket.add_static_constant("TYPE_UINT", pragma::math::to_integral(pragma::shadergraph::DataType::UInt));
+	defSocket.add_static_constant("TYPE_FLOAT", pragma::math::to_integral(pragma::shadergraph::DataType::Float));
+	defSocket.add_static_constant("TYPE_COLOR", pragma::math::to_integral(pragma::shadergraph::DataType::Color));
+	defSocket.add_static_constant("TYPE_VECTOR", pragma::math::to_integral(pragma::shadergraph::DataType::Vector));
+	defSocket.add_static_constant("TYPE_POINT", pragma::math::to_integral(pragma::shadergraph::DataType::Point));
+	defSocket.add_static_constant("TYPE_NORMAL", pragma::math::to_integral(pragma::shadergraph::DataType::Normal));
+	defSocket.add_static_constant("TYPE_POINT2", pragma::math::to_integral(pragma::shadergraph::DataType::Point2));
+	defSocket.add_static_constant("TYPE_STRING", pragma::math::to_integral(pragma::shadergraph::DataType::String));
+	defSocket.add_static_constant("TYPE_TRANSFORM", pragma::math::to_integral(pragma::shadergraph::DataType::Transform));
+	defSocket.add_static_constant("TYPE_ENUM", pragma::math::to_integral(pragma::shadergraph::DataType::Enum));
+	defSocket.add_static_constant("TYPE_INVALID", pragma::math::to_integral(pragma::shadergraph::DataType::Invalid));
 	defSocket.scope[luabind::def("udm_to_data_type", &pragma::shadergraph::to_data_type)];
 	defSocket.scope[luabind::def("to_udm_type", &pragma::shadergraph::to_udm_type)];
 	defSocket.scope[luabind::def("to_glsl_type", &pragma::shadergraph::to_glsl_type)];
@@ -534,7 +534,7 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 			     width = Lua::CheckInt(l, 2);
 		     if(Lua::IsSet(l, 3))
 			     height = Lua::CheckInt(l, 3);
-		     umath::Degree range = 360.f;
+		     pragma::math::Degree range = 360.f;
 		     if(Lua::IsSet(l, 4))
 			     range = Lua::CheckNumber(l, 4);
 		     auto layout = prosper::ImageLayout::ShaderReadOnlyOptimal;
@@ -604,15 +604,15 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 		Count
 	};
 	Lua::RegisterLibraryEnums(lua.GetState(), "shader",
-	  {{"TONE_MAPPING_NONE", umath::to_integral(ToneMapping::None)}, {"TONE_MAPPING_GAMMA_CORRECTION", umath::to_integral(ToneMapping::GammaCorrection)}, {"TONE_MAPPING_REINHARD", umath::to_integral(ToneMapping::Reinhard)},
-	    {"TONE_MAPPING_HEJIL_RICHARD", umath::to_integral(ToneMapping::HejilRichard)}, {"TONE_MAPPING_UNCHARTED", umath::to_integral(ToneMapping::Uncharted)}, {"TONE_MAPPING_ACES", umath::to_integral(ToneMapping::Aces)},
-	    {"TONE_MAPPING_GRAN_TURISMO", umath::to_integral(ToneMapping::GranTurismo)}, {"TONE_MAPPING_HDR", umath::to_integral(ToneMapping::Hdr)},
+	  {{"TONE_MAPPING_NONE", pragma::math::to_integral(ToneMapping::None)}, {"TONE_MAPPING_GAMMA_CORRECTION", pragma::math::to_integral(ToneMapping::GammaCorrection)}, {"TONE_MAPPING_REINHARD", pragma::math::to_integral(ToneMapping::Reinhard)},
+	    {"TONE_MAPPING_HEJIL_RICHARD", pragma::math::to_integral(ToneMapping::HejilRichard)}, {"TONE_MAPPING_UNCHARTED", pragma::math::to_integral(ToneMapping::Uncharted)}, {"TONE_MAPPING_ACES", pragma::math::to_integral(ToneMapping::Aces)},
+	    {"TONE_MAPPING_GRAN_TURISMO", pragma::math::to_integral(ToneMapping::GranTurismo)}, {"TONE_MAPPING_HDR", pragma::math::to_integral(ToneMapping::Hdr)},
 
-	    {"TONE_MAPPING_COUNT", umath::to_integral(ToneMapping::Count)}});
+	    {"TONE_MAPPING_COUNT", pragma::math::to_integral(ToneMapping::Count)}});
 
-	auto defShaderInfo = luabind::class_<util::ShaderInfo>("Info");
+	auto defShaderInfo = luabind::class_<pragma::util::ShaderInfo>("Info");
 	//defShaderInfo.def("GetID",&Lua_ShaderInfo_GetID);
-	defShaderInfo.def("GetName", &::util::ShaderInfo::GetIdentifier);
+	defShaderInfo.def("GetName", &pragma::util::ShaderInfo::GetIdentifier);
 	modShader[defShaderInfo];
 
 	auto defBindState = luabind::class_<prosper::ShaderBindState>("BindState");
@@ -641,8 +641,8 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 	  });
 
 	auto defProp = luabind::class_<pragma::rendering::Property>("Property");
-	defProp.add_static_constant("FLAG_NONE", umath::to_integral(pragma::rendering::Property::Flags::None));
-	defProp.add_static_constant("FLAG_HIDE_IN_EDITOR_BIT", umath::to_integral(pragma::rendering::Property::Flags::HideInEditor));
+	defProp.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::rendering::Property::Flags::None));
+	defProp.add_static_constant("FLAG_HIDE_IN_EDITOR_BIT", pragma::math::to_integral(pragma::rendering::Property::Flags::HideInEditor));
 	defProp.def(
 	  "__tostring", +[](const pragma::rendering::Property &prop) -> std::string {
 		  std::stringstream ss;
@@ -706,9 +706,9 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 	defShader.def(
 	  "RecordBindDescriptorSet",
 	  +[](lua::State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets) { Lua::Shader::RecordBindDescriptorSet(l, shader, pcb, ds, firstSet, dynamicOffsets, 5); });
-	defShader.def("RecordPushConstants", static_cast<void (*)(lua::State *, prosper::Shader &, const LuaShaderRecordTarget &, ::util::DataStream &, uint32_t)>(&Lua::Shader::RecordPushConstants));
+	defShader.def("RecordPushConstants", static_cast<void (*)(lua::State *, prosper::Shader &, const LuaShaderRecordTarget &, pragma::util::DataStream &, uint32_t)>(&Lua::Shader::RecordPushConstants));
 	defShader.def("RecordPushConstants", static_cast<void (*)(lua::State *, prosper::Shader &, prosper::util::PreparedCommandBuffer &, udm::Type, const Lua::Vulkan::PreparedCommandLuaArg &, uint32_t)>(&Lua::Shader::RecordPushConstants));
-	defShader.def("RecordPushConstants", static_cast<void (*)(lua::State *, prosper::Shader &, const LuaShaderRecordTarget &, ::util::DataStream &, uint32_t)>(&Lua::Shader::RecordPushConstants), luabind::default_parameter_policy<5, static_cast<uint32_t>(0)> {});
+	defShader.def("RecordPushConstants", static_cast<void (*)(lua::State *, prosper::Shader &, const LuaShaderRecordTarget &, pragma::util::DataStream &, uint32_t)>(&Lua::Shader::RecordPushConstants), luabind::default_parameter_policy<5, static_cast<uint32_t>(0)> {});
 	defShader.def("RecordPushConstants", static_cast<void (*)(lua::State *, prosper::Shader &, prosper::util::PreparedCommandBuffer &, udm::Type, const Lua::Vulkan::PreparedCommandLuaArg &, uint32_t)>(&Lua::Shader::RecordPushConstants),
 	  luabind::default_parameter_policy<6, static_cast<uint32_t>(0)> {});
 	defShader.def("GetEntrypointName", &Lua::Shader::GetEntrypointName);
@@ -774,9 +774,9 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 	auto defShaderScene = luabind::class_<pragma::ShaderScene, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("Scene3D");
 	defShaderScene.scope[luabind::def("get_render_pass", &Lua::Shader::Scene3D::GetRenderPass)];
 	defShaderScene.scope[luabind::def("get_render_pass", static_cast<void (*)(lua::State *)>([](lua::State *l) { Lua::Shader::Scene3D::GetRenderPass(l, 0u); }))];
-	defShaderScene.add_static_constant("RENDER_PASS_COLOR_FORMAT", umath::to_integral(pragma::ShaderScene::RENDER_PASS_FORMAT));
-	defShaderScene.add_static_constant("RENDER_PASS_BLOOM_FORMAT", umath::to_integral(pragma::ShaderScene::RENDER_PASS_FORMAT));
-	defShaderScene.add_static_constant("RENDER_PASS_DEPTH_FORMAT", umath::to_integral(pragma::ShaderScene::RENDER_PASS_DEPTH_FORMAT));
+	defShaderScene.add_static_constant("RENDER_PASS_COLOR_FORMAT", pragma::math::to_integral(pragma::ShaderScene::RENDER_PASS_FORMAT));
+	defShaderScene.add_static_constant("RENDER_PASS_BLOOM_FORMAT", pragma::math::to_integral(pragma::ShaderScene::RENDER_PASS_FORMAT));
+	defShaderScene.add_static_constant("RENDER_PASS_DEPTH_FORMAT", pragma::math::to_integral(pragma::ShaderScene::RENDER_PASS_DEPTH_FORMAT));
 	defShaderScene.def("GetCameraDescriptorSetIndex", &pragma::ShaderScene::GetCameraDescriptorSetIndex);
 	defShaderScene.def("GetRendererDescriptorSetIndex", &pragma::ShaderScene::GetRendererDescriptorSetIndex);
 	modShader[defShaderScene];
@@ -813,8 +813,8 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 
 	// Utility shaders
 	auto defShaderComposeRMA = luabind::class_<pragma::ShaderComposeRMA, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("ComposeRMA");
-	defShaderComposeRMA.add_static_constant("FLAG_NONE", umath::to_integral(pragma::ShaderComposeRMA::Flags::None));
-	defShaderComposeRMA.add_static_constant("FLAG_USE_SPECULAR_WORKFLOW_BIT", umath::to_integral(pragma::ShaderComposeRMA::Flags::UseSpecularWorkflow));
+	defShaderComposeRMA.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::ShaderComposeRMA::Flags::None));
+	defShaderComposeRMA.add_static_constant("FLAG_USE_SPECULAR_WORKFLOW_BIT", pragma::math::to_integral(pragma::ShaderComposeRMA::Flags::UseSpecularWorkflow));
 	defShaderComposeRMA.def("ComposeRMA",
 	  static_cast<void (*)(lua::State *, pragma::ShaderComposeRMA &, prosper::Texture *, prosper::Texture *, prosper::Texture *, uint32_t)>(
 	    [](lua::State *l, pragma::ShaderComposeRMA &shader, prosper::Texture *roughnessMap, prosper::Texture *metalnessMap, prosper::Texture *aoMap, uint32_t flags) {
@@ -841,7 +841,7 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_NEGATIVE_Y", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::NegativeY));
 	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_POSITIVE_Z", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::PositiveZ));
 	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_NEGATIVE_Z", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::NegativeZ));
-	static_assert(umath::to_integral(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::Count) == 6);
+	static_assert(pragma::math::to_integral(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::Count) == 6);
 	defShaderMergeIntoEquirect.def(
 	  "RecordDraw",
 	  +[](pragma::ShaderMerge2dImageIntoEquirectangular &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &dsEquirect, Lua::Vulkan::DescriptorSet &ds2d) { return shader.RecordDraw(hCommandBuffer, *dsEquirect.GetDescriptorSet(), *ds2d.GetDescriptorSet()); });
@@ -850,7 +850,7 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 		  return shader.RecordDraw(hCommandBuffer, *dsEquirect.GetDescriptorSet(), *ds2d.GetDescriptorSet(), cubeFace);
 	  });
 	defShaderMergeIntoEquirect.def(
-	  "RecordDraw", +[](pragma::ShaderMerge2dImageIntoEquirectangular &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &dsEquirect, Lua::Vulkan::DescriptorSet &ds2d, pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace cubeFace, umath::Degree range) {
+	  "RecordDraw", +[](pragma::ShaderMerge2dImageIntoEquirectangular &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &dsEquirect, Lua::Vulkan::DescriptorSet &ds2d, pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace cubeFace, pragma::math::Degree range) {
 		  return shader.RecordDraw(hCommandBuffer, *dsEquirect.GetDescriptorSet(), *ds2d.GetDescriptorSet(), cubeFace, range);
 	  });
 	modShader[defShaderMergeIntoEquirect];
@@ -1039,11 +1039,11 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 				    return false;
 			    auto &shader = *static_cast<pragma::LShaderGui *>(hShader.get());
 			    recordState.shaderBindState = std::make_unique<prosper::ShaderBindState>(recordState.commandBuffer);
-			    auto &drawState = recordState.userData.Get<pragma::gui::DrawState>(ustring::string_switch::hash("guiDrawState"));
+			    auto &drawState = recordState.userData.Get<pragma::gui::DrawState>(pragma::string::string_switch::hash("guiDrawState"));
 			    return shader.RecordBeginDraw(*recordState.shaderBindState, drawState, recordState.GetArgument<uint32_t>(0), recordState.GetArgument<uint32_t>(1), static_cast<pragma::gui::StencilPipeline>(recordState.GetArgument<std::underlying_type_t<pragma::gui::StencilPipeline>>(2)),
 			      recordState.GetArgument<bool>(3), recordState.GetArgument<uint32_t>(4));
 		    },
-		    util::make_vector<PcbArg>(PcbArg {"w"}, PcbArg {"h"}, PcbArg {"stencilPipeline"}, PcbArg {"msaa"}, PcbArg {"testStencilLevel"}));
+		    pragma::util::make_vector<PcbArg>(PcbArg {"w"}, PcbArg {"h"}, PcbArg {"stencilPipeline"}, PcbArg {"msaa"}, PcbArg {"testStencilLevel"}));
 	  });
 	modShader[defShaderGUIBase];
 
@@ -1081,12 +1081,12 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 	modShader[defShaderImageProcessing];
 
 	auto defShaderTextured3DBase = luabind::class_<pragma::LuaShaderWrapperTextured3D, luabind::bases<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>>("BaseTexturedLit3D");
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_FLAG_NONE", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::None));
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_LIGHT_MAPS_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableLightMapsBit));
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_ANIMATION_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableAnimationBit));
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_MORPH_TARGET_ANIMATION_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit));
-	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_TRANSLUCENCY_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableTranslucencyBit));
-	static_assert(umath::to_integral(pragma::GameShaderSpecializationConstantFlag::Last) == 8, "Update this list when adding new flags!");
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_FLAG_NONE", pragma::math::to_integral(pragma::GameShaderSpecializationConstantFlag::None));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_LIGHT_MAPS_BIT", pragma::math::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableLightMapsBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_ANIMATION_BIT", pragma::math::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableAnimationBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_MORPH_TARGET_ANIMATION_BIT", pragma::math::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_TRANSLUCENCY_BIT", pragma::math::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableTranslucencyBit));
+	static_assert(pragma::math::to_integral(pragma::GameShaderSpecializationConstantFlag::Last) == 8, "Update this list when adding new flags!");
 
 	defShaderTextured3DBase.def(luabind::constructor<>());
 	defShaderTextured3DBase.def("InitializeGfxPipelineVertexAttributes", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelineVertexAttributes, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeGfxPipelineVertexAttributes);
@@ -1203,44 +1203,44 @@ void pragma::CGame::RegisterLuaClasses()
 			  return {};
 		  return o->GetOutlineColor();
 	  });
-	defDebugRendererObject.def("GetPose", static_cast<const umath::ScaledTransform &(pragma::debug::DebugRenderer::BaseObject::*)() const>(&pragma::debug::DebugRenderer::BaseObject::GetPose), luabind::copy_policy<0> {});
+	defDebugRendererObject.def("GetPose", static_cast<const pragma::math::ScaledTransform &(pragma::debug::DebugRenderer::BaseObject::*)() const>(&pragma::debug::DebugRenderer::BaseObject::GetPose), luabind::copy_policy<0> {});
 	debugMod[defDebugRendererObject];
 
 	auto &modGame = GetLuaInterface().RegisterLibrary("game");
 	auto defRenderPassStats = luabind::class_<rendering::RenderPassStats>("RenderPassStats");
 	defRenderPassStats.def(luabind::constructor<>());
 	defRenderPassStats.def(luabind::self + luabind::const_self);
-	defRenderPassStats.add_static_constant("COUNTER_SHADER_STATE_CHANGES", umath::to_integral(rendering::RenderPassStats::Counter::ShaderStateChanges));
-	defRenderPassStats.add_static_constant("COUNTER_MATERIAL_STATE_CHANGES", umath::to_integral(rendering::RenderPassStats::Counter::MaterialStateChanges));
-	defRenderPassStats.add_static_constant("COUNTER_ENTITY_STATE_CHANGES", umath::to_integral(rendering::RenderPassStats::Counter::EntityStateChanges));
-	defRenderPassStats.add_static_constant("COUNTER_DRAW_CALLS", umath::to_integral(rendering::RenderPassStats::Counter::DrawCalls));
-	defRenderPassStats.add_static_constant("COUNTER_DRAWN_MESHES", umath::to_integral(rendering::RenderPassStats::Counter::DrawnMeshes));
-	defRenderPassStats.add_static_constant("COUNTER_DRAWN_VERTICES", umath::to_integral(rendering::RenderPassStats::Counter::DrawnVertices));
-	defRenderPassStats.add_static_constant("COUNTER_DRAWN_TRIANGLES", umath::to_integral(rendering::RenderPassStats::Counter::DrawnTriangles));
-	defRenderPassStats.add_static_constant("COUNTER_ENTITY_BUFFER_UPDATES", umath::to_integral(rendering::RenderPassStats::Counter::EntityBufferUpdates));
-	defRenderPassStats.add_static_constant("COUNTER_INSTANCE_SETS", umath::to_integral(rendering::RenderPassStats::Counter::InstanceSets));
-	defRenderPassStats.add_static_constant("COUNTER_INSTANCE_SET_MESHES", umath::to_integral(rendering::RenderPassStats::Counter::InstanceSetMeshes));
-	defRenderPassStats.add_static_constant("COUNTER_INSTANCED_MESHES", umath::to_integral(rendering::RenderPassStats::Counter::InstancedMeshes));
-	defRenderPassStats.add_static_constant("COUNTER_INSTANCED_SKIPPED_RENDER_ITEMS", umath::to_integral(rendering::RenderPassStats::Counter::InstancedSkippedRenderItems));
-	defRenderPassStats.add_static_constant("COUNTER_ENTITIES_WITHOUT_INSTANCING", umath::to_integral(rendering::RenderPassStats::Counter::EntitiesWithoutInstancing));
-	defRenderPassStats.add_static_constant("COUNTER_COUNT", umath::to_integral(rendering::RenderPassStats::Counter::Count));
-	static_assert(umath::to_integral(rendering::RenderPassStats::Counter::Count) == 13);
+	defRenderPassStats.add_static_constant("COUNTER_SHADER_STATE_CHANGES", pragma::math::to_integral(rendering::RenderPassStats::Counter::ShaderStateChanges));
+	defRenderPassStats.add_static_constant("COUNTER_MATERIAL_STATE_CHANGES", pragma::math::to_integral(rendering::RenderPassStats::Counter::MaterialStateChanges));
+	defRenderPassStats.add_static_constant("COUNTER_ENTITY_STATE_CHANGES", pragma::math::to_integral(rendering::RenderPassStats::Counter::EntityStateChanges));
+	defRenderPassStats.add_static_constant("COUNTER_DRAW_CALLS", pragma::math::to_integral(rendering::RenderPassStats::Counter::DrawCalls));
+	defRenderPassStats.add_static_constant("COUNTER_DRAWN_MESHES", pragma::math::to_integral(rendering::RenderPassStats::Counter::DrawnMeshes));
+	defRenderPassStats.add_static_constant("COUNTER_DRAWN_VERTICES", pragma::math::to_integral(rendering::RenderPassStats::Counter::DrawnVertices));
+	defRenderPassStats.add_static_constant("COUNTER_DRAWN_TRIANGLES", pragma::math::to_integral(rendering::RenderPassStats::Counter::DrawnTriangles));
+	defRenderPassStats.add_static_constant("COUNTER_ENTITY_BUFFER_UPDATES", pragma::math::to_integral(rendering::RenderPassStats::Counter::EntityBufferUpdates));
+	defRenderPassStats.add_static_constant("COUNTER_INSTANCE_SETS", pragma::math::to_integral(rendering::RenderPassStats::Counter::InstanceSets));
+	defRenderPassStats.add_static_constant("COUNTER_INSTANCE_SET_MESHES", pragma::math::to_integral(rendering::RenderPassStats::Counter::InstanceSetMeshes));
+	defRenderPassStats.add_static_constant("COUNTER_INSTANCED_MESHES", pragma::math::to_integral(rendering::RenderPassStats::Counter::InstancedMeshes));
+	defRenderPassStats.add_static_constant("COUNTER_INSTANCED_SKIPPED_RENDER_ITEMS", pragma::math::to_integral(rendering::RenderPassStats::Counter::InstancedSkippedRenderItems));
+	defRenderPassStats.add_static_constant("COUNTER_ENTITIES_WITHOUT_INSTANCING", pragma::math::to_integral(rendering::RenderPassStats::Counter::EntitiesWithoutInstancing));
+	defRenderPassStats.add_static_constant("COUNTER_COUNT", pragma::math::to_integral(rendering::RenderPassStats::Counter::Count));
+	static_assert(pragma::math::to_integral(rendering::RenderPassStats::Counter::Count) == 13);
 
-	defRenderPassStats.add_static_constant("TIMER_GPU_EXECUTION", umath::to_integral(rendering::RenderPassStats::Timer::GpuExecution));
-	defRenderPassStats.add_static_constant("TIMER_RENDER_THREAD_WAIT", umath::to_integral(rendering::RenderPassStats::Timer::RenderThreadWait));
-	defRenderPassStats.add_static_constant("TIMER_CPU_EXECUTION", umath::to_integral(rendering::RenderPassStats::Timer::CpuExecution));
-	defRenderPassStats.add_static_constant("TIMER_MATERIAL_BIND", umath::to_integral(rendering::RenderPassStats::Timer::MaterialBind));
-	defRenderPassStats.add_static_constant("TIMER_ENTITY_BIND", umath::to_integral(rendering::RenderPassStats::Timer::EntityBind));
-	defRenderPassStats.add_static_constant("TIMER_DRAW_CALL", umath::to_integral(rendering::RenderPassStats::Timer::DrawCall));
-	defRenderPassStats.add_static_constant("TIMER_SHADER_BIND", umath::to_integral(rendering::RenderPassStats::Timer::ShaderBind));
-	defRenderPassStats.add_static_constant("TIMER_COUNT", umath::to_integral(rendering::RenderPassStats::Timer::Count));
-	defRenderPassStats.add_static_constant("TIMER_GPU_START", umath::to_integral(rendering::RenderPassStats::Timer::GpuStart));
-	defRenderPassStats.add_static_constant("TIMER_GPU_END", umath::to_integral(rendering::RenderPassStats::Timer::GpuEnd));
-	defRenderPassStats.add_static_constant("TIMER_CPU_START", umath::to_integral(rendering::RenderPassStats::Timer::CpuStart));
-	defRenderPassStats.add_static_constant("TIMER_CPU_END", umath::to_integral(rendering::RenderPassStats::Timer::CpuEnd));
-	defRenderPassStats.add_static_constant("TIMER_GPU_COUNT", umath::to_integral(rendering::RenderPassStats::Timer::GpuCount));
-	defRenderPassStats.add_static_constant("TIMER_CPU_COUNT", umath::to_integral(rendering::RenderPassStats::Timer::CpuCount));
-	static_assert(umath::to_integral(rendering::RenderPassStats::Timer::Count) == 7);
+	defRenderPassStats.add_static_constant("TIMER_GPU_EXECUTION", pragma::math::to_integral(rendering::RenderPassStats::Timer::GpuExecution));
+	defRenderPassStats.add_static_constant("TIMER_RENDER_THREAD_WAIT", pragma::math::to_integral(rendering::RenderPassStats::Timer::RenderThreadWait));
+	defRenderPassStats.add_static_constant("TIMER_CPU_EXECUTION", pragma::math::to_integral(rendering::RenderPassStats::Timer::CpuExecution));
+	defRenderPassStats.add_static_constant("TIMER_MATERIAL_BIND", pragma::math::to_integral(rendering::RenderPassStats::Timer::MaterialBind));
+	defRenderPassStats.add_static_constant("TIMER_ENTITY_BIND", pragma::math::to_integral(rendering::RenderPassStats::Timer::EntityBind));
+	defRenderPassStats.add_static_constant("TIMER_DRAW_CALL", pragma::math::to_integral(rendering::RenderPassStats::Timer::DrawCall));
+	defRenderPassStats.add_static_constant("TIMER_SHADER_BIND", pragma::math::to_integral(rendering::RenderPassStats::Timer::ShaderBind));
+	defRenderPassStats.add_static_constant("TIMER_COUNT", pragma::math::to_integral(rendering::RenderPassStats::Timer::Count));
+	defRenderPassStats.add_static_constant("TIMER_GPU_START", pragma::math::to_integral(rendering::RenderPassStats::Timer::GpuStart));
+	defRenderPassStats.add_static_constant("TIMER_GPU_END", pragma::math::to_integral(rendering::RenderPassStats::Timer::GpuEnd));
+	defRenderPassStats.add_static_constant("TIMER_CPU_START", pragma::math::to_integral(rendering::RenderPassStats::Timer::CpuStart));
+	defRenderPassStats.add_static_constant("TIMER_CPU_END", pragma::math::to_integral(rendering::RenderPassStats::Timer::CpuEnd));
+	defRenderPassStats.add_static_constant("TIMER_GPU_COUNT", pragma::math::to_integral(rendering::RenderPassStats::Timer::GpuCount));
+	defRenderPassStats.add_static_constant("TIMER_CPU_COUNT", pragma::math::to_integral(rendering::RenderPassStats::Timer::CpuCount));
+	static_assert(pragma::math::to_integral(rendering::RenderPassStats::Timer::Count) == 7);
 	defRenderPassStats.def("Copy", static_cast<rendering::RenderPassStats (*)(lua::State *, rendering::RenderPassStats &)>([](lua::State *l, rendering::RenderPassStats &renderStats) -> rendering::RenderPassStats { return renderStats; }));
 	defRenderPassStats.def("GetCount", static_cast<uint32_t (*)(lua::State *, rendering::RenderPassStats &, rendering::RenderPassStats::Counter)>([](lua::State *l, rendering::RenderPassStats &renderStats, rendering::RenderPassStats::Counter counter) -> uint32_t { return renderStats->GetCount(counter); }));
 	defRenderPassStats.def("GetTime",
@@ -1250,38 +1250,38 @@ void pragma::CGame::RegisterLuaClasses()
 	auto defRenderStats = luabind::class_<rendering::RenderStats>("RenderStats");
 	defRenderStats.def(luabind::constructor<>());
 	defRenderStats.def(luabind::self + luabind::const_self);
-	defRenderStats.add_static_constant("RENDER_PASS_LIGHTING_PASS", umath::to_integral(rendering::RenderStats::RenderPass::LightingPass));
-	defRenderStats.add_static_constant("RENDER_PASS_LIGHTING_PASS_TRANSLUCENT", umath::to_integral(rendering::RenderStats::RenderPass::LightingPassTranslucent));
-	defRenderStats.add_static_constant("RENDER_PASS_PREPASS", umath::to_integral(rendering::RenderStats::RenderPass::Prepass));
-	defRenderStats.add_static_constant("RENDER_PASS_SHADOW_PASS", umath::to_integral(rendering::RenderStats::RenderPass::ShadowPass));
-	defRenderStats.add_static_constant("RENDER_PASS_GLOW_PASS", umath::to_integral(rendering::RenderStats::RenderPass::GlowPass));
-	defRenderStats.add_static_constant("RENDER_PASS_COUNT", umath::to_integral(rendering::RenderStats::RenderPass::Count));
-	static_assert(umath::to_integral(rendering::RenderStats::RenderPass::Count) == 5);
+	defRenderStats.add_static_constant("RENDER_PASS_LIGHTING_PASS", pragma::math::to_integral(rendering::RenderStats::RenderPass::LightingPass));
+	defRenderStats.add_static_constant("RENDER_PASS_LIGHTING_PASS_TRANSLUCENT", pragma::math::to_integral(rendering::RenderStats::RenderPass::LightingPassTranslucent));
+	defRenderStats.add_static_constant("RENDER_PASS_PREPASS", pragma::math::to_integral(rendering::RenderStats::RenderPass::Prepass));
+	defRenderStats.add_static_constant("RENDER_PASS_SHADOW_PASS", pragma::math::to_integral(rendering::RenderStats::RenderPass::ShadowPass));
+	defRenderStats.add_static_constant("RENDER_PASS_GLOW_PASS", pragma::math::to_integral(rendering::RenderStats::RenderPass::GlowPass));
+	defRenderStats.add_static_constant("RENDER_PASS_COUNT", pragma::math::to_integral(rendering::RenderStats::RenderPass::Count));
+	static_assert(pragma::math::to_integral(rendering::RenderStats::RenderPass::Count) == 5);
 
-	defRenderStats.add_static_constant("TIMER_LIGHT_CULLING_GPU", umath::to_integral(rendering::RenderStats::RenderStage::LightCullingGpu));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpu));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FOG", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuFog));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_DOF", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuDoF));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_BLOOM", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuBloom));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_GLOW", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuGlow));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_TONE_MAPPING", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuToneMapping));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FXAA", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuFxaa));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_SSAO", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuSsao));
-	defRenderStats.add_static_constant("TIMER_RENDER_SCENE_GPU", umath::to_integral(rendering::RenderStats::RenderStage::RenderSceneGpu));
-	defRenderStats.add_static_constant("TIMER_RENDERER_GPU", umath::to_integral(rendering::RenderStats::RenderStage::RendererGpu));
-	defRenderStats.add_static_constant("TIMER_UPDATE_RENDER_BUFFERS_GPU", umath::to_integral(rendering::RenderStats::RenderStage::UpdateRenderBuffersGpu));
-	defRenderStats.add_static_constant("TIMER_UPDATE_PREPASS_RENDER_BUFFERS_GPU", umath::to_integral(rendering::RenderStats::RenderStage::UpdatePrepassRenderBuffersGpu));
-	defRenderStats.add_static_constant("TIMER_RENDER_SHADOWS_GPU", umath::to_integral(rendering::RenderStats::RenderStage::RenderShadowsGpu));
-	defRenderStats.add_static_constant("TIMER_RENDER_PARTICLES_GPU", umath::to_integral(rendering::RenderStats::RenderStage::RenderParticlesGpu));
+	defRenderStats.add_static_constant("TIMER_LIGHT_CULLING_GPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::LightCullingGpu));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpu));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FOG", pragma::math::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuFog));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_DOF", pragma::math::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuDoF));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_BLOOM", pragma::math::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuBloom));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_GLOW", pragma::math::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuGlow));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_TONE_MAPPING", pragma::math::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuToneMapping));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FXAA", pragma::math::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuFxaa));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_SSAO", pragma::math::to_integral(rendering::RenderStats::RenderStage::PostProcessingGpuSsao));
+	defRenderStats.add_static_constant("TIMER_RENDER_SCENE_GPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::RenderSceneGpu));
+	defRenderStats.add_static_constant("TIMER_RENDERER_GPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::RendererGpu));
+	defRenderStats.add_static_constant("TIMER_UPDATE_RENDER_BUFFERS_GPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::UpdateRenderBuffersGpu));
+	defRenderStats.add_static_constant("TIMER_UPDATE_PREPASS_RENDER_BUFFERS_GPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::UpdatePrepassRenderBuffersGpu));
+	defRenderStats.add_static_constant("TIMER_RENDER_SHADOWS_GPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::RenderShadowsGpu));
+	defRenderStats.add_static_constant("TIMER_RENDER_PARTICLES_GPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::RenderParticlesGpu));
 
-	defRenderStats.add_static_constant("TIMER_LIGHT_CULLING_CPU", umath::to_integral(rendering::RenderStats::RenderStage::LightCullingCpu));
-	defRenderStats.add_static_constant("TIMER_PREPASS_EXECUTION_CPU", umath::to_integral(rendering::RenderStats::RenderStage::PrepassExecutionCpu));
-	defRenderStats.add_static_constant("TIMER_LIGHTING_PASS_EXECUTION_CPU", umath::to_integral(rendering::RenderStats::RenderStage::LightingPassExecutionCpu));
-	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_EXECUTION_CPU", umath::to_integral(rendering::RenderStats::RenderStage::PostProcessingExecutionCpu));
-	defRenderStats.add_static_constant("TIMER_UPDATE_RENDER_BUFFERS_CPU", umath::to_integral(rendering::RenderStats::RenderStage::UpdateRenderBuffersCpu));
-	defRenderStats.add_static_constant("TIMER_RENDER_SCENE_CPU", umath::to_integral(rendering::RenderStats::RenderStage::RenderSceneCpu));
-	defRenderStats.add_static_constant("TIMER_COUNT", umath::to_integral(rendering::RenderStats::RenderStage::Count));
-	static_assert(umath::to_integral(rendering::RenderStats::RenderStage::Count) == 21);
+	defRenderStats.add_static_constant("TIMER_LIGHT_CULLING_CPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::LightCullingCpu));
+	defRenderStats.add_static_constant("TIMER_PREPASS_EXECUTION_CPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::PrepassExecutionCpu));
+	defRenderStats.add_static_constant("TIMER_LIGHTING_PASS_EXECUTION_CPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::LightingPassExecutionCpu));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_EXECUTION_CPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::PostProcessingExecutionCpu));
+	defRenderStats.add_static_constant("TIMER_UPDATE_RENDER_BUFFERS_CPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::UpdateRenderBuffersCpu));
+	defRenderStats.add_static_constant("TIMER_RENDER_SCENE_CPU", pragma::math::to_integral(rendering::RenderStats::RenderStage::RenderSceneCpu));
+	defRenderStats.add_static_constant("TIMER_COUNT", pragma::math::to_integral(rendering::RenderStats::RenderStage::Count));
+	static_assert(pragma::math::to_integral(rendering::RenderStats::RenderStage::Count) == 21);
 	defRenderStats.def("Copy", static_cast<rendering::RenderStats (*)(lua::State *, rendering::RenderStats &)>([](lua::State *l, rendering::RenderStats &renderStats) -> rendering::RenderStats { return renderStats; }));
 	defRenderStats.def("GetPassStats", static_cast<rendering::RenderPassStats *(*)(lua::State *, rendering::RenderStats &, rendering::RenderStats::RenderPass)>([](lua::State *l, rendering::RenderStats &renderStats, rendering::RenderStats::RenderPass pass) -> rendering::RenderPassStats * { return &renderStats.GetPassStats(pass); }));
 	defRenderStats.def("GetTime",
@@ -1289,11 +1289,11 @@ void pragma::CGame::RegisterLuaClasses()
 	modGame[defRenderStats];
 
 	auto defDrawSceneInfo = luabind::class_<::pragma::rendering::DrawSceneInfo>("DrawSceneInfo");
-	defDrawSceneInfo.add_static_constant("FLAG_FLIP_VERTICALLY_BIT", umath::to_integral(::pragma::rendering::DrawSceneInfo::Flags::FlipVertically));
-	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_RENDER_BIT", umath::to_integral(::pragma::rendering::DrawSceneInfo::Flags::DisableRender));
-	defDrawSceneInfo.add_static_constant("FLAG_REFLECTION_BIT", umath::to_integral(::pragma::rendering::DrawSceneInfo::Flags::Reflection));
-	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_PREPASS_BIT", umath::to_integral(::pragma::rendering::DrawSceneInfo::Flags::DisablePrepass));
-	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_LIGHTING_PASS_BIT", umath::to_integral(::pragma::rendering::DrawSceneInfo::Flags::DisableLightingPass));
+	defDrawSceneInfo.add_static_constant("FLAG_FLIP_VERTICALLY_BIT", pragma::math::to_integral(::pragma::rendering::DrawSceneInfo::Flags::FlipVertically));
+	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_RENDER_BIT", pragma::math::to_integral(::pragma::rendering::DrawSceneInfo::Flags::DisableRender));
+	defDrawSceneInfo.add_static_constant("FLAG_REFLECTION_BIT", pragma::math::to_integral(::pragma::rendering::DrawSceneInfo::Flags::Reflection));
+	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_PREPASS_BIT", pragma::math::to_integral(::pragma::rendering::DrawSceneInfo::Flags::DisablePrepass));
+	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_LIGHTING_PASS_BIT", pragma::math::to_integral(::pragma::rendering::DrawSceneInfo::Flags::DisableLightingPass));
 	defDrawSceneInfo.def(luabind::constructor<>());
 	defDrawSceneInfo.property("scene", static_cast<luabind::object (*)(const ::pragma::rendering::DrawSceneInfo &)>([](const ::pragma::rendering::DrawSceneInfo &drawSceneInfo) -> luabind::object { return drawSceneInfo.scene.valid() ? drawSceneInfo.scene->GetLuaObject() : luabind::object {}; }),
 	  static_cast<void (*)(lua::State *, ::pragma::rendering::DrawSceneInfo &, luabind::object)>([](lua::State *l, ::pragma::rendering::DrawSceneInfo &drawSceneInfo, luabind::object o) {
@@ -1305,7 +1305,7 @@ void pragma::CGame::RegisterLuaClasses()
 		  drawSceneInfo.scene = scene.GetHandle<pragma::CSceneComponent>();
 	  }));
 	defDrawSceneInfo.property("toneMapping", static_cast<luabind::object (*)(lua::State *, ::pragma::rendering::DrawSceneInfo &)>([](lua::State *l, ::pragma::rendering::DrawSceneInfo &drawSceneInfo) -> luabind::object {
-		return drawSceneInfo.toneMapping.has_value() ? luabind::object {l, umath::to_integral(*drawSceneInfo.toneMapping)} : luabind::object {};
+		return drawSceneInfo.toneMapping.has_value() ? luabind::object {l, pragma::math::to_integral(*drawSceneInfo.toneMapping)} : luabind::object {};
 	}),
 	  static_cast<void (*)(lua::State *, ::pragma::rendering::DrawSceneInfo &, luabind::object)>([](lua::State *l, ::pragma::rendering::DrawSceneInfo &drawSceneInfo, luabind::object o) {
 		  if(Lua::IsSet(l, 2) == false) {
@@ -1398,10 +1398,10 @@ void pragma::CGame::RegisterLuaClasses()
 	modGame[defDrawSceneInfo];
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",
-	  {{"RENDER_MASK_NONE", umath::to_integral(pragma::rendering::RenderMask::None)},
+	  {{"RENDER_MASK_NONE", pragma::math::to_integral(pragma::rendering::RenderMask::None)},
 
-	    {"SCENE_RENDER_PASS_NONE", umath::to_integral(pragma::rendering::SceneRenderPass::None)}, {"SCENE_RENDER_PASS_WORLD", umath::to_integral(pragma::rendering::SceneRenderPass::World)}, {"SCENE_RENDER_PASS_VIEW", umath::to_integral(pragma::rendering::SceneRenderPass::View)},
-	    {"SCENE_RENDER_PASS_SKY", umath::to_integral(pragma::rendering::SceneRenderPass::Sky)}, {"SCENE_RENDER_PASS_COUNT", umath::to_integral(pragma::rendering::SceneRenderPass::Count)}});
+	    {"SCENE_RENDER_PASS_NONE", pragma::math::to_integral(pragma::rendering::SceneRenderPass::None)}, {"SCENE_RENDER_PASS_WORLD", pragma::math::to_integral(pragma::rendering::SceneRenderPass::World)}, {"SCENE_RENDER_PASS_VIEW", pragma::math::to_integral(pragma::rendering::SceneRenderPass::View)},
+	    {"SCENE_RENDER_PASS_SKY", pragma::math::to_integral(pragma::rendering::SceneRenderPass::Sky)}, {"SCENE_RENDER_PASS_COUNT", pragma::math::to_integral(pragma::rendering::SceneRenderPass::Count)}});
 
 	auto defRenderQueue = luabind::class_<pragma::rendering::RenderQueue>("RenderQueue");
 	defRenderQueue.def("WaitForCompletion", static_cast<void (*)(lua::State *, const pragma::rendering::RenderQueue &)>([](lua::State *l, const pragma::rendering::RenderQueue &renderQueue) { renderQueue.WaitForCompletion(); }));
@@ -1443,16 +1443,16 @@ void pragma::CGame::RegisterLuaClasses()
 	auto modelClassDef = luabind::class_<pragma::asset::Model>("Model");
 
 	auto defMdlExportInfo = luabind::class_<pragma::asset::ModelExportInfo>("ExportInfo");
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_PNG", umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::PNG));
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_BMP", umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::BMP));
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_TGA", umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::TGA));
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_JPG", umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::JPG));
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_HDR", umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::HDR));
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_DDS", umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::DDS));
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_KTX", umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::KTX));
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_PNG", pragma::math::to_integral(pragma::asset::ModelExportInfo::ImageFormat::PNG));
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_BMP", pragma::math::to_integral(pragma::asset::ModelExportInfo::ImageFormat::BMP));
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_TGA", pragma::math::to_integral(pragma::asset::ModelExportInfo::ImageFormat::TGA));
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_JPG", pragma::math::to_integral(pragma::asset::ModelExportInfo::ImageFormat::JPG));
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_HDR", pragma::math::to_integral(pragma::asset::ModelExportInfo::ImageFormat::HDR));
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_DDS", pragma::math::to_integral(pragma::asset::ModelExportInfo::ImageFormat::DDS));
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_KTX", pragma::math::to_integral(pragma::asset::ModelExportInfo::ImageFormat::KTX));
 
-	defMdlExportInfo.add_static_constant("DEVICE_CPU", umath::to_integral(pragma::rendering::cycles::SceneInfo::DeviceType::CPU));
-	defMdlExportInfo.add_static_constant("DEVICE_GPU", umath::to_integral(pragma::rendering::cycles::SceneInfo::DeviceType::GPU));
+	defMdlExportInfo.add_static_constant("DEVICE_CPU", pragma::math::to_integral(pragma::rendering::cycles::SceneInfo::DeviceType::CPU));
+	defMdlExportInfo.add_static_constant("DEVICE_GPU", pragma::math::to_integral(pragma::rendering::cycles::SceneInfo::DeviceType::GPU));
 	defMdlExportInfo.def(luabind::constructor<>());
 	defMdlExportInfo.def_readwrite("exportAnimations", &pragma::asset::ModelExportInfo::exportAnimations);
 	defMdlExportInfo.def_readwrite("exportSkinnedMeshData", &pragma::asset::ModelExportInfo::exportSkinnedMeshData);

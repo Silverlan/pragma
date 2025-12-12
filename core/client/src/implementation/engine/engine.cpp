@@ -54,7 +54,7 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 static pragma::CEngine *g_engine = nullptr;
 pragma::CEngine::CEngine(int argc, char *argv[])
     : pragma::Engine(argc, argv), rendering::RenderContext(), m_nearZ(pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z), //10.0f), //0.1f
-      m_farZ(pragma::baseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
+      m_farZ(pragma::baseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(pragma::util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
 {
 	g_engine = this;
 
@@ -92,8 +92,8 @@ pragma::CEngine::CEngine(int argc, char *argv[])
 		m_cpuProfilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
 		m_cpuProfilingStageManager->InitializeProfilingStageManager(cpuProfiler);
 	});
-	m_coreInputBindingLayer = ::util::make_shared<CoreInputBindingLayer>();
-	auto inputLayer = ::util::make_shared<InputBindingLayer>();
+	m_coreInputBindingLayer = pragma::util::make_shared<CoreInputBindingLayer>();
+	auto inputLayer = pragma::util::make_shared<InputBindingLayer>();
 	inputLayer->identifier = "core";
 	AddInputBindingLayer(inputLayer);
 
@@ -102,9 +102,9 @@ pragma::CEngine::CEngine(int argc, char *argv[])
 		importerInfo.name = "glTF";
 		importerInfo.fileExtensions = {{"gltf", false}, {"glb", true}, {"vrm", true}}; // VRM is based on glTF ( https://vrm.dev/en/ )
 		GetAssetManager().RegisterImporter(importerInfo, pragma::asset::Type::Model, [](pragma::Game &game, ufile::IFile &f, const std::optional<std::string> &mdlPath, std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
-			util::Path path {};
+			pragma::util::Path path {};
 			if(mdlPath.has_value()) {
-				path = util::Path::CreateFile(*mdlPath);
+				path = pragma::util::Path::CreateFile(*mdlPath);
 				path.PopBack();
 			}
 			auto mdl = pragma::asset::import_model(f, errMsg, path);
@@ -121,9 +121,9 @@ pragma::CEngine::CEngine(int argc, char *argv[])
 		importerInfo.name = "fbx";
 		importerInfo.fileExtensions = {{"fbx", true}};
 		GetAssetManager().RegisterImporter(importerInfo, pragma::asset::Type::Model, [](pragma::Game &game, ufile::IFile &f, const std::optional<std::string> &mdlPath, std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
-			util::Path path {};
+			pragma::util::Path path {};
 			if(mdlPath.has_value()) {
-				path = util::Path::CreateFile(*mdlPath);
+				path = pragma::util::Path::CreateFile(*mdlPath);
 				path.PopBack();
 			}
 			auto result = pragma::asset::import_fbx(f, errMsg, path);
@@ -177,7 +177,7 @@ void pragma::CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 		ss << "Device ID: " << deviceInfo.deviceId << "\n";
 		ss << "Driver Version: " << deviceInfo.driverVersion << "\n";
 		ss << "Vendor: " << prosper::util::to_string(deviceInfo.vendor) << "\n";
-		ss << "Vendor ID: " << umath::to_integral(deviceInfo.vendor);
+		ss << "Vendor ID: " << pragma::math::to_integral(deviceInfo.vendor);
 	};
 	auto deviceInfo = renderContext.GetVendorDeviceInfo();
 	if(deviceInfo.has_value()) {
@@ -263,7 +263,7 @@ Vector2i pragma::CEngine::GetRenderResolution() const
 
 double pragma::CEngine::GetFPS() const { return m_fps; }
 double pragma::CEngine::GetFrameTime() const { return m_tFPSTime * 1'000.0; }
-Double pragma::CEngine::GetDeltaFrameTime() const { return util::clock::to_seconds(m_tDeltaFrameTime); }
+Double pragma::CEngine::GetDeltaFrameTime() const { return pragma::util::clock::to_seconds(m_tDeltaFrameTime); }
 
 static auto cvFrameLimit = pragma::console::get_client_con_var("cl_max_fps");
 float pragma::CEngine::GetFPSLimit() const { return cvFrameLimit->GetFloat(); }
@@ -321,7 +321,7 @@ void pragma::CEngine::MouseInput(prosper::Window &window, pragma::platform::Mous
 		return;
 	if(pragma::gui::WGUI::GetInstance().HandleMouseInput(window, button, state, mods))
 		return;
-	button = static_cast<pragma::platform::MouseButton>(umath::to_integral(button) + umath::to_integral(pragma::platform::Key::Last));
+	button = static_cast<pragma::platform::MouseButton>(pragma::math::to_integral(button) + pragma::math::to_integral(pragma::platform::Key::Last));
 	if(client != nullptr && client->MouseInput(button, state, mods) == false)
 		return;
 	Input(static_cast<int>(button), state);
@@ -334,7 +334,7 @@ void pragma::CEngine::GetMappedKeys(const std::string &cvarName, std::vector<pra
 		return;
 	std::string cmd;
 	std::vector<std::string> argv {};
-	ustring::get_sequence_commands(cvarName, [&cmd, &argv](std::string cmdOther, std::vector<std::string> argvOther) {
+	pragma::string::get_sequence_commands(cvarName, [&cmd, &argv](std::string cmdOther, std::vector<std::string> argvOther) {
 		cmd = cmdOther;
 		argv = argvOther;
 	});
@@ -343,7 +343,7 @@ void pragma::CEngine::GetMappedKeys(const std::string &cvarName, std::vector<pra
 		for(auto &pair : keyMappings) {
 			auto &keyBind = pair.second;
 			auto bFoundCvar = false;
-			ustring::get_sequence_commands(keyBind.GetBind(), [&cmd, &argv, &bFoundCvar](std::string cmdOther, std::vector<std::string> &argvOther) {
+			pragma::string::get_sequence_commands(keyBind.GetBind(), [&cmd, &argv, &bFoundCvar](std::string cmdOther, std::vector<std::string> &argvOther) {
 				if(cmdOther == "toggle" && argvOther.empty() == false)
 					cmdOther += " " + argvOther.front();
 				if(cmdOther == cmd && argv.size() == argvOther.size()) {
@@ -395,11 +395,11 @@ void pragma::CEngine::JoystickAxisInput(prosper::Window &window, const pragma::p
 
 	m_joystickKeyStates[key] = state;
 	mods |= pragma::platform::Modifier::AxisInput;
-	if(umath::abs(newVal) > AXIS_PRESS_THRESHOLD) {
-		if(umath::abs(oldVal) <= AXIS_PRESS_THRESHOLD)
+	if(pragma::math::abs(newVal) > AXIS_PRESS_THRESHOLD) {
+		if(pragma::math::abs(oldVal) <= AXIS_PRESS_THRESHOLD)
 			mods |= pragma::platform::Modifier::AxisPress; // Axis represents actual button press
 	}
-	else if(umath::abs(oldVal) > AXIS_PRESS_THRESHOLD)
+	else if(pragma::math::abs(oldVal) > AXIS_PRESS_THRESHOLD)
 		mods |= pragma::platform::Modifier::AxisRelease; // Axis represents actual button release
 	KeyboardInput(window, key, -1, state, mods, newVal);
 }
@@ -408,7 +408,7 @@ bool pragma::CEngine::IsValidAxisInput(float axisInput) const
 {
 	if(!pragma::get_client_state())
 		return false;
-	return (umath::abs(axisInput) > cvAxisInputThreshold->GetFloat()) ? true : false;
+	return (pragma::math::abs(axisInput) > cvAxisInputThreshold->GetFloat()) ? true : false;
 }
 
 bool pragma::CEngine::GetInputButtonState(float axisInput, pragma::platform::Modifier mods, pragma::platform::KeyState &inOutState) const
@@ -466,10 +466,10 @@ void pragma::CEngine::KeyboardInput(prosper::Window &window, pragma::platform::K
 	}
 	if(client != nullptr && client->KeyboardInput(key, scanCode, state, mods, magnitude) == false)
 		return;
-	auto ikey = umath::to_integral(key);
-	if(ikey >= umath::to_integral(pragma::platform::Key::A) && ikey <= umath::to_integral(pragma::platform::Key::Z))
+	auto ikey = pragma::math::to_integral(key);
+	if(ikey >= pragma::math::to_integral(pragma::platform::Key::A) && ikey <= pragma::math::to_integral(pragma::platform::Key::Z))
 		key = static_cast<pragma::platform::Key>(std::tolower(ikey));
-	Input(umath::to_integral(key), state, buttonState, mods, magnitude);
+	Input(pragma::math::to_integral(key), state, buttonState, mods, magnitude);
 }
 void pragma::CEngine::CharInput(prosper::Window &window, unsigned int c)
 {
@@ -508,7 +508,7 @@ void pragma::CEngine::ScrollInput(prosper::Window &window, Vector2 offset)
 
 void pragma::CEngine::OnWindowFocusChanged(prosper::Window &window, bool bFocused)
 {
-	umath::set_flag(m_stateFlags, StateFlags::WindowFocused, bFocused);
+	pragma::math::set_flag(m_stateFlags, StateFlags::WindowFocused, bFocused);
 	auto *client = pragma::get_client_state();
 	if(client != nullptr)
 		client->UpdateSoundVolume();
@@ -529,8 +529,8 @@ void pragma::CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::s
 	m_droppedFiles.reserve(files.size());
 	auto addFile = [this](const std::string &fileName, const std::string &rootPath) {
 		m_droppedFiles.push_back(DroppedFile {rootPath, fileName});
-		auto path = util::Path::CreateFile(fileName).GetString();
-		ustring::to_lower(path);
+		auto path = pragma::util::Path::CreateFile(fileName).GetString();
+		pragma::string::to_lower(path);
 		g_droppedFiles.insert(std::make_pair(ufile::get_file_from_filename(path), path));
 	};
 	std::function<void(const std::vector<std::string> &, const std::optional<std::string> &)> addFiles = nullptr;
@@ -541,7 +541,7 @@ void pragma::CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::s
 			else if(filemanager::is_system_dir(f)) {
 				auto subRootPath = rootPath;
 				if(!subRootPath) {
-					auto path = util::Path::CreatePath(f);
+					auto path = pragma::util::Path::CreatePath(f);
 					path.PopBack();
 					subRootPath = path.GetString();
 				}
@@ -549,16 +549,16 @@ void pragma::CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::s
 				std::vector<std::string> subDirs;
 				filemanager::find_system_files(f + "/*", &subFiles, &subDirs);
 				for(auto &fileName : subFiles)
-					addFile(util::Path::CreateFile(f, fileName).GetString(), *subRootPath);
+					addFile(pragma::util::Path::CreateFile(f, fileName).GetString(), *subRootPath);
 				for(auto &subDir : subDirs)
-					subDir = util::Path::CreatePath(f, subDir).GetString();
+					subDir = pragma::util::Path::CreatePath(f, subDir).GetString();
 				addFiles(subDirs, subRootPath);
 			}
 		}
 	};
 	addFiles(files, {});
 
-	util::ScopeGuard g {[this]() {
+	pragma::util::ScopeGuard g {[this]() {
 		m_droppedFiles.clear();
 		m_droppedFiles.shrink_to_fit();
 	}};
@@ -611,7 +611,7 @@ void pragma::CEngine::OnIMEStatusChanged(prosper::Window &window, bool imeEnable
 	pragma::gui::WGUI::GetInstance().HandleIMEStatusChanged(window, imeEnabled);
 	client->OnIMEStatusChanged(window, imeEnabled);
 }
-bool pragma::CEngine::IsWindowFocused() const { return umath::is_flag_set(m_stateFlags, StateFlags::WindowFocused); }
+bool pragma::CEngine::IsWindowFocused() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::WindowFocused); }
 
 void pragma::CEngine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
 {
@@ -640,25 +640,25 @@ void register_game_shaders();
 
 bool pragma::CEngine::IsWindowless() const { return g_windowless; }
 bool pragma::CEngine::IsCPURenderingOnly() const { return g_cpuRendering; }
-bool pragma::CEngine::IsClosed() const { return umath::is_flag_set(m_stateFlags, StateFlags::CEClosed); }
+bool pragma::CEngine::IsClosed() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::CEClosed); }
 
 void pragma::CEngine::HandleOpenGLFallback()
 {
-	if(ustring::compare(GetRenderAPI(), std::string {"opengl"}, false))
+	if(pragma::string::compare(GetRenderAPI(), std::string {"opengl"}, false))
 		return;
 	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
 	if(!cl)
 		return;
 	auto msg = pragma::locale::get_text("prompt_fallback_to_opengl");
-	if(util::debug::show_message_prompt(msg, util::debug::MessageBoxButtons::YesNo, util::get_program_name()) != util::debug::MessageBoxButton::Yes)
+	if(pragma::debug::show_message_prompt(msg, pragma::debug::MessageBoxButtons::YesNo, pragma::util::get_program_name()) != pragma::debug::MessageBoxButton::Yes)
 		return;
 	cl->SetConVar("render_api", "opengl");
 	SaveClientConfig();
 	ShutDown();
-	util::CommandInfo cmdInfo;
-	cmdInfo.command = util::get_program_name();
+	pragma::util::CommandInfo cmdInfo;
+	cmdInfo.command = pragma::util::get_program_name();
 	cmdInfo.absoluteCommandPath = false;
-	util::start_process(cmdInfo);
+	pragma::util::start_process(cmdInfo);
 }
 
 std::optional<std::string> g_waylandLibdecorPlugin;
@@ -669,7 +669,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	SetCLIOnly(g_cli);
 
 #ifdef __linux__
-	auto xdgSessionType = util::get_env_variable("XDG_SESSION_TYPE");
+	auto xdgSessionType = pragma::util::get_env_variable("XDG_SESSION_TYPE");
 	if(!xdgSessionType || *xdgSessionType != "x11") {
 		if(!g_waylandLibdecorPlugin)
 			g_waylandLibdecorPlugin = "gtk";
@@ -677,10 +677,10 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 			// Note: Using cairo plugin with wayland will likely crash on startup
 			if (*g_waylandLibdecorPlugin == "cairo")
 				Con::cwar << "Using libdecor cairo plugin may crash on startup!" << Con::endl;
-			::util::set_env_variable("GDK_BACKEND", "wayland");
+			pragma::util::set_env_variable("GDK_BACKEND", "wayland");
 
-			auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor/plugins", *g_waylandLibdecorPlugin);
-			::util::set_env_variable("LIBDECOR_PLUGIN_DIR", path.GetString());
+			auto path = pragma::util::FilePath(pragma::util::get_program_path(), "modules/graphics/vulkan/libdecor/plugins", *g_waylandLibdecorPlugin);
+			pragma::util::set_env_variable("LIBDECOR_PLUGIN_DIR", path.GetString());
 		}
 	}
 #endif
@@ -738,11 +738,11 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 			contextCreateInfo.extensions[std::string {key}] = availability;
 		}
 
-		auto findAbsoluteFilePath = [](const std::string &relFilePath) -> util::Path {
+		auto findAbsoluteFilePath = [](const std::string &relFilePath) -> pragma::util::Path {
 			std::string strFilePath;
 			if(filemanager::find_absolute_path(relFilePath, strFilePath))
-				return util::FilePath(strFilePath);
-			return util::FilePath(util::get_program_path(), relFilePath);
+				return pragma::util::FilePath(strFilePath);
+			return pragma::util::FilePath(pragma::util::get_program_path(), relFilePath);
 		};
 
 		std::vector<std::string> layers;
@@ -780,7 +780,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 									else if constexpr(std::is_same_v<T, udm::String>) {
 										if(settingType == "file") {
 											auto *values = new const char *[size];
-											std::vector<util::Path> tmpPaths;
+											std::vector<pragma::util::Path> tmpPaths;
 											tmpPaths.reserve(size);
 											for(size_t i = 0; i < size; ++i) {
 												auto filePath = findAbsoluteFilePath(a->GetValue<std::string>(i));
@@ -848,10 +848,10 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 
 	if(windowRes) {
 		std::vector<std::string> vals;
-		ustring::explode(*windowRes, "x", vals);
+		pragma::string::explode(*windowRes, "x", vals);
 		if(vals.size() >= 2) {
-			contextCreateInfo.width = util::to_int(vals[0]);
-			contextCreateInfo.height = util::to_int(vals[1]);
+			contextCreateInfo.width = pragma::util::to_int(vals[0]);
+			contextCreateInfo.height = pragma::util::to_int(vals[1]);
 		}
 	}
 	// SetResolution(Vector2i(contextCreateInfo.width,contextCreateInfo.height));
@@ -859,9 +859,9 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	auto renderRes = findCmdArg("cl_render_resolution");
 	if(renderRes) {
 		std::vector<std::string> vals;
-		ustring::explode(*renderRes, "x", vals);
+		pragma::string::explode(*renderRes, "x", vals);
 		if(vals.size() >= 2) {
-			m_renderResolution = {util::to_int(vals[0]), util::to_int(vals[1])};
+			m_renderResolution = {util::to_int(vals[0]), pragma::util::to_int(vals[1])};
 		}
 	}
 	//
@@ -869,7 +869,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	auto windowMode = findCmdArg("cl_render_window_mode");
 	int mode = 1;
 	if(windowMode)
-		mode = util::to_int(*windowMode);
+		mode = pragma::util::to_int(*windowMode);
 	auto &initialWindowSettings = GetRenderContext().GetInitialWindowSettings();
 	initialWindowSettings.windowedMode = (mode != 0);
 	initialWindowSettings.decorated = ((mode == 2) ? false : true);
@@ -887,7 +887,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 
 	auto renderMonitor = findCmdArg("cl_render_monitor");
 	if(renderMonitor) {
-		auto monitor = util::to_int(*renderMonitor);
+		auto monitor = pragma::util::to_int(*renderMonitor);
 		auto monitors = pragma::platform::get_monitors();
 		if(monitor < monitors.size() && monitor > 0)
 			initialWindowSettings.monitor = monitors[monitor];
@@ -897,15 +897,15 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	if(gpuDevice) {
 		auto device = *gpuDevice;
 		std::vector<std::string> subStrings;
-		ustring::explode(device, ",", subStrings);
+		pragma::string::explode(device, ",", subStrings);
 		if(subStrings.size() >= 2)
-			contextCreateInfo.device = {static_cast<prosper::Vendor>(util::to_uint(subStrings.at(0))), util::to_uint(subStrings.at(1))};
+			contextCreateInfo.device = {static_cast<prosper::Vendor>(pragma::util::to_uint(subStrings.at(0))), pragma::util::to_uint(subStrings.at(1))};
 	}
 
 	auto presentMode = prosper::PresentModeKHR::Mailbox;
 	auto renderPresentMode = findCmdArg("cl_render_present_mode");
 	if(renderPresentMode) {
-		auto mode = util::to_int(*renderPresentMode);
+		auto mode = pragma::util::to_int(*renderPresentMode);
 		if(mode == 0)
 			presentMode = prosper::PresentModeKHR::Immediate;
 		else if(mode == 1)
@@ -928,17 +928,17 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	auto h = GetConsoleWindow();
 	if(g_titleBarColor.has_value()) {
 		auto tmp = *g_titleBarColor;
-		umath::swap(tmp.r, tmp.b);
+		pragma::math::swap(tmp.r, tmp.b);
 		auto hex = tmp.ToHexColorRGB();
-		COLORREF hexCol = umath::to_hex_number("0x" + hex);
+		COLORREF hexCol = pragma::math::to_hex_number("0x" + hex);
 		const DWORD ATTR_CAPTION_COLOR = 35; // See DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR, can't use the enum because it may not be available and there's no way to check for it
 		DwmSetWindowAttribute(h, ATTR_CAPTION_COLOR, &hexCol, sizeof(hexCol));
 	}
 	if(g_borderColor.has_value()) {
 		auto tmp = *g_borderColor;
-		umath::swap(tmp.r, tmp.b);
+		pragma::math::swap(tmp.r, tmp.b);
 		auto hex = tmp.ToHexColorRGB();
-		COLORREF hexCol = umath::to_hex_number("0x" + hex);
+		COLORREF hexCol = pragma::math::to_hex_number("0x" + hex);
 		const DWORD ATTR_BORDER_COLOR = 34; // See DWMWINDOWATTRIBUTE::DWMWA_BORDER_COLOR, can't use the enum because it may not be available and there's no way to check for it
 		DwmSetWindowAttribute(h, ATTR_BORDER_COLOR, &hexCol, sizeof(hexCol));
 	}
@@ -1030,7 +1030,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	pragma::gui::types::WIContextMenu::SetKeyBindHandler(
 	  [this](pragma::platform::Key key, const std::string &cmd) -> std::string {
 		  std::string keyStr;
-		  auto b = KeyToText(umath::to_integral(key), &keyStr);
+		  auto b = KeyToText(pragma::math::to_integral(key), &keyStr);
 		  short c;
 		  if(StringToKey(keyStr, &c)) {
 			  auto bindingLayer = GetCoreInputBindingLayer();
@@ -1046,19 +1046,19 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		  if(keys.empty())
 			  return {};
 		  std::string strKey {};
-		  KeyToText(umath::to_integral(keys.front()), &strKey);
+		  KeyToText(pragma::math::to_integral(keys.front()), &strKey);
 		  return strKey;
 	  });
 	pragma::gui::WITextTagLink::set_link_handler([this](const std::string &arg) {
 		std::vector<std::string> args {};
-		ustring::explode_whitespace(arg, args);
+		pragma::string::explode_whitespace(arg, args);
 		if(args.empty())
 			return;
 		auto cmd = args.front();
 		args.erase(args.begin());
-		if(ustring::compare<std::string>(cmd, "url", false)) {
+		if(pragma::string::compare<std::string>(cmd, "url", false)) {
 			if(args.empty() == false)
-				util::open_url_in_browser(args.front());
+				pragma::util::open_url_in_browser(args.front());
 			return;
 		}
 		RunConsoleCommand(cmd, args);
@@ -1068,7 +1068,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	m_speedCamMouse = 0.2f;
 
 	GetRenderContext().GetWindow().ReloadStagingRenderTarget();
-	umath::set_flag(m_stateFlags, StateFlags::FirstFrame);
+	pragma::math::set_flag(m_stateFlags, StateFlags::FirstFrame);
 
 	m_gpuProfiler = pragma::debug::GPUProfiler::Create<pragma::debug::GPUProfiler>();
 	AddGPUProfilingHandler([this](bool profilingEnabled) {
@@ -1086,18 +1086,18 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	OpenClientState();
 	register_game_shaders(); // Preload game shaders
 
-	if(umath::is_flag_set(m_stateFlags, StateFlags::ConsoleOpen))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ConsoleOpen))
 		OpenConsole(); // GUI Console mustn't be opened before client has been created!
 
 #ifdef _WIN32
 	if(GetRenderContext().IsValidationEnabled()) {
-		if(util::is_process_running("bdcam.exe")) {
+		if(pragma::util::is_process_running("bdcam.exe")) {
 			auto r = MessageBox(nullptr, "Bandicam is running and vulkan validation mode is enabled. This is NOT recommended, as Bandicam will cause misleading validation errors! Press OK to continue anyway.", "Validation Warning", MB_OK | MB_OKCANCEL);
 			if(r == IDCANCEL)
 				ShutDown();
 		}
 	}
-	else if(util::is_process_running("bdcam.exe")) {
+	else if(pragma::util::is_process_running("bdcam.exe")) {
 		auto r = MessageBox(nullptr, "Detected Bandicam running in the background, this can cause crashes and/or freezing! Please close Bandicam and restart Pragma. You can restart Bandicam after Pragma has been started, but it mustn't be running before then.", "Bandicam Warning",
 		  MB_OK | MB_OKCANCEL);
 		if(r == IDCANCEL)
@@ -1107,7 +1107,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 #endif
 
 	{
-		auto regBase = ::util::make_shared<pragma::shadergraph::NodeRegistry>();
+		auto regBase = pragma::util::make_shared<pragma::shadergraph::NodeRegistry>();
 		//regBase->RegisterNode<pragma::shadergraph::BlackbodyNode>("blackbody");
 		regBase->RegisterNode<pragma::shadergraph::BrightContrastNode>("bright_contrast");
 		regBase->RegisterNode<pragma::shadergraph::ClampNode>("clamp");
@@ -1137,7 +1137,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		//regBase->RegisterNode<pragma::shadergraph::VectorTransformNode>("vector_transform");
 		//regBase->RegisterNode<pragma::shadergraph::WavelengthNode>("wavelength");
 
-		auto regScene = ::util::make_shared<pragma::shadergraph::NodeRegistry>();
+		auto regScene = pragma::util::make_shared<pragma::shadergraph::NodeRegistry>();
 		regScene->RegisterNode<pragma::rendering::shader_graph::SceneOutputNode>("output");
 		regScene->RegisterNode<pragma::rendering::shader_graph::CameraNode>("camera");
 		regScene->RegisterNode<pragma::rendering::shader_graph::FogNode>("fog");
@@ -1177,13 +1177,13 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		for(auto &[name, mat] : cache.GetShaderMaterials()) {
 			auto nodeName = name;
 			nodeName = "sm_" + nodeName;
-			auto node = ::util::make_shared<pragma::rendering::shader_graph::ShaderMaterialNode>(pragma::GString {nodeName}, *mat);
+			auto node = pragma::util::make_shared<pragma::rendering::shader_graph::ShaderMaterialNode>(pragma::GString {nodeName}, *mat);
 			regScene->RegisterNode(node);
 		}
 
 		regScene->AddChildRegistry(regBase);
 
-		auto regPp = ::util::make_shared<pragma::shadergraph::NodeRegistry>();
+		auto regPp = pragma::util::make_shared<pragma::shadergraph::NodeRegistry>();
 		regPp->AddChildRegistry(regBase);
 
 		m_shaderGraphManager = std::make_unique<pragma::rendering::ShaderGraphManager>();
@@ -1348,7 +1348,7 @@ void pragma::CEngine::OpenConsole()
 			break;
 		}
 	}
-	umath::set_flag(m_stateFlags, StateFlags::ConsoleOpen, true);
+	pragma::math::set_flag(m_stateFlags, StateFlags::ConsoleOpen, true);
 	// Engine::OpenConsole();
 }
 void pragma::CEngine::CloseConsole()
@@ -1366,7 +1366,7 @@ void pragma::CEngine::CloseConsole()
 	}
 
 	// Engine::CloseConsole();
-	umath::set_flag(m_stateFlags, StateFlags::ConsoleOpen, false);
+	pragma::math::set_flag(m_stateFlags, StateFlags::ConsoleOpen, false);
 }
 void pragma::CEngine::SetConsoleType(ConsoleType type)
 {
@@ -1476,7 +1476,7 @@ void pragma::CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 void pragma::CEngine::OnWindowResized(prosper::Window &window, Vector2i size)
 {
 	m_stateFlags |= StateFlags::WindowSizeChanged;
-	m_tWindowResizeTime = util::Clock::now();
+	m_tWindowResizeTime = pragma::util::Clock::now();
 }
 
 DLLCLIENT std::optional<std::string> g_customWindowIcon {};
@@ -1496,17 +1496,17 @@ void pragma::CEngine::OnWindowInitialized()
 		}
 	}
 }
-void pragma::CEngine::InitializeExternalArchiveManager() { util::initialize_external_archive_manager(GetClientState()); }
+void pragma::CEngine::InitializeExternalArchiveManager() { pragma::util::initialize_external_archive_manager(GetClientState()); }
 bool pragma::CEngine::StartProfilingStage(const char *stage) { return m_cpuProfilingStageManager && m_cpuProfilingStageManager->StartProfilerStage(stage); }
 bool pragma::CEngine::StopProfilingStage() { return m_cpuProfilingStageManager && m_cpuProfilingStageManager->StopProfilerStage(); }
 bool pragma::CEngine::StartGPUProfilingStage(const char *stage) { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StartProfilerStage(stage); }
 bool pragma::CEngine::StopGPUProfilingStage() { return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StopProfilerStage(); }
-bool pragma::CEngine::GetControllersEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::ControllersEnabled); }
+bool pragma::CEngine::GetControllersEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::ControllersEnabled); }
 void pragma::CEngine::SetControllersEnabled(bool b)
 {
 	if(GetControllersEnabled() == b)
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::ControllersEnabled, b);
+	pragma::math::set_flag(m_stateFlags, StateFlags::ControllersEnabled, b);
 	if(b == false) {
 		pragma::platform::set_joysticks_enabled(false);
 		return;
@@ -1523,7 +1523,7 @@ void pragma::CEngine::SetControllersEnabled(bool b)
 		auto axisOffset = GLFW_CUSTOM_KEY_JOYSTICK_0_AXIS_START + joystick.GetJoystickId() * GLFW_CUSTOM_KEY_JOYSTICK_CONTROL_COUNT;
 		if(SEPARATE_JOYSTICK_AXES == true) {
 			axisId *= 2;
-			if(umath::sign(oldVal) != umath::sign(newVal)) {
+			if(pragma::math::sign(oldVal) != pragma::math::sign(newVal)) {
 				auto prevAxisId = axisId;
 				auto prevMods = mods;
 				if(oldVal < 0.f) {
@@ -1564,7 +1564,7 @@ pragma::Engine::StateInstance &pragma::CEngine::GetStateInstance(pragma::Network
 }
 pragma::Engine::StateInstance &pragma::CEngine::GetClientStateInstance() { return *m_clInstance; }
 
-::util::WeakHandle<prosper::Shader> pragma::CEngine::ReloadShader(const std::string &name)
+pragma::util::WeakHandle<prosper::Shader> pragma::CEngine::ReloadShader(const std::string &name)
 {
 #ifdef _DEBUG
 	bReload = true;
@@ -1723,9 +1723,9 @@ void pragma::CEngine::Start() { pragma::Engine::Start(); }
 
 void pragma::CEngine::Close()
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::CEClosed))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::CEClosed))
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::CEClosed);
+	pragma::math::set_flag(m_stateFlags, StateFlags::CEClosed);
 
 	auto closeSecondaryWindows = [this]() {
 		auto &renderContext = GetRenderContext();
@@ -1785,9 +1785,9 @@ static auto cvProfiling = pragma::console::get_engine_con_var("debug_profiling_e
 void pragma::CEngine::DrawFrame()
 {
 	auto primWindowCmd = GetWindow().GetDrawCommandBuffer();
-	auto perfTimers = umath::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers);
+	auto perfTimers = pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers);
 	if(perfTimers) {
-		auto n = umath::to_integral(GPUTimer::Count);
+		auto n = pragma::math::to_integral(GPUTimer::Count);
 		for(auto i = decltype(n) {0u}; i < n; ++i) {
 			auto idx = GetPerformanceTimerIndex(static_cast<GPUTimer>(i));
 			m_gpuTimers[idx]->QueryResult(m_gpuExecTimes[idx]);
@@ -1816,8 +1816,8 @@ void pragma::CEngine::DrawFrame()
 	StopProfilingStage(); // GUILogic
 
 	auto &stagingRt = GetRenderContext().GetWindow().GetStagingRenderTarget();
-	if(umath::is_flag_set(m_stateFlags, StateFlags::FirstFrame))
-		umath::set_flag(m_stateFlags, StateFlags::FirstFrame, false);
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::FirstFrame))
+		pragma::math::set_flag(m_stateFlags, StateFlags::FirstFrame, false);
 	else {
 		primWindowCmd->RecordImageBarrier(stagingRt->GetTexture().GetImage(), prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	}
@@ -1852,7 +1852,7 @@ void pragma::CEngine::DrawFrame()
 static auto cvHideGui = pragma::console::get_client_con_var("debug_hide_gui");
 void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 {
-	auto perfTimers = umath::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers);
+	auto perfTimers = pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers);
 	auto drawGui = !cvHideGui->GetBool();
 	if(drawGui) {
 		auto &rp = rt->GetRenderPass();
@@ -1888,7 +1888,7 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 	}
 
 	auto *cl = static_cast<pragma::ClientState *>(GetClientState());
-	auto tStart = util::Clock::now();
+	auto tStart = pragma::util::Clock::now();
 	if(cl != nullptr) {
 		StartProfilingStage("RecordScene");
 		StartGPUProfilingStage("DrawScene");
@@ -1946,14 +1946,14 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 	}
 }
 
-uint32_t pragma::CEngine::GetPerformanceTimerIndex(uint32_t swapchainIdx, GPUTimer timer) const { return swapchainIdx * umath::to_integral(GPUTimer::Count) + umath::to_integral(timer); }
+uint32_t pragma::CEngine::GetPerformanceTimerIndex(uint32_t swapchainIdx, GPUTimer timer) const { return swapchainIdx * pragma::math::to_integral(GPUTimer::Count) + pragma::math::to_integral(timer); }
 uint32_t pragma::CEngine::GetPerformanceTimerIndex(GPUTimer timer) const { return GetPerformanceTimerIndex(GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex(), timer); }
 
 void pragma::CEngine::SetGpuPerformanceTimersEnabled(bool enabled)
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers) == enabled)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers) == enabled)
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::EnableGpuPerformanceTimers, enabled);
+	pragma::math::set_flag(m_stateFlags, StateFlags::EnableGpuPerformanceTimers, enabled);
 
 	if(enabled == false) {
 		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_gpuTimerPool);
@@ -1968,7 +1968,7 @@ void pragma::CEngine::SetGpuPerformanceTimersEnabled(bool enabled)
 	}
 	auto &context = GetRenderContext();
 	auto numSwapchainImages = context.GetPrimaryWindowSwapchainImageCount();
-	auto numTimers = umath::to_integral(GPUTimer::Count) * numSwapchainImages;
+	auto numTimers = pragma::math::to_integral(GPUTimer::Count) * numSwapchainImages;
 	m_gpuTimerPool = context.CreateQueryPool(prosper::QueryType::Timestamp, numTimers * 2);
 	m_gpuTimers.resize(numTimers);
 	m_gpuExecTimes.resize(numTimers);
@@ -1977,7 +1977,7 @@ void pragma::CEngine::SetGpuPerformanceTimersEnabled(bool enabled)
 }
 std::chrono::nanoseconds pragma::CEngine::GetGpuExecutionTime(uint32_t swapchainIdx, GPUTimer timer) const
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers) == false)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers) == false)
 		return std::chrono::nanoseconds {0};
 	return m_gpuExecTimes[GetPerformanceTimerIndex(swapchainIdx, timer)];
 }
@@ -1986,7 +1986,7 @@ void pragma::CEngine::Think()
 {
 	pragma::platform::poll_joystick_events();
 
-	auto tNow = util::Clock::now();
+	auto tNow = pragma::util::Clock::now();
 
 	std::chrono::nanoseconds tDelta;
 	if(m_fixedFrameDeltaTimeInterpretation.has_value() == false)
@@ -2053,21 +2053,21 @@ void pragma::CEngine::Think()
 
 void pragma::CEngine::SetFixedFrameDeltaTimeInterpretation(std::optional<std::chrono::nanoseconds> frameDeltaTime) { m_fixedFrameDeltaTimeInterpretation = frameDeltaTime; }
 void pragma::CEngine::SetFixedFrameDeltaTimeInterpretationByFPS(uint16_t fps) { SetFixedFrameDeltaTimeInterpretation(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds {1}) / fps); }
-void pragma::CEngine::SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate) { umath::set_flag(m_stateFlags, StateFlags::TickDeltaTimeTiedToFrameRate, tieToFrameRate); }
+void pragma::CEngine::SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate) { pragma::math::set_flag(m_stateFlags, StateFlags::TickDeltaTimeTiedToFrameRate, tieToFrameRate); }
 
 void pragma::CEngine::UpdateTickCount()
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::TickDeltaTimeTiedToFrameRate) == false) {
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::TickDeltaTimeTiedToFrameRate) == false) {
 		pragma::Engine::UpdateTickCount();
 		return;
 	}
-	m_ctTick.UpdateByDelta(util::clock::to_seconds(m_tDeltaFrameTime));
+	m_ctTick.UpdateByDelta(pragma::util::clock::to_seconds(m_tDeltaFrameTime));
 }
 
 void pragma::CEngine::Tick()
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::WindowSizeChanged)) {
-		auto t = util::Clock::now();
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::WindowSizeChanged)) {
+		auto t = pragma::util::Clock::now();
 		auto dt = t - m_tWindowResizeTime;
 		// If the window is being resized by the user, we don't want to update the resolution constantly,
 		// so we add a small delay
@@ -2075,7 +2075,7 @@ void pragma::CEngine::Tick()
 			auto &window = GetWindow();
 			auto size = window.GetGlfwWindow().GetSize();
 			if(size.x > 0 && size.y > 0) { // If either size is 0, the window is probably minimized and we don't need to update.
-				umath::set_flag(m_stateFlags, StateFlags::WindowSizeChanged, false);
+				pragma::math::set_flag(m_stateFlags, StateFlags::WindowSizeChanged, false);
 				OnResolutionChanged(size.x, size.y);
 			}
 		}
@@ -2106,7 +2106,7 @@ void pragma::CEngine::Tick()
 
 bool pragma::CEngine::IsServerOnly() { return false; }
 
-void pragma::CEngine::UseFullbrightShader(bool b) { umath::set_flag(m_stateFlags, StateFlags::Fullbright, b); }
+void pragma::CEngine::UseFullbrightShader(bool b) { pragma::math::set_flag(m_stateFlags, StateFlags::Fullbright, b); }
 
 void pragma::CEngine::OnResolutionChanged(uint32_t width, uint32_t height)
 {
@@ -2118,7 +2118,7 @@ void pragma::CEngine::OnResolutionChanged(uint32_t width, uint32_t height)
 void pragma::CEngine::OnRenderResolutionChanged(uint32_t width, uint32_t height)
 {
 	GetRenderContext().GetWindow().ReloadStagingRenderTarget();
-	umath::set_flag(m_stateFlags, StateFlags::FirstFrame, true);
+	pragma::math::set_flag(m_stateFlags, StateFlags::FirstFrame, true);
 
 	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *baseEl = wgui.GetBaseElement();
@@ -2186,7 +2186,7 @@ uint32_t pragma::CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 
 pragma::CEngine::DroppedFile::DroppedFile(const std::string &rootPath, const std::string &_fullPath) : fullPath(_fullPath)
 {
-	auto path = util::Path::CreateFile(fullPath);
+	auto path = pragma::util::Path::CreateFile(fullPath);
 	path.MakeRelative(rootPath);
 	fileName = path.GetString();
 }
@@ -2210,11 +2210,11 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<std::string>(
 	  "cl_window_resolution", +[](pragma::NetworkState *, const pragma::console::ConVar &, std::string, std::string val) {
 		  std::vector<std::string> vals;
-		  ustring::explode(val, "x", vals);
+		  pragma::string::explode(val, "x", vals);
 		  if(vals.size() < 2)
 			  return;
-		  auto x = util::to_int(vals[0]);
-		  auto y = util::to_int(vals[1]);
+		  auto x = pragma::util::to_int(vals[0]);
+		  auto y = pragma::util::to_int(vals[1]);
 		  Vector2i resolution(x, y);
 		  pragma::get_cengine()->GetWindow().SetResolution(resolution);
 		  auto *client = static_cast<pragma::ClientState *>(pragma::get_cengine()->GetClientState());
@@ -2235,13 +2235,13 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<std::string>(
 	  "cl_render_resolution", +[](pragma::NetworkState *, const pragma::console::ConVar &, std::string, std::string val) {
 		  std::vector<std::string> vals;
-		  ustring::explode(val, "x", vals);
+		  pragma::string::explode(val, "x", vals);
 		  if(vals.size() < 2) {
 			  pragma::get_cengine()->SetRenderResolution({});
 			  return;
 		  }
-		  auto x = util::to_int(vals[0]);
-		  auto y = util::to_int(vals[1]);
+		  auto x = pragma::util::to_int(vals[0]);
+		  auto y = pragma::util::to_int(vals[1]);
 		  Vector2i resolution(x, y);
 		  pragma::get_cengine()->SetRenderResolution(resolution);
 	  });

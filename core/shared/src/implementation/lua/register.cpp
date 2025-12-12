@@ -32,10 +32,12 @@ static std::ostream &operator<<(std::ostream &out, const CallbackHandle &hCallba
 	return out;
 }
 
-static std::ostream &operator<<(std::ostream &out, const util::HSV &hsv)
-{
-	out << hsv.h << ' ' << hsv.s << ' ' << hsv.v;
-	return out;
+namespace pragma::util {
+    static std::ostream &operator<<(std::ostream &out, const pragma::util::HSV &hsv)
+    {
+        out << hsv.h << ' ' << hsv.s << ' ' << hsv.v;
+        return out;
+    }
 }
 
 static void call_callback(CallbackHandle &cb, std::initializer_list<luabind::object> args)
@@ -140,7 +142,7 @@ static int32_t parse_math_expression(lua::State *l)
 		Lua::SetTableValue(l, tToken);       /* 2 */
 
 		Lua::PushString(l, "code");                          /* 3 */
-		Lua::PushInt(l, umath::to_integral(pTok.GetCode())); /* 4 */
+		Lua::PushInt(l, pragma::math::to_integral(pTok.GetCode())); /* 4 */
 		Lua::SetTableValue(l, tToken);                       /* 2 */
 
 		Lua::SetTableValue(l, t); /* 0 */
@@ -174,7 +176,6 @@ bool Lua::util::start_debugger_server(lua::State *l)
 static std::vector<bezierfit::VECTOR> reduce(std::vector<bezierfit::VECTOR> points) { return bezierfit::reduce(points); }
 
 #ifdef __linux__
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, util::HSV);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std, std::match_results<const char *>);
 #endif
 
@@ -214,7 +215,7 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("get_min_max", static_cast<void (*)(lua::State *, luabind::table<>, ::Vector3 &, ::Vector3 &)>(Lua::vector::get_min_max), luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}),
 	  luabind::def("get_min_max", static_cast<void (*)(lua::State *, luabind::table<>, ::Vector4 &, ::Vector4 &)>(Lua::vector::get_min_max), luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}), luabind::def("random", uvec::create_random_unit_vector),
 	  luabind::def("random2D", Lua::vector::random_2d), luabind::def("create_from_string", static_cast<Vector3 (*)(const std::string &)>(uvec::create)), luabind::def("calc_average", Lua::vector::calc_average),
-	  luabind::def("calc_best_fitting_plane", Lua::vector::calc_best_fitting_plane, luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}), luabind::def("calc_linear_velocity_from_angular", util::angular_velocity_to_linear),
+	  luabind::def("calc_best_fitting_plane", Lua::vector::calc_best_fitting_plane, luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}), luabind::def("calc_linear_velocity_from_angular", pragma::math::angular_velocity_to_linear),
 	  luabind::def(
 	    "calc_spherical_stereo_transform",
 	    +[](const Vector3 &p, const Vector3 &d, float interocularDistance, float convergenceDistance) -> std::
@@ -254,7 +255,7 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	auto modNoise = luabind::module_(lua.GetState(), "noise");
 	modNoise[(luabind::def("perlin", Lua::noise::perlin), luabind::def("const", Lua::noise::noise_const), luabind::def("voronoi", Lua::noise::voronoi), luabind::def("generate_height_map", Lua::noise::generate_height_map))];
 
-	Lua::RegisterLibraryEnums(lua.GetState(), "noise", {{"QUALITY_FAST", umath::to_integral(noise::NoiseQuality::QUALITY_FAST)}, {"QUALITY_STD", umath::to_integral(noise::NoiseQuality::QUALITY_STD)}, {"QUALITY_BEST", umath::to_integral(noise::NoiseQuality::QUALITY_BEST)}});
+	Lua::RegisterLibraryEnums(lua.GetState(), "noise", {{"QUALITY_FAST", pragma::math::to_integral(noise::NoiseQuality::QUALITY_FAST)}, {"QUALITY_STD", pragma::math::to_integral(noise::NoiseQuality::QUALITY_STD)}, {"QUALITY_BEST", pragma::math::to_integral(noise::NoiseQuality::QUALITY_BEST)}});
 
 	//Lua::SetTableCFunction(lua.GetState(),"table","has_value",Lua::table::has_value); // Function is incomplete
 	Lua::SetTableCFunction(lua.GetState(), "table", "table_to_map", [](lua::State *l) -> int32_t {
@@ -346,15 +347,15 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	}));
 
 	auto modMath = luabind::module_(lua.GetState(), "math");
-	modMath[(luabind::def("approach", umath::approach<double>), luabind::def("get_angle_difference", umath::get_angle_difference), luabind::def("approach_angle", umath::approach_angle), luabind::def("clamp_angle", umath::clamp_angle),
-	  luabind::def("is_angle_in_range", umath::is_angle_in_range), luabind::def("clamp", umath::clamp<double>), luabind::def("get_next_power_of_2", umath::next_power_of_2), luabind::def("get_previous_power_of_2", umath::previous_power_of_2),
-	  luabind::def("get_power_of_2_values", umath::get_power_of_2_values), luabind::def("get_largest_power_of_10",+[](int32_t n) -> int32_t {
+	modMath[(luabind::def("approach", pragma::math::approach<double>), luabind::def("get_angle_difference", pragma::math::get_angle_difference), luabind::def("approach_angle", pragma::math::approach_angle), luabind::def("clamp_angle", pragma::math::clamp_angle),
+	  luabind::def("is_angle_in_range", pragma::math::is_angle_in_range), luabind::def("clamp", pragma::math::clamp<double>), luabind::def("get_next_power_of_2", pragma::math::next_power_of_2), luabind::def("get_previous_power_of_2", pragma::math::previous_power_of_2),
+	  luabind::def("get_power_of_2_values", pragma::math::get_power_of_2_values), luabind::def("get_largest_power_of_10",+[](int32_t n) -> int32_t {
 		    if(n == 0)
 			    return 0;
 		    int exponent = static_cast<int>(std::log10(n));
 		    return static_cast<int>(std::pow(10, exponent));
-		}),luabind::def("smooth_step", umath::smooth_step<double>), luabind::def("smoother_step", umath::smoother_step<double>), luabind::def("calc_ballistic_range", pragma::math::calc_ballistic_range),
-	  luabind::def("calc_ballistic_position", pragma::math::calc_ballistic_position), luabind::def("calc_ballistic_angle_of_reach", umath::approach<double>), luabind::def("get_frustum_plane_center", umath::frustum::get_plane_center),
+		}),luabind::def("smooth_step", pragma::math::smooth_step<double>), luabind::def("smoother_step", pragma::math::smoother_step<double>), luabind::def("calc_ballistic_range", pragma::math::calc_ballistic_range),
+	  luabind::def("calc_ballistic_position", pragma::math::calc_ballistic_position), luabind::def("calc_ballistic_angle_of_reach", pragma::math::approach<double>), luabind::def("get_frustum_plane_center", pragma::math::frustum::get_plane_center),
 	  luabind::def(
 	    "calc_average_rotation",
 	    +[](lua::State *l, luabind::table<> t) -> Quat {
@@ -372,19 +373,19 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("map_value_to_fraction", static_cast<float (*)(lua::State *, float, float, float)>([](lua::State *l, float v, float c, float i) -> float {
 		  auto pivot = 1 / (c - 1) * i;
 		  auto range = 1 / c;
-		  return umath::clamp(1 - umath::abs((v - pivot) / range), 0.f, 1.f);
+		  return pragma::math::clamp(1 - pragma::math::abs((v - pivot) / range), 0.f, 1.f);
 	  })),
-	  luabind::def("map_value_to_range", static_cast<float (*)(lua::State *, float, float, float)>([](lua::State *l, float value, float lower, float upper) -> float { return umath::clamp((value - lower) / (upper - lower), 0.f, 1.f); })),
-	  luabind::def("randomf", static_cast<float (*)()>([]() -> float { return umath::random(0.f, 1.f); })), luabind::def("randomf", static_cast<float (*)(float, float)>([](float min, float max) -> float { return umath::random(min, max); })),
-	  luabind::def("normalize_angle", static_cast<float (*)(float)>([](float angle) -> float { return umath::normalize_angle(angle); })),
-	  luabind::def("normalize_angle", static_cast<float (*)(float, float)>([](float angle, float base) -> float { return umath::normalize_angle(angle, base); })), luabind::def("sign", static_cast<int (*)(double)>([](double n) -> int {
+	  luabind::def("map_value_to_range", static_cast<float (*)(lua::State *, float, float, float)>([](lua::State *l, float value, float lower, float upper) -> float { return pragma::math::clamp((value - lower) / (upper - lower), 0.f, 1.f); })),
+	  luabind::def("randomf", static_cast<float (*)()>([]() -> float { return pragma::math::random(0.f, 1.f); })), luabind::def("randomf", static_cast<float (*)(float, float)>([](float min, float max) -> float { return pragma::math::random(min, max); })),
+	  luabind::def("normalize_angle", static_cast<float (*)(float)>([](float angle) -> float { return pragma::math::normalize_angle(angle); })),
+	  luabind::def("normalize_angle", static_cast<float (*)(float, float)>([](float angle, float base) -> float { return pragma::math::normalize_angle(angle, base); })), luabind::def("sign", static_cast<int (*)(double)>([](double n) -> int {
 		  if(n == 0.0)
 			  return 1;
 		  return static_cast<int>(n / fabs(n));
 	  })),
 	  luabind::def("perlin_noise", static_cast<double (*)(const Vector3 &, uint32_t)>(Lua::math::perlin_noise)), luabind::def("perlin_noise", static_cast<double (*)(const Vector3 &)>(Lua::math::perlin_noise)), luabind::def("lerp", &Lua::math::lerp),
-	  luabind::def("round", &Lua::math::round), luabind::def("round", static_cast<int32_t (*)(float)>(&umath::round)), luabind::def("snap_to_grid", static_cast<int32_t (*)(float)>([](float f) -> int32_t { return umath::snap_to_grid(f); })),
-	  luabind::def("snap_to_grid", &umath::snap_to_grid), luabind::def("snap_to_gridf", static_cast<float (*)(float)>([](float f) -> float { return umath::snap_to_gridf(f); })), luabind::def("snap_to_gridf", &umath::snap_to_gridf),
+	  luabind::def("round", &Lua::math::round), luabind::def("round", static_cast<int32_t (*)(float)>(&pragma::math::round)), luabind::def("snap_to_grid", static_cast<int32_t (*)(float)>([](float f) -> int32_t { return pragma::math::snap_to_grid(f); })),
+	  luabind::def("snap_to_grid", &pragma::math::snap_to_grid), luabind::def("snap_to_gridf", static_cast<float (*)(float)>([](float f) -> float { return pragma::math::snap_to_gridf(f); })), luabind::def("snap_to_gridf", &pragma::math::snap_to_gridf),
 	  luabind::def("calc_hermite_spline",
 	    static_cast<luabind::object (*)(lua::State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, uint32_t)>(
 	      [](lua::State *l, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, uint32_t segmentCount) -> luabind::object { return Lua::math::calc_hermite_spline(l, p0, p1, p2, p3, segmentCount); })),
@@ -392,7 +393,7 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("calc_hermite_spline_position", static_cast<Vector3 (*)(lua::State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, float)>([](lua::State *l, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, float s) -> Vector3 {
 		  return Lua::math::calc_hermite_spline_position(l, p0, p1, p2, p3, s);
 	  })),
-	  luabind::def("calc_hermite_spline_position", &Lua::math::calc_hermite_spline_position), luabind::def("is_in_range", &Lua::math::is_in_range), luabind::def("normalize_uv_coordinates", &umath::normalize_uv_coordinates),
+	  luabind::def("calc_hermite_spline_position", &Lua::math::calc_hermite_spline_position), luabind::def("is_in_range", &Lua::math::is_in_range), luabind::def("normalize_uv_coordinates", &pragma::math::normalize_uv_coordinates),
 #ifdef __GLIBC__
 	  //GLIBC provides overloads instead of templates for FP types.
 	  luabind::def("is_nan", static_cast<bool (*)(double)>([](double val) -> bool { return std::isnan(val); })), luabind::def("is_inf", static_cast<bool (*)(double)>([](double val) -> bool { return std::isinf(val); })),
@@ -401,10 +402,10 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("is_nan", static_cast<bool (*)(double)>([](double val) -> bool { return std::isnan<double>(val); })), luabind::def("is_inf", static_cast<bool (*)(double)>([](double val) -> bool { return std::isinf<double>(val); })),
 	  luabind::def("is_finite", static_cast<bool (*)(double)>([](double val) -> bool { return std::isfinite<double>(val); })),
 #endif
-	  luabind::def("cot", umath::cot), luabind::def("calc_fov_from_lens", &::umath::camera::calc_fov_from_lens), luabind::def("calc_focal_length_from_fov", &::umath::camera::calc_focal_length_from_fov),
-	  luabind::def("calc_fov_from_focal_length", &::umath::camera::calc_fov_from_focal_length), luabind::def("calc_aperture_size_from_fstop", &::umath::camera::calc_aperture_size_from_fstop),
-	  luabind::def("calc_aperture_size_from_fstop", static_cast<float (*)(float, umath::Millimeter)>([](float fstop, umath::Millimeter focalLength) -> float { return ::umath::camera::calc_aperture_size_from_fstop(fstop, focalLength); })),
-	  luabind::def("float_to_half_float", &::umath::float32_to_float16_glm), luabind::def("half_float_to_float", &::umath::float16_to_float32_glm), luabind::def("set_flag", static_cast<int64_t (*)(int64_t, int64_t, bool)>([](int64_t flags, int64_t flag, bool set) -> int64_t {
+	  luabind::def("cot", pragma::math::cot), luabind::def("calc_fov_from_lens", &::pragma::math::camera::calc_fov_from_lens), luabind::def("calc_focal_length_from_fov", &::pragma::math::camera::calc_focal_length_from_fov),
+	  luabind::def("calc_fov_from_focal_length", &::pragma::math::camera::calc_fov_from_focal_length), luabind::def("calc_aperture_size_from_fstop", &::pragma::math::camera::calc_aperture_size_from_fstop),
+	  luabind::def("calc_aperture_size_from_fstop", static_cast<float (*)(float, pragma::math::Millimeter)>([](float fstop, pragma::math::Millimeter focalLength) -> float { return ::pragma::math::camera::calc_aperture_size_from_fstop(fstop, focalLength); })),
+	  luabind::def("float_to_half_float", &::pragma::math::float32_to_float16_glm), luabind::def("half_float_to_float", &::pragma::math::float16_to_float32_glm), luabind::def("set_flag", static_cast<int64_t (*)(int64_t, int64_t, bool)>([](int64_t flags, int64_t flag, bool set) -> int64_t {
 		  if(set)
 			  flags |= flag;
 		  else
@@ -412,7 +413,7 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		  return flags;
 	  })),
 	  luabind::def("calc_horizontal_fov", &Lua::math::calc_horizontal_fov), luabind::def("calc_vertical_fov", &Lua::math::calc_vertical_fov), luabind::def("calc_diagonal_fov", &Lua::math::calc_diagonal_fov),
-	  luabind::def("calc_dielectric_specular_reflection", &::umath::calc_dielectric_specular_reflection), luabind::def("calc_ballistic_velocity", &Lua::math::calc_ballistic_velocity), luabind::def("ease_in", &Lua::math::ease_in), luabind::def("ease_out", &Lua::math::ease_out),
+	  luabind::def("calc_dielectric_specular_reflection", &::pragma::math::calc_dielectric_specular_reflection), luabind::def("calc_ballistic_velocity", &Lua::math::calc_ballistic_velocity), luabind::def("ease_in", &Lua::math::ease_in), luabind::def("ease_out", &Lua::math::ease_out),
 	  luabind::def("ease_in_out", &Lua::math::ease_in_out), luabind::def("get_frustum_plane_size", &Lua::math::get_frustum_plane_size), luabind::def("get_frustum_plane_boundaries", &Lua::math::get_frustum_plane_boundaries),
 	  luabind::def("get_frustum_plane_point", &Lua::math::get_frustum_plane_point),
 
@@ -422,8 +423,8 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("reduce_curve_points", &::reduce),
 	  luabind::def("calc_four_point_cubic_bezier", &bezierfit::calc_four_point_cubic_bezier),
 
-	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::meta::join<luabind::default_parameter_policy<3, true>, luabind::default_parameter_policy<4, true>>::type {}),
-	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::default_parameter_policy<4, true> {}), luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients),
+	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &pragma::util::generate_two_pass_gaussian_blur_coefficients, luabind::meta::join<luabind::default_parameter_policy<3, true>, luabind::default_parameter_policy<4, true>>::type {}),
+	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &pragma::util::generate_two_pass_gaussian_blur_coefficients, luabind::default_parameter_policy<4, true> {}), luabind::def("generate_two_pass_gaussian_blur_coefficients", &pragma::util::generate_two_pass_gaussian_blur_coefficients),
 
 	  luabind::def("horizontal_fov_to_vertical_fov", &Lua::math::horizontal_fov_to_vertical_fov),
 	  luabind::def("horizontal_fov_to_vertical_fov", static_cast<double (*)(float, float)>([](float fovDeg, float widthOrAspectRatio) -> double { return Lua::math::horizontal_fov_to_vertical_fov(fovDeg, widthOrAspectRatio); })),
@@ -449,8 +450,8 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		    if(time + panima::Channel::VALUE_EPSILON >= cp1Time)
 			    return cp1Val;
 		    std::array<float, 3> r;
-		    auto n = umath::find_bezier_roots(time, cp0Time, cp0OutTime, cp1InTime, cp1Time, r);
-		    return umath::calc_bezier_point(cp0Val, cp0OutVal, cp1InVal, cp1Val, r[0]);
+		    auto n = pragma::math::find_bezier_roots(time, cp0Time, cp0OutTime, cp1InTime, cp1Time, r);
+		    return pragma::math::calc_bezier_point(cp0Val, cp0OutVal, cp1InVal, cp1Val, r[0]);
 	    }),
 		luabind::def("calc_bezier_point_fraction",+[](float t, const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3) {
 		    auto u = 1 - t;
@@ -466,7 +467,7 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def(
 	    "remap", +[](float value, float fromLow, float fromHigh, float toLow, float toHigh) {
 		    auto diff = fromHigh - fromLow;
-		    if(umath::abs(diff) < 0.0001f)
+		    if(pragma::math::abs(diff) < 0.0001f)
 			    return toLow;
 		    return toLow + (value - fromLow) * (toHigh - toLow) / diff;
 		}),
@@ -489,17 +490,17 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "math",
 	  {
-	    {"EASE_TYPE_BACK", umath::to_integral(pragma::math::EaseType::Back)},
-	    {"EASE_TYPE_BOUNCE", umath::to_integral(pragma::math::EaseType::Bounce)},
-	    {"EASE_TYPE_CIRCULAR", umath::to_integral(pragma::math::EaseType::Circular)},
-	    {"EASE_TYPE_CUBIC", umath::to_integral(pragma::math::EaseType::Cubic)},
-	    {"EASE_TYPE_ELASTIC", umath::to_integral(pragma::math::EaseType::Elastic)},
-	    {"EASE_TYPE_EXPONENTIAL", umath::to_integral(pragma::math::EaseType::Exponential)},
-	    {"EASE_TYPE_LINEAR", umath::to_integral(pragma::math::EaseType::Linear)},
-	    {"EASE_TYPE_QUADRATIC", umath::to_integral(pragma::math::EaseType::Quadratic)},
-	    {"EASE_TYPE_QUARTIC", umath::to_integral(pragma::math::EaseType::Quartic)},
-	    {"EASE_TYPE_QUINTIC", umath::to_integral(pragma::math::EaseType::Quintic)},
-	    {"EASE_TYPE_SINE", umath::to_integral(pragma::math::EaseType::Sine)},
+	    {"EASE_TYPE_BACK", pragma::math::to_integral(pragma::math::EaseType::Back)},
+	    {"EASE_TYPE_BOUNCE", pragma::math::to_integral(pragma::math::EaseType::Bounce)},
+	    {"EASE_TYPE_CIRCULAR", pragma::math::to_integral(pragma::math::EaseType::Circular)},
+	    {"EASE_TYPE_CUBIC", pragma::math::to_integral(pragma::math::EaseType::Cubic)},
+	    {"EASE_TYPE_ELASTIC", pragma::math::to_integral(pragma::math::EaseType::Elastic)},
+	    {"EASE_TYPE_EXPONENTIAL", pragma::math::to_integral(pragma::math::EaseType::Exponential)},
+	    {"EASE_TYPE_LINEAR", pragma::math::to_integral(pragma::math::EaseType::Linear)},
+	    {"EASE_TYPE_QUADRATIC", pragma::math::to_integral(pragma::math::EaseType::Quadratic)},
+	    {"EASE_TYPE_QUARTIC", pragma::math::to_integral(pragma::math::EaseType::Quartic)},
+	    {"EASE_TYPE_QUINTIC", pragma::math::to_integral(pragma::math::EaseType::Quintic)},
+	    {"EASE_TYPE_SINE", pragma::math::to_integral(pragma::math::EaseType::Sine)},
 
 	    {"MAX_SINT8", std::numeric_limits<int8_t>::max()},
 	    {"MIN_SINT8", std::numeric_limits<int8_t>::lowest()},
@@ -524,27 +525,27 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	    {"MAX_LONG_DOUBLE", std::numeric_limits<long double>::max()},
 	    {"MIN_LONG_DOUBLE", std::numeric_limits<long double>::lowest()},
 
-	    {"ROTATION_ORDER_XYZ", umath::to_integral(pragma::RotationOrder::XYZ)},
-	    {"ROTATION_ORDER_YXZ", umath::to_integral(pragma::RotationOrder::YXZ)},
-	    {"ROTATION_ORDER_XZX", umath::to_integral(pragma::RotationOrder::XZX)},
-	    {"ROTATION_ORDER_XYX", umath::to_integral(pragma::RotationOrder::XYX)},
-	    {"ROTATION_ORDER_YXY", umath::to_integral(pragma::RotationOrder::YXY)},
-	    {"ROTATION_ORDER_YZY", umath::to_integral(pragma::RotationOrder::YZY)},
-	    {"ROTATION_ORDER_ZYZ", umath::to_integral(pragma::RotationOrder::ZYZ)},
-	    {"ROTATION_ORDER_ZXZ", umath::to_integral(pragma::RotationOrder::ZXZ)},
-	    {"ROTATION_ORDER_XZY", umath::to_integral(pragma::RotationOrder::XZY)},
-	    {"ROTATION_ORDER_YZX", umath::to_integral(pragma::RotationOrder::YZX)},
-	    {"ROTATION_ORDER_ZYX", umath::to_integral(pragma::RotationOrder::ZYX)},
-	    {"ROTATION_ORDER_ZXY", umath::to_integral(pragma::RotationOrder::ZXY)},
+	    {"ROTATION_ORDER_XYZ", pragma::math::to_integral(pragma::RotationOrder::XYZ)},
+	    {"ROTATION_ORDER_YXZ", pragma::math::to_integral(pragma::RotationOrder::YXZ)},
+	    {"ROTATION_ORDER_XZX", pragma::math::to_integral(pragma::RotationOrder::XZX)},
+	    {"ROTATION_ORDER_XYX", pragma::math::to_integral(pragma::RotationOrder::XYX)},
+	    {"ROTATION_ORDER_YXY", pragma::math::to_integral(pragma::RotationOrder::YXY)},
+	    {"ROTATION_ORDER_YZY", pragma::math::to_integral(pragma::RotationOrder::YZY)},
+	    {"ROTATION_ORDER_ZYZ", pragma::math::to_integral(pragma::RotationOrder::ZYZ)},
+	    {"ROTATION_ORDER_ZXZ", pragma::math::to_integral(pragma::RotationOrder::ZXZ)},
+	    {"ROTATION_ORDER_XZY", pragma::math::to_integral(pragma::RotationOrder::XZY)},
+	    {"ROTATION_ORDER_YZX", pragma::math::to_integral(pragma::RotationOrder::YZX)},
+	    {"ROTATION_ORDER_ZYX", pragma::math::to_integral(pragma::RotationOrder::ZYX)},
+	    {"ROTATION_ORDER_ZXY", pragma::math::to_integral(pragma::RotationOrder::ZXY)},
 
-	    {"AXIS_X", umath::to_integral(pragma::Axis::X)},
-	    {"AXIS_Y", umath::to_integral(pragma::Axis::Y)},
-	    {"AXIS_Z", umath::to_integral(pragma::Axis::Z)},
-	    {"AXIS_COUNT", umath::to_integral(pragma::Axis::Count)},
+	    {"AXIS_X", pragma::math::to_integral(pragma::Axis::X)},
+	    {"AXIS_Y", pragma::math::to_integral(pragma::Axis::Y)},
+	    {"AXIS_Z", pragma::math::to_integral(pragma::Axis::Z)},
+	    {"AXIS_COUNT", pragma::math::to_integral(pragma::Axis::Count)},
 
-	    {"AXIS_SIGNED_X", umath::to_integral(pragma::SignedAxis::NegX)},
-	    {"AXIS_SIGNED_Y", umath::to_integral(pragma::SignedAxis::NegY)},
-	    {"AXIS_SIGNED_Z", umath::to_integral(pragma::SignedAxis::NegZ)},
+	    {"AXIS_SIGNED_X", pragma::math::to_integral(pragma::SignedAxis::NegX)},
+	    {"AXIS_SIGNED_Y", pragma::math::to_integral(pragma::SignedAxis::NegY)},
+	    {"AXIS_SIGNED_Z", pragma::math::to_integral(pragma::SignedAxis::NegZ)},
 	  });
 
 	auto &mathMod = lua.RegisterLibrary("math");
@@ -612,10 +613,10 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  });
 	auto classDefDrawInfo = luabind::class_<pragma::debug::DebugRenderInfo>("DrawInfo");
 	classDefDrawInfo.def(luabind::constructor<>());
-	classDefDrawInfo.def(luabind::constructor<const umath::Transform &, const Color &>());
-	classDefDrawInfo.def(luabind::constructor<const umath::Transform &, const Color &, const Color &>());
-	classDefDrawInfo.def(luabind::constructor<const umath::Transform &, const Color &, float>());
-	classDefDrawInfo.def(luabind::constructor<const umath::Transform &, const Color &, const Color &, float>());
+	classDefDrawInfo.def(luabind::constructor<const pragma::math::Transform &, const Color &>());
+	classDefDrawInfo.def(luabind::constructor<const pragma::math::Transform &, const Color &, const Color &>());
+	classDefDrawInfo.def(luabind::constructor<const pragma::math::Transform &, const Color &, float>());
+	classDefDrawInfo.def(luabind::constructor<const pragma::math::Transform &, const Color &, const Color &, float>());
 	classDefDrawInfo.def("SetOrigin", &pragma::debug::DebugRenderInfo::SetOrigin, luabind::discard_result {});
 	classDefDrawInfo.def("SetRotation", &pragma::debug::DebugRenderInfo::SetRotation, luabind::discard_result {});
 	classDefDrawInfo.def("SetColor", &pragma::debug::DebugRenderInfo::SetColor, luabind::discard_result {});
@@ -744,8 +745,8 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	    {"SIZEOF_VECTOR2I", sizeof(Vector2i)},
 	    {"SIZEOF_VECTOR3I", sizeof(Vector3i)},
 	    {"SIZEOF_VECTOR4I", sizeof(Vector4i)},
-	    {"SIZEOF_VERTEX", sizeof(umath::Vertex)},
-	    {"SIZEOF_VERTEX_WEIGHT", sizeof(umath::VertexWeight)},
+	    {"SIZEOF_VERTEX", sizeof(pragma::math::Vertex)},
+	    {"SIZEOF_VERTEX_WEIGHT", sizeof(pragma::math::VertexWeight)},
 
 	    {"MIN_INT8", std::numeric_limits<int8_t>::lowest()},
 	    {"MAX_INT8", std::numeric_limits<int8_t>::max()},
@@ -764,30 +765,30 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	    {"MIN_UINT64", std::numeric_limits<uint64_t>::lowest()},
 	    {"MAX_UINT64", std::numeric_limits<uint64_t>::max()},
 
-	    {"VAR_TYPE_INVALID", umath::to_integral(util::VarType::Invalid)},
-	    {"VAR_TYPE_BOOL", umath::to_integral(util::VarType::Bool)},
-	    {"VAR_TYPE_DOUBLE", umath::to_integral(util::VarType::Double)},
-	    {"VAR_TYPE_FLOAT", umath::to_integral(util::VarType::Float)},
-	    {"VAR_TYPE_INT8", umath::to_integral(util::VarType::Int8)},
-	    {"VAR_TYPE_INT16", umath::to_integral(util::VarType::Int16)},
-	    {"VAR_TYPE_INT32", umath::to_integral(util::VarType::Int32)},
-	    {"VAR_TYPE_INT64", umath::to_integral(util::VarType::Int64)},
-	    {"VAR_TYPE_LONG_DOUBLE", umath::to_integral(util::VarType::LongDouble)},
-	    {"VAR_TYPE_STRING", umath::to_integral(util::VarType::String)},
-	    {"VAR_TYPE_UINT8", umath::to_integral(util::VarType::UInt8)},
-	    {"VAR_TYPE_UINT16", umath::to_integral(util::VarType::UInt16)},
-	    {"VAR_TYPE_UINT32", umath::to_integral(util::VarType::UInt32)},
-	    {"VAR_TYPE_UINT64", umath::to_integral(util::VarType::UInt64)},
-	    {"VAR_TYPE_EULER_ANGLES", umath::to_integral(util::VarType::EulerAngles)},
-	    {"VAR_TYPE_COLOR", umath::to_integral(util::VarType::Color)},
-	    {"VAR_TYPE_VECTOR", umath::to_integral(util::VarType::Vector)},
-	    {"VAR_TYPE_VECTOR2", umath::to_integral(util::VarType::Vector2)},
-	    {"VAR_TYPE_VECTOR4", umath::to_integral(util::VarType::Vector4)},
-	    {"VAR_TYPE_ENTITY", umath::to_integral(util::VarType::Entity)},
-	    {"VAR_TYPE_QUATERNION", umath::to_integral(util::VarType::Quaternion)},
+	    {"VAR_TYPE_INVALID", pragma::math::to_integral(pragma::util::VarType::Invalid)},
+	    {"VAR_TYPE_BOOL", pragma::math::to_integral(pragma::util::VarType::Bool)},
+	    {"VAR_TYPE_DOUBLE", pragma::math::to_integral(pragma::util::VarType::Double)},
+	    {"VAR_TYPE_FLOAT", pragma::math::to_integral(pragma::util::VarType::Float)},
+	    {"VAR_TYPE_INT8", pragma::math::to_integral(pragma::util::VarType::Int8)},
+	    {"VAR_TYPE_INT16", pragma::math::to_integral(pragma::util::VarType::Int16)},
+	    {"VAR_TYPE_INT32", pragma::math::to_integral(pragma::util::VarType::Int32)},
+	    {"VAR_TYPE_INT64", pragma::math::to_integral(pragma::util::VarType::Int64)},
+	    {"VAR_TYPE_LONG_DOUBLE", pragma::math::to_integral(pragma::util::VarType::LongDouble)},
+	    {"VAR_TYPE_STRING", pragma::math::to_integral(pragma::util::VarType::String)},
+	    {"VAR_TYPE_UINT8", pragma::math::to_integral(pragma::util::VarType::UInt8)},
+	    {"VAR_TYPE_UINT16", pragma::math::to_integral(pragma::util::VarType::UInt16)},
+	    {"VAR_TYPE_UINT32", pragma::math::to_integral(pragma::util::VarType::UInt32)},
+	    {"VAR_TYPE_UINT64", pragma::math::to_integral(pragma::util::VarType::UInt64)},
+	    {"VAR_TYPE_EULER_ANGLES", pragma::math::to_integral(pragma::util::VarType::EulerAngles)},
+	    {"VAR_TYPE_COLOR", pragma::math::to_integral(pragma::util::VarType::Color)},
+	    {"VAR_TYPE_VECTOR", pragma::math::to_integral(pragma::util::VarType::Vector)},
+	    {"VAR_TYPE_VECTOR2", pragma::math::to_integral(pragma::util::VarType::Vector2)},
+	    {"VAR_TYPE_VECTOR4", pragma::math::to_integral(pragma::util::VarType::Vector4)},
+	    {"VAR_TYPE_ENTITY", pragma::math::to_integral(pragma::util::VarType::Entity)},
+	    {"VAR_TYPE_QUATERNION", pragma::math::to_integral(pragma::util::VarType::Quaternion)},
 
-	    {"EVENT_REPLY_HANDLED", umath::to_integral(util::EventReply::Handled)},
-	    {"EVENT_REPLY_UNHANDLED", umath::to_integral(util::EventReply::Unhandled)},
+	    {"EVENT_REPLY_HANDLED", pragma::math::to_integral(pragma::util::EventReply::Handled)},
+	    {"EVENT_REPLY_UNHANDLED", pragma::math::to_integral(pragma::util::EventReply::Unhandled)},
 	  });
 	Lua::util::register_std_vector_types(lua.GetState());
 
@@ -874,7 +875,7 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	classDefCallback.def("IsValid", &Lua_Callback_IsValid);
 	classDefCallback.def("Remove", &Lua_Callback_Remove);
 
-	auto callbackHandlerClassDef = luabind::class_<util::CallbackHandler>("CallbackHandler");
+	auto callbackHandlerClassDef = luabind::class_<pragma::util::CallbackHandler>("CallbackHandler");
 	Lua::CallbackHandler::register_class(callbackHandlerClassDef);
 
 	auto _G = luabind::object {luabind::globals(lua.GetState())};
@@ -886,18 +887,18 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	utilMod[classDefCallback];
 	utilMod[callbackHandlerClassDef];
 
-	auto defHSV = luabind::class_<util::HSV>("HSVColor");
+	auto defHSV = luabind::class_<pragma::util::HSV>("HSVColor");
 	defHSV.def(luabind::constructor<>());
 	defHSV.def(luabind::constructor<double, double, double>());
 	defHSV.def(luabind::tostring(luabind::self));
 	defHSV.def(luabind::const_self == luabind::const_self);
-	defHSV.def_readwrite("h", &util::HSV::h);
-	defHSV.def_readwrite("s", &util::HSV::s);
-	defHSV.def_readwrite("v", &util::HSV::v);
-	defHSV.def("ToRGBColor", static_cast<void (*)(lua::State *, const util::HSV &)>([](lua::State *l, const util::HSV &hsv) { Lua::Push<Color>(l, util::hsv_to_rgb(hsv)); }));
-	defHSV.def("Lerp", static_cast<void (*)(lua::State *, const util::HSV &, const util::HSV &, float)>([](lua::State *l, const util::HSV &hsv0, const util::HSV &hsv1, float t) { Lua::Push<util::HSV>(l, util::lerp_hsv(hsv0, hsv1, t)); }));
+	defHSV.def_readwrite("h", &pragma::util::HSV::h);
+	defHSV.def_readwrite("s", &pragma::util::HSV::s);
+	defHSV.def_readwrite("v", &pragma::util::HSV::v);
+	defHSV.def("ToRGBColor", static_cast<void (*)(lua::State *, const pragma::util::HSV &)>([](lua::State *l, const pragma::util::HSV &hsv) { Lua::Push<Color>(l, pragma::util::hsv_to_rgb(hsv)); }));
+	defHSV.def("Lerp", static_cast<void (*)(lua::State *, const pragma::util::HSV &, const pragma::util::HSV &, float)>([](lua::State *l, const pragma::util::HSV &hsv0, const pragma::util::HSV &hsv1, float t) { Lua::Push<pragma::util::HSV>(l, pragma::util::lerp_hsv(hsv0, hsv1, t)); }));
 	defHSV.def(
-	  "Distance", +[](const util::HSV &hsv0, const util::HSV &hsv1) {
+	  "Distance", +[](const pragma::util::HSV &hsv0, const pragma::util::HSV &hsv1) {
 		  auto dh = std::min(abs(hsv1.h - hsv0.h), 360 - abs(hsv1.h - hsv0.h)) / 180.0;
 		  auto ds = abs(hsv1.s - hsv0.s);
 		  auto dv = abs(hsv1.v - hsv0.v);
@@ -932,7 +933,7 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	defColor.def("ToVector", &Lua::Color::ToVector);
 	defColor.def("ToHexColor", static_cast<void (*)(lua::State *, const Color &)>([](lua::State *l, const Color &color) { Lua::PushString(l, color.ToHexColor()); }));
 	defColor.def("ToHexColorRGB", static_cast<void (*)(lua::State *, const Color &)>([](lua::State *l, const Color &color) { Lua::PushString(l, color.ToHexColorRGB()); }));
-	defColor.def("ToHSVColor", static_cast<void (*)(lua::State *, const Color &)>([](lua::State *l, const Color &color) { Lua::Push<util::HSV>(l, util::rgb_to_hsv(color)); }));
+	defColor.def("ToHSVColor", static_cast<void (*)(lua::State *, const Color &)>([](lua::State *l, const Color &color) { Lua::Push<pragma::util::HSV>(l, pragma::util::rgb_to_hsv(color)); }));
 	defColor.def("GetComplementaryColor", static_cast<void (*)(lua::State *, const Color &)>([](lua::State *l, const Color &color) { Lua::Push(l, color.GetComplementaryColor()); }));
 	defColor.def("GetContrastColor", static_cast<void (*)(lua::State *, const Color &)>([](lua::State *l, const Color &color) { Lua::Push(l, color.GetContrastColor()); }));
 	defColor.def("CalcPerceivedLuminance", static_cast<void (*)(lua::State *, const Color &)>([](lua::State *l, const Color &color) { Lua::PushNumber(l, color.CalcPerceivedLuminance()); }));
@@ -1102,7 +1103,7 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	_G["util"]["Color"]["DarkSlateGray"] = colors::DarkSlateGray;
 	_G["util"]["Color"]["Black"] = colors::Black;
 
-	auto dataStreamClassDef = luabind::class_<::util::DataStream>("DataStream");
+	auto dataStreamClassDef = luabind::class_<pragma::util::DataStream>("DataStream");
 	Lua::DataStream::register_class(dataStreamClassDef);
 	dataStreamClassDef.def(luabind::constructor<uint32_t>());
 	utilMod[dataStreamClassDef];
@@ -1197,7 +1198,7 @@ void pragma::Game::RegisterLuaLibraries()
 	    {"export_model_asset", Lua::import::export_model_asset}, {"import_file", +[](lua::State *l) {
 		                                                              auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 		                                                              std::string path = Lua::CheckString(l, 1);
-		                                                              auto res = util::port_file(nw, path);
+		                                                              auto res = pragma::util::port_file(nw, path);
 		                                                              Lua::PushBool(l, res);
 		                                                              return 1;
 	                                                              }}});
@@ -1260,7 +1261,7 @@ void pragma::Game::RegisterLuaLibraries()
 		    std::vector<uint8_t> data;
 		    data.resize(contents.size());
 		    memcpy(data.data(), contents.data(), contents.size());
-		    auto vf = ::util::make_shared<ufile::VectorFile>(std::move(data));
+		    auto vf = pragma::util::make_shared<ufile::VectorFile>(std::move(data));
 		    LFile lf {};
 		    lf.Construct(vf);
 		    return lf;
@@ -1284,7 +1285,7 @@ void pragma::Game::RegisterLuaLibraries()
 		  if(res == false)
 			  return {};
 		  auto isPathToDir = !path.empty() && (path.back() == '/' || path.back() == '\\');
-		  auto absPath = isPathToDir ? ::util::Path::CreatePath(rpath) : ::util::Path::CreateFile(rpath);
+		  auto absPath = isPathToDir ? pragma::util::Path::CreatePath(rpath) : pragma::util::Path::CreateFile(rpath);
 		  std::string relPath;
 		  if(filemanager::find_relative_path(absPath.GetString(), relPath))
 			  return luabind::object {l, relPath};
@@ -1301,7 +1302,7 @@ void pragma::Game::RegisterLuaLibraries()
 	    "make_relative",
 	    +[](const std::string &path, const std::string &rootPath) -> std::
 	                                                                string {
-		    util::Path p {path};
+		    pragma::util::Path p {path};
 		    p.MakeRelative(rootPath);
 		    return p.GetString();
 	                                                                }),
@@ -1474,9 +1475,9 @@ void pragma::Game::RegisterLuaLibraries()
 	classDefFile.def("IgnoreComments", static_cast<void (*)(lua::State *, LFile &, std::string)>(&Lua_LFile_IgnoreComments));
 	classDefFile.def("IgnoreComments", static_cast<void (*)(lua::State *, LFile &, std::string, std::string)>(&Lua_LFile_IgnoreComments));
 	classDefFile.def("Read", static_cast<void (*)(lua::State *, LFile &, uint32_t)>(&Lua_LFile_Read));
-	classDefFile.def("Read", static_cast<void (*)(lua::State *, LFile &, ::util::DataStream &ds, uint32_t)>(&Lua_LFile_Read));
-	classDefFile.def("Write", static_cast<void (*)(lua::State *, LFile &, ::util::DataStream &ds)>(&Lua_LFile_Write));
-	classDefFile.def("Write", static_cast<void (*)(lua::State *, LFile &, ::util::DataStream &ds, uint32_t)>(&Lua_LFile_Write));
+	classDefFile.def("Read", static_cast<void (*)(lua::State *, LFile &, pragma::util::DataStream &ds, uint32_t)>(&Lua_LFile_Read));
+	classDefFile.def("Write", static_cast<void (*)(lua::State *, LFile &, pragma::util::DataStream &ds)>(&Lua_LFile_Write));
+	classDefFile.def("Write", static_cast<void (*)(lua::State *, LFile &, pragma::util::DataStream &ds, uint32_t)>(&Lua_LFile_Write));
 	classDefFile.def("GetPath", &Lua_LFile_GetPath);
 	fileMod[classDefFile];
 
@@ -1509,8 +1510,8 @@ void pragma::Game::RegisterLuaLibraries()
 	  luabind::def("get_rotated_aabb", static_cast<luabind::mult<Vector3, Vector3> (*)(lua::State *, const Vector3 &, const Vector3 &, const Quat &)>(Lua::boundingvolume::GetRotatedAABB)))];
 
 	auto intersectMod = luabind::module(GetLuaState(), "intersect");
-	intersectMod[(luabind::def("aabb_with_aabb", static_cast<umath::intersection::Intersect (*)(const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &)>(umath::intersection::aabb_aabb)), luabind::def("sphere_with_sphere", umath::intersection::sphere_sphere),
-	  luabind::def("aabb_with_sphere", umath::intersection::aabb_sphere), luabind::def("line_with_aabb", Lua::intersect::line_aabb, luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>, luabind::pure_out_value<8>>::type {}),
+	intersectMod[(luabind::def("aabb_with_aabb", static_cast<pragma::math::intersection::Intersect (*)(const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &)>(pragma::math::intersection::aabb_aabb)), luabind::def("sphere_with_sphere", pragma::math::intersection::sphere_sphere),
+	  luabind::def("aabb_with_sphere", pragma::math::intersection::aabb_sphere), luabind::def("line_with_aabb", Lua::intersect::line_aabb, luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>, luabind::pure_out_value<8>>::type {}),
 	  luabind::def("line_with_obb", Lua::intersect::line_obb),
 	  luabind::def("line_with_obb", static_cast<luabind::object (*)(lua::State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, bool)>([](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, const Vector3 &min, const Vector3 &max, bool precise) {
 		  return Lua::intersect::line_obb(l, rayStart, rayDir, min, max, precise);
@@ -1518,7 +1519,7 @@ void pragma::Game::RegisterLuaLibraries()
 	  luabind::def("line_with_obb", static_cast<luabind::object (*)(lua::State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &)>([](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, const Vector3 &min, const Vector3 &max) {
 		  return Lua::intersect::line_obb(l, rayStart, rayDir, min, max);
 	  })),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::geometry::ModelSubMesh &, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::geometry::ModelSubMesh &, luabind::object &, luabind::object &, bool, const pragma::math::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
 	  luabind::def("line_with_mesh",
 	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::geometry::ModelSubMesh &, luabind::object &, luabind::object &, bool)>(
@@ -1528,7 +1529,7 @@ void pragma::Game::RegisterLuaLibraries()
 	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::geometry::ModelSubMesh &, luabind::object &, luabind::object &)>(
 	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::geometry::ModelSubMesh &mesh, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1); }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::geometry::ModelMesh &, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::geometry::ModelMesh &, luabind::object &, luabind::object &, bool, const pragma::math::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
 	  luabind::def("line_with_mesh",
 	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::geometry::ModelMesh &, luabind::object &, luabind::object &, bool)>(
@@ -1538,7 +1539,7 @@ void pragma::Game::RegisterLuaLibraries()
 		  return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1);
 	  }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::asset::Model &, uint32_t, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::asset::Model &, uint32_t, luabind::object &, luabind::object &, bool, const pragma::math::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 	  luabind::def("line_with_mesh",
 	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::asset::Model &, uint32_t, luabind::object &, luabind::object &, bool)>(
@@ -1548,7 +1549,7 @@ void pragma::Game::RegisterLuaLibraries()
 	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::asset::Model &, uint32_t, luabind::object &, luabind::object &)>(
 	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::asset::Model &mdl, uint32_t lod, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, lod, r0, r1); }),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::asset::Model &, luabind::table<>, luabind::object &, luabind::object &, bool, const umath::Transform &)>(Lua::intersect::line_mesh),
+	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::asset::Model &, luabind::table<>, luabind::object &, luabind::object &, bool, const pragma::math::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 	  luabind::def("line_with_mesh",
 	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, pragma::asset::Model &, luabind::table<>, luabind::object &, luabind::object &, bool)>(
@@ -1559,20 +1560,20 @@ void pragma::Game::RegisterLuaLibraries()
 	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, pragma::asset::Model &mdl, luabind::table<> bodyGroups, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mdl, bodyGroups, r0, r1); }),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 	  luabind::def("line_with_plane", Lua::intersect::line_plane),
-	  luabind::def("point_in_aabb", static_cast<bool (*)(const Vector3 &, const Vector3 &, const Vector3 &)>([](const Vector3 &vec, const Vector3 &min, const Vector3 &max) { return umath::intersection::vector_in_bounds(vec, min, max); })),
+	  luabind::def("point_in_aabb", static_cast<bool (*)(const Vector3 &, const Vector3 &, const Vector3 &)>([](const Vector3 &vec, const Vector3 &min, const Vector3 &max) { return pragma::math::intersection::vector_in_bounds(vec, min, max); })),
 	  luabind::def("point_in_plane_mesh", Lua::intersect::point_in_plane_mesh), luabind::def("sphere_in_plane_mesh", Lua::intersect::sphere_in_plane_mesh), luabind::def("aabb_in_plane_mesh", Lua::intersect::aabb_in_plane_mesh),
-	  luabind::def("sphere_with_cone", static_cast<bool (*)(const Vector3 &, float, const Vector3 &, const Vector3 &, float, float)>(&umath::intersection::sphere_cone)),
-	  luabind::def("sphere_with_cone", static_cast<bool (*)(const Vector3 &, float, const Vector3 &, const Vector3 &, float)>(&umath::intersection::sphere_cone)),
+	  luabind::def("sphere_with_cone", static_cast<bool (*)(const Vector3 &, float, const Vector3 &, const Vector3 &, float, float)>(&pragma::math::intersection::sphere_cone)),
+	  luabind::def("sphere_with_cone", static_cast<bool (*)(const Vector3 &, float, const Vector3 &, const Vector3 &, float)>(&pragma::math::intersection::sphere_cone)),
 	  luabind::def("line_with_triangle", Lua::intersect::line_triangle, luabind::meta::join<luabind::pure_out_value<7>, luabind::pure_out_value<8>>::type {}),
 	  luabind::def("line_with_triangle",
 	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &, luabind::object &, luabind::object &)>(
 	      [](lua::State *l, const Vector3 &lineOrigin, const Vector3 &lineDir, const Vector3 &v0, const Vector3 &v1, const Vector3 &v2, luabind::object &outT, luabind::object &outUv) { Lua::intersect::line_triangle(l, lineOrigin, lineDir, v0, v1, v2, outT, outUv); }),
 	    luabind::meta::join<luabind::pure_out_value<7>, luabind::pure_out_value<8>>::type {}),
-	  luabind::def("aabb_with_plane", umath::intersection::aabb_plane), luabind::def("aabb_with_triangle", umath::intersection::aabb_triangle), luabind::def("obb_with_plane", umath::intersection::obb_plane), luabind::def("sphere_with_plane", umath::intersection::sphere_plane),
+	  luabind::def("aabb_with_plane", pragma::math::intersection::aabb_plane), luabind::def("aabb_with_triangle", pragma::math::intersection::aabb_triangle), luabind::def("obb_with_plane", pragma::math::intersection::obb_plane), luabind::def("sphere_with_plane", pragma::math::intersection::sphere_plane),
 	  luabind::def("line_with_sphere", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, const Vector3 &, float)>([](lua::State *l, const Vector3 &lineOrigin, const Vector3 &lineDir, const Vector3 &sphereOrigin, float sphereRadius) {
 		  float t;
 		  Vector3 p;
-		  if(umath::intersection::line_sphere(lineOrigin, lineDir, sphereOrigin, sphereRadius, t, p) == false) {
+		  if(pragma::math::intersection::line_sphere(lineOrigin, lineDir, sphereOrigin, sphereRadius, t, p) == false) {
 			  Lua::PushBool(l, false);
 			  return;
 		  }
@@ -1584,13 +1585,13 @@ void pragma::Game::RegisterLuaLibraries()
 	modGeometry[(luabind::def("closest_point_on_aabb_to_point", Lua::geometry::closest_point_on_aabb_to_point),
 	  luabind::def("closest_points_between_lines", Lua::geometry::closest_points_between_lines, luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),
 	  luabind::def("closest_point_on_plane_to_point", Lua::geometry::closest_point_on_plane_to_point), luabind::def("closest_point_on_triangle_to_point", Lua::geometry::closest_point_on_triangle_to_point),
-	  luabind::def("smallest_enclosing_sphere", Lua::geometry::smallest_enclosing_sphere, luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}), luabind::def("closest_point_on_line_to_point", umath::geometry::closest_point_on_line_to_point),
-	  luabind::def("closest_point_on_line_to_point", static_cast<Vector3 (*)(const Vector3 &, const Vector3 &, const Vector3 &)>([](const Vector3 &start, const Vector3 &end, const Vector3 &p) { return umath::geometry::closest_point_on_line_to_point(start, end, p); })),
-	  luabind::def("closest_point_on_sphere_to_line", umath::geometry::closest_point_on_sphere_to_line),
+	  luabind::def("smallest_enclosing_sphere", Lua::geometry::smallest_enclosing_sphere, luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}), luabind::def("closest_point_on_line_to_point", pragma::math::geometry::closest_point_on_line_to_point),
+	  luabind::def("closest_point_on_line_to_point", static_cast<Vector3 (*)(const Vector3 &, const Vector3 &, const Vector3 &)>([](const Vector3 &start, const Vector3 &end, const Vector3 &p) { return pragma::math::geometry::closest_point_on_line_to_point(start, end, p); })),
+	  luabind::def("closest_point_on_sphere_to_line", pragma::math::geometry::closest_point_on_sphere_to_line),
 	  luabind::def("closest_point_on_sphere_to_line",
-	    static_cast<Vector3 (*)(const Vector3 &, float, const Vector3 &, const Vector3 &)>([](const Vector3 &origin, float radius, const Vector3 &start, const Vector3 &end) { return umath::geometry::closest_point_on_sphere_to_line(origin, radius, start, end); })),
-	  luabind::def("get_triangle_winding_order", static_cast<umath::geometry::WindingOrder (*)(const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &)>(::umath::geometry::get_triangle_winding_order)),
-	  luabind::def("get_triangle_winding_order", static_cast<umath::geometry::WindingOrder (*)(const Vector2 &, const Vector2 &, const Vector2 &)>(::umath::geometry::get_triangle_winding_order)),
+	    static_cast<Vector3 (*)(const Vector3 &, float, const Vector3 &, const Vector3 &)>([](const Vector3 &origin, float radius, const Vector3 &start, const Vector3 &end) { return pragma::math::geometry::closest_point_on_sphere_to_line(origin, radius, start, end); })),
+	  luabind::def("get_triangle_winding_order", static_cast<pragma::math::geometry::WindingOrder (*)(const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &)>(::pragma::math::geometry::get_triangle_winding_order)),
+	  luabind::def("get_triangle_winding_order", static_cast<pragma::math::geometry::WindingOrder (*)(const Vector2 &, const Vector2 &, const Vector2 &)>(::pragma::math::geometry::get_triangle_winding_order)),
 	  luabind::def("generate_truncated_cone_mesh", Lua::geometry::generate_truncated_cone_mesh, luabind::meta::join<luabind::pure_out_value<7>, luabind::pure_out_value<8>, luabind::pure_out_value<9>>::type {}),
 	  luabind::def("generate_truncated_cone_mesh",
 	    static_cast<void (*)(lua::State *, const Vector3 &, float, const Vector3 &, float, float, luabind::object &, luabind::object &, luabind::object &, uint32_t, bool, bool)>(
@@ -1616,13 +1617,13 @@ void pragma::Game::RegisterLuaLibraries()
 		      Lua::geometry::generate_truncated_cone_mesh(l, origin, startRadius, dir, dist, endRadius, outVerts, outTris, outNormals);
 	      }),
 	    luabind::meta::join<luabind::pure_out_value<7>, luabind::pure_out_value<8>, luabind::pure_out_value<9>>::type {}),
-	  luabind::def("calc_face_normal", &uvec::calc_face_normal), luabind::def("calc_volume_of_triangle", ::umath::geometry::calc_volume_of_triangle), luabind::def("calc_volume_of_polyhedron", Lua::geometry::calc_volume_of_polyhedron),
+	  luabind::def("calc_face_normal", &uvec::calc_face_normal), luabind::def("calc_volume_of_triangle", ::pragma::math::geometry::calc_volume_of_triangle), luabind::def("calc_volume_of_polyhedron", Lua::geometry::calc_volume_of_polyhedron),
 	  luabind::def("calc_center_of_mass", Lua::geometry::calc_center_of_mass, luabind::meta::join<luabind::pure_out_value<4>, luabind::pure_out_value<5>>::type {}),
-	  luabind::def("calc_triangle_area", static_cast<float (*)(const Vector2 &, const Vector2 &, const Vector2 &, bool)>(umath::geometry::calc_triangle_area)),
-	  luabind::def("calc_triangle_area", static_cast<float (*)(const Vector2 &, const Vector2 &, const Vector2 &)>([](const Vector2 &p0, const Vector2 &p1, const Vector2 &p2) { return umath::geometry::calc_triangle_area(p0, p1, p2, false); })),
+	  luabind::def("calc_triangle_area", static_cast<float (*)(const Vector2 &, const Vector2 &, const Vector2 &, bool)>(pragma::math::geometry::calc_triangle_area)),
+	  luabind::def("calc_triangle_area", static_cast<float (*)(const Vector2 &, const Vector2 &, const Vector2 &)>([](const Vector2 &p0, const Vector2 &p1, const Vector2 &p2) { return pragma::math::geometry::calc_triangle_area(p0, p1, p2, false); })),
 	  luabind::def("calc_barycentric_coordinates", static_cast<::Vector2 (*)(const Vector3 &, const Vector2 &, const Vector3 &, const Vector2 &, const Vector3 &, const Vector2 &, const Vector3 &)>(Lua::geometry::calc_barycentric_coordinates)),
-	  luabind::def("calc_barycentric_coordinates", static_cast<::Vector2 (*)(const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &)>(Lua::geometry::calc_barycentric_coordinates)), luabind::def("calc_rotation_between_planes", ::umath::geometry::calc_rotation_between_planes),
-	  luabind::def("get_side_of_point_to_line", ::umath::geometry::get_side_of_point_to_line), luabind::def("get_side_of_point_to_plane", ::umath::geometry::get_side_of_point_to_plane), luabind::def("get_outline_vertices", Lua::geometry::get_outline_vertices),
+	  luabind::def("calc_barycentric_coordinates", static_cast<::Vector2 (*)(const Vector3 &, const Vector3 &, const Vector3 &, const Vector3 &)>(Lua::geometry::calc_barycentric_coordinates)), luabind::def("calc_rotation_between_planes", ::pragma::math::geometry::calc_rotation_between_planes),
+	  luabind::def("get_side_of_point_to_line", ::pragma::math::geometry::get_side_of_point_to_line), luabind::def("get_side_of_point_to_plane", ::pragma::math::geometry::get_side_of_point_to_plane), luabind::def("get_outline_vertices", Lua::geometry::get_outline_vertices),
 	  //luabind::def("triangulate_point_cloud",Lua::geometry::triangulate_point_cloud),
 	  luabind::def("triangulate", Lua::geometry::triangulate), luabind::def("calc_triangle_area", &uvec::calc_area_of_triangle), luabind::def("calc_point_on_triangle", &uvec::calc_point_on_triangle),
 	  luabind::def(
@@ -1630,7 +1631,7 @@ void pragma::Game::RegisterLuaLibraries()
 		    auto rectCenter = rectPos + rectSize / 2.f;
 
 		    Vector3 p;
-		    umath::geometry::closest_point_on_aabb_to_point(Vector3 {rectCenter - rectSize / 2.f, 0.f}, Vector3 {rectCenter + rectSize / 2.f, 0.f}, Vector3 {circlePos, 0.f}, &p);
+		    pragma::math::geometry::closest_point_on_aabb_to_point(Vector3 {rectCenter - rectSize / 2.f, 0.f}, Vector3 {rectCenter + rectSize / 2.f, 0.f}, Vector3 {circlePos, 0.f}, &p);
 		    p = p - Vector3 {rectPos, 0.f};
 
 		    auto dir = (Vector3(rectCenter, 0) - Vector3(circlePos, 0));
@@ -1640,11 +1641,11 @@ void pragma::Game::RegisterLuaLibraries()
 		    return (circlePos + dir2 * circleRadius) - Vector2 {p.x, p.y};
 	    }))];
 	Lua::RegisterLibraryEnums(GetLuaState(), "geometry",
-	  {{"WINDING_ORDER_CLOCKWISE", umath::to_integral(umath::geometry::WindingOrder::Clockwise)}, {"WINDING_ORDER_COUNTER_CLOCKWISE", umath::to_integral(umath::geometry::WindingOrder::CounterClockwise)},
+	  {{"WINDING_ORDER_CLOCKWISE", pragma::math::to_integral(pragma::math::geometry::WindingOrder::Clockwise)}, {"WINDING_ORDER_COUNTER_CLOCKWISE", pragma::math::to_integral(pragma::math::geometry::WindingOrder::CounterClockwise)},
 
-	    {"LINE_SIDE_LEFT", umath::to_integral(umath::geometry::LineSide::Left)}, {"LINE_SIDE_RIGHT", umath::to_integral(umath::geometry::LineSide::Right)}, {"LINE_SIDE_ON_LINE", umath::to_integral(umath::geometry::LineSide::OnLine)},
+	    {"LINE_SIDE_LEFT", pragma::math::to_integral(pragma::math::geometry::LineSide::Left)}, {"LINE_SIDE_RIGHT", pragma::math::to_integral(pragma::math::geometry::LineSide::Right)}, {"LINE_SIDE_ON_LINE", pragma::math::to_integral(pragma::math::geometry::LineSide::OnLine)},
 
-	    {"PLANE_SIDE_FRONT", umath::to_integral(umath::geometry::PlaneSide::Front)}, {"PLANE_SIDE_BACK", umath::to_integral(umath::geometry::PlaneSide::Back)}, {"PLANE_SIDE_ON_PLANE", umath::to_integral(umath::geometry::PlaneSide::OnPlane)}});
+	    {"PLANE_SIDE_FRONT", pragma::math::to_integral(pragma::math::geometry::PlaneSide::Front)}, {"PLANE_SIDE_BACK", pragma::math::to_integral(pragma::math::geometry::PlaneSide::Back)}, {"PLANE_SIDE_ON_PLANE", pragma::math::to_integral(pragma::math::geometry::PlaneSide::OnPlane)}});
 
 	auto modSweep = luabind::module_(GetLuaState(), "sweep");
 	modSweep[(luabind::def("aabb_with_aabb", Lua::sweep::AABBWithAABB, luabind::meta::join<luabind::pure_out_value<7>, luabind::pure_out_value<8>, luabind::pure_out_value<9>, luabind::pure_out_value<10>>::type {}),
@@ -1679,7 +1680,7 @@ void pragma::Game::RegisterLuaLibraries()
 	modLog[luabind::def("get_file_log_level", &pragma::get_file_log_level)];
 
 	modLog[luabind::def(
-	  "set_log_level", +[](const std::string &name, ::util::LogSeverity level) -> bool {
+	  "set_log_level", +[](const std::string &name, pragma::util::LogSeverity level) -> bool {
 		  auto logger = spdlog::get(name);
 		  if(!logger)
 			  return false;
@@ -1689,14 +1690,14 @@ void pragma::Game::RegisterLuaLibraries()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "log",
 	  {
-	    {"SEVERITY_TRACE", umath::to_integral(util::LogSeverity::Trace)},
-	    {"SEVERITY_INFO", umath::to_integral(util::LogSeverity::Info)},
-	    {"SEVERITY_WARNING", umath::to_integral(util::LogSeverity::Warning)},
-	    {"SEVERITY_ERROR", umath::to_integral(util::LogSeverity::Error)},
-	    {"SEVERITY_CRITICAL", umath::to_integral(util::LogSeverity::Critical)},
-	    {"SEVERITY_DEBUG", umath::to_integral(util::LogSeverity::Debug)},
-	    {"SEVERITY_DISABLED", umath::to_integral(util::LogSeverity::Disabled)},
-	    {"SEVERITY_COUNT", umath::to_integral(util::LogSeverity::Count)},
+	    {"SEVERITY_TRACE", pragma::math::to_integral(pragma::util::LogSeverity::Trace)},
+	    {"SEVERITY_INFO", pragma::math::to_integral(pragma::util::LogSeverity::Info)},
+	    {"SEVERITY_WARNING", pragma::math::to_integral(pragma::util::LogSeverity::Warning)},
+	    {"SEVERITY_ERROR", pragma::math::to_integral(pragma::util::LogSeverity::Error)},
+	    {"SEVERITY_CRITICAL", pragma::math::to_integral(pragma::util::LogSeverity::Critical)},
+	    {"SEVERITY_DEBUG", pragma::math::to_integral(pragma::util::LogSeverity::Debug)},
+	    {"SEVERITY_DISABLED", pragma::math::to_integral(pragma::util::LogSeverity::Disabled)},
+	    {"SEVERITY_COUNT", pragma::math::to_integral(pragma::util::LogSeverity::Count)},
 	  });
 
 	auto classDefLogger = luabind::class_<spdlog::logger>("Logger");
@@ -1729,12 +1730,12 @@ void pragma::Game::RegisterLuaLibraries()
 	regexMod[classDefRegexResult];
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "regex",
-	  {{"MATCH_DEFAULT", umath::to_integral(std::regex_constants::match_default)}, {"MATCH_NOT_BOL", umath::to_integral(std::regex_constants::match_not_bol)}, {"MATCH_NOT_EOL", umath::to_integral(std::regex_constants::match_not_eol)},
-	    {"MATCH_NOT_BOW", umath::to_integral(std::regex_constants::match_not_bow)}, {"MATCH_NOT_EOW", umath::to_integral(std::regex_constants::match_not_eow)}, {"MATCH_ANY", umath::to_integral(std::regex_constants::match_any)},
-	    {"MATCH_NOT_NULL", umath::to_integral(std::regex_constants::match_not_null)}, {"MATCH_CONTINUOUS", umath::to_integral(std::regex_constants::match_continuous)}, {"MATCH_PREV_AVAIL", umath::to_integral(std::regex_constants::match_prev_avail)},
+	  {{"MATCH_DEFAULT", pragma::math::to_integral(std::regex_constants::match_default)}, {"MATCH_NOT_BOL", pragma::math::to_integral(std::regex_constants::match_not_bol)}, {"MATCH_NOT_EOL", pragma::math::to_integral(std::regex_constants::match_not_eol)},
+	    {"MATCH_NOT_BOW", pragma::math::to_integral(std::regex_constants::match_not_bow)}, {"MATCH_NOT_EOW", pragma::math::to_integral(std::regex_constants::match_not_eow)}, {"MATCH_ANY", pragma::math::to_integral(std::regex_constants::match_any)},
+	    {"MATCH_NOT_NULL", pragma::math::to_integral(std::regex_constants::match_not_null)}, {"MATCH_CONTINUOUS", pragma::math::to_integral(std::regex_constants::match_continuous)}, {"MATCH_PREV_AVAIL", pragma::math::to_integral(std::regex_constants::match_prev_avail)},
 
-	    {"FORMAT_DEFAULT", umath::to_integral(std::regex_constants::format_default)}, {"FORMAT_SED", umath::to_integral(std::regex_constants::format_sed)}, {"FORMAT_NO_COPY", umath::to_integral(std::regex_constants::format_no_copy)},
-	    {"FORMAT_FIRST_ONLY", umath::to_integral(std::regex_constants::format_first_only)}});
+	    {"FORMAT_DEFAULT", pragma::math::to_integral(std::regex_constants::format_default)}, {"FORMAT_SED", pragma::math::to_integral(std::regex_constants::format_sed)}, {"FORMAT_NO_COPY", pragma::math::to_integral(std::regex_constants::format_no_copy)},
+	    {"FORMAT_FIRST_ONLY", pragma::math::to_integral(std::regex_constants::format_first_only)}});
 	Lua::physenv::register_library(GetLuaInterface());
 	Lua::animation::register_library(GetLuaInterface());
 }

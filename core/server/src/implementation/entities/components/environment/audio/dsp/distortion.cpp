@@ -12,16 +12,16 @@ bool SSoundDspDistortionComponent::OnSetKeyValue(const std::string &key, const s
 {
 	if(SBaseSoundDspComponent::OnSetKeyValue(key, val))
 		return true;
-	if(ustring::compare<std::string>(key, "edge", false))
-		m_kvEdge = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "gain", false))
-		m_kvGain = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "lowpass_cutoff", false))
-		m_kvLowpassCutoff = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "eqcenter", false))
-		m_kvEqCenter = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "eqbandwith", false))
-		m_kvEqBandwidth = util::to_float(val);
+	if(pragma::string::compare<std::string>(key, "edge", false))
+		m_kvEdge = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "gain", false))
+		m_kvGain = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "lowpass_cutoff", false))
+		m_kvLowpassCutoff = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "eqcenter", false))
+		m_kvEqCenter = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "eqbandwith", false))
+		m_kvEqBandwidth = pragma::util::to_float(val);
 	else
 		return false;
 	return true;

@@ -26,7 +26,7 @@ bool BaseAnimatedComponent::GetVertexPosition(uint32_t meshGroupId, uint32_t mes
 	auto &subMesh = subMeshes.at(subMeshId);
 	return GetVertexPosition(*subMesh, vertexId, pos);
 }
-bool BaseAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const
+bool BaseAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, pragma::math::ScaledTransform &outPose) const
 {
 	auto &verts = const_cast<pragma::geometry::ModelSubMesh &>(subMesh).GetVertices();
 	if(vertexId >= verts.size())
@@ -35,7 +35,7 @@ bool BaseAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::Mod
 	if(bindPose == nullptr)
 		return false;
 	auto &vertWeights = const_cast<pragma::geometry::ModelSubMesh &>(subMesh).GetVertexWeights();
-	umath::ScaledTransform transformMatrix {};
+	pragma::math::ScaledTransform transformMatrix {};
 	auto valid = false;
 	std::vector<Quat> rots;
 	std::vector<float> rotWeights;
@@ -60,7 +60,7 @@ bool BaseAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::Mod
 			auto *posBind = bindPose->GetBonePosition(boneId);
 			auto *rotBind = bindPose->GetBoneOrientation(boneId);
 			if(posBind != nullptr && rotBind != nullptr) {
-				umath::Transform tBindPose {*posBind, *rotBind};
+				pragma::math::Transform tBindPose {*posBind, *rotBind};
 				tBindPose = tBindPose.GetInverse();
 
 				auto tTmp = t;
@@ -117,7 +117,7 @@ std::optional<Mat4> BaseAnimatedComponent::GetVertexTransformMatrix(const pragma
 			auto *posBind = bindPose->GetBonePosition(boneId);
 			auto *rotBind = bindPose->GetBoneOrientation(boneId);
 			if(posBind != nullptr && rotBind != nullptr) {
-				umath::Transform tBindPose {*posBind, *rotBind};
+				pragma::math::Transform tBindPose {*posBind, *rotBind};
 				tBindPose = tBindPose.GetInverse();
 
 				auto mat = t.ToMatrix() * tBindPose.ToMatrix();

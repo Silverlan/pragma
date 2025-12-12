@@ -13,9 +13,9 @@ export namespace pragma::asset {
 	class GLTFWriter {
 	  public:
 		struct ModelDesc {
-			ModelDesc(pragma::asset::Model &mdl, const umath::Transform &pose = {}) : model {mdl}, pose {pose} {}
+			ModelDesc(pragma::asset::Model &mdl, const pragma::math::Transform &pose = {}) : model {mdl}, pose {pose} {}
 			pragma::asset::Model &model;
-			umath::Transform pose;
+			pragma::math::Transform pose;
 		};
 		struct LightSource {
 			enum class Type : uint8_t { Point = 0, Spot, Directional };
@@ -27,22 +27,22 @@ export namespace pragma::asset {
 			};
 			Type type = Type::Point;
 			std::optional<float> range = {};
-			umath::Transform pose {};
+			pragma::math::Transform pose {};
 
 			// Spot lights
-			umath::Fraction blendFraction = 0.f;
-			umath::Degree outerConeAngle = 90.f;
+			pragma::math::Fraction blendFraction = 0.f;
+			pragma::math::Degree outerConeAngle = 90.f;
 		};
 		struct Camera {
 			enum class Type : uint8_t { Perspective = 0, Orthographic };
 			std::string name;
 			Type type = Type::Perspective;
 			float aspectRatio = 1.f;
-			umath::Degree vFov = 90.f;
+			pragma::math::Degree vFov = 90.f;
 			float zNear = 0.01f;
 			float zFar = 1'000.f;
 
-			umath::Transform pose {};
+			pragma::math::Transform pose {};
 		};
 		using ModelCollection = std::vector<ModelDesc>;
 		using LightSourceList = std::vector<LightSource>;
@@ -86,7 +86,7 @@ export namespace pragma::asset {
 			ModelExportData(pragma::asset::Model &model) : model {model} {}
 
 			pragma::asset::Model &model;
-			std::vector<umath::Transform> instances {};
+			std::vector<pragma::math::Transform> instances {};
 
 			ExportMeshList exportMeshes;
 			uint64_t indexCount = 0;
@@ -114,7 +114,7 @@ export namespace pragma::asset {
 		void WriteMorphTargets(pragma::geometry::ModelSubMesh &mesh, tinygltf::Mesh &gltfMesh, tinygltf::Primitive &primitive, const std::vector<uint32_t> &nodeIndices);
 		void WriteMaterials();
 		void WriteLightSources();
-		void ToGLTFPose(const umath::Transform &pose, std::vector<double> &outPos, std::vector<double> &outRot) const;
+		void ToGLTFPose(const pragma::math::Transform &pose, std::vector<double> &outPos, std::vector<double> &outRot) const;
 		void GenerateAO(pragma::asset::Model &mdl);
 		uint32_t AddBufferView(const std::string &name, BufferIndex bufferIdx, uint64_t byteOffset, uint64_t byteLength, std::optional<uint64_t> byteStride);
 		tinygltf::Buffer &AddBuffer(const std::string &name, uint32_t *optOutBufIdx = nullptr);

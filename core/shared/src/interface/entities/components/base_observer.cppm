@@ -21,7 +21,7 @@ export namespace pragma {
 
 		virtual void SetObserverMode(ObserverMode mode);
 		ObserverMode GetObserverMode() const;
-		const util::PEnumProperty<ObserverMode> &GetObserverModeProperty() const;
+		const pragma::util::PEnumProperty<ObserverMode> &GetObserverModeProperty() const;
 
 		virtual void SetObserverTarget(BaseObservableComponent *ent);
 		BaseObservableComponent *GetObserverTarget() const;
@@ -35,7 +35,7 @@ export namespace pragma {
 
 		pragma::NetEventId m_netEvSetObserverMode = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvSetObserverTarget = pragma::INVALID_NET_EVENT;
-		util::PEnumProperty<ObserverMode> m_obsMode = nullptr;
+		pragma::util::PEnumProperty<ObserverMode> m_obsMode = nullptr;
 
 		virtual void Initialize() override;
 	};

@@ -24,28 +24,28 @@ void BaseTimeScaleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "time_scale", false))
-			*m_timeScale = util::to_float(kvData.value);
+		if(pragma::string::compare<std::string>(kvData.key, "time_scale", false))
+			*m_timeScale = pragma::util::to_float(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
-		if(ustring::compare<std::string>(inputData.input, "settimescale", false))
-			*m_timeScale = util::to_float(inputData.data);
+		if(pragma::string::compare<std::string>(inputData.input, "settimescale", false))
+			*m_timeScale = pragma::util::to_float(inputData.data);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	m_netEvSetTimeScale = SetupNetEvent("set_time_scale");
 }
 void BaseTimeScaleComponent::SetTimeScale(float timeScale) { *m_timeScale = timeScale; }
 float BaseTimeScaleComponent::GetTimeScale() const { return *m_timeScale; }
-const util::PFloatProperty &BaseTimeScaleComponent::GetTimeScaleProperty() const { return m_timeScale; }
+const pragma::util::PFloatProperty &BaseTimeScaleComponent::GetTimeScaleProperty() const { return m_timeScale; }
 float BaseTimeScaleComponent::GetEffectiveTimeScale() const { return GetEntity().GetNetworkState()->GetGameState()->GetTimeScale() * GetTimeScale(); }
 void BaseTimeScaleComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {

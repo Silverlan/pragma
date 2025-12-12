@@ -99,7 +99,7 @@ pragma::gui::types::WIButton *pragma::gui::types::WIMessageBox::AddButton(const 
 
 void pragma::gui::types::WIMessageBox::EnableButtons(Button buttons)
 {
-	auto values = umath::get_power_of_2_values(CUInt64(buttons));
+	auto values = pragma::math::get_power_of_2_values(CUInt64(buttons));
 	auto hMessageBox = GetHandle();
 
 	for(auto it = values.rbegin(); it != values.rend(); ++it) {

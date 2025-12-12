@@ -91,15 +91,15 @@ export namespace luabind {
 	// Path / String
 	namespace detail {
 		template<>
-		struct DLLNETWORK AliasTypeConverter<std::string, util::Path> {
-			static void convert(const util::Path &srcValue, std::string &outValue);
+		struct DLLNETWORK AliasTypeConverter<std::string, pragma::util::Path> {
+			static void convert(const pragma::util::Path &srcValue, std::string &outValue);
 		};
 		template<>
-		struct DLLNETWORK AliasTypeConverter<util::Path, std::string> {
-			static void convert(const std::string &srcValue, util::Path &outValue);
+		struct DLLNETWORK AliasTypeConverter<pragma::util::Path, std::string> {
+			static void convert(const std::string &srcValue, pragma::util::Path &outValue);
 		};
 	};
 	template<typename T>
-	    requires(is_one_of_alias_candidates<T, std::string, util::Path>)
-	struct default_converter<T> : alias_converter<T, std::string, util::Path> {};
+	    requires(is_one_of_alias_candidates<T, std::string, pragma::util::Path>)
+	struct default_converter<T> : alias_converter<T, std::string, pragma::util::Path> {};
 };

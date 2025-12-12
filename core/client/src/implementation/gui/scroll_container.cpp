@@ -88,13 +88,13 @@ void pragma::gui::types::WIScrollContainer::ScrollToElementY(pragma::gui::types:
 	scrlBar->SetScrollOffset(offset);
 }
 
-void pragma::gui::types::WIScrollContainer::SetAutoStickToBottom(bool autoStick) { umath::set_flag(m_scFlags, StateFlags::AutoStickToBottom, autoStick); }
-bool pragma::gui::types::WIScrollContainer::ShouldAutoStickToBottom() const { return umath::is_flag_set(m_scFlags, StateFlags::AutoStickToBottom); }
+void pragma::gui::types::WIScrollContainer::SetAutoStickToBottom(bool autoStick) { pragma::math::set_flag(m_scFlags, StateFlags::AutoStickToBottom, autoStick); }
+bool pragma::gui::types::WIScrollContainer::ShouldAutoStickToBottom() const { return pragma::math::is_flag_set(m_scFlags, StateFlags::AutoStickToBottom); }
 
-void pragma::gui::types::WIScrollContainer::SetContentsWidthFixed(bool fixed) { umath::set_flag(m_scFlags, StateFlags::ContentsWidthFixed, fixed); }
-void pragma::gui::types::WIScrollContainer::SetContentsHeightFixed(bool fixed) { umath::set_flag(m_scFlags, StateFlags::ContentsHeightFixed, fixed); }
-bool pragma::gui::types::WIScrollContainer::IsContentsWidthFixed() const { return umath::is_flag_set(m_scFlags, StateFlags::ContentsWidthFixed); }
-bool pragma::gui::types::WIScrollContainer::IsContentsHeightFixed() const { return umath::is_flag_set(m_scFlags, StateFlags::ContentsHeightFixed); }
+void pragma::gui::types::WIScrollContainer::SetContentsWidthFixed(bool fixed) { pragma::math::set_flag(m_scFlags, StateFlags::ContentsWidthFixed, fixed); }
+void pragma::gui::types::WIScrollContainer::SetContentsHeightFixed(bool fixed) { pragma::math::set_flag(m_scFlags, StateFlags::ContentsHeightFixed, fixed); }
+bool pragma::gui::types::WIScrollContainer::IsContentsWidthFixed() const { return pragma::math::is_flag_set(m_scFlags, StateFlags::ContentsWidthFixed); }
+bool pragma::gui::types::WIScrollContainer::IsContentsHeightFixed() const { return pragma::math::is_flag_set(m_scFlags, StateFlags::ContentsHeightFixed); }
 
 int pragma::gui::types::WIScrollContainer::GetScrollBarWidthV()
 {
@@ -150,10 +150,10 @@ void pragma::gui::types::WIScrollContainer::Initialize()
 	m_hChildAdded = pWrapper->AddCallback("OnChildAdded", FunctionCallback<void, WIBase *>::Create(std::bind(&pragma::gui::types::WIScrollContainer::OnWrapperChildAdded, this, std::placeholders::_1)));
 	m_hChildRemoved = pWrapper->AddCallback("OnChildRemoved", FunctionCallback<void, WIBase *>::Create(std::bind(&pragma::gui::types::WIScrollContainer::OnWrapperChildRemoved, this, std::placeholders::_1)));
 }
-util::EventReply pragma::gui::types::WIScrollContainer::ScrollCallback(Vector2 offset, bool offsetAsPixels)
+pragma::util::EventReply pragma::gui::types::WIScrollContainer::ScrollCallback(Vector2 offset, bool offsetAsPixels)
 {
-	if(WIBase::ScrollCallback(offset, offsetAsPixels) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(WIBase::ScrollCallback(offset, offsetAsPixels) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	auto &window = pragma::gui::WGUI::GetInstance().GetContext().GetWindow();
 	if(m_hScrollBarH.IsValid() && m_hScrollBarV.IsValid()) {
 		auto isShiftDown = (window->GetKeyState(pragma::platform::Key::LeftShift) != pragma::platform::KeyState::Release || window->GetKeyState(pragma::platform::Key::RightShift) != pragma::platform::KeyState::Release) ? true : false;
@@ -168,7 +168,7 @@ util::EventReply pragma::gui::types::WIScrollContainer::ScrollCallback(Vector2 o
 		if(m_hScrollBarV.IsValid())
 			m_hScrollBarV.get<WIScrollBar>()->ScrollCallback(Vector2(0.f, offset.y), offsetAsPixels);
 	}
-	return util::EventReply::Handled;
+	return pragma::util::EventReply::Handled;
 }
 pragma::gui::types::WIScrollBar *pragma::gui::types::WIScrollContainer::GetHorizontalScrollBar() { return static_cast<WIScrollBar *>(m_hScrollBarH.get()); }
 pragma::gui::types::WIScrollBar *pragma::gui::types::WIScrollContainer::GetVerticalScrollBar() { return static_cast<WIScrollBar *>(m_hScrollBarV.get()); }

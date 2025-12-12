@@ -40,21 +40,21 @@ pragma::SGame::SGame(pragma::NetworkState *state) : pragma::Game(state)
 	m_baseEnts.push_back(nullptr);
 
 	m_taskManager = std::make_unique<pragma::ai::TaskManager>();
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskMoveToTarget), []() { return ::util::make_shared<pragma::ai::TaskMoveToTarget>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskPlayAnimation), []() { return ::util::make_shared<pragma::ai::TaskPlayAnimation>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskPlayActivity), []() { return ::util::make_shared<pragma::ai::TaskPlayActivity>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskPlayLayeredAnimation), []() { return ::util::make_shared<pragma::ai::TaskPlayLayeredAnimation>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskPlayLayeredActivity), []() { return ::util::make_shared<pragma::ai::TaskPlayLayeredActivity>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskMoveRandom), []() { return ::util::make_shared<pragma::ai::TaskMoveRandom>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskPlaySound), []() { return ::util::make_shared<pragma::ai::TaskPlaySound>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskDebugPrint), []() { return ::util::make_shared<pragma::ai::TaskDebugPrint>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskDebugDrawText), []() { return ::util::make_shared<pragma::ai::TaskDebugDrawText>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskDecorator), []() { return ::util::make_shared<pragma::ai::TaskDecorator>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskWait), []() { return ::util::make_shared<pragma::ai::TaskWait>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskTurnToTarget), []() { return ::util::make_shared<pragma::ai::TaskTurnToTarget>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskRandom), []() { return ::util::make_shared<pragma::ai::TaskRandom>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskLookAtTarget), []() { return ::util::make_shared<pragma::ai::TaskLookAtTarget>(); });
-	m_taskManager->RegisterTask(typeid(pragma::ai::TaskEvent), []() { return ::util::make_shared<pragma::ai::TaskEvent>(); }); // These have to correspond with ai::Task enums (See ai_task.h)
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskMoveToTarget), []() { return pragma::util::make_shared<pragma::ai::TaskMoveToTarget>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskPlayAnimation), []() { return pragma::util::make_shared<pragma::ai::TaskPlayAnimation>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskPlayActivity), []() { return pragma::util::make_shared<pragma::ai::TaskPlayActivity>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskPlayLayeredAnimation), []() { return pragma::util::make_shared<pragma::ai::TaskPlayLayeredAnimation>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskPlayLayeredActivity), []() { return pragma::util::make_shared<pragma::ai::TaskPlayLayeredActivity>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskMoveRandom), []() { return pragma::util::make_shared<pragma::ai::TaskMoveRandom>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskPlaySound), []() { return pragma::util::make_shared<pragma::ai::TaskPlaySound>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskDebugPrint), []() { return pragma::util::make_shared<pragma::ai::TaskDebugPrint>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskDebugDrawText), []() { return pragma::util::make_shared<pragma::ai::TaskDebugDrawText>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskDecorator), []() { return pragma::util::make_shared<pragma::ai::TaskDecorator>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskWait), []() { return pragma::util::make_shared<pragma::ai::TaskWait>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskTurnToTarget), []() { return pragma::util::make_shared<pragma::ai::TaskTurnToTarget>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskRandom), []() { return pragma::util::make_shared<pragma::ai::TaskRandom>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskLookAtTarget), []() { return pragma::util::make_shared<pragma::ai::TaskLookAtTarget>(); });
+	m_taskManager->RegisterTask(typeid(pragma::ai::TaskEvent), []() { return pragma::util::make_shared<pragma::ai::TaskEvent>(); }); // These have to correspond with ai::Task enums (See ai_task.h)
 
 	m_cbProfilingHandle = pragma::Engine::Get()->AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false) {
@@ -148,8 +148,8 @@ void pragma::SGame::SetUp()
 	entGame->Spawn();
 }
 
-std::shared_ptr<pragma::geometry::ModelMesh> pragma::SGame::CreateModelMesh() const { return ::util::make_shared<pragma::geometry::ModelMesh>(); }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::SGame::CreateModelSubMesh() const { return ::util::make_shared<pragma::geometry::ModelSubMesh>(); }
+std::shared_ptr<pragma::geometry::ModelMesh> pragma::SGame::CreateModelMesh() const { return pragma::util::make_shared<pragma::geometry::ModelMesh>(); }
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::SGame::CreateModelSubMesh() const { return pragma::util::make_shared<pragma::geometry::ModelSubMesh>(); }
 
 bool pragma::SGame::LoadMap(const std::string &map, const Vector3 &origin, std::vector<EntityHandle> *entities)
 {
@@ -171,7 +171,7 @@ bool pragma::SGame::LoadMap(const std::string &map, const Vector3 &origin, std::
 static auto cvSimEnabled = pragma::console::get_server_con_var("sv_physics_simulation_enabled");
 bool pragma::SGame::IsPhysicsSimulationEnabled() const { return cvSimEnabled->GetBool(); }
 
-std::shared_ptr<pragma::EntityComponentManager> pragma::SGame::InitializeEntityComponentManager() { return ::util::make_shared<pragma::SEntityComponentManager>(); }
+std::shared_ptr<pragma::EntityComponentManager> pragma::SGame::InitializeEntityComponentManager() { return pragma::util::make_shared<pragma::SEntityComponentManager>(); }
 
 pragma::ai::TaskManager &pragma::SGame::GetAITaskManager() const { return *m_taskManager; }
 
@@ -411,7 +411,7 @@ void pragma::SGame::OnClientDropped(pragma::networking::IServerClient &client, p
 	auto &ent = pl->GetEntity();
 	NetPacket p;
 	networking::write_player(p, pl);
-	p->Write<int32_t>(umath::to_integral(reason));
+	p->Write<int32_t>(pragma::math::to_integral(reason));
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::CLIENT_DROPPED, p, pragma::networking::Protocol::SlowReliable, {client, pragma::networking::ClientRecipientFilter::FilterType::Exclude});
 	OnPlayerDropped(*pl, reason);
 	ent.RemoveSafely();
@@ -469,7 +469,7 @@ void pragma::SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, 
 	auto *pl = GetPlayer(session);
 	if(pl != nullptr)
 		return;
-	auto plVersion = packet->Read<util::Version>();
+	auto plVersion = packet->Read<pragma::util::Version>();
 	auto version = pragma::get_engine_version();
 	if(version != plVersion) {
 		Con::csv << "Client " << session.GetIdentifier() << " has a different engine version (" << plVersion.ToString() << ") from server's. Dropping client..." << Con::endl;
@@ -619,7 +619,7 @@ void pragma::SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, 
 	auto &sounds = pragma::ServerState::Get()->GetSounds();
 	for(auto &sndRef : sounds) {
 		auto *snd = dynamic_cast<pragma::audio::SALSound *>(&sndRef.get());
-		if(snd == nullptr || umath::is_flag_set(snd->GetCreateFlags(), pragma::audio::ALCreateFlags::DontTransmit))
+		if(snd == nullptr || pragma::math::is_flag_set(snd->GetCreateFlags(), pragma::audio::ALCreateFlags::DontTransmit))
 			continue;
 		pragma::ServerState::Get()->SendSoundSourceToClient(*snd, true, &rp);
 	}

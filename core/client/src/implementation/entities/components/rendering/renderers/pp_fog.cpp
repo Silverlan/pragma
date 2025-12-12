@@ -20,7 +20,7 @@ void CRendererPpFogComponent::DoRenderEffect(const pragma::rendering::DrawSceneI
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
 	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingFog");
 
-	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
+	pragma::util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
 		pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingFog
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);

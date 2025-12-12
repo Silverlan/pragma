@@ -44,10 +44,10 @@ void ResourceWatcherManager::Unlock()
 	for(auto &dirWatcher : m_watchers)
 		dirWatcher->SetEnabled(true);
 }
-util::ScopeGuard ResourceWatcherManager::ScopeLock()
+pragma::util::ScopeGuard ResourceWatcherManager::ScopeLock()
 {
 	Lock();
-	return util::ScopeGuard {[this]() { Unlock(); }};
+	return pragma::util::ScopeGuard {[this]() { Unlock(); }};
 }
 
 bool ResourceWatcherManager::IsLocked() const { return m_lockedCount > 0; }
@@ -80,7 +80,7 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 				auto &textures = mdl->GetTextures();
 				for(auto it = textures.begin(); it != textures.end(); ++it) {
 					auto tex = *it;
-					ustring::to_lower(tex);
+					pragma::string::to_lower(tex);
 					if(tex == fname) {
 						modelMap.insert(mdl.get());
 						mdl->PrecacheTexture(it - textures.begin());
@@ -127,9 +127,9 @@ void ResourceWatcherManager::CallChangeCallbacks(EResourceWatcherCallbackType ty
 static bool is_image_format(const std::string &ext)
 {
 	auto &supportedFormats = MaterialManager::get_supported_image_formats();
-	return std::find_if(supportedFormats.begin(), supportedFormats.end(), [&ext](const MaterialManager::ImageFormat &format) { return ustring::compare(format.extension, ext, false); }) != supportedFormats.end();
+	return std::find_if(supportedFormats.begin(), supportedFormats.end(), [&ext](const MaterialManager::ImageFormat &format) { return pragma::string::compare(format.extension, ext, false); }) != supportedFormats.end();
 }
-void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const util::Path &path, const std::string &ext)
+void ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path, const std::string &ext)
 {
 	auto &strPath = path.GetString();
 	auto *nw = m_networkState;
@@ -199,26 +199,26 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 				auto *mat = hMat.get();
 
 				auto canonName = FileManager::GetCanonicalizedPath(strPath);
-				ustring::to_lower(canonName);
+				pragma::string::to_lower(canonName);
 				ufile::remove_extension_from_filename(canonName);
 
-				std::function<bool(const util::Path &path)> fHasTexture = nullptr;
-				fHasTexture = [mat, &canonName, &fHasTexture](const util::Path &path) -> bool {
+				std::function<bool(const pragma::util::Path &path)> fHasTexture = nullptr;
+				fHasTexture = [mat, &canonName, &fHasTexture](const pragma::util::Path &path) -> bool {
 					for(auto &name : msys::MaterialPropertyBlockView {*mat, path}) {
 						auto propType = mat->GetPropertyType(name);
 						switch(propType) {
 						case msys::PropertyType::Block:
 							{
-								if(fHasTexture(util::FilePath(path, name)))
+								if(fHasTexture(pragma::util::FilePath(path, name)))
 									return true;
 								break;
 							}
 						case msys::PropertyType::Texture:
 							{
 								std::string texName;
-								if(mat->GetProperty(util::FilePath(path, name).GetString(), &texName)) {
+								if(mat->GetProperty(pragma::util::FilePath(path, name).GetString(), &texName)) {
 									texName = FileManager::GetCanonicalizedPath(texName);
-									ustring::to_lower(texName);
+									pragma::string::to_lower(texName);
 									ufile::remove_extension_from_filename(texName);
 									if(canonName == texName)
 										return true;
@@ -254,7 +254,7 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 		}
 	}
 	else if(rootPath == "scripts/sounds/") {
-		if(ustring::compare<std::string>(ext, "udm", false)) {
+		if(pragma::string::compare<std::string>(ext, "udm", false)) {
 			if(game != nullptr) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 				auto scriptPath = "scripts\\" + strPath;
@@ -270,7 +270,7 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 		pragma::locale::reload_files();
 }
 
-void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const util::Path &path)
+void ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path)
 {
 	filemanager::update_file_index_cache((rootPath + path).GetString());
 	/*std::string absPath;
@@ -308,8 +308,8 @@ bool ResourceWatcherManager::MountDirectory(const std::string &path, bool bAbsol
 		m_watcherMutex.lock();
 		m_watchers.reserve(m_watchers.size() + watchPaths.size());
 		for(auto &watchPath : watchPaths) {
-			auto pwatchPath = util::DirPath(watchPath);
-			m_watchers.push_back(::util::make_shared<DirectoryWatcherCallback>(util::DirPath(path, pwatchPath).GetString(), [this, pwatchPath = std::move(pwatchPath)](const std::string &fName) { OnResourceChanged(pwatchPath, fName); }, watchFlags, m_watcherManager.get()));
+			auto pwatchPath = pragma::util::DirPath(watchPath);
+			m_watchers.push_back(pragma::util::make_shared<DirectoryWatcherCallback>(pragma::util::DirPath(path, pwatchPath).GetString(), [this, pwatchPath = std::move(pwatchPath)](const std::string &fName) { OnResourceChanged(pwatchPath, fName); }, watchFlags, m_watcherManager.get()));
 		}
 		m_watcherMutex.unlock();
 	}

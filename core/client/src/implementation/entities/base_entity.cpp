@@ -28,7 +28,7 @@ void pragma::ecs::CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &com
 	else if(typeid(component) == typeid(pragma::CPhysicsComponent))
 		m_physicsComponent = &static_cast<pragma::CPhysicsComponent &>(component);
 	else if(typeid(component) == typeid(pragma::CWorldComponent))
-		umath::set_flag(m_stateFlags, StateFlags::HasWorldComponent);
+		pragma::math::set_flag(m_stateFlags, StateFlags::HasWorldComponent);
 	else if(typeid(component) == typeid(pragma::CModelComponent))
 		m_modelComponent = &static_cast<pragma::CModelComponent &>(component);
 	else if(typeid(component) == typeid(pragma::CGenericComponent))
@@ -36,15 +36,15 @@ void pragma::ecs::CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &com
 	else if(typeid(component) == typeid(pragma::CChildComponent))
 		m_childComponent = &static_cast<pragma::CChildComponent &>(component);
 	else if(typeid(component) == typeid(pragma::ecs::CompositeComponent)) {
-		static_cast<pragma::ecs::CompositeComponent &>(component).AddEventCallback(pragma::ecs::compositeComponent::EVENT_ON_ENTITY_ADDED, [this](std::reference_wrapper<pragma::ComponentEvent> e) -> util::EventReply {
+		static_cast<pragma::ecs::CompositeComponent &>(component).AddEventCallback(pragma::ecs::compositeComponent::EVENT_ON_ENTITY_ADDED, [this](std::reference_wrapper<pragma::ComponentEvent> e) -> pragma::util::EventReply {
 			auto &evData = static_cast<pragma::ecs::events::CECompositeEntityChanged &>(e.get());
 			static_cast<pragma::ecs::CBaseEntity &>(evData.ent).GetSceneFlagsProperty()->Link(*GetSceneFlagsProperty()); // TODO: This skips the EVENT_ON_SCENE_FLAGS_CHANGED event
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		});
-		static_cast<pragma::ecs::CompositeComponent &>(component).AddEventCallback(pragma::ecs::compositeComponent::EVENT_ON_ENTITY_REMOVED, [this](std::reference_wrapper<pragma::ComponentEvent> e) -> util::EventReply {
+		static_cast<pragma::ecs::CompositeComponent &>(component).AddEventCallback(pragma::ecs::compositeComponent::EVENT_ON_ENTITY_REMOVED, [this](std::reference_wrapper<pragma::ComponentEvent> e) -> pragma::util::EventReply {
 			auto &evData = static_cast<pragma::ecs::events::CECompositeEntityChanged &>(e.get());
 			static_cast<pragma::ecs::CBaseEntity &>(evData.ent).GetSceneFlagsProperty()->Unlink(); // TODO: This skips the EVENT_ON_SCENE_FLAGS_CHANGED event
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		});
 	}
 }
@@ -52,7 +52,7 @@ void pragma::ecs::CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &c
 {
 	pragma::ecs::BaseEntity::OnComponentRemoved(component);
 	if(typeid(component) == typeid(pragma::CWorldComponent))
-		umath::set_flag(m_stateFlags, StateFlags::HasWorldComponent, false);
+		pragma::math::set_flag(m_stateFlags, StateFlags::HasWorldComponent, false);
 	else if(typeid(component) == typeid(pragma::CRenderComponent))
 		m_renderComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CTransformComponent))
@@ -94,7 +94,7 @@ static uint64_t get_scene_flag(const pragma::CSceneComponent &scene)
 	auto index = scene.GetSceneIndex();
 	return 1 << index;
 }
-const util::PUInt32Property &pragma::ecs::CBaseEntity::GetSceneFlagsProperty() const { return m_sceneFlags; }
+const pragma::util::PUInt32Property &pragma::ecs::CBaseEntity::GetSceneFlagsProperty() const { return m_sceneFlags; }
 uint32_t pragma::ecs::CBaseEntity::GetSceneFlags() const { return *m_sceneFlags; }
 void pragma::ecs::CBaseEntity::AddToScene(pragma::CSceneComponent &scene)
 {
@@ -168,7 +168,7 @@ Bool pragma::ecs::CBaseEntity::ReceiveNetEvent(UInt32 eventId, NetPacket &p)
 void pragma::ecs::CBaseEntity::ReceiveData(NetPacket &packet)
 {
 	m_spawnFlags = packet->Read<uint32_t>();
-	SetUuid(packet->Read<util::Uuid>());
+	SetUuid(packet->Read<pragma::util::Uuid>());
 
 	auto &componentManager = static_cast<pragma::CEntityComponentManager &>(pragma::get_cgame()->GetEntityComponentManager());
 	auto &componentTypes = componentManager.GetRegisteredComponentTypes();
@@ -225,7 +225,7 @@ void pragma::ecs::CBaseEntity::OnRemove()
 
 void pragma::ecs::CBaseEntity::Remove()
 {
-	if(umath::is_flag_set(GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
+	if(pragma::math::is_flag_set(GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
 		return;
 	pragma::ecs::BaseEntity::Remove();
 	SceneRenderDesc::AssertRenderQueueThreadInactive();

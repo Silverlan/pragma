@@ -114,13 +114,13 @@ void SPlayerComponent::SetViewRotation(const Quat &rot)
 	ent.SendNetEvent(m_netEvSetViewOrientation, p, pragma::networking::Protocol::SlowReliable, *session);
 }
 
-util::EventReply SPlayerComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply SPlayerComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BasePlayerComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BasePlayerComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == sCharacterComponent::EVENT_ON_RESPAWN)
 		OnRespawn();
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 
 void SPlayerComponent::OnRespawn()
@@ -143,7 +143,7 @@ void SPlayerComponent::PrintMessage(std::string message, pragma::console::MESSAG
 		return;
 	NetPacket p;
 	p->WriteString(message);
-	p->Write<std::underlying_type_t<decltype(type)>>(umath::to_integral(type));
+	p->Write<std::underlying_type_t<decltype(type)>>(pragma::math::to_integral(type));
 
 	auto *session = GetClientSession();
 	if(session)

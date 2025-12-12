@@ -219,7 +219,7 @@ void pragma::ServerState::ReceiveUserInput(pragma::networking::IServerClient &cl
 	if(pl == nullptr)
 		return;
 	auto latency = client.GetLatency() / 2.f; // Latency is entire roundtrip; We need the time for one way
-	auto tActivated = (util::clock::to_int(util::clock::get_duration_since_start()) - packet.GetTimeActivated()) / 1'000'000.0;
+	auto tActivated = (pragma::util::clock::to_int(pragma::util::clock::get_duration_since_start()) - packet.GetTimeActivated()) / 1'000'000.0;
 	//Con::ccl<<"Snapshot delay: "<<+latency<<"+ "<<tActivated<<" = "<<(latency +tActivated)<<Con::endl;
 	auto tDelta = static_cast<float>((latency + tActivated) / 1'000.0);
 
@@ -245,7 +245,7 @@ void pragma::ServerState::ReceiveUserInput(pragma::networking::IServerClient &cl
 	pOut->Write<bool>(bController);
 	auto *actionInputC = pl->GetActionInputController();
 	if(bController == true) {
-		auto actionValues = umath::get_power_of_2_values(umath::to_integral(actions));
+		auto actionValues = pragma::math::get_power_of_2_values(pragma::math::to_integral(actions));
 		for(auto v : actionValues) {
 			auto magnitude = packet->Read<float>();
 			pOut->Write<float>(magnitude);

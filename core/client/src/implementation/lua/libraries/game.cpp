@@ -57,7 +57,7 @@ static void update_vehicle(Vehicle_Car *vhc)
 
 enum Method { IK_JACOB_TRANS = 0, IK_PURE_PSEUDO, IK_DLS, IK_SDLS, IK_DLS_SVD };
 
-static void get_local_bone_position(const std::function<umath::Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
+static void get_local_bone_position(const std::function<pragma::math::Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
 {
 	std::function<void(std::shared_ptr<pragma::animation::Bone> &, Vector3 *, Quat *, Vector3 *)> apply;
 	apply = [fGetTransform, &apply, fscale](std::shared_ptr<pragma::animation::Bone> &bone, Vector3 *pos, Quat *rot, Vector3 *scale) {
@@ -79,7 +79,7 @@ static void get_local_bone_position(const std::function<umath::Transform(uint32_
 	if(parent != nullptr)
 		apply(parent, pos, rot, scale);
 }
-static void get_local_bone_position(const std::shared_ptr<pragma::asset::Model> &mdl, const std::function<umath::Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr,
+static void get_local_bone_position(const std::shared_ptr<pragma::asset::Model> &mdl, const std::function<pragma::math::Transform(uint32_t)> &fGetTransform, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr,
   Vector3 *scale = nullptr)
 {
 	get_local_bone_position(fGetTransform, bone, fscale, pos, rot, scale);
@@ -211,22 +211,22 @@ class RagDoll {
 
 		transform.setIdentity();
 		transform.setOrigin(scale * btVector3(btScalar(-0.35), btScalar(1.45), btScalar(0.)));
-		transform.getBasis().setEulerZYX(0, 0, umath::pi_2);
+		transform.getBasis().setEulerZYX(0, 0, pragma::math::pi_2);
 		m_bodies[BODYPART_LEFT_UPPER_ARM] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_LEFT_UPPER_ARM]);
 
 		transform.setIdentity();
 		transform.setOrigin(scale * btVector3(btScalar(-0.7), btScalar(1.45), btScalar(0.)));
-		transform.getBasis().setEulerZYX(0, 0, umath::pi_2);
+		transform.getBasis().setEulerZYX(0, 0, pragma::math::pi_2);
 		m_bodies[BODYPART_LEFT_LOWER_ARM] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_LEFT_LOWER_ARM]);
 
 		transform.setIdentity();
 		transform.setOrigin(scale * btVector3(btScalar(0.35), btScalar(1.45), btScalar(0.)));
-		transform.getBasis().setEulerZYX(0, 0, -umath::pi_2);
+		transform.getBasis().setEulerZYX(0, 0, -pragma::math::pi_2);
 		m_bodies[BODYPART_RIGHT_UPPER_ARM] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_RIGHT_UPPER_ARM]);
 
 		transform.setIdentity();
 		transform.setOrigin(scale * btVector3(btScalar(0.7), btScalar(1.45), btScalar(0.)));
-		transform.getBasis().setEulerZYX(0, 0, -umath::pi_2);
+		transform.getBasis().setEulerZYX(0, 0, -pragma::math::pi_2);
 		m_bodies[BODYPART_RIGHT_LOWER_ARM] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_RIGHT_LOWER_ARM]);
 
 		// Setup some damping on the m_bodies
@@ -246,9 +246,9 @@ class RagDoll {
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, umath::pi_2, 0);
+		localA.getBasis().setEulerZYX(0, pragma::math::pi_2, 0);
 		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.15), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, umath::pi_2, 0);
+		localB.getBasis().setEulerZYX(0, pragma::math::pi_2, 0);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.15), btScalar(0.)));
 
 		std::vector<btRigidBody *> rigidBodies;
@@ -256,84 +256,84 @@ class RagDoll {
 			rigidBodies.push_back(static_cast<PhysRigidBody *>(hBody.get())->GetRigidBody());
 
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_PELVIS], *rigidBodies[BODYPART_SPINE], localA, localB));
-		hingeC->SetLimit(btScalar(-umath::pi_4), btScalar(umath::pi_2));
+		hingeC->SetLimit(btScalar(-pragma::math::pi_4), btScalar(pragma::math::pi_2));
 		m_joints[JOINT_PELVIS_SPINE] = hingeC;
 		hingeC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, 0, umath::pi_2);
+		localA.getBasis().setEulerZYX(0, 0, pragma::math::pi_2);
 		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.30), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, 0, umath::pi_2);
+		localB.getBasis().setEulerZYX(0, 0, pragma::math::pi_2);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.14), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_SPINE], *rigidBodies[BODYPART_HEAD], localA, localB));
-		coneC->SetLimit(umath::pi_4, umath::pi_4, umath::pi_2);
+		coneC->SetLimit(pragma::math::pi_4, pragma::math::pi_4, pragma::math::pi_2);
 		m_joints[JOINT_SPINE_HEAD] = coneC;
 		coneC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, 0, -umath::pi_4 * 5);
+		localA.getBasis().setEulerZYX(0, 0, -pragma::math::pi_4 * 5);
 		localA.setOrigin(scale * btVector3(btScalar(-0.18), btScalar(-0.10), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, 0, -umath::pi_4 * 5);
+		localB.getBasis().setEulerZYX(0, 0, -pragma::math::pi_4 * 5);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.225), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_PELVIS], *rigidBodies[BODYPART_LEFT_UPPER_LEG], localA, localB));
-		coneC->SetLimit(umath::pi_4, umath::pi_4, 0);
+		coneC->SetLimit(pragma::math::pi_4, pragma::math::pi_4, 0);
 		m_joints[JOINT_LEFT_HIP] = coneC;
 		coneC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, umath::pi_2, 0);
+		localA.getBasis().setEulerZYX(0, pragma::math::pi_2, 0);
 		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.225), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, umath::pi_2, 0);
+		localB.getBasis().setEulerZYX(0, pragma::math::pi_2, 0);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.185), btScalar(0.)));
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_LEFT_UPPER_LEG], *rigidBodies[BODYPART_LEFT_LOWER_LEG], localA, localB));
-		hingeC->SetLimit(btScalar(0), btScalar(umath::pi_2));
+		hingeC->SetLimit(btScalar(0), btScalar(pragma::math::pi_2));
 		m_joints[JOINT_LEFT_KNEE] = hingeC;
 		hingeC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, 0, umath::pi_4);
+		localA.getBasis().setEulerZYX(0, 0, pragma::math::pi_4);
 		localA.setOrigin(scale * btVector3(btScalar(0.18), btScalar(-0.10), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, 0, umath::pi_4);
+		localB.getBasis().setEulerZYX(0, 0, pragma::math::pi_4);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.225), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_PELVIS], *rigidBodies[BODYPART_RIGHT_UPPER_LEG], localA, localB));
-		coneC->SetLimit(umath::pi_4, umath::pi_4, 0);
+		coneC->SetLimit(pragma::math::pi_4, pragma::math::pi_4, 0);
 		m_joints[JOINT_RIGHT_HIP] = coneC;
 		coneC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, umath::pi_2, 0);
+		localA.getBasis().setEulerZYX(0, pragma::math::pi_2, 0);
 		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.225), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, umath::pi_2, 0);
+		localB.getBasis().setEulerZYX(0, pragma::math::pi_2, 0);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.185), btScalar(0.)));
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_RIGHT_UPPER_LEG], *rigidBodies[BODYPART_RIGHT_LOWER_LEG], localA, localB));
-		hingeC->SetLimit(btScalar(0), btScalar(umath::pi_2));
+		hingeC->SetLimit(btScalar(0), btScalar(pragma::math::pi_2));
 		m_joints[JOINT_RIGHT_KNEE] = hingeC;
 		hingeC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, 0, umath::pi);
+		localA.getBasis().setEulerZYX(0, 0, pragma::math::pi);
 		localA.setOrigin(scale * btVector3(btScalar(-0.2), btScalar(0.15), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, 0, umath::pi_2);
+		localB.getBasis().setEulerZYX(0, 0, pragma::math::pi_2);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.18), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_SPINE], *rigidBodies[BODYPART_LEFT_UPPER_ARM], localA, localB));
-		coneC->SetLimit(umath::pi_2, umath::pi_2, 0);
+		coneC->SetLimit(pragma::math::pi_2, pragma::math::pi_2, 0);
 		m_joints[JOINT_LEFT_SHOULDER] = coneC;
 		coneC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, umath::pi_2, 0);
+		localA.getBasis().setEulerZYX(0, pragma::math::pi_2, 0);
 		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.18), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, umath::pi_2, 0);
+		localB.getBasis().setEulerZYX(0, pragma::math::pi_2, 0);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.14), btScalar(0.)));
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_LEFT_UPPER_ARM], *rigidBodies[BODYPART_LEFT_LOWER_ARM], localA, localB));
-		hingeC->SetLimit(btScalar(-umath::pi_2), btScalar(0));
+		hingeC->SetLimit(btScalar(-pragma::math::pi_2), btScalar(0));
 		m_joints[JOINT_LEFT_ELBOW] = hingeC;
 		hingeC->DisableCollisions();
 
@@ -341,21 +341,21 @@ class RagDoll {
 		localB.setIdentity();
 		localA.getBasis().setEulerZYX(0, 0, 0);
 		localA.setOrigin(scale * btVector3(btScalar(0.2), btScalar(0.15), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, 0, umath::pi_2);
+		localB.getBasis().setEulerZYX(0, 0, pragma::math::pi_2);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.18), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_SPINE], *rigidBodies[BODYPART_RIGHT_UPPER_ARM], localA, localB));
-		coneC->SetLimit(umath::pi_2, umath::pi_2, 0);
+		coneC->SetLimit(pragma::math::pi_2, pragma::math::pi_2, 0);
 		m_joints[JOINT_RIGHT_SHOULDER] = coneC;
 		coneC->DisableCollisions();
 
 		localA.setIdentity();
 		localB.setIdentity();
-		localA.getBasis().setEulerZYX(0, umath::pi_2, 0);
+		localA.getBasis().setEulerZYX(0, pragma::math::pi_2, 0);
 		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.18), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0, umath::pi_2, 0);
+		localB.getBasis().setEulerZYX(0, pragma::math::pi_2, 0);
 		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.14), btScalar(0.)));
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_RIGHT_UPPER_ARM], *rigidBodies[BODYPART_RIGHT_LOWER_ARM], localA, localB));
-		hingeC->SetLimit(btScalar(-umath::pi_2), btScalar(0));
+		hingeC->SetLimit(btScalar(-pragma::math::pi_2), btScalar(0));
 		m_joints[JOINT_RIGHT_ELBOW] = hingeC;
 		hingeC->DisableCollisions();
 	}
@@ -525,8 +525,8 @@ int Lua::game::Client::test(lua::State *l)
 			ike->renderScene();
 		}));*/
 		/*#define RADIAN(X)	((X)*RadiansToDegrees)
-		auto ikTree = ::util::make_shared<Tree>();
-		auto jacobian = ::util::make_shared<Jacobian>(ikTree.get());
+		auto ikTree = pragma::util::make_shared<Tree>();
+		auto jacobian = pragma::util::make_shared<Jacobian>(ikTree.get());
 
 		Reset(*ikTree,jacobian.get());
 
@@ -541,28 +541,28 @@ int Lua::game::Client::test(lua::State *l)
 		const VectorR3& unitz = VectorR3::UnitZ;
 		const VectorR3& zero = VectorR3::Zero;
 
-		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 0.087500), unitz, 0.08, JOINT, -1e30, 1e30, RADIAN(0.)));
+		m_ikNodes.push_back(pragma::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 0.087500), unitz, 0.08, JOINT, -1e30, 1e30, RADIAN(0.)));
 		ikTree->InsertRoot(m_ikNodes[0].get());
 
-		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, -0.000000, 0.290000), unity, 0.08, JOINT, -0.5, 0.4, RADIAN(0.)));
+		m_ikNodes.push_back(pragma::util::make_shared<Node>(VectorR3(0.100000, -0.000000, 0.290000), unity, 0.08, JOINT, -0.5, 0.4, RADIAN(0.)));
 		ikTree->InsertLeftChild(m_ikNodes[0].get(), m_ikNodes[1].get());
 
-		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, -0.000000, 0.494500), unitz, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
+		m_ikNodes.push_back(pragma::util::make_shared<Node>(VectorR3(0.100000, -0.000000, 0.494500), unitz, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
 		ikTree->InsertLeftChild(m_ikNodes[1].get(), m_ikNodes[2].get());
 
-		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 0.710000), -unity, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
+		m_ikNodes.push_back(pragma::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 0.710000), -unity, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
 		ikTree->InsertLeftChild(m_ikNodes[2].get(), m_ikNodes[3].get());
 
-		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 0.894500), unitz, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
+		m_ikNodes.push_back(pragma::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 0.894500), unitz, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
 		ikTree->InsertLeftChild(m_ikNodes[3].get(), m_ikNodes[4].get());
 
-		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 1.110000), unity, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
+		m_ikNodes.push_back(pragma::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 1.110000), unity, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
 		ikTree->InsertLeftChild(m_ikNodes[4].get(), m_ikNodes[5].get());
 
-		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 1.191000), unitz, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
+		m_ikNodes.push_back(pragma::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 1.191000), unitz, 0.08, JOINT, minTheta, maxTheta, RADIAN(0.)));
 		ikTree->InsertLeftChild(m_ikNodes[5].get(), m_ikNodes[6].get());
 
-		m_ikNodes.push_back(::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 1.20000), zero, 0.08, EFFECTOR));
+		m_ikNodes.push_back(pragma::util::make_shared<Node>(VectorR3(0.100000, 0.000000, 1.20000), zero, 0.08, EFFECTOR));
 		ikTree->InsertLeftChild(m_ikNodes[6].get(), m_ikNodes[7].get());
 
 		ikTree->Init();
@@ -627,8 +627,8 @@ int Lua::game::Client::test(lua::State *l)
 											sndName = child->parameters.front();
 										else if(child->identifier == "time" && child->parameters.size() >= 2)
 										{
-											startTime = ustring::to_float(child->parameters.at(0));
-											endTime = ustring::to_float(child->parameters.at(1));
+											startTime = pragma::string::to_float(child->parameters.at(0));
+											endTime = pragma::string::to_float(child->parameters.at(1));
 										}
 									}
 									if(sndName.empty() == false)
@@ -664,7 +664,7 @@ int Lua::game::Client::test(lua::State *l)
 											{
 												auto &flexChild = *it;
 												auto bCombo = std::find_if(flexChild->parameters.begin(),flexChild->parameters.end(),[](const std::string &param) {
-													return ustring::compare(param,"combo",false);
+													return pragma::string::compare(param,"combo",false);
 												}) != flexChild->parameters.end();
 
 												auto &flexData = values.insert(std::make_pair(flexChild->identifier,FlexData{})).first->second;
@@ -675,8 +675,8 @@ int Lua::game::Client::test(lua::State *l)
 														continue;
 													flexData.values.push_back({});
 													auto &v = flexData.values.back();
-													v.time = ustring::to_float(child->identifier);
-													v.value = ustring::to_float(child->parameters.front());
+													v.time = pragma::string::to_float(child->identifier);
+													v.value = pragma::string::to_float(child->parameters.front());
 												}
 												if(bCombo == true)
 												{
@@ -692,16 +692,16 @@ int Lua::game::Client::test(lua::State *l)
 															continue;
 														flexData.lrDistribution.push_back({});
 														auto &v = flexData.lrDistribution.back();
-														v.time = ustring::to_float(child->identifier);
-														v.value = ustring::to_float(child->parameters.front());
+														v.time = pragma::string::to_float(child->identifier);
+														v.value = pragma::string::to_float(child->parameters.front());
 													}
 												}
 											}
 										}
 										else if(child->identifier == "time" && child->parameters.size() >= 2)
 										{
-											startTime = ustring::to_float(child->parameters.at(0));
-											endTime = ustring::to_float(child->parameters.at(1));
+											startTime = pragma::string::to_float(child->parameters.at(0));
+											endTime = pragma::string::to_float(child->parameters.at(1));
 										}
 									}
 									if(values.empty() == false)
@@ -791,8 +791,8 @@ int Lua::game::Client::open_dropped_file(lua::State *l)
 		auto it = std::find_if(droppedFiles.begin(), droppedFiles.end(), [&fileName](const pragma::CEngine::DroppedFile &f) { return (f.fileName == fileName) ? true : false; });
 		if(it == droppedFiles.end()) {
 			auto &gDroppedFiles = pragma::get_dropped_files();
-			auto npath = ::util::Path::CreateFile(fileName).GetString();
-			ustring::to_lower(npath);
+			auto npath = pragma::util::Path::CreateFile(fileName).GetString();
+			pragma::string::to_lower(npath);
 			auto nfileName = ufile::get_file_from_filename(npath);
 			auto it = gDroppedFiles.find(nfileName);
 			if(it == gDroppedFiles.end())
@@ -815,7 +815,7 @@ int Lua::game::Client::open_dropped_file(lua::State *l)
 	auto f = FileManager::OpenSystemFile(fullPath->c_str(), (bBinary == true) ? "rb" : "r");
 	if(f == nullptr)
 		return 0;
-	auto r = ::util::make_shared<LFile>();
+	auto r = pragma::util::make_shared<LFile>();
 	r->Construct(f);
 	Lua::Push<std::shared_ptr<LFile>>(l, r);
 	return 1;

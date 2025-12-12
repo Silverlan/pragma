@@ -25,7 +25,7 @@ module pragma.shared;
 
 import :math.noise;
 
-namespace util {
+namespace pragma::math {
 	namespace noise {
 		static void init();
 
@@ -33,30 +33,30 @@ namespace util {
 		static std::array<int32_t, PERMUTATION_COUNT * 2> PERMUTATIONS;
 	};
 };
-float util::noise::get_noise(float x)
+float pragma::math::noise::get_noise(float x)
 {
 	init();
-	int x0 = umath::floor(x);
+	int x0 = pragma::math::floor(x);
 	x -= x0;
 	x0 &= PERMUTATION_MASK;
-	return umath::lerp(grad(PERMUTATIONS[x0], x), grad(PERMUTATIONS[x0 + 1], x - 1.f), ease(x));
+	return pragma::math::lerp(grad(PERMUTATIONS[x0], x), grad(PERMUTATIONS[x0 + 1], x - 1.f), ease(x));
 }
 
-float util::noise::get_noise(float x, int y)
+float pragma::math::noise::get_noise(float x, int y)
 {
 	init();
-	int x0 = umath::floor(x);
+	int x0 = pragma::math::floor(x);
 	x -= x0;
 	x0 &= PERMUTATION_MASK;
 	y &= PERMUTATION_MASK;
-	return umath::lerp(grad(PERMUTATIONS[PERMUTATIONS[x0] + y], x), grad(PERMUTATIONS[PERMUTATIONS[x0 + 1] + y], x - 1.f), ease(x));
+	return pragma::math::lerp(grad(PERMUTATIONS[PERMUTATIONS[x0] + y], x), grad(PERMUTATIONS[PERMUTATIONS[x0 + 1] + y], x - 1.f), ease(x));
 }
 
-float util::noise::get_noise(float x, float y)
+float pragma::math::noise::get_noise(float x, float y)
 {
 	init();
-	int x0 = umath::floor(x);
-	int y0 = umath::floor(y);
+	int x0 = pragma::math::floor(x);
+	int y0 = pragma::math::floor(y);
 	x -= x0;
 	y -= y0;
 	x0 &= PERMUTATION_MASK;
@@ -66,14 +66,14 @@ float util::noise::get_noise(float x, float y)
 	int p1 = PERMUTATIONS[x0 + 1];
 	float xm1 = x - 1.f, ym1 = y - 1.f;
 	float s = ease(x);
-	return umath::lerp(umath::lerp(grad(PERMUTATIONS[p0 + y0], x, y), grad(PERMUTATIONS[p1 + y0], xm1, y), s), umath::lerp(grad(PERMUTATIONS[p0 + y1], x, ym1), grad(PERMUTATIONS[p1 + y1], xm1, ym1), s), ease(y));
+	return pragma::math::lerp(pragma::math::lerp(grad(PERMUTATIONS[p0 + y0], x, y), grad(PERMUTATIONS[p1 + y0], xm1, y), s), pragma::math::lerp(grad(PERMUTATIONS[p0 + y1], x, ym1), grad(PERMUTATIONS[p1 + y1], xm1, ym1), s), ease(y));
 }
 
-float util::noise::get_noise(float x, float y, int z)
+float pragma::math::noise::get_noise(float x, float y, int z)
 {
 	init();
-	int x0 = umath::floor(x);
-	int y0 = umath::floor(y);
+	int x0 = pragma::math::floor(x);
+	int y0 = pragma::math::floor(y);
 	x -= x0;
 	y -= y0;
 	x0 &= PERMUTATION_MASK;
@@ -84,15 +84,15 @@ float util::noise::get_noise(float x, float y, int z)
 	int p1 = PERMUTATIONS[x0 + 1];
 	float xm1 = x - 1.f, ym1 = y - 1.f;
 	float s = ease(x);
-	return umath::lerp(umath::lerp(grad(PERMUTATIONS[PERMUTATIONS[p0 + y0] + z], x, y), grad(PERMUTATIONS[PERMUTATIONS[p1 + y0] + z], xm1, y), s), umath::lerp(grad(PERMUTATIONS[PERMUTATIONS[p0 + y1] + z], x, ym1), grad(PERMUTATIONS[PERMUTATIONS[p1 + y1] + z], xm1, ym1), s), ease(y));
+	return pragma::math::lerp(pragma::math::lerp(grad(PERMUTATIONS[PERMUTATIONS[p0 + y0] + z], x, y), grad(PERMUTATIONS[PERMUTATIONS[p1 + y0] + z], xm1, y), s), pragma::math::lerp(grad(PERMUTATIONS[PERMUTATIONS[p0 + y1] + z], x, ym1), grad(PERMUTATIONS[PERMUTATIONS[p1 + y1] + z], xm1, ym1), s), ease(y));
 }
 
-float util::noise::get_noise(float x, float y, float z)
+float pragma::math::noise::get_noise(float x, float y, float z)
 {
 	init();
-	int x0 = umath::floor(x);
-	int y0 = umath::floor(y);
-	int z0 = umath::floor(z);
+	int x0 = pragma::math::floor(x);
+	int y0 = pragma::math::floor(y);
+	int z0 = pragma::math::floor(z);
 	x -= x0;
 	y -= y0;
 	z -= z0;
@@ -108,11 +108,11 @@ float util::noise::get_noise(float x, float y, float z)
 	int p11 = PERMUTATIONS[p1 + y1];
 	float xm1 = x - 1.f, ym1 = y - 1.f, zm1 = z - 1.f;
 	float s = ease(x), t = ease(y);
-	return umath::lerp(umath::lerp(umath::lerp(grad(PERMUTATIONS[p00 + z0], x, y, z), grad(PERMUTATIONS[p10 + z0], xm1, y, z), s), umath::lerp(grad(PERMUTATIONS[p01 + z0], x, ym1, z), grad(PERMUTATIONS[p11 + z0], xm1, ym1, z), s), t),
-	  umath::lerp(umath::lerp(grad(PERMUTATIONS[p00 + z1], x, y, zm1), grad(PERMUTATIONS[p10 + z1], xm1, y, zm1), s), umath::lerp(grad(PERMUTATIONS[p01 + z1], x, ym1, zm1), grad(PERMUTATIONS[p11 + z1], xm1, ym1, zm1), s), t), ease(z));
+	return pragma::math::lerp(pragma::math::lerp(pragma::math::lerp(grad(PERMUTATIONS[p00 + z0], x, y, z), grad(PERMUTATIONS[p10 + z0], xm1, y, z), s), pragma::math::lerp(grad(PERMUTATIONS[p01 + z0], x, ym1, z), grad(PERMUTATIONS[p11 + z0], xm1, ym1, z), s), t),
+	  pragma::math::lerp(pragma::math::lerp(grad(PERMUTATIONS[p00 + z1], x, y, zm1), grad(PERMUTATIONS[p10 + z1], xm1, y, zm1), s), pragma::math::lerp(grad(PERMUTATIONS[p01 + z1], x, ym1, zm1), grad(PERMUTATIONS[p11 + z1], xm1, ym1, zm1), s), t), ease(z));
 }
 
-float util::noise::grad(int hash, float x)
+float pragma::math::noise::grad(int hash, float x)
 {
 	// TODO: would a lookup table or the bit tests in Perlin's reference implementation
 	// be more efficient?
@@ -134,7 +134,7 @@ float util::noise::grad(int hash, float x)
 	}
 }
 
-float util::noise::grad(int hash, float x, float y)
+float pragma::math::noise::grad(int hash, float x, float y)
 {
 	switch(hash & GRADIENT_MASK) {
 	case 0:
@@ -166,7 +166,7 @@ float util::noise::grad(int hash, float x, float y)
 	}
 }
 
-float util::noise::grad(int hash, float x, float y, float z)
+float pragma::math::noise::grad(int hash, float x, float y, float z)
 {
 	switch(hash & GRADIENT_MASK) {
 	case 0:
@@ -202,9 +202,9 @@ float util::noise::grad(int hash, float x, float y, float z)
 	}
 }
 
-float util::noise::ease(float t) { return t * t * t * (t * (6.f * t - 15.f) + 10.f); }
+float pragma::math::noise::ease(float t) { return t * t * t * (t * (6.f * t - 15.f) + 10.f); }
 
-void util::noise::init()
+void pragma::math::noise::init()
 {
 	static auto bInitialized = false;
 	if(bInitialized)

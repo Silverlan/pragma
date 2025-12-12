@@ -15,7 +15,7 @@ export import :rendering.occlusion_culling.octree;
 export {
 	class CHC;
 	class CHCNode;
-	using CHCNodeHandle = util::TSharedHandle<CHCNode>;
+	using CHCNodeHandle = pragma::util::TSharedHandle<CHCNode>;
 };
 
 struct DLLCLIENT CHCMeshInfo {
@@ -104,7 +104,7 @@ export class DLLCLIENT CHC {
 	std::queue<std::shared_ptr<CHCQuery>> m_queryQueue;
 	std::queue<CHCNodeHandle> m_visQueue;
 	std::queue<CHCNodeHandle> m_invisQueue;
-	std::vector<umath::Plane> m_frustumPlanes;
+	std::vector<pragma::math::Plane> m_frustumPlanes;
 	std::vector<CHCMeshInfo> m_renderMeshes;
 	std::vector<std::shared_ptr<CHCNode>> m_nodes;
 	CallbackHandle m_cbOnNodeCreated;

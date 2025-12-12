@@ -21,7 +21,7 @@ export namespace pragma::pts {
 		Vector3 m_angularFactor = {1.f, 1.f, 1.f};
 		Vector3 m_posOffset = {};
 		Quat m_rotOffset = uquat::identity();
-		std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> m_physicsObjects;
+		std::vector<pragma::util::TSharedHandle<pragma::physics::IRigidBody>> m_physicsObjects;
 		virtual std::shared_ptr<pragma::physics::IShape> CreateShape() = 0;
 	  public:
 		CParticleOperatorPhysics() = default;

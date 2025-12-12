@@ -53,7 +53,7 @@ BaseEntityIterator &BaseEntityIterator::operator++()
 	if(!m_iteratorData)
 		return *this;
 	auto numEnts = m_iteratorData->entities->Size();
-	while((m_currentIndex = umath::min(m_currentIndex + 1u, numEnts)) < numEnts) {
+	while((m_currentIndex = pragma::math::min(m_currentIndex + 1u, numEnts)) < numEnts) {
 		auto *ent = m_iteratorData->entities->At(m_currentIndex);
 		if(ent != nullptr && ShouldPass(*ent, m_currentIndex))
 			break;
@@ -78,7 +78,7 @@ bool BaseEntityIterator::operator!=(const BaseEntityIterator &other) { return !o
 
 /////////////////
 
-pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, bool) : m_iteratorData(::util::make_shared<EntityIteratorData>(game)) {}
+pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, bool) : m_iteratorData(pragma::util::make_shared<EntityIteratorData>(game)) {}
 pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, FilterFlags filterFlags) : pragma::ecs::EntityIterator(game, false)
 {
 	if(filterFlags != FilterFlags::None)
@@ -89,7 +89,7 @@ pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, pragma::Componen
 	if(componentId != pragma::INVALID_COMPONENT_ID) {
 		std::size_t count;
 		auto &components = game.GetEntityComponentManager().GetComponents(componentId, count);
-		m_iteratorData = ::util::make_shared<EntityIteratorData>(game, components, count); // AttachFilter<EntityIteratorFilterComponent>(componentId);
+		m_iteratorData = pragma::util::make_shared<EntityIteratorData>(game, components, count); // AttachFilter<EntityIteratorFilterComponent>(componentId);
 	}
 	if(m_iteratorData == nullptr)
 		return;
@@ -102,7 +102,7 @@ pragma::ecs::EntityIterator::EntityIterator(pragma::Game &game, const std::strin
 	if(game.GetEntityComponentManager().GetComponentTypeId(componentName, componentId) == true && componentId != pragma::INVALID_COMPONENT_ID) {
 		std::size_t count;
 		auto &components = game.GetEntityComponentManager().GetComponents(componentId, count);
-		m_iteratorData = ::util::make_shared<EntityIteratorData>(game, components, count);
+		m_iteratorData = pragma::util::make_shared<EntityIteratorData>(game, components, count);
 	}
 	if(m_iteratorData == nullptr)
 		return;

@@ -19,10 +19,10 @@ DataFileBlock *DataFile::ReadBlock(VFilePtr f)
 	while(!f->Eof()) {
 		std::string sbuf = f->ReadLine();
 		if(sbuf.length() > 0 && sbuf[0] != '\0') {
-			ustring::remove_whitespace(sbuf);
+			pragma::string::remove_whitespace(sbuf);
 			if(sbuf.length() > 0) {
-				size_t cLast = sbuf.find_first_of(ustring::WHITESPACE);
-				size_t cNext = sbuf.find_first_not_of(ustring::WHITESPACE, cLast);
+				size_t cLast = sbuf.find_first_of(pragma::string::WHITESPACE);
+				size_t cNext = sbuf.find_first_not_of(pragma::string::WHITESPACE, cLast);
 				if(cNext != size_t(-1)) {
 					std::string key, val;
 					size_t stKey = sbuf.find('\"');
@@ -37,7 +37,7 @@ DataFileBlock *DataFile::ReadBlock(VFilePtr f)
 					return block;
 				else // Sub-Block
 				{
-					ustring::remove_quotes(sbuf);
+					pragma::string::remove_quotes(sbuf);
 					char c;
 					do
 						c = static_cast<char>(f->ReadChar());

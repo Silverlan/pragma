@@ -37,7 +37,7 @@ export namespace pragma {
 		bool FindHitgroup(const physics::ICollisionObject &phys, pragma::physics::HitGroup &hitgroup) const;
 		PhysObjHandle GetHitboxPhysicsObject() const;
 
-		const util::PBoolProperty &GetFrozenProperty() const;
+		const pragma::util::PBoolProperty &GetFrozenProperty() const;
 
 		void SetMoveController(const std::string &moveController);
 		void SetMoveController(const std::string &moveControllerX, const std::string &moveControllerY);
@@ -49,7 +49,7 @@ export namespace pragma {
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 		BaseActorComponent(pragma::ecs::BaseEntity &ent);
 		bool m_bAlive;
-		util::PBoolProperty m_bFrozen = nullptr;
+		pragma::util::PBoolProperty m_bFrozen = nullptr;
 		std::string m_moveControllerName = "move_yaw";
 		std::optional<std::string> m_moveControllerNameY;
 		int32_t m_moveController = -1;

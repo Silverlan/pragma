@@ -29,7 +29,7 @@ export namespace pragma::audio {
 		template<class TSoundScript>
 		bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = nullptr)
 		{
-			return Load(fname, [this](const std::string &name) -> std::shared_ptr<SoundScript> { return ::util::make_shared<TSoundScript>(this, name); }, scripts);
+			return Load(fname, [this](const std::string &name) -> std::shared_ptr<SoundScript> { return pragma::util::make_shared<TSoundScript>(this, name); }, scripts);
 		}
 		bool Load(const char *fname, const std::function<std::shared_ptr<SoundScript>(const std::string &)> fCreateSoundScript, std::vector<std::shared_ptr<SoundScript>> *scripts = nullptr);
 	  public:

@@ -35,9 +35,9 @@ std::string Lua::string::camel_case_to_snake_case(const std::string &str)
 	}
 	return newStr;
 }
-uint32_t Lua::string::calc_levenshtein_distance(const std::string &s0, const std::string &s1) { return ustring::calc_levenshtein_distance(s0, s1); }
-double Lua::string::calc_levenshtein_similarity(const std::string &s0, const std::string &s1) { return ustring::calc_levenshtein_similarity(s0, s1); }
-void Lua::string::find_longest_common_substring(const std::string &s0, const std::string &s1, size_t &outStartIdx, size_t &outLen, size_t &outEndIdx) { outLen = ustring::longest_common_substring(s0, s1, outStartIdx, outEndIdx); }
+uint32_t Lua::string::calc_levenshtein_distance(const std::string &s0, const std::string &s1) { return pragma::string::calc_levenshtein_distance(s0, s1); }
+double Lua::string::calc_levenshtein_similarity(const std::string &s0, const std::string &s1) { return pragma::string::calc_levenshtein_similarity(s0, s1); }
+void Lua::string::find_longest_common_substring(const std::string &s0, const std::string &s1, size_t &outStartIdx, size_t &outLen, size_t &outEndIdx) { outLen = pragma::string::longest_common_substring(s0, s1, outStartIdx, outEndIdx); }
 void Lua::string::find_similar_elements(lua::State *l, const std::string &baseElement, luabind::table<> inElements, uint32_t limit, luabind::object &outSimilarElements, luabind::object &outSimilarities)
 {
 	auto numElements = Lua::GetObjectLength(l, 2);
@@ -50,7 +50,7 @@ void Lua::string::find_similar_elements(lua::State *l, const std::string &baseEl
 
 	std::vector<size_t> similarElements {};
 	std::vector<float> similarities {};
-	ustring::gather_similar_elements(baseElement, elements, similarElements, limit, &similarities);
+	pragma::string::gather_similar_elements(baseElement, elements, similarElements, limit, &similarities);
 
 	uint32_t offset = 1u;
 	outSimilarElements = luabind::newtable(l);
@@ -97,12 +97,12 @@ luabind::object Lua::string::split(lua::State *l, const std::string &str, const 
 std::string Lua::string::remove_whitespace(const std::string &s)
 {
 	std::string str = s;
-	ustring::remove_whitespace(str);
+	pragma::string::remove_whitespace(str);
 	return str;
 }
 std::string Lua::string::remove_quotes(const std::string &s)
 {
 	std::string str = s;
-	ustring::remove_quotes(str);
+	pragma::string::remove_quotes(str);
 	return str;
 }

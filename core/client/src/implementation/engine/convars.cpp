@@ -20,7 +20,7 @@ pragma::console::ConConf *pragma::CEngine::GetConVar(const std::string &cv)
 
 bool pragma::CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(pragma::console::ConConf *, float &)> &callback)
 {
-	ustring::to_lower(cmd);
+	pragma::string::to_lower(cmd);
 	auto *stateCl = static_cast<pragma::ClientState *>(GetClientState());
 	pragma::BasePlayerComponent *pl = nullptr;
 	if(stateCl != nullptr) {

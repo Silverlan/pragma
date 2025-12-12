@@ -75,8 +75,8 @@ bool ShaderParticleModel::RecordParticleSystem(prosper::ShaderBindState &bindSta
 	auto r = RecordBindDescriptorSet(bindState, descSet, DESCRIPTOR_SET_ANIMATION.setIndex);
 	if(r == false)
 		return r;
-	PushConstants pushConstants {umath::to_integral(GetRenderFlags(pSys, pts::ParticleRenderFlags::None)), // TODO: Use correct particle render flags
-	  umath::to_integral(pSys.GetAlphaMode())};
+	PushConstants pushConstants {pragma::math::to_integral(GetRenderFlags(pSys, pts::ParticleRenderFlags::None)), // TODO: Use correct particle render flags
+	  pragma::math::to_integral(pSys.GetAlphaMode())};
 	return RecordPushConstants(bindState, sizeof(pushConstants), &pushConstants, sizeof(ShaderGameWorldLightingPass::PushConstants));
 }
 
@@ -100,7 +100,7 @@ bool ShaderParticleModel::RecordBeginDraw(prosper::ShaderBindState &bindState, c
 #if 0
 	return ShaderGameWorldLightingPass::RecordBeginDraw(
 		bindState,clipPlane,drawOrigin,
-		//static_cast<ShaderGameWorldPipeline>(umath::to_integral(pipelineIdx) *umath::to_integral(AlphaMode::Count) +umath::to_integral(GetRenderAlphaMode(pSys))),
+		//static_cast<ShaderGameWorldPipeline>(pragma::math::to_integral(pipelineIdx) *pragma::math::to_integral(AlphaMode::Count) +pragma::math::to_integral(GetRenderAlphaMode(pSys))),
 		recordFlags
 	);
 #endif

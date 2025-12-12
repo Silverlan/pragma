@@ -113,7 +113,7 @@ pragma::Engine::ConsoleInstance::ConsoleInstance()
 #endif
 	if(useConsoleThread) {
 		consoleThread = std::make_unique<std::thread>(std::bind(&KeyboardInput));
-		util::set_thread_name(*consoleThread, "pr_console_input_listener");
+		pragma::util::set_thread_name(*consoleThread, "pr_console_input_listener");
 	}
 }
 
@@ -125,7 +125,7 @@ pragma::Engine::ConsoleInstance::~ConsoleInstance()
 #endif
 	console->close();
 #ifdef _WIN32
-	if(util::get_subsystem() == util::SubSystem::Console && consoleThread) {
+	if(pragma::util::get_subsystem() == pragma::util::SubSystem::Console && consoleThread) {
 		// There's no way to cancel the blocking std::getline in the console thread if it is attached
 		// to a parent console, so we have to force terminate the thread.
 		// TODO: Do this properly by implementing an asynchronous non-blocking input method.
@@ -192,7 +192,7 @@ void pragma::Engine::ProcessConsoleInput(KeyState pressState)
 
 void pragma::Engine::ProcessConsoleInput(const std::string_view &line, KeyState pressState, float magnitude)
 {
-	ustring::get_sequence_commands(std::string {line}, [pressState, magnitude](std::string cmd, std::vector<std::string> &argv) { pragma::Engine::Get()->RunConsoleCommand(cmd, argv, pressState, magnitude); });
+	pragma::string::get_sequence_commands(std::string {line}, [pressState, magnitude](std::string cmd, std::vector<std::string> &argv) { pragma::Engine::Get()->RunConsoleCommand(cmd, argv, pressState, magnitude); });
 }
 
 bool pragma::Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
@@ -230,7 +230,7 @@ bool pragma::Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::
 
 bool pragma::Engine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
 {
-	ustring::to_lower(cmd);
+	pragma::string::to_lower(cmd);
 	auto *stateSv = GetServerNetworkState();
 	if(stateSv == nullptr)
 		return RunEngineConsoleCommand(cmd, argv, pressState, magnitude, callback);

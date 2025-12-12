@@ -64,11 +64,11 @@ export {
 				int32_t animation = -1;
 				float cycle = 0.f;
 				FPlayAnim flags = FPlayAnim::Default;
-				std::vector<umath::Transform> bonePoses;
+				std::vector<pragma::math::Transform> bonePoses;
 				std::vector<Vector3> boneScales;
 
 				// These are only used if the animation has a blend-controller
-				std::vector<umath::Transform> bonePosesBc;
+				std::vector<pragma::math::Transform> bonePosesBc;
 				std::vector<Vector3> boneScalesBc;
 
 				// Keep a reference to our last animation for blending
@@ -88,26 +88,26 @@ export {
 
 			virtual void MaintainAnimationMovement(const Vector3 &disp);
 
-			bool GetReferenceBonePose(animation::BoneId boneId, umath::Transform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
-			bool GetReferenceBonePose(animation::BoneId boneId, umath::ScaledTransform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
-			bool GetReferenceBonePos(animation::BoneId boneId, Vector3 &outPos, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
-			bool GetReferenceBoneRot(animation::BoneId boneId, Quat &outRot, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
-			bool GetReferenceBoneScale(animation::BoneId boneId, Vector3 &outScale, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
-			bool GetReferenceBonePose(animation::BoneId boneId, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
+			bool GetReferenceBonePose(animation::BoneId boneId, pragma::math::Transform &outPose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
+			bool GetReferenceBonePose(animation::BoneId boneId, pragma::math::ScaledTransform &outPose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
+			bool GetReferenceBonePos(animation::BoneId boneId, Vector3 &outPos, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
+			bool GetReferenceBoneRot(animation::BoneId boneId, Quat &outRot, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
+			bool GetReferenceBoneScale(animation::BoneId boneId, Vector3 &outScale, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
+			bool GetReferenceBonePose(animation::BoneId boneId, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale = nullptr, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
 
-			bool GetBonePose(animation::BoneId boneId, umath::Transform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
-			bool GetBonePose(animation::BoneId boneId, umath::ScaledTransform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
-			bool GetBonePos(animation::BoneId boneId, Vector3 &outPos, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
-			bool GetBoneRot(animation::BoneId boneId, Quat &outRot, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
-			bool GetBoneScale(animation::BoneId boneId, Vector3 &outScale, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
-			bool GetBonePose(animation::BoneId boneId, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
+			bool GetBonePose(animation::BoneId boneId, pragma::math::Transform &outPose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
+			bool GetBonePose(animation::BoneId boneId, pragma::math::ScaledTransform &outPose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
+			bool GetBonePos(animation::BoneId boneId, Vector3 &outPos, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
+			bool GetBoneRot(animation::BoneId boneId, Quat &outRot, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
+			bool GetBoneScale(animation::BoneId boneId, Vector3 &outScale, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
+			bool GetBonePose(animation::BoneId boneId, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale = nullptr, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
 
-			bool SetBonePose(animation::BoneId boneId, const umath::Transform &pose, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
-			bool SetBonePose(animation::BoneId boneId, const umath::ScaledTransform &pose, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
-			bool SetBonePos(animation::BoneId boneId, const Vector3 &pos, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
-			bool SetBoneRot(animation::BoneId boneId, const Quat &rot, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
-			bool SetBoneScale(animation::BoneId boneId, const Vector3 &scale, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
-			bool SetBonePose(animation::BoneId boneId, const Vector3 *optPos, const Quat *optRot, const Vector3 *optScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
+			bool SetBonePose(animation::BoneId boneId, const pragma::math::Transform &pose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local);
+			bool SetBonePose(animation::BoneId boneId, const pragma::math::ScaledTransform &pose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local);
+			bool SetBonePos(animation::BoneId boneId, const Vector3 &pos, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local);
+			bool SetBoneRot(animation::BoneId boneId, const Quat &rot, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local);
+			bool SetBoneScale(animation::BoneId boneId, const Vector3 &scale, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local);
+			bool SetBonePose(animation::BoneId boneId, const Vector3 *optPos, const Quat *optRot, const Vector3 *optScale = nullptr, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local);
 
 			void SetSkeletonUpdateListenerEnabled(bool enabled);
 			bool IsSkeletonUpdateListenerEnabled() const;
@@ -125,11 +125,11 @@ export {
 			void SetLayeredAnimationFlags(uint32_t layerIdx, FPlayAnim flags);
 
 			std::optional<animation::BoneId> GetMetaBoneId(animation::MetaRigBoneType boneType) const;
-			bool SetMetaBonePose(animation::MetaRigBoneType boneType, const umath::ScaledTransform &pose, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
-			bool SetMetaBonePose(animation::MetaRigBoneType boneType, const Vector3 *optPos, const Quat *optRot = nullptr, const Vector3 *optScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
-			bool GetMetaBonePose(animation::MetaRigBoneType boneType, umath::ScaledTransform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
-			bool GetMetaBonePose(animation::MetaRigBoneType boneType, Vector3 *optOutPos, Quat *optOutRot = nullptr, Vector3 *optOutScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
-			bool MetaBonePoseToSkeletal(animation::MetaRigBoneType boneType, umath::ScaledTransform &pose) const;
+			bool SetMetaBonePose(animation::MetaRigBoneType boneType, const pragma::math::ScaledTransform &pose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local);
+			bool SetMetaBonePose(animation::MetaRigBoneType boneType, const Vector3 *optPos, const Quat *optRot = nullptr, const Vector3 *optScale = nullptr, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local);
+			bool GetMetaBonePose(animation::MetaRigBoneType boneType, pragma::math::ScaledTransform &outPose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
+			bool GetMetaBonePose(animation::MetaRigBoneType boneType, Vector3 *optOutPos, Quat *optOutRot = nullptr, Vector3 *optOutScale = nullptr, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Local) const;
+			bool MetaBonePoseToSkeletal(animation::MetaRigBoneType boneType, pragma::math::ScaledTransform &pose) const;
 			bool MetaBoneRotationToSkeletal(animation::MetaRigBoneType boneType, Quat &rot) const;
 
 			float GetCycle() const;
@@ -153,7 +153,7 @@ export {
 			bool PlayAnimation(const std::string &animation, FPlayAnim flags = FPlayAnim::Default);
 			void SetPlaybackRate(float rate);
 			float GetPlaybackRate() const;
-			const util::PFloatProperty &GetPlaybackRateProperty() const;
+			const pragma::util::PFloatProperty &GetPlaybackRateProperty() const;
 			int32_t SelectTranslatedAnimation(pragma::Activity &inOutActivity) const;
 			int SelectWeightedAnimation(pragma::Activity activity, int animAvoid = -1) const;
 			// Returns the time left until the current animation has finished playing
@@ -184,8 +184,8 @@ export {
 
 			void SetLastAnimationBlendScale(float scale);
 
-			const std::vector<umath::ScaledTransform> &GetProcessedBones() const;
-			std::vector<umath::ScaledTransform> &GetProcessedBones();
+			const std::vector<pragma::math::ScaledTransform> &GetProcessedBones() const;
+			std::vector<pragma::math::ScaledTransform> &GetProcessedBones();
 
 			// Transforms all bone positions / rotations to entity space
 			bool UpdateSkeleton();
@@ -197,10 +197,10 @@ export {
 
 			bool ShouldUpdateBones() const;
 			UInt32 GetBoneCount() const;
-			const std::vector<umath::ScaledTransform> &GetBoneTransforms() const;
-			std::vector<umath::ScaledTransform> &GetBoneTransforms();
-			const std::vector<umath::ScaledTransform> &GetProcessedBoneTransforms() const;
-			std::vector<umath::ScaledTransform> &GetProcessedBoneTransforms();
+			const std::vector<pragma::math::ScaledTransform> &GetBoneTransforms() const;
+			std::vector<pragma::math::ScaledTransform> &GetBoneTransforms();
+			const std::vector<pragma::math::ScaledTransform> &GetProcessedBoneTransforms() const;
+			std::vector<pragma::math::ScaledTransform> &GetProcessedBoneTransforms();
 			const AnimationSlotInfo &GetBaseAnimationInfo() const;
 			AnimationSlotInfo &GetBaseAnimationInfo();
 			const std::unordered_map<uint32_t, AnimationSlotInfo> &GetAnimationSlotInfos() const;
@@ -211,16 +211,16 @@ export {
 			void SetAbsolutePosesDirty();
 			void ClearPreviousAnimation();
 
-			void BlendBonePoses(const std::vector<umath::Transform> &srcBonePoses, const std::vector<Vector3> *optSrcBoneScales, const std::vector<umath::Transform> &dstBonePoses, const std::vector<Vector3> *optDstBoneScales, std::vector<umath::Transform> &outBonePoses,
+			void BlendBonePoses(const std::vector<pragma::math::Transform> &srcBonePoses, const std::vector<Vector3> *optSrcBoneScales, const std::vector<pragma::math::Transform> &dstBonePoses, const std::vector<Vector3> *optDstBoneScales, std::vector<pragma::math::Transform> &outBonePoses,
 			  std::vector<Vector3> *optOutBoneScales, pragma::animation::Animation &anim, float interpFactor) const;
-			void BlendBoneFrames(std::vector<umath::Transform> &tgt, std::vector<Vector3> *tgtScales, std::vector<umath::Transform> &add, std::vector<Vector3> *addScales, float blendScale) const;
+			void BlendBoneFrames(std::vector<pragma::math::Transform> &tgt, std::vector<Vector3> *tgtScales, std::vector<pragma::math::Transform> &add, std::vector<Vector3> *addScales, float blendScale) const;
 
 			bool PreMaintainAnimations(double dt);
 			virtual bool MaintainAnimations(double dt);
 			void UpdateAnimations(double dt);
 			bool MaintainGestures(double dt);
 
-			virtual bool GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const;
+			virtual bool GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, pragma::math::ScaledTransform &outPose) const;
 			virtual std::optional<Mat4> GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId) const;
 			virtual bool GetLocalVertexPosition(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, const std::optional<Vector3> &vertexOffset = {}) const;
 			bool GetVertexPosition(uint32_t meshGroupId, uint32_t meshId, uint32_t subMeshId, uint32_t vertexId, Vector3 &pos) const;
@@ -281,8 +281,8 @@ export {
 			Frame *GetPreviousAnimationBlendFrame(AnimationSlotInfo &animInfo, double tDelta, float &blendScale);
 
 			// Animations
-			void TransformBoneFrames(std::vector<umath::Transform> &bonePoses, std::vector<Vector3> *boneScales, pragma::animation::Animation &anim, Frame *frameBlend, bool bAdd = true);
-			void TransformBoneFrames(std::vector<umath::Transform> &tgt, std::vector<Vector3> *boneScales, const std::shared_ptr<pragma::animation::Animation> &baseAnim, const std::shared_ptr<pragma::animation::Animation> &anim, std::vector<umath::Transform> &add,
+			void TransformBoneFrames(std::vector<pragma::math::Transform> &bonePoses, std::vector<Vector3> *boneScales, pragma::animation::Animation &anim, Frame *frameBlend, bool bAdd = true);
+			void TransformBoneFrames(std::vector<pragma::math::Transform> &tgt, std::vector<Vector3> *boneScales, const std::shared_ptr<pragma::animation::Animation> &baseAnim, const std::shared_ptr<pragma::animation::Animation> &anim, std::vector<pragma::math::Transform> &add,
 			  std::vector<Vector3> *addScales, bool bAdd = true);
 			//
 
@@ -290,8 +290,8 @@ export {
 			AnimationSlotInfo m_baseAnim = {};
 
 			Vector3 m_animDisplacement = {};
-			std::vector<umath::ScaledTransform> m_bones = {};
-			std::vector<umath::ScaledTransform> m_processedBones = {}; // Bone positions / rotations in entity space
+			std::vector<pragma::math::ScaledTransform> m_bones = {};
+			std::vector<pragma::math::ScaledTransform> m_processedBones = {}; // Bone positions / rotations in entity space
 		  protected:
 			// We have to collect the animation events for the current frame and execute them after ALL animations have been completed (In case some events need to access animation data)
 			std::queue<AnimationEventQueueItem> m_animEventQueue = std::queue<AnimationEventQueueItem> {};
@@ -314,7 +314,7 @@ export {
 			StateFlags m_stateFlags = StateFlags::AbsolutePosesDirty;
 			std::shared_ptr<const Frame> m_bindPose = nullptr;
 			std::unordered_map<unsigned int, float> m_blendControllers = {};
-			util::PFloatProperty m_playbackRate = nullptr;
+			pragma::util::PFloatProperty m_playbackRate = nullptr;
 
 			std::unordered_map<pragma::AnimationEvent::Type, CallbackHandle> m_boundAnimEvents;
 		};
@@ -420,11 +420,11 @@ export {
 			pragma::Activity &activity;
 		};
 		struct DLLNETWORK CEOnBlendAnimation : public ComponentEvent {
-			CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, pragma::Activity activity, std::vector<umath::Transform> &bonePoses, std::vector<Vector3> *boneScales);
+			CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, pragma::Activity activity, std::vector<pragma::math::Transform> &bonePoses, std::vector<Vector3> *boneScales);
 			virtual void PushArguments(lua::State *l) override;
 			BaseAnimatedComponent::AnimationSlotInfo &slotInfo;
 			pragma::Activity activity;
-			std::vector<umath::Transform> &bonePoses;
+			std::vector<pragma::math::Transform> &bonePoses;
 			std::vector<Vector3> *boneScales;
 		};
 		struct DLLNETWORK CEMaintainAnimations : public ComponentEvent {
@@ -455,7 +455,7 @@ export {
 			virtual void HandleReturnValues(lua::State *l) override;
 			bool bonePosesHaveChanged = false;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::BaseAnimatedComponent::StateFlags)
 };

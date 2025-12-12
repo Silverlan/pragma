@@ -38,13 +38,13 @@ pragma::Action ActionInputControllerComponent::GetRawActionInputs() const { retu
 void ActionInputControllerComponent::SetActionInputs(pragma::Action actions, bool bKeepMagnitudes)
 {
 	auto rawInputs = m_rawInputs;
-	auto valuesOld = umath::get_power_of_2_values(umath::to_integral(rawInputs));
+	auto valuesOld = pragma::math::get_power_of_2_values(pragma::math::to_integral(rawInputs));
 	for(auto v : valuesOld) {
 		if((actions & static_cast<pragma::Action>(v)) == pragma::Action::None) // Action has been unpressed
 			SetActionInput(static_cast<pragma::Action>(v), false);
 	}
 	actions &= ~rawInputs;
-	auto values = umath::get_power_of_2_values(umath::to_integral(actions));
+	auto values = pragma::math::get_power_of_2_values(pragma::math::to_integral(actions));
 	for(auto v : values)
 		SetActionInput(static_cast<pragma::Action>(v), true, bKeepMagnitudes);
 }
@@ -60,7 +60,7 @@ void ActionInputControllerComponent::SetActionInput(pragma::Action action, bool 
 		m_rawInputs |= action;
 
 	CEHandleActionInput evData {action, b, magnitude};
-	if(InvokeEventCallbacks(actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, evData) == util::EventReply::Handled)
+	if(InvokeEventCallbacks(actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, evData) == pragma::util::EventReply::Handled)
 		return;
 	auto &ent = GetEntity();
 	auto *nw = ent.GetNetworkState();
@@ -88,7 +88,7 @@ void ActionInputControllerComponent::SetActionInput(pragma::Action action, bool 
 CEHandleActionInput::CEHandleActionInput(pragma::Action action, bool pressed, float magnitude) : action {action}, pressed {pressed}, magnitude {magnitude} {}
 void CEHandleActionInput::PushArguments(lua::State *l)
 {
-	Lua::PushInt(l, umath::to_integral(action));
+	Lua::PushInt(l, pragma::math::to_integral(action));
 	Lua::PushBool(l, pressed);
 	Lua::PushNumber(l, magnitude);
 }
@@ -98,6 +98,6 @@ void CEHandleActionInput::PushArguments(lua::State *l)
 CEOnActionInputChanged::CEOnActionInputChanged(pragma::Action action, bool b) : action {action}, pressed {b} {}
 void CEOnActionInputChanged::PushArguments(lua::State *l)
 {
-	Lua::PushInt(l, umath::to_integral(action));
+	Lua::PushInt(l, pragma::math::to_integral(action));
 	Lua::PushBool(l, pressed);
 }

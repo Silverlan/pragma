@@ -41,6 +41,6 @@ export namespace pragma::rendering::shader_material {
 		Last = User,
 	};
 	constexpr uint32_t MAX_NUMBER_OF_SRGB_TEXTURES = 4;
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {REGISTER_ENUM_FLAGS(pragma::rendering::shader_material::MaterialFlags)}

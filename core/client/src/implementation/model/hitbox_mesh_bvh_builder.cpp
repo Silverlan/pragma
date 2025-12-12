@@ -12,7 +12,7 @@ import :model.hitbox_mesh_bvh_builder;
 
 static spdlog::logger &LOGGER = pragma::register_logger("bvh");
 
-static std::unique_ptr<pragma::bvh::MeshBvhTree> generate_mesh_bvh(pragma::geometry::ModelSubMesh &mesh, const std::vector<uint32_t> &triIndices, const umath::ScaledTransform &invPose)
+static std::unique_ptr<pragma::bvh::MeshBvhTree> generate_mesh_bvh(pragma::geometry::ModelSubMesh &mesh, const std::vector<uint32_t> &triIndices, const pragma::math::ScaledTransform &invPose)
 {
 	auto &verts = mesh.GetVertices();
 
@@ -58,7 +58,7 @@ static bool generate_mesh_bvh(pragma::asset::Model &mdl, const std::string &bone
 	auto boneId = skeleton.LookupBone(boneName);
 	if(boneId < 0)
 		return false;
-	umath::ScaledTransform pose;
+	pragma::math::ScaledTransform pose;
 	if(!ref.GetBonePose(boneId, pose))
 		return false;
 	auto invPose = pose.GetInverse();
@@ -72,11 +72,11 @@ static bool generate_mesh_bvh(pragma::asset::Model &mdl, const std::string &bone
 	return true;
 }
 
-static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo, pragma::animation::BoneId boneId, std::shared_ptr<pragma::geometry::ModelSubMesh> subMesh, std::array<umath::Plane, 6> planes, Vector3 hbMin, Vector3 hbMax, umath::ScaledTransform pose, util::Uuid uuid)
+static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo, pragma::animation::BoneId boneId, std::shared_ptr<pragma::geometry::ModelSubMesh> subMesh, std::array<pragma::math::Plane, 6> planes, Vector3 hbMin, Vector3 hbMax, pragma::math::ScaledTransform pose, pragma::util::Uuid uuid)
 {
 	Vector3 smMin, smMax;
 	subMesh->GetBounds(smMin, smMax);
-	if(umath::intersection::aabb_in_plane_mesh(smMin, smMax, planes.begin(), planes.end()) == umath::intersection::Intersect::Outside)
+	if(pragma::math::intersection::aabb_in_plane_mesh(smMin, smMax, planes.begin(), planes.end()) == pragma::math::intersection::Intersect::Outside)
 		return false;
 	auto &verts = subMesh->GetVertices();
 	auto &vertWeights = subMesh->GetVertexWeights();
@@ -110,7 +110,7 @@ static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInf
 		endLoop:
 			if(!hasBone)
 				continue;
-			if(umath::intersection::obb_triangle(hbMin, hbMax, pose, v0.position, v1.position, v2.position))
+			if(pragma::math::intersection::obb_triangle(hbMin, hbMax, pose, v0.position, v1.position, v2.position))
 				usedTris.push_back(i / 3);
 		}
 	});
@@ -118,7 +118,7 @@ static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInf
 	if(usedTris.empty())
 		return false;
 	boneMeshInfo.subMesh = subMesh;
-	boneMeshInfo.meshUuid = util::uuid_to_string(uuid);
+	boneMeshInfo.meshUuid = pragma::util::uuid_to_string(uuid);
 	boneMeshInfo.usedTris = std::move(usedTris);
 	return true;
 }
@@ -133,7 +133,7 @@ static bool generate_bvh_mesh(pragma::asset::Model &mdl, const std::string &bone
 	auto boneId = skeleton.LookupBone(boneName);
 	if(boneId < 0)
 		return false;
-	umath::ScaledTransform pose;
+	pragma::math::ScaledTransform pose;
 	if(!ref.GetBonePose(boneId, pose))
 		return false;
 	auto invPose = pose.GetInverse();
@@ -184,12 +184,12 @@ bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::asset::Model &mdl, pragm
 	auto bone = skeleton.GetBone(boneId).lock();
 	if(!bone)
 		return false;
-	umath::ScaledTransform pose;
+	pragma::math::ScaledTransform pose;
 	if(!ref.GetBonePose(boneId, pose))
 		return false;
 	auto &pos = pose.GetOrigin();
 	auto &rot = pose.GetRotation();
-	auto planes = umath::geometry::get_obb_planes(pos, rot, hb.min, hb.max);
+	auto planes = pragma::math::geometry::get_obb_planes(pos, rot, hb.min, hb.max);
 	auto &hbMin = hb.min;
 	auto &hbMax = hb.max;
 	for(auto &pair : lodInfo.meshReplacements) {
@@ -201,13 +201,13 @@ bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::asset::Model &mdl, pragm
 				if(!bvh::is_mesh_bvh_compatible(*subMesh))
 					continue;
 				auto &uuid = subMesh->GetUuid();
-				if(uuid == util::Uuid {}) {
+				if(uuid == pragma::util::Uuid {}) {
 					LOGGER.warn("Mesh with invalid uuid in model '{}'! Skipping...", mdl.GetName());
 					continue;
 				}
 
 				std::string boneName = bone->name;
-				auto bm = ::util::make_shared<pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo>();
+				auto bm = pragma::util::make_shared<pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo>();
 				auto genResult = m_threadPool.submit_task([&mdl, subMesh, planes, hbMin, hbMax, pose, uuid, boneName, bm, boneId]() -> bool {
 					auto success = calc_bone_mesh_info(*bm, boneId, subMesh, planes, hbMin, hbMax, pose, uuid);
 					if(!success)

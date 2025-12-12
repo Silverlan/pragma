@@ -10,7 +10,7 @@ static std::unordered_map<pragma::asset::Type, std::string> g_assetTypeToIdentif
 static std::unordered_map<std::string, pragma::asset::Type> g_identifierToAssetType;
 static void init_asset_type_maps()
 {
-	auto n = umath::to_integral(pragma::asset::Type::Count);
+	auto n = pragma::math::to_integral(pragma::asset::Type::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i) {
 		auto type = static_cast<pragma::asset::Type>(i);
 		std::string strType {magic_enum::enum_name(type)};
@@ -58,7 +58,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			return assetManager->ClearUnused();
 		}),
 		luabind::def("clear_unused",+[](pragma::NetworkState &nw) -> std::optional<uint32_t> {
-			auto num = umath::to_integral(pragma::asset::Type::Count);
+			auto num = pragma::math::to_integral(pragma::asset::Type::Count);
 			uint32_t numCleared = 0;
 			for (decltype(num) i=0u;i<num;++i)
 			{
@@ -178,20 +178,20 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			manager->WaitForAllPendingCompleted();
 		}),
 		luabind::def("precache",+[](lua::State *l,const std::string &name,pragma::asset::Type type)
-			-> Lua::var<bool,std::pair<::util::FileAssetManager::PreloadResult::Result,std::optional<::util::AssetLoadJobId>>> {
+			-> Lua::var<bool,std::pair<pragma::util::FileAssetManager::PreloadResult::Result,std::optional<pragma::util::AssetLoadJobId>>> {
 			auto *manager = pragma::Engine::Get()->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
 				return luabind::object{l,false};
 			auto result = manager->PreloadAsset(name);
 			return luabind::object{
 				l,
-				std::pair<::util::FileAssetManager::PreloadResult::Result,std::optional<::util::AssetLoadJobId>>{
+				std::pair<pragma::util::FileAssetManager::PreloadResult::Result,std::optional<pragma::util::AssetLoadJobId>>{
 					result.result,result.jobId
 				}
 			};
 		}),
 		luabind::def("get_asset_state",+[](lua::State *l,const std::string &name,pragma::asset::Type type)
-			-> Lua::opt<::util::AssetState> {
+			-> Lua::opt<pragma::util::AssetState> {
 			auto *manager = pragma::Engine::Get()->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
 				return luabind::object{};
@@ -236,7 +236,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			manager->Poll();
 		}),
 		luabind::def("poll_all",+[](lua::State *l) {
-			auto n = umath::to_integral(pragma::asset::Type::Count);
+			auto n = pragma::math::to_integral(pragma::asset::Type::Count);
 			for(auto i=decltype(n){0u};i<n;++i)
 			{
 				auto *manager = pragma::Engine::Get()->GetNetworkState(l)->GetAssetManager(static_cast<pragma::asset::Type>(i));
@@ -252,30 +252,30 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "asset",
 	  {
-	    {"TYPE_MODEL", umath::to_integral(pragma::asset::Type::Model)},
-	    {"TYPE_MAP", umath::to_integral(pragma::asset::Type::Map)},
-	    {"TYPE_MATERIAL", umath::to_integral(pragma::asset::Type::Material)},
-	    {"TYPE_TEXTURE", umath::to_integral(pragma::asset::Type::Texture)},
-	    {"TYPE_AUDIO", umath::to_integral(pragma::asset::Type::Sound)},
-	    {"TYPE_PARTICLE_SYSTEM", umath::to_integral(pragma::asset::Type::ParticleSystem)},
-	    {"TYPE_SHADER_GRAPH", umath::to_integral(pragma::asset::Type::ShaderGraph)},
-	    {"TYPE_COUNT", umath::to_integral(pragma::asset::Type::Count)},
+	    {"TYPE_MODEL", pragma::math::to_integral(pragma::asset::Type::Model)},
+	    {"TYPE_MAP", pragma::math::to_integral(pragma::asset::Type::Map)},
+	    {"TYPE_MATERIAL", pragma::math::to_integral(pragma::asset::Type::Material)},
+	    {"TYPE_TEXTURE", pragma::math::to_integral(pragma::asset::Type::Texture)},
+	    {"TYPE_AUDIO", pragma::math::to_integral(pragma::asset::Type::Sound)},
+	    {"TYPE_PARTICLE_SYSTEM", pragma::math::to_integral(pragma::asset::Type::ParticleSystem)},
+	    {"TYPE_SHADER_GRAPH", pragma::math::to_integral(pragma::asset::Type::ShaderGraph)},
+	    {"TYPE_COUNT", pragma::math::to_integral(pragma::asset::Type::Count)},
 
-	    {"FORMAT_TYPE_NATIVE", umath::to_integral(pragma::asset::FormatType::Native)},
-	    {"FORMAT_TYPE_IMPORT", umath::to_integral(pragma::asset::FormatType::Import)},
-	    {"FORMAT_TYPE_ALL", umath::to_integral(pragma::asset::FormatType::All)},
+	    {"FORMAT_TYPE_NATIVE", pragma::math::to_integral(pragma::asset::FormatType::Native)},
+	    {"FORMAT_TYPE_IMPORT", pragma::math::to_integral(pragma::asset::FormatType::Import)},
+	    {"FORMAT_TYPE_ALL", pragma::math::to_integral(pragma::asset::FormatType::All)},
 
-	    {"ASSET_LOAD_FLAG_NONE", umath::to_integral(::util::AssetLoadFlags::None)},
-	    {"ASSET_LOAD_FLAG_ABSOLUTE_PATH_BIT", umath::to_integral(::util::AssetLoadFlags::AbsolutePath)},
-	    {"ASSET_LOAD_FLAG_DONT_CACHE_BIT", umath::to_integral(::util::AssetLoadFlags::DontCache)},
-	    {"ASSET_LOAD_FLAG_IGNORE_CACHE_BIT", umath::to_integral(::util::AssetLoadFlags::IgnoreCache)},
+	    {"ASSET_LOAD_FLAG_NONE", pragma::math::to_integral(pragma::util::AssetLoadFlags::None)},
+	    {"ASSET_LOAD_FLAG_ABSOLUTE_PATH_BIT", pragma::math::to_integral(pragma::util::AssetLoadFlags::AbsolutePath)},
+	    {"ASSET_LOAD_FLAG_DONT_CACHE_BIT", pragma::math::to_integral(pragma::util::AssetLoadFlags::DontCache)},
+	    {"ASSET_LOAD_FLAG_IGNORE_CACHE_BIT", pragma::math::to_integral(pragma::util::AssetLoadFlags::IgnoreCache)},
 
-	    {"ASSET_STATE_NOT_LOADED", umath::to_integral(::util::AssetState::NotLoaded)},
-	    {"ASSET_STATE_LOADED", umath::to_integral(::util::AssetState::Loaded)},
-	    {"ASSET_STATE_FAILED_TO_LOAD", umath::to_integral(::util::AssetState::FailedToLoad)},
-	    {"ASSET_STATE_LOADING", umath::to_integral(::util::AssetState::Loading)},
+	    {"ASSET_STATE_NOT_LOADED", pragma::math::to_integral(pragma::util::AssetState::NotLoaded)},
+	    {"ASSET_STATE_LOADED", pragma::math::to_integral(pragma::util::AssetState::Loaded)},
+	    {"ASSET_STATE_FAILED_TO_LOAD", pragma::math::to_integral(pragma::util::AssetState::FailedToLoad)},
+	    {"ASSET_STATE_LOADING", pragma::math::to_integral(pragma::util::AssetState::Loading)},
 	  });
-	static_assert(umath::to_integral(pragma::asset::Type::Count) == 7, "Update this list!");
+	static_assert(pragma::math::to_integral(pragma::asset::Type::Count) == 7, "Update this list!");
 
 	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MAP_BINARY", pragma::asset::FORMAT_MAP_BINARY);
 	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MAP_ASCII", pragma::asset::FORMAT_MAP_ASCII);

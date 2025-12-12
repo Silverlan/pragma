@@ -29,7 +29,7 @@ export {
 			};
 
 			struct DLLNETWORK CoordinateTypeMetaData : public TypeMetaData {
-				umath::CoordinateSpace space = umath::CoordinateSpace::World;
+				pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::World;
 				pragma::GString parentProperty = nullptr;
 			};
 

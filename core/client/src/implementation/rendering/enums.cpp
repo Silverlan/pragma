@@ -36,7 +36,7 @@ int pragma::rendering::GetMaxMSAASampleCount()
 		Con::cwar << "Unable to retrieve max MSAA sample count! Setting sample count to 1..." << Con::endl;
 		return 1;
 	}
-	return umath::get_highest_bit(umath::to_integral(props->sampleCount));
+	return pragma::math::get_highest_bit(pragma::math::to_integral(props->sampleCount));
 }
 unsigned char pragma::rendering::ClampMSAASampleCount(unsigned int *samples)
 {

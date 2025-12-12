@@ -33,8 +33,8 @@ void CFlexComponent::UpdateFlexControllers(float dt)
 		auto &info = pair.second;
 		if(info.endTime != 0.f && t >= info.endTime && info.targetValue != 0.f)
 			info.targetValue = 0.f;
-		auto newVal = umath::lerp(info.value, info.targetValue, umath::min(dt / flexDrag, 1.f));
-		if(!m_flexDataUpdateRequired && umath::abs(newVal - info.value) > 0.001f)
+		auto newVal = pragma::math::lerp(info.value, info.targetValue, pragma::math::min(dt / flexDrag, 1.f));
+		if(!m_flexDataUpdateRequired && pragma::math::abs(newVal - info.value) > 0.001f)
 			m_flexDataUpdateRequired = true;
 		info.value = newVal;
 	}
@@ -100,16 +100,16 @@ void CFlexComponent::UpdateEyeFlexes(asset::Eyeball &eyeball, uint32_t eyeballId
 	std::array<int32_t, 3> lowererIndices = {eyeball.lowerLid.lowererFlexIndex, eyeball.lowerLid.neutralFlexIndex, eyeball.lowerLid.raiserFlexIndex};
 	std::array<float, 3> lowererValues = {eyeball.lowerLid.lowererValue, eyeball.lowerLid.neutralValue, eyeball.lowerLid.raiserValue};
 	for(auto i = decltype(upperIndices.size()) {0u}; i < upperIndices.size(); ++i)
-		upperLid += GetFlexWeight(upperIndices[i]) * umath::asin(upperValues[i] / eyeball.radius);
+		upperLid += GetFlexWeight(upperIndices[i]) * pragma::math::asin(upperValues[i] / eyeball.radius);
 	for(auto i = decltype(lowererIndices.size()) {0u}; i < lowererIndices.size(); ++i)
-		lowerLid += GetFlexWeight(lowererIndices[i]) * umath::asin(lowererValues[i] / eyeball.radius);
+		lowerLid += GetFlexWeight(lowererIndices[i]) * pragma::math::asin(lowererValues[i] / eyeball.radius);
 
 	float sinupper, cosupper, sinlower, coslower;
-	sinupper = umath::sin(upperLid);
-	cosupper = umath::cos(upperLid);
+	sinupper = pragma::math::sin(upperLid);
+	cosupper = pragma::math::cos(upperLid);
 
-	sinlower = umath::sin(lowerLid);
-	coslower = umath::cos(lowerLid);
+	sinlower = pragma::math::sin(lowerLid);
+	coslower = pragma::math::cos(lowerLid);
 
 	// To head space
 	headup = state.up;
@@ -173,7 +173,7 @@ void CFlexComponent::SetFlexController(uint32_t flexId, float val, float duratio
 	if(flexC == nullptr)
 		return;
 	if(clampToLimits)
-		val = umath::clamp(val, flexC->min, flexC->max);
+		val = pragma::math::clamp(val, flexC->min, flexC->max);
 	auto it = m_flexControllers.find(flexId);
 	if(it == m_flexControllers.end())
 		it = m_flexControllers.insert(std::make_pair(flexId, FlexControllerInfo {})).first;
@@ -214,7 +214,7 @@ void CFlexComponent::UpdateFlexWeightsMT()
 		return;
 	auto &flexes = mdl->GetFlexes();
 	assert(flexes.size() == m_flexWeights.size());
-	auto numFlexes = umath::min(flexes.size(), m_flexWeights.size());
+	auto numFlexes = pragma::math::min(flexes.size(), m_flexWeights.size());
 	for(auto flexId = decltype(numFlexes) {0u}; flexId < numFlexes; ++flexId) {
 		auto flexVal = 0.f;
 		UpdateFlexWeight(flexId, flexVal);
@@ -318,7 +318,7 @@ void CFlexComponent::UpdateSoundPhonemes(pragma::audio::CALSound &snd)
 							nextPhoneme = &nextWord.phonemes.front();
 					}
 				}
-				if(nextPhoneme != nullptr && umath::abs(nextPhoneme->tStart - phoneme.tEnd) < 0.1f) {
+				if(nextPhoneme != nullptr && pragma::math::abs(nextPhoneme->tStart - phoneme.tEnd) < 0.1f) {
 					auto it = phonemeMap.phonemes.find(nextPhoneme->phoneme);
 					if(it != phonemeMap.phonemes.end())
 						nextPhonemeInfo = &it->second;
@@ -336,7 +336,7 @@ void CFlexComponent::UpdateSoundPhonemes(pragma::audio::CALSound &snd)
 					if(nextPhonemeInfo != nullptr) {
 						auto it = nextPhonemeInfo->flexControllers.find(pair.first);
 						if(it != nextPhonemeInfo->flexControllers.end())
-							flexWeight = umath::lerp(pair.second, it->second, 1.f - weight); // Interpolate between current phoneme and next phoneme
+							flexWeight = pragma::math::lerp(pair.second, it->second, 1.f - weight); // Interpolate between current phoneme and next phoneme
 					}
 					auto curFlexWeight = 0.f;
 					if(GetFlexController(id, curFlexWeight) == true)

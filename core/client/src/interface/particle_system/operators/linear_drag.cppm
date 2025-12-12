@@ -30,15 +30,15 @@ void pragma::pts::CParticleOperatorLinearDrag::Initialize(pragma::BaseEnvParticl
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "drag")
-			m_fAmount = util::to_float(it->second);
+			m_fAmount = pragma::util::to_float(it->second);
 	}
 }
 void pragma::pts::CParticleOperatorLinearDrag::Simulate(double tDelta)
 {
 	CParticleOperator::Simulate(tDelta);
-	m_fTickDrag = umath::max(0.f, 1.f - m_fAmount * static_cast<float>(tDelta));
+	m_fTickDrag = pragma::math::max(0.f, 1.f - m_fAmount * static_cast<float>(tDelta));
 }
 void pragma::pts::CParticleOperatorLinearDrag::Simulate(pragma::pts::CParticle &particle, double tDelta, float strength)
 {

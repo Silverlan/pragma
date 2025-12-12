@@ -26,14 +26,14 @@ int main(int argc, char *argv[])
 	executableName = "pragma";
 #endif
 
-	auto launchParams = util::get_launch_parameters(argc, argv);
+	auto launchParams = pragma::util::get_launch_parameters(argc, argv);
 	auto itExe = launchParams.find("-executable");
 	if(itExe != launchParams.end())
 		executableName = itExe->second;
 
 	std::cout << "Waiting for " << executableName << " to close... " << std::endl;
 	// Wait until pragma has been closed
-	while(util::is_process_running(executableName.c_str()))
+	while(pragma::util::is_process_running(executableName.c_str()))
 		std::this_thread::sleep_for(std::chrono::milliseconds(250));
 
 	auto pos = path.find_last_of("\\/");

@@ -130,17 +130,17 @@ void ConstraintLimitLocationComponent::OnEntityComponentAdded(BaseEntityComponen
 		m_constraintC->SetDriverEnabled(false);
 	}
 }
-void ConstraintLimitLocationComponent::SetMinimum(pragma::Axis axis, float value) { m_minimum[umath::to_integral(axis)] = value; }
-void ConstraintLimitLocationComponent::SetMaximum(pragma::Axis axis, float value) { m_maximum[umath::to_integral(axis)] = value; }
+void ConstraintLimitLocationComponent::SetMinimum(pragma::Axis axis, float value) { m_minimum[pragma::math::to_integral(axis)] = value; }
+void ConstraintLimitLocationComponent::SetMaximum(pragma::Axis axis, float value) { m_maximum[pragma::math::to_integral(axis)] = value; }
 
-float ConstraintLimitLocationComponent::GetMinimum(pragma::Axis axis) const { return m_minimum[umath::to_integral(axis)]; }
-float ConstraintLimitLocationComponent::GetMaximum(pragma::Axis axis) const { return m_maximum[umath::to_integral(axis)]; }
+float ConstraintLimitLocationComponent::GetMinimum(pragma::Axis axis) const { return m_minimum[pragma::math::to_integral(axis)]; }
+float ConstraintLimitLocationComponent::GetMaximum(pragma::Axis axis) const { return m_maximum[pragma::math::to_integral(axis)]; }
 
-void ConstraintLimitLocationComponent::SetMinimumEnabled(pragma::Axis axis, bool enabled) { m_minimumEnabled[umath::to_integral(axis)] = enabled; }
-bool ConstraintLimitLocationComponent::IsMinimumEnabled(pragma::Axis axis) const { return m_minimumEnabled[umath::to_integral(axis)]; }
+void ConstraintLimitLocationComponent::SetMinimumEnabled(pragma::Axis axis, bool enabled) { m_minimumEnabled[pragma::math::to_integral(axis)] = enabled; }
+bool ConstraintLimitLocationComponent::IsMinimumEnabled(pragma::Axis axis) const { return m_minimumEnabled[pragma::math::to_integral(axis)]; }
 
-void ConstraintLimitLocationComponent::SetMaximumEnabled(pragma::Axis axis, bool enabled) { m_maximumEnabled[umath::to_integral(axis)] = enabled; }
-bool ConstraintLimitLocationComponent::IsMaximumEnabled(pragma::Axis axis) const { return m_maximumEnabled[umath::to_integral(axis)]; }
+void ConstraintLimitLocationComponent::SetMaximumEnabled(pragma::Axis axis, bool enabled) { m_maximumEnabled[pragma::math::to_integral(axis)] = enabled; }
+bool ConstraintLimitLocationComponent::IsMaximumEnabled(pragma::Axis axis) const { return m_maximumEnabled[pragma::math::to_integral(axis)]; }
 void ConstraintLimitLocationComponent::ApplyConstraint()
 {
 	if(m_constraintC.expired())
@@ -150,21 +150,21 @@ void ConstraintLimitLocationComponent::ApplyConstraint()
 	if(!constraintInfo || influence == 0.f)
 		return;
 	Vector3 pos;
-	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), pos);
+	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), pos);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driven object of constraint '{}'.", constraintInfo->drivenObjectPropIdx, GetEntity().ToString());
 		return;
 	}
 	auto origPos = pos;
-	constexpr auto numAxes = umath::to_integral(pragma::Axis::Count);
+	constexpr auto numAxes = pragma::math::to_integral(pragma::Axis::Count);
 	for(auto i = decltype(numAxes) {0u}; i < numAxes; ++i) {
 		auto axis = static_cast<pragma::Axis>(i);
 		if(IsMinimumEnabled(axis))
-			pos[i] = umath::max(pos[i], GetMinimum(axis));
+			pos[i] = pragma::math::max(pos[i], GetMinimum(axis));
 		if(IsMaximumEnabled(axis))
-			pos[i] = umath::min(pos[i], GetMaximum(axis));
+			pos[i] = pragma::math::min(pos[i], GetMaximum(axis));
 	}
 
 	pos = uvec::lerp(origPos, pos, influence);
-	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), pos);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), pos);
 }

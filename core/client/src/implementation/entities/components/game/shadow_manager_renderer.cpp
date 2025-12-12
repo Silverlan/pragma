@@ -22,7 +22,7 @@ ShadowRenderer::ShadowRenderer()
 
 	m_octreeCallbacks.nodeCallback = [this](const OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>::Node &node) -> bool {
 		auto &bounds = node.GetWorldBounds();
-		return umath::intersection::aabb_sphere(bounds.first, bounds.second, m_lightSourceData.position, m_lightSourceData.radius);
+		return pragma::math::intersection::aabb_sphere(bounds.first, bounds.second, m_lightSourceData.position, m_lightSourceData.radius);
 	};
 
 	m_octreeCallbacks.entityCallback = [this](const ecs::CBaseEntity &ent, uint32_t renderFlags) {
@@ -108,7 +108,7 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 	octree.IterateObjects(
 	  [this](const OcclusionOctree<ecs::CBaseEntity *>::Node &node) -> bool {
 		  auto &bounds = node.GetWorldBounds();
-		  return umath::intersection::aabb_sphere(bounds.first, bounds.second, m_lightSourceData.position, m_lightSourceData.radius);
+		  return pragma::math::intersection::aabb_sphere(bounds.first, bounds.second, m_lightSourceData.position, m_lightSourceData.radius);
 	  },
 	  [this, &light, &drawCmd, scene](const ecs::CBaseEntity *ent) {
 		  auto pRenderComponent = ent->GetRenderComponent();
@@ -282,7 +282,7 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 			continue;
 		// TODO
 		//auto renderResultFlags = RenderShadows(drawCmd,light,layerId,depthMVP,shader,false);
-		//if(umath::is_flag_set(renderResultFlags,RenderResultFlags::TranslucentPending) && shaderTransparent != nullptr)
+		//if(pragma::math::is_flag_set(renderResultFlags,RenderResultFlags::TranslucentPending) && shaderTransparent != nullptr)
 		//	RenderShadows(drawCmd,light,layerId,depthMVP,shader,true); // Draw translucent shadows
 		if(drawParticleShadows == true && renderer) {
 			auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();

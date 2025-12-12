@@ -44,8 +44,8 @@ export {
 			bool Read(VFilePtr &f, EntityData::Flags entMask = EntityData::Flags::None, std::string *optOutErrMsg = nullptr);
 			void AddEntity(EntityData &ent, bool isWorld = false);
 			EntityData *FindWorld();
-			void SetBSPTree(util::BSPTree &bspTree);
-			util::BSPTree *GetBSPTree();
+			void SetBSPTree(pragma::util::BSPTree &bspTree);
+			pragma::util::BSPTree *GetBSPTree();
 			std::vector<std::vector<WorldModelMeshIndex>> &GetClusterMeshIndices() { return m_meshesPerCluster; }
 			std::vector<uint16_t> &GetStaticPropLeaves();
 			NetworkState &GetNetworkState() const;
@@ -94,12 +94,12 @@ export {
 			std::vector<std::shared_ptr<EntityData>> m_entities {};
 			std::vector<std::string> m_materialTable {};
 			std::function<void(const std::string &)> m_messageLogger = nullptr;
-			std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
+			std::shared_ptr<pragma::util::BSPTree> m_bspTree = nullptr;
 			udm::Version m_version = PMAP_VERSION;
 
 			bool m_useLegacyLightmapDefinition = false;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::asset::WorldData &worldData);
 	REGISTER_ENUM_FLAGS(pragma::asset::WorldData::DataFlags)

@@ -51,14 +51,14 @@ void ShadowDataBufferManager::DoInitialize()
 #if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
 	createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit;
 	alignment = sizeof(Vector4);
-	limit = umath::to_integral(pragma::GameLimits::MaxUniformBufferSize);
+	limit = pragma::math::to_integral(pragma::GameLimits::MaxUniformBufferSize);
 #else
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 	limit = limits.maxStorageBufferRange;
 #endif
 
 	auto shadowDataSize = sizeof(ShadowBufferData);
-	auto numShadows = static_cast<uint32_t>(umath::min(static_cast<uint64_t>(limit / shadowDataSize), static_cast<uint64_t>(pragma::GameLimits::MaxAbsoluteShadowLights)));
+	auto numShadows = static_cast<uint32_t>(pragma::math::min(static_cast<uint64_t>(limit / shadowDataSize), static_cast<uint64_t>(pragma::GameLimits::MaxAbsoluteShadowLights)));
 	m_maxCount = numShadows;
 
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
@@ -97,13 +97,13 @@ void LightDataBufferManager::DoInitialize()
 	std::optional<uint64_t> alignment {};
 #if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
 	createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit;
-	maxBufferSize = umath::to_integral(pragma::GameLimits::MaxUniformBufferSize);
+	maxBufferSize = pragma::math::to_integral(pragma::GameLimits::MaxUniformBufferSize);
 	alignment = sizeof(Vector4);
 #else
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 	maxBufferSize = limits.maxStorageBufferRange;
 #endif
-	auto numLights = static_cast<uint32_t>(umath::min(static_cast<uint64_t>(maxBufferSize / lightDataSize), static_cast<uint64_t>(pragma::GameLimits::MaxAbsoluteLights)));
+	auto numLights = static_cast<uint32_t>(pragma::math::min(static_cast<uint64_t>(maxBufferSize / lightDataSize), static_cast<uint64_t>(pragma::GameLimits::MaxAbsoluteLights)));
 	m_maxCount = numLights;
 #ifdef ENABLE_LIGHT_BUFFER_DEBUGGING
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;

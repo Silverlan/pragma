@@ -88,15 +88,15 @@ void pragma::physics::CPhysWaterSurfaceSimulator::InitializeSurface()
 	m_positionBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, verts.data());
 
 	auto &descSetParticles = *m_descSetGroupParticles->GetDescriptorSet();
-	descSetParticles.SetBindingStorageBuffer(*m_particleBuffer, umath::to_integral(pragma::ShaderWaterSurface::WaterEffectBinding::WaterParticles));
-	descSetParticles.SetBindingStorageBuffer(*m_positionBuffer, umath::to_integral(pragma::ShaderWaterSurface::WaterEffectBinding::WaterPositions));
+	descSetParticles.SetBindingStorageBuffer(*m_particleBuffer, pragma::math::to_integral(pragma::ShaderWaterSurface::WaterEffectBinding::WaterParticles));
+	descSetParticles.SetBindingStorageBuffer(*m_positionBuffer, pragma::math::to_integral(pragma::ShaderWaterSurface::WaterEffectBinding::WaterPositions));
 
 	auto &descSetSplash = *m_descSetGroupSplash->GetDescriptorSet();
-	descSetSplash.SetBindingStorageBuffer(*m_particleBuffer, umath::to_integral(pragma::ShaderWaterSplash::WaterEffectBinding::WaterParticles));
-	descSetSplash.SetBindingStorageBuffer(*m_positionBuffer, umath::to_integral(pragma::ShaderWaterSplash::WaterEffectBinding::WaterPositions));
+	descSetSplash.SetBindingStorageBuffer(*m_particleBuffer, pragma::math::to_integral(pragma::ShaderWaterSplash::WaterEffectBinding::WaterParticles));
+	descSetSplash.SetBindingStorageBuffer(*m_positionBuffer, pragma::math::to_integral(pragma::ShaderWaterSplash::WaterEffectBinding::WaterPositions));
 
 	auto &descSetIntegrate = *m_descSetGroupIntegrate->GetDescriptorSet();
-	descSetIntegrate.SetBindingStorageBuffer(*m_particleBuffer, umath::to_integral(pragma::ShaderWaterSurfaceIntegrate::WaterParticlesBinding::WaterParticles));
+	descSetIntegrate.SetBindingStorageBuffer(*m_particleBuffer, pragma::math::to_integral(pragma::ShaderWaterSurfaceIntegrate::WaterParticlesBinding::WaterParticles));
 
 	// Initialize surface info buffer
 	size = sizeof(m_surfaceInfo);
@@ -105,7 +105,7 @@ void pragma::physics::CPhysWaterSurfaceSimulator::InitializeSurface()
 	m_surfaceInfoBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_surfaceInfo);
 	m_descSetGroupSurfaceInfo = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderWaterSurface::DESCRIPTOR_SET_SURFACE_INFO);
 	auto &descSetSurfaceInfo = *m_descSetGroupSurfaceInfo->GetDescriptorSet();
-	descSetSurfaceInfo.SetBindingUniformBuffer(*m_surfaceInfoBuffer, umath::to_integral(pragma::ShaderWaterSurface::SurfaceInfoBinding::SurfaceInfo));
+	descSetSurfaceInfo.SetBindingUniformBuffer(*m_surfaceInfoBuffer, pragma::math::to_integral(pragma::ShaderWaterSurface::SurfaceInfoBinding::SurfaceInfo));
 
 	// Initialize edge buffer
 	std::vector<ParticleEdgeInfo> particleEdgeInfo(m_particleField.size());
@@ -116,8 +116,8 @@ void pragma::physics::CPhysWaterSurfaceSimulator::InitializeSurface()
 	auto &shaderWaterSurfaceSolveEdges = static_cast<pragma::ShaderWaterSurfaceSolveEdges &>(*m_whShaderSurfaceSolveEdges.get());
 	m_edgeDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderWaterSurfaceSolveEdges::DESCRIPTOR_SET_WATER);
 	auto &descSetEdge = *m_edgeDescSetGroup->GetDescriptorSet();
-	descSetEdge.SetBindingStorageBuffer(*m_particleBuffer, umath::to_integral(pragma::ShaderWaterSurfaceSolveEdges::WaterBinding::WaterParticles));
-	descSetEdge.SetBindingStorageBuffer(*m_edgeBuffer, umath::to_integral(pragma::ShaderWaterSurfaceSolveEdges::WaterBinding::WaterEdgeData));
+	descSetEdge.SetBindingStorageBuffer(*m_particleBuffer, pragma::math::to_integral(pragma::ShaderWaterSurfaceSolveEdges::WaterBinding::WaterParticles));
+	descSetEdge.SetBindingStorageBuffer(*m_edgeBuffer, pragma::math::to_integral(pragma::ShaderWaterSurfaceSolveEdges::WaterBinding::WaterEdgeData));
 }
 
 const std::shared_ptr<prosper::IBuffer> &pragma::physics::CPhysWaterSurfaceSimulator::GetParticleBuffer() const { return m_particleBuffer; }
@@ -222,7 +222,7 @@ void pragma::physics::CPhysWaterSurfaceSimulator::Draw(std::shared_ptr<prosper::
 	std::vector<Vector4> particlePositions(m_particleField.size());
 	m_positionBuffer->Read(0ull, particlePositions.size() * sizeof(particlePositions.front()), particlePositions.data());
 
-	auto numVerts = umath::min(verts.size(), GetParticleCount());
+	auto numVerts = pragma::math::min(verts.size(), GetParticleCount());
 	for(auto i = decltype(numVerts) {0}; i < numVerts; ++i) {
 		auto pos = CalcParticlePosition(i); //m_particlePositions.at(i); // TODO: Remove m_particlePositions?
 

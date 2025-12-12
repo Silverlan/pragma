@@ -15,7 +15,7 @@ export namespace Lua {
 			DLLSERVER luabind::object fire_bullets(lua::State *l, const pragma::game::BulletInfo &bulletInfo, bool hitReport);
 			DLLSERVER luabind::object fire_bullets(lua::State *l, const pragma::game::BulletInfo &bulletInfo);
 			DLLSERVER void create_giblet(lua::State *l, const GibletCreateInfo &gibletInfo);
-			DLLSERVER void create_explosion(lua::State *l, const ::util::SplashDamageInfo &splashDamageInfo);
+			DLLSERVER void create_explosion(lua::State *l, const pragma::util::SplashDamageInfo &splashDamageInfo);
 		};
 	};
 };

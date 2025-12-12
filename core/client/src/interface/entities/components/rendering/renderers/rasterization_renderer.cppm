@@ -108,7 +108,7 @@ export namespace pragma::rendering {
 			bool Initialize(prosper::Texture &texture);
 			const Vector3 &UpdateColor();
 		  private:
-			util::WeakHandle<prosper::Shader> m_shaderCalcColor = {};
+			pragma::util::WeakHandle<prosper::Shader> m_shaderCalcColor = {};
 			std::weak_ptr<prosper::Texture> m_exposureColorSource = {};
 			std::shared_ptr<prosper::IPrimaryCommandBuffer> m_calcImgColorCmdBuffer = nullptr;
 			std::shared_ptr<prosper::IFence> m_calcImgColorFence = nullptr;
@@ -229,8 +229,8 @@ export namespace pragma {
 		pragma::ShaderGameWorldLightingPass *GetShaderOverride(pragma::ShaderGameWorldLightingPass *srcShader) const;
 		void ClearShaderOverride(const std::string &srcShader);
 
-		const std::vector<umath::Plane> &GetFrustumPlanes() const;
-		const std::vector<umath::Plane> &GetClippedFrustumPlanes() const;
+		const std::vector<pragma::math::Plane> &GetFrustumPlanes() const;
+		const std::vector<pragma::math::Plane> &GetClippedFrustumPlanes() const;
 
 		// SSAO
 		bool IsSSAOEnabled() const;
@@ -353,16 +353,16 @@ export namespace pragma {
 		// GlowData m_glowInfo;
 
 		// Frustum planes (Required for culling)
-		std::vector<umath::Plane> m_frustumPlanes = {};
-		std::vector<umath::Plane> m_clippedFrustumPlanes = {};
+		std::vector<pragma::math::Plane> m_frustumPlanes = {};
+		std::vector<pragma::math::Plane> m_clippedFrustumPlanes = {};
 		void UpdateFrustumPlanes(CSceneComponent &scene);
 
 		RendererData m_rendererData {};
 		std::shared_ptr<prosper::IBuffer> m_rendererBuffer = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupRenderer = nullptr;
 
-		std::unordered_map<size_t, ::util::WeakHandle<prosper::Shader>> m_shaderOverrides;
-		mutable ::util::WeakHandle<prosper::Shader> m_whShaderWireframe = {};
+		std::unordered_map<size_t, pragma::util::WeakHandle<prosper::Shader>> m_shaderOverrides;
+		mutable pragma::util::WeakHandle<prosper::Shader> m_whShaderWireframe = {};
 	};
 
 	struct DLLCLIENT CELightingStageData : public ComponentEvent {
@@ -383,7 +383,7 @@ export namespace pragma {
 		virtual void PushArguments(lua::State *l) override;
 		const pragma::rendering::DrawSceneInfo &drawSceneInfo;
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {
 	REGISTER_ENUM_FLAGS(pragma::CRasterizationRendererComponent::StateFlags)

@@ -16,7 +16,7 @@ pragma::animation::BoneId pragma::animation::MetaRig::GetBoneId(const pragma::GS
 
 pragma::animation::BoneId pragma::animation::MetaRig::GetBoneId(pragma::animation::MetaRigBoneType type) const
 {
-	auto i = umath::to_integral(type);
+	auto i = pragma::math::to_integral(type);
 	if(i >= bones.size())
 		return pragma::animation::INVALID_BONE_INDEX;
 	return bones[i].boneId;
@@ -24,7 +24,7 @@ pragma::animation::BoneId pragma::animation::MetaRig::GetBoneId(pragma::animatio
 
 std::shared_ptr<pragma::animation::MetaRig> pragma::animation::MetaRig::Load(const Skeleton &skeleton, const udm::AssetData &data, std::string &outErr)
 {
-	auto metaRig = ::util::make_shared<MetaRig>();
+	auto metaRig = pragma::util::make_shared<MetaRig>();
 	if(metaRig->LoadFromAssetData(skeleton, data, outErr) == false)
 		return nullptr;
 	return metaRig;
@@ -62,7 +62,7 @@ bool pragma::animation::MetaRig::LoadFromAssetData(const Skeleton &skeleton, con
 		auto boneId = skeleton.LookupBone(bone);
 		if(boneId == pragma::animation::INVALID_BONE_INDEX)
 			continue;
-		auto &metaBone = bones[umath::to_integral(*etype)];
+		auto &metaBone = bones[pragma::math::to_integral(*etype)];
 		metaBone.boneId = boneId;
 		udmBone["normalizedRotationOffset"] >> metaBone.normalizedRotationOffset;
 		udmBone["radius"] >> metaBone.radius;
@@ -83,7 +83,7 @@ bool pragma::animation::MetaRig::LoadFromAssetData(const Skeleton &skeleton, con
 		udmBlendShape["flexControllerId"] >> flexCId;
 		if(flexCId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
 			continue;
-		auto &blendShape = blendShapes[umath::to_integral(*etype)];
+		auto &blendShape = blendShapes[pragma::math::to_integral(*etype)];
 		blendShape.flexControllerId = flexCId;
 	}
 	return true;
@@ -177,7 +177,7 @@ void pragma::animation::MetaRig::DebugPrint(const pragma::asset::Model &mdl)
 	for(size_t i = 0; i < bones.size(); ++i)
 		printBone(static_cast<MetaRigBoneType>(i), bones[i]);
 	ss << "\nBlend shapes:\n";
-	for(size_t i = 0; i < umath::to_integral(BlendShape::Count); ++i) {
+	for(size_t i = 0; i < pragma::math::to_integral(BlendShape::Count); ++i) {
 		auto blendShape = static_cast<BlendShape>(i);
 		auto &blendShapeInfo = blendShapes[i];
 		auto flexConId = blendShapeInfo.flexControllerId;
@@ -204,14 +204,14 @@ std::optional<pragma::animation::MetaRigBoneType> pragma::animation::MetaRig::Fi
 }
 const pragma::animation::MetaRigBlendShape *pragma::animation::MetaRig::GetBlendShape(pragma::animation::BlendShape blendShape) const
 {
-	auto i = umath::to_integral(blendShape);
+	auto i = pragma::math::to_integral(blendShape);
 	if(i >= blendShapes.size() || blendShapes[i].flexControllerId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
 		return nullptr;
 	return &blendShapes[i];
 }
 const pragma::animation::MetaRigBone *pragma::animation::MetaRig::GetBone(pragma::animation::MetaRigBoneType type) const
 {
-	auto i = umath::to_integral(type);
+	auto i = pragma::math::to_integral(type);
 	if(i >= bones.size() || bones[i].boneId == pragma::animation::INVALID_BONE_INDEX)
 		return nullptr;
 	return &bones[i];
@@ -371,8 +371,8 @@ std::vector<pragma::animation::MetaRigBoneType> pragma::animation::get_meta_rig_
 	case MetaRigBoneType::RightBreastMiddle:
 		return {MetaRigBoneType::RightBreastTip};
 	}
-	static_assert(umath::to_integral(pragma::animation::BodyPart::Count) == 12, "Update this list when new bone types are addded!");
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
+	static_assert(pragma::math::to_integral(pragma::animation::BodyPart::Count) == 12, "Update this list when new bone types are addded!");
+	static_assert(pragma::math::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 	return {};
 }
 
@@ -404,7 +404,7 @@ pragma::animation::MetaRigBoneType pragma::animation::get_root_meta_bone_id(Body
 	case BodyPart::RightBreast:
 		return MetaRigBoneType::RightBreastBase;
 	}
-	static_assert(umath::to_integral(pragma::animation::BodyPart::Count) == 12, "Update this list when new bone types are addded!");
+	static_assert(pragma::math::to_integral(pragma::animation::BodyPart::Count) == 12, "Update this list when new bone types are addded!");
 	return MetaRigBoneType::Invalid;
 }
 

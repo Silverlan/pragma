@@ -62,9 +62,9 @@ void BaseIOComponent::Input(const std::string input, pragma::ecs::BaseEntity *ac
 
 void BaseIOComponent::StoreOutput(std::string name, std::string info)
 {
-	ustring::to_lower(name);
+	pragma::string::to_lower(name);
 	std::vector<std::string> data;
-	ustring::explode(info, ",", data);
+	pragma::string::explode(info, ",", data);
 	auto numData = data.size();
 	if(numData < 2)
 		return;
@@ -74,9 +74,9 @@ void BaseIOComponent::StoreOutput(std::string name, std::string info)
 	if(numData > 2) {
 		output.param = data[2];
 		if(numData > 3) {
-			output.delay = util::to_float(data[3]);
+			output.delay = pragma::util::to_float(data[3]);
 			if(numData > 4)
-				output.times = util::to_int(data[4]);
+				output.times = pragma::util::to_int(data[4]);
 		}
 	}
 	std::unordered_map<std::string, std::vector<Output>>::iterator it = m_outputs.find(name);
@@ -87,7 +87,7 @@ void BaseIOComponent::StoreOutput(std::string name, std::string info)
 
 void BaseIOComponent::StoreOutput(std::string name, std::string entities, std::string input, std::string param, float delay, int times)
 {
-	ustring::to_lower(name);
+	pragma::string::to_lower(name);
 	std::unordered_map<std::string, std::vector<Output>>::iterator it = m_outputs.find(name);
 	if(it == m_outputs.end())
 		it = m_outputs.insert(std::unordered_map<std::string, std::vector<Output>>::value_type(name, std::vector<Output>())).first;
@@ -110,13 +110,13 @@ bool BaseIOComponent::FireSingleOutput(Output &output, pragma::ecs::BaseEntity *
 		game->GetPlayers(&ents);
 	else {
 		std::string className = output.entities;
-		ustring::to_lower(className);
+		pragma::string::to_lower(className);
 		pragma::ecs::EntityIterator entIt {*game};
 		entIt.AttachFilter<EntityIteratorFilterUser>([&className, &output](pragma::ecs::BaseEntity &ent, std::size_t index) -> bool {
-			if(ustring::compare(ent.GetClass().c_str(), className.c_str(), false))
+			if(pragma::string::compare(ent.GetClass().c_str(), className.c_str(), false))
 				return true;
 			auto pNameComponent = static_cast<pragma::BaseNameComponent *>(ent.FindComponent("name").get());
-			return pNameComponent != nullptr && ustring::compare(pNameComponent->GetName(), output.entities, false);
+			return pNameComponent != nullptr && pragma::string::compare(pNameComponent->GetName(), output.entities, false);
 		});
 		for(auto *ent : entIt)
 			ents.push_back(ent);
@@ -126,7 +126,7 @@ bool BaseIOComponent::FireSingleOutput(Output &output, pragma::ecs::BaseEntity *
 		auto *pIoComponent = static_cast<BaseIOComponent *>(ent->FindComponent("io").get());
 		if(pIoComponent == nullptr)
 			continue;
-		if(output.delay <= 0.f && !umath::is_flag_set(flags, IoFlags::ForceDelayedFire)) {
+		if(output.delay <= 0.f && !pragma::math::is_flag_set(flags, IoFlags::ForceDelayedFire)) {
 			pIoComponent->Input(output.input, activator, &entThis, output.param);
 			if(!hThis.valid())
 				return false;
@@ -158,15 +158,15 @@ bool BaseIOComponent::FireSingleOutput(Output &output, pragma::ecs::BaseEntity *
 
 void BaseIOComponent::Input(std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, std::string data)
 {
-	ustring::to_lower(input);
+	pragma::string::to_lower(input);
 
 	pragma::CEInputData inputData {input, activator, caller, data};
-	if(BroadcastEvent(baseIOComponent::EVENT_HANDLE_INPUT, inputData) == util::EventReply::Handled)
+	if(BroadcastEvent(baseIOComponent::EVENT_HANDLE_INPUT, inputData) == pragma::util::EventReply::Handled)
 		return;
 	auto &entThis = GetEntity();
 	if(input == "addoutput") {
-		size_t sp = data.find_first_of(ustring::WHITESPACE);
-		if(sp != ustring::NOT_FOUND) {
+		size_t sp = data.find_first_of(pragma::string::WHITESPACE);
+		if(sp != pragma::string::NOT_FOUND) {
 			std::string output = data.substr(0, sp);
 			std::string info = data.substr(sp + 1, data.length());
 			StoreOutput(output, info);
@@ -188,7 +188,7 @@ void BaseIOComponent::Input(std::string input, pragma::ecs::BaseEntity *activato
 
 void BaseIOComponent::TriggerOutput(std::string name, pragma::ecs::BaseEntity *activator, IoFlags flags)
 {
-	ustring::to_lower(name);
+	pragma::string::to_lower(name);
 	std::unordered_map<std::string, std::vector<Output>>::iterator it = m_outputs.find(name);
 	if(it == m_outputs.end())
 		return;

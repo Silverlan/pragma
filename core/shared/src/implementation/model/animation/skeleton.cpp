@@ -8,7 +8,7 @@ import :model.animation.skeleton;
 
 std::shared_ptr<pragma::animation::Skeleton> pragma::animation::Skeleton::Load(const udm::AssetData &data, std::string &outErr)
 {
-	auto skeleton = ::util::make_shared<Skeleton>();
+	auto skeleton = pragma::util::make_shared<Skeleton>();
 	if(skeleton->LoadFromAssetData(data, outErr) == false)
 		return nullptr;
 	return skeleton;
@@ -17,7 +17,7 @@ pragma::animation::Skeleton::Skeleton(const Skeleton &other)
 {
 	m_bones.reserve(other.m_bones.size());
 	for(auto &bone : other.m_bones)
-		m_bones.push_back(::util::make_shared<Bone>(*bone));
+		m_bones.push_back(pragma::util::make_shared<Bone>(*bone));
 	m_rootBones = other.m_rootBones;
 	for(auto &pair : m_rootBones)
 		pair.second = m_bones[pair.first];
@@ -40,7 +40,7 @@ pragma::animation::Skeleton::Skeleton(const Skeleton &other)
 
 bool pragma::animation::Skeleton::IsRootBone(pragma::animation::BoneId boneId) const { return m_rootBones.find(boneId) != m_rootBones.end(); }
 
-bool pragma::animation::Skeleton::TransformToParentSpace(const std::vector<umath::ScaledTransform> &gsPoses, std::vector<umath::ScaledTransform> &outPoses) const
+bool pragma::animation::Skeleton::TransformToParentSpace(const std::vector<pragma::math::ScaledTransform> &gsPoses, std::vector<pragma::math::ScaledTransform> &outPoses) const
 {
 	if(gsPoses.size() != outPoses.size() || gsPoses.size() != m_bones.size())
 		return false;
@@ -59,7 +59,7 @@ bool pragma::animation::Skeleton::TransformToParentSpace(const std::vector<umath
 		transformToParentSpace(*pair.second);
 	return true;
 }
-bool pragma::animation::Skeleton::TransformToGlobalSpace(const std::vector<umath::ScaledTransform> &psPoses, std::vector<umath::ScaledTransform> &outPoses) const
+bool pragma::animation::Skeleton::TransformToGlobalSpace(const std::vector<pragma::math::ScaledTransform> &psPoses, std::vector<pragma::math::ScaledTransform> &outPoses) const
 {
 	if(psPoses.size() != outPoses.size() || psPoses.size() != m_bones.size())
 		return false;
@@ -192,7 +192,7 @@ bool pragma::animation::Skeleton::LoadFromAssetData(const udm::AssetData &data, 
 			outErr = "Bone index is out of bounds of bone list!";
 			return false;
 		}
-		bones[boneInfo.index] = ::util::make_shared<Bone>();
+		bones[boneInfo.index] = pragma::util::make_shared<Bone>();
 		bones[boneInfo.index]->ID = boneInfo.index;
 	}
 
@@ -258,10 +258,10 @@ void pragma::animation::Skeleton::Merge(Skeleton &other)
 	mergeHierarchy = [this, &bones, &rootBones, &mergeHierarchy](const std::unordered_map<pragma::animation::BoneId, std::shared_ptr<Bone>> &otherBones, std::shared_ptr<Bone> parent) {
 		for(auto &pair : otherBones) {
 			auto &otherBone = pair.second;
-			auto it = std::find_if(bones.begin(), bones.end(), [&otherBone](const std::shared_ptr<Bone> &bone) { return ustring::compare(bone->name.c_str(), otherBone->name.c_str(), true); });
+			auto it = std::find_if(bones.begin(), bones.end(), [&otherBone](const std::shared_ptr<Bone> &bone) { return pragma::string::compare(bone->name.c_str(), otherBone->name.c_str(), true); });
 			if(it == bones.end()) {
 				// Bone doesn't exist yet; Add to hierarchy
-				bones.push_back(::util::make_shared<Bone>());
+				bones.push_back(pragma::util::make_shared<Bone>());
 				auto &newBone = bones.back();
 				newBone->ID = bones.size() - 1;
 				newBone->name = otherBone->name;

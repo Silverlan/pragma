@@ -34,7 +34,7 @@ void InputDataModule::InitializeShaderResources()
 		if(!node)
 			continue;
 		auto texVarName = node->GetTextureVariableName(*graphNode);
-		ustring::to_upper(texVarName);
+		pragma::string::to_upper(texVarName);
 		bindings.push_back({pragma::register_global_string(texVarName), prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit});
 		if(m_imageTextureNodes.size() == m_imageTextureNodes.capacity())
 			m_imageTextureNodes.reserve(m_imageTextureNodes.size() * 2 + 10);
@@ -63,7 +63,7 @@ void InputDataModule::GetShaderPreprocessorDefinitions(std::unordered_map<std::s
 		auto *node = dynamic_cast<const ImageTextureNodeBase *>(&graphNode->node);
 		auto texVarName = node->GetTextureVariableName(*graphNode);
 		auto texVarNameUpper = texVarName;
-		ustring::to_upper(texVarNameUpper);
+		pragma::string::to_upper(texVarNameUpper);
 		code << "layout(LAYOUT_ID(SHADER_GRAPH, " << texVarNameUpper << ")) uniform sampler2D " << texVarName << ";\n";
 	}
 

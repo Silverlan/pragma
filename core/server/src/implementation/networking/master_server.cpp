@@ -6,7 +6,7 @@ module;
 module pragma.server;
 import :networking.master_server;
 
-std::unique_ptr<pragma::networking::MasterServerRegistration> pragma::networking::MasterServerRegistration::Register(const util::Library &steamworksLibrary, const GameServerInfo &serverInfo)
+std::unique_ptr<pragma::networking::MasterServerRegistration> pragma::networking::MasterServerRegistration::Register(const pragma::util::Library &steamworksLibrary, const GameServerInfo &serverInfo)
 {
 	std::unique_ptr<MasterServerRegistration> reg {new MasterServerRegistration {}};
 	if(reg->Initialize(steamworksLibrary) == false || reg->m_register_server(serverInfo) == false)
@@ -25,7 +25,7 @@ pragma::networking::MasterServerRegistration::~MasterServerRegistration()
 	if(m_unregister_server)
 		m_unregister_server();
 }
-bool pragma::networking::MasterServerRegistration::Initialize(const util::Library &library)
+bool pragma::networking::MasterServerRegistration::Initialize(const pragma::util::Library &library)
 {
 	m_register_server = library.FindSymbolAddress<decltype(m_register_server)>("pr_steamworks_register_server");
 	m_unregister_server = library.FindSymbolAddress<decltype(m_unregister_server)>("pr_steamworks_unregister_server");

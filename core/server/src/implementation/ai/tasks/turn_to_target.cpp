@@ -43,7 +43,7 @@ bool ai::TaskTurnToTarget::IsFacingTarget(pragma::BaseAIComponent &ai, const Vec
 void ai::TaskTurnToTarget::Print(const Schedule *sched, std::ostream &o) const
 {
 	o << "TurnToTarget[";
-	auto *target = GetParameter(sched, umath::to_integral(TaskTarget::Parameter::Target));
+	auto *target = GetParameter(sched, pragma::math::to_integral(TaskTarget::Parameter::Target));
 	auto type = (target != nullptr) ? target->GetType() : ai::Schedule::Parameter::Type::None;
 	switch(type) {
 	case ai::Schedule::Parameter::Type::Entity:

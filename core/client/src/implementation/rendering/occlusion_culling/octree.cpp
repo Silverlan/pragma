@@ -39,8 +39,8 @@ const std::array<std::shared_ptr<BaseOcclusionOctree::Node>, 8> *BaseOcclusionOc
 bool BaseOcclusionOctree::Node::IsContained(const Vector3 &min, const Vector3 &max) const
 {
 	if(m_tree->IsSingleReferenceMode() == true)
-		return umath::intersection::aabb_in_aabb(min, max, m_worldBounds.first, m_worldBounds.second);
-	return (umath::intersection::aabb_aabb(min, max, m_worldBounds.first, m_worldBounds.second) != umath::intersection::Intersect::Outside) ? true : false;
+		return pragma::math::intersection::aabb_in_aabb(min, max, m_worldBounds.first, m_worldBounds.second);
+	return (pragma::math::intersection::aabb_aabb(min, max, m_worldBounds.first, m_worldBounds.second) != pragma::math::intersection::Intersect::Outside) ? true : false;
 }
 
 bool BaseOcclusionOctree::Node::UpdateState(OcclusionOctreeUpdateMode updateMode)
@@ -76,7 +76,7 @@ void BaseOcclusionOctree::Node::InitializeChildren(bool bPopulateChildren)
 	if(m_children != nullptr || m_bIsFinal == true)
 		return;
 	// THIS CAUSES ERROR
-	m_children = ::util::make_shared<std::array<std::shared_ptr<Node>, 8>>();
+	m_children = pragma::util::make_shared<std::array<std::shared_ptr<Node>, 8>>();
 	for(auto &c : *m_children)
 		c = m_tree->CreateNode(this);
 	//
@@ -263,7 +263,7 @@ void BaseOcclusionOctree::ExtendRoot(const Vector3 &origin)
 	auto &dim = m_root->GetDimensions();
 	auto newDim = dim * 2.f;
 	auto maxDim = GetMaxNodeSize();
-	if(umath::abs(newDim.x) > maxDim || umath::abs(newDim.y) > maxDim || umath::abs(newDim.z) > maxDim)
+	if(pragma::math::abs(newDim.x) > maxDim || pragma::math::abs(newDim.y) > maxDim || pragma::math::abs(newDim.z) > maxDim)
 		return;
 	auto newNode = CreateNode();
 	newNode->SetWorldBounds(m_root->m_worldBounds.first, m_root->m_worldBounds.first + newDim);

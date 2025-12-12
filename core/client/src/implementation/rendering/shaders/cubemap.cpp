@@ -70,7 +70,7 @@ std::shared_ptr<prosper::IBuffer> ShaderCubemap::CreateCubeMesh(uint32_t &outNum
 }
 std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width, uint32_t height, prosper::util::ImageCreateInfo::Flags flags) const
 {
-	flags = static_cast<prosper::util::ImageCreateInfo::Flags>(umath::to_integral(flags) | umath::to_integral(prosper::util::ImageCreateInfo::Flags::Cubemap));
+	flags = static_cast<prosper::util::ImageCreateInfo::Flags>(pragma::math::to_integral(flags) | pragma::math::to_integral(prosper::util::ImageCreateInfo::Flags::Cubemap));
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.format = prosper::Format::R16G16B16A16_SFloat;
 	createInfo.width = width;
@@ -90,7 +90,7 @@ void ShaderCubemap::InitializeSamplerCreateInfo(prosper::util::ImageCreateInfo::
 	inOutSamplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
 	inOutSamplerCreateInfo.minFilter = prosper::Filter::Linear;
 	inOutSamplerCreateInfo.magFilter = prosper::Filter::Linear;
-	if(umath::is_flag_set(flags, prosper::util::ImageCreateInfo::Flags::FullMipmapChain))
+	if(pragma::math::is_flag_set(flags, prosper::util::ImageCreateInfo::Flags::FullMipmapChain))
 		inOutSamplerCreateInfo.mipmapMode = prosper::SamplerMipmapMode::Linear;
 }
 void ShaderCubemap::InitializeTextureCreateInfo(prosper::util::TextureCreateInfo &inOutTextureCreateInfo) { inOutTextureCreateInfo.flags |= prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer; }

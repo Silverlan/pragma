@@ -43,7 +43,7 @@ export namespace pragma::pts {
 		std::vector<ParticleModelComponent> m_particleComponents;
 
 		std::string m_animation;
-		util::WeakHandle<prosper::Shader> m_shader = {};
+		pragma::util::WeakHandle<prosper::Shader> m_shader = {};
 		uint64_t m_lastFrameUpdate = std::numeric_limits<uint64_t>::max();
 		CParticleRendererRotationalBuffer m_rotationalBuffer;
 		bool Update();

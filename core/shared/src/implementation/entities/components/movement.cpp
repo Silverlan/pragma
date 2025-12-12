@@ -37,8 +37,8 @@ float MovementComponent::GetAccelerationRampUpTime() const { return m_accelerati
 void MovementComponent::SetDirection(const std::optional<Vector3> &dir) { m_movementDirection = dir; }
 const std::optional<Vector3> &MovementComponent::GetDirection() const { return m_movementDirection; }
 
-void MovementComponent::SetDirectionMagnitude(MoveDirection direction, float magnitude) { m_directionMagnitude[umath::to_integral(direction)] = magnitude; }
-float MovementComponent::GetDirectionMagnitude(MoveDirection direction) const { return m_directionMagnitude[umath::to_integral(direction)]; }
+void MovementComponent::SetDirectionMagnitude(MoveDirection direction, float magnitude) { m_directionMagnitude[pragma::math::to_integral(direction)] = magnitude; }
+float MovementComponent::GetDirectionMagnitude(MoveDirection direction) const { return m_directionMagnitude[pragma::math::to_integral(direction)]; }
 
 Vector3 MovementComponent::GetLocalVelocity() const
 {
@@ -62,7 +62,7 @@ float MovementComponent::GetMovementBlendScale() const
 	auto vel = GetLocalVelocity();
 	float speed = uvec::length(vel);
 	auto mvSpeed = GetSpeed();
-	auto speedMax = umath::max(mvSpeed.x, mvSpeed.y);
+	auto speedMax = pragma::math::max(mvSpeed.x, mvSpeed.y);
 	if(speedMax == 0.f)
 		blendScale = 0.f;
 	else {
@@ -162,7 +162,7 @@ bool MovementComponent::UpdateMovement()
 		if(m_orientationComponent)
 			upDir = m_orientationComponent->GetUpDirection();
 		auto angle = uvec::dot(forward, upDir);
-		if(umath::abs(angle) < 0.99f)
+		if(pragma::math::abs(angle) < 0.99f)
 			forward = uvec::project_to_plane(forward, upDir, 0.f);
 		else // Looking straight up or down; Use camera up-direction as forward-direction instead
 		{
@@ -206,7 +206,7 @@ bool MovementComponent::UpdateMovement()
 	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
 	auto ts = pTimeScaleComponent.valid() ? CFloat(pTimeScaleComponent->GetTimeScale()) : 1.f;
 	auto scale = pTrComponent ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f};
-	auto speed = GetSpeed() * ts * umath::abs_max(scale.x, scale.y, scale.z);
+	auto speed = GetSpeed() * ts * pragma::math::abs_max(scale.x, scale.y, scale.z);
 
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
@@ -223,7 +223,7 @@ bool MovementComponent::UpdateMovement()
 				if(ent.IsNPC() || ent.GetNetworkState()->IsClient()) {
 					// TODO: Rotate with ground object?
 					//auto angVel = static_cast<PhysRigidBody*>(groundObject)->GetAngularVelocity() *static_cast<float>(tDelta);
-					//auto ang = EulerAngles(umath::rad_to_deg(angVel.x),umath::rad_to_deg(angVel.y),umath::rad_to_deg(angVel.z));
+					//auto ang = EulerAngles(pragma::math::rad_to_deg(angVel.x),pragma::math::rad_to_deg(angVel.y),pragma::math::rad_to_deg(angVel.z));
 					//owner->SetAngles(owner->GetAngles() +ang);
 					//SetViewAngles(GetViewAngles() +ang);
 				}
@@ -249,7 +249,7 @@ bool MovementComponent::UpdateMovement()
 		//else
 		//	Con::cout<<"NPC friction: "<<friction<<Con::endl;
 
-		vel += frictionForce * umath::min(tDelta * acceleration, 1.f);
+		vel += frictionForce * pragma::math::min(tDelta * acceleration, 1.f);
 	}
 	else
 		speed *= GetAirModifier();
@@ -275,26 +275,26 @@ bool MovementComponent::UpdateMovement()
 	if(l == 0.f)
 		m_timeSinceMovementStart = 0.f;
 	else
-		m_timeSinceMovementStart = umath::min(m_timeSinceMovementStart + tDelta, timeToReachFullAcc);
+		m_timeSinceMovementStart = pragma::math::min(m_timeSinceMovementStart + tDelta, timeToReachFullAcc);
 
 	auto speedDir = glm::dot(dir, vel); // The speed in the movement direction of the current velocity
-	if(speedDir < umath::abs(speed.x)) {
+	if(speedDir < pragma::math::abs(speed.x)) {
 		auto speedDelta = speed.x - speedDir;
 
 		auto addSpeed = speedDelta * tDelta * acceleration;
 		auto f = (timeToReachFullAcc > 0.f) ? (m_timeSinceMovementStart / timeToReachFullAcc) : 1.f;
 		addSpeed *= f;
 
-		vel += dir * umath::min(addSpeed, speedDelta);
+		vel += dir * pragma::math::min(addSpeed, speedDelta);
 	}
 
 	// Calculate sideways movement speed (NPC animation movement only)
 	if(speed.y != 0.f) {
 		auto dirRight = (uvec::length_sqr(dir) > 0.99f) ? uvec::cross(dir, pTrComponent ? pTrComponent->GetUp() : uvec::UP) : (pTrComponent ? pTrComponent->GetRight() : uvec::RIGHT);
 		auto speedDir = glm::dot(dirRight, vel);
-		if(speedDir < umath::abs(speed.y)) {
+		if(speedDir < pragma::math::abs(speed.y)) {
 			auto speedDelta = speed.y - speedDir;
-			vel += dirRight * umath::min(speedDelta * tDelta * acceleration, speedDelta);
+			vel += dirRight * pragma::math::min(speedDelta * tDelta * acceleration, speedDelta);
 		}
 	}
 	//static PhysContactInfo lastGroundContact = {btManifoldPoint{}};

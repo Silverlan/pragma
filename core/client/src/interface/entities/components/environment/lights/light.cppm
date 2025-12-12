@@ -64,7 +64,7 @@ export namespace pragma {
 		virtual ~CBaseLightComponent() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void Initialize() override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 
@@ -214,7 +214,7 @@ export namespace pragma {
 		void InitializeShadowMap(TCPPM &sm);
 		virtual void InitializeShadowMap();
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {
 	REGISTER_ENUM_FLAGS(pragma::CLightComponent::StateFlags)

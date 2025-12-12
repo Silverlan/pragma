@@ -8,9 +8,9 @@ import :assets.conversion;
 
 static bool s_bModuleInitialized = false;
 
-static std::shared_ptr<util::Library> dllHandle = nullptr;
-void util::close_mount_external_library() { dllHandle = nullptr; }
-static std::shared_ptr<util::Library> load_module(pragma::NetworkState *nw)
+static std::shared_ptr<pragma::util::Library> dllHandle = nullptr;
+void pragma::util::close_mount_external_library() { dllHandle = nullptr; }
+static std::shared_ptr<pragma::util::Library> load_module(pragma::NetworkState *nw)
 {
 	if(dllHandle == nullptr) {
 		std::string err;
@@ -30,8 +30,8 @@ static std::shared_ptr<util::Library> load_module(pragma::NetworkState *nw)
 	}
 	return dllHandle;
 }
-std::shared_ptr<util::Library> util::initialize_external_archive_manager(pragma::NetworkState *nw) { return load_module(nw); }
-void util::close_external_archive_manager()
+std::shared_ptr<pragma::util::Library> pragma::util::initialize_external_archive_manager(pragma::NetworkState *nw) { return load_module(nw); }
+void pragma::util::close_external_archive_manager()
 {
 	if(s_bModuleInitialized == false)
 		return;
@@ -40,7 +40,7 @@ void util::close_external_archive_manager()
 	if(fClose != nullptr)
 		fClose();
 }
-std::optional<int32_t> util::get_mounted_game_priority(const std::string &game)
+std::optional<int32_t> pragma::util::get_mounted_game_priority(const std::string &game)
 {
 	if(s_bModuleInitialized == false)
 		return {};
@@ -53,7 +53,7 @@ std::optional<int32_t> util::get_mounted_game_priority(const std::string &game)
 	}
 	return {};
 }
-void util::set_mounted_game_priority(const std::string &game, int32_t priority)
+void pragma::util::set_mounted_game_priority(const std::string &game, int32_t priority)
 {
 	if(s_bModuleInitialized == false)
 		return;
@@ -83,11 +83,11 @@ static bool port_model(pragma::NetworkState *nw, const std::string &path, std::s
 		     return mdl;
 	     },
 	     [game, formatName](const std::shared_ptr<pragma::asset::Model> &mdl, const std::string &path, const std::string &mdlName) {
-		     auto outPath = ustring::substr(path, 7) // Remove "models/"-prefix
+		     auto outPath = pragma::string::substr(path, 7) // Remove "models/"-prefix
 		       + mdlName + '.' + pragma::asset::FORMAT_MODEL_BINARY;
-		     if(FileManager::CreatePath((ufile::get_path_from_filename(util::CONVERT_PATH + "models/" + outPath)).c_str()) == false)
+		     if(FileManager::CreatePath((ufile::get_path_from_filename(pragma::util::CONVERT_PATH + "models/" + outPath)).c_str()) == false)
 			     return false;
-		     auto f = FileManager::OpenFile<VFilePtrReal>((util::CONVERT_PATH + "models/" + outPath).c_str(), "wb");
+		     auto f = FileManager::OpenFile<VFilePtrReal>((pragma::util::CONVERT_PATH + "models/" + outPath).c_str(), "wb");
 		     if(f == nullptr) {
 			     Con::cwar << "Unable to save model '" << outPath << "': Unable to open file!" << Con::endl;
 			     return false;
@@ -102,7 +102,7 @@ static bool port_model(pragma::NetworkState *nw, const std::string &path, std::s
 		     auto r = udmData->Save(f);
 		     if(r)
 			     filemanager::update_file_index_cache("models/" + outPath);
-		     r = r ? FileManager::Exists(util::CONVERT_PATH + "models/" + outPath) : false;
+		     r = r ? FileManager::Exists(pragma::util::CONVERT_PATH + "models/" + outPath) : false;
 		     if(r == true)
 			     Con::cout << "Successfully ported " << formatName << " Model '" << (path + mdlName) << "' and saved it as '" << outPath << "'!" << Con::endl;
 		     return r;
@@ -113,7 +113,7 @@ static bool port_model(pragma::NetworkState *nw, const std::string &path, std::s
 	return true;
 }
 
-void *util::impl::get_module_func(pragma::NetworkState *nw, const std::string &name)
+void *pragma::util::impl::get_module_func(pragma::NetworkState *nw, const std::string &name)
 {
 	static auto *dllHandle = load_module(nw).get();
 	if(dllHandle == nullptr)
@@ -121,7 +121,7 @@ void *util::impl::get_module_func(pragma::NetworkState *nw, const std::string &n
 	return dllHandle->FindSymbolAddress(name);
 }
 
-bool util::port_nif_model(pragma::NetworkState *nw, const std::string &path, std::string mdlName)
+bool pragma::util::port_nif_model(pragma::NetworkState *nw, const std::string &path, std::string mdlName)
 {
 	std::string ext;
 	if(ufile::get_extension(mdlName, &ext) == false || ext != "nif")
@@ -136,7 +136,7 @@ bool util::port_nif_model(pragma::NetworkState *nw, const std::string &path, std
 	    std::ostream *optLog) -> bool { return ptrConvertModel(nw, fCreateModel, fCallback, path, mdlName); });
 }
 
-bool util::port_hl2_particle(pragma::NetworkState *nw, const std::string &path)
+bool pragma::util::port_hl2_particle(pragma::NetworkState *nw, const std::string &path)
 {
 	static auto *ptrLoadParticle = reinterpret_cast<bool (*)(pragma::NetworkState &, const std::string &)>(impl::get_module_func(nw, "load_source_particle"));
 	if(ptrLoadParticle == nullptr)
@@ -145,7 +145,7 @@ bool util::port_hl2_particle(pragma::NetworkState *nw, const std::string &path)
 	return ptrLoadParticle(*nw, path);
 }
 
-bool util::port_source2_model(pragma::NetworkState *nw, const std::string &path, std::string mdlName)
+bool pragma::util::port_source2_model(pragma::NetworkState *nw, const std::string &path, std::string mdlName)
 {
 	ufile::remove_extension_from_filename(mdlName, std::array<std::string, 2> {"vmdl", "vmdl_c"});
 	mdlName += ".vmdl_c";
@@ -158,7 +158,7 @@ bool util::port_source2_model(pragma::NetworkState *nw, const std::string &path,
 	return port_model(nw, path, mdlName, "source2", ptrConvertModel);
 }
 
-bool util::port_hl2_model(pragma::NetworkState *nw, const std::string &path, std::string mdlName)
+bool pragma::util::port_hl2_model(pragma::NetworkState *nw, const std::string &path, std::string mdlName)
 {
 	ufile::remove_extension_from_filename(mdlName, std::array<std::string, 1> {"mdl"});
 	mdlName += ".mdl";
@@ -171,7 +171,7 @@ bool util::port_hl2_model(pragma::NetworkState *nw, const std::string &path, std
 	return port_model(nw, path, mdlName, "HL2", ptrConvertModel);
 }
 
-bool util::port_hl2_smd(pragma::NetworkState &nw, pragma::asset::Model &mdl, VFilePtr &f, const std::string &animName, bool isCollisionMesh, std::vector<std::string> &outTextures)
+bool pragma::util::port_hl2_smd(pragma::NetworkState &nw, pragma::asset::Model &mdl, VFilePtr &f, const std::string &animName, bool isCollisionMesh, std::vector<std::string> &outTextures)
 {
 	static auto *ptrConvertSmd = reinterpret_cast<bool (*)(pragma::NetworkState &, pragma::asset::Model &, VFilePtr &, const std::string &, bool, std::vector<std::string> &)>(impl::get_module_func(&nw, "convert_smd"));
 	if(ptrConvertSmd == nullptr)
@@ -180,7 +180,7 @@ bool util::port_hl2_smd(pragma::NetworkState &nw, pragma::asset::Model &mdl, VFi
 	return ptrConvertSmd(nw, mdl, f, animName, isCollisionMesh, outTextures);
 }
 
-bool util::port_file(pragma::NetworkState *nw, const std::string &path, const std::optional<std::string> &optOutputPath)
+bool pragma::util::port_file(pragma::NetworkState *nw, const std::string &path, const std::optional<std::string> &optOutputPath)
 {
 	if(pragma::Engine::Get()->ShouldMountExternalGameResources() == false)
 		return false;
@@ -188,7 +188,7 @@ bool util::port_file(pragma::NetworkState *nw, const std::string &path, const st
 	if(filemanager::exists(outputPath))
 		return true;
 	if(outputPath != path && filemanager::exists(path)) {
-		auto fullOutputPath = util::IMPORT_PATH + outputPath;
+		auto fullOutputPath = pragma::util::IMPORT_PATH + outputPath;
 		filemanager::create_path(ufile::get_path_from_filename(fullOutputPath));
 		return filemanager::copy_file(path, fullOutputPath);
 	}
@@ -199,5 +199,5 @@ bool util::port_file(pragma::NetworkState *nw, const std::string &path, const st
 	if(ptrExtractResource == nullptr)
 		return false;
 	auto lockWatcher = pragma::Engine::Get()->ScopeLockResourceWatchers();
-	return ptrExtractResource(nw, path, util::IMPORT_PATH + outputPath);
+	return ptrExtractResource(nw, path, pragma::util::IMPORT_PATH + outputPath);
 }

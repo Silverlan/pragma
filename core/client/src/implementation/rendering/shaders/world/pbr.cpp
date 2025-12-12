@@ -114,9 +114,9 @@ void ShaderPBR::OnPipelinesInitialized()
 	auto &dummyTex = context.GetDummyTexture();
 	auto &dummyCubemapTex = context.GetDummyCubemapTexture();
 	auto &ds = *m_defaultPbrDsg->GetDescriptorSet(0);
-	ds.SetBindingTexture(*dummyCubemapTex, umath::to_integral(PBRBinding::IrradianceMap));
-	ds.SetBindingTexture(*dummyCubemapTex, umath::to_integral(PBRBinding::PrefilterMap));
-	ds.SetBindingTexture(*dummyTex, umath::to_integral(PBRBinding::BRDFMap));
+	ds.SetBindingTexture(*dummyCubemapTex, pragma::math::to_integral(PBRBinding::IrradianceMap));
+	ds.SetBindingTexture(*dummyCubemapTex, pragma::math::to_integral(PBRBinding::PrefilterMap));
+	ds.SetBindingTexture(*dummyTex, pragma::math::to_integral(PBRBinding::BRDFMap));
 }
 prosper::IDescriptorSet &ShaderPBR::GetDefaultPbrDescriptorSet() const { return *m_defaultPbrDsg->GetDescriptorSet(); }
 void ShaderPBR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }

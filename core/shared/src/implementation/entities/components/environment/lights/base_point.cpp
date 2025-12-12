@@ -16,14 +16,14 @@ void BaseEnvLightPointComponent::Initialize()
 	ent.AddComponent("light");
 	ent.AddComponent("radius");
 }
-util::EventReply BaseEnvLightPointComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply BaseEnvLightPointComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
 	if(eventId == baseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT) {
 		auto &levData = static_cast<CECalcLightDirectionToPoint &>(evData);
 		auto dir = levData.pos - GetEntity().GetPosition();
 		uvec::normalize(&dir);
 		levData.direction = dir;
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	}
 	else if(eventId == baseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT) {
 		auto &levData = static_cast<CECalcLightIntensityAtPoint &>(evData);
@@ -33,7 +33,7 @@ util::EventReply BaseEnvLightPointComponent::HandleEvent(ComponentEventId eventI
 			auto radius = radiusC ? radiusC->GetRadius() : 0.f;
 			static_cast<CECalcLightIntensityAtPoint &>(evData).intensity = CalcIntensityAtPoint(GetEntity().GetPosition(), cLight->GetLightIntensityCandela(), levData.pos, radius);
 		}
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	}
 	return BaseEntityComponent::HandleEvent(eventId, evData);
 }

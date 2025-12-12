@@ -184,9 +184,9 @@ void Lua::AISchedule::GetParameterType(lua::State *l, pragma::ai::Schedule &sche
 {
 	auto *p = schedule.GetParameter(paramIdx);
 	if(p == nullptr)
-		Lua::PushInt(l, umath::to_integral(pragma::ai::Schedule::Parameter::Type::None));
+		Lua::PushInt(l, pragma::math::to_integral(pragma::ai::Schedule::Parameter::Type::None));
 	else
-		Lua::PushInt(l, umath::to_integral(p->GetType()));
+		Lua::PushInt(l, pragma::math::to_integral(p->GetType()));
 }
 void Lua::AISchedule::DebugPrint(lua::State *l, pragma::ai::Schedule &schedule)
 {

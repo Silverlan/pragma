@@ -11,11 +11,11 @@ import :game;
 
 using namespace pragma;
 
-void ai::TaskLookAtTarget::SetLookDuration(float dur) { SetParameter(umath::to_integral(Parameter::LookDuration), dur); }
+void ai::TaskLookAtTarget::SetLookDuration(float dur) { SetParameter(pragma::math::to_integral(Parameter::LookDuration), dur); }
 void ai::TaskLookAtTarget::Print(const Schedule *sched, std::ostream &o) const
 {
 	o << "LookAt[";
-	auto *target = GetParameter(sched, umath::to_integral(TaskTarget::Parameter::Target));
+	auto *target = GetParameter(sched, pragma::math::to_integral(TaskTarget::Parameter::Target));
 	auto type = (target != nullptr) ? target->GetType() : ai::Schedule::Parameter::Type::None;
 	switch(type) {
 	case ai::Schedule::Parameter::Type::Entity:
@@ -60,7 +60,7 @@ ai::BehaviorNode::Result ai::TaskLookAtTarget::Start(const Schedule *sched, prag
 	if(r == Result::Failed)
 		return r;
 	auto lookTime = std::numeric_limits<float>::max();
-	auto *param = GetParameter(sched, umath::to_integral(Parameter::LookDuration));
+	auto *param = GetParameter(sched, pragma::math::to_integral(Parameter::LookDuration));
 	if(param != nullptr)
 		lookTime = SGame::Get()->CurTime() + param->GetFloat();
 

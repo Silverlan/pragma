@@ -47,7 +47,7 @@ export {
 			float m_kvOuterRadius = 0.f;
 			float m_kvDspGain = 1.f;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::BaseEnvSoundDspComponent::SpawnFlags);
 };

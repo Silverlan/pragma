@@ -42,7 +42,7 @@ std::vector<Vector3> BaseShooterComponent::GetBulletDestinations(const Vector3 &
 	std::vector<Vector3> destPositions;
 	destPositions.reserve(bulletInfo.bulletCount);
 	for(auto i = decltype(bulletInfo.bulletCount) {0}; i < bulletInfo.bulletCount; ++i) {
-		auto randSpread = EulerAngles(umath::random(-bulletInfo.spread.p, bulletInfo.spread.p), umath::random(-bulletInfo.spread.y, bulletInfo.spread.y), 0);
+		auto randSpread = EulerAngles(pragma::math::random(-bulletInfo.spread.p, bulletInfo.spread.p), pragma::math::random(-bulletInfo.spread.y, bulletInfo.spread.y), 0);
 		auto bulletDir = dir;
 		uvec::rotate(&bulletDir, randSpread);
 

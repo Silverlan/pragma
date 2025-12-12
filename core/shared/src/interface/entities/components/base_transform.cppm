@@ -36,12 +36,12 @@ export {
 			void SetRotation(const Quat &q);
 			const Quat &GetRotation() const;
 			Quat GetRotation(pragma::CoordinateSpace space) const;
-			void SetPose(const umath::ScaledTransform &pose, pragma::CoordinateSpace space);
-			void SetPose(const umath::Transform &pose, pragma::CoordinateSpace space);
-			void SetPose(const umath::ScaledTransform &pose);
-			void SetPose(const umath::Transform &pose);
-			const umath::ScaledTransform &GetPose() const;
-			umath::ScaledTransform GetPose(pragma::CoordinateSpace space) const;
+			void SetPose(const pragma::math::ScaledTransform &pose, pragma::CoordinateSpace space);
+			void SetPose(const pragma::math::Transform &pose, pragma::CoordinateSpace space);
+			void SetPose(const pragma::math::ScaledTransform &pose);
+			void SetPose(const pragma::math::Transform &pose);
+			const pragma::math::ScaledTransform &GetPose() const;
+			pragma::math::ScaledTransform GetPose(pragma::CoordinateSpace space) const;
 			void SetAngles(const EulerAngles &ang, pragma::CoordinateSpace space);
 			void SetAngles(const EulerAngles &ang);
 			void SetPitch(float pitch, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
@@ -60,7 +60,7 @@ export {
 			float GetDistance(const pragma::ecs::BaseEntity &ent) const;
 			void GetOrientation(Vector3 *forward, Vector3 *right, Vector3 *up = nullptr) const;
 
-			void Teleport(const umath::Transform &targetPose);
+			void Teleport(const pragma::math::Transform &targetPose);
 
 			void LocalToWorld(Vector3 *origin) const;
 			void LocalToWorld(Quat *rot) const;
@@ -111,16 +111,16 @@ export {
 			pragma::NetEventId m_netEvSetScale = pragma::INVALID_NET_EVENT;
 			double m_tLastMoved = 0.0; // Last time the entity moved or changed rotation
 			Vector3 m_eyeOffset = {};
-			umath::ScaledTransform m_pose {};
+			pragma::math::ScaledTransform m_pose {};
 		};
 		struct DLLNETWORK CETeleport : public ComponentEvent {
-			CETeleport(const umath::Transform &originalPose, const umath::Transform &targetPose, const umath::Transform &deltaPose);
+			CETeleport(const pragma::math::Transform &originalPose, const pragma::math::Transform &targetPose, const pragma::math::Transform &deltaPose);
 			virtual void PushArguments(lua::State *l) override;
-			umath::Transform originalPose;
-			umath::Transform targetPose;
-			umath::Transform deltaPose;
+			pragma::math::Transform originalPose;
+			pragma::math::Transform targetPose;
+			pragma::math::Transform deltaPose;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::TransformChangeFlags)
 };

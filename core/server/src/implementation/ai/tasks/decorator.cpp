@@ -16,11 +16,11 @@ void ai::TaskDecorator::Initialize(const Schedule *sched)
 		return;
 	m_bInitialized = true;
 
-	auto *paramType = GetParameter(sched, umath::to_integral(Parameter::DecoratorType));
+	auto *paramType = GetParameter(sched, pragma::math::to_integral(Parameter::DecoratorType));
 	if(paramType != nullptr)
 		m_decoratorType = static_cast<DecoratorType>(paramType->GetInt());
 	if(m_decoratorType == DecoratorType::Limit || m_decoratorType == DecoratorType::Repeat) {
-		auto *paramLimit = GetParameter(sched, umath::to_integral(Parameter::Limit));
+		auto *paramLimit = GetParameter(sched, pragma::math::to_integral(Parameter::Limit));
 		if(paramLimit != nullptr)
 			m_limit = paramLimit->GetInt();
 	}

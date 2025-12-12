@@ -227,7 +227,7 @@ void pragma::gui::types::WIConsole::Initialize()
 		if(hThis.IsValid() == false)
 			return;
 		std::vector<std::string> subStrings {};
-		ustring::explode_whitespace(cmd, subStrings);
+		pragma::string::explode_whitespace(cmd, subStrings);
 		if(subStrings.empty() == false) {
 			auto *cf = pragma::get_cengine()->GetConVar(subStrings.front());
 			if(cf && cf->GetType() == pragma::console::ConType::Command) {
@@ -246,7 +246,7 @@ void pragma::gui::types::WIConsole::Initialize()
 		std::vector<std::pair<std::string_view, float>> bestCandidates(pEntry->GetAutoCompleteEntryLimit(), std::pair<std::string_view, float> {std::string_view {}, std::numeric_limits<float>::max()});
 		const auto fProcessConVars = [&cmd, &bestCandidates](const std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &conVars) {
 			for(auto &pair : conVars) {
-				auto percentage = ustring::calc_similarity(cmd, pair.first);
+				auto percentage = pragma::string::calc_similarity(cmd, pair.first);
 				auto it = std::find_if(bestCandidates.begin(), bestCandidates.end(), [percentage](const std::pair<std::string_view, float> &pair) { return percentage < pair.second; });
 				if(it == bestCandidates.end())
 					continue;
@@ -289,15 +289,15 @@ void pragma::gui::types::WIConsole::Initialize()
 			hLog.get()->SetWidth(pLogBg->GetWidth());
 	}));
 
-	pLog->GetTextElement()->SetTagArgument("luafile", 0u, FunctionCallback<util::EventReply, std::reference_wrapper<const std::vector<std::string>>>::CreateWithOptionalReturn([](util::EventReply *result, std::reference_wrapper<const std::vector<std::string>> args) -> CallbackReturnType {
+	pLog->GetTextElement()->SetTagArgument("luafile", 0u, FunctionCallback<pragma::util::EventReply, std::reference_wrapper<const std::vector<std::string>>>::CreateWithOptionalReturn([](pragma::util::EventReply *result, std::reference_wrapper<const std::vector<std::string>> args) -> CallbackReturnType {
 		if(args.get().empty() == false) {
 			auto &f = args.get().front();
 			auto lineIdx = 0u;
 			if(args.get().size() > 1u)
-				lineIdx = util::to_int(args.get().at(1u));
+				lineIdx = pragma::util::to_int(args.get().at(1u));
 			Lua::OpenFileInZeroBrane("lua/" + f, lineIdx);
 		}
-		*result = util::EventReply::Handled;
+		*result = pragma::util::EventReply::Handled;
 		return CallbackReturnType::HasReturnValue;
 	}));
 
@@ -480,7 +480,7 @@ void pragma::gui::types::WIConsole::SetText(const std::string &text)
 		auto pos = ltext.find('\n');
 		if(pos == std::string::npos)
 			break;
-		ltext = ustring::substr(ltext, pos + 1u);
+		ltext = pragma::string::substr(ltext, pos + 1u);
 		--numLinesRemove;
 	}
 	pLog->SetText(ltext);

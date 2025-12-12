@@ -31,11 +31,11 @@ void pragma::pts::CParticleOperatorRandomEmissionRate::Initialize(pragma::BaseEn
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "minimum")
-			m_fMinimum = util::to_float(pair.second);
+			m_fMinimum = pragma::util::to_float(pair.second);
 		else if(key == "maximum")
-			m_fMaximum = util::to_float(pair.second);
+			m_fMaximum = pragma::util::to_float(pair.second);
 	}
 }
 void pragma::pts::CParticleOperatorRandomEmissionRate::OnParticleSystemStarted()
@@ -45,7 +45,7 @@ void pragma::pts::CParticleOperatorRandomEmissionRate::OnParticleSystemStarted()
 	Simulate(0.f);
 }
 void pragma::pts::CParticleOperatorRandomEmissionRate::Reset() { m_fRemaining = GetInterval(); }
-float pragma::pts::CParticleOperatorRandomEmissionRate::GetInterval() const { return umath::max(0.f, umath::random(m_fMinimum, m_fMaximum)); }
+float pragma::pts::CParticleOperatorRandomEmissionRate::GetInterval() const { return pragma::math::max(0.f, pragma::math::random(m_fMinimum, m_fMaximum)); }
 void pragma::pts::CParticleOperatorRandomEmissionRate::Simulate(double tDelta)
 {
 	CParticleOperator::Simulate(tDelta);
@@ -56,7 +56,7 @@ void pragma::pts::CParticleOperatorRandomEmissionRate::Simulate(double tDelta)
 		return;
 	}
 	auto maximum = ps.GetMaxParticleCount();
-	auto count = umath::min(1u, maximum);
+	auto count = pragma::math::min(1u, maximum);
 	while(count < maximum && (m_fRemaining += GetInterval()) < 0.f)
 		++count;
 	ps.SetNextParticleEmissionCount(count);

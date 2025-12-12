@@ -227,8 +227,8 @@ export {
 			static constexpr uint32_t FORMAT_VERSION = 1u;
 			static constexpr auto PMRIG_IDENTIFIER = "PMRIG";
 			static std::shared_ptr<MetaRig> Load(const Skeleton &skeleton, const udm::AssetData &data, std::string &outErr);
-			std::array<MetaRigBone, umath::to_integral(MetaRigBoneType::Count)> bones;
-			std::array<MetaRigBlendShape, umath::to_integral(BlendShape::Count)> blendShapes;
+			std::array<MetaRigBone, pragma::math::to_integral(MetaRigBoneType::Count)> bones;
+			std::array<MetaRigBlendShape, pragma::math::to_integral(BlendShape::Count)> blendShapes;
 
 			bool Save(const Skeleton &skeleton, const udm::AssetData &outData, std::string &outErr) const;
 			float GetReferenceScale() const;
@@ -403,14 +403,14 @@ export {
 		case MetaRigBoneType::RightBreastTip:
 			return "right_breast_tip";
 		}
-		static_assert(umath::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
+		static_assert(pragma::math::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 		return nullptr;
 	}
 
 	constexpr std::optional<pragma::animation::MetaRigBoneType> pragma::animation::get_meta_rig_bone_type_enum(const std::string_view &boneType)
 	{
-		using namespace ustring::string_switch_ci;
-		switch(ustring::string_switch_ci::hash(boneType)) {
+		using namespace string::string_switch_ci;
+		switch(hash(boneType)) {
 		case "head"_:
 			return MetaRigBoneType::Head;
 		case "neck"_:
@@ -560,7 +560,7 @@ export {
 		case "right_breast_tip"_:
 			return MetaRigBoneType::RightBreastTip;
 		}
-		static_assert(umath::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
+		static_assert(pragma::math::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 		return {};
 	}
 
@@ -757,7 +757,7 @@ export {
 		case MetaRigBoneType::RightBreastTip:
 			return pragma::animation::BoneSide::Right;
 		}
-		static_assert(umath::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
+		static_assert(pragma::math::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 		return {};
 	}
 
@@ -910,7 +910,7 @@ export {
 		case MetaRigBoneType::RightBreastBase:
 			return MetaRigBoneType::Spine3;
 		}
-		static_assert(umath::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
+		static_assert(pragma::math::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 		return {};
 	}
 
@@ -1042,12 +1042,12 @@ export {
 		default:
 			return "";
 		}
-		static_assert(umath::to_integral(BlendShape::Count) == 61, "Update this list when new blend shape types are added!");
+		static_assert(pragma::math::to_integral(BlendShape::Count) == 61, "Update this list when new blend shape types are added!");
 	}
 	constexpr std::optional<pragma::animation::BlendShape> pragma::animation::get_blend_shape_enum(const std::string_view &name)
 	{
-		using namespace ustring::string_switch_ci;
-		switch(ustring::string_switch_ci::hash(name)) {
+		using namespace pragma::string::string_switch_ci;
+		switch(pragma::string::string_switch_ci::hash(name)) {
 		case "_neutral"_:
 			return BlendShape::Neutral;
 		case "browdownleft"_:
@@ -1153,7 +1153,7 @@ export {
 		case "nosesneerright"_:
 			return BlendShape::NoseSneerRight;
 		}
-		static_assert(umath::to_integral(BlendShape::Count) == 61, "Update this list when new blend shape types are added!");
+		static_assert(pragma::math::to_integral(BlendShape::Count) == 61, "Update this list when new blend shape types are added!");
 		return {};
 	}
 };

@@ -16,7 +16,7 @@ static void completion(const char *buf, linenoiseCompletions *lc);
 static const char *hints(const char *buf, int *color, int *bold);
 static constexpr const char *HISTORY_FILE_LOCATION_RELATIVE = "cache/terminal_history.txt";
 static constexpr const char *PROMPT_PREFIX = "> ";
-static std::string get_history_file_location() { return util::FilePath(filemanager::get_program_write_path(), HISTORY_FILE_LOCATION_RELATIVE).GetString(); }
+static std::string get_history_file_location() { return pragma::util::FilePath(filemanager::get_program_write_path(), HISTORY_FILE_LOCATION_RELATIVE).GetString(); }
 
 static bool g_enabled = false;
 bool pragma::console::impl::is_linenoise_enabled() { return g_enabled; }
@@ -93,7 +93,7 @@ static void get_autocomplete_options(const std::string &cmd, std::vector<std::st
 {
 	auto *en = pragma::get_engine();
 	std::vector<std::string> subStrings {};
-	ustring::explode_whitespace(cmd, subStrings);
+	pragma::string::explode_whitespace(cmd, subStrings);
 	if(subStrings.empty() == false) {
 		auto *cf = en->GetConVar(subStrings.front());
 		if(cf && cf->GetType() == pragma::console::ConType::Command) {
@@ -115,11 +115,11 @@ static void get_autocomplete_options(const std::string &cmd, std::vector<std::st
 		for(auto &pair : conVars) {
 			if(pair.first.length() < cmd.length())
 				continue;
-			if(!ustring::compare(pair.first.c_str(), cmd.c_str(), false, cmd.length()))
+			if(!pragma::string::compare(pair.first.c_str(), cmd.c_str(), false, cmd.length()))
 				continue;
 			if(traversed.find(pair.first) != traversed.end())
 				continue;
-			auto percentage = ustring::calc_similarity(cmd, pair.first);
+			auto percentage = pragma::string::calc_similarity(cmd, pair.first);
 			auto it = std::find_if(bestCandidates.begin(), bestCandidates.end(), [](const std::pair<std::string_view, float> &pair) { return pair.second == std::numeric_limits<float>::max(); });
 			if(it == bestCandidates.end())
 				it = std::find_if(bestCandidates.begin(), bestCandidates.end(), [percentage](const std::pair<std::string_view, float> &pair) { return percentage < pair.second; });
@@ -166,7 +166,7 @@ const char *hints(const char *buf, int *color, int *bold)
 				continue;
 			if(!bestCandidate.empty() && pair.first.length() > bestCandidate.size())
 				continue;
-			if(!ustring::compare(pair.first.c_str(), cmd.c_str(), false, cmd.length()))
+			if(!pragma::string::compare(pair.first.c_str(), cmd.c_str(), false, cmd.length()))
 				continue;
 			bestCandidate = pair.first;
 		}
@@ -183,28 +183,28 @@ const char *hints(const char *buf, int *color, int *bold)
 	if(!bestCandidate.empty()) {
 		*color = 35; // ANSI color for purple
 		*bold = 0;
-		bestCandidate = ustring::substr(bestCandidate, strlen(buf));
+		bestCandidate = pragma::string::substr(bestCandidate, strlen(buf));
 		return bestCandidate.c_str();
 	}
 
-	auto st = cmd.find_first_not_of(ustring::WHITESPACE);
-	st = cmd.find_first_of(ustring::WHITESPACE, st);
+	auto st = cmd.find_first_not_of(pragma::string::WHITESPACE);
+	st = cmd.find_first_of(pragma::string::WHITESPACE, st);
 	if(st != std::string::npos) {
-		auto cvarName = ustring::substr(cmd, 0, st);
-		ustring::remove_whitespace(cvarName);
+		auto cvarName = pragma::string::substr(cmd, 0, st);
+		pragma::string::remove_whitespace(cvarName);
 		auto *cf = en->GetConVar(cvarName);
 		if(cf && cf->GetType() == pragma::console::ConType::Command) {
 			auto &c = static_cast<pragma::console::ConCommand &>(*cf);
 			auto &fAutoComplete = c.GetAutoCompleteCallback();
 			if(fAutoComplete) {
 
-				auto arg = ustring::substr(cmd, cmd.find_first_not_of(ustring::WHITESPACE, st));
+				auto arg = pragma::string::substr(cmd, cmd.find_first_not_of(pragma::string::WHITESPACE, st));
 				std::vector<std::string> args;
 				fAutoComplete(arg, args, true);
 				if(!args.empty()) {
 					bestCandidate = args.front();
-					if(ustring::compare(bestCandidate.c_str(), arg.c_str(), false, arg.length()))
-						bestCandidate = ustring::substr(bestCandidate, arg.length());
+					if(pragma::string::compare(bestCandidate.c_str(), arg.c_str(), false, arg.length()))
+						bestCandidate = pragma::string::substr(bestCandidate, arg.length());
 					*color = 35; // ANSI color for purple
 					*bold = 0;
 					return bestCandidate.c_str();

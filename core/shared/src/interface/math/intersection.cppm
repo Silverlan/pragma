@@ -15,7 +15,7 @@ export {
 		struct DLLNETWORK LineMeshResult {
 			struct DLLNETWORK Precise {
 				std::shared_ptr<pragma::asset::ModelMeshGroup> meshGroup;
-				std::shared_ptr<geometry::ModelMesh> mesh;
+				std::shared_ptr<pragma::geometry::ModelMesh> mesh;
 				std::shared_ptr<pragma::geometry::ModelSubMesh> subMesh;
 
 				uint32_t meshGroupIndex = std::numeric_limits<uint32_t>::max();
@@ -27,7 +27,7 @@ export {
 				double u = 0.0;
 				double v = 0.0;
 			};
-			umath::intersection::Result result = umath::intersection::Result::NoIntersection;
+			pragma::math::intersection::Result result = pragma::math::intersection::Result::NoIntersection;
 			Vector3 hitPos = {};
 			double hitValue = std::numeric_limits<double>::max(); // Range if hit: [0,1]
 
@@ -38,7 +38,7 @@ export {
 			// Only for precise results
 			std::shared_ptr<Precise> precise = nullptr;
 		};
-		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, geometry::ModelMesh &mesh, LineMeshResult &outResult, bool precise = false, const Vector3 *origin = nullptr, const Quat *rot = nullptr);
+		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, pragma::geometry::ModelMesh &mesh, LineMeshResult &outResult, bool precise = false, const Vector3 *origin = nullptr, const Quat *rot = nullptr);
 		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, pragma::geometry::ModelSubMesh &subMesh, LineMeshResult &outResult, bool precise = false, const Vector3 *origin = nullptr, const Quat *rot = nullptr);
 		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, pragma::asset::Model &mdl, LineMeshResult &outResult, bool precise, const std::vector<uint32_t> *bodyGroups, uint32_t lod, const Vector3 &origin, const Quat &rot);
 		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, pragma::asset::Model &mdl, LineMeshResult &outResult, bool precise, uint32_t lod, const Vector3 &origin, const Quat &rot);

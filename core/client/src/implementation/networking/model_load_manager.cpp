@@ -156,7 +156,7 @@ void ModelLoadManager::Update()
 		auto query = m_loadQueries.front();
 		m_loadQueries.pop();
 		m_loadMutex.unlock();
-		static std::shared_ptr<util::Library> dllHandle = nullptr;
+		static std::shared_ptr<pragma::util::Library> dllHandle = nullptr;
 		if(dllHandle == nullptr) {
 			std::string err;
 			dllHandle = pragma::get_client_state()->LoadLibraryModule("pcl/util_pcl", {}, &err);
@@ -171,7 +171,7 @@ void ModelLoadManager::Update()
 		auto &packet = query->packet;
 
 		auto group = mdl->AddMeshGroup("reference");
-		auto mesh = ::util::make_shared<pragma::geometry::CModelMesh>();
+		auto mesh = pragma::util::make_shared<pragma::geometry::CModelMesh>();
 
 		auto type = packet->Read<uint8_t>();
 		auto numMeshes = packet->Read<uint32_t>();
@@ -179,7 +179,7 @@ void ModelLoadManager::Update()
 		Con::ccl << "[ResourceManager] Received " << numMeshes << " meshes" << Con::endl;
 		//#endif
 		for(auto i = decltype(numMeshes) {0}; i < numMeshes; ++i) {
-			auto subMesh = ::util::make_shared<pragma::geometry::CModelSubMesh>();
+			auto subMesh = pragma::util::make_shared<pragma::geometry::CModelSubMesh>();
 			auto colMesh = pragma::physics::CollisionMesh::Create(pragma::get_cgame());
 
 			Vector3 origin {};
@@ -245,7 +245,7 @@ void ModelLoadManager::Update()
 				auto &v = meshVerts[i];
 				auto &uv = uvs[i];
 				auto &n = meshNormals[i];
-				dstVerts.push_back(umath::Vertex {-origin + v, uv, n});
+				dstVerts.push_back(pragma::math::Vertex {-origin + v, uv, n});
 			}
 
 			subMesh->ReserveIndices(subMesh->GetIndexCount() + meshIndices.size());

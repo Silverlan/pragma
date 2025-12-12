@@ -27,7 +27,7 @@ static void flip_y(std::vector<uint8_t> &pixels, uint32_t w, uint32_t h)
 		memcpy(high, row.data(), stride);
 	}
 }
-void util::tga::write_tga(std::shared_ptr<VFilePtrInternalReal> &f, uint32_t w, uint32_t h, const uint8_t *pixelData)
+void pragma::util::tga::write_tga(std::shared_ptr<VFilePtrInternalReal> &f, uint32_t w, uint32_t h, const uint8_t *pixelData)
 {
 	std::vector<uint8_t> pixels {};
 	pixels.resize(w * h * 3);
@@ -59,8 +59,8 @@ void util::tga::write_tga(std::shared_ptr<VFilePtrInternalReal> &f, uint32_t w, 
 
 	f->Write(outPixels.data(), outPixels.size());
 }
-void util::tga::write_tga(VFilePtrReal &f, uint32_t w, uint32_t h, const std::vector<uint8_t> &pixels) { write_tga(f, w, h, pixels.data()); }
-bool util::tga::write_tga(const std::string &fileName, uint32_t w, uint32_t h, const std::vector<uint8_t> &pixels)
+void pragma::util::tga::write_tga(VFilePtrReal &f, uint32_t w, uint32_t h, const std::vector<uint8_t> &pixels) { write_tga(f, w, h, pixels.data()); }
+bool pragma::util::tga::write_tga(const std::string &fileName, uint32_t w, uint32_t h, const std::vector<uint8_t> &pixels)
 {
 	auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(), "wb");
 	if(f == nullptr)

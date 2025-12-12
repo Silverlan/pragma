@@ -12,52 +12,52 @@ bool SSoundDspEAXReverbComponent::OnSetKeyValue(const std::string &key, const st
 {
 	if(SBaseSoundDspComponent::OnSetKeyValue(key, val))
 		return true;
-	if(ustring::compare<std::string>(key, "density", false))
-		m_kvDensity = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "diffusion", false))
-		m_kvDiffusion = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "gain", false))
-		m_kvGain = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "gain_hf", false))
-		m_kvGainHF = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "gain_lf", false))
-		m_kvGainLF = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "decay", false))
-		m_kvDecay = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "decay_hf", false))
-		m_kvDecayHF = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "decay_lf", false))
-		m_kvDecayLF = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "decay_hf_limit", false))
-		m_kvDecayHFLimit = util::to_int(val);
-	else if(ustring::compare<std::string>(key, "reflections_gain", false))
-		m_kvReflectionsGain = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "reflections_delay", false))
-		m_kvReflectionsDelay = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "reflections_pan", false))
+	if(pragma::string::compare<std::string>(key, "density", false))
+		m_kvDensity = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "diffusion", false))
+		m_kvDiffusion = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "gain", false))
+		m_kvGain = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "gain_hf", false))
+		m_kvGainHF = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "gain_lf", false))
+		m_kvGainLF = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "decay", false))
+		m_kvDecay = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "decay_hf", false))
+		m_kvDecayHF = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "decay_lf", false))
+		m_kvDecayLF = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "decay_hf_limit", false))
+		m_kvDecayHFLimit = pragma::util::to_int(val);
+	else if(pragma::string::compare<std::string>(key, "reflections_gain", false))
+		m_kvReflectionsGain = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "reflections_delay", false))
+		m_kvReflectionsDelay = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "reflections_pan", false))
 		m_kvReflectionsPan = uvec::create(val);
-	else if(ustring::compare<std::string>(key, "late_gain", false))
-		m_kvLateGain = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "late_delay", false))
-		m_kvLateDelay = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "late_pan", false))
+	else if(pragma::string::compare<std::string>(key, "late_gain", false))
+		m_kvLateGain = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "late_delay", false))
+		m_kvLateDelay = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "late_pan", false))
 		m_kvLatePan = uvec::create(val);
-	else if(ustring::compare<std::string>(key, "echo_time", false))
-		m_kvEchoTime = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "echo_depth", false))
-		m_kvEchoDepth = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "mod_time", false))
-		m_kvModTime = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "mod_depth", false))
-		m_kvModDepth = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "reference_hf", false))
-		m_kvRefHF = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "reference_lf", false))
-		m_kvRefLF = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "room_rolloff", false))
-		m_kvRoomRolloff = util::to_float(val);
-	else if(ustring::compare<std::string>(key, "air_absorp_gain_hf", false))
-		m_kvAirAbsorpGainHF = util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "echo_time", false))
+		m_kvEchoTime = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "echo_depth", false))
+		m_kvEchoDepth = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "mod_time", false))
+		m_kvModTime = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "mod_depth", false))
+		m_kvModDepth = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "reference_hf", false))
+		m_kvRefHF = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "reference_lf", false))
+		m_kvRefLF = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "room_rolloff", false))
+		m_kvRoomRolloff = pragma::util::to_float(val);
+	else if(pragma::string::compare<std::string>(key, "air_absorp_gain_hf", false))
+		m_kvAirAbsorpGainHF = pragma::util::to_float(val);
 	else
 		return false;
 	return true;

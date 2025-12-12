@@ -31,7 +31,7 @@ export namespace pragma::audio {
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-	class DLLNETWORK ALSound : virtual public util::inheritable_enable_shared_from_this<pragma::audio::ALSound>, virtual public util::CallbackHandler, public LuaCallbackHandler {
+	class DLLNETWORK ALSound : virtual public pragma::util::inheritable_enable_shared_from_this<pragma::audio::ALSound>, virtual public pragma::util::CallbackHandler, public LuaCallbackHandler {
 	  public:
 		enum class NetEvent : uint8_t {
 			Play = 0,

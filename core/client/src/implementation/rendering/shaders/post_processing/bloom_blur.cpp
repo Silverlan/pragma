@@ -25,7 +25,7 @@ std::shared_ptr<pragma::rendering::BloomPipelineInfo> ShaderPPBloomBlurBase::Add
 		if(pInfo->radius == radius && pInfo->sigma == sigma)
 			return pInfo;
 	}
-	auto info = ::util::make_shared<pragma::rendering::BloomPipelineInfo>(radius, sigma);
+	auto info = pragma::util::make_shared<pragma::rendering::BloomPipelineInfo>(radius, sigma);
 	m_pipelineInfos.push_back(info);
 	return info;
 }
@@ -57,7 +57,7 @@ void ShaderPPBloomBlurBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreat
 		return;
 	auto pInfo = info.lock();
 	pInfo->pipelineIdx = pipelineIdx;
-	auto coefficients = util::generate_two_pass_gaussian_blur_coefficients(pInfo->radius, pInfo->sigma);
+	auto coefficients = pragma::util::generate_two_pass_gaussian_blur_coefficients(pInfo->radius, pInfo->sigma);
 
 	auto numSamples = coefficients.first.size();
 	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, 0u /* constantId */, static_cast<int32_t>(numSamples));

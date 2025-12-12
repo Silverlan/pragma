@@ -47,9 +47,9 @@ void pragma::physics::PhysObj::OnCollisionObjectSleep(pragma::physics::ICollisio
 }
 void pragma::physics::PhysObj::OnCollisionObjectRemoved(pragma::physics::ICollisionObject &o)
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::Spawned) && o.IsAwake())
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::Spawned) && o.IsAwake())
 		OnCollisionObjectSleep(o);
-	auto it = std::find_if(m_collisionObjects.begin(), m_collisionObjects.end(), [&o](const util::TSharedHandle<pragma::physics::ICollisionObject> &colObjOther) { return &o == colObjOther.Get(); });
+	auto it = std::find_if(m_collisionObjects.begin(), m_collisionObjects.end(), [&o](const pragma::util::TSharedHandle<pragma::physics::ICollisionObject> &colObjOther) { return &o == colObjOther.Get(); });
 	if(it != m_collisionObjects.end())
 		m_collisionObjects.erase(it);
 }
@@ -80,7 +80,7 @@ void pragma::physics::PhysObj::UpdateVelocity() {}
 pragma::NetworkState *pragma::physics::PhysObj::GetNetworkState() { return m_networkState; }
 float pragma::physics::PhysObj::GetMass() const { return 0.f; }
 void pragma::physics::PhysObj::SetMass(float) {}
-bool pragma::physics::PhysObj::IsDisabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::Disabled); }
+bool pragma::physics::PhysObj::IsDisabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::Disabled); }
 bool pragma::physics::PhysObj::IsStatic() const { return false; }
 void pragma::physics::PhysObj::SetStatic(bool) {}
 bool pragma::physics::PhysObj::IsRigid() const { return false; }
@@ -97,15 +97,15 @@ void pragma::physics::PhysObj::SetCCDEnabled(bool b)
 
 void pragma::physics::PhysObj::AddCollisionObject(pragma::physics::ICollisionObject &obj)
 {
-	m_collisionObjects.push_back(util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ICollisionObject>(obj.ClaimOwnership()));
+	m_collisionObjects.push_back(pragma::util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ICollisionObject>(obj.ClaimOwnership()));
 	obj.SetPhysObj(*this);
-	if(umath::is_flag_set(m_stateFlags, StateFlags::Spawned))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::Spawned))
 		obj.Spawn();
 }
 
 void pragma::physics::PhysObj::Spawn()
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::Spawned))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::Spawned))
 		return;
 	for(auto &hObj : m_collisionObjects) {
 		if(hObj.IsValid())
@@ -113,8 +113,8 @@ void pragma::physics::PhysObj::Spawn()
 	}
 }
 const pragma::physics::ICollisionObject *pragma::physics::PhysObj::GetCollisionObject() const { return const_cast<pragma::physics::PhysObj *>(this)->GetCollisionObject(); }
-std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &pragma::physics::PhysObj::GetCollisionObjects() { return m_collisionObjects; }
-const std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &pragma::physics::PhysObj::GetCollisionObjects() const { return const_cast<pragma::physics::PhysObj *>(this)->GetCollisionObjects(); }
+std::vector<pragma::util::TSharedHandle<pragma::physics::ICollisionObject>> &pragma::physics::PhysObj::GetCollisionObjects() { return m_collisionObjects; }
+const std::vector<pragma::util::TSharedHandle<pragma::physics::ICollisionObject>> &pragma::physics::PhysObj::GetCollisionObjects() const { return const_cast<pragma::physics::PhysObj *>(this)->GetCollisionObjects(); }
 pragma::physics::ICollisionObject *pragma::physics::PhysObj::GetCollisionObject()
 {
 	if(m_collisionObjects.empty())
@@ -151,8 +151,8 @@ void pragma::physics::PhysObj::OnWake()
 	if(pPhysComponent != nullptr)
 		pPhysComponent->OnPhysicsWake(this);
 }
-void pragma::physics::PhysObj::Enable() { umath::set_flag(m_stateFlags, StateFlags::Disabled, false); }
-void pragma::physics::PhysObj::Disable() { umath::set_flag(m_stateFlags, StateFlags::Disabled, true); }
+void pragma::physics::PhysObj::Enable() { pragma::math::set_flag(m_stateFlags, StateFlags::Disabled, false); }
+void pragma::physics::PhysObj::Disable() { pragma::math::set_flag(m_stateFlags, StateFlags::Disabled, true); }
 pragma::BaseEntityComponent *pragma::physics::PhysObj::GetOwner() { return m_owner.get(); }
 bool pragma::physics::PhysObj::IsController() const { return false; }
 

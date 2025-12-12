@@ -30,9 +30,9 @@ void pragma::pts::CParticleOperatorQuadraticDrag::Initialize(pragma::BaseEnvPart
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "drag")
-			m_fAmount = util::to_float(it->second);
+			m_fAmount = pragma::util::to_float(it->second);
 	}
 }
 void pragma::pts::CParticleOperatorQuadraticDrag::Simulate(double tDelta)
@@ -44,5 +44,5 @@ void pragma::pts::CParticleOperatorQuadraticDrag::Simulate(pragma::pts::CParticl
 {
 	CParticleOperator::Simulate(particle, tDelta, strength);
 	auto &velocity = particle.GetVelocity();
-	particle.SetVelocity(velocity * umath::max(0.f, 1.f - m_fTickDrag * uvec::length(velocity)));
+	particle.SetVelocity(velocity * pragma::math::max(0.f, 1.f - m_fTickDrag * uvec::length(velocity)));
 }

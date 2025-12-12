@@ -27,8 +27,8 @@ void ParentComponent::OnRemove()
 		hChild->GetEntity().Remove();
 	}
 }
-const std::vector<util::TWeakSharedHandle<BaseChildComponent>> &ParentComponent::GetChildren() const { return const_cast<ParentComponent *>(this)->GetChildren(); }
-std::vector<util::TWeakSharedHandle<BaseChildComponent>> &ParentComponent::GetChildren() { return m_children; }
+const std::vector<pragma::util::TWeakSharedHandle<BaseChildComponent>> &ParentComponent::GetChildren() const { return const_cast<ParentComponent *>(this)->GetChildren(); }
+std::vector<pragma::util::TWeakSharedHandle<BaseChildComponent>> &ParentComponent::GetChildren() { return m_children; }
 void ParentComponent::RemoveChild(BaseChildComponent &child)
 {
 	auto it = std::find_if(m_children.begin(), m_children.end(), [&child](const ComponentHandle<BaseChildComponent> &component) { return &child == component.get(); });

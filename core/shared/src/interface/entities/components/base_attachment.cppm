@@ -41,8 +41,8 @@ export {
 			void UpdateAttachmentData(bool bForceReload = false);
 			void ClearAttachment();
 
-			std::optional<umath::Transform> GetLocalPose() const;
-			void SetLocalPose(const umath::Transform &pose);
+			std::optional<pragma::math::Transform> GetLocalPose() const;
+			void SetLocalPose(const pragma::math::Transform &pose);
 
 			virtual void OnTick(double dt) override;
 		  protected:
@@ -51,8 +51,8 @@ export {
 			virtual AttachmentData *SetupAttachment(pragma::ecs::BaseEntity *ent, const AttachmentInfo &attInfo);
 			virtual void UpdateViewAttachmentOffset(pragma::ecs::BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly = false) const;
 			virtual void OnEntitySpawn() override;
-			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
-			std::optional<umath::Transform> GetParentPose() const;
+			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+			std::optional<pragma::math::Transform> GetParentPose() const;
 
 			StateFlags m_stateFlags = StateFlags::None;
 			float m_tLastAttachmentUpdate = 0.f;
@@ -61,7 +61,7 @@ export {
 			CallbackHandle m_parentModelChanged {};
 			std::string m_kvParent;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::BaseAttachmentComponent::StateFlags)
 };

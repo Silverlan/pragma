@@ -64,7 +64,7 @@ export {
 			std::vector<std::array<uint16_t, 4>> m_normals = {};  // Optional
 			Flags m_flags = Flags::None;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 
 		class DLLNETWORK MeshVertexAnimation : public std::enable_shared_from_this<MeshVertexAnimation> {
 		  public:

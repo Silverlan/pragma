@@ -17,11 +17,11 @@ export namespace pragma {
 	class DLLNETWORK AddonInfo {
 	  public:
 		friend AddonSystem;
-		AddonInfo(const std::string &absPath, const util::Version &version = {}, const std::string &uniqueId = "");
+		AddonInfo(const std::string &absPath, const pragma::util::Version &version = {}, const std::string &uniqueId = "");
 	  protected:
 		std::string m_path;
 		std::string m_uniqueId;
-		util::Version m_version;
+		pragma::util::Version m_version;
 	  public:
 		// Note: The addon directory can be a shortcut, in which case it will have the
 		// .lnk-extension on Windows systems and the path will have to be resolved to
@@ -29,7 +29,7 @@ export namespace pragma {
 		const std::string &GetLocalPath() const;
 		std::string GetAbsolutePath() const;
 		const std::string &GetUniqueId() const;
-		const util::Version &GetVersion() const;
+		const pragma::util::Version &GetVersion() const;
 	};
 
 	class DLLNETWORK AddonSystem {

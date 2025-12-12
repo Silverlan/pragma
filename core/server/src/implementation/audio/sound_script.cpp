@@ -9,7 +9,7 @@ import :audio.sound_script;
 import :server_state;
 
 pragma::audio::SALSoundScript::SALSoundScript(pragma::NetworkState *nw, unsigned int idx, SoundScript *script, pragma::NetworkState *state, const std::string &soundName, pragma::audio::ALCreateFlags createFlags)
-    : ALSoundScript(nw, idx, script, state, umath::is_flag_set(createFlags, pragma::audio::ALCreateFlags::Stream)), SALSound(nw, idx, 0.f, soundName, createFlags), ALSound(nw)
+    : ALSoundScript(nw, idx, script, state, pragma::math::is_flag_set(createFlags, pragma::audio::ALCreateFlags::Stream)), SALSound(nw, idx, 0.f, soundName, createFlags), ALSound(nw)
 {
 }
 std::shared_ptr<pragma::audio::ALSound> pragma::audio::SALSoundScript::CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags)

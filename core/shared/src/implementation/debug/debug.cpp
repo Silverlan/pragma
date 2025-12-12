@@ -30,11 +30,11 @@ void pragma::debug::end_profiling_task()
 void pragma::debug::open_file_in_zerobrane(const std::string &fileName, uint32_t lineIdx)
 {
 	std::string zeroBranePath = "C:/Program Files (x86)/ZeroBraneStudio/zbstudio.exe"; // TODO: Find program path from registry?
-	util::CommandInfo cmdInfo;
+	pragma::util::CommandInfo cmdInfo;
 	cmdInfo.command = zeroBranePath;
 	cmdInfo.args.push_back(fileName + ':' + std::to_string(lineIdx));
 	cmdInfo.absoluteCommandPath = true;
-	util::start_process(cmdInfo);
+	pragma::util::start_process(cmdInfo);
 
 	/*
 	// Check if process is already running
@@ -53,7 +53,7 @@ void pragma::debug::open_file_in_zerobrane(const std::string &fileName, uint32_t
 
 				if(hProcess)
 				{
-					util::start_process(zeroBranePath.c_str(),std::vector<std::string>{
+					pragma::util::start_process(zeroBranePath.c_str(),std::vector<std::string>{
 						fileName +':' +std::to_string(lineIdx)
 					},true);
 					// ...
@@ -83,7 +83,7 @@ class StackWalkerModuleFinder : public StackWalker {
 	virtual void OnOutput(LPCSTR szText) {}
 	virtual void OnCallstackEntry(CallstackEntryType eType, CallstackEntry &entry) override
 	{
-		if(ustring::find(std::string {entry.moduleName}, m_moduleName, false))
+		if(pragma::string::find(std::string {entry.moduleName}, m_moduleName, false))
 			m_found = true;
 	}
 	std::string m_moduleName;

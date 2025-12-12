@@ -45,7 +45,7 @@ bool pragma::game::savegame::save(pragma::Game &game, const std::string &fileNam
 }
 bool pragma::game::savegame::load(pragma::Game &game, const std::string &fileName, std::string &outErr)
 {
-	auto udmData = util::load_udm_asset(fileName, &outErr);
+	auto udmData = pragma::util::load_udm_asset(fileName, &outErr);
 	if(udmData == nullptr)
 		return false;
 	auto &data = *udmData;

@@ -81,7 +81,7 @@ bool BaseAIComponent::TurnStep(const Vector3 &target, float &turnAngle, const fl
 	const Vector2 pitchLimit {0.f, 0.f};
 	auto newRot = math::approach_direction(pTrComponent->GetRotation(), GetUpDirection(), dir, Vector2(speedMax, speedMax), &rotAm, &pitchLimit);
 	pTrComponent->SetRotation(newRot);
-	return (umath::abs(rotAm.y) <= speedMax) ? true : false;
+	return (pragma::math::abs(rotAm.y) <= speedMax) ? true : false;
 
 	// Deprecated if the above code works properly
 	/*
@@ -93,8 +93,8 @@ bool BaseAIComponent::TurnStep(const Vector3 &target, float &turnAngle, const fl
 	auto rotTgt = uquat::create(uvec::to_angle(dir)) *rotInv;
 	auto angTgt = EulerAngles(rotTgt);
 	auto speedMax = static_cast<double>((turnSpeed != nullptr) ? *turnSpeed : GetTurnSpeed()) *game->DeltaTickTime();
-	auto y = umath::approach_angle(0.f,angTgt.y,speedMax);
-	auto diff = umath::get_angle_difference(angTgt.y,y);
+	auto y = pragma::math::approach_angle(0.f,angTgt.y,speedMax);
+	auto diff = pragma::math::get_angle_difference(angTgt.y,y);
 	angTgt.y = y;
 	m_entity->SetOrientation();
 	turnAngle = diff;
@@ -104,8 +104,8 @@ bool BaseAIComponent::TurnStep(const Vector3 &target, float &turnAngle, const fl
 	angTgt.p = 0;
 	angTgt.r = 0;
 	auto speedMax = static_cast<double>((turnSpeed != nullptr) ? *turnSpeed : GetTurnSpeed()) *game->DeltaTickTime();
-	auto y = umath::approach_angle(angCur.y,angTgt.y,speedMax);
-	auto diff = umath::get_angle_difference(angTgt.y,y);
+	auto y = pragma::math::approach_angle(angCur.y,angTgt.y,speedMax);
+	auto diff = pragma::math::get_angle_difference(angTgt.y,y);
 	angTgt.y = y;
 	m_entity->SetAngles(angTgt);
 	turnAngle = diff;
@@ -137,7 +137,7 @@ void BaseAIComponent::ReloadNavThread(pragma::Game &game)
 	auto wpNavMesh = std::weak_ptr<pragma::nav::Mesh>(game.GetNavMesh());
 	if(wpNavMesh.expired() == true)
 		return;
-	s_navThread = ::util::make_shared<ai::navigation::NavThread>();
+	s_navThread = pragma::util::make_shared<ai::navigation::NavThread>();
 	auto cb = FunctionCallback<void>::Create(nullptr);
 	cb.get<Callback<void>>()->SetFunction([cb]() mutable {
 		if(cb.IsValid())
@@ -162,7 +162,7 @@ void BaseAIComponent::ReloadNavThread(pragma::Game &game)
 				auto navMesh = wpNavMesh.lock();
 				std::shared_ptr<RcPathResult> path = nullptr;
 				if(navMesh != nullptr && (path = navMesh->FindPath(item->start, item->end)) != nullptr)
-					item->pathInfo = ::util::make_shared<ai::navigation::PathInfo>(path);
+					item->pathInfo = pragma::util::make_shared<ai::navigation::PathInfo>(path);
 				s_navThread->queryQueue.pop();
 				item->complete = true;
 
@@ -181,7 +181,7 @@ void BaseAIComponent::Initialize()
 
 	BindEventUnhandled(basePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> eventData) {
 		PathStep(static_cast<float>(static_cast<pragma::CEPhysicsUpdateData &>(eventData.get()).deltaTime));
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	BindEventUnhandled(movementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
 	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(static_cast<pragma::CEOnModelChanged &>(evData.get()).model); });
@@ -208,9 +208,9 @@ void BaseAIComponent::Initialize()
 			BaseAIComponent::BlendAnimationMovementMT(evDataBlend.bonePoses, evDataBlend.boneScales);
 	});
 	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
-	BindEvent(baseCharacterComponent::EVENT_IS_MOVING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseCharacterComponent::EVENT_IS_MOVING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		static_cast<CEIsMoving &>(evData.get()).moving = IsMoving();
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -262,7 +262,7 @@ void BaseAIComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model>
 		Vector3 min, max;
 		model->GetRenderBounds(min, max);
 		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::ThirdPerson, true);
-		pObservableComponent->SetLocalCameraOrigin(BaseObservableComponent::CameraType::ThirdPerson, Vector3 {0.f, (max.y - min.y) * 0.25f, -umath::max(umath::abs(min.x), umath::abs(min.y), umath::abs(min.z), umath::abs(max.x), umath::abs(max.y), umath::abs(max.z))});
+		pObservableComponent->SetLocalCameraOrigin(BaseObservableComponent::CameraType::ThirdPerson, Vector3 {0.f, (max.y - min.y) * 0.25f, -pragma::math::max(pragma::math::abs(min.x), pragma::math::abs(min.y), pragma::math::abs(min.z), pragma::math::abs(max.x), pragma::math::abs(max.y), pragma::math::abs(max.z))});
 	}
 
 	// Update animation move speed

@@ -41,7 +41,7 @@ void pragma::pts::CParticle::Reset(float t)
 	m_rot = {};
 	m_origin = {};
 	m_angularVelocity = {};
-	m_seed = umath::random_int<decltype(m_seed)>(0u, std::numeric_limits<decltype(m_seed)>::max());
+	m_seed = pragma::math::random_int<decltype(m_seed)>(0u, std::numeric_limits<decltype(m_seed)>::max());
 	m_bHasLength = false;
 	m_bDying = false;
 	m_tDeath = 0.f;
@@ -114,38 +114,38 @@ const char *pragma::pts::CParticle::field_id_to_name(FieldId id)
 	case FieldId::Life:
 		return "life";
 	}
-	static_assert(umath::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
+	static_assert(pragma::math::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
 	return "invalid";
 }
 pragma::pts::CParticle::FieldId pragma::pts::CParticle::name_to_field_id(const std::string &fieldName)
 {
-	if(ustring::compare<std::string>(fieldName, "pos", false))
+	if(pragma::string::compare<std::string>(fieldName, "pos", false))
 		return FieldId::Pos;
-	else if(ustring::compare<std::string>(fieldName, "rot", false))
+	else if(pragma::string::compare<std::string>(fieldName, "rot", false))
 		return FieldId::Rot;
-	else if(ustring::compare<std::string>(fieldName, "rot_yaw", false))
+	else if(pragma::string::compare<std::string>(fieldName, "rot_yaw", false))
 		return FieldId::RotYaw;
-	else if(ustring::compare<std::string>(fieldName, "origin", false))
+	else if(pragma::string::compare<std::string>(fieldName, "origin", false))
 		return FieldId::Origin;
-	else if(ustring::compare<std::string>(fieldName, "velocity", false))
+	else if(pragma::string::compare<std::string>(fieldName, "velocity", false))
 		return FieldId::Velocity;
-	else if(ustring::compare<std::string>(fieldName, "angular_velocity", false))
+	else if(pragma::string::compare<std::string>(fieldName, "angular_velocity", false))
 		return FieldId::AngularVelocity;
-	else if(ustring::compare<std::string>(fieldName, "radius", false))
+	else if(pragma::string::compare<std::string>(fieldName, "radius", false))
 		return FieldId::Radius;
-	else if(ustring::compare<std::string>(fieldName, "length", false))
+	else if(pragma::string::compare<std::string>(fieldName, "length", false))
 		return FieldId::Length;
-	else if(ustring::compare<std::string>(fieldName, "color", false))
+	else if(pragma::string::compare<std::string>(fieldName, "color", false))
 		return FieldId::Color;
-	else if(ustring::compare<std::string>(fieldName, "alpha", false))
+	else if(pragma::string::compare<std::string>(fieldName, "alpha", false))
 		return FieldId::Alpha;
-	else if(ustring::compare<std::string>(fieldName, "sequence", false))
+	else if(pragma::string::compare<std::string>(fieldName, "sequence", false))
 		return FieldId::Sequence;
-	else if(ustring::compare<std::string>(fieldName, "life", false))
+	else if(pragma::string::compare<std::string>(fieldName, "life", false))
 		return FieldId::Life;
-	else if(ustring::compare<std::string>(fieldName, "creation_time", false))
+	else if(pragma::string::compare<std::string>(fieldName, "creation_time", false))
 		return FieldId::CreationTime;
-	static_assert(umath::to_integral(FieldId::Count) == 13);
+	static_assert(pragma::math::to_integral(FieldId::Count) == 13);
 	return FieldId::Invalid;
 }
 void pragma::pts::CParticle::SetField(FieldId fieldId, float value)
@@ -176,7 +176,7 @@ void pragma::pts::CParticle::SetField(FieldId fieldId, float value)
 		m_color.a = value;
 		break;
 	}
-	static_assert(umath::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
+	static_assert(pragma::math::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
 }
 void pragma::pts::CParticle::SetField(FieldId fieldId, const Vector4 &value)
 {
@@ -199,7 +199,7 @@ void pragma::pts::CParticle::SetField(FieldId fieldId, const Vector4 &value)
 		m_color.b = value.b;
 		break;
 	}
-	static_assert(umath::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
+	static_assert(pragma::math::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
 }
 bool pragma::pts::CParticle::GetField(FieldId fieldId, float &outValue) const
 {
@@ -231,7 +231,7 @@ bool pragma::pts::CParticle::GetField(FieldId fieldId, float &outValue) const
 	default:
 		return false;
 	}
-	static_assert(umath::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
+	static_assert(pragma::math::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
 	return true;
 }
 bool pragma::pts::CParticle::GetField(FieldId fieldId, Vector4 &outValue) const
@@ -255,7 +255,7 @@ bool pragma::pts::CParticle::GetField(FieldId fieldId, Vector4 &outValue) const
 	default:
 		return false;
 	}
-	static_assert(umath::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
+	static_assert(pragma::math::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
 	return true;
 }
 
@@ -316,6 +316,6 @@ void pragma::pts::CParticle::SetLength(float length)
 }
 float pragma::pts::CParticle::GetRadius() const { return m_radius; }
 float pragma::pts::CParticle::GetLength() const { return m_bHasLength ? m_length : m_radius; }
-float pragma::pts::CParticle::GetExtent() const { return umath::sqrt(umath::pow2(m_radius) * 2.f); }
+float pragma::pts::CParticle::GetExtent() const { return pragma::math::sqrt(pragma::math::pow2(m_radius) * 2.f); }
 void pragma::pts::CParticle::SetCameraDistance(float dist) { m_camDist = dist; }
 float pragma::pts::CParticle::GetCameraDistance() const { return m_camDist; }

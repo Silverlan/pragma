@@ -15,6 +15,6 @@ export namespace Lua {
 		DLLNETWORK double real_time(lua::State *l);
 		DLLNETWORK double delta_time(lua::State *l);
 		DLLNETWORK uint64_t time_since_epoch(lua::State *l);
-		DLLNETWORK int64_t convert_duration(int64_t duration, ::util::DurationType srcType, ::util::DurationType dstType);
+		DLLNETWORK int64_t convert_duration(int64_t duration, pragma::util::DurationType srcType, pragma::util::DurationType dstType);
 	};
 };

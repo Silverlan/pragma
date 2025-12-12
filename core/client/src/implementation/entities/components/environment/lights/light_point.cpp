@@ -20,12 +20,12 @@ CLightPointComponent::CLightPointComponent(pragma::ecs::BaseEntity &ent) : BaseE
 void CLightPointComponent::Initialize()
 {
 	BaseEnvLightPointComponent::Initialize();
-	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &shouldPassData = static_cast<CEShouldPassEntity &>(evData.get());
 		auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
 		if(pLightComponent.expired() || pLightComponent->IsInRange(shouldPassData.entity) == false) {
 			shouldPassData.shouldPass = false;
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		}
 		const auto ang = 0.7853982f; // 45 Degree
 
@@ -35,43 +35,43 @@ void CLightPointComponent::Initialize()
 		auto pTrComponentThis = GetEntity().GetTransformComponent();
 		if(!pRenderComponent || pTrComponent == nullptr || !pTrComponentThis) {
 			shouldPassData.shouldPass = false;
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		}
 		//auto &start = pTrComponentThis->GetPosition();
 		auto &sphere = pRenderComponent->GetUpdatedAbsoluteRenderSphere();
 		for(auto i = decltype(directions.size()) {0}; i < directions.size(); ++i) {
 			//auto &dir = directions[i];
 			auto &plane = m_frustumPlanes.at(i);
-			if(umath::intersection::sphere_in_plane_mesh(sphere.pos - this->GetEntity().GetPosition(), sphere.radius, plane.begin(), plane.end(), true) != umath::intersection::Intersect::Outside)
+			if(pragma::math::intersection::sphere_in_plane_mesh(sphere.pos - this->GetEntity().GetPosition(), sphere.radius, plane.begin(), plane.end(), true) != pragma::math::intersection::Intersect::Outside)
 				shouldPassData.renderFlags |= 1 << i;
 			//if(pLightComponent->IsInCone(shouldPassData.entity,dir,ang) == true)
 			//	shouldPassData.renderFlags |= 1<<i;
 		}
 		shouldPassData.shouldPass = (shouldPassData.renderFlags != 0) ? true : false;
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
-	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &shouldPassData = static_cast<CEShouldPassEntityMesh &>(evData.get());
 		auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
 		shouldPassData.shouldPass = pLightComponent.valid() && pLightComponent->IsInRange(shouldPassData.entity, shouldPassData.mesh);
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
-	BindEvent(cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &trData = static_cast<CEGetTransformationMatrix &>(evData.get());
 		trData.transformation = &MVPBias<6>::GetTransformationMatrix(trData.index);
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
 	BindEventUnhandled(cLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		for(auto i = 0; i < 6; i++)
 			UpdateTransformationMatrix(i);
 	});
-	BindEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
 		auto shadowC = GetEntity().AddComponent<CShadowComponent>(true);
 		if(shadowC.expired())
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		static_cast<CEHandleShadowMap &>(evData.get()).resultShadow = shadowC.get();
 		shadowC->SetType(CShadowComponent::Type::Cube);
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
 	BindEventUnhandled(cRadiusComponent::EVENT_ON_RADIUS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateFrustumPlanes(); });
 
@@ -112,7 +112,7 @@ void CLightPointComponent::UpdateProjectionMatrix()
 {
 	auto scale = Vector3(-1.f, -1.f, 1.f); // Vulkan TODO
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
-	auto p = glm::gtc::perspectiveRH<float>(CFloat(umath::deg_to_rad(90.f)), 1.f, 2.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f); // Vulkan TODO
+	auto p = glm::gtc::perspectiveRH<float>(CFloat(pragma::math::deg_to_rad(90.f)), 1.f, 2.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f); // Vulkan TODO
 	p = glm::gtc::scale(p, scale);
 	SetProjectionMatrix(p);
 	UpdateViewMatrices();
@@ -129,12 +129,12 @@ void CLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component
 	else if(typeid(component) == typeid(CTransformComponent)) {
 		auto &trC = static_cast<CTransformComponent &>(component);
 		FlagCallbackForRemoval(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
-		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			                         if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
-				                         return util::EventReply::Unhandled;
+		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+			                         if(pragma::math::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
+				                         return pragma::util::EventReply::Unhandled;
 			                         SetShadowDirty();
 			                         UpdateViewMatrices();
-			                         return util::EventReply::Unhandled;
+			                         return pragma::util::EventReply::Unhandled;
 		                         }),
 		  CallbackType::Component, &component);
 	}
@@ -143,8 +143,8 @@ void CLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component
 }
 void CLightPointComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-const std::array<std::vector<umath::Plane>, 6u> &CLightPointComponent::GetFrustumPlanes() const { return m_frustumPlanes; }
-const std::vector<umath::Plane> &CLightPointComponent::GetFrustumPlanes(rendering::CubeMapSide side) const { return m_frustumPlanes.at(umath::to_integral(side)); }
+const std::array<std::vector<pragma::math::Plane>, 6u> &CLightPointComponent::GetFrustumPlanes() const { return m_frustumPlanes; }
+const std::vector<pragma::math::Plane> &CLightPointComponent::GetFrustumPlanes(rendering::CubeMapSide side) const { return m_frustumPlanes.at(pragma::math::to_integral(side)); }
 
 /////////////
 
@@ -163,12 +163,12 @@ void CLightPointComponent::UpdateViewMatrices()
 	m_bSkipMatrixUpdate = true;
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
-	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[umath::to_integral(rendering::CubeMapSide::Left)], Vector3(0, 1, 0)), umath::to_integral(rendering::CubeMapSide::Left)); //umat::look_at(pos,pos +Vector3(1,0,0),Vector3(0,1,0)),1); // Vulkan TODO
-	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[umath::to_integral(rendering::CubeMapSide::Right)], Vector3(0, 1, 0)), umath::to_integral(rendering::CubeMapSide::Right));
-	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[umath::to_integral(rendering::CubeMapSide::Top)], Vector3(0, 0, -1)), umath::to_integral(rendering::CubeMapSide::Top));
-	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[umath::to_integral(rendering::CubeMapSide::Bottom)], Vector3(0, 0, 1)), umath::to_integral(rendering::CubeMapSide::Bottom));
-	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[umath::to_integral(rendering::CubeMapSide::Front)], Vector3(0, 1, 0)), umath::to_integral(rendering::CubeMapSide::Front));
-	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[umath::to_integral(rendering::CubeMapSide::Back)], Vector3(0, 1, 0)), umath::to_integral(rendering::CubeMapSide::Back));
+	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[pragma::math::to_integral(rendering::CubeMapSide::Left)], Vector3(0, 1, 0)), pragma::math::to_integral(rendering::CubeMapSide::Left)); //umat::look_at(pos,pos +Vector3(1,0,0),Vector3(0,1,0)),1); // Vulkan TODO
+	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[pragma::math::to_integral(rendering::CubeMapSide::Right)], Vector3(0, 1, 0)), pragma::math::to_integral(rendering::CubeMapSide::Right));
+	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[pragma::math::to_integral(rendering::CubeMapSide::Top)], Vector3(0, 0, -1)), pragma::math::to_integral(rendering::CubeMapSide::Top));
+	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[pragma::math::to_integral(rendering::CubeMapSide::Bottom)], Vector3(0, 0, 1)), pragma::math::to_integral(rendering::CubeMapSide::Bottom));
+	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[pragma::math::to_integral(rendering::CubeMapSide::Front)], Vector3(0, 1, 0)), pragma::math::to_integral(rendering::CubeMapSide::Front));
+	SetViewMatrix(glm::gtc::lookAtRH(pos, pos + directions[pragma::math::to_integral(rendering::CubeMapSide::Back)], Vector3(0, 1, 0)), pragma::math::to_integral(rendering::CubeMapSide::Back));
 	m_bSkipMatrixUpdate = b;
 	if(m_bSkipMatrixUpdate == false) {
 		for(auto i = 0; i < 6; i++)

@@ -23,7 +23,7 @@ export namespace pragma::pts {
 		float GetLengthFadeInTime() const { return m_lengthFadeInTime; }
 		float GetAnimationRate() const { return m_animationRate; }
 	private:
-		::util::WeakHandle<prosper::Shader> m_shader = {};
+		pragma::util::WeakHandle<prosper::Shader> m_shader = {};
 		float m_minLength = 0.f;
 		float m_maxLength = 2'000.f;
 		float m_lengthFadeInTime = 0.f;

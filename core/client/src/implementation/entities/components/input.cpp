@@ -33,11 +33,11 @@ void CInputComponent::UpdateMouseMovementDeltaValues()
 				// -> Recenter the mouse cursor
 				m_initialFocus = false;
 				m_lastFocusedElement = nullptr;
-				(*window)->SetCursorPos(Vector2i(umath::round(w / 2.f), umath::round(h / 2.f)));
+				(*window)->SetCursorPos(Vector2i(pragma::math::round(w / 2.f), pragma::math::round(h / 2.f)));
 			}
 
 			auto pos = (*window)->GetCursorPos();
-			(*window)->SetCursorPos(Vector2i(umath::round(w / 2.f), umath::round(h / 2.f)));
+			(*window)->SetCursorPos(Vector2i(pragma::math::round(w / 2.f), pragma::math::round(h / 2.f)));
 			xDelta = pos.x - w / 2.f;
 			yDelta = pos.y - h / 2.f;
 			if((w % 2) != 0)
@@ -50,9 +50,9 @@ void CInputComponent::UpdateMouseMovementDeltaValues()
 
 	auto acc = cvAcceleration->GetFloat() + 1.f;
 	if(yDelta != 0.f)
-		yDelta = umath::pow(CFloat(abs(yDelta)), acc) * ((yDelta > 0.f) ? 1 : -1);
+		yDelta = pragma::math::pow(CFloat(abs(yDelta)), acc) * ((yDelta > 0.f) ? 1 : -1);
 	if(xDelta != 0.f)
-		xDelta = umath::pow(CFloat(abs(xDelta)), acc) * ((xDelta > 0.f) ? 1 : -1);
+		xDelta = pragma::math::pow(CFloat(abs(xDelta)), acc) * ((xDelta > 0.f) ? 1 : -1);
 	m_mouseDeltaX = xDelta;
 	m_mouseDeltaY = yDelta;
 }

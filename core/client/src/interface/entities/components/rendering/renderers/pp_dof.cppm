@@ -15,7 +15,7 @@ export namespace pragma {
 		CRendererPpDoFComponent(pragma::ecs::BaseEntity &ent);
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual std::string GetIdentifier() const override { return "dof"; }
-		virtual uint32_t GetPostProcessingWeight() const override { return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::DoF); }
+		virtual uint32_t GetPostProcessingWeight() const override { return pragma::math::to_integral(CRendererComponent::StandardPostProcessingWeight::DoF); }
 	  private:
 		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) override;
 	};

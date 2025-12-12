@@ -42,8 +42,8 @@ std::shared_ptr<prosper::Texture> pragma::ShaderCombineImageChannels::CombineIma
 	std::array<prosper::Extent2D, 4> extents = {channelR.GetImage().GetExtents(), channelG.GetImage().GetExtents(), channelB.GetImage().GetExtents(), channelA.GetImage().GetExtents()};
 	prosper::Extent2D maxExtents {};
 	for(auto &ext : extents) {
-		maxExtents.width = umath::max(maxExtents.width, ext.width);
-		maxExtents.height = umath::max(maxExtents.height, ext.height);
+		maxExtents.width = pragma::math::max(maxExtents.width, ext.width);
+		maxExtents.height = pragma::math::max(maxExtents.height, ext.height);
 	}
 	auto rt = CreateRenderTarget(context, maxExtents);
 	if(!rt)
@@ -51,10 +51,10 @@ std::shared_ptr<prosper::Texture> pragma::ShaderCombineImageChannels::CombineIma
 
 	auto dsg = CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE.setIndex);
 	auto &ds = *dsg->GetDescriptorSet();
-	ds.SetBindingTexture(channelR, umath::to_integral(TextureBinding::ChannelR));
-	ds.SetBindingTexture(channelG, umath::to_integral(TextureBinding::ChannelG));
-	ds.SetBindingTexture(channelB, umath::to_integral(TextureBinding::ChannelB));
-	ds.SetBindingTexture(channelA, umath::to_integral(TextureBinding::ChannelA));
+	ds.SetBindingTexture(channelR, pragma::math::to_integral(TextureBinding::ChannelR));
+	ds.SetBindingTexture(channelG, pragma::math::to_integral(TextureBinding::ChannelG));
+	ds.SetBindingTexture(channelB, pragma::math::to_integral(TextureBinding::ChannelB));
+	ds.SetBindingTexture(channelA, pragma::math::to_integral(TextureBinding::ChannelA));
 
 	auto setupCmd = context.GetSetupCommandBuffer();
 	if(setupCmd->RecordBeginRenderPass(*rt)) {

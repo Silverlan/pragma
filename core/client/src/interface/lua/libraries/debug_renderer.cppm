@@ -30,7 +30,7 @@ export namespace Lua {
 			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawText(const std::string &text, const pragma::debug::DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawPath(const std::vector<Vector3> &path, const pragma::debug::DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawSpline(const std::vector<Vector3> &path, uint32_t numSegments, const pragma::debug::DebugRenderInfo &renderInfo, float curvature = 1.f);
-			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawPlane(const umath::Plane &plane, const pragma::debug::DebugRenderInfo &renderInfo);
+			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawPlane(const pragma::math::Plane &plane, const pragma::debug::DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawPlane(const Vector3 &n, float d, const pragma::debug::DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawFrustum(pragma::CCameraComponent &cam, const pragma::debug::DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> DrawFrustum(const std::vector<Vector3> &points, const pragma::debug::DebugRenderInfo &renderInfo);

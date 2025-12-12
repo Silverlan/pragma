@@ -15,15 +15,15 @@ void CFireComponent::Initialize()
 	pragma::ecs::CParticleSystemComponent::Precache("fire.wpt");
 }
 void CFireComponent::ReceiveData(NetPacket &packet) { m_fireType = packet->ReadString(); }
-util::EventReply CFireComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply CFireComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvFireComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEnvFireComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON)
 		InitializeParticle();
 	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		DestroyParticle();
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 void CFireComponent::InitializeParticle()
 {

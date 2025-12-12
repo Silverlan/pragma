@@ -22,9 +22,9 @@ void CCameraComponent::Initialize()
 	if(pTrComponent != nullptr) {
 		auto &trC = *pTrComponent;
 		FlagCallbackForRemoval(pTrComponent->AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
-		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 			                         FlagViewMatrixAsDirty();
-			                         return util::EventReply::Unhandled;
+			                         return pragma::util::EventReply::Unhandled;
 		                         }),
 		  CallbackType::Entity);
 	}
@@ -69,13 +69,13 @@ void CCameraComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	if(typeid(component) == typeid(CFieldAngleComponent))
 		SetFieldAngleComponent(static_cast<CFieldAngleComponent &>(component));
 }
-util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvCameraComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEnvCameraComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON || eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		UpdateState();
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 void CCameraComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

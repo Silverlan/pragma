@@ -21,7 +21,7 @@ void CRendererPpDoFComponent::DoRenderEffect(const pragma::rendering::DrawSceneI
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
 	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingDoF");
 
-	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
+	pragma::util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
 		pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingDoF
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
@@ -70,10 +70,10 @@ void CRendererPpDoFComponent::DoRenderEffect(const pragma::rendering::DrawSceneI
 			pushConstants.zFar = cam->GetFarZ();
 
 			pushConstants.flags = pragma::ShaderPPDoF::Flags::None;
-			umath::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::EnableVignette, opticalC->IsVignetteEnabled());
-			umath::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::PentagonBokehShape, opticalC->GetPentagonBokehShape());
-			umath::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::DebugShowDepth, opticalC->GetDebugShowDepth());
-			umath::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::DebugShowFocus, opticalC->GetDebugShowFocus());
+			pragma::math::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::EnableVignette, opticalC->IsVignetteEnabled());
+			pragma::math::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::PentagonBokehShape, opticalC->GetPentagonBokehShape());
+			pragma::math::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::DebugShowDepth, opticalC->GetDebugShowDepth());
+			pragma::math::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::DebugShowFocus, opticalC->GetDebugShowFocus());
 			pushConstants.rings = opticalC->GetRingCount();
 			pushConstants.ringSamples = opticalC->GetRingSamples();
 			pushConstants.CoC = opticalC->GetCircleOfConfusionSize();

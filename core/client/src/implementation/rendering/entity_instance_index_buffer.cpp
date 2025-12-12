@@ -17,7 +17,7 @@ rendering::EntityInstanceIndexBuffer::EntityInstanceIndexBuffer()
 	prosper::util::BufferCreateInfo bufCreateInfo = {};
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
-	bufCreateInfo.size = umath::to_integral(pragma::GameLimits::MaxEntityInstanceCount) * sizeof(RenderBufferIndex);
+	bufCreateInfo.size = pragma::math::to_integral(pragma::GameLimits::MaxEntityInstanceCount) * sizeof(RenderBufferIndex);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 
 	m_buffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo, bufCreateInfo.size);
@@ -75,7 +75,7 @@ void rendering::EntityInstanceIndexBuffer::UpdateBufferData(const RenderQueue &r
 	// TOOD: actually write data to buffers
 }
 
-std::shared_ptr<prosper::IBuffer> rendering::EntityInstanceIndexBuffer::AddInstanceList(const RenderQueue &renderQueue, std::vector<pragma::RenderBufferIndex> &&instanceList, util::Hash hash)
+std::shared_ptr<prosper::IBuffer> rendering::EntityInstanceIndexBuffer::AddInstanceList(const RenderQueue &renderQueue, std::vector<pragma::RenderBufferIndex> &&instanceList, pragma::util::Hash hash)
 {
 	auto itCache = m_cachedBuffers.find(hash);
 	if(itCache != m_cachedBuffers.end()) {

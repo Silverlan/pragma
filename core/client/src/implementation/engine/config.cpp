@@ -103,11 +103,11 @@ void pragma::CEngine::PreloadConfig(pragma::NwStateType type, const std::string 
 	pragma::locale::load("prompts.txt");
 	pragma::locale::load("shader_materials.txt");
 
-	constexpr auto numBts = umath::to_integral(util::debug::MessageBoxButton::Count);
+	constexpr auto numBts = pragma::math::to_integral(pragma::debug::MessageBoxButton::Count);
 	std::array<std::string, numBts> labels;
 	for(size_t i = 0; i < numBts; ++i) {
-		auto identifier = ustring::to_snake_case(std::string {magic_enum::enum_name(static_cast<util::debug::MessageBoxButton>(i))});
+		auto identifier = pragma::string::to_snake_case(std::string {magic_enum::enum_name(static_cast<pragma::debug::MessageBoxButton>(i))});
 		labels[i] = pragma::locale::get_text("prompt_button_" + identifier);
 	}
-	util::debug::set_button_labels(labels);
+	pragma::debug::set_button_labels(labels);
 }

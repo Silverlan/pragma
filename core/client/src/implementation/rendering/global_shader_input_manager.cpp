@@ -163,7 +163,7 @@ void pragma::rendering::GlobalShaderInputDataManager::ReallocateBuffer()
 	// TODO: Iterate all input parameter nodes of all shader graphs and add them to the input data
 	// TODO: What if a parameter is used in multiple shader graphs with different types?
 
-	auto bufferSize = umath::get_aligned_offset(m_inputData->data.size(), BUFFER_BASE_SIZE);
+	auto bufferSize = pragma::math::get_aligned_offset(m_inputData->data.size(), BUFFER_BASE_SIZE);
 	if(bufferSize == 0)
 		return;
 	prosper::util::BufferCreateInfo bufCreateInfo {};

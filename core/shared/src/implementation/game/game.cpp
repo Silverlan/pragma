@@ -248,7 +248,7 @@ void pragma::Game::OnPlayerReady(pragma::BasePlayerComponent &pl)
 void pragma::Game::OnPlayerDropped(pragma::BasePlayerComponent &pl, pragma::networking::DropReason reason)
 {
 	CallCallbacks<void, pragma::BasePlayerComponent *, pragma::networking::DropReason>("OnPlayerDropped", &pl, reason);
-	CallLuaCallbacks<void, luabind::object, std::underlying_type_t<decltype(reason)>>("OnPlayerDropped", pl.GetLuaObject(), umath::to_integral(reason));
+	CallLuaCallbacks<void, luabind::object, std::underlying_type_t<decltype(reason)>>("OnPlayerDropped", pl.GetLuaObject(), pragma::math::to_integral(reason));
 	for(auto *gmC : GetGamemodeComponents())
 		gmC->OnPlayerDropped(pl, reason);
 }
@@ -276,7 +276,7 @@ void pragma::Game::SetGameMode(const std::string &gameMode)
 
 	if(info) {
 		for(auto &pair : info->gameMountPriorities)
-			util::set_mounted_game_priority(pair.first, pair.second);
+			pragma::util::set_mounted_game_priority(pair.first, pair.second);
 	}
 }
 
@@ -356,7 +356,7 @@ void pragma::Game::OnInitialized()
 
 void pragma::Game::SetUp() {}
 
-static bool check_validity(pragma::BasePhysicsComponent &physC) { return !umath::is_flag_set(physC.BaseEntityComponent::GetStateFlags(), pragma::BaseEntityComponent::StateFlags::Removed); }
+static bool check_validity(pragma::BasePhysicsComponent &physC) { return !pragma::math::is_flag_set(physC.BaseEntityComponent::GetStateFlags(), pragma::BaseEntityComponent::StateFlags::Removed); }
 static bool check_validity(pragma::ecs::BaseEntity *ent)
 {
 	if(!ent || ent->IsRemoved())
@@ -465,7 +465,7 @@ void pragma::Game::InitializeGame()
 		auto &surfTypeManager = m_physEnvironment->GetSurfaceTypeManager();
 
 		std::string err;
-		auto udmData = util::load_udm_asset("scripts/physics/tire_types.udm", &err);
+		auto udmData = pragma::util::load_udm_asset("scripts/physics/tire_types.udm", &err);
 		if(udmData) {
 			auto &data = *udmData;
 			auto udm = data.GetAssetData().GetData();
@@ -696,26 +696,26 @@ void pragma::Game::UpdatePackagePaths()
 	packagePaths.reserve(2 + addons.size());
 
 	for(auto &path : filemanager::get_absolute_root_paths()) {
-		packagePaths.push_back(util::FilePath(path, "lua/?.lua").GetString());
-		packagePaths.push_back(util::FilePath(path, "lua/modules/?.lua").GetString());
+		packagePaths.push_back(pragma::util::FilePath(path, "lua/?.lua").GetString());
+		packagePaths.push_back(pragma::util::FilePath(path, "lua/modules/?.lua").GetString());
 	}
 
 	for(auto &addonInfo : addons) {
-		auto path = util::Path::CreatePath(addonInfo.GetAbsolutePath()) + "lua/modules/?.lua";
+		auto path = pragma::util::Path::CreatePath(addonInfo.GetAbsolutePath()) + "lua/modules/?.lua";
 		packagePaths.push_back(path.GetString());
 	}
 	auto package = luabind::object {luabind::globals(GetLuaState())["package"]};
 	if(Lua::GetType(package) == Lua::Type::Nil)
 		return;
-	package["path"] = ustring::implode(packagePaths, ";");
+	package["path"] = pragma::string::implode(packagePaths, ";");
 
 #ifdef _WIN32
 	std::string ext = ".dll";
 #else
 	std::string ext = ".so";
 #endif
-	auto path = util::Path::CreatePath(util::get_program_path());
-	package["cpath"] = util::FilePath(path, ("modules/?" + ext)).GetString();
+	auto path = pragma::util::Path::CreatePath(pragma::util::get_program_path());
+	package["cpath"] = pragma::util::FilePath(path, ("modules/?" + ext)).GetString();
 }
 
 bool pragma::Game::LoadSoundScripts(const char *file) { return m_stateNetwork->LoadSoundScripts(file, true); }
@@ -729,7 +729,7 @@ bool pragma::Game::LoadMap(const std::string &map, const Vector3 &origin, std::v
 		if(bPort == true) {
 			Con::cwar << "Map '" << map << "' not found." << Con::endl;
 			auto path = pragma::asset::relative_path_to_absolute_path(normPath, pragma::asset::Type::Map);
-			if(util::port_source2_map(GetNetworkState(), path.GetString()) == false && util::port_hl2_map(GetNetworkState(), path.GetString()) == false)
+			if(pragma::util::port_source2_map(GetNetworkState(), path.GetString()) == false && pragma::util::port_hl2_map(GetNetworkState(), path.GetString()) == false)
 				Con::cwar << " Loading empty map..." << Con::endl;
 			else {
 				Con::cwar << Con::endl;
@@ -745,7 +745,7 @@ bool pragma::Game::LoadMap(const std::string &map, const Vector3 &origin, std::v
 	}
 	m_mapInfo.name = map;
 	m_mapInfo.fileName = pragma::asset::relative_path_to_absolute_path(*filePath, pragma::asset::Type::Map).GetString();
-	util::ScopeGuard sg {[this]() { m_flags |= GameFlags::MapInitialized; }};
+	pragma::util::ScopeGuard sg {[this]() { m_flags |= GameFlags::MapInitialized; }};
 
 	auto error = [this, &map](const std::string_view &msg) { Con::cwar << "Unable to load map '" << map << "': " << msg << Con::endl; };
 
@@ -757,7 +757,7 @@ bool pragma::Game::LoadMap(const std::string &map, const Vector3 &origin, std::v
 
 	auto worldData = pragma::asset::WorldData::Create(*GetNetworkState());
 	if(pragma::asset::matches_format(format, pragma::asset::FORMAT_MAP_BINARY) || pragma::asset::matches_format(format, pragma::asset::FORMAT_MAP_ASCII)) {
-		auto udmData = util::load_udm_asset(std::make_unique<fsys::File>(f));
+		auto udmData = pragma::util::load_udm_asset(std::make_unique<fsys::File>(f));
 		std::string err;
 		if(udmData == nullptr || worldData->LoadFromAssetData(udmData->GetAssetData(), pragma::asset::EntityData::Flags::None, err) == false) {
 			error(err);
@@ -839,7 +839,7 @@ bool pragma::Game::PrecacheModel(const std::string &mdl)
 	if(asset)
 		return true;
 	auto loadInfo = std::make_unique<pragma::asset::ModelLoadInfo>();
-	loadInfo->onLoaded = [this](util::Asset &asset) {
+	loadInfo->onLoaded = [this](pragma::util::Asset &asset) {
 		auto mdl = pragma::asset::ModelManager::GetAssetObject(asset);
 		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<pragma::asset::Model>>>("OnModelLoaded", mdl);
 		CallLuaCallbacks<void, std::shared_ptr<pragma::asset::Model>>("OnModelLoaded", mdl);
@@ -853,14 +853,14 @@ std::shared_ptr<pragma::asset::Model> pragma::Game::LoadModel(const std::string 
 		return nullptr;
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("load_model");
-	util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
+	pragma::util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
 #endif
 	spdlog::debug("Loading model '{}'...", mdl);
 	auto *asset = GetNetworkState()->GetModelManager().FindCachedAsset(mdl);
 	if(asset)
 		return pragma::asset::ModelManager::GetAssetObject(*asset);
 	auto &mdlMananger = GetNetworkState()->GetModelManager();
-	util::FileAssetManager::PreloadResult result;
+	pragma::util::FileAssetManager::PreloadResult result;
 	auto r = bReload ? mdlMananger.ReloadAsset(mdl, nullptr, &result) : mdlMananger.LoadAsset(mdl, nullptr, &result);
 	if(r != nullptr) {
 		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<pragma::asset::Model>>>("OnModelLoaded", r);

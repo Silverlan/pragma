@@ -72,10 +72,10 @@ void SVehicleComponent::Initialize()
 {
 	BaseVehicleComponent::Initialize();
 
-	BindEvent(usableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(usableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &bCanUse = static_cast<CECanUseData &>(evData.get()).canUse;
 		bCanUse = !HasDriver();
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
 	BindEventUnhandled(usableComponent::EVENT_ON_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUse(static_cast<CEOnUseData &>(evData.get()).entity); });
 	BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_POST_SPAWN, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPostSpawn(); });
@@ -94,13 +94,13 @@ void SVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 		auto plComponent = ent->GetPlayerComponent();
 		auto *actionInputC = plComponent->GetActionInputController();
 		if(actionInputC) {
-			m_playerAction = actionInputC->BindEvent(actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			m_playerAction = actionInputC->BindEvent(actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 				auto &actionData = static_cast<CEHandleActionInput &>(evData.get());
 				if(actionData.action == pragma::Action::Use) {
 					OnActionInput(actionData.action, actionData.pressed);
-					return util::EventReply::Handled;
+					return pragma::util::EventReply::Handled;
 				}
-				return util::EventReply::Unhandled;
+				return pragma::util::EventReply::Unhandled;
 			});
 		}
 	}
@@ -138,7 +138,7 @@ void SVehicleComponent::SendData(NetPacket &packet, networking::ClientRecipientF
 	pragma::networking::write_entity(packet, GetDriver());
 }
 
-void SVehicleComponent::SetupSteeringWheel(const std::string &mdl, umath::Degree maxSteeringAngle)
+void SVehicleComponent::SetupSteeringWheel(const std::string &mdl, pragma::math::Degree maxSteeringAngle)
 {
 	BaseVehicleComponent::SetupSteeringWheel(mdl, maxSteeringAngle);
 	if(m_steeringWheel.valid())
@@ -157,7 +157,7 @@ void SVehicleComponent::SendSnapshotData(NetPacket &packet, pragma::BasePlayerCo
 	packet->Write<float>(physVehicle ? physVehicle->GetBrakeFactor() : 0.f);
 	packet->Write<float>(physVehicle ? physVehicle->GetHandbrakeFactor() : 0.f);
 	packet->Write<float>(physVehicle ? physVehicle->GetAccelerationFactor() : 0.f);
-	packet->Write<umath::Radian>(physVehicle ? physVehicle->GetEngineRotationSpeed() : 0.f);
+	packet->Write<pragma::math::Radian>(physVehicle ? physVehicle->GetEngineRotationSpeed() : 0.f);
 	auto numWheels = GetWheelCount();
 	for(auto i = decltype(numWheels) {0u}; i < numWheels; ++i)
 		packet->Write<float>(physVehicle ? physVehicle->GetWheelRotationSpeed(i) : 0.f);

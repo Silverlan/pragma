@@ -23,7 +23,7 @@ void pragma::game::SceneSnapshot::AddModel(pragma::asset::Model &mdl, uint32_t s
 	for(auto &meshGroup : mdl.GetMeshGroups()) {
 		for(auto &mesh : meshGroup->GetMeshes()) {
 			for(auto &subMesh : mesh->GetSubMeshes()) {
-				auto snapshotMesh = ::util::make_shared<Mesh>();
+				auto snapshotMesh = pragma::util::make_shared<Mesh>();
 
 				auto &verts = subMesh->GetVertices();
 				snapshotMesh->verts.reserve(verts.size());

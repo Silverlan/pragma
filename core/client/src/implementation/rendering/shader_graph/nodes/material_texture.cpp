@@ -29,7 +29,7 @@ std::string MaterialTextureNode::DoEvaluate(const pragma::shadergraph::Graph &gr
 	auto prefix = gn.GetBaseVarName() + "_";
 	auto *texInputSocket = gn.FindInputSocket(IN_TEXTURE);
 	if(texInputSocket && texInputSocket->link) {
-		std::string texName = ustring::to_snake_case(texInputSocket->link->GetSocket().name);
+		std::string texName = pragma::string::to_snake_case(texInputSocket->link->GetSocket().name);
 		if(texInputSocket->link->parent) {
 			auto *dynTexNode = dynamic_cast<const pragma::rendering::shader_graph::InputParameterTextureNode *>(&texInputSocket->link->parent->node);
 			if(dynTexNode) {

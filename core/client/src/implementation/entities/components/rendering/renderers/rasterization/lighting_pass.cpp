@@ -39,7 +39,7 @@ void pragma::CRasterizationRendererComponent::RecordPrepass(const pragma::render
 
 		CEPrepassStageData evDataPrepassStage {rsys, shaderPrepass};
 		InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS, evDataPrepassStage);
-		rsys.BindShader(shaderPrepass, umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
+		rsys.BindShader(shaderPrepass, pragma::math::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
 		// Render static world geometry
 		if((renderPassDrawInfo.drawSceneInfo.renderFlags & RenderFlags::World) != RenderFlags::None) {
 			std::chrono::steady_clock::time_point t;
@@ -60,7 +60,7 @@ void pragma::CRasterizationRendererComponent::RecordPrepass(const pragma::render
 			auto &queueTranslucent = *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, true /* translucent */);
 			queueTranslucent.WaitForCompletion(prepassStats);
 			if(queueTranslucent.queue.empty() == false) {
-				// rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::AlphaTest));
+				// rsys.BindShader(shaderPrepass,pragma::math::to_integral(pragma::ShaderPrepass::Pipeline::AlphaTest));
 				rsys.Render(queueTranslucent, pragma::rendering::RenderPass::Prepass, prepassStats);
 			}
 		}
@@ -71,8 +71,8 @@ void pragma::CRasterizationRendererComponent::RecordPrepass(const pragma::render
 			if(queue.queue.empty() == false) {
 				rsys.UnbindShader();
 				rsys.SetCameraType(pragma::rendering::BaseRenderProcessor::CameraType::View);
-				rsys.BindShader(shaderPrepass, umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
-				// rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
+				rsys.BindShader(shaderPrepass, pragma::math::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
+				// rsys.BindShader(shaderPrepass,pragma::math::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
 				rsys.Render(queue, pragma::rendering::RenderPass::Prepass, prepassStats);
 			}
 		}
@@ -116,7 +116,7 @@ void pragma::CRasterizationRendererComponent::UpdateLightingPassRenderBuffers(co
 }
 void pragma::CRasterizationRendererComponent::ExecutePrepass(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
-	if(umath::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisablePrepass))
+	if(pragma::math::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisablePrepass))
 		return;
 	auto &scene = *drawSceneInfo.scene;
 	auto &hCam = scene.GetActiveCamera();
@@ -164,7 +164,7 @@ void pragma::CRasterizationRendererComponent::ExecutePrepass(const pragma::rende
 
 void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
-	if(umath::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisablePrepass))
+	if(pragma::math::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisablePrepass))
 		return;
 	pragma::get_cgame()->StartProfilingStage("ExecuteLightingPass");
 	auto &scene = const_cast<pragma::CSceneComponent &>(*drawSceneInfo.scene);
@@ -249,7 +249,7 @@ void pragma::CRasterizationRendererComponent::StartPrepassRecording(const pragma
 	auto &prepassRt = *prepass.renderTarget;
 	m_prepassCommandBufferGroup->StartRecording(prepassRt.GetRenderPass(), prepassRt.GetFramebuffer());
 
-	if(!umath::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisablePrepass)) {
+	if(!pragma::math::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisablePrepass)) {
 		RecordPrepass(drawSceneInfo);
 		CEDrawSceneInfo evData {drawSceneInfo};
 		InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS, evData);
@@ -264,7 +264,7 @@ void pragma::CRasterizationRendererComponent::StartLightingPassRecording(const p
 		return;
 	m_lightingCommandBufferGroup->StartRecording(rt->GetRenderPass(), rt->GetFramebuffer());
 
-	if(!umath::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisableLightingPass)) {
+	if(!pragma::math::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisableLightingPass)) {
 		RecordLightingPass(drawSceneInfo);
 		CEDrawSceneInfo evData {drawSceneInfo};
 		InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS, evData);

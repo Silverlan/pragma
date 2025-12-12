@@ -30,7 +30,7 @@ export namespace luabind {
 	};
 
 	template<typename T>
-	concept is_gui_element = std::derived_from<util::base_type<T>, pragma::gui::types::WIBase> || std::is_same_v<util::base_type<T>, pragma::gui::WIHandle>;
+	concept is_gui_element = std::derived_from<pragma::util::base_type<T>, pragma::gui::types::WIBase> || std::is_same_v<pragma::util::base_type<T>, pragma::gui::WIHandle>;
 
 	template<typename T>
 	    requires(is_gui_element<T> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)

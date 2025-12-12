@@ -40,9 +40,9 @@ export namespace pragma::debug {
 				IgnoreDepth = Visible << 1,
 			};
 			virtual ~BaseObject() = default;
-			const umath::ScaledTransform &GetPose() const;
-			umath::ScaledTransform &GetPose();
-			void SetPose(const umath::ScaledTransform &pose);
+			const pragma::math::ScaledTransform &GetPose() const;
+			pragma::math::ScaledTransform &GetPose();
+			void SetPose(const pragma::math::ScaledTransform &pose);
 			const Vector3 &GetPos() const;
 			virtual void SetPos(const Vector3 &pos);
 			const Quat &GetRotation() const;
@@ -61,7 +61,7 @@ export namespace pragma::debug {
 			virtual ObjectType GetType() const = 0;
 		  protected:
 			BaseObject();
-			umath::ScaledTransform m_pose {};
+			pragma::math::ScaledTransform m_pose {};
 			Mat4 m_modelMatrix = umat::identity();
 			Flags m_flags = Flags::Visible;
 			void UpdateModelMatrix();
@@ -150,14 +150,14 @@ export namespace pragma::debug {
 		std::shared_ptr<DebugRenderer::BaseObject> DrawPath(const std::vector<Vector3> &path, const pragma::debug::DebugRenderInfo &renderInfo = {});
 		std::shared_ptr<DebugRenderer::BaseObject> DrawSpline(const std::vector<Vector3> &path, uint32_t segmentCount, float curvature = 1.f, const pragma::debug::DebugRenderInfo &renderInfo = {});
 		std::shared_ptr<DebugRenderer::BaseObject> DrawPlane(const Vector3 &n, float dist, const pragma::debug::DebugRenderInfo &renderInfo = {});
-		std::shared_ptr<DebugRenderer::BaseObject> DrawPlane(const umath::Plane &plane, const pragma::debug::DebugRenderInfo &renderInfo = {});
+		std::shared_ptr<DebugRenderer::BaseObject> DrawPlane(const pragma::math::Plane &plane, const pragma::debug::DebugRenderInfo &renderInfo = {});
 		std::shared_ptr<DebugRenderer::BaseObject> DrawFrustum(const std::vector<Vector3> &points, const pragma::debug::DebugRenderInfo &renderInfo = {});
 		std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DrawAxis(const pragma::debug::DebugRenderInfo &renderInfo, const Vector3 &x, const Vector3 &y, const Vector3 &z);
 		std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DrawAxis(const pragma::debug::DebugRenderInfo &renderInfo);
 		void ClearObjects();
 		void Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam);
 
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 }
 export {REGISTER_ENUM_FLAGS(pragma::debug::DebugRenderer::BaseObject::Flags)}

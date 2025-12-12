@@ -79,7 +79,7 @@ bool choreography::FacialFlexEvent::GetInterpolatedValue(double t, const std::ve
 	v = tv.value;
 	if(valIdx + 1u < srcValues.size()) {
 		auto tvNext = srcValues.at(valIdx + 1u);
-		v = umath::lerp(v, tvNext.value, (t - tv.time) / (tvNext.time - tv.time));
+		v = pragma::math::lerp(v, tvNext.value, (t - tv.time) / (tvNext.time - tv.time));
 	}
 	return true;
 }
@@ -98,8 +98,8 @@ choreography::FacialFlexEvent::State choreography::FacialFlexEvent::HandleTick(d
 				else {
 					auto vDistribution = 0.f;
 					if(GetInterpolatedValue(t, pair.second.leftRightDistribution, vDistribution, true) == true) {
-						auto leftDistribution = umath::clamp(vDistribution / 0.5f, 0.f, 1.f);
-						auto rightDistribution = umath::clamp((1.f - vDistribution) / 0.5f, 0.f, 1.f);
+						auto leftDistribution = pragma::math::clamp(vDistribution / 0.5f, 0.f, 1.f);
+						auto rightDistribution = pragma::math::clamp((1.f - vDistribution) / 0.5f, 0.f, 1.f);
 						pFlexComponent->SetFlexController("left_" + pair.first, v * leftDistribution, 0.1f);
 						pFlexComponent->SetFlexController("right_" + pair.first, v * rightDistribution, 0.1f);
 						Con::cout << "Flex Controller: " << ("left_" + pair.first) << " (" << (v * leftDistribution) << ")" << Con::endl;

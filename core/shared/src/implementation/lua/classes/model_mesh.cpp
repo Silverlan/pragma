@@ -42,7 +42,7 @@ void Lua::ModelMesh::register_class(luabind::class_<pragma::geometry::ModelMesh>
 	classDef.def(
 	  "RemoveSubMesh", +[](lua::State *l, pragma::geometry::ModelMesh &mesh, const std::string &uuid) {
 		  auto &subMeshes = mesh.GetSubMeshes();
-		  auto uuidValue = ::util::uuid_string_to_bytes(uuid);
+		  auto uuidValue = pragma::util::uuid_string_to_bytes(uuid);
 		  auto it = std::find_if(subMeshes.begin(), subMeshes.end(), [&uuidValue](const std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh) { return subMesh->GetUuid() == uuidValue; });
 		  if(it == subMeshes.end())
 			  return;
@@ -51,7 +51,7 @@ void Lua::ModelMesh::register_class(luabind::class_<pragma::geometry::ModelMesh>
 	classDef.def(
 	  "FindSubMesh", +[](lua::State *l, pragma::geometry::ModelMesh &mesh, const std::string &uuid) -> std::shared_ptr<pragma::geometry::ModelSubMesh> {
 		  auto &subMeshes = mesh.GetSubMeshes();
-		  auto uuidValue = ::util::uuid_string_to_bytes(uuid);
+		  auto uuidValue = pragma::util::uuid_string_to_bytes(uuid);
 		  auto it = std::find_if(subMeshes.begin(), subMeshes.end(), [&uuidValue](const std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh) { return subMesh->GetUuid() == uuidValue; });
 		  if(it == subMeshes.end())
 			  return nullptr;
@@ -127,8 +127,8 @@ void Lua::ModelSubMesh::register_class(luabind::class_<pragma::geometry::ModelSu
 	classDef.scope[luabind::def("create_ring", static_cast<std::shared_ptr<pragma::geometry::ModelSubMesh> (*)(pragma::Game &, const pragma::geometry::RingCreateInfo &)>(&pragma::geometry::create_ring))];
 	classDef.def("SetName", &pragma::geometry::ModelSubMesh::SetName);
 	classDef.def("GetName", &pragma::geometry::ModelSubMesh::GetName);
-	classDef.def("GetUuid", +[](pragma::geometry::ModelSubMesh &mesh) -> std::string { return ::util::uuid_to_string(mesh.GetUuid()); });
-	classDef.def("SetUuid", +[](pragma::geometry::ModelSubMesh &mesh, const std::string &uuid) { mesh.SetUuid(::util::uuid_string_to_bytes(uuid)); });
+	classDef.def("GetUuid", +[](pragma::geometry::ModelSubMesh &mesh) -> std::string { return pragma::util::uuid_to_string(mesh.GetUuid()); });
+	classDef.def("SetUuid", +[](pragma::geometry::ModelSubMesh &mesh, const std::string &uuid) { mesh.SetUuid(pragma::util::uuid_string_to_bytes(uuid)); });
 	classDef.def("SetUuid", +[](pragma::geometry::ModelSubMesh &mesh, const Lua::util::Uuid &uuid) { mesh.SetUuid(uuid.value); }, luabind::const_ref_policy<2> {});
 	classDef.def("GetSkinTextureIndex", &Lua::ModelSubMesh::GetSkinTextureIndex);
 	classDef.def("FlipTriangleWindingOrder", &Lua::ModelSubMesh::FlipTriangleWindingOrder);
@@ -151,7 +151,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<pragma::geometry::ModelSu
 	classDef.def("HasVertexWeights", +[](lua::State *l, pragma::geometry::ModelSubMesh &mesh) { return !mesh.GetVertexWeights().empty(); });
 	classDef.def("GetNormals", &Lua::ModelSubMesh::GetNormalMapping);
 	classDef.def("GetVertexWeights", &Lua::ModelSubMesh::GetVertexWeights);
-	classDef.def("AddTriangle", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &, const umath::Vertex &, const umath::Vertex &, const umath::Vertex &)>(&Lua::ModelSubMesh::AddTriangle));
+	classDef.def("AddTriangle", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &, const pragma::math::Vertex &, const pragma::math::Vertex &, const pragma::math::Vertex &)>(&Lua::ModelSubMesh::AddTriangle));
 	classDef.def("AddTriangle", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &, uint32_t, uint32_t, uint32_t)>(&Lua::ModelSubMesh::AddTriangle));
 	classDef.def("AddIndex", &pragma::geometry::ModelSubMesh::AddIndex);
 	classDef.def("SetIndex", &pragma::geometry::ModelSubMesh::SetIndex);
@@ -179,7 +179,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<pragma::geometry::ModelSu
 	classDef.def("GetVertexWeight", &Lua::ModelSubMesh::GetVertexWeight);
 	classDef.def("Optimize", &pragma::geometry::ModelSubMesh::Optimize);
 #ifdef _WIN32
-	classDef.def("Optimize", &pragma::geometry::ModelSubMesh::Optimize, luabind::default_parameter_policy<2, double {umath::VERTEX_EPSILON}> {});
+	classDef.def("Optimize", &pragma::geometry::ModelSubMesh::Optimize, luabind::default_parameter_policy<2, double {pragma::math::VERTEX_EPSILON}> {});
 #else
 	classDef.def("Optimize", +[](pragma::geometry::ModelSubMesh &mesh) { return mesh.Optimize(); });
 #endif
@@ -216,8 +216,8 @@ void Lua::ModelSubMesh::register_class(luabind::class_<pragma::geometry::ModelSu
 	  "MakeVerticesUnique", +[](lua::State *l, pragma::geometry::ModelSubMesh &mesh) {
 		  auto &verts = mesh.GetVertices();
 		  auto &vws = mesh.GetVertexWeights();
-		  std::vector<umath::Vertex> newVerts;
-		  std::vector<umath::VertexWeight> newVertWeights;
+		  std::vector<pragma::math::Vertex> newVerts;
+		  std::vector<pragma::math::VertexWeight> newVertWeights;
 		  mesh.VisitIndices([&newVerts, &verts, &newVertWeights, &vws](auto *indexData, uint32_t numIndices) {
 			  newVerts.resize(numIndices);
 			  for(auto i = decltype(numIndices) {0u}; i < numIndices; ++i)
@@ -232,24 +232,24 @@ void Lua::ModelSubMesh::register_class(luabind::class_<pragma::geometry::ModelSu
 		  verts = std::move(newVerts);
 		  vws = std::move(newVertWeights);
 	  });
-	classDef.def("SetVertices", +[](lua::State *l, pragma::geometry::ModelSubMesh &mesh, std::vector<umath::Vertex> verts) { mesh.GetVertices() = std::move(verts); });
+	classDef.def("SetVertices", +[](lua::State *l, pragma::geometry::ModelSubMesh &mesh, std::vector<pragma::math::Vertex> verts) { mesh.GetVertices() = std::move(verts); });
 	classDef.def(
 	  "SetIndices", +[](lua::State *l, pragma::geometry::ModelSubMesh &mesh, const std::vector<uint32_t> &indices) {
 		  mesh.SetIndices(indices);
 		  uint32_t highestIndex = 0;
 		  for(auto idx : indices)
-			  highestIndex = umath::max(highestIndex, idx);
+			  highestIndex = pragma::math::max(highestIndex, idx);
 		  if(highestIndex <= std::numeric_limits<uint16_t>::max())
 			  mesh.SetIndexType(pragma::geometry::IndexType::UInt16);
 	  });
 	classDef.def("GetReferenceId", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh) { Lua::PushInt(l, mesh.GetReferenceId()); }));
-	classDef.def("GetGeometryType", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh) { Lua::PushInt(l, umath::to_integral(mesh.GetGeometryType())); }));
+	classDef.def("GetGeometryType", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh) { Lua::PushInt(l, pragma::math::to_integral(mesh.GetGeometryType())); }));
 	classDef.def("SetGeometryType", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &, uint32_t)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh, uint32_t geometryType) { mesh.SetGeometryType(static_cast<pragma::geometry::ModelSubMesh::GeometryType>(geometryType)); }));
 	classDef.def("AddLine", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &, uint32_t, uint32_t)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh, uint32_t idx0, uint32_t idx1) { mesh.AddLine(idx0, idx1); }));
 	classDef.def("AddPoint", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &, uint32_t)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh, uint32_t idx) { mesh.AddPoint(idx); }));
-	classDef.def("GetPose", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh) { Lua::Push<umath::ScaledTransform>(l, mesh.GetPose()); }));
-	classDef.def("SetPose", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &, const umath::ScaledTransform &)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh, const umath::ScaledTransform &pose) { mesh.SetPose(pose); }));
-	classDef.def("Transform", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &, const umath::ScaledTransform &)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh, const umath::ScaledTransform &pose) { mesh.Transform(pose); }));
+	classDef.def("GetPose", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh) { Lua::Push<pragma::math::ScaledTransform>(l, mesh.GetPose()); }));
+	classDef.def("SetPose", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &, const pragma::math::ScaledTransform &)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh, const pragma::math::ScaledTransform &pose) { mesh.SetPose(pose); }));
+	classDef.def("Transform", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &, const pragma::math::ScaledTransform &)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh, const pragma::math::ScaledTransform &pose) { mesh.Transform(pose); }));
 	classDef.def("ClearVertices", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh) { mesh.GetVertices().clear(); }));
 	classDef.def("ClearIndices", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh) { mesh.GetIndexData().clear(); }));
 	classDef.def("ClearAlphas", static_cast<void (*)(lua::State *, pragma::geometry::ModelSubMesh &)>([](lua::State *l, pragma::geometry::ModelSubMesh &mesh) { mesh.GetAlphas().clear(); }));
@@ -305,12 +305,12 @@ void Lua::ModelSubMesh::register_class(luabind::class_<pragma::geometry::ModelSu
 			  return luabind::object {l, mesh};
 		  return luabind::object {l, std::pair<bool, std::string> {false, err}};
 	  })];
-	classDef.add_static_constant("GEOMETRY_TYPE_TRIANGLES", umath::to_integral(pragma::geometry::ModelSubMesh::GeometryType::Triangles));
-	classDef.add_static_constant("GEOMETRY_TYPE_LINES", umath::to_integral(pragma::geometry::ModelSubMesh::GeometryType::Lines));
-	classDef.add_static_constant("GEOMETRY_TYPE_POINTS", umath::to_integral(pragma::geometry::ModelSubMesh::GeometryType::Points));
+	classDef.add_static_constant("GEOMETRY_TYPE_TRIANGLES", pragma::math::to_integral(pragma::geometry::ModelSubMesh::GeometryType::Triangles));
+	classDef.add_static_constant("GEOMETRY_TYPE_LINES", pragma::math::to_integral(pragma::geometry::ModelSubMesh::GeometryType::Lines));
+	classDef.add_static_constant("GEOMETRY_TYPE_POINTS", pragma::math::to_integral(pragma::geometry::ModelSubMesh::GeometryType::Points));
 
-	classDef.add_static_constant("INDEX_TYPE_UINT16", umath::to_integral(pragma::geometry::IndexType::UInt16));
-	classDef.add_static_constant("INDEX_TYPE_UINT32", umath::to_integral(pragma::geometry::IndexType::UInt32));
+	classDef.add_static_constant("INDEX_TYPE_UINT16", pragma::math::to_integral(pragma::geometry::IndexType::UInt16));
+	classDef.add_static_constant("INDEX_TYPE_UINT32", pragma::math::to_integral(pragma::geometry::IndexType::UInt32));
 
 	classDef.add_static_constant("MAX_INDEX16", pragma::geometry::ModelSubMesh::MAX_INDEX16);
 	classDef.add_static_constant("MAX_INDEX32", pragma::geometry::ModelSubMesh::MAX_INDEX32);
@@ -396,12 +396,12 @@ void Lua::ModelSubMesh::GetVertexWeights(lua::State *l, pragma::geometry::ModelS
 	Lua::vector_to_table(l, vertWeights).push(l);
 }
 void Lua::ModelSubMesh::GetCenter(lua::State *l, pragma::geometry::ModelSubMesh &mdl) { Lua::Push<Vector3>(l, mdl.GetCenter()); }
-void Lua::ModelSubMesh::AddTriangle(lua::State *, pragma::geometry::ModelSubMesh &mdl, const umath::Vertex &v1, const umath::Vertex &v2, const umath::Vertex &v3) { mdl.AddTriangle(v1, v2, v3); }
+void Lua::ModelSubMesh::AddTriangle(lua::State *, pragma::geometry::ModelSubMesh &mdl, const pragma::math::Vertex &v1, const pragma::math::Vertex &v2, const pragma::math::Vertex &v3) { mdl.AddTriangle(v1, v2, v3); }
 void Lua::ModelSubMesh::AddTriangle(lua::State *, pragma::geometry::ModelSubMesh &mdl, uint32_t a, uint32_t b, uint32_t c) { mdl.AddTriangle(a, b, c); }
 void Lua::ModelSubMesh::SetSkinTextureIndex(lua::State *, pragma::geometry::ModelSubMesh &mdl, uint32_t texture) { mdl.SetSkinTextureIndex(texture); }
 void Lua::ModelSubMesh::Update(lua::State *, pragma::geometry::ModelSubMesh &mdl) { mdl.Update(); }
 void Lua::ModelSubMesh::Update(lua::State *, pragma::geometry::ModelSubMesh &mdl, uint32_t flags) { mdl.Update(static_cast<pragma::asset::ModelUpdateFlags>(flags)); }
-void Lua::ModelSubMesh::AddVertex(lua::State *l, pragma::geometry::ModelSubMesh &mdl, const umath::Vertex &v)
+void Lua::ModelSubMesh::AddVertex(lua::State *l, pragma::geometry::ModelSubMesh &mdl, const pragma::math::Vertex &v)
 {
 	auto idx = mdl.AddVertex(v);
 	Lua::PushInt(l, idx);
@@ -414,7 +414,7 @@ void Lua::ModelSubMesh::GetBounds(lua::State *l, pragma::geometry::ModelSubMesh 
 	Lua::Push<Vector3>(l, max);
 }
 
-void Lua::ModelSubMesh::SetVertex(lua::State *, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const umath::Vertex &v) { mdl.SetVertex(idx, v); }
+void Lua::ModelSubMesh::SetVertex(lua::State *, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const pragma::math::Vertex &v) { mdl.SetVertex(idx, v); }
 void Lua::ModelSubMesh::SetVertexPosition(lua::State *, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const Vector3 &pos) { mdl.SetVertexPosition(idx, pos); }
 void Lua::ModelSubMesh::SetVertexNormal(lua::State *, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const Vector3 &normal) { mdl.SetVertexNormal(idx, normal); }
 void Lua::ModelSubMesh::SetVertexUV(lua::State *l, pragma::geometry::ModelSubMesh &mdl, const std::string &uvSetName, uint32_t idx, const ::Vector2 &uv)
@@ -426,12 +426,12 @@ void Lua::ModelSubMesh::SetVertexUV(lua::State *l, pragma::geometry::ModelSubMes
 }
 void Lua::ModelSubMesh::SetVertexUV(lua::State *, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const ::Vector2 &uv) { mdl.SetVertexUV(idx, uv); }
 void Lua::ModelSubMesh::SetVertexAlpha(lua::State *, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const ::Vector2 &alpha) { mdl.SetVertexAlpha(idx, alpha); }
-void Lua::ModelSubMesh::SetVertexWeight(lua::State *, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const umath::VertexWeight &weight) { mdl.SetVertexWeight(idx, weight); }
+void Lua::ModelSubMesh::SetVertexWeight(lua::State *, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const pragma::math::VertexWeight &weight) { mdl.SetVertexWeight(idx, weight); }
 void Lua::ModelSubMesh::GetVertex(lua::State *l, pragma::geometry::ModelSubMesh &mdl, uint32_t idx)
 {
 	if(idx >= mdl.GetVertexCount())
 		return;
-	Lua::Push<umath::Vertex>(l, mdl.GetVertex(idx));
+	Lua::Push<pragma::math::Vertex>(l, mdl.GetVertex(idx));
 }
 void Lua::ModelSubMesh::GetVertexPosition(lua::State *l, pragma::geometry::ModelSubMesh &mdl, uint32_t idx)
 {
@@ -469,7 +469,7 @@ void Lua::ModelSubMesh::GetVertexWeight(lua::State *l, pragma::geometry::ModelSu
 {
 	if(idx >= mdl.GetVertexWeights().size())
 		return;
-	Lua::Push<umath::VertexWeight>(l, mdl.GetVertexWeight(idx));
+	Lua::Push<pragma::math::VertexWeight>(l, mdl.GetVertexWeight(idx));
 }
 void Lua::ModelSubMesh::GenerateNormals(lua::State *, pragma::geometry::ModelSubMesh &mdl) { mdl.GenerateNormals(); }
 void Lua::ModelSubMesh::NormalizeUVCoordinates(lua::State *l, pragma::geometry::ModelSubMesh &mdl) { mdl.NormalizeUVCoordinates(); }
@@ -546,6 +546,6 @@ void Lua::ModelSubMesh::FlipTriangleWindingOrder(lua::State *l, pragma::geometry
 		return;
 	mesh.VisitIndices([](auto *indexData, uint32_t numIndices) {
 		for(auto i = decltype(numIndices) {0u}; i < numIndices; i += 3)
-			umath::swap(indexData[i], indexData[i + 1]);
+			pragma::math::swap(indexData[i], indexData[i + 1]);
 	});
 }

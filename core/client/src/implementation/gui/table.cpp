@@ -102,8 +102,8 @@ void pragma::gui::types::WITable::Sort(bool bAsc, unsigned int col)
 void pragma::gui::types::WITable::OnRowCellCreated(WITableCell *cell)
 {
 	cell->SetMouseInputEnabled(true);
-	m_sortCallbacks.push_back(cell->AddCallback("OnMousePressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this, cell](util::EventReply *reply) -> CallbackReturnType {
-		*reply = util::EventReply::Handled;
+	m_sortCallbacks.push_back(cell->AddCallback("OnMousePressed", FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([this, cell](pragma::util::EventReply *reply) -> CallbackReturnType {
+		*reply = pragma::util::EventReply::Handled;
 		OnHeaderCellPressed(cell);
 		return CallbackReturnType::HasReturnValue;
 	})));
@@ -199,8 +199,8 @@ void pragma::gui::types::WITable::SetSortable(bool b)
 		WITableCell *cell = row->GetCell(i);
 		if(cell != nullptr) {
 			cell->SetMouseInputEnabled(true);
-			m_sortCallbacks.push_back(cell->AddCallback("OnMousePressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this, cell](util::EventReply *reply) -> CallbackReturnType {
-				*reply = util::EventReply::Handled;
+			m_sortCallbacks.push_back(cell->AddCallback("OnMousePressed", FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([this, cell](pragma::util::EventReply *reply) -> CallbackReturnType {
+				*reply = pragma::util::EventReply::Handled;
 				OnHeaderCellPressed(cell);
 				return CallbackReturnType::HasReturnValue;
 			})));
@@ -548,8 +548,8 @@ float pragma::gui::types::WITable::UpdateRowHeights(float yOffset, float defHeig
 		auto &hRow = m_rows[i];
 		if(hRow.IsValid() && hRow->IsVisible()) {
 			auto *row = hRow.get<WITableRow>();
-			row->SetSize(w - padding[umath::to_integral(WIContainer::Padding::Left)] - padding[umath::to_integral(WIContainer::Padding::Right)], CInt32(defHeight));
-			row->SetX(padding[umath::to_integral(WIContainer::Padding::Left)]);
+			row->SetSize(w - padding[pragma::math::to_integral(WIContainer::Padding::Left)] - padding[pragma::math::to_integral(WIContainer::Padding::Right)], CInt32(defHeight));
+			row->SetX(padding[pragma::math::to_integral(WIContainer::Padding::Left)]);
 			row->SetY(CInt32(yOffset));
 			yOffset += defHeight;
 		}
@@ -599,16 +599,16 @@ void pragma::gui::types::WITableRow::SetCellWidth(unsigned int col, int width)
 	m_cellWidths[col] = width;
 	ScheduleUpdate();
 }
-util::EventReply pragma::gui::types::WITableRow::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WITableRow::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
 {
-	if(WIBase::MouseCallback(button, state, mods) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(WIBase::MouseCallback(button, state, mods) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(button == pragma::platform::MouseButton::Left && state == pragma::platform::KeyState::Press) {
 		auto *t = GetTable();
 		if(t)
 			t->SelectRow(*this);
 	}
-	return util::EventReply::Handled;
+	return pragma::util::EventReply::Handled;
 }
 unsigned int pragma::gui::types::WITableRow::GetCellCount() const { return CUInt32(m_cells.size()); }
 pragma::gui::types::WITableCell *pragma::gui::types::WITableRow::GetCell(unsigned int id) const
@@ -742,7 +742,7 @@ void pragma::gui::types::WITableRow::SetSize(int x, int y)
 			width += widths[i + j];
 
 		cell->SetSize(width, y);
-		cell->SetPos(umath::round(offset.x), umath::round(offset.y));
+		cell->SetPos(pragma::math::round(offset.x), pragma::math::round(offset.y));
 		offset.x += width;
 	}
 }

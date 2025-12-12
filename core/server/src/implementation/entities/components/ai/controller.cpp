@@ -53,23 +53,23 @@ void SAIComponent::StartControl(pragma::SPlayerComponent &pl)
 	}
 	auto *actionInputC = pl.GetActionInputController();
 	if(actionInputC) {
-		m_controlInfo.hCbOnActionInput = actionInputC->BindEvent(actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_controlInfo.hCbOnActionInput = actionInputC->BindEvent(actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 			auto &actionInputData = static_cast<CEHandleActionInput &>(evData.get());
 			if(actionInputData.pressed == true) {
 				if((m_controlInfo.actions & actionInputData.action) != pragma::Action::None)
-					return util::EventReply::Handled;
+					return pragma::util::EventReply::Handled;
 				m_controlInfo.actions |= actionInputData.action;
 			}
 			else {
 				if((m_controlInfo.actions & actionInputData.action) == pragma::Action::None)
-					return util::EventReply::Handled;
+					return pragma::util::EventReply::Handled;
 				m_controlInfo.actions &= ~actionInputData.action;
 			}
 			OnControllerActionInput(actionInputData.action, actionInputData.pressed);
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		});
 	}
-	m_controlInfo.hController = util::WeakHandle<pragma::SPlayerComponent>(std::static_pointer_cast<pragma::SPlayerComponent>(pl.shared_from_this()));
+	m_controlInfo.hController = pragma::util::WeakHandle<pragma::SPlayerComponent>(std::static_pointer_cast<pragma::SPlayerComponent>(pl.shared_from_this()));
 
 	auto pObsComponent = GetEntity().GetComponent<pragma::SObservableComponent>();
 	if(pObsComponent.valid()) {

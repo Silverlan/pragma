@@ -8,7 +8,7 @@ module pragma.shared;
 
 import :util.bsp_tree;
 
-using namespace util;
+using namespace pragma::util;
 
 std::shared_ptr<BSPTree> BSPTree::Create()
 {
@@ -26,7 +26,7 @@ BSPTree::Node &BSPTree::CreateNode()
 
 const BSPTree::Node *BSPTree::Node::GetChild(BSPTree &tree, uint8_t idx) { return &tree.m_nodes[children[idx]]; }
 
-static void preprocess_bsp_data(util::BSPTree &bspTree, std::vector<std::vector<size_t>> &outClusterNodes, std::vector<std::vector<uint16_t>> &outClusterToClusterVisibility)
+static void preprocess_bsp_data(pragma::util::BSPTree &bspTree, std::vector<std::vector<size_t>> &outClusterNodes, std::vector<std::vector<uint16_t>> &outClusterToClusterVisibility)
 {
 	auto numClusters = bspTree.GetClusterCount();
 	auto &bspNodes = bspTree.GetNodes();
@@ -91,7 +91,7 @@ bool BSPTree::Save(udm::AssetDataArg outData, std::string &outErr)
 	auto udm = *outData;
 	udm["numClusters"] = m_clusterCount;
 	udm["numNodes"] = m_nodes.size();
-	auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [this](const util::BSPTree::Node &node) { return node.index == m_rootNode; });
+	auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [this](const pragma::util::BSPTree::Node &node) { return node.index == m_rootNode; });
 	assert(it != m_nodes.end());
 	if(it == m_nodes.end()) {
 		outErr = "Root node missing from node list!";

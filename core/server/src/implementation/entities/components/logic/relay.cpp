@@ -14,13 +14,13 @@ void SLogicRelayComponent::Initialize()
 {
 	BaseLogicRelayComponent::Initialize();
 
-	BindEvent(sIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(sIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
-		if(ustring::compare<std::string>(inputData.input, "trigger", false))
+		if(pragma::string::compare<std::string>(inputData.input, "trigger", false))
 			Trigger(inputData.activator);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();

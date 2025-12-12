@@ -67,7 +67,7 @@ SNetworkedComponent::NetworkedVariable::Type SNetworkedComponent::get_networked_
 }
 
 template<class TProperty>
-void SNetworkedComponent::add_networked_variable_callback(NetworkedVariable::Id id, util::BaseProperty &prop)
+void SNetworkedComponent::add_networked_variable_callback(NetworkedVariable::Id id, pragma::util::BaseProperty &prop)
 {
 	auto hThis = GetHandle();
 	static_cast<TProperty &>(prop).AddCallback([this, hThis, id](std::reference_wrapper<const decltype(TProperty::m_value)> oldVal, std::reference_wrapper<const decltype(TProperty::m_value)> val) {
@@ -88,48 +88,48 @@ void SNetworkedComponent::OnNetworkedVariableCreated(NetworkedVariable &nwVar)
 	switch(nwVar.type) {
 	case NetworkedVariable::Type::Bool:
 		{
-			add_networked_variable_callback<util::BoolProperty>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::BoolProperty>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::Double:
 		{
-			add_networked_variable_callback<util::DoubleProperty>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::DoubleProperty>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::Float:
 		{
-			add_networked_variable_callback<util::FloatProperty>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::FloatProperty>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::Int8:
 		{
-			add_networked_variable_callback<util::Int8Property>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::Int8Property>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::Int16:
 		{
-			add_networked_variable_callback<util::Int16Property>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::Int16Property>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::Int32:
 		{
-			add_networked_variable_callback<util::Int32Property>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::Int32Property>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::Int64:
 		{
-			add_networked_variable_callback<util::Int64Property>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::Int64Property>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::LongDouble:
 		{
-			add_networked_variable_callback<util::LongDoubleProperty>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::LongDoubleProperty>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::String:
 		{
 			auto hThis = GetHandle();
-			static_cast<util::StringProperty &>(*nwVar.data.get()).AddCallback([this, hThis, id](std::reference_wrapper<const std::string> oldVal, std::reference_wrapper<const std::string> val) {
+			static_cast<pragma::util::StringProperty &>(*nwVar.data.get()).AddCallback([this, hThis, id](std::reference_wrapper<const std::string> oldVal, std::reference_wrapper<const std::string> val) {
 				if(hThis.expired())
 					return;
 				NetPacket packet {};
@@ -142,47 +142,47 @@ void SNetworkedComponent::OnNetworkedVariableCreated(NetworkedVariable &nwVar)
 		}
 	case NetworkedVariable::Type::UInt8:
 		{
-			add_networked_variable_callback<util::UInt8Property>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::UInt8Property>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::UInt16:
 		{
-			add_networked_variable_callback<util::UInt16Property>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::UInt16Property>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::UInt32:
 		{
-			add_networked_variable_callback<util::UInt32Property>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::UInt32Property>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::UInt64:
 		{
-			add_networked_variable_callback<util::UInt64Property>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::UInt64Property>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::EulerAngles:
 		{
-			add_networked_variable_callback<util::EulerAnglesProperty>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::EulerAnglesProperty>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::Color:
 		{
-			add_networked_variable_callback<util::ColorProperty>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::ColorProperty>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::Vector:
 		{
-			add_networked_variable_callback<util::Vector3Property>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::Vector3Property>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::Vector2:
 		{
-			add_networked_variable_callback<util::Vector2Property>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::Vector2Property>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::Vector4:
 		{
-			add_networked_variable_callback<util::Vector4Property>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::Vector4Property>(id, *nwVar.data.get());
 			break;
 		}
 	case NetworkedVariable::Type::Entity:
@@ -201,7 +201,7 @@ void SNetworkedComponent::OnNetworkedVariableCreated(NetworkedVariable &nwVar)
 		}
 	case NetworkedVariable::Type::Quaternion:
 		{
-			add_networked_variable_callback<util::QuatProperty>(id, *nwVar.data.get());
+			add_networked_variable_callback<pragma::util::QuatProperty>(id, *nwVar.data.get());
 			break;
 		}
 	}

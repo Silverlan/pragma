@@ -31,15 +31,15 @@ void CSmokeTrailComponent::ReceiveData(NetPacket &packet)
 	m_maxSpriteSize = packet->Read<float>();
 	m_material = packet->ReadString();
 }
-util::EventReply CSmokeTrailComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply CSmokeTrailComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvSmokeTrailComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEnvSmokeTrailComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON)
 		InitializeParticle();
 	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		DestroyParticle();
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 
 void CSmokeTrailComponent::InitializeParticle()
@@ -48,7 +48,7 @@ void CSmokeTrailComponent::InitializeParticle()
 	auto *pToggleComponent = static_cast<pragma::BaseToggleComponent *>(ent.FindComponent("toggle").get());
 	if((pToggleComponent != nullptr && pToggleComponent->IsTurnedOn() == false) || m_hParticle.valid() == true)
 		return;
-	auto *pt = util::create_smoke_trail_particle(m_distance, m_speed, m_minSpriteSize, m_maxSpriteSize, m_material);
+	auto *pt = pragma::util::create_smoke_trail_particle(m_distance, m_speed, m_minSpriteSize, m_maxSpriteSize, m_material);
 	if(pt == nullptr)
 		return;
 	pt->Start();

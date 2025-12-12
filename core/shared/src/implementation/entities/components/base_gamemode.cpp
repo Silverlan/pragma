@@ -98,10 +98,10 @@ const std::string &BaseGamemodeComponent::GetAuthor() const
 	auto *gmInfo = GetGameModeInfo();
 	return gmInfo ? gmInfo->author : empty_string;
 }
-util::Version BaseGamemodeComponent::GetGamemodeVersion() const
+pragma::util::Version BaseGamemodeComponent::GetGamemodeVersion() const
 {
 	auto *gmInfo = GetGameModeInfo();
-	return gmInfo ? gmInfo->version : util::Version {};
+	return gmInfo ? gmInfo->version : pragma::util::Version {};
 }
 
 CEPlayerDeath::CEPlayerDeath(BasePlayerComponent &pl, game::DamageInfo *dmgInfo) : player {pl}, dmgInfo {dmgInfo} {}
@@ -116,7 +116,7 @@ CEPlayerDropped::CEPlayerDropped(BasePlayerComponent &pl, pragma::networking::Dr
 void CEPlayerDropped::PushArguments(lua::State *l)
 {
 	player.PushLuaObject(l);
-	Lua::PushInt(l, umath::to_integral(reason));
+	Lua::PushInt(l, pragma::math::to_integral(reason));
 }
 
 CEPlayerSpawned::CEPlayerSpawned(BasePlayerComponent &pl) : player {pl} {}

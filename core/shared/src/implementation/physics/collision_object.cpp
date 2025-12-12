@@ -31,7 +31,7 @@ void pragma::physics::ICollisionObject::UpdateSurfaceMaterial()
 	auto *shape = m_shape.get();
 	if(shape == nullptr)
 		return;
-	if(umath::is_flag_set(m_stateFlags, StateFlags::CustomSurfaceMaterial)) {
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::CustomSurfaceMaterial)) {
 		shape->SetSurfaceMaterial(m_surfaceMaterial);
 		return;
 	}
@@ -42,7 +42,7 @@ void pragma::physics::ICollisionObject::UpdateSurfaceMaterial()
 int pragma::physics::ICollisionObject::GetSurfaceMaterial() const { return m_surfaceMaterial; }
 void pragma::physics::ICollisionObject::SetSurfaceMaterial(int id)
 {
-	umath::set_flag(m_stateFlags, StateFlags::CustomSurfaceMaterial, true);
+	pragma::math::set_flag(m_stateFlags, StateFlags::CustomSurfaceMaterial, true);
 	auto *shape = GetCollisionShape();
 	if(shape)
 		shape->SetSurfaceMaterial(id);
@@ -52,7 +52,7 @@ bool pragma::physics::ICollisionObject::IsRigid() const { return false; }
 bool pragma::physics::ICollisionObject::IsGhost() const { return false; }
 bool pragma::physics::ICollisionObject::IsSoftBody() const { return false; }
 bool pragma::physics::ICollisionObject::IsAsleep() const { return !IsAwake(); }
-bool pragma::physics::ICollisionObject::IsAwake() const { return umath::is_flag_set(m_stateFlags, StateFlags::Awake); }
+bool pragma::physics::ICollisionObject::IsAwake() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::Awake); }
 
 void pragma::physics::ICollisionObject::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<ICollisionObject>(lua); }
 
@@ -60,7 +60,7 @@ const pragma::physics::IRigidBody *pragma::physics::ICollisionObject::GetRigidBo
 const pragma::physics::ISoftBody *pragma::physics::ICollisionObject::GetSoftBody() const { return const_cast<ICollisionObject *>(this)->GetSoftBody(); }
 const pragma::physics::IGhostObject *pragma::physics::ICollisionObject::GetGhostObject() const { return const_cast<ICollisionObject *>(this)->GetGhostObject(); }
 
-void pragma::physics::ICollisionObject::InitializeLuaHandle(const util::TWeakSharedHandle<IBase> &handle)
+void pragma::physics::ICollisionObject::InitializeLuaHandle(const pragma::util::TWeakSharedHandle<IBase> &handle)
 {
 	IBase::InitializeLuaHandle(handle);
 	UpdateSurfaceMaterial();
@@ -68,7 +68,7 @@ void pragma::physics::ICollisionObject::InitializeLuaHandle(const util::TWeakSha
 
 void pragma::physics::ICollisionObject::DoSpawn() { IWorldObject::DoSpawn(); }
 
-Bool pragma::physics::ICollisionObject::HasOrigin() const { return umath::is_flag_set(m_stateFlags, StateFlags::HasOrigin); }
+Bool pragma::physics::ICollisionObject::HasOrigin() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::HasOrigin); }
 Vector3 pragma::physics::ICollisionObject::GetGravity() const
 {
 	auto *physObj = GetPhysObj();
@@ -83,16 +83,16 @@ void pragma::physics::ICollisionObject::SetOrigin(const Vector3 &origin)
 	m_origin = origin;
 	if(m_origin.x < EPSILON && m_origin.x > -EPSILON && m_origin.y < EPSILON && m_origin.y > -EPSILON && m_origin.z < EPSILON && m_origin.z > -EPSILON) {
 		m_origin = Vector3(0.f, 0.f, 0.f);
-		umath::set_flag(m_stateFlags, StateFlags::HasOrigin, false);
+		pragma::math::set_flag(m_stateFlags, StateFlags::HasOrigin, false);
 	}
 	else
-		umath::set_flag(m_stateFlags, StateFlags::HasOrigin, true);
+		pragma::math::set_flag(m_stateFlags, StateFlags::HasOrigin, true);
 }
 const Vector3 &pragma::physics::ICollisionObject::GetOrigin() const { return m_origin; }
 
-void pragma::physics::ICollisionObject::UpdateAABB() { umath::set_flag(m_stateFlags, StateFlags::UpdateAABB, true); }
-bool pragma::physics::ICollisionObject::ShouldUpdateAABB() const { return umath::is_flag_set(m_stateFlags, StateFlags::UpdateAABB); }
-void pragma::physics::ICollisionObject::ResetUpdateAABBFlag() { umath::set_flag(m_stateFlags, StateFlags::UpdateAABB, false); }
+void pragma::physics::ICollisionObject::UpdateAABB() { pragma::math::set_flag(m_stateFlags, StateFlags::UpdateAABB, true); }
+bool pragma::physics::ICollisionObject::ShouldUpdateAABB() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::UpdateAABB); }
+void pragma::physics::ICollisionObject::ResetUpdateAABBFlag() { pragma::math::set_flag(m_stateFlags, StateFlags::UpdateAABB, false); }
 
 void pragma::physics::ICollisionObject::SetCollisionShape(pragma::physics::IShape *shape)
 {
@@ -121,8 +121,8 @@ void pragma::physics::ICollisionObject::SetCollisionFilterMask(pragma::physics::
 }
 pragma::physics::CollisionMask pragma::physics::ICollisionObject::GetCollisionFilterMask() const { return m_collisionFilterMask; }
 
-void pragma::physics::ICollisionObject::SetContactReportEnabled(bool reportEnabled) { return umath::set_flag(m_stateFlags, StateFlags::ContactReportEnabled, reportEnabled); }
-bool pragma::physics::ICollisionObject::IsContactReportEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::ContactReportEnabled); }
+void pragma::physics::ICollisionObject::SetContactReportEnabled(bool reportEnabled) { return pragma::math::set_flag(m_stateFlags, StateFlags::ContactReportEnabled, reportEnabled); }
+bool pragma::physics::ICollisionObject::IsContactReportEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::ContactReportEnabled); }
 
 void pragma::physics::ICollisionObject::PreSimulate() {}
 void pragma::physics::ICollisionObject::PostSimulate() {}
@@ -134,7 +134,7 @@ void pragma::physics::ICollisionObject::OnWake()
 {
 	if(IsAwake())
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::Awake);
+	pragma::math::set_flag(m_stateFlags, StateFlags::Awake);
 	m_physEnv.OnWake(*this);
 
 	auto *physObj = GetPhysObj();
@@ -145,7 +145,7 @@ void pragma::physics::ICollisionObject::OnSleep()
 {
 	if(IsAlwaysAwake() == true || IsAsleep())
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::Awake, false);
+	pragma::math::set_flag(m_stateFlags, StateFlags::Awake, false);
 	m_physEnv.OnSleep(*this);
 
 	auto *physObj = GetPhysObj();
@@ -154,13 +154,13 @@ void pragma::physics::ICollisionObject::OnSleep()
 }
 void pragma::physics::ICollisionObject::SetAlwaysAwake(bool alwaysAwake)
 {
-	umath::set_flag(m_stateFlags, StateFlags::AlwaysAwake, alwaysAwake);
+	pragma::math::set_flag(m_stateFlags, StateFlags::AlwaysAwake, alwaysAwake);
 	if(alwaysAwake) {
 		if(IsAsleep())
 			OnWake();
 	}
 }
-bool pragma::physics::ICollisionObject::IsAlwaysAwake() const { return umath::is_flag_set(m_stateFlags, StateFlags::AlwaysAwake); }
+bool pragma::physics::ICollisionObject::IsAlwaysAwake() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::AlwaysAwake); }
 
 pragma::physics::IRigidBody *pragma::physics::ICollisionObject::GetRigidBody() { return nullptr; }
 pragma::physics::ISoftBody *pragma::physics::ICollisionObject::GetSoftBody() { return nullptr; }

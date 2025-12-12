@@ -121,14 +121,14 @@ bool SPhysicsComponent::PostPhysicsSimulate()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto *phys = GetPhysicsObject();
 	auto *entCl = ent.GetClientsideEntity();
-	auto pPhysComponent = (entCl != nullptr) ? entCl->GetPhysicsComponent() : util::WeakHandle<BasePhysicsComponent> {};
+	auto pPhysComponent = (entCl != nullptr) ? entCl->GetPhysicsComponent() : pragma::util::WeakHandle<BasePhysicsComponent> {};
 	auto *physCl = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys == nullptr || physCl == nullptr)
 		return;
 	// Only executed on listen servers; Serverside soft-body data will be transferred to client directly
 	auto &colObjs = phys->GetCollisionObjects();
 	auto &colObjsCl = physCl->GetCollisionObjects();
-	auto numColObjs = umath::min(colObjs.size(), colObjsCl.size());
+	auto numColObjs = pragma::math::min(colObjs.size(), colObjsCl.size());
 	for(auto i = decltype(numColObjs) {0}; i < numColObjs; ++i) {
 		auto &col = colObjs.at(i);
 		auto &colCl = colObjsCl.at(i);
@@ -138,7 +138,7 @@ bool SPhysicsComponent::PostPhysicsSimulate()
 		auto &sbCl = *colCl->GetSoftBody();
 		auto *btSb = sb.GetSoftBody();
 		auto *btSbCl = sbCl.GetSoftBody();
-		auto numNodes = umath::min(btSb->m_nodes.size(), btSbCl->m_nodes.size());
+		auto numNodes = pragma::math::min(btSb->m_nodes.size(), btSbCl->m_nodes.size());
 		for(auto j = decltype(numNodes) {0}; j < numNodes; ++j) {
 			auto &node = btSb->m_nodes.at(j);
 			auto &nodeCl = btSbCl->m_nodes.at(j);

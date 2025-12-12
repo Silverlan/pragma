@@ -18,14 +18,14 @@ bool pragma::math::calc_ballistic_velocity(const Vector3 &start, const Vector3 &
 
 	auto dist = uvec::length(dir);
 	auto a = angle;
-	dir.y += dist * umath::tan(a);
+	dir.y += dist * pragma::math::tan(a);
 	uvec::normalize(&dir);
 
-	auto ta = umath::tan(a);
+	auto ta = pragma::math::tan(a);
 	if(ta == 0.f)
 		return false;
 	dist += h / ta;
-	auto s = umath::sin(2.0 * a);
+	auto s = pragma::math::sin(2.0 * a);
 	if(s == 0.f)
 		return false;
 	vel = dir * sqrtf(dist * gravity / s);
@@ -36,7 +36,7 @@ float pragma::math::calc_ballistic_time_of_flight(const Vector3 &start, float la
 {
 	// Source: https://en.wikipedia.org/wiki/Trajectory_of_a_projectile
 	launchAngle = launchAngle;
-	auto s = umath::sin(launchAngle);
+	auto s = pragma::math::sin(launchAngle);
 	auto y0 = start.y;
 	return (velocity * s + sqrtf((velocity * s) * (velocity * s) + 2.f * gravity * y0)) / gravity;
 }
@@ -52,7 +52,7 @@ float pragma::math::calc_ballistic_time_of_flight(const Vector3 &start, const Ve
 float pragma::math::calc_ballistic_angle_of_reach(const Vector3 &start, float distance, float initialVelocity, float gravity)
 {
 	// Source: https://en.wikipedia.org/wiki/Trajectory_of_a_projectile
-	return 0.5f * umath::asin((gravity * distance) / (initialVelocity * initialVelocity));
+	return 0.5f * pragma::math::asin((gravity * distance) / (initialVelocity * initialVelocity));
 }
 
 /////////////////////////////////////
@@ -76,9 +76,9 @@ float pragma::math::calc_ballistic_range(float speed, float gravity, float initi
 	//   (2) y = initial_height + (speed * time * sin O) - (.5 * gravity*time*time)
 	//   (3) via quadratic: t = (speed*sin O)/gravity + sqrt(speed*speed*sin O + 2*gravity*initial_height)/gravity    [ignore smaller root]
 	//   (4) solution: range = x = (speed*cos O)/gravity * sqrt(speed*speed*sin O + 2*gravity*initial_height)    [plug t back into x=speed*time*cos O]
-	auto angle = umath::deg_to_rad(45.f); // no air resistence, so 45 degrees provides maximum range
-	auto cos = umath::cos(angle);
-	auto sin = umath::sin(angle);
+	auto angle = pragma::math::deg_to_rad(45.f); // no air resistence, so 45 degrees provides maximum range
+	auto cos = pragma::math::cos(angle);
+	auto sin = pragma::math::sin(angle);
 
 	return (speed * cos / gravity) * (speed * sin + sqrtf(speed * speed * sin * sin + 2 * gravity * initialHeight));
 }
@@ -137,14 +137,14 @@ int32_t pragma::math::solve_ballistic_arc(const Vector3 &projPos, float projSpee
 
 	root = sqrtf(root);
 
-	auto lowAng = umath::atan2(speed2 - root, gx);
-	auto highAng = umath::atan2(speed2 + root, gx);
+	auto lowAng = pragma::math::atan2(speed2 - root, gx);
+	auto highAng = pragma::math::atan2(speed2 + root, gx);
 	int32_t numSolutions = (lowAng != highAng) ? 2 : 1;
 
 	auto groundDir = uvec::get_normal(diffXZ);
-	s[0] = groundDir * static_cast<float>(umath::cos(lowAng) * projSpeed) + uvec::UP * static_cast<float>(umath::sin(lowAng) * projSpeed);
+	s[0] = groundDir * static_cast<float>(pragma::math::cos(lowAng) * projSpeed) + uvec::UP * static_cast<float>(pragma::math::sin(lowAng) * projSpeed);
 	if(numSolutions > 1)
-		s[1] = groundDir * static_cast<float>(umath::cos(highAng) * projSpeed) + uvec::UP * static_cast<float>(umath::sin(highAng) * projSpeed);
+		s[1] = groundDir * static_cast<float>(pragma::math::cos(highAng) * projSpeed) + uvec::UP * static_cast<float>(pragma::math::sin(highAng) * projSpeed);
 	return numSolutions;
 }
 
@@ -216,7 +216,7 @@ int32_t pragma::math::solve_ballistic_arc(const Vector3 &projPos, float projSpee
 
 	// Solve quartic
 	std::array<double, 4> times;
-	auto numTimes = umath::solve_quartic(c, times);
+	auto numTimes = pragma::math::solve_quartic(c, times);
 
 	// Sort so faster collision is found first
 	std::sort(times.begin(), times.end());
@@ -326,7 +326,7 @@ bool pragma::math::solve_ballistic_arc_lateral(const Vector3 &projPos, float lat
 	std::array<double, 3> c = {uvec::dot(targetVelXZ, targetVelXZ) - lateralSpeed * lateralSpeed, 2.f * uvec::dot(diffXZ, targetVelXZ), uvec::dot(diffXZ, diffXZ)};
 
 	std::array<double, 2> t;
-	auto n = umath::solve_quadric(c, t);
+	auto n = pragma::math::solve_quadric(c, t);
 
 	// pick smallest, positive time
 	auto valid0 = (n > 0) && t[0] > 0;
@@ -336,7 +336,7 @@ bool pragma::math::solve_ballistic_arc_lateral(const Vector3 &projPos, float lat
 	if(!valid0 && !valid1)
 		return false;
 	else if(valid0 && valid1)
-		tr = umath::min(static_cast<float>(t[0]), static_cast<float>(t[1]));
+		tr = pragma::math::min(static_cast<float>(t[0]), static_cast<float>(t[1]));
 	else
 		tr = valid0 ? static_cast<float>(t[0]) : static_cast<float>(t[1]);
 
@@ -355,7 +355,7 @@ bool pragma::math::solve_ballistic_arc_lateral(const Vector3 &projPos, float lat
 	// end = y0 + vertical_speed*time + .5*gravity*time^s
 	// Wolfram Alpha: solve b = a + .5*v*t + .5*g*(.5*t)^2, c = a + vt + .5*g*t^2 for g, v
 	auto a = projPos.y;                                              // initial
-	auto b = umath::max(projPos.y, impactPoint.y) + maxHeightOffset; // peak
+	auto b = pragma::math::max(projPos.y, impactPoint.y) + maxHeightOffset; // peak
 	auto cr = impactPoint.y;                                         // final
 
 	gravity = -4 * (a - 2 * b + cr) / (tr * tr);

@@ -15,14 +15,14 @@ void BaseFuncLiquidComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(basePhysicsComponent::EVENT_HANDLE_RAYCAST, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(basePhysicsComponent::EVENT_HANDLE_RAYCAST, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &raycastData = static_cast<CEHandleRaycast &>(evData.get());
 		auto r = OnRayResultCallback(raycastData.rayCollisionGroup, raycastData.rayCollisionMask);
 		if(r == false) {
 			raycastData.hit = false;
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 
 	auto &ent = GetEntity();

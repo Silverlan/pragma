@@ -13,7 +13,7 @@ CompositeGroup::CompositeGroup(CompositeComponent &compositeC, const std::string
 CompositeGroup::~CompositeGroup() { ClearEntities(false); }
 std::unordered_map<CompositeGroup::UuidHash, EntityHandle>::const_iterator CompositeGroup::FindEntity(pragma::ecs::BaseEntity &ent) const
 {
-	auto hash = util::get_uuid_hash(ent.GetUuid());
+	auto hash = pragma::util::get_uuid_hash(ent.GetUuid());
 	return m_ents.find(hash);
 }
 void CompositeGroup::AddEntity(pragma::ecs::BaseEntity &ent)
@@ -97,7 +97,7 @@ static void write_group(udm::LinkedPropertyWrapperArg udmGroup, const CompositeG
 	for(auto &pair : groupEnts) {
 		if(!pair.second.valid())
 			continue;
-		ents.push_back(util::uuid_to_string(pair.second.get()->GetUuid()));
+		ents.push_back(pragma::util::uuid_to_string(pair.second.get()->GetUuid()));
 	}
 	udmGroup["entities"] = ents;
 
@@ -117,16 +117,16 @@ static void read_group(pragma::ecs::BaseEntity &ent, udm::LinkedPropertyWrapperA
 
 	auto &groupEnts = group.GetEntities();
 	groupEnts.reserve(ents.size());
-	auto toHash = [](const util::Uuid &uuid) -> util::Hash { return util::hash_combine<uint64_t>(util::hash_combine<uint64_t>(0, uuid[0]), uuid[1]); };
-	std::unordered_set<util::Hash> set;
+	auto toHash = [](const pragma::util::Uuid &uuid) -> pragma::util::Hash { return pragma::util::hash_combine<uint64_t>(pragma::util::hash_combine<uint64_t>(0, uuid[0]), uuid[1]); };
+	std::unordered_set<pragma::util::Hash> set;
 	for(auto uuid : ents)
-		set.insert(toHash(util::uuid_string_to_bytes(uuid)));
+		set.insert(toHash(pragma::util::uuid_string_to_bytes(uuid)));
 	pragma::ecs::EntityIterator entIt {*ent.GetNetworkState()->GetGameState(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
 	for(auto *ent : entIt) {
 		auto it = set.find(toHash(ent->GetUuid()));
 		if(it == set.end())
 			continue;
-		groupEnts[util::get_uuid_hash(ent->GetUuid())] = ent->GetHandle();
+		groupEnts[pragma::util::get_uuid_hash(ent->GetUuid())] = ent->GetHandle();
 	}
 
 	auto udmChildren = udmGroup["children"];

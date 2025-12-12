@@ -37,7 +37,7 @@ export {
 			float GetSpeedKmh() const;
 			float GetSteeringFactor() const;
 
-			virtual void SetupSteeringWheel(const std::string &mdl, umath::Degree maxSteeringAngle);
+			virtual void SetupSteeringWheel(const std::string &mdl, pragma::math::Degree maxSteeringAngle);
 
 			physics::IVehicle *GetPhysicsVehicle();
 			const physics::IVehicle *GetPhysicsVehicle() const;
@@ -52,7 +52,7 @@ export {
 			pragma::NetEventId m_netEvSetDriver = pragma::INVALID_NET_EVENT;
 			std::vector<WheelData> m_wheels = {};
 			physics::VehicleCreateInfo m_vhcCreateInfo = {};
-			util::TSharedHandle<physics::IVehicle> m_physVehicle = nullptr;
+			pragma::util::TSharedHandle<physics::IVehicle> m_physVehicle = nullptr;
 			std::string m_steeringWheelMdl;
 			EntityHandle m_steeringWheel = {};
 			CallbackHandle m_cbSteeringWheel = {};
@@ -65,7 +65,7 @@ export {
 			void InitializeWheelEntities();
 			void InitializeSteeringWheel();
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::BaseVehicleComponent::StateFlags)
 };

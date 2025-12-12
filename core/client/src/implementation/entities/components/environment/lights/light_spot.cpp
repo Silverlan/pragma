@@ -18,10 +18,10 @@ void CLightSpotComponent::Initialize()
 {
 	BaseEnvLightSpotComponent::Initialize();
 
-	BindEvent(cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &trData = static_cast<CEGetTransformationMatrix &>(evData.get());
 		trData.transformation = &MVPBias<1>::GetTransformationMatrix(trData.index);
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
 	BindEventUnhandled(cLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateTransformMatrix(); });
 	BindEventUnhandled(cRadiusComponent::EVENT_ON_RADIUS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
@@ -49,7 +49,7 @@ void CLightSpotComponent::SetFieldAngleComponent(BaseFieldAngleComponent &c)
 		if(pLightComponent.expired())
 			return;
 		auto &bufferData = pLightComponent->GetBufferData();
-		bufferData.outerConeHalfAngle = static_cast<umath::Radian>(umath::deg_to_rad(newAng.get() / 2.f));
+		bufferData.outerConeHalfAngle = static_cast<pragma::math::Radian>(pragma::math::deg_to_rad(newAng.get() / 2.f));
 		auto &renderBuffer = pLightComponent->GetRenderBuffer();
 		if(renderBuffer != nullptr)
 			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, offsetof(LightBufferData, outerConeHalfAngle), bufferData.outerConeHalfAngle);
@@ -68,7 +68,7 @@ void CLightSpotComponent::UpdateInnerConeAngle()
 	if(pLightComponent.expired())
 		return;
 	auto &bufferData = pLightComponent->GetBufferData();
-	bufferData.innerConeHalfAngle = umath::deg_to_rad(CalcInnerConeAngle(GetOuterConeAngle(), GetBlendFraction()) / 2.f);
+	bufferData.innerConeHalfAngle = pragma::math::deg_to_rad(CalcInnerConeAngle(GetOuterConeAngle(), GetBlendFraction()) / 2.f);
 	auto &renderBuffer = pLightComponent->GetRenderBuffer();
 	if(renderBuffer != nullptr)
 		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, offsetof(LightBufferData, innerConeHalfAngle), bufferData.innerConeHalfAngle);
@@ -91,12 +91,12 @@ void CLightSpotComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	else if(typeid(component) == typeid(CTransformComponent)) {
 		auto &trC = static_cast<CTransformComponent &>(component);
 		FlagCallbackForRemoval(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
-		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			                         if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged | pragma::TransformChangeFlags::RotationChanged) == false)
-				                         return util::EventReply::Unhandled;
+		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+			                         if(pragma::math::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged | pragma::TransformChangeFlags::RotationChanged) == false)
+				                         return pragma::util::EventReply::Unhandled;
 			                         SetShadowDirty();
 			                         UpdateViewMatrices();
-			                         return util::EventReply::Unhandled;
+			                         return pragma::util::EventReply::Unhandled;
 		                         }),
 		  CallbackType::Component, &component);
 	}
@@ -151,8 +151,8 @@ void CLightSpotComponent::UpdateTransformMatrix()
 void CLightSpotComponent::UpdateProjectionMatrix()
 {
 	auto scale = Vector3(-1.f, -1.f, 1.f); // Vulkan TODO
-	//SetProjectionMatrix(glm::gtc::perspectiveLH<float>(CFloat(umath::deg_to_rad(m_angOuterCutoff *2.f)),1.f,2.f,m_distance));
-	//auto p = glm::gtc::perspective<float>(CFloat(umath::deg_to_rad(m_angOuterCutoff *2.f)),1.f,1.f,m_distance);
+	//SetProjectionMatrix(glm::gtc::perspectiveLH<float>(CFloat(pragma::math::deg_to_rad(m_angOuterCutoff *2.f)),1.f,2.f,m_distance));
+	//auto p = glm::gtc::perspective<float>(CFloat(pragma::math::deg_to_rad(m_angOuterCutoff *2.f)),1.f,1.f,m_distance);
 	//p = glm::gtc::scale(p,scale); /* Shadow TODO */
 	/*static Mat4 transform{
 		1.f,0.f,0.f,0.f,
@@ -160,9 +160,9 @@ void CLightSpotComponent::UpdateProjectionMatrix()
 		0.f,0.f,0.5f,0.5f,
 		0.f,0.f,0.f,1.f
 	};*/
-	//auto p = glm::gtc::perspective<float>(CFloat(umath::deg_to_rad(m_angOuterCutoff *2.f)),1.f,1.f,m_distance);
+	//auto p = glm::gtc::perspective<float>(CFloat(pragma::math::deg_to_rad(m_angOuterCutoff *2.f)),1.f,1.f,m_distance);
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
-	auto p = glm::gtc::perspectiveRH<float>(CFloat(umath::deg_to_rad(GetOuterConeAngle())), 1.f, 2.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
+	auto p = glm::gtc::perspectiveRH<float>(CFloat(pragma::math::deg_to_rad(GetOuterConeAngle())), 1.f, 2.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
 	//p = transform *p;
 	p = glm::gtc::scale(p, scale); /* Shadow TODO */
 	SetProjectionMatrix(p);

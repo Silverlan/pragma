@@ -30,7 +30,7 @@ export {
 		  public:
 			using BaseEntityComponent::BaseEntityComponent;
 			virtual void Initialize() override;
-			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		  protected:
 			virtual void OnResetGravity(pragma::ecs::BaseEntity *ent, GravitySettings &settings);
 			virtual void OnStartTouch(pragma::ecs::BaseEntity *ent);
@@ -41,7 +41,7 @@ export {
 			bool m_kvUseForce = false;
 			std::unordered_map<std::shared_ptr<EntityHandle>, GravitySettings> m_gravityReset;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::Entity::TriggerGravity::SpawnFlags)
 	REGISTER_ENUM_FLAGS(pragma::Entity::TriggerGravity::NetFlags)

@@ -484,7 +484,7 @@ void CHC::IssueMultiQueries()
 			m_invisQueue.pop();
 			if(hNode.IsValid())
 			{
-				auto query = ::util::make_shared<CHCQuery>(*hNode.get());
+				auto query = pragma::util::make_shared<CHCQuery>(*hNode.get());
 				query->Run();
 				m_queryQueue.push(query);
 			}
@@ -499,7 +499,7 @@ bool CHC::InsideViewFrustum(CHCNode *cNode)
 {
 	if(cvCulling->GetInt() == 0)
 		return true;
-	return umath::intersection::aabb_in_plane_mesh(cNode->GetMin(), cNode->GetMax(), m_frustumPlanes.begin(), m_frustumPlanes.end()) != umath::intersection::Intersect::Outside;
+	return pragma::math::intersection::aabb_in_plane_mesh(cNode->GetMin(), cNode->GetMax(), m_frustumPlanes.begin(), m_frustumPlanes.end()) != pragma::math::intersection::Intersect::Outside;
 }
 
 bool CHC::WasVisible(CHCNode *cNode) { return (cNode->IsVisible() && (cNode->GetLastVisited() == (m_frameID - 1))) ? true : false; }
@@ -519,7 +519,7 @@ void CHC::HandleReturnedQuery(CHCQuery *query)
 
 void CHC::IssueQuery(CHCNode *node)
 {
-	auto query = ::util::make_shared<CHCQuery>(*node);
+	auto query = pragma::util::make_shared<CHCQuery>(*node);
 	query->Run();
 	m_queryQueue.push(query);
 }
@@ -670,7 +670,7 @@ std::vector<CHCMeshInfo> &CHC::PerformCulling()
 
 ///////////////////////////////////////////
 
-CHCNode::CHCNode(CHC *chc, const BaseOcclusionOctree::Node &node) : m_chc(chc), m_node(node.shared_from_this()), m_handle(util::to_shared_handle<CHCNode>(shared_from_this())) {}
+CHCNode::CHCNode(CHC *chc, const BaseOcclusionOctree::Node &node) : m_chc(chc), m_node(node.shared_from_this()), m_handle(pragma::util::to_shared_handle<CHCNode>(shared_from_this())) {}
 
 CHCNode::~CHCNode() { m_handle.Invalidate(); }
 

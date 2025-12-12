@@ -41,7 +41,7 @@ static pragma::rendering::RenderFlags render_mode_to_render_flag(pragma::renderi
 	case pragma::rendering::SceneRenderPass::Sky:
 		return pragma::rendering::RenderFlags::Skybox;
 	}
-	static_assert(umath::to_integral(pragma::rendering::SceneRenderPass::Count) == 4);
+	static_assert(pragma::math::to_integral(pragma::rendering::SceneRenderPass::Count) == 4);
 	return pragma::rendering::RenderFlags::None;
 }
 
@@ -57,13 +57,13 @@ SceneRenderDesc::RenderQueueId SceneRenderDesc::GetRenderQueueId(pragma::renderi
 	case pragma::rendering::SceneRenderPass::World:
 		return !translucent ? RenderQueueId::World : RenderQueueId::WorldTranslucent;
 	}
-	static_assert(umath::to_integral(RenderQueueId::Count) == 8u);
+	static_assert(pragma::math::to_integral(RenderQueueId::Count) == 8u);
 	return RenderQueueId::Invalid;
 }
 pragma::rendering::RenderQueue *SceneRenderDesc::GetRenderQueue(pragma::rendering::SceneRenderPass renderMode, bool translucent)
 {
 	auto renderQueueId = GetRenderQueueId(renderMode, translucent);
-	return (renderQueueId != RenderQueueId::Invalid) ? m_renderQueues.at(umath::to_integral(renderQueueId)).get() : nullptr;
+	return (renderQueueId != RenderQueueId::Invalid) ? m_renderQueues.at(pragma::math::to_integral(renderQueueId)).get() : nullptr;
 }
 const pragma::rendering::RenderQueue *SceneRenderDesc::GetRenderQueue(pragma::rendering::SceneRenderPass renderMode, bool translucent) const { return const_cast<SceneRenderDesc *>(this)->GetRenderQueue(renderMode, translucent); }
 const std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> &SceneRenderDesc::GetWorldRenderQueues() const { return m_worldRenderQueues; }
@@ -73,16 +73,16 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendere
   const std::function<void(pragma::rendering::RenderQueue &, const pragma::rendering::RenderQueueItem &)> &fOptInsertItemToQueue, pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags)
 {
 	auto *mdlC = renderC.GetModelComponent();
-	auto lod = umath::max(static_cast<int32_t>(mdlC->GetLOD()) + lodBias, 0);
+	auto lod = pragma::math::max(static_cast<int32_t>(mdlC->GetLOD()) + lodBias, 0);
 	auto &renderMeshes = renderC.GetRenderMeshes();
 	auto &renderBufferData = renderC.GetRenderBufferData();
 	auto &lodGroup = renderC.GetLodRenderMeshGroup(lod);
 	renderC.UpdateRenderDataMT(scene, cam, vp);
 	auto renderMode = renderC.GetSceneRenderPass();
 	auto baseShaderSpecializationFlags = mdlC->GetBaseShaderSpecializationFlags() | baseSpecializationFlags;
-	auto isBaseTranslucent = umath::is_flag_set(baseShaderSpecializationFlags, pragma::GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
+	auto isBaseTranslucent = pragma::math::is_flag_set(baseShaderSpecializationFlags, pragma::GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
 	auto &context = pragma::get_cengine()->GetRenderContext();
-	auto renderTranslucent = umath::is_flag_set(renderFlags, pragma::rendering::RenderFlags::Translucent);
+	auto renderTranslucent = pragma::math::is_flag_set(renderFlags, pragma::rendering::RenderFlags::Translucent);
 	for(auto meshIdx = lodGroup.first; meshIdx < lodGroup.first + lodGroup.second; ++meshIdx) {
 		if(fShouldCull && ShouldCull(renderC, meshIdx, fShouldCull))
 			continue;
@@ -182,15 +182,15 @@ bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC, pragma::rend
 	max += pos;
 	return fShouldCull(min, max);
 }
-bool SceneRenderDesc::ShouldCull(const Vector3 &min, const Vector3 &max, const std::vector<umath::Plane> &frustumPlanes) { return umath::intersection::aabb_in_plane_mesh(min, max, frustumPlanes.begin(), frustumPlanes.end()) == umath::intersection::Intersect::Outside; }
+bool SceneRenderDesc::ShouldCull(const Vector3 &min, const Vector3 &max, const std::vector<pragma::math::Plane> &frustumPlanes) { return pragma::math::intersection::aabb_in_plane_mesh(min, max, frustumPlanes.begin(), frustumPlanes.end()) == pragma::math::intersection::Intersect::Outside; }
 
 static auto cvEntitiesPerJob = pragma::console::get_client_con_var("render_queue_entities_per_worker_job");
 void SceneRenderDesc::CollectRenderMeshesFromOctree(pragma::CRasterizationRendererComponent *optRasterizationRenderer, pragma::rendering::RenderFlags renderFlags, bool enableClipping, const OcclusionOctree<pragma::ecs::CBaseEntity *> &tree, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam,
   const Mat4 &vp, pragma::rendering::RenderMask renderMask, const std::function<pragma::rendering::RenderQueue *(pragma::rendering::SceneRenderPass, bool)> &getRenderQueue, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull,
-  const std::vector<util::BSPTree *> *bspTrees, const std::vector<util::BSPTree::Node *> *bspLeafNodes, int32_t lodBias, const std::function<bool(pragma::ecs::CBaseEntity &, const pragma::CSceneComponent &, pragma::rendering::RenderFlags)> &shouldConsiderEntity,
+  const std::vector<pragma::util::BSPTree *> *bspTrees, const std::vector<pragma::util::BSPTree::Node *> *bspLeafNodes, int32_t lodBias, const std::function<bool(pragma::ecs::CBaseEntity &, const pragma::CSceneComponent &, pragma::rendering::RenderFlags)> &shouldConsiderEntity,
   pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags)
 {
-	auto numEntitiesPerWorkerJob = umath::max(cvEntitiesPerJob->GetInt(), 1);
+	auto numEntitiesPerWorkerJob = pragma::math::max(cvEntitiesPerJob->GetInt(), 1);
 	std::function<void(const OcclusionOctree<pragma::ecs::CBaseEntity *>::Node &node)> iterateTree = nullptr;
 	iterateTree = [&iterateTree, &shouldConsiderEntity, &scene, &cam, renderFlags, fShouldCull, optRasterizationRenderer, renderMask, &getRenderQueue, &vp, bspLeafNodes, bspTrees, lodBias, numEntitiesPerWorkerJob, baseSpecializationFlags](const OcclusionOctree<pragma::ecs::CBaseEntity *>::Node &node) {
 		auto &nodeBounds = node.GetWorldBounds();
@@ -200,7 +200,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(pragma::CRasterizationRender
 			auto hasIntersection = false;
 			for(auto i = decltype(bspLeafNodes->size()) {0u}; i < bspLeafNodes->size(); ++i) {
 				auto *node = (*bspLeafNodes)[i];
-				if(umath::intersection::aabb_aabb(nodeBounds.first, nodeBounds.second, node->minVisible, node->maxVisible) == umath::intersection::Intersect::Outside)
+				if(pragma::math::intersection::aabb_aabb(nodeBounds.first, nodeBounds.second, node->minVisible, node->maxVisible) == pragma::math::intersection::Intersect::Outside)
 					continue;
 				if((*bspTrees)[i]->IsAabbVisibleInCluster(nodeBounds.first, nodeBounds.second, node->cluster) == false)
 					continue;
@@ -215,7 +215,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(pragma::CRasterizationRender
 		auto numBatches = (numObjects / numEntitiesPerWorkerJob) + (((numObjects % numEntitiesPerWorkerJob) > 0) ? 1 : 0);
 		for(auto i = decltype(numBatches) {0u}; i < numBatches; ++i) {
 			auto iStart = i * numEntitiesPerWorkerJob;
-			auto iEnd = umath::min(static_cast<size_t>(iStart + numEntitiesPerWorkerJob), numObjects);
+			auto iEnd = pragma::math::min(static_cast<size_t>(iStart + numEntitiesPerWorkerJob), numObjects);
 			pragma::get_cgame()->GetRenderQueueWorkerManager().AddJob([iStart, iEnd, shouldConsiderEntity, renderMask, optRasterizationRenderer, &objs, renderFlags, getRenderQueue, &scene, &cam, vp, fShouldCull, lodBias, baseSpecializationFlags]() {
 				// Note: We don't add individual items directly to the render queue, because that would invoke
 				// a mutex lock which can stall all of the worker threads.
@@ -269,11 +269,11 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(pragma::CRasterizationRender
 	iterateTree(tree.GetRootNode());
 }
 void SceneRenderDesc::CollectRenderMeshesFromOctree(pragma::CRasterizationRendererComponent *optRasterizationRenderer, pragma::rendering::RenderFlags renderFlags, bool enableClipping, const OcclusionOctree<pragma::ecs::CBaseEntity *> &tree, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam,
-  const Mat4 &vp, pragma::rendering::RenderMask renderMask, const std::vector<umath::Plane> &frustumPlanes, const std::vector<util::BSPTree *> *bspTrees, const std::vector<util::BSPTree::Node *> *bspLeafNodes)
+  const Mat4 &vp, pragma::rendering::RenderMask renderMask, const std::vector<pragma::math::Plane> &frustumPlanes, const std::vector<pragma::util::BSPTree *> *bspTrees, const std::vector<pragma::util::BSPTree::Node *> *bspLeafNodes)
 {
 	CollectRenderMeshesFromOctree(
 	  optRasterizationRenderer, renderFlags, enableClipping, tree, scene, cam, vp, renderMask, [this](pragma::rendering::SceneRenderPass renderMode, bool translucent) { return GetRenderQueue(renderMode, translucent); },
-	  [frustumPlanes](const Vector3 &min, const Vector3 &max) -> bool { return umath::intersection::aabb_in_plane_mesh(min, max, frustumPlanes.begin(), frustumPlanes.end()) == umath::intersection::Intersect::Outside; }, bspTrees, bspLeafNodes, 0, nullptr);
+	  [frustumPlanes](const Vector3 &min, const Vector3 &max) -> bool { return pragma::math::intersection::aabb_in_plane_mesh(min, max, frustumPlanes.begin(), frustumPlanes.end()) == pragma::math::intersection::Intersect::Outside; }, bspTrees, bspLeafNodes, 0, nullptr);
 }
 
 bool SceneRenderDesc::ShouldConsiderEntity(pragma::ecs::CBaseEntity &ent, const pragma::CSceneComponent &scene, pragma::rendering::RenderFlags renderFlags, pragma::rendering::RenderMask renderMask)
@@ -283,12 +283,12 @@ bool SceneRenderDesc::ShouldConsiderEntity(pragma::ecs::CBaseEntity &ent, const 
 	auto *renderC = ent.GetRenderComponent();
 	auto renderMode = renderC->GetSceneRenderPass();
 	auto renderGroups = renderC->GetRenderGroups();
-	return umath::is_flag_set(renderFlags, render_mode_to_render_flag(renderMode)) && (renderGroups & renderMask) == renderGroups && ent.GetModel() != nullptr && renderC->ShouldDraw();
+	return pragma::math::is_flag_set(renderFlags, render_mode_to_render_flag(renderMode)) && (renderGroups & renderMask) == renderGroups && ent.GetModel() != nullptr && renderC->ShouldDraw();
 }
 
 struct DebugFreezeCamData {
 	Vector3 pos;
-	std::vector<umath::Plane> frustumPlanes;
+	std::vector<pragma::math::Plane> frustumPlanes;
 };
 static std::optional<DebugFreezeCamData> g_debugFreezeCamData = {};
 static void cmd_debug_occlusion_culling_freeze_camera(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val)
@@ -334,10 +334,10 @@ void SceneRenderDesc::BuildRenderQueueInstanceLists(pragma::rendering::RenderQue
 	instancer.Process();
 
 #if 0
-	util::Hash prevEntityHash = 0;
-	util::Hash curEntityHash = 0;
+	pragma::util::Hash prevEntityHash = 0;
+	pragma::util::Hash curEntityHash = 0;
 	uint32_t numHashMatches = 0;
-	auto instanceThreshold = umath::max(cvInstancingThreshold->GetInt(),2);
+	auto instanceThreshold = pragma::math::max(cvInstancingThreshold->GetInt(),2);
 	std::vector<EntityIndex> instantiableEntityList;
 	auto fUpdateEntityInstanceLists = [&instantiableEntityList,&curEntityHash,&prevEntityHash,instanceThreshold](
 		pragma::rendering::RenderQueue &renderQueue,EntityIndex entIdx,uint32_t numMeshes,pragma::rendering::RenderQueueItemSortPair *sortItem
@@ -399,10 +399,10 @@ void SceneRenderDesc::BuildRenderQueueInstanceLists(pragma::rendering::RenderQue
 			instantiableEntityList.push_back(entIdx);
 	};
 	auto &sortedItemIndices = renderQueue.sortedItemIndices;
-	auto fCalcNextEntityHash = [&sortedItemIndices,&renderQueue](uint32_t &inOutStartIndex,uint32_t &outNumMeshes) -> util::Hash {
+	auto fCalcNextEntityHash = [&sortedItemIndices,&renderQueue](uint32_t &inOutStartIndex,uint32_t &outNumMeshes) -> pragma::util::Hash {
 		if(inOutStartIndex >= sortedItemIndices.size())
 			return 0;
-		util::Hash hash = 0;
+		pragma::util::Hash hash = 0;
 		auto entity = renderQueue.queue[sortedItemIndices[inOutStartIndex].first].entity;
 		uint32_t numMeshes = 0;
 		while(inOutStartIndex < sortedItemIndices.size())
@@ -412,7 +412,7 @@ void SceneRenderDesc::BuildRenderQueueInstanceLists(pragma::rendering::RenderQue
 			if(item.entity != entity)
 				break;
 			++numMeshes;
-			hash = util::hash_combine<uint64_t>(hash,*reinterpret_cast<uint64_t*>(&sortKey.second));
+			hash = pragma::util::hash_combine<uint64_t>(hash,*reinterpret_cast<uint64_t*>(&sortKey.second));
 		}
 		return hash;
 	};
@@ -481,7 +481,7 @@ void SceneRenderDesc::BuildRenderQueueInstanceLists(pragma::rendering::RenderQue
 			++curEntityMeshes;
 
 			static_assert(sizeof(decltype(sortKey.second)) == sizeof(uint64_t));
-			curEntityHash = util::hash_combine<uint64_t>(curEntityHash,*reinterpret_cast<uint64_t*>(&sortKey.second));
+			curEntityHash = pragma::util::hash_combine<uint64_t>(curEntityHash,*reinterpret_cast<uint64_t*>(&sortKey.second));
 		}
 		curEntityHash = 0;
 		instantiableEntityList.push_back(std::numeric_limits<EntityIndex>::max());
@@ -550,12 +550,12 @@ void SceneRenderDesc::BuildRenderQueues(const pragma::rendering::DrawSceneInfo &
 		  pragma::CSceneComponent::GetEntityInstanceIndexBuffer()->UpdateAndClearUnusedBuffers();
 
 		  auto frustumCullingEnabled = cvFrustumCullingEnabled->GetBool();
-		  static std::vector<umath::Plane> frustumPlanesCube {};
+		  static std::vector<pragma::math::Plane> frustumPlanesCube {};
 		  if(frustumCullingEnabled == false && frustumPlanesCube.empty()) {
 			  double d = pragma::cCameraComponent::DEFAULT_FAR_Z;
-			  frustumPlanesCube = {umath::Plane {-uvec::RIGHT, d}, umath::Plane {uvec::RIGHT, d}, umath::Plane {uvec::UP, d}, umath::Plane {-uvec::UP, d}, umath::Plane {-uvec::FORWARD, d}, umath::Plane {uvec::FORWARD, d}};
+			  frustumPlanesCube = {pragma::math::Plane {-uvec::RIGHT, d}, pragma::math::Plane {uvec::RIGHT, d}, pragma::math::Plane {uvec::UP, d}, pragma::math::Plane {-uvec::UP, d}, pragma::math::Plane {-uvec::FORWARD, d}, pragma::math::Plane {uvec::FORWARD, d}};
 		  }
-		  std::vector<umath::Plane> frustumPlanes;
+		  std::vector<pragma::math::Plane> frustumPlanes;
 		  if(!frustumCullingEnabled)
 			  frustumPlanes = frustumPlanesCube;
 		  else if(g_debugFreezeCamData.has_value())
@@ -567,8 +567,8 @@ void SceneRenderDesc::BuildRenderQueues(const pragma::rendering::DrawSceneInfo &
 		  auto fShouldCull = [&frustumPlanes](const Vector3 &min, const Vector3 &max) -> bool { return SceneRenderDesc::ShouldCull(min, max, frustumPlanes); };
 		  auto vp = cam.GetProjectionMatrix() * cam.GetViewMatrix();
 
-		  std::vector<util::BSPTree::Node *> bspLeafNodes;
-		  std::vector<util::BSPTree *> bspTrees;
+		  std::vector<pragma::util::BSPTree::Node *> bspLeafNodes;
+		  std::vector<pragma::util::BSPTree *> bspTrees;
 		  // Note: World geometry is handled differently than other entities. World entities have their
 		  // own pre-built render queues, which we only have to iterate for maximum efficiency. Whether or not a world mesh is culled from the
 		  // camera frustum is stored in 'm_worldMeshVisibility', which is simply a boolean array so we don't have to copy any
@@ -596,7 +596,7 @@ void SceneRenderDesc::BuildRenderQueues(const pragma::rendering::DrawSceneInfo &
 			  bspLeafNodes.push_back(node);
 			  bspTrees.push_back(bspTree.get());
 
-			  if(umath::is_flag_set(drawSceneInfo.renderFlags, pragma::rendering::RenderFlags::Static) == false)
+			  if(pragma::math::is_flag_set(drawSceneInfo.renderFlags, pragma::rendering::RenderFlags::Static) == false)
 				  continue;
 
 			  auto *renderC = static_cast<pragma::ecs::CBaseEntity &>(worldC->GetEntity()).GetRenderComponent();
@@ -620,7 +620,7 @@ void SceneRenderDesc::BuildRenderQueues(const pragma::rendering::DrawSceneInfo &
 				  }
 			  }
 
-			  if(umath::is_flag_set(drawSceneInfo.renderFlags, pragma::rendering::RenderFlags::Translucent)) {
+			  if(pragma::math::is_flag_set(drawSceneInfo.renderFlags, pragma::rendering::RenderFlags::Translucent)) {
 				  // Translucent meshes will have to be sorted dynamically with all other non-world translucent objects,
 				  // so we'll copy the information to the dynamic queue
 				  auto *renderQueueTranslucentSrc = worldC->GetClusterRenderQueue(node->cluster, true /* translucent */);
@@ -652,7 +652,7 @@ void SceneRenderDesc::BuildRenderQueues(const pragma::rendering::DrawSceneInfo &
 		  if(stats)
 			  (*stats)->AddTime(pragma::rendering::RenderQueueBuilderStats::Timer::WorldQueueUpdate, std::chrono::steady_clock::now() - t);
 
-		  if(umath::is_flag_set(drawSceneInfo.renderFlags, pragma::rendering::RenderFlags::Dynamic)) {
+		  if(pragma::math::is_flag_set(drawSceneInfo.renderFlags, pragma::rendering::RenderFlags::Dynamic)) {
 			  if(stats)
 				  t = std::chrono::steady_clock::now();
 

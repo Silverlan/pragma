@@ -26,7 +26,7 @@ export namespace pragma::pts {
 		virtual void PostSimulate(double tDelta) override;
 		virtual pragma::ShaderParticleBase *GetShader() const override;
 	private:
-		::util::WeakHandle<prosper::Shader> m_shader = {};
+		pragma::util::WeakHandle<prosper::Shader> m_shader = {};
 		std::unique_ptr<pragma::pts::CParticleRendererRotationalBuffer> m_rotationalBuffer = nullptr;
 		bool m_bPlanarRotation = true;
 	};

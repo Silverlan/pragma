@@ -19,7 +19,7 @@ void CPhysicsComponent::Initialize()
 
 #if 0
 	// TODO
-	BindEvent(cAnimatedComponent::EVENT_ON_SKELETON_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cAnimatedComponent::EVENT_ON_SKELETON_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
 		auto *phys = GetPhysicsObject();
 		if(phys != nullptr && GetPhysicsType() == pragma::physics::PhysicsType::Dynamic)
 		{
@@ -33,10 +33,10 @@ void CPhysicsComponent::Initialize()
 					animComponent->GetLocalBonePosition(boneId,posRoot);
 				//offset = glm::gtc::translate(offset,-posRoot); // Deprecated? TODO: Remove this entire block!
 				static_cast<CEOnSkeletonUpdated&>(evData.get()).physRootBoneId = boneId;
-				return util::EventReply::Handled;
+				return pragma::util::EventReply::Handled;
 			}
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	BindEventUnhandled(cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) {
 		auto &ent = GetEntity();

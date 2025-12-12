@@ -66,7 +66,7 @@ export {
 			virtual bool HasPreFilter() const override;
 			virtual bool HasPostFilter() const override;
 		  private:
-			util::TWeakSharedHandle<ICollisionObject> m_hColObj = {};
+			pragma::util::TWeakSharedHandle<ICollisionObject> m_hColObj = {};
 		};
 
 		class DLLNETWORK CustomRayCastFilterCallback : public IRayCastFilterCallback {

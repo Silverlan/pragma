@@ -90,11 +90,11 @@ static void print_pass_stats(const pragma::rendering::RenderPassStats &stats, bo
 		uniqueEntities.insert(static_cast<pragma::ecs::CBaseEntity *>(entData.hEntity.get()));
 
 	Con::cout << "\nUnique meshes: " << stats.meshes.size() << Con::endl;
-	auto n = umath::to_integral(pragma::rendering::RenderPassStats::Counter::Count);
+	auto n = pragma::math::to_integral(pragma::rendering::RenderPassStats::Counter::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i)
 		Con::cout << magic_enum::enum_name(static_cast<pragma::rendering::RenderPassStats::Counter>(i)) << ": " << stats->GetCount(static_cast<pragma::rendering::RenderPassStats::Counter>(i)) << Con::endl;
 
-	n = umath::to_integral(pragma::rendering::RenderPassStats::Timer::Count);
+	n = pragma::math::to_integral(pragma::rendering::RenderPassStats::Timer::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i)
 		Con::cout << magic_enum::enum_name(static_cast<pragma::rendering::RenderPassStats::Timer>(i)) << ": " << nanoseconds_to_ms(stats->GetTime(static_cast<pragma::rendering::RenderPassStats::Timer>(i))) << Con::endl;
 }
@@ -102,7 +102,7 @@ DLLCLIENT void print_debug_render_stats(const pragma::rendering::RenderStats &re
 {
 	g_collectRenderStats = false;
 
-	auto n = umath::to_integral(pragma::rendering::RenderStats::RenderStage::Count);
+	auto n = pragma::math::to_integral(pragma::rendering::RenderStats::RenderStage::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i)
 		Con::cout << magic_enum::enum_name(static_cast<pragma::rendering::RenderStats::RenderStage>(i)) << ": " << nanoseconds_to_ms(renderStats->GetTime(static_cast<pragma::rendering::RenderStats::RenderStage>(i))) << Con::endl;
 
@@ -115,7 +115,7 @@ DLLCLIENT void print_debug_render_stats(const pragma::rendering::RenderStats &re
 	Con::cout<<"Render buffer update time: "<<nanoseconds_to_ms(renderStats.updateRenderBufferTime)<<Con::endl;*/
 
 	Con::cout << "\n----- Render queue builder stats: -----" << Con::endl;
-	n = umath::to_integral(pragma::rendering::RenderQueueBuilderStats::Timer::Count);
+	n = pragma::math::to_integral(pragma::rendering::RenderQueueBuilderStats::Timer::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i)
 		Con::cout << magic_enum::enum_name(static_cast<pragma::rendering::RenderQueueBuilderStats::Timer>(i)) << ": " << nanoseconds_to_ms(renderStats.renderQueueBuilderStats->GetTime(static_cast<pragma::rendering::RenderQueueBuilderStats::Timer>(i))) << Con::endl;
 
@@ -124,7 +124,7 @@ DLLCLIENT void print_debug_render_stats(const pragma::rendering::RenderStats &re
 	for(auto &workerStats : renderStats.renderQueueBuilderStats.workerStats)
 		Con::cout << "Worker #" << workerId++ << ": " << workerStats.numJobs << " jobs with total execution time of " << nanoseconds_to_ms(workerStats.totalExecutionTime) << Con::endl;
 
-	n = umath::to_integral(pragma::rendering::RenderStats::RenderPass::Count);
+	n = pragma::math::to_integral(pragma::rendering::RenderStats::RenderPass::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i) {
 		Con::cout << "\n----- " << magic_enum::enum_name(static_cast<pragma::rendering::RenderStats::RenderPass>(i)) << ": -----" << Con::endl;
 		print_pass_stats(renderStats.GetPassStats(static_cast<pragma::rendering::RenderStats::RenderPass>(i)), full);
@@ -190,7 +190,7 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 	g_collectRenderStats = enabled;
 	if(enabled == false)
 		return;
-	auto stats = ::util::make_shared<pragma::rendering::RenderStatsQueue>();
+	auto stats = pragma::util::make_shared<pragma::rendering::RenderStatsQueue>();
 	auto first = true;
 	g_cbPreRenderScene = pragma::get_cgame()->AddCallback("OnRenderScenes", FunctionCallback<void>::Create([stats, first, full, print]() mutable {
 		auto swapchainIdx = pragma::get_cengine()->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
@@ -270,7 +270,7 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 }
 
 pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const pragma::rendering::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin)
-    : m_drawSceneInfo {drawSceneInfo}, m_drawOrigin {drawOrigin}, m_shaderProcessor {*drawSceneInfo.commandBuffer, umath::is_flag_set(drawSceneInfo.drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::Reflection) ? PassType::Reflection : PassType::Generic}
+    : m_drawSceneInfo {drawSceneInfo}, m_drawOrigin {drawOrigin}, m_shaderProcessor {*drawSceneInfo.commandBuffer, pragma::math::is_flag_set(drawSceneInfo.drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::Reflection) ? PassType::Reflection : PassType::Generic}
 {
 	auto &scene = drawSceneInfo.drawSceneInfo.scene;
 	auto *renderer = scene->GetRenderer<pragma::CRendererComponent>();
@@ -279,36 +279,36 @@ pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const pragma::render
 }
 pragma::rendering::BaseRenderProcessor::~BaseRenderProcessor() { UnbindShader(); }
 
-void pragma::rendering::BaseRenderProcessor::SetCountNonOpaqueMaterialsOnly(bool b) { umath::set_flag(m_stateFlags, StateFlags::CountNonOpaqueMaterialsOnly, b); }
+void pragma::rendering::BaseRenderProcessor::SetCountNonOpaqueMaterialsOnly(bool b) { pragma::math::set_flag(m_stateFlags, StateFlags::CountNonOpaqueMaterialsOnly, b); }
 
 void pragma::rendering::BaseRenderProcessor::UnbindShader()
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false)
 		return;
 	//m_shaderScene->EndDraw();
 	m_drawSceneInfo.commandBuffer->RecordUnbindShaderPipeline();
 	m_curShader = nullptr;
 	m_curPipeline = std::numeric_limits<decltype(m_curPipeline)>::max();
 	m_curInstanceSet = nullptr;
-	umath::set_flag(m_stateFlags, StateFlags::ShaderBound, false);
+	pragma::math::set_flag(m_stateFlags, StateFlags::ShaderBound, false);
 }
 
 void pragma::rendering::BaseRenderProcessor::UnbindMaterial()
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::MaterialBound) == false)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::MaterialBound) == false)
 		return;
 	m_curMaterial = nullptr;
 	m_curMaterialIndex = std::numeric_limits<decltype(m_curMaterialIndex)>::max();
-	umath::set_flag(m_stateFlags, StateFlags::MaterialBound, false);
+	pragma::math::set_flag(m_stateFlags, StateFlags::MaterialBound, false);
 }
 
 void pragma::rendering::BaseRenderProcessor::UnbindEntity()
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false)
 		return;
 	m_curEntity = nullptr;
 	m_curEntityIndex = std::numeric_limits<decltype(m_curEntityIndex)>::max();
-	umath::set_flag(m_stateFlags, StateFlags::EntityBound, false);
+	pragma::math::set_flag(m_stateFlags, StateFlags::EntityBound, false);
 }
 
 bool pragma::rendering::BaseRenderProcessor::BindInstanceSet(pragma::ShaderGameWorld &shaderScene, const RenderQueue::InstanceSet *instanceSet)
@@ -337,7 +337,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::Shader &shader,
 bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipelineId)
 {
 	if(pipelineId == m_curPipeline)
-		return umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound);
+		return pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound);
 	uint32_t pipelineIdx;
 	auto *shader = pragma::get_cengine()->GetRenderContext().GetShaderPipeline(pipelineId, pipelineIdx);
 	assert(shader);
@@ -380,7 +380,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 		(*m_stats)->Increment(RenderPassStats::Counter::ShaderStateChanges);
 		m_stats->shaders.push_back(shader->GetHandle());
 	}
-	umath::set_flag(m_stateFlags, StateFlags::ShaderBound);
+	pragma::math::set_flag(m_stateFlags, StateFlags::ShaderBound);
 
 	m_shaderScene = shaderScene;
 	return true;
@@ -388,7 +388,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 void pragma::rendering::BaseRenderProcessor::SetCameraType(CameraType camType)
 {
 	m_camType = camType;
-	if(umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene.get();
 	auto *renderer = scene.GetRenderer<pragma::CRendererComponent>();
@@ -398,9 +398,9 @@ void pragma::rendering::BaseRenderProcessor::SetCameraType(CameraType camType)
 }
 void pragma::rendering::BaseRenderProcessor::Set3DSky(bool enabled)
 {
-	umath::set_flag(m_baseSceneFlags, ShaderGameWorld::SceneFlags::RenderAs3DSky, enabled);
-	// umath::set_flag(m_renderFlags,RenderFlags::RenderAs3DSky,enabled);
-	if(umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
+	pragma::math::set_flag(m_baseSceneFlags, ShaderGameWorld::SceneFlags::RenderAs3DSky, enabled);
+	// pragma::math::set_flag(m_renderFlags,RenderFlags::RenderAs3DSky,enabled);
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
 	//m_shaderScene->Set3DSky(enabled);
 }
@@ -408,24 +408,24 @@ void pragma::rendering::BaseRenderProcessor::SetDrawOrigin(const Vector4 &drawOr
 {
 	m_drawOrigin = drawOrigin;
 	m_shaderProcessor.SetDrawOrigin(drawOrigin);
-	if(umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
 	//m_shaderScene->BindDrawOrigin(drawOrigin);
 }
 void pragma::rendering::BaseRenderProcessor::SetDepthBias(float d, float delta)
 {
 	m_depthBias = (d > 0.f && delta > 0.f) ? Vector2 {d, delta} : std::optional<Vector2> {};
-	if(umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
 	//m_shaderScene->SetDepthBias(m_depthBias.has_value() ? *m_depthBias : Vector2{});
 }
 bool pragma::rendering::BaseRenderProcessor::BindMaterial(msys::CMaterial &mat)
 {
 	if(&mat == m_curMaterial)
-		return umath::is_flag_set(m_stateFlags, StateFlags::MaterialBound);
+		return pragma::math::is_flag_set(m_stateFlags, StateFlags::MaterialBound);
 	UnbindMaterial();
 	m_curMaterial = &mat;
-	if(umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false)
 		return false;
 	if(mat.IsInitialized() == false) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
@@ -444,12 +444,12 @@ bool pragma::rendering::BaseRenderProcessor::BindMaterial(msys::CMaterial &mat)
 	}
 
 	if(m_stats) {
-		if(umath::is_flag_set(m_stateFlags, StateFlags::CountNonOpaqueMaterialsOnly) == false || mat.GetAlphaMode() != AlphaMode::Opaque) {
+		if(pragma::math::is_flag_set(m_stateFlags, StateFlags::CountNonOpaqueMaterialsOnly) == false || mat.GetAlphaMode() != AlphaMode::Opaque) {
 			(*m_stats)->Increment(RenderPassStats::Counter::MaterialStateChanges);
 			m_stats->materials.push_back(mat.GetHandle());
 		}
 	}
-	umath::set_flag(m_stateFlags, StateFlags::MaterialBound);
+	pragma::math::set_flag(m_stateFlags, StateFlags::MaterialBound);
 
 	m_curMaterialIndex = mat.GetIndex();
 	return true;
@@ -457,11 +457,11 @@ bool pragma::rendering::BaseRenderProcessor::BindMaterial(msys::CMaterial &mat)
 bool pragma::rendering::BaseRenderProcessor::BindEntity(pragma::ecs::CBaseEntity &ent)
 {
 	if(&ent == m_curEntity)
-		return umath::is_flag_set(m_stateFlags, StateFlags::EntityBound);
+		return pragma::math::is_flag_set(m_stateFlags, StateFlags::EntityBound);
 	UnbindEntity();
 	m_curEntity = &ent;
 	auto *renderC = ent.GetRenderComponent();
-	if(umath::is_flag_set(m_stateFlags, StateFlags::MaterialBound) == false)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::MaterialBound) == false)
 		return false;
 	if(renderC == nullptr) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
@@ -473,7 +473,7 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(pragma::ecs::CBaseEntity
 			spdlog::warn("[Render] WARNING: Entity {} has been filtered out!", ent.ToString());
 		return false;
 	}
-	// if(m_stats && umath::is_flag_set(renderC->GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
+	// if(m_stats && pragma::math::is_flag_set(renderC->GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
 	// 	++m_stats->numEntityBufferUpdates;
 	// renderC->UpdateRenderBuffers(m_drawSceneInfo.commandBuffer);
 	//if(m_shaderScene->BindEntity(ent) == false)
@@ -494,7 +494,7 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(pragma::ecs::CBaseEntity
 	//auto *entClipPlane = m_curRenderC->GetRenderClipPlane();
 	//m_shaderScene->BindClipPlane(entClipPlane ? *entClipPlane : Vector4{});
 
-	/*if(umath::is_flag_set(m_curRenderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
+	/*if(pragma::math::is_flag_set(m_curRenderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
 	{
 		float constantFactor,biasClamp,slopeFactor;
 		m_curRenderC->GetDepthBias(constantFactor,biasClamp,slopeFactor);
@@ -507,17 +507,17 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(pragma::ecs::CBaseEntity
 		(*m_stats)->Increment(RenderPassStats::Counter::EntityStateChanges);
 		m_stats->entities.push_back(ent.GetHandle());
 	}
-	umath::set_flag(m_stateFlags, StateFlags::EntityBound);
+	pragma::math::set_flag(m_stateFlags, StateFlags::EntityBound);
 
 	m_curEntityIndex = ent.GetLocalIndex();
 	return true;
 }
 
-pragma::ShaderGameWorld *pragma::rendering::BaseRenderProcessor::GetCurrentShader() { return umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) ? m_shaderScene : nullptr; }
+pragma::ShaderGameWorld *pragma::rendering::BaseRenderProcessor::GetCurrentShader() { return pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) ? m_shaderScene : nullptr; }
 
 bool pragma::rendering::BaseRenderProcessor::Render(pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet)
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false || m_curRenderC == nullptr)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false || m_curRenderC == nullptr)
 		return false;
 	if((g_debugRenderFilter && g_debugRenderFilter->meshFilter && g_debugRenderFilter->meshFilter(*m_curEntity, m_curMaterial, mesh, meshIdx) == false)) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
@@ -605,7 +605,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 
 	renderQueue.WaitForCompletion(optStats);
 	auto isDepthPass = (pass == RenderPass::Prepass || pass == RenderPass::Shadow);
-	if(m_renderer == nullptr || (isDepthPass && umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false))
+	if(m_renderer == nullptr || (isDepthPass && pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false))
 		return 0;
 	m_stats = optStats;
 	m_shaderProcessor.SetStats(m_stats);
@@ -664,7 +664,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				if(optStats)
 					(*optStats)->AddTime(RenderPassStats::Timer::ShaderBind, std::chrono::steady_clock::now() - ttmp);
 			}
-			if(umath::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false)
+			if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false)
 				continue;
 		}
 		else {
@@ -696,14 +696,14 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				auto pipeline = enableAlphaTest ? ShaderPrepass::Pipeline::AlphaTest : ShaderPrepass::Pipeline::Opaque;
 
 				prosper::PipelineID pipelineId;
-				if(!static_cast<pragma::ShaderPrepass *>(m_shaderScene)->GetPipelineId(pipelineId, umath::to_integral(pipeline)) || !BindShader(pipelineId))
+				if(!static_cast<pragma::ShaderPrepass *>(m_shaderScene)->GetPipelineId(pipelineId, pragma::math::to_integral(pipeline)) || !BindShader(pipelineId))
 					continue;
 			}
 			BindMaterial(static_cast<msys::CMaterial &>(*mat));
 			if(optStats)
 				(*optStats)->AddTime(RenderPassStats::Timer::MaterialBind, std::chrono::steady_clock::now() - ttmp);
 		}
-		if(umath::is_flag_set(m_stateFlags, StateFlags::MaterialBound) == false)
+		if(pragma::math::is_flag_set(m_stateFlags, StateFlags::MaterialBound) == false)
 			continue;
 		if(item.entity != m_curEntityIndex) {
 			if(optStats)
@@ -723,7 +723,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				// TODO: If we're instancing, there's technically no need to bind
 				// the entity (except for resetting the clip plane, etc.)
 				BindEntity(static_cast<pragma::ecs::CBaseEntity &>(*ent));
-				if(m_stats && umath::is_flag_set(m_stateFlags, StateFlags::EntityBound)) {
+				if(m_stats && pragma::math::is_flag_set(m_stateFlags, StateFlags::EntityBound)) {
 					if(item.instanceSetIndex == RenderQueueItem::UNIQUE)
 						(*m_stats)->Increment(RenderPassStats::Counter::EntitiesWithoutInstancing);
 				}
@@ -733,7 +733,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 			if(optStats)
 				(*optStats)->AddTime(RenderPassStats::Timer::EntityBind, std::chrono::steady_clock::now() - ttmp);
 		}
-		if(umath::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false || item.mesh >= m_curEntityMeshList->size())
+		if(pragma::math::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false || item.mesh >= m_curEntityMeshList->size())
 			continue;
 		if(m_stats && curInstanceSet) {
 			(*m_stats)->Increment(RenderPassStats::Counter::InstanceSets);

@@ -26,7 +26,7 @@ export namespace pragma::scripting::lua_core {
 
 		Default = AddToCache | SkipIfCached,
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 
 	DLLNETWORK IncludeResult include(lua::State *l, const std::string &path, IncludeFlags flags = IncludeFlags::None);
 	DLLNETWORK void execute_files_in_directory(lua::State *l, const std::string &path);

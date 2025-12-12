@@ -44,7 +44,7 @@ void CAnimatedBvhComponent::UpdateDirtyBones()
 		return;
 	}
 
-	constexpr auto thresholdDistance = umath::pow2(0.4f);
+	constexpr auto thresholdDistance = pragma::math::pow2(0.4f);
 	m_dirtyBones.clear();
 	m_dirtyBones.resize(processedPoses.size(), false);
 	auto hasDirtyBones = false;
@@ -72,31 +72,31 @@ void CAnimatedBvhComponent::Initialize()
 
 	auto animC = GetEntity().GetComponent<CAnimatedComponent>();
 	if(animC.valid()) {
-		m_cbOnMatricesUpdated = animC->AddEventCallback(cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnMatricesUpdated = animC->AddEventCallback(cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 			UpdateDirtyBones();
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		});
 		animC->SetSkeletonUpdateCallbacksEnabled(true);
 	}
 
 	auto bvhC = GetEntity().GetComponent<CBvhComponent>();
 	if(bvhC.valid()) {
-		m_cbOnBvhCleared = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_CLEAR_BVH, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnBvhCleared = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_CLEAR_BVH, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 			Clear();
 			m_tmpBvhData = nullptr;
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		});
-		m_cbOnBvhUpdateRequested = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnBvhUpdateRequested = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 			/*if(m_updateLazily && m_rebuildScheduled)
 			{
 				RebuildAnimatedBvh(true);
 				WaitForCompletion();
 			}*/
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		});
-		m_cbOnBvhRebuilt = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_BVH_REBUILT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnBvhRebuilt = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_BVH_REBUILT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 			RebuildTemporaryBvhData();
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		});
 
 		if(bvhC->HasBvhData())
@@ -194,7 +194,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 	::debug::get_domain().BeginTask("bvh_animated_prepare");
 #endif
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	util::ScopeGuard sg {[]() { ::debug::get_domain().EndTask(); }};
+	pragma::util::ScopeGuard sg {[]() { ::debug::get_domain().EndTask(); }};
 #endif
 	if(!force && IsBusy()) {
 		if(m_rebuildScheduled)
@@ -263,10 +263,10 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 		m_animatedBvhData.transformedTris.resize(triCount);
 	}
 
-	std::function<bool(uint32_t, const umath::Vertex &, const umath::VertexWeight &)> fShouldConsiderVertex = nullptr;
+	std::function<bool(uint32_t, const pragma::math::Vertex &, const pragma::math::VertexWeight &)> fShouldConsiderVertex = nullptr;
 	if(optDirtyBones) {
 		auto cpyDirtyBones = *optDirtyBones;
-		fShouldConsiderVertex = [cpyDirtyBones = std::move(cpyDirtyBones)](uint32_t vertIdx, const umath::Vertex &v, const umath::VertexWeight &vw) -> bool {
+		fShouldConsiderVertex = [cpyDirtyBones = std::move(cpyDirtyBones)](uint32_t vertIdx, const pragma::math::Vertex &v, const pragma::math::VertexWeight &vw) -> bool {
 			constexpr auto n = decltype(vw.boneIds)::length();
 			for(auto i = decltype(n) {0u}; i < n; ++i) {
 				assert(vw.boneIds[i] < cpyDirtyBones.size());

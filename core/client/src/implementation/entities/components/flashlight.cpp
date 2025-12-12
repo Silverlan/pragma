@@ -21,21 +21,21 @@ void CFlashlightComponent::Initialize()
 	pragma::get_client_state()->PrecacheSound("fx\\flashlight_off.wav");
 
 	auto &ent = GetEntity();
-	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
 		auto pAttComponent = GetEntity().GetComponent<CAttachmentComponent>();
 		auto *pParent = pAttComponent.valid() ? pAttComponent->GetParent() : nullptr;
 		if(pParent != nullptr && &static_cast<CEShouldPassEntity &>(evData.get()).entity == pParent) {
 			static_cast<CEShouldPassEntity &>(evData.get()).shouldPass = false;
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 }
 
-util::EventReply CFlashlightComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply CFlashlightComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseFlashlightComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseFlashlightComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	auto &ent = GetEntity();
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON) {
 		auto pSoundEmitterCompnent = ent.GetComponent<pragma::CSoundEmitterComponent>();
@@ -47,7 +47,7 @@ util::EventReply CFlashlightComponent::HandleEvent(ComponentEventId eventId, Com
 		if(pSoundEmitterCompnent.valid())
 			pSoundEmitterCompnent->EmitSound("fx\\flashlight_off.wav", pragma::audio::ALSoundType::Effect, 1.f);
 	}
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 void CFlashlightComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

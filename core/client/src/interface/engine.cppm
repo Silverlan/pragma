@@ -134,7 +134,7 @@ export namespace pragma {
 		std::shared_ptr<al::IEffect> CreateAuxEffect(const std::string &name, const TEfxProperties &props)
 		{
 			auto lname = name;
-			ustring::to_lower(lname);
+			pragma::string::to_lower(lname);
 			auto effect = GetAuxEffect(lname);
 			if(effect != nullptr)
 				return effect;
@@ -202,7 +202,7 @@ export namespace pragma {
 		const InputBindingLayer &GetEffectiveInputBindingLayer();
 
 		// Shaders
-		::util::WeakHandle<prosper::Shader> ReloadShader(const std::string &name);
+		pragma::util::WeakHandle<prosper::Shader> ReloadShader(const std::string &name);
 		void ReloadShaderPipelines();
 		pragma::rendering::ShaderGraphManager &GetShaderGraphManager() { return *m_shaderGraphManager; }
 		const pragma::rendering::ShaderGraphManager &GetShaderGraphManager() const { return const_cast<CEngine *>(this)->GetShaderGraphManager(); }
@@ -253,16 +253,16 @@ export namespace pragma {
 		virtual void RegisterConsoleCommands() override;
 	  private:
 		// Sound
-		std::shared_ptr<util::Library> m_audioAPILib = nullptr;
+		std::shared_ptr<pragma::util::Library> m_audioAPILib = nullptr;
 		std::shared_ptr<al::ISoundSystem> m_soundSystem = nullptr;
 		std::string m_audioAPI;
 
 		// FPS
 		double m_fps;
 		double m_tFPSTime;
-		util::Clock::time_point m_tLastFrame;
-		util::Clock::duration m_tDeltaFrameTime;
-		util::Clock::time_point m_tWindowResizeTime;
+		pragma::util::Clock::time_point m_tLastFrame;
+		pragma::util::Clock::duration m_tDeltaFrameTime;
+		pragma::util::Clock::time_point m_tWindowResizeTime;
 		std::optional<std::chrono::nanoseconds> m_fixedFrameDeltaTimeInterpretation = {};
 
 		std::unordered_map<std::string, std::shared_ptr<al::IEffect>> m_auxEffects;

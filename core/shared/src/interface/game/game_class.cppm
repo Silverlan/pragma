@@ -36,7 +36,7 @@ export import :util.timer;
 
 export {
 	namespace pragma {
-		class DLLNETWORK Game : public util::CallbackHandler, public LuaCallbackHandler {
+		class DLLNETWORK Game : public pragma::util::CallbackHandler, public LuaCallbackHandler {
 		  public:
 			pragma::physics::IEnvironment *GetPhysicsEnvironment();
 			const pragma::physics::IEnvironment *GetPhysicsEnvironment() const;
@@ -114,12 +114,12 @@ export {
 			void RemoveEntities();
 			virtual pragma::ecs::BaseEntity *GetEntity(unsigned int idx);
 			virtual pragma::ecs::BaseEntity *GetEntityByLocalIndex(uint32_t idx);
-			const pragma::ecs::BaseEntity *FindEntityByUniqueId(const util::Uuid &uuid) const { return const_cast<pragma::Game *>(this)->FindEntityByUniqueId(uuid); }
-			pragma::ecs::BaseEntity *FindEntityByUniqueId(const util::Uuid &uuid);
+			const pragma::ecs::BaseEntity *FindEntityByUniqueId(const pragma::util::Uuid &uuid) const { return const_cast<pragma::Game *>(this)->FindEntityByUniqueId(uuid); }
+			pragma::ecs::BaseEntity *FindEntityByUniqueId(const pragma::util::Uuid &uuid);
 			const std::unordered_map<size_t, pragma::ecs::BaseEntity *> &GetEntityUuidMap() const { return const_cast<pragma::Game *>(this)->GetEntityUuidMap(); }
 			std::unordered_map<size_t, pragma::ecs::BaseEntity *> &GetEntityUuidMap() { return m_uuidToEnt; }
 			pragma::BaseWorldComponent *GetWorld();
-			const std::vector<util::TWeakSharedHandle<pragma::BaseWorldComponent>> &GetWorldComponents() const;
+			const std::vector<pragma::util::TWeakSharedHandle<pragma::BaseWorldComponent>> &GetWorldComponents() const;
 			unsigned char GetPlayerCount();
 			unsigned int GetEntityCount();
 			virtual void SpawnEntity(pragma::ecs::BaseEntity *ent);
@@ -333,7 +333,7 @@ export {
 			// for the next tick.
 			float m_tPhysDeltaRemainder = 0.f;
 			Vector3 m_gravity = {0, -600, 0};
-			std::vector<util::TWeakSharedHandle<pragma::BaseWorldComponent>> m_worldComponents {};
+			std::vector<pragma::util::TWeakSharedHandle<pragma::BaseWorldComponent>> m_worldComponents {};
 			game::GameModeInfo *m_gameMode = nullptr;
 			EntityHandle m_entGamemode;
 			EntityHandle m_entGame;
@@ -375,7 +375,7 @@ export {
 			virtual void InitializeEntityComponents(pragma::EntityComponentManager &componentManager);
 			virtual void OnMapLoaded();
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	}
 	REGISTER_ENUM_FLAGS(pragma::Game::GameFlags)
 
@@ -409,7 +409,7 @@ export {
 				auto *holder = luabind::object_cast<THandle *>(r);
 				if(elLua && holder) {
 					elLua->SetupLua(r, classname);
-					holder->SetHandle(util::weak_shared_handle_cast<ecs::BaseEntity, TLuaEntity>(elLua->GetHandle()));
+					holder->SetHandle(pragma::util::weak_shared_handle_cast<ecs::BaseEntity, TLuaEntity>(elLua->GetHandle()));
 					el = elLua;
 				}
 				else {
@@ -448,7 +448,7 @@ export {
 				auto *holder = luabind::object_cast<THolder *>(r);
 				if(elLua && holder) {
 					elLua->SetupLua(r);
-					holder->SetHandle(util::weak_shared_handle_cast<BaseEntityComponent, TComponent>(elLua->GetHandle()));
+					holder->SetHandle(pragma::util::weak_shared_handle_cast<BaseEntityComponent, TComponent>(elLua->GetHandle()));
 					el = elLua;
 				}
 				else {

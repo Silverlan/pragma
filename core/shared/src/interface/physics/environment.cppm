@@ -66,7 +66,7 @@ export {
 			template<class T, typename... TARGS>
 			std::shared_ptr<T> CreateSharedPtr(TARGS &&...args);
 			template<class T, typename... TARGS>
-			util::TSharedHandle<T> CreateSharedHandle(TARGS &&...args);
+			pragma::util::TSharedHandle<T> CreateSharedHandle(TARGS &&...args);
 			using RemainingDeltaTime = float;
 
 			IEnvironment(pragma::NetworkState &state);
@@ -88,21 +88,21 @@ export {
 			void SetVisualDebugger(std::unique_ptr<pragma::physics::IVisualDebugger> debugger);
 			IVisualDebugger *GetVisualDebugger() const;
 
-			virtual util::TSharedHandle<IFixedConstraint> CreateFixedConstraint(IRigidBody &a, const Vector3 &pivotA, const Quat &rotA, IRigidBody &b, const Vector3 &pivotB, const Quat &rotB) = 0;
-			virtual util::TSharedHandle<IBallSocketConstraint> CreateBallSocketConstraint(IRigidBody &a, const Vector3 &pivotA, IRigidBody &b, const Vector3 &pivotB) = 0;
-			virtual util::TSharedHandle<IHingeConstraint> CreateHingeConstraint(IRigidBody &a, const Vector3 &pivotA, IRigidBody &b, const Vector3 &pivotB, const Vector3 &axis) = 0;
-			virtual util::TSharedHandle<ISliderConstraint> CreateSliderConstraint(IRigidBody &a, const Vector3 &pivotA, const Quat &rotA, IRigidBody &b, const Vector3 &pivotB, const Quat &rotB) = 0;
-			virtual util::TSharedHandle<IConeTwistConstraint> CreateConeTwistConstraint(IRigidBody &a, const Vector3 &pivotA, const Quat &rotA, IRigidBody &b, const Vector3 &pivotB, const Quat &rotB) = 0;
-			virtual util::TSharedHandle<IDoFConstraint> CreateDoFConstraint(IRigidBody &a, const Vector3 &pivotA, const Quat &rotA, IRigidBody &b, const Vector3 &pivotB, const Quat &rotB) = 0;
-			virtual util::TSharedHandle<IDoFSpringConstraint> CreateDoFSpringConstraint(IRigidBody &a, const Vector3 &pivotA, const Quat &rotA, IRigidBody &b, const Vector3 &pivotB, const Quat &rotB) = 0;
+			virtual pragma::util::TSharedHandle<IFixedConstraint> CreateFixedConstraint(IRigidBody &a, const Vector3 &pivotA, const Quat &rotA, IRigidBody &b, const Vector3 &pivotB, const Quat &rotB) = 0;
+			virtual pragma::util::TSharedHandle<IBallSocketConstraint> CreateBallSocketConstraint(IRigidBody &a, const Vector3 &pivotA, IRigidBody &b, const Vector3 &pivotB) = 0;
+			virtual pragma::util::TSharedHandle<IHingeConstraint> CreateHingeConstraint(IRigidBody &a, const Vector3 &pivotA, IRigidBody &b, const Vector3 &pivotB, const Vector3 &axis) = 0;
+			virtual pragma::util::TSharedHandle<ISliderConstraint> CreateSliderConstraint(IRigidBody &a, const Vector3 &pivotA, const Quat &rotA, IRigidBody &b, const Vector3 &pivotB, const Quat &rotB) = 0;
+			virtual pragma::util::TSharedHandle<IConeTwistConstraint> CreateConeTwistConstraint(IRigidBody &a, const Vector3 &pivotA, const Quat &rotA, IRigidBody &b, const Vector3 &pivotB, const Quat &rotB) = 0;
+			virtual pragma::util::TSharedHandle<IDoFConstraint> CreateDoFConstraint(IRigidBody &a, const Vector3 &pivotA, const Quat &rotA, IRigidBody &b, const Vector3 &pivotB, const Quat &rotB) = 0;
+			virtual pragma::util::TSharedHandle<IDoFSpringConstraint> CreateDoFSpringConstraint(IRigidBody &a, const Vector3 &pivotA, const Quat &rotA, IRigidBody &b, const Vector3 &pivotB, const Quat &rotB) = 0;
 
-			virtual util::TSharedHandle<IController> CreateCapsuleController(float halfWidth, float halfHeight, float stepHeight, umath::Degree slopeLimit = DEFAULT_CHARACTER_SLOPE_LIMIT, const umath::Transform &startTransform = {}) = 0;
-			virtual util::TSharedHandle<IController> CreateBoxController(const Vector3 &halfExtents, float stepHeight, umath::Degree slopeLimit = DEFAULT_CHARACTER_SLOPE_LIMIT, const umath::Transform &startTransform = {}) = 0;
-			virtual util::TSharedHandle<ICollisionObject> CreateCollisionObject(IShape &shape) = 0;
-			virtual util::TSharedHandle<IRigidBody> CreateRigidBody(IShape &shape, bool dynamic = true) = 0;
-			virtual util::TSharedHandle<ISoftBody> CreateSoftBody(const PhysSoftBodyInfo &info, float mass, const std::vector<Vector3> &verts, const std::vector<uint16_t> &indices, std::vector<uint16_t> &indexTranslations) = 0;
-			virtual util::TSharedHandle<IGhostObject> CreateGhostObject(IShape &shape) = 0;
-			virtual util::TSharedHandle<ICollisionObject> CreatePlane(const Vector3 &n, float d, const IMaterial &mat) = 0;
+			virtual pragma::util::TSharedHandle<IController> CreateCapsuleController(float halfWidth, float halfHeight, float stepHeight, pragma::math::Degree slopeLimit = DEFAULT_CHARACTER_SLOPE_LIMIT, const pragma::math::Transform &startTransform = {}) = 0;
+			virtual pragma::util::TSharedHandle<IController> CreateBoxController(const Vector3 &halfExtents, float stepHeight, pragma::math::Degree slopeLimit = DEFAULT_CHARACTER_SLOPE_LIMIT, const pragma::math::Transform &startTransform = {}) = 0;
+			virtual pragma::util::TSharedHandle<ICollisionObject> CreateCollisionObject(IShape &shape) = 0;
+			virtual pragma::util::TSharedHandle<IRigidBody> CreateRigidBody(IShape &shape, bool dynamic = true) = 0;
+			virtual pragma::util::TSharedHandle<ISoftBody> CreateSoftBody(const PhysSoftBodyInfo &info, float mass, const std::vector<Vector3> &verts, const std::vector<uint16_t> &indices, std::vector<uint16_t> &indexTranslations) = 0;
+			virtual pragma::util::TSharedHandle<IGhostObject> CreateGhostObject(IShape &shape) = 0;
+			virtual pragma::util::TSharedHandle<ICollisionObject> CreatePlane(const Vector3 &n, float d, const IMaterial &mat) = 0;
 
 			virtual std::shared_ptr<IConvexShape> CreateCapsuleShape(float halfWidth, float halfHeight, const IMaterial &mat) = 0;
 			virtual std::shared_ptr<IConvexShape> CreateBoxShape(const Vector3 &halfExtents, const IMaterial &mat) = 0;
@@ -116,7 +116,7 @@ export {
 			virtual std::shared_ptr<IShape> CreateHeightfieldTerrainShape(uint32_t width, uint32_t length, double maxHeight, uint32_t upAxis, const IMaterial &mat) = 0;
 			virtual std::shared_ptr<IMaterial> CreateMaterial(float staticFriction, float dynamicFriction, float restitution) = 0;
 
-			virtual util::TSharedHandle<IVehicle> CreateVehicle(const VehicleCreateInfo &vhcDesc) = 0;
+			virtual pragma::util::TSharedHandle<IVehicle> CreateVehicle(const VehicleCreateInfo &vhcDesc) = 0;
 
 			RemainingDeltaTime StepSimulation(float timeStep, int maxSubSteps = 1, float fixedTimeStep = (1.f / 60.f));
 
@@ -124,14 +124,14 @@ export {
 			virtual Bool RayCast(const pragma::physics::TraceData &data, std::vector<TraceResult> *optOutResults = nullptr) const = 0;
 			virtual Bool Sweep(const pragma::physics::TraceData &data, std::vector<TraceResult> *optOutResults = nullptr) const = 0;
 
-			const std::vector<util::TSharedHandle<IConstraint>> &GetConstraints() const;
-			std::vector<util::TSharedHandle<IConstraint>> &GetConstraints();
-			const std::vector<util::TSharedHandle<ICollisionObject>> &GetCollisionObjects() const;
-			std::vector<util::TSharedHandle<ICollisionObject>> &GetCollisionObjects();
-			const std::vector<util::TSharedHandle<IController>> &GetControllers() const;
-			std::vector<util::TSharedHandle<IController>> &GetControllers();
-			const std::vector<util::TSharedHandle<IVehicle>> &GetVehicles() const;
-			std::vector<util::TSharedHandle<IVehicle>> &GetVehicles();
+			const std::vector<pragma::util::TSharedHandle<IConstraint>> &GetConstraints() const;
+			std::vector<pragma::util::TSharedHandle<IConstraint>> &GetConstraints();
+			const std::vector<pragma::util::TSharedHandle<ICollisionObject>> &GetCollisionObjects() const;
+			std::vector<pragma::util::TSharedHandle<ICollisionObject>> &GetCollisionObjects();
+			const std::vector<pragma::util::TSharedHandle<IController>> &GetControllers() const;
+			std::vector<pragma::util::TSharedHandle<IController>> &GetControllers();
+			const std::vector<pragma::util::TSharedHandle<IVehicle>> &GetVehicles() const;
+			std::vector<pragma::util::TSharedHandle<IVehicle>> &GetVehicles();
 
 			const SurfaceTypeManager &GetSurfaceTypeManager() const;
 			SurfaceTypeManager &GetSurfaceTypeManager();
@@ -155,10 +155,10 @@ export {
 			void ClearControllers();
 			void ClearVehicles();
 
-			std::vector<util::TSharedHandle<IConstraint>> m_constraints = {};
-			std::vector<util::TSharedHandle<ICollisionObject>> m_collisionObjects = {};
-			std::vector<util::TSharedHandle<IController>> m_controllers = {};
-			std::vector<util::TSharedHandle<IVehicle>> m_vehicles = {};
+			std::vector<pragma::util::TSharedHandle<IConstraint>> m_constraints = {};
+			std::vector<pragma::util::TSharedHandle<ICollisionObject>> m_collisionObjects = {};
+			std::vector<pragma::util::TSharedHandle<IController>> m_controllers = {};
+			std::vector<pragma::util::TSharedHandle<IVehicle>> m_vehicles = {};
 
 			void AddConstraint(IConstraint &constraint);
 			void AddCollisionObject(ICollisionObject &obj);
@@ -201,14 +201,14 @@ export {
 			return ptr;
 		}
 		template<class T, typename... TARGS>
-		util::TSharedHandle<T> IEnvironment::CreateSharedHandle(TARGS &&...args)
+		pragma::util::TSharedHandle<T> IEnvironment::CreateSharedHandle(TARGS &&...args)
 		{
-			auto handle = util::TSharedHandle<T> {new T {std::forward<TARGS>(args)...}, [](T *o) {
+			auto handle = pragma::util::TSharedHandle<T> {new T {std::forward<TARGS>(args)...}, [](T *o) {
 				                                      o->OnRemove();
 				                                      delete o;
 			                                      }};
 			handle->Initialize();
-			handle->InitializeLuaHandle(util::TWeakSharedHandle<IBase> {util::shared_handle_cast<T, IBase>(handle)});
+			handle->InitializeLuaHandle(pragma::util::TWeakSharedHandle<IBase> {util::shared_handle_cast<T, IBase>(handle)});
 			return handle;
 		}
 
@@ -230,7 +230,7 @@ export {
 			}
 		}
 
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::physics::IEnvironment::StateFlags)
 };

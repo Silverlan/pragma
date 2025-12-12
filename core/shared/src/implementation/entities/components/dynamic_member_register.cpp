@@ -56,7 +56,7 @@ void pragma::DynamicMemberRegister::UpdateMemberNameMap()
 std::optional<pragma::ComponentMemberIndex> pragma::DynamicMemberRegister::GetMemberIndex(const std::string &name) const
 {
 	auto lname = name;
-	ustring::to_lower(lname);
+	pragma::string::to_lower(lname);
 	auto it = m_memberNameToIndex.find(lname);
 	if(it == m_memberNameToIndex.end())
 		return {};
@@ -73,7 +73,7 @@ const pragma::ComponentMemberInfo *pragma::DynamicMemberRegister::GetMemberInfo(
 pragma::ComponentMemberIndex pragma::DynamicMemberRegister::RegisterMember(pragma::ComponentMemberInfo &&memberInfo)
 {
 	std::string lmemberName = memberInfo.GetName();
-	ustring::to_lower(lmemberName);
+	pragma::string::to_lower(lmemberName);
 	if(m_memberNameToIndex.find(lmemberName) != m_memberNameToIndex.end())
 		RemoveMember(lmemberName);
 	auto itName = m_memberNameToIndex.find(lmemberName);

@@ -35,7 +35,7 @@ static int32_t include(lua::State *l)
 	if(Lua::IsSet(l, 2))
 		ignoreGlobalCache = Lua::CheckBool(l, 2);
 	auto flags = pragma::scripting::lua_core::IncludeFlags::Default;
-	umath::set_flag(flags, pragma::scripting::lua_core::IncludeFlags::IgnoreGlobalCache, ignoreGlobalCache);
+	pragma::math::set_flag(flags, pragma::scripting::lua_core::IncludeFlags::IgnoreGlobalCache, ignoreGlobalCache);
 
 	auto result = pragma::scripting::lua_core::include(l, path, flags);
 	if(result.statusCode != Lua::StatusCode::Ok) {
@@ -83,7 +83,7 @@ void pragma::NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 			return 1;
 		}
 		std::string v = Lua::CheckString(l, 1);
-		auto b = util::to_boolean(v);
+		auto b = pragma::util::to_boolean(v);
 		Lua::PushBool(l, b);
 		return 1;
 	}));
@@ -93,81 +93,81 @@ void pragma::NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 			return 1;
 		}
 		if(Lua::IsNumber(l, 1)) {
-			Lua::PushInt(l, umath::round(Lua::CheckNumber(l, 1)));
+			Lua::PushInt(l, pragma::math::round(Lua::CheckNumber(l, 1)));
 			return 1;
 		}
 		std::string v = Lua::CheckString(l, 1);
-		auto i = util::to_int(v);
+		auto i = pragma::util::to_int(v);
 		Lua::PushInt(l, i);
 		return 1;
 	}));
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "console",
 	  {
-	    {"COLOR_FLAG_NONE", umath::to_integral(pragma::console::ConsoleColorFlags::None)},
-	    {"COLOR_FLAG_RED_BIT", umath::to_integral(pragma::console::ConsoleColorFlags::Red)},
-	    {"COLOR_FLAG_GREEN_BIT", umath::to_integral(pragma::console::ConsoleColorFlags::Green)},
-	    {"COLOR_FLAG_BLUE_BIT", umath::to_integral(pragma::console::ConsoleColorFlags::Blue)},
-	    {"COLOR_FLAG_INTENSITY_BIT", umath::to_integral(pragma::console::ConsoleColorFlags::Intensity)},
-	    {"COLOR_FLAG_BACKGROUND_RED_BIT", umath::to_integral(pragma::console::ConsoleColorFlags::BackgroundRed)},
-	    {"COLOR_FLAG_BACKGROUND_GREEN_BIT", umath::to_integral(pragma::console::ConsoleColorFlags::BackgroundGreen)},
-	    {"COLOR_FLAG_BACKGROUND_BLUE_BIT", umath::to_integral(pragma::console::ConsoleColorFlags::BackgroundBlue)},
-	    {"COLOR_FLAG_BACKGROUND_INTENSITY_BIT", umath::to_integral(pragma::console::ConsoleColorFlags::BackgroundIntensity)},
-	    {"COLOR_FLAG_YELLOW", umath::to_integral(pragma::console::ConsoleColorFlags::Yellow)},
-	    {"COLOR_FLAG_MAGENTA", umath::to_integral(pragma::console::ConsoleColorFlags::Magenta)},
-	    {"COLOR_FLAG_CYAN", umath::to_integral(pragma::console::ConsoleColorFlags::Cyan)},
-	    {"COLOR_FLAG_WHITE", umath::to_integral(pragma::console::ConsoleColorFlags::White)},
-	    {"COLOR_FLAG_BLACK", umath::to_integral(pragma::console::ConsoleColorFlags::Black)},
-	    {"COLOR_FLAG_BACKGROUND_YELLOW", umath::to_integral(pragma::console::ConsoleColorFlags::BackgroundYellow)},
-	    {"COLOR_FLAG_BACKGROUND_MAGENTA", umath::to_integral(pragma::console::ConsoleColorFlags::BackgroundMagenta)},
-	    {"COLOR_FLAG_BACKGROUND_CYAN", umath::to_integral(pragma::console::ConsoleColorFlags::BackgroundCyan)},
-	    {"COLOR_FLAG_BACKGROUND_WHITE", umath::to_integral(pragma::console::ConsoleColorFlags::BackgroundWhite)},
-	    {"COLOR_FLAG_BACKGROUND_BLACK", umath::to_integral(pragma::console::ConsoleColorFlags::BackgroundBlack)},
-	    {"COLOR_FLAG_RESET_BIT", umath::to_integral(pragma::console::ConsoleColorFlags::Reset)},
+	    {"COLOR_FLAG_NONE", pragma::math::to_integral(pragma::console::ConsoleColorFlags::None)},
+	    {"COLOR_FLAG_RED_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Red)},
+	    {"COLOR_FLAG_GREEN_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Green)},
+	    {"COLOR_FLAG_BLUE_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Blue)},
+	    {"COLOR_FLAG_INTENSITY_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Intensity)},
+	    {"COLOR_FLAG_BACKGROUND_RED_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundRed)},
+	    {"COLOR_FLAG_BACKGROUND_GREEN_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundGreen)},
+	    {"COLOR_FLAG_BACKGROUND_BLUE_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundBlue)},
+	    {"COLOR_FLAG_BACKGROUND_INTENSITY_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundIntensity)},
+	    {"COLOR_FLAG_YELLOW", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Yellow)},
+	    {"COLOR_FLAG_MAGENTA", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Magenta)},
+	    {"COLOR_FLAG_CYAN", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Cyan)},
+	    {"COLOR_FLAG_WHITE", pragma::math::to_integral(pragma::console::ConsoleColorFlags::White)},
+	    {"COLOR_FLAG_BLACK", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Black)},
+	    {"COLOR_FLAG_BACKGROUND_YELLOW", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundYellow)},
+	    {"COLOR_FLAG_BACKGROUND_MAGENTA", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundMagenta)},
+	    {"COLOR_FLAG_BACKGROUND_CYAN", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundCyan)},
+	    {"COLOR_FLAG_BACKGROUND_WHITE", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundWhite)},
+	    {"COLOR_FLAG_BACKGROUND_BLACK", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundBlack)},
+	    {"COLOR_FLAG_RESET_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Reset)},
 
-	    {"MESSAGE_FLAG_NONE", umath::to_integral(pragma::console::MessageFlags::None)},
-	    {"MESSAGE_FLAG_BIT_GENERIC", umath::to_integral(pragma::console::MessageFlags::Generic)},
-	    {"MESSAGE_FLAG_BIT_WARNING", umath::to_integral(pragma::console::MessageFlags::Warning)},
-	    {"MESSAGE_FLAG_BIT_ERROR", umath::to_integral(pragma::console::MessageFlags::Error)},
-	    {"MESSAGE_FLAG_BIT_CRITICAL", umath::to_integral(pragma::console::MessageFlags::Critical)},
-	    {"MESSAGE_FLAG_BIT_SERVER_SIDE", umath::to_integral(pragma::console::MessageFlags::ServerSide)},
-	    {"MESSAGE_FLAG_BIT_CLIENT_SIDE", umath::to_integral(pragma::console::MessageFlags::ClientSide)},
+	    {"MESSAGE_FLAG_NONE", pragma::math::to_integral(pragma::console::MessageFlags::None)},
+	    {"MESSAGE_FLAG_BIT_GENERIC", pragma::math::to_integral(pragma::console::MessageFlags::Generic)},
+	    {"MESSAGE_FLAG_BIT_WARNING", pragma::math::to_integral(pragma::console::MessageFlags::Warning)},
+	    {"MESSAGE_FLAG_BIT_ERROR", pragma::math::to_integral(pragma::console::MessageFlags::Error)},
+	    {"MESSAGE_FLAG_BIT_CRITICAL", pragma::math::to_integral(pragma::console::MessageFlags::Critical)},
+	    {"MESSAGE_FLAG_BIT_SERVER_SIDE", pragma::math::to_integral(pragma::console::MessageFlags::ServerSide)},
+	    {"MESSAGE_FLAG_BIT_CLIENT_SIDE", pragma::math::to_integral(pragma::console::MessageFlags::ClientSide)},
 	  });
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "console",
 	  {
-	    {"FLAG_NONE", umath::to_integral(pragma::console::ConVarFlags::None)},
-	    {"FLAG_BIT_CHEAT", umath::to_integral(pragma::console::ConVarFlags::Cheat)},
-	    {"FLAG_BIT_SINGLEPLAYER", umath::to_integral(pragma::console::ConVarFlags::Singleplayer)},
-	    {"FLAG_BIT_USERINFO", umath::to_integral(pragma::console::ConVarFlags::Userinfo)},
-	    {"FLAG_BIT_REPLICATED", umath::to_integral(pragma::console::ConVarFlags::Replicated)},
-	    {"FLAG_BIT_ARCHIVE", umath::to_integral(pragma::console::ConVarFlags::Archive)},
-	    {"FLAG_BIT_NOTIFY", umath::to_integral(pragma::console::ConVarFlags::Notify)},
-	    {"FLAG_BIT_JOYSTICK_AXIS_CONTINUOUS", umath::to_integral(pragma::console::ConVarFlags::JoystickAxisContinuous)},
-	    {"FLAG_BIT_JOYSTICK_AXIS_SINGLE", umath::to_integral(pragma::console::ConVarFlags::JoystickAxisSingle)},
-	    {"FLAG_BIT_HIDDEN", umath::to_integral(pragma::console::ConVarFlags::Hidden)},
-	    {"FLAG_BIT_PASSWORD", umath::to_integral(pragma::console::ConVarFlags::Password)},
+	    {"FLAG_NONE", pragma::math::to_integral(pragma::console::ConVarFlags::None)},
+	    {"FLAG_BIT_CHEAT", pragma::math::to_integral(pragma::console::ConVarFlags::Cheat)},
+	    {"FLAG_BIT_SINGLEPLAYER", pragma::math::to_integral(pragma::console::ConVarFlags::Singleplayer)},
+	    {"FLAG_BIT_USERINFO", pragma::math::to_integral(pragma::console::ConVarFlags::Userinfo)},
+	    {"FLAG_BIT_REPLICATED", pragma::math::to_integral(pragma::console::ConVarFlags::Replicated)},
+	    {"FLAG_BIT_ARCHIVE", pragma::math::to_integral(pragma::console::ConVarFlags::Archive)},
+	    {"FLAG_BIT_NOTIFY", pragma::math::to_integral(pragma::console::ConVarFlags::Notify)},
+	    {"FLAG_BIT_JOYSTICK_AXIS_CONTINUOUS", pragma::math::to_integral(pragma::console::ConVarFlags::JoystickAxisContinuous)},
+	    {"FLAG_BIT_JOYSTICK_AXIS_SINGLE", pragma::math::to_integral(pragma::console::ConVarFlags::JoystickAxisSingle)},
+	    {"FLAG_BIT_HIDDEN", pragma::math::to_integral(pragma::console::ConVarFlags::Hidden)},
+	    {"FLAG_BIT_PASSWORD", pragma::math::to_integral(pragma::console::ConVarFlags::Password)},
 	  });
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "sound",
 	  {
-	    {"TYPE_GENERIC", umath::to_integral(pragma::audio::ALSoundType::Generic)},
-	    {"TYPE_EFFECT", umath::to_integral(pragma::audio::ALSoundType::Effect)},
-	    {"TYPE_MUSIC", umath::to_integral(pragma::audio::ALSoundType::Music)},
-	    {"TYPE_VOICE", umath::to_integral(pragma::audio::ALSoundType::Voice)},
-	    {"TYPE_WEAPON", umath::to_integral(pragma::audio::ALSoundType::Weapon)},
-	    {"TYPE_NPC", umath::to_integral(pragma::audio::ALSoundType::NPC)},
-	    {"TYPE_PLAYER", umath::to_integral(pragma::audio::ALSoundType::Player)},
-	    {"TYPE_VEHICLE", umath::to_integral(pragma::audio::ALSoundType::Vehicle)},
-	    {"TYPE_PHYSICS", umath::to_integral(pragma::audio::ALSoundType::Physics)},
-	    {"TYPE_ENVIRONMENT", umath::to_integral(pragma::audio::ALSoundType::Environment)},
-	    {"TYPE_GUI", umath::to_integral(pragma::audio::ALSoundType::GUI)},
+	    {"TYPE_GENERIC", pragma::math::to_integral(pragma::audio::ALSoundType::Generic)},
+	    {"TYPE_EFFECT", pragma::math::to_integral(pragma::audio::ALSoundType::Effect)},
+	    {"TYPE_MUSIC", pragma::math::to_integral(pragma::audio::ALSoundType::Music)},
+	    {"TYPE_VOICE", pragma::math::to_integral(pragma::audio::ALSoundType::Voice)},
+	    {"TYPE_WEAPON", pragma::math::to_integral(pragma::audio::ALSoundType::Weapon)},
+	    {"TYPE_NPC", pragma::math::to_integral(pragma::audio::ALSoundType::NPC)},
+	    {"TYPE_PLAYER", pragma::math::to_integral(pragma::audio::ALSoundType::Player)},
+	    {"TYPE_VEHICLE", pragma::math::to_integral(pragma::audio::ALSoundType::Vehicle)},
+	    {"TYPE_PHYSICS", pragma::math::to_integral(pragma::audio::ALSoundType::Physics)},
+	    {"TYPE_ENVIRONMENT", pragma::math::to_integral(pragma::audio::ALSoundType::Environment)},
+	    {"TYPE_GUI", pragma::math::to_integral(pragma::audio::ALSoundType::GUI)},
 
-	    {"STATE_NO_ERROR", umath::to_integral(pragma::audio::ALState::NoError)},
-	    {"STATE_INITIAL", umath::to_integral(pragma::audio::ALState::Initial)},
-	    {"STATE_PLAYING", umath::to_integral(pragma::audio::ALState::Playing)},
-	    {"STATE_PAUSED", umath::to_integral(pragma::audio::ALState::Paused)},
-	    {"STATE_STOPPED", umath::to_integral(pragma::audio::ALState::Stopped)},
+	    {"STATE_NO_ERROR", pragma::math::to_integral(pragma::audio::ALState::NoError)},
+	    {"STATE_INITIAL", pragma::math::to_integral(pragma::audio::ALState::Initial)},
+	    {"STATE_PLAYING", pragma::math::to_integral(pragma::audio::ALState::Playing)},
+	    {"STATE_PAUSED", pragma::math::to_integral(pragma::audio::ALState::Paused)},
+	    {"STATE_STOPPED", pragma::math::to_integral(pragma::audio::ALState::Stopped)},
 	  });
 }
 
@@ -215,7 +215,7 @@ static pragma::ecs::BaseEntity *find_entity(lua::State *l, pragma::Game &game, l
 			for(auto *pair : lists) {
 				std::vector<size_t> similarElements {};
 				std::vector<float> similarities {};
-				ustring::gather_similar_elements(targetName, pair->names, similarElements, 1, &similarities);
+				pragma::string::gather_similar_elements(targetName, pair->names, similarElements, 1, &similarities);
 				if(!similarElements.empty() && similarities[0] >= 0.3f) {
 					ent = pair->ents[similarElements.front()];
 					break;
@@ -223,7 +223,7 @@ static pragma::ecs::BaseEntity *find_entity(lua::State *l, pragma::Game &game, l
 			}
 			for(auto *pair : lists) {
 				for(auto i = decltype(pair->names.size()) {0u}; i < pair->names.size(); ++i) {
-					if(ustring::match(pair->names[i], '*' + targetName + '*'))
+					if(pragma::string::match(pair->names[i], '*' + targetName + '*'))
 						return pair->ents[i];
 				}
 			}
@@ -245,23 +245,23 @@ void pragma::Game::RegisterLuaGlobals()
 	}));
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",
 	  {
-	    {"DAMAGETYPE_GENERIC", umath::to_integral(DamageType::Generic)},
-	    {"DAMAGETYPE_BULLET", umath::to_integral(DamageType::Bullet)},
-	    {"DAMAGETYPE_EXPLOSION", umath::to_integral(DamageType::Explosion)},
-	    {"DAMAGETYPE_FIRE", umath::to_integral(DamageType::Fire)},
-	    {"DAMAGETYPE_PLASMA", umath::to_integral(DamageType::Plasma)},
-	    {"DAMAGETYPE_BASH", umath::to_integral(DamageType::Bash)},
-	    {"DAMAGETYPE_CRUSH", umath::to_integral(DamageType::Crush)},
-	    {"DAMAGETYPE_SLASH", umath::to_integral(DamageType::Slash)},
-	    {"DAMAGETYPE_ELECTRICITY", umath::to_integral(DamageType::Electricity)},
-	    {"DAMAGETYPE_ENERGY", umath::to_integral(DamageType::Energy)},
+	    {"DAMAGETYPE_GENERIC", pragma::math::to_integral(DamageType::Generic)},
+	    {"DAMAGETYPE_BULLET", pragma::math::to_integral(DamageType::Bullet)},
+	    {"DAMAGETYPE_EXPLOSION", pragma::math::to_integral(DamageType::Explosion)},
+	    {"DAMAGETYPE_FIRE", pragma::math::to_integral(DamageType::Fire)},
+	    {"DAMAGETYPE_PLASMA", pragma::math::to_integral(DamageType::Plasma)},
+	    {"DAMAGETYPE_BASH", pragma::math::to_integral(DamageType::Bash)},
+	    {"DAMAGETYPE_CRUSH", pragma::math::to_integral(DamageType::Crush)},
+	    {"DAMAGETYPE_SLASH", pragma::math::to_integral(DamageType::Slash)},
+	    {"DAMAGETYPE_ELECTRICITY", pragma::math::to_integral(DamageType::Electricity)},
+	    {"DAMAGETYPE_ENERGY", pragma::math::to_integral(DamageType::Energy)},
 
-	    {"STATE_FLAG_NONE", umath::to_integral(pragma::Game::GameFlags::None)},
-	    {"STATE_FLAG_BIT_MAP_INITIALIZED", umath::to_integral(pragma::Game::GameFlags::MapInitialized)},
-	    {"STATE_FLAG_BIT_GAME_INITIALIZED", umath::to_integral(pragma::Game::GameFlags::GameInitialized)},
-	    {"STATE_FLAG_BIT_MAP_LOADED", umath::to_integral(pragma::Game::GameFlags::MapLoaded)},
-	    {"STATE_FLAG_BIT_INITIAL_TICK", umath::to_integral(pragma::Game::GameFlags::InitialTick)},
-	    {"STATE_FLAG_BIT_LEVEL_TRANSITION", umath::to_integral(pragma::Game::GameFlags::LevelTransition)},
+	    {"STATE_FLAG_NONE", pragma::math::to_integral(pragma::Game::GameFlags::None)},
+	    {"STATE_FLAG_BIT_MAP_INITIALIZED", pragma::math::to_integral(pragma::Game::GameFlags::MapInitialized)},
+	    {"STATE_FLAG_BIT_GAME_INITIALIZED", pragma::math::to_integral(pragma::Game::GameFlags::GameInitialized)},
+	    {"STATE_FLAG_BIT_MAP_LOADED", pragma::math::to_integral(pragma::Game::GameFlags::MapLoaded)},
+	    {"STATE_FLAG_BIT_INITIAL_TICK", pragma::math::to_integral(pragma::Game::GameFlags::InitialTick)},
+	    {"STATE_FLAG_BIT_LEVEL_TRANSITION", pragma::math::to_integral(pragma::Game::GameFlags::LevelTransition)},
 	  });
 
 	auto *l = GetLuaState();
@@ -274,113 +274,113 @@ void pragma::Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(l, "game.limits",
 	  {
-	    {"MAX_ABSOLUTE_LIGHTS", umath::to_integral(pragma::GameLimits::MaxAbsoluteLights)},
-	    {"MAX_ABSOLUTE_SHADOW_LIGHTS", umath::to_integral(pragma::GameLimits::MaxAbsoluteShadowLights)},
-	    {"MAX_CSM_CASCADES", umath::to_integral(pragma::GameLimits::MaxCSMCascades)},
-	    {"MAX_DIRECTIONAL_LIGHT_SOURCES", umath::to_integral(pragma::GameLimits::MaxDirectionalLightSources)},
-	    {"MAX_ACTIVE_SHADOW_MAPS", umath::to_integral(pragma::GameLimits::MaxActiveShadowMaps)},
-	    {"MAX_ACTIVE_SHADOW_CUBE_MAPS", umath::to_integral(pragma::GameLimits::MaxActiveShadowCubeMaps)},
-	    {"MAX_MESH_VERTICES", umath::to_integral(pragma::GameLimits::MaxMeshVertices)},
-	    {"MAX_WORLD_DISTANCE", umath::to_integral(pragma::GameLimits::MaxWorldDistance)},
-	    {"MAX_RAY_CAST_RANGE", umath::to_integral(pragma::GameLimits::MaxRayCastRange)},
-	    {"MAX_BONES", umath::to_integral(pragma::GameLimits::MaxBones)},
-	    {"MAX_IMAGE_ARRAY_LAYERS", umath::to_integral(pragma::GameLimits::MaxImageArrayLayers)},
+	    {"MAX_ABSOLUTE_LIGHTS", pragma::math::to_integral(pragma::GameLimits::MaxAbsoluteLights)},
+	    {"MAX_ABSOLUTE_SHADOW_LIGHTS", pragma::math::to_integral(pragma::GameLimits::MaxAbsoluteShadowLights)},
+	    {"MAX_CSM_CASCADES", pragma::math::to_integral(pragma::GameLimits::MaxCSMCascades)},
+	    {"MAX_DIRECTIONAL_LIGHT_SOURCES", pragma::math::to_integral(pragma::GameLimits::MaxDirectionalLightSources)},
+	    {"MAX_ACTIVE_SHADOW_MAPS", pragma::math::to_integral(pragma::GameLimits::MaxActiveShadowMaps)},
+	    {"MAX_ACTIVE_SHADOW_CUBE_MAPS", pragma::math::to_integral(pragma::GameLimits::MaxActiveShadowCubeMaps)},
+	    {"MAX_MESH_VERTICES", pragma::math::to_integral(pragma::GameLimits::MaxMeshVertices)},
+	    {"MAX_WORLD_DISTANCE", pragma::math::to_integral(pragma::GameLimits::MaxWorldDistance)},
+	    {"MAX_RAY_CAST_RANGE", pragma::math::to_integral(pragma::GameLimits::MaxRayCastRange)},
+	    {"MAX_BONES", pragma::math::to_integral(pragma::GameLimits::MaxBones)},
+	    {"MAX_IMAGE_ARRAY_LAYERS", pragma::math::to_integral(pragma::GameLimits::MaxImageArrayLayers)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "sound",
 	  {
-	    {"CHANNEL_AUTO", umath::to_integral(pragma::audio::ALChannel::Auto)},
-	    {"CHANNEL_MONO", umath::to_integral(pragma::audio::ALChannel::Mono)},
-	    {"CHANNEL_BOTH", umath::to_integral(pragma::audio::ALChannel::Both)},
+	    {"CHANNEL_AUTO", pragma::math::to_integral(pragma::audio::ALChannel::Auto)},
+	    {"CHANNEL_MONO", pragma::math::to_integral(pragma::audio::ALChannel::Mono)},
+	    {"CHANNEL_BOTH", pragma::math::to_integral(pragma::audio::ALChannel::Both)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "intersect",
 	  {
 	    // TODO: These should be obsolete?
-	    {"RESULT_OUTSIDE", umath::to_integral(umath::intersection::Intersect::Outside)},
-	    {"RESULT_INSIDE", umath::to_integral(umath::intersection::Intersect::Inside)},
-	    {"RESULT_OVERLAP", umath::to_integral(umath::intersection::Intersect::Overlap)},
+	    {"RESULT_OUTSIDE", pragma::math::to_integral(pragma::math::intersection::Intersect::Outside)},
+	    {"RESULT_INSIDE", pragma::math::to_integral(pragma::math::intersection::Intersect::Inside)},
+	    {"RESULT_OVERLAP", pragma::math::to_integral(pragma::math::intersection::Intersect::Overlap)},
 	    //
 
-	    {"RESULT_NO_INTERSECTION", umath::to_integral(umath::intersection::Result::NoIntersection)},
-	    {"RESULT_INTERSECT", umath::to_integral(umath::intersection::Result::Intersect)},
-	    {"RESULT_OUT_OF_RANGE", umath::to_integral(umath::intersection::Result::OutOfRange)},
+	    {"RESULT_NO_INTERSECTION", pragma::math::to_integral(pragma::math::intersection::Result::NoIntersection)},
+	    {"RESULT_INTERSECT", pragma::math::to_integral(pragma::math::intersection::Result::Intersect)},
+	    {"RESULT_OUT_OF_RANGE", pragma::math::to_integral(pragma::math::intersection::Result::OutOfRange)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "time",
 	  {
-	    {"TIMER_TYPE_CURTIME", umath::to_integral(TimerType::CurTime)},
-	    {"TIMER_TYPE_REALTIME", umath::to_integral(TimerType::RealTime)},
+	    {"TIMER_TYPE_CURTIME", pragma::math::to_integral(TimerType::CurTime)},
+	    {"TIMER_TYPE_REALTIME", pragma::math::to_integral(TimerType::RealTime)},
 
-	    {"DURATION_TYPE_NANO_SECONDS", umath::to_integral(util::DurationType::NanoSeconds)},
-	    {"DURATION_TYPE_MICRO_SECONDS", umath::to_integral(util::DurationType::MicroSeconds)},
-	    {"DURATION_TYPE_MILLI_SECONDS", umath::to_integral(util::DurationType::MilliSeconds)},
-	    {"DURATION_TYPE_SECONDS", umath::to_integral(util::DurationType::Seconds)},
-	    {"DURATION_TYPE_MINUTES", umath::to_integral(util::DurationType::Minutes)},
-	    {"DURATION_TYPE_HOURS", umath::to_integral(util::DurationType::Hours)},
+	    {"DURATION_TYPE_NANO_SECONDS", pragma::math::to_integral(pragma::util::DurationType::NanoSeconds)},
+	    {"DURATION_TYPE_MICRO_SECONDS", pragma::math::to_integral(pragma::util::DurationType::MicroSeconds)},
+	    {"DURATION_TYPE_MILLI_SECONDS", pragma::math::to_integral(pragma::util::DurationType::MilliSeconds)},
+	    {"DURATION_TYPE_SECONDS", pragma::math::to_integral(pragma::util::DurationType::Seconds)},
+	    {"DURATION_TYPE_MINUTES", pragma::math::to_integral(pragma::util::DurationType::Minutes)},
+	    {"DURATION_TYPE_HOURS", pragma::math::to_integral(pragma::util::DurationType::Hours)},
 	  });
 
-	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_WINDOWS", util::is_windows_system());
-	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_LINUX", util::is_linux_system());
-	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_X86", util::is_x86_system());
-	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_X64", util::is_x64_system());
+	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_WINDOWS", pragma::util::is_windows_system());
+	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_LINUX", pragma::util::is_linux_system());
+	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_X86", pragma::util::is_x86_system());
+	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_X64", pragma::util::is_x64_system());
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "input",
 	  {
-	    {"ACTION_MOVEFORWARD", umath::to_integral(pragma::Action::MoveForward)},
-	    {"ACTION_MOVEBACKWARD", umath::to_integral(pragma::Action::MoveBackward)},
-	    {"ACTION_MOVELEFT", umath::to_integral(pragma::Action::MoveLeft)},
-	    {"ACTION_MOVERIGHT", umath::to_integral(pragma::Action::MoveRight)},
-	    {"ACTION_SPRINT", umath::to_integral(pragma::Action::Sprint)},
-	    {"ACTION_WALK", umath::to_integral(pragma::Action::Walk)},
-	    {"ACTION_JUMP", umath::to_integral(pragma::Action::Jump)},
-	    {"ACTION_CROUCH", umath::to_integral(pragma::Action::Crouch)},
-	    {"ACTION_ATTACK", umath::to_integral(pragma::Action::Attack)},
-	    {"ACTION_ATTACK2", umath::to_integral(pragma::Action::Attack2)},
-	    {"ACTION_ATTACK3", umath::to_integral(pragma::Action::Attack3)},
-	    {"ACTION_ATTACK4", umath::to_integral(pragma::Action::Attack4)},
-	    {"ACTION_RELOAD", umath::to_integral(pragma::Action::Reload)},
-	    {"ACTION_USE", umath::to_integral(pragma::Action::Use)},
-	    {"ACTION_LAST", umath::to_integral(pragma::Action::Last)},
+	    {"ACTION_MOVEFORWARD", pragma::math::to_integral(pragma::Action::MoveForward)},
+	    {"ACTION_MOVEBACKWARD", pragma::math::to_integral(pragma::Action::MoveBackward)},
+	    {"ACTION_MOVELEFT", pragma::math::to_integral(pragma::Action::MoveLeft)},
+	    {"ACTION_MOVERIGHT", pragma::math::to_integral(pragma::Action::MoveRight)},
+	    {"ACTION_SPRINT", pragma::math::to_integral(pragma::Action::Sprint)},
+	    {"ACTION_WALK", pragma::math::to_integral(pragma::Action::Walk)},
+	    {"ACTION_JUMP", pragma::math::to_integral(pragma::Action::Jump)},
+	    {"ACTION_CROUCH", pragma::math::to_integral(pragma::Action::Crouch)},
+	    {"ACTION_ATTACK", pragma::math::to_integral(pragma::Action::Attack)},
+	    {"ACTION_ATTACK2", pragma::math::to_integral(pragma::Action::Attack2)},
+	    {"ACTION_ATTACK3", pragma::math::to_integral(pragma::Action::Attack3)},
+	    {"ACTION_ATTACK4", pragma::math::to_integral(pragma::Action::Attack4)},
+	    {"ACTION_RELOAD", pragma::math::to_integral(pragma::Action::Reload)},
+	    {"ACTION_USE", pragma::math::to_integral(pragma::Action::Use)},
+	    {"ACTION_LAST", pragma::math::to_integral(pragma::Action::Last)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",
 	  {
-	    {"HITGROUP_INVALID", umath::to_integral(physics::HitGroup::Invalid)},
-	    {"HITGROUP_GENERIC", umath::to_integral(physics::HitGroup::Generic)},
-	    {"HITGROUP_HEAD", umath::to_integral(physics::HitGroup::Head)},
-	    {"HITGROUP_CHEST", umath::to_integral(physics::HitGroup::Chest)},
-	    {"HITGROUP_STOMACH", umath::to_integral(physics::HitGroup::Stomach)},
-	    {"HITGROUP_LEFT_ARM", umath::to_integral(physics::HitGroup::LeftArm)},
-	    {"HITGROUP_RIGHT_ARM", umath::to_integral(physics::HitGroup::RightArm)},
-	    {"HITGROUP_LEFT_LEG", umath::to_integral(physics::HitGroup::LeftLeg)},
-	    {"HITGROUP_RIGHT_LEG", umath::to_integral(physics::HitGroup::RightLeg)},
-	    {"HITGROUP_GEAR", umath::to_integral(physics::HitGroup::Gear)},
-	    {"HITGROUP_TAIL", umath::to_integral(physics::HitGroup::Tail)},
+	    {"HITGROUP_INVALID", pragma::math::to_integral(physics::HitGroup::Invalid)},
+	    {"HITGROUP_GENERIC", pragma::math::to_integral(physics::HitGroup::Generic)},
+	    {"HITGROUP_HEAD", pragma::math::to_integral(physics::HitGroup::Head)},
+	    {"HITGROUP_CHEST", pragma::math::to_integral(physics::HitGroup::Chest)},
+	    {"HITGROUP_STOMACH", pragma::math::to_integral(physics::HitGroup::Stomach)},
+	    {"HITGROUP_LEFT_ARM", pragma::math::to_integral(physics::HitGroup::LeftArm)},
+	    {"HITGROUP_RIGHT_ARM", pragma::math::to_integral(physics::HitGroup::RightArm)},
+	    {"HITGROUP_LEFT_LEG", pragma::math::to_integral(physics::HitGroup::LeftLeg)},
+	    {"HITGROUP_RIGHT_LEG", pragma::math::to_integral(physics::HitGroup::RightLeg)},
+	    {"HITGROUP_GEAR", pragma::math::to_integral(physics::HitGroup::Gear)},
+	    {"HITGROUP_TAIL", pragma::math::to_integral(physics::HitGroup::Tail)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {
-	    {"FLAG_INVALID", umath::to_integral(fsys::FVFile::Invalid)},
-	    {"FLAG_PACKAGE", umath::to_integral(fsys::FVFile::Package)},
-	    {"FLAG_COMPRESSED", umath::to_integral(fsys::FVFile::Compressed)},
-	    {"FLAG_DIRECTORY", umath::to_integral(fsys::FVFile::Directory)},
-	    {"FLAG_ENCRYPTED", umath::to_integral(fsys::FVFile::Encrypted)},
-	    {"FLAG_VIRTUAL", umath::to_integral(fsys::FVFile::Virtual)},
-	    {"FLAG_READONLY", umath::to_integral(fsys::FVFile::ReadOnly)},
+	    {"FLAG_INVALID", pragma::math::to_integral(fsys::FVFile::Invalid)},
+	    {"FLAG_PACKAGE", pragma::math::to_integral(fsys::FVFile::Package)},
+	    {"FLAG_COMPRESSED", pragma::math::to_integral(fsys::FVFile::Compressed)},
+	    {"FLAG_DIRECTORY", pragma::math::to_integral(fsys::FVFile::Directory)},
+	    {"FLAG_ENCRYPTED", pragma::math::to_integral(fsys::FVFile::Encrypted)},
+	    {"FLAG_VIRTUAL", pragma::math::to_integral(fsys::FVFile::Virtual)},
+	    {"FLAG_READONLY", pragma::math::to_integral(fsys::FVFile::ReadOnly)},
 
-	    {"OPEN_MODE_READ", umath::to_integral(pragma::FileOpenMode::Read)},
-	    {"OPEN_MODE_WRITE", umath::to_integral(pragma::FileOpenMode::Write)},
-	    {"OPEN_MODE_APPEND", umath::to_integral(pragma::FileOpenMode::Append)},
-	    {"OPEN_MODE_UPDATE", umath::to_integral(pragma::FileOpenMode::Update)},
-	    {"OPEN_MODE_BINARY", umath::to_integral(pragma::FileOpenMode::Binary)},
+	    {"OPEN_MODE_READ", pragma::math::to_integral(pragma::FileOpenMode::Read)},
+	    {"OPEN_MODE_WRITE", pragma::math::to_integral(pragma::FileOpenMode::Write)},
+	    {"OPEN_MODE_APPEND", pragma::math::to_integral(pragma::FileOpenMode::Append)},
+	    {"OPEN_MODE_UPDATE", pragma::math::to_integral(pragma::FileOpenMode::Update)},
+	    {"OPEN_MODE_BINARY", pragma::math::to_integral(pragma::FileOpenMode::Binary)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {
-	    {"TYPE_VIRTUAL", umath::to_integral(EVFile::Virtual)},
-	    {"TYPE_LOCAL", umath::to_integral(EVFile::Local)},
-	    {"TYPE_PACKAGE", umath::to_integral(EVFile::Package)},
+	    {"TYPE_VIRTUAL", pragma::math::to_integral(EVFile::Virtual)},
+	    {"TYPE_LOCAL", pragma::math::to_integral(EVFile::Local)},
+	    {"TYPE_PACKAGE", pragma::math::to_integral(EVFile::Package)},
 	  });
 
 	/*Lua::RegisterLibraryEnums(GetLuaState(), "file",
@@ -405,13 +405,13 @@ void pragma::Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {
-	    {"SEARCH_NONE", umath::to_integral(fsys::SearchFlags::None)},
-	    {"SEARCH_VIRTUAL", umath::to_integral(fsys::SearchFlags::Virtual)},
-	    {"SEARCH_PACKAGE", umath::to_integral(fsys::SearchFlags::Package)},
-	    {"SEARCH_LOCAL", umath::to_integral(fsys::SearchFlags::Local)},
-	    {"SEARCH_NO_MOUNTS", umath::to_integral(fsys::SearchFlags::NoMounts)},
-	    {"SEARCH_LOCAL_ROOT", umath::to_integral(fsys::SearchFlags::LocalRoot)},
-	    {"SEARCH_ALL", umath::to_integral(fsys::SearchFlags::All)},
+	    {"SEARCH_NONE", pragma::math::to_integral(fsys::SearchFlags::None)},
+	    {"SEARCH_VIRTUAL", pragma::math::to_integral(fsys::SearchFlags::Virtual)},
+	    {"SEARCH_PACKAGE", pragma::math::to_integral(fsys::SearchFlags::Package)},
+	    {"SEARCH_LOCAL", pragma::math::to_integral(fsys::SearchFlags::Local)},
+	    {"SEARCH_NO_MOUNTS", pragma::math::to_integral(fsys::SearchFlags::NoMounts)},
+	    {"SEARCH_LOCAL_ROOT", pragma::math::to_integral(fsys::SearchFlags::LocalRoot)},
+	    {"SEARCH_ALL", pragma::math::to_integral(fsys::SearchFlags::All)},
 	    {"SEARCH_ADDON", FSYS_SEARCH_ADDON},
 	  });
 
@@ -439,7 +439,7 @@ void pragma::Game::RegisterLuaGlobals()
 			}
 			std::vector<size_t> similarElements {};
 			std::vector<float> similarities {};
-			ustring::gather_similar_elements(name, componentNames, similarElements, 1, &similarities);
+			pragma::string::gather_similar_elements(name, componentNames, similarElements, 1, &similarities);
 			if(!similarElements.empty() && similarities.front() >= 0.3f) {
 				auto &componentName = componentNames[similarElements.front()];
 				auto c = ent->FindComponent(componentName);
@@ -451,7 +451,7 @@ void pragma::Game::RegisterLuaGlobals()
 				componentNames.push_back(c->name);
 			similarElements.clear();
 			similarities.clear();
-			ustring::gather_similar_elements(name, componentNames, similarElements, 1, &similarities);
+			pragma::string::gather_similar_elements(name, componentNames, similarElements, 1, &similarities);
 			if(!similarElements.empty()) {
 				auto &componentName = componentNames[similarElements.front()];
 				auto c = ent->AddComponent(componentName);

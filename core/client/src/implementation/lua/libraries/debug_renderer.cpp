@@ -73,7 +73,7 @@ std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Cl
 {
 	return get_dbg_object(::pragma::debug::DebugRenderer::DrawSpline(path, numSegments, curvature, {renderInfo.color, renderInfo.duration}), renderInfo.duration);
 }
-std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPlane(const umath::Plane &plane, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(::pragma::debug::DebugRenderer::DrawPlane(plane, {renderInfo.color, renderInfo.duration}), renderInfo.duration); }
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPlane(const pragma::math::Plane &plane, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(::pragma::debug::DebugRenderer::DrawPlane(plane, {renderInfo.color, renderInfo.duration}), renderInfo.duration); }
 std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPlane(const ::Vector3 &n, float d, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(::pragma::debug::DebugRenderer::DrawPlane(n, d, {renderInfo.color, renderInfo.duration}), renderInfo.duration); }
 std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawFrustum(pragma::CCameraComponent &cam, const pragma::debug::DebugRenderInfo &renderInfo)
 {

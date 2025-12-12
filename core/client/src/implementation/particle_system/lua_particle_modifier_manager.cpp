@@ -10,7 +10,7 @@ import :entities.components;
 
 pragma::pts::CParticleModifierLua *pragma::pts::LuaParticleModifierManager::CreateModifier(std::string className) const
 {
-	ustring::to_lower(className);
+	pragma::string::to_lower(className);
 	auto it = m_modifiers.find(className);
 	if(it == m_modifiers.end())
 		return nullptr;
@@ -75,7 +75,7 @@ pragma::pts::CParticleModifierLua *pragma::pts::LuaParticleModifierManager::Crea
 
 bool pragma::pts::LuaParticleModifierManager::RegisterModifier(Type type, std::string className, luabind::object &o)
 {
-	ustring::to_lower(className);
+	pragma::string::to_lower(className);
 	auto itShader = m_modifiers.find(className);
 	if(itShader != m_modifiers.end()) {
 		Con::cwar << "Attempted to register particle modifier '" << className << "', which has already been registered previously! Ignoring..." << Con::endl;
@@ -90,7 +90,7 @@ bool pragma::pts::LuaParticleModifierManager::RegisterModifier(Type type, std::s
 
 luabind::object *pragma::pts::LuaParticleModifierManager::GetClassObject(std::string className)
 {
-	ustring::to_lower(className);
+	pragma::string::to_lower(className);
 	auto it = m_modifiers.find(className);
 	if(it == m_modifiers.end())
 		return nullptr;

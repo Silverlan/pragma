@@ -24,7 +24,7 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void OnTick(double tDelta) override;
 
-		virtual void SetupSteeringWheel(const std::string &mdl, umath::Degree maxSteeringAngle) override;
+		virtual void SetupSteeringWheel(const std::string &mdl, pragma::math::Degree maxSteeringAngle) override;
 
 		virtual bool ShouldTransmitNetData() const override { return true; };
 		virtual void SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl) override;

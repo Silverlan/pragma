@@ -229,7 +229,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdPose.def(luabind::constructor<>());
 	cdPose.def("SetTransformCount", &pragma::animation::Pose::SetTransformCount);
 	cdPose.def("SetBoneIndex", &pragma::animation::Pose::SetBoneIndex);
-	cdPose.def("GetTransform", static_cast<umath::ScaledTransform *(pragma::animation::Pose::*)(pragma::animation::BoneId)>(&pragma::animation::Pose::GetTransform));
+	cdPose.def("GetTransform", static_cast<pragma::math::ScaledTransform *(pragma::animation::Pose::*)(pragma::animation::BoneId)>(&pragma::animation::Pose::GetTransform));
 	cdPose.def("SetTransform", &pragma::animation::Pose::SetTransform);
 	cdPose.def("Clear", &pragma::animation::Pose::Clear);
 	cdPose.def("Lerp", &pragma::animation::Pose::Lerp);
@@ -261,9 +261,9 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			  return luabind::object {l, std::pair<std::vector<float>, std::vector<TValue>> {std::move(times), std::move(values)}};
 		  });
 	  })];
-	cdChannel.add_static_constant("INSERT_FLAG_NONE", umath::to_integral(panima::Channel::InsertFlags::None));
-	cdChannel.add_static_constant("INSERT_FLAG_BIT_CLEAR_EXISTING_DATA_IN_RANGE", umath::to_integral(panima::Channel::InsertFlags::ClearExistingDataInRange));
-	cdChannel.add_static_constant("INSERT_FLAG_BIT_DECIMATE_INSERTED_DATA", umath::to_integral(panima::Channel::InsertFlags::DecimateInsertedData));
+	cdChannel.add_static_constant("INSERT_FLAG_NONE", pragma::math::to_integral(panima::Channel::InsertFlags::None));
+	cdChannel.add_static_constant("INSERT_FLAG_BIT_CLEAR_EXISTING_DATA_IN_RANGE", pragma::math::to_integral(panima::Channel::InsertFlags::ClearExistingDataInRange));
+	cdChannel.add_static_constant("INSERT_FLAG_BIT_DECIMATE_INSERTED_DATA", pragma::math::to_integral(panima::Channel::InsertFlags::DecimateInsertedData));
 
 	auto cdPath = luabind::class_<panima::ChannelPath>("Path");
 	cdPath.def(luabind::constructor<>());
@@ -362,12 +362,12 @@ void Lua::animation::register_library(Lua::Interface &lua)
 				  values.reserve(numValues);
 				  auto nc = ::udm::get_numeric_component_count(::udm::type_to_enum<TValue>());
 				  for(auto i = decltype(numValues) {0u}; i < numValues; ++i) {
-					  times.push_back(umath::random(minTime, maxTime));
+					  times.push_back(pragma::math::random(minTime, maxTime));
 
 					  using TBase = std::conditional_t<std::is_same_v<TValue, ::udm::Quaternion>, ::udm::EulerAngles, TValue>;
 					  TBase value {};
 					  for(auto i = decltype(nc) {0u}; i < nc; ++i)
-						  ::udm::get_numeric_component(value, i) = umath::random(minVal, maxVal);
+						  ::udm::get_numeric_component(value, i) = pragma::math::random(minVal, maxVal);
 					  if constexpr(std::is_same_v<TValue, ::udm::Quaternion>)
 						  values.push_back(uquat::create(value));
 					  else
@@ -576,9 +576,9 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	Lua::RegisterLibraryValue(lua.GetState(), "panima", "VALUE_EPSILON", panima::Channel::VALUE_EPSILON);
 	Lua::RegisterLibraryValue(lua.GetState(), "panima", "TIME_EPSILON", panima::Channel::TIME_EPSILON);
 
-	pragma::LuaCore::define_custom_constructor<panima::Channel, +[]() -> std::shared_ptr<panima::Channel> { return ::util::make_shared<panima::Channel>(); }>(lua.GetState());
-	pragma::LuaCore::define_custom_constructor<panima::Channel, +[](panima::Channel &channel) -> std::shared_ptr<panima::Channel> { return ::util::make_shared<panima::Channel>(channel); }, panima::Channel &>(lua.GetState());
-	pragma::LuaCore::define_custom_constructor<panima::Channel, +[](::udm::LinkedPropertyWrapper &times, ::udm::LinkedPropertyWrapper &values) -> std::shared_ptr<panima::Channel> { return ::util::make_shared<panima::Channel>(times.ClaimOwnership(), values.ClaimOwnership()); },
+	pragma::LuaCore::define_custom_constructor<panima::Channel, +[]() -> std::shared_ptr<panima::Channel> { return pragma::util::make_shared<panima::Channel>(); }>(lua.GetState());
+	pragma::LuaCore::define_custom_constructor<panima::Channel, +[](panima::Channel &channel) -> std::shared_ptr<panima::Channel> { return pragma::util::make_shared<panima::Channel>(channel); }, panima::Channel &>(lua.GetState());
+	pragma::LuaCore::define_custom_constructor<panima::Channel, +[](::udm::LinkedPropertyWrapper &times, ::udm::LinkedPropertyWrapper &values) -> std::shared_ptr<panima::Channel> { return pragma::util::make_shared<panima::Channel>(times.ClaimOwnership(), values.ClaimOwnership()); },
 	  ::udm::LinkedPropertyWrapper &, ::udm::LinkedPropertyWrapper &>(lua.GetState());
 
 	auto cdSet = luabind::class_<panima::AnimationSet>("Set");
@@ -663,10 +663,10 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	auto cdAnim2 = luabind::class_<panima::Animation>("Animation");
 	cdAnim2.def(luabind::tostring(luabind::self));
 	cdAnim2.def(luabind::const_self == luabind::const_self);
-	cdAnim2.scope[luabind::def("create", +[](lua::State *l) { return ::util::make_shared<panima::Animation>(); })];
+	cdAnim2.scope[luabind::def("create", +[](lua::State *l) { return pragma::util::make_shared<panima::Animation>(); })];
 	cdAnim2.scope[luabind::def(
 	  "load", +[](lua::State *l, ::udm::LinkedPropertyWrapper &prop) -> Lua::var<bool, std::shared_ptr<panima::Animation>> {
-		  auto anim = ::util::make_shared<panima::Animation>();
+		  auto anim = pragma::util::make_shared<panima::Animation>();
 		  if(anim->Load(prop) == false)
 			  return luabind::object {l, false};
 		  return luabind::object {l, anim};
@@ -684,7 +684,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			  auto time = channel->GetTime(channel->GetTimeCount() - 1);
 			  if(!time.has_value())
 				  continue;
-			  duration = umath::max(duration, *time);
+			  duration = pragma::math::max(duration, *time);
 		  }
 		  anim.SetDuration(duration);
 		  return duration;
@@ -710,7 +710,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdAnim2.def("Save", &panima::Animation::Save);
 	cdAnim2.scope[luabind::def(
 	  "Load", +[](lua::State *l, ::udm::LinkedPropertyWrapper &assetData) -> std::shared_ptr<panima::Animation> {
-		  auto anim = ::util::make_shared<panima::Animation>();
+		  auto anim = pragma::util::make_shared<panima::Animation>();
 		  if(anim->Load(assetData) == false)
 			  return nullptr;
 		  return anim;

@@ -69,7 +69,7 @@ export namespace pragma {
 		void SetLightMapExposure(float exp);
 		float GetLightMapExposure() const;
 		float CalcLightMapPowExposurePow() const;
-		const util::PFloatProperty &GetLightMapExposureProperty() const { return m_lightMapExposure; }
+		const pragma::util::PFloatProperty &GetLightMapExposureProperty() const { return m_lightMapExposure; }
 
 		void ConvertLightmapToBSPLuxelData() const;
 
@@ -87,9 +87,9 @@ export namespace pragma {
 
 		std::string m_lightMapMaterialName;
 		msys::MaterialHandle m_lightMapMaterial;
-		std::array<std::shared_ptr<prosper::Texture>, umath::to_integral(Texture::Count)> m_textures;
+		std::array<std::shared_ptr<prosper::Texture>, pragma::math::to_integral(Texture::Count)> m_textures;
 
-		util::PFloatProperty m_lightMapExposure = nullptr;
+		pragma::util::PFloatProperty m_lightMapExposure = nullptr;
 		std::shared_ptr<rendering::LightmapDataCache> m_lightmapDataCache;
 
 		// Contains the light map uv-buffer for each mesh of the world in the same order

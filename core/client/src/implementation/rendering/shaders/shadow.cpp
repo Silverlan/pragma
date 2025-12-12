@@ -36,7 +36,7 @@ decltype(ShaderShadow::VERTEX_ATTRIBUTE_POSITION) ShaderShadow::VERTEX_ATTRIBUTE
 decltype(ShaderShadow::DESCRIPTOR_SET_INSTANCE) ShaderShadow::DESCRIPTOR_SET_INSTANCE = {&ShaderGameWorld::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderShadow::DESCRIPTOR_SET_SCENE) ShaderShadow::DESCRIPTOR_SET_SCENE = {&ShaderScene::DESCRIPTOR_SET_SCENE};
 decltype(ShaderShadow::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderShadow::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderGameWorld::DESCRIPTOR_SET_RENDER_SETTINGS};
-ShaderShadow::ShaderShadow(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader) : ShaderGameWorld(context, identifier, vsShader, fsShader) { SetPipelineCount(umath::to_integral(Pipeline::Count)); }
+ShaderShadow::ShaderShadow(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader) : ShaderGameWorld(context, identifier, vsShader, fsShader) { SetPipelineCount(pragma::math::to_integral(Pipeline::Count)); }
 
 ShaderShadow::ShaderShadow(prosper::IPrContext &context, const std::string &identifier) : ShaderShadow(context, identifier, "programs/lighting/shadow/shadow", "programs/lighting/shadow/shadow") {}
 void ShaderShadow::OnPipelinesInitialized() { ShaderGameWorld::OnPipelinesInitialized(); }
@@ -80,8 +80,8 @@ void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo, prosper::CullModeFlags::None);
 
 	pipelineInfo.ToggleDepthBias(true, SHADOW_DEPTH_BIAS_CONSTANT, 0.f, SHADOW_DEPTH_BIAS_SLOPE);
-	uint32_t enableMorphTagetAnimations = (pipelineIdx == umath::to_integral(Pipeline::WithMorphTargetAnimations));
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, umath::get_least_significant_set_bit_index(umath::to_integral(GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit)), sizeof(enableMorphTagetAnimations), &enableMorphTagetAnimations);
+	uint32_t enableMorphTagetAnimations = (pipelineIdx == pragma::math::to_integral(Pipeline::WithMorphTargetAnimations));
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, pragma::math::get_least_significant_set_bit_index(pragma::math::to_integral(GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit)), sizeof(enableMorphTagetAnimations), &enableMorphTagetAnimations);
 }
 
 uint32_t ShaderShadow::GetSceneDescriptorSetIndex() const { return DESCRIPTOR_SET_SCENE.setIndex; }

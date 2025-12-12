@@ -78,8 +78,8 @@ ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &co
 	if(g_instanceCount++ == 0u)
 		initialize_material_settings_cache();
 
-	auto n = umath::to_integral(GameShaderSpecialization::Count);
-	auto nPassTypes = umath::to_integral(rendering::PassType::Count);
+	auto n = pragma::math::to_integral(GameShaderSpecialization::Count);
+	auto nPassTypes = pragma::math::to_integral(rendering::PassType::Count);
 	for(auto j = decltype(nPassTypes) {0u}; j < nPassTypes; ++j) {
 		// Note: Every pass type has to have the exact same number of pipelines in the exact same order!
 		auto startIdx = ShaderSpecializationManager::GetPipelineCount();
@@ -117,7 +117,7 @@ void ShaderGameWorldLightingPass::GetShaderPreprocessorDefinitions(std::unordere
 	if(m_shaderMaterial)
 		outPrefixCode += m_shaderMaterial->ToGlslStruct();
 }
-uint32_t ShaderGameWorldLightingPass::GetPassPipelineIndexStartOffset(rendering::PassType passType) const { return GetPipelineIndexStartOffset(umath::to_integral(passType)); }
+uint32_t ShaderGameWorldLightingPass::GetPassPipelineIndexStartOffset(rendering::PassType passType) const { return GetPipelineIndexStartOffset(pragma::math::to_integral(passType)); }
 void ShaderGameWorldLightingPass::OnPipelinesInitialized() { ShaderGameWorld::OnPipelinesInitialized(); }
 GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const
 {
@@ -168,8 +168,8 @@ GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetMaterialPip
 		auto texture = std::static_pointer_cast<msys::Texture>(rmaMap->texture);
 		if(texture) {
 			auto texName = texture->GetName();
-			ustring::to_lower(texName);
-			auto path = util::Path::CreateFile(texName);
+			pragma::string::to_lower(texName);
+			auto path = pragma::util::Path::CreateFile(texName);
 			path.RemoveFileExtension();
 		}
 	}
@@ -296,7 +296,7 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 
 	// Properties
 	auto &shaderSettings = pragma::get_client_state()->GetGameWorldShaderSettings();
-	auto fSetPropertyValue = [this, &pipelineInfo](GameShaderSpecializationPropertyIndex prop, auto value) { ShaderGameWorld::AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, umath::to_integral(prop), sizeof(value), &value); };
+	auto fSetPropertyValue = [this, &pipelineInfo](GameShaderSpecializationPropertyIndex prop, auto value) { ShaderGameWorld::AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, pragma::math::to_integral(prop), sizeof(value), &value); };
 	fSetPropertyValue(GameShaderSpecializationPropertyIndex::ShadowQuality, shaderSettings.shadowQuality);
 	fSetPropertyValue(GameShaderSpecializationPropertyIndex::DebugModeEnabled, static_cast<uint32_t>(shaderSettings.debugModeEnabled));
 	fSetPropertyValue(GameShaderSpecializationPropertyIndex::BloomOutputEnabled, static_cast<uint32_t>(shaderSettings.bloomEnabled));
@@ -385,12 +385,12 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::Initi
 				return nullptr;
 			}
 			if(prosper::util::is_srgb_format(tex->GetImage().GetFormat()))
-				materialFlags |= static_cast<pragma::rendering::shader_material::MaterialFlags>(umath::to_integral(pragma::rendering::shader_material::MaterialFlags::Srgb0) + isrgb);
+				materialFlags |= static_cast<pragma::rendering::shader_material::MaterialFlags>(pragma::math::to_integral(pragma::rendering::shader_material::MaterialFlags::Srgb0) + isrgb);
 			++isrgb;
 		}
 
-		using namespace ustring::string_switch_ci;
-		switch(ustring::string_switch_ci::hash(shaderTexInfo.name)) {
+		using namespace pragma::string::string_switch_ci;
+		switch(pragma::string::string_switch_ci::hash(shaderTexInfo.name)) {
 		case "normal_map"_:
 			materialFlags |= pragma::rendering::shader_material::MaterialFlags::HasNormalMap;
 			break;
@@ -458,7 +458,7 @@ bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorS
 	return settingsBuffer->Write(0, matData.data.size(), matData.data.data());
 }
 void ShaderGameWorldLightingPass::InitializeMaterialData(const msys::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData) {}
-bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, msys::CMaterial &mat, const pragma::rendering::ShaderInputData &matData) { return InitializeMaterialBuffer(descSet, mat, matData, umath::to_integral(MaterialBinding::MaterialSettings)); }
+bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, msys::CMaterial &mat, const pragma::rendering::ShaderInputData &matData) { return InitializeMaterialBuffer(descSet, mat, matData, pragma::math::to_integral(MaterialBinding::MaterialSettings)); }
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(msys::CMaterial &mat) { return InitializeMaterialDescriptorSet(mat, GetMaterialDescriptorSetInfo()); }
 
 ////////
@@ -529,10 +529,10 @@ ShaderSpecializationManager::PassTypeInfo &ShaderSpecializationManager::Initiali
 void ShaderSpecializationManager::RegisterSpecializations(PassTypeIndex passType, SpecializationFlags staticFlags, SpecializationFlags dynamicFlags)
 {
 	auto &specializationMap = InitializePassTypeSpecializations(passType).specializationToPipelineIdx;
-	auto dynamicFlagValues = umath::get_power_of_2_values(dynamicFlags);
+	auto dynamicFlagValues = pragma::math::get_power_of_2_values(dynamicFlags);
 	auto &permutations = m_pipelineSpecializations;
 	std::function<void(uint32_t, SpecializationFlags)> registerSpecialization = nullptr;
-	permutations.reserve(permutations.size() + umath::pow(static_cast<size_t>(2), dynamicFlagValues.size()));
+	permutations.reserve(permutations.size() + pragma::math::pow(static_cast<size_t>(2), dynamicFlagValues.size()));
 	registerSpecialization = [&specializationMap, &registerSpecialization, &dynamicFlagValues, &permutations](uint32_t idx, SpecializationFlags perm) {
 		if(idx >= dynamicFlagValues.size()) {
 			permutations.push_back(perm);

@@ -54,7 +54,7 @@ void pragma::gui::types::WIOptionsList::SetSize(int x, int y)
 	WIBase::SetSize(x, y);
 	if(m_hTable.IsValid())
 		m_hTable->SetWidth(x);
-	if(umath::is_flag_set(m_stateFlags, StateFlags::IsBeingUpdated) == false)
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::IsBeingUpdated) == false)
 		ScheduleUpdate();
 }
 
@@ -214,7 +214,7 @@ void pragma::gui::types::WIOptionsList::RunUpdateConVars(bool bClear)
 		for(auto it = m_keyBindingsAdd[i].begin(); it != m_keyBindingsAdd[i].end(); ++it) {
 			auto &cmd = it->first;
 			if(coreLayer)
-				coreLayer->AddKeyMapping(umath::to_integral(it->second), cmd);
+				coreLayer->AddKeyMapping(pragma::math::to_integral(it->second), cmd);
 		}
 		m_keyBindingsAdd[i].clear();
 	}

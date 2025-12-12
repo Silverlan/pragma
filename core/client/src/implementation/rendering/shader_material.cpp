@@ -30,7 +30,7 @@ std::shared_ptr<ShaderMaterial> ShaderMaterialCache::Load(const std::string &id)
 	}
 	if(!udmData)
 		return nullptr;
-	auto shaderMat = ::util::make_shared<ShaderMaterial>(id);
+	auto shaderMat = pragma::util::make_shared<ShaderMaterial>(id);
 	std::string err;
 	if(shaderMat->LoadFromUdmData(udmData->GetAssetData().GetData()["shader_material"], err) == false) {
 		LOGGER.error("Failed to load shader material '" + id + "'!");
@@ -158,7 +158,7 @@ static std::string get_gl_type_name(udm::Type type)
 	return {};
 }
 
-static std::string get_property_name(const std::string &name) { return ustring::to_camel_case(name); }
+static std::string get_property_name(const std::string &name) { return pragma::string::to_camel_case(name); }
 
 template<typename T>
 static std::string vec_to_string(const std::string &typeName, T *baseVal, size_t numComponents)
@@ -202,7 +202,7 @@ static std::string value_to_glsl_string(const pragma::shadergraph::Value &value,
 
 std::string ShaderMaterial::GetTextureUniformVariableName(const std::string &texIdentifier)
 {
-	auto varName = ustring::to_camel_case(texIdentifier);
+	auto varName = pragma::string::to_camel_case(texIdentifier);
 	if(!varName.empty())
 		varName[0] = tolower(varName[0]);
 	varName = "u_" + varName;
@@ -242,7 +242,7 @@ std::string ShaderMaterial::ToGlslStruct() const
 	for(auto it = properties.begin(); it != properties.end();) {
 		auto &prop = *it;
 
-		auto idName = ustring::get_upper(prop.parameter.name);
+		auto idName = pragma::string::get_upper(prop.parameter.name);
 		ss << "#define MATERIAL_PROP_" << idName << "_ENABLED 1\n";
 
 		auto methodName = "get_mat_" + std::string {prop.parameter.name};
@@ -277,13 +277,13 @@ std::string ShaderMaterial::ToGlslStruct() const
 		}
 		if(prop->enumSet) {
 			for(auto &[optName, optVal] : prop->enumSet->getNameToValue()) {
-				std::string defName = "MAT_" + ustring::get_upper(ustring::to_snake_case(prop.parameter.name)) + "_" + ustring::get_upper(ustring::to_snake_case(std::string {optName}));
+				std::string defName = "MAT_" + pragma::string::get_upper(pragma::string::to_snake_case(prop.parameter.name)) + "_" + pragma::string::get_upper(pragma::string::to_snake_case(std::string {optName}));
 				definitions << "#define " << defName << " " << optVal << "\n";
 			}
 		}
 		if(prop.flags) {
 			for(auto &[flagName, flagVal] : *prop.flags) {
-				std::string defName = "FMAT_" + ustring::get_upper(ustring::to_snake_case(prop.parameter.name)) + "_" + ustring::get_upper(ustring::to_snake_case(std::string {flagName}));
+				std::string defName = "FMAT_" + pragma::string::get_upper(pragma::string::to_snake_case(prop.parameter.name)) + "_" + pragma::string::get_upper(pragma::string::to_snake_case(std::string {flagName}));
 				definitions << "#define " << defName << " " << flagVal << "\n";
 			}
 		}
@@ -296,7 +296,7 @@ std::string ShaderMaterial::ToGlslStruct() const
 	ss << "#include \"/common/alpha_mode.glsl\"\n";
 	uint32_t isrgb = 0;
 	for(auto &tex : textures) {
-		auto idName = ustring::get_upper(tex.name);
+		auto idName = pragma::string::get_upper(tex.name);
 		auto varName = GetTextureUniformVariableName(tex.name);
 
 		ss << "#define MATERIAL_" << idName << "_ENABLED 1\n";
@@ -395,7 +395,7 @@ ShaderMaterial::ShaderMaterial(const pragma::GString &name) : ShaderInputDescrip
 		for(size_t i = 0; i < names.size(); ++i) {
 			auto &name = names[i];
 			auto &val = values[i];
-			flags[std::string {name}] = umath::to_integral(val);
+			flags[std::string {name}] = pragma::math::to_integral(val);
 		}
 		propFlags.flags = std::make_unique<std::unordered_map<std::string, uint32_t>>(std::move(flags));
 		AddProperty(std::move(propFlags));
@@ -431,7 +431,7 @@ void ShaderMaterial::PopulateShaderInputDataFromMaterial(ShaderInputData &inputD
 		auto valSize = prop.GetSize();
 		totalSize += valSize + prop.padding;
 		if(totalSize > MAX_MATERIAL_SIZE)
-			throw std::runtime_error {"Size of shader material properties (" + util::get_pretty_bytes(totalSize) + " exceeds maximum allowed size of " + util::get_pretty_bytes(MAX_MATERIAL_SIZE) + "!"};
+			throw std::runtime_error {"Size of shader material properties (" + pragma::util::get_pretty_bytes(totalSize) + " exceeds maximum allowed size of " + pragma::util::get_pretty_bytes(MAX_MATERIAL_SIZE) + "!"};
 
 		auto val = prop->defaultValue;
 		auto matValType = mat.GetPropertyType(prop.parameter.name);
@@ -741,7 +741,7 @@ bool ShaderMaterial::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, std::st
 	}
 
 	if(totalSize > MAX_MATERIAL_SIZE) {
-		outErr = "Total size of material properties (" + util::get_pretty_bytes(totalSize) + ") exceeds maximum allowed size of " + util::get_pretty_bytes(MAX_MATERIAL_SIZE) + "!";
+		outErr = "Total size of material properties (" + pragma::util::get_pretty_bytes(totalSize) + ") exceeds maximum allowed size of " + pragma::util::get_pretty_bytes(MAX_MATERIAL_SIZE) + "!";
 		return false;
 	}
 	return true;

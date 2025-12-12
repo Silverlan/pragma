@@ -93,21 +93,21 @@ void CFlammableComponent::UpdateFlameParticlePositions()
 		}
 		else {
 			auto animComponent = ent.GetAnimatedComponent();
-			if(animComponent.expired() || animComponent->GetBonePos(info.boneId, pos, umath::CoordinateSpace::World) == false)
+			if(animComponent.expired() || animComponent->GetBonePos(info.boneId, pos, pragma::math::CoordinateSpace::World) == false)
 				pos = ent.GetCenter();
 		}
 		pTrComponent->SetPosition(pos);
 	}
 }
-util::EventReply CFlammableComponent::Ignite(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor)
+pragma::util::EventReply CFlammableComponent::Ignite(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor)
 {
 	auto bOnFire = IsOnFire();
-	if(BaseFlammableComponent::Ignite(duration, attacker, inflictor) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseFlammableComponent::Ignite(duration, attacker, inflictor) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	if(bOnFire == true || pTrComponent == nullptr)
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	auto pSndComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 	if(pSndComponent.valid()) {
 		auto snd = pSndComponent->CreateSound("fx.fire_small", pragma::audio::ALSoundType::Effect);
@@ -127,8 +127,8 @@ util::EventReply CFlammableComponent::Ignite(float duration, pragma::ecs::BaseEn
 	auto radius = uvec::length(extents);
 	auto particleDistance = radius * 0.06f;
 	auto distSqr = particleDistance * particleDistance;
-	auto particleCount = umath::clamp(umath::ceil(radius / 10.f), 12, 20);
-	auto particleRadius = umath::max(radius / 3.f, 14.f);
+	auto particleCount = pragma::math::clamp(pragma::math::ceil(radius / 10.f), 12, 20);
+	auto particleRadius = pragma::math::max(radius / 3.f, 14.f);
 
 	const std::unordered_map<std::string, std::string> radiusRandom = {{"radius_min", std::to_string(particleRadius)}, {"radius_max", std::to_string(particleRadius + 25)}};
 
@@ -166,7 +166,7 @@ util::EventReply CFlammableComponent::Ignite(float duration, pragma::ecs::BaseEn
 	for(auto i = particleId; i < particleCount; ++i) {
 		Vector3 pos {};
 		for(uint8_t i = 0; i < 3; ++i) {
-			auto r = umath::random(0.f, 1.f);
+			auto r = pragma::math::random(0.f, 1.f);
 			pos[i] = min[i] + (max[i] - min[i]) * r;
 		}
 		particlePositions.push_back({pos, 0}); // TODO Check pos distance
@@ -200,7 +200,7 @@ util::EventReply CFlammableComponent::Ignite(float duration, pragma::ecs::BaseEn
 			else
 				m_igniteInfo.flameParticles.push_back({*pt, info.position});
 		}
-		pt = util::create_smoke_trail_particle(60.f, 80.f, 22.f, 50.f);
+		pt = pragma::util::create_smoke_trail_particle(60.f, 80.f, 22.f, 50.f);
 		if(pt != nullptr) {
 			auto pTrComponent = pt->GetEntity().GetTransformComponent();
 			if(pTrComponent != nullptr)
@@ -213,7 +213,7 @@ util::EventReply CFlammableComponent::Ignite(float duration, pragma::ecs::BaseEn
 				m_igniteInfo.flameParticles.push_back({*pt, info.position});
 		}
 	}
-	return util::EventReply::Handled;
+	return pragma::util::EventReply::Handled;
 }
 void CFlammableComponent::Extinguish()
 {

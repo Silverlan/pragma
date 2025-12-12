@@ -19,7 +19,7 @@ export {
 				auto it = other.flexControllers.find(pair.first);
 				if(it == other.flexControllers.end())
 					return false;
-				if(umath::abs(pair.second - it->second) > 0.001f)
+				if(pragma::math::abs(pair.second - it->second) > 0.001f)
 					return false;
 			}
 			return true;

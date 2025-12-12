@@ -29,7 +29,7 @@ export namespace pragma {
 	};
 
 	enum class GameShaderSpecializationPropertyIndex : uint32_t {
-		Start = umath::get_least_significant_set_bit_index_c(umath::to_integral(GameShaderSpecializationConstantFlag::Last)) + 1,
+		Start = pragma::math::get_least_significant_set_bit_index_c(pragma::math::to_integral(GameShaderSpecializationConstantFlag::Last)) + 1,
 		ShadowQuality = Start,
 		DebugModeEnabled,
 		BloomOutputEnabled,
@@ -39,7 +39,7 @@ export namespace pragma {
 		EnableDynamicShadows
 	};
 	enum class GameShaderSpecialization : uint32_t { Generic = 0, Lightmapped, Animated, Count };
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {
 	REGISTER_ENUM_FLAGS(pragma::GameShaderSpecializationConstantFlag)

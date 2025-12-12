@@ -101,13 +101,13 @@ struct GLTFBufferData {
 				value = GetValue<uint8_t>(offset) / static_cast<float>(std::numeric_limits<uint8_t>::max());
 				break;
 			case TINYGLTF_COMPONENT_TYPE_BYTE:
-				value = umath::max(GetValue<int8_t>(offset) / static_cast<float>(std::numeric_limits<int8_t>::max()), -1.f);
+				value = pragma::math::max(GetValue<int8_t>(offset) / static_cast<float>(std::numeric_limits<int8_t>::max()), -1.f);
 				break;
 			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
 				value = GetValue<uint16_t>(offset) / static_cast<float>(std::numeric_limits<uint16_t>::max());
 				break;
 			case TINYGLTF_COMPONENT_TYPE_SHORT:
-				value = umath::max(GetValue<int16_t>(offset) / static_cast<float>(std::numeric_limits<int16_t>::max()), -1.f);
+				value = pragma::math::max(GetValue<int16_t>(offset) / static_cast<float>(std::numeric_limits<int16_t>::max()), -1.f);
 				break;
 			}
 			result[i] = value;
@@ -147,7 +147,7 @@ static uimg::TextureInfo get_texture_write_info(pragma::asset::ModelExportInfo::
 	}
 	texWriteInfo.flags = uimg::TextureInfo::Flags::GenerateMipmaps;
 	texWriteInfo.alphaMode = alphaMode;
-	// umath::set_flag(texWriteInfo.flags,uimg::TextureInfo::Flags::SRGB,srgb);
+	// pragma::math::set_flag(texWriteInfo.flags,uimg::TextureInfo::Flags::SRGB,srgb);
 	texWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::KeepInputImageFormat;
 	texWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::KeepInputImageFormat;
 	if(normalMap)
@@ -211,10 +211,10 @@ static bool load_image(tinygltf::Image *image, const int imageIdx, std::string *
 	}
 	auto &inputData = *static_cast<GLTFInputData *>(userData);
 	auto imgPath = inputData.path + image->uri;
-	std::string relImgPath = util::Path::CreateFile(imgPath).GetString();
+	std::string relImgPath = pragma::util::Path::CreateFile(imgPath).GetString();
 	filemanager::find_relative_path(relImgPath, relImgPath);
 	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
-	auto texture = texManager.LoadAsset(relImgPath, util::AssetLoadFlags::AbsolutePath | util::AssetLoadFlags::DontCache);
+	auto texture = texManager.LoadAsset(relImgPath, pragma::util::AssetLoadFlags::AbsolutePath | pragma::util::AssetLoadFlags::DontCache);
 	if(texture == nullptr) {
 		if(outErr)
 			*outErr = "Failed to load texture '" + relImgPath + "'!";
@@ -267,12 +267,12 @@ void pragma::asset::assign_texture(msys::CMaterial &mat, const std::string &text
 	auto texInfo = pragma::asset::get_texture_info(greyScale, normalMap, alphaMode);
 	pragma::get_cgame()->SaveImage(img, textureRootPath + texName, texInfo);
 
-	auto path = util::FilePath(texName);
+	auto path = pragma::util::FilePath(texName);
 	path.PopFront();
 	mat.SetTexture(matIdentifier, path.GetString());
 }
 
-static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::string &optFileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsMap)
+static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::string &optFileName, std::string &outErrMsg, const pragma::util::Path &outputPath, bool importAsMap)
 {
 	auto scale = static_cast<float>(pragma::metres_to_units(1.f));
 
@@ -321,14 +321,14 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		auto sz = optFile->GetSize();
 		fileData.resize(sz);
 		optFile->Read(fileData.data(), fileData.size());
-		auto binary = (sz >= 4) ? ustring::compare(reinterpret_cast<char *>(fileData.data()), "glTF", true, 4) : false;
+		auto binary = (sz >= 4) ? pragma::string::compare(reinterpret_cast<char *>(fileData.data()), "glTF", true, 4) : false;
 		result = binary ? reader.LoadBinaryFromMemory(&gltfMdl, &err, &warn, fileData.data(), fileData.size(), absPath) : reader.LoadASCIIFromString(&gltfMdl, &err, &warn, reinterpret_cast<char *>(fileData.data()), fileData.size(), absPath);
 	}
 	else {
 		std::string ext;
 		ufile::get_extension(fileName, &ext);
 
-		auto binary = ustring::compare<std::string>(ext, "glb", false);
+		auto binary = pragma::string::compare<std::string>(ext, "glb", false);
 		result = binary ? reader.LoadBinaryFromFile(&gltfMdl, &err, &warn, absPathToFile) : reader.LoadASCIIFromFile(&gltfMdl, &err, &warn, absPathToFile);
 	}
 	if(result)
@@ -420,7 +420,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		};
 
 		auto matName = matPath + name;
-		util::Path matPathRelative {matName};
+		pragma::util::Path matPathRelative {matName};
 		matPathRelative.PopFront();
 
 		auto mat = pragma::get_client_state()->CreateMaterial(matPathRelative.GetString(), "pbr");
@@ -429,7 +429,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		mat->SetProperty("alpha_cutoff", gltfMat.alphaCutoff);
 
 		auto fWriteImage = [cmat](const std::string &matIdentifier, const std::string &texName, prosper::IImage &img, bool greyScale, bool normalMap, AlphaMode alphaMode = AlphaMode::Opaque) {
-			pragma::asset::assign_texture(*cmat, ::util::CONVERT_PATH, matIdentifier, texName, img, greyScale, normalMap, alphaMode);
+			pragma::asset::assign_texture(*cmat, pragma::util::CONVERT_PATH, matIdentifier, texName, img, greyScale, normalMap, alphaMode);
 		};
 
 		auto isHandled = false;
@@ -540,7 +540,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 
 		mat->UpdateTextures();
 		mat->SetLoaded(true);
-		auto savePath = pragma::asset::relative_path_to_absolute_path(matPathRelative, pragma::asset::Type::Material, util::CONVERT_PATH);
+		auto savePath = pragma::asset::relative_path_to_absolute_path(matPathRelative, pragma::asset::Type::Material, pragma::util::CONVERT_PATH);
 		std::string err;
 		mat->Save(savePath.GetString(), err, true);
 
@@ -557,7 +557,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 	};
 
 	auto getNodePose = [&](const tinygltf::Node &node) {
-		umath::ScaledTransform pose {};
+		pragma::math::ScaledTransform pose {};
 		if(node.translation.size() == 3) {
 			pose.SetOrigin(TransformPos(Vector3 {static_cast<float>(node.translation[0]), static_cast<float>(node.translation[1]), static_cast<float>(node.translation[2])}));
 		}
@@ -574,7 +574,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 	uint32_t absUnnamedFcIdx = 0;
 	struct NodeMeshData {
 		std::optional<std::string> name;
-		umath::ScaledTransform pose;
+		pragma::math::ScaledTransform pose;
 	};
 	std::vector<std::vector<NodeMeshData>> meshToNodes;
 	meshToNodes.resize(gltfMeshes.size());
@@ -587,7 +587,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 
 	struct InstanceInfo {
 		std::string name;
-		umath::ScaledTransform pose;
+		pragma::math::ScaledTransform pose;
 	};
 	std::unordered_map<pragma::asset::ModelMeshGroup *, std::vector<InstanceInfo>> meshInstances;
 	for(uint32_t meshIdx = 0; auto &gltfMesh : gltfMeshes) {
@@ -708,7 +708,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 						(*lightmapUvs).at(i) = texCoordBufData1->GetIndexedValue<Vector2>(i);
 				}
 
-				if(pose != umath::ScaledTransform {}) {
+				if(pose != pragma::math::ScaledTransform {}) {
 					for(auto &v : verts) {
 						v.position *= pose.GetScale();
 						v.position = pose * v.position;
@@ -759,7 +759,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 
 				uint32_t targetIdx = 0;
 				for(auto &target : primitive.targets) {
-					util::ScopeGuard sg {[&targetIdx]() { ++targetIdx; }};
+					pragma::util::ScopeGuard sg {[&targetIdx]() { ++targetIdx; }};
 					auto itPos = target.find("POSITION");
 					auto itNormal = target.find("NORMAL");
 					// auto itTangent = target.find("TANGENT");
@@ -884,7 +884,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		auto bufferData = fGetBufferData(skin.inverseBindMatrices);
 
 		// Build hierarchy
-		std::vector<umath::ScaledTransform> bindPoses {};
+		std::vector<pragma::math::ScaledTransform> bindPoses {};
 		bindPoses.reserve(skin.joints.size());
 		for(auto i = decltype(skin.joints.size()) {0u}; i < skin.joints.size(); ++i) {
 			auto nodeIdx = skin.joints[i];
@@ -900,7 +900,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			}
 
 			auto invBindMatrix = bufferData.GetIndexedValue<Mat4>(i);
-			umath::ScaledTransform bindPose {invBindMatrix};
+			pragma::math::ScaledTransform bindPose {invBindMatrix};
 			bindPose = bindPose.GetInverse();
 			bindPose.SetOrigin(TransformPos(bindPose.GetOrigin()));
 			bindPoses.push_back(bindPose);
@@ -912,7 +912,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		for(auto i = decltype(skin.joints.size()) {0u}; i < skin.joints.size(); ++i) {
 			auto nodeIdx = skin.joints[i];
 			auto &node = gltfMdl.nodes[nodeIdx];
-			umath::ScaledTransform pose {};
+			pragma::math::ScaledTransform pose {};
 			if(!node.translation.empty())
 				pose.SetOrigin(TransformPos(Vector3 {static_cast<float>(node.translation[0]), static_cast<float>(node.translation[1]), static_cast<float>(node.translation[2])}));
 			if(!node.rotation.empty())
@@ -1053,7 +1053,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 
 				auto t0 = *it;
 				auto t1 = *itNext;
-				auto interp = (t1 > t0) ? umath::clamp((tTgt - t0) / (t1 - t0), 0.f, 1.f) : 0.f;
+				auto interp = (t1 > t0) ? pragma::math::clamp((tTgt - t0) / (t1 - t0), 0.f, 1.f) : 0.f;
 				auto &v0 = values[it - times.begin()];
 				auto &v1 = values[itNext - times.begin()];
 				Value interpValue {};
@@ -1075,14 +1075,14 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 					}
 				case Channel::Weights:
 					{
-						interpValue.weight = umath::lerp(v0.weight, v1.weight, interp);
+						interpValue.weight = pragma::math::lerp(v0.weight, v1.weight, interp);
 						break;
 					}
 				}
 				return interpValue;
 			};
 
-			auto numFrames = umath::max(umath::ceil(times.back() * 24), 1);
+			auto numFrames = pragma::math::max(pragma::math::ceil(times.back() * 24), 1);
 			for(auto i = decltype(numFrames) {0u}; i < numFrames; ++i) {
 				auto &frame = fGetFrame(i);
 				auto t = static_cast<float>(i) / fps;
@@ -1119,8 +1119,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		mdl->AddAnimation(animName, anim);
 	}
 
-	if(numBones > umath::to_integral(pragma::GameLimits::MaxBones))
-		Con::cwar << "Model has " << numBones << ", but engine only supports " << umath::to_integral(pragma::GameLimits::MaxBones) << ", this may cause rendering glitches!" << Con::endl;
+	if(numBones > pragma::math::to_integral(pragma::GameLimits::MaxBones))
+		Con::cwar << "Model has " << numBones << ", but engine only supports " << pragma::math::to_integral(pragma::GameLimits::MaxBones) << ", this may cause rendering glitches!" << Con::endl;
 #if 0
 	for(auto &meshGroup : mdl->GetMeshGroups())
 	{
@@ -1147,13 +1147,13 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 
 	OutputData outputData {};
 	auto relFileName = outputPath + mdlName;
-	auto mdlWritePath = ::util::CONVERT_PATH + pragma::asset::get_asset_root_directory(pragma::asset::Type::Model) + std::string {"/"} + outputPath.GetString();
+	auto mdlWritePath = pragma::util::CONVERT_PATH + pragma::asset::get_asset_root_directory(pragma::asset::Type::Model) + std::string {"/"} + outputPath.GetString();
 	if(importAsMap) {
 		std::unordered_set<std::string> materialMap;
 		struct PropInfo {
 			std::string name;
 			std::string modelName;
-			umath::ScaledTransform pose;
+			pragma::math::ScaledTransform pose;
 		};
 		std::vector<PropInfo> props;
 		auto &meshGroups = mdl->GetMeshGroups();
@@ -1175,9 +1175,9 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			cpy->Update();
 
 			auto subMdlName = meshGroup->GetName();
-			ustring::replace(subMdlName, " ", "_");
-			ustring::replace(subMdlName, ".", "_");
-			ustring::to_lower(subMdlName);
+			pragma::string::replace(subMdlName, " ", "_");
+			pragma::string::replace(subMdlName, ".", "_");
+			pragma::string::to_lower(subMdlName);
 			cpy->Save(*pragma::get_cgame(), mdlWritePath + subMdlName, err);
 			outputData.models.push_back((outputPath + subMdlName).GetString());
 
@@ -1208,7 +1208,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			materials.push_back(mat);
 
 		uint32_t hashIdx = 0;
-		auto createEntity = [&relFileName, &hashIdx](const umath::ScaledTransform &pose, bool includeScale = true) -> std::shared_ptr<pragma::asset::EntityData> {
+		auto createEntity = [&relFileName, &hashIdx](const pragma::math::ScaledTransform &pose, bool includeScale = true) -> std::shared_ptr<pragma::asset::EntityData> {
 			auto baseHash = std::hash<std::string> {}(relFileName.GetString() + "_" + std::to_string(hashIdx++));
 			auto ent = pragma::asset::EntityData::Create();
 			ent->SetPose(pose);
@@ -1277,7 +1277,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			auto ent = createEntity(pose, false);
 			ent->SetClassName("env_camera");
 
-			ent->SetKeyValue("fov", std::to_string(umath::rad_to_deg(cam.perspective.yfov)));
+			ent->SetKeyValue("fov", std::to_string(pragma::math::rad_to_deg(cam.perspective.yfov)));
 			ent->SetKeyValue("farz", std::to_string(pragma::metres_to_units(cam.perspective.znear)));
 			ent->SetKeyValue("nearz", std::to_string(pragma::metres_to_units(cam.perspective.zfar)));
 			ent->SetKeyValue("aspectRatio", std::to_string(cam.perspective.aspectRatio));
@@ -1285,7 +1285,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			worldData->AddEntity(*ent);
 		}
 
-		auto mapWritePath = ::util::CONVERT_PATH + pragma::asset::get_asset_root_directory(pragma::asset::Type::Map) + std::string {"/"} + relFileName.GetString();
+		auto mapWritePath = pragma::util::CONVERT_PATH + pragma::asset::get_asset_root_directory(pragma::asset::Type::Map) + std::string {"/"} + relFileName.GetString();
 
 		auto udmData = udm::Data::Create();
 		auto assetData = udmData->GetAssetData();
@@ -1316,21 +1316,21 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 	outputData.model = mdl;
 	return outputData;
 }
-std::shared_ptr<pragma::asset::Model> pragma::asset::import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
+std::shared_ptr<pragma::asset::Model> pragma::asset::import_model(ufile::IFile &f, std::string &outErrMsg, const pragma::util::Path &outputPath, bool importAsSingleModel)
 {
 	auto data = ::import_model(&f, "", outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
 		return nullptr;
 	return data->model;
 }
-std::shared_ptr<pragma::asset::Model> pragma::asset::import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
+std::shared_ptr<pragma::asset::Model> pragma::asset::import_model(const std::string &fileName, std::string &outErrMsg, const pragma::util::Path &outputPath, bool importAsSingleModel)
 {
 	auto data = ::import_model(nullptr, fileName, outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
 		return nullptr;
 	return data->model;
 }
-std::optional<pragma::asset::AssetImportResult> pragma::asset::import_gltf(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
+std::optional<pragma::asset::AssetImportResult> pragma::asset::import_gltf(ufile::IFile &f, std::string &outErrMsg, const pragma::util::Path &outputPath, bool importAsSingleModel)
 {
 	auto data = ::import_model(&f, "", outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
@@ -1340,7 +1340,7 @@ std::optional<pragma::asset::AssetImportResult> pragma::asset::import_gltf(ufile
 	importInfo.mapName = std::move(data->mapName);
 	return importInfo;
 }
-std::optional<pragma::asset::AssetImportResult> pragma::asset::import_gltf(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
+std::optional<pragma::asset::AssetImportResult> pragma::asset::import_gltf(const std::string &fileName, std::string &outErrMsg, const pragma::util::Path &outputPath, bool importAsSingleModel)
 {
 	auto data = ::import_model(nullptr, fileName, outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
@@ -1353,7 +1353,7 @@ std::optional<pragma::asset::AssetImportResult> pragma::asset::import_gltf(const
 
 bool pragma::asset::import_texture(const std::string &fileName, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg)
 {
-	auto tex = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset(fileName, util::AssetLoadFlags::DontCache);
+	auto tex = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset(fileName, pragma::util::AssetLoadFlags::DontCache);
 	if(tex == nullptr) {
 		outErrMsg = "Unable to load texture!";
 		return false;
@@ -1373,7 +1373,7 @@ bool pragma::asset::import_texture(std::unique_ptr<ufile::IFile> &&f, const Text
 	if(ufile::get_extension(*path, &ext) == false)
 		return false;
 	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
-	auto tex = texManager.LoadAsset("", std::move(f), ext, std::make_unique<msys::TextureLoadInfo>(util::AssetLoadFlags::DontCache));
+	auto tex = texManager.LoadAsset("", std::move(f), ext, std::make_unique<msys::TextureLoadInfo>(pragma::util::AssetLoadFlags::DontCache));
 	if(tex == nullptr) {
 		outErrMsg = "Unable to load texture!";
 		return false;
@@ -1406,26 +1406,26 @@ bool pragma::asset::import_texture(prosper::IImage &img, const TextureImportInfo
 			break;
 		}
 	}
-	auto imgOutputPath = "materials/" + util::Path {outputPath};
+	auto imgOutputPath = "materials/" + pragma::util::Path {outputPath};
 	imgOutputPath.RemoveFileExtension();
 	return pragma::get_cgame()->SaveImage(img, imgOutputPath.GetString(), texWriteInfo);
 }
 
 bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<MapExportInfo> &mapExp)
 {
-	::util::Path mapPath {mapName};
+	pragma::util::Path mapPath {mapName};
 	mapPath.RemoveFileExtension(get_supported_extensions(Type::Map));
 	VFilePtr f = nullptr;
 	auto openLocalMap = [&mapPath, &f]() {
 		auto localMapPath = pragma::asset::find_file(mapPath.GetString(), pragma::asset::Type::Map);
 		if(localMapPath.has_value()) {
-			auto filePath = util::Path::CreateFile(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Map)} + '/' + *localMapPath);
+			auto filePath = pragma::util::Path::CreateFile(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Map)} + '/' + *localMapPath);
 			f = FileManager::OpenFile(filePath.GetString().c_str(), "rb");
 		}
 	};
 	openLocalMap();
 	if(f == nullptr) {
-		if(util::port_source2_map(pragma::get_client_state(), mapPath.GetString()) || util::port_hl2_map(pragma::get_client_state(), mapPath.GetString())) {
+		if(pragma::util::port_source2_map(pragma::get_client_state(), mapPath.GetString()) || pragma::util::port_hl2_map(pragma::get_client_state(), mapPath.GetString())) {
 			f = FileManager::OpenFile(mapPath.GetString().c_str(), "rb");
 			if(f == nullptr) {
 				// Sleep for a bit, then try again, in case the file hasn't been fully written yet
@@ -1442,7 +1442,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 		Con::cout << "Loading map data..." << Con::endl;
 
 	auto worldData = pragma::asset::WorldData::Create(*pragma::get_client_state());
-	auto udmData = util::load_udm_asset(std::make_unique<fsys::File>(f));
+	auto udmData = pragma::util::load_udm_asset(std::make_unique<fsys::File>(f));
 	f = nullptr;
 	std::string err;
 	if(udmData == nullptr || worldData->LoadFromAssetData(udmData->GetAssetData(), pragma::asset::EntityData::Flags::None, err) == false)
@@ -1558,7 +1558,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 			if(radius.has_value() == false)
 				radius = ent->GetKeyValue("distance");
 			if(radius.has_value())
-				ls.range = util::to_float(*radius);
+				ls.range = pragma::util::to_float(*radius);
 
 			std::optional<float> outerCutoffAngle {};
 			if(ent->GetClassName() == "env_light_spot") {
@@ -1566,11 +1566,11 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 
 				auto blendFraction = ent->GetKeyValue("blendfraction");
 				if(blendFraction.has_value())
-					ls.blendFraction = util::to_float(*blendFraction);
+					ls.blendFraction = pragma::util::to_float(*blendFraction);
 
 				auto outerCutoff = ent->GetKeyValue("outercutoff");
 				if(outerCutoff.has_value()) {
-					ls.outerConeAngle = util::to_float(*outerCutoff);
+					ls.outerConeAngle = pragma::util::to_float(*outerCutoff);
 					outerCutoffAngle = ls.outerConeAngle;
 				}
 			}
@@ -1584,9 +1584,9 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 				auto intensityType = pragma::BaseEnvLightComponent::LightIntensityType::Candela;
 				auto vIntensityType = ent->GetKeyValue("light_intensity_type");
 				if(vIntensityType.has_value())
-					intensityType = static_cast<pragma::BaseEnvLightComponent::LightIntensityType>(util::to_int(*vIntensityType));
+					intensityType = static_cast<pragma::BaseEnvLightComponent::LightIntensityType>(pragma::util::to_int(*vIntensityType));
 
-				auto flIntensity = util::to_float(*intensity);
+				auto flIntensity = pragma::util::to_float(*intensity);
 				switch(ls.type) {
 				case pragma::asset::GLTFWriter::LightSource::Type::Spot:
 				case pragma::asset::GLTFWriter::LightSource::Type::Point:
@@ -1658,7 +1658,7 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 	auto imgPath = optFileNameOverride.has_value() ? *optFileNameOverride : ufile::get_file_from_filename(texturePath);
 	ufile::remove_extension_from_filename(imgPath);
 	if(optExportPath)
-		imgPath = (util::Path::CreatePath(*optExportPath) + imgPath).GetString();
+		imgPath = (pragma::util::Path::CreatePath(*optExportPath) + imgPath).GetString();
 	auto imgOutputPath = std::string {EXPORT_PATH} + imgPath;
 
 	auto exportSuccess = false;
@@ -1683,7 +1683,7 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 	}
 	else {
 		std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
-		if(::util::to_image_buffer(vkImg, {}, imgBuffers) == false) {
+		if(pragma::util::to_image_buffer(vkImg, {}, imgBuffers) == false) {
 			outErrMsg = "Unable to convert texture '" + texturePath + "' to image buffer!";
 			return false;
 		}
@@ -1729,9 +1729,9 @@ std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_materia
 	return texturePaths;
 }
 
-class ModelAOWorker : public util::ParallelWorker<pragma::asset::ModelAOWorkerResult> {
+class ModelAOWorker : public pragma::util::ParallelWorker<pragma::asset::ModelAOWorkerResult> {
   public:
-	ModelAOWorker(const std::vector<util::ParallelJob<uimg::ImageLayerSet>> &matAoJobs) : m_matAoJobs {matAoJobs}
+	ModelAOWorker(const std::vector<pragma::util::ParallelJob<uimg::ImageLayerSet>> &matAoJobs) : m_matAoJobs {matAoJobs}
 	{
 		AddThread([this]() {
 			auto numJobs = m_matAoJobs.size();
@@ -1761,19 +1761,19 @@ class ModelAOWorker : public util::ParallelWorker<pragma::asset::ModelAOWorkerRe
 				}
 				m_matAoJobs.erase(m_matAoJobs.begin());
 			}
-			SetStatus((numSuccessful > 0) ? util::JobStatus::Successful : util::JobStatus::Failed);
+			SetStatus((numSuccessful > 0) ? pragma::util::JobStatus::Successful : pragma::util::JobStatus::Failed);
 		});
 	}
 	virtual pragma::asset::ModelAOWorkerResult GetResult() override { return m_result; }
   private:
 	template<typename TJob, typename... TARGS>
-	friend util::ParallelJob<typename TJob::RESULT_TYPE> util::create_parallel_job(TARGS &&...args);
-	std::vector<util::ParallelJob<uimg::ImageLayerSet>> m_matAoJobs {};
+	friend pragma::util::ParallelJob<typename TJob::RESULT_TYPE> pragma::util::create_parallel_job(TARGS &&...args);
+	std::vector<pragma::util::ParallelJob<uimg::ImageLayerSet>> m_matAoJobs {};
 	pragma::asset::ModelAOWorkerResult m_result {};
 };
-std::optional<util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::asset::generate_ambient_occlusion(pragma::asset::Model &mdl, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples, pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
+std::optional<pragma::util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::asset::generate_ambient_occlusion(pragma::asset::Model &mdl, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples, pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
 {
-	std::vector<util::ParallelJob<uimg::ImageLayerSet>> aoJobs {};
+	std::vector<pragma::util::ParallelJob<uimg::ImageLayerSet>> aoJobs {};
 	std::unordered_set<std::string> builtRMAs {};
 	auto &materials = mdl.GetMaterials();
 	aoJobs.reserve(materials.size());
@@ -1786,7 +1786,7 @@ std::optional<util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::ass
 		if(builtRMAs.find(rmaMap->name) != builtRMAs.end())
 			continue; // AO has already been built (maybe by a different skin material)
 		builtRMAs.insert(rmaMap->name);
-		util::ParallelJob<uimg::ImageLayerSet> aoJob {};
+		pragma::util::ParallelJob<uimg::ImageLayerSet> aoJob {};
 		auto eResult = generate_ambient_occlusion(mdl, *mat.get(), aoJob, outErrMsg, forceRebuild, aoResolution, aoSamples, aoDevice);
 		if(eResult != AOResult::AOJobReady)
 			continue;
@@ -1794,7 +1794,7 @@ std::optional<util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::ass
 	}
 	if(aoJobs.empty())
 		return {};
-	return util::create_parallel_job<ModelAOWorker>(aoJobs);
+	return pragma::util::create_parallel_job<ModelAOWorker>(aoJobs);
 }
 
 template<class T>
@@ -1805,7 +1805,7 @@ static bool save_ambient_occlusion(msys::Material &mat, std::string rmaPath, T &
 		return false;
 	ufile::remove_extension_from_filename(rmaPath);
 
-	auto outPath = util::Path {rmaPath};
+	auto outPath = pragma::util::Path {rmaPath};
 	auto originalRmaPath = outPath.GetString();
 	auto requiresSave = false;
 	if(outPath.GetFront() == "pbr") {
@@ -1833,7 +1833,7 @@ static bool save_ambient_occlusion(msys::Material &mat, std::string rmaPath, T &
 	return true;
 }
 
-pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset::Model &mdl, msys::Material &mat, util::ParallelJob<uimg::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples,
+pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset::Model &mdl, msys::Material &mat, pragma::util::ParallelJob<uimg::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples,
   pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
 {
 	// TODO: There really is no good way to determine whether the material has a ambient occlusion map or not.
@@ -1891,23 +1891,23 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset:
 	}
 
 	auto hMat = mat.GetHandle();
-	outJob.SetCompletionHandler([rmaPath, hMat](::util::ParallelWorker<uimg::ImageLayerSet> &worker) mutable {
+	outJob.SetCompletionHandler([rmaPath, hMat](pragma::util::ParallelWorker<uimg::ImageLayerSet> &worker) mutable {
 		auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA *>(pragma::get_cengine()->GetShader("compose_rma").get());
 		if(worker.IsSuccessful() == false)
 			return;
 		if(!hMat) {
-			worker.SetStatus(util::JobStatus::Failed, "Material is not valid!");
+			worker.SetStatus(pragma::util::JobStatus::Failed, "Material is not valid!");
 			return;
 		}
 		if(shaderComposeRMA == nullptr) {
-			worker.SetStatus(util::JobStatus::Failed, "Shader is not valid!");
+			worker.SetStatus(pragma::util::JobStatus::Failed, "Shader is not valid!");
 			return;
 		}
 		auto aoImg = worker.GetResult().images.begin()->second;
 		std::string errMsg;
 		auto result = save_ambient_occlusion<uimg::ImageBuffer>(*hMat.get(), rmaPath, *aoImg, errMsg);
 		if(result == false)
-			worker.SetStatus(util::JobStatus::Failed, errMsg);
+			worker.SetStatus(pragma::util::JobStatus::Failed, errMsg);
 	});
 	return AOResult::AOJobReady;
 }
@@ -1915,7 +1915,7 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset:
 bool pragma::asset::export_texture_as_vtf(const std::string &fileName, const std::function<const uint8_t *(uint32_t, uint32_t)> &fGetImgData, uint32_t width, uint32_t height, uint32_t szPerPixel, uint32_t numLayers, uint32_t numMipmaps, bool cubemap, const VtfInfo &texInfo,
   const std::function<void(const std::string &)> &errorHandler, bool absoluteFileName)
 {
-	auto dllHandle = util::initialize_external_archive_manager(pragma::get_client_state());
+	auto dllHandle = pragma::util::initialize_external_archive_manager(pragma::get_client_state());
 	if(!dllHandle)
 		return false;
 	auto *fExportVtf = dllHandle->FindSymbolAddress<bool (*)(const std::string &, const std::function<const uint8_t *(uint32_t, uint32_t)> &, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, bool, const VtfInfo &, const std::function<void(const std::string &)> &, bool)>("export_vtf");
@@ -1950,7 +1950,7 @@ std::optional<prosper::Format> pragma::asset::vtf_format_to_prosper(VtfInfo::For
 		// vkImgData.swizzle = {prosper::ComponentSwizzle::A,prosper::ComponentSwizzle::B,prosper::ComponentSwizzle::G,prosper::ComponentSwizzle::R};
 		return prosper::Format::A8B8G8R8_UNorm_Pack32;
 	}
-	static_assert(umath::to_integral(pragma::asset::VtfInfo::Format::Count) == 10, "Update this implementation when new format types have been added!");
+	static_assert(pragma::math::to_integral(pragma::asset::VtfInfo::Format::Count) == 10, "Update this implementation when new format types have been added!");
 	return {};
 }
 std::optional<pragma::asset::VtfInfo::Format> pragma::asset::prosper_format_to_vtf(prosper::Format format)
@@ -1979,7 +1979,7 @@ std::optional<pragma::asset::VtfInfo::Format> pragma::asset::prosper_format_to_v
 		// vkImgData.swizzle = {prosper::ComponentSwizzle::A,prosper::ComponentSwizzle::B,prosper::ComponentSwizzle::G,prosper::ComponentSwizzle::R};
 		return VtfInfo::Format::A8B8G8R8_UNorm_Pack32;
 	}
-	static_assert(umath::to_integral(pragma::asset::VtfInfo::Format::Count) == 10, "Update this implementation when new format types have been added!");
+	static_assert(pragma::math::to_integral(pragma::asset::VtfInfo::Format::Count) == 10, "Update this implementation when new format types have been added!");
 	return {};
 }
 

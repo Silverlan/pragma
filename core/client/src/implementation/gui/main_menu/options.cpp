@@ -35,11 +35,11 @@ void pragma::gui::types::WIMainMenuOptions::ApplyWindowSize()
 	WIDropDownMenu *resMenu = static_cast<WIDropDownMenu *>(m_hResolutionList.get());
 	auto text = resMenu->GetText();
 	std::vector<std::string> res;
-	ustring::explode(std::string {text.cpp_str()}, "x", res);
+	pragma::string::explode(std::string {text.cpp_str()}, "x", res);
 	if(res.size() < 2)
 		return;
-	int w = ustring::to_int(res[0]);
-	int h = ustring::to_int(res[1]);
+	int w = pragma::string::to_int(res[0]);
+	int h = pragma::string::to_int(res[1]);
 
 	pragma::get_cengine()->GetWindow().SetResolution(Vector2i(w, h));
 }
@@ -52,10 +52,10 @@ void pragma::gui::types::WIMainMenuOptions::ApplyOptions()
 	if(m_hAntiAliasing.IsValid()) {
 		auto *pChoice = static_cast<WIChoiceList *>(m_hAntiAliasing.get())->GetSelectedChoice();
 		if(pChoice->value == "fxaa") {
-			std::vector<std::string> argv {std::to_string(umath::to_integral(pragma::rendering::AntiAliasing::FXAA))};
+			std::vector<std::string> argv {std::to_string(pragma::math::to_integral(pragma::rendering::AntiAliasing::FXAA))};
 			client->RunConsoleCommand("cl_render_anti_aliasing", argv);
 		}
-		else if(ustring::substr(pChoice->value, 0, 4) == "msaa") {
+		else if(pragma::string::substr(pChoice->value, 0, 4) == "msaa") {
 			std::string mssaaSamples = "1";
 			if(pChoice->value == "msaa2")
 				mssaaSamples = "1";
@@ -71,11 +71,11 @@ void pragma::gui::types::WIMainMenuOptions::ApplyOptions()
 				mssaaSamples = "6";
 			std::vector<std::string> argv {mssaaSamples};
 			client->RunConsoleCommand("cl_render_msaa_samples", argv);
-			argv = {std::to_string(umath::to_integral(pragma::rendering::AntiAliasing::MSAA))};
+			argv = {std::to_string(pragma::math::to_integral(pragma::rendering::AntiAliasing::MSAA))};
 			client->RunConsoleCommand("cl_render_anti_aliasing", argv);
 		}
 		else {
-			std::vector<std::string> argv {std::to_string(umath::to_integral(pragma::rendering::AntiAliasing::None))};
+			std::vector<std::string> argv {std::to_string(pragma::math::to_integral(pragma::rendering::AntiAliasing::None))};
 			client->RunConsoleCommand("cl_render_anti_aliasing", argv);
 		}
 	}
@@ -205,10 +205,10 @@ void pragma::gui::types::WIMainMenuOptions::InitializeOptionsList(WIOptionsList 
 	buttonReset->SizeToContents();
 	buttonReset->SetAutoCenterToParent(true);
 	buttonReset->AddCallback("OnMouseEvent",
-	  FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
-	    [this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+	  FunctionCallback<pragma::util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
+	    [this](pragma::util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 		    ResetDefaults(button, state, mods);
-		    *reply = util::EventReply::Handled;
+		    *reply = pragma::util::EventReply::Handled;
 		    return CallbackReturnType::HasReturnValue;
 	    }));
 	m_hButtonReset = buttonReset->GetHandle();
@@ -219,10 +219,10 @@ void pragma::gui::types::WIMainMenuOptions::InitializeOptionsList(WIOptionsList 
 	buttonApply->SizeToContents();
 	buttonApply->SetAutoCenterToParent(true);
 	buttonApply->AddCallback("OnMouseEvent",
-	  FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
-	    [this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+	  FunctionCallback<pragma::util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
+	    [this](pragma::util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 		    Apply(button, state, mods);
-		    *reply = util::EventReply::Handled;
+		    *reply = pragma::util::EventReply::Handled;
 		    return CallbackReturnType::HasReturnValue;
 	    }));
 	m_hButtonApply = buttonApply->GetHandle();
@@ -235,7 +235,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeGeneralSettings()
 	m_hGeneralSettings->SetName("settings_general");
 	auto *pList = static_cast<WIOptionsList *>(m_hGeneralSettings.get());
 	auto title = pragma::locale::get_text("general_options");
-	ustring::to_upper(title);
+	pragma::string::to_upper(title);
 	pList->SetTitle(title);
 	// Player Name
 	auto *teName = pList->AddTextEntry(pragma::locale::get_text("player_name"), "playername");
@@ -299,12 +299,12 @@ void pragma::gui::types::WIMainMenuOptions::InitializeGeneralSettings()
 				    if(percent <= 0.75)
 					    col = col0.Lerp(col1, percent / 0.75);
 				    else
-					    col = col1.Lerp(col2, umath::min((percent - 0.75) / 0.25, 1.0));
+					    col = col1.Lerp(col2, pragma::math::min((percent - 0.75) / 0.25, 1.0));
 				    pSlider->SetColor(col);
 			    });
 			    pSlider->SetValueTranslator([totalSize, pSlider](float f) -> std::string {
 				    auto percent = f / static_cast<double>(totalSize);
-				    return util::get_pretty_bytes(static_cast<uint64_t>(f)) + " / " + util::get_pretty_bytes(totalSize) + " (" + util::round_string(percent * 100.0, 2) + "%)";
+				    return pragma::util::get_pretty_bytes(static_cast<uint64_t>(f)) + " / " + pragma::util::get_pretty_bytes(totalSize) + " (" + pragma::util::round_string(percent * 100.0, 2) + "%)";
 			    });
 		    })
 		  ->GetHandle();
@@ -326,7 +326,7 @@ void pragma::gui::types::WIMainMenuOptions::UpdateMemoryUsage()
 {
 	if(IsVisible() == false)
 		return;
-	auto t = util::Clock::now();
+	auto t = pragma::util::Clock::now();
 	if(std::chrono::duration_cast<std::chrono::seconds>(t - m_tLastMemoryUsageUpdate).count() < 1)
 		return;
 	m_tLastMemoryUsageUpdate = t;
@@ -361,7 +361,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 	m_hVideoSettings->SetName("settings_video");
 	auto *pList = static_cast<WIOptionsList *>(m_hVideoSettings.get());
 	auto title = pragma::locale::get_text("video_options");
-	ustring::to_upper(title);
+	pragma::string::to_upper(title);
 	pList->SetTitle(title);
 
 	// Preset
@@ -380,7 +380,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 		if(hThis.IsValid() == false)
 			return;
 		auto *el = static_cast<WIMainMenuOptions *>(hThis.get());
-		auto val = util::to_int(value.get());
+		auto val = pragma::util::to_int(value.get());
 
 		// Defaults; should match the convar values
 		uint32_t textureQuality = 4;
@@ -413,7 +413,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 			//motionBlur = 0.f;
 			//occlusionCulling = 4;
 			//bDoF = false;
-			//presentMode = umath::min(static_cast<uint32_t>(1),static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1);
+			//presentMode = pragma::math::min(static_cast<uint32_t>(1),static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1);
 			//particleQuality = 0;
 			shaderQuality = 0;
 			shadowQuality = 0;
@@ -435,7 +435,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 			//motionBlur = 0.f;
 			//occlusionCulling = 4;
 			//bDoF = false;
-			//presentMode = umath::min(static_cast<uint32_t>(1),static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1);
+			//presentMode = pragma::math::min(static_cast<uint32_t>(1),static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1);
 			//particleQuality = 1;
 			shaderQuality = 1;
 			shadowQuality = 1;
@@ -457,7 +457,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 			//motionBlur = 0.f;
 			//occlusionCulling = 4;
 			//bDoF = false;
-			//presentMode = umath::min(static_cast<uint32_t>(2),static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1);
+			//presentMode = pragma::math::min(static_cast<uint32_t>(2),static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1);
 			//particleQuality = 1;
 			shaderQuality = 2;
 			shadowQuality = 2;
@@ -465,7 +465,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 			//bDynamicShadows = true;
 			//shadowUpdateFrequency = 5;
 			//pssmShadowUpdateFrequencyOffset = 2;
-			//pssmSplitCount = umath::max(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT -2,static_cast<uint32_t>(1));
+			//pssmSplitCount = pragma::math::max(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT -2,static_cast<uint32_t>(1));
 			mdlQuality = 2;
 			textureFiltering = 2;
 			shadowResolution = "1024";
@@ -487,7 +487,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 			//bDynamicShadows = true;
 			//shadowUpdateFrequency = 1;
 			//pssmShadowUpdateFrequencyOffset = 2;
-			//pssmSplitCount = umath::max(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT -1,static_cast<uint32_t>(1));
+			//pssmSplitCount = pragma::math::max(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT -1,static_cast<uint32_t>(1));
 			mdlQuality = static_cast<WIChoiceList *>(el->m_hMdlQuality.get())->GetChoiceCount() - 1;
 			textureFiltering = static_cast<WIChoiceList *>(el->m_hTextureFiltering.get())->GetChoiceCount() - 1;
 			shadowResolution = "2048";
@@ -648,7 +648,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 	auto *pDeviceMenu = pList->AddDropDownMenu(pragma::locale::get_text("physical_device"),[](WIDropDownMenu *pMenu) {
 		auto deviceList = prosper::util::get_available_vendor_devices(pragma::get_cengine()->GetRenderContext());
 		for(auto &devInfo : deviceList)
-			pMenu->AddOption(devInfo.deviceName,std::to_string(umath::to_integral(devInfo.vendor)) +"," +std::to_string(devInfo.deviceId));
+			pMenu->AddOption(devInfo.deviceName,std::to_string(pragma::math::to_integral(devInfo.vendor)) +"," +std::to_string(devInfo.deviceId));
 		
 		pMenu->SelectOption(0u);
 		pMenu->SelectOption(client->GetConVarString("cl_gpu_device"));
@@ -950,12 +950,12 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 			if(percent <= 0.75)
 				col = col0.Lerp(col1,percent /0.75);
 			else
-				col = col1.Lerp(col2,umath::min((percent -0.75) /0.25,1.0));
+				col = col1.Lerp(col2,pragma::math::min((percent -0.75) /0.25,1.0));
 			pSlider->SetColor(col);
 		});
 		pSlider->SetValueTranslator([totalSize,pSlider](float f) -> std::string {
 			auto percent = f /static_cast<double>(totalSize);
-			return util::get_pretty_bytes(static_cast<uint64_t>(f)) +" / " +util::get_pretty_bytes(totalSize) +" (" +util::round_string(percent *100.0,2) +"%)";
+			return pragma::util::get_pretty_bytes(static_cast<uint64_t>(f)) +" / " +util::get_pretty_bytes(totalSize) +" (" +util::round_string(percent *100.0,2) +"%)";
 		});
 	})->GetHandle();
 #endif
@@ -1003,7 +1003,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeAudioSettings()
 	m_hAudioSettings->SetName("settings_audio");
 	auto *pList = static_cast<WIOptionsList *>(m_hAudioSettings.get());
 	auto title = pragma::locale::get_text("audio_options");
-	ustring::to_upper(title);
+	pragma::string::to_upper(title);
 	pList->SetTitle(title);
 	// Audio Device
 	/*WIDropDownMenu *audioDevice = pList->AddDropDownMenu(pragma::locale::get_text("audio_device"));
@@ -1102,7 +1102,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeControlSettings()
 	m_hControlSettings->SetName("settings_controls");
 	auto *pList = static_cast<WIOptionsList *>(m_hControlSettings.get());
 	auto title = pragma::locale::get_text("control_options");
-	ustring::to_upper(title);
+	pragma::string::to_upper(title);
 	pList->SetTitle(title);
 	// Mouse Sensitivity
 	pList->AddSlider(pragma::locale::get_text("mouse_sensitivity"), [](WISlider *pSlider) { pSlider->SetRange(0.f, 4.f, 0.f); }, "cl_mouse_sensitivity");
@@ -1117,7 +1117,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeControlSettings()
 		  return "-1";
 	  },
 	  [](std::string str) {
-		  if(util::to_float(str) > 0.f)
+		  if(pragma::util::to_float(str) > 0.f)
 			  return true;
 		  return false;
 	  });

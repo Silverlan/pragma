@@ -129,13 +129,13 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 		prop["phonemeb_coarse_tuning"](props.iPhonemeBCoarseTuning);
 		prop["waveform"](props.iWaveform);
 
-		const std::unordered_map<std::string, int32_t> phonemes = {{"a", umath::to_integral(al::VocalMorpherPhoneme::A)}, {"e", umath::to_integral(al::VocalMorpherPhoneme::E)}, {"i", umath::to_integral(al::VocalMorpherPhoneme::I)}, {"o", umath::to_integral(al::VocalMorpherPhoneme::O)},
-		  {"u", umath::to_integral(al::VocalMorpherPhoneme::U)}, {"aa", umath::to_integral(al::VocalMorpherPhoneme::AA)}, {"ae", umath::to_integral(al::VocalMorpherPhoneme::AE)}, {"ah", umath::to_integral(al::VocalMorpherPhoneme::AH)},
-		  {"ao", umath::to_integral(al::VocalMorpherPhoneme::AO)}, {"eh", umath::to_integral(al::VocalMorpherPhoneme::EH)}, {"er", umath::to_integral(al::VocalMorpherPhoneme::ER)}, {"ih", umath::to_integral(al::VocalMorpherPhoneme::IH)},
-		  {"iy", umath::to_integral(al::VocalMorpherPhoneme::IY)}, {"uh", umath::to_integral(al::VocalMorpherPhoneme::UH)}, {"uw", umath::to_integral(al::VocalMorpherPhoneme::UW)}, {"b", umath::to_integral(al::VocalMorpherPhoneme::B)}, {"d", umath::to_integral(al::VocalMorpherPhoneme::D)},
-		  {"f", umath::to_integral(al::VocalMorpherPhoneme::F)}, {"g", umath::to_integral(al::VocalMorpherPhoneme::G)}, {"j", umath::to_integral(al::VocalMorpherPhoneme::J)}, {"k", umath::to_integral(al::VocalMorpherPhoneme::K)}, {"l", umath::to_integral(al::VocalMorpherPhoneme::L)},
-		  {"m", umath::to_integral(al::VocalMorpherPhoneme::M)}, {"n", umath::to_integral(al::VocalMorpherPhoneme::N)}, {"p", umath::to_integral(al::VocalMorpherPhoneme::P)}, {"r", umath::to_integral(al::VocalMorpherPhoneme::R)}, {"s", umath::to_integral(al::VocalMorpherPhoneme::S)},
-		  {"t", umath::to_integral(al::VocalMorpherPhoneme::T)}, {"v", umath::to_integral(al::VocalMorpherPhoneme::V)}, {"z", umath::to_integral(al::VocalMorpherPhoneme::Z)}};
+		const std::unordered_map<std::string, int32_t> phonemes = {{"a", pragma::math::to_integral(al::VocalMorpherPhoneme::A)}, {"e", pragma::math::to_integral(al::VocalMorpherPhoneme::E)}, {"i", pragma::math::to_integral(al::VocalMorpherPhoneme::I)}, {"o", pragma::math::to_integral(al::VocalMorpherPhoneme::O)},
+		  {"u", pragma::math::to_integral(al::VocalMorpherPhoneme::U)}, {"aa", pragma::math::to_integral(al::VocalMorpherPhoneme::AA)}, {"ae", pragma::math::to_integral(al::VocalMorpherPhoneme::AE)}, {"ah", pragma::math::to_integral(al::VocalMorpherPhoneme::AH)},
+		  {"ao", pragma::math::to_integral(al::VocalMorpherPhoneme::AO)}, {"eh", pragma::math::to_integral(al::VocalMorpherPhoneme::EH)}, {"er", pragma::math::to_integral(al::VocalMorpherPhoneme::ER)}, {"ih", pragma::math::to_integral(al::VocalMorpherPhoneme::IH)},
+		  {"iy", pragma::math::to_integral(al::VocalMorpherPhoneme::IY)}, {"uh", pragma::math::to_integral(al::VocalMorpherPhoneme::UH)}, {"uw", pragma::math::to_integral(al::VocalMorpherPhoneme::UW)}, {"b", pragma::math::to_integral(al::VocalMorpherPhoneme::B)}, {"d", pragma::math::to_integral(al::VocalMorpherPhoneme::D)},
+		  {"f", pragma::math::to_integral(al::VocalMorpherPhoneme::F)}, {"g", pragma::math::to_integral(al::VocalMorpherPhoneme::G)}, {"j", pragma::math::to_integral(al::VocalMorpherPhoneme::J)}, {"k", pragma::math::to_integral(al::VocalMorpherPhoneme::K)}, {"l", pragma::math::to_integral(al::VocalMorpherPhoneme::L)},
+		  {"m", pragma::math::to_integral(al::VocalMorpherPhoneme::M)}, {"n", pragma::math::to_integral(al::VocalMorpherPhoneme::N)}, {"p", pragma::math::to_integral(al::VocalMorpherPhoneme::P)}, {"r", pragma::math::to_integral(al::VocalMorpherPhoneme::R)}, {"s", pragma::math::to_integral(al::VocalMorpherPhoneme::S)},
+		  {"t", pragma::math::to_integral(al::VocalMorpherPhoneme::T)}, {"v", pragma::math::to_integral(al::VocalMorpherPhoneme::V)}, {"z", pragma::math::to_integral(al::VocalMorpherPhoneme::Z)}};
 
 		const std::unordered_map<std::string, int32_t *> phonemeKeys = {{"phonemea", &props.iPhonemeA}, {"phonemeb", &props.iPhonemeB}};
 		for(auto &pair : phonemeKeys) {
@@ -143,7 +143,7 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 			std::string val;
 			prop[key](val);
 			if(!val.empty()) {
-				ustring::to_lower(val);
+				pragma::string::to_lower(val);
 				auto itPhoneme = phonemes.find(val);
 				if(itPhoneme != phonemes.end())
 					*pair.second = itPhoneme->second;
@@ -224,7 +224,7 @@ std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name, cons
 			std::string val;
 			prop[pair.first](val);
 			if(!val.empty())
-				ustring::string_to_array<float>(val, pair.second, ustring::cstring_to_number<float>, 3);
+				pragma::string::string_to_array<float>(val, pair.second, pragma::string::cstring_to_number<float>, 3);
 		}
 		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}

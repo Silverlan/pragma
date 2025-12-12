@@ -20,10 +20,10 @@ export {
 				using MeshIndex = uint32_t;
 				struct DLLNETWORK ShapeInfo {
 					std::weak_ptr<pragma::physics::IShape> shape = {};
-					umath::Transform localPose = {};
+					pragma::math::Transform localPose = {};
 				};
 				// Returns the number of shapes that have been added
-				uint32_t AddShape(pragma::physics::IShape &shape, const umath::Transform &localPose = {}, BoneId boneId = -1);
+				uint32_t AddShape(pragma::physics::IShape &shape, const pragma::math::Transform &localPose = {}, BoneId boneId = -1);
 				void SetModelMeshBoneMapping(MeshIndex modelMeshIndex, BoneId boneIndex);
 				void SetModel(pragma::asset::Model &model);
 				pragma::asset::Model *GetModel() const;
@@ -32,7 +32,7 @@ export {
 			  private:
 				std::unordered_map<BoneId, std::vector<ShapeInfo>> m_shapes = {};
 				std::unordered_map<MeshIndex, BoneId> m_modelMeshIndexToShapeIndex = {};
-				util::WeakHandle<pragma::asset::Model> m_model = {};
+				pragma::util::WeakHandle<pragma::asset::Model> m_model = {};
 			};
 		};
 		struct DLLNETWORK CEPhysicsUpdateData : public ComponentEvent {
@@ -71,7 +71,7 @@ export {
 				PhysJoint(unsigned int source, unsigned int target);
 				unsigned int source; // Bone ID
 				unsigned int target; // Bone ID
-				util::TSharedHandle<pragma::physics::IConstraint> constraint;
+				pragma::util::TSharedHandle<pragma::physics::IConstraint> constraint;
 			};
 		  public:
 			enum class StateFlags : uint32_t {
@@ -218,15 +218,15 @@ export {
 
 			bool m_bRayResultCallbackEnabled = false;
 			pragma::physics::PhysicsType m_physicsType = pragma::physics::PhysicsType::None;
-			util::TSharedHandle<pragma::physics::PhysObj> m_physObject = nullptr;
+			pragma::util::TSharedHandle<pragma::physics::PhysObj> m_physObject = nullptr;
 			std::vector<PhysJoint> m_joints;
 			std::vector<CollisionInfo> m_customCollisions;
 			std::vector<CollisionInfo>::iterator FindCollisionInfo(pragma::ecs::BaseEntity *ent);
-			util::TSharedHandle<pragma::physics::IRigidBody> CreateRigidBody(pragma::physics::IShape &shape, bool dynamic, const umath::Transform &localPose = {});
-			util::TSharedHandle<pragma::physics::PhysObj> InitializeSoftBodyPhysics();
-			util::TSharedHandle<pragma::physics::PhysObj> InitializeModelPhysics(PhysFlags flags = PhysFlags::Dynamic);
-			util::TSharedHandle<pragma::physics::PhysObj> InitializeBoxControllerPhysics();
-			util::TSharedHandle<pragma::physics::PhysObj> InitializeCapsuleControllerPhysics();
+			pragma::util::TSharedHandle<pragma::physics::IRigidBody> CreateRigidBody(pragma::physics::IShape &shape, bool dynamic, const pragma::math::Transform &localPose = {});
+			pragma::util::TSharedHandle<pragma::physics::PhysObj> InitializeSoftBodyPhysics();
+			pragma::util::TSharedHandle<pragma::physics::PhysObj> InitializeModelPhysics(PhysFlags flags = PhysFlags::Dynamic);
+			pragma::util::TSharedHandle<pragma::physics::PhysObj> InitializeBoxControllerPhysics();
+			pragma::util::TSharedHandle<pragma::physics::PhysObj> InitializeCapsuleControllerPhysics();
 			virtual void OnPhysicsInitialized();
 			virtual void OnPhysicsDestroyed();
 			pragma::physics::CollisionMask m_collisionFilterGroup = pragma::physics::CollisionMask::Default;
@@ -261,7 +261,7 @@ export {
 			virtual void HandleReturnValues(lua::State *l) override;
 			bool keepAwake = true;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::BasePhysicsComponent::StateFlags)
 	REGISTER_ENUM_FLAGS(pragma::BasePhysicsComponent::PhysFlags)

@@ -6,11 +6,11 @@ module pragma.shared;
 
 import :util.umodule;
 
-std::string util::get_normalized_module_path(const std::string &lib, std::optional<bool> checkForClientSide)
+std::string pragma::util::get_normalized_module_path(const std::string &lib, std::optional<bool> checkForClientSide)
 {
 	auto r = FileManager::GetCanonicalizedPath(lib);
 	std::replace(r.begin(), r.end(), '\\', '/');
-	if(ustring::substr(r, 0, 8) != "modules/")
+	if(pragma::string::substr(r, 0, 8) != "modules/")
 		r = "modules/" + r;
 	std::string ext;
 	if(ufile::get_extension(r, &ext))
@@ -42,7 +42,7 @@ std::string util::get_normalized_module_path(const std::string &lib, std::option
 	return outName;
 }
 
-std::shared_ptr<util::Library> util::load_library_module(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories, std::optional<bool> checkForClientSide, std::string *err)
+std::shared_ptr<pragma::util::Library> pragma::util::load_library_module(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories, std::optional<bool> checkForClientSide, std::string *err)
 {
 	auto libPath = get_normalized_module_path(lib, checkForClientSide);
 	std::string lpath;
@@ -53,15 +53,15 @@ std::shared_ptr<util::Library> util::load_library_module(const std::string &lib,
 
 	auto linAdditionalSearchDirectories = additionalSearchDirectories;
 	std::string modPath;
-	if(filemanager::find_absolute_path(util::DirPath("modules", ufile::get_path_from_filename(lib)).GetString(), modPath))
+	if(filemanager::find_absolute_path(pragma::util::DirPath("modules", ufile::get_path_from_filename(lib)).GetString(), modPath))
 		linAdditionalSearchDirectories.push_back(modPath);
-	return util::Library::Load(lpath, linAdditionalSearchDirectories, err);
+	return pragma::util::Library::Load(lpath, linAdditionalSearchDirectories, err);
 #else
-	return util::Library::Load(lpath, additionalSearchDirectories, err);
+	return pragma::util::Library::Load(lpath, additionalSearchDirectories, err);
 #endif
 }
 
-std::vector<std::string> util::get_default_additional_library_search_directories(const std::string &libModulePath)
+std::vector<std::string> pragma::util::get_default_additional_library_search_directories(const std::string &libModulePath)
 {
 	auto brLast = libModulePath.find_last_of('/');
 	auto libPath = libModulePath.substr(0, brLast);
@@ -74,10 +74,10 @@ std::vector<std::string> util::get_default_additional_library_search_directories
 	std::string binDir = "lib";
 #endif
 	for(auto &rootPath : rootPaths) {
-		auto binPath = util::DirPath(rootPath, binDir);
+		auto binPath = pragma::util::DirPath(rootPath, binDir);
 		paths.push_back(binPath.GetString());
 
-		auto modPath = util::DirPath(rootPath, libPath);
+		auto modPath = pragma::util::DirPath(rootPath, libPath);
 		paths.push_back(modPath.GetString());
 	}
 	return paths;

@@ -14,7 +14,7 @@ import :model.model_manager;
 
 namespace pragma {
 	enum class CollisionMeshLoadFlags : uint64_t { None = 0u, SoftBody = 1u, Convex = SoftBody << 1u };
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 }
 REGISTER_ENUM_FLAGS(pragma::CollisionMeshLoadFlags)
 
@@ -72,7 +72,7 @@ struct DLLNETWORK FWMDVertex {
 	std::unordered_map<unsigned long long, float> weights;
 };
 
-pragma::asset::WmdFormatHandler::WmdFormatHandler(util::IAssetManager &assetManager) : IModelFormatHandler {assetManager} { m_gameState = static_cast<ModelManager &>(assetManager).GetNetworkState().GetGameState(); }
+pragma::asset::WmdFormatHandler::WmdFormatHandler(pragma::util::IAssetManager &assetManager) : IModelFormatHandler {assetManager} { m_gameState = static_cast<ModelManager &>(assetManager).GetNetworkState().GetGameState(); }
 
 bool pragma::asset::WmdFormatHandler::LoadData(ModelProcessor &processor, ModelLoadInfo &info)
 {
@@ -91,7 +91,7 @@ bool pragma::asset::WmdFormatHandler::LoadData(ModelProcessor &processor, ModelL
 		return false;
 	}
 	auto flags = f.Read<pragma::asset::Model::Flags>();
-	m_bStatic = umath::is_flag_set(flags, pragma::asset::Model::Flags::Static);
+	m_bStatic = pragma::math::is_flag_set(flags, pragma::asset::Model::Flags::Static);
 
 	Vector3 eyeOffset {};
 	if(ver > 0x0007)
@@ -134,7 +134,7 @@ bool pragma::asset::WmdFormatHandler::LoadData(ModelProcessor &processor, ModelL
 	if(!m_bStatic)
 		numBones = f.Read<unsigned int>();
 	auto &mdlManager = static_cast<ModelManager &>(processor.handler->GetAssetManager());
-	auto mdl = mdlManager.CreateModel(umath::max(numBones, (unsigned int)(1)), mdlName);
+	auto mdl = mdlManager.CreateModel(pragma::math::max(numBones, (unsigned int)(1)), mdlName);
 	mdl->SetEyeOffset(eyeOffset);
 	auto &meta = mdl->GetMetaInfo();
 	meta.flags = flags;
@@ -406,9 +406,9 @@ void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version, pragma:
 						meshVertIDs[k] = meshVertID;
 
 						auto &vert = wmdVerts[meshVertID];
-						subVertices.push_back(umath::Vertex {vert.position, vert.normal});
+						subVertices.push_back(pragma::math::Vertex {vert.position, vert.normal});
 						if(!vert.weights.empty()) {
-							vertexWeights.push_back(umath::VertexWeight {Vector4i {-1, -1, -1, -1}, Vector4 {0.f, 0.f, 0.f, 0.f}});
+							vertexWeights.push_back(pragma::math::VertexWeight {Vector4i {-1, -1, -1, -1}, Vector4 {0.f, 0.f, 0.f, 0.f}});
 							auto &weight = vertexWeights.back();
 							int numWeights = 0;
 							for(auto m = vert.weights.begin(); m != vert.weights.end(); m++) {
@@ -452,7 +452,7 @@ void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version, pragma:
 					auto subMesh = subMeshFactory();
 
 					if(version >= 26) {
-						auto pose = m_file->Read<umath::ScaledTransform>();
+						auto pose = m_file->Read<pragma::math::ScaledTransform>();
 						subMesh->SetPose(pose);
 					}
 
@@ -590,9 +590,9 @@ void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(pragma::Game *game, un
 		if(matCustom != nullptr && matCustom->GetIndex() != 0)
 			matSurface = matCustom;
 		for(char j = 0; j < 3; j++)
-			collisionMin[j] = umath::min(collisionMin[j], m_file->Read<float>() - origin[j]);
+			collisionMin[j] = pragma::math::min(collisionMin[j], m_file->Read<float>() - origin[j]);
 		for(char j = 0; j < 3; j++)
-			collisionMax[j] = umath::max(collisionMax[j], m_file->Read<float>() - origin[j]);
+			collisionMax[j] = pragma::math::max(collisionMax[j], m_file->Read<float>() - origin[j]);
 		auto mesh = pragma::physics::CollisionMesh::Create(game);
 		if(matSurface != nullptr)
 			mesh->SetSurfaceMaterial(CInt32(matSurface->GetIndex()));
@@ -600,7 +600,7 @@ void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(pragma::Game *game, un
 		mesh->SetOrigin(origin);
 		std::vector<Vector3> &colVerts = mesh->GetVertices();
 		mesh->SetBoneParent(boneParent);
-		mesh->SetConvex(umath::is_flag_set(flags, CollisionMeshLoadFlags::Convex));
+		mesh->SetConvex(pragma::math::is_flag_set(flags, CollisionMeshLoadFlags::Convex));
 
 		auto numVerts = m_file->Read<unsigned long long>();
 		colVerts.resize(numVerts);
@@ -639,7 +639,7 @@ void pragma::asset::WmdFormatHandler::LoadCollisionMeshes(pragma::Game *game, un
 		}
 		// Version 0x0014
 		if(version >= 0x0014) {
-			auto bSoftBodyData = (version < 30) ? m_file->Read<bool>() : umath::is_flag_set(flags, CollisionMeshLoadFlags::SoftBody);
+			auto bSoftBodyData = (version < 30) ? m_file->Read<bool>() : pragma::math::is_flag_set(flags, CollisionMeshLoadFlags::SoftBody);
 			if(bSoftBodyData)
 				LoadSoftBodyData(mdl, *mesh);
 		}
@@ -692,7 +692,7 @@ void pragma::asset::WmdFormatHandler::LoadIKControllers(uint16_t version, pragma
 		auto type = m_file->ReadString();
 		auto chainLength = m_file->Read<uint32_t>();
 		auto method = m_file->Read<uint32_t>();
-		auto *controller = mdl.AddIKController(name, chainLength, type, static_cast<util::ik::Method>(method));
+		auto *controller = mdl.AddIKController(name, chainLength, type, static_cast<pragma::physics::ik::Method>(method));
 
 		auto *keyValues = (controller != nullptr) ? &controller->GetKeyValues() : nullptr;
 		auto numKeyValues = m_file->Read<uint32_t>();
@@ -798,7 +798,7 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, pra
 								auto idx = m_file->Read<uint16_t>();
 								auto v = m_file->Read<std::array<uint16_t, 3>>();
 								meshFrame->SetVertexPosition(idx, v);
-								if(umath::is_flag_set(flags, pragma::animation::MeshVertexFrame::Flags::HasDeltaValues)) {
+								if(pragma::math::is_flag_set(flags, pragma::animation::MeshVertexFrame::Flags::HasDeltaValues)) {
 									auto deltaVal = m_file->Read<uint16_t>();
 									meshFrame->SetDeltaValue(idx, deltaVal);
 								}
@@ -807,7 +807,7 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version, pra
 						else {
 							Con::cwar << "Invalid mesh reference in vertex animation '" << name << "'! Skipping..." << Con::endl;
 							auto szPerVertex = sizeof(uint16_t) * 3;
-							if(umath::is_flag_set(flags, pragma::animation::MeshVertexFrame::Flags::HasDeltaValues))
+							if(pragma::math::is_flag_set(flags, pragma::animation::MeshVertexFrame::Flags::HasDeltaValues))
 								szPerVertex += sizeof(uint16_t);
 							m_file->Seek(m_file->Tell() + numUsedVerts * szPerVertex);
 						}

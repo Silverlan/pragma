@@ -22,14 +22,14 @@ static std::string get_screenshot_name(pragma::Game *game, uimg::ImageFormat for
 	do {
 		path = "screenshots\\";
 		path += map;
-		path += ustring::fill_zeroes(std::to_string(i), 4);
+		path += pragma::string::fill_zeroes(std::to_string(i), 4);
 		path += "." + uimg::get_image_output_format_extension(format);
 		i++;
 	} while(FileManager::Exists(path.c_str() /*,fsys::SearchFlags::Local*/));
 	return path;
 }
 
-void util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t height, const RtScreenshotSettings &settings, uimg::ImageFormat format)
+void pragma::util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t height, const RtScreenshotSettings &settings, uimg::ImageFormat format)
 {
 	FileManager::CreateDirectory("screenshots");
 
@@ -65,7 +65,7 @@ void util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t height, c
 	Con::cout << "Executing raytracer... This may take a few minutes!" << Con::endl;
 	auto job = ::pragma::rendering::cycles::render_image(*pragma::get_client_state(), sceneInfo, renderImgInfo);
 	if(job.IsValid()) {
-		job.SetCompletionHandler([format, quality, toneMapping](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
+		job.SetCompletionHandler([format, quality, toneMapping](pragma::util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 			if(worker.IsSuccessful() == false) {
 				Con::cwar << "Raytraced screenshot failed: " << worker.GetResultMessage() << Con::endl;
 				return;
@@ -87,15 +87,15 @@ void util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t height, c
 				Con::cwar << "Unable to save screenshot as '" << path << "'!" << Con::endl;
 
 			// Obsolete
-			// imgBuffer->Convert(util::ImageBuffer::Format::RGB8);
-			// util::tga::write_tga(f,imgBuffer->GetWidth(),imgBuffer->GetHeight(),static_cast<uint8_t*>(imgBuffer->GetData()));
+			// imgBuffer->Convert(pragma::util::ImageBuffer::Format::RGB8);
+			// pragma::util::tga::write_tga(f,imgBuffer->GetWidth(),imgBuffer->GetHeight(),static_cast<uint8_t*>(imgBuffer->GetData()));
 		});
 		job.Start();
 		pragma::get_cengine()->AddParallelJob(job, "Raytraced screenshot");
 	}
 }
 
-std::optional<std::string> util::screenshot(pragma::CGame &game)
+std::optional<std::string> pragma::util::screenshot(pragma::CGame &game)
 {
 	FileManager::CreateDirectory("screenshots");
 

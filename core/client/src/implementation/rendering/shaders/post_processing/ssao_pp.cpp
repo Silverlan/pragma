@@ -37,7 +37,7 @@ ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifi
 		sample = glm::normalize(sample);
 		sample *= randomFloats(generator);
 		auto scale = static_cast<float>(i) / 64.f;
-		scale = umath::lerp(0.1f, 1.f, umath::pow2(scale));
+		scale = pragma::math::lerp(0.1f, 1.f, pragma::math::pow2(scale));
 		sample *= scale;
 		ssaoKernel.push_back(sample);
 	}
@@ -56,9 +56,9 @@ ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifi
 	ssaoNoise.reserve(width * height);
 	for(auto i = decltype(ssaoNoise.capacity()) {0}; i < ssaoNoise.capacity(); ++i) {
 		ssaoNoise.push_back({
-		  umath::float32_to_float16(randomFloats(generator) * 2.f - 1.f), umath::float32_to_float16(randomFloats(generator) * 2.f - 1.f),
-		  umath::float32_to_float16(0.f), // Rotation axis
-		  umath::float32_to_float16(0.f)  // Alpha (Unused)
+		  pragma::math::float32_to_float16(randomFloats(generator) * 2.f - 1.f), pragma::math::float32_to_float16(randomFloats(generator) * 2.f - 1.f),
+		  pragma::math::float32_to_float16(0.f), // Rotation axis
+		  pragma::math::float32_to_float16(0.f)  // Alpha (Unused)
 		});
 	}
 	prosper::util::ImageCreateInfo imgCreateInfo {};
@@ -70,10 +70,10 @@ ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifi
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferSrcOptimal;
 	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 
-	umath::set_flag(imgCreateInfo.flags, prosper::util::ImageCreateInfo::Flags::DontAllocateMemory);
+	pragma::math::set_flag(imgCreateInfo.flags, prosper::util::ImageCreateInfo::Flags::DontAllocateMemory);
 	auto stagingImage = context.CreateImage(imgCreateInfo, reinterpret_cast<uint8_t *>(ssaoNoise.data()));
 	context.AllocateTemporaryBuffer(*stagingImage);
-	umath::set_flag(imgCreateInfo.flags, prosper::util::ImageCreateInfo::Flags::DontAllocateMemory, false);
+	pragma::math::set_flag(imgCreateInfo.flags, prosper::util::ImageCreateInfo::Flags::DontAllocateMemory, false);
 
 	imgCreateInfo.tiling = prosper::ImageTiling::Optimal;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;

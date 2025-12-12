@@ -12,7 +12,7 @@ static bool is_permitted_root_dir(const std::string_view &str) { return str == "
 
 LFile::LFile() {}
 
-void LFile::Construct(const VFilePtr &f) { m_file = ::util::make_shared<fsys::File>(f); }
+void LFile::Construct(const VFilePtr &f) { m_file = pragma::util::make_shared<fsys::File>(f); }
 void LFile::Construct(const std::shared_ptr<ufile::IFile> &f) { m_file = f; }
 
 bool LFile::Construct(const char *path, const char *mode, fsys::SearchFlags fsearchmode, std::string *optOutErr)
@@ -20,7 +20,7 @@ bool LFile::Construct(const char *path, const char *mode, fsys::SearchFlags fsea
 	auto f = FileManager::OpenFile(path, mode, nullptr, fsearchmode);
 	if(!f)
 		return false;
-	m_file = ::util::make_shared<fsys::File>(f);
+	m_file = pragma::util::make_shared<fsys::File>(f);
 	return true;
 }
 
@@ -233,23 +233,23 @@ DLLNETWORK void Lua_LFile_IgnoreComments(lua::State *, LFile &f, std::string sta
 DLLNETWORK void Lua_LFile_IgnoreComments(lua::State *, LFile &f, std::string start, std::string end) { f.IgnoreComments(start, end); }
 void Lua_LFile_Read(lua::State *l, LFile &f, uint32_t size)
 {
-	util::DataStream ds;
+	pragma::util::DataStream ds;
 	ds->Resize(size);
 	f.Read(ds->GetData(), size);
-	Lua::Push<::util::DataStream>(l, ds);
+	Lua::Push<pragma::util::DataStream>(l, ds);
 }
-void Lua_LFile_Read(lua::State *, LFile &f, util::DataStream &ds, uint32_t size)
+void Lua_LFile_Read(lua::State *, LFile &f, pragma::util::DataStream &ds, uint32_t size)
 {
 	auto offset = ds->GetOffset();
 	ds->Resize(offset + size);
 	f.Read(ds->GetData() + offset, size);
 }
-void Lua_LFile_Write(lua::State *, LFile &f, util::DataStream &ds)
+void Lua_LFile_Write(lua::State *, LFile &f, pragma::util::DataStream &ds)
 {
 	auto offset = ds->GetOffset();
 	f.Write(ds->GetData() + offset, ds->GetInternalSize() - offset);
 }
-void Lua_LFile_Write(lua::State *, LFile &f, util::DataStream &ds, uint32_t size)
+void Lua_LFile_Write(lua::State *, LFile &f, pragma::util::DataStream &ds, uint32_t size)
 {
 	auto offset = ds->GetOffset();
 	f.Write(ds->GetData() + offset, size - offset);
@@ -269,9 +269,9 @@ void Lua_LFile_GetPath(lua::State *l, LFile &f)
 
 std::string Lua::file::to_relative_path(const std::string &path)
 {
-	auto opath = ::util::Path::CreateFile(path);
+	auto opath = pragma::util::Path::CreateFile(path);
 	opath.Canonicalize();
-	if(ustring::compare<std::string_view>(opath.GetFront(), "addons", false)) {
+	if(pragma::string::compare<std::string_view>(opath.GetFront(), "addons", false)) {
 		opath.PopFront();
 		opath.PopFront();
 	}
@@ -279,7 +279,7 @@ std::string Lua::file::to_relative_path(const std::string &path)
 }
 static bool is_extension_blacklisted(const std::string &ext)
 {
-	using namespace ustring::string_switch_ci;
+	using namespace pragma::string::string_switch_ci;
 	switch(hash(ext)) {
 	// Windows File Extensions
 	case "exe"_:
@@ -350,19 +350,19 @@ bool Lua::file::validate_write_operation(lua::State *l, std::string &path, std::
 	std::string ext;
 	if(ufile::get_extension(path, &ext) && is_extension_blacklisted(ext))
 		return false;
-	auto opath = ::util::Path::CreateFile(path);
+	auto opath = pragma::util::Path::CreateFile(path);
 	opath.Canonicalize();
 	for(auto &item : pathBlacklist) {
-		if(ustring::find(opath.GetString(), item, false) != std::string::npos)
+		if(pragma::string::find(opath.GetString(), item, false) != std::string::npos)
 			return false;
 	}
-	if(path.length() >= 7 && ustring::compare(path.c_str(), "addons", false, 6) && (path.at(6) == '/' || path.at(6) == '\\')) {
+	if(path.length() >= 7 && pragma::string::compare(path.c_str(), "addons", false, 6) && (path.at(6) == '/' || path.at(6) == '\\')) {
 		// Validate that this is an addon path
 		auto addonPath = opath;
 		while(addonPath.GetComponentCount() > 2)
 			addonPath.PopBack();
 
-		if(ustring::compare<std::string_view>(addonPath.GetFront(), "addons", false) && FileManager::Exists(addonPath.GetString())) {
+		if(pragma::string::compare<std::string_view>(addonPath.GetFront(), "addons", false) && FileManager::Exists(addonPath.GetString())) {
 			opath.PopFront();
 			opath.PopFront();
 			outRootPath = addonPath.GetString();
@@ -370,9 +370,9 @@ bool Lua::file::validate_write_operation(lua::State *l, std::string &path, std::
 			return true;
 		}
 	}
-	auto fpath = ::util::FilePath(FileManager::GetCanonicalizedPath(Lua::get_current_file(l)));
+	auto fpath = pragma::util::FilePath(FileManager::GetCanonicalizedPath(Lua::get_current_file(l)));
 	auto fname = fpath.GetString();
-	if(fname.length() < 8 || ustring::compare(fname.c_str(), "addons/", false, 7) == false) {
+	if(fname.length() < 8 || pragma::string::compare(fname.c_str(), "addons/", false, 7) == false) {
 		if(Lua::get_extended_lua_modules_enabled()) {
 			outRootPath = "";
 			return true;
@@ -381,10 +381,10 @@ bool Lua::file::validate_write_operation(lua::State *l, std::string &path, std::
 		return false;
 	}
 	auto br = fname.find('/', 8);
-	auto prefix = ustring::substr(fname, 0, br + 1);
+	auto prefix = pragma::string::substr(fname, 0, br + 1);
 	outRootPath = prefix;
 	path = FileManager::GetCanonicalizedPath(path);
-	if(is_permitted_root_dir(::util::Path {path}.GetFront()))
+	if(is_permitted_root_dir(pragma::util::Path {path}.GetFront()))
 		outRootPath = ""; // Special case; We'll allow file writes in the cache directory
 	return true;
 }
@@ -419,7 +419,7 @@ std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Lua::file::Open(lu
 		if(validate_write_operation(l, path) == false)
 			return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {nullptr, {}};
 	}
-	auto f = ::util::make_shared<LFile>();
+	auto f = pragma::util::make_shared<LFile>();
 	std::string errMsg;
 	if(f->Construct(path.c_str(), mode.c_str(), searchFlags, &errMsg) == false)
 		return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {nullptr, errMsg};
@@ -462,7 +462,7 @@ bool Lua::file::DeleteDir(lua::State *l, std::string ppath)
 
 std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua::State *l, const std::string &path, const std::optional<std::string> &game)
 {
-	auto dllHandle = ::util::initialize_external_archive_manager(pragma::Engine::Get()->GetNetworkState(l));
+	auto dllHandle = pragma::util::initialize_external_archive_manager(pragma::Engine::Get()->GetNetworkState(l));
 	if(dllHandle == nullptr)
 		return nullptr;
 	auto *fOpenFile = dllHandle->FindSymbolAddress<void (*)(const std::string &, VFilePtr &, const std::optional<std::string> &)>("open_archive_file");
@@ -472,7 +472,7 @@ std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua::State *l, const 
 	fOpenFile(path, f, game);
 	if(f == nullptr)
 		return nullptr;
-	auto lf = ::util::make_shared<LFile>();
+	auto lf = pragma::util::make_shared<LFile>();
 	lf->Construct(f);
 	return lf;
 }
@@ -481,7 +481,7 @@ void Lua::file::find_external_game_resource_files(lua::State *l, const std::stri
 {
 	outFiles = luabind::newtable(l);
 	outDirs = luabind::newtable(l);
-	auto dllHandle = ::util::initialize_external_archive_manager(pragma::Engine::Get()->GetNetworkState(l));
+	auto dllHandle = pragma::util::initialize_external_archive_manager(pragma::Engine::Get()->GetNetworkState(l));
 	if(dllHandle == nullptr)
 		return;
 	auto *fFindFiles = dllHandle->FindSymbolAddress<void (*)(const std::string &, std::vector<std::string> *, std::vector<std::string> *)>("find_files");
@@ -547,7 +547,7 @@ bool Lua::file::Write(lua::State *l, std::string strPath, const std::string &con
 	strPath = FileManager::GetCanonicalizedPath(strPath);
 	if(validate_write_operation(l, strPath) == false)
 		return false;
-	auto fullPath = ::util::Path::CreateFile(strPath);
+	auto fullPath = pragma::util::Path::CreateFile(strPath);
 
 	auto path = std::string {fullPath.GetPath()};
 	FileManager::CreatePath(path.data());
@@ -563,7 +563,7 @@ bool Lua::file::Write(lua::State *l, std::string strPath, const std::string &con
 std::string Lua::file::GetCanonicalizedPath(const std::string &path)
 {
 	auto r = FileManager::GetCanonicalizedPath(path);
-	ustring::replace(r, "\\", "/");
+	pragma::string::replace(r, "\\", "/");
 	return r;
 }
 

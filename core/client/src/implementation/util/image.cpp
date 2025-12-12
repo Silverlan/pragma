@@ -160,7 +160,7 @@ static uimg::Format determine_target_format(prosper::Format format)
 	return targetFormat;
 }
 
-bool util::to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info, std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers)
+bool pragma::util::to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info, std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers)
 {
 	auto targetFormat = info.targetFormat.has_value() ? *info.targetFormat : determine_target_format(image.GetFormat());
 	auto outputFormat = targetFormat;

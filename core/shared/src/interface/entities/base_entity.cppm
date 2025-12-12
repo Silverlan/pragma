@@ -69,8 +69,8 @@ export {
 			void Construct(unsigned int idx);
 			EntityHandle GetHandle() const;
 
-			const util::Uuid GetUuid() const { return m_uuid; }
-			void SetUuid(const util::Uuid &uuid);
+			const pragma::util::Uuid GetUuid() const { return m_uuid; }
+			void SetUuid(const pragma::util::Uuid &uuid);
 
 			friend pragma::Engine;
 		  public:
@@ -87,10 +87,10 @@ export {
 			pragma::NetEventId FindNetEvent(const std::string &name) const;
 
 			// Returns IDENTITY if the entity has no transform component
-			const umath::ScaledTransform &GetPose() const;
-			umath::ScaledTransform GetPose(pragma::CoordinateSpace space) const;
-			void SetPose(const umath::ScaledTransform &outTransform, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
-			void SetPose(const umath::Transform &outTransform, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+			const pragma::math::ScaledTransform &GetPose() const;
+			pragma::math::ScaledTransform GetPose(pragma::CoordinateSpace space) const;
+			void SetPose(const pragma::math::ScaledTransform &outTransform, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+			void SetPose(const pragma::math::Transform &outTransform, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
 			const Vector3 &GetPosition() const;
 			Vector3 GetPosition(pragma::CoordinateSpace space) const;
 			void SetPosition(const Vector3 &pos, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
@@ -105,8 +105,8 @@ export {
 			Vector3 GetScale(pragma::CoordinateSpace space) const;
 			void SetScale(const Vector3 &scale, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
 
-			pragma::BaseEntityComponent *FindComponentMemberIndex(const util::Path &path, pragma::ComponentMemberIndex &outMemberIdx);
-			const pragma::BaseEntityComponent *FindComponentMemberIndex(const util::Path &path, pragma::ComponentMemberIndex &outMemberIdx) const { return const_cast<pragma::ecs::BaseEntity *>(this)->FindComponentMemberIndex(path, outMemberIdx); }
+			pragma::BaseEntityComponent *FindComponentMemberIndex(const pragma::util::Path &path, pragma::ComponentMemberIndex &outMemberIdx);
+			const pragma::BaseEntityComponent *FindComponentMemberIndex(const pragma::util::Path &path, pragma::ComponentMemberIndex &outMemberIdx) const { return const_cast<pragma::ecs::BaseEntity *>(this)->FindComponentMemberIndex(path, outMemberIdx); }
 
 			// Helper functions
 			virtual pragma::ComponentHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const = 0;
@@ -136,7 +136,7 @@ export {
 			void SetModel(const std::shared_ptr<pragma::asset::Model> &mdl);
 			const std::shared_ptr<pragma::asset::Model> &GetModel() const;
 			std::string GetModelName() const;
-			std::optional<umath::Transform> GetAttachmentPose(uint32_t attId) const;
+			std::optional<pragma::math::Transform> GetAttachmentPose(uint32_t attId) const;
 			uint32_t GetSkin() const;
 			void SetSkin(uint32_t skin);
 			uint32_t GetBodyGroup(const std::string &name) const;
@@ -256,9 +256,9 @@ export {
 			virtual pragma::ecs::BaseEntity *Copy();
 
 			std::string GetUri() const;
-			static std::string GetUri(util::Uuid uuid);
+			static std::string GetUri(pragma::util::Uuid uuid);
 			static std::string GetUri(const std::string name);
-			static bool ParseUri(std::string uriPath, pragma::EntityUComponentMemberRef &outRef, const util::Uuid *optSelf = nullptr);
+			static bool ParseUri(std::string uriPath, pragma::EntityUComponentMemberRef &outRef, const pragma::util::Uuid *optSelf = nullptr);
 			static bool CreateMemberReference(pragma::EntityIdentifier identifier, std::string var, pragma::EntityUComponentMemberRef &outRef);
 		  protected:
 			StateFlags m_stateFlags = StateFlags::None;
@@ -278,12 +278,12 @@ export {
 			uint32_t m_spawnFlags = 0u;
 
 			pragma::GString m_className = "BaseEntity";
-			util::Uuid m_uuid {};
+			pragma::util::Uuid m_uuid {};
 			EntityIndex m_index = 0u;
 			virtual void DoSpawn();
 			pragma::NetEventId SetupNetEvent(const std::string &name) const;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 
 		inline DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const BaseEntity &ent) { return ent.print(os); }
 

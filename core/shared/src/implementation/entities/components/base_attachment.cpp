@@ -16,15 +16,15 @@ void BaseAttachmentComponent::Initialize()
 	BaseEntityComponent::Initialize();
 
 	GetEntity().AddComponent("child");
-	BindEvent(baseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		if(m_attachment != nullptr && (m_attachment->flags & pragma::FAttachmentMode::BoneMerge) != pragma::FAttachmentMode::None) {
 			static_cast<CEShouldUpdateBones &>(evData.get()).shouldUpdate = true;
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 }
-util::EventReply BaseAttachmentComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply BaseAttachmentComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
 	if(eventId == baseModelComponent::EVENT_ON_MODEL_CHANGED)
 		UpdateAttachmentData(true);
@@ -35,19 +35,19 @@ util::EventReply BaseAttachmentComponent::HandleEvent(ComponentEventId eventId, 
 		auto *parent = childC ? childC->GetParentEntity() : nullptr;
 		auto *mdlC = parent ? parent->GetModelComponent() : nullptr;
 		if(mdlC) {
-			m_parentModelChanged = mdlC->AddEventCallback(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			m_parentModelChanged = mdlC->AddEventCallback(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 				UpdateAttachmentData(true);
-				return util::EventReply::Unhandled;
+				return pragma::util::EventReply::Unhandled;
 			});
 		}
 	}
 	else if(eventId == pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE) {
 		auto &kvData = static_cast<CEKeyValueData &>(evData);
-		if(ustring::compare<std::string>(kvData.key, "parent", false) || ustring::compare<std::string>(kvData.key, "parentname", false))
+		if(pragma::string::compare<std::string>(kvData.key, "parent", false) || pragma::string::compare<std::string>(kvData.key, "parentname", false))
 			m_kvParent = kvData.value;
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	}
 	return BaseEntityComponent::HandleEvent(eventId, evData);
 }
@@ -77,14 +77,14 @@ void BaseAttachmentComponent::OnEntitySpawn()
 	UpdateAttachmentData();
 }
 void BaseAttachmentComponent::ClearAttachment() { AttachToEntity(nullptr); }
-std::optional<umath::Transform> BaseAttachmentComponent::GetLocalPose() const
+std::optional<pragma::math::Transform> BaseAttachmentComponent::GetLocalPose() const
 {
 	auto *attData = GetAttachmentData();
 	if(attData == nullptr)
 		return {};
-	return umath::Transform {attData->offset, attData->rotation};
+	return pragma::math::Transform {attData->offset, attData->rotation};
 }
-void BaseAttachmentComponent::SetLocalPose(const umath::Transform &pose)
+void BaseAttachmentComponent::SetLocalPose(const pragma::math::Transform &pose)
 {
 	auto *attData = GetAttachmentData();
 	if(attData == nullptr)
@@ -193,10 +193,10 @@ AttachmentData *BaseAttachmentComponent::SetupAttachment(pragma::ecs::BaseEntity
 					m_poseChangeCallback.Remove();
 			}
 			else {
-				m_poseChangeCallback = pTrComponent->AddEventCallback(pragma::baseTransformComponent::EVENT_ON_POSE_CHANGED, [this, pTrComponent](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+				m_poseChangeCallback = pTrComponent->AddEventCallback(pragma::baseTransformComponent::EVENT_ON_POSE_CHANGED, [this, pTrComponent](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
 					auto changeFlags = static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags;
-					if(umath::is_flag_set(changeFlags, TransformChangeFlags::PositionChanged) && umath::is_flag_set(m_attachment->flags, pragma::FAttachmentMode::ForceTranslationInPlace) == false) {
-						if(!umath::is_flag_set(m_stateFlags, StateFlags::UpdatingPosition)) {
+					if(pragma::math::is_flag_set(changeFlags, TransformChangeFlags::PositionChanged) && pragma::math::is_flag_set(m_attachment->flags, pragma::FAttachmentMode::ForceTranslationInPlace) == false) {
+						if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::UpdatingPosition)) {
 							auto parentPose = GetParentPose();
 							if(parentPose.has_value()) {
 								auto localOffset = parentPose->GetInverse() * pTrComponent->GetPosition();
@@ -206,8 +206,8 @@ AttachmentData *BaseAttachmentComponent::SetupAttachment(pragma::ecs::BaseEntity
 							}
 						}
 					}
-					if(umath::is_flag_set(changeFlags, TransformChangeFlags::RotationChanged) && umath::is_flag_set(m_attachment->flags, pragma::FAttachmentMode::ForceRotationInPlace) == false) {
-						if(!umath::is_flag_set(m_stateFlags, StateFlags::UpdatingRotation)) {
+					if(pragma::math::is_flag_set(changeFlags, TransformChangeFlags::RotationChanged) && pragma::math::is_flag_set(m_attachment->flags, pragma::FAttachmentMode::ForceRotationInPlace) == false) {
+						if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::UpdatingRotation)) {
 							auto parentPose = GetParentPose();
 							if(parentPose.has_value()) {
 								auto localRot = parentPose->GetInverse() * pTrComponent->GetRotation();
@@ -217,7 +217,7 @@ AttachmentData *BaseAttachmentComponent::SetupAttachment(pragma::ecs::BaseEntity
 							}
 						}
 					}
-					return util::EventReply::Unhandled;
+					return pragma::util::EventReply::Unhandled;
 				});
 			}
 		}
@@ -404,14 +404,14 @@ void BaseAttachmentComponent::UpdateViewAttachmentOffset(pragma::ecs::BaseEntity
 		rot = uquat::get_inverse(rotRef) *rot;*/
 	}
 }
-std::optional<umath::Transform> BaseAttachmentComponent::GetParentPose() const
+std::optional<pragma::math::Transform> BaseAttachmentComponent::GetParentPose() const
 {
 	if(m_attachment == nullptr)
 		return {};
 	auto *parent = GetEntity().GetParent();
 	if(!parent)
 		return {};
-	umath::Transform pose {};
+	pragma::math::Transform pose {};
 	auto *pAttachableComponentParent = static_cast<BaseAttachmentComponent *>(parent->FindComponent("attachment").get());
 	if(pAttachableComponentParent != nullptr)
 		pAttachableComponentParent->UpdateAttachmentOffset(); // TODO
@@ -470,17 +470,17 @@ void BaseAttachmentComponent::UpdateAttachmentOffset(bool invokeUpdateEvents)
 		pose->TranslateLocal(m_attachment->offset);
 		auto pTrComponent = entThis.GetTransformComponent();
 		if(pTrComponent) {
-			umath::set_flag(m_stateFlags, StateFlags::UpdatingPosition);
+			pragma::math::set_flag(m_stateFlags, StateFlags::UpdatingPosition);
 			pTrComponent->SetPosition(pose->GetOrigin());
-			umath::set_flag(m_stateFlags, StateFlags::UpdatingPosition, false);
+			pragma::math::set_flag(m_stateFlags, StateFlags::UpdatingPosition, false);
 		}
 		if((m_attachment->flags & pragma::FAttachmentMode::PositionOnly) == pragma::FAttachmentMode::None) {
 			if(pTrComponent) {
 				pose->RotateLocal(m_attachment->rotation);
 
-				umath::set_flag(m_stateFlags, StateFlags::UpdatingRotation);
+				pragma::math::set_flag(m_stateFlags, StateFlags::UpdatingRotation);
 				pTrComponent->SetRotation(pose->GetRotation());
-				umath::set_flag(m_stateFlags, StateFlags::UpdatingRotation, false);
+				pragma::math::set_flag(m_stateFlags, StateFlags::UpdatingRotation, false);
 			}
 			if((m_attachment->flags & pragma::FAttachmentMode::BoneMerge) != pragma::FAttachmentMode::None && !m_attachment->boneMapping.empty()) {
 				auto mdlComponent = entThis.GetModelComponent();

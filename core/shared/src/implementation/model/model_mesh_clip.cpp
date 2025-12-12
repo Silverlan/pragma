@@ -8,14 +8,14 @@ import :model.model_mesh;
 
 static Vector3 intersect_line_plane(const Vector3 &a, const Vector3 &b, float da, float db) { return a + da / (da - db) * (b - a); }
 
-static Vector2 calc_barycentric_coordinates(const umath::Vertex &a, const umath::Vertex &b, const umath::Vertex &c, const Vector3 &va, const Vector3 &vb, const Vector3 &vc, const Vector3 &hitPoint)
+static Vector2 calc_barycentric_coordinates(const pragma::math::Vertex &a, const pragma::math::Vertex &b, const pragma::math::Vertex &c, const Vector3 &va, const Vector3 &vb, const Vector3 &vc, const Vector3 &hitPoint)
 {
 	Vector2 uv;
-	umath::geometry::calc_barycentric_coordinates(va, a.uv, vb, b.uv, vc, c.uv, hitPoint, uv.x, uv.y);
+	pragma::math::geometry::calc_barycentric_coordinates(va, a.uv, vb, b.uv, vc, c.uv, hitPoint, uv.x, uv.y);
 	return uv;
 }
 
-static void clip_triangle(const std::function<void(uint32_t)> &fAddTriangleIndex, const std::function<void(uint16_t, uint16_t, const Vector3 &, const Vector2 &)> &fAddNewVertex, const Vector3 &C, const std::vector<umath::Vertex> &verts, const std::array<uint32_t, 3> &indices,
+static void clip_triangle(const std::function<void(uint32_t)> &fAddTriangleIndex, const std::function<void(uint16_t, uint16_t, const Vector3 &, const Vector2 &)> &fAddNewVertex, const Vector3 &C, const std::vector<pragma::math::Vertex> &verts, const std::array<uint32_t, 3> &indices,
   const std::array<double, 3> &distances)
 {
 	const auto d0 = distances.at(0);
@@ -89,7 +89,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 	const auto &vertexWeights = GetVertexWeights();
 	auto bUseWeights = vertexWeights.size() >= verts.size();
 	auto fGetVertexPosition = std::function<const Vector3 &(uint32_t)>([&verts](uint32_t vertexIndex) -> const Vector3 & { return verts.at(vertexIndex).position; });
-	auto fApplyVertexBoneTransformations = [boneMatrices](const Vector3 &v, const umath::VertexWeight &vw) -> Vector3 {
+	auto fApplyVertexBoneTransformations = [boneMatrices](const Vector3 &v, const pragma::math::VertexWeight &vw) -> Vector3 {
 		auto m = Mat4 {0.f};
 		for(auto i = 0u; i < 4u; ++i) {
 			auto boneId = vw.boneIds[i];
@@ -131,8 +131,8 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 		clippedMesh.AddIndex(originalVertexIndicesToClippedVertexIndices.at(idx));
 	};
 	struct PointData {
-		umath::Vertex vertex;
-		umath::VertexWeight weight;
+		pragma::math::Vertex vertex;
+		pragma::math::VertexWeight weight;
 	};
 	using BoneId = int32_t;
 	std::vector<PointData> newPoints {};
@@ -183,7 +183,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 				fApplyVertexBoneTransformations(clipMeshVerts.back().position, vwClipped);
 		}
 
-		newPoints.push_back({clipMeshVerts.back(), bUseWeights ? clippedVertexWeights.back() : umath::VertexWeight {}});
+		newPoints.push_back({clipMeshVerts.back(), bUseWeights ? clippedVertexWeights.back() : pragma::math::VertexWeight {}});
 
 		if(idx0 < alphas.size() && idx1 < alphas.size()) {
 			auto &a0 = alphas.at(idx0);
@@ -253,7 +253,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 
 		std::vector<Vector2> points2d;
 		points2d.reserve(newPoints.size());
-		auto rot = umath::geometry::calc_rotation_between_planes(n, uvec::UP);
+		auto rot = pragma::math::geometry::calc_rotation_between_planes(n, uvec::UP);
 		for(auto &v : newPoints) {
 			auto p = v.vertex.position;
 			p = p * rot;
@@ -261,7 +261,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 		}
 
 		std::vector<uint16_t> newTriangles {};
-		auto outlineIndices = umath::geometry::get_outline_vertices(points2d);
+		auto outlineIndices = pragma::math::geometry::get_outline_vertices(points2d);
 		if(outlineIndices.has_value()) {
 			newTriangles.reserve((outlineIndices->size() - 1) * 3);
 			for(auto i = decltype(outlineIndices->size()) {0u}; i < outlineIndices->size(); ++i) {
@@ -289,7 +289,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 		Con::cout << ss.str() << Con::endl;
 
 		if(/*b == true &&*/ newTriangles.empty() == false) {
-			auto fCalcVertexWeights = [&newPoints](const Vector3 &pos) -> umath::VertexWeight {
+			auto fCalcVertexWeights = [&newPoints](const Vector3 &pos) -> pragma::math::VertexWeight {
 				std::vector<float> pointWeights {};
 				pointWeights.reserve(newPoints.size());
 				auto weightSum = 0.f;
@@ -326,8 +326,8 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 					sortedWeights.push_back({pair.first, pair.second.first / static_cast<float>(pair.second.second)});
 				std::sort(sortedWeights.begin(), sortedWeights.end(), [](const std::pair<pragma::animation::BoneId, Weight> &a, const std::pair<pragma::animation::BoneId, Weight> &b) { return a.second > b.second; });
 
-				umath::VertexWeight r {};
-				auto num = umath::min(sortedWeights.size(), static_cast<size_t>(4));
+				pragma::math::VertexWeight r {};
+				auto num = pragma::math::min(sortedWeights.size(), static_cast<size_t>(4));
 				weightSum = 0.f;
 				for(auto i = decltype(num) {0u}; i < num; ++i) {
 					auto &w = sortedWeights.at(i);
@@ -350,7 +350,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 			if(d < 0.0) // Wrong orientation; Triangles have to be flipped
 			{
 				for(auto i = decltype(newTriangles.size()) {0}; i < newTriangles.size(); i += 3)
-					umath::swap(newTriangles.at(i), newTriangles.at(i + 2));
+					pragma::math::swap(newTriangles.at(i), newTriangles.at(i + 2));
 			}
 
 			auto *pCoverVerts = &clipMeshVerts;
@@ -379,7 +379,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 
 					v.vertex.normal = nTriangulated;
 					v.vertex.uv = {};
-					umath::geometry::calc_barycentric_coordinates(p0.vertex.position, p1.vertex.position, p2.vertex.position, v.vertex.position, v.vertex.uv.x, v.vertex.uv.y);
+					pragma::math::geometry::calc_barycentric_coordinates(p0.vertex.position, p1.vertex.position, p2.vertex.position, v.vertex.position, v.vertex.uv.x, v.vertex.uv.y);
 
 					pCoverVerts->push_back(v.vertex);
 					coverMesh->AddIndex(pCoverVerts->size() - 1u);

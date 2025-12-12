@@ -20,7 +20,7 @@ std::shared_ptr<FlexAnimation> FlexAnimation::Load(ufile::IFile &f)
 	auto version = f.Read<uint32_t>();
 	if(version < 1 || version > FORMAT_VERSION)
 		return nullptr;
-	auto flexAnim = ::util::make_shared<FlexAnimation>();
+	auto flexAnim = pragma::util::make_shared<FlexAnimation>();
 	flexAnim->SetFps(f.Read<float>());
 
 	auto numFlexControllerIds = f.Read<uint32_t>();
@@ -40,7 +40,7 @@ std::shared_ptr<FlexAnimation> FlexAnimation::Load(ufile::IFile &f)
 }
 std::shared_ptr<FlexAnimation> FlexAnimation::Load(const udm::AssetData &data, std::string &outErr)
 {
-	auto flexAnim = ::util::make_shared<FlexAnimation>();
+	auto flexAnim = pragma::util::make_shared<FlexAnimation>();
 	if(flexAnim->LoadFromAssetData(data, outErr) == false)
 		return nullptr;
 	return flexAnim;
@@ -79,7 +79,7 @@ bool FlexAnimation::LoadFromAssetData(const udm::AssetData &data, std::string &o
 			udmChannel["times"](times);
 			m_frames.resize(times.size());
 			for(auto &frame : m_frames) {
-				frame = ::util::make_shared<FlexAnimationFrame>();
+				frame = pragma::util::make_shared<FlexAnimationFrame>();
 				frame->GetValues().resize(m_flexControllerIds.size());
 			}
 		}
@@ -157,7 +157,7 @@ bool FlexAnimation::SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f)
 FlexAnimation::FlexAnimation(const FlexAnimation &other) : m_flexControllerIds {other.m_flexControllerIds}, m_fps {other.m_fps}, m_frames {other.m_frames}
 {
 	for(auto &frame : m_frames)
-		frame = ::util::make_shared<FlexAnimationFrame>(*frame);
+		frame = pragma::util::make_shared<FlexAnimationFrame>(*frame);
 	static_assert(sizeof(FlexAnimation) == 72, "Update this function when making changes to this class!");
 }
 uint32_t FlexAnimation::AddFlexControllerId(pragma::animation::FlexControllerId id)
@@ -174,7 +174,7 @@ uint32_t FlexAnimation::AddFlexControllerId(pragma::animation::FlexControllerId 
 }
 FlexAnimationFrame &FlexAnimation::AddFrame()
 {
-	m_frames.push_back(::util::make_shared<FlexAnimationFrame>());
+	m_frames.push_back(pragma::util::make_shared<FlexAnimationFrame>());
 	auto &frame = m_frames.back();
 	auto &values = frame->GetValues();
 	values.resize(m_flexControllerIds.size());
@@ -183,7 +183,7 @@ FlexAnimationFrame &FlexAnimation::AddFrame()
 bool FlexAnimation::operator==(const FlexAnimation &other) const
 {
 	static_assert(sizeof(FlexAnimation) == 72, "Update this function when making changes to this class!");
-	if(!(m_frames.size() == other.m_frames.size() && m_flexControllerIds == other.m_flexControllerIds && umath::abs(m_fps - other.m_fps) < 0.001f))
+	if(!(m_frames.size() == other.m_frames.size() && m_flexControllerIds == other.m_flexControllerIds && pragma::math::abs(m_fps - other.m_fps) < 0.001f))
 		return false;
 	for(auto i = decltype(m_frames.size()) {0u}; i < m_frames.size(); ++i) {
 		if(*m_frames[i] != *other.m_frames[i])

@@ -142,7 +142,7 @@ export namespace pragma::gui::types {
 		bool GetValue(uint32_t col, std::string &val) const;
 		WITableCell *InsertElement(unsigned int col, WIBase *el);
 		WITableCell *InsertElement(unsigned int col, pragma::gui::WIHandle hElement);
-		virtual util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
 		void Select();
 		void Deselect();
 		bool IsSelected();

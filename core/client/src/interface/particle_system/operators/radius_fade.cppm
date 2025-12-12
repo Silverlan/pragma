@@ -56,9 +56,9 @@ void pragma::pts::CParticleOperatorRadiusFadeBase::Initialize(pragma::BaseEnvPar
 
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == m_identifier) // Alternative to "radius_end"
-			m_fRadiusEnd.SetRange(util::to_float(it->second));
+			m_fRadiusEnd.SetRange(pragma::util::to_float(it->second));
 	}
 
 	// If no start radius has been specified, the previous known radius of the particle has to be used as start radius.

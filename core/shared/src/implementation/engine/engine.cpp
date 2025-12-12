@@ -25,7 +25,7 @@ import pragma.oskit;
 const pragma::IServerState &pragma::Engine::GetServerStateInterface() const
 {
 	if(m_libServer == nullptr) {
-		auto path = util::Path::CreatePath(util::get_program_path());
+		auto path = pragma::util::Path::CreatePath(pragma::util::get_program_path());
 #ifdef _WIN32
 		path += "bin/";
 		path += "server";
@@ -35,7 +35,7 @@ const pragma::IServerState &pragma::Engine::GetServerStateInterface() const
 #endif
 		auto modPath = path.GetString();
 		std::string err;
-		m_libServer = util::Library::Load(modPath, {}, &err);
+		m_libServer = pragma::util::Library::Load(modPath, {}, &err);
 		if(m_libServer == nullptr) {
 			throw std::logic_error {"Unable to load module '" + modPath + "': " + err};
 			exit(EXIT_FAILURE);
@@ -77,8 +77,8 @@ static pragma::Engine *g_engine = nullptr;
 pragma::Engine *pragma::Engine::Get() { return g_engine; }
 
 extern std::optional<std::string> g_lpLogFile;
-extern util::LogSeverity g_lpLogLevelCon;
-extern util::LogSeverity g_lpLogLevelFile;
+extern pragma::util::LogSeverity g_lpLogLevelCon;
+extern pragma::util::LogSeverity g_lpLogLevelFile;
 extern bool g_lpManagedByPackageManager;
 extern bool g_lpSandboxed;
 
@@ -98,15 +98,15 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 
 #ifdef __linux__
 	// Enable linenoise by default
-	umath::set_flag(m_stateFlags, StateFlags::UseLinenoise, true);
+	pragma::math::set_flag(m_stateFlags, StateFlags::UseLinenoise, true);
 
 	// -disable_linenoise launch option can be used to disable it.
 	// Since launch options are handled *after* the console is initialized, we have to
 	// check for -disable_linenoise early.
 	// We also don't want linenoise enabled if -non_interactive is set.
 	for(int i = 0; i < argc; ++i) {
-		if(ustring::compare(argv[i], "-disable_linenoise", false) || ustring::compare(argv[i], "-non_interactive", false)) {
-			umath::set_flag(m_stateFlags, StateFlags::UseLinenoise, false);
+		if(pragma::string::compare(argv[i], "-disable_linenoise", false) || pragma::string::compare(argv[i], "-non_interactive", false)) {
+			pragma::math::set_flag(m_stateFlags, StateFlags::UseLinenoise, false);
 			break;
 		}
 	}
@@ -116,7 +116,7 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 	::debug::open_domain();
 #endif
 
-	util::debug::set_lua_backtrace_function([this]() -> std::string {
+	pragma::debug::set_lua_backtrace_function([this]() -> std::string {
 		// We can only get the Lua callstack from the main thread
 		if(std::this_thread::get_id() == GetMainThreadId()) {
 			for(auto *state : {GetClientState(), GetServerNetworkState()}) {
@@ -267,7 +267,7 @@ void pragma::Engine::PollResourceWatchers()
 	if(cl)
 		cl->GetResourceWatcher().Poll();
 }
-util::ScopeGuard pragma::Engine::ScopeLockResourceWatchers()
+pragma::util::ScopeGuard pragma::Engine::ScopeLockResourceWatchers()
 {
 	auto *sv = GetServerNetworkState();
 	auto *cl = GetClientState();
@@ -275,7 +275,7 @@ util::ScopeGuard pragma::Engine::ScopeLockResourceWatchers()
 		sv->GetResourceWatcher().Lock();
 	if(cl)
 		cl->GetResourceWatcher().Lock();
-	return util::ScopeGuard {[this, sv, cl]() {
+	return pragma::util::ScopeGuard {[this, sv, cl]() {
 		if(sv && GetServerNetworkState() == sv)
 			sv->GetResourceWatcher().Unlock();
 		if(cl && GetClientState() == cl)
@@ -283,7 +283,7 @@ util::ScopeGuard pragma::Engine::ScopeLockResourceWatchers()
 	}};
 }
 
-void pragma::Engine::AddParallelJob(const util::ParallelJobWrapper &job, const std::string &jobName)
+void pragma::Engine::AddParallelJob(const pragma::util::ParallelJobWrapper &job, const std::string &jobName)
 {
 	m_parallelJobMutex.lock();
 	m_parallelJobs.push_back({});
@@ -296,9 +296,9 @@ void pragma::Engine::AddParallelJob(const util::ParallelJobWrapper &job, const s
 
 void pragma::Engine::Close()
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::Closed))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::Closed))
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::Closed);
+	pragma::math::set_flag(m_stateFlags, StateFlags::Closed);
 
 	if(ShouldRunUpdaterOnClose()) {
 		std::string processPath;
@@ -307,11 +307,11 @@ void pragma::Engine::Close()
 #else
 		processPath = "lib/updater";
 #endif
-		util::CommandInfo cmdInfo;
+		pragma::util::CommandInfo cmdInfo;
 		cmdInfo.command = processPath;
 		cmdInfo.absoluteCommandPath = false;
-		cmdInfo.args.push_back("-executable=" + util::get_program_name());
-		if(!::util::start_process(cmdInfo))
+		cmdInfo.args.push_back("-executable=" + pragma::util::get_program_name());
+		if(!pragma::util::start_process(cmdInfo))
 			Con::cwar << "Failed to launch updater '" << processPath << "'! Please execute manually to install update." << Con::endl;
 	}
 
@@ -323,10 +323,10 @@ void pragma::Engine::Close()
 		jobInfo.job->Wait();
 	m_parallelJobs.clear();
 
-	umath::set_flag(m_stateFlags, StateFlags::Running, false);
-	util::close_external_archive_manager();
+	pragma::math::set_flag(m_stateFlags, StateFlags::Running, false);
+	pragma::util::close_external_archive_manager();
 	m_assetManager = nullptr;
-	util::close_mount_external_library();
+	pragma::util::close_mount_external_library();
 	CloseServerState();
 
 	ClearCommands();
@@ -449,7 +449,7 @@ void pragma::Engine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
 		matManager.GetLoader().SetMultiThreadingEnabled(enabled);
 	}
 }
-void pragma::Engine::UpdateAssetMultiThreadedLoadingEnabled() { SetAssetMultiThreadedLoadingEnabled(umath::is_flag_set(m_stateFlags, StateFlags::MultiThreadedAssetLoadingEnabled)); }
+void pragma::Engine::UpdateAssetMultiThreadedLoadingEnabled() { SetAssetMultiThreadedLoadingEnabled(pragma::math::is_flag_set(m_stateFlags, StateFlags::MultiThreadedAssetLoadingEnabled)); }
 uint32_t pragma::Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type> &types, bool verbose) const
 {
 	uint32_t n = 0;
@@ -460,8 +460,8 @@ uint32_t pragma::Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type
 	return n;
 }
 
-void pragma::Engine::SetRunUpdaterOnClose(bool run) { umath::set_flag(m_stateFlags, StateFlags::RunUpdaterOnClose, run); }
-bool pragma::Engine::ShouldRunUpdaterOnClose() const { return umath::is_flag_set(m_stateFlags, StateFlags::RunUpdaterOnClose); }
+void pragma::Engine::SetRunUpdaterOnClose(bool run) { pragma::math::set_flag(m_stateFlags, StateFlags::RunUpdaterOnClose, run); }
+bool pragma::Engine::ShouldRunUpdaterOnClose() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::RunUpdaterOnClose); }
 
 void pragma::Engine::ClearCache()
 {
@@ -585,15 +585,15 @@ void pragma::Engine::UpdateParallelJobs()
 		auto t = std::chrono::steady_clock::now();
 		auto tDelta = t - jobInfo.lastProgressUpdate;
 		if(progress != jobInfo.lastProgress) {
-			jobInfo.timeRemaining = util::clock::to_seconds(tDelta) / (progress - jobInfo.lastProgress) * (1.f - progress);
+			jobInfo.timeRemaining = pragma::util::clock::to_seconds(tDelta) / (progress - jobInfo.lastProgress) * (1.f - progress);
 			jobInfo.lastProgress = progress;
 			jobInfo.lastProgressUpdate = t;
 		}
 		if((t - jobInfo.lastNotification) >= jobInfo.notificationFrequency) {
 			auto percent = progress * 100.f;
-			Con::cout << "Progress of worker '" << jobInfo.name << "' at " << umath::floor(percent) << "%.";
+			Con::cout << "Progress of worker '" << jobInfo.name << "' at " << pragma::math::floor(percent) << "%.";
 			if(jobInfo.timeRemaining.has_value()) {
-				auto msgDur = util::get_pretty_duration(*jobInfo.timeRemaining * std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds {1}).count());
+				auto msgDur = pragma::util::get_pretty_duration(*jobInfo.timeRemaining * std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds {1}).count());
 				Con::cout << " Approximately " << msgDur << " remaining!";
 			}
 			Con::cout << Con::endl;
@@ -622,17 +622,17 @@ pragma::Engine::StateInstance &pragma::Engine::GetStateInstance(pragma::NetworkS
 }
 pragma::Engine::StateInstance &pragma::Engine::GetServerStateInstance() { return *m_svInstance; }
 
-void pragma::Engine::SetVerbose(bool bVerbose) { umath::set_flag(m_stateFlags, StateFlags::Verbose, bVerbose); }
-bool pragma::Engine::IsVerbose() const { return umath::is_flag_set(m_stateFlags, StateFlags::Verbose); }
+void pragma::Engine::SetVerbose(bool bVerbose) { pragma::math::set_flag(m_stateFlags, StateFlags::Verbose, bVerbose); }
+bool pragma::Engine::IsVerbose() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::Verbose); }
 
-void pragma::Engine::SetConsoleSubsystem(bool consoleSubsystem) { umath::set_flag(m_stateFlags, StateFlags::ConsoleSubsystem, consoleSubsystem); }
-bool pragma::Engine::IsConsoleSubsystem() const { return umath::is_flag_set(m_stateFlags, StateFlags::ConsoleSubsystem); }
+void pragma::Engine::SetConsoleSubsystem(bool consoleSubsystem) { pragma::math::set_flag(m_stateFlags, StateFlags::ConsoleSubsystem, consoleSubsystem); }
+bool pragma::Engine::IsConsoleSubsystem() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::ConsoleSubsystem); }
 
-void pragma::Engine::SetDeveloperMode(bool devMode) { umath::set_flag(m_stateFlags, StateFlags::DeveloperMode, devMode); }
-bool pragma::Engine::IsDeveloperModeEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::DeveloperMode); }
+void pragma::Engine::SetDeveloperMode(bool devMode) { pragma::math::set_flag(m_stateFlags, StateFlags::DeveloperMode, devMode); }
+bool pragma::Engine::IsDeveloperModeEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::DeveloperMode); }
 
-void pragma::Engine::SetNonInteractiveMode(bool nonInteractiveMode) { umath::set_flag(m_stateFlags, StateFlags::NonInteractiveMode, nonInteractiveMode); }
-bool pragma::Engine::IsNonInteractiveMode() const { return umath::is_flag_set(m_stateFlags, StateFlags::NonInteractiveMode); }
+void pragma::Engine::SetNonInteractiveMode(bool nonInteractiveMode) { pragma::math::set_flag(m_stateFlags, StateFlags::NonInteractiveMode, nonInteractiveMode); }
+bool pragma::Engine::IsNonInteractiveMode() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::NonInteractiveMode); }
 
 void pragma::Engine::SetLinenoiseEnabled(bool enabled)
 {
@@ -640,18 +640,18 @@ void pragma::Engine::SetLinenoiseEnabled(bool enabled)
 	// Linenoise is Linux-only
 	enabled = false;
 #endif
-	umath::set_flag(m_stateFlags, StateFlags::UseLinenoise, enabled);
+	pragma::math::set_flag(m_stateFlags, StateFlags::UseLinenoise, enabled);
 }
-bool pragma::Engine::IsLinenoiseEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::UseLinenoise); }
+bool pragma::Engine::IsLinenoiseEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::UseLinenoise); }
 
-void pragma::Engine::SetManagedByPackageManager(bool isPackageManagerInstallation) { umath::set_flag(m_stateFlags, StateFlags::ManagedByPackageManager, isPackageManagerInstallation); }
-bool pragma::Engine::IsManagedByPackageManager() const { return umath::is_flag_set(m_stateFlags, StateFlags::ManagedByPackageManager); }
+void pragma::Engine::SetManagedByPackageManager(bool isPackageManagerInstallation) { pragma::math::set_flag(m_stateFlags, StateFlags::ManagedByPackageManager, isPackageManagerInstallation); }
+bool pragma::Engine::IsManagedByPackageManager() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::ManagedByPackageManager); }
 
-void pragma::Engine::SetSandboxed(bool sandboxed) { umath::set_flag(m_stateFlags, StateFlags::Sandboxed, sandboxed); }
-bool pragma::Engine::IsSandboxed() const { return umath::is_flag_set(m_stateFlags, StateFlags::Sandboxed); }
+void pragma::Engine::SetSandboxed(bool sandboxed) { pragma::math::set_flag(m_stateFlags, StateFlags::Sandboxed, sandboxed); }
+bool pragma::Engine::IsSandboxed() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::Sandboxed); }
 
-void pragma::Engine::SetCLIOnly(bool cliOnly) { umath::set_flag(m_stateFlags, StateFlags::CLIOnly, cliOnly); }
-bool pragma::Engine::IsCLIOnly() const { return umath::is_flag_set(m_stateFlags, StateFlags::CLIOnly); }
+void pragma::Engine::SetCLIOnly(bool cliOnly) { pragma::math::set_flag(m_stateFlags, StateFlags::CLIOnly, cliOnly); }
+bool pragma::Engine::IsCLIOnly() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::CLIOnly); }
 
 void pragma::Engine::Release() { Close(); }
 
@@ -677,7 +677,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 			filemanager::set_absolute_root_path(g_lpUserDataDir, 0 /* priority */);
 		}
 		else
-			filemanager::set_absolute_root_path(util::get_program_path());
+			filemanager::set_absolute_root_path(pragma::util::get_program_path());
 
 		// TODO: File cache doesn't work with absolute paths at the moment
 		// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
@@ -685,7 +685,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 
 		if(!g_lpUserDataDir.empty()) {
 			// If we're using a custom user-data directory, we have to add the program path as an additional mount directory
-			filemanager::add_secondary_absolute_read_only_root_path("core", util::get_program_path());
+			filemanager::add_secondary_absolute_read_only_root_path("core", pragma::util::get_program_path());
 		}
 		size_t resDirIdx = 1;
 		for(auto &resourceDir : g_lpResourceDirs) {
@@ -700,7 +700,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	if(f) {
 		spdlog::info("Git Info:");
 		auto str = f->ReadString();
-		ustring::replace(str, "\n", spdlog::details::default_eol);
+		pragma::string::replace(str, "\n", spdlog::details::default_eol);
 		spdlog::info(str);
 	}
 
@@ -736,7 +736,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 		if(m_bRecordConsoleOutput == false)
 			return;
 		m_consoleOutputMutex.lock();
-		m_consoleOutput.push({std::string {output}, flags, color ? ::util::make_shared<Color>(*color) : nullptr});
+		m_consoleOutput.push({std::string {output}, flags, color ? pragma::util::make_shared<Color>(*color) : nullptr});
 		m_consoleOutputMutex.unlock();
 	});
 
@@ -782,13 +782,13 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	return true;
 }
 
-void pragma::Engine::InitializeAssetManager(util::FileAssetManager &assetManager) const
+void pragma::Engine::InitializeAssetManager(pragma::util::FileAssetManager &assetManager) const
 {
 	assetManager.SetLogHandler(&pragma::log);
 	assetManager.SetExternalSourceFileImportHandler([this, &assetManager](const std::string &path, const std::string &outputPath) -> std::optional<std::string> {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 		::debug::get_domain().BeginTask("import_asset_file");
-		util::ScopeGuard sg {[]() { ::debug::get_domain().EndTask(); }};
+		pragma::util::ScopeGuard sg {[]() { ::debug::get_domain().EndTask(); }};
 #endif
 		auto *nw = GetClientState();
 		if(!nw || !nw->IsGameActive()) {
@@ -801,20 +801,20 @@ void pragma::Engine::InitializeAssetManager(util::FileAssetManager &assetManager
 		auto &rootDir = assetManager.GetRootDirectory();
 		auto &extensions = assetManager.GetSupportedFormatExtensions();
 		for(auto &extInfo : extensions) {
-			auto relPath = util::Path::CreateFile(path + '.' + extInfo.extension);
+			auto relPath = pragma::util::Path::CreateFile(path + '.' + extInfo.extension);
 			auto formatPath = rootDir;
 			formatPath += relPath;
 
 			auto p = rootDir;
-			p += util::Path::CreateFile(outputPath + '.' + extInfo.extension);
+			p += pragma::util::Path::CreateFile(outputPath + '.' + extInfo.extension);
 
 			auto portSuccess = false;
 			if(extInfo.extension == "bsp")
-				portSuccess = util::port_hl2_map(nw, relPath.GetString());
+				portSuccess = pragma::util::port_hl2_map(nw, relPath.GetString());
 			else if(extInfo.extension == "mdl")
-				portSuccess = util::port_hl2_model(nw, ufile::get_path_from_filename(formatPath.GetString()), ufile::get_file_from_filename(p.GetString()));
+				portSuccess = pragma::util::port_hl2_model(nw, ufile::get_path_from_filename(formatPath.GetString()), ufile::get_file_from_filename(p.GetString()));
 			else
-				portSuccess = util::port_file(nw, formatPath.GetString(), p.GetString());
+				portSuccess = pragma::util::port_file(nw, formatPath.GetString(), p.GetString());
 			if(portSuccess)
 				return extInfo.extension;
 		}
@@ -822,7 +822,7 @@ void pragma::Engine::InitializeAssetManager(util::FileAssetManager &assetManager
 	});
 }
 
-void pragma::Engine::InitializeExternalArchiveManager() { util::initialize_external_archive_manager(GetServerNetworkState()); }
+void pragma::Engine::InitializeExternalArchiveManager() { pragma::util::initialize_external_archive_manager(GetServerNetworkState()); }
 
 void pragma::Engine::RunLaunchCommands()
 {
@@ -831,12 +831,12 @@ void pragma::Engine::RunLaunchCommands()
 		auto &cmd = *it;
 		spdlog::debug("Running launch command '{}'...", cmd.command);
 		RunConsoleCommand(cmd.command, cmd.args);
-		if(ustring::compare(cmd.command.c_str(), "map", false)) {
+		if(pragma::string::compare(cmd.command.c_str(), "map", false)) {
 			// We'll delay all remaining commands until after the map has been loaded
 			std::vector<LaunchCommand> remainingCommands;
 			++it;
 			for(auto it2 = it; it2 != m_launchCommands.rend(); ++it2) {
-				if(ustring::compare(it2->command.c_str(), "map", false))
+				if(pragma::string::compare(it2->command.c_str(), "map", false))
 					continue;
 				remainingCommands.push_back(*it2);
 			}
@@ -1030,8 +1030,8 @@ static void add_zip_file(uzip::ZIPFile &zip, const std::string &fileName, const 
 
 std::unique_ptr<uzip::ZIPFile> pragma::Engine::GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr)
 {
-	auto programPath = util::Path::CreatePath(filemanager::get_program_write_path());
-	outZipFileName = util::get_date_time(baseName + "_%Y-%m-%d_%H-%M-%S.zip");
+	auto programPath = pragma::util::Path::CreatePath(filemanager::get_program_write_path());
+	outZipFileName = pragma::util::get_date_time(baseName + "_%Y-%m-%d_%H-%M-%S.zip");
 	auto zipName = programPath + outZipFileName;
 	std::string err;
 	auto zipFile = uzip::ZIPFile::Open(zipName.GetString(), err, uzip::OpenMode::Write);
@@ -1046,7 +1046,7 @@ std::unique_ptr<uzip::ZIPFile> pragma::Engine::GenerateEngineDump(const std::str
 		zipFile->AddFile("exception.txt", exceptionMsg);
 
 	// Write Stack Backtrace
-	zipFile->AddFile("stack_backtrace.txt", util::debug::get_formatted_stack_backtrace_string());
+	zipFile->AddFile("stack_backtrace.txt", pragma::debug::get_formatted_stack_backtrace_string());
 
 	// Write Info
 	if(pragma::Engine::Get() != nullptr) {
@@ -1074,11 +1074,11 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 {
 	std::stringstream engineInfo;
 	engineInfo << "System: ";
-	if(util::is_windows_system())
+	if(pragma::util::is_windows_system())
 		engineInfo << "Windows";
 	else
 		engineInfo << "Linux";
-	if(util::is_x64_system())
+	if(pragma::util::is_x64_system())
 		engineInfo << " x64";
 	else
 		engineInfo << " x86";
@@ -1105,7 +1105,7 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 			if(pair.second->GetType() != pragma::console::ConType::Variable)
 				continue;
 			auto *cv = static_cast<pragma::console::ConVar *>(pair.second.get());
-			if(umath::is_flag_set(cv->GetFlags(), pragma::console::ConVarFlags::Password))
+			if(pragma::math::is_flag_set(cv->GetFlags(), pragma::console::ConVarFlags::Password))
 				continue; // Don't store potentially personal passwords in the crashdump
 			convars << pair.first << " \"" << cv->GetString() << "\"\n";
 		}
@@ -1181,7 +1181,7 @@ bool pragma::Engine::IsActiveState(pragma::NetworkState *state) { return state =
 
 void pragma::Engine::AddLaunchConVar(std::string cvar, std::string val) { m_launchCommands.push_back({cvar, {val}}); }
 
-void pragma::Engine::ShutDown() { umath::set_flag(m_stateFlags, StateFlags::Running, false); }
+void pragma::Engine::ShutDown() { pragma::math::set_flag(m_stateFlags, StateFlags::Running, false); }
 
 void pragma::Engine::HandleLocalHostPlayerClientPacket(NetPacket &p) {}
 void pragma::Engine::HandleLocalHostPlayerServerPacket(NetPacket &p) { return GetServerStateInterface().handle_local_host_player_server_packet(p); }
@@ -1193,13 +1193,13 @@ void pragma::Engine::WriteToLog(const std::string &str) { pragma::log(str); }
 pragma::Engine::~Engine()
 {
 	g_engine = nullptr;
-	if(umath::is_flag_set(m_stateFlags, StateFlags::Running))
+	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::Running))
 		throw std::runtime_error("Engine has to be closed before it can be destroyed!");
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::close_domain();
 #endif
 
-	util::debug::set_lua_backtrace_function(nullptr);
+	pragma::debug::set_lua_backtrace_function(nullptr);
 
 	spdlog::info("Closing logger...");
 	pragma::detail::close_logger();

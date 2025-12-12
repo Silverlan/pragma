@@ -23,7 +23,7 @@ bool pragma::asset::save_particle_system(VFilePtrReal &f, const std::unordered_m
 }
 bool pragma::asset::save_particle_system(const std::string &name, const std::unordered_map<std::string, ParticleSystemData> &particles, const std::string &rootPath)
 {
-	auto fpath = util::Path::CreatePath(rootPath) + (pragma::asset::get_normalized_path(name, pragma::asset::Type::ParticleSystem) + '.' + std::string {pragma::asset::FORMAT_PARTICLE_SYSTEM_ASCII});
+	auto fpath = pragma::util::Path::CreatePath(rootPath) + (pragma::asset::get_normalized_path(name, pragma::asset::Type::ParticleSystem) + '.' + std::string {pragma::asset::FORMAT_PARTICLE_SYSTEM_ASCII});
 	auto f = FileManager::OpenFile<VFilePtrReal>(fpath.GetString().c_str(), "w");
 	if(!f)
 		return false;

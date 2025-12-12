@@ -10,12 +10,12 @@ import :gui;
 
 void CLuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &path)
 {
-	auto filePath = util::FilePath(path);
+	auto filePath = pragma::util::FilePath(path);
 	auto it = filePath.begin();
 	auto end = filePath.end();
-	if(it != end && ustring::compare<std::string_view>(*it, "gui", false) == true) {
+	if(it != end && pragma::string::compare<std::string_view>(*it, "gui", false) == true) {
 		++it;
-		if(it != end && ustring::compare<std::string_view>(*it, "skins", false) == true) {
+		if(it != end && pragma::string::compare<std::string_view>(*it, "skins", false) == true) {
 			++it;
 			if(it != end) {
 				std::string skinName {*it};

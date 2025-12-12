@@ -20,7 +20,7 @@ void CViewModelComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(cAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &ent = GetEntity();
 		auto pAttachableComponent = ent.GetComponent<CAttachmentComponent>();
 		auto *parent = pAttachableComponent.valid() ? pAttachableComponent->GetParent() : nullptr;
@@ -29,10 +29,10 @@ void CViewModelComponent::Initialize()
 			auto *wep = charComponent->GetActiveWeapon();
 			if(wep != nullptr && wep->IsWeapon()) {
 				if(static_cast<pragma::CWeaponComponent &>(*wep->GetWeaponComponent()).HandleViewModelAnimationEvent(this, static_cast<CEHandleAnimationEvent &>(evData.get()).animationEvent))
-					return util::EventReply::Handled;
+					return pragma::util::EventReply::Handled;
 			}
 		}
-		return util::EventReply::Handled; // Always overwrite
+		return pragma::util::EventReply::Handled; // Always overwrite
 	});
 	BindEventUnhandled(cAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();

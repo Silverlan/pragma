@@ -190,7 +190,7 @@ int Lua::import::import_wrmi(lua::State *l)
 			v.second = f.Read<Vector3>();
 		}
 		auto numBonesMesh = f.Read<uint32_t>();
-		std::vector<umath::VertexWeight> boneWeights(numVerts);
+		std::vector<pragma::math::VertexWeight> boneWeights(numVerts);
 		for(auto j = decltype(numBonesMesh) {0}; j < numBonesMesh; ++j) {
 
 			// TODO
@@ -285,7 +285,7 @@ int Lua::import::import_smd(lua::State *l)
 		isCollisionMesh = Lua::CheckBool(l, 4);
 
 	std::vector<std::string> textures;
-	auto success = ::util::port_hl2_smd(nw, mdl, f, animName, isCollisionMesh, textures);
+	auto success = pragma::util::port_hl2_smd(nw, mdl, f, animName, isCollisionMesh, textures);
 	Lua::PushBool(l, success);
 	if(success) {
 		auto t = Lua::CreateTable(l);

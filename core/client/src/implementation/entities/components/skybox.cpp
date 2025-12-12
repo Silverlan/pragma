@@ -96,8 +96,8 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		cubemapImages.at(i) = img.shared_from_this();
 
 		auto extents = img.GetExtents();
-		largestWidth = umath::max(largestWidth, extents.width);
-		largestHeight = umath::max(largestHeight, extents.height);
+		largestWidth = pragma::math::max(largestWidth, extents.width);
+		largestHeight = pragma::math::max(largestHeight, extents.height);
 	}
 	Con::cout << "Found individual skybox textures for skybox '" << materialPath << "'! Generating cubemap texture..." << Con::endl;
 
@@ -214,7 +214,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		Con::cout << "Skybox cubemap texture saved as '" << fullPath << "'! Generating material..." << Con::endl;
 		auto mat = pragma::get_client_state()->CreateMaterial("skybox");
 		mat->SetTextureProperty("skybox", matName);
-		auto savePath = pragma::asset::relative_path_to_absolute_path(matName, pragma::asset::Type::Material, util::CONVERT_PATH);
+		auto savePath = pragma::asset::relative_path_to_absolute_path(matName, pragma::asset::Type::Material, pragma::util::CONVERT_PATH);
 		std::string err;
 		if(mat->Save(savePath.GetString(), err, true)) {
 			pragma::get_client_state()->LoadMaterial(matName, nullptr, true, true);
@@ -337,7 +337,7 @@ static void util_convert_cubemap_equirect(std::vector<std::string> &argv, Conver
 	}
 
 	auto &matMan = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
-	auto tex = matMan.GetTextureManager().LoadAsset(fileName, util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache);
+	auto tex = matMan.GetTextureManager().LoadAsset(fileName, pragma::util::AssetLoadFlags::DontCache | pragma::util::AssetLoadFlags::IgnoreCache);
 	if(!tex) {
 		Con::cwar << "Texture '" << fileName << "' could not be loaded!" << Con::endl;
 		return;
@@ -359,7 +359,7 @@ static void util_convert_cubemap_equirect(std::vector<std::string> &argv, Conver
 		return;
 	}
 
-	auto outputFileName = util::Path::CreateFile(absPath);
+	auto outputFileName = pragma::util::Path::CreateFile(absPath);
 	outputFileName.RemoveFileExtension(pragma::asset::get_supported_extensions(pragma::asset::Type::Texture));
 	if(conversionMode == ConversionMode::EquirectangularToCubemap) {
 		auto *shader = static_cast<pragma::ShaderEquirectangularToCubemap *>(pragma::get_cengine()->GetShader("equirectangular_to_cubemap").get());

@@ -68,10 +68,10 @@ std::string pragma::ecs::BaseEntity::GetModelName() const
 	auto mdlC = GetModelComponent();
 	return mdlC ? mdlC->GetModelName() : "";
 }
-std::optional<umath::Transform> pragma::ecs::BaseEntity::GetAttachmentPose(uint32_t attId) const
+std::optional<pragma::math::Transform> pragma::ecs::BaseEntity::GetAttachmentPose(uint32_t attId) const
 {
 	auto mdlC = GetModelComponent();
-	umath::Transform t {};
+	pragma::math::Transform t {};
 	if(mdlC) {
 		Vector3 pos;
 		Quat rot;

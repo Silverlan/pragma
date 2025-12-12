@@ -60,7 +60,7 @@ export namespace pragma::gui::types {
 		pragma::gui::WIHandle m_hPssmSplitCount;
 		bool m_bInitialized = false;
 
-		util::Clock::time_point m_tLastMemoryUsageUpdate = {};
+		pragma::util::Clock::time_point m_tLastMemoryUsageUpdate = {};
 
 		CallbackHandle m_joystickStateChanged = {};
 		int m_yOffset;

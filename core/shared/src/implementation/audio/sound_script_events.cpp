@@ -78,7 +78,7 @@ pragma::audio::SSESound *pragma::audio::SSEPlaySound::CreateSound(double tStart,
 	int numSounds = static_cast<int>(sources.size());
 	if(numSounds == 0)
 		return nullptr;
-	unsigned int r = umath::random(0, numSounds - 1);
+	unsigned int r = pragma::math::random(0, numSounds - 1);
 	auto createFlags = pragma::audio::ALCreateFlags::None;
 	if(stream == true)
 		createFlags |= pragma::audio::ALCreateFlags::Stream;
@@ -102,7 +102,7 @@ pragma::audio::SSESound *pragma::audio::SSEPlaySound::CreateSound(double tStart,
 		snd->SetPosition({});
 	}
 	if(type.IsSet() == true)
-		snd->SetType(static_cast<pragma::audio::ALSoundType>(umath::to_integral(snd->GetType()) | static_cast<uint32_t>(type.GetValue())));
+		snd->SetType(static_cast<pragma::audio::ALSoundType>(pragma::math::to_integral(snd->GetType()) | static_cast<uint32_t>(type.GetValue())));
 
 	if(startTime.IsSet() || endTime.IsSet()) {
 		auto start = (startTime.IsSet()) ? startTime.GetValue() : 0.f;
@@ -180,7 +180,7 @@ void pragma::audio::SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 	coneOuterGain.Load(prop["cone_outer_gain"]);
 	auto udmType = prop["sound_type"];
 	if(udmType.IsType(udm::Type::String)) {
-		type = umath::to_integral(udm::string_to_flags<pragma::audio::ALSoundType>(udmType, pragma::audio::ALSoundType::Generic));
+		type = pragma::math::to_integral(udm::string_to_flags<pragma::audio::ALSoundType>(udmType, pragma::audio::ALSoundType::Generic));
 		type.SetSet(true);
 	}
 	else
@@ -237,5 +237,5 @@ void pragma::audio::SoundScriptValue::Initialize(float min, float max)
 	m_min = min;
 	m_max = max;
 }
-float pragma::audio::SoundScriptValue::GetValue() const { return umath::random(m_min, m_max); }
+float pragma::audio::SoundScriptValue::GetValue() const { return pragma::math::random(m_min, m_max); }
 bool pragma::audio::SoundScriptValue::IsSet() const { return m_bIsSet; }

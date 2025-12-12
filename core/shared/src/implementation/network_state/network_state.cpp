@@ -16,7 +16,7 @@ UInt8 pragma::NetworkState::STATE_COUNT = 0;
 
 decltype(pragma::NetworkState::s_loadedLibraries) pragma::NetworkState::s_loadedLibraries = {};
 
-pragma::NetworkState::NetworkState() : util::CallbackHandler(), CVarHandler()
+pragma::NetworkState::NetworkState() : pragma::util::CallbackHandler(), CVarHandler()
 {
 	m_ctReal.Reset(static_cast<int64_t>(pragma::Engine::Get()->GetTickCount()));
 	m_tReal = CDouble(m_ctReal());
@@ -123,28 +123,28 @@ bool pragma::NetworkState::PortMaterial(const std::string &path)
 
 	// TODO: This doesn't belong here! Move it into the source module
 	auto matPath = pathWithoutExt + ".vmat_c";
-	if(util::port_file(this, "materials/" + matPath) == false) {
+	if(pragma::util::port_file(this, "materials/" + matPath) == false) {
 		matPath = pathWithoutExt + ".vmt";
-		if(util::port_file(this, "materials/" + matPath) == false)
+		if(pragma::util::port_file(this, "materials/" + matPath) == false)
 			return false;
 	}
 
 	auto *mat = LoadMaterial(matPath, true);
 	if(mat) {
-		std::function<void(const util::Path &path)> fPortTextures = nullptr;
-		fPortTextures = [this, mat, &fPortTextures](const util::Path &path) {
+		std::function<void(const pragma::util::Path &path)> fPortTextures = nullptr;
+		fPortTextures = [this, mat, &fPortTextures](const pragma::util::Path &path) {
 			for(auto &name : msys::MaterialPropertyBlockView {*mat, path}) {
 				auto propType = mat->GetPropertyType(name);
 				switch(propType) {
 				case msys::PropertyType::Block:
-					fPortTextures(util::FilePath(path, name));
+					fPortTextures(pragma::util::FilePath(path, name));
 					break;
 				case msys::PropertyType::Texture:
 					{
 						std::string texName;
-						if(mat->GetProperty(util::FilePath(path, name).GetString(), &texName)) {
-							auto path = util::FilePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), texName).GetString();
-							if(FileManager::Exists(path) == false && util::port_file(this, path + ".vtf") == false && util::port_file(this, path + ".vtex_c") == false)
+						if(mat->GetProperty(pragma::util::FilePath(path, name).GetString(), &texName)) {
+							auto path = pragma::util::FilePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), texName).GetString();
+							if(FileManager::Exists(path) == false && pragma::util::port_file(this, path + ".vtf") == false && pragma::util::port_file(this, path + ".vtex_c") == false)
 								Con::cwar << "Unable to port texture '" << texName << "'!" << Con::endl;
 						}
 						break;
@@ -157,7 +157,7 @@ bool pragma::NetworkState::PortMaterial(const std::string &path)
 	return (mat != nullptr) ? true : false;
 }
 
-util::FileAssetManager *pragma::NetworkState::GetAssetManager(pragma::asset::Type type)
+pragma::util::FileAssetManager *pragma::NetworkState::GetAssetManager(pragma::asset::Type type)
 {
 	switch(type) {
 	case pragma::asset::Type::Model:
@@ -222,7 +222,7 @@ msys::Material *pragma::NetworkState::LoadMaterial(const std::string &path, bool
 			auto vmtPath = path;
 			ufile::remove_extension_from_filename(vmtPath);
 			vmtPath += ".vmt";
-			if(util::port_file(this, "materials/" + vmtPath) == true) {
+			if(pragma::util::port_file(this, "materials/" + vmtPath) == true) {
 				bSkipPort = true;
 				mat = LoadMaterial(path, false);
 				bSkipPort = false;
@@ -486,23 +486,23 @@ bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::
 	return true;
 }
 
-std::shared_ptr<util::Library> pragma::NetworkState::LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories, std::string *err)
+std::shared_ptr<pragma::util::Library> pragma::NetworkState::LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories, std::string *err)
 {
-	auto pathLib = util::Path::CreateFile(lib);
+	auto pathLib = pragma::util::Path::CreateFile(lib);
 	static std::unordered_set<std::string> cache;
 	auto it = cache.find(pathLib.GetString());
 	if(it != cache.end())
 		return nullptr;
 
-	auto libModule = util::load_library_module(lib, additionalSearchDirectories, {}, err);
+	auto libModule = pragma::util::load_library_module(lib, additionalSearchDirectories, {}, err);
 	if(!libModule)
 		cache.insert(pathLib.GetString()); // Cache libraries we weren't able to load to avoid continuous error messages
 	return libModule;
 }
 
-std::shared_ptr<util::Library> pragma::NetworkState::GetLibraryModule(const std::string &library) const
+std::shared_ptr<pragma::util::Library> pragma::NetworkState::GetLibraryModule(const std::string &library) const
 {
-	auto lib = util::get_normalized_module_path(library, IsClient());
+	auto lib = pragma::util::get_normalized_module_path(library, IsClient());
 	auto it = s_loadedLibraries.find(lib);
 	if(it == s_loadedLibraries.end())
 		return nullptr;
@@ -520,7 +520,7 @@ void pragma::NetworkState::InitializeLuaModules(lua::State *l)
 	}
 }
 
-void pragma::NetworkState::InitializeDLLModule(lua::State *l, std::shared_ptr<util::Library> module)
+void pragma::NetworkState::InitializeDLLModule(lua::State *l, std::shared_ptr<pragma::util::Library> module)
 {
 	auto it = m_initializedLibraries.find(l);
 	if(it != m_initializedLibraries.end()) {
@@ -529,7 +529,7 @@ void pragma::NetworkState::InitializeDLLModule(lua::State *l, std::shared_ptr<ut
 			return; // Module was already initialized for this lua state
 	}
 	else
-		it = m_initializedLibraries.insert(std::make_pair(l, std::vector<std::shared_ptr<util::Library>> {})).first;
+		it = m_initializedLibraries.insert(std::make_pair(l, std::vector<std::shared_ptr<pragma::util::Library>> {})).first;
 	it->second.push_back(module);
 
 	auto *luaInterface = pragma::Engine::Get()->GetLuaInterface(l);
@@ -542,17 +542,17 @@ void pragma::NetworkState::InitializeDLLModule(lua::State *l, std::shared_ptr<ut
 
 bool pragma::NetworkState::UnloadLibrary(const std::string &library)
 {
-	auto libAbs = util::get_normalized_module_path(library, IsClient());
+	auto libAbs = pragma::util::get_normalized_module_path(library, IsClient());
 	auto it = s_loadedLibraries.find(libAbs);
 	if(it == s_loadedLibraries.end())
 		return true;
 	auto lib = it->second.library;
-	auto it2 = std::find_if(m_libHandles.begin(), m_libHandles.end(), [&lib](const std::shared_ptr<std::shared_ptr<util::Library>> &ptr) { return ptr->get() == lib->get(); });
+	auto it2 = std::find_if(m_libHandles.begin(), m_libHandles.end(), [&lib](const std::shared_ptr<std::shared_ptr<pragma::util::Library>> &ptr) { return ptr->get() == lib->get(); });
 	it = s_loadedLibraries.erase(it);
 
 	auto *ptrTerminateLua = (*lib)->FindSymbolAddress<void (*)(Lua::Interface &)>("pragma_terminate_lua");
 	for(auto &pair : m_initializedLibraries) {
-		auto it = std::find_if(pair.second.begin(), pair.second.end(), [&lib](const std::shared_ptr<util::Library> &ptr) { return ptr.get() == lib->get(); });
+		auto it = std::find_if(pair.second.begin(), pair.second.end(), [&lib](const std::shared_ptr<pragma::util::Library> &ptr) { return ptr.get() == lib->get(); });
 		if(it != pair.second.end()) {
 			if(ptrTerminateLua != nullptr)
 				ptrTerminateLua(*pragma::Engine::Get()->GetLuaInterface(pair.first));
@@ -572,20 +572,20 @@ bool pragma::NetworkState::UnloadLibrary(const std::string &library)
 	return true;
 }
 
-std::shared_ptr<util::Library> pragma::NetworkState::InitializeLibrary(std::string library, std::string *err, lua::State *l)
+std::shared_ptr<pragma::util::Library> pragma::NetworkState::InitializeLibrary(std::string library, std::string *err, lua::State *l)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("load_library_module_" + library);
-	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
+	pragma::util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	if(l == nullptr)
 		l = GetLuaState();
-	auto libAbs = util::get_normalized_module_path(library, IsClient());
+	auto libAbs = pragma::util::get_normalized_module_path(library, IsClient());
 
-	std::shared_ptr<util::Library> dllHandle = nullptr;
+	std::shared_ptr<pragma::util::Library> dllHandle = nullptr;
 	auto it = s_loadedLibraries.find(libAbs);
 	if(it == s_loadedLibraries.end()) {
-		auto additionalSearchDirectories = util::get_default_additional_library_search_directories(libAbs);
+		auto additionalSearchDirectories = pragma::util::get_default_additional_library_search_directories(libAbs);
 		dllHandle = LoadLibraryModule(libAbs.substr(8), additionalSearchDirectories, err);
 		m_lastModuleHandle = dllHandle;
 		if(dllHandle != nullptr) {
@@ -616,7 +616,7 @@ std::shared_ptr<util::Library> pragma::NetworkState::InitializeLibrary(std::stri
 			if(ptrKeepAlive != nullptr && ptrKeepAlive())
 				dllHandle->SetDontFreeLibraryOnDestruct();
 
-			auto ptrDllHandle = ::util::make_shared<std::shared_ptr<util::Library>>(dllHandle);
+			auto ptrDllHandle = pragma::util::make_shared<std::shared_ptr<pragma::util::Library>>(dllHandle);
 			m_libHandles.push_back(ptrDllHandle);
 			s_loadedLibraries.insert(decltype(s_loadedLibraries)::value_type(libAbs, {ptrDllHandle, IsServer(), IsClient()}));
 		}
@@ -675,7 +675,7 @@ pragma::console::ConVarMap *pragma::NetworkState::GetConVarMap() { return nullpt
 void pragma::NetworkState::UnregisterConVar(const std::string &scmd)
 {
 	auto lcmd = scmd;
-	ustring::to_lower(lcmd);
+	pragma::string::to_lower(lcmd);
 	auto it = m_conVars.find(scmd);
 	if(it != m_conVars.end())
 		m_conVars.erase(it);
@@ -684,7 +684,7 @@ void pragma::NetworkState::UnregisterConVar(const std::string &scmd)
 pragma::console::ConVar *pragma::NetworkState::RegisterConVar(const std::string &scmd, const std::shared_ptr<pragma::console::ConVar> &cvar)
 {
 	auto lcmd = scmd;
-	ustring::to_lower(lcmd);
+	pragma::string::to_lower(lcmd);
 	auto it = m_conVars.find(scmd);
 	if(it != m_conVars.end()) {
 		auto &cf = it->second;
@@ -718,7 +718,7 @@ std::unordered_map<std::string, unsigned int> &pragma::NetworkState::GetConComma
 pragma::console::ConCommand *pragma::NetworkState::CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags, const std::string &help)
 {
 	auto lcmd = scmd;
-	ustring::to_lower(lcmd);
+	pragma::string::to_lower(lcmd);
 	if(m_conVars.find(lcmd) != m_conVars.end())
 		return nullptr;
 	auto *cmd = new pragma::console::ConCommand(fc, flags, help);

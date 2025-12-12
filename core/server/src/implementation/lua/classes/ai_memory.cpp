@@ -32,9 +32,9 @@ void Lua::AIMemory::register_class(lua::State *l, luabind::module_ &mod)
 	auto classDef = luabind::class_<pragma::ai::Memory>("Memory");
 	classDef.def("GetFragments", &GetFragments);
 	classDef.def("GetFragmentCount", &GetFragmentCount);
-	classDef.add_static_constant("TYPE_VISUAL", umath::to_integral(pragma::ai::Memory::MemoryType::Visual));
-	classDef.add_static_constant("TYPE_SOUND", umath::to_integral(pragma::ai::Memory::MemoryType::Sound));
-	classDef.add_static_constant("TYPE_SMELL", umath::to_integral(pragma::ai::Memory::MemoryType::Smell));
+	classDef.add_static_constant("TYPE_VISUAL", pragma::math::to_integral(pragma::ai::Memory::MemoryType::Visual));
+	classDef.add_static_constant("TYPE_SOUND", pragma::math::to_integral(pragma::ai::Memory::MemoryType::Sound));
+	classDef.add_static_constant("TYPE_SMELL", pragma::math::to_integral(pragma::ai::Memory::MemoryType::Smell));
 	mod[classDef];
 
 	auto classDefFragment = luabind::class_<pragma::ai::Memory::Fragment>("MemoryFragment");

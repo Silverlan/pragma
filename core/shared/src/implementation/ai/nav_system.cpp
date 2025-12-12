@@ -68,7 +68,7 @@ static std::shared_ptr<dtNavMesh> initialize_detour_mesh(rcPolyMesh &polyMesh, r
 			*err = "Could not create detour navigation mesh!";
 		return nullptr;
 	}
-	util::ScopeGuard sg([navData]() { dtFree(navData); });
+	pragma::util::ScopeGuard sg([navData]() { dtFree(navData); });
 	auto dtNav = std::shared_ptr<dtNavMesh>(dtAllocNavMesh(), [](dtNavMesh *dtNavMesh) { dtFreeNavMesh(dtNavMesh); });
 	;
 	if(dtNav == nullptr) {
@@ -157,7 +157,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 	auto detailSampleMaxError = config.sampleDetailMaxError;
 	auto partitionType = config.partitionType;
 
-	auto ctx = ::util::make_shared<rcContext>();
+	auto ctx = pragma::util::make_shared<rcContext>();
 	auto keepInterResults = false;
 
 	Vector3 min(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
@@ -288,8 +288,8 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 			Vector3 max(std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest());
 			for(auto &v : convexArea.verts)
 			{
-				hMin = umath::min(hMin,v.y);
-				hMax = umath::max(hMax,v.y);
+				hMin = pragma::math::min(hMin,v.y);
+				hMax = pragma::math::max(hMax,v.y);
 
 				uvec::min(&min,v);
 				uvec::max(&max,v);
@@ -433,7 +433,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 				std::cout << "";
 			auto *surfMat = game.GetSurfaceMaterial(area);
 			if(surfMat != nullptr)
-				m_pmesh->flags[i] = umath::to_integral(surfMat->GetNavigationFlags());
+				m_pmesh->flags[i] = pragma::math::to_integral(surfMat->GetNavigationFlags());
 		}
 
 		dtNavMeshCreateParams params;
@@ -472,7 +472,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 			return nullptr;
 		}
 
-		util::ScopeGuard sg([navData]() { dtFree(navData); });
+		pragma::util::ScopeGuard sg([navData]() { dtFree(navData); });
 
 		m_navMesh = std::unique_ptr<dtNavMesh, void (*)(dtNavMesh *)>(dtAllocNavMesh(), [](dtNavMesh *navMesh) { dtFreeNavMesh(navMesh); });
 		if(m_navMesh == nullptr) {
@@ -504,7 +504,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 
 	auto m_totalBuildTimeMs = ctx->getAccumulatedTime(RC_TIMER_TOTAL) / 1000.f;
 
-	return ::util::make_shared<RcNavMesh>(std::move(m_pmesh), std::move(m_dmesh), std::move(m_navMesh));
+	return pragma::util::make_shared<RcNavMesh>(std::move(m_pmesh), std::move(m_dmesh), std::move(m_navMesh));
 
 	// Obsolete
 	/*for(unsigned int i=0;i<meshes->size();i++)
@@ -580,9 +580,9 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 	cfg.cs = 9.f;
 	cfg.ch = 6.f;
 	cfg.walkableSlopeAngle = 45.f;
-	cfg.walkableHeight = umath::ceil(64.f /cfg.ch);
-	cfg.walkableClimb = umath::floor(16.f /cfg.ch);
-	cfg.walkableRadius = umath::ceil(16.f /cfg.cs);
+	cfg.walkableHeight = pragma::math::ceil(64.f /cfg.ch);
+	cfg.walkableClimb = pragma::math::floor(16.f /cfg.ch);
+	cfg.walkableRadius = pragma::math::ceil(16.f /cfg.cs);
 	cfg.maxEdgeLen = static_cast<int>(256.f /cfg.cs);
 	cfg.maxSimplificationError = 1.f;
 	cfg.minRegionArea = static_cast<int>(rcSqr(0.f));
@@ -1025,7 +1025,7 @@ bool pragma::nav::Mesh::LoadFromAssetData(pragma::Game &game, const udm::AssetDa
 		outErr = "Unable to allocate dtNavMesh!";
 		return false;
 	}
-	auto navMesh = ::util::make_shared<RcNavMesh>(polyMesh, polyMeshDetail, dtMesh);
+	auto navMesh = pragma::util::make_shared<RcNavMesh>(polyMesh, polyMeshDetail, dtMesh);
 	if(navMesh == nullptr) {
 		outErr = "Unable to allocate RcNavMesh!";
 		return false;
@@ -1037,7 +1037,7 @@ bool pragma::nav::Mesh::LoadFromAssetData(pragma::Game &game, const udm::AssetDa
 std::shared_ptr<RcNavMesh> pragma::nav::load(pragma::Game &game, const std::string &fname, Config &outConfig)
 {
 	std::string err;
-	auto udmData = util::load_udm_asset(fname, &err);
+	auto udmData = pragma::util::load_udm_asset(fname, &err);
 	if(udmData == nullptr)
 		return nullptr;
 	auto &data = *udmData;
@@ -1129,7 +1129,7 @@ std::shared_ptr<RcPathResult> pragma::nav::Mesh::FindPath(const Vector3 &start, 
 		auto statusEnd = navQuery->findNearestPoly(&end[0], &extents[0], &filter, &endRef, &endPoint[0]);
 		if(!dtStatusFailed(statusEnd) && endRef != 0) {
 			int maxPath = 128;                                                                         // TODO
-			auto r = ::util::make_shared<RcPathResult>(mesh, navQuery, startPoint, endPoint, maxPath); // TODO
+			auto r = pragma::util::make_shared<RcPathResult>(mesh, navQuery, startPoint, endPoint, maxPath); // TODO
 			int32_t pathCount = 0;
 			auto findStatus = navQuery->findPath(startRef, endRef, &startPoint[0], &endPoint[0], &filter, &r->path[0], &pathCount, maxPath);
 			r->pathCount = pathCount + 2;

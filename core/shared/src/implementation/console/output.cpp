@@ -126,7 +126,7 @@ namespace pragma::logging::detail {
 };
 
 namespace Con::detail {
-	DLLNETWORK std::atomic<util::LogSeverity> currentLevel = util::LogSeverity::Disabled;
+	DLLNETWORK std::atomic<pragma::util::LogSeverity> currentLevel = pragma::util::LogSeverity::Disabled;
 	DLLNETWORK std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> outputCallback = nullptr;
 };
 
@@ -214,9 +214,9 @@ std::basic_ostream<char, std::char_traits<char>> &Con::endl(std::basic_ostream<c
 	//os<<"\033[0m"<<"\n";
 #endif
 	switch(Con::detail::currentLevel) {
-	case util::LogSeverity::Warning:
-	case util::LogSeverity::Error:
-	case util::LogSeverity::Critical:
+	case pragma::util::LogSeverity::Warning:
+	case pragma::util::LogSeverity::Error:
+	case pragma::util::LogSeverity::Critical:
 		os << Con::COLOR_RESET;
 		if(pragma::logging::detail::shouldLogOutput) {
 			pragma::logging::detail::logOutputMutex.lock();
@@ -226,12 +226,12 @@ std::basic_ostream<char, std::char_traits<char>> &Con::endl(std::basic_ostream<c
 		break;
 	}
 	std::cout.flush();
-	Con::detail::currentLevel = util::LogSeverity::Disabled;
+	Con::detail::currentLevel = pragma::util::LogSeverity::Disabled;
 	if(pragma::logging::detail::shouldLogOutput)
 		log_output();
 	switch(Con::detail::currentLevel) {
-	case util::LogSeverity::Error:
-	case util::LogSeverity::Critical:
+	case pragma::util::LogSeverity::Error:
+	case pragma::util::LogSeverity::Critical:
 		pragma::flush_loggers(); // Flush loggers immediately in case this will lead to a crash
 		break;
 	}
@@ -247,7 +247,7 @@ std::basic_ostream<char, std::char_traits<char>> &Con::prefix(std::basic_ostream
 	// If the message has a prefix, the prefix may overwrite the color of the main message, so we
 	// have to reset the color here.
 	switch(Con::detail::currentLevel) {
-	case util::LogSeverity::Warning:
+	case pragma::util::LogSeverity::Warning:
 		os << Con::COLOR_WARNING;
 		if(pragma::logging::detail::shouldLogOutput) {
 			pragma::logging::detail::logOutputMutex.lock();
@@ -255,7 +255,7 @@ std::basic_ostream<char, std::char_traits<char>> &Con::prefix(std::basic_ostream
 			pragma::logging::detail::logOutputMutex.unlock();
 		}
 		break;
-	case util::LogSeverity::Error:
+	case pragma::util::LogSeverity::Error:
 		os << Con::COLOR_ERROR;
 		if(pragma::logging::detail::shouldLogOutput) {
 			pragma::logging::detail::logOutputMutex.lock();
@@ -263,7 +263,7 @@ std::basic_ostream<char, std::char_traits<char>> &Con::prefix(std::basic_ostream
 			pragma::logging::detail::logOutputMutex.unlock();
 		}
 		break;
-	case util::LogSeverity::Critical:
+	case pragma::util::LogSeverity::Critical:
 		os << Con::COLOR_CRITICAL;
 		if(pragma::logging::detail::shouldLogOutput) {
 			pragma::logging::detail::logOutputMutex.lock();

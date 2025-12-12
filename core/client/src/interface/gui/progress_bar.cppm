@@ -18,7 +18,7 @@ export namespace pragma::gui::types {
 		virtual void SetSize(int x, int y) override;
 		void SetProgress(float progress);
 		float GetProgress() const;
-		const util::PFloatProperty &GetProgressProperty() const;
+		const pragma::util::PFloatProperty &GetProgressProperty() const;
 		void SetValue(float v);
 		void SetRange(float min, float max, float stepSize = 1.f);
 		std::array<float, 3> GetRange() const;
@@ -36,7 +36,7 @@ export namespace pragma::gui::types {
 		float m_min;
 		float m_max;
 		float m_stepSize;
-		util::PFloatProperty m_progress = nullptr;
+		pragma::util::PFloatProperty m_progress = nullptr;
 		std::string m_postfix;
 		std::vector<std::string> m_options;
 		std::function<std::string(float)> m_valueTranslator;

@@ -128,11 +128,11 @@ void CAIComponent::UpdateMovementProperties(MovementComponent &movementC)
 
 void CAIComponent::OnEntityComponentAdded(BaseEntityComponent &component) { BaseAIComponent::OnEntityComponentAdded(component); }
 
-util::EventReply CAIComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply CAIComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseAIComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
-	return util::EventReply::Unhandled;
+	if(BaseAIComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
+	return pragma::util::EventReply::Unhandled;
 }
 
 void CAIComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)

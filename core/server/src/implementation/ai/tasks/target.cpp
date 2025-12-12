@@ -12,7 +12,7 @@ using namespace pragma;
 
 const pragma::ecs::BaseEntity *ai::TaskTarget::GetTargetEntity(const Schedule *sched, pragma::BaseAIComponent &ent) const
 {
-	auto *target = GetParameter(sched, umath::to_integral(Parameter::Target));
+	auto *target = GetParameter(sched, pragma::math::to_integral(Parameter::Target));
 	auto type = (target != nullptr) ? target->GetType() : ai::Schedule::Parameter::Type::None;
 	if(type == ai::Schedule::Parameter::Type::Entity)
 		return target->GetEntity();
@@ -25,12 +25,12 @@ const pragma::ecs::BaseEntity *ai::TaskTarget::GetTargetEntity(const Schedule *s
 	return nullptr;
 }
 
-void ai::TaskTarget::SetTarget(const Vector3 &target) { SetParameter(umath::to_integral(Parameter::Target), target); }
-void ai::TaskTarget::SetTarget(const EntityHandle &hEnt) { SetParameter(umath::to_integral(Parameter::Target), hEnt.get()); }
+void ai::TaskTarget::SetTarget(const Vector3 &target) { SetParameter(pragma::math::to_integral(Parameter::Target), target); }
+void ai::TaskTarget::SetTarget(const EntityHandle &hEnt) { SetParameter(pragma::math::to_integral(Parameter::Target), hEnt.get()); }
 
 bool ai::TaskTarget::GetTargetPosition(const Schedule *sched, pragma::BaseAIComponent &ent, Vector3 &pos) const
 {
-	auto *target = GetParameter(sched, umath::to_integral(Parameter::Target));
+	auto *target = GetParameter(sched, pragma::math::to_integral(Parameter::Target));
 	auto type = (target != nullptr) ? target->GetType() : ai::Schedule::Parameter::Type::None;
 	if(type != ai::Schedule::Parameter::Type::Entity && type != ai::Schedule::Parameter::Type::Vector) {
 		auto *memFragment = static_cast<SAIComponent &>(ent).GetPrimaryTarget();

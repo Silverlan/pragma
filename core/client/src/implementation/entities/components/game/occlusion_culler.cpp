@@ -21,7 +21,7 @@ void COcclusionCullerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	m_occlusionOctree = ::util::make_shared<OcclusionOctree<ecs::CBaseEntity *>>(256.f, 1'073'741'824.f, 4096.f, [](const ecs::CBaseEntity *ent, Vector3 &min, Vector3 &max) {
+	m_occlusionOctree = pragma::util::make_shared<OcclusionOctree<ecs::CBaseEntity *>>(256.f, 1'073'741'824.f, 4096.f, [](const ecs::CBaseEntity *ent, Vector3 &min, Vector3 &max) {
 		auto &renderBounds = ent->GetAbsoluteRenderBounds();
 		min = renderBounds.min;
 		max = renderBounds.max;
@@ -39,7 +39,7 @@ void COcclusionCullerComponent::Initialize()
 void COcclusionCullerComponent::AddEntity(ecs::CBaseEntity &ent)
 {
 	// Add entity to octree
-	auto cbRenderMode = FunctionCallback<util::EventReply, std::reference_wrapper<ComponentEvent>>::Create(nullptr);
+	auto cbRenderMode = FunctionCallback<pragma::util::EventReply, std::reference_wrapper<ComponentEvent>>::Create(nullptr);
 	auto it = m_callbacks.find(&ent);
 	if(it == m_callbacks.end())
 		it = m_callbacks.insert(std::make_pair(&ent, std::vector<CallbackHandle> {})).first;
@@ -53,9 +53,9 @@ void COcclusionCullerComponent::AddEntity(ecs::CBaseEntity &ent)
 		auto pTrComponent = ent->GetTransformComponent();
 		if(pTrComponent != nullptr) {
 			auto &trC = static_cast<CTransformComponent &>(*pTrComponent);
-			it->second.push_back(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED, [this, ent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-				if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
-					return util::EventReply::Unhandled;
+			it->second.push_back(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED, [this, ent](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+				if(pragma::math::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
+					return pragma::util::EventReply::Unhandled;
 				// SceneRenderDesc::AssertRenderQueueThreadInactive();
 				// Note: Entity positions should generally not be updated during rendering,
 				// however in some cases they have to be updated every frame (e.g. for attachables).
@@ -63,7 +63,7 @@ void COcclusionCullerComponent::AddEntity(ecs::CBaseEntity &ent)
 				// check for it here. TODO: This is a messy solution, find a better way!
 				if(SceneRenderDesc::GetActiveRenderQueueThreadCount() == 0)
 					m_occlusionOctree->UpdateObject(ent);
-				return util::EventReply::Unhandled;
+				return pragma::util::EventReply::Unhandled;
 			}));
 		}
 		auto pGenericComponent = ent->GetComponent<pragma::CGenericComponent>();
@@ -101,11 +101,11 @@ void COcclusionCullerComponent::AddEntity(ecs::CBaseEntity &ent)
 	if(!pRenderComponent)
 		return;
 	auto hThis = GetHandle();
-	static_cast<Callback<util::EventReply, std::reference_wrapper<pragma::ComponentEvent>> *>(cbRenderMode.get())->SetFunction([this, &ent, fInsertOctreeObject, hThis, cbRenderMode](std::reference_wrapper<pragma::ComponentEvent> evData) mutable -> util::EventReply {
+	static_cast<Callback<pragma::util::EventReply, std::reference_wrapper<pragma::ComponentEvent>> *>(cbRenderMode.get())->SetFunction([this, &ent, fInsertOctreeObject, hThis, cbRenderMode](std::reference_wrapper<pragma::ComponentEvent> evData) mutable -> pragma::util::EventReply {
 		if(hThis.expired()) {
 			if(cbRenderMode.IsValid())
 				cbRenderMode.Remove();
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		}
 		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
 		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetSceneRenderPass() : pragma::rendering::SceneRenderPass::None;
@@ -116,7 +116,7 @@ void COcclusionCullerComponent::AddEntity(ecs::CBaseEntity &ent)
 		}
 		else
 			occlusionTree.RemoveObject(&ent);
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	pRenderComponent->AddEventCallback(cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED, cbRenderMode);
 	auto renderMode = pRenderComponent->GetSceneRenderPass();

@@ -8,7 +8,7 @@ export module pragma.shared:util.bsp_tree;
 
 export import pragma.udm;
 
-export namespace util {
+export namespace pragma::util {
 #pragma pack(push, 1)
 	class DLLNETWORK BSPTree : public std::enable_shared_from_this<BSPTree> {
 	  public:
@@ -40,7 +40,7 @@ export namespace util {
 			Vector3 maxVisible = {}; // Max bounds encompassing entire visible area of this leaf
 
 			// Only valid if this is a non-leaf node
-			umath::Plane plane = {};
+			pragma::math::Plane plane = {};
 		};
 		static std::shared_ptr<BSPTree> Create();
 		static std::shared_ptr<BSPTree> Load(const udm::AssetData &data, std::string &outErr);

@@ -22,7 +22,7 @@ std::optional<pragma::networking::Port> pragma::networking::LocalServerClient::G
 bool pragma::networking::LocalServerClient::IsListenServerHost() const { return true; }
 bool pragma::networking::LocalServerClient::SendPacket(pragma::networking::Protocol protocol, NetPacket &packet, pragma::networking::Error &outErr)
 {
-	packet.SetTimeActivated(util::clock::to_int(util::clock::get_duration_since_start()));
+	packet.SetTimeActivated(pragma::util::clock::to_int(pragma::util::clock::get_duration_since_start()));
 	packet->SetOffset(0);
 	pragma::Engine::Get()->HandleLocalHostPlayerClientPacket(packet);
 	return true;

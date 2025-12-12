@@ -1287,7 +1287,7 @@ void NET_cl_PLAYERINPUT(NetPacket packet)
 	auto bController = packet->Read<bool>();
 	auto *actionInputC = pl ? pl->GetActionInputController() : nullptr;
 	if(bController == true) {
-		auto actionValues = umath::get_power_of_2_values(umath::to_integral(actions));
+		auto actionValues = pragma::math::get_power_of_2_values(pragma::math::to_integral(actions));
 		for(auto v : actionValues) {
 			auto magnitude = packet->Read<float>();
 			if(pl != nullptr)
@@ -1892,7 +1892,7 @@ void CMD_debug_aim_info(pragma::NetworkState *state, pragma::BasePlayerComponent
 	auto trC = cam->GetEntity().GetComponent<pragma::CTransformComponent>();
 	if(trC.expired())
 		return;
-	auto trData = util::get_entity_trace_data(*trC);
+	auto trData = pragma::util::get_entity_trace_data(*trC);
 	trData.SetFlags(pragma::physics::RayCastFlags::InvertFilter);
 	trData.SetFilter(entPl);
 
@@ -1906,7 +1906,7 @@ void CMD_debug_aim_info(pragma::NetworkState *state, pragma::BasePlayerComponent
 			continue;
 		auto renderC = ent->GetComponent<pragma::CRenderComponent>();
 		auto lineMeshResult = renderC->CalcRayIntersection(trData.GetSourceOrigin(), trData.GetTargetOrigin(), true);
-		if(lineMeshResult.has_value() == false || lineMeshResult->result != umath::intersection::Result::Intersect)
+		if(lineMeshResult.has_value() == false || lineMeshResult->result != pragma::math::intersection::Result::Intersect)
 			continue;
 		if(closestMesh.has_value() && lineMeshResult->hitValue > closestMesh->hitValue)
 			continue;
@@ -1920,7 +1920,7 @@ void CMD_debug_aim_info(pragma::NetworkState *state, pragma::BasePlayerComponent
 		res.normal = {};
 		res.distance = uvec::distance(closestMesh->hitPos, trData.GetSourceOrigin());
 		if(closestMesh->precise) {
-			res.meshInfo = ::util::make_shared<pragma::physics::TraceResult::MeshInfo>();
+			res.meshInfo = pragma::util::make_shared<pragma::physics::TraceResult::MeshInfo>();
 			res.meshInfo->mesh = closestMesh->precise->mesh.get();
 			res.meshInfo->subMesh = closestMesh->precise->subMesh.get();
 		}
@@ -2020,11 +2020,11 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 			Lua::SetTableValue(l, tNode);
 
 			Lua::PushString(l, "nodeType");
-			Lua::PushInt(l, umath::to_integral(node.nodeType));
+			Lua::PushInt(l, pragma::math::to_integral(node.nodeType));
 			Lua::SetTableValue(l, tNode);
 
 			Lua::PushString(l, "selectorType");
-			Lua::PushInt(l, umath::to_integral(node.selectorType));
+			Lua::PushInt(l, pragma::math::to_integral(node.selectorType));
 			Lua::SetTableValue(l, tNode);
 
 			Lua::PushString(l, "lastUpdate");
@@ -2048,7 +2048,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 			Lua::SetTableValue(l, tNode);
 
 			Lua::PushString(l, "state");
-			Lua::PushInt(l, umath::to_integral(node.state));
+			Lua::PushInt(l, pragma::math::to_integral(node.state));
 			Lua::SetTableValue(l, tNode);
 
 			Lua::PushString(l, "children");
@@ -2108,7 +2108,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 		ent = pragma::networking::read_entity(packet);
 		if(ent == nullptr)
 			return;
-		dbgTree = ::util::make_shared<pragma::debug::DebugBehaviorTreeNode>();
+		dbgTree = pragma::util::make_shared<pragma::debug::DebugBehaviorTreeNode>();
 		std::function<void(NetPacket &, pragma::debug::DebugBehaviorTreeNode &)> fReadTree = nullptr;
 		fReadTree = [&fReadTree](NetPacket &p, pragma::debug::DebugBehaviorTreeNode &node) {
 			node.name = p->ReadString();
@@ -2122,7 +2122,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 			auto numChildren = p->Read<uint32_t>();
 			node.children.reserve(numChildren);
 			for(auto i = decltype(numChildren) {0}; i < numChildren; ++i) {
-				node.children.push_back(::util::make_shared<pragma::debug::DebugBehaviorTreeNode>());
+				node.children.push_back(pragma::util::make_shared<pragma::debug::DebugBehaviorTreeNode>());
 				fReadTree(p, *node.children.back());
 			}
 		};
@@ -2245,7 +2245,7 @@ void NET_cl_DEBUG_AI_SCHEDULE_TREE(NetPacket packet)
 			cbOnRemove.Remove();
 	});
 	dbgAiSchedule->SetUserData(0, dbgTree);
-	dbgAiSchedule->SetUserData(1, ::util::make_shared<EntityHandle>(ent->GetHandle()));
+	dbgAiSchedule->SetUserData(1, pragma::util::make_shared<EntityHandle>(ent->GetHandle()));
 }
 
 void NET_cl_CMD_CALL_RESPONSE(NetPacket packet)
@@ -2456,7 +2456,7 @@ void NET_cl_DEBUG_DRAW_MESH(NetPacket packet)
 	auto numTris = packet->Read<uint32_t>();
 	std::vector<Vector3> verts;
 	verts.resize(numTris * 3);
-	packet->Read(verts.data(), util::size_of_container(verts));
+	packet->Read(verts.data(), pragma::util::size_of_container(verts));
 	auto color = packet->Read<Color>();
 	auto colorOutline = packet->Read<Color>();
 	auto duration = packet->Read<float>();

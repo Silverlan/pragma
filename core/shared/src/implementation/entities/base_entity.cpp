@@ -118,7 +118,7 @@ pragma::ecs::BaseEntity::StateFlags pragma::ecs::BaseEntity::GetStateFlags() con
 void pragma::ecs::BaseEntity::ResetStateChangeFlags() { m_stateFlags &= ~(StateFlags::CollisionBoundsChanged | StateFlags::PositionChanged | StateFlags::RenderBoundsChanged | StateFlags::RotationChanged); }
 bool pragma::ecs::BaseEntity::HasStateFlag(StateFlags flag) const { return ((m_stateFlags & flag) == flag) ? true : false; }
 void pragma::ecs::BaseEntity::SetStateFlag(StateFlags flag) { m_stateFlags |= flag; }
-pragma::BaseEntityComponent *pragma::ecs::BaseEntity::FindComponentMemberIndex(const util::Path &path, pragma::ComponentMemberIndex &outMemberIdx)
+pragma::BaseEntityComponent *pragma::ecs::BaseEntity::FindComponentMemberIndex(const pragma::util::Path &path, pragma::ComponentMemberIndex &outMemberIdx)
 {
 	auto hComponent = FindComponent(std::string {path.GetFront()});
 	if(!hComponent.valid())
@@ -139,7 +139,7 @@ void pragma::ecs::BaseEntity::OnRemove()
 	pragma::BaseLuaHandle::InvalidateHandle();
 
 	auto &uuidMap = GetNetworkState()->GetGameState()->GetEntityUuidMap();
-	auto it = uuidMap.find(util::get_uuid_hash(m_uuid));
+	auto it = uuidMap.find(pragma::util::get_uuid_hash(m_uuid));
 	if(it != uuidMap.end())
 		uuidMap.erase(it);
 }
@@ -170,14 +170,14 @@ void pragma::ecs::BaseEntity::RemoveEntityOnRemoval(const EntityHandle &hEnt, Bo
 }
 void pragma::ecs::BaseEntity::SetKeyValue(std::string key, std::string val)
 {
-	ustring::to_lower(key);
+	pragma::string::to_lower(key);
 	pragma::CEKeyValueData inputData {key, val};
-	if(BroadcastEvent(baseEntity::EVENT_HANDLE_KEY_VALUE, inputData) == util::EventReply::Handled)
+	if(BroadcastEvent(baseEntity::EVENT_HANDLE_KEY_VALUE, inputData) == pragma::util::EventReply::Handled)
 		return;
 	if(key == "spawnflags")
-		m_spawnFlags = util::to_int(val);
+		m_spawnFlags = pragma::util::to_int(val);
 	else if(key == "uuid")
-		SetUuid(util::uuid_string_to_bytes(val));
+		SetUuid(pragma::util::uuid_string_to_bytes(val));
 }
 void pragma::ecs::BaseEntity::SetSpawnFlags(uint32_t spawnFlags) { m_spawnFlags = spawnFlags; }
 unsigned int pragma::ecs::BaseEntity::GetSpawnFlags() const { return m_spawnFlags; }
@@ -209,10 +209,10 @@ void pragma::ecs::BaseEntity::RegisterEvents(pragma::EntityComponentManager &com
 	baseEntity::EVENT_ON_REMOVE = componentManager.RegisterEvent("ON_REMOVE", typeIndex);
 }
 
-void pragma::ecs::BaseEntity::SetUuid(const util::Uuid &uuid)
+void pragma::ecs::BaseEntity::SetUuid(const pragma::util::Uuid &uuid)
 {
 	auto &uuidMap = GetNetworkState()->GetGameState()->GetEntityUuidMap();
-	auto it = uuidMap.find(util::get_uuid_hash(m_uuid));
+	auto it = uuidMap.find(pragma::util::get_uuid_hash(m_uuid));
 	if(it != uuidMap.end())
 		uuidMap.erase(it);
 	m_uuid = uuid;
@@ -232,7 +232,7 @@ void pragma::ecs::BaseEntity::Initialize()
 
 pragma::GString pragma::ecs::BaseEntity::GetClass() const { return m_className; }
 
-void pragma::ecs::BaseEntity::SetPose(const umath::Transform &outTransform, pragma::CoordinateSpace space)
+void pragma::ecs::BaseEntity::SetPose(const pragma::math::Transform &outTransform, pragma::CoordinateSpace space)
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
@@ -240,13 +240,13 @@ void pragma::ecs::BaseEntity::SetPose(const umath::Transform &outTransform, prag
 	SetPosition(outTransform.GetOrigin());
 	SetRotation(outTransform.GetRotation());
 }
-void pragma::ecs::BaseEntity::SetPose(const umath::ScaledTransform &outTransform, pragma::CoordinateSpace space)
+void pragma::ecs::BaseEntity::SetPose(const pragma::math::ScaledTransform &outTransform, pragma::CoordinateSpace space)
 {
 	SetPosition(outTransform.GetOrigin());
 	SetRotation(outTransform.GetRotation());
 	SetScale(outTransform.GetScale());
 }
-umath::ScaledTransform pragma::ecs::BaseEntity::GetPose(pragma::CoordinateSpace space) const
+pragma::math::ScaledTransform pragma::ecs::BaseEntity::GetPose(pragma::CoordinateSpace space) const
 {
 	switch(space) {
 	case pragma::CoordinateSpace::Local:
@@ -265,10 +265,10 @@ umath::ScaledTransform pragma::ecs::BaseEntity::GetPose(pragma::CoordinateSpace 
 	}
 	return {};
 }
-const umath::ScaledTransform &pragma::ecs::BaseEntity::GetPose() const
+const pragma::math::ScaledTransform &pragma::ecs::BaseEntity::GetPose() const
 {
 	if(!m_transformComponent) {
-		static umath::ScaledTransform defaultPose {};
+		static pragma::math::ScaledTransform defaultPose {};
 		return defaultPose;
 	}
 	return m_transformComponent->GetPose();
@@ -360,9 +360,9 @@ void pragma::ecs::BaseEntity::Spawn()
 {
 	if(IsSpawned())
 		return;
-	umath::set_flag(m_stateFlags, StateFlags::IsSpawning);
+	pragma::math::set_flag(m_stateFlags, StateFlags::IsSpawning);
 	DoSpawn();
-	umath::set_flag(m_stateFlags, StateFlags::IsSpawning, false);
+	pragma::math::set_flag(m_stateFlags, StateFlags::IsSpawning, false);
 	OnPostSpawn();
 }
 
@@ -386,7 +386,7 @@ bool pragma::ecs::BaseEntity::IsInert() const
 unsigned int pragma::ecs::BaseEntity::GetIndex() const { return m_index; }
 uint32_t pragma::ecs::BaseEntity::GetLocalIndex() const { return GetIndex(); }
 
-bool pragma::ecs::BaseEntity::IsWorld() const { return umath::is_flag_set(m_stateFlags, StateFlags::HasWorldComponent); }
+bool pragma::ecs::BaseEntity::IsWorld() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::HasWorldComponent); }
 bool pragma::ecs::BaseEntity::IsScripted() const { return false; }
 
 void pragma::ecs::BaseEntity::PrecacheModels() {}
@@ -397,7 +397,7 @@ pragma::BaseModelComponent *pragma::ecs::BaseEntity::GetModelComponent() const {
 pragma::BaseGenericComponent *pragma::ecs::BaseEntity::GetGenericComponent() const { return m_genericComponent; }
 pragma::BaseChildComponent *pragma::ecs::BaseEntity::GetChildComponent() const { return m_childComponent; }
 
-bool pragma::ecs::BaseEntity::IsRemoved() const { return umath::is_flag_set(m_stateFlags, StateFlags::Removed); }
+bool pragma::ecs::BaseEntity::IsRemoved() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::Removed); }
 void pragma::ecs::BaseEntity::Remove() {}
 void pragma::ecs::BaseEntity::RemoveSafely() { GetNetworkState()->GetGameState()->ScheduleEntityForRemoval(*this); }
 

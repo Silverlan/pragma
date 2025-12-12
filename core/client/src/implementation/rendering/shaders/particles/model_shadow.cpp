@@ -26,7 +26,7 @@ bool ParticleModelShadow::BeginDrawTest(Vulkan::BufferObject *particleBuffer,Vul
 	auto r = Shadow::BeginDrawTest(light,w,h);
 	if(r == false)
 		return r;
-	cmdBuffer->BindVertexBuffer(umath::to_integral(Binding::Xyzs),{particleBuffer,rotBuffer});
+	cmdBuffer->BindVertexBuffer(pragma::math::to_integral(Binding::Xyzs),{particleBuffer,rotBuffer});
 	return r;
 }
 
@@ -48,24 +48,24 @@ void ParticleModelShadow::InitializeVertexDescriptions(std::vector<vk::VertexInp
 {
 	Shadow::InitializeVertexDescriptions(vertexBindingDescriptions,vertexAttributeDescriptions);
 	vertexBindingDescriptions.push_back({
-		umath::to_integral(Binding::Xyzs),
+		pragma::math::to_integral(Binding::Xyzs),
 		CParticleSystem::PARTICLE_DATA_SIZE,
 		prosper::VertexInputRate::Instance
 	});
 	vertexBindingDescriptions.push_back({
-		umath::to_integral(Binding::Rotation),
+		pragma::math::to_integral(Binding::Rotation),
 		sizeof(Quat),
 		prosper::VertexInputRate::Instance
 	});
 
 	vertexAttributeDescriptions.push_back({
-		umath::to_integral(Location::Xyzs),
-		umath::to_integral(Binding::Xyzs),
+		pragma::math::to_integral(Location::Xyzs),
+		pragma::math::to_integral(Binding::Xyzs),
 		prosper::Format::R32G32B32A32_SFloat,0
 	});
 	vertexAttributeDescriptions.push_back({
-		umath::to_integral(Location::Rotation),
-		umath::to_integral(Binding::Rotation),
+		pragma::math::to_integral(Location::Rotation),
+		pragma::math::to_integral(Binding::Rotation),
 		prosper::Format::R32G32B32A32_SFloat,0
 	});
 }

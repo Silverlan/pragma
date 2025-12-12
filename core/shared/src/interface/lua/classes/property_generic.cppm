@@ -17,9 +17,9 @@ export {
 		friend LGenericIntPropertyWrapper;
 		LGenericFloatPropertyWrapper();
 		LGenericFloatPropertyWrapper(double v);
-		LGenericFloatPropertyWrapper(const util::PFloatProperty &prop);
-		LGenericFloatPropertyWrapper(const util::PDoubleProperty &prop);
-		LGenericFloatPropertyWrapper(const util::PLongDoubleProperty &prop);
+		LGenericFloatPropertyWrapper(const pragma::util::PFloatProperty &prop);
+		LGenericFloatPropertyWrapper(const pragma::util::PDoubleProperty &prop);
+		LGenericFloatPropertyWrapper(const pragma::util::PLongDoubleProperty &prop);
 
 		LGenericFloatPropertyWrapper *operator->();
 		CallbackHandle AddCallback(const std::function<void(std::reference_wrapper<const double>, std::reference_wrapper<const double>)> &callback);
@@ -30,13 +30,13 @@ export {
 		{
 			switch(m_propertyType) {
 			case ArithmeticFloatPropertyType::Float:
-				static_cast<util::FloatProperty &>(*m_property).Link(prop);
+				static_cast<pragma::util::FloatProperty &>(*m_property).Link(prop);
 				break;
 			case ArithmeticFloatPropertyType::Double:
-				static_cast<util::DoubleProperty &>(*m_property).Link(prop);
+				static_cast<pragma::util::DoubleProperty &>(*m_property).Link(prop);
 				break;
 			case ArithmeticFloatPropertyType::LongDouble:
-				static_cast<util::LongDoubleProperty &>(*m_property).Link(prop);
+				static_cast<pragma::util::LongDoubleProperty &>(*m_property).Link(prop);
 				break;
 			}
 		}
@@ -45,18 +45,18 @@ export {
 		{
 			switch(m_propertyType) {
 			case ArithmeticFloatPropertyType::Float:
-				prop.Link(static_cast<util::FloatProperty &>(*m_property));
+				prop.Link(static_cast<pragma::util::FloatProperty &>(*m_property));
 				break;
 			case ArithmeticFloatPropertyType::Double:
-				prop.Link(static_cast<util::DoubleProperty &>(*m_property));
+				prop.Link(static_cast<pragma::util::DoubleProperty &>(*m_property));
 				break;
 			case ArithmeticFloatPropertyType::LongDouble:
-				prop.Link(static_cast<util::LongDoubleProperty &>(*m_property));
+				prop.Link(static_cast<pragma::util::LongDoubleProperty &>(*m_property));
 				break;
 			}
 		}
-		void LinkOther(util::StringProperty &prop);
-		void Link(util::StringProperty &prop);
+		void LinkOther(pragma::util::StringProperty &prop);
+		void Link(pragma::util::StringProperty &prop);
 		void Link(LGenericFloatPropertyWrapper &prop);
 		void Link(LGenericIntPropertyWrapper &prop);
 		void Unlink();
@@ -88,7 +88,7 @@ export {
 		bool operator<=(const double &val) const;
 		bool operator<=(const LGenericFloatPropertyWrapper &propOther) const;
 	  private:
-		std::shared_ptr<util::BaseProperty> m_property = nullptr;
+		std::shared_ptr<pragma::util::BaseProperty> m_property = nullptr;
 		ArithmeticFloatPropertyType m_propertyType;
 	};
 
@@ -97,52 +97,52 @@ export {
 		friend LGenericFloatPropertyWrapper;
 		LGenericIntPropertyWrapper();
 		LGenericIntPropertyWrapper(int32_t v);
-		LGenericIntPropertyWrapper(const util::PInt8Property &prop);
-		LGenericIntPropertyWrapper(const util::PUInt8Property &prop);
-		LGenericIntPropertyWrapper(const util::PInt16Property &prop);
-		LGenericIntPropertyWrapper(const util::PUInt16Property &prop);
-		LGenericIntPropertyWrapper(const util::PInt32Property &prop);
-		LGenericIntPropertyWrapper(const util::PUInt32Property &prop);
-		LGenericIntPropertyWrapper(const util::PInt64Property &prop);
-		LGenericIntPropertyWrapper(const util::PUInt64Property &prop);
+		LGenericIntPropertyWrapper(const pragma::util::PInt8Property &prop);
+		LGenericIntPropertyWrapper(const pragma::util::PUInt8Property &prop);
+		LGenericIntPropertyWrapper(const pragma::util::PInt16Property &prop);
+		LGenericIntPropertyWrapper(const pragma::util::PUInt16Property &prop);
+		LGenericIntPropertyWrapper(const pragma::util::PInt32Property &prop);
+		LGenericIntPropertyWrapper(const pragma::util::PUInt32Property &prop);
+		LGenericIntPropertyWrapper(const pragma::util::PInt64Property &prop);
+		LGenericIntPropertyWrapper(const pragma::util::PUInt64Property &prop);
 		template<typename TEnum>
-		LGenericIntPropertyWrapper(const util::PEnumProperty<TEnum> &prop) : m_property(prop)
+		LGenericIntPropertyWrapper(const pragma::util::PEnumProperty<TEnum> &prop) : m_property(prop)
 		{
-			// Note: The implementation of util::TEnumProperty<TEnum> has to be exactly
+			// Note: The implementation of pragma::util::TEnumProperty<TEnum> has to be exactly
 			// the same as the implementation of the property class for the underlying integral
 			// type, because it will be cast into that type.
 			// TODO: HACK: Find a better way to do this!
 			if constexpr(std::is_same_v<std::underlying_type_t<TEnum>, int8_t>) {
 				m_propertyType = ArithmeticIntPropertyType::Int8;
-				static_assert(sizeof(util::TEnumProperty<TEnum>) == sizeof(util::Int8Property), "Implementation of util::TEnumProperty<TEnum> and util::Int8Property have to be the same!");
+				static_assert(sizeof(pragma::util::TEnumProperty<TEnum>) == sizeof(pragma::util::Int8Property), "Implementation of pragma::util::TEnumProperty<TEnum> and pragma::util::Int8Property have to be the same!");
 			}
 			else if constexpr(std::is_same_v<std::underlying_type_t<TEnum>, uint8_t>) {
 				m_propertyType = ArithmeticIntPropertyType::UInt8;
-				static_assert(sizeof(util::TEnumProperty<TEnum>) == sizeof(util::UInt8Property), "Implementation of util::TEnumProperty<TEnum> and util::UInt8Property have to be the same!");
+				static_assert(sizeof(pragma::util::TEnumProperty<TEnum>) == sizeof(pragma::util::UInt8Property), "Implementation of pragma::util::TEnumProperty<TEnum> and pragma::util::UInt8Property have to be the same!");
 			}
 			else if constexpr(std::is_same_v<std::underlying_type_t<TEnum>, int16_t>) {
 				m_propertyType = ArithmeticIntPropertyType::Int16;
-				static_assert(sizeof(util::TEnumProperty<TEnum>) == sizeof(util::Int16Property), "Implementation of util::TEnumProperty<TEnum> and util::Int16Property have to be the same!");
+				static_assert(sizeof(pragma::util::TEnumProperty<TEnum>) == sizeof(pragma::util::Int16Property), "Implementation of pragma::util::TEnumProperty<TEnum> and pragma::util::Int16Property have to be the same!");
 			}
 			else if constexpr(std::is_same_v<std::underlying_type_t<TEnum>, uint16_t>) {
 				m_propertyType = ArithmeticIntPropertyType::UInt16;
-				static_assert(sizeof(util::TEnumProperty<TEnum>) == sizeof(util::UInt16Property), "Implementation of util::TEnumProperty<TEnum> and util::UInt16Property have to be the same!");
+				static_assert(sizeof(pragma::util::TEnumProperty<TEnum>) == sizeof(pragma::util::UInt16Property), "Implementation of pragma::util::TEnumProperty<TEnum> and pragma::util::UInt16Property have to be the same!");
 			}
 			else if constexpr(std::is_same_v<std::underlying_type_t<TEnum>, int32_t>) {
 				m_propertyType = ArithmeticIntPropertyType::Int32;
-				static_assert(sizeof(util::TEnumProperty<TEnum>) == sizeof(util::Int32Property), "Implementation of util::TEnumProperty<TEnum> and util::Int32Property have to be the same!");
+				static_assert(sizeof(pragma::util::TEnumProperty<TEnum>) == sizeof(pragma::util::Int32Property), "Implementation of pragma::util::TEnumProperty<TEnum> and pragma::util::Int32Property have to be the same!");
 			}
 			else if constexpr(std::is_same_v<std::underlying_type_t<TEnum>, uint32_t>) {
 				m_propertyType = ArithmeticIntPropertyType::UInt32;
-				static_assert(sizeof(util::TEnumProperty<TEnum>) == sizeof(util::UInt32Property), "Implementation of util::TEnumProperty<TEnum> and util::UInt32Property have to be the same!");
+				static_assert(sizeof(pragma::util::TEnumProperty<TEnum>) == sizeof(pragma::util::UInt32Property), "Implementation of pragma::util::TEnumProperty<TEnum> and pragma::util::UInt32Property have to be the same!");
 			}
 			else if constexpr(std::is_same_v<std::underlying_type_t<TEnum>, int64_t>) {
 				m_propertyType = ArithmeticIntPropertyType::Int64;
-				static_assert(sizeof(util::TEnumProperty<TEnum>) == sizeof(util::Int64Property), "Implementation of util::TEnumProperty<TEnum> and util::Int64Property have to be the same!");
+				static_assert(sizeof(pragma::util::TEnumProperty<TEnum>) == sizeof(pragma::util::Int64Property), "Implementation of pragma::util::TEnumProperty<TEnum> and pragma::util::Int64Property have to be the same!");
 			}
 			else if constexpr(std::is_same_v<std::underlying_type_t<TEnum>, uint64_t>) {
 				m_propertyType = ArithmeticIntPropertyType::UInt64;
-				static_assert(sizeof(util::TEnumProperty<TEnum>) == sizeof(util::UInt64Property), "Implementation of util::TEnumProperty<TEnum> and util::UInt64Property have to be the same!");
+				static_assert(sizeof(pragma::util::TEnumProperty<TEnum>) == sizeof(pragma::util::UInt64Property), "Implementation of pragma::util::TEnumProperty<TEnum> and pragma::util::UInt64Property have to be the same!");
 			}
 			else
 				static_assert("Unsupported enum type!");
@@ -157,28 +157,28 @@ export {
 		{
 			switch(m_propertyType) {
 			case ArithmeticIntPropertyType::Int8:
-				static_cast<util::Int8Property &>(*m_property).Link(prop);
+				static_cast<pragma::util::Int8Property &>(*m_property).Link(prop);
 				break;
 			case ArithmeticIntPropertyType::UInt8:
-				static_cast<util::UInt8Property &>(*m_property).Link(prop);
+				static_cast<pragma::util::UInt8Property &>(*m_property).Link(prop);
 				break;
 			case ArithmeticIntPropertyType::Int16:
-				static_cast<util::Int16Property &>(*m_property).Link(prop);
+				static_cast<pragma::util::Int16Property &>(*m_property).Link(prop);
 				break;
 			case ArithmeticIntPropertyType::UInt16:
-				static_cast<util::UInt16Property &>(*m_property).Link(prop);
+				static_cast<pragma::util::UInt16Property &>(*m_property).Link(prop);
 				break;
 			case ArithmeticIntPropertyType::Int32:
-				static_cast<util::Int32Property &>(*m_property).Link(prop);
+				static_cast<pragma::util::Int32Property &>(*m_property).Link(prop);
 				break;
 			case ArithmeticIntPropertyType::UInt32:
-				static_cast<util::UInt32Property &>(*m_property).Link(prop);
+				static_cast<pragma::util::UInt32Property &>(*m_property).Link(prop);
 				break;
 			case ArithmeticIntPropertyType::Int64:
-				static_cast<util::Int64Property &>(*m_property).Link(prop);
+				static_cast<pragma::util::Int64Property &>(*m_property).Link(prop);
 				break;
 			case ArithmeticIntPropertyType::UInt64:
-				static_cast<util::UInt64Property &>(*m_property).Link(prop);
+				static_cast<pragma::util::UInt64Property &>(*m_property).Link(prop);
 				break;
 			}
 		}
@@ -187,33 +187,33 @@ export {
 		{
 			switch(m_propertyType) {
 			case ArithmeticIntPropertyType::Int8:
-				prop.Link(static_cast<util::Int8Property &>(*m_property));
+				prop.Link(static_cast<pragma::util::Int8Property &>(*m_property));
 				break;
 			case ArithmeticIntPropertyType::UInt8:
-				prop.Link(static_cast<util::UInt8Property &>(*m_property));
+				prop.Link(static_cast<pragma::util::UInt8Property &>(*m_property));
 				break;
 			case ArithmeticIntPropertyType::Int16:
-				prop.Link(static_cast<util::Int16Property &>(*m_property));
+				prop.Link(static_cast<pragma::util::Int16Property &>(*m_property));
 				break;
 			case ArithmeticIntPropertyType::UInt16:
-				prop.Link(static_cast<util::UInt16Property &>(*m_property));
+				prop.Link(static_cast<pragma::util::UInt16Property &>(*m_property));
 				break;
 			case ArithmeticIntPropertyType::Int32:
-				prop.Link(static_cast<util::Int32Property &>(*m_property));
+				prop.Link(static_cast<pragma::util::Int32Property &>(*m_property));
 				break;
 			case ArithmeticIntPropertyType::UInt32:
-				prop.Link(static_cast<util::UInt32Property &>(*m_property));
+				prop.Link(static_cast<pragma::util::UInt32Property &>(*m_property));
 				break;
 			case ArithmeticIntPropertyType::Int64:
-				prop.Link(static_cast<util::Int64Property &>(*m_property));
+				prop.Link(static_cast<pragma::util::Int64Property &>(*m_property));
 				break;
 			case ArithmeticIntPropertyType::UInt64:
-				prop.Link(static_cast<util::UInt64Property &>(*m_property));
+				prop.Link(static_cast<pragma::util::UInt64Property &>(*m_property));
 				break;
 			}
 		}
-		void LinkOther(util::StringProperty &prop);
-		void Link(util::StringProperty &prop);
+		void LinkOther(pragma::util::StringProperty &prop);
+		void Link(pragma::util::StringProperty &prop);
 		void Link(LGenericFloatPropertyWrapper &prop);
 		void Link(LGenericIntPropertyWrapper &prop);
 		void Unlink();
@@ -245,7 +245,7 @@ export {
 		bool operator<=(const int32_t &val) const;
 		bool operator<=(const LGenericIntPropertyWrapper &propOther) const;
 	  private:
-		std::shared_ptr<util::BaseProperty> m_property = nullptr;
+		std::shared_ptr<pragma::util::BaseProperty> m_property = nullptr;
 		ArithmeticIntPropertyType m_propertyType;
 	};
 
@@ -256,8 +256,8 @@ export {
 		{
 			prop = TProperty::Create(v);
 		}
-		mutable std::shared_ptr<util::BaseProperty> prop = nullptr;
-		virtual util::BaseProperty &GetProperty() const { return *prop; }
+		mutable std::shared_ptr<pragma::util::BaseProperty> prop = nullptr;
+		virtual pragma::util::BaseProperty &GetProperty() const { return *prop; }
 	  protected:
 		LBasePropertyWrapper() = default;
 	};

@@ -24,7 +24,7 @@ export namespace pragma {
 				DrawHitMeshesBit = DrawTraversedMeshesBit << 1u,
 			};
 			Flags flags = Flags::DrawHitLeavesBit;
-			umath::ScaledTransform basePose;
+			pragma::math::ScaledTransform basePose;
 			float duration = 0.1f;
 		};
 		struct DLLCLIENT MeshHitboxBvhCache {
@@ -69,7 +69,7 @@ export namespace pragma {
 		void InitializeBvh();
 		bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitInfo &outHitInfo, const bvh::DebugDrawInfo *debugDrawInfo = nullptr) const;
 		bool IntersectionTestAabb(const Vector3 &min, const Vector3 &max, IntersectionInfo *outIntersectionInfo = nullptr) const;
-		bool IntersectionTestKDop(const std::vector<umath::Plane> &planes, IntersectionInfo *outIntersectionInfo = nullptr) const;
+		bool IntersectionTestKDop(const std::vector<pragma::math::Plane> &planes, IntersectionInfo *outIntersectionInfo = nullptr) const;
 		void DebugDrawHitboxMeshes(pragma::animation::BoneId boneId, float duration = 12.f) const;
 		bvh::HitboxBvhCache &GetGlobalBvhCache() const;
 	  private:
@@ -86,15 +86,15 @@ export namespace pragma {
 		std::unordered_map<pragma::animation::BoneId, std::vector<std::shared_ptr<bvh::MeshHitboxBvhCache>>> m_hitboxMeshBvhCaches;
 		std::shared_ptr<bvh::ObbBvhTree> m_hitboxBvh;
 
-		std::vector<umath::ScaledTransform> m_hitboxBvhUpdatePoses;
+		std::vector<pragma::math::ScaledTransform> m_hitboxBvhUpdatePoses;
 		std::future<void> m_hitboxBvhUpdate;
 	};
 
 	namespace bvh {
 		struct DLLCLIENT HitboxObb {
 			HitboxObb(const Vector3 &min, const Vector3 &max);
-			pragma::bvh::BBox ToBvhBBox(const umath::ScaledTransform &pose, Vector3 &outOrigin) const;
-			umath::ScaledTransform GetPose(const std::vector<umath::ScaledTransform> &effectivePoses) const;
+			pragma::bvh::BBox ToBvhBBox(const pragma::math::ScaledTransform &pose, Vector3 &outOrigin) const;
+			pragma::math::ScaledTransform GetPose(const std::vector<pragma::math::ScaledTransform> &effectivePoses) const;
 			Vector3 position; // Position relative to bone
 			Vector3 halfExtents;
 			Vector3 min;
@@ -109,18 +109,18 @@ export namespace pragma {
 				float t;
 			};
 
-			void InitializeBvh(const std::vector<umath::ScaledTransform> &poses);
-			bool Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, const std::vector<umath::ScaledTransform> &bonePoses, std::vector<HitData> &outHits, const bvh::DebugDrawInfo *debugDrawInfo = nullptr);
+			void InitializeBvh(const std::vector<pragma::math::ScaledTransform> &poses);
+			bool Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, const std::vector<pragma::math::ScaledTransform> &bonePoses, std::vector<HitData> &outHits, const bvh::DebugDrawInfo *debugDrawInfo = nullptr);
 			std::vector<HitboxObb> primitives;
 		  private:
-			const std::vector<umath::ScaledTransform> *m_poses = nullptr;
+			const std::vector<pragma::math::ScaledTransform> *m_poses = nullptr;
 			virtual bool DoInitializeBvh(pragma::bvh::Executor &executor, ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config &config) override;
 		};
 
 		DLLCLIENT bool test_bvh_intersection(const ObbBvhTree &bvhData, const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const std::function<bool(const HitboxObb &)> &testObb, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
-		DLLCLIENT bool test_bvh_intersection_with_aabb(const ObbBvhTree &bvhData, const std::vector<umath::ScaledTransform> &effectivePoses, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
-		DLLCLIENT bool test_bvh_intersection_with_obb(const ObbBvhTree &bvhData, const std::vector<umath::ScaledTransform> &effectivePoses, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
-		DLLCLIENT bool test_bvh_intersection_with_kdop(const ObbBvhTree &bvhData, const std::vector<umath::ScaledTransform> &effectivePoses, const std::vector<umath::Plane> &kdop, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
+		DLLCLIENT bool test_bvh_intersection_with_aabb(const ObbBvhTree &bvhData, const std::vector<pragma::math::ScaledTransform> &effectivePoses, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
+		DLLCLIENT bool test_bvh_intersection_with_obb(const ObbBvhTree &bvhData, const std::vector<pragma::math::ScaledTransform> &effectivePoses, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
+		DLLCLIENT bool test_bvh_intersection_with_kdop(const ObbBvhTree &bvhData, const std::vector<pragma::math::ScaledTransform> &effectivePoses, const std::vector<pragma::math::Plane> &kdop, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
 	};
 };
 export {REGISTER_ENUM_FLAGS(pragma::bvh::DebugDrawInfo::Flags)}

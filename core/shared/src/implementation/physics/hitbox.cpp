@@ -82,7 +82,7 @@ std::unordered_map<pragma::animation::BoneId, pragma::physics::Hitbox> pragma::a
 	boneBounds.resize(numBones);
 
 	auto &ref = GetReference();
-	std::vector<umath::ScaledTransform> bonePoses;
+	std::vector<pragma::math::ScaledTransform> bonePoses;
 	bonePoses.resize(numBones);
 	for(auto i = decltype(numBones) {0u}; i < numBones; ++i) {
 		ref.GetBonePose(i, bonePoses[i]);
@@ -128,9 +128,9 @@ std::unordered_map<pragma::animation::BoneId, pragma::physics::Hitbox> pragma::a
 }
 bool pragma::asset::Model::GenerateHitboxes()
 {
-	if(umath::is_flag_set(m_metaInfo.flags, Flags::GeneratedHitboxes))
+	if(pragma::math::is_flag_set(m_metaInfo.flags, Flags::GeneratedHitboxes))
 		return false;
-	umath::set_flag(m_metaInfo.flags, Flags::GeneratedHitboxes);
+	pragma::math::set_flag(m_metaInfo.flags, Flags::GeneratedHitboxes);
 	auto hitboxes = CalcHitboxes();
 	for(auto &[boneId, hb] : hitboxes)
 		AddHitbox(boneId, hb);

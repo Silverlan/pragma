@@ -31,7 +31,7 @@ export {
 					std::shared_ptr<PathInfo> pathInfo;
 					Vector3 start;
 					Vector3 end;
-					util::WeakHandle<BaseAIComponent> npc = {};
+					pragma::util::WeakHandle<BaseAIComponent> npc = {};
 				};
 				struct NavThread {
 					std::thread thread;
@@ -170,14 +170,14 @@ export {
 			void ResolvePathObstruction(Vector3 &dir);
 
 			virtual void OnPathNodeChanged(uint32_t nodeIdx);
-			void BlendAnimationMovementMT(std::vector<umath::Transform> &bonePoses, std::vector<Vector3> *boneScales);
+			void BlendAnimationMovementMT(std::vector<pragma::math::Transform> &bonePoses, std::vector<Vector3> *boneScales);
 			Vector2 CalcMovementSpeed() const;
 			float CalcAirMovementModifier() const;
 			float CalcMovementAcceleration() const;
 			Vector3 CalcMovementDirection() const;
 			virtual bool IsObstruction(const pragma::ecs::BaseEntity &ent) const;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::BaseAIComponent::SnapshotFlags)
 };

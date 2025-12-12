@@ -79,7 +79,7 @@ void BaseTouchComponent::OnPhysicsInitialized()
 		if(physObj) {
 			physObj->SetTrigger(true);
 			auto &colObjs = physObj->GetCollisionObjects();
-			auto it = std::find_if(colObjs.begin(), colObjs.end(), [](const util::TSharedHandle<pragma::physics::ICollisionObject> &hColObj) { return hColObj.IsValid() && !hColObj->IsTrigger(); });
+			auto it = std::find_if(colObjs.begin(), colObjs.end(), [](const pragma::util::TSharedHandle<pragma::physics::ICollisionObject> &hColObj) { return hColObj.IsValid() && !hColObj->IsTrigger(); });
 			if(it != colObjs.end())
 				Con::cwar << "Trigger entity has non-trigger physics shapes!" << Con::endl;
 		}
@@ -109,10 +109,10 @@ void BaseTouchComponent::OnEntitySpawn()
 		m_triggerFlags |= TriggerFlags::Physics;
 	UpdatePhysics();
 }
-util::EventReply BaseTouchComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply BaseTouchComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF) {
 		// Fire touch events for all actors that are currently touching the trigger
 		auto num = m_touching.size();
@@ -129,7 +129,7 @@ util::EventReply BaseTouchComponent::HandleEvent(ComponentEventId eventId, Compo
 			bFirstTouch = false;
 		}
 	}
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 void BaseTouchComponent::EndAllTouch()
 {
@@ -206,7 +206,7 @@ void BaseTouchComponent::Contact(const pragma::physics::ContactInfo &contactInfo
 bool BaseTouchComponent::CanTrigger(pragma::ecs::BaseEntity &ent)
 {
 	auto evCanTriggerData = CECanTriggerData {&ent};
-	if(BroadcastEvent(baseTouchComponent::EVENT_CAN_TRIGGER, evCanTriggerData) == util::EventReply::Handled)
+	if(BroadcastEvent(baseTouchComponent::EVENT_CAN_TRIGGER, evCanTriggerData) == pragma::util::EventReply::Handled)
 		return evCanTriggerData.canTrigger;
 	if(evCanTriggerData.canTrigger == false)
 		return false;

@@ -27,7 +27,7 @@ export namespace pragma::asset::fbx {
 
 	class FbxImporter {
 	  public:
-		FbxImporter(ofbx::IScene *scene, const std::string &mdlPath, const std::string &mdlName, const util::Path &outputPath) : m_fbxScene {scene}, m_mdlPath {mdlPath}, m_mdlName {mdlName}, m_outputPath {outputPath} {}
+		FbxImporter(ofbx::IScene *scene, const std::string &mdlPath, const std::string &mdlName, const pragma::util::Path &outputPath) : m_fbxScene {scene}, m_mdlPath {mdlPath}, m_mdlName {mdlName}, m_outputPath {outputPath} {}
 		~FbxImporter();
 		std::optional<AssetImportResult> Load(std::string &outErr);
 	  private:
@@ -42,14 +42,14 @@ export namespace pragma::asset::fbx {
 		std::shared_ptr<pragma::asset::Model> m_model;
 		std::string m_mdlPath;
 		std::string m_mdlName;
-		util::Path m_outputPath;
+		pragma::util::Path m_outputPath;
 		ofbx::IScene *m_fbxScene;
 		float m_fbxScale = 1.f;
 		std::vector<const ofbx::Object *> m_fbxBones;
 		std::vector<FbxMeshInfo> m_fbxMeshes;
 		UpVector m_upVector = UpVector::Y;
 
-		static umath::ScaledTransform GetPose(const ofbx::Object &o);
+		static pragma::math::ScaledTransform GetPose(const ofbx::Object &o);
 		static Vector3 GetTranslation(const ofbx::DVec3 &o);
 		static Quat GetRotation(const ofbx::DVec3 &o, RotationOrder order);
 		static Vector3 GetScale(const ofbx::DVec3 &o);
@@ -59,7 +59,7 @@ export namespace pragma::asset::fbx {
 		void GatherBones(bool force_skinned);
 		void SortBones(bool force_skinned);
 		void InsertHierarchy(std::vector<const ofbx::Object *> &bones, const ofbx::Object *node);
-		void FillSkinInfo(std::vector<umath::VertexWeight> &skinning, const ofbx::Mesh *mesh, int32_t boneId);
+		void FillSkinInfo(std::vector<pragma::math::VertexWeight> &skinning, const ofbx::Mesh *mesh, int32_t boneId);
 		std::optional<uint32_t> LoadMaterial(const ofbx::Material &mat, uint32_t partitionIdx, std::string &outErr);
 		bool LoadMeshes(std::string &outErr);
 		bool LoadAnimations(std::string &outErr);

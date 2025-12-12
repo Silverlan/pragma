@@ -30,7 +30,7 @@ static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBoneBuffer = 
 const std::shared_ptr<prosper::IUniformResizableBuffer> &pragma::get_instance_bone_buffer() { return s_instanceBoneBuffer; }
 void pragma::initialize_articulated_buffers()
 {
-	auto instanceSize = umath::to_integral(pragma::GameLimits::MaxBones) * sizeof(Mat4);
+	auto instanceSize = pragma::math::to_integral(pragma::GameLimits::MaxBones) * sizeof(Mat4);
 	auto instanceCount = 512u;
 	auto maxInstanceCount = instanceCount * 4u;
 	prosper::util::BufferCreateInfo createInfo {};
@@ -54,9 +54,9 @@ void pragma::initialize_articulated_buffers()
 }
 void pragma::clear_articulated_buffers() { s_instanceBoneBuffer = nullptr; }
 
-void CAnimatedComponent::SetBoneBufferDirty() { umath::set_flag(m_stateFlags, StateFlags::BoneBufferDirty); }
-void CAnimatedComponent::SetSkeletonUpdateCallbacksEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::EnableSkeletonUpdateCallbacks, enabled); }
-bool CAnimatedComponent::AreSkeletonUpdateCallbacksEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::EnableSkeletonUpdateCallbacks); }
+void CAnimatedComponent::SetBoneBufferDirty() { pragma::math::set_flag(m_stateFlags, StateFlags::BoneBufferDirty); }
+void CAnimatedComponent::SetSkeletonUpdateCallbacksEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::EnableSkeletonUpdateCallbacks, enabled); }
+bool CAnimatedComponent::AreSkeletonUpdateCallbacksEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableSkeletonUpdateCallbacks); }
 
 void CAnimatedComponent::Initialize()
 {
@@ -74,14 +74,14 @@ void CAnimatedComponent::Initialize()
 		UpdateBoneMatricesMT();
 	});
 	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto isDirty = umath::is_flag_set(m_stateFlags, StateFlags::BoneBufferDirty);
-		umath::set_flag(m_stateFlags, StateFlags::BoneBufferDirty, false);
+		auto isDirty = pragma::math::is_flag_set(m_stateFlags, StateFlags::BoneBufferDirty);
+		pragma::math::set_flag(m_stateFlags, StateFlags::BoneBufferDirty, false);
 		UpdateBoneBuffer(*static_cast<pragma::CEOnUpdateRenderBuffers &>(evData.get()).commandBuffer, isDirty);
 	});
-	BindEvent(cRenderComponent::EVENT_UPDATE_INSTANTIABILITY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cRenderComponent::EVENT_UPDATE_INSTANTIABILITY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		// TODO: Allow instantiability for animated entities
 		static_cast<CEUpdateInstantiability &>(evData.get()).instantiable = false;
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
 	auto &ent = GetEntity();
 	auto pRenderComponent = ent.GetComponent<CRenderComponent>();
@@ -119,7 +119,7 @@ void CAnimatedComponent::ReceiveData(NetPacket &packet)
 	SetCycle(cycle);
 }
 
-bool CAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const { return BaseAnimatedComponent::GetVertexTransformMatrix(subMesh, vertexId, outPose); }
+bool CAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, pragma::math::ScaledTransform &outPose) const { return BaseAnimatedComponent::GetVertexTransformMatrix(subMesh, vertexId, outPose); }
 std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId) const { return GetVertexTransformMatrix(subMesh, vertexId, nullptr, nullptr); }
 std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset, float *optOutDelta) const
 {
@@ -276,9 +276,9 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 		if(posBind != nullptr && rotBind != nullptr) {
 			auto &mat = m_boneMatrices[i];
 			if(i != physRootBoneId) {
-				umath::Transform tBindPose {*posBind, *rotBind};
+				pragma::math::Transform tBindPose {*posBind, *rotBind};
 				tBindPose = tBindPose.GetInverse();
-				umath::ScaledTransform tBone {pos, orientation, scale};
+				pragma::math::ScaledTransform tBone {pos, orientation, scale};
 
 				mat = tBone.ToMatrix() * tBindPose.ToMatrix();
 				//mat = (tBone *tBindPose).ToMatrix();

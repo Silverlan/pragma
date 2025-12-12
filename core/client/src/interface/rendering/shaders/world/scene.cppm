@@ -239,7 +239,7 @@ export namespace pragma {
 		SceneFlags m_sceneFlags = SceneFlags::None;
 		std::unique_ptr<prosper::DescriptorSetInfo> m_materialDescSetInfo;
 	};
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {REGISTER_ENUM_FLAGS(pragma::rendering::InstanceData::RenderFlags)}
 export {REGISTER_ENUM_FLAGS(pragma::ShaderScene::DebugFlags)}

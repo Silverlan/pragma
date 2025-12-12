@@ -42,15 +42,15 @@ export {
 
 			MaxEntityInstanceCount = 1'310'720 // Maximum number instanced entities that can be visible in one frame
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	}
 	REGISTER_ENUM_FLAGS(pragma::GameLimits)
 
 	namespace pragma {
 		enum class CoordinateSpace : uint8_t {
-			World = umath::to_integral(umath::CoordinateSpace::World),
-			Local = umath::to_integral(umath::CoordinateSpace::Local),
-			Object = umath::to_integral(umath::CoordinateSpace::Object),
+			World = pragma::math::to_integral(pragma::math::CoordinateSpace::World),
+			Local = pragma::math::to_integral(pragma::math::CoordinateSpace::Local),
+			Object = pragma::math::to_integral(pragma::math::CoordinateSpace::Object),
 		};
 	};
 

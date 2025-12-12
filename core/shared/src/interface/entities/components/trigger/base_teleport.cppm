@@ -13,7 +13,7 @@ export namespace pragma {
 	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 	  protected:
 		std::string m_target;
 		enum class SpawnFlags : uint32_t { FaceTargetDirectionOnTeleport = 512 };

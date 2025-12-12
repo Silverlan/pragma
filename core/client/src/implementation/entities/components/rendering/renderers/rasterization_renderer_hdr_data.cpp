@@ -187,7 +187,7 @@ void HDRData::ReloadPresentationRenderTarget(uint32_t width, uint32_t height, pr
 	toneMappedRenderTarget = context.CreateRenderTarget({postHdrTex}, static_cast<prosper::ShaderGraphics *>(hShaderTonemapping.get())->GetRenderPass());
 	toneMappedRenderTarget->SetDebugName("scene_post_hdr_rt");
 
-	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*postHdrTex, umath::to_integral(pragma::ShaderPPFXAA::TextureBinding::SceneTexturePostToneMapping));
+	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*postHdrTex, pragma::math::to_integral(pragma::ShaderPPFXAA::TextureBinding::SceneTexturePostToneMapping));
 }
 
 static auto cvBloomResolution = pragma::console::get_client_con_var("render_bloom_resolution");
@@ -254,7 +254,7 @@ bool HDRData::Initialize(uint32_t width, uint32_t height, prosper::SampleCountFl
 
 	dsgBloomTonemapping = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPHDR::DESCRIPTOR_SET_TEXTURE);
 	auto &descSetHdrResolve = *dsgBloomTonemapping->GetDescriptorSet();
-	descSetHdrResolve.SetBindingTexture(*resolvedTex, umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
+	descSetHdrResolve.SetBindingTexture(*resolvedTex, pragma::math::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
 
 	ReloadBloomRenderTarget(cvBloomResolution->GetInt());
 
@@ -267,7 +267,7 @@ bool HDRData::Initialize(uint32_t width, uint32_t height, prosper::SampleCountFl
 	imgCreateInfo.samples = prosper::SampleCountFlags::e1Bit;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
 	dsgTonemappedPostProcessing = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFXAA::DESCRIPTOR_SET_TEXTURE);
-	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*resolvedTex, umath::to_integral(pragma::ShaderPPFXAA::TextureBinding::SceneTextureHdr));
+	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*resolvedTex, pragma::math::to_integral(pragma::ShaderPPFXAA::TextureBinding::SceneTextureHdr));
 
 	ReloadPresentationRenderTarget(width, height, sampleCount);
 
@@ -353,12 +353,12 @@ bool HDRData::ReloadBloomRenderTarget(uint32_t width)
 	auto bloomBlurTexture = context.CreateTexture(texCreateInfo, *hdrBloomBlurImg, hdrImgViewCreateInfo, hdrSamplerCreateInfo);
 	imgCreateInfo.width = width;
 	imgCreateInfo.height = height;
-	bloomBlurRenderTarget = context.CreateRenderTarget({bloomBlurTexture}, prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(context, umath::to_integral(prosper::ShaderBlurBase::Pipeline::R16G16B16A16Sfloat)));
+	bloomBlurRenderTarget = context.CreateRenderTarget({bloomBlurTexture}, prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(context, pragma::math::to_integral(prosper::ShaderBlurBase::Pipeline::R16G16B16A16Sfloat)));
 	bloomBlurRenderTarget->SetDebugName("scene_bloom_blur_rt");
 	bloomBlurSet = prosper::BlurSet::Create(context, bloomBlurRenderTarget);
 
 	auto &descSetHdrResolve = *dsgBloomTonemapping->GetDescriptorSet();
-	descSetHdrResolve.SetBindingTexture(*bloomBlurTexture, umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
+	descSetHdrResolve.SetBindingTexture(*bloomBlurTexture, pragma::math::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
 	return true;
 }
 
@@ -434,10 +434,10 @@ void HDRData::UpdateExposure()
 	const auto inc = 0.05f;
 	auto lum = 0.2126f * avgColor.r + 0.7152f * avgColor.g + 0.0722f * avgColor.b;
 	if(lum > 0.f) {
-		exposure = umath::lerp(exposure, 0.5f / lum, inc);
-		exposure = umath::min(exposure, max_exposure);
+		exposure = pragma::math::lerp(exposure, 0.5f / lum, inc);
+		exposure = pragma::math::min(exposure, max_exposure);
 	}
-	exposure = umath::lerp(exposure, 1.f, inc);
+	exposure = pragma::math::lerp(exposure, 1.f, inc);
 }
 
 static auto cvAntiAliasing = pragma::console::get_client_con_var("cl_render_anti_aliasing");
@@ -447,7 +447,7 @@ static void CVAR_CALLBACK_render_msaa_enabled(pragma::NetworkState *, const prag
 	if(pragma::get_cgame() == nullptr)
 		return;
 	auto bMsaaEnabled = static_cast<AntiAliasing>(cvAntiAliasing->GetInt()) == AntiAliasing::MSAA;
-	auto samples = bMsaaEnabled ? static_cast<uint32_t>(umath::pow(2, cvMsaaSamples->GetInt())) : 0u;
+	auto samples = bMsaaEnabled ? static_cast<uint32_t>(pragma::math::pow(2, cvMsaaSamples->GetInt())) : 0u;
 	auto err = ClampMSAASampleCount(&samples);
 	switch(err) {
 	case 1:
@@ -506,7 +506,7 @@ static void debug_render_scene(pragma::NetworkState *state, pragma::BasePlayerCo
 		return;
 	auto size = 256u;
 	if(argv.empty() == false)
-		size = util::to_float(argv.front());
+		size = pragma::util::to_float(argv.front());
 	static pragma::gui::WIHandle hTexture = {};
 	static pragma::gui::WIHandle hBloomTexture = {};
 	dbg = std::make_unique<DebugGameGUI>([size]() {

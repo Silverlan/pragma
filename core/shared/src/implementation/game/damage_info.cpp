@@ -16,7 +16,7 @@ void pragma::game::DamageInfo::AddDamage(unsigned short dmg)
 	else
 		m_damage += dmg;
 }
-void pragma::game::DamageInfo::ScaleDamage(float scale) { m_damage = umath::limit<UInt16>(UInt32(Float(m_damage) * scale)); }
+void pragma::game::DamageInfo::ScaleDamage(float scale) { m_damage = pragma::math::limit<UInt16>(UInt32(Float(m_damage) * scale)); }
 unsigned short pragma::game::DamageInfo::GetDamage() { return m_damage; }
 pragma::ecs::BaseEntity *pragma::game::DamageInfo::GetAttacker()
 {

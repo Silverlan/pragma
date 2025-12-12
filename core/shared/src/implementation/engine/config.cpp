@@ -63,7 +63,7 @@ bool pragma::Engine::ExecConfig(const std::string &cfg, const std::function<void
 	}
 	while(!f->Eof()) {
 		auto line = f->ReadLine();
-		ustring::get_sequence_commands(line, [this, &callback](std::string cmd, std::vector<std::string> &argv) { callback(cmd, argv); });
+		pragma::string::get_sequence_commands(line, [this, &callback](std::string cmd, std::vector<std::string> &argv) { callback(cmd, argv); });
 	}
 	return true;
 }

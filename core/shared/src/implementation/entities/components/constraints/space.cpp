@@ -64,15 +64,15 @@ void ConstraintSpaceComponent::Initialize()
 }
 void ConstraintSpaceComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void ConstraintSpaceComponent::SetAxisEnabled(pragma::Axis axis, bool enabled) { m_axisEnabled[umath::to_integral(axis)] = enabled; }
-bool ConstraintSpaceComponent::IsAxisEnabled(pragma::Axis axis) const { return m_axisEnabled[umath::to_integral(axis)]; }
+void ConstraintSpaceComponent::SetAxisEnabled(pragma::Axis axis, bool enabled) { m_axisEnabled[pragma::math::to_integral(axis)] = enabled; }
+bool ConstraintSpaceComponent::IsAxisEnabled(pragma::Axis axis) const { return m_axisEnabled[pragma::math::to_integral(axis)]; }
 
-void ConstraintSpaceComponent::SetAxisInverted(pragma::Axis axis, bool inverted) { m_axisInverted[umath::to_integral(axis)] = inverted; }
-bool ConstraintSpaceComponent::IsAxisInverted(pragma::Axis axis) const { return m_axisInverted[umath::to_integral(axis)]; }
+void ConstraintSpaceComponent::SetAxisInverted(pragma::Axis axis, bool inverted) { m_axisInverted[pragma::math::to_integral(axis)] = inverted; }
+bool ConstraintSpaceComponent::IsAxisInverted(pragma::Axis axis) const { return m_axisInverted[pragma::math::to_integral(axis)]; }
 
 void ConstraintSpaceComponent::ApplyFilter(const Vector3 &posDriver, const Vector3 &posDriven, Vector3 &outValue) const
 {
-	constexpr auto numAxes = umath::to_integral(pragma::Axis::Count);
+	constexpr auto numAxes = pragma::math::to_integral(pragma::Axis::Count);
 	for(auto i = decltype(numAxes) {0u}; i < numAxes; ++i) {
 		if(IsAxisEnabled(static_cast<pragma::Axis>(i)) == false)
 			outValue[i] = posDriven[i];
@@ -84,7 +84,7 @@ void ConstraintSpaceComponent::ApplyFilter(const Vector3 &posDriver, const Vecto
 }
 void ConstraintSpaceComponent::ApplyFilter(const EulerAngles &angDriver, const EulerAngles &angDriven, EulerAngles &outValue) const
 {
-	constexpr auto numAxes = umath::to_integral(pragma::Axis::Count);
+	constexpr auto numAxes = pragma::math::to_integral(pragma::Axis::Count);
 	for(auto i = decltype(numAxes) {0u}; i < numAxes; ++i) {
 		if(IsAxisEnabled(static_cast<pragma::Axis>(i)) == false)
 			outValue[i] = angDriven[i];

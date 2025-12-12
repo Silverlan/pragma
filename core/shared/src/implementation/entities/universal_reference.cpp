@@ -14,8 +14,8 @@ EntityURef::EntityURef(EntityIdentifier identifier)
 {
 	std::visit(
 	  [this](auto &v) {
-		  if constexpr(std::is_same_v<decltype(v), util::Uuid>)
-			  m_identifier = (v != util::Uuid {}) ? std::make_unique<EntityIdentifier>(v) : nullptr;
+		  if constexpr(std::is_same_v<decltype(v), pragma::util::Uuid>)
+			  m_identifier = (v != pragma::util::Uuid {}) ? std::make_unique<EntityIdentifier>(v) : nullptr;
 		  else
 			  m_identifier = std::make_unique<EntityIdentifier>(std::move(v));
 	  },
@@ -39,7 +39,7 @@ void EntityURef::AttachEntityFilter(pragma::ecs::EntityIterator &it, const Entit
 	std::visit(
 	  [&it](auto &val) {
 		  using T = decltype(val);
-		  if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, util::Uuid>)
+		  if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, pragma::util::Uuid>)
 			  it.AttachFilter<EntityIteratorFilterUuid>(val);
 		  else
 			  it.AttachFilter<EntityIteratorFilterNameOrClass>(val);
@@ -60,14 +60,14 @@ pragma::ecs::BaseEntity *EntityURef::GetEntity(pragma::Game &game)
 	}
 	return m_hEntity.get();
 }
-std::optional<util::Uuid> EntityURef::GetUuid() const
+std::optional<pragma::util::Uuid> EntityURef::GetUuid() const
 {
 	if(!m_identifier)
 		return {};
 	return std::visit(
-	  [](auto &val) -> std::optional<util::Uuid> {
+	  [](auto &val) -> std::optional<pragma::util::Uuid> {
 		  using T = decltype(val);
-		  if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, util::Uuid>)
+		  if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, pragma::util::Uuid>)
 			  return val;
 		  return {};
 	  },
@@ -80,7 +80,7 @@ std::optional<std::string> EntityURef::GetClassOrName() const
 	return std::visit(
 	  [](auto &val) -> std::optional<std::string> {
 		  using T = decltype(val);
-		  if constexpr(!std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, util::Uuid>)
+		  if constexpr(!std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, pragma::util::Uuid>)
 			  return val;
 		  return {};
 	  },
@@ -96,8 +96,8 @@ void EntityURef::ToStringArgs(std::stringstream &outSs) const
 		std::visit(
 		  [&outSs](auto &val) {
 			  using T = decltype(val);
-			  if constexpr(std::is_same_v<T, util::Uuid &>)
-				  outSs << util::uuid_to_string(val) << "]";
+			  if constexpr(std::is_same_v<T, pragma::util::Uuid &>)
+				  outSs << pragma::util::uuid_to_string(val) << "]";
 			  else
 				  outSs << val << "]";
 		  },
@@ -227,8 +227,8 @@ MultiEntityURef::MultiEntityURef(EntityIdentifier identifier)
 {
 	std::visit(
 	  [this](auto &v) {
-		  if constexpr(std::is_same_v<decltype(v), util::Uuid>)
-			  m_identifier = (v != util::Uuid {}) ? std::make_unique<EntityIdentifier>(v) : nullptr;
+		  if constexpr(std::is_same_v<decltype(v), pragma::util::Uuid>)
+			  m_identifier = (v != pragma::util::Uuid {}) ? std::make_unique<EntityIdentifier>(v) : nullptr;
 		  else
 			  m_identifier = std::make_unique<EntityIdentifier>(std::move(v));
 	  },
@@ -255,7 +255,7 @@ void MultiEntityURef::FindEntities(pragma::Game &game, std::vector<pragma::ecs::
 	std::visit(
 	  [&entIt](auto &val) {
 		  using T = decltype(val);
-		  if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, util::Uuid>)
+		  if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, pragma::util::Uuid>)
 			  entIt.AttachFilter<EntityIteratorFilterUuid>(val);
 		  else
 			  entIt.AttachFilter<EntityIteratorFilterNameOrClass>(val);
@@ -277,8 +277,8 @@ void MultiEntityURef::ToStringArgs(std::stringstream &outSs) const
 		std::visit(
 		  [&outSs](auto &val) {
 			  using T = decltype(val);
-			  if constexpr(std::is_same_v<T, util::Uuid &>)
-				  outSs << util::uuid_to_string(val) << "]";
+			  if constexpr(std::is_same_v<T, pragma::util::Uuid &>)
+				  outSs << pragma::util::uuid_to_string(val) << "]";
 			  else
 				  outSs << val << "]";
 		  },

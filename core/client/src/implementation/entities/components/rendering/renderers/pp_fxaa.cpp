@@ -23,7 +23,7 @@ void CRendererPpFxaaComponent::DoRenderEffect(const pragma::rendering::DrawScene
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuFxaa, *drawSceneInfo.commandBuffer);
 
-	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
+	pragma::util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuFxaa, *drawSceneInfo.commandBuffer);
 	}};
@@ -42,7 +42,7 @@ void CRendererPpFxaaComponent::DoRenderEffect(const pragma::rendering::DrawScene
 		auto &toneMappedImg = hdrInfo.toneMappedRenderTarget->GetTexture().GetImage();
 		drawCmd->RecordImageBarrier(toneMappedImg, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 
-		auto *srcImg = hdrInfo.dsgTonemappedPostProcessing->GetDescriptorSet()->GetBoundImage(umath::to_integral(pragma::ShaderPPFXAA::TextureBinding::SceneTextureHdr));
+		auto *srcImg = hdrInfo.dsgTonemappedPostProcessing->GetDescriptorSet()->GetBoundImage(pragma::math::to_integral(pragma::ShaderPPFXAA::TextureBinding::SceneTextureHdr));
 		if(srcImg)
 			drawCmd->RecordImageBarrier(*srcImg, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 

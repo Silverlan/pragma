@@ -6,4 +6,4 @@ module pragma.shared;
 
 import :entities.base_player;
 
-util::WeakHandle<pragma::BasePlayerComponent> BasePlayer::GetBasePlayerComponent() { return m_basePlayerComponent; }
+pragma::util::WeakHandle<pragma::BasePlayerComponent> BasePlayer::GetBasePlayerComponent() { return m_basePlayerComponent; }

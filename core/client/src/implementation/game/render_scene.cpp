@@ -30,7 +30,7 @@ std::shared_ptr<prosper::IPrimaryCommandBuffer> pragma::CGame::GetCurrentDrawCom
 void pragma::CGame::RenderScene(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
 {
 	m_currentDrawCmd = drawSceneInfo.commandBuffer;
-	util::ScopeGuard sgCurrentDrawCmd {[this]() { m_currentDrawCmd = {}; }};
+	pragma::util::ScopeGuard sgCurrentDrawCmd {[this]() { m_currentDrawCmd = {}; }};
 
 	std::chrono::steady_clock::time_point t;
 	if(drawSceneInfo.renderStats) {
@@ -45,7 +45,7 @@ void pragma::CGame::RenderScene(const pragma::rendering::DrawSceneInfo &drawScen
 	auto *renderer = const_cast<pragma::CSceneComponent *>(scene.get())->GetRenderer<pragma::CRendererComponent>();
 	if(renderer) {
 		prosper::Texture *presentationTexture = nullptr;
-		if(umath::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::HDR))
+		if(pragma::math::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::HDR))
 			presentationTexture = drawSceneInfo.renderTarget ? &drawSceneInfo.renderTarget->GetTexture() : renderer->GetHDRPresentationTexture();
 		else {
 			presentationTexture = renderer->GetPresentationTexture();

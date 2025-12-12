@@ -11,9 +11,9 @@ import :entities.components.particle_system;
 import :game;
 import pragma.shadergraph;
 
-decltype(ECResourceWatcherCallbackType::Shader) ECResourceWatcherCallbackType::Shader = ECResourceWatcherCallbackType {umath::to_integral(E::Shader)};
-decltype(ECResourceWatcherCallbackType::ParticleSystem) ECResourceWatcherCallbackType::ParticleSystem = ECResourceWatcherCallbackType {umath::to_integral(E::ParticleSystem)};
-decltype(ECResourceWatcherCallbackType::Count) ECResourceWatcherCallbackType::Count = ECResourceWatcherCallbackType {umath::to_integral(E::Count)};
+decltype(ECResourceWatcherCallbackType::Shader) ECResourceWatcherCallbackType::Shader = ECResourceWatcherCallbackType {pragma::math::to_integral(E::Shader)};
+decltype(ECResourceWatcherCallbackType::ParticleSystem) ECResourceWatcherCallbackType::ParticleSystem = ECResourceWatcherCallbackType {pragma::math::to_integral(E::ParticleSystem)};
+decltype(ECResourceWatcherCallbackType::Count) ECResourceWatcherCallbackType::Count = ECResourceWatcherCallbackType {pragma::math::to_integral(E::Count)};
 static auto cvMatStreaming = pragma::console::get_client_con_var("cl_material_streaming_enabled");
 
 CResourceWatcherManager::CResourceWatcherManager(pragma::NetworkState *nw) : ResourceWatcherManager(nw) {}
@@ -28,7 +28,7 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 		return;
 	texManager.RemoveFromCache(path);
 	auto loadInfo = std::make_unique<msys::TextureLoadInfo>();
-	loadInfo->onLoaded = [path, nw](util::Asset &asset) {
+	loadInfo->onLoaded = [path, nw](pragma::util::Asset &asset) {
 		if(nw == nullptr)
 			return;
 		auto &matManager = static_cast<msys::CMaterialManager &>(nw->GetMaterialManager());
@@ -41,18 +41,18 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 			ext = '.' + ext;
 		ufile::remove_extension_from_filename(pathNoExt);
 
-		std::function<void(msys::CMaterial &, const util::Path &path)> fLookForTextureAndUpdate = nullptr;
-		fLookForTextureAndUpdate = [&fLookForTextureAndUpdate, &pathNoExt](msys::CMaterial &mat, const util::Path &path) {
+		std::function<void(msys::CMaterial &, const pragma::util::Path &path)> fLookForTextureAndUpdate = nullptr;
+		fLookForTextureAndUpdate = [&fLookForTextureAndUpdate, &pathNoExt](msys::CMaterial &mat, const pragma::util::Path &path) {
 			for(auto &name : msys::MaterialPropertyBlockView {mat, path}) {
 				auto propType = mat.GetPropertyType(name);
 				switch(propType) {
 				case msys::PropertyType::Block:
-					fLookForTextureAndUpdate(mat, util::FilePath(path, name));
+					fLookForTextureAndUpdate(mat, pragma::util::FilePath(path, name));
 					break;
 				case msys::PropertyType::Texture:
 					{
 						std::string texName;
-						if(!mat.GetProperty(util::FilePath(path, name).GetString(), &texName))
+						if(!mat.GetProperty(pragma::util::FilePath(path, name).GetString(), &texName))
 							continue;
 						auto *texInfo = mat.GetTextureInfo(name);
 						if(!texInfo)
@@ -115,7 +115,7 @@ void CResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths)
 	paths.push_back("scripts/shader_data");
 }
 
-void CResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const util::Path &path, const std::string &ext)
+void CResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path, const std::string &ext)
 {
 	ResourceWatcherManager::OnResourceChanged(rootPath, path, ext);
 	auto &strPath = path.GetString();
@@ -139,7 +139,7 @@ void CResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, cons
 #endif
 		auto canonShader = FileManager::GetCanonicalizedPath(strPath);
 		ufile::remove_extension_from_filename(canonShader);
-		ustring::to_lower(canonShader);
+		pragma::string::to_lower(canonShader);
 		auto &shaderManager = pragma::get_cengine()->GetShaderManager();
 		std::vector<std::string> reloadShaders;
 		for(auto &pair : shaderManager.GetShaderNameToIndexTable()) {
@@ -149,7 +149,7 @@ void CResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, cons
 			for(auto &src : shader->GetSourceFilePaths()) {
 				auto fname = FileManager::GetCanonicalizedPath(src);
 				ufile::remove_extension_from_filename(fname);
-				ustring::to_lower(fname);
+				pragma::string::to_lower(fname);
 				if(canonShader == fname)
 					reloadShaders.push_back(pair.first);
 			}

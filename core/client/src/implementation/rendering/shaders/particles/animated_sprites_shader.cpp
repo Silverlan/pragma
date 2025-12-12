@@ -11,11 +11,11 @@ import :engine;
 
 using namespace pragma;
 
-static Mat3x4 calc_rotation_matrix_around_axis(const Vector3 &axis, umath::Degree ang)
+static Mat3x4 calc_rotation_matrix_around_axis(const Vector3 &axis, pragma::math::Degree ang)
 {
-	ang = umath::deg_to_rad(ang);
-	auto sin = umath::sin(ang);
-	auto cos = umath::cos(ang);
+	ang = pragma::math::deg_to_rad(ang);
+	auto sin = pragma::math::sin(ang);
+	auto cos = pragma::math::cos(ang);
 	auto xSq = axis.x * axis.x;
 	auto ySq = axis.y * axis.y;
 	auto zSq = axis.z * axis.z;
@@ -80,8 +80,8 @@ Vector3 ShaderParticleAnimatedSprites::DoCalcVertexPosition(const pragma::ecs::C
 	camRight = camRight * radius;
 	auto camUp = camUpWs * radius;
 
-	auto ca = umath::cos(-rot);
-	auto sa = umath::sin(-rot);
+	auto ca = pragma::math::cos(-rot);
+	auto sa = pragma::math::sin(-rot);
 
 	if(localVertIdx == 0) {
 		float x = ca - sa;

@@ -38,7 +38,7 @@ export namespace pragma::pts {
 		uint32_t m_nodeCount = 0u;
 		std::vector<Node> m_nodeOrigins;
 		uint32_t m_indexCount = 0u;
-		util::WeakHandle<prosper::Shader> m_shader = {};
+		pragma::util::WeakHandle<prosper::Shader> m_shader = {};
 		float m_curvature = 1.f;
 		void UpdateNodes();
 	};

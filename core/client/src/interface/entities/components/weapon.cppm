@@ -49,8 +49,8 @@ export namespace pragma {
 		bool GetHideWorldModelInFirstPerson() const;
 		void SetViewModelOffset(const Vector3 &offset);
 		const Vector3 &GetViewModelOffset() const;
-		void SetViewFOV(umath::Degree fov);
-		umath::Degree GetViewFOV() const;
+		void SetViewFOV(pragma::math::Degree fov);
+		pragma::math::Degree GetViewFOV() const;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 
 		void SetViewModelComponent(pragma::ComponentId component) { m_viewModelComponent = component; }
@@ -66,7 +66,7 @@ export namespace pragma {
 		Vector3 m_viewModelOffset;
 		pragma::ComponentId m_viewModelComponent = pragma::INVALID_COMPONENT_ID;
 
-		std::optional<umath::Degree> m_viewFov {};
+		std::optional<pragma::math::Degree> m_viewFov {};
 		CallbackHandle m_cbOnOwnerObserverModeChanged = {};
 		CallbackHandle m_cbOnObserverChanged {};
 		virtual pragma::Activity TranslateViewActivity(pragma::Activity act);
@@ -85,6 +85,6 @@ export namespace pragma {
 		CViewModelComponent *viewModel = nullptr;
 	};
 
-	using namespace umath::scoped_enum::bitwise;
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {REGISTER_ENUM_FLAGS(pragma::CWeaponComponent::StateFlags)}

@@ -9,9 +9,9 @@ export module pragma.shared:model.model_manager;
 export import :model.model;
 
 export namespace pragma::asset {
-	class DLLNETWORK ModelProcessor : public util::FileAssetProcessor {
+	class DLLNETWORK ModelProcessor : public pragma::util::FileAssetProcessor {
 	  public:
-		ModelProcessor(util::AssetFormatLoader &loader, std::unique_ptr<util::IAssetFormatHandler> &&handler);
+		ModelProcessor(pragma::util::AssetFormatLoader &loader, std::unique_ptr<pragma::util::IAssetFormatHandler> &&handler);
 		virtual bool Load() override;
 		virtual bool Finalize() override;
 
@@ -19,29 +19,29 @@ export namespace pragma::asset {
 		std::string identifier;
 		std::string formatExtension;
 	};
-	class DLLNETWORK ModelLoader : public util::TAssetFormatLoader<ModelProcessor> {
+	class DLLNETWORK ModelLoader : public pragma::util::TAssetFormatLoader<ModelProcessor> {
 	  public:
-		ModelLoader(util::IAssetManager &assetManager) : util::TAssetFormatLoader<ModelProcessor> {assetManager, "model"} {}
+		ModelLoader(pragma::util::IAssetManager &assetManager) : pragma::util::TAssetFormatLoader<ModelProcessor> {assetManager, "model"} {}
 	  protected:
-		virtual std::unique_ptr<util::IAssetProcessor> CreateAssetProcessor(const std::string &identifier, const std::string &ext, std::unique_ptr<util::IAssetFormatHandler> &&formatHandler) override;
+		virtual std::unique_ptr<pragma::util::IAssetProcessor> CreateAssetProcessor(const std::string &identifier, const std::string &ext, std::unique_ptr<pragma::util::IAssetFormatHandler> &&formatHandler) override;
 	};
-	struct DLLNETWORK ModelLoadInfo : public util::AssetLoadInfo {
-		ModelLoadInfo(util::AssetLoadFlags flags = util::AssetLoadFlags::None);
+	struct DLLNETWORK ModelLoadInfo : public pragma::util::AssetLoadInfo {
+		ModelLoadInfo(pragma::util::AssetLoadFlags flags = pragma::util::AssetLoadFlags::None);
 	};
-	class DLLNETWORK IModelFormatHandler : public util::IAssetFormatHandler {
+	class DLLNETWORK IModelFormatHandler : public pragma::util::IAssetFormatHandler {
 	  public:
-		IModelFormatHandler(util::IAssetManager &assetManager);
+		IModelFormatHandler(pragma::util::IAssetManager &assetManager);
 		virtual bool LoadData(ModelProcessor &processor, ModelLoadInfo &info);
 		std::shared_ptr<pragma::asset::Model> model = nullptr;
 	};
 	class DLLNETWORK PmdlFormatHandler : public IModelFormatHandler {
 	  public:
-		PmdlFormatHandler(util::IAssetManager &assetManager);
+		PmdlFormatHandler(pragma::util::IAssetManager &assetManager);
 		virtual bool LoadData(ModelProcessor &processor, ModelLoadInfo &info) override;
 	};
 	class DLLNETWORK WmdFormatHandler : public IModelFormatHandler {
 	  public:
-		WmdFormatHandler(util::IAssetManager &assetManager);
+		WmdFormatHandler(pragma::util::IAssetManager &assetManager);
 		virtual bool LoadData(ModelProcessor &processor, ModelLoadInfo &info) override;
 	  private:
 		void LoadBones(unsigned short version, unsigned int numBones, pragma::asset::Model &mdl);
@@ -62,57 +62,57 @@ export namespace pragma::asset {
 		pragma::Game *m_gameState = nullptr;
 	};
 
-	class DLLNETWORK SourceMdlFormatHandler : public util::IImportAssetFormatHandler {
+	class DLLNETWORK SourceMdlFormatHandler : public pragma::util::IImportAssetFormatHandler {
 	  public:
-		SourceMdlFormatHandler(util::IAssetManager &assetManager);
+		SourceMdlFormatHandler(pragma::util::IAssetManager &assetManager);
 		virtual bool Import(const std::string &outputPath, std::string &outFilePath) override;
 	};
 
-	class DLLNETWORK Source2VmdlFormatHandler : public util::IImportAssetFormatHandler {
+	class DLLNETWORK Source2VmdlFormatHandler : public pragma::util::IImportAssetFormatHandler {
 	  public:
-		Source2VmdlFormatHandler(util::IAssetManager &assetManager);
+		Source2VmdlFormatHandler(pragma::util::IAssetManager &assetManager);
 		virtual bool Import(const std::string &outputPath, std::string &outFilePath) override;
 	};
 
-	class DLLNETWORK NifFormatHandler : public util::IImportAssetFormatHandler {
+	class DLLNETWORK NifFormatHandler : public pragma::util::IImportAssetFormatHandler {
 	  public:
-		NifFormatHandler(util::IAssetManager &assetManager);
+		NifFormatHandler(pragma::util::IAssetManager &assetManager);
 		virtual bool Import(const std::string &outputPath, std::string &outFilePath) override;
 	};
 
-	class DLLNETWORK AssimpFormatHandler : public util::IImportAssetFormatHandler {
+	class DLLNETWORK AssimpFormatHandler : public pragma::util::IImportAssetFormatHandler {
 	  public:
-		AssimpFormatHandler(util::IAssetManager &assetManager);
+		AssimpFormatHandler(pragma::util::IAssetManager &assetManager);
 		virtual bool Import(const std::string &outputPath, std::string &outFilePath) override;
 	  private:
 	};
 
-	class DLLNETWORK BlenderFormatHandler : public util::IImportAssetFormatHandler {
+	class DLLNETWORK BlenderFormatHandler : public pragma::util::IImportAssetFormatHandler {
 	  public:
-		BlenderFormatHandler(util::IAssetManager &assetManager, std::string ext);
+		BlenderFormatHandler(pragma::util::IAssetManager &assetManager, std::string ext);
 		virtual bool Import(const std::string &outputPath, std::string &outFilePath) override;
 	  private:
 		std::string m_ext;
 	};
 
-	class DLLNETWORK AssetManagerFormatHandler : public util::IImportAssetFormatHandler {
+	class DLLNETWORK AssetManagerFormatHandler : public pragma::util::IImportAssetFormatHandler {
 	  public:
-		AssetManagerFormatHandler(util::IAssetManager &assetManager);
+		AssetManagerFormatHandler(pragma::util::IAssetManager &assetManager);
 		virtual bool Import(const std::string &outputPath, std::string &outFilePath) override;
 	};
 
 	class DLLNETWORK PmxFormatHandler : public AssetManagerFormatHandler {
 	  public:
-		PmxFormatHandler(util::IAssetManager &assetManager);
+		PmxFormatHandler(pragma::util::IAssetManager &assetManager);
 		virtual bool Import(const std::string &outputPath, std::string &outFilePath) override;
 	};
 
-	class DLLNETWORK ModelManager : public util::TFileAssetManager<pragma::asset::Model, ModelLoadInfo> {
+	class DLLNETWORK ModelManager : public pragma::util::TFileAssetManager<pragma::asset::Model, ModelLoadInfo> {
 	  public:
 		ModelManager(pragma::NetworkState &nw);
 		virtual ~ModelManager() = default;
 
-		using util::IAssetManager::FlagForRemoval;
+		using pragma::util::IAssetManager::FlagForRemoval;
 		void FlagForRemoval(const pragma::asset::Model &mdl, bool flag = true);
 
 		std::shared_ptr<pragma::asset::Model> CreateModel(const std::string &name = "", bool bAddReference = true, bool addToCache = false);
@@ -123,8 +123,8 @@ export namespace pragma::asset {
 		virtual std::shared_ptr<pragma::geometry::ModelMesh> CreateMesh();
 		virtual std::shared_ptr<pragma::geometry::ModelSubMesh> CreateSubMesh();
 	  protected:
-		virtual void InitializeProcessor(util::IAssetProcessor &processor) override;
-		virtual util::AssetObject InitializeAsset(const util::Asset &asset, const util::AssetLoadJob &job) override;
+		virtual void InitializeProcessor(pragma::util::IAssetProcessor &processor) override;
+		virtual pragma::util::AssetObject InitializeAsset(const pragma::util::Asset &asset, const pragma::util::AssetLoadJob &job) override;
 		//bool PrecacheModel(const std::string &mdlName) const;
 		//std::shared_ptr<Model> LoadModel(const std::string &cacheName,const std::shared_ptr<ufile::IFile> &file,const std::string &ext);
 

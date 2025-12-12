@@ -70,7 +70,7 @@ export {
 					Con::cout << "Changing channel value '" << channel.targetPath.ToUri() << " from " << to_string(curVal) << " to " << to_string(value) << " (t: " << t << ")..." << Con::endl;
 				}
 				auto &changed = const_cast<pragma::AnimationChannelCacheData &>(cacheData).changed;
-				if(!umath::is_flag_set(changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty)) {
+				if(!pragma::math::is_flag_set(changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty)) {
 					if(memcmp(const_cast<void *>(static_cast<const void *>(cacheData.data.data())), &value, sizeof(value)) != 0)
 						changed |= pragma::AnimationChannelCacheData::State::Dirty;
 				}
@@ -109,7 +109,7 @@ export {
 					Con::cout << "Changing " << TMapArray.size() << " components of channel value '" << channel.targetPath.ToUri() << " from " << to_string(curVal) << " to " << to_string(value) << " (t: " << t << ")..." << Con::endl;
 				}
 				auto &changed = const_cast<pragma::AnimationChannelCacheData &>(cacheData).changed;
-				if(!umath::is_flag_set(changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty)) {
+				if(!pragma::math::is_flag_set(changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty)) {
 					if(memcmp(const_cast<void *>(static_cast<const void *>(cacheData.data.data())), &curVal, sizeof(curVal)) != 0)
 						changed |= pragma::AnimationChannelCacheData::State::Dirty;
 				}

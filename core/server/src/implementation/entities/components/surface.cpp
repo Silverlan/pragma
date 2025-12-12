@@ -12,7 +12,7 @@ import :server_state;
 using namespace pragma;
 
 void SSurfaceComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->Write<Vector4>(GetPlane().ToVector4()); }
-void SSurfaceComponent::SetPlane(const umath::Plane &plane)
+void SSurfaceComponent::SetPlane(const pragma::math::Plane &plane)
 {
 	BaseSurfaceComponent::SetPlane(plane);
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());

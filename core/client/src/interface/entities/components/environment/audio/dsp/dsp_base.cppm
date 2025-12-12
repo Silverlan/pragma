@@ -18,7 +18,7 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual Bool ReceiveNetEvent(UInt32 eventId, NetPacket &p) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;

@@ -11,7 +11,7 @@ export namespace pragma {
 #pragma pack(push, 1)
 	struct RenderSettings {
 		Vector3 posCam;
-		umath::Radian fov;
+		pragma::math::Radian fov;
 		int32_t flags;
 		float shadowRatioX;
 		float shadowRatioY;

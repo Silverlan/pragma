@@ -32,30 +32,30 @@ void BaseHealthComponent::RegisterMembers(pragma::EntityComponentManager &compon
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseHealthComponent::BaseHealthComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_health(util::UInt16Property::Create(0)), m_maxHealth(util::UInt16Property::Create(0)) {}
+BaseHealthComponent::BaseHealthComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_health(pragma::util::UInt16Property::Create(0)), m_maxHealth(pragma::util::UInt16Property::Create(0)) {}
 void BaseHealthComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "health", false))
-			*m_health = util::to_int(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "max_health", false))
-			*m_maxHealth = util::to_int(kvData.value);
+		if(pragma::string::compare<std::string>(kvData.key, "health", false))
+			*m_health = pragma::util::to_int(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "max_health", false))
+			*m_maxHealth = pragma::util::to_int(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
-		if(ustring::compare<std::string>(inputData.input, "sethealth", false))
-			*m_health = util::to_int(inputData.data);
-		else if(ustring::compare<std::string>(inputData.input, "setmaxhealth", false))
-			*m_maxHealth = util::to_int(inputData.data);
+		if(pragma::string::compare<std::string>(inputData.input, "sethealth", false))
+			*m_health = pragma::util::to_int(inputData.data);
+		else if(pragma::string::compare<std::string>(inputData.input, "setmaxhealth", false))
+			*m_maxHealth = pragma::util::to_int(inputData.data);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -63,13 +63,13 @@ void BaseHealthComponent::Initialize()
 	ent.AddComponent("damageable");
 }
 
-util::EventReply BaseHealthComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply BaseHealthComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == damageableComponent::EVENT_ON_TAKE_DAMAGE)
 		OnTakeDamage(static_cast<CEOnTakeDamage &>(evData).damageInfo);
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 
 void BaseHealthComponent::OnTakeDamage(game::DamageInfo &info)
@@ -86,8 +86,8 @@ void BaseHealthComponent::OnTakeDamage(game::DamageInfo &info)
 	BroadcastEvent(baseHealthComponent::EVENT_ON_TAKEN_DAMAGE, takeDmgInfo);
 }
 
-const util::PUInt16Property &BaseHealthComponent::GetHealthProperty() const { return m_health; }
-const util::PUInt16Property &BaseHealthComponent::GetMaxHealthProperty() const { return m_maxHealth; }
+const pragma::util::PUInt16Property &BaseHealthComponent::GetHealthProperty() const { return m_health; }
+const pragma::util::PUInt16Property &BaseHealthComponent::GetMaxHealthProperty() const { return m_maxHealth; }
 uint16_t BaseHealthComponent::GetHealth() const { return *m_health; }
 uint16_t BaseHealthComponent::GetMaxHealth() const { return *m_maxHealth; }
 void BaseHealthComponent::SetHealth(uint16_t health)

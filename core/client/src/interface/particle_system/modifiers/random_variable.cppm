@@ -30,7 +30,7 @@ export namespace pragma::pts {
 		T GetMax() const;
 		bool IsSet() const;
 	  private:
-		uint32_t m_iSeed = umath::random_int(0u, std::numeric_limits<uint32_t>::max());
+		uint32_t m_iSeed = pragma::math::random_int(0u, std::numeric_limits<uint32_t>::max());
 		TUniformDis m_value = TUniformDis(T(0), T(0));
 		bool m_bIsSet = false;
 	};
@@ -50,9 +50,9 @@ void pragma::pts::CParticleModifierComponentRandomVariable<TUniformDis, T>::Init
 		T min, max;
 		// Dirty hack
 		if(std::is_floating_point<T>::value)
-			util::to_random_float(it->second, reinterpret_cast<float &>(min), reinterpret_cast<float &>(max));
+			pragma::math::to_random_float(it->second, reinterpret_cast<float &>(min), reinterpret_cast<float &>(max));
 		else
-			util::to_random_int(it->second, reinterpret_cast<int32_t &>(min), reinterpret_cast<int32_t &>(max));
+			pragma::math::to_random_int(it->second, reinterpret_cast<int32_t &>(min), reinterpret_cast<int32_t &>(max));
 		m_value = TUniformDis(min, max);
 	}
 }

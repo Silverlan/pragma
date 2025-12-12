@@ -89,7 +89,7 @@ bool Lua::doc::load_documentation_file(const std::string &fileName)
 	initialize_pragma_documentation();
 
 	std::string err;
-	auto udmData = ::util::load_udm_asset(fileName, &err);
+	auto udmData = pragma::util::load_udm_asset(fileName, &err);
 	if(udmData == nullptr) {
 		Con::cwar << "Unable to load Lua documentation '" << fileName << "': " << err << Con::endl;
 		return false;
@@ -113,9 +113,9 @@ bool Lua::doc::load_documentation_file(const std::string &fileName)
 			numFunctions += col.GetFunctions().size();
 			numEnums += col.GetEnumSets().size();
 			numMembers += col.GetMembers().size();
-			if(umath::is_flag_set(col.GetFlags(), ::pragma::doc::Collection::Flags::Library))
+			if(pragma::math::is_flag_set(col.GetFlags(), ::pragma::doc::Collection::Flags::Library))
 				++numLibs;
-			if(umath::is_flag_set(col.GetFlags(), ::pragma::doc::Collection::Flags::Class))
+			if(pragma::math::is_flag_set(col.GetFlags(), ::pragma::doc::Collection::Flags::Class))
 				++numClasses;
 
 			for(auto &child : col.GetChildren())
@@ -136,7 +136,7 @@ void Lua::doc::find_candidates(const std::string &name, std::vector<const ::prag
 	initialize_pragma_documentation();
 	std::vector<std::pair<const ::pragma::doc::BaseCollectionObject *, float>> similarCandidates {};
 	for(auto &pair : s_docInfo.lookupTable) {
-		auto percentage = ustring::calc_similarity(name, pair.first);
+		auto percentage = pragma::string::calc_similarity(name, pair.first);
 		auto bInserted = false;
 		for(auto it = similarCandidates.begin(); it != similarCandidates.end(); ++it) {
 			auto &sc = *it;

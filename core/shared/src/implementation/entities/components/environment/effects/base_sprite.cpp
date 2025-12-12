@@ -12,25 +12,25 @@ void BaseEnvSpriteComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "texture", false))
+		if(pragma::string::compare<std::string>(kvData.key, "texture", false))
 			m_spritePath = kvData.value;
-		else if(ustring::compare<std::string>(kvData.key, "scale", false))
-			m_size = ustring::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "bloom_scale", false))
-			m_bloomScale = ustring::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "color", false))
+		else if(pragma::string::compare<std::string>(kvData.key, "scale", false))
+			m_size = pragma::string::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "bloom_scale", false))
+			m_bloomScale = pragma::string::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "color", false))
 			m_color = Color(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "render_mode", false))
-			m_particleRenderMode = ustring::to_int(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "fade_in_time", false))
-			m_tFadeIn = ustring::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "fade_out_time", false))
-			m_tFadeOut = ustring::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "render_mode", false))
+			m_particleRenderMode = pragma::string::to_int(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "fade_in_time", false))
+			m_tFadeIn = pragma::string::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "fade_out_time", false))
+			m_tFadeOut = pragma::string::to_float(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();

@@ -30,7 +30,7 @@ bool InputBindingLayer::Save(const std::vector<std::shared_ptr<InputBindingLayer
 bool InputBindingLayer::Load(const udm::AssetData &data, std::vector<std::shared_ptr<InputBindingLayer>> &outLayers, std::string &outErr)
 {
 	for(auto &pair : data.GetData().ElIt()) {
-		auto layer = ::util::make_shared<InputBindingLayer>();
+		auto layer = pragma::util::make_shared<InputBindingLayer>();
 		layer->identifier = pair.key;
 		for(auto &pair : pair.property.ElIt()) {
 			auto val = pair.property.ToValue<udm::String>();
@@ -88,8 +88,8 @@ void InputBindingLayer::AddKeyMapping(short c, std::string cmd)
 			return;
 		binds.insert(std::unordered_map<std::string, std::vector<std::string>>::value_type(cmd, argv)).first;
 	};
-	ustring::get_sequence_commands(cmd, callback);
-	ustring::get_sequence_commands(bind, callback);
+	pragma::string::get_sequence_commands(cmd, callback);
+	pragma::string::get_sequence_commands(bind, callback);
 	MapKey(c, binds);
 }
 void InputBindingLayer::RemoveKeyMapping(short c, std::string cmd)
@@ -106,7 +106,7 @@ void InputBindingLayer::RemoveKeyMapping(short c, std::string cmd)
 			return;
 		binds.insert(std::unordered_map<std::string, std::vector<std::string>>::value_type(cmdBind, argv)).first;
 	};
-	ustring::get_sequence_commands(bind, callback);
+	pragma::string::get_sequence_commands(bind, callback);
 	MapKey(c, binds);
 }
 

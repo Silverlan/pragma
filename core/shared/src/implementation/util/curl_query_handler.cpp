@@ -55,7 +55,7 @@ void pragma::CurlQueryHandler::AddResource(const std::string &url, const std::st
 		FileData(const VFilePtrReal &f) : file {f} {}
 		VFilePtrReal file;
 	};
-	auto fd = ::util::make_shared<FileData>(f);
+	auto fd = pragma::util::make_shared<FileData>(f);
 	auto *fptr = f.get();
 	s_fAddResource(
 	  m_curl, url,

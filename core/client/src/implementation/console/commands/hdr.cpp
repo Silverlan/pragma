@@ -17,7 +17,7 @@ void CMD_debug_hdr_bloom(pragma::NetworkState *, pragma::BasePlayerComponent *, 
 		return;
 	const std::string name = "debug_hdr_bloom";
 	auto *pEl = pRoot->FindDescendantByName(name);
-	auto v = util::to_int(argv.front());
+	auto v = pragma::util::to_int(argv.front());
 	if(v == 0) {
 		if(pEl != nullptr)
 			pEl->Remove();

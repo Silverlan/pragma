@@ -111,17 +111,17 @@ void CPlayerComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 		m_observableComponent = nullptr;
 }
 
-util::EventReply CPlayerComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply CPlayerComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BasePlayerComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BasePlayerComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseCharacterComponent::EVENT_ON_DEPLOY_WEAPON)
 		OnDeployWeapon(static_cast<const CEOnDeployWeapon &>(evData).weapon);
 	else if(eventId == baseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON)
 		OnSetActiveWeapon(static_cast<const CEOnSetActiveWeapon &>(evData).weapon);
 	else if(eventId == baseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED)
 		OnSetCharacterOrientation(static_cast<const CEOnSetCharacterOrientation &>(evData).up);
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 
 void CPlayerComponent::OnSetUpDirection(const Vector3 &direction)
@@ -150,7 +150,7 @@ void CPlayerComponent::OnWaterSubmerged()
 	if(entDsp == nullptr)
 		return;
 	auto *pDspComponent = static_cast<pragma::BaseEnvSoundDspComponent *>(entDsp->FindComponent("sound_dsp").get());
-	entDsp->SetKeyValue("spawnflags", std::to_string(umath::to_integral(pragma::BaseEnvSoundDspComponent::SpawnFlags::All | pragma::BaseEnvSoundDspComponent::SpawnFlags::AffectRelative)));
+	entDsp->SetKeyValue("spawnflags", std::to_string(pragma::math::to_integral(pragma::BaseEnvSoundDspComponent::SpawnFlags::All | pragma::BaseEnvSoundDspComponent::SpawnFlags::AffectRelative)));
 	if(pDspComponent != nullptr)
 		pDspComponent->SetDSPEffect("underwater");
 	entDsp->Spawn();
@@ -173,9 +173,9 @@ void CPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang, float dur
 	auto cb = FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>>::Create(nullptr);
 	static_cast<Callback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>> *>(cb.get())->SetFunction([cb, tStart, ang, dur](std::reference_wrapper<Vector3>, std::reference_wrapper<Quat> rot) mutable {
 		auto &t = pragma::get_cgame()->CurTime();
-		auto tDelta = umath::min(static_cast<float>(t - tStart), dur);
-		auto sc = static_cast<float>(umath::sin(tDelta / (dur / 2.f) * umath::pi_2));
-		EulerAngles rotOffset {static_cast<float>(umath::approach_angle(0.f, ang.p, umath::abs(ang.p) * sc)), static_cast<float>(umath::approach_angle(0.f, ang.y, umath::abs(ang.y) * sc)), static_cast<float>(umath::approach_angle(0.f, ang.r, umath::abs(ang.r) * sc))};
+		auto tDelta = pragma::math::min(static_cast<float>(t - tStart), dur);
+		auto sc = static_cast<float>(pragma::math::sin(tDelta / (dur / 2.f) * pragma::math::pi_2));
+		EulerAngles rotOffset {static_cast<float>(pragma::math::approach_angle(0.f, ang.p, pragma::math::abs(ang.p) * sc)), static_cast<float>(pragma::math::approach_angle(0.f, ang.y, pragma::math::abs(ang.y) * sc)), static_cast<float>(pragma::math::approach_angle(0.f, ang.r, pragma::math::abs(ang.r) * sc))};
 		rot.get() = rot.get() * uquat::create(rotOffset);
 		if(tDelta >= dur) {
 			cb.Remove();
@@ -225,13 +225,13 @@ void CPlayerComponent::Initialize()
 
 	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_SUBMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnWaterSubmerged(); });
 	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_EMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnWaterEmerged(); });
-	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW_SHADOW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW_SHADOW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &shouldDrawData = static_cast<CEShouldDraw &>(evData.get());
 		if(ShouldDrawShadow() == false) {
 			shouldDrawData.shouldDraw = false;
-			return util::EventReply::Handled;
+			return pragma::util::EventReply::Handled;
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUpdateMatrices(static_cast<CEOnUpdateRenderMatrices &>(evData.get()).transformation); });
 
@@ -394,9 +394,9 @@ void CPlayerComponent::OnTick(double tDelta)
 		if(doffset.time <= 0)
 			m_crouchViewOffset = nullptr;
 		else {
-			doffset.delta = umath::min(doffset.delta + tDelta / 0.2, 1.0); // 0.2 seconds to reach full speed
+			doffset.delta = pragma::math::min(doffset.delta + tDelta / 0.2, 1.0); // 0.2 seconds to reach full speed
 			float scale = CFloat((doffset.delta * tDelta) / doffset.time);
-			scale = umath::min(scale, 1.0f);
+			scale = pragma::math::min(scale, 1.0f);
 			Vector3 mv = doffset.offset * scale;
 			doffset.offset -= mv;
 			if(m_observableComponent)
@@ -411,9 +411,9 @@ void CPlayerComponent::OnTick(double tDelta)
 		if(dtrans.time <= 0)
 			m_upDirOffset = nullptr;
 		else {
-			dtrans.delta = umath::min(dtrans.delta + tDelta / 0.2, 1.0); // 0.2 seconds to reach full speed
+			dtrans.delta = pragma::math::min(dtrans.delta + tDelta / 0.2, 1.0); // 0.2 seconds to reach full speed
 			float scale = CFloat((dtrans.delta * tDelta) / dtrans.time);
-			scale = umath::min(scale, 1.0f);
+			scale = pragma::math::min(scale, 1.0f);
 
 			Vector3 mv = dtrans.offset * scale;
 			dtrans.offset -= mv;
@@ -500,14 +500,14 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 	auto m = glm::mat4_cast(rotDst);
 	EulerAngles ang;
 	glm::gtx::extractEulerAngleYXZ(m, ang.y, ang.p, ang.r);
-	ang.p = umath::rad_to_deg(ang.p);
-	ang.y = umath::rad_to_deg(ang.y);
-	ang.r = umath::rad_to_deg(ang.r);
+	ang.p = pragma::math::rad_to_deg(ang.p);
+	ang.y = pragma::math::rad_to_deg(ang.y);
+	ang.r = pragma::math::rad_to_deg(ang.r);
 	//
 
 	auto fToQuat = [](const EulerAngles &ang) {
 		auto m = umat::identity();
-		m = glm::gtx::eulerAngleYXZ(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r));
+		m = glm::gtx::eulerAngleYXZ(pragma::math::deg_to_rad(ang.y), pragma::math::deg_to_rad(ang.p), pragma::math::deg_to_rad(ang.r));
 		auto q = glm::gtc::quat_cast(m);
 		return q;
 	};
@@ -543,11 +543,11 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 		if(ang.p < -135.f || ang.p > 135.f)
 		{
 			rotDst = uquat::create(ang) *uquat::create(EulerAngles(0.f,0.f,180.f)); // This will effectively flip pitch around
-			ang.p = umath::clamp(ang.p,-90.f,90.f);
+			ang.p = pragma::math::clamp(ang.p,-90.f,90.f);
 		}
 		else
 		{
-			ang.p = umath::clamp(ang.p,-90.f,90.f);
+			ang.p = pragma::math::clamp(ang.p,-90.f,90.f);
 			rotDst = uquat::create(ang);
 		}
 

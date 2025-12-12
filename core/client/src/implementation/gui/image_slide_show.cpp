@@ -174,8 +174,8 @@ void pragma::gui::types::WIImageSlideShow::PreloadNextImage(Int32 img)
 	auto hSlideShow = GetHandle();
 
 	auto loadInfo = std::make_unique<msys::TextureLoadInfo>();
-	loadInfo->flags |= util::AssetLoadFlags::AbsolutePath;
-	loadInfo->onLoaded = [this, hSlideShow](util::Asset &asset) {
+	loadInfo->flags |= pragma::util::AssetLoadFlags::AbsolutePath;
+	loadInfo->onLoaded = [this, hSlideShow](pragma::util::Asset &asset) {
 		if(!hSlideShow.IsValid())
 			return;
 		m_imgPreload.texture = msys::TextureManager::GetAssetObject(asset);
@@ -202,7 +202,7 @@ void pragma::gui::types::WIImageSlideShow::PreloadNextRandomShuffle()
 	}
 	if(m_randomShuffle.empty())
 		return;
-	auto r = umath::random(0, CUInt32(m_randomShuffle.size() - 1));
+	auto r = pragma::math::random(0, CUInt32(m_randomShuffle.size() - 1));
 	auto img = m_randomShuffle[r];
 	m_randomShuffle.erase(m_randomShuffle.begin() + r);
 	if(!m_randomShuffle.empty() && img == m_currentImg) {

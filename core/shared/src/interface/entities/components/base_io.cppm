@@ -47,7 +47,7 @@ export {
 
 			std::unordered_map<std::string, std::vector<Output>> m_outputs;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::BaseIOComponent::IoFlags)
 };

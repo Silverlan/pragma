@@ -38,7 +38,7 @@ void Lua::OpenFileInZeroBrane(const std::string &fname, uint32_t lineId)
 			else
 				++it;
 		}
-		auto it = std::find_if(zbFileInfo.begin(), zbFileInfo.end(), [&fname, lineId](const ZBFileInfo &info) { return ustring::compare(info.fileName, fname, false) && info.lineId == lineId; });
+		auto it = std::find_if(zbFileInfo.begin(), zbFileInfo.end(), [&fname, lineId](const ZBFileInfo &info) { return pragma::string::compare(info.fileName, fname, false) && info.lineId == lineId; });
 		if(it == zbFileInfo.end()) {
 			if(it != zbFileInfo.end())
 				zbFileInfo.erase(it);
@@ -60,13 +60,13 @@ static void strip_path_until_lua_dir(std::string &shortSrc)
 	uint32_t offset = 0;
 	auto bFound = false;
 	auto luaPath = Lua::SCRIPT_DIRECTORY + c;
-	while(br != std::string::npos && shortSrc.length() >= offset + luaPath.length() && (bFound = ustring::compare(shortSrc.data() + offset, luaPath.c_str(), false, luaPath.length())) == false) {
+	while(br != std::string::npos && shortSrc.length() >= offset + luaPath.length() && (bFound = pragma::string::compare(shortSrc.data() + offset, luaPath.c_str(), false, luaPath.length())) == false) {
 		offset = br + 1;
 		br = shortSrc.find(c, br + 1);
 	}
 	if(bFound == false)
 		return;
-	shortSrc = ustring::substr(shortSrc, offset + luaPath.length());
+	shortSrc = pragma::string::substr(shortSrc, offset + luaPath.length());
 	if(shortSrc.length() > maxLuaPathLen)
 		shortSrc = "..." + shortSrc.substr(shortSrc.size() - maxLuaPathLen);
 }
@@ -90,7 +90,7 @@ static void transform_path(const lua::DebugInfo &d, std::string &errPath, int32_
 
 		if(Lua::GetLuaFilePath(Lua::SCRIPT_DIRECTORY_SLASH + path))
 			path = pragma::scripting::lua_core::util::make_clickable_lua_script_link(path, currentLine);
-		errPath = ustring::substr(errPath, 0, qt0 + 1) + path + ustring::substr(errPath, qt1);
+		errPath = pragma::string::substr(errPath, 0, qt0 + 1) + path + pragma::string::substr(errPath, qt1);
 	}
 }
 
@@ -143,12 +143,12 @@ bool Lua::PrintTraceback(lua::State *l, std::stringstream &ssOut, const std::str
 			uint32_t offset = 0;
 			auto bFound = false;
 			auto luaPath = Lua::SCRIPT_DIRECTORY + c;
-			while(br != std::string::npos && shortSrc.length() >= offset + luaPath.length() && (bFound = ustring::compare(shortSrc.data() + offset, luaPath.c_str(), false, luaPath.length())) == false) {
+			while(br != std::string::npos && shortSrc.length() >= offset + luaPath.length() && (bFound = pragma::string::compare(shortSrc.data() + offset, luaPath.c_str(), false, luaPath.length())) == false) {
 				offset = br + 1;
 				br = shortSrc.find(c, br + 1);
 			}
 			if(bFound == true) {
-				shortSrc = ustring::substr(shortSrc, offset);
+				shortSrc = pragma::string::substr(shortSrc, offset);
 				if(shortSrc.length() > maxLuaPathLen)
 					shortSrc = "..." + shortSrc.substr(shortSrc.size() - maxLuaPathLen);
 				//shortSrc = "[string \"" + shortSrc + "\"]";

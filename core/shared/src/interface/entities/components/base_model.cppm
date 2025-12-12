@@ -62,7 +62,7 @@ export {
 			void SetModelName(const std::string &name);
 			bool HasModel() const;
 			unsigned int GetSkin() const;
-			const std::shared_ptr<util::UInt32Property> &GetSkinProperty() const;
+			const std::shared_ptr<pragma::util::UInt32Property> &GetSkinProperty() const;
 			virtual void SetSkin(unsigned int skin);
 			const std::vector<uint32_t> &GetBodyGroups() const;
 			UInt32 GetBodyGroup(unsigned int groupId) const;
@@ -87,7 +87,7 @@ export {
 			virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 
 			uint32_t GetHitboxCount() const;
-			bool GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max, Vector3 &origin, Quat &rot, umath::CoordinateSpace space = umath::CoordinateSpace::World) const;
+			bool GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max, Vector3 &origin, Quat &rot, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::World) const;
 
 			const BaseBvhComponent *GetBvhComponent() const;
 			BaseBvhComponent *GetBvhComponent();
@@ -107,7 +107,7 @@ export {
 			IntersectionHandlerComponent *m_intersectionHandlerComponent = nullptr;
 			std::vector<unsigned int> m_bodyGroups;
 			std::unique_ptr<std::string> m_modelName = nullptr;
-			std::shared_ptr<util::UInt32Property> m_skin = nullptr;
+			std::shared_ptr<pragma::util::UInt32Property> m_skin = nullptr;
 			pragma::NetEventId m_netEvSetBodyGroup = pragma::INVALID_NET_EVENT;
 			pragma::NetEventId m_netEvMaxDrawDist = pragma::INVALID_NET_EVENT;
 			CallbackHandle m_onModelMaterialsLoaded = {};

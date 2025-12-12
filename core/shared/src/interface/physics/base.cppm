@@ -20,8 +20,8 @@ export {
 			IBase &operator=(const IBase &) = delete;
 			virtual ~IBase() = default;
 
-			util::TWeakSharedHandle<IBase> GetHandle() const;
-			util::TSharedHandle<IBase> ClaimOwnership() const;
+			pragma::util::TWeakSharedHandle<IBase> GetHandle() const;
+			pragma::util::TSharedHandle<IBase> ClaimOwnership() const;
 
 			virtual bool IsConstraint() const;
 			virtual bool IsCollisionObject() const;
@@ -42,12 +42,12 @@ export {
 			friend pragma::physics::PhysObj;
 			IBase(IEnvironment &env);
 			void SetUserData(void *userData) const;
-			virtual void InitializeLuaHandle(const util::TWeakSharedHandle<IBase> &handle);
+			virtual void InitializeLuaHandle(const pragma::util::TWeakSharedHandle<IBase> &handle);
 			template<class T>
 			void InitializeLuaObject(lua::State *lua);
 
 			IEnvironment &m_physEnv;
-			util::TWeakSharedHandle<IBase> m_handle = {};
+			pragma::util::TWeakSharedHandle<IBase> m_handle = {};
 
 			std::unique_ptr<luabind::object> m_luaObj = nullptr;
 		  private:
@@ -73,7 +73,7 @@ export {
 		{
 			auto handle = ClaimOwnership();
 			if(handle.IsValid())
-				m_luaObj = std::make_unique<luabind::object>(lua, pragma::LuaCore::raw_object_to_luabind_object(lua, util::shared_handle_cast<IBase, T>(handle)));
+				m_luaObj = std::make_unique<luabind::object>(lua, pragma::LuaCore::raw_object_to_luabind_object(lua, pragma::util::shared_handle_cast<IBase, T>(handle)));
 			else
 				m_luaObj = std::make_unique<luabind::object>(lua, pragma::LuaCore::raw_object_to_luabind_object(lua, std::dynamic_pointer_cast<T>(shared_from_this())));
 		}

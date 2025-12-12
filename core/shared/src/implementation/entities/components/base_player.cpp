@@ -42,10 +42,10 @@ void BasePlayerComponent::SetViewRotation(const Quat &rot)
 	if(charComponent.valid())
 		charComponent->SetViewOrientation(rot);
 }
-util::EventReply BasePlayerComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply BasePlayerComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseActorComponent::EVENT_ON_KILLED)
 		OnKilled(static_cast<const CEOnCharacterKilled &>(evData).damageInfo);
 	else if(eventId == baseActorComponent::EVENT_ON_RESPAWN)
@@ -54,7 +54,7 @@ util::EventReply BasePlayerComponent::HandleEvent(ComponentEventId eventId, Comp
 		auto &healthInfo = static_cast<pragma::CEOnTakenDamage &>(evData);
 		OnTakenDamage(healthInfo.damageInfo, healthInfo.oldHealth, healthInfo.newHealth);
 	}
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 bool BasePlayerComponent::CanUnCrouch() const
 {
@@ -268,53 +268,53 @@ void BasePlayerComponent::Initialize()
 	m_hBasePlayer = ent.GetHandle();
 
 	BindEventUnhandled(movementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
-	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &hMdl = GetEntity().GetModel();
 		if(hMdl == nullptr)
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		auto anim = hMdl->GetAnimation(static_cast<CEOnAnimationComplete &>(evData.get()).animation);
 		if(anim == nullptr)
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		if(anim->HasFlag(pragma::FAnim::Loop) == false)
 			PlaySharedActivity(pragma::Activity::Idle); // A non-looping animation has completed; Switch back to idle
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_RESET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_RESET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		PlaySharedActivity(pragma::Activity::Idle); // A non-looping animation has completed; Switch back to idle
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_START, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_START, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		m_movementActivity = pragma::Activity::Invalid;
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(baseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(baseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		if((IsCrouching() == true && m_crouchTransition != CrouchTransition::Uncrouching) || m_crouchTransition == CrouchTransition::Crouching) {
 			auto &activity = static_cast<CETranslateActivity &>(evData.get()).activity;
 			switch(activity) {
 			case pragma::Activity::Idle:
 				activity = pragma::Activity::CrouchIdle;
-				return util::EventReply::Handled;
+				return pragma::util::EventReply::Handled;
 			case pragma::Activity::Walk:
 			case pragma::Activity::Run:
 				activity = pragma::Activity::CrouchWalk;
-				return util::EventReply::Handled;
+				return pragma::util::EventReply::Handled;
 			}
 		}
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		OnPhysicsInitialized();
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
-	BindEvent(baseCharacterComponent::EVENT_IS_MOVING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseCharacterComponent::EVENT_IS_MOVING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		static_cast<CEIsMoving &>(evData.get()).moving = IsMoving();
-		return util::EventReply::Handled;
+		return pragma::util::EventReply::Handled;
 	});
 	BindEventUnhandled(baseCharacterComponent::EVENT_ON_JUMP, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { PlaySharedActivity(pragma::Activity::Jump); });
-	BindEventUnhandled(actionInputControllerComponent::EVENT_ON_ACTION_INPUT_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(actionInputControllerComponent::EVENT_ON_ACTION_INPUT_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &evAction = static_cast<CEOnActionInputChanged &>(evData.get());
 		HandleActionInput(evAction.action, evAction.pressed);
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 
 	auto whObservableComponent = ent.FindComponent("observable");
@@ -436,7 +436,7 @@ pragma::ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
 			min += posEnt;
 			max += posEnt;
 			Vector3 res;
-			umath::geometry::closest_point_on_aabb_to_point(min, max, origin, &res);
+			pragma::math::geometry::closest_point_on_aabb_to_point(min, max, origin, &res);
 
 			float dist = glm::distance(origin, res);
 			if(dist <= maxDist) {
@@ -569,7 +569,7 @@ int BasePlayerComponent::GetConVarInt(std::string cvar) const
 	std::unordered_map<std::string, std::string>::iterator i = const_cast<BasePlayerComponent *>(this)->m_conVars.find(cvar);
 	if(i == m_conVars.end())
 		return 0;
-	return ustring::to_int(i->second);
+	return pragma::string::to_int(i->second);
 }
 
 float BasePlayerComponent::GetConVarFloat(std::string cvar) const
@@ -577,7 +577,7 @@ float BasePlayerComponent::GetConVarFloat(std::string cvar) const
 	std::unordered_map<std::string, std::string>::iterator i = const_cast<BasePlayerComponent *>(this)->m_conVars.find(cvar);
 	if(i == m_conVars.end())
 		return 0;
-	return util::to_float(i->second);
+	return pragma::util::to_float(i->second);
 }
 
 bool BasePlayerComponent::GetConVarBool(std::string cvar) const
@@ -690,7 +690,7 @@ float BasePlayerComponent::GetWalkSpeed() const
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent) {
 		auto &scale = pTrComponent->GetScale();
-		r *= umath::abs_max(scale.x, scale.y, scale.z);
+		r *= pragma::math::abs_max(scale.x, scale.y, scale.z);
 	}
 	return r;
 }
@@ -700,7 +700,7 @@ float BasePlayerComponent::GetRunSpeed() const
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent) {
 		auto &scale = pTrComponent->GetScale();
-		r *= umath::abs_max(scale.x, scale.y, scale.z);
+		r *= pragma::math::abs_max(scale.x, scale.y, scale.z);
 	}
 	return r;
 }
@@ -710,7 +710,7 @@ float BasePlayerComponent::GetSprintSpeed() const
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent) {
 		auto &scale = pTrComponent->GetScale();
-		r *= umath::abs_max(scale.x, scale.y, scale.z);
+		r *= pragma::math::abs_max(scale.x, scale.y, scale.z);
 	}
 	return r;
 }
@@ -723,7 +723,7 @@ float BasePlayerComponent::GetCrouchedWalkSpeed() const
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent) {
 		auto &scale = pTrComponent->GetScale();
-		r *= umath::abs_max(scale.x, scale.y, scale.z);
+		r *= pragma::math::abs_max(scale.x, scale.y, scale.z);
 	}
 	return r;
 }

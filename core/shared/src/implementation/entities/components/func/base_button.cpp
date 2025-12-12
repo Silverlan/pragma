@@ -12,15 +12,15 @@ void BaseFuncButtonComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "use_sound", false))
+		if(pragma::string::compare<std::string>(kvData.key, "use_sound", false))
 			m_kvUseSound = kvData.value;
-		else if(ustring::compare<std::string>(kvData.key, "wait", false))
-			m_kvWaitTime = util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "wait", false))
+			m_kvWaitTime = pragma::util::to_float(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -34,10 +34,10 @@ void BaseFuncButtonComponent::Initialize()
 	ent.AddComponent<pragma::UsableComponent>();
 }
 
-util::EventReply BaseFuncButtonComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply BaseFuncButtonComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == usableComponent::EVENT_ON_USE) {
 		if(m_useSound != nullptr)
 			m_useSound->Play();
@@ -48,7 +48,7 @@ util::EventReply BaseFuncButtonComponent::HandleEvent(ComponentEventId eventId, 
 		if(ioComponent != nullptr)
 			ioComponent->TriggerOutput("OnPressed", static_cast<const CEOnUseData &>(evData).entity);
 	}
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 
 void BaseFuncButtonComponent::OnEntitySpawn()

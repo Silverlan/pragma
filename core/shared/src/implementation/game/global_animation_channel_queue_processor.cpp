@@ -40,10 +40,10 @@ void GlobalAnimationChannelQueueProcessor::ApplyValues()
 				continue;
 			auto &component = *channelCacheData.component;
 			auto &memberInfo = *channelCacheData.memberInfo;
-			if(!umath::is_flag_set(channelCacheData.changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty))
+			if(!pragma::math::is_flag_set(channelCacheData.changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty))
 				continue;
 			memberInfo.setterFunction(memberInfo, component, channelCacheData.data.data());
-			umath::set_flag(const_cast<pragma::AnimationChannelCacheData &>(channelCacheData).changed, pragma::AnimationChannelCacheData::State::Dirty, false);
+			pragma::math::set_flag(const_cast<pragma::AnimationChannelCacheData &>(channelCacheData).changed, pragma::AnimationChannelCacheData::State::Dirty, false);
 		}
 		m_itemCompleteCount += (range.indexAfterLast - range.start);
 	}
@@ -60,7 +60,7 @@ void GlobalAnimationChannelQueueProcessor::Submit(pragma::AnimationManagerData &
 	auto &channels = anim->GetChannels();
 	if(channels.size() != channelValueSubmitters.size())
 		throw std::runtime_error {"Number of channels does not match number of channel value submitters!"};
-	auto n = umath::min(channelValueSubmitters.size(), channels.size());
+	auto n = pragma::math::min(channelValueSubmitters.size(), channels.size());
 	auto t = animManager->GetCurrentTime();
 
 	auto numItems = n;

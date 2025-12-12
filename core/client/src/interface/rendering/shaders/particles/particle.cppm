@@ -19,7 +19,7 @@ export namespace pragma {
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_WORLD_ROTATION;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_WORLD_ROTATION;
 
-		enum class VertexAttribute : uint32_t { WorldRotation = umath::to_integral(ShaderParticle2DBase::VertexAttribute::Count) };
+		enum class VertexAttribute : uint32_t { WorldRotation = pragma::math::to_integral(ShaderParticle2DBase::VertexAttribute::Count) };
 
 		bool RecordWorldRotationBuffer(prosper::ShaderBindState &bindState, prosper::IBuffer &buffer) const;
 		ShaderParticleRotational(prosper::IPrContext &context, const std::string &identifier);

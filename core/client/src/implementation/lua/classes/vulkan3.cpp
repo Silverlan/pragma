@@ -86,7 +86,7 @@ void Lua::Vulkan::VKMemory::Write(lua::State *l,Memory &hMemory,uint32_t offset,
 }
 void Lua::Vulkan::VKMemory::Read(lua::State *l,Memory &hMemory,uint32_t offset,uint32_t size)
 {
-	auto ds = ::util::DataStream(size);
+	auto ds = pragma::util::DataStream(size);
 	if(hMemory.read(offset,size,ds->GetData()) == false)
 		return;
 	Lua::Push(l,ds);
@@ -129,7 +129,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordClearAttachment(lua::State *l, CommandB
 bool Lua::Vulkan::VKCommandBuffer::RecordCopyImage(lua::State *l, CommandBuffer &hCommandBuffer, Image &imgSrc, Image &imgDst, const prosper::util::CopyInfo &copyInfo) { return hCommandBuffer.RecordCopyImage(copyInfo, imgSrc, imgDst); }
 bool Lua::Vulkan::VKCommandBuffer::RecordCopyBufferToImage(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &bufSrc, Image &imgDst, const prosper::util::BufferImageCopyInfo &copyInfo) { return hCommandBuffer.RecordCopyBufferToImage(copyInfo, bufSrc, imgDst); }
 bool Lua::Vulkan::VKCommandBuffer::RecordCopyBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &bufSrc, Buffer &bufDst, const prosper::util::BufferCopy &copyInfo) { return hCommandBuffer.RecordCopyBuffer(copyInfo, bufSrc, bufDst); }
-bool Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, ::util::DataStream &ds) { return hCommandBuffer.RecordUpdateBuffer(buf, offset, ds->GetSize(), ds->GetData()); }
+bool Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, pragma::util::DataStream &ds) { return hCommandBuffer.RecordUpdateBuffer(buf, offset, ds->GetSize(), ds->GetData()); }
 bool Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, ::udm::Type type, Lua::udm_ng value)
 {
 	return ::udm::visit_ng(type, [&buf, &value, &hCommandBuffer, offset](auto tag) {
@@ -275,7 +275,7 @@ std::string Lua::Vulkan::VKContextObject::GetDebugName(lua::State *l, const pros
 /////////////////////////////////
 
 bool Lua::Vulkan::VKBuffer::IsValid(lua::State *l, Buffer &hBuffer) { return true; }
-bool Lua::Vulkan::VKBuffer::Write(lua::State *l, Buffer &hBuffer, uint32_t offset, ::util::DataStream &ds, uint32_t dsOffset, uint32_t dsSize) { return hBuffer.Write(offset, dsSize, ds->GetData() + dsOffset); }
+bool Lua::Vulkan::VKBuffer::Write(lua::State *l, Buffer &hBuffer, uint32_t offset, pragma::util::DataStream &ds, uint32_t dsOffset, uint32_t dsSize) { return hBuffer.Write(offset, dsSize, ds->GetData() + dsOffset); }
 bool Lua::Vulkan::VKBuffer::Write(lua::State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, Lua::udm_ng value)
 {
 	return ::udm::visit_ng(type, [&hBuffer, &value, offset](auto tag) {
@@ -283,9 +283,9 @@ bool Lua::Vulkan::VKBuffer::Write(lua::State *l, Buffer &hBuffer, uint32_t offse
 		return hBuffer.Write(offset, luabind::object_cast<T>(value));
 	});
 }
-Lua::opt<::util::DataStream> Lua::Vulkan::VKBuffer::Read(lua::State *l, Buffer &hBuffer, uint32_t offset, uint32_t size)
+Lua::opt<pragma::util::DataStream> Lua::Vulkan::VKBuffer::Read(lua::State *l, Buffer &hBuffer, uint32_t offset, uint32_t size)
 {
-	auto ds = ::util::DataStream(size);
+	auto ds = pragma::util::DataStream(size);
 	auto r = hBuffer.Read(offset, size, ds->GetData());
 	if(r == false)
 		return Lua::nil;
@@ -299,7 +299,7 @@ bool Lua::Vulkan::VKBuffer::Read(lua::State *l, Buffer &hBuffer, uint32_t offset
 		return hBuffer.Read(offset, sizeof(val), &val);
 	});
 }
-bool Lua::Vulkan::VKBuffer::Read(lua::State *l, Buffer &hBuffer, uint32_t offset, uint32_t size, ::util::DataStream &ds, uint32_t dsOffset)
+bool Lua::Vulkan::VKBuffer::Read(lua::State *l, Buffer &hBuffer, uint32_t offset, uint32_t size, pragma::util::DataStream &ds, uint32_t dsOffset)
 {
 	auto reqSize = size + dsOffset;
 	if(ds->GetSize() < reqSize)

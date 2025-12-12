@@ -33,9 +33,9 @@ bool pragma::physics::ControllerPhysObj::IsGroundWalkable() const
 	auto n = m_controller->GetGroundTouchNormal();
 	if(!n.has_value())
 		return false;
-	auto angle = umath::acos(uvec::dot(*n, m_controller->GetUpDirection()));
+	auto angle = pragma::math::acos(uvec::dot(*n, m_controller->GetUpDirection()));
 	auto slopeLimit = GetSlopeLimit();
-	auto bGroundWalkable = (angle <= umath::deg_to_rad(slopeLimit));
+	auto bGroundWalkable = (angle <= pragma::math::deg_to_rad(slopeLimit));
 	return bGroundWalkable;
 }
 pragma::ecs::BaseEntity *pragma::physics::ControllerPhysObj::GetGroundEntity() const
@@ -79,7 +79,7 @@ void pragma::physics::ControllerPhysObj::PostSimulate()
 	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	data.SetCollisionFilterGroup(owner->GetCollisionFilter());
 	data.SetCollisionFilterMask(owner->GetCollisionFilterMask() &~CollisionMask::Trigger &~CollisionMask::Water &~CollisionMask::WaterSurface);
-	m_groundRayResult = ::util::make_shared<TraceResult>(game->Overlap(data));*/
+	m_groundRayResult = pragma::util::make_shared<TraceResult>(game->Overlap(data));*/
 
 	/* // Obsolete; Now handled by simulation and pragma::physics::ControllerPhysObj::SetGroundContactPoint
 	auto pTrComponent = owner->GetEntity().GetTransformComponent();
@@ -103,15 +103,15 @@ void pragma::physics::ControllerPhysObj::PostSimulate()
 	if(bFirst == true)
 	{
 		bFirst = false;
-		m_groundRayResult = ::util::make_shared<TraceResult>(game->RayCast(data));
+		m_groundRayResult = pragma::util::make_shared<TraceResult>(game->RayCast(data));
 		m_groundRayResult->hit = false;
 	}
 	*/
 
 	// See also: BaseCharacter::GetAimTraceData
 
-	//m_groundRayResult = ::util::make_shared<TraceResult>(game->Overlap(data));
-	//m_groundRayResult = ::util::make_shared<TraceResult>(game->RayCast(data));
+	//m_groundRayResult = pragma::util::make_shared<TraceResult>(game->Overlap(data));
+	//m_groundRayResult = pragma::util::make_shared<TraceResult>(game->RayCast(data));
 	/*auto origin = t.GetOrigin();
 	origin.y -= 100.f;//0.5f;
 	//auto pos = GetPosition();
@@ -128,8 +128,8 @@ void pragma::physics::ControllerPhysObj::PostSimulate()
 	data.SetCollisionFilterMask(owner->GetCollisionFilterMask() &~CollisionMask::Trigger &~CollisionMask::Water &~CollisionMask::WaterSurface);
 	// See also: BaseCharacter::GetAimTraceData
 
-	//m_groundRayResult = ::util::make_shared<TraceResult>(game->Overlap(data));
-	m_groundRayResult = ::util::make_shared<TraceResult>(game->RayCast(data));*/
+	//m_groundRayResult = pragma::util::make_shared<TraceResult>(game->Overlap(data));
+	m_groundRayResult = pragma::util::make_shared<TraceResult>(game->RayCast(data));*/
 
 	//auto bOnGround = m_bOnGround;
 	//if(r.hit == true && r.position.y > pos.y)
@@ -143,13 +143,13 @@ void pragma::physics::ControllerPhysObj::SetOrientation(const Quat &rot)
 	//PhysObj::SetOrientation(rot);
 }
 pragma::BaseEntityComponent *pragma::physics::ControllerPhysObj::GetOwner() { return pragma::physics::PhysObj::GetOwner(); }
-umath::Degree pragma::physics::ControllerPhysObj::GetSlopeLimit() const
+pragma::math::Degree pragma::physics::ControllerPhysObj::GetSlopeLimit() const
 {
 	if(m_controller == nullptr)
 		return 0.f;
 	return m_controller->GetSlopeLimit();
 }
-void pragma::physics::ControllerPhysObj::SetSlopeLimit(umath::Degree limit)
+void pragma::physics::ControllerPhysObj::SetSlopeLimit(pragma::math::Degree limit)
 {
 	if(m_controller == nullptr)
 		return;
@@ -179,7 +179,7 @@ Vector3 pragma::physics::ControllerPhysObj::GetGroundVelocity() const
 		return {};
 	auto *rigidBody = physColGround->GetRigidBody();
 	auto v = rigidBody->GetLinearVelocity();
-	v += util::angular_velocity_to_linear(rigidBody->GetPos(), rigidBody->GetAngularVelocity(), const_cast<ControllerPhysObj *>(this)->GetPosition());
+	v += pragma::math::angular_velocity_to_linear(rigidBody->GetPos(), rigidBody->GetAngularVelocity(), const_cast<ControllerPhysObj *>(this)->GetPosition());
 	return v;
 }
 
@@ -256,7 +256,7 @@ bool pragma::physics::BoxControllerPhysObj::Initialize(const Vector3 &halfExtent
 
 	auto pTrComponent = GetOwner()->GetEntity().GetTransformComponent();
 	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
-	umath::Transform startTransform;
+	pragma::math::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
 	auto *state = m_networkState;
@@ -268,7 +268,7 @@ bool pragma::physics::BoxControllerPhysObj::Initialize(const Vector3 &halfExtent
 	auto *collisionObject = m_controller.IsValid() ? m_controller->GetCollisionObject() : nullptr;
 	if(collisionObject == nullptr)
 		return false;
-	m_collisionObject = util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ICollisionObject>(collisionObject->ClaimOwnership());
+	m_collisionObject = pragma::util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ICollisionObject>(collisionObject->ClaimOwnership());
 	collisionObject->SetPhysObj(*this);
 	m_collisionObjects.push_back(m_collisionObject);
 
@@ -326,7 +326,7 @@ bool pragma::physics::CapsuleControllerPhysObj::Initialize(unsigned int width, u
 
 	auto pTrComponent = GetOwner()->GetEntity().GetTransformComponent();
 	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
-	umath::Transform startTransform;
+	pragma::math::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
 
@@ -339,7 +339,7 @@ bool pragma::physics::CapsuleControllerPhysObj::Initialize(unsigned int width, u
 	auto *collisionObject = m_controller.IsValid() ? m_controller->GetCollisionObject() : nullptr;
 	if(collisionObject == nullptr)
 		return false;
-	m_collisionObject = util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ICollisionObject>(collisionObject->ClaimOwnership());
+	m_collisionObject = pragma::util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ICollisionObject>(collisionObject->ClaimOwnership());
 	collisionObject->SetPhysObj(*this);
 	m_collisionObjects.push_back(m_collisionObject);
 

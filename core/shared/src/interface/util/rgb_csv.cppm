@@ -8,17 +8,17 @@ export module pragma.shared:util.rgb_csv;
 
 export import pragma.math;
 
-export namespace util {
+export namespace pragma::util {
 	struct DLLNETWORK HSV {
 		HSV(double h, double s, double v) : h {h}, s {s}, v {v} {}
 		HSV() = default;
 
-		bool operator==(const util::HSV &b) const
+		bool operator==(const pragma::util::HSV &b) const
 		{
 			constexpr auto EPSILON = 0.01f;
-			return umath::abs(h - b.h) <= EPSILON && umath::abs(s - b.s) <= EPSILON && umath::abs(v - b.v) <= EPSILON;
+			return pragma::math::abs(h - b.h) <= EPSILON && pragma::math::abs(s - b.s) <= EPSILON && pragma::math::abs(v - b.v) <= EPSILON;
 		}
-		bool operator!=(const util::HSV &b) const { return operator==(b); }
+		bool operator!=(const pragma::util::HSV &b) const { return operator==(b); }
 
 		double h = 0.0;
 		double s = 0.0;

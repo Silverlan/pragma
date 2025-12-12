@@ -12,19 +12,19 @@ void BaseTriggerPushComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "push_dir", false)) {
+		if(pragma::string::compare<std::string>(kvData.key, "push_dir", false)) {
 			EulerAngles ang(kvData.value);
 			m_kvPushDir = ang.Forward();
 		}
-		else if(ustring::compare<std::string>(kvData.key, "push_speed", false))
-			m_kvPushSpeed = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "change_duration", false))
-			m_kvChangeDuration = util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "push_speed", false))
+			m_kvPushSpeed = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "change_duration", false))
+			m_kvChangeDuration = pragma::util::to_float(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -52,7 +52,7 @@ void BaseTriggerPushComponent::OnTick(double dt)
 			continue;
 		}
 		auto *ent = info.hEntity.get();
-		auto t = umath::min(info.t, static_cast<float>(dt) / m_kvChangeDuration);
+		auto t = pragma::math::min(info.t, static_cast<float>(dt) / m_kvChangeDuration);
 		auto pVelComponentEnt = ent->GetComponent<pragma::VelocityComponent>();
 		auto vel = pVelComponentEnt.valid() ? pVelComponentEnt->GetVelocity() : Vector3 {};
 		vel = glm::gtc::slerp(uvec::get_normal(vel), m_kvPushDir, t) * uvec::length(vel);
@@ -65,7 +65,7 @@ void BaseTriggerPushComponent::OnTick(double dt)
 		}
 		++it;
 		/*auto speed = uvec::length(vel);
-		auto speedChange = umath::min(speed,umath::min(info.speed,static_cast<float>(tDelta) *(1.f /m_kvChangeDuration) *info.initialSpeed));
+		auto speedChange = pragma::math::min(speed,pragma::math::min(info.speed,static_cast<float>(tDelta) *(1.f /m_kvChangeDuration) *info.initialSpeed));
 		if(speedChange <= 0.f)
 		{
 			it = m_entityPushQueue.erase(it);
@@ -74,7 +74,7 @@ void BaseTriggerPushComponent::OnTick(double dt)
 		info.speed -= speedChange;
 		if(speed > 0.f)
 			vel /= speed;
-		vel *= umath::max(speed -speedChange,0.f);
+		vel *= pragma::math::max(speed -speedChange,0.f);
 		vel += m_kvPushDir *speedChange;
 		ent->SetVelocity(vel);
 		++it;*/
@@ -94,13 +94,13 @@ void BaseTriggerPushComponent::OnTick(double dt)
 	}
 }
 
-util::EventReply BaseTriggerPushComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply BaseTriggerPushComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseTouchComponent::EVENT_ON_START_TOUCH) {
 		auto &entThis = GetEntity();
-		if(entThis.GetSpawnFlags() & umath::to_integral(SpawnFlags::ChangeVelocityDirection)) {
+		if(entThis.GetSpawnFlags() & pragma::math::to_integral(SpawnFlags::ChangeVelocityDirection)) {
 			auto &touchData = static_cast<const pragma::CETouchData &>(evData);
 			m_entityPushQueue.push_back({});
 			auto &info = m_entityPushQueue.back();
@@ -109,5 +109,5 @@ util::EventReply BaseTriggerPushComponent::HandleEvent(ComponentEventId eventId,
 			info.rotation = uvec::get_rotation(pVelComponentEnt.valid() ? uvec::get_normal(pVelComponentEnt->GetVelocity()) : uvec::UP, m_kvPushDir);
 		}
 	}
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }

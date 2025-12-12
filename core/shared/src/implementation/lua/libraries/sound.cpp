@@ -11,8 +11,8 @@ import se_script;
 void Lua::sound::register_enums(lua::State *l)
 {
 	Lua::RegisterLibraryEnums(l, "sound",
-	  {{"FCREATE_NONE", umath::to_integral(pragma::audio::ALCreateFlags::None)}, {"FCREATE_MONO", umath::to_integral(pragma::audio::ALCreateFlags::Mono)}, {"FCREATE_STREAM", umath::to_integral(pragma::audio::ALCreateFlags::Stream)},
-	    {"FCREATE_DONT_TRANSMIT", umath::to_integral(pragma::audio::ALCreateFlags::DontTransmit)}});
+	  {{"FCREATE_NONE", pragma::math::to_integral(pragma::audio::ALCreateFlags::None)}, {"FCREATE_MONO", pragma::math::to_integral(pragma::audio::ALCreateFlags::Mono)}, {"FCREATE_STREAM", pragma::math::to_integral(pragma::audio::ALCreateFlags::Stream)},
+	    {"FCREATE_DONT_TRANSMIT", pragma::math::to_integral(pragma::audio::ALCreateFlags::DontTransmit)}});
 }
 
 void Lua::sound::register_library(luabind::module_ &soundMod)
@@ -147,7 +147,7 @@ luabind::object Lua::sound::read_wav_phonemes(lua::State *l, const std::string &
 	if(f == nullptr)
 		return Lua::nil;
 	source_engine::script::SoundPhonemeData sp {};
-	if(source_engine::script::read_wav_phonemes(f, sp) != ::util::MarkupFile::ResultCode::Ok)
+	if(source_engine::script::read_wav_phonemes(f, sp) != pragma::util::MarkupFile::ResultCode::Ok)
 		return Lua::nil;
 
 	auto t = luabind::newtable(l);

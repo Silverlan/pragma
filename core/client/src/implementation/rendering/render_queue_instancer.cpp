@@ -12,7 +12,7 @@ import :game;
 using namespace pragma;
 
 static auto cvInstancingThreshold = pragma::console::get_client_con_var("render_instancing_threshold");
-rendering::RenderQueueInstancer::RenderQueueInstancer(pragma::rendering::RenderQueue &renderQueue) : m_renderQueue {renderQueue}, m_instanceThreshold {static_cast<uint32_t>(umath::max(cvInstancingThreshold->GetInt(), 2))} {}
+rendering::RenderQueueInstancer::RenderQueueInstancer(pragma::rendering::RenderQueue &renderQueue) : m_renderQueue {renderQueue}, m_instanceThreshold {static_cast<uint32_t>(pragma::math::max(cvInstancingThreshold->GetInt(), 2))} {}
 
 void rendering::RenderQueueInstancer::Process()
 {
@@ -38,7 +38,7 @@ void rendering::RenderQueueInstancer::Process()
 	ProcessInstantiableList(m_curIndex, prevNumMeshes, prevHash);
 }
 
-void rendering::RenderQueueInstancer::ProcessInstantiableList(uint32_t endIndex, uint32_t numMeshes, util::Hash hash)
+void rendering::RenderQueueInstancer::ProcessInstantiableList(uint32_t endIndex, uint32_t numMeshes, pragma::util::Hash hash)
 {
 	auto numInstantiableEntities = m_instantiableEntityList.size();
 	if(numInstantiableEntities < m_instanceThreshold) {
@@ -61,7 +61,7 @@ void rendering::RenderQueueInstancer::ProcessInstantiableList(uint32_t endIndex,
 
 		// Note: Hash has to be in the right order for frame coherence, which is not necessarily the same order as the queue (since the entity index
 		// is not included in the sort key)
-		hash = util::hash_combine<uint64_t>(hash, static_cast<uint64_t>(m_instantiableEntityList[sortedInstantiableEntityIndices[i]]));
+		hash = pragma::util::hash_combine<uint64_t>(hash, static_cast<uint64_t>(m_instantiableEntityList[sortedInstantiableEntityIndices[i]]));
 	}
 
 	auto &instanceIndexBuffer = pragma::CSceneComponent::GetEntityInstanceIndexBuffer();
@@ -97,12 +97,12 @@ void rendering::RenderQueueInstancer::ProcessInstantiableList(uint32_t endIndex,
 	m_instantiableEntityList.clear();
 }
 
-util::Hash rendering::RenderQueueInstancer::CalcNextEntityHash(uint32_t &outNumMeshes, EntityIndex &entIndex)
+pragma::util::Hash rendering::RenderQueueInstancer::CalcNextEntityHash(uint32_t &outNumMeshes, EntityIndex &entIndex)
 {
 	auto &sortedItemIndices = m_renderQueue.sortedItemIndices;
 	if(m_curIndex >= sortedItemIndices.size())
 		return 0;
-	util::Hash hash = 0;
+	pragma::util::Hash hash = 0;
 	auto entity = m_renderQueue.queue[sortedItemIndices[m_curIndex].first].entity;
 	entIndex = entity;
 	auto &renderMeshes = static_cast<pragma::ecs::CBaseEntity &>(*pragma::get_cgame()->GetEntityByLocalIndex(entIndex)).GetRenderComponent()->GetRenderMeshes();
@@ -115,9 +115,9 @@ util::Hash rendering::RenderQueueInstancer::CalcNextEntityHash(uint32_t &outNumM
 		++outNumMeshes;
 		++m_curIndex;
 		static_assert(sizeof(SortingKey) == sizeof(uint64_t));
-		hash = util::hash_combine<uint64_t>(hash, *reinterpret_cast<uint64_t *>(&sortKey.second));
+		hash = pragma::util::hash_combine<uint64_t>(hash, *reinterpret_cast<uint64_t *>(&sortKey.second));
 		// TODO: The order of meshes is not guaranteed to be the same every frame!
-		hash = util::hash_combine<uint64_t>(hash, reinterpret_cast<uint64_t>(renderMeshes[item.mesh].get()));
+		hash = pragma::util::hash_combine<uint64_t>(hash, reinterpret_cast<uint64_t>(renderMeshes[item.mesh].get()));
 	}
 	return hash;
 }

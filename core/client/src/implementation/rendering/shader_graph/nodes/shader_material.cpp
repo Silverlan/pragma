@@ -12,17 +12,17 @@ using namespace pragma::rendering::shader_graph;
 ShaderMaterialNode::ShaderMaterialNode(const std::string_view &type, const pragma::rendering::shader_material::ShaderMaterial &shaderMaterial) : pragma::shadergraph::Node {type, pragma::shadergraph::CATEGORY_TEXTURE}, m_shaderMaterial {shaderMaterial}
 {
 	for(auto &tex : m_shaderMaterial.textures) {
-		auto name = ustring::to_camel_case(tex.name);
+		auto name = pragma::string::to_camel_case(tex.name);
 		AddOutput(name, pragma::shadergraph::DataType::String);
 	}
 
 	for(auto &prop : m_shaderMaterial.properties) {
-		if(umath::is_flag_set(prop.propertyFlags, pragma::rendering::Property::Flags::HideInEditor))
+		if(pragma::math::is_flag_set(prop.propertyFlags, pragma::rendering::Property::Flags::HideInEditor))
 			continue;
 		auto socketType = pragma::shadergraph::to_data_type(pragma::shadergraph::to_udm_type(prop.parameter.type));
 		if(socketType == pragma::shadergraph::DataType::Invalid)
 			continue;
-		AddOutput(ustring::to_camel_case(prop.parameter.name), socketType);
+		AddOutput(pragma::string::to_camel_case(prop.parameter.name), socketType);
 	}
 }
 std::string ShaderMaterialNode::GetTextureVariableName(const pragma::shadergraph::OutputSocket &socket) const { return pragma::rendering::shader_material::ShaderMaterial::GetTextureUniformVariableName(socket.GetSocket().name); }
@@ -35,7 +35,7 @@ std::string ShaderMaterialNode::DoEvaluate(const pragma::shadergraph::Graph &gra
 		auto socketType = prop.parameter.type;
 		if(socketType == pragma::shadergraph::DataType::Invalid)
 			continue;
-		auto socketName = ustring::to_camel_case(prop.parameter.name);
+		auto socketName = pragma::string::to_camel_case(prop.parameter.name);
 		if(!gn.IsOutputLinked(socketName))
 			continue;
 		auto *glslType = pragma::shadergraph::to_glsl_type(socketType);

@@ -25,9 +25,9 @@ export {
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			virtual void Initialize() override;
 
-			virtual void SetPlane(const umath::Plane &plane);
-			const umath::Plane &GetPlane() const;
-			umath::Plane GetPlaneWs() const;
+			virtual void SetPlane(const pragma::math::Plane &plane);
+			const pragma::math::Plane &GetPlane() const;
+			pragma::math::Plane GetPlaneWs() const;
 
 			void SetPlane(const Vector3 &n, float d);
 			void GetPlane(Vector3 &n, float &d) const;
@@ -60,7 +60,7 @@ export {
 		  protected:
 			virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 			BaseSurfaceComponent(pragma::ecs::BaseEntity &ent);
-			umath::Plane m_plane = {{0.f, 1.f, 0.f}, 0.f};
+			pragma::math::Plane m_plane = {{0.f, 1.f, 0.f}, 0.f};
 			std::weak_ptr<pragma::geometry::ModelSubMesh> m_mesh = {};
 			pragma::NetEventId m_netEvSetPlane = pragma::INVALID_NET_EVENT;
 			std::string m_kvSurfaceMaterial;

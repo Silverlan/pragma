@@ -93,10 +93,10 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 					CLightMapComponent::LOGGER.error("Failed to set lightmap on render scene!");
 			}
 			else
-				CLightMapComponent::LOGGER.error("Failed to find lightmap component on entity with ID {}!", util::uuid_to_string(m_lightmapDataCache->lightmapEntityId));
+				CLightMapComponent::LOGGER.error("Failed to find lightmap component on entity with ID {}!", pragma::util::uuid_to_string(m_lightmapDataCache->lightmapEntityId));
 		}
 		else
-			CLightMapComponent::LOGGER.error("Failed to find lightmap entity with ID {}!", util::uuid_to_string(m_lightmapDataCache->lightmapEntityId));
+			CLightMapComponent::LOGGER.error("Failed to find lightmap entity with ID {}!", pragma::util::uuid_to_string(m_lightmapDataCache->lightmapEntityId));
 	}
 	else
 		CLightMapComponent::LOGGER.error("Failed to initialize global lightmap uv buffer!");
@@ -104,7 +104,7 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 void CLightMapDataCacheComponent::ReloadCache()
 {
 	CLightMapComponent::LOGGER.info("Reloading lightmap data cache from cache file '{}'...", m_lightmapDataCacheFile);
-	m_lightmapDataCache = ::util::make_shared<rendering::LightmapDataCache>();
+	m_lightmapDataCache = pragma::util::make_shared<rendering::LightmapDataCache>();
 	std::string err;
 	if(!rendering::LightmapDataCache::Load(m_lightmapDataCacheFile, *m_lightmapDataCache, err))
 		m_lightmapDataCache = nullptr;
@@ -120,27 +120,27 @@ void CLightMapDataCacheComponent::ReloadCache()
 
 		auto it = entIt.begin();
 		if(it == entIt.end()) {
-			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache does not exist!", util::uuid_to_string(pair.first.uuid));
+			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache does not exist!", pragma::util::uuid_to_string(pair.first.uuid));
 			continue;
 		}
 		auto *ent = *it;
 		if(!ent) {
-			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache is invalid!", util::uuid_to_string(pair.first.uuid));
+			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache is invalid!", pragma::util::uuid_to_string(pair.first.uuid));
 			continue;
 		}
 		auto &mdl = ent->GetModel();
 		if(!mdl) {
-			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache has no valid model!", util::uuid_to_string(pair.first.uuid));
+			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache has no valid model!", pragma::util::uuid_to_string(pair.first.uuid));
 			continue;
 		}
 		auto mdlName = mdl->GetName();
 		if(mdlName != pair.second.model) {
-			CLightMapComponent::LOGGER.warn("Model name '{}' of entity '{}' defined in lightmap data cache does not match expected model '{}'!", mdlName, util::uuid_to_string(pair.first.uuid), pair.second.model);
+			CLightMapComponent::LOGGER.warn("Model name '{}' of entity '{}' defined in lightmap data cache does not match expected model '{}'!", mdlName, pragma::util::uuid_to_string(pair.first.uuid), pair.second.model);
 			continue;
 		}
 		auto itCache = cachedModels.find(mdlName);
 		if(itCache != cachedModels.end() && itCache->second == nullptr) {
-			CLightMapComponent::LOGGER.warn("Invalid model cache for entity '{}' defined in lightmap data cache! Ignoring...", util::uuid_to_string(pair.first.uuid));
+			CLightMapComponent::LOGGER.warn("Invalid model cache for entity '{}' defined in lightmap data cache! Ignoring...", pragma::util::uuid_to_string(pair.first.uuid));
 			continue;
 		}
 		auto hasLightmapData = false;
@@ -164,7 +164,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 		if(itCache != cachedModels.end())
 			lmModel = itCache->second;
 		else if(!hasLightmapData) {
-			CLightMapComponent::LOGGER.warn("Model '{}' of entity '{}' defined in lightmap data cache does not have lightmap uv data!", mdlName, util::uuid_to_string(pair.first.uuid));
+			CLightMapComponent::LOGGER.warn("Model '{}' of entity '{}' defined in lightmap data cache does not have lightmap uv data!", mdlName, pragma::util::uuid_to_string(pair.first.uuid));
 			cachedModels[mdlName] = nullptr;
 		}
 		else {
@@ -179,7 +179,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 						auto udmLightmapData = extData["lightmapData"];
 						if(udmLightmapData) {
 							auto udmMeshData = udmLightmapData["meshData"];
-							std::vector<umath::Vertex> verts;
+							std::vector<pragma::math::Vertex> verts;
 							udmMeshData["vertices"](verts);
 
 							auto udmAlphas = udmMeshData["alphas"];

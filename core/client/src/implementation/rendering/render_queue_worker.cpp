@@ -57,7 +57,7 @@ void RenderQueueWorker::StartThread()
 			}
 		}
 	}};
-	util::set_thread_name(m_thread, "render_queue_worker");
+	pragma::util::set_thread_name(m_thread, "render_queue_worker");
 }
 
 RenderQueueWorker::~RenderQueueWorker()
@@ -89,7 +89,7 @@ void RenderQueueWorkerManager::SetWorkerCount(uint32_t numWorkers)
 	}
 	m_workers.reserve(numWorkers);
 	for(auto i = m_workers.size(); i < numWorkers; ++i)
-		m_workers.push_back(::util::make_shared<RenderQueueWorker>(*this));
+		m_workers.push_back(pragma::util::make_shared<RenderQueueWorker>(*this));
 }
 
 RenderQueueWorkerManager::~RenderQueueWorkerManager()

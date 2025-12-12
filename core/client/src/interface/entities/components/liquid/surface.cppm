@@ -13,7 +13,7 @@ export import :entities.components.surface;
 export namespace pragma {
 	struct DLLCLIENT WaterScene {
 		~WaterScene();
-		util::TWeakSharedHandle<pragma::CSceneComponent> sceneReflection = {};
+		pragma::util::TWeakSharedHandle<pragma::CSceneComponent> sceneReflection = {};
 		std::shared_ptr<prosper::IBuffer> settingsBuffer = nullptr;
 
 		// Fog
@@ -28,10 +28,10 @@ export namespace pragma {
 		std::shared_ptr<prosper::Texture> texScene = nullptr;
 		std::shared_ptr<prosper::Texture> texSceneDepth = nullptr;
 
-		util::PFloatProperty waterScale = nullptr;
-		util::PFloatProperty waveStrength = nullptr;
-		util::PFloatProperty waveSpeed = nullptr;
-		util::PFloatProperty reflectiveIntensity = nullptr;
+		pragma::util::PFloatProperty waterScale = nullptr;
+		pragma::util::PFloatProperty waveStrength = nullptr;
+		pragma::util::PFloatProperty waveSpeed = nullptr;
+		pragma::util::PFloatProperty reflectiveIntensity = nullptr;
 	};
 
 	class DLLCLIENT CLiquidSurfaceComponent final : public BaseLiquidSurfaceComponent, public CBaseNetComponent {
@@ -60,8 +60,8 @@ export namespace pragma {
 		EntityHandle m_hEntUnderwater {};
 		pragma::ComponentHandle<CSurfaceComponent> m_surfaceComponent;
 		std::unique_ptr<WaterScene> m_waterScene = nullptr;
-		util::WeakHandle<prosper::Shader> m_shaderPpWater {};
-		umath::geometry::PlaneSide m_curCameraSurfaceSide = umath::geometry::PlaneSide::OnPlane;
+		pragma::util::WeakHandle<prosper::Shader> m_shaderPpWater {};
+		pragma::math::geometry::PlaneSide m_curCameraSurfaceSide = pragma::math::geometry::PlaneSide::OnPlane;
 		std::pair<Vector3, Vector3> m_waterAabbBounds = {};
 		bool m_renderDataInitialized = false;
 	};

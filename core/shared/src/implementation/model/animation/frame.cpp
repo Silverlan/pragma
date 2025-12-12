@@ -103,7 +103,7 @@ std::shared_ptr<Frame> Frame::Create(const Frame &other) { return std::shared_pt
 Frame::Frame(unsigned int numBones) : m_move(nullptr)
 {
 	m_bones.resize(numBones);
-	std::fill(m_bones.begin(), m_bones.end(), umath::Transform {});
+	std::fill(m_bones.begin(), m_bones.end(), pragma::math::Transform {});
 }
 
 Frame::Frame(const Frame &other) : m_move(nullptr)
@@ -184,7 +184,7 @@ void Frame::Mirror(pragma::Axis axis)
 	for(auto &t : m_bones) {
 		t.SetOrigin(t.GetOrigin() * transform);
 		auto &rot = t.GetRotation();
-		uquat::mirror_on_axis(rot, umath::to_integral(axis));
+		uquat::mirror_on_axis(rot, pragma::math::to_integral(axis));
 	}
 }
 
@@ -204,12 +204,12 @@ bool Frame::operator==(const Frame &other) const
 	return true;
 }
 
-const std::vector<umath::Transform> &Frame::GetBoneTransforms() const { return const_cast<Frame *>(this)->GetBoneTransforms(); }
+const std::vector<pragma::math::Transform> &Frame::GetBoneTransforms() const { return const_cast<Frame *>(this)->GetBoneTransforms(); }
 const std::vector<Vector3> &Frame::GetBoneScales() const { return const_cast<Frame *>(this)->GetBoneScales(); }
-std::vector<umath::Transform> &Frame::GetBoneTransforms() { return m_bones; }
+std::vector<pragma::math::Transform> &Frame::GetBoneTransforms() { return m_bones; }
 std::vector<Vector3> &Frame::GetBoneScales() { return m_scales; }
-umath::Transform *Frame::GetBoneTransform(uint32_t idx) { return (idx < m_bones.size()) ? &m_bones.at(idx) : nullptr; }
-const umath::Transform *Frame::GetBoneTransform(uint32_t idx) const { return const_cast<Frame *>(this)->GetBoneTransform(idx); }
+pragma::math::Transform *Frame::GetBoneTransform(uint32_t idx) { return (idx < m_bones.size()) ? &m_bones.at(idx) : nullptr; }
+const pragma::math::Transform *Frame::GetBoneTransform(uint32_t idx) const { return const_cast<Frame *>(this)->GetBoneTransform(idx); }
 void Frame::Validate()
 {
 	for(auto &pose : GetBoneTransforms()) {
@@ -221,15 +221,15 @@ void Frame::Validate()
 	for(auto &w : GetFlexFrameData().flexControllerWeights)
 		pragma::asset::validate_value(w);
 }
-bool Frame::GetBonePose(uint32_t boneId, umath::ScaledTransform &outTransform) const
+bool Frame::GetBonePose(uint32_t boneId, pragma::math::ScaledTransform &outTransform) const
 {
 	if(boneId >= m_bones.size())
 		return false;
 	auto &t = m_bones.at(boneId);
-	outTransform = umath::ScaledTransform {t.GetOrigin(), t.GetRotation(), (boneId < m_scales.size()) ? m_scales.at(boneId) : Vector3 {1.f, 1.f, 1.f}};
+	outTransform = pragma::math::ScaledTransform {t.GetOrigin(), t.GetRotation(), (boneId < m_scales.size()) ? m_scales.at(boneId) : Vector3 {1.f, 1.f, 1.f}};
 	return true;
 }
-void Frame::SetBonePose(uint32_t boneId, const umath::ScaledTransform &pose)
+void Frame::SetBonePose(uint32_t boneId, const pragma::math::ScaledTransform &pose)
 {
 	if(boneId >= m_bones.size())
 		return;
@@ -240,7 +240,7 @@ void Frame::SetBonePose(uint32_t boneId, const umath::ScaledTransform &pose)
 		m_scales.at(boneId) = pose.GetScale();
 }
 
-void Frame::SetBonePose(uint32_t boneId, const umath::Transform &pose)
+void Frame::SetBonePose(uint32_t boneId, const pragma::math::Transform &pose)
 {
 	if(boneId >= m_bones.size())
 		return;

@@ -20,7 +20,7 @@ void pragma::ClientState::Connect(std::string ip, std::string sport)
 		ip = "127.0.0.1";
 	auto &lastConnection = GetLastConnectionInfo();
 	lastConnection = {};
-	auto port = static_cast<uint16_t>(util::to_int(sport));
+	auto port = static_cast<uint16_t>(pragma::util::to_int(sport));
 	lastConnection.address = {ip, port};
 #ifdef DEBUG_SOCKET
 	Con::ccl << "Connecting to " << ip << ":" << port << "..." << Con::endl;

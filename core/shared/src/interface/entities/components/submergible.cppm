@@ -30,10 +30,10 @@ export namespace pragma {
 
 		pragma::ecs::BaseEntity *GetWaterEntity();
 		const pragma::ecs::BaseEntity *GetWaterEntity() const;
-		const util::PFloatProperty &GetSubmergedFractionProperty() const;
+		const pragma::util::PFloatProperty &GetSubmergedFractionProperty() const;
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
-		util::PFloatProperty m_submergedFraction;
+		pragma::util::PFloatProperty m_submergedFraction;
 		EntityHandle m_waterEntity = {};
 		virtual void OnWaterEntered();
 		virtual void OnWaterExited();

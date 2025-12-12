@@ -235,7 +235,7 @@ export {
 
 			Last = Use,
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	}
 	REGISTER_ENUM_FLAGS(pragma::Action);
 

@@ -20,15 +20,15 @@ void pragma::pts::CParticleRendererSpriteTrail::Initialize(pragma::BaseEnvPartic
 	auto bAlignVelocity = false;
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "min_length")
-			m_minLength = util::to_float(pair.second);
+			m_minLength = pragma::util::to_float(pair.second);
 		else if(key == "max_length")
-			m_maxLength = util::to_float(pair.second);
+			m_maxLength = pragma::util::to_float(pair.second);
 		else if(key == "length_fade_in_time")
-			m_lengthFadeInTime = util::to_float(pair.second);
+			m_lengthFadeInTime = pragma::util::to_float(pair.second);
 		else if(key == "animation_rate")
-			m_animationRate = util::to_float(pair.second);
+			m_animationRate = pragma::util::to_float(pair.second);
 	}
 	m_shader = pragma::get_cengine()->GetShader("pfm_particle_sprite_trail");
 }

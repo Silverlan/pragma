@@ -67,7 +67,7 @@ static void cl_gpu_timer_queries_dump(pragma::NetworkState *state, pragma::BaseP
 {
 	auto extended = false;
 	if(argv.empty() == false)
-		extended = util::to_boolean(argv.at(0));
+		extended = pragma::util::to_boolean(argv.at(0));
 	Con::cout << "-------- GPU-Profiler Query Results --------" << Con::endl;
 	std::function<void(pragma::debug::ProfilingStage &, const std::string &, bool)> fPrintResults = nullptr;
 	fPrintResults = [&fPrintResults, extended](pragma::debug::ProfilingStage &stage, const std::string &t, bool bRoot) {
@@ -75,8 +75,8 @@ static void cl_gpu_timer_queries_dump(pragma::NetworkState *state, pragma::BaseP
 			std::string sTime = "Pending";
 			auto result = stage.GetResult();
 			if(result && result->duration.has_value()) {
-				auto t = util::clock::to_milliseconds(*result->duration);
-				sTime = util::round_string(t, 2) + " ms";
+				auto t = pragma::util::clock::to_milliseconds(*result->duration);
+				sTime = pragma::util::round_string(t, 2) + " ms";
 				sTime += " (" + std::to_string(result->duration->count()) + " ns)";
 			}
 			Con::cout << t << stage.GetName() << ": " << sTime;

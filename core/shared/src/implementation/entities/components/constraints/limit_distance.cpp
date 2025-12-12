@@ -48,7 +48,7 @@ ConstraintLimitDistanceComponent::ClampRegion ConstraintLimitDistanceComponent::
 void ConstraintLimitDistanceComponent::SetDistance(float dist)
 {
 	m_dist = dist;
-	m_distSqr = umath::pow2(dist);
+	m_distSqr = pragma::math::pow2(dist);
 }
 float ConstraintLimitDistanceComponent::GetDistance() const { return m_dist; }
 void ConstraintLimitDistanceComponent::ApplyConstraint()
@@ -60,14 +60,14 @@ void ConstraintLimitDistanceComponent::ApplyConstraint()
 	if(!constraintInfo || influence == 0.f)
 		return;
 	Vector3 posDriven;
-	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriven);
+	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriven);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driven object of constraint '{}'.", constraintInfo->drivenObjectPropIdx, GetEntity().ToString());
 		return;
 	}
 
 	Vector3 posDriver;
-	res = constraintInfo->driverC->GetTransformMemberPos(constraintInfo->driverPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDriverSpace()), posDriver);
+	res = constraintInfo->driverC->GetTransformMemberPos(constraintInfo->driverPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDriverSpace()), posDriver);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driver of constraint '{}'.", constraintInfo->driverPropIdx, GetEntity().ToString());
 		return;
@@ -95,5 +95,5 @@ void ConstraintLimitDistanceComponent::ApplyConstraint()
 	posDriver = origin + dir * GetDistance();
 
 	posDriver = uvec::lerp(posDriven, posDriver, influence);
-	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriver);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriver);
 }

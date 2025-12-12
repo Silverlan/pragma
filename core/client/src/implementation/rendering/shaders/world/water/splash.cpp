@@ -27,5 +27,5 @@ void ShaderWaterSplash::InitializeShaderResources()
 
 bool ShaderWaterSplash::RecordCompute(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descParticles, const pragma::physics::PhysWaterSurfaceSimulator::SplashInfo &info) const
 {
-	return RecordPushConstants(bindState, info) && RecordBindDescriptorSet(bindState, descParticles, DESCRIPTOR_SET_WATER_EFFECT.setIndex) && RecordDispatch(bindState, umath::ceil(info.width / 8.f), umath::ceil(info.length / 8.f), 1); //width,length); // TODO
+	return RecordPushConstants(bindState, info) && RecordBindDescriptorSet(bindState, descParticles, DESCRIPTOR_SET_WATER_EFFECT.setIndex) && RecordDispatch(bindState, pragma::math::ceil(info.width / 8.f), pragma::math::ceil(info.length / 8.f), 1); //width,length); // TODO
 }

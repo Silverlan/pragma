@@ -57,7 +57,7 @@ export namespace pragma {
 		bool m_updateLazily = false;
 		uint32_t m_numJobs = 0;
 
-		std::vector<umath::ScaledTransform> m_prevBonePoses;
+		std::vector<pragma::math::ScaledTransform> m_prevBonePoses;
 		std::vector<bool> m_dirtyBones;
 	};
 };

@@ -94,10 +94,10 @@ void pragma::gui::types::WIMainMenuNewGame::InitializeOptionsList(WIOptionsList 
 	buttonStart->SizeToContents();
 	buttonStart->SetAutoCenterToParent(true);
 	buttonStart->AddCallback("OnMouseEvent",
-	  FunctionCallback<util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
-	    [this](util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+	  FunctionCallback<pragma::util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
+	    [this](pragma::util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
 		    OnStartGame(button, state, mods);
-		    *reply = util::EventReply::Handled;
+		    *reply = pragma::util::EventReply::Handled;
 		    return CallbackReturnType::HasReturnValue;
 	    }));
 	pRow->InsertElement(1, buttonStart);
@@ -125,7 +125,7 @@ void pragma::gui::types::WIMainMenuNewGame::ReloadMapList()
 	}
 
 	if(pragma::get_cengine()->GetConVarBool("sh_mount_external_game_resources")) {
-		auto dllHandle = util::initialize_external_archive_manager(pragma::get_client_state());
+		auto dllHandle = pragma::util::initialize_external_archive_manager(pragma::get_client_state());
 		if(dllHandle) {
 			auto *fFindFiles = dllHandle->FindSymbolAddress<void (*)(const std::string &, std::vector<std::string> *, std::vector<std::string> *)>("find_files");
 			if(fFindFiles) {
@@ -150,7 +150,7 @@ void pragma::gui::types::WIMainMenuNewGame::ReloadMapList()
 	if(files.size() > 1) {
 		for(auto it = files.begin(); it != files.end() - 1;) {
 			auto itNext = it + 1;
-			if(ustring::compare(*it, *itNext, false) == false) {
+			if(pragma::string::compare(*it, *itNext, false) == false) {
 				++it;
 				continue;
 			}
@@ -212,7 +212,7 @@ void pragma::gui::types::WIMainMenuNewGame::InitializeGameSettings()
 {
 	auto *pList = InitializeOptionsList();
 	auto title = pragma::locale::get_text("game_settings");
-	ustring::to_upper(title);
+	pragma::string::to_upper(title);
 	pList->SetTitle(title);
 
 	// Game Mode

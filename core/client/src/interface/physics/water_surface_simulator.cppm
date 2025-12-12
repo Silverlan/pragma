@@ -32,11 +32,11 @@ export namespace pragma::physics {
 
 		std::shared_ptr<prosper::IPrimaryCommandBuffer> m_cmdBuffer = nullptr;
 		uint32_t m_universalQueueFamilyIndex = std::numeric_limits<uint32_t>::max();
-		::util::WeakHandle<prosper::Shader> m_whShaderSurface = {};
-		::util::WeakHandle<prosper::Shader> m_whShaderSurfaceIntegrate = {};
-		::util::WeakHandle<prosper::Shader> m_whShaderSurfaceSolveEdges = {};
-		::util::WeakHandle<prosper::Shader> m_whShaderSurfaceSumEdges = {};
-		::util::WeakHandle<prosper::Shader> m_whShaderWaterSplash = {};
+		pragma::util::WeakHandle<prosper::Shader> m_whShaderSurface = {};
+		pragma::util::WeakHandle<prosper::Shader> m_whShaderSurfaceIntegrate = {};
+		pragma::util::WeakHandle<prosper::Shader> m_whShaderSurfaceSolveEdges = {};
+		pragma::util::WeakHandle<prosper::Shader> m_whShaderSurfaceSumEdges = {};
+		pragma::util::WeakHandle<prosper::Shader> m_whShaderWaterSplash = {};
 
 		std::shared_ptr<prosper::IBuffer> m_particleBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_positionBuffer = nullptr;

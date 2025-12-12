@@ -97,7 +97,7 @@ export {
 			pragma::audio::ALSoundType m_soundTypes = pragma::audio::ALSoundType::Generic;
 			std::shared_ptr<audio::ALSound> m_sound;
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::BaseEnvSoundComponent::SpawnFlags);
 };

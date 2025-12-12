@@ -63,7 +63,7 @@ void pragma::console::commands::lua_exec_autocomplete(const std::string &arg, st
 	path = ufile::get_path_from_filename(path.substr(4));
 	for(auto &mapName : resFiles) {
 		auto fullPath = path + mapName;
-		ustring::replace(fullPath, "\\", "/");
+		pragma::string::replace(fullPath, "\\", "/");
 		autoCompleteOptions.push_back(fullPath);
 	}
 }

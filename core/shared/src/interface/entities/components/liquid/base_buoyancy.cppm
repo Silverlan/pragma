@@ -19,7 +19,7 @@ export {
 			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			virtual void Initialize() override;
 
-			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		  protected:
 			BaseBuoyancyComponent(pragma::ecs::BaseEntity &ent);
 			virtual void OnEndTouch(pragma::ecs::BaseEntity *ent, pragma::physics::PhysObj *phys);

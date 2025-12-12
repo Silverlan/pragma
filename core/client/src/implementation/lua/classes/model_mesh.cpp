@@ -8,8 +8,8 @@ module pragma.client;
 import :scripting.lua.classes.model_mesh;
 import :model;
 
-void Lua::ModelMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::geometry::ModelMesh>>(l, ::util::make_shared<pragma::geometry::CModelMesh>()); }
-void Lua::ModelSubMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::geometry::ModelSubMesh>>(l, ::util::make_shared<pragma::geometry::CModelSubMesh>()); }
+void Lua::ModelMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::geometry::ModelMesh>>(l, pragma::util::make_shared<pragma::geometry::CModelMesh>()); }
+void Lua::ModelSubMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::geometry::ModelSubMesh>>(l, pragma::util::make_shared<pragma::geometry::CModelSubMesh>()); }
 void Lua::ModelSubMesh::Client::GetVkMesh(lua::State *l, pragma::geometry::ModelSubMesh &mesh) { Lua::Push<std::shared_ptr<::pragma::rendering::SceneMesh>>(l, static_cast<pragma::geometry::CModelSubMesh &>(mesh).GetSceneMesh()); }
 void Lua::ModelSubMesh::Client::GetTangents(lua::State *l, pragma::geometry::ModelSubMesh &mesh)
 {

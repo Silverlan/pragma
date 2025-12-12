@@ -66,7 +66,7 @@ void CRendererPpBloomComponent::DoRenderEffect(const pragma::rendering::DrawScen
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuBloom, *drawSceneInfo.commandBuffer);
 
-	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
+	pragma::util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuBloom, *drawSceneInfo.commandBuffer);
 	}};

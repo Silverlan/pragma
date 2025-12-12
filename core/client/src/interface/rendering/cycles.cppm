@@ -34,7 +34,7 @@ export namespace pragma::rendering::cycles {
 		bool renderJob = false;
 		float globalLightIntensityFactor = 1.f;
 		std::string renderer = "cycles";
-		SceneFlags sceneFlags = static_cast<SceneFlags>(umath::to_integral(SceneFlags::CullObjectsOutsidePvs) | umath::to_integral(SceneFlags::CullObjectsOutsideCameraFrustum));
+		SceneFlags sceneFlags = static_cast<SceneFlags>(pragma::math::to_integral(SceneFlags::CullObjectsOutsidePvs) | pragma::math::to_integral(SceneFlags::CullObjectsOutsideCameraFrustum));
 		DeviceType device = DeviceType::CPU;
 		std::string sky = "";
 		float skyStrength = 1.f;
@@ -44,21 +44,21 @@ export namespace pragma::rendering::cycles {
 		std::optional<ColorTransform> colorTransform {};
 	};
 	struct DLLCLIENT RenderImageInfo {
-		umath::Transform camPose {};
+		pragma::math::Transform camPose {};
 		bool equirectPanorama = false;
 		Mat4 viewProjectionMatrix = {};
 		float nearZ = pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z;
 		float farZ = pragma::baseEnvCameraComponent::DEFAULT_FAR_Z;
-		umath::Degree fov = baseEnvCameraComponent::DEFAULT_FOV;
+		pragma::math::Degree fov = baseEnvCameraComponent::DEFAULT_FOV;
 
 		std::function<bool(pragma::ecs::BaseEntity &)> entityFilter = nullptr;
 		const std::vector<pragma::ecs::BaseEntity *> *entityList = nullptr;
 	};
-	util::ParallelJob<uimg::ImageLayerSet> render_image(pragma::ClientState &client, const SceneInfo &sceneInfo, const RenderImageInfo &renderImageInfo);
-	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(pragma::ClientState &client, const SceneInfo &sceneInfo, pragma::asset::Model &mdl, uint32_t materialIndex);
-	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(pragma::ClientState &client, const SceneInfo &sceneInfo, pragma::ecs::BaseEntity &ent, uint32_t materialIndex);
-	util::ParallelJob<uimg::ImageLayerSet> bake_lightmaps(pragma::ClientState &client, const SceneInfo &sceneInfo);
-	using namespace umath::scoped_enum::bitwise;
+	pragma::util::ParallelJob<uimg::ImageLayerSet> render_image(pragma::ClientState &client, const SceneInfo &sceneInfo, const RenderImageInfo &renderImageInfo);
+	pragma::util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(pragma::ClientState &client, const SceneInfo &sceneInfo, pragma::asset::Model &mdl, uint32_t materialIndex);
+	pragma::util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(pragma::ClientState &client, const SceneInfo &sceneInfo, pragma::ecs::BaseEntity &ent, uint32_t materialIndex);
+	pragma::util::ParallelJob<uimg::ImageLayerSet> bake_lightmaps(pragma::ClientState &client, const SceneInfo &sceneInfo);
+	using namespace pragma::math::scoped_enum::bitwise;
 };
 export {
 	REGISTER_ENUM_FLAGS(pragma::rendering::cycles::SceneInfo::SceneFlags)

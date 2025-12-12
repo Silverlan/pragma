@@ -53,7 +53,7 @@ void CMD_debug_light_shadowmap(pragma::NetworkState *nw, pragma::BasePlayerCompo
 		pEl->Remove();
 
 	//auto smType = pragma::rendering::ShadowMapType::Static;
-	//if(argv.size() > 1 && util::to_boolean(argv.at(1)))
+	//if(argv.size() > 1 && pragma::util::to_boolean(argv.at(1)))
 	//	smType = pragma::rendering::ShadowMapType::Dynamic;
 	auto smType = pragma::rendering::ShadowMapType::Dynamic;
 

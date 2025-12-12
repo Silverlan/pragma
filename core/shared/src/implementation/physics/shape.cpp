@@ -34,7 +34,7 @@ void pragma::physics::IShape::SetSurfaceMaterial(int32_t surfMatIdx)
 {
 	auto *surfMat = m_physEnv.GetNetworkState().GetGameState()->GetSurfaceMaterial(surfMatIdx);
 	if(surfMat == nullptr) {
-		m_material = util::WeakHandle<IMaterial> {};
+		m_material = pragma::util::WeakHandle<IMaterial> {};
 		return;
 	}
 	SetMaterial(surfMat->GetPhysicsMaterial());
@@ -45,7 +45,7 @@ int32_t pragma::physics::IShape::GetSurfaceMaterialIndex() const
 	return surfMat ? surfMat->GetIndex() : -1;
 }
 pragma::physics::SurfaceMaterial *pragma::physics::IShape::GetSurfaceMaterial() const { return m_material.valid() ? m_material->GetSurfaceMaterial() : nullptr; }
-void pragma::physics::IShape::SetMaterial(const IMaterial &mat) { m_material = util::WeakHandle<IMaterial>(std::static_pointer_cast<IMaterial>(const_cast<IMaterial &>(mat).shared_from_this())); }
+void pragma::physics::IShape::SetMaterial(const IMaterial &mat) { m_material = pragma::util::WeakHandle<IMaterial>(std::static_pointer_cast<IMaterial>(const_cast<IMaterial &>(mat).shared_from_this())); }
 pragma::physics::IMaterial *pragma::physics::IShape::GetMaterial() const { return m_material.get(); }
 
 void pragma::physics::IShape::SetDensity(float density) { m_density = density; }
@@ -96,7 +96,7 @@ void pragma::physics::IConvexHullShape::InitializeLuaObject(lua::State *lua) { I
 
 pragma::physics::ICompoundShape::ICompoundShape(IEnvironment &env) : IShape {env} {}
 pragma::physics::ICompoundShape::ICompoundShape(IEnvironment &env, pragma::physics::IShape &shape, const Vector3 &origin) : IShape {env} {}
-void pragma::physics::ICompoundShape::AddShape(pragma::physics::IShape &shape, const umath::Transform &localPose)
+void pragma::physics::ICompoundShape::AddShape(pragma::physics::IShape &shape, const pragma::math::Transform &localPose)
 {
 	m_shapes.push_back({std::static_pointer_cast<IShape>(shape.shared_from_this()), localPose});
 	if(m_shapes.size() == 1) {

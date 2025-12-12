@@ -67,7 +67,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneCo
 	// TODO: This kind of depth bias isn't used anymore and should be removed from the shaders entirely!
 	m_cmdBuffer.RecordSetDepthBias();
 #endif
-	// m_cmdBuffer.RecordBindVertexBuffer(shader,*CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer(),umath::to_integral(ShaderEntity::VertexBinding::RenderBufferIndex));
+	// m_cmdBuffer.RecordBindVertexBuffer(shader,*CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer(),pragma::math::to_integral(ShaderEntity::VertexBinding::RenderBufferIndex));
 	return RecordBindScene(scene, renderer, shader, view);
 }
 void pragma::rendering::ShaderProcessor::UpdateSceneFlags(ShaderGameWorld::SceneFlags sceneFlags)
@@ -109,7 +109,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindMaterial(msys::CMaterial &mat
 	}
 
 	// TODO
-	//shaderScene->Set3DSky(umath::is_flag_set(m_renderFlags,RenderFlags::RenderAs3DSky));
+	//shaderScene->Set3DSky(pragma::math::is_flag_set(m_renderFlags,RenderFlags::RenderAs3DSky));
 	UpdateSceneFlags(flags);
 	return true;
 }
@@ -174,7 +174,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(pragma::ecs::CBaseEnti
 					sceneFlags |= ShaderGameWorld::SceneFlags::DirectionalLightmapsEnabled;
 			}
 		}
-		umath::set_flag(sceneFlags, ShaderGameWorld::SceneFlags::DisableShadows, !renderC->IsReceivingShadows());
+		pragma::math::set_flag(sceneFlags, ShaderGameWorld::SceneFlags::DisableShadows, !renderC->IsReceivingShadows());
 	}
 
 	UpdateSceneFlags(sceneFlags);
@@ -201,11 +201,11 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(pragma::geometry::CModelSubM
 		m_curShader->RecordVertexAnimationOffset(*this, vertexAnimationOffset);
 	}
 	// TODO
-	// umath::set_flag(renderFlags,RenderFlags::UseExtendedVertexWeights,mesh.GetExtendedVertexWeights().empty() == false);
+	// pragma::math::set_flag(renderFlags,RenderFlags::UseExtendedVertexWeights,mesh.GetExtendedVertexWeights().empty() == false);
 
 	auto numIndices = mesh.GetIndexCount();
-	if(numIndices > umath::to_integral(pragma::GameLimits::MaxMeshVertices)) {
-		Con::cerr << "Attempted to draw mesh with more than maximum (" << umath::to_integral(pragma::GameLimits::MaxMeshVertices) << ") amount of vertices!" << Con::endl;
+	if(numIndices > pragma::math::to_integral(pragma::GameLimits::MaxMeshVertices)) {
+		Con::cerr << "Attempted to draw mesh with more than maximum (" << pragma::math::to_integral(pragma::GameLimits::MaxMeshVertices) << ") amount of vertices!" << Con::endl;
 		return false;
 	}
 	auto &vkMesh = mesh.GetSceneMesh();
@@ -231,12 +231,12 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(pragma::geometry::CModelSubM
 		instanceCount = instanceSet->instanceCount;
 		if(instanceSet != m_curInstanceSet) {
 			m_curInstanceSet = instanceSet;
-			m_cmdBuffer.RecordBindVertexBuffer(*m_curShader, *instanceSet->instanceBuffer, umath::to_integral(ShaderEntity::VertexBinding::RenderBufferIndex));
+			m_cmdBuffer.RecordBindVertexBuffer(*m_curShader, *instanceSet->instanceBuffer, pragma::math::to_integral(ShaderEntity::VertexBinding::RenderBufferIndex));
 		}
 	}
 	else if(m_curInstanceSet) {
 		m_curInstanceSet = nullptr;
-		m_cmdBuffer.RecordBindVertexBuffer(*m_curShader, *CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer(), umath::to_integral(ShaderEntity::VertexBinding::RenderBufferIndex));
+		m_cmdBuffer.RecordBindVertexBuffer(*m_curShader, *CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer(), pragma::math::to_integral(ShaderEntity::VertexBinding::RenderBufferIndex));
 	}
 	if(m_stats) {
 		(*m_stats)->Increment(RenderPassStats::Counter::DrawnMeshes, instanceCount);

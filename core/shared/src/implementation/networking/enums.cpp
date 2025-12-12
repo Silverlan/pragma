@@ -23,7 +23,7 @@ std::string pragma::networking::drop_reason_to_string(DropReason reason)
 	default:
 		return "User has been dropped due to an error!";
 	}
-	static_assert(umath::to_integral(DropReason::Count) == 6);
+	static_assert(pragma::math::to_integral(DropReason::Count) == 6);
 }
 nwm::Protocol pragma::networking::get_nwm_protocol(Protocol protocol)
 {
@@ -34,7 +34,7 @@ nwm::Protocol pragma::networking::get_nwm_protocol(Protocol protocol)
 	default:
 		return nwm::Protocol::UDP;
 	}
-	static_assert(umath::to_integral(Protocol::Count) == 2);
+	static_assert(pragma::math::to_integral(Protocol::Count) == 2);
 }
 nwm::ClientDropped pragma::networking::get_nwm_drop_reason(DropReason reason)
 {
@@ -53,7 +53,7 @@ nwm::ClientDropped pragma::networking::get_nwm_drop_reason(DropReason reason)
 	default:
 		return nwm::ClientDropped::Error;
 	}
-	static_assert(umath::to_integral(DropReason::Count) == 6);
+	static_assert(pragma::math::to_integral(DropReason::Count) == 6);
 }
 pragma::networking::DropReason pragma::networking::get_pragma_drop_reason(nwm::ClientDropped reason)
 {

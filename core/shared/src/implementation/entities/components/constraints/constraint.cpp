@@ -184,7 +184,7 @@ void ConstraintComponent::SetDrivenObject(const pragma::EntityUComponentMemberRe
 		SetTickPolicy(pragma::TickPolicy::Always);
 		m_curDrivenConstraintManager = pragma::ComponentHandle<pragma::ConstraintManagerComponent> {};
 		auto uuid = drivenObject.GetUuid();
-		spdlog::debug("Constraint driven object '{}' does not exist for constraint '{}'. Listening for future instancing...", uuid.has_value() ? util::uuid_to_string(*uuid) : "", GetEntity().ToString());
+		spdlog::debug("Constraint driven object '{}' does not exist for constraint '{}'. Listening for future instancing...", uuid.has_value() ? pragma::util::uuid_to_string(*uuid) : "", GetEntity().ToString());
 		BroadcastEvent(constraintComponent::EVENT_ON_DRIVEN_OBJECT_CHANGED);
 		return;
 	}

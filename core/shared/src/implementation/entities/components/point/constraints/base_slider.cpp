@@ -12,15 +12,15 @@ void BasePointConstraintSliderComponent::Initialize()
 {
 	BasePointConstraintComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "limit_low", false))
-			m_kvLimitLinLow = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key, "limit_high", false))
-			m_kvLimitLinHigh = util::to_float(kvData.value);
+		if(pragma::string::compare<std::string>(kvData.key, "limit_low", false))
+			m_kvLimitLinLow = pragma::util::to_float(kvData.value);
+		else if(pragma::string::compare<std::string>(kvData.key, "limit_high", false))
+			m_kvLimitLinHigh = pragma::util::to_float(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 }
 
@@ -70,7 +70,7 @@ void BasePointConstraintSliderComponent::InitializeConstraint(pragma::ecs::BaseE
 		auto slider = physEnv->CreateSliderConstraint(*rigidBody0, pivot0, rotation0, *rigidBody1, pivot1, rotation1);
 		if(slider != nullptr) {
 			slider->SetEntity(GetEntity());
-			m_constraints.push_back(util::shared_handle_cast<pragma::physics::ISliderConstraint, pragma::physics::IConstraint>(slider));
+			m_constraints.push_back(pragma::util::shared_handle_cast<pragma::physics::ISliderConstraint, pragma::physics::IConstraint>(slider));
 		}
 	}
 }

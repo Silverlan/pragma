@@ -17,7 +17,7 @@ namespace Lua {
 		static Lua::var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> raycast(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData);
 		static Lua::var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> sweep(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData);
 		static Lua::var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> overlap(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData);
-		static ::util::TSharedHandle<pragma::physics::IRigidBody> create_rigid_body(pragma::physics::IEnvironment *env, pragma::physics::IShape &shape, bool dynamic = true);
+		static pragma::util::TSharedHandle<pragma::physics::IRigidBody> create_rigid_body(pragma::physics::IEnvironment *env, pragma::physics::IShape &shape, bool dynamic = true);
 		static std::shared_ptr<pragma::physics::IConvexHullShape> create_convex_hull_shape(pragma::physics::IEnvironment *env, pragma::physics::IMaterial &material);
 
 		static std::shared_ptr<pragma::physics::IConvexShape> create_convex_shape(pragma::physics::IEnvironment *env, const std::vector<Vector3> &verts, pragma::physics::IMaterial &material);
@@ -29,21 +29,21 @@ namespace Lua {
 		static std::shared_ptr<pragma::physics::IConvexShape> create_cylinder_shape(pragma::physics::IEnvironment *env, float radius, float height, pragma::physics::IMaterial &material);
 		static std::shared_ptr<pragma::physics::ICompoundShape> create_compound_shape(pragma::physics::IEnvironment *env, std::vector<pragma::physics::IShape *> &shapes);
 		static std::shared_ptr<pragma::physics::IShape> create_heightfield_terrain_shape(pragma::physics::IEnvironment *env, float width, float length, float maxHeight, float upAxis, pragma::physics::IMaterial &material);
-		static ::util::TSharedHandle<pragma::physics::IGhostObject> create_ghost_object(pragma::physics::IEnvironment *env, pragma::physics::IShape &shape);
-		static ::util::TSharedHandle<pragma::physics::ICollisionObject> create_plane(pragma::physics::IEnvironment *env, const Vector3 &n, double d, pragma::physics::IMaterial &material);
-		static ::util::TSharedHandle<pragma::physics::IFixedConstraint> create_fixed_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB);
-		static ::util::TSharedHandle<pragma::physics::IBallSocketConstraint> create_ball_socket_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB);
-		static ::util::TSharedHandle<pragma::physics::IHingeConstraint> create_hinge_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Vector3 &axis);
-		static ::util::TSharedHandle<pragma::physics::ISliderConstraint> create_slider_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB);
-		static ::util::TSharedHandle<pragma::physics::IConeTwistConstraint> create_cone_twist_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB,
+		static pragma::util::TSharedHandle<pragma::physics::IGhostObject> create_ghost_object(pragma::physics::IEnvironment *env, pragma::physics::IShape &shape);
+		static pragma::util::TSharedHandle<pragma::physics::ICollisionObject> create_plane(pragma::physics::IEnvironment *env, const Vector3 &n, double d, pragma::physics::IMaterial &material);
+		static pragma::util::TSharedHandle<pragma::physics::IFixedConstraint> create_fixed_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB);
+		static pragma::util::TSharedHandle<pragma::physics::IBallSocketConstraint> create_ball_socket_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB);
+		static pragma::util::TSharedHandle<pragma::physics::IHingeConstraint> create_hinge_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Vector3 &axis);
+		static pragma::util::TSharedHandle<pragma::physics::ISliderConstraint> create_slider_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB);
+		static pragma::util::TSharedHandle<pragma::physics::IConeTwistConstraint> create_cone_twist_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB,
 		  const Quat &rotB);
-		static ::util::TSharedHandle<pragma::physics::IDoFConstraint> create_DoF_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB);
-		static ::util::TSharedHandle<pragma::physics::IDoFSpringConstraint> create_dof_spring_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB,
+		static pragma::util::TSharedHandle<pragma::physics::IDoFConstraint> create_DoF_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB);
+		static pragma::util::TSharedHandle<pragma::physics::IDoFSpringConstraint> create_dof_spring_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB,
 		  const Quat &rotB);
 		static pragma::physics::SurfaceMaterial *create_surface_material(pragma::Game &game, const std::string &name, float friction, float restitution);
 
-		static ::util::TSharedHandle<pragma::physics::IController> create_box_controller(pragma::physics::IEnvironment *env, const Vector3 &halfExtents, float stepHeight, float slopeLimit = 45.f, const umath::Transform &startTransform = {});
-		static ::util::TSharedHandle<pragma::physics::IController> create_capsule_controller(pragma::physics::IEnvironment *env, float halfWidth, float halfHeight, float stepHeight, float slopeLimit = 45.f, const umath::Transform &startTransform = {});
+		static pragma::util::TSharedHandle<pragma::physics::IController> create_box_controller(pragma::physics::IEnvironment *env, const Vector3 &halfExtents, float stepHeight, float slopeLimit = 45.f, const pragma::math::Transform &startTransform = {});
+		static pragma::util::TSharedHandle<pragma::physics::IController> create_capsule_controller(pragma::physics::IEnvironment *env, float halfWidth, float halfHeight, float stepHeight, float slopeLimit = 45.f, const pragma::math::Transform &startTransform = {});
 
 		static std::shared_ptr<pragma::physics::IMaterial> create_material(pragma::physics::IEnvironment *env, float staticFriction, float dynamicFriction, float restitution);
 		static luabind::tableT<pragma::physics::SurfaceMaterial> get_surface_materials(lua::State *l, pragma::Game &game);
@@ -62,9 +62,9 @@ static pragma::physics::VehicleCreateInfo create_standard_four_wheel_drive(lua::
 	return pragma::physics::VehicleCreateInfo::CreateStandardFourWheelDrive(wheelCenterOffsets, handBrakeTorque, maxSteeringAngle);
 }
 
-namespace umath {
-	extern std::ostream &operator<<(std::ostream &out, const umath::Transform &t);
-	extern std::ostream &operator<<(std::ostream &out, const umath::ScaledTransform &t);
+namespace pragma::math {
+	extern std::ostream &operator<<(std::ostream &out, const pragma::math::Transform &t);
+	extern std::ostream &operator<<(std::ostream &out, const pragma::math::ScaledTransform &t);
 }
 void Lua::physenv::register_library(Lua::Interface &lua)
 {
@@ -83,8 +83,8 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	  luabind::def("create_conetwist_constraint", create_cone_twist_constraint), luabind::def("create_dof_constraint", create_DoF_constraint), luabind::def("create_dof_spring_constraint", create_dof_spring_constraint), luabind::def("create_surface_material", create_surface_material),
 	  luabind::def("create_material", create_material),
 #ifdef _WIN32
-	  luabind::def("create_box_controller", create_box_controller, luabind::meta::join<luabind::default_parameter_policy<4, 45.f>, luabind::default_parameter_policy<5, umath::Transform {}>>::type {}),
-	  luabind::def("create_capsule_controller", create_capsule_controller, luabind::meta::join<luabind::default_parameter_policy<5, 45.f>, luabind::default_parameter_policy<6, umath::Transform {}>>::type {}),
+	  luabind::def("create_box_controller", create_box_controller, luabind::meta::join<luabind::default_parameter_policy<4, 45.f>, luabind::default_parameter_policy<5, pragma::math::Transform {}>>::type {}),
+	  luabind::def("create_capsule_controller", create_capsule_controller, luabind::meta::join<luabind::default_parameter_policy<5, 45.f>, luabind::default_parameter_policy<6, pragma::math::Transform {}>>::type {}),
 #else
 	  luabind::def("create_box_controller", create_box_controller),
 	  luabind::def(
@@ -98,8 +98,8 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	    "create_capsule_controller", +[](pragma::physics::IEnvironment *env, float halfWidth, float halfHeight, float stepHeight) { return create_capsule_controller(env, halfWidth, halfHeight, stepHeight); }),
 #endif
 	  luabind::def("create_vehicle",
-	    static_cast<::util::TSharedHandle<pragma::physics::IVehicle> (*)(pragma::physics::IEnvironment *, const pragma::physics::VehicleCreateInfo &)>(
-	      [](pragma::physics::IEnvironment *env, const pragma::physics::VehicleCreateInfo &vhcCreateInfo) -> ::util::TSharedHandle<pragma::physics::IVehicle> {
+	    static_cast<pragma::util::TSharedHandle<pragma::physics::IVehicle> (*)(pragma::physics::IEnvironment *, const pragma::physics::VehicleCreateInfo &)>(
+	      [](pragma::physics::IEnvironment *env, const pragma::physics::VehicleCreateInfo &vhcCreateInfo) -> pragma::util::TSharedHandle<pragma::physics::IVehicle> {
 		      if(env == nullptr)
 			      return nullptr;
 		      return env->CreateVehicle(vhcCreateInfo);
@@ -116,29 +116,29 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	  luabind::def("calc_linear_velocity_from_force", calc_linear_velocity_from_force))];
 
 	Lua::RegisterLibraryEnums(l, libName,
-	  {{"ACTIVATION_STATE_ACTIVE", umath::to_integral(pragma::physics::ICollisionObject::ActivationState::Active)}, {"ACTIVATION_STATE_ALWAYS_ACTIVE", umath::to_integral(pragma::physics::ICollisionObject::ActivationState::AlwaysActive)},
-	    {"ACTIVATION_STATE_ALWAYS_INACTIVE", umath::to_integral(pragma::physics::ICollisionObject::ActivationState::AlwaysInactive)}, {"ACTIVATION_STATE_WAIT_FOR_DEACTIVATION", umath::to_integral(pragma::physics::ICollisionObject::ActivationState::WaitForDeactivation)},
-	    {"ACTIVATION_STATE_COUNT", umath::to_integral(pragma::physics::ICollisionObject::ActivationState::Count)}});
+	  {{"ACTIVATION_STATE_ACTIVE", pragma::math::to_integral(pragma::physics::ICollisionObject::ActivationState::Active)}, {"ACTIVATION_STATE_ALWAYS_ACTIVE", pragma::math::to_integral(pragma::physics::ICollisionObject::ActivationState::AlwaysActive)},
+	    {"ACTIVATION_STATE_ALWAYS_INACTIVE", pragma::math::to_integral(pragma::physics::ICollisionObject::ActivationState::AlwaysInactive)}, {"ACTIVATION_STATE_WAIT_FOR_DEACTIVATION", pragma::math::to_integral(pragma::physics::ICollisionObject::ActivationState::WaitForDeactivation)},
+	    {"ACTIVATION_STATE_COUNT", pragma::math::to_integral(pragma::physics::ICollisionObject::ActivationState::Count)}});
 
 	Lua::RegisterLibraryEnums(l, libName,
-	  {{"TYPE_NONE", umath::to_integral(pragma::physics::PhysicsType::None)}, {"TYPE_DYNAMIC", umath::to_integral(pragma::physics::PhysicsType::Dynamic)}, {"TYPE_STATIC", umath::to_integral(pragma::physics::PhysicsType::Static)},
-	    {"TYPE_BOXCONTROLLER", umath::to_integral(pragma::physics::PhysicsType::BoxController)}, {"TYPE_CAPSULECONTROLLER", umath::to_integral(pragma::physics::PhysicsType::CapsuleController)}, {"TYPE_SOFTBODY", umath::to_integral(pragma::physics::PhysicsType::SoftBody)},
+	  {{"TYPE_NONE", pragma::math::to_integral(pragma::physics::PhysicsType::None)}, {"TYPE_DYNAMIC", pragma::math::to_integral(pragma::physics::PhysicsType::Dynamic)}, {"TYPE_STATIC", pragma::math::to_integral(pragma::physics::PhysicsType::Static)},
+	    {"TYPE_BOXCONTROLLER", pragma::math::to_integral(pragma::physics::PhysicsType::BoxController)}, {"TYPE_CAPSULECONTROLLER", pragma::math::to_integral(pragma::physics::PhysicsType::CapsuleController)}, {"TYPE_SOFTBODY", pragma::math::to_integral(pragma::physics::PhysicsType::SoftBody)},
 
-	    {"COLLISIONMASK_NONE", umath::to_integral(pragma::physics::CollisionMask::None)}, {"COLLISIONMASK_STATIC", umath::to_integral(pragma::physics::CollisionMask::Static)}, {"COLLISIONMASK_DYNAMIC", umath::to_integral(pragma::physics::CollisionMask::Dynamic)},
-	    {"COLLISIONMASK_GENERIC", umath::to_integral(pragma::physics::CollisionMask::Generic)}, {"COLLISIONMASK_PLAYER", umath::to_integral(pragma::physics::CollisionMask::Player)}, {"COLLISIONMASK_NPC", umath::to_integral(pragma::physics::CollisionMask::NPC)},
-	    {"COLLISIONMASK_VEHICLE", umath::to_integral(pragma::physics::CollisionMask::Vehicle)}, {"COLLISIONMASK_ITEM", umath::to_integral(pragma::physics::CollisionMask::Item)}, {"COLLISIONMASK_ALL", umath::to_integral(pragma::physics::CollisionMask::All)},
-	    {"COLLISIONMASK_DEFAULT", umath::to_integral(pragma::physics::CollisionMask::Default)}, {"COLLISIONMASK_PARTICLE", umath::to_integral(pragma::physics::CollisionMask::Particle)}, {"COLLISIONMASK_CHARACTER", umath::to_integral(pragma::physics::CollisionMask::Character)},
-	    {"COLLISIONMASK_TRIGGER", umath::to_integral(pragma::physics::CollisionMask::Trigger)}, {"COLLISIONMASK_WATER", umath::to_integral(pragma::physics::CollisionMask::Water)}, {"COLLISIONMASK_WATER_SURFACE", umath::to_integral(pragma::physics::CollisionMask::WaterSurface)},
-	    {"COLLISIONMASK_PLAYER_HITBOX", umath::to_integral(pragma::physics::CollisionMask::PlayerHitbox)}, {"COLLISIONMASK_NPC_HITBOX", umath::to_integral(pragma::physics::CollisionMask::NPCHitbox)},
-	    {"COLLISIONMASK_CHARACTER_HITBOX", umath::to_integral(pragma::physics::CollisionMask::CharacterHitbox)}, {"COLLISIONMASK_ALL_HITBOX", umath::to_integral(pragma::physics::CollisionMask::AllHitbox)},
-	    {"COLLISIONMASK_NO_COLLISION", umath::to_integral(pragma::physics::CollisionMask::NoCollision)},
+	    {"COLLISIONMASK_NONE", pragma::math::to_integral(pragma::physics::CollisionMask::None)}, {"COLLISIONMASK_STATIC", pragma::math::to_integral(pragma::physics::CollisionMask::Static)}, {"COLLISIONMASK_DYNAMIC", pragma::math::to_integral(pragma::physics::CollisionMask::Dynamic)},
+	    {"COLLISIONMASK_GENERIC", pragma::math::to_integral(pragma::physics::CollisionMask::Generic)}, {"COLLISIONMASK_PLAYER", pragma::math::to_integral(pragma::physics::CollisionMask::Player)}, {"COLLISIONMASK_NPC", pragma::math::to_integral(pragma::physics::CollisionMask::NPC)},
+	    {"COLLISIONMASK_VEHICLE", pragma::math::to_integral(pragma::physics::CollisionMask::Vehicle)}, {"COLLISIONMASK_ITEM", pragma::math::to_integral(pragma::physics::CollisionMask::Item)}, {"COLLISIONMASK_ALL", pragma::math::to_integral(pragma::physics::CollisionMask::All)},
+	    {"COLLISIONMASK_DEFAULT", pragma::math::to_integral(pragma::physics::CollisionMask::Default)}, {"COLLISIONMASK_PARTICLE", pragma::math::to_integral(pragma::physics::CollisionMask::Particle)}, {"COLLISIONMASK_CHARACTER", pragma::math::to_integral(pragma::physics::CollisionMask::Character)},
+	    {"COLLISIONMASK_TRIGGER", pragma::math::to_integral(pragma::physics::CollisionMask::Trigger)}, {"COLLISIONMASK_WATER", pragma::math::to_integral(pragma::physics::CollisionMask::Water)}, {"COLLISIONMASK_WATER_SURFACE", pragma::math::to_integral(pragma::physics::CollisionMask::WaterSurface)},
+	    {"COLLISIONMASK_PLAYER_HITBOX", pragma::math::to_integral(pragma::physics::CollisionMask::PlayerHitbox)}, {"COLLISIONMASK_NPC_HITBOX", pragma::math::to_integral(pragma::physics::CollisionMask::NPCHitbox)},
+	    {"COLLISIONMASK_CHARACTER_HITBOX", pragma::math::to_integral(pragma::physics::CollisionMask::CharacterHitbox)}, {"COLLISIONMASK_ALL_HITBOX", pragma::math::to_integral(pragma::physics::CollisionMask::AllHitbox)},
+	    {"COLLISIONMASK_NO_COLLISION", pragma::math::to_integral(pragma::physics::CollisionMask::NoCollision)},
 
-	    {"RAYCAST_FLAG_BIT_REPORT_HIT_POSITION", umath::to_integral(pragma::physics::RayCastFlags::ReportHitPosition)}, {"RAYCAST_FLAG_BIT_REPORT_HIT_NORMAL", umath::to_integral(pragma::physics::RayCastFlags::ReportHitNormal)},
-	    {"RAYCAST_FLAG_BIT_REPORT_HIT_UV", umath::to_integral(pragma::physics::RayCastFlags::ReportHitUV)}, {"RAYCAST_FLAG_BIT_REPORT_ALL_RESULTS", umath::to_integral(pragma::physics::RayCastFlags::ReportAllResults)},
-	    {"RAYCAST_FLAG_BIT_REPORT_ANY_RESULT", umath::to_integral(pragma::physics::RayCastFlags::ReportAnyResult)}, {"RAYCAST_FLAG_BIT_REPORT_BACK_FACE_HITS", umath::to_integral(pragma::physics::RayCastFlags::ReportBackFaceHits)},
-	    {"RAYCAST_FLAG_BIT_PRECISE", umath::to_integral(pragma::physics::RayCastFlags::Precise)}, {"RAYCAST_FLAG_BIT_IGNORE_DYNAMIC", umath::to_integral(pragma::physics::RayCastFlags::IgnoreDynamic)},
-	    {"RAYCAST_FLAG_BIT_IGNORE_STATIC", umath::to_integral(pragma::physics::RayCastFlags::IgnoreStatic)}, {"RAYCAST_FLAG_BIT_INVERT_FILTER", umath::to_integral(pragma::physics::RayCastFlags::InvertFilter)},
-	    {"RAYCAST_FLAG_DEFAULT", umath::to_integral(pragma::physics::RayCastFlags::Default)}, {"RAYCAST_FLAG_NONE", umath::to_integral(pragma::physics::RayCastFlags::None)}});
+	    {"RAYCAST_FLAG_BIT_REPORT_HIT_POSITION", pragma::math::to_integral(pragma::physics::RayCastFlags::ReportHitPosition)}, {"RAYCAST_FLAG_BIT_REPORT_HIT_NORMAL", pragma::math::to_integral(pragma::physics::RayCastFlags::ReportHitNormal)},
+	    {"RAYCAST_FLAG_BIT_REPORT_HIT_UV", pragma::math::to_integral(pragma::physics::RayCastFlags::ReportHitUV)}, {"RAYCAST_FLAG_BIT_REPORT_ALL_RESULTS", pragma::math::to_integral(pragma::physics::RayCastFlags::ReportAllResults)},
+	    {"RAYCAST_FLAG_BIT_REPORT_ANY_RESULT", pragma::math::to_integral(pragma::physics::RayCastFlags::ReportAnyResult)}, {"RAYCAST_FLAG_BIT_REPORT_BACK_FACE_HITS", pragma::math::to_integral(pragma::physics::RayCastFlags::ReportBackFaceHits)},
+	    {"RAYCAST_FLAG_BIT_PRECISE", pragma::math::to_integral(pragma::physics::RayCastFlags::Precise)}, {"RAYCAST_FLAG_BIT_IGNORE_DYNAMIC", pragma::math::to_integral(pragma::physics::RayCastFlags::IgnoreDynamic)},
+	    {"RAYCAST_FLAG_BIT_IGNORE_STATIC", pragma::math::to_integral(pragma::physics::RayCastFlags::IgnoreStatic)}, {"RAYCAST_FLAG_BIT_INVERT_FILTER", pragma::math::to_integral(pragma::physics::RayCastFlags::InvertFilter)},
+	    {"RAYCAST_FLAG_DEFAULT", pragma::math::to_integral(pragma::physics::RayCastFlags::Default)}, {"RAYCAST_FLAG_NONE", pragma::math::to_integral(pragma::physics::RayCastFlags::None)}});
 
 	auto &physMod = lua.RegisterLibrary(libName);
 	auto classBase = luabind::class_<pragma::physics::IBase>("Base");
@@ -180,39 +180,39 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	physMod[classDefCon];
 
 	auto classDefVhc = luabind::class_<pragma::physics::IVehicle, pragma::physics::IBase>("Vehicle");
-	classDefVhc.add_static_constant("GEAR_REVERSE", umath::to_integral(pragma::physics::IVehicle::Gear::Reverse));
-	classDefVhc.add_static_constant("GEAR_NEUTRAL", umath::to_integral(pragma::physics::IVehicle::Gear::Neutral));
-	classDefVhc.add_static_constant("GEAR_FIRST", umath::to_integral(pragma::physics::IVehicle::Gear::First));
-	classDefVhc.add_static_constant("GEAR_SECOND", umath::to_integral(pragma::physics::IVehicle::Gear::Second));
-	classDefVhc.add_static_constant("GEAR_THIRD", umath::to_integral(pragma::physics::IVehicle::Gear::Third));
-	classDefVhc.add_static_constant("GEAR_FOURTH", umath::to_integral(pragma::physics::IVehicle::Gear::Fourth));
-	classDefVhc.add_static_constant("GEAR_FIFTH", umath::to_integral(pragma::physics::IVehicle::Gear::Fifth));
-	classDefVhc.add_static_constant("GEAR_SIXTH", umath::to_integral(pragma::physics::IVehicle::Gear::Sixth));
-	classDefVhc.add_static_constant("GEAR_SEVENTH", umath::to_integral(pragma::physics::IVehicle::Gear::Seventh));
-	classDefVhc.add_static_constant("GEAR_EIGHTH", umath::to_integral(pragma::physics::IVehicle::Gear::Eighth));
-	classDefVhc.add_static_constant("GEAR_NINTH", umath::to_integral(pragma::physics::IVehicle::Gear::Ninth));
-	classDefVhc.add_static_constant("GEAR_TENTH", umath::to_integral(pragma::physics::IVehicle::Gear::Tenth));
-	classDefVhc.add_static_constant("GEAR_ELEVENTH", umath::to_integral(pragma::physics::IVehicle::Gear::Eleventh));
-	classDefVhc.add_static_constant("GEAR_TWELFTH", umath::to_integral(pragma::physics::IVehicle::Gear::Twelfth));
-	classDefVhc.add_static_constant("GEAR_THIRTEENTH", umath::to_integral(pragma::physics::IVehicle::Gear::Thirteenth));
-	classDefVhc.add_static_constant("GEAR_FOURTEENTH", umath::to_integral(pragma::physics::IVehicle::Gear::Fourteenth));
-	classDefVhc.add_static_constant("GEAR_FIFTEENTH", umath::to_integral(pragma::physics::IVehicle::Gear::Fifteenth));
-	classDefVhc.add_static_constant("GEAR_SIXTEENTH", umath::to_integral(pragma::physics::IVehicle::Gear::Sixteenth));
-	classDefVhc.add_static_constant("GEAR_SEVENTEENTH", umath::to_integral(pragma::physics::IVehicle::Gear::Seventeenth));
-	classDefVhc.add_static_constant("GEAR_EIGHTEENTH", umath::to_integral(pragma::physics::IVehicle::Gear::Eighteenth));
-	classDefVhc.add_static_constant("GEAR_NINETEENTH", umath::to_integral(pragma::physics::IVehicle::Gear::Nineteenth));
-	classDefVhc.add_static_constant("GEAR_TWENTIETH", umath::to_integral(pragma::physics::IVehicle::Gear::Twentieth));
-	classDefVhc.add_static_constant("GEAR_TWENTYFIRST", umath::to_integral(pragma::physics::IVehicle::Gear::Twentyfirst));
-	classDefVhc.add_static_constant("GEAR_TWENTYSECOND", umath::to_integral(pragma::physics::IVehicle::Gear::Twentysecond));
-	classDefVhc.add_static_constant("GEAR_TWENTYTHIRD", umath::to_integral(pragma::physics::IVehicle::Gear::Twentythird));
-	classDefVhc.add_static_constant("GEAR_TWENTYFOURTH", umath::to_integral(pragma::physics::IVehicle::Gear::Twentyfourth));
-	classDefVhc.add_static_constant("GEAR_TWENTYFIFTH", umath::to_integral(pragma::physics::IVehicle::Gear::Twentyfifth));
-	classDefVhc.add_static_constant("GEAR_TWENTYSIXTH", umath::to_integral(pragma::physics::IVehicle::Gear::Twentysixth));
-	classDefVhc.add_static_constant("GEAR_TWENTYSEVENTH", umath::to_integral(pragma::physics::IVehicle::Gear::Twentyseventh));
-	classDefVhc.add_static_constant("GEAR_TWENTYEIGHTH", umath::to_integral(pragma::physics::IVehicle::Gear::Twentyeighth));
-	classDefVhc.add_static_constant("GEAR_TWENTYNINTH", umath::to_integral(pragma::physics::IVehicle::Gear::Twentyninth));
-	classDefVhc.add_static_constant("GEAR_THIRTIETH", umath::to_integral(pragma::physics::IVehicle::Gear::Thirtieth));
-	classDefVhc.add_static_constant("GEAR_COUNT", umath::to_integral(pragma::physics::IVehicle::Gear::Count));
+	classDefVhc.add_static_constant("GEAR_REVERSE", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Reverse));
+	classDefVhc.add_static_constant("GEAR_NEUTRAL", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Neutral));
+	classDefVhc.add_static_constant("GEAR_FIRST", pragma::math::to_integral(pragma::physics::IVehicle::Gear::First));
+	classDefVhc.add_static_constant("GEAR_SECOND", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Second));
+	classDefVhc.add_static_constant("GEAR_THIRD", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Third));
+	classDefVhc.add_static_constant("GEAR_FOURTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Fourth));
+	classDefVhc.add_static_constant("GEAR_FIFTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Fifth));
+	classDefVhc.add_static_constant("GEAR_SIXTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Sixth));
+	classDefVhc.add_static_constant("GEAR_SEVENTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Seventh));
+	classDefVhc.add_static_constant("GEAR_EIGHTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Eighth));
+	classDefVhc.add_static_constant("GEAR_NINTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Ninth));
+	classDefVhc.add_static_constant("GEAR_TENTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Tenth));
+	classDefVhc.add_static_constant("GEAR_ELEVENTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Eleventh));
+	classDefVhc.add_static_constant("GEAR_TWELFTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Twelfth));
+	classDefVhc.add_static_constant("GEAR_THIRTEENTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Thirteenth));
+	classDefVhc.add_static_constant("GEAR_FOURTEENTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Fourteenth));
+	classDefVhc.add_static_constant("GEAR_FIFTEENTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Fifteenth));
+	classDefVhc.add_static_constant("GEAR_SIXTEENTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Sixteenth));
+	classDefVhc.add_static_constant("GEAR_SEVENTEENTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Seventeenth));
+	classDefVhc.add_static_constant("GEAR_EIGHTEENTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Eighteenth));
+	classDefVhc.add_static_constant("GEAR_NINETEENTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Nineteenth));
+	classDefVhc.add_static_constant("GEAR_TWENTIETH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Twentieth));
+	classDefVhc.add_static_constant("GEAR_TWENTYFIRST", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Twentyfirst));
+	classDefVhc.add_static_constant("GEAR_TWENTYSECOND", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Twentysecond));
+	classDefVhc.add_static_constant("GEAR_TWENTYTHIRD", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Twentythird));
+	classDefVhc.add_static_constant("GEAR_TWENTYFOURTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Twentyfourth));
+	classDefVhc.add_static_constant("GEAR_TWENTYFIFTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Twentyfifth));
+	classDefVhc.add_static_constant("GEAR_TWENTYSIXTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Twentysixth));
+	classDefVhc.add_static_constant("GEAR_TWENTYSEVENTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Twentyseventh));
+	classDefVhc.add_static_constant("GEAR_TWENTYEIGHTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Twentyeighth));
+	classDefVhc.add_static_constant("GEAR_TWENTYNINTH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Twentyninth));
+	classDefVhc.add_static_constant("GEAR_THIRTIETH", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Thirtieth));
+	classDefVhc.add_static_constant("GEAR_COUNT", pragma::math::to_integral(pragma::physics::IVehicle::Gear::Count));
 	classDefVhc.def("IsValid", static_cast<bool (*)(lua::State *, pragma::physics::IVehicle *)>([](lua::State *l, pragma::physics::IVehicle *hPhys) { return hPhys != nullptr; }));
 	classDefVhc.def("Remove", static_cast<void (*)(lua::State *, pragma::physics::IVehicle *)>([](lua::State *l, pragma::physics::IVehicle *hPhys) {
 		if(Lua::CheckHandle<pragma::physics::IVehicle>(l, hPhys) == false)
@@ -281,10 +281,10 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefRayCastData.def("SetShape", static_cast<void (*)(lua::State *, pragma::physics::TraceData &, const pragma::physics::IConvexShape &)>(&Lua::TraceData::SetSource));
 	classDefRayCastData.def("SetSource", static_cast<void (pragma::physics::TraceData::*)(const Vector3 &)>(&pragma::physics::TraceData::SetSource));
 	classDefRayCastData.def("SetSourceRotation", &pragma::physics::TraceData::SetSourceRotation);
-	classDefRayCastData.def("SetSource", static_cast<void (pragma::physics::TraceData::*)(const umath::Transform &)>(&pragma::physics::TraceData::SetSource));
+	classDefRayCastData.def("SetSource", static_cast<void (pragma::physics::TraceData::*)(const pragma::math::Transform &)>(&pragma::physics::TraceData::SetSource));
 	classDefRayCastData.def("SetTarget", static_cast<void (pragma::physics::TraceData::*)(const Vector3 &)>(&pragma::physics::TraceData::SetTarget));
 	classDefRayCastData.def("SetTargetRotation", &pragma::physics::TraceData::SetTargetRotation);
-	classDefRayCastData.def("SetTarget", static_cast<void (pragma::physics::TraceData::*)(const umath::Transform &)>(&pragma::physics::TraceData::SetTarget));
+	classDefRayCastData.def("SetTarget", static_cast<void (pragma::physics::TraceData::*)(const pragma::math::Transform &)>(&pragma::physics::TraceData::SetTarget));
 	classDefRayCastData.def("SetRotation", &pragma::physics::TraceData::SetRotation);
 	classDefRayCastData.def("SetFlags", &Lua::TraceData::SetFlags);
 	classDefRayCastData.def("SetFilter", &Lua::TraceData::SetFilter);
@@ -328,9 +328,9 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		  ss << "[StartPos:" << res.startPosition << "]";
 		  return ss.str();
 	  });
-	classDefRayCastResult.add_static_constant("HIT_TYPE_BLOCK", umath::to_integral(pragma::physics::RayCastHitType::Block));
-	classDefRayCastResult.add_static_constant("HIT_TYPE_TOUCH", umath::to_integral(pragma::physics::RayCastHitType::Touch));
-	classDefRayCastResult.add_static_constant("HIT_TYPE_NONE", umath::to_integral(pragma::physics::RayCastHitType::None));
+	classDefRayCastResult.add_static_constant("HIT_TYPE_BLOCK", pragma::math::to_integral(pragma::physics::RayCastHitType::Block));
+	classDefRayCastResult.add_static_constant("HIT_TYPE_TOUCH", pragma::math::to_integral(pragma::physics::RayCastHitType::Touch));
+	classDefRayCastResult.add_static_constant("HIT_TYPE_NONE", pragma::math::to_integral(pragma::physics::RayCastHitType::None));
 	classDefRayCastResult.def_readonly("hitType", reinterpret_cast<std::underlying_type_t<decltype(pragma::physics::TraceResult::hitType)> pragma::physics::TraceResult::*>(&pragma::physics::TraceResult::hitType));
 	classDefRayCastResult.property("entity", static_cast<void (*)(lua::State *, pragma::physics::TraceResult &)>([](lua::State *l, pragma::physics::TraceResult &tr) {
 		if(tr.entity.valid() == false)
@@ -397,9 +397,9 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefVhcCreateInfo.scope[luabind::def("CreateStandardFourWheelDrive",
 	  static_cast<void (*)(lua::State *, const std::array<Vector3, pragma::physics::VehicleCreateInfo::WHEEL_COUNT_4W_DRIVE> &)>(
 	    [](lua::State *l, const std::array<Vector3, pragma::physics::VehicleCreateInfo::WHEEL_COUNT_4W_DRIVE> &wheelCenterOffsets) { create_standard_four_wheel_drive(l, wheelCenterOffsets); }))];
-	classDefVhcCreateInfo.add_static_constant("WHEEL_DRIVE_FRONT", umath::to_integral(pragma::physics::VehicleCreateInfo::WheelDrive::Front));
-	classDefVhcCreateInfo.add_static_constant("WHEEL_DRIVE_REAR", umath::to_integral(pragma::physics::VehicleCreateInfo::WheelDrive::Rear));
-	classDefVhcCreateInfo.add_static_constant("WHEEL_DRIVE_FOUR", umath::to_integral(pragma::physics::VehicleCreateInfo::WheelDrive::Four));
+	classDefVhcCreateInfo.add_static_constant("WHEEL_DRIVE_FRONT", pragma::math::to_integral(pragma::physics::VehicleCreateInfo::WheelDrive::Front));
+	classDefVhcCreateInfo.add_static_constant("WHEEL_DRIVE_REAR", pragma::math::to_integral(pragma::physics::VehicleCreateInfo::WheelDrive::Rear));
+	classDefVhcCreateInfo.add_static_constant("WHEEL_DRIVE_FOUR", pragma::math::to_integral(pragma::physics::VehicleCreateInfo::WheelDrive::Four));
 	classDefVhcCreateInfo.def(luabind::constructor<>());
 	classDefVhcCreateInfo.def_readwrite("actor", &pragma::physics::VehicleCreateInfo::actor);
 	classDefVhcCreateInfo.def_readwrite("chassis", &pragma::physics::VehicleCreateInfo::chassis);
@@ -410,8 +410,8 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefVhcCreateInfo.def_readwrite("gravityFactor", &pragma::physics::VehicleCreateInfo::gravityFactor);
 	classDefVhcCreateInfo.def_readwrite("wheelDrive", reinterpret_cast<std::underlying_type_t<decltype(pragma::physics::VehicleCreateInfo::wheelDrive)> pragma::physics::VehicleCreateInfo::*>(&pragma::physics::VehicleCreateInfo::wheelDrive));
 	classDefVhcCreateInfo.def("AddWheel", static_cast<void (*)(lua::State *, pragma::physics::VehicleCreateInfo &, pragma::physics::WheelCreateInfo &)>([](lua::State *l, pragma::physics::VehicleCreateInfo &vhcCreateInfo, pragma::physics::WheelCreateInfo &wheelCreateInfo) {
-		auto wheelType = umath::to_integral(pragma::physics::VehicleCreateInfo::GetWheelType(wheelCreateInfo));
-		auto it = std::find_if(vhcCreateInfo.wheels.begin(), vhcCreateInfo.wheels.end(), [wheelType](const pragma::physics::WheelCreateInfo &wheelDescOther) { return wheelType < umath::to_integral(pragma::physics::VehicleCreateInfo::GetWheelType(wheelDescOther)); });
+		auto wheelType = pragma::math::to_integral(pragma::physics::VehicleCreateInfo::GetWheelType(wheelCreateInfo));
+		auto it = std::find_if(vhcCreateInfo.wheels.begin(), vhcCreateInfo.wheels.end(), [wheelType](const pragma::physics::WheelCreateInfo &wheelDescOther) { return wheelType < pragma::math::to_integral(pragma::physics::VehicleCreateInfo::GetWheelType(wheelDescOther)); });
 		// Wheels have to be inserted in the correct order! (FrontLeft -> FrontRight -> RearLeft -> RearRight)
 		vhcCreateInfo.wheels.insert(it, wheelCreateInfo);
 	}));
@@ -446,11 +446,11 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	auto classDefWheelCreateInfo = luabind::class_<pragma::physics::WheelCreateInfo>("WheelCreateInfo");
 	classDefWheelCreateInfo.scope[luabind::def("CreateStandardFrontWheel", &pragma::physics::WheelCreateInfo::CreateStandardFrontWheel)];
 	classDefWheelCreateInfo.scope[luabind::def("CreateStandardRearWheel", &pragma::physics::WheelCreateInfo::CreateStandardRearWheel)];
-	classDefWheelCreateInfo.add_static_constant("FLAG_NONE", umath::to_integral(pragma::physics::WheelCreateInfo::Flags::None));
-	classDefWheelCreateInfo.add_static_constant("FLAG_BIT_FRONT", umath::to_integral(pragma::physics::WheelCreateInfo::Flags::Front));
-	classDefWheelCreateInfo.add_static_constant("FLAG_BIT_REAR", umath::to_integral(pragma::physics::WheelCreateInfo::Flags::Rear));
-	classDefWheelCreateInfo.add_static_constant("FLAG_BIT_LEFT", umath::to_integral(pragma::physics::WheelCreateInfo::Flags::Left));
-	classDefWheelCreateInfo.add_static_constant("FLAG_BIT_RIGHT", umath::to_integral(pragma::physics::WheelCreateInfo::Flags::Right));
+	classDefWheelCreateInfo.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::physics::WheelCreateInfo::Flags::None));
+	classDefWheelCreateInfo.add_static_constant("FLAG_BIT_FRONT", pragma::math::to_integral(pragma::physics::WheelCreateInfo::Flags::Front));
+	classDefWheelCreateInfo.add_static_constant("FLAG_BIT_REAR", pragma::math::to_integral(pragma::physics::WheelCreateInfo::Flags::Rear));
+	classDefWheelCreateInfo.add_static_constant("FLAG_BIT_LEFT", pragma::math::to_integral(pragma::physics::WheelCreateInfo::Flags::Left));
+	classDefWheelCreateInfo.add_static_constant("FLAG_BIT_RIGHT", pragma::math::to_integral(pragma::physics::WheelCreateInfo::Flags::Right));
 	classDefWheelCreateInfo.def(luabind::constructor<>());
 	classDefWheelCreateInfo.def_readwrite("suspension", &pragma::physics::WheelCreateInfo::suspension);
 	classDefWheelCreateInfo.def_readwrite("width", &pragma::physics::WheelCreateInfo::width);
@@ -465,7 +465,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	physMod[classDefWheelCreateInfo];
 
 	auto classTreeIkTree = luabind::class_<Tree>("IKTree");
-	classTreeIkTree.scope[luabind::def("Create", static_cast<std::shared_ptr<Tree> (*)(lua::State *)>([](lua::State *l) { return ::util::make_shared<Tree>(); }))];
+	classTreeIkTree.scope[luabind::def("Create", static_cast<std::shared_ptr<Tree> (*)(lua::State *)>([](lua::State *l) { return pragma::util::make_shared<Tree>(); }))];
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	classTreeIkTree.def("Draw", static_cast<void (*)(lua::State *, Tree &)>([](lua::State *l, Tree &tree) {
 		auto *game = pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
@@ -576,14 +576,14 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classTreeIkTreeNode.add_static_constant("PURPOSE_EFFECTOR", EFFECTOR);
 	classTreeIkTreeNode.scope[luabind::def("Create",
 	  static_cast<std::shared_ptr<Node> (*)(lua::State *, const Vector3 &, const Vector3 &, uint32_t, double, double, double)>([](lua::State *l, const Vector3 &origin, const Vector3 &rotAxis, uint32_t purpose, double minTheta, double maxTheta, double restAngle) -> std::shared_ptr<Node> {
-		  return ::util::make_shared<Node>(VectorR3(origin.x, origin.y, origin.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, static_cast<Purpose>(purpose), minTheta, maxTheta, restAngle);
+		  return pragma::util::make_shared<Node>(VectorR3(origin.x, origin.y, origin.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, static_cast<Purpose>(purpose), minTheta, maxTheta, restAngle);
 	  }))];
 	classTreeIkTreeNode.scope[luabind::def("Create", static_cast<std::shared_ptr<Node> (*)(lua::State *, const Vector3 &, const Vector3 &, uint32_t)>([](lua::State *l, const Vector3 &origin, const Vector3 &rotAxis, uint32_t purpose) -> std::shared_ptr<Node> {
-		return ::util::make_shared<Node>(VectorR3(origin.x, origin.y, origin.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, static_cast<Purpose>(purpose));
+		return pragma::util::make_shared<Node>(VectorR3(origin.x, origin.y, origin.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, static_cast<Purpose>(purpose));
 	}))];
-	classTreeIkTreeNode.def("GetLocalTransform", static_cast<umath::Transform (*)(lua::State *, Node &)>([](lua::State *l, Node &node) {
-		umath::Transform t {};
-		::util::ik::get_local_transform(node, t);
+	classTreeIkTreeNode.def("GetLocalTransform", static_cast<pragma::math::Transform (*)(lua::State *, Node &)>([](lua::State *l, Node &node) {
+		pragma::math::Transform t {};
+		pragma::util::ik::get_local_transform(node, t);
 		return t;
 	}));
 	classTreeIkTreeNode.def("PrintNode", &Node::PrintNode);
@@ -643,7 +643,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classTreeIkTreeNode.def("UnFreeze", &Node::UnFreeze);
 
 	auto classIkJacobian = luabind::class_<Jacobian>("IKJacobian");
-	classIkJacobian.scope[luabind::def("Create", static_cast<std::shared_ptr<Jacobian> (*)(lua::State *, Tree &)>([](lua::State *l, Tree &tree) { return ::util::make_shared<Jacobian>(&tree); }))];
+	classIkJacobian.scope[luabind::def("Create", static_cast<std::shared_ptr<Jacobian> (*)(lua::State *, Tree &)>([](lua::State *l, Tree &tree) { return pragma::util::make_shared<Jacobian>(&tree); }))];
 	classIkJacobian.def("ComputeJacobian", static_cast<void (*)(lua::State *, Jacobian &, const luabind::tableT<Vector3> &)>([](lua::State *l, Jacobian &jacobian, const luabind::tableT<Vector3> &vTargets) {
 		auto numTargets = Lua::GetObjectLength(l, vTargets);
 		std::vector<VectorR3> targets;
@@ -716,34 +716,34 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classTreeIkTree.scope[classTreeIkTreeNode];
 	physMod[classTreeIkTree];
 
-	auto classIkController = luabind::class_<IKController>("IKController");
-	classIkController.def("GetEffectorName", &IKController::GetEffectorName);
-	classIkController.def("GetChainLength", &IKController::GetChainLength);
-	classIkController.def("GetType", &IKController::GetType);
-	classIkController.def("SetEffectorName", &IKController::SetEffectorName);
-	classIkController.def("SetChainLength", &IKController::SetChainLength);
-	classIkController.def("SetType", &IKController::SetType);
-	classIkController.def("SetMethod", &IKController::SetMethod);
-	classIkController.def("GetMethod", &IKController::GetMethod);
-	classIkController.def("GetKeyValues", static_cast<std::unordered_map<std::string, std::string> &(IKController::*)()>(&IKController::GetKeyValues));
-	classIkController.def("SetKeyValues", +[](lua::State *l, IKController &ikController, std::unordered_map<std::string, std::string> keyValues) { ikController.GetKeyValues() = std::move(keyValues); });
-	classIkController.def("SetKeyValue", static_cast<void (*)(lua::State *, IKController &, const std::string &, const std::string &)>([](lua::State *l, IKController &ikController, const std::string &key, const std::string &value) {
+	auto classIkController = luabind::class_<pragma::physics::IKController>("IKController");
+	classIkController.def("GetEffectorName", &pragma::physics::IKController::GetEffectorName);
+	classIkController.def("GetChainLength", &pragma::physics::IKController::GetChainLength);
+	classIkController.def("GetType", &pragma::physics::IKController::GetType);
+	classIkController.def("SetEffectorName", &pragma::physics::IKController::SetEffectorName);
+	classIkController.def("SetChainLength", &pragma::physics::IKController::SetChainLength);
+	classIkController.def("SetType", &pragma::physics::IKController::SetType);
+	classIkController.def("SetMethod", &pragma::physics::IKController::SetMethod);
+	classIkController.def("GetMethod", &pragma::physics::IKController::GetMethod);
+	classIkController.def("GetKeyValues", static_cast<std::unordered_map<std::string, std::string> &(pragma::physics::IKController::*)()>(&pragma::physics::IKController::GetKeyValues));
+	classIkController.def("SetKeyValues", +[](lua::State *l, pragma::physics::IKController &ikController, std::unordered_map<std::string, std::string> keyValues) { ikController.GetKeyValues() = std::move(keyValues); });
+	classIkController.def("SetKeyValue", static_cast<void (*)(lua::State *, pragma::physics::IKController &, const std::string &, const std::string &)>([](lua::State *l, pragma::physics::IKController &ikController, const std::string &key, const std::string &value) {
 		auto &ikKeyValues = ikController.GetKeyValues();
 		ikKeyValues[key] = value;
 	}));
-	classIkController.def("GetKeyValue", static_cast<std::optional<std::string> (*)(lua::State *, IKController &, const std::string &)>([](lua::State *l, IKController &ikController, const std::string &key) -> std::optional<std::string> {
+	classIkController.def("GetKeyValue", static_cast<std::optional<std::string> (*)(lua::State *, pragma::physics::IKController &, const std::string &)>([](lua::State *l, pragma::physics::IKController &ikController, const std::string &key) -> std::optional<std::string> {
 		auto &ikKeyValues = ikController.GetKeyValues();
 		auto it = ikKeyValues.find(key);
 		if(it == ikKeyValues.end())
 			return {};
 		return it->second;
 	}));
-	classIkController.add_static_constant("METHOD_SELECTIVELY_DAMPED_LEAST_SQUARE", umath::to_integral(::util::ik::Method::SelectivelyDampedLeastSquare));
-	classIkController.add_static_constant("METHOD_DAMPED_LEAST_SQUARES", umath::to_integral(::util::ik::Method::DampedLeastSquares));
-	classIkController.add_static_constant("METHOD_DAMPED_LEAST_SQUARES_WITH_SINGULAR_VALUE_DECOMPOSITION", umath::to_integral(::util::ik::Method::DampedLeastSquaresWithSingularValueDecomposition));
-	classIkController.add_static_constant("METHOD_PSEUDOINVERSE", umath::to_integral(::util::ik::Method::Pseudoinverse));
-	classIkController.add_static_constant("METHOD_JACOBIAN_TRANSPOSE", umath::to_integral(::util::ik::Method::JacobianTranspose));
-	classIkController.add_static_constant("METHOD_DEFAULT", umath::to_integral(::util::ik::Method::Default));
+	classIkController.add_static_constant("METHOD_SELECTIVELY_DAMPED_LEAST_SQUARE", pragma::math::to_integral(pragma::physics::ik::Method::SelectivelyDampedLeastSquare));
+	classIkController.add_static_constant("METHOD_DAMPED_LEAST_SQUARES", pragma::math::to_integral(pragma::physics::ik::Method::DampedLeastSquares));
+	classIkController.add_static_constant("METHOD_DAMPED_LEAST_SQUARES_WITH_SINGULAR_VALUE_DECOMPOSITION", pragma::math::to_integral(pragma::physics::ik::Method::DampedLeastSquaresWithSingularValueDecomposition));
+	classIkController.add_static_constant("METHOD_PSEUDOINVERSE", pragma::math::to_integral(pragma::physics::ik::Method::Pseudoinverse));
+	classIkController.add_static_constant("METHOD_JACOBIAN_TRANSPOSE", pragma::math::to_integral(pragma::physics::ik::Method::JacobianTranspose));
+	classIkController.add_static_constant("METHOD_DEFAULT", pragma::math::to_integral(pragma::physics::ik::Method::Default));
 	physMod[classIkController];
 
 	auto classDef = luabind::class_<pragma::physics::PhysSoftBodyInfo>("SoftBodyInfo");
@@ -888,56 +888,56 @@ std::shared_ptr<pragma::physics::IShape> Lua::physenv::create_heightfield_terrai
 	return env->CreateHeightfieldTerrainShape(width, length, maxHeight, upAxis, material);
 }
 
-::util::TSharedHandle<pragma::physics::IRigidBody> Lua::physenv::create_rigid_body(pragma::physics::IEnvironment *env, pragma::physics::IShape &shape, bool dynamic)
+pragma::util::TSharedHandle<pragma::physics::IRigidBody> Lua::physenv::create_rigid_body(pragma::physics::IEnvironment *env, pragma::physics::IShape &shape, bool dynamic)
 {
 	if(!env)
 		return nullptr;
 	return env->CreateRigidBody(shape, dynamic);
 }
 
-::util::TSharedHandle<pragma::physics::IGhostObject> Lua::physenv::create_ghost_object(pragma::physics::IEnvironment *env, pragma::physics::IShape &shape)
+pragma::util::TSharedHandle<pragma::physics::IGhostObject> Lua::physenv::create_ghost_object(pragma::physics::IEnvironment *env, pragma::physics::IShape &shape)
 {
 	if(!env)
 		return nullptr;
 	return env->CreateGhostObject(shape);
 }
 
-::util::TSharedHandle<pragma::physics::ICollisionObject> Lua::physenv::create_plane(pragma::physics::IEnvironment *env, const Vector3 &n, double d, pragma::physics::IMaterial &material)
+pragma::util::TSharedHandle<pragma::physics::ICollisionObject> Lua::physenv::create_plane(pragma::physics::IEnvironment *env, const Vector3 &n, double d, pragma::physics::IMaterial &material)
 {
 	if(!env)
 		return nullptr;
 	return env->CreatePlane(n, d, material);
 }
 
-::util::TSharedHandle<pragma::physics::IFixedConstraint> Lua::physenv::create_fixed_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB)
+pragma::util::TSharedHandle<pragma::physics::IFixedConstraint> Lua::physenv::create_fixed_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB)
 {
 	if(!env)
 		return nullptr;
 	return env->CreateFixedConstraint(bodyA, pivotA, rotA, bodyB, pivotB, rotB);
 }
 
-::util::TSharedHandle<pragma::physics::IBallSocketConstraint> Lua::physenv::create_ball_socket_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB)
+pragma::util::TSharedHandle<pragma::physics::IBallSocketConstraint> Lua::physenv::create_ball_socket_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB)
 {
 	if(!env)
 		return nullptr;
 	return env->CreateBallSocketConstraint(bodyA, pivotA, bodyB, pivotB);
 }
 
-::util::TSharedHandle<pragma::physics::IHingeConstraint> Lua::physenv::create_hinge_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Vector3 &axis)
+pragma::util::TSharedHandle<pragma::physics::IHingeConstraint> Lua::physenv::create_hinge_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Vector3 &axis)
 {
 	if(!env)
 		return nullptr;
 	return env->CreateHingeConstraint(bodyA, pivotA, bodyB, pivotB, axis);
 }
 
-::util::TSharedHandle<pragma::physics::ISliderConstraint> Lua::physenv::create_slider_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB)
+pragma::util::TSharedHandle<pragma::physics::ISliderConstraint> Lua::physenv::create_slider_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB)
 {
 	if(!env)
 		return nullptr;
 	return env->CreateSliderConstraint(bodyA, pivotA, rotA, bodyB, pivotB, rotB);
 }
 
-::util::TSharedHandle<pragma::physics::IConeTwistConstraint> Lua::physenv::create_cone_twist_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB,
+pragma::util::TSharedHandle<pragma::physics::IConeTwistConstraint> Lua::physenv::create_cone_twist_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB,
   const Quat &rotB)
 {
 	if(!env)
@@ -945,14 +945,14 @@ std::shared_ptr<pragma::physics::IShape> Lua::physenv::create_heightfield_terrai
 	return env->CreateConeTwistConstraint(bodyA, pivotA, rotA, bodyB, pivotB, rotB);
 }
 
-::util::TSharedHandle<pragma::physics::IDoFConstraint> Lua::physenv::create_DoF_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB)
+pragma::util::TSharedHandle<pragma::physics::IDoFConstraint> Lua::physenv::create_DoF_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB, const Quat &rotB)
 {
 	if(!env)
 		return nullptr;
 	return env->CreateDoFConstraint(bodyA, pivotA, rotA, bodyB, pivotB, rotB);
 }
 
-::util::TSharedHandle<pragma::physics::IDoFSpringConstraint> Lua::physenv::create_dof_spring_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB,
+pragma::util::TSharedHandle<pragma::physics::IDoFSpringConstraint> Lua::physenv::create_dof_spring_constraint(pragma::physics::IEnvironment *env, pragma::physics::IRigidBody &bodyA, const Vector3 &pivotA, const Quat &rotA, pragma::physics::IRigidBody &bodyB, const Vector3 &pivotB,
   const Quat &rotB)
 {
 	if(!env)
@@ -962,13 +962,13 @@ std::shared_ptr<pragma::physics::IShape> Lua::physenv::create_heightfield_terrai
 
 pragma::physics::SurfaceMaterial *Lua::physenv::create_surface_material(pragma::Game &game, const std::string &name, float friction, float restitution) { return &game.CreateSurfaceMaterial(name, friction, restitution); }
 
-::util::TSharedHandle<pragma::physics::IController> Lua::physenv::create_box_controller(pragma::physics::IEnvironment *env, const Vector3 &halfExtents, float stepHeight, float slopeLimit, const umath::Transform &startTransform)
+pragma::util::TSharedHandle<pragma::physics::IController> Lua::physenv::create_box_controller(pragma::physics::IEnvironment *env, const Vector3 &halfExtents, float stepHeight, float slopeLimit, const pragma::math::Transform &startTransform)
 {
 	if(!env)
 		return nullptr;
 	return env->CreateBoxController(halfExtents, stepHeight, slopeLimit, startTransform);
 }
-::util::TSharedHandle<pragma::physics::IController> Lua::physenv::create_capsule_controller(pragma::physics::IEnvironment *env, float halfWidth, float halfHeight, float stepHeight, float slopeLimit, const umath::Transform &startTransform)
+pragma::util::TSharedHandle<pragma::physics::IController> Lua::physenv::create_capsule_controller(pragma::physics::IEnvironment *env, float halfWidth, float halfHeight, float stepHeight, float slopeLimit, const pragma::math::Transform &startTransform)
 {
 	if(!env)
 		return nullptr;

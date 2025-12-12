@@ -153,7 +153,7 @@ static SilkIcon icons[] = {SilkIcon("accept", 0, 0), SilkIcon("add", 0, 1), Silk
 
 void pragma::gui::types::WISilkIcon::SetIcon(std::string icon)
 {
-	ustring::to_lower(icon);
+	pragma::string::to_lower(icon);
 	SilkIcon *info = nullptr;
 	for(unsigned int i = 0; i < (sizeof(icons) / sizeof(SilkIcon)); i++) {
 		if(icons[i].name == icon) {

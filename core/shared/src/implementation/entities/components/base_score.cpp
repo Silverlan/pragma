@@ -18,7 +18,7 @@ void BaseScoreComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseScoreComponent::BaseScoreComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_score(util::Int32Property::Create(0)) {}
+BaseScoreComponent::BaseScoreComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_score(pragma::util::Int32Property::Create(0)) {}
 BaseScoreComponent::~BaseScoreComponent()
 {
 	if(m_cbOnScoreChanged.IsValid())
@@ -28,21 +28,21 @@ void BaseScoreComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "score", false))
-			*m_score = util::to_int(kvData.value);
+		if(pragma::string::compare<std::string>(kvData.key, "score", false))
+			*m_score = pragma::util::to_int(kvData.value);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
-		if(ustring::compare<std::string>(inputData.input, "setscore", false))
-			*m_score = util::to_int(inputData.data);
+		if(pragma::string::compare<std::string>(inputData.input, "setscore", false))
+			*m_score = pragma::util::to_int(inputData.data);
 		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
+			return pragma::util::EventReply::Unhandled;
+		return pragma::util::EventReply::Handled;
 	});
 	m_cbOnScoreChanged = m_score->AddCallback([this](std::reference_wrapper<const Score> oldScore, std::reference_wrapper<const Score> newScore) {
 		pragma::CEOnScoreChanged onScoreChanged {newScore.get()};
@@ -51,7 +51,7 @@ void BaseScoreComponent::Initialize()
 	m_netEvSetScore = SetupNetEvent("set_score");
 }
 BaseScoreComponent::Score BaseScoreComponent::GetScore() const { return *m_score; }
-const util::PInt32Property &BaseScoreComponent::GetScoreProperty() const { return m_score; }
+const pragma::util::PInt32Property &BaseScoreComponent::GetScoreProperty() const { return m_score; }
 void BaseScoreComponent::SetScore(Score score) { *m_score = score; }
 void BaseScoreComponent::AddScore(Score score) { SetScore(GetScore() + score); }
 void BaseScoreComponent::SubtractScore(Score score) { SetScore(GetScore() - score); }

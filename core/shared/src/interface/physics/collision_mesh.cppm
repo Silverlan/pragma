@@ -64,7 +64,7 @@ export {
 			int m_surfaceMaterialId = 0;
 			Vector3 m_centerOfMass = {};
 			double m_volume = 0.0;
-			util::Uuid m_uuid;
+			pragma::util::Uuid m_uuid;
 			void ClipAgainstPlane(const Vector3 &n, double d, pragma::physics::CollisionMesh &clippedMesh);
 			bool LoadFromAssetData(pragma::Game &game, pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr);
 		  public:
@@ -102,8 +102,8 @@ export {
 			void Mirror(pragma::Axis axis);
 			void Centralize();
 
-			const util::Uuid &GetUuid() const;
-			void SetUuid(const util::Uuid &uuid);
+			const pragma::util::Uuid &GetUuid() const;
+			void SetUuid(const pragma::util::Uuid &uuid);
 
 			// Triangles can be empty if the collision point-cloud was never triangulated
 			const std::vector<uint16_t> &GetTriangles() const;
@@ -131,7 +131,7 @@ export {
 
 			bool Save(pragma::Game &game, pragma::asset::Model &mdl, udm::AssetDataArg outData, std::string &outErr);
 		};
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	}
 	REGISTER_ENUM_FLAGS(pragma::physics::CollisionMesh::SoftBodyAnchor::Flags)
 

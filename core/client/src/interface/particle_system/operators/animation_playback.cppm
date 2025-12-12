@@ -28,9 +28,9 @@ void pragma::pts::CParticleOperatorAnimationPlayback::Initialize(pragma::BaseEnv
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &pair : values) {
 		auto key = pair.first;
-		ustring::to_lower(key);
+		pragma::string::to_lower(key);
 		if(key == "playbackspeed")
-			m_playbackSpeed = util::to_float(pair.second);
+			m_playbackSpeed = pragma::util::to_float(pair.second);
 	}
 }
 void pragma::pts::CParticleOperatorAnimationPlayback::Simulate(pragma::pts::CParticle &particle, double tDelta, float strength)

@@ -33,7 +33,7 @@ void CQuakeComponent::StartShake()
 	BaseEnvQuakeComponent::StartShake();
 	if(ShouldShakeView() == false)
 		return;
-	auto perlin = ::util::make_shared<noise::module::Perlin>();
+	auto perlin = pragma::util::make_shared<noise::module::Perlin>();
 	perlin->SetSeed(CInt32(pragma::get_cengine()->GetTickCount()));
 	m_tStartShake = CFloat(pragma::get_cgame()->CurTime());
 	m_cbScreenShake = pragma::get_cgame()->AddCallback("CalcView",
@@ -71,8 +71,8 @@ void CQuakeComponent::StartShake()
 		  if((InAir() == false && (pPhysComponent == nullptr || pPhysComponent->IsOnGround() == false)) || !pTrComponentEnt)
 			  return;
 		  auto dist = uvec::distance(origin, pos); //pTrComponentEnt->GetPosition());
-		  auto scale = (bGlobal == true) ? 1.f : (1.f - umath::clamp(dist / radius, 0.f, 1.f));
-		  scale *= util::get_faded_time_factor(CFloat(tDelta), duration, tFadeIn, tFadeOut);
+		  auto scale = (bGlobal == true) ? 1.f : (1.f - pragma::math::clamp(dist / radius, 0.f, 1.f));
+		  scale *= pragma::util::get_faded_time_factor(CFloat(tDelta), duration, tFadeIn, tFadeOut);
 		  frequency *= CFloat(scale);
 		  amplitude *= CFloat(scale);
 		  perlin->SetFrequency(frequency);

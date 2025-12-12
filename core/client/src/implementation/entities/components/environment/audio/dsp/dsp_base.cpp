@@ -27,8 +27,8 @@ void CBaseSoundDspComponent::OnTick(double dt)
 	auto pToggleComponent = ent.GetComponent<CToggleComponent>();
 	if(pTrComponent == nullptr || (pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false))
 		return;
-	auto radiusInnerSqr = umath::pow2(m_kvInnerRadius);
-	auto radiusOuterSqr = umath::pow2(m_kvOuterRadius);
+	auto radiusInnerSqr = pragma::math::pow2(m_kvInnerRadius);
+	auto radiusOuterSqr = pragma::math::pow2(m_kvOuterRadius);
 	auto &pos = pTrComponent->GetPosition();
 	auto &sounds = pragma::get_client_state()->GetSounds();
 	for(auto &rsnd : sounds) {
@@ -49,8 +49,8 @@ void CBaseSoundDspComponent::OnTick(double dt)
 			if(d > radiusOuterSqr)
 				DetachSoundSource(alSnd);
 			else {
-				d = umath::sqrt(d);
-				auto intensity = umath::clamp(d / m_kvInnerRadius, 0.f, 1.f);
+				d = pragma::math::sqrt(d);
+				auto intensity = pragma::math::clamp(d / m_kvInnerRadius, 0.f, 1.f);
 				UpdateSoundSource(alSnd, intensity);
 			}
 		}
@@ -71,8 +71,8 @@ void CBaseSoundDspComponent::ReceiveData(NetPacket &packet)
 	SetGain(gain);
 
 	auto spawnFlags = GetEntity().GetSpawnFlags();
-	m_bAffectRelative = (spawnFlags & umath::to_integral(SpawnFlags::AffectRelative));
-	m_bApplyGlobal = (spawnFlags & umath::to_integral(SpawnFlags::ApplyGlobally));
+	m_bAffectRelative = (spawnFlags & pragma::math::to_integral(SpawnFlags::AffectRelative));
+	m_bApplyGlobal = (spawnFlags & pragma::math::to_integral(SpawnFlags::ApplyGlobally));
 	m_types = GetTargetSoundTypes();
 	m_bAllWorldSounds = (static_cast<SpawnFlags>(spawnFlags) & (SpawnFlags::World | SpawnFlags::All)) != SpawnFlags::None;
 	m_bAllSounds = (static_cast<SpawnFlags>(spawnFlags) & SpawnFlags::All) != SpawnFlags::None;
@@ -87,13 +87,13 @@ void CBaseSoundDspComponent::OnEntitySpawn()
 	if(m_kvDsp.empty() == false)
 		m_dsp = pragma::get_cgame()->GetAuxEffect(m_kvDsp);
 }
-util::EventReply CBaseSoundDspComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply CBaseSoundDspComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvSoundDspComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEnvSoundDspComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		DetachAllSoundSources();
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }
 pragma::audio::ALSoundType CBaseSoundDspComponent::GetTargetSoundTypes() const
 {

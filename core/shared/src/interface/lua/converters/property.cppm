@@ -17,7 +17,7 @@ export namespace luabind {
 	void push_property(lua::State *l, T &prop);
 
 	template<typename T>
-	    requires(std::derived_from<util::base_type<T>, util::BaseProperty>)
+	    requires(std::derived_from<pragma::util::base_type<T>, pragma::util::BaseProperty>)
 	struct default_converter<T> : detail::default_converter_generator<T>::type {
 		enum { consumed_args = 1 };
 
@@ -59,7 +59,7 @@ export namespace luabind {
 	};
 
 	template<typename TProp>
-	    requires(std::derived_from<util::base_type<TProp>, util::BaseProperty>)
+	    requires(std::derived_from<pragma::util::base_type<TProp>, pragma::util::BaseProperty>)
 	struct property_converter : default_converter<TProp *> {
 		using is_native = std::false_type;
 
@@ -86,242 +86,242 @@ export namespace luabind {
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::ColorProperty>> : property_converter<util::ColorProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::ColorProperty>> : property_converter<pragma::util::ColorProperty> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::ColorProperty> const &> : property_converter<util::ColorProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::ColorProperty> const &> : property_converter<pragma::util::ColorProperty> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::BoolProperty>> : property_converter<util::BoolProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::BoolProperty>> : property_converter<pragma::util::BoolProperty> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::BoolProperty> const &> : property_converter<util::BoolProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::BoolProperty> const &> : property_converter<pragma::util::BoolProperty> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Int8Property>> : property_converter<util::Int8Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Int8Property>> : property_converter<pragma::util::Int8Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Int8Property> const &> : property_converter<util::Int8Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Int8Property> const &> : property_converter<pragma::util::Int8Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::UInt8Property>> : property_converter<util::UInt8Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::UInt8Property>> : property_converter<pragma::util::UInt8Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::UInt8Property> const &> : property_converter<util::UInt8Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::UInt8Property> const &> : property_converter<pragma::util::UInt8Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Int16Property>> : property_converter<util::Int16Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Int16Property>> : property_converter<pragma::util::Int16Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Int16Property> const &> : property_converter<util::Int16Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Int16Property> const &> : property_converter<pragma::util::Int16Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::UInt16Property>> : property_converter<util::UInt16Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::UInt16Property>> : property_converter<pragma::util::UInt16Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::UInt16Property> const &> : property_converter<util::UInt16Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::UInt16Property> const &> : property_converter<pragma::util::UInt16Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Int32Property>> : property_converter<util::Int32Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Int32Property>> : property_converter<pragma::util::Int32Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Int32Property> const &> : property_converter<util::Int32Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Int32Property> const &> : property_converter<pragma::util::Int32Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::UInt32Property>> : property_converter<util::UInt32Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::UInt32Property>> : property_converter<pragma::util::UInt32Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::UInt32Property> const &> : property_converter<util::UInt32Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::UInt32Property> const &> : property_converter<pragma::util::UInt32Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Int64Property>> : property_converter<util::Int64Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Int64Property>> : property_converter<pragma::util::Int64Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Int64Property> const &> : property_converter<util::Int64Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Int64Property> const &> : property_converter<pragma::util::Int64Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::UInt64Property>> : property_converter<util::UInt64Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::UInt64Property>> : property_converter<pragma::util::UInt64Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::UInt64Property> const &> : property_converter<util::UInt64Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::UInt64Property> const &> : property_converter<pragma::util::UInt64Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::FloatProperty>> : property_converter<util::FloatProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::FloatProperty>> : property_converter<pragma::util::FloatProperty> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::FloatProperty> const &> : property_converter<util::FloatProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::FloatProperty> const &> : property_converter<pragma::util::FloatProperty> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::DoubleProperty>> : property_converter<util::DoubleProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::DoubleProperty>> : property_converter<pragma::util::DoubleProperty> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::DoubleProperty> const &> : property_converter<util::DoubleProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::DoubleProperty> const &> : property_converter<pragma::util::DoubleProperty> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::LongDoubleProperty>> : property_converter<util::LongDoubleProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::LongDoubleProperty>> : property_converter<pragma::util::LongDoubleProperty> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::LongDoubleProperty> const &> : property_converter<util::LongDoubleProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::LongDoubleProperty> const &> : property_converter<pragma::util::LongDoubleProperty> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::EulerAnglesProperty>> : property_converter<util::EulerAnglesProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::EulerAnglesProperty>> : property_converter<pragma::util::EulerAnglesProperty> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::EulerAnglesProperty> const &> : property_converter<util::EulerAnglesProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::EulerAnglesProperty> const &> : property_converter<pragma::util::EulerAnglesProperty> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::QuatProperty>> : property_converter<util::QuatProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::QuatProperty>> : property_converter<pragma::util::QuatProperty> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::QuatProperty> const &> : property_converter<util::QuatProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::QuatProperty> const &> : property_converter<pragma::util::QuatProperty> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix2Property>> : property_converter<util::Matrix2Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix2Property>> : property_converter<pragma::util::Matrix2Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix2Property> const &> : property_converter<util::Matrix2Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix2Property> const &> : property_converter<pragma::util::Matrix2Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix2x3Property>> : property_converter<util::Matrix2x3Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix2x3Property>> : property_converter<pragma::util::Matrix2x3Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix2x3Property> const &> : property_converter<util::Matrix2x3Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix2x3Property> const &> : property_converter<pragma::util::Matrix2x3Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix2x4Property>> : property_converter<util::Matrix2x4Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix2x4Property>> : property_converter<pragma::util::Matrix2x4Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix2x4Property> const &> : property_converter<util::Matrix2x4Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix2x4Property> const &> : property_converter<pragma::util::Matrix2x4Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix3Property>> : property_converter<util::Matrix3Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix3Property>> : property_converter<pragma::util::Matrix3Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix3Property> const &> : property_converter<util::Matrix3Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix3Property> const &> : property_converter<pragma::util::Matrix3Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix3x2Property>> : property_converter<util::Matrix3x2Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix3x2Property>> : property_converter<pragma::util::Matrix3x2Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix3x2Property> const &> : property_converter<util::Matrix3x2Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix3x2Property> const &> : property_converter<pragma::util::Matrix3x2Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix3x4Property>> : property_converter<util::Matrix3x4Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix3x4Property>> : property_converter<pragma::util::Matrix3x4Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix3x4Property> const &> : property_converter<util::Matrix3x4Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix3x4Property> const &> : property_converter<pragma::util::Matrix3x4Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix4x2Property>> : property_converter<util::Matrix4x2Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix4x2Property>> : property_converter<pragma::util::Matrix4x2Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix4x2Property> const &> : property_converter<util::Matrix4x2Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix4x2Property> const &> : property_converter<pragma::util::Matrix4x2Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix4x3Property>> : property_converter<util::Matrix4x3Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix4x3Property>> : property_converter<pragma::util::Matrix4x3Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix4x3Property> const &> : property_converter<util::Matrix4x3Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix4x3Property> const &> : property_converter<pragma::util::Matrix4x3Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix4Property>> : property_converter<util::Matrix4Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix4Property>> : property_converter<pragma::util::Matrix4Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Matrix4Property> const &> : property_converter<util::Matrix4Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Matrix4Property> const &> : property_converter<pragma::util::Matrix4Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Vector2Property>> : property_converter<util::Vector2Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Vector2Property>> : property_converter<pragma::util::Vector2Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Vector2Property> const &> : property_converter<util::Vector2Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Vector2Property> const &> : property_converter<pragma::util::Vector2Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Vector2iProperty>> : property_converter<util::Vector2iProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Vector2iProperty>> : property_converter<pragma::util::Vector2iProperty> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Vector2iProperty> const &> : property_converter<util::Vector2iProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Vector2iProperty> const &> : property_converter<pragma::util::Vector2iProperty> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Vector3Property>> : property_converter<util::Vector3Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Vector3Property>> : property_converter<pragma::util::Vector3Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Vector3Property> const &> : property_converter<util::Vector3Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Vector3Property> const &> : property_converter<pragma::util::Vector3Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Vector3iProperty>> : property_converter<util::Vector3iProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Vector3iProperty>> : property_converter<pragma::util::Vector3iProperty> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Vector3iProperty> const &> : property_converter<util::Vector3iProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Vector3iProperty> const &> : property_converter<pragma::util::Vector3iProperty> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Vector4Property>> : property_converter<util::Vector4Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Vector4Property>> : property_converter<pragma::util::Vector4Property> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Vector4Property> const &> : property_converter<util::Vector4Property> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Vector4Property> const &> : property_converter<pragma::util::Vector4Property> {};
 	//
 
 	//
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Vector4iProperty>> : property_converter<util::Vector4iProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Vector4iProperty>> : property_converter<pragma::util::Vector4iProperty> {};
 
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<util::Vector4iProperty> const &> : property_converter<util::Vector4iProperty> {};
+	struct DLLNETWORK default_converter<std::shared_ptr<pragma::util::Vector4iProperty> const &> : property_converter<pragma::util::Vector4iProperty> {};
 	//
 }
 

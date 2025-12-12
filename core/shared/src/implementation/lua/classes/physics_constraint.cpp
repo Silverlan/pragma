@@ -282,7 +282,7 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 		constraint->CalculateTransforms();
 	}));
 	doFSprintClassDef.def("CalculateTransforms",
-	  static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, const umath::Transform &, const umath::Transform &)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, const umath::Transform &transformA, const umath::Transform &transformB) {
+	  static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, const pragma::math::Transform &, const pragma::math::Transform &)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, const pragma::math::Transform &transformA, const pragma::math::Transform &transformB) {
 		  if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			  return;
 		  constraint->CalculateTransforms(transformA, transformB);
@@ -308,22 +308,22 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 	doFSprintClassDef.def("GetCalculatedTransformA", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
-		Lua::Push<umath::Transform>(l, constraint->GetCalculatedTransformA());
+		Lua::Push<pragma::math::Transform>(l, constraint->GetCalculatedTransformA());
 	}));
 	doFSprintClassDef.def("GetCalculatedTransformB", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
-		Lua::Push<umath::Transform>(l, constraint->GetCalculatedTransformB());
+		Lua::Push<pragma::math::Transform>(l, constraint->GetCalculatedTransformB());
 	}));
 	doFSprintClassDef.def("GetFrameOffsetA", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
-		Lua::Push<umath::Transform>(l, constraint->GetFrameOffsetA());
+		Lua::Push<pragma::math::Transform>(l, constraint->GetFrameOffsetA());
 	}));
 	doFSprintClassDef.def("GetFrameOffsetB", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
-		Lua::Push<umath::Transform>(l, constraint->GetFrameOffsetB());
+		Lua::Push<pragma::math::Transform>(l, constraint->GetFrameOffsetB());
 	}));
 	doFSprintClassDef.def("GetAxis", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t axis) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
@@ -341,7 +341,7 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 		Lua::PushNumber(l, constraint->GetRelativePivotPosition(static_cast<pragma::Axis>(axis)));
 	}));
 	doFSprintClassDef.def("SetFrames",
-	  static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, const umath::Transform &, const umath::Transform &)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, const umath::Transform &transformA, const umath::Transform &transformB) {
+	  static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, const pragma::math::Transform &, const pragma::math::Transform &)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, const pragma::math::Transform &transformA, const pragma::math::Transform &transformB) {
 		  if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			  return;
 		  constraint->SetFrames(transformA, transformB);
@@ -429,7 +429,7 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 	doFSprintClassDef.def("GetRotationOrder", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
-		Lua::PushInt(l, umath::to_integral(constraint->GetRotationOrder()));
+		Lua::PushInt(l, pragma::math::to_integral(constraint->GetRotationOrder()));
 	}));
 	doFSprintClassDef.def("SetAxis", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, const Vector3 &, const Vector3 &)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, const Vector3 &axis1, const Vector3 &axis2) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
@@ -660,13 +660,13 @@ void Lua::PhysConstraint::GetSourceTransform(lua::State *l, pragma::physics::ICo
 {
 	if(Lua::CheckHandle<pragma::physics::IConstraint>(l, hConstraint) == false)
 		return;
-	Lua::Push<umath::Transform>(l, hConstraint->GetSourceTransform());
+	Lua::Push<pragma::math::Transform>(l, hConstraint->GetSourceTransform());
 }
 void Lua::PhysConstraint::GetTargetTransform(lua::State *l, pragma::physics::IConstraint *hConstraint)
 {
 	if(Lua::CheckHandle<pragma::physics::IConstraint>(l, hConstraint) == false)
 		return;
-	Lua::Push<umath::Transform>(l, hConstraint->GetTargetTransform());
+	Lua::Push<pragma::math::Transform>(l, hConstraint->GetTargetTransform());
 }
 void Lua::PhysConstraint::GetSourcePosition(lua::State *l, pragma::physics::IConstraint *hConstraint)
 {
@@ -763,7 +763,7 @@ void Lua::PhysConeTwistConstraint::SetLimit(lua::State *l, pragma::physics::ICon
 {
 	if(Lua::CheckHandle<pragma::physics::IConeTwistConstraint>(l, constraint) == false)
 		return;
-	constraint->SetLimit(umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.r));
+	constraint->SetLimit(pragma::math::deg_to_rad(ang.p), pragma::math::deg_to_rad(ang.y), pragma::math::deg_to_rad(ang.r));
 }
 
 void Lua::PhysDoFConstraint::SetLinearLowerLimit(lua::State *l, pragma::physics::IDoFConstraint *constraint, const Vector3 &limit)

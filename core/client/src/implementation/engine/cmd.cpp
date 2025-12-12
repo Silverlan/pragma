@@ -72,7 +72,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 		auto renderAPIs = pragma::rendering::get_available_graphics_apis();
 		auto it = renderAPIs.begin();
 		std::vector<std::string_view> similarCandidates {};
-		ustring::gather_similar_elements(
+		pragma::string::gather_similar_elements(
 		  arg,
 		  [&it, &renderAPIs]() -> std::optional<std::string_view> {
 			  if(it == renderAPIs.end())
@@ -103,7 +103,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  std::unordered_map<std::string, pragma::console::CommandOption> commandOptions {};
 		  pragma::console::parse_command_options(argv, commandOptions);
-		  auto full = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions, "full", "0"));
+		  auto full = pragma::util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions, "full", "0"));
 		  debug_render_stats(true, full, true, false);
 	  },
 	  pragma::console::ConVarFlags::None, "Prints information about the next frame.");
@@ -201,7 +201,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 				  stageName = "vertex";
 				  break;
 			  }
-			  static_assert(umath::to_integral(prosper::ShaderStage::Count) == 6);
+			  static_assert(pragma::math::to_integral(prosper::ShaderStage::Count) == 6);
 			  auto stageFileName = path + stageName + ".gls";
 			  auto f = FileManager::OpenFile<VFilePtrReal>(stageFileName.c_str(), "w");
 			  if(f) {
@@ -224,7 +224,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 		auto audioAPIs = pragma::audio::get_available_audio_apis();
 		auto it = audioAPIs.begin();
 		std::vector<std::string_view> similarCandidates {};
-		ustring::gather_similar_elements(
+		pragma::string::gather_similar_elements(
 		  arg,
 		  [&it, &audioAPIs]() -> std::optional<std::string_view> {
 			  if(it == audioAPIs.end())
@@ -298,7 +298,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  auto &context = img.GetContext();
 			  auto useCount = img.shared_from_this().use_count() - 1;
 			  auto imgName = img.GetDebugName();
-			  ustring::truncate_string(imgName, 35);
+			  pragma::string::truncate_string(imgName, 35);
 			  Con::cout << std::left << std::setw(35) << imgName;
 
 			  if(useCount == 0)
@@ -334,7 +334,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  if(!isCompressed && perfWarnings)
 				  pragma::console::reset_console_color();
 
-			  Con::cout << std::setw(12) << util::get_pretty_bytes(fGetImageSize(img));
+			  Con::cout << std::setw(12) << pragma::util::get_pretty_bytes(fGetImageSize(img));
 
 			  if(context.IsValidationEnabled() == false)
 				  Con::cout << std::setw(10) << "n/a";
@@ -346,7 +346,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 				  if(time.has_value()) {
 					  auto t = std::chrono::steady_clock::now();
 					  auto dt = t - *time;
-					  Con::cout << util::get_pretty_duration(std::chrono::duration_cast<std::chrono::milliseconds>(dt).count()) << " ago";
+					  Con::cout << pragma::util::get_pretty_duration(std::chrono::duration_cast<std::chrono::milliseconds>(dt).count()) << " ago";
 				  }
 				  else
 					  Con::cout << "Never";
@@ -356,11 +356,11 @@ void pragma::CEngine::RegisterConsoleCommands()
 
 			  Con::cout << std::setw(30) << fileName << Con::endl;
 
-			  /*auto deviceLocal = umath::is_flag_set(img.GetCreateInfo().memoryFeatures, prosper::MemoryFeatureFlags::DeviceLocal);
+			  /*auto deviceLocal = pragma::math::is_flag_set(img.GetCreateInfo().memoryFeatures, prosper::MemoryFeatureFlags::DeviceLocal);
 			  if(!deviceLocal) {
-				  util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
+				  pragma::util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
 				  Con::cout << "\tPerformance Warning: Image memory is not device local!" << Con::endl;
-				  util::reset_console_color();
+				  pragma::util::reset_console_color();
 			  }*/
 		  };
 
@@ -376,7 +376,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 
 			  totalSize += textureSizes[idx];
 		  }
-		  Con::cout << "Total memory: " << util::get_pretty_bytes(totalSize) << Con::endl << Con::endl;
+		  Con::cout << "Total memory: " << pragma::util::get_pretty_bytes(totalSize) << Con::endl << Con::endl;
 
 		  auto *client = GetClientState();
 		  auto *game = client ? static_cast<pragma::CGame *>(client->GetGameState()) : nullptr;
@@ -433,7 +433,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 					  fPrintImageInfo("<implementation>", *img, false);
 					  totalSceneSize += fGetImageSize(*img);
 				  }
-				  Con::cout << "Total scene image size: " << util::get_pretty_bytes(totalSceneSize) << Con::endl << Con::endl;
+				  Con::cout << "Total scene image size: " << pragma::util::get_pretty_bytes(totalSceneSize) << Con::endl << Con::endl;
 			  }
 		  }
 
@@ -441,7 +441,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  totalSize = 0;
 		  for(auto &imgBuf : imgBufs)
 			  totalSize += imgBuf->GetSize() - imgBuf->GetFreeSize();
-		  Con::cout << "Total device image memory: " << util::get_pretty_bytes(totalSize) << Con::endl;
+		  Con::cout << "Total device image memory: " << pragma::util::get_pretty_bytes(totalSize) << Con::endl;
 	  },
 	  pragma::console::ConVarFlags::None, "Prints information about the currently loaded textures.");
 #if LUA_ENABLE_RUN_GUI == 1
@@ -463,7 +463,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  autoCompleteOptions.reserve(resFiles.size());
 		  for(auto &mapName : resFiles) {
 			  auto fullPath = path.substr(4) + mapName;
-			  ustring::replace(fullPath, "\\", "/");
+			  pragma::string::replace(fullPath, "\\", "/");
 			  autoCompleteOptions.push_back(fullPath);
 		  }
 	  });

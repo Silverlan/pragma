@@ -50,7 +50,7 @@ void ConstraintLookAtComponent::SetTrackAxis(TrackAxis axis) { m_trackAxis = axi
 ConstraintLookAtComponent::TrackAxis ConstraintLookAtComponent::GetTrackAxis() const { return m_trackAxis; }
 
 // TODO: Use Model::GetTwistAxisRotationOffset?
-static std::array<Quat, umath::to_integral(ConstraintLookAtComponent::TrackAxis::Count)> g_axisRotations {
+static std::array<Quat, pragma::math::to_integral(ConstraintLookAtComponent::TrackAxis::Count)> g_axisRotations {
   pragma::asset::Model::GetTwistAxisRotationOffset(pragma::SignedAxis::X),    // x+
   pragma::asset::Model::GetTwistAxisRotationOffset(pragma::SignedAxis::Y),    // y+
   pragma::asset::Model::GetTwistAxisRotationOffset(pragma::SignedAxis::Z),    // z+
@@ -62,7 +62,7 @@ static std::array<Quat, umath::to_integral(ConstraintLookAtComponent::TrackAxis:
 static void rotate_towards_axis(Quat &rotation, const Vector3 &targetAxis, const Vector3 &upAxis, pragma::ConstraintLookAtComponent::TrackAxis eAxis)
 {
 	auto rotDriven = uquat::create_look_rotation(targetAxis, upAxis);
-	rotDriven = rotDriven * g_axisRotations[umath::to_integral(eAxis)];
+	rotDriven = rotDriven * g_axisRotations[pragma::math::to_integral(eAxis)];
 	rotation = rotDriven;
 }
 
@@ -174,14 +174,14 @@ void ConstraintLookAtComponent::ApplyConstraint()
 		return;
 
 	Vector3 posDriven;
-	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(idxDrivenObjectPos, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriven);
+	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(idxDrivenObjectPos, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriven);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driven object of constraint '{}'.", constraintInfo->drivenObjectPropIdx, GetEntity().ToString());
 		return;
 	}
 
 	Vector3 posDriver;
-	res = constraintInfo->driverC->GetTransformMemberPos(idxDriverPos, static_cast<umath::CoordinateSpace>(m_constraintC->GetDriverSpace()), posDriver);
+	res = constraintInfo->driverC->GetTransformMemberPos(idxDriverPos, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDriverSpace()), posDriver);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driver of constraint '{}'.", constraintInfo->driverPropIdx, GetEntity().ToString());
 		return;
@@ -195,13 +195,13 @@ void ConstraintLookAtComponent::ApplyConstraint()
 		dir /= l;
 
 	Quat curRot;
-	res = constraintInfo->drivenObjectC->GetTransformMemberRot(idxDrivenObjectRot, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), curRot);
+	res = constraintInfo->drivenObjectC->GetTransformMemberRot(idxDrivenObjectRot, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), curRot);
 
 	auto [upTargetC, upTargetPropIdx] = UpdateUpTarget();
 	auto upVec = uvec::UP;
 	if(upTargetC) {
 		Quat upTargetRot;
-		if(upTargetC->GetTransformMemberRot(upTargetPropIdx, umath::CoordinateSpace::World, upTargetRot))
+		if(upTargetC->GetTransformMemberRot(upTargetPropIdx, pragma::math::CoordinateSpace::World, upTargetRot))
 			upVec = uquat::up(upTargetRot);
 	}
 
@@ -211,5 +211,5 @@ void ConstraintLookAtComponent::ApplyConstraint()
 	if(res)
 		rot = uquat::slerp(curRot, rot, influence);
 
-	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberRot(idxDrivenObjectRot, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberRot(idxDrivenObjectRot, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
 }

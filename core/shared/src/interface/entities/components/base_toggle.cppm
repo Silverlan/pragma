@@ -26,13 +26,13 @@ export namespace pragma {
 		virtual void TurnOff();
 		void SetTurnedOn(bool b);
 		void Toggle();
-		const ::util::PBoolProperty &GetTurnedOnProperty() const;
+		const pragma::util::PBoolProperty &GetTurnedOnProperty() const;
 		virtual void OnEntitySpawn() override;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
-		::util::PBoolProperty m_bTurnedOn = nullptr;
+		pragma::util::PBoolProperty m_bTurnedOn = nullptr;
 		bool m_bStartDisabled = false;
 		pragma::NetEventId m_netEvToggleState = pragma::INVALID_NET_EVENT;
 		bool ToggleInput(std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, std::string data);

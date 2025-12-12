@@ -9,7 +9,7 @@ import :ai.factions;
 Faction::Faction(const std::string &name) : std::enable_shared_from_this<Faction>(), m_name(name), m_defaultDisp(DISPOSITION::NEUTRAL) {}
 void Faction::AddClass(std::string className)
 {
-	ustring::to_lower(className);
+	pragma::string::to_lower(className);
 	if(HasClass(className))
 		return;
 	m_classes.push_back(className);
@@ -35,7 +35,7 @@ void Faction::SetDisposition(Faction &faction, DISPOSITION disp, bool revert, in
 			++it;
 		}
 	}
-	m_relationships[static_cast<int>(disp)].push_back(::util::make_shared<FactionDisposition>(faction, priority));
+	m_relationships[static_cast<int>(disp)].push_back(pragma::util::make_shared<FactionDisposition>(faction, priority));
 }
 void Faction::SetEnemyFaction(Faction &faction, bool revert, int priority) { SetDisposition(faction, DISPOSITION::HATE, revert, priority); }
 void Faction::SetAlliedFaction(Faction &faction, bool revert, int priority) { SetDisposition(faction, DISPOSITION::LIKE, revert, priority); }
@@ -62,7 +62,7 @@ DISPOSITION Faction::GetDisposition(Faction &faction, int *priority)
 }
 DISPOSITION Faction::GetDisposition(std::string className, int *priority)
 {
-	ustring::to_lower(className);
+	pragma::string::to_lower(className);
 	if(HasClass(className))
 		return DISPOSITION::LIKE;
 	for(char i = 0; i < 4; i++) {
@@ -117,7 +117,7 @@ FactionManager::FactionManager() {}
 std::shared_ptr<Faction> FactionManager::RegisterFaction(const std::string &name)
 {
 	auto lname = name;
-	ustring::to_lower(lname);
+	pragma::string::to_lower(lname);
 	auto it = std::find_if(m_factions.begin(), m_factions.end(), [&lname](const std::shared_ptr<Faction> &faction) { return (faction->GetName() == lname) ? true : false; });
 	if(it != m_factions.end())
 		return *it;
@@ -128,7 +128,7 @@ const std::vector<std::shared_ptr<Faction>> &FactionManager::GetFactions() { ret
 std::shared_ptr<Faction> FactionManager::FindFactionByName(const std::string &name)
 {
 	auto lname = name;
-	ustring::to_lower(lname);
+	pragma::string::to_lower(lname);
 	auto it = std::find_if(m_factions.begin(), m_factions.end(), [&lname](const std::shared_ptr<Faction> &faction) { return (faction->GetName() == lname) ? true : false; });
 	return (it != m_factions.end()) ? *it : nullptr;
 }

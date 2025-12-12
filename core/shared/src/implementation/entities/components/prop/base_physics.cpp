@@ -12,15 +12,15 @@ void BasePropPhysicsComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
 		auto &ent = GetEntity();
 		auto mdlComponent = ent.GetModelComponent();
 		if(!mdlComponent || mdlComponent->HasModel() == false || !ent.IsSpawned())
-			return util::EventReply::Unhandled;
+			return pragma::util::EventReply::Unhandled;
 		auto *pPropComponent = static_cast<pragma::BasePropComponent *>(ent.FindComponent("prop").get());
 		if(pPropComponent != nullptr)
 			pPropComponent->UpdatePhysicsType(&ent);
-		return util::EventReply::Unhandled;
+		return pragma::util::EventReply::Unhandled;
 	});
 
 	auto &ent = GetEntity();

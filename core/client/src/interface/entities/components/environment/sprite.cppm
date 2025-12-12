@@ -21,7 +21,7 @@ export namespace pragma {
 		virtual ~CSpriteComponent() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void OnTick(double dt) override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		void SetOrientationType(pts::ParticleOrientationType orientationType);
 		virtual void StartParticle();

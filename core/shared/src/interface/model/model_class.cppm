@@ -57,7 +57,7 @@ export {
 			std::unordered_map<unsigned int, unsigned int> meshReplacements;
 			float distance = 0.f;
 
-			bool operator==(const LODInfo &other) const { return lod == other.lod && meshReplacements == other.meshReplacements && umath::abs(distance - other.distance) < 0.001f; }
+			bool operator==(const LODInfo &other) const { return lod == other.lod && meshReplacements == other.meshReplacements && pragma::math::abs(distance - other.distance) < 0.001f; }
 			bool operator!=(const LODInfo &other) const { return !operator==(other); }
 		};
 
@@ -134,9 +134,9 @@ export {
 				int32_t neutralFlexIndex = -1;
 				int32_t lowererFlexIndex = -1;
 
-				umath::Radian raiserValue = 0.f;
-				umath::Radian neutralValue = 0.f;
-				umath::Radian lowererValue = 0.f;
+				pragma::math::Radian raiserValue = 0.f;
+				pragma::math::Radian neutralValue = 0.f;
+				pragma::math::Radian lowererValue = 0.f;
 
 				bool operator==(const LidFlexDesc &other) const;
 				bool operator!=(const LidFlexDesc &other) const { return !operator==(other); }
@@ -246,7 +246,7 @@ export {
 					return nullptr;
 				return mdl;
 			}
-			static void GenerateStandardMetaRigReferenceBonePoses(const pragma::animation::MetaRig &metaRig, const pragma::animation::Skeleton &skeleton, const Frame &refFrame, std::vector<umath::ScaledTransform> &outPoses);
+			static void GenerateStandardMetaRigReferenceBonePoses(const pragma::animation::MetaRig &metaRig, const pragma::animation::Skeleton &skeleton, const Frame &refFrame, std::vector<pragma::math::ScaledTransform> &outPoses);
 			enum class DLLNETWORK MergeFlags : uint32_t {
 				None = 0,
 				Animations = 1,
@@ -382,12 +382,12 @@ export {
 			bool GetFlexFormula(const std::string &name, std::string &formula) const;
 
 			// Inverse kinematics
-			const std::vector<std::shared_ptr<IKController>> &GetIKControllers() const;
-			std::vector<std::shared_ptr<IKController>> &GetIKControllers();
-			const IKController *GetIKController(uint32_t id) const;
-			IKController *GetIKController(uint32_t id);
+			const std::vector<std::shared_ptr<physics::IKController>> &GetIKControllers() const;
+			std::vector<std::shared_ptr<physics::IKController>> &GetIKControllers();
+			const physics::IKController *GetIKController(uint32_t id) const;
+			physics::IKController *GetIKController(uint32_t id);
 			bool LookupIKController(const std::string &name, uint32_t &id) const;
-			IKController *AddIKController(const std::string &name, uint32_t chainLength, const std::string &type, util::ik::Method method = util::ik::Method::Default);
+			physics::IKController *AddIKController(const std::string &name, uint32_t chainLength, const std::string &type, pragma::physics::ik::Method method = pragma::physics::ik::Method::Default);
 			void RemoveIKController(uint32_t id);
 			void RemoveIKController(const std::string &name);
 
@@ -400,15 +400,15 @@ export {
 			const pragma::animation::Skeleton &GetSkeleton() const;
 			pragma::animation::Skeleton &GetSkeleton();
 
-			void TransformBone(pragma::animation::BoneId boneId, const umath::Transform &t, umath::CoordinateSpace space = umath::CoordinateSpace::World);
+			void TransformBone(pragma::animation::BoneId boneId, const pragma::math::Transform &t, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::World);
 
 			const std::shared_ptr<pragma::animation::MetaRig> &GetMetaRig() const;
 			bool GenerateMetaRig();
 			bool GenerateMetaBlendShapes();
 			void ClearMetaRig();
 			std::optional<pragma::animation::MetaRigBoneType> GetMetaRigBoneParentId(pragma::animation::MetaRigBoneType type) const;
-			std::optional<umath::ScaledTransform> GetMetaRigReferencePose(pragma::animation::MetaRigBoneType type) const;
-			bool GenerateStandardMetaRigReferenceBonePoses(std::vector<umath::ScaledTransform> &outPoses) const;
+			std::optional<pragma::math::ScaledTransform> GetMetaRigReferencePose(pragma::animation::MetaRigBoneType type) const;
+			bool GenerateStandardMetaRigReferenceBonePoses(std::vector<pragma::math::ScaledTransform> &outPoses) const;
 			Quat CalcNormalizedMetaBoneRotation(pragma::animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot) const;
 			Quat RetargetMetaBoneRotation(pragma::animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot, const pragma::animation::MetaRigBone &targetBone, const Quat &targetMetaReferenceRot) const;
 			void ApplyPostImportProcessing();
@@ -416,12 +416,12 @@ export {
 			uint32_t GetBoneCount() const;
 			bool GetLocalBonePosition(uint32_t animId, uint32_t frameId, uint32_t boneId, Vector3 &rPos, Quat &rRot, Vector3 *scale = nullptr);
 
-			bool GetReferenceBonePose(pragma::animation::BoneId boneId, umath::Transform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
-			bool GetReferenceBonePose(pragma::animation::BoneId boneId, umath::ScaledTransform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
-			bool GetReferenceBonePos(pragma::animation::BoneId boneId, Vector3 &outPos, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
-			bool GetReferenceBoneRot(pragma::animation::BoneId boneId, Quat &outRot, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
-			bool GetReferenceBoneScale(pragma::animation::BoneId boneId, Vector3 &outScale, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
-			bool GetReferenceBonePose(pragma::animation::BoneId boneId, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
+			bool GetReferenceBonePose(pragma::animation::BoneId boneId, pragma::math::Transform &outPose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
+			bool GetReferenceBonePose(pragma::animation::BoneId boneId, pragma::math::ScaledTransform &outPose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
+			bool GetReferenceBonePos(pragma::animation::BoneId boneId, Vector3 &outPos, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
+			bool GetReferenceBoneRot(pragma::animation::BoneId boneId, Quat &outRot, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
+			bool GetReferenceBoneScale(pragma::animation::BoneId boneId, Vector3 &outScale, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
+			bool GetReferenceBonePose(pragma::animation::BoneId boneId, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale = nullptr, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
 
 			bool IsRootBone(uint32_t boneId) const;
 			bool IntersectAABB(Vector3 &min, Vector3 &max);
@@ -453,8 +453,8 @@ export {
 			void RemoveAttachment(const std::string &name);
 			void RemoveAttachment(uint32_t idx);
 			int32_t LookupAttachment(const std::string &name);
-			std::optional<umath::ScaledTransform> CalcReferenceAttachmentPose(int32_t attId) const;
-			std::optional<umath::ScaledTransform> CalcReferenceBonePose(int32_t boneId) const;
+			std::optional<pragma::math::ScaledTransform> CalcReferenceAttachmentPose(int32_t attId) const;
+			std::optional<pragma::math::ScaledTransform> CalcReferenceBonePose(int32_t boneId) const;
 
 			const std::vector<ObjectAttachment> &GetObjectAttachments() const;
 			std::vector<ObjectAttachment> &GetObjectAttachments();
@@ -524,7 +524,7 @@ export {
 			void SetReference(std::shared_ptr<Frame> frame);
 			const Frame &GetReference() const;
 			Frame &GetReference();
-			bool SetReferencePoses(const std::vector<umath::ScaledTransform> &poses, bool posesInParentSpace = false);
+			bool SetReferencePoses(const std::vector<pragma::math::ScaledTransform> &poses, bool posesInParentSpace = false);
 			void Rotate(const Quat &rot);
 			void Translate(const Vector3 &t);
 			void Scale(const Vector3 &scale);
@@ -552,13 +552,13 @@ export {
 			Eyeball *GetEyeball(uint32_t idx);
 			void AddEyeball(const Eyeball &eyeball);
 
-			void SetMaxEyeDeflection(umath::Degree eyeDeflection);
-			umath::Degree GetMaxEyeDeflection() const;
+			void SetMaxEyeDeflection(pragma::math::Degree eyeDeflection);
+			pragma::math::Degree GetMaxEyeDeflection() const;
 
 			udm::PropertyWrapper GetExtensionData() const;
 
-			util::WeakHandle<const pragma::asset::Model> GetHandle() const;
-			util::WeakHandle<pragma::asset::Model> GetHandle();
+			pragma::util::WeakHandle<const pragma::asset::Model> GetHandle() const;
+			pragma::util::WeakHandle<pragma::asset::Model> GetHandle();
 
 			void RemoveUnusedMaterialReferences();
 			void ClipAgainstPlane(const Vector3 &n, double d, pragma::asset::Model &mdlA, pragma::asset::Model &mdlB, const std::vector<Mat4> *boneMatrices = nullptr);
@@ -573,7 +573,7 @@ export {
 			const FlexAnimation *GetFlexAnimation(uint32_t idx) const { return const_cast<pragma::asset::Model *>(this)->GetFlexAnimation(idx); }
 			const std::string *GetFlexAnimationName(uint32_t idx) const;
 
-			std::optional<umath::ScaledTransform> GetReferenceBonePose(pragma::animation::BoneId boneId) const;
+			std::optional<pragma::math::ScaledTransform> GetReferenceBonePose(pragma::animation::BoneId boneId) const;
 			std::optional<pragma::SignedAxis> FindBoneTwistAxis(pragma::animation::BoneId boneId) const;
 			std::optional<pragma::SignedAxis> FindBoneAxisForDirection(pragma::animation::BoneId boneId, const Vector3 &dir) const;
 			static Quat GetTwistAxisRotationOffset(pragma::SignedAxis axis);
@@ -594,8 +594,8 @@ export {
 			std::vector<animation::FlexController>::const_iterator FindFlexController(const std::string &name) const;
 			std::vector<animation::FlexController>::iterator FindFlexController(const std::string &name);
 
-			std::vector<std::shared_ptr<IKController>>::const_iterator FindIKController(const std::string &name) const;
-			std::vector<std::shared_ptr<IKController>>::iterator FindIKController(const std::string &name);
+			std::vector<std::shared_ptr<physics::IKController>>::const_iterator FindIKController(const std::string &name) const;
+			std::vector<std::shared_ptr<physics::IKController>>::iterator FindIKController(const std::string &name);
 
 			std::vector<animation::Flex>::const_iterator FindFlex(const std::string &name) const;
 			std::vector<animation::Flex>::iterator FindFlex(const std::string &name);
@@ -610,7 +610,7 @@ export {
 			uint32_t m_subMeshCount = 0u;
 			uint32_t m_vertexCount = 0u;
 			uint32_t m_triangleCount = 0u;
-			umath::Degree m_maxEyeDeflection = 30.f;
+			pragma::math::Degree m_maxEyeDeflection = 30.f;
 			PhonemeMap m_phonemeMap = {};
 			std::vector<BlendController> m_blendControllers;
 			std::vector<std::shared_ptr<pragma::asset::ModelMeshGroup>> m_meshGroups;
@@ -630,7 +630,7 @@ export {
 			std::vector<animation::FlexController> m_flexControllers;
 			std::vector<animation::Flex> m_flexes;
 
-			std::vector<std::shared_ptr<IKController>> m_ikControllers;
+			std::vector<std::shared_ptr<physics::IKController>> m_ikControllers;
 
 			std::vector<std::shared_ptr<FlexAnimation>> m_flexAnimations;
 			std::vector<std::string> m_flexAnimationNames;
@@ -655,7 +655,7 @@ export {
 			void OnMaterialLoaded();
 		};
 
-		using namespace umath::scoped_enum::bitwise;
+		using namespace pragma::math::scoped_enum::bitwise;
 	}
 	REGISTER_ENUM_FLAGS(pragma::asset::Model::CopyFlags)
 	REGISTER_ENUM_FLAGS(pragma::asset::Model::MergeFlags)

@@ -40,7 +40,7 @@ bool BaseSoftBodyComponent::InitializeSoftBodyData()
 		for(auto it = subMeshes.begin(); it != subMeshes.end();) {
 			auto &subMesh = *it;
 			auto matId = hMdl->GetMaterialIndex(*subMesh);
-			if(matId.has_value() == false || *matId >= materials.size() || ustring::compare<std::string>(materials.at(*matId)->GetShaderIdentifier(), "nodraw")) {
+			if(matId.has_value() == false || *matId >= materials.size() || pragma::string::compare<std::string>(materials.at(*matId)->GetShaderIdentifier(), "nodraw")) {
 				it = subMeshes.erase(it);
 				continue;
 			}
@@ -65,11 +65,11 @@ bool BaseSoftBodyComponent::InitializeSoftBodyData()
 const BaseSoftBodyComponent::SoftBodyData *BaseSoftBodyComponent::GetSoftBodyData() const { return const_cast<BaseSoftBodyComponent *>(this)->GetSoftBodyData(); }
 BaseSoftBodyComponent::SoftBodyData *BaseSoftBodyComponent::GetSoftBodyData() { return m_softBodyData.get(); }
 void BaseSoftBodyComponent::ReleaseSoftBodyData() { m_softBodyData = nullptr; }
-util::EventReply BaseSoftBodyComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+pragma::util::EventReply BaseSoftBodyComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
-		return util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
+		return pragma::util::EventReply::Handled;
 	if(eventId == pragma::basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED)
 		ReleaseSoftBodyData();
-	return util::EventReply::Unhandled;
+	return pragma::util::EventReply::Unhandled;
 }

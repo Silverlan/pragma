@@ -45,11 +45,11 @@ void BaseFlexComponent::Initialize()
 	if(mdl)
 		OnModelChanged(mdl);
 }
-void BaseFlexComponent::SetFlexControllerUpdateListenersEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners, enabled); }
-bool BaseFlexComponent::AreFlexControllerUpdateListenersEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners); }
+void BaseFlexComponent::SetFlexControllerUpdateListenersEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners, enabled); }
+bool BaseFlexComponent::AreFlexControllerUpdateListenersEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners); }
 void BaseFlexComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model)
 {
-	util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
+	pragma::util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
 	ClearMembers();
 	if(!model)
 		return;
@@ -58,7 +58,7 @@ void BaseFlexComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Mode
 	for(uint32_t idx = 0; auto &flexController : flexControllers) {
 		const auto &name = flexController.name;
 		auto lname = name;
-		// ustring::to_lower(lname);
+		// pragma::string::to_lower(lname);
 		auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
 		memberInfo.SetName("flexController/" + lname);
 		memberInfo.type = ents::EntityMemberType::Float;
@@ -112,8 +112,8 @@ bool BaseFlexComponent::GetScaledFlexController(uint32_t flexId, float &val) con
 	return true;
 }
 
-void BaseFlexComponent::SetFlexControllerLimitsEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::EnableFlexControllerLimits, enabled); }
-bool BaseFlexComponent::AreFlexControllerLimitsEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::EnableFlexControllerLimits); }
+void BaseFlexComponent::SetFlexControllerLimitsEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::EnableFlexControllerLimits, enabled); }
+bool BaseFlexComponent::AreFlexControllerLimitsEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableFlexControllerLimits); }
 
 void BaseFlexComponent::SetFlexControllerScale(float scale) { m_flexControllerScale = scale; }
 float BaseFlexComponent::GetFlexControllerScale() const { return m_flexControllerScale; }

@@ -31,7 +31,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowObjects(const pragma::re
 		RenderParticleSystems(drawSceneInfo,glowInfo.tmpBloomParticles,RenderMode::View,true);
 		glowInfo.tmpBloomParticles.clear();
 	}
-	for(auto i=std::underlying_type_t<RenderMode>{0};i<umath::to_integral(RenderMode::Count);++i)
+	for(auto i=std::underlying_type_t<RenderMode>{0};i<pragma::math::to_integral(RenderMode::Count);++i)
 	{
 		auto *renderInfo = scene.GetSceneRenderDesc().GetRenderInfo(static_cast<RenderMode>(i));
 		if(renderInfo == nullptr || renderInfo->glowMeshes.empty() == true)

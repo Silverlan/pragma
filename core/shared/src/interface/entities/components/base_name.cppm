@@ -27,13 +27,13 @@ export namespace pragma {
 
 		virtual void SetName(std::string name);
 		const std::string &GetName() const;
-		const util::PStringProperty &GetNameProperty() const;
+		const pragma::util::PStringProperty &GetNameProperty() const;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
 		BaseNameComponent(pragma::ecs::BaseEntity &ent);
-		util::PStringProperty m_name;
+		pragma::util::PStringProperty m_name;
 		CallbackHandle m_cbOnNameChanged = {};
 	};
 };

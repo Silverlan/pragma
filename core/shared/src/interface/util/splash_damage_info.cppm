@@ -11,7 +11,7 @@ import :game.damage_info;
 export namespace pragma::ecs {
 	class BaseEntity;
 }
-export namespace util {
+export namespace pragma::util {
 	struct DLLNETWORK SplashDamageInfo {
 		SplashDamageInfo();
 		pragma::game::DamageInfo damageInfo = {};

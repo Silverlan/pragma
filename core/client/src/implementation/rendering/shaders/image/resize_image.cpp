@@ -11,12 +11,12 @@ import :engine;
 
 using namespace pragma;
 
-ShaderResizeImage::ShaderResizeImage(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/image/resize_image") { SetPipelineCount(umath::to_integral(Filter::Count) * umath::to_integral(RenderPass::Count)); }
+ShaderResizeImage::ShaderResizeImage(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/image/resize_image") { SetPipelineCount(pragma::math::to_integral(Filter::Count) * pragma::math::to_integral(RenderPass::Count)); }
 
 ShaderResizeImage::~ShaderResizeImage() {}
 
-ShaderResizeImage::Filter ShaderResizeImage::GetFilter(uint32_t pipelineIdx) const { return static_cast<Filter>(pipelineIdx % umath::to_integral(Filter::Count)); }
-ShaderResizeImage::RenderPass ShaderResizeImage::GetRenderPassType(uint32_t pipelineIdx) const { return static_cast<RenderPass>(pipelineIdx / umath::to_integral(Filter::Count)); }
+ShaderResizeImage::Filter ShaderResizeImage::GetFilter(uint32_t pipelineIdx) const { return static_cast<Filter>(pipelineIdx % pragma::math::to_integral(Filter::Count)); }
+ShaderResizeImage::RenderPass ShaderResizeImage::GetRenderPassType(uint32_t pipelineIdx) const { return static_cast<RenderPass>(pipelineIdx / pragma::math::to_integral(Filter::Count)); }
 std::optional<ShaderResizeImage::RenderPass> ShaderResizeImage::GetRenderPassType(prosper::Format format) const
 {
 	switch(format) {
@@ -39,7 +39,7 @@ prosper::Format ShaderResizeImage::GetFormat(uint32_t pipelineIdx) const
 		return prosper::Format::Unknown;
 	}
 }
-uint32_t ShaderResizeImage::GetPipelineIndex(Filter filter, RenderPass renderPass) const { return umath::to_integral(filter) + umath::to_integral(renderPass) * umath::to_integral(Filter::Count); }
+uint32_t ShaderResizeImage::GetPipelineIndex(Filter filter, RenderPass renderPass) const { return pragma::math::to_integral(filter) + pragma::math::to_integral(renderPass) * pragma::math::to_integral(Filter::Count); }
 
 void ShaderResizeImage::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { CreateCachedRenderPass<ShaderResizeImage>({{prosper::util::RenderPassCreateInfo::AttachmentInfo {GetFormat(pipelineIdx)}}}, outRenderPass, pipelineIdx); }
 
@@ -83,7 +83,7 @@ bool ShaderResizeImage::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescr
 	  Vector4 {0.44031130485056913, 0.29880437751590694, 0.04535643028360444, -0.06431646022479595}, // x2
 	  Vector4 {0.2797564513818748, 0.2310717037833796, 0.11797652759318597, 0.01107354293249700}     // x4
 	};
-	auto idx = umath::get_least_significant_set_bit_index(umath::to_integral(lanczosFilter.scale)) - 1;
+	auto idx = pragma::math::get_least_significant_set_bit_index(pragma::math::to_integral(lanczosFilter.scale)) - 1;
 	PushConstants pushConstants {};
 	pushConstants.fparam = aaKernel[idx];
 	auto res = RecordDraw(bindState, descSetTexture, pushConstants);

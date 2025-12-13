@@ -13,11 +13,11 @@ import :rendering.shaders;
 
 using namespace pragma;
 
-static pragma::ShaderVelocityBuffer *g_velocityBufferShader = nullptr;
-pragma::ShaderVelocityBuffer *pragma::get_velocity_buffer_shader()
+static ShaderVelocityBuffer *g_velocityBufferShader = nullptr;
+ShaderVelocityBuffer *pragma::get_velocity_buffer_shader()
 {
 	if(!g_velocityBufferShader)
-		g_velocityBufferShader = static_cast<pragma::ShaderVelocityBuffer *>(pragma::get_cengine()->GetShader("velocity_buffer").get());
+		g_velocityBufferShader = static_cast<ShaderVelocityBuffer *>(get_cengine()->GetShader("velocity_buffer").get());
 	return g_velocityBufferShader;
 }
 
@@ -49,8 +49,8 @@ void CMotionBlurDataComponent::UpdateEntityPoses()
 		m_motionBlurData.cameraData.angularCameraVelocity = {angVel, 0.f};
 	}
 
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
+	ecs::EntityIterator entIt {*get_cgame()};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<CRenderComponent>>();
 	for(auto *ent : entIt) {
 		auto &r = *static_cast<ecs::CBaseEntity *>(ent)->GetRenderComponent();
 		auto curPose = r.GetTransformationMatrix();
@@ -65,10 +65,10 @@ void CMotionBlurDataComponent::UpdateEntityPoses()
 
 		if(curBoneBuffer) {
 			if(!m_motionBlurData.prevModelMatrices[ent].boneBuffer) {
-				auto boneBuffer = pragma::get_instance_bone_buffer()->AllocateBuffer();
+				auto boneBuffer = get_instance_bone_buffer()->AllocateBuffer();
 				m_motionBlurData.prevModelMatrices[ent].boneBuffer = boneBuffer;
 
-				auto dsg = velShader->CreateDescriptorSetGroup(pragma::ShaderVelocityBuffer::DESCRIPTOR_SET_BONE_BUFFER.setIndex);
+				auto dsg = velShader->CreateDescriptorSetGroup(ShaderVelocityBuffer::DESCRIPTOR_SET_BONE_BUFFER.setIndex);
 				dsg->GetDescriptorSet()->SetBindingUniformBuffer(*boneBuffer, 0);
 				m_motionBlurData.prevModelMatrices[ent].boneDsg = dsg;
 			}

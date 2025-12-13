@@ -15,14 +15,14 @@ export import :physics.surface_material;
 
 export namespace pragma {
 	struct DLLNETWORK CEOnDeployWeapon : public ComponentEvent {
-		CEOnDeployWeapon(pragma::ecs::BaseEntity &entWeapon);
+		CEOnDeployWeapon(ecs::BaseEntity &entWeapon);
 		virtual void PushArguments(lua::State *l) override;
-		pragma::ecs::BaseEntity &weapon;
+		ecs::BaseEntity &weapon;
 	};
 	struct DLLNETWORK CEOnSetActiveWeapon : public ComponentEvent {
-		CEOnSetActiveWeapon(pragma::ecs::BaseEntity *entWeapon);
+		CEOnSetActiveWeapon(ecs::BaseEntity *entWeapon);
 		virtual void PushArguments(lua::State *l) override;
-		pragma::ecs::BaseEntity *weapon;
+		ecs::BaseEntity *weapon;
 	};
 	struct DLLNETWORK CEOnSetCharacterOrientation : public ComponentEvent {
 		CEOnSetCharacterOrientation(const Vector3 &up);
@@ -53,12 +53,12 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseCharacterComponent : public BaseActorComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		//
 		enum class FootType : uint8_t { Left = 0, Right };
 
-		BaseCharacterComponent(pragma::ecs::BaseEntity &ent);
+		BaseCharacterComponent(ecs::BaseEntity &ent);
 		virtual ~BaseCharacterComponent() = default;
 		virtual void FootStep(FootType foot);
 		virtual Vector3 GetEyePosition() const;
@@ -98,10 +98,10 @@ export namespace pragma {
 		void SetTurnSpeed(float speed);
 		float GetSlopeLimit() const;
 		virtual void SetSlopeLimit(float limit);
-		const pragma::util::PFloatProperty &GetSlopeLimitProperty() const;
+		const util::PFloatProperty &GetSlopeLimitProperty() const;
 		float GetStepOffset() const;
 		virtual void SetStepOffset(float offset);
-		const pragma::util::PFloatProperty &GetStepOffsetProperty() const;
+		const util::PFloatProperty &GetStepOffsetProperty() const;
 		virtual bool IsCharacter() const;
 		virtual bool IsMoving() const;
 
@@ -118,19 +118,19 @@ export namespace pragma {
 
 		// Weapons
 		std::vector<EntityHandle> &GetWeapons();
-		virtual void GiveWeapon(pragma::ecs::BaseEntity &ent);
-		pragma::ecs::BaseEntity *GiveWeapon(std::string className);
-		pragma::ecs::BaseEntity *GetActiveWeapon();
-		pragma::ecs::BaseEntity *GetWeapon(std::string className);
-		std::vector<pragma::ecs::BaseEntity *> GetWeapons(std::string className);
-		void GetWeapons(std::string className, std::vector<pragma::ecs::BaseEntity *> &weapons);
+		virtual void GiveWeapon(ecs::BaseEntity &ent);
+		ecs::BaseEntity *GiveWeapon(std::string className);
+		ecs::BaseEntity *GetActiveWeapon();
+		ecs::BaseEntity *GetWeapon(std::string className);
+		std::vector<ecs::BaseEntity *> GetWeapons(std::string className);
+		void GetWeapons(std::string className, std::vector<ecs::BaseEntity *> &weapons);
 		void RemoveWeapon(std::string className);
-		virtual std::vector<EntityHandle>::iterator RemoveWeapon(pragma::ecs::BaseEntity &ent);
+		virtual std::vector<EntityHandle>::iterator RemoveWeapon(ecs::BaseEntity &ent);
 		virtual void RemoveWeapons();
 		void DeployWeapon(const std::string &className);
-		virtual void DeployWeapon(pragma::ecs::BaseEntity &ent);
+		virtual void DeployWeapon(ecs::BaseEntity &ent);
 		// Don't call this directly!
-		virtual void SetActiveWeapon(pragma::ecs::BaseEntity *ent);
+		virtual void SetActiveWeapon(ecs::BaseEntity *ent);
 		virtual void HolsterWeapon();
 		bool HasWeapon(std::string className);
 		virtual void PrimaryAttack();
@@ -142,7 +142,7 @@ export namespace pragma {
 		// Unsticks the character from ground (disabling friction and also making sure gravity is applied) for the specified duration.
 		void DetachFromGround(float duration = 0.1f);
 
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		MovementComponent *GetMovementComponent();
 		const MovementComponent *GetMovementComponent() const { return const_cast<BaseCharacterComponent *>(this)->GetMovementComponent(); }
@@ -152,23 +152,23 @@ export namespace pragma {
 		bool Jump();
 		bool Jump(const Vector3 &velocity);
 		float GetJumpPower() const;
-		const pragma::util::PFloatProperty &GetJumpPowerProperty() const;
+		const util::PFloatProperty &GetJumpPowerProperty() const;
 		void SetJumpPower(float power);
 		bool CanJump() const;
 	  protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 
-		pragma::NetEventId m_netEvSetActiveWeapon = pragma::INVALID_NET_EVENT;
-		pragma::NetEventId m_netEvSetAmmoCount = pragma::INVALID_NET_EVENT;
+		NetEventId m_netEvSetActiveWeapon = INVALID_NET_EVENT;
+		NetEventId m_netEvSetAmmoCount = INVALID_NET_EVENT;
 
 		float m_turnSpeed = 300.f;
 		float m_tDetachFromGround = 0.f;
-		pragma::util::PFloatProperty m_jumpPower = nullptr;
+		util::PFloatProperty m_jumpPower = nullptr;
 		std::unique_ptr<float> m_turnYaw = nullptr;
 		Quat m_angView = uquat::identity();
-		pragma::util::PFloatProperty m_slopeLimit = nullptr;
-		pragma::util::PFloatProperty m_stepOffset = nullptr;
+		util::PFloatProperty m_slopeLimit = nullptr;
+		util::PFloatProperty m_stepOffset = nullptr;
 		std::vector<EntityHandle> m_weapons;
 		EntityHandle m_weaponActive;
 		std::unordered_map<UInt32, UInt16> m_ammoCount;
@@ -182,9 +182,9 @@ export namespace pragma {
 
 		// PhysX
 		virtual void InitializeController();
-		virtual void InitializePhysObj(pragma::physics::PhysObj *phys);
+		virtual void InitializePhysObj(physics::PhysObj *phys);
 
-		bool HandleAnimationEvent(const pragma::AnimationEvent &ev);
+		bool HandleAnimationEvent(const AnimationEvent &ev);
 		virtual void PlayFootStepSound(FootType foot, const physics::SurfaceMaterial &surfMat, float scale);
 
 		void UpdateNeckControllers();

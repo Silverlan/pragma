@@ -14,10 +14,10 @@ export namespace pragma::util {
 	struct ToImageBufferInfo {
 		bool includeLayers = false;
 		bool includeMipmaps = false;
-		std::optional<uimg::Format> targetFormat {};
+		std::optional<image::Format> targetFormat {};
 		prosper::ImageLayout inputImageLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 		prosper::ImageLayout finalImageLayout = prosper::ImageLayout::TransferSrcOptimal;
 		prosper::IImage *stagingImage = nullptr;
 	};
-	DLLCLIENT bool to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info, std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers);
+	DLLCLIENT bool to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info, std::vector<std::vector<std::shared_ptr<image::ImageBuffer>>> &outImageBuffers);
 };

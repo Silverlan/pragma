@@ -8,15 +8,15 @@ import :entities.components.base_io;
 
 using namespace pragma;
 
-ComponentEventId baseIOComponent::EVENT_HANDLE_INPUT = pragma::INVALID_COMPONENT_ID;
-void BaseIOComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseIOComponent::EVENT_HANDLE_INPUT = registerEvent("HANDLE_INPUT", ComponentEventInfo::Type::Broadcast); }
+ComponentEventId baseIOComponent::EVENT_HANDLE_INPUT = INVALID_COMPONENT_ID;
+void BaseIOComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseIOComponent::EVENT_HANDLE_INPUT = registerEvent("HANDLE_INPUT", ComponentEventInfo::Type::Broadcast); }
 
-BaseIOComponent::BaseIOComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseIOComponent::BaseIOComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseIOComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_REMOVE, [this](std::reference_wrapper<ComponentEvent> evData) { TriggerOutput("OnRemove", &GetEntity()); });
-	BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_SPAWN, [this](std::reference_wrapper<ComponentEvent> evData) { TriggerOutput("OnSpawn", &GetEntity()); });
+	BindEventUnhandled(ecs::baseEntity::EVENT_ON_REMOVE, [this](std::reference_wrapper<ComponentEvent> evData) { TriggerOutput("OnRemove", &GetEntity()); });
+	BindEventUnhandled(ecs::baseEntity::EVENT_ON_SPAWN, [this](std::reference_wrapper<ComponentEvent> evData) { TriggerOutput("OnSpawn", &GetEntity()); });
 }
 
 void BaseIOComponent::Save(udm::LinkedPropertyWrapperArg udm)
@@ -58,13 +58,13 @@ void BaseIOComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version)
 	}
 }
 
-void BaseIOComponent::Input(const std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller) { Input(input, activator, caller, ""); }
+void BaseIOComponent::Input(const std::string input, ecs::BaseEntity *activator, ecs::BaseEntity *caller) { Input(input, activator, caller, ""); }
 
 void BaseIOComponent::StoreOutput(std::string name, std::string info)
 {
-	pragma::string::to_lower(name);
+	string::to_lower(name);
 	std::vector<std::string> data;
-	pragma::string::explode(info, ",", data);
+	string::explode(info, ",", data);
 	auto numData = data.size();
 	if(numData < 2)
 		return;
@@ -74,9 +74,9 @@ void BaseIOComponent::StoreOutput(std::string name, std::string info)
 	if(numData > 2) {
 		output.param = data[2];
 		if(numData > 3) {
-			output.delay = pragma::util::to_float(data[3]);
+			output.delay = util::to_float(data[3]);
 			if(numData > 4)
-				output.times = pragma::util::to_int(data[4]);
+				output.times = util::to_int(data[4]);
 		}
 	}
 	std::unordered_map<std::string, std::vector<Output>>::iterator it = m_outputs.find(name);
@@ -87,21 +87,21 @@ void BaseIOComponent::StoreOutput(std::string name, std::string info)
 
 void BaseIOComponent::StoreOutput(std::string name, std::string entities, std::string input, std::string param, float delay, int times)
 {
-	pragma::string::to_lower(name);
+	string::to_lower(name);
 	std::unordered_map<std::string, std::vector<Output>>::iterator it = m_outputs.find(name);
 	if(it == m_outputs.end())
 		it = m_outputs.insert(std::unordered_map<std::string, std::vector<Output>>::value_type(name, std::vector<Output>())).first;
 	it->second.push_back(Output(entities, input, param, delay, times));
 }
 
-bool BaseIOComponent::FireSingleOutput(Output &output, pragma::ecs::BaseEntity *activator, IoFlags flags)
+bool BaseIOComponent::FireSingleOutput(Output &output, ecs::BaseEntity *activator, IoFlags flags)
 {
 	if(output.times == 0)
 		return false;
 	auto &entThis = GetEntity();
 	auto *state = entThis.GetNetworkState();
-	pragma::Game *game = state->GetGameState();
-	std::vector<pragma::ecs::BaseEntity *> ents;
+	Game *game = state->GetGameState();
+	std::vector<ecs::BaseEntity *> ents;
 	if(output.entities == "!activator")
 		ents.push_back(activator);
 	else if(output.entities == "!self")
@@ -110,13 +110,13 @@ bool BaseIOComponent::FireSingleOutput(Output &output, pragma::ecs::BaseEntity *
 		game->GetPlayers(&ents);
 	else {
 		std::string className = output.entities;
-		pragma::string::to_lower(className);
-		pragma::ecs::EntityIterator entIt {*game};
-		entIt.AttachFilter<EntityIteratorFilterUser>([&className, &output](pragma::ecs::BaseEntity &ent, std::size_t index) -> bool {
-			if(pragma::string::compare(ent.GetClass().c_str(), className.c_str(), false))
+		string::to_lower(className);
+		ecs::EntityIterator entIt {*game};
+		entIt.AttachFilter<EntityIteratorFilterUser>([&className, &output](ecs::BaseEntity &ent, std::size_t index) -> bool {
+			if(string::compare(ent.GetClass().c_str(), className.c_str(), false))
 				return true;
-			auto pNameComponent = static_cast<pragma::BaseNameComponent *>(ent.FindComponent("name").get());
-			return pNameComponent != nullptr && pragma::string::compare(pNameComponent->GetName(), output.entities, false);
+			auto pNameComponent = static_cast<BaseNameComponent *>(ent.FindComponent("name").get());
+			return pNameComponent != nullptr && string::compare(pNameComponent->GetName(), output.entities, false);
 		});
 		for(auto *ent : entIt)
 			ents.push_back(ent);
@@ -126,7 +126,7 @@ bool BaseIOComponent::FireSingleOutput(Output &output, pragma::ecs::BaseEntity *
 		auto *pIoComponent = static_cast<BaseIOComponent *>(ent->FindComponent("io").get());
 		if(pIoComponent == nullptr)
 			continue;
-		if(output.delay <= 0.f && !pragma::math::is_flag_set(flags, IoFlags::ForceDelayedFire)) {
+		if(output.delay <= 0.f && !math::is_flag_set(flags, IoFlags::ForceDelayedFire)) {
 			pIoComponent->Input(output.input, activator, &entThis, output.param);
 			if(!hThis.valid())
 				return false;
@@ -138,11 +138,11 @@ bool BaseIOComponent::FireSingleOutput(Output &output, pragma::ecs::BaseEntity *
 			      [](EntityHandle &hEnt, EntityHandle activator, Output output) {
 				      if(!hEnt.valid())
 					      return;
-				      pragma::ecs::BaseEntity *ent = hEnt.get();
+				      ecs::BaseEntity *ent = hEnt.get();
 				      auto *pIoComponent = static_cast<BaseIOComponent *>(ent->FindComponent("io").get());
 				      if(pIoComponent == nullptr)
 					      return;
-				      pragma::ecs::BaseEntity *entActivator = nullptr;
+				      ecs::BaseEntity *entActivator = nullptr;
 				      if(activator.valid())
 					      entActivator = activator.get();
 				      pIoComponent->Input(output.input, entActivator, ent, output.param);
@@ -156,17 +156,17 @@ bool BaseIOComponent::FireSingleOutput(Output &output, pragma::ecs::BaseEntity *
 	return ((output.times > 0) || (output.times == -1)) ? true : false;
 }
 
-void BaseIOComponent::Input(std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, std::string data)
+void BaseIOComponent::Input(std::string input, ecs::BaseEntity *activator, ecs::BaseEntity *caller, std::string data)
 {
-	pragma::string::to_lower(input);
+	string::to_lower(input);
 
-	pragma::CEInputData inputData {input, activator, caller, data};
-	if(BroadcastEvent(baseIOComponent::EVENT_HANDLE_INPUT, inputData) == pragma::util::EventReply::Handled)
+	CEInputData inputData {input, activator, caller, data};
+	if(BroadcastEvent(baseIOComponent::EVENT_HANDLE_INPUT, inputData) == util::EventReply::Handled)
 		return;
 	auto &entThis = GetEntity();
 	if(input == "addoutput") {
-		size_t sp = data.find_first_of(pragma::string::WHITESPACE);
-		if(sp != pragma::string::NOT_FOUND) {
+		size_t sp = data.find_first_of(string::WHITESPACE);
+		if(sp != string::NOT_FOUND) {
 			std::string output = data.substr(0, sp);
 			std::string info = data.substr(sp + 1, data.length());
 			StoreOutput(output, info);
@@ -186,9 +186,9 @@ void BaseIOComponent::Input(std::string input, pragma::ecs::BaseEntity *activato
 		Con::cout << "WARNING: Unhandled input '" << input << "' for entity '" << entThis.GetClass() << "'!" << Con::endl;
 }
 
-void BaseIOComponent::TriggerOutput(std::string name, pragma::ecs::BaseEntity *activator, IoFlags flags)
+void BaseIOComponent::TriggerOutput(std::string name, ecs::BaseEntity *activator, IoFlags flags)
 {
-	pragma::string::to_lower(name);
+	string::to_lower(name);
 	std::unordered_map<std::string, std::vector<Output>>::iterator it = m_outputs.find(name);
 	if(it == m_outputs.end())
 		return;
@@ -210,7 +210,7 @@ void BaseIOComponent::TriggerOutput(std::string name, pragma::ecs::BaseEntity *a
 
 /////////////////
 
-CEInputData::CEInputData(const std::string &input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, const std::string &data) : input(input), activator(activator), caller(caller), data(data) {}
+CEInputData::CEInputData(const std::string &input, ecs::BaseEntity *activator, ecs::BaseEntity *caller, const std::string &data) : input(input), activator(activator), caller(caller), data(data) {}
 void CEInputData::PushArguments(lua::State *l)
 {
 	Lua::PushString(l, input);

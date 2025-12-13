@@ -21,7 +21,7 @@ export namespace pragma::gui::types {
 	  protected:
 		virtual void DoUpdate() override;
 		void UpdateResolvedTexture();
-		pragma::gui::WIHandle m_hTextureRect;
+		WIHandle m_hTextureRect;
 
 		std::shared_ptr<prosper::Texture> m_msaaTexture = nullptr;
 		std::shared_ptr<prosper::Texture> m_resolvedTexture = nullptr;

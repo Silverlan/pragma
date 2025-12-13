@@ -10,7 +10,7 @@ export module pragma.client:rendering.shader_graph.node_fog;
 export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
-	class DLLCLIENT FogNode : public pragma::shadergraph::Node {
+	class DLLCLIENT FogNode : public shadergraph::Node {
 	  public:
 		static constexpr const char *OUT_COLOR = "color";
 		static constexpr const char *OUT_START_DISTANCE = "startDistance";
@@ -19,6 +19,6 @@ export namespace pragma::rendering::shader_graph {
 
 		FogNode(const std::string_view &type);
 
-		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
+		virtual std::string DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const override;
 	};
 };

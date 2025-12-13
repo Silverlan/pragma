@@ -14,12 +14,12 @@ export namespace pragma {
 	}
 	class DLLCLIENT COwnableComponent final : public BaseOwnableComponent, public CBaseNetComponent {
 	  public:
-		COwnableComponent(pragma::ecs::BaseEntity &ent) : BaseOwnableComponent(ent) {}
+		COwnableComponent(ecs::BaseEntity &ent) : BaseOwnableComponent(ent) {}
 
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
-		virtual bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 	};
 };

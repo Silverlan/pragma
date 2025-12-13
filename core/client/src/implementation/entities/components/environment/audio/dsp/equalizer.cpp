@@ -27,10 +27,10 @@ void CSoundDspEqualizerComponent::ReceiveData(NetPacket &packet)
 void CSoundDspEqualizerComponent::OnEntitySpawn()
 {
 	//BaseEnvSoundDspEqualizer::OnEntitySpawn(); // Not calling BaseEnvSoundDspEqualizer::OnEntitySpawn() to skip the dsp effect lookup
-	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
+	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	al::EfxEqualizer props {};
+	pragma::audio::EfxEqualizer props {};
 	props.flLowGain = m_lowGain;
 	props.flLowCutoff = m_lowCutoff;
 	props.flMid1Gain = m_mid1Gain;

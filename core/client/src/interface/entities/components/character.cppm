@@ -11,13 +11,13 @@ export import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CCharacterComponent final : public BaseCharacterComponent, public CBaseNetComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
-		CCharacterComponent(pragma::ecs::BaseEntity &ent);
+		CCharacterComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override { return false; }
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 	  protected:
 		void CreateWaterSplash();
 		virtual void InitializeLuaObject(lua::State *l) override;

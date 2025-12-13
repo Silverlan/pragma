@@ -17,7 +17,7 @@ export namespace pragma::pts {
 		CParticleModifierComponentRandomColor() = default;
 		CParticleModifierComponentRandomColor(const std::string &suffix, const std::unordered_map<std::string, std::string> &values);
 		void Initialize(const std::string &suffix, const std::unordered_map<std::string, std::string> &values);
-		Color GetValue(pragma::pts::CParticle &p) const;
+		Color GetValue(CParticle &p) const;
 		bool IsSet() const;
 		bool IsSet(ComponentFlags components) const;
 		ComponentFlags GetComponentFlags() const;
@@ -42,7 +42,7 @@ void pragma::pts::CParticleModifierComponentRandomColor::Initialize(const std::s
 	auto idAlpha = "alpha" + strSuffix;
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		pragma::string::to_lower(key);
+		string::to_lower(key);
 		if(key == idColor) {
 			auto color = Color(it->second);
 			m_red.SetRange(color.r);
@@ -51,13 +51,13 @@ void pragma::pts::CParticleModifierComponentRandomColor::Initialize(const std::s
 			m_alpha.SetRange(color.a);
 		}
 		else if(key == idRed)
-			m_red.SetRange(pragma::util::to_int(it->second));
+			m_red.SetRange(util::to_int(it->second));
 		else if(key == idGreen)
-			m_green.SetRange(pragma::util::to_int(it->second));
+			m_green.SetRange(util::to_int(it->second));
 		else if(key == idBlue)
-			m_blue.SetRange(pragma::util::to_int(it->second));
+			m_blue.SetRange(util::to_int(it->second));
 		else if(key == idAlpha)
-			m_alpha.SetRange(pragma::util::to_int(it->second));
+			m_alpha.SetRange(util::to_int(it->second));
 		else if(key == idColor + "_min") {
 			auto color = Color(it->second);
 			m_red.SetMin(color.r);
@@ -66,13 +66,13 @@ void pragma::pts::CParticleModifierComponentRandomColor::Initialize(const std::s
 			m_alpha.SetMin(color.a);
 		}
 		else if(key == idRed + "_min")
-			m_red.SetMin(pragma::util::to_int(it->second));
+			m_red.SetMin(util::to_int(it->second));
 		else if(key == idGreen + "_min")
-			m_green.SetMin(pragma::util::to_int(it->second));
+			m_green.SetMin(util::to_int(it->second));
 		else if(key == idBlue + "_min")
-			m_blue.SetMin(pragma::util::to_int(it->second));
+			m_blue.SetMin(util::to_int(it->second));
 		else if(key == idAlpha + "_min")
-			m_alpha.SetMin(pragma::util::to_int(it->second));
+			m_alpha.SetMin(util::to_int(it->second));
 		else if(key == idColor + "_max") {
 			auto color = Color(it->second);
 			m_red.SetMax(color.r);
@@ -81,17 +81,17 @@ void pragma::pts::CParticleModifierComponentRandomColor::Initialize(const std::s
 			m_alpha.SetMax(color.a);
 		}
 		else if(key == idRed + "_max")
-			m_red.SetMax(pragma::util::to_int(it->second));
+			m_red.SetMax(util::to_int(it->second));
 		else if(key == idGreen + "_max")
-			m_green.SetMax(pragma::util::to_int(it->second));
+			m_green.SetMax(util::to_int(it->second));
 		else if(key == idBlue + "_max")
-			m_blue.SetMax(pragma::util::to_int(it->second));
+			m_blue.SetMax(util::to_int(it->second));
 		else if(key == idAlpha + "_max")
-			m_alpha.SetMax(pragma::util::to_int(it->second));
+			m_alpha.SetMax(util::to_int(it->second));
 	}
 }
 
-Color pragma::pts::CParticleModifierComponentRandomColor::GetValue(pragma::pts::CParticle &p) const { return Color(m_red.GetValue(p), m_green.GetValue(p), m_blue.GetValue(p), m_alpha.GetValue(p)); }
+Color pragma::pts::CParticleModifierComponentRandomColor::GetValue(CParticle &p) const { return Color(m_red.GetValue(p), m_green.GetValue(p), m_blue.GetValue(p), m_alpha.GetValue(p)); }
 
 bool pragma::pts::CParticleModifierComponentRandomColor::IsSet() const { return m_red.IsSet() || m_green.IsSet() || m_blue.IsSet() || m_alpha.IsSet(); }
 

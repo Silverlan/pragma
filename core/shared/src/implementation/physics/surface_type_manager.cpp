@@ -6,4 +6,4 @@ module pragma.shared;
 
 import :physics.surface_type_manager;
 
-pragma::physics::SurfaceType::SurfaceType(TypeId id, const std::string &name) : BaseNamedType {id, name} {}
+pragma::physics::SurfaceType::SurfaceType(util::TypeId id, const std::string &name) : BaseNamedType {id, name} {}

@@ -40,7 +40,7 @@ export {
 			const std::vector<NetworkedVariable> &GetNetworkedVariables() const;
 #endif
 		  protected:
-			BaseNetworkedComponent(pragma::ecs::BaseEntity &ent);
+			BaseNetworkedComponent(ecs::BaseEntity &ent);
 			NetworkFlags m_networkFlags = NetworkFlags::None;
 #if NETWORKED_VARS_ENABLED != 0
 			virtual void OnNetworkedVariableCreated(NetworkedVariable &nwVar);

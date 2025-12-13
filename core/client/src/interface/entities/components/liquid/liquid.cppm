@@ -12,7 +12,7 @@ export import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CLiquidComponent final : public BaseFuncLiquidComponent, public CBaseNetComponent {
 	  public:
-		CLiquidComponent(pragma::ecs::BaseEntity &ent);
+		CLiquidComponent(ecs::BaseEntity &ent);
 		virtual ~CLiquidComponent() override;
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;

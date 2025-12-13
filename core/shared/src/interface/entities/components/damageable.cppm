@@ -15,8 +15,8 @@ export namespace pragma {
 	}
 	class DLLNETWORK DamageableComponent final : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		DamageableComponent(pragma::ecs::BaseEntity &ent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		DamageableComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		// Called right before the entity is about to take damage

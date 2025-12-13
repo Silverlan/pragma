@@ -12,27 +12,27 @@ void BasePointConstraintConeTwistComponent::Initialize()
 {
 	BasePointConstraintComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "swingspan1", false))
-			m_kvSwingSpan1 = pragma::util::to_float(kvData.value);
+			m_kvSwingSpan1 = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "swingspan2", false))
-			m_kvSwingSpan2 = pragma::util::to_float(kvData.value);
+			m_kvSwingSpan2 = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "twistspan", false))
-			m_kvTwistSpan = pragma::util::to_float(kvData.value);
+			m_kvTwistSpan = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "softness", false))
-			m_kvSoftness = pragma::util::to_float(kvData.value);
+			m_kvSoftness = util::to_float(kvData.value);
 		// else if(pragma::string::compare<std::string>(kvData.key,"biasfactor",false))
 		// 	m_kvBiasFactor = pragma::util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "relaxationfactor", false))
-			m_kvRelaxationFactor = pragma::util::to_float(kvData.value);
+			m_kvRelaxationFactor = util::to_float(kvData.value);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 }
 
-void BasePointConstraintConeTwistComponent::InitializeConstraint(pragma::ecs::BaseEntity *src, pragma::ecs::BaseEntity *tgt)
+void BasePointConstraintConeTwistComponent::InitializeConstraint(ecs::BaseEntity *src, ecs::BaseEntity *tgt)
 {
 	auto &entThis = GetEntity();
 	auto *state = entThis.GetNetworkState();
@@ -40,13 +40,13 @@ void BasePointConstraintConeTwistComponent::InitializeConstraint(pragma::ecs::Ba
 	auto *physEnv = game->GetPhysicsEnvironment();
 
 	auto pPhysComponentSrc = src->GetPhysicsComponent();
-	auto *physSrc = pPhysComponentSrc ? dynamic_cast<pragma::physics::RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	auto *physSrc = pPhysComponentSrc ? dynamic_cast<physics::RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
-	auto *physTgt = pPhysComponentTgt ? dynamic_cast<pragma::physics::RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
+	auto *physTgt = pPhysComponentTgt ? dynamic_cast<physics::RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
 	if(physSrc == nullptr || physTgt == nullptr || !physSrc->IsRigid() || !physTgt->IsRigid())
 		return;
-	auto *rigidSrc = static_cast<pragma::physics::RigidPhysObj *>(physSrc)->GetRigidBody();
-	auto *rigidTgt = static_cast<pragma::physics::RigidPhysObj *>(physTgt)->GetRigidBody();
+	auto *rigidSrc = static_cast<physics::RigidPhysObj *>(physSrc)->GetRigidBody();
+	auto *rigidTgt = static_cast<physics::RigidPhysObj *>(physTgt)->GetRigidBody();
 	if(rigidSrc == nullptr || rigidTgt == nullptr)
 		return;
 
@@ -62,9 +62,9 @@ void BasePointConstraintConeTwistComponent::InitializeConstraint(pragma::ecs::Ba
 	originTgt = originConstraint - originTgt;
 	originConstraint -= pTrComponentSrc ? pTrComponentSrc->GetPosition() : Vector3 {};
 
-	auto swingSpan1 = CFloat(pragma::math::deg_to_rad(m_kvSwingSpan1));
-	auto swingSpan2 = CFloat(pragma::math::deg_to_rad(m_kvSwingSpan2));
-	auto twistSpan = CFloat(pragma::math::deg_to_rad(m_kvTwistSpan));
+	auto swingSpan1 = CFloat(math::deg_to_rad(m_kvSwingSpan1));
+	auto swingSpan2 = CFloat(math::deg_to_rad(m_kvSwingSpan2));
+	auto twistSpan = CFloat(math::deg_to_rad(m_kvTwistSpan));
 
 	auto coneTwist = physEnv->CreateConeTwistConstraint(*rigidSrc, originConstraint, rotConstraint, *rigidTgt, originTgt, rotTgt);
 	if(coneTwist.IsValid()) {

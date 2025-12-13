@@ -73,9 +73,9 @@ export namespace pragma::audio {
 	  public:
 		friend SSEPlaySound;
 	  protected:
-		SSESound(std::shared_ptr<pragma::audio::ALSound> sound, SSEPlaySound *event, double tStart, float eventOffset);
+		SSESound(std::shared_ptr<ALSound> sound, SSEPlaySound *event, double tStart, float eventOffset);
 	  public:
-		std::shared_ptr<pragma::audio::ALSound> sound;
+		std::shared_ptr<ALSound> sound;
 		ALSound *operator->();
 	};
 
@@ -119,7 +119,7 @@ export namespace pragma::audio {
 		int position = 0;
 		ALChannel mode = ALChannel::Mono;
 		virtual void Initialize(udm::LinkedPropertyWrapper &prop) override;
-		virtual SSESound *CreateSound(double tStart, const std::function<std::shared_ptr<pragma::audio::ALSound>(const std::string &, ALChannel, pragma::audio::ALCreateFlags)> &createSound);
+		virtual SSESound *CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, ALCreateFlags)> &createSound);
 		virtual void Precache() override;
 	};
 };

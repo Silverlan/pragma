@@ -39,8 +39,8 @@ void pragma::SGame::RegisterLua()
 	gameMod[(luabind::def("change_map", static_cast<void (*)(const std::string &, const std::string &)>(Lua::game::Server::change_level)), luabind::def("change_map", static_cast<void (*)(const std::string &)>(Lua::game::Server::change_level)),
 	  luabind::def("set_gravity", Lua::game::Server::set_gravity), luabind::def("get_gravity", Lua::game::Server::get_gravity), luabind::def("load_model", Lua::game::Server::load_model),
 	  luabind::def("load_sound_scripts", static_cast<void (*)(lua::State *, const std::string &, bool)>(Lua::engine::LoadSoundScripts)), luabind::def("load_sound_scripts", static_cast<void (*)(lua::State *, const std::string &)>(Lua::engine::LoadSoundScripts)),
-	  luabind::def("precache_model", Lua::engine::PrecacheModel_sv), luabind::def("get_model", Lua::engine::get_model), luabind::def("load_material", static_cast<msys::Material *(*)(const std::string &, bool)>(Lua::engine::server::LoadMaterial)),
-	  luabind::def("load_material", static_cast<msys::Material *(*)(const std::string &)>(Lua::engine::server::LoadMaterial)), luabind::def("set_time_scale", &Lua::game::set_time_scale))];
+	  luabind::def("precache_model", Lua::engine::PrecacheModel_sv), luabind::def("get_model", Lua::engine::get_model), luabind::def("load_material", static_cast<material::Material *(*)(const std::string &, bool)>(Lua::engine::server::LoadMaterial)),
+	  luabind::def("load_material", static_cast<material::Material *(*)(const std::string &)>(Lua::engine::server::LoadMaterial)), luabind::def("set_time_scale", &Lua::game::set_time_scale))];
 
 	Lua::ents::register_library(GetLuaState());
 	auto entsMod = luabind::module(GetLuaState(), "ents");
@@ -177,23 +177,23 @@ bool pragma::SGame::LoadLuaComponent(const std::string &luaFilePath, const std::
 	auto r = pragma::Game::LoadLuaComponent(luaFilePath, mainPath, componentName);
 	if(r == false)
 		return r;
-	auto nComponentName = FileManager::GetCanonicalizedPath(componentName);
+	auto nComponentName = fs::get_canonicalized_path(componentName);
 	auto componentPath = Lua::SCRIPT_DIRECTORY_SLASH + mainPath + "\\components\\" + nComponentName;
 	auto filePathLuaFile = componentPath + "\\init" + Lua::DOT_FILE_EXTENSION;
-	if(FileManager::Exists(filePathLuaFile))
+	if(fs::exists(filePathLuaFile))
 		return r;                                                                                               // init.lua is in main component directory, which means no network directories are used. In this case files that need to be transferred cannot be determined automatically.
 	std::vector<std::string> transferFiles;                                                                     // Files which need to be transferred to the client
-	FileManager::FindFiles((componentPath + "\\*" + Lua::DOT_FILE_EXTENSION).c_str(), &transferFiles, nullptr); // Shared Files
+	fs::find_files((componentPath + "\\*" + Lua::DOT_FILE_EXTENSION), &transferFiles, nullptr); // Shared Files
 	if(Lua::are_precompiled_files_enabled())
-		FileManager::FindFiles((componentPath + "\\*" + Lua::DOT_FILE_EXTENSION_PRECOMPILED).c_str(), &transferFiles, nullptr);
+		fs::find_files((componentPath + "\\*" + Lua::DOT_FILE_EXTENSION_PRECOMPILED), &transferFiles, nullptr);
 	for(auto &fName : transferFiles)
 		fName = componentPath + '\\' + fName;
 
 	auto componentPathClient = componentPath + "\\client";
 	auto offset = transferFiles.size();
-	FileManager::FindFiles((componentPathClient + "\\*" + Lua::DOT_FILE_EXTENSION).c_str(), &transferFiles, nullptr); // Clientside Files
+	fs::find_files((componentPathClient + "\\*" + Lua::DOT_FILE_EXTENSION), &transferFiles, nullptr); // Clientside Files
 	if(Lua::are_precompiled_files_enabled())
-		FileManager::FindFiles((componentPathClient + "\\*" + Lua::DOT_FILE_EXTENSION_PRECOMPILED).c_str(), &transferFiles, nullptr);
+		fs::find_files((componentPathClient + "\\*" + Lua::DOT_FILE_EXTENSION_PRECOMPILED), &transferFiles, nullptr);
 	for(auto i = offset; i < transferFiles.size(); ++i)
 		transferFiles.at(i) = componentPathClient + '\\' + transferFiles.at(i);
 

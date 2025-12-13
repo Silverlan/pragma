@@ -13,48 +13,48 @@ import :game;
 
 using namespace pragma;
 
-CLightDirectionalComponent::CLightDirectionalComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightDirectionalComponent(ent) {}
+CLightDirectionalComponent::CLightDirectionalComponent(ecs::BaseEntity &ent) : BaseEnvLightDirectionalComponent(ent) {}
 bool CLightDirectionalComponent::ShouldTransmitNetData() const { return true; }
 void CLightDirectionalComponent::Initialize()
 {
 	BaseEnvLightDirectionalComponent::Initialize();
 
-	BindEvent(cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &trData = static_cast<CEGetTransformationMatrix &>(evData.get());
-		trData.transformation = &MVPBias<1>::GetTransformationMatrix(trData.index);
-		return pragma::util::EventReply::Handled;
+		trData.transformation = &GetTransformationMatrix(trData.index);
+		return util::EventReply::Handled;
 	});
-	BindEvent(cLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS, [](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(cLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS, [](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		static_cast<CEShouldUpdateRenderPass &>(evData.get()).shouldUpdate = true; // CSM Update requirements are determined through ShadowMapCasc::ShouldUpdateLayer
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	});
-	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &shouldPassData = static_cast<CEShouldPassEntity &>(evData.get());
 		auto &ent = shouldPassData.entity;
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pRenderComponent = ent.GetRenderComponent();
 		if(pTrComponent == nullptr || !pRenderComponent) {
 			shouldPassData.shouldPass = false;
-			return pragma::util::EventReply::Handled;
+			return util::EventReply::Handled;
 		}
 		auto &aabb = pRenderComponent->GetUpdatedAbsoluteRenderBounds();
 
 		auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 		if(hShadow.expired())
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		auto numLayers = hShadow->GetLayerCount();
 		for(auto i = decltype(numLayers) {0}; i < numLayers; ++i) {
 			auto &frustum = *hShadow->GetFrustumSplit(i);
-			if(pragma::math::intersection::aabb_aabb(aabb.min, aabb.max, frustum.aabb.min + frustum.obbCenter, frustum.aabb.max + frustum.obbCenter) != pragma::math::intersection::Intersect::Outside)
+			if(math::intersection::aabb_aabb(aabb.min, aabb.max, frustum.aabb.min + frustum.obbCenter, frustum.aabb.max + frustum.obbCenter) != math::intersection::Intersect::Outside)
 				shouldPassData.renderFlags |= 1 << i;
 		}
 		if(shouldPassData.renderFlags == 0) {
 			shouldPassData.shouldPass = false;
-			return pragma::util::EventReply::Handled;
+			return util::EventReply::Handled;
 		}
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
-	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &shouldPassData = static_cast<CEShouldPassEntityMesh &>(evData.get());
 		auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 		if(hShadow.valid()) {
@@ -62,7 +62,7 @@ void CLightDirectionalComponent::Initialize()
 			auto pTrComponent = entTgt.GetTransformComponent();
 			if(pTrComponent == nullptr) {
 				shouldPassData.shouldPass = false;
-				return pragma::util::EventReply::Handled;
+				return util::EventReply::Handled;
 			}
 			auto &pos = pTrComponent->GetPosition();
 			Vector3 min;
@@ -74,17 +74,17 @@ void CLightDirectionalComponent::Initialize()
 			auto numLayers = hShadow->GetLayerCount();
 			for(auto i = decltype(numLayers) {0}; i < numLayers; ++i) {
 				auto &frustum = *hShadow->GetFrustumSplit(i);
-				if(pragma::math::intersection::aabb_aabb(min, max, frustum.aabb.min + frustum.obbCenter, frustum.aabb.max + frustum.obbCenter) != pragma::math::intersection::Intersect::Outside)
+				if(math::intersection::aabb_aabb(min, max, frustum.aabb.min + frustum.obbCenter, frustum.aabb.max + frustum.obbCenter) != math::intersection::Intersect::Outside)
 					shouldPassData.renderFlags |= 1 << i;
 			}
 		}
 		if(shouldPassData.renderFlags == 0) {
 			shouldPassData.shouldPass = false;
-			return pragma::util::EventReply::Handled;
+			return util::EventReply::Handled;
 		}
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
-	BindEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto csmC = GetEntity().AddComponent<CShadowCSMComponent>();
 		if(csmC.valid())
 			csmC->ReloadDepthTextures();
@@ -93,7 +93,7 @@ void CLightDirectionalComponent::Initialize()
 		auto lightC = GetEntity().GetComponent<CLightComponent>();
 		if(lightC.valid())
 			lightC->UpdateShadowTypes();
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -104,19 +104,19 @@ void CLightDirectionalComponent::Initialize()
 		SetViewMatrix(glm::gtc::lookAtRH(pos, pos + dir, uvec::get_perpendicular(dir)));
 		auto &trC = static_cast<CTransformComponent &>(*pTrComponent);
 		FlagCallbackForRemoval(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
-		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
-			                         if(pragma::math::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::RotationChanged) == false)
-				                         return pragma::util::EventReply::Unhandled;
+		                         [this, &trC](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+			                         if(math::is_flag_set(static_cast<CEOnPoseChanged &>(evData.get()).changeFlags, TransformChangeFlags::RotationChanged) == false)
+				                         return util::EventReply::Unhandled;
 			                         auto &ent = GetEntity();
 			                         auto pLightComponent = ent.GetComponent<CLightComponent>();
-			                         auto type = pragma::LightType::Undefined;
+			                         auto type = LightType::Undefined;
 			                         auto *pLight = pLightComponent.valid() ? pLightComponent->GetLight(type) : nullptr;
-			                         if(pLight == nullptr || type != pragma::LightType::Directional)
-				                         return pragma::util::EventReply::Unhandled;
+			                         if(pLight == nullptr || type != LightType::Directional)
+				                         return util::EventReply::Unhandled;
 			                         auto pTrComponent = pLight->GetEntity().GetTransformComponent();
 			                         if(pTrComponent != nullptr)
 				                         pTrComponent->SetRotation(trC.GetRotation());
-			                         return pragma::util::EventReply::Unhandled;
+			                         return util::EventReply::Unhandled;
 		                         }),
 		  CallbackType::Entity);
 	}
@@ -127,15 +127,15 @@ void CLightDirectionalComponent::Initialize()
 		// pLightComponent->SetStateFlag(CLightComponent::StateFlags::UseDualTextureSet,false);
 	}
 
-	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<ComponentEvent> evData) {
 		if(GetEntity().IsSpawned() == false)
 			return;
-		pragma::get_cgame()->UpdateEnvironmentLightSource();
+		get_cgame()->UpdateEnvironmentLightSource();
 	});
-	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<ComponentEvent> evData) {
 		if(GetEntity().IsSpawned() == false)
 			return;
-		pragma::get_cgame()->UpdateEnvironmentLightSource();
+		get_cgame()->UpdateEnvironmentLightSource();
 	});
 }
 void CLightDirectionalComponent::SetShadowDirty()
@@ -149,7 +149,7 @@ void CLightDirectionalComponent::OnEntitySpawn()
 	BaseEnvLightDirectionalComponent::OnEntitySpawn();
 	auto pToggleComponent = GetEntity().GetComponent<CToggleComponent>();
 	if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn())
-		pragma::get_cgame()->UpdateEnvironmentLightSource();
+		get_cgame()->UpdateEnvironmentLightSource();
 }
 CShadowCSMComponent *CLightDirectionalComponent::GetShadowMap() { return m_shadowMap.get(); }
 void CLightDirectionalComponent::ReceiveData(NetPacket &packet)
@@ -161,7 +161,7 @@ void CLightDirectionalComponent::ReceiveData(NetPacket &packet)
 	*m_ambientColor = Color {r, g, b, a};
 	m_maxExposure = packet->Read<Float>();
 }
-Bool CLightDirectionalComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CLightDirectionalComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetAmbientColor) {
 		Color color;
@@ -175,13 +175,13 @@ Bool CLightDirectionalComponent::ReceiveNetEvent(pragma::NetEventId eventId, Net
 		return CBaseNetComponent::ReceiveNetEvent(eventId, packet);
 	return true;
 }
-pragma::util::EventReply CLightDirectionalComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply CLightDirectionalComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvLightDirectionalComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseEnvLightDirectionalComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON)
 		UpdateAmbientColor();
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 
 void CLightDirectionalComponent::SetAmbientColor(const Color &color)
@@ -196,7 +196,7 @@ void CLightDirectionalComponent::UpdateAmbientColor()
 	if(pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false)
 		return;
 	// pragma::get_cgame()->GetWorldEnvironment().SetAmbientColor((*m_ambientColor)->ToVector4());
-	pragma::get_cgame()->SetMaxHDRExposure(m_maxExposure);
+	get_cgame()->SetMaxHDRExposure(m_maxExposure);
 }
 void CLightDirectionalComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
@@ -266,7 +266,7 @@ bool CLightDirectionalComponent::ShouldPass(uint32_t layer, const Vector3 &min, 
 		return false;
 	auto numLayers = hShadow->GetLayerCount();
 	auto &frustum = *hShadow->GetFrustumSplit(layer);
-	return (pragma::math::intersection::aabb_aabb(min, max, frustum.aabb.min + frustum.obbCenter, frustum.aabb.max + frustum.obbCenter) != pragma::math::intersection::Intersect::Outside) ? true : false;
+	return (math::intersection::aabb_aabb(min, max, frustum.aabb.min + frustum.obbCenter, frustum.aabb.max + frustum.obbCenter) != math::intersection::Intersect::Outside) ? true : false;
 }
 
 void CLightDirectionalComponent::OnEntityComponentAdded(BaseEntityComponent &component)
@@ -275,16 +275,16 @@ void CLightDirectionalComponent::OnEntityComponentAdded(BaseEntityComponent &com
 	if(typeid(component) == typeid(CTransformComponent)) {
 		auto &trC = static_cast<CTransformComponent &>(component);
 		FlagCallbackForRemoval(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
-		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
-			                         if(pragma::math::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::RotationChanged) == false)
-				                         return pragma::util::EventReply::Unhandled;
+		                         [this, &trC](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+			                         if(math::is_flag_set(static_cast<CEOnPoseChanged &>(evData.get()).changeFlags, TransformChangeFlags::RotationChanged) == false)
+				                         return util::EventReply::Unhandled;
 			                         auto dir = uquat::forward(trC.GetRotation());
 			                         SetViewMatrix(glm::gtc::lookAtRH(trC.GetPosition(), trC.GetPosition() + dir, uvec::get_perpendicular(dir)));
 
 			                         //auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
 			                         //if(pLightComponent.valid())
 			                         //	pLightComponent->SetStaticResolved(false);
-			                         return pragma::util::EventReply::Unhandled;
+			                         return util::EventReply::Unhandled;
 		                         }),
 		  CallbackType::Component, &component);
 	}
@@ -303,7 +303,7 @@ void CLightDirectionalComponent::UpdateFrustum(uint32_t frustumId)
 	auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 	if(hShadow.expired())
 		return;
-	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
+	auto *cam = get_cgame()->GetPrimaryCamera<CCameraComponent>();
 	hShadow->UpdateFrustum(frustumId, *cam, GetViewMatrix(), pTrComponent->GetForward());
 }
 
@@ -318,6 +318,6 @@ void CLightDirectionalComponent::UpdateFrustum()
 	auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 	if(hShadow.expired())
 		return;
-	auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
+	auto *cam = get_cgame()->GetPrimaryCamera<CCameraComponent>();
 	hShadow->UpdateFrustum(*cam, GetViewMatrix(), pTrComponent->GetForward());
 }

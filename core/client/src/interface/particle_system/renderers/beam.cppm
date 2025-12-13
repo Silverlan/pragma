@@ -16,13 +16,13 @@ export namespace pragma::pts {
 	class DLLCLIENT CParticleRendererBeam : public CParticleRenderer {
 	public:
 		CParticleRendererBeam() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::pts::ParticleRenderFlags renderFlags) override;
-		virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void RecordRender(prosper::ICommandBuffer &drawCmd, CSceneComponent &scene, const CRasterizationRendererComponent &renderer, ParticleRenderFlags renderFlags) override;
+		virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, CSceneComponent &scene, const CRasterizationRendererComponent &renderer, CLightComponent &light, uint32_t layerId = 0) override;
 		virtual void OnParticleSystemStopped() override;
 		virtual void PostSimulate(double tDelta) override;
 		virtual std::pair<Vector3, Vector3> GetRenderBounds() const override;
-		virtual pragma::ShaderParticleBase *GetShader() const override;
+		virtual ShaderParticleBase *GetShader() const override;
 	private:
 #pragma pack(push, 1)
 		struct DLLCLIENT Node {
@@ -38,7 +38,7 @@ export namespace pragma::pts {
 		uint32_t m_nodeCount = 0u;
 		std::vector<Node> m_nodeOrigins;
 		uint32_t m_indexCount = 0u;
-		pragma::util::WeakHandle<prosper::Shader> m_shader = {};
+		util::WeakHandle<prosper::Shader> m_shader = {};
 		float m_curvature = 1.f;
 		void UpdateNodes();
 	};

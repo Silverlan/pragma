@@ -10,7 +10,7 @@ import :client_state;
 import :engine;
 import :entities.components;
 
-static std::string get_screenshot_name(pragma::Game *game, uimg::ImageFormat format)
+static std::string get_screenshot_name(pragma::Game *game, pragma::image::ImageFormat format)
 {
 	std::string map;
 	if(game == nullptr)
@@ -23,15 +23,15 @@ static std::string get_screenshot_name(pragma::Game *game, uimg::ImageFormat for
 		path = "screenshots\\";
 		path += map;
 		path += pragma::string::fill_zeroes(std::to_string(i), 4);
-		path += "." + uimg::get_image_output_format_extension(format);
+		path += "." + pragma::image::get_image_output_format_extension(format);
 		i++;
-	} while(FileManager::Exists(path.c_str() /*,fsys::SearchFlags::Local*/));
+	} while(pragma::fs::exists(path.c_str() /*,fs::SearchFlags::Local*/));
 	return path;
 }
 
-void pragma::util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t height, const RtScreenshotSettings &settings, uimg::ImageFormat format)
+void pragma::util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t height, const RtScreenshotSettings &settings, image::ImageFormat format)
 {
-	FileManager::CreateDirectory("screenshots");
+	fs::create_directory("screenshots");
 
 	auto *pCam = game.GetRenderCamera<pragma::CCameraComponent>();
 	Con::cout << "Taking raytraced screenshot..." << Con::endl;
@@ -65,7 +65,7 @@ void pragma::util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t h
 	Con::cout << "Executing raytracer... This may take a few minutes!" << Con::endl;
 	auto job = ::pragma::rendering::cycles::render_image(*pragma::get_client_state(), sceneInfo, renderImgInfo);
 	if(job.IsValid()) {
-		job.SetCompletionHandler([format, quality, toneMapping](pragma::util::ParallelWorker<uimg::ImageLayerSet> &worker) {
+		job.SetCompletionHandler([format, quality, toneMapping](pragma::util::ParallelWorker<image::ImageLayerSet> &worker) {
 			if(worker.IsSuccessful() == false) {
 				Con::cwar << "Raytraced screenshot failed: " << worker.GetResultMessage() << Con::endl;
 				return;
@@ -74,7 +74,7 @@ void pragma::util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t h
 			auto *client = pragma::get_client_state();
 			auto path = get_screenshot_name(client ? client->GetGameState() : nullptr, format);
 			Con::cout << "Raytracing complete! Saving screenshot as '" << path << "'..." << Con::endl;
-			auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "wb");
+			auto fp = fs::open_file<fs::VFilePtrReal>(path, fs::FileMode::Write | fs::FileMode::Binary);
 			if(fp == nullptr) {
 				Con::cwar << "Unable to open file '" << path << "' for writing!" << Con::endl;
 				return;
@@ -82,8 +82,8 @@ void pragma::util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t h
 			auto imgBuffer = worker.GetResult().images.begin()->second;
 			if(imgBuffer->IsHDRFormat())
 				imgBuffer = imgBuffer->ApplyToneMapping(toneMapping);
-			fsys::File f {fp};
-			if(uimg::save_image(f, *imgBuffer, format, quality) == false)
+			fs::File f {fp};
+			if(image::save_image(f, *imgBuffer, format, quality) == false)
 				Con::cwar << "Unable to save screenshot as '" << path << "'!" << Con::endl;
 
 			// Obsolete
@@ -97,7 +97,7 @@ void pragma::util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t h
 
 std::optional<std::string> pragma::util::screenshot(pragma::CGame &game)
 {
-	FileManager::CreateDirectory("screenshots");
+	fs::create_directory("screenshots");
 
 	auto scene = game.GetScene<pragma::CSceneComponent>();
 	std::shared_ptr<prosper::IImage> imgScreenshot = nullptr;
@@ -156,9 +156,9 @@ std::optional<std::string> pragma::util::screenshot(pragma::CGame &game)
 		Con::cwar << "Failed to create screenshot image buffer!" << Con::endl;
 		return {};
 	}
-	auto imgFormat = uimg::ImageFormat::PNG;
+	auto imgFormat = image::ImageFormat::PNG;
 	auto path = get_screenshot_name(&game, imgFormat);
-	auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "wb");
+	auto fp = fs::open_file<fs::VFilePtrReal>(path, fs::FileMode::Write | fs::FileMode::Binary);
 	if(fp == nullptr) {
 		Con::cwar << "Failed to open image output file '" << path << "' for writing!" << Con::endl;
 		return {};
@@ -179,9 +179,9 @@ std::optional<std::string> pragma::util::screenshot(pragma::CGame &game)
 	auto extents = imgScreenshot->GetExtents();
 	auto numBytes = extents.width * extents.height * byteSize;
 	bufScreenshot->Map(0ull, numBytes, prosper::IBuffer::MapFlags::None, &data);
-	auto imgBuf = uimg::ImageBuffer::Create(data, extents.width, extents.height, uimg::Format::RGBA8);
-	fsys::File f {fp};
-	uimg::save_image(f, *imgBuf, imgFormat);
+	auto imgBuf = image::ImageBuffer::Create(data, extents.width, extents.height, image::Format::RGBA8);
+	fs::File f {fp};
+	image::save_image(f, *imgBuf, imgFormat);
 	bufScreenshot->Unmap();
 	//util::tga::write_tga(f,extents.width,extents.height,pixels);
 	return path;

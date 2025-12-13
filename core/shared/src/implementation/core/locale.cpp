@@ -20,7 +20,7 @@ static spdlog::logger &LOGGER = pragma::register_logger("locale");
 
 static constexpr auto LOCALIZATION_ROOT_PATH = "scripts/localization/";
 
-static std::unique_ptr<DirectoryWatcherCallback> g_locFileWatcher = nullptr;
+static std::unique_ptr<pragma::fs::DirectoryWatcherCallback> g_locFileWatcher = nullptr;
 
 namespace pragma::locale {
 	static LoadResult load(const std::string &file, const std::string &lan, bool bReload);
@@ -54,7 +54,7 @@ std::string pragma::locale::get_file_location(const std::string &file, const std
 pragma::locale::LoadResult pragma::locale::parse_file(const std::string &file, const std::string &lan, std::unordered_map<std::string, pragma::string::Utf8String> &outTexts)
 {
 	auto filePath = get_file_location(file, lan);
-	auto f = FileManager::OpenFile(filePath.c_str(), "r");
+	auto f = pragma::fs::open_file(filePath.c_str(), pragma::fs::FileMode::Read);
 	if(f != nullptr) {
 		while(!f->Eof()) {
 			auto l = f->ReadLine();
@@ -118,7 +118,7 @@ void pragma::locale::set_language(std::string lan)
 		load_file(fpath, lan);
 
 	try {
-		g_locFileWatcher = std::make_unique<DirectoryWatcherCallback>(LOCALIZATION_ROOT_PATH + lan + '/', [](const std::string &str) {
+		g_locFileWatcher = std::make_unique<fs::DirectoryWatcherCallback>(LOCALIZATION_ROOT_PATH + lan + '/', [](const std::string &str) {
 			auto filePath = pragma::util::Path::CreateFile(str);
 			auto it = std::find(g_loadedFiles.begin(), g_loadedFiles.end(), filePath.GetString());
 			if(it == g_loadedFiles.end())
@@ -145,10 +145,10 @@ const std::unordered_map<std::string, pragma::locale::LanguageInfo> &pragma::loc
 	if(g_languages.empty()) {
 		std::vector<std::string> lanDirs;
 		std::string baseDir = "scripts/localization/";
-		filemanager::find_files(baseDir + "*", nullptr, &lanDirs);
+		fs::find_files(baseDir + "*", nullptr, &lanDirs);
 		for(auto &identifier : lanDirs) {
 			auto lanPath = baseDir + identifier + "/";
-			if(!filemanager::exists(lanPath + "language.udm"))
+			if(!fs::exists(lanPath + "language.udm"))
 				continue;
 			LanguageInfo lanInfo {};
 			try {
@@ -307,7 +307,7 @@ void pragma::locale::load_all()
 {
 	auto &lan = get_language();
 	std::vector<std::string> files;
-	filemanager::find_files(LOCALIZATION_ROOT_PATH + lan + "/texts/*.txt", &files, nullptr);
+	fs::find_files(LOCALIZATION_ROOT_PATH + lan + "/texts/*.txt", &files, nullptr);
 	for(auto &f : files)
 		load_file(f, lan);
 }
@@ -351,9 +351,9 @@ static bool save_localization(const pragma::locale::Localization &loc, const std
 	}
 
 	auto fullFileName = pragma::locale::get_file_location(fileName, lan);
-	if(!FileManager::FindLocalPath(fullFileName, fullFileName))
+	if(!pragma::fs::find_local_path(fullFileName, fullFileName))
 		return false;
-	auto f = filemanager::open_file<VFilePtrReal>(fullFileName, filemanager::FileMode::Write);
+	auto f = pragma::fs::open_file<pragma::fs::VFilePtrReal>(fullFileName, pragma::fs::FileMode::Write);
 	if(!f)
 		return false;
 	f->WriteString(out.str());
@@ -385,14 +385,14 @@ bool pragma::locale::localize(const std::string &identifier, const std::string &
 	if(pragma::locale::load_file(fileName, lan, loc) == LoadResult::Failed) {
 		auto success = false;
 		auto filePath = get_file_location(fileName, lan);
-		if(!filemanager::exists(filePath) && lan != "en") {
+		if(!fs::exists(filePath) && lan != "en") {
 			auto filePathEn = get_file_location(fileName, "en");
 			std::string absPath;
-			if(FileManager::FindLocalPath(filePathEn, absPath)) {
+			if(fs::find_local_path(filePathEn, absPath)) {
 				pragma::string::replace(absPath, "\\", "/");
 				auto newPath = absPath;
 				pragma::string::replace(newPath, "/en/", "/" + lan + "/");
-				if(filemanager::create_path(ufile::get_path_from_filename(newPath)) && filemanager::write_file(newPath, ""))
+				if(fs::create_path(ufile::get_path_from_filename(newPath)) && fs::write_file(newPath, ""))
 					success = (pragma::locale::load_file(fileName, lan, loc) != LoadResult::Failed); // Try again
 			}
 		}

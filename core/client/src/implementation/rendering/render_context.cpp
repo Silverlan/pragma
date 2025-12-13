@@ -33,7 +33,7 @@ void pragma::rendering::RenderContext::InitializeRenderAPI()
 		auto additionalSearchDirectories = pragma::util::get_default_additional_library_search_directories(modulePath);
 		if(g_cpuRendering) {
 			if(renderAPI == "vulkan") {
-				if(filemanager::exists("modules/swiftshader/")) {
+				if(fs::exists("modules/swiftshader/")) {
 					auto p = pragma::util::Path::CreatePath(pragma::util::get_program_path());
 					p += "modules/swiftshader/";
 					additionalSearchDirectories.push_back(p.GetString());
@@ -51,7 +51,7 @@ void pragma::rendering::RenderContext::InitializeRenderAPI()
 			// vulkan driver will be used instead of swiftshader.
 			std::string absSwiftshaderPath;
 			std::string relSwiftShaderPath = "modules/swiftshader/libvulkan.so.1";
-			if(filemanager::find_absolute_path(relSwiftShaderPath, absSwiftshaderPath)) {
+			if(fs::find_absolute_path(relSwiftShaderPath, absSwiftshaderPath)) {
 				std::string err;
 				auto libVulkan = pragma::util::Library::Load(absSwiftshaderPath, {}, &err);
 				if(libVulkan)
@@ -115,7 +115,7 @@ void pragma::rendering::RenderContext::InitializeRenderAPI()
 	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::GfxAPIValidationEnabled))
 		m_renderContext->SetValidationEnabled(true);
 
-	msys::CMaterialManager::SetFlipTexturesVerticallyOnLoad(m_renderContext->ShouldFlipTexturesOnLoad());
+	material::CMaterialManager::SetFlipTexturesVerticallyOnLoad(m_renderContext->ShouldFlipTexturesOnLoad());
 
 	GetRenderContext().GetInitialWindowSettings().resizable = false;
 	prosper::Shader::SetLogCallback([](prosper::Shader &shader, prosper::ShaderStage stage, const std::string &infoLog, const std::string &debugInfoLog) {

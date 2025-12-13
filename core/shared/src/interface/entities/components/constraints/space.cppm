@@ -11,23 +11,23 @@ export import :entities.components.constraints.base;
 export namespace pragma {
 	class DLLNETWORK ConstraintSpaceComponent final : public BaseEntityComponent {
 	  public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		ConstraintSpaceComponent(pragma::ecs::BaseEntity &ent);
+		ConstraintSpaceComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
-		void SetAxisEnabled(pragma::Axis axis, bool enabled);
-		bool IsAxisEnabled(pragma::Axis axis) const;
+		void SetAxisEnabled(Axis axis, bool enabled);
+		bool IsAxisEnabled(Axis axis) const;
 
-		void SetAxisInverted(pragma::Axis axis, bool inverted);
-		bool IsAxisInverted(pragma::Axis axis) const;
+		void SetAxisInverted(Axis axis, bool inverted);
+		bool IsAxisInverted(Axis axis) const;
 
 		void ApplyFilter(const Vector3 &posDriver, const Vector3 &posDriven, Vector3 &outValue) const;
 		void ApplyFilter(const EulerAngles &angDriver, const EulerAngles &angDriven, EulerAngles &outValue) const;
 
 		virtual void InitializeLuaObject(lua::State *lua) override;
 	  protected:
-		std::array<bool, pragma::math::to_integral(pragma::Axis::Count)> m_axisEnabled {};
-		std::array<bool, pragma::math::to_integral(pragma::Axis::Count)> m_axisInverted {};
+		std::array<bool, math::to_integral(Axis::Count)> m_axisEnabled {};
+		std::array<bool, math::to_integral(Axis::Count)> m_axisInverted {};
 	};
 };

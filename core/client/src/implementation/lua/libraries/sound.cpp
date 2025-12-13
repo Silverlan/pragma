@@ -8,36 +8,36 @@ module pragma.client;
 import :scripting.lua.libraries.sound;
 import :engine;
 
-void Lua::sound::set_distance_model(al::DistanceModel distanceModel)
+void Lua::sound::set_distance_model(pragma::audio::DistanceModel distanceModel)
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
 	soundSys->SetDistanceModel(distanceModel);
 }
-al::DistanceModel Lua::sound::get_distance_model()
+pragma::audio::DistanceModel Lua::sound::get_distance_model()
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
-	auto distanceModel = al::DistanceModel::LinearClamped;
+	auto distanceModel = pragma::audio::DistanceModel::LinearClamped;
 	if(soundSys != nullptr)
 		distanceModel = soundSys->GetDistanceModel();
 	return distanceModel;
 }
 
-al::PEffect Lua::sound::register_aux_effect(const std::string &name, const al::EfxEaxReverbProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
-al::PEffect Lua::sound::register_aux_effect(const std::string &name, const al::EfxChorusProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
-al::PEffect Lua::sound::register_aux_effect(const std::string &name, const al::EfxDistortionProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
-al::PEffect Lua::sound::register_aux_effect(const std::string &name, const al::EfxEchoProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
-al::PEffect Lua::sound::register_aux_effect(const std::string &name, const al::EfxFlangerProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
-al::PEffect Lua::sound::register_aux_effect(const std::string &name, const al::EfxFrequencyShifterProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
-al::PEffect Lua::sound::register_aux_effect(const std::string &name, const al::EfxVocalMorpherProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
-al::PEffect Lua::sound::register_aux_effect(const std::string &name, const al::EfxPitchShifterProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
-al::PEffect Lua::sound::register_aux_effect(const std::string &name, const al::EfxRingModulatorProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
-al::PEffect Lua::sound::register_aux_effect(const std::string &name, const al::EfxAutoWahProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
-al::PEffect Lua::sound::register_aux_effect(const std::string &name, const al::EfxCompressor &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
-al::PEffect Lua::sound::register_aux_effect(const std::string &name, const al::EfxEqualizer &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
+pragma::audio::PEffect Lua::sound::register_aux_effect(const std::string &name, const pragma::audio::EfxEaxReverbProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
+pragma::audio::PEffect Lua::sound::register_aux_effect(const std::string &name, const pragma::audio::EfxChorusProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
+pragma::audio::PEffect Lua::sound::register_aux_effect(const std::string &name, const pragma::audio::EfxDistortionProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
+pragma::audio::PEffect Lua::sound::register_aux_effect(const std::string &name, const pragma::audio::EfxEchoProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
+pragma::audio::PEffect Lua::sound::register_aux_effect(const std::string &name, const pragma::audio::EfxFlangerProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
+pragma::audio::PEffect Lua::sound::register_aux_effect(const std::string &name, const pragma::audio::EfxFrequencyShifterProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
+pragma::audio::PEffect Lua::sound::register_aux_effect(const std::string &name, const pragma::audio::EfxVocalMorpherProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
+pragma::audio::PEffect Lua::sound::register_aux_effect(const std::string &name, const pragma::audio::EfxPitchShifterProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
+pragma::audio::PEffect Lua::sound::register_aux_effect(const std::string &name, const pragma::audio::EfxRingModulatorProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
+pragma::audio::PEffect Lua::sound::register_aux_effect(const std::string &name, const pragma::audio::EfxAutoWahProperties &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
+pragma::audio::PEffect Lua::sound::register_aux_effect(const std::string &name, const pragma::audio::EfxCompressor &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
+pragma::audio::PEffect Lua::sound::register_aux_effect(const std::string &name, const pragma::audio::EfxEqualizer &props) { return pragma::get_cengine()->CreateAuxEffect(name, props); }
 
-al::PEffect Lua::sound::get_aux_effect(const std::string &name)
+pragma::audio::PEffect Lua::sound::get_aux_effect(const std::string &name)
 {
 	auto effect = pragma::get_cengine()->GetAuxEffect(name);
 	if(effect == nullptr)
@@ -45,7 +45,7 @@ al::PEffect Lua::sound::get_aux_effect(const std::string &name)
 	return effect;
 }
 
-bool Lua::sound::is_supported(al::ChannelConfig channels, al::SampleType type)
+bool Lua::sound::is_supported(pragma::audio::ChannelConfig channels, pragma::audio::SampleType type)
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
@@ -86,7 +86,7 @@ std::optional<std::string> Lua::sound::get_device_name()
 		return {};
 	return soundSys->GetDeviceName();
 }
-bool Lua::sound::add_global_effect(const std::string &name, al::ISoundSystem::GlobalEffectFlag flags, const al::EffectParams &params)
+bool Lua::sound::add_global_effect(const std::string &name, pragma::audio::ISoundSystem::GlobalEffectFlag flags, const pragma::audio::EffectParams &params)
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
@@ -97,7 +97,7 @@ bool Lua::sound::add_global_effect(const std::string &name, al::ISoundSystem::Gl
 	auto r = soundSys->AddGlobalEffect(*effect, flags, params);
 	return (r != std::numeric_limits<uint32_t>::max()) ? true : false;
 }
-bool Lua::sound::add_global_effect(const std::string &name) { return add_global_effect(name, al::ISoundSystem::GlobalEffectFlag::All, {}); }
+bool Lua::sound::add_global_effect(const std::string &name) { return add_global_effect(name, pragma::audio::ISoundSystem::GlobalEffectFlag::All, {}); }
 void Lua::sound::remove_global_effect(const std::string &name)
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
@@ -108,7 +108,7 @@ void Lua::sound::remove_global_effect(const std::string &name)
 		return;
 	soundSys->RemoveGlobalEffect(*effect);
 }
-void Lua::sound::set_global_effect_parameters(const std::string &name, const al::EffectParams &params)
+void Lua::sound::set_global_effect_parameters(const std::string &name, const pragma::audio::EffectParams &params)
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)

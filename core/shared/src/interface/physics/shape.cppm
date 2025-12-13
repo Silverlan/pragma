@@ -52,8 +52,8 @@ export {
 			void SetMaterial(const IMaterial &mat);
 			IMaterial *GetMaterial() const;
 
-			virtual void SetLocalPose(const pragma::math::Transform &localPose) = 0;
-			virtual pragma::math::Transform GetLocalPose() const = 0;
+			virtual void SetLocalPose(const math::Transform &localPose) = 0;
+			virtual math::Transform GetLocalPose() const = 0;
 
 			virtual void SetDensity(float density);
 			float GetDensity() const;
@@ -65,7 +65,7 @@ export {
 		  protected:
 			IShape(IEnvironment &env);
 			float m_density = 1.f;
-			pragma::util::WeakHandle<IMaterial> m_material = {};
+			util::WeakHandle<IMaterial> m_material = {};
 		};
 
 		class DLLNETWORK IConvexShape : virtual public IShape {
@@ -75,17 +75,17 @@ export {
 			virtual void SetLocalScaling(const Vector3 &scale) = 0;
 			virtual void InitializeLuaObject(lua::State *lua) override;
 
-			void SetCollisionMesh(pragma::physics::CollisionMesh &collisionMesh);
+			void SetCollisionMesh(CollisionMesh &collisionMesh);
 			void SetCollisionMesh();
-			const pragma::physics::CollisionMesh *GetCollisionMesh() const;
-			pragma::physics::CollisionMesh *GetCollisionMesh();
+			const CollisionMesh *GetCollisionMesh() const;
+			CollisionMesh *GetCollisionMesh();
 
 			virtual bool IsConvex() const override;
 			virtual IConvexShape *GetConvexShape() override;
 		  protected:
 			IConvexShape(IEnvironment &env);
 		  private:
-			std::shared_ptr<pragma::physics::CollisionMesh> m_collisionMesh = nullptr;
+			std::shared_ptr<CollisionMesh> m_collisionMesh = nullptr;
 		};
 
 		class DLLNETWORK ICapsuleShape : virtual public IConvexShape {
@@ -129,11 +129,11 @@ export {
 		class DLLNETWORK ICompoundShape : virtual public IShape {
 		  public:
 			struct DLLNETWORK ShapeInfo {
-				std::shared_ptr<pragma::physics::IShape> shape;
-				pragma::math::Transform localPose;
+				std::shared_ptr<IShape> shape;
+				math::Transform localPose;
 			};
 			virtual void InitializeLuaObject(lua::State *lua) override;
-			void AddShape(pragma::physics::IShape &shape, const pragma::math::Transform &localPose = {});
+			void AddShape(IShape &shape, const math::Transform &localPose = {});
 			virtual void GetAABB(Vector3 &min, Vector3 &max) const override;
 
 			virtual void SetMass(float mass) override;
@@ -144,7 +144,7 @@ export {
 			const std::vector<ShapeInfo> &GetShapes() const;
 		  protected:
 			ICompoundShape(IEnvironment &env);
-			ICompoundShape(IEnvironment &env, pragma::physics::IShape &shape, const Vector3 &origin);
+			ICompoundShape(IEnvironment &env, IShape &shape, const Vector3 &origin);
 			std::vector<ShapeInfo> m_shapes;
 			Vector3 m_min = {};
 			Vector3 m_max = {};

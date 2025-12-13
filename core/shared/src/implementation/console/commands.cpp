@@ -57,8 +57,8 @@ void pragma::console::commands::lua_exec_autocomplete(const std::string &arg, st
 {
 	std::vector<std::string> resFiles;
 	auto path = Lua::SCRIPT_DIRECTORY_SLASH + arg;
-	FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION).c_str(), &resFiles, nullptr);
-	FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &resFiles, nullptr);
+	fs::find_files((path + "*." + Lua::FILE_EXTENSION), &resFiles, nullptr);
+	fs::find_files((path + "*." + Lua::FILE_EXTENSION_PRECOMPILED), &resFiles, nullptr);
 	autoCompleteOptions.reserve(resFiles.size());
 	path = ufile::get_path_from_filename(path.substr(4));
 	for(auto &mapName : resFiles) {

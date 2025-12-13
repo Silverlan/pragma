@@ -21,7 +21,7 @@ using namespace pragma;
 DecalProjector::DecalProjector(const Vector3 &pos, const Quat &rot, float size) : m_pose {pos, rot}, m_size {size} {}
 const Vector3 &DecalProjector::GetPos() const { return m_pose.GetOrigin(); }
 const Quat &DecalProjector::GetRotation() const { return m_pose.GetRotation(); }
-const pragma::math::Transform &DecalProjector::GetPose() const { return m_pose; }
+const math::Transform &DecalProjector::GetPose() const { return m_pose; }
 float DecalProjector::GetSize() const { return m_size; }
 std::pair<Vector3, Vector3> DecalProjector::GetAABB() const
 {
@@ -62,8 +62,8 @@ std::vector<DecalProjector::VertexInfo> DecalProjector::CropTriangleVertsByLine(
 	pointsOutOfBounds.resize(verts.size());
 	for(auto i = decltype(verts.size()) {0u}; i < verts.size(); ++i) {
 		auto &vInfo = verts.at(i);
-		auto side = pragma::math::geometry::get_side_of_point_to_line(lineStart, lineEnd, vInfo.position);
-		pointsOutOfBounds.at(i) = (side == pragma::math::geometry::LineSide::Right);
+		auto side = math::geometry::get_side_of_point_to_line(lineStart, lineEnd, vInfo.position);
+		pointsOutOfBounds.at(i) = (side == math::geometry::LineSide::Right);
 	}
 
 	std::vector<VertexInfo> newVerts {};
@@ -77,17 +77,17 @@ std::vector<DecalProjector::VertexInfo> DecalProjector::CropTriangleVertsByLine(
 
 		// Check if the line to the next vertex crosses the bounds
 		if((pointsOutOfBounds.at(v0Idx) == true && pointsOutOfBounds.at(v1Idx) == false) || (pointsOutOfBounds.at(v0Idx) == false && pointsOutOfBounds.at(v1Idx) == true)) {
-			auto intersectionPos = pragma::math::intersection::line_line(lineStart, lineEnd, verts.at(v0Idx).position, verts.at(v1Idx).position);
+			auto intersectionPos = math::intersection::line_line(lineStart, lineEnd, verts.at(v0Idx).position, verts.at(v1Idx).position);
 			if(intersectionPos.has_value()) {
 				float u, v;
-				if(pragma::math::geometry::calc_barycentric_coordinates(v0, v1, v2, Vector3 {intersectionPos->x, intersectionPos->y, 0.f}, u, v))
+				if(math::geometry::calc_barycentric_coordinates(v0, v1, v2, Vector3 {intersectionPos->x, intersectionPos->y, 0.f}, u, v))
 					newVerts.push_back({*intersectionPos, std::numeric_limits<uint32_t>::max(), Vector2 {u, v}});
 			}
 		}
 	}
 	return newVerts;
 }
-bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, std::vector<pragma::math::Vertex> &outVerts, std::vector<uint16_t> &outTris)
+bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, std::vector<math::Vertex> &outVerts, std::vector<uint16_t> &outTris)
 {
 	auto bounds = GetProjectorCubeBounds();
 
@@ -108,7 +108,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, s
 	for(auto &meshData : meshDatas) {
 		auto effectivePose = GetPose().GetInverse() * meshData.pose;
 		for(auto *subMesh : meshData.subMeshes) {
-			if(subMesh->GetGeometryType() != pragma::geometry::ModelSubMesh::GeometryType::Triangles)
+			if(subMesh->GetGeometryType() != geometry::ModelSubMesh::GeometryType::Triangles)
 				continue;
 			auto &verts = subMesh->GetVertices();
 
@@ -126,7 +126,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, s
 					auto p1 = effectivePose * v1.position;
 					auto p2 = effectivePose * v2.position;
 
-					if(pragma::math::intersection::aabb_triangle(bounds.first, bounds.second, p0, p1, p2) == false)
+					if(math::intersection::aabb_triangle(bounds.first, bounds.second, p0, p1, p2) == false)
 						continue;
 					intersectingTris.push_back({indices, std::array<Vector3, 3> {p0, p1, p2}});
 				}
@@ -147,7 +147,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas, s
 				auto &p2 = triInfo.vertices.at(2);
 
 				std::array<Vector3, 3> vertsPs = {uvec::project_to_plane(triInfo.vertices.at(0), n, d), uvec::project_to_plane(triInfo.vertices.at(1), n, d), uvec::project_to_plane(triInfo.vertices.at(2), n, d)};
-				auto area = pragma::math::geometry::calc_triangle_area(vertsPs.at(0), vertsPs.at(1), vertsPs.at(2));
+				auto area = math::geometry::calc_triangle_area(vertsPs.at(0), vertsPs.at(1), vertsPs.at(2));
 				constexpr auto AREA_EPSILON = 0.004f;
 				if(area < AREA_EPSILON)
 					continue; // Points don't actually create a triangle; skip it; TODO: It would be cheaper to use dot products for this!
@@ -210,7 +210,7 @@ void DecalProjector::DebugDraw(float duration) const
 	auto &pose = GetPose();
 	for(auto &l : lines)
 		l = pose * (l * prismSize);
-	pragma::debug::DebugRenderer::DrawLines(lines, {colors::White, duration});
+	debug::DebugRenderer::DrawLines(lines, {colors::White, duration});
 
 	lines.clear();
 	auto &prismPos = pose.GetOrigin();
@@ -227,7 +227,7 @@ void DecalProjector::DebugDraw(float duration) const
 	lines.push_back(points.at(4));
 	for(auto &l : lines)
 		l = pose * (l * prismSize);
-	pragma::debug::DebugRenderer::DrawLines(lines, {colors::Black, duration});
+	debug::DebugRenderer::DrawLines(lines, {colors::Black, duration});
 }
 
 /////////
@@ -235,7 +235,7 @@ void DecalProjector::DebugDraw(float duration) const
 void CDecalComponent::Initialize()
 {
 	BaseEnvDecalComponent::Initialize();
-	auto renderC = GetEntity().AddComponent<pragma::CRenderComponent>();
+	auto renderC = GetEntity().AddComponent<CRenderComponent>();
 	renderC->SetCastShadows(false);
 	/*auto &ent = static_cast<pragma::ecs::CBaseEntity&>(GetEntity());
 	auto pSpriteComponent = ent.AddComponent<pragma::CSpriteComponent>();
@@ -269,27 +269,27 @@ void CDecalComponent::OnEntitySpawn()
 	if(pSpriteComponent != nullptr)
 		pSpriteComponent->StartParticle();*/
 	if(m_startDisabled == false)
-		SetTickPolicy(pragma::TickPolicy::Always);
+		SetTickPolicy(TickPolicy::Always);
 }
 
 void CDecalComponent::OnTick(double dt)
 {
 	if(m_decalDirty)
 		ApplyDecal();
-	SetTickPolicy(pragma::TickPolicy::Never);
+	SetTickPolicy(TickPolicy::Never);
 }
 
 void CDecalComponent::SetSize(float size)
 {
 	BaseEnvDecalComponent::SetSize(size);
 	m_decalDirty = true;
-	SetTickPolicy(pragma::TickPolicy::Always);
+	SetTickPolicy(TickPolicy::Always);
 }
 void CDecalComponent::SetMaterial(const std::string &mat)
 {
 	BaseEnvDecalComponent::SetMaterial(mat);
 	m_decalDirty = true;
-	SetTickPolicy(pragma::TickPolicy::Always);
+	SetTickPolicy(TickPolicy::Always);
 }
 
 DecalProjector CDecalComponent::GetProjector() const
@@ -313,10 +313,10 @@ bool CDecalComponent::ApplyDecal(const std::vector<DecalProjector::MeshData> &me
 
 bool CDecalComponent::ApplyDecal(DecalProjector &projector, const std::vector<DecalProjector::MeshData> &meshDatas)
 {
-	auto *mat = pragma::get_client_state()->LoadMaterial(GetMaterial());
+	auto *mat = get_client_state()->LoadMaterial(GetMaterial());
 	if(mat == nullptr)
 		return false;
-	std::vector<pragma::math::Vertex> verts;
+	std::vector<math::Vertex> verts;
 	std::vector<uint16_t> tris;
 	if(projector.GenerateDecalMesh(meshDatas, verts, tris) == false)
 		return false;
@@ -327,20 +327,20 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector, const std::vector<De
 	for(auto &v : verts)
 		v.position = invPose * v.position;
 
-	auto mdl = pragma::get_cgame()->CreateModel();
+	auto mdl = get_cgame()->CreateModel();
 	auto meshGroup = mdl->GetMeshGroup(0);
-	auto subMesh = pragma::get_cgame()->CreateModelSubMesh();
+	auto subMesh = get_cgame()->CreateModelSubMesh();
 	subMesh->GetVertices() = std::move(verts);
 	subMesh->SetIndices(tris);
 	subMesh->SetSkinTextureIndex(0);
 	subMesh->GenerateNormals();
 
-	auto mesh = pragma::get_cgame()->CreateModelMesh();
+	auto mesh = get_cgame()->CreateModelMesh();
 	mesh->AddSubMesh(subMesh);
 	meshGroup->AddMesh(mesh);
 	mdl->AddMaterial(0, mat);
 
-	mdl->Update(pragma::asset::ModelUpdateFlags::All | pragma::asset::ModelUpdateFlags::UpdateChildren);
+	mdl->Update(asset::ModelUpdateFlags::All | asset::ModelUpdateFlags::UpdateChildren);
 
 	//decalRenderC->SetDepthBias(-1'000.f,0.f,-2.f);
 	// TODO
@@ -356,7 +356,7 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector, const std::vector<De
 bool CDecalComponent::ApplyDecal()
 {
 	m_decalDirty = false;
-	auto *mat = pragma::get_client_state()->LoadMaterial(GetMaterial());
+	auto *mat = get_client_state()->LoadMaterial(GetMaterial());
 	if(mat == nullptr)
 		return false;
 	std::vector<ecs::CBaseEntity *> targetEnts {};
@@ -369,10 +369,10 @@ bool CDecalComponent::ApplyDecal()
 
 	// pragma::get_cgame()->DrawBox(projectorAABB.first,projectorAABB.second,{},colors::Red,12.f);
 
-	pragma::PrimitiveIntersectionInfo bvhIntersectInfo {};
+	PrimitiveIntersectionInfo bvhIntersectInfo {};
 	std::vector<DecalProjector::MeshData> meshDatas {};
-	std::unordered_set<pragma::geometry::ModelSubMesh *> coveredMeshes;
-	auto findIntersectionMeshes = [&projectorAABB, &bvhIntersectInfo, &meshDatas, &coveredMeshes](const pragma::BaseBvhComponent &bvhC) {
+	std::unordered_set<geometry::ModelSubMesh *> coveredMeshes;
+	auto findIntersectionMeshes = [&projectorAABB, &bvhIntersectInfo, &meshDatas, &coveredMeshes](const BaseBvhComponent &bvhC) {
 		if(!bvhC.IntersectionTestAabb(projectorAABB.first, projectorAABB.second, bvhIntersectInfo)) {
 			bvhIntersectInfo.primitives.clear();
 			return;
@@ -395,20 +395,20 @@ bool CDecalComponent::ApplyDecal()
 	};
 
 	{
-		pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
-		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CStaticBvhCacheComponent>>();
+		ecs::EntityIterator entIt {*get_cgame()};
+		entIt.AttachFilter<TEntityIteratorFilterComponent<CStaticBvhCacheComponent>>();
 		for(auto *ent : entIt) {
-			auto bvhC = ent->GetComponent<pragma::CStaticBvhCacheComponent>();
+			auto bvhC = ent->GetComponent<CStaticBvhCacheComponent>();
 			findIntersectionMeshes(*bvhC);
 		}
 	}
 
 	{
-		pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
-		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CBvhComponent>>();
+		ecs::EntityIterator entIt {*get_cgame()};
+		entIt.AttachFilter<TEntityIteratorFilterComponent<CBvhComponent>>();
 		for(auto *ent : entIt) {
-			auto bvhC = ent->GetComponent<pragma::CBvhComponent>();
-			auto userC = ent->GetComponent<pragma::CStaticBvhUserComponent>();
+			auto bvhC = ent->GetComponent<CBvhComponent>();
+			auto userC = ent->GetComponent<CStaticBvhUserComponent>();
 			if(userC.valid() && userC->IsActive())
 				continue; // Already covered by static BVH cache
 			findIntersectionMeshes(*bvhC);
@@ -424,7 +424,7 @@ void CDecalComponent::ReceiveData(NetPacket &packet)
 	m_startDisabled = packet->Read<bool>();
 }
 
-void CDecalComponent::InitializeLuaObject(lua::State *l) { return BaseEnvDecalComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CDecalComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////
 

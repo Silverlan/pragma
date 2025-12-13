@@ -9,18 +9,18 @@ import :client_state;
 
 #undef GetMessage
 
-void pragma::ClientState::SendPacket(const std::string &name, NetPacket &packet, pragma::networking::Protocol protocol)
+void pragma::ClientState::SendPacket(const std::string &name, NetPacket &packet, networking::Protocol protocol)
 {
 	auto ID = GetServerMessageID(name);
 	if(ID == 0 || m_client == nullptr)
 		return;
 	packet.SetMessageID(ID);
-	pragma::networking::Error err;
+	networking::Error err;
 	if(m_client->SendPacket(protocol, packet, err) == false)
 		Con::cwar << "Unable to send packet '" << name << "': " << err.GetMessage() << Con::endl;
 }
-void pragma::ClientState::SendPacket(const std::string &name, NetPacket &packet) { SendPacket(name, packet, pragma::networking::Protocol::FastUnreliable); }
-void pragma::ClientState::SendPacket(const std::string &name, pragma::networking::Protocol protocol)
+void pragma::ClientState::SendPacket(const std::string &name, NetPacket &packet) { SendPacket(name, packet, networking::Protocol::FastUnreliable); }
+void pragma::ClientState::SendPacket(const std::string &name, networking::Protocol protocol)
 {
 	NetPacket packet {};
 	SendPacket(name, packet, protocol);

@@ -13,7 +13,7 @@ import :game;
 
 using namespace pragma::rendering;
 
-SortingKey::SortingKey(msys::MaterialIndex material, prosper::ShaderIndex shader, bool instantiable, bool translucentKey)
+SortingKey::SortingKey(material::MaterialIndex material, prosper::ShaderIndex shader, bool instantiable, bool translucentKey)
 {
 	if(translucentKey) {
 		translucent.material = material;
@@ -47,7 +47,7 @@ void SortingKey::SetDistance(double distSqr, const CCameraComponent &cam)
 	translucent.distance = glm::floatBitsToUint(static_cast<float>(distSqr));
 }
 
-RenderQueueItem::RenderQueueItem(pragma::ecs::CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const TranslucencyPassInfo *optTranslucencyPassInfo)
+RenderQueueItem::RenderQueueItem(pragma::ecs::CBaseEntity &ent, RenderMeshIndex meshIdx, material::CMaterial &mat, prosper::PipelineID pipelineId, const TranslucencyPassInfo *optTranslucencyPassInfo)
     : material {mat.GetIndex()}, pipelineId {pipelineId}, entity {ent.GetLocalIndex()}, mesh {meshIdx}, translucentKey {optTranslucencyPassInfo ? true : false}
 {
 	instanceSetIndex = RenderQueueItem::UNIQUE;
@@ -78,7 +78,7 @@ RenderQueueItem::RenderQueueItem(pragma::ecs::CBaseEntity &ent, RenderMeshIndex 
 	}
 }
 
-msys::CMaterial *RenderQueueItem::GetMaterial() const { return static_cast<msys::CMaterial *>(pragma::get_client_state()->GetMaterialManager().GetAsset(material)->assetObject.get()); }
+pragma::material::CMaterial *RenderQueueItem::GetMaterial() const { return static_cast<material::CMaterial *>(pragma::get_client_state()->GetMaterialManager().GetAsset(material)->assetObject.get()); }
 pragma::ecs::CBaseEntity *RenderQueueItem::GetEntity() const { return static_cast<pragma::ecs::CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(entity)); }
 pragma::geometry::CModelSubMesh *RenderQueueItem::GetMesh() const
 {
@@ -114,7 +114,7 @@ void RenderQueue::Clear()
 	queue.clear();
 	sortedItemIndices.clear();
 }
-void RenderQueue::Add(pragma::ecs::CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam)
+void RenderQueue::Add(pragma::ecs::CBaseEntity &ent, RenderMeshIndex meshIdx, material::CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam)
 {
 	if(optCam) {
 		RenderQueueItem::TranslucencyPassInfo translucencyPassInfo {*optCam};

@@ -22,8 +22,8 @@ export namespace pragma {
 		uint32_t sceneFlags = 0u;
 		uint32_t shadowIndex = 0u;
 
-		pragma::math::Radian outerConeHalfAngle = 0.f;
-		pragma::math::Radian innerConeHalfAngle = 0.f;
+		math::Radian outerConeHalfAngle = 0.f;
+		math::Radian innerConeHalfAngle = 0.f;
 		float attenuation = 0.f;
 		BufferFlags flags = BufferFlags::None;
 		uint32_t shadowMapIndexStatic = 0u;

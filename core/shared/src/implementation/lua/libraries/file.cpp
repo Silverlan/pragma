@@ -12,15 +12,15 @@ static bool is_permitted_root_dir(const std::string_view &str) { return str == "
 
 LFile::LFile() {}
 
-void LFile::Construct(const VFilePtr &f) { m_file = pragma::util::make_shared<fsys::File>(f); }
+void LFile::Construct(const pragma::fs::VFilePtr &f) { m_file = pragma::util::make_shared<pragma::fs::File>(f); }
 void LFile::Construct(const std::shared_ptr<ufile::IFile> &f) { m_file = f; }
 
-bool LFile::Construct(const char *path, const char *mode, fsys::SearchFlags fsearchmode, std::string *optOutErr)
+bool LFile::Construct(const char *path, pragma::fs::FileMode fileMode, pragma::fs::SearchFlags fsearchmode, std::string *optOutErr)
 {
-	auto f = FileManager::OpenFile(path, mode, nullptr, fsearchmode);
+	auto f = pragma::fs::open_file(path, fileMode, nullptr, fsearchmode);
 	if(!f)
 		return false;
-	m_file = pragma::util::make_shared<fsys::File>(f);
+	m_file = pragma::util::make_shared<pragma::fs::File>(f);
 	return true;
 }
 
@@ -362,7 +362,7 @@ bool Lua::file::validate_write_operation(lua::State *l, std::string &path, std::
 		while(addonPath.GetComponentCount() > 2)
 			addonPath.PopBack();
 
-		if(pragma::string::compare<std::string_view>(addonPath.GetFront(), "addons", false) && FileManager::Exists(addonPath.GetString())) {
+		if(pragma::string::compare<std::string_view>(addonPath.GetFront(), "addons", false) && pragma::fs::exists(addonPath.GetString())) {
 			opath.PopFront();
 			opath.PopFront();
 			outRootPath = addonPath.GetString();
@@ -370,7 +370,7 @@ bool Lua::file::validate_write_operation(lua::State *l, std::string &path, std::
 			return true;
 		}
 	}
-	auto fpath = pragma::util::FilePath(FileManager::GetCanonicalizedPath(Lua::get_current_file(l)));
+	auto fpath = pragma::util::FilePath(pragma::fs::get_canonicalized_path(Lua::get_current_file(l)));
 	auto fname = fpath.GetString();
 	if(fname.length() < 8 || pragma::string::compare(fname.c_str(), "addons/", false, 7) == false) {
 		if(Lua::get_extended_lua_modules_enabled()) {
@@ -383,7 +383,7 @@ bool Lua::file::validate_write_operation(lua::State *l, std::string &path, std::
 	auto br = fname.find('/', 8);
 	auto prefix = pragma::string::substr(fname, 0, br + 1);
 	outRootPath = prefix;
-	path = FileManager::GetCanonicalizedPath(path);
+	path = pragma::fs::get_canonicalized_path(path);
 	if(is_permitted_root_dir(pragma::util::Path {path}.GetFront()))
 		outRootPath = ""; // Special case; We'll allow file writes in the cache directory
 	return true;
@@ -399,29 +399,16 @@ bool Lua::file::validate_write_operation(lua::State *l, std::string &path)
 	return true;
 }
 
-std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Lua::file::Open(lua::State *l, std::string path, pragma::FileOpenMode openMode, fsys::SearchFlags searchFlags)
+std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Lua::file::Open(lua::State *l, std::string path, pragma::fs::FileMode openMode, pragma::fs::SearchFlags searchFlags)
 {
-	std::string mode {};
-	if((openMode & pragma::FileOpenMode::Read) != pragma::FileOpenMode::None)
-		mode += "r";
-	else if((openMode & pragma::FileOpenMode::Write) != pragma::FileOpenMode::None)
-		mode += "w";
-	else if((openMode & pragma::FileOpenMode::Append) != pragma::FileOpenMode::None)
-		mode += "a";
-	else
-		return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {nullptr, "Invalid file open mode"};
-	if((openMode & pragma::FileOpenMode::Binary) != pragma::FileOpenMode::None)
-		mode += "b";
-	if((openMode & pragma::FileOpenMode::Update) != pragma::FileOpenMode::None)
-		mode += "+";
-	if((openMode & (pragma::FileOpenMode::Write | pragma::FileOpenMode::Append)) != pragma::FileOpenMode::None) // Write mode
+	if((openMode & (pragma::fs::FileMode::Write | pragma::fs::FileMode::Append)) != pragma::fs::FileMode{}) // Write mode
 	{
 		if(validate_write_operation(l, path) == false)
 			return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {nullptr, {}};
 	}
 	auto f = pragma::util::make_shared<LFile>();
 	std::string errMsg;
-	if(f->Construct(path.c_str(), mode.c_str(), searchFlags, &errMsg) == false)
+	if(f->Construct(path.c_str(), openMode, searchFlags, &errMsg) == false)
 		return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {nullptr, errMsg};
 	return std::pair<std::shared_ptr<LFile>, std::optional<std::string>> {f, {}};
 }
@@ -430,14 +417,14 @@ bool Lua::file::CreateDir(lua::State *l, std::string path)
 {
 	if(validate_write_operation(l, path) == false)
 		return false;
-	return FileManager::CreateDirectory(path.c_str());
+	return pragma::fs::create_directory(path);
 }
 
 bool Lua::file::CreatePath(lua::State *l, std::string path)
 {
 	if(validate_write_operation(l, path) == false)
 		return false;
-	return FileManager::CreatePath(path.c_str());
+	return pragma::fs::create_path(path);
 }
 
 bool Lua::file::Delete(lua::State *l, std::string ppath)
@@ -445,9 +432,9 @@ bool Lua::file::Delete(lua::State *l, std::string ppath)
 	auto path = ppath;
 	if(validate_write_operation(l, path) == false)
 		return false;
-	if(Lua::get_extended_lua_modules_enabled() && FileManager::Exists(path) == false && FileManager::Exists(ppath))
-		return filemanager::remove_file(ppath);
-	return filemanager::remove_file(path);
+	if(Lua::get_extended_lua_modules_enabled() && pragma::fs::exists(path) == false && pragma::fs::exists(ppath))
+		return pragma::fs::remove_file(ppath);
+	return pragma::fs::remove_file(path);
 }
 
 bool Lua::file::DeleteDir(lua::State *l, std::string ppath)
@@ -455,9 +442,9 @@ bool Lua::file::DeleteDir(lua::State *l, std::string ppath)
 	auto path = ppath;
 	if(validate_write_operation(l, path) == false)
 		return false;
-	if(Lua::get_extended_lua_modules_enabled() && FileManager::Exists(path) == false && FileManager::Exists(ppath))
-		return filemanager::remove_directory(ppath);
-	return filemanager::remove_directory(path);
+	if(Lua::get_extended_lua_modules_enabled() && pragma::fs::exists(path) == false && pragma::fs::exists(ppath))
+		return pragma::fs::remove_directory(ppath);
+	return pragma::fs::remove_directory(path);
 }
 
 std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua::State *l, const std::string &path, const std::optional<std::string> &game)
@@ -465,10 +452,10 @@ std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua::State *l, const 
 	auto dllHandle = pragma::util::initialize_external_archive_manager(pragma::Engine::Get()->GetNetworkState(l));
 	if(dllHandle == nullptr)
 		return nullptr;
-	auto *fOpenFile = dllHandle->FindSymbolAddress<void (*)(const std::string &, VFilePtr &, const std::optional<std::string> &)>("open_archive_file");
+	auto *fOpenFile = dllHandle->FindSymbolAddress<void (*)(const std::string &,pragma::fs::VFilePtr &, const std::optional<std::string> &)>("open_archive_file");
 	if(fOpenFile == nullptr)
 		return nullptr;
-	VFilePtr f = nullptr;
+	pragma::fs::VFilePtr f = nullptr;
 	fOpenFile(path, f, game);
 	if(f == nullptr)
 		return nullptr;
@@ -500,11 +487,11 @@ void Lua::file::find_external_game_resource_files(lua::State *l, const std::stri
 		outDirs[idx++] = d;
 }
 
-luabind::object Lua::file::FindLuaFiles(lua::State *l, const std::string &path, fsys::SearchFlags searchFlag)
+luabind::object Lua::file::FindLuaFiles(lua::State *l, const std::string &path, pragma::fs::SearchFlags searchFlag)
 {
 	std::vector<std::string> files;
-	FileManager::FindFiles((path + "/*." + Lua::FILE_EXTENSION).c_str(), &files, nullptr, searchFlag);
-	FileManager::FindFiles((path + "/*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &files, nullptr, searchFlag);
+	pragma::fs::find_files((path + "/*." + Lua::FILE_EXTENSION), &files, nullptr, searchFlag);
+	pragma::fs::find_files((path + "/*." + Lua::FILE_EXTENSION_PRECOMPILED), &files, nullptr, searchFlag);
 
 	auto t = luabind::newtable(l);
 	auto idx = 1;
@@ -516,11 +503,11 @@ luabind::object Lua::file::FindLuaFiles(lua::State *l, const std::string &path, 
 	return t;
 }
 
-void Lua::file::Find(lua::State *l, const std::string &path, fsys::SearchFlags searchFlags, luabind::object &outFiles, luabind::object &outDirs)
+void Lua::file::Find(lua::State *l, const std::string &path, pragma::fs::SearchFlags searchFlags, luabind::object &outFiles, luabind::object &outDirs)
 {
 	std::vector<std::string> files;
 	std::vector<std::string> dirs;
-	FileManager::FindFiles(path.c_str(), &files, &dirs, searchFlags);
+	pragma::fs::find_files(path, &files, &dirs, searchFlags);
 
 	outFiles = luabind::newtable(l);
 	uint32_t idx = 1;
@@ -535,7 +522,7 @@ void Lua::file::Find(lua::State *l, const std::string &path, fsys::SearchFlags s
 
 luabind::object Lua::file::Read(lua::State *l, const std::string &path)
 {
-	auto f = FileManager::OpenFile(path.c_str(), "rb");
+	auto f = pragma::fs::open_file(path.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(f == nullptr)
 		return {};
 	std::string str = f->ReadString();
@@ -544,25 +531,25 @@ luabind::object Lua::file::Read(lua::State *l, const std::string &path)
 
 bool Lua::file::Write(lua::State *l, std::string strPath, const std::string &content)
 {
-	strPath = FileManager::GetCanonicalizedPath(strPath);
+	strPath = pragma::fs::get_canonicalized_path(strPath);
 	if(validate_write_operation(l, strPath) == false)
 		return false;
 	auto fullPath = pragma::util::Path::CreateFile(strPath);
 
 	auto path = std::string {fullPath.GetPath()};
-	FileManager::CreatePath(path.data());
+	pragma::fs::create_path(path);
 
-	auto f = FileManager::OpenFile(fullPath.GetString().c_str(), "w");
+	auto f = pragma::fs::open_file(fullPath.GetString().c_str(), pragma::fs::FileMode::Write);
 	if(f == nullptr || f->GetType() != EVFile::Local)
 		return false;
-	auto freal = std::static_pointer_cast<VFilePtrInternalReal>(f);
+	auto freal = std::static_pointer_cast<pragma::fs::VFilePtrInternalReal>(f);
 	freal->Write(content.c_str(), content.length());
 	return true;
 }
 
 std::string Lua::file::GetCanonicalizedPath(const std::string &path)
 {
-	auto r = FileManager::GetCanonicalizedPath(path);
+	auto r = pragma::fs::get_canonicalized_path(path);
 	pragma::string::replace(r, "\\", "/");
 	return r;
 }
@@ -588,4 +575,4 @@ luabind::object Lua::file::GetFileExtension(lua::State *l, const std::string &pa
 		return {};
 	return luabind::object {l, ext};
 }
-bool Lua::file::ComparePath(const std::string &path0, const std::string &path1) { return FileManager::GetCanonicalizedPath(path0) == FileManager::GetCanonicalizedPath(path1); }
+bool Lua::file::ComparePath(const std::string &path0, const std::string &path1) { return pragma::fs::get_canonicalized_path(path0) == pragma::fs::get_canonicalized_path(path1); }

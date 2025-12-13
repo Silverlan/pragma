@@ -13,15 +13,15 @@ export {
 	namespace pragma {
 		class DLLCLIENT CPropComponent final : public BasePropComponent, public CBaseNetComponent {
 		  public:
-			CPropComponent(pragma::ecs::BaseEntity &ent) : BasePropComponent(ent) {}
+			CPropComponent(ecs::BaseEntity &ent) : BasePropComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void OnEntitySpawn() override;
 			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 		  protected:
-			pragma::physics::PhysicsType m_propPhysType = pragma::physics::PhysicsType::None;
-			pragma::physics::MoveType m_propMoveType = pragma::physics::MoveType::None;
+			physics::PhysicsType m_propPhysType = physics::PhysicsType::None;
+			physics::MoveType m_propMoveType = physics::MoveType::None;
 		};
 	};
 

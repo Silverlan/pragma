@@ -13,9 +13,9 @@ using namespace pragma;
 void CFuncPhysicsComponent::Initialize()
 {
 	BaseFuncPhysicsComponent::Initialize();
-	auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
+	auto pRenderComponent = static_cast<ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
-		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
+		pRenderComponent->SetSceneRenderPass(rendering::SceneRenderPass::World);
 }
 
 void CFuncPhysicsComponent::ReceiveData(NetPacket &packet)

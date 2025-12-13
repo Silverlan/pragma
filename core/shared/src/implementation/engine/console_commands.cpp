@@ -40,7 +40,7 @@ static std::optional<std::string> udm_convert(const std::string &fileName)
 	}
 
 	std::string rpath;
-	if(FileManager::FindAbsolutePath(*newFileName, rpath) == false) {
+	if(pragma::fs::find_absolute_path(*newFileName, rpath) == false) {
 		Con::cwar << "Unable to locate converted UDM file on disk!" << Con::endl;
 		return {};
 	}
@@ -61,7 +61,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(pragma::console::ConVarMap &m
 	  pragma::console::ConVarFlags::None, "Executes a config file. Usage exec <fileName>",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		  std::vector<std::string> resFiles;
-		  FileManager::FindFiles(("cfg\\" + arg + "*.cfg").c_str(), &resFiles, nullptr);
+		  fs::find_files(("cfg\\" + arg + "*.cfg"), &resFiles, nullptr);
 		  autoCompleteOptions.reserve(resFiles.size());
 		  for(auto &mapName : resFiles) {
 			  ufile::remove_extension_from_filename(mapName);
@@ -76,10 +76,10 @@ void pragma::Engine::RegisterSharedConsoleCommands(pragma::console::ConVarMap &m
 			  return;
 		  }
 		  auto &fileName = argv.front();
-		  if(filemanager::is_dir(fileName)) {
+		  if(fs::is_dir(fileName)) {
 			  auto f = fileName + "/*";
 			  std::vector<std::string> files;
-			  filemanager::find_files(f, &files, nullptr);
+			  fs::find_files(f, &files, nullptr);
 			  for(auto &f : files)
 				  udm_convert(fileName + "/" + f);
 			  return;
@@ -158,7 +158,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(pragma::console::ConVarMap &m
 	map.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(NetworkState *, const pragma::console::ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool oldVal, bool newVal) -> void { SetAssetMultiThreadedLoadingEnabled(newVal); }});
 
 	map.RegisterConVar<bool>("asset_file_cache_enabled", true, pragma::console::ConVarFlags::Archive, "If enabled, all Pragma files will be indexed to improve lookup times.");
-	map.RegisterConVarCallback("asset_file_cache_enabled", std::function<void(NetworkState *, const pragma::console::ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool oldVal, bool newVal) -> void { filemanager::set_use_file_index_cache(newVal); }});
+	map.RegisterConVarCallback("asset_file_cache_enabled", std::function<void(NetworkState *, const pragma::console::ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool oldVal, bool newVal) -> void { fs::set_use_file_index_cache(newVal); }});
 
 	map.RegisterConVarCallback("sv_gravity", std::function<void(NetworkState *, const pragma::console::ConVar &, std::string, std::string)> {[](pragma::NetworkState *state, const pragma::console::ConVar &, std::string prev, std::string val) {
 		if(!state->IsGameActive())
@@ -211,7 +211,7 @@ static void compile_lua_file(lua::State *l, pragma::Game &game, std::string f)
 	std::string subPath = ufile::get_path_from_filename(f);
 	std::string cur = "";
 	std::string path = cur + f;
-	path = FileManager::GetNormalizedPath(path);
+	path = pragma::fs::get_normalized_path(path);
 	auto s = game.LoadLuaFile(path);
 	if(s != Lua::StatusCode::Ok)
 		return;
@@ -379,7 +379,7 @@ void pragma::Engine::RegisterConsoleCommands()
 		  std::vector<std::string> resFiles;
 		  auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map);
 		  for(auto &ext : exts)
-			  filemanager::find_files("maps/*." + ext, &resFiles, nullptr);
+			  fs::find_files("maps/*." + ext, &resFiles, nullptr);
 		  for(auto &f : resFiles)
 			  ufile::remove_extension_from_filename(f, exts);
 		  auto it = resFiles.begin();
@@ -432,7 +432,7 @@ void pragma::Engine::RegisterConsoleCommands()
 			  return;
 		  }
 		  auto path = "savegames/" + pragma::util::get_date_time("%Y-%m-%d_%H-%M-%S") + ".psav_b";
-		  FileManager::CreatePath(ufile::get_path_from_filename(path).c_str());
+		  fs::create_path(ufile::get_path_from_filename(path));
 		  std::string err;
 		  auto result = pragma::game::savegame::save(*game, path, err);
 		  if(result == false)
@@ -456,11 +456,11 @@ void pragma::Engine::RegisterConsoleCommands()
 			  return;
 		  }
 		  auto path = "savegames/" + argv.front();
-		  if(filemanager::exists(path + ".psav_b"))
+		  if(fs::exists(path + ".psav_b"))
 			  path += ".psav_b";
 		  else
 			  path += ".psav";
-		  FileManager::CreatePath(ufile::get_path_from_filename(path).c_str());
+		  fs::create_path(ufile::get_path_from_filename(path));
 		  std::string err;
 		  auto result = pragma::game::savegame::load(*game, path, err);
 		  if(result == false)
@@ -752,12 +752,12 @@ void pragma::Engine::RegisterConsoleCommands()
 		  pragma::Game *game = state->GetGameState();
 		  auto *l = game->GetLuaState();
 		  std::string arg = argv[0];
-		  if(FileManager::IsDir(Lua::SCRIPT_DIRECTORY_SLASH + arg)) {
+		  if(fs::is_dir(Lua::SCRIPT_DIRECTORY_SLASH + arg)) {
 			  std::function<void(const std::string &)> fCompileFiles = nullptr;
 			  fCompileFiles = [l, game, &fCompileFiles](const std::string &path) {
 				  std::vector<std::string> files {};
 				  std::vector<std::string> dirs {};
-				  FileManager::FindFiles((Lua::SCRIPT_DIRECTORY_SLASH + path + "/*").c_str(), &files, &dirs);
+				  fs::find_files((Lua::SCRIPT_DIRECTORY_SLASH + path + "/*"), &files, &dirs);
 				  for(auto &f : files) {
 					  std::string ext;
 					  if(ufile::get_extension(f, &ext) == false || pragma::string::compare<std::string>(ext, Lua::FILE_EXTENSION, false) == false)
@@ -804,7 +804,7 @@ void pragma::Engine::RegisterConsoleCommands()
 		  std::vector<std::string> resFiles;
 		  auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map);
 		  for(auto &ext : exts)
-			  filemanager::find_files("maps/*." + ext, &resFiles, nullptr);
+			  fs::find_files("maps/*." + ext, &resFiles, nullptr);
 		  for(auto &f : resFiles)
 			  ufile::remove_extension_from_filename(f, exts);
 		  for(auto &f : resFiles)
@@ -882,7 +882,7 @@ void ModuleInstallJob::Install()
 	}
 #endif
 
-	filemanager::create_directory("temp");
+	pragma::fs::create_directory("temp");
 	auto archivePath = "temp/" + archiveName;
 	m_lastProgressTime = std::chrono::steady_clock::now();
 	Con::cout << "Downloading module from '" << url << "'..." << Con::endl;
@@ -915,7 +915,7 @@ void ModuleInstallJob::Install()
 
 			  Con::cout << "Extracting module archive '" << archivePath << "'..." << Con::endl;
 			  err = {};
-			  if(!zip->ExtractFiles(filemanager::get_program_write_path(), err)) {
+			  if(!zip->ExtractFiles(pragma::fs::get_program_write_path(), err)) {
 				  std::string msg = "Failed to extract module archive '" + archivePath + "'!";
 				  Con::cwar << "" << msg << Con::endl;
 				  SetStatus(pragma::util::JobStatus::Failed, msg);
@@ -928,7 +928,7 @@ void ModuleInstallJob::Install()
 			  SetStatus(pragma::util::JobStatus::Failed, msg);
 			  return;
 		  }
-		  filemanager::remove_file(archivePath);
+		  pragma::fs::remove_file(archivePath);
 
 		  UpdateProgress(1.f);
 		  SetStatus(pragma::util::JobStatus::Successful);

@@ -24,10 +24,10 @@ void CSoundDspChorusComponent::OnEntitySpawn()
 {
 	CBaseSoundDspComponent::OnEntitySpawn();
 	//CBaseSoundDspComponent::OnSpawn(); // Not calling CBaseSoundDspComponent::OnSpawn() to skip the dsp effect lookup
-	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
+	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	al::EfxChorusProperties props {};
+	pragma::audio::EfxChorusProperties props {};
 	props.iWaveform = m_kvWaveform;
 	props.iPhase = m_kvPhase;
 	props.flRate = m_kvRate;

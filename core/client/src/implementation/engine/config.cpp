@@ -10,9 +10,9 @@ import pragma.string.unicode;
 
 void pragma::CEngine::SaveClientConfig()
 {
-	FileManager::CreatePath("cfg");
+	fs::create_path("cfg");
 	std::string path = "cfg\\client.cfg";
-	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "w");
+	auto f = fs::open_file<fs::VFilePtrReal>(path, fs::FileMode::Write);
 	if(f == nullptr) {
 		spdlog::warn("Unable to save client.cfg");
 		return;
@@ -20,7 +20,7 @@ void pragma::CEngine::SaveClientConfig()
 	WriteClientConfig(f);
 }
 
-void pragma::CEngine::WriteClientConfig(VFilePtrReal f)
+void pragma::CEngine::WriteClientConfig(fs::VFilePtrReal f)
 {
 	f->WriteString("unbindall\n");
 	auto inputLayer = GetCoreInputBindingLayer();

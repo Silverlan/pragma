@@ -15,20 +15,20 @@ export {
 	namespace pragma {
 		class DLLNETWORK BaseBuoyancyComponent : public BaseEntityComponent {
 		  public:
-			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+			static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			virtual void Initialize() override;
 
-			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		  protected:
-			BaseBuoyancyComponent(pragma::ecs::BaseEntity &ent);
-			virtual void OnEndTouch(pragma::ecs::BaseEntity *ent, pragma::physics::PhysObj *phys);
+			BaseBuoyancyComponent(ecs::BaseEntity &ent);
+			virtual void OnEndTouch(ecs::BaseEntity *ent, physics::PhysObj *phys);
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 			void OnPhysicsInitialized();
 			void SimulateBuoyancy() const;
-			pragma::ComponentHandle<BaseSurfaceComponent> m_surfaceC {};
-			pragma::ComponentHandle<BaseLiquidControlComponent> m_liquidControl {};
-			pragma::ComponentHandle<BaseLiquidSurfaceSimulationComponent> m_surfSim {};
+			ComponentHandle<BaseSurfaceComponent> m_surfaceC {};
+			ComponentHandle<BaseLiquidControlComponent> m_liquidControl {};
+			ComponentHandle<BaseLiquidSurfaceSimulationComponent> m_surfSim {};
 		};
 	};
 };

@@ -29,7 +29,7 @@ export namespace pragma {
 	};
 
 	enum class GameShaderSpecializationPropertyIndex : uint32_t {
-		Start = pragma::math::get_least_significant_set_bit_index_c(pragma::math::to_integral(GameShaderSpecializationConstantFlag::Last)) + 1,
+		Start = math::get_least_significant_set_bit_index_c(math::to_integral(GameShaderSpecializationConstantFlag::Last)) + 1,
 		ShadowQuality = Start,
 		DebugModeEnabled,
 		BloomOutputEnabled,

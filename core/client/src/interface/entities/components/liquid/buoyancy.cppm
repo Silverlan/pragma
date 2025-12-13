@@ -11,7 +11,7 @@ export import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CBuoyancyComponent final : public BaseBuoyancyComponent, public CBaseNetComponent {
 	  public:
-		CBuoyancyComponent(pragma::ecs::BaseEntity &ent) : BaseBuoyancyComponent(ent) {}
+		CBuoyancyComponent(ecs::BaseEntity &ent) : BaseBuoyancyComponent(ent) {}
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;

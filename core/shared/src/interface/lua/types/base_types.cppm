@@ -38,6 +38,6 @@ export namespace luabind {
 
 	template<typename T>
 	using type_converter = std::conditional_t<is_native_type<T>, default_converter<T>,
-	  std::conditional_t<std::is_pointer_v<T>, std::conditional_t<std::is_const_v<std::remove_pointer_t<T>>, detail::const_pointer_converter, luabind::detail::pointer_converter>,
-	    std::conditional_t<std::is_reference_v<T>, std::conditional_t<std::is_const_v<std::remove_reference_t<T>>, detail::const_ref_converter, luabind::detail::ref_converter>, luabind::detail::value_converter>>>;
+	  std::conditional_t<std::is_pointer_v<T>, std::conditional_t<std::is_const_v<std::remove_pointer_t<T>>, detail::const_pointer_converter, detail::pointer_converter>,
+	    std::conditional_t<std::is_reference_v<T>, std::conditional_t<std::is_const_v<std::remove_reference_t<T>>, detail::const_ref_converter, detail::ref_converter>, detail::value_converter>>>;
 };

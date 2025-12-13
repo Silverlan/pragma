@@ -11,7 +11,7 @@ export import pragma.gui;
 export namespace pragma::gui::types {
 	class DLLCLIENT WIFPS : public WIBase {
 	  private:
-		pragma::gui::WIHandle m_text;
+		WIHandle m_text;
 		uint32_t m_fpsLast;
 		double m_tLastUpdate;
 	  public:

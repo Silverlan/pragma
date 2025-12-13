@@ -18,7 +18,7 @@ void BaseWorldComponent::Initialize()
 	ent.AddComponent("model");
 	ent.AddComponent("physics");
 
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { InitializePhysics(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { InitializePhysics(); });
 }
 
 void BaseWorldComponent::InitializePhysics()
@@ -31,7 +31,7 @@ void BaseWorldComponent::InitializePhysics()
 		return;
 	auto mdl = ent.GetModel();
 	if(mdl)
-		pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Static);
+		pPhysComponent->InitializePhysics(physics::PhysicsType::Static);
 	else
 		pPhysComponent->DestroyPhysicsObject();
 }

@@ -36,7 +36,7 @@ std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphTypeManager::RegisterGrap
 	}
 	else {
 		auto path = ShaderGraphManager::GetShaderFilePath(m_typeName, identifier);
-		if(!filemanager::exists(path))
+		if(!fs::exists(path))
 			graphData->GenerateGlsl();
 		shaderManager.RegisterShader(identifier, [strFragFilePath, graph](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderGraph {context, graph, identifier, strFragFilePath}; });
 	}
@@ -116,7 +116,7 @@ std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphManager::LoadShader(const
 		return graph->GetGraph();
 	for(auto &[typeName, typeManager] : m_shaderGraphTypeManagers) {
 		auto path = GetShaderGraphFilePath(typeName, identifier);
-		if(!filemanager::exists(path))
+		if(!fs::exists(path))
 			continue;
 		auto graph = pragma::util::make_shared<pragma::shadergraph::Graph>(typeManager->GetNodeRegistry());
 		auto result = graph->Load(path, outErr);
@@ -182,7 +182,7 @@ std::shared_ptr<pragma::shadergraph::NodeRegistry> ShaderGraphManager::GetNodeRe
 
 void ShaderGraphData::GenerateGlsl()
 {
-	auto placeholder = filemanager::read_file("shaders/graph_placeholder.frag");
+	auto placeholder = fs::read_file("shaders/graph_placeholder.frag");
 	if(!placeholder)
 		return;
 
@@ -201,9 +201,9 @@ void ShaderGraphData::GenerateGlsl()
 	pragma::string::replace(code, "{{body}}", strBody);
 
 	auto path = ShaderGraphManager::GetShaderFilePath(m_typeName, m_identifier);
-	filemanager::create_path(ufile::get_path_from_filename(path));
+	fs::create_path(ufile::get_path_from_filename(path));
 	std::string err;
-	auto f = filemanager::open_file<VFilePtrReal>(path, filemanager::FileMode::Write, &err);
+	auto f = fs::open_file<fs::VFilePtrReal>(path, fs::FileMode::Write, &err);
 	if(!f)
 		return;
 	f->WriteString(code);

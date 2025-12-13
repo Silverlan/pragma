@@ -17,8 +17,8 @@ export namespace pragma::geometry {
 	public:
 		CModelSubMesh();
 		CModelSubMesh(const CModelSubMesh &other);
-		const std::shared_ptr<pragma::rendering::SceneMesh> &GetSceneMesh() const;
-		virtual void Update(pragma::asset::ModelUpdateFlags flags = pragma::asset::ModelUpdateFlags::AllData) override;
+		const std::shared_ptr<rendering::SceneMesh> &GetSceneMesh() const;
+		virtual void Update(asset::ModelUpdateFlags flags = asset::ModelUpdateFlags::AllData) override;
 		virtual void Centralize(const Vector3 &origin) override;
 		virtual std::shared_ptr<ModelSubMesh> Copy(bool fullCopy = false) const override;
 		static void InitializeBuffers();
@@ -28,13 +28,13 @@ export namespace pragma::geometry {
 		static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalVertexWeightBuffer();
 		static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalAlphaBuffer();
 		static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalIndexBuffer();
-		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(pragma::ShaderEntity &shader, uint32_t pipelineIdx = 0u);
+		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(ShaderEntity &shader, uint32_t pipelineIdx = 0u);
 
 		using VertexType = rendering::VertexBufferData;
-		using VertexWeightType = pragma::math::VertexWeight;
+		using VertexWeightType = math::VertexWeight;
 		using AlphaType = Vector2;
 	private:
-		std::shared_ptr<pragma::rendering::SceneMesh> m_sceneMesh;
+		std::shared_ptr<rendering::SceneMesh> m_sceneMesh;
 		void UpdateVertexBuffer();
 	};
 

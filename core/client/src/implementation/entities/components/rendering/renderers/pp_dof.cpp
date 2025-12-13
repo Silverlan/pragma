@@ -14,15 +14,15 @@ import :rendering.shaders;
 
 using namespace pragma;
 
-CRendererPpDoFComponent::CRendererPpDoFComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
-void CRendererPpDoFComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+CRendererPpDoFComponent::CRendererPpDoFComponent(ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
+void CRendererPpDoFComponent::DoRenderEffect(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
-	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingDoF");
+	get_cgame()->StartGPUProfilingStage("PostProcessingDoF");
 
-	pragma::util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
-		pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingDoF
+	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
+		get_cgame()->StopGPUProfilingStage(); // PostProcessingDoF
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
 	}};
@@ -33,13 +33,13 @@ void CRendererPpDoFComponent::DoRenderEffect(const pragma::rendering::DrawSceneI
 	auto &cam = scene.GetActiveCamera();
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto &hShaderDof = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPDoF);
+	auto &hShaderDof = get_cgame()->GetGameShader(CGame::GameShader::PPDoF);
 	if(hShaderDof.expired() || cam.expired())
 		return;
-	auto opticalC = cam->GetEntity().GetComponent<pragma::COpticalCameraComponent>();
+	auto opticalC = cam->GetEntity().GetComponent<COpticalCameraComponent>();
 	if(opticalC.expired())
 		return;
-	auto &shaderDoF = static_cast<pragma::ShaderPPDoF &>(*hShaderDof.get());
+	auto &shaderDoF = static_cast<ShaderPPDoF &>(*hShaderDof.get());
 	auto &prepass = hdrInfo.prepass;
 	auto texDepth = prepass.textureDepth;
 	if(texDepth->IsMSAATexture()) {
@@ -57,7 +57,7 @@ void CRendererPpDoFComponent::DoRenderEffect(const pragma::rendering::DrawSceneI
 	if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true) {
 		prosper::ShaderBindState bindState {*drawCmd};
 		if(shaderDoF.RecordBeginDraw(bindState) == true) {
-			pragma::ShaderPPDoF::PushConstants pushConstants {};
+			ShaderPPDoF::PushConstants pushConstants {};
 			pushConstants.mvp = cam->GetViewMatrix() * cam->GetProjectionMatrix();
 			pushConstants.width = scene.GetWidth();
 			pushConstants.height = scene.GetHeight();
@@ -69,11 +69,11 @@ void CRendererPpDoFComponent::DoRenderEffect(const pragma::rendering::DrawSceneI
 			pushConstants.zNear = cam->GetNearZ();
 			pushConstants.zFar = cam->GetFarZ();
 
-			pushConstants.flags = pragma::ShaderPPDoF::Flags::None;
-			pragma::math::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::EnableVignette, opticalC->IsVignetteEnabled());
-			pragma::math::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::PentagonBokehShape, opticalC->GetPentagonBokehShape());
-			pragma::math::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::DebugShowDepth, opticalC->GetDebugShowDepth());
-			pragma::math::set_flag(pushConstants.flags, pragma::ShaderPPDoF::Flags::DebugShowFocus, opticalC->GetDebugShowFocus());
+			pushConstants.flags = ShaderPPDoF::Flags::None;
+			math::set_flag(pushConstants.flags, ShaderPPDoF::Flags::EnableVignette, opticalC->IsVignetteEnabled());
+			math::set_flag(pushConstants.flags, ShaderPPDoF::Flags::PentagonBokehShape, opticalC->GetPentagonBokehShape());
+			math::set_flag(pushConstants.flags, ShaderPPDoF::Flags::DebugShowDepth, opticalC->GetDebugShowDepth());
+			math::set_flag(pushConstants.flags, ShaderPPDoF::Flags::DebugShowFocus, opticalC->GetDebugShowFocus());
 			pushConstants.rings = opticalC->GetRingCount();
 			pushConstants.ringSamples = opticalC->GetRingSamples();
 			pushConstants.CoC = opticalC->GetCircleOfConfusionSize();

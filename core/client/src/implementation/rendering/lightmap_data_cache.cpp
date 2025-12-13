@@ -31,7 +31,7 @@ std::string pragma::rendering::LightmapDataCache::GetCacheFileName(const std::st
 	auto fpath = path;
 	std::string ext;
 	if(!ufile::get_extension(fpath, &ext) || (ext != FORMAT_MODEL_BINARY && ext != FORMAT_MODEL_ASCII)) {
-		if(filemanager::exists(fpath + "." + std::string {FORMAT_MODEL_BINARY}))
+		if(fs::exists(fpath + "." + std::string {FORMAT_MODEL_BINARY}))
 			fpath += "." + std::string {FORMAT_MODEL_BINARY};
 		else
 			fpath += "." + std::string {FORMAT_MODEL_ASCII};

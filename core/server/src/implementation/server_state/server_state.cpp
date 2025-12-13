@@ -41,7 +41,7 @@ pragma::ServerState::ServerState() : NetworkState(), m_server(nullptr)
 	pragma::Engine::Get()->InitializeAssetManager(*m_modelManager);
 	pragma::asset::update_extension_cache(pragma::asset::Type::Model);
 
-	FileManager::AddCustomMountDirectory("cache", static_cast<fsys::SearchFlags>(pragma::FSYS_SEARCH_CACHE));
+	fs::add_custom_mount_directory("cache", static_cast<fs::SearchFlags>(pragma::FSYS_SEARCH_CACHE));
 
 	RegisterCallback<void, SGame *>("EndGame");
 	RegisterCallback<void, SGame *>("OnGameStart");
@@ -54,7 +54,7 @@ pragma::ServerState::ServerState() : NetworkState(), m_server(nullptr)
 pragma::ServerState::~ServerState()
 {
 	CloseServer();
-	FileManager::RemoveCustomMountDirectory("cache");
+	fs::remove_custom_mount_directory("cache");
 	auto &conVarPtrs = GetConVarPtrs();
 	for(auto itHandles = conVarPtrs.begin(); itHandles != conVarPtrs.end(); itHandles++)
 		itHandles->second->set(nullptr);
@@ -216,7 +216,7 @@ bool pragma::ServerState::LoadSoundScripts(const char *file, bool bPrecache)
 	return r;
 }
 
-void pragma::ServerState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<SResourceWatcherManager>(this); }
+void pragma::ServerState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<util::SResourceWatcherManager>(this); }
 
 void pragma::ServerState::Close()
 {
@@ -397,11 +397,11 @@ WMServerData &pragma::ServerState::GetServerData() { return m_serverData; }
 
 void pragma::ServerState::GetLuaConCommands(std::unordered_map<std::string, pragma::console::ConCommand *> **cmds) { *cmds = &m_luaConCommands; }
 
-msys::Material *pragma::ServerState::LoadMaterial(const std::string &path, bool precache, bool bReload)
+pragma::material::Material *pragma::ServerState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {
 	auto &matManager = GetMaterialManager();
 	auto success = true;
-	msys::Material *mat = nullptr;
+	material::Material *mat = nullptr;
 	if(precache) {
 		success = matManager.PreloadAsset(path);
 		return nullptr;
@@ -433,7 +433,7 @@ msys::Material *pragma::ServerState::LoadMaterial(const std::string &path, bool 
 	return mat;
 }
 
-msys::MaterialManager &pragma::ServerState::GetMaterialManager() { return *pragma::Engine::Get()->GetServerStateInstance().materialManager; }
+pragma::material::MaterialManager &pragma::ServerState::GetMaterialManager() { return *pragma::Engine::Get()->GetServerStateInstance().materialManager; }
 pragma::geometry::ModelSubMesh *pragma::ServerState::CreateSubMesh() const { return new pragma::geometry::ModelSubMesh; }
 pragma::geometry::ModelMesh *pragma::ServerState::CreateMesh() const { return new pragma::geometry::ModelMesh; }
 

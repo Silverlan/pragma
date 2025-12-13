@@ -12,11 +12,11 @@ void BaseEnvSoundDspComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(OnSetKeyValue(kvData.key, kvData.value) == true)
-			return pragma::util::EventReply::Handled;
-		return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Handled;
+		return util::EventReply::Unhandled;
 	});
 
 	auto &ent = GetEntity();
@@ -29,11 +29,11 @@ bool BaseEnvSoundDspComponent::OnSetKeyValue(const std::string &key, const std::
 	if(pragma::string::compare<std::string>(key, "dsp", false))
 		m_kvDsp = val;
 	else if(pragma::string::compare<std::string>(key, "inner_radius", false))
-		m_kvInnerRadius = pragma::util::to_float(val);
+		m_kvInnerRadius = util::to_float(val);
 	else if(pragma::string::compare<std::string>(key, "outer_radius", false))
-		m_kvOuterRadius = pragma::util::to_float(val);
+		m_kvOuterRadius = util::to_float(val);
 	else if(pragma::string::compare<std::string>(key, "intensity", false))
-		m_kvDspGain = pragma::util::to_float(val);
+		m_kvDspGain = util::to_float(val);
 	else
 		return false;
 	return true;
@@ -53,10 +53,10 @@ void BaseEnvSoundDspComponent::SetOuterRadius(float radius) { m_kvOuterRadius = 
 float BaseEnvSoundDspComponent::GetGain() const { return m_kvDspGain; }
 void BaseEnvSoundDspComponent::SetGain(float gain) { m_kvDspGain = gain; }
 
-bool BaseEnvSoundDspComponent::Input(const std::string &input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, std::string data)
+bool BaseEnvSoundDspComponent::Input(const std::string &input, ecs::BaseEntity *activator, ecs::BaseEntity *caller, std::string data)
 {
 	if(input == "setgain")
-		SetGain(pragma::string::to_int(data));
+		SetGain(string::to_int(data));
 	else
 		return false;
 	return true;

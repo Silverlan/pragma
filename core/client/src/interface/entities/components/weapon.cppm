@@ -18,7 +18,7 @@ export namespace pragma {
 	}
 	class DLLCLIENT CWeaponComponent final : public BaseWeaponComponent, public CBaseNetComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		static unsigned int GetWeaponCount();
@@ -28,13 +28,13 @@ export namespace pragma {
 
 		virtual ~CWeaponComponent() override;
 
-		CWeaponComponent(pragma::ecs::BaseEntity &ent);
+		CWeaponComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool HandleViewModelAnimationEvent(CViewModelComponent *vm, const AnimationEvent &ev);
 		virtual void Deploy() override;
 		virtual void Holster() override;
-		virtual bool PlayViewActivity(pragma::Activity activity, pragma::FPlayAnim flags = pragma::FPlayAnim::Default);
+		virtual bool PlayViewActivity(Activity activity, FPlayAnim flags = FPlayAnim::Default);
 		CViewModelComponent *GetViewModel();
 		virtual void PrimaryAttack() override;
 		virtual void SecondaryAttack() override;
@@ -49,12 +49,12 @@ export namespace pragma {
 		bool GetHideWorldModelInFirstPerson() const;
 		void SetViewModelOffset(const Vector3 &offset);
 		const Vector3 &GetViewModelOffset() const;
-		void SetViewFOV(pragma::math::Degree fov);
-		pragma::math::Degree GetViewFOV() const;
+		void SetViewFOV(math::Degree fov);
+		math::Degree GetViewFOV() const;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 
-		void SetViewModelComponent(pragma::ComponentId component) { m_viewModelComponent = component; }
-		pragma::ComponentId GetViewModelComponent() const { return m_viewModelComponent; }
+		void SetViewModelComponent(ComponentId component) { m_viewModelComponent = component; }
+		ComponentId GetViewModelComponent() const { return m_viewModelComponent; }
 		void UpdateDeployState();
 	  protected:
 		void UpdateObserver(BaseObserverComponent *observer);
@@ -64,12 +64,12 @@ export namespace pragma {
 		StateFlags m_stateFlags = StateFlags::None;
 		std::optional<std::string> m_viewModel {};
 		Vector3 m_viewModelOffset;
-		pragma::ComponentId m_viewModelComponent = pragma::INVALID_COMPONENT_ID;
+		ComponentId m_viewModelComponent = INVALID_COMPONENT_ID;
 
-		std::optional<pragma::math::Degree> m_viewFov {};
+		std::optional<math::Degree> m_viewFov {};
 		CallbackHandle m_cbOnOwnerObserverModeChanged = {};
 		CallbackHandle m_cbOnObserverChanged {};
-		virtual pragma::Activity TranslateViewActivity(pragma::Activity act);
+		virtual Activity TranslateViewActivity(Activity act);
 		virtual void OnFireBullets(const game::BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin = nullptr) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		void UpdateViewModel();
@@ -79,9 +79,9 @@ export namespace pragma {
 		static std::vector<CWeaponComponent *> s_weapons;
 	};
 	struct DLLCLIENT CEAttachToOwner : public ComponentEvent {
-		CEAttachToOwner(pragma::ecs::BaseEntity &owner, CViewModelComponent *optViewmodel);
+		CEAttachToOwner(ecs::BaseEntity &owner, CViewModelComponent *optViewmodel);
 		virtual void PushArguments(lua::State *l) override;
-		pragma::ecs::BaseEntity &owner;
+		ecs::BaseEntity &owner;
 		CViewModelComponent *viewModel = nullptr;
 	};
 

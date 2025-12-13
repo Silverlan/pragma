@@ -9,17 +9,17 @@ import :rendering.shader_graph.node_time;
 
 using namespace pragma::rendering::shader_graph;
 
-TimeNode::TimeNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_UTILITY}
+TimeNode::TimeNode(const std::string_view &type) : Node {type, shadergraph::CATEGORY_UTILITY}
 {
-	AddOutput(OUT_TIME, pragma::shadergraph::DataType::Float);
-	AddOutput(OUT_DELTA_TIME, pragma::shadergraph::DataType::Float);
-	AddOutput(OUT_REAL_TIME, pragma::shadergraph::DataType::Float);
-	AddOutput(OUT_DELTA_REAL_TIME, pragma::shadergraph::DataType::Float);
+	AddOutput(OUT_TIME, shadergraph::DataType::Float);
+	AddOutput(OUT_DELTA_TIME, shadergraph::DataType::Float);
+	AddOutput(OUT_REAL_TIME, shadergraph::DataType::Float);
+	AddOutput(OUT_DELTA_REAL_TIME, shadergraph::DataType::Float);
 
 	AddModuleDependency("time");
 }
 
-std::string TimeNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const
+std::string TimeNode::DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const
 {
 	std::ostringstream code;
 	code << instance.GetGlslOutputDeclaration(OUT_TIME) << " = cur_time();\n";

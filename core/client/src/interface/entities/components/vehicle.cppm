@@ -13,12 +13,12 @@ export namespace pragma {
 	  public:
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
-		CVehicleComponent(pragma::ecs::BaseEntity &ent);
+		CVehicleComponent(ecs::BaseEntity &ent);
 		virtual ~CVehicleComponent() override;
 		static unsigned int GetVehicleCount();
 		static const std::vector<CVehicleComponent *> &GetAll();
 		virtual void ClearDriver() override;
-		virtual void SetDriver(pragma::ecs::BaseEntity *ent) override;
+		virtual void SetDriver(ecs::BaseEntity *ent) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
@@ -28,7 +28,7 @@ export namespace pragma {
 	  protected:
 		void ReadWheelInfo(NetPacket &packet);
 		CallbackHandle m_hCbSteeringWheel;
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  private:
 		static std::vector<CVehicleComponent *> s_vehicles;

@@ -10,6 +10,6 @@ export import :util.steam.vdf;
 
 export namespace pragma::util::steam {
 	DLLNETWORK std::optional<std::string> find_steam_installation_path();
-	DLLNETWORK std::vector<pragma::util::Path> find_steam_root_paths();
+	DLLNETWORK std::vector<Path> find_steam_root_paths();
 	DLLNETWORK bool get_external_steam_locations(const std::string &steamRootPath, std::vector<std::string> &outExtLocations);
 }

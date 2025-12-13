@@ -10,28 +10,28 @@ import :entities.components.liquid.base_surface_simulation;
 
 using namespace pragma;
 
-ComponentEventId baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseLiquidSurfaceSimulationComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+ComponentEventId baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = INVALID_COMPONENT_ID;
+void BaseLiquidSurfaceSimulationComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = registerEvent("ON_WATER_SURFACE_SIMULATOR_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
-void BaseLiquidSurfaceSimulationComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
+void BaseLiquidSurfaceSimulationComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
 
-BaseLiquidSurfaceSimulationComponent::BaseLiquidSurfaceSimulationComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseLiquidSurfaceSimulationComponent::BaseLiquidSurfaceSimulationComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseLiquidSurfaceSimulationComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "max_wave_height", false))
-			SetMaxWaveHeight(pragma::string::to_float(kvData.value));
+			SetMaxWaveHeight(string::to_float(kvData.value));
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		auto *surfC = static_cast<BaseSurfaceComponent *>(GetEntity().FindComponent("surface").get());
 		assert(surfC);
 		if(surfC)
@@ -44,18 +44,18 @@ void BaseLiquidSurfaceSimulationComponent::OnEntitySpawn() { BaseEntityComponent
 uint32_t BaseLiquidSurfaceSimulationComponent::GetSpacing() const { return m_spacing; }
 void BaseLiquidSurfaceSimulationComponent::SetSpacing(uint32_t spacing) { m_spacing = spacing; }
 
-bool BaseLiquidSurfaceSimulationComponent::ShouldSimulateSurface() const { return ((GetEntity().GetSpawnFlags() & pragma::math::to_integral(SpawnFlags::SurfaceSimulation)) != 0) ? true : false; }
+bool BaseLiquidSurfaceSimulationComponent::ShouldSimulateSurface() const { return ((GetEntity().GetSpawnFlags() & math::to_integral(SpawnFlags::SurfaceSimulation)) != 0) ? true : false; }
 void BaseLiquidSurfaceSimulationComponent::SetMaxWaveHeight(float height) { m_kvMaxWaveHeight = height; }
 
-const pragma::physics::PhysWaterSurfaceSimulator *BaseLiquidSurfaceSimulationComponent::GetSurfaceSimulator() const { return const_cast<BaseLiquidSurfaceSimulationComponent *>(this)->GetSurfaceSimulator(); }
-pragma::physics::PhysWaterSurfaceSimulator *BaseLiquidSurfaceSimulationComponent::GetSurfaceSimulator() { return m_physSurfaceSim.get(); }
+const physics::PhysWaterSurfaceSimulator *BaseLiquidSurfaceSimulationComponent::GetSurfaceSimulator() const { return const_cast<BaseLiquidSurfaceSimulationComponent *>(this)->GetSurfaceSimulator(); }
+physics::PhysWaterSurfaceSimulator *BaseLiquidSurfaceSimulationComponent::GetSurfaceSimulator() { return m_physSurfaceSim.get(); }
 
-std::shared_ptr<pragma::physics::PhysWaterSurfaceSimulator> BaseLiquidSurfaceSimulationComponent::InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY)
+std::shared_ptr<physics::PhysWaterSurfaceSimulator> BaseLiquidSurfaceSimulationComponent::InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY)
 {
 	auto *controlC = static_cast<BaseLiquidControlComponent *>(GetEntity().FindComponent("liquid_control").get());
 	if(!controlC)
 		return nullptr;
-	return pragma::util::make_shared<pragma::physics::PhysWaterSurfaceSimulator>(min, max, originY, GetSpacing(), controlC->GetStiffness(), controlC->GetPropagation());
+	return pragma::util::make_shared<physics::PhysWaterSurfaceSimulator>(min, max, originY, GetSpacing(), controlC->GetStiffness(), controlC->GetPropagation());
 }
 
 void BaseLiquidSurfaceSimulationComponent::ClearSurfaceSimulator()
@@ -85,7 +85,7 @@ bool BaseLiquidSurfaceSimulationComponent::CalcLineSurfaceIntersection(const Vec
 
 				auto ptIdx3 = m_physSurfaceSim->GetParticleIndex(i + 1, j + 1);
 				auto v3 = m_physSurfaceSim->CalcParticlePosition(ptIdx3);
-				if(pragma::math::intersection::line_triangle(lineOrigin, lineDir, v0, v1, v2, t, u, v, bCull) == true || pragma::math::intersection::line_triangle(lineOrigin, lineDir, v3, v2, v1, t, u, v, bCull) == true) {
+				if(math::intersection::line_triangle(lineOrigin, lineDir, v0, v1, v2, t, u, v, bCull) == true || math::intersection::line_triangle(lineOrigin, lineDir, v3, v2, v1, t, u, v, bCull) == true) {
 					if(outT != nullptr)
 						*outT = t;
 					if(outU != nullptr)

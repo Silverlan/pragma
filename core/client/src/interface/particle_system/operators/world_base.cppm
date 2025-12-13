@@ -16,20 +16,20 @@ export namespace pragma::pts {
 		bool ShouldRotateWithEmitter() const;
 	protected:
 		CParticleOperatorWorldBase() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	private:
 		bool m_bRotateWithEmitter = false;
 	};
 }
 
-void pragma::pts::CParticleOperatorWorldBase::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorWorldBase::Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		pragma::string::to_lower(key);
+		string::to_lower(key);
 		if(key == "rotate_with_emitter")
-			m_bRotateWithEmitter = pragma::util::to_boolean(it->second);
+			m_bRotateWithEmitter = util::to_boolean(it->second);
 	}
 }
 

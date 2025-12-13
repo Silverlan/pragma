@@ -79,7 +79,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 							  fi->sizeUncompressed = 0;
 						  }
 						  if(addon->updateFile->ReOpen("rb") == true) {
-							  VFilePtr updateFile = addon->updateFile;
+							 fs::VFilePtr updateFile = addon->updateFile;
 							  updateFile->Seek(0);
 							  auto version = updateFile->Read<pragma::util::Version>();
 							  std::vector<uint32_t> newFileIds;
@@ -116,7 +116,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 							  if(r == true) {
 								  addon->updateFile = nullptr;
 								  auto updateFilePath = addon->GetUpdateFilePath();
-								  if(FileManager::RemoveFile(updateFilePath.c_str()) == false)
+								  if(fs::remove_file(updateFilePath) == false)
 									  ;
 							  }
 							  else
@@ -217,7 +217,7 @@ void pragma::AddonInstallManager::CheckForUpdates(const std::shared_ptr<AddonInf
 				auto &addonPath = updateQuery->addonInfo->GetLocalPath();
 				if(addonPath.empty() == false && updateQuery->addonPath != addonPath) {
 					// File name was changed by addon author; Change local file name accordingly
-					if(FileManager::RenameFile(addonPath.c_str(), updateQuery->addonPath.c_str()) == false)
+					if(fs::rename_file(addonPath, updateQuery->addonPath) == false)
 						return; // TODO
 				}
 				auto webVersion = pragma::util::Version::FromString(subStrings.at(1));
@@ -225,8 +225,8 @@ void pragma::AddonInstallManager::CheckForUpdates(const std::shared_ptr<AddonInf
 				if(webVersion > addonVersion) {
 					auto updateFilePath = updateQuery->GetUpdateFilePath();
 					std::unordered_map<uint32_t, bool> skipFileIds; // List of file ids that were already downloaded previously
-					if(FileManager::Exists(updateFilePath, fsys::SearchFlags::Local) == true) {
-						auto fRead = FileManager::OpenFile(updateFilePath.c_str(), "rb");
+					if(fs::exists(updateFilePath, fs::SearchFlags::Local) == true) {
+						auto fRead = pragma::fs::open_file(updateFilePath.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 						if(fRead != nullptr) {
 							auto lastUpdateVersion = fRead->Read<pragma::util::Version>();
 							if(lastUpdateVersion == webVersion) {
@@ -243,7 +243,7 @@ void pragma::AddonInstallManager::CheckForUpdates(const std::shared_ptr<AddonInf
 							}
 						}
 					}
-					updateQuery->updateFile = FileManager::OpenFile<VFilePtrReal>(updateFilePath.c_str(), (skipFileIds.empty() == true) ? "wb" : "ab");
+					updateQuery->updateFile = fs::open_file<fs::VFilePtrReal>(updateFilePath, (skipFileIds.empty() == true) ? (fs::FileMode::Write | fs::FileMode::Binary) : (fs::FileMode::Append | fs::FileMode::Binary));
 					if(updateQuery->updateFile == nullptr)
 						return;
 					if(skipFileIds.empty() == true)

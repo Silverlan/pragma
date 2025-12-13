@@ -42,7 +42,7 @@ namespace pragma::debug {
 	{
 		std::stringstream ss;
 		dump_api_dump_recorder_ss(ss, addr);
-		filemanager::write_file("temp/api_dump_recorder.txt", ss.str());
+		fs::write_file("temp/api_dump_recorder.txt", ss.str());
 	}
 	DLLCLIENT void dump_api_dump_recorder_f()
 	{
@@ -50,7 +50,7 @@ namespace pragma::debug {
 
 		std::stringstream ss;
 		apiDumpRecorder.Print(ss);
-		filemanager::write_file("temp/api_dump_recorder.txt", ss.str());
+		fs::write_file("temp/api_dump_recorder.txt", ss.str());
 	}
 	DLLCLIENT void dump_api_dump_recorder_calltrace_ss(std::stringstream &ss, uint64_t addr, uint64_t cmdIdx)
 	{
@@ -89,7 +89,7 @@ namespace pragma::debug {
 	{
 		std::stringstream ss;
 		dump_api_dump_recorder_calltrace_ss(ss, addr, cmdIdx);
-		filemanager::write_file("temp/api_dump_recorder_calltrace.txt", ss.str());
+		fs::write_file("temp/api_dump_recorder_calltrace.txt", ss.str());
 	}
 };
 #endif

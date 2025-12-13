@@ -11,31 +11,31 @@ export import :entities.components.constraints.base;
 export namespace pragma {
 	class DLLNETWORK ConstraintLimitScaleComponent final : public BaseEntityComponent {
 	  public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		ConstraintLimitScaleComponent(pragma::ecs::BaseEntity &ent);
+		ConstraintLimitScaleComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
-		void SetMinimum(pragma::Axis axis, float value);
-		void SetMaximum(pragma::Axis axis, float value);
+		void SetMinimum(Axis axis, float value);
+		void SetMaximum(Axis axis, float value);
 
-		float GetMinimum(pragma::Axis axis) const;
-		float GetMaximum(pragma::Axis axis) const;
+		float GetMinimum(Axis axis) const;
+		float GetMaximum(Axis axis) const;
 
-		void SetMinimumEnabled(pragma::Axis axis, bool enabled);
-		bool IsMinimumEnabled(pragma::Axis axis) const;
+		void SetMinimumEnabled(Axis axis, bool enabled);
+		bool IsMinimumEnabled(Axis axis) const;
 
-		void SetMaximumEnabled(pragma::Axis axis, bool enabled);
-		bool IsMaximumEnabled(pragma::Axis axis) const;
+		void SetMaximumEnabled(Axis axis, bool enabled);
+		bool IsMaximumEnabled(Axis axis) const;
 
 		virtual void InitializeLuaObject(lua::State *lua) override;
 	  protected:
 		void ApplyConstraint();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-		pragma::ComponentHandle<ConstraintComponent> m_constraintC;
-		std::array<float, pragma::math::to_integral(pragma::Axis::Count)> m_minimum {0.f, 0.f, 0.f};
-		std::array<float, pragma::math::to_integral(pragma::Axis::Count)> m_maximum {0.f, 0.f, 0.f};
-		std::array<bool, pragma::math::to_integral(pragma::Axis::Count)> m_minimumEnabled {false, false, false};
-		std::array<bool, pragma::math::to_integral(pragma::Axis::Count)> m_maximumEnabled {false, false, false};
+		ComponentHandle<ConstraintComponent> m_constraintC;
+		std::array<float, math::to_integral(Axis::Count)> m_minimum {0.f, 0.f, 0.f};
+		std::array<float, math::to_integral(Axis::Count)> m_maximum {0.f, 0.f, 0.f};
+		std::array<bool, math::to_integral(Axis::Count)> m_minimumEnabled {false, false, false};
+		std::array<bool, math::to_integral(Axis::Count)> m_maximumEnabled {false, false, false};
 	};
 };

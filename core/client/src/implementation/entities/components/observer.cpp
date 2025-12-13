@@ -20,14 +20,14 @@ namespace pragma {
 	using ::operator<<;
 };
 
-ComponentEventId cObserverComponent::EVENT_CALC_VIEW = pragma::INVALID_COMPONENT_ID;
-ComponentEventId cObserverComponent::EVENT_CALC_VIEW_OFFSET = pragma::INVALID_COMPONENT_ID;
-void CObserverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+ComponentEventId cObserverComponent::EVENT_CALC_VIEW = INVALID_COMPONENT_ID;
+ComponentEventId cObserverComponent::EVENT_CALC_VIEW_OFFSET = INVALID_COMPONENT_ID;
+void CObserverComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	cObserverComponent::EVENT_CALC_VIEW = registerEvent("CALC_VIEW", ComponentEventInfo::Type::Explicit);
 	cObserverComponent::EVENT_CALC_VIEW = registerEvent("CALC_VIEW_OFFSET", ComponentEventInfo::Type::Explicit);
 }
-CObserverComponent::CObserverComponent(pragma::ecs::BaseEntity &ent) : BaseObserverComponent(ent) {}
+CObserverComponent::CObserverComponent(ecs::BaseEntity &ent) : BaseObserverComponent(ent) {}
 
 CObserverComponent::~CObserverComponent() {}
 
@@ -35,13 +35,13 @@ void CObserverComponent::InitializeLuaObject(lua::State *l) { return BaseEntityC
 
 bool CObserverComponent::IsInFirstPersonMode() const { return (GetObserverMode() == ObserverMode::FirstPerson) ? true : false; }
 
-Bool CObserverComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CObserverComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetObserverMode)
 		SetObserverMode(packet->Read<ObserverMode>());
 	else if(eventId == m_netEvSetObserverTarget) {
-		auto *ent = pragma::networking::read_entity(packet);
-		auto pObsComponent = ent->GetComponent<pragma::CObservableComponent>();
+		auto *ent = networking::read_entity(packet);
+		auto pObsComponent = ent->GetComponent<CObservableComponent>();
 		SetObserverTarget(pObsComponent.get());
 	}
 	else
@@ -51,7 +51,7 @@ Bool CObserverComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &
 
 void CObserverComponent::ReceiveData(NetPacket &packet)
 {
-	auto *ent = pragma::networking::read_entity(packet);
+	auto *ent = networking::read_entity(packet);
 	if(!ent)
 		SetObserverTarget(nullptr);
 	else {
@@ -70,14 +70,14 @@ void CObserverComponent::DoSetObserverMode(ObserverMode mode) { BaseObserverComp
 void CObserverComponent::SetObserverMode(ObserverMode mode)
 {
 	BaseObserverComponent::SetObserverMode(mode);
-	auto *renderC = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
+	auto *renderC = static_cast<ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(renderC)
 		renderC->UpdateShouldDrawState();
 }
 
-static auto cvSpeed = pragma::console::get_client_con_var("cl_mouse_sensitivity");
-static auto cvYaw = pragma::console::get_client_con_var("cl_mouse_yaw");
-static auto cvPitch = pragma::console::get_client_con_var("cl_mouse_pitch");
+static auto cvSpeed = console::get_client_con_var("cl_mouse_sensitivity");
+static auto cvYaw = console::get_client_con_var("cl_mouse_yaw");
+static auto cvPitch = console::get_client_con_var("cl_mouse_pitch");
 void CObserverComponent::UpdateCharacterViewOrientationFromMouseMovement()
 {
 	auto *target = GetObserverTarget();
@@ -104,7 +104,7 @@ void CObserverComponent::UpdateCharacterViewOrientationFromMouseMovement()
 	auto observerC = GetEntity().GetComponent<CObserverComponent>();
 	auto *pObserverTarget = observerC.valid() ? observerC->GetObserverTarget() : nullptr;
 	if(pObserverTarget != nullptr) {
-		auto *pObserverCharComponent = static_cast<pragma::CCharacterComponent *>(pObserverTarget->GetEntity().GetCharacterComponent().get());
+		auto *pObserverCharComponent = static_cast<CCharacterComponent *>(pObserverTarget->GetEntity().GetCharacterComponent().get());
 		if(pObserverCharComponent != nullptr)
 			rot = pObserverCharComponent->GetOrientationAxesRotation();
 		else
@@ -117,7 +117,7 @@ void CObserverComponent::UpdateCharacterViewOrientationFromMouseMovement()
 	const Vector3 right(-1, 0, 0);
 	const Vector3 up(0, 1, 0);
 
-	auto *gameC = static_cast<pragma::CGame &>(GetGame()).GetGameComponent<pragma::CGameComponent>();
+	auto *gameC = static_cast<CGame &>(GetGame()).GetGameComponent<CGameComponent>();
 	float xDelta = 0.f;
 	float yDelta = 0.f;
 	if(gameC) {
@@ -142,13 +142,13 @@ void CObserverComponent::UpdateCharacterViewOrientationFromMouseMovement()
 			if(oldAng.p >= -90.f)
 				ang.p = -90.f;
 			else
-				ang.p = pragma::math::max(ang.p, oldAng.p);
+				ang.p = math::max(ang.p, oldAng.p);
 		}
 		else if(ang.p > 90.f) {
 			if(oldAng.p <= 90.f)
 				ang.p = 90.f;
 			else
-				ang.p = pragma::math::min(ang.p, oldAng.p);
+				ang.p = math::min(ang.p, oldAng.p);
 		}
 		orientation = uquat::create(ang);
 	}
@@ -166,7 +166,7 @@ void CObserverComponent::ApplyCameraObservationMode(Vector3 &pos, Quat &rot, Qua
 	auto *obsC = GetObserverTarget();
 	if(obsC == nullptr)
 		return;
-	pragma::ObserverCameraData *obsCamData = nullptr;
+	ObserverCameraData *obsCamData = nullptr;
 	switch(GetObserverMode()) {
 	case ObserverMode::FirstPerson:
 		obsCamData = &obsC->GetCameraData(BaseObservableComponent::CameraType::FirstPerson);
@@ -188,7 +188,7 @@ void CObserverComponent::ApplyCameraObservationMode(Vector3 &pos, Quat &rot, Qua
 		// Instead, we'll use the "eyes" attachment as reference if available.
 		auto &mdl = obsC->GetEntity().GetModel();
 		auto eyeAtt = mdl ? mdl->LookupAttachment("eyes") : -1; // TODO: Cache the lookup
-		auto eyePose = (eyeAtt != -1) ? obsC->GetEntity().GetAttachmentPose(eyeAtt) : std::optional<pragma::math::Transform> {};
+		auto eyePose = (eyeAtt != -1) ? obsC->GetEntity().GetAttachmentPose(eyeAtt) : std::optional<math::Transform> {};
 		if(eyePose.has_value()) {
 			eyePose->GetOrigin().x = 0;
 			eyePose->GetOrigin().z = 0;
@@ -225,13 +225,13 @@ void CObserverComponent::ApplyCameraObservationMode(Vector3 &pos, Quat &rot, Qua
 		camPos += uquat::forward(rotPos) * (*obsCamData->offset)->z + uquat::up(rotPos) * (*obsCamData->offset)->y - uquat::right(rotPos) * (*obsCamData->offset)->x;
 
 	if(obsCamData != nullptr && uvec::length_sqr(*obsCamData->offset) > 0.f) {
-		pragma::physics::TraceData data {};
+		physics::TraceData data {};
 		data.SetSource(camLookAtPos);
 		data.SetTarget(camPos);
-		data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
+		data.SetFlags(physics::RayCastFlags::Default | physics::RayCastFlags::InvertFilter);
 		data.SetFilter(obsC->GetEntity());
 		auto r = GetGame().RayCast(data);
-		pos = (r.hitType == pragma::physics::RayCastHitType::Block) ? r.position : camPos;
+		pos = (r.hitType == physics::RayCastHitType::Block) ? r.position : camPos;
 	}
 	else
 		pos = camPos;

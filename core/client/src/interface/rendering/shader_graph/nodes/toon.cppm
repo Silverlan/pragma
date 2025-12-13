@@ -9,7 +9,7 @@ export module pragma.client:rendering.shader_graph.node_toon;
 export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
-	class DLLCLIENT ToonNode : public pragma::shadergraph::Node {
+	class DLLCLIENT ToonNode : public shadergraph::Node {
 	  public:
 		static constexpr const char *IN_ALBEDO_COLOR = "albedoColor";
 		static constexpr const char *IN_ALPHA = "alpha";
@@ -24,6 +24,6 @@ export namespace pragma::rendering::shader_graph {
 
 		ToonNode(const std::string_view &type);
 
-		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
+		virtual std::string DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const override;
 	};
 };

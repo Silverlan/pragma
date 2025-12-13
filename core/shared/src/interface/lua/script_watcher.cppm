@@ -13,8 +13,8 @@ export {
 	class DLLNETWORK LuaDirectoryWatcherManager {
 	  private:
 		std::unordered_map<std::string, std::function<void()>> m_watchFiles;
-		std::vector<std::shared_ptr<DirectoryWatcherCallback>> m_watchers;
-		std::shared_ptr<filemanager::DirectoryWatcherManager> m_watcherManager;
+		std::vector<std::shared_ptr<pragma::fs::DirectoryWatcherCallback>> m_watchers;
+		std::shared_ptr<pragma::fs::DirectoryWatcherManager> m_watcherManager;
 		pragma::Game *m_game;
 	  protected:
 		virtual void OnLuaFileChanged(const std::string &path);

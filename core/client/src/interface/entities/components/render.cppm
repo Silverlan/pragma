@@ -60,11 +60,11 @@ export namespace pragma {
 		};
 		static constexpr auto USE_HOST_MEMORY_FOR_RENDER_DATA = true;
 
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
-		CRenderComponent(pragma::ecs::BaseEntity &ent);
+		CRenderComponent(ecs::BaseEntity &ent);
 		const prosper::IBuffer *GetRenderBuffer() const;
 		std::optional<RenderBufferIndex> GetRenderBufferIndex() const;
 		bool IsRenderBufferValid() const { return m_renderBuffer != nullptr; }
@@ -78,12 +78,12 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual ~CRenderComponent() override;
 
-		std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &GetRenderMeshes();
-		const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &GetRenderMeshes() const;
+		std::vector<std::shared_ptr<geometry::ModelSubMesh>> &GetRenderMeshes();
+		const std::vector<std::shared_ptr<geometry::ModelSubMesh>> &GetRenderMeshes() const;
 		std::vector<rendering::RenderBufferData> &GetRenderBufferData();
 		const std::vector<rendering::RenderBufferData> &GetRenderBufferData() const { return const_cast<CRenderComponent *>(this)->GetRenderBufferData(); }
-		std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &GetLODMeshes();
-		const std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &GetLODMeshes() const;
+		std::vector<std::shared_ptr<geometry::ModelMesh>> &GetLODMeshes();
+		const std::vector<std::shared_ptr<geometry::ModelMesh>> &GetLODMeshes() const;
 
 		rendering::RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
 		const rendering::RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;
@@ -108,21 +108,21 @@ export namespace pragma {
 		bounding_volume::AABB CalcAbsoluteRenderBounds() const;
 		math::Sphere CalcAbsoluteRenderSphere() const;
 
-		pragma::rendering::SceneRenderPass GetSceneRenderPass() const;
-		void SetSceneRenderPass(pragma::rendering::SceneRenderPass pass);
-		const pragma::util::PEnumProperty<pragma::rendering::SceneRenderPass> &GetSceneRenderPassProperty() const;
+		rendering::SceneRenderPass GetSceneRenderPass() const;
+		void SetSceneRenderPass(rendering::SceneRenderPass pass);
+		const util::PEnumProperty<rendering::SceneRenderPass> &GetSceneRenderPassProperty() const;
 
-		bool IsInRenderGroup(pragma::rendering::RenderGroup group) const;
+		bool IsInRenderGroup(rendering::RenderGroup group) const;
 		bool AddToRenderGroup(const std::string &name);
-		void AddToRenderGroup(pragma::rendering::RenderGroup group);
+		void AddToRenderGroup(rendering::RenderGroup group);
 		bool RemoveFromRenderGroup(const std::string &name);
-		void RemoveFromRenderGroup(pragma::rendering::RenderGroup group);
-		void SetRenderGroups(pragma::rendering::RenderGroup group);
-		pragma::rendering::RenderGroup GetRenderGroups() const;
-		const pragma::util::PEnumProperty<pragma::rendering::RenderGroup> &GetRenderGroupsProperty() const;
+		void RemoveFromRenderGroup(rendering::RenderGroup group);
+		void SetRenderGroups(rendering::RenderGroup group);
+		rendering::RenderGroup GetRenderGroups() const;
+		const util::PEnumProperty<rendering::RenderGroup> &GetRenderGroupsProperty() const;
 
 		Mat4 &GetTransformationMatrix();
-		const pragma::math::ScaledTransform &GetRenderPose() const;
+		const math::ScaledTransform &GetRenderPose() const;
 
 		virtual void ReceiveData(NetPacket &packet) override;
 
@@ -172,14 +172,14 @@ export namespace pragma {
 
 		void UpdateShouldDrawState();
 
-		void SetRenderOffsetTransform(const pragma::math::ScaledTransform &t);
+		void SetRenderOffsetTransform(const math::ScaledTransform &t);
 		void ClearRenderOffsetTransform();
-		const pragma::math::ScaledTransform *GetRenderOffsetTransform() const;
+		const math::ScaledTransform *GetRenderOffsetTransform() const;
 
 		bool IsInPvs(const Vector3 &camPos, const CWorldComponent &world) const;
 		bool IsInPvs(const Vector3 &camPos) const;
 
-		const pragma::rendering::InstanceData &GetInstanceData() const;
+		const rendering::InstanceData &GetInstanceData() const;
 
 		void SetTranslucencyPassDistanceOverride(double distance);
 		void ClearTranslucencyPassDistanceOverride();
@@ -204,16 +204,16 @@ export namespace pragma {
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		void UpdateRenderMeshes();
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		void InitializeRenderBuffers();
 		void UpdateBoneBuffer();
 
-		std::optional<pragma::math::ScaledTransform> m_renderOffset {};
-		pragma::math::ScaledTransform m_renderPose {};
+		std::optional<math::ScaledTransform> m_renderOffset {};
+		math::ScaledTransform m_renderPose {};
 		Mat4 m_matTransformation = umat::identity();
-		pragma::util::PEnumProperty<pragma::rendering::RenderGroup> m_renderGroups = nullptr;
-		pragma::util::PEnumProperty<rendering::SceneRenderPass> m_renderPass = nullptr;
+		util::PEnumProperty<rendering::RenderGroup> m_renderGroups = nullptr;
+		util::PEnumProperty<rendering::SceneRenderPass> m_renderPass = nullptr;
 
 		// Used for quick access to avoid having to do a lookup on the entity's components
 		mutable CAttachmentComponent *m_attachmentComponent = nullptr;
@@ -230,7 +230,7 @@ export namespace pragma {
 		std::optional<Vector2> m_depthBias {};
 
 		StateFlags m_stateFlags
-		  = static_cast<StateFlags>(pragma::math::to_integral(StateFlags::RenderBufferDirty) | pragma::math::to_integral(StateFlags::EnableDepthPass) | pragma::math::to_integral(StateFlags::RenderBoundsDirty) | pragma::math::to_integral(StateFlags::ShouldDraw) | pragma::math::to_integral(StateFlags::ShouldDrawShadow));
+		  = static_cast<StateFlags>(math::to_integral(StateFlags::RenderBufferDirty) | math::to_integral(StateFlags::EnableDepthPass) | math::to_integral(StateFlags::RenderBoundsDirty) | math::to_integral(StateFlags::ShouldDraw) | math::to_integral(StateFlags::ShouldDrawShadow));
 		std::atomic<uint64_t> m_lastRender = 0ull;
 		std::mutex m_renderDataMutex;
 		static std::vector<CRenderComponent *> s_ocExemptEntities;
@@ -238,7 +238,7 @@ export namespace pragma {
 		void UpdateAbsoluteRenderBounds();
 		void UpdateAbsoluteSphereRenderBounds();
 		void UpdateAbsoluteAABBRenderBounds();
-		pragma::rendering::InstanceData m_instanceData {};
+		rendering::InstanceData m_instanceData {};
 		std::shared_ptr<prosper::IBuffer> m_renderBuffer = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_renderDescSetGroup = nullptr;
 		std::optional<double> m_translucencyPassDistanceOverrideSqr {};
@@ -263,11 +263,11 @@ export namespace pragma {
 	};
 
 	struct DLLCLIENT CEOnUpdateRenderMatrices : public ComponentEvent {
-		CEOnUpdateRenderMatrices(pragma::math::ScaledTransform &pose, Mat4 &transformation);
+		CEOnUpdateRenderMatrices(math::ScaledTransform &pose, Mat4 &transformation);
 		virtual void PushArguments(lua::State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua::State *l) override;
-		pragma::math::ScaledTransform &pose;
+		math::ScaledTransform &pose;
 		Mat4 &transformation;
 	};
 

@@ -11,7 +11,7 @@ import :game;
 
 using namespace pragma;
 
-CBaseLightComponent::CBaseLightComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightComponent(ent) {}
+CBaseLightComponent::CBaseLightComponent(ecs::BaseEntity &ent) : BaseEnvLightComponent(ent) {}
 
 CBaseLightComponent::~CBaseLightComponent() {}
 
@@ -19,11 +19,11 @@ void CBaseLightComponent::Initialize() { BaseEnvLightComponent::Initialize(); }
 
 void CBaseLightComponent::OnEntityComponentAdded(BaseEntityComponent &component) { BaseEnvLightComponent::OnEntityComponentAdded(component); }
 
-pragma::util::EventReply CBaseLightComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply CBaseLightComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvLightComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
-	return pragma::util::EventReply::Unhandled;
+	if(BaseEnvLightComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
+	return util::EventReply::Unhandled;
 }
 
 void CBaseLightComponent::ReceiveData(NetPacket &packet)
@@ -37,10 +37,10 @@ void CBaseLightComponent::ReceiveData(NetPacket &packet)
 	SetLightIntensity(lightIntensity, lightIntensityType);
 }
 
-Bool CBaseLightComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CBaseLightComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetShadowType)
-		SetShadowType(packet->Read<BaseEnvLightComponent::ShadowType>());
+		SetShadowType(packet->Read<ShadowType>());
 	else if(eventId == m_netEvSetFalloffExponent)
 		SetFalloffExponent(packet->Read<float>());
 	else

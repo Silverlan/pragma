@@ -13,13 +13,13 @@ import :model;
 
 void pragma::ClientState::StartResourceTransfer()
 {
-	FileManager::CreatePath(m_svInfo->GetDownloadPath().c_str());
+	fs::create_path(m_svInfo->GetDownloadPath());
 
 	if(m_client != nullptr)
 		m_client->SetTimeoutDuration(0.0); // Disable timeout until resource transfer has been completed
 	NetPacket resourceReq;
 	resourceReq->Write<bool>(GetConVarBool("cl_allowdownload"));
-	SendPacket(pragma::networking::net_messages::server::RESOURCE_BEGIN, resourceReq, pragma::networking::Protocol::SlowReliable);
+	SendPacket(networking::net_messages::server::RESOURCE_BEGIN, resourceReq, networking::Protocol::SlowReliable);
 }
 
 void pragma::ClientState::HandleClientResource(NetPacket &packet)
@@ -28,7 +28,7 @@ void pragma::ClientState::HandleClientResource(NetPacket &packet)
 	if(!networking::is_valid_resource(file)) {
 		NetPacket response;
 		response->Write<bool>(false);
-		SendPacket(pragma::networking::net_messages::server::RESOURCEINFO_RESPONSE, response, pragma::networking::Protocol::SlowReliable);
+		SendPacket(networking::net_messages::server::RESOURCEINFO_RESPONSE, response, networking::Protocol::SlowReliable);
 		return;
 	}
 	auto bDefaultPath = true;
@@ -43,10 +43,10 @@ void pragma::ClientState::HandleClientResource(NetPacket &packet)
 	if(bDefaultPath == true)
 		fileDst = "downloads\\" + fileDst; // Files are placed into 'downloads' directory by default (Which is automatically mounted)
 
-	FileManager::CreatePath(fileDst.substr(0, fileDst.find_last_of('\\')).c_str());
+	fs::create_path(fileDst.substr(0, fileDst.find_last_of('\\')));
 	auto size = packet->Read<UInt64>();
-	Con::ccl << "Downloading file '" << file << "' (" << pragma::util::get_pretty_bytes(size) << ")..." << Con::endl;
-	auto f = FileManager::OpenFile(file.c_str(), "rb"); //,fsys::SearchFlags::Local);
+	Con::ccl << "Downloading file '" << file << "' (" << util::get_pretty_bytes(size) << ")..." << Con::endl;
+	auto f = pragma::fs::open_file(file.c_str(), fs::FileMode::Read | fs::FileMode::Binary); //,fs::SearchFlags::Local);
 	NetPacket response;
 	bool bSkip = false;
 	if(f != nullptr) {
@@ -60,7 +60,7 @@ void pragma::ClientState::HandleClientResource(NetPacket &packet)
 			f = nullptr;
 	}
 	if(bSkip == false)
-		f = FileManager::OpenFile((fileDst + ".part").c_str(), "wb");
+		f = pragma::fs::open_file((fileDst + ".part").c_str(), fs::FileMode::Write | fs::FileMode::Binary);
 	if(!bSkip) {
 		if(f == nullptr) {
 			response->Write<bool>(false);
@@ -68,10 +68,10 @@ void pragma::ClientState::HandleClientResource(NetPacket &packet)
 		}
 		else {
 			response->Write<bool>(true);
-			m_resDownload = std::make_unique<ResourceDownload>(std::static_pointer_cast<VFilePtrInternalReal>(f), fileDst, CUInt32(size));
+			m_resDownload = std::make_unique<ResourceDownload>(std::static_pointer_cast<fs::VFilePtrInternalReal>(f), fileDst, CUInt32(size));
 		}
 	}
-	SendPacket(pragma::networking::net_messages::server::RESOURCEINFO_RESPONSE, response, pragma::networking::Protocol::SlowReliable);
+	SendPacket(networking::net_messages::server::RESOURCEINFO_RESPONSE, response, networking::Protocol::SlowReliable);
 }
 
 void pragma::ClientState::HandleClientResourceFragment(NetPacket &packet)
@@ -94,12 +94,12 @@ void pragma::ClientState::HandleClientResourceFragment(NetPacket &packet)
 		f = nullptr;
 		resourceReq->Write<bool>(true);
 
-		if((FileManager::Exists(resName.c_str()) == true && FileManager::RemoveFile(resName.c_str()) == false) || FileManager::RenameFile((resName + ".part").c_str(), resName.c_str()) == false)
+		if((fs::exists(resName.c_str()) == true && fs::remove_file(resName) == false) || fs::rename_file((resName + ".part"), resName) == false)
 			Con::ccl << "File '" << (resName + ".part") << "' successfully received, but unable to rename to '" << resName << "'... Requesting next..." << Con::endl;
 		else
 			Con::ccl << "File '" << resName << "' successfully received... Requesting next..." << Con::endl;
 	}
 	else
 		resourceReq->Write<bool>(false);
-	SendPacket(pragma::networking::net_messages::server::RESOURCE_REQUEST, resourceReq, pragma::networking::Protocol::SlowReliable);
+	SendPacket(networking::net_messages::server::RESOURCE_REQUEST, resourceReq, networking::Protocol::SlowReliable);
 }

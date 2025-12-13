@@ -26,29 +26,29 @@ export {
 				std::vector<Vertex> verts = {};
 				std::vector<uint32_t> tris = {};
 				std::vector<Vector2> lightmapUvs = {};
-				msys::MaterialHandle material = {};
+				material::MaterialHandle material = {};
 			};
 			struct DLLNETWORK Object {
-				pragma::math::Transform pose = {};
+				math::Transform pose = {};
 			};
 			static std::shared_ptr<SceneSnapshot> Create();
 			SceneSnapshot(const SceneSnapshot &) = delete;
 			SceneSnapshot &operator=(const SceneSnapshot &) = delete;
 
 			void MergeMeshesByMaterial();
-			void AddModel(pragma::asset::Model &mdl, uint32_t skin = 0u);
+			void AddModel(asset::Model &mdl, uint32_t skin = 0u);
 			const std::vector<std::shared_ptr<Mesh>> &GetMeshes() const;
 			std::vector<std::shared_ptr<Mesh>> &GetMeshes();
 			const std::vector<std::shared_ptr<Object>> &GetObjects() const;
 			std::vector<std::shared_ptr<Object>> &GetObjects();
-			const std::vector<msys::MaterialHandle> &GetMaterials() const;
-			std::vector<msys::MaterialHandle> &GetMaterials();
+			const std::vector<material::MaterialHandle> &GetMaterials() const;
+			std::vector<material::MaterialHandle> &GetMaterials();
 		  private:
-			void AddMaterial(msys::Material &mat);
+			void AddMaterial(material::Material &mat);
 			SceneSnapshot() = default;
 			std::vector<std::shared_ptr<Mesh>> m_meshes = {};
 			std::vector<std::shared_ptr<Object>> m_objects = {};
-			std::vector<msys::MaterialHandle> m_materials = {};
+			std::vector<material::MaterialHandle> m_materials = {};
 		};
 	};
 };

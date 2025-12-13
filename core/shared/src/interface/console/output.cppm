@@ -49,7 +49,7 @@ export {
 		  public:
 			friend DLLNETWORK std::basic_ostream<char, std::char_traits<char>> &endl(std::basic_ostream<char, std::char_traits<char>> &os);
 			template<class T>
-			friend Con::c_crit & ::operator<<(Con::c_crit & con, const T & t);
+			friend c_crit & ::operator<<(c_crit & con, const T & t);
 		};
 		class DLLNETWORK c_csv {};
 		class DLLNETWORK c_ccl {};
@@ -68,14 +68,14 @@ export {
 		DLLNETWORK int GetLogLevel();
 
 		DLLNETWORK void disable_ansi_color_codes();
-		DLLNETWORK void set_output_callback(const std::function<void(const std::string_view &, pragma::console::MessageFlags, const ::Color *)> &callback);
-		DLLNETWORK const std::function<void(const std::string_view &, pragma::console::MessageFlags, const ::Color *)> &get_output_callback();
-		DLLNETWORK void print(const std::string_view &sv, const ::Color &color, pragma::console::MessageFlags flags = pragma::console::MessageFlags::None);
+		DLLNETWORK void set_output_callback(const std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> &callback);
+		DLLNETWORK const std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> &get_output_callback();
+		DLLNETWORK void print(const std::string_view &sv, const Color &color, pragma::console::MessageFlags flags = pragma::console::MessageFlags::None);
 		DLLNETWORK void print(const std::string_view &sv, pragma::console::MessageFlags flags = pragma::console::MessageFlags::None);
 		template<typename T>
 		inline void invoke_output_callback(const T &value, pragma::console::MessageFlags flags)
 		{
-			auto &outputCallback = Con::get_output_callback();
+			auto &outputCallback = get_output_callback();
 			if(outputCallback == nullptr)
 				return;
 			auto color = pragma::console::console_color_flags_to_color(pragma::console::get_active_console_color_flags());

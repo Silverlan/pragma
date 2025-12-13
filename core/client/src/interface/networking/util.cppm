@@ -11,5 +11,5 @@ export import :entities.base_entity;
 
 export namespace pragma::networking {
 	DLLCLIENT ecs::CBaseEntity *read_unique_entity(NetPacket &packet);
-	DLLCLIENT CallbackHandle read_unique_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated);
+	DLLCLIENT CallbackHandle read_unique_entity(NetPacket &packet, const std::function<void(ecs::BaseEntity *)> &onCreated);
 };

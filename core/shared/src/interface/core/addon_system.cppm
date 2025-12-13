@@ -17,11 +17,11 @@ export namespace pragma {
 	class DLLNETWORK AddonInfo {
 	  public:
 		friend AddonSystem;
-		AddonInfo(const std::string &absPath, const pragma::util::Version &version = {}, const std::string &uniqueId = "");
+		AddonInfo(const std::string &absPath, const util::Version &version = {}, const std::string &uniqueId = "");
 	  protected:
 		std::string m_path;
 		std::string m_uniqueId;
-		pragma::util::Version m_version;
+		util::Version m_version;
 	  public:
 		// Note: The addon directory can be a shortcut, in which case it will have the
 		// .lnk-extension on Windows systems and the path will have to be resolved to
@@ -29,7 +29,7 @@ export namespace pragma {
 		const std::string &GetLocalPath() const;
 		std::string GetAbsolutePath() const;
 		const std::string &GetUniqueId() const;
-		const pragma::util::Version &GetVersion() const;
+		const util::Version &GetVersion() const;
 	};
 
 	class DLLNETWORK AddonSystem {
@@ -39,12 +39,12 @@ export namespace pragma {
 		static void UnmountAddons();
 		static const std::vector<AddonInfo> &GetMountedAddons();
 		static void Poll();
-		static DirectoryWatcherCallback *GetAddonWatcher();
+		static fs::DirectoryWatcherCallback *GetAddonWatcher();
 	  private:
 		static bool MountAddon(const std::string &addonPath, std::vector<AddonInfo> &outAddons, bool silent = true);
 		static std::vector<AddonInfo> m_addons;
-		static std::shared_ptr<DirectoryWatcherCallback> m_addonWatcher;
-		static pragma::pad::PADPackage *LoadPADPackage(const std::string &path);
+		static std::shared_ptr<fs::DirectoryWatcherCallback> m_addonWatcher;
+		static pad::PADPackage *LoadPADPackage(const std::string &path);
 	};
 #pragma warning(pop)
 };

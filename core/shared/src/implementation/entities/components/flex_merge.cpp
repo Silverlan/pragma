@@ -8,7 +8,7 @@ import :entities.components.flex_merge;
 
 using namespace pragma;
 
-bool FlexMergeComponent::can_merge(const pragma::asset::Model &mdl, const pragma::asset::Model &mdlParent)
+bool FlexMergeComponent::can_merge(const asset::Model &mdl, const asset::Model &mdlParent)
 {
 	auto &flexControllers = mdl.GetFlexControllers();
 	for(auto &flexCon : flexControllers) {
@@ -19,51 +19,51 @@ bool FlexMergeComponent::can_merge(const pragma::asset::Model &mdl, const pragma
 	return false;
 }
 
-ComponentEventId flexMergeComponent::EVENT_ON_TARGET_CHANGED = pragma::INVALID_COMPONENT_ID;
-void FlexMergeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { flexMergeComponent::EVENT_ON_TARGET_CHANGED = registerEvent("ON_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast); }
-void FlexMergeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+ComponentEventId flexMergeComponent::EVENT_ON_TARGET_CHANGED = INVALID_COMPONENT_ID;
+void FlexMergeComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { flexMergeComponent::EVENT_ON_TARGET_CHANGED = registerEvent("ON_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast); }
+void FlexMergeComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = FlexMergeComponent;
 
 	{
-		using TTarget = pragma::EntityURef;
+		using TTarget = EntityURef;
 		auto memberInfo = create_component_member_info<T, TTarget, static_cast<void (T::*)(const TTarget &)>(&T::SetTarget), static_cast<const TTarget &(T::*)() const>(&T::GetTarget)>("target", TTarget {});
 		registerMember(std::move(memberInfo));
 	}
 }
-FlexMergeComponent::FlexMergeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+FlexMergeComponent::FlexMergeComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void FlexMergeComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { SetTargetDirty(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { SetTargetDirty(); });
 	GetEntity().AddComponent("flex");
 }
-void FlexMergeComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void FlexMergeComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void FlexMergeComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
 	SetTargetDirty();
 }
 
-void FlexMergeComponent::SetTarget(const pragma::EntityURef &target)
+void FlexMergeComponent::SetTarget(const EntityURef &target)
 {
 	m_target = target;
 	SetTargetDirty();
 	BroadcastEvent(flexMergeComponent::EVENT_ON_TARGET_CHANGED);
 }
-const pragma::EntityURef &FlexMergeComponent::GetTarget() const { return m_target; }
+const EntityURef &FlexMergeComponent::GetTarget() const { return m_target; }
 
 void FlexMergeComponent::SetTargetDirty(bool updateImmediately)
 {
-	m_flexC = pragma::ComponentHandle<pragma::BaseFlexComponent> {};
-	m_flexCParent = pragma::ComponentHandle<pragma::BaseFlexComponent> {};
+	m_flexC = pragma::ComponentHandle<BaseFlexComponent> {};
+	m_flexCParent = pragma::ComponentHandle<BaseFlexComponent> {};
 	m_flexControllerMap.clear();
 	if(m_cbOnFlexControllerChanged.IsValid())
 		m_cbOnFlexControllerChanged.Remove();
 	if(m_cbOnFlexControllerComponentRemoved.IsValid())
 		m_cbOnFlexControllerComponentRemoved.Remove();
 
-	SetTickPolicy(pragma::TickPolicy::Always);
+	SetTickPolicy(TickPolicy::Always);
 	if(updateImmediately)
 		UpdateFlexControllerMappings();
 }
@@ -103,22 +103,22 @@ void FlexMergeComponent::UpdateFlexControllerMappings()
 		m_cbOnFlexControllerChanged.Remove();
 	if(m_cbOnFlexControllerComponentRemoved.IsValid())
 		m_cbOnFlexControllerComponentRemoved.Remove();
-	m_cbOnFlexControllerChanged = m_flexCParent->AddEventCallback(baseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> ev) -> pragma::util::EventReply {
-		auto &evFlex = static_cast<pragma::CEOnFlexControllerChanged &>(ev.get());
+	m_cbOnFlexControllerChanged = m_flexCParent->AddEventCallback(baseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED, [this](std::reference_wrapper<ComponentEvent> ev) -> util::EventReply {
+		auto &evFlex = static_cast<CEOnFlexControllerChanged &>(ev.get());
 		ApplyFlexController(evFlex.flexControllerId, evFlex.value);
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
 	auto flexCId = m_flexCParent->GetComponentId();
 	auto *genericC = entTgt->GetGenericComponent();
 	if(genericC) {
-		m_cbOnFlexControllerComponentRemoved = genericC->AddEventCallback(baseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED, [this, flexCId](std::reference_wrapper<pragma::ComponentEvent> ev) -> pragma::util::EventReply {
-			auto &evRemoved = static_cast<pragma::CEOnEntityComponentRemoved &>(ev.get());
+		m_cbOnFlexControllerComponentRemoved = genericC->AddEventCallback(baseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED, [this, flexCId](std::reference_wrapper<ComponentEvent> ev) -> util::EventReply {
+			auto &evRemoved = static_cast<CEOnEntityComponentRemoved &>(ev.get());
 			if(evRemoved.component.GetComponentId() == flexCId) {
 				if(m_cbOnFlexControllerComponentRemoved.IsValid())
 					m_cbOnFlexControllerComponentRemoved.Remove();
 				SetTargetDirty(false);
 			}
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		});
 	}
 	MergeFlexControllers();
@@ -130,7 +130,7 @@ void FlexMergeComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	BaseEntityComponent::OnEntityComponentAdded(component);
 	auto *flexC = dynamic_cast<BaseFlexComponent *>(&component);
 	if(flexC) {
-		SetTickPolicy(pragma::TickPolicy::Always);
+		SetTickPolicy(TickPolicy::Always);
 		UpdateFlexControllerMappings();
 	}
 }
@@ -139,7 +139,7 @@ void FlexMergeComponent::OnEntityComponentRemoved(BaseEntityComponent &component
 	BaseEntityComponent::OnEntityComponentRemoved(component);
 	auto *flexC = dynamic_cast<BaseFlexComponent *>(&component);
 	if(flexC) {
-		SetTickPolicy(pragma::TickPolicy::Always);
+		SetTickPolicy(TickPolicy::Always);
 		UpdateFlexControllerMappings();
 	}
 }

@@ -44,7 +44,7 @@ void ImageTextureModule::InitializeGfxPipelineDescriptorSets()
 	/*auto &context = pragma::get_cengine()->GetRenderContext();
 	auto dsg = context.CreateDescriptorSetGroup(m_descSetInfo);
 	auto &ds = *dsg->GetDescriptorSet(0);
-	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 	uint32_t bindingIdx = 0;
 	for(auto *node : m_nodes) {
 		std::string fileName;

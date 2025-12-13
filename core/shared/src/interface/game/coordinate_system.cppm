@@ -13,23 +13,23 @@ export {
 		enum class RotationOrder : uint16_t { XYZ = 0u, YXZ, XZX, XYX, YXY, YZY, ZYZ, ZXZ, XZY, YZX, ZYX, ZXY };
 		constexpr bool is_positive_axis(Axis axis) { return true; }
 		constexpr bool is_negative_axis(Axis axis) { return false; }
-		constexpr bool is_positive_axis(SignedAxis axis) { return (pragma::math::to_integral(axis) < pragma::math::to_integral(SignedAxis::NegX)); }
+		constexpr bool is_positive_axis(SignedAxis axis) { return (math::to_integral(axis) < math::to_integral(SignedAxis::NegX)); }
 		constexpr bool is_negative_axis(SignedAxis axis) { return !is_positive_axis(axis); }
 
 		constexpr Vector3 axis_to_vector(SignedAxis axis)
 		{
 			switch(axis) {
-			case pragma::SignedAxis::X:
+			case SignedAxis::X:
 				return Vector3 {1.f, 0.f, 0.f};
-			case pragma::SignedAxis::Y:
+			case SignedAxis::Y:
 				return Vector3 {0.f, 1.f, 0.f};
-			case pragma::SignedAxis::Z:
+			case SignedAxis::Z:
 				return Vector3 {0.f, 0.f, 1.f};
-			case pragma::SignedAxis::NegX:
+			case SignedAxis::NegX:
 				return Vector3 {-1.f, 0.f, 0.f};
-			case pragma::SignedAxis::NegY:
+			case SignedAxis::NegY:
 				return Vector3 {0.f, -1.f, 0.f};
-			case pragma::SignedAxis::NegZ:
+			case SignedAxis::NegZ:
 				return Vector3 {0.f, 0.f, -1.f};
 			default:
 				break;

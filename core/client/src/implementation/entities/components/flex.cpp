@@ -13,10 +13,10 @@ import se_script;
 
 using namespace pragma;
 
-static auto cvFlexPhonemeDrag = pragma::console::get_client_con_var("cl_flex_phoneme_drag");
+static auto cvFlexPhonemeDrag = console::get_client_con_var("cl_flex_phoneme_drag");
 
 ComponentEventId cFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED = INVALID_COMPONENT_ID;
-void CFlexComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void CFlexComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseFlexComponent::RegisterEvents(componentManager, registerEvent);
 	cFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED = registerEvent("ON_FLEX_CONTROLLERS_UPDATED", ComponentEventInfo::Type::Explicit);
@@ -26,15 +26,15 @@ void CFlexComponent::InitializeLuaObject(lua::State *l) { return BaseEntityCompo
 void CFlexComponent::UpdateFlexControllers(float dt)
 {
 	// TODO: Update every frame!
-	auto t = pragma::get_cgame()->CurTime();
+	auto t = get_cgame()->CurTime();
 	MaintainFlexAnimations(dt);
 	auto flexDrag = cvFlexPhonemeDrag->GetFloat();
 	for(auto &pair : m_flexControllers) {
 		auto &info = pair.second;
 		if(info.endTime != 0.f && t >= info.endTime && info.targetValue != 0.f)
 			info.targetValue = 0.f;
-		auto newVal = pragma::math::lerp(info.value, info.targetValue, pragma::math::min(dt / flexDrag, 1.f));
-		if(!m_flexDataUpdateRequired && pragma::math::abs(newVal - info.value) > 0.001f)
+		auto newVal = math::lerp(info.value, info.targetValue, math::min(dt / flexDrag, 1.f));
+		if(!m_flexDataUpdateRequired && math::abs(newVal - info.value) > 0.001f)
 			m_flexDataUpdateRequired = true;
 		info.value = newVal;
 	}
@@ -100,16 +100,16 @@ void CFlexComponent::UpdateEyeFlexes(asset::Eyeball &eyeball, uint32_t eyeballId
 	std::array<int32_t, 3> lowererIndices = {eyeball.lowerLid.lowererFlexIndex, eyeball.lowerLid.neutralFlexIndex, eyeball.lowerLid.raiserFlexIndex};
 	std::array<float, 3> lowererValues = {eyeball.lowerLid.lowererValue, eyeball.lowerLid.neutralValue, eyeball.lowerLid.raiserValue};
 	for(auto i = decltype(upperIndices.size()) {0u}; i < upperIndices.size(); ++i)
-		upperLid += GetFlexWeight(upperIndices[i]) * pragma::math::asin(upperValues[i] / eyeball.radius);
+		upperLid += GetFlexWeight(upperIndices[i]) * math::asin(upperValues[i] / eyeball.radius);
 	for(auto i = decltype(lowererIndices.size()) {0u}; i < lowererIndices.size(); ++i)
-		lowerLid += GetFlexWeight(lowererIndices[i]) * pragma::math::asin(lowererValues[i] / eyeball.radius);
+		lowerLid += GetFlexWeight(lowererIndices[i]) * math::asin(lowererValues[i] / eyeball.radius);
 
 	float sinupper, cosupper, sinlower, coslower;
-	sinupper = pragma::math::sin(upperLid);
-	cosupper = pragma::math::cos(upperLid);
+	sinupper = math::sin(upperLid);
+	cosupper = math::cos(upperLid);
 
-	sinlower = pragma::math::sin(lowerLid);
-	coslower = pragma::math::cos(lowerLid);
+	sinlower = math::sin(lowerLid);
+	coslower = math::cos(lowerLid);
 
 	// To head space
 	headup = state.up;
@@ -136,7 +136,7 @@ void CFlexComponent::UpdateEyeFlexes()
 		UpdateEyeFlexes(eyeballs.at(eyeballIdx), eyeballIdx);
 }
 
-void CFlexComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl)
+void CFlexComponent::OnModelChanged(const std::shared_ptr<asset::Model> &mdl)
 {
 	m_flexControllers.clear();
 	m_flexWeights.clear();
@@ -151,7 +151,7 @@ void CFlexComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> 
 void CFlexComponent::Initialize()
 {
 	BaseFlexComponent::Initialize();
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(static_cast<pragma::CEOnModelChanged &>(evData.get()).model); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { OnModelChanged(static_cast<CEOnModelChanged &>(evData.get()).model); });
 	// This has been moved to vertex animated component
 	//BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 	//	UpdateFlexWeightsMT();
@@ -173,13 +173,13 @@ void CFlexComponent::SetFlexController(uint32_t flexId, float val, float duratio
 	if(flexC == nullptr)
 		return;
 	if(clampToLimits)
-		val = pragma::math::clamp(val, flexC->min, flexC->max);
+		val = math::clamp(val, flexC->min, flexC->max);
 	auto it = m_flexControllers.find(flexId);
 	if(it == m_flexControllers.end())
 		it = m_flexControllers.insert(std::make_pair(flexId, FlexControllerInfo {})).first;
 	auto &flexInfo = it->second;
 	flexInfo.targetValue = val;
-	flexInfo.endTime = (duration > 0.f) ? pragma::get_cgame()->CurTime() + duration : 0.f;
+	flexInfo.endTime = (duration > 0.f) ? get_cgame()->CurTime() + duration : 0.f;
 	//InitializeVertexAnimationBuffer();
 
 	//if(m_vertexAnimationBuffer == nullptr) // prosper TODO
@@ -214,7 +214,7 @@ void CFlexComponent::UpdateFlexWeightsMT()
 		return;
 	auto &flexes = mdl->GetFlexes();
 	assert(flexes.size() == m_flexWeights.size());
-	auto numFlexes = pragma::math::min(flexes.size(), m_flexWeights.size());
+	auto numFlexes = math::min(flexes.size(), m_flexWeights.size());
 	for(auto flexId = decltype(numFlexes) {0u}; flexId < numFlexes; ++flexId) {
 		auto flexVal = 0.f;
 		UpdateFlexWeight(flexId, flexVal);
@@ -280,9 +280,9 @@ bool CFlexComponent::UpdateFlexWeight(uint32_t flexId, float &val, bool storeInC
 	}
 	return true;
 }
-void CFlexComponent::UpdateSoundPhonemes(pragma::audio::CALSound &snd)
+void CFlexComponent::UpdateSoundPhonemes(audio::CALSound &snd)
 {
-	al::impl::BufferBase *buf = snd->GetBuffer();
+	pragma::audio::impl::BufferBase *buf = snd->GetBuffer();
 	if(buf == nullptr)
 		buf = snd->GetDecoder();
 	auto userData = (buf != nullptr) ? buf->GetUserData() : nullptr;
@@ -318,7 +318,7 @@ void CFlexComponent::UpdateSoundPhonemes(pragma::audio::CALSound &snd)
 							nextPhoneme = &nextWord.phonemes.front();
 					}
 				}
-				if(nextPhoneme != nullptr && pragma::math::abs(nextPhoneme->tStart - phoneme.tEnd) < 0.1f) {
+				if(nextPhoneme != nullptr && math::abs(nextPhoneme->tStart - phoneme.tEnd) < 0.1f) {
 					auto it = phonemeMap.phonemes.find(nextPhoneme->phoneme);
 					if(it != phonemeMap.phonemes.end())
 						nextPhonemeInfo = &it->second;
@@ -336,7 +336,7 @@ void CFlexComponent::UpdateSoundPhonemes(pragma::audio::CALSound &snd)
 					if(nextPhonemeInfo != nullptr) {
 						auto it = nextPhonemeInfo->flexControllers.find(pair.first);
 						if(it != nextPhonemeInfo->flexControllers.end())
-							flexWeight = pragma::math::lerp(pair.second, it->second, 1.f - weight); // Interpolate between current phoneme and next phoneme
+							flexWeight = math::lerp(pair.second, it->second, 1.f - weight); // Interpolate between current phoneme and next phoneme
 					}
 					auto curFlexWeight = 0.f;
 					if(GetFlexController(id, curFlexWeight) == true)
@@ -349,14 +349,14 @@ void CFlexComponent::UpdateSoundPhonemes(pragma::audio::CALSound &snd)
 }
 
 namespace Lua::Flex {
-	std::optional<float> GetFlexController(pragma::CFlexComponent &hEnt, uint32_t flexId)
+	std::optional<float> GetFlexController(CFlexComponent &hEnt, uint32_t flexId)
 	{
 		auto val = 0.f;
 		if(hEnt.GetFlexController(flexId, val) == false)
 			return {};
 		return val;
 	}
-	std::optional<float> GetFlexController(pragma::CFlexComponent &hEnt, const std::string &flexController)
+	std::optional<float> GetFlexController(CFlexComponent &hEnt, const std::string &flexController)
 	{
 		auto flexId = 0u;
 		auto mdlComponent = hEnt.GetEntity().GetModelComponent();
@@ -367,7 +367,7 @@ namespace Lua::Flex {
 			return {};
 		return val;
 	}
-	std::optional<float> CalcFlexValue(pragma::CFlexComponent &hEnt, uint32_t flexId)
+	std::optional<float> CalcFlexValue(CFlexComponent &hEnt, uint32_t flexId)
 	{
 		auto val = 0.f;
 		if(hEnt.CalcFlexValue(flexId, val) == false)
@@ -379,29 +379,29 @@ namespace Lua::Flex {
 void CFlexComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseFlexComponent::RegisterLuaBindings(l, modEnts);
-	auto defCFlex = pragma::LuaCore::create_entity_component_class<pragma::CFlexComponent, pragma::BaseFlexComponent>("FlexComponent");
+	auto defCFlex = pragma::LuaCore::create_entity_component_class<CFlexComponent, BaseFlexComponent>("FlexComponent");
 	defCFlex.def("SetFlexController",
-	  static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t, float, float, bool)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t flexId, float value, float duration, bool clampToLimits) { hEnt.SetFlexController(flexId, value, duration, clampToLimits); }));
-	defCFlex.def("SetFlexController", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t, float, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t flexId, float value, float duration) { hEnt.SetFlexController(flexId, value, duration); }));
-	defCFlex.def("SetFlexController", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t flexId, float value) { hEnt.SetFlexController(flexId, value); }));
-	defCFlex.def("SetFlexController", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, const std::string &, float, float, bool)>([](lua::State *l, pragma::CFlexComponent &hEnt, const std::string &flexName, float value, float duration, bool clampToLimits) {
+	  static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t, float, float, bool)>([](lua::State *l, CFlexComponent &hEnt, uint32_t flexId, float value, float duration, bool clampToLimits) { hEnt.SetFlexController(flexId, value, duration, clampToLimits); }));
+	defCFlex.def("SetFlexController", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t, float, float)>([](lua::State *l, CFlexComponent &hEnt, uint32_t flexId, float value, float duration) { hEnt.SetFlexController(flexId, value, duration); }));
+	defCFlex.def("SetFlexController", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t, float)>([](lua::State *l, CFlexComponent &hEnt, uint32_t flexId, float value) { hEnt.SetFlexController(flexId, value); }));
+	defCFlex.def("SetFlexController", static_cast<void (*)(lua::State *, CFlexComponent &, const std::string &, float, float, bool)>([](lua::State *l, CFlexComponent &hEnt, const std::string &flexName, float value, float duration, bool clampToLimits) {
 		hEnt.SetFlexController(flexName, value, duration, clampToLimits);
 	}));
 	defCFlex.def("SetFlexController",
-	  static_cast<void (*)(lua::State *, pragma::CFlexComponent &, const std::string &, float, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, const std::string &flexName, float value, float duration) { hEnt.SetFlexController(flexName, value, duration); }));
-	defCFlex.def("SetFlexController", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, const std::string &, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, const std::string &flexName, float value) { hEnt.SetFlexController(flexName, value); }));
-	defCFlex.def("GetFlexController", static_cast<std::optional<float> (*)(pragma::CFlexComponent &, uint32_t)>(&Lua::Flex::GetFlexController));
-	defCFlex.def("GetFlexController", static_cast<std::optional<float> (*)(pragma::CFlexComponent &, const std::string &)>(&Lua::Flex::GetFlexController));
-	defCFlex.def("GetScaledFlexController", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t flexControllerId) {
+	  static_cast<void (*)(lua::State *, CFlexComponent &, const std::string &, float, float)>([](lua::State *l, CFlexComponent &hEnt, const std::string &flexName, float value, float duration) { hEnt.SetFlexController(flexName, value, duration); }));
+	defCFlex.def("SetFlexController", static_cast<void (*)(lua::State *, CFlexComponent &, const std::string &, float)>([](lua::State *l, CFlexComponent &hEnt, const std::string &flexName, float value) { hEnt.SetFlexController(flexName, value); }));
+	defCFlex.def("GetFlexController", static_cast<std::optional<float> (*)(CFlexComponent &, uint32_t)>(&Lua::Flex::GetFlexController));
+	defCFlex.def("GetFlexController", static_cast<std::optional<float> (*)(CFlexComponent &, const std::string &)>(&Lua::Flex::GetFlexController));
+	defCFlex.def("GetScaledFlexController", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t)>([](lua::State *l, CFlexComponent &hEnt, uint32_t flexControllerId) {
 		float value;
 		if(hEnt.GetScaledFlexController(flexControllerId, value) == false)
 			return;
 		Lua::PushNumber(l, value);
 	}));
-	defCFlex.def("SetFlexControllerScale", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, float scale) { hEnt.SetFlexControllerScale(scale); }));
-	defCFlex.def("GetFlexControllerScale", static_cast<void (*)(lua::State *, pragma::CFlexComponent &)>([](lua::State *l, pragma::CFlexComponent &hEnt) { Lua::PushNumber(l, hEnt.GetFlexControllerScale()); }));
+	defCFlex.def("SetFlexControllerScale", static_cast<void (*)(lua::State *, CFlexComponent &, float)>([](lua::State *l, CFlexComponent &hEnt, float scale) { hEnt.SetFlexControllerScale(scale); }));
+	defCFlex.def("GetFlexControllerScale", static_cast<void (*)(lua::State *, CFlexComponent &)>([](lua::State *l, CFlexComponent &hEnt) { Lua::PushNumber(l, hEnt.GetFlexControllerScale()); }));
 	defCFlex.def("CalcFlexValue", &Lua::Flex::CalcFlexValue);
-	defCFlex.def("GetFlexWeights", static_cast<void (*)(lua::State *, pragma::CFlexComponent &)>([](lua::State *l, pragma::CFlexComponent &hEnt) {
+	defCFlex.def("GetFlexWeights", static_cast<void (*)(lua::State *, CFlexComponent &)>([](lua::State *l, CFlexComponent &hEnt) {
 		auto &flexWeights = hEnt.GetFlexWeights();
 		auto t = Lua::CreateTable(l);
 		for(auto i = decltype(flexWeights.size()) {0u}; i < flexWeights.size(); ++i) {
@@ -410,17 +410,17 @@ void CFlexComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnt
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defCFlex.def("GetFlexWeight", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t flexId) {
+	defCFlex.def("GetFlexWeight", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t)>([](lua::State *l, CFlexComponent &hEnt, uint32_t flexId) {
 		float weight;
 		if(hEnt.GetFlexWeight(flexId, weight) == false)
 			return;
 		Lua::PushNumber(l, weight);
 	}));
-	defCFlex.def("SetFlexWeight", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t flexId, float weight) { hEnt.SetFlexWeight(flexId, weight); }));
-	defCFlex.def("ClearFlexWeightOverride", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t flexId) { hEnt.ClearFlexWeightOverride(flexId); }));
-	defCFlex.def("HasFlexWeightOverride", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t flexId) { Lua::PushBool(l, hEnt.HasFlexWeightOverride(flexId)); }));
-	defCFlex.def("SetFlexWeightOverride", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t flexId, float weight) { hEnt.SetFlexWeightOverride(flexId, weight); }));
-	defCFlex.def("GetFlexAnimations", static_cast<luabind::object (*)(lua::State *, pragma::CFlexComponent &)>([](lua::State *l, pragma::CFlexComponent &hEnt) -> luabind::object {
+	defCFlex.def("SetFlexWeight", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t, float)>([](lua::State *l, CFlexComponent &hEnt, uint32_t flexId, float weight) { hEnt.SetFlexWeight(flexId, weight); }));
+	defCFlex.def("ClearFlexWeightOverride", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t)>([](lua::State *l, CFlexComponent &hEnt, uint32_t flexId) { hEnt.ClearFlexWeightOverride(flexId); }));
+	defCFlex.def("HasFlexWeightOverride", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t)>([](lua::State *l, CFlexComponent &hEnt, uint32_t flexId) { Lua::PushBool(l, hEnt.HasFlexWeightOverride(flexId)); }));
+	defCFlex.def("SetFlexWeightOverride", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t, float)>([](lua::State *l, CFlexComponent &hEnt, uint32_t flexId, float weight) { hEnt.SetFlexWeightOverride(flexId, weight); }));
+	defCFlex.def("GetFlexAnimations", static_cast<luabind::object (*)(lua::State *, CFlexComponent &)>([](lua::State *l, CFlexComponent &hEnt) -> luabind::object {
 		auto &flexAnims = hEnt.GetFlexAnimations();
 		auto t = luabind::newtable(l);
 		int32_t idx = 1;
@@ -428,21 +428,21 @@ void CFlexComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnt
 			t[idx++] = flexAnim.flexAnimationId;
 		return t;
 	}));
-	defCFlex.def("GetFlexAnimationCount", static_cast<uint32_t (*)(lua::State *, pragma::CFlexComponent &)>([](lua::State *l, pragma::CFlexComponent &hEnt) -> uint32_t { return hEnt.GetFlexAnimations().size(); }));
-	defCFlex.def("PlayFlexAnimation", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t, bool, bool)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t id, bool loop, bool reset) { hEnt.PlayFlexAnimation(id, loop, reset); }));
-	defCFlex.def("PlayFlexAnimation", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t, bool)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t id, bool loop) { hEnt.PlayFlexAnimation(id, loop); }));
-	defCFlex.def("PlayFlexAnimation", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t id) { hEnt.PlayFlexAnimation(id); }));
-	defCFlex.def("PlayFlexAnimation", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, const std::string &, bool, bool)>([](lua::State *l, pragma::CFlexComponent &hEnt, const std::string &id, bool loop, bool reset) { hEnt.PlayFlexAnimation(id, loop, reset); }));
-	defCFlex.def("PlayFlexAnimation", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, const std::string &, bool)>([](lua::State *l, pragma::CFlexComponent &hEnt, const std::string &id, bool loop) { hEnt.PlayFlexAnimation(id, loop); }));
-	defCFlex.def("PlayFlexAnimation", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, const std::string &)>([](lua::State *l, pragma::CFlexComponent &hEnt, const std::string &id) { hEnt.PlayFlexAnimation(id); }));
-	defCFlex.def("StopFlexAnimation", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t id) { hEnt.StopFlexAnimation(id); }));
-	defCFlex.def("StopFlexAnimation", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, const std::string &)>([](lua::State *l, pragma::CFlexComponent &hEnt, const std::string &id) { hEnt.StopFlexAnimation(id); }));
-	defCFlex.def("GetFlexAnimationCycle", static_cast<float (*)(lua::State *, pragma::CFlexComponent &, uint32_t)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t id) -> float { return hEnt.GetFlexAnimationCycle(id); }));
-	defCFlex.def("GetFlexAnimationCycle", static_cast<float (*)(lua::State *, pragma::CFlexComponent &, const std::string &)>([](lua::State *l, pragma::CFlexComponent &hEnt, const std::string &id) -> float { return hEnt.GetFlexAnimationCycle(id); }));
-	defCFlex.def("SetFlexAnimationCycle", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t id, float cycle) { hEnt.SetFlexAnimationCycle(id, cycle); }));
-	defCFlex.def("SetFlexAnimationCycle", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, const std::string &, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, const std::string &id, float cycle) { hEnt.SetFlexAnimationCycle(id, cycle); }));
-	defCFlex.def("SetFlexAnimationPlaybackRate", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, uint32_t, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, uint32_t id, float playbackRate) { hEnt.SetFlexAnimationPlaybackRate(id, playbackRate); }));
-	defCFlex.def("SetFlexAnimationPlaybackRate", static_cast<void (*)(lua::State *, pragma::CFlexComponent &, const std::string &, float)>([](lua::State *l, pragma::CFlexComponent &hEnt, const std::string &id, float playbackRate) { hEnt.SetFlexAnimationPlaybackRate(id, playbackRate); }));
-	defCFlex.add_static_constant("EVENT_ON_FLEX_CONTROLLERS_UPDATED", pragma::cFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED);
+	defCFlex.def("GetFlexAnimationCount", static_cast<uint32_t (*)(lua::State *, CFlexComponent &)>([](lua::State *l, CFlexComponent &hEnt) -> uint32_t { return hEnt.GetFlexAnimations().size(); }));
+	defCFlex.def("PlayFlexAnimation", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t, bool, bool)>([](lua::State *l, CFlexComponent &hEnt, uint32_t id, bool loop, bool reset) { hEnt.PlayFlexAnimation(id, loop, reset); }));
+	defCFlex.def("PlayFlexAnimation", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t, bool)>([](lua::State *l, CFlexComponent &hEnt, uint32_t id, bool loop) { hEnt.PlayFlexAnimation(id, loop); }));
+	defCFlex.def("PlayFlexAnimation", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t)>([](lua::State *l, CFlexComponent &hEnt, uint32_t id) { hEnt.PlayFlexAnimation(id); }));
+	defCFlex.def("PlayFlexAnimation", static_cast<void (*)(lua::State *, CFlexComponent &, const std::string &, bool, bool)>([](lua::State *l, CFlexComponent &hEnt, const std::string &id, bool loop, bool reset) { hEnt.PlayFlexAnimation(id, loop, reset); }));
+	defCFlex.def("PlayFlexAnimation", static_cast<void (*)(lua::State *, CFlexComponent &, const std::string &, bool)>([](lua::State *l, CFlexComponent &hEnt, const std::string &id, bool loop) { hEnt.PlayFlexAnimation(id, loop); }));
+	defCFlex.def("PlayFlexAnimation", static_cast<void (*)(lua::State *, CFlexComponent &, const std::string &)>([](lua::State *l, CFlexComponent &hEnt, const std::string &id) { hEnt.PlayFlexAnimation(id); }));
+	defCFlex.def("StopFlexAnimation", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t)>([](lua::State *l, CFlexComponent &hEnt, uint32_t id) { hEnt.StopFlexAnimation(id); }));
+	defCFlex.def("StopFlexAnimation", static_cast<void (*)(lua::State *, CFlexComponent &, const std::string &)>([](lua::State *l, CFlexComponent &hEnt, const std::string &id) { hEnt.StopFlexAnimation(id); }));
+	defCFlex.def("GetFlexAnimationCycle", static_cast<float (*)(lua::State *, CFlexComponent &, uint32_t)>([](lua::State *l, CFlexComponent &hEnt, uint32_t id) -> float { return hEnt.GetFlexAnimationCycle(id); }));
+	defCFlex.def("GetFlexAnimationCycle", static_cast<float (*)(lua::State *, CFlexComponent &, const std::string &)>([](lua::State *l, CFlexComponent &hEnt, const std::string &id) -> float { return hEnt.GetFlexAnimationCycle(id); }));
+	defCFlex.def("SetFlexAnimationCycle", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t, float)>([](lua::State *l, CFlexComponent &hEnt, uint32_t id, float cycle) { hEnt.SetFlexAnimationCycle(id, cycle); }));
+	defCFlex.def("SetFlexAnimationCycle", static_cast<void (*)(lua::State *, CFlexComponent &, const std::string &, float)>([](lua::State *l, CFlexComponent &hEnt, const std::string &id, float cycle) { hEnt.SetFlexAnimationCycle(id, cycle); }));
+	defCFlex.def("SetFlexAnimationPlaybackRate", static_cast<void (*)(lua::State *, CFlexComponent &, uint32_t, float)>([](lua::State *l, CFlexComponent &hEnt, uint32_t id, float playbackRate) { hEnt.SetFlexAnimationPlaybackRate(id, playbackRate); }));
+	defCFlex.def("SetFlexAnimationPlaybackRate", static_cast<void (*)(lua::State *, CFlexComponent &, const std::string &, float)>([](lua::State *l, CFlexComponent &hEnt, const std::string &id, float playbackRate) { hEnt.SetFlexAnimationPlaybackRate(id, playbackRate); }));
+	defCFlex.add_static_constant("EVENT_ON_FLEX_CONTROLLERS_UPDATED", cFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED);
 	modEnts[defCFlex];
 }

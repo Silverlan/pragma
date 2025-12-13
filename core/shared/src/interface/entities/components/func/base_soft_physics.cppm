@@ -14,9 +14,9 @@ export namespace pragma {
 	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
-		pragma::physics::PhysSoftBodyInfo *GetSoftBodyInfo();
+		physics::PhysSoftBodyInfo *GetSoftBodyInfo();
 	  protected:
 		bool SetKeyValue(std::string key, std::string val);
-		pragma::physics::PhysSoftBodyInfo m_softBodyInfo = {};
+		physics::PhysSoftBodyInfo m_softBodyInfo = {};
 	};
 };

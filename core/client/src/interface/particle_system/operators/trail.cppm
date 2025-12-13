@@ -16,23 +16,23 @@ export namespace pragma::pts {
 		std::vector<uint32_t> m_particleNodes;
 	public:
 		CParticleOperatorTrail() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void Simulate(pragma::pts::CParticle &particle, double tDelta, float strength) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 	};
 }
 
-void pragma::pts::CParticleOperatorTrail::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorTrail::Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &it : values) {
 		auto key = it.first;
-		pragma::string::to_lower(key);
+		string::to_lower(key);
 		if(key == "travel_time")
-			m_travelTime = pragma::util::to_float(it.second);
+			m_travelTime = util::to_float(it.second);
 	}
-	m_particleNodes.resize(static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount(), 0);
+	m_particleNodes.resize(static_cast<ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount(), 0);
 }
-void pragma::pts::CParticleOperatorTrail::Simulate(pragma::pts::CParticle &particle, double, float strength)
+void pragma::pts::CParticleOperatorTrail::Simulate(CParticle &particle, double, float strength)
 {
 	auto vel = particle.GetVelocity();
 	auto nodeIdx = particle.GetIndex();

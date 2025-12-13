@@ -38,16 +38,16 @@ export namespace pragma::gui::types {
 		void Refresh();
 	  protected:
 		struct ServerData {
-			pragma::networking::MasterServerQueryResult queryResult;
-			pragma::gui::WIHandle row = {};
+			networking::MasterServerQueryResult queryResult;
+			WIHandle row = {};
 		};
 		std::vector<ServerData> m_servers;
-		pragma::gui::WIHandle m_hServerList;
-		pragma::gui::WIHandle m_hRefresh;
-		pragma::gui::WIHandle m_hConnect;
+		WIHandle m_hServerList;
+		WIHandle m_hRefresh;
+		WIHandle m_hConnect;
 		bool m_bRefreshScheduled;
-		std::unique_ptr<pragma::networking::IMasterServerQueryDispatcher, void (*)(pragma::networking::IMasterServerQueryDispatcher *)> m_msQueryDispatcher = {nullptr, [](pragma::networking::IMasterServerQueryDispatcher *) {}};
-		void AddServer(const pragma::networking::MasterServerQueryResult &queryResult);
+		std::unique_ptr<networking::IMasterServerQueryDispatcher, void (*)(networking::IMasterServerQueryDispatcher *)> m_msQueryDispatcher = {nullptr, [](networking::IMasterServerQueryDispatcher *) {}};
+		void AddServer(const networking::MasterServerQueryResult &queryResult);
 		void OnServerDoubleClick(unsigned int idx);
 		void DisplayMessage(std::string msg);
 		void DoRefresh();

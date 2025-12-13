@@ -10,8 +10,8 @@ import :game;
 
 using namespace pragma;
 
-decltype(CEntityComponentManager::INVALID_COMPONENT) CEntityComponentManager::INVALID_COMPONENT = std::numeric_limits<decltype(CEntityComponentManager::INVALID_COMPONENT)>::max();
-NetEventId CBaseNetComponent::FindNetEvent(const std::string &evName) const { return pragma::get_cgame()->FindNetEvent(evName); }
+decltype(CEntityComponentManager::INVALID_COMPONENT) CEntityComponentManager::INVALID_COMPONENT = std::numeric_limits<decltype(INVALID_COMPONENT)>::max();
+NetEventId CBaseNetComponent::FindNetEvent(const std::string &evName) const { return get_cgame()->FindNetEvent(evName); }
 
 const std::vector<ComponentId> &CEntityComponentManager::GetServerComponentIdToClientComponentIdTable() const { return const_cast<CEntityComponentManager *>(this)->GetServerComponentIdToClientComponentIdTable(); }
 std::vector<ComponentId> &CEntityComponentManager::GetServerComponentIdToClientComponentIdTable() { return m_svComponentToClComponentTable; }

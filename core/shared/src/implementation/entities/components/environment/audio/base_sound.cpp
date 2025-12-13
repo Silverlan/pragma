@@ -8,7 +8,7 @@ import :entities.components.environment.audio.base_sound;
 
 using namespace pragma;
 
-void BaseEnvSoundComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void BaseEnvSoundComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseEnvSoundComponent;
 	{
@@ -16,8 +16,8 @@ void BaseEnvSoundComponent::RegisterMembers(pragma::EntityComponentManager &comp
 		auto memberInfo = create_component_member_info<T, TSound, [](const ComponentMemberInfo &info, T &component, const TSound &mdl) { component.SetSoundSource(mdl); }, static_cast<const TSound &(T::*)() const>(&T::GetSoundSource)>("sound", "", AttributeSpecializationType::File);
 		auto &metaData = memberInfo.AddMetaData();
 		metaData["assetType"] = "sound";
-		metaData["rootPath"] = pragma::util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Sound)).GetString();
-		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Sound, pragma::asset::FormatType::All);
+		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(asset::Type::Sound)).GetString();
+		metaData["extensions"] = pragma::asset::get_supported_extensions(asset::Type::Sound, asset::FormatType::All);
 		metaData["stripRootPath"] = true;
 		metaData["stripExtension"] = true;
 		registerMember(std::move(memberInfo));
@@ -62,35 +62,35 @@ void BaseEnvSoundComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "sound", false))
 			m_kvSoundName = kvData.value;
 		else if(pragma::string::compare<std::string>(kvData.key, "pitch", false))
-			m_kvPitch = pragma::util::to_float(kvData.value);
+			m_kvPitch = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "gain", false))
-			m_kvGain = pragma::util::to_float(kvData.value);
+			m_kvGain = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "rolloff", false))
-			m_kvRolloff = pragma::util::to_float(kvData.value);
+			m_kvRolloff = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "min_gain", false))
-			m_kvMinGain = pragma::util::to_float(kvData.value);
+			m_kvMinGain = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "max_gain", false))
-			m_kvMaxGain = pragma::util::to_float(kvData.value);
+			m_kvMaxGain = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "inner_cone", false))
-			m_kvInnerCone = pragma::util::to_float(kvData.value);
+			m_kvInnerCone = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "outer_cone", false))
-			m_kvOuterCone = pragma::util::to_float(kvData.value);
+			m_kvOuterCone = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "offset", false))
-			m_kvOffset = pragma::util::to_float(kvData.value);
+			m_kvOffset = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "reference_dist", false))
-			m_kvReferenceDist = pragma::util::to_float(kvData.value);
+			m_kvReferenceDist = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "max_dist", false))
-			m_kvMaxDist = pragma::util::to_float(kvData.value);
+			m_kvMaxDist = util::to_float(kvData.value);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		auto *snd = (m_sound != nullptr) ? m_sound.get() : nullptr;
 		if(pragma::string::compare<std::string>(inputData.input, "play", false)) {
@@ -111,11 +111,11 @@ void BaseEnvSoundComponent::Initialize()
 		}
 		else if(pragma::string::compare<std::string>(inputData.input, "fadein", false)) {
 			if(snd != nullptr) {
-				snd->FadeIn(pragma::util::to_float(inputData.data));
+				snd->FadeIn(util::to_float(inputData.data));
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "fadeout", false)) {
 				if(snd != nullptr) {
-					snd->FadeOut(pragma::util::to_float(inputData.data));
+					snd->FadeOut(util::to_float(inputData.data));
 				}
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "rewind", false)) {
@@ -130,69 +130,69 @@ void BaseEnvSoundComponent::Initialize()
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "setpitch", false)) {
 				if(snd != nullptr) {
-					snd->SetPitch(pragma::util::to_float(inputData.data));
+					snd->SetPitch(util::to_float(inputData.data));
 				}
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "setlooping", false)) {
 				if(snd != nullptr) {
-					snd->SetLooping(pragma::util::to_boolean(inputData.data));
+					snd->SetLooping(util::to_boolean(inputData.data));
 				}
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "setgain", false)) {
 				if(snd != nullptr) {
-					snd->SetGain(pragma::util::to_float(inputData.data));
+					snd->SetGain(util::to_float(inputData.data));
 				}
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "setrelativetolistener", false)) {
 				if(snd != nullptr) {
-					snd->SetRelative(pragma::util::to_boolean(inputData.data));
+					snd->SetRelative(util::to_boolean(inputData.data));
 				}
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "setoffset", false)) {
 				if(snd != nullptr) {
-					snd->SetOffset(pragma::util::to_float(inputData.data));
+					snd->SetOffset(util::to_float(inputData.data));
 				}
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "setsecoffset", false)) {
 				if(snd != nullptr) {
-					snd->SetTimeOffset(pragma::util::to_float(inputData.data));
+					snd->SetTimeOffset(util::to_float(inputData.data));
 				}
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "setrollofffactor", false)) {
 				if(snd != nullptr) {
-					snd->SetRolloffFactor(pragma::util::to_float(inputData.data));
+					snd->SetRolloffFactor(util::to_float(inputData.data));
 				}
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "setmaxdistance", false)) {
 				if(snd != nullptr) {
-					snd->SetMaxDistance(pragma::util::to_float(inputData.data));
+					snd->SetMaxDistance(util::to_float(inputData.data));
 				}
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "setmingain", false)) {
 				if(snd != nullptr) {
-					snd->SetMinGain(pragma::util::to_float(inputData.data));
+					snd->SetMinGain(util::to_float(inputData.data));
 				}
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "setmaxgain", false)) {
 				if(snd != nullptr) {
-					snd->SetMaxGain(pragma::util::to_float(inputData.data));
+					snd->SetMaxGain(util::to_float(inputData.data));
 				}
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "setconeinnerangle", false)) {
 				if(snd != nullptr) {
-					snd->SetInnerConeAngle(pragma::util::to_float(inputData.data));
+					snd->SetInnerConeAngle(util::to_float(inputData.data));
 				}
 			}
 			else if(pragma::string::compare<std::string>(inputData.input, "setconeouterangle", false)) {
 				if(snd != nullptr) {
-					snd->SetOuterConeAngle(pragma::util::to_float(inputData.data));
+					snd->SetOuterConeAngle(util::to_float(inputData.data));
 				}
 				else {
-					return pragma::util::EventReply::Unhandled;
+					return util::EventReply::Unhandled;
 				}
 			}
 		}
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	});
 	GetEntity().AddComponent("io");
 }
@@ -342,9 +342,9 @@ void BaseEnvSoundComponent::SetRelativeToListener(bool bRelative)
 	auto &ent = GetEntity();
 	auto spawnFlags = ent.GetSpawnFlags();
 	if(bRelative)
-		ent.SetSpawnFlags(spawnFlags | pragma::math::to_integral(SpawnFlags::PlayEverywhere));
+		ent.SetSpawnFlags(spawnFlags | math::to_integral(SpawnFlags::PlayEverywhere));
 	else
-		ent.SetSpawnFlags(spawnFlags & ~pragma::math::to_integral(SpawnFlags::PlayEverywhere));
+		ent.SetSpawnFlags(spawnFlags & ~math::to_integral(SpawnFlags::PlayEverywhere));
 	if(m_sound != nullptr)
 		m_sound->SetRelative(bRelative);
 }
@@ -353,25 +353,25 @@ void BaseEnvSoundComponent::SetPlayOnSpawn(bool bPlayOnSpawn)
 	auto &ent = GetEntity();
 	auto spawnFlags = ent.GetSpawnFlags();
 	if(bPlayOnSpawn)
-		ent.SetSpawnFlags(spawnFlags | pragma::math::to_integral(SpawnFlags::PlayOnSpawn));
+		ent.SetSpawnFlags(spawnFlags | math::to_integral(SpawnFlags::PlayOnSpawn));
 	else
-		ent.SetSpawnFlags(spawnFlags & ~pragma::math::to_integral(SpawnFlags::PlayOnSpawn));
+		ent.SetSpawnFlags(spawnFlags & ~math::to_integral(SpawnFlags::PlayOnSpawn));
 }
 void BaseEnvSoundComponent::SetLooping(bool bLoop)
 {
 	auto &ent = GetEntity();
 	auto spawnFlags = ent.GetSpawnFlags();
 	if(bLoop)
-		ent.SetSpawnFlags(spawnFlags | pragma::math::to_integral(SpawnFlags::IsLooped));
+		ent.SetSpawnFlags(spawnFlags | math::to_integral(SpawnFlags::IsLooped));
 	else
-		ent.SetSpawnFlags(spawnFlags & ~pragma::math::to_integral(SpawnFlags::IsLooped));
+		ent.SetSpawnFlags(spawnFlags & ~math::to_integral(SpawnFlags::IsLooped));
 	if(m_sound != nullptr)
 		m_sound->SetLooping(bLoop);
 }
-void BaseEnvSoundComponent::SetSoundType(pragma::audio::ALSoundType types)
+void BaseEnvSoundComponent::SetSoundType(audio::ALSoundType types)
 {
 	m_soundTypes = types;
-	GetEntity().SetSpawnFlags(GetEntity().GetSpawnFlags() & ~pragma::math::to_integral(SpawnFlags::AllTypes));
+	GetEntity().SetSpawnFlags(GetEntity().GetSpawnFlags() & ~math::to_integral(SpawnFlags::AllTypes));
 	if(m_sound != nullptr)
 		m_sound->SetType(types);
 }
@@ -383,17 +383,17 @@ void BaseEnvSoundComponent::InitializeSound()
 	auto *nw = ent.GetNetworkState();
 	auto spawnFlags = static_cast<SpawnFlags>(ent.GetSpawnFlags());
 	auto mode = audio::ALChannel::Auto;
-	auto createFlags = pragma::audio::ALCreateFlags::None;
+	auto createFlags = audio::ALCreateFlags::None;
 	if((spawnFlags & SpawnFlags::PlayEverywhere) == SpawnFlags::None) {
 		mode = audio::ALChannel::Mono;
-		createFlags = pragma::audio::ALCreateFlags::Mono;
+		createFlags = audio::ALCreateFlags::Mono;
 	}
 	nw->PrecacheSound(m_kvSoundName, mode);
 
 	auto type = m_soundTypes;
-	const std::unordered_map<SpawnFlags, pragma::audio::ALSoundType> types = {{SpawnFlags::Effect, pragma::audio::ALSoundType::Effect}, {SpawnFlags::Music, pragma::audio::ALSoundType::Music}, {SpawnFlags::Voice, pragma::audio::ALSoundType::Voice},
-	  {SpawnFlags::Weapon, pragma::audio::ALSoundType::Weapon}, {SpawnFlags::NPC, pragma::audio::ALSoundType::NPC}, {SpawnFlags::Player, pragma::audio::ALSoundType::Player}, {SpawnFlags::Vehicle, pragma::audio::ALSoundType::Vehicle},
-	  {SpawnFlags::Physics, pragma::audio::ALSoundType::Physics}, {SpawnFlags::Environment, pragma::audio::ALSoundType::Environment}, {SpawnFlags::GUI, pragma::audio::ALSoundType::GUI}};
+	const std::unordered_map<SpawnFlags, audio::ALSoundType> types = {{SpawnFlags::Effect, audio::ALSoundType::Effect}, {SpawnFlags::Music, audio::ALSoundType::Music}, {SpawnFlags::Voice, audio::ALSoundType::Voice},
+	  {SpawnFlags::Weapon, audio::ALSoundType::Weapon}, {SpawnFlags::NPC, audio::ALSoundType::NPC}, {SpawnFlags::Player, audio::ALSoundType::Player}, {SpawnFlags::Vehicle, audio::ALSoundType::Vehicle},
+	  {SpawnFlags::Physics, audio::ALSoundType::Physics}, {SpawnFlags::Environment, audio::ALSoundType::Environment}, {SpawnFlags::GUI, audio::ALSoundType::GUI}};
 	for(auto &pair : types) {
 		if((spawnFlags & pair.first) != SpawnFlags::None)
 			type |= pair.second;
@@ -449,7 +449,7 @@ void BaseEnvSoundComponent::Pause()
 }
 bool BaseEnvSoundComponent::IsPlaying() const { return (m_sound != nullptr) ? m_sound->IsPlaying() : false; }
 bool BaseEnvSoundComponent::IsPaused() const { return (m_sound != nullptr) ? m_sound->IsPaused() : true; }
-const std::shared_ptr<pragma::audio::ALSound> &BaseEnvSoundComponent::GetSound() const { return m_sound; }
+const std::shared_ptr<audio::ALSound> &BaseEnvSoundComponent::GetSound() const { return m_sound; }
 
 void BaseEnvSoundComponent::OnEntitySpawn()
 {

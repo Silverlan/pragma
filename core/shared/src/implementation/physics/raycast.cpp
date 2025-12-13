@@ -60,7 +60,7 @@ void pragma::physics::TraceResult::GetMeshes(pragma::geometry::ModelMesh **outMe
 	*outMesh = meshInfo->mesh;
 	*outSubMesh = meshInfo->subMesh;
 }
-msys::Material *pragma::physics::TraceResult::GetMaterial()
+pragma::material::Material *pragma::physics::TraceResult::GetMaterial()
 {
 	if(entity.valid() == false)
 		return nullptr;

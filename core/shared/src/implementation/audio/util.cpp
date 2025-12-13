@@ -14,7 +14,7 @@ void pragma::audio::get_full_sound_path(std::string &inOutPath, bool bPathRelati
 	const std::vector<std::string> supportedExtensions = engine_info::get_supported_audio_formats();
 	for(auto &extChk : supportedExtensions) {
 		auto extPath = inOutPath + '.' + extChk;
-		if(bPathRelativeToSounds ? FileManager::Exists("sounds\\" + extPath) : FileManager::Exists(extPath)) {
+		if(bPathRelativeToSounds ? fs::exists("sounds\\" + extPath) : fs::exists(extPath)) {
 			inOutPath = extPath;
 			break;
 		}

@@ -18,8 +18,8 @@ export {
 			float delay = 0.f;
 			int32_t times = -1;
 
-			void Write(VFilePtrReal &f);
-			void Read(VFilePtr &f);
+			void Write(fs::VFilePtrReal &f);
+			void Read(fs::VFilePtr &f);
 		};
 	};
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::asset::Output &output);

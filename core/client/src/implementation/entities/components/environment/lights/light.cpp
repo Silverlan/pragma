@@ -27,19 +27,19 @@ import :game;
 using namespace pragma;
 
 decltype(CLightComponent::s_lightCount) CLightComponent::s_lightCount = 0u;
-prosper::IUniformResizableBuffer &CLightComponent::GetGlobalRenderBuffer() { return pragma::LightDataBufferManager::GetInstance().GetGlobalRenderBuffer(); }
-prosper::IUniformResizableBuffer &CLightComponent::GetGlobalShadowBuffer() { return pragma::ShadowDataBufferManager::GetInstance().GetGlobalRenderBuffer(); }
-uint32_t CLightComponent::GetMaxLightCount() { return pragma::LightDataBufferManager::GetInstance().GetMaxCount(); }
-uint32_t CLightComponent::GetMaxShadowCount() { return pragma::ShadowDataBufferManager::GetInstance().GetMaxCount(); }
+prosper::IUniformResizableBuffer &CLightComponent::GetGlobalRenderBuffer() { return LightDataBufferManager::GetInstance().GetGlobalRenderBuffer(); }
+prosper::IUniformResizableBuffer &CLightComponent::GetGlobalShadowBuffer() { return ShadowDataBufferManager::GetInstance().GetGlobalRenderBuffer(); }
+uint32_t CLightComponent::GetMaxLightCount() { return LightDataBufferManager::GetInstance().GetMaxCount(); }
+uint32_t CLightComponent::GetMaxShadowCount() { return ShadowDataBufferManager::GetInstance().GetMaxCount(); }
 uint32_t CLightComponent::GetLightCount() { return s_lightCount; }
-ComponentEventId cLightComponent::EVENT_SHOULD_PASS_ENTITY = pragma::INVALID_COMPONENT_ID;
-ComponentEventId cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH = pragma::INVALID_COMPONENT_ID;
-ComponentEventId cLightComponent::EVENT_SHOULD_PASS_MESH = pragma::INVALID_COMPONENT_ID;
-ComponentEventId cLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS = pragma::INVALID_COMPONENT_ID;
-ComponentEventId cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX = pragma::INVALID_COMPONENT_ID;
-ComponentEventId cLightComponent::EVENT_HANDLE_SHADOW_MAP = pragma::INVALID_COMPONENT_ID;
-ComponentEventId cLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED = pragma::INVALID_COMPONENT_ID;
-void CLightComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+ComponentEventId cLightComponent::EVENT_SHOULD_PASS_ENTITY = INVALID_COMPONENT_ID;
+ComponentEventId cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH = INVALID_COMPONENT_ID;
+ComponentEventId cLightComponent::EVENT_SHOULD_PASS_MESH = INVALID_COMPONENT_ID;
+ComponentEventId cLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS = INVALID_COMPONENT_ID;
+ComponentEventId cLightComponent::EVENT_GET_TRANSFORMATION_MATRIX = INVALID_COMPONENT_ID;
+ComponentEventId cLightComponent::EVENT_HANDLE_SHADOW_MAP = INVALID_COMPONENT_ID;
+ComponentEventId cLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED = INVALID_COMPONENT_ID;
+void CLightComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	cLightComponent::EVENT_SHOULD_PASS_ENTITY = registerEvent("SHOULD_PASS_ENTITY", ComponentEventInfo::Type::Explicit);
 	cLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH = registerEvent("SHOULD_PASS_ENTITY_MESH", ComponentEventInfo::Type::Explicit);
@@ -51,8 +51,8 @@ void CLightComponent::RegisterEvents(pragma::EntityComponentManager &componentMa
 }
 void CLightComponent::InitializeBuffers()
 {
-	pragma::LightDataBufferManager::GetInstance().Initialize();
-	pragma::ShadowDataBufferManager::GetInstance().Initialize();
+	LightDataBufferManager::GetInstance().Initialize();
+	ShadowDataBufferManager::GetInstance().Initialize();
 }
 CLightComponent *CLightComponent::GetLightByBufferIndex(LightBufferIndex idx) { return LightDataBufferManager::GetInstance().GetLightByBufferIndex(idx); }
 CLightComponent *CLightComponent::GetLightByShadowBufferIndex(ShadowBufferIndex idx) { return ShadowDataBufferManager::GetInstance().GetLightByBufferIndex(idx); }
@@ -62,7 +62,7 @@ void CLightComponent::ClearBuffers()
 	ShadowDataBufferManager::GetInstance().Reset();
 }
 
-CLightComponent::CLightComponent(pragma::ecs::BaseEntity &ent) : CBaseLightComponent(ent), m_stateFlags {StateFlags::StaticUpdateRequired | StateFlags::FullUpdateRequired | StateFlags::AddToGameScene} {}
+CLightComponent::CLightComponent(ecs::BaseEntity &ent) : CBaseLightComponent(ent), m_stateFlags {StateFlags::StaticUpdateRequired | StateFlags::FullUpdateRequired | StateFlags::AddToGameScene} {}
 CLightComponent::~CLightComponent()
 {
 	--s_lightCount;
@@ -78,7 +78,7 @@ void CLightComponent::SetBaked(bool baked)
 	}
 	if(!m_renderBuffer && GetEntity().IsEnabled()) {
 		auto &flags = m_bufferData.flags;
-		pragma::math::set_flag(flags, LightBufferData::BufferFlags::TurnedOn, true);
+		math::set_flag(flags, LightBufferData::BufferFlags::TurnedOn, true);
 		InitializeRenderBuffer();
 		UpdateBuffers();
 	}
@@ -86,7 +86,7 @@ void CLightComponent::SetBaked(bool baked)
 void CLightComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CLightComponent::InitializeRenderBuffer()
 {
-	if(m_renderBuffer != nullptr || pragma::math::is_flag_set(m_lightFlags, LightFlags::BakedLightSource))
+	if(m_renderBuffer != nullptr || math::is_flag_set(m_lightFlags, LightFlags::BakedLightSource))
 		return;
 	m_renderBuffer = LightDataBufferManager::GetInstance().Request(*this, m_bufferData);
 }
@@ -106,9 +106,9 @@ void CLightComponent::DestroyRenderBuffer(bool freeBuffer)
 	if(m_renderBuffer == nullptr)
 		return;
 	auto flags = m_bufferData.flags;
-	pragma::math::set_flag(flags, LightBufferData::BufferFlags::TurnedOn, false);
+	math::set_flag(flags, LightBufferData::BufferFlags::TurnedOn, false);
 	if(m_renderBuffer != nullptr)
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), flags);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), flags);
 
 	auto buf = m_renderBuffer;
 	m_renderBuffer = nullptr;
@@ -131,7 +131,7 @@ void CLightComponent::DestroyShadowBuffer(bool freeBuffer)
 
 bool CLightComponent::ShouldRender() { return true; }
 
-bool CLightComponent::ShouldPass(const pragma::asset::Model &mdl, const pragma::geometry::CModelSubMesh &mesh)
+bool CLightComponent::ShouldPass(const asset::Model &mdl, const geometry::CModelSubMesh &mesh)
 {
 	auto &materials = mdl.GetMaterials();
 	auto texId = mdl.GetMaterialIndex(mesh);
@@ -139,7 +139,7 @@ bool CLightComponent::ShouldPass(const pragma::asset::Model &mdl, const pragma::
 		return false;
 	auto &mat = materials[*texId];
 	auto *info = mat.get()->GetShaderInfo();
-	if(info == nullptr || const_cast<pragma::util::ShaderInfo *>(info)->GetShader() == nullptr) // Ignore meshes with nodraw (Or invalid) shaders
+	if(info == nullptr || const_cast<util::ShaderInfo *>(info)->GetShader() == nullptr) // Ignore meshes with nodraw (Or invalid) shaders
 		return false;
 	CEShouldPassMesh evData {mdl, mesh};
 	InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_PASS_MESH, evData);
@@ -153,11 +153,11 @@ bool CLightComponent::ShouldPass(const ecs::CBaseEntity &ent, uint32_t &renderFl
 	if(ShouldCastShadows() == false)
 		return false;
 	CEShouldPassEntity evData {ent, renderFlags};
-	if(InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_PASS_ENTITY, evData) == pragma::util::EventReply::Handled)
+	if(InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_PASS_ENTITY, evData) == util::EventReply::Handled)
 		return evData.shouldPass;
 	return true;
 }
-bool CLightComponent::ShouldPass(const ecs::CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags)
+bool CLightComponent::ShouldPass(const ecs::CBaseEntity &ent, const geometry::CModelMesh &mesh, uint32_t &renderFlags)
 {
 	if(ShouldCastShadows() == false)
 		return false;
@@ -191,7 +191,7 @@ bool CLightComponent::IsInCone(const ecs::CBaseEntity &ent, const Vector3 &dir, 
 		return false;
 	auto &start = pTrComponentThis->GetPosition();
 	auto &sphere = pRenderComponent->GetUpdatedAbsoluteRenderSphere();
-	return pragma::math::intersection::sphere_cone(pTrComponent->GetPosition() + sphere.pos, sphere.radius, start, dir, angle);
+	return math::intersection::sphere_cone(pTrComponent->GetPosition() + sphere.pos, sphere.radius, start, dir, angle);
 }
 void CLightComponent::SetLightIntensity(float intensity, LightIntensityType type)
 {
@@ -208,7 +208,7 @@ void CLightComponent::UpdateLightIntensity()
 	m_bufferData.intensity = GetLightIntensityCandela();
 	if(m_renderBuffer == nullptr)
 		return;
-	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, intensity), m_bufferData.intensity);
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, intensity), m_bufferData.intensity);
 }
 bool CLightComponent::IsInRange(const ecs::CBaseEntity &ent) const
 {
@@ -224,7 +224,7 @@ bool CLightComponent::IsInRange(const ecs::CBaseEntity &ent) const
 	auto radius = pRadiusComponent->GetRadius();
 	return (uvec::distance(pos + sphere.pos, origin) <= (radius + sphere.radius)) ? true : false;
 }
-bool CLightComponent::IsInRange(const ecs::CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh) const
+bool CLightComponent::IsInRange(const ecs::CBaseEntity &ent, const geometry::CModelMesh &mesh) const
 {
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -239,23 +239,23 @@ bool CLightComponent::IsInRange(const ecs::CBaseEntity &ent, const pragma::geome
 	mesh.GetBounds(min, max);
 	min += pos;
 	max += pos;
-	return pragma::math::intersection::aabb_sphere(min, max, origin, radius);
+	return math::intersection::aabb_sphere(min, max, origin, radius);
 }
 
 bool CLightComponent::ShouldUpdateRenderPass(rendering::ShadowMapType smType) const
 {
 	CEShouldUpdateRenderPass evData {};
-	if(InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS, evData) == pragma::util::EventReply::Handled)
+	if(InvokeEventCallbacks(cLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS, evData) == util::EventReply::Handled)
 		return evData.shouldUpdate;
-	return pragma::math::is_flag_set(m_stateFlags, (smType == rendering::ShadowMapType::Static) ? StateFlags::StaticUpdateRequired : StateFlags::DynamicUpdateRequired);
+	return math::is_flag_set(m_stateFlags, (smType == rendering::ShadowMapType::Static) ? StateFlags::StaticUpdateRequired : StateFlags::DynamicUpdateRequired);
 }
 
 void CLightComponent::UpdateBuffers()
 {
 	if(m_renderBuffer != nullptr)
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, 0ull, m_bufferData);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, 0ull, m_bufferData);
 	if(m_shadowBuffer != nullptr && m_shadowBufferData != nullptr)
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_shadowBuffer, 0ull, m_shadowBufferData);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_shadowBuffer, 0ull, m_shadowBufferData);
 }
 void CLightComponent::UpdateShadowTypes()
 {
@@ -276,7 +276,7 @@ void CLightComponent::UpdateShadowTypes()
 	}
 	m_bufferData.shadowIndex = shadowIndex;
 	if(m_renderBuffer != nullptr)
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, shadowIndex), m_bufferData.shadowIndex);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, shadowIndex), m_bufferData.shadowIndex);
 }
 bool CLightComponent::ShouldCastShadows() const { return GetEffectiveShadowType() != ShadowType::None; }
 bool CLightComponent::ShouldCastDynamicShadows() const { return GetEffectiveShadowType() == ShadowType::Full; }
@@ -302,7 +302,7 @@ void CLightComponent::SetFalloffExponent(float falloffExponent)
 	BaseEnvLightComponent::SetFalloffExponent(falloffExponent);
 	m_bufferData.falloffExponent = falloffExponent;
 	if(m_renderBuffer != nullptr)
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, falloffExponent), m_bufferData.falloffExponent);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, falloffExponent), m_bufferData.falloffExponent);
 }
 
 uint32_t CLightComponent::GetShadowMapIndex(rendering::ShadowMapType smType) const
@@ -324,7 +324,7 @@ void CLightComponent::SetShadowMapIndex(uint32_t idx, rendering::ShadowMapType s
 		return;
 	target = idx;
 	if(m_renderBuffer != nullptr) {
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, (smType == rendering::ShadowMapType::Dynamic) ? offsetof(LightBufferData, shadowMapIndexDynamic) : offsetof(LightBufferData, shadowMapIndexStatic), target);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, (smType == rendering::ShadowMapType::Dynamic) ? offsetof(LightBufferData, shadowMapIndexDynamic) : offsetof(LightBufferData, shadowMapIndexStatic), target);
 	}
 }
 
@@ -341,7 +341,7 @@ void CLightComponent::InitializeShadowMap()
 	if(GetEffectiveShadowType() == ShadowType::None)
 		return;
 	CEHandleShadowMap ceData {};
-	if(BroadcastEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, ceData) == pragma::util::EventReply::Unhandled)
+	if(BroadcastEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, ceData) == util::EventReply::Unhandled)
 		m_shadowMapStatic = GetEntity().AddComponent<CShadowComponent>(true)->GetHandle();
 	else if(ceData.resultShadow)
 		m_shadowMapStatic = ceData.resultShadow->GetHandle();
@@ -349,7 +349,7 @@ void CLightComponent::InitializeShadowMap()
 		InitializeShadowMap(*m_shadowMapStatic);
 	if(GetEffectiveShadowType() == ShadowType::Full) {
 		CEHandleShadowMap ceData {};
-		if(BroadcastEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, ceData) == pragma::util::EventReply::Unhandled)
+		if(BroadcastEvent(cLightComponent::EVENT_HANDLE_SHADOW_MAP, ceData) == util::EventReply::Unhandled)
 			m_shadowMapDynamic = GetEntity().AddComponent<CShadowComponent>(true)->GetHandle();
 		else if(ceData.resultShadow)
 			m_shadowMapDynamic = ceData.resultShadow->GetHandle();
@@ -358,22 +358,22 @@ void CLightComponent::InitializeShadowMap()
 	}
 }
 
-void CLightComponent::SetStateFlag(StateFlags flag, bool enabled) { pragma::math::set_flag(m_stateFlags, flag, enabled); }
+void CLightComponent::SetStateFlag(StateFlags flag, bool enabled) { math::set_flag(m_stateFlags, flag, enabled); }
 
 void CLightComponent::SetMorphTargetsInShadowsEnabled(bool enabled) { SetStateFlag(StateFlags::EnableMorphTargetsInShadows, enabled); }
-bool CLightComponent::AreMorphTargetsInShadowsEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableMorphTargetsInShadows); }
+bool CLightComponent::AreMorphTargetsInShadowsEnabled() const { return math::is_flag_set(m_stateFlags, StateFlags::EnableMorphTargetsInShadows); }
 
 void CLightComponent::Initialize()
 {
 	CBaseLightComponent::Initialize();
 
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
 	ent.AddComponent<CShadowComponent>();
 
 	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<ComponentEvent> evData) {
-		pragma::math::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, true);
+		math::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, true);
 		if(m_renderBuffer != nullptr)
-			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
+			get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
 		else
 			InitializeRenderBuffer();
 		// TODO: This will update all light and shadow buffers for this light source.
@@ -382,23 +382,23 @@ void CLightComponent::Initialize()
 		// line can be removed!
 		UpdateBuffers();
 
-		(pragma::TickPolicy::Never);
+		(TickPolicy::Never);
 	});
 	BindEventUnhandled(baseToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<ComponentEvent> evData) {
-		pragma::math::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, false);
+		math::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, false);
 		if(m_renderBuffer != nullptr)
-			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
-		m_tTurnedOff = pragma::get_cgame()->RealTime();
+			get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
+		m_tTurnedOff = get_cgame()->RealTime();
 
-		SetTickPolicy(pragma::TickPolicy::Always);
-		SetNextTick(pragma::get_cgame()->CurTime() + 30.f);
+		SetTickPolicy(TickPolicy::Always);
+		SetNextTick(get_cgame()->CurTime() + 30.f);
 	});
 	BindEventUnhandled(cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
-		m_bufferData.sceneFlags = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetSceneFlags();
+		m_bufferData.sceneFlags = static_cast<ecs::CBaseEntity &>(GetEntity()).GetSceneFlags();
 		if(m_renderBuffer != nullptr)
-			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, sceneFlags), m_bufferData.sceneFlags);
+			get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, sceneFlags), m_bufferData.sceneFlags);
 	});
-	SetTickPolicy(pragma::TickPolicy::Never);
+	SetTickPolicy(TickPolicy::Never);
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent != nullptr)
 		reinterpret_cast<Vector3 &>(m_bufferData.position) = pTrComponent->GetPosition();
@@ -410,18 +410,18 @@ void CLightComponent::Initialize()
 }
 void CLightComponent::OnTick(double dt)
 {
-	auto frameId = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
+	auto frameId = get_cengine()->GetRenderContext().GetLastFrameId();
 	if(m_lastThink == frameId)
 		return;
 	m_lastThink = frameId;
 
-	if(pragma::get_cgame()->CurTime() - m_tTurnedOff > 30.0) {
+	if(get_cgame()->CurTime() - m_tTurnedOff > 30.0) {
 		if(m_renderBuffer != nullptr) {
 			auto pToggleComponent = GetEntity().GetComponent<CToggleComponent>();
 			if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn() == false)
 				DestroyRenderBuffer(); // Free buffer if light hasn't been on in 30 seconds
 		}
-		SetTickPolicy(pragma::TickPolicy::Never);
+		SetTickPolicy(TickPolicy::Never);
 	}
 }
 void CLightComponent::UpdateTransformationMatrix(const Mat4 &biasMatrix, const Mat4 &viewMatrix, const Mat4 &projectionMatrix)
@@ -432,7 +432,7 @@ void CLightComponent::UpdateTransformationMatrix(const Mat4 &biasMatrix, const M
 		m_shadowBufferData->depthVP = biasMatrix;
 	}
 	if(m_shadowBuffer != nullptr)
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_shadowBuffer, offsetof(ShadowBufferData, depthVP), biasMatrix);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_shadowBuffer, offsetof(ShadowBufferData, depthVP), biasMatrix);
 }
 void CLightComponent::UpdatePos()
 {
@@ -440,15 +440,15 @@ void CLightComponent::UpdatePos()
 	if(uvec::cmp(pos, reinterpret_cast<Vector3 &>(m_bufferData.position)) == false) {
 		reinterpret_cast<Vector3 &>(m_bufferData.position) = pos;
 		if(m_renderBuffer)
-			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, position), m_bufferData.position);
-		pragma::math::set_flag(m_stateFlags, StateFlags::FullUpdateRequired);
+			get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, position), m_bufferData.position);
+		math::set_flag(m_stateFlags, StateFlags::FullUpdateRequired);
 	}
 }
 void CLightComponent::UpdateDir()
 {
-	pragma::LightType lightType;
+	LightType lightType;
 	GetLight(lightType);
-	if(lightType != pragma::LightType::Point) {
+	if(lightType != LightType::Point) {
 		auto &rot = GetEntity().GetRotation();
 		auto dir = uquat::forward(rot);
 		if(uvec::cmp(dir, reinterpret_cast<Vector3 &>(m_bufferData.direction)) == false) {
@@ -456,8 +456,8 @@ void CLightComponent::UpdateDir()
 			if(m_bufferData.direction.x == 0.f && m_bufferData.direction.y == 0.f && m_bufferData.direction.z == 0.f)
 				m_bufferData.direction.z = 1.f;
 			if(m_renderBuffer)
-				pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, direction), m_bufferData.direction);
-			pragma::math::set_flag(m_stateFlags, StateFlags::FullUpdateRequired);
+				get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, direction), m_bufferData.direction);
+			math::set_flag(m_stateFlags, StateFlags::FullUpdateRequired);
 		}
 	}
 }
@@ -469,14 +469,14 @@ void CLightComponent::UpdateColor()
 	auto &color = colorC->GetColor();
 	m_bufferData.color = color;
 	if(m_renderBuffer != nullptr)
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, color), m_bufferData.color);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, color), m_bufferData.color);
 
 	if(color.a == 0 || (color.r == 0 && color.g == 0 && color.b == 0))
-		pragma::math::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, false);
+		math::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, false);
 	else {
 		auto pToggleComponent = GetEntity().GetComponent<CToggleComponent>();
 		if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn() == true)
-			pragma::math::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, true);
+			math::set_flag(m_bufferData.flags, LightBufferData::BufferFlags::TurnedOn, true);
 	}
 }
 void CLightComponent::UpdateRadius()
@@ -489,8 +489,8 @@ void CLightComponent::UpdateRadius()
 		return;
 	m_bufferData.position.w = radius;
 	if(m_renderBuffer != nullptr)
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, position) + offsetof(Vector4, w), m_bufferData.position.w);
-	pragma::math::set_flag(m_stateFlags, StateFlags::FullUpdateRequired);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, position) + offsetof(Vector4, w), m_bufferData.position.w);
+	math::set_flag(m_stateFlags, StateFlags::FullUpdateRequired);
 }
 void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
@@ -498,13 +498,13 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	if(typeid(component) == typeid(CTransformComponent)) {
 		auto &trC = static_cast<CTransformComponent &>(component);
 		FlagCallbackForRemoval(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
-		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
-			                         if(pragma::math::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged))
+		                         [this, &trC](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+			                         if(math::is_flag_set(static_cast<CEOnPoseChanged &>(evData.get()).changeFlags, TransformChangeFlags::PositionChanged))
 				                         UpdatePos();
 
-			                         if(pragma::math::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::RotationChanged))
+			                         if(math::is_flag_set(static_cast<CEOnPoseChanged &>(evData.get()).changeFlags, TransformChangeFlags::RotationChanged))
 				                         UpdateDir();
-			                         return pragma::util::EventReply::Unhandled;
+			                         return util::EventReply::Unhandled;
 		                         }),
 		  CallbackType::Component, &component);
 	}
@@ -518,19 +518,19 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		m_bufferData.flags &= ~(LightBufferData::BufferFlags::TypeSpot | LightBufferData::BufferFlags::TypePoint | LightBufferData::BufferFlags::TypeDirectional);
 		m_bufferData.flags |= LightBufferData::BufferFlags::TypeSpot;
 		if(m_renderBuffer != nullptr)
-			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
+			get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
 	}
 	else if(typeid(component) == typeid(CLightPointComponent)) {
 		m_bufferData.flags &= ~(LightBufferData::BufferFlags::TypeSpot | LightBufferData::BufferFlags::TypePoint | LightBufferData::BufferFlags::TypeDirectional);
 		m_bufferData.flags |= LightBufferData::BufferFlags::TypePoint;
 		if(m_renderBuffer != nullptr)
-			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
+			get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
 	}
 	else if(typeid(component) == typeid(CLightDirectionalComponent)) {
 		m_bufferData.flags &= ~(LightBufferData::BufferFlags::TypeSpot | LightBufferData::BufferFlags::TypePoint | LightBufferData::BufferFlags::TypeDirectional);
 		m_bufferData.flags |= LightBufferData::BufferFlags::TypeDirectional;
 		if(m_renderBuffer != nullptr)
-			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
+			get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
 	}
 	else if(typeid(component) == typeid(CShadowComponent))
 		m_shadowComponent = &static_cast<CShadowComponent &>(component);
@@ -546,10 +546,10 @@ void CLightComponent::OnEntitySpawn()
 	CBaseLightComponent::OnEntitySpawn();
 	InitializeShadowMap();
 
-	if(pragma::math::is_flag_set(m_lightFlags, LightFlags::BakedLightSource)) {
+	if(math::is_flag_set(m_lightFlags, LightFlags::BakedLightSource)) {
 		m_bufferData.flags |= LightBufferData::BufferFlags::BakedLightSource;
 		if(m_renderBuffer != nullptr)
-			pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
+			get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, flags), m_bufferData.flags);
 	}
 	UpdatePos();
 	UpdateDir();
@@ -557,13 +557,13 @@ void CLightComponent::OnEntitySpawn()
 	UpdateColor();
 }
 
-const pragma::LightBufferData &CLightComponent::GetBufferData() const { return const_cast<CLightComponent *>(this)->GetBufferData(); }
-pragma::LightBufferData &CLightComponent::GetBufferData() { return m_bufferData; }
-const pragma::ShadowBufferData *CLightComponent::GetShadowBufferData() const { return const_cast<CLightComponent *>(this)->GetShadowBufferData(); }
-pragma::ShadowBufferData *CLightComponent::GetShadowBufferData() { return m_shadowBufferData.get(); }
+const LightBufferData &CLightComponent::GetBufferData() const { return const_cast<CLightComponent *>(this)->GetBufferData(); }
+LightBufferData &CLightComponent::GetBufferData() { return m_bufferData; }
+const ShadowBufferData *CLightComponent::GetShadowBufferData() const { return const_cast<CLightComponent *>(this)->GetShadowBufferData(); }
+ShadowBufferData *CLightComponent::GetShadowBufferData() { return m_shadowBufferData.get(); }
 
 template<typename TCPPM>
-pragma::ComponentHandle<TCPPM> CLightComponent::GetShadowMap(rendering::ShadowMapType type) const
+ComponentHandle<TCPPM> CLightComponent::GetShadowMap(rendering::ShadowMapType type) const
 {
 	if(type == rendering::ShadowMapType::Dynamic) {
 		if(m_shadowMapDynamic.expired())
@@ -574,7 +574,7 @@ pragma::ComponentHandle<TCPPM> CLightComponent::GetShadowMap(rendering::ShadowMa
 		return pragma::ComponentHandle<TCPPM> {};
 	return const_cast<BaseEntityComponent *>(m_shadowMapStatic.get())->GetHandle<TCPPM>();
 }
-template pragma::ComponentHandle<CShadowComponent> CLightComponent::GetShadowMap(rendering::ShadowMapType type) const;
+template ComponentHandle<CShadowComponent> CLightComponent::GetShadowMap(rendering::ShadowMapType type) const;
 
 template<typename TCPPM>
 TCPPM *CLightComponent::GetShadowComponent()
@@ -617,14 +617,14 @@ void CLightComponent::SetShadowBuffer(const std::shared_ptr<prosper::IBuffer> &r
 
 ///////////////////
 
-static void debug_light_sources(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_light_sources(NetworkState *state, BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	context.WaitIdle();
 
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
+	ecs::EntityIterator entIt {*get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CLightComponent>>();
-	std::vector<pragma::CLightComponent *> lights;
+	std::vector<CLightComponent *> lights;
 	lights.reserve(entIt.GetCount());
 	for(auto *ent : entIt)
 		lights.push_back(ent->GetComponent<CLightComponent>().get());
@@ -668,10 +668,10 @@ static void debug_light_sources(pragma::NetworkState *state, pragma::BasePlayerC
 		Con::cout << "\t\tDirection: (" << data.direction.x << "," << data.direction.y << "," << data.direction.z << ")" << Con::endl;
 		Con::cout << "\t\tCone Start Offset: " << data.direction.w << Con::endl;
 		Con::cout << "\t\tDistance: " << data.position.w << Con::endl;
-		Con::cout << "\t\tOuter cone half-angle: " << pragma::math::rad_to_deg(data.outerConeHalfAngle) << Con::endl;
-		Con::cout << "\t\tInner cone half-angle: " << pragma::math::rad_to_deg(data.innerConeHalfAngle) << Con::endl;
+		Con::cout << "\t\tOuter cone half-angle: " << math::rad_to_deg(data.outerConeHalfAngle) << Con::endl;
+		Con::cout << "\t\tInner cone half-angle: " << math::rad_to_deg(data.innerConeHalfAngle) << Con::endl;
 		Con::cout << "\t\tAttenuation: " << data.attenuation << Con::endl;
-		Con::cout << "\t\tFlags: " << pragma::math::to_integral(data.flags) << Con::endl;
+		Con::cout << "\t\tFlags: " << math::to_integral(data.flags) << Con::endl;
 		Con::cout << "\t\tTurned On: " << (((data.flags & LightBufferData::BufferFlags::TurnedOn) == LightBufferData::BufferFlags::TurnedOn) ? "Yes" : "No") << Con::endl;
 	};
 
@@ -694,9 +694,9 @@ static void debug_light_sources(pragma::NetworkState *state, pragma::BasePlayerC
 
 	auto *rawData = bufData.data();
 	for(auto i = decltype(numTotal) {0u}; i < numTotal; ++i) {
-		pragma::util::ScopeGuard sg {[&rawData, &buf]() { rawData += buf.GetStride(); }};
+		util::ScopeGuard sg {[&rawData, &buf]() { rawData += buf.GetStride(); }};
 		auto &data = *reinterpret_cast<LightBufferData *>(rawData);
-		if(!pragma::math::is_flag_set(data.flags, LightBufferData::BufferFlags::TurnedOn))
+		if(!math::is_flag_set(data.flags, LightBufferData::BufferFlags::TurnedOn))
 			continue;
 		Con::cout << "Buffer Index: " << i << Con::endl;
 		printBufferData(data);
@@ -708,16 +708,16 @@ static void debug_light_sources(pragma::NetworkState *state, pragma::BasePlayerC
 	for(auto *l : lights) {
 		Con::cout << "Light #" << lightId << ":" << Con::endl;
 		Con::cout << "\tType: ";
-		auto type = pragma::LightType::Undefined;
+		auto type = LightType::Undefined;
 		auto *pLight = l->GetLight(type);
 		switch(type) {
-		case pragma::LightType::Directional:
+		case LightType::Directional:
 			Con::cout << "Directional";
 			break;
-		case pragma::LightType::Point:
+		case LightType::Point:
 			Con::cout << "Point";
 			break;
-		case pragma::LightType::Spot:
+		case LightType::Spot:
 			Con::cout << "Spot";
 			break;
 		default:
@@ -744,7 +744,7 @@ static void debug_light_sources(pragma::NetworkState *state, pragma::BasePlayerC
 	}
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_light_sources", &debug_light_sources, pragma::console::ConVarFlags::None, "Prints debug information about all light sources in the scene.");
+	auto UVN = console::client::register_command("debug_light_sources", &debug_light_sources, console::ConVarFlags::None, "Prints debug information about all light sources in the scene.");
 }
 
 /////////////////
@@ -754,12 +754,12 @@ void CEShouldPassEntity::PushArguments(lua::State *l) {}
 
 /////////////////
 
-CEShouldPassMesh::CEShouldPassMesh(const pragma::asset::Model &model, const pragma::geometry::CModelSubMesh &mesh) : model {model}, mesh {mesh} {}
+CEShouldPassMesh::CEShouldPassMesh(const asset::Model &model, const geometry::CModelSubMesh &mesh) : model {model}, mesh {mesh} {}
 void CEShouldPassMesh::PushArguments(lua::State *l) {}
 
 /////////////////
 
-CEShouldPassEntityMesh::CEShouldPassEntityMesh(const ecs::CBaseEntity &entity, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags) : entity {entity}, mesh {mesh}, renderFlags {renderFlags} {}
+CEShouldPassEntityMesh::CEShouldPassEntityMesh(const ecs::CBaseEntity &entity, const geometry::CModelMesh &mesh, uint32_t &renderFlags) : entity {entity}, mesh {mesh}, renderFlags {renderFlags} {}
 void CEShouldPassEntityMesh::PushArguments(lua::State *l) {}
 
 /////////////////

@@ -11,7 +11,7 @@ export import :entities.components.base;
 export namespace pragma {
 	class DLLNETWORK BaseGameComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
@@ -19,6 +19,6 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
-		BaseGameComponent(pragma::ecs::BaseEntity &ent);
+		BaseGameComponent(ecs::BaseEntity &ent);
 	};
 };

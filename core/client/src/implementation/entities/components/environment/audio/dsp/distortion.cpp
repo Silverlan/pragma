@@ -22,10 +22,10 @@ void CSoundDspDistortionComponent::ReceiveData(NetPacket &packet)
 void CSoundDspDistortionComponent::OnEntitySpawn()
 {
 	//BaseEnvSoundDspDistortion::OnEntitySpawn(); // Not calling BaseEnvSoundDspDistortion::OnEntitySpawn() to skip the dsp effect lookup
-	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
+	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	al::EfxDistortionProperties props {};
+	pragma::audio::EfxDistortionProperties props {};
 	props.flEdge = m_kvEdge;
 	props.flGain = m_kvGain;
 	props.flLowpassCutoff = m_kvLowpassCutoff;

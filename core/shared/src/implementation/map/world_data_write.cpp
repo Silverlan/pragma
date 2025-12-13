@@ -8,7 +8,7 @@ module pragma.shared;
 
 import :map.world_data;
 
-void pragma::asset::Output::Write(VFilePtrReal &f)
+void pragma::asset::Output::Write(fs::VFilePtrReal &f)
 {
 	auto lname = name;
 	pragma::string::to_lower(lname);
@@ -22,7 +22,7 @@ void pragma::asset::Output::Write(VFilePtrReal &f)
 
 /////////
 
-void pragma::asset::WorldData::WriteDataOffset(VFilePtrReal &f, uint64_t offsetToOffset)
+void pragma::asset::WorldData::WriteDataOffset(fs::VFilePtrReal &f, uint64_t offsetToOffset)
 {
 	auto offset = f->Tell();
 	f->Seek(offsetToOffset);
@@ -37,12 +37,12 @@ bool pragma::asset::WorldData::Write(const std::string &fileName, std::string *o
 	nFileName += ".wld";
 	auto fullPath = pragma::util::CONVERT_PATH + nFileName;
 	auto pathNoFile = ufile::get_path_from_filename(fullPath);
-	if(FileManager::CreatePath(pathNoFile.c_str()) == false) {
+	if(fs::create_path(pathNoFile) == false) {
 		if(optOutErrMsg)
 			*optOutErrMsg = "Unable to create path '" + pathNoFile + "'!";
 		return false;
 	}
-	auto fOut = FileManager::OpenFile<VFilePtrReal>(fullPath.c_str(), "wb");
+	auto fOut = fs::open_file<fs::VFilePtrReal>(fullPath, fs::FileMode::Write | fs::FileMode::Binary);
 	if(fOut == nullptr) {
 		if(optOutErrMsg)
 			*optOutErrMsg = "Unable to write file '" + nFileName + "'!";
@@ -246,12 +246,12 @@ bool pragma::asset::WorldData::Save(const std::string &fileName, const std::stri
 
 	auto asciiFormat = pragma::string::compare(*ext, std::string {PMAP_EXTENSION_ASCII}, false);
 	auto filePath = pragma::util::Path::CreateFile(fileName);
-	auto fileMode = filemanager::FileMode::Write;
+	auto fileMode = fs::FileMode::Write;
 	if(!asciiFormat)
-		fileMode |= filemanager::FileMode::Binary;
+		fileMode |= fs::FileMode::Binary;
 	auto absFilePath = filePath.GetString();
-	filemanager::find_local_path(absFilePath, absFilePath);
-	auto f = filemanager::open_file(absFilePath, fileMode);
+	fs::find_local_path(absFilePath, absFilePath);
+	auto f = fs::open_file(absFilePath, fileMode);
 	if(!f) {
 		outErr = "Failed to open file '" + filePath.GetString() + "' for writing.";
 		return false;
@@ -395,7 +395,7 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 	return true;
 }
 
-void pragma::asset::WorldData::Write(VFilePtrReal &f)
+void pragma::asset::WorldData::Write(fs::VFilePtrReal &f)
 {
 	auto mapName = pragma::util::Path::CreateFile(f->GetPath());
 	while(pragma::string::compare<std::string_view>(mapName.GetFront(), "maps", false) == false)
@@ -474,7 +474,7 @@ void pragma::asset::WorldData::Write(VFilePtrReal &f)
 	m_messageLogger("All operations are complete!");
 }
 
-void pragma::asset::WorldData::WriteMaterials(VFilePtrReal &f)
+void pragma::asset::WorldData::WriteMaterials(fs::VFilePtrReal &f)
 {
 	f->Write<uint32_t>(m_materialTable.size());
 	for(auto &str : m_materialTable) {
@@ -488,7 +488,7 @@ void pragma::asset::WorldData::WriteMaterials(VFilePtrReal &f)
 	}
 }
 
-void pragma::asset::WorldData::WriteBSPTree(VFilePtrReal &f)
+void pragma::asset::WorldData::WriteBSPTree(fs::VFilePtrReal &f)
 {
 	auto &bspTree = *m_bspTree;
 	std::vector<std::vector<size_t>> clusterNodes;
@@ -537,7 +537,7 @@ void pragma::asset::WorldData::WriteBSPTree(VFilePtrReal &f)
 	f->Write(clusterVisibility.data(), clusterVisibility.size() * sizeof(clusterVisibility.front()));
 }
 
-void pragma::asset::WorldData::WriteEntities(VFilePtrReal &f)
+void pragma::asset::WorldData::WriteEntities(fs::VFilePtrReal &f)
 {
 	f->Write<uint32_t>(m_entities.size());
 
@@ -604,16 +604,16 @@ bool pragma::asset::WorldData::SaveLightmapAtlas(const std::string &mapName)
 		return false;
 	}
 	// Build lightmap texture
-	uimg::TextureSaveInfo saveInfo {};
+	image::TextureSaveInfo saveInfo {};
 	auto &texInfo = saveInfo.texInfo;
-	texInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
-	// texInfo.flags = uimg::TextureInfo::Flags::SRGB;
-	texInfo.inputFormat = uimg::TextureInfo::InputFormat::R16G16B16A16_Float;
-	texInfo.outputFormat = uimg::TextureInfo::OutputFormat::HDRColorMap;
+	texInfo.containerFormat = image::TextureInfo::ContainerFormat::DDS;
+	// texInfo.flags = image::TextureInfo::Flags::SRGB;
+	texInfo.inputFormat = image::TextureInfo::InputFormat::R16G16B16A16_Float;
+	texInfo.outputFormat = image::TextureInfo::OutputFormat::HDRColorMap;
 	auto matPath = "materials/maps/" + mapName;
-	FileManager::CreatePath(matPath.c_str());
+	fs::create_path(matPath);
 	auto filePath = matPath + "/lightmap_atlas.dds";
-	auto result = uimg::save_texture(filePath, *m_lightMapAtlas, saveInfo, [](const std::string &msg) { Con::cwar << "Unable to save lightmap atlas: " << msg << Con::endl; });
+	auto result = image::save_texture(filePath, *m_lightMapAtlas, saveInfo, [](const std::string &msg) { Con::cwar << "Unable to save lightmap atlas: " << msg << Con::endl; });
 	if(result)
 		m_messageLogger("Lightmap atlas has been saved as '" + filePath + "'!");
 	else

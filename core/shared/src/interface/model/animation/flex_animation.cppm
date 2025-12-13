@@ -42,7 +42,7 @@ export {
 		float GetFps() const { return m_fps; }
 
 		bool Save(udm::AssetDataArg outData, std::string &outErr);
-		bool SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f);
+		bool SaveLegacy(std::shared_ptr<pragma::fs::VFilePtrInternalReal> &f);
 
 		bool operator==(const FlexAnimation &other) const;
 		bool operator!=(const FlexAnimation &other) const { return !operator==(other); }

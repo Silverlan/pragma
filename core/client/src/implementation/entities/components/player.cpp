@@ -52,16 +52,16 @@ std::ostream &CPlayerComponent::print(std::ostream &os)
 	return os;
 }
 
-CPlayerComponent::CPlayerComponent(pragma::ecs::BaseEntity &ent) : BasePlayerComponent(ent), m_crouchViewOffset(nullptr), m_upDirOffset(nullptr)
+CPlayerComponent::CPlayerComponent(ecs::BaseEntity &ent) : BasePlayerComponent(ent), m_crouchViewOffset(nullptr), m_upDirOffset(nullptr)
 {
 	s_players.push_back(this);
 
-	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_SUBMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_SUBMERGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto pSoundEmitterComponent = ent.GetComponent<CSoundEmitterComponent>();
 		if(pSoundEmitterComponent.valid()) {
 			if(m_sndUnderwater == nullptr) {
-				m_sndUnderwater = pragma::get_client_state()->CreateSound("fx.underwater", pragma::audio::ALSoundType::Effect, pragma::audio::ALCreateFlags::Mono);
+				m_sndUnderwater = get_client_state()->CreateSound("fx.underwater", audio::ALSoundType::Effect, audio::ALCreateFlags::Mono);
 				m_sndUnderwater->SetRelative(true);
 			}
 			if(m_sndUnderwater != nullptr) {
@@ -70,7 +70,7 @@ CPlayerComponent::CPlayerComponent(pragma::ecs::BaseEntity &ent) : BasePlayerCom
 			}
 		}
 	});
-	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_EMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_EMERGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		if(m_sndUnderwater != nullptr)
 			m_sndUnderwater->FadeOut(0.1f);
 	});
@@ -91,7 +91,7 @@ CPlayerComponent::~CPlayerComponent()
 
 void CPlayerComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void CPlayerComponent::OnDeployWeapon(pragma::ecs::BaseEntity &ent) {}
+void CPlayerComponent::OnDeployWeapon(ecs::BaseEntity &ent) {}
 
 void CPlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
@@ -111,17 +111,17 @@ void CPlayerComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 		m_observableComponent = nullptr;
 }
 
-pragma::util::EventReply CPlayerComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply CPlayerComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BasePlayerComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BasePlayerComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == baseCharacterComponent::EVENT_ON_DEPLOY_WEAPON)
 		OnDeployWeapon(static_cast<const CEOnDeployWeapon &>(evData).weapon);
 	else if(eventId == baseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON)
 		OnSetActiveWeapon(static_cast<const CEOnSetActiveWeapon &>(evData).weapon);
 	else if(eventId == baseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED)
 		OnSetCharacterOrientation(static_cast<const CEOnSetCharacterOrientation &>(evData).up);
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 
 void CPlayerComponent::OnSetUpDirection(const Vector3 &direction)
@@ -134,27 +134,27 @@ void CPlayerComponent::OnSetUpDirection(const Vector3 &direction)
 	//m_upDirOffset = std::make_unique<DeltaTransform>(Vector3(0,0,0),rot,4);
 }
 
-void CPlayerComponent::OnSetActiveWeapon(pragma::ecs::BaseEntity *ent)
+void CPlayerComponent::OnSetActiveWeapon(ecs::BaseEntity *ent)
 {
 	auto charComponent = GetEntity().GetCharacterComponent();
 	auto *prevWeapon = charComponent.valid() ? charComponent->GetActiveWeapon() : nullptr;
 	if(prevWeapon != nullptr && prevWeapon->IsWeapon())
-		static_cast<pragma::CWeaponComponent &>(*prevWeapon->GetWeaponComponent()).UpdateOwnerAttachment();
+		static_cast<CWeaponComponent &>(*prevWeapon->GetWeaponComponent()).UpdateOwnerAttachment();
 }
 
 void CPlayerComponent::OnWaterSubmerged()
 {
 	if(IsLocalPlayer() == false || m_cbUnderwaterDsp.valid() == true)
 		return;
-	auto *entDsp = pragma::get_cgame()->CreateEntity<CEnvSoundDsp>();
+	auto *entDsp = get_cgame()->CreateEntity<CEnvSoundDsp>();
 	if(entDsp == nullptr)
 		return;
-	auto *pDspComponent = static_cast<pragma::BaseEnvSoundDspComponent *>(entDsp->FindComponent("sound_dsp").get());
-	entDsp->SetKeyValue("spawnflags", std::to_string(pragma::math::to_integral(pragma::BaseEnvSoundDspComponent::SpawnFlags::All | pragma::BaseEnvSoundDspComponent::SpawnFlags::AffectRelative)));
+	auto *pDspComponent = static_cast<BaseEnvSoundDspComponent *>(entDsp->FindComponent("sound_dsp").get());
+	entDsp->SetKeyValue("spawnflags", std::to_string(math::to_integral(BaseEnvSoundDspComponent::SpawnFlags::All | BaseEnvSoundDspComponent::SpawnFlags::AffectRelative)));
 	if(pDspComponent != nullptr)
 		pDspComponent->SetDSPEffect("underwater");
 	entDsp->Spawn();
-	auto *pToggleComponent = static_cast<pragma::BaseToggleComponent *>(entDsp->FindComponent("toggle").get());
+	auto *pToggleComponent = static_cast<BaseToggleComponent *>(entDsp->FindComponent("toggle").get());
 	if(pToggleComponent != nullptr)
 		pToggleComponent->TurnOn();
 	m_cbUnderwaterDsp = entDsp->GetHandle();
@@ -169,13 +169,13 @@ void CPlayerComponent::OnWaterEmerged()
 
 void CPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang, float dur)
 {
-	auto tStart = pragma::get_cgame()->CurTime();
+	auto tStart = get_cgame()->CurTime();
 	auto cb = FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>>::Create(nullptr);
 	static_cast<Callback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>> *>(cb.get())->SetFunction([cb, tStart, ang, dur](std::reference_wrapper<Vector3>, std::reference_wrapper<Quat> rot) mutable {
-		auto &t = pragma::get_cgame()->CurTime();
-		auto tDelta = pragma::math::min(static_cast<float>(t - tStart), dur);
-		auto sc = static_cast<float>(pragma::math::sin(tDelta / (dur / 2.f) * pragma::math::pi_2));
-		EulerAngles rotOffset {static_cast<float>(pragma::math::approach_angle(0.f, ang.p, pragma::math::abs(ang.p) * sc)), static_cast<float>(pragma::math::approach_angle(0.f, ang.y, pragma::math::abs(ang.y) * sc)), static_cast<float>(pragma::math::approach_angle(0.f, ang.r, pragma::math::abs(ang.r) * sc))};
+		auto &t = get_cgame()->CurTime();
+		auto tDelta = math::min(static_cast<float>(t - tStart), dur);
+		auto sc = static_cast<float>(math::sin(tDelta / (dur / 2.f) * math::pi_2));
+		EulerAngles rotOffset {static_cast<float>(math::approach_angle(0.f, ang.p, math::abs(ang.p) * sc)), static_cast<float>(math::approach_angle(0.f, ang.y, math::abs(ang.y) * sc)), static_cast<float>(math::approach_angle(0.f, ang.r, math::abs(ang.r) * sc))};
 		rot.get() = rot.get() * uquat::create(rotOffset);
 		if(tDelta >= dur) {
 			cb.Remove();
@@ -187,19 +187,19 @@ void CPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang, float dur
 			pragma::get_cgame()->AddCallback("CalcView",cb);*/ // Makes sure the camera rotation STAYS at the designated rotation (Works, but only reasonable for pitch-axis, and at half the duration -> Useless?)
 		}
 	});
-	pragma::get_cgame()->AddCallback("CalcViewOffset", cb);
+	get_cgame()->AddCallback("CalcViewOffset", cb);
 }
 
-bool CPlayerComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+bool CPlayerComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvApplyViewRotationOffset) {
-		auto ang = pragma::networking::read_angles(packet);
+		auto ang = networking::read_angles(packet);
 		auto dur = packet->Read<float>();
 		ApplyViewRotationOffset(ang, dur);
 	}
 	else if(eventId == m_netEvPrintMessage) {
 		auto msg = packet->ReadString();
-		auto type = static_cast<pragma::console::MESSAGE>(packet->Read<std::underlying_type_t<pragma::console::MESSAGE>>());
+		auto type = static_cast<console::MESSAGE>(packet->Read<std::underlying_type_t<console::MESSAGE>>());
 		PrintMessage(msg, type);
 	}
 	else if(eventId == m_netEvRespawn) {
@@ -223,23 +223,23 @@ void CPlayerComponent::Initialize()
 {
 	BasePlayerComponent::Initialize();
 
-	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_SUBMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnWaterSubmerged(); });
-	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_EMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnWaterEmerged(); });
-	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW_SHADOW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_SUBMERGED, [this](std::reference_wrapper<ComponentEvent> evData) { OnWaterSubmerged(); });
+	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_EMERGED, [this](std::reference_wrapper<ComponentEvent> evData) { OnWaterEmerged(); });
+	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW_SHADOW, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &shouldDrawData = static_cast<CEShouldDraw &>(evData.get());
 		if(ShouldDrawShadow() == false) {
 			shouldDrawData.shouldDraw = false;
-			return pragma::util::EventReply::Handled;
+			return util::EventReply::Handled;
 		}
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUpdateMatrices(static_cast<CEOnUpdateRenderMatrices &>(evData.get()).transformation); });
+	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES, [this](std::reference_wrapper<ComponentEvent> evData) { OnUpdateMatrices(static_cast<CEOnUpdateRenderMatrices &>(evData.get()).transformation); });
 
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
-		pPhysComponent->SetCollisionType(pragma::physics::CollisionType::AABB);
+		pPhysComponent->SetCollisionType(physics::CollisionType::AABB);
 
 	GetEntity().AddComponent<CObservableComponent>();
 	if(m_observableComponent)
@@ -267,7 +267,7 @@ void CPlayerComponent::OnUpdateMatrices(Mat4 &transformMatrix)
 
 void CPlayerComponent::UpdateViewModelTransform()
 {
-	auto *vm = pragma::get_cgame()->GetViewModel<pragma::CViewModelComponent>();
+	auto *vm = get_cgame()->GetViewModel<CViewModelComponent>();
 	if(vm == nullptr)
 		return;
 	auto &vmEnt = vm->GetEntity();
@@ -286,17 +286,17 @@ void CPlayerComponent::UpdateViewModelTransform()
 	auto pAttComponent = vmEnt.AddComponent<CAttachmentComponent>();
 	if(pAttComponent.valid()) {
 		AttachmentInfo attInfo {};
-		attInfo.flags |= pragma::FAttachmentMode::PlayerView | pragma::FAttachmentMode::UpdateEachFrame;
+		attInfo.flags |= FAttachmentMode::PlayerView | FAttachmentMode::UpdateEachFrame;
 		pAttComponent->AttachToEntity(&ent, attInfo);
 	}
 }
 
 void CPlayerComponent::UpdateViewFOV()
 {
-	auto *vm = pragma::get_cgame()->GetViewModel<pragma::CViewModelComponent>();
+	auto *vm = get_cgame()->GetViewModel<CViewModelComponent>();
 	if(vm == nullptr)
 		return;
-	pragma::get_cgame()->SetViewModelFOV(vm->GetViewFOV());
+	get_cgame()->SetViewModelFOV(vm->GetViewFOV());
 }
 
 void CPlayerComponent::SetLocalPlayer(bool b)
@@ -313,7 +313,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 
 	if(b == false)
 		return;
-	auto *vm = pragma::get_cgame()->GetViewModel<pragma::CViewModelComponent>();
+	auto *vm = get_cgame()->GetViewModel<CViewModelComponent>();
 	if(vm != nullptr) {
 		auto &vmEnt = vm->GetEntity();
 		UpdateViewModelTransform();
@@ -322,7 +322,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 			vmEnt.Spawn();
 	}
 	auto &ent = GetEntity();
-	auto *body = pragma::get_cgame()->GetViewBody<pragma::CViewBodyComponent>();
+	auto *body = get_cgame()->GetViewBody<CViewBodyComponent>();
 	if(body != nullptr) {
 		auto &entBody = body->GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
@@ -336,14 +336,14 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 		auto pAttComponent = entBody.AddComponent<CAttachmentComponent>();
 		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
-			attInfo.flags |= pragma::FAttachmentMode::PlayerViewYaw | pragma::FAttachmentMode::BoneMerge | pragma::FAttachmentMode::UpdateEachFrame;
+			attInfo.flags |= FAttachmentMode::PlayerViewYaw | FAttachmentMode::BoneMerge | FAttachmentMode::UpdateEachFrame;
 			pAttComponent->AttachToEntity(&ent, attInfo);
 		}
 		//body->SetRenderMode(RenderMode::None);
 		if(!entBody.IsSpawned())
 			entBody.Spawn();
 	}
-	auto *listener = pragma::get_cgame()->GetListener<pragma::CListenerComponent>();
+	auto *listener = get_cgame()->GetListener<CListenerComponent>();
 	if(listener != nullptr) {
 		auto &entListener = listener->GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
@@ -355,7 +355,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 		auto pAttComponent = entListener.AddComponent<CAttachmentComponent>();
 		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
-			attInfo.flags |= pragma::FAttachmentMode::PlayerView;
+			attInfo.flags |= FAttachmentMode::PlayerView;
 			pAttComponent->AttachToEntity(&ent, attInfo);
 		}
 		if(!entListener.IsSpawned())
@@ -368,8 +368,8 @@ bool CPlayerComponent::ShouldDraw() const
 	if(!IsLocalPlayer())
 		return true;
 #pragma message("TODO: Find a better way to enable rendering, if being rendered through anything but the main camera (e.g. reflections)!")
-	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
-	if(pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>() != scene)
+	auto *scene = get_cgame()->GetScene<CSceneComponent>();
+	if(get_cgame()->GetRenderScene<CSceneComponent>() != scene)
 		return true;
 	if(!m_observableComponent)
 		return true;
@@ -390,13 +390,13 @@ void CPlayerComponent::OnTick(double tDelta)
 	BasePlayerComponent::OnTick(tDelta);
 
 	if(m_crouchViewOffset != nullptr) {
-		pragma::math::DeltaOffset &doffset = *m_crouchViewOffset;
+		math::DeltaOffset &doffset = *m_crouchViewOffset;
 		if(doffset.time <= 0)
 			m_crouchViewOffset = nullptr;
 		else {
-			doffset.delta = pragma::math::min(doffset.delta + tDelta / 0.2, 1.0); // 0.2 seconds to reach full speed
+			doffset.delta = math::min(doffset.delta + tDelta / 0.2, 1.0); // 0.2 seconds to reach full speed
 			float scale = CFloat((doffset.delta * tDelta) / doffset.time);
-			scale = pragma::math::min(scale, 1.0f);
+			scale = math::min(scale, 1.0f);
 			Vector3 mv = doffset.offset * scale;
 			doffset.offset -= mv;
 			if(m_observableComponent)
@@ -407,13 +407,13 @@ void CPlayerComponent::OnTick(double tDelta)
 		}
 	}
 	if(m_upDirOffset != nullptr) {
-		pragma::math::DeltaTransform &dtrans = *m_upDirOffset;
+		math::DeltaTransform &dtrans = *m_upDirOffset;
 		if(dtrans.time <= 0)
 			m_upDirOffset = nullptr;
 		else {
-			dtrans.delta = pragma::math::min(dtrans.delta + tDelta / 0.2, 1.0); // 0.2 seconds to reach full speed
+			dtrans.delta = math::min(dtrans.delta + tDelta / 0.2, 1.0); // 0.2 seconds to reach full speed
 			float scale = CFloat((dtrans.delta * tDelta) / dtrans.time);
-			scale = pragma::math::min(scale, 1.0f);
+			scale = math::min(scale, 1.0f);
 
 			Vector3 mv = dtrans.offset * scale;
 			dtrans.offset -= mv;
@@ -431,21 +431,21 @@ void CPlayerComponent::OnCrouch()
 	Vector3 viewOffset {};
 	if(m_observableComponent)
 		viewOffset = m_observableComponent->GetViewOffset();
-	m_crouchViewOffset = std::make_unique<pragma::math::DeltaOffset>(Vector3(0, m_crouchEyeLevel - viewOffset.y, 0), 0.2f);
+	m_crouchViewOffset = std::make_unique<math::DeltaOffset>(Vector3(0, m_crouchEyeLevel - viewOffset.y, 0), 0.2f);
 }
 void CPlayerComponent::OnUnCrouch()
 {
 	Vector3 viewOffset {};
 	if(m_observableComponent)
 		viewOffset = m_observableComponent->GetViewOffset();
-	m_crouchViewOffset = std::make_unique<pragma::math::DeltaOffset>(Vector3(0, m_standEyeLevel - viewOffset.y, 0), 0.4f);
+	m_crouchViewOffset = std::make_unique<math::DeltaOffset>(Vector3(0, m_standEyeLevel - viewOffset.y, 0), 0.4f);
 }
 void CPlayerComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BasePlayerComponent)); }
 void CPlayerComponent::ReceiveData(NetPacket &packet)
 {
 	m_timeConnected = packet->Read<double>();
 	auto hThis = GetHandle();
-	pragma::networking::read_unique_entity(packet, [hThis, this](pragma::ecs::BaseEntity *ent) {
+	networking::read_unique_entity(packet, [hThis, this](ecs::BaseEntity *ent) {
 		if(ent == nullptr || hThis.expired())
 			return;
 		m_entFlashlight = ent->GetHandle();
@@ -460,19 +460,19 @@ void CPlayerComponent::ReceiveData(NetPacket &packet)
 		auto pAttComponent = ent->AddComponent<CAttachmentComponent>();
 		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
-			attInfo.flags |= pragma::FAttachmentMode::PlayerView | pragma::FAttachmentMode::UpdateEachFrame;
+			attInfo.flags |= FAttachmentMode::PlayerView | FAttachmentMode::UpdateEachFrame;
 			pAttComponent->AttachToEntity(&entThis, attInfo);
 		}
 	});
 }
 
-void CPlayerComponent::PrintMessage(std::string message, pragma::console::MESSAGE type)
+void CPlayerComponent::PrintMessage(std::string message, console::MESSAGE type)
 {
 	switch(type) {
-	case pragma::console::MESSAGE::PRINTCONSOLE:
+	case console::MESSAGE::PRINTCONSOLE:
 		Con::cout << message << Con::endl;
 		break;
-	case pragma::console::MESSAGE::PRINTCHAT:
+	case console::MESSAGE::PRINTCHAT:
 		{
 			// TODO
 			//auto *l = client->GetLuaState();
@@ -500,14 +500,14 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 	auto m = glm::mat4_cast(rotDst);
 	EulerAngles ang;
 	glm::gtx::extractEulerAngleYXZ(m, ang.y, ang.p, ang.r);
-	ang.p = pragma::math::rad_to_deg(ang.p);
-	ang.y = pragma::math::rad_to_deg(ang.y);
-	ang.r = pragma::math::rad_to_deg(ang.r);
+	ang.p = math::rad_to_deg(ang.p);
+	ang.y = math::rad_to_deg(ang.y);
+	ang.r = math::rad_to_deg(ang.r);
 	//
 
 	auto fToQuat = [](const EulerAngles &ang) {
 		auto m = umat::identity();
-		m = glm::gtx::eulerAngleYXZ(pragma::math::deg_to_rad(ang.y), pragma::math::deg_to_rad(ang.p), pragma::math::deg_to_rad(ang.r));
+		m = glm::gtx::eulerAngleYXZ(math::deg_to_rad(ang.y), math::deg_to_rad(ang.p), math::deg_to_rad(ang.r));
 		auto q = glm::gtc::quat_cast(m);
 		return q;
 	};
@@ -559,7 +559,7 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 void CPlayerComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BasePlayerComponent::RegisterLuaBindings(l, modEnts);
-	auto def = pragma::LuaCore::create_entity_component_class<pragma::CPlayerComponent, pragma::BasePlayerComponent>("PlayerComponent");
-	def.def("IsInFirstPersonMode", &pragma::CPlayerComponent::IsInFirstPersonMode);
+	auto def = pragma::LuaCore::create_entity_component_class<CPlayerComponent, BasePlayerComponent>("PlayerComponent");
+	def.def("IsInFirstPersonMode", &CPlayerComponent::IsInFirstPersonMode);
 	modEnts[def];
 }

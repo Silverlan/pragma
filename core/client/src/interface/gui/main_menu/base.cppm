@@ -15,8 +15,8 @@ export namespace pragma::gui::types {
 	  public:
 		WIMainMenuBase();
 		virtual void Initialize() override;
-		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
-		virtual pragma::util::EventReply KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual util::EventReply MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods) override;
+		virtual util::EventReply KeyboardCallback(platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods) override;
 		void SelectItem(int i);
 		void SelectNextItem();
 		void SelectPreviousItem();
@@ -29,11 +29,11 @@ export namespace pragma::gui::types {
 		void UpdateElements();
 		void UpdateElement(int i);
 	  protected:
-		std::vector<pragma::gui::WIHandle> m_elements;
-		std::vector<pragma::gui::WIHandle> m_optionLists = {};
-		pragma::gui::WIHandle m_menuElementsContainer = {};
+		std::vector<WIHandle> m_elements;
+		std::vector<WIHandle> m_optionLists = {};
+		WIHandle m_menuElementsContainer = {};
 		int m_selected;
-		pragma::gui::WIHandle m_hControlSettings;
+		WIHandle m_hControlSettings;
 		void OnGoBack(int button, int action, int mods);
 		virtual void InitializeOptionsList(WIOptionsList *pList);
 		WIOptionsList *InitializeOptionsList();
@@ -42,8 +42,8 @@ export namespace pragma::gui::types {
 
 	class DLLCLIENT WIMainMenuElement : public WIBase {
 	  protected:
-		pragma::gui::WIHandle m_hBackground;
-		pragma::gui::WIHandle m_hText;
+		WIHandle m_hBackground;
+		WIHandle m_hText;
 		bool m_bSelected;
 	  public:
 		WIMainMenuElement();
@@ -52,7 +52,7 @@ export namespace pragma::gui::types {
 		void Select();
 		void Deselect();
 		void SetText(std::string &text);
-		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual util::EventReply MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods) override;
 		virtual void OnCursorEntered() override;
 		virtual void OnCursorExited() override;
 		void Activate();

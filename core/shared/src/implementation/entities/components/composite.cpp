@@ -11,25 +11,25 @@ using namespace compositeComponent;
 
 CompositeGroup::CompositeGroup(CompositeComponent &compositeC, const std::string &name) : m_compositeComponent {&compositeC}, m_groupName {name} {}
 CompositeGroup::~CompositeGroup() { ClearEntities(false); }
-std::unordered_map<CompositeGroup::UuidHash, EntityHandle>::const_iterator CompositeGroup::FindEntity(pragma::ecs::BaseEntity &ent) const
+std::unordered_map<CompositeGroup::UuidHash, EntityHandle>::const_iterator CompositeGroup::FindEntity(BaseEntity &ent) const
 {
-	auto hash = pragma::util::get_uuid_hash(ent.GetUuid());
+	auto hash = util::get_uuid_hash(ent.GetUuid());
 	return m_ents.find(hash);
 }
-void CompositeGroup::AddEntity(pragma::ecs::BaseEntity &ent)
+void CompositeGroup::AddEntity(BaseEntity &ent)
 {
 	if(FindEntity(ent) != m_ents.end())
 		return;
 	m_ents[util::get_uuid_hash(ent.GetUuid())] = ent.GetHandle();
-	m_compositeComponent->BroadcastEvent(compositeComponent::EVENT_ON_ENTITY_ADDED, events::CECompositeEntityChanged {*this, ent});
+	m_compositeComponent->BroadcastEvent(EVENT_ON_ENTITY_ADDED, events::CECompositeEntityChanged {*this, ent});
 }
-void CompositeGroup::RemoveEntity(pragma::ecs::BaseEntity &ent)
+void CompositeGroup::RemoveEntity(BaseEntity &ent)
 {
 	auto it = FindEntity(ent);
 	if(it == m_ents.end())
 		return;
 	m_ents.erase(it);
-	m_compositeComponent->BroadcastEvent(compositeComponent::EVENT_ON_ENTITY_REMOVED, events::CECompositeEntityChanged {*this, ent});
+	m_compositeComponent->BroadcastEvent(EVENT_ON_ENTITY_REMOVED, events::CECompositeEntityChanged {*this, ent});
 }
 CompositeGroup *CompositeGroup::FindChildGroup(const std::string &name)
 {
@@ -70,13 +70,13 @@ void CompositeGroup::ClearEntities(bool safely)
 
 pragma::ComponentEventId compositeComponent::EVENT_ON_ENTITY_ADDED = INVALID_COMPONENT_ID;
 pragma::ComponentEventId compositeComponent::EVENT_ON_ENTITY_REMOVED = INVALID_COMPONENT_ID;
-void CompositeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void CompositeComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	compositeComponent::EVENT_ON_ENTITY_ADDED = registerEvent("ON_COMPOSITE_ENTITY_ADDED", ComponentEventInfo::Type::Broadcast);
 	compositeComponent::EVENT_ON_ENTITY_REMOVED = registerEvent("ON_COMPOSITE_ENTITY_REMOVED", ComponentEventInfo::Type::Broadcast);
 }
 
-CompositeComponent::CompositeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_rootGroup {std::make_unique<CompositeGroup>(*this, "root")} {}
+CompositeComponent::CompositeComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_rootGroup {std::make_unique<CompositeGroup>(*this, "root")} {}
 void CompositeComponent::Initialize() { BaseEntityComponent::Initialize(); }
 
 void CompositeComponent::OnRemove()
@@ -87,7 +87,7 @@ void CompositeComponent::OnRemove()
 
 void CompositeComponent::ClearEntities(bool safely) { m_rootGroup->ClearEntities(safely); }
 
-void CompositeComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CompositeComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 static void write_group(udm::LinkedPropertyWrapperArg udmGroup, const CompositeGroup &group)
 {
@@ -110,7 +110,7 @@ void CompositeComponent::Save(udm::LinkedPropertyWrapperArg udm)
 	BaseEntityComponent::Save(udm);
 	write_group(udm["rootGroup"], *m_rootGroup);
 }
-static void read_group(pragma::ecs::BaseEntity &ent, udm::LinkedPropertyWrapperArg udmGroup, CompositeGroup &group)
+static void read_group(BaseEntity &ent, udm::LinkedPropertyWrapperArg udmGroup, CompositeGroup &group)
 {
 	std::vector<std::string> ents;
 	udmGroup["entities"](ents);
@@ -121,7 +121,7 @@ static void read_group(pragma::ecs::BaseEntity &ent, udm::LinkedPropertyWrapperA
 	std::unordered_set<pragma::util::Hash> set;
 	for(auto uuid : ents)
 		set.insert(toHash(pragma::util::uuid_string_to_bytes(uuid)));
-	pragma::ecs::EntityIterator entIt {*ent.GetNetworkState()->GetGameState(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
+	EntityIterator entIt {*ent.GetNetworkState()->GetGameState(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 	for(auto *ent : entIt) {
 		auto it = set.find(toHash(ent->GetUuid()));
 		if(it == set.end())
@@ -141,8 +141,8 @@ void CompositeComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t versio
 	read_group(GetEntity(), udm["rootGroup"], *m_rootGroup);
 }
 
-pragma::ecs::events::CECompositeEntityChanged::CECompositeEntityChanged(CompositeGroup &group, pragma::ecs::BaseEntity &ent) : ent {ent}, group {group} {}
-void pragma::ecs::events::CECompositeEntityChanged::PushArguments(lua::State *l)
+events::CECompositeEntityChanged::CECompositeEntityChanged(CompositeGroup &group, BaseEntity &ent) : ent {ent}, group {group} {}
+void events::CECompositeEntityChanged::PushArguments(lua::State *l)
 {
 	Lua::Push<CompositeGroup *>(l, &group);
 	ent.GetLuaObject().push(l);

@@ -17,7 +17,7 @@ export namespace pragma {
 
 #pragma pack(push, 1)
 		struct MotionBlurPushConstants {
-			static constexpr auto Offset = sizeof(ShaderPrepassBase::PushConstants);
+			static constexpr auto Offset = sizeof(PushConstants);
 			Vector3 padding;
 			Mat4 prevPose;
 		};

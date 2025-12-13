@@ -12,7 +12,7 @@ import :model;
 
 using namespace pragma;
 
-void CLightMapReceiverComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) { using T = CLightMapReceiverComponent; }
+void CLightMapReceiverComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember) { using T = CLightMapReceiverComponent; }
 void CLightMapReceiverComponent::SetupLightMapUvData(ecs::CBaseEntity &ent, rendering::LightmapDataCache *cache)
 {
 	auto mdl = ent.GetModel();
@@ -53,12 +53,12 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 		return;
 	}
 	m_modelName = mdl->GetName();
-	pragma::math::set_flag(m_stateFlags, StateFlags::IsModelBakedWithLightMaps, true);
+	math::set_flag(m_stateFlags, StateFlags::IsModelBakedWithLightMaps, true);
 	m_uvDataPerMesh.clear();
 	m_meshes.clear();
 	m_meshToMeshIdx.clear();
 	m_meshToBufIdx.clear();
-	pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty);
+	math::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty);
 	uint32_t subMeshIdx = 0u;
 	auto wasInitialized = false;
 	for(auto &subMesh : renderC->GetRenderMeshes()) {
@@ -69,14 +69,14 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 		}
 		m_uvDataPerMesh.insert(std::make_pair(subMeshIdx, *uvSet));
 		m_meshes.insert(std::make_pair(subMeshIdx, subMesh));
-		m_meshToMeshIdx.insert(std::make_pair(static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get()), subMeshIdx));
+		m_meshToMeshIdx.insert(std::make_pair(static_cast<geometry::CModelSubMesh *>(subMesh.get()), subMeshIdx));
 		++subMeshIdx;
 	}
 	UpdateRenderMeshBufferList();
 }
-const pragma::rendering::LightmapDataCache *CLightMapReceiverComponent::GetLightmapDataCache() const { return m_lightmapDataCache.get(); }
+const rendering::LightmapDataCache *CLightMapReceiverComponent::GetLightmapDataCache() const { return m_lightmapDataCache.get(); }
 void CLightMapReceiverComponent::SetLightmapDataCache(rendering::LightmapDataCache *cache) { m_lightmapDataCache = cache ? cache->shared_from_this() : nullptr; }
-const std::vector<Vector2> *CLightMapReceiverComponent::FindLightmapUvSet(pragma::geometry::ModelSubMesh &mesh) const
+const std::vector<Vector2> *CLightMapReceiverComponent::FindLightmapUvSet(geometry::ModelSubMesh &mesh) const
 {
 	auto *cache = GetLightmapDataCache();
 	if(cache)
@@ -112,11 +112,11 @@ void CLightMapReceiverComponent::UpdateRenderMeshBufferList()
 		CLightMapComponent::LOGGER.warn("Unable to update render mesh buffer list: No model component found for entity '{}'!", GetEntity().ToString());
 		return;
 	}
-	pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty, false);
+	math::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty, false);
 	auto &renderMeshes = static_cast<CModelComponent *>(mdlC)->GetRenderMeshes();
 	m_meshBufferIndices.resize(renderMeshes.size());
 	for(auto i = decltype(renderMeshes.size()) {0u}; i < renderMeshes.size(); ++i) {
-		auto bufIdx = FindBufferIndex(static_cast<pragma::geometry::CModelSubMesh &>(*renderMeshes[i]));
+		auto bufIdx = FindBufferIndex(static_cast<geometry::CModelSubMesh &>(*renderMeshes[i]));
 		m_meshBufferIndices[i] = bufIdx.has_value() ? *bufIdx : std::numeric_limits<BufferIdx>::max();
 	}
 }
@@ -142,11 +142,11 @@ void CLightMapReceiverComponent::UpdateModelMeshes()
 			continue;
 		meshIdxToBufIdx.insert(std::make_pair(pair.second, it->second));
 	}
-	pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty);
+	math::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty);
 	m_meshToBufIdx.clear();
 	m_meshToMeshIdx.clear();
 	uint32_t subMeshIdx = 0u;
-	std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes;
+	std::vector<std::shared_ptr<geometry::ModelMesh>> meshes;
 	mdlC->GetBaseModelMeshes(meshes);
 	for(auto &mesh : meshes) {
 		for(auto &subMesh : mesh->GetSubMeshes()) {
@@ -158,8 +158,8 @@ void CLightMapReceiverComponent::UpdateModelMeshes()
 			m_meshes.insert(std::make_pair(subMeshIdx, subMesh));
 			auto itBufIdx = meshIdxToBufIdx.find(subMeshIdx);
 			if(itBufIdx != meshIdxToBufIdx.end()) {
-				m_meshToBufIdx.insert(std::make_pair(static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get()), itBufIdx->second));
-				m_meshToMeshIdx.insert(std::make_pair(static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get()), subMeshIdx));
+				m_meshToBufIdx.insert(std::make_pair(static_cast<geometry::CModelSubMesh *>(subMesh.get()), itBufIdx->second));
+				m_meshToMeshIdx.insert(std::make_pair(static_cast<geometry::CModelSubMesh *>(subMesh.get()), subMeshIdx));
 			}
 			++subMeshIdx;
 		}
@@ -173,18 +173,18 @@ void CLightMapReceiverComponent::AssignBufferIndex(MeshIdx meshIdx, BufferIdx bu
 		CLightMapComponent::LOGGER.warn("Unable to assign buffer index for buffer {} of mesh {} to lightmap receiver component of entity {}: Mesh not found!", bufIdx, meshIdx, GetEntity().ToString());
 		return;
 	}
-	m_meshToBufIdx.insert(std::make_pair(static_cast<pragma::geometry::CModelSubMesh *>(itMesh->second.get()), bufIdx));
-	pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty);
+	m_meshToBufIdx.insert(std::make_pair(static_cast<geometry::CModelSubMesh *>(itMesh->second.get()), bufIdx));
+	math::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty);
 }
-std::optional<pragma::CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent::GetBufferIndex(RenderMeshIndex meshIdx) const
+std::optional<CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent::GetBufferIndex(RenderMeshIndex meshIdx) const
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty))
+	if(math::is_flag_set(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty))
 		const_cast<CLightMapReceiverComponent *>(this)->UpdateRenderMeshBufferList();
-	return (meshIdx < m_meshBufferIndices.size() && m_meshBufferIndices[meshIdx] != std::numeric_limits<BufferIdx>::max()) ? m_meshBufferIndices[meshIdx] : std::optional<pragma::CLightMapReceiverComponent::BufferIdx> {};
+	return (meshIdx < m_meshBufferIndices.size() && m_meshBufferIndices[meshIdx] != std::numeric_limits<BufferIdx>::max()) ? m_meshBufferIndices[meshIdx] : std::optional<BufferIdx> {};
 }
-std::optional<CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent::FindBufferIndex(pragma::geometry::CModelSubMesh &mesh) const
+std::optional<CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent::FindBufferIndex(geometry::CModelSubMesh &mesh) const
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::IsModelBakedWithLightMaps) == false)
+	if(math::is_flag_set(m_stateFlags, StateFlags::IsModelBakedWithLightMaps) == false)
 		return {};
 	auto it = m_meshToBufIdx.find(&mesh);
 	if(it == m_meshToBufIdx.end())
@@ -200,11 +200,11 @@ void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent 
 		return;
 	}
 	uint32_t subMeshIdx = 0u;
-	std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes;
+	std::vector<std::shared_ptr<geometry::ModelMesh>> meshes;
 	mdlC->GetBaseModelMeshes(meshes);
 	for(auto &mesh : meshes) {
 		for(auto &subMesh : mesh->GetSubMeshes()) {
-			auto bufIdx = FindBufferIndex(*static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get()));
+			auto bufIdx = FindBufferIndex(*static_cast<geometry::CModelSubMesh *>(subMesh.get()));
 			if(bufIdx.has_value() == false)
 				continue;
 			auto *pUvBuffer = lightMapC.GetMeshLightMapUvBuffer(*bufIdx);
@@ -212,8 +212,8 @@ void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent 
 			if(pUvBuffer != nullptr)
 				pLightMapUvBuffer = pUvBuffer;
 			else
-				pLightMapUvBuffer = pragma::get_cengine()->GetRenderContext().GetDummyBuffer().get();
-			mdlC->SetLightmapUvBuffer(*static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get()), pLightMapUvBuffer->shared_from_this());
+				pLightMapUvBuffer = get_cengine()->GetRenderContext().GetDummyBuffer().get();
+			mdlC->SetLightmapUvBuffer(*static_cast<geometry::CModelSubMesh *>(subMesh.get()), pLightMapUvBuffer->shared_from_this());
 		}
 	}
 }

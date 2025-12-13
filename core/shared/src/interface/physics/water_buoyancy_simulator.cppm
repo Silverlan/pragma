@@ -18,7 +18,7 @@ export namespace pragma::physics {
 		double CalcBuoyancy(const Quat &rorigin, const PhysLiquid &liquid, const Vector3 &waterPlane, double waterPlaneDist, const Vector3 &waterPlaneRelObj, double waterPlaneDistRelObj, const Vector3 &waterVelocity, double gravity, InputItVert vertsBegin, InputItIndex indicesBegin,
 		  InputItIndex indicesEnd, double mass, double volBody, const Vector3 &bodyVelocity, const Vector3 &bodyAngularVelocity, Vector3 *force = nullptr, Vector3 *torque = nullptr, Vector3 *optOutSubmergedCenter = nullptr) const;
 		// Not safe to call, unless particle heights of surface simulator were locked!
-		void Simulate(pragma::ecs::BaseEntity &entWater, const PhysLiquid &liquid, pragma::ecs::BaseEntity &ent, Vector3 waterPlane, double waterPlaneDist, const Vector3 &waterVelocity, const PhysWaterSurfaceSimulator *surfaceSim = nullptr) const;
+		void Simulate(ecs::BaseEntity &entWater, const PhysLiquid &liquid, ecs::BaseEntity &ent, Vector3 waterPlane, double waterPlaneDist, const Vector3 &waterVelocity, const PhysWaterSurfaceSimulator *surfaceSim = nullptr) const;
 	  protected:
 		Vector3 CalcBuoyancy(double liquidDensity, double submergedVolume, double gravity, const Vector3 &liquidUpVec) const;
 		Vector3 CalcTorque(const Quat &rorigin, const Vector3 &centerBody, const Vector3 &centerSubmergedVolume, double liquidDensity, double submergedVolume, double gravity, const Vector3 &liquidUpVec) const;

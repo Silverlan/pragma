@@ -21,10 +21,10 @@ export {
 		class NetworkState;
 	};
 	namespace pragma::console {
-		DLLNETWORK std::vector<pragma::ecs::BaseEntity *> find_target_entity(pragma::NetworkState *state, pragma::BaseCharacterComponent &pl, std::vector<std::string> &argv, const std::function<void(pragma::physics::TraceData &)> &trCallback = nullptr);
-		DLLNETWORK std::vector<pragma::ecs::BaseEntity *> find_trace_targets(pragma::NetworkState *state, pragma::BaseCharacterComponent &pl, const std::function<void(pragma::physics::TraceData &)> &trCallback = nullptr);
-		DLLNETWORK std::vector<pragma::ecs::BaseEntity *> find_named_targets(pragma::NetworkState *state, const std::string &targetName);
+		DLLNETWORK std::vector<ecs::BaseEntity *> find_target_entity(NetworkState *state, BaseCharacterComponent &pl, std::vector<std::string> &argv, const std::function<void(physics::TraceData &)> &trCallback = nullptr);
+		DLLNETWORK std::vector<ecs::BaseEntity *> find_trace_targets(NetworkState *state, BaseCharacterComponent &pl, const std::function<void(physics::TraceData &)> &trCallback = nullptr);
+		DLLNETWORK std::vector<ecs::BaseEntity *> find_named_targets(NetworkState *state, const std::string &targetName);
 
-		DLLNETWORK std::vector<std::pair<pragma::ecs::BaseEntity *, float>> get_sorted_entities(pragma::Game &game, ::pragma::BasePlayerComponent *pl = nullptr);
+		DLLNETWORK std::vector<std::pair<ecs::BaseEntity *, float>> get_sorted_entities(Game &game, BasePlayerComponent *pl = nullptr);
 	};
 };

@@ -11,9 +11,9 @@ export import :rendering.shaders.scene;
 export namespace pragma {
 	class DLLCLIENT ShaderFlat : public ShaderScene {
 	  public:
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_UV;
+		static VertexBinding VERTEX_BINDING_VERTEX;
+		static VertexAttribute VERTEX_ATTRIBUTE_POSITION;
+		static VertexAttribute VERTEX_ATTRIBUTE_UV;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;

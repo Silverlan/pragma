@@ -15,25 +15,25 @@ BaseActorComponent::HitboxData::HitboxData(uint32_t _boneId, const Vector3 &_off
 ComponentEventId baseActorComponent::EVENT_ON_KILLED = INVALID_COMPONENT_ID;
 ComponentEventId baseActorComponent::EVENT_ON_RESPAWN = INVALID_COMPONENT_ID;
 ComponentEventId baseActorComponent::EVENT_ON_DEATH = INVALID_COMPONENT_ID;
-void BaseActorComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void BaseActorComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseActorComponent::EVENT_ON_KILLED = registerEvent("ON_KILLED", ComponentEventInfo::Type::Broadcast);
 	baseActorComponent::EVENT_ON_RESPAWN = registerEvent("ON_RESPAWN", ComponentEventInfo::Type::Broadcast);
 	baseActorComponent::EVENT_ON_DEATH = registerEvent("ON_DEATH", ComponentEventInfo::Type::Broadcast);
 }
-BaseActorComponent::BaseActorComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bAlive(true), m_bFrozen(pragma::util::BoolProperty::Create(false)) {}
+BaseActorComponent::BaseActorComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bAlive(true), m_bFrozen(util::BoolProperty::Create(false)) {}
 
 void BaseActorComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		InitializeMoveController();
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsDestroyed(); });
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { PhysicsUpdate(0.0 /* unused */); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) { OnPhysicsInitialized(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED, [this](std::reference_wrapper<ComponentEvent> evData) { OnPhysicsDestroyed(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED, [this](std::reference_wrapper<ComponentEvent> evData) { PhysicsUpdate(0.0 /* unused */); });
 
 	auto &ent = GetEntity();
 	ent.AddComponent("gravity");
@@ -43,8 +43,8 @@ void BaseActorComponent::Initialize()
 	auto whObservableComponent = ent.AddComponent("observable");
 	if(whObservableComponent.valid()) {
 		auto *pObservableComponent = static_cast<BaseObservableComponent *>(whObservableComponent.get());
-		pObservableComponent->SetCameraEnabled(pragma::BaseObservableComponent::CameraType::FirstPerson, false);
-		pObservableComponent->SetCameraEnabled(pragma::BaseObservableComponent::CameraType::ThirdPerson, true);
+		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::FirstPerson, false);
+		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::ThirdPerson, true);
 	}
 	ent.AddComponent("submergible");
 	ent.AddComponent("physics");
@@ -138,7 +138,7 @@ void BaseActorComponent::UpdateMoveController()
 	if(animComponent.expired())
 		return;
 	auto pTrComponent = ent.GetTransformComponent();
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+	auto pVelComponent = ent.GetComponent<VelocityComponent>();
 	auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 	auto l = uvec::length_sqr(vel);
 	if(m_moveControllerY == -1) {
@@ -147,8 +147,8 @@ void BaseActorComponent::UpdateMoveController()
 			auto dir = pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
 			float yawMove = uvec::get_yaw(dirMove);
 			float yawDir = uvec::get_yaw(dir);
-			float yawOffset = pragma::math::get_angle_difference(yawDir, yawMove);
-			yawOffset = pragma::math::normalize_angle(yawOffset, 0);
+			float yawOffset = math::get_angle_difference(yawDir, yawMove);
+			yawOffset = math::normalize_angle(yawOffset, 0);
 			//float moveYaw = GetBlendController(blendController);
 			//yawOffset = Math::ApproachAngle(moveYaw,yawOffset,1.f);
 			animComponent->SetBlendController(m_moveController, CInt32(yawOffset));
@@ -176,7 +176,7 @@ void BaseActorComponent::UpdateMoveController()
 	}
 }
 
-const pragma::util::PBoolProperty &BaseActorComponent::GetFrozenProperty() const { return m_bFrozen; }
+const util::PBoolProperty &BaseActorComponent::GetFrozenProperty() const { return m_bFrozen; }
 bool BaseActorComponent::IsFrozen() const { return *m_bFrozen; }
 bool BaseActorComponent::IsAlive() const { return m_bAlive; }
 bool BaseActorComponent::IsDead() const { return !IsAlive(); }
@@ -189,10 +189,10 @@ void BaseActorComponent::Ragdolize()
 	if(!pPhysComponent)
 		return;
 	auto *phys = pPhysComponent->GetPhysicsObject();
-	if(phys != nullptr && pPhysComponent->GetPhysicsType() == pragma::physics::PhysicsType::Dynamic)
+	if(phys != nullptr && pPhysComponent->GetPhysicsType() == physics::PhysicsType::Dynamic)
 		return;
-	pPhysComponent->SetMoveType(pragma::physics::MoveType::Physics);
-	phys = pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Dynamic);
+	pPhysComponent->SetMoveType(physics::MoveType::Physics);
+	phys = pPhysComponent->InitializePhysics(physics::PhysicsType::Dynamic);
 	if(phys == nullptr)
 		return;
 }
@@ -200,7 +200,7 @@ void BaseActorComponent::Ragdolize()
 void BaseActorComponent::OnDeath(game::DamageInfo *dmgInfo)
 {
 	auto evOnDeath = CEOnCharacterKilled {dmgInfo};
-	if(BroadcastEvent(baseActorComponent::EVENT_ON_DEATH, evOnDeath) == pragma::util::EventReply::Handled)
+	if(BroadcastEvent(baseActorComponent::EVENT_ON_DEATH, evOnDeath) == util::EventReply::Handled)
 		return;
 
 	Ragdolize();
@@ -223,11 +223,11 @@ void BaseActorComponent::Respawn()
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent)
-		pPhysComponent->SetMoveType(pragma::physics::MoveType::Walk);
+		pPhysComponent->SetMoveType(physics::MoveType::Walk);
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent)
 		pTrComponent->SetRotation(uquat::identity());
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+	auto pVelComponent = ent.GetComponent<VelocityComponent>();
 	if(pVelComponent.valid()) {
 		pVelComponent->SetVelocity({});
 		pVelComponent->SetAngularVelocity({});
@@ -252,7 +252,7 @@ void BaseActorComponent::OnPhysicsInitialized()
 	auto scale = pTrComponent ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f};
 
 	auto &hitboxes = hMdl->GetHitboxes();
-	std::vector<pragma::physics::ICollisionObject *> physHitboxes;
+	std::vector<physics::ICollisionObject *> physHitboxes;
 	physHitboxes.reserve(hitboxes.size());
 	m_hitboxData.reserve(hitboxes.size());
 	for(auto &it : hitboxes) {
@@ -273,17 +273,17 @@ void BaseActorComponent::OnPhysicsInitialized()
 		auto offset = max - extents; // Offset between bone origin and physics object origin
 		m_hitboxData.push_back({it.first, offset});
 	}
-	m_physHitboxes = pragma::physics::PhysObj::Create<pragma::physics::PhysObj>(*this, physHitboxes);
-	auto collisionMask = ent.IsPlayer() ? pragma::physics::CollisionMask::PlayerHitbox : pragma::physics::CollisionMask::NPCHitbox;
+	m_physHitboxes = physics::PhysObj::Create<physics::PhysObj>(*this, physHitboxes);
+	auto collisionMask = ent.IsPlayer() ? physics::CollisionMask::PlayerHitbox : physics::CollisionMask::NPCHitbox;
 	m_physHitboxes->SetCollisionFilter(collisionMask, collisionMask); // Required for raytraces
 	m_physHitboxes->Spawn();
 }
-bool BaseActorComponent::FindHitgroup(const pragma::physics::ICollisionObject &phys, pragma::physics::HitGroup &hitgroup) const
+bool BaseActorComponent::FindHitgroup(const physics::ICollisionObject &phys, physics::HitGroup &hitgroup) const
 {
 	if(m_physHitboxes == nullptr)
 		return false;
 	auto &colObjs = m_physHitboxes->GetCollisionObjects();
-	auto it = std::find_if(colObjs.begin(), colObjs.end(), [&phys](const pragma::util::TSharedHandle<pragma::physics::ICollisionObject> &hPhys) { return (hPhys.Get() == &phys) ? true : false; });
+	auto it = std::find_if(colObjs.begin(), colObjs.end(), [&phys](const util::TSharedHandle<physics::ICollisionObject> &hPhys) { return (hPhys.Get() == &phys) ? true : false; });
 	if(it == colObjs.end())
 		return false;
 	auto idx = it - colObjs.begin();

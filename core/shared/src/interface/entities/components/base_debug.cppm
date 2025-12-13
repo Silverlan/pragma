@@ -15,9 +15,9 @@ export namespace pragma {
 		virtual void SetText(const std::string &text);
 		virtual void SetSize(float size);
 	  protected:
-		BaseDebugTextComponent(pragma::ecs::BaseEntity &ent);
-		pragma::NetEventId m_netEvSetText = pragma::INVALID_NET_EVENT;
-		pragma::NetEventId m_netEvSetSize = pragma::INVALID_NET_EVENT;
+		BaseDebugTextComponent(ecs::BaseEntity &ent);
+		NetEventId m_netEvSetText = INVALID_NET_EVENT;
+		NetEventId m_netEvSetSize = INVALID_NET_EVENT;
 		std::string m_debugText = {};
 		float m_size = 0.3f;
 	};
@@ -32,7 +32,7 @@ export namespace pragma {
 		const Color &GetOutlineColor() const;
 	  protected:
 		BaseDebugOutlineComponent() = default;
-		pragma::NetEventId m_netEvSetOutlineColor = pragma::INVALID_NET_EVENT;
+		NetEventId m_netEvSetOutlineColor = INVALID_NET_EVENT;
 		Color m_outlineColor = {0u, 0u, 0u, 0u};
 	};
 
@@ -42,7 +42,7 @@ export namespace pragma {
 	  public:
 		virtual void Initialize() override;
 	  protected:
-		BaseDebugPointComponent(pragma::ecs::BaseEntity &ent);
+		BaseDebugPointComponent(ecs::BaseEntity &ent);
 		bool m_bAxis = false;
 	};
 
@@ -52,7 +52,7 @@ export namespace pragma {
 	  public:
 		virtual void Initialize() override;
 	  protected:
-		BaseDebugLineComponent(pragma::ecs::BaseEntity &ent);
+		BaseDebugLineComponent(ecs::BaseEntity &ent);
 		std::string m_targetEntity = {};
 		Vector3 m_targetOrigin = {};
 	};
@@ -65,8 +65,8 @@ export namespace pragma {
 		virtual void SetBounds(const Vector3 &min, const Vector3 &max);
 		const std::pair<Vector3, Vector3> &GetBounds() const;
 	  protected:
-		BaseDebugBoxComponent(pragma::ecs::BaseEntity &ent);
-		pragma::NetEventId m_netEvSetBounds = pragma::INVALID_NET_EVENT;
+		BaseDebugBoxComponent(ecs::BaseEntity &ent);
+		NetEventId m_netEvSetBounds = INVALID_NET_EVENT;
 		std::pair<Vector3, Vector3> m_bounds = {};
 	};
 
@@ -76,7 +76,7 @@ export namespace pragma {
 	  public:
 		virtual void Initialize() override;
 	  protected:
-		BaseDebugSphereComponent(pragma::ecs::BaseEntity &ent);
+		BaseDebugSphereComponent(ecs::BaseEntity &ent);
 		uint32_t m_recursionLevel = 1u;
 	};
 
@@ -92,12 +92,12 @@ export namespace pragma {
 		virtual void SetStartRadius(float radius);
 		float GetStartRadius() const;
 	  protected:
-		BaseDebugConeComponent(pragma::ecs::BaseEntity &ent);
+		BaseDebugConeComponent(ecs::BaseEntity &ent);
 		float m_coneAngle = 0.f;
 		float m_startRadius = 0.f;
 		uint32_t m_segmentCount = 12u;
-		pragma::NetEventId m_netEvSetConeAngle = pragma::INVALID_NET_EVENT;
-		pragma::NetEventId m_netEvSetStartRadius = pragma::INVALID_NET_EVENT;
+		NetEventId m_netEvSetConeAngle = INVALID_NET_EVENT;
+		NetEventId m_netEvSetStartRadius = INVALID_NET_EVENT;
 	};
 
 	////////////////
@@ -109,10 +109,10 @@ export namespace pragma {
 		virtual void SetLength(float length);
 		float GetLength() const;
 	  protected:
-		BaseDebugCylinderComponent(pragma::ecs::BaseEntity &ent);
+		BaseDebugCylinderComponent(ecs::BaseEntity &ent);
 		float m_length = 0.f;
 		uint32_t m_segmentCount = 12u;
-		pragma::NetEventId m_netEvSetLength = pragma::INVALID_NET_EVENT;
+		NetEventId m_netEvSetLength = INVALID_NET_EVENT;
 	};
 
 	////////////////
@@ -121,6 +121,6 @@ export namespace pragma {
 	  public:
 		virtual void Initialize() override;
 	  protected:
-		BaseDebugPlaneComponent(pragma::ecs::BaseEntity &ent);
+		BaseDebugPlaneComponent(ecs::BaseEntity &ent);
 	};
 };

@@ -14,7 +14,7 @@ export namespace pragma {
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_PBR;
 
 		enum class MaterialBinding : uint32_t {
-			MaterialSettings = pragma::math::to_integral(ShaderGameWorldLightingPass::MaterialBinding::MaterialSettings),
+			MaterialSettings = math::to_integral(ShaderGameWorldLightingPass::MaterialBinding::MaterialSettings),
 			AlbedoMap,
 			NormalMap,
 			RMAMap,
@@ -41,19 +41,19 @@ export namespace pragma {
 		prosper::IDescriptorSet &GetDefaultPbrDescriptorSet() const;
 
 		//
-		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
+		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
+		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const override;
 
-		prosper::IDescriptorSet *GetReflectionProbeDescriptorSet(const pragma::CSceneComponent &scene, float &outIblStrength, ShaderGameWorld::SceneFlags &inOutSceneFlags) const;
+		prosper::IDescriptorSet *GetReflectionProbeDescriptorSet(const CSceneComponent &scene, float &outIblStrength, SceneFlags &inOutSceneFlags) const;
 	  protected:
-		void RecordBindSceneDescriptorSets(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
-		  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows, ShaderGameWorld::SceneFlags &inOutSceneFlags, float &outIblStrength) const;
+		void RecordBindSceneDescriptorSets(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
+		  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows, SceneFlags &inOutSceneFlags, float &outIblStrength) const;
 		virtual void OnPipelinesInitialized() override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
-		virtual void InitializeMaterialData(const msys::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData) override;
-		virtual void UpdateRenderFlags(pragma::geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags) override;
+		virtual void InitializeMaterialData(const material::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, rendering::ShaderInputData &inOutMatData) override;
+		virtual void UpdateRenderFlags(geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags) override;
 		virtual void InitializeGfxPipelineDescriptorSets() override;
-		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo);
+		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(material::CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo);
 
 		SceneFlags m_extRenderFlags = SceneFlags::None;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_defaultPbrDsg = nullptr;

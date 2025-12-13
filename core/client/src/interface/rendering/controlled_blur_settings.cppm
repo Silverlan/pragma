@@ -34,8 +34,8 @@ export namespace pragma::rendering {
 	  private:
 		uint32_t m_radius = DEFAULT_RADIUS;
 		double m_sigma = DEFAULT_SIGMA;
-		std::shared_ptr<pragma::rendering::BloomPipelineInfo> m_bloomPipelineInfoH = nullptr;
-		std::shared_ptr<pragma::rendering::BloomPipelineInfo> m_bloomPipelineInfoV = nullptr;
+		std::shared_ptr<BloomPipelineInfo> m_bloomPipelineInfoH = nullptr;
+		std::shared_ptr<BloomPipelineInfo> m_bloomPipelineInfoV = nullptr;
 		int32_t m_blurAmount = -1;
 		bool m_pipelineDirty = false;
 	};

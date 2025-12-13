@@ -33,19 +33,19 @@ export namespace pragma::rendering {
 		DrawSceneInfo();
 		DrawSceneInfo(const DrawSceneInfo &other);
 		DrawSceneInfo &operator=(const DrawSceneInfo &other);
-		pragma::util::TWeakSharedHandle<::pragma::CSceneComponent> scene = pragma::util::TWeakSharedHandle<::pragma::CSceneComponent> {};
+		util::TWeakSharedHandle<CSceneComponent> scene = pragma::util::TWeakSharedHandle<CSceneComponent> {};
 		mutable std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer = nullptr;
 		std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
 		RenderFlags renderFlags = RenderFlags::All;
 		std::optional<Color> clearColor = {};
-		std::optional<::pragma::rendering::ToneMapping> toneMapping {};
+		std::optional<ToneMapping> toneMapping {};
 		std::optional<Vector4> clipPlane {};
 		std::optional<Vector3> pvsOrigin {};
-		::pragma::rendering::RenderMask exclusionMask = ::pragma::rendering::RenderMask::None;
-		::pragma::rendering::RenderMask inclusionMask = ::pragma::rendering::RenderMask::None;
+		RenderMask exclusionMask = RenderMask::None;
+		RenderMask inclusionMask = RenderMask::None;
 
-		std::function<bool(pragma::ecs::CBaseEntity &)> prepassFilter = nullptr;
-		std::function<bool(pragma::ecs::CBaseEntity &)> renderFilter = nullptr;
+		std::function<bool(ecs::CBaseEntity &)> prepassFilter = nullptr;
+		std::function<bool(ecs::CBaseEntity &)> renderFilter = nullptr;
 
 		std::shared_ptr<prosper::IImage> outputImage = nullptr;
 		uint32_t outputLayerId = 0u;
@@ -54,7 +54,7 @@ export namespace pragma::rendering {
 		mutable std::unique_ptr<RenderStats> renderStats = nullptr;
 		std::unique_ptr<std::vector<DrawSceneInfo>> subPasses = nullptr;
 
-		::pragma::rendering::RenderMask GetRenderMask(pragma::Game &game) const;
+		RenderMask GetRenderMask(Game &game) const;
 		Vector3 GetPvsOrigin() const;
 		void AddSubPass(const DrawSceneInfo &drawSceneInfo);
 		const std::vector<DrawSceneInfo> *GetSubPasses() const;

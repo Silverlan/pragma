@@ -12,26 +12,26 @@ void BasePointConstraintSliderComponent::Initialize()
 {
 	BasePointConstraintComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "limit_low", false))
-			m_kvLimitLinLow = pragma::util::to_float(kvData.value);
+			m_kvLimitLinLow = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "limit_high", false))
-			m_kvLimitLinHigh = pragma::util::to_float(kvData.value);
+			m_kvLimitLinHigh = util::to_float(kvData.value);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 }
 
-void BasePointConstraintSliderComponent::InitializeConstraint(pragma::ecs::BaseEntity *src, pragma::ecs::BaseEntity *tgt)
+void BasePointConstraintSliderComponent::InitializeConstraint(ecs::BaseEntity *src, ecs::BaseEntity *tgt)
 {
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
-	auto *physTgt = pPhysComponentTgt ? dynamic_cast<pragma::physics::RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
+	auto *physTgt = pPhysComponentTgt ? dynamic_cast<physics::RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
 	if(physTgt == nullptr)
 		return;
 	auto pPhysComponentSrc = src->GetPhysicsComponent();
-	auto *physSrc = pPhysComponentSrc ? dynamic_cast<pragma::physics::RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	auto *physSrc = pPhysComponentSrc ? dynamic_cast<physics::RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	if(physSrc == nullptr)
 		return;
 	auto *bodySrc = physSrc->GetRigidBody();
@@ -70,7 +70,7 @@ void BasePointConstraintSliderComponent::InitializeConstraint(pragma::ecs::BaseE
 		auto slider = physEnv->CreateSliderConstraint(*rigidBody0, pivot0, rotation0, *rigidBody1, pivot1, rotation1);
 		if(slider != nullptr) {
 			slider->SetEntity(GetEntity());
-			m_constraints.push_back(pragma::util::shared_handle_cast<pragma::physics::ISliderConstraint, pragma::physics::IConstraint>(slider));
+			m_constraints.push_back(pragma::util::shared_handle_cast<physics::ISliderConstraint, physics::IConstraint>(slider));
 		}
 	}
 }

@@ -67,5 +67,5 @@ export namespace pragma::rendering {
 
 		Count
 	};
-	DLLCLIENT bool premultiply_alpha(Vector4 &color, pragma::rendering::ParticleAlphaMode alphaMode);
+	DLLCLIENT bool premultiply_alpha(Vector4 &color, ParticleAlphaMode alphaMode);
 };

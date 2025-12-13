@@ -11,7 +11,7 @@ export import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CLiquidVolumeComponent final : public BaseLiquidVolumeComponent, public CBaseNetComponent {
 	  public:
-		CLiquidVolumeComponent(pragma::ecs::BaseEntity &ent) : BaseLiquidVolumeComponent(ent) {}
+		CLiquidVolumeComponent(ecs::BaseEntity &ent) : BaseLiquidVolumeComponent(ent) {}
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;

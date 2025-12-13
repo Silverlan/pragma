@@ -361,19 +361,18 @@ void pragma::Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {
-	    {"FLAG_INVALID", pragma::math::to_integral(fsys::FVFile::Invalid)},
-	    {"FLAG_PACKAGE", pragma::math::to_integral(fsys::FVFile::Package)},
-	    {"FLAG_COMPRESSED", pragma::math::to_integral(fsys::FVFile::Compressed)},
-	    {"FLAG_DIRECTORY", pragma::math::to_integral(fsys::FVFile::Directory)},
-	    {"FLAG_ENCRYPTED", pragma::math::to_integral(fsys::FVFile::Encrypted)},
-	    {"FLAG_VIRTUAL", pragma::math::to_integral(fsys::FVFile::Virtual)},
-	    {"FLAG_READONLY", pragma::math::to_integral(fsys::FVFile::ReadOnly)},
+	    {"FLAG_INVALID", pragma::math::to_integral(fs::FVFile::Invalid)},
+	    {"FLAG_PACKAGE", pragma::math::to_integral(fs::FVFile::Package)},
+	    {"FLAG_COMPRESSED", pragma::math::to_integral(fs::FVFile::Compressed)},
+	    {"FLAG_DIRECTORY", pragma::math::to_integral(fs::FVFile::Directory)},
+	    {"FLAG_ENCRYPTED", pragma::math::to_integral(fs::FVFile::Encrypted)},
+	    {"FLAG_VIRTUAL", pragma::math::to_integral(fs::FVFile::Virtual)},
+	    {"FLAG_READONLY", pragma::math::to_integral(fs::FVFile::ReadOnly)},
 
-	    {"OPEN_MODE_READ", pragma::math::to_integral(pragma::FileOpenMode::Read)},
-	    {"OPEN_MODE_WRITE", pragma::math::to_integral(pragma::FileOpenMode::Write)},
-	    {"OPEN_MODE_APPEND", pragma::math::to_integral(pragma::FileOpenMode::Append)},
-	    {"OPEN_MODE_UPDATE", pragma::math::to_integral(pragma::FileOpenMode::Update)},
-	    {"OPEN_MODE_BINARY", pragma::math::to_integral(pragma::FileOpenMode::Binary)},
+	    {"OPEN_MODE_READ", pragma::math::to_integral(fs::FileMode::Read)},
+	    {"OPEN_MODE_WRITE", pragma::math::to_integral(fs::FileMode::Write)},
+	    {"OPEN_MODE_APPEND", pragma::math::to_integral(fs::FileMode::Append)},
+	    {"OPEN_MODE_BINARY", pragma::math::to_integral(fs::FileMode::Binary)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
@@ -405,13 +404,13 @@ void pragma::Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {
-	    {"SEARCH_NONE", pragma::math::to_integral(fsys::SearchFlags::None)},
-	    {"SEARCH_VIRTUAL", pragma::math::to_integral(fsys::SearchFlags::Virtual)},
-	    {"SEARCH_PACKAGE", pragma::math::to_integral(fsys::SearchFlags::Package)},
-	    {"SEARCH_LOCAL", pragma::math::to_integral(fsys::SearchFlags::Local)},
-	    {"SEARCH_NO_MOUNTS", pragma::math::to_integral(fsys::SearchFlags::NoMounts)},
-	    {"SEARCH_LOCAL_ROOT", pragma::math::to_integral(fsys::SearchFlags::LocalRoot)},
-	    {"SEARCH_ALL", pragma::math::to_integral(fsys::SearchFlags::All)},
+	    {"SEARCH_NONE", pragma::math::to_integral(fs::SearchFlags::None)},
+	    {"SEARCH_VIRTUAL", pragma::math::to_integral(fs::SearchFlags::Virtual)},
+	    {"SEARCH_PACKAGE", pragma::math::to_integral(fs::SearchFlags::Package)},
+	    {"SEARCH_LOCAL", pragma::math::to_integral(fs::SearchFlags::Local)},
+	    {"SEARCH_NO_MOUNTS", pragma::math::to_integral(fs::SearchFlags::NoMounts)},
+	    {"SEARCH_LOCAL_ROOT", pragma::math::to_integral(fs::SearchFlags::LocalRoot)},
+	    {"SEARCH_ALL", pragma::math::to_integral(fs::SearchFlags::All)},
 	    {"SEARCH_ADDON", FSYS_SEARCH_ADDON},
 	  });
 

@@ -28,18 +28,18 @@ export {
 				IsBeingRemoved = ComponentCleanupRequired << 1u
 			};
 			virtual ~BaseEntityComponentSystem();
-			pragma::util::EventReply BroadcastEvent(ComponentEventId ev, ComponentEvent &evData, const BaseEntityComponent *src = nullptr) const;
-			pragma::util::EventReply BroadcastEvent(ComponentEventId ev) const;
+			util::EventReply BroadcastEvent(ComponentEventId ev, ComponentEvent &evData, const BaseEntityComponent *src = nullptr) const;
+			util::EventReply BroadcastEvent(ComponentEventId ev) const;
 
-			ComponentHandle<pragma::BaseEntityComponent> AddComponent(const std::string &name, bool bForceCreateNew = false);
-			ComponentHandle<pragma::BaseEntityComponent> AddComponent(ComponentId componentId, bool bForceCreateNew = false);
+			ComponentHandle<BaseEntityComponent> AddComponent(const std::string &name, bool bForceCreateNew = false);
+			ComponentHandle<BaseEntityComponent> AddComponent(ComponentId componentId, bool bForceCreateNew = false);
 			template<class TComponent, typename = std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent, TComponent>::value>>
 			ComponentHandle<TComponent> AddComponent(bool bForceCreateNew = false);
 			// This will remove ALL components of this type
 			void RemoveComponent(ComponentId componentId);
 			void RemoveComponent(const std::string &name);
 
-			void RemoveComponent(pragma::BaseEntityComponent &component);
+			void RemoveComponent(BaseEntityComponent &component);
 			template<class TComponent, typename = std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent, TComponent>::value>>
 			void RemoveComponent();
 
@@ -47,8 +47,8 @@ export {
 			void ClearComponents();
 
 			// Note: TSharedHandle should never be stored outside of this object type
-			const std::vector<pragma::util::TSharedHandle<BaseEntityComponent>> &GetComponents() const;
-			std::vector<pragma::util::TSharedHandle<BaseEntityComponent>> &GetComponents();
+			const std::vector<util::TSharedHandle<BaseEntityComponent>> &GetComponents() const;
+			std::vector<util::TSharedHandle<BaseEntityComponent>> &GetComponents();
 
 			template<class TComponent, typename = std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent, TComponent>::value>>
 			ComponentHandle<TComponent> GetComponent() const;
@@ -69,14 +69,14 @@ export {
 		  protected:
 			BaseEntityComponentSystem() = default;
 
-			void Initialize(pragma::ecs::BaseEntity &ent, EntityComponentManager &componentManager);
+			void Initialize(ecs::BaseEntity &ent, EntityComponentManager &componentManager);
 			virtual void OnComponentAdded(BaseEntityComponent &component);
 			virtual void OnComponentRemoved(BaseEntityComponent &component);
 		  private:
 			std::unordered_map<ComponentId, ComponentHandle<BaseEntityComponent>> m_componentLookupTable; // Only contains one (the first) component per type; Used for fast lookups
-			std::vector<pragma::util::TSharedHandle<BaseEntityComponent>> m_components;
+			std::vector<util::TSharedHandle<BaseEntityComponent>> m_components;
 			EntityComponentManager *m_componentManager;
-			pragma::ecs::BaseEntity *m_entity;
+			ecs::BaseEntity *m_entity;
 			mutable StateFlags m_stateFlags = StateFlags::None;
 		};
 		using namespace pragma::math::scoped_enum::bitwise;

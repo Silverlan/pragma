@@ -10,16 +10,16 @@ import panima;
 #undef GetCurrentTime
 
 using namespace pragma;
-ComponentEventId panimaComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId panimaComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId panimaComponent::EVENT_ON_ANIMATION_COMPLETE = pragma::INVALID_COMPONENT_ID;
-ComponentEventId panimaComponent::EVENT_ON_ANIMATION_START = pragma::INVALID_COMPONENT_ID;
-ComponentEventId panimaComponent::EVENT_MAINTAIN_ANIMATIONS = pragma::INVALID_COMPONENT_ID;
-ComponentEventId panimaComponent::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId panimaComponent::EVENT_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId panimaComponent::EVENT_TRANSLATE_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId panimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = pragma::INVALID_COMPONENT_ID;
-void PanimaComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+ComponentEventId panimaComponent::EVENT_HANDLE_ANIMATION_EVENT = INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_ON_PLAY_ANIMATION = INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_ON_ANIMATION_COMPLETE = INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_ON_ANIMATION_START = INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_MAINTAIN_ANIMATIONS = INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_ON_ANIMATIONS_UPDATED = INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_PLAY_ANIMATION = INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_TRANSLATE_ANIMATION = INVALID_COMPONENT_ID;
+ComponentEventId panimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = INVALID_COMPONENT_ID;
+void PanimaComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	panimaComponent::EVENT_HANDLE_ANIMATION_EVENT = registerEvent("A2_HANDLE_ANIMATION_EVENT", ComponentEventInfo::Type::Broadcast);
 	panimaComponent::EVENT_ON_PLAY_ANIMATION = registerEvent("A2_ON_PLAY_ANIMATION", ComponentEventInfo::Type::Broadcast);
@@ -31,7 +31,7 @@ void PanimaComponent::RegisterEvents(pragma::EntityComponentManager &componentMa
 	panimaComponent::EVENT_TRANSLATE_ANIMATION = registerEvent("A2_TRANSLATE_ANIMATION", ComponentEventInfo::Type::Broadcast);
 	panimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = registerEvent("A2_INITIALIZE_CHANNEL_VALUE_SUBMITTER", ComponentEventInfo::Type::Broadcast);
 }
-std::optional<std::pair<std::string, pragma::util::Path>> PanimaComponent::ParseComponentChannelPath(const panima::ChannelPath &path)
+std::optional<std::pair<std::string, util::Path>> PanimaComponent::ParseComponentChannelPath(const panima::ChannelPath &path)
 {
 	size_t offset = 0;
 	if(path.path.GetComponent(offset, &offset) != "ec")
@@ -40,15 +40,15 @@ std::optional<std::pair<std::string, pragma::util::Path>> PanimaComponent::Parse
 	if(offset == std::string::npos)
 		return {};
 	auto pathStr = path.path.GetString().substr(offset);
-	pragma::string::replace(pathStr, "%20", " ");
-	pragma::util::Path componentPath {std::move(pathStr)};
-	return std::pair<std::string, pragma::util::Path> {std::string {componentName}, std::move(componentPath)};
+	string::replace(pathStr, "%20", " ");
+	util::Path componentPath {std::move(pathStr)};
+	return std::pair<std::string, util::Path> {std::string {componentName}, std::move(componentPath)};
 }
-PanimaComponent::PanimaComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_playbackRate(pragma::util::FloatProperty::Create(1.f)) {}
+PanimaComponent::PanimaComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_playbackRate(util::FloatProperty::Create(1.f)) {}
 void PanimaComponent::SetPlaybackRate(float rate) { *m_playbackRate = rate; }
 float PanimaComponent::GetPlaybackRate() const { return *m_playbackRate; }
-const pragma::util::PFloatProperty &PanimaComponent::GetPlaybackRateProperty() const { return m_playbackRate; }
-std::vector<std::shared_ptr<pragma::AnimationManagerData>>::iterator PanimaComponent::FindAnimationManager(const std::string_view &name)
+const util::PFloatProperty &PanimaComponent::GetPlaybackRateProperty() const { return m_playbackRate; }
+std::vector<std::shared_ptr<AnimationManagerData>>::iterator PanimaComponent::FindAnimationManager(const std::string_view &name)
 {
 	return std::find_if(m_animationManagers.begin(), m_animationManagers.end(), [&name](const std::shared_ptr<AnimationManagerData> &data) { return data->name == name; });
 }
@@ -71,7 +71,7 @@ panima::PAnimationManager PanimaComponent::AddAnimationManager(std::string name,
 	panima::AnimationPlayerCallbackInterface callbackInteface {};
 	callbackInteface.onPlayAnimation = [this](const panima::AnimationSet &set, panima::AnimationId animId, panima::PlaybackFlags flags) -> bool {
 		CEAnim2OnPlayAnimation evData {set, animId, flags};
-		return InvokeEventCallbacks(panimaComponent::EVENT_PLAY_ANIMATION, evData) != pragma::util::EventReply::Handled;
+		return InvokeEventCallbacks(panimaComponent::EVENT_PLAY_ANIMATION, evData) != util::EventReply::Handled;
 	};
 	callbackInteface.onStopAnimation = []() {
 
@@ -224,7 +224,7 @@ bool PanimaComponent::UnsetPropertyFlags(const char *propName, PropertyFlags fla
 	auto it = m_propertyFlags.find(propName);
 	if(it == m_propertyFlags.end())
 		return false;
-	auto hasFlags = pragma::math::is_flag_set(it->second, flags);
+	auto hasFlags = math::is_flag_set(it->second, flags);
 	it->second &= ~flags;
 	if(it->second == PropertyFlags::None)
 		m_propertyFlags.erase(it);
@@ -235,13 +235,13 @@ bool PanimaComponent::SetPropertyFlag(const std::string &propName, PropertyFlags
 {
 	panima::ChannelPath channelPath {propName};
 	auto normalizedPath = channelPath.ToUri(false);
-	auto *cnorm = pragma::register_global_string(normalizedPath);
+	auto *cnorm = register_global_string(normalizedPath);
 	if(!enabled)
 		return UnsetPropertyFlags(cnorm, flag);
 	auto it = m_propertyFlags.find(cnorm);
 	if(it == m_propertyFlags.end())
 		it = m_propertyFlags.insert(std::make_pair(cnorm, PropertyFlags::None)).first;
-	else if(pragma::math::is_flag_set(it->second, flag))
+	else if(math::is_flag_set(it->second, flag))
 		return false;
 	it->second |= flag;
 	InitializeAnimationChannelValueSubmitters();
@@ -252,8 +252,8 @@ bool PanimaComponent::IsPropertyFlagSet(const std::string &propName, PropertyFla
 {
 	panima::ChannelPath channelPath {propName};
 	auto normalizedPath = channelPath.ToUri(false);
-	auto it = m_propertyFlags.find(pragma::register_global_string(normalizedPath));
-	return it != m_propertyFlags.end() && pragma::math::is_flag_set(it->second, flag);
+	auto it = m_propertyFlags.find(register_global_string(normalizedPath));
+	return it != m_propertyFlags.end() && math::is_flag_set(it->second, flag);
 }
 
 bool PanimaComponent::SetPropertyAlwaysDirty(const std::string &propName, bool alwaysDirty) { return SetPropertyFlag(propName, PropertyFlags::AlwaysDirty, alwaysDirty); }
@@ -265,7 +265,7 @@ void PanimaComponent::SetPropertyEnabled(const std::string &propName, bool enabl
 		InitializeAnimationChannelValueSubmitters();
 }
 bool PanimaComponent::IsPropertyEnabled(const std::string &propName) const { return !IsPropertyFlagSet(propName, PropertyFlags::Disabled); }
-bool PanimaComponent::GetRawAnimatedPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue, const ComponentMemberInfo **optOutMemberInfo, pragma::BaseEntityComponent **optOutComponent) const
+bool PanimaComponent::GetRawAnimatedPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue, const ComponentMemberInfo **optOutMemberInfo, BaseEntityComponent **optOutComponent) const
 {
 	if(optOutMemberInfo)
 		*optOutMemberInfo = nullptr;
@@ -291,7 +291,7 @@ bool PanimaComponent::GetRawAnimatedPropertyValue(panima::AnimationManager &mana
 		return false;
 	if(optOutMemberInfo)
 		*optOutMemberInfo = memberInfo;
-	if(!pragma::ents::is_udm_member_type(memberInfo->type))
+	if(!ents::is_udm_member_type(memberInfo->type))
 		return false;
 	auto memberType = static_cast<udm::Type>(memberInfo->type);
 	auto &player = manager.GetPlayer();
@@ -334,7 +334,7 @@ bool PanimaComponent::GetRawAnimatedPropertyValue(panima::AnimationManager &mana
 bool PanimaComponent::GetRawPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue) const
 {
 	const ComponentMemberInfo *memberInfo = nullptr;
-	pragma::BaseEntityComponent *c = nullptr;
+	BaseEntityComponent *c = nullptr;
 	auto res = GetRawAnimatedPropertyValue(manager, propName, type, outValue, &memberInfo, &c);
 	if(res || !memberInfo)
 		return res;
@@ -452,7 +452,7 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(AnimationManager
 		}
 		auto memberPath = memberName;
 		CEAnim2InitializeChannelValueSubmitter evData {memberPath};
-		if(hComponent->InvokeEventCallbacks(panimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER, evData) == pragma::util::EventReply::Handled) {
+		if(hComponent->InvokeEventCallbacks(panimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER, evData) == util::EventReply::Handled) {
 			if(evData.submitter == nullptr)
 				continue;
 			channelValueSubmitters[channelIdx] = std::move(evData.submitter);
@@ -479,13 +479,13 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(AnimationManager
 
 		channelCache[channelIdx].component = hComponent.get();
 		channelCache[channelIdx].memberInfo = memberInfo;
-		channelCache[channelIdx].changed = pragma::AnimationChannelCacheData::State::Dirty;
+		channelCache[channelIdx].changed = AnimationChannelCacheData::State::Dirty;
 		if(IsPropertyAlwaysDirty(path))
-			channelCache[channelIdx].changed |= pragma::AnimationChannelCacheData::State::AlwaysDirty;
+			channelCache[channelIdx].changed |= AnimationChannelCacheData::State::AlwaysDirty;
 
 		auto vsGetMemberChannelSubmitter = [this, valueComponents, &path, &memberIdx, channelIdx, &channelValueSubmitters, &channelCache, &component]<typename TMember>(auto tag) mutable {
 			using TChannel = typename decltype(tag)::type;
-			constexpr auto setMemberValue = [](const pragma::ComponentMemberInfo &memberInfo, pragma::BaseEntityComponent &component, const void *value, void *userData) { memberInfo.setterFunction(memberInfo, component, value); };
+			constexpr auto setMemberValue = [](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, const void *value, void *userData) { memberInfo.setterFunction(memberInfo, component, value); };
 			if(!valueComponents || valueComponents->empty()) {
 				if constexpr(std::is_same_v<TChannel, TMember>)
 					channelValueSubmitters[channelIdx] = get_member_channel_submitter<TChannel, TMember, 0>(component, channelCache[channelIdx], *memberIdx, setMemberValue);
@@ -633,7 +633,7 @@ bool PanimaComponent::UpdateAnimations(GlobalAnimationChannelQueueProcessor &cha
 bool PanimaComponent::MaintainAnimations(GlobalAnimationChannelQueueProcessor &channelQueueProcessor, double dt)
 {
 	CEAnim2MaintainAnimations evData {dt};
-	if(InvokeEventCallbacks(panimaComponent::EVENT_MAINTAIN_ANIMATIONS, evData) == pragma::util::EventReply::Handled) {
+	if(InvokeEventCallbacks(panimaComponent::EVENT_MAINTAIN_ANIMATIONS, evData) == util::EventReply::Handled) {
 		InvokeEventCallbacks(panimaComponent::EVENT_ON_ANIMATIONS_UPDATED);
 		return true;
 	}
@@ -672,7 +672,7 @@ void PanimaComponent::UpdateAnimationData(GlobalAnimationChannelQueueProcessor *
 		return;
 	auto &channelValueSubmitters = manager.GetChannelValueSubmitters();
 	auto &channels = anim->GetChannels();
-	auto n = pragma::math::min(channelValueSubmitters.size(), channels.size());
+	auto n = math::min(channelValueSubmitters.size(), channels.size());
 	auto t = manager->GetCurrentTime();
 	if(!channelQueueProcessor) {
 		for(auto i = decltype(n) {0u}; i < n; ++i) {
@@ -726,10 +726,10 @@ void PanimaComponent::ApplyAnimationValues(GlobalAnimationChannelQueueProcessor 
 				auto &channelCacheData = cacheData[i];
 				auto &component = *channelCacheData.component;
 				auto &memberInfo = *channelCacheData.memberInfo;
-				if(!pragma::math::is_flag_set(channelCacheData.changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty))
+				if(!math::is_flag_set(channelCacheData.changed, AnimationChannelCacheData::State::Dirty | AnimationChannelCacheData::State::AlwaysDirty))
 					continue;
 				memberInfo.setterFunction(memberInfo, component, channelCacheData.data.data());
-				pragma::math::set_flag(channelCacheData.changed, pragma::AnimationChannelCacheData::State::Dirty, false);
+				math::set_flag(channelCacheData.changed, AnimationChannelCacheData::State::Dirty, false);
 			}
 		}
 	}
@@ -743,13 +743,13 @@ void PanimaComponent::ApplyAnimationValues(GlobalAnimationChannelQueueProcessor 
 	}
 	InvokeEventCallbacks(panimaComponent::EVENT_ON_ANIMATIONS_UPDATED);
 }
-void PanimaComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void PanimaComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void PanimaComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(baseEntityComponent::EVENT_ON_MEMBERS_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { InitializeAnimationChannelValueSubmitters(); });
+	BindEventUnhandled(baseEntityComponent::EVENT_ON_MEMBERS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { InitializeAnimationChannelValueSubmitters(); });
 }
 
 void PanimaComponent::OnEntitySpawn()
@@ -772,7 +772,7 @@ void PanimaComponent::ReloadAnimation()
 }
 void PanimaComponent::Save(udm::LinkedPropertyWrapperArg udm) {}
 void PanimaComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) {}
-void PanimaComponent::ResetAnimation(const std::shared_ptr<pragma::asset::Model> &mdl) {}
+void PanimaComponent::ResetAnimation(const std::shared_ptr<asset::Model> &mdl) {}
 
 /////////////////
 
@@ -786,7 +786,7 @@ void CEAnim2TranslateAnimation::PushArguments(lua::State *l)
 {
 	Lua::Push<const panima::AnimationSet *>(l, &set);
 	Lua::PushInt(l, animation);
-	Lua::PushInt(l, pragma::math::to_integral(flags));
+	Lua::PushInt(l, math::to_integral(flags));
 }
 uint32_t CEAnim2TranslateAnimation::GetReturnCount() { return 2; }
 void CEAnim2TranslateAnimation::HandleReturnValues(lua::State *l)
@@ -799,28 +799,28 @@ void CEAnim2TranslateAnimation::HandleReturnValues(lua::State *l)
 
 /////////////////
 
-CEAnim2OnAnimationStart::CEAnim2OnAnimationStart(const panima::AnimationSet &set, int32_t animation, pragma::Activity activity, panima::PlaybackFlags flags) : set {set}, animation(animation), activity(activity), flags(flags) {}
+CEAnim2OnAnimationStart::CEAnim2OnAnimationStart(const panima::AnimationSet &set, int32_t animation, Activity activity, panima::PlaybackFlags flags) : set {set}, animation(animation), activity(activity), flags(flags) {}
 void CEAnim2OnAnimationStart::PushArguments(lua::State *l)
 {
 	Lua::Push<const panima::AnimationSet *>(l, &set);
 	Lua::PushInt(l, animation);
-	Lua::PushInt(l, pragma::math::to_integral(activity));
-	Lua::PushInt(l, pragma::math::to_integral(flags));
+	Lua::PushInt(l, math::to_integral(activity));
+	Lua::PushInt(l, math::to_integral(flags));
 }
 
 /////////////////
 
-CEAnim2OnAnimationComplete::CEAnim2OnAnimationComplete(const panima::AnimationSet &set, int32_t animation, pragma::Activity activity) : set {set}, animation(animation), activity(activity) {}
+CEAnim2OnAnimationComplete::CEAnim2OnAnimationComplete(const panima::AnimationSet &set, int32_t animation, Activity activity) : set {set}, animation(animation), activity(activity) {}
 void CEAnim2OnAnimationComplete::PushArguments(lua::State *l)
 {
 	Lua::Push<const panima::AnimationSet *>(l, &set);
 	Lua::PushInt(l, animation);
-	Lua::PushInt(l, pragma::math::to_integral(activity));
+	Lua::PushInt(l, math::to_integral(activity));
 }
 
 /////////////////
 
-CEAnim2HandleAnimationEvent::CEAnim2HandleAnimationEvent(const pragma::AnimationEvent &animationEvent) : animationEvent(animationEvent) {}
+CEAnim2HandleAnimationEvent::CEAnim2HandleAnimationEvent(const AnimationEvent &animationEvent) : animationEvent(animationEvent) {}
 void CEAnim2HandleAnimationEvent::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, static_cast<int32_t>(animationEvent.eventID));
@@ -847,12 +847,12 @@ void CEAnim2OnPlayAnimation::PushArguments(lua::State *l)
 {
 	Lua::Push<const panima::AnimationSet *>(l, &set);
 	Lua::PushInt(l, animation);
-	Lua::PushInt(l, pragma::math::to_integral(flags));
+	Lua::PushInt(l, math::to_integral(flags));
 }
 
 /////////////////
 
-CEAnim2InitializeChannelValueSubmitter::CEAnim2InitializeChannelValueSubmitter(pragma::util::Path &path) : path {path} {}
+CEAnim2InitializeChannelValueSubmitter::CEAnim2InitializeChannelValueSubmitter(util::Path &path) : path {path} {}
 void CEAnim2InitializeChannelValueSubmitter::PushArguments(lua::State *l) {}
 uint32_t CEAnim2InitializeChannelValueSubmitter::GetReturnCount() { return 0; }
 void CEAnim2InitializeChannelValueSubmitter::HandleReturnValues(lua::State *l) {}

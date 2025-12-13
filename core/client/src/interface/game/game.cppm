@@ -53,7 +53,7 @@ export namespace pragma {
 	}
 	class DLLCLIENT CGame : public Game {
 	public:
-		CGame(pragma::NetworkState *state);
+		CGame(NetworkState *state);
 		virtual ~CGame() override;
 		virtual void OnRemove() override;
 
@@ -99,19 +99,19 @@ export namespace pragma {
 		void SetRenderClipPlane(const Vector4 &clipPlane);
 		const Vector4 &GetRenderClipPlane() const;
 
-		void ReloadMaterialShader(msys::CMaterial *mat);
-		void SetRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode, bool bEnabled);
-		void EnableRenderMode(pragma::rendering::SceneRenderPass renderMode);
-		void DisableRenderMode(pragma::rendering::SceneRenderPass renderMode);
-		bool IsRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode) const;
+		void ReloadMaterialShader(material::CMaterial *mat);
+		void SetRenderModeEnabled(rendering::SceneRenderPass renderMode, bool bEnabled);
+		void EnableRenderMode(rendering::SceneRenderPass renderMode);
+		void DisableRenderMode(rendering::SceneRenderPass renderMode);
+		bool IsRenderModeEnabled(rendering::SceneRenderPass renderMode) const;
 
-		pragma::rendering::RenderMask RegisterRenderMask(const std::string &name, bool inclusiveByDefault = true);
-		pragma::rendering::RenderMask GetInclusiveRenderMasks() const;
-		pragma::rendering::RenderMask GetExclusiveRenderMasks() const;
-		bool IsInclusiveRenderMask(pragma::rendering::RenderMask mask) const;
-		bool IsExclusiveRenderMask(pragma::rendering::RenderMask mask) const;
-		std::optional<pragma::rendering::RenderMask> GetRenderMask(const std::string &name);
-		const std::string *FindRenderMaskName(pragma::rendering::RenderMask mask) const;
+		rendering::RenderMask RegisterRenderMask(const std::string &name, bool inclusiveByDefault = true);
+		rendering::RenderMask GetInclusiveRenderMasks() const;
+		rendering::RenderMask GetExclusiveRenderMasks() const;
+		bool IsInclusiveRenderMask(rendering::RenderMask mask) const;
+		bool IsExclusiveRenderMask(rendering::RenderMask mask) const;
+		std::optional<rendering::RenderMask> GetRenderMask(const std::string &name);
+		const std::string *FindRenderMaskName(rendering::RenderMask mask) const;
 
 		std::shared_ptr<prosper::IPrimaryCommandBuffer> GetCurrentDrawCommandBuffer() const;
 		virtual void InitializeLua() override;
@@ -127,37 +127,37 @@ export namespace pragma {
 		void SendUserInput();
 		template<typename TCPPM>
 		void CreateGiblet(const GibletCreateInfo &info, TCPPM **particle);
-		virtual pragma::BaseEntityComponent *CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) override;
+		virtual BaseEntityComponent *CreateLuaEntityComponent(ecs::BaseEntity &ent, std::string classname) override;
 		virtual void CreateGiblet(const GibletCreateInfo &info) override;
-		virtual std::shared_ptr<pragma::geometry::ModelMesh> CreateModelMesh() const override;
-		virtual std::shared_ptr<pragma::geometry::ModelSubMesh> CreateModelSubMesh() const override;
+		virtual std::shared_ptr<geometry::ModelMesh> CreateModelMesh() const override;
+		virtual std::shared_ptr<geometry::ModelSubMesh> CreateModelSubMesh() const override;
 		virtual void GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const override;
 
 		bool StartGPUProfilingStage(const char *stage);
 		bool StopGPUProfilingStage();
-		pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage> *GetGPUProfilingStageManager();
+		debug::ProfilingStageManager<debug::GPUProfilingStage> *GetGPUProfilingStageManager();
 
-		std::shared_ptr<al::IEffect> GetAuxEffect(const std::string &name);
+		std::shared_ptr<pragma::audio::IEffect> GetAuxEffect(const std::string &name);
 
-		pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
+		debug::ProfilingStageManager<debug::ProfilingStage> *GetProfilingStageManager();
 		bool StartProfilingStage(const char *stage);
 		bool StopProfilingStage();
 
 		// Config
-		Bool RawMouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
-		Bool RawKeyboardInput(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude = 1.f);
+		Bool RawMouseInput(platform::MouseButton button, platform::KeyState state, platform::Modifier mods);
+		Bool RawKeyboardInput(platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods, float magnitude = 1.f);
 		Bool RawCharInput(unsigned int c);
 		Bool RawScrollInput(Vector2 offset);
 
-		Bool MouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
-		Bool KeyboardInput(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude = 1.f);
+		Bool MouseInput(platform::MouseButton button, platform::KeyState state, platform::Modifier mods);
+		Bool KeyboardInput(platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods, float magnitude = 1.f);
 		Bool CharInput(unsigned int c);
 		Bool ScrollInput(Vector2 offset);
 		void OnFilesDropped(std::vector<std::string> &files);
 		void OnDragEnter(prosper::Window &window);
 		void OnDragExit(prosper::Window &window);
 		bool OnWindowShouldClose(prosper::Window &window);
-		void OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
+		void OnPreedit(prosper::Window &window, const string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
 		void OnIMEStatusChanged(prosper::Window &window, bool imeEnabled);
 
 		// Game
@@ -173,10 +173,10 @@ export namespace pragma {
 		virtual ecs::CBaseEntity *GetEntity(unsigned int idx) override;
 		virtual ecs::CBaseEntity *GetEntityByLocalIndex(uint32_t idx) override;
 		ecs::CBaseEntity *GetEntityByClientIndex(unsigned int idx);
-		virtual void GetPlayers(std::vector<pragma::ecs::BaseEntity *> *ents) override;
-		virtual void GetNPCs(std::vector<pragma::ecs::BaseEntity *> *ents) override;
-		virtual void GetWeapons(std::vector<pragma::ecs::BaseEntity *> *ents) override;
-		virtual void GetVehicles(std::vector<pragma::ecs::BaseEntity *> *ents) override;
+		virtual void GetPlayers(std::vector<ecs::BaseEntity *> *ents) override;
+		virtual void GetNPCs(std::vector<ecs::BaseEntity *> *ents) override;
+		virtual void GetWeapons(std::vector<ecs::BaseEntity *> *ents) override;
+		virtual void GetVehicles(std::vector<ecs::BaseEntity *> *ents) override;
 
 		virtual void GetPlayers(std::vector<EntityHandle> *ents) override;
 		virtual void GetNPCs(std::vector<EntityHandle> *ents) override;
@@ -191,30 +191,30 @@ export namespace pragma {
 		template<class T>
 		T *CreateEntity()
 		{
-			if(pragma::math::is_flag_set(m_flags, GameFlags::ClosingGame))
+			if(math::is_flag_set(m_flags, GameFlags::ClosingGame))
 				return nullptr;
 			return CreateEntity<T>(GetFreeEntityIndex());
 		}
 		template<class T>
 		T *CreateEntity(unsigned int idx)
 		{
-			if(pragma::math::is_flag_set(m_flags, GameFlags::ClosingGame))
+			if(math::is_flag_set(m_flags, GameFlags::ClosingGame))
 				return nullptr;
 			T *ent = new T();
 			SetupEntity(ent, idx);
 			return ent;
 		}
-		virtual void RemoveEntity(pragma::ecs::BaseEntity *ent) override;
+		virtual void RemoveEntity(ecs::BaseEntity *ent) override;
 		template<typename TCPPM>
 		TCPPM *GetListener();
-		pragma::CPlayerComponent *GetLocalPlayer();
-		void GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask, ::pragma::rendering::RenderMask &exclusionMask) const;
-		void SetLocalPlayer(pragma::CPlayerComponent *pl);
-		virtual void SpawnEntity(pragma::ecs::BaseEntity *ent) override;
+		CPlayerComponent *GetLocalPlayer();
+		void GetPrimaryCameraRenderMask(rendering::RenderMask &inclusionMask, rendering::RenderMask &exclusionMask) const;
+		void SetLocalPlayer(CPlayerComponent *pl);
+		virtual void SpawnEntity(ecs::BaseEntity *ent) override;
 		void GetEntities(std::vector<ecs::CBaseEntity *> **ents);
-		virtual void GetEntities(std::vector<pragma::ecs::BaseEntity *> **ents) override;
+		virtual void GetEntities(std::vector<ecs::BaseEntity *> **ents) override;
 		void GetSharedEntities(std::vector<ecs::CBaseEntity *> **ents);
-		void GetSharedEntities(std::vector<pragma::ecs::BaseEntity *> **ents);
+		void GetSharedEntities(std::vector<ecs::BaseEntity *> **ents);
 
 		// Sockets
 		void ReceiveSnapshot(NetPacket &packet);
@@ -223,8 +223,8 @@ export namespace pragma {
 		virtual Float GetRestitutionScale() const override;
 
 		template<typename TCPPM>
-		TCPPM *CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius = pragma::game::bulletInfo::DEFAULT_TRACER_RADIUS, const Color &col = pragma::game::bulletInfo::DEFAULT_TRACER_COLOR, float length = pragma::game::bulletInfo::DEFAULT_TRACER_LENGTH, float speed = pragma::game::bulletInfo::DEFAULT_TRACER_SPEED,
-		  const std::string &material = std::string {pragma::game::bulletInfo::DEFAULT_TRACER_MATERIAL}, float bloomScale = pragma::game::bulletInfo::DEFAULT_TRACER_BLOOM);
+		TCPPM *CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius = game::bulletInfo::DEFAULT_TRACER_RADIUS, const Color &col = game::bulletInfo::DEFAULT_TRACER_COLOR, float length = game::bulletInfo::DEFAULT_TRACER_LENGTH, float speed = game::bulletInfo::DEFAULT_TRACER_SPEED,
+		  const std::string &material = std::string {game::bulletInfo::DEFAULT_TRACER_MATERIAL}, float bloomScale = game::bulletInfo::DEFAULT_TRACER_BLOOM);
 
 		virtual bool IsPhysicsSimulationEnabled() const override;
 
@@ -236,35 +236,35 @@ export namespace pragma {
 		template<typename TCPPM>
 		void RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, TCPPM &cam);
 
-		using pragma::Game::LoadNavMesh;
+		using Game::LoadNavMesh;
 
 		void OnReceivedRegisterNetEvent(NetPacket &packet);
-		virtual pragma::NetEventId FindNetEvent(const std::string &name) const override;
-		virtual pragma::NetEventId SetupNetEvent(const std::string &name) override;
-		pragma::NetEventId SharedNetEventIdToLocal(pragma::NetEventId evId) const;
-		pragma::NetEventId LocalNetEventIdToShared(pragma::NetEventId evId) const;
-		std::unordered_map<std::string, pragma::NetEventId> &GetLocalNetEventIds() { return m_clientNetEventData.localNetEventIds; }
-		std::vector<pragma::NetEventId> &GetSharedNetEventIdToLocal() { return m_clientNetEventData.sharedNetEventIdToLocalId; }
-		std::vector<pragma::NetEventId> &GetLocalNetEventIdToShared() { return m_clientNetEventData.localNetEventIdToSharedId; }
+		virtual NetEventId FindNetEvent(const std::string &name) const override;
+		virtual NetEventId SetupNetEvent(const std::string &name) override;
+		NetEventId SharedNetEventIdToLocal(NetEventId evId) const;
+		NetEventId LocalNetEventIdToShared(NetEventId evId) const;
+		std::unordered_map<std::string, NetEventId> &GetLocalNetEventIds() { return m_clientNetEventData.localNetEventIds; }
+		std::vector<NetEventId> &GetSharedNetEventIdToLocal() { return m_clientNetEventData.sharedNetEventIdToLocalId; }
+		std::vector<NetEventId> &GetLocalNetEventIdToShared() { return m_clientNetEventData.localNetEventIdToSharedId; }
 
 		void SetLODBias(int32_t bias);
 		int32_t GetLODBias() const;
 		uint32_t GetLOD(float dist, uint32_t maxLod = std::numeric_limits<uint32_t>::max()) const;
 		LuaCallbackHandler &GetInputCallbackHandler();
 		uint32_t GetMSAASampleCount();
-		void SetMaterialOverride(msys::Material *mat);
-		msys::Material *GetMaterialOverride();
+		void SetMaterialOverride(material::Material *mat);
+		material::Material *GetMaterialOverride();
 		void SetColorScale(const Vector4 &col);
 		Vector4 &GetColorScale();
 		void SetAlphaScale(float a);
 		float GetAlphaScale();
 		LuaGUIManager &GetLuaGUIManager();
-		pragma::LuaShaderManager &GetLuaShaderManager();
-		pragma::cxxm_LuaParticleModifierManager &GetLuaParticleModifierManager();
-		pragma::LuaInputBindingLayerRegister &GetLuaInputBindingLayerRegister();
-		msys::Material *GetLoadMaterial();
+		LuaShaderManager &GetLuaShaderManager();
+		cxxm_LuaParticleModifierManager &GetLuaParticleModifierManager();
+		LuaInputBindingLayerRegister &GetLuaInputBindingLayerRegister();
+		material::Material *GetLoadMaterial();
 		virtual bool RunLua(const std::string &lua) override;
-		virtual bool InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject) override;
+		virtual bool InvokeEntityEvent(BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject) override;
 		void OnReceivedPlayerInputResponse(uint8_t userInputId);
 		uint16_t GetLatency() const;
 		// Returns the number of lost snapshot packets within the last second
@@ -294,8 +294,8 @@ export namespace pragma {
 		TCPPM *GetViewBody();
 		void ReloadRenderFrameBuffer();
 
-		void RenderScenes(pragma::rendering::DrawSceneInfo &drawSceneInfo);
-		void RenderScene(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void RenderScenes(rendering::DrawSceneInfo &drawSceneInfo);
+		void RenderScene(const rendering::DrawSceneInfo &drawSceneInfo);
 
 		// GUI
 		void PreGUIDraw();
@@ -332,27 +332,27 @@ export namespace pragma {
 		virtual void InitializeGame() override;
 
 		void SetViewModelFOV(float fov);
-		const pragma::util::PFloatProperty &GetViewModelFOVProperty() const;
+		const util::PFloatProperty &GetViewModelFOVProperty() const;
 		float GetViewModelFOV() const;
 		float GetViewModelFOVRad() const;
 		Mat4 GetViewModelProjectionMatrix() const;
 
 		// Shaders
-		const pragma::util::WeakHandle<prosper::Shader> &GetGameShader(GameShader shader) const;
+		const util::WeakHandle<prosper::Shader> &GetGameShader(GameShader shader) const;
 
 		// Lights
-		pragma::BaseEnvLightDirectionalComponent *GetEnvironmentLightSource() const;
+		BaseEnvLightDirectionalComponent *GetEnvironmentLightSource() const;
 		void UpdateEnvironmentLightSource();
 
 		// Inputs
-		void SetActionInput(pragma::Action action, bool b, bool bKeepMagnitude);
-		void SetActionInput(pragma::Action action, bool b, float magnitude = 1.f);
-		bool GetActionInput(pragma::Action action);
+		void SetActionInput(Action action, bool b, bool bKeepMagnitude);
+		void SetActionInput(Action action, bool b, float magnitude = 1.f);
+		bool GetActionInput(Action action);
 
 		// Util
-		bool SaveImage(prosper::IImage &image, const std::string &fileName, const uimg::TextureInfo &imageWriteInfo) const;
-		bool SaveImage(const std::vector<std::vector<const void *>> &imgLayerMipmapData, uint32_t width, uint32_t height, uint32_t szPerPixel, const std::string &fileName, const uimg::TextureInfo &imageWriteInfo, bool cubemap = false) const;
-		bool SaveImage(uimg::ImageBuffer &imgBuffer, const std::string &fileName, const uimg::TextureInfo &imageWriteInfo, bool cubemap = false) const;
+		bool SaveImage(prosper::IImage &image, const std::string &fileName, const image::TextureInfo &imageWriteInfo) const;
+		bool SaveImage(const std::vector<std::vector<const void *>> &imgLayerMipmapData, uint32_t width, uint32_t height, uint32_t szPerPixel, const std::string &fileName, const image::TextureInfo &imageWriteInfo, bool cubemap = false) const;
+		bool SaveImage(image::ImageBuffer &imgBuffer, const std::string &fileName, const image::TextureInfo &imageWriteInfo, bool cubemap = false) const;
 
 		virtual std::string GetLuaNetworkDirectoryName() const override;
 		virtual std::string GetLuaNetworkFileName() const override;
@@ -361,9 +361,9 @@ export namespace pragma {
 		bool IsDefaultGameRenderEnabled() const;
 
 		uint32_t GetNumberOfScenesQueuedForRendering() const;
-		pragma::rendering::DrawSceneInfo *GetQueuedSceneRenderInfo(uint32_t i);
-		void QueueForRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
-		void RenderScenes(const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos);
+		rendering::DrawSceneInfo *GetQueuedSceneRenderInfo(uint32_t i);
+		void QueueForRendering(const rendering::DrawSceneInfo &drawSceneInfo);
+		void RenderScenes(const std::vector<rendering::DrawSceneInfo> &drawSceneInfos);
 		template<typename TCPPM>
 		void SetRenderScene(TCPPM &scene);
 		void ResetRenderScene();
@@ -380,24 +380,24 @@ export namespace pragma {
 		template<typename TCPPM>
 		TCPPM *GetGameplayControlCamera();
 
-		pragma::rendering::GlobalShaderInputDataManager &GetGlobalShaderInputDataManager();
-		const pragma::rendering::GlobalShaderInputDataManager &GetGlobalShaderInputDataManager() const;
+		rendering::GlobalShaderInputDataManager &GetGlobalShaderInputDataManager();
+		const rendering::GlobalShaderInputDataManager &GetGlobalShaderInputDataManager() const;
 
-		pragma::rendering::RenderQueueBuilder &GetRenderQueueBuilder();
-		pragma::rendering::RenderQueueWorkerManager &GetRenderQueueWorkerManager();
+		rendering::RenderQueueBuilder &GetRenderQueueBuilder();
+		rendering::RenderQueueWorkerManager &GetRenderQueueWorkerManager();
 		prosper::IDescriptorSet &GetGlobalRenderSettingsDescriptorSet();
-		pragma::rendering::GlobalRenderSettingsBufferData &GetGlobalRenderSettingsBufferData();
+		rendering::GlobalRenderSettingsBufferData &GetGlobalRenderSettingsBufferData();
 		void ReloadGameWorldShaderPipelines() const;
 		void ReloadPrepassShaderPipelines() const;
-		void OnGameWorldShaderSettingsChanged(const pragma::rendering::GameWorldShaderSettings &newSettings, const pragma::rendering::GameWorldShaderSettings &oldSettings);
+		void OnGameWorldShaderSettingsChanged(const rendering::GameWorldShaderSettings &newSettings, const rendering::GameWorldShaderSettings &oldSettings);
 
 		// For internal use only!
-		const std::vector<pragma::rendering::DrawSceneInfo> &GetQueuedRenderScenes() const;
+		const std::vector<rendering::DrawSceneInfo> &GetQueuedRenderScenes() const;
 	protected:
 		virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod) override;
 		virtual void OnMapLoaded() override;
-		virtual void InitializeWorldData(pragma::asset::WorldData &worldData) override;
-		virtual void InitializeMapEntities(pragma::asset::WorldData &worldData, std::vector<EntityHandle> &outEnts) override;
+		virtual void InitializeWorldData(asset::WorldData &worldData) override;
+		virtual void InitializeMapEntities(asset::WorldData &worldData, std::vector<EntityHandle> &outEnts) override;
 
 		template<class T>
 		void GetPlayers(std::vector<T *> *ents);
@@ -409,28 +409,28 @@ export namespace pragma {
 		void GetVehicles(std::vector<T *> *ents);
 
 		virtual void UpdateTime() override;
-		virtual void OnEntityCreated(pragma::ecs::BaseEntity *ent) override;
+		virtual void OnEntityCreated(ecs::BaseEntity *ent) override;
 		virtual unsigned int GetFreeEntityIndex() override;
-		virtual void SetupEntity(pragma::ecs::BaseEntity *ent, unsigned int idx) override;
+		virtual void SetupEntity(ecs::BaseEntity *ent, unsigned int idx) override;
 		virtual void InitializeLuaScriptWatcher() override;
-		virtual std::shared_ptr<pragma::EntityComponentManager> InitializeEntityComponentManager() override;
+		virtual std::shared_ptr<EntityComponentManager> InitializeEntityComponentManager() override;
 	private:
-		std::queue<pragma::gui::WIHandle> m_luaGUIObjects = {};
+		std::queue<gui::WIHandle> m_luaGUIObjects = {};
 		double m_tLastClientUpdate = 0.0;
-		std::array<bool, pragma::math::to_integral(pragma::rendering::SceneRenderPass::Count)> m_renderModesEnabled;
+		std::array<bool, math::to_integral(rendering::SceneRenderPass::Count)> m_renderModesEnabled;
 		CallbackHandle m_hCbDrawFrame = {};
 
 		struct {
-			std::unordered_map<std::string, pragma::NetEventId> localNetEventIds {};
-			pragma::NetEventId nextLocalNetEventId = 0;
-			std::vector<pragma::NetEventId> sharedNetEventIdToLocalId {};
-			std::vector<pragma::NetEventId> localNetEventIdToSharedId {};
+			std::unordered_map<std::string, NetEventId> localNetEventIds {};
+			NetEventId nextLocalNetEventId = 0;
+			std::vector<NetEventId> sharedNetEventIdToLocalId {};
+			std::vector<NetEventId> localNetEventIdToSharedId {};
 		} m_clientNetEventData {};
 
 		CallbackHandle m_cbGPUProfilingHandle = {};
-		std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage>> m_gpuProfilingStageManager;
+		std::unique_ptr<debug::ProfilingStageManager<debug::GPUProfilingStage>> m_gpuProfilingStageManager;
 		CallbackHandle m_cbProfilingHandle = {};
-		std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_profilingStageManager;
+		std::unique_ptr<debug::ProfilingStageManager<debug::ProfilingStage>> m_profilingStageManager;
 
 		struct DLLCLIENT MessagePacketTracker {
 			MessagePacketTracker();
@@ -450,80 +450,80 @@ export namespace pragma {
 		std::vector<std::string> m_requestedResources;
 
 		LuaGUIManager m_luaGUIElements = {};
-		std::shared_ptr<pragma::LuaShaderManager> m_luaShaderManager = nullptr;
-		std::shared_ptr<pragma::cxxm_LuaParticleModifierManager_vp> m_luaParticleModifierManager = nullptr;
+		std::shared_ptr<LuaShaderManager> m_luaShaderManager = nullptr;
+		std::shared_ptr<cxxm_LuaParticleModifierManager_vp> m_luaParticleModifierManager = nullptr;
 		double m_tServer = 0.0;
 		LuaCallbackHandler m_inputCallbackHandler;
-		std::unique_ptr<pragma::LuaInputBindingLayerRegister> m_luaInputBindingLayerRegister {};
+		std::unique_ptr<LuaInputBindingLayerRegister> m_luaInputBindingLayerRegister {};
 
 		// Shaders
 		void InitShaders();
 		void LoadLuaShaders();
 		void LoadLuaShader(std::string file);
-		msys::MaterialHandle m_matLoad = {};
+		material::MaterialHandle m_matLoad = {};
 
 		// FOV used for view-models
-		pragma::util::PFloatProperty m_viewFov = nullptr;
+		util::PFloatProperty m_viewFov = nullptr;
 
 		// Sound
 		bool LoadAuxEffects(const std::string &fname);
 
 		// Render
 		bool m_defaultGameRenderEnabled = true;
-		std::vector<pragma::rendering::DrawSceneInfo> m_sceneRenderQueue {};
-		std::shared_ptr<pragma::rendering::RenderQueueBuilder> m_renderQueueBuilder = nullptr;
-		std::shared_ptr<pragma::rendering::RenderQueueWorkerManager> m_renderQueueWorkerManager = nullptr;
-		std::unique_ptr<pragma::rendering::GlobalShaderInputDataManager> m_globalShaderInputDataManager;
+		std::vector<rendering::DrawSceneInfo> m_sceneRenderQueue {};
+		std::shared_ptr<rendering::RenderQueueBuilder> m_renderQueueBuilder = nullptr;
+		std::shared_ptr<rendering::RenderQueueWorkerManager> m_renderQueueWorkerManager = nullptr;
+		std::unique_ptr<rendering::GlobalShaderInputDataManager> m_globalShaderInputDataManager;
 		Vector4 m_clipPlane = {};
 		Vector4 m_colScale = {};
-		msys::Material *m_matOverride = nullptr;
+		material::Material *m_matOverride = nullptr;
 		bool m_bMainRenderPass = true;
 		std::weak_ptr<prosper::IPrimaryCommandBuffer> m_currentDrawCmd = {};
-		pragma::ComponentHandle<pragma::BaseEntityComponent> m_controlCamera {};
+		ComponentHandle<BaseEntityComponent> m_controlCamera {};
 
-		std::array<pragma::util::WeakHandle<prosper::Shader>, pragma::math::to_integral(GameShader::Count)> m_gameShaders = {};
+		std::array<util::WeakHandle<prosper::Shader>, math::to_integral(GameShader::Count)> m_gameShaders = {};
 		StateFlags m_stateFlags = StateFlags::None;
 		void RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, prosper::Texture &texPostHdr, prosper::IImage *optOutImage, uint32_t layerId = 0u);
 
-		std::unique_ptr<pragma::rendering::GlobalRenderSettingsBufferData> m_globalRenderSettingsBufferData;
+		std::unique_ptr<rendering::GlobalRenderSettingsBufferData> m_globalRenderSettingsBufferData;
 
 		// Scene
-		pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> m_scene = pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
+		util::TWeakSharedHandle<BaseEntityComponent> m_scene = pragma::util::TWeakSharedHandle<BaseEntityComponent> {};
 		std::shared_ptr<rendering::WorldEnvironment> m_worldEnvironment = nullptr;
 
-		void OnEnvironmentLightSourceChanged(pragma::BaseEnvLightDirectionalComponent *oldSource, pragma::BaseEnvLightDirectionalComponent *newSource);
+		void OnEnvironmentLightSourceChanged(BaseEnvLightDirectionalComponent *oldSource, BaseEnvLightDirectionalComponent *newSource);
 
 		void UpdateShaderTimeData();
 
-		std::unordered_map<std::string, pragma::rendering::RenderMask> m_customRenderMasks;
-		pragma::rendering::RenderMask m_inclusiveRenderMasks = pragma::rendering::RenderMask::None;
-		pragma::rendering::RenderMask m_exclusiveRenderMasks = pragma::rendering::RenderMask::None;
-		pragma::rendering::RenderMask m_nextCustomRenderMaskIndex = static_cast<pragma::rendering::RenderMask>(1);
-		pragma::rendering::RenderMask m_firstPersonRenderMask = pragma::rendering::RenderMask::None;
-		pragma::rendering::RenderMask m_thirdPersonRenderMask = pragma::rendering::RenderMask::None;
+		std::unordered_map<std::string, rendering::RenderMask> m_customRenderMasks;
+		rendering::RenderMask m_inclusiveRenderMasks = rendering::RenderMask::None;
+		rendering::RenderMask m_exclusiveRenderMasks = rendering::RenderMask::None;
+		rendering::RenderMask m_nextCustomRenderMaskIndex = static_cast<rendering::RenderMask>(1);
+		rendering::RenderMask m_firstPersonRenderMask = rendering::RenderMask::None;
+		rendering::RenderMask m_thirdPersonRenderMask = rendering::RenderMask::None;
 
 		// Entities
-		pragma::ComponentHandle<pragma::BaseEntityComponent> m_gameComponent;
+		ComponentHandle<BaseEntityComponent> m_gameComponent;
 		std::vector<ecs::CBaseEntity *> m_ents;
 		std::vector<ecs::CBaseEntity *> m_shEnts;
 		std::vector<ecs::CBaseEntity *> m_entsOccluded;
-		std::vector<pragma::ecs::BaseEntity *> m_shBaseEnts;
-		pragma::util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> m_hEnvLight = pragma::util::TWeakSharedHandle<pragma::BaseEnvLightDirectionalComponent> {};
-		pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> m_listener = pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
-		pragma::util::TWeakSharedHandle<pragma::CPlayerComponent> m_plLocal = pragma::util::TWeakSharedHandle<pragma::CPlayerComponent> {};
-		pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> m_viewModel = pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
-		pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> m_viewBody = pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
-		pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> m_primaryCamera = pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
+		std::vector<ecs::BaseEntity *> m_shBaseEnts;
+		util::TWeakSharedHandle<BaseEnvLightDirectionalComponent> m_hEnvLight = pragma::util::TWeakSharedHandle<BaseEnvLightDirectionalComponent> {};
+		util::TWeakSharedHandle<BaseEntityComponent> m_listener = pragma::util::TWeakSharedHandle<BaseEntityComponent> {};
+		util::TWeakSharedHandle<CPlayerComponent> m_plLocal = pragma::util::TWeakSharedHandle<CPlayerComponent> {};
+		util::TWeakSharedHandle<BaseEntityComponent> m_viewModel = pragma::util::TWeakSharedHandle<BaseEntityComponent> {};
+		util::TWeakSharedHandle<BaseEntityComponent> m_viewBody = pragma::util::TWeakSharedHandle<BaseEntityComponent> {};
+		util::TWeakSharedHandle<BaseEntityComponent> m_primaryCamera = pragma::util::TWeakSharedHandle<BaseEntityComponent> {};
 
-		pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> m_renderScene = pragma::util::TWeakSharedHandle<pragma::BaseEntityComponent> {};
+		util::TWeakSharedHandle<BaseEntityComponent> m_renderScene = pragma::util::TWeakSharedHandle<BaseEntityComponent> {};
 
 		// Map
-		virtual std::shared_ptr<pragma::nav::Mesh> LoadNavMesh(const std::string &fname) override;
+		virtual std::shared_ptr<nav::Mesh> LoadNavMesh(const std::string &fname) override;
 
 		// Entities
 		void GetOccludedEntities(std::vector<ecs::CBaseEntity *> &entsOccluded);
 
-		virtual void InitializeEntityComponents(pragma::EntityComponentManager &componentManager) override;
+		virtual void InitializeEntityComponents(EntityComponentManager &componentManager) override;
 		void InitializeWorldEnvironment();
 	};
 }

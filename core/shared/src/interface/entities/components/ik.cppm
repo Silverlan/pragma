@@ -14,7 +14,7 @@ export import :entities.components.base;
 export namespace pragma {
 	class DLLNETWORK IKComponent final : public BaseEntityComponent {
 	  public:
-		IKComponent(pragma::ecs::BaseEntity &ent);
+		IKComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		void SetIKControllerEnabled(uint32_t ikControllerId, bool b);

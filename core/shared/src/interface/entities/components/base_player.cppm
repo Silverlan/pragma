@@ -22,14 +22,14 @@ export {
 		class BaseObservableComponent;
 		class DLLNETWORK BasePlayerComponent : public BaseEntityComponent {
 		  public:
-			friend pragma::Engine;
+			friend Engine;
 			virtual ~BasePlayerComponent() override;
 			virtual Con::c_cout &print(Con::c_cout &);
 			virtual std::ostream &print(std::ostream &);
 
 			virtual void OnTakenDamage(game::DamageInfo &info, unsigned short oldHealth, unsigned short newHealth);
 			// Same as PlayActivity, but doesn't automatically transmit to clients if called serverside
-			virtual bool PlaySharedActivity(pragma::Activity activity);
+			virtual bool PlaySharedActivity(Activity activity);
 
 			virtual void SetViewRotation(const Quat &rot);
 
@@ -77,14 +77,14 @@ export {
 			virtual unsigned short GetClientPort();
 			double ConnectionTime() const;
 			double TimeConnected() const;
-			virtual void PrintMessage(std::string message, pragma::console::MESSAGE type) = 0;
+			virtual void PrintMessage(std::string message, console::MESSAGE type) = 0;
 			void GetConVars(std::unordered_map<std::string, std::string> **convars);
 			bool GetConVar(std::string cvar, std::string *val);
 			std::string GetConVarString(std::string cvar) const;
 			int GetConVarInt(std::string cvar) const;
 			float GetConVarFloat(std::string cvar) const;
 			bool GetConVarBool(std::string cvar) const;
-			pragma::ecs::BaseEntity *FindUseEntity() const;
+			ecs::BaseEntity *FindUseEntity() const;
 			void Use();
 			Vector3 GetViewPos() const;
 			void SetViewPos(const std::optional<Vector3> &pos);
@@ -97,7 +97,7 @@ export {
 			bool IsSprinting() const;
 
 			virtual void ApplyViewRotationOffset(const EulerAngles &ang, float dur = 0.5f) = 0;
-			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 			ActionInputControllerComponent *GetActionInputController();
 			const ActionInputControllerComponent *GetActionInputController() const { return const_cast<BasePlayerComponent *>(this)->GetActionInputController(); }
@@ -110,12 +110,12 @@ export {
 				Crouching = 0,
 				Uncrouching = 1,
 			};
-			BasePlayerComponent(pragma::ecs::BaseEntity &ent);
+			BasePlayerComponent(ecs::BaseEntity &ent);
 			void UpdateMovementProperties();
 			virtual void OnPhysicsInitialized();
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 			virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
-			void HandleActionInput(pragma::Action action, bool pressed);
+			void HandleActionInput(Action action, bool pressed);
 			void OnRespawn();
 			bool m_bFlashlightOn;
 			EntityHandle m_entFlashlight = {};
@@ -123,10 +123,10 @@ export {
 			BaseObservableComponent *m_observableComponent = nullptr;
 			ActionInputControllerComponent *m_actionController = nullptr;
 
-			pragma::NetEventId m_netEvApplyViewRotationOffset = pragma::INVALID_NET_EVENT;
-			pragma::NetEventId m_netEvPrintMessage = pragma::INVALID_NET_EVENT;
-			pragma::NetEventId m_netEvRespawn = pragma::INVALID_NET_EVENT;
-			pragma::NetEventId m_netEvSetViewOrientation = pragma::INVALID_NET_EVENT;
+			NetEventId m_netEvApplyViewRotationOffset = INVALID_NET_EVENT;
+			NetEventId m_netEvPrintMessage = INVALID_NET_EVENT;
+			NetEventId m_netEvRespawn = INVALID_NET_EVENT;
+			NetEventId m_netEvSetViewOrientation = INVALID_NET_EVENT;
 
 			double m_timeConnected;
 			bool m_bForceAnimationUpdate = false;
@@ -137,7 +137,7 @@ export {
 			float m_tCrouch;
 			CrouchTransition m_crouchTransition = CrouchTransition::None;
 			bool m_bCrouching;
-			pragma::Activity m_movementActivity = pragma::Activity::Invalid; // Current activity, if we're moving
+			Activity m_movementActivity = Activity::Invalid; // Current activity, if we're moving
 
 			virtual void Initialize() override;
 
@@ -147,7 +147,7 @@ export {
 			void OnKilled(game::DamageInfo *dmgInfo = nullptr);
 
 			virtual void OnTick(double tDelta) override;
-			std::shared_ptr<pragma::physics::IConvexShape> m_shapeStand = nullptr;
+			std::shared_ptr<physics::IConvexShape> m_shapeStand = nullptr;
 		  private:
 			unsigned short m_portUDP;
 			std::unordered_map<int, bool> m_keysPressed;

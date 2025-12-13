@@ -23,16 +23,16 @@ export namespace pragma {
 	class DLLNETWORK ConstraintComponent final : public BaseEntityComponent {
 	  public:
 		struct DLLNETWORK ConstraintParticipants {
-			pragma::ComponentHandle<pragma::BaseEntityComponent> driverC;
-			pragma::ComponentHandle<pragma::BaseEntityComponent> drivenObjectC;
-			pragma::ComponentMemberIndex driverPropIdx;
-			pragma::ComponentMemberIndex drivenObjectPropIdx;
+			ComponentHandle<BaseEntityComponent> driverC;
+			ComponentHandle<BaseEntityComponent> drivenObjectC;
+			ComponentMemberIndex driverPropIdx;
+			ComponentMemberIndex drivenObjectPropIdx;
 		};
 
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		ConstraintComponent(pragma::ecs::BaseEntity &ent);
+		ConstraintComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		virtual void OnEntitySpawn() override;
@@ -42,11 +42,11 @@ export namespace pragma {
 		void SetInfluence(float influence);
 		float GetInfluence() const;
 
-		void SetDriver(const pragma::EntityUComponentMemberRef &driver);
-		const pragma::EntityUComponentMemberRef &GetDriver() const;
+		void SetDriver(const EntityUComponentMemberRef &driver);
+		const EntityUComponentMemberRef &GetDriver() const;
 
-		void SetDrivenObject(const pragma::EntityUComponentMemberRef &drivenObject);
-		const pragma::EntityUComponentMemberRef &GetDrivenObject() const;
+		void SetDrivenObject(const EntityUComponentMemberRef &drivenObject);
+		const EntityUComponentMemberRef &GetDrivenObject() const;
 
 		void SetDriverSpace(CoordinateSpace space);
 		CoordinateSpace GetDriverSpace() const;
@@ -68,12 +68,12 @@ export namespace pragma {
 		void SetConstraintParticipantsDirty();
 		const std::optional<ConstraintParticipants> &UpdateConstraintParticipants();
 		friend ConstraintManagerComponent;
-		pragma::EntityUComponentMemberRef m_driver;
-		pragma::EntityUComponentMemberRef m_drivenObject;
+		EntityUComponentMemberRef m_driver;
+		EntityUComponentMemberRef m_drivenObject;
 		CoordinateSpace m_driverSpace = CoordinateSpace::World;
 		CoordinateSpace m_drivenObjectSpace = CoordinateSpace::World;
-		pragma::ComponentHandle<ConstraintManagerComponent> m_curDrivenConstraintManager;
-		std::optional<ConstraintComponent::ConstraintParticipants> m_constraintParticipants {};
+		ComponentHandle<ConstraintManagerComponent> m_curDrivenConstraintManager;
+		std::optional<ConstraintParticipants> m_constraintParticipants {};
 		bool m_hasDriver = true;
 		bool m_registeredWithConstraintManager = false;
 		int32_t m_orderIndex = 0;

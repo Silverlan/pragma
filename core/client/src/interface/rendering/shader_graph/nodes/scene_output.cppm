@@ -9,7 +9,7 @@ export module pragma.client:rendering.shader_graph.node_scene_output;
 export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
-	class DLLCLIENT SceneOutputNode : public pragma::shadergraph::Node {
+	class DLLCLIENT SceneOutputNode : public shadergraph::Node {
 	  public:
 		static constexpr const char *IN_COLOR = "color";
 		static constexpr const char *IN_ALPHA = "alpha";
@@ -20,6 +20,6 @@ export namespace pragma::rendering::shader_graph {
 		// TODO: Only allow one of these!
 		SceneOutputNode(const std::string_view &type);
 
-		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
+		virtual std::string DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const override;
 	};
 };

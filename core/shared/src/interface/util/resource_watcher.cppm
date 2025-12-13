@@ -10,8 +10,8 @@ export import :networking.util;
 export import :types;
 export import pragma.materialsystem;
 
-export {
-	class DLLNETWORK EResourceWatcherCallbackType : public pragma::util::ExtensibleEnum {
+export namespace pragma::util {
+	class DLLNETWORK EResourceWatcherCallbackType : public ExtensibleEnum {
 	  public:
 		// declare the enum first so it can be used in following declarations
 		enum class E : uint32_t { Model = 0u, Material, Texture, Map, SoundScript, Sound, Count };
@@ -21,7 +21,7 @@ export {
 	  protected:
 		// forwarding ctor that calls the base ctor (base ctor is protected)
 		// do NOT mark constexpr if the base ctor is not constexpr
-		explicit EResourceWatcherCallbackType(uint32_t v) noexcept : pragma::util::ExtensibleEnum(v) {}
+		explicit EResourceWatcherCallbackType(uint32_t v) noexcept : ExtensibleEnum(v) {}
 	};
 	namespace eResourceWatcherCallbackType {
 		CLASS_ENUM_COMPAT const EResourceWatcherCallbackType Model;
@@ -32,18 +32,22 @@ export {
 		CLASS_ENUM_COMPAT const EResourceWatcherCallbackType Sound;
 		CLASS_ENUM_COMPAT const EResourceWatcherCallbackType Count;
 	}
+};
 
+export {
 	namespace std {
 		template<>
-		struct hash<EResourceWatcherCallbackType> {
-			std::size_t operator()(const EResourceWatcherCallbackType &object) const { return object.Hash(); }
+		struct hash<pragma::util::EResourceWatcherCallbackType> {
+			std::size_t operator()(const pragma::util::EResourceWatcherCallbackType &object) const { return object.Hash(); }
 		};
 	}
+}
 
+export namespace pragma::util {
 	class DLLNETWORK ResourceWatcherManager {
-	  public:
-		using TypeHandler = std::function<void(const pragma::util::Path &, const std::string &)>;
-		ResourceWatcherManager(pragma::NetworkState *nw);
+	public:
+		using TypeHandler = std::function<void(const Path &, const std::string &)>;
+		ResourceWatcherManager(NetworkState *nw);
 		bool MountDirectory(const std::string &path, bool bAbsolutePath = false);
 		void Poll();
 
@@ -52,26 +56,26 @@ export {
 		// times to resume watching
 		void Lock();
 		void Unlock();
-		pragma::util::ScopeGuard ScopeLock();
+		ScopeGuard ScopeLock();
 		bool IsLocked() const;
 		CallbackHandle AddChangeCallback(EResourceWatcherCallbackType type, const std::function<void(std::reference_wrapper<const std::string>, std::reference_wrapper<const std::string>)> &fcallback);
 		void RegisterTypeHandler(const std::string &ext, const TypeHandler &handler);
-	  protected:
-		pragma::NetworkState *m_networkState = nullptr;
+	protected:
+		NetworkState *m_networkState = nullptr;
 		uint32_t m_lockedCount = 0;
 		std::recursive_mutex m_watcherMutex;
-		void OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path);
+		void OnResourceChanged(const Path &rootPath, const Path &path);
 		void ReloadMaterial(const std::string &path);
-		virtual void OnMaterialReloaded(const std::string &path, const std::unordered_set<pragma::asset::Model *> &modelMap) {}
-		virtual void OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path, const std::string &ext);
+		virtual void OnMaterialReloaded(const std::string &path, const std::unordered_set<asset::Model *> &modelMap) {}
+		virtual void OnResourceChanged(const Path &rootPath, const Path &path, const std::string &ext);
 		virtual void GetWatchPaths(std::vector<std::string> &paths);
 		virtual void ReloadTexture(const std::string &path);
 		void CallChangeCallbacks(EResourceWatcherCallbackType type, const std::string &path, const std::string &ext);
-	  private:
+	private:
 		std::unordered_map<EResourceWatcherCallbackType, std::vector<CallbackHandle>> m_callbacks;
 		std::unordered_map<std::string, std::function<void()>> m_watchFiles;
-		std::vector<std::shared_ptr<DirectoryWatcherCallback>> m_watchers;
+		std::vector<std::shared_ptr<fs::DirectoryWatcherCallback>> m_watchers;
 		std::unordered_map<std::string, TypeHandler> m_typeHandlers;
-		std::shared_ptr<filemanager::DirectoryWatcherManager> m_watcherManager;
+		std::shared_ptr<fs::DirectoryWatcherManager> m_watcherManager;
 	};
-};
+}

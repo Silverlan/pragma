@@ -14,9 +14,9 @@ export namespace pragma {
 	}
 	class DLLCLIENT CColorComponent final : public BaseColorComponent, public CBaseNetComponent {
 	  public:
-		CColorComponent(pragma::ecs::BaseEntity &ent) : BaseColorComponent(ent) {}
+		CColorComponent(ecs::BaseEntity &ent) : BaseColorComponent(ent) {}
 
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

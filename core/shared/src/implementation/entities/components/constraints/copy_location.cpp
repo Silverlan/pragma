@@ -8,15 +8,15 @@ import :entities.components.constraints.copy_location;
 
 using namespace pragma;
 
-ConstraintCopyLocationComponent::ConstraintCopyLocationComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintCopyLocationComponent::ConstraintCopyLocationComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintCopyLocationComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
 	GetEntity().AddComponent<ConstraintSpaceComponent>();
-	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
+	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<ComponentEvent> evData) { ApplyConstraint(); });
 }
-void ConstraintCopyLocationComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintCopyLocationComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintCopyLocationComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
@@ -34,14 +34,14 @@ void ConstraintCopyLocationComponent::ApplyConstraint()
 	if(!constraintInfo || influence == 0.f)
 		return;
 	Vector3 posDriven;
-	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriven);
+	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriven);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driven object of constraint '{}'.", constraintInfo->drivenObjectPropIdx, GetEntity().ToString());
 		return;
 	}
 
 	Vector3 posDriver;
-	res = constraintInfo->driverC->GetTransformMemberPos(constraintInfo->driverPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDriverSpace()), posDriver);
+	res = constraintInfo->driverC->GetTransformMemberPos(constraintInfo->driverPropIdx, static_cast<math::CoordinateSpace>(m_constraintC->GetDriverSpace()), posDriver);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driver of constraint '{}'.", constraintInfo->driverPropIdx, GetEntity().ToString());
 		return;
@@ -51,5 +51,5 @@ void ConstraintCopyLocationComponent::ApplyConstraint()
 		m_constraintSpaceC->ApplyFilter(posDriver, posDriven, posDriver);
 
 	posDriver = uvec::lerp(posDriven, posDriver, influence);
-	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriver);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriver);
 }

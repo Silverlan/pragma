@@ -50,7 +50,7 @@ float CLightSpotVolComponent::CalcEndRadius() const
 	auto pFieldAngleComponent = GetEntity().GetComponent<CFieldAngleComponent>();
 	auto maxDist = pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 100.f;
 	auto fieldAngle = pFieldAngleComponent.valid() ? pFieldAngleComponent->GetFieldAngle() : 0.f;
-	return maxDist * pragma::math::tan(pragma::math::deg_to_rad(fieldAngle / 2.f));
+	return maxDist * math::tan(math::deg_to_rad(fieldAngle / 2.f));
 }
 uint32_t CLightSpotVolComponent::CalcSegmentCount() const
 {
@@ -102,7 +102,7 @@ bool CLightSpotVolComponent::UpdateMeshData()
 		auto startPos = dir * maxDist * static_cast<float>(segStartRadius / endRadius);
 		auto endPos = dir * maxDist * static_cast<float>(segEndRadius / endRadius);
 		ConeSegment segment;
-		pragma::math::geometry::generate_truncated_cone_mesh(startPos, static_cast<float>(segStartRadius), dir, uvec::distance(startPos, endPos), static_cast<float>(segEndRadius), segment.verts, &segment.indices, &segment.normals, coneDetail, false);
+		math::geometry::generate_truncated_cone_mesh(startPos, static_cast<float>(segStartRadius), dir, uvec::distance(startPos, endPos), static_cast<float>(segEndRadius), segment.verts, &segment.indices, &segment.normals, coneDetail, false);
 		coneSegments.push_back(std::move(segment));
 	}
 
@@ -111,7 +111,7 @@ bool CLightSpotVolComponent::UpdateMeshData()
 		m_subMeshes.clear();
 		m_subMeshes.reserve(coneSegments.size());
 		for(auto &segData : coneSegments) {
-			auto subMesh = pragma::util::make_shared<pragma::geometry::CModelSubMesh>();
+			auto subMesh = pragma::util::make_shared<geometry::CModelSubMesh>();
 			subMesh->SetIndexCount(segData.indices.size());
 			subMesh->GetVertices().resize(segData.verts.size());
 			subMesh->SetSkinTextureIndex(0);
@@ -129,23 +129,23 @@ bool CLightSpotVolComponent::UpdateMeshData()
 			return false;
 		}
 		for(auto i = decltype(segData.verts.size()) {0u}; i < segData.verts.size(); ++i)
-			verts[i] = pragma::math::Vertex {segData.verts[i], segData.normals[i]};
+			verts[i] = math::Vertex {segData.verts[i], segData.normals[i]};
 		subMesh->VisitIndices([&segData](auto *indexData, uint32_t numIndices) {
 			assert(pragma::util::size_of_container(segData.indices) == sizeof(indexData[0]) * numIndices);
-			if(pragma::util::size_of_container(segData.indices) != sizeof(indexData[0]) * numIndices)
+			if(util::size_of_container(segData.indices) != sizeof(indexData[0]) * numIndices)
 				throw std::runtime_error {"Volumetric mesh index data size mismatch!"};
-			memcpy(indexData, segData.indices.data(), pragma::util::size_of_container(segData.indices));
+			memcpy(indexData, segData.indices.data(), util::size_of_container(segData.indices));
 		});
-		subMesh->Update(pragma::asset::ModelUpdateFlags::UpdateVertexBuffer | pragma::asset::ModelUpdateFlags::UpdateIndexBuffer);
+		subMesh->Update(asset::ModelUpdateFlags::UpdateVertexBuffer | asset::ModelUpdateFlags::UpdateIndexBuffer);
 		++idx;
 	}
 	return newMeshes;
 }
 
-Bool CLightSpotVolComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CLightSpotVolComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetSpotlightTarget) {
-		auto *ent = pragma::networking::read_entity(packet);
+		auto *ent = networking::read_entity(packet);
 		if(ent != nullptr)
 			SetSpotlightTarget(*ent);
 		else
@@ -160,7 +160,7 @@ void CLightSpotVolComponent::ReceiveData(NetPacket &packet)
 {
 	m_coneStartOffset = packet->Read<float>();
 	auto hEnt = GetHandle();
-	pragma::networking::read_unique_entity(packet, [this, hEnt](pragma::ecs::BaseEntity *ent) {
+	networking::read_unique_entity(packet, [this, hEnt](ecs::BaseEntity *ent) {
 		if(hEnt.expired())
 			return;
 		if(ent != nullptr)
@@ -170,21 +170,21 @@ void CLightSpotVolComponent::ReceiveData(NetPacket &packet)
 	});
 }
 
-pragma::util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvLightSpotVolComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseEnvLightSpotVolComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON) {
 		auto pRenderComponent = static_cast<ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
-			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
+			pRenderComponent->SetSceneRenderPass(rendering::SceneRenderPass::World);
 	}
 	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF) {
 		auto pRenderComponent = static_cast<ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
-			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::None);
+			pRenderComponent->SetSceneRenderPass(rendering::SceneRenderPass::None);
 	}
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 
 void CLightSpotVolComponent::InitializeVolumetricLight()
@@ -196,11 +196,11 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	if(!newMeshes)
 		return;
 	m_model = nullptr;
-	auto mdl = pragma::get_cgame()->CreateModel();
+	auto mdl = get_cgame()->CreateModel();
 	auto group = mdl->AddMeshGroup("reference");
 
-	auto mat = pragma::get_client_state()->CreateMaterial("lightcone", "noop");
-	auto *cmat = static_cast<msys::CMaterial *>(mat.get());
+	auto mat = get_client_state()->CreateMaterial("lightcone", "noop");
+	auto *cmat = static_cast<material::CMaterial *>(mat.get());
 	cmat->SetProperty("alpha_mode", AlphaMode::Blend);
 	cmat->SetProperty("cone_height", CalcEndRadius());
 	cmat->SetTexture("albedo_map", "error");
@@ -209,13 +209,13 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	Lua::Material::Client::InitializeShaderData(nullptr, cmat, false);
 	m_material = mat->GetHandle();
 
-	auto mesh = pragma::util::make_shared<pragma::geometry::CModelMesh>();
+	auto mesh = pragma::util::make_shared<geometry::CModelMesh>();
 	for(auto &subMesh : m_subMeshes)
 		mesh->AddSubMesh(subMesh);
 	group->AddMesh(mesh);
 	mdl->AddMaterial(0, mat.get());
 
-	mdl->Update(pragma::asset::ModelUpdateFlags::All);
+	mdl->Update(asset::ModelUpdateFlags::All);
 	mdlComponent->SetModel(mdl);
 	mdlComponent->SetDepthPrepassEnabled(false);
 	m_model = mdl;

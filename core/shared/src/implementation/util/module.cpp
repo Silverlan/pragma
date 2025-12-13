@@ -8,7 +8,7 @@ import :util.umodule;
 
 std::string pragma::util::get_normalized_module_path(const std::string &lib, std::optional<bool> checkForClientSide)
 {
-	auto r = FileManager::GetCanonicalizedPath(lib);
+	auto r = fs::get_canonicalized_path(lib);
 	std::replace(r.begin(), r.end(), '\\', '/');
 	if(pragma::string::substr(r, 0, 8) != "modules/")
 		r = "modules/" + r;
@@ -28,7 +28,7 @@ std::string pragma::util::get_normalized_module_path(const std::string &lib, std
 			r = r.substr(0, brLast + 1) + prefixRepl + r.substr(brLast + 1, r.length());
 		outName = r;
 		std::replace(outName.begin(), outName.end(), '\\', '/');
-		return FileManager::Exists(outName);
+		return fs::exists(outName);
 	};
 	std::string outName;
 	if(fGetFileName(r, outName) == false && (checkForClientSide.has_value() == false || *checkForClientSide == false || fGetFileName(r, outName, "cl_") == false) && (checkForClientSide.has_value() == false || *checkForClientSide == true || fGetFileName(r, outName, "sv_") == false)
@@ -46,14 +46,14 @@ std::shared_ptr<pragma::util::Library> pragma::util::load_library_module(const s
 {
 	auto libPath = get_normalized_module_path(lib, checkForClientSide);
 	std::string lpath;
-	if(FileManager::FindAbsolutePath(libPath, lpath) == false)
+	if(fs::find_absolute_path(libPath, lpath) == false)
 		lpath = libPath;
 #ifdef __linux__
 	std::replace(lpath.begin(), lpath.end(), '\\', '/');
 
 	auto linAdditionalSearchDirectories = additionalSearchDirectories;
 	std::string modPath;
-	if(filemanager::find_absolute_path(pragma::util::DirPath("modules", ufile::get_path_from_filename(lib)).GetString(), modPath))
+	if(fs::find_absolute_path(pragma::util::DirPath("modules", ufile::get_path_from_filename(lib)).GetString(), modPath))
 		linAdditionalSearchDirectories.push_back(modPath);
 	return pragma::util::Library::Load(lpath, linAdditionalSearchDirectories, err);
 #else
@@ -66,7 +66,7 @@ std::vector<std::string> pragma::util::get_default_additional_library_search_dir
 	auto brLast = libModulePath.find_last_of('/');
 	auto libPath = libModulePath.substr(0, brLast);
 	std::vector<std::string> paths;
-	auto &rootPaths = filemanager::get_absolute_root_paths();
+	auto &rootPaths = fs::get_absolute_root_paths();
 	paths.reserve(rootPaths.size() * 2);
 #ifdef _WIN32
 	std::string binDir = "bin";

@@ -40,5 +40,5 @@ void CPropComponent::OnEntitySpawn()
 {
 	BasePropComponent::OnEntitySpawn();
 	auto physType = UpdatePhysicsType(&GetEntity());
-	BasePropComponent::Setup(physType, m_propMoveType);
+	Setup(physType, m_propMoveType);
 }

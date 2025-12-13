@@ -14,13 +14,13 @@ import :game;
 
 using namespace pragma;
 
-void CPBRConverterComponent::UpdateMetalness(pragma::asset::Model &mdl, msys::CMaterial &mat)
+void CPBRConverterComponent::UpdateMetalness(asset::Model &mdl, material::CMaterial &mat)
 {
 	// Material has no surface material. To find out whether it is a metal material,
 	// we'll try to find a collision mesh near the visual mesh that uses this material
 	// and check its surface material instead. If its metal, we'll assume the visual material is metal as well.
 	auto &mats = mdl.GetMaterials();
-	auto itMat = std::find_if(mats.begin(), mats.end(), [&mat](const msys::MaterialHandle &hMat) { return hMat.get() == &mat; });
+	auto itMat = std::find_if(mats.begin(), mats.end(), [&mat](const material::MaterialHandle &hMat) { return hMat.get() == &mat; });
 	assert(itMat != mats.end());
 	if(itMat == mats.end())
 		return; // Material doesn't exist in model, this shouldn't happen
@@ -34,7 +34,7 @@ void CPBRConverterComponent::UpdateMetalness(pragma::asset::Model &mdl, msys::CM
 	for(auto &colMesh : colMeshes) {
 		auto boneId = colMesh->GetBoneParent();
 		auto tBone = mdl.CalcReferenceBonePose(boneId);
-		pragma::math::Transform t {};
+		math::Transform t {};
 		if(tBone.has_value())
 			t = *tBone;
 
@@ -54,8 +54,8 @@ void CPBRConverterComponent::UpdateMetalness(pragma::asset::Model &mdl, msys::CM
 	// Find the closest collision mesh
 	// Then calculate the average metalness of all found collision meshes
 	// via the collision mesh surface material
-	std::vector<pragma::physics::CollisionMesh *> matColMeshes {};
-	std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> lodMeshes {};
+	std::vector<physics::CollisionMesh *> matColMeshes {};
+	std::vector<std::shared_ptr<geometry::ModelMesh>> lodMeshes {};
 	std::vector<uint32_t> bodyGroups {};
 	bodyGroups.resize(mdl.GetBodyGroupCount());
 	mdl.GetBodyGroupMeshes(bodyGroups, 0, lodMeshes);
@@ -110,14 +110,14 @@ void CPBRConverterComponent::UpdateMetalness(pragma::asset::Model &mdl, msys::CM
 	auto accRoughness = 0.f;
 	auto accFlesh = 0.f;
 	auto accGlass = 0.f;
-	pragma::physics::SurfaceMaterial *surfMatGlass = nullptr;
-	pragma::physics::SurfaceMaterial *sufMatSSS = nullptr;
+	physics::SurfaceMaterial *surfMatGlass = nullptr;
+	physics::SurfaceMaterial *sufMatSSS = nullptr;
 	for(auto *colMesh : matColMeshes) {
 		auto surfMatIdx = colMesh->GetSurfaceMaterial();
 		auto &surfMats = colMesh->GetSurfaceMaterials();
 		if(surfMatIdx == -1 && surfMats.empty() == false)
 			surfMatIdx = surfMats.front();
-		auto *surfMat = pragma::get_cgame()->GetSurfaceMaterial(surfMatIdx);
+		auto *surfMat = get_cgame()->GetSurfaceMaterial(surfMatIdx);
 		if(surfMat == nullptr)
 			continue;
 		++numSurfMats;
@@ -166,21 +166,21 @@ void CPBRConverterComponent::UpdateMetalness(pragma::asset::Model &mdl, msys::CM
 	if(accGlass > 0.5f)
 		ApplyMiscMaterialProperties(mat, *surfMatGlass, "glass");
 
-	auto resWatcherLock = pragma::get_cengine()->ScopeLockResourceWatchers();
+	auto resWatcherLock = get_cengine()->ScopeLockResourceWatchers();
 
 	mat.UpdateTextures();
 	std::string err;
 	if(mat.Save(err))
-		pragma::get_client_state()->LoadMaterial(mat.GetName(), nullptr, true, true); // Reload material immediately
+		get_client_state()->LoadMaterial(mat.GetName(), nullptr, true, true); // Reload material immediately
 }
 
-void CPBRConverterComponent::UpdateMetalness(pragma::asset::Model &mdl)
+void CPBRConverterComponent::UpdateMetalness(asset::Model &mdl)
 {
 	ConvertMaterialsToPBR(mdl);
 	for(auto hMat : mdl.GetMaterials()) {
 		if(!hMat)
 			continue;
-		auto &mat = static_cast<msys::CMaterial &>(*hMat.get());
+		auto &mat = static_cast<material::CMaterial &>(*hMat.get());
 		// Make sure it's a PBR material
 		if(IsPBR(mat) == false)
 			continue;

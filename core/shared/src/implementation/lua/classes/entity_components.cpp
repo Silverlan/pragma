@@ -2424,11 +2424,11 @@ void pragma::LuaCore::base_color_component::register_class(luabind::module_ &mod
 	def.add_static_constant("EVENT_ON_COLOR_CHANGED", pragma::baseColorComponent::EVENT_ON_COLOR_CHANGED);
 }
 
-static std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, msys::Material *>> FindAndAssignSurfaceMesh(pragma::BaseSurfaceComponent &c, luabind::object oFilter)
+static std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, pragma::material::Material *>> FindAndAssignSurfaceMesh(pragma::BaseSurfaceComponent &c, luabind::object oFilter)
 {
-	std::function<int32_t(pragma::geometry::ModelMesh &, pragma::geometry::ModelSubMesh &, msys::Material &, const std::string &)> filter = nullptr;
+	std::function<int32_t(pragma::geometry::ModelMesh &, pragma::geometry::ModelSubMesh &, pragma::material::Material &, const std::string &)> filter = nullptr;
 	if(oFilter) {
-		filter = [&oFilter](pragma::geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh, msys::Material &mat, const std::string &shader) -> int32_t {
+		filter = [&oFilter](pragma::geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh, pragma::material::Material &mat, const std::string &shader) -> int32_t {
 			auto res = oFilter(&mat, shader);
 			return luabind::object_cast<int32_t>(res);
 		};
@@ -2436,7 +2436,7 @@ static std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, st
 	auto res = c.FindAndAssignMesh(filter);
 	if(!res.has_value())
 		return {};
-	return std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, msys::Material *> {res->mesh->shared_from_this(), res->subMesh->shared_from_this(), res->material};
+	return std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, pragma::material::Material *> {res->mesh->shared_from_this(), res->subMesh->shared_from_this(), res->material};
 }
 
 void pragma::LuaCore::base_surface_component::register_class(luabind::module_ &mod)
@@ -2462,8 +2462,8 @@ void pragma::LuaCore::base_surface_component::register_class(luabind::module_ &m
 		  return std::pair<bool, double> {r, t};
 	  });
 	def.def("GetMesh", static_cast<pragma::geometry::ModelSubMesh *(pragma::BaseSurfaceComponent::*)()>(&pragma::BaseSurfaceComponent::GetMesh), luabind::shared_from_this_policy<0> {});
-	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c, luabind::object oFilter) -> std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, msys::Material *>> { return FindAndAssignSurfaceMesh(c, oFilter); });
-	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c) -> std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, msys::Material *>> { return FindAndAssignSurfaceMesh(c, Lua::nil); });
+	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c, luabind::object oFilter) -> std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, material::Material *>> { return FindAndAssignSurfaceMesh(c, oFilter); });
+	def.def("FindAndAssignSurfaceMesh", +[](pragma::BaseSurfaceComponent &c) -> std::optional<std::tuple<std::shared_ptr<pragma::geometry::ModelMesh>, std::shared_ptr<pragma::geometry::ModelSubMesh>, material::Material *>> { return FindAndAssignSurfaceMesh(c, Lua::nil); });
 	def.add_static_constant("EVENT_ON_SURFACE_PLANE_CHANGED", pragma::baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED);
 }
 

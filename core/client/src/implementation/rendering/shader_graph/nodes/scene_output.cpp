@@ -9,20 +9,20 @@ import :rendering.shader_graph.node_scene_output;
 
 using namespace pragma::rendering::shader_graph;
 
-SceneOutputNode::SceneOutputNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_OUTPUT}
+SceneOutputNode::SceneOutputNode(const std::string_view &type) : Node {type, shadergraph::CATEGORY_OUTPUT}
 {
-	AddInput(IN_COLOR, pragma::shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
-	AddInput(IN_ALPHA, pragma::shadergraph::DataType::Float, 1.f);
-	AddInput(IN_ALPHA_CUTOFF, pragma::shadergraph::DataType::Float, 0.5f);
-	AddInput(IN_BLOOM_FACTOR, pragma::shadergraph::DataType::Float, 1.f);
-	AddInput(IN_EMISSIVE_COLOR, pragma::shadergraph::DataType::Color, Vector3 {0.f, 0.f, 0.f});
+	AddInput(IN_COLOR, shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
+	AddInput(IN_ALPHA, shadergraph::DataType::Float, 1.f);
+	AddInput(IN_ALPHA_CUTOFF, shadergraph::DataType::Float, 0.5f);
+	AddInput(IN_BLOOM_FACTOR, shadergraph::DataType::Float, 1.f);
+	AddInput(IN_EMISSIVE_COLOR, shadergraph::DataType::Color, Vector3 {0.f, 0.f, 0.f});
 
 	AddSocketEnum<AlphaMode>(CONST_ALPHA_MODE, AlphaMode::Opaque, true);
 
 	AddModuleDependency("scene_output");
 }
 
-std::string SceneOutputNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
+std::string SceneOutputNode::DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &gn) const
 {
 	std::ostringstream code;
 	code << "fs_color = vec4(" << GetInputNameOrValue(gn, IN_COLOR) << ", " << GetInputNameOrValue(gn, IN_ALPHA) << ");\n";

@@ -13,12 +13,12 @@ export {
 	namespace pragma {
 		class DLLCLIENT CKinematicComponent final : public BaseFuncKinematicComponent, public CBaseNetComponent {
 		  public:
-			CKinematicComponent(pragma::ecs::BaseEntity &ent) : BaseFuncKinematicComponent(ent) {}
+			CKinematicComponent(ecs::BaseEntity &ent) : BaseFuncKinematicComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
-			virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+			virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 			virtual void OnEntitySpawn() override;
 		  protected:
 			bool m_bInitiallyMoving = false;

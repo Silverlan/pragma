@@ -8,17 +8,17 @@ import :entities.components.liquid.base_buoyancy;
 
 using namespace pragma;
 
-void BaseBuoyancyComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
+void BaseBuoyancyComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
 
-void BaseBuoyancyComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
-BaseBuoyancyComponent::BaseBuoyancyComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+void BaseBuoyancyComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
+BaseBuoyancyComponent::BaseBuoyancyComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseBuoyancyComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { SimulateBuoyancy(); });
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { static_cast<CEPostPhysicsSimulate &>(evData.get()).keepAwake = true; });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) { OnPhysicsInitialized(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED, [this](std::reference_wrapper<ComponentEvent> evData) { SimulateBuoyancy(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE, [this](std::reference_wrapper<ComponentEvent> evData) { static_cast<CEPostPhysicsSimulate &>(evData.get()).keepAwake = true; });
 
 	auto &ent = GetEntity();
 	auto touchC = ent.AddComponent("touch");
@@ -35,17 +35,17 @@ void BaseBuoyancyComponent::OnPhysicsInitialized()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	pPhysComponent->SetCollisionFilterMask(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic);
-	pPhysComponent->SetCollisionFilterGroup(pragma::physics::CollisionMask::Water | pragma::physics::CollisionMask::WaterSurface);
+	pPhysComponent->SetCollisionFilterMask(physics::CollisionMask::Dynamic | physics::CollisionMask::Generic);
+	pPhysComponent->SetCollisionFilterGroup(physics::CollisionMask::Water | physics::CollisionMask::WaterSurface);
 	pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true);
 }
 
 void BaseBuoyancyComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
-	auto *pPhysicsComponent = dynamic_cast<pragma::BasePhysicsComponent *>(&component);
-	auto *pSurfC = dynamic_cast<pragma::BaseSurfaceComponent *>(&component);
-	auto *pLiquidControl = dynamic_cast<pragma::BaseLiquidControlComponent *>(&component);
+	auto *pPhysicsComponent = dynamic_cast<BasePhysicsComponent *>(&component);
+	auto *pSurfC = dynamic_cast<BaseSurfaceComponent *>(&component);
+	auto *pLiquidControl = dynamic_cast<BaseLiquidControlComponent *>(&component);
 	if(pPhysicsComponent != nullptr)
 		pPhysicsComponent->SetRayResultCallbackEnabled(true);
 	else if(pSurfC)
@@ -54,25 +54,25 @@ void BaseBuoyancyComponent::OnEntityComponentAdded(BaseEntityComponent &componen
 		m_liquidControl = pLiquidControl->GetHandle<BaseLiquidControlComponent>();
 }
 
-pragma::util::EventReply BaseBuoyancyComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply BaseBuoyancyComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == baseTouchComponent::EVENT_CAN_TRIGGER) {
 		auto &triggerData = static_cast<CECanTriggerData &>(evData);
 		if(triggerData.entity != nullptr) {
 			auto pPhysComponent = triggerData.entity->GetPhysicsComponent();
-			if(pPhysComponent != nullptr && (pPhysComponent->GetCollisionFilterMask() & pragma::physics::CollisionMask::Water) == pragma::physics::CollisionMask::None)
+			if(pPhysComponent != nullptr && (pPhysComponent->GetCollisionFilterMask() & physics::CollisionMask::Water) == physics::CollisionMask::None)
 				triggerData.canTrigger = false;
 		}
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	}
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 
-void BaseBuoyancyComponent::OnEndTouch(pragma::ecs::BaseEntity *ent, pragma::physics::PhysObj *phys)
+void BaseBuoyancyComponent::OnEndTouch(ecs::BaseEntity *ent, physics::PhysObj *phys)
 {
-	auto pSubmergibleComponent = ent->GetComponent<pragma::SubmergibleComponent>();
+	auto pSubmergibleComponent = ent->GetComponent<SubmergibleComponent>();
 	if(pSubmergibleComponent.valid())
 		pSubmergibleComponent->SetSubmergedFraction(GetEntity(), 0.f);
 }
@@ -94,17 +94,17 @@ void BaseBuoyancyComponent::SimulateBuoyancy() const
 
 	auto *sim = m_surfSim.valid() ? m_surfSim->GetSurfaceSimulator() : nullptr;
 	if(sim != nullptr)
-		const_cast<pragma::physics::PhysWaterSurfaceSimulator *>(sim)->LockParticleHeights();
+		const_cast<physics::PhysWaterSurfaceSimulator *>(sim)->LockParticleHeights();
 	//const std::vector<PhysTouch> &BaseTouchComponent::GetTouchingInfo() const {return m_touching;}
 	if(touchComponent != nullptr) {
 		for(auto &touchInfo : touchComponent->GetTouchingInfo()) {
 			if(touchInfo.touch.entity.valid() == false || touchInfo.triggered == false)
 				continue;
-			buoyancySim.Simulate(const_cast<pragma::ecs::BaseEntity &>(ent), m_liquidControl->GetLiquidDescription(), const_cast<pragma::ecs::BaseEntity &>(*touchInfo.touch.entity.get()), n, d, m_liquidControl->GetLiquidVelocity(), sim);
+			buoyancySim.Simulate(const_cast<ecs::BaseEntity &>(ent), m_liquidControl->GetLiquidDescription(), const_cast<ecs::BaseEntity &>(*touchInfo.touch.entity.get()), n, d, m_liquidControl->GetLiquidVelocity(), sim);
 		} // TODO: Trigger has to be higher than max surface height
 	}
 	if(sim)
-		const_cast<pragma::physics::PhysWaterSurfaceSimulator *>(sim)->UnlockParticleHeights();
+		const_cast<physics::PhysWaterSurfaceSimulator *>(sim)->UnlockParticleHeights();
 	/*if(m_physSurfaceSim != nullptr)
 		m_physSurfaceSim->LockParticleHeights();
 	auto *ent = m_entity->GetNetworkState()->GetGameState()->FindEntityByClass("prop_physics");

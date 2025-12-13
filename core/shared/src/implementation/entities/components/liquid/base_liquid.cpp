@@ -10,19 +10,19 @@ import :entities.components.liquid.base_liquid;
 
 using namespace pragma;
 
-void BaseFuncLiquidComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
+void BaseFuncLiquidComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
 void BaseFuncLiquidComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(basePhysicsComponent::EVENT_HANDLE_RAYCAST, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(basePhysicsComponent::EVENT_HANDLE_RAYCAST, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &raycastData = static_cast<CEHandleRaycast &>(evData.get());
 		auto r = OnRayResultCallback(raycastData.rayCollisionGroup, raycastData.rayCollisionMask);
 		if(r == false) {
 			raycastData.hit = false;
-			return pragma::util::EventReply::Handled;
+			return util::EventReply::Handled;
 		}
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
 
 	auto &ent = GetEntity();
@@ -42,9 +42,9 @@ void BaseFuncLiquidComponent::OnEntitySpawn() { BaseEntityComponent::OnEntitySpa
 void BaseFuncLiquidComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
-	auto *pRenderComponent = dynamic_cast<pragma::BaseRenderComponent *>(&component);
-	auto *pSurfC = dynamic_cast<pragma::BaseSurfaceComponent *>(&component);
-	auto *pSurfSim = dynamic_cast<pragma::BaseLiquidSurfaceSimulationComponent *>(&component);
+	auto *pRenderComponent = dynamic_cast<BaseRenderComponent *>(&component);
+	auto *pSurfC = dynamic_cast<BaseSurfaceComponent *>(&component);
+	auto *pSurfSim = dynamic_cast<BaseLiquidSurfaceSimulationComponent *>(&component);
 	if(pRenderComponent != nullptr)
 		pRenderComponent->SetCastShadows(false);
 	else if(pSurfC)
@@ -53,7 +53,7 @@ void BaseFuncLiquidComponent::OnEntityComponentAdded(BaseEntityComponent &compon
 		m_surfSim = pSurfSim->GetHandle<BaseLiquidSurfaceSimulationComponent>();
 }
 
-bool BaseFuncLiquidComponent::OnRayResultCallback(pragma::physics::CollisionMask rayCollisionGroup, pragma::physics::CollisionMask rayCollisionMask)
+bool BaseFuncLiquidComponent::OnRayResultCallback(physics::CollisionMask rayCollisionGroup, physics::CollisionMask rayCollisionMask)
 {
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	if(m_physSurfaceSim == nullptr || (rayCollisionMask & pragma::physics::CollisionMask::WaterSurface) == pragma::physics::CollisionMask::None)
@@ -87,7 +87,7 @@ void BaseFuncLiquidComponent::InitializeWaterSurface()
 		return;
 	if(m_surfaceC.expired())
 		return;
-	m_surfaceC->FindAndAssignMesh([](pragma::geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh, msys::Material &mat, const std::string &shader) -> uint32_t { return (shader == "water") ? 1 : 0; });
+	m_surfaceC->FindAndAssignMesh([](geometry::ModelMesh &mesh, geometry::ModelSubMesh &subMesh, material::Material &mat, const std::string &shader) -> uint32_t { return (shader == "water") ? 1 : 0; });
 }
 
 void BaseFuncLiquidComponent::ClearWaterSurface()

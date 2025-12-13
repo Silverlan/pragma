@@ -8,9 +8,9 @@ import :entities.components.damageable;
 
 using namespace pragma;
 
-ComponentEventId damageableComponent::EVENT_ON_TAKE_DAMAGE = pragma::INVALID_COMPONENT_ID;
-void DamageableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { damageableComponent::EVENT_ON_TAKE_DAMAGE = registerEvent("ON_TAKE_DAMAGE", ComponentEventInfo::Type::Broadcast); }
-DamageableComponent::DamageableComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+ComponentEventId damageableComponent::EVENT_ON_TAKE_DAMAGE = INVALID_COMPONENT_ID;
+void DamageableComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { damageableComponent::EVENT_ON_TAKE_DAMAGE = registerEvent("ON_TAKE_DAMAGE", ComponentEventInfo::Type::Broadcast); }
+DamageableComponent::DamageableComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void DamageableComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -18,7 +18,7 @@ void DamageableComponent::Initialize()
 	ent.AddComponent("health");
 }
 
-void DamageableComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void DamageableComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void DamageableComponent::OnTakeDamage(game::DamageInfo &info) {}
 
@@ -27,7 +27,7 @@ void DamageableComponent::TakeDamage(game::DamageInfo &info)
 	auto &ent = GetEntity();
 	auto *state = ent.GetNetworkState();
 	auto *game = state->GetGameState();
-	game->CallCallbacks<void, pragma::ecs::BaseEntity *, std::reference_wrapper<game::DamageInfo>>("OnEntityTakeDamage", &ent, std::ref<game::DamageInfo>(info));
+	game->CallCallbacks<void, ecs::BaseEntity *, std::reference_wrapper<game::DamageInfo>>("OnEntityTakeDamage", &ent, std::ref<game::DamageInfo>(info));
 	OnTakeDamage(info);
 
 	CEOnTakeDamage takeDmgInfo {info};

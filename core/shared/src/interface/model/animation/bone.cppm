@@ -15,8 +15,8 @@ export {
 		struct DLLNETWORK Bone : public std::enable_shared_from_this<Bone> {
 			Bone();
 			Bone(const Bone &other); // Parent has to be updated by caller!
-			pragma::GString name;
-			std::unordered_map<pragma::animation::BoneId, std::shared_ptr<Bone>> children;
+			GString name;
+			std::unordered_map<BoneId, std::shared_ptr<Bone>> children;
 			std::weak_ptr<Bone> parent;
 			BoneId ID;
 

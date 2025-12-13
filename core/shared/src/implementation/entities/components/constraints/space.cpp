@@ -7,20 +7,20 @@ module pragma.shared;
 import :entities.components.constraints.space;
 
 using namespace pragma;
-static void set_x_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool enabled) { component.SetAxisEnabled(pragma::Axis::X, enabled); }
-static void set_y_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool enabled) { component.SetAxisEnabled(pragma::Axis::Y, enabled); }
-static void set_z_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool enabled) { component.SetAxisEnabled(pragma::Axis::Z, enabled); }
-static void is_x_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool &outValue) { outValue = component.IsAxisEnabled(pragma::Axis::X); }
-static void is_y_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool &outValue) { outValue = component.IsAxisEnabled(pragma::Axis::Y); }
-static void is_z_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool &outValue) { outValue = component.IsAxisEnabled(pragma::Axis::Z); }
+static void set_x_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool enabled) { component.SetAxisEnabled(Axis::X, enabled); }
+static void set_y_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool enabled) { component.SetAxisEnabled(Axis::Y, enabled); }
+static void set_z_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool enabled) { component.SetAxisEnabled(Axis::Z, enabled); }
+static void is_x_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool &outValue) { outValue = component.IsAxisEnabled(Axis::X); }
+static void is_y_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool &outValue) { outValue = component.IsAxisEnabled(Axis::Y); }
+static void is_z_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool &outValue) { outValue = component.IsAxisEnabled(Axis::Z); }
 
-static void set_x_axis_inverted(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool inverted) { component.SetAxisInverted(pragma::Axis::X, inverted); }
-static void set_y_axis_inverted(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool inverted) { component.SetAxisInverted(pragma::Axis::Y, inverted); }
-static void set_z_axis_inverted(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool inverted) { component.SetAxisInverted(pragma::Axis::Z, inverted); }
-static void is_x_axis_inverted(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool &outValue) { outValue = component.IsAxisInverted(pragma::Axis::X); }
-static void is_y_axis_inverted(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool &outValue) { outValue = component.IsAxisInverted(pragma::Axis::Y); }
-static void is_z_axis_inverted(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool &outValue) { outValue = component.IsAxisInverted(pragma::Axis::Z); }
-void ConstraintSpaceComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+static void set_x_axis_inverted(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool inverted) { component.SetAxisInverted(Axis::X, inverted); }
+static void set_y_axis_inverted(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool inverted) { component.SetAxisInverted(Axis::Y, inverted); }
+static void set_z_axis_inverted(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool inverted) { component.SetAxisInverted(Axis::Z, inverted); }
+static void is_x_axis_inverted(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool &outValue) { outValue = component.IsAxisInverted(Axis::X); }
+static void is_y_axis_inverted(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool &outValue) { outValue = component.IsAxisInverted(Axis::Y); }
+static void is_z_axis_inverted(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool &outValue) { outValue = component.IsAxisInverted(Axis::Z); }
+void ConstraintSpaceComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = ConstraintSpaceComponent;
 
@@ -52,7 +52,7 @@ void ConstraintSpaceComponent::RegisterMembers(pragma::EntityComponentManager &c
 		registerMember(std::move(memberInfo));
 	}
 }
-ConstraintSpaceComponent::ConstraintSpaceComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent)
+ConstraintSpaceComponent::ConstraintSpaceComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent)
 {
 	m_axisEnabled.fill(true);
 	m_axisInverted.fill(false);
@@ -62,21 +62,21 @@ void ConstraintSpaceComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent<ConstraintComponent>();
 }
-void ConstraintSpaceComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintSpaceComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void ConstraintSpaceComponent::SetAxisEnabled(pragma::Axis axis, bool enabled) { m_axisEnabled[pragma::math::to_integral(axis)] = enabled; }
-bool ConstraintSpaceComponent::IsAxisEnabled(pragma::Axis axis) const { return m_axisEnabled[pragma::math::to_integral(axis)]; }
+void ConstraintSpaceComponent::SetAxisEnabled(Axis axis, bool enabled) { m_axisEnabled[math::to_integral(axis)] = enabled; }
+bool ConstraintSpaceComponent::IsAxisEnabled(Axis axis) const { return m_axisEnabled[math::to_integral(axis)]; }
 
-void ConstraintSpaceComponent::SetAxisInverted(pragma::Axis axis, bool inverted) { m_axisInverted[pragma::math::to_integral(axis)] = inverted; }
-bool ConstraintSpaceComponent::IsAxisInverted(pragma::Axis axis) const { return m_axisInverted[pragma::math::to_integral(axis)]; }
+void ConstraintSpaceComponent::SetAxisInverted(Axis axis, bool inverted) { m_axisInverted[math::to_integral(axis)] = inverted; }
+bool ConstraintSpaceComponent::IsAxisInverted(Axis axis) const { return m_axisInverted[math::to_integral(axis)]; }
 
 void ConstraintSpaceComponent::ApplyFilter(const Vector3 &posDriver, const Vector3 &posDriven, Vector3 &outValue) const
 {
-	constexpr auto numAxes = pragma::math::to_integral(pragma::Axis::Count);
+	constexpr auto numAxes = math::to_integral(Axis::Count);
 	for(auto i = decltype(numAxes) {0u}; i < numAxes; ++i) {
-		if(IsAxisEnabled(static_cast<pragma::Axis>(i)) == false)
+		if(IsAxisEnabled(static_cast<Axis>(i)) == false)
 			outValue[i] = posDriven[i];
-		else if(IsAxisInverted(static_cast<pragma::Axis>(i)))
+		else if(IsAxisInverted(static_cast<Axis>(i)))
 			outValue[i] = -posDriver[i];
 		else
 			outValue[i] = posDriver[i];
@@ -84,11 +84,11 @@ void ConstraintSpaceComponent::ApplyFilter(const Vector3 &posDriver, const Vecto
 }
 void ConstraintSpaceComponent::ApplyFilter(const EulerAngles &angDriver, const EulerAngles &angDriven, EulerAngles &outValue) const
 {
-	constexpr auto numAxes = pragma::math::to_integral(pragma::Axis::Count);
+	constexpr auto numAxes = math::to_integral(Axis::Count);
 	for(auto i = decltype(numAxes) {0u}; i < numAxes; ++i) {
-		if(IsAxisEnabled(static_cast<pragma::Axis>(i)) == false)
+		if(IsAxisEnabled(static_cast<Axis>(i)) == false)
 			outValue[i] = angDriven[i];
-		else if(IsAxisInverted(static_cast<pragma::Axis>(i)))
+		else if(IsAxisInverted(static_cast<Axis>(i)))
 			outValue[i] = -angDriver[i];
 		else
 			outValue[i] = angDriver[i];

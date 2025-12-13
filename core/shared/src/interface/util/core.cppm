@@ -13,13 +13,13 @@ export import pragma.udm;
 
 export {
 	namespace pragma::util {
-		DLLNETWORK pragma::util::ParallelJob<std::vector<Vector2> &> generate_lightmap_uvs(pragma::NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<pragma::math::Vertex> &verts, const std::vector<uint32_t> &tris);
+		DLLNETWORK ParallelJob<std::vector<Vector2> &> generate_lightmap_uvs(NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<math::Vertex> &verts, const std::vector<uint32_t> &tris);
 		DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(const std::string &fileName, std::string *optOutErr = nullptr);
 		DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(std::unique_ptr<ufile::IFile> &&f, std::string *optOutErr = nullptr);
 
 		DLLNETWORK void write_udm_entity(udm::LinkedPropertyWrapperArg udm, EntityHandle &hEnt);
-		DLLNETWORK EntityHandle read_udm_entity(pragma::Game &game, udm::LinkedPropertyWrapperArg udm);
-		DLLNETWORK EntityHandle read_udm_entity(::pragma::BaseEntityComponent &c, udm::LinkedPropertyWrapperArg udm);
+		DLLNETWORK EntityHandle read_udm_entity(Game &game, udm::LinkedPropertyWrapperArg udm);
+		DLLNETWORK EntityHandle read_udm_entity(BaseEntityComponent &c, udm::LinkedPropertyWrapperArg udm);
 
 		class HairFile {
 		  public:
@@ -30,7 +30,7 @@ export {
 			bool Save(udm::AssetData &outData, std::string &outErr) const;
 		  private:
 			bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr);
-			pragma::util::HairConfig m_hairConfig;
+			HairConfig m_hairConfig;
 			HairData m_hairData;
 		};
 
@@ -39,8 +39,8 @@ export {
 
 		DLLNETWORK std::pair<std::vector<double>, std::vector<double>> generate_two_pass_gaussian_blur_coefficients(uint32_t radius, double sigma, bool linear = true, bool correction = true);
 
-		DLLNETWORK pragma::util::Path get_user_data_dir();
-		DLLNETWORK std::vector<pragma::util::Path> get_resource_dirs();
+		DLLNETWORK Path get_user_data_dir();
+		DLLNETWORK std::vector<Path> get_resource_dirs();
 
 		DLLNETWORK bool show_notification(const std::string &summary, const std::string &body);
 	};

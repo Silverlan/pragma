@@ -46,6 +46,6 @@ export namespace Lua {
 
 		DLLNETWORK luabind::mult<float, float> get_frustum_plane_size(lua::State *l, float fovRad, float aspectRatio, float z);
 		DLLNETWORK luabind::mult<luabind::tableT<Vector3>, float, float> get_frustum_plane_boundaries(lua::State *l, const Vector3 &pos, const Vector3 &forward, const Vector3 &up, float fovRad, float aspectRatio, float z);
-		DLLNETWORK Vector3 get_frustum_plane_point(lua::State *l, const Vector3 &pos, const Vector3 &forward, const Vector3 &right, const Vector3 &up, float fovRad, float aspectRatio, const ::Vector2 &uv, float z);
+		DLLNETWORK Vector3 get_frustum_plane_point(lua::State *l, const Vector3 &pos, const Vector3 &forward, const Vector3 &right, const Vector3 &up, float fovRad, float aspectRatio, const Vector2 &uv, float z);
 	};
 };

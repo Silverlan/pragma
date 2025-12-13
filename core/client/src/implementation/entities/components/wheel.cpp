@@ -41,7 +41,7 @@ void CWheelComponent::ReceiveSnapshotData(NetPacket &packet)
 #endif
 }
 
-Bool CWheelComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CWheelComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 #if 0
 	if(eventId == m_netEvAttach)

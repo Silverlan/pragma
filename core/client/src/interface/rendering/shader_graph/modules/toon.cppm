@@ -10,7 +10,7 @@ export import :rendering.shader_graph.sg_module;
 export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
-	class DLLCLIENT ToonModule : public pragma::rendering::ShaderGraphModule {
+	class DLLCLIENT ToonModule : public ShaderGraphModule {
 	  public:
 		/*enum class PBRBinding : uint32_t {
 			IrradianceMap = 0u,
@@ -22,7 +22,7 @@ export namespace pragma::rendering::shader_graph {
 		ToonModule(ShaderGraph &shader);
 		virtual ~ToonModule() override;
 		virtual void InitializeGfxPipelineDescriptorSets() override;
-		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
+		virtual void RecordBindScene(ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
 	  private:
 		prosper::DescriptorSetInfo m_pbrDescSetInfo;
 		static std::shared_ptr<prosper::IDescriptorSetGroup> g_defaultPbrDsg;

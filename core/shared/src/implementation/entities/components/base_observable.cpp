@@ -8,13 +8,13 @@ import :entities.components.base_observable;
 
 using namespace pragma;
 
-pragma::ObserverCameraData::ObserverCameraData() : enabled {util::BoolProperty::Create(false)}, offset {util::Vector3Property::Create()} {}
+ObserverCameraData::ObserverCameraData() : enabled {util::BoolProperty::Create(false)}, offset {util::Vector3Property::Create()} {}
 
 /////////
 
-ComponentEventId baseObservableComponent::EVENT_ON_OBSERVER_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseObservableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseObservableComponent::EVENT_ON_OBSERVER_CHANGED = registerEvent("ON_OBSERVER_CHANGED", ComponentEventInfo::Type::Broadcast); }
-BaseObservableComponent::BaseObservableComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_viewOffset(0, 0, 0) {}
+ComponentEventId baseObservableComponent::EVENT_ON_OBSERVER_CHANGED = INVALID_COMPONENT_ID;
+void BaseObservableComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseObservableComponent::EVENT_ON_OBSERVER_CHANGED = registerEvent("ON_OBSERVER_CHANGED", ComponentEventInfo::Type::Broadcast); }
+BaseObservableComponent::BaseObservableComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_viewOffset(0, 0, 0) {}
 
 void BaseObservableComponent::Initialize()
 {
@@ -29,7 +29,7 @@ void BaseObservableComponent::ClearObserver()
 	if(m_observer.IsValid() == false)
 		return;
 	BroadcastEvent(baseObservableComponent::EVENT_ON_OBSERVER_CHANGED);
-	m_observer = pragma::ComponentHandle<pragma::BaseObserverComponent> {};
+	m_observer = pragma::ComponentHandle<BaseObserverComponent> {};
 }
 
 void BaseObservableComponent::SetObserver(BaseObserverComponent *observer)
@@ -58,18 +58,18 @@ void BaseObservableComponent::SetLocalCameraOffset(CameraType type, const Vector
 const Vector3 &BaseObservableComponent::GetLocalCameraOffset(CameraType type) const { return *GetCameraData(type).offset; }
 
 const ObserverCameraData &BaseObservableComponent::GetCameraData(CameraType type) const { return const_cast<BaseObservableComponent *>(this)->GetCameraData(type); }
-ObserverCameraData &BaseObservableComponent::GetCameraData(CameraType type) { return m_cameraData.at(pragma::math::to_integral(type)); }
+ObserverCameraData &BaseObservableComponent::GetCameraData(CameraType type) { return m_cameraData.at(math::to_integral(type)); }
 
 void BaseObservableComponent::SetCameraEnabled(CameraType type, bool enabled) { *GetCameraData(type).enabled = enabled; }
 bool BaseObservableComponent::IsCameraEnabled(CameraType type) const { return *GetCameraData(type).enabled; }
 
-const pragma::util::PBoolProperty &BaseObservableComponent::GetCameraEnabledProperty(CameraType type) const { return GetCameraData(type).enabled; }
-const pragma::util::PVector3Property &BaseObservableComponent::GetCameraOffsetProperty(CameraType type) const { return GetCameraData(type).offset; }
+const util::PBoolProperty &BaseObservableComponent::GetCameraEnabledProperty(CameraType type) const { return GetCameraData(type).enabled; }
+const util::PVector3Property &BaseObservableComponent::GetCameraOffsetProperty(CameraType type) const { return GetCameraData(type).offset; }
 
 void BaseObservableComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
-	constexpr auto numTypes = pragma::math::to_integral(CameraType::Count);
+	constexpr auto numTypes = math::to_integral(CameraType::Count);
 	auto fWriteCameraData = [](udm::LinkedPropertyWrapperArg udm, ObserverCameraData &camData) {
 		udm["enabled"] = **camData.enabled;
 		if(camData.localOrigin.has_value())
@@ -91,7 +91,7 @@ void BaseObservableComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t v
 {
 	BaseEntityComponent::Load(udm, version);
 
-	constexpr auto numTypes = pragma::math::to_integral(CameraType::Count);
+	constexpr auto numTypes = math::to_integral(CameraType::Count);
 	auto fReadCameraData = [](udm::LinkedPropertyWrapperArg udm, ObserverCameraData &camData) {
 		udm["enabled"](**camData.enabled);
 		camData.localOrigin = udm["localOrigin"].ToValue<Vector3>();

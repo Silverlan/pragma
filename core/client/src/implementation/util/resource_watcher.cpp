@@ -11,27 +11,27 @@ import :entities.components.particle_system;
 import :game;
 import pragma.shadergraph;
 
-decltype(ECResourceWatcherCallbackType::Shader) ECResourceWatcherCallbackType::Shader = ECResourceWatcherCallbackType {pragma::math::to_integral(E::Shader)};
-decltype(ECResourceWatcherCallbackType::ParticleSystem) ECResourceWatcherCallbackType::ParticleSystem = ECResourceWatcherCallbackType {pragma::math::to_integral(E::ParticleSystem)};
-decltype(ECResourceWatcherCallbackType::Count) ECResourceWatcherCallbackType::Count = ECResourceWatcherCallbackType {pragma::math::to_integral(E::Count)};
+decltype(pragma::util::ECResourceWatcherCallbackType::Shader) pragma::util::ECResourceWatcherCallbackType::Shader = ECResourceWatcherCallbackType {pragma::math::to_integral(E::Shader)};
+decltype(pragma::util::ECResourceWatcherCallbackType::ParticleSystem) pragma::util::ECResourceWatcherCallbackType::ParticleSystem = ECResourceWatcherCallbackType {pragma::math::to_integral(E::ParticleSystem)};
+decltype(pragma::util::ECResourceWatcherCallbackType::Count) pragma::util::ECResourceWatcherCallbackType::Count = ECResourceWatcherCallbackType {pragma::math::to_integral(E::Count)};
 static auto cvMatStreaming = pragma::console::get_client_con_var("cl_material_streaming_enabled");
 
-CResourceWatcherManager::CResourceWatcherManager(pragma::NetworkState *nw) : ResourceWatcherManager(nw) {}
+pragma::util::CResourceWatcherManager::CResourceWatcherManager(pragma::NetworkState *nw) : ResourceWatcherManager(nw) {}
 
-void CResourceWatcherManager::ReloadTexture(const std::string &path)
+void pragma::util::CResourceWatcherManager::ReloadTexture(const std::string &path)
 {
 	auto *nw = m_networkState;
-	auto &matManager = static_cast<msys::CMaterialManager &>(nw->GetMaterialManager());
+	auto &matManager = static_cast<material::CMaterialManager &>(nw->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 	auto *asset = texManager.FindCachedAsset(path);
 	if(asset == nullptr)
 		return;
 	texManager.RemoveFromCache(path);
-	auto loadInfo = std::make_unique<msys::TextureLoadInfo>();
+	auto loadInfo = std::make_unique<material::TextureLoadInfo>();
 	loadInfo->onLoaded = [path, nw](pragma::util::Asset &asset) {
 		if(nw == nullptr)
 			return;
-		auto &matManager = static_cast<msys::CMaterialManager &>(nw->GetMaterialManager());
+		auto &matManager = static_cast<material::CMaterialManager &>(nw->GetMaterialManager());
 		auto &texManager = matManager.GetTextureManager();
 
 		auto pathNoExt = path;
@@ -41,15 +41,15 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 			ext = '.' + ext;
 		ufile::remove_extension_from_filename(pathNoExt);
 
-		std::function<void(msys::CMaterial &, const pragma::util::Path &path)> fLookForTextureAndUpdate = nullptr;
-		fLookForTextureAndUpdate = [&fLookForTextureAndUpdate, &pathNoExt](msys::CMaterial &mat, const pragma::util::Path &path) {
-			for(auto &name : msys::MaterialPropertyBlockView {mat, path}) {
+		std::function<void(material::CMaterial &, const pragma::util::Path &path)> fLookForTextureAndUpdate = nullptr;
+		fLookForTextureAndUpdate = [&fLookForTextureAndUpdate, &pathNoExt](material::CMaterial &mat, const pragma::util::Path &path) {
+			for(auto &name : material::MaterialPropertyBlockView {mat, path}) {
 				auto propType = mat.GetPropertyType(name);
 				switch(propType) {
-				case msys::PropertyType::Block:
+				case material::PropertyType::Block:
 					fLookForTextureAndUpdate(mat, pragma::util::FilePath(path, name));
 					break;
-				case msys::PropertyType::Texture:
+				case material::PropertyType::Texture:
 					{
 						std::string texName;
 						if(!mat.GetProperty(pragma::util::FilePath(path, name).GetString(), &texName))
@@ -58,12 +58,12 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 						if(!texInfo)
 							continue;
 						ufile::remove_extension_from_filename(texName);
-						if(FileManager::ComparePath(texName, pathNoExt) == false)
+						if(fs::compare_path(texName, pathNoExt) == false)
 							continue;
 						auto &identifier = name;
 						auto &texture = texInfo->texture;
 						mat.CallOnLoaded([&mat, identifier, texture]() {
-							auto &tex = *static_cast<msys::Texture *>(texture.get());
+							auto &tex = *static_cast<material::Texture *>(texture.get());
 							mat.SetTexture(std::string {identifier}, &tex);
 						});
 						break;
@@ -77,16 +77,16 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 			auto asset = matManager.GetAsset(pair.second);
 			if(!asset)
 				continue;
-			auto hMat = msys::CMaterialManager::GetAssetObject(*asset);
+			auto hMat = material::CMaterialManager::GetAssetObject(*asset);
 			if(!hMat)
 				continue;
-			fLookForTextureAndUpdate(static_cast<msys::CMaterial &>(*hMat.get()), {});
+			fLookForTextureAndUpdate(static_cast<material::CMaterial &>(*hMat.get()), {});
 		}
 	};
 	texManager.LoadAsset(path, std::move(loadInfo));
 }
 
-void CResourceWatcherManager::OnMaterialReloaded(const std::string &path, const std::unordered_set<pragma::asset::Model *> &modelMap)
+void pragma::util::CResourceWatcherManager::OnMaterialReloaded(const std::string &path, const std::unordered_set<pragma::asset::Model *> &modelMap)
 {
 	ResourceWatcherManager::OnMaterialReloaded(path, modelMap);
 	if(pragma::get_cgame() == nullptr)
@@ -106,7 +106,7 @@ void CResourceWatcherManager::OnMaterialReloaded(const std::string &path, const 
 	}
 }
 
-void CResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths)
+void pragma::util::CResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths)
 {
 	ResourceWatcherManager::GetWatchPaths(paths);
 	paths.reserve(paths.size() + 2);
@@ -115,7 +115,7 @@ void CResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths)
 	paths.push_back("scripts/shader_data");
 }
 
-void CResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path, const std::string &ext)
+void pragma::util::CResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path, const std::string &ext)
 {
 	ResourceWatcherManager::OnResourceChanged(rootPath, path, ext);
 	auto &strPath = path.GetString();
@@ -129,7 +129,7 @@ void CResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPa
 			Con::cout << "[ResourceWatcher] Particle has changed: " << ptPath << ". Attempting to reload..." << Con::endl;
 #endif
 			pragma::ecs::CParticleSystemComponent::Precache(strPath, true);
-			CallChangeCallbacks(ECResourceWatcherCallbackType::ParticleSystem, strPath, ext);
+			CallChangeCallbacks(pragma::util::ECResourceWatcherCallbackType::ParticleSystem, strPath, ext);
 		}
 	}
 	else if(prosper::glsl::is_glsl_file_extension(ext) || ext == "hlsl") {
@@ -137,7 +137,7 @@ void CResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPa
 		auto shaderPath = "shaders\\" + strPath;
 		Con::cout << "[ResourceWatcher] Shader has changed: " << shaderPath << ". Attempting to reload..." << Con::endl;
 #endif
-		auto canonShader = FileManager::GetCanonicalizedPath(strPath);
+		auto canonShader = fs::get_canonicalized_path(strPath);
 		ufile::remove_extension_from_filename(canonShader);
 		pragma::string::to_lower(canonShader);
 		auto &shaderManager = pragma::get_cengine()->GetShaderManager();
@@ -147,7 +147,7 @@ void CResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPa
 			if(shader == nullptr)
 				continue;
 			for(auto &src : shader->GetSourceFilePaths()) {
-				auto fname = FileManager::GetCanonicalizedPath(src);
+				auto fname = fs::get_canonicalized_path(src);
 				ufile::remove_extension_from_filename(fname);
 				pragma::string::to_lower(fname);
 				if(canonShader == fname)
@@ -160,7 +160,7 @@ void CResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPa
 #endif
 			pragma::get_cengine()->ReloadShader(name);
 		}
-		CallChangeCallbacks(ECResourceWatcherCallbackType::Shader, strPath, ext);
+		CallChangeCallbacks(pragma::util::ECResourceWatcherCallbackType::Shader, strPath, ext);
 	}
 	else if(ext == pragma::shadergraph::Graph::EXTENSION_ASCII || ext == pragma::shadergraph::Graph::EXTENSION_BINARY) {
 		auto &graphManager = pragma::get_cengine()->GetShaderGraphManager();

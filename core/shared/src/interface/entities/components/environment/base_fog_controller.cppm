@@ -12,23 +12,23 @@ export import :util.enums;
 export namespace pragma {
 	class DLLNETWORK BaseEnvFogControllerComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 
 		virtual void SetFogStart(float start);
 		virtual void SetFogEnd(float end);
 		virtual void SetMaxDensity(float density);
-		virtual void SetFogType(pragma::util::FogType type);
+		virtual void SetFogType(util::FogType type);
 
 		float GetFogStart() const { return m_kvFogStart; }
 		float GetFogEnd() const { return m_kvFogEnd; }
 		float GetMaxDensity() const { return m_kvMaxDensity; }
-		pragma::util::FogType GetFogType() const { return m_kvFogType; }
+		util::FogType GetFogType() const { return m_kvFogType; }
 	  protected:
 		float m_kvFogStart = 500.f;
 		float m_kvFogEnd = 2'000.f;
 		float m_kvMaxDensity = 1.f;
-		pragma::util::FogType m_kvFogType = pragma::util::FogType::Linear;
+		util::FogType m_kvFogType = util::FogType::Linear;
 	};
 };

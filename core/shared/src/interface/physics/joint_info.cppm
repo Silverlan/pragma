@@ -12,11 +12,11 @@ export namespace pragma::physics {
 	enum class JointType : uint8_t { None = 0, Fixed, BallSocket, Hinge, Slider, ConeTwist, DOF };
 
 	struct DLLNETWORK JointInfo {
-		JointInfo(JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent) : type(type), parent(parent), child(child), collide(false) {}
+		JointInfo(JointType type, animation::BoneId child, animation::BoneId parent) : type(type), parent(parent), child(child), collide(false) {}
 		JointInfo() : JointInfo(JointType::None, 0, 0) {}
 		JointType type;
-		pragma::animation::BoneId parent;
-		pragma::animation::BoneId child;
+		animation::BoneId parent;
+		animation::BoneId child;
 		bool collide;
 		std::unordered_map<std::string, std::string> args;
 

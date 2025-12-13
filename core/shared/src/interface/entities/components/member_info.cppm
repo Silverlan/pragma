@@ -29,30 +29,30 @@ export {
 			};
 
 			struct DLLNETWORK CoordinateTypeMetaData : public TypeMetaData {
-				pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::World;
-				pragma::GString parentProperty = nullptr;
+				math::CoordinateSpace space = math::CoordinateSpace::World;
+				GString parentProperty = nullptr;
 			};
 
 			struct DLLNETWORK PoseTypeMetaData : public TypeMetaData {
-				pragma::GString posProperty = nullptr;
-				pragma::GString rotProperty = nullptr;
-				pragma::GString scaleProperty = nullptr;
+				GString posProperty = nullptr;
+				GString rotProperty = nullptr;
+				GString scaleProperty = nullptr;
 			};
 
 			struct DLLNETWORK PoseComponentTypeMetaData : public TypeMetaData {
-				pragma::GString poseProperty = nullptr;
+				GString poseProperty = nullptr;
 			};
 
 			struct DLLNETWORK OptionalTypeMetaData : public TypeMetaData {
-				pragma::GString enabledProperty = nullptr;
+				GString enabledProperty = nullptr;
 			};
 
 			struct DLLNETWORK EnablerTypeMetaData : public TypeMetaData {
-				pragma::GString targetProperty = nullptr;
+				GString targetProperty = nullptr;
 			};
 
 			struct DLLNETWORK ParentTypeMetaData : public TypeMetaData {
-				pragma::GString parentProperty = nullptr;
+				GString parentProperty = nullptr;
 			};
 		};
 		class BaseEntityComponent;
@@ -199,8 +199,8 @@ export {
 #endif
 			}
 
-			void SetName(const pragma::GString &name);
-			const pragma::GString &GetName() const { return m_name; }
+			void SetName(const GString &name);
+			const GString &GetName() const { return m_name; }
 			size_t GetNameHash() const { return m_nameHash; }
 
 			AttributeSpecializationType GetSpecializationType() const { return m_specializationType; }
@@ -257,7 +257,7 @@ export {
 			};
 		  private:
 			ComponentMemberInfo();
-			pragma::GString m_name = "";
+			GString m_name = "";
 			size_t m_nameHash = 0;
 			ComponentMemberFlags m_flags = static_cast<ComponentMemberFlags>(0);
 

@@ -142,8 +142,8 @@ void Lua::sound::load_scripts(lua::State *l, const std::string &file)
 
 luabind::object Lua::sound::read_wav_phonemes(lua::State *l, const std::string &fileName)
 {
-	auto fname = "sounds\\" + FileManager::GetCanonicalizedPath(fileName);
-	auto f = FileManager::OpenFile(fname.c_str(), "rb");
+	auto fname = "sounds\\" + pragma::fs::get_canonicalized_path(fileName);
+	auto f = pragma::fs::open_file(fname.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(f == nullptr)
 		return Lua::nil;
 	source_engine::script::SoundPhonemeData sp {};

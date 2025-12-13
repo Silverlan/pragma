@@ -20,59 +20,59 @@ export namespace pragma::rendering {
 
 			void SetColor(const Color &col);
 			const Color &GetColor() const;
-			const std::shared_ptr<pragma::util::ColorProperty> &GetColorProperty() const;
+			const std::shared_ptr<util::ColorProperty> &GetColorProperty() const;
 
 			void SetStart(float start);
 			float GetStart() const;
-			const std::shared_ptr<pragma::util::FloatProperty> &GetStartProperty() const;
+			const std::shared_ptr<util::FloatProperty> &GetStartProperty() const;
 
 			void SetEnd(float end);
 			float GetEnd() const;
-			const std::shared_ptr<pragma::util::FloatProperty> &GetEndProperty() const;
+			const std::shared_ptr<util::FloatProperty> &GetEndProperty() const;
 
 			void SetMaxDensity(float density);
 			float GetMaxDensity() const;
-			const std::shared_ptr<pragma::util::FloatProperty> &GetMaxDensityProperty() const;
+			const std::shared_ptr<util::FloatProperty> &GetMaxDensityProperty() const;
 
-			void SetType(pragma::util::FogType type);
-			pragma::util::FogType GetType() const;
-			const std::shared_ptr<pragma::util::UInt8Property> &GetTypeProperty() const;
+			void SetType(util::FogType type);
+			util::FogType GetType() const;
+			const std::shared_ptr<util::UInt8Property> &GetTypeProperty() const;
 
 			void SetEnabled(bool bEnabled);
 			bool IsEnabled() const;
-			const std::shared_ptr<pragma::util::BoolProperty> &GetEnabledProperty() const;
+			const std::shared_ptr<util::BoolProperty> &GetEnabledProperty() const;
 
 			Vector2 GetRange() const;
 			void SetRange(const Vector2 &range);
 			void SetRange(float start, float end);
 			float GetFarDistance() const;
 		private:
-			std::shared_ptr<pragma::util::ColorProperty> m_color;
-			std::shared_ptr<pragma::util::FloatProperty> m_start;
-			std::shared_ptr<pragma::util::FloatProperty> m_end;
-			std::shared_ptr<pragma::util::FloatProperty> m_maxDensity;
-			std::shared_ptr<pragma::util::UInt8Property> m_type;
-			std::shared_ptr<pragma::util::BoolProperty> m_bEnabled;
+			std::shared_ptr<util::ColorProperty> m_color;
+			std::shared_ptr<util::FloatProperty> m_start;
+			std::shared_ptr<util::FloatProperty> m_end;
+			std::shared_ptr<util::FloatProperty> m_maxDensity;
+			std::shared_ptr<util::UInt8Property> m_type;
+			std::shared_ptr<util::BoolProperty> m_bEnabled;
 		};
 
 		void SetShaderQuality(int32_t quality);
 		int32_t GetShaderQuality() const;
-		const std::shared_ptr<pragma::util::Int32Property> &GetShaderQualityProperty() const;
+		const std::shared_ptr<util::Int32Property> &GetShaderQualityProperty() const;
 
 		void SetUnlit(bool b);
 		bool IsUnlit() const;
-		const std::shared_ptr<pragma::util::BoolProperty> &GetUnlitProperty() const;
+		const std::shared_ptr<util::BoolProperty> &GetUnlitProperty() const;
 
 		void SetShadowResolution(uint32_t resolution);
 		uint32_t GetShadowResolution() const;
-		const std::shared_ptr<pragma::util::UInt32Property> &GetShadowResolutionProperty() const;
+		const std::shared_ptr<util::UInt32Property> &GetShadowResolutionProperty() const;
 
 		Fog &GetFogSettings();
 	protected:
 		WorldEnvironment();
-		std::shared_ptr<pragma::util::Int32Property> m_shaderQuality;
-		std::shared_ptr<pragma::util::BoolProperty> m_bUnlit;
-		std::shared_ptr<pragma::util::UInt32Property> m_shadowResolution;
+		std::shared_ptr<util::Int32Property> m_shaderQuality;
+		std::shared_ptr<util::BoolProperty> m_bUnlit;
+		std::shared_ptr<util::UInt32Property> m_shadowResolution;
 		Fog m_fog = {};
 	};
 }

@@ -19,6 +19,6 @@ export namespace pragma {
 		const EulerAngles &GetSkyAngles() const;
 	  protected:
 		EulerAngles m_skyAngles = {};
-		pragma::NetEventId m_netEvSetSkyAngles = pragma::INVALID_NET_EVENT;
+		NetEventId m_netEvSetSkyAngles = INVALID_NET_EVENT;
 	};
 };

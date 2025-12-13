@@ -13,16 +13,16 @@ using namespace pragma;
 
 ShadowRenderer::ShadowRenderer()
 {
-	m_shader = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Shadow);
-	m_shaderTransparent = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowTransparent);
-	m_shaderSpot = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowSpot);
-	m_shaderSpotTransparent = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowTransparentSpot);
-	m_shaderCSM = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowCSM);
-	m_shaderCSMTransparent = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::ShadowCSMTransparent);
+	m_shader = get_cgame()->GetGameShader(CGame::GameShader::Shadow);
+	m_shaderTransparent = get_cgame()->GetGameShader(CGame::GameShader::ShadowTransparent);
+	m_shaderSpot = get_cgame()->GetGameShader(CGame::GameShader::ShadowSpot);
+	m_shaderSpotTransparent = get_cgame()->GetGameShader(CGame::GameShader::ShadowTransparentSpot);
+	m_shaderCSM = get_cgame()->GetGameShader(CGame::GameShader::ShadowCSM);
+	m_shaderCSMTransparent = get_cgame()->GetGameShader(CGame::GameShader::ShadowCSMTransparent);
 
-	m_octreeCallbacks.nodeCallback = [this](const OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>::Node &node) -> bool {
+	m_octreeCallbacks.nodeCallback = [this](const OcclusionOctree<std::shared_ptr<geometry::ModelMesh>>::Node &node) -> bool {
 		auto &bounds = node.GetWorldBounds();
-		return pragma::math::intersection::aabb_sphere(bounds.first, bounds.second, m_lightSourceData.position, m_lightSourceData.radius);
+		return math::intersection::aabb_sphere(bounds.first, bounds.second, m_lightSourceData.position, m_lightSourceData.radius);
 	};
 
 	m_octreeCallbacks.entityCallback = [this](const ecs::CBaseEntity &ent, uint32_t renderFlags) {
@@ -36,7 +36,7 @@ ShadowRenderer::ShadowRenderer()
 		m_shadowCasters.push_back({});
 		auto &info = m_shadowCasters.back();
 		info.entity = &ent;
-		info.renderFlags = (m_lightSourceData.type == pragma::LightType::Point) ? renderFlags : 1u; // Spot-lights only have 1 layer, so we can ignore the flags
+		info.renderFlags = (m_lightSourceData.type == LightType::Point) ? renderFlags : 1u; // Spot-lights only have 1 layer, so we can ignore the flags
 		auto pRenderComponent = ent.GetRenderComponent();
 		if(pRenderComponent) {
 			// Make sure entity buffer data is up to date
@@ -45,24 +45,24 @@ ShadowRenderer::ShadowRenderer()
 		}
 	};
 
-	m_octreeCallbacks.meshCallback = [this](const std::shared_ptr<pragma::geometry::ModelMesh> &mesh) {
+	m_octreeCallbacks.meshCallback = [this](const std::shared_ptr<geometry::ModelMesh> &mesh) {
 		auto *ent = m_currentEntity;
-		if(m_lightSourceData.light->ShouldPass(*ent, *static_cast<pragma::geometry::CModelMesh *>(mesh.get()), m_currentRenderFlags) == false)
+		if(m_lightSourceData.light->ShouldPass(*ent, *static_cast<geometry::CModelMesh *>(mesh.get()), m_currentRenderFlags) == false)
 			return;
 		for(auto &subMesh : mesh->GetSubMeshes()) {
-			if(m_lightSourceData.light->ShouldPass(*m_currentModel, *static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get())) == false)
+			if(m_lightSourceData.light->ShouldPass(*m_currentModel, *static_cast<geometry::CModelSubMesh *>(subMesh.get())) == false)
 				continue;
 			auto matIdx = m_currentModel->GetMaterialIndex(*subMesh);
 			auto *mat = matIdx.has_value() ? m_currentModel->GetMaterial(*matIdx) : nullptr;
 			if(mat == nullptr || mat->GetShaderIdentifier() == "nodraw") // TODO: Do this properly
 				continue;
-			m_octreeCallbacks.subMeshCallback(*m_currentModel, *static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get()), m_currentRenderFlags);
+			m_octreeCallbacks.subMeshCallback(*m_currentModel, *static_cast<geometry::CModelSubMesh *>(subMesh.get()), m_currentRenderFlags);
 		}
 	};
 
-	m_octreeCallbacks.subMeshCallback = [this](const pragma::asset::Model &mdl, const pragma::geometry::CModelSubMesh &subMesh, uint32_t renderFlags) {
+	m_octreeCallbacks.subMeshCallback = [this](const asset::Model &mdl, const geometry::CModelSubMesh &subMesh, uint32_t renderFlags) {
 		auto matIdx = mdl.GetMaterialIndex(subMesh);
-		auto *mat = matIdx.has_value() ? const_cast<pragma::asset::Model &>(mdl).GetMaterial(*matIdx) : nullptr;
+		auto *mat = matIdx.has_value() ? const_cast<asset::Model &>(mdl).GetMaterial(*matIdx) : nullptr;
 		m_shadowCasters.push_back({});
 		auto &info = m_shadowCasters.back();
 		info.mesh = &subMesh;
@@ -71,19 +71,19 @@ ShadowRenderer::ShadowRenderer()
 	};
 }
 
-void ShadowRenderer::UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light)
+void ShadowRenderer::UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CLightComponent &light)
 {
 	auto *scene = light.FindShadowScene();
 	if(scene == nullptr)
 		return;
-	auto *pWorld = pragma::get_cgame()->GetWorld();
+	auto *pWorld = get_cgame()->GetWorld();
 	if(pWorld == nullptr)
 		return;
-	auto &entWorld = static_cast<pragma::ecs::CBaseEntity &>(pWorld->GetEntity());
+	auto &entWorld = static_cast<ecs::CBaseEntity &>(pWorld->GetEntity());
 	if(entWorld.IsInScene(*scene) == false)
 		return;
 	auto &mdl = entWorld.GetModel();
-	auto meshTree = mdl ? static_cast<pragma::CWorldComponent *>(pWorld)->GetMeshTree() : nullptr;
+	auto meshTree = mdl ? static_cast<CWorldComponent *>(pWorld)->GetMeshTree() : nullptr;
 	if(meshTree == nullptr)
 		return;
 
@@ -95,12 +95,12 @@ void ShadowRenderer::UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryC
 	m_octreeCallbacks.entityCallback(entWorld, renderFlags);
 	meshTree->IterateObjects(m_octreeCallbacks.nodeCallback, m_octreeCallbacks.meshCallback);
 }
-void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light)
+void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CLightComponent &light)
 {
 	auto *scene = light.FindShadowScene();
 	if(scene == nullptr)
 		return;
-	auto *culler = scene->FindOcclusionCuller<pragma::COcclusionCullerComponent>();
+	auto *culler = scene->FindOcclusionCuller<COcclusionCullerComponent>();
 	if(culler == nullptr)
 		return;
 	auto &octree = culler->GetOcclusionOctree();
@@ -108,7 +108,7 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 	octree.IterateObjects(
 	  [this](const OcclusionOctree<ecs::CBaseEntity *>::Node &node) -> bool {
 		  auto &bounds = node.GetWorldBounds();
-		  return pragma::math::intersection::aabb_sphere(bounds.first, bounds.second, m_lightSourceData.position, m_lightSourceData.radius);
+		  return math::intersection::aabb_sphere(bounds.first, bounds.second, m_lightSourceData.position, m_lightSourceData.radius);
 	  },
 	  [this, &light, &drawCmd, scene](const ecs::CBaseEntity *ent) {
 		  auto pRenderComponent = ent->GetRenderComponent();
@@ -121,25 +121,25 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 		  auto *mdlComponent = pRenderComponent->GetModelComponent();
 		  if(mdlComponent) {
 			  auto mdl = mdlComponent->GetModel();
-			  for(auto &mesh : static_cast<pragma::CModelComponent &>(*mdlComponent).GetLODMeshes()) {
-				  if(light.ShouldPass(*ent, *static_cast<pragma::geometry::CModelMesh *>(mesh.get()), renderFlags) == false)
+			  for(auto &mesh : static_cast<CModelComponent &>(*mdlComponent).GetLODMeshes()) {
+				  if(light.ShouldPass(*ent, *static_cast<geometry::CModelMesh *>(mesh.get()), renderFlags) == false)
 					  continue;
 				  //meshCallback(static_cast<pragma::geometry::CModelMesh*>(mesh.get()),renderFlags);
 				  for(auto &subMesh : mesh->GetSubMeshes()) {
-					  if(light.ShouldPass(*mdl, *static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get())) == false)
+					  if(light.ShouldPass(*mdl, *static_cast<geometry::CModelSubMesh *>(subMesh.get())) == false)
 						  continue;
 					  auto matIdx = mdl->GetMaterialIndex(*subMesh);
 					  auto *mat = matIdx.has_value() ? mdl->GetMaterial(*matIdx) : nullptr;
 					  if(mat == nullptr || mat->GetShaderIdentifier() == "nodraw") // TODO
 						  continue;
-					  m_octreeCallbacks.subMeshCallback(*mdl, *static_cast<pragma::geometry::CModelSubMesh *>(subMesh.get()), renderFlags);
+					  m_octreeCallbacks.subMeshCallback(*mdl, *static_cast<geometry::CModelSubMesh *>(subMesh.get()), renderFlags);
 				  }
 			  }
 		  }
 	  });
 }
 
-bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::rendering::ShadowMapType smType)
+bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CLightComponent &light, rendering::ShadowMapType smType)
 {
 	// TODO: Remove me
 #if 0
@@ -194,7 +194,7 @@ bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryComman
 	return true;
 }
 
-ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, uint32_t layerId, const Mat4 &depthMVP, pragma::ShaderShadow &shader, bool bTranslucent)
+ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CLightComponent &light, uint32_t layerId, const Mat4 &depthMVP, ShaderShadow &shader, bool bTranslucent)
 {
 	// TODO
 #if 0
@@ -206,7 +206,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 	{
 		auto layerFlag = 1<<layerId;
 		auto bProcessMeshes = false;
-		msys::Material *prevMat = nullptr;
+		material::Material *prevMat = nullptr;
 		for(auto &info : m_shadowCasters)
 		{
 			if(info.entity != nullptr)
@@ -222,7 +222,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 					if(bTranslucent == true)
 					{
 						auto &shaderTranslucent = static_cast<pragma::ShaderShadowTransparent&>(shader);
-						if(info.material == prevMat || shaderTranslucent.BindMaterial(static_cast<msys::CMaterial&>(*info.material)) == true)
+						if(info.material == prevMat || shaderTranslucent.BindMaterial(static_cast<material::CMaterial&>(*info.material)) == true)
 						{
 							shaderTranslucent.Draw(*const_cast<pragma::geometry::CModelSubMesh*>(info.mesh));
 							prevMat = info.material;
@@ -242,18 +242,18 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(std::shared_ptr<
 	return RenderResultFlags::None;
 }
 
-static auto cvParticleQuality = pragma::console::get_client_con_var("cl_render_particle_quality");
-void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::rendering::ShadowMapType smType, pragma::LightType type, bool drawParticleShadows)
+static auto cvParticleQuality = console::get_client_con_var("cl_render_particle_quality");
+void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CLightComponent &light, rendering::ShadowMapType smType, LightType type, bool drawParticleShadows)
 {
-	auto hShadowMap = light.GetShadowMap<pragma::CShadowComponent>(smType);
-	if(hShadowMap.expired() || light.GetEffectiveShadowType() == pragma::BaseEnvLightComponent::ShadowType::None || UpdateShadowCasters(drawCmd, light, smType) == false)
+	auto hShadowMap = light.GetShadowMap<CShadowComponent>(smType);
+	if(hShadowMap.expired() || light.GetEffectiveShadowType() == BaseEnvLightComponent::ShadowType::None || UpdateShadowCasters(drawCmd, light, smType) == false)
 		return;
-	auto &shader = (type != pragma::LightType::Spot) ? static_cast<pragma::ShaderShadow &>(*m_shader.get()) : static_cast<pragma::ShaderShadow &>(*m_shaderSpot.get());
-	pragma::ShaderShadowTransparent *shaderTransparent = nullptr;
-	if(type != pragma::LightType::Spot)
-		shaderTransparent = static_cast<pragma::ShaderShadowTransparent *>(m_shaderTransparent.expired() == false ? m_shaderTransparent.get() : nullptr);
+	auto &shader = (type != LightType::Spot) ? static_cast<ShaderShadow &>(*m_shader.get()) : static_cast<ShaderShadow &>(*m_shaderSpot.get());
+	ShaderShadowTransparent *shaderTransparent = nullptr;
+	if(type != LightType::Spot)
+		shaderTransparent = static_cast<ShaderShadowTransparent *>(m_shaderTransparent.expired() == false ? m_shaderTransparent.get() : nullptr);
 	else
-		shaderTransparent = static_cast<pragma::ShaderShadowTransparent *>(m_shaderSpotTransparent.expired() == false ? m_shaderSpotTransparent.get() : nullptr);
+		shaderTransparent = static_cast<ShaderShadowTransparent *>(m_shaderSpotTransparent.expired() == false ? m_shaderSpotTransparent.get() : nullptr);
 #if DEBUG_SHADOWS == 1
 	s_shadowMeshCount = 0;
 	s_shadowIndexCount = 0;
@@ -263,9 +263,9 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 
 	auto *smRt = hShadowMap->GetDepthRenderTarget();
 	auto &tex = smRt->GetTexture();
-	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
-	auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
-	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
+	auto *scene = get_cgame()->GetScene<CSceneComponent>();
+	auto *renderer = scene ? scene->GetRenderer<CRendererComponent>() : nullptr;
+	auto raster = renderer ? renderer->GetEntity().GetComponent<CRasterizationRendererComponent>() : pragma::ComponentHandle<CRasterizationRendererComponent> {};
 	if(raster.expired())
 		return;
 
@@ -285,12 +285,12 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 		//if(pragma::math::is_flag_set(renderResultFlags,RenderResultFlags::TranslucentPending) && shaderTransparent != nullptr)
 		//	RenderShadows(drawCmd,light,layerId,depthMVP,shader,true); // Draw translucent shadows
 		if(drawParticleShadows == true && renderer) {
-			auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
+			auto *scene = get_cgame()->GetRenderScene<CSceneComponent>();
 			// TODO: Only culled particles
-			pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
-			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::ecs::CParticleSystemComponent>>();
+			ecs::EntityIterator entIt {*get_cgame()};
+			entIt.AttachFilter<TEntityIteratorFilterComponent<ecs::CParticleSystemComponent>>();
 			for(auto *ent : entIt) {
-				auto p = ent->GetComponent<pragma::ecs::CParticleSystemComponent>();
+				auto p = ent->GetComponent<ecs::CParticleSystemComponent>();
 				if(p.valid() && p->GetCastShadows() == true)
 					p->RecordRenderShadow(*drawCmd, *scene, *raster, &light, layerId);
 			}
@@ -302,17 +302,17 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 	}
 }
 
-void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light)
+void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CLightComponent &light)
 {
-	auto type = pragma::LightType::Undefined;
+	auto type = LightType::Undefined;
 	auto *pLight = light.GetLight(type);
 	auto bDrawParticleShadows = (cvParticleQuality->GetInt() >= 3) ? true : false;
-	if(type == pragma::LightType::Directional) {
-		RenderCSMShadows(drawCmd, static_cast<pragma::CLightDirectionalComponent &>(*pLight), bDrawParticleShadows);
+	if(type == LightType::Directional) {
+		RenderCSMShadows(drawCmd, static_cast<CLightDirectionalComponent &>(*pLight), bDrawParticleShadows);
 		return;
 	}
 	if(m_shader.expired() || m_shaderSpot.expired())
 		return;
-	RenderShadows(drawCmd, light, pragma::rendering::ShadowMapType::Static, type, bDrawParticleShadows);
-	RenderShadows(drawCmd, light, pragma::rendering::ShadowMapType::Dynamic, type, bDrawParticleShadows);
+	RenderShadows(drawCmd, light, rendering::ShadowMapType::Static, type, bDrawParticleShadows);
+	RenderShadows(drawCmd, light, rendering::ShadowMapType::Dynamic, type, bDrawParticleShadows);
 }

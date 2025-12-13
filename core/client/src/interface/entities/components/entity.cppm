@@ -13,9 +13,9 @@ export namespace pragma {
 	class DLLCLIENT CBaseNetComponent : public BaseNetComponent {
 	  public:
 		virtual void ReceiveData(NetPacket &packet) = 0;
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) { return false; }
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) { return false; }
 
-		pragma::NetEventId FindNetEvent(const std::string &evName) const;
+		NetEventId FindNetEvent(const std::string &evName) const;
 	};
 
 	class DLLCLIENT CBaseSnapshotComponent : public CBaseNetComponent {

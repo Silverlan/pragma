@@ -93,7 +93,7 @@ static aiNode &add_node(aiNode &parentNode,uint32_t index,const std::string &nam
 int Lua::lib_export::export_scene(lua::State *l)
 {
 #if 0
-	std::string outputPath = FileManager::GetCanonicalizedPath(Lua::CheckString(l,1));
+	std::string outputPath = fs::get_canonicalized_path(Lua::CheckString(l,1));
 	if(Lua::file::validate_write_operation(l,outputPath) == false)
 		return 0;
 	auto *world = pragma::get_cgame()->GetWorld();
@@ -190,7 +190,7 @@ int Lua::lib_export::export_scene(lua::State *l)
 
 	if(outputPath.empty() || (outputPath.front() != '/' && outputPath.front() != '\\'))
 		outputPath = '/' +outputPath;
-	outputPath = pragma::util::FilePath(filemanager::get_program_write_path(), outputPath).GetString();
+	outputPath = pragma::util::FilePath(fs::get_program_write_path(), outputPath).GetString();
 	ufile::remove_extension_from_filename(outputPath);
 	// The assimp FBX exporter currently does not support lights or cameras!
 	outputPath += ".fbx";

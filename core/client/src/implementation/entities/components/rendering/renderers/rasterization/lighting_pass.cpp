@@ -21,25 +21,25 @@ static auto cvDrawParticles = pragma::console::get_client_con_var("render_draw_p
 static auto cvDrawGlow = pragma::console::get_client_con_var("render_draw_glow");
 static auto cvDrawTranslucent = pragma::console::get_client_con_var("render_draw_translucent");
 
-void pragma::CRasterizationRendererComponent::RecordPrepass(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RecordPrepass(const DrawSceneInfo &drawSceneInfo)
 {
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &prepass = GetPrepass();
 
 	auto &shaderPrepass = GetPrepassShader();
-	auto *prepassStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::Prepass) : nullptr;
+	auto *prepassStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr;
 	auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
 	m_prepassCommandBufferGroup->Record([this, &drawSceneInfo, &shaderPrepass, &worldRenderQueues, &sceneRenderDesc, prepassStats](prosper::ISecondaryCommandBuffer &cmd) {
-		pragma::rendering::RenderPassDrawInfo renderPassDrawInfo {drawSceneInfo, cmd};
-		pragma::rendering::DepthStageRenderProcessor rsys {
+		RenderPassDrawInfo renderPassDrawInfo {drawSceneInfo, cmd};
+		DepthStageRenderProcessor rsys {
 		  renderPassDrawInfo,
 		  {} /* drawOrigin */,
 		};
 
 		CEPrepassStageData evDataPrepassStage {rsys, shaderPrepass};
 		InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS, evDataPrepassStage);
-		rsys.BindShader(shaderPrepass, pragma::math::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
+		rsys.BindShader(shaderPrepass, math::to_integral(ShaderPrepass::Pipeline::Opaque));
 		// Render static world geometry
 		if((renderPassDrawInfo.drawSceneInfo.renderFlags & RenderFlags::World) != RenderFlags::None) {
 			std::chrono::steady_clock::time_point t;
@@ -47,33 +47,33 @@ void pragma::CRasterizationRendererComponent::RecordPrepass(const pragma::render
 				t = std::chrono::steady_clock::now();
 			sceneRenderDesc.WaitForWorldRenderQueues();
 			if(drawSceneInfo.renderStats)
-				drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::Prepass)->SetTime(RenderPassStats::Timer::RenderThreadWait, std::chrono::steady_clock::now() - t);
+				drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->SetTime(RenderPassStats::Timer::RenderThreadWait, std::chrono::steady_clock::now() - t);
 			for(auto i = decltype(worldRenderQueues.size()) {0u}; i < worldRenderQueues.size(); ++i)
-				rsys.Render(*worldRenderQueues.at(i), pragma::rendering::RenderPass::Prepass, prepassStats, i);
+				rsys.Render(*worldRenderQueues.at(i), RenderPass::Prepass, prepassStats, i);
 		}
 
 		// Note: The non-translucent render queues also include transparent (alpha masked) objects.
 		// We don't care about translucent objects here.
 		if((renderPassDrawInfo.drawSceneInfo.renderFlags & RenderFlags::World) != RenderFlags::None) {
-			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, false /* translucent */), pragma::rendering::RenderPass::Prepass, prepassStats);
+			rsys.Render(*sceneRenderDesc.GetRenderQueue(SceneRenderPass::World, false /* translucent */), RenderPass::Prepass, prepassStats);
 
-			auto &queueTranslucent = *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, true /* translucent */);
+			auto &queueTranslucent = *sceneRenderDesc.GetRenderQueue(SceneRenderPass::World, true /* translucent */);
 			queueTranslucent.WaitForCompletion(prepassStats);
 			if(queueTranslucent.queue.empty() == false) {
 				// rsys.BindShader(shaderPrepass,pragma::math::to_integral(pragma::ShaderPrepass::Pipeline::AlphaTest));
-				rsys.Render(queueTranslucent, pragma::rendering::RenderPass::Prepass, prepassStats);
+				rsys.Render(queueTranslucent, RenderPass::Prepass, prepassStats);
 			}
 		}
 
 		if((renderPassDrawInfo.drawSceneInfo.renderFlags & RenderFlags::View) != RenderFlags::None) {
-			auto &queue = *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::View, false /* translucent */);
+			auto &queue = *sceneRenderDesc.GetRenderQueue(SceneRenderPass::View, false /* translucent */);
 			queue.WaitForCompletion(prepassStats);
 			if(queue.queue.empty() == false) {
 				rsys.UnbindShader();
-				rsys.SetCameraType(pragma::rendering::BaseRenderProcessor::CameraType::View);
-				rsys.BindShader(shaderPrepass, pragma::math::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
+				rsys.SetCameraType(BaseRenderProcessor::CameraType::View);
+				rsys.BindShader(shaderPrepass, math::to_integral(ShaderPrepass::Pipeline::Opaque));
 				// rsys.BindShader(shaderPrepass,pragma::math::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
-				rsys.Render(queue, pragma::rendering::RenderPass::Prepass, prepassStats);
+				rsys.Render(queue, RenderPass::Prepass, prepassStats);
 			}
 		}
 		rsys.UnbindShader();
@@ -82,7 +82,7 @@ void pragma::CRasterizationRendererComponent::RecordPrepass(const pragma::render
 			RenderParticles(cmd, drawSceneInfo, true);
 	});
 }
-void pragma::CRasterizationRendererComponent::UpdatePrepassRenderBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::UpdatePrepassRenderBuffers(const DrawSceneInfo &drawSceneInfo)
 {
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
@@ -90,39 +90,39 @@ void pragma::CRasterizationRendererComponent::UpdatePrepassRenderBuffers(const p
 	// In the meantime, we can make use of the wait time by updating the entity buffers
 	// for the entity we need for the prepass.
 	if((drawSceneInfo.renderFlags & RenderFlags::World) != RenderFlags::None) {
-		CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, false /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::Prepass) : nullptr);
-		CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, true /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::Prepass) : nullptr);
+		CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(SceneRenderPass::World, false /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+		CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(SceneRenderPass::World, true /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
 	}
 
 	if((drawSceneInfo.renderFlags & RenderFlags::View) != RenderFlags::None) {
-		CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::View, false /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::Prepass) : nullptr);
-		CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::View, true /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::Prepass) : nullptr);
+		CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(SceneRenderPass::View, false /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+		CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(SceneRenderPass::View, true /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
 	}
 
 	CEUpdateRenderBuffers evData {drawSceneInfo};
 	InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_UPDATE_RENDER_BUFFERS, evData);
 
-	pragma::get_cgame()->CallLuaCallbacks<void, const pragma::rendering::DrawSceneInfo *>("UpdateRenderBuffers", &drawSceneInfo);
+	get_cgame()->CallLuaCallbacks<void, const DrawSceneInfo *>("UpdateRenderBuffers", &drawSceneInfo);
 	//
 }
-void pragma::CRasterizationRendererComponent::UpdateLightingPassRenderBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::UpdateLightingPassRenderBuffers(const DrawSceneInfo &drawSceneInfo)
 {
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
-	CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::Sky, false /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::LightingPass) : nullptr);
-	CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::Sky, true /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::LightingPass) : nullptr);
+	CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(SceneRenderPass::Sky, false /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr);
+	CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(SceneRenderPass::Sky, true /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr);
 	//CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
-	CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::View, true /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::LightingPass) : nullptr);
+	CSceneComponent::UpdateRenderBuffers(drawCmd, *sceneRenderDesc.GetRenderQueue(SceneRenderPass::View, true /* translucent */), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr);
 }
-void pragma::CRasterizationRendererComponent::ExecutePrepass(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::ExecutePrepass(const DrawSceneInfo &drawSceneInfo)
 {
-	if(pragma::math::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisablePrepass))
+	if(math::is_flag_set(drawSceneInfo.flags, DrawSceneInfo::Flags::DisablePrepass))
 		return;
 	auto &scene = *drawSceneInfo.scene;
 	auto &hCam = scene.GetActiveCamera();
 	// Pre-render depths and normals (if SSAO is enabled)
-	pragma::get_cgame()->StartProfilingStage("Prepass");
-	pragma::get_cgame()->StartGPUProfilingStage("Prepass");
+	get_cgame()->StartProfilingStage("Prepass");
+	get_cgame()->StartGPUProfilingStage("Prepass");
 	auto &prepass = GetPrepass();
 	if(prepass.textureDepth->IsMSAATexture())
 		static_cast<prosper::MSAATexture &>(*prepass.textureDepth).Reset();
@@ -131,11 +131,11 @@ void pragma::CRasterizationRendererComponent::ExecutePrepass(const pragma::rende
 
 	// Entity instance buffer barrier
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	drawCmd->RecordBufferBarrier(*pragma::CRenderComponent::GetInstanceBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+	drawCmd->RecordBufferBarrier(*CRenderComponent::GetInstanceBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
 	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	// Entity bone buffer barrier
-	drawCmd->RecordBufferBarrier(*pragma::get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+	drawCmd->RecordBufferBarrier(*get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
 	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	// Camera buffer barrier
@@ -158,16 +158,16 @@ void pragma::CRasterizationRendererComponent::ExecutePrepass(const pragma::rende
 
 	InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_POST_PREPASS, evData);
 
-	pragma::get_cgame()->StopGPUProfilingStage(); // Prepass
-	pragma::get_cgame()->StopProfilingStage();    // Prepass
+	get_cgame()->StopGPUProfilingStage(); // Prepass
+	get_cgame()->StopProfilingStage();    // Prepass
 }
 
-void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const DrawSceneInfo &drawSceneInfo)
 {
-	if(pragma::math::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisablePrepass))
+	if(math::is_flag_set(drawSceneInfo.flags, DrawSceneInfo::Flags::DisablePrepass))
 		return;
-	pragma::get_cgame()->StartProfilingStage("ExecuteLightingPass");
-	auto &scene = const_cast<pragma::CSceneComponent &>(*drawSceneInfo.scene);
+	get_cgame()->StartProfilingStage("ExecuteLightingPass");
+	auto &scene = const_cast<CSceneComponent &>(*drawSceneInfo.scene);
 	auto &cam = scene.GetActiveCamera();
 	bool bShadows = (drawSceneInfo.renderFlags & RenderFlags::Shadows) == RenderFlags::Shadows;
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -179,15 +179,15 @@ void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const pragma::
 	drawCmd->RecordBufferBarrier(*GetForwardPlusInstance().GetTileVisLightIndexBuffer(), prosper::PipelineStageFlags::ComputeShaderBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::ShaderWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	// Entity instance buffer barrier
-	drawCmd->RecordBufferBarrier(*pragma::CRenderComponent::GetInstanceBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+	drawCmd->RecordBufferBarrier(*CRenderComponent::GetInstanceBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
 	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	// Entity bone buffer barrier
-	drawCmd->RecordBufferBarrier(*pragma::get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+	drawCmd->RecordBufferBarrier(*get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
 	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
-	auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
-	auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
+	auto &bufLightSources = CLightComponent::GetGlobalRenderBuffer();
+	auto &bufShadowData = CLightComponent::GetGlobalShadowBuffer();
 	// Light source data barrier
 	drawCmd->RecordBufferBarrier(bufLightSources, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit,
 	  prosper::AccessFlags::ShaderReadBit);
@@ -196,7 +196,7 @@ void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const pragma::
 	drawCmd->RecordBufferBarrier(bufShadowData, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit,
 	  prosper::AccessFlags::ShaderReadBit);
 
-	auto &renderSettingsBufferData = pragma::get_cgame()->GetGlobalRenderSettingsBufferData();
+	auto &renderSettingsBufferData = get_cgame()->GetGlobalRenderSettingsBufferData();
 	// Debug buffer barrier
 	drawCmd->RecordBufferBarrier(*renderSettingsBufferData.debugBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
@@ -227,7 +227,7 @@ void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const pragma::
 
 	InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_POST_LIGHTING_PASS, evData);
 
-	pragma::get_cgame()->StopProfilingStage(); // ExecuteLightingPass
+	get_cgame()->StopProfilingStage(); // ExecuteLightingPass
 }
 template<typename TCPPM>
 TCPPM *pragma::CRasterizationRendererComponent::GetRendererComponent()
@@ -239,17 +239,17 @@ template pragma::CRendererComponent *pragma::CRasterizationRendererComponent::Ge
 template<typename TCPPM>
 const TCPPM *pragma::CRasterizationRendererComponent::GetRendererComponent() const
 {
-	return const_cast<CRasterizationRendererComponent *>(this)->GetRendererComponent<pragma::CRendererComponent>();
+	return const_cast<CRasterizationRendererComponent *>(this)->GetRendererComponent<CRendererComponent>();
 }
 template const pragma::CRendererComponent *pragma::CRasterizationRendererComponent::GetRendererComponent() const;
 
-void pragma::CRasterizationRendererComponent::StartPrepassRecording(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::StartPrepassRecording(const DrawSceneInfo &drawSceneInfo)
 {
 	auto &prepass = GetPrepass();
 	auto &prepassRt = *prepass.renderTarget;
 	m_prepassCommandBufferGroup->StartRecording(prepassRt.GetRenderPass(), prepassRt.GetFramebuffer());
 
-	if(!pragma::math::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisablePrepass)) {
+	if(!math::is_flag_set(drawSceneInfo.flags, DrawSceneInfo::Flags::DisablePrepass)) {
 		RecordPrepass(drawSceneInfo);
 		CEDrawSceneInfo evData {drawSceneInfo};
 		InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS, evData);
@@ -257,14 +257,14 @@ void pragma::CRasterizationRendererComponent::StartPrepassRecording(const pragma
 
 	m_prepassCommandBufferGroup->EndRecording();
 }
-void pragma::CRasterizationRendererComponent::StartLightingPassRecording(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::StartLightingPassRecording(const DrawSceneInfo &drawSceneInfo)
 {
 	auto *rt = GetLightingPassRenderTarget(drawSceneInfo);
 	if(rt == nullptr || drawSceneInfo.scene.expired())
 		return;
 	m_lightingCommandBufferGroup->StartRecording(rt->GetRenderPass(), rt->GetFramebuffer());
 
-	if(!pragma::math::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisableLightingPass)) {
+	if(!math::is_flag_set(drawSceneInfo.flags, DrawSceneInfo::Flags::DisableLightingPass)) {
 		RecordLightingPass(drawSceneInfo);
 		CEDrawSceneInfo evData {drawSceneInfo};
 		InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS, evData);
@@ -273,34 +273,34 @@ void pragma::CRasterizationRendererComponent::StartLightingPassRecording(const p
 	m_lightingCommandBufferGroup->EndRecording();
 }
 
-void pragma::CRasterizationRendererComponent::RecordLightingPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RecordLightingPass(const DrawSceneInfo &drawSceneInfo)
 {
-	auto &scene = const_cast<pragma::CSceneComponent &>(*drawSceneInfo.scene);
+	auto &scene = const_cast<CSceneComponent &>(*drawSceneInfo.scene);
 	auto &cam = scene.GetActiveCamera();
 	m_lightingCommandBufferGroup->Record([this, &scene, &cam, &drawSceneInfo](prosper::ISecondaryCommandBuffer &cmd) mutable {
-		pragma::get_cgame()->StartProfilingStage("RecordLightingPass");
+		get_cgame()->StartProfilingStage("RecordLightingPass");
 		auto pcmd = cmd.shared_from_this();
 		auto bGlow = cvDrawGlow->GetBool();
 		auto bTranslucent = cvDrawTranslucent->GetBool();
 
-		auto *lightingStageStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::LightingPass) : nullptr;
-		auto *lightingStageTranslucentStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::LightingPassTranslucent) : nullptr;
-		pragma::rendering::RenderPassDrawInfo rpDrawInfo {drawSceneInfo, cmd};
-		pragma::rendering::LightingStageRenderProcessor rsys {rpDrawInfo, {} /* drawOrigin */};
+		auto *lightingStageStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr;
+		auto *lightingStageTranslucentStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPassTranslucent) : nullptr;
+		RenderPassDrawInfo rpDrawInfo {drawSceneInfo, cmd};
+		LightingStageRenderProcessor rsys {rpDrawInfo, {} /* drawOrigin */};
 		auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
 
 		CELightingStageData evDataLightingStage {rsys};
 		if((drawSceneInfo.renderFlags & RenderFlags::Skybox) != RenderFlags::None) {
-			pragma::get_cgame()->StartProfilingStage("Skybox");
-			pragma::get_cgame()->StartGPUProfilingStage("Skybox");
+			get_cgame()->StartProfilingStage("Skybox");
+			get_cgame()->StartGPUProfilingStage("Skybox");
 			InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_SKYBOX, evDataLightingStage);
 
-			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::Sky, false /* translucent */), lightingStageStats);
-			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::Sky, true /* translucent */), lightingStageTranslucentStats);
+			rsys.Render(*sceneRenderDesc.GetRenderQueue(SceneRenderPass::Sky, false /* translucent */), lightingStageStats);
+			rsys.Render(*sceneRenderDesc.GetRenderQueue(SceneRenderPass::Sky, true /* translucent */), lightingStageTranslucentStats);
 
 			InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_END_RECORD_SKYBOX, evDataLightingStage);
-			pragma::get_cgame()->StopGPUProfilingStage(); // Skybox
-			pragma::get_cgame()->StopProfilingStage();    // Skybox
+			get_cgame()->StopGPUProfilingStage(); // Skybox
+			get_cgame()->StopProfilingStage();    // Skybox
 		}
 
 		// Render static world geometry
@@ -308,8 +308,8 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const pragma::r
 		if(g_dbgMode == 3 || g_dbgMode == 5) {
 #endif
 			if((drawSceneInfo.renderFlags & RenderFlags::World) != RenderFlags::None) {
-				pragma::get_cgame()->StartProfilingStage("World");
-				pragma::get_cgame()->StartGPUProfilingStage("World");
+				get_cgame()->StartProfilingStage("World");
+				get_cgame()->StartGPUProfilingStage("World");
 				InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_WORLD, evDataLightingStage);
 
 				// For optimization purposes, world geometry is stored in separate render queues.
@@ -324,19 +324,19 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const pragma::r
 					t = std::chrono::steady_clock::now();
 				sceneRenderDesc.WaitForWorldRenderQueues();
 				if(drawSceneInfo.renderStats)
-					drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::LightingPass)->SetTime(RenderPassStats::Timer::RenderThreadWait, std::chrono::steady_clock::now() - t);
+					drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass)->SetTime(RenderPassStats::Timer::RenderThreadWait, std::chrono::steady_clock::now() - t);
 
 				auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
 				for(auto i = decltype(worldRenderQueues.size()) {0u}; i < worldRenderQueues.size(); ++i)
 					rsys.Render(*worldRenderQueues.at(i), lightingStageStats, i);
 
 				// Note: The non-translucent render queues also include transparent (alpha masked) objects
-				rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, false /* translucent */), lightingStageStats);
-				rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, true /* translucent */), lightingStageTranslucentStats);
+				rsys.Render(*sceneRenderDesc.GetRenderQueue(SceneRenderPass::World, false /* translucent */), lightingStageStats);
+				rsys.Render(*sceneRenderDesc.GetRenderQueue(SceneRenderPass::World, true /* translucent */), lightingStageTranslucentStats);
 
 				InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_END_RECORD_WORLD, evDataLightingStage);
-				pragma::get_cgame()->StopGPUProfilingStage(); // World
-				pragma::get_cgame()->StopProfilingStage();    // World
+				get_cgame()->StopGPUProfilingStage(); // World
+				get_cgame()->StopProfilingStage();    // World
 			}
 #if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
 		}
@@ -403,13 +403,13 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const pragma::r
 		// pragma::get_cgame()->CallLuaCallbacks<void,const pragma::rendering::DrawSceneInfo*>("Render",&drawSceneInfo);
 
 		if((drawSceneInfo.renderFlags & RenderFlags::Debug) == RenderFlags::Debug) {
-			pragma::get_cgame()->StartProfilingStage("Debug");
-			pragma::get_cgame()->StartGPUProfilingStage("Debug");
+			get_cgame()->StartProfilingStage("Debug");
+			get_cgame()->StartGPUProfilingStage("Debug");
 			InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_DEBUG, evDataLightingStage);
 
 			if(cam.valid())
-				pragma::debug::DebugRenderer::Render(pcmd, *cam);
-			pragma::get_cgame()->RenderDebugPhysics(pcmd, *cam);
+				debug::DebugRenderer::Render(pcmd, *cam);
+			get_cgame()->RenderDebugPhysics(pcmd, *cam);
 
 #if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
 			pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
@@ -501,18 +501,18 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const pragma::r
 #endif
 
 			InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_END_RECORD_DEBUG, evDataLightingStage);
-			pragma::get_cgame()->StopGPUProfilingStage(); // Debug
-			pragma::get_cgame()->StopProfilingStage();    // Debug
+			get_cgame()->StopGPUProfilingStage(); // Debug
+			get_cgame()->StopProfilingStage();    // Debug
 		}
 
 		if((drawSceneInfo.renderFlags & RenderFlags::View) != RenderFlags::None) {
-			pragma::get_cgame()->StartGPUProfilingStage("View");
-			pragma::get_cgame()->StartProfilingStage("View");
+			get_cgame()->StartGPUProfilingStage("View");
+			get_cgame()->StartProfilingStage("View");
 			InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_VIEW, evDataLightingStage);
 
-			rsys.SetCameraType(pragma::rendering::BaseRenderProcessor::CameraType::View);
-			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::View, false /* translucent */), lightingStageStats);
-			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::View, true /* translucent */), lightingStageTranslucentStats);
+			rsys.SetCameraType(BaseRenderProcessor::CameraType::View);
+			rsys.Render(*sceneRenderDesc.GetRenderQueue(SceneRenderPass::View, false /* translucent */), lightingStageStats);
+			rsys.Render(*sceneRenderDesc.GetRenderQueue(SceneRenderPass::View, true /* translucent */), lightingStageTranslucentStats);
 
 			//if((drawSceneInfo.renderFlags &RenderFlags::Particles) == RenderFlags::Particles)
 			{
@@ -528,9 +528,9 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const pragma::r
 			//RenderGlowMeshes(cam,true);
 
 			InvokeEventCallbacks(cRasterizationRendererComponent::EVENT_MT_END_RECORD_VIEW, evDataLightingStage);
-			pragma::get_cgame()->StopGPUProfilingStage(); // View
-			pragma::get_cgame()->StopProfilingStage();    // View
+			get_cgame()->StopGPUProfilingStage(); // View
+			get_cgame()->StopProfilingStage();    // View
 		}
-		pragma::get_cgame()->StopProfilingStage(); // RecordLightingPass
+		get_cgame()->StopProfilingStage(); // RecordLightingPass
 	});
 }

@@ -53,10 +53,10 @@ export {
 
 			// static ComponentEventId EVENT_ON_EYEBALLS_UPDATED;
 			// static ComponentEventId EVENT_ON_BLINK;
-			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+			static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-			CEyeComponent(pragma::ecs::BaseEntity &ent);
+			CEyeComponent(ecs::BaseEntity &ent);
 
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua::State *l) override;
@@ -73,25 +73,25 @@ export {
 			void ClearViewTarget();
 			Vector3 GetViewTarget() const;
 			void SetViewTarget(const Vector3 &viewTarget);
-			std::optional<pragma::math::Transform> GetEyePose() const;
+			std::optional<math::Transform> GetEyePose() const;
 
 			void SetBlinkDuration(float dur);
 			float GetBlinkDuration() const;
 
 			void SetBlinkingEnabled(bool enabled);
 			bool IsBlinkingEnabled() const;
-			bool FindEyeballIndex(pragma::geometry::CModelSubMesh &subMesh, uint32_t &outEyeballIndex) const;
+			bool FindEyeballIndex(geometry::CModelSubMesh &subMesh, uint32_t &outEyeballIndex) const;
 			bool FindEyeballIndex(uint32_t skinMatIdx, uint32_t &outEyeballIndex) const;
 
 			void SetLocalViewTargetFactor(float f);
 			float GetLocalViewTargetFactor() const;
 
-			pragma::math::Transform CalcEyeballPose(uint32_t eyeballIndex, pragma::math::Transform *optOutBonePose = nullptr) const;
+			math::Transform CalcEyeballPose(uint32_t eyeballIndex, math::Transform *optOutBonePose = nullptr) const;
 
 			void UpdateEyeballsMT();
 		  protected:
 			void UpdateBlinkMT();
-			void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl);
+			void OnModelChanged(const std::shared_ptr<asset::Model> &mdl);
 			Vector3 ClampViewTarget(const Vector3 &viewTarget) const;
 			void UpdateEyeballMT(const asset::Eyeball &eyeball, uint32_t eyeballIndex);
 			void UpdateEyeMaterialData();

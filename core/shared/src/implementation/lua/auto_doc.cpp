@@ -67,8 +67,8 @@ static void initialize_pragma_documentation()
 	doc_initialized = true;
 	s_docInfo.Clear();
 	std::vector<std::string> files;
-	filemanager::find_files(Lua::doc::FILE_LOCATION + std::string {"*."} + Lua::doc::FILE_EXTENSION_ASCII, &files, nullptr);
-	filemanager::find_files(Lua::doc::FILE_LOCATION + std::string {"*."} + Lua::doc::FILE_EXTENSION_BINARY, &files, nullptr);
+	pragma::fs::find_files(Lua::doc::FILE_LOCATION + std::string {"*."} + Lua::doc::FILE_EXTENSION_ASCII, &files, nullptr);
+	pragma::fs::find_files(Lua::doc::FILE_LOCATION + std::string {"*."} + Lua::doc::FILE_EXTENSION_BINARY, &files, nullptr);
 	for(auto &f : files)
 		Lua::doc::load_documentation_file(Lua::doc::FILE_LOCATION + f);
 }
@@ -159,14 +159,14 @@ void Lua::doc::generate_autocomplete_script()
 {
 	initialize_pragma_documentation();
 
-	filemanager::create_path("doc/ZeroBrane/api/lua");
+	pragma::fs::create_path("doc/ZeroBrane/api/lua");
 	auto autocompleteScriptZb = ::pragma::doc::zerobrane::generate_autocomplete_script(s_docInfo.collections);
-	filemanager::write_file("doc/ZeroBrane/api/lua/pragma.lua", autocompleteScriptZb);
+	pragma::fs::write_file("doc/ZeroBrane/api/lua/pragma.lua", autocompleteScriptZb);
 
 	auto lsDoc = ::pragma::doc::luals::generate_doc(s_docInfo.collections);
 	for(auto &pair : lsDoc.streams) {
 		std::string path = "doc/LuaLS/meta/";
-		filemanager::create_path(path);
+		pragma::fs::create_path(path);
 		path += pair.first + ".lua";
 		auto &ss = pair.second;
 		if(pair.first == "_G") {
@@ -184,11 +184,11 @@ void Lua::doc::generate_autocomplete_script()
 			for(auto &pair : globalAliases)
 				ss << pair.first << " = " << pair.second << "\n";
 		}
-		filemanager::write_file(path, ss.str());
+		pragma::fs::write_file(path, ss.str());
 	}
 
-	filemanager::create_path("doc/ZeroBrane/cfg");
-	filemanager::write_file("doc/ZeroBrane/cfg/pragma.lua",
+	pragma::fs::create_path("doc/ZeroBrane/cfg");
+	pragma::fs::write_file("doc/ZeroBrane/cfg/pragma.lua",
 	  R"(debugger.allowediting = true
 debugger.ignorecase = true
 editor.autotabs = true
@@ -200,8 +200,8 @@ acandtip.nodynwords = false
 acandtip.shorttip = false
 acandtip.width = 120)");
 
-	filemanager::create_path("doc/ZeroBrane/interpreters");
-	filemanager::write_file("doc/ZeroBrane/interpreters/pragma.lua",
+	pragma::fs::create_path("doc/ZeroBrane/interpreters");
+	pragma::fs::write_file("doc/ZeroBrane/interpreters/pragma.lua",
 	  R"(dofile 'interpreters/luabase.lua'
 local interpreter = MakeLuaInterpreter()
 interpreter.name = "Pragma"
@@ -210,8 +210,8 @@ interpreter.description = "Lua-implementation for the Pragma game engine"
 interpreter.api = {"pragma"}
 return interpreter)");
 
-	filemanager::create_path("doc/ZeroBrane/");
-	filemanager::write_file("doc/ZeroBrane/readme.txt", R"(See https://wiki.pragma-engine.com/books/lua-api/page/zerobrane-ide for more information.)");
+	pragma::fs::create_path("doc/ZeroBrane/");
+	pragma::fs::write_file("doc/ZeroBrane/readme.txt", R"(See https://wiki.pragma-engine.com/books/lua-api/page/zerobrane-ide for more information.)");
 }
 void Lua::doc::print_documentation(const std::string &name, std::stringstream &ss)
 {

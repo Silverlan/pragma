@@ -71,7 +71,7 @@ void Lua::engine::LoadSoundScripts(lua::State *l, const std::string &fileName) {
 bool Lua::engine::LibraryExists(lua::State *l, const std::string &library)
 {
 	auto libAbs = pragma::util::get_normalized_module_path(library, pragma::Engine::Get()->GetNetworkState(l)->IsClient());
-	return FileManager::Exists(libAbs);
+	return pragma::fs::exists(libAbs);
 }
 
 bool Lua::engine::UnloadLibrary(lua::State *l, const std::string &path)

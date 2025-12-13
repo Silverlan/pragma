@@ -12,27 +12,27 @@ void BaseFuncKinematicComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "first_node", false))
 			m_kvFirstNode = kvData.value;
 		else if(pragma::string::compare<std::string>(kvData.key, "move_speed", false))
-			m_kvMoveSpeed = pragma::util::to_float(kvData.value);
+			m_kvMoveSpeed = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "start_sound", false))
 			m_kvStartSound = kvData.value;
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(pragma::string::compare<std::string>(inputData.input, "startforward", false))
 			StartForward();
 		else if(pragma::string::compare<std::string>(inputData.input, "startbackward", false))
 			StartBackward();
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -53,13 +53,13 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr) {
-		pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Dynamic);
+		pPhysComponent->InitializePhysics(physics::PhysicsType::Dynamic);
 		pPhysComponent->SetKinematic(true);
 	}
 	auto *state = ent.GetNetworkState();
 	if(m_kvFirstNode.empty() == false) {
-		pragma::Game *game = state->GetGameState();
-		pragma::ecs::EntityIterator entIt {*game};
+		Game *game = state->GetGameState();
+		ecs::EntityIterator entIt {*game};
 		//entIt.AttachFilter<EntityIteratorFilterComponent>("path_node");
 		entIt.AttachFilter<EntityIteratorFilterEntity>(m_kvFirstNode);
 		auto it = entIt.begin();
@@ -71,9 +71,9 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 	if(!m_kvStartSound.empty()) {
 		state->PrecacheSound(m_kvStartSound);
 		m_startSound = nullptr;
-		auto pSoundEmitterComponent = static_cast<pragma::BaseSoundEmitterComponent *>(ent.FindComponent("sound_emitter").get());
+		auto pSoundEmitterComponent = static_cast<BaseSoundEmitterComponent *>(ent.FindComponent("sound_emitter").get());
 		if(pSoundEmitterComponent != nullptr)
-			m_startSound = pSoundEmitterComponent->CreateSound(m_kvStartSound, pragma::audio::ALSoundType::Effect);
+			m_startSound = pSoundEmitterComponent->CreateSound(m_kvStartSound, audio::ALSoundType::Effect);
 	}
 }
 
@@ -86,7 +86,7 @@ void BaseFuncKinematicComponent::OnTick(double tDelta)
 
 void BaseFuncKinematicComponent::UpdateTickPolicy() { SetTickPolicy((m_bMoving && m_nextNode.valid()) ? TickPolicy::Always : TickPolicy::Never); }
 
-void BaseFuncKinematicComponent::MoveToTarget(pragma::ecs::BaseEntity *node, float speed)
+void BaseFuncKinematicComponent::MoveToTarget(ecs::BaseEntity *node, float speed)
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
@@ -94,7 +94,7 @@ void BaseFuncKinematicComponent::MoveToTarget(pragma::ecs::BaseEntity *node, flo
 	if(phys == nullptr || phys->IsStatic())
 		return;
 	auto pTrComponent = ent.GetTransformComponent();
-	auto *kinematic = dynamic_cast<pragma::physics::PhysObjKinematic *>(phys);
+	auto *kinematic = dynamic_cast<physics::PhysObjKinematic *>(phys);
 	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
 	auto pTrComponentNode = node->GetTransformComponent();
 	auto posTarget = pTrComponentNode ? pTrComponentNode->GetPosition() : Vector3 {};
@@ -108,7 +108,7 @@ void BaseFuncKinematicComponent::MoveToTarget(pragma::ecs::BaseEntity *node, flo
 	if(d <= speed) {
 		m_nextNode = EntityHandle {};
 		UpdateTickPolicy();
-		auto *ptrPathNodeComponent = static_cast<pragma::BasePointPathNodeComponent *>(node->FindComponent("path_node").get());
+		auto *ptrPathNodeComponent = static_cast<BasePointPathNodeComponent *>(node->FindComponent("path_node").get());
 		if(ptrPathNodeComponent != nullptr) {
 			auto *nodeNext = ptrPathNodeComponent->GetNextNode();
 			if(nodeNext == nullptr)

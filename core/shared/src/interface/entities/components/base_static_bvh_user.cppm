@@ -18,7 +18,7 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseStaticBvhUserComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
@@ -34,12 +34,12 @@ export namespace pragma {
 		void DestroyDynamicBvhSubstitute();
 		bool IsActive() const;
 	  protected:
-		BaseStaticBvhUserComponent(pragma::ecs::BaseEntity &ent);
+		BaseStaticBvhUserComponent(ecs::BaseEntity &ent);
 		friend BaseStaticBvhCacheComponent;
 		void UpdateBvhStatus();
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		CallbackHandle m_cbOnPoseChanged;
-		pragma::ComponentHandle<BaseStaticBvhCacheComponent> m_staticBvhComponent {};
+		ComponentHandle<BaseStaticBvhCacheComponent> m_staticBvhComponent {};
 		BaseBvhComponent *m_bvhComponent = nullptr;
 		PanimaComponent *m_panimaComponent = nullptr;
 		bool m_isActive = false;

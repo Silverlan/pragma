@@ -16,7 +16,7 @@ static void completion(const char *buf, linenoiseCompletions *lc);
 static const char *hints(const char *buf, int *color, int *bold);
 static constexpr const char *HISTORY_FILE_LOCATION_RELATIVE = "cache/terminal_history.txt";
 static constexpr const char *PROMPT_PREFIX = "> ";
-static std::string get_history_file_location() { return pragma::util::FilePath(filemanager::get_program_write_path(), HISTORY_FILE_LOCATION_RELATIVE).GetString(); }
+static std::string get_history_file_location() { return pragma::util::FilePath(pragma::fs::get_program_write_path(), HISTORY_FILE_LOCATION_RELATIVE).GetString(); }
 
 static bool g_enabled = false;
 bool pragma::console::impl::is_linenoise_enabled() { return g_enabled; }

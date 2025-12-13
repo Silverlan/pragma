@@ -21,7 +21,7 @@ export namespace pragma::game {
 	struct DLLNETWORK BulletInfo {
 		EulerAngles spread = EulerAngles(0, 0, 0);
 		float force = std::numeric_limits<float>::signaling_NaN(); // Overwrite for ammo type?
-		float distance = static_cast<float>(pragma::math::to_integral(pragma::GameLimits::MaxWorldDistance));
+		float distance = static_cast<float>(math::to_integral(GameLimits::MaxWorldDistance));
 		Vector3 direction = {}; // Not used for Entity::FireBullets
 		Vector3 effectOrigin = {std::numeric_limits<float>::signaling_NaN(), std::numeric_limits<float>::signaling_NaN(), std::numeric_limits<float>::signaling_NaN()};
 		uint32_t damage = std::numeric_limits<uint32_t>::max();

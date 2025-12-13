@@ -273,7 +273,7 @@ int Lua::import::import_smd(lua::State *l)
 		Lua::PushBool(l,false);
 		return 1;
 	}*/
-	auto f = FileManager::OpenFile(smdFileName.c_str(), "rb");
+	auto f = pragma::fs::open_file(smdFileName.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(f == nullptr) {
 		Lua::PushBool(l, false);
 		return 1;
@@ -310,7 +310,7 @@ int Lua::import::export_model_asset(lua::State *l) { return 0; }
 bool Lua::import::import_model_asset(pragma::NetworkState &nw, const std::string &outputPath, std::string &outFilePath, std::string &outErr)
 {
 	auto mdlPath = outputPath + ".blend";
-	auto f = filemanager::open_file("models/" + mdlPath, filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	auto f = pragma::fs::open_file("models/" + mdlPath, pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(!f)
 		return false;
 	outFilePath = outputPath;

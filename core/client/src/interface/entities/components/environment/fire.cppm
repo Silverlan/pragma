@@ -15,11 +15,11 @@ export namespace pragma::ecs {
 export namespace pragma {
 	class DLLCLIENT CFireComponent final : public BaseEnvFireComponent, public CBaseNetComponent {
 	  public:
-		CFireComponent(pragma::ecs::BaseEntity &ent) : BaseEnvFireComponent(ent) {}
+		CFireComponent(ecs::BaseEntity &ent) : BaseEnvFireComponent(ent) {}
 		virtual ~CFireComponent() override;
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:

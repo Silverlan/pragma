@@ -49,7 +49,7 @@ export namespace Lua {
 		DLLNETWORK opt<type<pragma::ecs::BaseEntity>> find_by_unique_index(lua::State *l, const std::string &uuid);
 		DLLNETWORK type<EntityHandle> get_null(lua::State *l);
 		DLLNETWORK type<pragma::ecs::BaseEntity> create(lua::State *l, const std::string &classname);
-		DLLNETWORK Lua::type<pragma::ecs::BaseEntity> create_prop(lua::State *l, const std::string &mdl, const Vector3 *origin, const EulerAngles *angles, bool physicsProp);
+		DLLNETWORK type<pragma::ecs::BaseEntity> create_prop(lua::State *l, const std::string &mdl, const Vector3 *origin, const EulerAngles *angles, bool physicsProp);
 
 		DLLNETWORK type<pragma::ecs::BaseEntity> create_trigger(lua::State *l, const Vector3 &origin, pragma::physics::IShape &shape);
 		DLLNETWORK type<pragma::ecs::BaseEntity> create_trigger(lua::State *l, const Vector3 &origin, const Vector3 &min, const Vector3 &max, const EulerAngles &angles);
@@ -64,17 +64,17 @@ export namespace Lua {
 		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> find_in_box(lua::State *l, const Vector3 &min, const Vector3 &max);
 		DLLNETWORK tb<type<pragma::ecs::BaseEntity>> find_in_cone(lua::State *l, const Vector3 &origin, const Vector3 &dir, float radius, float angle);
 		DLLNETWORK opt<pragma::ComponentEventId> get_event_id(lua::State *l, const std::string &name);
-		DLLNETWORK void register_class(lua::State *l, const std::string &className, const Lua::classObject &classObject);
+		DLLNETWORK void register_class(lua::State *l, const std::string &className, const classObject &classObject);
 		DLLNETWORK void register_class(lua::State *l, const std::string &className, const luabind::tableT<luabind::variant<std::string, pragma::ComponentId>> &tComponents, LuaEntityType type);
 		DLLNETWORK opt<pragma::ComponentEventId> register_component_event(lua::State *l, pragma::ComponentId componentId, const std::string &name);
 		DLLNETWORK opt<pragma::NetEventId> register_component_net_event(lua::State *l, pragma::ComponentId componentId, const std::string &name);
 		template<class TComponent>
 		int register_component(lua::State *l)
 		{
-			std::string name = Lua::CheckString(l, 1);
+			std::string name = CheckString(l, 1);
 			pragma::string::to_lower(name);
 			auto idxClass = 2;
-			Lua::CheckUserData(l, idxClass);
+			CheckUserData(l, idxClass);
 			auto o = luabind::object(luabind::from_stack(l, idxClass));
 			if(!o)
 				return 0;
@@ -85,14 +85,14 @@ export namespace Lua {
 			auto &classManager = game->GetLuaClassManager();
 			std::string categoryPath;
 			auto componentFlags = pragma::ComponentFlags::None;
-			if(Lua::IsSet(l, 3)) {
+			if(IsSet(l, 3)) {
 				int32_t argFlags = 3;
-				if(!Lua::IsNumber(l, 3)) {
-					categoryPath = Lua::CheckString(l, 3);
+				if(!IsNumber(l, 3)) {
+					categoryPath = CheckString(l, 3);
 					++argFlags;
 				}
-				if(Lua::IsSet(l, argFlags))
-					componentFlags = static_cast<pragma::ComponentFlags>(Lua::CheckInt(l, argFlags));
+				if(IsSet(l, argFlags))
+					componentFlags = static_cast<pragma::ComponentFlags>(CheckInt(l, argFlags));
 			}
 			componentFlags |= pragma::ComponentFlags::LuaBased;
 
@@ -101,13 +101,13 @@ export namespace Lua {
 			if(classManager.IsClassMethodDefined(o, "__init") == false) {
 				std::string luaStr = "function(self,ent) BaseEntityComponent.__init(self,ent) end";
 				std::string err;
-				if(Lua::PushLuaFunctionFromString(l, luaStr, "ComponentInit", err) == false)
+				if(PushLuaFunctionFromString(l, luaStr, "ComponentInit", err) == false)
 					Con::cwar << "Unable to register __init method for component class '" << name << "': " << err << Con::endl;
 				else {
-					Lua::CheckFunction(l, -1);
+					CheckFunction(l, -1);
 					o["__init"] = luabind::object {luabind::from_stack {l, -1}};
 
-					Lua::Pop(l, 1);
+					Pop(l, 1);
 				}
 			}
 

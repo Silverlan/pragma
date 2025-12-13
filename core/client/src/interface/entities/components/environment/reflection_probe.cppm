@@ -25,25 +25,25 @@ export {
 		  public:
 			enum class UpdateStatus : uint8_t { Initial = 0, Pending, Complete, Failed };
 			enum class StateFlags : uint8_t { None = 0u, BakingFailed = 1u, RequiresRebuild = BakingFailed << 1u };
-			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-			static void BuildAllReflectionProbes(pragma::Game &game, bool rebuild = false);
-			static void BuildReflectionProbes(pragma::Game &game, std::vector<CReflectionProbeComponent *> &probes, bool rebuild = false);
+			static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+			static void BuildAllReflectionProbes(Game &game, bool rebuild = false);
+			static void BuildReflectionProbes(Game &game, std::vector<CReflectionProbeComponent *> &probes, bool rebuild = false);
 			static prosper::IDescriptorSet *FindDescriptorSetForClosestProbe(const CSceneComponent &scene, const Vector3 &origin, float &outIntensity);
 
-			CReflectionProbeComponent(pragma::ecs::BaseEntity &ent);
+			CReflectionProbeComponent(ecs::BaseEntity &ent);
 			virtual ~CReflectionProbeComponent() override;
 			virtual void Initialize() override;
 			virtual void OnEntitySpawn() override;
 			virtual void OnRemove() override;
 			virtual void InitializeLuaObject(lua::State *l) override;
-			bool CaptureIBLReflectionsFromScene(const std::vector<pragma::ecs::BaseEntity *> *optEntityList = nullptr, bool renderJob = false);
+			bool CaptureIBLReflectionsFromScene(const std::vector<ecs::BaseEntity *> *optEntityList = nullptr, bool renderJob = false);
 			bool GenerateIBLReflectionsFromEnvMap(const std::string &envMapFileName);
 			bool GenerateIBLReflectionsFromCubemap(prosper::Texture &cubemap);
 			bool LoadIBLReflectionsFromFile();
 			bool SaveIBLReflectionsToFile();
 			const rendering::IBLData *GetIBLData() const;
 			prosper::IDescriptorSet *GetIBLDescriptorSet();
-			bool GenerateFromEquirectangularImage(uimg::ImageBuffer &imgBuf);
+			bool GenerateFromEquirectangularImage(image::ImageBuffer &imgBuf);
 
 			float GetIBLStrength() const;
 			void SetIBLStrength(float iblStrength);
@@ -56,13 +56,13 @@ export {
 			void SetCubemapIBLMaterialFilePath(const std::string &path);
 		  private:
 			static std::shared_ptr<prosper::IImage> CreateCubemapImage();
-			msys::Material *LoadMaterial(bool &outIsDefault);
+			material::Material *LoadMaterial(bool &outIsDefault);
 
 			void InitializeDescriptorSet();
 			void ClearDescriptorSet();
 			void ClearIblData();
-			pragma::util::ParallelJob<uimg::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, pragma::math::Degree fov, float exposure,
-			  const std::vector<pragma::ecs::BaseEntity *> *optEntityList = nullptr, bool renderJob = false);
+			util::ParallelJob<image::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, math::Degree fov, float exposure,
+			  const std::vector<ecs::BaseEntity *> *optEntityList = nullptr, bool renderJob = false);
 			bool FinalizeCubemap(prosper::IImage &imgCubemap);
 			std::string GetCubemapIBLMaterialPath() const;
 			std::string GetCubemapIdentifier() const;
@@ -72,8 +72,8 @@ export {
 			struct RaytracingJobManager {
 				RaytracingJobManager(CReflectionProbeComponent &probe);
 				~RaytracingJobManager();
-				pragma::util::ParallelJob<uimg::ImageLayerSet> job = {};
-				std::shared_ptr<uimg::ImageBuffer> m_equirectImageBuffer = nullptr;
+				util::ParallelJob<image::ImageLayerSet> job = {};
+				std::shared_ptr<image::ImageBuffer> m_equirectImageBuffer = nullptr;
 				CReflectionProbeComponent &probe;
 				void StartNextJob();
 				void Finalize();

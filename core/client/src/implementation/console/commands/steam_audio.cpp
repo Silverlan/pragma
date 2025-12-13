@@ -57,20 +57,20 @@ static void cl_steam_audio_enabled(pragma::NetworkState *state, ConVar *, bool, 
 
 	auto &props = soundSys->GetSteamAudioProperties();
 	props.spatializer.directBinaural = en->GetConVarBool("cl_steam_audio_spatialize_direct_binaural");
-	props.spatializer.HRTFInterpolation = static_cast<al::steam_audio::SpatializerInterpolation>(en->GetConVarInt("cl_steam_audio_spatialize_hrtf_interpolation"));
+	props.spatializer.HRTFInterpolation = static_cast<pragma::audio::steam_audio::SpatializerInterpolation>(en->GetConVarInt("cl_steam_audio_spatialize_hrtf_interpolation"));
 	props.spatializer.distanceAttenuation = en->GetConVarBool("cl_steam_audio_spatialize_distance_attenuation");
 	props.spatializer.airAbsorption = en->GetConVarBool("cl_steam_audio_spatialize_air_absorption");
-	props.spatializer.occlusionMode = static_cast<al::steam_audio::SpatializerOcclusionMode>(en->GetConVarInt("cl_steam_audio_spatialize_occlusion_mode"));
-	props.spatializer.occlusionMethod = static_cast<al::steam_audio::OcclusionMethod>(en->GetConVarInt("cl_steam_audio_spatialize_occlusion_method"));
+	props.spatializer.occlusionMode = static_cast<pragma::audio::steam_audio::SpatializerOcclusionMode>(en->GetConVarInt("cl_steam_audio_spatialize_occlusion_mode"));
+	props.spatializer.occlusionMethod = static_cast<pragma::audio::steam_audio::OcclusionMethod>(en->GetConVarInt("cl_steam_audio_spatialize_occlusion_method"));
 	props.spatializer.directLevel = en->GetConVarFloat("cl_steam_audio_spatialize_direct_level");
 	props.spatializer.indirect = en->GetConVarBool("cl_steam_audio_spatialize_indirect");
 	props.spatializer.indirectBinaural = en->GetConVarBool("cl_steam_audio_spatialize_indirect_binaural");
 	props.spatializer.indirectLevel = en->GetConVarFloat("cl_steam_audio_spatialize_indirect_level");
-	props.spatializer.simulationType = static_cast<al::steam_audio::SimulationType>(en->GetConVarInt("cl_steam_audio_spatialize_simulation_type"));
+	props.spatializer.simulationType = static_cast<pragma::audio::steam_audio::SimulationType>(en->GetConVarInt("cl_steam_audio_spatialize_simulation_type"));
 	props.spatializer.staticListener = en->GetConVarBool("cl_steam_audio_spatialize_static_listener");
 
 	props.reverb.indirectBinaural = en->GetConVarBool("cl_steam_audio_reverb_indirect_binaural");
-	props.reverb.simulationType = static_cast<al::steam_audio::SimulationType>(en->GetConVarInt("cl_steam_audio_reverb_simulation_type"));
+	props.reverb.simulationType = static_cast<pragma::audio::steam_audio::SimulationType>(en->GetConVarInt("cl_steam_audio_reverb_simulation_type"));
 
 	if(val == true)
 		reload_sound_cache();
@@ -127,7 +127,7 @@ namespace {
 		  if(soundSys == nullptr)
 			  return;
 		  auto &props = soundSys->GetSteamAudioProperties();
-		  props.spatializer.HRTFInterpolation = static_cast<al::steam_audio::SpatializerInterpolation>(val);
+		  props.spatializer.HRTFInterpolation = static_cast<pragma::audio::steam_audio::SpatializerInterpolation>(val);
 	  });
 };
 namespace {
@@ -157,7 +157,7 @@ namespace {
 		  if(soundSys == nullptr)
 			  return;
 		  auto &props = soundSys->GetSteamAudioProperties();
-		  props.spatializer.occlusionMode = static_cast<al::steam_audio::SpatializerOcclusionMode>(val);
+		  props.spatializer.occlusionMode = static_cast<pragma::audio::steam_audio::SpatializerOcclusionMode>(val);
 	  });
 };
 namespace {
@@ -167,7 +167,7 @@ namespace {
 		  if(soundSys == nullptr)
 			  return;
 		  auto &props = soundSys->GetSteamAudioProperties();
-		  props.spatializer.occlusionMethod = static_cast<al::steam_audio::OcclusionMethod>(val);
+		  props.spatializer.occlusionMethod = static_cast<pragma::audio::steam_audio::OcclusionMethod>(val);
 	  });
 };
 namespace {
@@ -217,7 +217,7 @@ namespace {
 		  if(soundSys == nullptr)
 			  return;
 		  auto &props = soundSys->GetSteamAudioProperties();
-		  props.spatializer.simulationType = static_cast<al::steam_audio::SimulationType>(val);
+		  props.spatializer.simulationType = static_cast<pragma::audio::steam_audio::SimulationType>(val);
 	  });
 };
 namespace {
@@ -248,7 +248,7 @@ namespace {
 		  if(soundSys == nullptr)
 			  return;
 		  auto &props = soundSys->GetSteamAudioProperties();
-		  props.reverb.simulationType = static_cast<al::steam_audio::SimulationType>(val);
+		  props.reverb.simulationType = static_cast<pragma::audio::steam_audio::SimulationType>(val);
 	  });
 };
 

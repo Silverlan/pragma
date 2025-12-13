@@ -12,7 +12,7 @@ import :game;
 
 using namespace pragma;
 
-void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::BaseEnvLightDirectionalComponent &light, bool drawParticleShadows)
+void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, BaseEnvLightDirectionalComponent &light, bool drawParticleShadows)
 {
 #if 0
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();
@@ -159,7 +159,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 			const auto fDraw = [this,layerFlag,layer,&drawCmd,&csm](pragma::ShaderShadowCSM &shader,bool bTranslucent) -> bool {
 				auto bRetTranslucent = false;
 				auto bProcessMeshes = false;
-				msys::Material *prevMat = nullptr;
+				material::Material *prevMat = nullptr;
 				for(auto &info : m_shadowCasters)
 				{
 					if(info.entity != nullptr)
@@ -175,7 +175,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 							if(bTranslucent == true)
 							{
 								auto &shaderTranslucent = static_cast<pragma::ShaderShadowCSMTransparent&>(shader);
-								if(info.material == prevMat || shaderTranslucent.RecordBindMaterial(static_cast<msys::CMaterial &>(*info.material)) == true)
+								if(info.material == prevMat || shaderTranslucent.RecordBindMaterial(static_cast<material::CMaterial &>(*info.material)) == true)
 								{
 									shaderTranslucent.RecordDraw(*const_cast<pragma::geometry::CModelSubMesh *>(info.mesh));
 									prevMat = info.material;

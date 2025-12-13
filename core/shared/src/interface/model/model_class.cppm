@@ -33,20 +33,20 @@ export {
 			public:
 				static constexpr std::uint32_t layout_version = 1;
 
-				static std::shared_ptr<pragma::asset::ModelMeshGroup> Create(const std::string &name);
-				static std::shared_ptr<pragma::asset::ModelMeshGroup> Create(const pragma::asset::ModelMeshGroup &other);
-				bool operator==(const pragma::asset::ModelMeshGroup &other) const;
-				bool operator!=(const pragma::asset::ModelMeshGroup &other) const;
+				static std::shared_ptr<ModelMeshGroup> Create(const std::string &name);
+				static std::shared_ptr<ModelMeshGroup> Create(const ModelMeshGroup &other);
+				bool operator==(const ModelMeshGroup &other) const;
+				bool operator!=(const ModelMeshGroup &other) const;
 				uint32_t GetMeshCount() const;
 				const std::string &GetName() const;
-				std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &GetMeshes();
-				void AddMesh(const std::shared_ptr<pragma::geometry::ModelMesh> &mesh);
+				std::vector<std::shared_ptr<geometry::ModelMesh>> &GetMeshes();
+				void AddMesh(const std::shared_ptr<geometry::ModelMesh> &mesh);
 
-				bool IsEqual(const pragma::asset::ModelMeshGroup &other) const;
+				bool IsEqual(const ModelMeshGroup &other) const;
 			private:
 				ModelMeshGroup(const std::string &name);
 				std::string m_name;
-				std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> m_meshes;
+				std::vector<std::shared_ptr<geometry::ModelMesh>> m_meshes;
 			};
 		}
 	}
@@ -57,7 +57,7 @@ export {
 			std::unordered_map<unsigned int, unsigned int> meshReplacements;
 			float distance = 0.f;
 
-			bool operator==(const LODInfo &other) const { return lod == other.lod && meshReplacements == other.meshReplacements && pragma::math::abs(distance - other.distance) < 0.001f; }
+			bool operator==(const LODInfo &other) const { return lod == other.lod && meshReplacements == other.meshReplacements && math::abs(distance - other.distance) < 0.001f; }
 			bool operator!=(const LODInfo &other) const { return !operator==(other); }
 		};
 
@@ -134,9 +134,9 @@ export {
 				int32_t neutralFlexIndex = -1;
 				int32_t lowererFlexIndex = -1;
 
-				pragma::math::Radian raiserValue = 0.f;
-				pragma::math::Radian neutralValue = 0.f;
-				pragma::math::Radian lowererValue = 0.f;
+				math::Radian raiserValue = 0.f;
+				math::Radian neutralValue = 0.f;
+				math::Radian lowererValue = 0.f;
 
 				bool operator==(const LidFlexDesc &other) const;
 				bool operator!=(const LidFlexDesc &other) const { return !operator==(other); }
@@ -169,9 +169,9 @@ export {
 					validate_value(v[i]);
 			}
 		}
-		Vector3 get_mirror_transform_vector(pragma::Axis axis);
+		Vector3 get_mirror_transform_vector(Axis axis);
 
-		class DLLNETWORK Model : public std::enable_shared_from_this<pragma::asset::Model> {
+		class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 		  public:
 			static constexpr std::uint32_t layout_version = 1;
 
@@ -227,26 +227,26 @@ export {
 		  public:
 			static constexpr auto PMDL_IDENTIFIER = "PMDL";
 			static constexpr udm::Version PMDL_VERSION = 1;
-			static bool Load(pragma::asset::Model &mdl, pragma::NetworkState &nw, const udm::AssetData &data, std::string &outErr);
+			static bool Load(Model &mdl, NetworkState &nw, const udm::AssetData &data, std::string &outErr);
 			template<class TModel>
-			static std::shared_ptr<pragma::asset::Model> Create(pragma::NetworkState *nw, uint32_t numBones, const std::string &name = "")
+			static std::shared_ptr<Model> Create(NetworkState *nw, uint32_t numBones, const std::string &name = "")
 			{
-				return std::shared_ptr<pragma::asset::Model> {new TModel {nw, numBones, name}};
+				return std::shared_ptr<Model> {new TModel {nw, numBones, name}};
 			}
 			template<class TModel>
-			static std::shared_ptr<pragma::asset::Model> Create(const pragma::asset::Model &other)
+			static std::shared_ptr<Model> Create(const Model &other)
 			{
-				return std::shared_ptr<pragma::asset::Model> {new TModel {other}};
+				return std::shared_ptr<Model> {new TModel {other}};
 			}
 			template<class TModel>
-			static std::shared_ptr<pragma::asset::Model> Load(pragma::NetworkState &nw, const udm::AssetData &data, std::string &outErr)
+			static std::shared_ptr<Model> Load(NetworkState &nw, const udm::AssetData &data, std::string &outErr)
 			{
 				auto mdl = Create<TModel>(&nw, 0u);
 				if(Load(*mdl, nw, data, outErr) == false)
 					return nullptr;
 				return mdl;
 			}
-			static void GenerateStandardMetaRigReferenceBonePoses(const pragma::animation::MetaRig &metaRig, const pragma::animation::Skeleton &skeleton, const Frame &refFrame, std::vector<pragma::math::ScaledTransform> &outPoses);
+			static void GenerateStandardMetaRigReferenceBonePoses(const animation::MetaRig &metaRig, const animation::Skeleton &skeleton, const Frame &refFrame, std::vector<math::ScaledTransform> &outPoses);
 			enum class DLLNETWORK MergeFlags : uint32_t {
 				None = 0,
 				Animations = 1,
@@ -260,43 +260,43 @@ export {
 				All = (Meshes << 1) - 1
 			};
 
-			bool IsEqual(const pragma::asset::Model &other) const;
-			bool operator==(const pragma::asset::Model &other) const;
-			bool operator!=(const pragma::asset::Model &other) const;
-			pragma::asset::Model &operator=(const pragma::asset::Model &other);
+			bool IsEqual(const Model &other) const;
+			bool operator==(const Model &other) const;
+			bool operator!=(const Model &other) const;
+			Model &operator=(const Model &other);
 			virtual ~Model();
-			bool Save(pragma::Game &game, udm::AssetDataArg outData, std::string &outErr);
-			bool Save(pragma::Game &game, const std::string &fileName, std::string &outErr);
-			bool Save(pragma::Game &game, std::string &outErr);
-			bool SaveLegacy(pragma::Game *game, const std::string &name, const std::string &rootPath = "") const;
-			std::shared_ptr<pragma::asset::Model> Copy(pragma::Game *game, CopyFlags copyFlags = CopyFlags::ShallowCopy) const;
+			bool Save(Game &game, udm::AssetDataArg outData, std::string &outErr);
+			bool Save(Game &game, const std::string &fileName, std::string &outErr);
+			bool Save(Game &game, std::string &outErr);
+			bool SaveLegacy(Game *game, const std::string &name, const std::string &rootPath = "") const;
+			std::shared_ptr<Model> Copy(Game *game, CopyFlags copyFlags = CopyFlags::ShallowCopy) const;
 			bool FindMaterial(const std::string &texture, std::string &matPath) const;
-			bool GenerateLowLevelLODs(pragma::Game &game);
+			bool GenerateLowLevelLODs(Game &game);
 			bool GenerateCollisionMeshes(bool convex, float mass, const std::optional<std::string> &surfaceMaterial = {});
 			MetaInfo &GetMetaInfo() const;
 			Vector3 GetOrigin() const;
 			const Vector3 &GetEyeOffset() const;
 			void SetEyeOffset(const Vector3 &offset);
-			virtual void AddMesh(const std::string &meshGroup, const std::shared_ptr<pragma::geometry::ModelMesh> &mesh);
+			virtual void AddMesh(const std::string &meshGroup, const std::shared_ptr<geometry::ModelMesh> &mesh);
 			bool IsValid() const;
 			CallbackHandle CallOnMaterialsLoaded(const std::function<void(void)> &f);
-			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &outMeshes) const;
-			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, uint32_t lod, std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &outMeshes) const;
-			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &outMeshes) const;
-			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, uint32_t lod, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &outMeshes) const;
+			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, std::vector<std::shared_ptr<geometry::ModelMesh>> &outMeshes) const;
+			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, uint32_t lod, std::vector<std::shared_ptr<geometry::ModelMesh>> &outMeshes) const;
+			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, std::vector<std::shared_ptr<geometry::ModelSubMesh>> &outMeshes) const;
+			void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, uint32_t lod, std::vector<std::shared_ptr<geometry::ModelSubMesh>> &outMeshes) const;
 			// Returns all existing meshes in this model (Including LOD meshes)
-			std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> *GetMeshes(const std::string &meshGroup);
-			std::shared_ptr<pragma::asset::ModelMeshGroup> GetMeshGroup(const std::string &meshGroup);
-			std::shared_ptr<pragma::asset::ModelMeshGroup> AddMeshGroup(const std::string &meshGroup, uint32_t &meshGroupId);
-			std::shared_ptr<pragma::asset::ModelMeshGroup> AddMeshGroup(const std::string &meshGroup);
+			std::vector<std::shared_ptr<geometry::ModelMesh>> *GetMeshes(const std::string &meshGroup);
+			std::shared_ptr<ModelMeshGroup> GetMeshGroup(const std::string &meshGroup);
+			std::shared_ptr<ModelMeshGroup> AddMeshGroup(const std::string &meshGroup, uint32_t &meshGroupId);
+			std::shared_ptr<ModelMeshGroup> AddMeshGroup(const std::string &meshGroup);
 			bool GetMeshGroupId(const std::string &meshGroup, uint32_t &groupId) const;
-			std::shared_ptr<pragma::asset::ModelMeshGroup> GetMeshGroup(uint32_t groupId);
-			void AddMeshGroup(std::shared_ptr<pragma::asset::ModelMeshGroup> &meshGroup);
-			std::vector<std::shared_ptr<pragma::asset::ModelMeshGroup>> &GetMeshGroups();
-			const std::vector<std::shared_ptr<pragma::asset::ModelMeshGroup>> &GetMeshGroups() const;
-			std::vector<std::shared_ptr<pragma::physics::CollisionMesh>> &GetCollisionMeshes();
-			const std::vector<std::shared_ptr<pragma::physics::CollisionMesh>> &GetCollisionMeshes() const;
-			void AddCollisionMesh(const std::shared_ptr<pragma::physics::CollisionMesh> &mesh);
+			std::shared_ptr<ModelMeshGroup> GetMeshGroup(uint32_t groupId);
+			void AddMeshGroup(std::shared_ptr<ModelMeshGroup> &meshGroup);
+			std::vector<std::shared_ptr<ModelMeshGroup>> &GetMeshGroups();
+			const std::vector<std::shared_ptr<ModelMeshGroup>> &GetMeshGroups() const;
+			std::vector<std::shared_ptr<physics::CollisionMesh>> &GetCollisionMeshes();
+			const std::vector<std::shared_ptr<physics::CollisionMesh>> &GetCollisionMeshes() const;
+			void AddCollisionMesh(const std::shared_ptr<physics::CollisionMesh> &mesh);
 			// Gets the level of detail info for the given lod, or the next best
 			LODInfo *GetLODInfo(uint32_t lod);
 			LODInfo *AddLODInfo(uint32_t lod, float distance, std::unordered_map<uint32_t, uint32_t> &replaceIds);
@@ -307,48 +307,48 @@ export {
 			// Returns true if the bodygroup exists and sets 'outMeshId' to the mesh Id. If the bodygroup mesh is none/blank, 'outMeshId' will be (unsigned int)(-1)
 			bool GetMesh(uint32_t bodyGroupId, uint32_t groupId, uint32_t &outMeshId);
 			geometry::ModelMesh *GetMesh(uint32_t meshGroupIdx, uint32_t meshIdx);
-			const geometry::ModelMesh *GetMesh(uint32_t meshGroupIdx, uint32_t meshIdx) const { return const_cast<pragma::asset::Model *>(this)->GetMesh(meshGroupIdx, meshIdx); }
-			pragma::geometry::ModelSubMesh *GetSubMesh(uint32_t meshGroupIdx, uint32_t meshIdx, uint32_t subMeshIdx);
-			const pragma::geometry::ModelSubMesh *GetSubMesh(uint32_t meshGroupIdx, uint32_t meshIdx, uint32_t subMeshIdx) const { return const_cast<pragma::asset::Model *>(this)->GetSubMesh(meshGroupIdx, meshIdx, subMeshIdx); }
-			void GetMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &outMeshes);
-			void GetSubMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &outMeshes);
+			const geometry::ModelMesh *GetMesh(uint32_t meshGroupIdx, uint32_t meshIdx) const { return const_cast<Model *>(this)->GetMesh(meshGroupIdx, meshIdx); }
+			geometry::ModelSubMesh *GetSubMesh(uint32_t meshGroupIdx, uint32_t meshIdx, uint32_t subMeshIdx);
+			const geometry::ModelSubMesh *GetSubMesh(uint32_t meshGroupIdx, uint32_t meshIdx, uint32_t subMeshIdx) const { return const_cast<Model *>(this)->GetSubMesh(meshGroupIdx, meshIdx, subMeshIdx); }
+			void GetMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::shared_ptr<geometry::ModelMesh>> &outMeshes);
+			void GetSubMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::shared_ptr<geometry::ModelSubMesh>> &outMeshes);
 			//void GetWeights(std::vector<VertexWeight*> **weights);
 			static void ClearCache();
 			const std::string &GetName() const;
 			void SetName(const std::string &name) { m_name = name; }
-			uint32_t AddAnimation(const std::string &name, const std::shared_ptr<pragma::animation::Animation> &anim);
+			uint32_t AddAnimation(const std::string &name, const std::shared_ptr<animation::Animation> &anim);
 			int LookupAnimation(const std::string &name) const;
-			int SelectWeightedAnimation(pragma::Activity activity, int32_t animIgnore = -1);
-			int SelectFirstAnimation(pragma::Activity activity) const;
+			int SelectWeightedAnimation(Activity activity, int32_t animIgnore = -1);
+			int SelectFirstAnimation(Activity activity) const;
 			unsigned char GetAnimationActivityWeight(uint32_t animation) const;
-			pragma::Activity GetAnimationActivity(uint32_t animation) const;
+			Activity GetAnimationActivity(uint32_t animation) const;
 			float GetAnimationDuration(uint32_t animation);
-			std::shared_ptr<pragma::animation::Animation> GetAnimation(uint32_t ID) const;
-			void GetAnimations(pragma::Activity activity, std::vector<uint32_t> &animations);
+			std::shared_ptr<animation::Animation> GetAnimation(uint32_t ID) const;
+			void GetAnimations(Activity activity, std::vector<uint32_t> &animations);
 			void GetAnimations(std::unordered_map<std::string, uint32_t> **anims);
-			const std::vector<std::shared_ptr<pragma::animation::Animation>> &GetAnimations() const;
-			std::vector<std::shared_ptr<pragma::animation::Animation>> &GetAnimations();
+			const std::vector<std::shared_ptr<animation::Animation>> &GetAnimations() const;
+			std::vector<std::shared_ptr<animation::Animation>> &GetAnimations();
 			std::unordered_map<std::string, unsigned int> &GetAnimationNames() { return m_animationIDs; }
-			const std::unordered_map<std::string, unsigned int> &GetAnimationNames() const { return const_cast<pragma::asset::Model *>(this)->GetAnimationNames(); }
+			const std::unordered_map<std::string, unsigned int> &GetAnimationNames() const { return const_cast<Model *>(this)->GetAnimationNames(); }
 			bool GetAnimationName(uint32_t animId, std::string &name) const;
 			std::string GetAnimationName(uint32_t animId) const;
 			uint32_t GetAnimationCount() const;
 			bool HasVertexWeights() const;
 			std::optional<float> CalcFlexWeight(uint32_t flexId, const std::function<std::optional<float>(uint32_t)> &fFetchFlexControllerWeight, const std::function<std::optional<float>(uint32_t)> &fFetchFlexWeight) const;
-			virtual std::shared_ptr<pragma::geometry::ModelMesh> CreateMesh() const;
-			virtual std::shared_ptr<pragma::geometry::ModelSubMesh> CreateSubMesh() const;
-			float CalcBoneLength(pragma::animation::BoneId boneId) const;
-			void RemoveBone(pragma::animation::BoneId boneId);
+			virtual std::shared_ptr<geometry::ModelMesh> CreateMesh() const;
+			virtual std::shared_ptr<geometry::ModelSubMesh> CreateSubMesh() const;
+			float CalcBoneLength(animation::BoneId boneId) const;
+			void RemoveBone(animation::BoneId boneId);
 
 			// Vertex animations
-			const std::vector<std::shared_ptr<pragma::animation::VertexAnimation>> &GetVertexAnimations() const;
-			std::vector<std::shared_ptr<pragma::animation::VertexAnimation>> &GetVertexAnimations();
-			const std::shared_ptr<pragma::animation::VertexAnimation> *GetVertexAnimation(uint32_t vaIdx) const;
+			const std::vector<std::shared_ptr<animation::VertexAnimation>> &GetVertexAnimations() const;
+			std::vector<std::shared_ptr<animation::VertexAnimation>> &GetVertexAnimations();
+			const std::shared_ptr<animation::VertexAnimation> *GetVertexAnimation(uint32_t vaIdx) const;
 			bool GetVertexAnimationId(const std::string &name, uint32_t &id) const;
-			std::shared_ptr<pragma::animation::VertexAnimation> *GetVertexAnimation(uint32_t vaIdx);
-			const std::shared_ptr<pragma::animation::VertexAnimation> *GetVertexAnimation(const std::string &name) const;
-			std::shared_ptr<pragma::animation::VertexAnimation> *GetVertexAnimation(const std::string &name);
-			std::shared_ptr<pragma::animation::VertexAnimation> AddVertexAnimation(const std::string &name);
+			std::shared_ptr<animation::VertexAnimation> *GetVertexAnimation(uint32_t vaIdx);
+			const std::shared_ptr<animation::VertexAnimation> *GetVertexAnimation(const std::string &name) const;
+			std::shared_ptr<animation::VertexAnimation> *GetVertexAnimation(const std::string &name);
+			std::shared_ptr<animation::VertexAnimation> AddVertexAnimation(const std::string &name);
 			void RemoveVertexAnimation(const std::string &name);
 
 			// Flex controllers
@@ -387,7 +387,7 @@ export {
 			const physics::IKController *GetIKController(uint32_t id) const;
 			physics::IKController *GetIKController(uint32_t id);
 			bool LookupIKController(const std::string &name, uint32_t &id) const;
-			physics::IKController *AddIKController(const std::string &name, uint32_t chainLength, const std::string &type, pragma::physics::ik::Method method = pragma::physics::ik::Method::Default);
+			physics::IKController *AddIKController(const std::string &name, uint32_t chainLength, const std::string &type, physics::ik::Method method = physics::ik::Method::Default);
 			void RemoveIKController(uint32_t id);
 			void RemoveIKController(const std::string &name);
 
@@ -395,39 +395,39 @@ export {
 			const PhonemeMap &GetPhonemeMap() const;
 			PhonemeMap &GetPhonemeMap();
 
-			bool FindSubMeshIndex(const pragma::asset::ModelMeshGroup *optMeshGroup, const geometry::ModelMesh *optMesh, const pragma::geometry::ModelSubMesh *optSubMesh, uint32_t &outGroupIdx, uint32_t &outMeshIdx, uint32_t &outSubMeshIdx) const;
+			bool FindSubMeshIndex(const ModelMeshGroup *optMeshGroup, const geometry::ModelMesh *optMesh, const geometry::ModelSubMesh *optSubMesh, uint32_t &outGroupIdx, uint32_t &outMeshIdx, uint32_t &outSubMeshIdx) const;
 
-			const pragma::animation::Skeleton &GetSkeleton() const;
-			pragma::animation::Skeleton &GetSkeleton();
+			const animation::Skeleton &GetSkeleton() const;
+			animation::Skeleton &GetSkeleton();
 
-			void TransformBone(pragma::animation::BoneId boneId, const pragma::math::Transform &t, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::World);
+			void TransformBone(animation::BoneId boneId, const math::Transform &t, math::CoordinateSpace space = math::CoordinateSpace::World);
 
-			const std::shared_ptr<pragma::animation::MetaRig> &GetMetaRig() const;
+			const std::shared_ptr<animation::MetaRig> &GetMetaRig() const;
 			bool GenerateMetaRig();
 			bool GenerateMetaBlendShapes();
 			void ClearMetaRig();
-			std::optional<pragma::animation::MetaRigBoneType> GetMetaRigBoneParentId(pragma::animation::MetaRigBoneType type) const;
-			std::optional<pragma::math::ScaledTransform> GetMetaRigReferencePose(pragma::animation::MetaRigBoneType type) const;
-			bool GenerateStandardMetaRigReferenceBonePoses(std::vector<pragma::math::ScaledTransform> &outPoses) const;
-			Quat CalcNormalizedMetaBoneRotation(pragma::animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot) const;
-			Quat RetargetMetaBoneRotation(pragma::animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot, const pragma::animation::MetaRigBone &targetBone, const Quat &targetMetaReferenceRot) const;
+			std::optional<animation::MetaRigBoneType> GetMetaRigBoneParentId(animation::MetaRigBoneType type) const;
+			std::optional<math::ScaledTransform> GetMetaRigReferencePose(animation::MetaRigBoneType type) const;
+			bool GenerateStandardMetaRigReferenceBonePoses(std::vector<math::ScaledTransform> &outPoses) const;
+			Quat CalcNormalizedMetaBoneRotation(animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot) const;
+			Quat RetargetMetaBoneRotation(animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot, const animation::MetaRigBone &targetBone, const Quat &targetMetaReferenceRot) const;
 			void ApplyPostImportProcessing();
 
 			uint32_t GetBoneCount() const;
 			bool GetLocalBonePosition(uint32_t animId, uint32_t frameId, uint32_t boneId, Vector3 &rPos, Quat &rRot, Vector3 *scale = nullptr);
 
-			bool GetReferenceBonePose(pragma::animation::BoneId boneId, pragma::math::Transform &outPose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
-			bool GetReferenceBonePose(pragma::animation::BoneId boneId, pragma::math::ScaledTransform &outPose, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
-			bool GetReferenceBonePos(pragma::animation::BoneId boneId, Vector3 &outPos, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
-			bool GetReferenceBoneRot(pragma::animation::BoneId boneId, Quat &outRot, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
-			bool GetReferenceBoneScale(pragma::animation::BoneId boneId, Vector3 &outScale, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
-			bool GetReferenceBonePose(pragma::animation::BoneId boneId, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale = nullptr, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::Object) const;
+			bool GetReferenceBonePose(animation::BoneId boneId, math::Transform &outPose, math::CoordinateSpace space = math::CoordinateSpace::Object) const;
+			bool GetReferenceBonePose(animation::BoneId boneId, math::ScaledTransform &outPose, math::CoordinateSpace space = math::CoordinateSpace::Object) const;
+			bool GetReferenceBonePos(animation::BoneId boneId, Vector3 &outPos, math::CoordinateSpace space = math::CoordinateSpace::Object) const;
+			bool GetReferenceBoneRot(animation::BoneId boneId, Quat &outRot, math::CoordinateSpace space = math::CoordinateSpace::Object) const;
+			bool GetReferenceBoneScale(animation::BoneId boneId, Vector3 &outScale, math::CoordinateSpace space = math::CoordinateSpace::Object) const;
+			bool GetReferenceBonePose(animation::BoneId boneId, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale = nullptr, math::CoordinateSpace space = math::CoordinateSpace::Object) const;
 
 			bool IsRootBone(uint32_t boneId) const;
 			bool IntersectAABB(Vector3 &min, Vector3 &max);
 			void CalculateRenderBounds();
 			void CalculateCollisionBounds();
-			virtual void Update(pragma::asset::ModelUpdateFlags flags = pragma::asset::ModelUpdateFlags::AllData);
+			virtual void Update(ModelUpdateFlags flags = ModelUpdateFlags::AllData);
 			void GetCollisionBounds(Vector3 &min, Vector3 &max) const;
 			void GetRenderBounds(Vector3 &min, Vector3 &max) const;
 			void SetCollisionBounds(const Vector3 &min, const Vector3 &max);
@@ -453,8 +453,8 @@ export {
 			void RemoveAttachment(const std::string &name);
 			void RemoveAttachment(uint32_t idx);
 			int32_t LookupAttachment(const std::string &name);
-			std::optional<pragma::math::ScaledTransform> CalcReferenceAttachmentPose(int32_t attId) const;
-			std::optional<pragma::math::ScaledTransform> CalcReferenceBonePose(int32_t boneId) const;
+			std::optional<math::ScaledTransform> CalcReferenceAttachmentPose(int32_t attId) const;
+			std::optional<math::ScaledTransform> CalcReferenceBonePose(int32_t boneId) const;
 
 			const std::vector<ObjectAttachment> &GetObjectAttachments() const;
 			std::vector<ObjectAttachment> &GetObjectAttachments();
@@ -466,24 +466,24 @@ export {
 			bool RemoveObjectAttachment(uint32_t idx);
 
 			int32_t LookupBone(const std::string &name) const;
-			void Merge(const pragma::asset::Model &other, MergeFlags flags = MergeFlags::All);
+			void Merge(const Model &other, MergeFlags flags = MergeFlags::All);
 
-			std::optional<uint32_t> AssignDistinctMaterial(const pragma::asset::ModelMeshGroup &group, const geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh);
+			std::optional<uint32_t> AssignDistinctMaterial(const ModelMeshGroup &group, const geometry::ModelMesh &mesh, geometry::ModelSubMesh &subMesh);
 
 			// Hitboxes
-			void AddHitbox(uint32_t boneId, pragma::physics::HitGroup group, const Vector3 &min, const Vector3 &max);
-			void AddHitbox(uint32_t boneId, const pragma::physics::Hitbox &hitbox);
+			void AddHitbox(uint32_t boneId, physics::HitGroup group, const Vector3 &min, const Vector3 &max);
+			void AddHitbox(uint32_t boneId, const physics::Hitbox &hitbox);
 			uint32_t GetHitboxCount() const;
-			const std::unordered_map<uint32_t, pragma::physics::Hitbox> &GetHitboxes() const;
-			std::unordered_map<uint32_t, pragma::physics::Hitbox> &GetHitboxes();
-			const pragma::physics::Hitbox *GetHitbox(uint32_t boneId) const;
-			pragma::physics::HitGroup GetHitboxGroup(uint32_t boneId) const;
+			const std::unordered_map<uint32_t, physics::Hitbox> &GetHitboxes() const;
+			std::unordered_map<uint32_t, physics::Hitbox> &GetHitboxes();
+			const physics::Hitbox *GetHitbox(uint32_t boneId) const;
+			physics::HitGroup GetHitboxGroup(uint32_t boneId) const;
 			bool GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max) const;
-			std::vector<uint32_t> GetHitboxBones(pragma::physics::HitGroup group) const;
-			void GetHitboxBones(pragma::physics::HitGroup group, std::vector<uint32_t> &boneIds) const;
+			std::vector<uint32_t> GetHitboxBones(physics::HitGroup group) const;
+			void GetHitboxBones(physics::HitGroup group, std::vector<uint32_t> &boneIds) const;
 			std::vector<uint32_t> GetHitboxBones() const;
 			void GetHitboxBones(std::vector<uint32_t> &boneIds) const;
-			std::unordered_map<pragma::animation::BoneId, pragma::physics::Hitbox> CalcHitboxes() const;
+			std::unordered_map<animation::BoneId, physics::Hitbox> CalcHitboxes() const;
 			bool GenerateHitboxes();
 
 			void UpdateShape(const std::vector<physics::SurfaceMaterial> *materials = nullptr);
@@ -496,20 +496,20 @@ export {
 			uint32_t GetVertexCount() const;
 			uint32_t GetTriangleCount() const;
 			// Textures
-			uint32_t AddTexture(const std::string &tex, msys::Material *mat);
-			bool SetTexture(uint32_t texIdx, const std::string &tex, msys::Material *mat);
-			uint32_t AddMaterial(uint32_t skin, msys::Material *mat, const std::optional<std::string> &matName = {}, std::optional<uint32_t> *optOutSkinTexIdx = nullptr);
-			bool SetMaterial(uint32_t texIdx, msys::Material *mat);
+			uint32_t AddTexture(const std::string &tex, material::Material *mat);
+			bool SetTexture(uint32_t texIdx, const std::string &tex, material::Material *mat);
+			uint32_t AddMaterial(uint32_t skin, material::Material *mat, const std::optional<std::string> &matName = {}, std::optional<uint32_t> *optOutSkinTexIdx = nullptr);
+			bool SetMaterial(uint32_t texIdx, material::Material *mat);
 			void RemoveTexture(uint32_t idx);
 			void ClearTextures();
 			void LoadMaterials(bool bReload = false);
 			void PrecacheMaterials();
 			TextureGroup *CreateTextureGroup();
 			std::vector<std::string> &GetTextures();
-			std::vector<msys::MaterialHandle> &GetMaterials();
-			const std::vector<msys::MaterialHandle> &GetMaterials() const;
-			msys::Material *GetMaterial(uint32_t texID);
-			msys::Material *GetMaterial(uint32_t texGroup, uint32_t texID);
+			std::vector<material::MaterialHandle> &GetMaterials();
+			const std::vector<material::MaterialHandle> &GetMaterials() const;
+			material::Material *GetMaterial(uint32_t texID);
+			material::Material *GetMaterial(uint32_t texGroup, uint32_t texID);
 			virtual void PrecacheTexture(uint32_t texId, bool bReload = false);
 			std::vector<TextureGroup> &GetTextureGroups();
 			TextureGroup *GetTextureGroup(uint32_t i);
@@ -520,15 +520,15 @@ export {
 			void AddTexturePath(const std::string &path);
 			void RemoveTexturePath(uint32_t idx);
 			void SetTexturePaths(const std::vector<std::string> &paths);
-			std::optional<uint32_t> GetMaterialIndex(const pragma::geometry::ModelSubMesh &mesh, uint32_t skinId = 0) const;
+			std::optional<uint32_t> GetMaterialIndex(const geometry::ModelSubMesh &mesh, uint32_t skinId = 0) const;
 			void SetReference(std::shared_ptr<Frame> frame);
 			const Frame &GetReference() const;
 			Frame &GetReference();
-			bool SetReferencePoses(const std::vector<pragma::math::ScaledTransform> &poses, bool posesInParentSpace = false);
+			bool SetReferencePoses(const std::vector<math::ScaledTransform> &poses, bool posesInParentSpace = false);
 			void Rotate(const Quat &rot);
 			void Translate(const Vector3 &t);
 			void Scale(const Vector3 &scale);
-			void Mirror(pragma::Axis axis);
+			void Mirror(Axis axis);
 
 			// Merges meshes with same materials (Only within mesh groups)
 			void Optimize();
@@ -541,9 +541,9 @@ export {
 			std::vector<BodyGroup> &GetBodyGroups();
 			UInt32 GetBodyGroupCount() const;
 
-			const std::vector<pragma::physics::JointInfo> &GetJoints() const;
-			std::vector<pragma::physics::JointInfo> &GetJoints();
-			pragma::physics::JointInfo &AddJoint(pragma::physics::JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent);
+			const std::vector<physics::JointInfo> &GetJoints() const;
+			std::vector<physics::JointInfo> &GetJoints();
+			physics::JointInfo &AddJoint(physics::JointType type, animation::BoneId child, animation::BoneId parent);
 
 			const std::vector<Eyeball> &GetEyeballs() const;
 			std::vector<Eyeball> &GetEyeballs();
@@ -552,44 +552,44 @@ export {
 			Eyeball *GetEyeball(uint32_t idx);
 			void AddEyeball(const Eyeball &eyeball);
 
-			void SetMaxEyeDeflection(pragma::math::Degree eyeDeflection);
-			pragma::math::Degree GetMaxEyeDeflection() const;
+			void SetMaxEyeDeflection(math::Degree eyeDeflection);
+			math::Degree GetMaxEyeDeflection() const;
 
 			udm::PropertyWrapper GetExtensionData() const;
 
-			pragma::util::WeakHandle<const pragma::asset::Model> GetHandle() const;
-			pragma::util::WeakHandle<pragma::asset::Model> GetHandle();
+			util::WeakHandle<const Model> GetHandle() const;
+			util::WeakHandle<Model> GetHandle();
 
 			void RemoveUnusedMaterialReferences();
-			void ClipAgainstPlane(const Vector3 &n, double d, pragma::asset::Model &mdlA, pragma::asset::Model &mdlB, const std::vector<Mat4> *boneMatrices = nullptr);
+			void ClipAgainstPlane(const Vector3 &n, double d, Model &mdlA, Model &mdlB, const std::vector<Mat4> *boneMatrices = nullptr);
 
 			std::vector<std::shared_ptr<FlexAnimation>> &GetFlexAnimations() { return m_flexAnimations; }
-			const std::vector<std::shared_ptr<FlexAnimation>> &GetFlexAnimations() const { return const_cast<pragma::asset::Model *>(this)->GetFlexAnimations(); }
+			const std::vector<std::shared_ptr<FlexAnimation>> &GetFlexAnimations() const { return const_cast<Model *>(this)->GetFlexAnimations(); }
 			std::vector<std::string> &GetFlexAnimationNames() { return m_flexAnimationNames; }
-			const std::vector<std::string> &GetFlexAnimationNames() const { return const_cast<pragma::asset::Model *>(this)->GetFlexAnimationNames(); }
+			const std::vector<std::string> &GetFlexAnimationNames() const { return const_cast<Model *>(this)->GetFlexAnimationNames(); }
 			std::optional<uint32_t> LookupFlexAnimation(const std::string &name) const;
 			uint32_t AddFlexAnimation(const std::string &name, FlexAnimation &anim);
 			FlexAnimation *GetFlexAnimation(uint32_t idx);
-			const FlexAnimation *GetFlexAnimation(uint32_t idx) const { return const_cast<pragma::asset::Model *>(this)->GetFlexAnimation(idx); }
+			const FlexAnimation *GetFlexAnimation(uint32_t idx) const { return const_cast<Model *>(this)->GetFlexAnimation(idx); }
 			const std::string *GetFlexAnimationName(uint32_t idx) const;
 
-			std::optional<pragma::math::ScaledTransform> GetReferenceBonePose(pragma::animation::BoneId boneId) const;
-			std::optional<pragma::SignedAxis> FindBoneTwistAxis(pragma::animation::BoneId boneId) const;
-			std::optional<pragma::SignedAxis> FindBoneAxisForDirection(pragma::animation::BoneId boneId, const Vector3 &dir) const;
-			static Quat GetTwistAxisRotationOffset(pragma::SignedAxis axis);
+			std::optional<math::ScaledTransform> GetReferenceBonePose(animation::BoneId boneId) const;
+			std::optional<SignedAxis> FindBoneTwistAxis(animation::BoneId boneId) const;
+			std::optional<SignedAxis> FindBoneAxisForDirection(animation::BoneId boneId, const Vector3 &dir) const;
+			static Quat GetTwistAxisRotationOffset(SignedAxis axis);
 		  protected:
-			Model(pragma::NetworkState *nw, uint32_t numBones, const std::string &name = "");
-			Model(const pragma::asset::Model &other);
-			bool LoadFromAssetData(pragma::Game &game, const udm::AssetData &data, std::string &outErr);
+			Model(NetworkState *nw, uint32_t numBones, const std::string &name = "");
+			Model(const Model &other);
+			bool LoadFromAssetData(Game &game, const udm::AssetData &data, std::string &outErr);
 			virtual void OnMaterialMissing(const std::string &matName);
-			void AddLoadingMaterial(msys::Material &mat, std::optional<uint32_t> index = {});
+			void AddLoadingMaterial(material::Material &mat, std::optional<uint32_t> index = {});
 			void LoadMaterials(const std::vector<uint32_t> &textureGroups, bool precache, bool bReload);
 			void LoadMaterials(bool precache, bool bReload);
 			bool FindMaterial(const std::string &texture, std::string &matPath, bool importIfNotFound) const;
 
-			virtual std::shared_ptr<pragma::animation::VertexAnimation> CreateVertexAnimation(const std::string &name) const;
-			std::vector<std::shared_ptr<pragma::animation::VertexAnimation>>::const_iterator FindVertexAnimation(const std::string &name) const;
-			std::vector<std::shared_ptr<pragma::animation::VertexAnimation>>::iterator FindVertexAnimation(const std::string &name);
+			virtual std::shared_ptr<animation::VertexAnimation> CreateVertexAnimation(const std::string &name) const;
+			std::vector<std::shared_ptr<animation::VertexAnimation>>::const_iterator FindVertexAnimation(const std::string &name) const;
+			std::vector<std::shared_ptr<animation::VertexAnimation>>::iterator FindVertexAnimation(const std::string &name);
 
 			std::vector<animation::FlexController>::const_iterator FindFlexController(const std::string &name) const;
 			std::vector<animation::FlexController>::iterator FindFlexController(const std::string &name);
@@ -610,22 +610,22 @@ export {
 			uint32_t m_subMeshCount = 0u;
 			uint32_t m_vertexCount = 0u;
 			uint32_t m_triangleCount = 0u;
-			pragma::math::Degree m_maxEyeDeflection = 30.f;
+			math::Degree m_maxEyeDeflection = 30.f;
 			PhonemeMap m_phonemeMap = {};
 			std::vector<BlendController> m_blendControllers;
-			std::vector<std::shared_ptr<pragma::asset::ModelMeshGroup>> m_meshGroups;
+			std::vector<std::shared_ptr<ModelMeshGroup>> m_meshGroups;
 			std::vector<BodyGroup> m_bodyGroups;
-			std::unordered_map<uint32_t, pragma::physics::Hitbox> m_hitboxes;
+			std::unordered_map<uint32_t, physics::Hitbox> m_hitboxes;
 			std::vector<Eyeball> m_eyeballs;
 			//std::vector<std::vector<VertexWeight>*> m_weights;
-			static std::unordered_map<std::string, std::shared_ptr<pragma::asset::Model>> m_models;
+			static std::unordered_map<std::string, std::shared_ptr<Model>> m_models;
 			std::shared_ptr<Frame> m_reference = nullptr;
 			std::string m_name;
-			std::vector<std::shared_ptr<pragma::animation::Animation>> m_animations;
-			std::vector<std::shared_ptr<pragma::animation::VertexAnimation>> m_vertexAnimations;
+			std::vector<std::shared_ptr<animation::Animation>> m_animations;
+			std::vector<std::shared_ptr<animation::VertexAnimation>> m_vertexAnimations;
 			std::unordered_map<std::string, unsigned int> m_animationIDs;
-			std::shared_ptr<pragma::animation::Skeleton> m_skeleton = nullptr;
-			std::shared_ptr<pragma::animation::MetaRig> m_metaRig = nullptr;
+			std::shared_ptr<animation::Skeleton> m_skeleton = nullptr;
+			std::shared_ptr<animation::MetaRig> m_metaRig = nullptr;
 
 			std::vector<animation::FlexController> m_flexControllers;
 			std::vector<animation::Flex> m_flexes;
@@ -642,13 +642,13 @@ export {
 			Vector3 m_collisionMax = {};
 			Vector3 m_renderMin = {};
 			Vector3 m_renderMax = {};
-			std::vector<std::shared_ptr<pragma::physics::CollisionMesh>> m_collisionMeshes;
-			std::vector<pragma::physics::JointInfo> m_joints;
+			std::vector<std::shared_ptr<physics::CollisionMesh>> m_collisionMeshes;
+			std::vector<physics::JointInfo> m_joints;
 			std::vector<unsigned int> m_baseMeshes; // Meshes in LOD 0
 			std::vector<LODInfo> m_lods;            // LODs have to be in order!
 			std::vector<Attachment> m_attachments;
 			std::vector<ObjectAttachment> m_objectAttachments;
-			std::vector<msys::MaterialHandle> m_materials;
+			std::vector<material::MaterialHandle> m_materials;
 			std::vector<TextureGroup> m_textureGroups;
 			std::vector<CallbackHandle> m_matLoadCallbacks;
 			std::vector<CallbackHandle> m_onAllMatsLoadedCallbacks;

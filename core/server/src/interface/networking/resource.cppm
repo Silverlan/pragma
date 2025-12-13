@@ -18,7 +18,7 @@ export namespace pragma::networking {
 		bool Construct();
 		std::string name;
 		unsigned int offset;
-		std::shared_ptr<VFilePtrInternal> file;
+		std::shared_ptr<fs::VFilePtrInternal> file;
 		bool stream;
 	};
 #pragma warning(pop)

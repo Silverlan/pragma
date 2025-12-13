@@ -18,14 +18,14 @@ using namespace pragma;
 ComponentEventId cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId cModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED = INVALID_COMPONENT_ID;
 void CModelComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void CModelComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseModelComponent::RegisterEvents(componentManager, registerEvent);
 	cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = registerEvent("EVENT_ON_RENDER_MESHES_UPDATED", ComponentEventInfo::Type::Explicit);
 	cModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED = registerEvent("EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED", ComponentEventInfo::Type::Broadcast);
 }
 
-CModelComponent::CModelComponent(pragma::ecs::BaseEntity &ent) : BaseModelComponent(ent), m_baseShaderSpecializationConstantFlags {pragma::GameShaderSpecializationConstantFlag::None}, m_staticShaderSpecializationConstantFlags {pragma::GameShaderSpecializationConstantFlag::None} {}
+CModelComponent::CModelComponent(ecs::BaseEntity &ent) : BaseModelComponent(ent), m_baseShaderSpecializationConstantFlags {GameShaderSpecializationConstantFlag::None}, m_staticShaderSpecializationConstantFlags {GameShaderSpecializationConstantFlag::None} {}
 
 void CModelComponent::Initialize()
 {
@@ -36,15 +36,15 @@ void CModelComponent::Initialize()
 		pRenderComponent->SetRenderBufferDirty();
 	UpdateBaseShaderSpecializationFlags();
 
-	BindEventUnhandled(cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
-	BindEventUnhandled(cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
-	BindEventUnhandled(cColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
-	BindEventUnhandled(baseModelComponent::EVENT_ON_SKIN_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
+	BindEventUnhandled(cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
+	BindEventUnhandled(cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
+	BindEventUnhandled(cColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_SKIN_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
+		math::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
 		SetTickPolicy(TickPolicy::Always);
 	});
-	BindEventUnhandled(baseModelComponent::EVENT_ON_BODY_GROUP_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
+	BindEventUnhandled(baseModelComponent::EVENT_ON_BODY_GROUP_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
+		math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
 		SetTickPolicy(TickPolicy::Always);
 	});
 }
@@ -53,7 +53,7 @@ void CModelComponent::UpdateBaseShaderSpecializationFlags()
 {
 	auto clipPlane = false;
 	auto depthBias = false;
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
 	auto *renderC = ent.GetRenderComponent();
 	if(renderC != nullptr) {
 		clipPlane = renderC->GetRenderClipPlane();
@@ -63,7 +63,7 @@ void CModelComponent::UpdateBaseShaderSpecializationFlags()
 	// pragma::math::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableDepthBias, depthBias);
 
 	auto colorC = ent.GetComponent<CColorComponent>();
-	pragma::math::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableTranslucencyBit, colorC.valid() && colorC->GetColor().a < 1.f);
+	math::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableTranslucencyBit, colorC.valid() && colorC->GetColor().a < 1.f);
 
 	m_baseShaderSpecializationConstantFlags |= m_staticShaderSpecializationConstantFlags;
 
@@ -72,7 +72,7 @@ void CModelComponent::UpdateBaseShaderSpecializationFlags()
 
 CMaterialOverrideComponent *CModelComponent::GetMaterialOverrideComponent() { return m_materialOverrideComponent; }
 
-msys::CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx, uint32_t skin) const
+material::CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx, uint32_t skin) const
 {
 	// TODO: Move this to Model class
 	auto &mdl = GetModel();
@@ -89,12 +89,12 @@ msys::CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx, uint32_t skin)
 		if(matOverride)
 			return matOverride;
 	}
-	auto *mat = static_cast<msys::CMaterial *>(mdl->GetMaterial(idx));
-	return mat ? mat : static_cast<msys::CMaterial *>(pragma::get_client_state()->GetMaterialManager().GetErrorMaterial());
+	auto *mat = static_cast<material::CMaterial *>(mdl->GetMaterial(idx));
+	return mat ? mat : static_cast<material::CMaterial *>(get_client_state()->GetMaterialManager().GetErrorMaterial());
 }
-msys::CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx) const { return GetRenderMaterial(idx, GetSkin()); }
+material::CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx) const { return GetRenderMaterial(idx, GetSkin()); }
 
-Bool CModelComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CModelComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetBodyGroup) {
 		auto groupId = packet->Read<UInt32>();
@@ -132,7 +132,7 @@ bool CModelComponent::IsWeighted() const
 
 uint32_t CModelComponent::GetLOD() const { return m_lod; }
 
-void CModelComponent::GetBaseModelMeshes(std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &outMeshes, uint32_t lod) const
+void CModelComponent::GetBaseModelMeshes(std::vector<std::shared_ptr<geometry::ModelMesh>> &outMeshes, uint32_t lod) const
 {
 	auto &mdl = GetModel();
 	if(mdl == nullptr)
@@ -142,33 +142,33 @@ void CModelComponent::GetBaseModelMeshes(std::vector<std::shared_ptr<pragma::geo
 
 const std::shared_ptr<prosper::IRenderBuffer> &CModelComponent::GetRenderBuffer(uint32_t idx) const { return m_lodMeshRenderBufferData[idx].renderBuffer; }
 const rendering::RenderBufferData *CModelComponent::GetRenderBufferData(uint32_t idx) const { return &m_lodMeshRenderBufferData[idx]; }
-pragma::GameShaderSpecializationConstantFlag CModelComponent::GetPipelineSpecializationFlags(uint32_t idx) const { return m_lodMeshRenderBufferData[idx].pipelineSpecializationFlags; }
+GameShaderSpecializationConstantFlag CModelComponent::GetPipelineSpecializationFlags(uint32_t idx) const { return m_lodMeshRenderBufferData[idx].pipelineSpecializationFlags; }
 
 void CModelComponent::ReloadRenderBufferList(bool immediate)
 {
 	if(immediate)
 		UpdateRenderBufferList();
 	else
-		pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
+		math::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
 }
 
-void CModelComponent::SetLightmapUvBuffer(const pragma::geometry::CModelSubMesh &mesh, const std::shared_ptr<prosper::IBuffer> &buffer) { m_lightmapUvBuffers[&mesh] = buffer; }
-std::shared_ptr<prosper::IBuffer> CModelComponent::GetLightmapUvBuffer(const pragma::geometry::CModelSubMesh &mesh) const
+void CModelComponent::SetLightmapUvBuffer(const geometry::CModelSubMesh &mesh, const std::shared_ptr<prosper::IBuffer> &buffer) { m_lightmapUvBuffers[&mesh] = buffer; }
+std::shared_ptr<prosper::IBuffer> CModelComponent::GetLightmapUvBuffer(const geometry::CModelSubMesh &mesh) const
 {
 	auto it = m_lightmapUvBuffers.find(&mesh);
 	return (it != m_lightmapUvBuffers.end()) ? it->second : nullptr;
 }
 
-bool CModelComponent::IsDepthPrepassEnabled() const { return !pragma::math::is_flag_set(m_stateFlags, StateFlags::DepthPrepassDisabled); }
-void CModelComponent::SetDepthPrepassEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::DepthPrepassDisabled, !enabled); }
+bool CModelComponent::IsDepthPrepassEnabled() const { return !math::is_flag_set(m_stateFlags, StateFlags::DepthPrepassDisabled); }
+void CModelComponent::SetDepthPrepassEnabled(bool enabled) { math::set_flag(m_stateFlags, StateFlags::DepthPrepassDisabled, !enabled); }
 
 void CModelComponent::SetRenderBufferData(const std::vector<rendering::RenderBufferData> &renderBufferData) { m_lodMeshRenderBufferData = renderBufferData; }
 
-void CModelComponent::AddRenderMesh(pragma::geometry::CModelSubMesh &mesh, msys::CMaterial &mat, pragma::rendering::RenderBufferData::StateFlags stateFlags)
+void CModelComponent::AddRenderMesh(geometry::CModelSubMesh &mesh, material::CMaterial &mat, rendering::RenderBufferData::StateFlags stateFlags)
 {
 	if(m_lodRenderMeshGroups.empty())
 		return;
-	auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(mat.GetPrimaryShader());
+	auto *shader = dynamic_cast<ShaderGameWorldLightingPass *>(mat.GetPrimaryShader());
 	if(!shader || !shader->IsValid())
 		return;
 	if(!shader->InitializeMaterialDescriptorSet(mat))
@@ -180,9 +180,9 @@ void CModelComponent::AddRenderMesh(pragma::geometry::CModelSubMesh &mesh, msys:
 	auto insertIdx = lodGroup.first + lodGroup.second;
 
 	if(!shader || !shader->IsDepthPrepassEnabled())
-		pragma::math::set_flag(stateFlags, pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass, false);
+		math::set_flag(stateFlags, rendering::RenderBufferData::StateFlags::EnableDepthPrepass, false);
 
-	pragma::rendering::RenderBufferData renderBufferData {};
+	rendering::RenderBufferData renderBufferData {};
 	renderBufferData.material = mat.GetHandle();
 	renderBufferData.renderBuffer = renderBuffer;
 	renderBufferData.stateFlags = stateFlags;
@@ -198,22 +198,22 @@ void CModelComponent::AddRenderMesh(pragma::geometry::CModelSubMesh &mesh, msys:
 
 void CModelComponent::UpdateRenderBufferList()
 {
-	if(std::this_thread::get_id() != pragma::get_cengine()->GetMainThreadId()) {
+	if(std::this_thread::get_id() != get_cengine()->GetMainThreadId()) {
 		Con::cwar << "Attempted to update render meshes from non-main thread, this is illegal!" << Con::endl;
 		return;
 	}
-	pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired, false);
+	math::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired, false);
 	for(auto &bufData : m_lodMeshRenderBufferData)
-		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(bufData.renderBuffer);
+		get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(bufData.renderBuffer);
 	m_lodMeshRenderBufferData.clear();
 	m_lodMeshRenderBufferData.reserve(m_lodRenderMeshes.size());
 	auto depthPrepassEnabled = IsDepthPrepassEnabled();
-	pragma::get_cengine()->GetRenderContext().GetPipelineLoader().Flush();
+	get_cengine()->GetRenderContext().GetPipelineLoader().Flush();
 	for(auto i = decltype(m_lodRenderMeshes.size()) {0u}; i < m_lodRenderMeshes.size(); ++i) {
-		auto &mesh = static_cast<pragma::geometry::CModelSubMesh &>(*m_lodRenderMeshes[i]);
+		auto &mesh = static_cast<geometry::CModelSubMesh &>(*m_lodRenderMeshes[i]);
 		auto *mat = GetRenderMaterial(mesh.GetSkinTextureIndex());
 		std::shared_ptr<prosper::IRenderBuffer> renderBuffer = nullptr;
-		auto *shader = mat ? dynamic_cast<pragma::ShaderGameWorldLightingPass *>(mat->GetPrimaryShader()) : nullptr;
+		auto *shader = mat ? dynamic_cast<ShaderGameWorldLightingPass *>(mat->GetPrimaryShader()) : nullptr;
 		if(shader && shader->IsValid()) {
 			renderBuffer = mesh.GetRenderBuffer(*shader);
 
@@ -225,10 +225,10 @@ void CModelComponent::UpdateRenderBufferList()
 				for(auto &buffer : buffers)
 					newBuffers.push_back(buffer.get());
 				auto *indexBuffer = renderBuffer->GetIndexBufferInfo();
-				auto lightmapUvIndex = pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::VertexBinding::LightmapUv);
+				auto lightmapUvIndex = math::to_integral(ShaderGameWorldLightingPass::VertexBinding::LightmapUv);
 				if(lightmapUvIndex < newBuffers.size()) {
 					newBuffers[lightmapUvIndex] = uvBuffer.get();
-					renderBuffer = pragma::get_cengine()->GetRenderContext().CreateRenderBuffer(renderBuffer->GetPipelineCreateInfo(), newBuffers, renderBuffer->GetOffsets(), indexBuffer ? std::optional<prosper::IndexBufferInfo> {*indexBuffer} : std::optional<prosper::IndexBufferInfo> {});
+					renderBuffer = get_cengine()->GetRenderContext().CreateRenderBuffer(renderBuffer->GetPipelineCreateInfo(), newBuffers, renderBuffer->GetOffsets(), indexBuffer ? std::optional<prosper::IndexBufferInfo> {*indexBuffer} : std::optional<prosper::IndexBufferInfo> {});
 				}
 			}
 
@@ -244,36 +244,36 @@ void CModelComponent::UpdateRenderBufferList()
 		m_lodMeshRenderBufferData.push_back({});
 		auto &renderBufferData = m_lodMeshRenderBufferData.back();
 		renderBufferData.renderBuffer = renderBuffer;
-		renderBufferData.material = mat ? mat->GetHandle() : msys::MaterialHandle {};
-		pragma::math::set_flag(renderBufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass, depthPrepassEnabled && shader && shader->IsDepthPrepassEnabled());
+		renderBufferData.material = mat ? mat->GetHandle() : material::MaterialHandle {};
+		math::set_flag(renderBufferData.stateFlags, rendering::RenderBufferData::StateFlags::EnableDepthPrepass, depthPrepassEnabled && shader && shader->IsDepthPrepassEnabled());
 		if(mat == nullptr || shader == nullptr)
 			continue;
 		renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(*mat);
 		if(mat->GetProperty("test_glow", false))
-			pragma::math::set_flag(renderBufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::EnableGlowPass);
+			math::set_flag(renderBufferData.stateFlags, rendering::RenderBufferData::StateFlags::EnableGlowPass);
 	}
 }
 
-void CModelComponent::SetBaseShaderSpecializationFlag(pragma::GameShaderSpecializationConstantFlag flag, bool enabled) { pragma::math::set_flag(m_baseShaderSpecializationConstantFlags, flag, enabled); }
+void CModelComponent::SetBaseShaderSpecializationFlag(GameShaderSpecializationConstantFlag flag, bool enabled) { math::set_flag(m_baseShaderSpecializationConstantFlags, flag, enabled); }
 
 void CModelComponent::UpdateRenderMeshes(bool requireBoundingVolumeUpdate)
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired | StateFlags::RenderBufferListUpdateRequired) == false)
+	if(math::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired | StateFlags::RenderBufferListUpdateRequired) == false)
 		return;
-	if(std::this_thread::get_id() != pragma::get_cengine()->GetMainThreadId()) {
+	if(std::this_thread::get_id() != get_cengine()->GetMainThreadId()) {
 		Con::cwar << "Attempted to update render meshes from non-main thread, this is illegal!" << Con::endl;
 		return;
 	}
 	auto renderMeshesUpdated = false;
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired)) {
-		pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, false);
+	if(math::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired)) {
+		math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, false);
 		m_lodRenderMeshes.clear();
 		m_lodMeshes.clear();
 		m_lodMeshGroups.clear();
 		m_lodRenderMeshGroups.clear();
 
 		auto &mdl = GetModel();
-		auto numLods = pragma::math::max(mdl ? mdl->GetLODCount() : 1u, static_cast<uint32_t>(1));
+		auto numLods = math::max(mdl ? mdl->GetLODCount() : 1u, static_cast<uint32_t>(1));
 		m_lodRenderMeshGroups.resize(numLods);
 		m_lodMeshGroups.resize(numLods);
 		if(mdl != nullptr) {
@@ -318,8 +318,8 @@ void CModelComponent::UpdateLOD(UInt32 lod)
 
 void CModelComponent::SetLOD(uint32_t lod) { m_lod = lod; }
 
-void CModelComponent::SetAutoLodEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::AutoLodDisabled, !enabled); }
-bool CModelComponent::IsAutoLodEnabled() const { return !pragma::math::is_flag_set(m_stateFlags, StateFlags::AutoLodDisabled); }
+void CModelComponent::SetAutoLodEnabled(bool enabled) { math::set_flag(m_stateFlags, StateFlags::AutoLodDisabled, !enabled); }
+bool CModelComponent::IsAutoLodEnabled() const { return !math::is_flag_set(m_stateFlags, StateFlags::AutoLodDisabled); }
 
 void CModelComponent::UpdateLOD(const CSceneComponent &scene, const CCameraComponent &cam, const Mat4 &vp)
 {
@@ -332,7 +332,7 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene, const CCameraCompo
 	auto numLods = mdl->GetLODCount();
 	if(numLods <= 1 && m_maxDrawDistance == 0.f)
 		return;
-	auto t = pragma::get_cgame()->CurTime();
+	auto t = get_cgame()->CurTime();
 	if(t < m_tNextLodUpdate)
 		return;
 	// Updating LODs is relatively expensive, but there's really no reason to update them every frame,
@@ -340,12 +340,12 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene, const CCameraCompo
 	// We'll use random time intervals to lower the risk of a bunch of objects updating at the same time.
 	// TODO: This doesn't really work if the object is being rendered from multiple perspectives with different distances in the same frame!
 	// Also, changing LODs should occur via a fade-effect (both meshes could be added to render queue with alpha modifier)
-	m_tNextLodUpdate = t + pragma::math::random(0.2f, 0.6f);
+	m_tNextLodUpdate = t + math::random(0.2f, 0.6f);
 
 	auto &pos = GetEntity().GetPosition();
 	auto d = uvec::distance(pos, cam.GetEntity().GetPosition());
 	constexpr auto LOD_CAMERA_DISTANCE_THRESHOLD = 20.f;
-	if(pragma::math::abs(d - m_lastLodCamDistance) < LOD_CAMERA_DISTANCE_THRESHOLD)
+	if(math::abs(d - m_lastLodCamDistance) < LOD_CAMERA_DISTANCE_THRESHOLD)
 		return; // Don't bother updating if the distance to the camera hasn't changed much. TODO: This also doesn't work well with different perspectives in the same frame!
 
 	if(m_maxDrawDistance > 0.f && d >= m_maxDrawDistance) {
@@ -365,7 +365,7 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene, const CCameraCompo
 	auto posOffset = pos + cam.GetEntity().GetUp() * 1.f;
 	auto uvMin = umat::to_screen_uv(pos, vp);
 	auto uvMax = umat::to_screen_uv(posOffset, vp);
-	auto extents = pragma::math::max(uvMin.y, uvMax.y) - pragma::math::min(uvMin.y, uvMax.y);
+	auto extents = math::max(uvMin.y, uvMax.y) - math::min(uvMin.y, uvMax.y);
 	extents *= h;
 	extents *= 2.f; // TODO: Why?
 
@@ -380,37 +380,37 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene, const CCameraCompo
 		}
 		break;
 	}
-	lod += pragma::get_cgame()->GetLODBias();
+	lod += get_cgame()->GetLODBias();
 	if(m_lod == lod)
 		return;
 	UpdateLOD(lod);
 }
 
-std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CModelComponent::GetLODMeshes() { return m_lodMeshes; }
-const std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CModelComponent::GetLODMeshes() const { return const_cast<CModelComponent *>(this)->GetLODMeshes(); }
-std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CModelComponent::GetRenderMeshes() { return m_lodRenderMeshes; }
-const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CModelComponent::GetRenderMeshes() const { return const_cast<CModelComponent *>(this)->GetRenderMeshes(); }
+std::vector<std::shared_ptr<geometry::ModelMesh>> &CModelComponent::GetLODMeshes() { return m_lodMeshes; }
+const std::vector<std::shared_ptr<geometry::ModelMesh>> &CModelComponent::GetLODMeshes() const { return const_cast<CModelComponent *>(this)->GetLODMeshes(); }
+std::vector<std::shared_ptr<geometry::ModelSubMesh>> &CModelComponent::GetRenderMeshes() { return m_lodRenderMeshes; }
+const std::vector<std::shared_ptr<geometry::ModelSubMesh>> &CModelComponent::GetRenderMeshes() const { return const_cast<CModelComponent *>(this)->GetRenderMeshes(); }
 
-pragma::rendering::RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod)
+rendering::RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod)
 {
 	if(m_lod == std::numeric_limits<uint32_t>::max()) {
 		static rendering::RenderMeshGroup emptyGroup {};
 		return emptyGroup; // TODO: This should only be returned as const!
 	}
 	UpdateRenderMeshes();
-	lod = pragma::math::min(lod, static_cast<uint32_t>(m_lodMeshGroups.size() - 1));
+	lod = math::min(lod, static_cast<uint32_t>(m_lodMeshGroups.size() - 1));
 	assert(lod < m_lodMeshGroups.size());
 	return m_lodMeshGroups[lod];
 }
-const pragma::rendering::RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod) const { return const_cast<CModelComponent *>(this)->GetLodMeshGroup(lod); }
-pragma::rendering::RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod)
+const rendering::RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod) const { return const_cast<CModelComponent *>(this)->GetLodMeshGroup(lod); }
+rendering::RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod)
 {
 	if(m_lod == std::numeric_limits<uint32_t>::max()) {
 		static rendering::RenderMeshGroup emptyGroup {};
 		return emptyGroup; // TODO: This should only be returned as const!
 	}
 	UpdateRenderMeshes();
-	lod = pragma::math::min(lod, static_cast<uint32_t>(m_lodRenderMeshGroups.size() - 1));
+	lod = math::min(lod, static_cast<uint32_t>(m_lodRenderMeshGroups.size() - 1));
 	assert(lod < m_lodRenderMeshGroups.size());
 	if(lod >= m_lodRenderMeshGroups.size()) {
 		static rendering::RenderMeshGroup emptyGroup {};
@@ -418,7 +418,7 @@ pragma::rendering::RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint3
 	}
 	return m_lodRenderMeshGroups[lod];
 }
-const pragma::rendering::RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod) const { return const_cast<CModelComponent *>(this)->GetLodRenderMeshGroup(lod); }
+const rendering::RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod) const { return const_cast<CModelComponent *>(this)->GetLodRenderMeshGroup(lod); }
 
 void CModelComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
@@ -427,7 +427,7 @@ void CModelComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		m_bvhComponent = static_cast<CBvhComponent *>(&component);
 	else if(typeid(component) == typeid(CMaterialOverrideComponent)) {
 		m_materialOverrideComponent = static_cast<CMaterialOverrideComponent *>(&component);
-		pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, true);
+		math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, true);
 		SetTickPolicy(TickPolicy::Always);
 	}
 }
@@ -438,20 +438,20 @@ void CModelComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 		m_bvhComponent = nullptr;
 	else if(typeid(component) == typeid(CMaterialOverrideComponent)) {
 		m_materialOverrideComponent = nullptr;
-		pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, true);
+		math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired, true);
 		SetTickPolicy(TickPolicy::Always);
 	}
 }
 
 void CModelComponent::FlushRenderData()
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired))
+	if(math::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired))
 		UpdateRenderMeshes();
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderBufferListUpdateRequired))
+	if(math::is_flag_set(m_stateFlags, StateFlags::RenderBufferListUpdateRequired))
 		UpdateRenderBufferList();
 }
 
-void CModelComponent::SetRenderBufferListUpdateRequired() { pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired); }
+void CModelComponent::SetRenderBufferListUpdateRequired() { math::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired); }
 
 void CModelComponent::OnTick(double tDelta)
 {
@@ -464,15 +464,15 @@ bool CModelComponent::SetBodyGroup(UInt32 groupId, UInt32 id)
 	auto r = BaseModelComponent::SetBodyGroup(groupId, id);
 	if(r == false)
 		return r;
-	pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
+	math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
 	SetTickPolicy(TickPolicy::Always);
 	// UpdateLOD(m_lod); // Update our active meshes
 	return true;
 }
 
-void CModelComponent::SetRenderMeshesDirty() { pragma::math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired); }
+void CModelComponent::SetRenderMeshesDirty() { math::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired); }
 
-void CModelComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model)
+void CModelComponent::OnModelChanged(const std::shared_ptr<asset::Model> &model)
 {
 	auto &ent = GetEntity();
 	auto pRenderComponent = ent.GetComponent<CRenderComponent>();
@@ -514,57 +514,57 @@ void CEOnRenderMeshesUpdated::PushArguments(lua::State *l) { Lua::PushBool(l, re
 void CModelComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseModelComponent::RegisterLuaBindings(l, modEnts);
-	auto defCModel = pragma::LuaCore::create_entity_component_class<pragma::CModelComponent, pragma::BaseModelComponent>("ModelComponent");
-	defCModel.add_static_constant("EVENT_ON_RENDER_MESHES_UPDATED", pragma::cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED);
-	defCModel.add_static_constant("EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED", pragma::cModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED);
+	auto defCModel = pragma::LuaCore::create_entity_component_class<CModelComponent, BaseModelComponent>("ModelComponent");
+	defCModel.add_static_constant("EVENT_ON_RENDER_MESHES_UPDATED", cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED);
+	defCModel.add_static_constant("EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED", cModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED);
 	//Lua::register_base_model_component_methods<luabind::class_<CModelHandle,BaseEntityComponentHandle>,CModelHandle>(l,defCModel);
-	defCModel.def("GetRenderMaterial", static_cast<msys::CMaterial *(pragma::CModelComponent::*)(uint32_t, uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
-	defCModel.def("GetRenderMaterial", static_cast<msys::CMaterial *(pragma::CModelComponent::*)(uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
-	defCModel.def("GetLOD", &pragma::CModelComponent::GetLOD);
-	defCModel.def("IsAutoLodEnabled", &pragma::CModelComponent::IsAutoLodEnabled);
-	defCModel.def("SetAutoLodEnabled", &pragma::CModelComponent::SetAutoLodEnabled);
-	defCModel.def("SetMaxDrawDistance", &pragma::CModelComponent::SetMaxDrawDistance);
-	defCModel.def("GetMaxDrawDistance", &pragma::CModelComponent::GetMaxDrawDistance);
-	defCModel.def("UpdateRenderMeshes", &pragma::CModelComponent::UpdateRenderMeshes, luabind::default_parameter_policy<2, true> {});
-	defCModel.def("UpdateRenderMeshes", &pragma::CModelComponent::UpdateRenderMeshes);
-	defCModel.def("UpdateRenderBufferList", &pragma::CModelComponent::UpdateRenderBufferList);
-	defCModel.def("SetRenderMeshesDirty", &pragma::CModelComponent::SetRenderMeshesDirty);
-	defCModel.def("ReloadRenderBufferList", &pragma::CModelComponent::ReloadRenderBufferList, luabind::default_parameter_policy<2, false> {});
-	defCModel.def("ReloadRenderBufferList", &pragma::CModelComponent::ReloadRenderBufferList);
-	defCModel.def("IsDepthPrepassEnabled", &pragma::CModelComponent::IsDepthPrepassEnabled);
-	defCModel.def("SetDepthPrepassEnabled", &pragma::CModelComponent::SetDepthPrepassEnabled);
-	defCModel.def("SetRenderBufferData", &pragma::CModelComponent::SetRenderBufferData);
-	defCModel.def("GetRenderBufferData", +[](pragma::CModelComponent &c) -> std::vector<pragma::rendering::RenderBufferData> { return c.GetRenderBufferData(); });
-	defCModel.def("AddRenderMesh", &pragma::CModelComponent::AddRenderMesh);
-	defCModel.def("AddRenderMesh", &pragma::CModelComponent::AddRenderMesh, luabind::default_parameter_policy<4, pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass> {});
-	defCModel.def("GetRenderMeshes", +[](pragma::CModelComponent &c) -> std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> { return c.GetRenderMeshes(); });
-	defCModel.def("GetBaseShaderSpecializationFlags", &pragma::CModelComponent::GetBaseShaderSpecializationFlags);
-	defCModel.def("SetBaseShaderSpecializationFlags", &pragma::CModelComponent::SetBaseShaderSpecializationFlags);
-	defCModel.def("SetBaseShaderSpecializationFlag", &pragma::CModelComponent::SetBaseShaderSpecializationFlag);
-	defCModel.def("SetBaseShaderSpecializationFlag", +[](pragma::CModelComponent &c, pragma::GameShaderSpecializationConstantFlag flag) { c.SetBaseShaderSpecializationFlag(flag); });
-	defCModel.def("GetStaticShaderSpecializationFlags", &pragma::CModelComponent::GetStaticShaderSpecializationFlags);
-	defCModel.def("SetStaticShaderSpecializationFlags", &pragma::CModelComponent::SetStaticShaderSpecializationFlags);
-	defCModel.def("SetStaticShaderSpecializationFlags", &pragma::CModelComponent::SetStaticShaderSpecializationFlags);
+	defCModel.def("GetRenderMaterial", static_cast<material::CMaterial *(CModelComponent::*)(uint32_t, uint32_t) const>(&CModelComponent::GetRenderMaterial));
+	defCModel.def("GetRenderMaterial", static_cast<material::CMaterial *(CModelComponent::*)(uint32_t) const>(&CModelComponent::GetRenderMaterial));
+	defCModel.def("GetLOD", &CModelComponent::GetLOD);
+	defCModel.def("IsAutoLodEnabled", &CModelComponent::IsAutoLodEnabled);
+	defCModel.def("SetAutoLodEnabled", &CModelComponent::SetAutoLodEnabled);
+	defCModel.def("SetMaxDrawDistance", &CModelComponent::SetMaxDrawDistance);
+	defCModel.def("GetMaxDrawDistance", &CModelComponent::GetMaxDrawDistance);
+	defCModel.def("UpdateRenderMeshes", &CModelComponent::UpdateRenderMeshes, luabind::default_parameter_policy<2, true> {});
+	defCModel.def("UpdateRenderMeshes", &CModelComponent::UpdateRenderMeshes);
+	defCModel.def("UpdateRenderBufferList", &CModelComponent::UpdateRenderBufferList);
+	defCModel.def("SetRenderMeshesDirty", &CModelComponent::SetRenderMeshesDirty);
+	defCModel.def("ReloadRenderBufferList", &CModelComponent::ReloadRenderBufferList, luabind::default_parameter_policy<2, false> {});
+	defCModel.def("ReloadRenderBufferList", &CModelComponent::ReloadRenderBufferList);
+	defCModel.def("IsDepthPrepassEnabled", &CModelComponent::IsDepthPrepassEnabled);
+	defCModel.def("SetDepthPrepassEnabled", &CModelComponent::SetDepthPrepassEnabled);
+	defCModel.def("SetRenderBufferData", &CModelComponent::SetRenderBufferData);
+	defCModel.def("GetRenderBufferData", +[](CModelComponent &c) -> std::vector<rendering::RenderBufferData> { return c.GetRenderBufferData(); });
+	defCModel.def("AddRenderMesh", &CModelComponent::AddRenderMesh);
+	defCModel.def("AddRenderMesh", &CModelComponent::AddRenderMesh, luabind::default_parameter_policy<4, rendering::RenderBufferData::StateFlags::EnableDepthPrepass> {});
+	defCModel.def("GetRenderMeshes", +[](CModelComponent &c) -> std::vector<std::shared_ptr<geometry::ModelSubMesh>> { return c.GetRenderMeshes(); });
+	defCModel.def("GetBaseShaderSpecializationFlags", &CModelComponent::GetBaseShaderSpecializationFlags);
+	defCModel.def("SetBaseShaderSpecializationFlags", &CModelComponent::SetBaseShaderSpecializationFlags);
+	defCModel.def("SetBaseShaderSpecializationFlag", &CModelComponent::SetBaseShaderSpecializationFlag);
+	defCModel.def("SetBaseShaderSpecializationFlag", +[](CModelComponent &c, GameShaderSpecializationConstantFlag flag) { c.SetBaseShaderSpecializationFlag(flag); });
+	defCModel.def("GetStaticShaderSpecializationFlags", &CModelComponent::GetStaticShaderSpecializationFlags);
+	defCModel.def("SetStaticShaderSpecializationFlags", &CModelComponent::SetStaticShaderSpecializationFlags);
+	defCModel.def("SetStaticShaderSpecializationFlags", &CModelComponent::SetStaticShaderSpecializationFlags);
 
-	auto defRenderBufferData = luabind::class_<pragma::rendering::RenderBufferData>("RenderBufferData");
-	defRenderBufferData.add_static_constant("STATE_FLAG_NONE", pragma::math::to_integral(pragma::rendering::RenderBufferData::StateFlags::None));
-	defRenderBufferData.add_static_constant("STATE_FLAG_ENABLE_DEPTH_PREPASS_BIT", pragma::math::to_integral(pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass));
-	defRenderBufferData.add_static_constant("STATE_FLAG_ENABLE_GLOW_PASS_BIT", pragma::math::to_integral(pragma::rendering::RenderBufferData::StateFlags::EnableGlowPass));
-	defRenderBufferData.add_static_constant("STATE_FLAG_EXCLUDE_FROM_ACCELERATION_STRUCTURES_BIT", pragma::math::to_integral(pragma::rendering::RenderBufferData::StateFlags::ExcludeFromAccelerationStructures));
+	auto defRenderBufferData = luabind::class_<rendering::RenderBufferData>("RenderBufferData");
+	defRenderBufferData.add_static_constant("STATE_FLAG_NONE", math::to_integral(rendering::RenderBufferData::StateFlags::None));
+	defRenderBufferData.add_static_constant("STATE_FLAG_ENABLE_DEPTH_PREPASS_BIT", math::to_integral(rendering::RenderBufferData::StateFlags::EnableDepthPrepass));
+	defRenderBufferData.add_static_constant("STATE_FLAG_ENABLE_GLOW_PASS_BIT", math::to_integral(rendering::RenderBufferData::StateFlags::EnableGlowPass));
+	defRenderBufferData.add_static_constant("STATE_FLAG_EXCLUDE_FROM_ACCELERATION_STRUCTURES_BIT", math::to_integral(rendering::RenderBufferData::StateFlags::ExcludeFromAccelerationStructures));
 	defRenderBufferData.def(luabind::constructor<>());
-	defRenderBufferData.def_readwrite("stateFlags", &pragma::rendering::RenderBufferData::stateFlags);
-	defRenderBufferData.def_readwrite("pipelineSpecializationFlags", &pragma::rendering::RenderBufferData::pipelineSpecializationFlags);
-	defRenderBufferData.def_readwrite("material", &pragma::rendering::RenderBufferData::material);
-	defRenderBufferData.def_readwrite("renderBuffer", &pragma::rendering::RenderBufferData::renderBuffer);
+	defRenderBufferData.def_readwrite("stateFlags", &rendering::RenderBufferData::stateFlags);
+	defRenderBufferData.def_readwrite("pipelineSpecializationFlags", &rendering::RenderBufferData::pipelineSpecializationFlags);
+	defRenderBufferData.def_readwrite("material", &rendering::RenderBufferData::material);
+	defRenderBufferData.def_readwrite("renderBuffer", &rendering::RenderBufferData::renderBuffer);
 	defCModel.scope[defRenderBufferData];
 
-	auto defPropBlock = luabind::class_<pragma::rendering::MaterialPropertyBlock>("MaterialPropertyBlock");
+	auto defPropBlock = luabind::class_<rendering::MaterialPropertyBlock>("MaterialPropertyBlock");
 	defPropBlock.def(luabind::constructor<>());
-	defPropBlock.def("GetPropertyBlock", &pragma::rendering::MaterialPropertyBlock::GetPropertyBlock);
-	defPropBlock.def("GetTextureBlock", &pragma::rendering::MaterialPropertyBlock::GetTextureBlock);
+	defPropBlock.def("GetPropertyBlock", &rendering::MaterialPropertyBlock::GetPropertyBlock);
+	defPropBlock.def("GetTextureBlock", &rendering::MaterialPropertyBlock::GetTextureBlock);
 	defCModel.scope[defPropBlock];
 
 	modEnts[defCModel];
 
-	pragma::LuaCore::define_custom_constructor<pragma::rendering::RenderBufferData, +[](const pragma::rendering::RenderBufferData &renderBufferData) -> pragma::rendering::RenderBufferData { return renderBufferData; }, const pragma::rendering::RenderBufferData &>(l);
+	pragma::LuaCore::define_custom_constructor<rendering::RenderBufferData, +[](const rendering::RenderBufferData &renderBufferData) -> rendering::RenderBufferData { return renderBufferData; }, const rendering::RenderBufferData &>(l);
 }

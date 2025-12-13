@@ -30,14 +30,14 @@ Frustum::Frustum() : radius(0.f)
 	projection = umat::identity();
 }
 
-static void cmd_cl_render_shadow_pssm_split_count(pragma::NetworkState *, const pragma::console::ConVar &, int, int val)
+static void cmd_cl_render_shadow_pssm_split_count(NetworkState *, const console::ConVar &, int, int val)
 {
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CShadowCSMComponent>>();
+	ecs::EntityIterator entIt {*get_cgame()};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<CShadowCSMComponent>>();
 	for(auto *ent : entIt) {
-		auto hCsmC = ent->GetComponent<pragma::CShadowCSMComponent>();
+		auto hCsmC = ent->GetComponent<CShadowCSMComponent>();
 		if(hCsmC.expired())
 			continue;
 		hCsmC->SetSplitCount(val);
@@ -48,14 +48,14 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<int>("cl_render_shadow_pssm_split_count", &cmd_cl_render_shadow_pssm_split_count);
 }
 
-static void cmd_render_csm_max_distance(pragma::NetworkState *, const pragma::console::ConVar &, float, float val)
+static void cmd_render_csm_max_distance(NetworkState *, const console::ConVar &, float, float val)
 {
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CShadowCSMComponent>>();
+	ecs::EntityIterator entIt {*get_cgame()};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<CShadowCSMComponent>>();
 	for(auto *ent : entIt) {
-		auto hCsmC = ent->GetComponent<pragma::CShadowCSMComponent>();
+		auto hCsmC = ent->GetComponent<CShadowCSMComponent>();
 		if(hCsmC.expired())
 			continue;
 		hCsmC->SetMaxDistance(val);
@@ -65,15 +65,15 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<float>("render_csm_max_distance", &cmd_render_csm_max_distance);
 }
 
-static auto cvCascadeCount = pragma::console::get_client_con_var("cl_render_shadow_pssm_split_count");
-static auto cvRange = pragma::console::get_client_con_var("render_csm_max_distance");
-CShadowCSMComponent::CShadowCSMComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_maxDistance {cvRange->GetFloat()}, m_layerUpdate {false}
+static auto cvCascadeCount = console::get_client_con_var("cl_render_shadow_pssm_split_count");
+static auto cvRange = console::get_client_con_var("render_csm_max_distance");
+CShadowCSMComponent::CShadowCSMComponent(ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_maxDistance {cvRange->GetFloat()}, m_layerUpdate {false}
 {
 	SetSplitCount(cvCascadeCount->GetInt());
 	UpdateSplitDistances(2.f, GetMaxDistance());
 
-	m_whShaderCsm = pragma::get_cengine()->GetShader("shadowcsm");
-	m_whShaderCsmTransparent = pragma::get_cengine()->GetShader("shadowcsmtransparent");
+	m_whShaderCsm = get_cengine()->GetShader("shadowcsm");
+	m_whShaderCsmTransparent = get_cengine()->GetShader("shadowcsmtransparent");
 }
 
 void CShadowCSMComponent::Initialize() { BaseEntityComponent::Initialize(); }
@@ -99,14 +99,14 @@ void CShadowCSMComponent::SetSplitCount(unsigned int numSplits)
 {
 	if(numSplits == 0)
 		numSplits = 1;
-	else if(numSplits > CShadowCSMComponent::MAX_CASCADE_COUNT)
-		numSplits = CShadowCSMComponent::MAX_CASCADE_COUNT;
+	else if(numSplits > MAX_CASCADE_COUNT)
+		numSplits = MAX_CASCADE_COUNT;
 	m_numSplits = numSplits;
 	m_layerCount = numSplits;
 
-	auto &csmBuffer = pragma::get_cgame()->GetGlobalRenderSettingsBufferData().csmBuffer;
-	auto splitCount = static_cast<decltype(pragma::ShaderGameWorldLightingPass::CSMData::count)>(numSplits);
-	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, count), splitCount);
+	auto &csmBuffer = get_cgame()->GetGlobalRenderSettingsBufferData().csmBuffer;
+	auto splitCount = static_cast<decltype(ShaderGameWorldLightingPass::CSMData::count)>(numSplits);
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, count), splitCount);
 
 	m_frustums.resize(m_numSplits);
 	m_fard.resize(m_numSplits);
@@ -144,10 +144,10 @@ uint32_t CShadowCSMComponent::GetLayerCount() const { return m_layerCount; }
 
 void CShadowCSMComponent::SetFrustumUpdateCallback(const std::function<void(void)> &f) { m_onFrustumUpdated = f; }
 
-static auto cvUpdateFrequency = pragma::console::get_client_con_var("cl_render_shadow_update_frequency");
-static auto cvUpdateFrequencyOffset = pragma::console::get_client_con_var("cl_render_shadow_pssm_update_frequency_offset");
-static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
-void CShadowCSMComponent::UpdateFrustum(uint32_t splitId, pragma::CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir)
+static auto cvUpdateFrequency = console::get_client_con_var("cl_render_shadow_update_frequency");
+static auto cvUpdateFrequencyOffset = console::get_client_con_var("cl_render_shadow_pssm_update_frequency_offset");
+static auto cvShadowmapSize = console::get_client_con_var("cl_render_shadow_resolution");
+void CShadowCSMComponent::UpdateFrustum(uint32_t splitId, CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir)
 {
 	auto &frustumSplit = m_frustums.at(splitId);
 	m_pendingInfo.prevVpMatrices.at(splitId) = m_vpMatrices.at(splitId);
@@ -170,10 +170,10 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId, pragma::CCameraCompone
 	cam.SetNearZ(zNear);
 	cam.SetFarZ(zFar);
 
-	auto &ftr = frustumSplit.points[static_cast<int>(pragma::math::FrustumPoint::FarTopRight)];
-	auto &fbl = frustumSplit.points[static_cast<int>(pragma::math::FrustumPoint::FarBottomLeft)];
-	auto &nbl = frustumSplit.points[static_cast<int>(pragma::math::FrustumPoint::NearBottomLeft)];
-	auto &ntr = frustumSplit.points[static_cast<int>(pragma::math::FrustumPoint::NearTopRight)];
+	auto &ftr = frustumSplit.points[static_cast<int>(math::FrustumPoint::FarTopRight)];
+	auto &fbl = frustumSplit.points[static_cast<int>(math::FrustumPoint::FarBottomLeft)];
+	auto &nbl = frustumSplit.points[static_cast<int>(math::FrustumPoint::NearBottomLeft)];
+	auto &ntr = frustumSplit.points[static_cast<int>(math::FrustumPoint::NearTopRight)];
 
 	std::vector<Vector3> trapezoid = {ftr, fbl, nbl, ntr};
 	auto &center = frustumSplit.center;
@@ -218,17 +218,17 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId, pragma::CCameraCompone
 	auto &camProj = cam.GetProjectionMatrix();
 	auto &splitDistance = m_pendingInfo.prevSplitDistances;
 
-	auto &csmBuffer = pragma::get_cgame()->GetGlobalRenderSettingsBufferData().csmBuffer;
-	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, VP), m_pendingInfo.prevVpMatrices.size() * sizeof(Mat4), m_pendingInfo.prevVpMatrices.data());
-	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, fard), splitDistance);
+	auto &csmBuffer = get_cgame()->GetGlobalRenderSettingsBufferData().csmBuffer;
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, VP), m_pendingInfo.prevVpMatrices.size() * sizeof(Mat4), m_pendingInfo.prevVpMatrices.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, fard), splitDistance);
 
 	// Calculate new split distances
 	splitDistance[splitId] = 0.5f * (-frustumSplit.split.fard * camProj[2][2] + camProj[3][2]) / frustumSplit.split.fard + 0.5f;
 }
 void CShadowCSMComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CShadowCSMComponent::InitializeTextureSet(TextureSet &set, pragma::rendering::ShadowMapType smType)
+void CShadowCSMComponent::InitializeTextureSet(TextureSet &set, rendering::ShadowMapType smType)
 {
-	auto wpShaderShadow = pragma::get_cengine()->GetShader("shadowcsm");
+	auto wpShaderShadow = get_cengine()->GetShader("shadowcsm");
 	if(wpShaderShadow.expired())
 		return;
 	auto size = cvShadowmapSize->GetInt();
@@ -239,13 +239,13 @@ void CShadowCSMComponent::InitializeTextureSet(TextureSet &set, pragma::renderin
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.width = size;
 	imgCreateInfo.height = size;
-	imgCreateInfo.format = pragma::ShaderShadow::RENDER_PASS_DEPTH_FORMAT;
+	imgCreateInfo.format = ShaderShadow::RENDER_PASS_DEPTH_FORMAT;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::DepthStencilAttachmentBit | prosper::ImageUsageFlags::TransferDstBit;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
-	if(smType == pragma::rendering::ShadowMapType::Static)
+	if(smType == rendering::ShadowMapType::Static)
 		imgCreateInfo.usage |= prosper::ImageUsageFlags::TransferSrcBit;
 	imgCreateInfo.layers = layerCount;
-	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(imgCreateInfo);
+	auto img = get_cengine()->GetRenderContext().CreateImage(imgCreateInfo);
 
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	//samplerCreateInfo.compareEnable = true; // When enabled, causes strange behavior on Nvidia cards when doing texture lookups
@@ -258,21 +258,21 @@ void CShadowCSMComponent::InitializeTextureSet(TextureSet &set, pragma::renderin
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	texCreateInfo.flags |= prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer;
-	auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+	auto tex = get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
 
-	set.renderTarget = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({tex}, static_cast<prosper::ShaderGraphics *>(wpShaderShadow.get())->GetRenderPass(), rtCreateInfo);
+	set.renderTarget = get_cengine()->GetRenderContext().CreateRenderTarget({tex}, static_cast<prosper::ShaderGraphics *>(wpShaderShadow.get())->GetRenderPass(), rtCreateInfo);
 	set.renderTarget->SetDebugName("csm_rt");
 }
-void CShadowCSMComponent::UpdateFrustum(pragma::CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir)
+void CShadowCSMComponent::UpdateFrustum(CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir)
 {
 	auto numCascades = GetSplitCount();
 	for(auto i = decltype(numCascades) {0}; i < numCascades; ++i)
 		UpdateFrustum(i, cam, matView, dir);
 }
 
-void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::BaseEnvLightDirectionalComponent &light)
+void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, BaseEnvLightDirectionalComponent &light)
 {
 #if 0
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();
@@ -373,7 +373,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 				if(shaderCsmTransparent != nullptr)
 				{
 					CBaseEntity *prevEntity = nullptr;
-					msys::Material *prevMat = nullptr;
+					material::Material *prevMat = nullptr;
 					if(shaderCsmTransparent->BeginDraw(drawCmd) == true)
 					{
 						shaderCsmTransparent->BindLight(*pLightComponent);
@@ -399,7 +399,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 									auto *mat = matIdx.has_value() ? mdl->GetMaterial(*matIdx) : nullptr;
 									if(mat != nullptr)
 									{
-										if(mat == prevMat || shaderCsmTransparent->BindMaterial(static_cast<msys::CMaterial&>(*mat)) == true)
+										if(mat == prevMat || shaderCsmTransparent->BindMaterial(static_cast<material::CMaterial&>(*mat)) == true)
 										{
 											shaderCsmTransparent->Draw(*cSubMesh);
 											prevMat = mat;

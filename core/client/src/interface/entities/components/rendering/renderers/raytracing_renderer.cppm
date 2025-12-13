@@ -14,7 +14,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CRaytracingRendererComponent final : public BaseEntityComponent {
 		  public:
-			CRaytracingRendererComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+			CRaytracingRendererComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		  private:
 		};

@@ -19,8 +19,8 @@ export {
 				Dirty = 1u,
 				AlwaysDirty = Dirty << 1u,
 			};
-			pragma::BaseEntityComponent *component;
-			const pragma::ComponentMemberInfo *memberInfo;
+			BaseEntityComponent *component;
+			const ComponentMemberInfo *memberInfo;
 			State changed = State::Dirty;
 			std::array<float, 16> data;
 		};

@@ -59,7 +59,7 @@ void pragma::rendering::shader_material::clear_cache() { g_shaderMaterialCache =
 
 //////////
 
-static std::optional<pragma::shadergraph::Value> get_ds_value(const msys::Material &mat, const std::string_view &propertyPath, udm::Type type)
+static std::optional<pragma::shadergraph::Value> get_ds_value(const pragma::material::Material &mat, const std::string_view &propertyPath, udm::Type type)
 {
 	auto sz = udm::size_of(type);
 	switch(type) {
@@ -415,10 +415,10 @@ ShaderMaterial::ShaderMaterial(const pragma::GString &name) : ShaderInputDescrip
 
 pragma::rendering::ShaderInputDescriptor *ShaderMaterial::Import(const std::string &name) { return g_shaderMaterialCache->Load(name).get(); }
 
-static void to_srgb_color(Vector3 &col) { uimg::linear_to_srgb(col); }
-static void to_srgb_color(Vector4 &col) { col = Vector4 {uimg::linear_to_srgb(reinterpret_cast<Vector3 &>(col)), col.w}; }
+static void to_srgb_color(Vector3 &col) { pragma::image::linear_to_srgb(col); }
+static void to_srgb_color(Vector4 &col) { col = Vector4 {pragma::image::linear_to_srgb(reinterpret_cast<Vector3 &>(col)), col.w}; }
 
-void ShaderMaterial::PopulateShaderInputDataFromMaterial(ShaderInputData &inputData, const msys::CMaterial &mat)
+void ShaderMaterial::PopulateShaderInputDataFromMaterial(ShaderInputData &inputData, const material::CMaterial &mat)
 {
 	inputData.data.resize(MAX_MATERIAL_SIZE);
 
@@ -435,9 +435,9 @@ void ShaderMaterial::PopulateShaderInputDataFromMaterial(ShaderInputData &inputD
 
 		auto val = prop->defaultValue;
 		auto matValType = mat.GetPropertyType(prop.parameter.name);
-		if(matValType != msys::PropertyType::None && matValType != msys::PropertyType::Block) {
+		if(matValType != material::PropertyType::None && matValType != material::PropertyType::Block) {
 			auto handled = false;
-			if(mat.GetPropertyValueType(prop.parameter.name) == ds::ValueType::String) {
+			if(mat.GetPropertyValueType(prop.parameter.name) == datasystem::ValueType::String) {
 				std::string strVal;
 				mat.GetProperty(prop.parameter.name, &strVal);
 				if(prop->enumSet) {

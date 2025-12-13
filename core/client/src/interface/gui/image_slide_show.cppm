@@ -15,12 +15,12 @@ export namespace pragma::gui::types {
 		struct PreloadImage {
 			PreloadImage();
 			Int32 image;
-			std::shared_ptr<msys::Texture> texture;
+			std::shared_ptr<material::Texture> texture;
 			bool ready;
 			bool loading;
 		};
-		pragma::gui::WIHandle m_hImgPrev;
-		pragma::gui::WIHandle m_hImgNext;
+		WIHandle m_hImgPrev;
+		WIHandle m_hImgNext;
 		std::shared_ptr<prosper::Texture> m_lastTexture = nullptr;
 		std::shared_ptr<prosper::BlurSet> m_blurSet = nullptr;
 		int m_currentImg;

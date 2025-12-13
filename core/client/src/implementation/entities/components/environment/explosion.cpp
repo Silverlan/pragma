@@ -20,8 +20,8 @@ using namespace pragma;
 void CExplosionComponent::Initialize()
 {
 	BaseEnvExplosionComponent::Initialize();
-	pragma::ecs::CParticleSystemComponent::Precache("explosion");
-	pragma::get_client_state()->LoadSoundScripts("fx.udm");
+	ecs::CParticleSystemComponent::Precache("explosion");
+	get_client_state()->LoadSoundScripts("fx.udm");
 }
 
 void CExplosionComponent::Explode()
@@ -30,7 +30,7 @@ void CExplosionComponent::Explode()
 #pragma message("TODO: Apply damage to all ents within range -> Serverside")
 #pragma message("TODO: Leave a scorch mark!")
 	auto &ent = GetEntity();
-	auto *particle = pragma::ecs::CParticleSystemComponent::Create("explosion");
+	auto *particle = ecs::CParticleSystemComponent::Create("explosion");
 	if(particle != nullptr) {
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pTrComponentPt = particle->GetEntity().GetTransformComponent();
@@ -40,13 +40,13 @@ void CExplosionComponent::Explode()
 		if(particle != nullptr)
 			particle->Start();
 	}
-	auto pSoundEmitterComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();
+	auto pSoundEmitterComponent = ent.GetComponent<CSoundEmitterComponent>();
 	if(pSoundEmitterComponent.valid())
-		pSoundEmitterComponent->EmitSound("fx.explosion", pragma::audio::ALSoundType::Effect, 1.f);
+		pSoundEmitterComponent->EmitSound("fx.explosion", audio::ALSoundType::Effect, 1.f);
 	auto radius = 500.f;
-	auto *entQuake = pragma::get_cgame()->CreateEntity<CEnvQuake>();
+	auto *entQuake = get_cgame()->CreateEntity<CEnvQuake>();
 	if(entQuake != nullptr) {
-		auto *pQuakeComponent = static_cast<pragma::CQuakeComponent *>(entQuake->FindComponent("quake").get());
+		auto *pQuakeComponent = static_cast<CQuakeComponent *>(entQuake->FindComponent("quake").get());
 		if(pQuakeComponent != nullptr) {
 			pQuakeComponent->SetFrequency(50.f);
 			pQuakeComponent->SetAmplitude(50.f);
@@ -55,7 +55,7 @@ void CExplosionComponent::Explode()
 		auto pAttComponent = entQuake->AddComponent<CAttachmentComponent>();
 		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
-			attInfo.flags |= pragma::FAttachmentMode::SnapToOrigin | pragma::FAttachmentMode::PositionOnly;
+			attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::PositionOnly;
 			pAttComponent->AttachToEntity(&ent, attInfo);
 		}
 		entQuake->SetKeyValue("spawnflags", std::to_string(SF_QUAKE_IN_AIR | SF_QUAKE_REMOVE_ON_COMPLETE));

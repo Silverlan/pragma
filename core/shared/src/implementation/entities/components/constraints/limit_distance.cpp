@@ -8,7 +8,7 @@ import :entities.components.constraints.limit_distance;
 
 using namespace pragma;
 
-void ConstraintLimitDistanceComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void ConstraintLimitDistanceComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = ConstraintLimitDistanceComponent;
 
@@ -16,7 +16,7 @@ void ConstraintLimitDistanceComponent::RegisterMembers(pragma::EntityComponentMa
 		using TDistance = float;
 		auto memberInfo = create_component_member_info<T, TDistance, static_cast<void (T::*)(TDistance)>(&T::SetDistance), static_cast<TDistance (T::*)() const>(&T::GetDistance)>("distance", 0.f);
 		memberInfo.SetMin(0.f);
-		memberInfo.SetSpecializationType(pragma::AttributeSpecializationType::Distance);
+		memberInfo.SetSpecializationType(AttributeSpecializationType::Distance);
 		registerMember(std::move(memberInfo));
 	}
 
@@ -27,15 +27,15 @@ void ConstraintLimitDistanceComponent::RegisterMembers(pragma::EntityComponentMa
 	}
 }
 
-ConstraintLimitDistanceComponent::ConstraintLimitDistanceComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintLimitDistanceComponent::ConstraintLimitDistanceComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintLimitDistanceComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
 	GetEntity().AddComponent<ConstraintComponent>();
-	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
+	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<ComponentEvent> evData) { ApplyConstraint(); });
 }
-void ConstraintLimitDistanceComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintLimitDistanceComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintLimitDistanceComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
@@ -48,7 +48,7 @@ ConstraintLimitDistanceComponent::ClampRegion ConstraintLimitDistanceComponent::
 void ConstraintLimitDistanceComponent::SetDistance(float dist)
 {
 	m_dist = dist;
-	m_distSqr = pragma::math::pow2(dist);
+	m_distSqr = math::pow2(dist);
 }
 float ConstraintLimitDistanceComponent::GetDistance() const { return m_dist; }
 void ConstraintLimitDistanceComponent::ApplyConstraint()
@@ -60,14 +60,14 @@ void ConstraintLimitDistanceComponent::ApplyConstraint()
 	if(!constraintInfo || influence == 0.f)
 		return;
 	Vector3 posDriven;
-	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriven);
+	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriven);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driven object of constraint '{}'.", constraintInfo->drivenObjectPropIdx, GetEntity().ToString());
 		return;
 	}
 
 	Vector3 posDriver;
-	res = constraintInfo->driverC->GetTransformMemberPos(constraintInfo->driverPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDriverSpace()), posDriver);
+	res = constraintInfo->driverC->GetTransformMemberPos(constraintInfo->driverPropIdx, static_cast<math::CoordinateSpace>(m_constraintC->GetDriverSpace()), posDriver);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driver of constraint '{}'.", constraintInfo->driverPropIdx, GetEntity().ToString());
 		return;
@@ -95,5 +95,5 @@ void ConstraintLimitDistanceComponent::ApplyConstraint()
 	posDriver = origin + dir * GetDistance();
 
 	posDriver = uvec::lerp(posDriven, posDriver, influence);
-	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriver);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriver);
 }

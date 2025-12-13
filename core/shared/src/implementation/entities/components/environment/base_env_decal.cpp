@@ -8,7 +8,7 @@ import :entities.components.environment.base_decal;
 
 using namespace pragma;
 
-void BaseEnvDecalComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void BaseEnvDecalComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseEnvDecalComponent;
 	{
@@ -16,8 +16,8 @@ void BaseEnvDecalComponent::RegisterMembers(pragma::EntityComponentManager &comp
 		auto memberInfo = create_component_member_info<T, TMaterial, static_cast<void (T::*)(const TMaterial &)>(&T::SetMaterial), static_cast<const TMaterial &(T::*)() const>(&T::GetMaterial)>("material", "", AttributeSpecializationType::File);
 		auto &metaData = memberInfo.AddMetaData();
 		metaData["assetType"] = "material";
-		metaData["rootPath"] = pragma::util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)).GetString();
-		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Material, pragma::asset::FormatType::All);
+		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(asset::Type::Material)).GetString();
+		metaData["extensions"] = pragma::asset::get_supported_extensions(asset::Type::Material, asset::FormatType::All);
 		metaData["stripRootPath"] = true;
 		metaData["stripExtension"] = true;
 		registerMember(std::move(memberInfo));
@@ -35,17 +35,17 @@ void BaseEnvDecalComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "material", false))
 			m_material = kvData.value;
 		else if(pragma::string::compare<std::string>(kvData.key, "size", false))
-			m_size = pragma::string::to_float(kvData.value);
+			m_size = string::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "start_disabled", false))
-			m_startDisabled = pragma::util::to_boolean(kvData.value);
+			m_startDisabled = util::to_boolean(kvData.value);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();

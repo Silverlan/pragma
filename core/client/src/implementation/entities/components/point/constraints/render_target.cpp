@@ -38,9 +38,9 @@ void CRenderTargetComponent::GetRenderSize(float *w, float *h)
 	*h = m_kvRenderHeight;
 }
 
-void CRenderTargetComponent::SetRenderMaterial(msys::Material *mat) { m_matRender = mat; }
-msys::Material *CRenderTargetComponent::GetRenderMaterial() { return m_matRender; }
-void CRenderTargetComponent::SetRenderMaterial(std::string mat) { SetRenderMaterial(pragma::get_client_state()->LoadMaterial(mat.c_str())); }
+void CRenderTargetComponent::SetRenderMaterial(material::Material *mat) { m_matRender = mat; }
+material::Material *CRenderTargetComponent::GetRenderMaterial() { return m_matRender; }
+void CRenderTargetComponent::SetRenderMaterial(std::string mat) { SetRenderMaterial(get_client_state()->LoadMaterial(mat.c_str())); }
 
 void CRenderTargetComponent::SetRefreshRate(float f) { m_kvRefreshRate = f; }
 float CRenderTargetComponent::GetRefreshRate() { return m_kvRefreshRate; }
@@ -58,7 +58,7 @@ void CRenderTargetComponent::Spawn()
 
 unsigned int CRenderTargetComponent::GetTextureBuffer() { return 0; } // Obsolete
 
-void CRenderTargetComponent::Render(pragma::rendering::SceneRenderPass renderMode)
+void CRenderTargetComponent::Render(rendering::SceneRenderPass renderMode)
 {
 	// TODO
 }

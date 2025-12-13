@@ -40,7 +40,7 @@ export namespace luabind {
 	template<class U>
 	std::shared_ptr<ufile::IFile> default_converter<std::shared_ptr<ufile::IFile>>::to_cpp(lua::State *L, U u, int index)
 	{
-		auto *f = luabind::object_cast<LFile *>(luabind::object {luabind::from_stack(L, index)});
+		auto *f = luabind::object_cast<LFile *>(object {from_stack(L, index)});
 		return f->GetHandle();
 	}
 }

@@ -12,10 +12,10 @@ static auto cvOpenEditorOnError = pragma::console::get_con_var("lua_open_editor_
 std::optional<std::string> Lua::GetLuaFilePath(const std::string &fname)
 {
 	std::string fullLocalPath;
-	if(FileManager::FindLocalPath(fname, fullLocalPath) == false)
+	if(pragma::fs::find_local_path(fname, fullLocalPath) == false)
 		fullLocalPath = fname;
-	filemanager::find_absolute_path(fullLocalPath, fullLocalPath);
-	if(FileManager::ExistsSystem(fullLocalPath) == false)
+	pragma::fs::find_absolute_path(fullLocalPath, fullLocalPath);
+	if(pragma::fs::exists_system(fullLocalPath) == false)
 		return {};
 	return fullLocalPath;
 }
@@ -55,7 +55,7 @@ void Lua::OpenFileInZeroBrane(const std::string &fname, uint32_t lineId)
 const auto maxLuaPathLen = 120u;
 static void strip_path_until_lua_dir(std::string &shortSrc)
 {
-	auto c = FileManager::GetDirectorySeparator();
+	auto c = pragma::fs::get_directory_separator();
 	auto br = shortSrc.find(c);
 	uint32_t offset = 0;
 	auto bFound = false;
@@ -82,8 +82,8 @@ static void transform_path(const lua::DebugInfo &d, std::string &errPath, int32_
 	auto qt0 = errPath.find_first_of('\"', start);
 	auto qt1 = errPath.find_first_of('\"', qt0 + 1);
 	if(qt0 < end && qt1 < end) {
-		auto path = FileManager::GetCanonicalizedPath(Lua::get_source(d));
-		filemanager::find_relative_path(path, path);
+		auto path = pragma::fs::get_canonicalized_path(Lua::get_source(d));
+		pragma::fs::find_relative_path(path, path);
 		strip_path_until_lua_dir(path);
 		if(path.length() > maxLuaPathLen)
 			path = "..." + path.substr(path.size() - maxLuaPathLen);
@@ -138,7 +138,7 @@ bool Lua::PrintTraceback(lua::State *l, std::stringstream &ssOut, const std::str
 	if(bFoundSrc == true) {
 		if(!errMsg.empty() && errMsg.front() != '[') {
 			std::string shortSrc = get_source(d);
-			auto c = FileManager::GetDirectorySeparator();
+			auto c = pragma::fs::get_directory_separator();
 			auto br = shortSrc.find(c);
 			uint32_t offset = 0;
 			auto bFound = false;

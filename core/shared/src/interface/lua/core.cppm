@@ -11,7 +11,7 @@ export import pragma.lua;
 export {
 	namespace Lua {
 		void TypeError(const luabind::object &o, Type type);
-		DLLNETWORK Lua::Type GetType(const luabind::object &o);
+		DLLNETWORK Type GetType(const luabind::object &o);
 		DLLNETWORK void CheckType(const luabind::object &o, Type type);
 	};
 
@@ -37,8 +37,8 @@ export {
 	bool Lua::CheckHandle(lua::State *l, const pragma::util::TSharedHandle<TType> &handle)
 	{
 		if(handle.IsExpired()) {
-			Lua::PushString(l, "Attempted to use a NULL handle");
-			Lua::Error(l);
+			PushString(l, "Attempted to use a NULL handle");
+			Error(l);
 			return false;
 		}
 		return true;
@@ -48,8 +48,8 @@ export {
 	bool Lua::CheckHandle(lua::State *l, const pragma::util::TWeakSharedHandle<TType> &handle)
 	{
 		if(handle.IsExpired()) {
-			Lua::PushString(l, "Attempted to use a NULL handle");
-			Lua::Error(l);
+			PushString(l, "Attempted to use a NULL handle");
+			Error(l);
 			return false;
 		}
 		return true;
@@ -59,8 +59,8 @@ export {
 	{
 		auto *handle = CheckPtr<TType>(l, idx);
 		if(handle == nullptr) {
-			Lua::PushString(l, "Attempted to use a NULL handle");
-			Lua::Error(l);
+			PushString(l, "Attempted to use a NULL handle");
+			Error(l);
 			// Unreachable
 		}
 		return *handle;
@@ -70,18 +70,18 @@ export {
 	bool Lua::CheckHandle(lua::State *l, const TType *value)
 	{
 		if(value == nullptr) {
-			Lua::PushString(l, "Attempted to use a NULL handle");
-			Lua::Error(l);
+			PushString(l, "Attempted to use a NULL handle");
+			Error(l);
 			// Unreachable
 		}
 		return true;
 	}
 
 	namespace Lua {
-		DLLNETWORK Lua::StatusCode Execute(lua::State *l, const std::function<Lua::StatusCode(int (*traceback)(lua::State *))> &target);
-		DLLNETWORK void Execute(lua::State *l, const std::function<void(int (*traceback)(lua::State *), void (*syntaxHandle)(lua::State *, Lua::StatusCode))> &target);
+		DLLNETWORK StatusCode Execute(lua::State *l, const std::function<StatusCode(int (*traceback)(lua::State *))> &target);
+		DLLNETWORK void Execute(lua::State *l, const std::function<void(int (*traceback)(lua::State *), void (*syntaxHandle)(lua::State *, StatusCode))> &target);
 		DLLNETWORK void HandleLuaError(lua::State *l);
-		DLLNETWORK void HandleLuaError(lua::State *l, Lua::StatusCode s);
+		DLLNETWORK void HandleLuaError(lua::State *l, StatusCode s);
 		DLLNETWORK std::string GetErrorMessagePrefix(lua::State *l);
 		template<typename T>
 		void table_to_vector(lua::State *l, const luabind::object &t, int32_t tableStackIndex, std::vector<T> &outData);
@@ -101,7 +101,7 @@ export {
 	template<typename T>
 	void Lua::table_to_vector(lua::State *l, const luabind::object &t, int32_t tableStackIndex, std::vector<T> &outData)
 	{
-		auto n = Lua::GetObjectLength(l, tableStackIndex);
+		auto n = GetObjectLength(l, tableStackIndex);
 		outData.reserve(outData.size() + n);
 		for(auto it = luabind::iterator {t}, end = luabind::iterator {}; it != end; ++it) {
 			auto val = luabind::object_cast_nothrow<T>(*it, T {});
@@ -161,18 +161,18 @@ export {
 		T Check(lua::State *l, int32_t n)
 		{
 			if constexpr(std::is_same_v<T, bool>)
-				return Lua::CheckBool(l, n);
+				return CheckBool(l, n);
 			else if constexpr(std::is_integral_v<T>)
-				return Lua::CheckInt(l, n);
+				return CheckInt(l, n);
 			else if constexpr(std::is_arithmetic_v<T>)
-				return Lua::CheckNumber(l, n);
+				return CheckNumber(l, n);
 			else // if constexpr(pragma::util::is_string<T>::value)
-				return Lua::CheckString(l, n);
+				return CheckString(l, n);
 		}
 		template<typename T, typename = std::enable_if_t<!is_trivial_type<T>>>
 		T &Check(lua::State *l, int32_t n)
 		{
-			Lua::CheckUserData(l, n);
+			CheckUserData(l, n);
 			luabind::object o(luabind::from_stack(l, n));
 			auto *pValue = luabind::object_cast_nothrow<T *>(o, static_cast<T *>(nullptr));
 			if(pValue == nullptr) {
@@ -186,7 +186,7 @@ export {
 		template<typename T, typename = std::enable_if_t<!std::is_arithmetic<T>::value>>
 		T *CheckPtr(lua::State *l, int32_t n)
 		{
-			Lua::CheckUserData(l, n);
+			CheckUserData(l, n);
 			luabind::object o(luabind::from_stack(l, n));
 			return luabind::object_cast_nothrow<T *>(o, static_cast<T *>(nullptr));
 		}
@@ -195,13 +195,13 @@ export {
 		bool IsType(lua::State *l, int32_t n)
 		{
 			if constexpr(std::is_same_v<T, bool>)
-				return Lua::IsBool(l, n);
+				return IsBool(l, n);
 			else if constexpr(std::is_arithmetic_v<T>)
-				return Lua::IsNumber(l, n);
+				return IsNumber(l, n);
 			else if constexpr(pragma::util::is_string<T>::value)
-				return Lua::IsString(l, n);
+				return IsString(l, n);
 			else {
-				if(!Lua::IsUserData(l, n))
+				if(!IsUserData(l, n))
 					return false;
 				luabind::object o(luabind::from_stack(l, n));
 				auto *pValue = luabind::object_cast_nothrow<T *>(o, static_cast<T *>(nullptr));

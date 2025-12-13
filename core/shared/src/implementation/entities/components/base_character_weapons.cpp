@@ -9,7 +9,7 @@ import :entities.components.base_character;
 using namespace pragma;
 
 std::vector<EntityHandle> &BaseCharacterComponent::GetWeapons() { return m_weapons; }
-void BaseCharacterComponent::GiveWeapon(pragma::ecs::BaseEntity &ent)
+void BaseCharacterComponent::GiveWeapon(ecs::BaseEntity &ent)
 {
 	if(!ent.IsWeapon())
 		return;
@@ -21,7 +21,7 @@ void BaseCharacterComponent::GiveWeapon(pragma::ecs::BaseEntity &ent)
 	if(GetActiveWeapon() == nullptr)
 		DeployWeapon(ent);
 }
-pragma::ecs::BaseEntity *BaseCharacterComponent::GiveWeapon(std::string className)
+ecs::BaseEntity *BaseCharacterComponent::GiveWeapon(std::string className)
 {
 	auto &ent = GetEntity();
 	auto *state = ent.GetNetworkState();
@@ -37,27 +37,27 @@ pragma::ecs::BaseEntity *BaseCharacterComponent::GiveWeapon(std::string classNam
 	GiveWeapon(*wep);
 	return wep;
 }
-pragma::ecs::BaseEntity *BaseCharacterComponent::GetActiveWeapon()
+ecs::BaseEntity *BaseCharacterComponent::GetActiveWeapon()
 {
 	if(m_weaponActive.valid() == false)
 		return nullptr;
 	return m_weaponActive.get();
 }
-pragma::ecs::BaseEntity *BaseCharacterComponent::GetWeapon(std::string className)
+ecs::BaseEntity *BaseCharacterComponent::GetWeapon(std::string className)
 {
-	pragma::string::to_lower(className);
+	string::to_lower(className);
 	auto it = std::find_if(m_weapons.begin(), m_weapons.end(), [&className](const EntityHandle &hEnt) { return (hEnt.valid() && hEnt.get()->GetClass() == className) ? true : false; });
 	return (it != m_weapons.end()) ? it->get() : nullptr;
 }
-std::vector<pragma::ecs::BaseEntity *> BaseCharacterComponent::GetWeapons(std::string className)
+std::vector<ecs::BaseEntity *> BaseCharacterComponent::GetWeapons(std::string className)
 {
-	std::vector<pragma::ecs::BaseEntity *> weapons;
+	std::vector<ecs::BaseEntity *> weapons;
 	GetWeapons(className, weapons);
 	return weapons;
 }
-void BaseCharacterComponent::GetWeapons(std::string className, std::vector<pragma::ecs::BaseEntity *> &weapons)
+void BaseCharacterComponent::GetWeapons(std::string className, std::vector<ecs::BaseEntity *> &weapons)
 {
-	pragma::string::to_lower(className);
+	string::to_lower(className);
 	for(auto &hEnt : m_weapons) {
 		if(hEnt.valid() && hEnt->GetClass() == className)
 			weapons.push_back(hEnt.get());
@@ -72,7 +72,7 @@ void BaseCharacterComponent::DeployWeapon(const std::string &className)
 		return;
 	DeployWeapon(*it->get());
 }
-void BaseCharacterComponent::DeployWeapon(pragma::ecs::BaseEntity &ent)
+void BaseCharacterComponent::DeployWeapon(ecs::BaseEntity &ent)
 {
 	if(&ent == GetActiveWeapon())
 		return;
@@ -88,7 +88,7 @@ void BaseCharacterComponent::DeployWeapon(pragma::ecs::BaseEntity &ent)
 	auto evOnDeployWeapon = CEOnDeployWeapon {ent};
 	BroadcastEvent(baseCharacterComponent::EVENT_ON_DEPLOY_WEAPON, evOnDeployWeapon);
 }
-void BaseCharacterComponent::SetActiveWeapon(pragma::ecs::BaseEntity *ent)
+void BaseCharacterComponent::SetActiveWeapon(ecs::BaseEntity *ent)
 {
 	if(ent == nullptr)
 		m_weaponActive = EntityHandle();
@@ -115,13 +115,13 @@ void BaseCharacterComponent::RemoveWeapon(std::string className)
 			it = m_weapons.erase(it);
 			continue;
 		}
-		if(pragma::string::compare(className.c_str(), hEnt->GetClass().c_str(), false)) {
+		if(string::compare(className.c_str(), hEnt->GetClass().c_str(), false)) {
 			it = RemoveWeapon(*it->get());
 			continue;
 		}
 	}
 }
-std::vector<EntityHandle>::iterator BaseCharacterComponent::RemoveWeapon(pragma::ecs::BaseEntity &ent)
+std::vector<EntityHandle>::iterator BaseCharacterComponent::RemoveWeapon(ecs::BaseEntity &ent)
 {
 	auto it = std::find_if(m_weapons.begin(), m_weapons.end(), [&ent](const EntityHandle &hEnt) { return (hEnt.get() == &ent) ? true : false; });
 	if(it == m_weapons.end())
@@ -140,7 +140,7 @@ void BaseCharacterComponent::RemoveWeapons()
 }
 bool BaseCharacterComponent::HasWeapon(std::string className)
 {
-	pragma::string::to_lower(className);
+	string::to_lower(className);
 	auto it = std::find_if(m_weapons.begin(), m_weapons.end(), [&className](const EntityHandle &hEnt) { return (hEnt.valid() && hEnt.get()->GetClass() == className) ? true : false; });
 	return (it != m_weapons.end()) ? true : false;
 }

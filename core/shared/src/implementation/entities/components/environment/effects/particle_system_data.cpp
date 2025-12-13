@@ -7,7 +7,7 @@ module pragma.shared;
 import :entities.components.environment.effects.particle_system;
 
 // See c_particlesystem_save.cpp as well
-bool pragma::asset::save_particle_system(VFilePtrReal &f, const std::unordered_map<std::string, ParticleSystemData> &particles, const std::string &rootPath)
+bool pragma::asset::save_particle_system(fs::VFilePtrReal &f, const std::unordered_map<std::string, ParticleSystemData> &particles, const std::string &rootPath)
 {
 	auto udmData = udm::Data::Create(PPTSYS_COLLECTION_IDENTIFIER, PPTSYS_FORMAT_VERSION);
 	auto &udm = *udmData;
@@ -23,8 +23,8 @@ bool pragma::asset::save_particle_system(VFilePtrReal &f, const std::unordered_m
 }
 bool pragma::asset::save_particle_system(const std::string &name, const std::unordered_map<std::string, ParticleSystemData> &particles, const std::string &rootPath)
 {
-	auto fpath = pragma::util::Path::CreatePath(rootPath) + (pragma::asset::get_normalized_path(name, pragma::asset::Type::ParticleSystem) + '.' + std::string {pragma::asset::FORMAT_PARTICLE_SYSTEM_ASCII});
-	auto f = FileManager::OpenFile<VFilePtrReal>(fpath.GetString().c_str(), "w");
+	auto fpath = util::Path::CreatePath(rootPath) + (get_normalized_path(name, Type::ParticleSystem) + '.' + std::string {FORMAT_PARTICLE_SYSTEM_ASCII});
+	auto f = fs::open_file<fs::VFilePtrReal>(fpath.GetString().c_str(), fs::FileMode::Write);
 	if(!f)
 		return false;
 	return save_particle_system(f, particles, rootPath);

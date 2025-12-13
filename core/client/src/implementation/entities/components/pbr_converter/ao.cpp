@@ -13,7 +13,7 @@ import :engine;
 
 using namespace pragma;
 
-PBRAOBakeJob::PBRAOBakeJob(pragma::asset::Model &mdl, msys::Material &mat) : hModel {mdl.GetHandle()}, hMaterial {mat.GetHandle()} {}
+PBRAOBakeJob::PBRAOBakeJob(asset::Model &mdl, material::Material &mat) : hModel {mdl.GetHandle()}, hMaterial {mat.GetHandle()} {}
 
 void CPBRConverterComponent::ProcessQueue()
 {
@@ -34,11 +34,11 @@ void CPBRConverterComponent::ProcessQueue()
 	auto &mat = *item.hMaterial.get();
 	auto &mdl = *item.hModel.get();
 	auto &mats = mdl.GetMaterials();
-	auto itMat = std::find_if(mats.begin(), mats.end(), [&mat](const msys::MaterialHandle &hMat) { return hMat.get() == &mat; });
+	auto itMat = std::find_if(mats.begin(), mats.end(), [&mat](const material::MaterialHandle &hMat) { return hMat.get() == &mat; });
 	assert(itMat != mats.end());
 	if(itMat == mats.end())
 		return; // Material doesn't exist in model, this shouldn't happen!
-	pragma::rendering::cycles::SceneInfo sceneInfo {};
+	rendering::cycles::SceneInfo sceneInfo {};
 	sceneInfo.denoise = true;
 	sceneInfo.hdrOutput = false;
 	sceneInfo.width = item.width;
@@ -46,14 +46,14 @@ void CPBRConverterComponent::ProcessQueue()
 	sceneInfo.samples = item.samples;
 
 	if(item.hEntity.valid())
-		item.job = rendering::cycles::bake_ambient_occlusion(*pragma::get_client_state(), sceneInfo, *item.hEntity.get(), itMat - mats.begin() /* materialIndex */);
+		item.job = rendering::cycles::bake_ambient_occlusion(*get_client_state(), sceneInfo, *item.hEntity.get(), itMat - mats.begin() /* materialIndex */);
 	else
-		item.job = rendering::cycles::bake_ambient_occlusion(*pragma::get_client_state(), sceneInfo, *item.hModel.get(), itMat - mats.begin() /* materialIndex */);
+		item.job = rendering::cycles::bake_ambient_occlusion(*get_client_state(), sceneInfo, *item.hModel.get(), itMat - mats.begin() /* materialIndex */);
 	if(item.job.IsValid() == false)
 		return;
 	auto hMat = item.hMaterial;
 	auto hMdl = item.hModel;
-	item.job.SetCompletionHandler([this, hMat, hMdl](pragma::util::ParallelWorker<uimg::ImageLayerSet> &worker) {
+	item.job.SetCompletionHandler([this, hMat, hMdl](util::ParallelWorker<image::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false) {
 			Con::cwar << "Generating ambient occlusion map failed: " << worker.GetResultMessage() << Con::endl;
 			return;
@@ -61,13 +61,13 @@ void CPBRConverterComponent::ProcessQueue()
 		if(hMat == nullptr || hMdl.expired())
 			return;
 		auto imgBuffer = worker.GetResult().images.begin()->second;
-		WriteAOMap(*hMdl.get(), const_cast<msys::CMaterial &>(static_cast<const msys::CMaterial &>(*hMat.get())), *imgBuffer, imgBuffer->GetWidth(), imgBuffer->GetHeight());
+		WriteAOMap(*hMdl.get(), const_cast<material::CMaterial &>(static_cast<const material::CMaterial &>(*hMat.get())), *imgBuffer, imgBuffer->GetWidth(), imgBuffer->GetHeight());
 	});
 	item.job.Start();
-	pragma::get_cengine()->AddParallelJob(item.job, "Ambient Occlusion");
+	get_cengine()->AddParallelJob(item.job, "Ambient Occlusion");
 }
 
-void CPBRConverterComponent::UpdateAmbientOcclusion(pragma::asset::Model &mdl, const AmbientOcclusionInfo &aoInfo, pragma::ecs::BaseEntity *optEnt)
+void CPBRConverterComponent::UpdateAmbientOcclusion(asset::Model &mdl, const AmbientOcclusionInfo &aoInfo, ecs::BaseEntity *optEnt)
 {
 	ConvertMaterialsToPBR(mdl);
 
@@ -77,7 +77,7 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(pragma::asset::Model &mdl, c
 	if(texGroup == nullptr)
 		return;
 	for(auto texId : texGroup->textures) {
-		auto *mat = static_cast<msys::CMaterial *>(mdl.GetMaterial(texId));
+		auto *mat = static_cast<material::CMaterial *>(mdl.GetMaterial(texId));
 		if(mat == nullptr)
 			continue;
 		// Make sure it's a PBR material and it doesn't already have an ao map
@@ -94,32 +94,32 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(pragma::asset::Model &mdl, c
 	}
 	SetTickPolicy(TickPolicy::Always);
 }
-void CPBRConverterComponent::WriteAOMap(pragma::asset::Model &mdl, msys::CMaterial &mat, uimg::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const
+void CPBRConverterComponent::WriteAOMap(asset::Model &mdl, material::CMaterial &mat, image::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const
 {
 	Con::cout << "Ambient occlusion map has been generated for material '" << mat.GetName() << "' of model '" << mdl.GetName() << "'! Combining with RMA map..." << Con::endl;
 
-	auto *shader = static_cast<pragma::ShaderComposeRMA *>(pragma::get_cengine()->GetShader("compose_rma").get());
+	auto *shader = static_cast<ShaderComposeRMA *>(get_cengine()->GetShader("compose_rma").get());
 	if(shader == nullptr)
 		return;
 	auto *texInfoRMA = mat.GetRMAMap();
 	if(texInfoRMA == nullptr)
 		return;
-	auto resWatcherLock = pragma::get_cengine()->ScopeLockResourceWatchers();
+	auto resWatcherLock = get_cengine()->ScopeLockResourceWatchers();
 	auto rmaName = texInfoRMA->name;
 	ufile::remove_extension_from_filename(rmaName);
 
-	auto outPath = pragma::util::Path {rmaName};
+	auto outPath = util::Path {rmaName};
 	auto requiresSave = false;
 	if(outPath.GetFront() == "pbr") {
 		// We don't want to overwrite the default pbr materials, so we'll use a different rma path
 		outPath = mat.GetName();
 		outPath.RemoveFileExtension();
 		rmaName = outPath.GetString() + "_rma";
-		mat.SetTextureProperty(msys::material::RMA_MAP_IDENTIFIER, rmaName);
+		mat.SetTextureProperty(material::ematerial::RMA_MAP_IDENTIFIER, rmaName);
 		requiresSave = true;
 	}
 
-	shader->InsertAmbientOcclusion(pragma::get_cengine()->GetRenderContext(), rmaName, imgBuffer);
+	shader->InsertAmbientOcclusion(get_cengine()->GetRenderContext(), rmaName, imgBuffer);
 
 	if(requiresSave) {
 		mat.UpdateTextures();

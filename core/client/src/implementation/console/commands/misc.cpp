@@ -459,13 +459,13 @@ void CMD_screenshot(pragma::NetworkState *, pragma::BasePlayerComponent *, std::
 		auto width = pragma::util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "width", std::to_string(resolution.x)));
 		auto height = pragma::util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "height", std::to_string(resolution.y)));
 
-		auto format = uimg::ImageFormat::PNG;
+		auto format = pragma::image::ImageFormat::PNG;
 		auto itFormat = commandOptions.find("format");
 		if(itFormat != commandOptions.end()) {
 			std::string customFormat {};
 			if(itFormat->second.parameters.empty() == false)
 				customFormat = itFormat->second.parameters.front();
-			auto eCustomFormat = uimg::string_to_image_output_format(customFormat);
+			auto eCustomFormat = pragma::image::string_to_image_output_format(customFormat);
 			if(eCustomFormat.has_value())
 				format = *eCustomFormat;
 			else
@@ -485,10 +485,10 @@ void CMD_screenshot(pragma::NetworkState *, pragma::BasePlayerComponent *, std::
 			quality = pragma::util::to_float(itQuality->second.parameters.front());
 		settings.quality = quality;
 
-		auto toneMapping = uimg::ToneMapping::GammaCorrection;
+		auto toneMapping = pragma::image::ToneMapping::GammaCorrection;
 		auto itToneMapping = commandOptions.find("tone_mapping");
 		if(itToneMapping != commandOptions.end() && itToneMapping->second.parameters.empty() == false) {
-			auto customToneMapping = uimg::string_to_tone_mapping(itToneMapping->second.parameters.front());
+			auto customToneMapping = pragma::image::string_to_tone_mapping(itToneMapping->second.parameters.front());
 			if(customToneMapping.has_value() == false)
 				Con::cwar << "'" << itToneMapping->second.parameters.front() << "' is not a valid tone mapper!" << Con::endl;
 			else
@@ -586,10 +586,10 @@ void CMD_shader_optimize(pragma::NetworkState *state, pragma::BasePlayerComponen
 		auto fileName = outputPath + *shaderFile;
 		ufile::remove_extension_from_filename(fileName);
 		fileName += "_vk.gls";
-		if(reload == false && FileManager::Exists(fileName))
+		if(reload == false && pragma::fs::exists(fileName))
 			continue;
-		FileManager::CreatePath(ufile::get_path_from_filename(fileName).c_str());
-		auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(), "w");
+		pragma::fs::create_path(ufile::get_path_from_filename(fileName));
+		auto f = pragma::fs::open_file<pragma::fs::VFilePtrReal>(fileName, pragma::fs::FileMode::Write);
 		if(f == nullptr) {
 			Con::cwar << "Unable to open file '" << fileName << "' for writing!" << Con::endl;
 			return;
@@ -716,7 +716,7 @@ static void write_to_file(const std::string &fileName, const std::optional<std::
 		Con::cwar << "Unable to dump '" << fileName << "': No contents available!" << Con::endl;
 		return;
 	}
-	if(!filemanager::write_file(fileName, *contents)) {
+	if(!pragma::fs::write_file(fileName, *contents)) {
 		Con::cwar << "Unable to write '" << fileName << "'!" << Con::endl;
 		return;
 	}
@@ -773,7 +773,7 @@ void Console::commands::vk_dump_memory_stats(pragma::NetworkState *state, pragma
 	/*auto &context = pragma::get_cengine()->GetRenderContext();
 	auto &memoryMan = context.GetMemoryManager();
 	auto stats = memoryMan.GetStatistics();
-	auto f = FileManager::OpenFile<VFilePtrReal>("vk_memory_stats.txt","w");
+	auto f = fs::open_file<fs::VFilePtrReal>("vk_memory_stats.txt",fs::FileMode::Write);
 	if(f == nullptr)
 		return;
 	std::stringstream ss;

@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CWeatherComponent final : public BaseEnvWeatherComponent {
 		  public:
-			CWeatherComponent(pragma::ecs::BaseEntity &ent) : BaseEnvWeatherComponent(ent) {}
+			CWeatherComponent(ecs::BaseEntity &ent) : BaseEnvWeatherComponent(ent) {}
 			virtual ~CWeatherComponent() override;
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua::State *l) override;

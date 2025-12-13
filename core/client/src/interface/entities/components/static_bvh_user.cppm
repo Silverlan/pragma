@@ -12,7 +12,7 @@ export import pragma.shared;
 export namespace pragma {
 	class DLLCLIENT CStaticBvhUserComponent final : public BaseStaticBvhUserComponent {
 	  public:
-		CStaticBvhUserComponent(pragma::ecs::BaseEntity &ent) : BaseStaticBvhUserComponent(ent) {}
+		CStaticBvhUserComponent(ecs::BaseEntity &ent) : BaseStaticBvhUserComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;

@@ -125,14 +125,14 @@ void ShaderTest::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 	pipelineInfo.ToggleDynamicStates(true, {prosper::DynamicState::DepthBias});
 }
 
-static bool bind_texture(msys::Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, msys::Texture *optDefaultTex = nullptr)
+static bool bind_texture(material::Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, material::Texture *optDefaultTex = nullptr)
 {
-	auto &matManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
+	auto &matManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 
-	std::shared_ptr<msys::Texture> tex = nullptr;
+	std::shared_ptr<material::Texture> tex = nullptr;
 	if(texInfo && texInfo->texture)
-		tex = std::static_pointer_cast<msys::Texture>(texInfo->texture);
+		tex = std::static_pointer_cast<material::Texture>(texInfo->texture);
 	else if(optDefaultTex == nullptr)
 		return false;
 	else
@@ -144,7 +144,7 @@ static bool bind_texture(msys::Material &mat, prosper::IDescriptorSet &ds, Textu
 
 static bool bind_default_texture(prosper::IDescriptorSet &ds, const std::string &defaultTexName, uint32_t bindingIndex)
 {
-	auto &matManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
+	auto &matManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 	auto ptrTex = texManager.LoadAsset(defaultTexName);
 	if(ptrTex == nullptr)
@@ -154,14 +154,14 @@ static bool bind_default_texture(prosper::IDescriptorSet &ds, const std::string 
 	return true;
 }
 
-static bool bind_texture(msys::Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, const std::string &defaultTexName)
+static bool bind_texture(material::Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, const std::string &defaultTexName)
 {
-	auto &matManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
+	auto &matManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 
-	std::shared_ptr<msys::Texture> tex = nullptr;
+	std::shared_ptr<material::Texture> tex = nullptr;
 	if(texInfo && texInfo->texture) {
-		tex = std::static_pointer_cast<msys::Texture>(texInfo->texture);
+		tex = std::static_pointer_cast<material::Texture>(texInfo->texture);
 		if(tex->HasValidVkTexture()) {
 			ds.SetBindingTexture(*tex->GetVkTexture(), bindingIndex);
 			return true;

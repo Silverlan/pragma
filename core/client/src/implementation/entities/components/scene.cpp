@@ -20,7 +20,7 @@ CSceneComponent::CSMCascadeDescriptor::CSMCascadeDescriptor() {}
 
 ///////////////////////////
 
-CSceneComponent::CreateInfo::CreateInfo() : sampleCount {static_cast<prosper::SampleCountFlags>(pragma::get_cgame()->GetMSAASampleCount())} {}
+CSceneComponent::CreateInfo::CreateInfo() : sampleCount {static_cast<prosper::SampleCountFlags>(get_cgame()->GetMSAASampleCount())} {}
 
 ///////////////////////////
 
@@ -28,7 +28,7 @@ ComponentEventId cSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED = INVALID_COMPO
 ComponentEventId cSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES = INVALID_COMPONENT_ID;
 ComponentEventId cSceneComponent::EVENT_ON_RENDERER_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId cSceneComponent::EVENT_POST_RENDER_PREPASS = INVALID_COMPONENT_ID;
-void CSceneComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void CSceneComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	cSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED = registerEvent("ON_ACTIVE_CAMERA_CHANGED", ComponentEventInfo::Type::Broadcast);
 	cSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES = registerEvent("ON_BUILD_RENDER_QUEUES", ComponentEventInfo::Type::Explicit);
@@ -42,13 +42,13 @@ const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &CSceneComponent::Ge
 void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const rendering::RenderQueue &renderQueue, rendering::RenderPassStats *optStats)
 {
 	renderQueue.WaitForCompletion(optStats);
-	CSceneComponent::GetEntityInstanceIndexBuffer()->UpdateBufferData(renderQueue);
+	GetEntityInstanceIndexBuffer()->UpdateBufferData(renderQueue);
 	auto curEntity = std::numeric_limits<EntityIndex>::max();
 	for(auto &item : renderQueue.queue) {
 		if(item.entity == curEntity)
 			continue;
 		curEntity = item.entity;
-		auto *ent = static_cast<ecs::CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(item.entity));
+		auto *ent = static_cast<ecs::CBaseEntity *>(get_cgame()->GetEntityByLocalIndex(item.entity));
 		assert(ent);
 		if(!ent) {
 			// TODO: This should be unreachable, but there are cases where the entity does
@@ -66,7 +66,7 @@ void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimar
 			// which is not allowed.
 			continue;
 		}
-		if(optStats && pragma::math::is_flag_set(renderC->GetStateFlags(), CRenderComponent::StateFlags::RenderBufferDirty))
+		if(optStats && math::is_flag_set(renderC->GetStateFlags(), CRenderComponent::StateFlags::RenderBufferDirty))
 			(*optStats)->Increment(rendering::RenderPassStats::Counter::EntityBufferUpdates);
 		auto *animC = renderC->GetAnimatedComponent();
 		if(animC && animC->AreSkeletonUpdateCallbacksEnabled())
@@ -91,7 +91,7 @@ CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo, CSceneCom
 			return nullptr;
 		sceneIndex = (it - g_sceneUseCount.begin());
 	}
-	auto *scene = pragma::get_cgame()->CreateEntity<CScene>();
+	auto *scene = get_cgame()->CreateEntity<CScene>();
 	if(scene == nullptr)
 		return nullptr;
 	auto sceneC = scene->GetComponent<CSceneComponent>();
@@ -104,14 +104,14 @@ CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo, CSceneCom
 	if(optParent == nullptr)
 		g_scenes.at(sceneIndex) = sceneC.get();
 	else
-		pragma::math::set_flag(sceneC->m_stateFlags, StateFlags::HasParentScene);
+		math::set_flag(sceneC->m_stateFlags, StateFlags::HasParentScene);
 
 	scene->Spawn();
 	return sceneC.get();
 }
 
 static uint32_t g_numScenes = 0;
-CSceneComponent::CSceneComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_sceneRenderDesc {*this} { ++g_numScenes; }
+CSceneComponent::CSceneComponent(ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_sceneRenderDesc {*this} { ++g_numScenes; }
 CSceneComponent::~CSceneComponent()
 {
 	ClearWorldEnvironment();
@@ -128,12 +128,12 @@ void CSceneComponent::OnRemove()
 		return;
 	assert(g_sceneUseCount.size() > 0);
 	--g_sceneUseCount.at(sceneIndex);
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::HasParentScene) == false) {
+	if(math::is_flag_set(m_stateFlags, StateFlags::HasParentScene) == false) {
 		g_scenes.at(sceneIndex) = nullptr;
 
 		// Clear all entities from this scene
-		std::vector<pragma::ecs::CBaseEntity *> *ents;
-		pragma::get_cgame()->GetEntities(&ents);
+		std::vector<ecs::CBaseEntity *> *ents;
+		get_cgame()->GetEntities(&ents);
 		for(auto *ent : *ents) {
 			if(ent == nullptr)
 				continue;
@@ -150,7 +150,7 @@ void CSceneComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void CSceneComponent::Setup(const CreateInfo &createInfo, SceneIndex sceneIndex)
 {
 	m_sceneIndex = sceneIndex;
-	for(auto i = decltype(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT) {0}; i < pragma::CShadowCSMComponent::MAX_CASCADE_COUNT; ++i)
+	for(auto i = decltype(CShadowCSMComponent::MAX_CASCADE_COUNT) {0}; i < CShadowCSMComponent::MAX_CASCADE_COUNT; ++i)
 		m_csmDescriptors.push_back(std::unique_ptr<CSMCascadeDescriptor>(new CSMCascadeDescriptor()));
 	InitializeCameraBuffer();
 	InitializeFogBuffer();
@@ -168,18 +168,18 @@ void CSceneComponent::Link(const CSceneComponent &other, bool linkCamera)
 {
 	auto &hCam = other.GetActiveCamera();
 	if(hCam.valid())
-		SetActiveCamera(const_cast<pragma::CCameraComponent &>(*hCam.get()));
+		SetActiveCamera(const_cast<CCameraComponent &>(*hCam.get()));
 	else
 		SetActiveCamera();
 
-	auto *renderer = const_cast<CSceneComponent &>(other).GetRenderer<pragma::CRendererComponent>();
+	auto *renderer = const_cast<CSceneComponent &>(other).GetRenderer<CRendererComponent>();
 	SetRenderer(renderer);
 
 	// m_sceneRenderDesc.SetOcclusionCullingHandler(const_cast<pragma::OcclusionCullingHandler&>(other.m_sceneRenderDesc.GetOcclusionCullingHandler()).shared_from_this());
 
 	auto *occlusionCuller = const_cast<CSceneComponent &>(other).FindOcclusionCuller<COcclusionCullerComponent>();
 	if(occlusionCuller)
-		static_cast<pragma::ecs::CBaseEntity &>(occlusionCuller->GetEntity()).AddToScene(*this);
+		static_cast<ecs::CBaseEntity &>(occlusionCuller->GetEntity()).AddToScene(*this);
 
 	auto *worldEnv = other.GetWorldEnvironment();
 	if(worldEnv)
@@ -189,36 +189,36 @@ void CSceneComponent::Link(const CSceneComponent &other, bool linkCamera)
 		m_cbLink.Remove();
 	if(linkCamera == false)
 		return;
-	m_cbLink = const_cast<CSceneComponent &>(other).AddEventCallback(cSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED, [this, &other](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	m_cbLink = const_cast<CSceneComponent &>(other).AddEventCallback(cSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED, [this, &other](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &hCam = other.GetActiveCamera();
 		if(hCam.valid())
-			SetActiveCamera(const_cast<pragma::CCameraComponent &>(*hCam.get()));
+			SetActiveCamera(const_cast<CCameraComponent &>(*hCam.get()));
 		else
 			SetActiveCamera();
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
 }
 
 void CSceneComponent::InitializeShadowDescriptorSet()
 {
-	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SHADOWS.IsValid()) {
-		auto &context = pragma::get_cengine()->GetRenderContext();
-		m_shadowDsg = context.CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SHADOWS);
+	if(ShaderGameWorldLightingPass::DESCRIPTOR_SET_SHADOWS.IsValid()) {
+		auto &context = get_cengine()->GetRenderContext();
+		m_shadowDsg = context.CreateDescriptorSetGroup(ShaderGameWorldLightingPass::DESCRIPTOR_SET_SHADOWS);
 		auto &cubeTex = context.GetDummyCubemapTexture();
-		auto n = pragma::math::to_integral(pragma::GameLimits::MaxActiveShadowCubeMaps);
+		auto n = math::to_integral(GameLimits::MaxActiveShadowCubeMaps);
 		for(auto i = decltype(n) {0u}; i < n; ++i)
-			m_shadowDsg->GetDescriptorSet()->SetBindingArrayTexture(*cubeTex, pragma::math::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps), i);
+			m_shadowDsg->GetDescriptorSet()->SetBindingArrayTexture(*cubeTex, math::to_integral(ShaderSceneLit::ShadowBinding::ShadowCubeMaps), i);
 	}
 }
 
-pragma::CSceneComponent *CSceneComponent::GetByIndex(SceneIndex sceneIndex) { return (sceneIndex < g_scenes.size()) ? g_scenes.at(sceneIndex) : nullptr; }
+CSceneComponent *CSceneComponent::GetByIndex(SceneIndex sceneIndex) { return (sceneIndex < g_scenes.size()) ? g_scenes.at(sceneIndex) : nullptr; }
 
 uint32_t CSceneComponent::GetSceneFlag(SceneIndex sceneIndex) { return 1 << sceneIndex; }
 
-CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex(uint32_t flag) { return pragma::math::get_least_significant_set_bit_index(flag); }
+CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex(uint32_t flag) { return math::get_least_significant_set_bit_index(flag); }
 
-static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
-static auto cvShaderQuality = pragma::console::get_client_con_var("cl_render_shader_quality");
+static auto cvShadowmapSize = console::get_client_con_var("cl_render_shadow_resolution");
+static auto cvShaderQuality = console::get_client_con_var("cl_render_shader_quality");
 void CSceneComponent::InitializeRenderSettingsBuffer()
 {
 	// Initialize Render Settings
@@ -228,19 +228,19 @@ void CSceneComponent::InitializeRenderSettingsBuffer()
 
 	m_renderSettings.posCam = Vector3(0.f, 0.f, 0.f);
 	m_renderSettings.fov = 0.f;
-	m_renderSettings.flags = pragma::math::to_integral(FRenderSetting::None);
+	m_renderSettings.flags = math::to_integral(FRenderSetting::None);
 	m_renderSettings.shadowRatioX = 1.f / szShadowMap;
 	m_renderSettings.shadowRatioY = 1.f / szShadowMap;
 	m_renderSettings.shaderQuality = cvShaderQuality->GetInt();
 
 	if(m_renderer.valid())
-		static_cast<pragma::CRendererComponent *>(m_renderer.get())->UpdateRenderSettings();
+		static_cast<CRendererComponent *>(m_renderer.get())->UpdateRenderSettings();
 
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_renderSettings);
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-	m_renderSettingsBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_renderSettings);
+	m_renderSettingsBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_renderSettings);
 	m_renderSettingsBuffer->SetDebugName("render_settings_buf");
 	UpdateRenderSettings();
 	//
@@ -256,12 +256,12 @@ void CSceneComponent::InitializeCameraBuffer()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_cameraData);
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-	m_cameraBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
+	m_cameraBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
 	m_cameraBuffer->SetDebugName("camera_buf");
 	//
 
 	// View Camera
-	m_cameraViewBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
+	m_cameraViewBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
 	m_cameraViewBuffer->SetDebugName("camera_view_buf");
 	//
 }
@@ -271,26 +271,26 @@ void CSceneComponent::InitializeFogBuffer()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_fogData);
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-	m_fogBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
+	m_fogBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
 	m_fogBuffer->SetDebugName("fog_buf");
 }
 template<typename TCPPM>
 TCPPM *CSceneComponent::FindOcclusionCuller()
 {
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
-	entIt.AttachFilter<EntityIteratorFilterUser>([this](pragma::ecs::BaseEntity &ent, std::size_t index) -> bool { return static_cast<pragma::ecs::CBaseEntity &>(ent).IsInScene(*this); });
+	ecs::EntityIterator entIt {*get_cgame()};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<COcclusionCullerComponent>>();
+	entIt.AttachFilter<EntityIteratorFilterUser>([this](ecs::BaseEntity &ent, std::size_t index) -> bool { return static_cast<ecs::CBaseEntity &>(ent).IsInScene(*this); });
 	auto it = entIt.begin();
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
-	return ent ? ent->GetComponent<pragma::COcclusionCullerComponent>().get() : nullptr;
+	return ent ? ent->GetComponent<COcclusionCullerComponent>().get() : nullptr;
 }
-template DLLCLIENT pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller();
+template DLLCLIENT COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller();
 template<typename TCPPM>
 const TCPPM *CSceneComponent::FindOcclusionCuller() const
 {
 	return const_cast<CSceneComponent *>(this)->FindOcclusionCuller<TCPPM>();
 }
-template DLLCLIENT const pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller() const;
+template DLLCLIENT const COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller() const;
 const std::shared_ptr<prosper::IBuffer> &CSceneComponent::GetFogBuffer() const { return m_fogBuffer; }
 void CSceneComponent::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, bool bView)
 {
@@ -299,13 +299,13 @@ void CSceneComponent::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryComman
 		return;
 	auto &bufCam = (bView == true) ? GetViewCameraBuffer() : GetCameraBuffer();
 	auto &v = cam->GetViewMatrix();
-	auto &p = (bView == true) ? pragma::CCameraComponent::CalcProjectionMatrix(pragma::get_cgame()->GetViewModelFOVRad(), cam->GetAspectRatio(), cam->GetNearZ(), cam->GetFarZ()) : cam->GetProjectionMatrix();
+	auto &p = (bView == true) ? CCameraComponent::CalcProjectionMatrix(get_cgame()->GetViewModelFOVRad(), cam->GetAspectRatio(), cam->GetNearZ(), cam->GetFarZ()) : cam->GetProjectionMatrix();
 	m_cameraData.V = v;
 	m_cameraData.P = p;
 	m_cameraData.VP = p * v;
 
 	if(bView == false && m_renderer.valid())
-		static_cast<pragma::CRendererComponent *>(m_renderer.get())->UpdateCameraData(*this, m_cameraData);
+		static_cast<CRendererComponent *>(m_renderer.get())->UpdateCameraData(*this, m_cameraData);
 
 	drawCmd->RecordBufferBarrier(*bufCam, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit | prosper::PipelineStageFlags::ComputeShaderBit, prosper::PipelineStageFlags::TransferBit,
 	  prosper::AccessFlags::ShaderReadBit, prosper::AccessFlags::TransferWriteBit);
@@ -333,11 +333,11 @@ void CSceneComponent::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuff
 	// prosper TODO: Move camPos to camera buffer, and don't update render settings buffer every frame (update when needed instead)
 
 	if(m_renderer.valid())
-		static_cast<pragma::CRendererComponent *>(m_renderer.get())->UpdateRendererBuffer(drawCmd);
+		static_cast<CRendererComponent *>(m_renderer.get())->UpdateRendererBuffer(drawCmd);
 }
-void CSceneComponent::RecordRenderCommandBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void CSceneComponent::RecordRenderCommandBuffers(const rendering::DrawSceneInfo &drawSceneInfo)
 {
-	auto *renderer = GetRenderer<pragma::CRendererComponent>();
+	auto *renderer = GetRenderer<CRendererComponent>();
 	if(renderer == nullptr)
 		return;
 	renderer->RecordCommandBuffers(drawSceneInfo);
@@ -357,29 +357,29 @@ void CSceneComponent::InitializeDescriptorSetLayouts()
 }
 void CSceneComponent::InitializeSwapDescriptorBuffers()
 {
-	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
+	if(ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE.IsValid() == false || ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
 		return;
-	m_camDescSetGroupGraphics = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
+	m_camDescSetGroupGraphics = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
 	auto &descSetGraphics = *m_camDescSetGroupGraphics->GetDescriptorSet();
-	descSetGraphics.SetBindingUniformBuffer(*m_cameraBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::Camera));
-	descSetGraphics.SetBindingUniformBuffer(*m_renderSettingsBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::RenderSettings));
+	descSetGraphics.SetBindingUniformBuffer(*m_cameraBuffer, math::to_integral(ShaderGameWorldLightingPass::SceneBinding::Camera));
+	descSetGraphics.SetBindingUniformBuffer(*m_renderSettingsBuffer, math::to_integral(ShaderGameWorldLightingPass::SceneBinding::RenderSettings));
 
-	m_camDescSetGroupCompute = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE);
+	m_camDescSetGroupCompute = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE);
 	auto &descSetCompute = *m_camDescSetGroupCompute->GetDescriptorSet();
-	descSetCompute.SetBindingUniformBuffer(*m_cameraBuffer, pragma::math::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::Camera));
-	descSetCompute.SetBindingUniformBuffer(*m_renderSettingsBuffer, pragma::math::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::RenderSettings));
+	descSetCompute.SetBindingUniformBuffer(*m_cameraBuffer, math::to_integral(ShaderForwardPLightCulling::CameraBinding::Camera));
+	descSetCompute.SetBindingUniformBuffer(*m_renderSettingsBuffer, math::to_integral(ShaderForwardPLightCulling::CameraBinding::RenderSettings));
 
-	m_camViewDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
+	m_camViewDescSetGroup = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
 	auto &descSetViewGraphics = *m_camViewDescSetGroup->GetDescriptorSet();
-	descSetViewGraphics.SetBindingUniformBuffer(*m_cameraViewBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::Camera));
-	descSetViewGraphics.SetBindingUniformBuffer(*m_renderSettingsBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::RenderSettings));
+	descSetViewGraphics.SetBindingUniformBuffer(*m_cameraViewBuffer, math::to_integral(ShaderGameWorldLightingPass::SceneBinding::Camera));
+	descSetViewGraphics.SetBindingUniformBuffer(*m_renderSettingsBuffer, math::to_integral(ShaderGameWorldLightingPass::SceneBinding::RenderSettings));
 
-	m_fogDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
+	m_fogDescSetGroup = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderPPFog::DESCRIPTOR_SET_FOG);
 	m_fogDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*m_fogBuffer, 0u);
 }
 const std::shared_ptr<prosper::IBuffer> &CSceneComponent::GetRenderSettingsBuffer() const { return m_renderSettingsBuffer; }
-pragma::RenderSettings &CSceneComponent::GetRenderSettings() { return m_renderSettings; }
-const pragma::RenderSettings &CSceneComponent::GetRenderSettings() const { return const_cast<CSceneComponent *>(this)->GetRenderSettings(); }
+RenderSettings &CSceneComponent::GetRenderSettings() { return m_renderSettings; }
+const RenderSettings &CSceneComponent::GetRenderSettings() const { return const_cast<CSceneComponent *>(this)->GetRenderSettings(); }
 const std::shared_ptr<prosper::IBuffer> &CSceneComponent::GetCameraBuffer() const { return m_cameraBuffer; }
 const std::shared_ptr<prosper::IBuffer> &CSceneComponent::GetViewCameraBuffer() const { return m_cameraViewBuffer; }
 const std::shared_ptr<prosper::IDescriptorSetGroup> &CSceneComponent::GetCameraDescriptorSetGroup(prosper::PipelineBindPoint bindPoint) const
@@ -399,14 +399,14 @@ prosper::IDescriptorSet *CSceneComponent::GetCameraDescriptorSetCompute() const 
 prosper::IDescriptorSet *CSceneComponent::GetViewCameraDescriptorSet() const { return m_camViewDescSetGroup->GetDescriptorSet(); }
 const std::shared_ptr<prosper::IDescriptorSetGroup> &CSceneComponent::GetFogDescriptorSetGroup() const { return m_fogDescSetGroup; }
 
-void CSceneComponent::SetExclusionRenderMask(::pragma::rendering::RenderMask renderMask) { m_exclusionRenderMask = renderMask; }
-::pragma::rendering::RenderMask CSceneComponent::GetExclusionRenderMask() const { return m_exclusionRenderMask; }
-void CSceneComponent::SetInclusionRenderMask(::pragma::rendering::RenderMask renderMask) { m_inclusionRenderMask = renderMask; }
-::pragma::rendering::RenderMask CSceneComponent::GetInclusionRenderMask() const { return m_inclusionRenderMask; }
+void CSceneComponent::SetExclusionRenderMask(rendering::RenderMask renderMask) { m_exclusionRenderMask = renderMask; }
+rendering::RenderMask CSceneComponent::GetExclusionRenderMask() const { return m_exclusionRenderMask; }
+void CSceneComponent::SetInclusionRenderMask(rendering::RenderMask renderMask) { m_inclusionRenderMask = renderMask; }
+rendering::RenderMask CSceneComponent::GetInclusionRenderMask() const { return m_inclusionRenderMask; }
 
-void CSceneComponent::BuildRenderQueues(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void CSceneComponent::BuildRenderQueues(const rendering::DrawSceneInfo &drawSceneInfo)
 {
-	pragma::CEDrawSceneInfo evData {drawSceneInfo};
+	CEDrawSceneInfo evData {drawSceneInfo};
 	GetSceneRenderDesc().BuildRenderQueues(drawSceneInfo, [this, &drawSceneInfo, &evData]() {
 		// Start building the render queues for the light sources
 		// that create shadows and were previously visible.
@@ -415,17 +415,17 @@ void CSceneComponent::BuildRenderQueues(const pragma::rendering::DrawSceneInfo &
 		for(auto &hLight : m_previouslyVisibleShadowedLights) {
 			if(hLight.expired())
 				continue;
-			auto *shadowC = hLight->GetShadowComponent<pragma::CShadowComponent>();
+			auto *shadowC = hLight->GetShadowComponent<CShadowComponent>();
 			if(shadowC == nullptr)
 				continue;
 			shadowC->GetRenderer().BuildRenderQueues(drawSceneInfo);
 		}
 
-		InvokeEventCallbacks(pragma::cSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES, evData);
+		InvokeEventCallbacks(cSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES, evData);
 	});
 }
 
-pragma::rendering::WorldEnvironment *CSceneComponent::GetWorldEnvironment() const { return m_worldEnvironment.get(); }
+rendering::WorldEnvironment *CSceneComponent::GetWorldEnvironment() const { return m_worldEnvironment.get(); }
 void CSceneComponent::SetWorldEnvironment(rendering::WorldEnvironment &env)
 {
 	ClearWorldEnvironment();
@@ -443,35 +443,35 @@ void CSceneComponent::SetWorldEnvironment(rendering::WorldEnvironment &env)
 	auto &fog = m_worldEnvironment->GetFogSettings();
 	m_envCallbacks.push_back(fog.GetColorProperty()->AddCallback([this](std::reference_wrapper<const Color> oldVal, std::reference_wrapper<const Color> newVal) {
 		m_fogData.color = newVal.get().ToVector4();
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, color), m_fogData.color);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, color), m_fogData.color);
 	}));
 	m_envCallbacks.push_back(fog.GetStartProperty()->AddCallback([this](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> newVal) {
 		m_fogData.start = newVal.get();
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, start), m_fogData.start);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, start), m_fogData.start);
 	}));
 	m_envCallbacks.push_back(fog.GetEndProperty()->AddCallback([this](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> newVal) {
 		m_fogData.end = newVal.get();
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, end), m_fogData.end);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, end), m_fogData.end);
 	}));
 	m_envCallbacks.push_back(fog.GetMaxDensityProperty()->AddCallback([this](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> newVal) {
 		m_fogData.density = newVal.get();
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, density), m_fogData.density);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, density), m_fogData.density);
 	}));
 	m_envCallbacks.push_back(fog.GetTypeProperty()->AddCallback([this](std::reference_wrapper<const uint8_t> oldVal, std::reference_wrapper<const uint8_t> newVal) {
 		m_fogData.type = static_cast<uint32_t>(newVal.get());
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, type), m_fogData.type);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, type), m_fogData.type);
 	}));
 	m_envCallbacks.push_back(fog.GetEnabledProperty()->AddCallback([this](std::reference_wrapper<const bool> oldVal, std::reference_wrapper<const bool> newVal) {
 		m_fogData.flags = static_cast<uint32_t>(newVal.get());
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, flags), m_fogData.flags);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, offsetof(FogData, flags), m_fogData.flags);
 	}));
 	m_fogData.color = fog.GetColor().ToVector4();
 	m_fogData.start = fog.GetStart();
 	m_fogData.end = fog.GetEnd();
 	m_fogData.density = fog.GetMaxDensity();
-	m_fogData.type = pragma::math::to_integral(fog.GetType());
+	m_fogData.type = math::to_integral(fog.GetType());
 	m_fogData.flags = fog.IsEnabled();
-	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, 0ull, m_fogData);
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer, 0ull, m_fogData);
 }
 template<typename TCPPM>
 void CSceneComponent::SetLightMap(TCPPM &lightMapC)
@@ -482,7 +482,7 @@ void CSceneComponent::SetLightMap(TCPPM &lightMapC)
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
 }
-template DLLCLIENT void CSceneComponent::SetLightMap(pragma::CLightMapComponent &lightMapC);
+template DLLCLIENT void CSceneComponent::SetLightMap(CLightMapComponent &lightMapC);
 void CSceneComponent::UpdateRendererLightMap()
 {
 	if(m_renderer.expired() || m_lightMap.expired())
@@ -492,7 +492,7 @@ void CSceneComponent::UpdateRendererLightMap()
 	if(texLightMap == nullptr)
 		return;
 	// TODO: Not ideal to have this here; How to handle this in a better way?
-	auto raster = m_renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
+	auto raster = m_renderer->GetEntity().GetComponent<CRasterizationRendererComponent>();
 	if(raster.valid())
 		raster->SetLightMap(*lightMapC);
 }
@@ -504,9 +504,9 @@ void CSceneComponent::UpdateRenderSettings()
 	auto flags = FRenderSetting::None;
 	if(unlitProperty->GetValue() == true)
 		flags |= FRenderSetting::Unlit;
-	m_renderSettings.flags = pragma::math::to_integral(flags);
+	m_renderSettings.flags = math::to_integral(flags);
 	if(m_renderer.valid())
-		static_cast<pragma::CRendererComponent *>(m_renderer.get())->UpdateRenderSettings();
+		static_cast<CRendererComponent *>(m_renderer.get())->UpdateRenderSettings();
 }
 void CSceneComponent::ClearWorldEnvironment()
 {
@@ -563,21 +563,21 @@ void CSceneComponent::SetRenderer(TCPPM *renderer)
 	UpdateRendererLightMap();
 	BroadcastEvent(cSceneComponent::EVENT_ON_RENDERER_CHANGED);
 }
-template DLLCLIENT void CSceneComponent::SetRenderer(pragma::CRendererComponent *renderer);
+template DLLCLIENT void CSceneComponent::SetRenderer(CRendererComponent *renderer);
 
 template<typename TCPPM>
 TCPPM *CSceneComponent::GetRenderer()
 {
 	return static_cast<TCPPM *>(m_renderer.get());
 }
-template DLLCLIENT pragma::CRendererComponent *CSceneComponent::GetRenderer();
+template DLLCLIENT CRendererComponent *CSceneComponent::GetRenderer();
 
 template<typename TCPPM>
 const TCPPM *CSceneComponent::GetRenderer() const
 {
-	return const_cast<CSceneComponent *>(this)->GetRenderer<pragma::CRendererComponent>();
+	return const_cast<CSceneComponent *>(this)->GetRenderer<CRendererComponent>();
 }
-template DLLCLIENT const pragma::CRendererComponent *CSceneComponent::GetRenderer() const;
+template DLLCLIENT const CRendererComponent *CSceneComponent::GetRenderer() const;
 
 SceneDebugMode CSceneComponent::GetDebugMode() const { return m_debugMode; }
 void CSceneComponent::SetDebugMode(SceneDebugMode debugMode) { m_debugMode = debugMode; }
@@ -588,37 +588,37 @@ const SceneRenderDesc &CSceneComponent::GetSceneRenderDesc() const { return cons
 void CSceneComponent::SetParticleSystemColorFactor(const Vector4 &colorFactor) { m_particleSystemColorFactor = colorFactor; }
 const Vector4 &CSceneComponent::GetParticleSystemColorFactor() const { return m_particleSystemColorFactor; }
 
-bool CSceneComponent::IsValid() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::ValidRenderer); }
+bool CSceneComponent::IsValid() const { return math::is_flag_set(m_stateFlags, StateFlags::ValidRenderer); }
 
 CSceneComponent *CSceneComponent::GetParentScene()
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::HasParentScene) == false)
+	if(math::is_flag_set(m_stateFlags, StateFlags::HasParentScene) == false)
 		return nullptr;
 	return GetByIndex(GetSceneIndex());
 }
 
 CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex() const { return m_sceneIndex; }
 
-uint32_t CSceneComponent::GetWidth() const { return m_renderer.valid() ? static_cast<const pragma::CRendererComponent *>(m_renderer.get())->GetWidth() : 0; }
-uint32_t CSceneComponent::GetHeight() const { return m_renderer.valid() ? static_cast<const pragma::CRendererComponent *>(m_renderer.get())->GetHeight() : 0; }
+uint32_t CSceneComponent::GetWidth() const { return m_renderer.valid() ? static_cast<const CRendererComponent *>(m_renderer.get())->GetWidth() : 0; }
+uint32_t CSceneComponent::GetHeight() const { return m_renderer.valid() ? static_cast<const CRendererComponent *>(m_renderer.get())->GetHeight() : 0; }
 
 //const Vulkan::DescriptorSet &CSceneComponent::GetBloomGlowDescriptorSet() const {return m_descSetBloomGlow;} // prosper TODO
 
 void CSceneComponent::ReloadRenderTarget(uint32_t width, uint32_t height)
 {
-	pragma::math::set_flag(m_stateFlags, StateFlags::ValidRenderer, false);
+	math::set_flag(m_stateFlags, StateFlags::ValidRenderer, false);
 
-	if(m_renderer.expired() || static_cast<pragma::CRendererComponent *>(m_renderer.get())->ReloadRenderTarget(*this, width, height) == false)
+	if(m_renderer.expired() || static_cast<CRendererComponent *>(m_renderer.get())->ReloadRenderTarget(*this, width, height) == false)
 		return;
 
-	pragma::math::set_flag(m_stateFlags, StateFlags::ValidRenderer, true);
+	math::set_flag(m_stateFlags, StateFlags::ValidRenderer, true);
 }
 
-const pragma::ComponentHandle<pragma::CCameraComponent> &CSceneComponent::GetActiveCamera() const { return const_cast<CSceneComponent *>(this)->GetActiveCamera(); }
-pragma::ComponentHandle<pragma::CCameraComponent> &CSceneComponent::GetActiveCamera() { return m_camera; }
-void CSceneComponent::SetActiveCamera(pragma::CCameraComponent &cam)
+const ComponentHandle<CCameraComponent> &CSceneComponent::GetActiveCamera() const { return const_cast<CSceneComponent *>(this)->GetActiveCamera(); }
+ComponentHandle<CCameraComponent> &CSceneComponent::GetActiveCamera() { return m_camera; }
+void CSceneComponent::SetActiveCamera(CCameraComponent &cam)
 {
-	m_camera = cam.GetHandle<pragma::CCameraComponent>();
+	m_camera = cam.GetHandle<CCameraComponent>();
 	m_renderSettings.nearZ = cam.GetNearZ();
 	m_renderSettings.farZ = cam.GetFarZ();
 
@@ -633,8 +633,8 @@ void CSceneComponent::SetActiveCamera()
 
 /////////////////
 
-CEDrawSceneInfo::CEDrawSceneInfo(const pragma::rendering::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
-void CEDrawSceneInfo::PushArguments(lua::State *l) { Lua::Push<const pragma::rendering::DrawSceneInfo *>(l, &drawSceneInfo); }
+CEDrawSceneInfo::CEDrawSceneInfo(const rendering::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
+void CEDrawSceneInfo::PushArguments(lua::State *l) { Lua::Push<const rendering::DrawSceneInfo *>(l, &drawSceneInfo); }
 
 ////////
 

@@ -21,9 +21,9 @@ export namespace pragma::gui::types {
 		struct DetachedWindow {
 			~DetachedWindow();
 			void Clear();
-			pragma::gui::WIHandle reattachElement {};
+			WIHandle reattachElement {};
 			std::shared_ptr<prosper::Window> window;
-			pragma::gui::WIHandle detachedBg {};
+			WIHandle detachedBg {};
 			Vector2i origPos;
 			Vector2i origSize;
 			std::optional<std::array<float, 4>> origAnchor;

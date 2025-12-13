@@ -8,7 +8,7 @@ import :entities.components.func.base_soft_physics;
 
 using namespace pragma;
 
-pragma::physics::PhysSoftBodyInfo *BaseFuncSoftPhysicsComponent::GetSoftBodyInfo() { return &m_softBodyInfo; }
+physics::PhysSoftBodyInfo *BaseFuncSoftPhysicsComponent::GetSoftBodyInfo() { return &m_softBodyInfo; }
 
 // TODO
 /*PhysObj *BaseFuncSoftPhysicsComponent::InitializePhysics()
@@ -21,9 +21,9 @@ pragma::physics::PhysSoftBodyInfo *BaseFuncSoftPhysicsComponent::GetSoftBodyInfo
 void BaseFuncSoftPhysicsComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		return SetKeyValue(kvData.key, kvData.value) ? pragma::util::EventReply::Handled : pragma::util::EventReply::Unhandled;
+		return SetKeyValue(kvData.key, kvData.value) ? util::EventReply::Handled : util::EventReply::Unhandled;
 	});
 	auto &ent = GetEntity();
 	ent.AddComponent("model");
@@ -36,47 +36,47 @@ void BaseFuncSoftPhysicsComponent::Initialize()
 bool BaseFuncSoftPhysicsComponent::SetKeyValue(std::string key, std::string val)
 {
 	if(key == "pose_matching_coefficient")
-		m_softBodyInfo.poseMatchingCoefficient = pragma::string::to_float(val);
+		m_softBodyInfo.poseMatchingCoefficient = string::to_float(val);
 	else if(key == "anchors_hardness")
-		m_softBodyInfo.anchorsHardness = pragma::string::to_float(val);
+		m_softBodyInfo.anchorsHardness = string::to_float(val);
 	else if(key == "drag_coefficient")
-		m_softBodyInfo.dragCoefficient = pragma::string::to_float(val);
+		m_softBodyInfo.dragCoefficient = string::to_float(val);
 	else if(key == "rigid_contacts_hardness")
-		m_softBodyInfo.rigidContactsHardness = pragma::string::to_float(val);
+		m_softBodyInfo.rigidContactsHardness = string::to_float(val);
 	else if(key == "soft_contacts_hardness")
-		m_softBodyInfo.softContactsHardness = pragma::string::to_float(val);
+		m_softBodyInfo.softContactsHardness = string::to_float(val);
 	else if(key == "lift_coefficient")
-		m_softBodyInfo.liftCoefficient = pragma::string::to_float(val);
+		m_softBodyInfo.liftCoefficient = string::to_float(val);
 	else if(key == "kinetic_contacts_hardness")
-		m_softBodyInfo.kineticContactsHardness = pragma::string::to_float(val);
+		m_softBodyInfo.kineticContactsHardness = string::to_float(val);
 	else if(key == "dynamic_friction_coefficient")
-		m_softBodyInfo.dynamicFrictionCoefficient = pragma::string::to_float(val);
+		m_softBodyInfo.dynamicFrictionCoefficient = string::to_float(val);
 	else if(key == "damping_coefficient")
-		m_softBodyInfo.dampingCoefficient = pragma::string::to_float(val);
+		m_softBodyInfo.dampingCoefficient = string::to_float(val);
 	else if(key == "volume_conversation_coefficient")
-		m_softBodyInfo.volumeConversationCoefficient = pragma::string::to_float(val);
+		m_softBodyInfo.volumeConversationCoefficient = string::to_float(val);
 	else if(key == "soft_vs_rigid_impulse_split_k")
-		m_softBodyInfo.softVsRigidImpulseSplitK = pragma::string::to_float(val);
+		m_softBodyInfo.softVsRigidImpulseSplitK = string::to_float(val);
 	else if(key == "soft_vs_rigid_impulse_split_r")
-		m_softBodyInfo.softVsRigidImpulseSplitR = pragma::string::to_float(val);
+		m_softBodyInfo.softVsRigidImpulseSplitR = string::to_float(val);
 	else if(key == "soft_vs_rigid_impulse_split_s")
-		m_softBodyInfo.softVsRigidImpulseSplitS = pragma::string::to_float(val);
+		m_softBodyInfo.softVsRigidImpulseSplitS = string::to_float(val);
 	else if(key == "soft_vs_kinetic_hardness")
-		m_softBodyInfo.softVsKineticHardness = pragma::string::to_float(val);
+		m_softBodyInfo.softVsKineticHardness = string::to_float(val);
 	else if(key == "soft_vs_rigid_hardness")
-		m_softBodyInfo.softVsRigidHardness = pragma::string::to_float(val);
+		m_softBodyInfo.softVsRigidHardness = string::to_float(val);
 	else if(key == "soft_vs_soft_hardness")
-		m_softBodyInfo.softVsSoftHardness = pragma::string::to_float(val);
+		m_softBodyInfo.softVsSoftHardness = string::to_float(val);
 	else if(key == "pressure_coefficient")
-		m_softBodyInfo.pressureCoefficient = pragma::string::to_float(val);
+		m_softBodyInfo.pressureCoefficient = string::to_float(val);
 	else if(key == "velocities_correction_factor")
-		m_softBodyInfo.velocitiesCorrectionFactor = pragma::string::to_float(val);
+		m_softBodyInfo.velocitiesCorrectionFactor = string::to_float(val);
 	else if(key == "bending_constraints_distance")
-		m_softBodyInfo.bendingConstraintsDistance = pragma::string::to_float(val);
+		m_softBodyInfo.bendingConstraintsDistance = string::to_float(val);
 	else if(key == "cluster_count")
-		m_softBodyInfo.clusterCount = pragma::string::to_int(val);
+		m_softBodyInfo.clusterCount = string::to_int(val);
 	else if(key == "max_cluster_iterations")
-		m_softBodyInfo.maxClusterIterations = pragma::string::to_int(val);
+		m_softBodyInfo.maxClusterIterations = string::to_int(val);
 	else
 		return false;
 	return true;

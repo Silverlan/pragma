@@ -27,8 +27,8 @@ export namespace pragma {
 #pragma pack(pop)
 
 		ShaderPPWater(prosper::IPrContext &context, const std::string &identifier);
-		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat);
-		bool RecordRefractionMaterial(prosper::ShaderBindState &bindState, msys::CMaterial &mat) const;
+		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(material::CMaterial &mat);
+		bool RecordRefractionMaterial(prosper::ShaderBindState &bindState, material::CMaterial &mat) const;
 		bool RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, prosper::IDescriptorSet &descSetDepth, prosper::IDescriptorSet &descSetCamera, prosper::IDescriptorSet &descSetTime, prosper::IDescriptorSet &descSetFog, const Vector4 &clipPlane) const;
 	  protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;

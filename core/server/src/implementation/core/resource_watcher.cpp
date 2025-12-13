@@ -8,9 +8,9 @@ import :core.resource_watcher;
 
 import :game;
 
-decltype(ESResourceWatcherCallbackType::NavMesh) ESResourceWatcherCallbackType::NavMesh = ESResourceWatcherCallbackType {pragma::math::to_integral(E::NavMesh)};
-decltype(ESResourceWatcherCallbackType::Count) ESResourceWatcherCallbackType::Count = ESResourceWatcherCallbackType {pragma::math::to_integral(E::Count)};
-void SResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path, const std::string &ext)
+decltype(pragma::util::ESResourceWatcherCallbackType::NavMesh) pragma::util::ESResourceWatcherCallbackType::NavMesh = ESResourceWatcherCallbackType {pragma::math::to_integral(E::NavMesh)};
+decltype(pragma::util::ESResourceWatcherCallbackType::Count) pragma::util::ESResourceWatcherCallbackType::Count = ESResourceWatcherCallbackType {pragma::math::to_integral(E::Count)};
+void pragma::util::SResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path, const std::string &ext)
 {
 	ResourceWatcherManager::OnResourceChanged(rootPath, path, ext);
 	auto &strPath = path.GetString();
@@ -29,6 +29,6 @@ void SResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPa
 #endif
 			}
 		}
-		CallChangeCallbacks(ESResourceWatcherCallbackType::NavMesh, strPath, ext);
+		CallChangeCallbacks(pragma::util::ESResourceWatcherCallbackType::NavMesh, strPath, ext);
 	}
 }

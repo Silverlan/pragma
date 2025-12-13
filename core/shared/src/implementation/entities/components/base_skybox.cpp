@@ -28,5 +28,5 @@ void BaseSkyboxComponent::OnEntitySpawn()
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
 	if(!pPhysComponent)
 		return;
-	pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Static);
+	pPhysComponent->InitializePhysics(physics::PhysicsType::Static);
 }

@@ -213,7 +213,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			if(!rootPath.empty())
 				rootPath += '/';
 			std::vector<std::string> files;
-			filemanager::find_files(rootPath +path,&files,nullptr);
+			pragma::fs::find_files(rootPath +path,&files,nullptr);
 
 			std::unordered_set<std::string> extMap;
 			for(auto &ext : exts)

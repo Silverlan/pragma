@@ -66,11 +66,11 @@ export namespace Lua {
 		DLLNETWORK Vector3 world_to_local(lua::State *l, const Vector3 &vLocal, const Quat &rLocal, const Vector3 &v);
 		DLLNETWORK void world_to_local(lua::State *l, const Vector3 &vLocal, const Quat &rLocal, const Vector3 &v, const Quat &r);
 
-		DLLNETWORK Vector3 calc_world_direction_from_2d_coordinates(lua::State *l, const Vector3 &forward, const Vector3 &right, const Vector3 &up, float fov, float nearZ, float farZ, float aspectRatio, const ::Vector2 &uv);
-		DLLNETWORK void world_space_point_to_screen_space_uv(lua::State *l, const Vector3 &point, const ::Mat4 &vp, float nearZ, float farZ);
-		DLLNETWORK ::Vector2 world_space_point_to_screen_space_uv(lua::State *l, const Vector3 &point, const ::Mat4 &vp);
-		DLLNETWORK ::Vector2 world_space_direction_to_screen_space(lua::State *l, const Vector3 &dir, const ::Mat4 &vp);
-		DLLNETWORK float calc_screenspace_distance_to_worldspace_position(lua::State *l, const Vector3 &point, const ::Mat4 &vp, float nearZ, float farZ);
+		DLLNETWORK Vector3 calc_world_direction_from_2d_coordinates(lua::State *l, const Vector3 &forward, const Vector3 &right, const Vector3 &up, float fov, float nearZ, float farZ, float aspectRatio, const Vector2 &uv);
+		DLLNETWORK void world_space_point_to_screen_space_uv(lua::State *l, const Vector3 &point, const Mat4 &vp, float nearZ, float farZ);
+		DLLNETWORK Vector2 world_space_point_to_screen_space_uv(lua::State *l, const Vector3 &point, const Mat4 &vp);
+		DLLNETWORK Vector2 world_space_direction_to_screen_space(lua::State *l, const Vector3 &dir, const Mat4 &vp);
+		DLLNETWORK float calc_screenspace_distance_to_worldspace_position(lua::State *l, const Vector3 &point, const Mat4 &vp, float nearZ, float farZ);
 		DLLNETWORK float depth_to_distance(lua::State *l, float depth, float nearZ, float farZ);
 
 		DLLNETWORK bool is_same_object(lua::State *l, const luabind::object &o0, const luabind::object &o1);
@@ -89,14 +89,14 @@ export namespace Lua {
 		DLLNETWORK luabind::object read_scene_file(lua::State *l, const std::string &fileName);
 
 		DLLNETWORK luabind::object fade_property(lua::State *l, LColorProperty &colProp, const Color &colDst, float duration);
-		DLLNETWORK luabind::object fade_property(lua::State *l, LVector2Property &vProp, const ::Vector2 &vDst, float duration);
-		DLLNETWORK luabind::object fade_property(lua::State *l, LVector2iProperty &vProp, const ::Vector2i &vDst, float duration);
-		DLLNETWORK luabind::object fade_property(lua::State *l, LVector3Property &vProp, const ::Vector3 &vDst, float duration);
-		DLLNETWORK luabind::object fade_property(lua::State *l, LVector3iProperty &vProp, const ::Vector3i &vDst, float duration);
-		DLLNETWORK luabind::object fade_property(lua::State *l, LVector4Property &vProp, const ::Vector4 &vDst, float duration);
-		DLLNETWORK luabind::object fade_property(lua::State *l, LVector4iProperty &vProp, const ::Vector4i &vDst, float duration);
-		DLLNETWORK luabind::object fade_property(lua::State *l, LQuatProperty &vProp, const ::Quat &vDst, float duration);
-		DLLNETWORK luabind::object fade_property(lua::State *l, LEulerAnglesProperty &vProp, const ::EulerAngles &vDst, float duration);
+		DLLNETWORK luabind::object fade_property(lua::State *l, LVector2Property &vProp, const Vector2 &vDst, float duration);
+		DLLNETWORK luabind::object fade_property(lua::State *l, LVector2iProperty &vProp, const Vector2i &vDst, float duration);
+		DLLNETWORK luabind::object fade_property(lua::State *l, LVector3Property &vProp, const Vector3 &vDst, float duration);
+		DLLNETWORK luabind::object fade_property(lua::State *l, LVector3iProperty &vProp, const Vector3i &vDst, float duration);
+		DLLNETWORK luabind::object fade_property(lua::State *l, LVector4Property &vProp, const Vector4 &vDst, float duration);
+		DLLNETWORK luabind::object fade_property(lua::State *l, LVector4iProperty &vProp, const Vector4i &vDst, float duration);
+		DLLNETWORK luabind::object fade_property(lua::State *l, LQuatProperty &vProp, const Quat &vDst, float duration);
+		DLLNETWORK luabind::object fade_property(lua::State *l, LEulerAnglesProperty &vProp, const EulerAngles &vDst, float duration);
 		DLLNETWORK luabind::object fade_property(lua::State *l, LGenericIntPropertyWrapper &vProp, const int64_t &vDst, float duration);
 		DLLNETWORK luabind::object fade_property(lua::State *l, LGenericFloatPropertyWrapper &vProp, const double &vDst, float duration);
 
@@ -108,7 +108,7 @@ export namespace Lua {
 		DLLNETWORK std::string get_addon_path(lua::State *l, const std::string &relPath);
 		DLLNETWORK std::string get_string_hash(const std::string &str);
 		DLLNETWORK luabind::object get_class_value(lua::State *l, const luabind::object &o, const std::string &key);
-		DLLNETWORK Lua::var<bool, pragma::util::ParallelJob<luabind::object>> pack_zip_archive(lua::State *l, pragma::Game &game, const std::string &zipFileName, const luabind::table<> &t);
+		DLLNETWORK var<bool, pragma::util::ParallelJob<luabind::object>> pack_zip_archive(lua::State *l, pragma::Game &game, const std::string &zipFileName, const luabind::table<> &t);
 
 		DLLNETWORK void register_std_vector_types(lua::State *l);
 

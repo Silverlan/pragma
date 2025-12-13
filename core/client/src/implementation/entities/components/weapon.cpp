@@ -12,7 +12,7 @@ import :game;
 using namespace pragma;
 
 ComponentEventId cWeaponComponent::EVENT_ATTACH_TO_OWNER = INVALID_COMPONENT_ID;
-void CWeaponComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void CWeaponComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseWeaponComponent::RegisterEvents(componentManager, registerEvent);
 	cWeaponComponent::EVENT_ATTACH_TO_OWNER = registerEvent("ATTACH_TO_OWNER", ComponentEventInfo::Type::Explicit);
@@ -22,7 +22,7 @@ std::vector<CWeaponComponent *> CWeaponComponent::s_weapons;
 const std::vector<CWeaponComponent *> &CWeaponComponent::GetAll() { return s_weapons; }
 unsigned int CWeaponComponent::GetWeaponCount() { return CUInt32(s_weapons.size()); }
 
-CWeaponComponent::CWeaponComponent(pragma::ecs::BaseEntity &ent) : BaseWeaponComponent(ent), CBaseNetComponent() { s_weapons.push_back(this); }
+CWeaponComponent::CWeaponComponent(ecs::BaseEntity &ent) : BaseWeaponComponent(ent), CBaseNetComponent() { s_weapons.push_back(this); }
 
 CWeaponComponent::~CWeaponComponent()
 {
@@ -50,7 +50,7 @@ void CWeaponComponent::ReceiveData(NetPacket &packet)
 	SetMaxSecondaryClipSize(secMaxClipSize);
 }
 
-bool CWeaponComponent::HandleViewModelAnimationEvent(pragma::CViewModelComponent *, const AnimationEvent &) { return false; }
+bool CWeaponComponent::HandleViewModelAnimationEvent(CViewModelComponent *, const AnimationEvent &) { return false; }
 
 void CWeaponComponent::UpdateViewModel()
 {
@@ -59,13 +59,13 @@ void CWeaponComponent::UpdateViewModel()
 	auto *vm = GetViewModel();
 	if(vm == nullptr)
 		return;
-	auto &vmEnt = static_cast<pragma::ecs::CBaseEntity &>(vm->GetEntity());
+	auto &vmEnt = static_cast<ecs::CBaseEntity &>(vm->GetEntity());
 	auto pRenderComponentVm = vmEnt.GetRenderComponent();
 	auto mdlComponentVm = vmEnt.GetModelComponent();
 	if(m_viewModel.has_value()) {
 		if(m_viewModel->empty() == true) {
 			if(pRenderComponentVm)
-				pRenderComponentVm->SetSceneRenderPass(pragma::rendering::SceneRenderPass::None);
+				pRenderComponentVm->SetSceneRenderPass(rendering::SceneRenderPass::None);
 			vm->SetViewModelOffset({});
 			return;
 		}
@@ -73,12 +73,12 @@ void CWeaponComponent::UpdateViewModel()
 			mdlComponentVm->SetModel(*m_viewModel);
 	}
 	if(pRenderComponentVm)
-		pRenderComponentVm->SetSceneRenderPass(pragma::rendering::SceneRenderPass::View);
+		pRenderComponentVm->SetSceneRenderPass(rendering::SceneRenderPass::View);
 	vm->SetViewModelOffset(GetViewModelOffset());
 	vm->SetViewFOV(GetViewFOV());
 }
 
-static auto cvViewFov = pragma::console::get_client_con_var("cl_fov_viewmodel");
+static auto cvViewFov = console::get_client_con_var("cl_fov_viewmodel");
 void CWeaponComponent::SetViewModelOffset(const Vector3 &offset)
 {
 	m_viewModelOffset = offset;
@@ -88,7 +88,7 @@ void CWeaponComponent::SetViewModelOffset(const Vector3 &offset)
 	vm->SetViewModelOffset(offset);
 }
 const Vector3 &CWeaponComponent::GetViewModelOffset() const { return m_viewModelOffset; }
-void CWeaponComponent::SetViewFOV(pragma::math::Degree fov)
+void CWeaponComponent::SetViewFOV(math::Degree fov)
 {
 	m_viewFov = fov;
 	auto *vm = GetViewModel();
@@ -109,20 +109,20 @@ void CWeaponComponent::Initialize()
 {
 	BaseWeaponComponent::Initialize();
 
-	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &shouldDrawData = static_cast<CEShouldDraw &>(evData.get());
-		auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
-		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
-		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetSceneRenderPass() : pragma::rendering::SceneRenderPass::None;
-		if(renderMode != pragma::rendering::SceneRenderPass::None) {
-			if(renderMode == pragma::rendering::SceneRenderPass::View) {
-				auto *pl = pragma::get_cgame()->GetLocalPlayer();
+		auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
+		auto pRenderComponent = ent.GetComponent<CRenderComponent>();
+		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetSceneRenderPass() : rendering::SceneRenderPass::None;
+		if(renderMode != rendering::SceneRenderPass::None) {
+			if(renderMode == rendering::SceneRenderPass::View) {
+				auto *pl = get_cgame()->GetLocalPlayer();
 				auto *plComponent = static_cast<CPlayerComponent *>(pl->GetEntity().GetPlayerComponent().get());
 				if(pl->IsInFirstPersonMode() == false) {
 					shouldDrawData.shouldDraw = false;
-					return pragma::util::EventReply::Handled;
+					return util::EventReply::Handled;
 				}
-				return pragma::util::EventReply::Unhandled;
+				return util::EventReply::Unhandled;
 			}
 			auto *owner = m_whOwnerComponent.valid() ? m_whOwnerComponent->GetOwner() : nullptr;
 			if(owner != nullptr) {
@@ -130,50 +130,50 @@ void CWeaponComponent::Initialize()
 				if(charComponent.valid()) {
 					if(charComponent->GetActiveWeapon() != &GetEntity()) {
 						shouldDrawData.shouldDraw = false;
-						return pragma::util::EventReply::Handled;
+						return util::EventReply::Handled;
 					}
-					return pragma::util::EventReply::Unhandled;
+					return util::EventReply::Unhandled;
 				}
 			}
 		}
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
-	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW_SHADOW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(cRenderComponent::EVENT_SHOULD_DRAW_SHADOW, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		if(m_bDeployed == false) {
 			static_cast<CEShouldDraw &>(evData.get()).shouldDraw = false;
-			return pragma::util::EventReply::Handled;
+			return util::EventReply::Handled;
 		}
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(cOwnableComponent::EVENT_ON_OWNER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cOwnableComponent::EVENT_ON_OWNER_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		UpdateOwnerAttachment();
 		ClearOwnerCallbacks();
-		auto &ownerChangedData = static_cast<pragma::CEOnOwnerChanged &>(evData.get());
+		auto &ownerChangedData = static_cast<CEOnOwnerChanged &>(evData.get());
 		if(ownerChangedData.newOwner != nullptr && ownerChangedData.newOwner->IsPlayer() == true && static_cast<CPlayerComponent *>(ownerChangedData.newOwner->GetPlayerComponent().get())->IsLocalPlayer() == true) {
 			auto plComponent = ownerChangedData.newOwner->GetPlayerComponent();
 			auto *observableC = plComponent->GetObservableComponent();
 			if(observableC) {
-				m_cbOnObserverChanged = observableC->AddEventCallback(cObservableComponent::EVENT_ON_OBSERVER_CHANGED, [this, observableC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+				m_cbOnObserverChanged = observableC->AddEventCallback(cObservableComponent::EVENT_ON_OBSERVER_CHANGED, [this, observableC](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 					UpdateObserver(observableC->GetObserver());
-					return pragma::util::EventReply::Unhandled;
+					return util::EventReply::Unhandled;
 				});
 				FlagCallbackForRemoval(m_cbOnObserverChanged, CallbackType::Component);
 				UpdateObserver(observableC->GetObserver());
 			}
 		}
 	});
-	BindEventUnhandled(cWeaponComponent::EVENT_ON_DEPLOY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto *renderC = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
+	BindEventUnhandled(cWeaponComponent::EVENT_ON_DEPLOY, [this](std::reference_wrapper<ComponentEvent> evData) {
+		auto *renderC = static_cast<ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(renderC)
 			renderC->UpdateShouldDrawState();
 	});
-	BindEventUnhandled(cWeaponComponent::EVENT_ON_HOLSTER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto *renderC = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
+	BindEventUnhandled(cWeaponComponent::EVENT_ON_HOLSTER, [this](std::reference_wrapper<ComponentEvent> evData) {
+		auto *renderC = static_cast<ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 		if(renderC)
 			renderC->UpdateShouldDrawState();
 	});
 }
-pragma::math::Degree CWeaponComponent::GetViewFOV() const
+math::Degree CWeaponComponent::GetViewFOV() const
 {
 	if(m_viewFov.has_value() == false)
 		return cvViewFov->GetFloat();
@@ -193,11 +193,11 @@ bool CWeaponComponent::IsInFirstPersonMode() const
 
 void CWeaponComponent::UpdateWorldModel()
 {
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(!pRenderComponent)
 		return;
-	pRenderComponent->SetSceneRenderPass(IsInFirstPersonMode() ? ((pragma::math::is_flag_set(m_stateFlags, StateFlags::HideWorldModelInFirstPerson) == true) ? pragma::rendering::SceneRenderPass::None : pragma::rendering::SceneRenderPass::View) : pragma::rendering::SceneRenderPass::World);
+	pRenderComponent->SetSceneRenderPass(IsInFirstPersonMode() ? ((math::is_flag_set(m_stateFlags, StateFlags::HideWorldModelInFirstPerson) == true) ? rendering::SceneRenderPass::None : rendering::SceneRenderPass::View) : rendering::SceneRenderPass::World);
 }
 
 void CWeaponComponent::SetViewModel(const std::string &mdl)
@@ -255,13 +255,13 @@ void CWeaponComponent::UpdateOwnerAttachment()
 			pAttComponent->ClearAttachment();
 		return;
 	}
-	auto *game = pragma::get_client_state()->GetGameState();
+	auto *game = get_client_state()->GetGameState();
 	CViewModelComponent *cVm = nullptr;
 	if(owner->IsPlayer()) {
 		auto *plComponent = static_cast<CPlayerComponent *>(owner->GetPlayerComponent().get());
 		auto charComponent = owner->GetCharacterComponent();
 		if(plComponent->IsLocalPlayer() && charComponent.valid() && charComponent->GetActiveWeapon() == &ent && IsInFirstPersonMode() == true) {
-			auto *vm = game->GetViewModel<pragma::CViewModelComponent>();
+			auto *vm = game->GetViewModel<CViewModelComponent>();
 			if(vm == nullptr)
 				return;
 			cVm = vm;
@@ -269,7 +269,7 @@ void CWeaponComponent::UpdateOwnerAttachment()
 	}
 
 	CEAttachToOwner evData {*owner, cVm};
-	if(BroadcastEvent(cWeaponComponent::EVENT_ATTACH_TO_OWNER, evData) == pragma::util::EventReply::Unhandled) {
+	if(BroadcastEvent(cWeaponComponent::EVENT_ATTACH_TO_OWNER, evData) == util::EventReply::Unhandled) {
 		auto *parent = cVm ? &cVm->GetEntity() : owner;
 		auto pTransformComponent = ent.GetTransformComponent();
 		auto pTransformComponentParent = parent->GetTransformComponent();
@@ -283,7 +283,7 @@ void CWeaponComponent::UpdateOwnerAttachment()
 			auto pMdlComponent = parent->GetModelComponent();
 			auto attId = pMdlComponent ? pMdlComponent->LookupAttachment("weapon") : -1;
 			AttachmentInfo attInfo {};
-			attInfo.flags |= pragma::FAttachmentMode::SnapToOrigin | pragma::FAttachmentMode::UpdateEachFrame;
+			attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
 			if(attId != -1)
 				pAttComponent->AttachToAttachment(parent, "weapon", attInfo);
 			else
@@ -302,27 +302,27 @@ void CWeaponComponent::UpdateOwnerAttachment()
 
 void CWeaponComponent::SetHideWorldModelInFirstPerson(bool b)
 {
-	pragma::math::set_flag(m_stateFlags, StateFlags::HideWorldModelInFirstPerson, b);
+	math::set_flag(m_stateFlags, StateFlags::HideWorldModelInFirstPerson, b);
 	UpdateWorldModel();
 }
-bool CWeaponComponent::GetHideWorldModelInFirstPerson() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::HideWorldModelInFirstPerson); }
+bool CWeaponComponent::GetHideWorldModelInFirstPerson() const { return math::is_flag_set(m_stateFlags, StateFlags::HideWorldModelInFirstPerson); }
 
 void CWeaponComponent::UpdateDeployState()
 {
 	if(IsDeployed() == false)
 		return;
 
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::UpdatingDeployState))
+	if(math::is_flag_set(m_stateFlags, StateFlags::UpdatingDeployState))
 		return; // Prevent infinite recursion
-	pragma::math::set_flag(m_stateFlags, StateFlags::UpdatingDeployState);
-	pragma::util::ScopeGuard sg {[this]() { pragma::math::set_flag(m_stateFlags, StateFlags::UpdatingDeployState, false); }};
+	math::set_flag(m_stateFlags, StateFlags::UpdatingDeployState);
+	util::ScopeGuard sg {[this]() { math::set_flag(m_stateFlags, StateFlags::UpdatingDeployState, false); }};
 
 	UpdateOwnerAttachment();
 	UpdateViewModel();
 	auto *vm = GetViewModel();
 	if(vm == nullptr)
 		return;
-	PlayViewActivity(pragma::Activity::VmIdle);
+	PlayViewActivity(Activity::VmIdle);
 }
 
 void CWeaponComponent::Deploy()
@@ -333,8 +333,8 @@ void CWeaponComponent::Deploy()
 	auto *vm = GetViewModel();
 	if(vm == nullptr)
 		return;
-	if(PlayViewActivity(pragma::Activity::VmDeploy) == false)
-		PlayViewActivity(pragma::Activity::VmIdle);
+	if(PlayViewActivity(Activity::VmDeploy) == false)
+		PlayViewActivity(Activity::VmIdle);
 }
 
 void CWeaponComponent::Holster()
@@ -343,25 +343,25 @@ void CWeaponComponent::Holster()
 	auto *vm = GetViewModel();
 	if(vm == nullptr)
 		return;
-	CGame *game = pragma::get_client_state()->GetGameState();
-	PlayViewActivity(pragma::Activity::VmHolster);
+	CGame *game = get_client_state()->GetGameState();
+	PlayViewActivity(Activity::VmHolster);
 }
 
-pragma::Activity CWeaponComponent::TranslateViewActivity(pragma::Activity act) { return act; }
+Activity CWeaponComponent::TranslateViewActivity(Activity act) { return act; }
 
-pragma::CViewModelComponent *CWeaponComponent::GetViewModel()
+CViewModelComponent *CWeaponComponent::GetViewModel()
 {
-	pragma::ecs::BaseEntity *parent = m_hTarget.get();
+	ecs::BaseEntity *parent = m_hTarget.get();
 	if(parent == nullptr)
 		return nullptr;
-	CGame *game = pragma::get_client_state()->GetGameState();
-	auto *vm = game->GetViewModel<pragma::CViewModelComponent>();
+	CGame *game = get_client_state()->GetGameState();
+	auto *vm = game->GetViewModel<CViewModelComponent>();
 	if(vm == nullptr || &vm->GetEntity() != parent)
 		return nullptr;
 	return vm;
 }
 
-bool CWeaponComponent::PlayViewActivity(pragma::Activity activity, pragma::FPlayAnim flags)
+bool CWeaponComponent::PlayViewActivity(Activity activity, FPlayAnim flags)
 {
 	auto *vm = GetViewModel();
 	if(vm == nullptr)
@@ -389,7 +389,7 @@ void CWeaponComponent::TertiaryAttack() { BaseWeaponComponent::TertiaryAttack();
 void CWeaponComponent::Attack4() { BaseWeaponComponent::Attack4(); }
 void CWeaponComponent::Reload() { BaseWeaponComponent::Reload(); }
 
-CEAttachToOwner::CEAttachToOwner(pragma::ecs::BaseEntity &owner, CViewModelComponent *optViewmodel) : owner {owner}, viewModel {optViewmodel} {}
+CEAttachToOwner::CEAttachToOwner(ecs::BaseEntity &owner, CViewModelComponent *optViewmodel) : owner {owner}, viewModel {optViewmodel} {}
 void CEAttachToOwner::PushArguments(lua::State *l)
 {
 	owner.GetLuaObject().push(l);
@@ -400,18 +400,18 @@ void CEAttachToOwner::PushArguments(lua::State *l)
 void CWeaponComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseWeaponComponent::RegisterLuaBindings(l, modEnts);
-	auto def = pragma::LuaCore::create_entity_component_class<pragma::CWeaponComponent, pragma::BaseWeaponComponent>("WeaponComponent");
-	def.def("PlayViewActivity", &pragma::CWeaponComponent::PlayViewActivity);
-	def.def("PlayViewActivity", static_cast<bool (*)(pragma::CWeaponComponent &wepComponent, pragma::Activity)>([](pragma::CWeaponComponent &wepComponent, pragma::Activity activity) { return wepComponent.PlayViewActivity(activity); }));
-	def.def("SetViewModel", &pragma::CWeaponComponent::SetViewModel);
-	def.def("GetViewModel", &pragma::CWeaponComponent::GetViewModel);
-	def.def("SetHideWorldModelInFirstPerson", &pragma::CWeaponComponent::SetHideWorldModelInFirstPerson);
-	def.def("GetHideWorldModelInFirstPerson", &pragma::CWeaponComponent::GetHideWorldModelInFirstPerson);
-	def.def("IsInFirstPersonMode", &pragma::CWeaponComponent::IsInFirstPersonMode);
-	def.def("SetViewModelOffset", &pragma::CWeaponComponent::SetViewModelOffset);
-	def.def("GetViewModelOffset", &pragma::CWeaponComponent::GetViewModelOffset);
-	def.def("SetViewFOV", &pragma::CWeaponComponent::SetViewFOV);
-	def.def("GetViewFOV", &pragma::CWeaponComponent::GetViewFOV);
-	def.add_static_constant("EVENT_ATTACH_TO_OWNER", pragma::cWeaponComponent::EVENT_ATTACH_TO_OWNER);
+	auto def = pragma::LuaCore::create_entity_component_class<CWeaponComponent, BaseWeaponComponent>("WeaponComponent");
+	def.def("PlayViewActivity", &CWeaponComponent::PlayViewActivity);
+	def.def("PlayViewActivity", static_cast<bool (*)(CWeaponComponent &wepComponent, Activity)>([](CWeaponComponent &wepComponent, Activity activity) { return wepComponent.PlayViewActivity(activity); }));
+	def.def("SetViewModel", &CWeaponComponent::SetViewModel);
+	def.def("GetViewModel", &CWeaponComponent::GetViewModel);
+	def.def("SetHideWorldModelInFirstPerson", &CWeaponComponent::SetHideWorldModelInFirstPerson);
+	def.def("GetHideWorldModelInFirstPerson", &CWeaponComponent::GetHideWorldModelInFirstPerson);
+	def.def("IsInFirstPersonMode", &CWeaponComponent::IsInFirstPersonMode);
+	def.def("SetViewModelOffset", &CWeaponComponent::SetViewModelOffset);
+	def.def("GetViewModelOffset", &CWeaponComponent::GetViewModelOffset);
+	def.def("SetViewFOV", &CWeaponComponent::SetViewFOV);
+	def.def("GetViewFOV", &CWeaponComponent::GetViewFOV);
+	def.add_static_constant("EVENT_ATTACH_TO_OWNER", cWeaponComponent::EVENT_ATTACH_TO_OWNER);
 	modEnts[def];
 }

@@ -16,27 +16,27 @@ export namespace pragma::pts {
 	class DLLCLIENT CParticleInitializerSpeed : public CParticleInitializer {
 	public:
 		CParticleInitializerSpeed() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
 	private:
 		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fSpeed;
 	};
 }
 
-void pragma::pts::CParticleInitializerSpeed::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleInitializerSpeed::Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	m_fSpeed.Initialize("speed", values);
 	for(auto &pair : values) {
 		auto key = pair.first;
-		pragma::string::to_lower(key);
+		string::to_lower(key);
 		if(key == "speed_min")
-			m_fSpeed.SetMin(pragma::util::to_float(pair.second));
+			m_fSpeed.SetMin(util::to_float(pair.second));
 		else if(key == "speed_max")
-			m_fSpeed.SetMax(pragma::util::to_float(pair.second));
+			m_fSpeed.SetMax(util::to_float(pair.second));
 	}
 }
-void pragma::pts::CParticleInitializerSpeed::OnParticleCreated(pragma::pts::CParticle &particle)
+void pragma::pts::CParticleInitializerSpeed::OnParticleCreated(CParticle &particle)
 {
 	auto vel = particle.GetVelocity();
 	auto l = uvec::length(vel);

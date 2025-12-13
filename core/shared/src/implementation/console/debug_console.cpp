@@ -60,7 +60,7 @@ void pragma::console::DebugConsole::open()
 	// Change the console font
 	/*if(handleOut) {
 		std::string fontPath;
-		if(filemanager::find_absolute_path("fonts/ubuntu/UbuntuMono-R.ttf", fontPath)) {
+		if(fs::find_absolute_path("fonts/ubuntu/UbuntuMono-R.ttf", fontPath)) {
 			pragma::string::replace(fontPath, "/", "\\");
 			HANDLE m_stdOut = handleOut;
 			auto numFontsAdded = AddFontResourceEx(fontPath.c_str(), FR_NOT_ENUM, 0);

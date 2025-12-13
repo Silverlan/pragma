@@ -14,7 +14,7 @@ export namespace pragma {
 	}
 	class DLLCLIENT CToggleComponent final : public BaseToggleComponent, public CBaseNetComponent {
 	  public:
-		CToggleComponent(pragma::ecs::BaseEntity &ent) : BaseToggleComponent(ent) {}
+		CToggleComponent(ecs::BaseEntity &ent) : BaseToggleComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(UInt32 eventId, NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;

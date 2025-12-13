@@ -55,8 +55,8 @@ bool pragma::Engine::ExecConfig(const std::string &cfg, const std::function<void
 	std::string path = cfg;
 	if(path.substr(path.length() - 4) != ".cfg")
 		path += ".cfg";
-	path = "cfg\\" + FileManager::GetCanonicalizedPath(path);
-	auto f = FileManager::OpenFile(path.c_str(), "r");
+	path = "cfg\\" + fs::get_canonicalized_path(path);
+	auto f = pragma::fs::open_file(path.c_str(), pragma::fs::FileMode::Read);
 	if(f == nullptr) {
 		spdlog::warn("'{}' not present; not executing.", cfg);
 		return false;
@@ -86,9 +86,9 @@ void pragma::Engine::LoadConfig() { LoadServerConfig(); }
 
 void pragma::Engine::SaveServerConfig()
 {
-	FileManager::CreatePath("cfg");
+	fs::create_path("cfg");
 	std::string path = "cfg\\server.cfg";
-	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "w");
+	auto f = fs::open_file<fs::VFilePtrReal>(path, fs::FileMode::Write);
 	if(f == nullptr) {
 		spdlog::warn("Unable to save server.cfg");
 		return;
@@ -98,9 +98,9 @@ void pragma::Engine::SaveServerConfig()
 
 void pragma::Engine::SaveEngineConfig()
 {
-	FileManager::CreatePath("cfg");
+	fs::create_path("cfg");
 	std::string path = "cfg\\engine.cfg";
-	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "w");
+	auto f = fs::open_file<fs::VFilePtrReal>(path, fs::FileMode::Write);
 	if(f == nullptr) {
 		spdlog::warn("Unable to save engine.cfg");
 		return;
@@ -108,7 +108,7 @@ void pragma::Engine::SaveEngineConfig()
 	WriteEngineConfig(f);
 }
 
-void pragma::Engine::RestoreConVarsForUnknownCommands(VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<console::ConConf>> &stateConVars)
+void pragma::Engine::RestoreConVarsForUnknownCommands(fs::VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<console::ConConf>> &stateConVars)
 {
 	// We need to restore commands from the previous config in cases where we don't know the command.
 	// In this case the command may be from a script or module that hasn't been loaded during this instance and
@@ -127,7 +127,7 @@ void pragma::Engine::RestoreConVarsForUnknownCommands(VFilePtrReal f, const ConV
 	}
 }
 
-void pragma::Engine::WriteEngineConfig(VFilePtrReal f)
+void pragma::Engine::WriteEngineConfig(fs::VFilePtrReal f)
 {
 	auto &cvars = GetConVars();
 	for(auto it = cvars.begin(); it != cvars.end(); it++) {
@@ -142,7 +142,7 @@ void pragma::Engine::WriteEngineConfig(VFilePtrReal f)
 	}
 }
 
-void pragma::Engine::WriteServerConfig(VFilePtrReal f)
+void pragma::Engine::WriteServerConfig(fs::VFilePtrReal f)
 {
 	auto *stateSv = GetServerNetworkState();
 	if(stateSv != nullptr) {

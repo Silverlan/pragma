@@ -27,11 +27,11 @@ export namespace pragma::gui::types {
 		void LoadURL(const std::string &url);
 		void SetViewSize(const Vector2i &size);
 		void SetTransparentBackground(bool b);
-		void RegisterJavascriptFunction(const std::string &name, const std::function<std::unique_ptr<pragma::JSValue>(const std::vector<pragma::JSValue> &)> &callback);
+		void RegisterJavascriptFunction(const std::string &name, const std::function<std::unique_ptr<JSValue>(const std::vector<JSValue> &)> &callback);
 		void ExecJavascript(const std::string &js);
 
 		bool m_bEntered = false;
-		pragma::gui::WIHandle m_hWeb;
+		WIHandle m_hWeb;
 		std::string m_initialURL;
 	  private:
 		WIBase *m_parent = nullptr;

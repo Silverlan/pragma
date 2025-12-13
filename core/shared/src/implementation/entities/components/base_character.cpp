@@ -24,7 +24,7 @@ ComponentEventId baseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND = INVALID_COM
 ComponentEventId baseCharacterComponent::EVENT_IS_MOVING = INVALID_COMPONENT_ID;
 ComponentEventId baseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION = INVALID_COMPONENT_ID;
 ComponentEventId baseCharacterComponent::EVENT_ON_JUMP = INVALID_COMPONENT_ID;
-void BaseCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void BaseCharacterComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseActorComponent::RegisterEvents(componentManager, registerEvent);
 	baseCharacterComponent::EVENT_ON_FOOT_STEP = registerEvent("ON_FOOT_STEP", ComponentEventInfo::Type::Broadcast);
@@ -37,17 +37,17 @@ void BaseCharacterComponent::RegisterEvents(pragma::EntityComponentManager &comp
 	baseCharacterComponent::EVENT_ON_JUMP = registerEvent("ON_JUMP", ComponentEventInfo::Type::Broadcast);
 }
 
-BaseCharacterComponent::BaseCharacterComponent(pragma::ecs::BaseEntity &ent) : BaseActorComponent(ent), m_slopeLimit(pragma::util::FloatProperty::Create(CFloat(pragma::math::cos(pragma::math::deg_to_rad(45.0f))))), m_stepOffset(pragma::util::FloatProperty::Create(2.f)), m_jumpPower(pragma::util::FloatProperty::Create(0.f)) {}
+BaseCharacterComponent::BaseCharacterComponent(ecs::BaseEntity &ent) : BaseActorComponent(ent), m_slopeLimit(util::FloatProperty::Create(CFloat(math::cos(math::deg_to_rad(45.0f))))), m_stepOffset(util::FloatProperty::Create(2.f)), m_jumpPower(util::FloatProperty::Create(0.f)) {}
 
-const pragma::util::PFloatProperty &BaseCharacterComponent::GetSlopeLimitProperty() const { return m_slopeLimit; }
-const pragma::util::PFloatProperty &BaseCharacterComponent::GetStepOffsetProperty() const { return m_stepOffset; }
+const util::PFloatProperty &BaseCharacterComponent::GetSlopeLimitProperty() const { return m_slopeLimit; }
+const util::PFloatProperty &BaseCharacterComponent::GetStepOffsetProperty() const { return m_stepOffset; }
 
-void BaseCharacterComponent::InitializePhysObj(pragma::physics::PhysObj *)
+void BaseCharacterComponent::InitializePhysObj(physics::PhysObj *)
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent)
-		pPhysComponent->AddCollisionFilter(pragma::physics::CollisionMask::Character);
+		pPhysComponent->AddCollisionFilter(physics::CollisionMask::Character);
 }
 
 void BaseCharacterComponent::Initialize()
@@ -56,8 +56,8 @@ void BaseCharacterComponent::Initialize()
 	m_netEvSetActiveWeapon = SetupNetEvent("set_active_weapon");
 	m_netEvSetAmmoCount = SetupNetEvent("set_ammo_count");
 
-	BindEvent(baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { return HandleAnimationEvent(static_cast<CEHandleAnimationEvent &>(evData.get()).animationEvent) ? pragma::util::EventReply::Handled : pragma::util::EventReply::Unhandled; });
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEvent(baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<ComponentEvent> evData) { return HandleAnimationEvent(static_cast<CEHandleAnimationEvent &>(evData.get()).animationEvent) ? util::EventReply::Handled : util::EventReply::Unhandled; });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE, [this](std::reference_wrapper<ComponentEvent> evData) {
 		auto t = GetEntity().GetNetworkState()->GetGameState()->CurTime();
 		if(t >= m_tDetachFromGround)
 			return;
@@ -66,11 +66,11 @@ void BaseCharacterComponent::Initialize()
 		auto *phys = whPhysComponent ? whPhysComponent->GetPhysicsObject() : nullptr;
 		if(phys == nullptr || phys->IsController() == false)
 			return;
-		auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(phys);
+		auto *physController = static_cast<physics::ControllerPhysObj *>(phys);
 		auto contactNormal = physController->GetController()->GetGroundTouchNormal();
 		if(contactNormal.has_value() == false)
 			return;
-		auto whVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+		auto whVelComponent = ent.GetComponent<VelocityComponent>();
 		if(whVelComponent.valid()) {
 			auto vel = whVelComponent->GetVelocity();
 			uvec::normalize(&vel);
@@ -82,7 +82,7 @@ void BaseCharacterComponent::Initialize()
 			}
 		}
 	});
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateNeckControllers(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateNeckControllers(); });
 	auto &ent = GetEntity();
 	ent.AddComponent("sound_emitter");
 	ent.AddComponent("physics");
@@ -101,7 +101,7 @@ void BaseCharacterComponent::SetSlopeLimit(float limit)
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys != nullptr && phys->IsController()) {
-		auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(phys);
+		auto *physController = static_cast<physics::ControllerPhysObj *>(phys);
 		physController->SetSlopeLimit(limit);
 	}
 }
@@ -113,7 +113,7 @@ void BaseCharacterComponent::SetStepOffset(float offset)
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys != nullptr && phys->IsController()) {
-		auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(phys);
+		auto *physController = static_cast<physics::ControllerPhysObj *>(phys);
 		physController->SetStepOffset(offset);
 	}
 }
@@ -204,7 +204,7 @@ void BaseCharacterComponent::SetViewOrientation(const Quat &orientation)
 	m_angView.z = orientation.z;
 
 	CEViewRotation evData {orientation};
-	if(InvokeEventCallbacks(baseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION, evData) == pragma::util::EventReply::Handled)
+	if(InvokeEventCallbacks(baseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION, evData) == util::EventReply::Handled)
 		return;
 
 	auto &ent = GetEntity();
@@ -220,12 +220,12 @@ void BaseCharacterComponent::SetViewOrientation(const Quat &orientation)
 		auto pTrComponent = ent.GetTransformComponent();
 		auto rotCur = pTrComponent ? pTrComponent->GetRotation() : uquat::identity();
 		auto angCur = EulerAngles(rotRef * rotCur);
-		float pitchDelta = pragma::math::get_angle_difference(angView.p, angCur.p);
+		float pitchDelta = math::get_angle_difference(angView.p, angCur.p);
 		if(m_pitchController != -1)
 			animComponent->SetBlendController(m_pitchController, pitchDelta);
 		auto *yaw = hMdl->GetBlendController(m_yawController);
 		if(yaw != nullptr) {
-			float yawDelta = pragma::math::get_angle_difference(angView.y, angCur.y);
+			float yawDelta = math::get_angle_difference(angView.y, angCur.y);
 			if(yawDelta >= yaw->min && yawDelta <= yaw->max) {
 				animComponent->SetBlendController(m_yawController, yawDelta);
 				m_turnYaw = nullptr;
@@ -239,10 +239,10 @@ void BaseCharacterComponent::SetViewOrientation(const Quat &orientation)
 		*m_turnYaw = angView.y;
 }
 
-pragma::util::EventReply BaseCharacterComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply BaseCharacterComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == baseTransformComponent::EVENT_ON_TELEPORT) {
 		auto &te = static_cast<CETeleport &>(evData);
 		auto rot = GetViewOrientation();
@@ -257,7 +257,7 @@ pragma::util::EventReply BaseCharacterComponent::HandleEvent(ComponentEventId ev
 		else
 			SetViewOrientation(rot);
 	}
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 
 Quat BaseCharacterComponent::GetOrientationAxesRotation() const
@@ -282,16 +282,16 @@ EulerAngles BaseCharacterComponent::WorldToLocalOrientation(const EulerAngles &a
 Quat BaseCharacterComponent::LocalOrientationToWorld(const Quat &rot) { return uquat::get_inverse(GetOrientationAxesRotation()) * rot; }
 EulerAngles BaseCharacterComponent::LocalOrientationToWorld(const EulerAngles &ang) { return EulerAngles(LocalOrientationToWorld(uquat::create(ang))); }
 
-bool BaseCharacterComponent::HandleAnimationEvent(const pragma::AnimationEvent &ev)
+bool BaseCharacterComponent::HandleAnimationEvent(const AnimationEvent &ev)
 {
 	switch(ev.eventID) {
-	case pragma::AnimationEvent::Type::FootstepLeft:
-	case pragma::AnimationEvent::Type::FootstepRight:
+	case AnimationEvent::Type::FootstepLeft:
+	case AnimationEvent::Type::FootstepRight:
 		{
-			if(ev.eventID == pragma::AnimationEvent::Type::FootstepLeft)
-				FootStep(BaseCharacterComponent::FootType::Left);
+			if(ev.eventID == AnimationEvent::Type::FootstepLeft)
+				FootStep(FootType::Left);
 			else
-				FootStep(BaseCharacterComponent::FootType::Right);
+				FootStep(FootType::Right);
 			return true;
 		}
 	};
@@ -358,7 +358,7 @@ void BaseCharacterComponent::RemoveAmmo(const std::string &ammoType, int16_t cou
 		AddAmmo(ammoType, -count);
 		return;
 	}
-	SetAmmoCount(ammoType, pragma::math::max(static_cast<int32_t>(GetAmmoCount(ammoType)) - static_cast<int32_t>(count), 0));
+	SetAmmoCount(ammoType, math::max(static_cast<int32_t>(GetAmmoCount(ammoType)) - static_cast<int32_t>(count), 0));
 }
 void BaseCharacterComponent::RemoveAmmo(UInt32 ammoType, int16_t count)
 {
@@ -366,25 +366,25 @@ void BaseCharacterComponent::RemoveAmmo(UInt32 ammoType, int16_t count)
 		AddAmmo(ammoType, -count);
 		return;
 	}
-	SetAmmoCount(ammoType, pragma::math::max(static_cast<int32_t>(GetAmmoCount(ammoType)) - static_cast<int32_t>(count), 0));
+	SetAmmoCount(ammoType, math::max(static_cast<int32_t>(GetAmmoCount(ammoType)) - static_cast<int32_t>(count), 0));
 }
 
-void BaseCharacterComponent::PlayFootStepSound(FootType foot, const pragma::physics::SurfaceMaterial &surfMat, float scale)
+void BaseCharacterComponent::PlayFootStepSound(FootType foot, const physics::SurfaceMaterial &surfMat, float scale)
 {
 	CEPlayFootstepSound footStepInfo {foot, surfMat, scale};
-	if(BroadcastEvent(baseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND, footStepInfo) == pragma::util::EventReply::Handled)
+	if(BroadcastEvent(baseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND, footStepInfo) == util::EventReply::Handled)
 		return;
-	auto pSoundEmitterComponent = static_cast<pragma::BaseSoundEmitterComponent *>(GetEntity().FindComponent("sound_emitter").get());
+	auto pSoundEmitterComponent = static_cast<BaseSoundEmitterComponent *>(GetEntity().FindComponent("sound_emitter").get());
 	if(pSoundEmitterComponent == nullptr)
 		return;
 	const auto maxGain = 0.5f;
 	auto &ent = GetEntity();
-	auto soundType = pragma::audio::ALSoundType::Effect;
-	soundType |= (ent.IsPlayer() == true) ? pragma::audio::ALSoundType::Player : pragma::audio::ALSoundType::NPC;
+	auto soundType = audio::ALSoundType::Effect;
+	soundType |= (ent.IsPlayer() == true) ? audio::ALSoundType::Player : audio::ALSoundType::NPC;
 	auto pSubmergibleComponent = ent.GetComponent<SubmergibleComponent>();
 	if(pSubmergibleComponent.valid() && pSubmergibleComponent->IsSubmerged() == true)
 		return; // Don't play footsteps when underwater
-	pragma::BaseSoundEmitterComponent::SoundInfo sndInfo {};
+	BaseSoundEmitterComponent::SoundInfo sndInfo {};
 	sndInfo.transmit = false;
 	if(pSubmergibleComponent.valid() == false || pSubmergibleComponent->GetSubmergedFraction() == 0.f) {
 		sndInfo.gain = maxGain * scale;
@@ -427,7 +427,7 @@ void BaseCharacterComponent::FootStep(FootType foot)
 		if(moveScale < 0.1f) //0.25f)
 			return;
 	}
-	auto *phys = static_cast<pragma::physics::ControllerPhysObj *>(pPhysComponent->GetPhysicsObject());
+	auto *phys = static_cast<physics::ControllerPhysObj *>(pPhysComponent->GetPhysicsObject());
 	if(phys == nullptr || !phys->IsController())
 		return;
 	auto id = phys->GetGroundSurfaceMaterial();
@@ -438,17 +438,17 @@ void BaseCharacterComponent::FootStep(FootType foot)
 		return;
 	PlayFootStepSound(foot, *mat, moveScale); // TODO: Is Moving -> Blend move scale -> Same as player!
 }
-pragma::physics::TraceData BaseCharacterComponent::GetAimTraceData(std::optional<float> maxDist) const
+physics::TraceData BaseCharacterComponent::GetAimTraceData(std::optional<float> maxDist) const
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	if(!pTrComponent)
 		return {};
-	auto trData = pragma::util::get_entity_trace_data(*pTrComponent);
+	auto trData = util::get_entity_trace_data(*pTrComponent);
 	auto origin = GetEyePosition();
 	auto dir = GetViewForward();
 	trData.SetSource(origin);
-	trData.SetTarget(origin + dir * (maxDist.has_value() ? *maxDist : static_cast<float>(pragma::GameLimits::MaxRayCastRange)));
+	trData.SetTarget(origin + dir * (maxDist.has_value() ? *maxDist : static_cast<float>(GameLimits::MaxRayCastRange)));
 	// See also: ControllerPhysObj::PostSimulate
 	return trData;
 }
@@ -470,7 +470,7 @@ void BaseCharacterComponent::OnTick(double tDelta)
 				auto &rotCur = pTrComponent->GetRotation();
 				auto rot = rotRef * rotCur;
 				auto angCur = EulerAngles(rot);
-				angCur.y = pragma::math::approach_angle(angCur.y, *m_turnYaw, m_turnSpeed * CFloat(tDelta));
+				angCur.y = math::approach_angle(angCur.y, *m_turnYaw, m_turnSpeed * CFloat(tDelta));
 				rot = uquat::get_inverse(rotRef) * uquat::create(angCur);
 				pTrComponent->SetRotation(rot);
 			}
@@ -492,8 +492,8 @@ Vector3 BaseCharacterComponent::GetEyePosition() const
 	if(!pTrComponent)
 		return Vector3 {};
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto physType = pPhysComponent ? pPhysComponent->GetPhysicsType() : pragma::physics::PhysicsType::None;
-	if(physType != pragma::physics::PhysicsType::BoxController && physType != pragma::physics::PhysicsType::CapsuleController)
+	auto physType = pPhysComponent ? pPhysComponent->GetPhysicsType() : physics::PhysicsType::None;
+	if(physType != physics::PhysicsType::BoxController && physType != physics::PhysicsType::CapsuleController)
 		return pTrComponent->GetPosition();
 	Vector3 eyeOffset = pTrComponent->GetEyeOffset();
 	Vector3 forward, right, up;
@@ -512,11 +512,11 @@ bool BaseCharacterComponent::Jump(const Vector3 &velocity)
 		return false;
 	DetachFromGround();
 	auto &ent = GetEntity();
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+	auto pVelComponent = ent.GetComponent<VelocityComponent>();
 	if(pVelComponent.valid())
 		pVelComponent->AddVelocity(velocity);
 	CEOnJump footStepInfo {velocity};
-	if(BroadcastEvent(baseCharacterComponent::EVENT_ON_JUMP, footStepInfo) == pragma::util::EventReply::Handled)
+	if(BroadcastEvent(baseCharacterComponent::EVENT_ON_JUMP, footStepInfo) == util::EventReply::Handled)
 		return true;
 	return true;
 }
@@ -531,26 +531,26 @@ bool BaseCharacterComponent::Jump()
 	return Jump(vel);
 }
 
-const pragma::util::PFloatProperty &BaseCharacterComponent::GetJumpPowerProperty() const { return m_jumpPower; }
+const util::PFloatProperty &BaseCharacterComponent::GetJumpPowerProperty() const { return m_jumpPower; }
 float BaseCharacterComponent::GetJumpPower() const { return *m_jumpPower; }
 void BaseCharacterComponent::SetJumpPower(float power) { *m_jumpPower = power; }
 bool BaseCharacterComponent::CanJump() const
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+	auto pVelComponent = ent.GetComponent<VelocityComponent>();
 	return pPhysComponent && pPhysComponent->IsOnGround() == true && pVelComponent.valid();
 }
 void BaseCharacterComponent::DetachFromGround(float duration) { m_tDetachFromGround = GetEntity().GetNetworkState()->GetGameState()->CurTime() + duration; }
 
 //////////////////
 
-CEOnDeployWeapon::CEOnDeployWeapon(pragma::ecs::BaseEntity &entWeapon) : weapon {entWeapon} {}
+CEOnDeployWeapon::CEOnDeployWeapon(ecs::BaseEntity &entWeapon) : weapon {entWeapon} {}
 void CEOnDeployWeapon::PushArguments(lua::State *l) { weapon.GetLuaObject().push(l); }
 
 //////////////////
 
-CEOnSetActiveWeapon::CEOnSetActiveWeapon(pragma::ecs::BaseEntity *entWeapon) : weapon {entWeapon} {}
+CEOnSetActiveWeapon::CEOnSetActiveWeapon(ecs::BaseEntity *entWeapon) : weapon {entWeapon} {}
 void CEOnSetActiveWeapon::PushArguments(lua::State *l)
 {
 	if(weapon != nullptr)
@@ -566,18 +566,18 @@ void CEOnSetCharacterOrientation::PushArguments(lua::State *l) { Lua::Push<Vecto
 
 //////////////////
 
-CEPlayFootstepSound::CEPlayFootstepSound(BaseCharacterComponent::FootType footType, const pragma::physics::SurfaceMaterial &surfaceMaterial, float scale) : footType(footType), surfaceMaterial(surfaceMaterial), scale(scale) {}
+CEPlayFootstepSound::CEPlayFootstepSound(BaseCharacterComponent::FootType footType, const physics::SurfaceMaterial &surfaceMaterial, float scale) : footType(footType), surfaceMaterial(surfaceMaterial), scale(scale) {}
 void CEPlayFootstepSound::PushArguments(lua::State *l)
 {
-	Lua::PushInt(l, pragma::math::to_integral(footType));
-	Lua::Push<pragma::physics::SurfaceMaterial *>(l, const_cast<pragma::physics::SurfaceMaterial *>(&surfaceMaterial));
+	Lua::PushInt(l, math::to_integral(footType));
+	Lua::Push<physics::SurfaceMaterial *>(l, const_cast<physics::SurfaceMaterial *>(&surfaceMaterial));
 	Lua::PushNumber(l, scale);
 }
 
 //////////////////
 
 CEOnFootStep::CEOnFootStep(BaseCharacterComponent::FootType footType) : footType {footType} {}
-void CEOnFootStep::PushArguments(lua::State *l) { Lua::PushInt(l, pragma::math::to_integral(footType)); }
+void CEOnFootStep::PushArguments(lua::State *l) { Lua::PushInt(l, math::to_integral(footType)); }
 
 //////////////////
 

@@ -21,18 +21,18 @@ export namespace pragma {
 export namespace pragma {
 	class DLLCLIENT ShaderParticle2DBase : public ShaderSceneLit, public ShaderParticleBase {
 	  public:
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_PARTICLE;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RADIUS;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_PREVPOS;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_AGE;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_COLOR;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ROTATION;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_LENGTH_YAW;
+		static VertexBinding VERTEX_BINDING_PARTICLE;
+		static VertexAttribute VERTEX_ATTRIBUTE_POSITION;
+		static VertexAttribute VERTEX_ATTRIBUTE_RADIUS;
+		static VertexAttribute VERTEX_ATTRIBUTE_PREVPOS;
+		static VertexAttribute VERTEX_ATTRIBUTE_AGE;
+		static VertexAttribute VERTEX_ATTRIBUTE_COLOR;
+		static VertexAttribute VERTEX_ATTRIBUTE_ROTATION;
+		static VertexAttribute VERTEX_ATTRIBUTE_LENGTH_YAW;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_ANIMATION_START;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ANIMATION_INTERP_FACTOR;
+		static VertexBinding VERTEX_BINDING_ANIMATION_START;
+		static VertexAttribute VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES;
+		static VertexAttribute VERTEX_ATTRIBUTE_ANIMATION_INTERP_FACTOR;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_DEPTH_MAP;
@@ -74,20 +74,20 @@ export namespace pragma {
 #pragma pack(pop)
 
 		ShaderParticle2DBase(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader = "");
-		virtual bool RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, pts::ParticleOrientationType orientationType, pts::ParticleRenderFlags renderFlags);
+		virtual bool RecordDraw(prosper::ShaderBindState &bindState, CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, pts::ParticleOrientationType orientationType, pts::ParticleRenderFlags renderFlags);
 		std::optional<uint32_t> RecordBeginDraw(prosper::ShaderBindState &bindState, ecs::CParticleSystemComponent &pSys, pts::ParticleRenderFlags renderFlags, RecordFlags recordFlags = RecordFlags::RenderPassTargetAsViewportAndScissor);
-		virtual bool RecordBindScene(prosper::ICommandBuffer &cmd, const prosper::IShaderPipelineLayout &layout, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
+		virtual bool RecordBindScene(prosper::ICommandBuffer &cmd, const prosper::IShaderPipelineLayout &layout, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
 		  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows) const;
 		virtual uint32_t GetSceneDescriptorSetIndex() const;
 
-		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, pts::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material = nullptr, float camNearZ = 0.f,
+		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, pts::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const material::Material *material = nullptr, float camNearZ = 0.f,
 		  float camFarZ = 0.f) const;
 
-		Vector3 CalcVertexPosition(const pragma::ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t absVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const;
+		Vector3 CalcVertexPosition(const ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t absVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const;
 
-		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat) override;
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(material::CMaterial &mat) override;
 	  protected:
-		virtual Vector3 DoCalcVertexPosition(const pragma::ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const;
+		virtual Vector3 DoCalcVertexPosition(const ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const;
 
 		virtual prosper::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const override;
 		virtual bool RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps) const;
@@ -103,8 +103,8 @@ export namespace pragma {
 		void RegisterDefaultGfxPipelinePushConstantRanges();
 		void RegisterDefaultGfxPipelineDescriptorSetGroups();
 
-		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, pts::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material = nullptr,
-		  const pragma::BaseEnvCameraComponent *cam = nullptr) const;
-		virtual void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material = nullptr, const pragma::BaseEnvCameraComponent *cam = nullptr) const;
+		void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, pts::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const material::Material *material = nullptr,
+		  const BaseEnvCameraComponent *cam = nullptr) const;
+		virtual void GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const material::Material *material = nullptr, const BaseEnvCameraComponent *cam = nullptr) const;
 	};
 };

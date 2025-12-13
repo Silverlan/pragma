@@ -28,7 +28,7 @@ void pragma::networking::IServerClient::SetPlayer(pragma::BasePlayerComponent &p
 const std::vector<std::shared_ptr<pragma::networking::Resource>> &pragma::networking::IServerClient::GetResourceTransfer() const { return m_resourceTransfer; }
 bool pragma::networking::IServerClient::AddResource(const std::string &fileName, bool stream)
 {
-	auto canonName = FileManager::GetCanonicalizedPath(fileName);
+	auto canonName = fs::get_canonicalized_path(fileName);
 	auto it = std::find_if(m_resourceTransfer.begin(), m_resourceTransfer.end(), [canonName](const std::shared_ptr<Resource> &res) { return (res->name == canonName) ? true : false; });
 	if(it != m_resourceTransfer.end()) {
 		if(stream == false)

@@ -25,8 +25,8 @@ export {
 
 	namespace pragma {
 		namespace level {
-			DLLNETWORK void load_map_brushes(pragma::Game &game, uint32_t version, VFilePtr f, pragma::ecs::BaseEntity *ent, std::vector<msys::Material *> &materials, std::vector<physics::SurfaceMaterial> &surfaceMaterials, const Vector3 &origin);
-			DLLNETWORK void load_optimized_map_geometry(pragma::Game &game, uint32_t version, VFilePtr f, pragma::ecs::BaseEntity *ent, std::vector<msys::Material *> &materials, std::vector<physics::SurfaceMaterial> &surfaceMaterials);
+			DLLNETWORK void load_map_brushes(Game &game, uint32_t version,fs::VFilePtr f, ecs::BaseEntity *ent, std::vector<material::Material *> &materials, std::vector<physics::SurfaceMaterial> &surfaceMaterials, const Vector3 &origin);
+			DLLNETWORK void load_optimized_map_geometry(Game &game, uint32_t version,fs::VFilePtr f, ecs::BaseEntity *ent, std::vector<material::Material *> &materials, std::vector<physics::SurfaceMaterial> &surfaceMaterials);
 		};
 	};
 };

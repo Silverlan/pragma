@@ -62,7 +62,7 @@ const std::vector<std::string> pragma::engine_info::get_supported_audio_formats(
 
 std::optional<pragma::engine_info::GitInfo> pragma::engine_info::get_git_info()
 {
-	auto f = filemanager::open_file("git_info.txt", filemanager::FileMode::Read, nullptr, fsys::SearchFlags::Local | fsys::SearchFlags::NoMounts);
+	auto f = fs::open_file("git_info.txt", fs::FileMode::Read, nullptr, fs::SearchFlags::Local | fs::SearchFlags::NoMounts);
 	if(f == nullptr)
 		return {};
 	GitInfo gitInfo {};

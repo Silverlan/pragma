@@ -10,12 +10,12 @@ import :entities.components.constraints.base;
 
 using namespace pragma;
 
-ComponentEventId constraintComponent::EVENT_APPLY_CONSTRAINT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId constraintComponent::EVENT_ON_DRIVER_CHANGED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId constraintComponent::EVENT_ON_DRIVEN_OBJECT_CHANGED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId constraintComponent::EVENT_ON_ORDER_INDEX_CHANGED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId constraintComponent::EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY = pragma::INVALID_COMPONENT_ID;
-void ConstraintComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+ComponentEventId constraintComponent::EVENT_APPLY_CONSTRAINT = INVALID_COMPONENT_ID;
+ComponentEventId constraintComponent::EVENT_ON_DRIVER_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId constraintComponent::EVENT_ON_DRIVEN_OBJECT_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId constraintComponent::EVENT_ON_ORDER_INDEX_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId constraintComponent::EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY = INVALID_COMPONENT_ID;
+void ConstraintComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	constraintComponent::EVENT_APPLY_CONSTRAINT = registerEvent("APPLY_CONSTRAINT", ComponentEventInfo::Type::Explicit);
 	constraintComponent::EVENT_ON_DRIVER_CHANGED = registerEvent("ON_DRIVER_CHANGED", ComponentEventInfo::Type::Broadcast);
@@ -23,7 +23,7 @@ void ConstraintComponent::RegisterEvents(pragma::EntityComponentManager &compone
 	constraintComponent::EVENT_ON_ORDER_INDEX_CHANGED = registerEvent("ON_ORDER_INDEX_CHANGED", ComponentEventInfo::Type::Explicit);
 	constraintComponent::EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY = registerEvent("ON_PARTICIPANTS_FLAGGED_DIRTY", ComponentEventInfo::Type::Broadcast);
 }
-void ConstraintComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void ConstraintComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = ConstraintComponent;
 
@@ -49,13 +49,13 @@ void ConstraintComponent::RegisterMembers(pragma::EntityComponentManager &compon
 	}
 
 	{
-		using TDrivenObject = pragma::EntityUComponentMemberRef;
+		using TDrivenObject = EntityUComponentMemberRef;
 		auto memberInfo = create_component_member_info<T, TDrivenObject, static_cast<void (T::*)(const TDrivenObject &)>(&T::SetDrivenObject), static_cast<const TDrivenObject &(T::*)() const>(&T::GetDrivenObject)>("drivenObject", TDrivenObject {});
 		registerMember(std::move(memberInfo));
 	}
 
 	{
-		using TDriver = pragma::EntityUComponentMemberRef;
+		using TDriver = EntityUComponentMemberRef;
 		auto memberInfo = create_component_member_info<T, TDriver, static_cast<void (T::*)(const TDriver &)>(&T::SetDriver), static_cast<const TDriver &(T::*)() const>(&T::GetDriver)>("driver", TDriver {});
 		registerMember(std::move(memberInfo));
 	}
@@ -68,9 +68,9 @@ void ConstraintComponent::RegisterMembers(pragma::EntityComponentManager &compon
 		registerMember(std::move(memberInfo));
 	}
 }
-ConstraintComponent::ConstraintComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintComponent::ConstraintComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void ConstraintComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintComponent::ApplyConstraint() { InvokeEventCallbacks(constraintComponent::EVENT_APPLY_CONSTRAINT); }
 
 void ConstraintComponent::SetDriverEnabled(bool enabled) { m_hasDriver = enabled; }
@@ -98,19 +98,19 @@ const std::optional<ConstraintComponent::ConstraintParticipants> &ConstraintComp
 	auto *drivenObjC = drivenObj.GetComponent(game);
 	drivenObj.UpdateMemberIndex(game);
 	auto idxDrivenObject = drivenObj.GetMemberIndex();
-	if(!drivenObjC || idxDrivenObject == pragma::INVALID_COMPONENT_MEMBER_INDEX) {
+	if(!drivenObjC || idxDrivenObject == INVALID_COMPONENT_MEMBER_INDEX) {
 		if(m_constraintParticipants)
 			m_constraintParticipants = {};
 		return m_constraintParticipants;
 	}
 
 	ConstraintParticipants participants {};
-	participants.drivenObjectC = const_cast<pragma::BaseEntityComponent *>(drivenObjC)->GetHandle();
+	participants.drivenObjectC = const_cast<BaseEntityComponent *>(drivenObjC)->GetHandle();
 	participants.drivenObjectPropIdx = idxDrivenObject;
 
 	auto *entDrivenObj = drivenObj.GetEntity(GetGame());
 	if(entDrivenObj) {
-		auto panimaC = entDrivenObj->GetComponent<pragma::PanimaComponent>();
+		auto panimaC = entDrivenObj->GetComponent<PanimaComponent>();
 		if(panimaC.valid()) {
 			auto *memberInfo = drivenObj.GetMemberInfo(GetGame());
 			if(memberInfo) {
@@ -129,13 +129,13 @@ const std::optional<ConstraintComponent::ConstraintParticipants> &ConstraintComp
 	auto *driverC = driver.GetComponent(game);
 	driver.UpdateMemberIndex(game);
 	auto idxDriver = driver.GetMemberIndex();
-	if(!driverC || idxDriver == pragma::INVALID_COMPONENT_MEMBER_INDEX) {
+	if(!driverC || idxDriver == INVALID_COMPONENT_MEMBER_INDEX) {
 		if(m_constraintParticipants)
 			m_constraintParticipants = {};
 		return m_constraintParticipants;
 	}
 
-	participants.driverC = const_cast<pragma::BaseEntityComponent *>(driverC)->GetHandle();
+	participants.driverC = const_cast<BaseEntityComponent *>(driverC)->GetHandle();
 	participants.driverPropIdx = idxDriver;
 	m_constraintParticipants = std::move(participants);
 	return m_constraintParticipants;
@@ -152,13 +152,13 @@ void ConstraintComponent::OnRemove()
 void ConstraintComponent::SetInfluence(float influence) { m_influence = influence; }
 float ConstraintComponent::GetInfluence() const { return m_influence; }
 
-void ConstraintComponent::SetDriver(const pragma::EntityUComponentMemberRef &driver)
+void ConstraintComponent::SetDriver(const EntityUComponentMemberRef &driver)
 {
 	SetConstraintParticipantsDirty();
 	m_driver = driver;
 	BroadcastEvent(constraintComponent::EVENT_ON_DRIVER_CHANGED);
 }
-const pragma::EntityUComponentMemberRef &ConstraintComponent::GetDriver() const { return m_driver; }
+const EntityUComponentMemberRef &ConstraintComponent::GetDriver() const { return m_driver; }
 
 void ConstraintComponent::OnTick(double tDelta)
 {
@@ -170,7 +170,7 @@ void ConstraintComponent::OnTick(double tDelta)
 	SetDrivenObject(m_drivenObject);
 }
 
-void ConstraintComponent::SetDrivenObject(const pragma::EntityUComponentMemberRef &drivenObject)
+void ConstraintComponent::SetDrivenObject(const EntityUComponentMemberRef &drivenObject)
 {
 	SetConstraintParticipantsDirty();
 	if(m_curDrivenConstraintManager.valid())
@@ -181,28 +181,28 @@ void ConstraintComponent::SetDrivenObject(const pragma::EntityUComponentMemberRe
 	if(!ent) {
 		// Entity doesn't exist (yet?), so we have to wait
 		// until it exists before we can register the constraint
-		SetTickPolicy(pragma::TickPolicy::Always);
-		m_curDrivenConstraintManager = pragma::ComponentHandle<pragma::ConstraintManagerComponent> {};
+		SetTickPolicy(TickPolicy::Always);
+		m_curDrivenConstraintManager = pragma::ComponentHandle<ConstraintManagerComponent> {};
 		auto uuid = drivenObject.GetUuid();
-		spdlog::debug("Constraint driven object '{}' does not exist for constraint '{}'. Listening for future instancing...", uuid.has_value() ? pragma::util::uuid_to_string(*uuid) : "", GetEntity().ToString());
+		spdlog::debug("Constraint driven object '{}' does not exist for constraint '{}'. Listening for future instancing...", uuid.has_value() ? util::uuid_to_string(*uuid) : "", GetEntity().ToString());
 		BroadcastEvent(constraintComponent::EVENT_ON_DRIVEN_OBJECT_CHANGED);
 		return;
 	}
-	auto constraintManagerC = const_cast<pragma::ecs::BaseEntity *>(ent)->AddComponent<ConstraintManagerComponent>();
+	auto constraintManagerC = const_cast<ecs::BaseEntity *>(ent)->AddComponent<ConstraintManagerComponent>();
 	assert(constraintManagerC.valid());
 	constraintManagerC->AddConstraint(*this);
 	m_curDrivenConstraintManager = constraintManagerC;
 	m_registeredWithConstraintManager = true;
-	SetTickPolicy(pragma::TickPolicy::Never);
+	SetTickPolicy(TickPolicy::Never);
 	BroadcastEvent(constraintComponent::EVENT_ON_DRIVEN_OBJECT_CHANGED);
 }
-const pragma::EntityUComponentMemberRef &ConstraintComponent::GetDrivenObject() const { return m_drivenObject; }
+const EntityUComponentMemberRef &ConstraintComponent::GetDrivenObject() const { return m_drivenObject; }
 
 void ConstraintComponent::SetDriverSpace(CoordinateSpace space) { m_driverSpace = space; }
-pragma::CoordinateSpace ConstraintComponent::GetDriverSpace() const { return m_driverSpace; }
+CoordinateSpace ConstraintComponent::GetDriverSpace() const { return m_driverSpace; }
 
 void ConstraintComponent::SetDrivenObjectSpace(CoordinateSpace space) { m_drivenObjectSpace = space; }
-pragma::CoordinateSpace ConstraintComponent::GetDrivenObjectSpace() const { return m_drivenObjectSpace; }
+CoordinateSpace ConstraintComponent::GetDrivenObjectSpace() const { return m_drivenObjectSpace; }
 
 void ConstraintComponent::SetOrderIndex(int32_t idx)
 {

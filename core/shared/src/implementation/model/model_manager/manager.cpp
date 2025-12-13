@@ -121,15 +121,15 @@ pragma::asset::ModelManager::ModelManager(pragma::NetworkState &nw) : m_nw {nw}
 {
 	auto fileHandler = std::make_unique<pragma::util::AssetFileHandler>();
 	fileHandler->open = [](const std::string &path, pragma::util::AssetFormatType formatType) -> std::unique_ptr<ufile::IFile> {
-		auto openMode = filemanager::FileMode::Read;
+		auto openMode = fs::FileMode::Read;
 		if(formatType == pragma::util::AssetFormatType::Binary)
-			openMode |= filemanager::FileMode::Binary;
-		auto f = filemanager::open_file(path, openMode);
+			openMode |= fs::FileMode::Binary;
+		auto f = fs::open_file(path, openMode);
 		if(!f)
 			return nullptr;
-		return std::make_unique<fsys::File>(f);
+		return std::make_unique<fs::File>(f);
 	};
-	fileHandler->exists = [](const std::string &path) -> bool { return filemanager::exists(path); };
+	fileHandler->exists = [](const std::string &path) -> bool { return fs::exists(path); };
 	SetFileHandler(std::move(fileHandler));
 	SetRootDirectory("models");
 	m_loader = std::make_unique<ModelLoader>(*this);
@@ -208,13 +208,13 @@ pragma::util::AssetObject pragma::asset::ModelManager::InitializeAsset(const pra
 #if 0
 bool pragma::asset::ModelManager::PrecacheModel(const std::string &mdlName) const
 {
-	auto f = filemanager::open_file(mdlName,filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	auto f = fs::open_file(mdlName,fs::FileMode::Read | fs::FileMode::Binary);
 	if(!f)
 		return false;
 	std::string ext;
 	if(!ufile::get_extension(mdlName,&ext))
 		return false;
-	auto fp = std::make_unique<fsys::File>(f);
+	auto fp = std::make_unique<fs::File>(f);
 	auto jobId = m_loader->AddJob(m_nw,mdlName,ext,std::move(fp));
 	return jobId.has_value();
 }
@@ -227,7 +227,7 @@ std::shared_ptr<pragma::asset::Model> pragma::asset::ModelManager::LoadModel(con
 	auto *asset = FindCachedAsset(cacheName);
 	if(asset)
 		return GetAssetObject(*asset);
-	auto fp = std::make_unique<fsys::File>(file);
+	auto fp = std::make_unique<fs::File>(file);
 	auto jobId = m_loader->AddJob(m_nw,cacheName,ext,std::move(fp));
 	return jobId.has_value();
 	mdl->Update();

@@ -29,7 +29,7 @@ export namespace pragma::gui::types {
 		bool IsDraggable();
 		bool IsResizable();
 		virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
-		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual util::EventReply MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods) override;
 		virtual void OnCursorMoved(int x, int y) override;
 		void SetMinWidth(int w);
 		void SetMinHeight(int h);
@@ -65,15 +65,15 @@ export namespace pragma::gui::types {
 	  protected:
 		virtual void DoUpdate() override;
 		enum class ResizeMode { none = -1, ew = 1, we = 2, ns = 3, sn = 4, nwse = 5, nesw = 6, senw = 7, swne = 8 };
-		pragma::gui::WIHandle m_hMoveRect = {};
-		pragma::gui::WIHandle m_hResizeRect = {};
+		WIHandle m_hMoveRect = {};
+		WIHandle m_hResizeRect = {};
 		StateFlags m_stateFlags = StateFlags::None;
 		ResizeMode m_resizeMode = ResizeMode::none;
-		pragma::gui::WIHandle m_snapGhost = {};
+		WIHandle m_snapGhost = {};
 		Vector2i m_resizeLastPos = {};
 		Vector2i m_dragCursorOffset = {};
 		bool m_bRemoveOnClose = true;
-		std::vector<pragma::gui::WIHandle> m_snapTargets = {};
+		std::vector<WIHandle> m_snapTargets = {};
 		void InitializeSnapTargetGhost(WISnapArea &snapArea);
 		void DestroySnapTargetGhost();
 		void SetResizeMode(ResizeMode mode);
@@ -89,7 +89,7 @@ export namespace pragma::gui::types {
 
 		virtual void OnVisibilityChanged(bool bVisible) override;
 		Vector2i GetConfinedMousePos();
-		void OnTitleBarMouseEvent(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
+		void OnTitleBarMouseEvent(platform::MouseButton button, platform::KeyState state, platform::Modifier mods);
 		void OnCloseButtonPressed();
 		void UpdateResizeRect();
 		void UpdateResizeRectPos();

@@ -13,7 +13,7 @@ export namespace pragma::ecs {
 }
 export namespace pragma::physics {
 	struct DLLNETWORK PhysTouch {
-		PhysTouch(pragma::ecs::BaseEntity *ent, CallbackHandle onRemove);
+		PhysTouch(ecs::BaseEntity *ent, CallbackHandle onRemove);
 		~PhysTouch();
 		EntityHandle entity;
 		CallbackHandle onRemoveCallback;

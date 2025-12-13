@@ -11,7 +11,7 @@ export import :rendering.gpu_swapchain_timer;
 
 export namespace pragma {
 	namespace debug {
-		struct DLLCLIENT GPUProfilerResult : public pragma::debug::ProfilerResult {
+		struct DLLCLIENT GPUProfilerResult : public ProfilerResult {
 			std::optional<prosper::PipelineStatistics> statistics;
 		};
 

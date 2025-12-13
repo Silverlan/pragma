@@ -360,7 +360,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			return nullptr;
 		return subMesh->shared_from_this();
 	}));
-	classDefRayCastResult.property("material", static_cast<msys::Material *(pragma::physics::TraceResult::*)()>(&pragma::physics::TraceResult::GetMaterial));
+	classDefRayCastResult.property("material", static_cast<pragma::material::Material *(pragma::physics::TraceResult::*)()>(&pragma::physics::TraceResult::GetMaterial));
 	classDefRayCastResult.property("materialName", static_cast<std::optional<std::string> (*)(lua::State *, pragma::physics::TraceResult &)>([](lua::State *l, pragma::physics::TraceResult &tr) -> std::optional<std::string> {
 		std::string mat;
 		if(tr.GetMaterial(mat) == false)

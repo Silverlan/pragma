@@ -73,7 +73,7 @@ bool pragma::python::exec(std::string fileName, uint32_t argc, const char **argv
 	auto path = pragma::util::Path::CreateFile(fileName);
 	path.Canonicalize();
 	std::string absPath;
-	if(!filemanager::find_absolute_path(path.GetString(), absPath))
+	if(!fs::find_absolute_path(path.GetString(), absPath))
 		return false;
 	return wrapper->exec(absPath.c_str(), argc, argv);
 }
@@ -95,12 +95,12 @@ bool pragma::python::init_blender()
 		return g_blenderInitSuccess;
 	g_blenderInitialized = true;
 	std::string scriptsPath;
-	if(!filemanager::find_absolute_path("modules/blender/3.2/scripts", scriptsPath) || !util::set_env_variable("BLENDER_SYSTEM_SCRIPTS", scriptsPath.c_str()))
+	if(!fs::find_absolute_path("modules/blender/3.2/scripts", scriptsPath) || !util::set_env_variable("BLENDER_SYSTEM_SCRIPTS", scriptsPath.c_str()))
 		return false;
 	if(!run("import sys"))
 		return false;
 	std::string sitePackagesPath;
-	if(!filemanager::find_absolute_path("modules/blender/site-packages", sitePackagesPath))
+	if(!fs::find_absolute_path("modules/blender/site-packages", sitePackagesPath))
 		return false;
 	g_blenderInitSuccess = run(("sys.path.append(\"" + sitePackagesPath + "\")").c_str());
 	return g_blenderInitSuccess;

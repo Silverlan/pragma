@@ -13,10 +13,10 @@ using namespace pragma;
 void CChildComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CChildComponent::OnRemove() { BaseChildComponent::OnRemove(); }
 
-bool CChildComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+bool CChildComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetParent) {
-		auto *ent = pragma::networking::read_entity(packet);
+		auto *ent = networking::read_entity(packet);
 		if(ent)
 			SetParent(*ent);
 		else
@@ -30,7 +30,7 @@ bool CChildComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &pac
 void CChildComponent::ReceiveData(NetPacket &packet)
 {
 	auto hThis = GetHandle();
-	pragma::networking::read_unique_entity(packet, [this, hThis](pragma::ecs::BaseEntity *ent) {
+	networking::read_unique_entity(packet, [this, hThis](ecs::BaseEntity *ent) {
 		if(hThis.expired())
 			return;
 		if(ent)

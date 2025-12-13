@@ -17,7 +17,7 @@ export {
 		class IMaterial;
 		class DLLNETWORK SurfaceMaterialManager {
 		public:
-			SurfaceMaterialManager(pragma::physics::IEnvironment &env);
+			SurfaceMaterialManager(IEnvironment &env);
 			bool Load(const std::string &path);
 			SurfaceMaterial &Create(const std::string &identifier, Float staticFriction, Float dynamicFriction, Float restitution);
 			SurfaceMaterial &Create(const std::string &identifier, Float friction = 0.5f, Float restitution = 0.5f);
@@ -26,7 +26,7 @@ export {
 			std::vector<SurfaceMaterial> &GetMaterials();
 		protected:
 			std::vector<SurfaceMaterial> m_materials; // These have to be objects (Not pointers) to uphold the requirements for the btTriangleIndexVertexMaterialArray constructor.
-			pragma::physics::IEnvironment &m_physEnv;
+			IEnvironment &m_physEnv;
 		};
 
 		class DLLNETWORK SurfaceMaterial {
@@ -52,7 +52,7 @@ export {
 				} subsurface;
 			};
 		public:
-			SurfaceMaterial(pragma::physics::IEnvironment &env, const std::string &identifier, UInt idx, pragma::physics::IMaterial &physMat);
+			SurfaceMaterial(IEnvironment &env, const std::string &identifier, UInt idx, IMaterial &physMat);
 			SurfaceMaterial(const SurfaceMaterial &other);
 			void Reset();
 			void Load(udm::LinkedPropertyWrapper &prop);
@@ -70,8 +70,8 @@ export {
 			void SetIOR(float ior);
 			void ClearIOR();
 
-			pragma::physics::IMaterial &GetPhysicsMaterial() const;
-			pragma::physics::SurfaceType *GetSurfaceType() const;
+			IMaterial &GetPhysicsMaterial() const;
+			SurfaceType *GetSurfaceType() const;
 			void SetSurfaceType(const std::string &surfaceType);
 
 			void SetRestitution(Float restitution);
@@ -86,8 +86,8 @@ export {
 			void SetImpactParticleEffect(const std::string &particle);
 			const std::string &GetImpactParticleEffect() const;
 
-			void SetNavigationFlags(pragma::nav::PolyFlags flags);
-			pragma::nav::PolyFlags GetNavigationFlags() const;
+			void SetNavigationFlags(nav::PolyFlags flags);
+			nav::PolyFlags GetNavigationFlags() const;
 
 			void SetDensity(float density);
 			float GetDensity() const;
@@ -120,7 +120,7 @@ export {
 			void SetAudioHighFrequencyTransmission(float transmission);
 			float GetAudioHighFrequencyTransmission() const;
 		protected:
-			pragma::physics::IEnvironment &m_physEnv;
+			IEnvironment &m_physEnv;
 			UInt m_index;
 			std::string m_identifier;
 			std::string m_footstepType;
@@ -129,10 +129,10 @@ export {
 			std::string m_bulletImpactSound;
 			std::string m_impactParticle;
 			std::optional<float> m_ior {};
-			pragma::nav::PolyFlags m_navigationFlags;
+			nav::PolyFlags m_navigationFlags;
 			std::unique_ptr<PhysLiquid> m_liquidInfo = nullptr;
-			std::shared_ptr<pragma::physics::IMaterial> m_physMaterial = nullptr;
-			mutable pragma::util::TWeakSharedHandle<pragma::physics::SurfaceType> m_surfaceType = {};
+			std::shared_ptr<IMaterial> m_physMaterial = nullptr;
+			mutable util::TWeakSharedHandle<SurfaceType> m_surfaceType = {};
 			AudioInfo m_audioInfo = {};
 			PBRInfo m_pbrInfo = {};
 			PhysLiquid &InitializeLiquid();

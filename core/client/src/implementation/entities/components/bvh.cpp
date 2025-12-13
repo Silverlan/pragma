@@ -13,18 +13,18 @@ import :entities.components.model;
 
 using namespace pragma;
 
-bool CBvhComponent::ShouldConsiderMesh(const pragma::geometry::ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData)
+bool CBvhComponent::ShouldConsiderMesh(const geometry::ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData)
 {
-	return BaseBvhComponent::ShouldConsiderMesh(mesh) && !pragma::math::is_flag_set(bufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::ExcludeFromAccelerationStructures);
+	return BaseBvhComponent::ShouldConsiderMesh(mesh) && !math::is_flag_set(bufferData.stateFlags, rendering::RenderBufferData::StateFlags::ExcludeFromAccelerationStructures);
 }
 
-void CBvhComponent::InitializeLuaObject(lua::State *l) { return BaseBvhComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CBvhComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CBvhComponent::Initialize()
 {
 	BaseBvhComponent::Initialize();
 
-	BindEventUnhandled(cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		if(static_cast<CEOnRenderMeshesUpdated &>(evData.get()).requireBoundingVolumeUpdate)
 			RebuildBvh();
 	});
@@ -82,6 +82,6 @@ void CBvhComponent::DoRebuildBvh()
 		return;
 	auto &renderMeshes = mdlC->GetRenderMeshes();
 	BvhBuildInfo buildInfo {};
-	buildInfo.shouldConsiderMesh = [mdlC](const pragma::geometry::ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
-	m_bvhData = BaseBvhComponent::RebuildBvh(renderMeshes, &buildInfo, nullptr, &GetEntity());
+	buildInfo.shouldConsiderMesh = [mdlC](const geometry::ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
+	m_bvhData = RebuildBvh(renderMeshes, &buildInfo, nullptr, &GetEntity());
 }

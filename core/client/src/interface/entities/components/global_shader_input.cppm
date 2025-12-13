@@ -14,7 +14,7 @@ export namespace pragma {
 		UdmPropertyList();
 		const udm::PProperty &GetUdmData() const;
 		udm::LinkedPropertyWrapper GetPropertyData() const { return (*m_properties)["properties"]; }
-		void AddProperty(const pragma::ComponentMemberInfo &memberInfo);
+		void AddProperty(const ComponentMemberInfo &memberInfo);
 		void UpdateNameCache();
 		bool HasProperty(const std::string &name) const;
 		std::optional<size_t> GetPropertyIndex(const std::string &name) const;
@@ -28,10 +28,10 @@ export namespace pragma {
 	class DLLCLIENT CGlobalShaderInputComponent final : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static void DebugPrintProperties();
 
-		CGlobalShaderInputComponent(pragma::ecs::BaseEntity &ent);
+		CGlobalShaderInputComponent(ecs::BaseEntity &ent);
 
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;

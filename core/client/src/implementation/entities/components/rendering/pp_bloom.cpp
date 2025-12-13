@@ -13,9 +13,9 @@ import :rendering.shaders;
 
 using namespace pragma;
 
-static auto cvBloomEnabled = pragma::console::get_client_con_var("render_bloom_enabled");
+static auto cvBloomEnabled = console::get_client_con_var("render_bloom_enabled");
 
-void CRendererPpBloomComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void CRendererPpBloomComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = CRendererPpBloomComponent;
 
@@ -52,7 +52,7 @@ void CRendererPpBloomComponent::RegisterMembers(pragma::EntityComponentManager &
 	}
 }
 
-CRendererPpBloomComponent::CRendererPpBloomComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) { SetPipelineDirty(); }
+CRendererPpBloomComponent::CRendererPpBloomComponent(ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) { SetPipelineDirty(); }
 void CRendererPpBloomComponent::SetBloomThreshold(float threshold)
 {
 	m_bloomThreshold = threshold;
@@ -61,12 +61,12 @@ void CRendererPpBloomComponent::SetBloomThreshold(float threshold)
 		rasterC->SetBloomThreshold(threshold);
 }
 float CRendererPpBloomComponent::GetBloomThreshold() const { return m_bloomThreshold; }
-void CRendererPpBloomComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void CRendererPpBloomComponent::DoRenderEffect(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuBloom, *drawSceneInfo.commandBuffer);
 
-	pragma::util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
+	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuBloom, *drawSceneInfo.commandBuffer);
 	}};
@@ -77,7 +77,7 @@ void CRendererPpBloomComponent::DoRenderEffect(const pragma::rendering::DrawScen
 	if(!m_controlledBlurSettings.IsValid())
 		return;
 
-	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingBloom");
+	get_cgame()->StartGPUProfilingStage("PostProcessingBloom");
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	auto bloomTexMsaa = hdrInfo.sceneRenderTarget->GetTexture(1u);
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -90,7 +90,7 @@ void CRendererPpBloomComponent::DoRenderEffect(const pragma::rendering::DrawScen
 	m_controlledBlurSettings.RecordBlur(drawCmd, *hdrInfo.bloomBlurSet);
 	drawCmd->RecordImageBarrier(hdrInfo.bloomTexture->GetImage(), prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	// drawCmd->RecordImageBarrier(hdrInfo.bloomBlurRenderTarget->GetTexture().GetImage(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
-	pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingBloom
+	get_cgame()->StopGPUProfilingStage(); // PostProcessingBloom
 }
 void CRendererPpBloomComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
@@ -110,7 +110,7 @@ double CRendererPpBloomComponent::GetBlurSigma() const { return m_controlledBlur
 void CRendererPpBloomComponent::SetBlurAmount(int32_t blurAmount) { m_controlledBlurSettings.SetBlurAmount(blurAmount); }
 int32_t CRendererPpBloomComponent::GetBlurAmount() const { return m_controlledBlurSettings.GetBlurAmount(); }
 
-void CRendererPpBloomComponent::SetPipelineDirty() { SetTickPolicy(pragma::TickPolicy::Always); }
+void CRendererPpBloomComponent::SetPipelineDirty() { SetTickPolicy(TickPolicy::Always); }
 
 void CRendererPpBloomComponent::OnTick(double dt)
 {

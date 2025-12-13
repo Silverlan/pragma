@@ -27,7 +27,7 @@ std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRou
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::SampledBit;
 
 	auto fGetWhiteTex = [&context]() -> prosper::Texture * {
-		auto tex = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("white");
+		auto tex = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("white");
 		if(tex == nullptr)
 			return nullptr;
 		return tex->GetVkTexture().get();

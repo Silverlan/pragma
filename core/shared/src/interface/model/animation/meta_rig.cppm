@@ -112,7 +112,7 @@ export {
 		constexpr const char *get_meta_rig_bone_type_name(MetaRigBoneType type);
 		constexpr std::optional<MetaRigBoneType> get_meta_rig_bone_type_enum(const std::string_view &boneType);
 		constexpr std::optional<MetaRigBoneType> get_meta_rig_bone_parent_type(MetaRigBoneType type);
-		DLLNETWORK std::vector<pragma::animation::MetaRigBoneType> get_meta_rig_bone_children(MetaRigBoneType type);
+		DLLNETWORK std::vector<MetaRigBoneType> get_meta_rig_bone_children(MetaRigBoneType type);
 
 		enum class BodyPart : uint8_t {
 			LowerBody = 0,
@@ -129,7 +129,7 @@ export {
 			RightBreast,
 			Count,
 		};
-		DLLNETWORK std::vector<pragma::animation::MetaRigBoneType> get_meta_rig_bone_ids(BodyPart bp);
+		DLLNETWORK std::vector<MetaRigBoneType> get_meta_rig_bone_ids(BodyPart bp);
 		DLLNETWORK MetaRigBoneType get_root_meta_bone_id(BodyPart bp);
 
 		enum class BoneSide : uint8_t { Left = 0, Right, None };
@@ -210,7 +210,7 @@ export {
 		constexpr std::optional<BlendShape> get_blend_shape_enum(const std::string_view &name);
 
 		struct DLLNETWORK MetaRigBone {
-			pragma::animation::BoneId boneId = pragma::animation::INVALID_BONE_INDEX;
+			BoneId boneId = INVALID_BONE_INDEX;
 			std::pair<Vector3, Vector3> bounds;
 			Quat normalizedRotationOffset; // Rotation offset from bone rotation to normalized rotation
 
@@ -219,7 +219,7 @@ export {
 		};
 
 		struct DLLNETWORK MetaRigBlendShape {
-			FlexControllerId flexControllerId = pragma::animation::INVALID_FLEX_CONTROLLER_INDEX;
+			FlexControllerId flexControllerId = INVALID_FLEX_CONTROLLER_INDEX;
 		};
 
 		enum class RigType : uint8_t { Biped = 0, Quadruped };
@@ -227,21 +227,21 @@ export {
 			static constexpr uint32_t FORMAT_VERSION = 1u;
 			static constexpr auto PMRIG_IDENTIFIER = "PMRIG";
 			static std::shared_ptr<MetaRig> Load(const Skeleton &skeleton, const udm::AssetData &data, std::string &outErr);
-			std::array<MetaRigBone, pragma::math::to_integral(MetaRigBoneType::Count)> bones;
-			std::array<MetaRigBlendShape, pragma::math::to_integral(BlendShape::Count)> blendShapes;
+			std::array<MetaRigBone, math::to_integral(MetaRigBoneType::Count)> bones;
+			std::array<MetaRigBlendShape, math::to_integral(BlendShape::Count)> blendShapes;
 
 			bool Save(const Skeleton &skeleton, const udm::AssetData &outData, std::string &outErr) const;
 			float GetReferenceScale() const;
-			void DebugPrint(const pragma::asset::Model &mdl);
-			const MetaRigBone *GetBone(pragma::animation::MetaRigBoneType type) const;
-			const MetaRigBlendShape *GetBlendShape(pragma::animation::BlendShape blendShape) const;
-			std::optional<pragma::animation::MetaRigBoneType> FindMetaBoneType(pragma::animation::BoneId boneId) const;
-			pragma::animation::BoneId GetBoneId(const pragma::GString &type) const;
-			pragma::animation::BoneId GetBoneId(pragma::animation::MetaRigBoneType type) const;
+			void DebugPrint(const asset::Model &mdl);
+			const MetaRigBone *GetBone(MetaRigBoneType type) const;
+			const MetaRigBlendShape *GetBlendShape(BlendShape blendShape) const;
+			std::optional<MetaRigBoneType> FindMetaBoneType(BoneId boneId) const;
+			BoneId GetBoneId(const GString &type) const;
+			BoneId GetBoneId(MetaRigBoneType type) const;
 			RigType rigType = RigType::Biped;
 			Quat forwardFacingRotationOffset = uquat::identity();
-			pragma::SignedAxis forwardAxis = pragma::SignedAxis::Z;
-			pragma::SignedAxis upAxis = pragma::SignedAxis::Y;
+			SignedAxis forwardAxis = SignedAxis::Z;
+			SignedAxis upAxis = SignedAxis::Y;
 
 			// Bounds in normalized space (with forwardFacingRotationOffset applied)
 			Vector3 min {};
@@ -403,7 +403,7 @@ export {
 		case MetaRigBoneType::RightBreastTip:
 			return "right_breast_tip";
 		}
-		static_assert(pragma::math::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
+		static_assert(math::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 		return nullptr;
 	}
 
@@ -560,7 +560,7 @@ export {
 		case "right_breast_tip"_:
 			return MetaRigBoneType::RightBreastTip;
 		}
-		static_assert(pragma::math::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
+		static_assert(math::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 		return {};
 	}
 
@@ -676,7 +676,7 @@ export {
 		return {};
 	}
 
-	constexpr std::optional<pragma::animation::BoneSide> pragma::animation::get_meta_rig_bone_type_side(pragma::animation::MetaRigBoneType type)
+	constexpr std::optional<pragma::animation::BoneSide> pragma::animation::get_meta_rig_bone_type_side(MetaRigBoneType type)
 	{
 		switch(type) {
 		case MetaRigBoneType::Hips:
@@ -724,7 +724,7 @@ export {
 		case MetaRigBoneType::LeftBreastBase:
 		case MetaRigBoneType::LeftBreastMiddle:
 		case MetaRigBoneType::LeftBreastTip:
-			return pragma::animation::BoneSide::Left;
+			return BoneSide::Left;
 		case MetaRigBoneType::RightEar:
 		case MetaRigBoneType::RightEye:
 		case MetaRigBoneType::RightUpperArm:
@@ -755,9 +755,9 @@ export {
 		case MetaRigBoneType::RightBreastBase:
 		case MetaRigBoneType::RightBreastMiddle:
 		case MetaRigBoneType::RightBreastTip:
-			return pragma::animation::BoneSide::Right;
+			return BoneSide::Right;
 		}
-		static_assert(pragma::math::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
+		static_assert(math::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 		return {};
 	}
 
@@ -910,7 +910,7 @@ export {
 		case MetaRigBoneType::RightBreastBase:
 			return MetaRigBoneType::Spine3;
 		}
-		static_assert(pragma::math::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
+		static_assert(math::to_integral(MetaRigBoneType::Count) == 74, "Update this list when new types are added!");
 		return {};
 	}
 
@@ -1042,12 +1042,12 @@ export {
 		default:
 			return "";
 		}
-		static_assert(pragma::math::to_integral(BlendShape::Count) == 61, "Update this list when new blend shape types are added!");
+		static_assert(math::to_integral(BlendShape::Count) == 61, "Update this list when new blend shape types are added!");
 	}
 	constexpr std::optional<pragma::animation::BlendShape> pragma::animation::get_blend_shape_enum(const std::string_view &name)
 	{
 		using namespace pragma::string::string_switch_ci;
-		switch(pragma::string::string_switch_ci::hash(name)) {
+		switch(hash(name)) {
 		case "_neutral"_:
 			return BlendShape::Neutral;
 		case "browdownleft"_:
@@ -1153,7 +1153,7 @@ export {
 		case "nosesneerright"_:
 			return BlendShape::NoseSneerRight;
 		}
-		static_assert(pragma::math::to_integral(BlendShape::Count) == 61, "Update this list when new blend shape types are added!");
+		static_assert(math::to_integral(BlendShape::Count) == 61, "Update this list when new blend shape types are added!");
 		return {};
 	}
 };

@@ -30,16 +30,16 @@ void COcclusionCullerComponent::Initialize()
 	m_occlusionOctree->SetSingleReferenceMode(true);
 	m_occlusionOctree->SetToStringCallback([](ecs::CBaseEntity *ent) -> std::string { return std::string {*ent->GetClass()} + " " + std::to_string(ent->GetIndex()); });
 
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
+	ecs::EntityIterator entIt {*get_cgame()};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<CRenderComponent>>();
 	for(auto *ent : entIt)
-		AddEntity(static_cast<pragma::ecs::CBaseEntity &>(*ent));
+		AddEntity(static_cast<ecs::CBaseEntity &>(*ent));
 }
 
 void COcclusionCullerComponent::AddEntity(ecs::CBaseEntity &ent)
 {
 	// Add entity to octree
-	auto cbRenderMode = FunctionCallback<pragma::util::EventReply, std::reference_wrapper<ComponentEvent>>::Create(nullptr);
+	auto cbRenderMode = FunctionCallback<util::EventReply, std::reference_wrapper<ComponentEvent>>::Create(nullptr);
 	auto it = m_callbacks.find(&ent);
 	if(it == m_callbacks.end())
 		it = m_callbacks.insert(std::make_pair(&ent, std::vector<CallbackHandle> {})).first;
@@ -53,9 +53,9 @@ void COcclusionCullerComponent::AddEntity(ecs::CBaseEntity &ent)
 		auto pTrComponent = ent->GetTransformComponent();
 		if(pTrComponent != nullptr) {
 			auto &trC = static_cast<CTransformComponent &>(*pTrComponent);
-			it->second.push_back(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED, [this, ent](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
-				if(pragma::math::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
-					return pragma::util::EventReply::Unhandled;
+			it->second.push_back(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED, [this, ent](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+				if(math::is_flag_set(static_cast<CEOnPoseChanged &>(evData.get()).changeFlags, TransformChangeFlags::PositionChanged) == false)
+					return util::EventReply::Unhandled;
 				// SceneRenderDesc::AssertRenderQueueThreadInactive();
 				// Note: Entity positions should generally not be updated during rendering,
 				// however in some cases they have to be updated every frame (e.g. for attachables).
@@ -63,22 +63,22 @@ void COcclusionCullerComponent::AddEntity(ecs::CBaseEntity &ent)
 				// check for it here. TODO: This is a messy solution, find a better way!
 				if(SceneRenderDesc::GetActiveRenderQueueThreadCount() == 0)
 					m_occlusionOctree->UpdateObject(ent);
-				return pragma::util::EventReply::Unhandled;
+				return util::EventReply::Unhandled;
 			}));
 		}
-		auto pGenericComponent = ent->GetComponent<pragma::CGenericComponent>();
+		auto pGenericComponent = ent->GetComponent<CGenericComponent>();
 		if(pGenericComponent.valid()) {
-			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::cModelComponent::EVENT_ON_MODEL_CHANGED, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
+			it->second.push_back(pGenericComponent->BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this, pGenericComponent](std::reference_wrapper<ComponentEvent> evData) mutable {
 				SceneRenderDesc::AssertRenderQueueThreadInactive();
 				auto *ent = static_cast<ecs::CBaseEntity *>(&pGenericComponent->GetEntity());
 				m_occlusionOctree->UpdateObject(ent);
 			}));
-			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::cRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
+			it->second.push_back(pGenericComponent->BindEventUnhandled(cRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED, [this, pGenericComponent](std::reference_wrapper<ComponentEvent> evData) mutable {
 				SceneRenderDesc::AssertRenderQueueThreadInactive();
 				auto *ent = static_cast<ecs::CBaseEntity *>(&pGenericComponent->GetEntity());
 				m_occlusionOctree->UpdateObject(ent);
 			}));
-			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_REMOVE, [this, pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
+			it->second.push_back(pGenericComponent->BindEventUnhandled(ecs::baseEntity::EVENT_ON_REMOVE, [this, pGenericComponent](std::reference_wrapper<ComponentEvent> evData) mutable {
 				auto *ent = static_cast<ecs::CBaseEntity *>(&pGenericComponent->GetEntity());
 				auto it = m_callbacks.find(ent);
 
@@ -101,32 +101,32 @@ void COcclusionCullerComponent::AddEntity(ecs::CBaseEntity &ent)
 	if(!pRenderComponent)
 		return;
 	auto hThis = GetHandle();
-	static_cast<Callback<pragma::util::EventReply, std::reference_wrapper<pragma::ComponentEvent>> *>(cbRenderMode.get())->SetFunction([this, &ent, fInsertOctreeObject, hThis, cbRenderMode](std::reference_wrapper<pragma::ComponentEvent> evData) mutable -> pragma::util::EventReply {
+	static_cast<Callback<util::EventReply, std::reference_wrapper<ComponentEvent>> *>(cbRenderMode.get())->SetFunction([this, &ent, fInsertOctreeObject, hThis, cbRenderMode](std::reference_wrapper<ComponentEvent> evData) mutable -> util::EventReply {
 		if(hThis.expired()) {
 			if(cbRenderMode.IsValid())
 				cbRenderMode.Remove();
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		}
-		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
-		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetSceneRenderPass() : pragma::rendering::SceneRenderPass::None;
+		auto pRenderComponent = ent.GetComponent<CRenderComponent>();
+		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetSceneRenderPass() : rendering::SceneRenderPass::None;
 		auto &occlusionTree = GetOcclusionOctree();
-		if(renderMode == pragma::rendering::SceneRenderPass::World || renderMode == pragma::rendering::SceneRenderPass::Sky) {
+		if(renderMode == rendering::SceneRenderPass::World || renderMode == rendering::SceneRenderPass::Sky) {
 			if(occlusionTree.ContainsObject(&ent) == false)
 				fInsertOctreeObject(&ent);
 		}
 		else
 			occlusionTree.RemoveObject(&ent);
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
 	pRenderComponent->AddEventCallback(cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED, cbRenderMode);
 	auto renderMode = pRenderComponent->GetSceneRenderPass();
-	if(renderMode != pragma::rendering::SceneRenderPass::World && renderMode != pragma::rendering::SceneRenderPass::Sky)
+	if(renderMode != rendering::SceneRenderPass::World && renderMode != rendering::SceneRenderPass::Sky)
 		return;
 	fInsertOctreeObject(&ent);
 }
 
-const OcclusionOctree<pragma::ecs::CBaseEntity *> &COcclusionCullerComponent::GetOcclusionOctree() const { return const_cast<COcclusionCullerComponent *>(this)->GetOcclusionOctree(); }
-OcclusionOctree<pragma::ecs::CBaseEntity *> &COcclusionCullerComponent::GetOcclusionOctree() { return *m_occlusionOctree; }
+const OcclusionOctree<ecs::CBaseEntity *> &COcclusionCullerComponent::GetOcclusionOctree() const { return const_cast<COcclusionCullerComponent *>(this)->GetOcclusionOctree(); }
+OcclusionOctree<ecs::CBaseEntity *> &COcclusionCullerComponent::GetOcclusionOctree() { return *m_occlusionOctree; }
 
 void COcclusionCullerComponent::OnRemove()
 {
@@ -150,16 +150,16 @@ void COcclusionCuller::Initialize()
 	AddComponent<COcclusionCullerComponent>();
 }
 
-DLLCLIENT void CMD_debug_render_octree_static_print(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
+DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState *, BasePlayerComponent *, std::vector<std::string> &)
 {
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
-	auto *entWorld = pragma::get_cgame()->GetWorld();
+	auto *entWorld = get_cgame()->GetWorld();
 	if(entWorld == nullptr) {
 		Con::cwar << "No world entity found!" << Con::endl;
 		return;
 	}
-	auto meshTree = static_cast<pragma::CWorldComponent *>(entWorld)->GetMeshTree();
+	auto meshTree = static_cast<CWorldComponent *>(entWorld)->GetMeshTree();
 	if(meshTree == nullptr) {
 		Con::cwar << "World-entity has no octree!" << Con::endl;
 		return;
@@ -167,21 +167,21 @@ DLLCLIENT void CMD_debug_render_octree_static_print(pragma::NetworkState *, prag
 	meshTree->DebugPrint();
 }
 
-DLLCLIENT void CMD_debug_render_octree_dynamic_print(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState *state, BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
-	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
-	auto *culler = scene ? scene->FindOcclusionCuller<pragma::COcclusionCullerComponent>() : nullptr;
+	auto *scene = get_cgame()->GetScene<CSceneComponent>();
+	auto *culler = scene ? scene->FindOcclusionCuller<COcclusionCullerComponent>() : nullptr;
 	if(culler == nullptr)
 		return;
 	auto &octree = culler->GetOcclusionOctree();
 	octree.DebugPrint();
 }
 
-DLLCLIENT void CMD_debug_render_octree_dynamic_find(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	if(pragma::get_client_state() == nullptr || pl == nullptr)
+	if(get_client_state() == nullptr || pl == nullptr)
 		return;
 	auto &entPl = pl->GetEntity();
 	if(entPl.IsCharacter() == false)
@@ -190,8 +190,8 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(pragma::NetworkState *state,
 	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	if(ents.empty())
 		return;
-	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
-	auto *culler = scene ? scene->FindOcclusionCuller<pragma::COcclusionCullerComponent>() : nullptr;
+	auto *scene = get_cgame()->GetScene<CSceneComponent>();
+	auto *culler = scene ? scene->FindOcclusionCuller<COcclusionCullerComponent>() : nullptr;
 	if(culler == nullptr)
 		return;
 	auto *entFind = ents.front();
@@ -224,21 +224,21 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(pragma::NetworkState *state,
 	node->DebugPrint();
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_render_octree_static_print", &CMD_debug_render_octree_static_print, pragma::console::ConVarFlags::None, "Prints the octree for static world geometry to the console, or a file if a file name is specified.");
-	auto UVN = pragma::console::client::register_command("debug_render_octree_dynamic_print", &CMD_debug_render_octree_dynamic_print, pragma::console::ConVarFlags::None, "Prints the octree for dynamic objects to the console, or a file if a file name is specified.");
-	auto UVN = pragma::console::client::register_command("debug_render_octree_dynamic_find", &CMD_debug_render_octree_dynamic_find, pragma::console::ConVarFlags::None, "Finds the specified entity in the octree for dynamic objects.");
+	auto UVN = console::client::register_command("debug_render_octree_static_print", &CMD_debug_render_octree_static_print, console::ConVarFlags::None, "Prints the octree for static world geometry to the console, or a file if a file name is specified.");
+	auto UVN = console::client::register_command("debug_render_octree_dynamic_print", &CMD_debug_render_octree_dynamic_print, console::ConVarFlags::None, "Prints the octree for dynamic objects to the console, or a file if a file name is specified.");
+	auto UVN = console::client::register_command("debug_render_octree_dynamic_find", &CMD_debug_render_octree_dynamic_find, console::ConVarFlags::None, "Finds the specified entity in the octree for dynamic objects.");
 }
 
-static void CVAR_CALLBACK_debug_render_octree_static_draw(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val)
+static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState *, const console::ConVar &, bool, bool val)
 {
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
-	auto *entWorld = pragma::get_cgame()->GetWorld();
+	auto *entWorld = get_cgame()->GetWorld();
 	if(entWorld == nullptr) {
 		Con::cwar << "No world entity found!" << Con::endl;
 		return;
 	}
-	auto meshTree = static_cast<pragma::CWorldComponent *>(entWorld)->GetMeshTree();
+	auto meshTree = static_cast<CWorldComponent *>(entWorld)->GetMeshTree();
 	if(meshTree == nullptr) {
 		Con::cwar << "World-entity has no octree!" << Con::endl;
 		return;
@@ -265,12 +265,12 @@ namespace {
 	auto UVN = pragma::console::client::register_variable_listener<bool>("debug_render_octree_static_draw", &CVAR_CALLBACK_debug_render_octree_static_draw);
 }
 
-static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool val)
+static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState *, const console::ConVar &, bool, bool val)
 {
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
-	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
-	auto *culler = scene ? scene->FindOcclusionCuller<pragma::COcclusionCullerComponent>() : nullptr;
+	auto *scene = get_cgame()->GetScene<CSceneComponent>();
+	auto *culler = scene ? scene->FindOcclusionCuller<COcclusionCullerComponent>() : nullptr;
 	if(culler == nullptr)
 		return;
 	auto &octree = culler->GetOcclusionOctree();

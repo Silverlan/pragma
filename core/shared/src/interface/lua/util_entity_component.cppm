@@ -26,5 +26,5 @@ export namespace pragma {
 			return def;
 		}
 	};
-	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::BaseEntityComponent &component);
+	DLLNETWORK std::ostream &operator<<(std::ostream &out, const BaseEntityComponent &component);
 };

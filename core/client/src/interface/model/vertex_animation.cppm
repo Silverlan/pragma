@@ -15,7 +15,7 @@ export namespace pragma::animation {
 		static std::shared_ptr<CVertexAnimation> Create(const CVertexAnimation &other);
 		static std::shared_ptr<CVertexAnimation> Create(const std::string &name);
 
-		virtual std::shared_ptr<pragma::animation::VertexAnimation> Copy() const override;
+		virtual std::shared_ptr<VertexAnimation> Copy() const override;
 
 		void UpdateBuffer();
 	protected:

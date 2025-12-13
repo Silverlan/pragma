@@ -9,8 +9,8 @@ import :audio;
 std::vector<std::string> pragma::audio::get_available_audio_apis()
 {
 	std::vector<std::string> dirs {};
-	FileManager::FindFiles("modules/audio/*", nullptr, &dirs,
-	  fsys::SearchFlags::Local // Binary modules can only be loaded from actual files
+	fs::find_files("modules/audio/*", nullptr, &dirs,
+	  fs::SearchFlags::Local // Binary modules can only be loaded from actual files
 	);
 	return dirs;
 }

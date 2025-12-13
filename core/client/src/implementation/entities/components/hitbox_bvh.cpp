@@ -16,13 +16,13 @@ import :entities.components.render;
 
 using namespace pragma;
 
-static spdlog::logger &LOGGER = pragma::register_logger("bvh");
+static spdlog::logger &LOGGER = register_logger("bvh");
 
 static std::shared_ptr<pragma::bvh::HitboxBvhCache> g_hbBvhCache {};
 static std::unique_ptr<BS::light_thread_pool> g_hbThreadPool {};
 static size_t g_hbBvhCount = 0;
 
-pragma::bvh::HitboxBvhCache::HitboxBvhCache(pragma::Game &game) : m_game {game} {}
+pragma::bvh::HitboxBvhCache::HitboxBvhCache(Game &game) : m_game {game} {}
 pragma::bvh::HitboxBvhCache::~HitboxBvhCache()
 {
 	for(auto &[mdlName, mdlCache] : m_modelBvhCache) {
@@ -32,11 +32,11 @@ pragma::bvh::HitboxBvhCache::~HitboxBvhCache()
 }
 pragma::bvh::ModelHitboxBvhCache *pragma::bvh::HitboxBvhCache::GetModelCache(const ModelName &mdlName)
 {
-	auto normName = pragma::asset::get_normalized_path(mdlName, pragma::asset::Type::Model);
+	auto normName = pragma::asset::get_normalized_path(mdlName, asset::Type::Model);
 	auto it = m_modelBvhCache.find(normName);
 	return (it != m_modelBvhCache.end() && it->second->complete) ? it->second.get() : nullptr;
 }
-void pragma::bvh::HitboxBvhCache::PrepareModel(pragma::asset::Model &mdl)
+void pragma::bvh::HitboxBvhCache::PrepareModel(asset::Model &mdl)
 {
 	auto t = std::chrono::steady_clock::now();
 	auto savingRequired = false;
@@ -50,7 +50,7 @@ void pragma::bvh::HitboxBvhCache::PrepareModel(pragma::asset::Model &mdl)
 			LOGGER.warn("Failed to save model '{}': {}", mdl.GetName(), err);
 	}
 }
-void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(pragma::asset::Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache)
+void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(asset::Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &boneCaches = mdlHbBvhCache.boneCache;
@@ -62,8 +62,8 @@ void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(pragma::asset::M
 		for(auto &boneMeshInfo : boneMeshInfos) {
 			auto it = boneCaches.find(boneId);
 			if(it == boneCaches.end())
-				it = boneCaches.insert(std::make_pair(boneId, pragma::util::make_shared<pragma::bvh::BoneHitboxBvhCache>())).first;
-			auto meshBvhCache = pragma::util::make_shared<pragma::bvh::MeshHitboxBvhCache>();
+				it = boneCaches.insert(std::make_pair(boneId, pragma::util::make_shared<BoneHitboxBvhCache>())).first;
+			auto meshBvhCache = pragma::util::make_shared<MeshHitboxBvhCache>();
 			meshBvhCache->bvhTree = std::move(boneMeshInfo->meshBvhTree);
 			meshBvhCache->bvhTriToOriginalTri = std::move(boneMeshInfo->usedTris);
 			meshBvhCache->mesh = boneMeshInfo->subMesh;
@@ -73,9 +73,9 @@ void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(pragma::asset::M
 		}
 	}
 }
-std::shared_future<void> pragma::bvh::HitboxBvhCache::GenerateModelCache(const ModelName &mdlName, pragma::asset::Model &mdl)
+std::shared_future<void> pragma::bvh::HitboxBvhCache::GenerateModelCache(const ModelName &mdlName, asset::Model &mdl)
 {
-	auto normName = pragma::asset::get_normalized_path(mdlName, pragma::asset::Type::Model);
+	auto normName = pragma::asset::get_normalized_path(mdlName, asset::Type::Model);
 	auto it = m_modelBvhCache.find(normName);
 	if(it != m_modelBvhCache.end())
 		return it->second->task;
@@ -94,11 +94,11 @@ std::shared_future<void> pragma::bvh::HitboxBvhCache::GenerateModelCache(const M
 	return mdlCache->task;
 }
 
-CHitboxBvhComponent::CHitboxBvhComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent)
+CHitboxBvhComponent::CHitboxBvhComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent)
 {
 	if(g_hbBvhCount++ == 0) {
 		g_hbThreadPool = std::make_unique<BS::light_thread_pool>(10);
-		g_hbBvhCache = pragma::util::make_shared<pragma::bvh::HitboxBvhCache>(GetGame());
+		g_hbBvhCache = pragma::util::make_shared<bvh::HitboxBvhCache>(GetGame());
 	}
 }
 CHitboxBvhComponent::~CHitboxBvhComponent()
@@ -123,9 +123,9 @@ void CHitboxBvhComponent::Initialize()
 	auto animC = GetEntity().AddComponent<CAnimatedComponent>();
 	if(animC.valid())
 		animC->SetSkeletonUpdateCallbacksEnabled(true);
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(); });
-	BindEventUnhandled(cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { InitializeHitboxMeshBvhs(); });
-	BindEventUnhandled(cAnimatedComponent::EVENT_ON_SKELETON_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateHitboxBvh(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { OnModelChanged(); });
+	BindEventUnhandled(cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<ComponentEvent> evData) { InitializeHitboxMeshBvhs(); });
+	BindEventUnhandled(cAnimatedComponent::EVENT_ON_SKELETON_UPDATED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateHitboxBvh(); });
 
 	auto intersectionHandlerC = GetEntity().AddComponent<IntersectionHandlerComponent>();
 	if(intersectionHandlerC.valid()) {
@@ -133,7 +133,7 @@ void CHitboxBvhComponent::Initialize()
 		intersectionHandler.userData = this;
 		intersectionHandler.intersectionTest = [](void *userData, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitInfo &outHitInfo) -> bool { return static_cast<CHitboxBvhComponent *>(userData)->IntersectionTest(origin, dir, minDist, maxDist, outHitInfo); };
 		intersectionHandler.intersectionTestAabb = [](void *userData, const Vector3 &min, const Vector3 &max, IntersectionInfo *outIntersectionInfo) -> bool { return static_cast<CHitboxBvhComponent *>(userData)->IntersectionTestAabb(min, max, outIntersectionInfo); };
-		intersectionHandler.intersectionTestKDop = [](void *userData, const std::vector<pragma::math::Plane> &planes, IntersectionInfo *outIntersectionInfo) -> bool { return static_cast<CHitboxBvhComponent *>(userData)->IntersectionTestKDop(planes, outIntersectionInfo); };
+		intersectionHandler.intersectionTestKDop = [](void *userData, const std::vector<math::Plane> &planes, IntersectionInfo *outIntersectionInfo) -> bool { return static_cast<CHitboxBvhComponent *>(userData)->IntersectionTestKDop(planes, outIntersectionInfo); };
 		intersectionHandlerC->SetIntersectionHandler(intersectionHandler);
 	}
 }
@@ -207,10 +207,10 @@ void CHitboxBvhComponent::UpdateHitboxBvh()
 
 	WaitForHitboxBvhUpdate();
 	m_hitboxBvhUpdatePoses.resize(bonePoses.size());
-	memcpy(m_hitboxBvhUpdatePoses.data(), bonePoses.data(), pragma::util::size_of_container(bonePoses));
+	memcpy(m_hitboxBvhUpdatePoses.data(), bonePoses.data(), util::size_of_container(bonePoses));
 	auto &updatePoses = m_hitboxBvhUpdatePoses;
 	m_hitboxBvhUpdate = g_hbThreadPool->submit_task([&updatePoses, &hitboxBvh, &bvh]() {
-		bvh.refit([&bvh, &hitboxBvh, &updatePoses](pragma::bvh::Node &node) {
+		bvh.refit([&bvh, &hitboxBvh, &updatePoses](bvh::Node &node) {
 			auto begin = node.index.first_id();
 			auto end = begin + node.index.prim_count();
 			for(size_t i = begin; i < end; ++i) {
@@ -278,21 +278,21 @@ void CHitboxBvhComponent::InitializeHitboxMeshBvhs()
 	if(numLods == 0)
 		return;
 	auto &lastLod = mdl->GetLODs().back();
-	std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> lodMeshes;
+	std::vector<std::shared_ptr<geometry::ModelSubMesh>> lodMeshes;
 	mdl->GetBodyGroupMeshes(mdlC->GetBodyGroups(), lastLod.lod, lodMeshes);
 
 	std::unordered_set<std::string> renderMeshUuids;
 	renderMeshUuids.reserve(lodMeshes.size());
 	for(auto &subMesh : lodMeshes)
-		renderMeshUuids.insert(pragma::util::uuid_to_string(subMesh->GetUuid()));
+		renderMeshUuids.insert(util::uuid_to_string(subMesh->GetUuid()));
 	// Get the BVH caches for the current body groups
 	for(auto &[boneId, boneCache] : cache->boneCache) {
-		std::vector<std::shared_ptr<pragma::bvh::MeshHitboxBvhCache>> *boneMeshCache = nullptr;
+		std::vector<std::shared_ptr<bvh::MeshHitboxBvhCache>> *boneMeshCache = nullptr;
 		for(auto &[uuid, meshCache] : boneCache->meshCache) {
 			if(renderMeshUuids.find(uuid) == renderMeshUuids.end())
 				continue;
 			if(boneMeshCache == nullptr) {
-				auto &rtCache = m_hitboxMeshBvhCaches[boneId] = std::vector<std::shared_ptr<pragma::bvh::MeshHitboxBvhCache>> {};
+				auto &rtCache = m_hitboxMeshBvhCaches[boneId] = std::vector<std::shared_ptr<bvh::MeshHitboxBvhCache>> {};
 				rtCache.reserve(boneCache->meshCache.size());
 				boneMeshCache = &rtCache;
 			}
@@ -301,7 +301,7 @@ void CHitboxBvhComponent::InitializeHitboxMeshBvhs()
 	}
 }
 
-static void draw_mesh(const pragma::bvh::MeshBvhTree &bvhTree, const pragma::math::ScaledTransform &pose, const Color &color, const Color &outlineColor, float duration = 0.1f)
+static void draw_mesh(const pragma::bvh::MeshBvhTree &bvhTree, const math::ScaledTransform &pose, const Color &color, const Color &outlineColor, float duration = 0.1f)
 {
 	std::vector<Vector3> verts;
 	verts.reserve(bvhTree.primitives.size() * 3);
@@ -310,7 +310,7 @@ static void draw_mesh(const pragma::bvh::MeshBvhTree &bvhTree, const pragma::mat
 		verts.push_back(pragma::bvh::from_bvh_vector(tri.p1));
 		verts.push_back(pragma::bvh::from_bvh_vector(tri.p2));
 	}
-	auto o = pragma::debug::DebugRenderer::DrawMesh(verts, {color, outlineColor, duration});
+	auto o = debug::DebugRenderer::DrawMesh(verts, {color, outlineColor, duration});
 	if(o)
 		o->SetPose(pose);
 }
@@ -325,7 +325,7 @@ bool CHitboxBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3
 	if(animC.expired())
 		return false;
 	auto &renderBounds = renderC->GetUpdatedAbsoluteRenderBounds();
-	if(pragma::math::intersection::aabb_aabb(min, max, renderBounds.min, renderBounds.max) == pragma::math::intersection::Intersect::Outside)
+	if(math::intersection::aabb_aabb(min, max, renderBounds.min, renderBounds.max) == math::intersection::Intersect::Outside)
 		return false;
 
 	if(!UpdateHitboxMeshCache())
@@ -347,9 +347,9 @@ bool CHitboxBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3
 	auto isPrimitiveIntersectionInfo = outIntersectionInfo != nullptr && typeid(*outIntersectionInfo) == typeid(PrimitiveIntersectionInfo);
 	auto isMeshIntersectionInfo = outIntersectionInfo != nullptr && typeid(*outIntersectionInfo) == typeid(MeshIntersectionInfo);
 
-	std::unique_ptr<pragma::bvh::IntersectionCache> intersectionCache {};
+	std::unique_ptr<bvh::IntersectionCache> intersectionCache {};
 	if(isPrimitiveIntersectionInfo || isMeshIntersectionInfo)
-		intersectionCache = std::make_unique<pragma::bvh::IntersectionCache>();
+		intersectionCache = std::make_unique<bvh::IntersectionCache>();
 
 	auto hasHit = false;
 	for(auto hbIdx : hbIntersectionInfo.primitives) {
@@ -379,7 +379,7 @@ bool CHitboxBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3
 				auto *outMeshIntersectionInfo = static_cast<MeshIntersectionInfo *>(outIntersectionInfo);
 				if(outMeshIntersectionInfo->meshInfos.size() == outMeshIntersectionInfo->meshInfos.capacity())
 					outMeshIntersectionInfo->meshInfos.reserve(outMeshIntersectionInfo->meshInfos.size() * 2 + 10);
-				outMeshIntersectionInfo->meshInfos.push_back({hitboxBvhInfo->mesh.get(), const_cast<pragma::ecs::BaseEntity *>(&GetEntity())});
+				outMeshIntersectionInfo->meshInfos.push_back({hitboxBvhInfo->mesh.get(), const_cast<ecs::BaseEntity *>(&GetEntity())});
 				hasHit = true;
 				continue;
 			}
@@ -391,7 +391,7 @@ bool CHitboxBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3
 				auto *outPrimitiveIntersectionInfo = static_cast<PrimitiveIntersectionInfo *>(outIntersectionInfo);
 				auto offset = outPrimitiveIntersectionInfo->primitives.size();
 				outPrimitiveIntersectionInfo->primitives.resize(offset + primIntersectionInfo.primitives.size());
-				memcpy(outPrimitiveIntersectionInfo->primitives.data() + offset, primIntersectionInfo.primitives.data(), pragma::util::size_of_container(primIntersectionInfo.primitives));
+				memcpy(outPrimitiveIntersectionInfo->primitives.data() + offset, primIntersectionInfo.primitives.data(), util::size_of_container(primIntersectionInfo.primitives));
 				intersectionCache->meshRanges.push_back({*hitboxBvhInfo->mesh, offset, outPrimitiveIntersectionInfo->primitives.size()});
 				hasHit = true;
 				continue;
@@ -400,7 +400,7 @@ bool CHitboxBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3
 	}
 	return hasHit;
 }
-bool CHitboxBvhComponent::IntersectionTestKDop(const std::vector<pragma::math::Plane> &planes, IntersectionInfo *outIntersectionInfo) const
+bool CHitboxBvhComponent::IntersectionTestKDop(const std::vector<math::Plane> &planes, IntersectionInfo *outIntersectionInfo) const
 {
 	auto &ent = static_cast<const ecs::CBaseEntity &>(GetEntity());
 	auto *renderC = ent.GetRenderComponent();
@@ -410,7 +410,7 @@ bool CHitboxBvhComponent::IntersectionTestKDop(const std::vector<pragma::math::P
 	if(animC.expired())
 		return false;
 	auto &renderBounds = renderC->GetLocalRenderBounds();
-	if(pragma::math::intersection::aabb_in_plane_mesh(renderBounds.min, renderBounds.max, planes.begin(), planes.end()) == pragma::math::intersection::Intersect::Outside)
+	if(math::intersection::aabb_in_plane_mesh(renderBounds.min, renderBounds.max, planes.begin(), planes.end()) == math::intersection::Intersect::Outside)
 		return false;
 
 	if(!UpdateHitboxMeshCache())
@@ -432,9 +432,9 @@ bool CHitboxBvhComponent::IntersectionTestKDop(const std::vector<pragma::math::P
 	auto isPrimitiveIntersectionInfo = outIntersectionInfo != nullptr && typeid(*outIntersectionInfo) == typeid(PrimitiveIntersectionInfo);
 	auto isMeshIntersectionInfo = outIntersectionInfo != nullptr && typeid(*outIntersectionInfo) == typeid(MeshIntersectionInfo);
 
-	std::unique_ptr<pragma::bvh::IntersectionCache> intersectionCache {};
+	std::unique_ptr<bvh::IntersectionCache> intersectionCache {};
 	if(isPrimitiveIntersectionInfo || isMeshIntersectionInfo)
-		intersectionCache = std::make_unique<pragma::bvh::IntersectionCache>();
+		intersectionCache = std::make_unique<bvh::IntersectionCache>();
 
 	auto hasHit = false;
 	for(auto hbIdx : hbIntersectionInfo.primitives) {
@@ -469,7 +469,7 @@ bool CHitboxBvhComponent::IntersectionTestKDop(const std::vector<pragma::math::P
 				auto *outMeshIntersectionInfo = static_cast<MeshIntersectionInfo *>(outIntersectionInfo);
 				if(outMeshIntersectionInfo->meshInfos.size() == outMeshIntersectionInfo->meshInfos.capacity())
 					outMeshIntersectionInfo->meshInfos.reserve(outMeshIntersectionInfo->meshInfos.size() * 2 + 10);
-				outMeshIntersectionInfo->meshInfos.push_back({hitboxBvhInfo->mesh.get(), const_cast<pragma::ecs::BaseEntity *>(&GetEntity())});
+				outMeshIntersectionInfo->meshInfos.push_back({hitboxBvhInfo->mesh.get(), const_cast<ecs::BaseEntity *>(&GetEntity())});
 				hasHit = true;
 				continue;
 			}
@@ -481,7 +481,7 @@ bool CHitboxBvhComponent::IntersectionTestKDop(const std::vector<pragma::math::P
 				auto *outPrimitiveIntersectionInfo = static_cast<PrimitiveIntersectionInfo *>(outIntersectionInfo);
 				auto offset = outPrimitiveIntersectionInfo->primitives.size();
 				outPrimitiveIntersectionInfo->primitives.resize(offset + primIntersectionInfo.primitives.size());
-				memcpy(outPrimitiveIntersectionInfo->primitives.data() + offset, primIntersectionInfo.primitives.data(), pragma::util::size_of_container(primIntersectionInfo.primitives));
+				memcpy(outPrimitiveIntersectionInfo->primitives.data() + offset, primIntersectionInfo.primitives.data(), util::size_of_container(primIntersectionInfo.primitives));
 				intersectionCache->meshRanges.push_back({*hitboxBvhInfo->mesh, offset, outPrimitiveIntersectionInfo->primitives.size()});
 				hasHit = true;
 				continue;
@@ -526,7 +526,7 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 
 	auto &renderBounds = renderC->GetLocalRenderBounds();
 	float t;
-	if(pragma::math::intersection::line_aabb(origin, dir, renderBounds.min, renderBounds.max, &t) != pragma::math::intersection::Result::Intersect || t > maxDist)
+	if(math::intersection::line_aabb(origin, dir, renderBounds.min, renderBounds.max, &t) != math::intersection::Result::Intersect || t > maxDist)
 		return false; // Ray doesn't intersect with render bounds, so we can quit early
 
 	if(!UpdateHitboxMeshCache())
@@ -570,7 +570,7 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 			bvh::MeshBvhTree::HitData meshHitData;
 			auto res = meshBvh->Raycast(originBs, dirBs, minDist, maxDist, meshHitData);
 			if(debugDraw) {
-				if(pragma::math::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawTraversedMeshesBit) || (res && pragma::math::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawHitMeshesBit))) {
+				if(math::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawTraversedMeshesBit) || (res && math::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawHitMeshesBit))) {
 					auto color = res ? Color {0, 255, 0, 64} : Color {255, 0, 0, 64};
 					draw_mesh(*meshBvh, debugDrawInfo->basePose * effectiveBonePoses[boneId], color, colors::White, debugDrawInfo->duration);
 				}
@@ -626,7 +626,7 @@ void CHitboxBvhComponent::DebugDrawHitboxMeshes(animation::BoneId boneId, float 
 	uint32_t colorIdx = 0;
 	auto pose = GetEntity().GetPose();
 	auto &ref = mdl->GetReference();
-	pragma::math::ScaledTransform refBonePose;
+	math::ScaledTransform refBonePose;
 	ref.GetBonePose(boneId, refBonePose);
 	auto relPose = effectivePoses[boneId] * refBonePose.GetInverse();
 	pose *= relPose;
@@ -653,7 +653,7 @@ void CHitboxBvhComponent::DebugDrawHitboxMeshes(animation::BoneId boneId, float 
 			}
 		});
 
-		auto o = pragma::debug::DebugRenderer::DrawMesh(dbgVerts, {col, colors::White, duration});
+		auto o = debug::DebugRenderer::DrawMesh(dbgVerts, {col, colors::White, duration});
 		if(o)
 			o->SetPose(pose);
 
@@ -679,16 +679,16 @@ void CHitboxBvhComponent::DebugDraw()
 			continue;
 		auto pose = hObb.GetPose(effectivePoses);
 		auto &pos = pose.GetOrigin();
-		pragma::debug::DebugRenderInfo renderInfo {color, outlineColor, duration};
+		debug::DebugRenderInfo renderInfo {color, outlineColor, duration};
 		renderInfo.pose.SetOrigin(pos);
 		renderInfo.pose.SetRotation(pose.GetRotation());
-		pragma::debug::DebugRenderer::DrawBox(-hObb.halfExtents, hObb.halfExtents, renderInfo);
+		debug::DebugRenderer::DrawBox(-hObb.halfExtents, hObb.halfExtents, renderInfo);
 	}
 
 	auto &mdl = ent.GetModel();
 	auto &ref = mdl->GetReference();
 	for(auto &pair : m_hitboxMeshBvhCaches) {
-		pragma::math::ScaledTransform pose;
+		math::ScaledTransform pose;
 		if(!ref.GetBonePose(pair.first, pose))
 			continue;
 		std::vector<Vector3> dbgMeshVerts;
@@ -710,33 +710,33 @@ void CHitboxBvhComponent::DebugDraw()
 				dbgMeshVerts.push_back(v2);
 			}
 		}
-		pragma::debug::DebugRenderer::DrawMesh(dbgMeshVerts, {color, outlineColor, duration});
+		debug::DebugRenderer::DrawMesh(dbgMeshVerts, {color, outlineColor, duration});
 	}
 }
 
-pragma::bvh::HitboxObb::HitboxObb(const Vector3 &min, const Vector3 &max) : min {min}, max {max} { pragma::math::geometry::calc_aabb_extents(min, max, position, halfExtents); }
+pragma::bvh::HitboxObb::HitboxObb(const Vector3 &min, const Vector3 &max) : min {min}, max {max} { math::geometry::calc_aabb_extents(min, max, position, halfExtents); }
 
-pragma::math::ScaledTransform pragma::bvh::HitboxObb::GetPose(const std::vector<pragma::math::ScaledTransform> &effectivePoses) const
+math::ScaledTransform pragma::bvh::HitboxObb::GetPose(const std::vector<math::ScaledTransform> &effectivePoses) const
 {
 	auto pose = effectivePoses[boneId];
 	pose.TranslateLocal(position);
 	return pose;
 }
 
-pragma::bvh::BBox pragma::bvh::HitboxObb::ToBvhBBox(const pragma::math::ScaledTransform &pose, Vector3 &outOrigin) const
+pragma::bvh::BBox pragma::bvh::HitboxObb::ToBvhBBox(const math::ScaledTransform &pose, Vector3 &outOrigin) const
 {
-	auto [aabbMin, aabbMax] = pragma::math::geometry::calc_aabb_around_obb(pose, position, halfExtents);
-	return pragma::bvh::BBox {pragma::bvh::to_bvh_vector(aabbMin), pragma::bvh::to_bvh_vector(aabbMax)};
+	auto [aabbMin, aabbMax] = math::geometry::calc_aabb_around_obb(pose, position, halfExtents);
+	return BBox {to_bvh_vector(aabbMin), to_bvh_vector(aabbMax)};
 }
 
-bool pragma::bvh::ObbBvhTree::DoInitializeBvh(pragma::bvh::Executor &executor, ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config &config)
+bool pragma::bvh::ObbBvhTree::DoInitializeBvh(Executor &executor, ::bvh::v2::DefaultBuilder<Node>::Config &config)
 {
 	auto numObbs = primitives.size();
 	if(numObbs == 0)
 		return false;
 	auto numBones = m_poses->size();
-	std::vector<pragma::bvh::BBox> bboxes {numObbs};
-	std::vector<pragma::bvh::Vec> centers {numObbs};
+	std::vector<BBox> bboxes {numObbs};
+	std::vector<Vec> centers {numObbs};
 	executor.for_each(0, numObbs, [&](size_t begin, size_t end) {
 		for(size_t i = begin; i < end; ++i) {
 			Vector3 center;
@@ -744,40 +744,40 @@ bool pragma::bvh::ObbBvhTree::DoInitializeBvh(pragma::bvh::Executor &executor, :
 			if(hObb.boneId >= numBones)
 				continue;
 			bboxes[i] = hObb.ToBvhBBox((*m_poses)[hObb.boneId], center);
-			centers[i] = bvh::to_bvh_vector(center);
+			centers[i] = to_bvh_vector(center);
 		}
 	});
 
-	bvh = ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::build(GetThreadPool(), bboxes, centers, config);
+	bvh = ::bvh::v2::DefaultBuilder<Node>::build(GetThreadPool(), bboxes, centers, config);
 	return true;
 }
 
-void pragma::bvh::ObbBvhTree::InitializeBvh(const std::vector<pragma::math::ScaledTransform> &poses)
+void pragma::bvh::ObbBvhTree::InitializeBvh(const std::vector<math::ScaledTransform> &poses)
 {
 	m_poses = &poses;
-	pragma::bvh::BvhTree::InitializeBvh();
+	BvhTree::InitializeBvh();
 	m_poses = nullptr;
 }
 
-bool pragma::bvh::ObbBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, const std::vector<pragma::math::ScaledTransform> &bonePoses, std::vector<HitData> &outHits, const bvh::DebugDrawInfo *debugDrawInfo)
+bool pragma::bvh::ObbBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, const std::vector<math::ScaledTransform> &bonePoses, std::vector<HitData> &outHits, const DebugDrawInfo *debugDrawInfo)
 {
 	constexpr size_t invalid_id = std::numeric_limits<size_t>::max();
 	constexpr size_t stack_size = 64;
 	constexpr bool use_robust_traversal = false;
 
-	std::function<void(const bvh::Node &, const bvh::Node &)> innerFn = [](const bvh::Node &, const bvh::Node &) {};
-	if(debugDrawInfo && pragma::math::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawTraversedNodesBit)) {
-		auto &game = *pragma::get_cengine()->GetClientState()->GetGameState();
-		innerFn = [&game, debugDrawInfo](const bvh::Node &a, const bvh::Node &b) {
+	std::function<void(const Node &, const Node &)> innerFn = [](const Node &, const Node &) {};
+	if(debugDrawInfo && math::is_flag_set(debugDrawInfo->flags, DebugDrawInfo::Flags::DrawTraversedNodesBit)) {
+		auto &game = *get_cengine()->GetClientState()->GetGameState();
+		innerFn = [&game, debugDrawInfo](const Node &a, const Node &b) {
 			auto col = Color {255, 0, 255, 64};
-			bvh::debug::draw_node(game, a, debugDrawInfo->basePose, col, debugDrawInfo->duration);
-			bvh::debug::draw_node(game, b, debugDrawInfo->basePose, col, debugDrawInfo->duration);
+			debug::draw_node(game, a, debugDrawInfo->basePose, col, debugDrawInfo->duration);
+			debug::draw_node(game, b, debugDrawInfo->basePose, col, debugDrawInfo->duration);
 		};
 	}
 
 	auto distDiff = maxDist - minDist;
-	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
-	auto ray = pragma::bvh::get_ray(origin, dir, minDist, maxDist);
+	::bvh::v2::SmallStack<Bvh::Index, stack_size> stack;
+	auto ray = get_ray(origin, dir, minDist, maxDist);
 	auto numBones = bonePoses.size();
 	bvh.intersect<false, use_robust_traversal>(
 	  ray, bvh.get_root().index, stack,
@@ -792,13 +792,13 @@ bool pragma::bvh::ObbBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir,
 			  float dist;
 
 			  auto tmpDir = dir * maxDist;
-			  auto hit = pragma::math::intersection::line_obb(origin, tmpDir, hObb.min, hObb.max, &dist, pose.GetOrigin(), pose.GetRotation());
-			  if(debugDrawInfo && (pragma::math::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawTraversedLeavesBit) || (pragma::math::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawHitLeavesBit) && hit))) {
-				  auto &game = *pragma::get_cengine()->GetClientState()->GetGameState();
+			  auto hit = math::intersection::line_obb(origin, tmpDir, hObb.min, hObb.max, &dist, pose.GetOrigin(), pose.GetRotation());
+			  if(debugDrawInfo && (math::is_flag_set(debugDrawInfo->flags, DebugDrawInfo::Flags::DrawTraversedLeavesBit) || (math::is_flag_set(debugDrawInfo->flags, DebugDrawInfo::Flags::DrawHitLeavesBit) && hit))) {
+				  auto &game = *get_cengine()->GetClientState()->GetGameState();
 				  auto col = hit ? Color {0, 255, 0, 64} : Color {0, 0, 255, 64};
 				  Vector3 center;
 				  auto bbox = hObb.ToBvhBBox(pose, center);
-				  bvh::debug::draw_node(game, bbox, debugDrawInfo->basePose, col, debugDrawInfo->duration);
+				  debug::draw_node(game, bbox, debugDrawInfo->basePose, col, debugDrawInfo->duration);
 			  }
 			  if(hit) {
 				  dist *= maxDist;
@@ -813,7 +813,7 @@ bool pragma::bvh::ObbBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir,
 				  else
 					  hitData.t = 0.f;
 
-				  pragma::util::insert_sorted(outHits, hitData, [](const HitData &a, const HitData &b) { return a.t < b.t; });
+				  util::insert_sorted(outHits, hitData, [](const HitData &a, const HitData &b) { return a.t < b.t; });
 			  }
 		  }
 		  return false;
@@ -827,7 +827,7 @@ bool pragma::bvh::test_bvh_intersection(const ObbBvhTree &bvhData, const std::fu
 	auto &bvh = bvhData.bvh;
 	auto &node = bvh.nodes[nodeIdx];
 	constexpr size_t stack_size = 64;
-	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
+	::bvh::v2::SmallStack<Bvh::Index, stack_size> stack;
 	auto hasAnyHit = false;
 
 	auto primitivesRequired = outIntersectionInfo != nullptr && typeid(*outIntersectionInfo) == typeid(PrimitiveIntersectionInfo);
@@ -854,7 +854,7 @@ bool pragma::bvh::test_bvh_intersection(const ObbBvhTree &bvhData, const std::fu
 			  }
 			  return hasHit;
 		  },
-		  [&testAabb](const pragma::bvh::Node &left, const pragma::bvh::Node &right) { return test_node_aabb_intersection(testAabb, left, right); });
+		  [&testAabb](const Node &left, const Node &right) { return test_node_aabb_intersection(testAabb, left, right); });
 	};
 	if(!outIntersectionInfo)
 		traverse.template operator()<true>();
@@ -862,39 +862,39 @@ bool pragma::bvh::test_bvh_intersection(const ObbBvhTree &bvhData, const std::fu
 		traverse.template operator()<false>();
 	return hasAnyHit;
 }
-bool pragma::bvh::test_bvh_intersection_with_obb(const pragma::bvh::ObbBvhTree &bvhData, const std::vector<pragma::math::ScaledTransform> &effectivePoses, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
+bool pragma::bvh::test_bvh_intersection_with_obb(const ObbBvhTree &bvhData, const std::vector<math::ScaledTransform> &effectivePoses, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
 {
-	auto planes = pragma::math::geometry::get_obb_planes(origin, rot, min, max);
-	auto pose = pragma::math::Transform {origin, rot};
+	auto planes = math::geometry::get_obb_planes(origin, rot, min, max);
+	auto pose = math::Transform {origin, rot};
 	return test_bvh_intersection(
-	  bvhData, [&origin, &rot, &min, &max, &planes](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return pragma::math::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, planes.begin(), planes.end()) != pragma::math::intersection::Intersect::Outside; },
+	  bvhData, [&origin, &rot, &min, &max, &planes](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return math::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, planes.begin(), planes.end()) != math::intersection::Intersect::Outside; },
 	  [&min, &max, &effectivePoses, pose](const HitboxObb &hObb) -> bool {
 		  auto poseB = hObb.GetPose(effectivePoses);
-		  return pragma::math::intersection::obb_obb(pose, min, max, poseB, hObb.min, hObb.max) != pragma::math::intersection::Intersect::Outside;
+		  return math::intersection::obb_obb(pose, min, max, poseB, hObb.min, hObb.max) != math::intersection::Intersect::Outside;
 	  },
 	  nodeIdx, outIntersectionInfo);
 }
-bool pragma::bvh::test_bvh_intersection_with_aabb(const pragma::bvh::ObbBvhTree &bvhData, const std::vector<pragma::math::ScaledTransform> &effectivePoses, const Vector3 &min, const Vector3 &max, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
+bool pragma::bvh::test_bvh_intersection_with_aabb(const ObbBvhTree &bvhData, const std::vector<math::ScaledTransform> &effectivePoses, const Vector3 &min, const Vector3 &max, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
 {
 	return test_bvh_intersection(
-	  bvhData, [&min, &max](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return pragma::math::intersection::aabb_aabb(min, max, aabbMin, aabbMax) != pragma::math::intersection::Intersect::Outside; },
+	  bvhData, [&min, &max](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return math::intersection::aabb_aabb(min, max, aabbMin, aabbMax) != math::intersection::Intersect::Outside; },
 	  [&min, &max, &effectivePoses](const HitboxObb &prim) -> bool {
 		  auto pose = prim.GetPose(effectivePoses);
-		  return pragma::math::intersection::aabb_obb(min, max, pose.GetOrigin(), pose.GetRotation(), prim.min, prim.max) != pragma::math::intersection::Intersect::Outside;
+		  return math::intersection::aabb_obb(min, max, pose.GetOrigin(), pose.GetRotation(), prim.min, prim.max) != math::intersection::Intersect::Outside;
 	  },
 	  nodeIdx, outIntersectionInfo);
 }
-bool pragma::bvh::test_bvh_intersection_with_kdop(const pragma::bvh::ObbBvhTree &bvhData, const std::vector<pragma::math::ScaledTransform> &effectivePoses, const std::vector<pragma::math::Plane> &kdop, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
+bool pragma::bvh::test_bvh_intersection_with_kdop(const ObbBvhTree &bvhData, const std::vector<math::ScaledTransform> &effectivePoses, const std::vector<math::Plane> &kdop, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
 {
 	return test_bvh_intersection(
-	  bvhData, [&kdop](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return pragma::math::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, kdop.begin(), kdop.end()) != pragma::math::intersection::Intersect::Outside; },
+	  bvhData, [&kdop](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return math::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, kdop.begin(), kdop.end()) != math::intersection::Intersect::Outside; },
 	  [&kdop, &effectivePoses](const HitboxObb &prim) -> bool {
 		  // OBB-KDOP intersection is not yet implemented, so we're calculating an AABB for the OBB and doing a AABB-KDOP intersection
 		  // for the time being.
 		  // TODO: Change this once OBB-KDOP intersection is implemented!
 		  auto pose = prim.GetPose(effectivePoses);
-		  auto [aabbMin, aabbMax] = pragma::math::geometry::calc_aabb_around_obb(pose, prim.position, prim.halfExtents);
-		  return pragma::math::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, kdop.begin(), kdop.end()) != pragma::math::intersection::Intersect::Outside;
+		  auto [aabbMin, aabbMax] = math::geometry::calc_aabb_around_obb(pose, prim.position, prim.halfExtents);
+		  return math::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, kdop.begin(), kdop.end()) != math::intersection::Intersect::Outside;
 	  },
 	  nodeIdx, outIntersectionInfo);
 }

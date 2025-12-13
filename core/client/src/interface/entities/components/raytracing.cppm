@@ -16,13 +16,13 @@ export import pragma.shared;
 export namespace pragma {
 	class DLLCLIENT CRaytracingComponent final : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static bool InitializeBuffers();
 		static void ClearBuffers();
 		static bool IsRaytracingEnabled();
 
 		static const std::shared_ptr<prosper::IUniformResizableBuffer> &GetEntityMeshInfoBuffer();
-		static const std::shared_ptr<MaterialDescriptorArrayManager> &GetMaterialDescriptorArrayManager();
+		static const std::shared_ptr<material::MaterialDescriptorArrayManager> &GetMaterialDescriptorArrayManager();
 		static const std::shared_ptr<prosper::IDescriptorSetGroup> &GetGameSceneDescriptorSetGroup();
 		static uint32_t GetBufferMeshCount();
 
@@ -40,7 +40,7 @@ export namespace pragma {
 
 				UseNormalMap = RenderModeSkybox << 1u
 			};
-			static_assert(pragma::math::to_integral(pragma::rendering::SceneRenderPass::Count) == 4);
+			static_assert(math::to_integral(rendering::SceneRenderPass::Count) == 4);
 			// Bounds for the sub-mesh. w-component is unused.
 			Vector4 aabbMin = {};
 			Vector4 aabbMax = {};
@@ -58,7 +58,7 @@ export namespace pragma {
 		};
 #pragma pack(pop)
 
-		CRaytracingComponent(pragma::ecs::BaseEntity &ent);
+		CRaytracingComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual ~CRaytracingComponent() override;
 

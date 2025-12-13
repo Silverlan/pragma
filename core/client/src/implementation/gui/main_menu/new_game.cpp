@@ -113,7 +113,7 @@ void pragma::gui::types::WIMainMenuNewGame::ReloadMapList()
 	auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map, pragma::asset::FormatType::All);
 	std::vector<std::string> files;
 	for(auto &ext : exts)
-		filemanager::find_files("maps/*." + ext, &files, nullptr);
+		fs::find_files("maps/*." + ext, &files, nullptr);
 
 	std::unordered_set<std::string> uniqueFiles;
 	std::unordered_set<std::string> nativeFiles;
@@ -177,10 +177,10 @@ void pragma::gui::types::WIMainMenuNewGame::ReloadMapList()
 		for(unsigned int i = 0; i < files.size(); i++) {
 			auto &fName = files[i];
 			auto displayName = fName;
-			auto f = FileManager::OpenFile((std::string("maps/") + fName + ".txt").c_str(), "r");
+			auto f = pragma::fs::open_file((std::string("maps/") + fName + ".txt").c_str(), pragma::fs::FileMode::Read);
 			if(f != nullptr) {
-				fsys::File fp {f};
-				auto root = ds::System::ReadData(fp);
+				fs::File fp {f};
+				auto root = datasystem::System::ReadData(fp);
 				if(root != nullptr) {
 					auto block = root->GetBlock(fName.c_str(), 0);
 					if(block != nullptr) {
@@ -248,7 +248,7 @@ void pragma::gui::types::WIMainMenuNewGame::InitializeGameSettings()
 	auto &resourceWatcher = pragma::get_client_state()->GetResourceWatcher();
 	if(m_cbMapListReload.IsValid())
 		m_cbMapListReload.Remove();
-	m_cbMapListReload = resourceWatcher.AddChangeCallback(eResourceWatcherCallbackType::Map, [this](std::reference_wrapper<const std::string> fileName, std::reference_wrapper<const std::string> ext) { ReloadMapList(); });
+	m_cbMapListReload = resourceWatcher.AddChangeCallback(util::eResourceWatcherCallbackType::Map, [this](std::reference_wrapper<const std::string> fileName, std::reference_wrapper<const std::string> ext) { ReloadMapList(); });
 
 	// Server Name
 	auto *pServerName = pList->AddTextEntry(pragma::locale::get_text("server_name"), "sv_servername");

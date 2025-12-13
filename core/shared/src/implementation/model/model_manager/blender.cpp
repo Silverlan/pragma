@@ -15,14 +15,14 @@ bool pragma::asset::BlenderFormatHandler::Import(const std::string &outputPath, 
 	}
 	auto filePath = "models/" + outputPath + '.' + m_ext;
 	std::string absPath;
-	if(!FileManager::FindAbsolutePath(filePath, absPath)) {
+	if(!fs::find_absolute_path(filePath, absPath)) {
 		m_error = "File not found!";
 		return false;
 	}
 
 	std::string glbMdlPath = "models/" + outputPath + ".glb";
 	auto glbPath = "addons/imported/" + glbMdlPath;
-	auto absGlbPath = pragma::util::Path::CreatePath(filemanager::get_program_write_path()) + pragma::util::Path::CreateFile(glbPath);
+	auto absGlbPath = pragma::util::Path::CreatePath(fs::get_program_write_path()) + pragma::util::Path::CreateFile(glbPath);
 	std::vector<const char *> argv {absPath.c_str()};
 	if(!pragma::python::exec("modules/blender/scripts/format_importers/" + m_ext + ".py", argv.size(), argv.data())) {
 		auto errMsg = pragma::python::get_last_error();
@@ -43,11 +43,11 @@ bool pragma::asset::BlenderFormatHandler::Import(const std::string &outputPath, 
 			*m_error += "Unknown error";
 		return false;
 	}
-	filemanager::update_file_index_cache(absGlbPath.GetString(), true);
+	fs::update_file_index_cache(absGlbPath.GetString(), true);
 
 	// Asset has been converted to glb, we can now redirect it to the gltf format handler
 	auto res = static_cast<pragma::util::FileAssetManager &>(GetAssetManager()).Import("models/" + outputPath + ".glb");
-	filemanager::remove_file(glbPath); // Don't need the glb anymore
+	fs::remove_file(glbPath); // Don't need the glb anymore
 	outFilePath = outputPath;
 	return res;
 }

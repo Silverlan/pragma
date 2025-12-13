@@ -10,12 +10,6 @@ export module pragma.shared:scripting.lua.libraries.file;
 export import pragma.lua;
 
 export {
-	namespace pragma {
-		enum class FileOpenMode : uint32_t { None = 0u, Read = 1u, Write = Read << 1u, Append = Write << 1u, Update = Append << 1u, Binary = Update << 1u };
-		using namespace pragma::math::scoped_enum::bitwise;
-	}
-	REGISTER_ENUM_FLAGS(pragma::FileOpenMode)
-
 	class DLLNETWORK LFile {
 	  public:
 		LFile();
@@ -23,9 +17,9 @@ export {
 	  private:
 		std::shared_ptr<ufile::IFile> m_file = nullptr;
 	  public:
-		void Construct(const VFilePtr &f);
+		void Construct(const pragma::fs::VFilePtr &f);
 		void Construct(const std::shared_ptr<ufile::IFile> &f);
-		bool Construct(const char *path, const char *mode, fsys::SearchFlags fsearchmode = fsys::SearchFlags::All, std::string *optOutErr = nullptr);
+		bool Construct(const char *path, pragma::fs::FileMode fileMode, pragma::fs::SearchFlags fsearchmode = pragma::fs::SearchFlags::All, std::string *optOutErr = nullptr);
 		bool IsValid() const;
 		std::shared_ptr<ufile::IFile> GetHandle();
 		void Close();
@@ -110,13 +104,13 @@ export {
 			DLLNETWORK bool validate_write_operation(lua::State *l, std::string &path, std::string &outRootPath);
 			DLLNETWORK std::string to_relative_path(const std::string &path);
 
-			DLLNETWORK std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Open(lua::State *l, std::string path, pragma::FileOpenMode openMode, fsys::SearchFlags searchFlags = fsys::SearchFlags::All);
+			DLLNETWORK std::pair<std::shared_ptr<LFile>, std::optional<std::string>> Open(lua::State *l, std::string path, pragma::fs::FileMode openMode, pragma::fs::SearchFlags searchFlags = pragma::fs::SearchFlags::All);
 			DLLNETWORK bool CreateDir(lua::State *l, std::string path);
 			DLLNETWORK bool CreatePath(lua::State *l, std::string path);
 			DLLNETWORK bool Delete(lua::State *l, std::string path);
 			DLLNETWORK bool DeleteDir(lua::State *l, std::string path);
-			DLLNETWORK void Find(lua::State *l, const std::string &path, fsys::SearchFlags searchFlags, luabind::object &outFiles, luabind::object &outDirs);
-			DLLNETWORK luabind::object FindLuaFiles(lua::State *l, const std::string &path, fsys::SearchFlags searchFlags = fsys::SearchFlags::All);
+			DLLNETWORK void Find(lua::State *l, const std::string &path, pragma::fs::SearchFlags searchFlags, luabind::object &outFiles, luabind::object &outDirs);
+			DLLNETWORK luabind::object FindLuaFiles(lua::State *l, const std::string &path, pragma::fs::SearchFlags searchFlags = pragma::fs::SearchFlags::All);
 			DLLNETWORK void find_external_game_resource_files(lua::State *l, const std::string &path, luabind::object &outFiles, luabind::object &outDirs);
 			DLLNETWORK std::shared_ptr<LFile> open_external_asset_file(lua::State *l, const std::string &path, const std::optional<std::string> &game = {});
 			DLLNETWORK luabind::object Read(lua::State *l, const std::string &path);

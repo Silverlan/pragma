@@ -16,8 +16,8 @@ void CListenerComponent::Initialize()
 	BaseEntityComponent::Initialize();
 
 	auto &ent = GetEntity();
-	ent.AddComponent<pragma::CTransformComponent>();
-	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
+	ent.AddComponent<CTransformComponent>();
+	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr) {
 		ent.RemoveSafely();
 		return;
@@ -33,7 +33,7 @@ void CListenerComponent::OnTick(double dt)
 		return;
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+	auto pVelComponent = ent.GetComponent<VelocityComponent>();
 	if(pTrComponent != nullptr)
 		m_listener->SetPosition(pTrComponent->GetPosition());
 	if(pVelComponent.valid())

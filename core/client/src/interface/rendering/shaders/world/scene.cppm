@@ -133,26 +133,26 @@ export namespace pragma {
 
 	class DLLCLIENT ShaderEntity : public ShaderSceneLit {
 	  public:
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
+		static VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
+		static VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
+		static VertexBinding VERTEX_BINDING_BONE_WEIGHT;
+		static VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
+		static VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT_EXT;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT;
+		static VertexBinding VERTEX_BINDING_BONE_WEIGHT_EXT;
+		static VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID;
+		static VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_UV;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_NORMAL;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_TANGENT;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BI_TANGENT;
+		static VertexBinding VERTEX_BINDING_VERTEX;
+		static VertexAttribute VERTEX_ATTRIBUTE_POSITION;
+		static VertexAttribute VERTEX_ATTRIBUTE_UV;
+		static VertexAttribute VERTEX_ATTRIBUTE_NORMAL;
+		static VertexAttribute VERTEX_ATTRIBUTE_TANGENT;
+		static VertexAttribute VERTEX_ATTRIBUTE_BI_TANGENT;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_LIGHTMAP;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_LIGHTMAP_UV;
+		static VertexBinding VERTEX_BINDING_LIGHTMAP;
+		static VertexAttribute VERTEX_ATTRIBUTE_LIGHTMAP_UV;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 
@@ -167,10 +167,10 @@ export namespace pragma {
 			Count
 		};
 
-		virtual bool GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const;
+		virtual bool GetRenderBufferTargets(geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const = 0;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const = 0;
-		std::shared_ptr<prosper::IRenderBuffer> CreateRenderBuffer(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx) const;
+		std::shared_ptr<prosper::IRenderBuffer> CreateRenderBuffer(geometry::CModelSubMesh &mesh, uint32_t pipelineIdx) const;
 	  protected:
 		ShaderEntity(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader = "");
 	};
@@ -219,12 +219,12 @@ export namespace pragma {
 		const prosper::DescriptorSetInfo *GetMaterialDescriptorSetInfo() const;
 
 		// Note: All recording functions are called in a multi-threaded environment! Handle with care!
-		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
+		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
 		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const
 		{
 		}
 		virtual bool RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const;
-		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, msys::CMaterial &mat) const;
+		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, material::CMaterial &mat) const;
 		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor, SceneFlags sceneFlags) const;
 		virtual void RecordBindLight(rendering::ShaderProcessor &shaderProcessor, CLightComponent &light, uint32_t layerId) const {}
 		virtual void RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor, float alphaCutoff) const {}
@@ -232,7 +232,7 @@ export namespace pragma {
 		virtual void RecordDrawOrigin(rendering::ShaderProcessor &shaderProcessor, const Vector4 &drawOrigin) const;
 		virtual void RecordDepthBias(rendering::ShaderProcessor &shaderProcessor, const Vector2 &depthBias) const;
 		virtual void RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor, uint32_t vertexAnimationOffset) const;
-		virtual bool OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor, pragma::geometry::CModelSubMesh &mesh) const { return true; }
+		virtual bool OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor, geometry::CModelSubMesh &mesh) const { return true; }
 		virtual bool IsUsingLightmaps() const { return false; }
 		virtual uint32_t GetPassPipelineIndexStartOffset(rendering::PassType passType) const { return 0; }
 	  protected:

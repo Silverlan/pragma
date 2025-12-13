@@ -11,7 +11,7 @@ export import :entities.base_entity;
 export namespace pragma {
 	class DLLCLIENT CTouchComponent final : public BaseTouchComponent {
 	  public:
-		CTouchComponent(pragma::ecs::BaseEntity &ent) : BaseTouchComponent(ent) {}
+		CTouchComponent(ecs::BaseEntity &ent) : BaseTouchComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;

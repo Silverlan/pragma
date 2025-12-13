@@ -17,10 +17,10 @@ export {
 	namespace pragma::ecs {
 		namespace events {
 			struct DLLNETWORK CEOnBulletsFired : public ComponentEvent {
-				CEOnBulletsFired(const game::BulletInfo &bulletInfo, const std::vector<pragma::physics::TraceResult> &hitTargets);
+				CEOnBulletsFired(const game::BulletInfo &bulletInfo, const std::vector<physics::TraceResult> &hitTargets);
 				virtual void PushArguments(lua::State *l) override;
 				const game::BulletInfo &bulletInfo;
-				const std::vector<pragma::physics::TraceResult> &hitTargets;
+				const std::vector<physics::TraceResult> &hitTargets;
 			};
 			struct DLLNETWORK CEOnFireBullets : public ComponentEvent {
 				CEOnFireBullets(const game::BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin);
@@ -41,26 +41,26 @@ export {
 		};
 		class DLLNETWORK BaseShooterComponent : public BaseEntityComponent {
 		  public:
-			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 			virtual void Initialize() override;
 
-			void GetBulletTraceData(const game::BulletInfo &bulletInfo, pragma::physics::TraceData &data) const;
+			void GetBulletTraceData(const game::BulletInfo &bulletInfo, physics::TraceData &data) const;
 
 			virtual void OnFireBullets(const game::BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin = nullptr);
-			virtual void FireBullets(const game::BulletInfo &bulletInfo, std::vector<pragma::physics::TraceResult> &outHitTargets, bool bMaster = true) = 0;
+			virtual void FireBullets(const game::BulletInfo &bulletInfo, std::vector<physics::TraceResult> &outHitTargets, bool bMaster = true) = 0;
 		  protected:
-			BaseShooterComponent(pragma::ecs::BaseEntity &ent);
+			BaseShooterComponent(BaseEntity &ent);
 			struct DLLNETWORK NextBulletInfo {
 				std::vector<Vector3> destinations;
 				EntityHandle source;
 			};
 			mutable std::unique_ptr<NextBulletInfo> m_nextBullet = nullptr;
-			void ReceiveBulletEvent(NetPacket &packet, pragma::BasePlayerComponent *pl = nullptr);
+			void ReceiveBulletEvent(NetPacket &packet, BasePlayerComponent *pl = nullptr);
 			std::vector<Vector3> GetBulletDestinations(const Vector3 &origin, const Vector3 &dir, const game::BulletInfo &bulletInfo);
-			virtual pragma::physics::RayCastHitType OnBulletHit(const game::BulletInfo &bulletInfo, const pragma::physics::TraceData &data, pragma::physics::PhysObj &phys, physics::ICollisionObject &col);
+			virtual physics::RayCastHitType OnBulletHit(const game::BulletInfo &bulletInfo, const physics::TraceData &data, physics::PhysObj &phys, physics::ICollisionObject &col);
 
-			pragma::NetEventId m_netEvFireBullets = pragma::INVALID_NET_EVENT;
+			NetEventId m_netEvFireBullets = INVALID_NET_EVENT;
 		};
 	};
 };

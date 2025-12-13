@@ -9,9 +9,9 @@ import :util.rgb_csv;
 
 using namespace pragma;
 
-ComponentEventId baseColorComponent::EVENT_ON_COLOR_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseColorComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseColorComponent::EVENT_ON_COLOR_CHANGED = registerEvent("ON_COLOR_CHANGED", ComponentEventInfo::Type::Broadcast); }
-void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+ComponentEventId baseColorComponent::EVENT_ON_COLOR_CHANGED = INVALID_COMPONENT_ID;
+void BaseColorComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseColorComponent::EVENT_ON_COLOR_CHANGED = registerEvent("ON_COLOR_CHANGED", ComponentEventInfo::Type::Broadcast); }
+void BaseColorComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseColorComponent;
 	{
@@ -19,12 +19,12 @@ void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		  colors::White.ToVector3(), AttributeSpecializationType::Color);
 		memberInfo.SetInterpolationFunction<T, Vector3, [](const Vector3 &col0, const Vector3 &col1, double t, Vector3 &vOut) {
 			double h0, s0, v0;
-			pragma::math::rgb_to_hsv(col0, h0, s0, v0);
+			math::rgb_to_hsv(col0, h0, s0, v0);
 
 			double h1, s1, v1;
-			pragma::math::rgb_to_hsv(col1, h1, s1, v1);
+			math::rgb_to_hsv(col1, h1, s1, v1);
 
-			pragma::math::lerp_hsv(h0, s0, v0, h1, s1, v1, t);
+			math::lerp_hsv(h0, s0, v0, h1, s1, v1, t);
 
 			vOut = Vector3 {math::hsv_to_rgb(h0, s0, v0)};
 		}>();
@@ -44,7 +44,7 @@ void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseColorComponent::BaseColorComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_color(pragma::util::SimpleProperty<pragma::util::Vector4Property, Vector4>::Create(colors::White.ToVector4())) {}
+BaseColorComponent::BaseColorComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_color(util::SimpleProperty<util::Vector4Property, Vector4>::Create(colors::White.ToVector4())) {}
 BaseColorComponent::~BaseColorComponent()
 {
 	if(m_cbOnColorChanged.IsValid())
@@ -54,7 +54,7 @@ void BaseColorComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "color", false)) {
 			Vector4 r;
@@ -66,10 +66,10 @@ void BaseColorComponent::Initialize()
 			*m_color = r;
 		}
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(pragma::string::compare<std::string>(inputData.input, "setcolor", false)) {
 			Vector4 r;
@@ -81,11 +81,11 @@ void BaseColorComponent::Initialize()
 			*m_color = r;
 		}
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 	m_cbOnColorChanged = m_color->AddCallback([this](std::reference_wrapper<const Vector4> oldColor, std::reference_wrapper<const Vector4> newColor) {
-		pragma::CEOnColorChanged onColorChanged {oldColor.get(), newColor.get()};
+		CEOnColorChanged onColorChanged {oldColor.get(), newColor.get()};
 		BroadcastEvent(baseColorComponent::EVENT_ON_COLOR_CHANGED, onColorChanged);
 	});
 
@@ -106,7 +106,7 @@ void BaseColorComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t versio
 	(*m_color) = color;
 }
 const Vector4 &BaseColorComponent::GetColor() const { return *m_color; }
-const pragma::util::PVector4Property &BaseColorComponent::GetColorProperty() const { return m_color; }
+const util::PVector4Property &BaseColorComponent::GetColorProperty() const { return m_color; }
 
 void BaseColorComponent::SetColor(const Color &color) { *m_color = color.ToVector4(); }
 void BaseColorComponent::SetColor(const Vector4 &color) { *m_color = color; }

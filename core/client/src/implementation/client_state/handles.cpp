@@ -33,7 +33,7 @@ void pragma::ClientState::RequestServerInfo()
 	Con::ccl << "Sending serverinfo request..." << Con::endl;
 	NetPacket packet;
 	packet->WriteString(GetConVarString("password"));
-	SendPacket(pragma::networking::net_messages::server::SERVERINFO_REQUEST, packet, pragma::networking::Protocol::SlowReliable);
+	SendPacket(networking::net_messages::server::SERVERINFO_REQUEST, packet, networking::Protocol::SlowReliable);
 }
 
 void pragma::ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
@@ -80,7 +80,7 @@ void pragma::ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
 		outAuthPacket->Write<uint16_t>(token.size());
 		outAuthPacket->Write(reinterpret_cast<uint8_t *>(token.data()), token.size() * sizeof(token.front()));
 	}
-	SendPacket(pragma::networking::net_messages::server::AUTHENTICATE, outAuthPacket, pragma::networking::Protocol::SlowReliable);
+	SendPacket(networking::net_messages::server::AUTHENTICATE, outAuthPacket, networking::Protocol::SlowReliable);
 }
 
 void pragma::ClientState::HandleClientStartResourceTransfer(NetPacket &packet)
@@ -90,13 +90,13 @@ void pragma::ClientState::HandleClientStartResourceTransfer(NetPacket &packet)
 		return;
 	}
 	auto svPath = m_svInfo->address;
-	pragma::string::replace(svPath, ":", "_");
-	pragma::string::replace(svPath, "[", "");
-	pragma::string::replace(svPath, "]", "");
+	string::replace(svPath, ":", "_");
+	string::replace(svPath, "[", "");
+	string::replace(svPath, "]", "");
 	m_svInfo->SetDownloadPath("downloads\\" + svPath + '\\');
 
 	auto luaPath = m_svInfo->GetDownloadPath() + "lua";
-	FileManager::CreatePath(luaPath.c_str());
+	fs::create_path(luaPath);
 
 	unsigned int numResources = packet->Read<unsigned int>();
 	Con::ccl << "Downloading " << numResources << " files from server..." << Con::endl;
@@ -109,7 +109,7 @@ void pragma::ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize
 	throw std::runtime_error {"Not implemented."};
 #if 0
 	std::string path = "cache\\" + cache + ".cache";
-	auto f = FileManager::OpenFile(path.c_str(), "rb");
+	auto f = pragma::fs::open_file(path.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(f == nullptr) {
 		Con::cwar << "Unable to open lua-cache '" << cache << "' file!" << Con::endl;
 		return;
@@ -131,7 +131,7 @@ void pragma::ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize
 			auto data = pragma::util::make_shared<std::vector<uint8_t>>();
 			data->resize(content.length() + 1);
 			memcpy(data->data(), content.c_str(), content.length() + 1);
-			FileManager::AddVirtualFile((Lua::SCRIPT_DIRECTORY_SLASH + path).c_str(), data);
+			fs::AddVirtualFile((Lua::SCRIPT_DIRECTORY_SLASH + path).c_str(), data);
 			//int s = luaL_dostring(m_lua,content.c_str());
 			//lua_err(m_lua,s);
 		}
@@ -163,7 +163,7 @@ void pragma::ClientState::ReadEntityData(NetPacket &packet)
 			packet->SetOffset(offset + entSize);
 		}
 		if(ent != nullptr) {
-			auto pMapComponent = ent->GetComponent<pragma::MapComponent>();
+			auto pMapComponent = ent->GetComponent<MapComponent>();
 			if(pMapComponent.expired() || pMapComponent->GetMapIndex() == 0u)
 				ents.push_back(ent->GetHandle());
 		}
@@ -199,9 +199,9 @@ void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 		if(bIdentifier == true) {
 			auto *cf = GetConVar(cvar);
 			if(cf != nullptr) {
-				if(cf->GetType() == pragma::console::ConType::Var) {
-					auto *cv = static_cast<pragma::console::ConVar *>(cf);
-					if((cv->GetFlags() & pragma::console::ConVarFlags::Replicated) != pragma::console::ConVarFlags::None)
+				if(cf->GetType() == console::ConType::Var) {
+					auto *cv = static_cast<console::ConVar *>(cf);
+					if((cv->GetFlags() & console::ConVarFlags::Replicated) != console::ConVarFlags::None)
 						SetConVar(cvar, value);
 				}
 			}
@@ -214,7 +214,7 @@ void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	//if(IsConnected())
 	if(IsGameActive() == false)
 		StartNewGame(GetConVarString("sv_gamemode"));
-	auto *game = static_cast<pragma::CGame *>(GetGameState());
+	auto *game = static_cast<CGame *>(GetGameState());
 	game->InitializeGame();
 
 	auto luaPath = m_svInfo->GetDownloadPath() + "lua";
@@ -227,9 +227,9 @@ void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	//if(game == nullptr)
 	//	return;
 	std::string map = packet->ReadString();
-	auto svGameFlags = packet->Read<pragma::Game::GameFlags>();
-	if((svGameFlags & pragma::Game::GameFlags::LevelTransition) != pragma::Game::GameFlags::None)
-		game->SetGameFlags(game->GetGameFlags() | pragma::Game::GameFlags::LevelTransition);
+	auto svGameFlags = packet->Read<Game::GameFlags>();
+	if((svGameFlags & Game::GameFlags::LevelTransition) != Game::GameFlags::None)
+		game->SetGameFlags(game->GetGameFlags() | Game::GameFlags::LevelTransition);
 	double tServer = packet->Read<double>();
 	tServer -= game->CurTime();
 	game->SetServerTime(tServer);
@@ -241,14 +241,14 @@ void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	for(unsigned int i = 0; i < numMessages; i++)
 		msgs->push_back(packet->ReadString());
 
-	auto &sharedNetEventIdToLocal = pragma::get_cgame()->GetSharedNetEventIdToLocal();
+	auto &sharedNetEventIdToLocal = get_cgame()->GetSharedNetEventIdToLocal();
 	sharedNetEventIdToLocal.clear();
 
 	auto numEventIds = packet->Read<uint32_t>();
-	sharedNetEventIdToLocal.resize(numEventIds, std::numeric_limits<pragma::NetEventId>::max());
+	sharedNetEventIdToLocal.resize(numEventIds, std::numeric_limits<NetEventId>::max());
 	for(auto i = decltype(numEventIds) {0u}; i < numEventIds; ++i) {
 		auto name = packet->ReadString();
-		sharedNetEventIdToLocal[i] = pragma::get_cgame()->SetupNetEvent(name);
+		sharedNetEventIdToLocal[i] = get_cgame()->SetupNetEvent(name);
 	}
 
 	unsigned int numConCommands = packet->Read<unsigned int>();
@@ -259,18 +259,18 @@ void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	}
 
 	// Read component manager table
-	auto &componentManager = static_cast<pragma::CEntityComponentManager &>(pragma::get_cgame()->GetEntityComponentManager());
+	auto &componentManager = static_cast<CEntityComponentManager &>(get_cgame()->GetEntityComponentManager());
 	auto &componentTypes = componentManager.GetRegisteredComponentTypes();
 	auto &svComponentToClComponentTable = componentManager.GetServerComponentIdToClientComponentIdTable();
 	auto numTotalSvComponents = packet->Read<uint32_t>();
 	auto numComponents = packet->Read<uint32_t>();
-	svComponentToClComponentTable.resize(numTotalSvComponents, pragma::CEntityComponentManager::INVALID_COMPONENT);
+	svComponentToClComponentTable.resize(numTotalSvComponents, CEntityComponentManager::INVALID_COMPONENT);
 	for(auto i = decltype(numComponents) {0u}; i < numComponents; ++i) {
 		auto name = packet->ReadString();
-		auto svId = packet->Read<pragma::ComponentId>();
+		auto svId = packet->Read<ComponentId>();
 		auto clComponentId = componentManager.PreRegisterComponentType(name);
 		if(clComponentId >= svComponentToClComponentTable.size())
-			svComponentToClComponentTable.resize(clComponentId + 1u, pragma::CEntityComponentManager::INVALID_COMPONENT);
+			svComponentToClComponentTable.resize(clComponentId + 1u, CEntityComponentManager::INVALID_COMPONENT);
 		svComponentToClComponentTable.at(svId) = clComponentId;
 	}
 	//
@@ -291,9 +291,9 @@ void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 
 	ReadEntityData(packet);
 
-	pragma::ecs::BaseEntity *wrld = pragma::networking::read_entity(packet);
+	ecs::BaseEntity *wrld = networking::read_entity(packet);
 	if(wrld != nullptr) {
-		auto pWorldComponent = wrld->GetComponent<pragma::CWorldComponent>();
+		auto pWorldComponent = wrld->GetComponent<CWorldComponent>();
 		game->SetWorld(pWorldComponent.get());
 	}
 	ChangeLevel(map.c_str());
@@ -304,6 +304,6 @@ void pragma::ClientState::SetGameReady()
 {
 	if(!m_game)
 		return;
-	SendPacket(pragma::networking::net_messages::server::GAME_READY, pragma::networking::Protocol::SlowReliable);
+	SendPacket(networking::net_messages::server::GAME_READY, networking::Protocol::SlowReliable);
 	m_game->OnGameReady();
 }

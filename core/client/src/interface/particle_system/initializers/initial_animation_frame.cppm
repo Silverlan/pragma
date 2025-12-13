@@ -15,7 +15,7 @@ export namespace pragma::pts {
 		float m_maxFrame = 1.f;
 	public:
 		CParticleInitializerInitialAnimationFrame() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
 	};
 }

@@ -9,7 +9,7 @@ export import pragma.lua;
 export namespace luabind {
 	namespace detail {
 
-		template<auto DEF = luabind::nil>
+		template<auto DEF = nil>
 		struct default_parameter {
 			enum { consumed_args = 0 };
 
@@ -28,7 +28,7 @@ export namespace luabind {
 			}
 		};
 
-		template<auto DEF = luabind::nil>
+		template<auto DEF = nil>
 		struct default_parameter_policy {
 			template<class T, class Direction>
 			struct specialize {
@@ -38,7 +38,7 @@ export namespace luabind {
 
 	}
 
-	template<unsigned int N, auto DEF = luabind::nil>
+	template<unsigned int N, auto DEF = nil>
 	using default_parameter_policy = meta::type_list<converter_policy_injector<N, detail::default_parameter_policy<DEF>>>;
 
 } // namespace luabind

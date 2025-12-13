@@ -11,8 +11,8 @@ export import :gui.main_menu_base;
 export namespace pragma::gui::types {
 	class DLLCLIENT WILoadScreen : public WIMainMenuBase {
 	  private:
-		pragma::gui::WIHandle m_hText;
-		pragma::gui::WIHandle m_hProgress;
+		WIHandle m_hText;
+		WIHandle m_hProgress;
 	  public:
 		WILoadScreen();
 		virtual ~WILoadScreen() override;

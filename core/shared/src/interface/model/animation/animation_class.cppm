@@ -41,8 +41,8 @@ export {
 		class Animation;
 		class DLLNETWORK Animation : public std::enable_shared_from_this<Animation> {
 		  public:
-			static pragma::util::EnumRegister &GetActivityEnumRegister();
-			static pragma::util::EnumRegister &GetEventEnumRegister();
+			static util::EnumRegister &GetActivityEnumRegister();
+			static util::EnumRegister &GetEventEnumRegister();
 			static constexpr uint32_t PANIM_VERSION = 1;
 			static constexpr auto PANIM_IDENTIFIER = "PANI";
 			enum class DLLNETWORK ShareMode : uint32_t {
@@ -52,22 +52,22 @@ export {
 			};
 			static std::shared_ptr<Animation> Create();
 			static std::shared_ptr<Animation> Create(const Animation &other, ShareMode share = ShareMode::None);
-			static std::shared_ptr<Animation> Create(const panima::Animation &panim, const pragma::animation::Skeleton &skeleton, const Frame &refPose, uint8_t fps);
-			static std::shared_ptr<Animation> Load(const udm::AssetData &data, std::string &outErr, const pragma::animation::Skeleton *optSkeleton = nullptr, const Frame *optReference = nullptr);
+			static std::shared_ptr<Animation> Create(const panima::Animation &panim, const Skeleton &skeleton, const Frame &refPose, uint8_t fps);
+			static std::shared_ptr<Animation> Load(const udm::AssetData &data, std::string &outErr, const Skeleton *optSkeleton = nullptr, const Frame *optReference = nullptr);
 			const std::pair<Vector3, Vector3> &GetRenderBounds() const;
 			void SetRenderBounds(const Vector3 &min, const Vector3 &max);
-			void CalcRenderBounds(pragma::asset::Model &mdl);
-			pragma::Activity GetActivity() const;
-			void SetActivity(pragma::Activity activity);
+			void CalcRenderBounds(asset::Model &mdl);
+			Activity GetActivity() const;
+			void SetActivity(Activity activity);
 			unsigned char GetActivityWeight() const;
 			void SetActivityWeight(unsigned char weight);
 			unsigned char GetFPS();
 			void SetFPS(unsigned char fps);
-			void SetFlags(pragma::FAnim flags);
-			pragma::FAnim GetFlags() const;
-			bool HasFlag(pragma::FAnim flag) const;
-			void AddFlags(pragma::FAnim flags);
-			void RemoveFlags(pragma::FAnim flags);
+			void SetFlags(FAnim flags);
+			FAnim GetFlags() const;
+			bool HasFlag(FAnim flag) const;
+			void AddFlags(FAnim flags);
+			void RemoveFlags(FAnim flags);
 			void AddFrame(std::shared_ptr<Frame> frame);
 			float GetDuration() const;
 			std::shared_ptr<Frame> GetFrame(unsigned int ID);
@@ -80,8 +80,8 @@ export {
 			unsigned int GetBoneCount();
 			unsigned int GetFrameCount();
 			std::vector<std::shared_ptr<Frame>> &GetFrames();
-			void AddEvent(unsigned int frame, pragma::AnimationEvent *ev);
-			std::vector<std::shared_ptr<pragma::AnimationEvent>> *GetEvents(unsigned int frame);
+			void AddEvent(unsigned int frame, AnimationEvent *ev);
+			std::vector<std::shared_ptr<AnimationEvent>> *GetEvents(unsigned int frame);
 			float GetFadeInTime();
 			float GetFadeOutTime();
 			bool HasFadeInTime();
@@ -93,11 +93,11 @@ export {
 			const AnimationBlendController *GetBlendController() const;
 			void ClearBlendController();
 			void Validate();
-			void Localize(const pragma::animation::Skeleton &skeleton);
-			void Rotate(const pragma::animation::Skeleton &skeleton, const Quat &rot);
-			void Translate(const pragma::animation::Skeleton &skeleton, const Vector3 &t);
+			void Localize(const Skeleton &skeleton);
+			void Rotate(const Skeleton &skeleton, const Quat &rot);
+			void Translate(const Skeleton &skeleton, const Vector3 &t);
 			void Scale(const Vector3 &scale);
-			void Mirror(pragma::Axis axis);
+			void Mirror(Axis axis);
 			// Reverses all frames in the animation
 			void Reverse();
 
@@ -109,30 +109,30 @@ export {
 			const std::vector<float> &GetBoneWeights() const;
 			std::vector<float> &GetBoneWeights();
 
-			std::shared_ptr<panima::Animation> ToPanimaAnimation(const pragma::animation::Skeleton &skel, const Frame *optRefPose = nullptr) const;
+			std::shared_ptr<panima::Animation> ToPanimaAnimation(const Skeleton &skel, const Frame *optRefPose = nullptr) const;
 
 			// If reference frame is specified, it will be used to optimize frame data and reduce the file size
 			bool Save(udm::AssetDataArg outData, std::string &outErr, const Frame *optReference = nullptr, bool enableOptimizations = true);
-			bool SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f);
+			bool SaveLegacy(std::shared_ptr<fs::VFilePtrInternalReal> &f);
 
 			bool operator==(const Animation &other) const;
 			bool operator!=(const Animation &other) const { return !operator==(other); }
 		  private:
-			static pragma::util::EnumRegister s_activityEnumRegister;
-			static pragma::util::EnumRegister s_eventEnumRegister;
-			bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr, const pragma::animation::Skeleton *optSkeleton = nullptr, const Frame *optReference = nullptr);
+			static util::EnumRegister s_activityEnumRegister;
+			static util::EnumRegister s_eventEnumRegister;
+			bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr, const Skeleton *optSkeleton = nullptr, const Frame *optReference = nullptr);
 			Animation();
 			Animation(const Animation &other, ShareMode share = ShareMode::None);
 
 			std::vector<std::shared_ptr<Frame>> m_frames;
 			// Contains a list of model bone Ids which are used by this animation
-			std::vector<pragma::animation::BoneId> m_boneIds;
+			std::vector<BoneId> m_boneIds;
 			std::vector<float> m_boneWeights;
 			// Maps a model bone id to a local bone id (m_boneIds index)
 			std::unordered_map<uint32_t, uint32_t> m_boneIdMap;
-			std::unordered_map<unsigned int, std::vector<std::shared_ptr<pragma::AnimationEvent>>> m_events;
-			pragma::FAnim m_flags;
-			pragma::Activity m_activity;
+			std::unordered_map<unsigned int, std::vector<std::shared_ptr<AnimationEvent>>> m_events;
+			FAnim m_flags;
+			Activity m_activity;
 			unsigned char m_activityWeight;
 			unsigned char m_fps;
 			std::pair<Vector3, Vector3> m_renderBounds;

@@ -8,13 +8,13 @@ import :entities.components.base_physics;
 
 using namespace pragma;
 
-pragma::util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
+util::TSharedHandle<physics::PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 {
 	auto &ent = GetEntity();
-	auto *pSoftBodyComponent = static_cast<pragma::BaseSoftBodyComponent *>(ent.AddComponent("softbody").get());
+	auto *pSoftBodyComponent = static_cast<BaseSoftBodyComponent *>(ent.AddComponent("softbody").get());
 	if(pSoftBodyComponent == nullptr)
 		return {};
-	pragma::util::ScopeGuard sgSoftBodyComponent([&ent]() { ent.RemoveComponent("softbody"); });
+	util::ScopeGuard sgSoftBodyComponent([&ent]() { ent.RemoveComponent("softbody"); });
 	if(pSoftBodyComponent->InitializeSoftBodyData() == false)
 		return {};
 	auto &hMdl = ent.GetModel();
@@ -38,7 +38,7 @@ pragma::util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::Init
 	auto *state = ent.GetNetworkState();
 	auto *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
-	pragma::util::TSharedHandle<pragma::physics::SoftBodyPhysObj> phys = nullptr;
+	util::TSharedHandle<physics::SoftBodyPhysObj> phys = nullptr;
 	for(auto idx : softBodyMeshes) {
 		auto &colMesh = colMeshes.at(idx);
 		auto &sbInfo = *colMesh->GetSoftBodyInfo();
@@ -88,22 +88,22 @@ pragma::util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::Init
 		softBody->SetOrigin(origin);
 		auto pTrComponent = ent.GetTransformComponent();
 		auto originOffset = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
-		pragma::math::Transform startTransform;
+		math::Transform startTransform;
 		startTransform.SetIdentity();
 		startTransform.SetOrigin(-origin + originOffset);
 		startTransform.SetRotation(pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity());
 		auto contactProcessingThreshold = 1e30;
 
 		auto group = GetCollisionFilter();
-		if(group != pragma::physics::CollisionMask::Default)
+		if(group != physics::CollisionMask::Default)
 			softBody->SetCollisionFilterGroup(group);
 		auto mask = GetCollisionFilterMask();
-		if(mask != pragma::physics::CollisionMask::Default)
+		if(mask != physics::CollisionMask::Default)
 			softBody->SetCollisionFilterMask(mask);
 		softBody->SetWorldTransform(startTransform);
 		softBody->SetContactProcessingThreshold(CFloat(contactProcessingThreshold));
 
-		pragma::physics::IRigidBody *pRigid = nullptr; // TODO
+		physics::IRigidBody *pRigid = nullptr; // TODO
 		for(auto &anchor : *colMesh->GetSoftBodyAnchors()) {
 			uint16_t nodeIdx = 0u;
 			if(softBody->MeshVertexIndexToNodeIndex(anchor.vertexIndex, nodeIdx) == false) {
@@ -118,22 +118,22 @@ pragma::util::TSharedHandle<pragma::physics::PhysObj> BasePhysicsComponent::Init
 				rigid->Spawn();
 				pRigid = rigid.Get();
 			}
-			softBody->AppendAnchor(nodeIdx, *pRigid, (anchor.flags & pragma::physics::CollisionMesh::SoftBodyAnchor::Flags::DisableCollisions) != pragma::physics::CollisionMesh::SoftBodyAnchor::Flags::None, anchor.influence);
+			softBody->AppendAnchor(nodeIdx, *pRigid, (anchor.flags & physics::CollisionMesh::SoftBodyAnchor::Flags::DisableCollisions) != physics::CollisionMesh::SoftBodyAnchor::Flags::None, anchor.influence);
 		}
 		if(phys == nullptr)
-			phys = pragma::util::to_shared_handle<pragma::physics::SoftBodyPhysObj>(pragma::physics::PhysObj::Create<pragma::physics::SoftBodyPhysObj, pragma::physics::ISoftBody &>(*this, *softBody));
+			phys = util::to_shared_handle<physics::SoftBodyPhysObj>(physics::PhysObj::Create<physics::SoftBodyPhysObj, physics::ISoftBody &>(*this, *softBody));
 		else
 			phys->AddCollisionObject(*softBody);
 	}
 
 	if(phys == nullptr)
 		return {};
-	m_physObject = pragma::util::shared_handle_cast<pragma::physics::SoftBodyPhysObj, pragma::physics::PhysObj>(phys);
+	m_physObject = pragma::util::shared_handle_cast<physics::SoftBodyPhysObj, physics::PhysObj>(phys);
 	m_physObject->Spawn();
 
-	m_physicsType = pragma::physics::PhysicsType::SoftBody;
-	SetCollisionFilter(pragma::physics::CollisionMask::Dynamic | pragma::physics::CollisionMask::Generic, pragma::physics::CollisionMask::All);
-	SetMoveType(pragma::physics::MoveType::Physics);
+	m_physicsType = physics::PhysicsType::SoftBody;
+	SetCollisionFilter(physics::CollisionMask::Dynamic | physics::CollisionMask::Generic, physics::CollisionMask::All);
+	SetMoveType(physics::MoveType::Physics);
 
 	InitializePhysObj();
 	OnPhysicsInitialized();

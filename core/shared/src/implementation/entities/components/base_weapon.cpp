@@ -8,18 +8,18 @@ import :entities.components.base_weapon;
 
 using namespace pragma;
 
-ComponentEventId baseWeaponComponent::EVENT_ON_DEPLOY = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_HOLSTER = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_PRIMARY_ATTACK = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_SECONDARY_ATTACK = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_TERTIARY_ATTACK = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_ATTACK4 = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_END_PRIMARY_ATTACK = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_END_SECONDARY_ATTACK = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_RELOAD = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseWeaponComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+ComponentEventId baseWeaponComponent::EVENT_ON_DEPLOY = INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_HOLSTER = INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_PRIMARY_ATTACK = INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_SECONDARY_ATTACK = INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_TERTIARY_ATTACK = INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_ATTACK4 = INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_END_PRIMARY_ATTACK = INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_END_SECONDARY_ATTACK = INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_RELOAD = INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId baseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED = INVALID_COMPONENT_ID;
+void BaseWeaponComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseWeaponComponent::EVENT_ON_DEPLOY = registerEvent("ON_DEPLOY", ComponentEventInfo::Type::Broadcast);
 	baseWeaponComponent::EVENT_ON_HOLSTER = registerEvent("ON_HOLSTER", ComponentEventInfo::Type::Broadcast);
@@ -33,9 +33,9 @@ void BaseWeaponComponent::RegisterEvents(pragma::EntityComponentManager &compone
 	baseWeaponComponent::EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED = registerEvent("ON_PRIMARY_CLIP_SIZE_CHANGED", ComponentEventInfo::Type::Broadcast);
 	baseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED = registerEvent("ON_SECONDARY_CLIP_SIZE_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
-BaseWeaponComponent::BaseWeaponComponent(pragma::ecs::BaseEntity &ent)
-    : BaseEntityComponent(ent), m_clipPrimary(pragma::util::UInt16Property::Create(0)), m_clipSecondary(pragma::util::UInt16Property::Create(0)), m_maxPrimaryClipSize(pragma::util::UInt16Property::Create(30)), m_maxSecondaryClipSize(pragma::util::UInt16Property::Create(10)),
-      m_ammoPrimary(pragma::util::UInt32Property::Create(0)), m_ammoSecondary(pragma::util::UInt32Property::Create(0))
+BaseWeaponComponent::BaseWeaponComponent(ecs::BaseEntity &ent)
+    : BaseEntityComponent(ent), m_clipPrimary(util::UInt16Property::Create(0)), m_clipSecondary(util::UInt16Property::Create(0)), m_maxPrimaryClipSize(util::UInt16Property::Create(30)), m_maxSecondaryClipSize(util::UInt16Property::Create(10)),
+      m_ammoPrimary(util::UInt32Property::Create(0)), m_ammoSecondary(util::UInt32Property::Create(0))
 {
 }
 
@@ -55,8 +55,8 @@ void BaseWeaponComponent::OnPhysicsInitialized()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(!pPhysComponent)
 		return;
-	pPhysComponent->AddCollisionFilter(pragma::physics::CollisionMask::Item);
-	pPhysComponent->SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter() | pragma::physics::CollisionMask::Item);
+	pPhysComponent->AddCollisionFilter(physics::CollisionMask::Item);
+	pPhysComponent->SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter() | physics::CollisionMask::Item);
 }
 
 void BaseWeaponComponent::OnFireBullets(const game::BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin)
@@ -85,7 +85,7 @@ void BaseWeaponComponent::OnFireBullets(const game::BulletInfo &bulletInfo, Vect
 void BaseWeaponComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
-	auto *pOwnerComponent = dynamic_cast<pragma::BaseOwnableComponent *>(&component);
+	auto *pOwnerComponent = dynamic_cast<BaseOwnableComponent *>(&component);
 	if(pOwnerComponent != nullptr)
 		m_whOwnerComponent = pOwnerComponent->GetHandle<BaseOwnableComponent>();
 }
@@ -105,7 +105,7 @@ void BaseWeaponComponent::OnTick(double)
 			auto plComponent = owner->GetPlayerComponent();
 			auto *inputC = plComponent->GetActionInputController();
 			if(m_bInAttack1 == true) {
-				if(inputC && inputC->GetActionInput(pragma::Action::Attack) == true) {
+				if(inputC && inputC->GetActionInput(Action::Attack) == true) {
 					if(CanPrimaryAttack())
 						PrimaryAttack();
 				}
@@ -116,7 +116,7 @@ void BaseWeaponComponent::OnTick(double)
 				}
 			}
 			if(m_bInAttack2 == true) {
-				if(inputC && inputC->GetActionInput(pragma::Action::Attack2) == true) {
+				if(inputC && inputC->GetActionInput(Action::Attack2) == true) {
 					if(CanSecondaryAttack())
 						SecondaryAttack();
 				}
@@ -205,18 +205,18 @@ void BaseWeaponComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) { OnPhysicsInitialized(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto mdlComponent = ent.GetModelComponent();
 		m_attMuzzle = mdlComponent ? mdlComponent->LookupAttachment("muzzle") : -1;
 	});
-	BindEventUnhandled(ecs::baseShooterComponent::EVENT_ON_FIRE_BULLETS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto &evDataOnFireBullets = static_cast<pragma::ecs::events::CEOnFireBullets &>(evData.get());
+	BindEventUnhandled(ecs::baseShooterComponent::EVENT_ON_FIRE_BULLETS, [this](std::reference_wrapper<ComponentEvent> evData) {
+		auto &evDataOnFireBullets = static_cast<ecs::events::CEOnFireBullets &>(evData.get());
 		OnFireBullets(evDataOnFireBullets.bulletInfo, evDataOnFireBullets.bulletOrigin, evDataOnFireBullets.bulletDir, evDataOnFireBullets.effectsOrigin);
 	});
-	BindEventUnhandled(baseOwnableComponent::EVENT_ON_OWNER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto &ownerChangedData = static_cast<pragma::CEOnOwnerChanged &>(evData.get());
+	BindEventUnhandled(baseOwnableComponent::EVENT_ON_OWNER_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
+		auto &ownerChangedData = static_cast<CEOnOwnerChanged &>(evData.get());
 		auto &ent = GetEntity();
 		auto ptrPhysComponent = ent.GetPhysicsComponent();
 		if(ptrPhysComponent)
@@ -242,7 +242,7 @@ void BaseWeaponComponent::Deploy()
 	m_bDeployed = true;
 	auto animComponent = GetEntity().GetAnimatedComponent();
 	if(animComponent.valid())
-		animComponent->PlayActivity(pragma::Activity::VmIdle);
+		animComponent->PlayActivity(Activity::VmIdle);
 
 	BroadcastEvent(baseWeaponComponent::EVENT_ON_DEPLOY);
 }
@@ -283,7 +283,7 @@ void BaseWeaponComponent::Reload() { BroadcastEvent(baseWeaponComponent::EVENT_O
 
 //////////////
 
-CEOnOwnerChanged::CEOnOwnerChanged(pragma::ecs::BaseEntity *oldOwner, pragma::ecs::BaseEntity *newOwner) : oldOwner {oldOwner}, newOwner {newOwner} {}
+CEOnOwnerChanged::CEOnOwnerChanged(ecs::BaseEntity *oldOwner, ecs::BaseEntity *newOwner) : oldOwner {oldOwner}, newOwner {newOwner} {}
 void CEOnOwnerChanged::PushArguments(lua::State *l)
 {
 	if(oldOwner != nullptr)

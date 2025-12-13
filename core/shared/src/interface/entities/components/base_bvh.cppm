@@ -20,8 +20,8 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseBvhComponent : public BaseEntityComponent {
 	  public:
-		static bool ShouldConsiderMesh(const pragma::geometry::ModelSubMesh &mesh);
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static bool ShouldConsiderMesh(const geometry::ModelSubMesh &mesh);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
@@ -30,15 +30,15 @@ export namespace pragma {
 		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitInfo &outHitInfo) const;
 		bool IntersectionTestAabb(const Vector3 &min, const Vector3 &max) const;
 		bool IntersectionTestAabb(const Vector3 &min, const Vector3 &max, IntersectionInfo &outIntersectionInfo) const;
-		bool IntersectionTestKDop(const std::vector<pragma::math::Plane> &planes) const;
-		bool IntersectionTestKDop(const std::vector<pragma::math::Plane> &planes, IntersectionInfo &outIntersectionInfo) const;
+		bool IntersectionTestKDop(const std::vector<math::Plane> &planes) const;
+		bool IntersectionTestKDop(const std::vector<math::Plane> &planes, IntersectionInfo &outIntersectionInfo) const;
 		void SetStaticCache(BaseStaticBvhCacheComponent *staticCache);
 		virtual bool IsStaticBvh() const { return false; }
 		const bvh::MeshRange *FindPrimitiveMeshInfo(size_t primIdx) const;
 
 		void SendBvhUpdateRequestOnInteraction();
-		static bool SetVertexData(pragma::bvh::MeshBvhTree &bvhData, const std::vector<bvh::Primitive> &data);
-		static void DeleteRange(pragma::bvh::MeshBvhTree &bvhData, size_t start, size_t end);
+		static bool SetVertexData(bvh::MeshBvhTree &bvhData, const std::vector<bvh::Primitive> &data);
+		static void DeleteRange(bvh::MeshBvhTree &bvhData, size_t start, size_t end);
 		bool SetVertexData(const std::vector<bvh::Primitive> &data);
 		void GetVertexData(std::vector<bvh::Primitive> &outData) const;
 		void RebuildBvh();
@@ -52,15 +52,15 @@ export namespace pragma {
 
 		// For internal use only
 		struct DLLNETWORK BvhBuildInfo {
-			const std::vector<pragma::math::ScaledTransform> *poses = nullptr;
+			const std::vector<math::ScaledTransform> *poses = nullptr;
 			std::function<bool()> isCancelled = nullptr;
-			std::function<bool(const pragma::geometry::ModelSubMesh &, uint32_t)> shouldConsiderMesh = nullptr;
+			std::function<bool(const geometry::ModelSubMesh &, uint32_t)> shouldConsiderMesh = nullptr;
 		};
-		static std::shared_ptr<pragma::bvh::MeshBvhTree> RebuildBvh(const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo = nullptr, std::vector<size_t> *optOutMeshIndices = nullptr, pragma::ecs::BaseEntity *ent = nullptr);
+		static std::shared_ptr<bvh::MeshBvhTree> RebuildBvh(const std::vector<std::shared_ptr<geometry::ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo = nullptr, std::vector<size_t> *optOutMeshIndices = nullptr, ecs::BaseEntity *ent = nullptr);
 		std::shared_ptr<bvh::MeshBvhTree> SetBvhData(std::shared_ptr<bvh::MeshBvhTree> &bvhData);
 		bool HasBvhData() const;
 	  protected:
-		BaseBvhComponent(pragma::ecs::BaseEntity &ent);
+		BaseBvhComponent(ecs::BaseEntity &ent);
 		virtual void DoRebuildBvh() = 0;
 		const std::shared_ptr<bvh::MeshBvhTree> &GetUpdatedBvh() const;
 		std::vector<bvh::MeshRange> &GetMeshRanges();

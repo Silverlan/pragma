@@ -13,7 +13,7 @@ void CTransformComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const 
 void CTransformComponent::ReceiveData(NetPacket &packet)
 {
 	Vector3 pos = networking::read_vector(packet);
-	auto rot = pragma::networking::read_quat(packet);
+	auto rot = networking::read_quat(packet);
 	SetPosition(pos);
 	SetRotation(rot);
 	SetEyeOffset(packet->Read<Vector3>());
@@ -22,7 +22,7 @@ void CTransformComponent::ReceiveData(NetPacket &packet)
 	SetScale(scale);
 }
 
-Bool CTransformComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CTransformComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetScale)
 		SetScale(packet->Read<Vector3>());

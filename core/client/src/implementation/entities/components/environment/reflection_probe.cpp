@@ -27,27 +27,27 @@ struct RenderSettings {
 	float skyStrength = 0.3f;
 	float exposure = 50.f;
 } static g_renderSettings;
-static void map_build_reflection_probes(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void map_build_reflection_probes(NetworkState *state, BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
-	std::unordered_map<std::string, pragma::console::CommandOption> commandOptions {};
+	std::unordered_map<std::string, console::CommandOption> commandOptions {};
 	pragma::console::parse_command_options(argv, commandOptions);
 	auto rebuild = commandOptions.contains("rebuild");
 	auto closest = commandOptions.contains("closest");
-	g_renderSettings.renderer = pragma::console::get_command_option_parameter_value(commandOptions, "renderer", pragma::util::declvalue(&::RenderSettings::renderer));
-	g_renderSettings.sky = pragma::console::get_command_option_parameter_value(commandOptions, "sky", pragma::util::declvalue(&::RenderSettings::sky));
-	g_renderSettings.skyStrength = pragma::util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "sky_strength", std::to_string(pragma::util::declvalue(&::RenderSettings::skyStrength))));
-	g_renderSettings.exposure = pragma::util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "exposure", std::to_string(pragma::util::declvalue(&::RenderSettings::exposure))));
-	auto defAngles = pragma::util::declvalue(&::RenderSettings::skyAngles);
+	g_renderSettings.renderer = pragma::console::get_command_option_parameter_value(commandOptions, "renderer", util::declvalue(&::RenderSettings::renderer));
+	g_renderSettings.sky = pragma::console::get_command_option_parameter_value(commandOptions, "sky", util::declvalue(&::RenderSettings::sky));
+	g_renderSettings.skyStrength = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "sky_strength", std::to_string(util::declvalue(&::RenderSettings::skyStrength))));
+	g_renderSettings.exposure = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "exposure", std::to_string(util::declvalue(&::RenderSettings::exposure))));
+	auto defAngles = util::declvalue(&::RenderSettings::skyAngles);
 	g_renderSettings.skyAngles = EulerAngles {pragma::console::get_command_option_parameter_value(commandOptions, "sky_angles", std::to_string(defAngles.p) + ' ' + std::to_string(defAngles.y) + ' ' + std::to_string(defAngles.r))};
 	if(closest) {
-		pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
+		ecs::EntityIterator entIt {*get_cgame(), ecs::EntityIterator::FilterFlags::Default | ecs::EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<CReflectionProbeComponent>>();
 		CReflectionProbeComponent *probeClosest = nullptr;
 		auto dClosest = std::numeric_limits<float>::max();
 		Vector3 origin {};
-		if(auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>())
+		if(auto *cam = get_cgame()->GetRenderCamera<CCameraComponent>())
 			origin = cam->GetEntity().GetPosition();
 		for(const auto *entProbe : entIt) {
 			auto d = uvec::distance_sqr(origin, entProbe->GetPosition());
@@ -61,24 +61,24 @@ static void map_build_reflection_probes(pragma::NetworkState *state, pragma::Bas
 			return;
 		}
 		std::vector<CReflectionProbeComponent *> probes {probeClosest};
-		CReflectionProbeComponent::BuildReflectionProbes(*pragma::get_cgame(), probes, rebuild);
+		CReflectionProbeComponent::BuildReflectionProbes(*get_cgame(), probes, rebuild);
 		return;
 	}
-	CReflectionProbeComponent::BuildAllReflectionProbes(*pragma::get_cgame(), rebuild);
+	CReflectionProbeComponent::BuildAllReflectionProbes(*get_cgame(), rebuild);
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("map_build_reflection_probes", &map_build_reflection_probes, pragma::console::ConVarFlags::None,
+	auto UVN = console::client::register_command("map_build_reflection_probes", &map_build_reflection_probes, console::ConVarFlags::None,
 	  "Build all reflection probes in the map. Use the '-rebuild' argument to clear all current IBL textures first. Use 'debug_pbr_ibl' to check the probes after they have been built.");
 }
 static void print_status(const uint32_t i, const uint32_t count)
 {
-	auto percent = pragma::math::ceil((count > 0u) ? (i / static_cast<float>(count) * 100.f) : 100.f);
+	auto percent = math::ceil((count > 0u) ? (i / static_cast<float>(count) * 100.f) : 100.f);
 	CReflectionProbeComponent::get_logger<CReflectionProbeComponent>().info("Reflection probe update at %{}", percent);
 }
 
 ////////////////
 
-CReflectionProbeComponent::CReflectionProbeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+CReflectionProbeComponent::CReflectionProbeComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 CReflectionProbeComponent::~CReflectionProbeComponent() { m_raytracingJobManager = nullptr; }
 CReflectionProbeComponent::RaytracingJobManager::RaytracingJobManager(CReflectionProbeComponent &probe) : probe {probe} {}
 CReflectionProbeComponent::RaytracingJobManager::~RaytracingJobManager()
@@ -89,9 +89,9 @@ CReflectionProbeComponent::RaytracingJobManager::~RaytracingJobManager()
 void CReflectionProbeComponent::RaytracingJobManager::StartNextJob()
 {
 	auto preprocessCompletionHandler = job.GetCompletionHandler();
-	job.SetCompletionHandler([this, preprocessCompletionHandler](pragma::util::ParallelWorker<uimg::ImageLayerSet> &worker) {
+	job.SetCompletionHandler([this, preprocessCompletionHandler](util::ParallelWorker<image::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false) {
-			CReflectionProbeComponent::get_logger<CReflectionProbeComponent>().warn("Raytracing scene for reflection probe has failed: {}", worker.GetResultMessage());
+			get_logger<CReflectionProbeComponent>().warn("Raytracing scene for reflection probe has failed: {}", worker.GetResultMessage());
 			probe.m_raytracingJobManager = nullptr;
 			return;
 		}
@@ -103,7 +103,7 @@ void CReflectionProbeComponent::RaytracingJobManager::StartNextJob()
 		Finalize();
 	});
 	job.Start();
-	pragma::get_cengine()->AddParallelJob(job, "Reflection probe");
+	get_cengine()->AddParallelJob(job, "Reflection probe");
 }
 void CReflectionProbeComponent::RaytracingJobManager::Finalize()
 {
@@ -146,12 +146,12 @@ void CReflectionProbeComponent::RaytracingJobManager::Finalize()
 ////////////////
 
 //static auto *GUI_EL_NAME = "cubemap_generation_image";
-static std::queue<pragma::ComponentHandle<CReflectionProbeComponent>> g_reflectionProbeQueue = {};
+static std::queue<ComponentHandle<CReflectionProbeComponent>> g_reflectionProbeQueue = {};
 static std::vector<CReflectionProbeComponent *> get_probes()
 {
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return {};
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
+	ecs::EntityIterator entIt {*get_cgame(), ecs::EntityIterator::FilterFlags::Default | ecs::EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CReflectionProbeComponent>>();
 	auto numProbes = entIt.GetCount();
 	std::vector<CReflectionProbeComponent *> probes {};
@@ -164,7 +164,7 @@ static std::vector<CReflectionProbeComponent *> get_probes()
 }
 static void build_next_reflection_probe()
 {
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
 	while(g_reflectionProbeQueue.empty() == false) {
 		auto hProbe = g_reflectionProbeQueue.front();
@@ -198,7 +198,7 @@ static void build_next_reflection_probe()
 	}*/
 }
 
-void CReflectionProbeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void CReflectionProbeComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = CReflectionProbeComponent;
 
@@ -215,14 +215,14 @@ void CReflectionProbeComponent::RegisterMembers(pragma::EntityComponentManager &
 			  component.LoadIBLReflectionsFromFile();
 		  },
 		  [](const ComponentMemberInfo &info, T &component, TMaterial &value) {
-			  auto path = pragma::util::Path::CreateFile(component.GetCubemapIBLMaterialFilePath());
+			  auto path = util::Path::CreateFile(component.GetCubemapIBLMaterialFilePath());
 			  path.PopFront();
 			  value = path.GetString();
 		  }>("iblMaterial", "", AttributeSpecializationType::File);
 		auto &metaData = memberInfo.AddMetaData();
 		metaData["assetType"] = "material";
-		metaData["rootPath"] = pragma::util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)).GetString();
-		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Material, pragma::asset::FormatType::All);
+		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(asset::Type::Material)).GetString();
+		metaData["extensions"] = pragma::asset::get_supported_extensions(asset::Type::Material, asset::FormatType::All);
 		metaData["stripRootPath"] = true;
 		metaData["stripExtension"] = true;
 		registerMember(std::move(memberInfo));
@@ -234,11 +234,11 @@ void CReflectionProbeComponent::RegisterMembers(pragma::EntityComponentManager &
 static uint32_t CUBEMAP_LAYER_WIDTH = 512;
 static uint32_t CUBEMAP_LAYER_HEIGHT = 512;
 static uint32_t RAYTRACING_SAMPLE_COUNT = 32;
-void CReflectionProbeComponent::BuildReflectionProbes(pragma::Game &game, std::vector<CReflectionProbeComponent *> &probes, bool rebuild)
+void CReflectionProbeComponent::BuildReflectionProbes(Game &game, std::vector<CReflectionProbeComponent *> &probes, bool rebuild)
 {
 	g_reflectionProbeQueue = {};
 	if(rebuild) {
-		auto filePostfixes = pragma::asset::get_supported_extensions(pragma::asset::Type::Material);
+		auto filePostfixes = pragma::asset::get_supported_extensions(asset::Type::Material);
 		for(auto &ext : filePostfixes)
 			ext = '.' + ext;
 		filePostfixes.push_back("_irradiance.ktx");
@@ -248,19 +248,19 @@ void CReflectionProbeComponent::BuildReflectionProbes(pragma::Game &game, std::v
 			probe->m_stateFlags |= StateFlags::RequiresRebuild;
 			if(probe->m_iblMat.empty() == false)
 				continue;
-			auto path = pragma::util::Path {probe->GetCubemapIBLMaterialFilePath()};
+			auto path = util::Path {probe->GetCubemapIBLMaterialFilePath()};
 			path.PopFront();
-			path.RemoveFileExtension(pragma::asset::get_supported_extensions(pragma::asset::Type::Material));
+			path.RemoveFileExtension(pragma::asset::get_supported_extensions(asset::Type::Material));
 			auto identifier = probe->GetCubemapIdentifier();
 			for(auto &postfix : filePostfixes) {
 				auto fpath = path + postfix;
-				auto fileName = pragma::asset::find_file(path.GetString(), pragma::asset::Type::Material);
+				auto fileName = pragma::asset::find_file(path.GetString(), asset::Type::Material);
 				if(fileName.has_value() == false)
 					continue;
-				CReflectionProbeComponent::get_logger<CReflectionProbeComponent>().info("Removing probe IBL file '{}'...", fpath.GetString());
-				if(FileManager::RemoveFile(("materials/" + *fileName).c_str()))
+				get_logger<CReflectionProbeComponent>().info("Removing probe IBL file '{}'...", fpath.GetString());
+				if(fs::remove_file(("materials/" + *fileName)))
 					continue;
-				CReflectionProbeComponent::get_logger<CReflectionProbeComponent>().warn("Unable to remove IBL file '{}'! This reflection probe may not be rebuilt!", fpath.GetString());
+				get_logger<CReflectionProbeComponent>().warn("Unable to remove IBL file '{}'! This reflection probe may not be rebuilt!", fpath.GetString());
 			}
 		}
 	}
@@ -271,10 +271,10 @@ void CReflectionProbeComponent::BuildReflectionProbes(pragma::Game &game, std::v
 			g_reflectionProbeQueue.push(probe->GetHandle<CReflectionProbeComponent>());
 		}
 	}
-	CReflectionProbeComponent::get_logger<CReflectionProbeComponent>().info("Updating {} reflection probes... This may take a while!", numProbes);
+	get_logger<CReflectionProbeComponent>().info("Updating {} reflection probes... This may take a while!", numProbes);
 	build_next_reflection_probe();
 }
-void CReflectionProbeComponent::BuildAllReflectionProbes(pragma::Game &game, bool rebuild)
+void CReflectionProbeComponent::BuildAllReflectionProbes(Game &game, bool rebuild)
 {
 	auto probes = get_probes();
 	BuildReflectionProbes(game, probes, rebuild);
@@ -282,13 +282,13 @@ void CReflectionProbeComponent::BuildAllReflectionProbes(pragma::Game &game, boo
 
 prosper::IDescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestProbe(const CSceneComponent &scene, const Vector3 &origin, float &outIntensity)
 {
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return nullptr;
 	// Find closest reflection probe to camera position
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CReflectionProbeComponent>>();
+	ecs::EntityIterator entIt {*get_cgame()};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<CReflectionProbeComponent>>();
 	auto dClosest = std::numeric_limits<float>::max();
-	pragma::ecs::BaseEntity *entClosest = nullptr;
+	ecs::BaseEntity *entClosest = nullptr;
 	for(auto *ent : entIt) {
 		if(static_cast<ecs::CBaseEntity *>(ent)->IsInScene(scene) == false)
 			continue;
@@ -300,20 +300,20 @@ prosper::IDescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestP
 		entClosest = ent;
 	}
 	if(entClosest) {
-		auto &reflectionProbeC = *entClosest->GetComponent<pragma::CReflectionProbeComponent>();
+		auto &reflectionProbeC = *entClosest->GetComponent<CReflectionProbeComponent>();
 		outIntensity = reflectionProbeC.GetIBLStrength();
 		return reflectionProbeC.GetIBLDescriptorSet();
 	}
 	return nullptr;
 }
 
-bool CReflectionProbeComponent::GenerateFromEquirectangularImage(uimg::ImageBuffer &imgBuf)
+bool CReflectionProbeComponent::GenerateFromEquirectangularImage(image::ImageBuffer &imgBuf)
 {
-	auto *shaderEquiRectToCubemap = static_cast<pragma::ShaderEquirectangularToCubemap *>(pragma::get_cengine()->GetShader("equirectangular_to_cubemap").get());
+	auto *shaderEquiRectToCubemap = static_cast<ShaderEquirectangularToCubemap *>(get_cengine()->GetShader("equirectangular_to_cubemap").get());
 	if(shaderEquiRectToCubemap == nullptr)
 		return false;
-	auto imgEquirect = pragma::get_cengine()->GetRenderContext().CreateImage(imgBuf);
-	auto texEquirect = pragma::get_cengine()->GetRenderContext().CreateTexture({}, *imgEquirect, prosper::util::ImageViewCreateInfo {}, prosper::util::SamplerCreateInfo {});
+	auto imgEquirect = get_cengine()->GetRenderContext().CreateImage(imgBuf);
+	auto texEquirect = get_cengine()->GetRenderContext().CreateTexture({}, *imgEquirect, prosper::util::ImageViewCreateInfo {}, prosper::util::SamplerCreateInfo {});
 	auto cubemapTex = shaderEquiRectToCubemap->EquirectangularTextureToCubemap(*texEquirect, 256); // TODO: What resolution?
 	return FinalizeCubemap(cubemapTex->GetImage());
 }
@@ -323,17 +323,17 @@ void CReflectionProbeComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent<CTransformComponent>();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "env_map", false))
 			m_srcEnvMap = kvData.value;
 		else if(pragma::string::compare<std::string>(kvData.key, "ibl_material", false))
 			m_iblMat = kvData.value;
 		else if(pragma::string::compare<std::string>(kvData.key, "ibl_strength", false))
-			m_strength = kvData.value.empty() ? std::optional<float> {} : pragma::util::to_float(kvData.value);
+			m_strength = kvData.value.empty() ? std::optional<float> {} : util::to_float(kvData.value);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 }
 
@@ -356,16 +356,16 @@ std::string CReflectionProbeComponent::GetCubemapIBLMaterialFilePath() const
 {
 	if(m_iblMat.empty() == false)
 		return "materials/" + m_iblMat;
-	return "materials/" + GetCubemapIBLMaterialPath() + GetCubemapIdentifier() + "." + pragma::asset::FORMAT_MATERIAL_ASCII;
+	return "materials/" + GetCubemapIBLMaterialPath() + GetCubemapIdentifier() + "." + asset::FORMAT_MATERIAL_ASCII;
 }
 
 void CReflectionProbeComponent::SetCubemapIBLMaterialFilePath(const std::string &path) { m_iblMat = path; }
 
 bool CReflectionProbeComponent::RequiresRebuild() const
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::BakingFailed))
+	if(math::is_flag_set(m_stateFlags, StateFlags::BakingFailed))
 		return false; // We've already tried baking the probe and it failed; don't try again!
-	return pragma::math::is_flag_set(m_stateFlags, StateFlags::RequiresRebuild);
+	return math::is_flag_set(m_stateFlags, StateFlags::RequiresRebuild);
 }
 
 CReflectionProbeComponent::UpdateStatus CReflectionProbeComponent::UpdateIBLData(bool rebuild)
@@ -387,9 +387,9 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 {
 	if(m_iblData == nullptr)
 		return false;
-	auto *client = pragma::get_client_state();
+	auto *client = get_client_state();
 	if(m_iblMat.empty() == false) {
-		if(pragma::asset::exists(m_iblMat, pragma::asset::Type::Material)) {
+		if(pragma::asset::exists(m_iblMat, asset::Type::Material)) {
 			auto *curMat = client->LoadMaterial(m_iblMat);
 			if(curMat) {
 				if(curMat->GetProperty("generated", false) == false)
@@ -400,7 +400,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 
 	auto relPath = GetCubemapIBLMaterialPath();
 	auto absPath = "materials/" + relPath;
-	FileManager::CreatePath(absPath.c_str());
+	fs::create_path(absPath);
 	auto identifier = GetCubemapIdentifier();
 
 	auto &imgPrefilter = m_iblData->prefilterMap->GetImage();
@@ -409,25 +409,25 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 
 	auto fErrorHandler = [this](const std::string &errMsg) { LogWarn("Unable to create IBL reflection files: {}", errMsg); };
 	const std::string pathBrdf = "materials/env/brdf.ktx";
-	if(FileManager::Exists(pathBrdf) == false) {
-		uimg::TextureInfo imgWriteInfo {};
-		imgWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R16G16B16A16_Float;
-		imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::HDRColorMap;
-		if(pragma::get_cgame()->SaveImage(imgBrdf, "materials/env/brdf", imgWriteInfo) == false) {
+	if(fs::exists(pathBrdf) == false) {
+		image::TextureInfo imgWriteInfo {};
+		imgWriteInfo.inputFormat = image::TextureInfo::InputFormat::R16G16B16A16_Float;
+		imgWriteInfo.outputFormat = image::TextureInfo::OutputFormat::HDRColorMap;
+		if(get_cgame()->SaveImage(imgBrdf, "materials/env/brdf", imgWriteInfo) == false) {
 			fErrorHandler("Unable to save BRDF map!");
 			return false;
 		}
 	}
 
-	uimg::TextureInfo imgWriteInfo {};
-	imgWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R16G16B16A16_Float;
-	imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::HDRColorMap;
+	image::TextureInfo imgWriteInfo {};
+	imgWriteInfo.inputFormat = image::TextureInfo::InputFormat::R16G16B16A16_Float;
+	imgWriteInfo.outputFormat = image::TextureInfo::OutputFormat::HDRColorMap;
 	auto prefix = identifier + "_";
-	if(pragma::get_cgame()->SaveImage(imgPrefilter, absPath + prefix + "prefilter", imgWriteInfo) == false) {
+	if(get_cgame()->SaveImage(imgPrefilter, absPath + prefix + "prefilter", imgWriteInfo) == false) {
 		fErrorHandler("Unable to save prefilter map!");
 		return false;
 	}
-	if(pragma::get_cgame()->SaveImage(imgIrradiance, absPath + prefix + "irradiance", imgWriteInfo) == false) {
+	if(get_cgame()->SaveImage(imgIrradiance, absPath + prefix + "irradiance", imgWriteInfo) == false) {
 		fErrorHandler("Unable to save irradiance map!");
 		return false;
 	}
@@ -439,8 +439,8 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	mat->SetTextureProperty("irradiance", relPath + prefix + "irradiance");
 	mat->SetTextureProperty("brdf", "env/brdf");
 	mat->SetProperty("generated", true);
-	auto rpath = pragma::util::Path::CreateFile(relPath + identifier + "." + pragma::asset::FORMAT_MATERIAL_ASCII);
-	auto apath = pragma::asset::relative_path_to_absolute_path(rpath, pragma::asset::Type::Material);
+	auto rpath = util::Path::CreateFile(relPath + identifier + "." + asset::FORMAT_MATERIAL_ASCII);
+	auto apath = pragma::asset::relative_path_to_absolute_path(rpath, asset::Type::Material);
 	std::string err;
 	apath.PopFront();
 	auto result = mat->Save(apath.GetString(), err);
@@ -449,15 +449,15 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	return result;
 }
 
-pragma::util::ParallelJob<uimg::ImageLayerSet> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, pragma::math::Degree fov, float exposure,
-  const std::vector<pragma::ecs::BaseEntity *> *optEntityList, bool renderJob)
+util::ParallelJob<image::ImageLayerSet> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, math::Degree fov, float exposure,
+  const std::vector<ecs::BaseEntity *> *optEntityList, bool renderJob)
 {
 	rendering::cycles::SceneInfo sceneInfo {};
 	sceneInfo.width = width;
 	sceneInfo.height = height;
 	sceneInfo.exposure = exposure;
-	sceneInfo.device = pragma::rendering::cycles::SceneInfo::DeviceType::GPU;
-	sceneInfo.colorTransform = pragma::rendering::cycles::SceneInfo::ColorTransform {};
+	sceneInfo.device = rendering::cycles::SceneInfo::DeviceType::GPU;
+	sceneInfo.colorTransform = rendering::cycles::SceneInfo::ColorTransform {};
 	sceneInfo.colorTransform->config = "filmic-blender";
 	sceneInfo.colorTransform->look = "Medium Contrast";
 	sceneInfo.renderJob = renderJob;
@@ -483,20 +483,20 @@ pragma::util::ParallelJob<uimg::ImageLayerSet> CReflectionProbeComponent::Captur
 	sceneInfo.samples = RAYTRACING_SAMPLE_COUNT;
 	sceneInfo.denoise = true;
 	sceneInfo.hdrOutput = true;
-	pragma::math::set_flag(sceneInfo.sceneFlags, rendering::cycles::SceneInfo::SceneFlags::CullObjectsOutsideCameraFrustum, false);
+	math::set_flag(sceneInfo.sceneFlags, rendering::cycles::SceneInfo::SceneFlags::CullObjectsOutsideCameraFrustum, false);
 
-	std::shared_ptr<uimg::ImageBuffer> imgBuffer = nullptr;
+	std::shared_ptr<image::ImageBuffer> imgBuffer = nullptr;
 	if(optEntityList)
 		renderImgInfo.entityList = optEntityList;
 	else {
-		renderImgInfo.entityFilter = [](pragma::ecs::BaseEntity &ent) -> bool { return ent.IsMapEntity(); };
+		renderImgInfo.entityFilter = [](ecs::BaseEntity &ent) -> bool { return ent.IsMapEntity(); };
 	}
-	auto job = rendering::cycles::render_image(*pragma::get_client_state(), sceneInfo, renderImgInfo);
+	auto job = rendering::cycles::render_image(*get_client_state(), sceneInfo, renderImgInfo);
 	if(job.IsValid() == false)
 		return {};
-	job.SetCompletionHandler([](pragma::util::ParallelWorker<uimg::ImageLayerSet> &worker) {
+	job.SetCompletionHandler([](util::ParallelWorker<image::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false) {
-			CReflectionProbeComponent::get_logger<CReflectionProbeComponent>().warn("Raytracing scene for IBL reflections has failed: {}", worker.GetResultMessage());
+			get_logger<CReflectionProbeComponent>().warn("Raytracing scene for IBL reflections has failed: {}", worker.GetResultMessage());
 			return;
 		}
 	});
@@ -516,16 +516,16 @@ std::shared_ptr<prosper::IImage> CReflectionProbeComponent::CreateCubemapImage()
 	createInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
 	createInfo.tiling = prosper::ImageTiling::Optimal;
 	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
-	return pragma::get_cengine()->GetRenderContext().CreateImage(createInfo);
+	return get_cengine()->GetRenderContext().CreateImage(createInfo);
 }
 
-bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector<pragma::ecs::BaseEntity *> *optEntityList, bool renderJob)
+bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector<ecs::BaseEntity *> *optEntityList, bool renderJob)
 {
-	pragma::math::set_flag(m_stateFlags, StateFlags::BakingFailed, true); // Mark as failed until complete
+	math::set_flag(m_stateFlags, StateFlags::BakingFailed, true); // Mark as failed until complete
 	auto pos = GetEntity().GetPosition();
 	LogInfo("Capturing reflection probe IBL reflections for probe at position ({},{},{})...", pos.x, pos.y, pos.z);
 
-	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
+	auto *scene = get_cgame()->GetScene<CSceneComponent>();
 	if(scene == nullptr)
 		return false;
 	auto hCam = scene->GetActiveCamera();
@@ -534,7 +534,7 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector
 		return false;
 	}
 
-	auto hShaderPbr = pragma::get_cengine()->GetShader("pbr");
+	auto hShaderPbr = get_cengine()->GetShader("pbr");
 	if(hShaderPbr.expired()) {
 		LogWarn("Unable to capture scene: PBR shader is not valid!");
 		return false;
@@ -657,11 +657,11 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector
 
 bool CReflectionProbeComponent::FinalizeCubemap(prosper::IImage &imgCubemap)
 {
-	auto drawCmd = pragma::get_cengine()->GetSetupCommandBuffer();
+	auto drawCmd = get_cengine()->GetSetupCommandBuffer();
 	// Generate cubemap mipmaps
 	drawCmd->RecordImageBarrier(imgCubemap, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::TransferSrcOptimal);
 	drawCmd->RecordGenerateMipmaps(imgCubemap, prosper::ImageLayout::TransferSrcOptimal, prosper::AccessFlags::TransferReadBit | prosper::AccessFlags::TransferWriteBit, prosper::PipelineStageFlags::TransferBit);
-	pragma::get_cengine()->FlushSetupCommandBuffer();
+	get_cengine()->FlushSetupCommandBuffer();
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
@@ -669,7 +669,7 @@ bool CReflectionProbeComponent::FinalizeCubemap(prosper::IImage &imgCubemap)
 	samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
 	samplerCreateInfo.minFilter = prosper::Filter::Linear;
 	samplerCreateInfo.magFilter = prosper::Filter::Linear;
-	auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture({}, imgCubemap, imgViewCreateInfo, samplerCreateInfo);
+	auto tex = get_cengine()->GetRenderContext().CreateTexture({}, imgCubemap, imgViewCreateInfo, samplerCreateInfo);
 
 	LogInfo("Generating IBL reflection textures from reflection probe...");
 	auto result = GenerateIBLReflectionsFromCubemap(*tex);
@@ -680,7 +680,7 @@ bool CReflectionProbeComponent::FinalizeCubemap(prosper::IImage &imgCubemap)
 	}
 
 	auto success = (m_iblData && SaveIBLReflectionsToFile());
-	pragma::math::set_flag(m_stateFlags, StateFlags::BakingFailed, !success);
+	math::set_flag(m_stateFlags, StateFlags::BakingFailed, !success);
 	build_next_reflection_probe();
 	/*auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *p = dynamic_cast<WITexturedCubemap*>(wgui.GetBaseElement()->FindDescendantByName(GUI_EL_NAME));
@@ -696,9 +696,9 @@ bool CReflectionProbeComponent::FinalizeCubemap(prosper::IImage &imgCubemap)
 
 bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Texture &cubemap)
 {
-	auto *shaderConvolute = static_cast<pragma::ShaderConvoluteCubemapLighting *>(pragma::get_cengine()->GetShader("convolute_cubemap_lighting").get());
-	auto *shaderRoughness = static_cast<pragma::ShaderComputeIrradianceMapRoughness *>(pragma::get_cengine()->GetShader("compute_irradiance_map_roughness").get());
-	auto *shaderBRDF = static_cast<pragma::ShaderBRDFConvolution *>(pragma::get_cengine()->GetShader("brdf_convolution").get());
+	auto *shaderConvolute = static_cast<ShaderConvoluteCubemapLighting *>(get_cengine()->GetShader("convolute_cubemap_lighting").get());
+	auto *shaderRoughness = static_cast<ShaderComputeIrradianceMapRoughness *>(get_cengine()->GetShader("compute_irradiance_map_roughness").get());
+	auto *shaderBRDF = static_cast<ShaderBRDFConvolution *>(get_cengine()->GetShader("brdf_convolution").get());
 	if(shaderConvolute == nullptr || shaderRoughness == nullptr || shaderBRDF == nullptr)
 		return false;
 	auto irradianceMap = shaderConvolute->ConvoluteCubemapLighting(cubemap, 32);
@@ -707,10 +707,10 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 	std::shared_ptr<void> texPtr = nullptr;
 
 	// Load BRDF texture from disk, if it already exists
-	auto loadInfo = std::make_unique<msys::TextureLoadInfo>();
-	loadInfo->mipmapMode = msys::TextureMipmapMode::Ignore;
+	auto loadInfo = std::make_unique<material::TextureLoadInfo>();
+	loadInfo->mipmapMode = material::TextureMipmapMode::Ignore;
 	std::shared_ptr<prosper::Texture> brdfTex = nullptr;
-	auto texInfo = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("env/brdf.ktx", std::move(loadInfo));
+	auto texInfo = static_cast<material::CMaterialManager &>(get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("env/brdf.ktx", std::move(loadInfo));
 	if(texInfo)
 		brdfTex = texInfo->GetVkTexture();
 	// Otherwise generate it
@@ -731,8 +731,8 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 			if(pair.first.find("skybox") == std::string::npos)
 				continue;
 			auto *texInfo = pair.second.get()->GetTextureInfo("skybox");
-			std::static_pointer_cast<msys::Texture>(texInfo->texture)->texture = m_iblData->prefilterMap;
-			pragma::get_cgame()->ReloadMaterialShader(static_cast<msys::CMaterial*>(pair.second.get()));
+			std::static_pointer_cast<material::Texture>(texInfo->texture)->texture = m_iblData->prefilterMap;
+			pragma::get_cgame()->ReloadMaterialShader(static_cast<material::CMaterial*>(pair.second.get()));
 			break;
 		}
 	}*/
@@ -741,7 +741,7 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 
 bool CReflectionProbeComponent::GenerateIBLReflectionsFromEnvMap(const std::string &envMapFileName)
 {
-	auto *shaderEquiRectToCubemap = static_cast<pragma::ShaderEquirectangularToCubemap *>(pragma::get_cengine()->GetShader("equirectangular_to_cubemap").get());
+	auto *shaderEquiRectToCubemap = static_cast<ShaderEquirectangularToCubemap *>(get_cengine()->GetShader("equirectangular_to_cubemap").get());
 	if(shaderEquiRectToCubemap == nullptr)
 		return false;
 	auto pos = GetEntity().GetPosition();
@@ -751,16 +751,16 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromEnvMap(const std::stri
 		return false;
 	return GenerateIBLReflectionsFromCubemap(*cubemapTex);
 }
-msys::Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
+material::Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
 {
 	outIsDefault = false;
-	auto matPath = pragma::util::Path {GetCubemapIBLMaterialFilePath()};
+	auto matPath = util::Path {GetCubemapIBLMaterialFilePath()};
 	matPath.PopFront();
-	if(pragma::asset::exists(matPath.GetString(), pragma::asset::Type::Material) == false) {
+	if(pragma::asset::exists(matPath.GetString(), asset::Type::Material) == false) {
 		outIsDefault = true;
-		matPath = "maps/default_ibl." + std::string {pragma::asset::FORMAT_MATERIAL_ASCII};
+		matPath = "maps/default_ibl." + std::string {asset::FORMAT_MATERIAL_ASCII};
 	}
-	auto *mat = pragma::get_client_state()->LoadMaterial(matPath.GetString(), nullptr, false, true);
+	auto *mat = get_client_state()->LoadMaterial(matPath.GetString(), nullptr, false, true);
 	if(mat && !mat->IsError())
 		return mat;
 	LogWarn("Failed to load material '{}'!", matPath.GetString());
@@ -769,9 +769,9 @@ msys::Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
 void CReflectionProbeComponent::ClearIblData()
 {
 	if(m_iblData) {
-		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->brdfMap);
-		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->irradianceMap);
-		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->prefilterMap);
+		get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->brdfMap);
+		get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->irradianceMap);
+		get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->prefilterMap);
 	}
 	m_iblData = nullptr;
 }
@@ -796,9 +796,9 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 		LogWarn("Material has no brdf texture!");
 		return false;
 	}
-	auto texPrefilter = std::static_pointer_cast<msys::Texture>(pPrefilter->texture);
-	auto texIrradiance = std::static_pointer_cast<msys::Texture>(pIrradiance->texture);
-	auto texBrdf = std::static_pointer_cast<msys::Texture>(pBrdf->texture);
+	auto texPrefilter = std::static_pointer_cast<material::Texture>(pPrefilter->texture);
+	auto texIrradiance = std::static_pointer_cast<material::Texture>(pIrradiance->texture);
+	auto texBrdf = std::static_pointer_cast<material::Texture>(pBrdf->texture);
 	if(!texPrefilter || !texPrefilter->HasValidVkTexture()) {
 		LogWarn("Prefilter texture is invalid!");
 		return false;
@@ -830,25 +830,25 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 		samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
 		samplerCreateInfo.minFilter = prosper::Filter::Linear;
 		samplerCreateInfo.magFilter = prosper::Filter::Linear;
-		auto sampler = pragma::get_cengine()->GetRenderContext().CreateSampler(samplerCreateInfo);
+		auto sampler = get_cengine()->GetRenderContext().CreateSampler(samplerCreateInfo);
 		texIrradiance->GetVkTexture()->SetSampler(*sampler);
 		texBrdf->GetVkTexture()->SetSampler(*sampler);
 
 		samplerCreateInfo.mipmapMode = prosper::SamplerMipmapMode::Linear;
-		sampler = pragma::get_cengine()->GetRenderContext().CreateSampler(samplerCreateInfo);
+		sampler = get_cengine()->GetRenderContext().CreateSampler(samplerCreateInfo);
 		texPrefilter->GetVkTexture()->SetSampler(*sampler);
 	}
 
 	InitializeDescriptorSet();
 	if(isDefaultMaterial == false)
-		pragma::math::set_flag(m_stateFlags, StateFlags::RequiresRebuild, false);
+		math::set_flag(m_stateFlags, StateFlags::RequiresRebuild, false);
 	LogInfo("Loaded IBL reflection resources for cubemap {}!", GetCubemapIdentifier());
 	return true;
 }
 void CReflectionProbeComponent::ClearDescriptorSet()
 {
 	if(m_iblDsg)
-		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblDsg);
+		get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblDsg);
 	m_iblDsg = nullptr;
 }
 void CReflectionProbeComponent::InitializeDescriptorSet()
@@ -856,12 +856,12 @@ void CReflectionProbeComponent::InitializeDescriptorSet()
 	ClearDescriptorSet();
 	if(m_iblData == nullptr)
 		return;
-	auto &context = pragma::get_cengine()->GetRenderContext();
-	m_iblDsg = context.CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
+	auto &context = get_cengine()->GetRenderContext();
+	m_iblDsg = context.CreateDescriptorSetGroup(ShaderPBR::DESCRIPTOR_SET_PBR);
 	auto &ds = *m_iblDsg->GetDescriptorSet();
-	ds.SetBindingTexture(*m_iblData->irradianceMap, pragma::math::to_integral(pragma::ShaderPBR::PBRBinding::IrradianceMap));
-	ds.SetBindingTexture(*m_iblData->prefilterMap, pragma::math::to_integral(pragma::ShaderPBR::PBRBinding::PrefilterMap));
-	ds.SetBindingTexture(*m_iblData->brdfMap, pragma::math::to_integral(pragma::ShaderPBR::PBRBinding::BRDFMap));
+	ds.SetBindingTexture(*m_iblData->irradianceMap, math::to_integral(ShaderPBR::PBRBinding::IrradianceMap));
+	ds.SetBindingTexture(*m_iblData->prefilterMap, math::to_integral(ShaderPBR::PBRBinding::PrefilterMap));
+	ds.SetBindingTexture(*m_iblData->brdfMap, math::to_integral(ShaderPBR::PBRBinding::BRDFMap));
 
 	m_iblDsg->GetDescriptorSet()->Update();
 }
@@ -869,7 +869,7 @@ std::string CReflectionProbeComponent::GetCubemapIBLMaterialPath() const
 {
 	if(m_iblMat.empty() == false)
 		return ufile::get_path_from_filename(m_iblMat);
-	return "maps/" + pragma::get_cgame()->GetMapName() + "/ibl/";
+	return "maps/" + get_cgame()->GetMapName() + "/ibl/";
 }
 std::string CReflectionProbeComponent::GetLocationIdentifier() const
 {
@@ -906,12 +906,12 @@ void CEnvReflectionProbe::Initialize()
 
 ////////
 
-static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_pbr_ibl(NetworkState *state, BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
 	const std::string name = "pbr_ibl_brdf";
-	auto &wgui = pragma::gui::WGUI::GetInstance();
+	auto &wgui = gui::WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
 	auto *p = pRoot->FindDescendantByName(name);
 	if(p != nullptr) {
@@ -919,15 +919,15 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 		return;
 	}
 
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
 
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
+	ecs::EntityIterator entIt {*get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CReflectionProbeComponent>>();
 
 	auto origin = pl->GetEntity().GetPosition();
 	auto dClosest = std::numeric_limits<float>::max();
-	pragma::ecs::BaseEntity *entClosest = nullptr;
+	ecs::BaseEntity *entClosest = nullptr;
 	for(auto *ent : entIt) {
 		auto trC = ent->GetTransformComponent();
 		if(!trC)
@@ -944,9 +944,9 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 		return;
 	}
 
-	auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
+	auto *cam = get_cgame()->GetRenderCamera<CCameraComponent>();
 	if(cam)
-		pragma::get_cgame()->DrawLine(cam->GetEntity().GetPosition(), entClosest->GetPosition(), colors::Red, 30.f);
+		get_cgame()->DrawLine(cam->GetEntity().GetPosition(), entClosest->GetPosition(), colors::Red, 30.f);
 
 	auto reflProbeC = entClosest->GetComponent<CReflectionProbeComponent>();
 	if(reflProbeC.expired())
@@ -960,15 +960,15 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 	auto &irradianceMap = iblData->irradianceMap;
 	auto &prefilterMap = iblData->prefilterMap;
 
-	auto *pElContainer = wgui.Create<pragma::gui::types::WIBase>();
+	auto *pElContainer = wgui.Create<gui::types::WIBase>();
 	pElContainer->SetAutoAlignToParent(true);
 	pElContainer->SetName(name);
 	pElContainer->TrapFocus(true);
 	pElContainer->RequestFocus();
 
-	auto *pFrameBrdf = wgui.Create<pragma::gui::types::WIFrame>(pElContainer);
+	auto *pFrameBrdf = wgui.Create<gui::types::WIFrame>(pElContainer);
 	pFrameBrdf->SetTitle("BRDF");
-	auto *pBrdf = wgui.Create<pragma::gui::types::WITexturedRect>(pFrameBrdf);
+	auto *pBrdf = wgui.Create<gui::types::WITexturedRect>(pFrameBrdf);
 	pBrdf->SetSize(256, 256);
 	pBrdf->SetY(24);
 	pBrdf->SetTexture(*brdfMap);
@@ -977,7 +977,7 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 
 	auto maxLod = brdfMap->GetImage().GetMipmapCount();
 	if(maxLod > 1) {
-		auto *pSlider = wgui.Create<pragma::gui::types::WISlider>(pBrdf);
+		auto *pSlider = wgui.Create<gui::types::WISlider>(pBrdf);
 		pSlider->SetSize(pSlider->GetParent()->GetWidth(), 24);
 		pSlider->SetRange(0.f, maxLod, 0.01f);
 		pSlider->SetPostFix(" LOD");
@@ -985,17 +985,17 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 		pSlider->AddCallback("OnChange", FunctionCallback<void, float, float>::Create([hBrdf](float oldVal, float newVal) mutable {
 			if(hBrdf.IsValid() == false)
 				return;
-			static_cast<pragma::gui::types::WITexturedRect *>(hBrdf.get())->SetLOD(newVal);
+			static_cast<gui::types::WITexturedRect *>(hBrdf.get())->SetLOD(newVal);
 		}));
 		pSlider->SetAnchor(0.f, 0.f, 1.f, 0.f);
 	}
 
 	///
 
-	auto *pFrameIrradiance = wgui.Create<pragma::gui::types::WIFrame>(pElContainer);
+	auto *pFrameIrradiance = wgui.Create<gui::types::WIFrame>(pElContainer);
 	pFrameIrradiance->SetTitle("Irradiance");
 	pFrameIrradiance->SetX(pFrameBrdf->GetRight());
-	auto *pIrradiance = wgui.Create<pragma::gui::types::WITexturedCubemap>(pFrameIrradiance);
+	auto *pIrradiance = wgui.Create<gui::types::WITexturedCubemap>(pFrameIrradiance);
 	pIrradiance->SetY(24);
 	pIrradiance->SetTexture(*irradianceMap);
 	pFrameIrradiance->SizeToContents();
@@ -1003,7 +1003,7 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 
 	maxLod = irradianceMap->GetImage().GetMipmapCount();
 	if(maxLod > 1) {
-		auto *pSlider = wgui.Create<pragma::gui::types::WISlider>(pIrradiance);
+		auto *pSlider = wgui.Create<gui::types::WISlider>(pIrradiance);
 		pSlider->SetSize(pSlider->GetParent()->GetWidth(), 24);
 		pSlider->SetRange(0.f, maxLod, 0.01f);
 		pSlider->SetPostFix(" LOD");
@@ -1011,17 +1011,17 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 		pSlider->AddCallback("OnChange", FunctionCallback<void, float, float>::Create([hIrradiance](float oldVal, float newVal) mutable {
 			if(hIrradiance.IsValid() == false)
 				return;
-			static_cast<pragma::gui::types::WITexturedCubemap *>(hIrradiance.get())->SetLOD(newVal);
+			static_cast<gui::types::WITexturedCubemap *>(hIrradiance.get())->SetLOD(newVal);
 		}));
 		pSlider->SetAnchor(0.f, 0.f, 1.f, 0.f);
 	}
 
 	///
 
-	auto *pFramePrefilter = wgui.Create<pragma::gui::types::WIFrame>(pElContainer);
+	auto *pFramePrefilter = wgui.Create<gui::types::WIFrame>(pElContainer);
 	pFramePrefilter->SetTitle("Prefilter");
 	pFramePrefilter->SetY(pFrameIrradiance->GetBottom());
-	auto *pPrefilter = wgui.Create<pragma::gui::types::WITexturedCubemap>(pFramePrefilter);
+	auto *pPrefilter = wgui.Create<gui::types::WITexturedCubemap>(pFramePrefilter);
 	pPrefilter->SetY(24);
 	pPrefilter->SetTexture(*prefilterMap);
 	pFramePrefilter->SizeToContents();
@@ -1029,7 +1029,7 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 
 	maxLod = prefilterMap->GetImage().GetMipmapCount();
 	if(maxLod > 1) {
-		auto *pSlider = wgui.Create<pragma::gui::types::WISlider>(pPrefilter);
+		auto *pSlider = wgui.Create<gui::types::WISlider>(pPrefilter);
 		pSlider->SetSize(pSlider->GetParent()->GetWidth(), 24);
 		pSlider->SetRange(0.f, maxLod, 0.01f);
 		pSlider->SetPostFix(" LOD");
@@ -1037,11 +1037,11 @@ static void debug_pbr_ibl(pragma::NetworkState *state, pragma::BasePlayerCompone
 		pSlider->AddCallback("OnChange", FunctionCallback<void, float, float>::Create([hPrefilter](float oldVal, float newVal) mutable {
 			if(hPrefilter.IsValid() == false)
 				return;
-			static_cast<pragma::gui::types::WITexturedCubemap *>(hPrefilter.get())->SetLOD(newVal);
+			static_cast<gui::types::WITexturedCubemap *>(hPrefilter.get())->SetLOD(newVal);
 		}));
 		pSlider->SetAnchor(0.f, 0.f, 1.f, 0.f);
 	}
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_pbr_ibl", &debug_pbr_ibl, pragma::console::ConVarFlags::None, "Displays the irradiance, prefilter and brdf map for the closest cubemap.");
+	auto UVN = console::client::register_command("debug_pbr_ibl", &debug_pbr_ibl, console::ConVarFlags::None, "Displays the irradiance, prefilter and brdf map for the closest cubemap.");
 }

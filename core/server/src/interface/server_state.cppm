@@ -40,7 +40,7 @@ namespace pragma {
 		std::vector<std::shared_ptr<pragma::audio::ALSound>> m_serverSounds;
 	  protected:
 		virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const override;
-		virtual msys::Material *LoadMaterial(const std::string &path, bool precache, bool bReload) override;
+		virtual material::Material *LoadMaterial(const std::string &path, bool precache, bool bReload) override;
 		virtual void InitializeResourceManager() override;
 		void ClearConCommands();
 		void OnMasterServerRegistered(bool b, std::string reason);
@@ -100,7 +100,7 @@ namespace pragma {
 		static ServerState *Get();
 		ServerState();
 		virtual ~ServerState() override;
-		virtual msys::MaterialManager &GetMaterialManager() override;
+		virtual material::MaterialManager &GetMaterialManager() override;
 		virtual pragma::geometry::ModelSubMesh *CreateSubMesh() const override;
 		virtual pragma::geometry::ModelMesh *CreateMesh() const override;
 		virtual bool IsServer() const override;

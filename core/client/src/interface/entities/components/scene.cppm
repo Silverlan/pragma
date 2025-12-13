@@ -89,7 +89,7 @@ export namespace pragma {
 	}
 	class DLLCLIENT CSceneComponent final : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		friend SceneRenderDesc;
 		enum class FRenderSetting : uint32_t { None = 0, Unlit = 1 };
@@ -109,9 +109,9 @@ export namespace pragma {
 		static SceneFlags GetSceneFlag(SceneIndex sceneIndex);
 		static SceneIndex GetSceneIndex(SceneFlags flag);
 		static const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &GetEntityInstanceIndexBuffer();
-		static void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const rendering::RenderQueue &renderQueue, pragma::rendering::RenderPassStats *optStats = nullptr);
+		static void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const rendering::RenderQueue &renderQueue, rendering::RenderPassStats *optStats = nullptr);
 
-		CSceneComponent(pragma::ecs::BaseEntity &ent);
+		CSceneComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual ~CSceneComponent() override;
@@ -119,15 +119,15 @@ export namespace pragma {
 		virtual void InitializeLuaObject(lua::State *l) override;
 
 		void Setup(const CreateInfo &createInfo, SceneIndex sceneIndex);
-		const ComponentHandle<pragma::CCameraComponent> &GetActiveCamera() const;
-		ComponentHandle<pragma::CCameraComponent> &GetActiveCamera();
-		void SetActiveCamera(pragma::CCameraComponent &cam);
+		const ComponentHandle<CCameraComponent> &GetActiveCamera() const;
+		ComponentHandle<CCameraComponent> &GetActiveCamera();
+		void SetActiveCamera(CCameraComponent &cam);
 		void SetActiveCamera();
 
-		void SetExclusionRenderMask(::pragma::rendering::RenderMask renderMask);
-		::pragma::rendering::RenderMask GetExclusionRenderMask() const;
-		void SetInclusionRenderMask(::pragma::rendering::RenderMask renderMask);
-		::pragma::rendering::RenderMask GetInclusionRenderMask() const;
+		void SetExclusionRenderMask(rendering::RenderMask renderMask);
+		rendering::RenderMask GetExclusionRenderMask() const;
+		void SetInclusionRenderMask(rendering::RenderMask renderMask);
+		rendering::RenderMask GetInclusionRenderMask() const;
 
 		void Link(const CSceneComponent &other, bool linkCamera = true);
 		uint32_t GetWidth() const;
@@ -138,8 +138,8 @@ export namespace pragma {
 
 		void UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		const std::shared_ptr<prosper::IBuffer> &GetRenderSettingsBuffer() const;
-		pragma::RenderSettings &GetRenderSettings();
-		const pragma::RenderSettings &GetRenderSettings() const;
+		RenderSettings &GetRenderSettings();
+		const RenderSettings &GetRenderSettings() const;
 		const std::shared_ptr<prosper::IBuffer> &GetCameraBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetViewCameraBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetFogBuffer() const;
@@ -150,8 +150,8 @@ export namespace pragma {
 		prosper::IDescriptorSet *GetViewCameraDescriptorSet() const;
 		const std::shared_ptr<prosper::IDescriptorSetGroup> &GetFogDescriptorSetGroup() const;
 
-		pragma::rendering::WorldEnvironment *GetWorldEnvironment() const;
-		void SetWorldEnvironment(pragma::rendering::WorldEnvironment &env);
+		rendering::WorldEnvironment *GetWorldEnvironment() const;
+		void SetWorldEnvironment(rendering::WorldEnvironment &env);
 		void ClearWorldEnvironment();
 
 		void LinkWorldEnvironment(CSceneComponent &other);
@@ -183,12 +183,12 @@ export namespace pragma {
 		CSceneComponent *GetParentScene();
 		const CSceneComponent *GetParentScene() const { return const_cast<CSceneComponent *>(this)->GetParentScene(); }
 
-		void BuildRenderQueues(const ::pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void BuildRenderQueues(const rendering::DrawSceneInfo &drawSceneInfo);
 
-		const std::vector<ComponentHandle<pragma::CLightComponent>> &GetPreviouslyVisibleShadowedLights() const { return m_previouslyVisibleShadowedLights; }
-		void SwapPreviouslyVisibleLights(std::vector<ComponentHandle<pragma::CLightComponent>> &&components) { std::swap(m_previouslyVisibleShadowedLights, components); }
+		const std::vector<ComponentHandle<CLightComponent>> &GetPreviouslyVisibleShadowedLights() const { return m_previouslyVisibleShadowedLights; }
+		void SwapPreviouslyVisibleLights(std::vector<ComponentHandle<CLightComponent>> &&components) { std::swap(m_previouslyVisibleShadowedLights, components); }
 
-		void RecordRenderCommandBuffers(const ::pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void RecordRenderCommandBuffers(const rendering::DrawSceneInfo &drawSceneInfo);
 		void UpdateRenderData();
 	  private:
 		void InitializeShadowDescriptorSet();
@@ -207,28 +207,28 @@ export namespace pragma {
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_camViewDescSetGroup = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_shadowDsg = nullptr;
 
-		std::vector<ComponentHandle<pragma::CLightComponent>> m_previouslyVisibleShadowedLights;
-		ComponentHandle<pragma::BaseEntityComponent> m_lightMap = {};
-		ComponentHandle<pragma::CCameraComponent> m_camera = {};
+		std::vector<ComponentHandle<CLightComponent>> m_previouslyVisibleShadowedLights;
+		ComponentHandle<BaseEntityComponent> m_lightMap = {};
+		ComponentHandle<CCameraComponent> m_camera = {};
 		std::shared_ptr<prosper::IBuffer> m_cameraBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_cameraViewBuffer = nullptr;
 
 		std::shared_ptr<prosper::IBuffer> m_renderSettingsBuffer = nullptr;
-		pragma::RenderSettings m_renderSettings = {};
-		pragma::CameraData m_cameraData = {};
+		RenderSettings m_renderSettings = {};
+		CameraData m_cameraData = {};
 		SceneDebugMode m_debugMode = SceneDebugMode::None;
 		Vector4 m_particleSystemColorFactor {1.f, 1.f, 1.f, 1.f};
 
-		::pragma::rendering::RenderMask m_exclusionRenderMask = ::pragma::rendering::RenderMask::None;
-		::pragma::rendering::RenderMask m_inclusionRenderMask = ::pragma::rendering::RenderMask::None;
+		rendering::RenderMask m_exclusionRenderMask = rendering::RenderMask::None;
+		rendering::RenderMask m_inclusionRenderMask = rendering::RenderMask::None;
 
 		// Fog
-		pragma::FogData m_fogData = {};
+		FogData m_fogData = {};
 		std::shared_ptr<prosper::IBuffer> m_fogBuffer = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_fogDescSetGroup = nullptr;
 
 		mutable std::vector<CallbackHandle> m_envCallbacks;
-		mutable std::shared_ptr<pragma::rendering::WorldEnvironment> m_worldEnvironment;
+		mutable std::shared_ptr<rendering::WorldEnvironment> m_worldEnvironment;
 		CallbackHandle m_cbFogCallback = {};
 		CallbackHandle m_cbLink {};
 
@@ -250,9 +250,9 @@ export namespace pragma {
 	// Events
 
 	struct DLLCLIENT CEDrawSceneInfo : public ComponentEvent {
-		CEDrawSceneInfo(const ::pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		CEDrawSceneInfo(const rendering::DrawSceneInfo &drawSceneInfo);
 		virtual void PushArguments(lua::State *l) override;
-		const ::pragma::rendering::DrawSceneInfo &drawSceneInfo;
+		const rendering::DrawSceneInfo &drawSceneInfo;
 	};
 	using namespace pragma::math::scoped_enum::bitwise;
 };

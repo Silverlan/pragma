@@ -163,19 +163,19 @@ void NET_sv_QUERY_MODEL_TEXTURE(pragma::networking::IServerClient &session, NetP
 	auto &matManager = pragma::ServerState::Get()->GetMaterialManager();
 	auto normalizedName = matManager.ToCacheIdentifier(dstName);
 	auto *matAsset = matManager.FindCachedAsset(dstName);
-	auto mat = matAsset ? msys::MaterialManager::GetAssetObject(*matAsset) : nullptr;
+	auto mat = matAsset ? pragma::material::MaterialManager::GetAssetObject(*matAsset) : nullptr;
 	if(mat == nullptr)
 		return;
 	std::vector<std::string> textures;
 	std::function<void(const pragma::util::Path &path)> fFindTextures = nullptr;
 	fFindTextures = [mat, &fFindTextures, &textures](const pragma::util::Path &path) {
-		for(auto &name : msys::MaterialPropertyBlockView {*mat, path}) {
+		for(auto &name : pragma::material::MaterialPropertyBlockView {*mat, path}) {
 			auto propType = mat->GetPropertyType(name);
 			switch(propType) {
-			case msys::PropertyType::Block:
+			case pragma::material::PropertyType::Block:
 				fFindTextures(pragma::util::FilePath(path, name));
 				break;
-			case msys::PropertyType::Texture:
+			case pragma::material::PropertyType::Texture:
 				{
 					std::string texName;
 					if(mat->GetProperty(pragma::util::FilePath(path, name).GetString(), &texName)) {

@@ -14,9 +14,9 @@ using namespace pragma;
 
 using namespace ecs::baseShooterComponent;
 void ecs::CShooterComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, const Vector3 &origin, const Vector3 &effectsOrigins, const std::vector<Vector3> &destPositions, bool bTransmitToServer, std::vector<pragma::physics::TraceResult> &outHitTargets)
+void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, const Vector3 &origin, const Vector3 &effectsOrigins, const std::vector<Vector3> &destPositions, bool bTransmitToServer, std::vector<physics::TraceResult> &outHitTargets)
 {
-	auto *physEnv = pragma::get_cgame()->GetPhysicsEnvironment();
+	auto *physEnv = get_cgame()->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return;
 
@@ -24,7 +24,7 @@ void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, con
 	NetPacket p {};
 	if(bTransmitToServer == true)
 		p->Write<uint32_t>(static_cast<uint32_t>(numBullets));
-	pragma::physics::TraceData data;
+	physics::TraceData data;
 	GetBulletTraceData(bulletInfo, data);
 	outHitTargets.reserve(numBullets);
 	for(auto i = decltype(numBullets) {0}; i < numBullets; ++i) {
@@ -34,7 +34,7 @@ void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, con
 		auto offset = outHitTargets.size();
 		auto hit = physEnv->RayCast(data, &outHitTargets);
 		if(outHitTargets.size() == offset)
-			outHitTargets.push_back(pragma::physics::TraceResult {data}); // Empty trace result
+			outHitTargets.push_back(physics::TraceResult {data}); // Empty trace result
 		for(auto j = offset; j < outHitTargets.size(); ++j) {
 			auto &result = outHitTargets.at(j);
 			auto &hitPos = result.position;
@@ -47,19 +47,19 @@ void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, con
 				p->Write<Vector3>(destPositions[i]);
 			const auto minTracerDistance = 80.f; // Don't show a tracer if the distance is less than this, otherwise the tracer might look odd when close to a wall.
 			if(bulletInfo.tracerCount > 0 && (i % bulletInfo.tracerCount) == 0 && l > minTracerDistance)
-				pragma::get_cgame()->CreateParticleTracer<pragma::ecs::CParticleSystemComponent>(effectsOrigins, hitPos, bulletInfo.tracerRadius, bulletInfo.tracerColor, bulletInfo.tracerLength, bulletInfo.tracerSpeed, bulletInfo.tracerMaterial, bulletInfo.tracerBloom);
-			if(result.hitType != pragma::physics::RayCastHitType::None) {
+				get_cgame()->CreateParticleTracer<CParticleSystemComponent>(effectsOrigins, hitPos, bulletInfo.tracerRadius, bulletInfo.tracerColor, bulletInfo.tracerLength, bulletInfo.tracerSpeed, bulletInfo.tracerMaterial, bulletInfo.tracerBloom);
+			if(result.hitType != physics::RayCastHitType::None) {
 				auto *col = result.collisionObj.Get();
 				if(col != nullptr) {
 					auto surfaceMaterialId = col->GetSurfaceMaterial();
-					auto *surfaceMaterial = (surfaceMaterialId != -1) ? pragma::get_cgame()->GetSurfaceMaterial(surfaceMaterialId) : nullptr;
-					auto *surfaceMaterialGeneric = pragma::get_cgame()->GetSurfaceMaterial(0);
+					auto *surfaceMaterial = (surfaceMaterialId != -1) ? get_cgame()->GetSurfaceMaterial(surfaceMaterialId) : nullptr;
+					auto *surfaceMaterialGeneric = get_cgame()->GetSurfaceMaterial(0);
 					if(surfaceMaterial != nullptr || surfaceMaterialGeneric != nullptr) {
 						auto particleEffect = (surfaceMaterial != nullptr) ? surfaceMaterial->GetImpactParticleEffect() : "";
 						if(particleEffect.empty() && surfaceMaterialGeneric != nullptr)
 							particleEffect = surfaceMaterialGeneric->GetImpactParticleEffect();
 						if(!particleEffect.empty()) {
-							auto *pt = pragma::ecs::CParticleSystemComponent::Create(particleEffect);
+							auto *pt = CParticleSystemComponent::Create(particleEffect);
 							if(pt != nullptr) {
 								auto pTrComponent = pt->GetEntity().GetTransformComponent();
 								if(pTrComponent != nullptr) {
@@ -79,7 +79,7 @@ void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, con
 						if(sndEffect.empty() && surfaceMaterialGeneric != nullptr)
 							sndEffect = surfaceMaterialGeneric->GetBulletImpactSound();
 						if(!sndEffect.empty()) {
-							auto snd = pragma::get_client_state()->CreateSound(sndEffect, pragma::audio::ALSoundType::Effect | pragma::audio::ALSoundType::Physics, pragma::audio::ALCreateFlags::Mono);
+							auto snd = get_client_state()->CreateSound(sndEffect, audio::ALSoundType::Effect | audio::ALSoundType::Physics, audio::ALCreateFlags::Mono);
 							if(snd != nullptr) {
 								snd->SetPosition(result.position);
 								snd->Play();
@@ -91,20 +91,20 @@ void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, con
 		}
 	}
 	if(bTransmitToServer == true)
-		static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).SendNetEventUDP(m_netEvFireBullets, p);
+		static_cast<CBaseEntity &>(GetEntity()).SendNetEventUDP(m_netEvFireBullets, p);
 
 	events::CEOnBulletsFired evData {bulletInfo, outHitTargets};
 	BroadcastEvent(EVENT_ON_BULLETS_FIRED, evData);
 }
 
-void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, std::vector<pragma::physics::TraceResult> &outHitTargets, bool bMaster)
+void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, std::vector<physics::TraceResult> &outHitTargets, bool bMaster)
 {
 	Vector3 origin {};
 	Vector3 dir {};
 	Vector3 effectsOrigin {};
 	OnFireBullets(bulletInfo, origin, dir, &effectsOrigin);
 
-	pragma::util::ScopeGuard sg([this]() { m_nextBullet = nullptr; });
+	util::ScopeGuard sg([this]() { m_nextBullet = nullptr; });
 
 	auto bTransmit = true;
 	if(bMaster == false) // We weren't the trigger for the bullet shot; Most likely some other client
@@ -118,7 +118,7 @@ void ecs::CShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, std
 	}
 	FireBullets(bulletInfo, origin, effectsOrigin, GetBulletDestinations(origin, dir, bulletInfo), bTransmit, outHitTargets);
 }
-Bool ecs::CShooterComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool ecs::CShooterComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvFireBullets)
 		ReceiveBulletEvent(packet);

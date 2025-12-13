@@ -16,8 +16,8 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseGenericComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 	  protected:
-		BaseGenericComponent(pragma::ecs::BaseEntity &ent);
+		BaseGenericComponent(ecs::BaseEntity &ent);
 	};
 };

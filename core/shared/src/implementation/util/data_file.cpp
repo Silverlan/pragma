@@ -6,14 +6,14 @@ module pragma.shared;
 
 import :util.data_file;
 
-DataFileBlock *DataFile::Read(const char *fName)
+pragma::util::DataFileBlock *pragma::util::DataFile::Read(const char *fName)
 {
-	auto f = FileManager::OpenFile(fName, "r");
+	auto f = pragma::fs::open_file(fName, pragma::fs::FileMode::Read);
 	DataFileBlock *block = ReadBlock(f);
 	return block;
 }
 
-DataFileBlock *DataFile::ReadBlock(VFilePtr f)
+pragma::util::DataFileBlock *pragma::util::DataFile::ReadBlock(fs::VFilePtr f)
 {
 	DataFileBlock *block = new DataFileBlock;
 	while(!f->Eof()) {

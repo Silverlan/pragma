@@ -24,12 +24,12 @@ export namespace pragma::rendering::shader_material {
 	struct DLLCLIENT ShaderMaterial : public ShaderInputDescriptor {
 		static constexpr uint32_t PREDEFINED_PROPERTY_COUNT = 6;
 
-		static void PopulateShaderInputDataFromMaterial(ShaderInputData &inputData, const msys::CMaterial &mat);
+		static void PopulateShaderInputDataFromMaterial(ShaderInputData &inputData, const material::CMaterial &mat);
 		static MaterialFlags GetFlagsFromShaderInputData(const ShaderInputData &inputData);
 		static void SetShaderInputDataFlags(ShaderInputData &inputData, MaterialFlags flags);
 		static std::string GetTextureUniformVariableName(const std::string &texIdentifier);
 
-		ShaderMaterial(const pragma::GString &name);
+		ShaderMaterial(const GString &name);
 		std::vector<Texture> textures;
 
 		Texture *FindTexture(const char *key)

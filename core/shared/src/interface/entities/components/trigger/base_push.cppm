@@ -13,11 +13,11 @@ export namespace pragma {
 	class DLLNETWORK BaseTriggerPushComponent : public BaseEntityComponent {
 	  public:
 		enum class SpawnFlags : uint32_t { ChangeVelocityDirection = 2'048 };
-		BaseTriggerPushComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+		BaseTriggerPushComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
 	  protected:
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 
 		Vector3 m_kvPushDir = {};
@@ -30,6 +30,6 @@ export namespace pragma {
 			float t = 1.f;
 		};
 		std::vector<PushInfo> m_entityPushQueue;
-		ComponentHandle<pragma::BaseToggleComponent> m_toggleComponent = {};
+		ComponentHandle<BaseToggleComponent> m_toggleComponent = {};
 	};
 };

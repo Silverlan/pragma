@@ -20,8 +20,8 @@ export namespace pragma::rendering {
 			ExcludeFromAccelerationStructures = EnableGlowPass << 1u,
 		};
 		std::shared_ptr<prosper::IRenderBuffer> renderBuffer;
-		pragma::GameShaderSpecializationConstantFlag pipelineSpecializationFlags;
-		msys::MaterialHandle material;
+		GameShaderSpecializationConstantFlag pipelineSpecializationFlags;
+		material::MaterialHandle material;
 		StateFlags stateFlags = StateFlags::EnableDepthPrepass;
 
 		void SetDepthPrepassEnabled(bool enabled);

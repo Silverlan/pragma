@@ -13,7 +13,7 @@ export namespace pragma {
 	constexpr uint32_t SF_PARTICLE_SYSTEM_REMOVE_ON_COMPLETE = 4096;
 	class DLLNETWORK BaseEnvParticleSystemComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void SetRemoveOnComplete(bool b);

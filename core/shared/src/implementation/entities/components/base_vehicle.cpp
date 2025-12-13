@@ -10,14 +10,14 @@ import :entities.components.base_vehicle;
 
 using namespace pragma;
 
-ComponentEventId baseVehicleComponent::EVENT_ON_DRIVER_ENTERED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseVehicleComponent::EVENT_ON_DRIVER_EXITED = pragma::INVALID_COMPONENT_ID;
-void BaseVehicleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+ComponentEventId baseVehicleComponent::EVENT_ON_DRIVER_ENTERED = INVALID_COMPONENT_ID;
+ComponentEventId baseVehicleComponent::EVENT_ON_DRIVER_EXITED = INVALID_COMPONENT_ID;
+void BaseVehicleComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseVehicleComponent::EVENT_ON_DRIVER_ENTERED = registerEvent("ON_DRIVER_ENTERED", ComponentEventInfo::Type::Broadcast);
 	baseVehicleComponent::EVENT_ON_DRIVER_EXITED = registerEvent("ON_DRIVER_EXITED", ComponentEventInfo::Type::Broadcast);
 }
-BaseVehicleComponent::BaseVehicleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseVehicleComponent::BaseVehicleComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseVehicleComponent::OnRemove()
 {
@@ -31,7 +31,7 @@ void BaseVehicleComponent::OnRemove()
 	}
 }
 
-void BaseVehicleComponent::InitializeVehiclePhysics(pragma::physics::PhysicsType type, BasePhysicsComponent::PhysFlags flags)
+void BaseVehicleComponent::InitializeVehiclePhysics(physics::PhysicsType type, BasePhysicsComponent::PhysFlags flags)
 {
 	auto &ent = GetEntity();
 	auto *nw = ent.GetNetworkState();
@@ -46,7 +46,7 @@ void BaseVehicleComponent::InitializeVehiclePhysics(pragma::physics::PhysicsType
 	auto &colMeshes = mdl->GetCollisionMeshes();
 	if(colMeshes.empty())
 		return;
-	std::vector<pragma::physics::IShape *> chassisShapes {};
+	std::vector<physics::IShape *> chassisShapes {};
 	chassisShapes.reserve(colMeshes.size());
 	for(auto &colMesh : colMeshes)
 		chassisShapes.push_back(colMesh->GetShape().get());
@@ -88,8 +88,8 @@ void BaseVehicleComponent::InitializeVehiclePhysics(pragma::physics::PhysicsType
 	auto *pRigidBody = colObj->GetRigidBody();
 
 	m_vhcCreateInfo.actor = pragma::util::shared_handle_cast<physics::IBase, physics::IRigidBody>(pRigidBody->ClaimOwnership());
-	pRigidBody->SetCollisionFilterGroup(pragma::physics::CollisionMask::Vehicle);
-	pRigidBody->SetCollisionFilterMask(pragma::physics::CollisionMask::All);
+	pRigidBody->SetCollisionFilterGroup(physics::CollisionMask::Vehicle);
+	pRigidBody->SetCollisionFilterMask(physics::CollisionMask::All);
 
 	auto vhc = physEnv->CreateVehicle(m_vhcCreateInfo);
 	vhc->SetGear(physics::IVehicle::Gear::First);
@@ -117,7 +117,7 @@ float BaseVehicleComponent::GetSpeedKmh() const
 {
 	if(m_physVehicle == nullptr)
 		return 0.f;
-	return pragma::units_to_metres(m_physVehicle->GetForwardSpeed()) / 1'000.f * 60.f * 60.f;
+	return units_to_metres(m_physVehicle->GetForwardSpeed()) / 1'000.f * 60.f * 60.f;
 }
 
 void BaseVehicleComponent::InitializeSteeringWheel()
@@ -125,30 +125,30 @@ void BaseVehicleComponent::InitializeSteeringWheel()
 	auto *ent = GetSteeringWheel();
 	if(ent == nullptr) // || pragma::math::is_flag_set(m_stateFlags,StateFlags::SteeringWheelInitialized))
 		return;
-	pragma::math::set_flag(m_stateFlags, StateFlags::SteeringWheelInitialized);
+	math::set_flag(m_stateFlags, StateFlags::SteeringWheelInitialized);
 	if(m_cbSteeringWheel.IsValid())
 		m_cbSteeringWheel.Remove();
 	auto pAttachableComponent = ent->AddComponent("attachment");
 	if(pAttachableComponent.expired())
 		return;
 	AttachmentInfo attInfo {};
-	attInfo.flags |= pragma::FAttachmentMode::SnapToOrigin | pragma::FAttachmentMode::UpdateEachFrame;
+	attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
 	static_cast<BaseAttachmentComponent *>(pAttachableComponent.get())->AttachToAttachment(&GetEntity(), "steering_wheel", attInfo);
 
-	m_cbSteeringWheel = pAttachableComponent->AddEventCallback(baseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE, [this, pAttachableComponent](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	m_cbSteeringWheel = pAttachableComponent->AddEventCallback(baseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE, [this, pAttachableComponent](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto pTrComponentSteeringWheel = pAttachableComponent->GetEntity().GetTransformComponent();
 		if(!pTrComponentSteeringWheel)
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		auto ang = EulerAngles(-GetSteeringFactor() * m_maxSteeringWheelAngle, 0.f, 0.f);
 		auto rot = uquat::create(ang);
 		auto rotEnt = pTrComponentSteeringWheel->GetRotation();
 		rotEnt = rotEnt * rot;
 		pTrComponentSteeringWheel->SetRotation(rotEnt);
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
 }
 
-void BaseVehicleComponent::SetupSteeringWheel(const std::string &mdl, pragma::math::Degree maxSteeringAngle)
+void BaseVehicleComponent::SetupSteeringWheel(const std::string &mdl, math::Degree maxSteeringAngle)
 {
 	m_steeringWheelMdl = mdl;
 	m_maxSteeringWheelAngle = maxSteeringAngle;
@@ -172,27 +172,27 @@ void BaseVehicleComponent::SetupSteeringWheel(const std::string &mdl, pragma::ma
 
 void BaseVehicleComponent::ClearDriver()
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::HasDriver) == false)
+	if(math::is_flag_set(m_stateFlags, StateFlags::HasDriver) == false)
 		return;
 	BroadcastEvent(baseVehicleComponent::EVENT_ON_DRIVER_EXITED);
-	pragma::math::set_flag(m_stateFlags, StateFlags::HasDriver, false);
+	math::set_flag(m_stateFlags, StateFlags::HasDriver, false);
 	SetTickPolicy(TickPolicy::Never);
 	m_driver = EntityHandle();
 	if(m_physVehicle.IsValid())
 		m_physVehicle->ResetControls();
 }
 
-void BaseVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
+void BaseVehicleComponent::SetDriver(ecs::BaseEntity *ent)
 {
 	if(m_driver.valid())
 		ClearDriver();
 	m_driver = ent->GetHandle();
-	pragma::math::set_flag(m_stateFlags, StateFlags::HasDriver, true);
+	math::set_flag(m_stateFlags, StateFlags::HasDriver, true);
 	SetTickPolicy(TickPolicy::Always);
 	BroadcastEvent(baseVehicleComponent::EVENT_ON_DRIVER_ENTERED);
 }
 
-pragma::ecs::BaseEntity *BaseVehicleComponent::GetDriver() { return m_driver.get(); }
+ecs::BaseEntity *BaseVehicleComponent::GetDriver() { return m_driver.get(); }
 Bool BaseVehicleComponent::HasDriver() const { return m_driver.valid(); }
 
 BaseWheelComponent *BaseVehicleComponent::CreateWheelEntity(uint8_t wheelIndex)
@@ -210,7 +210,7 @@ BaseWheelComponent *BaseVehicleComponent::CreateWheelEntity(uint8_t wheelIndex)
 
 void BaseVehicleComponent::InitializeWheelEntities()
 {
-	auto numWheels = pragma::math::min(m_wheels.size(), m_vhcCreateInfo.wheels.size());
+	auto numWheels = math::min(m_wheels.size(), m_vhcCreateInfo.wheels.size());
 	for(auto i = decltype(numWheels) {0u}; i < numWheels; ++i) {
 		auto &wheelData = m_wheels.at(i);
 		auto &wheelDesc = m_vhcCreateInfo.wheels.at(i);
@@ -228,9 +228,9 @@ void BaseVehicleComponent::InitializeWheelEntities()
 	}
 }
 
-pragma::ecs::BaseEntity *BaseVehicleComponent::GetSteeringWheel() { return m_steeringWheel.get(); }
+ecs::BaseEntity *BaseVehicleComponent::GetSteeringWheel() { return m_steeringWheel.get(); }
 
-void BaseVehicleComponent::SetupVehicle(const pragma::physics::VehicleCreateInfo &createInfo, const std::vector<std::string> &wheelModels)
+void BaseVehicleComponent::SetupVehicle(const physics::VehicleCreateInfo &createInfo, const std::vector<std::string> &wheelModels)
 {
 	m_vhcCreateInfo = createInfo;
 	auto numWheels = createInfo.wheels.size();
@@ -245,7 +245,7 @@ void BaseVehicleComponent::SetupVehicle(const pragma::physics::VehicleCreateInfo
 void BaseVehicleComponent::OnTick(double tDelta)
 {
 	auto *driver = GetDriver();
-	if(m_physVehicle == nullptr || pragma::math::is_flag_set(m_stateFlags, StateFlags::HasDriver) == false)
+	if(m_physVehicle == nullptr || math::is_flag_set(m_stateFlags, StateFlags::HasDriver) == false)
 		return;
 	if(driver == nullptr || driver->IsPlayer() == false) {
 		ClearDriver();
@@ -255,19 +255,19 @@ void BaseVehicleComponent::OnTick(double tDelta)
 
 	auto accFactor = 0.f;
 	auto *actionC = plComponent->GetActionInputController();
-	if(actionC && actionC->GetActionInput(pragma::Action::MoveForward))
+	if(actionC && actionC->GetActionInput(Action::MoveForward))
 		accFactor += 1.f;
-	if(actionC && actionC->GetActionInput(pragma::Action::MoveBackward))
+	if(actionC && actionC->GetActionInput(Action::MoveBackward))
 		accFactor -= 1.f;
 	m_physVehicle->SetAccelerationFactor(accFactor);
 
-	auto brakeFactor = (actionC && actionC->GetActionInput(pragma::Action::Jump)) ? 1.f : 0.f;
+	auto brakeFactor = (actionC && actionC->GetActionInput(Action::Jump)) ? 1.f : 0.f;
 	m_physVehicle->SetBrakeFactor(brakeFactor);
 
 	auto steerFactor = 0.f;
-	if(actionC && actionC->GetActionInput(pragma::Action::MoveLeft))
+	if(actionC && actionC->GetActionInput(Action::MoveLeft))
 		steerFactor -= 1.f;
-	if(actionC && actionC->GetActionInput(pragma::Action::MoveRight))
+	if(actionC && actionC->GetActionInput(Action::MoveRight))
 		steerFactor += 1.f;
 	m_physVehicle->SetSteerFactor(steerFactor);
 }
@@ -275,22 +275,22 @@ void BaseVehicleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(basePhysicsComponent::EVENT_INITIALIZE_PHYSICS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(basePhysicsComponent::EVENT_INITIALIZE_PHYSICS, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto pPhysComponent = GetEntity().GetPhysicsComponent();
 		if(!pPhysComponent)
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		auto &physInitData = static_cast<CEInitializePhysics &>(evData.get());
-		if(physInitData.physicsType != pragma::physics::PhysicsType::Dynamic)
-			return pragma::util::EventReply::Unhandled;
+		if(physInitData.physicsType != physics::PhysicsType::Dynamic)
+			return util::EventReply::Unhandled;
 		InitializeVehiclePhysics(physInitData.physicsType, physInitData.flags);
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { DestroyVehiclePhysics(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED, [this](std::reference_wrapper<ComponentEvent> evData) { DestroyVehiclePhysics(); });
 
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent)
-		pPhysComponent->SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter() | pragma::physics::CollisionMask::Vehicle);
+		pPhysComponent->SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter() | physics::CollisionMask::Vehicle);
 	ent.AddComponent("model");
 	ent.AddComponent("physics");
 	ent.AddComponent("observable");
@@ -307,5 +307,5 @@ Float BaseVehicleComponent::GetSteeringFactor() const
 {
 	if(m_physVehicle == nullptr || m_vhcCreateInfo.wheels.empty())
 		return 0.f;
-	return pragma::math::clamp(static_cast<float>(pragma::math::rad_to_deg(m_physVehicle->GetWheelYawAngle(0)) / m_vhcCreateInfo.wheels.front().maxSteeringAngle), -1.f, 1.f);
+	return math::clamp(static_cast<float>(math::rad_to_deg(m_physVehicle->GetWheelYawAngle(0)) / m_vhcCreateInfo.wheels.front().maxSteeringAngle), -1.f, 1.f);
 }

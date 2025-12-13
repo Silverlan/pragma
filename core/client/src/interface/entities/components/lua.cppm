@@ -11,15 +11,15 @@ export import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CLuaBaseEntityComponent final : public BaseLuaBaseEntityComponent, public CBaseSnapshotComponent {
 	  public:
-		CLuaBaseEntityComponent(pragma::ecs::BaseEntity &ent);
+		CLuaBaseEntityComponent(ecs::BaseEntity &ent);
 
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveSnapshotData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override;
 		virtual bool ShouldTransmitSnapshotData() const override;
 	  protected:
-		virtual void InvokeNetEventHandle(const std::string &methodName, NetPacket &packet, pragma::BasePlayerComponent *pl) override;
+		virtual void InvokeNetEventHandle(const std::string &methodName, NetPacket &packet, BasePlayerComponent *pl) override;
 	};
 };
 

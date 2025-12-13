@@ -9,12 +9,12 @@ import :engine;
 import :entities.components.input;
 using namespace pragma;
 
-CInputComponent::CInputComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent} {}
+CInputComponent::CInputComponent(ecs::BaseEntity &ent) : BaseEntityComponent {ent} {}
 CInputComponent::~CInputComponent() {}
 void CInputComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CInputComponent::Initialize() { BaseEntityComponent::Initialize(); }
 
-static auto cvAcceleration = pragma::console::get_client_con_var("cl_mouse_acceleration");
+static auto cvAcceleration = console::get_client_con_var("cl_mouse_acceleration");
 void CInputComponent::UpdateMouseMovementDeltaValues()
 {
 	auto xDelta = 0.f;
@@ -33,11 +33,11 @@ void CInputComponent::UpdateMouseMovementDeltaValues()
 				// -> Recenter the mouse cursor
 				m_initialFocus = false;
 				m_lastFocusedElement = nullptr;
-				(*window)->SetCursorPos(Vector2i(pragma::math::round(w / 2.f), pragma::math::round(h / 2.f)));
+				(*window)->SetCursorPos(Vector2i(math::round(w / 2.f), math::round(h / 2.f)));
 			}
 
 			auto pos = (*window)->GetCursorPos();
-			(*window)->SetCursorPos(Vector2i(pragma::math::round(w / 2.f), pragma::math::round(h / 2.f)));
+			(*window)->SetCursorPos(Vector2i(math::round(w / 2.f), math::round(h / 2.f)));
 			xDelta = pos.x - w / 2.f;
 			yDelta = pos.y - h / 2.f;
 			if((w % 2) != 0)
@@ -50,9 +50,9 @@ void CInputComponent::UpdateMouseMovementDeltaValues()
 
 	auto acc = cvAcceleration->GetFloat() + 1.f;
 	if(yDelta != 0.f)
-		yDelta = pragma::math::pow(CFloat(abs(yDelta)), acc) * ((yDelta > 0.f) ? 1 : -1);
+		yDelta = math::pow(CFloat(abs(yDelta)), acc) * ((yDelta > 0.f) ? 1 : -1);
 	if(xDelta != 0.f)
-		xDelta = pragma::math::pow(CFloat(abs(xDelta)), acc) * ((xDelta > 0.f) ? 1 : -1);
+		xDelta = math::pow(CFloat(abs(xDelta)), acc) * ((xDelta > 0.f) ? 1 : -1);
 	m_mouseDeltaX = xDelta;
 	m_mouseDeltaY = yDelta;
 }

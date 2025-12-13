@@ -13,7 +13,7 @@ import panima;
 
 using namespace pragma;
 
-DLLNETWORK std::ostream &pragma::operator<<(std::ostream &os, const pragma::BaseEntityComponent &component)
+DLLNETWORK std::ostream &pragma::operator<<(std::ostream &os, const BaseEntityComponent &component)
 {
 	auto *info = component.GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().GetComponentInfo(component.GetComponentId());
 	os << "Component[";
@@ -25,12 +25,12 @@ DLLNETWORK std::ostream &pragma::operator<<(std::ostream &os, const pragma::Base
 	return os;
 }
 
-decltype(EEntityComponentCallbackEvent::Count) EEntityComponentCallbackEvent::Count = EEntityComponentCallbackEvent {pragma::math::to_integral(E::Count)};
+decltype(EEntityComponentCallbackEvent::Count) EEntityComponentCallbackEvent::Count = EEntityComponentCallbackEvent {math::to_integral(E::Count)};
 decltype(baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED = INVALID_COMPONENT_ID;
 decltype(baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED) baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED = INVALID_COMPONENT_ID;
 decltype(baseEntityComponent::EVENT_ON_MEMBERS_CHANGED) baseEntityComponent::EVENT_ON_MEMBERS_CHANGED = INVALID_COMPONENT_ID;
 decltype(baseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED) baseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED = INVALID_COMPONENT_ID;
-BaseEntityComponent::BaseEntityComponent(pragma::ecs::BaseEntity &ent) : m_entity {ent} {}
+BaseEntityComponent::BaseEntityComponent(ecs::BaseEntity &ent) : m_entity {ent} {}
 BaseEntityComponent::~BaseEntityComponent()
 {
 	if(m_callbackInfos) {
@@ -41,7 +41,7 @@ BaseEntityComponent::~BaseEntityComponent()
 		}
 		m_callbackInfos = nullptr;
 	}
-	if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::CleanedUp)) {
+	if(!math::is_flag_set(m_stateFlags, StateFlags::CleanedUp)) {
 		auto *info = this->GetComponentInfo();
 		std::string typeName = info ? info->name : "UNKNOWN";
 		std::string msg = "Component of type '" + typeName + "' was not cleaned up properly! Was :CleanUp not called?";
@@ -50,7 +50,7 @@ BaseEntityComponent::~BaseEntityComponent()
 	}
 	GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().DeregisterComponent(*this);
 }
-void BaseEntityComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void BaseEntityComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED = registerEvent("ON_ENTITY_COMPONENT_ADDED", ComponentEventInfo::Type::Broadcast);
 	baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED = registerEvent("ON_ENTITY_COMPONENT_REMOVED", ComponentEventInfo::Type::Broadcast);
@@ -62,7 +62,7 @@ spdlog::logger &BaseEntityComponent::InitLogger() const
 {
 	auto *info = GetComponentInfo();
 	assert(info != nullptr);
-	return pragma::register_logger("c_" + std::string {info->name.str});
+	return register_logger("c_" + std::string {info->name.str});
 }
 
 void BaseEntityComponent::Log(const std::string &msg, LogSeverity severity) const
@@ -153,7 +153,7 @@ void BaseEntityComponent::SetPropertyAnimated(const std::string &property, bool 
 		auto *anim = const_cast<panima::Animation *>(player.GetAnimation());
 		if(anim) {
 			auto *memberInfo = GetMemberInfo(*memberIdx);
-			if(memberInfo && pragma::is_animatable_type(memberInfo->type)) {
+			if(memberInfo && is_animatable_type(memberInfo->type)) {
 				udm::visit_ng(static_cast<udm::Type>(memberInfo->type), [this, anim, &panimaC, &baseManager, &targetPath, memberInfo](auto tag) {
 					using T = typename decltype(tag)::type;
 					if constexpr(pragma::is_animatable_type_v<T>) {
@@ -179,9 +179,9 @@ void BaseEntityComponent::OnMembersChanged()
 		genericC->InvokeEventCallbacks(baseGenericComponent::EVENT_ON_MEMBERS_CHANGED, ev);
 	}
 }
-void BaseEntityComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
+void BaseEntityComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
 void BaseEntityComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts) {}
-static pragma::math::ScaledTransform get_entity_pose(const pragma::BaseEntityComponent &component) { return component.GetEntity().GetPose(); }
+static math::ScaledTransform get_entity_pose(const BaseEntityComponent &component) { return component.GetEntity().GetPose(); }
 template<typename TValue>
 TValue get_identity_value()
 {
@@ -190,16 +190,16 @@ TValue get_identity_value()
 	return TValue {};
 }
 template<typename TValue, bool parentSpaceOnly = false>
-static bool get_transform_member_value(const pragma::BaseEntityComponent &component, ComponentMemberIndex idx, pragma::math::CoordinateSpace space, TValue &outValue);
+static bool get_transform_member_value(const BaseEntityComponent &component, ComponentMemberIndex idx, math::CoordinateSpace space, TValue &outValue);
 template<typename TValue, bool parentSpaceOnly = false>
-static bool get_transform_member_value(const pragma::BaseEntityComponent &component, ComponentMemberIndex idx, pragma::math::CoordinateSpace space, TValue &outValue, void (*getValue)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, void *, const void *))
+static bool get_transform_member_value(const BaseEntityComponent &component, ComponentMemberIndex idx, math::CoordinateSpace space, TValue &outValue, void (*getValue)(const ComponentMemberInfo &, BaseEntityComponent &, void *, const void *))
 {
 	auto *memberInfo = component.GetMemberInfo(idx);
-	if(!memberInfo || !memberInfo->getterFunction || (space != pragma::math::CoordinateSpace::Local && space != pragma::math::CoordinateSpace::World && space != pragma::math::CoordinateSpace::Object))
+	if(!memberInfo || !memberInfo->getterFunction || (space != math::CoordinateSpace::Local && space != math::CoordinateSpace::World && space != math::CoordinateSpace::Object))
 		return false;
-	if constexpr(std::is_same_v<TValue, pragma::math::Transform> || std::is_same_v<TValue, pragma::math::ScaledTransform>) {
-		if(memberInfo->type != pragma::ents::EntityMemberType::Transform && memberInfo->type != pragma::ents::EntityMemberType::ScaledTransform) {
-			auto *cPoseType = memberInfo->FindTypeMetaData<pragma::ents::PoseComponentTypeMetaData>();
+	if constexpr(std::is_same_v<TValue, math::Transform> || std::is_same_v<TValue, math::ScaledTransform>) {
+		if(memberInfo->type != ents::EntityMemberType::Transform && memberInfo->type != ents::EntityMemberType::ScaledTransform) {
+			auto *cPoseType = memberInfo->FindTypeMetaData<ents::PoseComponentTypeMetaData>();
 			if(cPoseType) {
 				// The requested type is Transform/ScaledTransform, but the property type is
 				// position or rotation. In this case we want to take our pos/rot siblings into account, so
@@ -208,7 +208,7 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 				return idxPose.has_value() ? get_transform_member_value(component, *idxPose, space, outValue, getValue) : false;
 			}
 			switch(memberInfo->type) {
-			case pragma::ents::EntityMemberType::Vector3:
+			case ents::EntityMemberType::Vector3:
 				{
 					Vector3 value;
 					if(!get_transform_member_value<Vector3, parentSpaceOnly>(component, idx, space, value, getValue))
@@ -217,8 +217,8 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 					outValue.SetOrigin(value);
 					return true;
 				}
-			case pragma::ents::EntityMemberType::EulerAngles:
-			case pragma::ents::EntityMemberType::Quaternion:
+			case ents::EntityMemberType::EulerAngles:
+			case ents::EntityMemberType::Quaternion:
 				{
 					Quat value;
 					if(!get_transform_member_value<Quat, parentSpaceOnly>(component, idx, space, value, getValue))
@@ -231,15 +231,15 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 			return false;
 		}
 	}
-	auto *cMetaData = memberInfo->FindTypeMetaData<pragma::ents::CoordinateTypeMetaData>();
+	auto *cMetaData = memberInfo->FindTypeMetaData<ents::CoordinateTypeMetaData>();
 	if constexpr(!parentSpaceOnly) {
-		auto result = pragma::ents::visit_member(memberInfo->type, [&component, memberInfo, &outValue, getValue](auto tag) -> bool {
+		auto result = ents::visit_member(memberInfo->type, [&component, memberInfo, &outValue, getValue](auto tag) -> bool {
 			using T = typename decltype(tag)::type;
 			if constexpr(!udm::is_convertible<T, TValue>())
 				return false;
 			else {
 				T value;
-				getValue(*memberInfo, const_cast<pragma::BaseEntityComponent &>(component), &value, &outValue);
+				getValue(*memberInfo, const_cast<BaseEntityComponent &>(component), &value, &outValue);
 				outValue = udm::convert<T, TValue>(value);
 				return true;
 			}
@@ -258,7 +258,7 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 			return false;
 		}
 		switch(space) {
-		case pragma::math::CoordinateSpace::Local:
+		case math::CoordinateSpace::Local:
 			{
 				outValue = get_identity_value<TValue>();
 				return true; // Nothing to do
@@ -269,26 +269,26 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 		return false; // Unreachable
 	}
 	else {
-		auto valueSpace = cMetaData ? cMetaData->space : pragma::math::CoordinateSpace::World;
+		auto valueSpace = cMetaData ? cMetaData->space : math::CoordinateSpace::World;
 		if(valueSpace == space)
 			return true;
 		switch(valueSpace) {
-		case pragma::math::CoordinateSpace::Local:
+		case math::CoordinateSpace::Local:
 			{
-				pragma::math::ScaledTransform parentPose {};
+				math::ScaledTransform parentPose {};
 				if(!idxParent.has_value()) {
-					if(space == pragma::math::CoordinateSpace::Object)
+					if(space == math::CoordinateSpace::Object)
 						return true;
 					parentPose = get_entity_pose(component);
 				}
-				else if(!get_transform_member_value<pragma::math::ScaledTransform, false>(component, *idxParent, space, parentPose))
+				else if(!get_transform_member_value<math::ScaledTransform, false>(component, *idxParent, space, parentPose))
 					return false;
 				outValue = parentPose * outValue;
 				return true;
 			}
-		case pragma::math::CoordinateSpace::Object:
+		case math::CoordinateSpace::Object:
 			{
-				if(space == pragma::math::CoordinateSpace::World) {
+				if(space == math::CoordinateSpace::World) {
 					// Effectively the same as the else branch below, but faster
 					outValue = get_entity_pose(component) * outValue;
 					return true;
@@ -296,24 +296,24 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 				else {
 					if(!idxParent.has_value())
 						return true; // Object space is equivalent to local space
-					pragma::math::ScaledTransform parentPose {};
-					if(!get_transform_member_value<pragma::math::ScaledTransform, false>(component, *idxParent, space, parentPose))
+					math::ScaledTransform parentPose {};
+					if(!get_transform_member_value<math::ScaledTransform, false>(component, *idxParent, space, parentPose))
 						return false;
 					outValue = parentPose.GetInverse() * outValue;
 					return true;
 				}
 				return false;
 			}
-		case pragma::math::CoordinateSpace::World:
+		case math::CoordinateSpace::World:
 			{
-				if(space == pragma::math::CoordinateSpace::Object || !idxParent.has_value()) {
+				if(space == math::CoordinateSpace::Object || !idxParent.has_value()) {
 					// Effectively the same as the else branch below, but faster
 					outValue = get_entity_pose(component).GetInverse() * outValue;
 					return true;
 				}
 				else {
-					pragma::math::ScaledTransform parentPose {};
-					if(!get_transform_member_value<pragma::math::ScaledTransform, false>(component, *idxParent, space, parentPose))
+					math::ScaledTransform parentPose {};
+					if(!get_transform_member_value<math::ScaledTransform, false>(component, *idxParent, space, parentPose))
 						return false;
 					outValue = parentPose.GetInverse() * outValue;
 					return true;
@@ -326,29 +326,29 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 	return false; // Unreachable
 }
 template<typename TValue, bool parentSpaceOnly>
-bool get_transform_member_value(const pragma::BaseEntityComponent &component, ComponentMemberIndex idx, pragma::math::CoordinateSpace space, TValue &outValue)
+bool get_transform_member_value(const BaseEntityComponent &component, ComponentMemberIndex idx, math::CoordinateSpace space, TValue &outValue)
 {
-	return get_transform_member_value<TValue, parentSpaceOnly>(component, idx, space, outValue, +[](const pragma::ComponentMemberInfo &memberInfo, pragma::BaseEntityComponent &component, void *outData, const void *) { memberInfo.getterFunction(memberInfo, component, outData); });
+	return get_transform_member_value<TValue, parentSpaceOnly>(component, idx, space, outValue, +[](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, void *outData, const void *) { memberInfo.getterFunction(memberInfo, component, outData); });
 }
 
 template<typename TValue>
-static std::optional<TValue> get_value_in_property_space(pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, pragma::math::CoordinateSpace space, const TValue &value, pragma::math::CoordinateSpace *optOutPropSpace = nullptr)
+static std::optional<TValue> get_value_in_property_space(BaseEntityComponent &component, const ComponentMemberInfo &memberInfo, math::CoordinateSpace space, const TValue &value, math::CoordinateSpace *optOutPropSpace = nullptr)
 {
-	if((space != pragma::math::CoordinateSpace::Local && space != pragma::math::CoordinateSpace::World && space != pragma::math::CoordinateSpace::Object))
+	if((space != math::CoordinateSpace::Local && space != math::CoordinateSpace::World && space != math::CoordinateSpace::Object))
 		return {};
-	auto *cMetaData = memberInfo.FindTypeMetaData<pragma::ents::CoordinateTypeMetaData>();
-	auto valueSpace = cMetaData ? cMetaData->space : pragma::math::CoordinateSpace::World;
+	auto *cMetaData = memberInfo.FindTypeMetaData<ents::CoordinateTypeMetaData>();
+	auto valueSpace = cMetaData ? cMetaData->space : math::CoordinateSpace::World;
 	if(optOutPropSpace)
 		*optOutPropSpace = valueSpace;
 	if(valueSpace == space)
 		return value;
 	auto idxParent = cMetaData ? component.GetMemberIndex(cMetaData->parentProperty) : std::optional<ComponentMemberIndex> {};
 	switch(space) {
-	case pragma::math::CoordinateSpace::Local:
+	case math::CoordinateSpace::Local:
 		{
-			pragma::math::ScaledTransform parentPose {};
+			math::ScaledTransform parentPose {};
 			if(!idxParent.has_value()) {
-				if(valueSpace == pragma::math::CoordinateSpace::World)
+				if(valueSpace == math::CoordinateSpace::World)
 					parentPose = get_entity_pose(component);
 			}
 			else if(!get_transform_member_value(component, *idxParent, valueSpace, parentPose))
@@ -356,9 +356,9 @@ static std::optional<TValue> get_value_in_property_space(pragma::BaseEntityCompo
 			auto valueInPropSpace = parentPose * value;
 			return valueInPropSpace;
 		}
-	case pragma::math::CoordinateSpace::Object:
+	case math::CoordinateSpace::Object:
 		{
-			if(valueSpace == pragma::math::CoordinateSpace::World) {
+			if(valueSpace == math::CoordinateSpace::World) {
 				// Effectively the same as the else branch below, but faster
 				auto valueInPropSpace = get_entity_pose(component) * value;
 				return valueInPropSpace;
@@ -366,7 +366,7 @@ static std::optional<TValue> get_value_in_property_space(pragma::BaseEntityCompo
 			else {
 				if(!idxParent.has_value())
 					return value; // Object space is equivalent to local space
-				pragma::math::ScaledTransform parentPose {};
+				math::ScaledTransform parentPose {};
 				if(!get_transform_member_value(component, *idxParent, valueSpace, parentPose))
 					return {};
 				auto valueInPropSpace = parentPose.GetInverse() * value;
@@ -374,18 +374,18 @@ static std::optional<TValue> get_value_in_property_space(pragma::BaseEntityCompo
 			}
 			return {};
 		}
-	case pragma::math::CoordinateSpace::World:
+	case math::CoordinateSpace::World:
 		{
-			if(valueSpace == pragma::math::CoordinateSpace::Object || !idxParent.has_value()) {
+			if(valueSpace == math::CoordinateSpace::Object || !idxParent.has_value()) {
 				// Effectively the same as the else branch below, but faster
 				auto valueInPropSpace = get_entity_pose(component).GetInverse() * value;
 				return valueInPropSpace;
 			}
 			else {
-				pragma::math::ScaledTransform parentPose;
+				math::ScaledTransform parentPose;
 				if(!idxParent.has_value())
 					parentPose = get_entity_pose(component);
-				else if(!get_transform_member_value(component, *idxParent, pragma::math::CoordinateSpace::World, parentPose))
+				else if(!get_transform_member_value(component, *idxParent, math::CoordinateSpace::World, parentPose))
 					return {};
 				auto valueInPropSpace = parentPose.GetInverse() * value;
 				return valueInPropSpace;
@@ -397,13 +397,13 @@ static std::optional<TValue> get_value_in_property_space(pragma::BaseEntityCompo
 }
 
 template<typename TValue>
-static bool set_transform_member_value(pragma::BaseEntityComponent &component, ComponentMemberIndex idx, pragma::math::CoordinateSpace space, const TValue &value)
+static bool set_transform_member_value(BaseEntityComponent &component, ComponentMemberIndex idx, math::CoordinateSpace space, const TValue &value)
 {
 	auto *memberInfo = component.GetMemberInfo(idx);
 	if(!memberInfo)
 		return {};
 	auto setValue = [memberInfo, &component](const TValue &value) {
-		return pragma::ents::visit_member(memberInfo->type, [&component, memberInfo, &value](auto tag) -> bool {
+		return ents::visit_member(memberInfo->type, [&component, memberInfo, &value](auto tag) -> bool {
 			using T = typename decltype(tag)::type;
 			if constexpr(!udm::is_convertible<TValue, T>())
 				return false;
@@ -421,10 +421,10 @@ static bool set_transform_member_value(pragma::BaseEntityComponent &component, C
 }
 
 template<class T>
-bool convert_transform_member_value_to_target_space(const BaseEntityComponent &component, ComponentMemberIndex idx, pragma::math::CoordinateSpace space, T &inOutPos)
+bool convert_transform_member_value_to_target_space(const BaseEntityComponent &component, ComponentMemberIndex idx, math::CoordinateSpace space, T &inOutPos)
 {
 	return get_transform_member_value<T>(
-	  component, idx, space, inOutPos, +[](const pragma::ComponentMemberInfo &memberInfo, pragma::BaseEntityComponent &component, void *outData, const void *inOutPos) {
+	  component, idx, space, inOutPos, +[](const ComponentMemberInfo &memberInfo, BaseEntityComponent &component, void *outData, const void *inOutPos) {
 		  if(!pragma::ents::is_udm_member_type(memberInfo.type))
 			  throw std::invalid_argument {"Property has type '" + std::string {magic_enum::enum_name(memberInfo.type)} + "', which is not a valid UDM type!"};
 		  constexpr auto type = udm::type_to_enum<T>();
@@ -432,7 +432,7 @@ bool convert_transform_member_value_to_target_space(const BaseEntityComponent &c
 		  if(memberType == type)
 			  memcpy(outData, inOutPos, sizeof(T));
 		  else if(udm::is_convertible(memberType, type)) {
-			  pragma::ents::visit_member(memberInfo.type, [inOutPos, outData](auto tag) {
+			  ents::visit_member(memberInfo.type, [inOutPos, outData](auto tag) {
 				  using TMember = typename decltype(tag)::type;
 				  if constexpr(!udm::is_convertible<TMember, T>()) {
 					  // unreachable
@@ -450,42 +450,42 @@ bool convert_transform_member_value_to_target_space(const BaseEntityComponent &c
 			  throw std::invalid_argument {"Property type '" + std::string {magic_enum::enum_name(memberInfo.type)} + "' is not compatible with expected type '" + std::string {magic_enum::enum_name(type)} + "'!"};
 	  });
 }
-bool BaseEntityComponent::ConvertTransformMemberPosToTargetSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &inOutPos) const { return convert_transform_member_value_to_target_space(*this, idx, space, inOutPos); }
-bool BaseEntityComponent::ConvertTransformMemberRotToTargetSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Quat &inOutRot) const { return convert_transform_member_value_to_target_space(*this, idx, space, inOutRot); }
-bool BaseEntityComponent::ConvertTransformMemberScaleToTargetSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &inOutScale) const { return convert_transform_member_value_to_target_space(*this, idx, space, inOutScale); }
-bool BaseEntityComponent::ConvertTransformMemberPoseToTargetSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, pragma::math::ScaledTransform &inOutPose) const { return convert_transform_member_value_to_target_space(*this, idx, space, inOutPose); }
+bool BaseEntityComponent::ConvertTransformMemberPosToTargetSpace(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &inOutPos) const { return convert_transform_member_value_to_target_space(*this, idx, space, inOutPos); }
+bool BaseEntityComponent::ConvertTransformMemberRotToTargetSpace(ComponentMemberIndex idx, math::CoordinateSpace space, Quat &inOutRot) const { return convert_transform_member_value_to_target_space(*this, idx, space, inOutRot); }
+bool BaseEntityComponent::ConvertTransformMemberScaleToTargetSpace(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &inOutScale) const { return convert_transform_member_value_to_target_space(*this, idx, space, inOutScale); }
+bool BaseEntityComponent::ConvertTransformMemberPoseToTargetSpace(ComponentMemberIndex idx, math::CoordinateSpace space, math::ScaledTransform &inOutPose) const { return convert_transform_member_value_to_target_space(*this, idx, space, inOutPose); }
 
-bool BaseEntityComponent::GetTransformMemberPos(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &outPos) const { return get_transform_member_value(*this, idx, space, outPos); }
-bool BaseEntityComponent::GetTransformMemberRot(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Quat &outRot) const { return get_transform_member_value(*this, idx, space, outRot); }
-bool BaseEntityComponent::GetTransformMemberScale(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &outScale) const { return get_transform_member_value(*this, idx, space, outScale); }
-bool BaseEntityComponent::GetTransformMemberPose(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, pragma::math::ScaledTransform &outPose) const { return get_transform_member_value(*this, idx, space, outPose); }
+bool BaseEntityComponent::GetTransformMemberPos(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &outPos) const { return get_transform_member_value(*this, idx, space, outPos); }
+bool BaseEntityComponent::GetTransformMemberRot(ComponentMemberIndex idx, math::CoordinateSpace space, Quat &outRot) const { return get_transform_member_value(*this, idx, space, outRot); }
+bool BaseEntityComponent::GetTransformMemberScale(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &outScale) const { return get_transform_member_value(*this, idx, space, outScale); }
+bool BaseEntityComponent::GetTransformMemberPose(ComponentMemberIndex idx, math::CoordinateSpace space, math::ScaledTransform &outPose) const { return get_transform_member_value(*this, idx, space, outPose); }
 
-bool BaseEntityComponent::SetTransformMemberPos(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, const Vector3 &pos) { return set_transform_member_value(*this, idx, space, pos); }
-bool BaseEntityComponent::SetTransformMemberRot(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, const Quat &rot) { return set_transform_member_value(*this, idx, space, rot); }
-bool BaseEntityComponent::SetTransformMemberScale(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, const Vector3 &scale) { return set_transform_member_value(*this, idx, space, scale); }
-bool BaseEntityComponent::SetTransformMemberPose(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, const pragma::math::ScaledTransform &pose) { return set_transform_member_value(*this, idx, space, pose); }
+bool BaseEntityComponent::SetTransformMemberPos(ComponentMemberIndex idx, math::CoordinateSpace space, const Vector3 &pos) { return set_transform_member_value(*this, idx, space, pos); }
+bool BaseEntityComponent::SetTransformMemberRot(ComponentMemberIndex idx, math::CoordinateSpace space, const Quat &rot) { return set_transform_member_value(*this, idx, space, rot); }
+bool BaseEntityComponent::SetTransformMemberScale(ComponentMemberIndex idx, math::CoordinateSpace space, const Vector3 &scale) { return set_transform_member_value(*this, idx, space, scale); }
+bool BaseEntityComponent::SetTransformMemberPose(ComponentMemberIndex idx, math::CoordinateSpace space, const math::ScaledTransform &pose) { return set_transform_member_value(*this, idx, space, pose); }
 
-bool BaseEntityComponent::GetTransformMemberParentPos(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &outPos) const { return get_transform_member_value<std::remove_reference_t<decltype(outPos)>, true>(*this, idx, space, outPos); }
-bool BaseEntityComponent::GetTransformMemberParentRot(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Quat &outRot) const { return get_transform_member_value<std::remove_reference_t<decltype(outRot)>, true>(*this, idx, space, outRot); }
-bool BaseEntityComponent::GetTransformMemberParentScale(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &outScale) const { return get_transform_member_value<std::remove_reference_t<decltype(outScale)>, true>(*this, idx, space, outScale); }
-bool BaseEntityComponent::GetTransformMemberParentPose(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, pragma::math::ScaledTransform &outPose) const { return get_transform_member_value<std::remove_reference_t<decltype(outPose)>, true>(*this, idx, space, outPose); }
+bool BaseEntityComponent::GetTransformMemberParentPos(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &outPos) const { return get_transform_member_value<std::remove_reference_t<decltype(outPos)>, true>(*this, idx, space, outPos); }
+bool BaseEntityComponent::GetTransformMemberParentRot(ComponentMemberIndex idx, math::CoordinateSpace space, Quat &outRot) const { return get_transform_member_value<std::remove_reference_t<decltype(outRot)>, true>(*this, idx, space, outRot); }
+bool BaseEntityComponent::GetTransformMemberParentScale(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &outScale) const { return get_transform_member_value<std::remove_reference_t<decltype(outScale)>, true>(*this, idx, space, outScale); }
+bool BaseEntityComponent::GetTransformMemberParentPose(ComponentMemberIndex idx, math::CoordinateSpace space, math::ScaledTransform &outPose) const { return get_transform_member_value<std::remove_reference_t<decltype(outPose)>, true>(*this, idx, space, outPose); }
 
 template<typename TValue>
-static bool convert_value_to_member_space(const pragma::BaseEntityComponent &component, ComponentMemberIndex idx, pragma::math::CoordinateSpace space, TValue &inOutValue, pragma::math::CoordinateSpace *optOutMemberSpace)
+static bool convert_value_to_member_space(const BaseEntityComponent &component, ComponentMemberIndex idx, math::CoordinateSpace space, TValue &inOutValue, math::CoordinateSpace *optOutMemberSpace)
 {
 	auto *memberInfo = component.GetMemberInfo(idx);
 	if(!memberInfo)
 		return {};
-	auto valueInPropSpace = get_value_in_property_space<TValue>(const_cast<pragma::BaseEntityComponent &>(component), *memberInfo, space, inOutValue);
+	auto valueInPropSpace = get_value_in_property_space<TValue>(const_cast<BaseEntityComponent &>(component), *memberInfo, space, inOutValue);
 	if(!valueInPropSpace)
 		return false;
 	inOutValue = *valueInPropSpace;
 	return true;
 }
-bool BaseEntityComponent::ConvertPosToMemberSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &inOutPos, pragma::math::CoordinateSpace *optOutMemberSpace) const { return convert_value_to_member_space(*this, idx, space, inOutPos, optOutMemberSpace); }
-bool BaseEntityComponent::ConvertRotToMemberSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Quat &inOutRot, pragma::math::CoordinateSpace *optOutMemberSpace) const { return convert_value_to_member_space(*this, idx, space, inOutRot, optOutMemberSpace); }
-bool BaseEntityComponent::ConvertScaleToMemberSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &inOutScale, pragma::math::CoordinateSpace *optOutMemberSpace) const { return convert_value_to_member_space(*this, idx, space, inOutScale, optOutMemberSpace); }
-bool BaseEntityComponent::ConvertPoseToMemberSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, pragma::math::ScaledTransform &inOutPose, pragma::math::CoordinateSpace *optOutMemberSpace) const { return convert_value_to_member_space(*this, idx, space, inOutPose, optOutMemberSpace); }
+bool BaseEntityComponent::ConvertPosToMemberSpace(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &inOutPos, math::CoordinateSpace *optOutMemberSpace) const { return convert_value_to_member_space(*this, idx, space, inOutPos, optOutMemberSpace); }
+bool BaseEntityComponent::ConvertRotToMemberSpace(ComponentMemberIndex idx, math::CoordinateSpace space, Quat &inOutRot, math::CoordinateSpace *optOutMemberSpace) const { return convert_value_to_member_space(*this, idx, space, inOutRot, optOutMemberSpace); }
+bool BaseEntityComponent::ConvertScaleToMemberSpace(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &inOutScale, math::CoordinateSpace *optOutMemberSpace) const { return convert_value_to_member_space(*this, idx, space, inOutScale, optOutMemberSpace); }
+bool BaseEntityComponent::ConvertPoseToMemberSpace(ComponentMemberIndex idx, math::CoordinateSpace space, math::ScaledTransform &inOutPose, math::CoordinateSpace *optOutMemberSpace) const { return convert_value_to_member_space(*this, idx, space, inOutPose, optOutMemberSpace); }
 
 const ComponentMemberInfo *BaseEntityComponent::FindMemberInfo(const std::string &name) const
 {
@@ -512,7 +512,7 @@ uint32_t BaseEntityComponent::GetStaticMemberCount() const
 std::optional<ComponentMemberIndex> BaseEntityComponent::GetMemberIndex(const std::string &name) const
 {
 	auto lname = name;
-	pragma::string::to_lower(lname);
+	string::to_lower(lname);
 	return DoGetMemberIndex(lname);
 }
 std::optional<ComponentMemberIndex> BaseEntityComponent::DoGetMemberIndex(const std::string &name) const
@@ -525,8 +525,8 @@ std::optional<ComponentMemberIndex> BaseEntityComponent::DoGetMemberIndex(const 
 		return {};
 	return itMember->second;
 }
-pragma::util::TWeakSharedHandle<const BaseEntityComponent> BaseEntityComponent::GetHandle() const { return GetHandle<BaseEntityComponent>(); }
-pragma::util::TWeakSharedHandle<BaseEntityComponent> BaseEntityComponent::GetHandle() { return GetHandle<BaseEntityComponent>(); }
+util::TWeakSharedHandle<const BaseEntityComponent> BaseEntityComponent::GetHandle() const { return GetHandle<BaseEntityComponent>(); }
+util::TWeakSharedHandle<BaseEntityComponent> BaseEntityComponent::GetHandle() { return GetHandle<BaseEntityComponent>(); }
 void BaseEntityComponent::Initialize() { InitializeLuaObject(GetEntity().GetLuaState()); }
 void BaseEntityComponent::PostInitialize()
 {
@@ -539,7 +539,7 @@ void BaseEntityComponent::PostInitialize()
 }
 void BaseEntityComponent::CleanUp()
 {
-	pragma::math::set_flag(m_stateFlags, StateFlags::CleanedUp);
+	math::set_flag(m_stateFlags, StateFlags::CleanedUp);
 	OnDetached(GetEntity());
 	if(m_eventCallbacks) {
 		for(auto &pair : *m_eventCallbacks) {
@@ -561,10 +561,10 @@ void BaseEntityComponent::CleanUp()
 		}
 		m_boundEvents = nullptr;
 	}
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::IsLogicEnabled)) {
+	if(math::is_flag_set(m_stateFlags, StateFlags::IsLogicEnabled)) {
 		auto &logicComponents = GetEntity().GetNetworkState()->GetGameState()->GetEntityTickComponents();
 		*std::find(logicComponents.begin(), logicComponents.end(), this) = nullptr;
-		pragma::math::set_flag(m_stateFlags, StateFlags::IsLogicEnabled, false);
+		math::set_flag(m_stateFlags, StateFlags::IsLogicEnabled, false);
 	}
 }
 void BaseEntityComponent::OnRemove() {}
@@ -587,10 +587,10 @@ void BaseEntityComponent::FlagCallbackForRemoval(const CallbackHandle &hCallback
 	cbInfo.hCallback = hCallback;
 	cbInfo.pComponent = component;
 }
-const pragma::ecs::BaseEntity &BaseEntityComponent::GetEntity() const { return const_cast<BaseEntityComponent *>(this)->GetEntity(); }
-pragma::ecs::BaseEntity &BaseEntityComponent::GetEntity() { return m_entity; }
-const pragma::ecs::BaseEntity &BaseEntityComponent::operator->() const { return GetEntity(); }
-pragma::ecs::BaseEntity &BaseEntityComponent::operator->() { return GetEntity(); }
+const ecs::BaseEntity &BaseEntityComponent::GetEntity() const { return const_cast<BaseEntityComponent *>(this)->GetEntity(); }
+ecs::BaseEntity &BaseEntityComponent::GetEntity() { return m_entity; }
+const ecs::BaseEntity &BaseEntityComponent::operator->() const { return GetEntity(); }
+ecs::BaseEntity &BaseEntityComponent::operator->() { return GetEntity(); }
 ComponentId BaseEntityComponent::GetComponentId() const { return m_componentId; }
 std::vector<BaseEntityComponent::CallbackInfo> &BaseEntityComponent::GetCallbackInfos() const
 {
@@ -610,9 +610,9 @@ std::unordered_map<ComponentEventId, std::vector<CallbackHandle>> &BaseEntityCom
 		m_boundEvents = std::make_unique<std::unordered_map<ComponentEventId, std::vector<CallbackHandle>>>();
 	return *m_boundEvents;
 }
-CallbackHandle BaseEntityComponent::AddEventCallback(ComponentEventId eventId, const std::function<pragma::util::EventReply(std::reference_wrapper<ComponentEvent>)> &fCallback)
+CallbackHandle BaseEntityComponent::AddEventCallback(ComponentEventId eventId, const std::function<util::EventReply(std::reference_wrapper<ComponentEvent>)> &fCallback)
 {
-	return AddEventCallback(eventId, FunctionCallback<pragma::util::EventReply, std::reference_wrapper<ComponentEvent>>::Create(fCallback));
+	return AddEventCallback(eventId, FunctionCallback<util::EventReply, std::reference_wrapper<ComponentEvent>>::Create(fCallback));
 }
 CallbackHandle BaseEntityComponent::AddEventCallback(ComponentEventId eventId, const CallbackHandle &hCallback)
 {
@@ -647,18 +647,18 @@ void BaseEntityComponent::RemoveEventCallback(ComponentEventId eventId, const Ca
 	if(itEv->second.empty())
 		eventCallbacks.erase(itEv);
 }
-pragma::util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEventId eventId, const ComponentEvent &evData) const
+util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEventId eventId, const ComponentEvent &evData) const
 {
 	return InvokeEventCallbacks(eventId, const_cast<ComponentEvent &>(evData)); // Hack: This assumes the argument was passed as temporary variable and changing it does not matter
 }
-pragma::util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEventId eventId, ComponentEvent &evData) const
+util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEventId eventId, ComponentEvent &evData) const
 {
 	if(!m_eventCallbacks)
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	auto &eventCallbacks = GetEventCallbacks();
 	auto itEv = eventCallbacks.find(eventId);
 	if(itEv == eventCallbacks.end())
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	auto hThis = GetHandle();
 	auto &evs = itEv->second;
 	for(auto i = decltype(evs.size()) {0u}; i < evs.size();) {
@@ -667,52 +667,52 @@ pragma::util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEven
 			itEv->second.erase(itEv->second.begin() + i);
 			continue;
 		}
-		if(hCb.Call<pragma::util::EventReply, std::reference_wrapper<ComponentEvent>>(std::reference_wrapper<ComponentEvent>(evData)) == pragma::util::EventReply::Handled)
-			return pragma::util::EventReply::Handled;
+		if(hCb.Call<util::EventReply, std::reference_wrapper<ComponentEvent>>(std::reference_wrapper<ComponentEvent>(evData)) == util::EventReply::Handled)
+			return util::EventReply::Handled;
 		if(hThis.expired()) // This component has been removed directly or indirectly by the callback; Return immediately
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		++i;
 	}
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
-pragma::util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEventId eventId) const
+util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEventId eventId) const
 {
 	CEGenericComponentEvent ev {};
 	return InvokeEventCallbacks(eventId, ev);
 }
-pragma::util::EventReply BaseEntityComponent::BroadcastEvent(ComponentEventId eventId, const ComponentEvent &evData) const
+util::EventReply BaseEntityComponent::BroadcastEvent(ComponentEventId eventId, const ComponentEvent &evData) const
 {
 	return BroadcastEvent(eventId, const_cast<ComponentEvent &>(evData)); // Hack: This assumes the argument was passed as temporary variable and changing it does not matter
 }
-pragma::util::EventReply BaseEntityComponent::BroadcastEvent(ComponentEventId eventId, ComponentEvent &evData) const
+util::EventReply BaseEntityComponent::BroadcastEvent(ComponentEventId eventId, ComponentEvent &evData) const
 {
 	auto &ent = GetEntity();
-	if(ent.BroadcastEvent(eventId, evData, this) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(ent.BroadcastEvent(eventId, evData, this) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	return InvokeEventCallbacks(eventId, evData);
 }
-pragma::util::EventReply BaseEntityComponent::BroadcastEvent(ComponentEventId eventId) const
+util::EventReply BaseEntityComponent::BroadcastEvent(ComponentEventId eventId) const
 {
 	CEGenericComponentEvent ev {};
 	return BroadcastEvent(eventId, ev);
 }
-pragma::util::EventReply BaseEntityComponent::InjectEvent(ComponentEventId eventId, const ComponentEvent &evData) { return InjectEvent(eventId, const_cast<ComponentEvent &>(evData)); }
-pragma::util::EventReply BaseEntityComponent::InjectEvent(ComponentEventId eventId, ComponentEvent &evData) { return HandleEvent(eventId, evData); }
-pragma::util::EventReply BaseEntityComponent::InjectEvent(ComponentEventId eventId)
+util::EventReply BaseEntityComponent::InjectEvent(ComponentEventId eventId, const ComponentEvent &evData) { return InjectEvent(eventId, const_cast<ComponentEvent &>(evData)); }
+util::EventReply BaseEntityComponent::InjectEvent(ComponentEventId eventId, ComponentEvent &evData) { return HandleEvent(eventId, evData); }
+util::EventReply BaseEntityComponent::InjectEvent(ComponentEventId eventId)
 {
 	CEGenericComponentEvent ev {};
 	return BroadcastEvent(eventId, ev);
 }
 CallbackHandle BaseEntityComponent::BindEventUnhandled(ComponentEventId eventId, const std::function<void(std::reference_wrapper<ComponentEvent>)> &fCallback)
 {
-	return BindEvent(eventId, [fCallback](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
+	return BindEvent(eventId, [fCallback](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		fCallback(evData);
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
 }
-CallbackHandle BaseEntityComponent::BindEvent(ComponentEventId eventId, const std::function<pragma::util::EventReply(std::reference_wrapper<ComponentEvent>)> &fCallback)
+CallbackHandle BaseEntityComponent::BindEvent(ComponentEventId eventId, const std::function<util::EventReply(std::reference_wrapper<ComponentEvent>)> &fCallback)
 {
-	auto hCallback = FunctionCallback<pragma::util::EventReply, std::reference_wrapper<ComponentEvent>>::Create(fCallback);
+	auto hCallback = FunctionCallback<util::EventReply, std::reference_wrapper<ComponentEvent>>::Create(fCallback);
 	auto &ent = GetEntity();
 	auto &events = ent.GetNetworkState()->GetGameState()->GetEntityComponentManager().GetEvents();
 	auto itInfo = events.find(eventId);
@@ -740,30 +740,30 @@ CallbackHandle BaseEntityComponent::BindEvent(ComponentEventId eventId, const st
 	itEv->second.push_back(hCallback);
 	return itEv->second.back();
 }
-pragma::util::EventReply BaseEntityComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply BaseEntityComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(eventId == pragma::ecs::baseEntity::EVENT_ON_SPAWN)
+	if(eventId == ecs::baseEntity::EVENT_ON_SPAWN)
 		OnEntitySpawn();
-	else if(eventId == pragma::ecs::baseEntity::EVENT_ON_POST_SPAWN)
+	else if(eventId == ecs::baseEntity::EVENT_ON_POST_SPAWN)
 		OnEntityPostSpawn();
 
 	if(!m_boundEvents)
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	auto &boundEvents = GetBoundEvents();
 	auto itEv = boundEvents.find(eventId);
 	if(itEv == boundEvents.end())
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	for(auto it = itEv->second.begin(); it != itEv->second.end();) {
 		auto &hCb = *it;
 		if(hCb.IsValid() == false) {
 			it = itEv->second.erase(it);
 			continue;
 		}
-		if(hCb.Call<pragma::util::EventReply, std::reference_wrapper<ComponentEvent>>(std::reference_wrapper<ComponentEvent>(evData)) == pragma::util::EventReply::Handled)
-			return pragma::util::EventReply::Handled;
+		if(hCb.Call<util::EventReply, std::reference_wrapper<ComponentEvent>>(std::reference_wrapper<ComponentEvent>(evData)) == util::EventReply::Handled)
+			return util::EventReply::Handled;
 		++it;
 	}
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 void BaseEntityComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {}
 void BaseEntityComponent::OnEntityComponentAdded(BaseEntityComponent &component) {}
@@ -821,12 +821,12 @@ void BaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &componen
 		if(m_callbackInfos->empty())
 			m_callbackInfos = nullptr;
 	}
-	pragma::CEOnEntityComponentRemoved evData {*this};
+	CEOnEntityComponentRemoved evData {*this};
 	auto *genericC = GetEntity().GetGenericComponent();
-	if(BroadcastEvent(baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED, evData) != pragma::util::EventReply::Handled && genericC)
+	if(BroadcastEvent(baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED, evData) != util::EventReply::Handled && genericC)
 		genericC->InvokeEventCallbacks(baseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED, evData);
 }
-pragma::Game &BaseEntityComponent::GetGame() { return *GetNetworkState().GetGameState(); }
+Game &BaseEntityComponent::GetGame() { return *GetNetworkState().GetGameState(); }
 NetworkState &BaseEntityComponent::GetNetworkState() { return *GetEntity().GetNetworkState(); }
 EntityComponentManager &BaseEntityComponent::GetComponentManager() { return GetGame().GetEntityComponentManager(); }
 void BaseEntityComponent::Save(udm::LinkedPropertyWrapperArg udm)
@@ -855,8 +855,8 @@ void BaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm)
 void BaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) {}
 void BaseEntityComponent::OnEntitySpawn() {}
 void BaseEntityComponent::OnEntityPostSpawn() { UpdateTickPolicy(); }
-void BaseEntityComponent::OnAttached(pragma::ecs::BaseEntity &ent) {}
-void BaseEntityComponent::OnDetached(pragma::ecs::BaseEntity &ent)
+void BaseEntityComponent::OnAttached(ecs::BaseEntity &ent) {}
+void BaseEntityComponent::OnDetached(ecs::BaseEntity &ent)
 {
 	if(m_callbackInfos) {
 		for(auto it = m_callbackInfos->begin(); it != m_callbackInfos->end();) {
@@ -873,7 +873,7 @@ void BaseEntityComponent::OnDetached(pragma::ecs::BaseEntity &ent)
 			m_callbackInfos = nullptr;
 	}
 }
-pragma::NetEventId BaseEntityComponent::SetupNetEvent(const std::string &name) const { return GetEntity().GetNetworkState()->GetGameState()->SetupNetEvent(name); }
+NetEventId BaseEntityComponent::SetupNetEvent(const std::string &name) const { return GetEntity().GetNetworkState()->GetGameState()->SetupNetEvent(name); }
 
 //////////////////
 
@@ -893,16 +893,16 @@ void BaseEntityComponent::UpdateTickPolicy()
 		return;
 	auto &logicComponents = GetEntity().GetNetworkState()->GetGameState()->GetEntityTickComponents();
 	if(ShouldThink()) {
-		if(pragma::math::is_flag_set(m_stateFlags, StateFlags::IsLogicEnabled))
+		if(math::is_flag_set(m_stateFlags, StateFlags::IsLogicEnabled))
 			return;
 		logicComponents.push_back(this);
-		pragma::math::set_flag(m_stateFlags, StateFlags::IsLogicEnabled);
+		math::set_flag(m_stateFlags, StateFlags::IsLogicEnabled);
 		return;
 	}
-	if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::IsLogicEnabled))
+	if(!math::is_flag_set(m_stateFlags, StateFlags::IsLogicEnabled))
 		return;
 	logicComponents.erase(std::find(logicComponents.begin(), logicComponents.end(), this));
-	pragma::math::set_flag(m_stateFlags, StateFlags::IsLogicEnabled, false);
+	math::set_flag(m_stateFlags, StateFlags::IsLogicEnabled, false);
 }
 void BaseEntityComponent::SetTickPolicy(TickPolicy policy)
 {
@@ -910,7 +910,7 @@ void BaseEntityComponent::SetTickPolicy(TickPolicy policy)
 		return;
 	m_tickData.tickPolicy = policy;
 
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::IsThinking))
+	if(math::is_flag_set(m_stateFlags, StateFlags::IsThinking))
 		return; // Tick policy update will be handled by game
 	UpdateTickPolicy();
 }
@@ -922,7 +922,7 @@ double BaseEntityComponent::LastTick() const { return m_tickData.lastTick; }
 
 double BaseEntityComponent::DeltaTime() const
 {
-	pragma::Game *game = GetEntity().GetNetworkState()->GetGameState();
+	Game *game = GetEntity().GetNetworkState()->GetGameState();
 	//auto r = game->CurTime() -m_lastThink; // This would be more accurate, but can be 0 if the engine had to catch up on the tick rate
 	auto r = game->DeltaTickTime();
 	//assert(r != 0.0); // Delta time mustn't ever be 0, otherwise there can be problems with animation events repeating (among other things)
@@ -931,20 +931,20 @@ double BaseEntityComponent::DeltaTime() const
 
 bool BaseEntityComponent::Tick(double tDelta)
 {
-	m_stateFlags |= pragma::BaseEntityComponent::StateFlags::IsThinking;
+	m_stateFlags |= StateFlags::IsThinking;
 
 	auto hThis = GetHandle();
 	auto &ent = GetEntity();
 	OnTick(tDelta);
 	if(hThis.expired())
 		return true; // This component isn't valid anymore; Return immediately
-	pragma::Game *game = ent.GetNetworkState()->GetGameState();
+	Game *game = ent.GetNetworkState()->GetGameState();
 	m_tickData.lastTick = game->CurTime();
 
-	m_stateFlags &= ~pragma::BaseEntityComponent::StateFlags::IsThinking;
+	m_stateFlags &= ~StateFlags::IsThinking;
 
 	if(ShouldThink() == false) {
-		m_stateFlags &= ~pragma::BaseEntityComponent::StateFlags::IsLogicEnabled;
+		m_stateFlags &= ~StateFlags::IsLogicEnabled;
 		return false; // Game will handle removal from tick componentlist
 	}
 	return true;
@@ -954,12 +954,12 @@ void BaseEntityComponent::SetActive(bool enabled)
 {
 	if(enabled == IsActive())
 		return;
-	pragma::math::set_flag(m_stateFlags, StateFlags::IsInactive, !enabled);
+	math::set_flag(m_stateFlags, StateFlags::IsInactive, !enabled);
 	BroadcastEvent(baseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED);
 	OnActiveStateChanged(enabled);
 	UpdateTickPolicy();
 }
-bool BaseEntityComponent::IsActive() const { return !pragma::math::is_flag_set(m_stateFlags, StateFlags::IsInactive); }
+bool BaseEntityComponent::IsActive() const { return !math::is_flag_set(m_stateFlags, StateFlags::IsInactive); }
 void BaseEntityComponent::Activate() { SetActive(true); }
 void BaseEntityComponent::Deactivate() { SetActive(false); }
 void BaseEntityComponent::OnActiveStateChanged(bool active) {}
@@ -983,15 +983,15 @@ std::optional<std::string> BaseEntityComponent::GetMemberUri(ComponentMemberInde
 		return {};
 	return GetMemberUri(GetEntity().GetNetworkState()->GetGameState(), GetEntity().GetUuid(), GetComponentId(), *info->GetName());
 }
-std::optional<std::string> BaseEntityComponent::GetUri(pragma::Game *game, std::variant<pragma::util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier)
+std::optional<std::string> BaseEntityComponent::GetUri(Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier)
 {
 	return std::visit(
 	  [&componentIdentifier, game](auto &value) -> std::optional<std::string> {
-		  auto uri = pragma::ecs::BaseEntity::GetUri(value);
+		  auto uri = ecs::BaseEntity::GetUri(value);
 		  auto q = uri.find('?');
 		  auto componentName = std::visit(
 		    [game](auto &value) -> std::optional<std::string> {
-			    using T = pragma::util::base_type<decltype(value)>;
+			    using T = util::base_type<decltype(value)>;
 			    if constexpr(std::is_same_v<T, ComponentId>) {
 				    if(!game)
 					    return {};
@@ -1010,20 +1010,20 @@ std::optional<std::string> BaseEntityComponent::GetUri(pragma::Game *game, std::
 	  },
 	  entityIdentifier);
 }
-std::optional<std::string> BaseEntityComponent::GetMemberUri(pragma::Game *game, std::variant<pragma::util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier, std::variant<ComponentMemberIndex, std::string> memberIdentifier)
+std::optional<std::string> BaseEntityComponent::GetMemberUri(Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier, std::variant<ComponentMemberIndex, std::string> memberIdentifier)
 {
 	auto uri = GetUri(game, entityIdentifier, componentIdentifier);
 	if(!uri.has_value())
 		return {};
 	auto memberName = std::visit(
 	  [game, &componentIdentifier](auto &memberId) -> std::optional<std::string> {
-		  using T = pragma::util::base_type<decltype(memberId)>;
+		  using T = util::base_type<decltype(memberId)>;
 		  if constexpr(std::is_same_v<T, ComponentMemberIndex>) {
 			  if(!game)
 				  return {};
 			  return std::visit(
 			    [game, &memberId](auto &value) -> std::optional<std::string> {
-				    using T = pragma::util::base_type<decltype(value)>;
+				    using T = util::base_type<decltype(value)>;
 				    ComponentId componentId;
 				    if constexpr(std::is_same_v<T, ComponentId>)
 					    componentId = value;
@@ -1050,23 +1050,23 @@ std::optional<std::string> BaseEntityComponent::GetMemberUri(pragma::Game *game,
 	return uri->substr(0, q) + "/" + *memberName + uri->substr(q);
 }
 
-spdlog::logger *pragma::find_logger(pragma::Game &game, std::type_index typeIndex)
+spdlog::logger *pragma::find_logger(Game &game, std::type_index typeIndex)
 {
 	auto &componentManager = game.GetEntityComponentManager();
-	pragma::ComponentId componentId;
+	ComponentId componentId;
 	if(componentManager.GetComponentId(typeIndex, componentId)) {
 		auto *info = componentManager.GetComponentInfo(componentId);
 		if(info)
-			return &pragma::register_logger("c_" + std::string {info->name.str});
+			return &register_logger("c_" + std::string {info->name.str});
 	}
 	return nullptr;
 }
 
-spdlog::logger &pragma::BaseEntityComponent::get_logger(std::type_index typeIndex)
+spdlog::logger &BaseEntityComponent::get_logger(std::type_index typeIndex)
 {
-	auto *engine = pragma::get_engine();
+	auto *engine = get_engine();
 
-	for(auto *state : {pragma::Engine::Get()->GetClientState(), pragma::Engine::Get()->GetServerNetworkState()}) {
+	for(auto *state : {Engine::Get()->GetClientState(), Engine::Get()->GetServerNetworkState()}) {
 		if(!state)
 			continue;
 		auto *game = state->GetGameState();
@@ -1076,5 +1076,5 @@ spdlog::logger &pragma::BaseEntityComponent::get_logger(std::type_index typeInde
 		if(logger)
 			return *logger;
 	}
-	return pragma::register_logger("c_unknown");
+	return register_logger("c_unknown");
 }

@@ -18,7 +18,7 @@ export {
 		}
 		class DLLNETWORK BaseAttachmentComponent : public BaseEntityComponent {
 		  public:
-			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 			enum class StateFlags : uint32_t { None = 0u, UpdatingPosition = 1u, UpdatingRotation = UpdatingPosition << 1u };
 
@@ -26,33 +26,33 @@ export {
 			virtual void OnRemove() override;
 			void UpdateAttachmentOffset(bool invokeUpdateEvents = true);
 
-			AttachmentData *AttachToEntity(pragma::ecs::BaseEntity *ent, const AttachmentInfo &attInfo = {});
-			AttachmentData *AttachToBone(pragma::ecs::BaseEntity *ent, uint32_t boneID, const AttachmentInfo &attInfo = {});
-			AttachmentData *AttachToBone(pragma::ecs::BaseEntity *ent, std::string bone, const AttachmentInfo &attInfo = {});
-			AttachmentData *AttachToAttachment(pragma::ecs::BaseEntity *ent, uint32_t attachmentID, const AttachmentInfo &attInfo = {});
-			AttachmentData *AttachToAttachment(pragma::ecs::BaseEntity *ent, std::string attachment, const AttachmentInfo &attInfo = {});
-			virtual void SetAttachmentFlags(pragma::FAttachmentMode flags);
-			void AddAttachmentFlags(pragma::FAttachmentMode flags);
-			void RemoveAttachmentFlags(pragma::FAttachmentMode flags);
-			pragma::FAttachmentMode GetAttachmentFlags() const;
-			bool HasAttachmentFlag(pragma::FAttachmentMode flag) const;
-			pragma::ecs::BaseEntity *GetParent() const;
+			AttachmentData *AttachToEntity(ecs::BaseEntity *ent, const AttachmentInfo &attInfo = {});
+			AttachmentData *AttachToBone(ecs::BaseEntity *ent, uint32_t boneID, const AttachmentInfo &attInfo = {});
+			AttachmentData *AttachToBone(ecs::BaseEntity *ent, std::string bone, const AttachmentInfo &attInfo = {});
+			AttachmentData *AttachToAttachment(ecs::BaseEntity *ent, uint32_t attachmentID, const AttachmentInfo &attInfo = {});
+			AttachmentData *AttachToAttachment(ecs::BaseEntity *ent, std::string attachment, const AttachmentInfo &attInfo = {});
+			virtual void SetAttachmentFlags(FAttachmentMode flags);
+			void AddAttachmentFlags(FAttachmentMode flags);
+			void RemoveAttachmentFlags(FAttachmentMode flags);
+			FAttachmentMode GetAttachmentFlags() const;
+			bool HasAttachmentFlag(FAttachmentMode flag) const;
+			ecs::BaseEntity *GetParent() const;
 			AttachmentData *GetAttachmentData() const;
 			void UpdateAttachmentData(bool bForceReload = false);
 			void ClearAttachment();
 
-			std::optional<pragma::math::Transform> GetLocalPose() const;
-			void SetLocalPose(const pragma::math::Transform &pose);
+			std::optional<math::Transform> GetLocalPose() const;
+			void SetLocalPose(const math::Transform &pose);
 
 			virtual void OnTick(double dt) override;
 		  protected:
-			BaseAttachmentComponent(pragma::ecs::BaseEntity &ent);
+			BaseAttachmentComponent(ecs::BaseEntity &ent);
 			virtual void OnAttachmentChanged() {}
-			virtual AttachmentData *SetupAttachment(pragma::ecs::BaseEntity *ent, const AttachmentInfo &attInfo);
-			virtual void UpdateViewAttachmentOffset(pragma::ecs::BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly = false) const;
+			virtual AttachmentData *SetupAttachment(ecs::BaseEntity *ent, const AttachmentInfo &attInfo);
+			virtual void UpdateViewAttachmentOffset(ecs::BaseEntity *ent, BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly = false) const;
 			virtual void OnEntitySpawn() override;
-			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
-			std::optional<pragma::math::Transform> GetParentPose() const;
+			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+			std::optional<math::Transform> GetParentPose() const;
 
 			StateFlags m_stateFlags = StateFlags::None;
 			float m_tLastAttachmentUpdate = 0.f;

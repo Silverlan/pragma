@@ -23,7 +23,7 @@ void CViewBodyComponent::Initialize()
 	auto pRenderComponent = ent.AddComponent<CRenderComponent>();
 	if(pRenderComponent.valid()) {
 		pRenderComponent->AddToRenderGroup("firstperson");
-		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::View);
+		pRenderComponent->SetSceneRenderPass(rendering::SceneRenderPass::View);
 		pRenderComponent->SetCastShadows(false);
 	}
 	ent.AddComponent<CAnimatedComponent>();

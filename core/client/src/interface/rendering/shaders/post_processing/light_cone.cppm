@@ -21,9 +21,9 @@ export namespace pragma {
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_NORMAL;
+		static VertexBinding VERTEX_BINDING_VERTEX;
+		static VertexAttribute VERTEX_ATTRIBUTE_POSITION;
+		static VertexAttribute VERTEX_ATTRIBUTE_NORMAL;
 
 		enum class TextureBinding : uint32_t { SceneTexturePostToneMapping = 0 };
 
@@ -40,7 +40,7 @@ export namespace pragma {
 #pragma pack(pop)
 
 		ShaderPPLightCone(prosper::IPrContext &context, const std::string &identifier);
-		bool RecordDraw(prosper::ShaderBindState &bindState, const pragma::geometry::CModelSubMesh &mesh, prosper::IDescriptorSet &descSetTex, prosper::IDescriptorSet &descSetDepth, prosper::IDescriptorSet &descSetInstance, prosper::IDescriptorSet &descSetCam) const;
+		bool RecordDraw(prosper::ShaderBindState &bindState, const geometry::CModelSubMesh &mesh, prosper::IDescriptorSet &descSetTex, prosper::IDescriptorSet &descSetDepth, prosper::IDescriptorSet &descSetInstance, prosper::IDescriptorSet &descSetCam) const;
 		bool RecordPushConstants(prosper::ShaderBindState &bindState, const PushConstants &pushConstants) const;
 	  protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;

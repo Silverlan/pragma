@@ -199,7 +199,7 @@ bool pragma::ShaderGameWorld::RecordBindEntity(rendering::ShaderProcessor &shade
 	return shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, layout, entityInstanceDescriptorSetIndex, *renderC.GetRenderDescriptorSet());
 }
 
-bool pragma::ShaderGameWorld::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, msys::CMaterial &mat) const
+bool pragma::ShaderGameWorld::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, material::CMaterial &mat) const
 {
 	auto descSetGroup = mat.GetDescriptorSetGroup(const_cast<pragma::ShaderGameWorld &>(*this));
 	// if(descSetGroup == nullptr)

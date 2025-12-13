@@ -13,7 +13,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CFuncPhysicsComponent final : public BaseFuncPhysicsComponent, public CBaseNetComponent {
 		  public:
-			CFuncPhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseFuncPhysicsComponent(ent) {}
+			CFuncPhysicsComponent(ecs::BaseEntity &ent) : BaseFuncPhysicsComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua::State *l) override;

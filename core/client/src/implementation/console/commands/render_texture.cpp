@@ -63,9 +63,9 @@ static void CVAR_CALLBACK_cl_render_texture_quality(pragma::NetworkState *, cons
 	UInt32 anisotropy;
 	get_filter_mode(cvTextureFiltering->GetInt(), minFilter, magFilter, mipmapMode, anisotropy);
 	auto lodOffset = get_quality_lod_offset();
-	auto &materialManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
+	auto &materialManager = static_cast<pragma::material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &textureManager = materialManager.GetTextureManager();
-	auto &sampler = static_cast<msys::TextureLoader &>(textureManager.GetLoader()).GetTextureSampler();
+	auto &sampler = static_cast<pragma::material::TextureLoader &>(textureManager.GetLoader()).GetTextureSampler();
 	//auto &customSamplers = textureManager.GetCustomSamplers();
 	auto fUpdateSampler = [anisotropy, mipmapMode, minFilter, magFilter, lodOffset](prosper::ISampler &sampler) {
 		sampler.SetMaxAnisotropy(static_cast<float>(anisotropy));

@@ -43,7 +43,7 @@ export namespace Lua {
 			bool RecordCopyBufferToImage(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &bufSrc, Image &imgDst, const prosper::util::BufferImageCopyInfo &copyInfo);
 			bool RecordCopyBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &bufSrc, Buffer &bufDst, const prosper::util::BufferCopy &copyInfo);
 			bool RecordUpdateBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, pragma::util::DataStream &ds);
-			bool RecordUpdateBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, ::udm::Type type, Lua::udm_ng value);
+			bool RecordUpdateBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, ::udm::Type type, udm_ng value);
 			bool RecordBlitImage(lua::State *l, CommandBuffer &hCommandBuffer, Image &imgSrc, Image &imgDst, const prosper::util::BlitInfo &blitInfo);
 			bool RecordResolveImage(lua::State *l, CommandBuffer &hCommandBuffer, Image &imgSrc, Image &imgDst);
 			bool RecordBlitTexture(lua::State *l, CommandBuffer &hCommandBuffer, Texture &texSrc, Image &imgDst);
@@ -54,7 +54,7 @@ export namespace Lua {
 			bool RecordBufferBarrier(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t srcStageMask, uint32_t dstStageMask, uint32_t srcAccessMask, uint32_t dstAccessMask, uint32_t offset = 0ull, uint32_t size = std::numeric_limits<uint32_t>::max());
 			bool RecordSetViewport(lua::State *l, CommandBuffer &hCommandBuffer, uint32_t width, uint32_t height, uint32_t x = 0u, uint32_t y = 0u);
 			bool RecordSetScissor(lua::State *l, CommandBuffer &hCommandBuffer, uint32_t width, uint32_t height, uint32_t x = 0u, uint32_t y = 0u);
-			bool RecordBeginRenderPass(lua::State *l, CommandBuffer &hCommandBuffer, Lua::Vulkan::RenderPassInfo &rpInfo);
+			bool RecordBeginRenderPass(lua::State *l, CommandBuffer &hCommandBuffer, RenderPassInfo &rpInfo);
 			bool RecordEndRenderPass(lua::State *l, CommandBuffer &hCommandBuffer);
 			bool RecordBindIndexBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &indexBuffer, uint32_t indexType, uint32_t offset);
 			bool RecordBindVertexBuffer(lua::State *l, CommandBuffer &hCommandBuffer, prosper::ShaderGraphics &, Buffer &vertexBuffer, uint32_t startBinding, uint32_t offset);
@@ -92,10 +92,10 @@ export namespace Lua {
 		namespace VKBuffer {
 			bool IsValid(lua::State *l, Buffer &hBuffer);
 			bool Write(lua::State *l, Buffer &hBuffer, uint32_t offset, pragma::util::DataStream &ds, uint32_t dsOffset, uint32_t dsSize);
-			bool Write(lua::State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, Lua::udm_ng value);
-			Lua::opt<pragma::util::DataStream> Read(lua::State *l, Buffer &hBuffer, uint32_t offset, uint32_t size);
+			bool Write(lua::State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, udm_ng value);
+			opt<pragma::util::DataStream> Read(lua::State *l, Buffer &hBuffer, uint32_t offset, uint32_t size);
 			bool Read(lua::State *l, Buffer &hBuffer, uint32_t offset, uint32_t size, pragma::util::DataStream &ds, uint32_t dsOffset);
-			bool Read(lua::State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, Lua::udm_ng value);
+			bool Read(lua::State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, udm_ng value);
 			bool Map(lua::State *l, Buffer &hBuffer, uint32_t offset, uint32_t size, Buffer::MapFlags mapFlags);
 		};
 		namespace VKDescriptorSet {
@@ -104,14 +104,14 @@ export namespace Lua {
 			void GetBindingInfo(lua::State *l,DescriptorSet &hDescSet);
 			void GetBindingInfo(lua::State *l,DescriptorSet &hDescSet,uint32_t bindingIdx);
 #endif
-			bool SetBindingTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t layerId);
-			bool SetBindingTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture);
+			bool SetBindingTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Texture &texture, uint32_t layerId);
+			bool SetBindingTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Texture &texture);
 			prosper::Texture *GetBindingTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx);
-			bool SetBindingArrayTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t arrayIdx, uint32_t layerId);
-			bool SetBindingArrayTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t arrayIdx);
-			bool SetBindingStorageBuffer(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Buffer &buffer, uint32_t startOffset, uint32_t size);
-			bool SetBindingUniformBuffer(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Buffer &buffer, uint32_t startOffset, uint32_t size);
-			bool SetBindingUniformBufferDynamic(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Buffer &buffer, uint32_t startOffset, uint32_t size);
+			bool SetBindingArrayTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Texture &texture, uint32_t arrayIdx, uint32_t layerId);
+			bool SetBindingArrayTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Texture &texture, uint32_t arrayIdx);
+			bool SetBindingStorageBuffer(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Buffer &buffer, uint32_t startOffset, uint32_t size);
+			bool SetBindingUniformBuffer(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Buffer &buffer, uint32_t startOffset, uint32_t size);
+			bool SetBindingUniformBufferDynamic(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Buffer &buffer, uint32_t startOffset, uint32_t size);
 			//void GetLayout(lua::State *l,DescriptorSet &hDescSet); // TODO
 			//void GetBindingProperties(lua::State *l,DescriptorSet &hDescSet); // TODO
 		};

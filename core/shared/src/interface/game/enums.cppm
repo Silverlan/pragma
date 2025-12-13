@@ -48,9 +48,9 @@ export {
 
 	namespace pragma {
 		enum class CoordinateSpace : uint8_t {
-			World = pragma::math::to_integral(pragma::math::CoordinateSpace::World),
-			Local = pragma::math::to_integral(pragma::math::CoordinateSpace::Local),
-			Object = pragma::math::to_integral(pragma::math::CoordinateSpace::Object),
+			World = pragma::math::to_integral(math::CoordinateSpace::World),
+			Local = pragma::math::to_integral(math::CoordinateSpace::Local),
+			Object = pragma::math::to_integral(math::CoordinateSpace::Object),
 		};
 	};
 

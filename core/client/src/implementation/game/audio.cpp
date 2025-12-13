@@ -86,7 +86,7 @@ void pragma::CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cac
 
 			auto steamCachePath = "maps\\" + map + ".sta";
 			if(bReloadBakedCache == false) {
-				auto f = FileManager::OpenFile(steamCachePath.c_str(), "rb");
+				auto f = pragma::fs::open_file(steamCachePath.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 				if(f != nullptr) {
 					iplScene->Finalize(
 					  f, info, steam_audio_message_callback,
@@ -159,7 +159,7 @@ void pragma::CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cac
 								iplVerts.reserve(verts.size());
 								for(auto v : verts) {
 									uvec::local_to_world(pos, rot, v);
-									iplVerts.push_back(al::to_custom_vector<IPLVector3>(al::to_audio_position(v)));
+									iplVerts.push_back(pragma::audio::to_custom_vector<IPLVector3>(pragma::audio::to_audio_position(v)));
 								}
 
 								iplTris.reserve(indices.size() / 3);
@@ -189,7 +189,7 @@ void pragma::CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cac
 							auto vertIdx = 0u;
 							for(auto &v : verts) {
 								uvec::local_to_world(pos, rot, v);
-								iplVerts.push_back(al::to_custom_vector<IPLVector3>(al::to_audio_position(v)));
+								iplVerts.push_back(pragma::audio::to_custom_vector<IPLVector3>(pragma::audio::to_audio_position(v)));
 							}
 							iplTris.reserve(triangles.size() / 3);
 							for(auto i = decltype(triangles.size()) {0}; i < triangles.size(); i += 3) {
@@ -266,7 +266,7 @@ void pragma::CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cac
 				  info, steam_audio_message_callback,
 				  [iplScene, steamCachePath, bSaveProbeBoxes]() {
 					  Con::cout << "[STEAM AUDIO] Scene has been finalized!" << Con::endl;
-					  auto f = FileManager::OpenFile<VFilePtrReal>(steamCachePath.c_str(), "wb");
+					  auto f = fs::open_file<fs::VFilePtrReal>(steamCachePath, fs::FileMode::Write | fs::FileMode::Binary);
 					  if(f != nullptr) {
 						  iplScene->Save(f, bSaveProbeBoxes);
 						  Con::cout << "[STEAM AUDIO] Scene has been saved as '" << steamCachePath << "'!" << Con::endl;

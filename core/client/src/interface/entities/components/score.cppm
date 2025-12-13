@@ -11,9 +11,9 @@ export import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CScoreComponent final : public BaseScoreComponent, public CBaseNetComponent {
 	  public:
-		CScoreComponent(pragma::ecs::BaseEntity &ent) : BaseScoreComponent(ent) {}
+		CScoreComponent(ecs::BaseEntity &ent) : BaseScoreComponent(ent) {}
 
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

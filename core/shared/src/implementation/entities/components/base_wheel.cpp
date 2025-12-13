@@ -10,7 +10,7 @@ import :entities.components.base_wheel;
 
 using namespace pragma;
 
-BaseWheelComponent::BaseWheelComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseWheelComponent::BaseWheelComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseWheelComponent::Initialize()
 {
@@ -162,7 +162,7 @@ void BaseWheelComponent::OnTick(double dt)
 	UpdatePose();
 }
 
-void BaseWheelComponent::SetupWheel(BaseVehicleComponent &vhc, const pragma::physics::WheelCreateInfo &createInfo, uint8_t wheelId)
+void BaseWheelComponent::SetupWheel(BaseVehicleComponent &vhc, const physics::WheelCreateInfo &createInfo, uint8_t wheelId)
 {
 	m_createInfo = createInfo;
 	m_vehicle = vhc.GetHandle<BaseVehicleComponent>();
@@ -181,7 +181,7 @@ void BaseWheelComponent::UpdatePose()
 	if(pose.has_value() == false)
 		return;
 	auto &entVhc = m_vehicle->GetEntity();
-	auto t = pragma::math::Transform {entVhc.GetPosition(), entVhc.GetRotation()};
+	auto t = math::Transform {entVhc.GetPosition(), entVhc.GetRotation()};
 	t *= *pose;
 
 	auto &ent = GetEntity();

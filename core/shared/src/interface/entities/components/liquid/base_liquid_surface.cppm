@@ -11,10 +11,10 @@ export import :entities.components.base;
 export namespace pragma {
 	class DLLNETWORK BaseLiquidSurfaceComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 	  protected:
-		BaseLiquidSurfaceComponent(pragma::ecs::BaseEntity &ent);
+		BaseLiquidSurfaceComponent(ecs::BaseEntity &ent);
 	};
 };

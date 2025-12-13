@@ -25,7 +25,7 @@ export namespace pragma {
 			const std::shared_ptr<prosper::IBuffer> &GetTileVisLightIndexBuffer() const;
 			const std::shared_ptr<prosper::IBuffer> &GetVisLightIndexBuffer() const;
 
-			void Compute(prosper::IPrimaryCommandBuffer &cmdBuffer, pragma::CSceneComponent &scene, prosper::IImage &imgDepth, prosper::IDescriptorSet &descSetCam);
+			void Compute(prosper::IPrimaryCommandBuffer &cmdBuffer, CSceneComponent &scene, prosper::IImage &imgDepth, prosper::IDescriptorSet &descSetCam);
 
 			static std::pair<uint32_t, uint32_t> CalcWorkGroupCount(uint32_t w, uint32_t h);
 			static uint32_t CalcTileCount(uint32_t w, uint32_t h);
@@ -37,7 +37,7 @@ export namespace pragma {
 			std::vector<uint32_t> m_shadowLightBits;
 			std::shared_ptr<prosper::IBuffer> m_bufTileVisLightIndex = nullptr;
 			std::shared_ptr<prosper::IBuffer> m_bufVisLightIndex = nullptr;
-			pragma::util::WeakHandle<prosper::Shader> m_shaderLightCulling = {};
+			util::WeakHandle<prosper::Shader> m_shaderLightCulling = {};
 			std::shared_ptr<prosper::IPrimaryCommandBuffer> m_cmdBuffer = nullptr;
 			uint32_t m_cmdBufferQueueFamilyIndex = std::numeric_limits<uint32_t>::max();
 

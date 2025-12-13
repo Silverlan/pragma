@@ -11,13 +11,13 @@ export import :entities.components.base;
 export namespace pragma {
 	class DLLNETWORK BaseTimeScaleComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 		virtual void Initialize() override;
 
 		virtual void SetTimeScale(float timeScale);
 		float GetTimeScale() const;
-		const pragma::util::PFloatProperty &GetTimeScaleProperty() const;
+		const util::PFloatProperty &GetTimeScaleProperty() const;
 		float GetEffectiveTimeScale() const;
 
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
@@ -25,8 +25,8 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
-		BaseTimeScaleComponent(pragma::ecs::BaseEntity &ent);
-		pragma::NetEventId m_netEvSetTimeScale = pragma::INVALID_NET_EVENT;
-		pragma::util::PFloatProperty m_timeScale = nullptr;
+		BaseTimeScaleComponent(ecs::BaseEntity &ent);
+		NetEventId m_netEvSetTimeScale = INVALID_NET_EVENT;
+		util::PFloatProperty m_timeScale = nullptr;
 	};
 };

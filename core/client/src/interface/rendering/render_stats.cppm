@@ -12,11 +12,11 @@ export import :model.mesh;
 export namespace pragma::rendering {
 	template<typename TCounter>
 	struct BaseSceneStatsCounterList {
-		void Increment(TCounter counter, uint32_t n = 1) { counters[pragma::math::to_integral(counter)] += n; }
+		void Increment(TCounter counter, uint32_t n = 1) { counters[math::to_integral(counter)] += n; }
 
 		BaseSceneStatsCounterList<TCounter> &operator+(const BaseSceneStatsCounterList<TCounter> &other)
 		{
-			auto n = pragma::math::to_integral(TCounter::Count);
+			auto n = math::to_integral(TCounter::Count);
 			for(auto i = decltype(n) {0u}; i < n; ++i)
 				counters[i] += other.counters[i];
 			return *this;
@@ -27,8 +27,8 @@ export namespace pragma::rendering {
 			return *this;
 		}
 
-		uint32_t GetCount(TCounter counter) const { return counters[pragma::math::to_integral(counter)]; }
-		std::array<uint32_t, pragma::math::to_integral(TCounter::Count)> counters {};
+		uint32_t GetCount(TCounter counter) const { return counters[math::to_integral(counter)]; }
+		std::array<uint32_t, math::to_integral(TCounter::Count)> counters {};
 	};
 
 	template<typename TTimer>
@@ -40,13 +40,13 @@ export namespace pragma::rendering {
 				//	pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(timer);
 			}
 		}
-		void SetTime(TTimer timer, std::chrono::nanoseconds s) { timers[pragma::math::to_integral(timer)] = s; }
-		void AddTime(TTimer timer, std::chrono::nanoseconds s) { timers[pragma::math::to_integral(timer)] += s; }
+		void SetTime(TTimer timer, std::chrono::nanoseconds s) { timers[math::to_integral(timer)] = s; }
+		void AddTime(TTimer timer, std::chrono::nanoseconds s) { timers[math::to_integral(timer)] += s; }
 		std::chrono::nanoseconds GetTime(TTimer timer) const
 		{
-			auto &t = timers[pragma::math::to_integral(timer)];
-			if(pragma::math::to_integral(timer) >= pragma::math::to_integral(m_gpuTimerStart) && pragma::math::to_integral(timer) < pragma::math::to_integral(m_gpuTimerStart) + gpuTimers.size()) {
-				auto &gpuTimer = gpuTimers[pragma::math::to_integral(timer) - pragma::math::to_integral(m_gpuTimerStart)];
+			auto &t = timers[math::to_integral(timer)];
+			if(math::to_integral(timer) >= math::to_integral(m_gpuTimerStart) && math::to_integral(timer) < math::to_integral(m_gpuTimerStart) + gpuTimers.size()) {
+				auto &gpuTimer = gpuTimers[math::to_integral(timer) - math::to_integral(m_gpuTimerStart)];
 				if(t.count() > 0 || gpuTimer == nullptr)
 					return t;
 				t = std::chrono::nanoseconds {0};
@@ -58,14 +58,14 @@ export namespace pragma::rendering {
 
 		void BeginGpuTimer(TTimer timer, prosper::ICommandBuffer &cmdBuffer)
 		{
-			auto &t = gpuTimers[pragma::math::to_integral(timer)];
+			auto &t = gpuTimers[math::to_integral(timer)];
 			if(t == nullptr)
 				return;
 			t->Begin(cmdBuffer);
 		}
 		void EndGpuTimer(TTimer timer, prosper::ICommandBuffer &cmdBuffer)
 		{
-			auto &t = gpuTimers[pragma::math::to_integral(timer)];
+			auto &t = gpuTimers[math::to_integral(timer)];
 			if(t == nullptr)
 				return;
 			t->End(cmdBuffer);
@@ -81,7 +81,7 @@ export namespace pragma::rendering {
 
 		BaseSceneStatsTimerList<TTimer> &operator+(const BaseSceneStatsTimerList<TTimer> &other)
 		{
-			auto n = pragma::math::to_integral(TTimer::Count);
+			auto n = math::to_integral(TTimer::Count);
 			for(auto i = decltype(n) {0u}; i < n; ++i)
 				timers[i] = GetTime(static_cast<TTimer>(i)) + other.GetTime(static_cast<TTimer>(i));
 			return *this;
@@ -92,7 +92,7 @@ export namespace pragma::rendering {
 			return *this;
 		}
 
-		mutable std::array<std::chrono::nanoseconds, pragma::math::to_integral(TTimer::Count)> timers {};
+		mutable std::array<std::chrono::nanoseconds, math::to_integral(TTimer::Count)> timers {};
 		std::vector<std::shared_ptr<prosper::TimerQuery>> gpuTimers;
 		void SetGpuTimerStart(TTimer start) { m_gpuTimerStart = start; }
 	  private:
@@ -169,9 +169,9 @@ export namespace pragma::rendering {
 		BaseSceneStatsCounterTimerList<Counter, Timer> *operator->() { return &stats; }
 		const BaseSceneStatsCounterTimerList<Counter, Timer> *operator->() const { return const_cast<RenderPassStats *>(this)->operator->(); }
 		std::vector<EntityHandle> entities;
-		std::vector<msys::MaterialHandle> materials;
-		std::vector<pragma::util::WeakHandle<prosper::Shader>> shaders;
-		std::vector<std::shared_ptr<const pragma::geometry::CModelSubMesh>> meshes;
+		std::vector<material::MaterialHandle> materials;
+		std::vector<util::WeakHandle<prosper::Shader>> shaders;
+		std::vector<std::shared_ptr<const geometry::CModelSubMesh>> meshes;
 
 		std::unordered_set<EntityIndex> instancedEntities;
 
@@ -198,7 +198,7 @@ export namespace pragma::rendering {
 		RenderQueueBuilderStats &operator+(const RenderQueueBuilderStats &other)
 		{
 			timers += other.timers;
-			auto numWorkers = pragma::math::min(workerStats.size(), other.workerStats.size()); // Should be the same if they were executed during the same frame
+			auto numWorkers = math::min(workerStats.size(), other.workerStats.size()); // Should be the same if they were executed during the same frame
 			for(auto i = decltype(numWorkers) {0u}; i < numWorkers; ++i)
 				workerStats[i] += other.workerStats[i];
 			return *this;
@@ -273,7 +273,7 @@ export namespace pragma::rendering {
 		~RenderStats();
 		RenderStats &operator+(const RenderStats &other)
 		{
-			auto n = pragma::math::to_integral(RenderPass::Count);
+			auto n = math::to_integral(RenderPass::Count);
 			for(auto i = decltype(n) {0u}; i < n; ++i)
 				passes[i] += other.passes[i];
 
@@ -286,14 +286,14 @@ export namespace pragma::rendering {
 			*this = *this + other;
 			return *this;
 		}
-		RenderPassStats &GetPassStats(RenderPass rp) { return passes[pragma::math::to_integral(rp)]; }
+		RenderPassStats &GetPassStats(RenderPass rp) { return passes[math::to_integral(rp)]; }
 		const RenderPassStats &GetPassStats(RenderPass rp) const { return const_cast<RenderStats *>(this)->GetPassStats(rp); }
 
 		std::shared_ptr<prosper::IQueryPool> queryPool = nullptr;
 		uint32_t swapchainImageIndex = 0;
 		RenderQueueBuilderStats renderQueueBuilderStats {};
 		BaseSceneStatsTimerList<RenderStage> stageTimes;
-		std::array<RenderPassStats, pragma::math::to_integral(RenderPass::Count)> passes {};
+		std::array<RenderPassStats, math::to_integral(RenderPass::Count)> passes {};
 		BaseSceneStatsTimerList<RenderStage> *operator->() { return &stageTimes; }
 		const BaseSceneStatsTimerList<RenderStage> *operator->() const { return const_cast<RenderStats *>(this)->operator->(); }
 	};

@@ -21,25 +21,25 @@ export namespace pragma::pts {
 		float EaseInOut(float t) const;
 	private:
 		enum class EaseFunc : uint32_t { None = 0u, In, Out, InOut };
-		pragma::math::EaseType m_type;
+		math::EaseType m_type;
 		EaseFunc m_easeFunc = EaseFunc::InOut;
 	};
 }
 
-pragma::pts::CParticleModifierComponentEase::CParticleModifierComponentEase() : m_type {pragma::math::EaseType::Linear} {}
+pragma::pts::CParticleModifierComponentEase::CParticleModifierComponentEase() : m_type {math::EaseType::Linear} {}
 void pragma::pts::CParticleModifierComponentEase::Initialize(const std::unordered_map<std::string, std::string> &values)
 {
 	auto bEaseIn = true;
 	auto bEaseOut = true;
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		pragma::string::to_lower(key);
+		string::to_lower(key);
 		if(key == "ease")
-			m_type = static_cast<pragma::math::EaseType>(pragma::util::to_int(it->second));
+			m_type = static_cast<math::EaseType>(util::to_int(it->second));
 		else if(key == "ease_in")
-			bEaseIn = pragma::util::to_boolean(it->second);
+			bEaseIn = util::to_boolean(it->second);
 		else if(key == "ease_out")
-			bEaseOut = pragma::util::to_boolean(it->second);
+			bEaseOut = util::to_boolean(it->second);
 	}
 	m_easeFunc = (bEaseIn && bEaseOut) ? EaseFunc::InOut : bEaseIn ? EaseFunc::In : bEaseOut ? EaseFunc::Out : EaseFunc::None;
 }

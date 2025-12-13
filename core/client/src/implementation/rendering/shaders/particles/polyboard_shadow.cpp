@@ -33,7 +33,7 @@ void ParticlePolyboardShadow::InitializePipelineLayout(const Vulkan::Context &co
 void ParticlePolyboardShadow::Draw(pragma::pts::CParticleSystem *particle,const Vulkan::Buffer &vertexBuffer,const Vulkan::Buffer &indexBuffer,uint32_t indexCount,float radius,float curvature,CLightBase *light,uint32_t layerId)
 {
 	auto *mat = particle->GetMaterial();
-	auto &descTexture = static_cast<msys::CMaterial*>(mat)->GetDescriptorSet();
+	auto &descTexture = static_cast<material::CMaterial*>(mat)->GetDescriptorSet();
 	if(!descTexture.IsValid())
 		return;
 	auto *shadow = light->GetShadowMap();

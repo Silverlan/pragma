@@ -21,33 +21,33 @@ void CShadowManagerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	m_genericSet.limit = pragma::math::to_integral(pragma::GameLimits::MaxActiveShadowMaps);
+	m_genericSet.limit = math::to_integral(GameLimits::MaxActiveShadowMaps);
 	m_genericSet.buffers.reserve(m_genericSet.limit);
 
-	m_cubeSet.limit = pragma::math::to_integral(pragma::GameLimits::MaxActiveShadowCubeMaps);
+	m_cubeSet.limit = math::to_integral(GameLimits::MaxActiveShadowCubeMaps);
 	m_cubeSet.buffers.reserve(m_cubeSet.limit);
 
-	if(m_descSetGroup != nullptr || pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS.IsValid() == false)
+	if(m_descSetGroup != nullptr || ShaderPBR::DESCRIPTOR_SET_SHADOWS.IsValid() == false)
 		return;
 	g_shadowManager = this;
-	m_whShadowShader = pragma::get_cengine()->GetShader("shadow");
-	m_descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS);
+	m_whShadowShader = get_cengine()->GetShader("shadow");
+	m_descSetGroup = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderPBR::DESCRIPTOR_SET_SHADOWS);
 
 	auto *descSet = m_descSetGroup->GetDescriptorSet();
 
 	// Shadow map descriptor bindings need to be bound to dummy images.
 	// For normal shadow maps this is already taken care of, but cubemaps are a special case
 	// that needs to be dealt with
-	auto arraySizeShadows = pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS.bindings.at(pragma::math::to_integral(pragma::ShaderPBR::ShadowBinding::ShadowMaps)).descriptorArraySize;
-	auto arraySizeCubeShadows = pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS.bindings.at(pragma::math::to_integral(pragma::ShaderPBR::ShadowBinding::ShadowCubeMaps)).descriptorArraySize;
+	auto arraySizeShadows = ShaderPBR::DESCRIPTOR_SET_SHADOWS.bindings.at(math::to_integral(ShaderPBR::ShadowBinding::ShadowMaps)).descriptorArraySize;
+	auto arraySizeCubeShadows = ShaderPBR::DESCRIPTOR_SET_SHADOWS.bindings.at(math::to_integral(ShaderPBR::ShadowBinding::ShadowCubeMaps)).descriptorArraySize;
 
-	auto &dummyTex = pragma::get_cengine()->GetRenderContext().GetDummyTexture();
+	auto &dummyTex = get_cengine()->GetRenderContext().GetDummyTexture();
 	for(auto i = decltype(arraySizeShadows) {0u}; i < arraySizeShadows; ++i)
-		descSet->SetBindingArrayTexture(*dummyTex, pragma::math::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowMaps), i);
+		descSet->SetBindingArrayTexture(*dummyTex, math::to_integral(ShaderSceneLit::ShadowBinding::ShadowMaps), i);
 
-	auto &dummyCubeTex = pragma::get_cengine()->GetRenderContext().GetDummyCubemapTexture();
+	auto &dummyCubeTex = get_cengine()->GetRenderContext().GetDummyCubemapTexture();
 	for(auto i = decltype(arraySizeCubeShadows) {0u}; i < arraySizeCubeShadows; ++i)
-		descSet->SetBindingArrayTexture(*dummyCubeTex, pragma::math::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps), i);
+		descSet->SetBindingArrayTexture(*dummyCubeTex, math::to_integral(ShaderSceneLit::ShadowBinding::ShadowCubeMaps), i);
 	descSet->Update();
 }
 
@@ -55,7 +55,7 @@ void CShadowManagerComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
 
-	pragma::get_cengine()->GetRenderContext().WaitIdle();
+	get_cengine()->GetRenderContext().WaitIdle();
 	ClearRenderTargets();
 	m_descSetGroup = nullptr;
 	m_whShadowShader = {};
@@ -98,13 +98,13 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.width = size;
 	createInfo.height = size;
-	createInfo.format = pragma::ShaderShadow::RENDER_PASS_DEPTH_FORMAT;
+	createInfo.format = ShaderShadow::RENDER_PASS_DEPTH_FORMAT;
 	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::DepthStencilAttachmentBit | prosper::ImageUsageFlags::TransferDstBit;
 	createInfo.layers = layerCount;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 	if(type == Type::Cube)
 		createInfo.flags = prosper::util::ImageCreateInfo::Flags::Cubemap;
-	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(createInfo);
+	auto img = get_cengine()->GetRenderContext().CreateImage(createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	//samplerCreateInfo.compareEnable = true; // When enabled, causes strange behavior on Nvidia cards when doing texture lookups
@@ -116,12 +116,12 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	texCreateInfo.flags = prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer;
-	auto depthTexture = pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+	auto depthTexture = get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 
 	auto rt = pragma::util::make_shared<RenderTarget>();
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
-	rt->renderTarget = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({depthTexture}, static_cast<prosper::ShaderGraphics *>(m_whShadowShader.get())->GetRenderPass(), rtCreateInfo);
+	rt->renderTarget = get_cengine()->GetRenderContext().CreateRenderTarget({depthTexture}, static_cast<prosper::ShaderGraphics *>(m_whShadowShader.get())->GetRenderPass(), rtCreateInfo);
 	rt->renderTarget->SetDebugName("shadowmap_rt");
 	set.buffers.push_back({});
 	auto &data = set.buffers.back();
@@ -130,7 +130,7 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 	data.renderTargetHandle = pragma::util::make_shared<std::weak_ptr<RenderTarget>>(data.renderTarget);
 
 	rt->index = set.buffers.size() - 1;
-	m_descSetGroup->GetDescriptorSet()->SetBindingArrayTexture(*depthTexture, pragma::math::to_integral((type != Type::Cube) ? pragma::ShaderSceneLit::ShadowBinding::ShadowMaps : pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps), rt->index);
+	m_descSetGroup->GetDescriptorSet()->SetBindingArrayTexture(*depthTexture, math::to_integral((type != Type::Cube) ? ShaderSceneLit::ShadowBinding::ShadowMaps : ShaderSceneLit::ShadowBinding::ShadowCubeMaps), rt->index);
 	m_descSetGroup->GetDescriptorSet()->Update();
 	return data.renderTargetHandle;
 }

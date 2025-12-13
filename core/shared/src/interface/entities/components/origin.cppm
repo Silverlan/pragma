@@ -14,22 +14,22 @@ export namespace pragma {
 	}
 	class DLLNETWORK OriginComponent final : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		OriginComponent(pragma::ecs::BaseEntity &ent);
+		OriginComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
-		void SetOriginPose(const pragma::math::Transform &pose);
+		void SetOriginPose(const math::Transform &pose);
 		void SetOriginPos(const Vector3 &pos);
 		void SetOriginRot(const Quat &rot);
 
-		const pragma::math::Transform &GetOriginPose() const;
+		const math::Transform &GetOriginPose() const;
 		const Vector3 &GetOriginPos() const;
 		const Quat &GetOriginRot() const;
 
 		virtual void InitializeLuaObject(lua::State *lua) override;
 	  protected:
-		pragma::math::Transform m_origin;
+		math::Transform m_origin;
 	};
 };

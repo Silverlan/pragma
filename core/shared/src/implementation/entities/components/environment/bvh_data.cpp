@@ -10,15 +10,15 @@ module pragma.shared;
 
 import :entities.components.bvh_data;
 
-static_assert(sizeof(Vector3) == sizeof(::pragma::bvh::Vec));
+static_assert(sizeof(Vector3) == sizeof(pragma::bvh::Vec));
 
-const ::pragma::bvh::Vec &pragma::bvh::to_bvh_vector(const Vector3 &v) { return reinterpret_cast<const ::pragma::bvh::Vec &>(v); }
-const Vector3 &pragma::bvh::from_bvh_vector(const ::pragma::bvh::Vec &v) { return reinterpret_cast<const Vector3 &>(v); }
-bool pragma::bvh::is_mesh_bvh_compatible(const pragma::geometry::ModelSubMesh &mesh) { return mesh.GetGeometryType() == pragma::geometry::ModelSubMesh::GeometryType::Triangles; }
+const pragma::bvh::Vec &pragma::bvh::to_bvh_vector(const Vector3 &v) { return reinterpret_cast<const Vec &>(v); }
+const Vector3 &pragma::bvh::from_bvh_vector(const Vec &v) { return reinterpret_cast<const Vector3 &>(v); }
+bool pragma::bvh::is_mesh_bvh_compatible(const geometry::ModelSubMesh &mesh) { return mesh.GetGeometryType() == geometry::ModelSubMesh::GeometryType::Triangles; }
 
-pragma::bvh::Primitive pragma::bvh::create_triangle(const Vector3 &a, const Vector3 &b, const Vector3 &c) { return pragma::bvh::Primitive {to_bvh_vector(a), to_bvh_vector(b), to_bvh_vector(c)}; }
+pragma::bvh::Primitive pragma::bvh::create_triangle(const Vector3 &a, const Vector3 &b, const Vector3 &c) { return Primitive {to_bvh_vector(a), to_bvh_vector(b), to_bvh_vector(c)}; }
 
-std::vector<pragma::bvh::MeshRange> &pragma::bvh::get_bvh_mesh_ranges(pragma::bvh::MeshBvhTree &bvhData) { return bvhData.meshRanges; }
+std::vector<pragma::bvh::MeshRange> &pragma::bvh::get_bvh_mesh_ranges(MeshBvhTree &bvhData) { return bvhData.meshRanges; }
 
 static void get_bvh_bounds(const pragma::bvh::BBox &bb, Vector3 &outMin, Vector3 &outMax)
 {
@@ -26,7 +26,7 @@ static void get_bvh_bounds(const pragma::bvh::BBox &bb, Vector3 &outMin, Vector3
 	outMin = Vector3 {pragma::math::min(bb.min.values[0], bb.max.values[0]) - epsilon, pragma::math::min(bb.min.values[1], bb.max.values[1]) - epsilon, pragma::math::min(bb.min.values[2], bb.max.values[2]) - epsilon};
 	outMax = Vector3 {pragma::math::max(bb.min.values[0], bb.max.values[0]) + epsilon, pragma::math::max(bb.min.values[1], bb.max.values[1]) + epsilon, pragma::math::max(bb.min.values[2], bb.max.values[2]) + epsilon};
 }
-std::tuple<bool, bool, bool> pragma::bvh::test_node_aabb_intersection(const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const pragma::bvh::Node &left, const pragma::bvh::Node &right)
+std::tuple<bool, bool, bool> pragma::bvh::test_node_aabb_intersection(const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const Node &left, const Node &right)
 {
 	bool hit_left, hit_right;
 	{
@@ -42,12 +42,12 @@ std::tuple<bool, bool, bool> pragma::bvh::test_node_aabb_intersection(const std:
 	}
 	return std::make_tuple(hit_left, hit_right, false);
 }
-bool pragma::bvh::test_bvh_intersection(const pragma::bvh::MeshBvhTree &bvhData, const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const std::function<bool(const pragma::bvh::Primitive &)> &testTri, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
+bool pragma::bvh::test_bvh_intersection(const MeshBvhTree &bvhData, const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const std::function<bool(const Primitive &)> &testTri, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
 {
 	auto &bvh = bvhData.bvh;
 	auto &node = bvh.nodes[nodeIdx];
 	constexpr size_t stack_size = 64;
-	::bvh::v2::SmallStack<bvh::Bvh::Index, stack_size> stack;
+	::bvh::v2::SmallStack<Bvh::Index, stack_size> stack;
 	auto hasAnyHit = false;
 
 	auto isPrimitiveIntersectionInfo = outIntersectionInfo != nullptr && typeid(*outIntersectionInfo) == typeid(PrimitiveIntersectionInfo);
@@ -125,38 +125,38 @@ bool pragma::bvh::test_bvh_intersection(const pragma::bvh::MeshBvhTree &bvhData,
 		traverse.template operator()<false>();
 	return hasAnyHit;
 }
-bool pragma::bvh::test_bvh_intersection_with_obb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
+bool pragma::bvh::test_bvh_intersection_with_obb(const MeshBvhTree &bvhData, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
 {
-	auto planes = pragma::math::geometry::get_obb_planes(origin, rot, min, max);
+	auto planes = math::geometry::get_obb_planes(origin, rot, min, max);
 	return test_bvh_intersection(
-	  bvhData, [&origin, &rot, &min, &max, &planes](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return pragma::math::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, planes.begin(), planes.end()) != pragma::math::intersection::Intersect::Outside; },
+	  bvhData, [&origin, &rot, &min, &max, &planes](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return math::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, planes.begin(), planes.end()) != math::intersection::Intersect::Outside; },
 	  [&min, &max, &origin, &rot](
-	    const pragma::bvh::Primitive &prim) -> bool { return pragma::math::intersection::obb_triangle(min, max, origin, rot, *reinterpret_cast<const Vector3 *>(&prim.p0.values), *reinterpret_cast<const Vector3 *>(&prim.p1.values), *reinterpret_cast<const Vector3 *>(&prim.p2.values)); },
+	    const Primitive &prim) -> bool { return math::intersection::obb_triangle(min, max, origin, rot, *reinterpret_cast<const Vector3 *>(&prim.p0.values), *reinterpret_cast<const Vector3 *>(&prim.p1.values), *reinterpret_cast<const Vector3 *>(&prim.p2.values)); },
 	  nodeIdx, outIntersectionInfo);
 }
-bool pragma::bvh::test_bvh_intersection_with_aabb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
+bool pragma::bvh::test_bvh_intersection_with_aabb(const MeshBvhTree &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
 {
 	return test_bvh_intersection(
-	  bvhData, [&min, &max](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return pragma::math::intersection::aabb_aabb(min, max, aabbMin, aabbMax) != pragma::math::intersection::Intersect::Outside; },
-	  [&min, &max](const pragma::bvh::Primitive &prim) -> bool { return pragma::math::intersection::aabb_triangle(min, max, *reinterpret_cast<const Vector3 *>(&prim.p0.values), *reinterpret_cast<const Vector3 *>(&prim.p1.values), *reinterpret_cast<const Vector3 *>(&prim.p2.values)); }, nodeIdx,
+	  bvhData, [&min, &max](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return math::intersection::aabb_aabb(min, max, aabbMin, aabbMax) != math::intersection::Intersect::Outside; },
+	  [&min, &max](const Primitive &prim) -> bool { return math::intersection::aabb_triangle(min, max, *reinterpret_cast<const Vector3 *>(&prim.p0.values), *reinterpret_cast<const Vector3 *>(&prim.p1.values), *reinterpret_cast<const Vector3 *>(&prim.p2.values)); }, nodeIdx,
 	  outIntersectionInfo);
 }
-bool pragma::bvh::test_bvh_intersection_with_kdop(const pragma::bvh::MeshBvhTree &bvhData, const std::vector<pragma::math::Plane> &kdop, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
+bool pragma::bvh::test_bvh_intersection_with_kdop(const MeshBvhTree &bvhData, const std::vector<math::Plane> &kdop, size_t nodeIdx, IntersectionInfo *outIntersectionInfo)
 {
 	return test_bvh_intersection(
-	  bvhData, [&kdop](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return pragma::math::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, kdop.begin(), kdop.end()) != pragma::math::intersection::Intersect::Outside; },
-	  [&kdop](const pragma::bvh::Primitive &prim) -> bool {
+	  bvhData, [&kdop](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return math::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, kdop.begin(), kdop.end()) != math::intersection::Intersect::Outside; },
+	  [&kdop](const Primitive &prim) -> bool {
 		  // TODO: Use pragma::math::intersection::triangle_in_plane_mesh() once it's implemented
 
 		  // Use AABB approximation for intersection check
 		  Vector3 v0, v1;
 		  get_bvh_bounds(prim.get_bbox(), v0, v1);
-		  return pragma::math::intersection::aabb_in_plane_mesh(v0, v1, kdop.begin(), kdop.end()) != pragma::math::intersection::Intersect::Outside;
+		  return math::intersection::aabb_in_plane_mesh(v0, v1, kdop.begin(), kdop.end()) != math::intersection::Intersect::Outside;
 	  },
 	  nodeIdx, outIntersectionInfo);
 }
 
-static std::unique_ptr<::bvh::v2::ThreadPool> g_threadPool {};
+static std::unique_ptr<bvh::v2::ThreadPool> g_threadPool {};
 static size_t g_bvhCount = 0;
 pragma::bvh::BvhTree::BvhTree()
 {
@@ -168,7 +168,7 @@ pragma::bvh::BvhTree::~BvhTree()
 	if(--g_bvhCount == 0)
 		g_threadPool = nullptr;
 }
-::bvh::v2::ThreadPool &pragma::bvh::BvhTree::GetThreadPool() { return *g_threadPool; }
+bvh::v2::ThreadPool &pragma::bvh::BvhTree::GetThreadPool() { return *g_threadPool; }
 
 void pragma::bvh::BvhTree::InitializeBvh()
 {
@@ -181,13 +181,13 @@ template<typename T>
 static std::unique_ptr<pragma::bvh::Executor> make_executor()
 {
 	std::unique_ptr<pragma::bvh::Executor> executor;
-	if constexpr(std::is_same_v<T, ::bvh::v2::ParallelExecutor>)
+	if constexpr(std::is_same_v<T, bvh::v2::ParallelExecutor>)
 		executor = std::make_unique<T>(*g_threadPool);
 	else
 		executor = std::make_unique<T>();
 	return executor;
 }
-::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config pragma::bvh::BvhTree::InitializeExecutor()
+bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config pragma::bvh::BvhTree::InitializeExecutor()
 {
 	executor = make_executor<Executor>();
 	::bvh::v2::DefaultBuilder<Node>::Config config;
@@ -197,7 +197,7 @@ static std::unique_ptr<pragma::bvh::Executor> make_executor()
 
 void pragma::bvh::MeshBvhTree::Refit()
 {
-	bvh.refit([this](pragma::bvh::Node &node) {
+	bvh.refit([this](Node &node) {
 		auto begin = node.index.first_id();
 		auto end = begin + node.index.prim_count();
 		for(size_t i = begin; i < end; ++i) {
@@ -218,7 +218,7 @@ void pragma::bvh::MeshBvhTree::Update()
 	Refit();
 }
 
-void pragma::bvh::MeshBvhTree::Deserialize(const std::vector<uint8_t> &data, std::vector<pragma::bvh::Primitive> &&primitives)
+void pragma::bvh::MeshBvhTree::Deserialize(const std::vector<uint8_t> &data, std::vector<Primitive> &&primitives)
 {
 	InitializeExecutor();
 	struct BinaryStream : public ::bvh::v2::InputStream {
@@ -229,7 +229,7 @@ void pragma::bvh::MeshBvhTree::Deserialize(const std::vector<uint8_t> &data, std
 			if(m_readPos >= m_data.size())
 				return 0;
 			auto remaining = m_data.size() - m_readPos;
-			auto szRead = pragma::math::min(remaining, sz);
+			auto szRead = math::min(remaining, sz);
 			memcpy(data, m_data.data() + m_readPos, szRead);
 			m_readPos += szRead;
 			return szRead;
@@ -239,7 +239,7 @@ void pragma::bvh::MeshBvhTree::Deserialize(const std::vector<uint8_t> &data, std
 	};
 
 	BinaryStream binStream {data};
-	bvh = pragma::bvh::Bvh::deserialize(binStream);
+	bvh = Bvh::deserialize(binStream);
 	this->primitives = std::move(primitives);
 	InitializePrecomputedTris();
 }
@@ -274,7 +274,7 @@ bool pragma::bvh::MeshBvhTree::DoInitializeBvh(Executor &executor, ::bvh::v2::De
 	auto numTris = primitives.size();
 	if(numTris == 0)
 		return false;
-	std::vector<pragma::bvh::BBox> bboxes {numTris};
+	std::vector<BBox> bboxes {numTris};
 	std::vector<Vec> centers {numTris};
 	executor.for_each(0, numTris, [&](size_t begin, size_t end) {
 		for(size_t i = begin; i < end; ++i) {
@@ -301,13 +301,13 @@ bool pragma::bvh::MeshBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir
 	auto &prim_id = outHitData.primitiveIndex = invalid_id;
 	auto &u = outHitData.u;
 	auto &v = outHitData.v;
-	::bvh::v2::SmallStack<bvh::Bvh::Index, stack_size> stack;
+	::bvh::v2::SmallStack<Bvh::Index, stack_size> stack;
 	auto ray = get_ray(origin, dir, minDist, maxDist);
 	bvh.intersect<false, use_robust_traversal>(ray, bvh.get_root().index, stack, [&](size_t begin, size_t end) {
 		for(size_t i = begin; i < end; ++i) {
 			size_t j = bvh.prim_ids[i];
 			auto &prim = primitives[j];
-			pragma::bvh::PrecomputedTri tri {prim.p0, prim.p1, prim.p2};
+			PrecomputedTri tri {prim.p0, prim.p1, prim.p2};
 			if(auto hit = tri.intersect(ray)) {
 				prim_id = j;
 				float d;
@@ -326,13 +326,13 @@ bool pragma::bvh::MeshBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir
 
 pragma::bvh::Ray pragma::bvh::get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) { return Ray {to_bvh_vector(origin), to_bvh_vector(dir), minDist, maxDist}; }
 
-std::unordered_map<std::string, std::shared_ptr<pragma::geometry::ModelSubMesh>> pragma::bvh::get_uuid_mesh_map(pragma::asset::Model &mdl)
+std::unordered_map<std::string, std::shared_ptr<pragma::geometry::ModelSubMesh>> pragma::bvh::get_uuid_mesh_map(asset::Model &mdl)
 {
-	std::unordered_map<std::string, std::shared_ptr<pragma::geometry::ModelSubMesh>> mdlMeshes;
+	std::unordered_map<std::string, std::shared_ptr<geometry::ModelSubMesh>> mdlMeshes;
 	for(auto &mg : mdl.GetMeshGroups()) {
 		for(auto &m : mg->GetMeshes()) {
 			for(auto &sm : m->GetSubMeshes()) {
-				if(!pragma::bvh::is_mesh_bvh_compatible(*sm))
+				if(!is_mesh_bvh_compatible(*sm))
 					continue;
 				mdlMeshes[util::uuid_to_string(sm->GetUuid())] = sm;
 			}
@@ -341,11 +341,11 @@ std::unordered_map<std::string, std::shared_ptr<pragma::geometry::ModelSubMesh>>
 	return mdlMeshes;
 }
 
-void pragma::bvh::debug::print_bvh_tree(pragma::bvh::Bvh &bvh)
+void pragma::bvh::debug::print_bvh_tree(Bvh &bvh)
 {
 	std::stringstream ss;
-	std::function<void(const pragma::bvh::Node &, std::string)> printStack = nullptr;
-	printStack = [&printStack, &ss, &bvh](const pragma::bvh::Node &node, std::string t) {
+	std::function<void(const Node &, std::string)> printStack = nullptr;
+	printStack = [&printStack, &ss, &bvh](const Node &node, std::string t) {
 		auto bbox = node.get_bbox();
 		auto min = from_bvh_vector(bbox.min);
 		auto max = from_bvh_vector(bbox.max);
@@ -365,10 +365,10 @@ void pragma::bvh::debug::print_bvh_tree(pragma::bvh::Bvh &bvh)
 	Con::cout << "BVH Tree:" << ss.str() << Con::endl;
 }
 
-void pragma::bvh::debug::draw_bvh_tree(const pragma::Game &game, pragma::bvh::Bvh &bvh, const pragma::math::ScaledTransform &pose, float duration)
+void pragma::bvh::debug::draw_bvh_tree(const Game &game, Bvh &bvh, const math::ScaledTransform &pose, float duration)
 {
 	constexpr size_t stack_size = 64;
-	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
+	::bvh::v2::SmallStack<Bvh::Index, stack_size> stack;
 	draw_node(game, bvh.get_root(), pose, DEFAULT_NODE_COLOR, duration);
 	auto start = bvh.get_root().index;
 	stack.push(start);
@@ -391,19 +391,19 @@ restart:
 		}
 	}
 }
-void pragma::bvh::debug::draw_node(const pragma::Game &game, const pragma::bvh::BBox &bbox, const pragma::math::ScaledTransform &pose, const Color &col, float duration)
+void pragma::bvh::debug::draw_node(const Game &game, const BBox &bbox, const math::ScaledTransform &pose, const Color &col, float duration)
 {
 	auto vstart = from_bvh_vector(bbox.min);
 	auto vend = from_bvh_vector(bbox.max);
-	const_cast<pragma::Game &>(game).DrawBox(pose.GetOrigin(), vstart, vend, pose.GetRotation(), colors::White, col, duration);
+	const_cast<Game &>(game).DrawBox(pose.GetOrigin(), vstart, vend, pose.GetRotation(), colors::White, col, duration);
 }
-void pragma::bvh::debug::draw_node(const pragma::Game &game, const pragma::bvh::Node &node, const pragma::math::ScaledTransform &pose, const Color &col, float duration)
+void pragma::bvh::debug::draw_node(const Game &game, const Node &node, const math::ScaledTransform &pose, const Color &col, float duration)
 {
 	auto bbox = node.get_bbox();
 	draw_node(game, bbox, pose, col, duration);
 }
 
-std::unique_ptr<pragma::bvh::MeshBvhTree> pragma::bvh::create_bvh_data(std::vector<pragma::bvh::Primitive> &&triangles)
+std::unique_ptr<pragma::bvh::MeshBvhTree> pragma::bvh::create_bvh_data(std::vector<Primitive> &&triangles)
 {
 	auto bvhData = std::make_unique<MeshBvhTree>();
 	bvhData->primitives = std::move(triangles);

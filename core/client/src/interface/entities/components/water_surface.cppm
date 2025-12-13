@@ -13,19 +13,19 @@ import :model.mesh;
 export namespace pragma {
 	class DLLCLIENT CWaterSurfaceComponent final : public BaseEntityComponent {
 	  public:
-		CWaterSurfaceComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CWaterSurfaceComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 
 		virtual ~CWaterSurfaceComponent() override;
 		void SetSurfaceSimulator(const std::shared_ptr<physics::PhysWaterSurfaceSimulator> &simulator);
-		msys::CMaterial *GetWaterMaterial() const;
+		material::CMaterial *GetWaterMaterial() const;
 		void SetWaterObject(BaseLiquidSurfaceSimulationComponent *ent);
-		pragma::geometry::CModelSubMesh *GetWaterSurfaceMesh() const;
+		geometry::CModelSubMesh *GetWaterSurfaceMesh() const;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
 	  protected:
 		std::shared_ptr<physics::PhysWaterSurfaceSimulator> m_surfaceSimulator = nullptr;
-		mutable std::weak_ptr<pragma::geometry::CModelSubMesh> m_waterSurfaceMesh = {};
+		mutable std::weak_ptr<geometry::CModelSubMesh> m_waterSurfaceMesh = {};
 		CallbackHandle m_cbRenderSurface = {};
 		ComponentHandle<BaseLiquidSurfaceSimulationComponent> m_hFuncWater = {};
 		void UpdateSurfaceMesh();

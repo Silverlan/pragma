@@ -50,7 +50,7 @@ void pragma::networking::MessageTracker::SetMemoryCount(uint32_t count)
 
 void pragma::networking::MessageTracker::DebugDump(const std::string &dumpFileName, const pragma::util::StringMap<uint32_t> &inMsgs, const pragma::util::StringMap<uint32_t> &outMsgs)
 {
-	auto f = FileManager::OpenFile<VFilePtrReal>(dumpFileName.c_str(), "wb");
+	auto f = fs::open_file<fs::VFilePtrReal>(dumpFileName, fs::FileMode::Write | fs::FileMode::Binary);
 	if(f == nullptr)
 		return;
 	for(auto type : {MessageType::Incoming, MessageType::Outgoing}) {

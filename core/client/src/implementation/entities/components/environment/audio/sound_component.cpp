@@ -11,16 +11,16 @@ import :client_state;
 
 using namespace pragma;
 
-static void apply_sound_identifier(pragma::audio::ALSound &snd, const std::string &name)
+static void apply_sound_identifier(audio::ALSound &snd, const std::string &name)
 {
 	if(snd.IsSoundScript() == false) {
-		static_cast<pragma::audio::CALSound &>(snd)->SetIdentifier(name);
+		static_cast<audio::CALSound &>(snd)->SetIdentifier(name);
 		return;
 	}
-	auto *sndScript = dynamic_cast<pragma::audio::ALSoundScript *>(&snd);
+	auto *sndScript = dynamic_cast<audio::ALSoundScript *>(&snd);
 	if(sndScript == nullptr)
 		return;
-	sndScript->AddCallback("OnSoundCreated", FunctionCallback<void, pragma::audio::ALSound *>::Create([name](pragma::audio::ALSound *snd) { apply_sound_identifier(*snd, name); }));
+	sndScript->AddCallback("OnSoundCreated", FunctionCallback<void, audio::ALSound *>::Create([name](audio::ALSound *snd) { apply_sound_identifier(*snd, name); }));
 }
 
 void CSoundComponent::OnEntitySpawn()
@@ -45,7 +45,7 @@ void CSoundComponent::ReceiveData(NetPacket &packet)
 {
 	m_kvMaxDistance = packet->Read<float>();
 	auto soundIdx = packet->Read<uint32_t>();
-	auto snd = pragma::get_client_state()->GetSoundByIndex(soundIdx);
+	auto snd = get_client_state()->GetSoundByIndex(soundIdx);
 	if(snd != nullptr) {
 		snd->SetSource(&GetEntity());
 		m_wpSound = snd;

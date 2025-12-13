@@ -11,6 +11,6 @@ export import pragma.materialsystem;
 
 export namespace Lua {
 	namespace Material {
-		DLLNETWORK void register_class(luabind::class_<msys::Material> &classDef);
+		DLLNETWORK void register_class(luabind::class_<pragma::material::Material> &classDef);
 	};
 };

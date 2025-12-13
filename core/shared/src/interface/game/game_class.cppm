@@ -36,10 +36,10 @@ export import :util.timer;
 
 export {
 	namespace pragma {
-		class DLLNETWORK Game : public pragma::util::CallbackHandler, public LuaCallbackHandler {
+		class DLLNETWORK Game : public util::CallbackHandler, public LuaCallbackHandler {
 		  public:
-			pragma::physics::IEnvironment *GetPhysicsEnvironment();
-			const pragma::physics::IEnvironment *GetPhysicsEnvironment() const;
+			physics::IEnvironment *GetPhysicsEnvironment();
+			const physics::IEnvironment *GetPhysicsEnvironment() const;
 			physics::SurfaceMaterial &CreateSurfaceMaterial(const std::string &identifier, Float friction = 0.5f, Float restitution = 0.5f);
 			physics::SurfaceMaterial *GetSurfaceMaterial(const std::string &id);
 			physics::SurfaceMaterial *GetSurfaceMaterial(UInt32 id);
@@ -58,23 +58,23 @@ export {
 
 			Vector3 &GetGravity();
 			void SetGravity(Vector3 &gravity);
-			std::shared_ptr<pragma::asset::Model> CreateModel(const std::string &mdl) const;
-			std::shared_ptr<pragma::asset::Model> CreateModel(bool bAddReference = true) const;
-			std::shared_ptr<pragma::asset::Model> LoadModel(const std::string &mdl, bool bReload = false);
+			std::shared_ptr<asset::Model> CreateModel(const std::string &mdl) const;
+			std::shared_ptr<asset::Model> CreateModel(bool bAddReference = true) const;
+			std::shared_ptr<asset::Model> LoadModel(const std::string &mdl, bool bReload = false);
 			bool PrecacheModel(const std::string &mdl);
 			bool RunLua(const std::string &lua, const std::string &chunkName);
 			LuaDirectoryWatcherManager &GetLuaScriptWatcher();
-			ResourceWatcherManager &GetResourceWatcher();
+			util::ResourceWatcherManager &GetResourceWatcher();
 			void ReloadGameModeScripts();
 
-			virtual std::shared_ptr<pragma::geometry::ModelMesh> CreateModelMesh() const = 0;
-			virtual std::shared_ptr<pragma::geometry::ModelSubMesh> CreateModelSubMesh() const = 0;
+			virtual std::shared_ptr<geometry::ModelMesh> CreateModelMesh() const = 0;
+			virtual std::shared_ptr<geometry::ModelSubMesh> CreateModelSubMesh() const = 0;
 
 			virtual void GetRegisteredEntities(std::vector<std::string> &classes, std::vector<std::string> &luaClasses) const = 0;
-			void ScheduleEntityForRemoval(pragma::ecs::BaseEntity &ent);
+			void ScheduleEntityForRemoval(ecs::BaseEntity &ent);
 
-			virtual pragma::NetEventId FindNetEvent(const std::string &name) const = 0;
-			virtual pragma::NetEventId SetupNetEvent(const std::string &name) = 0;
+			virtual NetEventId FindNetEvent(const std::string &name) const = 0;
+			virtual NetEventId SetupNetEvent(const std::string &name) = 0;
 
 			bool IsGameModeInitialized() const;
 			bool IsGameInitialized() const;
@@ -88,57 +88,57 @@ export {
 			virtual void OnInitialized();
 			void InitializeMountedAddon(const AddonInfo &addonInfo) const;
 
-			const pragma::EntityComponentManager &GetEntityComponentManager() const;
-			pragma::EntityComponentManager &GetEntityComponentManager();
+			const EntityComponentManager &GetEntityComponentManager() const;
+			EntityComponentManager &GetEntityComponentManager();
 
 			// Entities
-			const std::vector<pragma::ecs::BaseEntity *> &GetBaseEntities() const;
-			std::vector<pragma::ecs::BaseEntity *> &GetBaseEntities();
+			const std::vector<ecs::BaseEntity *> &GetBaseEntities() const;
+			std::vector<ecs::BaseEntity *> &GetBaseEntities();
 			std::size_t GetBaseEntityCount() const;
-			virtual void GetEntities(std::vector<pragma::ecs::BaseEntity *> **ents);
-			void GetSpawnedEntities(std::vector<pragma::ecs::BaseEntity *> *ents);
+			virtual void GetEntities(std::vector<ecs::BaseEntity *> **ents);
+			void GetSpawnedEntities(std::vector<ecs::BaseEntity *> *ents);
 
-			virtual void GetPlayers(std::vector<pragma::ecs::BaseEntity *> *ents) = 0;
-			virtual void GetNPCs(std::vector<pragma::ecs::BaseEntity *> *ents) = 0;
-			virtual void GetWeapons(std::vector<pragma::ecs::BaseEntity *> *ents) = 0;
-			virtual void GetVehicles(std::vector<pragma::ecs::BaseEntity *> *ents) = 0;
+			virtual void GetPlayers(std::vector<ecs::BaseEntity *> *ents) = 0;
+			virtual void GetNPCs(std::vector<ecs::BaseEntity *> *ents) = 0;
+			virtual void GetWeapons(std::vector<ecs::BaseEntity *> *ents) = 0;
+			virtual void GetVehicles(std::vector<ecs::BaseEntity *> *ents) = 0;
 
 			virtual void GetPlayers(std::vector<EntityHandle> *ents) = 0;
 			virtual void GetNPCs(std::vector<EntityHandle> *ents) = 0;
 			virtual void GetWeapons(std::vector<EntityHandle> *ents) = 0;
 			virtual void GetVehicles(std::vector<EntityHandle> *ents) = 0;
 
-			virtual pragma::ecs::BaseEntity *CreateEntity();
-			virtual pragma::ecs::BaseEntity *CreateEntity(std::string classname);
-			virtual void RemoveEntity(pragma::ecs::BaseEntity *ent);
+			virtual ecs::BaseEntity *CreateEntity();
+			virtual ecs::BaseEntity *CreateEntity(std::string classname);
+			virtual void RemoveEntity(ecs::BaseEntity *ent);
 			void RemoveEntities();
-			virtual pragma::ecs::BaseEntity *GetEntity(unsigned int idx);
-			virtual pragma::ecs::BaseEntity *GetEntityByLocalIndex(uint32_t idx);
-			const pragma::ecs::BaseEntity *FindEntityByUniqueId(const pragma::util::Uuid &uuid) const { return const_cast<pragma::Game *>(this)->FindEntityByUniqueId(uuid); }
-			pragma::ecs::BaseEntity *FindEntityByUniqueId(const pragma::util::Uuid &uuid);
-			const std::unordered_map<size_t, pragma::ecs::BaseEntity *> &GetEntityUuidMap() const { return const_cast<pragma::Game *>(this)->GetEntityUuidMap(); }
-			std::unordered_map<size_t, pragma::ecs::BaseEntity *> &GetEntityUuidMap() { return m_uuidToEnt; }
-			pragma::BaseWorldComponent *GetWorld();
-			const std::vector<pragma::util::TWeakSharedHandle<pragma::BaseWorldComponent>> &GetWorldComponents() const;
+			virtual ecs::BaseEntity *GetEntity(unsigned int idx);
+			virtual ecs::BaseEntity *GetEntityByLocalIndex(uint32_t idx);
+			const ecs::BaseEntity *FindEntityByUniqueId(const util::Uuid &uuid) const { return const_cast<Game *>(this)->FindEntityByUniqueId(uuid); }
+			ecs::BaseEntity *FindEntityByUniqueId(const util::Uuid &uuid);
+			const std::unordered_map<size_t, ecs::BaseEntity *> &GetEntityUuidMap() const { return const_cast<Game *>(this)->GetEntityUuidMap(); }
+			std::unordered_map<size_t, ecs::BaseEntity *> &GetEntityUuidMap() { return m_uuidToEnt; }
+			BaseWorldComponent *GetWorld();
+			const std::vector<util::TWeakSharedHandle<BaseWorldComponent>> &GetWorldComponents() const;
 			unsigned char GetPlayerCount();
 			unsigned int GetEntityCount();
-			virtual void SpawnEntity(pragma::ecs::BaseEntity *ent);
-			void SplashDamage(const Vector3 &origin, Float radius, game::DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback = nullptr);
-			void SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback = nullptr);
-			void SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, const EntityHandle &attacker = EntityHandle(), const EntityHandle &inflictor = EntityHandle(), const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback = nullptr);
+			virtual void SpawnEntity(ecs::BaseEntity *ent);
+			void SplashDamage(const Vector3 &origin, Float radius, game::DamageInfo &dmg, const std::function<bool(ecs::BaseEntity *, game::DamageInfo &)> &callback = nullptr);
+			void SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, ecs::BaseEntity *attacker = nullptr, ecs::BaseEntity *inflictor = nullptr, const std::function<bool(ecs::BaseEntity *, game::DamageInfo &)> &callback = nullptr);
+			void SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force = 0.f, const EntityHandle &attacker = EntityHandle(), const EntityHandle &inflictor = EntityHandle(), const std::function<bool(ecs::BaseEntity *, game::DamageInfo &)> &callback = nullptr);
 
-			Bool Overlap(const pragma::physics::TraceData &data, std::vector<pragma::physics::TraceResult> *optOutResults) const;
-			Bool RayCast(const pragma::physics::TraceData &data, std::vector<pragma::physics::TraceResult> *optOutResults) const;
-			Bool Sweep(const pragma::physics::TraceData &data, std::vector<pragma::physics::TraceResult> *optOutResults) const;
+			Bool Overlap(const physics::TraceData &data, std::vector<physics::TraceResult> *optOutResults) const;
+			Bool RayCast(const physics::TraceData &data, std::vector<physics::TraceResult> *optOutResults) const;
+			Bool Sweep(const physics::TraceData &data, std::vector<physics::TraceResult> *optOutResults) const;
 
-			pragma::physics::TraceResult Overlap(const pragma::physics::TraceData &data) const;
-			pragma::physics::TraceResult RayCast(const pragma::physics::TraceData &data) const;
-			pragma::physics::TraceResult Sweep(const pragma::physics::TraceData &data) const;
+			physics::TraceResult Overlap(const physics::TraceData &data) const;
+			physics::TraceResult RayCast(const physics::TraceData &data) const;
+			physics::TraceResult Sweep(const physics::TraceData &data) const;
 
 			virtual void CreateGiblet(const GibletCreateInfo &info) = 0;
 
-			const std::shared_ptr<pragma::nav::Mesh> &GetNavMesh() const;
-			std::shared_ptr<pragma::nav::Mesh> &GetNavMesh();
+			const std::shared_ptr<nav::Mesh> &GetNavMesh() const;
+			std::shared_ptr<nav::Mesh> &GetNavMesh();
 
 			bool IsMultiPlayer() const;
 			bool IsSinglePlayer() const;
@@ -150,20 +150,20 @@ export {
 			virtual void OnGameReady();
 			bool LoadNavMesh(bool bReload = false);
 			game::AmmoTypeManager &GetAmmoTypeManager();
-			Bool RegisterAmmoType(const std::string &name, Int32 damage = 10, Float force = 200.f, DamageType dmgType = DamageType::Bullet, game::AmmoType **ammoOut = nullptr);
+			Bool RegisterAmmoType(const std::string &name, Int32 damage = 10, Float force = 200.f, DamageType dmgType = Bullet, game::AmmoType **ammoOut = nullptr);
 			game::AmmoType *GetAmmoType(const std::string &name, UInt32 *ammoId = nullptr);
 			game::AmmoType *GetAmmoType(UInt32 ammoId);
 			const game::GameModeInfo *GetGameMode() const;
 			game::GameModeInfo *GetGameMode();
 			void SetGameMode(const std::string &gameMode);
-			pragma::ecs::BaseEntity *GetGameModeEntity();
-			pragma::ecs::BaseEntity *GetGameEntity();
+			ecs::BaseEntity *GetGameModeEntity();
+			ecs::BaseEntity *GetGameEntity();
 			LuaEntityManager &GetLuaEntityManager();
-			const LuaEntityManager &GetLuaEntityManager() const { return const_cast<pragma::Game *>(this)->GetLuaEntityManager(); }
-			pragma::AnimationUpdateManager &GetAnimationUpdateManager();
+			const LuaEntityManager &GetLuaEntityManager() const { return const_cast<Game *>(this)->GetLuaEntityManager(); }
+			AnimationUpdateManager &GetAnimationUpdateManager();
 			void UpdatePackagePaths();
 
-			void SetWorld(pragma::BaseWorldComponent *entWorld);
+			void SetWorld(BaseWorldComponent *entWorld);
 			void CloseMap();
 			void ClearModels();
 			virtual void Think();
@@ -180,13 +180,13 @@ export {
 			bool m_bCollisionsEnabled = true;
 			bool CollisionTest();
 			bool CollisionTest(Vector3 *pos);
-			bool CollisionTest(pragma::BasePlayerComponent &pl, float *distance, Vector3 *hitnormal = nullptr);
-			void CollisionTest(pragma::ecs::BaseEntity *a, pragma::ecs::BaseEntity *b);
+			bool CollisionTest(BasePlayerComponent &pl, float *distance, Vector3 *hitnormal = nullptr);
+			void CollisionTest(ecs::BaseEntity *a, ecs::BaseEntity *b);
 			void EnableCollisions(bool b);
 			//
 		  public:
 			//
-			Game(pragma::NetworkState *state);
+			Game(NetworkState *state);
 			virtual ~Game();
 			virtual void OnRemove();
 			virtual bool IsServer();
@@ -217,9 +217,9 @@ export {
 			virtual bool RegisterNetMessage(std::string name);
 			void RegisterLuaNetMessage(std::string name, int handler);
 			std::vector<std::string> *GetLuaNetMessageIndices();
-			bool BroadcastEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx);
-			bool InjectEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx);
-			Lua::StatusCode LoadLuaFile(std::string &fInOut, fsys::SearchFlags includeFlags = fsys::SearchFlags::All, fsys::SearchFlags excludeFlags = fsys::SearchFlags::None);
+			bool BroadcastEntityEvent(BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx);
+			bool InjectEntityEvent(BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx);
+			Lua::StatusCode LoadLuaFile(std::string &fInOut, fs::SearchFlags includeFlags = fs::SearchFlags::All, fs::SearchFlags excludeFlags = fs::SearchFlags::None);
 			virtual bool ExecuteLuaFile(std::string &fInOut, lua::State *optCustomLuaState = nullptr);
 			// Same as ExecuteLuaFile, but uses the last value from the include stack
 			//bool IncludeLuaFile(std::string &fInOut); // Deprecated
@@ -228,9 +228,9 @@ export {
 			virtual void RunLuaFiles(const std::string &subPath);
 			Lua::StatusCode ProtectedLuaCall(const std::function<Lua::StatusCode(lua::State *)> &pushFuncArgs, int32_t numResults);
 			template<class TLuaEntity, class THandle>
-			pragma::ecs::BaseEntity *CreateLuaEntity(std::string classname, luabind::object &oClass, bool bLoadIfNotExists = false);
-			virtual pragma::ecs::BaseEntity *CreateLuaEntity(std::string classname, bool bLoadIfNotExists = false) = 0;
-			virtual pragma::BaseEntityComponent *CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname) = 0;
+			ecs::BaseEntity *CreateLuaEntity(std::string classname, luabind::object &oClass, bool bLoadIfNotExists = false);
+			virtual ecs::BaseEntity *CreateLuaEntity(std::string classname, bool bLoadIfNotExists = false) = 0;
+			virtual BaseEntityComponent *CreateLuaEntityComponent(ecs::BaseEntity &ent, std::string classname) = 0;
 			void LoadLuaEntities(std::string subPath);
 			void LoadLuaComponents(const std::string &typePath);
 			virtual std::string GetLuaNetworkDirectoryName() const = 0;
@@ -248,15 +248,15 @@ export {
 			bool LoadLuaComponent(const std::string &mainPath, const std::string &componentName);
 			bool LoadLuaEntityByClass(const std::string &className);
 			bool LoadLuaComponentByName(const std::string &componentName);
-			const pragma::LuaCore::ClassManager &GetLuaClassManager() const;
-			pragma::LuaCore::ClassManager &GetLuaClassManager();
+			const LuaCore::ClassManager &GetLuaClassManager() const;
+			LuaCore::ClassManager &GetLuaClassManager();
 
 			CallbackHandle AddConVarCallback(const std::string &cvar, LuaFunction function);
 			unsigned int GetNetMessageID(std::string name);
 			std::string *GetNetMessageIdentifier(unsigned int ID);
-			virtual void OnPlayerDropped(pragma::BasePlayerComponent &pl, pragma::networking::DropReason reason);
-			virtual void OnPlayerReady(pragma::BasePlayerComponent &pl);
-			virtual void OnPlayerJoined(pragma::BasePlayerComponent &pl);
+			virtual void OnPlayerDropped(BasePlayerComponent &pl, networking::DropReason reason);
+			virtual void OnPlayerReady(BasePlayerComponent &pl);
+			virtual void OnPlayerJoined(BasePlayerComponent &pl);
 			// Timers
 			Timer *CreateTimer(float delay, int reps, LuaFunctionObject luaFunction, TimerType timeType = TimerType::CurTime);
 			Timer *CreateTimer(float delay, int reps, const CallbackHandle &hCallback, TimerType timeType = TimerType::CurTime);
@@ -269,7 +269,7 @@ export {
 			std::string GetConVarString(const std::string &scmd);
 			float GetConVarFloat(const std::string &scmd);
 			bool GetConVarBool(const std::string &scmd);
-			pragma::console::ConVarFlags GetConVarFlags(const std::string &scmd);
+			console::ConVarFlags GetConVarFlags(const std::string &scmd);
 			const std::unordered_map<std::string, std::vector<console::CvarCallback>> &GetConVarCallbacks() const;
 
 			virtual Float GetFrictionScale() const = 0;
@@ -281,16 +281,16 @@ export {
 
 			virtual bool IsPhysicsSimulationEnabled() const = 0;
 
-			std::vector<pragma::ComponentHandle<pragma::BasePhysicsComponent>> &GetAwakePhysicsComponents();
-			std::vector<pragma::BaseEntityComponent *> &GetEntityTickComponents() { return m_entityTickComponents; }
-			std::vector<pragma::BaseGamemodeComponent *> &GetGamemodeComponents() { return m_gamemodeComponents; }
+			std::vector<ComponentHandle<BasePhysicsComponent>> &GetAwakePhysicsComponents();
+			std::vector<BaseEntityComponent *> &GetEntityTickComponents() { return m_entityTickComponents; }
+			std::vector<BaseGamemodeComponent *> &GetGamemodeComponents() { return m_gamemodeComponents; }
 
 			// Debug
 			virtual void DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration = 0.f) = 0;
 			virtual void DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration = 0.f) = 0;
 			virtual void DrawPlane(const Vector3 &n, float dist, const Color &color, float duration = 0.f) = 0;
 			virtual void DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration = 0.f) = 0;
-			pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
+			debug::ProfilingStageManager<debug::ProfilingStage> *GetProfilingStageManager();
 			bool StartProfilingStage(const char *stage);
 			bool StopProfilingStage();
 		  protected:
@@ -298,17 +298,17 @@ export {
 			void GetLuaRegisteredEntities(std::vector<std::string> &luaClasses) const;
 
 			GameFlags m_flags = GameFlags::InitialTick;
-			std::unique_ptr<pragma::AnimationUpdateManager> m_animUpdateManager;
-			std::vector<pragma::ecs::BaseEntity *> m_baseEnts;
-			std::unordered_map<size_t, pragma::ecs::BaseEntity *> m_uuidToEnt;
+			std::unique_ptr<AnimationUpdateManager> m_animUpdateManager;
+			std::vector<ecs::BaseEntity *> m_baseEnts;
+			std::unordered_map<size_t, ecs::BaseEntity *> m_uuidToEnt;
 			std::queue<EntityHandle> m_entsScheduledForRemoval;
-			std::vector<pragma::ComponentHandle<pragma::BasePhysicsComponent>> m_awakePhysicsEntities;
-			std::vector<pragma::BaseEntityComponent *> m_entityTickComponents;
-			std::vector<pragma::BaseGamemodeComponent *> m_gamemodeComponents;
+			std::vector<ComponentHandle<BasePhysicsComponent>> m_awakePhysicsEntities;
+			std::vector<BaseEntityComponent *> m_entityTickComponents;
+			std::vector<BaseGamemodeComponent *> m_gamemodeComponents;
 			std::shared_ptr<Lua::Interface> m_lua = nullptr;
-			std::unique_ptr<pragma::LuaCore::ClassManager> m_luaClassManager;
+			std::unique_ptr<LuaCore::ClassManager> m_luaClassManager;
 			std::unique_ptr<LuaDirectoryWatcherManager> m_scriptWatcher = nullptr;
-			std::unique_ptr<pragma::physics::SurfaceMaterialManager> m_surfaceMaterialManager = nullptr;
+			std::unique_ptr<physics::SurfaceMaterialManager> m_surfaceMaterialManager = nullptr;
 			std::unordered_map<std::string, std::vector<console::CvarCallback>> m_cvarCallbacks;
 			std::vector<std::unique_ptr<Timer>> m_timers;
 			std::unordered_map<std::string, int> m_luaNetMessages;
@@ -333,28 +333,28 @@ export {
 			// for the next tick.
 			float m_tPhysDeltaRemainder = 0.f;
 			Vector3 m_gravity = {0, -600, 0};
-			std::vector<pragma::util::TWeakSharedHandle<pragma::BaseWorldComponent>> m_worldComponents {};
+			std::vector<util::TWeakSharedHandle<BaseWorldComponent>> m_worldComponents {};
 			game::GameModeInfo *m_gameMode = nullptr;
 			EntityHandle m_entGamemode;
 			EntityHandle m_entGame;
 			CallbackHandle m_cbProfilingHandle = {};
-			std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_profilingStageManager;
-			std::shared_ptr<pragma::nav::Mesh> m_navMesh = nullptr;
+			std::unique_ptr<debug::ProfilingStageManager<debug::ProfilingStage>> m_profilingStageManager;
+			std::shared_ptr<nav::Mesh> m_navMesh = nullptr;
 			std::unique_ptr<game::AmmoTypeManager> m_ammoTypes = nullptr;
 			std::unique_ptr<LuaEntityManager> m_luaEnts = nullptr;
-			std::shared_ptr<pragma::EntityComponentManager> m_componentManager = nullptr;
+			std::shared_ptr<EntityComponentManager> m_componentManager = nullptr;
 
 			// Lua
 			std::vector<std::string> m_luaIncludeStack = {};
 
-			virtual void InitializeWorldData(pragma::asset::WorldData &worldData);
-			virtual void InitializeMapEntities(pragma::asset::WorldData &worldData, std::vector<EntityHandle> &outEnts);
+			virtual void InitializeWorldData(asset::WorldData &worldData);
+			virtual void InitializeMapEntities(asset::WorldData &worldData, std::vector<EntityHandle> &outEnts);
 			virtual bool LoadLuaComponent(const std::string &luaFilePath, const std::string &mainPath, const std::string &componentName);
 			virtual bool InitializeGameMode();
 			template<class TComponent, class THolder>
-			pragma::BaseEntityComponent *CreateLuaEntityComponent(pragma::ecs::BaseEntity &ent, std::string classname);
+			BaseEntityComponent *CreateLuaEntityComponent(ecs::BaseEntity &ent, std::string classname);
 
-			virtual bool InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject);
+			virtual bool InvokeEntityEvent(BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject);
 			virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod);
 			void LoadConfig();
 			void SaveConfig();
@@ -362,17 +362,17 @@ export {
 			virtual void InitializeLuaScriptWatcher();
 
 			// Map
-			pragma::ecs::BaseEntity *CreateMapEntity(pragma::asset::EntityData &entData);
-			pragma::BaseEntityComponent *CreateMapComponent(pragma::ecs::BaseEntity &ent, const std::string &componentType, const pragma::asset::ComponentData &componentData);
-			std::unique_ptr<pragma::physics::IEnvironment, void (*)(pragma::physics::IEnvironment *)> m_physEnvironment = std::unique_ptr<pragma::physics::IEnvironment, void (*)(pragma::physics::IEnvironment *)> {nullptr, [](pragma::physics::IEnvironment *) {}};
+			ecs::BaseEntity *CreateMapEntity(asset::EntityData &entData);
+			BaseEntityComponent *CreateMapComponent(ecs::BaseEntity &ent, const std::string &componentType, const asset::ComponentData &componentData);
+			std::unique_ptr<physics::IEnvironment, void (*)(physics::IEnvironment *)> m_physEnvironment = std::unique_ptr<physics::IEnvironment, void (*)(physics::IEnvironment *)> {nullptr, [](physics::IEnvironment *) {}};
 
-			virtual std::shared_ptr<pragma::EntityComponentManager> InitializeEntityComponentManager() = 0;
-			virtual void OnEntityCreated(pragma::ecs::BaseEntity *ent);
-			virtual void SetupEntity(pragma::ecs::BaseEntity *ent, unsigned int idx) = 0;
+			virtual std::shared_ptr<EntityComponentManager> InitializeEntityComponentManager() = 0;
+			virtual void OnEntityCreated(ecs::BaseEntity *ent);
+			virtual void SetupEntity(ecs::BaseEntity *ent, unsigned int idx) = 0;
 			virtual unsigned int GetFreeEntityIndex() = 0;
-			virtual std::shared_ptr<pragma::nav::Mesh> LoadNavMesh(const std::string &fname);
-			void SetupEntity(pragma::ecs::BaseEntity *ent);
-			virtual void InitializeEntityComponents(pragma::EntityComponentManager &componentManager);
+			virtual std::shared_ptr<nav::Mesh> LoadNavMesh(const std::string &fname);
+			void SetupEntity(ecs::BaseEntity *ent);
+			virtual void InitializeEntityComponents(EntityComponentManager &componentManager);
 			virtual void OnMapLoaded();
 		};
 		using namespace pragma::math::scoped_enum::bitwise;
@@ -409,7 +409,7 @@ export {
 				auto *holder = luabind::object_cast<THandle *>(r);
 				if(elLua && holder) {
 					elLua->SetupLua(r, classname);
-					holder->SetHandle(pragma::util::weak_shared_handle_cast<ecs::BaseEntity, TLuaEntity>(elLua->GetHandle()));
+					holder->SetHandle(util::weak_shared_handle_cast<ecs::BaseEntity, TLuaEntity>(elLua->GetHandle()));
 					el = elLua;
 				}
 				else {
@@ -448,7 +448,7 @@ export {
 				auto *holder = luabind::object_cast<THolder *>(r);
 				if(elLua && holder) {
 					elLua->SetupLua(r);
-					holder->SetHandle(pragma::util::weak_shared_handle_cast<BaseEntityComponent, TComponent>(elLua->GetHandle()));
+					holder->SetHandle(util::weak_shared_handle_cast<BaseEntityComponent, TComponent>(elLua->GetHandle()));
 					el = elLua;
 				}
 				else {

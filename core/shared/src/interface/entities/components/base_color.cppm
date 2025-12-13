@@ -21,11 +21,11 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseColorComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 		const Vector4 &GetColor() const;
-		const pragma::util::PVector4Property &GetColorProperty() const;
+		const util::PVector4Property &GetColorProperty() const;
 
 		virtual ~BaseColorComponent() override;
 		void SetColor(const Color &color);
@@ -35,9 +35,9 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	  protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
-		BaseColorComponent(pragma::ecs::BaseEntity &ent);
-		pragma::util::PVector4Property m_color;
+		BaseColorComponent(ecs::BaseEntity &ent);
+		util::PVector4Property m_color;
 		CallbackHandle m_cbOnColorChanged = {};
-		pragma::NetEventId m_netEvSetColor = pragma::INVALID_NET_EVENT;
+		NetEventId m_netEvSetColor = INVALID_NET_EVENT;
 	};
 };

@@ -13,6 +13,6 @@ export namespace pragma {
 	constexpr uint32_t ENGINE_VERSION_MINOR = 3;
 	constexpr uint32_t ENGINE_VERSION_REVISION = 0;
 
-	DLLNETWORK pragma::util::Version &get_engine_version();
+	DLLNETWORK util::Version &get_engine_version();
 	DLLNETWORK std::string get_pretty_engine_version();
 };

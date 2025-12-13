@@ -14,9 +14,9 @@ export import :rendering.shaders.scene;
 
 export namespace pragma::debug {
 	struct DLLCLIENT DebugRenderFilter {
-		std::function<bool(pragma::ShaderGameWorld &)> shaderFilter = nullptr;
-		std::function<bool(msys::CMaterial &)> materialFilter = nullptr;
-		std::function<bool(pragma::ecs::CBaseEntity &, msys::CMaterial &)> entityFilter = nullptr;
-		std::function<bool(pragma::ecs::CBaseEntity &, msys::CMaterial *, pragma::geometry::CModelSubMesh &, pragma::rendering::RenderMeshIndex)> meshFilter = nullptr;
+		std::function<bool(ShaderGameWorld &)> shaderFilter = nullptr;
+		std::function<bool(material::CMaterial &)> materialFilter = nullptr;
+		std::function<bool(ecs::CBaseEntity &, material::CMaterial &)> entityFilter = nullptr;
+		std::function<bool(ecs::CBaseEntity &, material::CMaterial *, geometry::CModelSubMesh &, rendering::RenderMeshIndex)> meshFilter = nullptr;
 	};
 }

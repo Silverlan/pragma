@@ -12,11 +12,11 @@ export namespace pragma {
 	class DLLNETWORK BaseEnvLightSpotVolComponent : public BaseEntityComponent {
 	  public:
 		using BaseEntityComponent::BaseEntityComponent;
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 
-		pragma::ecs::BaseEntity *GetSpotlightTarget() const;
+		ecs::BaseEntity *GetSpotlightTarget() const;
 
 		void SetIntensityFactor(float intensityFactor);
 		float GetIntensityFactor() const;
@@ -24,12 +24,12 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	  protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
-		virtual void SetSpotlightTarget(pragma::ecs::BaseEntity &ent);
+		virtual void SetSpotlightTarget(ecs::BaseEntity &ent);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		float m_coneStartOffset = 0.f;
 		float m_intensityFactor = 1.f;
 		EntityHandle m_hSpotlightTarget = {};
 		std::string m_kvSpotlightTargetName = "";
-		pragma::NetEventId m_netEvSetSpotlightTarget = pragma::INVALID_NET_EVENT;
+		NetEventId m_netEvSetSpotlightTarget = INVALID_NET_EVENT;
 	};
 };

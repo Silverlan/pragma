@@ -17,7 +17,7 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseSoundEmitterComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		struct DLLNETWORK SoundInfo {
 			SoundInfo(float gain = 1.f, float pitch = 1.f) : gain {gain}, pitch {pitch} {}
@@ -31,12 +31,12 @@ export namespace pragma {
 
 		virtual void OnTick(double dt) override;
 		virtual void PrecacheSounds();
-		virtual std::shared_ptr<audio::ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {});
-		virtual std::shared_ptr<audio::ALSound> EmitSound(std::string snd, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {});
+		virtual std::shared_ptr<audio::ALSound> CreateSound(std::string snd, audio::ALSoundType type, const SoundInfo &sndInfo = {});
+		virtual std::shared_ptr<audio::ALSound> EmitSound(std::string snd, audio::ALSoundType type, const SoundInfo &sndInfo = {});
 		void StopSounds();
 		void GetSounds(std::vector<std::shared_ptr<audio::ALSound>> **sounds);
 	  protected:
-		BaseSoundEmitterComponent(pragma::ecs::BaseEntity &ent);
+		BaseSoundEmitterComponent(ecs::BaseEntity &ent);
 		void InitializeSound(const std::shared_ptr<audio::ALSound> &snd);
 		virtual void UpdateSoundTransform(audio::ALSound &snd) const;
 		virtual bool ShouldRemoveSound(audio::ALSound &snd) const;

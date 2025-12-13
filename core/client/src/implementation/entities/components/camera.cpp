@@ -22,9 +22,9 @@ void CCameraComponent::Initialize()
 	if(pTrComponent != nullptr) {
 		auto &trC = *pTrComponent;
 		FlagCallbackForRemoval(pTrComponent->AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
-		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+		                         [this, &trC](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 			                         FlagViewMatrixAsDirty();
-			                         return pragma::util::EventReply::Unhandled;
+			                         return util::EventReply::Unhandled;
 		                         }),
 		  CallbackType::Entity);
 	}
@@ -41,16 +41,16 @@ void CCameraComponent::UpdateState()
 		return;
 	auto toggleC = GetEntity().GetComponent<CToggleComponent>();
 	if(toggleC.expired() || toggleC->IsTurnedOn()) {
-		auto *renderScene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
+		auto *renderScene = get_cgame()->GetRenderScene<CSceneComponent>();
 		if(renderScene && static_cast<ecs::CBaseEntity &>(GetEntity()).IsInScene(*renderScene))
 			renderScene->SetActiveCamera(*this);
 		return;
 	}
 
-	auto *renderScene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
+	auto *renderScene = get_cgame()->GetRenderScene<CSceneComponent>();
 	if(renderScene) {
 		if(renderScene->GetActiveCamera().get() == this) {
-			pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
+			ecs::EntityIterator entIt {*get_cgame()};
 			entIt.AttachFilter<TEntityIteratorFilterComponent<CCameraComponent>>();
 			for(auto *ent : entIt) {
 				auto toggleC = ent->GetComponent<CToggleComponent>();
@@ -69,13 +69,13 @@ void CCameraComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	if(typeid(component) == typeid(CFieldAngleComponent))
 		SetFieldAngleComponent(static_cast<CFieldAngleComponent &>(component));
 }
-pragma::util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvCameraComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseEnvCameraComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON || eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		UpdateState();
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 void CCameraComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

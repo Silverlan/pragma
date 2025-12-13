@@ -19,7 +19,7 @@ export {
 		  public:
 			using BaseEntityComponent::BaseEntityComponent;
 			virtual void Initialize() override;
-			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 			Float GetFrequency() const;
 			Float GetAmplitude() const;
 			Float GetRadius() const;

@@ -16,13 +16,13 @@ import :entities.components.surface;
 
 using namespace pragma;
 
-void CCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BaseCharacterComponent::RegisterEvents(componentManager, registerEvent); }
-CCharacterComponent::CCharacterComponent(pragma::ecs::BaseEntity &ent) : BaseCharacterComponent(ent) {}
+void CCharacterComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BaseCharacterComponent::RegisterEvents(componentManager, registerEvent); }
+CCharacterComponent::CCharacterComponent(ecs::BaseEntity &ent) : BaseCharacterComponent(ent) {}
 
 void CCharacterComponent::Initialize()
 {
 	BaseCharacterComponent::Initialize();
-	BindEventUnhandled(cAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT, [this](std::reference_wrapper<ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto animComponent = ent.GetAnimatedComponent();
 		auto &hMdl = ent.GetModel();
@@ -42,7 +42,7 @@ void CCharacterComponent::Initialize()
 			// However, this requires sending the moveActivity from the server to the clients (snapshots?)
 			if(anim != nullptr && anim->HasFlag(FAnim::Loop) && (moveSpeed.x > 0.f || moveSpeed.y > 0.f)) //IsMoving())
 			{
-				auto anim = hMdl->GetAnimation(hMdl->SelectFirstAnimation(animComponent->TranslateActivity(pragma::Activity::Idle)));
+				auto anim = hMdl->GetAnimation(hMdl->SelectFirstAnimation(animComponent->TranslateActivity(Activity::Idle)));
 				auto frame = anim ? anim->GetFrame(0) : nullptr;
 				if(frame != nullptr) {
 					auto blendScale = movementC ? movementC->GetMovementBlendScale() : 0.f;
@@ -54,8 +54,8 @@ void CCharacterComponent::Initialize()
 			}
 		}
 	});
-	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_ENTERED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { CreateWaterSplash(); });
-	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_EXITED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { CreateWaterSplash(); });
+	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_ENTERED, [this](std::reference_wrapper<ComponentEvent> evData) { CreateWaterSplash(); });
+	BindEventUnhandled(submergibleComponent::EVENT_ON_WATER_EXITED, [this](std::reference_wrapper<ComponentEvent> evData) { CreateWaterSplash(); });
 	GetEntity().AddComponent<CEyeComponent>();
 }
 
@@ -70,8 +70,8 @@ void CCharacterComponent::CreateWaterSplash()
 	if(pSoundEmitterComponent.valid() && pTrComponent != nullptr && pSurfC.valid()) {
 		auto pos = pTrComponent->GetPosition();
 		pos = pSurfC->ProjectToSurface(pos);
-		pragma::get_client_state()->PlayWorldSound("fx.water_slosh", pragma::audio::ALSoundType::Effect, pos);
-		auto *pt = pragma::ecs::CParticleSystemComponent::Create("watersplash");
+		get_client_state()->PlayWorldSound("fx.water_slosh", audio::ALSoundType::Effect, pos);
+		auto *pt = ecs::CParticleSystemComponent::Create("watersplash");
 		if(pt != nullptr) {
 			auto pTrComponent = pt->GetEntity().GetTransformComponent();
 			if(pTrComponent != nullptr) {
@@ -96,14 +96,14 @@ void CCharacterComponent::ReceiveData(NetPacket &packet)
 {
 	// Note: Change return value of ShouldTransmitNetData if data should be received
 }
-Bool CCharacterComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CCharacterComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetFrozen) {
 		auto b = packet->Read<bool>();
 		SetFrozen(b);
 	}
 	else if(eventId == m_netEvSetActiveWeapon) {
-		auto *ent = pragma::networking::read_entity(packet);
+		auto *ent = networking::read_entity(packet);
 		SetActiveWeapon(ent);
 	}
 	else if(eventId == m_netEvSetAmmoCount) {
@@ -119,6 +119,6 @@ Bool CCharacterComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket 
 void CCharacterComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseCharacterComponent::RegisterLuaBindings(l, modEnts);
-	auto def = pragma::LuaCore::create_entity_component_class<pragma::CCharacterComponent, pragma::BaseCharacterComponent>("CharacterComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<CCharacterComponent, BaseCharacterComponent>("CharacterComponent");
 	modEnts[def];
 }

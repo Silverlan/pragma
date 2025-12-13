@@ -54,7 +54,7 @@ export {
 
 			void Rotate(const Quat &rot);
 			void Scale(const Vector3 &scale);
-			void Mirror(pragma::Axis axis);
+			void Mirror(Axis axis);
 
 			bool operator==(const MeshVertexFrame &other) const;
 			bool operator!=(const MeshVertexFrame &other) const { return !operator==(other); }
@@ -79,54 +79,54 @@ export {
 
 			std::shared_ptr<MeshVertexFrame> AddFrame();
 
-			pragma::geometry::ModelMesh *GetMesh() const;
-			pragma::geometry::ModelSubMesh *GetSubMesh() const;
-			void SetMesh(pragma::geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh);
+			geometry::ModelMesh *GetMesh() const;
+			geometry::ModelSubMesh *GetSubMesh() const;
+			void SetMesh(geometry::ModelMesh &mesh, geometry::ModelSubMesh &subMesh);
 
 			void Rotate(const Quat &rot);
 			void Scale(const Vector3 &scale);
-			void Mirror(pragma::Axis axis);
+			void Mirror(Axis axis);
 
 			bool operator==(const MeshVertexAnimation &other) const;
 			bool operator!=(const MeshVertexAnimation &other) const { return !operator==(other); }
 		  private:
-			mutable std::weak_ptr<pragma::geometry::ModelMesh> m_wpMesh = {};
-			mutable std::weak_ptr<pragma::geometry::ModelSubMesh> m_wpSubMesh = {};
+			mutable std::weak_ptr<geometry::ModelMesh> m_wpMesh = {};
+			mutable std::weak_ptr<geometry::ModelSubMesh> m_wpSubMesh = {};
 			std::vector<std::shared_ptr<MeshVertexFrame>> m_frames;
 		};
 
-		class DLLNETWORK VertexAnimation : public std::enable_shared_from_this<pragma::animation::VertexAnimation> {
+		class DLLNETWORK VertexAnimation : public std::enable_shared_from_this<VertexAnimation> {
 		  public:
 			static constexpr std::uint32_t layout_version = 1;
 
 			static constexpr uint32_t FORMAT_VERSION = 1u;
 			static constexpr auto PMORPHANI_IDENTIFIER = "PMORPHANI";
-			static std::shared_ptr<pragma::animation::VertexAnimation> Create();
-			static std::shared_ptr<pragma::animation::VertexAnimation> Create(const VertexAnimation &other);
-			static std::shared_ptr<pragma::animation::VertexAnimation> Create(const std::string &name);
-			static std::shared_ptr<pragma::animation::VertexAnimation> Load(pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr);
+			static std::shared_ptr<VertexAnimation> Create();
+			static std::shared_ptr<VertexAnimation> Create(const VertexAnimation &other);
+			static std::shared_ptr<VertexAnimation> Create(const std::string &name);
+			static std::shared_ptr<VertexAnimation> Load(asset::Model &mdl, const udm::AssetData &data, std::string &outErr);
 
-			virtual std::shared_ptr<pragma::animation::VertexAnimation> Copy() const;
+			virtual std::shared_ptr<VertexAnimation> Copy() const;
 			virtual ~VertexAnimation() = default;
 
-			std::shared_ptr<MeshVertexFrame> AddMeshFrame(pragma::geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh);
+			std::shared_ptr<MeshVertexFrame> AddMeshFrame(geometry::ModelMesh &mesh, geometry::ModelSubMesh &subMesh);
 			const std::vector<std::shared_ptr<MeshVertexAnimation>> &GetMeshAnimations() const;
 			std::vector<std::shared_ptr<MeshVertexAnimation>> &GetMeshAnimations();
 
-			bool GetMeshAnimationId(pragma::geometry::ModelSubMesh &subMesh, uint32_t &id) const;
-			const MeshVertexAnimation *GetMeshAnimation(pragma::geometry::ModelSubMesh &subMesh) const;
-			MeshVertexAnimation *GetMeshAnimation(pragma::geometry::ModelSubMesh &subMesh);
+			bool GetMeshAnimationId(geometry::ModelSubMesh &subMesh, uint32_t &id) const;
+			const MeshVertexAnimation *GetMeshAnimation(geometry::ModelSubMesh &subMesh) const;
+			MeshVertexAnimation *GetMeshAnimation(geometry::ModelSubMesh &subMesh);
 
-			const MeshVertexFrame *GetMeshFrame(pragma::geometry::ModelSubMesh &subMesh, uint32_t frameId) const;
-			MeshVertexFrame *GetMeshFrame(pragma::geometry::ModelSubMesh &subMesh, uint32_t frameId);
+			const MeshVertexFrame *GetMeshFrame(geometry::ModelSubMesh &subMesh, uint32_t frameId) const;
+			MeshVertexFrame *GetMeshFrame(geometry::ModelSubMesh &subMesh, uint32_t frameId);
 
 			void SetName(const std::string &name);
 			const std::string &GetName() const;
 
 			void Rotate(const Quat &rot);
 			void Scale(const Vector3 &scale);
-			void Mirror(pragma::Axis axis);
-			bool Save(pragma::asset::Model &mdl, udm::AssetDataArg outData, std::string &outErr);
+			void Mirror(Axis axis);
+			bool Save(asset::Model &mdl, udm::AssetDataArg outData, std::string &outErr);
 
 			bool operator==(const VertexAnimation &other) const;
 			bool operator!=(const VertexAnimation &other) const { return !operator==(other); }
@@ -134,7 +134,7 @@ export {
 			VertexAnimation() = default;
 			VertexAnimation(const VertexAnimation &other);
 			VertexAnimation(const std::string &name);
-			bool LoadFromAssetData(pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr);
+			bool LoadFromAssetData(asset::Model &mdl, const udm::AssetData &data, std::string &outErr);
 			std::string m_name;
 			std::vector<std::shared_ptr<MeshVertexAnimation>> m_meshAnims;
 		};

@@ -89,8 +89,8 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 	static auto registeredGlobals = false;
 	if (!registeredGlobals) {
 		registeredGlobals = true;
-		ds::register_base_types();
-		ds::Texture::register_type();
+		datasystem::register_base_types();
+		datasystem::Texture::register_type();
 		pragma::console::register_shared_convars(*pragma::console::server::get_convar_map());
 		register_launch_parameters(*GetLaunchParaMap());
 		pragma::networking::register_net_messages();
@@ -334,10 +334,10 @@ void pragma::Engine::Close()
 
 	Con::set_output_callback(nullptr);
 	pragma::locale::clear();
-	filemanager::close_file_watcher();
+	fs::close_file_watcher();
 	pragma::oskit::shutdown();
-	FileManager::Close();
-	ds::close();
+	fs::close();
+	datasystem::close();
 #ifdef __linux__
 	if(pragma::console::impl::is_linenoise_enabled())
 		pragma::console::impl::close_linenoise();
@@ -396,22 +396,22 @@ static uint32_t clear_assets(pragma::NetworkState *state, pragma::asset::Type ty
 			else {
 				auto &cache = matManager.GetCache();
 
-				std::unordered_map<msys::Material *, std::string> oldCache;
+				std::unordered_map<pragma::material::Material *, std::string> oldCache;
 				for(auto &pair : cache) {
 					auto asset = matManager.GetAsset(pair.second);
 					if(!asset)
 						continue;
-					oldCache[msys::MaterialManager::GetAssetObject(*asset).get()] = pair.first;
+					oldCache[pragma::material::MaterialManager::GetAssetObject(*asset).get()] = pair.first;
 				}
 
 				n = matManager.ClearUnused();
 
-				std::unordered_map<msys::Material *, std::string> newCache;
+				std::unordered_map<pragma::material::Material *, std::string> newCache;
 				for(auto &pair : cache) {
 					auto asset = matManager.GetAsset(pair.second);
 					if(!asset)
 						continue;
-					newCache[msys::MaterialManager::GetAssetObject(*asset).get()] = pair.first;
+					newCache[pragma::material::MaterialManager::GetAssetObject(*asset).get()] = pair.first;
 				}
 
 				for(auto &pair : oldCache) {
@@ -469,7 +469,7 @@ void pragma::Engine::ClearCache()
 	spdlog::info("Clearing cached files...");
 	auto fRemoveDir = [](const std::string &name) {
 		spdlog::info("Removing '{}'", name);
-		auto result = FileManager::RemoveDirectory(name.c_str());
+		auto result = pragma::fs::remove_directory(name);
 		if(result == false)
 			spdlog::warn("Failed to remove cache directory '{}'! Please remove it manually.", name);
 		return result;
@@ -483,9 +483,9 @@ void pragma::Engine::ClearCache()
 	spdlog::info("Removing addon cache directories...");
 	for(auto &addonInfo : AddonSystem::GetMountedAddons()) {
 		auto path = addonInfo.GetAbsolutePath() + "\\cache";
-		if(FileManager::ExistsSystem(path) == false)
+		if(pragma::fs::exists_system(path) == false)
 			continue;
-		if(FileManager::RemoveSystemDirectory(path.c_str()) == false)
+		if(fs::remove_system_directory(path) == false)
 			spdlog::warn("Failed to remove cache directory '{}'! Please remove it manually.", path);
 	}
 
@@ -493,10 +493,10 @@ void pragma::Engine::ClearCache()
 	std::this_thread::sleep_for(std::chrono::milliseconds {500});
 
 	// Re-create the directories
-	FileManager::CreatePath("cache");
+	fs::create_path("cache");
 	if(clearAssetFiles) {
-		FileManager::CreatePath("addons/imported");
-		FileManager::CreatePath("addons/converted");
+		fs::create_path("addons/imported");
+		fs::create_path("addons/converted");
 	}
 
 	// Give it a bit of time to complete
@@ -674,29 +674,29 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	{
 		if(!g_lpUserDataDir.empty()) {
 			spdlog::debug("Using user-data directory '{}'...", g_lpUserDataDir);
-			filemanager::set_absolute_root_path(g_lpUserDataDir, 0 /* priority */);
+			fs::set_absolute_root_path(g_lpUserDataDir, 0 /* priority */);
 		}
 		else
-			filemanager::set_absolute_root_path(pragma::util::get_program_path());
+			fs::set_absolute_root_path(pragma::util::get_program_path());
 
 		// TODO: File cache doesn't work with absolute paths at the moment
 		// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
-		filemanager::set_use_file_index_cache(true);
+		fs::set_use_file_index_cache(true);
 
 		if(!g_lpUserDataDir.empty()) {
 			// If we're using a custom user-data directory, we have to add the program path as an additional mount directory
-			filemanager::add_secondary_absolute_read_only_root_path("core", pragma::util::get_program_path());
+			fs::add_secondary_absolute_read_only_root_path("core", pragma::util::get_program_path());
 		}
 		size_t resDirIdx = 1;
 		for(auto &resourceDir : g_lpResourceDirs) {
 			spdlog::debug("Adding read-only resource directory '{}'...", resourceDir);
-			filemanager::add_secondary_absolute_read_only_root_path("resource" + std::to_string(resDirIdx), resourceDir, resDirIdx /* priority */);
+			fs::add_secondary_absolute_read_only_root_path("resource" + std::to_string(resDirIdx), resourceDir, resDirIdx /* priority */);
 			++resDirIdx;
 		}
 	}
 	//
 
-	auto f = filemanager::open_file("git_info.txt", filemanager::FileMode::Read, nullptr, fsys::SearchFlags::Local | fsys::SearchFlags::NoMounts);
+	auto f = fs::open_file("git_info.txt", fs::FileMode::Read, nullptr, fs::SearchFlags::Local | fs::SearchFlags::NoMounts);
 	if(f) {
 		spdlog::info("Git Info:");
 		auto str = f->ReadString();
@@ -724,10 +724,10 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 #endif
 
 	// These need to exist, so they can be automatically mounted
-	if(FileManager::Exists("addons/imported") == false)
-		FileManager::CreatePath("addons/imported");
-	if(FileManager::Exists("addons/converted") == false)
-		FileManager::CreatePath("addons/converted");
+	if(fs::exists("addons/imported") == false)
+		fs::create_path("addons/imported");
+	if(fs::exists("addons/converted") == false)
+		fs::create_path("addons/converted");
 
 	pragma::register_engine_animation_events();
 	pragma::register_engine_activities();
@@ -744,7 +744,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	CVarHandler::Initialize();
 
 	// Initialize Server Instance
-	auto matManager = msys::MaterialManager::Create();
+	auto matManager = material::MaterialManager::Create();
 	matManager->SetImportDirectory("addons/converted/");
 	InitializeAssetManager(*matManager);
 
@@ -776,7 +776,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 		LoadConfig();
 
 	if(!GetConVarBool("asset_file_cache_enabled"))
-		filemanager::set_use_file_index_cache(false);
+		fs::set_use_file_index_cache(false);
 	if(!GetConVarBool("asset_multithreading_enabled"))
 		SetAssetMultiThreadedLoadingEnabled(false);
 	return true;
@@ -1017,7 +1017,7 @@ void pragma::Engine::UpdateTickCount() { m_ctTick.Update(); }
 
 static void add_zip_file(uzip::ZIPFile &zip, const std::string &fileName, const std::string &zipFileName) {
 	std::string path;
-	if(!filemanager::find_absolute_path(fileName, path))
+	if(!pragma::fs::find_absolute_path(fileName, path))
 		return;
 	std::ifstream t {path};
 	if(t.is_open()) {
@@ -1030,7 +1030,7 @@ static void add_zip_file(uzip::ZIPFile &zip, const std::string &fileName, const 
 
 std::unique_ptr<uzip::ZIPFile> pragma::Engine::GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr)
 {
-	auto programPath = pragma::util::Path::CreatePath(filemanager::get_program_write_path());
+	auto programPath = pragma::util::Path::CreatePath(fs::get_program_write_path());
 	outZipFileName = pragma::util::get_date_time(baseName + "_%Y-%m-%d_%H-%M-%S.zip");
 	auto zipName = programPath + outZipFileName;
 	std::string err;
@@ -1058,7 +1058,7 @@ std::unique_ptr<uzip::ZIPFile> pragma::Engine::GenerateEngineDump(const std::str
 			pragma::flush_loggers();
 
 			/* For some reason this will fail sometimes
-			auto logContents = filemanager::read_file(*logFileName);
+			auto logContents = fs::read_file(*logFileName);
 			if(logContents.has_value()) {
 				zip.AddFile("log.txt", *logContents);
 			}

@@ -67,26 +67,26 @@ static void debug_texture_mipmaps(pragma::NetworkState *, pragma::BasePlayerComp
 		return;
 	}
 	auto &texPath = argv.front();
-	auto &materialManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
+	auto &materialManager = static_cast<pragma::material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &textureManager = materialManager.GetTextureManager();
 	auto a = textureManager.FindCachedAsset(texPath);
-	auto asset = a ? msys::TextureManager::GetAssetObject(*a) : nullptr;
-	std::shared_ptr<msys::Texture> texture = nullptr;
+	auto asset = a ? pragma::material::TextureManager::GetAssetObject(*a) : nullptr;
+	std::shared_ptr<pragma::material::Texture> texture = nullptr;
 	if(asset && asset->HasValidVkTexture())
 		texture = asset;
 	else {
 		auto *asset = materialManager.FindCachedAsset(texPath);
-		auto mat = asset ? msys::CMaterialManager::GetAssetObject(*asset) : nullptr;
+		auto mat = asset ? pragma::material::CMaterialManager::GetAssetObject(*asset) : nullptr;
 		if(!mat) {
 			Con::cwar << "No material with name '" << texPath << "' found or loaded!" << Con::endl;
 			return;
 		}
 		auto *diffuseMap = mat->GetDiffuseMap();
-		if(diffuseMap == nullptr || diffuseMap->texture == nullptr || static_cast<msys::Texture *>(diffuseMap->texture.get())->HasValidVkTexture() == false) {
+		if(diffuseMap == nullptr || diffuseMap->texture == nullptr || static_cast<pragma::material::Texture *>(diffuseMap->texture.get())->HasValidVkTexture() == false) {
 			Con::cwar << "Material '" << texPath << "' has no valid albedo map!" << Con::endl;
 			return;
 		}
-		texture = std::static_pointer_cast<msys::Texture>(diffuseMap->texture);
+		texture = std::static_pointer_cast<pragma::material::Texture>(diffuseMap->texture);
 	}
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	if(dbg == nullptr) {
@@ -97,7 +97,7 @@ static void debug_texture_mipmaps(pragma::NetworkState *, pragma::BasePlayerComp
 		if(path.has_value())
 			Con::cout << "File path: " << *path << Con::endl;
 		auto type = texture->GetFileFormatType();
-		if(type != msys::TextureType::Invalid)
+		if(type != pragma::material::TextureType::Invalid)
 			Con::cout << "File image type: " << magic_enum::enum_name(type) << Con::endl;
 		dbg = std::make_unique<DebugGameGUI>([vkTexture]() {
 			auto &wgui = pragma::gui::WGUI::GetInstance();

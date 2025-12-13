@@ -20,9 +20,9 @@ export namespace pragma {
 		virtual ~BaseStaticBvhCacheComponent() override;
 		void SetCacheDirty();
 
-		void SetEntityDirty(pragma::ecs::BaseEntity &ent);
-		void AddEntity(pragma::ecs::BaseEntity &ent);
-		void RemoveEntity(pragma::ecs::BaseEntity &ent, bool removeFinal = true);
+		void SetEntityDirty(ecs::BaseEntity &ent);
+		void AddEntity(ecs::BaseEntity &ent);
+		void RemoveEntity(ecs::BaseEntity &ent, bool removeFinal = true);
 
 		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitInfo &outHitInfo) const override;
 		using BaseBvhComponent::IntersectionTest;
@@ -31,20 +31,20 @@ export namespace pragma {
 	  protected:
 		struct BvhPendingWorkerResult {
 			std::queue<std::function<void()>> callOnComplete;
-			std::shared_ptr<pragma::bvh::MeshBvhTree> bvhData;
+			std::shared_ptr<bvh::MeshBvhTree> bvhData;
 			std::atomic<bool> complete = false;
 		};
 
-		BaseStaticBvhCacheComponent(pragma::ecs::BaseEntity &ent);
-		void RemoveEntityFromBvh(const pragma::ecs::BaseEntity &ent);
+		BaseStaticBvhCacheComponent(ecs::BaseEntity &ent);
+		void RemoveEntityFromBvh(const ecs::BaseEntity &ent);
 		void UpdateBuild();
 
-		void Build(std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &&meshes, std::vector<pragma::ecs::BaseEntity *> &&meshToEntity, std::vector<pragma::math::ScaledTransform> &&meshPoses);
+		void Build(std::vector<std::shared_ptr<geometry::ModelSubMesh>> &&meshes, std::vector<ecs::BaseEntity *> &&meshToEntity, std::vector<math::ScaledTransform> &&meshPoses);
 
 		virtual void TestRebuildBvh() = 0;
 		bool m_staticBvhDirty = false;
 		bool m_bvhInitialized = false; // Was the bvh initialized at least once?
-		std::shared_ptr<pragma::util::FunctionalParallelWorker> m_buildWorker = nullptr;
+		std::shared_ptr<util::FunctionalParallelWorker> m_buildWorker = nullptr;
 		std::unordered_set<BaseStaticBvhUserComponent *> m_entities;
 		std::unique_ptr<BvhPendingWorkerResult> m_bvhPendingWorkerResult;
 		CallbackHandle m_onEndGame;

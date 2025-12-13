@@ -22,11 +22,11 @@ export namespace pragma {
 			ConstraintComponent *operator->() { return constraint; }
 			const ConstraintComponent *operator->() const { return constraint; }
 		};
-		enum class CoordinateSpace : uint8_t { World = pragma::math::to_integral(pragma::math::CoordinateSpace::World), Local = pragma::math::to_integral(pragma::math::CoordinateSpace::Local), Object = pragma::math::to_integral(pragma::math::CoordinateSpace::Object) };
+		enum class CoordinateSpace : uint8_t { World = pragma::math::to_integral(math::CoordinateSpace::World), Local = pragma::math::to_integral(math::CoordinateSpace::Local), Object = pragma::math::to_integral(math::CoordinateSpace::Object) };
 
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		ConstraintManagerComponent(pragma::ecs::BaseEntity &ent);
+		ConstraintManagerComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		virtual void OnEntitySpawn() override;

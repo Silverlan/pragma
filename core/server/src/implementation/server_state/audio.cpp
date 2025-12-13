@@ -84,7 +84,7 @@ void pragma::ServerState::SendSoundSourceToClient(pragma::audio::SALSound &sound
 std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
 {
 	pragma::string::to_lower(snd);
-	snd = FileManager::GetNormalizedPath(snd);
+	snd = pragma::fs::get_normalized_path(snd);
 	if(m_missingSoundCache.find(snd) != m_missingSoundCache.end())
 		return nullptr;
 	pragma::audio::SoundScript *script = m_soundScriptManager->FindScript(snd.c_str());
@@ -181,7 +181,7 @@ void pragma::ServerState::StopSound(std::shared_ptr<pragma::audio::ALSound> pSnd
 bool pragma::ServerState::PrecacheSound(std::string snd, pragma::audio::ALChannel mode)
 {
 	pragma::string::to_lower(snd);
-	snd = FileManager::GetCanonicalizedPath(snd);
+	snd = fs::get_canonicalized_path(snd);
 	pragma::audio::get_full_sound_path(snd, true);
 
 	pragma::audio::SoundCacheInfo *inf = nullptr;
@@ -199,8 +199,8 @@ bool pragma::ServerState::PrecacheSound(std::string snd, pragma::audio::ALChanne
 		else if(mode == pragma::audio::ALChannel::Auto && inf->stereo == true)
 			return true;
 	}
-	auto subPath = FileManager::GetCanonicalizedPath("sounds\\" + snd);
-	if(!FileManager::IsFile(subPath)) {
+	auto subPath = fs::get_canonicalized_path("sounds\\" + snd);
+	if(!fs::is_file(subPath)) {
 		auto bPort = false;
 		std::string ext;
 		if(ufile::get_extension(subPath, &ext) == true)

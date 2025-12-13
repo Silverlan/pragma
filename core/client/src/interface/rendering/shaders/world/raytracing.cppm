@@ -34,9 +34,9 @@ export namespace pragma {
 
 		enum class RenderFlags : uint32_t {
 			None = 0u,
-			RenderWorld = pragma::math::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeWorld),
-			RenderView = pragma::math::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeView),
-			RenderSkybox = pragma::math::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeSkybox),
+			RenderWorld = math::to_integral(CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeWorld),
+			RenderView = math::to_integral(CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeView),
+			RenderSkybox = math::to_integral(CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeSkybox),
 			// RenderWater = pragma::math::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeWater),
 			NoIBL = RenderSkybox << 1u
 		};

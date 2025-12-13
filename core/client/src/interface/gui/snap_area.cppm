@@ -15,6 +15,6 @@ export namespace pragma::gui::types {
 		virtual void Initialize() override;
 		WIBase *GetTriggerArea();
 	private:
-		pragma::gui::WIHandle m_hTriggerArea = {};
+		WIHandle m_hTriggerArea = {};
 	};
 }

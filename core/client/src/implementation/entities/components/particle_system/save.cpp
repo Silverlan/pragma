@@ -9,7 +9,7 @@ import :entities.components.particle_system;
 using namespace pragma;
 
 // See c_lengine.cpp as well
-bool ecs::CParticleSystemComponent::Save(VFilePtrReal &f, const std::vector<ecs::CParticleSystemComponent *> &particleSystems)
+bool ecs::CParticleSystemComponent::Save(fs::VFilePtrReal &f, const std::vector<CParticleSystemComponent *> &particleSystems)
 {
 	for(auto *ps : particleSystems) {
 		if(ps->IsRecordingKeyValues() == false)
@@ -50,14 +50,14 @@ void ecs::CParticleSystemComponent::ToParticleSystemData(asset::ParticleSystemDa
 		dtChild.delay = child.delay;
 	}
 }
-bool ecs::CParticleSystemComponent::Save(const std::string &fileName, const std::vector<ecs::CParticleSystemComponent *> &particleSystems)
+bool ecs::CParticleSystemComponent::Save(const std::string &fileName, const std::vector<CParticleSystemComponent *> &particleSystems)
 {
 	for(auto *ps : particleSystems) {
 		if(ps->IsRecordingKeyValues() == false)
 			return false;
 	}
-	auto ptPath = pragma::asset::get_normalized_path("particles/" + fileName, pragma::asset::Type::ParticleSystem) + '.' + pragma::asset::FORMAT_PARTICLE_SYSTEM_ASCII;
-	auto f = FileManager::OpenFile<VFilePtrReal>(ptPath.c_str(), "w");
+	auto ptPath = pragma::asset::get_normalized_path("particles/" + fileName, asset::Type::ParticleSystem) + '.' + asset::FORMAT_PARTICLE_SYSTEM_ASCII;
+	auto f = fs::open_file<fs::VFilePtrReal>(ptPath, fs::FileMode::Write);
 	if(!f)
 		return false;
 	return Save(f, particleSystems);

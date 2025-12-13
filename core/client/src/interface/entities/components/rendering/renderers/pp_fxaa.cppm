@@ -12,12 +12,12 @@ export namespace pragma {
 	class CRasterizationRendererComponent;
 	class DLLCLIENT CRendererPpFxaaComponent final : public CRendererPpBaseComponent {
 	  public:
-		CRendererPpFxaaComponent(pragma::ecs::BaseEntity &ent);
+		CRendererPpFxaaComponent(ecs::BaseEntity &ent);
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual std::string GetIdentifier() const override { return "fxaa"; }
-		virtual uint32_t GetPostProcessingWeight() const override { return pragma::math::to_integral(CRendererComponent::StandardPostProcessingWeight::Fxaa); }
+		virtual uint32_t GetPostProcessingWeight() const override { return math::to_integral(CRendererComponent::StandardPostProcessingWeight::Fxaa); }
 		virtual PostProcessingEffectData::Flags GetFlags() const override { return PostProcessingEffectData::Flags::ToneMapped; }
 	  private:
-		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) override;
+		virtual void DoRenderEffect(const rendering::DrawSceneInfo &drawSceneInfo) override;
 	};
 };

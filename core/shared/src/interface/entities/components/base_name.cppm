@@ -16,24 +16,24 @@ export namespace pragma {
 	};
 
 	namespace baseNameComponent {
-		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_ON_NAME_CHANGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_NAME_CHANGED;
 	}
 	class DLLNETWORK BaseNameComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 		virtual ~BaseNameComponent() override;
 
 		virtual void SetName(std::string name);
 		const std::string &GetName() const;
-		const pragma::util::PStringProperty &GetNameProperty() const;
+		const util::PStringProperty &GetNameProperty() const;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
-		BaseNameComponent(pragma::ecs::BaseEntity &ent);
-		pragma::util::PStringProperty m_name;
+		BaseNameComponent(ecs::BaseEntity &ent);
+		util::PStringProperty m_name;
 		CallbackHandle m_cbOnNameChanged = {};
 	};
 };

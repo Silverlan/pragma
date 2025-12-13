@@ -16,6 +16,6 @@ export namespace pragma {
 	  protected:
 		float m_kvLimitLinLow = 0.f;
 		float m_kvLimitLinHigh = -1.f;
-		virtual void InitializeConstraint(pragma::ecs::BaseEntity *src, pragma::ecs::BaseEntity *tgt) override;
+		virtual void InitializeConstraint(ecs::BaseEntity *src, ecs::BaseEntity *tgt) override;
 	};
 };

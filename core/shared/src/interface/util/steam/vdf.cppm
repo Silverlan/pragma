@@ -22,6 +22,6 @@ export namespace pragma::util::steam::vdf {
 		DataBlock dataBlock = {};
 	};
 
-	DLLNETWORK pragma::util::MarkupFile::ResultCode read_vdf_block(pragma::util::MarkupFile &mf, pragma::util::steam::vdf::DataBlock &block, uint32_t depth = 0);
+	DLLNETWORK MarkupFile::ResultCode read_vdf_block(MarkupFile &mf, DataBlock &block, uint32_t depth = 0);
 	DLLNETWORK bool get_external_steam_locations(const std::string &steamRootPath, std::vector<std::string> &outExtLocations);
 };

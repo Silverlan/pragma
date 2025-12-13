@@ -19,20 +19,20 @@ export namespace pragma {
 		};
 		static prosper::util::RenderPassCreateInfo::AttachmentInfo get_depth_render_pass_attachment_info(prosper::SampleCountFlags sampleCount);
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
+		static ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
+		static VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
+		static ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
+		static VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
+		static VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT_EXT;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT;
+		static ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT_EXT;
+		static VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID;
+		static VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_UV;
+		static ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
+		static VertexAttribute VERTEX_ATTRIBUTE_POSITION;
+		static VertexAttribute VERTEX_ATTRIBUTE_UV;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
@@ -59,13 +59,13 @@ export namespace pragma {
 		virtual uint32_t GetSceneDescriptorSetIndex() const override;
 
 		//
-		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
+		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
+		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const override;
 		virtual void RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor, float alphaCutoff) const override;
-		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, msys::CMaterial &mat) const override;
+		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, material::CMaterial &mat) const override;
 	  protected:
 		virtual void OnPipelinesInitialized() override;
-		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat) override;
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(material::CMaterial &mat) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;
@@ -85,7 +85,7 @@ export namespace pragma {
 
 	class DLLCLIENT ShaderPrepass : public ShaderPrepassBase {
 	  public:
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_NORMAL;
+		static VertexAttribute VERTEX_ATTRIBUTE_NORMAL;
 
 		static prosper::Format RENDER_PASS_NORMAL_FORMAT;
 		static prosper::util::RenderPassCreateInfo::AttachmentInfo get_normal_render_pass_attachment_info(prosper::SampleCountFlags sampleCount);

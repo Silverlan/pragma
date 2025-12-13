@@ -21,8 +21,8 @@ export namespace Lua {
 		DLLNETWORK double calc_volume_of_polyhedron(lua::State *l, luabind::table<> tVerts, luabind::table<> tTriangles);
 		DLLNETWORK void calc_center_of_mass(lua::State *l, luabind::table<> tVerts, luabind::table<> tTriangles, Vector3 &outCom, double &outVolume);
 
-		DLLNETWORK ::Vector2 calc_barycentric_coordinates(const Vector3 &p0, const ::Vector2 &uv0, const Vector3 &p1, const ::Vector2 &uv1, const Vector3 &p2, const ::Vector2 &uv2, const Vector3 &hitPoint);
-		DLLNETWORK ::Vector2 calc_barycentric_coordinates(const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &hitPoint);
+		DLLNETWORK Vector2 calc_barycentric_coordinates(const Vector3 &p0, const Vector2 &uv0, const Vector3 &p1, const Vector2 &uv1, const Vector3 &p2, const Vector2 &uv2, const Vector3 &hitPoint);
+		DLLNETWORK Vector2 calc_barycentric_coordinates(const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &hitPoint);
 		DLLNETWORK int get_outline_vertices(lua::State *l);
 		DLLNETWORK int triangulate_point_cloud(lua::State *l);
 		DLLNETWORK luabind::object triangulate(lua::State *l, luabind::table<> contour);

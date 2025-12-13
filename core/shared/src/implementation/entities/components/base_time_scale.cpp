@@ -8,7 +8,7 @@ import :entities.components.base_time_scale;
 
 using namespace pragma;
 
-void BaseTimeScaleComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void BaseTimeScaleComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseTimeScaleComponent;
 
@@ -19,33 +19,33 @@ void BaseTimeScaleComponent::RegisterMembers(pragma::EntityComponentManager &com
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseTimeScaleComponent::BaseTimeScaleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_timeScale {util::FloatProperty::Create(1.f)} {}
+BaseTimeScaleComponent::BaseTimeScaleComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_timeScale {util::FloatProperty::Create(1.f)} {}
 void BaseTimeScaleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "time_scale", false))
-			*m_timeScale = pragma::util::to_float(kvData.value);
+			*m_timeScale = util::to_float(kvData.value);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(pragma::string::compare<std::string>(inputData.input, "settimescale", false))
-			*m_timeScale = pragma::util::to_float(inputData.data);
+			*m_timeScale = util::to_float(inputData.data);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 
 	m_netEvSetTimeScale = SetupNetEvent("set_time_scale");
 }
 void BaseTimeScaleComponent::SetTimeScale(float timeScale) { *m_timeScale = timeScale; }
 float BaseTimeScaleComponent::GetTimeScale() const { return *m_timeScale; }
-const pragma::util::PFloatProperty &BaseTimeScaleComponent::GetTimeScaleProperty() const { return m_timeScale; }
+const util::PFloatProperty &BaseTimeScaleComponent::GetTimeScaleProperty() const { return m_timeScale; }
 float BaseTimeScaleComponent::GetEffectiveTimeScale() const { return GetEntity().GetNetworkState()->GetGameState()->GetTimeScale() * GetTimeScale(); }
 void BaseTimeScaleComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {

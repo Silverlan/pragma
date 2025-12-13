@@ -23,6 +23,6 @@ export namespace pragma::gui::types {
 		WIText &AddText(const std::string &header, const std::string &styleClass);
 		WIBase &AddGap(uint32_t size);
 		void AddCreditsElement(WIBase &el);
-		pragma::gui::WIHandle m_creditsContainer = {};
+		WIHandle m_creditsContainer = {};
 	};
 };

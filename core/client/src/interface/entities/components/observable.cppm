@@ -14,10 +14,10 @@ export namespace pragma {
 	}
 	class DLLCLIENT CObservableComponent final : public BaseObservableComponent, public CBaseNetComponent {
 	  public:
-		CObservableComponent(pragma::ecs::BaseEntity &ent);
+		CObservableComponent(ecs::BaseEntity &ent);
 		virtual void SetLocalCameraOrigin(CameraType type, const Vector3 &offset) override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	};

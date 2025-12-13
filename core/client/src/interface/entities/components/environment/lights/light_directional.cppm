@@ -12,11 +12,11 @@ export import :math.mvp_bias;
 export namespace pragma {
 	class DLLCLIENT CLightDirectionalComponent final : public BaseEnvLightDirectionalComponent, public CBaseNetComponent, public math::MVPBias<1> {
 	  public:
-		CLightDirectionalComponent(pragma::ecs::BaseEntity &ent);
+		CLightDirectionalComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void SetAmbientColor(const Color &color) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override;

@@ -24,14 +24,14 @@ export namespace pragma::rendering {
 		virtual void InitializeShaderResources() {}
 		virtual void InitializeGfxPipelineDescriptorSets() = 0;
 		virtual void GetShaderPreprocessorDefinitions(std::unordered_map<std::string, std::string> &outDefinitions, std::string &outPrefixCode) {}
-		virtual void UpdateRenderFlags(pragma::geometry::CModelSubMesh &mesh, ShaderGameWorld::SceneFlags &inOutFlags) {}
-		virtual void RecordBindScene(ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const = 0;
-		virtual void RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const {}
-		virtual void RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, msys::CMaterial &mat) const {}
-		void SetNodes(std::vector<pragma::shadergraph::GraphNode *> &&nodes) { m_nodes = std::move(nodes); }
+		virtual void UpdateRenderFlags(geometry::CModelSubMesh &mesh, ShaderGameWorld::SceneFlags &inOutFlags) {}
+		virtual void RecordBindScene(ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const = 0;
+		virtual void RecordBindEntity(ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const {}
+		virtual void RecordBindMaterial(ShaderProcessor &shaderProcessor, material::CMaterial &mat) const {}
+		void SetNodes(std::vector<shadergraph::GraphNode *> &&nodes) { m_nodes = std::move(nodes); }
 	  protected:
 		ShaderGraph &m_shader;
-		std::vector<pragma::shadergraph::GraphNode *> m_nodes;
+		std::vector<shadergraph::GraphNode *> m_nodes;
 	};
 
 	class DLLCLIENT ShaderGraphModuleManager {
@@ -39,7 +39,7 @@ export namespace pragma::rendering {
 		using Factory = std::function<std::unique_ptr<ShaderGraphModule>(ShaderGraph &shader)>;
 		ShaderGraphModuleManager() {}
 		void RegisterFactory(const std::string &name, const Factory &factory);
-		std::unique_ptr<ShaderGraphModule> CreateModule(const std::string &name, ShaderGraph &shader, std::vector<pragma::shadergraph::GraphNode *> &&nodes) const;
+		std::unique_ptr<ShaderGraphModule> CreateModule(const std::string &name, ShaderGraph &shader, std::vector<shadergraph::GraphNode *> &&nodes) const;
 		const std::unordered_map<std::string, Factory> &GetFactories() const { return m_factories; }
 	  private:
 		std::unordered_map<std::string, Factory> m_factories;

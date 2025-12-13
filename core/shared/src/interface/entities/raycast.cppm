@@ -16,7 +16,7 @@ export {
 		class BaseEntity;
 	}
 	namespace pragma::util {
-		DLLNETWORK pragma::physics::TraceData get_entity_trace_data(pragma::ecs::BaseEntity &ent);
-		DLLNETWORK pragma::physics::TraceData get_entity_trace_data(::pragma::BaseTransformComponent &component);
+		DLLNETWORK physics::TraceData get_entity_trace_data(ecs::BaseEntity &ent);
+		DLLNETWORK physics::TraceData get_entity_trace_data(BaseTransformComponent &component);
 	};
 };

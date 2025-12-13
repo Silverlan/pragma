@@ -36,7 +36,7 @@ export namespace pragma::gui::types {
 		void SetFrame(WIFrame &frame);
 		WIFrame *GetFrame();
 
-		const pragma::string::Utf8String &GetText() const;
+		const string::Utf8String &GetText() const;
 		void SetText(const std::string &text);
 		// This will only add complete lines (lines which have
 		// been ended with a new-line character). Anything
@@ -54,11 +54,11 @@ export namespace pragma::gui::types {
 		uint32_t m_maxLogLineCount = 1'000u;
 		// Console output which hasn't been finished with a new-line character yet
 		std::string m_pendingConsoleOutput = {};
-		pragma::gui::WIHandle m_hFrame = {};
-		pragma::gui::WIHandle m_hLog = {};
-		pragma::gui::WIHandle m_hLogBg = {};
-		pragma::gui::WIHandle m_hCommandEntry = {};
-		pragma::gui::WIHandle m_hTopSnapArea = {};
+		WIHandle m_hFrame = {};
+		WIHandle m_hLog = {};
+		WIHandle m_hLogBg = {};
+		WIHandle m_hCommandEntry = {};
+		WIHandle m_hTopSnapArea = {};
 		CallbackHandle m_cbConsoleOutput = {};
 		CallbackHandle m_cbMainMenuVisibility = {};
 		CallbackHandle m_cbCommandEntryVisibility = {};

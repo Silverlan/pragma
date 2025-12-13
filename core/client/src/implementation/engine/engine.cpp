@@ -536,9 +536,9 @@ void pragma::CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::s
 	std::function<void(const std::vector<std::string> &, const std::optional<std::string> &)> addFiles = nullptr;
 	addFiles = [this, &addFile, &addFiles](const std::vector<std::string> &files, const std::optional<std::string> &rootPath) {
 		for(auto &f : files) {
-			if(filemanager::is_system_file(f))
+			if(fs::is_system_file(f))
 				addFile(f, rootPath ? *rootPath : ufile::get_path_from_filename(f));
-			else if(filemanager::is_system_dir(f)) {
+			else if(fs::is_system_dir(f)) {
 				auto subRootPath = rootPath;
 				if(!subRootPath) {
 					auto path = pragma::util::Path::CreatePath(f);
@@ -547,7 +547,7 @@ void pragma::CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::s
 				}
 				std::vector<std::string> subFiles;
 				std::vector<std::string> subDirs;
-				filemanager::find_system_files(f + "/*", &subFiles, &subDirs);
+				fs::find_system_files(f + "/*", &subFiles, &subDirs);
 				for(auto &fileName : subFiles)
 					addFile(pragma::util::Path::CreateFile(f, fileName).GetString(), *subRootPath);
 				for(auto &subDir : subDirs)
@@ -620,7 +620,7 @@ void pragma::CEngine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
 	if(cl) {
 		auto &mdlManager = cl->GetModelManager();
 		mdlManager.GetLoader().SetMultiThreadingEnabled(enabled);
-		auto &matManager = static_cast<msys::CMaterialManager &>(cl->GetMaterialManager());
+		auto &matManager = static_cast<material::CMaterialManager &>(cl->GetMaterialManager());
 		matManager.GetLoader().SetMultiThreadingEnabled(enabled);
 		auto &texManager = matManager.GetTextureManager();
 		texManager.GetLoader().SetMultiThreadingEnabled(enabled);
@@ -740,7 +740,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 
 		auto findAbsoluteFilePath = [](const std::string &relFilePath) -> pragma::util::Path {
 			std::string strFilePath;
-			if(filemanager::find_absolute_path(relFilePath, strFilePath))
+			if(fs::find_absolute_path(relFilePath, strFilePath))
 				return pragma::util::FilePath(strFilePath);
 			return pragma::util::FilePath(pragma::util::get_program_path(), relFilePath);
 		};
@@ -953,7 +953,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	shaderManager.GetShader("blur_vertical");
 
 	// Initialize Client Instance
-	auto matManager = msys::CMaterialManager::Create(GetRenderContext());
+	auto matManager = material::CMaterialManager::Create(GetRenderContext());
 	matManager->SetImportDirectory("addons/converted/");
 	InitializeAssetManager(*matManager);
 	pragma::asset::update_extension_cache(pragma::asset::Type::Material);
@@ -1000,7 +1000,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	auto &fontSet = GetDefaultFontSet();
 	auto &gui = pragma::gui::WGUI::Open(GetRenderContext(), matManager);
 	RegisterUiElementTypes();
-	gui.SetMaterialLoadHandler([this](const std::string &path) -> msys::Material * { return GetClientState()->LoadMaterial(path); });
+	gui.SetMaterialLoadHandler([this](const std::string &path) -> material::Material * { return GetClientState()->LoadMaterial(path); });
 	auto *fontData = fontSet.FindFontFileCandidate(pragma::FontSetFlag::Sans | pragma::FontSetFlag::Bold);
 	if(!fontData) {
 		spdlog::error("Failed to determine default font for font set '{}'!", defaultFontSet);
@@ -1167,7 +1167,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		regScene->RegisterNode<pragma::rendering::shader_graph::InputParameterTextureNode>("input_parameter_texture");
 
 		std::vector<std::string> files;
-		filemanager::find_files("scripts/shader_data/materials/*.udm", &files, nullptr);
+		fs::find_files("scripts/shader_data/materials/*.udm", &files, nullptr);
 		for(auto &f : files) {
 			ufile::remove_extension_from_filename(f);
 			pragma::rendering::shader_material::get_cache().Load(f);
@@ -1199,8 +1199,8 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		// TODO: Load shader graphs from mounted addons
 		for(auto &[type, man] : m_shaderGraphManager->GetShaderGraphTypeManagers()) {
 			std::vector<std::string> sgFiles;
-			filemanager::find_files(pragma::rendering::ShaderGraphManager::ROOT_GRAPH_PATH + type + std::string {"/*."} + pragma::shadergraph::Graph::EXTENSION_BINARY, &sgFiles, nullptr);
-			filemanager::find_files(pragma::rendering::ShaderGraphManager::ROOT_GRAPH_PATH + type + std::string {"/*."} + pragma::shadergraph::Graph::EXTENSION_ASCII, &sgFiles, nullptr);
+			fs::find_files(pragma::rendering::ShaderGraphManager::ROOT_GRAPH_PATH + type + std::string {"/*."} + pragma::shadergraph::Graph::EXTENSION_BINARY, &sgFiles, nullptr);
+			fs::find_files(pragma::rendering::ShaderGraphManager::ROOT_GRAPH_PATH + type + std::string {"/*."} + pragma::shadergraph::Graph::EXTENSION_ASCII, &sgFiles, nullptr);
 			for(auto &f : sgFiles) {
 				ufile::remove_extension_from_filename(f, std::array<std::string, 2> {pragma::shadergraph::Graph::EXTENSION_BINARY, pragma::shadergraph::Graph::EXTENSION_ASCII});
 				std::string err;
@@ -1269,7 +1269,7 @@ const FontSet *pragma::CEngine::FindFontSet(const std::string &name) const
 void pragma::CEngine::LoadFontSets()
 {
 	std::vector<std::string> dirs;
-	filemanager::find_files("fonts/*", nullptr, &dirs);
+	fs::find_files("fonts/*", nullptr, &dirs);
 	for(auto &dir : dirs) {
 		try {
 			auto data = udm::Data::Load("fonts/" + dir + "/font.udm");
@@ -1488,9 +1488,9 @@ void pragma::CEngine::OnWindowInitialized()
 	window->SetWindowSizeCallback([this, &window](pragma::platform::Window &glfwWindow, Vector2i size) mutable { OnWindowResized(window, size); });
 
 	if(g_customWindowIcon.has_value()) {
-		auto imgBuf = uimg::load_image(*g_customWindowIcon, uimg::PixelFormat::LDR);
+		auto imgBuf = image::load_image(*g_customWindowIcon, image::PixelFormat::LDR);
 		if(imgBuf) {
-			imgBuf->ToLDRFormat(uimg::Format::RGBA32);
+			imgBuf->ToLDRFormat(image::Format::RGBA32);
 			window->SetWindowIcon(imgBuf->GetWidth(), imgBuf->GetHeight(), static_cast<uint8_t *>(imgBuf->GetData()));
 			pragma::platform::poll_events();
 		}
@@ -1805,7 +1805,7 @@ void pragma::CEngine::DrawFrame()
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("poll_material_manager");
 #endif
-	static_cast<msys::CMaterialManager &>(*m_clInstance->materialManager).Poll(); // Requires active command buffer
+	static_cast<material::CMaterialManager &>(*m_clInstance->materialManager).Poll(); // Requires active command buffer
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().EndTask();
 #endif
@@ -2144,29 +2144,29 @@ uint32_t pragma::CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 		{
 			auto *cl = GetClientState();
 			if(cl) {
-				auto &texManager = static_cast<msys::CMaterialManager &>(cl->GetMaterialManager()).GetTextureManager();
+				auto &texManager = static_cast<material::CMaterialManager &>(cl->GetMaterialManager()).GetTextureManager();
 				if(!IsVerbose())
 					n += texManager.ClearUnused();
 				else {
 					auto &cache = texManager.GetCache();
 
-					std::unordered_map<msys::Texture *, std::string> oldCache;
+					std::unordered_map<material::Texture *, std::string> oldCache;
 					for(auto &pair : cache) {
 						auto asset = texManager.GetAsset(pair.second);
 						if(!asset)
 							continue;
-						auto tex = msys::TextureManager::GetAssetObject(*asset);
+						auto tex = material::TextureManager::GetAssetObject(*asset);
 						oldCache[tex.get()] = tex->GetName();
 					}
 
 					n += texManager.ClearUnused();
 
-					std::unordered_map<msys::Texture *, std::string> newCache;
+					std::unordered_map<material::Texture *, std::string> newCache;
 					for(auto &pair : cache) {
 						auto asset = texManager.GetAsset(pair.second);
 						if(!asset)
 							continue;
-						auto tex = msys::TextureManager::GetAssetObject(*asset);
+						auto tex = material::TextureManager::GetAssetObject(*asset);
 						newCache[tex.get()] = tex->GetName();
 					}
 

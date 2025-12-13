@@ -50,8 +50,8 @@ export {
 		DLLNETWORK void PushNewAnyProperty(lua::State *l, pragma::util::VarType varType, const std::any &value);
 
 		DLLNETWORK void WriteAny(pragma::util::DataStream &ds, pragma::util::VarType varType, const std::any &value, uint32_t *pos = nullptr);
-		DLLNETWORK void WriteAny(::NetPacket &ds, pragma::util::VarType varType, const std::any &value, uint32_t *pos = nullptr);
+		DLLNETWORK void WriteAny(NetPacket &ds, pragma::util::VarType varType, const std::any &value, uint32_t *pos = nullptr);
 		DLLNETWORK void ReadAny(pragma::Game &game, pragma::util::DataStream &ds, pragma::util::VarType varType, std::any &outValue);
-		DLLNETWORK void ReadAny(::NetPacket &ds, pragma::util::VarType varType, std::any &outValue);
+		DLLNETWORK void ReadAny(NetPacket &ds, pragma::util::VarType varType, std::any &outValue);
 	};
 };

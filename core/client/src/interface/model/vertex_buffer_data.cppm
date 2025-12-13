@@ -18,7 +18,7 @@ export namespace pragma::rendering {
 		VertexBufferData(const Vector3 &position, const Vector3 &normal);
 		VertexBufferData();
 		VertexBufferData(const VertexBufferData &other);
-		VertexBufferData(const pragma::math::Vertex &vertex);
+		VertexBufferData(const math::Vertex &vertex);
 		union {
 			Vector3 position;
 			Vector4 paddedPosition;

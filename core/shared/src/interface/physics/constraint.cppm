@@ -24,18 +24,18 @@ export namespace pragma::physics {
 		Bool GetCollisionsEnabled() const;
 		void EnableCollisions();
 		void DisableCollisions();
-		virtual pragma::physics::IRigidBody *GetSourceActor() = 0;
-		virtual pragma::physics::IRigidBody *GetTargetActor() = 0;
-		pragma::math::Transform &GetSourceTransform();
-		pragma::math::Transform &GetTargetTransform();
+		virtual IRigidBody *GetSourceActor() = 0;
+		virtual IRigidBody *GetTargetActor() = 0;
+		math::Transform &GetSourceTransform();
+		math::Transform &GetTargetTransform();
 		Vector3 GetSourcePosition();
 		Quat GetSourceRotation();
 		Vector3 GetTargetPosition();
 		Quat GetTargetRotation();
 
 		// Returns the entity this constraint belongs to (if any)
-		pragma::ecs::BaseEntity *GetEntity() const;
-		void SetEntity(pragma::ecs::BaseEntity &ent);
+		ecs::BaseEntity *GetEntity() const;
+		void SetEntity(ecs::BaseEntity &ent);
 
 		virtual float GetBreakForce() const = 0;
 		virtual void SetBreakForce(float threshold) = 0;
@@ -55,8 +55,8 @@ export namespace pragma::physics {
 	  protected:
 		IConstraint(IEnvironment &env);
 		virtual void DoSetCollisionsEnabled(Bool b) = 0;
-		pragma::math::Transform m_srcTransform;
-		pragma::math::Transform m_tgtTransform;
+		math::Transform m_srcTransform;
+		math::Transform m_tgtTransform;
 		EntityHandle m_hEntity = {};
 	  private:
 		bool m_bCollisionsEnabled = true;
@@ -79,8 +79,8 @@ export namespace pragma::physics {
 	class DLLNETWORK IHingeConstraint : virtual public IConstraint {
 	  public:
 		virtual void InitializeLuaObject(lua::State *lua) override;
-		virtual void SetLimit(pragma::math::Radian lowerLimit, pragma::math::Radian upperLimit) = 0;
-		virtual std::pair<pragma::math::Radian, pragma::math::Radian> GetLimit() const = 0;
+		virtual void SetLimit(math::Radian lowerLimit, math::Radian upperLimit) = 0;
+		virtual std::pair<math::Radian, math::Radian> GetLimit() const = 0;
 		virtual void DisableLimit() = 0;
 	  protected:
 		using IConstraint::IConstraint;
@@ -182,15 +182,15 @@ export namespace pragma::physics {
 
 		virtual void InitializeLuaObject(lua::State *lua) override;
 		virtual void CalculateTransforms() = 0;
-		virtual void CalculateTransforms(const pragma::math::Transform &frameA, const pragma::math::Transform &frameB) = 0;
-		virtual pragma::math::Transform GetCalculatedTransformA() const = 0;
-		virtual pragma::math::Transform GetCalculatedTransformB() const = 0;
-		virtual pragma::math::Transform GetFrameOffsetA() const = 0;
-		virtual pragma::math::Transform GetFrameOffsetB() const = 0;
-		virtual Vector3 GetAxis(pragma::Axis axisIndex) const = 0;
-		virtual double GetAngle(pragma::Axis axisIndex) const = 0;
-		virtual double GetRelativePivotPosition(pragma::Axis axisIndex) const = 0;
-		virtual void SetFrames(const pragma::math::Transform &frameA, const pragma::math::Transform &frameB) = 0;
+		virtual void CalculateTransforms(const math::Transform &frameA, const math::Transform &frameB) = 0;
+		virtual math::Transform GetCalculatedTransformA() const = 0;
+		virtual math::Transform GetCalculatedTransformB() const = 0;
+		virtual math::Transform GetFrameOffsetA() const = 0;
+		virtual math::Transform GetFrameOffsetB() const = 0;
+		virtual Vector3 GetAxis(Axis axisIndex) const = 0;
+		virtual double GetAngle(Axis axisIndex) const = 0;
+		virtual double GetRelativePivotPosition(Axis axisIndex) const = 0;
+		virtual void SetFrames(const math::Transform &frameA, const math::Transform &frameB) = 0;
 		virtual void SetLinearLowerLimit(const Vector3 &linearLower) = 0;
 		virtual Vector3 GetLinearLowerLimit() const = 0;
 		virtual void SetLinearUpperLimit(const Vector3 &linearUpper) = 0;
@@ -203,32 +203,32 @@ export namespace pragma::physics {
 		virtual void SetAngularUpperLimitReversed(const Vector3 &angularUpper) = 0;
 		virtual Vector3 GetAngularUpperLimit() const = 0;
 		virtual Vector3 GetAngularUpperLimitReversed() const = 0;
-		virtual void SetLimit(AxisType type, pragma::Axis axis, double lo, double hi) = 0;
-		virtual void SetLimitReversed(AxisType type, pragma::Axis axis, double lo, double hi) = 0;
-		virtual bool IsLimited(AxisType type, pragma::Axis axis) const = 0;
-		virtual void SetRotationOrder(pragma::RotationOrder order) = 0;
-		virtual pragma::RotationOrder GetRotationOrder() const = 0;
+		virtual void SetLimit(AxisType type, Axis axis, double lo, double hi) = 0;
+		virtual void SetLimitReversed(AxisType type, Axis axis, double lo, double hi) = 0;
+		virtual bool IsLimited(AxisType type, Axis axis) const = 0;
+		virtual void SetRotationOrder(RotationOrder order) = 0;
+		virtual RotationOrder GetRotationOrder() const = 0;
 		virtual void SetAxis(const Vector3 &axis1, const Vector3 &axis2) = 0;
-		virtual void SetBounce(AxisType type, pragma::Axis axis, double bounce) = 0;
-		virtual void EnableMotor(AxisType type, pragma::Axis axis, bool onOff) = 0;
-		virtual void SetServo(AxisType type, pragma::Axis axis, bool onOff) = 0;
-		virtual void SetTargetVelocity(AxisType type, pragma::Axis axis, double velocity) = 0;
-		virtual void SetServoTarget(AxisType type, pragma::Axis axis, double target) = 0;
-		virtual void SetMaxMotorForce(AxisType type, pragma::Axis axis, double force) = 0;
-		virtual void EnableSpring(AxisType type, pragma::Axis axis, bool onOff) = 0;
-		virtual void SetStiffness(AxisType type, pragma::Axis axis, double stiffness, bool limitIfNeeded = true) = 0;
-		virtual void SetDamping(AxisType type, pragma::Axis axis, double damping, bool limitIfNeeded = true) = 0;
+		virtual void SetBounce(AxisType type, Axis axis, double bounce) = 0;
+		virtual void EnableMotor(AxisType type, Axis axis, bool onOff) = 0;
+		virtual void SetServo(AxisType type, Axis axis, bool onOff) = 0;
+		virtual void SetTargetVelocity(AxisType type, Axis axis, double velocity) = 0;
+		virtual void SetServoTarget(AxisType type, Axis axis, double target) = 0;
+		virtual void SetMaxMotorForce(AxisType type, Axis axis, double force) = 0;
+		virtual void EnableSpring(AxisType type, Axis axis, bool onOff) = 0;
+		virtual void SetStiffness(AxisType type, Axis axis, double stiffness, bool limitIfNeeded = true) = 0;
+		virtual void SetDamping(AxisType type, Axis axis, double damping, bool limitIfNeeded = true) = 0;
 		virtual void SetEquilibriumPoint() = 0;
-		virtual void SetEquilibriumPoint(AxisType type, pragma::Axis axis) = 0;
-		virtual void SetEquilibriumPoint(AxisType type, pragma::Axis axis, double val) = 0;
+		virtual void SetEquilibriumPoint(AxisType type, Axis axis) = 0;
+		virtual void SetEquilibriumPoint(AxisType type, Axis axis, double val) = 0;
 
-		virtual void SetERP(AxisType type, pragma::Axis axis, double value) = 0;
-		virtual double GetERP(AxisType type, pragma::Axis axis) const = 0;
-		virtual void SetStopERP(AxisType type, pragma::Axis axis, double value) = 0;
-		virtual double GetStopERP(AxisType type, pragma::Axis axis) const = 0;
-		virtual void SetCFM(AxisType type, pragma::Axis axis, double value) = 0;
-		virtual double GetCFM(AxisType type, pragma::Axis axis) const = 0;
-		virtual void SetStopCFM(AxisType type, pragma::Axis axis, double value) = 0;
-		virtual double GetStopCFM(AxisType type, pragma::Axis axis) const = 0;
+		virtual void SetERP(AxisType type, Axis axis, double value) = 0;
+		virtual double GetERP(AxisType type, Axis axis) const = 0;
+		virtual void SetStopERP(AxisType type, Axis axis, double value) = 0;
+		virtual double GetStopERP(AxisType type, Axis axis) const = 0;
+		virtual void SetCFM(AxisType type, Axis axis, double value) = 0;
+		virtual double GetCFM(AxisType type, Axis axis) const = 0;
+		virtual void SetStopCFM(AxisType type, Axis axis, double value) = 0;
+		virtual double GetStopCFM(AxisType type, Axis axis) const = 0;
 	};
 };

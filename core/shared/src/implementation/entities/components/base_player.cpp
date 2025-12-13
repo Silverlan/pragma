@@ -42,19 +42,19 @@ void BasePlayerComponent::SetViewRotation(const Quat &rot)
 	if(charComponent.valid())
 		charComponent->SetViewOrientation(rot);
 }
-pragma::util::EventReply BasePlayerComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply BasePlayerComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == baseActorComponent::EVENT_ON_KILLED)
 		OnKilled(static_cast<const CEOnCharacterKilled &>(evData).damageInfo);
 	else if(eventId == baseActorComponent::EVENT_ON_RESPAWN)
 		OnRespawn();
 	else if(eventId == baseHealthComponent::EVENT_ON_TAKEN_DAMAGE) {
-		auto &healthInfo = static_cast<pragma::CEOnTakenDamage &>(evData);
+		auto &healthInfo = static_cast<CEOnTakenDamage &>(evData);
 		OnTakenDamage(healthInfo.damageInfo, healthInfo.oldHealth, healthInfo.newHealth);
 	}
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 bool BasePlayerComponent::CanUnCrouch() const
 {
@@ -79,7 +79,7 @@ bool BasePlayerComponent::CanUnCrouch() const
 	data.SetSource(colPos);
 	data.SetTarget(colPos + (pTrComponent ? pTrComponent->GetUp() : uvec::UP) * 0.001f); // Target position musn't be the same as the source position, otherwise the trace will never detect a hit
 	data.SetShape(*m_shapeStand);
-	return game->Sweep(data).hitType == pragma::physics::RayCastHitType::None; // Overlap only works with collision objects, not with individual shapes, so we have to use Sweep instead
+	return game->Sweep(data).hitType == physics::RayCastHitType::None; // Overlap only works with collision objects, not with individual shapes, so we have to use Sweep instead
 }
 ActionInputControllerComponent *BasePlayerComponent::GetActionInputController() { return m_actionController; }
 void BasePlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
@@ -100,19 +100,19 @@ void BasePlayerComponent::OnTick(double tDelta)
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(m_bCrouching || m_crouchTransition != CrouchTransition::None) {
-		if((!m_actionController || m_actionController->GetActionInput(pragma::Action::Crouch) == false) && m_crouchTransition != CrouchTransition::Uncrouching)
+		if((!m_actionController || m_actionController->GetActionInput(Action::Crouch) == false) && m_crouchTransition != CrouchTransition::Uncrouching)
 			UnCrouch();
 		else if(m_crouchTransition != CrouchTransition::None) {
 			auto *state = ent.GetNetworkState();
-			pragma::Game *game = state->GetGameState();
+			Game *game = state->GetGameState();
 			if(game->CurTime() >= m_tCrouch) {
 				m_tCrouch = 0.f;
 				if(m_crouchTransition == CrouchTransition::Crouching) {
 					m_bCrouching = true;
 					if(phys != nullptr && phys->IsController()) {
-						auto *controller = static_cast<pragma::physics::ControllerPhysObj *>(phys);
+						auto *controller = static_cast<physics::ControllerPhysObj *>(phys);
 						if(controller->IsCapsule()) {
-							auto *capsule = static_cast<pragma::physics::CapsuleControllerPhysObj *>(controller);
+							auto *capsule = static_cast<physics::CapsuleControllerPhysObj *>(controller);
 							capsule->SetHeight(m_crouchHeight);
 						}
 						OnFullyCrouched();
@@ -121,9 +121,9 @@ void BasePlayerComponent::OnTick(double tDelta)
 				else {
 					m_bCrouching = false;
 					if(phys != nullptr && phys->IsController()) {
-						auto *controller = static_cast<pragma::physics::ControllerPhysObj *>(phys);
+						auto *controller = static_cast<physics::ControllerPhysObj *>(phys);
 						if(controller->IsCapsule()) {
-							auto *capsule = static_cast<pragma::physics::CapsuleControllerPhysObj *>(controller);
+							auto *capsule = static_cast<physics::CapsuleControllerPhysObj *>(controller);
 							capsule->SetHeight(m_standHeight);
 						}
 						OnFullyUnCrouched();
@@ -139,13 +139,13 @@ void BasePlayerComponent::OnTick(double tDelta)
 	if(animComponent.valid() && (phys == nullptr || phys->IsController())) // Only run this if not in ragdoll mode
 	{
 		auto pTrComponent = ent.GetTransformComponent();
-		auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+		auto pVelComponent = ent.GetComponent<VelocityComponent>();
 		auto &vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 		auto speed = uvec::length(vel);
 		auto charComponent = ent.GetCharacterComponent();
 		const auto movementSpeedThreshold = 0.04f;
 		if(speed >= movementSpeedThreshold) {
-			if((m_bForceAnimationUpdate == true || animComponent->GetActivity() == animComponent->TranslateActivity(pragma::Activity::Idle)) && PlaySharedActivity(IsWalking() ? pragma::Activity::Walk : pragma::Activity::Run) == true)
+			if((m_bForceAnimationUpdate == true || animComponent->GetActivity() == animComponent->TranslateActivity(Activity::Idle)) && PlaySharedActivity(IsWalking() ? Activity::Walk : Activity::Run) == true)
 				m_movementActivity = animComponent->GetActivity();
 			m_bForceAnimationUpdate = false;
 
@@ -165,7 +165,7 @@ void BasePlayerComponent::OnTick(double tDelta)
 			auto bMoving = IsMoving();
 			if(m_bForceAnimationUpdate == true || bMoving == true) {
 				m_bForceAnimationUpdate = false;
-				PlaySharedActivity(pragma::Activity::Idle);
+				PlaySharedActivity(Activity::Idle);
 				if(bMoving == true) {
 					auto moveBlendScale = 0.f;
 					if(charComponent.valid()) {
@@ -184,10 +184,10 @@ bool BasePlayerComponent::IsMoving() const
 {
 	auto &ent = GetEntity();
 	auto animComponent = ent.GetAnimatedComponent();
-	return (animComponent.valid() && animComponent->GetActivity() == m_movementActivity && m_movementActivity != pragma::Activity::Invalid) ? true : false;
+	return (animComponent.valid() && animComponent->GetActivity() == m_movementActivity && m_movementActivity != Activity::Invalid) ? true : false;
 }
-bool BasePlayerComponent::IsWalking() const { return m_actionController && m_actionController->GetActionInput(pragma::Action::Walk); }
-bool BasePlayerComponent::IsSprinting() const { return (!IsWalking() && m_actionController && m_actionController->GetActionInput(pragma::Action::Sprint)) ? true : false; }
+bool BasePlayerComponent::IsWalking() const { return m_actionController && m_actionController->GetActionInput(Action::Walk); }
+bool BasePlayerComponent::IsSprinting() const { return (!IsWalking() && m_actionController && m_actionController->GetActionInput(Action::Sprint)) ? true : false; }
 
 Con::c_cout &BasePlayerComponent::print(Con::c_cout &os)
 {
@@ -221,7 +221,7 @@ std::ostream &BasePlayerComponent::print(std::ostream &os)
 	return os;
 }
 
-BasePlayerComponent::BasePlayerComponent(pragma::ecs::BaseEntity &ent)
+BasePlayerComponent::BasePlayerComponent(ecs::BaseEntity &ent)
     : BaseEntityComponent(ent), m_portUDP(0), m_speedWalk(63.33f), m_speedRun(190), m_speedSprint(320), m_speedCrouchWalk(63.33f), m_bCrouching(false), m_standHeight(72), m_crouchHeight(36), m_standEyeLevel(64), m_crouchEyeLevel(28), m_tCrouch(0), m_bFlashlightOn(false)
 {
 	m_bLocalPlayer = false;
@@ -267,54 +267,54 @@ void BasePlayerComponent::Initialize()
 		movementControllerC->SetActionInputController(actionInputControllerC.get());
 	m_hBasePlayer = ent.GetHandle();
 
-	BindEventUnhandled(movementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
-	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEventUnhandled(movementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateMovementProperties(); });
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &hMdl = GetEntity().GetModel();
 		if(hMdl == nullptr)
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		auto anim = hMdl->GetAnimation(static_cast<CEOnAnimationComplete &>(evData.get()).animation);
 		if(anim == nullptr)
-			return pragma::util::EventReply::Unhandled;
-		if(anim->HasFlag(pragma::FAnim::Loop) == false)
-			PlaySharedActivity(pragma::Activity::Idle); // A non-looping animation has completed; Switch back to idle
-		return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
+		if(anim->HasFlag(FAnim::Loop) == false)
+			PlaySharedActivity(Activity::Idle); // A non-looping animation has completed; Switch back to idle
+		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_RESET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
-		PlaySharedActivity(pragma::Activity::Idle); // A non-looping animation has completed; Switch back to idle
-		return pragma::util::EventReply::Unhandled;
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_RESET, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+		PlaySharedActivity(Activity::Idle); // A non-looping animation has completed; Switch back to idle
+		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_START, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
-		m_movementActivity = pragma::Activity::Invalid;
-		return pragma::util::EventReply::Unhandled;
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_START, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+		m_movementActivity = Activity::Invalid;
+		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(baseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEventUnhandled(baseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		if((IsCrouching() == true && m_crouchTransition != CrouchTransition::Uncrouching) || m_crouchTransition == CrouchTransition::Crouching) {
 			auto &activity = static_cast<CETranslateActivity &>(evData.get()).activity;
 			switch(activity) {
-			case pragma::Activity::Idle:
-				activity = pragma::Activity::CrouchIdle;
-				return pragma::util::EventReply::Handled;
-			case pragma::Activity::Walk:
-			case pragma::Activity::Run:
-				activity = pragma::Activity::CrouchWalk;
-				return pragma::util::EventReply::Handled;
+			case Activity::Idle:
+				activity = Activity::CrouchIdle;
+				return util::EventReply::Handled;
+			case Activity::Walk:
+			case Activity::Run:
+				activity = Activity::CrouchWalk;
+				return util::EventReply::Handled;
 			}
 		}
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		OnPhysicsInitialized();
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
-	BindEvent(baseCharacterComponent::EVENT_IS_MOVING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseCharacterComponent::EVENT_IS_MOVING, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		static_cast<CEIsMoving &>(evData.get()).moving = IsMoving();
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(baseCharacterComponent::EVENT_ON_JUMP, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { PlaySharedActivity(pragma::Activity::Jump); });
-	BindEventUnhandled(actionInputControllerComponent::EVENT_ON_ACTION_INPUT_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEventUnhandled(baseCharacterComponent::EVENT_ON_JUMP, [this](std::reference_wrapper<ComponentEvent> evData) { PlaySharedActivity(Activity::Jump); });
+	BindEventUnhandled(actionInputControllerComponent::EVENT_ON_ACTION_INPUT_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &evAction = static_cast<CEOnActionInputChanged &>(evData.get());
 		HandleActionInput(evAction.action, evAction.pressed);
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
 
 	auto whObservableComponent = ent.FindComponent("observable");
@@ -342,54 +342,54 @@ void BasePlayerComponent::UpdateMovementProperties()
 	movementC->SetAirModifier(CalcAirMovementModifier());
 }
 
-void BasePlayerComponent::HandleActionInput(pragma::Action action, bool pressed)
+void BasePlayerComponent::HandleActionInput(Action action, bool pressed)
 {
 	if(!pressed)
 		return;
 	auto charComponent = GetEntity().GetCharacterComponent();
 	switch(action) {
-	case pragma::Action::Jump:
+	case Action::Jump:
 		{
 			if(charComponent.valid())
 				charComponent->Jump();
 			break;
 		}
-	case pragma::Action::Crouch:
+	case Action::Crouch:
 		{
 			Crouch();
 			break;
 		}
-	case pragma::Action::Attack:
+	case Action::Attack:
 		{
 			if(charComponent.valid())
 				charComponent->PrimaryAttack();
 			break;
 		}
-	case pragma::Action::Attack2:
+	case Action::Attack2:
 		{
 			if(charComponent.valid())
 				charComponent->SecondaryAttack();
 			break;
 		}
-	case pragma::Action::Attack3:
+	case Action::Attack3:
 		{
 			if(charComponent.valid())
 				charComponent->TertiaryAttack();
 			break;
 		}
-	case pragma::Action::Attack4:
+	case Action::Attack4:
 		{
 			if(charComponent.valid())
 				charComponent->Attack4();
 			break;
 		}
-	case pragma::Action::Reload:
+	case Action::Reload:
 		{
 			if(charComponent.valid())
 				charComponent->ReloadWeapon();
 			break;
 		}
-	case pragma::Action::Use:
+	case Action::Use:
 		{
 			Use();
 			break;
@@ -402,14 +402,14 @@ void BasePlayerComponent::OnPhysicsInitialized()
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent)
-		pPhysComponent->AddCollisionFilter(pragma::physics::CollisionMask::Player);
+		pPhysComponent->AddCollisionFilter(physics::CollisionMask::Player);
 }
 
-pragma::ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
+ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
 {
 	auto &ent = GetEntity();
 	auto *state = ent.GetNetworkState();
-	pragma::Game *game = state->GetGameState();
+	Game *game = state->GetGameState();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
 	Vector3 origin = charComponent.valid() ? charComponent->GetEyePosition() : (pTrComponent ? pTrComponent->GetPosition() : Vector3 {});
@@ -418,12 +418,12 @@ pragma::ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
 	float dotClosest = 1.f;
 	float maxDist = 96.f;
 	float distClosest = std::numeric_limits<float>::max();
-	pragma::ecs::BaseEntity *entClosest = nullptr;
-	pragma::ecs::EntityIterator it {*game};
-	it.AttachFilter<TEntityIteratorFilterComponent<pragma::UsableComponent>>();
+	ecs::BaseEntity *entClosest = nullptr;
+	ecs::EntityIterator it {*game};
+	it.AttachFilter<TEntityIteratorFilterComponent<UsableComponent>>();
 	for(auto *entOther : it) {
-		auto pUsableComponent = entOther->GetComponent<pragma::UsableComponent>();
-		if(pUsableComponent->CanUse(const_cast<pragma::ecs::BaseEntity *>(&ent))) {
+		auto pUsableComponent = entOther->GetComponent<UsableComponent>();
+		if(pUsableComponent->CanUse(const_cast<ecs::BaseEntity *>(&ent))) {
 			auto pTrComponentOther = entOther->GetTransformComponent();
 			if(!pTrComponentOther)
 				continue;
@@ -436,7 +436,7 @@ pragma::ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
 			min += posEnt;
 			max += posEnt;
 			Vector3 res;
-			pragma::math::geometry::closest_point_on_aabb_to_point(min, max, origin, &res);
+			math::geometry::closest_point_on_aabb_to_point(min, max, origin, &res);
 
 			float dist = glm::distance(origin, res);
 			if(dist <= maxDist) {
@@ -444,12 +444,12 @@ pragma::ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
 				uvec::normalize(&dir);
 				auto dot = uvec::dot(viewDir, dir);
 				if(dot >= dotMin && ((dot - dotClosest) >= 0.2f || (distClosest - dist) >= 20.f)) {
-					pragma::physics::TraceData data;
+					physics::TraceData data;
 					data.SetSource(origin);
 					data.SetTarget(origin + dir * dist);
 					data.SetFilter(*entOther);
 					auto result = game->RayCast(data);
-					if(result.hitType == pragma::physics::RayCastHitType::None || result.entity.get() == entOther) {
+					if(result.hitType == physics::RayCastHitType::None || result.entity.get() == entOther) {
 						dotClosest = dot;
 						entClosest = entOther;
 					}
@@ -462,10 +462,10 @@ pragma::ecs::BaseEntity *BasePlayerComponent::FindUseEntity() const
 
 void BasePlayerComponent::Use()
 {
-	pragma::ecs::BaseEntity *ent = FindUseEntity();
+	ecs::BaseEntity *ent = FindUseEntity();
 	if(ent == nullptr)
 		return;
-	auto pUsableComponent = ent->GetComponent<pragma::UsableComponent>();
+	auto pUsableComponent = ent->GetComponent<UsableComponent>();
 	if(pUsableComponent.valid())
 		pUsableComponent->OnUse(&GetEntity());
 }
@@ -474,7 +474,7 @@ void BasePlayerComponent::SetFlashlight(bool b)
 {
 	if(m_entFlashlight.valid() == false)
 		return;
-	auto *toggleComponent = static_cast<pragma::BaseToggleComponent *>(m_entFlashlight.get()->FindComponent("toggle").get());
+	auto *toggleComponent = static_cast<BaseToggleComponent *>(m_entFlashlight.get()->FindComponent("toggle").get());
 	if(toggleComponent != nullptr)
 		toggleComponent->SetTurnedOn(b);
 }
@@ -489,7 +489,7 @@ bool BasePlayerComponent::IsFlashlightOn() const
 {
 	if(m_entFlashlight.valid() == false)
 		return false;
-	auto *toggleComponent = static_cast<pragma::BaseToggleComponent *>(m_entFlashlight.get()->FindComponent("toggle").get());
+	auto *toggleComponent = static_cast<BaseToggleComponent *>(m_entFlashlight.get()->FindComponent("toggle").get());
 	return (toggleComponent != nullptr) ? toggleComponent->IsTurnedOn() : false;
 }
 
@@ -497,7 +497,7 @@ Vector2 BasePlayerComponent::CalcMovementSpeed() const
 {
 	float speed;
 	auto physComponent = GetEntity().GetPhysicsComponent();
-	if(physComponent && physComponent->GetMoveType() == pragma::physics::MoveType::Noclip) {
+	if(physComponent && physComponent->GetMoveType() == physics::MoveType::Noclip) {
 		speed = GetEntity().GetNetworkState()->GetGameState()->GetConVarFloat("sv_noclip_speed");
 		if(IsWalking())
 			speed *= 0.5f;
@@ -542,7 +542,7 @@ void BasePlayerComponent::OnEntitySpawn()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent)
 		pPhysComponent->SetCollisionBounds(Vector3(-16, 0, -16), Vector3(16, m_standHeight, 16));
-	PlaySharedActivity(pragma::Activity::Idle);
+	PlaySharedActivity(Activity::Idle);
 }
 
 void BasePlayerComponent::GetConVars(std::unordered_map<std::string, std::string> **convars) { *convars = &m_conVars; }
@@ -569,7 +569,7 @@ int BasePlayerComponent::GetConVarInt(std::string cvar) const
 	std::unordered_map<std::string, std::string>::iterator i = const_cast<BasePlayerComponent *>(this)->m_conVars.find(cvar);
 	if(i == m_conVars.end())
 		return 0;
-	return pragma::string::to_int(i->second);
+	return string::to_int(i->second);
 }
 
 float BasePlayerComponent::GetConVarFloat(std::string cvar) const
@@ -577,7 +577,7 @@ float BasePlayerComponent::GetConVarFloat(std::string cvar) const
 	std::unordered_map<std::string, std::string>::iterator i = const_cast<BasePlayerComponent *>(this)->m_conVars.find(cvar);
 	if(i == m_conVars.end())
 		return 0;
-	return pragma::util::to_float(i->second);
+	return util::to_float(i->second);
 }
 
 bool BasePlayerComponent::GetConVarBool(std::string cvar) const
@@ -611,7 +611,7 @@ Vector3 BasePlayerComponent::GetViewPos() const
 	return GetEntity().GetPosition() + viewOffset;
 }
 
-bool BasePlayerComponent::PlaySharedActivity(pragma::Activity activity)
+bool BasePlayerComponent::PlaySharedActivity(Activity activity)
 {
 	auto animComponent = GetEntity().GetAnimatedComponent();
 	return animComponent.valid() ? animComponent->PlayActivity(activity) : false;
@@ -637,16 +637,16 @@ void BasePlayerComponent::Crouch()
 	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	m_shapeStand = nullptr;
 	auto *state = ent.GetNetworkState();
-	pragma::Game *game = state->GetGameState();
+	Game *game = state->GetGameState();
 	if(phys != nullptr && phys->IsController()) {
-		auto *controllerPhys = static_cast<pragma::physics::ControllerPhysObj *>(phys);
+		auto *controllerPhys = static_cast<physics::ControllerPhysObj *>(phys);
 		assert(controllerPhys->IsCapsule());
 		if(!controllerPhys->IsCapsule())
 			spdlog::warn("Box-controller crouching not implemented!");
 		auto *controller = controllerPhys->GetController();
 		auto shape = controller->GetShape();
 		if(shape != nullptr && controllerPhys->IsCapsule()) {
-			auto *capsuleShape = dynamic_cast<pragma::physics::ICapsuleShape *>(shape);
+			auto *capsuleShape = dynamic_cast<physics::ICapsuleShape *>(shape);
 			if(capsuleShape) {
 				auto radius = capsuleShape->GetRadius();
 				auto halfHeight = capsuleShape->GetHalfHeight();
@@ -672,7 +672,7 @@ void BasePlayerComponent::UnCrouch(bool bForce)
 	m_crouchTransition = CrouchTransition::Uncrouching;
 	auto &ent = GetEntity();
 	auto *state = ent.GetNetworkState();
-	pragma::Game *game = state->GetGameState();
+	Game *game = state->GetGameState();
 	m_bForceAnimationUpdate = true;
 	m_tCrouch = CFloat(game->CurTime()) + 0.4f;
 	OnUnCrouch();
@@ -690,7 +690,7 @@ float BasePlayerComponent::GetWalkSpeed() const
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent) {
 		auto &scale = pTrComponent->GetScale();
-		r *= pragma::math::abs_max(scale.x, scale.y, scale.z);
+		r *= math::abs_max(scale.x, scale.y, scale.z);
 	}
 	return r;
 }
@@ -700,7 +700,7 @@ float BasePlayerComponent::GetRunSpeed() const
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent) {
 		auto &scale = pTrComponent->GetScale();
-		r *= pragma::math::abs_max(scale.x, scale.y, scale.z);
+		r *= math::abs_max(scale.x, scale.y, scale.z);
 	}
 	return r;
 }
@@ -710,7 +710,7 @@ float BasePlayerComponent::GetSprintSpeed() const
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent) {
 		auto &scale = pTrComponent->GetScale();
-		r *= pragma::math::abs_max(scale.x, scale.y, scale.z);
+		r *= math::abs_max(scale.x, scale.y, scale.z);
 	}
 	return r;
 }
@@ -723,10 +723,10 @@ float BasePlayerComponent::GetCrouchedWalkSpeed() const
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent) {
 		auto &scale = pTrComponent->GetScale();
-		r *= pragma::math::abs_max(scale.x, scale.y, scale.z);
+		r *= math::abs_max(scale.x, scale.y, scale.z);
 	}
 	return r;
 }
 void BasePlayerComponent::SetCrouchedWalkSpeed(float speed) { m_speedCrouchWalk = speed; }
 
-void BasePlayerComponent::PrintMessage(std::string message, pragma::console::MESSAGE) {}
+void BasePlayerComponent::PrintMessage(std::string message, console::MESSAGE) {}

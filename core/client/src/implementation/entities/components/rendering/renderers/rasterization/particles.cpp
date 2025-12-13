@@ -15,29 +15,29 @@ import :rendering.shaders;
 using namespace pragma::rendering;
 
 static auto cvDrawParticles = pragma::console::get_client_con_var("render_draw_particles");
-void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandBuffer &cmd, const pragma::rendering::DrawSceneInfo &drawSceneInfo, bool depthPass, prosper::IPrimaryCommandBuffer *primCmdBuffer)
+void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandBuffer &cmd, const DrawSceneInfo &drawSceneInfo, bool depthPass, prosper::IPrimaryCommandBuffer *primCmdBuffer)
 {
 	assert(!depthPass || primCmdBuffer != nullptr);
 	// TODO: Only render particles if they're visible
 	auto &culledParticles = m_culledParticles;
 	culledParticles.clear();
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::ecs::CParticleSystemComponent>>();
+	ecs::EntityIterator entIt {*get_cgame()};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<ecs::CParticleSystemComponent>>();
 	culledParticles.reserve(entIt.GetCount());
 	for(auto *ent : entIt) {
-		auto *ptrC = ent->GetComponent<pragma::ecs::CParticleSystemComponent>().get();
+		auto *ptrC = ent->GetComponent<ecs::CParticleSystemComponent>().get();
 		auto &renderers = ptrC->GetRenderers();
 		auto *renderer = !renderers.empty() ? renderers.front().get() : nullptr;
 		if(!renderer)
 			continue;
 		if(depthPass && !renderer->RequiresDepthPass())
 			continue;
-		culledParticles.push_back(ent->GetComponent<pragma::ecs::CParticleSystemComponent>().get());
+		culledParticles.push_back(ent->GetComponent<ecs::CParticleSystemComponent>().get());
 	}
 	auto bShouldDrawParticles = (drawSceneInfo.renderFlags & RenderFlags::Particles) == RenderFlags::Particles && cvDrawParticles->GetBool() == true && culledParticles.empty() == false;
 	if(!bShouldDrawParticles)
 		return;
-	pragma::get_cgame()->StartGPUProfilingStage("Particles");
+	get_cgame()->StartGPUProfilingStage("Particles");
 	///InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_PARTICLES,evDataLightingStage);
 
 	auto &hdrInfo = GetHDRInfo();
@@ -69,7 +69,7 @@ void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandB
 
 		// cmd.RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 		if(primCmdBuffer->RecordBeginRenderPass(*hdrInfo.rtParticle) == true) {
-			RecordRenderParticleSystems(cmd, drawSceneInfo, culledParticles, pragma::rendering::SceneRenderPass::World, depthPass, false);
+			RecordRenderParticleSystems(cmd, drawSceneInfo, culledParticles, SceneRenderPass::World, depthPass, false);
 			primCmdBuffer->RecordEndRenderPass();
 		}
 		// cmd.RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
@@ -86,9 +86,9 @@ void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandB
 		}
 	}
 	else {
-		RecordRenderParticleSystems(cmd, drawSceneInfo, culledParticles, pragma::rendering::SceneRenderPass::World, depthPass, false);
+		RecordRenderParticleSystems(cmd, drawSceneInfo, culledParticles, SceneRenderPass::World, depthPass, false);
 	}
 
 	//InvokeEventCallbacks(EVENT_MT_END_RECORD_PARTICLES,evDataLightingStage);
-	pragma::get_cgame()->StopGPUProfilingStage(); // Particles
+	get_cgame()->StopGPUProfilingStage(); // Particles
 }

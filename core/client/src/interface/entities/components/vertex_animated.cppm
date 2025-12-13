@@ -26,14 +26,14 @@ export namespace pragma {
 		};
 #pragma pack(pop)
 
-		CVertexAnimatedComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CVertexAnimatedComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual ~CVertexAnimatedComponent() override;
 		virtual void Initialize() override;
 		void UpdateVertexAnimationDataMT();
 		void UpdateVertexAnimationBuffer(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		const std::shared_ptr<prosper::IBuffer> &GetVertexAnimationBuffer() const;
-		bool GetVertexAnimationBufferMeshOffset(pragma::geometry::CModelSubMesh &mesh, uint32_t &offset, uint32_t &animCount) const;
-		bool GetLocalVertexPosition(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, Vector3 *optOutNormal = nullptr, float *optOutDelta = nullptr) const;
+		bool GetVertexAnimationBufferMeshOffset(geometry::CModelSubMesh &mesh, uint32_t &offset, uint32_t &animCount) const;
+		bool GetLocalVertexPosition(const geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, Vector3 *optOutNormal = nullptr, float *optOutDelta = nullptr) const;
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
 		// Vertex animations
@@ -41,17 +41,17 @@ export namespace pragma {
 			float playbackRate = 0.f;
 			float cycle = 0.f;
 		};
-		std::unordered_map<pragma::geometry::CModelSubMesh *, std::vector<VertexAnimationData>> m_vertexAnimationData {};
+		std::unordered_map<geometry::CModelSubMesh *, std::vector<VertexAnimationData>> m_vertexAnimationData {};
 		struct VertexAnimationSlot {
 			uint32_t vertexAnimationId = std::numeric_limits<uint32_t>::max();
 			uint32_t frameId = std::numeric_limits<uint32_t>::max();
 			uint32_t nextFrameId = std::numeric_limits<uint32_t>::max();
-			std::weak_ptr<pragma::geometry::ModelSubMesh> mesh = {};
+			std::weak_ptr<geometry::ModelSubMesh> mesh = {};
 			float blend = 0.f;
 		};
 		std::vector<VertexAnimationSlot> m_vertexAnimationSlots {};
 
-		std::unordered_map<pragma::geometry::CModelSubMesh *, std::pair<uint32_t, uint32_t>> m_vertexAnimationMeshBufferOffsets {};
+		std::unordered_map<geometry::CModelSubMesh *, std::pair<uint32_t, uint32_t>> m_vertexAnimationMeshBufferOffsets {};
 		std::vector<VertexAnimationData> m_vertexAnimationBufferData {};
 		uint32_t m_maxVertexAnimations = 0u;
 		uint32_t m_activeVertexAnimations = 0u;

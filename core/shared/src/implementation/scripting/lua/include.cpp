@@ -17,7 +17,7 @@ static pragma::scripting::lua_core::IncludeResult include_directory(lua::State *
 	std::unordered_set<uint32_t> traversed;
 	for(auto &ext : {Lua::FILE_EXTENSION_PRECOMPILED, Lua::FILE_EXTENSION}) {
 		std::vector<std::string> luaFiles;
-		filemanager::find_files(fullLuaPath.GetString() + "*." + ext, &luaFiles, nullptr);
+		pragma::fs::find_files(fullLuaPath.GetString() + "*." + ext, &luaFiles, nullptr);
 		std::sort(luaFiles.begin(), luaFiles.end());
 
 		for(auto &fileName : luaFiles) {
@@ -48,7 +48,7 @@ void pragma::scripting::lua_core::execute_files_in_directory(lua::State *l, cons
 	std::unordered_set<uint32_t> traversed;
 	for(auto &ext : {Lua::FILE_EXTENSION_PRECOMPILED, Lua::FILE_EXTENSION}) {
 		std::vector<std::string> luaFiles;
-		filemanager::find_files(fullNormPath.GetString() + "*." + ext, &luaFiles, nullptr);
+		fs::find_files(fullNormPath.GetString() + "*." + ext, &luaFiles, nullptr);
 		std::sort(luaFiles.begin(), luaFiles.end());
 
 		for(auto &fileName : luaFiles) {
@@ -176,7 +176,7 @@ pragma::scripting::lua_core::IncludeResult pragma::scripting::lua_core::include(
 	auto nStack = Lua::GetStackTop(l);
 	IncludeResult result;
 	auto fullIncludeDirPath = pragma::util::DirPath(Lua::SCRIPT_DIRECTORY, Lua::GetIncludePath(path)).GetString();
-	if(filemanager::is_dir(fullIncludeDirPath))
+	if(fs::is_dir(fullIncludeDirPath))
 		result = include_directory(l, fullIncludeDirPath, path, flags, includeCache);
 	else
 		result = include_file(l, path, flags, includeCache);

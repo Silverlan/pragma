@@ -183,7 +183,7 @@ DLLNETWORK void LPARAM_connect(const std::vector<std::string> &argv)
 DLLNETWORK void LPARAM_USE_VKV_PARSER(const std::vector<std::string> &argv)
 {
 	if(argv.empty() || pragma::util::to_boolean(argv.front()))
-		msys::set_use_vkv_vmt_parser(true);
+		pragma::material::set_use_vkv_vmt_parser(true);
 }
 
 DLLNETWORK void LPARAM_help(const std::vector<std::string> &argv)

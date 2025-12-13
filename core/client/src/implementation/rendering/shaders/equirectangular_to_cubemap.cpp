@@ -32,15 +32,15 @@ void ShaderEquirectangularToCubemap::InitializeRenderPass(std::shared_ptr<prospe
 
 std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(const std::string &fileName, uint32_t resolution)
 {
-	auto f = FileManager::OpenFile(fileName.c_str(), "rb");
+	auto f = pragma::fs::open_file(fileName.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(f == nullptr)
 		return nullptr;
 	return LoadEquirectangularImage(f, resolution);
 }
-std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(VFilePtr fp, uint32_t resolution)
+std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(fs::VFilePtr fp, uint32_t resolution)
 {
-	fsys::File f {fp};
-	auto imgBuffer = uimg::load_image(f, uimg::PixelFormat::Float);
+	fs::File f {fp};
+	auto imgBuffer = image::load_image(f, image::PixelFormat::Float);
 	if(imgBuffer == nullptr)
 		return nullptr;
 	prosper::util::ImageCreateInfo createInfo {};

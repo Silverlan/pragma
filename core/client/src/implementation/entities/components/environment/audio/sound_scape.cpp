@@ -35,20 +35,20 @@ void CSoundScapeComponent::OnTick(double dt)
 		return;
 	auto &entThis = GetEntity();
 	auto pTrComponent = entThis.GetTransformComponent();
-	SetNextTick(pragma::get_cgame()->CurTime() + 0.25f);
+	SetNextTick(get_cgame()->CurTime() + 0.25f);
 	if(pTrComponent != nullptr && IsPlayerInRange()) {
 		if(s_active != this) {
-			auto *pl = pragma::get_cgame()->GetLocalPlayer();
+			auto *pl = get_cgame()->GetLocalPlayer();
 			auto &ent = pl->GetEntity();
 			auto charComponentEnt = ent.GetCharacterComponent();
 			auto pTrComponentEnt = ent.GetTransformComponent();
 			if(charComponentEnt.valid() || pTrComponentEnt) {
-				pragma::physics::TraceData tr;
+				physics::TraceData tr;
 				tr.SetSource(charComponentEnt.valid() ? charComponentEnt->GetEyePosition() : pTrComponentEnt->GetPosition());
 				tr.SetTarget(pTrComponent->GetPosition());
-				tr.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::IgnoreDynamic);
-				auto result = pragma::get_cgame()->RayCast(tr);
-				if(result.hitType == pragma::physics::RayCastHitType::None)
+				tr.SetFlags(physics::RayCastFlags::Default | physics::RayCastFlags::IgnoreDynamic);
+				auto result = get_cgame()->RayCast(tr);
+				if(result.hitType == physics::RayCastHitType::None)
 					StartSoundScape();
 			}
 		}
@@ -61,7 +61,7 @@ void CSoundScapeComponent::OnEntitySpawn()
 {
 	BaseEnvSoundScapeComponent::OnEntitySpawn();
 	for(auto &pair : m_positions) {
-		pragma::ecs::EntityIterator itEnt {*pragma::get_cgame()};
+		ecs::EntityIterator itEnt {*get_cgame()};
 		itEnt.AttachFilter<EntityIteratorFilterEntity>(pair.second);
 		auto it = itEnt.begin();
 		if(it != itEnt.end())
@@ -69,14 +69,14 @@ void CSoundScapeComponent::OnEntitySpawn()
 	}
 	m_sound = nullptr;
 	auto &ent = GetEntity();
-	auto pSoundEmitterComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();
+	auto pSoundEmitterComponent = ent.GetComponent<CSoundEmitterComponent>();
 	if(pSoundEmitterComponent.valid()) {
-		std::shared_ptr<pragma::audio::ALSound> snd = pSoundEmitterComponent->CreateSound(m_kvSoundScape, pragma::audio::ALSoundType::Environment);
+		std::shared_ptr<audio::ALSound> snd = pSoundEmitterComponent->CreateSound(m_kvSoundScape, audio::ALSoundType::Environment);
 		if(snd.get() == nullptr) {
 			Con::cwar << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
 			return;
 		}
-		pragma::audio::ALSoundScript *al = dynamic_cast<pragma::audio::ALSoundScript *>(snd.get());
+		audio::ALSoundScript *al = dynamic_cast<audio::ALSoundScript *>(snd.get());
 		if(al == nullptr) {
 			Con::cwar << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
 			return;
@@ -84,7 +84,7 @@ void CSoundScapeComponent::OnEntitySpawn()
 		snd->SetRelative(true);
 		m_sound = snd;
 	}
-	SetNextTick(pragma::get_cgame()->CurTime() + pragma::math::random(0.f, 0.25f)); // Spread out think time between entities
+	SetNextTick(get_cgame()->CurTime() + math::random(0.f, 0.25f)); // Spread out think time between entities
 }
 
 void CSoundScapeComponent::ReceiveData(NetPacket &packet)
@@ -103,7 +103,7 @@ void CSoundScapeComponent::UpdateTargetPositions()
 {
 	if(m_sound.get() == nullptr)
 		return;
-	pragma::audio::ALSoundScript *al = dynamic_cast<pragma::audio::ALSoundScript *>(m_sound.get());
+	audio::ALSoundScript *al = dynamic_cast<audio::ALSoundScript *>(m_sound.get());
 	std::unordered_map<unsigned int, EntityHandle>::iterator it;
 	for(it = m_targets.begin(); it != m_targets.end(); it++) {
 		EntityHandle &hEnt = it->second;
@@ -139,7 +139,7 @@ void CSoundScapeComponent::StopSoundScape()
 
 bool CSoundScapeComponent::IsPlayerInRange()
 {
-	auto *pl = pragma::get_cgame()->GetLocalPlayer();
+	auto *pl = get_cgame()->GetLocalPlayer();
 	if(pl == nullptr)
 		return false;
 	auto &ent = GetEntity();

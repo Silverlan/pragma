@@ -27,7 +27,7 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseGamemodeComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
@@ -37,7 +37,7 @@ export namespace pragma {
 
 		virtual void OnPlayerDeath(BasePlayerComponent &pl, game::DamageInfo *dmgInfo);
 		virtual void OnPlayerSpawned(BasePlayerComponent &pl);
-		virtual void OnPlayerDropped(BasePlayerComponent &pl, pragma::networking::DropReason reason);
+		virtual void OnPlayerDropped(BasePlayerComponent &pl, networking::DropReason reason);
 		virtual void OnPlayerReady(BasePlayerComponent &pl);
 		virtual void OnPlayerJoined(BasePlayerComponent &pl);
 		virtual void OnGameInitialized();
@@ -50,9 +50,9 @@ export namespace pragma {
 		const std::string &GetIdentifier() const;
 		const std::string &GetComponentName() const;
 		const std::string &GetAuthor() const;
-		pragma::util::Version GetGamemodeVersion() const;
+		util::Version GetGamemodeVersion() const;
 	  protected:
-		BaseGamemodeComponent(pragma::ecs::BaseEntity &ent);
+		BaseGamemodeComponent(ecs::BaseEntity &ent);
 	};
 	struct DLLNETWORK CEPlayerDeath : public ComponentEvent {
 		CEPlayerDeath(BasePlayerComponent &pl, game::DamageInfo *dmgInfo);
@@ -61,10 +61,10 @@ export namespace pragma {
 		game::DamageInfo *dmgInfo = nullptr;
 	};
 	struct DLLNETWORK CEPlayerDropped : public ComponentEvent {
-		CEPlayerDropped(BasePlayerComponent &pl, pragma::networking::DropReason reason);
+		CEPlayerDropped(BasePlayerComponent &pl, networking::DropReason reason);
 		virtual void PushArguments(lua::State *l) override;
 		BasePlayerComponent &player;
-		pragma::networking::DropReason reason;
+		networking::DropReason reason;
 	};
 	struct DLLNETWORK CEPlayerSpawned : public ComponentEvent {
 		CEPlayerSpawned(BasePlayerComponent &pl);

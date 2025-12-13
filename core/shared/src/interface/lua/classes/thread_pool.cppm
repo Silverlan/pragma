@@ -14,7 +14,7 @@ export namespace pragma::LuaCore {
 		void AddSubTask(const std::function<void()> &subTask) { subTasks.push_back(subTask); }
 		std::vector<std::function<void()>> subTasks;
 	};
-	class DLLNETWORK LuaThreadPool : public pragma::ThreadPool {
+	class DLLNETWORK LuaThreadPool : public ThreadPool {
 	  public:
 		using ResultHandler = std::function<void(lua::State *)>;
 

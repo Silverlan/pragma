@@ -13,12 +13,12 @@ export namespace pragma::gui::types {
 	  public:
 		enum class Button : Int32 { NONE = 0, APPLY = 1, CANCEL = 2, YES = 4, NO = 8, YESNO = 12, ACCEPT = 16, DECLINE = 32, OK = 64 };
 	  private:
-		static void __buttonCallback(WIHandle hMessageBox, WIMessageBox::Button button);
+		static void __buttonCallback(WIHandle hMessageBox, Button button);
 	  protected:
-		pragma::gui::WIHandle m_hBg;
-		pragma::gui::WIHandle m_hMessage;
-		pragma::gui::WIHandle m_hText;
-		std::vector<pragma::gui::WIHandle> m_buttons;
+		WIHandle m_hBg;
+		WIHandle m_hMessage;
+		WIHandle m_hText;
+		std::vector<WIHandle> m_buttons;
 		std::function<void(WIMessageBox *, Button)> m_buttonCallback;
 		WIButton *AddButton(const std::string &text, Button button);
 		virtual void OnRemove() override;

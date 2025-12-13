@@ -1253,7 +1253,7 @@ void pragma::Game::RegisterLuaLibraries()
 	Lua::nav::register_library(GetLuaInterface());
 
 	auto fileMod = luabind::module(GetLuaState(), "file");
-	fileMod[(luabind::def("open", Lua::file::Open), luabind::def("open", static_cast<std::pair<std::shared_ptr<LFile>, std::optional<std::string>> (*)(lua::State *, std::string, pragma::FileOpenMode)>([](lua::State *l, std::string path, pragma::FileOpenMode openMode) { return Lua::file::Open(l, path, openMode); })),
+	fileMod[(luabind::def("open", Lua::file::Open), luabind::def("open", static_cast<std::pair<std::shared_ptr<LFile>, std::optional<std::string>> (*)(lua::State *, std::string, pragma::fs::FileMode)>([](lua::State *l, std::string path, pragma::fs::FileMode openMode) { return Lua::file::Open(l, path, openMode); })),
 	  luabind::def("create_directory", Lua::file::CreateDir), luabind::def("create_path", Lua::file::CreatePath),
 	  luabind::def(
 	    "create_virtual",
@@ -1266,34 +1266,34 @@ void pragma::Game::RegisterLuaLibraries()
 		    lf.Construct(vf);
 		    return lf;
 	    }),
-	  luabind::def("exists", static_cast<bool (*)(std::string, fsys::SearchFlags)>([](std::string path, fsys::SearchFlags searchFlags) { return FileManager::Exists(path, searchFlags); })),
-	  luabind::def("exists", static_cast<bool (*)(std::string)>([](std::string path) { return FileManager::Exists(path); })), luabind::def("delete", Lua::file::Delete), luabind::def("delete_directory", Lua::file::DeleteDir),
+	  luabind::def("exists", static_cast<bool (*)(std::string, fs::SearchFlags)>([](std::string path, fs::SearchFlags searchFlags) { return fs::exists(path, searchFlags); })),
+	  luabind::def("exists", static_cast<bool (*)(std::string)>([](std::string path) { return fs::exists(path); })), luabind::def("delete", Lua::file::Delete), luabind::def("delete_directory", Lua::file::DeleteDir),
 	  luabind::def("find_external_game_asset_files", Lua::file::find_external_game_resource_files, luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}),
 	  luabind::def("open_external_asset_file",
 	    static_cast<std::shared_ptr<LFile> (*)(lua::State *, const std::string &, const std::string &)>([](lua::State *l, const std::string &path, const std::string &game) -> std::shared_ptr<LFile> { return Lua::file::open_external_asset_file(l, path, game); })),
 	  luabind::def("open_external_asset_file", static_cast<std::shared_ptr<LFile> (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) -> std::shared_ptr<LFile> { return Lua::file::open_external_asset_file(l, path); })),
-	  luabind::def("to_relative_path", Lua::file::to_relative_path), luabind::def("is_directory", FileManager::IsDir), luabind::def("is_directory", static_cast<bool (*)(std::string)>([](std::string path) { return FileManager::IsDir(path); })),
+	  luabind::def("to_relative_path", Lua::file::to_relative_path), luabind::def("is_directory", fs::is_dir), luabind::def("is_directory", static_cast<bool (*)(std::string)>([](std::string path) { return fs::is_dir(path); })),
 	  luabind::def("find", Lua::file::Find, luabind::meta::join<luabind::pure_out_value<4>, luabind::pure_out_value<5>>::type {}),
-	  luabind::def("find", static_cast<void (*)(lua::State *, const std::string &, luabind::object &, luabind::object &)>([](lua::State *l, const std::string &path, luabind::object &outFiles, luabind::object &outDirs) { Lua::file::Find(l, path, fsys::SearchFlags::All, outFiles, outDirs); }),
+	  luabind::def("find", static_cast<void (*)(lua::State *, const std::string &, luabind::object &, luabind::object &)>([](lua::State *l, const std::string &path, luabind::object &outFiles, luabind::object &outDirs) { Lua::file::Find(l, path, fs::SearchFlags::All, outFiles, outDirs); }),
 	    luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>>::type {}),
 	  luabind::def("find_lua_files", Lua::file::FindLuaFiles), luabind::def("find_lua_files", static_cast<luabind::object (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) { return Lua::file::FindLuaFiles(l, path); })),
-	  luabind::def("get_attributes", FileManager::GetFileAttributes), luabind::def("get_flags", static_cast<fsys::FVFile (*)(std::string, fsys::SearchFlags)>(+[](std::string path, fsys::SearchFlags searchFlags) { return FileManager::GetFileFlags(path, searchFlags); })),
-	  luabind::def("get_flags", static_cast<fsys::FVFile (*)(std::string)>(+[](std::string path) { return FileManager::GetFileFlags(path); })),
+	  luabind::def("get_attributes", fs::get_file_attributes), luabind::def("get_flags", static_cast<fs::FVFile (*)(std::string, fs::SearchFlags)>(+[](std::string path, fs::SearchFlags searchFlags) { return fs::get_file_flags(path, searchFlags); })),
+	  luabind::def("get_flags", static_cast<fs::FVFile (*)(std::string)>(+[](std::string path) { return fs::get_file_flags(path); })),
 	  luabind::def("find_absolute_path", static_cast<luabind::object (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) -> luabind::object {
 		  std::string rpath;
-		  auto res = FileManager::FindAbsolutePath(path, rpath);
+		  auto res = fs::find_absolute_path(path, rpath);
 		  if(res == false)
 			  return {};
 		  auto isPathToDir = !path.empty() && (path.back() == '/' || path.back() == '\\');
 		  auto absPath = isPathToDir ? pragma::util::Path::CreatePath(rpath) : pragma::util::Path::CreateFile(rpath);
 		  std::string relPath;
-		  if(filemanager::find_relative_path(absPath.GetString(), relPath))
+		  if(fs::find_relative_path(absPath.GetString(), relPath))
 			  return luabind::object {l, relPath};
 		  return {};
 	  })),
 	  luabind::def("find_path_on_disk", static_cast<luabind::object (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) -> luabind::object {
 		  std::string rpath;
-		  auto res = FileManager::FindAbsolutePath(path, rpath);
+		  auto res = fs::find_absolute_path(path, rpath);
 		  if(res == false)
 			  return {};
 		  return luabind::object {l, rpath};
@@ -1308,10 +1308,10 @@ void pragma::Game::RegisterLuaLibraries()
 	                                                                }),
 	  luabind::def("read", Lua::file::Read), luabind::def("write", Lua::file::Write), luabind::def("get_canonicalized_path", Lua::file::GetCanonicalizedPath), luabind::def("get_file_path", ufile::get_path_from_filename), luabind::def("get_file_name", ufile::get_file_from_filename),
 	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua::State *, const std::string &, const std::vector<std::string> &)>(Lua::file::GetFileExtension)),
-	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua::State *, const std::string &)>(Lua::file::GetFileExtension)), luabind::def("get_size", FileManager::GetFileSize),
-	  luabind::def("get_size", static_cast<uint64_t (*)(std::string)>(+[](std::string path) { return FileManager::GetFileSize(path); })), luabind::def("compare_path", Lua::file::ComparePath),
+	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua::State *, const std::string &)>(Lua::file::GetFileExtension)), luabind::def("get_size", fs::get_file_size),
+	  luabind::def("get_size", static_cast<uint64_t (*)(std::string)>(+[](std::string path) { return fs::get_file_size(path); })), luabind::def("compare_path", Lua::file::ComparePath),
 	  luabind::def("get_last_write_time",+[](const std::string &path) -> std::optional<std::string> {
-		    auto ftime = filemanager::get_last_write_time(path);
+		    auto ftime = fs::get_last_write_time(path);
 		    if(!ftime)
 			    return {};
 		    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(*ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
@@ -1350,28 +1350,28 @@ void pragma::Game::RegisterLuaLibraries()
 	  luabind::def("copy", static_cast<bool (*)(lua::State *, const std::string &, std::string)>([](lua::State *l, const std::string &srcFile, std::string dstFile) -> bool {
 		  if(Lua::file::validate_write_operation(l, dstFile) == false)
 			  return false;
-		  return FileManager::CopyFile(srcFile.c_str(), dstFile.c_str());
+		  return fs::copy_file(srcFile, dstFile);
 	  })),
 	  luabind::def("move", static_cast<bool (*)(lua::State *, std::string, std::string)>([](lua::State *l, std::string srcFile, std::string dstFile) -> bool {
 		  if(Lua::file::validate_write_operation(l, srcFile) == false)
 			  return false;
 		  if(Lua::file::validate_write_operation(l, dstFile) == false)
 			  return false;
-		  return filemanager::move_file(srcFile.c_str(), dstFile.c_str());
+		  return fs::move_file(srcFile, dstFile);
 	  })),
 	  luabind::def(
-	    "update_file_index_cache", +[](lua::State *l, const std::string &path) { filemanager::update_file_index_cache(path); }),
+	    "update_file_index_cache", +[](lua::State *l, const std::string &path) { fs::update_file_index_cache(path); }),
 	  luabind::def(
 	    "rename", +[](lua::State *l, std::string srcFile, std::string dstFile) -> bool {
 		    if(Lua::file::validate_write_operation(l, srcFile) == false)
 			    return false;
 		    if(Lua::file::validate_write_operation(l, dstFile) == false)
 			    return false;
-		    return filemanager::rename_file(srcFile, dstFile);
+		    return fs::rename_file(srcFile, dstFile);
 	}),
 	  luabind::def(
 	    "is_empty", +[](const std::string &path) -> std::optional<bool> {
-		    auto paths = FileManager::FindAbsolutePaths(path);
+		    auto paths = fs::find_absolute_paths(path);
 		    auto allEmpty = true;
 		    for(auto &path : paths) {
 			    try {

@@ -20,7 +20,7 @@ static std::shared_ptr<prosper::IDynamicResizableBuffer> g_vertexAnimationBuffer
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &pragma::get_vertex_animation_buffer() { return g_vertexAnimationBuffer; }
 void pragma::initialize_vertex_animation_buffer()
 {
-	auto alignment = pragma::get_cengine()->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::StorageBufferBit);
+	auto alignment = get_cengine()->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::StorageBufferBit);
 	if(alignment > 0 && (sizeof(CVertexAnimatedComponent::VertexAnimationData) % alignment) != 0) {
 		Con::cwar << "Minimum storage buffer alignment is " << alignment << ", but only alignment values of <=" << sizeof(CVertexAnimatedComponent::VertexAnimationData) << " are supported! Morph target animations will be disabled!" << Con::endl;
 		return;
@@ -35,7 +35,7 @@ void pragma::initialize_vertex_animation_buffer()
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
 
-	g_vertexAnimationBuffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 5 /* 5 MiB */, 0.05f);
+	g_vertexAnimationBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 5 /* 5 MiB */, 0.05f);
 	g_vertexAnimationBuffer->SetDebugName("entity_vertex_anim_bone_buf");
 	g_vertexAnimationBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
 	assert(g_vertexAnimationBuffer->GetAlignment() == 0 || (sizeof(CVertexAnimatedComponent::VertexAnimationData) % g_vertexAnimationBuffer->GetAlignment()) == 0);
@@ -57,10 +57,10 @@ void CVertexAnimatedComponent::Initialize()
 	BindEventUnhandled(cRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) { InitializeVertexAnimationBuffer(); });
 	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateVertexAnimationDataMT(); });
 	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateVertexAnimationBuffer(static_cast<CEOnUpdateRenderBuffers &>(evData.get()).commandBuffer); });
-	BindEvent(cRenderComponent::EVENT_UPDATE_INSTANTIABILITY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(cRenderComponent::EVENT_UPDATE_INSTANTIABILITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		// TODO: Allow instantiability for vertex animated entities
 		static_cast<CEUpdateInstantiability &>(evData.get()).instantiable = false;
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	});
 	// TODO: We shouldn't need the animated component, but morph target animations appear broken if it's not there.
 	// Find out why and then remove this line!
@@ -74,7 +74,7 @@ void CVertexAnimatedComponent::Initialize()
 }
 void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 {
-	auto &globalVertAnimBuffer = pragma::get_vertex_animation_buffer();
+	auto &globalVertAnimBuffer = get_vertex_animation_buffer();
 	if(!globalVertAnimBuffer)
 		return;
 	auto &ent = GetEntity();
@@ -100,8 +100,8 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 	}
 
 	auto &vertAnimBuffer = static_cast<asset::CModel &>(*mdl).GetVertexAnimationBuffer();
-	ds->SetBindingStorageBuffer(*m_vertexAnimationBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData));
-	ds->SetBindingStorageBuffer(*vertAnimBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimations));
+	ds->SetBindingStorageBuffer(*m_vertexAnimationBuffer, math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData));
+	ds->SetBindingStorageBuffer(*vertAnimBuffer, math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::VertexAnimations));
 	ds->Update();
 }
 
@@ -116,7 +116,7 @@ void CVertexAnimatedComponent::DestroyVertexAnimationBuffer()
 	auto whRenderComponent = ent.GetComponent<CRenderComponent>();
 	auto *pRenderDescSet = whRenderComponent.valid() ? whRenderComponent->GetRenderDescriptorSet() : nullptr;
 	if(pRenderDescSet) {
-		pRenderDescSet->SetBindingStorageBuffer(*pragma::get_cengine()->GetRenderContext().GetDummyBuffer(), pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData)); // Reset buffer
+		pRenderDescSet->SetBindingStorageBuffer(*get_cengine()->GetRenderContext().GetDummyBuffer(), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData)); // Reset buffer
 		pRenderDescSet->Update();
 	}
 }
@@ -150,7 +150,7 @@ void CVertexAnimatedComponent::UpdateVertexAnimationDataMT()
 	auto &flexWeights = whFlexComponent->GetFlexWeights();
 	auto &flexes = mdl->GetFlexes();
 	assert(flexes.size() == flexWeights.size());
-	auto numFlexes = pragma::math::min(flexes.size(), flexWeights.size());
+	auto numFlexes = math::min(flexes.size(), flexWeights.size());
 	for(auto flexId = decltype(numFlexes) {0u}; flexId < numFlexes; ++flexId) {
 		auto flexWeight = flexWeights.at(flexId);
 		if(flexWeight == 0.f)
@@ -163,7 +163,7 @@ void CVertexAnimatedComponent::UpdateVertexAnimationDataMT()
 		auto frameId = flex.GetFrameIndex();
 		//auto *ma = flex.GetMeshVertexAnimation();
 		//auto *fr = flex.GetMeshVertexFrame();
-		auto it = std::find_if(vertAnims.begin(), vertAnims.end(), [va](const std::shared_ptr<pragma::animation::VertexAnimation> &vaOther) { return vaOther.get() == va; });
+		auto it = std::find_if(vertAnims.begin(), vertAnims.end(), [va](const std::shared_ptr<animation::VertexAnimation> &vaOther) { return vaOther.get() == va; });
 		if(it == vertAnims.end())
 			continue;
 		auto vaId = it - vertAnims.begin();
@@ -180,20 +180,20 @@ void CVertexAnimatedComponent::UpdateVertexAnimationDataMT()
 				continue;
 			auto cycle = flexWeight * (frames.size() - 1);
 			auto fraction = fmodf(cycle, 1.f);
-			auto nextFrameId = pragma::math::min(static_cast<uint32_t>(frameId + 1), static_cast<uint32_t>(frames.size() - 1));
+			auto nextFrameId = math::min(static_cast<uint32_t>(frameId + 1), static_cast<uint32_t>(frames.size() - 1));
 
 			uint64_t srcFrameOffset = 0ull;
 			uint64_t dstFrameOffset = 0ull;
-			if(static_cast<pragma::asset::CModel &>(*mdl).GetVertexAnimationBufferFrameOffset(vaId, static_cast<pragma::geometry::CModelSubMesh &>(*subMesh), frameId, srcFrameOffset) == false
-			  || static_cast<pragma::asset::CModel &>(*mdl).GetVertexAnimationBufferFrameOffset(vaId, static_cast<pragma::geometry::CModelSubMesh &>(*subMesh), nextFrameId, dstFrameOffset) == false)
+			if(static_cast<asset::CModel &>(*mdl).GetVertexAnimationBufferFrameOffset(vaId, static_cast<geometry::CModelSubMesh &>(*subMesh), frameId, srcFrameOffset) == false
+			  || static_cast<asset::CModel &>(*mdl).GetVertexAnimationBufferFrameOffset(vaId, static_cast<geometry::CModelSubMesh &>(*subMesh), nextFrameId, dstFrameOffset) == false)
 				continue;
 			if(srcFrameOffset > std::numeric_limits<uint32_t>::max() || dstFrameOffset > std::numeric_limits<uint32_t>::max())
 				continue;
 			++m_activeVertexAnimations;
 
-			auto it = data.find(static_cast<pragma::geometry::CModelSubMesh *>(subMesh));
+			auto it = data.find(static_cast<geometry::CModelSubMesh *>(subMesh));
 			if(it == data.end())
-				it = data.insert(std::make_pair(static_cast<pragma::geometry::CModelSubMesh *>(subMesh), std::vector<VertexAnimationData> {})).first;
+				it = data.insert(std::make_pair(static_cast<geometry::CModelSubMesh *>(subMesh), std::vector<VertexAnimationData> {})).first;
 			it->second.push_back({});
 			auto &vaData = it->second.back();
 			vaData.srcFrameOffset = srcFrameOffset;
@@ -243,7 +243,7 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 	}
 }
 
-bool CVertexAnimatedComponent::GetVertexAnimationBufferMeshOffset(pragma::geometry::CModelSubMesh &mesh, uint32_t &offset, uint32_t &animCount) const
+bool CVertexAnimatedComponent::GetVertexAnimationBufferMeshOffset(geometry::CModelSubMesh &mesh, uint32_t &offset, uint32_t &animCount) const
 {
 	auto it = m_vertexAnimationMeshBufferOffsets.find(&mesh);
 	if(it == m_vertexAnimationMeshBufferOffsets.end())
@@ -252,7 +252,7 @@ bool CVertexAnimatedComponent::GetVertexAnimationBufferMeshOffset(pragma::geomet
 	animCount = it->second.second;
 	return true;
 }
-bool CVertexAnimatedComponent::GetLocalVertexPosition(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, Vector3 *optOutNormal, float *optOutDelta) const
+bool CVertexAnimatedComponent::GetLocalVertexPosition(const geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, Vector3 *optOutNormal, float *optOutDelta) const
 {
 	pos = {};
 	if(optOutNormal)
@@ -269,7 +269,7 @@ bool CVertexAnimatedComponent::GetLocalVertexPosition(const pragma::geometry::Mo
 		if(animSlot.mesh.expired() || animSlot.mesh.lock().get() != &subMesh || animSlot.vertexAnimationId >= vaAnims.size())
 			continue;
 		auto &vaAnim = vaAnims.at(animSlot.vertexAnimationId);
-		auto *ma = vaAnim->GetMeshAnimation(const_cast<pragma::geometry::ModelSubMesh &>(subMesh));
+		auto *ma = vaAnim->GetMeshAnimation(const_cast<geometry::ModelSubMesh &>(subMesh));
 		if(ma == nullptr)
 			continue;
 		auto *frame = ma->GetFrame(animSlot.frameId);
@@ -297,28 +297,28 @@ bool CVertexAnimatedComponent::GetLocalVertexPosition(const pragma::geometry::Mo
 
 void CVertexAnimatedComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
-	auto defCVertexAnimated = pragma::LuaCore::create_entity_component_class<pragma::CVertexAnimatedComponent, pragma::BaseEntityComponent>("VertexAnimatedComponent");
-	defCVertexAnimated.def("UpdateVertexAnimationBuffer", static_cast<void (*)(lua::State *, pragma::CVertexAnimatedComponent &, std::shared_ptr<prosper::ICommandBuffer> &)>([](lua::State *l, pragma::CVertexAnimatedComponent &hAnim, std::shared_ptr<prosper::ICommandBuffer> &drawCmd) {
+	auto defCVertexAnimated = pragma::LuaCore::create_entity_component_class<CVertexAnimatedComponent, BaseEntityComponent>("VertexAnimatedComponent");
+	defCVertexAnimated.def("UpdateVertexAnimationBuffer", static_cast<void (*)(lua::State *, CVertexAnimatedComponent &, std::shared_ptr<prosper::ICommandBuffer> &)>([](lua::State *l, CVertexAnimatedComponent &hAnim, std::shared_ptr<prosper::ICommandBuffer> &drawCmd) {
 		if(drawCmd->IsPrimary() == false)
 			return;
 		hAnim.UpdateVertexAnimationBuffer(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd));
 	}));
-	defCVertexAnimated.def("GetVertexAnimationBuffer", &pragma::CVertexAnimatedComponent::GetVertexAnimationBuffer);
+	defCVertexAnimated.def("GetVertexAnimationBuffer", &CVertexAnimatedComponent::GetVertexAnimationBuffer);
 	defCVertexAnimated.def("GetVertexAnimationBufferMeshOffset",
-	  static_cast<Lua::opt<luabind::mult<uint32_t, uint32_t>> (*)(lua::State *, pragma::CVertexAnimatedComponent &, std::shared_ptr<pragma::geometry::ModelSubMesh> &)>(
-	    [](lua::State *l, pragma::CVertexAnimatedComponent &hAnim, std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh) -> Lua::opt<luabind::mult<uint32_t, uint32_t>> {
+	  static_cast<Lua::opt<luabind::mult<uint32_t, uint32_t>> (*)(lua::State *, CVertexAnimatedComponent &, std::shared_ptr<geometry::ModelSubMesh> &)>(
+	    [](lua::State *l, CVertexAnimatedComponent &hAnim, std::shared_ptr<geometry::ModelSubMesh> &subMesh) -> Lua::opt<luabind::mult<uint32_t, uint32_t>> {
 		    uint32_t offset;
 		    uint32_t animCount;
-		    auto b = hAnim.GetVertexAnimationBufferMeshOffset(static_cast<pragma::geometry::CModelSubMesh &>(*subMesh), offset, animCount);
+		    auto b = hAnim.GetVertexAnimationBufferMeshOffset(static_cast<geometry::CModelSubMesh &>(*subMesh), offset, animCount);
 		    if(b == false)
 			    return luabind::object {};
 		    return luabind::mult<uint32_t, uint32_t> {l, offset, animCount};
 	    }));
 	defCVertexAnimated.def("GetLocalVertexPosition",
-	  static_cast<Lua::opt<luabind::mult<Vector3, Vector3>> (*)(lua::State *, pragma::CVertexAnimatedComponent &, std::shared_ptr<pragma::geometry::ModelSubMesh> &, uint32_t)>(
-	    [](lua::State *l, pragma::CVertexAnimatedComponent &hAnim, std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh, uint32_t vertexId) -> Lua::opt<luabind::mult<Vector3, Vector3>> {
+	  static_cast<Lua::opt<luabind::mult<Vector3, Vector3>> (*)(lua::State *, CVertexAnimatedComponent &, std::shared_ptr<geometry::ModelSubMesh> &, uint32_t)>(
+	    [](lua::State *l, CVertexAnimatedComponent &hAnim, std::shared_ptr<geometry::ModelSubMesh> &subMesh, uint32_t vertexId) -> Lua::opt<luabind::mult<Vector3, Vector3>> {
 		    Vector3 pos, n;
-		    auto b = hAnim.GetLocalVertexPosition(static_cast<pragma::geometry::CModelSubMesh &>(*subMesh), vertexId, pos, &n);
+		    auto b = hAnim.GetLocalVertexPosition(static_cast<geometry::CModelSubMesh &>(*subMesh), vertexId, pos, &n);
 		    if(b == false)
 			    return luabind::object {};
 		    return luabind::mult<Vector3, Vector3> {l, pos, n};

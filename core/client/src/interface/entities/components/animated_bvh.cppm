@@ -17,7 +17,7 @@ export namespace pragma {
 			std::vector<Vector3> transformedVerts;
 		};
 		AnimationBvhData animationBvhData;
-		std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> renderMeshes;
+		std::vector<std::shared_ptr<geometry::ModelSubMesh>> renderMeshes;
 		std::vector<uint16_t> renderMeshIndices;
 		std::vector<MeshData> meshData;
 		std::vector<bvh::Primitive> transformedTris;
@@ -27,7 +27,7 @@ export namespace pragma {
 	};
 	class DLLCLIENT CAnimatedBvhComponent final : public BaseEntityComponent {
 	  public:
-		CAnimatedBvhComponent(pragma::ecs::BaseEntity &ent);
+		CAnimatedBvhComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnRemove() override;
@@ -57,7 +57,7 @@ export namespace pragma {
 		bool m_updateLazily = false;
 		uint32_t m_numJobs = 0;
 
-		std::vector<pragma::math::ScaledTransform> m_prevBonePoses;
+		std::vector<math::ScaledTransform> m_prevBonePoses;
 		std::vector<bool> m_dirtyBones;
 	};
 };

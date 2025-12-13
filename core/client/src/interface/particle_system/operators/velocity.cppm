@@ -17,23 +17,23 @@ export namespace pragma::pts {
 		Vector3 m_velocity = {};
 	public:
 		CParticleOperatorVelocity() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void Simulate(pragma::pts::CParticle &particle, double tDelta, float strength) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 		float GetSpeed() const;
 	};
 }
 
-void pragma::pts::CParticleOperatorVelocity::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorVelocity::Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		pragma::string::to_lower(key);
+		string::to_lower(key);
 		if(key == "velocity")
 			m_velocity = uvec::create(it->second);
 	}
 }
-void pragma::pts::CParticleOperatorVelocity::Simulate(pragma::pts::CParticle &particle, double tDelta, float strength)
+void pragma::pts::CParticleOperatorVelocity::Simulate(CParticle &particle, double tDelta, float strength)
 {
 	Vector3 vel = particle.GetVelocity();
 	vel += m_velocity * (float)tDelta;

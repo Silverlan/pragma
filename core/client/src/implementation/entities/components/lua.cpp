@@ -8,7 +8,7 @@ module pragma.client;
 import :entities.components.lua;
 using namespace pragma;
 
-CLuaBaseEntityComponent::CLuaBaseEntityComponent(pragma::ecs::BaseEntity &ent) : BaseLuaBaseEntityComponent(ent), CBaseSnapshotComponent() {}
+CLuaBaseEntityComponent::CLuaBaseEntityComponent(ecs::BaseEntity &ent) : BaseLuaBaseEntityComponent(ent), CBaseSnapshotComponent() {}
 
 void CLuaBaseEntityComponent::ReceiveData(NetPacket &packet)
 {
@@ -23,7 +23,7 @@ void CLuaBaseEntityComponent::ReceiveData(NetPacket &packet)
 	}
 	CallLuaMethod<void, NetPacket>("ReceiveData", packet);
 }
-Bool CLuaBaseEntityComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CLuaBaseEntityComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(m_networkedMemberInfo != nullptr && eventId == m_networkedMemberInfo->netEvSetMember) {
 		auto nwIdx = packet->Read<uint8_t>();
@@ -44,9 +44,9 @@ Bool CLuaBaseEntityComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPac
 		it->second.Call<void, std::reference_wrapper<NetPacket>>(std::reference_wrapper<NetPacket> {packet});
 		return true;
 	}
-	auto handled = static_cast<uint32_t>(pragma::util::EventReply::Unhandled);
+	auto handled = static_cast<uint32_t>(util::EventReply::Unhandled);
 	CallLuaMethod<uint32_t, uint32_t, NetPacket>("ReceiveNetEvent", &handled, eventId, packet);
-	return static_cast<pragma::util::EventReply>(handled) == pragma::util::EventReply::Handled;
+	return static_cast<util::EventReply>(handled) == util::EventReply::Handled;
 }
 void CLuaBaseEntityComponent::ReceiveSnapshotData(NetPacket &packet)
 {
@@ -63,4 +63,4 @@ void CLuaBaseEntityComponent::ReceiveSnapshotData(NetPacket &packet)
 }
 bool CLuaBaseEntityComponent::ShouldTransmitNetData() const { return IsNetworked(); }
 bool CLuaBaseEntityComponent::ShouldTransmitSnapshotData() const { return BaseLuaBaseEntityComponent::ShouldTransmitSnapshotData(); }
-void CLuaBaseEntityComponent::InvokeNetEventHandle(const std::string &methodName, NetPacket &packet, pragma::BasePlayerComponent *pl) { CallLuaMethod<void, NetPacket>(methodName, packet); }
+void CLuaBaseEntityComponent::InvokeNetEventHandle(const std::string &methodName, NetPacket &packet, BasePlayerComponent *pl) { CallLuaMethod<void, NetPacket>(methodName, packet); }

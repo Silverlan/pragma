@@ -20,8 +20,8 @@ export {
 			IBase &operator=(const IBase &) = delete;
 			virtual ~IBase() = default;
 
-			pragma::util::TWeakSharedHandle<IBase> GetHandle() const;
-			pragma::util::TSharedHandle<IBase> ClaimOwnership() const;
+			util::TWeakSharedHandle<IBase> GetHandle() const;
+			util::TSharedHandle<IBase> ClaimOwnership() const;
 
 			virtual bool IsConstraint() const;
 			virtual bool IsCollisionObject() const;
@@ -35,24 +35,24 @@ export {
 			void Push(lua::State *l);
 
 			void *GetUserData() const;
-			pragma::physics::PhysObj *GetPhysObj() const;
-			void SetPhysObj(pragma::physics::PhysObj &physObj);
+			PhysObj *GetPhysObj() const;
+			void SetPhysObj(PhysObj &physObj);
 		  protected:
 			friend IEnvironment;
-			friend pragma::physics::PhysObj;
+			friend PhysObj;
 			IBase(IEnvironment &env);
 			void SetUserData(void *userData) const;
-			virtual void InitializeLuaHandle(const pragma::util::TWeakSharedHandle<IBase> &handle);
+			virtual void InitializeLuaHandle(const util::TWeakSharedHandle<IBase> &handle);
 			template<class T>
 			void InitializeLuaObject(lua::State *lua);
 
 			IEnvironment &m_physEnv;
-			pragma::util::TWeakSharedHandle<IBase> m_handle = {};
+			util::TWeakSharedHandle<IBase> m_handle = {};
 
 			std::unique_ptr<luabind::object> m_luaObj = nullptr;
 		  private:
 			mutable void *m_userData = nullptr;
-			mutable pragma::physics::PhysObj *m_physObj = nullptr;
+			mutable PhysObj *m_physObj = nullptr;
 		};
 
 		class DLLNETWORK IWorldObject {
@@ -69,13 +69,13 @@ export {
 		};
 
 		template<class T>
-		void pragma::physics::IBase::InitializeLuaObject(lua::State *lua)
+		void IBase::InitializeLuaObject(lua::State *lua)
 		{
 			auto handle = ClaimOwnership();
 			if(handle.IsValid())
-				m_luaObj = std::make_unique<luabind::object>(lua, pragma::LuaCore::raw_object_to_luabind_object(lua, pragma::util::shared_handle_cast<IBase, T>(handle)));
+				m_luaObj = std::make_unique<luabind::object>(lua, LuaCore::raw_object_to_luabind_object(lua, util::shared_handle_cast<IBase, T>(handle)));
 			else
-				m_luaObj = std::make_unique<luabind::object>(lua, pragma::LuaCore::raw_object_to_luabind_object(lua, std::dynamic_pointer_cast<T>(shared_from_this())));
+				m_luaObj = std::make_unique<luabind::object>(lua, LuaCore::raw_object_to_luabind_object(lua, std::dynamic_pointer_cast<T>(shared_from_this())));
 		}
 	};
 };

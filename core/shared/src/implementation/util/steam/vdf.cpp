@@ -50,7 +50,7 @@ pragma::util::MarkupFile::ResultCode pragma::util::steam::vdf::read_vdf_block(pr
 
 bool pragma::util::steam::vdf::get_external_steam_locations(const std::string &steamRootPath, std::vector<std::string> &outExtLocations)
 {
-	auto f = FileManager::OpenSystemFile((steamRootPath + "/steamapps/libraryfolders.vdf").c_str(), "r");
+	auto f = fs::open_system_file((steamRootPath + "/steamapps/libraryfolders.vdf"), fs::FileMode::Read);
 	if(f == nullptr)
 		return false;
 	auto lenContents = f->GetSize();

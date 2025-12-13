@@ -8,18 +8,18 @@ import :entities.components.movement;
 
 using namespace pragma;
 ComponentEventId movementComponent::EVENT_ON_UPDATE_MOVEMENT = INVALID_COMPONENT_ID;
-void MovementComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void MovementComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseEntityComponent::RegisterEvents(componentManager, registerEvent);
 	movementComponent::EVENT_ON_UPDATE_MOVEMENT = registerEvent("ON_UPDATE_MOVEMENT", ComponentEventInfo::Type::Explicit);
 }
-MovementComponent::MovementComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+MovementComponent::MovementComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void MovementComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovement(); });
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateMovement(); });
 }
-void MovementComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void MovementComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void MovementComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 
 void MovementComponent::SetSpeed(const Vector2 &speed) { m_movementSpeed = speed; }
@@ -37,20 +37,20 @@ float MovementComponent::GetAccelerationRampUpTime() const { return m_accelerati
 void MovementComponent::SetDirection(const std::optional<Vector3> &dir) { m_movementDirection = dir; }
 const std::optional<Vector3> &MovementComponent::GetDirection() const { return m_movementDirection; }
 
-void MovementComponent::SetDirectionMagnitude(MoveDirection direction, float magnitude) { m_directionMagnitude[pragma::math::to_integral(direction)] = magnitude; }
-float MovementComponent::GetDirectionMagnitude(MoveDirection direction) const { return m_directionMagnitude[pragma::math::to_integral(direction)]; }
+void MovementComponent::SetDirectionMagnitude(MoveDirection direction, float magnitude) { m_directionMagnitude[math::to_integral(direction)] = magnitude; }
+float MovementComponent::GetDirectionMagnitude(MoveDirection direction) const { return m_directionMagnitude[math::to_integral(direction)]; }
 
 Vector3 MovementComponent::GetLocalVelocity() const
 {
 	auto &ent = GetEntity();
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+	auto pVelComponent = ent.GetComponent<VelocityComponent>();
 	if(pVelComponent.expired())
 		return Vector3 {};
 	auto vel = pVelComponent->GetVelocity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys != nullptr && phys->IsController()) {
-		auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(phys);
+		auto *physController = static_cast<physics::ControllerPhysObj *>(phys);
 		vel -= physController->GetGroundVelocity();
 	}
 	return vel;
@@ -62,7 +62,7 @@ float MovementComponent::GetMovementBlendScale() const
 	auto vel = GetLocalVelocity();
 	float speed = uvec::length(vel);
 	auto mvSpeed = GetSpeed();
-	auto speedMax = pragma::math::max(mvSpeed.x, mvSpeed.y);
+	auto speedMax = math::max(mvSpeed.x, mvSpeed.y);
 	if(speedMax == 0.f)
 		blendScale = 0.f;
 	else {
@@ -78,8 +78,8 @@ float MovementComponent::GetMovementBlendScale() const
 bool MovementComponent::CanMove() const
 {
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	auto mvType = pPhysComponent ? pPhysComponent->GetMoveType() : pragma::physics::MoveType::None;
-	if(!pPhysComponent || mvType == pragma::physics::MoveType::None)
+	auto mvType = pPhysComponent ? pPhysComponent->GetMoveType() : physics::MoveType::None;
+	if(!pPhysComponent || mvType == physics::MoveType::None)
 		return false;
 	auto *pPhysObj = pPhysComponent->GetPhysicsObject();
 	return pPhysObj != nullptr && pPhysObj->IsController();
@@ -122,12 +122,12 @@ bool MovementComponent::UpdateMovement()
 	if(phys == nullptr || phys->IsController() == false)
 		return false;
 	auto mv = pPhysComponent->GetMoveType();
-	if(mv == pragma::physics::MoveType::None || mv == pragma::physics::MoveType::Physics)
+	if(mv == physics::MoveType::None || mv == physics::MoveType::Physics)
 		return false;
 	InvokeEventCallbacks(movementComponent::EVENT_ON_UPDATE_MOVEMENT);
-	auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(phys);
+	auto *physController = static_cast<physics::ControllerPhysObj *>(phys);
 	auto pTrComponent = ent.GetTransformComponent();
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+	auto pVelComponent = ent.GetComponent<VelocityComponent>();
 	auto pos = pTrComponent ? pTrComponent->GetPosition() : Vector3 {};
 	auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 
@@ -135,7 +135,7 @@ bool MovementComponent::UpdateMovement()
 	auto groundVelocity = physController->GetGroundVelocity();
 	vel -= groundVelocity; // We only care about the local velocity; The ground velocity will be re-added later
 
-	auto pSubmergibleComponent = ent.GetComponent<pragma::SubmergibleComponent>();
+	auto pSubmergibleComponent = ent.GetComponent<SubmergibleComponent>();
 	auto bSubmerged = (pSubmergibleComponent.valid() && pSubmergibleComponent->GetSubmergedFraction() > 0.5f) ? true : false;
 	Vector3 axisForward = uvec::FORWARD;
 	Vector3 axisRight = uvec::RIGHT;
@@ -156,13 +156,13 @@ bool MovementComponent::UpdateMovement()
 
 	Vector3 forward = uquat::forward(rot);
 	Vector3 right = uquat::right(rot);
-	if(mv == pragma::physics::MoveType::Walk && bSubmerged == false) {
+	if(mv == physics::MoveType::Walk && bSubmerged == false) {
 		// No movement on up-axis
 		auto upDir = uvec::UP;
 		if(m_orientationComponent)
 			upDir = m_orientationComponent->GetUpDirection();
 		auto angle = uvec::dot(forward, upDir);
-		if(pragma::math::abs(angle) < 0.99f)
+		if(math::abs(angle) < 0.99f)
 			forward = uvec::project_to_plane(forward, upDir, 0.f);
 		else // Looking straight up or down; Use camera up-direction as forward-direction instead
 		{
@@ -206,7 +206,7 @@ bool MovementComponent::UpdateMovement()
 	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
 	auto ts = pTimeScaleComponent.valid() ? CFloat(pTimeScaleComponent->GetTimeScale()) : 1.f;
 	auto scale = pTrComponent ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f};
-	auto speed = GetSpeed() * ts * pragma::math::abs_max(scale.x, scale.y, scale.z);
+	auto speed = GetSpeed() * ts * math::abs_max(scale.x, scale.y, scale.z);
 
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
@@ -231,11 +231,11 @@ bool MovementComponent::UpdateMovement()
 		}
 	}
 
-	if(pPhysComponent->IsGroundWalkable() || mv != pragma::physics::MoveType::Walk || bSubmerged == true) {
+	if(pPhysComponent->IsGroundWalkable() || mv != physics::MoveType::Walk || bSubmerged == true) {
 		auto friction = 0.8f;
 		std::optional<Vector3> contactNormal = {};
 		if(phys != nullptr && phys->IsController()) {
-			auto *controller = static_cast<pragma::physics::ControllerPhysObj *>(phys);
+			auto *controller = static_cast<physics::ControllerPhysObj *>(phys);
 			auto *surfMat = controller->GetGroundMaterial();
 			friction = surfMat ? surfMat->GetDynamicFriction() : 1.f;
 			contactNormal = controller->GetController()->GetGroundTouchNormal();
@@ -249,7 +249,7 @@ bool MovementComponent::UpdateMovement()
 		//else
 		//	Con::cout<<"NPC friction: "<<friction<<Con::endl;
 
-		vel += frictionForce * pragma::math::min(tDelta * acceleration, 1.f);
+		vel += frictionForce * math::min(tDelta * acceleration, 1.f);
 	}
 	else
 		speed *= GetAirModifier();
@@ -275,26 +275,26 @@ bool MovementComponent::UpdateMovement()
 	if(l == 0.f)
 		m_timeSinceMovementStart = 0.f;
 	else
-		m_timeSinceMovementStart = pragma::math::min(m_timeSinceMovementStart + tDelta, timeToReachFullAcc);
+		m_timeSinceMovementStart = math::min(m_timeSinceMovementStart + tDelta, timeToReachFullAcc);
 
 	auto speedDir = glm::dot(dir, vel); // The speed in the movement direction of the current velocity
-	if(speedDir < pragma::math::abs(speed.x)) {
+	if(speedDir < math::abs(speed.x)) {
 		auto speedDelta = speed.x - speedDir;
 
 		auto addSpeed = speedDelta * tDelta * acceleration;
 		auto f = (timeToReachFullAcc > 0.f) ? (m_timeSinceMovementStart / timeToReachFullAcc) : 1.f;
 		addSpeed *= f;
 
-		vel += dir * pragma::math::min(addSpeed, speedDelta);
+		vel += dir * math::min(addSpeed, speedDelta);
 	}
 
 	// Calculate sideways movement speed (NPC animation movement only)
 	if(speed.y != 0.f) {
 		auto dirRight = (uvec::length_sqr(dir) > 0.99f) ? uvec::cross(dir, pTrComponent ? pTrComponent->GetUp() : uvec::UP) : (pTrComponent ? pTrComponent->GetRight() : uvec::RIGHT);
 		auto speedDir = glm::dot(dirRight, vel);
-		if(speedDir < pragma::math::abs(speed.y)) {
+		if(speedDir < math::abs(speed.y)) {
 			auto speedDelta = speed.y - speedDir;
-			vel += dirRight * pragma::math::min(speedDelta * tDelta * acceleration, speedDelta);
+			vel += dirRight * math::min(speedDelta * tDelta * acceleration, speedDelta);
 		}
 	}
 	//static PhysContactInfo lastGroundContact = {btManifoldPoint{}};

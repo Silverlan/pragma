@@ -19,7 +19,7 @@ export namespace pragma {
 	  public:
 		virtual Con::c_cout &print(Con::c_cout &);
 	  public:
-		BaseWorldComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+		BaseWorldComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 	  protected:

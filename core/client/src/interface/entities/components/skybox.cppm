@@ -13,12 +13,12 @@ export {
 	namespace pragma {
 		class DLLCLIENT CSkyboxComponent final : public BaseSkyboxComponent, public CBaseNetComponent {
 		  public:
-			CSkyboxComponent(pragma::ecs::BaseEntity &ent) : BaseSkyboxComponent(ent) {}
+			CSkyboxComponent(ecs::BaseEntity &ent) : BaseSkyboxComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
 			virtual void InitializeLuaObject(lua::State *l) override;
 
-			virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+			virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 
@@ -26,7 +26,7 @@ export {
 			const EulerAngles &GetSkyAngles() const;
 			const Vector4 &GetRenderSkyAngles() const;
 
-			void SetSkyMaterial(msys::Material *mat);
+			void SetSkyMaterial(material::Material *mat);
 			void ValidateMaterials();
 		  private:
 			bool CreateCubemapFromIndividualTextures(const std::string &materialPath, const std::string &postfix = "") const;

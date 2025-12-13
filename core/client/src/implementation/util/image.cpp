@@ -8,9 +8,9 @@ module pragma.client;
 import :util.image;
 import :engine;
 
-static uimg::Format determine_target_format(prosper::Format format)
+static pragma::image::Format determine_target_format(prosper::Format format)
 {
-	auto targetFormat = uimg::Format::RGBA8;
+	auto targetFormat = pragma::image::Format::RGBA8;
 	switch(format) {
 	case prosper::Format::R8_UNorm:
 	case prosper::Format::R8_SNorm:
@@ -84,7 +84,7 @@ static uimg::Format determine_target_format(prosper::Format format)
 	case prosper::Format::BC3_SRGB_Block:
 	case prosper::Format::BC4_UNorm_Block:
 	case prosper::Format::BC4_SNorm_Block:
-		targetFormat = uimg::Format::RGBA8;
+		targetFormat = pragma::image::Format::RGBA8;
 		break;
 	case prosper::Format::R16_UNorm:
 	case prosper::Format::R16_SNorm:
@@ -114,7 +114,7 @@ static uimg::Format determine_target_format(prosper::Format format)
 	case prosper::Format::R16G16B16A16_UInt:
 	case prosper::Format::R16G16B16A16_SInt:
 	case prosper::Format::R16G16B16A16_SFloat:
-		targetFormat = uimg::Format::RGBA16;
+		targetFormat = pragma::image::Format::RGBA16;
 		break;
 	case prosper::Format::R32_UInt:
 	case prosper::Format::R32_SInt:
@@ -154,32 +154,32 @@ static uimg::Format determine_target_format(prosper::Format format)
 	case prosper::Format::BC6H_SFloat_Block:
 	case prosper::Format::BC7_UNorm_Block:
 	case prosper::Format::BC7_SRGB_Block:
-		targetFormat = uimg::Format::RGBA32;
+		targetFormat = pragma::image::Format::RGBA32;
 		break;
 	}
 	return targetFormat;
 }
 
-bool pragma::util::to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info, std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers)
+bool pragma::util::to_image_buffer(prosper::IImage &image, const ToImageBufferInfo &info, std::vector<std::vector<std::shared_ptr<image::ImageBuffer>>> &outImageBuffers)
 {
 	auto targetFormat = info.targetFormat.has_value() ? *info.targetFormat : determine_target_format(image.GetFormat());
 	auto outputFormat = targetFormat;
 	prosper::Format dstFormat;
 	switch(targetFormat) {
-	case uimg::Format::RGB8:
-	case uimg::Format::RGBA8:
+	case image::Format::RGB8:
+	case image::Format::RGBA8:
 		dstFormat = prosper::Format::R8G8B8A8_UNorm;
-		targetFormat = uimg::Format::RGBA8;
+		targetFormat = image::Format::RGBA8;
 		break;
-	case uimg::Format::RGB16:
-	case uimg::Format::RGBA16:
+	case image::Format::RGB16:
+	case image::Format::RGBA16:
 		dstFormat = prosper::Format::R16G16B16A16_SFloat;
-		targetFormat = uimg::Format::RGBA16;
+		targetFormat = image::Format::RGBA16;
 		break;
-	case uimg::Format::RGB32:
-	case uimg::Format::RGBA32:
+	case image::Format::RGB32:
+	case image::Format::RGBA32:
 		dstFormat = prosper::Format::R32G32B32A32_SFloat;
-		targetFormat = uimg::Format::RGBA32;
+		targetFormat = image::Format::RGBA32;
 		break;
 	default:
 		return false;
@@ -289,7 +289,7 @@ bool pragma::util::to_image_buffer(prosper::IImage &image, const ToImageBufferIn
 		for(auto iMipmap = decltype(layerData.mipmaps.size()) {0u}; iMipmap < layerData.mipmaps.size(); ++iMipmap) {
 			auto &mipmapData = layerData.mipmaps.at(iMipmap);
 			auto &mipmapImg = layerImages.at(iMipmap);
-			mipmapImg = uimg::ImageBuffer::Create(mipmapData.extents.width, mipmapData.extents.height, targetFormat);
+			mipmapImg = image::ImageBuffer::Create(mipmapData.extents.width, mipmapData.extents.height, targetFormat);
 			if(buf->Map(mipmapData.bufferOffset, mipmapData.bufferSize, prosper::IBuffer::MapFlags::ReadBit)) {
 				buf->Read(0, mipmapData.bufferSize, mipmapImg->GetData());
 				buf->Unmap();

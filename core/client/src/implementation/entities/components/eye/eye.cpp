@@ -13,23 +13,23 @@ using namespace pragma;
 
 // ComponentEventId CEyeComponent::EVENT_ON_EYEBALLS_UPDATED = INVALID_COMPONENT_ID;
 // ComponentEventId CEyeComponent::EVENT_ON_BLINK = INVALID_COMPONENT_ID;
-void CEyeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void CEyeComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseAnimatedComponent::RegisterEvents(componentManager, registerEvent);
 	// EVENT_ON_EYEBALLS_UPDATED = registerEvent("ON_EYEBALLS_UPDATED",ComponentEventInfo::Type::Explicit);
 	// EVENT_ON_BLINK = registerEvent("EVENT_ON_BLINK");
 }
-void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void CEyeComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = CEyeComponent;
 
 	{
 		auto coordMetaData = pragma::util::make_shared<ents::CoordinateTypeMetaData>();
-		coordMetaData->space = pragma::math::CoordinateSpace::Local;
+		coordMetaData->space = math::CoordinateSpace::Local;
 
 		using TViewTarget = Vector3;
 		auto memberInfo = create_component_member_info<T, TViewTarget, static_cast<void (T::*)(const Vector3 &)>(&T::SetViewTarget), [](const ComponentMemberInfo &, T &c, TViewTarget &value) { value = c.m_viewTarget; }>("viewTarget", Vector3 {});
-		memberInfo.SetFlag(pragma::ComponentMemberFlags::ObjectSpace);
+		memberInfo.SetFlag(ComponentMemberFlags::ObjectSpace);
 		memberInfo.AddTypeMetaData(coordMetaData);
 		registerMember(std::move(memberInfo));
 	}
@@ -56,14 +56,14 @@ void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentMan
 }
 void CEyeComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-CEyeComponent::CEyeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_stateFlags {StateFlags::BlinkingEnabled | StateFlags::PrevBlinkToggle} {}
+CEyeComponent::CEyeComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_stateFlags {StateFlags::BlinkingEnabled | StateFlags::PrevBlinkToggle} {}
 
 void CEyeComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(static_cast<pragma::CEOnModelChanged &>(evData.get()).model); });
-	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { OnModelChanged(static_cast<CEOnModelChanged &>(evData.get()).model); });
+	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT, [this](std::reference_wrapper<ComponentEvent> evData) {
 		auto mdlC = static_cast<CModelComponent *>(GetEntity().GetModelComponent());
 		if(mdlC == nullptr || mdlC->GetLOD() > 0)
 			return;
@@ -87,8 +87,8 @@ void CEyeComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 void CEyeComponent::SetBlinkDuration(float dur) { m_blinkDuration = dur; }
 float CEyeComponent::GetBlinkDuration() const { return m_blinkDuration; }
 
-void CEyeComponent::SetBlinkingEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::BlinkingEnabled, enabled); };
-bool CEyeComponent::IsBlinkingEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::BlinkingEnabled); }
+void CEyeComponent::SetBlinkingEnabled(bool enabled) { math::set_flag(m_stateFlags, StateFlags::BlinkingEnabled, enabled); };
+bool CEyeComponent::IsBlinkingEnabled() const { return math::is_flag_set(m_stateFlags, StateFlags::BlinkingEnabled); }
 
 bool CEyeComponent::FindEyeballIndex(uint32_t skinMatIdx, uint32_t &outEyeballIndex) const
 {
@@ -98,9 +98,9 @@ bool CEyeComponent::FindEyeballIndex(uint32_t skinMatIdx, uint32_t &outEyeballIn
 	outEyeballIndex = it->second;
 	return true;
 }
-bool CEyeComponent::FindEyeballIndex(pragma::geometry::CModelSubMesh &subMesh, uint32_t &outEyeballIndex) const { return FindEyeballIndex(subMesh.GetSkinTextureIndex(), outEyeballIndex); }
+bool CEyeComponent::FindEyeballIndex(geometry::CModelSubMesh &subMesh, uint32_t &outEyeballIndex) const { return FindEyeballIndex(subMesh.GetSkinTextureIndex(), outEyeballIndex); }
 
-void CEyeComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl)
+void CEyeComponent::OnModelChanged(const std::shared_ptr<asset::Model> &mdl)
 {
 	m_eyeballData.clear();
 	m_blinkFlexController = std::numeric_limits<uint32_t>::max();

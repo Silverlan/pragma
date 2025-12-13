@@ -26,8 +26,8 @@ export {
 				EnableFlexControllerUpdateListeners = EnableFlexControllerLimits << 1u,
 			};
 
-			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+			static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			virtual void Initialize() override;
 
 			void SetFlexControllerUpdateListenersEnabled(bool enabled);
@@ -53,16 +53,16 @@ export {
 
 			virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 		  protected:
-			void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model);
+			void OnModelChanged(const std::shared_ptr<asset::Model> &model);
 			virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
-			BaseFlexComponent(pragma::ecs::BaseEntity &ent);
+			BaseFlexComponent(ecs::BaseEntity &ent);
 			float m_flexControllerScale = 1.f;
 			StateFlags m_stateFlags = StateFlags::EnableFlexControllerLimits;
 		};
 		struct DLLNETWORK CEOnFlexControllerChanged : public ComponentEvent {
-			CEOnFlexControllerChanged(pragma::animation::FlexControllerId flexControllerId, float value);
+			CEOnFlexControllerChanged(animation::FlexControllerId flexControllerId, float value);
 			virtual void PushArguments(lua::State *l) override;
-			pragma::animation::FlexControllerId flexControllerId;
+			animation::FlexControllerId flexControllerId;
 			float value;
 		};
 		using namespace pragma::math::scoped_enum::bitwise;

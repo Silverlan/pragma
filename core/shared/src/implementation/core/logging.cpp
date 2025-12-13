@@ -429,7 +429,7 @@ void pragma::detail::initialize_logger(pragma::util::LogSeverity conLogLevel, pr
 	std::vector<spdlog::sink_ptr> sinks {};
 	sinks.push_back(consoleSink);
 	if(logFile.has_value()) {
-		auto fullLogFilePath = pragma::util::FilePath(filemanager::get_program_write_path(), *logFile);
+		auto fullLogFilePath = pragma::util::FilePath(fs::get_program_write_path(), *logFile);
 		auto fileSink = pragma::util::make_shared<spdlog::sinks::basic_file_sink_mt>(fullLogFilePath.GetString(), true);
 		fileSink->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(fileLogLevel)));
 		auto formatter = std::make_unique<spdlog::pattern_formatter>();

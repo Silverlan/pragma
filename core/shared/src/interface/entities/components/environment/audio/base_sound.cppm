@@ -35,7 +35,7 @@ export {
 			};
 
 			using BaseEntityComponent::BaseEntityComponent;
-			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+			static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
 			virtual void InjectStateChange(audio::ALState oldState, audio::ALState newState);
@@ -71,7 +71,7 @@ export {
 			void SetRelativeToListener(bool bRelative);
 			void SetPlayOnSpawn(bool bPlayOnSpawn);
 			void SetLooping(bool bLoop);
-			void SetSoundType(pragma::audio::ALSoundType types);
+			void SetSoundType(audio::ALSoundType types);
 
 			void Play();
 			void Stop();
@@ -94,7 +94,7 @@ export {
 			float m_kvOffset = 0.f;
 			float m_kvReferenceDist = 1.f;
 			float m_kvMaxDist = 1024.f;
-			pragma::audio::ALSoundType m_soundTypes = pragma::audio::ALSoundType::Generic;
+			audio::ALSoundType m_soundTypes = audio::ALSoundType::Generic;
 			std::shared_ptr<audio::ALSound> m_sound;
 		};
 		using namespace pragma::math::scoped_enum::bitwise;

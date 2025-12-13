@@ -27,9 +27,9 @@ export {
 			uint32_t skinId;
 		};
 		struct DLLNETWORK CEOnModelChanged : public ComponentEvent {
-			CEOnModelChanged(const std::shared_ptr<pragma::asset::Model> &model);
+			CEOnModelChanged(const std::shared_ptr<asset::Model> &model);
 			virtual void PushArguments(lua::State *l) override;
-			std::shared_ptr<pragma::asset::Model> model;
+			std::shared_ptr<asset::Model> model;
 		};
 		namespace baseModelComponent {
 			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_MODEL_CHANGED;
@@ -39,8 +39,8 @@ export {
 		}
 		class DLLNETWORK BaseModelComponent : public BaseEntityComponent, public DynamicMemberRegister {
 		  public:
-			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+			static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
@@ -49,20 +49,20 @@ export {
 			Int32 LookupBone(const std::string &name) const;
 			int LookupAnimation(const std::string &name) const;
 			int LookupAttachment(const std::string &name) const;
-			void GetAnimations(pragma::Activity activity, std::vector<unsigned int> &animations) const;
+			void GetAnimations(Activity activity, std::vector<unsigned int> &animations) const;
 			unsigned char GetAnimationActivityWeight(unsigned int animation) const;
-			pragma::Activity GetAnimationActivity(unsigned int animation) const;
+			Activity GetAnimationActivity(unsigned int animation) const;
 			float GetAnimationDuration(unsigned int animation) const;
 			void OnModelMaterialsLoaded();
 			bool HasModelMaterialsLoaded() const;
 			void SetModel(const std::string &mdl);
-			virtual void SetModel(const std::shared_ptr<pragma::asset::Model> &mdl);
-			const std::shared_ptr<pragma::asset::Model> &GetModel() const;
+			virtual void SetModel(const std::shared_ptr<asset::Model> &mdl);
+			const std::shared_ptr<asset::Model> &GetModel() const;
 			std::string GetModelName() const;
 			void SetModelName(const std::string &name);
 			bool HasModel() const;
 			unsigned int GetSkin() const;
-			const std::shared_ptr<pragma::util::UInt32Property> &GetSkinProperty() const;
+			const std::shared_ptr<util::UInt32Property> &GetSkinProperty() const;
 			virtual void SetSkin(unsigned int skin);
 			const std::vector<uint32_t> &GetBodyGroups() const;
 			UInt32 GetBodyGroup(unsigned int groupId) const;
@@ -87,7 +87,7 @@ export {
 			virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 
 			uint32_t GetHitboxCount() const;
-			bool GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max, Vector3 &origin, Quat &rot, pragma::math::CoordinateSpace space = pragma::math::CoordinateSpace::World) const;
+			bool GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max, Vector3 &origin, Quat &rot, math::CoordinateSpace space = math::CoordinateSpace::World) const;
 
 			const BaseBvhComponent *GetBvhComponent() const;
 			BaseBvhComponent *GetBvhComponent();
@@ -97,19 +97,19 @@ export {
 
 			virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 		  protected:
-			BaseModelComponent(pragma::ecs::BaseEntity &ent);
+			BaseModelComponent(ecs::BaseEntity &ent);
 			virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
-			virtual void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model);
+			virtual void OnModelChanged(const std::shared_ptr<asset::Model> &model);
 			virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
-			std::shared_ptr<pragma::asset::Model> m_model = nullptr;
+			std::shared_ptr<asset::Model> m_model = nullptr;
 
 			BaseBvhComponent *m_bvhComponent = nullptr;
 			IntersectionHandlerComponent *m_intersectionHandlerComponent = nullptr;
 			std::vector<unsigned int> m_bodyGroups;
 			std::unique_ptr<std::string> m_modelName = nullptr;
-			std::shared_ptr<pragma::util::UInt32Property> m_skin = nullptr;
-			pragma::NetEventId m_netEvSetBodyGroup = pragma::INVALID_NET_EVENT;
-			pragma::NetEventId m_netEvMaxDrawDist = pragma::INVALID_NET_EVENT;
+			std::shared_ptr<util::UInt32Property> m_skin = nullptr;
+			NetEventId m_netEvSetBodyGroup = INVALID_NET_EVENT;
+			NetEventId m_netEvMaxDrawDist = INVALID_NET_EVENT;
 			CallbackHandle m_onModelMaterialsLoaded = {};
 			float m_maxDrawDistance = 0.f;
 

@@ -11,31 +11,31 @@ export namespace luabind {
 		struct const_ref_policy {
 			template<class T, class Direction>
 			struct specialize {
-				using type = luabind::detail::const_ref_converter;
+				using type = const_ref_converter;
 			};
 		};
 		struct ref_policy {
 			template<class T, class Direction>
 			struct specialize {
-				using type = luabind::detail::ref_converter;
+				using type = ref_converter;
 			};
 		};
 		struct pointer_policy {
 			template<class T, class Direction>
 			struct specialize {
-				using type = luabind::detail::pointer_converter;
+				using type = pointer_converter;
 			};
 		};
 		struct const_pointer_policy {
 			template<class T, class Direction>
 			struct specialize {
-				using type = luabind::detail::const_pointer_converter;
+				using type = const_pointer_converter;
 			};
 		};
 		struct value_policy {
 			template<class T, class Direction>
 			struct specialize {
-				using type = luabind::detail::value_converter;
+				using type = value_converter;
 			};
 		};
 	};

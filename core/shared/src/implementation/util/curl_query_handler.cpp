@@ -39,7 +39,7 @@ pragma::CurlQueryHandler::~CurlQueryHandler()
 		{
 			auto path = f->GetPath();
 			f = nullptr;
-			FileManager::RemoveFile(path.c_str());
+			fs::remove_file(path);
 		}
 	}
 	else
@@ -47,13 +47,13 @@ pragma::CurlQueryHandler::~CurlQueryHandler()
 }
 void pragma::CurlQueryHandler::AddResource(const std::string &url, const std::string &fname, const std::function<void(int64_t, int64_t, int64_t, int64_t)> &progressCallback, const std::function<void(int32_t)> &onComplete)
 {
-	auto f = FileManager::OpenFile<VFilePtrReal>(fname.c_str(), "wb");
+	auto f = fs::open_file<fs::VFilePtrReal>(fname, fs::FileMode::Write | fs::FileMode::Binary);
 	if(f == nullptr)
 		return;
 	m_files.push_back(f);
 	struct FileData {
-		FileData(const VFilePtrReal &f) : file {f} {}
-		VFilePtrReal file;
+		FileData(const fs::VFilePtrReal &f) : file {f} {}
+		fs::VFilePtrReal file;
 	};
 	auto fd = pragma::util::make_shared<FileData>(f);
 	auto *fptr = f.get();
@@ -66,7 +66,7 @@ void pragma::CurlQueryHandler::AddResource(const std::string &url, const std::st
 	  nullptr, progressCallback,
 	  [this, onComplete, fd](int32_t code) {
 		  auto fptr = fd->file.get();
-		  auto it = std::find_if(m_files.begin(), m_files.end(), [fptr](const std::shared_ptr<VFilePtrInternalReal> &fOther) { return (fOther.get() == fptr) ? true : false; });
+		  auto it = std::find_if(m_files.begin(), m_files.end(), [fptr](const std::shared_ptr<fs::VFilePtrInternalReal> &fOther) { return (fOther.get() == fptr) ? true : false; });
 		  if(it != m_files.end())
 			  m_files.erase(it);
 		  fd->file = nullptr;

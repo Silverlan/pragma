@@ -19,8 +19,8 @@ export namespace pragma {
 		virtual void OnEntitySpawn() override;
 	  protected:
 		std::string m_kvNextNode;
-		pragma::util::WeakHandle<BasePointPathNodeComponent> m_nextNode = {};
-		pragma::util::WeakHandle<BasePointPathNodeComponent> m_previousNode = {};
+		util::WeakHandle<BasePointPathNodeComponent> m_nextNode = {};
+		util::WeakHandle<BasePointPathNodeComponent> m_previousNode = {};
 		void SetPreviousNode(BasePointPathNodeComponent *node);
 	};
 };

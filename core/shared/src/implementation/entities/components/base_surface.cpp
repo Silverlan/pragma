@@ -12,13 +12,13 @@ using namespace pragma;
 
 ComponentEventId baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED = INVALID_COMPONENT_ID;
-void BaseSurfaceComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void BaseSurfaceComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED = registerEvent("ON_SURFACE_PLANE_CHANGED", ComponentEventInfo::Type::Broadcast);
 	baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED = registerEvent("ON_SURFACE_MESH_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
-void BaseSurfaceComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void BaseSurfaceComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseSurfaceComponent;
 	{
@@ -49,7 +49,7 @@ void BaseSurfaceComponent::RegisterMembers(pragma::EntityComponentManager &compo
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseSurfaceComponent::BaseSurfaceComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseSurfaceComponent::BaseSurfaceComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseSurfaceComponent::Initialize()
 {
@@ -70,19 +70,19 @@ void BaseSurfaceComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t vers
 	udm["plane"](plane);
 	m_plane = {plane};
 }
-void BaseSurfaceComponent::SetPlane(const pragma::math::Plane &plane)
+void BaseSurfaceComponent::SetPlane(const math::Plane &plane)
 {
 	m_plane = plane;
 	BroadcastEvent(baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED);
 }
-const pragma::math::Plane &BaseSurfaceComponent::GetPlane() const { return m_plane; }
-pragma::math::Plane BaseSurfaceComponent::GetPlaneWs() const
+const math::Plane &BaseSurfaceComponent::GetPlane() const { return m_plane; }
+math::Plane BaseSurfaceComponent::GetPlaneWs() const
 {
 	auto &plane = GetPlane();
 	auto n = plane.GetNormal();
 	auto d = plane.GetDistance();
-	pragma::math::geometry::local_plane_to_world_space(n, d, GetEntity().GetPosition(), GetEntity().GetRotation());
-	return pragma::math::Plane {n, d};
+	math::geometry::local_plane_to_world_space(n, d, GetEntity().GetPosition(), GetEntity().GetRotation());
+	return math::Plane {n, d};
 }
 
 void BaseSurfaceComponent::SetPlane(const Vector3 &n, float d) { SetPlane({n, d}); }
@@ -118,7 +118,7 @@ void BaseSurfaceComponent::Clear()
 	m_mesh = {};
 	SetPlane({{0.f, 1.f, 0.f}, 0.f});
 }
-pragma::geometry::ModelSubMesh *BaseSurfaceComponent::GetMesh() { return m_mesh.lock().get(); }
+geometry::ModelSubMesh *BaseSurfaceComponent::GetMesh() { return m_mesh.lock().get(); }
 Vector3 BaseSurfaceComponent::ProjectToSurface(const Vector3 &pos) const
 {
 	Vector3 n;
@@ -126,22 +126,22 @@ Vector3 BaseSurfaceComponent::ProjectToSurface(const Vector3 &pos) const
 	GetPlaneWs(n, d);
 	return uvec::project_to_plane(pos, n, d);
 }
-std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssignMesh(const std::function<int32_t(pragma::geometry::ModelMesh &, pragma::geometry::ModelSubMesh &, msys::Material &, const std::string &)> &filter)
+std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssignMesh(const std::function<int32_t(geometry::ModelMesh &, geometry::ModelSubMesh &, material::Material &, const std::string &)> &filter)
 {
 	auto &ent = GetEntity();
 	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return {};
-	msys::Material *mat = nullptr;
+	material::Material *mat = nullptr;
 	auto dir = Vector3(0.f, 1.f, 0.f); // TODO
 	auto &mats = hMdl->GetMaterials();
-	std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes;
+	std::vector<std::shared_ptr<geometry::ModelMesh>> meshes;
 	hMdl->GetBodyGroupMeshes({}, 0, meshes);
 	auto minDot = std::numeric_limits<float>::max();
 	uint32_t highestPriority = 0;
 
 	// Find best plane candidate
-	pragma::math::Plane plane;
+	math::Plane plane;
 	std::optional<MeshInfo> meshInfo {};
 	for(auto &mesh : meshes) {
 		for(auto &subMesh : mesh->GetSubMeshes()) {
@@ -152,8 +152,8 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 			if(!hMat)
 				continue;
 			auto shaderName = hMat->GetShaderIdentifier();
-			pragma::string::to_lower(shaderName);
-			pragma::string::substr(shaderName, 0, 5);
+			string::to_lower(shaderName);
+			string::substr(shaderName, 0, 5);
 
 			auto prio = filter ? filter(*mesh, *subMesh, *hMat.get(), shaderName) : 0;
 			if(prio < 0)
@@ -169,8 +169,8 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 			auto &v1 = verts.at(1);
 			auto &v2 = verts.at(2);
 
-			pragma::math::Plane p {v0.position, v1.position, v2.position};
-			auto dot = pragma::math::abs(uvec::dot(dir, p.GetNormal()) - 1.f);
+			math::Plane p {v0.position, v1.position, v2.position};
+			auto dot = math::abs(uvec::dot(dir, p.GetNormal()) - 1.f);
 			if(dot >= minDot)
 				continue;
 			minDot = dot;
@@ -195,14 +195,14 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 	return {};
 }
 
-bool BaseSurfaceComponent::IsPointBelowSurface(const Vector3 &p) const { return pragma::math::geometry::get_side_of_point_to_plane(m_plane.GetNormal(), m_plane.GetDistance(), p) == pragma::math::geometry::PlaneSide::Back; }
+bool BaseSurfaceComponent::IsPointBelowSurface(const Vector3 &p) const { return math::geometry::get_side_of_point_to_plane(m_plane.GetNormal(), m_plane.GetDistance(), p) == math::geometry::PlaneSide::Back; }
 
 Quat BaseSurfaceComponent::GetPlaneRotation() const
 {
 	auto plane = GetPlaneWs();
 	auto up = uvec::UP;
 	auto &n = plane.GetNormal();
-	if(pragma::math::abs(uvec::dot(n, up)) > 0.99f)
+	if(math::abs(uvec::dot(n, up)) > 0.99f)
 		up = uvec::FORWARD;
 	up = up - uvec::project(up, n);
 	uvec::normalize(&up);
@@ -215,10 +215,10 @@ bool BaseSurfaceComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrigin
 	float d;
 	GetPlaneWs(n, d);
 	auto t = 0.f;
-	auto r = pragma::math::intersection::line_plane(lineOrigin, lineDir, n, d, &t);
+	auto r = math::intersection::line_plane(lineOrigin, lineDir, n, d, &t);
 	if(outT != nullptr)
 		*outT = t;
-	return r == pragma::math::intersection::Result::Intersect;
+	return r == math::intersection::Result::Intersect;
 }
 
 /////////////////////////////////

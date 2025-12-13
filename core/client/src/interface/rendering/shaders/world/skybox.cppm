@@ -11,8 +11,8 @@ export import :rendering.shaders.textured;
 export namespace pragma {
 	class DLLCLIENT ShaderSkybox : public ShaderGameWorldLightingPass {
 	  public:
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
+		static ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
+		static VertexAttribute VERTEX_ATTRIBUTE_POSITION;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
@@ -25,12 +25,12 @@ export namespace pragma {
 #pragma pack(pop)
 
 		ShaderSkybox(prosper::IPrContext &context, const std::string &identifier);
-		virtual bool GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const override;
-		virtual ShaderGameWorld::GameShaderType GetPassType() const override { return ShaderGameWorld::GameShaderType::SkyPass; }
+		virtual bool GetRenderBufferTargets(geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const override;
+		virtual GameShaderType GetPassType() const override { return GameShaderType::SkyPass; }
 
 		//
-		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
+		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
+		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const override;
 		virtual bool RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const override;
 		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor, SceneFlags sceneFlags) const override {}
 		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor, const Vector4 &clipPlane) const override {}

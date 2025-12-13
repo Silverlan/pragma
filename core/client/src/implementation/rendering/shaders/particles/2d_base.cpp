@@ -117,11 +117,11 @@ std::optional<uint32_t> ShaderParticle2DBase::RecordBeginDraw(prosper::ShaderBin
 uint32_t ShaderParticle2DBase::GetRenderSettingsDescriptorSetIndex() const { return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex; }
 uint32_t ShaderParticle2DBase::GetCameraDescriptorSetIndex() const { return DESCRIPTOR_SET_SCENE.setIndex; }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticle2DBase::InitializeMaterialDescriptorSet(msys::CMaterial &mat)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticle2DBase::InitializeMaterialDescriptorSet(material::CMaterial &mat)
 {
 	auto *diffuseMap = mat.GetDiffuseMap();
 	if(diffuseMap != nullptr && diffuseMap->texture != nullptr) {
-		auto texture = std::static_pointer_cast<msys::Texture>(diffuseMap->texture);
+		auto texture = std::static_pointer_cast<material::Texture>(diffuseMap->texture);
 		if(texture->HasValidVkTexture()) {
 			auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
 			mat.SetDescriptorSetGroup(*this, descSetGroup);
@@ -163,7 +163,7 @@ void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::IRender
 
 bool ShaderParticle2DBase::ShouldInitializePipeline(uint32_t pipelineIdx) { return ShaderSceneLit::ShouldInitializePipeline(GetBasePipelineIndex(pipelineIdx)); }
 
-void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, pts::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material, float camNearZ,
+void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, pts::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const material::Material *material, float camNearZ,
   float camFarZ) const
 {
 	auto pTrComponent = particle.GetEntity().GetTransformComponent();
@@ -179,8 +179,8 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 		right = uquat::right(rot);
 		auto scale = particle.GetStaticWorldScale() * 0.25f;
 		if(material != nullptr) {
-			nearZ = const_cast<msys::Material *>(material)->GetDiffuseMap()->width * scale; // Width
-			farZ = const_cast<msys::Material *>(material)->GetDiffuseMap()->height * scale; // Height
+			nearZ = const_cast<material::Material *>(material)->GetDiffuseMap()->width * scale; // Width
+			farZ = const_cast<material::Material *>(material)->GetDiffuseMap()->height * scale; // Height
 		}
 	}
 
@@ -197,7 +197,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 	}
 }
 
-void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::ecs::CParticleSystemComponent &particle, pragma::pts::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material,
+void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::ecs::CParticleSystemComponent &particle, pragma::pts::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const material::Material *material,
   const pragma::BaseEnvCameraComponent *cam) const
 {
 	auto camNearZ = 0.f;
@@ -213,7 +213,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 	GetParticleSystemOrientationInfo(matrix, particle, orientationType, up, right, nearZ, farZ, material, camNearZ, camFarZ);
 }
 
-void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::ecs::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const msys::Material *material, const pragma::BaseEnvCameraComponent *cam) const
+void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::ecs::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const material::Material *material, const pragma::BaseEnvCameraComponent *cam) const
 {
 	return GetParticleSystemOrientationInfo(matrix, particle, particle.GetOrientationType(), up, right, nearZ, farZ, material, cam);
 }
@@ -221,7 +221,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 prosper::DescriptorSetInfo &ShaderParticle2DBase::GetAnimationDescriptorSetInfo() const { return DESCRIPTOR_SET_ANIMATION; }
 bool ShaderParticle2DBase::RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const pragma::ecs::CParticleSystemComponent &ps) const
 {
-	auto *mat = static_cast<msys::CMaterial *>(ps.GetMaterial());
+	auto *mat = static_cast<material::CMaterial *>(ps.GetMaterial());
 	if(mat == nullptr)
 		return false;
 	auto descSetGroupMat = mat->GetDescriptorSetGroup(const_cast<ShaderParticle2DBase &>(*this));
@@ -321,9 +321,9 @@ bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, pragm
 		{
 			auto &data = mat->GetDataBlock();
 			auto &dColorFactor = data->GetValue("color_factor");
-			if(dColorFactor != nullptr && typeid(*dColorFactor) == typeid(ds::Vector4))
+			if(dColorFactor != nullptr && typeid(*dColorFactor) == typeid(datasystem::Vector4))
 			{
-				auto &matColorFactor = static_cast<ds::Vector4*>(dColorFactor.get())->GetValue();
+				auto &matColorFactor = static_cast<datasystem::Vector4*>(dColorFactor.get())->GetValue();
 				colorFactor *= matColorFactor;
 			}
 		}

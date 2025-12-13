@@ -44,13 +44,13 @@ export {
 				AlwaysDirty = Disabled << 1u,
 			};
 
-			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-			static std::optional<std::pair<std::string, pragma::util::Path>> ParseComponentChannelPath(const panima::ChannelPath &path);
+			static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static std::optional<std::pair<std::string, util::Path>> ParseComponentChannelPath(const panima::ChannelPath &path);
 
-			PanimaComponent(pragma::ecs::BaseEntity &ent);
+			PanimaComponent(ecs::BaseEntity &ent);
 			void SetPlaybackRate(float rate);
 			float GetPlaybackRate() const;
-			const pragma::util::PFloatProperty &GetPlaybackRateProperty() const;
+			const util::PFloatProperty &GetPlaybackRateProperty() const;
 
 			std::vector<std::shared_ptr<AnimationManagerData>> &GetAnimationManagers() { return m_animationManagers; }
 			const std::vector<std::shared_ptr<AnimationManagerData>> &GetAnimationManagers() const { return const_cast<PanimaComponent *>(this)->GetAnimationManagers(); }
@@ -100,29 +100,29 @@ export {
 			bool UnsetPropertyFlags(const char *propName, PropertyFlags flags);
 			virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 			void UpdateAnimationData(GlobalAnimationChannelQueueProcessor *channelQueueProcessor, AnimationManagerData &amd);
-			bool GetRawAnimatedPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue, const ComponentMemberInfo **optOutMemberInfo, pragma::BaseEntityComponent **optOutComponent) const;
+			bool GetRawAnimatedPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue, const ComponentMemberInfo **optOutMemberInfo, BaseEntityComponent **optOutComponent) const;
 			std::vector<std::shared_ptr<AnimationManagerData>>::iterator FindAnimationManager(const std::string_view &name);
 			AnimationManagerData *FindAnimationManagerData(panima::AnimationManager &manager);
 			void InitializeAnimationChannelValueSubmitters();
 			void InitializeAnimationChannelValueSubmitters(AnimationManagerData &amData);
-			void ResetAnimation(const std::shared_ptr<pragma::asset::Model> &mdl);
-			pragma::util::PFloatProperty m_playbackRate = nullptr;
+			void ResetAnimation(const std::shared_ptr<asset::Model> &mdl);
+			util::PFloatProperty m_playbackRate = nullptr;
 			std::vector<std::shared_ptr<AnimationManagerData>> m_animationManagers;
 			std::unordered_map<const char *, PropertyFlags> m_propertyFlags;
 		};
 
 		struct DLLNETWORK CEAnim2OnAnimationComplete : public ComponentEvent {
-			CEAnim2OnAnimationComplete(const panima::AnimationSet &set, int32_t animation, pragma::Activity activity);
+			CEAnim2OnAnimationComplete(const panima::AnimationSet &set, int32_t animation, Activity activity);
 			virtual void PushArguments(lua::State *l) override;
 			const panima::AnimationSet &set;
 			int32_t animation;
-			pragma::Activity activity;
+			Activity activity;
 		};
 		struct DLLNETWORK CEAnim2HandleAnimationEvent : public ComponentEvent {
-			CEAnim2HandleAnimationEvent(const pragma::AnimationEvent &animationEvent);
+			CEAnim2HandleAnimationEvent(const AnimationEvent &animationEvent);
 			virtual void PushArguments(lua::State *l) override;
 			void PushArgumentVariadic(lua::State *l);
-			const pragma::AnimationEvent &animationEvent;
+			const AnimationEvent &animationEvent;
 		};
 		struct DLLNETWORK CEAnim2OnPlayAnimation : public ComponentEvent {
 			CEAnim2OnPlayAnimation(const panima::AnimationSet &set, panima::AnimationId animation, panima::PlaybackFlags flags);
@@ -132,11 +132,11 @@ export {
 			panima::PlaybackFlags flags;
 		};
 		struct DLLNETWORK CEAnim2OnAnimationStart : public ComponentEvent {
-			CEAnim2OnAnimationStart(const panima::AnimationSet &set, int32_t animation, pragma::Activity activity, panima::PlaybackFlags flags);
+			CEAnim2OnAnimationStart(const panima::AnimationSet &set, int32_t animation, Activity activity, panima::PlaybackFlags flags);
 			virtual void PushArguments(lua::State *l) override;
 			const panima::AnimationSet &set;
 			int32_t animation;
-			pragma::Activity activity;
+			Activity activity;
 			panima::PlaybackFlags flags;
 		};
 		struct DLLNETWORK CEAnim2TranslateAnimation : public ComponentEvent {
@@ -154,11 +154,11 @@ export {
 			double deltaTime;
 		};
 		struct DLLNETWORK CEAnim2InitializeChannelValueSubmitter : public ComponentEvent {
-			CEAnim2InitializeChannelValueSubmitter(pragma::util::Path &path);
+			CEAnim2InitializeChannelValueSubmitter(util::Path &path);
 			virtual void PushArguments(lua::State *l) override;
 			virtual uint32_t GetReturnCount() override;
 			virtual void HandleReturnValues(lua::State *l) override;
-			pragma::util::Path &path;
+			util::Path &path;
 			panima::ChannelValueSubmitter submitter {};
 		};
 		using namespace pragma::math::scoped_enum::bitwise;

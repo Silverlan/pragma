@@ -11,8 +11,8 @@ export import :rendering.shaders.scene;
 export namespace pragma {
 	class DLLCLIENT ShaderDebug : public ShaderScene {
 	  public:
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
+		static VertexBinding VERTEX_BINDING_VERTEX;
+		static VertexAttribute VERTEX_ATTRIBUTE_POSITION;
 
 #pragma pack(push, 1)
 		struct PushConstants {
@@ -60,8 +60,8 @@ export namespace pragma {
 
 	class DLLCLIENT ShaderDebugTexture : public ShaderScene {
 	  public:
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
+		static VertexBinding VERTEX_BINDING_VERTEX;
+		static VertexAttribute VERTEX_ATTRIBUTE_POSITION;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 
@@ -81,8 +81,8 @@ export namespace pragma {
 	  public:
 		ShaderDebugVertexColor(prosper::IPrContext &context, const std::string &identifier);
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_COLOR;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_COLOR;
+		static VertexBinding VERTEX_BINDING_COLOR;
+		static VertexAttribute VERTEX_ATTRIBUTE_COLOR;
 
 		bool RecordDraw(prosper::ShaderBindState &bindState, prosper::IBuffer &vertexBuffer, prosper::IBuffer &colorBuffer, uint32_t vertexCount, const Mat4 &modelMatrix = umat::identity()) const;
 	  protected:

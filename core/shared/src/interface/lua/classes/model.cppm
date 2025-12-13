@@ -103,8 +103,8 @@ export namespace Lua {
 		DLLNETWORK void SetCollisionBounds(lua::State *l, pragma::asset::Model &mdl, const Vector3 &min, const Vector3 &max);
 		DLLNETWORK void SetRenderBounds(lua::State *l, pragma::asset::Model &mdl, const Vector3 &min, const Vector3 &max);
 		DLLNETWORK void AddCollisionMesh(lua::State *l, pragma::asset::Model &mdl, pragma::physics::CollisionMesh &colMesh);
-		DLLNETWORK void AddMaterial(lua::State *l, pragma::asset::Model &mdl, uint32_t textureGroup, msys::Material *mat);
-		DLLNETWORK void SetMaterial(lua::State *l, pragma::asset::Model &mdl, uint32_t matId, msys::Material *mat);
+		DLLNETWORK void AddMaterial(lua::State *l, pragma::asset::Model &mdl, uint32_t textureGroup, pragma::material::Material *mat);
+		DLLNETWORK void SetMaterial(lua::State *l, pragma::asset::Model &mdl, uint32_t matId, pragma::material::Material *mat);
 		DLLNETWORK void GetMaterials(lua::State *l, pragma::asset::Model &mdl);
 		DLLNETWORK void GetMaterialCount(lua::State *l, pragma::asset::Model &mdl);
 		DLLNETWORK void GetMeshGroupCount(lua::State *l, pragma::asset::Model &mdl);

@@ -29,7 +29,7 @@ ComponentEventId cRendererComponent::EVENT_GET_HDR_PRESENTATION_TEXTURE = INVALI
 ComponentEventId cRendererComponent::EVENT_RECORD_COMMAND_BUFFERS = INVALID_COMPONENT_ID;
 ComponentEventId cRendererComponent::EVENT_RENDER = INVALID_COMPONENT_ID;
 ComponentEventId cRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED = INVALID_COMPONENT_ID;
-void CRendererComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void CRendererComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	cRendererComponent::EVENT_RELOAD_RENDER_TARGET = registerEvent("EVENT_RELOAD_RENDER_TARGET", ComponentEventInfo::Type::Explicit);
 	cRendererComponent::EVENT_RELOAD_BLOOM_RENDER_TARGET = registerEvent("EVENT_RELOAD_BLOOM_RENDER_TARGET", ComponentEventInfo::Type::Explicit);
@@ -66,51 +66,51 @@ void CRendererComponent::UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryC
 	InvokeEventCallbacks(cRendererComponent::EVENT_UPDATE_RENDERER_BUFFER, evData);
 }
 
-void CRendererComponent::UpdateCameraData(pragma::CSceneComponent &scene, pragma::CameraData &cameraData)
+void CRendererComponent::UpdateCameraData(CSceneComponent &scene, CameraData &cameraData)
 {
-	pragma::CEUpdateCameraData evData {scene, cameraData};
+	CEUpdateCameraData evData {scene, cameraData};
 	InvokeEventCallbacks(cRendererComponent::EVENT_UPDATE_CAMERA_DATA, evData);
 }
 
-void CRendererComponent::RecordCommandBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void CRendererComponent::RecordCommandBuffers(const rendering::DrawSceneInfo &drawSceneInfo)
 {
-	pragma::CEDrawSceneInfo evData {drawSceneInfo};
+	CEDrawSceneInfo evData {drawSceneInfo};
 	InvokeEventCallbacks(cRendererComponent::EVENT_RECORD_COMMAND_BUFFERS, evData);
 }
-void CRendererComponent::Render(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void CRendererComponent::Render(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	BeginRendering(drawSceneInfo);
-	pragma::CERender evData {drawSceneInfo};
+	CERender evData {drawSceneInfo};
 	InvokeEventCallbacks(cRendererComponent::EVENT_RENDER, evData);
 	EndRendering();
 }
 
 prosper::Texture *CRendererComponent::GetSceneTexture()
 {
-	pragma::CEGetSceneTexture evData {};
+	CEGetSceneTexture evData {};
 	InvokeEventCallbacks(cRendererComponent::EVENT_GET_SCENE_TEXTURE, evData);
 	return evData.resultTexture;
 }
 prosper::Texture *CRendererComponent::GetPresentationTexture()
 {
-	pragma::CEGetPresentationTexture evData {};
+	CEGetPresentationTexture evData {};
 	InvokeEventCallbacks(cRendererComponent::EVENT_GET_PRESENTATION_TEXTURE, evData);
 	return evData.resultTexture;
 }
 prosper::Texture *CRendererComponent::GetHDRPresentationTexture()
 {
-	pragma::CEGetHdrPresentationTexture evData {};
+	CEGetHdrPresentationTexture evData {};
 	InvokeEventCallbacks(cRendererComponent::EVENT_GET_HDR_PRESENTATION_TEXTURE, evData);
 	return evData.resultTexture;
 }
 
-bool CRendererComponent::ReloadRenderTarget(pragma::CSceneComponent &scene, uint32_t width, uint32_t height)
+bool CRendererComponent::ReloadRenderTarget(CSceneComponent &scene, uint32_t width, uint32_t height)
 {
 	auto oldWidth = m_width;
 	auto oldHeight = m_height;
 	m_width = width;
 	m_height = height;
-	pragma::CEReloadRenderTarget evData {scene, width, height};
+	CEReloadRenderTarget evData {scene, width, height};
 	InvokeEventCallbacks(cRendererComponent::EVENT_RELOAD_RENDER_TARGET, evData);
 	if(!evData.resultSuccess) {
 		m_width = oldWidth;
@@ -123,14 +123,14 @@ bool CRendererComponent::ReloadRenderTarget(pragma::CSceneComponent &scene, uint
 
 bool CRendererComponent::ReloadBloomRenderTarget(uint32_t width)
 {
-	pragma::CEReloadBloomRenderTarget evData {width};
+	CEReloadBloomRenderTarget evData {width};
 	InvokeEventCallbacks(cRendererComponent::EVENT_RELOAD_BLOOM_RENDER_TARGET, evData);
 	return evData.resultSuccess;
 }
 
-CallbackHandle CRendererComponent::AddPostProcessingEffect(const std::string &name, const std::function<void(const pragma::rendering::DrawSceneInfo &)> &render, uint32_t weight, const std::function<PostProcessingEffectData::Flags()> &fGetFlags)
+CallbackHandle CRendererComponent::AddPostProcessingEffect(const std::string &name, const std::function<void(const rendering::DrawSceneInfo &)> &render, uint32_t weight, const std::function<PostProcessingEffectData::Flags()> &fGetFlags)
 {
-	auto cb = FunctionCallback<void, const pragma::rendering::DrawSceneInfo &>::Create(render);
+	auto cb = FunctionCallback<void, const rendering::DrawSceneInfo &>::Create(render);
 	PostProcessingEffectData effectData {};
 	effectData.name = name;
 	effectData.render = cb;
@@ -158,15 +158,15 @@ void CRendererComponent::RemovePostProcessingEffect(const std::string &name)
 const std::vector<PostProcessingEffectData> &CRendererComponent::GetPostProcessingEffects() const { return m_postProcessingEffects; }
 
 void CRendererComponent::EndRendering() { InvokeEventCallbacks(cRendererComponent::EVENT_END_RENDERING); }
-void CRendererComponent::BeginRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void CRendererComponent::BeginRendering(const rendering::DrawSceneInfo &drawSceneInfo)
 {
-	const_cast<pragma::CSceneComponent *>(drawSceneInfo.scene.get())->UpdateBuffers(drawSceneInfo.commandBuffer);
+	const_cast<CSceneComponent *>(drawSceneInfo.scene.get())->UpdateBuffers(drawSceneInfo.commandBuffer);
 	InvokeEventCallbacks(cRendererComponent::EVENT_BEGIN_RENDERING);
 }
 
 ////////////
 
-CEReloadRenderTarget::CEReloadRenderTarget(pragma::CSceneComponent &scene, uint32_t width, uint32_t height) : ComponentEvent {}, scene {scene}, width {width}, height {height} {}
+CEReloadRenderTarget::CEReloadRenderTarget(CSceneComponent &scene, uint32_t width, uint32_t height) : ComponentEvent {}, scene {scene}, width {width}, height {height} {}
 
 void CEReloadRenderTarget::PushArguments(lua::State *l)
 {
@@ -183,8 +183,8 @@ void CEReloadRenderTarget::HandleReturnValues(lua::State *l)
 
 ////////////
 
-CEBeginRendering::CEBeginRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo) : ComponentEvent {}, drawSceneInfo {drawSceneInfo} {}
-void CEBeginRendering::PushArguments(lua::State *l) { Lua::Push<const pragma::rendering::DrawSceneInfo *>(l, &drawSceneInfo); }
+CEBeginRendering::CEBeginRendering(const rendering::DrawSceneInfo &drawSceneInfo) : ComponentEvent {}, drawSceneInfo {drawSceneInfo} {}
+void CEBeginRendering::PushArguments(lua::State *l) { Lua::Push<const rendering::DrawSceneInfo *>(l, &drawSceneInfo); }
 
 ////////////
 
@@ -198,7 +198,7 @@ void CEReloadBloomRenderTarget::HandleReturnValues(lua::State *l)
 
 ////////////
 
-CEUpdateCameraData::CEUpdateCameraData(pragma::CSceneComponent &scene, pragma::CameraData &cameraData) : scene {scene}, cameraData {cameraData} {}
+CEUpdateCameraData::CEUpdateCameraData(CSceneComponent &scene, CameraData &cameraData) : scene {scene}, cameraData {cameraData} {}
 
 ////////////
 
@@ -210,8 +210,8 @@ void CEGetSceneTexture::HandleReturnValues(lua::State *l)
 
 ////////////
 
-CERender::CERender(const pragma::rendering::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
-void CERender::PushArguments(lua::State *l) { Lua::Push<const pragma::rendering::DrawSceneInfo *>(l, &drawSceneInfo); }
+CERender::CERender(const rendering::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
+void CERender::PushArguments(lua::State *l) { Lua::Push<const rendering::DrawSceneInfo *>(l, &drawSceneInfo); }
 
 ////////////
 

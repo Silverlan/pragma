@@ -55,7 +55,7 @@ export {
 		template<typename U>
 		LuaShaderRecordTarget default_converter<LuaShaderRecordTarget>::to_cpp(lua::State *L, U u, int index)
 		{
-			return LuaShaderRecordTarget {luabind::object {luabind::from_stack(L, index)}};
+			return LuaShaderRecordTarget {object {from_stack(L, index)}};
 		}
 
 		template<class U>
@@ -184,17 +184,17 @@ export {
 			DLLCLIENT void GetSourceFilePath(lua::State *l, prosper::Shader &shader, uint32_t shaderStage);
 			DLLCLIENT void GetSourceFilePaths(lua::State *l, prosper::Shader &shader);
 			DLLCLIENT void RecordPushConstants(lua::State *l, prosper::Shader &shader, const LuaShaderRecordTarget &recordTarget, pragma::util::DataStream &ds, uint32_t offset);
-			DLLCLIENT void RecordPushConstants(lua::State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, ::udm::Type type, const Lua::Vulkan::PreparedCommandLuaArg &value, uint32_t offset);
-			DLLCLIENT void RecordBindDescriptorSet(lua::State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex = {});
-			DLLCLIENT void RecordBindDescriptorSet(lua::State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex = {});
+			DLLCLIENT void RecordPushConstants(lua::State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, ::udm::Type type, const Vulkan::PreparedCommandLuaArg &value, uint32_t offset);
+			DLLCLIENT void RecordBindDescriptorSet(lua::State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex = {});
+			DLLCLIENT void RecordBindDescriptorSet(lua::State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex = {});
 			DLLCLIENT void RecordBindDescriptorSets(lua::State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, luabind::object descSets, uint32_t firstSet, luabind::object dynamicOffsets);
 			DLLCLIENT void AttachPushConstantRange(lua::State *l, pragma::LuaShaderWrapperBase &shader, uint32_t offset, uint32_t size, uint32_t shaderStages);
 			DLLCLIENT uint32_t AttachDescriptorSetInfo(lua::State *l, pragma::LuaShaderWrapperBase &shader, pragma::LuaDescriptorSetInfo &descSetInfo);
 
 			namespace Graphics {
-				DLLCLIENT void RecordBindVertexBuffer(lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::Buffer &buffer, uint32_t startBinding, uint32_t offset);
+				DLLCLIENT void RecordBindVertexBuffer(lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Vulkan::Buffer &buffer, uint32_t startBinding, uint32_t offset);
 				DLLCLIENT void RecordBindVertexBuffers(lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, luabind::object buffers, uint32_t startBinding, luabind::object offsets);
-				DLLCLIENT void RecordBindIndexBuffer(lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::Buffer &indexBuffer, uint32_t indexType, uint32_t offset);
+				DLLCLIENT void RecordBindIndexBuffer(lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Vulkan::Buffer &indexBuffer, uint32_t indexType, uint32_t offset);
 				DLLCLIENT void RecordDraw(lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t vertCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
 				DLLCLIENT void RecordDrawIndexed(lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t firstInstance);
 				DLLCLIENT void RecordBeginDraw(lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t pipelineIdx);

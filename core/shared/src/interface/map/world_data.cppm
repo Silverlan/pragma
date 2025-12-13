@@ -32,25 +32,25 @@ export {
 
 			using Edge = std::array<uint16_t, 2>; // Vertex indices
 
-			static std::shared_ptr<WorldData> Create(pragma::NetworkState &nw);
+			static std::shared_ptr<WorldData> Create(NetworkState &nw);
 			static std::string GetLightmapAtlasTexturePath(const std::string &mapName);
 
-			static std::shared_ptr<WorldData> load(pragma::NetworkState &nw, const std::string &fileName, std::string &outErr, EntityData::Flags entMask = EntityData::Flags::None);
-			static std::shared_ptr<WorldData> load_from_udm_data(pragma::NetworkState &nw, udm::LinkedPropertyWrapper &prop, std::string &outErr, EntityData::Flags entMask = EntityData::Flags::None);
+			static std::shared_ptr<WorldData> load(NetworkState &nw, const std::string &fileName, std::string &outErr, EntityData::Flags entMask = EntityData::Flags::None);
+			static std::shared_ptr<WorldData> load_from_udm_data(NetworkState &nw, udm::LinkedPropertyWrapper &prop, std::string &outErr, EntityData::Flags entMask = EntityData::Flags::None);
 			static const std::vector<std::string> &get_supported_extensions();
 
 			bool Write(const std::string &fileName, std::string *optOutErrMsg = nullptr);
-			void Write(VFilePtrReal &f);
-			bool Read(VFilePtr &f, EntityData::Flags entMask = EntityData::Flags::None, std::string *optOutErrMsg = nullptr);
+			void Write(fs::VFilePtrReal &f);
+			bool Read(fs::VFilePtr &f, EntityData::Flags entMask = EntityData::Flags::None, std::string *optOutErrMsg = nullptr);
 			void AddEntity(EntityData &ent, bool isWorld = false);
 			EntityData *FindWorld();
-			void SetBSPTree(pragma::util::BSPTree &bspTree);
-			pragma::util::BSPTree *GetBSPTree();
+			void SetBSPTree(util::BSPTree &bspTree);
+			util::BSPTree *GetBSPTree();
 			std::vector<std::vector<WorldModelMeshIndex>> &GetClusterMeshIndices() { return m_meshesPerCluster; }
 			std::vector<uint16_t> &GetStaticPropLeaves();
 			NetworkState &GetNetworkState() const;
 
-			void SetLightMapAtlas(uimg::ImageBuffer &imgAtlas);
+			void SetLightMapAtlas(image::ImageBuffer &imgAtlas);
 			void SetLightMapEnabled(bool enabled);
 			bool IsLegacyLightMapEnabled() const;
 
@@ -72,21 +72,21 @@ export {
 			bool Save(const std::string &fileName, const std::string &mapName, std::string &outErr);
 			bool LoadFromAssetData(udm::AssetDataArg data, EntityData::Flags entMask, std::string &outErr);
 		  private:
-			WorldData(pragma::NetworkState &nw);
-			void WriteDataOffset(VFilePtrReal &f, uint64_t offsetToOffset);
-			void WriteMaterials(VFilePtrReal &f);
-			void WriteBSPTree(VFilePtrReal &f);
+			WorldData(NetworkState &nw);
+			void WriteDataOffset(fs::VFilePtrReal &f, uint64_t offsetToOffset);
+			void WriteMaterials(fs::VFilePtrReal &f);
+			void WriteBSPTree(fs::VFilePtrReal &f);
 			bool SaveLightmapAtlas(const std::string &mapName);
-			void WriteEntities(VFilePtrReal &f);
+			void WriteEntities(fs::VFilePtrReal &f);
 
 			bool LoadFromAssetData(udm::LinkedPropertyWrapper &prop, EntityData::Flags entMask, std::string &outErr);
-			std::vector<msys::MaterialHandle> ReadMaterials(VFilePtr &f);
-			void ReadBSPTree(VFilePtr &f, uint32_t version);
-			void ReadEntities(VFilePtr &f, const std::vector<msys::MaterialHandle> &materials, EntityData::Flags entMask);
+			std::vector<material::MaterialHandle> ReadMaterials(fs::VFilePtr &f);
+			void ReadBSPTree(fs::VFilePtr &f, uint32_t version);
+			void ReadEntities(fs::VFilePtr &f, const std::vector<material::MaterialHandle> &materials, EntityData::Flags entMask);
 
 			NetworkState &m_nw;
 			std::vector<std::vector<WorldModelMeshIndex>> m_meshesPerCluster;
-			std::shared_ptr<uimg::ImageBuffer> m_lightMapAtlas = nullptr;
+			std::shared_ptr<image::ImageBuffer> m_lightMapAtlas = nullptr;
 			bool m_lightMapAtlasEnabled = false;
 			float m_lightMapIntensity = 1.f;
 			float m_lightMapExposure = 0.f;
@@ -94,7 +94,7 @@ export {
 			std::vector<std::shared_ptr<EntityData>> m_entities {};
 			std::vector<std::string> m_materialTable {};
 			std::function<void(const std::string &)> m_messageLogger = nullptr;
-			std::shared_ptr<pragma::util::BSPTree> m_bspTree = nullptr;
+			std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
 			udm::Version m_version = PMAP_VERSION;
 
 			bool m_useLegacyLightmapDefinition = false;

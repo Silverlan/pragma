@@ -20,21 +20,21 @@ export {
 			uint32_t rotationChannel = INVALID_CHANNEL;
 			uint32_t scaleChannel = INVALID_CHANNEL;
 		};
-		using BoneChannelMap = std::unordered_map<pragma::animation::BoneId, AnimBoneChannelDesc>;
+		using BoneChannelMap = std::unordered_map<BoneId, AnimBoneChannelDesc>;
 
-		pragma::util::EnumRegister &get_activity_enum_register();
-		pragma::Activity get_activity(const panima::Animation &anim);
-		void set_activity(panima::Animation &anim, pragma::Activity act);
+		util::EnumRegister &get_activity_enum_register();
+		Activity get_activity(const panima::Animation &anim);
+		void set_activity(panima::Animation &anim, Activity act);
 		uint8_t get_activity_weight(const panima::Animation &anim);
 		void set_activity_weight(panima::Animation &anim, uint8_t weight);
 
 		std::pair<Vector3, Vector3> get_render_bounds(const panima::Animation &anim);
 		void set_render_bounds(panima::Animation &anim, const Vector3 &min, const Vector3 &max);
 
-		BoneChannelMap get_bone_channel_map(const panima::Animation &animation, const pragma::animation::Skeleton &skeleton);
-		void animation_slice_to_animated_pose(const BoneChannelMap &boneChannelMap, const panima::Slice &slice, pragma::animation::Pose &pose);
+		BoneChannelMap get_bone_channel_map(const panima::Animation &animation, const Skeleton &skeleton);
+		void animation_slice_to_animated_pose(const BoneChannelMap &boneChannelMap, const panima::Slice &slice, Pose &pose);
 
-		void interpolate_animated_poses(const pragma::animation::Pose &pose0, const pragma::animation::Pose &pose1, pragma::animation::Pose &poseDst, float f);
+		void interpolate_animated_poses(const Pose &pose0, const Pose &pose1, Pose &poseDst, float f);
 
 		bool is_bone_position_channel(const panima::Channel &channel);
 		bool is_bone_rotation_channel(const panima::Channel &channel);

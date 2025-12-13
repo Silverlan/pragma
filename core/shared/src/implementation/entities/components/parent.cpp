@@ -8,16 +8,16 @@ import :entities.components.parent;
 
 using namespace pragma;
 
-ComponentEventId parentComponent::EVENT_ON_CHILD_ADDED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId parentComponent::EVENT_ON_CHILD_REMOVED = pragma::INVALID_COMPONENT_ID;
-void ParentComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+ComponentEventId parentComponent::EVENT_ON_CHILD_ADDED = INVALID_COMPONENT_ID;
+ComponentEventId parentComponent::EVENT_ON_CHILD_REMOVED = INVALID_COMPONENT_ID;
+void ParentComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	parentComponent::EVENT_ON_CHILD_ADDED = registerEvent("ON_CHILD_ADDED", ComponentEventInfo::Type::Broadcast);
 	parentComponent::EVENT_ON_CHILD_REMOVED = registerEvent("ON_CHILD_REMOVED", ComponentEventInfo::Type::Broadcast);
 }
-ParentComponent::ParentComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+ParentComponent::ParentComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ParentComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void ParentComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ParentComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ParentComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
@@ -27,8 +27,8 @@ void ParentComponent::OnRemove()
 		hChild->GetEntity().Remove();
 	}
 }
-const std::vector<pragma::util::TWeakSharedHandle<BaseChildComponent>> &ParentComponent::GetChildren() const { return const_cast<ParentComponent *>(this)->GetChildren(); }
-std::vector<pragma::util::TWeakSharedHandle<BaseChildComponent>> &ParentComponent::GetChildren() { return m_children; }
+const std::vector<util::TWeakSharedHandle<BaseChildComponent>> &ParentComponent::GetChildren() const { return const_cast<ParentComponent *>(this)->GetChildren(); }
+std::vector<util::TWeakSharedHandle<BaseChildComponent>> &ParentComponent::GetChildren() { return m_children; }
 void ParentComponent::RemoveChild(BaseChildComponent &child)
 {
 	auto it = std::find_if(m_children.begin(), m_children.end(), [&child](const ComponentHandle<BaseChildComponent> &component) { return &child == component.get(); });

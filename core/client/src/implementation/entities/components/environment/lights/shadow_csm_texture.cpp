@@ -15,7 +15,7 @@ using namespace pragma;
 
 CShadowCSMComponent::TextureSet::TextureSet() {}
 
-static auto cvDynamicShadows = pragma::console::get_client_con_var("cl_render_shadow_dynamic");
+static auto cvDynamicShadows = console::get_client_con_var("cl_render_shadow_dynamic");
 
 void CShadowCSMComponent::DestroyTextures()
 {
@@ -29,14 +29,14 @@ void CShadowCSMComponent::InitializeDepthTextures(uint32_t size)
 	auto format = prosper::Format::D32_SFloat;
 	auto layerCount = m_layerCount;
 	for(auto i = decltype(m_textureSets.size()) {0}; i < m_textureSets.size(); ++i) {
-		auto rp = static_cast<pragma::rendering::ShadowMapType>(i);
-		if(rp == pragma::rendering::ShadowMapType::Dynamic && bDynamic == false)
+		auto rp = static_cast<rendering::ShadowMapType>(i);
+		if(rp == rendering::ShadowMapType::Dynamic && bDynamic == false)
 			continue;
 		InitializeTextureSet(m_textureSets.at(i), rp);
 	}
 }
 
-static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
+static auto cvShadowmapSize = console::get_client_con_var("cl_render_shadow_resolution");
 void CShadowCSMComponent::ReloadDepthTextures()
 {
 	for(auto &t : m_textureSets)
@@ -53,32 +53,32 @@ void CShadowCSMComponent::ReloadDepthTextures()
 	auto size = cvShadowmapSize->GetInt();
 	if(size > 0)
 		InitializeDepthTextures(size);
-	InitializeTextureSet(m_pendingInfo.staticTextureSet, pragma::rendering::ShadowMapType::Static);
+	InitializeTextureSet(m_pendingInfo.staticTextureSet, rendering::ShadowMapType::Static);
 }
 
 void CShadowCSMComponent::FreeRenderTarget() {}
 
-prosper::IRenderPass *CShadowCSMComponent::GetRenderPass(pragma::rendering::ShadowMapType smType) const
+prosper::IRenderPass *CShadowCSMComponent::GetRenderPass(rendering::ShadowMapType smType) const
 {
-	auto &set = m_textureSets.at(pragma::math::to_integral(smType));
+	auto &set = m_textureSets.at(math::to_integral(smType));
 	return set.renderTarget ? &set.renderTarget->GetRenderPass() : nullptr;
 }
-prosper::Texture *CShadowCSMComponent::GetDepthTexture(pragma::rendering::ShadowMapType rp) const
+prosper::Texture *CShadowCSMComponent::GetDepthTexture(rendering::ShadowMapType rp) const
 {
-	auto &set = m_textureSets.at(pragma::math::to_integral(rp));
+	auto &set = m_textureSets.at(math::to_integral(rp));
 	return set.renderTarget ? &set.renderTarget->GetTexture() : nullptr;
 }
-prosper::Texture *CShadowCSMComponent::GetDepthTexture() const { return GetDepthTexture(pragma::rendering::ShadowMapType::Dynamic); }
-const std::shared_ptr<prosper::RenderTarget> &CShadowCSMComponent::GetRenderTarget(pragma::rendering::ShadowMapType smType) const { return m_textureSets.at(pragma::math::to_integral(smType)).renderTarget; }
+prosper::Texture *CShadowCSMComponent::GetDepthTexture() const { return GetDepthTexture(rendering::ShadowMapType::Dynamic); }
+const std::shared_ptr<prosper::RenderTarget> &CShadowCSMComponent::GetRenderTarget(rendering::ShadowMapType smType) const { return m_textureSets.at(math::to_integral(smType)).renderTarget; }
 const std::shared_ptr<prosper::RenderTarget> &CShadowCSMComponent::GetStaticPendingRenderTarget() const { return m_pendingInfo.staticTextureSet.renderTarget; }
 const Mat4 &CShadowCSMComponent::GetStaticPendingViewProjectionMatrix(uint32_t layer) const { return m_pendingInfo.prevVpMatrices[layer]; }
 
-std::shared_ptr<prosper::IFramebuffer> CShadowCSMComponent::GetFramebuffer(pragma::rendering::ShadowMapType smType, uint32_t layer) const
+std::shared_ptr<prosper::IFramebuffer> CShadowCSMComponent::GetFramebuffer(rendering::ShadowMapType smType, uint32_t layer) const
 {
-	auto &set = m_textureSets.at(pragma::math::to_integral(smType));
+	auto &set = m_textureSets.at(math::to_integral(smType));
 	auto *fb = set.renderTarget->GetFramebuffer(layer);
 	assert(fb != nullptr);
 	return fb ? fb->shared_from_this() : nullptr;
 }
 
-bool CShadowCSMComponent::IsDynamicValid() const { return (GetDepthTexture(pragma::rendering::ShadowMapType::Dynamic) != nullptr) ? true : false; }
+bool CShadowCSMComponent::IsDynamicValid() const { return (GetDepthTexture(rendering::ShadowMapType::Dynamic) != nullptr) ? true : false; }

@@ -9,7 +9,7 @@ export module pragma.client:rendering.shader_graph.node_vector_transform;
 export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
-	class DLLCLIENT VectorTransformNode : public pragma::shadergraph::Node {
+	class DLLCLIENT VectorTransformNode : public shadergraph::Node {
 	  public:
 		enum class Type : uint8_t {
 			Vector = 0,
@@ -32,6 +32,6 @@ export namespace pragma::rendering::shader_graph {
 
 		VectorTransformNode(const std::string_view &type);
 
-		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
+		virtual std::string DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const override;
 	};
 };

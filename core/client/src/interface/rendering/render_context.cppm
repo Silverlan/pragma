@@ -31,10 +31,10 @@ namespace pragma::rendering {
 		prosper::IPrContext &GetRenderContext();
 		prosper::ShaderManager &GetShaderManager() const;
 		void RegisterShader(const std::string &identifier, const std::function<prosper::Shader *(prosper::IPrContext &, const std::string &)> &fFactory);
-		pragma::util::WeakHandle<prosper::Shader> GetShader(const std::string &identifier) const;
+		util::WeakHandle<prosper::Shader> GetShader(const std::string &identifier) const;
 
 		prosper::Window &GetWindow();
-		pragma::platform::Window &GetGlfwWindow();
+		platform::Window &GetGlfwWindow();
 		const std::shared_ptr<prosper::IPrimaryCommandBuffer> &GetSetupCommandBuffer();
 		const std::shared_ptr<prosper::IPrimaryCommandBuffer> &GetDrawCommandBuffer() const;
 		const std::shared_ptr<prosper::IPrimaryCommandBuffer> &GetDrawCommandBuffer(uint32_t swapchainIdx) const;
@@ -64,8 +64,8 @@ namespace pragma::rendering {
 		std::shared_ptr<prosper::IPrContext> m_renderContext = nullptr;
 		std::unordered_set<std::string> m_disabledValidationErrors;
 		StateFlags m_stateFlags = StateFlags::None;
-		std::shared_ptr<pragma::util::Library> m_graphicsAPILib = nullptr;
-		std::unique_ptr<pragma::platform::Monitor> m_monitor = nullptr;
+		std::shared_ptr<util::Library> m_graphicsAPILib = nullptr;
+		std::unique_ptr<platform::Monitor> m_monitor = nullptr;
 		std::string m_renderAPI;
 	};
 	using namespace pragma::math::scoped_enum::bitwise;

@@ -11,7 +11,7 @@ import :debug;
 export namespace pragma {
 	class DLLCLIENT CDebugHitboxComponent final : public BaseEntityComponent {
 	  public:
-		CDebugHitboxComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CDebugHitboxComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual ~CDebugHitboxComponent() override;
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;

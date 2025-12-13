@@ -19,17 +19,17 @@ void CEnvSoundProbeComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "spacing", false))
-			m_spacing = pragma::util::to_float(kvData.value);
+			m_spacing = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "height_above_floor", false))
-			m_heightAboveFloor = pragma::util::to_float(kvData.value);
+			m_heightAboveFloor = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "radius", false))
-			m_radius = pragma::util::to_float(kvData.value);
+			m_radius = util::to_float(kvData.value);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 }
 void CEnvSoundProbeComponent::OnEntitySpawn()
@@ -56,8 +56,8 @@ void CEnvSoundProbeComponent::OnEntitySpawn()
 		pPhysComponent->GetCollisionBounds(&min, &max);
 	s_probes.push_back({origin + min, origin + max, Placement::UniformFloor, m_spacing, m_heightAboveFloor});
 	if(s_probeCallback.IsValid() == false) {
-		s_probeCallback = pragma::get_client_state()->AddCallback("EndGame", FunctionCallback<void, pragma::CGame *>::Create([](pragma::CGame *game) {
-			CEnvSoundProbeComponent::ClearProbes();
+		s_probeCallback = get_client_state()->AddCallback("EndGame", FunctionCallback<void, CGame *>::Create([](CGame *game) {
+			ClearProbes();
 			s_probeCallback.Remove();
 		}));
 	}

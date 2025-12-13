@@ -12,13 +12,13 @@ void BasePointPathNodeComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "next_node", false))
 			m_kvNextNode = kvData.value;
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 }
 
@@ -27,7 +27,7 @@ void BasePointPathNodeComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 	if(!m_kvNextNode.empty()) {
 		auto componentId = GetComponentId();
-		pragma::ecs::EntityIterator entIterator {*GetEntity().GetNetworkState()->GetGameState()};
+		ecs::EntityIterator entIterator {*GetEntity().GetNetworkState()->GetGameState()};
 		entIterator.AttachFilter<EntityIteratorFilterComponent>(componentId);
 		entIterator.AttachFilter<EntityIteratorFilterEntity>(m_kvNextNode);
 

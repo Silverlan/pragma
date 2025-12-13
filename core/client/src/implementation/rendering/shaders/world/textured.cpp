@@ -141,7 +141,7 @@ std::optional<uint32_t> ShaderGameWorldLightingPass::FindPipelineIndex(rendering
 		return 0; // We only have 1 pipeline if validation mode is enabled
 	return ShaderSpecializationManager::FindSpecializationPipelineIndex(passType, GetStaticSpecializationConstantFlags(specialization) | specializationFlags);
 }
-static std::optional<Vector3> get_emission_factor(msys::CMaterial &mat)
+static std::optional<Vector3> get_emission_factor(material::CMaterial &mat)
 {
 	Vector3 emissionFactor;
 	if(!mat.GetProperty("emission_factor", &emissionFactor))
@@ -153,19 +153,19 @@ static std::optional<Vector3> get_emission_factor(msys::CMaterial &mat)
 }
 void ShaderGameWorldLightingPass::SetShaderMaterialName(const std::optional<std::string> &shaderMaterial) { m_shaderMaterialName = shaderMaterial; }
 const std::optional<std::string> &ShaderGameWorldLightingPass::GetShaderMaterialName() const { return m_shaderMaterialName; }
-GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetMaterialPipelineSpecializationRequirements(msys::CMaterial &mat) const
+GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetMaterialPipelineSpecializationRequirements(material::CMaterial &mat) const
 {
 	auto flags = GameShaderSpecializationConstantFlag::None;
-	auto hasEmission = (mat.GetTextureInfo(msys::material::EMISSION_MAP_IDENTIFIER) != nullptr);
+	auto hasEmission = (mat.GetTextureInfo(material::ematerial::EMISSION_MAP_IDENTIFIER) != nullptr);
 	if(!hasEmission) {
-		if(mat.GetPropertyValueType("emission_factor") != ds::ValueType::Invalid)
+		if(mat.GetPropertyValueType("emission_factor") != datasystem::ValueType::Invalid)
 			hasEmission = get_emission_factor(mat).has_value();
 	}
 	if(mat.GetAlphaMode() != AlphaMode::Opaque)
 		flags |= GameShaderSpecializationConstantFlag::EnableTranslucencyBit;
 	auto *rmaMap = mat.GetRMAMap();
 	if(rmaMap) {
-		auto texture = std::static_pointer_cast<msys::Texture>(rmaMap->texture);
+		auto texture = std::static_pointer_cast<material::Texture>(rmaMap->texture);
 		if(texture) {
 			auto texName = texture->GetName();
 			pragma::string::to_lower(texName);
@@ -306,9 +306,9 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableDynamicShadows, static_cast<uint32_t>(shaderSettings.dynamicShadowsEnabled));
 }
 
-std::shared_ptr<msys::Texture> ShaderGameWorldLightingPass::GetTexture(const std::string &texName, bool load)
+std::shared_ptr<material::Texture> ShaderGameWorldLightingPass::GetTexture(const std::string &texName, bool load)
 {
-	auto &matManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
+	auto &matManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 	auto *asset = texManager.FindCachedAsset(texName);
 	if(load && !asset) {
@@ -317,14 +317,14 @@ std::shared_ptr<msys::Texture> ShaderGameWorldLightingPass::GetTexture(const std
 	}
 	if(!asset)
 		return nullptr;
-	auto ptrTex = msys::TextureManager::GetAssetObject(*asset);
+	auto ptrTex = material::TextureManager::GetAssetObject(*asset);
 	if(ptrTex == nullptr)
 		return nullptr;
-	return std::static_pointer_cast<msys::Texture>(ptrTex);
+	return std::static_pointer_cast<material::Texture>(ptrTex);
 }
 
 static auto cvNormalMappingEnabled = pragma::console::get_client_con_var("render_normalmapping_enabled");
-void ShaderGameWorldLightingPass::ApplyMaterialFlags(msys::CMaterial &mat, rendering::shader_material::MaterialFlags &outFlags) const {}
+void ShaderGameWorldLightingPass::ApplyMaterialFlags(material::CMaterial &mat, rendering::shader_material::MaterialFlags &outFlags) const {}
 void ShaderGameWorldLightingPass::UpdateRenderFlags(pragma::geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags) {}
 bool ShaderGameWorldLightingPass::IsDepthPrepassEnabled() const { return m_depthPrepassEnabled; }
 uint32_t ShaderGameWorldLightingPass::GetCameraDescriptorSetIndex() const { return DESCRIPTOR_SET_SCENE.setIndex; }
@@ -341,7 +341,7 @@ bool ShaderGameWorldLightingPass::GetRenderBufferTargets(pragma::geometry::CMode
 	outOffsets.push_back(0ull);
 	return true;
 }
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(msys::CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(material::CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo)
 {
 	if(!m_shaderMaterial)
 		return nullptr;
@@ -353,10 +353,10 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::Initi
 	uint32_t isrgb = 0;
 	for(auto &shaderTexInfo : m_shaderMaterial->textures) {
 		std::shared_ptr<prosper::Texture> tex {};
-		std::shared_ptr<msys::Texture> texData {};
+		std::shared_ptr<material::Texture> texData {};
 		auto *texInfo = mat.GetTextureInfo(shaderTexInfo.name);
 		if(texInfo != nullptr && texInfo->texture != nullptr) {
-			texData = std::static_pointer_cast<msys::Texture>(texInfo->texture);
+			texData = std::static_pointer_cast<material::Texture>(texInfo->texture);
 			if(texData && texData->HasValidVkTexture())
 				tex = texData->GetVkTexture();
 		}
@@ -446,7 +446,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::Initi
 
 	return descSetGroup;
 }
-bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, msys::CMaterial &mat, const pragma::rendering::ShaderInputData &matData, uint32_t bindingIdx)
+bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, material::CMaterial &mat, const pragma::rendering::ShaderInputData &matData, uint32_t bindingIdx)
 {
 	auto settingsBuffer = mat.GetSettingsBuffer() ? mat.GetSettingsBuffer()->shared_from_this() : nullptr;
 	if(settingsBuffer == nullptr && g_materialSettingsBuffer)
@@ -457,9 +457,9 @@ bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorS
 	mat.SetSettingsBuffer(*settingsBuffer);
 	return settingsBuffer->Write(0, matData.data.size(), matData.data.data());
 }
-void ShaderGameWorldLightingPass::InitializeMaterialData(const msys::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData) {}
-bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, msys::CMaterial &mat, const pragma::rendering::ShaderInputData &matData) { return InitializeMaterialBuffer(descSet, mat, matData, pragma::math::to_integral(MaterialBinding::MaterialSettings)); }
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(msys::CMaterial &mat) { return InitializeMaterialDescriptorSet(mat, GetMaterialDescriptorSetInfo()); }
+void ShaderGameWorldLightingPass::InitializeMaterialData(const material::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData) {}
+bool ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, material::CMaterial &mat, const pragma::rendering::ShaderInputData &matData) { return InitializeMaterialBuffer(descSet, mat, matData, pragma::math::to_integral(MaterialBinding::MaterialSettings)); }
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(material::CMaterial &mat) { return InitializeMaterialDescriptorSet(mat, GetMaterialDescriptorSetInfo()); }
 
 ////////
 
@@ -554,7 +554,7 @@ std::optional<uint32_t> ShaderSpecializationManager::FindSpecializationPipelineI
 	return (pipelineIdx != std::numeric_limits<uint32_t>::max()) ? pipelineIdx : std::optional<uint32_t> {};
 }
 
-static void print_shader_material_data(msys::CMaterial &mat)
+static void print_shader_material_data(material::CMaterial &mat)
 {
 	auto *shader = dynamic_cast<ShaderGameWorldLightingPass *>(mat.GetPrimaryShader());
 	if(!shader) {
@@ -591,7 +591,7 @@ static void debug_print_shader_material_data(pragma::NetworkState *state, pragma
 		Con::cwar << "Failed to load material '" << matName << "'!" << Con::endl;
 		return;
 	}
-	print_shader_material_data(static_cast<msys::CMaterial &>(*mat));
+	print_shader_material_data(static_cast<material::CMaterial &>(*mat));
 }
 namespace {
 	auto UVN = pragma::console::client::register_command("debug_print_shader_material_data", &debug_print_shader_material_data, pragma::console::ConVarFlags::None, "Prints the shader material data for the specified material.");

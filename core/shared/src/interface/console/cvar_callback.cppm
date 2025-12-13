@@ -17,8 +17,8 @@ export namespace pragma::console {
 	  public:
 		CvarCallback();
 		CvarCallback(LuaFunction fc);
-		CvarCallback(const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, const void *, const void *)> &f);
-		void SetFunction(const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, const void *, const void *)> &f);
+		CvarCallback(const std::function<void(NetworkState *, const ConVar &, const void *, const void *)> &f);
+		void SetFunction(const std::function<void(NetworkState *, const ConVar &, const void *, const void *)> &f);
 	  private:
 		bool m_isLuaCallback = false;
 		CallbackHandle m_callbackHandle;

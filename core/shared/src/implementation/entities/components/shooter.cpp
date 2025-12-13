@@ -11,12 +11,12 @@ using namespace pragma::ecs;
 pragma::ComponentEventId baseShooterComponent::EVENT_ON_FIRE_BULLETS = INVALID_COMPONENT_ID;
 pragma::ComponentEventId baseShooterComponent::EVENT_ON_BULLETS_FIRED = INVALID_COMPONENT_ID;
 using namespace baseShooterComponent;
-void BaseShooterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void BaseShooterComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseShooterComponent::EVENT_ON_FIRE_BULLETS = registerEvent("ON_FIRE_BULLETS", ComponentEventInfo::Type::Broadcast);
 	baseShooterComponent::EVENT_ON_BULLETS_FIRED = registerEvent("ON_BULLETS_FIRED", ComponentEventInfo::Type::Broadcast);
 }
-BaseShooterComponent::BaseShooterComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseShooterComponent::BaseShooterComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseShooterComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -26,7 +26,7 @@ void BaseShooterComponent::Initialize()
 	ent.AddComponent("transform");
 }
 
-void BaseShooterComponent::ReceiveBulletEvent(NetPacket &packet, pragma::BasePlayerComponent *pl)
+void BaseShooterComponent::ReceiveBulletEvent(NetPacket &packet, BasePlayerComponent *pl)
 {
 	m_nextBullet = std::unique_ptr<NextBulletInfo>(new NextBulletInfo);
 	auto numBullets = packet->Read<uint32_t>();
@@ -42,7 +42,7 @@ std::vector<Vector3> BaseShooterComponent::GetBulletDestinations(const Vector3 &
 	std::vector<Vector3> destPositions;
 	destPositions.reserve(bulletInfo.bulletCount);
 	for(auto i = decltype(bulletInfo.bulletCount) {0}; i < bulletInfo.bulletCount; ++i) {
-		auto randSpread = EulerAngles(pragma::math::random(-bulletInfo.spread.p, bulletInfo.spread.p), pragma::math::random(-bulletInfo.spread.y, bulletInfo.spread.y), 0);
+		auto randSpread = EulerAngles(math::random(-bulletInfo.spread.p, bulletInfo.spread.p), math::random(-bulletInfo.spread.y, bulletInfo.spread.y), 0);
 		auto bulletDir = dir;
 		uvec::rotate(&bulletDir, randSpread);
 
@@ -65,31 +65,31 @@ void BaseShooterComponent::OnFireBullets(const game::BulletInfo &bulletInfo, Vec
 	BroadcastEvent(baseShooterComponent::EVENT_ON_FIRE_BULLETS, evData);
 }
 
-pragma::physics::RayCastHitType BaseShooterComponent::OnBulletHit(const game::BulletInfo &bulletInfo, const pragma::physics::TraceData &data, pragma::physics::PhysObj &phys, physics::ICollisionObject &col) { return pragma::physics::RayCastHitType::Block; }
+pragma::physics::RayCastHitType BaseShooterComponent::OnBulletHit(const game::BulletInfo &bulletInfo, const physics::TraceData &data, physics::PhysObj &phys, physics::ICollisionObject &col) { return physics::RayCastHitType::Block; }
 
-void BaseShooterComponent::GetBulletTraceData(const game::BulletInfo &bulletInfo, pragma::physics::TraceData &data) const
+void BaseShooterComponent::GetBulletTraceData(const game::BulletInfo &bulletInfo, physics::TraceData &data) const
 {
 	auto *attacker = bulletInfo.hAttacker.get();
 	auto *inflictor = bulletInfo.hInflictor.get();
 	auto *entSrc = (attacker != nullptr) ? attacker : (inflictor != nullptr) ? inflictor : &GetEntity();
-	data.SetCollisionFilterMask(pragma::physics::CollisionMask::AllHitbox & ~pragma::physics::CollisionMask::Trigger); // Let everything pass (Except specific filters below)
-	data.SetFilter([this, &data, attacker, inflictor, &bulletInfo](pragma::physics::IShape &shape, pragma::physics::IRigidBody &body) -> pragma::physics::RayCastHitType {
+	data.SetCollisionFilterMask(physics::CollisionMask::AllHitbox & ~physics::CollisionMask::Trigger); // Let everything pass (Except specific filters below)
+	data.SetFilter([this, &data, attacker, inflictor, &bulletInfo](physics::IShape &shape, physics::IRigidBody &body) -> physics::RayCastHitType {
 		auto *phys = body.GetPhysObj();
 		auto *ent = phys ? phys->GetOwner() : nullptr;
 		if(ent == nullptr || &ent->GetEntity() == &GetEntity() || &ent->GetEntity() == attacker || &ent->GetEntity() == inflictor) // Attacker can't shoot themselves or the inflictor
-			return pragma::physics::RayCastHitType::None;
+			return physics::RayCastHitType::None;
 		auto filterGroup = phys->GetCollisionFilter();
 		auto mdlComponent = ent->GetEntity().GetModelComponent();
-		if(mdlComponent && mdlComponent->GetHitboxCount() > 0 && (filterGroup & pragma::physics::CollisionMask::NPC) != pragma::physics::CollisionMask::None
-		  || (filterGroup & pragma::physics::CollisionMask::Player) != pragma::physics::CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
-			return pragma::physics::RayCastHitType::None;
+		if(mdlComponent && mdlComponent->GetHitboxCount() > 0 && (filterGroup & physics::CollisionMask::NPC) != physics::CollisionMask::None
+		  || (filterGroup & physics::CollisionMask::Player) != physics::CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
+			return physics::RayCastHitType::None;
 		return const_cast<BaseShooterComponent *>(this)->OnBulletHit(bulletInfo, data, *phys, body);
 	});
 	auto physComponent = GetEntity().GetPhysicsComponent();
-	auto filterGroup = pragma::physics::CollisionMask::None;
+	auto filterGroup = physics::CollisionMask::None;
 	if(physComponent)
 		filterGroup = physComponent->GetCollisionFilter();
-	filterGroup |= pragma::physics::CollisionMask::Water | pragma::physics::CollisionMask::WaterSurface | pragma::physics::CollisionMask::PlayerHitbox | pragma::physics::CollisionMask::NPCHitbox;
+	filterGroup |= physics::CollisionMask::Water | physics::CollisionMask::WaterSurface | physics::CollisionMask::PlayerHitbox | physics::CollisionMask::NPCHitbox;
 	data.SetCollisionFilterGroup(filterGroup);
 }
 
@@ -119,7 +119,7 @@ void events::CEOnFireBullets::HandleReturnValues(lua::State *l)
 
 //////////////
 
-events::CEOnBulletsFired::CEOnBulletsFired(const game::BulletInfo &bulletInfo, const std::vector<pragma::physics::TraceResult> &hitTargets) : bulletInfo {bulletInfo}, hitTargets {hitTargets} {}
+events::CEOnBulletsFired::CEOnBulletsFired(const game::BulletInfo &bulletInfo, const std::vector<physics::TraceResult> &hitTargets) : bulletInfo {bulletInfo}, hitTargets {hitTargets} {}
 void events::CEOnBulletsFired::PushArguments(lua::State *l)
 {
 	Lua::Push<game::BulletInfo *>(l, &const_cast<game::BulletInfo &>(bulletInfo));
@@ -127,7 +127,7 @@ void events::CEOnBulletsFired::PushArguments(lua::State *l)
 	auto t = Lua::CreateTable(l);
 	for(auto i = decltype(hitTargets.size()) {0}; i < hitTargets.size(); ++i) {
 		Lua::PushInt(l, i + 1);
-		Lua::Push<pragma::physics::TraceResult *>(l, const_cast<pragma::physics::TraceResult *>(&hitTargets.at(i)));
+		Lua::Push<physics::TraceResult *>(l, const_cast<physics::TraceResult *>(&hitTargets.at(i)));
 		Lua::SetTableValue(l, t);
 	}
 }

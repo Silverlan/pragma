@@ -10,7 +10,7 @@ using namespace pragma;
 
 void CFieldAngleComponent::ReceiveData(NetPacket &packet) { SetFieldAngle(packet->Read<float>()); }
 void CFieldAngleComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-Bool CFieldAngleComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CFieldAngleComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetFieldAngle)
 		SetFieldAngle(packet->Read<float>());

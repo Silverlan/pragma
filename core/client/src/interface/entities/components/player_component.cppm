@@ -16,7 +16,7 @@ export namespace pragma {
 	  public:
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
-		CPlayerComponent(pragma::ecs::BaseEntity &ent);
+		CPlayerComponent(ecs::BaseEntity &ent);
 		virtual ~CPlayerComponent() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua::State *l) override;
@@ -31,11 +31,11 @@ export namespace pragma {
 		virtual void OnCrouch() override;
 		virtual void OnUnCrouch() override;
 		virtual void SetLocalPlayer(bool b) override;
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		bool IsInFirstPersonMode() const;
 
 		virtual void ApplyViewRotationOffset(const EulerAngles &ang, float dur = 0.5f) override;
-		virtual void PrintMessage(std::string message, pragma::console::MESSAGE type) override;
+		virtual void PrintMessage(std::string message, console::MESSAGE type) override;
 
 		void UpdateViewModelTransform();
 		void UpdateViewFOV();
@@ -43,15 +43,15 @@ export namespace pragma {
 		CallbackHandle m_cbCalcOrientationView = {};
 		std::unique_ptr<math::DeltaOffset> m_crouchViewOffset = nullptr;
 		std::unique_ptr<math::DeltaTransform> m_upDirOffset = nullptr;
-		std::shared_ptr<pragma::audio::ALSound> m_sndUnderwater = nullptr;
+		std::shared_ptr<audio::ALSound> m_sndUnderwater = nullptr;
 		EntityHandle m_cbUnderwaterDsp = {};
 		void OnWaterSubmerged();
 		void OnWaterEmerged();
 		void OnUpdateMatrices(Mat4 &transformMatrix);
-		void OnDeployWeapon(pragma::ecs::BaseEntity &ent);
-		void OnSetActiveWeapon(pragma::ecs::BaseEntity *ent);
+		void OnDeployWeapon(ecs::BaseEntity &ent);
+		void OnSetActiveWeapon(ecs::BaseEntity *ent);
 		void OnSetUpDirection(const Vector3 &direction);
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 		void OnSetCharacterOrientation(const Vector3 &up);
 		bool ShouldDraw() const;
 		bool ShouldDrawShadow() const;

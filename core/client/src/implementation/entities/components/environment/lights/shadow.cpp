@@ -15,7 +15,7 @@ import :rendering.render_queue_instancer;
 
 using namespace pragma;
 
-CShadowComponent::CShadowComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent} {}
+CShadowComponent::CShadowComponent(ecs::BaseEntity &ent) : BaseEntityComponent {ent} {}
 
 void CShadowComponent::Initialize()
 {
@@ -28,20 +28,20 @@ void CShadowComponent::Initialize()
 
 static void reload_all_shadow_maps()
 {
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
+	ecs::EntityIterator entIt {*get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CShadowComponent>>();
 	for(auto *ent : entIt) {
-		auto shadowC = ent->GetComponent<pragma::CShadowComponent>();
+		auto shadowC = ent->GetComponent<CShadowComponent>();
 		shadowC->ReloadDepthTextures();
 	}
 }
 
-static void cmd_render_shadow_quality(pragma::NetworkState *, const pragma::console::ConVar &, int, int quality)
+static void cmd_render_shadow_quality(NetworkState *, const console::ConVar &, int, int quality)
 {
 	reload_all_shadow_maps();
-	auto *client = pragma::get_client_state();
+	auto *client = get_client_state();
 	if(client == nullptr)
 		return;
 	client->UpdateGameWorldShaderSettings();
@@ -51,7 +51,7 @@ namespace {
 }
 
 namespace {
-	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_shadow_dynamic", +[](pragma::NetworkState *, const pragma::console::ConVar &, bool, bool) { reload_all_shadow_maps(); });
+	auto UVN = pragma::console::client::register_variable_listener<bool>("cl_render_shadow_dynamic", +[](NetworkState *, const console::ConVar &, bool, bool) { reload_all_shadow_maps(); });
 }
 
 prosper::IDescriptorSet *CShadowComponent::GetDescriptorSet()
@@ -95,12 +95,12 @@ void CShadowComponent::InitializeLuaObject(lua::State *l) { return BaseEntityCom
 LightShadowRenderer &CShadowComponent::GetRenderer() { return *m_lightShadowRenderer; }
 const LightShadowRenderer &CShadowComponent::GetRenderer() const { return const_cast<CShadowComponent *>(this)->GetRenderer(); }
 
-static auto cvShadowmapSize = pragma::console::get_client_con_var("cl_render_shadow_resolution");
-static auto cvShadowQuality = pragma::console::get_client_con_var("render_shadow_quality");
+static auto cvShadowmapSize = console::get_client_con_var("cl_render_shadow_resolution");
+static auto cvShadowQuality = console::get_client_con_var("render_shadow_quality");
 void CShadowComponent::ReloadDepthTextures()
 {
 	//Scene::ClearLightCache();
-	volatile pragma::util::ScopeGuard sg {[this]() {
+	volatile util::ScopeGuard sg {[this]() {
 		if(m_onTexturesReloaded == nullptr)
 			return;
 		m_onTexturesReloaded();
@@ -124,7 +124,7 @@ std::weak_ptr<CShadowManagerComponent::RenderTarget> CShadowComponent::RequestRe
 	auto *shadowManager = CShadowManagerComponent::GetShadowManager();
 	if(shadowManager == nullptr)
 		return std::weak_ptr<CShadowManagerComponent::RenderTarget> {};
-	auto priority = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
+	auto priority = get_cengine()->GetRenderContext().GetLastFrameId();
 	if(m_hRt.valid()) {
 		// We'll keep our current render target; Just update the priority
 		shadowManager->UpdatePriority(*m_hRt->lock(), priority);
@@ -132,7 +132,7 @@ std::weak_ptr<CShadowManagerComponent::RenderTarget> CShadowComponent::RequestRe
 	}
 	GetRenderer().SetRenderState(LightShadowRenderer::RenderState::RenderRequired);
 	SetDirty(true);
-	m_hRt = shadowManager->RequestRenderTarget((GetType() == CShadowComponent::Type::Cube) ? CShadowManagerComponent::Type::Cube : CShadowManagerComponent::Type::Generic, cvShadowmapSize->GetInt(), priority);
+	m_hRt = shadowManager->RequestRenderTarget((GetType() == Type::Cube) ? CShadowManagerComponent::Type::Cube : CShadowManagerComponent::Type::Generic, cvShadowmapSize->GetInt(), priority);
 	return m_hRt.valid() ? *m_hRt : std::weak_ptr<CShadowManagerComponent::RenderTarget> {};
 }
 void CShadowComponent::FreeRenderTarget() { DestroyTextures(); }
@@ -167,7 +167,7 @@ bool CShadowComponent::HasRenderTarget() const { return m_hRt.valid(); }
 
 bool CShadowComponent::ShouldUpdateLayer(uint32_t) const { return true; }
 
-void CShadowComponent::RenderShadows(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void CShadowComponent::RenderShadows(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_lightShadowRenderer == nullptr)
 		return;
@@ -178,14 +178,14 @@ void CShadowComponent::RenderShadows(const pragma::rendering::DrawSceneInfo &dra
 
 LightShadowRenderer::LightShadowRenderer(CLightComponent &l) : m_hLight {l.GetHandle<CLightComponent>()}
 {
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(l.GetEntity());
-	m_cbPreRenderScenes = pragma::get_cgame()->AddCallback("PreRenderScenes", FunctionCallback<void>::Create([this]() {
+	auto &ent = static_cast<ecs::CBaseEntity &>(l.GetEntity());
+	m_cbPreRenderScenes = get_cgame()->AddCallback("PreRenderScenes", FunctionCallback<void>::Create([this]() {
 		m_requiresRenderQueueUpdate = true;
 		m_renderState = RenderState::RenderRequiredOnChange;
 		for(auto &renderQueue : m_renderQueues)
 			renderQueue->Clear();
 	}));
-	m_cbOnSceneFlagsChanged = m_hLight->BindEventUnhandled(cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED, [this, &ent](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateSceneCallbacks(); });
+	m_cbOnSceneFlagsChanged = m_hLight->BindEventUnhandled(cBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED, [this, &ent](std::reference_wrapper<ComponentEvent> evData) { UpdateSceneCallbacks(); });
 	// TODO: Render shadows AFTER prepass and BEFORE lighting pass
 	UpdateSceneCallbacks();
 }
@@ -235,21 +235,21 @@ void LightShadowRenderer::UpdateSceneCallbacks()
 #endif
 }
 
-static auto cvLodBias = pragma::console::get_client_con_var("cl_render_shadow_lod_bias");
-static auto cvInstancingEnabled = pragma::console::get_client_con_var("render_instancing_enabled");
-void LightShadowRenderer::BuildRenderQueues(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+static auto cvLodBias = console::get_client_con_var("cl_render_shadow_lod_bias");
+static auto cvInstancingEnabled = console::get_client_con_var("render_instancing_enabled");
+void LightShadowRenderer::BuildRenderQueues(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_hLight.expired())
 		return;
 	auto &light = *m_hLight;
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(light.GetEntity());
+	auto &ent = static_cast<ecs::CBaseEntity &>(light.GetEntity());
 	auto &scene = *drawSceneInfo.scene;
-	auto shadowC = m_hLight->GetShadowComponent<pragma::CShadowComponent>();
+	auto shadowC = m_hLight->GetShadowComponent<CShadowComponent>();
 	if(m_requiresRenderQueueUpdate == false || ent.IsInScene(scene) == false || shadowC == nullptr)
 		return;
 
-	auto *renderer = drawSceneInfo.scene->GetRenderer<pragma::CRendererComponent>();
-	auto hRasterizer = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
+	auto *renderer = drawSceneInfo.scene->GetRenderer<CRendererComponent>();
+	auto hRasterizer = renderer ? renderer->GetEntity().GetComponent<CRasterizationRendererComponent>() : pragma::ComponentHandle<CRasterizationRendererComponent> {};
 	if(hRasterizer.expired())
 		return;
 	auto *rasterizer = hRasterizer.get();
@@ -265,10 +265,10 @@ void LightShadowRenderer::BuildRenderQueues(const pragma::rendering::DrawSceneIn
 		renderQueue->Lock();
 	}
 
-	auto renderMask = drawSceneInfo.GetRenderMask(*pragma::get_cgame());
+	auto renderMask = drawSceneInfo.GetRenderMask(*get_cgame());
 	// TODO: Use separate shadow queue builder thread
 	auto lodBias = cvLodBias->GetInt();
-	pragma::get_cgame()->GetRenderQueueBuilder().Append(
+	get_cgame()->GetRenderQueueBuilder().Append(
 	  [this, &drawSceneInfo, rasterizer, &scene, &light, &ent, lodBias, renderMask]() {
 		  for(auto &renderQueue : m_renderQueues)
 			  renderQueue->instanceSets.clear();
@@ -283,39 +283,39 @@ void LightShadowRenderer::BuildRenderQueues(const pragma::rendering::DrawSceneIn
 			  auto lightSpotC = ent.GetComponent<CLightSpotComponent>();
 			  if(lightSpotC.valid()) {
 				  auto coneDir = ent.GetForward();
-				  auto coneAngle = pragma::math::deg_to_rad(lightSpotC->GetOuterConeAngle() / 2.f);
+				  auto coneAngle = math::deg_to_rad(lightSpotC->GetOuterConeAngle() / 2.f);
 				  fShouldCull = [&lightOrigin, lightRadius, coneDir, coneAngle](const Vector3 &min, const Vector3 &max) -> bool {
-					  if(pragma::math::intersection::aabb_sphere(min, max, lightOrigin, lightRadius) == false)
+					  if(math::intersection::aabb_sphere(min, max, lightOrigin, lightRadius) == false)
 						  return true;
 					  auto center = (min + max) / 2.f;
 					  auto extents = (max - min) / 2.f;
 					  auto radius = uvec::length(extents);
-					  return !pragma::math::intersection::sphere_cone(center, radius, lightOrigin, coneDir, coneAngle, lightRadius); // TODO: Frustum culling might be more efficient?
+					  return !math::intersection::sphere_cone(center, radius, lightOrigin, coneDir, coneAngle, lightRadius); // TODO: Frustum culling might be more efficient?
 				  };
 			  }
 			  else
-				  fShouldCull = [&lightOrigin, lightRadius](const Vector3 &min, const Vector3 &max) -> bool { return !pragma::math::intersection::aabb_sphere(min, max, lightOrigin, lightRadius); };
+				  fShouldCull = [&lightOrigin, lightRadius](const Vector3 &min, const Vector3 &max) -> bool { return !math::intersection::aabb_sphere(min, max, lightOrigin, lightRadius); };
 
 			  auto &posCam = hCam->GetEntity().GetPosition();
 			  auto vp = hCam->GetProjectionMatrix() * hCam->GetViewMatrix();
-			  std::vector<pragma::util::BSPTree::Node *> bspLeafNodes;
-			  pragma::ecs::EntityIterator entItWorld {*pragma::get_cgame()};
-			  entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
+			  std::vector<util::BSPTree::Node *> bspLeafNodes;
+			  ecs::EntityIterator entItWorld {*get_cgame()};
+			  entItWorld.AttachFilter<TEntityIteratorFilterComponent<CWorldComponent>>();
 			  bspLeafNodes.reserve(entItWorld.GetCount());
 			  for(auto *entWorld : entItWorld) {
 				  if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<ecs::CBaseEntity *>(entWorld), scene, drawSceneInfo.renderFlags, renderMask) == false)
 					  continue;
-				  auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
+				  auto worldC = entWorld->GetComponent<CWorldComponent>();
 				  auto &bspTree = worldC->GetBSPTree();
 				  auto *node = bspTree ? bspTree->FindLeafNode(posCam) : nullptr;
 				  if(node == nullptr)
 					  continue;
 				  bspLeafNodes.push_back(node);
 
-				  if(pragma::math::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::Static) == false)
+				  if(math::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::Static) == false)
 					  continue;
 
-				  auto *renderC = static_cast<pragma::ecs::CBaseEntity &>(worldC->GetEntity()).GetRenderComponent();
+				  auto *renderC = static_cast<ecs::CBaseEntity &>(worldC->GetEntity()).GetRenderComponent();
 				  if(renderC->ShouldDrawShadow() == false)
 					  continue;
 				  renderC->UpdateRenderDataMT(scene, *hCam, vp);
@@ -341,23 +341,23 @@ void LightShadowRenderer::BuildRenderQueues(const pragma::rendering::DrawSceneIn
 				  }
 			  }
 
-			  auto fGetRenderQueue = [&mainRenderQueue](pragma::rendering::SceneRenderPass renderMode, bool translucent) -> pragma::rendering::RenderQueue * { return (renderMode == pragma::rendering::SceneRenderPass::World) ? mainRenderQueue.get() : nullptr; };
-			  for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling()) {
-				  if(SceneRenderDesc::ShouldConsiderEntity(static_cast<pragma::ecs::CBaseEntity &>(pRenderComponent->GetEntity()), scene, drawSceneInfo.renderFlags, renderMask) == false || pRenderComponent->ShouldDrawShadow() == false)
+			  auto fGetRenderQueue = [&mainRenderQueue](rendering::SceneRenderPass renderMode, bool translucent) -> rendering::RenderQueue * { return (renderMode == rendering::SceneRenderPass::World) ? mainRenderQueue.get() : nullptr; };
+			  for(auto *pRenderComponent : CRenderComponent::GetEntitiesExemptFromOcclusionCulling()) {
+				  if(SceneRenderDesc::ShouldConsiderEntity(static_cast<ecs::CBaseEntity &>(pRenderComponent->GetEntity()), scene, drawSceneInfo.renderFlags, renderMask) == false || pRenderComponent->ShouldDrawShadow() == false)
 					  continue;
 				  SceneRenderDesc::AddRenderMeshesToRenderQueue(rasterizer, drawSceneInfo.renderFlags, *pRenderComponent, fGetRenderQueue, scene, *hCam, vp, nullptr);
 			  }
 
-			  auto *culler = scene.FindOcclusionCuller<pragma::COcclusionCullerComponent>();
+			  auto *culler = scene.FindOcclusionCuller<COcclusionCullerComponent>();
 			  if(culler) {
 				  auto &dynOctree = culler->GetOcclusionOctree();
 				  SceneRenderDesc::CollectRenderMeshesFromOctree(rasterizer, drawSceneInfo.renderFlags, drawSceneInfo.clipPlane.has_value(), dynOctree, scene, *hCam, vp, renderMask, fGetRenderQueue, fShouldCull, nullptr, nullptr, lodBias,
-				    [](ecs::CBaseEntity &ent, const pragma::CSceneComponent &, rendering::RenderFlags) -> bool { return ent.GetRenderComponent()->ShouldDrawShadow(); });
+				    [](ecs::CBaseEntity &ent, const CSceneComponent &, rendering::RenderFlags) -> bool { return ent.GetRenderComponent()->ShouldDrawShadow(); });
 			  }
 		  }
 	  },
 	  [this, &drawSceneInfo, &ent]() {
-		  pragma::get_cgame()->GetRenderQueueWorkerManager().WaitForCompletion();
+		  get_cgame()->GetRenderQueueWorkerManager().WaitForCompletion();
 		  // Sorting is technically not necessary, we only use it to lower the number of material state changes (for translucent meshes)
 		  auto &mainRenderQueue = m_renderQueues.front();
 		  mainRenderQueue->Sort();
@@ -375,10 +375,10 @@ void LightShadowRenderer::BuildRenderQueues(const pragma::rendering::DrawSceneIn
 				  }
 
 				  auto &planes = lightPointC->GetFrustumPlanes(static_cast<rendering::CubeMapSide>(i));
-				  auto fShouldCull = [&planes](const Vector3 &min, const Vector3 &max) -> bool { return pragma::math::intersection::aabb_in_plane_mesh(min, max, planes.begin(), planes.end()) == pragma::math::intersection::Intersect::Outside; };
+				  auto fShouldCull = [&planes](const Vector3 &min, const Vector3 &max) -> bool { return math::intersection::aabb_in_plane_mesh(min, max, planes.begin(), planes.end()) == math::intersection::Intersect::Outside; };
 				  for(auto it = renderQueue->queue.begin(); it != renderQueue->queue.end();) {
 					  auto &item = *it;
-					  auto *ent = static_cast<ecs::CBaseEntity *>(pragma::get_cgame()->GetEntityByLocalIndex(item.entity));
+					  auto *ent = static_cast<ecs::CBaseEntity *>(get_cgame()->GetEntityByLocalIndex(item.entity));
 					  auto *renderC = ent->GetRenderComponent();
 					  if(SceneRenderDesc::ShouldCull(*renderC, fShouldCull) == false || SceneRenderDesc::ShouldCull(*renderC, item.mesh, fShouldCull) == false) {
 						  ++it;
@@ -405,7 +405,7 @@ void LightShadowRenderer::BuildRenderQueues(const pragma::rendering::DrawSceneIn
 #endif
 		  if(cvInstancingEnabled->GetBool()) {
 			  for(auto &renderQueue : m_renderQueues) {
-				  pragma::rendering::RenderQueueInstancer instancer {*renderQueue};
+				  rendering::RenderQueueInstancer instancer {*renderQueue};
 				  instancer.Process();
 			  }
 		  }
@@ -419,15 +419,15 @@ void LightShadowRenderer::BuildRenderQueues(const pragma::rendering::DrawSceneIn
 bool LightShadowRenderer::DoesRenderQueueRequireBuilding() const { return m_requiresRenderQueueUpdate; }
 bool LightShadowRenderer::IsRenderQueueComplete() const { return !m_requiresRenderQueueUpdate && m_renderQueuesComplete; }
 
-void LightShadowRenderer::Render(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void LightShadowRenderer::Render(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_renderState == RenderState::NoRenderRequired || m_hLight.expired())
 		return;
 	m_renderState = RenderState::NoRenderRequired;
 
 	// TODO: Cleanup
-	auto shadowC = m_hLight->GetShadowComponent<pragma::CShadowComponent>();
-	if(shadowC == nullptr || m_hLight->GetEffectiveShadowType() == pragma::BaseEnvLightComponent::ShadowType::None) // TODO: Clear render target?
+	auto shadowC = m_hLight->GetShadowComponent<CShadowComponent>();
+	if(shadowC == nullptr || m_hLight->GetEffectiveShadowType() == BaseEnvLightComponent::ShadowType::None) // TODO: Clear render target?
 		return;
 
 	if(m_hLight->GetEntity().HasComponent<CLightDirectionalComponent>())
@@ -435,11 +435,11 @@ void LightShadowRenderer::Render(const pragma::rendering::DrawSceneInfo &drawSce
 
 	auto wpRt = shadowC->RequestRenderTarget();
 	if(wpRt.expired() == true) {
-		m_hLight->SetShadowMapIndex(std::numeric_limits<uint32_t>::max(), pragma::rendering::ShadowMapType::Dynamic);
+		m_hLight->SetShadowMapIndex(std::numeric_limits<uint32_t>::max(), rendering::ShadowMapType::Dynamic);
 		return;
 	}
 	auto rt = wpRt.lock();
-	m_hLight->SetShadowMapIndex(rt->index, pragma::rendering::ShadowMapType::Dynamic);
+	m_hLight->SetShadowMapIndex(rt->index, rendering::ShadowMapType::Dynamic);
 
 	//auto &shader = (type != pragma::LightType::Spot) ? static_cast<pragma::ShaderShadow&>(*m_shader.get()) : static_cast<pragma::ShaderShadow&>(*m_shaderSpot.get());
 	//pragma::ShaderShadowTransparent *shaderTransparent = nullptr;
@@ -449,15 +449,15 @@ void LightShadowRenderer::Render(const pragma::rendering::DrawSceneInfo &drawSce
 	//	shaderTransparent = static_cast<pragma::ShaderShadowTransparent*>(m_shaderSpotTransparent.expired() == false ? m_shaderSpotTransparent.get() : nullptr);
 
 	// TODO
-	auto *shader = static_cast<pragma::ShaderShadow *>(pragma::get_cengine()->GetShader("shadow").get());
+	auto *shader = static_cast<ShaderShadow *>(get_cengine()->GetShader("shadow").get());
 	if(shader == nullptr)
 		return;
 
 	auto &light = *m_hLight;
 	auto *smRt = shadowC->GetDepthRenderTarget();
 	auto &tex = smRt->GetTexture();
-	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
-	auto *renderer = scene ? scene->GetRenderer<pragma::CRendererComponent>() : nullptr;
+	auto *scene = get_cgame()->GetScene<CSceneComponent>();
+	auto *renderer = scene ? scene->GetRenderer<CRendererComponent>() : nullptr;
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &img = tex.GetImage();
@@ -469,7 +469,7 @@ void LightShadowRenderer::Render(const pragma::rendering::DrawSceneInfo &drawSce
 
 	auto pipeline = m_hLight->AreMorphTargetsInShadowsEnabled() ? ShaderShadow::Pipeline::WithMorphTargetAnimations : ShaderShadow::Pipeline::Default;
 
-	pragma::rendering::RenderPassDrawInfo rpDrawInfo {drawSceneInfo, *drawSceneInfo.commandBuffer};
+	rendering::RenderPassDrawInfo rpDrawInfo {drawSceneInfo, *drawSceneInfo.commandBuffer};
 	rendering::DepthStageRenderProcessor shadowRenderProcessor {rpDrawInfo, {}};
 	for(auto layerId = decltype(numLayers) {0}; layerId < numLayers; ++layerId) {
 		auto *framebuffer = shadowC->GetFramebuffer(layerId);
@@ -478,9 +478,9 @@ void LightShadowRenderer::Render(const pragma::rendering::DrawSceneInfo &drawSce
 		if(drawCmd->RecordBeginRenderPass(*smRt, layerId, prosper::IPrimaryCommandBuffer::RenderPassFlags::None, &clearVal) == false)
 			continue;
 
-		if(shadowRenderProcessor.BindShader(*shader, pragma::math::to_integral(pipeline))) {
+		if(shadowRenderProcessor.BindShader(*shader, math::to_integral(pipeline))) {
 			shadowRenderProcessor.BindLight(*m_hLight, layerId);
-			shadowRenderProcessor.Render(*m_renderQueues.at(layerId), pragma::rendering::RenderPass::Shadow, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::ShadowPass) : nullptr);
+			shadowRenderProcessor.Render(*m_renderQueues.at(layerId), rendering::RenderPass::Shadow, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::ShadowPass) : nullptr);
 
 			// TODO: Translucent render pass ?
 			shadowRenderProcessor.UnbindShader();

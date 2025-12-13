@@ -104,7 +104,7 @@ void ShaderGraph::InitializeShaderResources()
 	ShaderGameWorldLightingPass::InitializeShaderResources();
 }
 
-void ShaderGraph::InitializeMaterialData(const msys::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
+void ShaderGraph::InitializeMaterialData(const material::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 {
 	// If graph has "pbr" module, pbr descriptor set should be added
 	//prosper::DescriptorSetInfo
@@ -120,7 +120,7 @@ void ShaderGraph::InitializeMaterialData(const msys::CMaterial &mat, const rende
 	}
 }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGraph::InitializeMaterialDescriptorSet(msys::CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo) { return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat, descSetInfo); }
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGraph::InitializeMaterialDescriptorSet(material::CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo) { return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat, descSetInfo); }
 void ShaderGraph::OnPipelinesInitialized() { ShaderGameWorldLightingPass::OnPipelinesInitialized(); }
 void ShaderGraph::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
@@ -368,7 +368,7 @@ bool ShaderGraph::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, 
 		mod->RecordBindEntity(shaderProcessor, renderC, layout, entityInstanceDescriptorSetIndex);
 	return true;
 }
-bool ShaderGraph::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, msys::CMaterial &mat) const
+bool ShaderGraph::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, material::CMaterial &mat) const
 {
 	if(!ShaderGameWorldLightingPass::RecordBindMaterial(shaderProcessor, mat))
 		return false;

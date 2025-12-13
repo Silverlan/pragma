@@ -12,7 +12,7 @@ import :game;
 
 using namespace pragma::rendering;
 
-void pragma::CRasterizationRendererComponent::RenderGlowObjects(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RenderGlowObjects(const DrawSceneInfo &drawSceneInfo)
 {
 #if 0
 	auto &glowInfo = GetGlowInfo();
@@ -63,7 +63,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowObjects(const pragma::re
 #endif
 }
 
-void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const pragma::CSceneComponent &scene, pragma::rendering::SceneRenderPass renderMode)
+void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const CSceneComponent &scene, SceneRenderPass renderMode)
 {
 	// TODO
 #if 0
@@ -80,7 +80,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<p
 		for(auto &matContainer : renderInfo->glowMeshes)
 		{
 			auto *mat = matContainer->material;
-			if(shader->BindGlowMaterial(static_cast<msys::CMaterial&>(*mat)) == true)
+			if(shader->BindGlowMaterial(static_cast<material::CMaterial&>(*mat)) == true)
 			{
 				for(auto &pair : matContainer->containers)
 				{

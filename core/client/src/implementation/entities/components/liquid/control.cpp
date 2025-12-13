@@ -20,7 +20,7 @@ void CLiquidControlComponent::ReceiveData(NetPacket &packet)
 	GetEntity().SetKeyValue("surface_material", surfMat);
 }
 
-Bool CLiquidControlComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CLiquidControlComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvCreateSplash) {
 		auto origin = packet->Read<Vector3>();
@@ -33,7 +33,7 @@ Bool CLiquidControlComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPac
 	return true;
 }
 
-bool CLiquidControlComponent::OnBulletHit(const game::BulletInfo &bulletInfo, const pragma::physics::TraceData &data, pragma::physics::PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result)
+bool CLiquidControlComponent::OnBulletHit(const game::BulletInfo &bulletInfo, const physics::TraceData &data, physics::PhysObj *phys, physics::ICollisionObject *col, const LocalRayResult &result)
 {
 	auto srcOrigin = data.GetSourceOrigin();
 	auto dir = data.GetDirection();
@@ -41,11 +41,11 @@ bool CLiquidControlComponent::OnBulletHit(const game::BulletInfo &bulletInfo, co
 	auto hitPos = srcOrigin + dir * (dist * static_cast<float>(result.friction));
 
 	auto surfMatId = col->GetSurfaceMaterial();
-	auto *surfMat = pragma::get_cgame()->GetSurfaceMaterial(surfMatId);
+	auto *surfMat = get_cgame()->GetSurfaceMaterial(surfMatId);
 	if(surfMat != nullptr) {
 		auto &ptEffect = surfMat->GetImpactParticleEffect();
 		if(ptEffect.empty() == false) {
-			auto *pt = pragma::ecs::CParticleSystemComponent::Create(ptEffect);
+			auto *pt = ecs::CParticleSystemComponent::Create(ptEffect);
 			if(pt != nullptr) {
 				auto pTrComponent = pt->GetEntity().GetTransformComponent();
 				if(pTrComponent != nullptr) {
@@ -63,10 +63,10 @@ bool CLiquidControlComponent::OnBulletHit(const game::BulletInfo &bulletInfo, co
 
 		auto &bulletImpactSnd = surfMat->GetBulletImpactSound();
 		if(bulletImpactSnd.empty() == false) {
-			auto snd = pragma::get_client_state()->CreateSound(bulletImpactSnd, pragma::audio::ALSoundType::Effect | pragma::audio::ALSoundType::Physics, pragma::audio::ALCreateFlags::Mono);
+			auto snd = get_client_state()->CreateSound(bulletImpactSnd, audio::ALSoundType::Effect | audio::ALSoundType::Physics, audio::ALCreateFlags::Mono);
 			if(snd != nullptr) {
 				snd->SetPosition(hitPos);
-				snd->SetType(pragma::audio::ALSoundType::Effect);
+				snd->SetType(audio::ALSoundType::Effect);
 				snd->Play();
 			}
 		}

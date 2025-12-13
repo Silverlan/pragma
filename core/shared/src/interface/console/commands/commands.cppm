@@ -13,11 +13,11 @@ export {
 		class NetworkState;
 	}
 	namespace pragma::console::commands {
-		DLLNETWORK void lua_run(lua::State *l, const std::string &chunkName, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float);
-		DLLNETWORK void lua_run(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float);
+		DLLNETWORK void lua_run(lua::State *l, const std::string &chunkName, BasePlayerComponent *, std::vector<std::string> &argv, float);
+		DLLNETWORK void lua_run(NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float);
 		DLLNETWORK void lua_run_autocomplete(lua::State *l, const std::string &arg, std::vector<std::string> &autoCompleteOptions);
 
-		DLLNETWORK void lua_exec(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float);
+		DLLNETWORK void lua_exec(NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float);
 		DLLNETWORK void lua_exec_autocomplete(const std::string &arg, std::vector<std::string> &autoCompleteOptions);
 	};
 };

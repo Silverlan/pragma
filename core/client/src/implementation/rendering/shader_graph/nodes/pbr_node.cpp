@@ -9,19 +9,19 @@ import :rendering.shader_graph.node_pbr;
 
 using namespace pragma::rendering::shader_graph;
 
-PbrNode::PbrNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_SHADER}
+PbrNode::PbrNode(const std::string_view &type) : Node {type, shadergraph::CATEGORY_SHADER}
 {
-	AddInput(IN_ALBEDO_COLOR, pragma::shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
-	AddInput(IN_METALNESS, pragma::shadergraph::DataType::Float, 0.f);
-	AddInput(IN_ROUGHNESS, pragma::shadergraph::DataType::Float, 0.5f);
-	AddInput(IN_AMBIENT_OCCLUSION, pragma::shadergraph::DataType::Float, 0.f);
+	AddInput(IN_ALBEDO_COLOR, shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
+	AddInput(IN_METALNESS, shadergraph::DataType::Float, 0.f);
+	AddInput(IN_ROUGHNESS, shadergraph::DataType::Float, 0.5f);
+	AddInput(IN_AMBIENT_OCCLUSION, shadergraph::DataType::Float, 0.f);
 
-	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);
+	AddOutput(OUT_COLOR, shadergraph::DataType::Color);
 
 	AddModuleDependency("pbr");
 }
 
-std::string PbrNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
+std::string PbrNode::DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &gn) const
 {
 	std::ostringstream code;
 

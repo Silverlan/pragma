@@ -8,15 +8,15 @@ import :entities.components.constraints.copy_scale;
 
 using namespace pragma;
 
-ConstraintCopyScaleComponent::ConstraintCopyScaleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintCopyScaleComponent::ConstraintCopyScaleComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintCopyScaleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
 	GetEntity().AddComponent<ConstraintSpaceComponent>();
-	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
+	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<ComponentEvent> evData) { ApplyConstraint(); });
 }
-void ConstraintCopyScaleComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintCopyScaleComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintCopyScaleComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
@@ -34,14 +34,14 @@ void ConstraintCopyScaleComponent::ApplyConstraint()
 	if(!constraintInfo || influence == 0.f)
 		return;
 	Vector3 scaleDriven;
-	auto res = constraintInfo->drivenObjectC->GetTransformMemberScale(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), scaleDriven);
+	auto res = constraintInfo->drivenObjectC->GetTransformMemberScale(constraintInfo->drivenObjectPropIdx, static_cast<math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), scaleDriven);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driven object of constraint '{}'.", constraintInfo->drivenObjectPropIdx, GetEntity().ToString());
 		return;
 	}
 
 	Vector3 scaleDriver;
-	res = constraintInfo->driverC->GetTransformMemberScale(constraintInfo->driverPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDriverSpace()), scaleDriver);
+	res = constraintInfo->driverC->GetTransformMemberScale(constraintInfo->driverPropIdx, static_cast<math::CoordinateSpace>(m_constraintC->GetDriverSpace()), scaleDriver);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driver of constraint '{}'.", constraintInfo->driverPropIdx, GetEntity().ToString());
 		return;
@@ -51,5 +51,5 @@ void ConstraintCopyScaleComponent::ApplyConstraint()
 		m_constraintSpaceC->ApplyFilter(scaleDriver, scaleDriven, scaleDriver);
 
 	scaleDriver = uvec::lerp(scaleDriven, scaleDriver, influence);
-	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberScale(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), scaleDriver);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberScale(constraintInfo->drivenObjectPropIdx, static_cast<math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), scaleDriver);
 }

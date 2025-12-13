@@ -11,7 +11,7 @@ export import pragma.lua;
 export {
 	namespace Lua {
 		namespace physenv {
-			DLLNETWORK void register_library(Lua::Interface &lua);
+			DLLNETWORK void register_library(Interface &lua);
 		};
 		namespace PhysShape {
 			DLLNETWORK void register_class(lua::State *l, luabind::module_ &mod);

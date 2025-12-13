@@ -194,7 +194,7 @@ pragma::CGame::CGame(pragma::NetworkState *state)
 
 	m_globalShaderInputDataManager = std::make_unique<pragma::rendering::GlobalShaderInputDataManager>();
 
-	auto &texManager = static_cast<msys::CMaterialManager &>(static_cast<pragma::ClientState *>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<material::CMaterialManager &>(static_cast<pragma::ClientState *>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
 	for(auto &tex : g_requiredGameTextures) {
 		texManager.LoadAsset(tex); // Pre-loaded in ClientState constructor
 		texManager.FlagAssetAsAlwaysInUse(tex, true);
@@ -465,7 +465,7 @@ bool pragma::CGame::IsRenderModeEnabled(pragma::rendering::SceneRenderPass rende
 
 void pragma::CGame::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_unique<CLuaDirectoryWatcherManager>(this); }
 
-msys::Material *pragma::CGame::GetLoadMaterial() { return m_matLoad.get(); }
+pragma::material::Material *pragma::CGame::GetLoadMaterial() { return m_matLoad.get(); }
 void pragma::CGame::OnEntityCreated(pragma::ecs::BaseEntity *ent)
 {
 	pragma::Game::OnEntityCreated(ent);
@@ -507,7 +507,7 @@ TCPPM *pragma::CGame::GetViewBody()
 }
 template DLLCLIENT pragma::CViewBodyComponent *pragma::CGame::GetViewBody<pragma::CViewBodyComponent>();
 
-static void shader_handler(msys::Material *mat)
+static void shader_handler(pragma::material::Material *mat)
 {
 	if(mat->IsLoaded() == false)
 		return;
@@ -515,7 +515,7 @@ static void shader_handler(msys::Material *mat)
 	auto whShader = shaderManager.GetShader(mat->GetShaderIdentifier());
 	if(whShader.expired())
 		return;
-	auto &cmat = *static_cast<msys::CMaterial *>(mat);
+	auto &cmat = *static_cast<pragma::material::CMaterial *>(mat);
 	// Clear descriptor set in case the shader has changed; The new shader will re-create it appropriately
 	cmat.SetDescriptorSetGroup(*whShader.get(), nullptr);
 
@@ -532,7 +532,7 @@ static void shader_handler(msys::Material *mat)
 		prepass->InitializeMaterialDescriptorSet(cmat, false); // TODO: Only if this is a material with masked transparency?
 }
 
-void pragma::CGame::ReloadMaterialShader(msys::CMaterial *mat)
+void pragma::CGame::ReloadMaterialShader(material::CMaterial *mat)
 {
 	auto *shader = static_cast<pragma::ShaderTexturedBase *>(mat->GetUserData());
 	if(shader == nullptr)
@@ -544,7 +544,7 @@ void pragma::CGame::Initialize()
 {
 	pragma::Game::Initialize();
 	auto *client = pragma::get_client_state();
-	auto &materialManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
+	auto &materialManager = static_cast<material::CMaterialManager &>(client->GetMaterialManager());
 	materialManager.SetShaderHandler(&shader_handler);
 	pragma::CRenderComponent::InitializeBuffers();
 	pragma::CLightComponent::InitializeBuffers();
@@ -637,7 +637,7 @@ void pragma::CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	}));
 
 	auto *client = pragma::get_client_state();
-	auto &materialManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
+	auto &materialManager = static_cast<material::CMaterialManager &>(client->GetMaterialManager());
 	if(m_surfaceMaterialManager)
 		m_surfaceMaterialManager->Load("scripts/physics/materials.udm");
 
@@ -693,7 +693,7 @@ void pragma::CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 void pragma::CGame::RequestResource(const std::string &fileName)
 {
 	Con::ccl << "[CGame] RequestResource '" << fileName << "'" << Con::endl;
-	auto fName = FileManager::GetCanonicalizedPath(fileName);
+	auto fName = fs::get_canonicalized_path(fileName);
 	auto it = std::find(m_requestedResources.begin(), m_requestedResources.end(), fName);
 	if(it != m_requestedResources.end())
 		return;
@@ -788,8 +788,8 @@ TCPPM *pragma::CGame::GetPrimaryCamera() const
 }
 template DLLCLIENT pragma::CCameraComponent *pragma::CGame::GetPrimaryCamera<pragma::CCameraComponent>() const;
 
-void pragma::CGame::SetMaterialOverride(msys::Material *mat) { m_matOverride = mat; }
-msys::Material *pragma::CGame::GetMaterialOverride() { return m_matOverride; }
+void pragma::CGame::SetMaterialOverride(material::Material *mat) { m_matOverride = mat; }
+pragma::material::Material *pragma::CGame::GetMaterialOverride() { return m_matOverride; }
 
 void pragma::CGame::SetColorScale(const Vector4 &col) { m_colScale = col; }
 Vector4 &pragma::CGame::GetColorScale() { return m_colScale; }
@@ -1198,14 +1198,14 @@ void pragma::CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 {
 	pragma::Game::InitializeWorldData(worldData);
 
-	auto &texManager = static_cast<msys::CMaterialManager &>(static_cast<pragma::ClientState *>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<material::CMaterialManager &>(static_cast<pragma::ClientState *>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
 	auto texture = texManager.LoadAsset(worldData.GetLightmapAtlasTexturePath(GetMapName()));
 	if(texture) {
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};
 		auto sampler = pragma::get_cengine()->GetRenderContext().CreateSampler(samplerCreateInfo);
 		texture->GetVkTexture()->SetSampler(*sampler);
 
-		auto &tex = *static_cast<msys::Texture *>(texture.get());
+		auto &tex = *static_cast<material::Texture *>(texture.get());
 		auto lightmapAtlas = tex.GetVkTexture();
 		//auto lightmapAtlas = pragma::CLightMapComponent::CreateLightmapTexture(img->GetWidth(),img->GetHeight(),static_cast<uint16_t*>(img->GetData()));
 		auto *scene = GetScene<pragma::CSceneComponent>();
@@ -1245,7 +1245,7 @@ void pragma::CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 		}
 	}
 
-	auto &materialManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
+	auto &materialManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
 	materialManager.ReloadMaterialShaders();
 }
 
@@ -1683,40 +1683,40 @@ bool pragma::CGame::LoadAuxEffects(const std::string &fname)
 		pragma::string::to_lower(name);
 		std::string type;
 		pair.property["type"](type);
-		al::create_aux_effect(name, type, pair.property);
+		pragma::audio::create_aux_effect(name, type, pair.property);
 	}
 	return true;
 }
-std::shared_ptr<al::IEffect> pragma::CGame::GetAuxEffect(const std::string &name) { return pragma::get_cengine()->GetAuxEffect(name); }
+std::shared_ptr<pragma::audio::IEffect> pragma::CGame::GetAuxEffect(const std::string &name) { return pragma::get_cengine()->GetAuxEffect(name); }
 
-bool pragma::CGame::SaveImage(prosper::IImage &image, const std::string &fileName, const uimg::TextureInfo &imageWriteInfo) const
+bool pragma::CGame::SaveImage(prosper::IImage &image, const std::string &fileName, const image::TextureInfo &imageWriteInfo) const
 {
 	auto path = ufile::get_path_from_filename(fileName);
-	FileManager::CreatePath(path.c_str());
+	fs::create_path(path);
 	return prosper::util::save_texture(fileName, image, imageWriteInfo, [fileName](const std::string &err) { Con::cwar << "Unable to save image '" << fileName << "': " << err << Con::endl; });
 }
 
-bool pragma::CGame::SaveImage(const std::vector<std::vector<const void *>> &imgLayerMipmapData, uint32_t width, uint32_t height, uint32_t szPerPixel, const std::string &fileName, const uimg::TextureInfo &imageWriteInfo, bool cubemap) const
+bool pragma::CGame::SaveImage(const std::vector<std::vector<const void *>> &imgLayerMipmapData, uint32_t width, uint32_t height, uint32_t szPerPixel, const std::string &fileName, const image::TextureInfo &imageWriteInfo, bool cubemap) const
 {
 	auto path = ufile::get_path_from_filename(fileName);
-	FileManager::CreatePath(path.c_str());
-	uimg::TextureSaveInfo texSaveInfo;
+	fs::create_path(path);
+	image::TextureSaveInfo texSaveInfo;
 	texSaveInfo.texInfo = imageWriteInfo;
 	texSaveInfo.width = width;
 	texSaveInfo.height = height;
 	texSaveInfo.szPerPixel = szPerPixel;
 	texSaveInfo.cubemap = cubemap;
-	return uimg::save_texture(fileName, imgLayerMipmapData, texSaveInfo, [fileName](const std::string &err) { Con::cwar << "Unable to save image '" << fileName << "': " << err << Con::endl; });
+	return image::save_texture(fileName, imgLayerMipmapData, texSaveInfo, [fileName](const std::string &err) { Con::cwar << "Unable to save image '" << fileName << "': " << err << Con::endl; });
 }
 
-bool pragma::CGame::SaveImage(uimg::ImageBuffer &imgBuffer, const std::string &fileName, const uimg::TextureInfo &imageWriteInfo, bool cubemap) const
+bool pragma::CGame::SaveImage(image::ImageBuffer &imgBuffer, const std::string &fileName, const image::TextureInfo &imageWriteInfo, bool cubemap) const
 {
 	auto path = ufile::get_path_from_filename(fileName);
-	filemanager::create_path(path);
-	uimg::TextureSaveInfo texSaveInfo;
+	fs::create_path(path);
+	image::TextureSaveInfo texSaveInfo;
 	texSaveInfo.texInfo = imageWriteInfo;
 	texSaveInfo.cubemap = cubemap;
-	return uimg::save_texture(fileName, imgBuffer, texSaveInfo, [fileName](const std::string &err) { Con::cwar << "Unable to save image '" << fileName << "': " << err << Con::endl; });
+	return image::save_texture(fileName, imgBuffer, texSaveInfo, [fileName](const std::string &err) { Con::cwar << "Unable to save image '" << fileName << "': " << err << Con::endl; });
 }
 
 static auto cvFriction = pragma::console::get_client_con_var("sv_friction");

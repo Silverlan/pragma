@@ -18,7 +18,7 @@ void CNetworkedComponent::ReceiveData(NetPacket &packet)
 #endif
 }
 void CNetworkedComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-Bool CNetworkedComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CNetworkedComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 #if NETWORKED_VARS_ENABLED != 0
 	if(eventId == m_netEvSetVar) {

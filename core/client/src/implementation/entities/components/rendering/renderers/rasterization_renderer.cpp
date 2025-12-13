@@ -43,7 +43,7 @@ ComponentEventId cRasterizationRendererComponent::EVENT_MT_END_RECORD_WATER = IN
 ComponentEventId cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_VIEW = INVALID_COMPONENT_ID;
 ComponentEventId cRasterizationRendererComponent::EVENT_MT_END_RECORD_VIEW = INVALID_COMPONENT_ID;
 ComponentEventId cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS = INVALID_COMPONENT_ID;
-void CRasterizationRendererComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void CRasterizationRendererComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	cRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS = registerEvent("ON_RECORD_PREPASS", ComponentEventInfo::Type::Explicit);
 	cRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS = registerEvent("ON_RECORD_LIGHTING_PASS", ComponentEventInfo::Type::Explicit);
@@ -74,14 +74,14 @@ void CRasterizationRendererComponent::RegisterEvents(pragma::EntityComponentMana
 
 void CRasterizationRendererComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-static pragma::ComponentHandle<pragma::CLightMapComponent> g_lightmapC = {};
+static ComponentHandle<CLightMapComponent> g_lightmapC = {};
 void CRasterizationRendererComponent::UpdateLightmap(CLightMapComponent &lightMapC)
 {
 	if(!lightMapC.HasValidLightMap()) {
 		CLightMapComponent::LOGGER.warn("Lightmap has no valid lightmap texture!");
 		return;
 	}
-	for(auto &renderer : EntityCIterator<CRasterizationRendererComponent> {*pragma::get_cgame()})
+	for(auto &renderer : EntityCIterator<CRasterizationRendererComponent> {*get_cgame()})
 		renderer.SetLightMap(lightMapC);
 	g_lightmapC = lightMapC.GetHandle<CLightMapComponent>();
 }
@@ -94,9 +94,9 @@ void CRasterizationRendererComponent::UpdateLightmap()
 	UpdateLightmap(*g_lightmapC);
 }
 
-CRasterizationRendererComponent::CRasterizationRendererComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_hdrInfo {*this}, m_stateFlags {StateFlags::PrepassEnabled | StateFlags::InitialRender}
+CRasterizationRendererComponent::CRasterizationRendererComponent(ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_hdrInfo {*this}, m_stateFlags {StateFlags::PrepassEnabled | StateFlags::InitialRender}
 {
-	m_whShaderWireframe = pragma::get_cengine()->GetShader("wireframe");
+	m_whShaderWireframe = get_cengine()->GetShader("wireframe");
 
 	InitializeCommandBufferGroups();
 
@@ -104,13 +104,13 @@ CRasterizationRendererComponent::CRasterizationRendererComponent(pragma::ecs::Ba
 	bufCreateInfo.size = sizeof(m_rendererData);
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
-	m_rendererBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo, &m_rendererData);
+	m_rendererBuffer = get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo, &m_rendererData);
 
-	auto *shaderPbr = static_cast<pragma::ShaderPBR *>(pragma::get_cengine()->GetShader("pbr").get());
+	auto *shaderPbr = static_cast<ShaderPBR *>(get_cengine()->GetShader("pbr").get());
 	assert(shaderPbr);
 	if(shaderPbr) {
-		m_descSetGroupRenderer = shaderPbr->CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_RENDERER.setIndex);
-		m_descSetGroupRenderer->GetDescriptorSet()->SetBindingUniformBuffer(*m_rendererBuffer, pragma::math::to_integral(pragma::ShaderScene::RendererBinding::Renderer));
+		m_descSetGroupRenderer = shaderPbr->CreateDescriptorSetGroup(ShaderPBR::DESCRIPTOR_SET_RENDERER.setIndex);
+		m_descSetGroupRenderer->GetDescriptorSet()->SetBindingUniformBuffer(*m_rendererBuffer, math::to_integral(ShaderScene::RendererBinding::Renderer));
 	}
 
 	InitializeLightDescriptorSets();
@@ -118,7 +118,7 @@ CRasterizationRendererComponent::CRasterizationRendererComponent(pragma::ecs::Ba
 
 CRasterizationRendererComponent::~CRasterizationRendererComponent()
 {
-	auto &renderContext = pragma::get_cengine()->GetRenderContext();
+	auto &renderContext = get_cengine()->GetRenderContext();
 	renderContext.KeepResourceAliveUntilPresentationComplete(m_prepassCommandBufferGroup);
 	renderContext.KeepResourceAliveUntilPresentationComplete(m_shadowCommandBufferGroup);
 	renderContext.KeepResourceAliveUntilPresentationComplete(m_lightingCommandBufferGroup);
@@ -132,30 +132,30 @@ void CRasterizationRendererComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(cRendererComponent::EVENT_RELOAD_RENDER_TARGET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cRendererComponent::EVENT_RELOAD_RENDER_TARGET, [this](std::reference_wrapper<ComponentEvent> evData) {
 		auto &reloadRenderTargetEv = static_cast<CEReloadRenderTarget &>(evData.get());
 		reloadRenderTargetEv.resultSuccess = ReloadRenderTarget(reloadRenderTargetEv.width, reloadRenderTargetEv.height);
 	});
-	BindEventUnhandled(cRendererComponent::EVENT_RELOAD_BLOOM_RENDER_TARGET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { m_hdrInfo.ReloadBloomRenderTarget(static_cast<CEReloadBloomRenderTarget &>(evData.get()).width); });
-	BindEventUnhandled(cRendererComponent::EVENT_BEGIN_RENDERING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { BeginRendering(static_cast<CEBeginRendering &>(evData.get()).drawSceneInfo); });
-	BindEventUnhandled(cRendererComponent::EVENT_END_RENDERING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { EndRendering(); });
-	BindEventUnhandled(cRendererComponent::EVENT_UPDATE_CAMERA_DATA, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateFrustumPlanes(static_cast<CEUpdateCameraData &>(evData.get()).scene); });
-	BindEvent(cRendererComponent::EVENT_GET_SCENE_TEXTURE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
-		static_cast<pragma::CEGetSceneTexture &>(evData.get()).resultTexture = m_hdrInfo.sceneRenderTarget ? &m_hdrInfo.sceneRenderTarget->GetTexture() : nullptr;
-		return pragma::util::EventReply::Handled;
+	BindEventUnhandled(cRendererComponent::EVENT_RELOAD_BLOOM_RENDER_TARGET, [this](std::reference_wrapper<ComponentEvent> evData) { m_hdrInfo.ReloadBloomRenderTarget(static_cast<CEReloadBloomRenderTarget &>(evData.get()).width); });
+	BindEventUnhandled(cRendererComponent::EVENT_BEGIN_RENDERING, [this](std::reference_wrapper<ComponentEvent> evData) { BeginRendering(static_cast<CEBeginRendering &>(evData.get()).drawSceneInfo); });
+	BindEventUnhandled(cRendererComponent::EVENT_END_RENDERING, [this](std::reference_wrapper<ComponentEvent> evData) { EndRendering(); });
+	BindEventUnhandled(cRendererComponent::EVENT_UPDATE_CAMERA_DATA, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateFrustumPlanes(static_cast<CEUpdateCameraData &>(evData.get()).scene); });
+	BindEvent(cRendererComponent::EVENT_GET_SCENE_TEXTURE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+		static_cast<CEGetSceneTexture &>(evData.get()).resultTexture = m_hdrInfo.sceneRenderTarget ? &m_hdrInfo.sceneRenderTarget->GetTexture() : nullptr;
+		return util::EventReply::Handled;
 	});
-	BindEvent(cRendererComponent::EVENT_GET_PRESENTATION_TEXTURE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
-		static_cast<pragma::CEGetPresentationTexture &>(evData.get()).resultTexture = m_hdrInfo.toneMappedRenderTarget ? &m_hdrInfo.toneMappedRenderTarget->GetTexture() : nullptr;
-		return pragma::util::EventReply::Handled;
+	BindEvent(cRendererComponent::EVENT_GET_PRESENTATION_TEXTURE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+		static_cast<CEGetPresentationTexture &>(evData.get()).resultTexture = m_hdrInfo.toneMappedRenderTarget ? &m_hdrInfo.toneMappedRenderTarget->GetTexture() : nullptr;
+		return util::EventReply::Handled;
 	});
-	BindEvent(cRendererComponent::EVENT_GET_HDR_PRESENTATION_TEXTURE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
-		static_cast<pragma::CEGetHdrPresentationTexture &>(evData.get()).resultTexture = m_hdrInfo.sceneRenderTarget ? &m_hdrInfo.sceneRenderTarget->GetTexture() : nullptr;
-		return pragma::util::EventReply::Handled;
+	BindEvent(cRendererComponent::EVENT_GET_HDR_PRESENTATION_TEXTURE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+		static_cast<CEGetHdrPresentationTexture &>(evData.get()).resultTexture = m_hdrInfo.sceneRenderTarget ? &m_hdrInfo.sceneRenderTarget->GetTexture() : nullptr;
+		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(cRendererComponent::EVENT_RECORD_COMMAND_BUFFERS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { RecordCommandBuffers(static_cast<CEDrawSceneInfo &>(evData.get()).drawSceneInfo); });
-	BindEventUnhandled(cRendererComponent::EVENT_RENDER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { Render(static_cast<CERender &>(evData.get()).drawSceneInfo); });
-	BindEventUnhandled(cRendererComponent::EVENT_UPDATE_RENDER_SETTINGS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateRenderSettings(); });
-	BindEventUnhandled(cRendererComponent::EVENT_UPDATE_RENDERER_BUFFER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateRendererBuffer(static_cast<CEUpdateRendererBuffer &>(evData.get()).drawCommandBuffer); });
+	BindEventUnhandled(cRendererComponent::EVENT_RECORD_COMMAND_BUFFERS, [this](std::reference_wrapper<ComponentEvent> evData) { RecordCommandBuffers(static_cast<CEDrawSceneInfo &>(evData.get()).drawSceneInfo); });
+	BindEventUnhandled(cRendererComponent::EVENT_RENDER, [this](std::reference_wrapper<ComponentEvent> evData) { Render(static_cast<CERender &>(evData.get()).drawSceneInfo); });
+	BindEventUnhandled(cRendererComponent::EVENT_UPDATE_RENDER_SETTINGS, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateRenderSettings(); });
+	BindEventUnhandled(cRendererComponent::EVENT_UPDATE_RENDERER_BUFFER, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateRendererBuffer(static_cast<CEUpdateRendererBuffer &>(evData.get()).drawCommandBuffer); });
 
 	auto &ent = GetEntity();
 	m_rendererComponent = ent.AddComponent<CRendererComponent>().get();
@@ -172,11 +172,11 @@ prosper::IDescriptorSet *CRasterizationRendererComponent::GetLightSourceDescript
 
 void CRasterizationRendererComponent::InitializeCommandBufferGroups()
 {
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	auto &window = context.GetWindow();
 	std::string dbgPrefix;
 	auto uuid = GetEntity().GetUuid();
-	dbgPrefix = pragma::util::uuid_to_string(uuid) + "_";
+	dbgPrefix = util::uuid_to_string(uuid) + "_";
 	m_prepassCommandBufferGroup = context.CreateSwapCommandBufferGroup(window, true, dbgPrefix + "prepass");
 	m_shadowCommandBufferGroup = context.CreateSwapCommandBufferGroup(window, true, dbgPrefix + "shadow");
 	m_lightingCommandBufferGroup = context.CreateSwapCommandBufferGroup(window, true, dbgPrefix + "lighting");
@@ -184,22 +184,22 @@ void CRasterizationRendererComponent::InitializeCommandBufferGroups()
 
 void CRasterizationRendererComponent::InitializeLightDescriptorSets()
 {
-	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDERER.IsValid()) {
-		auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
-		auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
+	if(ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDERER.IsValid()) {
+		auto &bufLightSources = CLightComponent::GetGlobalRenderBuffer();
+		auto &bufShadowData = CLightComponent::GetGlobalShadowBuffer();
 		auto &ds = *GetRendererDescriptorSet();
 #if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
-		ds.SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::RendererBinding::LightBuffers));
-		ds.SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::RendererBinding::ShadowData));
+		ds.SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), math::to_integral(ShaderGameWorldLightingPass::RendererBinding::LightBuffers));
+		ds.SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), math::to_integral(ShaderGameWorldLightingPass::RendererBinding::ShadowData));
 #else
 		ds.SetBindingStorageBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::RendererBinding::LightBuffers));
 		ds.SetBindingStorageBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::RendererBinding::ShadowData));
 #endif
 
-		m_dsgLightsCompute = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS);
+		m_dsgLightsCompute = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS);
 #if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
-		m_dsgLightsCompute->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), pragma::math::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::LightBuffers));
-		m_dsgLightsCompute->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), pragma::math::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::ShadowData));
+		m_dsgLightsCompute->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), math::to_integral(ShaderForwardPLightCulling::LightBinding::LightBuffers));
+		m_dsgLightsCompute->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), math::to_integral(ShaderForwardPLightCulling::LightBinding::ShadowData));
 #else
 		m_dsgLightsCompute->GetDescriptorSet()->SetBindingStorageBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), pragma::math::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::LightBuffers));
 		m_dsgLightsCompute->GetDescriptorSet()->SetBindingStorageBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), pragma::math::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::ShadowData));
@@ -207,7 +207,7 @@ void CRasterizationRendererComponent::InitializeLightDescriptorSets()
 	}
 }
 
-void CRasterizationRendererComponent::UpdateCSMDescriptorSet(pragma::BaseEnvLightDirectionalComponent &lightSource)
+void CRasterizationRendererComponent::UpdateCSMDescriptorSet(BaseEnvLightDirectionalComponent &lightSource)
 {
 	auto *dsLights = GetRendererDescriptorSet();
 	if(dsLights == nullptr)
@@ -218,7 +218,7 @@ void CRasterizationRendererComponent::UpdateCSMDescriptorSet(pragma::BaseEnvLigh
 		return;
 	auto numLayers = pShadowMap->GetLayerCount();
 	for(auto i = decltype(numLayers) {0}; i < numLayers; ++i) {
-		dsLights->SetBindingArrayTexture(*texture, pragma::math::to_integral(pragma::ShaderSceneLit::RendererBinding::CSM), i, i);
+		dsLights->SetBindingArrayTexture(*texture, math::to_integral(ShaderSceneLit::RendererBinding::CSM), i, i);
 	}
 }
 
@@ -251,13 +251,13 @@ bool CRasterizationRendererComponent::ReloadRenderTarget(uint32_t width, uint32_
 			ssaoBlurTexResolved = static_cast<prosper::MSAATexture *>(ssaoBlurTexResolved)->GetResolvedTexture().get();
 
 		auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
-		ds.SetBindingTexture(*ssaoBlurTexResolved, pragma::math::to_integral(pragma::ShaderScene::RendererBinding::SSAOMap));
+		ds.SetBindingTexture(*ssaoBlurTexResolved, math::to_integral(ShaderScene::RendererBinding::SSAOMap));
 	}
-	auto &dummyTex = pragma::get_cengine()->GetRenderContext().GetDummyTexture();
+	auto &dummyTex = get_cengine()->GetRenderContext().GetDummyTexture();
 	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
-	ds.SetBindingTexture(*dummyTex, pragma::math::to_integral(pragma::ShaderScene::RendererBinding::LightMapDiffuse));
-	ds.SetBindingTexture(*dummyTex, pragma::math::to_integral(pragma::ShaderScene::RendererBinding::LightMapDiffuseIndirect));
-	ds.SetBindingTexture(*dummyTex, pragma::math::to_integral(pragma::ShaderScene::RendererBinding::LightMapDominantDirection));
+	ds.SetBindingTexture(*dummyTex, math::to_integral(ShaderScene::RendererBinding::LightMapDiffuse));
+	ds.SetBindingTexture(*dummyTex, math::to_integral(ShaderScene::RendererBinding::LightMapDiffuseIndirect));
+	ds.SetBindingTexture(*dummyTex, math::to_integral(ShaderScene::RendererBinding::LightMapDominantDirection));
 
 	m_lightMapInfo.lightMapTexture = nullptr;
 	if(g_lightmapC.expired() == false)
@@ -268,7 +268,7 @@ bool CRasterizationRendererComponent::ReloadRenderTarget(uint32_t width, uint32_
 }
 void CRasterizationRendererComponent::SetFrameDepthBufferSamplingRequired() { m_bFrameDepthBufferSamplingRequired = true; }
 void CRasterizationRendererComponent::EndRendering() {}
-void CRasterizationRendererComponent::BeginRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { pragma::math::set_flag(m_stateFlags, StateFlags::DepthResolved | StateFlags::BloomResolved | StateFlags::RenderResolved, false); }
+void CRasterizationRendererComponent::BeginRendering(const rendering::DrawSceneInfo &drawSceneInfo) { math::set_flag(m_stateFlags, StateFlags::DepthResolved | StateFlags::BloomResolved | StateFlags::RenderResolved, false); }
 
 void CRasterizationRendererComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
@@ -283,10 +283,10 @@ void CRasterizationRendererComponent::OnEntityComponentRemoved(BaseEntityCompone
 		m_rendererComponent = nullptr;
 }
 
-bool CRasterizationRendererComponent::IsSSAOEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::SSAOEnabled) && pragma::get_client_state()->GetGameWorldShaderSettings().ssaoEnabled; }
+bool CRasterizationRendererComponent::IsSSAOEnabled() const { return math::is_flag_set(m_stateFlags, StateFlags::SSAOEnabled) && get_client_state()->GetGameWorldShaderSettings().ssaoEnabled; }
 void CRasterizationRendererComponent::SetSSAOEnabled(bool b)
 {
-	pragma::math::set_flag(m_stateFlags, StateFlags::SSAOEnabled, b);
+	math::set_flag(m_stateFlags, StateFlags::SSAOEnabled, b);
 	UpdateRenderSettings();
 	if(GetWidth() > 0 && GetHeight() > 0)
 		ReloadRenderTarget(GetWidth(), GetHeight());
@@ -300,45 +300,45 @@ void CRasterizationRendererComponent::SetSSAOEnabled(bool b)
 	m_hdrInfo.ssaoInfo.Clear();
 	UpdateRenderSettings();*/
 }
-uint32_t CRasterizationRendererComponent::GetWidth() const { return m_rendererComponent ? static_cast<pragma::CRendererComponent *>(m_rendererComponent)->GetWidth() : 0; }
-uint32_t CRasterizationRendererComponent::GetHeight() const { return m_rendererComponent ? static_cast<pragma::CRendererComponent *>(m_rendererComponent)->GetHeight() : 0; }
+uint32_t CRasterizationRendererComponent::GetWidth() const { return m_rendererComponent ? static_cast<CRendererComponent *>(m_rendererComponent)->GetWidth() : 0; }
+uint32_t CRasterizationRendererComponent::GetHeight() const { return m_rendererComponent ? static_cast<CRendererComponent *>(m_rendererComponent)->GetHeight() : 0; }
 void CRasterizationRendererComponent::UpdateRenderSettings()
 {
 	auto &tileInfo = m_rendererData.tileInfo;
-	tileInfo = static_cast<uint32_t>(pragma::ShaderForwardPLightCulling::TILE_SIZE) << 16;
-	tileInfo |= static_cast<uint32_t>(pragma::rendering::ForwardPlusInstance::CalcWorkGroupCount(GetWidth(), GetHeight()).first);
+	tileInfo = static_cast<uint32_t>(ShaderForwardPLightCulling::TILE_SIZE) << 16;
+	tileInfo |= static_cast<uint32_t>(rendering::ForwardPlusInstance::CalcWorkGroupCount(GetWidth(), GetHeight()).first);
 	m_rendererData.SetResolution(GetWidth(), GetHeight());
 
 	if(IsSSAOEnabled() == true)
-		m_rendererData.flags |= pragma::RendererData::Flags::SSAOEnabled;
+		m_rendererData.flags |= RendererData::Flags::SSAOEnabled;
 }
 void CRasterizationRendererComponent::SetShaderOverride(const std::string &srcShaderId, const std::string &shaderOverrideId)
 {
-	auto hSrcShader = pragma::get_cengine()->GetShader(srcShaderId);
-	if(hSrcShader.get()->GetBaseTypeHashCode() != pragma::ShaderGameWorldLightingPass::HASH_TYPE)
+	auto hSrcShader = get_cengine()->GetShader(srcShaderId);
+	if(hSrcShader.get()->GetBaseTypeHashCode() != ShaderGameWorldLightingPass::HASH_TYPE)
 		return;
-	auto *srcShader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(hSrcShader.get());
+	auto *srcShader = dynamic_cast<ShaderGameWorldLightingPass *>(hSrcShader.get());
 	if(srcShader == nullptr)
 		return;
-	auto hDstShader = pragma::get_cengine()->GetShader(shaderOverrideId);
-	auto dstShader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(hDstShader.get());
+	auto hDstShader = get_cengine()->GetShader(shaderOverrideId);
+	auto dstShader = dynamic_cast<ShaderGameWorldLightingPass *>(hDstShader.get());
 	if(dstShader == nullptr)
 		return;
 	m_shaderOverrides[typeid(*srcShader).hash_code()] = dstShader->GetHandle();
 }
-pragma::ShaderGameWorldLightingPass *CRasterizationRendererComponent::GetShaderOverride(pragma::ShaderGameWorldLightingPass *srcShader) const
+ShaderGameWorldLightingPass *CRasterizationRendererComponent::GetShaderOverride(ShaderGameWorldLightingPass *srcShader) const
 {
 	if(srcShader == nullptr)
 		return nullptr;
 	auto it = m_shaderOverrides.find(typeid(*srcShader).hash_code());
 	if(it == m_shaderOverrides.end())
 		return srcShader;
-	return static_cast<pragma::ShaderGameWorldLightingPass *>(it->second.get());
+	return static_cast<ShaderGameWorldLightingPass *>(it->second.get());
 }
 void CRasterizationRendererComponent::ClearShaderOverride(const std::string &srcShaderId)
 {
-	auto hSrcShader = pragma::get_cengine()->GetShader(srcShaderId);
-	auto *srcShader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(hSrcShader.get());
+	auto hSrcShader = get_cengine()->GetShader(srcShaderId);
+	auto *srcShader = dynamic_cast<ShaderGameWorldLightingPass *>(hSrcShader.get());
 	if(srcShader == nullptr)
 		return;
 	auto it = m_shaderOverrides.find(typeid(*srcShader).hash_code());
@@ -352,35 +352,35 @@ void CRasterizationRendererComponent::SetPrepassMode(PrepassMode mode)
 	auto &prepass = GetPrepass();
 	switch(static_cast<PrepassMode>(mode)) {
 	case PrepassMode::NoPrepass:
-		pragma::math::set_flag(m_stateFlags, StateFlags::PrepassEnabled, false);
+		math::set_flag(m_stateFlags, StateFlags::PrepassEnabled, false);
 		break;
 	case PrepassMode::DepthOnly:
-		pragma::math::set_flag(m_stateFlags, StateFlags::PrepassEnabled, true);
+		math::set_flag(m_stateFlags, StateFlags::PrepassEnabled, true);
 		prepass.SetUseExtendedPrepass(false);
 		break;
 	case PrepassMode::Extended:
-		pragma::math::set_flag(m_stateFlags, StateFlags::PrepassEnabled, true);
+		math::set_flag(m_stateFlags, StateFlags::PrepassEnabled, true);
 		prepass.SetUseExtendedPrepass(true);
 		break;
 	}
 }
 CRasterizationRendererComponent::PrepassMode CRasterizationRendererComponent::GetPrepassMode() const
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::PrepassEnabled) == false)
+	if(math::is_flag_set(m_stateFlags, StateFlags::PrepassEnabled) == false)
 		return PrepassMode::NoPrepass;
 	auto &prepass = const_cast<CRasterizationRendererComponent *>(this)->GetPrepass();
 	return prepass.IsExtended() ? PrepassMode::Extended : PrepassMode::DepthOnly;
 }
 
-pragma::ShaderPrepassBase &CRasterizationRendererComponent::GetPrepassShader() const { return const_cast<CRasterizationRendererComponent *>(this)->GetPrepass().GetShader(); }
+ShaderPrepassBase &CRasterizationRendererComponent::GetPrepassShader() const { return const_cast<CRasterizationRendererComponent *>(this)->GetPrepass().GetShader(); }
 
-pragma::rendering::HDRData &CRasterizationRendererComponent::GetHDRInfo() { return m_hdrInfo; }
-const pragma::rendering::HDRData &CRasterizationRendererComponent::GetHDRInfo() const { return const_cast<CRasterizationRendererComponent *>(this)->GetHDRInfo(); }
+rendering::HDRData &CRasterizationRendererComponent::GetHDRInfo() { return m_hdrInfo; }
+const rendering::HDRData &CRasterizationRendererComponent::GetHDRInfo() const { return const_cast<CRasterizationRendererComponent *>(this)->GetHDRInfo(); }
 // GlowData &CRasterizationRendererComponent::GetGlowInfo() {return m_glowInfo;}
-pragma::rendering::SSAOInfo &CRasterizationRendererComponent::GetSSAOInfo() { return m_hdrInfo.ssaoInfo; }
-pragma::rendering::Prepass &CRasterizationRendererComponent::GetPrepass() { return m_hdrInfo.prepass; }
-const pragma::rendering::ForwardPlusInstance &CRasterizationRendererComponent::GetForwardPlusInstance() const { return const_cast<CRasterizationRendererComponent *>(this)->GetForwardPlusInstance(); }
-pragma::rendering::ForwardPlusInstance &CRasterizationRendererComponent::GetForwardPlusInstance() { return m_hdrInfo.forwardPlusInstance; }
+rendering::SSAOInfo &CRasterizationRendererComponent::GetSSAOInfo() { return m_hdrInfo.ssaoInfo; }
+rendering::Prepass &CRasterizationRendererComponent::GetPrepass() { return m_hdrInfo.prepass; }
+const rendering::ForwardPlusInstance &CRasterizationRendererComponent::GetForwardPlusInstance() const { return const_cast<CRasterizationRendererComponent *>(this)->GetForwardPlusInstance(); }
+rendering::ForwardPlusInstance &CRasterizationRendererComponent::GetForwardPlusInstance() { return m_hdrInfo.forwardPlusInstance; }
 
 void CRasterizationRendererComponent::SetBloomThreshold(float threshold) { m_rendererData.bloomThreshold = threshold; }
 float CRasterizationRendererComponent::GetBloomThreshold() const { return m_rendererData.bloomThreshold; }
@@ -389,10 +389,10 @@ Float CRasterizationRendererComponent::GetHDRExposure() const { return m_hdrInfo
 Float CRasterizationRendererComponent::GetMaxHDRExposure() const { return m_hdrInfo.max_exposure; }
 void CRasterizationRendererComponent::SetMaxHDRExposure(Float exposure) { m_hdrInfo.max_exposure = exposure; }
 
-const std::vector<pragma::math::Plane> &CRasterizationRendererComponent::GetFrustumPlanes() const { return m_frustumPlanes; }
-const std::vector<pragma::math::Plane> &CRasterizationRendererComponent::GetClippedFrustumPlanes() const { return m_clippedFrustumPlanes; }
+const std::vector<math::Plane> &CRasterizationRendererComponent::GetFrustumPlanes() const { return m_frustumPlanes; }
+const std::vector<math::Plane> &CRasterizationRendererComponent::GetClippedFrustumPlanes() const { return m_clippedFrustumPlanes; }
 
-void CRasterizationRendererComponent::UpdateFrustumPlanes(pragma::CSceneComponent &scene)
+void CRasterizationRendererComponent::UpdateFrustumPlanes(CSceneComponent &scene)
 {
 	m_frustumPlanes.clear();
 	m_clippedFrustumPlanes.clear();
@@ -438,7 +438,7 @@ void CRasterizationRendererComponent::UpdateFrustumPlanes(pragma::CSceneComponen
 	}*/
 }
 
-void CRasterizationRendererComponent::SetLightMap(pragma::CLightMapComponent &lightMapC)
+void CRasterizationRendererComponent::SetLightMap(CLightMapComponent &lightMapC)
 {
 	m_rendererData.lightmapExposurePow = lightMapC.CalcLightMapPowExposurePow();
 	/*if(
@@ -447,11 +447,11 @@ void CRasterizationRendererComponent::SetLightMap(pragma::CLightMapComponent &li
 		lightMapC.GetDirectionalLightMap() == m_lightMapInfo.directionalLightMapTexture
 	)
 		return;*/
-	m_lightMapInfo.lightMapTexture = lightMapC.GetTexture(pragma::CLightMapComponent::Texture::DiffuseMap);
+	m_lightMapInfo.lightMapTexture = lightMapC.GetTexture(CLightMapComponent::Texture::DiffuseMap);
 	if(!m_lightMapInfo.lightMapTexture) {
-		m_lightMapInfo.lightMapTexture = lightMapC.GetTexture(pragma::CLightMapComponent::Texture::DiffuseDirectMap);
-		m_lightMapInfo.lightMapIndirectTexture = lightMapC.GetTexture(pragma::CLightMapComponent::Texture::DiffuseIndirectMap);
-		m_lightMapInfo.lightMapDominantDirectionTexture = lightMapC.GetTexture(pragma::CLightMapComponent::Texture::DominantDirectionMap);
+		m_lightMapInfo.lightMapTexture = lightMapC.GetTexture(CLightMapComponent::Texture::DiffuseDirectMap);
+		m_lightMapInfo.lightMapIndirectTexture = lightMapC.GetTexture(CLightMapComponent::Texture::DiffuseIndirectMap);
+		m_lightMapInfo.lightMapDominantDirectionTexture = lightMapC.GetTexture(CLightMapComponent::Texture::DominantDirectionMap);
 	}
 	m_lightMapInfo.lightMapComponent = lightMapC.GetHandle<CLightMapComponent>();
 	if(m_lightMapInfo.cbExposure.IsValid())
@@ -463,13 +463,13 @@ void CRasterizationRendererComponent::SetLightMap(pragma::CLightMapComponent &li
 	}
 	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
 
-	auto &dummyTex = pragma::get_cengine()->GetRenderContext().GetDummyTexture();
+	auto &dummyTex = get_cengine()->GetRenderContext().GetDummyTexture();
 	auto getTex = [&dummyTex](const std::shared_ptr<prosper::Texture> &tex) { return tex ? tex : dummyTex; };
-	ds.SetBindingTexture(*getTex(m_lightMapInfo.lightMapTexture), pragma::math::to_integral(pragma::ShaderScene::RendererBinding::LightMapDiffuse));
-	ds.SetBindingTexture(*getTex(m_lightMapInfo.lightMapIndirectTexture), pragma::math::to_integral(pragma::ShaderScene::RendererBinding::LightMapDiffuseIndirect));
-	ds.SetBindingTexture(*getTex(m_lightMapInfo.lightMapDominantDirectionTexture), pragma::math::to_integral(pragma::ShaderScene::RendererBinding::LightMapDominantDirection));
+	ds.SetBindingTexture(*getTex(m_lightMapInfo.lightMapTexture), math::to_integral(ShaderScene::RendererBinding::LightMapDiffuse));
+	ds.SetBindingTexture(*getTex(m_lightMapInfo.lightMapIndirectTexture), math::to_integral(ShaderScene::RendererBinding::LightMapDiffuseIndirect));
+	ds.SetBindingTexture(*getTex(m_lightMapInfo.lightMapDominantDirectionTexture), math::to_integral(ShaderScene::RendererBinding::LightMapDominantDirection));
 }
-const pragma::ComponentHandle<pragma::CLightMapComponent> &CRasterizationRendererComponent::GetLightMap() const { return m_lightMapInfo.lightMapComponent; }
+const ComponentHandle<CLightMapComponent> &CRasterizationRendererComponent::GetLightMap() const { return m_lightMapInfo.lightMapComponent; }
 bool CRasterizationRendererComponent::HasIndirectLightmap() const { return m_lightMapInfo.lightMapIndirectTexture != nullptr; }
 bool CRasterizationRendererComponent::HasDirectionalLightmap() const { return m_lightMapInfo.lightMapDominantDirectionTexture != nullptr; }
 
@@ -478,15 +478,15 @@ void CRasterizationRendererComponent::ReloadPresentationRenderTarget() { m_hdrIn
 prosper::SampleCountFlags CRasterizationRendererComponent::GetSampleCount() const { return const_cast<CRasterizationRendererComponent *>(this)->GetHDRInfo().sceneRenderTarget->GetTexture().GetImage().GetSampleCount(); }
 bool CRasterizationRendererComponent::IsMultiSampled() const { return GetSampleCount() != prosper::SampleCountFlags::e1Bit; }
 
-prosper::RenderTarget *CRasterizationRendererComponent::GetPrepassRenderTarget(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { return GetPrepass().renderTarget.get(); }
-prosper::RenderTarget *CRasterizationRendererComponent::GetLightingPassRenderTarget(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+prosper::RenderTarget *CRasterizationRendererComponent::GetPrepassRenderTarget(const rendering::DrawSceneInfo &drawSceneInfo) { return GetPrepass().renderTarget.get(); }
+prosper::RenderTarget *CRasterizationRendererComponent::GetLightingPassRenderTarget(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	auto &hdrInfo = GetHDRInfo();
 	auto &rt = hdrInfo.GetRenderTarget(drawSceneInfo);
 	return &rt;
 }
 
-prosper::RenderTarget *CRasterizationRendererComponent::BeginRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass, bool secondaryCommandBuffers)
+prosper::RenderTarget *CRasterizationRendererComponent::BeginRenderPass(const rendering::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass, bool secondaryCommandBuffers)
 {
 	auto *rt = GetLightingPassRenderTarget(drawSceneInfo);
 	if(rt == nullptr)
@@ -498,12 +498,12 @@ prosper::RenderTarget *CRasterizationRendererComponent::BeginRenderPass(const pr
 	return result ? rt : nullptr;
 	;
 }
-bool CRasterizationRendererComponent::EndRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+bool CRasterizationRendererComponent::EndRenderPass(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	auto &hdrInfo = GetHDRInfo();
 	return hdrInfo.EndRenderPass(drawSceneInfo);
 }
-bool CRasterizationRendererComponent::ResolveRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+bool CRasterizationRendererComponent::ResolveRenderPass(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	auto &hdrInfo = GetHDRInfo();
 	return hdrInfo.ResolveRenderPass(drawSceneInfo);
@@ -513,17 +513,17 @@ prosper::Shader *CRasterizationRendererComponent::GetWireframeShader() const { r
 
 ////////
 
-CELightingStageData::CELightingStageData(pragma::rendering::LightingStageRenderProcessor &renderProcessor) : renderProcessor {renderProcessor} {}
+CELightingStageData::CELightingStageData(rendering::LightingStageRenderProcessor &renderProcessor) : renderProcessor {renderProcessor} {}
 void CELightingStageData::PushArguments(lua::State *l) {}
 
 ////////
 
-CEPrepassStageData::CEPrepassStageData(pragma::rendering::DepthStageRenderProcessor &renderProcessor, pragma::ShaderPrepassBase &shader) : renderProcessor {renderProcessor}, shader {shader} {}
+CEPrepassStageData::CEPrepassStageData(rendering::DepthStageRenderProcessor &renderProcessor, ShaderPrepassBase &shader) : renderProcessor {renderProcessor}, shader {shader} {}
 void CEPrepassStageData::PushArguments(lua::State *l) {}
 
 ////////
 
-CEUpdateRenderBuffers::CEUpdateRenderBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
+CEUpdateRenderBuffers::CEUpdateRenderBuffers(const rendering::DrawSceneInfo &drawSceneInfo) : drawSceneInfo {drawSceneInfo} {}
 void CEUpdateRenderBuffers::PushArguments(lua::State *l) {}
 
 ////////
@@ -534,17 +534,17 @@ void CRasterizationRenderer::Initialize()
 	AddComponent<CRasterizationRendererComponent>();
 }
 
-static void cl_render_ssao_callback(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool enabled)
+static void cl_render_ssao_callback(NetworkState *, const console::ConVar &, bool, bool enabled)
 {
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
-	auto &gameWorldShaderSettings = pragma::get_client_state()->GetGameWorldShaderSettings();
+	auto &gameWorldShaderSettings = get_client_state()->GetGameWorldShaderSettings();
 	if(gameWorldShaderSettings.ssaoEnabled == enabled)
 		return;
 	gameWorldShaderSettings.ssaoEnabled = enabled;
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	context.WaitIdle();
-	for(auto &c : EntityCIterator<CRasterizationRendererComponent> {*pragma::get_cgame()})
+	for(auto &c : EntityCIterator<CRasterizationRendererComponent> {*get_cgame()})
 		c.SetSSAOEnabled(enabled);
 }
 namespace {

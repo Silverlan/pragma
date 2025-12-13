@@ -15,13 +15,13 @@ export namespace pragma {
 	}
 	class DLLCLIENT CObserverComponent final : public BaseObserverComponent, public CBaseNetComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		CObserverComponent(pragma::ecs::BaseEntity &ent);
+		CObserverComponent(ecs::BaseEntity &ent);
 		virtual ~CObserverComponent() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua::State *l) override;
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 	  public:
 		virtual void SetObserverMode(ObserverMode mode) override;

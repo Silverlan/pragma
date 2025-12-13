@@ -81,7 +81,7 @@ void pragma::gui::types::WIMainMenu::PlayNextMenuTrack(bool newRound)
 	if(m_cbMenuTrack.IsValid())
 		m_cbMenuTrack.Remove();
 	if(m_menuTracks.empty()) {
-		FileManager::FindFiles("sounds/ui/gamestartup*.*", &m_menuTracks, nullptr);
+		fs::find_files("sounds/ui/gamestartup*.*", &m_menuTracks, nullptr);
 		newRound = true;
 	}
 	if(m_menuTracks.empty())
@@ -149,8 +149,8 @@ void pragma::gui::types::WIMainMenu::Initialize()
 	pImageSlideShow->SetAnchor(0.f, 0.f, 1.f, 1.f);
 	pImageSlideShow->SetColor(0.75f, 0.75f, 0.75f, 1.f);
 	std::vector<std::string> imgFiles;
-	FileManager::FindFiles("screenshots/*.tga", &imgFiles, nullptr);
-	FileManager::FindFiles("screenshots/*.png", &imgFiles, nullptr);
+	fs::find_files("screenshots/*.tga", &imgFiles, nullptr);
+	fs::find_files("screenshots/*.png", &imgFiles, nullptr);
 	for(auto it = imgFiles.begin(); it != imgFiles.end(); it++)
 		*it = "screenshots/" + *it;
 	pImageSlideShow->SetImages(imgFiles);

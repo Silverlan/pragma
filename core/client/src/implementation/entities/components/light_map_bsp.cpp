@@ -30,21 +30,21 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 #else
 	auto numPixels = extents.width * extents.height;
 #endif
-	auto imgBuf = uimg::ImageBuffer::Create(extents.width, extents.height, uimg::Format::RGBA16);
+	auto imgBuf = image::ImageBuffer::Create(extents.width, extents.height, image::Format::RGBA16);
 
 	// We can't read the image data directly, so we'll need a temporary buffer to copy it into
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.size = imgBuf->GetSize();
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
 	createInfo.usageFlags = prosper::BufferUsageFlags::TransferDstBit;
 	auto buf = context.CreateBuffer(createInfo);
 
-	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
+	auto &setupCmd = get_cengine()->GetSetupCommandBuffer();
 	setupCmd->RecordImageBarrier(img, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferDstOptimal);
 	setupCmd->RecordCopyImageToBuffer({}, img, prosper::ImageLayout::TransferDstOptimal, *buf);
 	setupCmd->RecordImageBarrier(img, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
-	pragma::get_cengine()->FlushSetupCommandBuffer();
+	get_cengine()->FlushSetupCommandBuffer();
 
 	if(buf->Map(0, createInfo.size, prosper::IBuffer::MapFlags::ReadBit) == false)
 		return;
@@ -61,12 +61,12 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 #endif
 	// imgBuf->Clear(colors::Red);
 
-	auto mapPath = "maps/" + pragma::get_cgame()->GetMapName() + ".bsp";
-	auto *convertLightmapDataToBspLuxelData = reinterpret_cast<bool (*)(pragma::NetworkState &, const std::string &, const uimg::ImageBuffer &, uint32_t, uint32_t, std::string &)>(pragma::util::impl::get_module_func(pragma::get_client_state(), "convert_lightmap_data_to_bsp_luxel_data"));
+	auto mapPath = "maps/" + get_cgame()->GetMapName() + ".bsp";
+	auto *convertLightmapDataToBspLuxelData = reinterpret_cast<bool (*)(NetworkState &, const std::string &, const image::ImageBuffer &, uint32_t, uint32_t, std::string &)>(util::impl::get_module_func(get_client_state(), "convert_lightmap_data_to_bsp_luxel_data"));
 	if(convertLightmapDataToBspLuxelData == nullptr)
 		return;
 	std::string errMsg;
-	if(convertLightmapDataToBspLuxelData(*pragma::get_client_state(), mapPath, *imgBuf, extents.width, extents.height, errMsg) == false) {
+	if(convertLightmapDataToBspLuxelData(*get_client_state(), mapPath, *imgBuf, extents.width, extents.height, errMsg) == false) {
 		Con::cwar << "Unable to convert lightmap data to BSP luxel data: " << errMsg << Con::endl;
 		return;
 	}

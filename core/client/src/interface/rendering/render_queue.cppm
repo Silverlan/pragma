@@ -18,7 +18,7 @@ export namespace pragma::rendering {
 		// Distance should *not* be set unless necessary (e.g. translucent geometry),
 		// otherwise instancing effectiveness will be reduced
 		SortingKey() = default;
-		SortingKey(msys::MaterialIndex material, prosper::ShaderIndex shader, bool instantiable, bool translucentKey);
+		SortingKey(material::MaterialIndex material, prosper::ShaderIndex shader, bool instantiable, bool translucentKey);
 		union {
 			struct {
 				// Note: Distance is currently unused and could be used for other purposes in the future.
@@ -44,17 +44,17 @@ export namespace pragma::rendering {
 		static auto constexpr INSTANCED = std::numeric_limits<uint16_t>::max();
 		static auto constexpr UNIQUE = std::numeric_limits<uint16_t>::max() - 1;
 		RenderQueueItem() = default;
-		RenderQueueItem(ecs::CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const TranslucencyPassInfo *optTranslucencyPassInfo = nullptr);
+		RenderQueueItem(ecs::CBaseEntity &ent, RenderMeshIndex meshIdx, material::CMaterial &mat, prosper::PipelineID pipelineId, const TranslucencyPassInfo *optTranslucencyPassInfo = nullptr);
 
-		msys::CMaterial *GetMaterial() const;
+		material::CMaterial *GetMaterial() const;
 		ecs::CBaseEntity *GetEntity() const;
-		pragma::geometry::CModelSubMesh *GetMesh() const;
+		geometry::CModelSubMesh *GetMesh() const;
 		prosper::ShaderGraphics *GetShader(uint32_t &outPipelineIndex) const;
 
-		msys::MaterialIndex material;
+		material::MaterialIndex material;
 		prosper::PipelineID pipelineId = std::numeric_limits<prosper::PipelineID>::max();
 		EntityIndex entity;
-		pragma::rendering::RenderMeshIndex mesh;
+		RenderMeshIndex mesh;
 		SortingKey sortingKey;
 		bool translucentKey;
 
@@ -81,7 +81,7 @@ export namespace pragma::rendering {
 		void Reserve();
 		void Add(const std::vector<RenderQueueItem> &items);
 		void Add(const RenderQueueItem &item);
-		void Add(ecs::CBaseEntity &ent, RenderMeshIndex meshIdx, msys::CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam = nullptr);
+		void Add(ecs::CBaseEntity &ent, RenderMeshIndex meshIdx, material::CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam = nullptr);
 		void Sort();
 		void Merge(const RenderQueue &other);
 		const std::string &GetName() const { return m_name; }

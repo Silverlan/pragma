@@ -13,15 +13,15 @@ import :rendering.shaders;
 
 using namespace pragma;
 
-CRendererPpFogComponent::CRendererPpFogComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
-void CRendererPpFogComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+CRendererPpFogComponent::CRendererPpFogComponent(ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
+void CRendererPpFogComponent::DoRenderEffect(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
-	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingFog");
+	get_cgame()->StartGPUProfilingStage("PostProcessingFog");
 
-	pragma::util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
-		pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingFog
+	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
+		get_cgame()->StopGPUProfilingStage(); // PostProcessingFog
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
 	}};
@@ -40,10 +40,10 @@ void CRendererPpFogComponent::DoRenderEffect(const pragma::rendering::DrawSceneI
 		}
 	}
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto hShaderFog = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPFog);
+	auto hShaderFog = get_cgame()->GetGameShader(CGame::GameShader::PPFog);
 	if(descSetGroupFog == nullptr || hShaderFog.expired())
 		return;
-	auto &shaderFog = static_cast<pragma::ShaderPPFog &>(*hShaderFog.get());
+	auto &shaderFog = static_cast<ShaderPPFog &>(*hShaderFog.get());
 	auto &prepass = hdrInfo.prepass;
 	auto texDepth = prepass.textureDepth;
 	if(texDepth->IsMSAATexture()) {

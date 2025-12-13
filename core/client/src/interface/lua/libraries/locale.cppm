@@ -19,8 +19,8 @@ export namespace Lua {
 		DLLCLIENT bool localize(const std::string &identifier, const std::string &lan, const std::string &category, const std::string &text);
 		DLLCLIENT bool relocalize(const std::string &identifier, const std::string &newIdentifier, const std::string &oldCategory, const std::string &newCategory);
 		DLLCLIENT void clear();
-		DLLCLIENT Lua::map<std::string, std::string> get_texts(lua::State *l);
-		DLLCLIENT Lua::opt<Lua::map<std::string, std::string>> parse(lua::State *l, const std::string &fileName, const std::string &lan);
-		DLLCLIENT Lua::opt<Lua::map<std::string, std::string>> parse(lua::State *l, const std::string &fileName);
+		DLLCLIENT map<std::string, std::string> get_texts(lua::State *l);
+		DLLCLIENT opt<map<std::string, std::string>> parse(lua::State *l, const std::string &fileName, const std::string &lan);
+		DLLCLIENT opt<map<std::string, std::string>> parse(lua::State *l, const std::string &fileName);
 	};
 };

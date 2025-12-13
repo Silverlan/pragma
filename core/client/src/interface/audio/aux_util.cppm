@@ -11,8 +11,8 @@ export import pragma.soundsystem;
 export import pragma.udm;
 export import std;
 
-export namespace al {
-	DLLCLIENT std::shared_ptr<al::IEffect> create_aux_effect(const std::string &type, udm::LinkedPropertyWrapper &prop);
-	DLLCLIENT std::shared_ptr<al::IEffect> create_aux_effect(const std::string &name, const std::string &type, udm::LinkedPropertyWrapper &prop);
+export namespace pragma::audio {
+	DLLCLIENT std::shared_ptr<IEffect> create_aux_effect(const std::string &type, udm::LinkedPropertyWrapper &prop);
+	DLLCLIENT std::shared_ptr<IEffect> create_aux_effect(const std::string &name, const std::string &type, udm::LinkedPropertyWrapper &prop);
 	DLLCLIENT const std::vector<std::string> &get_aux_types();
 };

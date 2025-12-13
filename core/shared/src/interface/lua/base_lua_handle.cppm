@@ -15,7 +15,7 @@ export {
 		  public:
 			BaseLuaHandle();
 			virtual ~BaseLuaHandle();
-			pragma::util::TWeakSharedHandle<BaseLuaHandle> GetHandle() const { return pragma::util::TWeakSharedHandle<BaseLuaHandle> {m_handle}; }
+			util::TWeakSharedHandle<BaseLuaHandle> GetHandle() const { return pragma::util::TWeakSharedHandle<BaseLuaHandle> {m_handle}; }
 			virtual void InitializeLuaObject(lua::State *lua) = 0;
 			const luabind::object &GetLuaObject(lua::State *lua) const { return const_cast<BaseLuaHandle *>(this)->GetLuaObject(lua); }
 			luabind::object &GetLuaObject(lua::State *lua) { return GetLuaObject(); }
@@ -32,14 +32,14 @@ export {
 			CallbackReturnType CallLuaMethod(const std::string &name, T *ret, TARGS... args);
 
 			template<typename T>
-			pragma::util::TWeakSharedHandle<T> GetHandle() const;
+			util::TWeakSharedHandle<T> GetHandle() const;
 		  protected:
 			template<typename T>
 			void InitializeLuaObject(lua::State *l);
 			void InvalidateHandle();
 			void SetLuaObject(const luabind::object &o);
 		  private:
-			pragma::util::TSharedHandle<BaseLuaHandle> m_handle {};
+			util::TSharedHandle<BaseLuaHandle> m_handle {};
 			luabind::object m_luaObj {};
 		};
 
@@ -50,9 +50,9 @@ export {
 		}
 
 		template<typename T>
-		pragma::util::TWeakSharedHandle<T> BaseLuaHandle::GetHandle() const
+		util::TWeakSharedHandle<T> BaseLuaHandle::GetHandle() const
 		{
-			return pragma::util::weak_shared_handle_cast<BaseLuaHandle, T>(GetHandle());
+			return util::weak_shared_handle_cast<BaseLuaHandle, T>(GetHandle());
 		}
 
 		template<class T, typename... TARGS>

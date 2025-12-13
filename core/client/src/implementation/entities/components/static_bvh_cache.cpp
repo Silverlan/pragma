@@ -10,7 +10,7 @@ import :engine;
 
 using namespace pragma;
 
-void CStaticBvhCacheComponent::InitializeLuaObject(lua::State *l) { return BaseStaticBvhCacheComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CStaticBvhCacheComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CStaticBvhCacheComponent::Initialize() { BaseStaticBvhCacheComponent::Initialize(); }
 
@@ -18,9 +18,9 @@ void CStaticBvhCacheComponent::DoRebuildBvh() {}
 
 void CStaticBvhCacheComponent::TestRebuildBvh()
 {
-	std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> meshes;
-	std::vector<pragma::ecs::BaseEntity *> meshToEntity;
-	std::vector<pragma::math::ScaledTransform> meshPoses;
+	std::vector<std::shared_ptr<geometry::ModelSubMesh>> meshes;
+	std::vector<ecs::BaseEntity *> meshToEntity;
+	std::vector<math::ScaledTransform> meshPoses;
 	for(auto *c : m_entities) {
 		auto &ent = c->GetEntity();
 		auto *mdlC = static_cast<CModelComponent *>(ent.GetModelComponent());

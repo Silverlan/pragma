@@ -144,7 +144,7 @@ std::optional<std::string> CrashHandler::GenerateMiniDump(std::string &outErr) c
 		return {};
 	}
 
-	auto programPath = filemanager::get_program_write_path();
+	auto programPath = fs::get_program_write_path();
 	auto szDumpPath = programPath + "/crashdumps/";
 	szDumpPath += m_appName + std::string(".dmp");
 
@@ -276,7 +276,7 @@ bool CrashHandler::GenerateCrashDump() const
 	pragma::locale::load("prompts.txt");
 
 	LOGGER.debug("Creating 'crashdumps' directory...");
-	FileManager::CreateDirectory("crashdumps");
+	fs::create_directory("crashdumps");
 
 	// ask the user if they want to save a dump file
 	auto saveDump = false;
@@ -343,7 +343,7 @@ bool CrashHandler::GenerateCrashDump() const
 					if(tDelta >= 4) // Don't wait more than 4 seconds
 						break;
 					std::this_thread::sleep_for(std::chrono::milliseconds(250));
-					f = FileManager::OpenSystemFile(minidumpPath->c_str(), "rb");
+					f = fs::open_system_file(minidumpPath, fs::FileMode::Read | fs::FileMode::Binary);
 				}
 				if(f != nullptr) {
 					auto size = f->GetSize();
@@ -366,7 +366,7 @@ bool CrashHandler::GenerateCrashDump() const
 
 			szResult = pragma::locale::get_text("prompt_crash_dump_saved", std::vector<std::string> {zipFileName, "crashdumps@pragma-engine.com"});
 			std::string absPath;
-			if(filemanager::find_absolute_path(zipFileName, absPath)) {
+			if(fs::find_absolute_path(zipFileName, absPath)) {
 				auto path = pragma::util::FilePath(absPath);
 				pragma::util::open_path_in_explorer(std::string {path.GetPath()}, std::string {path.GetFileName()});
 			}

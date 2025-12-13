@@ -13,15 +13,15 @@ import :entities.components.particle_system;
 using namespace pragma;
 
 void CSoundEmitterComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-bool CSoundEmitterComponent::ShouldRemoveSound(pragma::audio::ALSound &snd) const { return (BaseSoundEmitterComponent::ShouldRemoveSound(snd) /* && snd.GetIndex() == 0*/) ? true : false; }
+bool CSoundEmitterComponent::ShouldRemoveSound(audio::ALSound &snd) const { return (BaseSoundEmitterComponent::ShouldRemoveSound(snd) /* && snd.GetIndex() == 0*/) ? true : false; }
 
-void CSoundEmitterComponent::AddSound(std::shared_ptr<pragma::audio::ALSound> snd) { InitializeSound(snd); }
+void CSoundEmitterComponent::AddSound(std::shared_ptr<audio::ALSound> snd) { InitializeSound(snd); }
 
 void CSoundEmitterComponent::PrecacheSounds()
 {
 	BaseSoundEmitterComponent::PrecacheSounds();
-	pragma::get_client_state()->PrecacheSound("fx.fire_small", pragma::audio::ALChannel::Mono);
-	pragma::ecs::CParticleSystemComponent::Precache("fire");
+	get_client_state()->PrecacheSound("fx.fire_small", audio::ALChannel::Mono);
+	ecs::CParticleSystemComponent::Precache("fire");
 }
 
 void CSoundEmitterComponent::ReceiveData(NetPacket &packet)
@@ -29,16 +29,16 @@ void CSoundEmitterComponent::ReceiveData(NetPacket &packet)
 	auto numSounds = packet->Read<uint8_t>();
 	for(auto i = decltype(numSounds) {0}; i < numSounds; ++i) {
 		auto sndIdx = packet->Read<uint32_t>();
-		auto snd = pragma::get_client_state()->GetSoundByIndex(sndIdx);
+		auto snd = get_client_state()->GetSoundByIndex(sndIdx);
 		if(snd == nullptr)
 			continue;
 		AddSound(snd);
 	}
 }
 
-std::shared_ptr<pragma::audio::ALSound> CSoundEmitterComponent::CreateSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo)
+std::shared_ptr<audio::ALSound> CSoundEmitterComponent::CreateSound(std::string sndname, audio::ALSoundType type, const SoundInfo &sndInfo)
 {
-	std::shared_ptr<pragma::audio::ALSound> snd = pragma::get_client_state()->CreateSound(sndname, type, pragma::audio::ALCreateFlags::Mono);
+	std::shared_ptr<audio::ALSound> snd = get_client_state()->CreateSound(sndname, type, audio::ALCreateFlags::Mono);
 	if(snd == nullptr)
 		return snd;
 	InitializeSound(snd);
@@ -47,13 +47,13 @@ std::shared_ptr<pragma::audio::ALSound> CSoundEmitterComponent::CreateSound(std:
 	return snd;
 }
 
-std::shared_ptr<pragma::audio::ALSound> CSoundEmitterComponent::EmitSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo)
+std::shared_ptr<audio::ALSound> CSoundEmitterComponent::EmitSound(std::string sndname, audio::ALSoundType type, const SoundInfo &sndInfo)
 {
-	std::shared_ptr<pragma::audio::ALSound> snd = CreateSound(sndname, type, sndInfo);
+	std::shared_ptr<audio::ALSound> snd = CreateSound(sndname, type, sndInfo);
 	if(snd == nullptr)
 		return snd;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	pragma::audio::ALSound *al = snd.get();
+	audio::ALSound *al = snd.get();
 	al->SetPosition(pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {});
 	//al->SetVelocity(*GetVelocity());
 	// TODO: Orientation
@@ -63,16 +63,16 @@ std::shared_ptr<pragma::audio::ALSound> CSoundEmitterComponent::EmitSound(std::s
 void CSoundEmitterComponent::MaintainSounds()
 {
 	BaseSoundEmitterComponent::MaintainSounds();
-	auto pFlexComponent = GetEntity().GetComponent<pragma::CFlexComponent>();
+	auto pFlexComponent = GetEntity().GetComponent<CFlexComponent>();
 	for(auto &snd : m_sounds) {
-		if(snd->IsPlaying() == false || (snd->GetType() & pragma::audio::ALSoundType::Voice) == pragma::audio::ALSoundType::Generic)
+		if(snd->IsPlaying() == false || (snd->GetType() & audio::ALSoundType::Voice) == audio::ALSoundType::Generic)
 			continue;
 		if(snd->IsSoundScript() == false) {
 			if(pFlexComponent.valid())
-				pFlexComponent->UpdateSoundPhonemes(static_cast<pragma::audio::CALSound &>(*snd));
+				pFlexComponent->UpdateSoundPhonemes(static_cast<audio::CALSound &>(*snd));
 			continue;
 		}
-		auto *sndScript = dynamic_cast<pragma::audio::ALSoundScript *>(snd.get());
+		auto *sndScript = dynamic_cast<audio::ALSoundScript *>(snd.get());
 		if(sndScript == nullptr)
 			continue;
 		auto numSounds = sndScript->GetSoundCount();
@@ -81,7 +81,7 @@ void CSoundEmitterComponent::MaintainSounds()
 			if(snd == nullptr)
 				continue;
 			if(pFlexComponent.valid())
-				pFlexComponent->UpdateSoundPhonemes(static_cast<pragma::audio::CALSound &>(*snd));
+				pFlexComponent->UpdateSoundPhonemes(static_cast<audio::CALSound &>(*snd));
 		}
 	}
 }
@@ -89,7 +89,7 @@ void CSoundEmitterComponent::MaintainSounds()
 void CSoundEmitterComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseSoundEmitterComponent::RegisterLuaBindings(l, modEnts);
-	auto defCSoundEmitter = pragma::LuaCore::create_entity_component_class<pragma::CSoundEmitterComponent, pragma::BaseSoundEmitterComponent>("SoundEmitterComponent");
+	auto defCSoundEmitter = pragma::LuaCore::create_entity_component_class<CSoundEmitterComponent, BaseSoundEmitterComponent>("SoundEmitterComponent");
 	defCSoundEmitter.scope[Lua::SoundEmitter::RegisterSoundInfo()];
 	modEnts[defCSoundEmitter];
 }

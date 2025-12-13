@@ -20,10 +20,10 @@ const std::vector<pragma::networking::ResourceManager::ResourceInfo> &pragma::ne
 
 const pragma::networking::ResourceManager::ResourceInfo *pragma::networking::ResourceManager::FindResource(const std::string &fileName)
 {
-	auto tgt = FileManager::GetCanonicalizedPath(fileName);
+	auto tgt = fs::get_canonicalized_path(fileName);
 	auto it = std::find_if(m_resources.begin(), m_resources.end(), [&tgt](const ResourceInfo &info) { return (info.fileName == tgt) ? true : false; });
 	if(it == m_resources.end()) {
-		static const auto sndPath = std::string("sounds") + FileManager::GetDirectorySeparator();
+		static const auto sndPath = std::string("sounds") + fs::get_directory_separator();
 		if(pragma::string::compare(fileName.c_str(), sndPath.c_str(), false, sndPath.length()) == true) {
 			std::string ext;
 			if(ufile::get_extension(fileName, &ext) == false) {
@@ -44,7 +44,7 @@ bool pragma::networking::ResourceManager::AddResource(std::string res, bool stre
 {
 	if(pragma::ServerState::Get()->IsSinglePlayer())
 		return false; // We don't need resources in SinglePlayer
-	res = FileManager::GetCanonicalizedPath(res);
+	res = fs::get_canonicalized_path(res);
 	auto checkName = res;
 	std::string ext;
 	if(ufile::get_extension(res, &ext) == true && ext == Lua::FILE_EXTENSION) {
@@ -57,7 +57,7 @@ bool pragma::networking::ResourceManager::AddResource(std::string res, bool stre
 		Con::cwar << "Attempted to add invalid resource '" << res << "'! Skipping..." << Con::endl;
 		return false;
 	}
-	if(!FileManager::Exists(checkName)) {
+	if(!fs::exists(checkName)) {
 		Con::cwar << "Unable to add resource file '" << res << "': File not found! Skipping..." << Con::endl;
 		return false;
 	}

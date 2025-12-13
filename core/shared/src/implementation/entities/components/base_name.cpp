@@ -8,10 +8,10 @@ import :entities.components.base_name;
 
 using namespace pragma;
 
-ComponentEventId baseNameComponent::EVENT_ON_NAME_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseNameComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseNameComponent::EVENT_ON_NAME_CHANGED = registerEvent("ON_NAME_CHANGED", ComponentEventInfo::Type::Broadcast); }
-void BaseNameComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) { using T = BaseNameComponent; }
-BaseNameComponent::BaseNameComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_name(pragma::util::StringProperty::Create()) {}
+ComponentEventId baseNameComponent::EVENT_ON_NAME_CHANGED = INVALID_COMPONENT_ID;
+void BaseNameComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseNameComponent::EVENT_ON_NAME_CHANGED = registerEvent("ON_NAME_CHANGED", ComponentEventInfo::Type::Broadcast); }
+void BaseNameComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember) { using T = BaseNameComponent; }
+BaseNameComponent::BaseNameComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_name(util::StringProperty::Create()) {}
 BaseNameComponent::~BaseNameComponent()
 {
 	if(m_cbOnNameChanged.IsValid())
@@ -21,31 +21,31 @@ void BaseNameComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "name", false) || pragma::string::compare<std::string>(kvData.key, "targetname", false))
 			*m_name = kvData.value;
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(pragma::string::compare<std::string>(inputData.input, "setname", false))
 			*m_name = inputData.data;
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 	m_cbOnNameChanged = m_name->AddCallback([this](std::reference_wrapper<const std::string> oldName, std::reference_wrapper<const std::string> newName) {
-		pragma::CEOnNameChanged onNameChanged {newName.get()};
+		CEOnNameChanged onNameChanged {newName.get()};
 		BroadcastEvent(baseNameComponent::EVENT_ON_NAME_CHANGED, onNameChanged);
 	});
 }
 
 const std::string &BaseNameComponent::GetName() const { return *m_name; }
 void BaseNameComponent::SetName(std::string name) { *m_name = name; }
-const pragma::util::PStringProperty &BaseNameComponent::GetNameProperty() const { return m_name; }
+const util::PStringProperty &BaseNameComponent::GetNameProperty() const { return m_name; }
 
 void BaseNameComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {

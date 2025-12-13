@@ -33,7 +33,7 @@ export namespace pragma {
 #pragma pack(pop)
 
 		ShaderMerge2dImageIntoEquirectangular(prosper::IPrContext &context, const std::string &identifier);
-		bool RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTextureEquirect, prosper::IDescriptorSet &descSetTexture2d, CubeFace cubeFace = CubeFace::PositiveX, pragma::math::Degree range = 360.f);
+		bool RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTextureEquirect, prosper::IDescriptorSet &descSetTexture2d, CubeFace cubeFace = CubeFace::PositiveX, math::Degree range = 360.f);
 	  protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;

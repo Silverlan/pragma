@@ -10,23 +10,23 @@ export import pragma.soundsystem;
 
 export namespace Lua {
 	namespace sound {
-		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxEaxReverbProperties &props);
-		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxChorusProperties &props);
-		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxDistortionProperties &props);
-		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxEchoProperties &props);
-		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxFlangerProperties &props);
-		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxFrequencyShifterProperties &props);
-		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxVocalMorpherProperties &props);
-		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxPitchShifterProperties &props);
-		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxRingModulatorProperties &props);
-		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxAutoWahProperties &props);
-		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxCompressor &props);
-		DLLCLIENT al::PEffect register_aux_effect(const std::string &name, const al::EfxEqualizer &props);
+		DLLCLIENT pragma::audio::PEffect register_aux_effect(const std::string &name, const pragma::audio::EfxEaxReverbProperties &props);
+		DLLCLIENT pragma::audio::PEffect register_aux_effect(const std::string &name, const pragma::audio::EfxChorusProperties &props);
+		DLLCLIENT pragma::audio::PEffect register_aux_effect(const std::string &name, const pragma::audio::EfxDistortionProperties &props);
+		DLLCLIENT pragma::audio::PEffect register_aux_effect(const std::string &name, const pragma::audio::EfxEchoProperties &props);
+		DLLCLIENT pragma::audio::PEffect register_aux_effect(const std::string &name, const pragma::audio::EfxFlangerProperties &props);
+		DLLCLIENT pragma::audio::PEffect register_aux_effect(const std::string &name, const pragma::audio::EfxFrequencyShifterProperties &props);
+		DLLCLIENT pragma::audio::PEffect register_aux_effect(const std::string &name, const pragma::audio::EfxVocalMorpherProperties &props);
+		DLLCLIENT pragma::audio::PEffect register_aux_effect(const std::string &name, const pragma::audio::EfxPitchShifterProperties &props);
+		DLLCLIENT pragma::audio::PEffect register_aux_effect(const std::string &name, const pragma::audio::EfxRingModulatorProperties &props);
+		DLLCLIENT pragma::audio::PEffect register_aux_effect(const std::string &name, const pragma::audio::EfxAutoWahProperties &props);
+		DLLCLIENT pragma::audio::PEffect register_aux_effect(const std::string &name, const pragma::audio::EfxCompressor &props);
+		DLLCLIENT pragma::audio::PEffect register_aux_effect(const std::string &name, const pragma::audio::EfxEqualizer &props);
 
-		DLLCLIENT al::PEffect get_aux_effect(const std::string &name);
-		DLLCLIENT void set_distance_model(al::DistanceModel distanceModel);
-		DLLCLIENT al::DistanceModel get_distance_model();
-		DLLCLIENT bool is_supported(al::ChannelConfig channels, al::SampleType type);
+		DLLCLIENT pragma::audio::PEffect get_aux_effect(const std::string &name);
+		DLLCLIENT void set_distance_model(pragma::audio::DistanceModel distanceModel);
+		DLLCLIENT pragma::audio::DistanceModel get_distance_model();
+		DLLCLIENT bool is_supported(pragma::audio::ChannelConfig channels, pragma::audio::SampleType type);
 
 		DLLCLIENT float get_doppler_factor();
 		DLLCLIENT void set_doppler_factor(float dopplerFactor);
@@ -35,8 +35,8 @@ export namespace Lua {
 
 		DLLCLIENT std::optional<std::string> get_device_name();
 		DLLCLIENT bool add_global_effect(const std::string &name);
-		DLLCLIENT bool add_global_effect(const std::string &name, al::ISoundSystem::GlobalEffectFlag flags, const al::EffectParams &params);
+		DLLCLIENT bool add_global_effect(const std::string &name, pragma::audio::ISoundSystem::GlobalEffectFlag flags, const pragma::audio::EffectParams &params);
 		DLLCLIENT void remove_global_effect(const std::string &name);
-		DLLCLIENT void set_global_effect_parameters(const std::string &name, const al::EffectParams &params);
+		DLLCLIENT void set_global_effect_parameters(const std::string &name, const pragma::audio::EffectParams &params);
 	};
 };

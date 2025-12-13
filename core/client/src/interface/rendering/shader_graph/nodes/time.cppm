@@ -9,7 +9,7 @@ export module pragma.client:rendering.shader_graph.node_time;
 export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
-	class DLLCLIENT TimeNode : public pragma::shadergraph::Node {
+	class DLLCLIENT TimeNode : public shadergraph::Node {
 	  public:
 		static constexpr const char *OUT_TIME = "time";
 		static constexpr const char *OUT_DELTA_TIME = "deltaTime";
@@ -18,6 +18,6 @@ export namespace pragma::rendering::shader_graph {
 
 		TimeNode(const std::string_view &type);
 
-		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
+		virtual std::string DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const override;
 	};
 };

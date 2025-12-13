@@ -743,11 +743,11 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 	}
 
 #if 0
-	auto fVertexData = FileManager::OpenFile<VFilePtrReal>("vertices.bin","wb");
+	auto fVertexData = fs::open_file<fs::VFilePtrReal>("vertices.bin",fs::FileMode::Write | fs::FileMode::Binary);
 	fVertexData->Write(vertexData.data(),vertexData.size() *sizeof(vertexData.front()));
 	fVertexData = nullptr;
 
-	auto fIndexData = FileManager::OpenFile<VFilePtrReal>("indices.bin","wb");
+	auto fIndexData = fs::open_file<fs::VFilePtrReal>("indices.bin",fs::FileMode::Write | fs::FileMode::Binary);
 	fIndexData->Write(indexData.data(),indexData.size() *sizeof(indexData.front()));
 	fIndexData = nullptr;
 #endif
@@ -756,7 +756,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 		outputPath += "animations/";
 		name = *m_animName;
 	}
-	FileManager::CreatePath(outputPath.c_str());
+	fs::create_path(outputPath);
 
 	std::string ext = "gltf";
 	if(m_exportInfo.saveAsBinary)
@@ -764,7 +764,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 
 	auto fileName = ufile::get_file_from_filename(name) + '.' + ext;
 
-	auto writePath = pragma::util::FilePath(filemanager::get_program_write_path(), outputPath, fileName).GetString();
+	auto writePath = pragma::util::FilePath(fs::get_program_write_path(), outputPath, fileName).GetString();
 	if(optOutPath)
 		*optOutPath = outputPath + fileName;
 	tinygltf::TinyGLTF writer {};
@@ -774,7 +774,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 
 	if(m_exportInfo.verbose)
 		Con::cout << "Writing output file as '" << output_filename << "'..." << Con::endl;
-	FileManager::RemoveSystemFile(output_filename.c_str()); // The glTF writer doesn't write anything if the file already exists
+	fs::remove_system_file(output_filename); // The glTF writer doesn't write anything if the file already exists
 	auto result = writer.WriteGltfSceneToFile(&gltfMdl, output_filename, false, true, true, m_exportInfo.saveAsBinary);
 	if(m_exportInfo.verbose) {
 		if(result)
@@ -1324,7 +1324,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 
 	if(m_exportInfo.verbose)
 		Con::cout << "Collecting materials..." << Con::endl;
-	std::vector<msys::Material *> materials {};
+	std::vector<material::Material *> materials {};
 	for(auto &mdlDesc : m_sceneDesc.modelCollection) {
 		for(auto &hMat : mdlDesc.model.GetMaterials()) {
 			if(!hMat)
@@ -1355,7 +1355,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 
 	m_gltfMdl.materials.reserve(materials.size());
 
-	std::unordered_map<msys::Material *, uint32_t> matTranslationTable {};
+	std::unordered_map<material::Material *, uint32_t> matTranslationTable {};
 	for(auto *mat : materials) {
 		std::string errMsg;
 		auto texturePaths = pragma::asset::export_material(*mat, m_exportInfo.imageFormat, errMsg, &m_exportPath, m_exportInfo.normalizeTextureNames);
@@ -1369,7 +1369,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		gltfMat.name = ufile::get_file_from_filename(mat->GetName());
 		ufile::remove_extension_from_filename(gltfMat.name);
 
-		auto itAlbedo = texturePaths->find(msys::material::ALBEDO_MAP_IDENTIFIER);
+		auto itAlbedo = texturePaths->find(material::ematerial::ALBEDO_MAP_IDENTIFIER);
 		if(itAlbedo != texturePaths->end())
 			gltfMat.pbrMetallicRoughness.baseColorTexture.index = fAddTexture(itAlbedo->second);
 
@@ -1378,13 +1378,13 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		mat->GetProperty("alpha_factor", &colorFactor.a);
 		gltfMat.pbrMetallicRoughness.baseColorFactor = {colorFactor[0], colorFactor[1], colorFactor[2], colorFactor[3]};
 
-		auto itNormal = texturePaths->find(msys::material::NORMAL_MAP_IDENTIFIER);
+		auto itNormal = texturePaths->find(material::ematerial::NORMAL_MAP_IDENTIFIER);
 		if(itNormal != texturePaths->end())
 			gltfMat.normalTexture.index = fAddTexture(itNormal->second);
 
 		auto metalnessFactor = 0.f;
 		auto roughnessFactor = 0.5f;
-		auto itRMA = texturePaths->find(msys::material::RMA_MAP_IDENTIFIER);
+		auto itRMA = texturePaths->find(material::ematerial::RMA_MAP_IDENTIFIER);
 		if(itRMA != texturePaths->end()) {
 			gltfMat.pbrMetallicRoughness.metallicRoughnessTexture.index = fAddTexture(itRMA->second);
 			metalnessFactor = 1.f;
@@ -1410,7 +1410,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		}
 		gltfMat.alphaCutoff = alphaCutoff;
 
-		auto itEmissive = texturePaths->find(msys::material::EMISSION_MAP_IDENTIFIER);
+		auto itEmissive = texturePaths->find(material::ematerial::EMISSION_MAP_IDENTIFIER);
 		if(itEmissive != texturePaths->end())
 			gltfMat.emissiveTexture.index = fAddTexture(itEmissive->second);
 

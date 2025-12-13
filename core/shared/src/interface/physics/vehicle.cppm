@@ -18,11 +18,11 @@ export {
 			// Optional custom center of mass.
 			// If not specified, center of mass will be calculated automatically
 			std::optional<Vector3> centerOfMass = {};
-			float GetMass(const pragma::physics::IRigidBody &body) const;
-			void GetAABB(const pragma::physics::IRigidBody &body, Vector3 &min, Vector3 &max) const;
-			Vector3 GetMomentOfInertia(const pragma::physics::IRigidBody &body) const;
-			Vector3 GetCenterOfMass(const pragma::physics::IRigidBody &body) const;
-			std::vector<const pragma::physics::IShape *> GetShapes(const pragma::physics::IRigidBody &body) const;
+			float GetMass(const IRigidBody &body) const;
+			void GetAABB(const IRigidBody &body, Vector3 &min, Vector3 &max) const;
+			Vector3 GetMomentOfInertia(const IRigidBody &body) const;
+			Vector3 GetCenterOfMass(const IRigidBody &body) const;
+			std::vector<const IShape *> GetShapes(const IRigidBody &body) const;
 			bool operator==(const ChassisCreateInfo &other) const { return momentOfInertia == other.momentOfInertia && shapeIndices == other.shapeIndices && centerOfMass == other.centerOfMass; }
 			bool operator!=(const ChassisCreateInfo &other) const { return !operator==(other); }
 		};
@@ -65,21 +65,21 @@ export {
 			// for this wheel. -1 means no shape is associated with
 			// the wheel.
 			int32_t shapeIndex = -1;
-			pragma::math::Degree maxSteeringAngle = 0.f;
+			math::Degree maxSteeringAngle = 0.f;
 			Vector3 chassisOffset = {};
 			SuspensionInfo suspension = {};
 			// Has to match one of the tire types defined in
 			// the tire type manager of the physics environment
-			TypeId tireType = 0;
+			util::TypeId tireType = 0;
 
 			std::optional<float> momentOfInertia = {};
 			// Returns moi if specified, otherwise calculates
 			// moi for a cylinder of the specified radius and mass.
-			float GetMomentOfInertia(const pragma::physics::IRigidBody &body) const;
-			const pragma::physics::IShape *GetShape(const pragma::physics::IRigidBody &body) const;
-			void GetAABB(const pragma::physics::IRigidBody &body, Vector3 &min, Vector3 &max) const;
-			float GetRadius(const pragma::physics::IRigidBody &body) const;
-			float GetWidth(const pragma::physics::IRigidBody &body) const;
+			float GetMomentOfInertia(const IRigidBody &body) const;
+			const IShape *GetShape(const IRigidBody &body) const;
+			void GetAABB(const IRigidBody &body, Vector3 &min, Vector3 &max) const;
+			float GetRadius(const IRigidBody &body) const;
+			float GetWidth(const IRigidBody &body) const;
 		};
 
 		struct DLLNETWORK VehicleCreateInfo {
@@ -117,11 +117,11 @@ export {
 			WheelDrive wheelDrive = WheelDrive::Four;
 			std::vector<AntiRollBar> antiRollBars = {};
 			float maxEngineTorque = 500.f;
-			pragma::math::Radian maxEngineRotationSpeed = 600.f;
+			math::Radian maxEngineRotationSpeed = 600.f;
 			float gearSwitchTime = 0.5f;
 			float clutchStrength = 10.f;
 			float gravityFactor = 1.f; // TODO
-			mutable pragma::util::TSharedHandle<IRigidBody> actor = nullptr;
+			mutable util::TSharedHandle<IRigidBody> actor = nullptr;
 		};
 
 		class DLLNETWORK IVehicle : public IBase, public IWorldObject {
@@ -187,34 +187,34 @@ export {
 
 			virtual bool ShouldUseAutoGears() const = 0;
 			virtual Gear GetCurrentGear() const = 0;
-			virtual pragma::math::Radian GetEngineRotationSpeed() const = 0;
-			virtual void SetEngineRotationSpeed(pragma::math::Radian speed) const = 0;
+			virtual math::Radian GetEngineRotationSpeed() const = 0;
+			virtual void SetEngineRotationSpeed(math::Radian speed) const = 0;
 
 			virtual void SetRestState() = 0;
 
 			virtual void ResetControls() = 0;
 
-			virtual void SetWheelRotationAngle(WheelIndex wheel, pragma::math::Radian angle) = 0;
-			virtual void SetWheelRotationSpeed(WheelIndex wheel, pragma::math::Radian speed) = 0;
+			virtual void SetWheelRotationAngle(WheelIndex wheel, math::Radian angle) = 0;
+			virtual void SetWheelRotationSpeed(WheelIndex wheel, math::Radian speed) = 0;
 
 			virtual bool IsInAir() const = 0;
 
-			virtual std::optional<pragma::math::Transform> GetLocalWheelPose(WheelIndex wheelIndex) const = 0;
+			virtual std::optional<math::Transform> GetLocalWheelPose(WheelIndex wheelIndex) const = 0;
 			virtual uint32_t GetWheelCount() const = 0;
 			virtual float GetSteerFactor() const = 0;
-			virtual pragma::math::Radian GetWheelYawAngle(WheelIndex wheel) const = 0;
-			virtual pragma::math::Radian GetWheelRollAngle(WheelIndex wheel) const = 0;
+			virtual math::Radian GetWheelYawAngle(WheelIndex wheel) const = 0;
+			virtual math::Radian GetWheelRollAngle(WheelIndex wheel) const = 0;
 			virtual float GetForwardSpeed() const = 0;
 			virtual float GetSidewaysSpeed() const = 0;
 
 			virtual float GetBrakeFactor() const = 0;
 			virtual float GetHandbrakeFactor() const = 0;
 			virtual float GetAccelerationFactor() const = 0;
-			virtual pragma::math::Radian GetWheelRotationSpeed(WheelIndex wheel) const = 0;
+			virtual math::Radian GetWheelRotationSpeed(WheelIndex wheel) const = 0;
 		  protected:
-			IVehicle(IEnvironment &env, const pragma::util::TSharedHandle<ICollisionObject> &collisionObject);
+			IVehicle(IEnvironment &env, const util::TSharedHandle<ICollisionObject> &collisionObject);
 			virtual bool ShouldUseDigitalInputs() const = 0;
-			pragma::util::TSharedHandle<ICollisionObject> m_collisionObject = nullptr;
+			util::TSharedHandle<ICollisionObject> m_collisionObject = nullptr;
 		};
 
 		class DLLNETWORK IWheel : public IBase {

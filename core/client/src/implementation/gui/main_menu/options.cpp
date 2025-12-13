@@ -1045,7 +1045,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeAudioSettings()
 
 	// Sound Device
 	/*auto *soundDeviceMenu = pList->AddDropDownMenu(pragma::locale::get_text("audio_device"),[](WIDropDownMenu *pMenu) {
-		auto devices = al::get_devices();
+		auto devices = pragma::audio::get_devices();
 		for(auto &dev : devices)
 			pMenu->AddOption(dev,dev); // TODO: ID?
 	},"cl_audio_device");*/
@@ -1204,19 +1204,19 @@ void pragma::gui::types::WIMainMenuOptions::InitializeControlSettings()
 	pList->AddKeyBinding(pragma::locale::get_text("key_toggle_vr_mirror_window"), "toggle cl_vr_mirror_window_enabled");
 
 	// Initialize custom control options from addons
-	auto *upadManager = dynamic_cast<pragma::pad::PackageManager *>(FileManager::GetPackageManager("upad"));
+	auto *upadManager = dynamic_cast<pragma::pad::PackageManager *>(fs::get_package_manager("upad"));
 	auto &mountedAddons = pragma::AddonSystem::GetMountedAddons();
 	for(auto &info : mountedAddons) {
 		auto addonPath = info.GetAbsolutePath();
-		VFilePtr f = nullptr;
+		fs::VFilePtr f = nullptr;
 		std::string ext;
 		if(ufile::get_extension(addonPath, &ext) == true && ext == "pad") {
 			if(upadManager != nullptr)
-				f = upadManager->OpenFile(info.GetLocalPath(), "menu.xml", false, fsys::SearchFlags::All, fsys::SearchFlags::All); // TODO: Absolute path
+				f = upadManager->OpenFile(info.GetLocalPath(), "menu.xml", false, fs::SearchFlags::All, fs::SearchFlags::All); // TODO: Absolute path
 		}
 		else {
 			auto path = addonPath + "\\menu.xml";
-			f = FileManager::OpenSystemFile(path.c_str(), "r");
+			f = fs::open_system_file(path, fs::FileMode::Read);
 		}
 		if(f != nullptr) {
 			auto content = f->ReadString();

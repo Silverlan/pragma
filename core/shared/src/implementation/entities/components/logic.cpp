@@ -9,14 +9,14 @@ import :entities.components.logic_component;
 using namespace pragma;
 
 ComponentEventId logicComponent::EVENT_ON_TICK = INVALID_COMPONENT_ID;
-void LogicComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { logicComponent::EVENT_ON_TICK = registerEvent("ON_TICK", ComponentEventInfo::Type::Explicit); }
+void LogicComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { logicComponent::EVENT_ON_TICK = registerEvent("ON_TICK", ComponentEventInfo::Type::Explicit); }
 
-LogicComponent::LogicComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+LogicComponent::LogicComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void LogicComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void LogicComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 void LogicComponent::OnEntitySpawn() { BaseEntityComponent::OnEntitySpawn(); }
-void LogicComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void LogicComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void LogicComponent::OnTick(double dt)
 {

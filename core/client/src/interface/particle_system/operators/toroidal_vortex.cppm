@@ -16,8 +16,8 @@ export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorToroidalVortex : public CParticleOperatorWorldBase {
 	public:
 		CParticleOperatorToroidalVortex() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void Simulate(pragma::pts::CParticle &particle, double tDelta, float strength) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 		virtual void Simulate(double tDelta) override;
 	private:
 		Vector3 m_vAxis = {0.f, 1.f, 0.f};
@@ -33,22 +33,22 @@ export namespace pragma::pts {
 	};
 }
 
-void pragma::pts::CParticleOperatorToroidalVortex::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorToroidalVortex::Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperatorWorldBase::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		pragma::string::to_lower(key);
+		string::to_lower(key);
 		if(key == "axis")
 			m_vAxis = uvec::get_normal(uvec::create(it->second));
 		else if(key == "strength")
-			m_fStrength = pragma::util::to_float(it->second);
+			m_fStrength = util::to_float(it->second);
 		else if(key == "divergence")
-			m_fDivergence = pragma::util::to_float(it->second);
+			m_fDivergence = util::to_float(it->second);
 		else if(key == "height")
-			m_fHeight = pragma::util::to_float(it->second);
+			m_fHeight = util::to_float(it->second);
 		else if(key == "radius")
-			m_fRadius = pragma::util::to_float(it->second);
+			m_fRadius = util::to_float(it->second);
 	}
 }
 void pragma::pts::CParticleOperatorToroidalVortex::Simulate(double tDelta)
@@ -64,7 +64,7 @@ void pragma::pts::CParticleOperatorToroidalVortex::Simulate(double tDelta)
 	// find divergence rotation
 	m_dtRotation = uquat::create(m_dtAxis, -m_fDivergence);
 }
-void pragma::pts::CParticleOperatorToroidalVortex::Simulate(pragma::pts::CParticle &particle, double tDelta, float strength)
+void pragma::pts::CParticleOperatorToroidalVortex::Simulate(CParticle &particle, double tDelta, float strength)
 {
 	CParticleOperatorWorldBase::Simulate(particle, tDelta, strength);
 	// cross product of ring axis and particle position is tangent

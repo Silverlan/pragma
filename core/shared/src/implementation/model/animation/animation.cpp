@@ -736,7 +736,7 @@ bool pragma::animation::Animation::Save(udm::AssetDataArg outData, std::string &
 	return true;
 }
 
-bool pragma::animation::Animation::SaveLegacy(VFilePtrReal &f)
+bool pragma::animation::Animation::SaveLegacy(fs::VFilePtrReal &f)
 {
 	f->Write<uint32_t>(PRAGMA_ANIMATION_VERSION);
 	auto offsetToLen = f->Tell();

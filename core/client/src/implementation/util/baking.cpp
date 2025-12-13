@@ -150,16 +150,16 @@ static void generate_sh_normals(const std::vector<pragma::util::baking::BakePixe
 	pool.WaitForCompletion();
 }
 
-static std::shared_ptr<uimg::ImageBuffer> generate_sh_normal_map(const std::vector<pragma::util::baking::BakePixel> &bps, const std::vector<pragma::util::baking::LightSource> &lights, const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> meshes, uint32_t width, uint32_t height)
+static std::shared_ptr<pragma::image::ImageBuffer> generate_sh_normal_map(const std::vector<pragma::util::baking::BakePixel> &bps, const std::vector<pragma::util::baking::LightSource> &lights, const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> meshes, uint32_t width, uint32_t height)
 {
-	auto imgBuf = uimg::ImageBuffer::Create(width, height, uimg::Format::RGB32);
+	auto imgBuf = pragma::image::ImageBuffer::Create(width, height, pragma::image::Format::RGB32);
 	generate_sh_normals(bps, lights, meshes, static_cast<Vector3 *>(imgBuf->GetData()));
-	/*auto f = filemanager::open_file("test_nm.png",filemanager::FileMode::Write | filemanager::FileMode::Binary);
+	/*auto f = fs::open_file("test_nm.png",fs::FileMode::Write | fs::FileMode::Binary);
 	if(f)
 	{
 		auto tmp = imgBuf->Copy();
-		fsys::File fp {f};
-		uimg::save_image(fp,*tmp,uimg::ImageFormat::PNG);
+		fs::File fp {f};
+		image::save_image(fp,*tmp,image::ImageFormat::PNG);
 	}
 	f = nullptr;*/
 
@@ -174,14 +174,14 @@ static std::shared_ptr<uimg::ImageBuffer> generate_sh_normal_map(const std::vect
 	mask_buffer.resize(numPixels);
 	constexpr auto margin = 16u;
 	pragma::util::baking::fill_bake_mask(bps, numPixels, reinterpret_cast<char *>(mask_buffer.data()));
-	uimg::bake_margin(*imgBuf, mask_buffer, margin);
+	pragma::image::bake_margin(*imgBuf, mask_buffer, margin);
 	return imgBuf;
 }
 
-pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> pragma::util::baking::bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
+pragma::util::ParallelJob<std::shared_ptr<pragma::image::ImageBuffer>> pragma::util::baking::bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
   uint32_t height, ::pragma::rendering::LightmapDataCache *optLightmapDataCache)
 {
-	class LightmapBakeJob : public pragma::util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> {
+	class LightmapBakeJob : public pragma::util::ParallelWorker<std::shared_ptr<image::ImageBuffer>> {
 	  public:
 		LightmapBakeJob(uint32_t width, uint32_t height, std::vector<LightSource> &&lights, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &&meshes, std::vector<std::string> &&meshEntityUuids, std::vector<pragma::math::ScaledTransform> &&meshEntityPoses,
 		  const std::shared_ptr<::pragma::rendering::LightmapDataCache> &lmdCache)
@@ -189,7 +189,7 @@ pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> pragma::util::baki
 		{
 			AddThread([this]() {
 				Run();
-				//m_imgBuffer = uimg::load_image(f,pixelFormat);
+				//m_imgBuffer = image::load_image(f,pixelFormat);
 
 				//SetStatus(pragma::util::JobStatus::Failed,"Unable to open image!");
 				//UpdateProgress(1.f);
@@ -198,7 +198,7 @@ pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> pragma::util::baki
 			});
 		}
 
-		virtual std::shared_ptr<uimg::ImageBuffer> GetResult() override { return m_imgBuffer; }
+		virtual std::shared_ptr<image::ImageBuffer> GetResult() override { return m_imgBuffer; }
 	  private:
 		void Run()
 		{
@@ -258,7 +258,7 @@ pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> pragma::util::baki
 		std::vector<std::string> m_meshEntityUuids;
 		std::vector<pragma::math::ScaledTransform> m_meshEntityPoses;
 		std::shared_ptr<::pragma::rendering::LightmapDataCache> m_lightmapDataCache;
-		std::shared_ptr<uimg::ImageBuffer> m_imgBuffer;
+		std::shared_ptr<image::ImageBuffer> m_imgBuffer;
 	};
 
 	std::vector<LightSource> lightData;

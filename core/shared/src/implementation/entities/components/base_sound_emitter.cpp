@@ -8,9 +8,9 @@ import :entities.components.base_sound_emitter;
 
 using namespace pragma;
 
-ComponentEventId baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED = pragma::INVALID_COMPONENT_ID;
-void BaseSoundEmitterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED = registerEvent("ON_SOUND_CREATED", ComponentEventInfo::Type::Broadcast); }
-BaseSoundEmitterComponent::BaseSoundEmitterComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+ComponentEventId baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED = INVALID_COMPONENT_ID;
+void BaseSoundEmitterComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED = registerEvent("ON_SOUND_CREATED", ComponentEventInfo::Type::Broadcast); }
+BaseSoundEmitterComponent::BaseSoundEmitterComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 BaseSoundEmitterComponent::~BaseSoundEmitterComponent()
 {
 	for(int i = 0; i < m_sounds.size(); i++) {
@@ -26,8 +26,8 @@ void BaseSoundEmitterComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("transform");
 }
-std::shared_ptr<pragma::audio::ALSound> BaseSoundEmitterComponent::CreateSound(std::string snd, pragma::audio::ALSoundType, const SoundInfo &) { return std::shared_ptr<pragma::audio::ALSound>(); }
-std::shared_ptr<pragma::audio::ALSound> BaseSoundEmitterComponent::EmitSound(std::string snd, pragma::audio::ALSoundType, const SoundInfo &) { return std::shared_ptr<pragma::audio::ALSound>(); }
+std::shared_ptr<audio::ALSound> BaseSoundEmitterComponent::CreateSound(std::string snd, audio::ALSoundType, const SoundInfo &) { return std::shared_ptr<audio::ALSound>(); }
+std::shared_ptr<audio::ALSound> BaseSoundEmitterComponent::EmitSound(std::string snd, audio::ALSoundType, const SoundInfo &) { return std::shared_ptr<audio::ALSound>(); }
 
 void BaseSoundEmitterComponent::StopSounds()
 {
@@ -40,7 +40,7 @@ void BaseSoundEmitterComponent::StopSounds()
 	SetTickPolicy(TickPolicy::Never);
 }
 
-void BaseSoundEmitterComponent::GetSounds(std::vector<std::shared_ptr<pragma::audio::ALSound>> **sounds) { *sounds = &m_sounds; }
+void BaseSoundEmitterComponent::GetSounds(std::vector<std::shared_ptr<audio::ALSound>> **sounds) { *sounds = &m_sounds; }
 
 bool BaseSoundEmitterComponent::ShouldRemoveSound(audio::ALSound &snd) const
 {
@@ -63,10 +63,10 @@ void BaseSoundEmitterComponent::MaintainSounds()
 	}
 }
 
-void BaseSoundEmitterComponent::InitializeSound(const std::shared_ptr<pragma::audio::ALSound> &ptrSnd)
+void BaseSoundEmitterComponent::InitializeSound(const std::shared_ptr<audio::ALSound> &ptrSnd)
 {
 	auto &ent = GetEntity();
-	auto *snd = static_cast<pragma::audio::ALSound *>(ptrSnd.get());
+	auto *snd = static_cast<audio::ALSound *>(ptrSnd.get());
 	snd->SetSource(&ent);
 	snd->SetRolloffFactor(2.f);
 	snd->SetReferenceDistance(150.f);
@@ -91,12 +91,12 @@ void BaseSoundEmitterComponent::UpdateSoundTransform(audio::ALSound &snd) const
 	auto tComponent = ent.GetTransformComponent();
 	snd.SetPosition(tComponent->GetPosition());
 	snd.SetDirection(tComponent->GetForward());
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+	auto pVelComponent = ent.GetComponent<VelocityComponent>();
 	if(pVelComponent.valid())
 		snd.SetVelocity(pVelComponent->GetVelocity());
 }
 
 /////////////////
 
-CEOnSoundCreated::CEOnSoundCreated(const std::shared_ptr<pragma::audio::ALSound> &sound) : sound {sound} {}
-void CEOnSoundCreated::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<pragma::audio::ALSound>>(l, sound); }
+CEOnSoundCreated::CEOnSoundCreated(const std::shared_ptr<audio::ALSound> &sound) : sound {sound} {}
+void CEOnSoundCreated::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<audio::ALSound>>(l, sound); }

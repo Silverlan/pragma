@@ -20,14 +20,14 @@ export {
 		constexpr double REFERENCE_META_RIG_SCALE = 0.0782465711;
 
 		struct DLLNETWORK RigConfigBone {
-			pragma::GString name;
+			GString name;
 			bool locked = false;
 			// TODO: What units are these? Meters?
 			float length = 1.f;
 			float radius = 0.25f;
 
 			// If not set, bone pose will be used instead
-			std::optional<pragma::math::Transform> ikPose {};
+			std::optional<math::Transform> ikPose {};
 		};
 
 		struct DLLNETWORK RigConfigControl {
@@ -41,16 +41,16 @@ export {
 				PoleTarget,
 				Count,
 			};
-			pragma::GString bone;
+			GString bone;
 			Type type = Type::Drag;
 			float maxForce = -1.f;
 			float rigidity = 1.f;
 			std::optional<Vector3> initialPos {};
 			std::optional<Quat> initialRot {};
 
-			pragma::GString poleTargetBaseBone;
-			pragma::GString poleTargetEffectorBone;
-			pragma::math::Degree poleAngle = 0.f;
+			GString poleTargetBaseBone;
+			GString poleTargetEffectorBone;
+			math::Degree poleAngle = 0.f;
 		};
 
 		struct DLLNETWORK RigConfigConstraint {
@@ -60,13 +60,13 @@ export {
 				BallSocket,
 				Count,
 			};
-			pragma::GString bone0;
-			pragma::GString bone1;
+			GString bone0;
+			GString bone1;
 			Type type = Type::Fixed;
 			SignedAxis axis = SignedAxis::Z;
 			EulerAngles minLimits;
 			EulerAngles maxLimits;
-			pragma::math::ScaledTransform offsetPose {};
+			math::ScaledTransform offsetPose {};
 
 			float rigidity = 1'000.f;
 			float maxForce = -1.f;
@@ -85,12 +85,12 @@ export {
 
 				Count,
 			};
-			pragma::GString bone0;
-			pragma::GString bone1;
+			GString bone0;
+			GString bone1;
 			Type type = Type::BallSocketJoint;
 			std::optional<Vector3> axisA {};
 			std::optional<Vector3> axisB {};
-			std::optional<pragma::math::Degree> maxAngle {};
+			std::optional<math::Degree> maxAngle {};
 			float rigidity = 1.f;
 			union {
 				std::optional<Vector3> anchorPosition {};
@@ -117,38 +117,38 @@ export {
 			void DebugPrint() const;
 			void ToUdmData(udm::LinkedPropertyWrapper &udmData) const;
 
-			PRigConfigBone AddBone(const pragma::GString &name);
-			PRigConfigBone FindBone(const pragma::GString &name);
-			void RemoveBone(const pragma::GString &name);
-			bool HasBone(const pragma::GString &name) const;
-			bool IsBoneLocked(const pragma::GString &name) const;
-			void SetBoneLocked(const pragma::GString &name, bool locked);
+			PRigConfigBone AddBone(const GString &name);
+			PRigConfigBone FindBone(const GString &name);
+			void RemoveBone(const GString &name);
+			bool HasBone(const GString &name) const;
+			bool IsBoneLocked(const GString &name) const;
+			void SetBoneLocked(const GString &name, bool locked);
 
-			void RemoveControl(const pragma::GString &name);
-			bool HasControl(const pragma::GString &name) const;
+			void RemoveControl(const GString &name);
+			bool HasControl(const GString &name) const;
 
-			PRigConfigControl AddControl(const pragma::GString &bone, RigConfigControl::Type type, float rigidity = 1.f);
+			PRigConfigControl AddControl(const GString &bone, RigConfigControl::Type type, float rigidity = 1.f);
 
-			void RemoveJoints(const pragma::GString &bone);
-			void RemoveJoints(const pragma::GString &bone0, const pragma::GString &bone1);
+			void RemoveJoints(const GString &bone);
+			void RemoveJoints(const GString &bone0, const GString &bone1);
 			void RemoveJoint(const RigConfigJoint &joint);
-			PRigConfigJoint AddBallSocketJoint(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &anchorPosition, float rigidity = 1.f);
-			PRigConfigJoint AddSwingLimit(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, pragma::math::Degree maxAngle, float rigidity = 1.f);
-			PRigConfigJoint AddTwistLimit(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, pragma::math::Degree maxAngle, float rigidity = 1.f, const std::optional<Vector3> &measurementAxisA = {});
-			PRigConfigJoint AddSwivelHingeJoint(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity = 1.f);
-			PRigConfigJoint AddTwistJoint(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity);
-			PRigConfigJoint AddDistanceJoint(const pragma::GString &bone0, const pragma::GString &bone1, float rigidity = 1.f);
-			PRigConfigJoint AddAngularJoint(const pragma::GString &bone0, const pragma::GString &bone1, float rigidity = 1.f);
-			PRigConfigJoint AddParentJoint(const pragma::GString &bone0, const pragma::GString &bone1);
+			PRigConfigJoint AddBallSocketJoint(const GString &bone0, const GString &bone1, const Vector3 &anchorPosition, float rigidity = 1.f);
+			PRigConfigJoint AddSwingLimit(const GString &bone0, const GString &bone1, const Vector3 &axisA, const Vector3 &axisB, math::Degree maxAngle, float rigidity = 1.f);
+			PRigConfigJoint AddTwistLimit(const GString &bone0, const GString &bone1, const Vector3 &axisA, const Vector3 &axisB, math::Degree maxAngle, float rigidity = 1.f, const std::optional<Vector3> &measurementAxisA = {});
+			PRigConfigJoint AddSwivelHingeJoint(const GString &bone0, const GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity = 1.f);
+			PRigConfigJoint AddTwistJoint(const GString &bone0, const GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity);
+			PRigConfigJoint AddDistanceJoint(const GString &bone0, const GString &bone1, float rigidity = 1.f);
+			PRigConfigJoint AddAngularJoint(const GString &bone0, const GString &bone1, float rigidity = 1.f);
+			PRigConfigJoint AddParentJoint(const GString &bone0, const GString &bone1);
 
-			void RemoveConstraints(const pragma::GString &bone);
-			void RemoveConstraints(const pragma::GString &bone0, const pragma::GString &bone1);
+			void RemoveConstraints(const GString &bone);
+			void RemoveConstraints(const GString &bone0, const GString &bone1);
 			void RemoveConstraint(const RigConfigConstraint &constraint);
 			void RemoveControl(const RigConfigControl &control);
 			void RemoveBone(const RigConfigBone &bone);
-			PRigConfigConstraint AddFixedConstraint(const pragma::GString &bone0, const pragma::GString &bone1);
-			PRigConfigConstraint AddHingeConstraint(const pragma::GString &bone0, const pragma::GString &bone1, pragma::math::Degree minAngle, pragma::math::Degree maxAngle, const Quat &offsetRotation = uquat::identity());
-			PRigConfigConstraint AddBallSocketConstraint(const pragma::GString &bone0, const pragma::GString &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, SignedAxis axis = SignedAxis::Z);
+			PRigConfigConstraint AddFixedConstraint(const GString &bone0, const GString &bone1);
+			PRigConfigConstraint AddHingeConstraint(const GString &bone0, const GString &bone1, math::Degree minAngle, math::Degree maxAngle, const Quat &offsetRotation = uquat::identity());
+			PRigConfigConstraint AddBallSocketConstraint(const GString &bone0, const GString &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, SignedAxis axis = SignedAxis::Z);
 
 			const std::vector<PRigConfigBone> &GetBones() const { return m_bones; }
 			const std::vector<PRigConfigControl> &GetControls() const { return m_controls; }
@@ -163,11 +163,11 @@ export {
 
 			bool Save(const std::string &fileName);
 		  private:
-			std::vector<PRigConfigBone>::iterator FindBoneIt(const pragma::GString &name);
-			const std::vector<PRigConfigBone>::iterator FindBoneIt(const pragma::GString &name) const;
+			std::vector<PRigConfigBone>::iterator FindBoneIt(const GString &name);
+			const std::vector<PRigConfigBone>::iterator FindBoneIt(const GString &name) const;
 
-			std::vector<PRigConfigControl>::iterator FindControlIt(const pragma::GString &name);
-			const std::vector<PRigConfigControl>::iterator FindControlIt(const pragma::GString &name) const;
+			std::vector<PRigConfigControl>::iterator FindControlIt(const GString &name);
+			const std::vector<PRigConfigControl>::iterator FindControlIt(const GString &name) const;
 
 			std::optional<std::string> m_rootBone {};
 			std::vector<PRigConfigBone> m_bones;

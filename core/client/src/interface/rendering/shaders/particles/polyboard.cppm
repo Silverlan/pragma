@@ -12,9 +12,9 @@ export namespace pragma {
 	class CRasterizationRendererComponent;
 	class DLLCLIENT ShaderParticlePolyboard : public ShaderParticle2DBase {
 	  public:
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_VERTEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_COLOR;
+		static VertexBinding VERTEX_BINDING_VERTEX;
+		static ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_VERTEX;
+		static ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_COLOR;
 
 		ShaderParticlePolyboard(prosper::IPrContext &context, const std::string &identifier);
 
@@ -30,11 +30,11 @@ export namespace pragma {
 			float viewportH;
 		};
 #pragma pack(pop)
-		bool Draw(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::ecs::CParticleSystemComponent &ps, prosper::IBuffer &vertexBuffer, prosper::IBuffer &indexBuffer, uint32_t numIndices, float radius, float curvature);
+		bool Draw(CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, prosper::IBuffer &vertexBuffer, prosper::IBuffer &indexBuffer, uint32_t numIndices, float radius, float curvature);
 	  protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;
 	  private:
-		bool Draw(pragma::CSceneComponent &scene, const pragma::ecs::CParticleSystemComponent &ps, bool bloom) = delete;
+		bool Draw(CSceneComponent &scene, const ecs::CParticleSystemComponent &ps, bool bloom) = delete;
 	};
 };

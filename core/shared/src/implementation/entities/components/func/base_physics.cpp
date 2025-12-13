@@ -12,19 +12,19 @@ void BaseFuncPhysicsComponent::Initialize()
 {
 	BaseFuncSurfaceMaterialComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "mass", false))
-			m_kvMass = pragma::util::to_float(kvData.value);
+			m_kvMass = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "surface_material", false))
 			m_kvSurfaceMaterial = kvData.value;
 		else if(pragma::string::compare<std::string>(kvData.key, "clientside_physics", false))
-			m_bClientsidePhysics = pragma::util::to_boolean(kvData.value);
+			m_bClientsidePhysics = util::to_boolean(kvData.value);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		auto *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
@@ -48,7 +48,7 @@ void BaseFuncPhysicsComponent::OnEntitySpawn()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr) {
 		pPhysComponent->DestroyPhysicsObject();
-		pPhysComponent->SetMoveType(pragma::physics::MoveType::Physics);
+		pPhysComponent->SetMoveType(physics::MoveType::Physics);
 	}
 	auto *phys = InitializePhysics();
 	if(phys != nullptr) {
@@ -57,11 +57,11 @@ void BaseFuncPhysicsComponent::OnEntitySpawn()
 	}
 }
 
-pragma::physics::PhysObj *BaseFuncPhysicsComponent::InitializePhysics()
+physics::PhysObj *BaseFuncPhysicsComponent::InitializePhysics()
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return nullptr;
-	return pPhysComponent->InitializePhysics((m_kvMass > 0) ? pragma::physics::PhysicsType::Dynamic : pragma::physics::PhysicsType::Static);
+	return pPhysComponent->InitializePhysics((m_kvMass > 0) ? physics::PhysicsType::Dynamic : physics::PhysicsType::Static);
 }

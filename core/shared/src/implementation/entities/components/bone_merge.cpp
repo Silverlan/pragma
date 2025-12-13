@@ -8,7 +8,7 @@ import :entities.components.bone_merge;
 
 using namespace pragma;
 
-bool BoneMergeComponent::can_merge(const pragma::asset::Model &mdl, const pragma::asset::Model &mdlParent, bool includeRootBones)
+bool BoneMergeComponent::can_merge(const asset::Model &mdl, const asset::Model &mdlParent, bool includeRootBones)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &skeletonParent = mdlParent.GetSkeleton();
@@ -21,47 +21,47 @@ bool BoneMergeComponent::can_merge(const pragma::asset::Model &mdl, const pragma
 	return false;
 }
 
-ComponentEventId boneMergeComponent::EVENT_ON_TARGET_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BoneMergeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { boneMergeComponent::EVENT_ON_TARGET_CHANGED = registerEvent("ON_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast); }
-void BoneMergeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+ComponentEventId boneMergeComponent::EVENT_ON_TARGET_CHANGED = INVALID_COMPONENT_ID;
+void BoneMergeComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { boneMergeComponent::EVENT_ON_TARGET_CHANGED = registerEvent("ON_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast); }
+void BoneMergeComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BoneMergeComponent;
 
 	{
-		using TTarget = pragma::EntityURef;
+		using TTarget = EntityURef;
 		auto memberInfo = create_component_member_info<T, TTarget, static_cast<void (T::*)(const TTarget &)>(&T::SetTarget), static_cast<const TTarget &(T::*)() const>(&T::GetTarget)>("target", TTarget {});
 		registerMember(std::move(memberInfo));
 	}
 }
-BoneMergeComponent::BoneMergeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+BoneMergeComponent::BoneMergeComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BoneMergeComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { SetTargetDirty(); });
-	BindEventUnhandled(baseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { MergeBonePoses(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { SetTargetDirty(); });
+	BindEventUnhandled(baseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE, [this](std::reference_wrapper<ComponentEvent> evData) { MergeBonePoses(); });
 }
-void BoneMergeComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void BoneMergeComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void BoneMergeComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
 	SetTargetDirty();
 }
 
-void BoneMergeComponent::SetTarget(const pragma::EntityURef &target)
+void BoneMergeComponent::SetTarget(const EntityURef &target)
 {
 	m_target = target;
 	SetTargetDirty();
 	BroadcastEvent(boneMergeComponent::EVENT_ON_TARGET_CHANGED);
 }
-const pragma::EntityURef &BoneMergeComponent::GetTarget() const { return m_target; }
+const EntityURef &BoneMergeComponent::GetTarget() const { return m_target; }
 
 void BoneMergeComponent::SetTargetDirty()
 {
-	m_animC = pragma::ComponentHandle<pragma::BaseAnimatedComponent> {};
-	m_animCParent = pragma::ComponentHandle<pragma::BaseAnimatedComponent> {};
+	m_animC = pragma::ComponentHandle<BaseAnimatedComponent> {};
+	m_animCParent = pragma::ComponentHandle<BaseAnimatedComponent> {};
 	m_boneMappings.clear();
 
-	SetTickPolicy(pragma::TickPolicy::Always);
+	SetTickPolicy(TickPolicy::Always);
 	UpdateBoneMappings();
 }
 
@@ -108,7 +108,7 @@ void BoneMergeComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	BaseEntityComponent::OnEntityComponentAdded(component);
 	auto *animC = dynamic_cast<BaseAnimatedComponent *>(&component);
 	if(animC) {
-		SetTickPolicy(pragma::TickPolicy::Always);
+		SetTickPolicy(TickPolicy::Always);
 		UpdateBoneMappings();
 	}
 }
@@ -117,7 +117,7 @@ void BoneMergeComponent::OnEntityComponentRemoved(BaseEntityComponent &component
 	BaseEntityComponent::OnEntityComponentRemoved(component);
 	auto *animC = dynamic_cast<BaseAnimatedComponent *>(&component);
 	if(animC) {
-		SetTickPolicy(pragma::TickPolicy::Always);
+		SetTickPolicy(TickPolicy::Always);
 		UpdateBoneMappings();
 	}
 }
@@ -130,10 +130,10 @@ void BoneMergeComponent::MergeBonePoses()
 	for(auto &mapping : m_boneMappings) {
 		if(mapping.boneId >= poses.size() || mapping.parentBoneId >= posesParent.size())
 			continue;
-		pragma::math::ScaledTransform pose;
-		if(!m_animCParent->GetBonePose(mapping.parentBoneId, pose, pragma::math::CoordinateSpace::Object))
+		math::ScaledTransform pose;
+		if(!m_animCParent->GetBonePose(mapping.parentBoneId, pose, math::CoordinateSpace::Object))
 			continue;
-		m_animC->SetBonePose(mapping.boneId, pose, pragma::math::CoordinateSpace::Object);
+		m_animC->SetBonePose(mapping.boneId, pose, math::CoordinateSpace::Object);
 	}
 	m_animC->SetAbsolutePosesDirty();
 }

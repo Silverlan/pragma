@@ -12,8 +12,8 @@ import :rendering;
 export namespace pragma {
 	class DLLCLIENT CRendererPpBloomComponent final : public CRendererPpBaseComponent {
 	  public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-		CRendererPpBloomComponent(pragma::ecs::BaseEntity &ent);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		CRendererPpBloomComponent(ecs::BaseEntity &ent);
 
 		void SetBlurRadius(uint32_t radius);
 		void SetBlurSigma(double sigma);
@@ -28,12 +28,12 @@ export namespace pragma {
 
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual std::string GetIdentifier() const override { return "bloom"; }
-		virtual uint32_t GetPostProcessingWeight() const override { return pragma::math::to_integral(CRendererComponent::StandardPostProcessingWeight::Bloom); }
+		virtual uint32_t GetPostProcessingWeight() const override { return math::to_integral(CRendererComponent::StandardPostProcessingWeight::Bloom); }
 
 		virtual void OnTick(double dt) override;
 	  private:
 		void SetPipelineDirty();
-		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) override;
+		virtual void DoRenderEffect(const rendering::DrawSceneInfo &drawSceneInfo) override;
 		rendering::ControlledBlurSettings m_controlledBlurSettings;
 		float m_bloomThreshold = 1.f;
 	};

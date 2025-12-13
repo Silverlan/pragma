@@ -78,13 +78,13 @@ export namespace pragma::rendering {
 			return true;
 		}
 
-		const pragma::rendering::ShaderInputData &GetData() const { return *m_inputData; }
-		const pragma::rendering::ShaderInputDescriptor &GetDescriptor() const { return *m_inputDescriptor; }
+		const ShaderInputData &GetData() const { return *m_inputData; }
+		const ShaderInputDescriptor &GetDescriptor() const { return *m_inputDescriptor; }
 		const std::shared_ptr<prosper::IBuffer> &GetBuffer() const { return m_inputDataBuffer; }
 
 		void UpdateBufferData(prosper::ICommandBuffer &cmd);
-		void AddProperty(pragma::rendering::Property &&prop);
-		void PopulateProperties(const pragma::shadergraph::Graph &graph);
+		void AddProperty(Property &&prop);
+		void PopulateProperties(const shadergraph::Graph &graph);
 	  private:
 		void ResetInputDescriptor();
 		void AllocateInputData();
@@ -94,10 +94,10 @@ export namespace pragma::rendering {
 
 		DirtyRangeTracker m_dirtyTracker;
 
-		std::unique_ptr<pragma::rendering::ShaderInputData> m_inputData;
+		std::unique_ptr<ShaderInputData> m_inputData;
 		bool m_inputDataDirty = false;
 
-		std::unique_ptr<pragma::rendering::ShaderInputDescriptor> m_inputDescriptor;
+		std::unique_ptr<ShaderInputDescriptor> m_inputDescriptor;
 		std::shared_ptr<prosper::IBuffer> m_inputDataBuffer;
 	};
 };

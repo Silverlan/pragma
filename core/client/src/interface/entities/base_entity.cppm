@@ -21,20 +21,20 @@ namespace cBaseEntity {
 export namespace pragma::ecs {
 	class DLLCLIENT CBaseEntity : public BaseEntity {
 	public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(EntityComponentManager &componentManager);
 
 		CBaseEntity();
 		void Construct(unsigned int idx, unsigned int clientIdx);
 		virtual void InitializeLuaObject(lua::State *lua) override;
 
-		virtual pragma::ComponentHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const override;
-		virtual pragma::ComponentHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const override;
-		virtual pragma::ComponentHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const override;
-		virtual pragma::ComponentHandle<pragma::BaseAIComponent> GetAIComponent() const override;
-		virtual pragma::ComponentHandle<pragma::BaseCharacterComponent> GetCharacterComponent() const override;
-		virtual pragma::ComponentHandle<pragma::BasePlayerComponent> GetPlayerComponent() const override;
-		virtual pragma::ComponentHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const override;
-		virtual pragma::ComponentHandle<pragma::BaseNameComponent> GetNameComponent() const override;
+		virtual ComponentHandle<BaseAnimatedComponent> GetAnimatedComponent() const override;
+		virtual ComponentHandle<BaseWeaponComponent> GetWeaponComponent() const override;
+		virtual ComponentHandle<BaseVehicleComponent> GetVehicleComponent() const override;
+		virtual ComponentHandle<BaseAIComponent> GetAIComponent() const override;
+		virtual ComponentHandle<BaseCharacterComponent> GetCharacterComponent() const override;
+		virtual ComponentHandle<BasePlayerComponent> GetPlayerComponent() const override;
+		virtual ComponentHandle<BaseTimeScaleComponent> GetTimeScaleComponent() const override;
+		virtual ComponentHandle<BaseNameComponent> GetNameComponent() const override;
 		virtual bool IsCharacter() const override;
 		virtual bool IsPlayer() const override;
 		virtual bool IsWeapon() const override;
@@ -43,14 +43,14 @@ export namespace pragma::ecs {
 
 		// Returns the server-side representation of this entity (If the entity isn't clientside only)
 		// This only works for single-player / listen servers!
-		pragma::ecs::BaseEntity *GetServersideEntity() const;
+		BaseEntity *GetServersideEntity() const;
 
-		pragma::CRenderComponent *GetRenderComponent() const;
+		CRenderComponent *GetRenderComponent() const;
 
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet);
 		virtual void ReceiveSnapshotData(NetPacket &packet);
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet);
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet);
 
 		virtual void Remove() override;
 		virtual void OnRemove() override;
@@ -62,12 +62,12 @@ export namespace pragma::ecs {
 		virtual uint32_t GetLocalIndex() const override;
 
 		uint32_t GetSceneFlags() const;
-		const pragma::util::PUInt32Property &GetSceneFlagsProperty() const;
-		void AddToScene(pragma::CSceneComponent &scene);
-		void RemoveFromScene(pragma::CSceneComponent &scene);
+		const util::PUInt32Property &GetSceneFlagsProperty() const;
+		void AddToScene(CSceneComponent &scene);
+		void RemoveFromScene(CSceneComponent &scene);
 		void RemoveFromAllScenes();
-		bool IsInScene(const pragma::CSceneComponent &scene) const;
-		std::vector<pragma::CSceneComponent *> GetScenes() const;
+		bool IsInScene(const CSceneComponent &scene) const;
+		std::vector<CSceneComponent *> GetScenes() const;
 
 		void AddChild(CBaseEntity &ent);
 
@@ -81,16 +81,16 @@ export namespace pragma::ecs {
 		void SendNetEventUDP(UInt32 eventId, NetPacket &data) const;
 		void SendNetEventUDP(UInt32 eventId) const;
 
-		virtual pragma::NetworkState *GetNetworkState() const override final;
+		virtual NetworkState *GetNetworkState() const override final;
 	protected:
 		virtual void DoSpawn() override;
-		virtual void OnComponentAdded(pragma::BaseEntityComponent &component) override;
-		virtual void OnComponentRemoved(pragma::BaseEntityComponent &component) override;
+		virtual void OnComponentAdded(BaseEntityComponent &component) override;
+		virtual void OnComponentRemoved(BaseEntityComponent &component) override;
 
-		friend pragma::BaseEntityComponent;
+		friend BaseEntityComponent;
 		uint32_t m_clientIdx = 0u;
-		pragma::util::PUInt32Property m_sceneFlags = nullptr;
-		pragma::CRenderComponent *m_renderComponent = nullptr;
+		util::PUInt32Property m_sceneFlags = nullptr;
+		CRenderComponent *m_renderComponent = nullptr;
 	};
 }
 

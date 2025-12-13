@@ -14,11 +14,11 @@ export import :scripting.lua.types;
 export {
 	namespace pragma::LuaCore {
 		DLLNETWORK void register_entity_component_classes(lua::State *l, luabind::module_ &mod);
-		DLLNETWORK std::optional<Lua::udm_type> get_member_value(lua::State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo);
-		DLLNETWORK bool set_member_value(lua::State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, Lua::udm_type value);
-		DLLNETWORK bool set_member_value(lua::State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::EntityURef &eref);
-		DLLNETWORK bool set_member_value(lua::State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::MultiEntityURef &eref);
-		DLLNETWORK bool set_member_value(lua::State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::EntityUComponentMemberRef &eref);
+		DLLNETWORK std::optional<Lua::udm_type> get_member_value(lua::State *l, BaseEntityComponent &component, const ComponentMemberInfo &memberInfo);
+		DLLNETWORK bool set_member_value(lua::State *l, BaseEntityComponent &component, const ComponentMemberInfo &memberInfo, Lua::udm_type value);
+		DLLNETWORK bool set_member_value(lua::State *l, BaseEntityComponent &component, const ComponentMemberInfo &memberInfo, const EntityURef &eref);
+		DLLNETWORK bool set_member_value(lua::State *l, BaseEntityComponent &component, const ComponentMemberInfo &memberInfo, const MultiEntityURef &eref);
+		DLLNETWORK bool set_member_value(lua::State *l, BaseEntityComponent &component, const ComponentMemberInfo &memberInfo, const EntityUComponentMemberRef &eref);
 	};
 
 	namespace Lua::SoundEmitter {

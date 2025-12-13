@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 	}
 
 	auto rootPath = ufile::get_path_from_filename(fileName);
-	filemanager::set_absolute_root_path(rootPath);
+	pragma::fs::set_absolute_root_path(rootPath);
 
 	auto relFilePath = pragma::util::Path::CreateFile(fileName);
 	relFilePath.MakeRelative(rootPath);

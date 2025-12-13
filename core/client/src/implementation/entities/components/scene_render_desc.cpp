@@ -87,7 +87,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendere
 		if(fShouldCull && ShouldCull(renderC, meshIdx, fShouldCull))
 			continue;
 		auto &renderMesh = renderMeshes[meshIdx];
-		auto *mat = static_cast<msys::CMaterial *>(renderBufferData[meshIdx].material.get());
+		auto *mat = static_cast<pragma::material::CMaterial *>(renderBufferData[meshIdx].material.get());
 		if(mat == nullptr) {
 			if(pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED) {
 				Con::cwar << "[RenderQueue] WARNING: Entity" << mdlC->GetEntity() << " has invalid render material!" << Con::endl;
@@ -495,7 +495,7 @@ static std::atomic<uint32_t> g_activeRenderQueueThreads = 0;
 uint32_t SceneRenderDesc::GetActiveRenderQueueThreadCount() { return g_activeRenderQueueThreads; }
 bool SceneRenderDesc::AssertRenderQueueThreadInactive()
 {
-	if(SceneRenderDesc::GetActiveRenderQueueThreadCount() == 0)
+	if(GetActiveRenderQueueThreadCount() == 0)
 		return true;
 	std::string msg = "Game scene was changed during rendering, this is not allowed!";
 	Con::crit << msg << Con::endl;
@@ -564,7 +564,7 @@ void SceneRenderDesc::BuildRenderQueues(const pragma::rendering::DrawSceneInfo &
 			  cam.GetFrustumPlanes(frustumPlanes);
 		  if(drawSceneInfo.clipPlane.has_value())
 			  frustumPlanes.push_back(*drawSceneInfo.clipPlane);
-		  auto fShouldCull = [&frustumPlanes](const Vector3 &min, const Vector3 &max) -> bool { return SceneRenderDesc::ShouldCull(min, max, frustumPlanes); };
+		  auto fShouldCull = [&frustumPlanes](const Vector3 &min, const Vector3 &max) -> bool { return ShouldCull(min, max, frustumPlanes); };
 		  auto vp = cam.GetProjectionMatrix() * cam.GetViewMatrix();
 
 		  std::vector<pragma::util::BSPTree::Node *> bspLeafNodes;

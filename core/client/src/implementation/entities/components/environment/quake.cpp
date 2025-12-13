@@ -34,9 +34,9 @@ void CQuakeComponent::StartShake()
 	if(ShouldShakeView() == false)
 		return;
 	auto perlin = pragma::util::make_shared<noise::module::Perlin>();
-	perlin->SetSeed(CInt32(pragma::get_cengine()->GetTickCount()));
-	m_tStartShake = CFloat(pragma::get_cgame()->CurTime());
-	m_cbScreenShake = pragma::get_cgame()->AddCallback("CalcView",
+	perlin->SetSeed(CInt32(get_cengine()->GetTickCount()));
+	m_tStartShake = CFloat(get_cgame()->CurTime());
+	m_cbScreenShake = get_cgame()->AddCallback("CalcView",
 	  FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>::Create([this, perlin](std::reference_wrapper<Vector3> refPos, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>) {
 		  auto &pos = refPos.get();
 		  //auto &rot = refRot.get();
@@ -53,7 +53,7 @@ void CQuakeComponent::StartShake()
 		  auto frequency = m_frequency;
 		  auto amplitude = m_amplitude;
 
-		  auto &t = pragma::get_cgame()->CurTime();
+		  auto &t = get_cgame()->CurTime();
 		  auto tDelta = t - m_tStartShake;
 		  if(tDelta >= duration) {
 			  if(ShouldRemoveOnComplete())
@@ -62,7 +62,7 @@ void CQuakeComponent::StartShake()
 			  return;
 		  }
 		  auto bGlobal = IsGlobal();
-		  auto *pl = pragma::get_cgame()->GetLocalPlayer();
+		  auto *pl = get_cgame()->GetLocalPlayer();
 		  if(pl == nullptr || (radius == 0.f && bGlobal == false))
 			  return;
 		  auto &ent = pl->GetEntity();
@@ -71,8 +71,8 @@ void CQuakeComponent::StartShake()
 		  if((InAir() == false && (pPhysComponent == nullptr || pPhysComponent->IsOnGround() == false)) || !pTrComponentEnt)
 			  return;
 		  auto dist = uvec::distance(origin, pos); //pTrComponentEnt->GetPosition());
-		  auto scale = (bGlobal == true) ? 1.f : (1.f - pragma::math::clamp(dist / radius, 0.f, 1.f));
-		  scale *= pragma::util::get_faded_time_factor(CFloat(tDelta), duration, tFadeIn, tFadeOut);
+		  auto scale = (bGlobal == true) ? 1.f : (1.f - math::clamp(dist / radius, 0.f, 1.f));
+		  scale *= util::get_faded_time_factor(CFloat(tDelta), duration, tFadeIn, tFadeOut);
 		  frequency *= CFloat(scale);
 		  amplitude *= CFloat(scale);
 		  perlin->SetFrequency(frequency);

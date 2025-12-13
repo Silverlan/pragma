@@ -13,11 +13,11 @@ export namespace pragma::debug {
 		DebugRenderInfo() = default;
 		DebugRenderInfo(const Color &color, float duration = 0.f) : color {color}, duration {duration} {}
 		DebugRenderInfo(const Color &color, const Color &colorOutline, float duration = 0.f) : color {color}, outlineColor {colorOutline}, duration {duration} {}
-		DebugRenderInfo(const pragma::math::Transform &pose, const Color &color) : pose {pose}, color {color} {}
-		DebugRenderInfo(const pragma::math::Transform &pose, const Color &color, const Color &outlineColor) : pose {pose}, color {color}, outlineColor {outlineColor} {}
-		DebugRenderInfo(const pragma::math::Transform &pose, const Color &color, float duration) : pose {pose}, color {color}, duration {duration} {}
-		DebugRenderInfo(const pragma::math::Transform &pose, const Color &color, const Color &outlineColor, float duration) : pose {pose}, color {color}, outlineColor {outlineColor}, duration {duration} {}
-		pragma::math::Transform pose {};
+		DebugRenderInfo(const math::Transform &pose, const Color &color) : pose {pose}, color {color} {}
+		DebugRenderInfo(const math::Transform &pose, const Color &color, const Color &outlineColor) : pose {pose}, color {color}, outlineColor {outlineColor} {}
+		DebugRenderInfo(const math::Transform &pose, const Color &color, float duration) : pose {pose}, color {color}, duration {duration} {}
+		DebugRenderInfo(const math::Transform &pose, const Color &color, const Color &outlineColor, float duration) : pose {pose}, color {color}, outlineColor {outlineColor}, duration {duration} {}
+		math::Transform pose {};
 		Color color;
 		std::optional<Color> outlineColor {};
 		float duration = 0.f;

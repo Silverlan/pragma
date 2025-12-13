@@ -9,11 +9,11 @@ import :entities.components.observable;
 
 using namespace pragma;
 
-CObservableComponent::CObservableComponent(pragma::ecs::BaseEntity &ent) : BaseObservableComponent(ent) {}
+CObservableComponent::CObservableComponent(ecs::BaseEntity &ent) : BaseObservableComponent(ent) {}
 void CObservableComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CObservableComponent::ReceiveData(NetPacket &packet)
 {
-	constexpr auto numTypes = pragma::math::to_integral(CameraType::Count);
+	constexpr auto numTypes = math::to_integral(CameraType::Count);
 	for(auto i = 0u; i < numTypes; ++i) {
 		auto &data = GetCameraData(static_cast<CameraType>(i));
 		*data.enabled = packet->Read<bool>();
@@ -37,7 +37,7 @@ void CObservableComponent::ReceiveData(NetPacket &packet)
 	}
 }
 
-Bool CObservableComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CObservableComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netSetObserverOrigin) {
 		auto camType = packet->Read<CameraType>();

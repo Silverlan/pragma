@@ -20,7 +20,7 @@ void CViewModelComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(cAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(cAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &ent = GetEntity();
 		auto pAttachableComponent = ent.GetComponent<CAttachmentComponent>();
 		auto *parent = pAttachableComponent.valid() ? pAttachableComponent->GetParent() : nullptr;
@@ -28,13 +28,13 @@ void CViewModelComponent::Initialize()
 			auto charComponent = parent->GetCharacterComponent();
 			auto *wep = charComponent->GetActiveWeapon();
 			if(wep != nullptr && wep->IsWeapon()) {
-				if(static_cast<pragma::CWeaponComponent &>(*wep->GetWeaponComponent()).HandleViewModelAnimationEvent(this, static_cast<CEHandleAnimationEvent &>(evData.get()).animationEvent))
-					return pragma::util::EventReply::Handled;
+				if(static_cast<CWeaponComponent &>(*wep->GetWeaponComponent()).HandleViewModelAnimationEvent(this, static_cast<CEHandleAnimationEvent &>(evData.get()).animationEvent))
+					return util::EventReply::Handled;
 			}
 		}
-		return pragma::util::EventReply::Handled; // Always overwrite
+		return util::EventReply::Handled; // Always overwrite
 	});
-	BindEventUnhandled(cAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto &hMdl = ent.GetModel();
 		if(hMdl != nullptr) {
@@ -44,18 +44,18 @@ void CViewModelComponent::Initialize()
 		}
 		auto animComponent = ent.GetAnimatedComponent();
 		if(animComponent.valid())
-			animComponent->PlayActivity(pragma::Activity::VmIdle);
+			animComponent->PlayActivity(Activity::VmIdle);
 	});
-	BindEventUnhandled(cAnimatedComponent::EVENT_ON_ANIMATION_RESET, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto *wepC = static_cast<pragma::CWeaponComponent *>(GetWeapon());
+	BindEventUnhandled(cAnimatedComponent::EVENT_ON_ANIMATION_RESET, [this](std::reference_wrapper<ComponentEvent> evData) {
+		auto *wepC = static_cast<CWeaponComponent *>(GetWeapon());
 		if(wepC)
 			wepC->UpdateDeployState();
 	});
 
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
-	ent.AddComponent<pragma::CTransformComponent>();
-	ent.AddComponent<pragma::LogicComponent>(); // Logic component is needed for animations
-	auto pRenderComponent = ent.AddComponent<pragma::CRenderComponent>();
+	auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
+	ent.AddComponent<CTransformComponent>();
+	ent.AddComponent<LogicComponent>(); // Logic component is needed for animations
+	auto pRenderComponent = ent.AddComponent<CRenderComponent>();
 	if(pRenderComponent.valid()) {
 		pRenderComponent->AddToRenderGroup("firstperson");
 		pRenderComponent->SetSceneRenderPass(rendering::SceneRenderPass::None);
@@ -67,7 +67,7 @@ void CViewModelComponent::Initialize()
 	ent.AddComponent<CAnimatedComponent>();
 }
 
-static auto cvViewFov = pragma::console::get_client_con_var("cl_fov_viewmodel");
+static auto cvViewFov = console::get_client_con_var("cl_fov_viewmodel");
 void CViewModelComponent::SetViewFOV(float fov)
 {
 	m_viewFov = fov;
@@ -76,7 +76,7 @@ void CViewModelComponent::SetViewFOV(float fov)
 	auto *parent = pAttComponent.valid() ? pAttComponent->GetParent() : nullptr;
 	if(parent == nullptr || parent->IsPlayer() == false)
 		return;
-	static_cast<pragma::CPlayerComponent *>(parent->GetPlayerComponent().get())->UpdateViewFOV();
+	static_cast<CPlayerComponent *>(parent->GetPlayerComponent().get())->UpdateViewFOV();
 }
 float CViewModelComponent::GetViewFOV() const
 {
@@ -91,7 +91,7 @@ BasePlayerComponent *CViewModelComponent::GetPlayer()
 	auto *parent = pAttComponent.valid() ? pAttComponent->GetParent() : nullptr;
 	if(parent == nullptr || parent->IsPlayer() == false)
 		return nullptr;
-	return static_cast<pragma::CPlayerComponent *>(parent->GetPlayerComponent().get());
+	return static_cast<CPlayerComponent *>(parent->GetPlayerComponent().get());
 }
 BaseWeaponComponent *CViewModelComponent::GetWeapon()
 {

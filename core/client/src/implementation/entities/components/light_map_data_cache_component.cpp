@@ -14,22 +14,22 @@ import :game;
 
 using namespace pragma;
 
-void CLightMapDataCacheComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void CLightMapDataCacheComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = CLightMapDataCacheComponent;
 
 	using TDataCache = std::string;
 	{
 		auto memberInfo = create_component_member_info<T, TDataCache, static_cast<void (T::*)(const TDataCache &)>(&T::SetLightMapDataCachePath), static_cast<const TDataCache &(T::*)() const>(&T::GetLightMapDataCachePath)>("lightmapDataCache", "", AttributeSpecializationType::File);
-		memberInfo.SetSpecializationType(pragma::AttributeSpecializationType::File);
+		memberInfo.SetSpecializationType(AttributeSpecializationType::File);
 		auto &metaData = memberInfo.AddMetaData();
-		metaData["extensions"] = std::vector<std::string> {pragma::rendering::LightmapDataCache::FORMAT_MODEL_BINARY, pragma::rendering::LightmapDataCache::FORMAT_MODEL_ASCII};
+		metaData["extensions"] = std::vector<std::string> {rendering::LightmapDataCache::FORMAT_MODEL_BINARY, rendering::LightmapDataCache::FORMAT_MODEL_ASCII};
 		metaData["stripRootPath"] = false;
 		metaData["stripExtension"] = false;
 		registerMember(std::move(memberInfo));
 	}
 }
-CLightMapDataCacheComponent::CLightMapDataCacheComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+CLightMapDataCacheComponent::CLightMapDataCacheComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void CLightMapDataCacheComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void CLightMapDataCacheComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
@@ -37,14 +37,14 @@ void CLightMapDataCacheComponent::SetLightMapDataCachePath(const std::string &ca
 {
 	m_lightmapDataCacheFile = cachePath;
 	m_lightmapDataCacheDirty = true;
-	SetTickPolicy(pragma::TickPolicy::Always);
+	SetTickPolicy(TickPolicy::Always);
 }
 const std::string &CLightMapDataCacheComponent::GetLightMapDataCachePath() const { return m_lightmapDataCacheFile; }
-const std::shared_ptr<pragma::rendering::LightmapDataCache> &CLightMapDataCacheComponent::GetLightMapDataCache() const { return m_lightmapDataCache; }
+const std::shared_ptr<rendering::LightmapDataCache> &CLightMapDataCacheComponent::GetLightMapDataCache() const { return m_lightmapDataCache; }
 
 void CLightMapDataCacheComponent::OnTick(double dt)
 {
-	SetTickPolicy(pragma::TickPolicy::Never);
+	SetTickPolicy(TickPolicy::Never);
 	if(m_lightmapDataCacheDirty) {
 		m_lightmapDataCacheDirty = false;
 		ReloadCache();
@@ -58,12 +58,12 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 	CLightMapComponent::LOGGER.info("Initializing lightmap uv buffers from cache for {} entities...", m_lightmapDataCache->cacheData.size());
 	uint32_t numInitialized = 0;
 	for(auto &pair : m_lightmapDataCache->cacheData) {
-		pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
+		ecs::EntityIterator entIt {*get_cgame()};
 		entIt.AttachFilter<EntityIteratorFilterUuid>(pair.first.uuid);
 		auto it = entIt.begin();
 		if(it == entIt.end())
 			continue;
-		pragma::CLightMapReceiverComponent::SetupLightMapUvData(static_cast<pragma::ecs::CBaseEntity &>(**it), m_lightmapDataCache.get());
+		CLightMapReceiverComponent::SetupLightMapUvData(static_cast<ecs::CBaseEntity &>(**it), m_lightmapDataCache.get());
 		++numInitialized;
 	}
 
@@ -72,31 +72,31 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 
 	// Generate lightmap uv buffers for all entities
 	std::vector<std::shared_ptr<prosper::IBuffer>> buffers {};
-	auto globalLightmapUvBuffer = pragma::CLightMapComponent::GenerateLightmapUVBuffers(buffers);
+	auto globalLightmapUvBuffer = CLightMapComponent::GenerateLightmapUVBuffers(buffers);
 
 	if(globalLightmapUvBuffer) {
-		pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
+		ecs::EntityIterator entIt {*get_cgame()};
 		entIt.AttachFilter<EntityIteratorFilterUuid>(m_lightmapDataCache->lightmapEntityId);
 		auto it = entIt.begin();
 		if(it != entIt.end()) {
 			auto *ent = *it;
 			assert(ent);
-			auto lightMapC = ent->GetComponent<pragma::CLightMapComponent>();
+			auto lightMapC = ent->GetComponent<CLightMapComponent>();
 			if(lightMapC.valid()) {
 				// lightMapC->SetLightMapIntensity(worldData.GetLightMapIntensity());
 				// lightMapC->SetLightMapExposure(worldData.GetLightMapExposure());
 				lightMapC->InitializeLightMapData(nullptr, globalLightmapUvBuffer, buffers, nullptr, true);
-				auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
+				auto *scene = get_cgame()->GetRenderScene<CSceneComponent>();
 				if(scene)
 					scene->SetLightMap(*lightMapC);
 				else
 					CLightMapComponent::LOGGER.error("Failed to set lightmap on render scene!");
 			}
 			else
-				CLightMapComponent::LOGGER.error("Failed to find lightmap component on entity with ID {}!", pragma::util::uuid_to_string(m_lightmapDataCache->lightmapEntityId));
+				CLightMapComponent::LOGGER.error("Failed to find lightmap component on entity with ID {}!", util::uuid_to_string(m_lightmapDataCache->lightmapEntityId));
 		}
 		else
-			CLightMapComponent::LOGGER.error("Failed to find lightmap entity with ID {}!", pragma::util::uuid_to_string(m_lightmapDataCache->lightmapEntityId));
+			CLightMapComponent::LOGGER.error("Failed to find lightmap entity with ID {}!", util::uuid_to_string(m_lightmapDataCache->lightmapEntityId));
 	}
 	else
 		CLightMapComponent::LOGGER.error("Failed to initialize global lightmap uv buffer!");
@@ -113,34 +113,34 @@ void CLightMapDataCacheComponent::ReloadCache()
 		CLightMapComponent::LOGGER.error("Failed to load lightmap data cache: {}", err);
 		return;
 	}
-	std::unordered_map<std::string, std::shared_ptr<pragma::asset::Model>> cachedModels;
+	std::unordered_map<std::string, std::shared_ptr<asset::Model>> cachedModels;
 	for(auto &pair : m_lightmapDataCache->cacheData) {
-		pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
+		ecs::EntityIterator entIt {*get_cgame(), ecs::EntityIterator::FilterFlags::Default | ecs::EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<EntityIteratorFilterUuid>(pair.first.uuid);
 
 		auto it = entIt.begin();
 		if(it == entIt.end()) {
-			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache does not exist!", pragma::util::uuid_to_string(pair.first.uuid));
+			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache does not exist!", util::uuid_to_string(pair.first.uuid));
 			continue;
 		}
 		auto *ent = *it;
 		if(!ent) {
-			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache is invalid!", pragma::util::uuid_to_string(pair.first.uuid));
+			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache is invalid!", util::uuid_to_string(pair.first.uuid));
 			continue;
 		}
 		auto &mdl = ent->GetModel();
 		if(!mdl) {
-			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache has no valid model!", pragma::util::uuid_to_string(pair.first.uuid));
+			CLightMapComponent::LOGGER.warn("Entity '{}' defined in lightmap data cache has no valid model!", util::uuid_to_string(pair.first.uuid));
 			continue;
 		}
 		auto mdlName = mdl->GetName();
 		if(mdlName != pair.second.model) {
-			CLightMapComponent::LOGGER.warn("Model name '{}' of entity '{}' defined in lightmap data cache does not match expected model '{}'!", mdlName, pragma::util::uuid_to_string(pair.first.uuid), pair.second.model);
+			CLightMapComponent::LOGGER.warn("Model name '{}' of entity '{}' defined in lightmap data cache does not match expected model '{}'!", mdlName, util::uuid_to_string(pair.first.uuid), pair.second.model);
 			continue;
 		}
 		auto itCache = cachedModels.find(mdlName);
 		if(itCache != cachedModels.end() && itCache->second == nullptr) {
-			CLightMapComponent::LOGGER.warn("Invalid model cache for entity '{}' defined in lightmap data cache! Ignoring...", pragma::util::uuid_to_string(pair.first.uuid));
+			CLightMapComponent::LOGGER.warn("Invalid model cache for entity '{}' defined in lightmap data cache! Ignoring...", util::uuid_to_string(pair.first.uuid));
 			continue;
 		}
 		auto hasLightmapData = false;
@@ -160,15 +160,15 @@ void CLightMapDataCacheComponent::ReloadCache()
 		else
 			hasLightmapData = (itCache->second != nullptr);
 
-		std::shared_ptr<pragma::asset::Model> lmModel = nullptr;
+		std::shared_ptr<asset::Model> lmModel = nullptr;
 		if(itCache != cachedModels.end())
 			lmModel = itCache->second;
 		else if(!hasLightmapData) {
-			CLightMapComponent::LOGGER.warn("Model '{}' of entity '{}' defined in lightmap data cache does not have lightmap uv data!", mdlName, pragma::util::uuid_to_string(pair.first.uuid));
+			CLightMapComponent::LOGGER.warn("Model '{}' of entity '{}' defined in lightmap data cache does not have lightmap uv data!", mdlName, util::uuid_to_string(pair.first.uuid));
 			cachedModels[mdlName] = nullptr;
 		}
 		else {
-			auto cpy = mdl->Copy(GetEntity().GetNetworkState()->GetGameState(), pragma::asset::Model::CopyFlags::CopyMeshesBit | pragma::asset::Model::CopyFlags::CopyUniqueIdsBit | pragma::asset::Model::CopyFlags::CopyVertexData);
+			auto cpy = mdl->Copy(GetEntity().GetNetworkState()->GetGameState(), asset::Model::CopyFlags::CopyMeshesBit | asset::Model::CopyFlags::CopyUniqueIdsBit | asset::Model::CopyFlags::CopyVertexData);
 			for(auto &mg : cpy->GetMeshGroups()) {
 				for(auto &mesh : mg->GetMeshes()) {
 					auto &subMeshes = mesh->GetSubMeshes();
@@ -179,7 +179,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 						auto udmLightmapData = extData["lightmapData"];
 						if(udmLightmapData) {
 							auto udmMeshData = udmLightmapData["meshData"];
-							std::vector<pragma::math::Vertex> verts;
+							std::vector<math::Vertex> verts;
 							udmMeshData["vertices"](verts);
 
 							auto udmAlphas = udmMeshData["alphas"];
@@ -226,7 +226,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 					}
 				}
 			}
-			cpy->Update(pragma::asset::ModelUpdateFlags::UpdatePrimitiveCounts | pragma::asset::ModelUpdateFlags::UpdateBuffers | pragma::asset::ModelUpdateFlags::UpdateChildren);
+			cpy->Update(asset::ModelUpdateFlags::UpdatePrimitiveCounts | asset::ModelUpdateFlags::UpdateBuffers | asset::ModelUpdateFlags::UpdateChildren);
 			cachedModels[cpy->GetName()] = cpy;
 			lmModel = cpy;
 		}

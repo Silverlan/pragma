@@ -12,8 +12,8 @@ export import pragma.cmaterialsystem;
 export namespace pragma {
 	class DLLCLIENT ShaderTexturedBase {
 	  public:
-		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat, bool bReload);
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(material::CMaterial &mat, bool bReload);
 	  protected:
-		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(msys::CMaterial &mat);
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(material::CMaterial &mat);
 	};
 };

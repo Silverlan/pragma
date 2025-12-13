@@ -21,7 +21,7 @@ export {
 	};
 
 	namespace pragma::geometry {
-		class DLLNETWORK ModelSubMesh : public std::enable_shared_from_this<pragma::geometry::ModelSubMesh> {
+		class DLLNETWORK ModelSubMesh : public std::enable_shared_from_this<ModelSubMesh> {
 		  public:
 			static constexpr std::uint32_t layout_version = 1;
 
@@ -33,24 +33,24 @@ export {
 			using Index32 = uint32_t;
 			static constexpr auto MAX_INDEX16 = std::numeric_limits<Index16>::max();
 			static constexpr auto MAX_INDEX32 = std::numeric_limits<Index32>::max();
-			static size_t size_of_index(pragma::geometry::IndexType it)
+			static size_t size_of_index(IndexType it)
 			{
 				switch(it) {
-				case pragma::geometry::IndexType::UInt16:
+				case IndexType::UInt16:
 					return sizeof(Index16);
-				case pragma::geometry::IndexType::UInt32:
+				case IndexType::UInt32:
 					return sizeof(Index32);
 				}
 				return 0;
 			}
 
 			ModelSubMesh();
-			ModelSubMesh(const pragma::geometry::ModelSubMesh &other);
-			static std::shared_ptr<pragma::geometry::ModelSubMesh> Load(pragma::Game &game, const udm::AssetData &data, std::string &outErr);
-			bool operator==(const pragma::geometry::ModelSubMesh &other) const;
-			bool operator!=(const pragma::geometry::ModelSubMesh &other) const;
-			bool IsEqual(const pragma::geometry::ModelSubMesh &other) const;
-			void SetShared(const pragma::geometry::ModelSubMesh &other, ShareMode mode = ShareMode::All);
+			ModelSubMesh(const ModelSubMesh &other);
+			static std::shared_ptr<ModelSubMesh> Load(Game &game, const udm::AssetData &data, std::string &outErr);
+			bool operator==(const ModelSubMesh &other) const;
+			bool operator!=(const ModelSubMesh &other) const;
+			bool IsEqual(const ModelSubMesh &other) const;
+			void SetShared(const ModelSubMesh &other, ShareMode mode = ShareMode::All);
 			void ClearTriangles();
 			virtual void Centralize(const Vector3 &origin);
 			const Vector3 &GetCenter() const;
@@ -67,24 +67,24 @@ export {
 			void GenerateNormals();
 			void NormalizeUVCoordinates();
 			void SetSkinTextureIndex(uint32_t texture);
-			std::vector<pragma::math::Vertex> &GetVertices();
+			std::vector<math::Vertex> &GetVertices();
 			std::vector<Vector2> &GetAlphas();
 			std::vector<uint8_t> &GetIndexData();
 			void GetIndices(std::vector<Index32> &outIndices) const;
 			std::optional<Index32> GetIndex(uint32_t i) const;
 			bool SetIndex(uint32_t i, Index32 idx);
-			std::vector<pragma::math::VertexWeight> &GetVertexWeights();         // Vertex weights 0-3
-			std::vector<pragma::math::VertexWeight> &GetExtendedVertexWeights(); // Vertex weights 0-7
-			const std::vector<pragma::math::Vertex> &GetVertices() const { return const_cast<pragma::geometry::ModelSubMesh *>(this)->GetVertices(); }
-			const std::vector<Vector2> &GetAlphas() const { return const_cast<pragma::geometry::ModelSubMesh *>(this)->GetAlphas(); }
-			const std::vector<uint8_t> &GetIndexData() const { return const_cast<pragma::geometry::ModelSubMesh *>(this)->GetIndexData(); }
-			const std::vector<pragma::math::VertexWeight> &GetVertexWeights() const { return const_cast<pragma::geometry::ModelSubMesh *>(this)->GetVertexWeights(); }
-			const std::vector<pragma::math::VertexWeight> &GetExtendedVertexWeights() const { return const_cast<pragma::geometry::ModelSubMesh *>(this)->GetExtendedVertexWeights(); }
+			std::vector<math::VertexWeight> &GetVertexWeights();         // Vertex weights 0-3
+			std::vector<math::VertexWeight> &GetExtendedVertexWeights(); // Vertex weights 0-7
+			const std::vector<math::Vertex> &GetVertices() const { return const_cast<ModelSubMesh *>(this)->GetVertices(); }
+			const std::vector<Vector2> &GetAlphas() const { return const_cast<ModelSubMesh *>(this)->GetAlphas(); }
+			const std::vector<uint8_t> &GetIndexData() const { return const_cast<ModelSubMesh *>(this)->GetIndexData(); }
+			const std::vector<math::VertexWeight> &GetVertexWeights() const { return const_cast<ModelSubMesh *>(this)->GetVertexWeights(); }
+			const std::vector<math::VertexWeight> &GetExtendedVertexWeights() const { return const_cast<ModelSubMesh *>(this)->GetExtendedVertexWeights(); }
 			void GetBounds(Vector3 &min, Vector3 &max) const;
 			uint8_t GetAlphaCount() const;
 			void SetAlphaCount(uint8_t numAlpha);
-			uint32_t AddVertex(const pragma::math::Vertex &v);
-			void AddTriangle(const pragma::math::Vertex &v1, const pragma::math::Vertex &v2, const pragma::math::Vertex &v3);
+			uint32_t AddVertex(const math::Vertex &v);
+			void AddTriangle(const math::Vertex &v1, const math::Vertex &v2, const math::Vertex &v3);
 			void AddTriangle(uint32_t a, uint32_t b, uint32_t c);
 			void AddIndex(Index32 index);
 			void AddLine(uint32_t idx0, uint32_t idx1);
@@ -92,22 +92,22 @@ export {
 			void ReserveIndices(size_t num);
 			void ReserveVertices(size_t num);
 			void Validate();
-			virtual void Update(pragma::asset::ModelUpdateFlags flags = pragma::asset::ModelUpdateFlags::AllData);
+			virtual void Update(asset::ModelUpdateFlags flags = asset::ModelUpdateFlags::AllData);
 
 			GeometryType GetGeometryType() const;
 			void SetGeometryType(GeometryType type);
 
-			pragma::geometry::IndexType GetIndexType() const;
-			void SetIndexType(pragma::geometry::IndexType type);
+			IndexType GetIndexType() const;
+			void SetIndexType(IndexType type);
 			udm::Type GetUdmIndexType() const;
 			void VisitIndices(auto vs)
 			{
 				auto &indexData = GetIndexData();
 				switch(m_indexType) {
-				case pragma::geometry::IndexType::UInt16:
+				case IndexType::UInt16:
 					vs(reinterpret_cast<Index16 *>(indexData.data()), GetIndexCount());
 					break;
-				case pragma::geometry::IndexType::UInt32:
+				case IndexType::UInt32:
 					vs(reinterpret_cast<Index32 *>(indexData.data()), GetIndexCount());
 					break;
 				}
@@ -116,21 +116,21 @@ export {
 			{
 				auto &indexData = GetIndexData();
 				switch(m_indexType) {
-				case pragma::geometry::IndexType::UInt16:
+				case IndexType::UInt16:
 					vs(reinterpret_cast<const Index16 *>(indexData.data()), GetIndexCount());
 					break;
-				case pragma::geometry::IndexType::UInt32:
+				case IndexType::UInt32:
 					vs(reinterpret_cast<const Index32 *>(indexData.data()), GetIndexCount());
 					break;
 				}
 			}
 
-			void SetVertex(uint32_t idx, const pragma::math::Vertex &v);
+			void SetVertex(uint32_t idx, const math::Vertex &v);
 			void SetVertexPosition(uint32_t idx, const Vector3 &pos);
 			void SetVertexNormal(uint32_t idx, const Vector3 &normal);
 			void SetVertexUV(uint32_t idx, const Vector2 &uv);
 			void SetVertexAlpha(uint32_t idx, const Vector2 &alpha);
-			void SetVertexWeight(uint32_t idx, const pragma::math::VertexWeight &weight);
+			void SetVertexWeight(uint32_t idx, const math::VertexWeight &weight);
 
 			const std::vector<Vector2> *GetUVSet(const std::string &name) const;
 			std::vector<Vector2> *GetUVSet(const std::string &name);
@@ -138,37 +138,37 @@ export {
 			std::unordered_map<std::string, std::vector<Vector2>> &GetUVSets();
 			std::vector<Vector2> &AddUVSet(const std::string &name);
 
-			pragma::math::Vertex GetVertex(uint32_t idx) const;
+			math::Vertex GetVertex(uint32_t idx) const;
 			Vector3 GetVertexPosition(uint32_t idx) const;
 			Vector3 GetVertexNormal(uint32_t idx) const;
 			Vector2 GetVertexUV(uint32_t idx) const;
 			Vector2 GetVertexAlpha(uint32_t idx) const;
-			pragma::math::VertexWeight GetVertexWeight(uint32_t idx) const;
-			void Optimize(double epsilon = pragma::math::VERTEX_EPSILON);
+			math::VertexWeight GetVertexWeight(uint32_t idx) const;
+			void Optimize(double epsilon = math::VERTEX_EPSILON);
 			void Rotate(const Quat &rot);
 			void Translate(const Vector3 &t);
-			void Transform(const pragma::math::ScaledTransform &pose);
-			void Merge(const pragma::geometry::ModelSubMesh &other);
+			void Transform(const math::ScaledTransform &pose);
+			void Merge(const ModelSubMesh &other);
 			void Scale(const Vector3 &scale);
-			void Mirror(pragma::Axis axis);
-			void ClipAgainstPlane(const Vector3 &n, double d, pragma::geometry::ModelSubMesh &clippedMeshA, pragma::geometry::ModelSubMesh &clippedMeshB, const std::vector<Mat4> *boneMatrices = nullptr, pragma::geometry::ModelSubMesh *clippedCoverMeshA = nullptr, pragma::geometry::ModelSubMesh *clippedCoverMeshB = nullptr);
-			virtual std::shared_ptr<pragma::geometry::ModelSubMesh> Copy(bool fullCopy = false) const;
-			std::shared_ptr<pragma::geometry::ModelSubMesh> Simplify(uint32_t targetVertexCount, double aggressiveness = 5.0, std::vector<uint64_t> *optOutNewVertexIndexToOriginalIndex = nullptr) const;
+			void Mirror(Axis axis);
+			void ClipAgainstPlane(const Vector3 &n, double d, ModelSubMesh &clippedMeshA, ModelSubMesh &clippedMeshB, const std::vector<Mat4> *boneMatrices = nullptr, ModelSubMesh *clippedCoverMeshA = nullptr, ModelSubMesh *clippedCoverMeshB = nullptr);
+			virtual std::shared_ptr<ModelSubMesh> Copy(bool fullCopy = false) const;
+			std::shared_ptr<ModelSubMesh> Simplify(uint32_t targetVertexCount, double aggressiveness = 5.0, std::vector<uint64_t> *optOutNewVertexIndexToOriginalIndex = nullptr) const;
 
 			void ApplyUVMapping(const Vector3 &nu, const Vector3 &nv, uint32_t w, uint32_t h, float ou, float ov, float su, float sv);
 			void RemoveVertex(uint64_t idx);
 
-			const pragma::math::ScaledTransform &GetPose() const;
-			pragma::math::ScaledTransform &GetPose();
-			void SetPose(const pragma::math::ScaledTransform &pose);
+			const math::ScaledTransform &GetPose() const;
+			math::ScaledTransform &GetPose();
+			void SetPose(const math::ScaledTransform &pose);
 
 			udm::PropertyWrapper GetExtensionData() const;
 
 			uint32_t GetReferenceId() const;
 			void SetReferenceId(uint32_t refId);
 
-			const pragma::util::Uuid &GetUuid() const;
-			void SetUuid(const pragma::util::Uuid &uuid);
+			const util::Uuid &GetUuid() const;
+			void SetUuid(const util::Uuid &uuid);
 
 			const std::string &GetName() const;
 			void SetName(const std::string &name);
@@ -176,63 +176,63 @@ export {
 			bool Save(udm::AssetDataArg outData, std::string &outErr);
 			bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr);
 		  protected:
-			void Copy(pragma::geometry::ModelSubMesh &other, bool fullCopy) const;
-			std::vector<pragma::math::VertexWeight> &GetVertexWeightSet(uint32_t idx);
-			const std::vector<pragma::math::VertexWeight> &GetVertexWeightSet(uint32_t idx) const;
+			void Copy(ModelSubMesh &other, bool fullCopy) const;
+			std::vector<math::VertexWeight> &GetVertexWeightSet(uint32_t idx);
+			const std::vector<math::VertexWeight> &GetVertexWeightSet(uint32_t idx) const;
 			void ComputeTangentBasis();
 
 			uint32_t m_skinTextureIndex;
 			Vector3 m_center;
-			std::shared_ptr<std::vector<pragma::math::Vertex>> m_vertices;
+			std::shared_ptr<std::vector<math::Vertex>> m_vertices;
 			std::shared_ptr<std::vector<Vector2>> m_alphas;
 			std::shared_ptr<std::unordered_map<std::string, std::vector<Vector2>>> m_uvSets;
 			uint8_t m_numAlphas;
 			std::shared_ptr<std::vector<uint8_t>> m_indexData;
-			std::shared_ptr<std::vector<pragma::math::VertexWeight>> m_vertexWeights;
-			std::shared_ptr<std::vector<pragma::math::VertexWeight>> m_extendedVertexWeights;
+			std::shared_ptr<std::vector<math::VertexWeight>> m_vertexWeights;
+			std::shared_ptr<std::vector<math::VertexWeight>> m_extendedVertexWeights;
 			udm::PProperty m_extensions = nullptr;
 			Vector3 m_min;
 			Vector3 m_max;
 			GeometryType m_geometryType = GeometryType::Triangles;
-			pragma::geometry::IndexType m_indexType = pragma::geometry::IndexType::UInt16;
+			IndexType m_indexType = IndexType::UInt16;
 			uint32_t m_referenceId = std::numeric_limits<uint32_t>::max();
-			pragma::util::Uuid m_uuid;
+			util::Uuid m_uuid;
 			std::string m_name;
-			pragma::math::ScaledTransform m_pose = pragma::math::ScaledTransform {};
-			void ClipAgainstPlane(const Vector3 &n, double d, pragma::geometry::ModelSubMesh &clippedMesh, const std::vector<Mat4> *boneMatrices = nullptr, pragma::geometry::ModelSubMesh *clippedCoverMesh = nullptr);
+			math::ScaledTransform m_pose = math::ScaledTransform {};
+			void ClipAgainstPlane(const Vector3 &n, double d, ModelSubMesh &clippedMesh, const std::vector<Mat4> *boneMatrices = nullptr, ModelSubMesh *clippedCoverMesh = nullptr);
 		};
 		using namespace pragma::math::scoped_enum::bitwise;
 	}
 	REGISTER_ENUM_FLAGS(pragma::geometry::ModelSubMesh::ShareMode)
 
 	namespace pragma::geometry {
-		class DLLNETWORK pragma::geometry::ModelMesh : public std::enable_shared_from_this<pragma::geometry::ModelMesh> {
+		class DLLNETWORK geometry::ModelMesh : public std::enable_shared_from_this<ModelMesh> {
 		public:
 			static constexpr std::uint32_t layout_version = 1;
 
 			ModelMesh();
-			ModelMesh(const pragma::geometry::ModelMesh &other);
-			ModelMesh &operator=(const pragma::geometry::ModelMesh &) = delete;
-			bool operator==(const pragma::geometry::ModelMesh &other) const;
-			bool operator!=(const pragma::geometry::ModelMesh &other) const;
-			bool IsEqual(const pragma::geometry::ModelMesh &other) const;
+			ModelMesh(const ModelMesh &other);
+			ModelMesh &operator=(const ModelMesh &) = delete;
+			bool operator==(const ModelMesh &other) const;
+			bool operator!=(const ModelMesh &other) const;
+			bool IsEqual(const ModelMesh &other) const;
 			void Centralize();
 			const Vector3 &GetCenter() const;
 			void SetCenter(const Vector3 &center);
-			virtual void AddSubMesh(const std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh);
-			std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &GetSubMeshes();
+			virtual void AddSubMesh(const std::shared_ptr<ModelSubMesh> &subMesh);
+			std::vector<std::shared_ptr<ModelSubMesh>> &GetSubMeshes();
 			uint32_t GetVertexCount() const;
 			uint32_t GetIndexCount() const;
 			uint32_t GetTriangleCount() const;
 			uint32_t GetSubMeshCount() const;
-			virtual void Update(pragma::asset::ModelUpdateFlags flags = pragma::asset::ModelUpdateFlags::AllData);
+			virtual void Update(asset::ModelUpdateFlags flags = asset::ModelUpdateFlags::AllData);
 			void GetBounds(Vector3 &min, Vector3 &max) const;
 			void Rotate(const Quat &rot);
 			void Translate(const Vector3 &t);
-			void Merge(const pragma::geometry::ModelMesh &other);
+			void Merge(const ModelMesh &other);
 			void Scale(const Vector3 &scale);
-			void Mirror(pragma::Axis axis);
-			virtual std::shared_ptr<pragma::geometry::ModelMesh> Copy() const;
+			void Mirror(Axis axis);
+			virtual std::shared_ptr<ModelMesh> Copy() const;
 
 			uint32_t GetReferenceId() const;
 			void SetReferenceId(uint32_t refId);
@@ -242,19 +242,19 @@ export {
 			uint32_t m_numVerts;
 			uint32_t m_numIndices;
 			Vector3 m_center;
-			std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> m_subMeshes;
+			std::vector<std::shared_ptr<ModelSubMesh>> m_subMeshes;
 			uint32_t m_referenceId = std::numeric_limits<uint32_t>::max();
 		};
 
 		DLLNETWORK std::ostream &operator<<(std::ostream &out, const ModelSubMesh &o);
-		DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::geometry::ModelMesh &o);
+		DLLNETWORK std::ostream &operator<<(std::ostream &out, const ModelMesh &o);
 
 		struct DLLNETWORK QuadCreateInfo {
 			QuadCreateInfo() = default;
 			float size = 0.f;
 		};
-		DLLNETWORK void create_quad(pragma::geometry::ModelSubMesh &mesh, const QuadCreateInfo &createInfo);
-		DLLNETWORK std::shared_ptr<pragma::geometry::ModelSubMesh> create_quad(pragma::Game &game, const QuadCreateInfo &createInfo);
+		DLLNETWORK void create_quad(ModelSubMesh &mesh, const QuadCreateInfo &createInfo);
+		DLLNETWORK std::shared_ptr<ModelSubMesh> create_quad(Game &game, const QuadCreateInfo &createInfo);
 
 		struct DLLNETWORK BoxCreateInfo {
 			BoxCreateInfo() = default;
@@ -262,8 +262,8 @@ export {
 			Vector3 min;
 			Vector3 max;
 		};
-		DLLNETWORK void create_box(pragma::geometry::ModelSubMesh &mesh, const BoxCreateInfo &createInfo);
-		DLLNETWORK std::shared_ptr<pragma::geometry::ModelSubMesh> create_box(pragma::Game &game, const BoxCreateInfo &createInfo);
+		DLLNETWORK void create_box(ModelSubMesh &mesh, const BoxCreateInfo &createInfo);
+		DLLNETWORK std::shared_ptr<ModelSubMesh> create_box(Game &game, const BoxCreateInfo &createInfo);
 
 		struct DLLNETWORK SphereCreateInfo {
 			SphereCreateInfo() = default;
@@ -272,8 +272,8 @@ export {
 			float radius = 0.f;
 			uint32_t recursionLevel = 1;
 		};
-		DLLNETWORK void create_sphere(pragma::geometry::ModelSubMesh &mesh, const SphereCreateInfo &createInfo);
-		DLLNETWORK std::shared_ptr<pragma::geometry::ModelSubMesh> create_sphere(pragma::Game &game, const SphereCreateInfo &createInfo);
+		DLLNETWORK void create_sphere(ModelSubMesh &mesh, const SphereCreateInfo &createInfo);
+		DLLNETWORK std::shared_ptr<ModelSubMesh> create_sphere(Game &game, const SphereCreateInfo &createInfo);
 
 		struct DLLNETWORK CylinderCreateInfo {
 			CylinderCreateInfo() = default;
@@ -282,30 +282,30 @@ export {
 			float length = 0.f;
 			uint32_t segmentCount = 12;
 		};
-		DLLNETWORK void create_cylinder(pragma::geometry::ModelSubMesh &mesh, const CylinderCreateInfo &createInfo);
-		DLLNETWORK std::shared_ptr<pragma::geometry::ModelSubMesh> create_cylinder(pragma::Game &game, const CylinderCreateInfo &createInfo);
+		DLLNETWORK void create_cylinder(ModelSubMesh &mesh, const CylinderCreateInfo &createInfo);
+		DLLNETWORK std::shared_ptr<ModelSubMesh> create_cylinder(Game &game, const CylinderCreateInfo &createInfo);
 
 		struct DLLNETWORK ConeCreateInfo {
 			ConeCreateInfo() = default;
-			ConeCreateInfo(pragma::math::Degree angle, float length);
+			ConeCreateInfo(math::Degree angle, float length);
 			ConeCreateInfo(float startRadius, float length, float endRadius);
 			float length = 0.f;
 			uint32_t segmentCount = 12;
 			float startRadius = 0.f;
 			float endRadius = 0.f;
 		};
-		DLLNETWORK void create_cone(pragma::geometry::ModelSubMesh &mesh, const ConeCreateInfo &createInfo);
-		DLLNETWORK std::shared_ptr<pragma::geometry::ModelSubMesh> create_cone(pragma::Game &game, const ConeCreateInfo &createInfo);
+		DLLNETWORK void create_cone(ModelSubMesh &mesh, const ConeCreateInfo &createInfo);
+		DLLNETWORK std::shared_ptr<ModelSubMesh> create_cone(Game &game, const ConeCreateInfo &createInfo);
 
 		struct DLLNETWORK EllipticConeCreateInfo : public ConeCreateInfo {
 			EllipticConeCreateInfo() = default;
-			EllipticConeCreateInfo(pragma::math::Degree angleX, pragma::math::Degree angleY, float length);
+			EllipticConeCreateInfo(math::Degree angleX, math::Degree angleY, float length);
 			EllipticConeCreateInfo(float startRadiusX, float startRadiusY, float length, float endRadiusX, float endRadiusY);
 			float startRadiusY = 0.f;
 			float endRadiusY = 0.f;
 		};
-		DLLNETWORK void create_elliptic_cone(pragma::geometry::ModelSubMesh &mesh, const EllipticConeCreateInfo &createInfo);
-		DLLNETWORK std::shared_ptr<pragma::geometry::ModelSubMesh> create_elliptic_cone(pragma::Game &game, const EllipticConeCreateInfo &createInfo);
+		DLLNETWORK void create_elliptic_cone(ModelSubMesh &mesh, const EllipticConeCreateInfo &createInfo);
+		DLLNETWORK std::shared_ptr<ModelSubMesh> create_elliptic_cone(Game &game, const EllipticConeCreateInfo &createInfo);
 
 		struct DLLNETWORK CircleCreateInfo {
 			CircleCreateInfo() = default;
@@ -313,10 +313,10 @@ export {
 			float radius = 0.f;
 			bool doubleSided = true;
 			uint32_t segmentCount = 36;
-			pragma::math::Degree totalAngle = 360.f;
+			math::Degree totalAngle = 360.f;
 		};
-		DLLNETWORK void create_circle(pragma::geometry::ModelSubMesh &mesh, const CircleCreateInfo &createInfo);
-		DLLNETWORK std::shared_ptr<pragma::geometry::ModelSubMesh> create_circle(pragma::Game &game, const CircleCreateInfo &createInfo);
+		DLLNETWORK void create_circle(ModelSubMesh &mesh, const CircleCreateInfo &createInfo);
+		DLLNETWORK std::shared_ptr<ModelSubMesh> create_circle(Game &game, const CircleCreateInfo &createInfo);
 
 		struct DLLNETWORK RingCreateInfo {
 			RingCreateInfo() = default;
@@ -325,9 +325,9 @@ export {
 			float outerRadius = 0.f;
 			bool doubleSided = true;
 			uint32_t segmentCount = 36;
-			pragma::math::Degree totalAngle = 360.f;
+			math::Degree totalAngle = 360.f;
 		};
-		DLLNETWORK void create_ring(pragma::geometry::ModelSubMesh &mesh, const RingCreateInfo &createInfo);
-		DLLNETWORK std::shared_ptr<pragma::geometry::ModelSubMesh> create_ring(pragma::Game &game, const RingCreateInfo &createInfo);
+		DLLNETWORK void create_ring(ModelSubMesh &mesh, const RingCreateInfo &createInfo);
+		DLLNETWORK std::shared_ptr<ModelSubMesh> create_ring(Game &game, const RingCreateInfo &createInfo);
 	};
 };

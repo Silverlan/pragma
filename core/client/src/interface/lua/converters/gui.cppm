@@ -34,17 +34,17 @@ export namespace luabind {
 
 	template<typename T>
 	    requires(is_gui_element<T> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)
-	struct default_converter<T> : gui_element_converter<T, luabind::detail::pointer_converter> {};
+	struct default_converter<T> : gui_element_converter<T, detail::pointer_converter> {};
 	template<typename T>
 	    requires(is_gui_element<T> && std::is_pointer_v<T> && std::is_const_v<std::remove_pointer_t<T>>)
-	struct default_converter<T> : gui_element_converter<T, luabind::detail::const_pointer_converter> {};
+	struct default_converter<T> : gui_element_converter<T, detail::const_pointer_converter> {};
 
 	template<typename T>
 	    requires(is_gui_element<T> && std::is_reference_v<T> && !std::is_const_v<std::remove_reference_t<T>>)
-	struct default_converter<T> : gui_element_converter<T, luabind::detail::ref_converter> {};
+	struct default_converter<T> : gui_element_converter<T, detail::ref_converter> {};
 	template<typename T>
 	    requires(is_gui_element<T> && std::is_reference_v<T> && std::is_const_v<std::remove_reference_t<T>>)
-	struct default_converter<T> : gui_element_converter<T, luabind::detail::const_ref_converter> {};
+	struct default_converter<T> : gui_element_converter<T, detail::const_ref_converter> {};
 
 	// Implementation
 	template<typename T, typename TConverter>

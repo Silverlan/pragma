@@ -11,8 +11,8 @@ export {
 		namespace savegame {
 			constexpr uint32_t FORMAT_VERSION = 1u;
 			constexpr auto PSAV_IDENTIFIER = "PSAV";
-			bool save(pragma::Game &game, const std::string &fileName, std::string &outErr);
-			bool load(pragma::Game &game, const std::string &fileName, std::string &outErr);
+			bool save(Game &game, const std::string &fileName, std::string &outErr);
+			bool load(Game &game, const std::string &fileName, std::string &outErr);
 		};
 	};
 };

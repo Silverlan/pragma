@@ -35,8 +35,8 @@ export namespace Lua {
 	DLLNETWORK void PrintTraceback(lua::State *l, const std::string *pOptErrMsg = nullptr);
 	// Note: This function will attempt to retrieve the file name from the error message.
 	// If the file name is truncated, this will not work! To be sure, define the third parameter as the actual file name.
-	DLLNETWORK void HandleSyntaxError(lua::State *l, Lua::StatusCode r);
-	DLLNETWORK void HandleSyntaxError(lua::State *l, Lua::StatusCode r, const std::string &fileName);
+	DLLNETWORK void HandleSyntaxError(lua::State *l, StatusCode r);
+	DLLNETWORK void HandleSyntaxError(lua::State *l, StatusCode r, const std::string &fileName);
 
 	DLLNETWORK void OpenFileInZeroBrane(const std::string &fname, uint32_t lineId);
 	DLLNETWORK std::optional<std::string> GetLuaFilePath(const std::string &fname);

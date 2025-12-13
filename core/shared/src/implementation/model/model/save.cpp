@@ -25,7 +25,7 @@ import :model.model;
 #define INDEX_OFFSET_EYEBALLS (INDEX_OFFSET_IK_CONTROLLERS + 1)
 #define INDEX_OFFSET_FLEX_ANIMATIONS (INDEX_OFFSET_EYEBALLS + 1)
 
-static void write_offset(VFilePtrReal f, uint64_t offIndex)
+static void write_offset(pragma::fs::VFilePtrReal f, uint64_t offIndex)
 {
 	auto cur = f->Tell();
 	f->Seek(offIndex);
@@ -686,11 +686,11 @@ bool pragma::asset::Model::Save(pragma::Game &game, const std::string &fileName,
 	auto result = Save(game, udmData->GetAssetData(), outErr);
 	if(result == false)
 		return false;
-	FileManager::CreatePath(ufile::get_path_from_filename(fileName).c_str());
+	fs::create_path(ufile::get_path_from_filename(fileName));
 	auto writeFileName = fileName;
 	ufile::remove_extension_from_filename(writeFileName, pragma::asset::get_supported_extensions(pragma::asset::Type::Model));
 	writeFileName += '.' + std::string {pragma::asset::FORMAT_MODEL_BINARY};
-	auto f = FileManager::OpenFile<VFilePtrReal>(writeFileName.c_str(), "wb");
+	auto f = fs::open_file<fs::VFilePtrReal>(writeFileName, fs::FileMode::Write | fs::FileMode::Binary);
 	if(f == nullptr) {
 		outErr = "Unable to open file '" + writeFileName + "'!";
 		return false;
@@ -710,12 +710,12 @@ bool pragma::asset::Model::Save(pragma::Game &game, std::string &outErr)
 	mdlName += '.' + std::string {pragma::asset::FORMAT_MODEL_BINARY};
 
 	std::string absFileName;
-	auto result = FileManager::FindAbsolutePath("models/" + mdlName, absFileName);
+	auto result = fs::find_absolute_path("models/" + mdlName, absFileName);
 	if(result == false)
 		absFileName = "models/" + mdlName;
 	else {
 		auto path = pragma::util::Path::CreateFile(absFileName);
-		path.MakeRelative(filemanager::get_program_write_path());
+		path.MakeRelative(fs::get_program_write_path());
 		absFileName = path.GetString();
 	}
 	return Save(game, absFileName, outErr);
@@ -1073,8 +1073,8 @@ bool pragma::asset::Model::SaveLegacy(pragma::Game *game, const std::string &nam
 {
 	auto fname = pragma::asset::get_normalized_path(name, pragma::asset::Type::Model) + '.' + pragma::asset::FORMAT_MODEL_LEGACY;
 	fname = rootPath + "models\\" + fname;
-	FileManager::CreatePath(ufile::get_path_from_filename(fname).c_str());
-	auto f = FileManager::OpenFile<VFilePtrReal>(fname.c_str(), "wb");
+	fs::create_path(ufile::get_path_from_filename(fname));
+	auto f = fs::open_file<fs::VFilePtrReal>(fname, fs::FileMode::Write | fs::FileMode::Binary);
 	if(f == nullptr)
 		return false;
 	auto &mdl = const_cast<pragma::asset::Model &>(*this);
@@ -1141,8 +1141,8 @@ bool pragma::asset::Model::SaveLegacy(pragma::Game *game, const std::string &nam
 		f->WriteString(path);
 
 	if(!bStatic) {
-		std::function<void(VFilePtrReal &, pragma::animation::Bone &)> fWriteChildBones;
-		fWriteChildBones = [&fWriteChildBones](VFilePtrReal &f, pragma::animation::Bone &bone) {
+		std::function<void(fs::VFilePtrReal &, pragma::animation::Bone &)> fWriteChildBones;
+		fWriteChildBones = [&fWriteChildBones](fs::VFilePtrReal &f, pragma::animation::Bone &bone) {
 			auto &children = bone.children;
 			f->Write<uint32_t>(static_cast<uint32_t>(children.size()));
 			for(auto &pair : children) {
@@ -1214,7 +1214,7 @@ bool pragma::asset::Model::SaveLegacy(pragma::Game *game, const std::string &nam
 		assert(skin.textures.size() == skins.front().textures.size());
 		if(skin.textures.size() != skins.front().textures.size()) {
 			f = nullptr;
-			FileManager::RemoveFile(fname.c_str());
+			pragma::fs::remove_file(fname);
 			throw std::logic_error("All skins have to contain same number of textures.");
 		}
 		for(auto &texId : skin.textures)

@@ -639,7 +639,7 @@ CallbackHandle pragma::asset::Model::CallOnMaterialsLoaded(const std::function<v
 	m_onAllMatsLoadedCallbacks.push_back(FunctionCallback<>::Create(f));
 	return m_onAllMatsLoadedCallbacks.back();
 }
-void pragma::asset::Model::AddLoadingMaterial(msys::Material &mat, std::optional<uint32_t> index)
+void pragma::asset::Model::AddLoadingMaterial(material::Material &mat, std::optional<uint32_t> index)
 {
 	pragma::math::set_flag(m_stateFlags, StateFlags::AllMaterialsLoaded, false);
 	if(index.has_value())
@@ -650,7 +650,7 @@ void pragma::asset::Model::AddLoadingMaterial(msys::Material &mat, std::optional
 	if(cb.IsValid() == true)
 		m_matLoadCallbacks.push_back(cb);
 }
-uint32_t pragma::asset::Model::AddTexture(const std::string &tex, msys::Material *mat)
+uint32_t pragma::asset::Model::AddTexture(const std::string &tex, material::Material *mat)
 {
 	auto &meta = GetMetaInfo();
 	auto ntex = pragma::asset::get_normalized_path(tex, pragma::asset::Type::Material);
@@ -659,12 +659,12 @@ uint32_t pragma::asset::Model::AddTexture(const std::string &tex, msys::Material
 		return it - meta.textures.begin();
 	meta.textures.push_back(ntex);
 	if(mat == nullptr)
-		m_materials.push_back(msys::MaterialHandle {});
+		m_materials.push_back(material::MaterialHandle {});
 	else
 		AddLoadingMaterial(*mat);
 	return static_cast<uint32_t>(meta.textures.size() - 1);
 }
-bool pragma::asset::Model::SetTexture(uint32_t texIdx, const std::string &tex, msys::Material *mat)
+bool pragma::asset::Model::SetTexture(uint32_t texIdx, const std::string &tex, material::Material *mat)
 {
 	auto &meta = GetMetaInfo();
 	if(texIdx < meta.textures.size()) {
@@ -680,7 +680,7 @@ bool pragma::asset::Model::SetTexture(uint32_t texIdx, const std::string &tex, m
 		return false;
 	return true;
 }
-uint32_t pragma::asset::Model::AddMaterial(uint32_t skin, msys::Material *mat, const std::optional<std::string> &matName, std::optional<uint32_t> *optOutSkinTexIdx)
+uint32_t pragma::asset::Model::AddMaterial(uint32_t skin, material::Material *mat, const std::optional<std::string> &matName, std::optional<uint32_t> *optOutSkinTexIdx)
 {
 	auto texName = matName.has_value() ? *matName : mat->GetName();
 	texName = pragma::asset::get_normalized_path(texName, pragma::asset::Type::Material);
@@ -699,7 +699,7 @@ uint32_t pragma::asset::Model::AddMaterial(uint32_t skin, msys::Material *mat, c
 	}
 	return r;
 }
-bool pragma::asset::Model::SetMaterial(uint32_t texIdx, msys::Material *mat)
+bool pragma::asset::Model::SetMaterial(uint32_t texIdx, material::Material *mat)
 {
 	auto texName = mat->GetName();
 	AddTexturePath(ufile::get_path_from_filename(texName)); // TODO: Remove previous texture path if it is not in use anymore
@@ -747,7 +747,7 @@ bool pragma::asset::Model::FindMaterial(const std::string &texture, std::string 
 	for(auto &path : texturePaths) {
 		auto texPath = path + texture;
 		auto foundPath = pragma::asset::find_file(texPath, pragma::asset::Type::Material);
-		if(foundPath.has_value() || FileManager::Exists("materials\\" + texPath + ".vmt") || FileManager::Exists("materials\\" + texPath + ".vmat_c")) {
+		if(foundPath.has_value() || fs::exists("materials\\" + texPath + ".vmt") || fs::exists("materials\\" + texPath + ".vmat_c")) {
 			matPath = texPath;
 			return true;
 		}
@@ -1066,7 +1066,7 @@ std::vector<std::string> &pragma::asset::Model::GetTexturePaths() { return m_met
 void pragma::asset::Model::AddTexturePath(const std::string &path)
 {
 	auto npath = path;
-	npath = FileManager::GetCanonicalizedPath(npath);
+	npath = fs::get_canonicalized_path(npath);
 	if(npath.empty() == false && npath.back() != '/' && npath.back() != '\\')
 		npath += '/';
 	npath = pragma::util::Path::CreatePath(npath).GetString();
@@ -1092,23 +1092,23 @@ std::optional<uint32_t> pragma::asset::Model::GetMaterialIndex(const pragma::geo
 		return {};
 	return texGroup->textures.at(idx);
 }
-std::vector<msys::MaterialHandle> &pragma::asset::Model::GetMaterials()
+std::vector<pragma::material::MaterialHandle> &pragma::asset::Model::GetMaterials()
 {
 	if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::MaterialsLoadInitiated))
 		LoadMaterials();
 	return m_materials;
 }
-const std::vector<msys::MaterialHandle> &pragma::asset::Model::GetMaterials() const { return const_cast<pragma::asset::Model *>(this)->GetMaterials(); }
+const std::vector<pragma::material::MaterialHandle> &pragma::asset::Model::GetMaterials() const { return const_cast<pragma::asset::Model *>(this)->GetMaterials(); }
 std::vector<std::string> &pragma::asset::Model::GetTextures() { return m_metaInfo.textures; }
 std::vector<pragma::asset::TextureGroup> &pragma::asset::Model::GetTextureGroups() { return m_textureGroups; }
-msys::Material *pragma::asset::Model::GetMaterial(uint32_t texID)
+pragma::material::Material *pragma::asset::Model::GetMaterial(uint32_t texID)
 {
 	auto &materials = GetMaterials();
 	if(texID >= materials.size())
 		return nullptr;
 	return materials[texID].get();
 }
-msys::Material *pragma::asset::Model::GetMaterial(uint32_t texGroup, uint32_t texID)
+pragma::material::Material *pragma::asset::Model::GetMaterial(uint32_t texGroup, uint32_t texID)
 {
 	if(m_textureGroups.empty())
 		return nullptr;
@@ -1516,7 +1516,7 @@ std::optional<uint32_t> pragma::asset::Model::AssignDistinctMaterial(const pragm
 		mpath += '.' + *ext;
 	path.PopFront();
 
-	if(FileManager::Exists(mpath) == false) {
+	if(fs::exists(mpath) == false) {
 		auto savePath = pragma::asset::relative_path_to_absolute_path(path, pragma::asset::Type::Material, rootPath.GetString());
 		std::string err;
 		if(hMat->Save(savePath.GetString(), err) == false)

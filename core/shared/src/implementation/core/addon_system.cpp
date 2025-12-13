@@ -17,10 +17,10 @@ decltype(pragma::AddonSystem::m_addonWatcher) pragma::AddonSystem::m_addonWatche
 
 pragma::pad::PADPackage *pragma::AddonSystem::LoadPADPackage(const std::string &path)
 {
-	auto it = std::find_if(m_addons.begin(), m_addons.end(), [&path](const AddonInfo &addon) { return FileManager::ComparePath(addon.GetLocalPath(), path); });
+	auto it = std::find_if(m_addons.begin(), m_addons.end(), [&path](const AddonInfo &addon) { return pragma::fs::compare_path(addon.GetLocalPath(), path); });
 	if(it != m_addons.end())
 		return nullptr;
-	auto *package = dynamic_cast<pragma::pad::PADPackage *>(FileManager::LoadPackage(path.c_str(), static_cast<fsys::SearchFlags>(FSYS_SEARCH_ADDON)));
+	auto *package = dynamic_cast<pragma::pad::PADPackage *>(pragma::fs::load_package(path, static_cast<fs::SearchFlags>(FSYS_SEARCH_ADDON)));
 	if(package != nullptr)
 		m_addons.push_back(AddonInfo(path, package->GetPackageVersion(), package->GetPackageId()));
 	return package;
@@ -68,7 +68,7 @@ static void load_autorun_scripts(const std::function<void(const std::string &, s
 static bool is_addon_mounted(const std::string &addonPath, const std::vector<pragma::AddonInfo> &addons)
 {
 	auto path = "addons\\" + addonPath;
-	auto it = std::find_if(addons.begin(), addons.end(), [&path](const pragma::AddonInfo &addonInfo) { return FileManager::ComparePath(addonInfo.GetLocalPath(), path); });
+	auto it = std::find_if(addons.begin(), addons.end(), [&path](const pragma::AddonInfo &addonInfo) { return pragma::fs::compare_path(addonInfo.GetLocalPath(), path); });
 	return it != addons.end();
 }
 
@@ -79,23 +79,23 @@ static bool mount_linked_addon(const std::string &pathLink, std::vector<AddonInf
 		return true;
 	std::string resolvedPath;
 	std::string lnkPath;
-	if(!filemanager::find_absolute_path(pragma::util::DirPath("addons", pathLink).GetString(), lnkPath))
+	if(!pragma::fs::find_absolute_path(pragma::util::DirPath("addons", pathLink).GetString(), lnkPath))
 		return false;
 	ufile::remove_extension_from_filename(lnkPath);
 	if(pragma::util::resolve_link(lnkPath, resolvedPath) == false) {
 		Con::cwar << "Unable to resolve link path for '" << lnkPath << "'! This addon will not be mounted." << Con::endl;
 		return false;
 	}
-	FileManager::AddCustomMountDirectory(resolvedPath.c_str(), true, static_cast<fsys::SearchFlags>(FSYS_SEARCH_ADDON));
+	pragma::fs::add_custom_mount_directory(resolvedPath, true, static_cast<fs::SearchFlags>(FSYS_SEARCH_ADDON));
 	outAddons.push_back(AddonInfo("addons\\" + pathLink));
-	load_autorun_scripts([&resolvedPath](const std::string &findTarget, std::vector<std::string> &outFiles) { FileManager::FindSystemFiles((resolvedPath + '\\' + findTarget).c_str(), &outFiles, nullptr); });
+	load_autorun_scripts([&resolvedPath](const std::string &findTarget, std::vector<std::string> &outFiles) { fs::find_system_files((resolvedPath + '\\' + findTarget), &outFiles, nullptr); });
 	if(silent == false)
 		Con::cout << "Mounting linked addon '" << pathLink << "'..." << Con::endl;
 	return true;
 }
 #endif
 
-DirectoryWatcherCallback *pragma::AddonSystem::GetAddonWatcher() { return m_addonWatcher.get(); }
+pragma::fs::DirectoryWatcherCallback *pragma::AddonSystem::GetAddonWatcher() { return m_addonWatcher.get(); }
 
 bool pragma::AddonSystem::MountAddon(const std::string &paddonPath, std::vector<AddonInfo> &outAddons, bool silent)
 {
@@ -120,10 +120,10 @@ bool pragma::AddonSystem::MountAddon(const std::string &paddonPath, std::vector<
 	if(is_addon_mounted(addonPath, outAddons))
 		return true;
 	auto fullPath = "addons\\" + addonPath;
-	FileManager::AddCustomMountDirectory(fullPath.c_str(), static_cast<fsys::SearchFlags>(FSYS_SEARCH_ADDON));
+	fs::add_custom_mount_directory(fullPath, static_cast<fs::SearchFlags>(FSYS_SEARCH_ADDON));
 	outAddons.push_back(AddonInfo(fullPath));
 	update_package_paths();
-	load_autorun_scripts([&fullPath](const std::string &findTarget, std::vector<std::string> &outFiles) { FileManager::FindFiles((fullPath + '\\' + findTarget).c_str(), &outFiles, nullptr); });
+	load_autorun_scripts([&fullPath](const std::string &findTarget, std::vector<std::string> &outFiles) { fs::find_files((fullPath + '\\' + findTarget), &outFiles, nullptr); });
 	if(silent == false)
 		Con::cout << "Mounting addon '" << addonPath << "'..." << Con::endl;
 	spdlog::info("Mounting addon '{}'...", addonPath);
@@ -150,8 +150,8 @@ void pragma::AddonSystem::MountAddons()
 {
 	std::vector<std::string> resFiles;
 	std::vector<std::string> resDirs;
-	FileManager::FindFiles("addons\\*", nullptr, &resDirs);
-	FileManager::FindFiles("addons\\*.pad", &resFiles, nullptr);
+	fs::find_files("addons\\*", nullptr, &resDirs);
+	fs::find_files("addons\\*.pad", &resFiles, nullptr);
 	m_addons.reserve(resFiles.size() + resDirs.size());
 
 	// Make sure that the "converted" addon is always the first in the mount order!
@@ -170,7 +170,7 @@ void pragma::AddonSystem::MountAddons()
 
 #ifdef _WIN32
 	std::vector<std::string> resLinks;
-	FileManager::FindFiles("addons\\*.lnk", &resLinks, nullptr);
+	fs::find_files("addons\\*.lnk", &resLinks, nullptr);
 	for(auto &pathLink : resLinks)
 		mount_linked_addon(pathLink, m_addons);
 #endif
@@ -180,7 +180,7 @@ void pragma::AddonSystem::MountAddons()
 
 	// Initialize watcher for new addons
 	try {
-		m_addonWatcher = pragma::util::make_shared<DirectoryWatcherCallback>(
+		m_addonWatcher = pragma::util::make_shared<fs::DirectoryWatcherCallback>(
 		  "addons",
 		  [](const std::string &fName) {
 			  std::string ext;
@@ -214,9 +214,9 @@ void pragma::AddonSystem::MountAddons()
 				  MountAddon(fName, m_addons, false);
 			  }
 		  },
-		  DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges);
+		  fs::DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges);
 	}
-	catch(const DirectoryWatcher::ConstructException &e) {
+	catch(const fs::DirectoryWatcher::ConstructException &e) {
 		Con::cwar << "[AddonSystem] Unable to watch addons directory: " << e.what() << Con::endl;
 	}
 }
@@ -231,8 +231,8 @@ void pragma::AddonSystem::Poll()
 void pragma::AddonSystem::UnmountAddons()
 {
 	m_addonWatcher = nullptr;
-	FileManager::ClearCustomMountDirectories();
-	FileManager::ClearPackages(static_cast<fsys::SearchFlags>(FSYS_SEARCH_ADDON));
+	fs::clear_custom_mount_directories();
+	fs::clear_packages(static_cast<fs::SearchFlags>(FSYS_SEARCH_ADDON));
 	m_addons.clear();
 }
 
@@ -245,8 +245,8 @@ const std::string &pragma::AddonInfo::GetLocalPath() const { return m_path; }
 std::string pragma::AddonInfo::GetAbsolutePath() const
 {
 	std::string absPath;
-	if(!filemanager::find_absolute_path(m_path, absPath))
-		return pragma::util::DirPath(filemanager::get_program_path(), m_path).GetString();
+	if(!fs::find_absolute_path(m_path, absPath))
+		return pragma::util::DirPath(fs::get_program_path(), m_path).GetString();
 
 	std::string ext;
 	if(ufile::get_extension(absPath, &ext) == false)

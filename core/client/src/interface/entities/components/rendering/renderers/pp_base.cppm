@@ -12,7 +12,7 @@ import :entities.components.renderer;
 export namespace pragma {
 	class DLLCLIENT CRendererPpBaseComponent : public BaseEntityComponent {
 	  public:
-		CRendererPpBaseComponent(pragma::ecs::BaseEntity &ent);
+		CRendererPpBaseComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnRemove() override;
@@ -20,9 +20,9 @@ export namespace pragma {
 		virtual uint32_t GetPostProcessingWeight() const = 0;
 		virtual PostProcessingEffectData::Flags GetFlags() const;
 	  protected:
-		void RenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
-		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) = 0;
-		pragma::ComponentHandle<CRasterizationRendererComponent> m_renderer {};
+		void RenderEffect(const rendering::DrawSceneInfo &drawSceneInfo);
+		virtual void DoRenderEffect(const rendering::DrawSceneInfo &drawSceneInfo) = 0;
+		ComponentHandle<CRasterizationRendererComponent> m_renderer {};
 		CallbackHandle m_cbEffect;
 	};
 };

@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :physics.tire_type_manager;
 
-pragma::physics::TireType::TireType(TypeId id, const std::string &name) : BaseNamedType {id, name} {}
+pragma::physics::TireType::TireType(util::TypeId id, const std::string &name) : BaseNamedType {id, name} {}
 void pragma::physics::TireType::SetFrictionModifier(SurfaceType &surfType, float modifier) { m_frictionModifiers[&surfType] = modifier; }
 std::optional<float> pragma::physics::TireType::GetFrictionModifier(SurfaceType &surfType)
 {

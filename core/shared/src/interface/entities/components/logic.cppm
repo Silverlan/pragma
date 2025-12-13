@@ -14,9 +14,9 @@ export namespace pragma {
 	}
 	class DLLNETWORK LogicComponent final : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		LogicComponent(pragma::ecs::BaseEntity &ent);
+		LogicComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 

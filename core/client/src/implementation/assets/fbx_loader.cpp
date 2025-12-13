@@ -29,22 +29,22 @@ static std::shared_ptr<prosper::Texture> load_texture_image(const std::string &m
 		fullTexFilePath = mdlPath + fullTexFilePath;
 	auto ext = fullTexFilePath.GetFileExtension();
 	if(ext && (*ext == "dds" || *ext == "ktx")) {
-		auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
+		auto &texManager = static_cast<pragma::material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 		auto tex = texManager.LoadAsset(fullTexFilePath.GetString(), pragma::util::AssetLoadFlags::AbsolutePath | pragma::util::AssetLoadFlags::DontCache | pragma::util::AssetLoadFlags::IgnoreCache);
 		if(!tex)
 			return nullptr;
 		return tex->GetVkTexture();
 	}
-	auto f = filemanager::open_file(fullTexFilePath.GetString(), filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	auto f = pragma::fs::open_file(fullTexFilePath.GetString(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(!f)
-		f = filemanager::open_system_file(fullTexFilePath.GetString(), filemanager::FileMode::Read | filemanager::FileMode::Binary);
+		f = pragma::fs::open_system_file(fullTexFilePath.GetString(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(!f)
 		return nullptr;
-	fsys::File file {f};
-	auto imgBuf = uimg::load_image(file);
+	pragma::fs::File file {f};
+	auto imgBuf = pragma::image::load_image(file);
 	if(!imgBuf)
 		return nullptr;
-	imgBuf->SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
+	imgBuf->SwapChannels(pragma::image::Channel::Red, pragma::image::Channel::Blue);
 	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(*imgBuf);
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
@@ -66,23 +66,23 @@ static std::optional<std::string> import_texture(const std::string &mdlPath, con
 		auto srcPath = fullTexFilePath.GetString();
 		auto dstPath = fullOutputPath + std::string {fullTexFilePath.GetFileName()};
 		if(isAbsPath) {
-			auto absFullPath = (filemanager::get_program_write_path() + dstPath).GetString();
-			auto res = filemanager::copy_system_file(srcPath, absFullPath);
+			auto absFullPath = (pragma::fs::get_program_write_path() + dstPath).GetString();
+			auto res = pragma::fs::copy_system_file(srcPath, absFullPath);
 			return res ? absFullPath : std::optional<std::string> {};
 		}
-		auto res = filemanager::copy_file(srcPath, dstPath.GetString());
+		auto res = pragma::fs::copy_file(srcPath, dstPath.GetString());
 		return res ? dstPath.GetString() : std::optional<std::string> {};
 	}
-	auto f = filemanager::open_file(fullTexFilePath.GetString(), filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	auto f = pragma::fs::open_file(fullTexFilePath.GetString(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(!f)
-		f = filemanager::open_system_file(fullTexFilePath.GetString(), filemanager::FileMode::Read | filemanager::FileMode::Binary);
+		f = pragma::fs::open_system_file(fullTexFilePath.GetString(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(!f)
 		return {};
-	fsys::File file {f};
-	auto img = uimg::load_image(file);
+	pragma::fs::File file {f};
+	auto img = pragma::image::load_image(file);
 	if(!img)
 		return {};
-	img->SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
+	img->SwapChannels(pragma::image::Channel::Red, pragma::image::Channel::Blue);
 	// TODO
 	auto greyScale = false;
 	auto normalMap = false;
@@ -187,7 +187,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 	relMatPath.MakeRelative(pragma::util::CONVERT_PATH);
 	relMatPath.MakeRelative(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)});
 	auto mat = pragma::get_client_state()->CreateMaterial(relMatPath.GetString(), "pbr");
-	auto *cmat = static_cast<msys::CMaterial *>(mat.get());
+	auto *cmat = static_cast<material::CMaterial *>(mat.get());
 
 	auto importAndAssignTexture = [&importTexture, cmat](ofbx::Texture::TextureType etex, const std::string &matIdentifier) -> std::optional<std::string> {
 		auto texPath = importTexture(etex);
@@ -199,9 +199,9 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 		cmat->SetTexture(matIdentifier, relTexPath.GetString());
 		return texPath;
 	};
-	importAndAssignTexture(ofbx::Texture::TextureType::DIFFUSE, msys::material::ALBEDO_MAP_IDENTIFIER);
-	importAndAssignTexture(ofbx::Texture::TextureType::NORMAL, msys::material::NORMAL_MAP_IDENTIFIER);
-	importAndAssignTexture(ofbx::Texture::TextureType::EMISSIVE, msys::material::EMISSION_MAP_IDENTIFIER);
+	importAndAssignTexture(ofbx::Texture::TextureType::DIFFUSE, material::ematerial::ALBEDO_MAP_IDENTIFIER);
+	importAndAssignTexture(ofbx::Texture::TextureType::NORMAL, material::ematerial::NORMAL_MAP_IDENTIFIER);
+	importAndAssignTexture(ofbx::Texture::TextureType::EMISSIVE, material::ematerial::EMISSION_MAP_IDENTIFIER);
 
 	auto applyColorFactor = [&fbxMat, mat](const ofbx::Color &fbxColor, double factor, const std::string &matProp) mutable {
 		Vector3 colorFactor {fbxColor.r, fbxColor.g, fbxColor.b};
@@ -225,7 +225,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 		auto reflectionMap = loadTexture(ofbx::Texture::TextureType::REFLECTION); // TODO
 
 		if(specularMap || shininessMap || ambientMap) {
-			auto tex = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("white");
+			auto tex = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("white");
 			if(tex) {
 				auto whiteMap = tex->GetVkTexture();
 				if(!specularMap)
@@ -235,7 +235,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 
 				auto &context = pragma::get_cengine()->GetRenderContext();
 				pragma::ShaderCombineImageChannels::PushConstants pushConstants {};
-				pushConstants.alphaChannel = pragma::math::to_integral(uimg::Channel::Red);
+				pushConstants.alphaChannel = pragma::math::to_integral(image::Channel::Red);
 				auto specularGlossinessMap = combine->CombineImageChannels(context, *specularMap, *specularMap, *specularMap, *shininessMap, pushConstants);
 				if(specularGlossinessMap) {
 					pragma::ShaderSpecularGlossinessToMetalnessRoughness::PushConstants pushConstants {};
@@ -243,7 +243,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 					if(metallicRoughnessSet.has_value()) {
 						auto texPath = matFilePath;
 						texPath.MakeRelative(pragma::util::CONVERT_PATH);
-						pragma::asset::assign_texture(*cmat, pragma::util::CONVERT_PATH, msys::material::RMA_MAP_IDENTIFIER, texPath.GetString() + "_rma", *metallicRoughnessSet->rmaMap, false, false, ambientMap ? AlphaMode::Blend : AlphaMode::Opaque);
+						pragma::asset::assign_texture(*cmat, pragma::util::CONVERT_PATH, material::ematerial::RMA_MAP_IDENTIFIER, texPath.GetString() + "_rma", *metallicRoughnessSet->rmaMap, false, false, ambientMap ? AlphaMode::Blend : AlphaMode::Opaque);
 					}
 				}
 			}
@@ -1240,11 +1240,11 @@ std::optional<pragma::asset::AssetImportResult> pragma::asset::import_fbx(ufile:
 
 std::optional<pragma::asset::AssetImportResult> pragma::asset::import_fbx(const std::string &fileName, std::string &outErrMsg, const pragma::util::Path &outputPath)
 {
-	auto f = filemanager::open_file(fileName, filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	auto f = fs::open_file(fileName, fs::FileMode::Read | fs::FileMode::Binary);
 	if(!f) {
 		outErrMsg = "Failed to open file '" + fileName + "' for reading!";
 		return {};
 	}
-	fsys::File fptr {f};
+	fs::File fptr {f};
 	return import_fbx(fptr, outErrMsg, outputPath);
 }

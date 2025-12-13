@@ -12,9 +12,9 @@ export import pragma.prosper;
 export namespace pragma {
 	class DLLCLIENT ShaderDepthToRGB : public prosper::ShaderGraphics {
 	  public:
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_UV;
+		static VertexBinding VERTEX_BINDING_VERTEX;
+		static VertexAttribute VERTEX_ATTRIBUTE_POSITION;
+		static VertexAttribute VERTEX_ATTRIBUTE_UV;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET;
 

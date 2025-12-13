@@ -10,7 +10,7 @@ export module pragma.client:rendering.shader_graph.node_input_parameter;
 export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
-	class DLLCLIENT BaseInputParameterNode : public pragma::shadergraph::Node {
+	class DLLCLIENT BaseInputParameterNode : public shadergraph::Node {
 	  public:
 		enum class Scope : uint32_t {
 			Global = 0,
@@ -24,14 +24,14 @@ export namespace pragma::rendering::shader_graph {
 
 		static constexpr const char *OUT_VALUE = "value";
 
-		BaseInputParameterNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_INPUT_PARAMETER}
+		BaseInputParameterNode(const std::string_view &type) : Node {type, shadergraph::CATEGORY_INPUT_PARAMETER}
 		{
-			AddSocket(CONST_NAME, pragma::shadergraph::DataType::String, "");
+			AddSocket(CONST_NAME, shadergraph::DataType::String, "");
 			AddSocketEnum<Scope>(CONST_SCOPE, Scope::Global);
 
 			AddModuleDependency("input_data");
 		}
-		virtual pragma::shadergraph::DataType GetParameterType() const = 0;
+		virtual shadergraph::DataType GetParameterType() const = 0;
 	};
 
 	class DLLCLIENT InputParameterTextureNode : public BaseInputParameterNode {
@@ -54,14 +54,14 @@ export namespace pragma::rendering::shader_graph {
 
 		InputParameterTextureNode(const std::string_view &type) : BaseInputParameterNode {type}
 		{
-			AddSocket(CONST_DEFAULT_TEXTURE, pragma::shadergraph::DataType::String, "white");
+			AddSocket(CONST_DEFAULT_TEXTURE, shadergraph::DataType::String, "white");
 			AddSocketEnum<ColorSpace>(CONST_COLOR_SPACE, ColorSpace::Srgb);
 			AddSocketEnum<ImageType>(CONST_IMAGE_TYPE, ImageType::e2D);
 
-			AddOutput(OUT_TEXTURE, pragma::shadergraph::DataType::String);
+			AddOutput(OUT_TEXTURE, shadergraph::DataType::String);
 		}
-		virtual pragma::shadergraph::DataType GetParameterType() const override { return pragma::shadergraph::DataType::String; }
-		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const override
+		virtual shadergraph::DataType GetParameterType() const override { return shadergraph::DataType::String; }
+		virtual std::string DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &gn) const override
 		{
 			std::ostringstream code;
 			return code.str();
@@ -76,8 +76,8 @@ export namespace pragma::rendering::shader_graph {
 			AddSocket(CONST_DEFAULT, GetParameterType(), T {});
 			AddOutput(OUT_VALUE, GetParameterType());
 		}
-		virtual pragma::shadergraph::DataType GetParameterType() const override { return pragma::shadergraph::to_data_type(udm::type_to_enum<T>()); }
-		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const override
+		virtual shadergraph::DataType GetParameterType() const override { return shadergraph::to_data_type(udm::type_to_enum<T>()); }
+		virtual std::string DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &gn) const override
 		{
 			std::ostringstream code;
 
@@ -90,11 +90,11 @@ export namespace pragma::rendering::shader_graph {
 				code << "u_material.material." << name << ";\n";
 			else {
 				auto type = GetParameterType();
-				pragma::shadergraph::visit(type, [&code](auto tag) {
+				shadergraph::visit(type, [&code](auto tag) {
 					using TValue = typename decltype(tag)::type;
 					if constexpr(!std::is_same_v<TValue, udm::String>) {
 						TValue value {};
-						code << pragma::shadergraph::to_glsl_value(value) << ";\n";
+						code << shadergraph::to_glsl_value(value) << ";\n";
 					}
 				});
 			}
@@ -111,9 +111,9 @@ export namespace pragma::rendering::shader_graph {
 
 		InputParameterFloatNode(const std::string_view &type) : InputParameterNode<float> {type}
 		{
-			AddSocket(CONST_MIN, pragma::shadergraph::DataType::Float, 0.f);
-			AddSocket(CONST_MAX, pragma::shadergraph::DataType::Float, 1.f);
-			AddSocket(CONST_STEP_SIZE, pragma::shadergraph::DataType::Float, 0.1f);
+			AddSocket(CONST_MIN, shadergraph::DataType::Float, 0.f);
+			AddSocket(CONST_MAX, shadergraph::DataType::Float, 1.f);
+			AddSocket(CONST_STEP_SIZE, shadergraph::DataType::Float, 0.1f);
 		}
 	};
 

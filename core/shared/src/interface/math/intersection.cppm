@@ -14,7 +14,7 @@ export {
 	namespace pragma::math::intersection {
 		struct DLLNETWORK LineMeshResult {
 			struct DLLNETWORK Precise {
-				std::shared_ptr<pragma::asset::ModelMeshGroup> meshGroup;
+				std::shared_ptr<asset::ModelMeshGroup> meshGroup;
 				std::shared_ptr<pragma::geometry::ModelMesh> mesh;
 				std::shared_ptr<pragma::geometry::ModelSubMesh> subMesh;
 
@@ -27,12 +27,12 @@ export {
 				double u = 0.0;
 				double v = 0.0;
 			};
-			pragma::math::intersection::Result result = pragma::math::intersection::Result::NoIntersection;
+			Result result = Result::NoIntersection;
 			Vector3 hitPos = {};
 			double hitValue = std::numeric_limits<double>::max(); // Range if hit: [0,1]
 
 			// Only for imprecise results
-			pragma::physics::Hitbox *hitbox = nullptr;
+			physics::Hitbox *hitbox = nullptr;
 			uint32_t boneId;
 
 			// Only for precise results
@@ -40,9 +40,9 @@ export {
 		};
 		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, pragma::geometry::ModelMesh &mesh, LineMeshResult &outResult, bool precise = false, const Vector3 *origin = nullptr, const Quat *rot = nullptr);
 		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, pragma::geometry::ModelSubMesh &subMesh, LineMeshResult &outResult, bool precise = false, const Vector3 *origin = nullptr, const Quat *rot = nullptr);
-		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, pragma::asset::Model &mdl, LineMeshResult &outResult, bool precise, const std::vector<uint32_t> *bodyGroups, uint32_t lod, const Vector3 &origin, const Quat &rot);
-		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, pragma::asset::Model &mdl, LineMeshResult &outResult, bool precise, uint32_t lod, const Vector3 &origin, const Quat &rot);
-		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, pragma::asset::Model &mdl, LineMeshResult &outResult, bool precise, const std::vector<uint32_t> &bodyGroups, const Vector3 &origin, const Quat &rot);
-		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, pragma::asset::Model &mdl, LineMeshResult &outResult, bool precise, const Vector3 &origin, const Quat &rot);
+		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, asset::Model &mdl, LineMeshResult &outResult, bool precise, const std::vector<uint32_t> *bodyGroups, uint32_t lod, const Vector3 &origin, const Quat &rot);
+		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, asset::Model &mdl, LineMeshResult &outResult, bool precise, uint32_t lod, const Vector3 &origin, const Quat &rot);
+		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, asset::Model &mdl, LineMeshResult &outResult, bool precise, const std::vector<uint32_t> &bodyGroups, const Vector3 &origin, const Quat &rot);
+		DLLNETWORK bool line_with_mesh(const Vector3 &start, const Vector3 &dir, asset::Model &mdl, LineMeshResult &outResult, bool precise, const Vector3 &origin, const Quat &rot);
 	};
 };

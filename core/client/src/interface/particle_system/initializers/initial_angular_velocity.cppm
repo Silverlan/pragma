@@ -26,7 +26,7 @@ export namespace pragma::pts {
 		std::unique_ptr<RandomVelocity> m_randomVelocity = nullptr;
 	public:
 		CParticleInitializerInitialAngularVelocity() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
 	};
 }

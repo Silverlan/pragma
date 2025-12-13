@@ -31,7 +31,7 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseWeaponComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
 		virtual void Deploy();
@@ -56,9 +56,9 @@ export namespace pragma {
 		virtual void OnRemove() override;
 		// Ammo
 		UInt32 GetPrimaryAmmoType() const;
-		const pragma::util::PUInt32Property &GetPrimaryAmmoTypeProperty() const;
+		const util::PUInt32Property &GetPrimaryAmmoTypeProperty() const;
 		UInt32 GetSecondaryAmmoType() const;
-		const pragma::util::PUInt32Property &GetSecondaryAmmoTypeProperty() const;
+		const util::PUInt32Property &GetSecondaryAmmoTypeProperty() const;
 		Bool HasPrimaryAmmo() const;
 		Bool HasSecondaryAmmo() const;
 		Bool IsPrimaryClipEmpty() const;
@@ -67,13 +67,13 @@ export namespace pragma {
 		virtual void SetPrimaryClipSize(UInt16 size);
 		virtual void SetSecondaryClipSize(UInt16 size);
 		UInt16 GetPrimaryClipSize() const;
-		const pragma::util::PUInt16Property &GetPrimaryClipSizeProperty() const;
+		const util::PUInt16Property &GetPrimaryClipSizeProperty() const;
 		UInt16 GetSecondaryClipSize() const;
-		const pragma::util::PUInt16Property &GetSecondaryClipSizeProperty() const;
+		const util::PUInt16Property &GetSecondaryClipSizeProperty() const;
 		UInt16 GetMaxPrimaryClipSize() const;
-		const pragma::util::PUInt16Property &GetMaxPrimaryClipSizeProperty() const;
+		const util::PUInt16Property &GetMaxPrimaryClipSizeProperty() const;
 		UInt16 GetMaxSecondaryClipSize() const;
-		const pragma::util::PUInt16Property &GetMaxSecondaryClipSizeProperty() const;
+		const util::PUInt16Property &GetMaxSecondaryClipSizeProperty() const;
 		virtual void SetMaxPrimaryClipSize(UInt16 size);
 		virtual void SetMaxSecondaryClipSize(UInt16 size);
 		virtual void SetPrimaryAmmoType(UInt32 type);
@@ -82,7 +82,7 @@ export namespace pragma {
 		BaseOwnableComponent *GetOwnerComponent();
 		virtual void OnEntitySpawn() override;
 	  protected:
-		BaseWeaponComponent(pragma::ecs::BaseEntity &ent);
+		BaseWeaponComponent(ecs::BaseEntity &ent);
 		void UpdateTickPolicy();
 		bool CanPrimaryAttack() const;
 		bool CanSecondaryAttack() const;
@@ -90,7 +90,7 @@ export namespace pragma {
 		virtual void OnPhysicsInitialized();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 
-		ComponentHandle<pragma::BaseOwnableComponent> m_whOwnerComponent = {};
+		ComponentHandle<BaseOwnableComponent> m_whOwnerComponent = {};
 		float m_tDeploy = 0.f;
 		float m_tNextPrimaryAttack = 0.f;
 		float m_tNextSecondaryAttack = 0.f;
@@ -101,12 +101,12 @@ export namespace pragma {
 		bool m_bDeployed = false;
 		int32_t m_attMuzzle = -1;
 		// Ammo
-		pragma::util::PUInt32Property m_ammoPrimary = nullptr;
-		pragma::util::PUInt32Property m_ammoSecondary = nullptr;
-		pragma::util::PUInt16Property m_clipPrimary = nullptr;
-		pragma::util::PUInt16Property m_clipSecondary = nullptr;
-		pragma::util::PUInt16Property m_maxPrimaryClipSize = nullptr;
-		pragma::util::PUInt16Property m_maxSecondaryClipSize = nullptr;
+		util::PUInt32Property m_ammoPrimary = nullptr;
+		util::PUInt32Property m_ammoSecondary = nullptr;
+		util::PUInt16Property m_clipPrimary = nullptr;
+		util::PUInt16Property m_clipSecondary = nullptr;
+		util::PUInt16Property m_maxPrimaryClipSize = nullptr;
+		util::PUInt16Property m_maxSecondaryClipSize = nullptr;
 		//
 	};
 };

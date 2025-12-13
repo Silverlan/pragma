@@ -50,8 +50,8 @@ export {
 		};
 		struct DLLNETWORK ValueDriverVariable {
 			// Path format: pragma:game/entity/ec/<componentTypeName>/<memberName>?entity_uuid=<uuid>
-			static std::optional<ValueDriverVariable> Create(std::string path, const pragma::util::Uuid &self);
-			ValueDriverVariable(pragma::util::Uuid entUuid, std::string var);
+			static std::optional<ValueDriverVariable> Create(std::string path, const util::Uuid &self);
+			ValueDriverVariable(util::Uuid entUuid, std::string var);
 			ValueDriverVariable(EntityUComponentMemberRef memberRef);
 			ValueDriverVariable(const ValueDriverVariable &) = default;
 			EntityUComponentMemberRef memberRef;
@@ -60,25 +60,25 @@ export {
 			enum class StateFlags : uint32_t { None = 0u, MemberRefFailed = 1u, ComponentRefFailed = MemberRefFailed << 1u, EntityRefFailed = ComponentRefFailed << 1u };
 			enum class Result : uint32_t { Success = 0, ErrorNoExpression, ErrorComponentNotFound, ErrorMemberNotFound, ErrorInvalidMemberType, ErrorInvalidParameterReference, ErrorExpressionExecutionFailed, ErrorNoExpressionReturnValue, ErrorUnexpectedExpressionReturnValueType };
 			ValueDriver() = default;
-			ValueDriver(pragma::ComponentId componentId, ComponentMemberReference memberRef, ValueDriverDescriptor descriptor, const pragma::util::Uuid &self);
+			ValueDriver(ComponentId componentId, ComponentMemberReference memberRef, ValueDriverDescriptor descriptor, const util::Uuid &self);
 			const ComponentMemberReference &GetMemberReference() const { return m_memberReference; }
 			const ValueDriverDescriptor &GetDescriptor() const { return m_descriptor; }
-			pragma::ComponentId GetComponentId() const { return m_componentId; }
+			ComponentId GetComponentId() const { return m_componentId; }
 
-			Result Apply(pragma::ecs::BaseEntity &ent);
+			Result Apply(ecs::BaseEntity &ent);
 			void ResetFailureState();
 			bool IsFailureFlagSet() const;
 		  private:
 			ValueDriverDescriptor m_descriptor;
 			std::unordered_map<std::string, ValueDriverVariable> m_variables;
-			pragma::ComponentId m_componentId = std::numeric_limits<pragma::ComponentId>::max();
+			ComponentId m_componentId = std::numeric_limits<ComponentId>::max();
 			ComponentMemberReference m_memberReference;
 			StateFlags m_stateFlags = StateFlags::None;
 		};
 		using namespace pragma::math::scoped_enum::bitwise;
 
-		std::ostream &operator<<(std::ostream &out, const pragma::game::ValueDriverDescriptor &descriptor);
-		std::ostream &operator<<(std::ostream &out, const pragma::game::ValueDriver &driver);
+		std::ostream &operator<<(std::ostream &out, const ValueDriverDescriptor &descriptor);
+		std::ostream &operator<<(std::ostream &out, const ValueDriver &driver);
 	};
 	REGISTER_ENUM_FLAGS(pragma::game::ValueDriver::StateFlags)
 };

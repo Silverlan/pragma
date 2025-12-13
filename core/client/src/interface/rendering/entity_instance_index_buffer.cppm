@@ -16,7 +16,7 @@ export namespace pragma::rendering {
 	  public:
 		EntityInstanceIndexBuffer();
 		~EntityInstanceIndexBuffer();
-		std::shared_ptr<prosper::IBuffer> AddInstanceList(const RenderQueue &renderQueue, std::vector<pragma::RenderBufferIndex> &&instanceList, pragma::util::Hash hash);
+		std::shared_ptr<prosper::IBuffer> AddInstanceList(const RenderQueue &renderQueue, std::vector<RenderBufferIndex> &&instanceList, util::Hash hash);
 		const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetBuffer() const { return m_buffer; }
 		const std::shared_ptr<prosper::IBuffer> &GetZeroIndexBuffer() const { return m_zeroIndexBuffer; }
 		bool BufferUpdateRequred() const { return !m_bufferUpdateQueue.empty(); }
@@ -32,12 +32,12 @@ export namespace pragma::rendering {
 		};
 		std::shared_ptr<prosper::IDynamicResizableBuffer> m_buffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_zeroIndexBuffer = nullptr;
-		std::unordered_map<pragma::util::Hash, BufferInfo> m_cachedBuffers;
+		std::unordered_map<util::Hash, BufferInfo> m_cachedBuffers;
 		prosper::FrameIndex m_lastFrameCheck = std::numeric_limits<prosper::FrameIndex>::max();
 
 		struct BufferUpdateData {
 			std::shared_ptr<prosper::IBuffer> buffer;
-			std::vector<pragma::RenderBufferIndex> data;
+			std::vector<RenderBufferIndex> data;
 		};
 		std::mutex m_bufferUpdateQueueMutex;
 		std::unordered_map<const RenderQueue *, std::queue<BufferUpdateData>> m_bufferUpdateQueue;

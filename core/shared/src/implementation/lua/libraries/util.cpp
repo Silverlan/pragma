@@ -30,10 +30,10 @@ void Lua::set_ignore_include_cache(bool b) { s_bIgnoreIncludeCache = b; }
 std::optional<std::string> Lua::find_script_file(const std::string &fileName)
 {
 	auto raw = fileName + Lua::DOT_FILE_EXTENSION;
-	if(filemanager::exists(Lua::SCRIPT_DIRECTORY_SLASH + raw))
+	if(pragma::fs::exists(Lua::SCRIPT_DIRECTORY_SLASH + raw))
 		return raw;
 	auto precompiled = fileName + Lua::DOT_FILE_EXTENSION_PRECOMPILED;
-	if(filemanager::exists(Lua::SCRIPT_DIRECTORY_SLASH + precompiled))
+	if(pragma::fs::exists(Lua::SCRIPT_DIRECTORY_SLASH + precompiled))
 		return precompiled;
 	return {};
 }
@@ -287,7 +287,7 @@ static Lua::var<bool, Lua::opt<std::string>, pragma::util::FunctionalParallelWor
 {
 	auto path = pragma::util::Path::CreateFile(outputPath);
 	path.Canonicalize();
-	path = pragma::util::Path::CreatePath(filemanager::get_program_write_path()) + path;
+	path = pragma::util::Path::CreatePath(pragma::fs::get_program_write_path()) + path;
 	auto &zip = *luabind::object_cast<uzip::ZIPFile *>(ozip);
 	if(runInBackground) {
 		auto job = pragma::util::create_parallel_job<pragma::util::FunctionalParallelWorker>(false);
@@ -446,12 +446,12 @@ void Lua::util::register_shared_generic(lua::State *l, luabind::module_ &mod)
 		  path.Canonicalize();
 		  if(openMode == uzip::OpenMode::Read) {
 			  std::string absPath;
-			  if(!filemanager::find_absolute_path(path.GetString(), absPath))
+			  if(!pragma::fs::find_absolute_path(path.GetString(), absPath))
 				  return nullptr;
 			  path = pragma::util::FilePath(absPath);
 		  }
 		  else
-			  path = pragma::util::FilePath(filemanager::get_program_write_path(), path);
+			  path = pragma::util::FilePath(pragma::fs::get_program_write_path(), path);
 		  std::string err;
 		  auto zipFile = uzip::ZIPFile::Open(path.GetString(), err, openMode);
 		  if(!zipFile)
@@ -494,11 +494,11 @@ void Lua::util::register_shared_generic(lua::State *l, luabind::module_ &mod)
 		  std::string err;
 		  if(!zip.ReadFile(zipFileName, data, err))
 			  return {false, err};
-		  filemanager::create_path(ufile::get_path_from_filename(outputZipFileName));
-		  auto f = filemanager::open_file(outputZipFileName, filemanager::FileMode::Write | filemanager::FileMode::Binary);
+		  pragma::fs::create_path(ufile::get_path_from_filename(outputZipFileName));
+		  auto f = pragma::fs::open_file(outputZipFileName, pragma::fs::FileMode::Write | pragma::fs::FileMode::Binary);
 		  if(!f)
 			  return {false, "Unable to open output file!"};
-		  fsys::File fp {f};
+		  pragma::fs::File fp {f};
 		  fp.Write(data.data(), data.size());
 		  return {true, {}};
 	  });
@@ -510,7 +510,7 @@ void Lua::util::register_shared(lua::State *l, luabind::module_ &mod)
 	mod[(luabind::def("is_valid_entity", static_cast<bool (*)(lua::State *)>(Lua::util::is_valid_entity)), luabind::def("is_valid_entity", static_cast<bool (*)(lua::State *, const luabind::object &)>(Lua::util::is_valid_entity)),
 	  luabind::def("shake_screen", static_cast<void (*)(lua::State *, const Vector3 &, float, float, float, float, float, float)>(Lua::util::shake_screen)), luabind::def("shake_screen", static_cast<void (*)(lua::State *, float, float, float, float, float)>(Lua::util::shake_screen)),
 	  luabind::def("read_scene_file", Lua::util::read_scene_file), luabind::def("is_cli_only", &pragma::Engine::IsCLIOnly), luabind::def("is_sandboxed", &pragma::Engine::IsSandboxed), luabind::def("is_managed_by_package_manager", &pragma::Engine::IsManagedByPackageManager),
-	  luabind::def("get_program_path", +[]() { return pragma::util::Path::CreatePath(pragma::util::get_program_path()).GetString(); }), luabind::def("get_program_write_path", +[]() { return pragma::util::Path::CreatePath(filemanager::get_program_write_path()).GetString(); }))];
+	  luabind::def("get_program_path", +[]() { return pragma::util::Path::CreatePath(pragma::util::get_program_path()).GetString(); }), luabind::def("get_program_write_path", +[]() { return pragma::util::Path::CreatePath(pragma::fs::get_program_write_path()).GetString(); }))];
 }
 static Lua::mult<bool, Lua::opt<std::string>> exec_python(lua::State *l, const std::string &fileName, const std::vector<std::string> &args)
 {
@@ -518,7 +518,7 @@ static Lua::mult<bool, Lua::opt<std::string>> exec_python(lua::State *l, const s
 	cargs.reserve(args.size());
 	for(auto &arg : args)
 		cargs.push_back(arg.c_str());
-	auto fullPath = filemanager::get_canonicalized_path(fileName);
+	auto fullPath = pragma::fs::get_canonicalized_path(fileName);
 	auto res = pragma::python::exec(fullPath.c_str(), cargs.size(), cargs.data());
 	if(res == false) {
 		auto err = pragma::python::get_last_error();
@@ -1150,7 +1150,7 @@ void Lua::util::open_path_in_explorer(const std::string &spath, const std::strin
 {
 	auto path = pragma::util::Path::CreatePath(spath) + pragma::util::Path::CreateFile(selectFile);
 	std::string strAbsPath;
-	if(FileManager::FindAbsolutePath(path.GetString(), strAbsPath) == false)
+	if(pragma::fs::find_absolute_path(path.GetString(), strAbsPath) == false)
 		return;
 	auto absPath = pragma::util::Path::CreateFile(strAbsPath);
 	pragma::util::open_path_in_explorer(std::string {absPath.GetPath()}, std::string {absPath.GetFileName()});
@@ -1159,7 +1159,7 @@ void Lua::util::open_path_in_explorer(const std::string &spath)
 {
 	auto path = pragma::util::Path::CreatePath(spath);
 	std::string strAbsPath;
-	if(FileManager::FindAbsolutePath(path.GetString(), strAbsPath) == false)
+	if(pragma::fs::find_absolute_path(path.GetString(), strAbsPath) == false)
 		return;
 	auto absPath = pragma::util::Path::CreatePath(strAbsPath);
 	pragma::util::open_path_in_explorer(std::string {absPath.GetPath()});
@@ -1203,8 +1203,8 @@ double Lua::util::units_to_metres(double units) { return ::pragma::units_to_metr
 double Lua::util::metres_to_units(double metres) { return ::pragma::metres_to_units(metres); }
 luabind::object Lua::util::read_scene_file(lua::State *l, const std::string &fileName)
 {
-	auto fname = "scenes\\" + FileManager::GetCanonicalizedPath(fileName);
-	auto f = FileManager::OpenFile(fname.c_str(), "r");
+	auto fname = "scenes\\" + pragma::fs::get_canonicalized_path(fileName);
+	auto f = pragma::fs::open_file(fname.c_str(), pragma::fs::FileMode::Read);
 	if(f == nullptr)
 		return {};
 	source_engine::script::SceneScriptValue root {};
@@ -1414,8 +1414,8 @@ Lua::var<bool, pragma::util::ParallelJob<luabind::object>> Lua::util::pack_zip_a
 			}
 		}
 	}
-	filemanager::create_path(ufile::get_path_from_filename(zipFileName));
-	auto absFilePath = pragma::util::FilePath(filemanager::get_program_write_path(), zipFileName).GetString();
+	pragma::fs::create_path(ufile::get_path_from_filename(zipFileName));
+	auto absFilePath = pragma::util::FilePath(pragma::fs::get_program_write_path(), zipFileName).GetString();
 	std::string err;
 	auto zip = uzip::ZIPFile::Open(absFilePath, err, uzip::OpenMode::Write);
 	if(zip == nullptr) {
@@ -1441,7 +1441,7 @@ Lua::var<bool, pragma::util::ParallelJob<luabind::object>> Lua::util::pack_zip_a
 			incrementFileIndex();
 			if(worker.IsCancelled())
 				return;
-			auto f = filemanager::open_file(pair.second, filemanager::FileMode::Read | filemanager::FileMode::Binary);
+			auto f = pragma::fs::open_file(pair.second, pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 			if(f == nullptr) {
 				if(notFound.size() == notFound.capacity())
 					notFound.reserve(notFound.size() * 1.5 + 100);
@@ -1495,9 +1495,9 @@ Lua::var<bool, pragma::util::ParallelJob<luabind::object>> Lua::util::pack_zip_a
 std::string Lua::util::get_addon_path(lua::State *l, const std::string &relPath)
 {
 	std::string rpath;
-	if(FileManager::FindAbsolutePath(relPath, rpath) == false)
+	if(pragma::fs::find_absolute_path(relPath, rpath) == false)
 		return relPath;
-	if(!filemanager::find_relative_path(rpath, rpath))
+	if(!pragma::fs::find_relative_path(rpath, rpath))
 		return relPath;
 	return rpath;
 }

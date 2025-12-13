@@ -20,7 +20,7 @@ export namespace pragma {
 		const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const;
 
 		const std::vector<ComponentMemberInfo> &GetMembers() const { return m_members; }
-		const std::unordered_map<pragma::GString, ComponentMemberIndex> &GetMemberIndexMap() const { return m_memberNameToIndex; }
+		const std::unordered_map<GString, ComponentMemberIndex> &GetMemberIndexMap() const { return m_memberNameToIndex; }
 	  protected:
 		friend BaseEntityComponentSystem;
 		virtual void OnMemberRegistered(const ComponentMemberInfo &memberInfo, ComponentMemberIndex index) {}
@@ -35,6 +35,6 @@ export namespace pragma {
 		void UpdateMemberNameMap();
 	  private:
 		std::vector<ComponentMemberInfo> m_members = {};
-		std::unordered_map<pragma::GString, ComponentMemberIndex> m_memberNameToIndex = {};
+		std::unordered_map<GString, ComponentMemberIndex> m_memberNameToIndex = {};
 	};
 };

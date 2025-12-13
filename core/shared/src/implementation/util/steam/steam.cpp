@@ -48,7 +48,7 @@ std::optional<std::string> pragma::util::steam::find_steam_installation_path()
 	}
 	else {
 		auto snapPath = pragma::util::DirPath(std::string {pHomePath}) + "/snap/steam/common/.local/share/Steam/";
-		if(filemanager::is_system_dir(snapPath.GetString()) == true)
+		if(fs::is_system_dir(snapPath.GetString()) == true)
 			rootSteamPath = snapPath.GetString();
 		else
 			spdlog::info("Cannot find steam installation!");
@@ -61,7 +61,7 @@ std::optional<std::string> pragma::util::steam::find_steam_installation_path()
 
 bool pragma::util::steam::get_external_steam_locations(const std::string &steamRootPath, std::vector<std::string> &outExtLocations)
 {
-	auto f = FileManager::OpenSystemFile((steamRootPath + "/steamapps/libraryfolders.vdf").c_str(), "r");
+	auto f = fs::open_system_file((steamRootPath + "/steamapps/libraryfolders.vdf"), fs::FileMode::Read);
 	if(f == nullptr)
 		return false;
 	auto lenContents = f->GetSize();

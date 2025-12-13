@@ -18,7 +18,7 @@ export namespace pragma::networking {
 		virtual bool SendPacket(Protocol protocol, NetPacket &packet, Error &outErr) override;
 		virtual bool IsRunning() const override;
 		virtual bool IsDisconnected() const override;
-		virtual bool PollEvents(pragma::networking::Error &outErr) override;
+		virtual bool PollEvents(Error &outErr) override;
 		virtual uint16_t GetLatency() const override;
 		virtual void SetTimeoutDuration(float duration) override;
 		virtual std::optional<std::string> GetIP() const override;

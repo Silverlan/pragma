@@ -8,13 +8,13 @@ import :entities.components.input_movement_controller;
 
 using namespace pragma;
 
-InputMovementControllerComponent::InputMovementControllerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+InputMovementControllerComponent::InputMovementControllerComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void InputMovementControllerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(movementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
+	BindEventUnhandled(movementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateMovementProperties(); });
 }
-void InputMovementControllerComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void InputMovementControllerComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void InputMovementControllerComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 
 void InputMovementControllerComponent::SetActionInputController(ActionInputControllerComponent *controller) { m_actionInputController = controller ? controller->GetHandle<ActionInputControllerComponent>() : ComponentHandle<ActionInputControllerComponent> {}; }
@@ -37,8 +37,8 @@ void InputMovementControllerComponent::UpdateMovementProperties()
 {
 	if(!IsActive() || m_actionInputController.expired() || !m_movementComponent)
 		return;
-	m_movementComponent->SetDirectionMagnitude(MovementComponent::MoveDirection::Forward, m_actionInputController->GetActionInputAxisMagnitude(pragma::Action::MoveForward));
-	m_movementComponent->SetDirectionMagnitude(MovementComponent::MoveDirection::Backward, m_actionInputController->GetActionInputAxisMagnitude(pragma::Action::MoveBackward));
-	m_movementComponent->SetDirectionMagnitude(MovementComponent::MoveDirection::Left, m_actionInputController->GetActionInputAxisMagnitude(pragma::Action::MoveLeft));
-	m_movementComponent->SetDirectionMagnitude(MovementComponent::MoveDirection::Right, m_actionInputController->GetActionInputAxisMagnitude(pragma::Action::MoveRight));
+	m_movementComponent->SetDirectionMagnitude(MovementComponent::MoveDirection::Forward, m_actionInputController->GetActionInputAxisMagnitude(Action::MoveForward));
+	m_movementComponent->SetDirectionMagnitude(MovementComponent::MoveDirection::Backward, m_actionInputController->GetActionInputAxisMagnitude(Action::MoveBackward));
+	m_movementComponent->SetDirectionMagnitude(MovementComponent::MoveDirection::Left, m_actionInputController->GetActionInputAxisMagnitude(Action::MoveLeft));
+	m_movementComponent->SetDirectionMagnitude(MovementComponent::MoveDirection::Right, m_actionInputController->GetActionInputAxisMagnitude(Action::MoveRight));
 }

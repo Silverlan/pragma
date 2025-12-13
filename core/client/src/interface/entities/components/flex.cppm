@@ -15,7 +15,7 @@ export namespace pragma {
 	}
 	class DLLCLIENT CFlexComponent final : public BaseFlexComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		struct FlexAnimationData {
@@ -24,7 +24,7 @@ export namespace pragma {
 			bool loop = false;
 			float playbackRate = 1.f;
 		};
-		CFlexComponent(pragma::ecs::BaseEntity &ent) : BaseFlexComponent(ent) {}
+		CFlexComponent(ecs::BaseEntity &ent) : BaseFlexComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
 		// Vertex animations
@@ -59,7 +59,7 @@ export namespace pragma {
 		void UpdateEyeFlexes();
 		void UpdateEyeFlexes(asset::Eyeball &eyeball, uint32_t eyeballIdx);
 		void UpdateFlexControllers(float dt);
-		void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl);
+		void OnModelChanged(const std::shared_ptr<asset::Model> &mdl);
 
 		// Flex controllers
 		struct FlexControllerInfo {

@@ -28,7 +28,7 @@ export namespace pragma::game {
 		std::vector<std::unique_ptr<AmmoType>> m_ammoTypes;
 	  public:
 		AmmoTypeManager();
-		Bool RegisterAmmoType(const std::string &name, Int32 damage = 10, Float force = 200.f, DamageType dmgType = DamageType::Bullet, AmmoType **ammoOut = nullptr);
+		Bool RegisterAmmoType(const std::string &name, Int32 damage = 10, Float force = 200.f, DamageType dmgType = Bullet, AmmoType **ammoOut = nullptr);
 		AmmoType *GetAmmoType(const std::string &name, UInt32 *ammoId = nullptr);
 		AmmoType *GetAmmoType(UInt32 ammoId);
 		AmmoTypeManager(AmmoTypeManager &) = delete;

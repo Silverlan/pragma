@@ -281,7 +281,7 @@ void pragma::SGame::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_u
 void pragma::SGame::RegisterGameResource(const std::string &fileName)
 {
 	//Con::csv<<"RegisterGameResource: "<<fileName<<Con::endl;
-	auto fName = FileManager::GetCanonicalizedPath(fileName);
+	auto fName = fs::get_canonicalized_path(fileName);
 	if(IsValidGameResource(fileName) == true)
 		return;
 	m_gameResources.push_back(fName);
@@ -309,7 +309,7 @@ void pragma::SGame::CreateGiblet(const GibletCreateInfo &info)
 
 bool pragma::SGame::IsValidGameResource(const std::string &fileName)
 {
-	auto fName = FileManager::GetCanonicalizedPath(fileName);
+	auto fName = fs::get_canonicalized_path(fileName);
 	auto it = std::find(m_gameResources.begin(), m_gameResources.end(), fName);
 	return (it != m_gameResources.end()) ? true : false;
 }
@@ -318,16 +318,16 @@ void pragma::SGame::UpdateLuaCache(const std::string &fName)
 {
 	auto *l = GetLuaState();
 	auto dstPath = "cache\\" + fName;
-	auto includeFlags = fsys::SearchFlags::All;
-	auto excludeFlags = static_cast<fsys::SearchFlags>(pragma::FSYS_SEARCH_CACHE);
-	if(FileManager::Exists(fName.c_str(), includeFlags, excludeFlags))
-		FileManager::CopyFile(fName.c_str(), dstPath.c_str()); // Compiled file already exists, just copy it
+	auto includeFlags = fs::SearchFlags::All;
+	auto excludeFlags = static_cast<fs::SearchFlags>(pragma::FSYS_SEARCH_CACHE);
+	if(fs::exists(fName, includeFlags, excludeFlags))
+		fs::copy_file(fName, dstPath); // Compiled file already exists, just copy it
 	else {
 		auto luaPath = fName.substr(0, fName.length() - 4) + Lua::SCRIPT_DIRECTORY;
 		auto luaPathNoLuaDir = luaPath.substr(4, luaPath.length());
 		auto s = LoadLuaFile(luaPathNoLuaDir, includeFlags, excludeFlags);
 		if(s == Lua::StatusCode::Ok) {
-			FileManager::CreatePath(ufile::get_path_from_filename(dstPath).c_str());
+			fs::create_path(ufile::get_path_from_filename(dstPath));
 			Lua::compile_file(l, dstPath);
 		}
 	}
@@ -336,7 +336,7 @@ void pragma::SGame::UpdateLuaCache(const std::string &fName)
 void pragma::SGame::GenerateLuaCache()
 {
 	auto &resources = networking::ResourceManager::GetResources();
-	filemanager::create_path("cache/" + Lua::SCRIPT_DIRECTORY);
+	fs::create_path("cache/" + Lua::SCRIPT_DIRECTORY);
 	Con::csv << "Generating lua cache..." << Con::endl;
 	for(auto &res : resources) {
 		auto &fName = res.fileName;
@@ -355,21 +355,21 @@ bool pragma::SGame::InitializeGameMode()
 	std::vector<std::string> transferFiles; // Files which need to be transferred to the client
 
 	auto infoFile = path + "\\info.txt";
-	if(FileManager::Exists(infoFile))
+	if(fs::exists(infoFile))
 		transferFiles.push_back(infoFile);
 
 	auto offset = transferFiles.size();
-	FileManager::FindFiles((path + "\\*." + Lua::FILE_EXTENSION).c_str(), &transferFiles, nullptr); // Shared Files
+	fs::find_files((path + "\\*." + Lua::FILE_EXTENSION), &transferFiles, nullptr); // Shared Files
 	if(Lua::are_precompiled_files_enabled())
-		FileManager::FindFiles((path + "\\*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &transferFiles, nullptr);
+		fs::find_files((path + "\\*." + Lua::FILE_EXTENSION_PRECOMPILED), &transferFiles, nullptr);
 	for(auto i = offset; i < transferFiles.size(); ++i)
 		transferFiles.at(i) = path + '\\' + transferFiles.at(i);
 
 	auto pathClient = path + "\\client";
 	offset = transferFiles.size();
-	FileManager::FindFiles((pathClient + "\\*." + Lua::FILE_EXTENSION).c_str(), &transferFiles, nullptr); // Clientside Files
+	fs::find_files((pathClient + "\\*." + Lua::FILE_EXTENSION), &transferFiles, nullptr); // Clientside Files
 	if(Lua::are_precompiled_files_enabled())
-		FileManager::FindFiles((pathClient + "\\*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &transferFiles, nullptr);
+		fs::find_files((pathClient + "\\*." + Lua::FILE_EXTENSION_PRECOMPILED), &transferFiles, nullptr);
 	for(auto i = offset; i < transferFiles.size(); ++i)
 		transferFiles.at(i) = pathClient + '\\' + transferFiles.at(i);
 

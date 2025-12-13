@@ -29,8 +29,8 @@ export namespace pragma {
 		virtual prosper::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const = 0;
 		prosper::IDescriptorSet &GetAnimationDescriptorSet(const ecs::CParticleSystemComponent &ps);
 		uint32_t GetBasePipelineIndex(uint32_t pipelineIdx) const;
-		pragma::rendering::ParticleAlphaMode GetAlphaMode(uint32_t pipelineIdx) const;
-		pragma::rendering::ParticleAlphaMode GetRenderAlphaMode(const ecs::CParticleSystemComponent &particle) const;
+		rendering::ParticleAlphaMode GetAlphaMode(uint32_t pipelineIdx) const;
+		rendering::ParticleAlphaMode GetRenderAlphaMode(const ecs::CParticleSystemComponent &particle) const;
 		static uint32_t GetParticlePipelineCount();
 		void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
 	  private:

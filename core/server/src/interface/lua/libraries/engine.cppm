@@ -10,6 +10,6 @@ export module pragma.server:scripting.lua.libraries.engine;
 export import pragma.materialsystem;
 
 export namespace Lua::engine::server {
-	DLLSERVER msys::Material *LoadMaterial(const std::string &mat, bool reload);
-	DLLSERVER msys::Material *LoadMaterial(const std::string &mat);
+	DLLSERVER pragma::material::Material *LoadMaterial(const std::string &mat, bool reload);
+	DLLSERVER pragma::material::Material *LoadMaterial(const std::string &mat);
 }

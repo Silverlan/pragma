@@ -13,7 +13,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CQuakeComponent final : public BaseEnvQuakeComponent, public CBaseNetComponent {
 		  public:
-			CQuakeComponent(pragma::ecs::BaseEntity &ent) : BaseEnvQuakeComponent(ent) {}
+			CQuakeComponent(ecs::BaseEntity &ent) : BaseEnvQuakeComponent(ent) {}
 			virtual ~CQuakeComponent() override;
 
 			virtual void ReceiveData(NetPacket &packet) override;

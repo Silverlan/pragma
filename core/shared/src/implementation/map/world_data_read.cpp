@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :map.world_data;
 
-void pragma::asset::Output::Read(VFilePtr &f)
+void pragma::asset::Output::Read(fs::VFilePtr &f)
 {
 	name = f->ReadString();
 	target = f->ReadString();
@@ -18,7 +18,7 @@ void pragma::asset::Output::Read(VFilePtr &f)
 
 /////////
 
-bool pragma::asset::WorldData::Read(VFilePtr &f, EntityData::Flags entMask, std::string *errMsg)
+bool pragma::asset::WorldData::Read(fs::VFilePtr &f, EntityData::Flags entMask, std::string *errMsg)
 {
 	auto header = f->Read<std::array<char, 3>>();
 	if(pragma::string::compare(header.data(), "WLD", true, 3) == false) {
@@ -54,20 +54,20 @@ bool pragma::asset::WorldData::Read(VFilePtr &f, EntityData::Flags entMask, std:
 	ReadEntities(f, materials, entMask);
 	return true;
 }
-std::vector<msys::MaterialHandle> pragma::asset::WorldData::ReadMaterials(VFilePtr &f)
+std::vector<pragma::material::MaterialHandle> pragma::asset::WorldData::ReadMaterials(fs::VFilePtr &f)
 {
 	auto numMaterials = f->Read<uint32_t>();
 	m_materialTable.resize(numMaterials);
-	std::vector<msys::MaterialHandle> materials {};
+	std::vector<material::MaterialHandle> materials {};
 	materials.reserve(numMaterials);
 	for(auto &str : m_materialTable) {
 		str = f->ReadString();
 		auto *mat = m_nw.LoadMaterial(str);
-		materials.push_back(mat ? mat->GetHandle() : msys::MaterialHandle {});
+		materials.push_back(mat ? mat->GetHandle() : material::MaterialHandle {});
 	}
 	return materials;
 }
-void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f, uint32_t version)
+void pragma::asset::WorldData::ReadBSPTree(fs::VFilePtr &f, uint32_t version)
 {
 	m_bspTree = pragma::util::BSPTree::Create();
 	auto &nodes = m_bspTree->GetNodes();
@@ -121,7 +121,7 @@ void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f, uint32_t version)
 		f->Read(meshIndices.data(), meshIndices.size() * sizeof(meshIndices.front()));
 	}
 }
-void pragma::asset::WorldData::ReadEntities(VFilePtr &f, const std::vector<msys::MaterialHandle> &materials, EntityData::Flags entMask)
+void pragma::asset::WorldData::ReadEntities(fs::VFilePtr &f, const std::vector<material::MaterialHandle> &materials, EntityData::Flags entMask)
 {
 	auto numEnts = f->Read<uint32_t>();
 	m_entities.reserve(numEnts);

@@ -9,18 +9,18 @@ export module pragma.client:rendering.shader_graph.node_image_texture;
 export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
-	class DLLCLIENT ImageTextureNodeBase : public pragma::shadergraph::Node {
+	class DLLCLIENT ImageTextureNodeBase : public shadergraph::Node {
 	  public:
 		static constexpr const char *IN_FILENAME = "fileName";
 
 		static constexpr const char *OUT_TEXTURE = "texture";
 
 		ImageTextureNodeBase(const std::string_view &type, bool populateOutputsAndInputs = true);
-		std::string GetTextureVariableName(const pragma::shadergraph::GraphNode &gn) const;
-		std::string GetTextureVariableName(const pragma::shadergraph::OutputSocket &socket) const;
+		std::string GetTextureVariableName(const shadergraph::GraphNode &gn) const;
+		std::string GetTextureVariableName(const shadergraph::OutputSocket &socket) const;
 
-		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
-		virtual std::string DoEvaluateResourceDeclarations(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
+		virtual std::string DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const override;
+		virtual std::string DoEvaluateResourceDeclarations(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const override;
 	};
 	class DLLCLIENT ImageTextureNode : public ImageTextureNodeBase {
 	  public:
@@ -31,6 +31,6 @@ export namespace pragma::rendering::shader_graph {
 
 		ImageTextureNode(const std::string_view &type);
 
-		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
+		virtual std::string DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const override;
 	};
 };

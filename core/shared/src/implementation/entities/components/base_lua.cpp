@@ -51,64 +51,64 @@ static std::string get_member_variable_name(const std::string &funcName)
 		return "";
 	return "m_" + get_member_name(funcName);
 }
-static std::any string_to_any(pragma::Game &game, const std::string &value, pragma::util::VarType type)
+static std::any string_to_any(Game &game, const std::string &value, util::VarType type)
 {
-	static_assert(pragma::math::to_integral(pragma::util::VarType::Count) == 23);
+	static_assert(math::to_integral(util::VarType::Count) == 23);
 	switch(type) {
-	case pragma::util::VarType::Bool:
-		return static_cast<bool>(pragma::util::to_boolean(value));
-	case pragma::util::VarType::Double:
-		return static_cast<double>(pragma::util::to_float(value));
-	case pragma::util::VarType::Float:
-		return static_cast<float>(pragma::util::to_float(value));
-	case pragma::util::VarType::Int8:
-		return static_cast<int8_t>(pragma::util::to_int(value));
-	case pragma::util::VarType::Int16:
-		return static_cast<int16_t>(pragma::util::to_int(value));
-	case pragma::util::VarType::Int32:
-		return static_cast<int32_t>(pragma::util::to_int(value));
-	case pragma::util::VarType::Int64:
-		return static_cast<int64_t>(pragma::util::to_int(value));
-	case pragma::util::VarType::LongDouble:
-		return static_cast<long double>(pragma::util::to_int(value));
-	case pragma::util::VarType::String:
+	case util::VarType::Bool:
+		return static_cast<bool>(util::to_boolean(value));
+	case util::VarType::Double:
+		return static_cast<double>(util::to_float(value));
+	case util::VarType::Float:
+		return static_cast<float>(util::to_float(value));
+	case util::VarType::Int8:
+		return static_cast<int8_t>(util::to_int(value));
+	case util::VarType::Int16:
+		return static_cast<int16_t>(util::to_int(value));
+	case util::VarType::Int32:
+		return static_cast<int32_t>(util::to_int(value));
+	case util::VarType::Int64:
+		return static_cast<int64_t>(util::to_int(value));
+	case util::VarType::LongDouble:
+		return static_cast<long double>(util::to_int(value));
+	case util::VarType::String:
 		return value;
-	case pragma::util::VarType::UInt8:
-		return static_cast<uint8_t>(pragma::util::to_int(value));
-	case pragma::util::VarType::UInt16:
-		return static_cast<uint16_t>(pragma::util::to_int(value));
-	case pragma::util::VarType::UInt32:
-		return static_cast<uint32_t>(pragma::util::to_int(value));
-	case pragma::util::VarType::UInt64:
-		return static_cast<uint64_t>(pragma::util::to_int(value));
-	case pragma::util::VarType::EulerAngles:
+	case util::VarType::UInt8:
+		return static_cast<uint8_t>(util::to_int(value));
+	case util::VarType::UInt16:
+		return static_cast<uint16_t>(util::to_int(value));
+	case util::VarType::UInt32:
+		return static_cast<uint32_t>(util::to_int(value));
+	case util::VarType::UInt64:
+		return static_cast<uint64_t>(util::to_int(value));
+	case util::VarType::EulerAngles:
 		return EulerAngles {value};
-	case pragma::util::VarType::Color:
+	case util::VarType::Color:
 		return Color {value};
-	case pragma::util::VarType::Vector:
+	case util::VarType::Vector:
 		return uvec::create(value);
-	case pragma::util::VarType::Vector2:
+	case util::VarType::Vector2:
 		{
 			Vector2 r;
 			pragma::string::string_to_array<Float>(value, reinterpret_cast<float *>(&r), pragma::string::cstring_to_number<float>, 2);
 			return r;
 		}
-	case pragma::util::VarType::Vector4:
+	case util::VarType::Vector4:
 		{
 			Vector4 r;
 			pragma::string::string_to_array<Float>(value, reinterpret_cast<float *>(&r), pragma::string::cstring_to_number<float>, 4);
 			return r;
 		}
-	case pragma::util::VarType::Entity:
-		return pragma::EntityURef {value};
-	case pragma::util::VarType::Quaternion:
+	case util::VarType::Entity:
+		return EntityURef {value};
+	case util::VarType::Quaternion:
 		{
 			Quat r;
 			pragma::string::string_to_array<Float>(value, reinterpret_cast<float *>(&r), pragma::string::cstring_to_number<float>, 4);
 			return r;
 		}
-	case pragma::util::VarType::Transform:
-	case pragma::util::VarType::ScaledTransform:
+	case util::VarType::Transform:
+	case util::VarType::ScaledTransform:
 		return {}; // Not yet supported
 	}
 	return {};
@@ -139,7 +139,7 @@ static std::optional<BaseLuaBaseEntityComponent::MemberIndex> find_member_info_i
 		return {};
 	return itMember - members->memberDeclarations.begin();
 }
-const pragma::BaseLuaBaseEntityComponent::MemberInfo *BaseLuaBaseEntityComponent::GetLuaMemberInfo(ComponentMemberInfo &memberInfo) const
+const BaseLuaBaseEntityComponent::MemberInfo *BaseLuaBaseEntityComponent::GetLuaMemberInfo(ComponentMemberInfo &memberInfo) const
 {
 	if(!m_classMembers) {
 		m_classMembers = get_class_member_declarations(*GetClassObject());
@@ -152,7 +152,7 @@ const pragma::BaseLuaBaseEntityComponent::MemberInfo *BaseLuaBaseEntityComponent
 		}
 	}
 	if(memberInfo.userIndex >= m_classMembers->memberDeclarations.size() || m_classMembers->memberDeclarations[memberInfo.userIndex].memberNameHash != memberInfo.GetNameHash()) {
-		auto it = std::find_if(m_classMembers->memberDeclarations.begin(), m_classMembers->memberDeclarations.end(), [&memberInfo](const BaseLuaBaseEntityComponent::MemberInfo &luaMemberInfo) { return luaMemberInfo.memberNameHash == memberInfo.GetNameHash(); });
+		auto it = std::find_if(m_classMembers->memberDeclarations.begin(), m_classMembers->memberDeclarations.end(), [&memberInfo](const MemberInfo &luaMemberInfo) { return luaMemberInfo.memberNameHash == memberInfo.GetNameHash(); });
 		assert(it != m_classMembers->memberDeclarations.end());
 		if(it == m_classMembers->memberDeclarations.end()) {
 			throw std::runtime_error {"Member '" + std::string {*memberInfo.GetName()} + "' is missing Lua meta data!"};
@@ -167,19 +167,19 @@ template<typename T>
 static void init_pose_type_meta_data(const ComponentMemberInfo &memberInfo, BaseLuaBaseEntityComponent &component, BaseLuaBaseEntityComponent::MemberInfo &info)
 {
 	// Lazy initialization
-	auto *poseMetaData = memberInfo.FindTypeMetaData<pragma::ents::PoseTypeMetaData>();
+	auto *poseMetaData = memberInfo.FindTypeMetaData<ents::PoseTypeMetaData>();
 	assert(poseMetaData);
 	auto idxPos = static_cast<BaseEntityComponent &>(component).GetMemberIndex(poseMetaData->posProperty);
 	auto idxRot = static_cast<BaseEntityComponent &>(component).GetMemberIndex(poseMetaData->rotProperty);
-	auto idxScale = std::is_same_v<T, udm::Transform> ? pragma::INVALID_COMPONENT_MEMBER_INDEX : static_cast<BaseEntityComponent &>(component).GetMemberIndex(poseMetaData->scaleProperty);
+	auto idxScale = std::is_same_v<T, udm::Transform> ? INVALID_COMPONENT_MEMBER_INDEX : static_cast<BaseEntityComponent &>(component).GetMemberIndex(poseMetaData->scaleProperty);
 	auto &ncInfo = const_cast<BaseLuaBaseEntityComponent::MemberInfo &>(info);
 	ncInfo.transformCompositeInfo = std::make_unique<BaseLuaBaseEntityComponent::MemberInfo::TransformCompositeInfo>();
-	ncInfo.transformCompositeInfo->posIdx = idxPos ? *idxPos : pragma::INVALID_COMPONENT_MEMBER_INDEX;
-	ncInfo.transformCompositeInfo->rotIdx = idxRot ? *idxRot : pragma::INVALID_COMPONENT_MEMBER_INDEX;
-	ncInfo.transformCompositeInfo->scaleIdx = idxScale ? *idxScale : pragma::INVALID_COMPONENT_MEMBER_INDEX;
+	ncInfo.transformCompositeInfo->posIdx = idxPos ? *idxPos : INVALID_COMPONENT_MEMBER_INDEX;
+	ncInfo.transformCompositeInfo->rotIdx = idxRot ? *idxRot : INVALID_COMPONENT_MEMBER_INDEX;
+	ncInfo.transformCompositeInfo->scaleIdx = idxScale ? *idxScale : INVALID_COMPONENT_MEMBER_INDEX;
 }
 
-std::optional<ComponentMemberInfo> pragma::LuaCore::get_component_member_info(lua::State *l, const std::string &functionName, ents::EntityMemberType memberType, const std::any &initialValue, BaseLuaBaseEntityComponent::MemberFlags memberFlags, const Lua::map<std::string, void> &attributes,
+std::optional<ComponentMemberInfo> LuaCore::get_component_member_info(lua::State *l, const std::string &functionName, ents::EntityMemberType memberType, const std::any &initialValue, BaseLuaBaseEntityComponent::MemberFlags memberFlags, const Lua::map<std::string, void> &attributes,
   luabind::object &outOnChange, bool dynamicMember)
 {
 	auto memberName = get_member_name(functionName);
@@ -188,26 +188,26 @@ std::optional<ComponentMemberInfo> pragma::LuaCore::get_component_member_info(lu
 	std::optional<ComponentMemberInfo> componentMemberInfo {};
 	// TODO: Add support for properties
 	auto &onChange = outOnChange;
-	if(pragma::is_valid_component_property_type(memberType)) {
+	if(is_valid_component_property_type(memberType)) {
 		onChange = attributes["onChange"];
 		if(onChange) {
 			onChange.push(l);
 			Lua::CheckFunction(l, -1);
 			Lua::Pop(l, 1);
 		}
-		auto vs = [&tmpMemberName, &functionName, &onChange, &attributes, memberType, dynamicMember](auto tag) -> pragma::ComponentMemberInfo {
+		auto vs = [&tmpMemberName, &functionName, &onChange, &attributes, memberType, dynamicMember](auto tag) -> ComponentMemberInfo {
 			using T = typename decltype(tag)::type;
 			if constexpr(pragma::is_valid_component_property_type_v<T>) {
 				if constexpr(std::is_same_v<T, udm::Transform> || std::is_same_v<T, udm::ScaledTransform>) {
 					// If a transform type has a PoseTypeMetaData attached to it, it will be treated as a special case.
 					// In this case the property will act as a composite type, redirecting to a different position/rotation/scale property.
 					auto oTypeMetaData = attributes["typeMetaData"];
-					pragma::ents::PoseTypeMetaData *poseMetaData = nullptr;
+					ents::PoseTypeMetaData *poseMetaData = nullptr;
 					for(luabind::iterator it {oTypeMetaData}, end; it != end; ++it) {
 						{
-							auto typeData = luabind::object_cast<std::shared_ptr<pragma::ents::TypeMetaData>>(*it);
-							if(typeid(*typeData) == typeid(pragma::ents::PoseTypeMetaData)) {
-								poseMetaData = static_cast<pragma::ents::PoseTypeMetaData *>(typeData.get());
+							auto typeData = luabind::object_cast<std::shared_ptr<ents::TypeMetaData>>(*it);
+							if(typeid(*typeData) == typeid(ents::PoseTypeMetaData)) {
+								poseMetaData = static_cast<ents::PoseTypeMetaData *>(typeData.get());
 								break;
 							}
 						}
@@ -278,7 +278,7 @@ std::optional<ComponentMemberInfo> pragma::LuaCore::get_component_member_info(lu
 				if(dynamicMember) {
 					if constexpr(udm::is_udm_type<T>()) {
 						constexpr auto getter = +[](const ComponentMemberInfo &memberInfo, BaseLuaBaseEntityComponent &component, T &value) {
-							pragma::ents::EntityMemberType type;
+							ents::EntityMemberType type;
 							component.GetDynamicMemberValue<T>(memberInfo.userIndex, value, type);
 						};
 						if(!onChange) {
@@ -303,7 +303,7 @@ std::optional<ComponentMemberInfo> pragma::LuaCore::get_component_member_info(lu
 					else {
 						// TODO: Add support for non-UDM types
 						throw std::runtime_error {"Member " + functionName + " of type " + std::string {magic_enum::enum_name(memberType)} + " cannot be animated!"};
-						return pragma::ComponentMemberInfo::CreateDummy();
+						return ComponentMemberInfo::CreateDummy();
 					}
 				}
 				else {
@@ -343,19 +343,19 @@ std::optional<ComponentMemberInfo> pragma::LuaCore::get_component_member_info(lu
 			else {
 				// Unreachable
 				throw std::runtime_error {"Member " + functionName + " of type " + std::string {magic_enum::enum_name(memberType)} + " cannot be animated!"};
-				return pragma::ComponentMemberInfo::CreateDummy();
+				return ComponentMemberInfo::CreateDummy();
 			}
 		};
 		componentMemberInfo = std::move(ents::visit_member<false>(memberType, vs));
 
-		auto specializationType = pragma::AttributeSpecializationType::None;
+		auto specializationType = AttributeSpecializationType::None;
 		auto oCustomSpecializationType = attributes["customSpecializationType"];
 		if(oCustomSpecializationType)
-			specializationType = pragma::AttributeSpecializationType::Custom;
+			specializationType = AttributeSpecializationType::Custom;
 		auto oSpecializationType = attributes["specializationType"];
 		if(oSpecializationType)
-			specializationType = luabind::object_cast<pragma::AttributeSpecializationType>(oSpecializationType);
-		if(specializationType == pragma::AttributeSpecializationType::Custom) {
+			specializationType = luabind::object_cast<AttributeSpecializationType>(oSpecializationType);
+		if(specializationType == AttributeSpecializationType::Custom) {
 			std::string customType;
 			if(oCustomSpecializationType)
 				customType = luabind::object_cast<std::string>(oCustomSpecializationType);
@@ -374,7 +374,7 @@ std::optional<ComponentMemberInfo> pragma::LuaCore::get_component_member_info(lu
 		if(oTypeMetaData) {
 			for(luabind::iterator it {oTypeMetaData}, end; it != end; ++it) {
 				{
-					auto typeData = luabind::object_cast<std::shared_ptr<pragma::ents::TypeMetaData>>(*it);
+					auto typeData = luabind::object_cast<std::shared_ptr<ents::TypeMetaData>>(*it);
 					componentMemberInfo->AddTypeMetaData(typeData);
 				}
 			}
@@ -483,7 +483,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 	auto itMember = std::find_if((*it)->memberDeclarations.begin(), (*it)->memberDeclarations.end(), [&functionName](const MemberInfo &memberInfo) { return pragma::string::compare<std::string_view>(functionName, memberInfo.functionName, false); });
 	if(itMember == (*it)->memberDeclarations.end()) {
 		luabind::object onChange;
-		auto componentMemberInfo = pragma::LuaCore::get_component_member_info(l, functionName, memberType, initialValue, memberFlags, attributes, onChange, false);
+		auto componentMemberInfo = LuaCore::get_component_member_info(l, functionName, memberType, initialValue, memberFlags, attributes, onChange, false);
 
 		if(componentMemberInfo.has_value()) {
 			(*it)->memberDeclarations.push_back({functionName, memberName, get_component_member_name_hash(memberName), memberVarName, memberType, initialValue, memberFlags, std::move(onChange), std::move(componentMemberInfo)});
@@ -504,7 +504,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 		}
 	}
 
-	static_assert(pragma::math::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
+	static_assert(math::to_integral(ents::EntityMemberType::VersionIndex) == 0);
 	std::string getterName = "Get";
 	auto bProperty = (memberFlags & MemberFlags::PropertyBit) != MemberFlags::None;
 	if((memberFlags & MemberFlags::GetterBit) != MemberFlags::None) {
@@ -635,7 +635,7 @@ void BaseLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 		return;
 	auto &member = members.at(memberIdx);
 	if((member.flags & MemberFlags::OutputBit) != MemberFlags::None) {
-		auto *pIoComponent = static_cast<pragma::BaseIOComponent *>(GetEntity().FindComponent("io").get());
+		auto *pIoComponent = static_cast<BaseIOComponent *>(GetEntity().FindComponent("io").get());
 		if(pIoComponent != nullptr)
 			pIoComponent->TriggerOutput("OnSet" + std::string {member.functionName}, &GetEntity());
 	}
@@ -658,7 +658,7 @@ void BaseLuaBaseEntityComponent::SetupLua(const luabind::object &o) { SetLuaObje
 
 ////////////////
 
-BaseLuaBaseEntityComponent::BaseLuaBaseEntityComponent(pragma::ecs::BaseEntity &ent) : pragma::BaseEntityComponent(ent) {}
+BaseLuaBaseEntityComponent::BaseLuaBaseEntityComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseLuaBaseEntityComponent::InitializeLuaObject(lua::State *l) {}
 
@@ -684,7 +684,7 @@ void BaseLuaBaseEntityComponent::Initialize()
 
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	auto &componentManager = game.GetEntityComponentManager();
-	if((componentManager.GetComponentInfo(GetComponentId())->flags & pragma::ComponentFlags::Networked) != pragma::ComponentFlags::None)
+	if((componentManager.GetComponentInfo(GetComponentId())->flags & ComponentFlags::Networked) != ComponentFlags::None)
 		SetNetworked(true);
 
 	auto *l = GetLuaState();
@@ -712,10 +712,10 @@ void BaseLuaBaseEntityComponent::Initialize()
 
 	auto &ent = GetEntity();
 	CallLuaMethod("OnAttachedToEntity");
-	pragma::BaseEntityComponent::Initialize();
+	BaseEntityComponent::Initialize();
 }
 
-void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBaseEntityComponent::MemberInfo> &members)
+void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<MemberInfo> &members)
 {
 	m_members = members;
 	auto &o = GetLuaObject();
@@ -750,14 +750,14 @@ void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBase
 		totalMemberFlags |= member.flags;
 
 		if(member.type == ents::EntityMemberType::Element)
-			o[memberVarName] = ::udm::Property::Create<::udm::Element>();
+			o[memberVarName] = udm::Property::Create<udm::Element>();
 
 		InitializeMember(member);
 
 		if((member.flags & (MemberFlags::KeyValueBit | MemberFlags::InputBit)) != MemberFlags::None) {
 			// We only need this for quick keyvalue or input lookups
 			std::string lmemberName = member.functionName;
-			pragma::string::to_lower(lmemberName);
+			string::to_lower(lmemberName);
 
 			auto kvName = name_to_keyvalue_name(member.functionName);
 			if(kvName != lmemberName)
@@ -771,28 +771,28 @@ void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBase
 	Lua::Pop(l, 1); /* 0 */
 
 	if((totalMemberFlags & MemberFlags::KeyValueBit) != MemberFlags::None) {
-		BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](const std::reference_wrapper<pragma::ComponentEvent> &evData) -> pragma::util::EventReply {
-			auto &kvData = static_cast<pragma::CEKeyValueData &>(evData.get());
+		BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](const std::reference_wrapper<ComponentEvent> &evData) -> util::EventReply {
+			auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 			auto it = m_memberNameToIndex.find(kvData.key);
 			if(it == m_memberNameToIndex.end())
-				return pragma::util::EventReply::Unhandled;
+				return util::EventReply::Unhandled;
 			auto &member = m_members.at(it->second);
 			SetMemberValue(member, string_to_any(*GetEntity().GetNetworkState()->GetGameState(), kvData.value, detail::member_type_to_util_type(member.type)));
-			return pragma::util::EventReply::Handled;
+			return util::EventReply::Handled;
 		});
 	}
 	if((totalMemberFlags & MemberFlags::InputBit) != MemberFlags::None) {
-		BindEvent(pragma::baseIOComponent::EVENT_HANDLE_INPUT, [this](const std::reference_wrapper<pragma::ComponentEvent> &evData) -> pragma::util::EventReply {
-			auto &ioData = static_cast<pragma::CEInputData &>(evData.get());
+		BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](const std::reference_wrapper<ComponentEvent> &evData) -> util::EventReply {
+			auto &ioData = static_cast<CEInputData &>(evData.get());
 			if(strncmp(ioData.input.data(), "set", 3u) != 0)
-				return pragma::util::EventReply::Unhandled;
+				return util::EventReply::Unhandled;
 			auto input = ioData.input.substr(3u);
 			auto it = m_memberNameToIndex.find(input);
 			if(it == m_memberNameToIndex.end())
-				return pragma::util::EventReply::Unhandled;
+				return util::EventReply::Unhandled;
 			auto &member = m_members.at(it->second);
 			SetMemberValue(member, string_to_any(*GetEntity().GetNetworkState()->GetGameState(), ioData.data, detail::member_type_to_util_type(member.type)));
-			return pragma::util::EventReply::Handled;
+			return util::EventReply::Handled;
 		});
 	}
 }
@@ -913,10 +913,10 @@ const ComponentMemberInfo *BaseLuaBaseEntityComponent::GetMemberInfo(ComponentMe
 	return DynamicMemberRegister::GetMemberInfo(idx); // -GetStaticMemberCount());
 }
 
-const luabind::object &BaseLuaBaseEntityComponent::GetLuaObject() const { return pragma::BaseEntityComponent::GetLuaObject(); }
-luabind::object &BaseLuaBaseEntityComponent::GetLuaObject() { return pragma::BaseEntityComponent::GetLuaObject(); }
+const luabind::object &BaseLuaBaseEntityComponent::GetLuaObject() const { return BaseEntityComponent::GetLuaObject(); }
+luabind::object &BaseLuaBaseEntityComponent::GetLuaObject() { return BaseEntityComponent::GetLuaObject(); }
 
-CallbackHandle BaseLuaBaseEntityComponent::BindInitComponentEvent(ComponentId componentId, const std::function<void(std::reference_wrapper<pragma::BaseEntityComponent>)> &callback)
+CallbackHandle BaseLuaBaseEntityComponent::BindInitComponentEvent(ComponentId componentId, const std::function<void(std::reference_wrapper<BaseEntityComponent>)> &callback)
 {
 	auto it = m_initComponentCallbacks.find(componentId);
 	if(it != m_initComponentCallbacks.end()) {
@@ -924,26 +924,26 @@ CallbackHandle BaseLuaBaseEntityComponent::BindInitComponentEvent(ComponentId co
 			it->second.Remove();
 		m_initComponentCallbacks.erase(it);
 	}
-	it = m_initComponentCallbacks.insert(std::make_pair(componentId, FunctionCallback<void, std::reference_wrapper<pragma::BaseEntityComponent>>::Create(callback))).first;
+	it = m_initComponentCallbacks.insert(std::make_pair(componentId, FunctionCallback<void, std::reference_wrapper<BaseEntityComponent>>::Create(callback))).first;
 	auto pComponent = GetEntity().FindComponent(componentId);
 	if(pComponent.valid())
-		callback(std::reference_wrapper<pragma::BaseEntityComponent>(*pComponent));
+		callback(std::reference_wrapper<BaseEntityComponent>(*pComponent));
 	return it->second;
 }
 
-pragma::util::EventReply BaseLuaBaseEntityComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply BaseLuaBaseEntityComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
-	if(eventId == pragma::baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) {
-		auto &componentAddedData = static_cast<pragma::CEOnEntityComponentAdded &>(evData);
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
+	if(eventId == baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) {
+		auto &componentAddedData = static_cast<CEOnEntityComponentAdded &>(evData);
 		auto it = m_initComponentCallbacks.find(componentAddedData.component.GetComponentId());
 		if(it != m_initComponentCallbacks.end()) {
 			auto &hCb = it->second;
 			if(hCb.IsValid() == false)
 				m_initComponentCallbacks.erase(it);
 			else
-				hCb.Call<void, std::reference_wrapper<pragma::BaseEntityComponent>>(componentAddedData.component);
+				hCb.Call<void, std::reference_wrapper<BaseEntityComponent>>(componentAddedData.component);
 		}
 	}
 
@@ -981,17 +981,17 @@ pragma::util::EventReply BaseLuaBaseEntityComponent::HandleEvent(ComponentEventI
 				evData.HandleReturnValues(l);
 		}
 	}*/
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 
-void BaseLuaBaseEntityComponent::OnAttached(pragma::ecs::BaseEntity &ent)
+void BaseLuaBaseEntityComponent::OnAttached(ecs::BaseEntity &ent)
 {
-	pragma::BaseEntityComponent::OnAttached(ent);
+	BaseEntityComponent::OnAttached(ent);
 	CallLuaMethod("OnAttachedToEntity");
 }
-void BaseLuaBaseEntityComponent::OnDetached(pragma::ecs::BaseEntity &ent)
+void BaseLuaBaseEntityComponent::OnDetached(ecs::BaseEntity &ent)
 {
-	pragma::BaseEntityComponent::OnDetached(ent);
+	BaseEntityComponent::OnDetached(ent);
 	CallLuaMethod("OnDetachedToEntity");
 }
 
@@ -1034,222 +1034,222 @@ void BaseLuaBaseEntityComponent::SetMemberValue(const MemberInfo &memberInfo, co
 		memberInfo.onChange(o);
 }
 
-static void write_value(udm::LinkedPropertyWrapperArg udm, const std::any &value, pragma::util::VarType type)
+static void write_value(udm::LinkedPropertyWrapperArg udm, const std::any &value, util::VarType type)
 {
 	switch(type) {
-	case pragma::util::VarType::Bool:
+	case util::VarType::Bool:
 		udm = std::any_cast<udm::Boolean>(value);
 		break;
-	case pragma::util::VarType::Double:
+	case util::VarType::Double:
 		udm = std::any_cast<udm::Double>(value);
 		break;
-	case pragma::util::VarType::Float:
+	case util::VarType::Float:
 		udm = std::any_cast<udm::Float>(value);
 		break;
-	case pragma::util::VarType::Int8:
+	case util::VarType::Int8:
 		udm = std::any_cast<udm::Int8>(value);
 		break;
-	case pragma::util::VarType::Int16:
+	case util::VarType::Int16:
 		udm = std::any_cast<udm::Int16>(value);
 		break;
-	case pragma::util::VarType::Int32:
+	case util::VarType::Int32:
 		udm = std::any_cast<udm::Int32>(value);
 		break;
-	case pragma::util::VarType::Int64:
+	case util::VarType::Int64:
 		udm = std::any_cast<udm::Int64>(value);
 		break;
-	case pragma::util::VarType::LongDouble:
+	case util::VarType::LongDouble:
 		udm = static_cast<udm::Double>(std::any_cast<long double>(value));
 		break;
-	case pragma::util::VarType::String:
+	case util::VarType::String:
 		udm = std::any_cast<udm::String>(value);
 		break;
-	case pragma::util::VarType::UInt8:
+	case util::VarType::UInt8:
 		udm = std::any_cast<udm::UInt8>(value);
 		break;
-	case pragma::util::VarType::UInt16:
+	case util::VarType::UInt16:
 		udm = std::any_cast<udm::UInt16>(value);
 		break;
-	case pragma::util::VarType::UInt32:
+	case util::VarType::UInt32:
 		udm = std::any_cast<udm::UInt32>(value);
 		break;
-	case pragma::util::VarType::UInt64:
+	case util::VarType::UInt64:
 		udm = std::any_cast<udm::UInt64>(value);
 		break;
-	case pragma::util::VarType::EulerAngles:
+	case util::VarType::EulerAngles:
 		udm = std::any_cast<udm::EulerAngles>(value);
 		break;
-	case pragma::util::VarType::Color:
+	case util::VarType::Color:
 		{
 			auto color = std::any_cast<Color>(value);
 			udm = Vector4 {color.r, color.g, color.b, color.a};
 			break;
 		}
-	case pragma::util::VarType::Vector:
+	case util::VarType::Vector:
 		udm = std::any_cast<udm::Vector3>(value);
 		break;
-	case pragma::util::VarType::Vector2:
+	case util::VarType::Vector2:
 		udm = std::any_cast<udm::Vector2>(value);
 		break;
-	case pragma::util::VarType::Vector4:
+	case util::VarType::Vector4:
 		udm = std::any_cast<udm::Vector4>(value);
 		break;
-	case pragma::util::VarType::Entity:
+	case util::VarType::Entity:
 		{
-			auto ref = std::any_cast<pragma::EntityURef>(value);
+			auto ref = std::any_cast<EntityURef>(value);
 			auto *ident = ref.GetIdentifier();
 			if(!ident)
 				udm = "";
 			else
-				udm = std::visit([&udm](auto &val) { return pragma::ecs::BaseEntity::GetUri(val); }, *ident);
+				udm = std::visit([&udm](auto &val) { return ecs::BaseEntity::GetUri(val); }, *ident);
 			break;
 		}
-	case pragma::util::VarType::Quaternion:
+	case util::VarType::Quaternion:
 		udm = std::any_cast<udm::Quaternion>(value);
 		break;
 	}
 }
 
-static void read_value(pragma::Game &game, udm::LinkedPropertyWrapperArg udm, std::any &value, pragma::util::VarType type)
+static void read_value(Game &game, udm::LinkedPropertyWrapperArg udm, std::any &value, util::VarType type)
 {
 	switch(type) {
-	case pragma::util::VarType::Bool:
+	case util::VarType::Bool:
 		{
 			auto val = udm.ToValue<udm::Boolean>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::Double:
+	case util::VarType::Double:
 		{
 			auto val = udm.ToValue<udm::Double>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::Float:
+	case util::VarType::Float:
 		{
 			auto val = udm.ToValue<udm::Float>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::Int8:
+	case util::VarType::Int8:
 		{
 			auto val = udm.ToValue<udm::Int8>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::Int16:
+	case util::VarType::Int16:
 		{
 			auto val = udm.ToValue<udm::Int16>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::Int32:
+	case util::VarType::Int32:
 		{
 			auto val = udm.ToValue<udm::Int32>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::Int64:
+	case util::VarType::Int64:
 		{
 			auto val = udm.ToValue<udm::Int64>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::LongDouble:
+	case util::VarType::LongDouble:
 		{
 			auto val = udm.ToValue<udm::Double>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::String:
+	case util::VarType::String:
 		{
 			auto val = udm.ToValue<udm::String>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::UInt8:
+	case util::VarType::UInt8:
 		{
 			auto val = udm.ToValue<udm::UInt8>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::UInt16:
+	case util::VarType::UInt16:
 		{
 			auto val = udm.ToValue<udm::UInt16>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::UInt32:
+	case util::VarType::UInt32:
 		{
 			auto val = udm.ToValue<udm::UInt32>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::UInt64:
+	case util::VarType::UInt64:
 		{
 			auto val = udm.ToValue<udm::UInt64>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::EulerAngles:
+	case util::VarType::EulerAngles:
 		{
 			auto val = udm.ToValue<udm::EulerAngles>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::Color:
+	case util::VarType::Color:
 		{
 			auto val = udm.ToValue<udm::Vector4>();
 			if(val.has_value())
 				value = Color {static_cast<int16_t>(val->x), static_cast<int16_t>(val->y), static_cast<int16_t>(val->z), static_cast<int16_t>(val->w)};
 			break;
 		}
-	case pragma::util::VarType::Vector:
+	case util::VarType::Vector:
 		{
 			auto val = udm.ToValue<udm::Vector3>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::Vector2:
+	case util::VarType::Vector2:
 		{
 			auto val = udm.ToValue<udm::Vector2>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::Vector4:
+	case util::VarType::Vector4:
 		{
 			auto val = udm.ToValue<udm::Vector4>();
 			if(val.has_value())
 				value = *val;
 			break;
 		}
-	case pragma::util::VarType::Entity:
+	case util::VarType::Entity:
 		{
 			auto val = udm.ToValue<udm::String>();
 			if(val.has_value()) {
-				pragma::EntityUComponentMemberRef ref;
-				if(pragma::ecs::BaseEntity::ParseUri(std::move(*val), ref))
-					value = pragma::EntityURef {std::move(ref)};
+				EntityUComponentMemberRef ref;
+				if(ecs::BaseEntity::ParseUri(std::move(*val), ref))
+					value = EntityURef {std::move(ref)};
 			}
 			break;
 		}
-	case pragma::util::VarType::Quaternion:
+	case util::VarType::Quaternion:
 		{
 			auto val = udm.ToValue<udm::Quaternion>();
 			if(val.has_value())
@@ -1273,7 +1273,7 @@ void BaseLuaBaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &c
 const std::vector<BaseLuaBaseEntityComponent::MemberInfo> &BaseLuaBaseEntityComponent::GetMembers() const { return m_members; }
 void BaseLuaBaseEntityComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
-	pragma::BaseEntityComponent::Save(udm);
+	BaseEntityComponent::Save(udm);
 	for(auto &member : m_members) {
 		if((member.flags & MemberFlags::StoreBit) == MemberFlags::None)
 			continue;
@@ -1284,7 +1284,7 @@ void BaseLuaBaseEntityComponent::Save(udm::LinkedPropertyWrapperArg udm)
 }
 void BaseLuaBaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version)
 {
-	pragma::BaseEntityComponent::Load(udm, version);
+	BaseEntityComponent::Load(udm, version);
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	for(auto &member : m_members) {
 		if((member.flags & MemberFlags::StoreBit) == MemberFlags::None)
@@ -1314,7 +1314,7 @@ void BaseLuaBaseEntityComponent::OnEntityPostSpawn()
 
 void BaseLuaBaseEntityComponent::OnRemove()
 {
-	pragma::BaseEntityComponent::OnRemove();
+	BaseEntityComponent::OnRemove();
 	CallLuaMethod("OnRemove");
 }
 
@@ -1323,20 +1323,20 @@ bool BaseLuaBaseEntityComponent::IsNetworked() const { return m_bShouldTransmitN
 void BaseLuaBaseEntityComponent::SetShouldTransmitSnapshotData(bool b) { m_bShouldTransmitSnapshotData = b; }
 bool BaseLuaBaseEntityComponent::ShouldTransmitSnapshotData() const { return m_bShouldTransmitSnapshotData; }
 
-CallbackHandle BaseLuaBaseEntityComponent::BindInitComponentEvent(lua::State *l, pragma::ComponentId componentId, luabind::object methodNameOrFunction)
+CallbackHandle BaseLuaBaseEntityComponent::BindInitComponentEvent(lua::State *l, ComponentId componentId, luabind::object methodNameOrFunction)
 {
 	methodNameOrFunction.push(l);
-	pragma::util::ScopeGuard sg([l]() { Lua::Pop(l, 1); });
+	util::ScopeGuard sg([l]() { Lua::Pop(l, 1); });
 
 	auto argTarget = -1;
 	if(Lua::IsString(l, argTarget)) {
 		std::string methodName = Lua::CheckString(l, argTarget);
-		auto hCb = BindInitComponentEvent(componentId, [this, methodName](std::reference_wrapper<pragma::BaseEntityComponent> component) { CallLuaMethod<void, luabind::object>(methodName, component.get().GetLuaObject()); });
+		auto hCb = BindInitComponentEvent(componentId, [this, methodName](std::reference_wrapper<BaseEntityComponent> component) { CallLuaMethod<void, luabind::object>(methodName, component.get().GetLuaObject()); });
 		Lua::Push<CallbackHandle>(l, hCb);
 		return hCb;
 	}
 	Lua::CheckFunction(l, argTarget);
-	auto hCb = BindInitComponentEvent(componentId, [methodNameOrFunction](std::reference_wrapper<pragma::BaseEntityComponent> component) {
+	auto hCb = BindInitComponentEvent(componentId, [methodNameOrFunction](std::reference_wrapper<BaseEntityComponent> component) {
 		auto &fc = methodNameOrFunction;
 		auto *l = fc.interpreter();
 		auto c = Lua::CallFunction(
@@ -1351,7 +1351,7 @@ CallbackHandle BaseLuaBaseEntityComponent::BindInitComponentEvent(lua::State *l,
 	Lua::Push<CallbackHandle>(l, hCb);
 	return hCb;
 }
-CallbackHandle BaseLuaBaseEntityComponent::BindNetEvent(pragma::NetEventId eventId, const std::function<void(std::reference_wrapper<NetPacket>, pragma::BasePlayerComponent *)> &callback)
+CallbackHandle BaseLuaBaseEntityComponent::BindNetEvent(NetEventId eventId, const std::function<void(std::reference_wrapper<NetPacket>, BasePlayerComponent *)> &callback)
 {
 	auto it = m_boundNetEvents.find(eventId);
 	if(it != m_boundNetEvents.end()) {
@@ -1359,24 +1359,24 @@ CallbackHandle BaseLuaBaseEntityComponent::BindNetEvent(pragma::NetEventId event
 			it->second.Remove();
 		m_boundNetEvents.erase(it);
 	}
-	auto hCb = FunctionCallback<void, std::reference_wrapper<NetPacket>, pragma::BasePlayerComponent *>::Create(callback);
+	auto hCb = FunctionCallback<void, std::reference_wrapper<NetPacket>, BasePlayerComponent *>::Create(callback);
 	m_boundNetEvents.insert(std::make_pair(eventId, hCb));
 	return hCb;
 }
-CallbackHandle BaseLuaBaseEntityComponent::BindNetEvent(lua::State *l, pragma::NetEventId eventId, luabind::object methodNameOrFunction)
+CallbackHandle BaseLuaBaseEntityComponent::BindNetEvent(lua::State *l, NetEventId eventId, luabind::object methodNameOrFunction)
 {
 	methodNameOrFunction.push(l);
-	pragma::util::ScopeGuard sg([l]() { Lua::Pop(l, 1); });
+	util::ScopeGuard sg([l]() { Lua::Pop(l, 1); });
 
 	auto argTarget = -1;
 	if(Lua::IsString(l, argTarget)) {
 		std::string methodName = Lua::CheckString(l, argTarget);
-		auto hCb = BindNetEvent(eventId, [this, methodName](std::reference_wrapper<NetPacket> packet, pragma::BasePlayerComponent *pl) { InvokeNetEventHandle(methodName, packet, pl); });
+		auto hCb = BindNetEvent(eventId, [this, methodName](std::reference_wrapper<NetPacket> packet, BasePlayerComponent *pl) { InvokeNetEventHandle(methodName, packet, pl); });
 		Lua::Push<CallbackHandle>(l, hCb);
 		return hCb;
 	}
 	Lua::CheckFunction(l, argTarget);
-	auto hCb = BindNetEvent(eventId, [methodNameOrFunction](std::reference_wrapper<NetPacket> packet, pragma::BasePlayerComponent *pl) {
+	auto hCb = BindNetEvent(eventId, [methodNameOrFunction](std::reference_wrapper<NetPacket> packet, BasePlayerComponent *pl) {
 		auto &fc = methodNameOrFunction;
 		auto *l = fc.interpreter();
 		auto c = Lua::CallFunction(
@@ -1393,15 +1393,15 @@ CallbackHandle BaseLuaBaseEntityComponent::BindNetEvent(lua::State *l, pragma::N
 	Lua::Push<CallbackHandle>(l, hCb);
 	return hCb;
 }
-CallbackHandle BaseLuaBaseEntityComponent::BindEvent(lua::State *l, pragma::ComponentId eventId, luabind::object methodNameOrFunction)
+CallbackHandle BaseLuaBaseEntityComponent::BindEvent(lua::State *l, ComponentId eventId, luabind::object methodNameOrFunction)
 {
 	methodNameOrFunction.push(l);
-	pragma::util::ScopeGuard sg([l]() { Lua::Pop(l, 1); });
+	util::ScopeGuard sg([l]() { Lua::Pop(l, 1); });
 
 	auto argTarget = -1;
 	if(Lua::IsString(l, argTarget)) {
 		std::string methodName = Lua::CheckString(l, argTarget);
-		auto hCb = BindEvent(eventId, [this, methodName](std::reference_wrapper<pragma::ComponentEvent> ev) -> pragma::util::EventReply {
+		auto hCb = BindEvent(eventId, [this, methodName](std::reference_wrapper<ComponentEvent> ev) -> util::EventReply {
 			// CallLuaMember does not work with a variable number of arguments,
 			// so we have to call the method manually.
 			// See also BaseLuaBaseEntityComponent::HandleEvent
@@ -1420,10 +1420,10 @@ CallbackHandle BaseLuaBaseEntityComponent::BindEvent(lua::State *l, pragma::Comp
 				  },
 				  1 + numRet);
 				if(c == Lua::StatusCode::Ok) {
-					auto r = pragma::util::EventReply::Unhandled;
+					auto r = util::EventReply::Unhandled;
 					auto idxFirst = -static_cast<int32_t>(numRet + 1);
 					if(Lua::IsSet(l, idxFirst) && Lua::IsNumber(l, idxFirst))
-						r = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, idxFirst));
+						r = static_cast<util::EventReply>(Lua::CheckInt(l, idxFirst));
 					Lua::RemoveValue(l, idxFirst); /* pop handled value */
 
 					ev.get().HandleReturnValues(l);
@@ -1431,13 +1431,13 @@ CallbackHandle BaseLuaBaseEntityComponent::BindEvent(lua::State *l, pragma::Comp
 					return r;
 				}
 			}
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		});
 		Lua::Push<CallbackHandle>(l, hCb);
 		return hCb;
 	}
 	Lua::CheckFunction(l, argTarget);
-	auto hCb = BindEvent(eventId, [methodNameOrFunction](std::reference_wrapper<pragma::ComponentEvent> ev) -> pragma::util::EventReply {
+	auto hCb = BindEvent(eventId, [methodNameOrFunction](std::reference_wrapper<ComponentEvent> ev) -> util::EventReply {
 		auto &fc = methodNameOrFunction;
 		auto *l = fc.interpreter();
 
@@ -1451,68 +1451,68 @@ CallbackHandle BaseLuaBaseEntityComponent::BindEvent(lua::State *l, pragma::Comp
 		  },
 		  1 + numRet);
 		if(c == Lua::StatusCode::Ok) {
-			auto r = pragma::util::EventReply::Unhandled;
+			auto r = util::EventReply::Unhandled;
 			if(Lua::IsSet(l, -1))
-				r = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
+				r = static_cast<util::EventReply>(Lua::CheckInt(l, -1));
 			Lua::Pop(l, 1); /* pop handled value */
 
 			ev.get().HandleReturnValues(l);
 			Lua::Pop(l, numRet);
 			return r;
 		}
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
 	Lua::Push<CallbackHandle>(l, hCb);
 	return hCb;
 }
 
-static pragma::BaseLuaBaseEntityComponent::MemberFlags string_to_member_flag(lua::State *l, const std::string_view &str)
+static BaseLuaBaseEntityComponent::MemberFlags string_to_member_flag(lua::State *l, const std::string_view &str)
 {
 	using namespace pragma::string::string_switch;
 	switch(hash(str)) {
 	case "prop"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::PropertyBit;
+		return BaseLuaBaseEntityComponent::MemberFlags::PropertyBit;
 	case "get"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::GetterBit;
+		return BaseLuaBaseEntityComponent::MemberFlags::GetterBit;
 	case "set"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::SetterBit;
+		return BaseLuaBaseEntityComponent::MemberFlags::SetterBit;
 	case "sav"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::StoreBit;
+		return BaseLuaBaseEntityComponent::MemberFlags::StoreBit;
 	case "kv"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::KeyValueBit;
+		return BaseLuaBaseEntityComponent::MemberFlags::KeyValueBit;
 	case "in"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::InputBit;
+		return BaseLuaBaseEntityComponent::MemberFlags::InputBit;
 	case "out"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::OutputBit;
+		return BaseLuaBaseEntityComponent::MemberFlags::OutputBit;
 	case "io"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::InputBit | pragma::BaseLuaBaseEntityComponent::MemberFlags::OutputBit;
+		return BaseLuaBaseEntityComponent::MemberFlags::InputBit | BaseLuaBaseEntityComponent::MemberFlags::OutputBit;
 	case "net"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::NetworkedBit;
+		return BaseLuaBaseEntityComponent::MemberFlags::NetworkedBit;
 	case "has"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::UseHasGetterBit;
+		return BaseLuaBaseEntityComponent::MemberFlags::UseHasGetterBit;
 	case "is"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::UseIsGetterBit;
+		return BaseLuaBaseEntityComponent::MemberFlags::UseIsGetterBit;
 	case "trans"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::TransmitOnChange;
+		return BaseLuaBaseEntityComponent::MemberFlags::TransmitOnChange;
 	case "snap"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::SnapshotData;
+		return BaseLuaBaseEntityComponent::MemberFlags::SnapshotData;
 	case "def"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::Default;
+		return BaseLuaBaseEntityComponent::MemberFlags::Default;
 	case "defnw"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::DefaultNetworked;
+		return BaseLuaBaseEntityComponent::MemberFlags::DefaultNetworked;
 	case "deftrans"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::DefaultTransmit;
+		return BaseLuaBaseEntityComponent::MemberFlags::DefaultTransmit;
 	case "defsnap"_:
-		return pragma::BaseLuaBaseEntityComponent::MemberFlags::DefaultSnapshot;
+		return BaseLuaBaseEntityComponent::MemberFlags::DefaultSnapshot;
 	}
 	Lua::Error(l, "Invalid definition of component member flags: Flag '" + std::string {str} + "' is not a recognized flag! Valid flags are: prop, get, set, sav, kv, in, out, io, net, has, is, trans, snap, def, defnw, deftrans, defsnap.");
-	return pragma::BaseLuaBaseEntityComponent::MemberFlags::None;
+	return BaseLuaBaseEntityComponent::MemberFlags::None;
 }
 
-pragma::BaseLuaBaseEntityComponent::MemberFlags pragma::LuaCore::string_to_member_flags(lua::State *l, std::string_view strFlags)
+BaseLuaBaseEntityComponent::MemberFlags LuaCore::string_to_member_flags(lua::State *l, std::string_view strFlags)
 {
-	auto flags = pragma::BaseLuaBaseEntityComponent::MemberFlags::None;
-	auto flagsRem = pragma::BaseLuaBaseEntityComponent::MemberFlags::None;
+	auto flags = BaseLuaBaseEntityComponent::MemberFlags::None;
+	auto flagsRem = BaseLuaBaseEntityComponent::MemberFlags::None;
 
 	size_t start = strFlags.empty() ? std::string::npos : 0;
 	while(start != std::string::npos) {
@@ -1524,7 +1524,7 @@ pragma::BaseLuaBaseEntityComponent::MemberFlags pragma::LuaCore::string_to_membe
 			auto sign = hasSign ? sub[0] : '+';
 			auto val = sub.substr(hasSign ? 1 : 0);
 			auto flag = string_to_member_flag(l, val);
-			if(flag != pragma::BaseLuaBaseEntityComponent::MemberFlags::None) {
+			if(flag != BaseLuaBaseEntityComponent::MemberFlags::None) {
 				switch(sign) {
 				case '+':
 					flags |= flag;
@@ -1548,125 +1548,125 @@ pragma::BaseLuaBaseEntityComponent::MemberFlags pragma::LuaCore::string_to_membe
 
 void Lua::register_base_entity_component(luabind::module_ &modEnts)
 {
-	auto classDef = ::pragma::LuaCore::create_entity_component_class<::pragma::BaseLuaBaseEntityComponent, ::pragma::BaseEntityComponent>("BaseBaseEntityComponent");
-	classDef.def("SetNetworked", &::pragma::BaseLuaBaseEntityComponent::SetNetworked);
-	classDef.def("IsNetworked", &::pragma::BaseLuaBaseEntityComponent::IsNetworked);
-	classDef.def("SetShouldTransmitSnapshotData", &::pragma::BaseLuaBaseEntityComponent::SetShouldTransmitSnapshotData);
-	classDef.def("ShouldTransmitSnapshotData", &::pragma::BaseLuaBaseEntityComponent::ShouldTransmitSnapshotData);
-	classDef.def("GetVersion", &::pragma::BaseLuaBaseEntityComponent::GetVersion);
+	auto classDef = ::pragma::LuaCore::create_entity_component_class<BaseLuaBaseEntityComponent, BaseEntityComponent>("BaseBaseEntityComponent");
+	classDef.def("SetNetworked", &BaseLuaBaseEntityComponent::SetNetworked);
+	classDef.def("IsNetworked", &BaseLuaBaseEntityComponent::IsNetworked);
+	classDef.def("SetShouldTransmitSnapshotData", &BaseLuaBaseEntityComponent::SetShouldTransmitSnapshotData);
+	classDef.def("ShouldTransmitSnapshotData", &BaseLuaBaseEntityComponent::ShouldTransmitSnapshotData);
+	classDef.def("GetVersion", &BaseLuaBaseEntityComponent::GetVersion);
 	classDef.def("FlagCallbackForRemoval",
-	  static_cast<void (*)(lua::State *, ::pragma::BaseLuaBaseEntityComponent &, CallbackHandle &, ::pragma::BaseEntityComponent::CallbackType, ::pragma::BaseLuaBaseEntityComponent &)>(
-	    [](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, CallbackHandle &hCb, ::pragma::BaseEntityComponent::CallbackType callbackType, ::pragma::BaseLuaBaseEntityComponent &hComponentOther) {
+	  static_cast<void (*)(lua::State *, BaseLuaBaseEntityComponent &, CallbackHandle &, BaseEntityComponent::CallbackType, BaseLuaBaseEntityComponent &)>(
+	    [](lua::State *l, BaseLuaBaseEntityComponent &hComponent, CallbackHandle &hCb, BaseEntityComponent::CallbackType callbackType, BaseLuaBaseEntityComponent &hComponentOther) {
 		    if(hCb.IsValid() == false)
 			    return;
 		    hComponent.FlagCallbackForRemoval(hCb, callbackType, &hComponentOther);
 	    }));
 	classDef.def("FlagCallbackForRemoval",
-	  static_cast<void (*)(lua::State *, ::pragma::BaseLuaBaseEntityComponent &, CallbackHandle &, ::pragma::BaseEntityComponent::CallbackType)>(
-	    [](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, CallbackHandle &hCb, ::pragma::BaseEntityComponent::CallbackType callbackType) {
+	  static_cast<void (*)(lua::State *, BaseLuaBaseEntityComponent &, CallbackHandle &, BaseEntityComponent::CallbackType)>(
+	    [](lua::State *l, BaseLuaBaseEntityComponent &hComponent, CallbackHandle &hCb, BaseEntityComponent::CallbackType callbackType) {
 		    if(hCb.IsValid() == false)
 			    return;
 		    hComponent.FlagCallbackForRemoval(hCb, callbackType);
 	    }));
-	classDef.def("BindComponentInitEvent", static_cast<CallbackHandle (*)(lua::State *, ::pragma::BaseLuaBaseEntityComponent &, uint32_t, luabind::object)>([](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, uint32_t componentId, luabind::object methodNameOrFunction) {
+	classDef.def("BindComponentInitEvent", static_cast<CallbackHandle (*)(lua::State *, BaseLuaBaseEntityComponent &, uint32_t, luabind::object)>([](lua::State *l, BaseLuaBaseEntityComponent &hComponent, uint32_t componentId, luabind::object methodNameOrFunction) {
 		return hComponent.BindInitComponentEvent(l, componentId, methodNameOrFunction);
 	}));
-	classDef.def("BindEvent", static_cast<CallbackHandle (*)(lua::State *, ::pragma::BaseLuaBaseEntityComponent &, uint32_t, luabind::object)>([](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, uint32_t eventId, luabind::object methodNameOrFunction) {
+	classDef.def("BindEvent", static_cast<CallbackHandle (*)(lua::State *, BaseLuaBaseEntityComponent &, uint32_t, luabind::object)>([](lua::State *l, BaseLuaBaseEntityComponent &hComponent, uint32_t eventId, luabind::object methodNameOrFunction) {
 		return hComponent.BindEvent(l, eventId, methodNameOrFunction);
 	}));
-	classDef.def("GetEntityComponent", +[](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, Lua::nil_type) { return; });
+	classDef.def("GetEntityComponent", +[](lua::State *l, BaseLuaBaseEntityComponent &hComponent, nil_type) { return; });
 	classDef.def("GetEntityComponent",
-	  static_cast<::pragma::ComponentHandle<::pragma::BaseEntityComponent> (*)(lua::State *, ::pragma::BaseLuaBaseEntityComponent &, uint32_t)>(
-	    [](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, uint32_t componentId) -> ::pragma::ComponentHandle<::pragma::BaseEntityComponent> { return hComponent.GetEntity().FindComponent(componentId); }));
+	  static_cast<ComponentHandle<BaseEntityComponent> (*)(lua::State *, BaseLuaBaseEntityComponent &, uint32_t)>(
+	    [](lua::State *l, BaseLuaBaseEntityComponent &hComponent, uint32_t componentId) -> ComponentHandle<BaseEntityComponent> { return hComponent.GetEntity().FindComponent(componentId); }));
 	classDef.def("GetEntityComponent",
-	  static_cast<::pragma::ComponentHandle<::pragma::BaseEntityComponent> (*)(lua::State *, ::pragma::BaseLuaBaseEntityComponent &, const std::string &)>(
-	    [](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, const std::string &componentName) -> ::pragma::ComponentHandle<::pragma::BaseEntityComponent> { return hComponent.GetEntity().FindComponent(componentName); }));
+	  static_cast<ComponentHandle<BaseEntityComponent> (*)(lua::State *, BaseLuaBaseEntityComponent &, const std::string &)>(
+	    [](lua::State *l, BaseLuaBaseEntityComponent &hComponent, const std::string &componentName) -> ComponentHandle<BaseEntityComponent> { return hComponent.GetEntity().FindComponent(componentName); }));
 	classDef.def("AddEntityComponent",
-	  static_cast<::pragma::ComponentHandle<::pragma::BaseEntityComponent> (*)(lua::State *, ::pragma::BaseLuaBaseEntityComponent &, uint32_t)>(
-	    [](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, uint32_t componentId) -> ::pragma::ComponentHandle<::pragma::BaseEntityComponent> { return hComponent.GetEntity().AddComponent(componentId); }));
+	  static_cast<ComponentHandle<BaseEntityComponent> (*)(lua::State *, BaseLuaBaseEntityComponent &, uint32_t)>(
+	    [](lua::State *l, BaseLuaBaseEntityComponent &hComponent, uint32_t componentId) -> ComponentHandle<BaseEntityComponent> { return hComponent.GetEntity().AddComponent(componentId); }));
 	classDef.def("AddEntityComponent",
-	  static_cast<::pragma::ComponentHandle<::pragma::BaseEntityComponent> (*)(lua::State *, ::pragma::BaseLuaBaseEntityComponent &, uint32_t, luabind::object)>(
-	    [](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, uint32_t componentId, luabind::object methodNameOrFunction) -> ::pragma::ComponentHandle<::pragma::BaseEntityComponent> {
+	  static_cast<ComponentHandle<BaseEntityComponent> (*)(lua::State *, BaseLuaBaseEntityComponent &, uint32_t, luabind::object)>(
+	    [](lua::State *l, BaseLuaBaseEntityComponent &hComponent, uint32_t componentId, luabind::object methodNameOrFunction) -> ComponentHandle<BaseEntityComponent> {
 		    hComponent.BindInitComponentEvent(l, componentId, methodNameOrFunction);
 		    return hComponent.GetEntity().AddComponent(componentId);
 	    }));
 	classDef.def("AddEntityComponent",
-	  static_cast<::pragma::ComponentHandle<::pragma::BaseEntityComponent> (*)(lua::State *, ::pragma::BaseLuaBaseEntityComponent &, const std::string &)>(
-	    [](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, const std::string &name) -> ::pragma::ComponentHandle<::pragma::BaseEntityComponent> { return hComponent.GetEntity().AddComponent(name); }));
+	  static_cast<ComponentHandle<BaseEntityComponent> (*)(lua::State *, BaseLuaBaseEntityComponent &, const std::string &)>(
+	    [](lua::State *l, BaseLuaBaseEntityComponent &hComponent, const std::string &name) -> ComponentHandle<BaseEntityComponent> { return hComponent.GetEntity().AddComponent(name); }));
 	classDef.def("AddEntityComponent",
-	  static_cast<::pragma::ComponentHandle<::pragma::BaseEntityComponent> (*)(lua::State *, ::pragma::BaseLuaBaseEntityComponent &, const std::string &, luabind::object)>(
-	    [](lua::State *l, ::pragma::BaseLuaBaseEntityComponent &hComponent, const std::string &name, luabind::object methodNameOrFunction) -> ::pragma::ComponentHandle<::pragma::BaseEntityComponent> {
+	  static_cast<ComponentHandle<BaseEntityComponent> (*)(lua::State *, BaseLuaBaseEntityComponent &, const std::string &, luabind::object)>(
+	    [](lua::State *l, BaseLuaBaseEntityComponent &hComponent, const std::string &name, luabind::object methodNameOrFunction) -> ComponentHandle<BaseEntityComponent> {
 		    auto hNewComponent = hComponent.GetEntity().AddComponent(name);
 		    if(hNewComponent.expired())
 			    return hNewComponent;
 		    hComponent.BindInitComponentEvent(l, hNewComponent->GetComponentId(), methodNameOrFunction);
 		    return hNewComponent;
 	    }));
-	classDef.def("OnMemberValueChanged", &::pragma::BaseLuaBaseEntityComponent::OnMemberValueChanged);
+	classDef.def("OnMemberValueChanged", &BaseLuaBaseEntityComponent::OnMemberValueChanged);
 	classDef.scope[luabind::def(
-	  "RegisterMember", +[](lua::State *l, const Lua::classObject &o, const std::string &memberName, ::pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault, const Lua::map<std::string, void> &attributes, ::pragma::BaseLuaBaseEntityComponent::MemberFlags memberFlags) {
-		  auto anyInitialValue = Lua::GetAnyValue(l, detail::member_type_to_util_type(memberType), 4);
-		  ::pragma::BaseLuaBaseEntityComponent::RegisterMember(o, memberName, memberType, anyInitialValue, memberFlags, attributes);
+	  "RegisterMember", +[](lua::State *l, const classObject &o, const std::string &memberName, pragma::ents::EntityMemberType memberType, udm_type oDefault, const map<std::string, void> &attributes, BaseLuaBaseEntityComponent::MemberFlags memberFlags) {
+		  auto anyInitialValue = GetAnyValue(l, detail::member_type_to_util_type(memberType), 4);
+		  BaseLuaBaseEntityComponent::RegisterMember(o, memberName, memberType, anyInitialValue, memberFlags, attributes);
 	  })];
 	classDef.scope[luabind::def(
-	  "RegisterMember", +[](lua::State *l, const Lua::classObject &o, const std::string &memberName, ::pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault, const std::string &memberFlags) {
-		  auto anyInitialValue = Lua::GetAnyValue(l, detail::member_type_to_util_type(memberType), 4);
-		  ::pragma::BaseLuaBaseEntityComponent::RegisterMember(o, memberName, memberType, anyInitialValue, ::pragma::LuaCore::string_to_member_flags(l, memberFlags), luabind::newtable(l));
+	  "RegisterMember", +[](lua::State *l, const classObject &o, const std::string &memberName, pragma::ents::EntityMemberType memberType, udm_type oDefault, const std::string &memberFlags) {
+		  auto anyInitialValue = GetAnyValue(l, detail::member_type_to_util_type(memberType), 4);
+		  BaseLuaBaseEntityComponent::RegisterMember(o, memberName, memberType, anyInitialValue, LuaCore::string_to_member_flags(l, memberFlags), luabind::newtable(l));
 	  })];
 	classDef.scope[luabind::def(
-	  "RegisterMember", +[](lua::State *l, const Lua::classObject &o, const std::string &memberName, ::pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault, const Lua::map<std::string, void> &attributes, const std::string &memberFlags) {
-		  auto anyInitialValue = Lua::GetAnyValue(l, detail::member_type_to_util_type(memberType), 4);
-		  ::pragma::BaseLuaBaseEntityComponent::RegisterMember(o, memberName, memberType, anyInitialValue, ::pragma::LuaCore::string_to_member_flags(l, memberFlags), attributes);
+	  "RegisterMember", +[](lua::State *l, const classObject &o, const std::string &memberName, pragma::ents::EntityMemberType memberType, udm_type oDefault, const map<std::string, void> &attributes, const std::string &memberFlags) {
+		  auto anyInitialValue = GetAnyValue(l, detail::member_type_to_util_type(memberType), 4);
+		  BaseLuaBaseEntityComponent::RegisterMember(o, memberName, memberType, anyInitialValue, LuaCore::string_to_member_flags(l, memberFlags), attributes);
 	  })];
 	classDef.scope[luabind::def(
-	  "RegisterMember", +[](lua::State *l, const Lua::classObject &o, const std::string &memberName, ::pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault, const Lua::map<std::string, void> &attributes) {
-		  auto anyInitialValue = Lua::GetAnyValue(l, detail::member_type_to_util_type(memberType), 4);
-		  ::pragma::BaseLuaBaseEntityComponent::RegisterMember(o, memberName, memberType, anyInitialValue, ::pragma::BaseLuaBaseEntityComponent::MemberFlags::Default, attributes);
+	  "RegisterMember", +[](lua::State *l, const classObject &o, const std::string &memberName, pragma::ents::EntityMemberType memberType, udm_type oDefault, const map<std::string, void> &attributes) {
+		  auto anyInitialValue = GetAnyValue(l, detail::member_type_to_util_type(memberType), 4);
+		  BaseLuaBaseEntityComponent::RegisterMember(o, memberName, memberType, anyInitialValue, BaseLuaBaseEntityComponent::MemberFlags::Default, attributes);
 	  })];
 	classDef.scope[luabind::def(
-	  "RegisterMember", +[](lua::State *l, const Lua::classObject &o, const std::string &memberName, ::pragma::ents::EntityMemberType memberType, Lua::udm_type oDefault) {
-		  auto anyInitialValue = Lua::GetAnyValue(l, detail::member_type_to_util_type(memberType), 4);
-		  ::pragma::BaseLuaBaseEntityComponent::RegisterMember(o, memberName, memberType, anyInitialValue, ::pragma::BaseLuaBaseEntityComponent::MemberFlags::Default, luabind::newtable(l));
+	  "RegisterMember", +[](lua::State *l, const classObject &o, const std::string &memberName, pragma::ents::EntityMemberType memberType, udm_type oDefault) {
+		  auto anyInitialValue = GetAnyValue(l, detail::member_type_to_util_type(memberType), 4);
+		  BaseLuaBaseEntityComponent::RegisterMember(o, memberName, memberType, anyInitialValue, BaseLuaBaseEntityComponent::MemberFlags::Default, luabind::newtable(l));
 	  })];
-	classDef.scope[luabind::def("RegisterNetEvent", &::pragma::Game::SetupNetEvent)];
+	classDef.scope[luabind::def("RegisterNetEvent", &Game::SetupNetEvent)];
 
-	classDef.add_static_constant("MEMBER_FLAG_NONE", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::None));
-	classDef.add_static_constant("MEMBER_FLAG_BIT_PROPERTY", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::PropertyBit));
-	classDef.add_static_constant("MEMBER_FLAG_BIT_GETTER", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::GetterBit));
-	classDef.add_static_constant("MEMBER_FLAG_BIT_SETTER", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::SetterBit));
-	classDef.add_static_constant("MEMBER_FLAG_BIT_STORE", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::StoreBit));
-	classDef.add_static_constant("MEMBER_FLAG_BIT_KEY_VALUE", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::KeyValueBit));
-	classDef.add_static_constant("MEMBER_FLAG_BIT_INPUT", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::InputBit));
-	classDef.add_static_constant("MEMBER_FLAG_BIT_OUTPUT", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::OutputBit));
-	classDef.add_static_constant("MEMBER_FLAG_BIT_NETWORKED", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::NetworkedBit));
-	classDef.add_static_constant("MEMBER_FLAG_BIT_USE_HAS_GETTER", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::UseHasGetterBit));
-	classDef.add_static_constant("MEMBER_FLAG_BIT_USE_IS_GETTER", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::UseIsGetterBit));
+	classDef.add_static_constant("MEMBER_FLAG_NONE", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::None));
+	classDef.add_static_constant("MEMBER_FLAG_BIT_PROPERTY", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::PropertyBit));
+	classDef.add_static_constant("MEMBER_FLAG_BIT_GETTER", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::GetterBit));
+	classDef.add_static_constant("MEMBER_FLAG_BIT_SETTER", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::SetterBit));
+	classDef.add_static_constant("MEMBER_FLAG_BIT_STORE", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::StoreBit));
+	classDef.add_static_constant("MEMBER_FLAG_BIT_KEY_VALUE", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::KeyValueBit));
+	classDef.add_static_constant("MEMBER_FLAG_BIT_INPUT", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::InputBit));
+	classDef.add_static_constant("MEMBER_FLAG_BIT_OUTPUT", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::OutputBit));
+	classDef.add_static_constant("MEMBER_FLAG_BIT_NETWORKED", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::NetworkedBit));
+	classDef.add_static_constant("MEMBER_FLAG_BIT_USE_HAS_GETTER", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::UseHasGetterBit));
+	classDef.add_static_constant("MEMBER_FLAG_BIT_USE_IS_GETTER", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::UseIsGetterBit));
 
-	classDef.add_static_constant("MEMBER_FLAG_TRANSMIT_ON_CHANGE", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::TransmitOnChange));
-	classDef.add_static_constant("MEMBER_FLAG_SNAPSHOT_DATA", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::SnapshotData));
-	classDef.add_static_constant("MEMBER_FLAG_DEFAULT", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::Default));
-	classDef.add_static_constant("MEMBER_FLAG_DEFAULT_NETWORKED", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::DefaultNetworked));
-	classDef.add_static_constant("MEMBER_FLAG_DEFAULT_TRANSMIT", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::DefaultTransmit));
-	classDef.add_static_constant("MEMBER_FLAG_DEFAULT_SNAPSHOT", pragma::math::to_integral(::pragma::BaseLuaBaseEntityComponent::MemberFlags::DefaultSnapshot));
+	classDef.add_static_constant("MEMBER_FLAG_TRANSMIT_ON_CHANGE", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::TransmitOnChange));
+	classDef.add_static_constant("MEMBER_FLAG_SNAPSHOT_DATA", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::SnapshotData));
+	classDef.add_static_constant("MEMBER_FLAG_DEFAULT", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::Default));
+	classDef.add_static_constant("MEMBER_FLAG_DEFAULT_NETWORKED", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::DefaultNetworked));
+	classDef.add_static_constant("MEMBER_FLAG_DEFAULT_TRANSMIT", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::DefaultTransmit));
+	classDef.add_static_constant("MEMBER_FLAG_DEFAULT_SNAPSHOT", pragma::math::to_integral(BaseLuaBaseEntityComponent::MemberFlags::DefaultSnapshot));
 
-	classDef.def("Initialize", &::pragma::BaseLuaBaseEntityComponent::Lua_Initialize, &::pragma::BaseLuaBaseEntityComponent::default_Lua_Initialize);
-	classDef.def("OnTick", &::pragma::BaseLuaBaseEntityComponent::Lua_OnTick, &::pragma::BaseLuaBaseEntityComponent::default_Lua_OnTick);
-	classDef.def("OnRemove", &::pragma::BaseLuaBaseEntityComponent::Lua_OnRemove, &::pragma::BaseLuaBaseEntityComponent::default_Lua_OnRemove);
-	classDef.def("OnEntitySpawn", &::pragma::BaseLuaBaseEntityComponent::Lua_OnEntitySpawn, &::pragma::BaseLuaBaseEntityComponent::default_Lua_OnEntitySpawn);
-	classDef.def("OnEntityPostSpawn", &::pragma::BaseLuaBaseEntityComponent::Lua_OnEntityPostSpawn, &::pragma::BaseLuaBaseEntityComponent::default_Lua_OnEntityPostSpawn);
-	classDef.def("OnActiveStateChanged", &::pragma::BaseLuaBaseEntityComponent::Lua_OnActiveStateChanged, &::pragma::BaseLuaBaseEntityComponent::default_Lua_OnActiveStateChanged);
-	classDef.def("OnAttachedToEntity", &::pragma::BaseLuaBaseEntityComponent::Lua_OnAttachedToEntity, &::pragma::BaseLuaBaseEntityComponent::default_Lua_OnAttachedToEntity);
-	classDef.def("OnDetachedFromEntity", &::pragma::BaseLuaBaseEntityComponent::Lua_OnDetachedToEntity, &::pragma::BaseLuaBaseEntityComponent::default_Lua_OnDetachedToEntity);
+	classDef.def("Initialize", &BaseLuaBaseEntityComponent::Lua_Initialize, &BaseLuaBaseEntityComponent::default_Lua_Initialize);
+	classDef.def("OnTick", &BaseLuaBaseEntityComponent::Lua_OnTick, &BaseLuaBaseEntityComponent::default_Lua_OnTick);
+	classDef.def("OnRemove", &BaseLuaBaseEntityComponent::Lua_OnRemove, &BaseLuaBaseEntityComponent::default_Lua_OnRemove);
+	classDef.def("OnEntitySpawn", &BaseLuaBaseEntityComponent::Lua_OnEntitySpawn, &BaseLuaBaseEntityComponent::default_Lua_OnEntitySpawn);
+	classDef.def("OnEntityPostSpawn", &BaseLuaBaseEntityComponent::Lua_OnEntityPostSpawn, &BaseLuaBaseEntityComponent::default_Lua_OnEntityPostSpawn);
+	classDef.def("OnActiveStateChanged", &BaseLuaBaseEntityComponent::Lua_OnActiveStateChanged, &BaseLuaBaseEntityComponent::default_Lua_OnActiveStateChanged);
+	classDef.def("OnAttachedToEntity", &BaseLuaBaseEntityComponent::Lua_OnAttachedToEntity, &BaseLuaBaseEntityComponent::default_Lua_OnAttachedToEntity);
+	classDef.def("OnDetachedFromEntity", &BaseLuaBaseEntityComponent::Lua_OnDetachedToEntity, &BaseLuaBaseEntityComponent::default_Lua_OnDetachedToEntity);
 	// classDef.def("OnEntityComponentAdded",&::pragma::BaseLuaBaseEntityComponent::Lua_OnEntityComponentAdded,&::pragma::BaseLuaBaseEntityComponent::default_Lua_OnEntityComponentAdded);
 	// classDef.def("OnEntityComponentRemoved",&::pragma::BaseLuaBaseEntityComponent::Lua_OnEntityComponentRemoved,&::pragma::BaseLuaBaseEntityComponent::default_Lua_OnEntityComponentRemoved);
 	// HandleEvent is variadic and can't be defined like this in luabind!
 	//classDef.def("HandleEvent",&::pragma::BaseLuaBaseEntityComponent::Lua_HandleEvent,&::pragma::BaseLuaBaseEntityComponent::default_Lua_HandleEvent);
-	classDef.def("Save", &::pragma::BaseLuaBaseEntityComponent::Lua_Save, +[](lua::State *l, BaseLuaBaseEntityComponent *hComponent, ::udm::LinkedPropertyWrapper udm) { ::pragma::BaseLuaBaseEntityComponent::default_Lua_Save(l, *hComponent, udm); });
-	classDef.def("Load", &::pragma::BaseLuaBaseEntityComponent::Lua_Load, +[](lua::State *l, BaseLuaBaseEntityComponent *hComponent, ::udm::LinkedPropertyWrapper udm, uint32_t version) { ::pragma::BaseLuaBaseEntityComponent::default_Lua_Load(l, *hComponent, udm, version); });
+	classDef.def("Save", &BaseLuaBaseEntityComponent::Lua_Save, +[](lua::State *l, BaseLuaBaseEntityComponent *hComponent, ::udm::LinkedPropertyWrapper udm) { BaseLuaBaseEntityComponent::default_Lua_Save(l, *hComponent, udm); });
+	classDef.def("Load", &BaseLuaBaseEntityComponent::Lua_Load, +[](lua::State *l, BaseLuaBaseEntityComponent *hComponent, ::udm::LinkedPropertyWrapper udm, uint32_t version) { BaseLuaBaseEntityComponent::default_Lua_Load(l, *hComponent, udm, version); });
 	modEnts[classDef];
 }
 
-BaseLuaBaseEntityComponent::MemberInfo::MemberInfo(const std::string &functionName, const std::string &memberName, size_t memberNameHash, const std::string &memberVariableName, ents::EntityMemberType type, const std::any &initialValue, BaseLuaBaseEntityComponent::MemberFlags flags,
+BaseLuaBaseEntityComponent::MemberInfo::MemberInfo(const std::string &functionName, const std::string &memberName, size_t memberNameHash, const std::string &memberVariableName, ents::EntityMemberType type, const std::any &initialValue, MemberFlags flags,
   const luabind::object &onChange, const std::optional<ComponentMemberInfo> &componentMemberInfo)
     : functionName(functionName), memberName(memberName), memberNameHash(memberNameHash), memberVariableName(memberVariableName), type(type), initialValue(initialValue), flags(flags), onChange(onChange), componentMemberInfo(componentMemberInfo)
 {

@@ -18,18 +18,18 @@ export {
 		}
 		class DLLNETWORK BoneMergeComponent final : public BaseEntityComponent {
 		  public:
-			static bool can_merge(const pragma::asset::Model &mdl, const pragma::asset::Model &mdlParent, bool includeRootBones = false);
+			static bool can_merge(const asset::Model &mdl, const asset::Model &mdlParent, bool includeRootBones = false);
 
-			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+			static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-			BoneMergeComponent(pragma::ecs::BaseEntity &ent);
+			BoneMergeComponent(ecs::BaseEntity &ent);
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
 			virtual void OnTick(double tDelta) override;
 
-			void SetTarget(const pragma::EntityURef &target);
-			const pragma::EntityURef &GetTarget() const;
+			void SetTarget(const EntityURef &target);
+			const EntityURef &GetTarget() const;
 
 			virtual void InitializeLuaObject(lua::State *lua) override;
 		  private:
@@ -38,9 +38,9 @@ export {
 				animation::BoneId parentBoneId;
 			};
 			std::vector<BoneMapping> m_boneMappings;
-			pragma::EntityURef m_target;
-			pragma::ComponentHandle<BaseAnimatedComponent> m_animC;
-			pragma::ComponentHandle<BaseAnimatedComponent> m_animCParent;
+			EntityURef m_target;
+			ComponentHandle<BaseAnimatedComponent> m_animC;
+			ComponentHandle<BaseAnimatedComponent> m_animCParent;
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 			virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 			void SetTargetDirty();

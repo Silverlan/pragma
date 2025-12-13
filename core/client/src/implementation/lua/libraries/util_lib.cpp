@@ -201,9 +201,9 @@ int Lua::util::Client::export_texture(lua::State *l)
 	if(Lua::IsString(l, 1)) {
 		std::string texturePath = Lua::CheckString(l, 1);
 		auto imgFormat = static_cast<pragma::asset::ModelExportInfo::ImageFormat>(Lua::CheckInt(l, 2));
-		auto alphaMode = uimg::TextureInfo::AlphaMode::Auto;
+		auto alphaMode = pragma::image::TextureInfo::AlphaMode::Auto;
 		if(Lua::IsSet(l, 3))
-			alphaMode = static_cast<uimg::TextureInfo::AlphaMode>(Lua::CheckInt(l, 3));
+			alphaMode = static_cast<pragma::image::TextureInfo::AlphaMode>(Lua::CheckInt(l, 3));
 		auto enabledExtendedDDs = false;
 		if(Lua::IsSet(l, 4))
 			enabledExtendedDDs = Lua::CheckBool(l, 4);
@@ -218,7 +218,7 @@ int Lua::util::Client::export_texture(lua::State *l)
 			Lua::PushString(l, outputPath);
 		return 2;
 	}
-	auto &imgBuf = Lua::Check<uimg::ImageBuffer>(l, 1);
+	auto &imgBuf = Lua::Check<pragma::image::ImageBuffer>(l, 1);
 	auto imgFormat = static_cast<pragma::asset::ModelExportInfo::ImageFormat>(Lua::CheckInt(l, 2));
 	std::string outputPath = Lua::CheckString(l, 3);
 	if(Lua::file::validate_write_operation(l, outputPath) == false) {
@@ -231,9 +231,9 @@ int Lua::util::Client::export_texture(lua::State *l)
 	auto srgb = false;
 	if(Lua::IsSet(l, 5))
 		srgb = Lua::CheckBool(l, 5);
-	auto alphaMode = uimg::TextureInfo::AlphaMode::Auto;
+	auto alphaMode = pragma::image::TextureInfo::AlphaMode::Auto;
 	if(Lua::IsSet(l, 6))
-		alphaMode = static_cast<uimg::TextureInfo::AlphaMode>(Lua::CheckInt(l, 6));
+		alphaMode = static_cast<pragma::image::TextureInfo::AlphaMode>(Lua::CheckInt(l, 6));
 
 	std::string errMsg;
 	std::string finalOutputPath;
@@ -248,13 +248,13 @@ int Lua::util::Client::export_texture(lua::State *l)
 
 int Lua::util::Client::export_material(lua::State *l)
 {
-	msys::Material *mat = nullptr;
+	pragma::material::Material *mat = nullptr;
 	if(Lua::IsString(l, 1)) {
 		std::string matPath = Lua::CheckString(l, 1);
 		mat = pragma::get_client_state()->LoadMaterial(matPath, nullptr, true, false);
 	}
 	else
-		mat = &Lua::Check<msys::Material>(l, 1);
+		mat = &Lua::Check<pragma::material::Material>(l, 1);
 
 	if(mat == nullptr) {
 		Lua::PushBool(l, false);
@@ -286,7 +286,7 @@ int Lua::util::Client::export_material(lua::State *l)
 std::string Lua::util::Client::get_clipboard_string() { return pragma::get_cengine()->GetWindow()->GetClipboardString(); }
 void Lua::util::Client::set_clipboard_string(const std::string &str) { pragma::get_cengine()->GetWindow()->SetClipboardString(str); }
 
-pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> &meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
+pragma::util::ParallelJob<std::shared_ptr<pragma::image::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> &meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
   uint32_t height, ::pragma::rendering::LightmapDataCache *optLightmapDataCache)
 {
 	return pragma::util::baking::bake_directional_lightmap_atlas(lights, meshes, entities, width, height, optLightmapDataCache);

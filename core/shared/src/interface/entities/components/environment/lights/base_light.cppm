@@ -28,8 +28,8 @@ export {
 				Lumen,
 				Lux // Lumen per square-meter; Directional lights only
 			};
-			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+			static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			static std::string LightIntensityTypeToString(LightIntensityType type);
 			static Candela GetLightIntensityCandela(float intensity, LightIntensityType type, std::optional<float> outerConeAngle = {});
 			static Lumen GetLightIntensityLumen(float intensity, LightIntensityType type, std::optional<float> outerConeAngle = {});
@@ -48,7 +48,7 @@ export {
 			void SetLight(BaseEnvLightPointComponent &light);
 			void SetLight(BaseEnvLightDirectionalComponent &light);
 
-			BaseEntityComponent *GetLight(pragma::LightType &outType) const;
+			BaseEntityComponent *GetLight(LightType &outType) const;
 			BaseEntityComponent *GetLight() const;
 
 			virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
@@ -68,14 +68,14 @@ export {
 			virtual void InitializeLight(BaseEntityComponent &component);
 			ComponentHandle<BaseEntityComponent> m_hLight = {};
 
-			pragma::LightType m_lightType = pragma::LightType::Undefined;
+			LightType m_lightType = LightType::Undefined;
 			ShadowType m_shadowType = ShadowType::Full;
 			LightFlags m_lightFlags = LightFlags::None;
 			float m_falloffExponent = 1.f;
 			LightIntensityType m_lightIntensityType = LightIntensityType::Candela;
 			float m_lightIntensity = 0.f;
-			pragma::NetEventId m_netEvSetShadowType = pragma::INVALID_NET_EVENT;
-			pragma::NetEventId m_netEvSetFalloffExponent = pragma::INVALID_NET_EVENT;
+			NetEventId m_netEvSetShadowType = INVALID_NET_EVENT;
+			NetEventId m_netEvSetFalloffExponent = INVALID_NET_EVENT;
 		  public:
 			ShadowType GetShadowType() const;
 			ShadowType GetEffectiveShadowType() const;

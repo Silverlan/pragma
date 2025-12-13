@@ -71,7 +71,7 @@ bool pragma::gui::types::WIMainMenuMods::SetAddonSubscription(const std::shared_
 		m_addonInstallManager->CancelDownload();
 
 		// Remove temporary update file if it exists
-		FileManager::RemoveFile(("addons\\" + uniqueId + ".pad.update").c_str());
+		fs::remove_file(("addons\\" + uniqueId + ".pad.update"));
 	}
 	m_downloadMutex.unlock();
 	return true;

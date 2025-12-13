@@ -12,11 +12,11 @@ void BaseFlashlightComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	auto &ent = GetEntity();
-	auto *pLightComponent = static_cast<pragma::BaseEnvLightComponent *>(ent.AddComponent("light").get());
-	auto *pLightSpotComponent = static_cast<pragma::BaseEnvLightSpotComponent *>(ent.AddComponent("light_spot").get());
+	auto *pLightComponent = static_cast<BaseEnvLightComponent *>(ent.AddComponent("light").get());
+	auto *pLightSpotComponent = static_cast<BaseEnvLightSpotComponent *>(ent.AddComponent("light_spot").get());
 	ent.AddComponent("sound_emitter");
-	auto *pRadiusComponent = static_cast<pragma::BaseRadiusComponent *>(ent.AddComponent("radius").get());
-	auto *pColorComponent = static_cast<pragma::BaseColorComponent *>(ent.AddComponent("color").get());
+	auto *pRadiusComponent = static_cast<BaseRadiusComponent *>(ent.AddComponent("radius").get());
+	auto *pColorComponent = static_cast<BaseColorComponent *>(ent.AddComponent("color").get());
 
 	if(pLightSpotComponent != nullptr) {
 		pLightSpotComponent->SetBlendFraction(0.4f);

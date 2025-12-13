@@ -16,8 +16,8 @@ export namespace pragma {
 		LightShadowRenderer(CLightComponent &l);
 		~LightShadowRenderer();
 
-		void BuildRenderQueues(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
-		void Render(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void BuildRenderQueues(const rendering::DrawSceneInfo &drawSceneInfo);
+		void Render(const rendering::DrawSceneInfo &drawSceneInfo);
 		bool DoesRenderQueueRequireBuilding() const;
 		bool IsRenderQueueComplete() const;
 
@@ -26,7 +26,7 @@ export namespace pragma {
 	  private:
 		void UpdateSceneCallbacks();
 
-		std::vector<std::shared_ptr<pragma::rendering::RenderQueue>> m_renderQueues {};
+		std::vector<std::shared_ptr<rendering::RenderQueue>> m_renderQueues {};
 		std::atomic<bool> m_renderQueuesComplete = false;
 		std::vector<CallbackHandle> m_sceneCallbacks {};
 		CallbackHandle m_cbOnSceneFlagsChanged {};
@@ -41,7 +41,7 @@ export namespace pragma {
 		enum class Type : uint8_t { Generic = 1, Cube };
 		static prosper::IDescriptorSet *GetDescriptorSet();
 
-		CShadowComponent(pragma::ecs::BaseEntity &ent);
+		CShadowComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 
@@ -68,11 +68,11 @@ export namespace pragma {
 		LightShadowRenderer &GetRenderer();
 		const LightShadowRenderer &GetRenderer() const;
 
-		void RenderShadows(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void RenderShadows(const rendering::DrawSceneInfo &drawSceneInfo);
 	  protected:
 		void DestroyTextures();
 		bool m_bDirty = true;
-		Type m_type = CShadowComponent::Type::Generic;
+		Type m_type = Type::Generic;
 		CShadowManagerComponent::RtHandle m_hRt = {};
 		std::function<void(void)> m_onTexturesReloaded = nullptr;
 		void InitializeDepthTextures(uint32_t size);

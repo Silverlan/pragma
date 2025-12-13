@@ -20,9 +20,9 @@ export namespace pragma {
 		class DLLCLIENT Prepass {
 		  public:
 			bool Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags sampleCount, bool bExtended);
-			pragma::ShaderPrepassBase &GetShader() const;
-			prosper::RenderTarget &BeginRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *optRenderPass = nullptr, bool secondaryCommandBuffers = false);
-			void EndRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+			ShaderPrepassBase &GetShader() const;
+			prosper::RenderTarget &BeginRenderPass(const DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *optRenderPass = nullptr, bool secondaryCommandBuffers = false);
+			void EndRenderPass(const DrawSceneInfo &drawSceneInfo);
 			// Required for SSAO
 			std::shared_ptr<prosper::Texture> textureNormals = nullptr;
 
@@ -45,7 +45,7 @@ export namespace pragma {
 		  private:
 			bool m_bExtended = false;
 			std::vector<prosper::ClearValue> m_clearValues = {};
-			pragma::util::WeakHandle<prosper::Shader> m_shaderPrepass = {};
+			util::WeakHandle<prosper::Shader> m_shaderPrepass = {};
 		};
 	};
 };

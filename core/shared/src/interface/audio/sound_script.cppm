@@ -24,12 +24,12 @@ export namespace pragma::audio {
 		virtual void SetState(ALState state) override;
 		std::unordered_map<unsigned int, Vector3> m_positions;
 		bool m_bStream = false;
-		virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags);
+		virtual std::shared_ptr<ALSound> CreateSound(const std::string &name, ALChannel channel, ALCreateFlags createFlags);
 	protected:
 		bool HandleEvents(SoundScriptEvent *ev, float eventOffset, float lastOffset, float newOffset);
 		void InitializeEvent(SoundScriptEvent *ev);
 	public:
-		ALSoundScript(pragma::NetworkState *nw, unsigned int idx, SoundScript *script, pragma::NetworkState *state, bool bStream);
+		ALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, bool bStream);
 		virtual ~ALSoundScript() override;
 		virtual void Initialize() override;
 		virtual ALState GetState() const override;

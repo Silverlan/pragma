@@ -15,7 +15,7 @@ export import :types;
 
 export {
 	namespace pragma::physics {
-		class DLLNETWORK CollisionMesh : public std::enable_shared_from_this<pragma::physics::CollisionMesh> {
+		class DLLNETWORK CollisionMesh : public std::enable_shared_from_this<CollisionMesh> {
 		  public:
 			static constexpr auto PCOL_IDENTIFIER = "PCOL";
 			static constexpr udm::Version PCOL_VERSION = 1;
@@ -31,16 +31,16 @@ export {
 				bool operator!=(const SoftBodyAnchor &other) const { return !operator==(other); }
 			};
 #pragma pack(pop)
-			CollisionMesh(const pragma::physics::CollisionMesh &other);
-			bool operator==(const pragma::physics::CollisionMesh &other) const;
-			bool operator!=(const pragma::physics::CollisionMesh &other) const { return !operator==(other); }
+			CollisionMesh(const CollisionMesh &other);
+			bool operator==(const CollisionMesh &other) const;
+			bool operator!=(const CollisionMesh &other) const { return !operator==(other); }
 		  private:
-			CollisionMesh(pragma::Game *game);
+			CollisionMesh(Game *game);
 
 			//void PhysSoftBody::AppendAnchor(uint32_t nodeId,PhysRigidBody &body,const Vector3 &localPivot,bool bDisableCollision,float influence)
 			struct DLLNETWORK SoftBodyInfo {
 				SoftBodyInfo();
-				std::weak_ptr<pragma::geometry::ModelSubMesh> subMesh = {};
+				std::weak_ptr<geometry::ModelSubMesh> subMesh = {};
 				std::vector<uint32_t> triangles; // Triangles of sub-mesh to use of soft-body physics
 				std::shared_ptr<PhysSoftBodyInfo> info = nullptr;
 				std::vector<SoftBodyAnchor> anchors;
@@ -50,7 +50,7 @@ export {
 
 			std::shared_ptr<SoftBodyInfo> m_softBodyInfo = nullptr;
 
-			pragma::Game *m_game = nullptr;
+			Game *m_game = nullptr;
 			std::vector<Vector3> m_vertices;
 			std::vector<uint16_t> m_triangles;
 			std::vector<int> m_surfaceMaterials;
@@ -58,20 +58,20 @@ export {
 			Vector3 m_max = {};
 			Vector3 m_origin = {};
 			float m_mass = 0.f;
-			std::shared_ptr<pragma::physics::IShape> m_shape = nullptr;
+			std::shared_ptr<IShape> m_shape = nullptr;
 			bool m_bConvex = true;
 			int m_boneID = -1;
 			int m_surfaceMaterialId = 0;
 			Vector3 m_centerOfMass = {};
 			double m_volume = 0.0;
-			pragma::util::Uuid m_uuid;
-			void ClipAgainstPlane(const Vector3 &n, double d, pragma::physics::CollisionMesh &clippedMesh);
-			bool LoadFromAssetData(pragma::Game &game, pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr);
+			util::Uuid m_uuid;
+			void ClipAgainstPlane(const Vector3 &n, double d, CollisionMesh &clippedMesh);
+			bool LoadFromAssetData(Game &game, asset::Model &mdl, const udm::AssetData &data, std::string &outErr);
 		  public:
-			static std::shared_ptr<pragma::physics::CollisionMesh> Create(pragma::Game *game);
-			static std::shared_ptr<pragma::physics::CollisionMesh> Create(const pragma::physics::CollisionMesh &other);
-			static std::shared_ptr<pragma::physics::CollisionMesh> Load(pragma::Game &game, pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr);
-			std::shared_ptr<pragma::physics::IShape> CreateShape(const Vector3 &scale = {1.f, 1.f, 1.f}) const;
+			static std::shared_ptr<CollisionMesh> Create(Game *game);
+			static std::shared_ptr<CollisionMesh> Create(const CollisionMesh &other);
+			static std::shared_ptr<CollisionMesh> Load(Game &game, asset::Model &mdl, const udm::AssetData &data, std::string &outErr);
+			std::shared_ptr<IShape> CreateShape(const Vector3 &scale = {1.f, 1.f, 1.f}) const;
 			void SetBoneParent(int boneID);
 			int GetBoneParent() const;
 			void CalculateBounds();
@@ -81,7 +81,7 @@ export {
 			void SetOrigin(const Vector3 &origin);
 			const Vector3 &GetOrigin() const;
 			Vector3 &GetOrigin();
-			std::shared_ptr<pragma::physics::IShape> GetShape();
+			std::shared_ptr<IShape> GetShape();
 			bool IntersectAABB(Vector3 *min, Vector3 *max);
 			void UpdateShape();
 			void ClearShape();
@@ -94,16 +94,16 @@ export {
 			int GetSurfaceMaterial() const;
 			void SetMass(float mass);
 			float GetMass() const;
-			void Update(pragma::asset::ModelUpdateFlags flags = pragma::asset::ModelUpdateFlags::AllData);
+			void Update(asset::ModelUpdateFlags flags = asset::ModelUpdateFlags::AllData);
 			void AddVertex(const Vector3 &v);
 			void Rotate(const Quat &rot);
 			void Translate(const Vector3 &t);
 			void Scale(const Vector3 &scale);
-			void Mirror(pragma::Axis axis);
+			void Mirror(Axis axis);
 			void Centralize();
 
-			const pragma::util::Uuid &GetUuid() const;
-			void SetUuid(const pragma::util::Uuid &uuid);
+			const util::Uuid &GetUuid() const;
+			void SetUuid(const util::Uuid &uuid);
 
 			// Triangles can be empty if the collision point-cloud was never triangulated
 			const std::vector<uint16_t> &GetTriangles() const;
@@ -114,12 +114,12 @@ export {
 			double GetVolume() const;
 			void SetVolume(double vol);
 
-			void ClipAgainstPlane(const Vector3 &n, double d, pragma::physics::CollisionMesh &clippedMeshA, pragma::physics::CollisionMesh &clippedMeshB);
+			void ClipAgainstPlane(const Vector3 &n, double d, CollisionMesh &clippedMeshA, CollisionMesh &clippedMeshB);
 
 			void SetSoftBody(bool b);
 			bool IsSoftBody() const;
-			pragma::geometry::ModelSubMesh *GetSoftBodyMesh() const;
-			void SetSoftBodyMesh(pragma::geometry::ModelSubMesh &mesh);
+			geometry::ModelSubMesh *GetSoftBodyMesh() const;
+			void SetSoftBodyMesh(geometry::ModelSubMesh &mesh);
 			const std::vector<uint32_t> *GetSoftBodyTriangles() const;
 			std::vector<uint32_t> *GetSoftBodyTriangles();
 			PhysSoftBodyInfo *GetSoftBodyInfo() const;
@@ -129,7 +129,7 @@ export {
 			const std::vector<SoftBodyAnchor> *GetSoftBodyAnchors() const;
 			std::vector<SoftBodyAnchor> *GetSoftBodyAnchors();
 
-			bool Save(pragma::Game &game, pragma::asset::Model &mdl, udm::AssetDataArg outData, std::string &outErr);
+			bool Save(Game &game, asset::Model &mdl, udm::AssetDataArg outData, std::string &outErr);
 		};
 		using namespace pragma::math::scoped_enum::bitwise;
 	}

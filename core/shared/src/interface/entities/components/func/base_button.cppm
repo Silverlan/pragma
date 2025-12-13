@@ -14,12 +14,12 @@ export namespace pragma {
 	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void OnEntitySpawn() override;
 	  protected:
 		std::string m_kvUseSound;
 		float m_kvWaitTime = 0.f;
 		float m_tNextUse = 0.f;
-		std::shared_ptr<pragma::audio::ALSound> m_useSound = nullptr;
+		std::shared_ptr<audio::ALSound> m_useSound = nullptr;
 	};
 };

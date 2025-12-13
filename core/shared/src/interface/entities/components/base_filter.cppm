@@ -16,18 +16,18 @@ export namespace pragma {
 	  protected:
 		std::string m_kvFilter;
 	  public:
-		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent) const = 0;
+		virtual bool ShouldPass(ecs::BaseEntity &ent) const = 0;
 	};
 
 	class DLLNETWORK BaseFilterNameComponent : public BaseFilterComponent {
 	  public:
 		using BaseFilterComponent::BaseFilterComponent;
-		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent) const override;
+		virtual bool ShouldPass(ecs::BaseEntity &ent) const override;
 	};
 
 	class DLLNETWORK BaseFilterClassComponent : public BaseFilterComponent {
 	  public:
 		using BaseFilterComponent::BaseFilterComponent;
-		virtual bool ShouldPass(pragma::ecs::BaseEntity &ent) const override;
+		virtual bool ShouldPass(ecs::BaseEntity &ent) const override;
 	};
 };

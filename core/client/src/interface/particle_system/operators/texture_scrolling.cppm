@@ -14,38 +14,38 @@ export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorTextureScrolling : public CParticleOperator {
 	public:
 		CParticleOperatorTextureScrolling() = default;
-		virtual void Simulate(pragma::pts::CParticle &particle, double, float strength) override;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+		virtual void Simulate(CParticle &particle, double, float strength) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
 	private:
-		void SetFrameOffset(pragma::pts::CParticle &particle, Vector2 uv);
+		void SetFrameOffset(CParticle &particle, Vector2 uv);
 		float m_fHorizontalSpeed = 0.f;
 		float m_fVerticalSpeed = 0.f;
 	};
 }
 
-void pragma::pts::CParticleOperatorTextureScrolling::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorTextureScrolling::Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto &pair : values) {
 		auto key = pair.first;
-		pragma::string::to_lower(key);
+		string::to_lower(key);
 		if(key == "horizontal_speed")
-			m_fHorizontalSpeed = pragma::util::to_float(pair.second);
+			m_fHorizontalSpeed = util::to_float(pair.second);
 		else if(key == "vertical_speed")
-			m_fVerticalSpeed = pragma::util::to_float(pair.second);
+			m_fVerticalSpeed = util::to_float(pair.second);
 	}
-	static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).SetTextureScrollingEnabled(true);
+	static_cast<ecs::CParticleSystemComponent &>(pSystem).SetTextureScrollingEnabled(true);
 }
-void pragma::pts::CParticleOperatorTextureScrolling::SetFrameOffset(pragma::pts::CParticle &particle, Vector2 uv)
+void pragma::pts::CParticleOperatorTextureScrolling::SetFrameOffset(CParticle &particle, Vector2 uv)
 {
-	pragma::math::normalize_uv_coordinates(uv);
+	math::normalize_uv_coordinates(uv);
 
 	auto frameOffset = glm::packHalf2x16(uv);
 	particle.SetFrameOffset(reinterpret_cast<float &>(frameOffset));
 }
-void pragma::pts::CParticleOperatorTextureScrolling::OnParticleCreated(pragma::pts::CParticle &particle) { SetFrameOffset(particle, {}); }
-void pragma::pts::CParticleOperatorTextureScrolling::Simulate(pragma::pts::CParticle &particle, double dt, float strength)
+void pragma::pts::CParticleOperatorTextureScrolling::OnParticleCreated(CParticle &particle) { SetFrameOffset(particle, {}); }
+void pragma::pts::CParticleOperatorTextureScrolling::Simulate(CParticle &particle, double dt, float strength)
 {
 	auto offsetH = m_fHorizontalSpeed * dt;
 	auto offsetV = m_fVerticalSpeed * dt;
@@ -57,7 +57,7 @@ void pragma::pts::CParticleOperatorTextureScrolling::Simulate(pragma::pts::CPart
 	auto uv = glm::unpackHalf2x16(reinterpret_cast<uint32_t &>(frameOffset));
 	uv.x += offsetH;
 	uv.y += offsetV;
-	pragma::math::normalize_uv_coordinates(uv);
+	math::normalize_uv_coordinates(uv);
 
 	SetFrameOffset(particle, uv);
 }

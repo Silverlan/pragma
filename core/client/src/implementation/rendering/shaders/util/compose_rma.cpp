@@ -28,7 +28,7 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(prosper::I
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::SampledBit;
 
 	auto fGetWhiteTex = [&context]() -> prosper::Texture * {
-		auto tex = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("white");
+		auto tex = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("white");
 		if(tex == nullptr)
 			return nullptr;
 		return tex->GetVkTexture().get();
@@ -84,7 +84,7 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(prosper::I
 }
 bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &context, const std::string &rmaInputPath, prosper::IImage &aoImg, const std::string *optRmaOutputPath)
 {
-	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 	auto rmaTexInfo = texManager.LoadAsset(rmaInputPath);
 	if(rmaTexInfo == nullptr || rmaTexInfo->HasValidVkTexture() == false)
 		return false;
@@ -97,12 +97,12 @@ bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &conte
 	auto texRMA = (rmaTexInfo->IsError() == false) ? rmaTexInfo->GetVkTexture() : nullptr;
 	auto newRMA = ComposeRMA(context, texRMA.get(), texRMA.get(), aoTex.get());
 
-	uimg::TextureInfo imgWriteInfo {};
-	imgWriteInfo.alphaMode = uimg::TextureInfo::AlphaMode::None;
-	imgWriteInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
-	imgWriteInfo.flags = uimg::TextureInfo::Flags::GenerateMipmaps;
-	imgWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R8G8B8A8_UInt;
-	imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::ColorMap;
+	image::TextureInfo imgWriteInfo {};
+	imgWriteInfo.alphaMode = image::TextureInfo::AlphaMode::None;
+	imgWriteInfo.containerFormat = image::TextureInfo::ContainerFormat::DDS;
+	imgWriteInfo.flags = image::TextureInfo::Flags::GenerateMipmaps;
+	imgWriteInfo.inputFormat = image::TextureInfo::InputFormat::R8G8B8A8_UInt;
+	imgWriteInfo.outputFormat = image::TextureInfo::OutputFormat::ColorMap;
 
 	auto rmaOutputPath = optRmaOutputPath ? *optRmaOutputPath : rmaInputPath;
 
@@ -114,7 +114,7 @@ bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &conte
 	// TODO: RMA should overwrite the existing one
 	return pragma::get_cgame()->SaveImage(*newRMA, "addons/converted/" + matName, imgWriteInfo);
 }
-bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &context, const std::string &rmaInputPath, uimg::ImageBuffer &imgBuffer, const std::string *optRmaOutputPath)
+bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &context, const std::string &rmaInputPath, image::ImageBuffer &imgBuffer, const std::string *optRmaOutputPath)
 {
 	auto aoImg = context.CreateImage(imgBuffer);
 	return InsertAmbientOcclusion(context, rmaInputPath, *aoImg, optRmaOutputPath);

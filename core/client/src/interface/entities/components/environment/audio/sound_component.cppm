@@ -12,7 +12,7 @@ export import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CSoundComponent final : public BaseEnvSoundComponent, public CBaseNetComponent {
 	  public:
-		CSoundComponent(pragma::ecs::BaseEntity &ent) : BaseEnvSoundComponent(ent) {}
+		CSoundComponent(ecs::BaseEntity &ent) : BaseEnvSoundComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		float GetMaxDistance() const;
 		virtual void InitializeLuaObject(lua::State *l) override;
@@ -26,7 +26,7 @@ export namespace pragma {
 #endif
 	  protected:
 		float m_kvMaxDistance = 0.f;
-		std::weak_ptr<pragma::audio::ALSound> m_wpSound = {};
+		std::weak_ptr<audio::ALSound> m_wpSound = {};
 	};
 };
 

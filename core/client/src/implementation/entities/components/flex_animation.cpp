@@ -112,9 +112,9 @@ void CFlexComponent::MaintainFlexAnimations(float dt)
 		if(flexAnimData.loop)
 			t = fmodf(t, 1.f);
 		else
-			t = pragma::math::min(t, 1.f);
+			t = math::min(t, 1.f);
 		auto tFrame = t * (frames.size() - 1);
-		auto frameId0 = pragma::math::floor(tFrame);
+		auto frameId0 = math::floor(tFrame);
 		auto frameId1 = frameId0 + 1;
 		auto endOfAnimation = (tFrame >= 1.f);
 		if((endOfAnimation && flexAnimData.loop == false) || frameId1 >= numFrames)
@@ -128,7 +128,7 @@ void CFlexComponent::MaintainFlexAnimations(float dt)
 		auto &values1 = frame1->GetValues();
 		tFrame = fmodf(tFrame, 1.f);
 		for(auto i = decltype(flexControllerIds.size()) {0u}; i < flexControllerIds.size(); ++i) {
-			auto v = pragma::math::lerp(values0[i], values1[i], tFrame);
+			auto v = math::lerp(values0[i], values1[i], tFrame);
 			SetFlexController(flexControllerIds[i], v);
 		}
 		if(endOfAnimation && flexAnimData.loop == false) {

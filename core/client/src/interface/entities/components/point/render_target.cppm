@@ -17,7 +17,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CRenderTargetComponent final : public BasePointRenderTargetComponent, public CBaseNetComponent {
 		  public:
-			CRenderTargetComponent(pragma::ecs::BaseEntity &ent) : BasePointRenderTargetComponent(ent) {}
+			CRenderTargetComponent(ecs::BaseEntity &ent) : BasePointRenderTargetComponent(ent) {}
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
@@ -27,8 +27,8 @@ export {
 			Vector2 GetRenderSize();
 			void GetRenderSize(float *w, float *h);
 
-			void SetRenderMaterial(msys::Material *mat);
-			msys::Material *GetRenderMaterial();
+			void SetRenderMaterial(material::Material *mat);
+			material::Material *GetRenderMaterial();
 			void SetRenderMaterial(std::string mat);
 
 			void SetRefreshRate(float f);
@@ -42,14 +42,14 @@ export {
 
 			void Spawn();
 			unsigned int GetTextureBuffer();
-			void Render(pragma::rendering::SceneRenderPass renderMode);
+			void Render(rendering::SceneRenderPass renderMode);
 
-			std::unique_ptr<msys::Texture> m_texture = nullptr;
-			msys::Material *m_matRender = nullptr;
+			std::unique_ptr<material::Texture> m_texture = nullptr;
+			material::Material *m_matRender = nullptr;
 			float m_refreshRate = 0.f;
 			double m_tLastRefresh;
 			unsigned int m_curDepth = 0u;
-			pragma::util::WeakHandle<pragma::CCameraComponent> m_cam = {};
+			util::WeakHandle<CCameraComponent> m_cam = {};
 		};
 	};
 

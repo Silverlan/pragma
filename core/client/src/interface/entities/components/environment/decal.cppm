@@ -15,17 +15,17 @@ export {
 		class DLLCLIENT DecalProjector {
 		  public:
 			struct DLLCLIENT MeshData {
-				std::vector<pragma::geometry::ModelSubMesh *> subMeshes {};
-				pragma::math::ScaledTransform pose = {};
+				std::vector<geometry::ModelSubMesh *> subMeshes {};
+				math::ScaledTransform pose = {};
 			};
 			DecalProjector(const Vector3 &pos, const Quat &rot, float size);
 			const Vector3 &GetPos() const;
 			const Quat &GetRotation() const;
-			const pragma::math::Transform &GetPose() const;
+			const math::Transform &GetPose() const;
 			float GetSize() const;
 			std::pair<Vector3, Vector3> GetAABB() const;
 
-			bool GenerateDecalMesh(const std::vector<MeshData> &meshDatas, std::vector<pragma::math::Vertex> &outVerts, std::vector<uint16_t> &outTris);
+			bool GenerateDecalMesh(const std::vector<MeshData> &meshDatas, std::vector<math::Vertex> &outVerts, std::vector<uint16_t> &outTris);
 			void DebugDraw(float duration) const;
 		  private:
 			struct VertexInfo {
@@ -39,13 +39,13 @@ export {
 			std::pair<Vector3, Vector3> GetProjectorCubeBounds() const;
 			std::vector<VertexInfo> CropTriangleVertsByLine(const Vector3 &v0, const Vector3 &v1, const Vector3 &v2, const std::vector<VertexInfo> &verts, const Vector2 &lineStart, const Vector2 &lineEnd);
 
-			pragma::math::Transform m_pose = {};
+			math::Transform m_pose = {};
 			float m_size = 0.f;
 		};
 
 		class DLLCLIENT CDecalComponent final : public BaseEnvDecalComponent, public CBaseNetComponent {
 		  public:
-			CDecalComponent(pragma::ecs::BaseEntity &ent) : BaseEnvDecalComponent(ent) {}
+			CDecalComponent(ecs::BaseEntity &ent) : BaseEnvDecalComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual void OnEntitySpawn() override;

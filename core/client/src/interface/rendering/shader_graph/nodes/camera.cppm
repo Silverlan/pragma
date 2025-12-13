@@ -9,7 +9,7 @@ export module pragma.client:rendering.shader_graph.node_camera;
 export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
-	class DLLCLIENT CameraNode : public pragma::shadergraph::Node {
+	class DLLCLIENT CameraNode : public shadergraph::Node {
 	  public:
 		static constexpr const char *OUT_POSITION = "position";
 		static constexpr const char *OUT_FOV = "fov";
@@ -21,7 +21,7 @@ export namespace pragma::rendering::shader_graph {
 
 		CameraNode(const std::string_view &type);
 
-		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
+		virtual std::string DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const override;
 	};
 };
 

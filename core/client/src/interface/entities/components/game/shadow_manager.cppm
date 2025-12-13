@@ -14,9 +14,9 @@ export namespace pragma {
 	class CLightComponent;
 	struct ShadowRenderInfo {
 		const ecs::CBaseEntity *entity = nullptr;
-		const pragma::geometry::CModelSubMesh *mesh = nullptr;
+		const geometry::CModelSubMesh *mesh = nullptr;
 		uint32_t renderFlags = 0;
-		msys::Material *material = nullptr;
+		material::Material *material = nullptr;
 	};
 
 	class DLLCLIENT ShadowRenderer {
@@ -26,42 +26,42 @@ export namespace pragma {
 		ShadowRenderer &operator=(const ShadowRenderer &) = delete;
 		enum class RenderResultFlags : uint8_t { None = 0u, TranslucentPending = 1u };
 
-		void RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light);
+		void RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CLightComponent &light);
 	  private:
 		struct OctreeCallbacks {
-			std::function<bool(const OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>::Node &)> nodeCallback;
+			std::function<bool(const OcclusionOctree<std::shared_ptr<geometry::ModelMesh>>::Node &)> nodeCallback;
 			std::function<void(const ecs::CBaseEntity &, uint32_t)> entityCallback;
-			std::function<void(const std::shared_ptr<pragma::geometry::ModelMesh> &)> meshCallback;
-			std::function<void(const pragma::asset::Model &, const pragma::geometry::CModelSubMesh &, uint32_t)> subMeshCallback;
+			std::function<void(const std::shared_ptr<geometry::ModelMesh> &)> meshCallback;
+			std::function<void(const asset::Model &, const geometry::CModelSubMesh &, uint32_t)> subMeshCallback;
 		};
 		struct LightSourceData {
 			std::shared_ptr<prosper::IPrimaryCommandBuffer> drawCmd;
-			pragma::CLightComponent *light;
-			pragma::LightType type;
+			CLightComponent *light;
+			LightType type;
 			Vector3 position;
 			float radius;
 		};
-		void RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::rendering::ShadowMapType smType, pragma::LightType type, bool drawParticleShadows);
-		bool UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::rendering::ShadowMapType smType);
-		void UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light);
-		void UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light);
-		RenderResultFlags RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, uint32_t layerId, const Mat4 &depthMVP, pragma::ShaderShadow &shader, bool bTranslucent);
-		void RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::BaseEnvLightDirectionalComponent &light, bool drawParticleShadows);
+		void RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CLightComponent &light, rendering::ShadowMapType smType, LightType type, bool drawParticleShadows);
+		bool UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CLightComponent &light, rendering::ShadowMapType smType);
+		void UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CLightComponent &light);
+		void UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CLightComponent &light);
+		RenderResultFlags RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CLightComponent &light, uint32_t layerId, const Mat4 &depthMVP, ShaderShadow &shader, bool bTranslucent);
+		void RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, BaseEnvLightDirectionalComponent &light, bool drawParticleShadows);
 
 		std::vector<ShadowRenderInfo> m_shadowCasters = {};
 
 		OctreeCallbacks m_octreeCallbacks = {};
 		LightSourceData m_lightSourceData = {};
-		pragma::util::WeakHandle<prosper::Shader> m_shader = {};
-		pragma::util::WeakHandle<prosper::Shader> m_shaderTransparent = {};
-		pragma::util::WeakHandle<prosper::Shader> m_shaderSpot = {};
-		pragma::util::WeakHandle<prosper::Shader> m_shaderSpotTransparent = {};
-		pragma::util::WeakHandle<prosper::Shader> m_shaderCSM = {};
-		pragma::util::WeakHandle<prosper::Shader> m_shaderCSMTransparent = {};
+		util::WeakHandle<prosper::Shader> m_shader = {};
+		util::WeakHandle<prosper::Shader> m_shaderTransparent = {};
+		util::WeakHandle<prosper::Shader> m_shaderSpot = {};
+		util::WeakHandle<prosper::Shader> m_shaderSpotTransparent = {};
+		util::WeakHandle<prosper::Shader> m_shaderCSM = {};
+		util::WeakHandle<prosper::Shader> m_shaderCSMTransparent = {};
 
 		// Current entity when iterating entity meshes in an octree
 		const ecs::CBaseEntity *m_currentEntity = nullptr;
-		pragma::asset::Model *m_currentModel = nullptr;
+		asset::Model *m_currentModel = nullptr;
 		uint32_t m_currentRenderFlags = 0;
 	};
 
@@ -69,7 +69,7 @@ export namespace pragma {
 	  public:
 		static CShadowManagerComponent *GetShadowManager();
 
-		CShadowManagerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CShadowManagerComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
@@ -79,7 +79,7 @@ export namespace pragma {
 			std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
 			uint32_t index = std::numeric_limits<uint32_t>::max();
 		};
-		using RtHandle = pragma::util::WeakHandle<std::weak_ptr<RenderTarget>>;
+		using RtHandle = util::WeakHandle<std::weak_ptr<RenderTarget>>;
 		using Priority = int64_t;
 		enum class Type : uint32_t { Generic = 0, Cube };
 		RtHandle RequestRenderTarget(Type type, uint32_t size, Priority priority = 0);
@@ -104,7 +104,7 @@ export namespace pragma {
 		BufferSet m_cubeSet = {};
 		ShadowRenderer m_renderer = {};
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroup = nullptr;
-		pragma::util::WeakHandle<prosper::Shader> m_whShadowShader = {};
+		util::WeakHandle<prosper::Shader> m_whShadowShader = {};
 	};
 	using namespace pragma::math::scoped_enum::bitwise;
 };

@@ -20,20 +20,20 @@ import :rendering.shaders;
 
 using namespace pragma;
 
-class DLLCLIENT VelocityStageRenderProcessor : public pragma::rendering::DepthStageRenderProcessor {
+class DLLCLIENT VelocityStageRenderProcessor : public rendering::DepthStageRenderProcessor {
   public:
-	VelocityStageRenderProcessor(pragma::ShaderVelocityBuffer &shaderVelocity, const pragma::rendering::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin, const pragma::MotionBlurTemporalData &motionBlurData, prosper::IDescriptorSet &dsMotionData, prosper::IDescriptorSet &dsBoneGeneric);
-	virtual bool BindEntity(pragma::ecs::CBaseEntity &ent) override;
+	VelocityStageRenderProcessor(ShaderVelocityBuffer &shaderVelocity, const rendering::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin, const MotionBlurTemporalData &motionBlurData, prosper::IDescriptorSet &dsMotionData, prosper::IDescriptorSet &dsBoneGeneric);
+	virtual bool BindEntity(ecs::CBaseEntity &ent) override;
 	virtual bool BindShader(prosper::Shader &shader, uint32_t pipelineIdx = 0u) override;
   private:
-	pragma::ShaderVelocityBuffer &m_shaderVelocity;
-	const pragma::MotionBlurTemporalData &m_motionBlurData;
+	ShaderVelocityBuffer &m_shaderVelocity;
+	const MotionBlurTemporalData &m_motionBlurData;
 	prosper::IDescriptorSet &m_dsMotionData;
 	prosper::IDescriptorSet &m_dsBoneGeneric;
 };
-VelocityStageRenderProcessor::VelocityStageRenderProcessor(pragma::ShaderVelocityBuffer &shaderVelocity, const pragma::rendering::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin, const pragma::MotionBlurTemporalData &motionBlurData, prosper::IDescriptorSet &dsMotionData,
+VelocityStageRenderProcessor::VelocityStageRenderProcessor(ShaderVelocityBuffer &shaderVelocity, const rendering::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin, const MotionBlurTemporalData &motionBlurData, prosper::IDescriptorSet &dsMotionData,
   prosper::IDescriptorSet &dsBoneGeneric)
-    : pragma::rendering::DepthStageRenderProcessor {drawSceneInfo, drawOrigin}, m_shaderVelocity {shaderVelocity}, m_motionBlurData {motionBlurData}, m_dsMotionData {dsMotionData}, m_dsBoneGeneric {dsBoneGeneric}
+    : DepthStageRenderProcessor {drawSceneInfo, drawOrigin}, m_shaderVelocity {shaderVelocity}, m_motionBlurData {motionBlurData}, m_dsMotionData {dsMotionData}, m_dsBoneGeneric {dsBoneGeneric}
 {
 }
 bool VelocityStageRenderProcessor::BindShader(prosper::Shader &shader, uint32_t pipelineIdx)
@@ -41,30 +41,30 @@ bool VelocityStageRenderProcessor::BindShader(prosper::Shader &shader, uint32_t 
 	if(!DepthStageRenderProcessor::BindShader(shader, pipelineIdx))
 		return false;
 	auto &cmd = m_shaderProcessor.GetCommandBuffer();
-	return cmd.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, m_shaderProcessor.GetCurrentPipelineLayout(), pragma::ShaderVelocityBuffer::DESCRIPTOR_SET_MOTION_BLUR.setIndex, m_dsMotionData);
+	return cmd.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, m_shaderProcessor.GetCurrentPipelineLayout(), ShaderVelocityBuffer::DESCRIPTOR_SET_MOTION_BLUR.setIndex, m_dsMotionData);
 }
 bool VelocityStageRenderProcessor::BindEntity(ecs::CBaseEntity &ent)
 {
-	auto res = pragma::rendering::DepthStageRenderProcessor::BindEntity(ent);
+	auto res = DepthStageRenderProcessor::BindEntity(ent);
 	if(res == false)
 		return false;
 	auto *dsBone = &m_dsBoneGeneric;
 	auto it = m_motionBlurData.prevModelMatrices.find(&ent);
 	if(it != m_motionBlurData.prevModelMatrices.end() && it->second.boneDsg != nullptr)
 		dsBone = it->second.boneDsg->GetDescriptorSet();
-	if(!m_shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, m_shaderProcessor.GetCurrentPipelineLayout(), pragma::ShaderVelocityBuffer::DESCRIPTOR_SET_BONE_BUFFER.setIndex, *dsBone))
+	if(!m_shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, m_shaderProcessor.GetCurrentPipelineLayout(), ShaderVelocityBuffer::DESCRIPTOR_SET_BONE_BUFFER.setIndex, *dsBone))
 		return false;
 
-	pragma::ShaderVelocityBuffer::MotionBlurPushConstants pushConstants {};
+	ShaderVelocityBuffer::MotionBlurPushConstants pushConstants {};
 	if(it != m_motionBlurData.prevModelMatrices.end())
 		pushConstants.prevPose = it->second.matrix;
 	else
 		pushConstants.prevPose = umat::identity();
-	return m_shaderProcessor.GetCommandBuffer().RecordPushConstants(m_shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit, pragma::ShaderVelocityBuffer::MotionBlurPushConstants::Offset, sizeof(pushConstants),
+	return m_shaderProcessor.GetCommandBuffer().RecordPushConstants(m_shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit, ShaderVelocityBuffer::MotionBlurPushConstants::Offset, sizeof(pushConstants),
 	  &pushConstants);
 }
 
-void CRendererPpMotionBlurComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void CRendererPpMotionBlurComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = CRendererPpMotionBlurComponent;
 
@@ -76,27 +76,27 @@ void CRendererPpMotionBlurComponent::RegisterMembers(pragma::EntityComponentMana
 		registerMember(std::move(memberInfo));
 	}
 }
-CRendererPpMotionBlurComponent::CRendererPpMotionBlurComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent)
+CRendererPpMotionBlurComponent::CRendererPpMotionBlurComponent(ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent)
 {
 	static auto g_shadersRegistered = false;
 	if(!g_shadersRegistered) {
 		g_shadersRegistered = true;
-		pragma::get_cengine()->GetShaderManager().RegisterShader("velocity_buffer", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderVelocityBuffer(context, identifier); });
-		pragma::get_cengine()->GetShaderManager().RegisterShader("pp_motion_blur", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPMotionBlur(context, identifier); });
+		get_cengine()->GetShaderManager().RegisterShader("velocity_buffer", [](prosper::IPrContext &context, const std::string &identifier) { return new ShaderVelocityBuffer(context, identifier); });
+		get_cengine()->GetShaderManager().RegisterShader("pp_motion_blur", [](prosper::IPrContext &context, const std::string &identifier) { return new ShaderPPMotionBlur(context, identifier); });
 	}
 }
 void CRendererPpMotionBlurComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CRendererPpMotionBlurComponent::ReloadVelocityTexture()
 {
-	auto *shader = pragma::get_velocity_buffer_shader();
+	auto *shader = get_velocity_buffer_shader();
 	if(!shader)
 		return;
-	auto rendererC = GetEntity().GetComponent<pragma::CRendererComponent>();
+	auto rendererC = GetEntity().GetComponent<CRendererComponent>();
 	auto cRenderer = GetEntity().GetComponent<CRasterizationRendererComponent>();
 	if(rendererC.expired() || cRenderer.expired())
 		return;
-	pragma::get_cengine()->GetRenderContext().WaitIdle();
+	get_cengine()->GetRenderContext().WaitIdle();
 
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.width = rendererC->GetWidth();
@@ -104,7 +104,7 @@ void CRendererPpMotionBlurComponent::ReloadVelocityTexture()
 	createInfo.format = prosper::Format::R32G32B32A32_SFloat;
 	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
 
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	auto img = context.CreateImage(createInfo);
 	auto tex = context.CreateTexture({}, *img, prosper::util::ImageViewCreateInfo {}, prosper::util::SamplerCreateInfo {});
 	auto rt = context.CreateRenderTarget({tex, cRenderer->GetPrepass().textureDepth}, shader->GetRenderPass());
@@ -128,21 +128,21 @@ void CRendererPpMotionBlurComponent::Initialize()
 {
 	CRendererPpBaseComponent::Initialize();
 
-	auto *velShader = pragma::get_velocity_buffer_shader();
-	auto *shaderMotionBlur = static_cast<pragma::ShaderPPMotionBlur *>(pragma::get_cengine()->GetShader("pp_motion_blur").get());
+	auto *velShader = get_velocity_buffer_shader();
+	auto *shaderMotionBlur = static_cast<ShaderPPMotionBlur *>(get_cengine()->GetShader("pp_motion_blur").get());
 	if(!velShader || !shaderMotionBlur)
 		return;
-	BindEventUnhandled(pragma::cRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS, [this](std::reference_wrapper<ComponentEvent> evData) {
 		if(!m_valid)
 			return;
 		RecordVelocityPass(static_cast<CEDrawSceneInfo &>(evData.get()).drawSceneInfo);
 	});
-	BindEventUnhandled(pragma::cRasterizationRendererComponent::EVENT_POST_PREPASS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cRasterizationRendererComponent::EVENT_POST_PREPASS, [this](std::reference_wrapper<ComponentEvent> evData) {
 		if(!m_valid)
 			return;
 		ExecuteVelocityPass(static_cast<CEDrawSceneInfo &>(evData.get()).drawSceneInfo);
 	});
-	BindEventUnhandled(pragma::cRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		m_valid = false;
 		auto evDataReloaded = static_cast<CEOnRenderTargetReloaded &>(evData.get());
 		if(!evDataReloaded.success)
@@ -150,27 +150,27 @@ void CRendererPpMotionBlurComponent::Initialize()
 		ReloadVelocityTexture();
 	});
 
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	m_swapCmd = context.CreateSwapCommandBufferGroup(context.GetWindow());
 
-	m_velocityTexDsg = shaderMotionBlur->CreateDescriptorSetGroup(pragma::ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY.setIndex);
+	m_velocityTexDsg = shaderMotionBlur->CreateDescriptorSetGroup(ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY.setIndex);
 
 	prosper::util::BufferCreateInfo motionBlurBufCreateInfo {};
 	motionBlurBufCreateInfo.size = sizeof(MotionBlurCameraData);
 	motionBlurBufCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 	auto buf = context.CreateBuffer(motionBlurBufCreateInfo);
-	m_motionBlurDataDsg = velShader->CreateDescriptorSetGroup(pragma::ShaderVelocityBuffer::DESCRIPTOR_SET_MOTION_BLUR.setIndex);
+	m_motionBlurDataDsg = velShader->CreateDescriptorSetGroup(ShaderVelocityBuffer::DESCRIPTOR_SET_MOTION_BLUR.setIndex);
 	m_motionBlurDataDsg->GetDescriptorSet()->SetBindingUniformBuffer(*buf, 0);
 	m_motionBlurDataBuffer = buf;
 
-	m_genericBoneDsg = velShader->CreateDescriptorSetGroup(pragma::ShaderVelocityBuffer::DESCRIPTOR_SET_BONE_BUFFER.setIndex);
+	m_genericBoneDsg = velShader->CreateDescriptorSetGroup(ShaderVelocityBuffer::DESCRIPTOR_SET_BONE_BUFFER.setIndex);
 
 	ReloadVelocityTexture();
 }
 
-void CRendererPpMotionBlurComponent::RecordVelocityPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void CRendererPpMotionBlurComponent::RecordVelocityPass(const rendering::DrawSceneInfo &drawSceneInfo)
 {
-	auto *velShader = pragma::get_velocity_buffer_shader();
+	auto *velShader = get_velocity_buffer_shader();
 	if(!velShader)
 		return;
 	auto &cam = drawSceneInfo.scene->GetActiveCamera();
@@ -193,10 +193,10 @@ void CRendererPpMotionBlurComponent::RecordVelocityPass(const pragma::rendering:
 
 	cmd->StartRecording(rt->GetRenderPass(), rt->GetFramebuffer());
 	cmd->Record([this, &drawSceneInfo, velShader, &worldRenderQueues, &sceneRenderDesc, &motionBlurTempData](prosper::ISecondaryCommandBuffer &cmd) {
-		pragma::rendering::RenderPassDrawInfo renderPassDrawInfo {drawSceneInfo, cmd};
+		rendering::RenderPassDrawInfo renderPassDrawInfo {drawSceneInfo, cmd};
 		VelocityStageRenderProcessor rsys {*velShader, renderPassDrawInfo, {} /* drawOrigin */, motionBlurTempData, *m_motionBlurDataDsg->GetDescriptorSet(), *m_genericBoneDsg->GetDescriptorSet()};
 
-		rsys.BindShader(*velShader, pragma::math::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
+		rsys.BindShader(*velShader, math::to_integral(ShaderPrepass::Pipeline::Opaque));
 		// Render static world geometry
 		if((renderPassDrawInfo.drawSceneInfo.renderFlags & rendering::RenderFlags::World) != rendering::RenderFlags::None) {
 			std::chrono::steady_clock::time_point t;
@@ -206,19 +206,19 @@ void CRendererPpMotionBlurComponent::RecordVelocityPass(const pragma::rendering:
 			if(drawSceneInfo.renderStats)
 				drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::Prepass)->SetTime(rendering::RenderPassStats::Timer::RenderThreadWait, std::chrono::steady_clock::now() - t);
 			for(auto i = decltype(worldRenderQueues.size()) {0u}; i < worldRenderQueues.size(); ++i)
-				rsys.Render(*worldRenderQueues.at(i), pragma::rendering::RenderPass::Prepass, nullptr, i);
+				rsys.Render(*worldRenderQueues.at(i), rendering::RenderPass::Prepass, nullptr, i);
 		}
 
 		// Note: The non-translucent render queues also include transparent (alpha masked) objects.
 		// We don't care about translucent objects here.
 		if((renderPassDrawInfo.drawSceneInfo.renderFlags & rendering::RenderFlags::World) != rendering::RenderFlags::None) {
-			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, false /* translucent */), pragma::rendering::RenderPass::Prepass);
+			rsys.Render(*sceneRenderDesc.GetRenderQueue(rendering::SceneRenderPass::World, false /* translucent */), rendering::RenderPass::Prepass);
 
-			auto &queueTranslucent = *sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::World, true /* translucent */);
+			auto &queueTranslucent = *sceneRenderDesc.GetRenderQueue(rendering::SceneRenderPass::World, true /* translucent */);
 			queueTranslucent.WaitForCompletion();
 			if(queueTranslucent.queue.empty() == false) {
 				// rsys.BindShader(shaderPrepass,pragma::math::to_integral(pragma::ShaderPrepass::Pipeline::AlphaTest));
-				rsys.Render(queueTranslucent, pragma::rendering::RenderPass::Prepass);
+				rsys.Render(queueTranslucent, rendering::RenderPass::Prepass);
 			}
 		}
 		rsys.UnbindShader();
@@ -232,11 +232,11 @@ void CRendererPpMotionBlurComponent::DoUpdatePoses(const CMotionBlurDataComponen
 		return;
 	m_lastMotionDataBufferUpdateIndex = lastUpdateIdx;
 
-	auto *velShader = pragma::get_velocity_buffer_shader();
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
+	auto *velShader = get_velocity_buffer_shader();
+	ecs::EntityIterator entIt {*get_cgame()};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<CRenderComponent>>();
 	for(auto *ent : entIt) {
-		auto &r = *static_cast<pragma::ecs::CBaseEntity *>(ent)->GetRenderComponent();
+		auto &r = *static_cast<ecs::CBaseEntity *>(ent)->GetRenderComponent();
 		auto curPose = r.GetTransformationMatrix();
 		auto it = motionBlurData.curModelMatrices.find(ent);
 
@@ -266,12 +266,12 @@ void CRendererPpMotionBlurComponent::OnRemove()
 		m_debugTex.Remove();
 #endif
 }
-void CRendererPpMotionBlurComponent::ExecuteVelocityPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void CRendererPpMotionBlurComponent::ExecuteVelocityPass(const rendering::DrawSceneInfo &drawSceneInfo)
 {
-	auto *velShader = pragma::get_velocity_buffer_shader();
+	auto *velShader = get_velocity_buffer_shader();
 	if(!velShader)
 		return;
-	auto *renderer = drawSceneInfo.scene->GetRenderer<pragma::CRendererComponent>();
+	auto *renderer = drawSceneInfo.scene->GetRenderer<CRendererComponent>();
 	assert(renderer != nullptr);
 	auto motionBlurC = renderer->GetEntity().GetComponent<CRendererPpMotionBlurComponent>();
 	if(motionBlurC.expired())
@@ -286,18 +286,18 @@ void CRendererPpMotionBlurComponent::ExecuteVelocityPass(const pragma::rendering
 
 	drawCmd->RecordEndRenderPass();
 }
-void CRendererPpMotionBlurComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { RenderPostProcessing(drawSceneInfo); }
-void CRendererPpMotionBlurComponent::RenderPostProcessing(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void CRendererPpMotionBlurComponent::DoRenderEffect(const rendering::DrawSceneInfo &drawSceneInfo) { RenderPostProcessing(drawSceneInfo); }
+void CRendererPpMotionBlurComponent::RenderPostProcessing(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto *shaderMotionBlur = static_cast<pragma::ShaderPPMotionBlur *>(pragma::get_cengine()->GetShader("pp_motion_blur").get());
+	auto *shaderMotionBlur = static_cast<ShaderPPMotionBlur *>(get_cengine()->GetShader("pp_motion_blur").get());
 
 	if(!shaderMotionBlur)
 		return;
-	auto rasterC = scene.GetRenderer<pragma::CRendererComponent>()->GetEntity().GetComponent<CRasterizationRendererComponent>();
+	auto rasterC = scene.GetRenderer<CRendererComponent>()->GetEntity().GetComponent<CRasterizationRendererComponent>();
 	if(rasterC.expired())
 		return;
 	auto &hdrInfo = rasterC->GetHDRInfo();
@@ -312,7 +312,7 @@ void CRendererPpMotionBlurComponent::RenderPostProcessing(const pragma::renderin
 		if(shaderMotionBlur->RecordBeginDraw(bindState) == true) {
 			ShaderPPMotionBlur::PushConstants pushConstants {};
 			pushConstants.velocityScale = GetMotionBlurIntensity();
-			pushConstants.blurQuality = pragma::math::to_integral(GetMotionBlurQuality());
+			pushConstants.blurQuality = math::to_integral(GetMotionBlurQuality());
 			shaderMotionBlur->RecordDraw(bindState, pushConstants, *hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(), *m_velocityTexDsg->GetDescriptorSet());
 			shaderMotionBlur->RecordEndDraw(bindState);
 		}

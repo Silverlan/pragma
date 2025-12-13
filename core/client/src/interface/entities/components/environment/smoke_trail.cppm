@@ -15,11 +15,11 @@ export namespace pragma::ecs {
 export namespace pragma {
 	class DLLCLIENT CSmokeTrailComponent final : public BaseEnvSmokeTrailComponent, public CBaseNetComponent {
 	  public:
-		CSmokeTrailComponent(pragma::ecs::BaseEntity &ent) : BaseEnvSmokeTrailComponent(ent) {}
+		CSmokeTrailComponent(ecs::BaseEntity &ent) : BaseEnvSmokeTrailComponent(ent) {}
 		virtual ~CSmokeTrailComponent() override;
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;

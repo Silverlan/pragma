@@ -11,7 +11,7 @@ export import pragma.udm;
 
 export namespace pragma::rendering {
 	struct DLLCLIENT LmUuid {
-		pragma::util::Uuid uuid;
+		util::Uuid uuid;
 		bool operator==(const LmUuid &other) const { return uuid == other.uuid; }
 	};
 };
@@ -38,7 +38,7 @@ export namespace pragma::rendering {
 		static constexpr udm::Version PLMD_VERSION = 1;
 		static constexpr auto FORMAT_MODEL_BINARY = "lmd_b";
 		static constexpr auto FORMAT_MODEL_ASCII = "lmd";
-		static size_t CalcPoseHash(const pragma::math::Transform &pose);
+		static size_t CalcPoseHash(const math::Transform &pose);
 		static bool Load(const std::string &path, LightmapDataCache &outCache, std::string &outErr);
 		static std::string GetCacheFileName(const std::string &path);
 		struct MeshCacheData {
@@ -46,14 +46,14 @@ export namespace pragma::rendering {
 		};
 		struct InstanceCacheData {
 			std::string model;     // Needed for debugging purposes only
-			pragma::math::Transform pose; // Needed for debugging purposes only
-			pragma::util::Uuid entityUuid;
+			math::Transform pose; // Needed for debugging purposes only
+			util::Uuid entityUuid;
 			std::unordered_map<LmUuid, MeshCacheData> meshData;
 		};
 		std::unordered_map<LmUuid, InstanceCacheData> cacheData;
-		pragma::util::Uuid lightmapEntityId {};
-		void AddInstanceData(const pragma::util::Uuid &entUuid, const std::string &model, const pragma::math::Transform &pose, const pragma::util::Uuid &meshUuid, std::vector<Vector2> &&uvs);
-		const std::vector<Vector2> *FindLightmapUvs(const pragma::util::Uuid &entUuid, const pragma::util::Uuid &meshUuid) const;
+		util::Uuid lightmapEntityId {};
+		void AddInstanceData(const util::Uuid &entUuid, const std::string &model, const math::Transform &pose, const util::Uuid &meshUuid, std::vector<Vector2> &&uvs);
+		const std::vector<Vector2> *FindLightmapUvs(const util::Uuid &entUuid, const util::Uuid &meshUuid) const;
 		bool Save(udm::AssetDataArg outData, std::string &outErr) const;
 		bool SaveAs(const std::string &path, std::string &outErr) const;
 		bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr);

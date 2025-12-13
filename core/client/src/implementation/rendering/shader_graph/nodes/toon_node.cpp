@@ -8,18 +8,18 @@ module pragma.client;
 import :rendering.shader_graph.node_toon;
 
 using namespace pragma::rendering::shader_graph;
-ToonNode::ToonNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_SHADER}
+ToonNode::ToonNode(const std::string_view &type) : Node {type, shadergraph::CATEGORY_SHADER}
 {
-	AddInput(IN_ALBEDO_COLOR, pragma::shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
-	AddInput(IN_ALPHA, pragma::shadergraph::DataType::Float, 1.f);
-	AddInput(IN_SPECULAR_COLOR, pragma::shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
-	AddInput(IN_GLOSSINESS, pragma::shadergraph::DataType::Float, 1.f);
-	AddInput(IN_RIM_AMOUNT, pragma::shadergraph::DataType::Float, 0.5f);
-	AddInput(IN_RIM_COLOR, pragma::shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
-	AddInput(IN_MATCAP_TEXTURE, pragma::shadergraph::DataType::String, "");
-	AddInput(IN_RAMP_TEXTURE, pragma::shadergraph::DataType::String, "");
+	AddInput(IN_ALBEDO_COLOR, shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
+	AddInput(IN_ALPHA, shadergraph::DataType::Float, 1.f);
+	AddInput(IN_SPECULAR_COLOR, shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
+	AddInput(IN_GLOSSINESS, shadergraph::DataType::Float, 1.f);
+	AddInput(IN_RIM_AMOUNT, shadergraph::DataType::Float, 0.5f);
+	AddInput(IN_RIM_COLOR, shadergraph::DataType::Color, Vector3 {1.f, 1.f, 1.f});
+	AddInput(IN_MATCAP_TEXTURE, shadergraph::DataType::String, "");
+	AddInput(IN_RAMP_TEXTURE, shadergraph::DataType::String, "");
 
-	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);
+	AddOutput(OUT_COLOR, shadergraph::DataType::Color);
 
 	AddModuleDependency("toon");
 }
@@ -35,7 +35,7 @@ static std::optional<std::string> get_image_texture_variable_name(const pragma::
 	return {};
 }
 
-std::string ToonNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
+std::string ToonNode::DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &gn) const
 {
 	auto inAlbedoColor = gn.GetInputNameOrValue(IN_ALBEDO_COLOR);
 	auto inAlpha = gn.GetInputNameOrValue(IN_ALPHA);

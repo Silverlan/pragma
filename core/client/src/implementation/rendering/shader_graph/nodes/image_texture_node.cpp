@@ -11,14 +11,14 @@ using namespace pragma::rendering::shader_graph;
 
 ImageTextureNode::ImageTextureNode(const std::string_view &type) : ImageTextureNodeBase {type, false}
 {
-	AddInput(IN_FILENAME, pragma::shadergraph::DataType::String, "");
-	AddInput(IN_VECTOR, pragma::shadergraph::DataType::Vector, Vector3 {0.f, 0.f, 0.f}); // TODO: Make input only, don't allow writing manually
+	AddInput(IN_FILENAME, shadergraph::DataType::String, "");
+	AddInput(IN_VECTOR, shadergraph::DataType::Vector, Vector3 {0.f, 0.f, 0.f}); // TODO: Make input only, don't allow writing manually
 
-	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);
-	AddOutput(OUT_ALPHA, pragma::shadergraph::DataType::Float);
+	AddOutput(OUT_COLOR, shadergraph::DataType::Color);
+	AddOutput(OUT_ALPHA, shadergraph::DataType::Float);
 }
 
-std::string ImageTextureNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
+std::string ImageTextureNode::DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &gn) const
 {
 	std::ostringstream code;
 	std::string uv;
@@ -40,26 +40,26 @@ std::string ImageTextureNode::DoEvaluate(const pragma::shadergraph::Graph &graph
 
 //
 
-ImageTextureNodeBase::ImageTextureNodeBase(const std::string_view &type, bool populateOutputsAndInputs) : Node {type, pragma::shadergraph::CATEGORY_TEXTURE}
+ImageTextureNodeBase::ImageTextureNodeBase(const std::string_view &type, bool populateOutputsAndInputs) : Node {type, shadergraph::CATEGORY_TEXTURE}
 {
 	if(populateOutputsAndInputs) {
-		AddInput(IN_FILENAME, pragma::shadergraph::DataType::String, "");
+		AddInput(IN_FILENAME, shadergraph::DataType::String, "");
 
-		AddOutput(OUT_TEXTURE, pragma::shadergraph::DataType::String);
+		AddOutput(OUT_TEXTURE, shadergraph::DataType::String);
 	}
 
 	AddModuleDependency("image_texture");
 }
 
-std::string ImageTextureNodeBase::GetTextureVariableName(const pragma::shadergraph::OutputSocket &socket) const { return GetTextureVariableName(*socket.parent); }
+std::string ImageTextureNodeBase::GetTextureVariableName(const shadergraph::OutputSocket &socket) const { return GetTextureVariableName(*socket.parent); }
 
-std::string ImageTextureNodeBase::GetTextureVariableName(const pragma::shadergraph::GraphNode &gn) const
+std::string ImageTextureNodeBase::GetTextureVariableName(const shadergraph::GraphNode &gn) const
 {
 	auto prefix = gn.GetBaseVarName() + "_";
 	return prefix + "tex";
 }
 
-std::string ImageTextureNodeBase::DoEvaluateResourceDeclarations(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
+std::string ImageTextureNodeBase::DoEvaluateResourceDeclarations(const shadergraph::Graph &graph, const shadergraph::GraphNode &gn) const
 {
 	std::ostringstream code;
 	//auto texName = GetTextureVariableName(gn);
@@ -69,7 +69,7 @@ std::string ImageTextureNodeBase::DoEvaluateResourceDeclarations(const pragma::s
 	return code.str();
 }
 
-std::string ImageTextureNodeBase::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
+std::string ImageTextureNodeBase::DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &gn) const
 {
 	std::ostringstream code;
 	return code.str();

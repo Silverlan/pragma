@@ -8,105 +8,105 @@ import :entities.components.constraints.child_of;
 
 using namespace pragma;
 
-void ConstraintChildOfComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void ConstraintChildOfComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = ConstraintChildOfComponent;
 	using TAxisEnabled = bool;
 	{
 		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetLocationAxisEnabled(pragma::Axis::X, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsLocationAxisEnabled(pragma::Axis::X); }>(
+		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetLocationAxisEnabled(Axis::X, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsLocationAxisEnabled(Axis::X); }>(
 		    "locationX", true);
 		registerMember(std::move(memberInfo));
 	}
 	{
 		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetLocationAxisEnabled(pragma::Axis::Y, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsLocationAxisEnabled(pragma::Axis::Y); }>(
+		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetLocationAxisEnabled(Axis::Y, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsLocationAxisEnabled(Axis::Y); }>(
 		    "locationY", true);
 		registerMember(std::move(memberInfo));
 	}
 	{
 		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetLocationAxisEnabled(pragma::Axis::Z, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsLocationAxisEnabled(pragma::Axis::Z); }>(
+		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetLocationAxisEnabled(Axis::Z, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsLocationAxisEnabled(Axis::Z); }>(
 		    "locationZ", true);
 		registerMember(std::move(memberInfo));
 	}
 	{
 		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetRotationAxisEnabled(pragma::Axis::X, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsRotationAxisEnabled(pragma::Axis::X); }>(
+		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetRotationAxisEnabled(Axis::X, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsRotationAxisEnabled(Axis::X); }>(
 		    "rotationX", true);
 		registerMember(std::move(memberInfo));
 	}
 	{
 		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetRotationAxisEnabled(pragma::Axis::Y, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsRotationAxisEnabled(pragma::Axis::Y); }>(
+		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetRotationAxisEnabled(Axis::Y, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsRotationAxisEnabled(Axis::Y); }>(
 		    "rotationY", true);
 		registerMember(std::move(memberInfo));
 	}
 	{
 		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetRotationAxisEnabled(pragma::Axis::Z, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsRotationAxisEnabled(pragma::Axis::Z); }>(
+		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetRotationAxisEnabled(Axis::Z, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsRotationAxisEnabled(Axis::Z); }>(
 		    "rotationZ", true);
 		registerMember(std::move(memberInfo));
 	}
 	{
 		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetScaleAxisEnabled(pragma::Axis::X, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsScaleAxisEnabled(pragma::Axis::X); }>(
+		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetScaleAxisEnabled(Axis::X, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsScaleAxisEnabled(Axis::X); }>(
 		    "scaleX", true);
 		registerMember(std::move(memberInfo));
 	}
 	{
 		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetScaleAxisEnabled(pragma::Axis::Y, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsScaleAxisEnabled(pragma::Axis::Y); }>(
+		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetScaleAxisEnabled(Axis::Y, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsScaleAxisEnabled(Axis::Y); }>(
 		    "scaleY", true);
 		registerMember(std::move(memberInfo));
 	}
 	{
 		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetScaleAxisEnabled(pragma::Axis::Z, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsScaleAxisEnabled(pragma::Axis::Z); }>(
+		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetScaleAxisEnabled(Axis::Z, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsScaleAxisEnabled(Axis::Z); }>(
 		    "scaleZ", true);
 		registerMember(std::move(memberInfo));
 	}
 }
 
-ConstraintChildOfComponent::ConstraintChildOfComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_locationEnabled {true, true, true}, m_rotationEnabled {true, true, true}, m_scaleEnabled {true, true, true} {}
+ConstraintChildOfComponent::ConstraintChildOfComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_locationEnabled {true, true, true}, m_rotationEnabled {true, true, true}, m_scaleEnabled {true, true, true} {}
 
 void ConstraintChildOfComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
 	GetEntity().AddComponent<ConstraintComponent>();
-	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
+	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<ComponentEvent> evData) { ApplyConstraint(); });
 }
-pragma::util::EventReply ConstraintChildOfComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply ConstraintChildOfComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == constraintComponent::EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY)
 		SetPropertyInfosDirty();
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
-void ConstraintChildOfComponent::SetLocationAxisEnabled(pragma::Axis axis, bool enabled)
+void ConstraintChildOfComponent::SetLocationAxisEnabled(Axis axis, bool enabled)
 {
-	m_locationEnabled[pragma::math::to_integral(axis)] = enabled;
+	m_locationEnabled[math::to_integral(axis)] = enabled;
 	UpdateAxisState();
 }
-bool ConstraintChildOfComponent::IsLocationAxisEnabled(pragma::Axis axis) const { return m_locationEnabled[pragma::math::to_integral(axis)]; }
+bool ConstraintChildOfComponent::IsLocationAxisEnabled(Axis axis) const { return m_locationEnabled[math::to_integral(axis)]; }
 
-void ConstraintChildOfComponent::SetRotationAxisEnabled(pragma::Axis axis, bool enabled)
+void ConstraintChildOfComponent::SetRotationAxisEnabled(Axis axis, bool enabled)
 {
-	m_rotationEnabled[pragma::math::to_integral(axis)] = enabled;
+	m_rotationEnabled[math::to_integral(axis)] = enabled;
 	UpdateAxisState();
 }
-bool ConstraintChildOfComponent::IsRotationAxisEnabled(pragma::Axis axis) const { return m_rotationEnabled[pragma::math::to_integral(axis)]; }
+bool ConstraintChildOfComponent::IsRotationAxisEnabled(Axis axis) const { return m_rotationEnabled[math::to_integral(axis)]; }
 
-void ConstraintChildOfComponent::SetScaleAxisEnabled(pragma::Axis axis, bool enabled)
+void ConstraintChildOfComponent::SetScaleAxisEnabled(Axis axis, bool enabled)
 {
-	m_scaleEnabled[pragma::math::to_integral(axis)] = enabled;
+	m_scaleEnabled[math::to_integral(axis)] = enabled;
 	UpdateAxisState();
 }
-bool ConstraintChildOfComponent::IsScaleAxisEnabled(pragma::Axis axis) const { return m_scaleEnabled[pragma::math::to_integral(axis)]; }
+bool ConstraintChildOfComponent::IsScaleAxisEnabled(Axis axis) const { return m_scaleEnabled[math::to_integral(axis)]; }
 
-std::pair<std::optional<Vector3>, std::optional<Quat>> pragma::ConstraintChildOfComponent::GetDriverPose(pragma::math::CoordinateSpace space) const
+std::pair<std::optional<Vector3>, std::optional<Quat>> ConstraintChildOfComponent::GetDriverPose(math::CoordinateSpace space) const
 {
 	if(!const_cast<ConstraintChildOfComponent *>(this)->UpdatePropertyInfos() || !m_driverPropertyInfo)
 		return {};
@@ -118,7 +118,7 @@ std::pair<std::optional<Vector3>, std::optional<Quat>> pragma::ConstraintChildOf
 	return GetPropertyPose(*m_driverPropertyInfo, *constraintInfo->driverC, space);
 }
 
-std::pair<std::optional<Vector3>, std::optional<Quat>> pragma::ConstraintChildOfComponent::GetDrivenPose(pragma::math::CoordinateSpace space) const
+std::pair<std::optional<Vector3>, std::optional<Quat>> ConstraintChildOfComponent::GetDrivenPose(math::CoordinateSpace space) const
 {
 	if(!const_cast<ConstraintChildOfComponent *>(this)->UpdatePropertyInfos() || !m_drivenObjectPropertyInfo)
 		return {};
@@ -130,8 +130,8 @@ std::pair<std::optional<Vector3>, std::optional<Quat>> pragma::ConstraintChildOf
 	return GetPropertyPose(*m_drivenObjectPropertyInfo, *constraintInfo->driverC, space);
 }
 
-const pragma::ComponentHandle<ConstraintComponent> &ConstraintChildOfComponent::GetConstraint() const { return m_constraintC; }
-void ConstraintChildOfComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+const ComponentHandle<ConstraintComponent> &ConstraintChildOfComponent::GetConstraint() const { return m_constraintC; }
+void ConstraintChildOfComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintChildOfComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
@@ -142,7 +142,7 @@ void ConstraintChildOfComponent::OnEntityComponentAdded(BaseEntityComponent &com
 void ConstraintChildOfComponent::UpdateAxisState()
 {
 	m_allAxesEnabled = true;
-	constexpr auto num = pragma::math::to_integral(pragma::Axis::Count);
+	constexpr auto num = math::to_integral(Axis::Count);
 	for(auto i = decltype(num) {0u}; i < num; ++i) {
 		if(!m_locationEnabled[i] || !m_rotationEnabled[i] || !m_scaleEnabled[i]) {
 			m_allAxesEnabled = false;
@@ -151,16 +151,16 @@ void ConstraintChildOfComponent::UpdateAxisState()
 	}
 }
 
-std::optional<pragma::EntityUComponentMemberRef> ConstraintChildOfComponent::FindPosePropertyReference(const pragma::BaseEntityComponent &c, pragma::ComponentMemberIndex basePropIdx)
+std::optional<EntityUComponentMemberRef> ConstraintChildOfComponent::FindPosePropertyReference(const BaseEntityComponent &c, ComponentMemberIndex basePropIdx)
 {
 	auto *memberInfo = c.GetMemberInfo(basePropIdx);
 	if(!memberInfo)
 		return {};
-	if(memberInfo->type == pragma::ents::EntityMemberType::Transform || memberInfo->type == pragma::ents::EntityMemberType::ScaledTransform)
-		return pragma::EntityUComponentMemberRef {c.GetEntity(), c.GetComponentId(), memberInfo->GetName()};
+	if(memberInfo->type == ents::EntityMemberType::Transform || memberInfo->type == ents::EntityMemberType::ScaledTransform)
+		return EntityUComponentMemberRef {c.GetEntity(), c.GetComponentId(), memberInfo->GetName()};
 	// Not a pose property, but we'll also allow positional and rotational properties
-	if(memberInfo->type == pragma::ents::EntityMemberType::Vector3 || memberInfo->type == pragma::ents::EntityMemberType::Quaternion || memberInfo->type == pragma::ents::EntityMemberType::EulerAngles)
-		return pragma::EntityUComponentMemberRef {c.GetEntity(), c.GetComponentId(), memberInfo->GetName()};
+	if(memberInfo->type == ents::EntityMemberType::Vector3 || memberInfo->type == ents::EntityMemberType::Quaternion || memberInfo->type == ents::EntityMemberType::EulerAngles)
+		return EntityUComponentMemberRef {c.GetEntity(), c.GetComponentId(), memberInfo->GetName()};
 	return {};
 }
 
@@ -182,7 +182,7 @@ bool ConstraintChildOfComponent::UpdatePropertyInfos()
 	if(m_drivenObjectPropertyInfo && m_driverPropertyInfo)
 		return true;
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
-	auto applyPropInfo = [&game](const pragma::BaseEntityComponent &objC, pragma::ComponentMemberIndex propIdx, std::optional<PropertyInfo> &propInfo) {
+	auto applyPropInfo = [&game](const BaseEntityComponent &objC, ComponentMemberIndex propIdx, std::optional<PropertyInfo> &propInfo) {
 		auto drivenObjPoseProp = FindPosePropertyReference(objC, propIdx);
 		if(drivenObjPoseProp) {
 			auto &info = propInfo;
@@ -191,9 +191,9 @@ bool ConstraintChildOfComponent::UpdatePropertyInfos()
 			info->propertyRef.UpdateMemberIndex(game);
 			auto *memInfo = info->propertyRef.GetMemberInfo(game);
 			if(memInfo) {
-				if(memInfo->type == pragma::ents::EntityMemberType::Vector3)
+				if(memInfo->type == ents::EntityMemberType::Vector3)
 					info->type = Type::Position;
-				else if(memInfo->type == pragma::ents::EntityMemberType::Quaternion || memInfo->type == pragma::ents::EntityMemberType::EulerAngles)
+				else if(memInfo->type == ents::EntityMemberType::Quaternion || memInfo->type == ents::EntityMemberType::EulerAngles)
 					info->type = Type::Rotation;
 				else
 					info->type = Type::Pose;
@@ -209,19 +209,19 @@ bool ConstraintChildOfComponent::UpdatePropertyInfos()
 	return m_drivenObjectPropertyInfo && m_driverPropertyInfo;
 }
 
-std::optional<pragma::math::ScaledTransform> ConstraintChildOfComponent::CalcInversePose(pragma::math::ScaledTransform &pose) const
+std::optional<math::ScaledTransform> ConstraintChildOfComponent::CalcInversePose(math::ScaledTransform &pose) const
 {
-	pragma::ComponentMemberIndex drivenPropertyIndex;
+	ComponentMemberIndex drivenPropertyIndex;
 	ConstraintComponent::ConstraintParticipants constraintInfo;
 	return CalcConstraintPose(&pose, true, drivenPropertyIndex, constraintInfo);
 }
 
-std::pair<std::optional<Vector3>, std::optional<Quat>> ConstraintChildOfComponent::GetPropertyPose(const PropertyInfo &propInfo, const BaseEntityComponent &c, pragma::math::CoordinateSpace space) const
+std::pair<std::optional<Vector3>, std::optional<Quat>> ConstraintChildOfComponent::GetPropertyPose(const PropertyInfo &propInfo, const BaseEntityComponent &c, math::CoordinateSpace space) const
 {
 	switch(propInfo.type) {
 	case Type::Pose:
 		{
-			pragma::math::ScaledTransform pose;
+			math::ScaledTransform pose;
 			c.GetTransformMemberPose(propInfo.propertyRef.GetMemberIndex(), space, pose);
 			return {pose.GetOrigin(), pose.GetRotation()};
 		}
@@ -241,7 +241,7 @@ std::pair<std::optional<Vector3>, std::optional<Quat>> ConstraintChildOfComponen
 	return {};
 }
 
-std::optional<pragma::math::ScaledTransform> ConstraintChildOfComponent::CalcConstraintPose(pragma::math::ScaledTransform *optPose, bool inverse, pragma::ComponentMemberIndex &outDrivenPropertyIndex, ConstraintComponent::ConstraintParticipants &outConstraintParticipants) const
+std::optional<math::ScaledTransform> ConstraintChildOfComponent::CalcConstraintPose(math::ScaledTransform *optPose, bool inverse, ComponentMemberIndex &outDrivenPropertyIndex, ConstraintComponent::ConstraintParticipants &outConstraintParticipants) const
 {
 	if(!const_cast<ConstraintChildOfComponent *>(this)->UpdatePropertyInfos())
 		return {};
@@ -251,8 +251,8 @@ std::optional<pragma::math::ScaledTransform> ConstraintChildOfComponent::CalcCon
 	m_drivenObjectPropertyInfo->propertyRef.UpdateMemberIndex(game);
 	m_driverPropertyInfo->propertyRef.UpdateMemberIndex(game);
 
-	pragma::math::ScaledTransform parentPose {};
-	auto getPropertyValue = [](const PropertyInfo &propInfo, const BaseEntityComponent &c, pragma::math::ScaledTransform &outPose, pragma::math::CoordinateSpace space) {
+	math::ScaledTransform parentPose {};
+	auto getPropertyValue = [](const PropertyInfo &propInfo, const BaseEntityComponent &c, math::ScaledTransform &outPose, math::CoordinateSpace space) {
 		switch(propInfo.type) {
 		case Type::Pose:
 			c.GetTransformMemberPose(propInfo.propertyRef.GetMemberIndex(), space, outPose);
@@ -273,17 +273,17 @@ std::optional<pragma::math::ScaledTransform> ConstraintChildOfComponent::CalcCon
 			}
 		}
 	};
-	getPropertyValue(*m_driverPropertyInfo, *constraintInfo->driverC, parentPose, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDriverSpace()));
+	getPropertyValue(*m_driverPropertyInfo, *constraintInfo->driverC, parentPose, static_cast<math::CoordinateSpace>(m_constraintC->GetDriverSpace()));
 
-	pragma::math::ScaledTransform curPose;
+	math::ScaledTransform curPose;
 	if(optPose)
 		curPose = *optPose;
 	else
-		getPropertyValue(*m_drivenObjectPropertyInfo, *constraintInfo->drivenObjectC, curPose, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()));
+		getPropertyValue(*m_drivenObjectPropertyInfo, *constraintInfo->drivenObjectC, curPose, static_cast<math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()));
 
 	if(inverse)
 		parentPose = parentPose.GetInverse();
-	pragma::math::ScaledTransform newPose = parentPose * curPose;
+	math::ScaledTransform newPose = parentPose * curPose;
 
 	auto &curPos = curPose.GetOrigin();
 	auto &newPos = newPose.GetOrigin();
@@ -292,7 +292,7 @@ std::optional<pragma::math::ScaledTransform> ConstraintChildOfComponent::CalcCon
 	if(!m_allAxesEnabled) {
 		auto curAng = EulerAngles {curPose.GetRotation()};
 		auto newAng = EulerAngles {newPose.GetRotation()};
-		constexpr auto num = pragma::math::to_integral(pragma::Axis::Count);
+		constexpr auto num = math::to_integral(Axis::Count);
 		for(auto i = decltype(num) {0u}; i < num; ++i) {
 			if(!m_locationEnabled[i])
 				newPos[i] = curPos[i];
@@ -313,19 +313,19 @@ std::optional<pragma::math::ScaledTransform> ConstraintChildOfComponent::CalcCon
 
 void ConstraintChildOfComponent::ApplyConstraint()
 {
-	pragma::ComponentMemberIndex drivenPropertyIndex;
+	ComponentMemberIndex drivenPropertyIndex;
 	ConstraintComponent::ConstraintParticipants constraintInfo;
 	auto newPose = CalcConstraintPose(nullptr, false, drivenPropertyIndex, constraintInfo);
 	if(!newPose.has_value())
 		return;
 	switch(m_drivenObjectPropertyInfo->type) {
 	case Type::Pose:
-		constraintInfo.drivenObjectC->SetTransformMemberPose(drivenPropertyIndex, pragma::math::CoordinateSpace::World, *newPose);
+		constraintInfo.drivenObjectC->SetTransformMemberPose(drivenPropertyIndex, math::CoordinateSpace::World, *newPose);
 		break;
 	case Type::Position:
-		constraintInfo.drivenObjectC->SetTransformMemberPos(drivenPropertyIndex, pragma::math::CoordinateSpace::World, newPose->GetOrigin());
+		constraintInfo.drivenObjectC->SetTransformMemberPos(drivenPropertyIndex, math::CoordinateSpace::World, newPose->GetOrigin());
 		break;
 	case Type::Rotation:
-		constraintInfo.drivenObjectC->SetTransformMemberRot(drivenPropertyIndex, pragma::math::CoordinateSpace::World, newPose->GetRotation());
+		constraintInfo.drivenObjectC->SetTransformMemberRot(drivenPropertyIndex, math::CoordinateSpace::World, newPose->GetRotation());
 	}
 }

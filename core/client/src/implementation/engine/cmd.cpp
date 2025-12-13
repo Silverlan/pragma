@@ -60,7 +60,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 
 	conVarMap.RegisterConVar<bool>("cl_downscale_imported_high_resolution_rma_textures", true, pragma::console::ConVarFlags::Archive, "If enabled, imported high-resolution RMA textures will be downscaled to a more memory-friendly size.");
 	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures", std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> {[](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool oldVal, bool newVal) -> void {
-		//static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);
+		//static_cast<material::CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);
 	}});
 	conVarMap.RegisterConVar<uint8_t>("render_debug_mode", 0, pragma::console::ConVarFlags::None,
 	  "0 = Disabled, 1 = Ambient Occlusion, 2 = Albedo Colors, 3 = Metalness, 4 = Roughness, 5 = Diffuse Lighting, 6 = Normals, 7 = Normal Map, 8 = Reflectance, 9 = IBL Prefilter, 10 = IBL Irradiance, 11 = Emission, 12 = Lightmaps, 13 = Lightmap Uvs, 14 = Unlit, 15 = Show CSM cascades, 16 = Shadow Map Depth, 17 = Forward+ Heatmap, 18 = Specular, 19 = Indirect Lightmap, 20 = Dominant Lightmap.");
@@ -176,7 +176,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  return;
 		  }
 		  std::string path = "shader_dump/" + shaderName + "/";
-		  FileManager::CreatePath(path.c_str());
+		  fs::create_path(path);
 		  for(auto i = decltype(glslCodeStages.size()) {0u}; i < glslCodeStages.size(); ++i) {
 			  auto &glslCode = glslCodePerStage[i];
 			  auto stage = glslCodeStages[i];
@@ -203,7 +203,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  }
 			  static_assert(pragma::math::to_integral(prosper::ShaderStage::Count) == 6);
 			  auto stageFileName = path + stageName + ".gls";
-			  auto f = FileManager::OpenFile<VFilePtrReal>(stageFileName.c_str(), "w");
+			  auto f = fs::open_file<fs::VFilePtrReal>(stageFileName, fs::FileMode::Write);
 			  if(f) {
 				  f->WriteString(glslCode);
 				  f = nullptr;
@@ -252,15 +252,15 @@ void pragma::CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand(
 	  "debug_textures",
 	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
-		  auto &texManager = static_cast<msys::CMaterialManager &>(static_cast<pragma::ClientState *>(GetClientState())->GetMaterialManager()).GetTextureManager();
-		  std::vector<std::shared_ptr<msys::Texture>> textures;
+		  auto &texManager = static_cast<material::CMaterialManager &>(static_cast<pragma::ClientState *>(GetClientState())->GetMaterialManager()).GetTextureManager();
+		  std::vector<std::shared_ptr<material::Texture>> textures;
 		  auto &cache = texManager.GetCache();
 		  textures.reserve(cache.size());
 		  for(auto &pair : cache) {
 			  auto asset = texManager.GetAsset(pair.second);
 			  if(!asset)
 				  continue;
-			  textures.push_back(msys::TextureManager::GetAssetObject(*asset));
+			  textures.push_back(material::TextureManager::GetAssetObject(*asset));
 		  }
 		  std::vector<prosper::DeviceSize> textureSizes;
 		  std::vector<size_t> sortedIndices {};
@@ -458,8 +458,8 @@ void pragma::CEngine::RegisterConsoleCommands()
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		  std::vector<std::string> resFiles;
 		  auto path = Lua::SCRIPT_DIRECTORY_SLASH + arg;
-		  FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION).c_str(), &resFiles, nullptr);
-		  FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &resFiles, nullptr);
+		  fs::find_files((path + "*." + Lua::FILE_EXTENSION), &resFiles, nullptr);
+		  fs::find_files((path + "*." + Lua::FILE_EXTENSION_PRECOMPILED), &resFiles, nullptr);
 		  autoCompleteOptions.reserve(resFiles.size());
 		  for(auto &mapName : resFiles) {
 			  auto fullPath = path.substr(4) + mapName;
@@ -502,7 +502,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  if(argv.size() < 4) {
 			  Con::cwar << "Insufficient arguments supplied!" << Con::endl;
 			  std::vector<std::string> files;
-			  filemanager::find_files("scripts/localization/en/texts/*.txt", &files, nullptr);
+			  fs::find_files("scripts/localization/en/texts/*.txt", &files, nullptr);
 			  std::sort(files.begin(), files.end());
 			  Con::cout << "Available groups: " << Con::endl;
 			  for(auto &f : files) {

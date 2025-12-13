@@ -9,8 +9,8 @@ import :networking.modules;
 std::vector<std::string> pragma::networking::GetAvailableNetworkingModules()
 {
 	std::vector<std::string> dirs {};
-	FileManager::FindFiles("modules/networking/*", nullptr, &dirs,
-	  fsys::SearchFlags::Local // Binary modules can only be loaded from actual files
+	fs::find_files("modules/networking/*", nullptr, &dirs,
+	  fs::SearchFlags::Local // Binary modules can only be loaded from actual files
 	);
 	return dirs;
 }

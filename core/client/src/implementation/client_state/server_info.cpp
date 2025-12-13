@@ -15,8 +15,8 @@ void pragma::ServerInfo::SetDownloadPath(const std::string &path)
 {
 	assert(path.empty() || path.back() == '\\');
 	if(!m_downloadPath.empty())
-		FileManager::RemoveCustomMountDirectory((m_downloadPath.substr(0, m_downloadPath.length() - 1)).c_str());
+		fs::remove_custom_mount_directory((m_downloadPath.substr(0, m_downloadPath.length() - 1)));
 	if(!path.empty())
-		FileManager::AddCustomMountDirectory((path.substr(0, path.length() - 1)).c_str(), static_cast<fsys::SearchFlags>(pragma::networking::FSYS_SEARCH_RESOURCES));
+		fs::add_custom_mount_directory((path.substr(0, path.length() - 1)), static_cast<fs::SearchFlags>(networking::FSYS_SEARCH_RESOURCES));
 	m_downloadPath = path;
 }

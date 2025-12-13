@@ -13,7 +13,7 @@ const std::vector<std::string> &pragma::ik::RigConfig::get_supported_extensions(
 }
 std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load(const std::string &fileName)
 {
-	auto nFileName = filemanager::find_available_file(fileName, get_supported_extensions());
+	auto nFileName = fs::find_available_file(fileName, get_supported_extensions());
 	std::shared_ptr<udm::Data> udmData = nullptr;
 	try {
 		udmData = udm::Data::Load(nFileName ? *nFileName : fileName);
@@ -613,12 +613,12 @@ bool pragma::ik::RigConfig::Save(const std::string &fileName)
 	ToUdmData(assetData);
 
 	std::string path {filePath.GetPath()};
-	if(filemanager::create_path(path) == false) {
+	if(fs::create_path(path) == false) {
 		spdlog::error("Failed to create path '{}' for ik rig.", filePath.GetString());
 		return false;
 	}
 
-	auto f = filemanager::open_file(filePath.GetString(), filemanager::FileMode::Write);
+	auto f = fs::open_file(filePath.GetString(), fs::FileMode::Write);
 	if(!f) {
 		spdlog::error("Failed to open ik rig file '{}' for saving.", filePath.GetString());
 		return false;

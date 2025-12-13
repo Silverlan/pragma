@@ -55,7 +55,7 @@ void pragma::CGame::RegisterLua()
 	  luabind::def("is_library_loaded", Lua::engine::IsLibraryLoaded), luabind::def("get_info", Lua::engine::get_info), luabind::def("get_user_data_dir", pragma::util::get_user_data_dir), luabind::def("get_resource_dirs", pragma::util::get_resource_dirs),
 	  luabind::def(
 	    "open_user_data_dir_in_explorer", +[]() {
-		    auto &dir = filemanager::get_absolute_primary_root_path();
+		    auto &dir = fs::get_absolute_primary_root_path();
 		    pragma::util::open_path_in_explorer(dir.GetString());
 	    }))];
 
@@ -163,8 +163,8 @@ void pragma::CGame::RegisterLua()
 	  });
 	auto modGame = luabind::module_(GetLuaState(), "game");
 	Lua::game::register_shared_functions(GetLuaState(), modGame);
-	modGame[(luabind::def("load_material", static_cast<msys::Material *(*)(lua::State *, const std::string &, bool, bool)>(Lua::engine::load_material)), luabind::def("load_material", static_cast<msys::Material *(*)(lua::State *, const std::string &, bool)>(Lua::engine::load_material)),
-	  luabind::def("load_material", static_cast<msys::Material *(*)(lua::State *, const std::string &)>(Lua::engine::load_material)),
+	modGame[(luabind::def("load_material", static_cast<material::Material *(*)(lua::State *, const std::string &, bool, bool)>(Lua::engine::load_material)), luabind::def("load_material", static_cast<material::Material *(*)(lua::State *, const std::string &, bool)>(Lua::engine::load_material)),
+	  luabind::def("load_material", static_cast<material::Material *(*)(lua::State *, const std::string &)>(Lua::engine::load_material)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua::State *, const std::string &, pragma::util::AssetLoadFlags)>(Lua::engine::load_texture)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua::State *, const std::string &)>(Lua::engine::load_texture)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua::State *, const LFile &, const std::string &, pragma::util::AssetLoadFlags loadFlags)>(Lua::engine::load_texture)),
@@ -256,11 +256,11 @@ void pragma::CGame::RegisterLua()
 	modTime[(luabind::def("server_time", Lua::ServerTime), luabind::def("frame_time", Lua::FrameTime))];
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "sound",
-	  {{"CHANNEL_CONFIG_MONO", pragma::math::to_integral(al::ChannelConfig::Mono)}, {"CHANNEL_CONFIG_STEREO", pragma::math::to_integral(al::ChannelConfig::Stereo)}, {"CHANNEL_CONFIG_REAR", pragma::math::to_integral(al::ChannelConfig::Rear)}, {"CHANNEL_CONFIG_QUAD", pragma::math::to_integral(al::ChannelConfig::Quad)},
-	    {"CHANNEL_CONFIG_X51", pragma::math::to_integral(al::ChannelConfig::X51)}, {"CHANNEL_CONFIG_X61", pragma::math::to_integral(al::ChannelConfig::X61)}, {"CHANNEL_CONFIG_X71", pragma::math::to_integral(al::ChannelConfig::X71)},
-	    {"CHANNEL_CONFIG_BFORMAT_2D", pragma::math::to_integral(al::ChannelConfig::BFormat2D)}, {"CHANNEL_CONFIG_BFORMAT_3D", pragma::math::to_integral(al::ChannelConfig::BFormat3D)},
+	  {{"CHANNEL_CONFIG_MONO", pragma::math::to_integral(pragma::audio::ChannelConfig::Mono)}, {"CHANNEL_CONFIG_STEREO", pragma::math::to_integral(pragma::audio::ChannelConfig::Stereo)}, {"CHANNEL_CONFIG_REAR", pragma::math::to_integral(pragma::audio::ChannelConfig::Rear)}, {"CHANNEL_CONFIG_QUAD", pragma::math::to_integral(pragma::audio::ChannelConfig::Quad)},
+	    {"CHANNEL_CONFIG_X51", pragma::math::to_integral(pragma::audio::ChannelConfig::X51)}, {"CHANNEL_CONFIG_X61", pragma::math::to_integral(pragma::audio::ChannelConfig::X61)}, {"CHANNEL_CONFIG_X71", pragma::math::to_integral(pragma::audio::ChannelConfig::X71)},
+	    {"CHANNEL_CONFIG_BFORMAT_2D", pragma::math::to_integral(pragma::audio::ChannelConfig::BFormat2D)}, {"CHANNEL_CONFIG_BFORMAT_3D", pragma::math::to_integral(pragma::audio::ChannelConfig::BFormat3D)},
 
-	    {"SAMPLE_TYPE_UINT8", pragma::math::to_integral(al::SampleType::UInt8)}, {"SAMPLE_TYPE_INT16", pragma::math::to_integral(al::SampleType::Int16)}, {"SAMPLE_TYPE_FLOAT32", pragma::math::to_integral(al::SampleType::Float32)}, {"SAMPLE_TYPE_MULAW", pragma::math::to_integral(al::SampleType::Mulaw)}});
+	    {"SAMPLE_TYPE_UINT8", pragma::math::to_integral(pragma::audio::SampleType::UInt8)}, {"SAMPLE_TYPE_INT16", pragma::math::to_integral(pragma::audio::SampleType::Int16)}, {"SAMPLE_TYPE_FLOAT32", pragma::math::to_integral(pragma::audio::SampleType::Float32)}, {"SAMPLE_TYPE_MULAW", pragma::math::to_integral(pragma::audio::SampleType::Mulaw)}});
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "time", {{"TIMER_TYPE_SERVERTIME", pragma::math::to_integral(TimerType::ServerTime)}});
 
@@ -534,7 +534,7 @@ void pragma::CGame::SetupLua()
 void pragma::CGame::LoadLuaShaders()
 {
 	std::vector<std::string> files;
-	//FileManager::FindFiles(Lua::SCRIPT_DIRECTORY_SLASH +"shaders\\*.lua",&files,nullptr); // Deprecated; Shaders have to be explicitely included now
+	//fs::find_files(Lua::SCRIPT_DIRECTORY_SLASH +"shaders\\*.lua",&files,nullptr); // Deprecated; Shaders have to be explicitely included now
 	for(unsigned int i = 0; i < files.size(); i++)
 		LoadLuaShader(files[i]);
 }

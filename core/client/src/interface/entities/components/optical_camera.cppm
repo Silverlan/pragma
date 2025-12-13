@@ -12,7 +12,7 @@ import :rendering.shaders;
 export namespace pragma {
 	class DLLCLIENT COpticalCameraComponent final : public BaseEntityComponent {
 	  public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 		void SetDebugShowFocus(bool enabled);
 		bool GetDebugShowFocus() const;
@@ -55,7 +55,7 @@ export namespace pragma {
 		void SetPentagonShapeFeather(float pentagonShapeFeather);
 		float GetPentagonShapeFeather() const;
 
-		COpticalCameraComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+		COpticalCameraComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  private:

@@ -14,24 +14,24 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseFieldAngleComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
-		pragma::math::Degree GetFieldAngle() const;
-		const pragma::util::PFloatProperty &GetFieldAngleProperty() const;
-		void SetFieldAngle(pragma::math::Degree coneAngle);
+		math::Degree GetFieldAngle() const;
+		const util::PFloatProperty &GetFieldAngleProperty() const;
+		void SetFieldAngle(math::Degree coneAngle);
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
-		BaseFieldAngleComponent(pragma::ecs::BaseEntity &ent);
-		pragma::NetEventId m_netEvSetFieldAngle = pragma::INVALID_NET_EVENT;
-		pragma::util::PFloatProperty m_fieldAngle;
+		BaseFieldAngleComponent(ecs::BaseEntity &ent);
+		NetEventId m_netEvSetFieldAngle = INVALID_NET_EVENT;
+		util::PFloatProperty m_fieldAngle;
 	};
 	struct DLLNETWORK CEOnFieldAngleChanged : public ComponentEvent {
 		CEOnFieldAngleChanged(float oldRadius, float newRadius);
 		virtual void PushArguments(lua::State *l) override;
-		pragma::math::Degree oldFieldAngle;
-		pragma::math::Degree newFieldAngle;
+		math::Degree oldFieldAngle;
+		math::Degree newFieldAngle;
 	};
 };

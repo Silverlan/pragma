@@ -169,12 +169,12 @@ std::shared_ptr<pragma::animation::Animation> FWAD::Load(unsigned short version,
 	std::string path = "models\\";
 	path += animation;
 	const char *cPath = path.c_str();
-	auto f = FileManager::OpenFile(cPath, "rb");
+	auto f = pragma::fs::open_file(cPath, pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(f == nullptr) {
 		Con::cout << "WARNING: Unable to open animation '" << animation << "': File not found!" << Con::endl;
 		return nullptr;
 	}
-	fsys::File fp {f};
+	pragma::fs::File fp {f};
 	auto anim = ReadData(version, fp);
 	return anim;
 }

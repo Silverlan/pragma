@@ -16,7 +16,7 @@ void CDebugHitboxComponent::InitializeLuaObject(lua::State *l) { return BaseEnti
 void CDebugHitboxComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	SetTickPolicy(pragma::TickPolicy::Always);
+	SetTickPolicy(TickPolicy::Always);
 }
 void CDebugHitboxComponent::OnTick(double tDelta)
 {
@@ -92,31 +92,31 @@ void CDebugHitboxComponent::InitializeDebugObjects()
 					col = it->second;
 				else {
 					switch(hb.group) {
-					case pragma::physics::HitGroup::Head:
+					case physics::HitGroup::Head:
 						col = colors::Red;
 						break;
-					case pragma::physics::HitGroup::Chest:
+					case physics::HitGroup::Chest:
 						col = colors::Lime;
 						break;
-					case pragma::physics::HitGroup::Stomach:
+					case physics::HitGroup::Stomach:
 						col = colors::Blue;
 						break;
-					case pragma::physics::HitGroup::LeftArm:
+					case physics::HitGroup::LeftArm:
 						col = colors::Yellow;
 						break;
-					case pragma::physics::HitGroup::RightArm:
+					case physics::HitGroup::RightArm:
 						col = colors::Cyan;
 						break;
-					case pragma::physics::HitGroup::LeftLeg:
+					case physics::HitGroup::LeftLeg:
 						col = colors::Magenta;
 						break;
-					case pragma::physics::HitGroup::RightLeg:
+					case physics::HitGroup::RightLeg:
 						col = colors::OrangeRed;
 						break;
-					case pragma::physics::HitGroup::Gear:
+					case physics::HitGroup::Gear:
 						col = colors::SpringGreen;
 						break;
-					case pragma::physics::HitGroup::Tail:
+					case physics::HitGroup::Tail:
 						col = colors::Violet;
 						break;
 					}
@@ -125,7 +125,7 @@ void CDebugHitboxComponent::InitializeDebugObjects()
 				debug::DebugRenderInfo renderInfo {col};
 				renderInfo.SetOrigin(origin);
 				renderInfo.SetRotation(rot);
-				m_debugObjects.push_back(pragma::debug::DebugRenderer::DrawBox(min, max, renderInfo));
+				m_debugObjects.push_back(debug::DebugRenderer::DrawBox(min, max, renderInfo));
 			}
 		}
 	}

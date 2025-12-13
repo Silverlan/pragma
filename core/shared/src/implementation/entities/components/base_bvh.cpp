@@ -14,7 +14,7 @@ using namespace pragma;
 ComponentEventId baseBvhComponent::EVENT_ON_CLEAR_BVH = INVALID_COMPONENT_ID;
 ComponentEventId baseBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED = INVALID_COMPONENT_ID;
 ComponentEventId baseBvhComponent::EVENT_ON_BVH_REBUILT = INVALID_COMPONENT_ID;
-void BaseBvhComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void BaseBvhComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseBvhComponent::EVENT_ON_CLEAR_BVH = registerEvent("EVENT_ON_CLEAR_BVH", ComponentEventInfo::Type::Explicit);
 	baseBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED = registerEvent("EVENT_ON_BVH_UPDATE_REQUESTED", ComponentEventInfo::Type::Explicit);
@@ -61,7 +61,7 @@ bool BaseBvhComponent::HasBvhData() const
 	return m_bvhData != nullptr;
 }
 
-std::shared_ptr<pragma::bvh::MeshBvhTree> BaseBvhComponent::SetBvhData(std::shared_ptr<pragma::bvh::MeshBvhTree> &bvhData)
+std::shared_ptr<pragma::bvh::MeshBvhTree> BaseBvhComponent::SetBvhData(std::shared_ptr<bvh::MeshBvhTree> &bvhData)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("bvh_mutex_wait");
@@ -77,12 +77,12 @@ std::shared_ptr<pragma::bvh::MeshBvhTree> BaseBvhComponent::SetBvhData(std::shar
 void BaseBvhComponent::DebugPrint()
 {
 	auto &bvh = m_bvhData->bvh;
-	pragma::bvh::debug::print_bvh_tree(bvh);
+	bvh::debug::print_bvh_tree(bvh);
 }
 void BaseBvhComponent::DebugDraw()
 {
 	auto &bvh = m_bvhData->bvh;
-	pragma::bvh::debug::draw_bvh_tree(GetGame(), bvh);
+	bvh::debug::draw_bvh_tree(GetGame(), bvh);
 }
 void BaseBvhComponent::DebugDrawBvhTree(const Vector3 &origin, const Vector3 &dir, float maxDist, float duration) const
 {
@@ -91,7 +91,7 @@ void BaseBvhComponent::DebugDrawBvhTree(const Vector3 &origin, const Vector3 &di
 	constexpr bool use_robust_traversal = false;
 
 	::bvh::v2::SmallStack<bvh::Bvh::Index, stack_size> stack;
-	auto ray = pragma::bvh::get_ray(origin, dir, 0.f, maxDist);
+	auto ray = bvh::get_ray(origin, dir, 0.f, maxDist);
 	auto &bvh = m_bvhData->bvh;
 	auto &game = GetGame();
 	auto pose = GetEntity().GetPose();
@@ -123,14 +123,14 @@ std::optional<Vector3> BaseBvhComponent::GetVertex(size_t idx) const
 	return {};
 }
 
-void BaseBvhComponent::GetVertexData(std::vector<pragma::bvh::Primitive> &outData) const
+void BaseBvhComponent::GetVertexData(std::vector<bvh::Primitive> &outData) const
 {
 	std::scoped_lock lock {m_bvhDataMutex};
 	outData.resize(m_bvhData->primitives.size());
-	memcpy(outData.data(), m_bvhData->primitives.data(), pragma::util::size_of_container(outData));
+	memcpy(outData.data(), m_bvhData->primitives.data(), util::size_of_container(outData));
 }
 
-void BaseBvhComponent::DeleteRange(pragma::bvh::MeshBvhTree &bvhData, size_t start, size_t end)
+void BaseBvhComponent::DeleteRange(bvh::MeshBvhTree &bvhData, size_t start, size_t end)
 {
 	if(end == start)
 		return;
@@ -143,16 +143,16 @@ void BaseBvhComponent::DeleteRange(pragma::bvh::MeshBvhTree &bvhData, size_t sta
 	bvhData.SetDirty();
 }
 
-bool BaseBvhComponent::SetVertexData(pragma::bvh::MeshBvhTree &bvhData, const std::vector<pragma::bvh::Primitive> &data)
+bool BaseBvhComponent::SetVertexData(bvh::MeshBvhTree &bvhData, const std::vector<bvh::Primitive> &data)
 {
 	if(bvhData.primitives.size() != data.size())
 		return false;
-	memcpy(bvhData.primitives.data(), data.data(), pragma::util::size_of_container(data));
+	memcpy(bvhData.primitives.data(), data.data(), util::size_of_container(data));
 	bvhData.SetDirty();
 	return true;
 }
 
-bool BaseBvhComponent::SetVertexData(const std::vector<pragma::bvh::Primitive> &data)
+bool BaseBvhComponent::SetVertexData(const std::vector<bvh::Primitive> &data)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("bvh_mutex_wait");
@@ -164,11 +164,11 @@ bool BaseBvhComponent::SetVertexData(const std::vector<pragma::bvh::Primitive> &
 	return SetVertexData(*m_bvhData, data);
 }
 
-bool BaseBvhComponent::ShouldConsiderMesh(const pragma::geometry::ModelSubMesh &mesh) { return mesh.GetGeometryType() == pragma::geometry::ModelSubMesh::GeometryType::Triangles; }
+bool BaseBvhComponent::ShouldConsiderMesh(const geometry::ModelSubMesh &mesh) { return mesh.GetGeometryType() == geometry::ModelSubMesh::GeometryType::Triangles; }
 
-std::shared_ptr<pragma::bvh::MeshBvhTree> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices, pragma::ecs::BaseEntity *ent)
+std::shared_ptr<pragma::bvh::MeshBvhTree> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<geometry::ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices, ecs::BaseEntity *ent)
 {
-	auto bvhData = std::make_unique<pragma::bvh::MeshBvhTree>();
+	auto bvhData = std::make_unique<bvh::MeshBvhTree>();
 
 	size_t numVerts = 0;
 	bvhData->meshRanges.reserve(meshes.size());
@@ -274,7 +274,7 @@ bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &m
 #endif
 	return test_bvh_intersection_with_aabb(*bvhData, min, max);
 }
-bool BaseBvhComponent::IntersectionTestKDop(const std::vector<pragma::math::Plane> &planes, IntersectionInfo &outIntersectionInfo) const
+bool BaseBvhComponent::IntersectionTestKDop(const std::vector<math::Plane> &planes, IntersectionInfo &outIntersectionInfo) const
 {
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
@@ -289,7 +289,7 @@ bool BaseBvhComponent::IntersectionTestKDop(const std::vector<pragma::math::Plan
 #endif
 	return test_bvh_intersection_with_kdop(*bvhData, planes, 0u, &outIntersectionInfo);
 }
-bool BaseBvhComponent::IntersectionTestKDop(const std::vector<pragma::math::Plane> &planes) const
+bool BaseBvhComponent::IntersectionTestKDop(const std::vector<math::Plane> &planes) const
 {
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
@@ -321,7 +321,7 @@ bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &di
 	auto hit = bvhData->Raycast(origin, dir, minDist, maxDist, bvhHitData);
 	m_bvhDataMutex.unlock();
 	if(hit) {
-		pragma::bvh::MeshRange search {};
+		bvh::MeshRange search {};
 		search.start = bvhHitData.primitiveIndex * 3;
 		auto it = std::upper_bound(bvhData->meshRanges.begin(), bvhData->meshRanges.end(), search);
 		assert(it != bvhData->meshRanges.begin());
@@ -343,7 +343,7 @@ bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &di
 
 const pragma::bvh::MeshRange *BaseBvhComponent::FindPrimitiveMeshInfo(size_t primIdx) const { return m_bvhData->FindMeshRange(primIdx); }
 
-BaseBvhComponent::BaseBvhComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseBvhComponent::BaseBvhComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 BaseBvhComponent::~BaseBvhComponent() {}
 void BaseBvhComponent::Initialize()
 {
@@ -359,7 +359,7 @@ void BaseBvhComponent::Initialize()
 				return static_cast<BaseBvhComponent *>(userData)->IntersectionTestAabb(min, max, *outIntersectionInfo);
 			return static_cast<BaseBvhComponent *>(userData)->IntersectionTestAabb(min, max);
 		};
-		intersectionHandler.intersectionTestKDop = [](void *userData, const std::vector<pragma::math::Plane> &planes, IntersectionInfo *outIntersectionInfo) -> bool {
+		intersectionHandler.intersectionTestKDop = [](void *userData, const std::vector<math::Plane> &planes, IntersectionInfo *outIntersectionInfo) -> bool {
 			if(outIntersectionInfo)
 				return static_cast<BaseBvhComponent *>(userData)->IntersectionTestKDop(planes, *outIntersectionInfo);
 			return static_cast<BaseBvhComponent *>(userData)->IntersectionTestKDop(planes);

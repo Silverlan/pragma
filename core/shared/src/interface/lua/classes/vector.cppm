@@ -17,7 +17,7 @@ export namespace Lua {
 		DLLNETWORK pragma::math::VertexWeight Copy(pragma::math::VertexWeight &vw);
 	};
 	namespace Vectori {
-		DLLNETWORK ::Vector3i Copy(::Vector3i &v);
+		DLLNETWORK Vector3i Copy(Vector3i &v);
 	};
 	namespace Vector2i {
 		DLLNETWORK ::Vector2i Copy(::Vector2i &v);
@@ -32,10 +32,10 @@ export namespace Lua {
 		DLLNETWORK void Rotate(lua::State *l, Vector3 &vec, const Vector3 &normal, float angle);
 		DLLNETWORK void Rotate(lua::State *l, Vector3 &vec, const Quat &orientation);
 		DLLNETWORK void RotateAround(lua::State *l, Vector3 &vec, const Vector3 &origin, const EulerAngles &ang);
-		DLLNETWORK ::Vector3 Copy(lua::State *l, const Vector3 &vec);
-		DLLNETWORK ::Vector3 Lerp(lua::State *l, const Vector3 &vec, const Vector3 &vecB, float factor);
+		DLLNETWORK Vector3 Copy(lua::State *l, const Vector3 &vec);
+		DLLNETWORK Vector3 Lerp(lua::State *l, const Vector3 &vec, const Vector3 &vecB, float factor);
 		DLLNETWORK void Set(lua::State *l, Vector3 &vec, const Vector3 &vecB);
-		DLLNETWORK ::Mat4 ToMatrix(lua::State *l, const Vector3 &vec);
+		DLLNETWORK Mat4 ToMatrix(lua::State *l, const Vector3 &vec);
 		DLLNETWORK void Set(lua::State *l, Vector3 &vec, float x, float y, float z);
 		DLLNETWORK void SnapToGrid(lua::State *l, Vector3 &vec);
 		DLLNETWORK void SnapToGrid(lua::State *l, Vector3 &vec, UInt32 gridSize);
@@ -73,16 +73,16 @@ export namespace Lua {
 	};
 	namespace vector {
 		DLLNETWORK void to_min_max(::Vector2 &inOutA, ::Vector2 &inOutB);
-		DLLNETWORK void to_min_max(::Vector3 &inOutA, ::Vector3 &inOutB);
+		DLLNETWORK void to_min_max(Vector3 &inOutA, Vector3 &inOutB);
 		DLLNETWORK void to_min_max(::Vector4 &inOutA, ::Vector4 &inOutB);
 		DLLNETWORK void to_min_max(::Vector2 &inOutA, ::Vector2 &inOutB, const ::Vector2 &c);
-		DLLNETWORK void to_min_max(::Vector3 &inOutA, ::Vector3 &inOutB, const ::Vector3 &c);
+		DLLNETWORK void to_min_max(Vector3 &inOutA, Vector3 &inOutB, const Vector3 &c);
 		DLLNETWORK void to_min_max(::Vector4 &inOutA, ::Vector4 &inOutB, const ::Vector4 &c);
 		DLLNETWORK void get_min_max(lua::State *l, luabind::table<> t, ::Vector2 &outMin, ::Vector2 &outMax);
-		DLLNETWORK void get_min_max(lua::State *l, luabind::table<> t, ::Vector3 &outMin, ::Vector3 &outMax);
+		DLLNETWORK void get_min_max(lua::State *l, luabind::table<> t, Vector3 &outMin, Vector3 &outMax);
 		DLLNETWORK void get_min_max(lua::State *l, luabind::table<> t, ::Vector4 &outMin, ::Vector4 &outMax);
 		DLLNETWORK ::Vector2 random_2d();
-		DLLNETWORK ::Vector3 calc_average(luabind::table<> points);
+		DLLNETWORK Vector3 calc_average(luabind::table<> points);
 		DLLNETWORK void calc_best_fitting_plane(luabind::table<> points, float ang, Vector3 &outNormal, double &outDistance);
 	};
 };

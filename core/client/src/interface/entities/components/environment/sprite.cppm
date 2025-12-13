@@ -16,12 +16,12 @@ export namespace pragma::ecs {
 export namespace pragma {
 	class DLLCLIENT CSpriteComponent final : public BaseEnvSpriteComponent, public CBaseNetComponent {
 	  public:
-		CSpriteComponent(pragma::ecs::BaseEntity &ent) : BaseEnvSpriteComponent(ent) {}
+		CSpriteComponent(ecs::BaseEntity &ent) : BaseEnvSpriteComponent(ent) {}
 		virtual void Initialize() override;
 		virtual ~CSpriteComponent() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void OnTick(double dt) override;
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		void SetOrientationType(pts::ParticleOrientationType orientationType);
 		virtual void StartParticle();

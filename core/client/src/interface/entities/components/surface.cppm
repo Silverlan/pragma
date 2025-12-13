@@ -11,9 +11,9 @@ export import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CSurfaceComponent final : public BaseSurfaceComponent, public CBaseNetComponent {
 	  public:
-		CSurfaceComponent(pragma::ecs::BaseEntity &ent) : BaseSurfaceComponent(ent) {}
+		CSurfaceComponent(ecs::BaseEntity &ent) : BaseSurfaceComponent(ent) {}
 
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

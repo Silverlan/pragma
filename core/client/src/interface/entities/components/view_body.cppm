@@ -11,7 +11,7 @@ export import :entities.base_entity;
 export namespace pragma {
 	class DLLCLIENT CViewBodyComponent final : public BaseEntityComponent {
 	  public:
-		CViewBodyComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CViewBodyComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 	};

@@ -132,70 +132,70 @@ struct GLTFBufferData {
 	}
 };
 
-static uimg::TextureInfo get_texture_write_info(pragma::asset::ModelExportInfo::ImageFormat imageFormat, bool normalMap, bool srgb, uimg::TextureInfo::AlphaMode alphaMode, std::string &outExt)
+static pragma::image::TextureInfo get_texture_write_info(pragma::asset::ModelExportInfo::ImageFormat imageFormat, bool normalMap, bool srgb, pragma::image::TextureInfo::AlphaMode alphaMode, std::string &outExt)
 {
-	uimg::TextureInfo texWriteInfo {};
+	pragma::image::TextureInfo texWriteInfo {};
 	switch(imageFormat) {
 	case pragma::asset::ModelExportInfo::ImageFormat::DDS:
-		texWriteInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
+		texWriteInfo.containerFormat = pragma::image::TextureInfo::ContainerFormat::DDS;
 		outExt = "dds";
 		break;
 	case pragma::asset::ModelExportInfo::ImageFormat::KTX:
-		texWriteInfo.containerFormat = uimg::TextureInfo::ContainerFormat::KTX;
+		texWriteInfo.containerFormat = pragma::image::TextureInfo::ContainerFormat::KTX;
 		outExt = "ktx";
 		break;
 	}
-	texWriteInfo.flags = uimg::TextureInfo::Flags::GenerateMipmaps;
+	texWriteInfo.flags = pragma::image::TextureInfo::Flags::GenerateMipmaps;
 	texWriteInfo.alphaMode = alphaMode;
-	// pragma::math::set_flag(texWriteInfo.flags,uimg::TextureInfo::Flags::SRGB,srgb);
-	texWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::KeepInputImageFormat;
-	texWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::KeepInputImageFormat;
+	// pragma::math::set_flag(texWriteInfo.flags,image::TextureInfo::Flags::SRGB,srgb);
+	texWriteInfo.inputFormat = pragma::image::TextureInfo::InputFormat::KeepInputImageFormat;
+	texWriteInfo.outputFormat = pragma::image::TextureInfo::OutputFormat::KeepInputImageFormat;
 	if(normalMap)
 		texWriteInfo.SetNormalMap();
 	return texWriteInfo;
 }
 
-static bool save_image(uimg::ImageBuffer &imgBuf, pragma::asset::ModelExportInfo::ImageFormat imageFormat, std::string &inOutImgOutputPath, bool normalMap, bool srgb, uimg::TextureInfo::AlphaMode alphaMode)
+static bool save_image(pragma::image::ImageBuffer &imgBuf, pragma::asset::ModelExportInfo::ImageFormat imageFormat, std::string &inOutImgOutputPath, bool normalMap, bool srgb, pragma::image::TextureInfo::AlphaMode alphaMode)
 {
-	imgBuf.Convert(uimg::Format::RGBA8); // TODO
+	imgBuf.Convert(pragma::image::Format::RGBA8); // TODO
 
 	if(imageFormat == pragma::asset::ModelExportInfo::ImageFormat::DDS || imageFormat == pragma::asset::ModelExportInfo::ImageFormat::KTX) {
 		std::string ext;
 		auto texWriteInfo = get_texture_write_info(imageFormat, normalMap, srgb, alphaMode, ext);
-		texWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R8G8B8A8_UInt;
+		texWriteInfo.inputFormat = pragma::image::TextureInfo::InputFormat::R8G8B8A8_UInt;
 		inOutImgOutputPath += '.' + ext;
 		return pragma::get_cgame()->SaveImage(imgBuf, inOutImgOutputPath, texWriteInfo);
 	}
 
-	auto saveFormat = uimg::ImageFormat::PNG;
+	auto saveFormat = pragma::image::ImageFormat::PNG;
 	switch(imageFormat) {
 	case pragma::asset::ModelExportInfo::ImageFormat::PNG:
-		saveFormat = uimg::ImageFormat::PNG;
+		saveFormat = pragma::image::ImageFormat::PNG;
 		break;
 	case pragma::asset::ModelExportInfo::ImageFormat::BMP:
-		saveFormat = uimg::ImageFormat::BMP;
+		saveFormat = pragma::image::ImageFormat::BMP;
 		break;
 	case pragma::asset::ModelExportInfo::ImageFormat::TGA:
-		saveFormat = uimg::ImageFormat::TGA;
+		saveFormat = pragma::image::ImageFormat::TGA;
 		break;
 	case pragma::asset::ModelExportInfo::ImageFormat::JPG:
-		saveFormat = uimg::ImageFormat::JPG;
+		saveFormat = pragma::image::ImageFormat::JPG;
 		break;
 	case pragma::asset::ModelExportInfo::ImageFormat::HDR:
-		saveFormat = uimg::ImageFormat::HDR;
+		saveFormat = pragma::image::ImageFormat::HDR;
 		break;
 	}
-	auto ext = uimg::get_file_extension(saveFormat);
+	auto ext = pragma::image::get_file_extension(saveFormat);
 	inOutImgOutputPath += '.' + ext;
 
-	if(alphaMode == uimg::TextureInfo::AlphaMode::None)
-		imgBuf.Convert(uimg::ImageBuffer::ToRGBFormat(imgBuf.GetFormat()));
-	FileManager::CreatePath(ufile::get_path_from_filename(inOutImgOutputPath).c_str());
-	auto fImg = FileManager::OpenFile<VFilePtrReal>(inOutImgOutputPath.c_str(), "wb");
+	if(alphaMode == pragma::image::TextureInfo::AlphaMode::None)
+		imgBuf.Convert(pragma::image::ImageBuffer::ToRGBFormat(imgBuf.GetFormat()));
+	pragma::fs::create_path(ufile::get_path_from_filename(inOutImgOutputPath));
+	auto fImg = pragma::fs::open_file<pragma::fs::VFilePtrReal>(inOutImgOutputPath, pragma::fs::FileMode::Write | pragma::fs::FileMode::Binary);
 	if(fImg == nullptr)
 		return false;
-	fsys::File f {fImg};
-	return uimg::save_image(f, imgBuf, saveFormat);
+	pragma::fs::File f {fImg};
+	return pragma::image::save_image(f, imgBuf, saveFormat);
 };
 
 struct GLTFInputData {
@@ -212,8 +212,8 @@ static bool load_image(tinygltf::Image *image, const int imageIdx, std::string *
 	auto &inputData = *static_cast<GLTFInputData *>(userData);
 	auto imgPath = inputData.path + image->uri;
 	std::string relImgPath = pragma::util::Path::CreateFile(imgPath).GetString();
-	filemanager::find_relative_path(relImgPath, relImgPath);
-	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
+	pragma::fs::find_relative_path(relImgPath, relImgPath);
+	auto &texManager = static_cast<pragma::material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 	auto texture = texManager.LoadAsset(relImgPath, pragma::util::AssetLoadFlags::AbsolutePath | pragma::util::AssetLoadFlags::DontCache);
 	if(texture == nullptr) {
 		if(outErr)
@@ -227,7 +227,7 @@ static bool load_image(tinygltf::Image *image, const int imageIdx, std::string *
 	}
 	if(imageIdx >= inputData.textures.size())
 		inputData.textures.resize(imageIdx + 1);
-	inputData.textures.at(imageIdx) = std::static_pointer_cast<msys::Texture>(texture)->GetVkTexture();
+	inputData.textures.at(imageIdx) = std::static_pointer_cast<pragma::material::Texture>(texture)->GetVkTexture();
 	return true;
 }
 
@@ -237,23 +237,23 @@ struct OutputData {
 	std::string mapName;
 };
 
-uimg::TextureInfo pragma::asset::get_texture_info(bool isGreyScale, bool isNormalMap, AlphaMode alphaMode)
+pragma::image::TextureInfo pragma::asset::get_texture_info(bool isGreyScale, bool isNormalMap, AlphaMode alphaMode)
 {
-	uimg::TextureInfo texInfo {};
-	texInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
-	texInfo.flags |= uimg::TextureInfo::Flags::GenerateMipmaps;
+	image::TextureInfo texInfo {};
+	texInfo.containerFormat = image::TextureInfo::ContainerFormat::DDS;
+	texInfo.flags |= image::TextureInfo::Flags::GenerateMipmaps;
 	if(isGreyScale)
-		texInfo.outputFormat = uimg::TextureInfo::OutputFormat::GradientMap;
+		texInfo.outputFormat = image::TextureInfo::OutputFormat::GradientMap;
 	else {
 		switch(alphaMode) {
 		case AlphaMode::Opaque:
-			texInfo.outputFormat = uimg::TextureInfo::OutputFormat::BC1;
+			texInfo.outputFormat = image::TextureInfo::OutputFormat::BC1;
 			break;
 		case AlphaMode::Mask:
-			texInfo.outputFormat = uimg::TextureInfo::OutputFormat::BC1a;
+			texInfo.outputFormat = image::TextureInfo::OutputFormat::BC1a;
 			break;
 		case AlphaMode::Blend:
-			texInfo.outputFormat = uimg::TextureInfo::OutputFormat::BC3;
+			texInfo.outputFormat = image::TextureInfo::OutputFormat::BC3;
 			break;
 		}
 	}
@@ -262,7 +262,7 @@ uimg::TextureInfo pragma::asset::get_texture_info(bool isGreyScale, bool isNorma
 	return texInfo;
 }
 
-void pragma::asset::assign_texture(msys::CMaterial &mat, const std::string &textureRootPath, const std::string &matIdentifier, const std::string &texName, prosper::IImage &img, bool greyScale, bool normalMap, AlphaMode alphaMode)
+void pragma::asset::assign_texture(material::CMaterial &mat, const std::string &textureRootPath, const std::string &matIdentifier, const std::string &texName, prosper::IImage &img, bool greyScale, bool normalMap, AlphaMode alphaMode)
 {
 	auto texInfo = pragma::asset::get_texture_info(greyScale, normalMap, alphaMode);
 	pragma::get_cgame()->SaveImage(img, textureRootPath + texName, texInfo);
@@ -287,10 +287,10 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		}
 		else {
 			fileName = "unknown";
-			absPathToFile = FileManager::GetProgramPath() + '/' + fileName;
+			absPathToFile = pragma::fs::get_program_path() + '/' + fileName;
 		}
 	}
-	else if(!filemanager::find_absolute_path(fileName, absPathToFile)) {
+	else if(!pragma::fs::find_absolute_path(fileName, absPathToFile)) {
 		spdlog::debug("Unable to determine absolute path for '{}'!", fileName);
 		outErrMsg = "Unable to determine absolute path for '" + fileName + "'!";
 		return {};
@@ -364,17 +364,17 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			// It's an embedded image
 			auto *data = gltfImg.image.data();
 
-			std::shared_ptr<uimg::ImageBuffer> imgBuf = nullptr;
+			std::shared_ptr<pragma::image::ImageBuffer> imgBuf = nullptr;
 			auto numPixels = gltfImg.width * gltfImg.height;
 			auto bytesPerChannel = gltfImg.bits / 8;
-			auto format = uimg::Format::RGBA8;
+			auto format = pragma::image::Format::RGBA8;
 			if(bytesPerChannel == 2)
-				format = uimg::Format::RGBA16;
+				format = pragma::image::Format::RGBA16;
 			else if(bytesPerChannel == 4)
-				format = uimg::Format::RGBA32;
+				format = pragma::image::Format::RGBA32;
 			auto numChannels = gltfImg.component;
 			if(numChannels < 4) {
-				imgBuf = uimg::ImageBuffer::Create(gltfImg.width, gltfImg.height, format);
+				imgBuf = pragma::image::ImageBuffer::Create(gltfImg.width, gltfImg.height, format);
 				auto *convertedData = static_cast<uint8_t *>(imgBuf->GetData());
 				for(auto i = decltype(numPixels) {0u}; i < numPixels; ++i) {
 					auto *pIn = data + i * bytesPerChannel * numChannels;
@@ -383,7 +383,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 				}
 			}
 			else
-				imgBuf = uimg::ImageBuffer::Create(data, gltfImg.width, gltfImg.height, format);
+				imgBuf = pragma::image::ImageBuffer::Create(data, gltfImg.width, gltfImg.height, format);
 
 			auto img = pragma::get_cengine()->GetRenderContext().CreateImage(*imgBuf);
 			prosper::util::TextureCreateInfo texCreateInfo {};
@@ -424,7 +424,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		matPathRelative.PopFront();
 
 		auto mat = pragma::get_client_state()->CreateMaterial(matPathRelative.GetString(), "pbr");
-		auto *cmat = static_cast<msys::CMaterial *>(mat.get());
+		auto *cmat = static_cast<pragma::material::CMaterial *>(mat.get());
 		mat->SetProperty("alpha_mode", alphaMode);
 		mat->SetProperty("alpha_cutoff", gltfMat.alphaCutoff);
 
@@ -480,8 +480,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 					if(shader) {
 						auto metallicRoughnessSet = shader->ConvertToMetalnessRoughness(pragma::get_cengine()->GetRenderContext(), diffuseTex, specularGlossinessTex, pushConstants, occlusionTex.get());
 						if(metallicRoughnessSet.has_value()) {
-							fWriteImage(msys::material::ALBEDO_MAP_IDENTIFIER, matName + "_albedo", *metallicRoughnessSet->albedoMap, false /* greyScale */, false /* normalMap */, alphaMode);
-							fWriteImage(msys::material::RMA_MAP_IDENTIFIER, matName + "_rma", *metallicRoughnessSet->rmaMap, false /* greyScale */, false /* normalMap */);
+							fWriteImage(pragma::material::ematerial::ALBEDO_MAP_IDENTIFIER, matName + "_albedo", *metallicRoughnessSet->albedoMap, false /* greyScale */, false /* normalMap */, alphaMode);
+							fWriteImage(pragma::material::ematerial::RMA_MAP_IDENTIFIER, matName + "_rma", *metallicRoughnessSet->rmaMap, false /* greyScale */, false /* normalMap */);
 						}
 					}
 
@@ -495,9 +495,9 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			auto &baseColorTexture = gltfMat.pbrMetallicRoughness.baseColorTexture;
 			auto baseColorImage = fGetImage(baseColorTexture.index);
 			if(baseColorImage)
-				fWriteImage(msys::material::ALBEDO_MAP_IDENTIFIER, matName + "_albedo", *baseColorImage, false /* greyScale */, false /* normalMap */, alphaMode);
+				fWriteImage(pragma::material::ematerial::ALBEDO_MAP_IDENTIFIER, matName + "_albedo", *baseColorImage, false /* greyScale */, false /* normalMap */, alphaMode);
 			else
-				cmat->SetTexture(msys::material::ALBEDO_MAP_IDENTIFIER, "white");
+				cmat->SetTexture(pragma::material::ematerial::ALBEDO_MAP_IDENTIFIER, "white");
 
 			auto &baseColorFactor = gltfMat.pbrMetallicRoughness.baseColorFactor;
 			if(baseColorFactor != std::vector<double> {1.0, 1.0, 1.0, 1.0})
@@ -506,7 +506,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			auto metallicRoughnessImg = fGetImage(gltfMat.pbrMetallicRoughness.metallicRoughnessTexture.index);
 			if(metallicRoughnessImg) {
 				auto rmaName = matName + "_rma";
-				fWriteImage(msys::material::RMA_MAP_IDENTIFIER, rmaName, *metallicRoughnessImg, false /* greyScale */, false /* normalMap */);
+				fWriteImage(pragma::material::ematerial::RMA_MAP_IDENTIFIER, rmaName, *metallicRoughnessImg, false /* greyScale */, false /* normalMap */);
 
 				auto occlusionImg = fGetImage(gltfMat.occlusionTexture.index);
 				if(occlusionImg) {
@@ -526,13 +526,13 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		if(gltfMat.normalTexture.index != -1) {
 			auto &tex = inputData.textures.at(gltfMdl.textures.at(gltfMat.normalTexture.index).source);
 			if(tex)
-				fWriteImage(msys::material::NORMAL_MAP_IDENTIFIER, matName + "_normal", tex->GetImage(), false /* greyScale */, true /* normalMap */);
+				fWriteImage(pragma::material::ematerial::NORMAL_MAP_IDENTIFIER, matName + "_normal", tex->GetImage(), false /* greyScale */, true /* normalMap */);
 		}
 
 		if(gltfMat.emissiveTexture.index != -1) {
 			auto &tex = inputData.textures.at(gltfMdl.textures.at(gltfMat.emissiveTexture.index).source);
 			if(tex)
-				fWriteImage(msys::material::EMISSION_MAP_IDENTIFIER, matName + "_emission", tex->GetImage(), false /* greyScale */, false /* normalMap */);
+				fWriteImage(pragma::material::ematerial::EMISSION_MAP_IDENTIFIER, matName + "_emission", tex->GetImage(), false /* greyScale */, false /* normalMap */);
 		}
 		auto &emissiveFactor = gltfMat.emissiveFactor;
 		if(emissiveFactor != std::vector<double> {1.0, 1.0, 1.0, 1.0})
@@ -1298,7 +1298,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		auto ext = pragma::asset::get_udm_format_extension(pragma::asset::Type::Map, true);
 		assert(ext.has_value());
 		mapWritePath += "." + *ext;
-		filemanager::create_path(ufile::get_path_from_filename(mapWritePath));
+		pragma::fs::create_path(ufile::get_path_from_filename(mapWritePath));
 		try {
 			res = udmData->Save(mapWritePath);
 		}
@@ -1353,16 +1353,16 @@ std::optional<pragma::asset::AssetImportResult> pragma::asset::import_gltf(const
 
 bool pragma::asset::import_texture(const std::string &fileName, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg)
 {
-	auto tex = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset(fileName, pragma::util::AssetLoadFlags::DontCache);
+	auto tex = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset(fileName, pragma::util::AssetLoadFlags::DontCache);
 	if(tex == nullptr) {
 		outErrMsg = "Unable to load texture!";
 		return false;
 	}
-	if(std::static_pointer_cast<msys::Texture>(tex)->HasValidVkTexture() == false) {
+	if(std::static_pointer_cast<material::Texture>(tex)->HasValidVkTexture() == false) {
 		outErrMsg = "Invalid texture!";
 		return false;
 	}
-	return import_texture(std::static_pointer_cast<msys::Texture>(tex)->GetVkTexture()->GetImage(), texInfo, outputPath, outErrMsg);
+	return import_texture(std::static_pointer_cast<material::Texture>(tex)->GetVkTexture()->GetImage(), texInfo, outputPath, outErrMsg);
 }
 bool pragma::asset::import_texture(std::unique_ptr<ufile::IFile> &&f, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg)
 {
@@ -1372,28 +1372,28 @@ bool pragma::asset::import_texture(std::unique_ptr<ufile::IFile> &&f, const Text
 	std::string ext;
 	if(ufile::get_extension(*path, &ext) == false)
 		return false;
-	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
-	auto tex = texManager.LoadAsset("", std::move(f), ext, std::make_unique<msys::TextureLoadInfo>(pragma::util::AssetLoadFlags::DontCache));
+	auto &texManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
+	auto tex = texManager.LoadAsset("", std::move(f), ext, std::make_unique<material::TextureLoadInfo>(pragma::util::AssetLoadFlags::DontCache));
 	if(tex == nullptr) {
 		outErrMsg = "Unable to load texture!";
 		return false;
 	}
-	if(std::static_pointer_cast<msys::Texture>(tex)->HasValidVkTexture() == false) {
+	if(std::static_pointer_cast<material::Texture>(tex)->HasValidVkTexture() == false) {
 		outErrMsg = "Invalid texture!";
 		return false;
 	}
-	return import_texture(std::static_pointer_cast<msys::Texture>(tex)->GetVkTexture()->GetImage(), texInfo, outputPath, outErrMsg);
+	return import_texture(std::static_pointer_cast<material::Texture>(tex)->GetVkTexture()->GetImage(), texInfo, outputPath, outErrMsg);
 }
 bool pragma::asset::import_texture(prosper::IImage &img, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg)
 {
 	std::string ext;
-	auto texWriteInfo = get_texture_write_info(pragma::asset::ModelExportInfo::ImageFormat::DDS, texInfo.normalMap, texInfo.srgb, uimg::TextureInfo::AlphaMode::Auto, ext);
+	auto texWriteInfo = get_texture_write_info(pragma::asset::ModelExportInfo::ImageFormat::DDS, texInfo.normalMap, texInfo.srgb, image::TextureInfo::AlphaMode::Auto, ext);
 	if(texInfo.greyScaleMap)
-		texWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::GradientMap;
+		texWriteInfo.outputFormat = image::TextureInfo::OutputFormat::GradientMap;
 	else // TODO: Use BC1 if no alpha!
-		texWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::BC3;
+		texWriteInfo.outputFormat = image::TextureInfo::OutputFormat::BC3;
 
-	if(texWriteInfo.containerFormat == uimg::TextureInfo::ContainerFormat::DDS) {
+	if(texWriteInfo.containerFormat == image::TextureInfo::ContainerFormat::DDS) {
 		auto anvFormat = img.GetFormat();
 		switch(anvFormat) {
 			// These formats require DDS10, which is not well supported, so we'll fall back to
@@ -1402,7 +1402,7 @@ bool pragma::asset::import_texture(prosper::IImage &img, const TextureImportInfo
 		case prosper::Format::BC6H_UFloat_Block:
 		case prosper::Format::BC7_SRGB_Block:
 		case prosper::Format::BC7_UNorm_Block:
-			texWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::BC3;
+			texWriteInfo.outputFormat = image::TextureInfo::OutputFormat::BC3;
 			break;
 		}
 	}
@@ -1415,18 +1415,18 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 {
 	pragma::util::Path mapPath {mapName};
 	mapPath.RemoveFileExtension(get_supported_extensions(Type::Map));
-	VFilePtr f = nullptr;
+	fs::VFilePtr f = nullptr;
 	auto openLocalMap = [&mapPath, &f]() {
 		auto localMapPath = pragma::asset::find_file(mapPath.GetString(), pragma::asset::Type::Map);
 		if(localMapPath.has_value()) {
 			auto filePath = pragma::util::Path::CreateFile(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Map)} + '/' + *localMapPath);
-			f = FileManager::OpenFile(filePath.GetString().c_str(), "rb");
+			f = pragma::fs::open_file(filePath.GetString().c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 		}
 	};
 	openLocalMap();
 	if(f == nullptr) {
 		if(pragma::util::port_source2_map(pragma::get_client_state(), mapPath.GetString()) || pragma::util::port_hl2_map(pragma::get_client_state(), mapPath.GetString())) {
-			f = FileManager::OpenFile(mapPath.GetString().c_str(), "rb");
+			f = pragma::fs::open_file(mapPath.GetString().c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 			if(f == nullptr) {
 				// Sleep for a bit, then try again, in case the file hasn't been fully written yet
 				std::this_thread::sleep_for(std::chrono::seconds {1});
@@ -1442,7 +1442,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 		Con::cout << "Loading map data..." << Con::endl;
 
 	auto worldData = pragma::asset::WorldData::Create(*pragma::get_client_state());
-	auto udmData = pragma::util::load_udm_asset(std::make_unique<fsys::File>(f));
+	auto udmData = pragma::util::load_udm_asset(std::make_unique<fs::File>(f));
 	f = nullptr;
 	std::string err;
 	if(udmData == nullptr || worldData->LoadFromAssetData(udmData->GetAssetData(), pragma::asset::EntityData::Flags::None, err) == false)
@@ -1625,7 +1625,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 		return false;
 	if(exportInfo.verbose)
 		Con::cout << "Exporting lightmap atlas..." << Con::endl;
-	success = export_texture("maps/" + mapName + "/lightmap_atlas", mapExportInfo.imageFormat, outErrMsg, uimg::TextureInfo::AlphaMode::None, true /* extended DDS */, &exportPath);
+	success = export_texture("maps/" + mapName + "/lightmap_atlas", mapExportInfo.imageFormat, outErrMsg, image::TextureInfo::AlphaMode::None, true /* extended DDS */, &exportPath);
 	if(success == false) {
 		if(exportInfo.verbose)
 			Con::cwar << "Unable to export lightmap atlas: " << outErrMsg << Con::endl;
@@ -1635,7 +1635,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 
 bool pragma::asset::export_model(pragma::asset::Model &mdl, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName, std::string *optOutPath) { return GLTFWriter::Export(mdl, exportInfo, outErrMsg, modelName, optOutPath); }
 bool pragma::asset::export_animation(pragma::asset::Model &mdl, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName) { return GLTFWriter::Export(mdl, animName, exportInfo, outErrMsg, modelName); }
-bool pragma::asset::export_texture(uimg::ImageBuffer &imgBuf, ModelExportInfo::ImageFormat imageFormat, const std::string &outputPath, std::string &outErrMsg, bool normalMap, bool srgb, uimg::TextureInfo::AlphaMode alphaMode, std::string *optOutOutputPath)
+bool pragma::asset::export_texture(image::ImageBuffer &imgBuf, ModelExportInfo::ImageFormat imageFormat, const std::string &outputPath, std::string &outErrMsg, bool normalMap, bool srgb, image::TextureInfo::AlphaMode alphaMode, std::string *optOutOutputPath)
 {
 	std::string inOutPath = std::string {EXPORT_PATH} + outputPath;
 	auto success = save_image(imgBuf, imageFormat, inOutPath, normalMap, srgb, alphaMode);
@@ -1643,16 +1643,16 @@ bool pragma::asset::export_texture(uimg::ImageBuffer &imgBuf, ModelExportInfo::I
 		*optOutOutputPath = inOutPath;
 	return success;
 }
-bool pragma::asset::export_texture(const std::string &texturePath, ModelExportInfo::ImageFormat imageFormat, std::string &outErrMsg, uimg::TextureInfo::AlphaMode alphaMode, bool enableExtendedDDS, std::string *optExportPath, std::string *optOutOutputPath,
+bool pragma::asset::export_texture(const std::string &texturePath, ModelExportInfo::ImageFormat imageFormat, std::string &outErrMsg, image::TextureInfo::AlphaMode alphaMode, bool enableExtendedDDS, std::string *optExportPath, std::string *optOutOutputPath,
   const std::optional<std::string> &optFileNameOverride)
 {
-	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 	auto pTexture = texManager.LoadAsset(texturePath);
 	if(pTexture == nullptr || pTexture->HasValidVkTexture() == false) {
 		outErrMsg = "Unable to load texture '" + texturePath + "'!";
 		return false;
 	}
-	auto texture = std::static_pointer_cast<msys::Texture>(pTexture);
+	auto texture = std::static_pointer_cast<material::Texture>(pTexture);
 	auto &vkImg = texture->GetVkTexture()->GetImage();
 
 	auto imgPath = optFileNameOverride.has_value() ? *optFileNameOverride : ufile::get_file_from_filename(texturePath);
@@ -1664,9 +1664,9 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 	auto exportSuccess = false;
 	if(imageFormat == ModelExportInfo::ImageFormat::DDS || imageFormat == ModelExportInfo::ImageFormat::KTX) {
 		std::string ext;
-		auto texWriteInfo = get_texture_write_info(imageFormat, texture->HasFlag(msys::Texture::Flags::NormalMap), texture->HasFlag(msys::Texture::Flags::SRGB), alphaMode, ext);
+		auto texWriteInfo = get_texture_write_info(imageFormat, texture->HasFlag(material::Texture::Flags::NormalMap), texture->HasFlag(material::Texture::Flags::SRGB), alphaMode, ext);
 		imgOutputPath += '.' + ext;
-		if(texWriteInfo.containerFormat == uimg::TextureInfo::ContainerFormat::DDS && enableExtendedDDS == false) {
+		if(texWriteInfo.containerFormat == image::TextureInfo::ContainerFormat::DDS && enableExtendedDDS == false) {
 			auto anvFormat = vkImg.GetFormat();
 			switch(anvFormat) {
 				// These formats require DDS10, which is not well supported, so we'll fall back to
@@ -1675,20 +1675,20 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 			case prosper::Format::BC6H_UFloat_Block:
 			case prosper::Format::BC7_SRGB_Block:
 			case prosper::Format::BC7_UNorm_Block:
-				texWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::BC3;
+				texWriteInfo.outputFormat = image::TextureInfo::OutputFormat::BC3;
 				break;
 			}
 		}
 		exportSuccess = pragma::get_cgame()->SaveImage(vkImg, imgOutputPath, texWriteInfo);
 	}
 	else {
-		std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
+		std::vector<std::vector<std::shared_ptr<image::ImageBuffer>>> imgBuffers;
 		if(pragma::util::to_image_buffer(vkImg, {}, imgBuffers) == false) {
 			outErrMsg = "Unable to convert texture '" + texturePath + "' to image buffer!";
 			return false;
 		}
 		auto &imgBuf = imgBuffers.front().front();
-		exportSuccess = save_image(*imgBuf, imageFormat, imgOutputPath, texture->HasFlag(msys::Texture::Flags::NormalMap), texture->HasFlag(msys::Texture::Flags::SRGB), alphaMode);
+		exportSuccess = save_image(*imgBuf, imageFormat, imgOutputPath, texture->HasFlag(material::Texture::Flags::NormalMap), texture->HasFlag(material::Texture::Flags::SRGB), alphaMode);
 	}
 	if(exportSuccess == false) {
 		outErrMsg = "Unable to export texture '" + texturePath + "'!";
@@ -1698,7 +1698,7 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 		*optOutOutputPath = imgOutputPath;
 	return true;
 }
-std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_material(msys::Material &mat, ModelExportInfo::ImageFormat imageFormat, std::string &outErrMsg, std::string *optExportPath, bool normalizeTextureNames)
+std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_material(material::Material &mat, ModelExportInfo::ImageFormat imageFormat, std::string &outErrMsg, std::string *optExportPath, bool normalizeTextureNames)
 {
 	auto name = ufile::get_file_from_filename(mat.GetName());
 	ufile::remove_extension_from_filename(name);
@@ -1709,7 +1709,7 @@ std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_materia
 		if(texInfo == nullptr)
 			return false;
 		std::string errMsg;
-		return export_texture(texInfo->name, imageFormat, errMsg, alpha ? uimg::TextureInfo::AlphaMode::Transparency : uimg::TextureInfo::AlphaMode::None, false, &exportPath, &imgOutputPath, normalizeTextureNames ? normalizedName : std::optional<std::string> {});
+		return export_texture(texInfo->name, imageFormat, errMsg, alpha ? image::TextureInfo::AlphaMode::Transparency : image::TextureInfo::AlphaMode::None, false, &exportPath, &imgOutputPath, normalizeTextureNames ? normalizedName : std::optional<std::string> {});
 	};
 
 	auto alphaMode = mat.GetAlphaMode();
@@ -1718,20 +1718,20 @@ std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_materia
 
 	std::string imgOutputPath;
 	if(fSaveTexture(mat.GetAlbedoMap(), false, alphaMode != AlphaMode::Opaque, imgOutputPath, name))
-		texturePaths.insert(std::make_pair(msys::material::ALBEDO_MAP_IDENTIFIER, imgOutputPath));
+		texturePaths.insert(std::make_pair(material::ematerial::ALBEDO_MAP_IDENTIFIER, imgOutputPath));
 	if(fSaveTexture(mat.GetNormalMap(), true, false, imgOutputPath, name + "_normal"))
-		texturePaths.insert(std::make_pair(msys::material::NORMAL_MAP_IDENTIFIER, imgOutputPath));
+		texturePaths.insert(std::make_pair(material::ematerial::NORMAL_MAP_IDENTIFIER, imgOutputPath));
 	if(fSaveTexture(mat.GetRMAMap(), true, false, imgOutputPath, name + "_rma"))
-		texturePaths.insert(std::make_pair(msys::material::RMA_MAP_IDENTIFIER, imgOutputPath));
+		texturePaths.insert(std::make_pair(material::ematerial::RMA_MAP_IDENTIFIER, imgOutputPath));
 
 	if(fSaveTexture(mat.GetGlowMap(), false, false, imgOutputPath, name + "_emission"))
-		texturePaths.insert(std::make_pair(msys::material::EMISSION_MAP_IDENTIFIER, imgOutputPath));
+		texturePaths.insert(std::make_pair(material::ematerial::EMISSION_MAP_IDENTIFIER, imgOutputPath));
 	return texturePaths;
 }
 
 class ModelAOWorker : public pragma::util::ParallelWorker<pragma::asset::ModelAOWorkerResult> {
   public:
-	ModelAOWorker(const std::vector<pragma::util::ParallelJob<uimg::ImageLayerSet>> &matAoJobs) : m_matAoJobs {matAoJobs}
+	ModelAOWorker(const std::vector<pragma::util::ParallelJob<pragma::image::ImageLayerSet>> &matAoJobs) : m_matAoJobs {matAoJobs}
 	{
 		AddThread([this]() {
 			auto numJobs = m_matAoJobs.size();
@@ -1768,12 +1768,12 @@ class ModelAOWorker : public pragma::util::ParallelWorker<pragma::asset::ModelAO
   private:
 	template<typename TJob, typename... TARGS>
 	friend pragma::util::ParallelJob<typename TJob::RESULT_TYPE> pragma::util::create_parallel_job(TARGS &&...args);
-	std::vector<pragma::util::ParallelJob<uimg::ImageLayerSet>> m_matAoJobs {};
+	std::vector<pragma::util::ParallelJob<pragma::image::ImageLayerSet>> m_matAoJobs {};
 	pragma::asset::ModelAOWorkerResult m_result {};
 };
 std::optional<pragma::util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::asset::generate_ambient_occlusion(pragma::asset::Model &mdl, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples, pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
 {
-	std::vector<pragma::util::ParallelJob<uimg::ImageLayerSet>> aoJobs {};
+	std::vector<pragma::util::ParallelJob<image::ImageLayerSet>> aoJobs {};
 	std::unordered_set<std::string> builtRMAs {};
 	auto &materials = mdl.GetMaterials();
 	aoJobs.reserve(materials.size());
@@ -1786,7 +1786,7 @@ std::optional<pragma::util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pra
 		if(builtRMAs.find(rmaMap->name) != builtRMAs.end())
 			continue; // AO has already been built (maybe by a different skin material)
 		builtRMAs.insert(rmaMap->name);
-		pragma::util::ParallelJob<uimg::ImageLayerSet> aoJob {};
+		pragma::util::ParallelJob<image::ImageLayerSet> aoJob {};
 		auto eResult = generate_ambient_occlusion(mdl, *mat.get(), aoJob, outErrMsg, forceRebuild, aoResolution, aoSamples, aoDevice);
 		if(eResult != AOResult::AOJobReady)
 			continue;
@@ -1798,7 +1798,7 @@ std::optional<pragma::util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pra
 }
 
 template<class T>
-static bool save_ambient_occlusion(msys::Material &mat, std::string rmaPath, T &img, std::string &errMsg)
+static bool save_ambient_occlusion(pragma::material::Material &mat, std::string rmaPath, T &img, std::string &errMsg)
 {
 	auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA *>(pragma::get_cengine()->GetShader("compose_rma").get());
 	if(shaderComposeRMA == nullptr)
@@ -1813,7 +1813,7 @@ static bool save_ambient_occlusion(msys::Material &mat, std::string rmaPath, T &
 		outPath = mat.GetName();
 		outPath.RemoveFileExtension();
 		rmaPath = outPath.GetString() + "_rma";
-		mat.SetTextureProperty(msys::material::RMA_MAP_IDENTIFIER, rmaPath);
+		mat.SetTextureProperty(pragma::material::ematerial::RMA_MAP_IDENTIFIER, rmaPath);
 		requiresSave = true;
 	}
 
@@ -1833,7 +1833,7 @@ static bool save_ambient_occlusion(msys::Material &mat, std::string rmaPath, T &
 	return true;
 }
 
-pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset::Model &mdl, msys::Material &mat, pragma::util::ParallelJob<uimg::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples,
+pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset::Model &mdl, material::Material &mat, pragma::util::ParallelJob<image::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples,
   pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
 {
 	// TODO: There really is no good way to determine whether the material has a ambient occlusion map or not.
@@ -1845,11 +1845,11 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset:
 	if(forceRebuild == false && requiresAOUpdate == false)
 		return AOResult::NoAOGenerationRequired;
 	auto *rmaTexInfo = mat.GetRMAMap();
-	if(rmaTexInfo == nullptr || std::static_pointer_cast<msys::Texture>(rmaTexInfo->texture) == nullptr) {
+	if(rmaTexInfo == nullptr || std::static_pointer_cast<material::Texture>(rmaTexInfo->texture) == nullptr) {
 		outErrMsg = "Material has no RMA texture assigned!";
 		return AOResult::FailedToCreateAOJob; // This is not a valid pbr material?
 	}
-	auto rmaTex = std::static_pointer_cast<msys::Texture>(rmaTexInfo->texture);
+	auto rmaTex = std::static_pointer_cast<material::Texture>(rmaTexInfo->texture);
 	auto rmaPath = rmaTex->GetName();
 	auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA *>(pragma::get_cengine()->GetShader("compose_rma").get());
 	if(shaderComposeRMA == nullptr) {
@@ -1857,7 +1857,7 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset:
 		return AOResult::FailedToCreateAOJob;
 	}
 	auto &materials = mdl.GetMaterials();
-	auto it = std::find_if(materials.begin(), materials.end(), [&mat](const msys::MaterialHandle &hMat) { return &mat == hMat.get(); });
+	auto it = std::find_if(materials.begin(), materials.end(), [&mat](const material::MaterialHandle &hMat) { return &mat == hMat.get(); });
 	if(it == materials.end()) {
 		outErrMsg = "Material not found in model!";
 		return AOResult::FailedToCreateAOJob;
@@ -1872,7 +1872,7 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset:
 	sceneInfo.samples = aoSamples;
 	sceneInfo.device = aoDevice;
 
-	//std::shared_ptr<uimg::ImageBuffer> aoImg = nullptr;
+	//std::shared_ptr<image::ImageBuffer> aoImg = nullptr;
 	outJob = pragma::rendering::cycles::bake_ambient_occlusion(*pragma::get_client_state(), sceneInfo, mdl, matIdx);
 	if(outJob.IsValid() == false) {
 		outErrMsg = "Unable to create job for ao generation!";
@@ -1880,9 +1880,9 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset:
 	}
 
 	auto *texInfoAo = mat.GetTextureInfo("ao_map");
-	if(texInfoAo && texInfoAo->texture && std::static_pointer_cast<msys::Texture>(texInfoAo->texture)->HasValidVkTexture()) {
+	if(texInfoAo && texInfoAo->texture && std::static_pointer_cast<material::Texture>(texInfoAo->texture)->HasValidVkTexture()) {
 		// Material already has a separate ambient occlusion map, just use that one
-		auto &img = std::static_pointer_cast<msys::Texture>(texInfoAo->texture)->GetVkTexture()->GetImage();
+		auto &img = std::static_pointer_cast<material::Texture>(texInfoAo->texture)->GetVkTexture()->GetImage();
 		std::string errMsg;
 		auto result = save_ambient_occlusion<prosper::IImage>(mat, rmaPath, img, errMsg);
 		if(result)
@@ -1891,7 +1891,7 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset:
 	}
 
 	auto hMat = mat.GetHandle();
-	outJob.SetCompletionHandler([rmaPath, hMat](pragma::util::ParallelWorker<uimg::ImageLayerSet> &worker) mutable {
+	outJob.SetCompletionHandler([rmaPath, hMat](pragma::util::ParallelWorker<image::ImageLayerSet> &worker) mutable {
 		auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA *>(pragma::get_cengine()->GetShader("compose_rma").get());
 		if(worker.IsSuccessful() == false)
 			return;
@@ -1905,7 +1905,7 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset:
 		}
 		auto aoImg = worker.GetResult().images.begin()->second;
 		std::string errMsg;
-		auto result = save_ambient_occlusion<uimg::ImageBuffer>(*hMat.get(), rmaPath, *aoImg, errMsg);
+		auto result = save_ambient_occlusion<image::ImageBuffer>(*hMat.get(), rmaPath, *aoImg, errMsg);
 		if(result == false)
 			worker.SetStatus(pragma::util::JobStatus::Failed, errMsg);
 	});

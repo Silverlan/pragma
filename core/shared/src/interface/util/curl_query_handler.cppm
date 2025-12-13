@@ -24,7 +24,7 @@ export namespace pragma {
 	  private:
 		void Initialize();
 		void *m_curl = nullptr;
-		std::vector<std::shared_ptr<VFilePtrInternalReal>> m_files;
+		std::vector<std::shared_ptr<fs::VFilePtrInternalReal>> m_files;
 		static bool s_bInitialized;
 		static void *(*s_fCreate)();
 		static void (*s_fRelease)(void *);

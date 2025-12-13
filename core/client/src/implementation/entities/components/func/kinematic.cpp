@@ -13,13 +13,13 @@ using namespace pragma;
 void CKinematicComponent::Initialize()
 {
 	BaseFuncKinematicComponent::Initialize();
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent)
-		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
+		pRenderComponent->SetSceneRenderPass(rendering::SceneRenderPass::World);
 }
 
-Bool CKinematicComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CKinematicComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvStartForward)
 		StartForward();

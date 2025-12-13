@@ -89,7 +89,7 @@ pragma::NetworkState::~NetworkState()
 
 std::vector<CallbackHandle> &pragma::NetworkState::GetLuaEnumRegisterCallbacks() { return m_luaEnumRegisterCallbacks; }
 
-ResourceWatcherManager &pragma::NetworkState::GetResourceWatcher() { return *m_resourceWatcher; }
+pragma::util::ResourceWatcherManager &pragma::NetworkState::GetResourceWatcher() { return *m_resourceWatcher; }
 
 bool pragma::NetworkState::ShouldRemoveSound(pragma::audio::ALSound &snd) { return snd.IsPlaying() == false; }
 
@@ -133,18 +133,18 @@ bool pragma::NetworkState::PortMaterial(const std::string &path)
 	if(mat) {
 		std::function<void(const pragma::util::Path &path)> fPortTextures = nullptr;
 		fPortTextures = [this, mat, &fPortTextures](const pragma::util::Path &path) {
-			for(auto &name : msys::MaterialPropertyBlockView {*mat, path}) {
+			for(auto &name : material::MaterialPropertyBlockView {*mat, path}) {
 				auto propType = mat->GetPropertyType(name);
 				switch(propType) {
-				case msys::PropertyType::Block:
+				case material::PropertyType::Block:
 					fPortTextures(pragma::util::FilePath(path, name));
 					break;
-				case msys::PropertyType::Texture:
+				case material::PropertyType::Texture:
 					{
 						std::string texName;
 						if(mat->GetProperty(pragma::util::FilePath(path, name).GetString(), &texName)) {
 							auto path = pragma::util::FilePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), texName).GetString();
-							if(FileManager::Exists(path) == false && pragma::util::port_file(this, path + ".vtf") == false && pragma::util::port_file(this, path + ".vtex_c") == false)
+							if(fs::exists(path) == false && pragma::util::port_file(this, path + ".vtf") == false && pragma::util::port_file(this, path + ".vtex_c") == false)
 								Con::cwar << "Unable to port texture '" << texName << "'!" << Con::endl;
 						}
 						break;
@@ -186,15 +186,15 @@ bool pragma::NetworkState::CheatsEnabled() const
 	return pragma::Engine::Get()->GetConVarBool("sv_cheats");
 }
 
-msys::Material *pragma::NetworkState::PrecacheMaterial(const std::string &path) { return LoadMaterial(path, true, false); }
-msys::Material *pragma::NetworkState::LoadMaterial(const std::string &path, bool bReload) { return LoadMaterial(path, false, bReload); }
+pragma::material::Material *pragma::NetworkState::PrecacheMaterial(const std::string &path) { return LoadMaterial(path, true, false); }
+pragma::material::Material *pragma::NetworkState::LoadMaterial(const std::string &path, bool bReload) { return LoadMaterial(path, false, bReload); }
 
-msys::Material *pragma::NetworkState::LoadMaterial(const std::string &path, bool precache, bool bReload)
+pragma::material::Material *pragma::NetworkState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {
 	static auto bSkipPort = false;
 	auto &matManager = GetMaterialManager();
 	auto success = true;
-	msys::Material *mat = nullptr;
+	material::Material *mat = nullptr;
 	if(precache) {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 		debug::get_domain().BeginTask("preload_material");
@@ -333,7 +333,7 @@ void pragma::NetworkState::Initialize()
 bool pragma::NetworkState::IsClient() const { return false; }
 bool pragma::NetworkState::IsServer() const { return false; }
 
-void pragma::NetworkState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<ResourceWatcherManager>(this); }
+void pragma::NetworkState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<pragma::util::ResourceWatcherManager>(this); }
 
 pragma::console::ConVar *pragma::NetworkState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
 {

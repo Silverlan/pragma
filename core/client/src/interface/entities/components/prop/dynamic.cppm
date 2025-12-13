@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CPropDynamicComponent final : public BasePropDynamicComponent {
 		  public:
-			CPropDynamicComponent(pragma::ecs::BaseEntity &ent) : BasePropDynamicComponent(ent) {}
+			CPropDynamicComponent(ecs::BaseEntity &ent) : BasePropDynamicComponent(ent) {}
 			virtual void Initialize() override;
 			using BasePropDynamicComponent::BasePropDynamicComponent;
 			virtual void InitializeLuaObject(lua::State *l) override;

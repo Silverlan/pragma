@@ -16,8 +16,8 @@ export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorQuadraticDrag : public CParticleOperator {
 	public:
 		CParticleOperatorQuadraticDrag() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void Simulate(pragma::pts::CParticle &particle, double tDelta, float strength) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 		virtual void Simulate(double tDelta) override;
 	private:
 		float m_fAmount = 1.f;
@@ -25,14 +25,14 @@ export namespace pragma::pts {
 	};
 }
 
-void pragma::pts::CParticleOperatorQuadraticDrag::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperatorQuadraticDrag::Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleOperator::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
-		pragma::string::to_lower(key);
+		string::to_lower(key);
 		if(key == "drag")
-			m_fAmount = pragma::util::to_float(it->second);
+			m_fAmount = util::to_float(it->second);
 	}
 }
 void pragma::pts::CParticleOperatorQuadraticDrag::Simulate(double tDelta)
@@ -40,9 +40,9 @@ void pragma::pts::CParticleOperatorQuadraticDrag::Simulate(double tDelta)
 	CParticleOperator::Simulate(tDelta);
 	m_fTickDrag = m_fAmount * static_cast<float>(tDelta);
 }
-void pragma::pts::CParticleOperatorQuadraticDrag::Simulate(pragma::pts::CParticle &particle, double tDelta, float strength)
+void pragma::pts::CParticleOperatorQuadraticDrag::Simulate(CParticle &particle, double tDelta, float strength)
 {
 	CParticleOperator::Simulate(particle, tDelta, strength);
 	auto &velocity = particle.GetVelocity();
-	particle.SetVelocity(velocity * pragma::math::max(0.f, 1.f - m_fTickDrag * uvec::length(velocity)));
+	particle.SetVelocity(velocity * math::max(0.f, 1.f - m_fTickDrag * uvec::length(velocity)));
 }

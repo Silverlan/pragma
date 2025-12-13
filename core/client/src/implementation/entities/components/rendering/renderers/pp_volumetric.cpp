@@ -18,20 +18,20 @@ import :rendering.shaders;
 
 using namespace pragma;
 
-CRendererPpVolumetricComponent::CRendererPpVolumetricComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent)
+CRendererPpVolumetricComponent::CRendererPpVolumetricComponent(ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent)
 {
 	static auto g_shadersRegistered = false;
 	if(!g_shadersRegistered) {
 		g_shadersRegistered = true;
-		pragma::get_cengine()->GetShaderManager().RegisterShader("pp_light_cone", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPLightCone(context, identifier); });
+		get_cengine()->GetShaderManager().RegisterShader("pp_light_cone", [](prosper::IPrContext &context, const std::string &identifier) { return new ShaderPPLightCone(context, identifier); });
 	}
 }
-static pragma::util::WeakHandle<prosper::Shader> g_shader {};
+static util::WeakHandle<prosper::Shader> g_shader {};
 void CRendererPpVolumetricComponent::OnEntitySpawn()
 {
 	CRendererPpBaseComponent::OnEntitySpawn();
 	if(g_shader.expired())
-		g_shader = pragma::get_cengine()->GetShader("pp_light_cone");
+		g_shader = get_cengine()->GetShader("pp_light_cone");
 	ReloadRenderTarget();
 }
 
@@ -39,23 +39,23 @@ void CRendererPpVolumetricComponent::ReloadRenderTarget()
 {
 	if(m_renderer.expired())
 		return;
-	pragma::get_cengine()->GetRenderContext().WaitIdle();
+	get_cengine()->GetRenderContext().WaitIdle();
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	if(!hdrInfo.sceneRenderTarget)
 		return;
 	m_renderTarget = nullptr;
-	auto rendererC = GetEntity().GetComponent<pragma::CRendererComponent>();
+	auto rendererC = GetEntity().GetComponent<CRendererComponent>();
 	auto cRenderer = GetEntity().GetComponent<CRasterizationRendererComponent>();
 	if(rendererC.expired() || cRenderer.expired() || g_shader.expired())
 		return;
-	auto *shaderLightCone = static_cast<pragma::ShaderPPLightCone *>(g_shader.get());
+	auto *shaderLightCone = static_cast<ShaderPPLightCone *>(g_shader.get());
 	if(shaderLightCone && shaderLightCone->IsValid())
-		m_renderTarget = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({hdrInfo.sceneRenderTarget->GetTexture(0)->shared_from_this(), hdrInfo.bloomTexture, hdrInfo.prepass.textureDepth}, shaderLightCone->GetRenderPass());
+		m_renderTarget = get_cengine()->GetRenderContext().CreateRenderTarget({hdrInfo.sceneRenderTarget->GetTexture(0)->shared_from_this(), hdrInfo.bloomTexture, hdrInfo.prepass.textureDepth}, shaderLightCone->GetRenderPass());
 }
 void CRendererPpVolumetricComponent::Initialize()
 {
 	CRendererPpBaseComponent::Initialize();
-	BindEventUnhandled(pragma::cRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		if(!GetEntity().IsSpawned())
 			return;
 		ReloadRenderTarget();
@@ -63,11 +63,11 @@ void CRendererPpVolumetricComponent::Initialize()
 	if(GetEntity().IsSpawned())
 		ReloadRenderTarget();
 }
-void CRendererPpVolumetricComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void CRendererPpVolumetricComponent::DoRenderEffect(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired() || m_renderer.expired() || g_shader.expired() || !m_renderTarget)
 		return;
-	auto &shaderLightCone = *static_cast<pragma::ShaderPPLightCone *>(g_shader.get());
+	auto &shaderLightCone = *static_cast<ShaderPPLightCone *>(g_shader.get());
 	auto &scene = *drawSceneInfo.scene;
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -77,15 +77,15 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const pragma::rendering::Dra
 		return;
 
 	auto &hdrTex = hdrInfo.sceneRenderTarget->GetTexture();
-	pragma::ShaderPPLightCone::PushConstants pushConstants {};
+	ShaderPPLightCone::PushConstants pushConstants {};
 	pushConstants.nearZ = cam->GetNearZ();
 	pushConstants.farZ = cam->GetFarZ();
 	pushConstants.SetResolution(m_renderTarget->GetTexture().GetImage().GetWidth(), m_renderTarget->GetTexture().GetImage().GetHeight());
 	auto &frustumPlanes = cam->GetFrustumPlanes();
 
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightSpotVolComponent>>();
-	std::vector<pragma::ecs::BaseEntity *> ents;
+	ecs::EntityIterator entIt {*get_cgame(), ecs::EntityIterator::FilterFlags::Default};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<CLightSpotVolComponent>>();
+	std::vector<ecs::BaseEntity *> ents;
 	ents.reserve(entIt.GetCount());
 	for(auto *ent : entIt) {
 		auto renderC = ent->GetComponent<CRenderComponent>();
@@ -101,7 +101,7 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const pragma::rendering::Dra
 		prosper::ShaderBindState bindState {*drawCmd};
 		if(shaderLightCone.RecordBeginDraw(bindState) == true) {
 			for(auto *ent : ents) {
-				auto volC = ent->GetComponent<pragma::CLightSpotVolComponent>();
+				auto volC = ent->GetComponent<CLightSpotVolComponent>();
 				auto mdlC = ent->GetComponent<CModelComponent>();
 				auto renderC = ent->GetComponent<CRenderComponent>();
 				auto radiusC = ent->GetComponent<CRadiusComponent>();
@@ -113,7 +113,7 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const pragma::rendering::Dra
 				if(!dsInstance)
 					continue;
 				pushConstants.color = colorC.valid() ? colorC->GetColor() : colors::White.ToVector4();
-				pushConstants.color = Vector4 {uimg::linear_to_srgb(reinterpret_cast<Vector3 &>(pushConstants.color)), pushConstants.color.w};
+				pushConstants.color = Vector4 {image::linear_to_srgb(reinterpret_cast<Vector3 &>(pushConstants.color)), pushConstants.color.w};
 				pushConstants.color.w = lightC.valid() ? (lightC->GetLightIntensityCandela() * lightIntensityFactor) : 1.f;
 				pushConstants.color.w *= volC->GetIntensityFactor();
 				pushConstants.coneOrigin = ent->GetPosition();
@@ -122,7 +122,7 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const pragma::rendering::Dra
 
 				auto &renderMeshes = mdlC->GetRenderMeshes();
 				for(auto &mesh : renderMeshes) {
-					auto &cmesh = static_cast<pragma::geometry::CModelSubMesh &>(*mesh);
+					auto &cmesh = static_cast<geometry::CModelSubMesh &>(*mesh);
 
 					// TODO: We only have to bind the instance and camera descriptor sets once per entity and not for every mesh
 					shaderLightCone.RecordDraw(bindState, cmesh, *hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(), *hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(), *dsInstance, *dsCam);

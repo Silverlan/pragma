@@ -18,7 +18,7 @@ std::vector<CVehicleComponent *> CVehicleComponent::s_vehicles;
 const std::vector<CVehicleComponent *> &CVehicleComponent::GetAll() { return s_vehicles; }
 unsigned int CVehicleComponent::GetVehicleCount() { return CUInt32(s_vehicles.size()); }
 
-CVehicleComponent::CVehicleComponent(pragma::ecs::BaseEntity &ent) : BaseVehicleComponent(ent), CBaseSnapshotComponent {} { s_vehicles.push_back(this); }
+CVehicleComponent::CVehicleComponent(ecs::BaseEntity &ent) : BaseVehicleComponent(ent), CBaseSnapshotComponent {} { s_vehicles.push_back(this); }
 
 CVehicleComponent::~CVehicleComponent()
 {
@@ -37,11 +37,11 @@ void CVehicleComponent::ReceiveSnapshotData(NetPacket &packet)
 {
 	auto *physVehicle = GetPhysicsVehicle();
 	auto steerFactor = packet->Read<float>();
-	auto gear = packet->Read<pragma::physics::IVehicle::Gear>();
+	auto gear = packet->Read<physics::IVehicle::Gear>();
 	auto brakeFactor = packet->Read<float>();
 	auto handbrakeFactor = packet->Read<float>();
 	auto accFactor = packet->Read<float>();
-	auto engineRotSpeed = packet->Read<pragma::math::Radian>();
+	auto engineRotSpeed = packet->Read<math::Radian>();
 	if(physVehicle) {
 		physVehicle->SetSteerFactor(steerFactor);
 		physVehicle->SetGear(gear);
@@ -82,10 +82,10 @@ void CVehicleComponent::ReadWheelInfo(NetPacket &packet)
 
 void CVehicleComponent::ReceiveData(NetPacket &packet)
 {
-	auto *entSteeringWheel = pragma::networking::read_entity(packet);
+	auto *entSteeringWheel = networking::read_entity(packet);
 	m_steeringWheel = entSteeringWheel ? entSteeringWheel->GetHandle() : EntityHandle {};
 
-	auto *driver = pragma::networking::read_entity(packet);
+	auto *driver = networking::read_entity(packet);
 	if(driver)
 		SetDriver(driver);
 	else
@@ -104,15 +104,15 @@ void CVehicleComponent::ClearDriver()
 	if(entDriver != nullptr && entDriver->IsPlayer()) {
 		auto plComponent = entDriver->GetPlayerComponent();
 		if(plComponent->IsLocalPlayer()) {
-			pragma::get_cgame()->EnableRenderMode(pragma::rendering::SceneRenderPass::View);
-			auto *vb = pragma::get_cgame()->GetViewBody<pragma::CViewBodyComponent>();
+			get_cgame()->EnableRenderMode(rendering::SceneRenderPass::View);
+			auto *vb = get_cgame()->GetViewBody<CViewBodyComponent>();
 			if(vb != nullptr) {
-				auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
+				auto pRenderComponent = static_cast<ecs::CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
 				if(pRenderComponent)
-					pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::View);
+					pRenderComponent->SetSceneRenderPass(rendering::SceneRenderPass::View);
 			}
 
-			auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
+			auto *cam = get_cgame()->GetPrimaryCamera<CCameraComponent>();
 			if(cam) {
 				auto observerC = cam->GetEntity().GetComponent<CObserverComponent>();
 				if(observerC.valid()) {
@@ -124,7 +124,7 @@ void CVehicleComponent::ClearDriver()
 	}
 	BaseVehicleComponent::ClearDriver();
 }
-void CVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
+void CVehicleComponent::SetDriver(ecs::BaseEntity *ent)
 {
 	if(ent == GetDriver())
 		return;
@@ -132,12 +132,12 @@ void CVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 	BaseVehicleComponent::SetDriver(ent);
 	if(!ent->IsPlayer() || !ent->GetPlayerComponent()->IsLocalPlayer())
 		return;
-	pragma::get_cgame()->DisableRenderMode(pragma::rendering::SceneRenderPass::View);
-	auto *vb = pragma::get_cgame()->GetViewBody<pragma::CViewBodyComponent>();
+	get_cgame()->DisableRenderMode(rendering::SceneRenderPass::View);
+	auto *vb = get_cgame()->GetViewBody<CViewBodyComponent>();
 	if(vb != nullptr) {
-		auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
+		auto pRenderComponent = static_cast<ecs::CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
-			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::None);
+			pRenderComponent->SetSceneRenderPass(rendering::SceneRenderPass::None);
 	}
 	auto plComponent = ent->GetPlayerComponent();
 	if(plComponent.expired())
@@ -148,20 +148,20 @@ void CVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 		return;
 	observer->SetObserverMode(ObserverMode::ThirdPerson);
 
-	auto vhcObservableC = GetEntity().GetComponent<pragma::CObservableComponent>();
+	auto vhcObservableC = GetEntity().GetComponent<CObservableComponent>();
 	observer->SetObserverTarget(vhcObservableC.get());
 }
 void CVehicleComponent::Initialize() { BaseVehicleComponent::Initialize(); }
-Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+Bool CVehicleComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSteeringWheelModel) {
-		auto *ent = pragma::networking::read_entity(packet);
+		auto *ent = networking::read_entity(packet);
 		m_steeringWheel = ent ? ent->GetHandle() : EntityHandle {};
 		m_maxSteeringWheelAngle = packet->Read<float>();
 		InitializeSteeringWheel();
 	}
 	else if(eventId == m_netEvSetDriver) {
-		auto *ent = pragma::networking::read_entity(packet);
+		auto *ent = networking::read_entity(packet);
 		if(ent)
 			SetDriver(ent);
 		else
@@ -175,6 +175,6 @@ Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &p
 void CVehicleComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseVehicleComponent::RegisterLuaBindings(l, modEnts);
-	auto def = pragma::LuaCore::create_entity_component_class<pragma::CVehicleComponent, pragma::BaseVehicleComponent>("VehicleComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<CVehicleComponent, BaseVehicleComponent>("VehicleComponent");
 	modEnts[def];
 }

@@ -10,12 +10,12 @@ using namespace pragma;
 
 ComponentEventId baseToggleComponent::EVENT_ON_TURN_ON = INVALID_COMPONENT_ID;
 ComponentEventId baseToggleComponent::EVENT_ON_TURN_OFF = INVALID_COMPONENT_ID;
-void BaseToggleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void BaseToggleComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseToggleComponent::EVENT_ON_TURN_ON = registerEvent("ON_TURN_ON", ComponentEventInfo::Type::Broadcast);
 	baseToggleComponent::EVENT_ON_TURN_OFF = registerEvent("ON_TURN_OFF", ComponentEventInfo::Type::Broadcast);
 }
-void BaseToggleComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void BaseToggleComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseToggleComponent;
 
@@ -25,20 +25,20 @@ void BaseToggleComponent::RegisterMembers(pragma::EntityComponentManager &compon
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseToggleComponent::BaseToggleComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bTurnedOn(pragma::util::BoolProperty::Create(false)) {}
+BaseToggleComponent::BaseToggleComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bTurnedOn(util::BoolProperty::Create(false)) {}
 void BaseToggleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "startdisabled", false))
-			m_bStartDisabled = pragma::util::to_boolean(kvData.value);
+			m_bStartDisabled = util::to_boolean(kvData.value);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(pragma::string::compare<std::string>(inputData.input, "enable", false) || pragma::string::compare<std::string>(inputData.input, "turnon", false))
 			TurnOn();
@@ -47,8 +47,8 @@ void BaseToggleComponent::Initialize()
 		else if(pragma::string::compare<std::string>(inputData.input, "toggle", false))
 			Toggle();
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 	m_netEvToggleState = SetupNetEvent("set_toggle_state");
 	GetEntity().AddComponent("io");
@@ -77,7 +77,7 @@ void BaseToggleComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t versi
 	SetTurnedOn(isTurnedOn);
 }
 
-bool BaseToggleComponent::ToggleInput(std::string input, pragma::ecs::BaseEntity *, pragma::ecs::BaseEntity *, std::string data)
+bool BaseToggleComponent::ToggleInput(std::string input, ecs::BaseEntity *, ecs::BaseEntity *, std::string data)
 {
 	if(input == "turnon")
 		TurnOn();
@@ -95,7 +95,7 @@ void BaseToggleComponent::TurnOn()
 {
 	*m_bTurnedOn = true;
 
-	auto *pIoComponent = static_cast<pragma::BaseIOComponent *>(GetEntity().FindComponent("io").get());
+	auto *pIoComponent = static_cast<BaseIOComponent *>(GetEntity().FindComponent("io").get());
 	if(pIoComponent != nullptr)
 		pIoComponent->TriggerOutput("OnActivate", &GetEntity());
 
@@ -105,7 +105,7 @@ void BaseToggleComponent::TurnOff()
 {
 	*m_bTurnedOn = false;
 
-	auto *pIoComponent = static_cast<pragma::BaseIOComponent *>(GetEntity().FindComponent("io").get());
+	auto *pIoComponent = static_cast<BaseIOComponent *>(GetEntity().FindComponent("io").get());
 	if(pIoComponent != nullptr)
 		pIoComponent->TriggerOutput("OnDeactivate", &GetEntity());
 
@@ -119,7 +119,7 @@ void BaseToggleComponent::Toggle()
 	}
 	TurnOn();
 }
-const pragma::util::PBoolProperty &BaseToggleComponent::GetTurnedOnProperty() const { return m_bTurnedOn; }
+const util::PBoolProperty &BaseToggleComponent::GetTurnedOnProperty() const { return m_bTurnedOn; }
 void BaseToggleComponent::SetTurnedOn(bool b)
 {
 	if(*m_bTurnedOn == b)

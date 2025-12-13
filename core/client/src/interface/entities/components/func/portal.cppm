@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CFuncPortalComponent final : public BaseFuncPortalComponent {
 		  public:
-			CFuncPortalComponent(pragma::ecs::BaseEntity &ent) : BaseFuncPortalComponent(ent) {}
+			CFuncPortalComponent(ecs::BaseEntity &ent) : BaseFuncPortalComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};

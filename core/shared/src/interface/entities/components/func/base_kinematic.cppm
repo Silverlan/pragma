@@ -25,13 +25,13 @@ export namespace pragma {
 		std::string m_kvStartSound;
 		std::shared_ptr<audio::ALSound> m_startSound;
 
-		pragma::NetEventId m_netEvStartForward = pragma::INVALID_NET_EVENT;
-		pragma::NetEventId m_netEvStartBackward = pragma::INVALID_NET_EVENT;
+		NetEventId m_netEvStartForward = INVALID_NET_EVENT;
+		NetEventId m_netEvStartBackward = INVALID_NET_EVENT;
 	  protected:
 		void UpdateTickPolicy();
 		virtual void StartForward();
 		virtual void StartBackward();
 	  private:
-		void MoveToTarget(pragma::ecs::BaseEntity *node, float speed);
+		void MoveToTarget(ecs::BaseEntity *node, float speed);
 	};
 };

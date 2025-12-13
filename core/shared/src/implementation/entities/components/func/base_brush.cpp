@@ -12,15 +12,15 @@ void BaseFuncBrushComponent::Initialize()
 {
 	BaseFuncSurfaceMaterialComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "solidity", false))
-			m_kvSolid = pragma::util::to_boolean(kvData.value);
+			m_kvSolid = util::to_boolean(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "surface_material", false))
 			m_kvSurfaceMaterial = kvData.value;
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();

@@ -12,23 +12,23 @@ export import :types;
 
 export {
 	namespace pragma::LuaCore {
-		class DLLNETWORK LuaWorker : public pragma::util::ParallelWorker<luabind::object> {
+		class DLLNETWORK LuaWorker : public util::ParallelWorker<luabind::object> {
 		  public:
 			enum class TaskStatus : uint8_t {
 				Complete = 0,
 				Pending,
 			};
 
-			LuaWorker(pragma::Game &game, const std::string &name);
+			LuaWorker(Game &game, const std::string &name);
 			virtual ~LuaWorker() override;
 			virtual luabind::object GetResult() override;
 			virtual void Wait() override;
 			void SetResult(const luabind::object &result);
 			void AddTask(const luabind::object &subJob, const Lua::func<bool> &onCompleteTask, float taskProgress);
-			void AddLuaTask(const std::shared_ptr<pragma::util::ParallelJob<luabind::object>> &subJob, float taskProgress);
-			void AddLuaTask(const std::shared_ptr<pragma::util::ParallelJob<luabind::object>> &subJob, const Lua::func<bool> &onCompleteTask, float taskProgress);
+			void AddLuaTask(const std::shared_ptr<util::ParallelJob<luabind::object>> &subJob, float taskProgress);
+			void AddLuaTask(const std::shared_ptr<util::ParallelJob<luabind::object>> &subJob, const Lua::func<bool> &onCompleteTask, float taskProgress);
 			void AddLuaTask(const Lua::func<TaskStatus> &task, const Lua::func<bool> &cancel, float taskProgress);
-			void AddCppTask(const std::shared_ptr<pragma::util::BaseParallelJob> &subJob, const std::function<void()> &onComplete, float taskProgress);
+			void AddCppTask(const std::shared_ptr<util::BaseParallelJob> &subJob, const std::function<void()> &onComplete, float taskProgress);
 			void CallOnComplete(const Lua::func<void> &func);
 			void UpdateProgress(float progress);
 			void SetProgressCallback(const Lua::func<float> &func);
@@ -38,7 +38,7 @@ export {
 			void Finalize();
 			void Update();
 			template<typename TJob, typename... TARGS>
-			friend pragma::util::ParallelJob<typename TJob::RESULT_TYPE> pragma::util::create_parallel_job(TARGS &&...args);
+			friend util::ParallelJob<typename TJob::RESULT_TYPE> util::create_parallel_job(TARGS &&...args);
 
 			struct Task {
 				std::function<TaskStatus(const Task &)> update;

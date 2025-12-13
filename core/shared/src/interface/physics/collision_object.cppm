@@ -52,9 +52,9 @@ export {
 
 			UInt32 GetBoneID() const;
 			void SetBoneID(UInt32 id);
-			void SetCollisionShape(pragma::physics::IShape *shape);
-			const pragma::physics::IShape *GetCollisionShape() const;
-			pragma::physics::IShape *GetCollisionShape();
+			void SetCollisionShape(IShape *shape);
+			const IShape *GetCollisionShape() const;
+			IShape *GetCollisionShape();
 
 			virtual bool IsRigid() const;
 			virtual bool IsGhost() const;
@@ -65,7 +65,7 @@ export {
 			virtual void SetTrigger(bool bTrigger) = 0;
 			virtual bool IsTrigger() const = 0;
 
-			virtual void TransformLocalPose(const pragma::math::Transform &t) = 0;
+			virtual void TransformLocalPose(const math::Transform &t) = 0;
 
 			virtual void SetActivationState(ActivationState state) = 0;
 			virtual ActivationState GetActivationState() const = 0;
@@ -80,10 +80,10 @@ export {
 			virtual void SetPos(const Vector3 &pos) = 0;
 			virtual Quat GetRotation() const = 0;
 			virtual void SetRotation(const Quat &rot) = 0;
-			virtual pragma::math::Transform GetBaseTransform() = 0;
-			virtual void SetBaseTransform(const pragma::math::Transform &t) = 0;
-			virtual pragma::math::Transform GetWorldTransform() = 0;
-			virtual void SetWorldTransform(const pragma::math::Transform &t) = 0;
+			virtual math::Transform GetBaseTransform() = 0;
+			virtual void SetBaseTransform(const math::Transform &t) = 0;
+			virtual math::Transform GetWorldTransform() = 0;
+			virtual void SetWorldTransform(const math::Transform &t) = 0;
 			virtual void WakeUp(bool forceActivation = false) = 0;
 			virtual void PutToSleep() = 0;
 			bool IsAsleep() const;
@@ -95,10 +95,10 @@ export {
 			virtual bool IsSimulationEnabled() const = 0;
 			virtual void SetCollisionsEnabled(bool enabled) = 0;
 
-			void SetCollisionFilterGroup(pragma::physics::CollisionMask group);
-			pragma::physics::CollisionMask GetCollisionFilterGroup() const;
-			void SetCollisionFilterMask(pragma::physics::CollisionMask mask);
-			pragma::physics::CollisionMask GetCollisionFilterMask() const;
+			void SetCollisionFilterGroup(CollisionMask group);
+			CollisionMask GetCollisionFilterGroup() const;
+			void SetCollisionFilterMask(CollisionMask mask);
+			CollisionMask GetCollisionFilterMask() const;
 			virtual void SetSleepReportEnabled(bool reportEnabled) = 0;
 			virtual bool IsSleepReportEnabled() const = 0;
 
@@ -127,21 +127,21 @@ export {
 			virtual IGhostObject *GetGhostObject();
 			const IGhostObject *GetGhostObject() const;
 
-			virtual void InitializeLuaHandle(const pragma::util::TWeakSharedHandle<IBase> &handle) override;
+			virtual void InitializeLuaHandle(const util::TWeakSharedHandle<IBase> &handle) override;
 		  protected:
-			ICollisionObject(pragma::physics::IEnvironment &env, pragma::physics::IShape &shape);
-			virtual void ApplyCollisionShape(pragma::physics::IShape *optShape) = 0;
-			virtual void DoSetCollisionFilterGroup(pragma::physics::CollisionMask group) = 0;
-			virtual void DoSetCollisionFilterMask(pragma::physics::CollisionMask mask) = 0;
+			ICollisionObject(IEnvironment &env, IShape &shape);
+			virtual void ApplyCollisionShape(IShape *optShape) = 0;
+			virtual void DoSetCollisionFilterGroup(CollisionMask group) = 0;
+			virtual void DoSetCollisionFilterMask(CollisionMask mask) = 0;
 			virtual void DoSpawn() override;
 
-			std::shared_ptr<pragma::physics::IShape> m_shape;
+			std::shared_ptr<IShape> m_shape;
 			UInt32 m_boneId = 0u;
 			Vector3 m_origin = {};
 			StateFlags m_stateFlags = StateFlags::CCDEnabled;
 			int m_surfaceMaterial = 0u;
-			pragma::physics::CollisionMask m_collisionFilterGroup = pragma::physics::CollisionMask::Default;
-			pragma::physics::CollisionMask m_collisionFilterMask = pragma::physics::CollisionMask::Default;
+			CollisionMask m_collisionFilterGroup = CollisionMask::Default;
+			CollisionMask m_collisionFilterMask = CollisionMask::Default;
 
 			void UpdateSurfaceMaterial();
 		};
@@ -203,7 +203,7 @@ export {
 			virtual void SetKinematic(bool bKinematic) = 0;
 			virtual bool IsKinematic() const = 0;
 		  protected:
-			IRigidBody(IEnvironment &env, pragma::physics::IShape &shape);
+			IRigidBody(IEnvironment &env, IShape &shape);
 		};
 
 		class DLLNETWORK ISoftBody : virtual public ICollisionObject {
@@ -226,8 +226,8 @@ export {
 			virtual bool MeshVertexIndexToNodeIndex(uint16_t meshVertexIndex, uint16_t &nodeIndex) const = 0;
 			virtual bool NodeIndexToMeshVertexIndex(uint16_t nodeIndex, uint16_t &meshVertexIndex) const = 0;
 
-			virtual void SetSubMesh(const pragma::geometry::ModelSubMesh &subMesh, const std::vector<uint16_t> &meshVertexIndicesToLocalVertexIndices) = 0;
-			pragma::geometry::ModelSubMesh *GetSubMesh() const;
+			virtual void SetSubMesh(const geometry::ModelSubMesh &subMesh, const std::vector<uint16_t> &meshVertexIndicesToLocalVertexIndices) = 0;
+			geometry::ModelSubMesh *GetSubMesh() const;
 
 			virtual void UpdateLinearVelocity() = 0;
 
@@ -312,8 +312,8 @@ export {
 			virtual float GetMaterialLinearStiffnessCoefficient(uint32_t matId) const = 0;
 			virtual float GetMaterialVolumeStiffnessCoefficient(uint32_t matId) const = 0;
 		  protected:
-			ISoftBody(IEnvironment &env, pragma::physics::IShape &shape, const std::vector<uint16_t> &meshVertIndicesToPhysIndices);
-			std::weak_ptr<pragma::geometry::ModelSubMesh> m_subMesh = {};
+			ISoftBody(IEnvironment &env, IShape &shape, const std::vector<uint16_t> &meshVertIndicesToPhysIndices);
+			std::weak_ptr<geometry::ModelSubMesh> m_subMesh = {};
 		};
 		using namespace pragma::math::scoped_enum::bitwise;
 

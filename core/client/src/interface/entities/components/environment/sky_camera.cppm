@@ -15,13 +15,13 @@ export {
 	namespace pragma {
 		class DLLCLIENT CSkyCameraComponent final : public BaseEntityComponent {
 		  public:
-			CSkyCameraComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+			CSkyCameraComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void OnRemove() override;
 			virtual void OnEntitySpawn() override;
 			virtual void InitializeLuaObject(lua::State *l) override;
-			void BuildSkyMeshRenderQueues(const pragma::CSceneComponent &scene, rendering::RenderFlags renderFlags, pragma::rendering::RenderMask renderMask, bool enableClipping, rendering::RenderQueue &outRenderQueue, rendering::RenderQueue &outTranslucentRenderQueue,
-			  pragma::CRasterizationRendererComponent *optRasterizationRenderer = nullptr, bool waitForRenderQueues = true) const;
+			void BuildSkyMeshRenderQueues(const CSceneComponent &scene, rendering::RenderFlags renderFlags, rendering::RenderMask renderMask, bool enableClipping, rendering::RenderQueue &outRenderQueue, rendering::RenderQueue &outTranslucentRenderQueue,
+			  CRasterizationRendererComponent *optRasterizationRenderer = nullptr, bool waitForRenderQueues = true) const;
 
 			float GetSkyboxScale() const;
 		  private:
@@ -33,17 +33,17 @@ export {
 				CallbackHandle renderPrepass = {};
 				CallbackHandle updateRenderBuffers = {};
 
-				std::shared_ptr<pragma::rendering::RenderQueue> renderQueue = nullptr;
-				std::shared_ptr<pragma::rendering::RenderQueue> renderQueueTranslucent = nullptr;
+				std::shared_ptr<rendering::RenderQueue> renderQueue = nullptr;
+				std::shared_ptr<rendering::RenderQueue> renderQueueTranslucent = nullptr;
 			};
 			void UpdateScenes();
 			void UpdateToggleState();
-			void BindToShader(pragma::rendering::BaseRenderProcessor &processor) const;
-			void UnbindFromShader(pragma::rendering::BaseRenderProcessor &processor) const;
-			void BuildRenderQueues(const pragma::rendering::DrawSceneInfo &drawSceneInfo, SceneData &sceneData);
+			void BindToShader(rendering::BaseRenderProcessor &processor) const;
+			void UnbindFromShader(rendering::BaseRenderProcessor &processor) const;
+			void BuildRenderQueues(const rendering::DrawSceneInfo &drawSceneInfo, SceneData &sceneData);
 
 			float m_skyboxScale = 1.f;
-			std::unordered_map<pragma::CSceneComponent::SceneIndex, std::shared_ptr<SceneData>> m_sceneData;
+			std::unordered_map<CSceneComponent::SceneIndex, std::shared_ptr<SceneData>> m_sceneData;
 		};
 	};
 

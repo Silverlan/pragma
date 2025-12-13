@@ -12,9 +12,9 @@ export import pragma.client_manager;
 
 export namespace pragma::networking {
 	class StandardClient;
-	class NWMClientConnection : public nwm::Client, public pragma::networking::MessageTracker {
+	class NWMClientConnection : public nwm::Client, public MessageTracker {
 	  public:
-		friend nwm::Client;
+		friend Client;
 		static std::unique_ptr<NWMClientConnection> Create(const std::string &serverIp, unsigned short serverPort);
 		void SetClient(StandardClient &client);
 
@@ -42,7 +42,7 @@ export namespace pragma::networking {
 		virtual bool SendPacket(Protocol protocol, NetPacket &packet, Error &outErr) override;
 		virtual bool IsRunning() const override;
 		virtual bool IsDisconnected() const override;
-		virtual bool PollEvents(pragma::networking::Error &outErr) override;
+		virtual bool PollEvents(Error &outErr) override;
 		virtual uint16_t GetLatency() const override;
 		virtual void SetTimeoutDuration(float duration) override;
 		virtual std::optional<std::string> GetIP() const override;

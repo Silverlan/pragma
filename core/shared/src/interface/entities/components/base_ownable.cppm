@@ -11,28 +11,28 @@ export import :entities.property;
 
 export namespace pragma {
 	struct DLLNETWORK CEOnOwnerChanged : public ComponentEvent {
-		CEOnOwnerChanged(pragma::ecs::BaseEntity *oldOwner, pragma::ecs::BaseEntity *newOwner);
+		CEOnOwnerChanged(ecs::BaseEntity *oldOwner, ecs::BaseEntity *newOwner);
 		virtual void PushArguments(lua::State *l) override;
-		pragma::ecs::BaseEntity *oldOwner;
-		pragma::ecs::BaseEntity *newOwner;
+		ecs::BaseEntity *oldOwner;
+		ecs::BaseEntity *newOwner;
 	};
 	namespace baseOwnableComponent {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_OWNER_CHANGED;
 	}
 	class DLLNETWORK BaseOwnableComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
-		const pragma::PEntityProperty &GetOwnerProperty() const;
-		void SetOwner(pragma::ecs::BaseEntity &owner);
+		const PEntityProperty &GetOwnerProperty() const;
+		void SetOwner(ecs::BaseEntity &owner);
 		void ClearOwner();
-		pragma::ecs::BaseEntity *GetOwner();
-		const pragma::ecs::BaseEntity *GetOwner() const;
+		ecs::BaseEntity *GetOwner();
+		const ecs::BaseEntity *GetOwner() const;
 	  protected:
-		BaseOwnableComponent(pragma::ecs::BaseEntity &ent);
-		virtual void SetOwner(pragma::ecs::BaseEntity *owner);
-		pragma::NetEventId m_netEvSetOwner = pragma::INVALID_NET_EVENT;
-		pragma::PEntityProperty m_owner;
+		BaseOwnableComponent(ecs::BaseEntity &ent);
+		virtual void SetOwner(ecs::BaseEntity *owner);
+		NetEventId m_netEvSetOwner = INVALID_NET_EVENT;
+		PEntityProperty m_owner;
 	};
 };

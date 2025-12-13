@@ -17,7 +17,7 @@ export namespace pragma {
 		std::string name;
 		uint32_t weight;
 		mutable CallbackHandle render;
-		std::function<PostProcessingEffectData::Flags()> getFlags = nullptr;
+		std::function<Flags()> getFlags = nullptr;
 	};
 	namespace cRendererComponent {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_RELOAD_RENDER_TARGET;
@@ -38,23 +38,23 @@ export namespace pragma {
 	  public:
 		enum class StandardPostProcessingWeight : uint32_t { Fog = 100'000, MotionBlur = 200'000, DoF = 300'000, Bloom = 400'000, ToneMapping = 500'000, Fxaa = 600'000 };
 
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		CRendererComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CRendererComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 
-		void RecordCommandBuffers(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
-		void Render(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void RecordCommandBuffers(const rendering::DrawSceneInfo &drawSceneInfo);
+		void Render(const rendering::DrawSceneInfo &drawSceneInfo);
 
-		CallbackHandle AddPostProcessingEffect(const std::string &name, const std::function<void(const pragma::rendering::DrawSceneInfo &)> &render, uint32_t weight, const std::function<PostProcessingEffectData::Flags()> &fGetFlags = nullptr);
+		CallbackHandle AddPostProcessingEffect(const std::string &name, const std::function<void(const rendering::DrawSceneInfo &)> &render, uint32_t weight, const std::function<PostProcessingEffectData::Flags()> &fGetFlags = nullptr);
 		void RemovePostProcessingEffect(const std::string &name);
 		const std::vector<PostProcessingEffectData> &GetPostProcessingEffects() const;
 
-		bool ReloadRenderTarget(pragma::CSceneComponent &scene, uint32_t width, uint32_t height);
+		bool ReloadRenderTarget(CSceneComponent &scene, uint32_t width, uint32_t height);
 
 		void EndRendering();
-		void BeginRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void BeginRendering(const rendering::DrawSceneInfo &drawSceneInfo);
 		bool ReloadBloomRenderTarget(uint32_t width);
 
 		prosper::Texture *GetSceneTexture();
@@ -62,7 +62,7 @@ export namespace pragma {
 		prosper::Texture *GetHDRPresentationTexture();
 
 		void UpdateRenderSettings();
-		void UpdateCameraData(pragma::CSceneComponent &scene, pragma::CameraData &cameraData);
+		void UpdateCameraData(CSceneComponent &scene, CameraData &cameraData);
 		void UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		uint32_t GetWidth() const { return m_width; }
 		uint32_t GetHeight() const { return m_height; }
@@ -73,10 +73,10 @@ export namespace pragma {
 	};
 
 	struct DLLCLIENT CEReloadRenderTarget : public ComponentEvent {
-		CEReloadRenderTarget(pragma::CSceneComponent &scene, uint32_t width, uint32_t height);
+		CEReloadRenderTarget(CSceneComponent &scene, uint32_t width, uint32_t height);
 		virtual void PushArguments(lua::State *l) override;
 		virtual void HandleReturnValues(lua::State *l) override;
-		pragma::CSceneComponent &scene;
+		CSceneComponent &scene;
 		uint32_t width;
 		uint32_t height;
 
@@ -93,16 +93,16 @@ export namespace pragma {
 	};
 
 	struct DLLCLIENT CEBeginRendering : public ComponentEvent {
-		CEBeginRendering(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		CEBeginRendering(const rendering::DrawSceneInfo &drawSceneInfo);
 		virtual void PushArguments(lua::State *l) override;
-		const pragma::rendering::DrawSceneInfo &drawSceneInfo;
+		const rendering::DrawSceneInfo &drawSceneInfo;
 	};
 
 	struct DLLCLIENT CEUpdateCameraData : public ComponentEvent {
-		CEUpdateCameraData(pragma::CSceneComponent &scene, pragma::CameraData &cameraData);
+		CEUpdateCameraData(CSceneComponent &scene, CameraData &cameraData);
 		virtual void PushArguments(lua::State *l) override {}
-		pragma::CSceneComponent &scene;
-		pragma::CameraData &cameraData;
+		CSceneComponent &scene;
+		CameraData &cameraData;
 	};
 
 	struct DLLCLIENT CEGetSceneTexture : public ComponentEvent {
@@ -114,9 +114,9 @@ export namespace pragma {
 	};
 
 	struct DLLCLIENT CERender : public ComponentEvent {
-		CERender(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		CERender(const rendering::DrawSceneInfo &drawSceneInfo);
 		virtual void PushArguments(lua::State *l) override;
-		const pragma::rendering::DrawSceneInfo &drawSceneInfo;
+		const rendering::DrawSceneInfo &drawSceneInfo;
 	};
 
 	struct DLLCLIENT CEOnRenderTargetReloaded : public ComponentEvent {

@@ -12,19 +12,19 @@ export import pragma.shared;
 
 export namespace Lua {
 	namespace asset_client {
-		DLLCLIENT void register_library(Lua::Interface &lua, luabind::module_ &modAsset);
-		DLLCLIENT msys::Material *get_error_material();
-		DLLCLIENT std::shared_ptr<msys::Material> create_material(const std::string &identifier, const std::string &shader);
-		DLLCLIENT std::shared_ptr<msys::Material> create_material(const std::string &shader);
-		DLLCLIENT std::shared_ptr<msys::Material> create_material(const ::udm::AssetData &data);
-		DLLCLIENT msys::Material *get_material(const std::string &identifier);
+		DLLCLIENT void register_library(Interface &lua, luabind::module_ &modAsset);
+		DLLCLIENT pragma::material::Material *get_error_material();
+		DLLCLIENT std::shared_ptr<pragma::material::Material> create_material(const std::string &identifier, const std::string &shader);
+		DLLCLIENT std::shared_ptr<pragma::material::Material> create_material(const std::string &shader);
+		DLLCLIENT std::shared_ptr<pragma::material::Material> create_material(const ::udm::AssetData &data);
+		DLLCLIENT pragma::material::Material *get_material(const std::string &identifier);
 	};
 	namespace engine {
 		DLLCLIENT void precache_material(lua::State *l, const std::string &mat);
 		DLLCLIENT void precache_model(lua::State *l, const std::string &mdl);
-		DLLCLIENT msys::Material *load_material(lua::State *l, const std::string &mat, bool reload, bool loadInstantly);
-		DLLCLIENT msys::Material *load_material(lua::State *l, const std::string &mat, bool reload);
-		DLLCLIENT msys::Material *load_material(lua::State *l, const std::string &mat);
+		DLLCLIENT pragma::material::Material *load_material(lua::State *l, const std::string &mat, bool reload, bool loadInstantly);
+		DLLCLIENT pragma::material::Material *load_material(lua::State *l, const std::string &mat, bool reload);
+		DLLCLIENT pragma::material::Material *load_material(lua::State *l, const std::string &mat);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua::State *l, const std::string &name, pragma::util::AssetLoadFlags loadFlags);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua::State *l, const std::string &name);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua::State *l, const LFile &file, const std::string &cacheName, pragma::util::AssetLoadFlags loadFlags);

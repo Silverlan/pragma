@@ -9,22 +9,22 @@ import se_script;
 
 bool pragma::util::port_sound_script(pragma::NetworkState *nw, const std::string &path)
 {
-	static auto *ptrOpenArchiveFile = reinterpret_cast<void (*)(const std::string &, VFilePtr &, const std::optional<std::string> &)>(pragma::util::impl::get_module_func(nw, "open_archive_file"));
+	static auto *ptrOpenArchiveFile = reinterpret_cast<void (*)(const std::string &,fs::VFilePtr &, const std::optional<std::string> &)>(pragma::util::impl::get_module_func(nw, "open_archive_file"));
 	if(ptrOpenArchiveFile == nullptr)
 		return false;
-	VFilePtr f = nullptr;
+	fs::VFilePtr f = nullptr;
 	ptrOpenArchiveFile(path, f, {});
 	if(f == nullptr)
 		return false;
 	source_engine::script::ScriptBlock root {};
 	if(source_engine::script::read_script(f, root) != source_engine::script::ResultCode::Ok)
 		return false;
-	auto outPath = pragma::util::IMPORT_PATH + FileManager::GetCanonicalizedPath(path);
-	if(pragma::string::substr(outPath, 0, 8) == std::string("scripts") + FileManager::GetDirectorySeparator())
+	auto outPath = pragma::util::IMPORT_PATH + fs::get_canonicalized_path(path);
+	if(pragma::string::substr(outPath, 0, 8) == std::string("scripts") + fs::get_directory_separator())
 		outPath = "scripts/sounds/" + outPath.substr(8);
 	ufile::remove_extension_from_filename(outPath, std::array<std::string, 1> {"txt"});
 	outPath += ".udm";
-	FileManager::CreatePath(ufile::get_path_from_filename(outPath).c_str());
+	fs::create_path(ufile::get_path_from_filename(outPath));
 
 	auto udmData = udm::Data::Create();
 	auto outData = udmData->GetAssetData();
@@ -115,7 +115,7 @@ bool pragma::util::port_sound_script(pragma::NetworkState *nw, const std::string
 		udmEvent["mode"] = mode;
 	}
 
-	auto fOut = FileManager::OpenFile<VFilePtrReal>(outPath.c_str(), "w");
+	auto fOut = fs::open_file<fs::VFilePtrReal>(outPath, fs::FileMode::Write);
 	if(fOut == nullptr)
 		return false;
 	return udmData->SaveAscii(fOut, udm::AsciiSaveFlags::Default);

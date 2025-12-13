@@ -8,7 +8,7 @@ import :entities.components.environment.effects.base_particle_system;
 
 using namespace pragma;
 
-void BaseEnvParticleSystemComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void BaseEnvParticleSystemComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseEnvParticleSystemComponent;
 
@@ -24,8 +24,8 @@ void BaseEnvParticleSystemComponent::RegisterMembers(pragma::EntityComponentMana
 		  "particleSystemFile", "", AttributeSpecializationType::File);
 		auto &metaData = memberInfo.AddMetaData();
 		metaData["assetType"] = "particlesystem";
-		metaData["rootPath"] = pragma::util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::ParticleSystem)).GetString();
-		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::ParticleSystem, pragma::asset::FormatType::All);
+		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(asset::Type::ParticleSystem)).GetString();
+		metaData["extensions"] = pragma::asset::get_supported_extensions(asset::Type::ParticleSystem, asset::FormatType::All);
 		metaData["stripRootPath"] = true;
 		metaData["stripExtension"] = true;
 		registerMember(std::move(memberInfo));
@@ -42,25 +42,25 @@ void BaseEnvParticleSystemComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "particle", false))
 			m_particleName = kvData.value;
 		else if(pragma::string::compare<std::string>(kvData.key, "particle_file", false))
 			SetParticleFile(kvData.value);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(pragma::string::compare<std::string>(inputData.input, "setcontinuous", false)) {
-			auto b = (pragma::util::to_int(inputData.data) == 0) ? false : true;
+			auto b = (util::to_int(inputData.data) == 0) ? false : true;
 			SetContinuous(b);
 		}
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -77,7 +77,7 @@ void BaseEnvParticleSystemComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 	auto flags = GetEntity().GetSpawnFlags();
 	UpdateRemoveOnComplete();
-	auto *pToggleComponent = static_cast<pragma::BaseToggleComponent *>(GetEntity().FindComponent("toggle").get());
+	auto *pToggleComponent = static_cast<BaseToggleComponent *>(GetEntity().FindComponent("toggle").get());
 	if((pToggleComponent == nullptr || pToggleComponent->IsTurnedOn()) && GetRemoveOnComplete())
 		GetEntity().RemoveSafely();
 }
@@ -107,7 +107,7 @@ void BaseEnvParticleSystemComponent::SetContinuous(bool b)
 	ent.SetSpawnFlags(spawnFlags);
 
 	UpdateRemoveOnComplete();
-	auto *pToggleComponent = static_cast<pragma::BaseToggleComponent *>(GetEntity().FindComponent("toggle").get());
+	auto *pToggleComponent = static_cast<BaseToggleComponent *>(GetEntity().FindComponent("toggle").get());
 	if((pToggleComponent == nullptr || pToggleComponent->IsTurnedOn()) && GetRemoveOnComplete())
 		ent.RemoveSafely();
 }

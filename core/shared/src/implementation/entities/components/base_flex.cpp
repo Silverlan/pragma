@@ -9,12 +9,12 @@ import :entities.components.base_flex;
 using namespace pragma;
 
 ComponentEventId baseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED = INVALID_COMPONENT_ID;
-void BaseFlexComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void BaseFlexComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseEntityComponent::RegisterEvents(componentManager, registerEvent);
 	baseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED = registerEvent("ON_FLEX_CONTROLLER_CHANGED", ComponentEventInfo::Type::Explicit);
 }
-void BaseFlexComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void BaseFlexComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseFlexComponent;
 	{
@@ -31,12 +31,12 @@ void BaseFlexComponent::RegisterMembers(pragma::EntityComponentManager &componen
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseFlexComponent::BaseFlexComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseFlexComponent::BaseFlexComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseFlexComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		auto &changeData = static_cast<CEOnModelChanged &>(evData.get());
 		OnModelChanged(changeData.model);
 	});
@@ -45,11 +45,11 @@ void BaseFlexComponent::Initialize()
 	if(mdl)
 		OnModelChanged(mdl);
 }
-void BaseFlexComponent::SetFlexControllerUpdateListenersEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners, enabled); }
-bool BaseFlexComponent::AreFlexControllerUpdateListenersEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners); }
-void BaseFlexComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model)
+void BaseFlexComponent::SetFlexControllerUpdateListenersEnabled(bool enabled) { math::set_flag(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners, enabled); }
+bool BaseFlexComponent::AreFlexControllerUpdateListenersEnabled() const { return math::is_flag_set(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners); }
+void BaseFlexComponent::OnModelChanged(const std::shared_ptr<asset::Model> &model)
 {
-	pragma::util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
+	util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
 	ClearMembers();
 	if(!model)
 		return;
@@ -59,15 +59,15 @@ void BaseFlexComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Mode
 		const auto &name = flexController.name;
 		auto lname = name;
 		// pragma::string::to_lower(lname);
-		auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
+		auto memberInfo = ComponentMemberInfo::CreateDummy();
 		memberInfo.SetName("flexController/" + lname);
 		memberInfo.type = ents::EntityMemberType::Float;
 		memberInfo.SetMin(flexController.min);
 		memberInfo.SetMax(flexController.max);
 		memberInfo.userIndex = idx++;
 		memberInfo.SetGetterFunction<BaseFlexComponent, float,
-		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseFlexComponent &, float &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseFlexComponent &component, float &outValue) { outValue = component.GetFlexController(memberInfo.userIndex); })>();
-		memberInfo.SetSetterFunction<BaseFlexComponent, float, static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseFlexComponent &, const float &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseFlexComponent &component, const float &value) {
+		  static_cast<void (*)(const ComponentMemberInfo &, BaseFlexComponent &, float &)>([](const ComponentMemberInfo &memberInfo, BaseFlexComponent &component, float &outValue) { outValue = component.GetFlexController(memberInfo.userIndex); })>();
+		memberInfo.SetSetterFunction<BaseFlexComponent, float, static_cast<void (*)(const ComponentMemberInfo &, BaseFlexComponent &, const float &)>([](const ComponentMemberInfo &memberInfo, BaseFlexComponent &component, const float &value) {
 			component.SetFlexController(memberInfo.userIndex, value, 0.f, component.AreFlexControllerLimitsEnabled());
 		})>();
 		RegisterMember(std::move(memberInfo));
@@ -112,8 +112,8 @@ bool BaseFlexComponent::GetScaledFlexController(uint32_t flexId, float &val) con
 	return true;
 }
 
-void BaseFlexComponent::SetFlexControllerLimitsEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::EnableFlexControllerLimits, enabled); }
-bool BaseFlexComponent::AreFlexControllerLimitsEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableFlexControllerLimits); }
+void BaseFlexComponent::SetFlexControllerLimitsEnabled(bool enabled) { math::set_flag(m_stateFlags, StateFlags::EnableFlexControllerLimits, enabled); }
+bool BaseFlexComponent::AreFlexControllerLimitsEnabled() const { return math::is_flag_set(m_stateFlags, StateFlags::EnableFlexControllerLimits); }
 
 void BaseFlexComponent::SetFlexControllerScale(float scale) { m_flexControllerScale = scale; }
 float BaseFlexComponent::GetFlexControllerScale() const { return m_flexControllerScale; }
@@ -128,7 +128,7 @@ float BaseFlexComponent::GetFlexController(const std::string &flexController) co
 
 /////////////////
 
-CEOnFlexControllerChanged::CEOnFlexControllerChanged(pragma::animation::FlexControllerId flexControllerId, float value) : flexControllerId {flexControllerId}, value {value} {}
+CEOnFlexControllerChanged::CEOnFlexControllerChanged(animation::FlexControllerId flexControllerId, float value) : flexControllerId {flexControllerId}, value {value} {}
 void CEOnFlexControllerChanged::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, flexControllerId);

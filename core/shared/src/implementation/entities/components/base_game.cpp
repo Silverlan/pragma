@@ -8,8 +8,8 @@ import :entities.components.base_game;
 
 using namespace pragma;
 
-void BaseGameComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
-BaseGameComponent::BaseGameComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+void BaseGameComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
+BaseGameComponent::BaseGameComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseGameComponent::Initialize() { BaseEntityComponent::Initialize(); }
 

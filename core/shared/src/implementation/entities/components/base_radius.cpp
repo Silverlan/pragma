@@ -8,9 +8,9 @@ import :entities.components.base_radius;
 
 using namespace pragma;
 
-ComponentEventId baseRadiusComponent::EVENT_ON_RADIUS_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseRadiusComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseRadiusComponent::EVENT_ON_RADIUS_CHANGED = registerEvent("ON_RADIUS_CHANGED", ComponentEventInfo::Type::Broadcast); }
-void BaseRadiusComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+ComponentEventId baseRadiusComponent::EVENT_ON_RADIUS_CHANGED = INVALID_COMPONENT_ID;
+void BaseRadiusComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseRadiusComponent::EVENT_ON_RADIUS_CHANGED = registerEvent("ON_RADIUS_CHANGED", ComponentEventInfo::Type::Broadcast); }
+void BaseRadiusComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseRadiusComponent;
 	using TRadius = float;
@@ -20,26 +20,26 @@ void BaseRadiusComponent::RegisterMembers(pragma::EntityComponentManager &compon
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseRadiusComponent::BaseRadiusComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_radius(pragma::util::FloatProperty::Create(0.f)) {}
+BaseRadiusComponent::BaseRadiusComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_radius(util::FloatProperty::Create(0.f)) {}
 void BaseRadiusComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "radius", false))
-			SetRadius(pragma::util::to_float(kvData.value));
+			SetRadius(util::to_float(kvData.value));
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(pragma::string::compare<std::string>(inputData.input, "setradius", false))
-			SetRadius(pragma::util::to_float(inputData.data));
+			SetRadius(util::to_float(inputData.data));
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -59,7 +59,7 @@ void BaseRadiusComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t versi
 	SetRadius(radius);
 }
 float BaseRadiusComponent::GetRadius() const { return *m_radius; }
-const pragma::util::PFloatProperty &BaseRadiusComponent::GetRadiusProperty() const { return m_radius; }
+const util::PFloatProperty &BaseRadiusComponent::GetRadiusProperty() const { return m_radius; }
 void BaseRadiusComponent::SetRadius(float radius)
 {
 	auto oldRadius = GetRadius();

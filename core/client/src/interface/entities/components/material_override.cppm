@@ -19,9 +19,9 @@ export namespace pragma {
 	class DLLCLIENT CMaterialOverrideComponent final : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		CMaterialOverrideComponent(pragma::ecs::BaseEntity &ent);
+		CMaterialOverrideComponent(ecs::BaseEntity &ent);
 		virtual ~CMaterialOverrideComponent() override;
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
@@ -29,28 +29,28 @@ export namespace pragma {
 		virtual void OnRemove() override;
 
 		void SetMaterialOverride(uint32_t idx, const std::string &matOverride);
-		void SetMaterialOverride(uint32_t idx, msys::CMaterial &mat);
+		void SetMaterialOverride(uint32_t idx, material::CMaterial &mat);
 		void ClearMaterialOverride(uint32_t idx);
 		void ClearMaterialOverrides();
-		msys::CMaterial *GetMaterialOverride(uint32_t idx) const;
-		msys::CMaterial *GetRenderMaterial(uint32_t idx) const;
+		material::CMaterial *GetMaterialOverride(uint32_t idx) const;
+		material::CMaterial *GetRenderMaterial(uint32_t idx) const;
 		size_t GetMaterialOverrideCount() const;
 
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 	  protected:
 		struct MaterialOverride {
-			msys::MaterialHandle materialOverride;
+			material::MaterialHandle materialOverride;
 		};
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		void PopulateProperties();
-		void UpdateMaterialOverride(uint32_t matIdx, msys::CMaterial &mat);
+		void UpdateMaterialOverride(uint32_t matIdx, material::CMaterial &mat);
 		std::vector<MaterialOverride> m_materialOverrides = {};
 	};
 
 	struct DLLCLIENT CEOnMaterialOverrideChanged : public ComponentEvent {
-		CEOnMaterialOverrideChanged(uint32_t idx, msys::CMaterial &mat);
+		CEOnMaterialOverrideChanged(uint32_t idx, material::CMaterial &mat);
 		virtual void PushArguments(lua::State *l) override;
 		uint32_t materialIndex;
-		msys::CMaterial &material;
+		material::CMaterial &material;
 	};
 };

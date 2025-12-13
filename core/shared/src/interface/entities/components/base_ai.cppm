@@ -31,7 +31,7 @@ export {
 					std::shared_ptr<PathInfo> pathInfo;
 					Vector3 start;
 					Vector3 end;
-					pragma::util::WeakHandle<BaseAIComponent> npc = {};
+					util::WeakHandle<BaseAIComponent> npc = {};
 				};
 				struct NavThread {
 					std::thread thread;
@@ -50,14 +50,14 @@ export {
 			enum class MoveResult : uint32_t { TargetUnreachable = 0, TargetReached, WaitingForPath, MovingToTarget };
 			enum class SnapshotFlags : uint8_t { None = 0u, Moving = 1u, MoveSpeed = Moving << 1, TurnSpeed = MoveSpeed << 1u, FaceTarget = TurnSpeed << 1u };
 			static const char *MoveResultToString(MoveResult result);
-			static void ReloadNavThread(pragma::Game &game);
+			static void ReloadNavThread(Game &game);
 			static void ReleaseNavThread();
 			struct DLLNETWORK MoveInfo {
 				MoveInfo() {}
-				MoveInfo(pragma::Activity act);
-				MoveInfo(pragma::Activity act, bool bMoveOnPath);
-				MoveInfo(pragma::Activity act, bool bMoveOnPath, const Vector3 &faceTarget, float moveSpeed, float turnSpeed);
-				pragma::Activity activity = pragma::Activity::Run;
+				MoveInfo(Activity act);
+				MoveInfo(Activity act, bool bMoveOnPath);
+				MoveInfo(Activity act, bool bMoveOnPath, const Vector3 &faceTarget, float moveSpeed, float turnSpeed);
+				Activity activity = Activity::Run;
 				bool moveOnPath = true;
 				Vector3 faceTarget = {std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()};
 				float moveSpeed = std::numeric_limits<float>::quiet_NaN();
@@ -71,7 +71,7 @@ export {
 			bool TurnStep(const Vector3 &target, const float *turnSpeed = nullptr);
 			void ClearLookTarget();
 			void SetLookTarget(const Vector3 &pos, float t = std::numeric_limits<float>::max());
-			void SetLookTarget(const pragma::ecs::BaseEntity &ent, float t = std::numeric_limits<float>::max());
+			void SetLookTarget(const ecs::BaseEntity &ent, float t = std::numeric_limits<float>::max());
 			Vector3 GetLookTarget() const;
 
 			void SetMoveSpeed(int32_t animId, float speed);
@@ -87,20 +87,20 @@ export {
 			virtual void OnPathChanged();
 			virtual void OnPathDestinationReached();
 			bool HasReachedDestination() const;
-			pragma::Activity GetMoveActivity() const;
+			Activity GetMoveActivity() const;
 			void StopMoving();
 			Vector3 GetUpDirection() const;
 			bool CanMove() const;
 
 			float GetMaxSpeed(bool bUseAnimSpeedIfAvailable = true) const;
 		  protected:
-			virtual void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model);
+			virtual void OnModelChanged(const std::shared_ptr<asset::Model> &model);
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 			static std::atomic<uint32_t> s_npcCount;
 			static std::shared_ptr<ai::navigation::NavThread> s_navThread;
 			//
 		  protected:
-			BaseAIComponent(pragma::ecs::BaseEntity &ent);
+			BaseAIComponent(ecs::BaseEntity &ent);
 			virtual ~BaseAIComponent() override;
 			void UpdateMovementProperties();
 			virtual void UpdateMovementProperties(MovementComponent &movementC);
@@ -124,7 +124,7 @@ export {
 				std::unique_ptr<float> moveSpeed = nullptr;
 				std::unique_ptr<float> turnSpeed = nullptr;
 				bool moveOnPath = false;
-				pragma::Activity moveActivity = pragma::Activity::Run;
+				Activity moveActivity = Activity::Run;
 				std::unique_ptr<Vector3> faceTarget = nullptr;
 				float destinationTolerance = 10.f;
 			} m_moveInfo;
@@ -155,7 +155,7 @@ export {
 			virtual void OnLookTargetChanged();
 			void ResetPath();
 
-			pragma::NetEventId m_netEvSetLookTarget = pragma::INVALID_NET_EVENT;
+			NetEventId m_netEvSetLookTarget = INVALID_NET_EVENT;
 			int m_seqIdle;
 			std::unordered_map<int32_t, float> m_animIdMoveSpeed;
 			std::unordered_map<std::string, float> m_animMoveSpeed;
@@ -170,12 +170,12 @@ export {
 			void ResolvePathObstruction(Vector3 &dir);
 
 			virtual void OnPathNodeChanged(uint32_t nodeIdx);
-			void BlendAnimationMovementMT(std::vector<pragma::math::Transform> &bonePoses, std::vector<Vector3> *boneScales);
+			void BlendAnimationMovementMT(std::vector<math::Transform> &bonePoses, std::vector<Vector3> *boneScales);
 			Vector2 CalcMovementSpeed() const;
 			float CalcAirMovementModifier() const;
 			float CalcMovementAcceleration() const;
 			Vector3 CalcMovementDirection() const;
-			virtual bool IsObstruction(const pragma::ecs::BaseEntity &ent) const;
+			virtual bool IsObstruction(const ecs::BaseEntity &ent) const;
 		};
 		using namespace pragma::math::scoped_enum::bitwise;
 	};

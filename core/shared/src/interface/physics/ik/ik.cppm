@@ -11,7 +11,7 @@ export import pragma.math;
 
 export namespace pragma::util {
 	namespace ik {
-		DLLNETWORK void get_local_transform(const Node &node, pragma::math::Transform &t);
+		DLLNETWORK void get_local_transform(const Node &node, math::Transform &t);
 		DLLNETWORK Quat get_rotation(const Node &node);
 	};
 };

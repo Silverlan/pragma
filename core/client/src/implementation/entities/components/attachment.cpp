@@ -18,7 +18,7 @@ void CAttachmentComponent::ReceiveData(NetPacket &packet)
 	if(bParent == true) {
 		auto att = packet->Read<int>();
 		auto bone = packet->Read<int>();
-		auto flags = packet->Read<pragma::FAttachmentMode>();
+		auto flags = packet->Read<FAttachmentMode>();
 		auto offset = packet->Read<Vector3>();
 		auto rot = packet->Read<Quat>();
 		auto bBoneMapping = packet->Read<Bool>();
@@ -33,7 +33,7 @@ void CAttachmentComponent::ReceiveData(NetPacket &packet)
 		}
 
 		auto hThis = GetHandle();
-		pragma::networking::read_unique_entity(packet, [this, hThis, att, bone, flags, offset, rot, bBoneMapping, boneMapping](pragma::ecs::BaseEntity *ent) {
+		networking::read_unique_entity(packet, [this, hThis, att, bone, flags, offset, rot, bBoneMapping, boneMapping](ecs::BaseEntity *ent) {
 			if(hThis.expired())
 				return;
 			if(m_attachment == nullptr)
@@ -50,10 +50,10 @@ void CAttachmentComponent::ReceiveData(NetPacket &packet)
 
 void CAttachmentComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseAttachmentComponent)); }
 
-void CAttachmentComponent::UpdateViewAttachmentOffset(pragma::ecs::BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly) const
+void CAttachmentComponent::UpdateViewAttachmentOffset(ecs::BaseEntity *ent, BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly) const
 {
-	auto *scene = pragma::get_cgame()->GetRenderScene<pragma::CSceneComponent>();
-	auto cam = scene ? scene->GetActiveCamera() : pragma::ComponentHandle<pragma::CCameraComponent> {};
+	auto *scene = get_cgame()->GetRenderScene<CSceneComponent>();
+	auto cam = scene ? scene->GetActiveCamera() : pragma::ComponentHandle<CCameraComponent> {};
 	if(cam.expired())
 		return;
 	auto trComponent = cam->GetEntity().GetTransformComponent();

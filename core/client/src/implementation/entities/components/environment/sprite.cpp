@@ -32,8 +32,8 @@ void CSpriteComponent::OnEntitySpawn()
 void CSpriteComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEnvSpriteComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(pragma::CColorComponent)) {
-		FlagCallbackForRemoval(static_cast<pragma::CColorComponent *>(&component)->GetColorProperty()->AddCallback([this](std::reference_wrapper<const Vector4> oldColor, std::reference_wrapper<const Vector4> color) { UpdateColor(); }), CallbackType::Component, &component);
+	if(typeid(component) == typeid(CColorComponent)) {
+		FlagCallbackForRemoval(static_cast<CColorComponent *>(&component)->GetColorProperty()->AddCallback([this](std::reference_wrapper<const Vector4> oldColor, std::reference_wrapper<const Vector4> color) { UpdateColor(); }), CallbackType::Component, &component);
 	}
 }
 
@@ -45,17 +45,17 @@ void CSpriteComponent::UpdateColor()
 		m_hParticle->SetColorFactor(colorFactor);
 }
 
-void CSpriteComponent::SetOrientationType(pragma::pts::ParticleOrientationType orientationType) { m_orientationType = orientationType; }
+void CSpriteComponent::SetOrientationType(pts::ParticleOrientationType orientationType) { m_orientationType = orientationType; }
 
-pragma::util::EventReply CSpriteComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply CSpriteComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvSpriteComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseEnvSpriteComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON)
 		StartParticle();
 	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		StopParticle();
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 
 void CSpriteComponent::StopParticle()
@@ -89,14 +89,14 @@ void CSpriteComponent::StartParticle()
 	auto &ent = GetEntity();
 	StopParticle();
 	auto startAlpha = (m_tFadeIn == 0.f) ? m_color.a : 0;
-	std::unordered_map<std::string, std::string> values = {{"maxparticles", "1"}, {"emission_rate", std::to_string(std::numeric_limits<uint16_t>::max())}, {"material", m_spritePath}, {"sort_particles", "0"}, {"orientation_type", std::to_string(pragma::math::to_integral(m_orientationType))},
+	std::unordered_map<std::string, std::string> values = {{"maxparticles", "1"}, {"emission_rate", std::to_string(std::numeric_limits<uint16_t>::max())}, {"material", m_spritePath}, {"sort_particles", "0"}, {"orientation_type", std::to_string(math::to_integral(m_orientationType))},
 	  {"cast_shadows", "0"}, {"static_scale", std::to_string(m_size)}, {"color", std::to_string(m_color.r) + " " + std::to_string(m_color.g) + " " + std::to_string(m_color.b) + " " + std::to_string(startAlpha)}, {"bloom_scale", std::to_string(m_bloomScale)}, {"move_with_emitter", "1"}};
 	auto spawnFlags = ent.GetSpawnFlags();
-	if(spawnFlags & pragma::math::to_integral(SpawnFlags::BlackToAlpha))
+	if(spawnFlags & math::to_integral(SpawnFlags::BlackToAlpha))
 		values.insert(std::make_pair("black_to_alpha", "1"));
-	if(spawnFlags & pragma::math::to_integral(SpawnFlags::NoSoftParticles))
+	if(spawnFlags & math::to_integral(SpawnFlags::NoSoftParticles))
 		values.insert(std::make_pair("soft_particles", "0"));
-	auto *pt = pragma::ecs::CParticleSystemComponent::Create(values);
+	auto *pt = ecs::CParticleSystemComponent::Create(values);
 	if(pt == nullptr)
 		return;
 	pt->AddInitializer("radius_random", std::unordered_map<std::string, std::string> {{"radius_min", std::to_string(m_size)}, {"radius_max", std::to_string(m_size)}});
@@ -121,19 +121,19 @@ void CSpriteComponent::StartParticle()
 	auto whAttComponent = pt->GetEntity().AddComponent<CAttachmentComponent>();
 	if(whAttComponent.valid()) {
 		AttachmentInfo attInfo {};
-		attInfo.flags = pragma::FAttachmentMode::SnapToOrigin | pragma::FAttachmentMode::UpdateEachFrame;
+		attInfo.flags = FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
 		whAttComponent->AttachToEntity(&ent, attInfo);
 	}
 	// We need to update the particle system position every frame
 	m_hCbRenderCallback = pt->AddRenderCallback([this]() {
 		auto &ent = GetEntity();
-		auto pAttComponent = ent.GetComponent<pragma::CAttachmentComponent>();
+		auto pAttComponent = ent.GetComponent<CAttachmentComponent>();
 		if(pAttComponent.valid())
 			pAttComponent->UpdateAttachmentOffset();
 	});
 
 	if(m_particleRenderMode != std::numeric_limits<uint32_t>::max())
-		pt->SetSceneRenderPass(static_cast<pragma::rendering::SceneRenderPass>(m_particleRenderMode));
+		pt->SetSceneRenderPass(static_cast<rendering::SceneRenderPass>(m_particleRenderMode));
 	pt->SetContinuous(true);
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentPt = pt->GetEntity().GetTransformComponent();
@@ -142,7 +142,7 @@ void CSpriteComponent::StartParticle()
 		pTrComponentPt->SetRotation(pTrComponent->GetRotation());
 	}
 	pt->Start();
-	m_hParticle = pt->GetHandle<pragma::ecs::CParticleSystemComponent>();
+	m_hParticle = pt->GetHandle<ecs::CParticleSystemComponent>();
 
 	UpdateColor();
 }

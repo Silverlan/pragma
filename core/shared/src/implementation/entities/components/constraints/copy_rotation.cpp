@@ -8,15 +8,15 @@ import :entities.components.constraints.copy_rotation;
 
 using namespace pragma;
 
-ConstraintCopyRotationComponent::ConstraintCopyRotationComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintCopyRotationComponent::ConstraintCopyRotationComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintCopyRotationComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
 	GetEntity().AddComponent<ConstraintSpaceComponent>();
-	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
+	BindEventUnhandled(constraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<ComponentEvent> evData) { ApplyConstraint(); });
 }
-void ConstraintCopyRotationComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintCopyRotationComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintCopyRotationComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
@@ -34,14 +34,14 @@ void ConstraintCopyRotationComponent::ApplyConstraint()
 	if(!constraintInfo || influence == 0.f)
 		return;
 	Quat rotDriven;
-	auto res = constraintInfo->drivenObjectC->GetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rotDriven);
+	auto res = constraintInfo->drivenObjectC->GetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rotDriven);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driven object of constraint '{}'.", constraintInfo->drivenObjectPropIdx, GetEntity().ToString());
 		return;
 	}
 
 	Quat rotDriver;
-	res = constraintInfo->driverC->GetTransformMemberRot(constraintInfo->driverPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDriverSpace()), rotDriver);
+	res = constraintInfo->driverC->GetTransformMemberRot(constraintInfo->driverPropIdx, static_cast<math::CoordinateSpace>(m_constraintC->GetDriverSpace()), rotDriver);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driver of constraint '{}'.", constraintInfo->driverPropIdx, GetEntity().ToString());
 		return;
@@ -55,5 +55,5 @@ void ConstraintCopyRotationComponent::ApplyConstraint()
 	}
 
 	rotDriver = uquat::slerp(rotDriven, rotDriver, influence);
-	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<pragma::math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rotDriver);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rotDriver);
 }

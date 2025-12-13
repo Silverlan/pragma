@@ -42,7 +42,7 @@ export {
 			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_POST_SPAWN;
 			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_REMOVE;
 		}
-		class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseEntityComponentSystem {
+		class DLLNETWORK BaseEntity : public BaseLuaHandle, public BaseEntityComponentSystem {
 		  public:
 			static constexpr auto PSAVE_IDENTIFIER = "PSAVE";
 			static constexpr uint32_t PSAVE_VERSION = 1;
@@ -62,17 +62,17 @@ export {
 				IsSpawning = Removed << 1u
 			};
 
-			static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+			static void RegisterEvents(EntityComponentManager &componentManager);
 
-			virtual pragma::GString GetClass() const;
+			virtual GString GetClass() const;
 			BaseEntity();
 			void Construct(unsigned int idx);
 			EntityHandle GetHandle() const;
 
-			const pragma::util::Uuid GetUuid() const { return m_uuid; }
-			void SetUuid(const pragma::util::Uuid &uuid);
+			const util::Uuid GetUuid() const { return m_uuid; }
+			void SetUuid(const util::Uuid &uuid);
 
-			friend pragma::Engine;
+			friend Engine;
 		  public:
 			StateFlags GetStateFlags() const;
 			bool HasStateFlag(StateFlags flag) const;
@@ -82,87 +82,87 @@ export {
 			virtual bool IsStatic() const;
 			bool IsDynamic() const;
 			virtual NetworkState *GetNetworkState() const = 0;
-			pragma::Game &GetGame() const;
+			Game &GetGame() const;
 
-			pragma::NetEventId FindNetEvent(const std::string &name) const;
+			NetEventId FindNetEvent(const std::string &name) const;
 
 			// Returns IDENTITY if the entity has no transform component
-			const pragma::math::ScaledTransform &GetPose() const;
-			pragma::math::ScaledTransform GetPose(pragma::CoordinateSpace space) const;
-			void SetPose(const pragma::math::ScaledTransform &outTransform, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
-			void SetPose(const pragma::math::Transform &outTransform, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+			const math::ScaledTransform &GetPose() const;
+			math::ScaledTransform GetPose(CoordinateSpace space) const;
+			void SetPose(const math::ScaledTransform &outTransform, CoordinateSpace space = CoordinateSpace::World);
+			void SetPose(const math::Transform &outTransform, CoordinateSpace space = CoordinateSpace::World);
 			const Vector3 &GetPosition() const;
-			Vector3 GetPosition(pragma::CoordinateSpace space) const;
-			void SetPosition(const Vector3 &pos, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+			Vector3 GetPosition(CoordinateSpace space) const;
+			void SetPosition(const Vector3 &pos, CoordinateSpace space = CoordinateSpace::World);
 			Vector3 GetCenter() const;
 
 			// Returns unit quaternion if entity has no transform component
 			const Quat &GetRotation() const;
-			Quat GetRotation(pragma::CoordinateSpace space) const;
-			void SetRotation(const Quat &rot, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+			Quat GetRotation(CoordinateSpace space) const;
+			void SetRotation(const Quat &rot, CoordinateSpace space = CoordinateSpace::World);
 
 			const Vector3 &GetScale() const;
-			Vector3 GetScale(pragma::CoordinateSpace space) const;
-			void SetScale(const Vector3 &scale, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+			Vector3 GetScale(CoordinateSpace space) const;
+			void SetScale(const Vector3 &scale, CoordinateSpace space = CoordinateSpace::World);
 
-			pragma::BaseEntityComponent *FindComponentMemberIndex(const pragma::util::Path &path, pragma::ComponentMemberIndex &outMemberIdx);
-			const pragma::BaseEntityComponent *FindComponentMemberIndex(const pragma::util::Path &path, pragma::ComponentMemberIndex &outMemberIdx) const { return const_cast<pragma::ecs::BaseEntity *>(this)->FindComponentMemberIndex(path, outMemberIdx); }
+			BaseEntityComponent *FindComponentMemberIndex(const util::Path &path, ComponentMemberIndex &outMemberIdx);
+			const BaseEntityComponent *FindComponentMemberIndex(const util::Path &path, ComponentMemberIndex &outMemberIdx) const { return const_cast<BaseEntity *>(this)->FindComponentMemberIndex(path, outMemberIdx); }
 
 			// Helper functions
-			virtual pragma::ComponentHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const = 0;
-			virtual pragma::ComponentHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const = 0;
-			virtual pragma::ComponentHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const = 0;
-			virtual pragma::ComponentHandle<pragma::BaseAIComponent> GetAIComponent() const = 0;
-			virtual pragma::ComponentHandle<pragma::BaseCharacterComponent> GetCharacterComponent() const = 0;
-			virtual pragma::ComponentHandle<pragma::BasePlayerComponent> GetPlayerComponent() const = 0;
-			virtual pragma::ComponentHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const = 0;
-			virtual pragma::ComponentHandle<pragma::BaseNameComponent> GetNameComponent() const = 0;
-			pragma::BaseModelComponent *GetModelComponent() const;
-			pragma::BaseTransformComponent *GetTransformComponent() const;
-			pragma::BasePhysicsComponent *GetPhysicsComponent() const;
-			pragma::BaseGenericComponent *GetGenericComponent() const;
-			pragma::BaseChildComponent *GetChildComponent() const;
+			virtual ComponentHandle<BaseAnimatedComponent> GetAnimatedComponent() const = 0;
+			virtual ComponentHandle<BaseWeaponComponent> GetWeaponComponent() const = 0;
+			virtual ComponentHandle<BaseVehicleComponent> GetVehicleComponent() const = 0;
+			virtual ComponentHandle<BaseAIComponent> GetAIComponent() const = 0;
+			virtual ComponentHandle<BaseCharacterComponent> GetCharacterComponent() const = 0;
+			virtual ComponentHandle<BasePlayerComponent> GetPlayerComponent() const = 0;
+			virtual ComponentHandle<BaseTimeScaleComponent> GetTimeScaleComponent() const = 0;
+			virtual ComponentHandle<BaseNameComponent> GetNameComponent() const = 0;
+			BaseModelComponent *GetModelComponent() const;
+			BaseTransformComponent *GetTransformComponent() const;
+			BasePhysicsComponent *GetPhysicsComponent() const;
+			BaseGenericComponent *GetGenericComponent() const;
+			BaseChildComponent *GetChildComponent() const;
 
 			// These are quick-access functions for commonly used component functions.
 			// In some cases these may create the component, if it doesn't exist, and transmit
 			// it to the client if called serverside!
-			std::shared_ptr<pragma::audio::ALSound> CreateSound(const std::string &snd, pragma::audio::ALSoundType type);
-			std::shared_ptr<pragma::audio::ALSound> EmitSound(const std::string &snd, pragma::audio::ALSoundType type, float gain = 1.f, float pitch = 1.f);
+			std::shared_ptr<audio::ALSound> CreateSound(const std::string &snd, audio::ALSoundType type);
+			std::shared_ptr<audio::ALSound> EmitSound(const std::string &snd, audio::ALSoundType type, float gain = 1.f, float pitch = 1.f);
 
 			std::string GetName() const;
 			void SetName(const std::string &name);
 
 			void SetModel(const std::string &mdl);
-			void SetModel(const std::shared_ptr<pragma::asset::Model> &mdl);
-			const std::shared_ptr<pragma::asset::Model> &GetModel() const;
+			void SetModel(const std::shared_ptr<asset::Model> &mdl);
+			const std::shared_ptr<asset::Model> &GetModel() const;
 			std::string GetModelName() const;
-			std::optional<pragma::math::Transform> GetAttachmentPose(uint32_t attId) const;
+			std::optional<math::Transform> GetAttachmentPose(uint32_t attId) const;
 			uint32_t GetSkin() const;
 			void SetSkin(uint32_t skin);
 			uint32_t GetBodyGroup(const std::string &name) const;
 			void SetBodyGroup(const std::string &name, uint32_t id);
 
-			pragma::ecs::BaseEntity *CreateChild(const std::string &className);
-			void SetParent(pragma::ecs::BaseEntity *parent);
+			BaseEntity *CreateChild(const std::string &className);
+			void SetParent(BaseEntity *parent);
 			void ClearParent();
-			pragma::ecs::BaseEntity *GetParent() const;
+			BaseEntity *GetParent() const;
 			bool HasParent() const;
 			bool HasChildren() const;
 
-			bool IsChildOf(const pragma::ecs::BaseEntity &ent) const;
-			bool IsAncestorOf(const pragma::ecs::BaseEntity &ent) const;
-			bool IsDescendantOf(const pragma::ecs::BaseEntity &ent) const;
-			bool IsParentOf(const pragma::ecs::BaseEntity &ent) const;
+			bool IsChildOf(const BaseEntity &ent) const;
+			bool IsAncestorOf(const BaseEntity &ent) const;
+			bool IsDescendantOf(const BaseEntity &ent) const;
+			bool IsParentOf(const BaseEntity &ent) const;
 
-			pragma::physics::PhysObj *GetPhysicsObject() const;
-			pragma::physics::PhysObj *InitializePhysics(pragma::physics::PhysicsType type);
+			physics::PhysObj *GetPhysicsObject() const;
+			physics::PhysObj *InitializePhysics(physics::PhysicsType type);
 			void DestroyPhysicsObject();
 			void DropToFloor();
 			std::pair<Vector3, Vector3> GetCollisionBounds() const;
-			void SetCollisionFilterMask(pragma::physics::CollisionMask filterMask);
-			void SetCollisionFilterGroup(pragma::physics::CollisionMask filterGroup);
-			pragma::physics::CollisionMask GetCollisionFilterGroup() const;
-			pragma::physics::CollisionMask GetCollisionFilterMask() const;
+			void SetCollisionFilterMask(physics::CollisionMask filterMask);
+			void SetCollisionFilterGroup(physics::CollisionMask filterGroup);
+			physics::CollisionMask GetCollisionFilterGroup() const;
+			physics::CollisionMask GetCollisionFilterMask() const;
 
 			void SetEnabled(bool enabled);
 			bool IsEnabled() const;
@@ -175,7 +175,7 @@ export {
 			Vector3 GetUp() const;
 			Vector3 GetRight() const;
 
-			void Input(const std::string &input, pragma::ecs::BaseEntity *activator = nullptr, pragma::ecs::BaseEntity *caller = nullptr, const std::string &data = "");
+			void Input(const std::string &input, BaseEntity *activator = nullptr, BaseEntity *caller = nullptr, const std::string &data = "");
 
 			uint16_t GetHealth() const;
 			uint16_t GetMaxHealth() const;
@@ -189,15 +189,15 @@ export {
 			void AddAngularVelocity(const Vector3 &vel);
 			Vector3 GetAngularVelocity() const;
 
-			void PlayAnimation(int32_t animation, pragma::FPlayAnim flags = pragma::FPlayAnim::Default);
-			void PlayLayeredAnimation(int32_t slot, int32_t animation, pragma::FPlayAnim flags = pragma::FPlayAnim::Default);
-			bool PlayActivity(pragma::Activity activity, pragma::FPlayAnim flags = pragma::FPlayAnim::Default);
-			bool PlayLayeredActivity(int32_t slot, pragma::Activity activity, pragma::FPlayAnim flags = pragma::FPlayAnim::Default);
-			bool PlayLayeredAnimation(int32_t slot, std::string animation, pragma::FPlayAnim flags = pragma::FPlayAnim::Default);
+			void PlayAnimation(int32_t animation, FPlayAnim flags = FPlayAnim::Default);
+			void PlayLayeredAnimation(int32_t slot, int32_t animation, FPlayAnim flags = FPlayAnim::Default);
+			bool PlayActivity(Activity activity, FPlayAnim flags = FPlayAnim::Default);
+			bool PlayLayeredActivity(int32_t slot, Activity activity, FPlayAnim flags = FPlayAnim::Default);
+			bool PlayLayeredAnimation(int32_t slot, std::string animation, FPlayAnim flags = FPlayAnim::Default);
 			void StopLayeredAnimation(int slot);
-			bool PlayAnimation(const std::string &animation, pragma::FPlayAnim flags = pragma::FPlayAnim::Default);
+			bool PlayAnimation(const std::string &animation, FPlayAnim flags = FPlayAnim::Default);
 			int32_t GetAnimation() const;
-			pragma::Activity GetActivity() const;
+			Activity GetActivity() const;
 
 			void TakeDamage(game::DamageInfo &info);
 			//
@@ -208,7 +208,7 @@ export {
 			void SetSpawnFlags(uint32_t spawnFlags);
 			unsigned int GetSpawnFlags() const;
 
-			void RemoveEntityOnRemoval(pragma::ecs::BaseEntity *ent, Bool bRemove = true);
+			void RemoveEntityOnRemoval(BaseEntity *ent, Bool bRemove = true);
 			void RemoveEntityOnRemoval(const EntityHandle &hEnt, Bool bRemove = true);
 
 			CallbackHandle CallOnRemove(const CallbackHandle &hCallback);
@@ -253,35 +253,35 @@ export {
 
 			virtual void Load(udm::LinkedPropertyWrapper &udm);
 			virtual void Save(udm::LinkedPropertyWrapper &udm);
-			virtual pragma::ecs::BaseEntity *Copy();
+			virtual BaseEntity *Copy();
 
 			std::string GetUri() const;
-			static std::string GetUri(pragma::util::Uuid uuid);
+			static std::string GetUri(util::Uuid uuid);
 			static std::string GetUri(const std::string name);
-			static bool ParseUri(std::string uriPath, pragma::EntityUComponentMemberRef &outRef, const pragma::util::Uuid *optSelf = nullptr);
-			static bool CreateMemberReference(pragma::EntityIdentifier identifier, std::string var, pragma::EntityUComponentMemberRef &outRef);
+			static bool ParseUri(std::string uriPath, EntityUComponentMemberRef &outRef, const util::Uuid *optSelf = nullptr);
+			static bool CreateMemberReference(EntityIdentifier identifier, std::string var, EntityUComponentMemberRef &outRef);
 		  protected:
 			StateFlags m_stateFlags = StateFlags::None;
 
 			// These components are needed frequently, so we store a direct reference to them for faster access
-			pragma::BaseTransformComponent *m_transformComponent = nullptr;
-			pragma::BasePhysicsComponent *m_physicsComponent = nullptr;
-			pragma::BaseModelComponent *m_modelComponent = nullptr;
-			pragma::BaseGenericComponent *m_genericComponent = nullptr;
-			pragma::BaseChildComponent *m_childComponent = nullptr;
+			BaseTransformComponent *m_transformComponent = nullptr;
+			BasePhysicsComponent *m_physicsComponent = nullptr;
+			BaseModelComponent *m_modelComponent = nullptr;
+			BaseGenericComponent *m_genericComponent = nullptr;
+			BaseChildComponent *m_childComponent = nullptr;
 
 			// Should only be used by quick-access methods!
 			// Adds the component and trasmits the information
 			// to the clients if called serverside.
-			virtual pragma::ComponentHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name);
+			virtual ComponentHandle<BaseEntityComponent> AddNetworkedComponent(const std::string &name);
 		  protected:
 			uint32_t m_spawnFlags = 0u;
 
-			pragma::GString m_className = "BaseEntity";
-			pragma::util::Uuid m_uuid {};
+			GString m_className = "BaseEntity";
+			util::Uuid m_uuid {};
 			EntityIndex m_index = 0u;
 			virtual void DoSpawn();
-			pragma::NetEventId SetupNetEvent(const std::string &name) const;
+			NetEventId SetupNetEvent(const std::string &name) const;
 		};
 		using namespace pragma::math::scoped_enum::bitwise;
 

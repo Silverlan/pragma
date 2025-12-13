@@ -114,9 +114,9 @@ export {
 				Any = Spawned | Pending | IncludeShared | IncludeNetworkLocal | AnyType
 			};
 
-			EntityIterator(pragma::Game &game, FilterFlags filterFlags = FilterFlags::Default);
-			EntityIterator(pragma::Game &game, pragma::ComponentId componentId, FilterFlags filterFlags = FilterFlags::Default);
-			EntityIterator(pragma::Game &game, const std::string &componentName, FilterFlags filterFlags = FilterFlags::Default);
+			EntityIterator(Game &game, FilterFlags filterFlags = FilterFlags::Default);
+			EntityIterator(Game &game, ComponentId componentId, FilterFlags filterFlags = FilterFlags::Default);
+			EntityIterator(Game &game, const std::string &componentName, FilterFlags filterFlags = FilterFlags::Default);
 			EntityIterator(const EntityIterator &) = default;
 			EntityIterator(EntityIterator &&) = delete;
 			EntityIterator &operator=(const EntityIterator &) = default;
@@ -133,8 +133,8 @@ export {
 			EntityIteratorData *GetIteratorData() { return m_iteratorData.get(); }
 		  protected:
 			EntityIterator() = default;
-			EntityIterator(pragma::Game &game, bool /* dummy */);
-			void SetBaseComponentType(pragma::ComponentId componentId);
+			EntityIterator(Game &game, bool /* dummy */);
+			void SetBaseComponentType(ComponentId componentId);
 			void SetBaseComponentType(std::type_index typeIndex);
 			void SetBaseComponentType(const std::string &componentName);
 
@@ -323,7 +323,7 @@ export {
 	template<class TComponent>
 	class EntityCIterator : public pragma::ecs::EntityIterator {
 	  public:
-		EntityCIterator(pragma::Game &game, FilterFlags filterFlags = FilterFlags::Default) : pragma::ecs::EntityIterator {game, false} { SetBaseComponentType(std::type_index(typeid(TComponent))); }
+		EntityCIterator(pragma::Game &game, FilterFlags filterFlags = FilterFlags::Default) : EntityIterator {game, false} { SetBaseComponentType(std::type_index(typeid(TComponent))); }
 		BaseEntityComponentIterator<TComponent> begin() const { return BaseEntityComponentIterator<TComponent> {m_iteratorData, false}; }
 		BaseEntityComponentIterator<TComponent> end() const { return BaseEntityComponentIterator<TComponent> {m_iteratorData, true}; }
 	};

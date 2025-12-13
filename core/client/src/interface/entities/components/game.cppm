@@ -11,7 +11,7 @@ export import :entities.components.camera;
 export namespace pragma {
 	class DLLCLIENT CGameComponent final : public BaseGameComponent {
 	  public:
-		CGameComponent(pragma::ecs::BaseEntity &ent) : BaseGameComponent(ent) {}
+		CGameComponent(ecs::BaseEntity &ent) : BaseGameComponent(ent) {}
 		virtual void InitializeLuaObject(lua::State *l) override;
 		void UpdateFrame(CCameraComponent *cam);
 		void UpdateCamera(CCameraComponent *cam);

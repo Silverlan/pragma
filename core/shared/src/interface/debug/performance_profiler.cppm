@@ -136,8 +136,8 @@ export {
 				virtual std::unique_ptr<ProfilerResult> GetResult() const override;
 			  private:
 				CPUTimer() = default;
-				pragma::util::Clock::time_point m_startTime = {};
-				pragma::util::Clock::duration m_duration = {};
+				util::Clock::time_point m_startTime = {};
+				util::Clock::duration m_duration = {};
 			};
 
 			class DLLNETWORK CPUProfiler : public Profiler {

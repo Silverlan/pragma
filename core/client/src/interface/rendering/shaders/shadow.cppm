@@ -18,19 +18,19 @@ export namespace pragma {
 	  public:
 		static prosper::Format RENDER_PASS_DEPTH_FORMAT;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
+		static ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
+		static VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
+		static ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
+		static VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
+		static VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT_EXT;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT;
+		static ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT_EXT;
+		static VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID;
+		static VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
+		static ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
+		static VertexAttribute VERTEX_ATTRIBUTE_POSITION;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
@@ -65,12 +65,12 @@ export namespace pragma {
 		virtual GameShaderType GetPassType() const override { return GameShaderType::ShadowPass; }
 
 		//
-		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
+		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
+		  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const override;
 		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor, SceneFlags sceneFlags) const override;
 		virtual void RecordBindLight(rendering::ShaderProcessor &shaderProcessor, CLightComponent &light, uint32_t layerId) const override;
 		virtual void RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor, float alphaCutoff) const override;
-		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, msys::CMaterial &mat) const override;
+		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, material::CMaterial &mat) const override;
 		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor, const Vector4 &clipPlane) const override {}
 		virtual void RecordDrawOrigin(rendering::ShaderProcessor &shaderProcessor, const Vector4 &drawOrigin) const override {}
 		virtual void RecordDepthBias(rendering::ShaderProcessor &shaderProcessor, const Vector2 &depthBias) const override {}
@@ -91,7 +91,7 @@ export namespace pragma {
 
 	class DLLCLIENT ShaderShadowTransparent : public ShaderShadow {
 	  public:
-		//bool BindMaterial(msys::CMaterial &mat);
+		//bool BindMaterial(material::CMaterial &mat);
 	};
 
 	//////////////////
@@ -114,6 +114,6 @@ export namespace pragma {
 
 	class DLLCLIENT ShaderShadowCSMTransparent : public ShaderShadowCSM {
 	  public:
-		//bool BindMaterial(msys::CMaterial &mat);
+		//bool BindMaterial(material::CMaterial &mat);
 	};
 };

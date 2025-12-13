@@ -10,15 +10,15 @@ export import :rendering.shader_material;
 export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
-	class DLLCLIENT ShaderMaterialNode : public pragma::shadergraph::Node {
+	class DLLCLIENT ShaderMaterialNode : public shadergraph::Node {
 	  public:
-		ShaderMaterialNode(const std::string_view &type, const pragma::rendering::shader_material::ShaderMaterial &shaderMaterial);
+		ShaderMaterialNode(const std::string_view &type, const shader_material::ShaderMaterial &shaderMaterial);
 
-		std::string GetTextureVariableName(const pragma::shadergraph::OutputSocket &socket) const;
+		std::string GetTextureVariableName(const shadergraph::OutputSocket &socket) const;
 
-		virtual std::string DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const override;
-		const pragma::rendering::shader_material::ShaderMaterial &GetShaderMaterial() const { return m_shaderMaterial; }
+		virtual std::string DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const override;
+		const shader_material::ShaderMaterial &GetShaderMaterial() const { return m_shaderMaterial; }
 	  private:
-		const pragma::rendering::shader_material::ShaderMaterial &m_shaderMaterial;
+		const shader_material::ShaderMaterial &m_shaderMaterial;
 	};
 };

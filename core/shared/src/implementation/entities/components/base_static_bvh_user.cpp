@@ -10,13 +10,13 @@ using namespace pragma;
 
 ComponentEventId baseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId baseStaticBvhUserComponent::EVENT_ON_STATIC_BVH_COMPONENT_CHANGED = INVALID_COMPONENT_ID;
-void BaseStaticBvhUserComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void BaseStaticBvhUserComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED = registerEvent("ON_ACTIVATION_STATE_CHANGED", ComponentEventInfo::Type::Broadcast);
 	baseStaticBvhUserComponent::EVENT_ON_STATIC_BVH_COMPONENT_CHANGED = registerEvent("ON_STATIC_BVH_COMPONENT_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
-BaseStaticBvhUserComponent::BaseStaticBvhUserComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseStaticBvhUserComponent::BaseStaticBvhUserComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 BaseStaticBvhUserComponent::~BaseStaticBvhUserComponent() {}
 void BaseStaticBvhUserComponent::Initialize()
 {
@@ -27,10 +27,10 @@ void BaseStaticBvhUserComponent::Initialize()
 		auto &trC = *pTrComponent;
 		if(m_cbOnPoseChanged.IsValid())
 			m_cbOnPoseChanged.Remove();
-		m_cbOnPoseChanged = pTrComponent->AddEventCallback(baseTransformComponent::EVENT_ON_POSE_CHANGED, [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+		m_cbOnPoseChanged = pTrComponent->AddEventCallback(baseTransformComponent::EVENT_ON_POSE_CHANGED, [this, &trC](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 			if(m_staticBvhComponent.valid())
 				m_staticBvhComponent->SetEntityDirty(GetEntity());
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		});
 	}
 }
@@ -92,7 +92,7 @@ void BaseStaticBvhUserComponent::OnEntityComponentRemoved(BaseEntityComponent &c
 	}
 }
 bool BaseStaticBvhUserComponent::IsActive() const { return m_isActive; }
-pragma::util::EventReply BaseStaticBvhUserComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply BaseStaticBvhUserComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
 	if(eventId == basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED || eventId == basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED)
 		UpdateBvhStatus();

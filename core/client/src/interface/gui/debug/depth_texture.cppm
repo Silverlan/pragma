@@ -27,11 +27,11 @@ export namespace pragma::gui::types {
 	  protected:
 		virtual void DoUpdate() override;
 		void UpdateResolvedTexture();
-		pragma::gui::WIHandle m_hTextureRect;
+		WIHandle m_hTextureRect;
 
-		pragma::util::WeakHandle<prosper::Shader> m_whDepthToRgbShader = {};
-		pragma::util::WeakHandle<prosper::Shader> m_whCubeDepthToRgbShader = {};
-		pragma::util::WeakHandle<prosper::Shader> m_whCsmDepthToRgbShader = {};
+		util::WeakHandle<prosper::Shader> m_whDepthToRgbShader = {};
+		util::WeakHandle<prosper::Shader> m_whCubeDepthToRgbShader = {};
+		util::WeakHandle<prosper::Shader> m_whCsmDepthToRgbShader = {};
 		CallbackHandle m_depthToRgbCallback = {};
 		std::shared_ptr<prosper::Texture> m_srcDepthTex = nullptr;
 		std::shared_ptr<prosper::RenderTarget> m_renderTarget = nullptr;

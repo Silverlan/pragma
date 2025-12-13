@@ -8,10 +8,10 @@ module pragma.client;
 import :engine;
 import :audio;
 
-const al::ISoundSystem *pragma::CEngine::GetSoundSystem() const { return const_cast<CEngine *>(this)->GetSoundSystem(); }
-al::ISoundSystem *pragma::CEngine::GetSoundSystem() { return m_soundSystem.get(); }
+const pragma::audio::ISoundSystem *pragma::CEngine::GetSoundSystem() const { return const_cast<CEngine *>(this)->GetSoundSystem(); }
+pragma::audio::ISoundSystem *pragma::CEngine::GetSoundSystem() { return m_soundSystem.get(); }
 
-al::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
+pragma::audio::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
 {
 	spdlog::info("Initializing sound engine...");
 
@@ -47,7 +47,7 @@ al::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
 
 	if(lib != nullptr) {
 		spdlog::info("Loading audio module '{}'...", location);
-		auto fInitAudioAPI = lib->FindSymbolAddress<bool (*)(float, std::shared_ptr<al::ISoundSystem> &, std::string &)>("initialize_audio_api");
+		auto fInitAudioAPI = lib->FindSymbolAddress<bool (*)(float, std::shared_ptr<pragma::audio::ISoundSystem> &, std::string &)>("initialize_audio_api");
 		if(fInitAudioAPI == nullptr)
 			err = "Symbol 'initialize_audio_api' not found in library '" + location + "'!";
 		else {
@@ -61,14 +61,14 @@ al::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
 		err = "Module '" + modulePath + "' not found!";
 	if(m_soundSystem == nullptr)
 		throw std::runtime_error {"Unable to load audio implementation library: " + err + "!"};
-	m_soundSystem->SetSoundSourceFactory([](const al::PSoundChannel &channel) -> al::PSoundSource {
+	m_soundSystem->SetSoundSourceFactory([](const pragma::audio::PSoundChannel &channel) -> pragma::audio::PSoundSource {
 		return pragma::audio::CALSound::Create(pragma::get_cengine()->GetClientState(), channel);
 	});
-	al::set_world_scale(pragma::units_to_metres(1.0));
+	pragma::audio::set_world_scale(pragma::units_to_metres(1.0));
 	return m_soundSystem.get();
 }
 
-al::PEffect pragma::CEngine::GetAuxEffect(const std::string &name)
+pragma::audio::PEffect pragma::CEngine::GetAuxEffect(const std::string &name)
 {
 	auto lname = name;
 	pragma::string::to_lower(lname);

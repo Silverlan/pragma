@@ -8,5 +8,5 @@ export import pragma.util;
 
 export namespace pragma {
 	template<class T>
-	using ComponentHandle = pragma::util::TWeakSharedHandle<T>;
+	using ComponentHandle = util::TWeakSharedHandle<T>;
 };

@@ -16,8 +16,8 @@ export namespace pragma::pts {
 	class DLLCLIENT CParticleInitializerShootCone : public CParticleInitializer {
 	  public:
 		CParticleInitializerShootCone() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
 	  private:
 		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fMinAngle;
 		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fMaxAngle;
@@ -29,8 +29,8 @@ export namespace pragma::pts {
 	class DLLCLIENT CParticleInitializerShootOutward : public CParticleInitializer {
 	  public:
 		CParticleInitializerShootOutward() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
 	  private:
 		Vector3 m_vBias = {};
 	};

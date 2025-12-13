@@ -27,16 +27,16 @@ void CBaseSoundDspComponent::OnTick(double dt)
 	auto pToggleComponent = ent.GetComponent<CToggleComponent>();
 	if(pTrComponent == nullptr || (pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false))
 		return;
-	auto radiusInnerSqr = pragma::math::pow2(m_kvInnerRadius);
-	auto radiusOuterSqr = pragma::math::pow2(m_kvOuterRadius);
+	auto radiusInnerSqr = math::pow2(m_kvInnerRadius);
+	auto radiusOuterSqr = math::pow2(m_kvOuterRadius);
 	auto &pos = pTrComponent->GetPosition();
-	auto &sounds = pragma::get_client_state()->GetSounds();
+	auto &sounds = get_client_state()->GetSounds();
 	for(auto &rsnd : sounds) {
 		auto &snd = rsnd.get();
 		if(snd.IsPlaying() == false)
 			continue;
-		auto &alSnd = *static_cast<al::SoundSource *>(static_cast<pragma::audio::CALSound *>(&snd));
-		if(m_bAllSounds == false && (m_bAllWorldSounds == false || snd.IsRelative() == true) && (snd.GetType() & m_types) == pragma::audio::ALSoundType::Generic) {
+		auto &alSnd = *static_cast<pragma::audio::SoundSource *>(static_cast<audio::CALSound *>(&snd));
+		if(m_bAllSounds == false && (m_bAllWorldSounds == false || snd.IsRelative() == true) && (snd.GetType() & m_types) == audio::ALSoundType::Generic) {
 			DetachSoundSource(alSnd);
 			continue;
 		}
@@ -49,8 +49,8 @@ void CBaseSoundDspComponent::OnTick(double dt)
 			if(d > radiusOuterSqr)
 				DetachSoundSource(alSnd);
 			else {
-				d = pragma::math::sqrt(d);
-				auto intensity = pragma::math::clamp(d / m_kvInnerRadius, 0.f, 1.f);
+				d = math::sqrt(d);
+				auto intensity = math::clamp(d / m_kvInnerRadius, 0.f, 1.f);
 				UpdateSoundSource(alSnd, intensity);
 			}
 		}
@@ -71,8 +71,8 @@ void CBaseSoundDspComponent::ReceiveData(NetPacket &packet)
 	SetGain(gain);
 
 	auto spawnFlags = GetEntity().GetSpawnFlags();
-	m_bAffectRelative = (spawnFlags & pragma::math::to_integral(SpawnFlags::AffectRelative));
-	m_bApplyGlobal = (spawnFlags & pragma::math::to_integral(SpawnFlags::ApplyGlobally));
+	m_bAffectRelative = (spawnFlags & math::to_integral(SpawnFlags::AffectRelative));
+	m_bApplyGlobal = (spawnFlags & math::to_integral(SpawnFlags::ApplyGlobally));
 	m_types = GetTargetSoundTypes();
 	m_bAllWorldSounds = (static_cast<SpawnFlags>(spawnFlags) & (SpawnFlags::World | SpawnFlags::All)) != SpawnFlags::None;
 	m_bAllSounds = (static_cast<SpawnFlags>(spawnFlags) & SpawnFlags::All) != SpawnFlags::None;
@@ -85,42 +85,42 @@ void CBaseSoundDspComponent::OnEntitySpawn()
 {
 	BaseEnvSoundDspComponent::OnEntitySpawn();
 	if(m_kvDsp.empty() == false)
-		m_dsp = pragma::get_cgame()->GetAuxEffect(m_kvDsp);
+		m_dsp = get_cgame()->GetAuxEffect(m_kvDsp);
 }
-pragma::util::EventReply CBaseSoundDspComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply CBaseSoundDspComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvSoundDspComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseEnvSoundDspComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		DetachAllSoundSources();
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
-pragma::audio::ALSoundType CBaseSoundDspComponent::GetTargetSoundTypes() const
+audio::ALSoundType CBaseSoundDspComponent::GetTargetSoundTypes() const
 {
-	auto types = pragma::audio::ALSoundType::Generic;
+	auto types = audio::ALSoundType::Generic;
 	auto spawnFlags = static_cast<SpawnFlags>(GetEntity().GetSpawnFlags());
 	if((spawnFlags & SpawnFlags::Effects) != SpawnFlags::None)
-		types |= pragma::audio::ALSoundType::Effect;
+		types |= audio::ALSoundType::Effect;
 	if((spawnFlags & SpawnFlags::Music) != SpawnFlags::None)
-		types |= pragma::audio::ALSoundType::Music;
+		types |= audio::ALSoundType::Music;
 	if((spawnFlags & SpawnFlags::Voices) != SpawnFlags::None)
-		types |= pragma::audio::ALSoundType::Voice;
+		types |= audio::ALSoundType::Voice;
 	if((spawnFlags & SpawnFlags::Weapons) != SpawnFlags::None)
-		types |= pragma::audio::ALSoundType::Weapon;
+		types |= audio::ALSoundType::Weapon;
 	if((spawnFlags & SpawnFlags::NPCs) != SpawnFlags::None)
-		types |= pragma::audio::ALSoundType::NPC;
+		types |= audio::ALSoundType::NPC;
 	if((spawnFlags & SpawnFlags::Players) != SpawnFlags::None)
-		types |= pragma::audio::ALSoundType::Player;
+		types |= audio::ALSoundType::Player;
 	if((spawnFlags & SpawnFlags::Vehicles) != SpawnFlags::None)
-		types |= pragma::audio::ALSoundType::Vehicle;
+		types |= audio::ALSoundType::Vehicle;
 	if((spawnFlags & SpawnFlags::Physics) != SpawnFlags::None)
-		types |= pragma::audio::ALSoundType::Physics;
+		types |= audio::ALSoundType::Physics;
 	if((spawnFlags & SpawnFlags::Environment) != SpawnFlags::None)
-		types |= pragma::audio::ALSoundType::Environment;
+		types |= audio::ALSoundType::Environment;
 	if((spawnFlags & SpawnFlags::GUI) != SpawnFlags::None)
-		types |= pragma::audio::ALSoundType::GUI;
+		types |= audio::ALSoundType::GUI;
 	if((spawnFlags & SpawnFlags::All) != SpawnFlags::None)
-		types |= pragma::audio::ALSoundType::All;
+		types |= audio::ALSoundType::All;
 	return types;
 }
 Bool CBaseSoundDspComponent::ReceiveNetEvent(UInt32 eventId, NetPacket &p)
@@ -133,11 +133,11 @@ Bool CBaseSoundDspComponent::ReceiveNetEvent(UInt32 eventId, NetPacket &p)
 		return CBaseNetComponent::ReceiveNetEvent(eventId, p);
 	return true;
 }
-std::vector<std::pair<al::SoundSourceHandle, uint32_t>>::iterator CBaseSoundDspComponent::FindSoundSource(al::SoundSource &src)
+std::vector<std::pair<pragma::audio::SoundSourceHandle, uint32_t>>::iterator CBaseSoundDspComponent::FindSoundSource(pragma::audio::SoundSource &src)
 {
-	return std::find_if(m_affectedSounds.begin(), m_affectedSounds.end(), [&src](const std::pair<al::SoundSourceHandle, uint32_t> &pair) { return (pair.first.get() == &src) ? true : false; });
+	return std::find_if(m_affectedSounds.begin(), m_affectedSounds.end(), [&src](const std::pair<pragma::audio::SoundSourceHandle, uint32_t> &pair) { return (pair.first.get() == &src) ? true : false; });
 }
-void CBaseSoundDspComponent::UpdateSoundSource(al::SoundSource &src, float gain)
+void CBaseSoundDspComponent::UpdateSoundSource(pragma::audio::SoundSource &src, float gain)
 {
 	if(m_dsp == nullptr)
 		return;
@@ -152,7 +152,7 @@ void CBaseSoundDspComponent::UpdateSoundSource(al::SoundSource &src, float gain)
 		return;
 	m_affectedSounds.push_back({src.GetHandle(), slotId});
 }
-void CBaseSoundDspComponent::DetachSoundSource(al::SoundSource &src)
+void CBaseSoundDspComponent::DetachSoundSource(pragma::audio::SoundSource &src)
 {
 	auto it = FindSoundSource(src);
 	if(it == m_affectedSounds.end())
@@ -165,7 +165,7 @@ void CBaseSoundDspComponent::DetachAllSoundSources()
 	for(auto &pair : m_affectedSounds) {
 		if(pair.first.IsValid() == false)
 			continue;
-		auto &src = *static_cast<al::SoundSource *>(static_cast<pragma::audio::CALSound *>(pair.first.get()));
+		auto &src = *static_cast<pragma::audio::SoundSource *>(static_cast<audio::CALSound *>(pair.first.get()));
 		src->RemoveEffect(pair.second);
 	}
 	m_affectedSounds.clear();

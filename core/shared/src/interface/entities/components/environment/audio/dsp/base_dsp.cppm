@@ -35,13 +35,13 @@ export {
 			void SetDSPEffect(const std::string &identifier);
 			void SetInnerRadius(float radius);
 			void SetOuterRadius(float radius);
-			bool Input(const std::string &input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, std::string data);
+			bool Input(const std::string &input, ecs::BaseEntity *activator, ecs::BaseEntity *caller, std::string data);
 			float GetGain() const;
 			virtual void SetGain(float gain);
 		  protected:
 			virtual bool OnSetKeyValue(const std::string &key, const std::string &val);
 
-			pragma::NetEventId m_netEvSetGain = pragma::INVALID_NET_EVENT;
+			NetEventId m_netEvSetGain = INVALID_NET_EVENT;
 			std::string m_kvDsp = "";
 			float m_kvInnerRadius = 0.f;
 			float m_kvOuterRadius = 0.f;

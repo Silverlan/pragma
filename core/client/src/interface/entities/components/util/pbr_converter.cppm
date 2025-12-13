@@ -15,11 +15,11 @@ export namespace pragma {
 		class Scene;
 	};
 	struct PBRAOBakeJob {
-		PBRAOBakeJob(pragma::asset::Model &mdl, msys::Material &mat);
-		pragma::util::WeakHandle<pragma::asset::Model> hModel = {};
-		msys::MaterialHandle hMaterial = {};
+		PBRAOBakeJob(asset::Model &mdl, material::Material &mat);
+		util::WeakHandle<asset::Model> hModel = {};
+		material::MaterialHandle hMaterial = {};
 		EntityHandle hEntity = {};
-		pragma::util::ParallelJob<uimg::ImageLayerSet> job = {};
+		util::ParallelJob<image::ImageLayerSet> job = {};
 		bool isRunning = false;
 		uint32_t width = 512;
 		uint32_t height = 512;
@@ -28,16 +28,16 @@ export namespace pragma {
 
 	class DLLCLIENT CPBRConverterComponent final : public BaseEntityComponent {
 	  public:
-		CPBRConverterComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CPBRConverterComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
 		virtual void OnTick(double dt) override;
-		void GenerateAmbientOcclusionMaps(pragma::asset::Model &mdl, uint32_t w = 512, uint32_t h = 512, uint32_t samples = 512, bool rebuild = false);
-		void GenerateAmbientOcclusionMaps(pragma::ecs::BaseEntity &ent, uint32_t w = 512, uint32_t h = 512, uint32_t samples = 512, bool rebuild = false);
+		void GenerateAmbientOcclusionMaps(asset::Model &mdl, uint32_t w = 512, uint32_t h = 512, uint32_t samples = 512, bool rebuild = false);
+		void GenerateAmbientOcclusionMaps(ecs::BaseEntity &ent, uint32_t w = 512, uint32_t h = 512, uint32_t samples = 512, bool rebuild = false);
 
-		bool ConvertToPBR(msys::CMaterial &matTraditional);
+		bool ConvertToPBR(material::CMaterial &matTraditional);
 		void PollEvents();
 	  private:
 		struct AmbientOcclusionInfo {
@@ -55,18 +55,18 @@ export namespace pragma {
 			bool updateMetalness = false;
 			std::optional<AmbientOcclusionInfo> updateAmbientOcclusion = {};
 		};
-		void ConvertMaterialsToPBR(pragma::asset::Model &mdl);
-		void UpdateMetalness(pragma::asset::Model &mdl);
-		void UpdateMetalness(pragma::asset::Model &mdl, msys::CMaterial &mat);
-		void UpdateAmbientOcclusion(pragma::asset::Model &mdl, const AmbientOcclusionInfo &aoInfo = {}, pragma::ecs::BaseEntity *optEnt = nullptr);
-		void UpdateModel(pragma::asset::Model &mdl, ModelUpdateInfo &updateInfo, pragma::ecs::BaseEntity *optEnt = nullptr);
-		void ApplyMiscMaterialProperties(msys::CMaterial &mat, const physics::SurfaceMaterial &surfMat, const std::string &surfMatName);
-		void ScheduleModelUpdate(pragma::asset::Model &mdl, bool updateMetalness, std::optional<AmbientOcclusionInfo> updateAOInfo = {}, pragma::ecs::BaseEntity *optEnt = nullptr);
+		void ConvertMaterialsToPBR(asset::Model &mdl);
+		void UpdateMetalness(asset::Model &mdl);
+		void UpdateMetalness(asset::Model &mdl, material::CMaterial &mat);
+		void UpdateAmbientOcclusion(asset::Model &mdl, const AmbientOcclusionInfo &aoInfo = {}, ecs::BaseEntity *optEnt = nullptr);
+		void UpdateModel(asset::Model &mdl, ModelUpdateInfo &updateInfo, ecs::BaseEntity *optEnt = nullptr);
+		void ApplyMiscMaterialProperties(material::CMaterial &mat, const physics::SurfaceMaterial &surfMat, const std::string &surfMatName);
+		void ScheduleModelUpdate(asset::Model &mdl, bool updateMetalness, std::optional<AmbientOcclusionInfo> updateAOInfo = {}, ecs::BaseEntity *optEnt = nullptr);
 
 		void ProcessQueue();
-		void WriteAOMap(pragma::asset::Model &mdl, msys::CMaterial &mat, uimg::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const;
-		bool ShouldConvertMaterial(msys::CMaterial &mat) const;
-		bool IsPBR(msys::CMaterial &mat) const;
+		void WriteAOMap(asset::Model &mdl, material::CMaterial &mat, image::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const;
+		bool ShouldConvertMaterial(material::CMaterial &mat) const;
+		bool IsPBR(material::CMaterial &mat) const;
 		std::shared_ptr<prosper::Texture> ConvertSpecularMapToRoughness(prosper::Texture &specularMap);
 
 		std::queue<PBRAOBakeJob> m_workQueue = {};
@@ -74,7 +74,7 @@ export namespace pragma {
 
 		CallbackHandle m_cbOnModelLoaded = {};
 		CallbackHandle m_cbOnMaterialLoaded = {};
-		std::unordered_map<pragma::asset::Model *, ModelUpdateInfo> m_scheduledModelUpdates = {};
+		std::unordered_map<asset::Model *, ModelUpdateInfo> m_scheduledModelUpdates = {};
 	};
 };
 

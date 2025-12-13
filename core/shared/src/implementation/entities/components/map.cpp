@@ -8,7 +8,7 @@ import :entities.components.map;
 
 using namespace pragma;
 
-MapComponent::MapComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+MapComponent::MapComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void MapComponent::Initialize()
 {
@@ -16,7 +16,7 @@ void MapComponent::Initialize()
 	GetEntity().AddComponent("name");
 }
 
-void MapComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void MapComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void MapComponent::SetMapIndex(unsigned int idx) { m_mapIndex = idx; }
 unsigned int MapComponent::GetMapIndex() const { return m_mapIndex; }

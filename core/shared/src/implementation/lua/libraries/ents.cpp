@@ -165,7 +165,7 @@ void Lua::ents::register_library(lua::State *l)
 		luabind::def("find_installed_custom_components",+[](lua::State *l,pragma::Game &game) -> Lua::tb<std::string> {
 			std::vector<std::string> dirs;
 			std::string rootPath {Lua::SCRIPT_DIRECTORY +"/entities/components/"};
-			filemanager::find_files(rootPath +'*',nullptr,&dirs);
+			pragma::fs::find_files(rootPath +'*',nullptr,&dirs);
 			auto customComponents = luabind::newtable(l);
 			auto nwStateDirName = game.GetLuaNetworkDirectoryName();
 			auto luaFileName = game.GetLuaNetworkFileName();
@@ -180,8 +180,8 @@ void Lua::ents::register_library(lua::State *l)
 			{
 				auto cdir = rootPath +dir +'/';
 				if(
-					filemanager::exists(cdir +luaFileName) || filemanager::exists(cdir +nwStateDirName +'/' +luaFileName) ||
-					filemanager::exists(cdir +luaFileNameC) || filemanager::exists(cdir +nwStateDirName +'/' +luaFileNameC)
+					pragma::fs::exists(cdir +luaFileName) || pragma::fs::exists(cdir +nwStateDirName +'/' +luaFileName) ||
+					pragma::fs::exists(cdir +luaFileNameC) || pragma::fs::exists(cdir +nwStateDirName +'/' +luaFileNameC)
 				)
 					customComponents[idx++] = dir;
 			}

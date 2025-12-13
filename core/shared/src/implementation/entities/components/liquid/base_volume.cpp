@@ -8,9 +8,9 @@ import :entities.components.liquid.base_volume;
 
 using namespace pragma;
 
-void BaseLiquidVolumeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
+void BaseLiquidVolumeComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
 
-void BaseLiquidVolumeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
-BaseLiquidVolumeComponent::BaseLiquidVolumeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+void BaseLiquidVolumeComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
+BaseLiquidVolumeComponent::BaseLiquidVolumeComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseLiquidVolumeComponent::Initialize() { BaseEntityComponent::Initialize(); }

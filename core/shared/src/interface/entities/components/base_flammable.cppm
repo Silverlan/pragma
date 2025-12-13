@@ -15,16 +15,16 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseFlammableComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		virtual ~BaseFlammableComponent() override;
 		virtual void Initialize() override;
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
-		const pragma::util::PBoolProperty &GetOnFireProperty() const;
-		const pragma::util::PBoolProperty &GetIgnitableProperty() const;
+		const util::PBoolProperty &GetOnFireProperty() const;
+		const util::PBoolProperty &GetIgnitableProperty() const;
 		bool IsOnFire() const;
 		bool IsIgnitable() const;
-		virtual pragma::util::EventReply Ignite(float duration, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr);
+		virtual util::EventReply Ignite(float duration, ecs::BaseEntity *attacker = nullptr, ecs::BaseEntity *inflictor = nullptr);
 		virtual void Extinguish();
 		virtual void SetIgnitable(bool b);
 		virtual void OnTick(double dt) override;
@@ -32,16 +32,16 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 	  protected:
-		BaseFlammableComponent(pragma::ecs::BaseEntity &ent);
-		pragma::NetEventId m_netEvIgnite = pragma::INVALID_NET_EVENT;
-		pragma::NetEventId m_netEvExtinguish = pragma::INVALID_NET_EVENT;
-		pragma::NetEventId m_netEvSetIgnitable = pragma::INVALID_NET_EVENT;
-		pragma::util::PBoolProperty m_bIsOnFire;
-		pragma::util::PBoolProperty m_bIgnitable;
+		BaseFlammableComponent(ecs::BaseEntity &ent);
+		NetEventId m_netEvIgnite = INVALID_NET_EVENT;
+		NetEventId m_netEvExtinguish = INVALID_NET_EVENT;
+		NetEventId m_netEvSetIgnitable = INVALID_NET_EVENT;
+		util::PBoolProperty m_bIsOnFire;
+		util::PBoolProperty m_bIgnitable;
 		float m_tExtinguishTime = 0.f;
 	};
 	struct DLLNETWORK CEOnIgnited : public ComponentEvent {
-		CEOnIgnited(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor);
+		CEOnIgnited(float duration, ecs::BaseEntity *attacker, ecs::BaseEntity *inflictor);
 		virtual void PushArguments(lua::State *l) override;
 		float duration;
 		EntityHandle attacker;

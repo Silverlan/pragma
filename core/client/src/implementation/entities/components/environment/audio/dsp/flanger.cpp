@@ -23,10 +23,10 @@ void CSoundDspFlangerComponent::ReceiveData(NetPacket &packet)
 void CSoundDspFlangerComponent::OnEntitySpawn()
 {
 	//BaseEnvSoundDspFlanger::OnEntitySpawn(); // Not calling BaseEnvSoundDspFlanger::OnEntitySpawn() to skip the dsp effect lookup
-	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
+	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	al::EfxFlangerProperties props {};
+	pragma::audio::EfxFlangerProperties props {};
 	props.iWaveform = m_kvWaveform;
 	props.iPhase = m_kvPhase;
 	props.flRate = m_kvRate;

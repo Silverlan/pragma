@@ -40,7 +40,7 @@ export namespace pragma::util {
 			Vector3 maxVisible = {}; // Max bounds encompassing entire visible area of this leaf
 
 			// Only valid if this is a non-leaf node
-			pragma::math::Plane plane = {};
+			math::Plane plane = {};
 		};
 		static std::shared_ptr<BSPTree> Create();
 		static std::shared_ptr<BSPTree> Load(const udm::AssetData &data, std::string &outErr);
@@ -64,10 +64,10 @@ export namespace pragma::util {
 		Node &CreateNode();
 	  protected:
 		BSPTree() = default;
-		void UpdateVisibilityBounds(BSPTree::Node &node);
-		BSPTree::Node *FindLeafNode(BSPTree::Node &node, const Vector3 &point);
-		void FindLeafNodesInAabb(BSPTree::Node &node, const std::array<Vector3, 8> &aabbPoints, std::vector<BSPTree::Node *> &outNodes);
-		bool IsAabbVisibleInCluster(const BSPTree::Node &node, const std::array<Vector3, 8> &aabbPoints, BSPTree::ClusterIndex clusterIdx) const;
+		void UpdateVisibilityBounds(Node &node);
+		Node *FindLeafNode(Node &node, const Vector3 &point);
+		void FindLeafNodesInAabb(Node &node, const std::array<Vector3, 8> &aabbPoints, std::vector<Node *> &outNodes);
+		bool IsAabbVisibleInCluster(const Node &node, const std::array<Vector3, 8> &aabbPoints, ClusterIndex clusterIdx) const;
 		ChildIndex m_rootNode = std::numeric_limits<ChildIndex>::max();
 		std::vector<Node> m_nodes = {};
 		std::vector<uint8_t> m_clusterVisibility = {};

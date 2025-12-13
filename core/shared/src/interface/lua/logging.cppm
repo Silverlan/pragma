@@ -29,6 +29,6 @@ export namespace Lua::logging {
 	{
 		Lua::PushCFunction(l, +[](lua::State *l) -> int { return LOG_FUNC(l, TLevel); });
 		oClass[name] = luabind::object {luabind::from_stack(l, -1)};
-		Lua::Pop(l, 1);
+		Pop(l, 1);
 	}
 };

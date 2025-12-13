@@ -19,7 +19,7 @@ export namespace pragma::networking {
 		std::function<void(NetPacket &)> handlePacket = nullptr;
 	};
 
-	class DLLCLIENT IClient : public pragma::networking::MessageTracker {
+	class DLLCLIENT IClient : public MessageTracker {
 	  public:
 		virtual ~IClient() = default;
 		virtual std::string GetIdentifier() const = 0;
@@ -30,14 +30,14 @@ export namespace pragma::networking {
 		virtual bool SendPacket(Protocol protocol, NetPacket &packet, Error &outErr) = 0;
 		virtual bool IsRunning() const = 0;
 		virtual bool IsDisconnected() const = 0;
-		virtual bool PollEvents(pragma::networking::Error &outErr) = 0;
+		virtual bool PollEvents(Error &outErr) = 0;
 		virtual uint16_t GetLatency() const = 0;
 		virtual void SetTimeoutDuration(float duration) = 0;
 		virtual std::optional<std::string> GetIP() const = 0;
 		virtual std::optional<Port> GetLocalTCPPort() const { return {}; }
 		virtual std::optional<Port> GetLocalUDPPort() const { return {}; }
 		virtual std::string GetNetworkLayerIdentifier() const = 0;
-		std::optional<networking::IPAddress> GetIPAddress() const;
+		std::optional<IPAddress> GetIPAddress() const;
 		void SetEventInterface(const ClientEventInterface &eventHandler);
 
 		// These have to be called by the implementation of IClient

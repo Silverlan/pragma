@@ -419,7 +419,7 @@ void pragma::rendering::BaseRenderProcessor::SetDepthBias(float d, float delta)
 		return;
 	//m_shaderScene->SetDepthBias(m_depthBias.has_value() ? *m_depthBias : Vector2{});
 }
-bool pragma::rendering::BaseRenderProcessor::BindMaterial(msys::CMaterial &mat)
+bool pragma::rendering::BaseRenderProcessor::BindMaterial(material::CMaterial &mat)
 {
 	if(&mat == m_curMaterial)
 		return pragma::math::is_flag_set(m_stateFlags, StateFlags::MaterialBound);
@@ -699,7 +699,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				if(!static_cast<pragma::ShaderPrepass *>(m_shaderScene)->GetPipelineId(pipelineId, pragma::math::to_integral(pipeline)) || !BindShader(pipelineId))
 					continue;
 			}
-			BindMaterial(static_cast<msys::CMaterial &>(*mat));
+			BindMaterial(static_cast<material::CMaterial &>(*mat));
 			if(optStats)
 				(*optStats)->AddTime(RenderPassStats::Timer::MaterialBind, std::chrono::steady_clock::now() - ttmp);
 		}

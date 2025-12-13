@@ -16,11 +16,11 @@ static std::vector<ConstraintManagerComponent::ConstraintInfo> &get_constraints(
 	static std::vector<ConstraintManagerComponent::ConstraintInfo> g_cl;
 	return nw.IsServer() ? g_sv : g_cl;
 }
-ComponentEventId constraintManagerComponent::EVENT_APPLY_CONSTRAINT = pragma::INVALID_COMPONENT_ID;
-void ConstraintManagerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { constraintManagerComponent::EVENT_APPLY_CONSTRAINT = registerEvent("APPLY_CONSTRAINT", ComponentEventInfo::Type::Explicit); }
-ConstraintManagerComponent::ConstraintManagerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+ComponentEventId constraintManagerComponent::EVENT_APPLY_CONSTRAINT = INVALID_COMPONENT_ID;
+void ConstraintManagerComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { constraintManagerComponent::EVENT_APPLY_CONSTRAINT = registerEvent("APPLY_CONSTRAINT", ComponentEventInfo::Type::Explicit); }
+ConstraintManagerComponent::ConstraintManagerComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintManagerComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void ConstraintManagerComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintManagerComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 std::vector<ConstraintManagerComponent::ConstraintInfo> &ConstraintManagerComponent::GetConstraints() { return get_constraints(GetNetworkState()); }
 void ConstraintManagerComponent::ApplyConstraints(const NetworkState &nw)
@@ -65,7 +65,7 @@ void ConstraintManagerComponent::AddConstraint(ConstraintComponent &constraint)
 {
 	auto &constraints = GetConstraints();
 	assert(FindConstraint(constraint) == constraints.end());
-	pragma::util::insert_sorted(constraints, ConstraintInfo {&constraint}, [](const ConstraintInfo &a, const ConstraintInfo &b) { return a->GetOrderIndex() < b->GetOrderIndex(); });
+	util::insert_sorted(constraints, ConstraintInfo {&constraint}, [](const ConstraintInfo &a, const ConstraintInfo &b) { return a->GetOrderIndex() < b->GetOrderIndex(); });
 	m_ownConstraints.push_back(&constraint);
 }
 std::vector<ConstraintManagerComponent::ConstraintInfo>::iterator ConstraintManagerComponent::FindConstraint(ConstraintComponent &constraint)

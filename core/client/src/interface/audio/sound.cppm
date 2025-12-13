@@ -13,9 +13,9 @@ export import pragma.soundsystem;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 export namespace pragma::audio {
-	class DLLCLIENT CALSound : public al::SoundSource, public ALSound {
+	class DLLCLIENT CALSound : public pragma::audio::SoundSource, public ALSound {
 	public:
-		static std::shared_ptr<CALSound> Create(pragma::NetworkState *nw, const al::PSoundChannel &channel);
+		static std::shared_ptr<CALSound> Create(NetworkState *nw, const pragma::audio::PSoundChannel &channel);
 		static ALSound *FindByServerIndex(uint32_t idx);
 		static void SetIndex(ALSound *snd, uint32_t idx);
 
@@ -97,21 +97,21 @@ export namespace pragma::audio {
 
 		virtual void Update() override;
 		virtual void PostUpdate() override;
-		virtual void SetType(pragma::audio::ALSoundType type) override;
+		virtual void SetType(ALSoundType type) override;
 		virtual bool IsIdle() const override;
 		void Terminate();
 
-		bool AddEffect(al::IEffect &effect, const SoundEffectParams &params = SoundEffectParams());
-		bool AddEffect(al::IEffect &effect, uint32_t &slotId, const SoundEffectParams &params = SoundEffectParams());
-		bool AddEffect(al::IEffect &effect, float gain);
-		bool AddEffect(al::IEffect &effect, uint32_t &slotId, float gain);
-		void RemoveEffect(al::IEffect &effect);
+		bool AddEffect(pragma::audio::IEffect &effect, const SoundEffectParams &params = SoundEffectParams());
+		bool AddEffect(pragma::audio::IEffect &effect, uint32_t &slotId, const SoundEffectParams &params = SoundEffectParams());
+		bool AddEffect(pragma::audio::IEffect &effect, float gain);
+		bool AddEffect(pragma::audio::IEffect &effect, uint32_t &slotId, float gain);
+		void RemoveEffect(pragma::audio::IEffect &effect);
 		void RemoveEffect(uint32_t slotId);
 
 		void UpdateVolume();
 	protected:
-		CALSound(pragma::NetworkState *nw, const al::PSoundChannel &channel);
-		static std::unordered_map<uint32_t, std::weak_ptr<pragma::audio::ALSound>> s_svIndexedSounds; // Sounds created by the server
+		CALSound(NetworkState *nw, const pragma::audio::PSoundChannel &channel);
+		static std::unordered_map<uint32_t, std::weak_ptr<ALSound>> s_svIndexedSounds; // Sounds created by the server
 		float m_modPitch = 1.f;
 		float m_modVol = 1.f;
 		float m_pitch = 1.f;

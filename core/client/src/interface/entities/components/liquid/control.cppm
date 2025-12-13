@@ -14,11 +14,11 @@ export namespace pragma {
 	}
 	class DLLCLIENT CLiquidControlComponent final : public BaseLiquidControlComponent, public CBaseNetComponent {
 	  public:
-		CLiquidControlComponent(pragma::ecs::BaseEntity &ent) : BaseLiquidControlComponent(ent) {}
+		CLiquidControlComponent(ecs::BaseEntity &ent) : BaseLiquidControlComponent(ent) {}
 		virtual bool ShouldTransmitNetData() const override { return true; }
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
-		virtual bool OnBulletHit(const game::BulletInfo &bulletInfo, const pragma::physics::TraceData &data, pragma::physics::PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result) override;
+		virtual bool OnBulletHit(const game::BulletInfo &bulletInfo, const physics::TraceData &data, physics::PhysObj *phys, physics::ICollisionObject *col, const LocalRayResult &result) override;
 	};
 };

@@ -21,7 +21,7 @@ export namespace pragma {
 		GlobalAnimationChannelQueueProcessor();
 		bool IsPending() const;
 		ChannelRange GetNextRange();
-		void Submit(pragma::AnimationManagerData &amData);
+		void Submit(AnimationManagerData &amData);
 		void ApplyValues();
 		void Reset();
 

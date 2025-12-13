@@ -14,9 +14,9 @@ export namespace pragma {
 	}
 	class DLLCLIENT CRadiusComponent final : public BaseRadiusComponent, public CBaseNetComponent {
 	  public:
-		CRadiusComponent(pragma::ecs::BaseEntity &ent);
+		CRadiusComponent(ecs::BaseEntity &ent);
 
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override;

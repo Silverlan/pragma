@@ -47,7 +47,7 @@ std::optional<std::pair<std::string, int32_t>> pragma::scripting::lua_core::util
 std::string pragma::scripting::lua_core::util::make_clickable_lua_script_link(const std::string &fileName, int32_t lineIdx)
 {
 	auto absPath = fileName;
-	filemanager::find_absolute_path(absPath, absPath);
+	fs::find_absolute_path(absPath, absPath);
 	return pragma::util::make_clickable_link(absPath, lineIdx);
 }
 
@@ -60,13 +60,13 @@ bool pragma::scripting::lua_core::util::get_code_snippet(std::stringstream &outM
 		//ssMsg<<"[PRECOMPILED - NO DEBUG INFORMATION AVAILABLE]";
 		return false;
 	}
-	fname = FileManager::GetNormalizedPath(fname);
-	auto br = fname.find_first_of(FileManager::GetDirectorySeparator());
+	fname = pragma::fs::get_normalized_path(fname);
+	auto br = fname.find_first_of(fs::get_directory_separator());
 	while(br != std::string::npos && fname.substr(0, br) != Lua::SCRIPT_DIRECTORY) {
 		fname = fname.substr(br + 1);
-		br = fname.find_first_of(FileManager::GetDirectorySeparator());
+		br = fname.find_first_of(fs::get_directory_separator());
 	}
-	auto f = filemanager::open_file(fname, filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	auto f = fs::open_file(fname, fs::FileMode::Read | fs::FileMode::Binary);
 	if(f != nullptr) {
 		char c = 0;
 		uint32_t curLineId = 1;

@@ -9,23 +9,23 @@ module pragma.shared;
 import :locale;
 import :util.resource_watcher;
 
-decltype(eResourceWatcherCallbackType::Model) eResourceWatcherCallbackType::Model = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Model);
-decltype(eResourceWatcherCallbackType::Material) eResourceWatcherCallbackType::Material = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Material);
-decltype(eResourceWatcherCallbackType::Texture) eResourceWatcherCallbackType::Texture = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Texture);
-decltype(eResourceWatcherCallbackType::Map) eResourceWatcherCallbackType::Map = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Map);
-decltype(eResourceWatcherCallbackType::SoundScript) eResourceWatcherCallbackType::SoundScript = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::SoundScript);
-decltype(eResourceWatcherCallbackType::Sound) eResourceWatcherCallbackType::Sound = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Sound);
-decltype(eResourceWatcherCallbackType::Count) eResourceWatcherCallbackType::Count = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Count);
-ResourceWatcherManager::ResourceWatcherManager(pragma::NetworkState *nw) : m_networkState(nw), m_watcherManager {filemanager::create_directory_watcher_manager()} {}
+decltype(pragma::util::eResourceWatcherCallbackType::Model) pragma::util::eResourceWatcherCallbackType::Model = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::Model);
+decltype(pragma::util::eResourceWatcherCallbackType::Material) pragma::util::eResourceWatcherCallbackType::Material = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::Material);
+decltype(pragma::util::eResourceWatcherCallbackType::Texture) pragma::util::eResourceWatcherCallbackType::Texture = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::Texture);
+decltype(pragma::util::eResourceWatcherCallbackType::Map) pragma::util::eResourceWatcherCallbackType::Map = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::Map);
+decltype(pragma::util::eResourceWatcherCallbackType::SoundScript) pragma::util::eResourceWatcherCallbackType::SoundScript = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::SoundScript);
+decltype(pragma::util::eResourceWatcherCallbackType::Sound) pragma::util::eResourceWatcherCallbackType::Sound = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::Sound);
+decltype(pragma::util::eResourceWatcherCallbackType::Count) pragma::util::eResourceWatcherCallbackType::Count = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::Count);
+pragma::util::ResourceWatcherManager::ResourceWatcherManager(pragma::NetworkState *nw) : m_networkState(nw), m_watcherManager {fs::create_directory_watcher_manager()} {}
 
-void ResourceWatcherManager::Poll()
+void pragma::util::ResourceWatcherManager::Poll()
 {
 	std::scoped_lock lock {m_watcherMutex};
 	for(auto &watcher : m_watchers)
 		watcher->Poll();
 }
 
-void ResourceWatcherManager::Lock()
+void pragma::util::ResourceWatcherManager::Lock()
 {
 	std::scoped_lock lock {m_watcherMutex};
 	if(m_lockedCount++ > 0)
@@ -33,7 +33,7 @@ void ResourceWatcherManager::Lock()
 	for(auto &dirWatcher : m_watchers)
 		dirWatcher->SetEnabled(false);
 }
-void ResourceWatcherManager::Unlock()
+void pragma::util::ResourceWatcherManager::Unlock()
 {
 	std::scoped_lock lock {m_watcherMutex};
 	assert(m_lockedCount > 0);
@@ -44,17 +44,17 @@ void ResourceWatcherManager::Unlock()
 	for(auto &dirWatcher : m_watchers)
 		dirWatcher->SetEnabled(true);
 }
-pragma::util::ScopeGuard ResourceWatcherManager::ScopeLock()
+pragma::util::ScopeGuard pragma::util::ResourceWatcherManager::ScopeLock()
 {
 	Lock();
 	return pragma::util::ScopeGuard {[this]() { Unlock(); }};
 }
 
-bool ResourceWatcherManager::IsLocked() const { return m_lockedCount > 0; }
+bool pragma::util::ResourceWatcherManager::IsLocked() const { return m_lockedCount > 0; }
 
-void ResourceWatcherManager::RegisterTypeHandler(const std::string &ext, const TypeHandler &handler) { m_typeHandlers[ext] = handler; }
+void pragma::util::ResourceWatcherManager::RegisterTypeHandler(const std::string &ext, const TypeHandler &handler) { m_typeHandlers[ext] = handler; }
 
-void ResourceWatcherManager::ReloadMaterial(const std::string &path)
+void pragma::util::ResourceWatcherManager::ReloadMaterial(const std::string &path)
 {
 	auto *nw = m_networkState;
 	auto *game = m_networkState->GetGameState();
@@ -95,9 +95,9 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 	}
 }
 
-void ResourceWatcherManager::ReloadTexture(const std::string &path) {}
+void pragma::util::ResourceWatcherManager::ReloadTexture(const std::string &path) {}
 
-CallbackHandle ResourceWatcherManager::AddChangeCallback(EResourceWatcherCallbackType type, const std::function<void(std::reference_wrapper<const std::string>, std::reference_wrapper<const std::string>)> &fcallback)
+CallbackHandle pragma::util::ResourceWatcherManager::AddChangeCallback(EResourceWatcherCallbackType type, const std::function<void(std::reference_wrapper<const std::string>, std::reference_wrapper<const std::string>)> &fcallback)
 {
 	auto it = m_callbacks.find(type);
 	if(it == m_callbacks.end())
@@ -106,7 +106,7 @@ CallbackHandle ResourceWatcherManager::AddChangeCallback(EResourceWatcherCallbac
 	return it->second.back();
 }
 
-void ResourceWatcherManager::CallChangeCallbacks(EResourceWatcherCallbackType type, const std::string &path, const std::string &ext)
+void pragma::util::ResourceWatcherManager::CallChangeCallbacks(EResourceWatcherCallbackType type, const std::string &path, const std::string &ext)
 {
 	auto it = m_callbacks.find(type);
 	if(it == m_callbacks.end())
@@ -129,7 +129,7 @@ static bool is_image_format(const std::string &ext)
 	auto &supportedFormats = MaterialManager::get_supported_image_formats();
 	return std::find_if(supportedFormats.begin(), supportedFormats.end(), [&ext](const MaterialManager::ImageFormat &format) { return pragma::string::compare(format.extension, ext, false); }) != supportedFormats.end();
 }
-void ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path, const std::string &ext)
+void pragma::util::ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path, const std::string &ext)
 {
 	auto &strPath = path.GetString();
 	auto *nw = m_networkState;
@@ -158,7 +158,7 @@ void ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPat
 						entIt.AttachFilter<EntityIteratorFilterComponent>("model");
 						for(auto *ent : entIt) {
 							auto mdlComponent = ent->GetModelComponent();
-							if(!mdlComponent || FileManager::ComparePath(mdlComponent->GetModelName(), strPath) == false)
+							if(!mdlComponent || fs::compare_path(mdlComponent->GetModelName(), strPath) == false)
 								continue;
 #if RESOURCE_WATCHER_VERBOSE > 0
 							Con::cout << "[ResourceWatcher] Reloading model for entity " << ent->GetClass() << "..." << Con::endl;
@@ -169,7 +169,7 @@ void ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPat
 					}
 				}
 			}
-			CallChangeCallbacks(eResourceWatcherCallbackType::Model, strPath, ext);
+			CallChangeCallbacks(pragma::util::eResourceWatcherCallbackType::Model, strPath, ext);
 		}
 		else if(*assetType == pragma::asset::Type::Material) {
 #if RESOURCE_WATCHER_VERBOSE > 0
@@ -177,10 +177,10 @@ void ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPat
 			Con::cout << "[ResourceWatcher] Material has changed: " << matPath << ". Attempting to reload..." << Con::endl;
 #endif
 			ReloadMaterial(strPath);
-			CallChangeCallbacks(eResourceWatcherCallbackType::Material, strPath, ext);
+			CallChangeCallbacks(pragma::util::eResourceWatcherCallbackType::Material, strPath, ext);
 		}
 		else if(*assetType == pragma::asset::Type::Map)
-			CallChangeCallbacks(eResourceWatcherCallbackType::Map, strPath, ext);
+			CallChangeCallbacks(pragma::util::eResourceWatcherCallbackType::Map, strPath, ext);
 		else if(*assetType == pragma::asset::Type::Texture) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 			auto texPath = "materials\\" + strPath;
@@ -193,31 +193,31 @@ void ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPat
 				auto asset = matManager.GetAsset(pair.second);
 				if(!asset)
 					continue;
-				auto hMat = msys::MaterialManager::GetAssetObject(*asset);
+				auto hMat = material::MaterialManager::GetAssetObject(*asset);
 				if(!hMat)
 					continue;
 				auto *mat = hMat.get();
 
-				auto canonName = FileManager::GetCanonicalizedPath(strPath);
+				auto canonName = fs::get_canonicalized_path(strPath);
 				pragma::string::to_lower(canonName);
 				ufile::remove_extension_from_filename(canonName);
 
 				std::function<bool(const pragma::util::Path &path)> fHasTexture = nullptr;
 				fHasTexture = [mat, &canonName, &fHasTexture](const pragma::util::Path &path) -> bool {
-					for(auto &name : msys::MaterialPropertyBlockView {*mat, path}) {
+					for(auto &name : material::MaterialPropertyBlockView {*mat, path}) {
 						auto propType = mat->GetPropertyType(name);
 						switch(propType) {
-						case msys::PropertyType::Block:
+						case material::PropertyType::Block:
 							{
 								if(fHasTexture(pragma::util::FilePath(path, name)))
 									return true;
 								break;
 							}
-						case msys::PropertyType::Texture:
+						case material::PropertyType::Texture:
 							{
 								std::string texName;
 								if(mat->GetProperty(pragma::util::FilePath(path, name).GetString(), &texName)) {
-									texName = FileManager::GetCanonicalizedPath(texName);
+									texName = fs::get_canonicalized_path(texName);
 									pragma::string::to_lower(texName);
 									ufile::remove_extension_from_filename(texName);
 									if(canonName == texName)
@@ -239,7 +239,7 @@ void ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPat
 					ReloadMaterial(matName);
 				}
 			}
-			CallChangeCallbacks(eResourceWatcherCallbackType::Texture, strPath, ext);
+			CallChangeCallbacks(pragma::util::eResourceWatcherCallbackType::Texture, strPath, ext);
 		}
 		else if(*assetType == pragma::asset::Type::Sound) {
 			if(game != nullptr) {
@@ -250,7 +250,7 @@ void ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPat
 				// TODO: Reload sounds if they had been loaded previously
 				game->GetNetworkState()->PrecacheSound(strPath, pragma::audio::ALChannel::Both); // TODO: Only precache whatever's been requested before?
 			}
-			CallChangeCallbacks(eResourceWatcherCallbackType::Sound, strPath, ext);
+			CallChangeCallbacks(pragma::util::eResourceWatcherCallbackType::Sound, strPath, ext);
 		}
 	}
 	else if(rootPath == "scripts/sounds/") {
@@ -263,23 +263,23 @@ void ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPat
 				// TODO: Reload sound-scripts if they had been loaded previously
 				game->LoadSoundScripts(strPath.c_str()); // TODO: Only reload if they have been requested before?
 			}
-			CallChangeCallbacks(eResourceWatcherCallbackType::SoundScript, strPath, ext);
+			CallChangeCallbacks(pragma::util::eResourceWatcherCallbackType::SoundScript, strPath, ext);
 		}
 	}
 	else if(rootPath == "scripts/localization/")
 		pragma::locale::reload_files();
 }
 
-void ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path)
+void pragma::util::ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path)
 {
-	filemanager::update_file_index_cache((rootPath + path).GetString());
+	fs::update_file_index_cache((rootPath + path).GetString());
 	/*std::string absPath;
-	if(FileManager::FindAbsolutePath(rootPath +'/' +path,absPath))
+	if(fs::find_absolute_path(rootPath +'/' +path,absPath))
 	{
 		std::string path;
-		if(filemanager::find_relative_path(absPath, path)) {
+		if(fs::find_relative_path(absPath, path)) {
 			absPath = path;
-			filemanager::update_file_index_cache(absPath);
+			fs::update_file_index_cache(absPath);
 		}
 	}*/
 	auto ext = path.GetFileExtension();
@@ -291,29 +291,29 @@ void ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPat
 	OnResourceChanged(rootPath, path, *ext);
 }
 
-void ResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths) { paths = {"models", "materials", "sounds", "scripts/sounds", "scripts/localization", "maps"}; }
+void pragma::util::ResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths) { paths = {"models", "materials", "sounds", "scripts/sounds", "scripts/localization", "maps"}; }
 
-bool ResourceWatcherManager::MountDirectory(const std::string &path, bool bAbsolutePath)
+bool pragma::util::ResourceWatcherManager::MountDirectory(const std::string &path, bool bAbsolutePath)
 {
 	std::vector<std::string> watchPaths;
 	GetWatchPaths(watchPaths);
 	for(auto &path : watchPaths)
-		path = FileManager::GetCanonicalizedPath(path);
+		path = fs::get_canonicalized_path(path);
 	try {
-		auto watchFlags = DirectoryWatcherCallback::WatchFlags::WatchSubDirectories;
+		auto watchFlags = fs::DirectoryWatcherCallback::WatchFlags::WatchSubDirectories;
 		if(bAbsolutePath)
-			watchFlags |= DirectoryWatcherCallback::WatchFlags::AbsolutePath;
+			watchFlags |= fs::DirectoryWatcherCallback::WatchFlags::AbsolutePath;
 		if(m_lockedCount > 0)
-			watchFlags |= DirectoryWatcherCallback::WatchFlags::StartDisabled;
+			watchFlags |= fs::DirectoryWatcherCallback::WatchFlags::StartDisabled;
 		m_watcherMutex.lock();
 		m_watchers.reserve(m_watchers.size() + watchPaths.size());
 		for(auto &watchPath : watchPaths) {
 			auto pwatchPath = pragma::util::DirPath(watchPath);
-			m_watchers.push_back(pragma::util::make_shared<DirectoryWatcherCallback>(pragma::util::DirPath(path, pwatchPath).GetString(), [this, pwatchPath = std::move(pwatchPath)](const std::string &fName) { OnResourceChanged(pwatchPath, fName); }, watchFlags, m_watcherManager.get()));
+			m_watchers.push_back(pragma::util::make_shared<fs::DirectoryWatcherCallback>(pragma::util::DirPath(path, pwatchPath).GetString(), [this, pwatchPath = std::move(pwatchPath)](const std::string &fName) { OnResourceChanged(pwatchPath, fName); }, watchFlags, m_watcherManager.get()));
 		}
 		m_watcherMutex.unlock();
 	}
-	catch(const DirectoryWatcher::ConstructException &e) {
+	catch(const fs::DirectoryWatcher::ConstructException &e) {
 #if RESOURCE_WATCHER_VERBOSE > 1
 		Con::cwar << "[ResourceWatcher] Unable to mount directory '" << path << "': " << e.what() << Con::endl;
 #endif

@@ -20,7 +20,7 @@ ai::navigation::PathQuery::PathQuery(const Vector3 &_start, const Vector3 &_end)
 
 //////////////////
 
-BaseAIComponent::BaseAIComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_seqIdle(-1), m_navInfo(), m_obstruction()
+BaseAIComponent::BaseAIComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_seqIdle(-1), m_navInfo(), m_obstruction()
 {
 	m_obstruction.nextObstructionCheck = 0.0;
 	m_obstruction.pathObstructed = false;
@@ -81,7 +81,7 @@ bool BaseAIComponent::TurnStep(const Vector3 &target, float &turnAngle, const fl
 	const Vector2 pitchLimit {0.f, 0.f};
 	auto newRot = math::approach_direction(pTrComponent->GetRotation(), GetUpDirection(), dir, Vector2(speedMax, speedMax), &rotAm, &pitchLimit);
 	pTrComponent->SetRotation(newRot);
-	return (pragma::math::abs(rotAm.y) <= speedMax) ? true : false;
+	return (math::abs(rotAm.y) <= speedMax) ? true : false;
 
 	// Deprecated if the above code works properly
 	/*
@@ -130,11 +130,11 @@ void BaseAIComponent::ReleaseNavThread()
 	s_navThread = nullptr;
 }
 
-void BaseAIComponent::ReloadNavThread(pragma::Game &game)
+void BaseAIComponent::ReloadNavThread(Game &game)
 {
 	ReleaseNavThread();
 
-	auto wpNavMesh = std::weak_ptr<pragma::nav::Mesh>(game.GetNavMesh());
+	auto wpNavMesh = std::weak_ptr<nav::Mesh>(game.GetNavMesh());
 	if(wpNavMesh.expired() == true)
 		return;
 	s_navThread = pragma::util::make_shared<ai::navigation::NavThread>();
@@ -179,13 +179,13 @@ void BaseAIComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	m_netEvSetLookTarget = SetupNetEvent("set_look_target");
 
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> eventData) {
-		PathStep(static_cast<float>(static_cast<pragma::CEPhysicsUpdateData &>(eventData.get()).deltaTime));
-		return pragma::util::EventReply::Unhandled;
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED, [this](std::reference_wrapper<ComponentEvent> eventData) {
+		PathStep(static_cast<float>(static_cast<CEPhysicsUpdateData &>(eventData.get()).deltaTime));
+		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(movementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateMovementProperties(); });
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(static_cast<pragma::CEOnModelChanged &>(evData.get()).model); });
-	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_START, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(movementComponent::EVENT_ON_UPDATE_MOVEMENT, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateMovementProperties(); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { OnModelChanged(static_cast<CEOnModelChanged &>(evData.get()).model); });
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATION_START, [this](std::reference_wrapper<ComponentEvent> evData) {
 		auto animComponent = GetEntity().GetAnimatedComponent();
 		if(animComponent.expired())
 			return;
@@ -195,22 +195,22 @@ void BaseAIComponent::Initialize()
 			m_animMoveInfo.blend = false;
 			return;
 		}
-		m_animMoveInfo.blend = !anim->HasFlag(pragma::FAnim::NoMoveBlend);
-		m_animMoveInfo.moving = (anim->HasFlag(pragma::FAnim::MoveX) || anim->HasFlag(pragma::FAnim::MoveZ)) ? true : false;
+		m_animMoveInfo.blend = !anim->HasFlag(FAnim::NoMoveBlend);
+		m_animMoveInfo.moving = (anim->HasFlag(FAnim::MoveX) || anim->HasFlag(FAnim::MoveZ)) ? true : false;
 	});
-	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT, [this](std::reference_wrapper<ComponentEvent> evData) {
 		auto animComponent = GetEntity().GetAnimatedComponent();
 		if(animComponent.expired())
 			return;
 		auto &evDataBlend = static_cast<CEOnBlendAnimation &>(evData.get());
 		auto &animInfo = evDataBlend.slotInfo;
 		if(&animInfo == &animComponent->GetBaseAnimationInfo()) // Only apply for base animation, not for gestures
-			BaseAIComponent::BlendAnimationMovementMT(evDataBlend.bonePoses, evDataBlend.boneScales);
+			BlendAnimationMovementMT(evDataBlend.bonePoses, evDataBlend.boneScales);
 	});
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
-	BindEvent(baseCharacterComponent::EVENT_IS_MOVING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) { OnPhysicsInitialized(); });
+	BindEvent(baseCharacterComponent::EVENT_IS_MOVING, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		static_cast<CEIsMoving &>(evData.get()).moving = IsMoving();
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -250,10 +250,10 @@ void BaseAIComponent::OnEntitySpawn()
 	m_obstruction.sweepFilter = std::make_unique<physics::MultiEntityRayCastFilterCallback>(std::move(filterEnts));
 }
 
-void BaseAIComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model)
+void BaseAIComponent::OnModelChanged(const std::shared_ptr<asset::Model> &model)
 {
 	m_seqIdle = -1;
-	auto *pObservableComponent = static_cast<pragma::BaseObservableComponent *>(GetEntity().FindComponent("observable").get());
+	auto *pObservableComponent = static_cast<BaseObservableComponent *>(GetEntity().FindComponent("observable").get());
 	if(pObservableComponent != nullptr)
 		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::ThirdPerson, false);
 	if(model == nullptr)
@@ -262,7 +262,7 @@ void BaseAIComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model>
 		Vector3 min, max;
 		model->GetRenderBounds(min, max);
 		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::ThirdPerson, true);
-		pObservableComponent->SetLocalCameraOrigin(BaseObservableComponent::CameraType::ThirdPerson, Vector3 {0.f, (max.y - min.y) * 0.25f, -pragma::math::max(pragma::math::abs(min.x), pragma::math::abs(min.y), pragma::math::abs(min.z), pragma::math::abs(max.x), pragma::math::abs(max.y), pragma::math::abs(max.z))});
+		pObservableComponent->SetLocalCameraOrigin(BaseObservableComponent::CameraType::ThirdPerson, Vector3 {0.f, (max.y - min.y) * 0.25f, -math::max(math::abs(min.x), math::abs(min.y), math::abs(min.z), math::abs(max.x), math::abs(max.y), math::abs(max.z))});
 	}
 
 	// Update animation move speed
@@ -275,13 +275,13 @@ void BaseAIComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model>
 
 	// Find idle animation
 	std::vector<unsigned int> animations;
-	model->GetAnimations(pragma::Activity::Idle, animations);
+	model->GetAnimations(Activity::Idle, animations);
 	if(animations.empty())
 		return;
 	m_seqIdle = animations.front();
 	auto it = std::find_if(animations.begin(), animations.end(), [&model](uint32_t animId) {
 		auto anim = model->GetAnimation(animId);
-		return (anim != nullptr && !anim->HasFlag(pragma::FAnim::NoRepeat)) ? true : false; // Prefer an idle animation that can be repeated (More likely to be a generic idle animation)
+		return (anim != nullptr && !anim->HasFlag(FAnim::NoRepeat)) ? true : false; // Prefer an idle animation that can be repeated (More likely to be a generic idle animation)
 	});
 	if(it != animations.end())
 		m_seqIdle = *it;
@@ -292,7 +292,7 @@ void BaseAIComponent::OnPhysicsInitialized()
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent)
-		pPhysComponent->AddCollisionFilter(pragma::physics::CollisionMask::NPC);
+		pPhysComponent->AddCollisionFilter(physics::CollisionMask::NPC);
 }
 
 void BaseAIComponent::Spawn() {}

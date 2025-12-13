@@ -16,21 +16,21 @@ export namespace pragma {
 	}
 	class DLLNETWORK ParentComponent final : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		ParentComponent(pragma::ecs::BaseEntity &ent);
+		ParentComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *lua) override;
 		virtual void OnRemove() override;
 
-		const std::vector<pragma::ComponentHandle<BaseChildComponent>> &GetChildren() const;
-		std::vector<pragma::ComponentHandle<BaseChildComponent>> &GetChildren();
+		const std::vector<ComponentHandle<BaseChildComponent>> &GetChildren() const;
+		std::vector<ComponentHandle<BaseChildComponent>> &GetChildren();
 	  protected:
 		friend BaseChildComponent;
 		void AddChild(BaseChildComponent &ent);
 		void RemoveChild(BaseChildComponent &ent);
 
-		std::vector<pragma::ComponentHandle<BaseChildComponent>> m_children = {};
+		std::vector<ComponentHandle<BaseChildComponent>> m_children = {};
 	};
 	struct DLLNETWORK CEOnChildAdded : public ComponentEvent {
 		CEOnChildAdded(BaseChildComponent &child);

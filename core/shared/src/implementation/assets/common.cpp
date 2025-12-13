@@ -271,7 +271,7 @@ bool pragma::asset::remove_asset(const std::string &name, Type type)
 		if(it != deleted.end())
 			return false;
 		auto fullPath = std::string {get_asset_root_directory(type)} + '/' + *f;
-		if(FileManager::RemoveFile(fullPath.c_str()) == false)
+		if(fs::remove_file(fullPath) == false)
 			return false;
 		deleted.push_back(*f);
 		f = find_file(name, type);
@@ -291,7 +291,7 @@ std::optional<std::string> pragma::asset::find_file(const std::string &name, Typ
 		{
 			for(auto &ext : get_supported_extensions(type)) {
 				auto nameWithExt = normalizedName + '.' + ext;
-				if(FileManager::Exists(std::string {get_asset_root_directory(type)} + "/" + nameWithExt)) {
+				if(fs::exists(std::string {get_asset_root_directory(type)} + "/" + nameWithExt)) {
 					if(optOutFormat)
 						*optOutFormat = ext;
 					return nameWithExt;
@@ -340,8 +340,8 @@ bool pragma::asset::is_loaded(pragma::NetworkState &nw, const std::string &name,
 void pragma::asset::ModelAssetWrapper::SetModel(pragma::asset::Model &model) { m_model = model.shared_from_this(); }
 pragma::asset::Model *pragma::asset::ModelAssetWrapper::GetModel() const { return m_model.get(); }
 
-void pragma::asset::MaterialAssetWrapper::SetMaterial(msys::Material &mat) { m_material = mat.GetHandle(); }
-msys::Material *pragma::asset::MaterialAssetWrapper::GetMaterial() const { return const_cast<msys::Material *>(m_material.get()); }
+void pragma::asset::MaterialAssetWrapper::SetMaterial(material::Material &mat) { m_material = mat.GetHandle(); }
+pragma::material::Material *pragma::asset::MaterialAssetWrapper::GetMaterial() const { return const_cast<material::Material *>(m_material.get()); }
 
 void pragma::asset::AssetManager::RegisterImporter(const ImporterInfo &importerInfo, Type type, const ImportHandler &importHandler)
 {
@@ -366,13 +366,13 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 		for(auto &importer : m_importers[pragma::math::to_integral(type)]) {
 			for(auto &extInfo : importer.info.fileExtensions) {
 				auto filePathWithExt = filePathNoExt + '.' + extInfo.first;
-				auto f = FileManager::OpenFile(filePathWithExt.c_str(), extInfo.second ? "rb" : "r");
+				auto f = fs::open_file(filePathWithExt, extInfo.second ? (fs::FileMode::Read | fs::FileMode::Binary) : fs::FileMode::Read);
 				if(f == nullptr)
 					continue;
 				fpath = filePathWithExt;
 
 				std::string err;
-				fsys::File fp {f};
+				fs::File fp {f};
 				auto aw = importer.handler(game, fp, fpath, err);
 				if(aw && aw->GetType() == type) {
 					if(filePath.has_value()) {

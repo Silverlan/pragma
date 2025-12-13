@@ -62,27 +62,27 @@ export namespace luabind {
 	}
 
 	template<typename T>
-	struct lua_proxy_traits<adl::udm_type<T, true, false, false>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<udm_type<T, true, false, false>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return check_udm<true, false, false>(L, idx); }
 	};
 
 	template<typename T>
-	struct lua_proxy_traits<adl::udm_type<T, false, true, false>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<udm_type<T, false, true, false>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return check_udm<false, true, false>(L, idx); }
 	};
 
 	template<typename T>
-	struct lua_proxy_traits<adl::udm_type<T, true, true, false>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<udm_type<T, true, true, false>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return check_udm<true, true, false>(L, idx); }
 	};
 
 	template<typename T>
-	struct lua_proxy_traits<adl::udm_type<T, false, false, true>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<udm_type<T, false, false, true>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return check_udm<false, false, true>(L, idx); }
 	};
 
 	template<typename T>
-	struct lua_proxy_traits<adl::udm_type<T, true, true, true>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<udm_type<T, true, true, true>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return check_udm<true, true, true>(L, idx); }
 	};
 };

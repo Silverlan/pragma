@@ -215,7 +215,7 @@ void pragma::pts::CParticleRendererModel::RecordRender(prosper::ICommandBuffer &
 					}
 					if(mat == nullptr)
 						continue;
-					shader->BindMaterial(static_cast<msys::CMaterial&>(*mat));
+					shader->BindMaterial(static_cast<material::CMaterial&>(*mat));
 					shader->Draw(*static_cast<pragma::geometry::CModelSubMesh*>(subMesh.get()),bAnimated ? 1u : instanceCount,instanceIdx); // TODO: Bloom?
 				}
 			}

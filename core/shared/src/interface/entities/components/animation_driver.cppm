@@ -14,10 +14,10 @@ export namespace pragma {
 	class DLLNETWORK AnimationDriverComponent final : public BaseEntityComponent {
 	  public:
 		using ValueDriverHash = uint64_t; // ComponentId +ComponentMemberIndex
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		AnimationDriverComponent(pragma::ecs::BaseEntity &ent);
+		AnimationDriverComponent(ecs::BaseEntity &ent);
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
@@ -42,8 +42,8 @@ export namespace pragma {
 		const std::unordered_map<std::string, udm::PProperty> &GetConstants() const;
 		const std::unordered_map<std::string, std::string> &GetReferences() const;
 
-		void SetDrivenObject(const pragma::EntityUComponentMemberRef &drivenObject);
-		const pragma::EntityUComponentMemberRef &GetDrivenObject() const;
+		void SetDrivenObject(const EntityUComponentMemberRef &drivenObject);
+		const EntityUComponentMemberRef &GetDrivenObject() const;
 
 		udm::PProperty &GetParameters();
 		void UpdateParameters();
@@ -54,7 +54,7 @@ export namespace pragma {
 	  protected:
 		std::optional<ComponentMemberIndex> FindComponentMember(ComponentId componentId, const std::string &memberName);
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
-		pragma::EntityUComponentMemberRef m_drivenObject;
+		EntityUComponentMemberRef m_drivenObject;
 		std::unique_ptr<game::ValueDriver> m_driver;
 		game::ValueDriverDescriptor m_descriptor;
 		bool m_driverDirty = true;

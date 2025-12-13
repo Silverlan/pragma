@@ -8,7 +8,7 @@ export module pragma.shared:util.data_file;
 
 export import pragma.filesystem;
 
-export {
+export namespace pragma::util {
 	struct DLLNETWORK DataFileBlock {
 		~DataFileBlock()
 		{
@@ -26,7 +26,7 @@ export {
 	class DLLNETWORK DataFile {
 	  private:
 	  public:
-		static DataFileBlock *ReadBlock(VFilePtr f);
+		static DataFileBlock *ReadBlock(fs::VFilePtr f);
 		static DataFileBlock *Read(const char *f);
 	};
 };

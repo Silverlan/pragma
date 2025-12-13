@@ -43,7 +43,7 @@ export namespace pragma {
 			def->def("__tostring", tostring);
 			return def;
 		}
-		template<pragma::util::StringLiteral TStr, typename... Types>
+		template<util::StringLiteral TStr, typename... Types>
 		ClassWrapper<Types...> register_class(lua::State *l, const char *name)
 		{
 			using FirstType = std::tuple_element_t<0, std::tuple<Types...>>;
@@ -51,7 +51,7 @@ export namespace pragma {
 			def->def("__tostring", +[]() -> const char * { return TStr; });
 			return def;
 		}
-		template<pragma::util::StringLiteral TStr, typename... Types>
+		template<util::StringLiteral TStr, typename... Types>
 		ClassWrapper<Types...> register_class(lua::State *l)
 		{
 			using FirstType = std::tuple_element_t<0, std::tuple<Types...>>;

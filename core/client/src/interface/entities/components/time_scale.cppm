@@ -11,10 +11,10 @@ export import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CTimeScaleComponent final : public BaseTimeScaleComponent, public CBaseNetComponent {
 	  public:
-		CTimeScaleComponent(pragma::ecs::BaseEntity &ent) : BaseTimeScaleComponent(ent) {}
+		CTimeScaleComponent(ecs::BaseEntity &ent) : BaseTimeScaleComponent(ent) {}
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void ReceiveData(NetPacket &packet) override {}
 		virtual bool ShouldTransmitNetData() const override { return true; }
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 	};
 };

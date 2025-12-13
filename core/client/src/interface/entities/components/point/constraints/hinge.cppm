@@ -13,7 +13,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CPointConstraintHingeComponent final : public BasePointConstraintHingeComponent, public CBaseNetComponent {
 		  public:
-			CPointConstraintHingeComponent(pragma::ecs::BaseEntity &ent) : BasePointConstraintHingeComponent(ent) {}
+			CPointConstraintHingeComponent(ecs::BaseEntity &ent) : BasePointConstraintHingeComponent(ent) {}
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }

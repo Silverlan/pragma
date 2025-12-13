@@ -22,10 +22,10 @@ void CSoundDspEchoComponent::ReceiveData(NetPacket &packet)
 void CSoundDspEchoComponent::OnEntitySpawn()
 {
 	//BaseEnvSoundDspEcho::OnEntitySpawn(); // Not calling BaseEnvSoundDspEcho::OnEntitySpawn() to skip the dsp effect lookup
-	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
+	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	al::EfxEchoProperties props {};
+	pragma::audio::EfxEchoProperties props {};
 	props.flDelay = m_kvDelay;
 	props.flLRDelay = m_kvLRDelay;
 	props.flDamping = m_kvDamping;

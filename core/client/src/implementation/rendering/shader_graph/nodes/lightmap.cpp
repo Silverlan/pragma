@@ -9,9 +9,9 @@ import :rendering.shader_graph.node_lightmap;
 
 using namespace pragma::rendering::shader_graph;
 
-LightmapNode::LightmapNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_TEXTURE} { AddModuleDependency("lightmap"); }
+LightmapNode::LightmapNode(const std::string_view &type) : Node {type, shadergraph::CATEGORY_TEXTURE} { AddModuleDependency("lightmap"); }
 
-std::string LightmapNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const
+std::string LightmapNode::DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const
 {
 	std::ostringstream code;
 	return code.str();

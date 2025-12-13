@@ -14,64 +14,64 @@ void BaseEnvQuakeComponent::Initialize()
 
 	auto &ent = GetEntity();
 	ent.AddComponent("toggle");
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "frequency", false))
-			m_frequency = pragma::util::to_float(kvData.value);
+			m_frequency = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "amplitude", false))
-			m_amplitude = pragma::util::to_float(kvData.value);
+			m_amplitude = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "radius", false))
-			m_radius = pragma::util::to_float(kvData.value);
+			m_radius = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "duration", false))
-			m_duration = pragma::util::to_float(kvData.value);
+			m_duration = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "fadein", false))
-			m_tFadeIn = pragma::util::to_float(kvData.value);
+			m_tFadeIn = util::to_float(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "fadeout", false))
-			m_tFadeOut = pragma::util::to_float(kvData.value);
+			m_tFadeOut = util::to_float(kvData.value);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(pragma::string::compare<std::string>(inputData.input, "startshake", false)) {
 			auto whToggleComponent = GetEntity().FindComponent("toggle");
 			if(whToggleComponent.valid())
-				static_cast<pragma::BaseToggleComponent *>(whToggleComponent.get())->TurnOn();
+				static_cast<BaseToggleComponent *>(whToggleComponent.get())->TurnOn();
 		}
 		else if(pragma::string::compare<std::string>(inputData.input, "stopshake", false)) {
 			auto whToggleComponent = GetEntity().FindComponent("toggle");
 			if(whToggleComponent.valid())
-				static_cast<pragma::BaseToggleComponent *>(whToggleComponent.get())->TurnOff();
+				static_cast<BaseToggleComponent *>(whToggleComponent.get())->TurnOff();
 		}
 		else if(pragma::string::compare<std::string>(inputData.input, "setamplitude", false))
-			m_amplitude = pragma::util::to_float(inputData.data);
+			m_amplitude = util::to_float(inputData.data);
 		else if(pragma::string::compare<std::string>(inputData.input, "setfrequency", false))
-			m_frequency = pragma::util::to_float(inputData.data);
+			m_frequency = util::to_float(inputData.data);
 		else if(pragma::string::compare<std::string>(inputData.input, "setduration", false))
-			m_duration = pragma::util::to_float(inputData.data);
+			m_duration = util::to_float(inputData.data);
 		else if(pragma::string::compare<std::string>(inputData.input, "setfadeinduration", false))
-			m_tFadeIn = pragma::util::to_float(inputData.data);
+			m_tFadeIn = util::to_float(inputData.data);
 		else if(pragma::string::compare<std::string>(inputData.input, "setfadeoutduration", false))
-			m_tFadeOut = pragma::util::to_float(inputData.data);
+			m_tFadeOut = util::to_float(inputData.data);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 	ent.AddComponent("io");
 	ent.AddComponent("transform");
 }
 
-pragma::util::EventReply BaseEnvQuakeComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply BaseEnvQuakeComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON)
 		StartShake();
 	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		StopShake();
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 
 Bool BaseEnvQuakeComponent::IsGlobal() const { return (m_quakeFlags & SF_QUAKE_GLOBAL_SHAKE) != 0; }

@@ -597,7 +597,7 @@ int Lua::game::Client::test(lua::State *l)
 		auto channel = scene->AddChannel<choreography::Channel>("Test");
 
 		se_script::SceneScriptValue ssv {};
-		auto f = FileManager::OpenFile("scenes/sdk_barney1.vcd","r");//sdk_barney1.vcd","r");
+		auto f = pragma::fs::open_file("scenes/sdk_barney1.vcd", pragma::fs::FileMode::Read);//sdk_barney1.vcd","r");
 		if(f != nullptr)
 		{
 			if(se_script::read_scene(f,ssv) == se_script::ResultCode::Ok)
@@ -785,7 +785,7 @@ int Lua::game::Client::open_dropped_file(lua::State *l)
 {
 	auto &droppedFiles = pragma::get_cengine()->GetDroppedFiles();
 	const pragma::CEngine::DroppedFile *pf = nullptr;
-	std::optional<std::string> fullPath {};
+	std::string fullPath {};
 	if(Lua::IsString(l, 1)) {
 		auto *fileName = Lua::CheckString(l, 1);
 		auto it = std::find_if(droppedFiles.begin(), droppedFiles.end(), [&fileName](const pragma::CEngine::DroppedFile &f) { return (f.fileName == fileName) ? true : false; });
@@ -812,7 +812,7 @@ int Lua::game::Client::open_dropped_file(lua::State *l)
 	auto bBinary = false;
 	if(Lua::IsSet(l, 2) == true)
 		bBinary = Lua::CheckBool(l, 2);
-	auto f = FileManager::OpenSystemFile(fullPath->c_str(), (bBinary == true) ? "rb" : "r");
+	auto f = pragma::fs::open_system_file(fullPath, (bBinary == true) ? (pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary) : pragma::fs::FileMode::Read);
 	if(f == nullptr)
 		return 0;
 	auto r = pragma::util::make_shared<LFile>();
@@ -919,24 +919,24 @@ int Lua::game::Client::set_debug_render_filter(lua::State *l)
 	}
 	if(t["materialFilter"]) {
 		auto materialFilter = luabind::object {t["materialFilter"]};
-		filter->materialFilter = [materialFilter](msys::CMaterial &mat) mutable -> bool {
-			auto r = materialFilter(static_cast<msys::Material *>(&mat));
+		filter->materialFilter = [materialFilter](pragma::material::CMaterial &mat) mutable -> bool {
+			auto r = materialFilter(static_cast<pragma::material::Material *>(&mat));
 			return luabind::object_cast<bool>(r);
 		};
 	}
 	if(t["entityFilter"]) {
 		auto entityFilter = luabind::object {t["entityFilter"]};
-		filter->entityFilter = [entityFilter](pragma::ecs::CBaseEntity &ent, msys::CMaterial &mat) mutable -> bool {
+		filter->entityFilter = [entityFilter](pragma::ecs::CBaseEntity &ent, pragma::material::CMaterial &mat) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
-			auto r = entityFilter(oEnt, static_cast<msys::Material *>(&mat));
+			auto r = entityFilter(oEnt, static_cast<pragma::material::Material *>(&mat));
 			return luabind::object_cast<bool>(r);
 		};
 	}
 	if(t["meshFilter"]) {
 		auto meshFilter = luabind::object {t["meshFilter"]};
-		filter->meshFilter = [meshFilter](pragma::ecs::CBaseEntity &ent, msys::CMaterial *mat, pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx) mutable -> bool {
+		filter->meshFilter = [meshFilter](pragma::ecs::CBaseEntity &ent, pragma::material::CMaterial *mat, pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
-			auto r = meshFilter(oEnt, mat ? static_cast<msys::Material *>(mat) : nullptr, mesh.shared_from_this(), meshIdx);
+			auto r = meshFilter(oEnt, mat ? static_cast<pragma::material::Material *>(mat) : nullptr, mesh.shared_from_this(), meshIdx);
 			return luabind::object_cast<bool>(r);
 		};
 	}

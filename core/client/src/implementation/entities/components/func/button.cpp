@@ -13,9 +13,9 @@ using namespace pragma;
 void CButtonComponent::Initialize()
 {
 	BaseFuncButtonComponent::Initialize();
-	auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
+	auto pRenderComponent = static_cast<ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
-		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
+		pRenderComponent->SetSceneRenderPass(rendering::SceneRenderPass::World);
 }
 void CButtonComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

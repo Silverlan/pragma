@@ -402,7 +402,7 @@ export {
 
 	namespace Lua {
 		namespace Property {
-			DLLNETWORK void register_classes(Lua::Interface &l);
+			DLLNETWORK void register_classes(Interface &l);
 
 			DLLNETWORK void push(lua::State *l, pragma::util::Int8Property &prop);
 			DLLNETWORK void push(lua::State *l, pragma::util::UInt8Property &prop);
@@ -444,15 +444,15 @@ export {
 			template<class TProperty, typename T>
 			void add_callback(lua::State *l, TProperty &prop, const luabind::object &oCallback)
 			{
-				Lua::CheckFunction(l, 2);
+				CheckFunction(l, 2);
 				auto cb = prop->AddCallback([l, oCallback](std::reference_wrapper<const T> oldVal, std::reference_wrapper<const T> newVal) {
 					auto c = Lua::CallFunction(
 					  l,
-					  [&oCallback, &oldVal, &newVal](lua::State *l) -> Lua::StatusCode {
+					  [&oCallback, &oldVal, &newVal](lua::State *l) -> StatusCode {
 						  oCallback.push(l);
 						  Lua::Push<T>(l, oldVal.get());
 						  Lua::Push<T>(l, newVal.get());
-						  return Lua::StatusCode::Ok;
+						  return StatusCode::Ok;
 					  },
 					  0);
 				});
@@ -462,17 +462,17 @@ export {
 			template<class TProperty, typename T>
 			void add_modifier(lua::State *l, TProperty &prop, const luabind::object &oCallback)
 			{
-				Lua::CheckFunction(l, 2);
+				CheckFunction(l, 2);
 				auto cb = prop->AddModifier([l, oCallback](T &val) {
 					auto c = Lua::CallFunction(
 					  l,
-					  [&oCallback, &val](lua::State *l) -> Lua::StatusCode {
+					  [&oCallback, &val](lua::State *l) -> StatusCode {
 						  oCallback.push(l);
 						  Lua::Push<T>(l, val);
-						  return Lua::StatusCode::Ok;
+						  return StatusCode::Ok;
 					  },
 					  1);
-					if(c == Lua::StatusCode::Ok && Lua::IsSet(l, -1))
+					if(c == StatusCode::Ok && IsSet(l, -1))
 						val = Lua::Check<T>(l, -1);
 				});
 				Lua::Push<CallbackHandle>(l, cb);

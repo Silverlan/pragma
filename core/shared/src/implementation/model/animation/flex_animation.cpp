@@ -135,7 +135,7 @@ bool FlexAnimation::Save(udm::AssetDataArg outData, std::string &outErr)
 	}
 	return true;
 }
-bool FlexAnimation::SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f)
+bool FlexAnimation::SaveLegacy(std::shared_ptr<pragma::fs::VFilePtrInternalReal> &f)
 {
 	f->Write<uint32_t>(FORMAT_VERSION);
 	f->Write<float>(GetFps());

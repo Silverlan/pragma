@@ -11,8 +11,8 @@ export import :rendering.shaders.textured;
 export namespace pragma {
 	class DLLCLIENT ShaderTexturedAlphaTransition : public ShaderGameWorldLightingPass {
 	  public:
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_ALPHA;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ALPHA;
+		static ShaderGraphics::VertexBinding VERTEX_BINDING_ALPHA;
+		static VertexAttribute VERTEX_ATTRIBUTE_ALPHA;
 
 #pragma pack(push, 1)
 		struct PushConstants {

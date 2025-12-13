@@ -14,15 +14,15 @@ export namespace pragma {
 	}
 	class DLLCLIENT CPhysicsComponent final : public BasePhysicsComponent, public CBaseNetComponent, public networking::VelocityCorrection {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		CPhysicsComponent(pragma::ecs::BaseEntity &ent) : BasePhysicsComponent(ent) {}
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		CPhysicsComponent(ecs::BaseEntity &ent) : BasePhysicsComponent(ent) {}
 		virtual void Initialize() override;
 
 		virtual void PrePhysicsSimulate() override;
 		virtual bool PostPhysicsSimulate() override;
 
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;

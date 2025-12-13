@@ -21,7 +21,7 @@ void CFogControllerComponent::Initialize()
 void CFogControllerComponent::OnRemove()
 {
 	BaseEnvFogControllerComponent::OnRemove();
-	auto toggleC = GetEntity().GetComponent<pragma::CToggleComponent>();
+	auto toggleC = GetEntity().GetComponent<CToggleComponent>();
 	if(toggleC.expired() || toggleC->IsTurnedOn())
 		GetFog().SetEnabled(false);
 }
@@ -51,14 +51,14 @@ void CFogControllerComponent::OnEntitySpawn()
 }
 void CFogControllerComponent::ReceiveData(NetPacket &packet)
 {
-	m_kvFogType = packet->Read<pragma::util::FogType>();
+	m_kvFogType = packet->Read<util::FogType>();
 	m_kvFogStart = packet->Read<float>();
 	m_kvFogEnd = packet->Read<float>();
 	m_kvMaxDensity = packet->Read<float>();
 }
-pragma::rendering::WorldEnvironment::Fog &CFogControllerComponent::GetFog()
+rendering::WorldEnvironment::Fog &CFogControllerComponent::GetFog()
 {
-	auto &worldEnv = pragma::get_cgame()->GetWorldEnvironment();
+	auto &worldEnv = get_cgame()->GetWorldEnvironment();
 	return worldEnv.GetFogSettings();
 }
 void CFogControllerComponent::SetFogStart(float start)
@@ -76,7 +76,7 @@ void CFogControllerComponent::SetMaxDensity(float density)
 	BaseEnvFogControllerComponent::SetMaxDensity(density);
 	GetFog().SetMaxDensity(density);
 }
-void CFogControllerComponent::SetFogType(pragma::util::FogType type)
+void CFogControllerComponent::SetFogType(util::FogType type)
 {
 	BaseEnvFogControllerComponent::SetFogType(type);
 	GetFog().SetType(type);

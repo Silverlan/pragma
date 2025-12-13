@@ -8,7 +8,7 @@ import :scripting.lua.script_watcher;
 
 //import pragma.scripting.lua;
 
-LuaDirectoryWatcherManager::LuaDirectoryWatcherManager(pragma::Game *game) : m_game(game) { m_watcherManager = filemanager::create_directory_watcher_manager(); }
+LuaDirectoryWatcherManager::LuaDirectoryWatcherManager(pragma::Game *game) : m_game(game) { m_watcherManager = pragma::fs::create_directory_watcher_manager(); }
 
 void LuaDirectoryWatcherManager::Poll()
 {
@@ -80,9 +80,9 @@ void LuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &fName)
 bool LuaDirectoryWatcherManager::MountDirectory(const std::string &path, bool stripBaseBath)
 {
 	try {
-		auto watchFlags = DirectoryWatcherCallback::WatchFlags::WatchSubDirectories;
+		auto watchFlags = pragma::fs::DirectoryWatcherCallback::WatchFlags::WatchSubDirectories;
 		auto basePath = pragma::util::DirPath(path);
-		m_watchers.push_back(pragma::util::make_shared<DirectoryWatcherCallback>(
+		m_watchers.push_back(pragma::util::make_shared<pragma::fs::DirectoryWatcherCallback>(
 		  path,
 		  [this, basePath = std::move(basePath)](const std::string &fName) {
 			  auto relName = pragma::util::FilePath(fName);
@@ -92,7 +92,7 @@ bool LuaDirectoryWatcherManager::MountDirectory(const std::string &path, bool st
 		  watchFlags, m_watcherManager.get()));
 		return true;
 	}
-	catch(const DirectoryWatcher::ConstructException &) {
+	catch(const pragma::fs::DirectoryWatcher::ConstructException &) {
 		return false;
 	}
 }

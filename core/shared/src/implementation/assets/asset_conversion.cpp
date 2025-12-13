@@ -68,7 +68,7 @@ static bool port_model(pragma::NetworkState *nw, const std::string &path, std::s
 {
 	if(nw->IsGameActive() == false || pragma::Engine::Get()->ShouldMountExternalGameResources() == false)
 		return false;
-	//if(FileManager::Exists(path +mdlName) == false) // Could be in bsa archive
+	//if(fs::exists(path +mdlName) == false) // Could be in bsa archive
 	//	return false;
 	//Con::cout<<"Found "<<formatName<<" Model '"<<(path +mdlName)<<"', attempting to port..."<<Con::endl;
 	ufile::remove_extension_from_filename(mdlName, pragma::asset::get_supported_extensions(pragma::asset::Type::Model, pragma::asset::FormatType::All));
@@ -85,9 +85,9 @@ static bool port_model(pragma::NetworkState *nw, const std::string &path, std::s
 	     [game, formatName](const std::shared_ptr<pragma::asset::Model> &mdl, const std::string &path, const std::string &mdlName) {
 		     auto outPath = pragma::string::substr(path, 7) // Remove "models/"-prefix
 		       + mdlName + '.' + pragma::asset::FORMAT_MODEL_BINARY;
-		     if(FileManager::CreatePath((ufile::get_path_from_filename(pragma::util::CONVERT_PATH + "models/" + outPath)).c_str()) == false)
+		     if(pragma::fs::create_path((ufile::get_path_from_filename(pragma::util::CONVERT_PATH + "models/" + outPath))) == false)
 			     return false;
-		     auto f = FileManager::OpenFile<VFilePtrReal>((pragma::util::CONVERT_PATH + "models/" + outPath).c_str(), "wb");
+		     auto f = pragma::fs::open_file<pragma::fs::VFilePtrReal>((pragma::util::CONVERT_PATH + "models/" + outPath).c_str(), pragma::fs::FileMode::Write | pragma::fs::FileMode::Binary);
 		     if(f == nullptr) {
 			     Con::cwar << "Unable to save model '" << outPath << "': Unable to open file!" << Con::endl;
 			     return false;
@@ -101,8 +101,8 @@ static bool port_model(pragma::NetworkState *nw, const std::string &path, std::s
 		     }
 		     auto r = udmData->Save(f);
 		     if(r)
-			     filemanager::update_file_index_cache("models/" + outPath);
-		     r = r ? FileManager::Exists(pragma::util::CONVERT_PATH + "models/" + outPath) : false;
+			     pragma::fs::update_file_index_cache("models/" + outPath);
+		     r = r ? pragma::fs::exists(pragma::util::CONVERT_PATH + "models/" + outPath) : false;
 		     if(r == true)
 			     Con::cout << "Successfully ported " << formatName << " Model '" << (path + mdlName) << "' and saved it as '" << outPath << "'!" << Con::endl;
 		     return r;
@@ -171,9 +171,9 @@ bool pragma::util::port_hl2_model(pragma::NetworkState *nw, const std::string &p
 	return port_model(nw, path, mdlName, "HL2", ptrConvertModel);
 }
 
-bool pragma::util::port_hl2_smd(pragma::NetworkState &nw, pragma::asset::Model &mdl, VFilePtr &f, const std::string &animName, bool isCollisionMesh, std::vector<std::string> &outTextures)
+bool pragma::util::port_hl2_smd(pragma::NetworkState &nw, pragma::asset::Model &mdl,fs::VFilePtr &f, const std::string &animName, bool isCollisionMesh, std::vector<std::string> &outTextures)
 {
-	static auto *ptrConvertSmd = reinterpret_cast<bool (*)(pragma::NetworkState &, pragma::asset::Model &, VFilePtr &, const std::string &, bool, std::vector<std::string> &)>(impl::get_module_func(&nw, "convert_smd"));
+	static auto *ptrConvertSmd = reinterpret_cast<bool (*)(pragma::NetworkState &, pragma::asset::Model &,fs::VFilePtr &, const std::string &, bool, std::vector<std::string> &)>(impl::get_module_func(&nw, "convert_smd"));
 	if(ptrConvertSmd == nullptr)
 		return false;
 	auto lockWatcher = nw.GetResourceWatcher().ScopeLock();
@@ -185,12 +185,12 @@ bool pragma::util::port_file(pragma::NetworkState *nw, const std::string &path, 
 	if(pragma::Engine::Get()->ShouldMountExternalGameResources() == false)
 		return false;
 	auto outputPath = optOutputPath.has_value() ? *optOutputPath : path;
-	if(filemanager::exists(outputPath))
+	if(fs::exists(outputPath))
 		return true;
-	if(outputPath != path && filemanager::exists(path)) {
+	if(outputPath != path && fs::exists(path)) {
 		auto fullOutputPath = pragma::util::IMPORT_PATH + outputPath;
-		filemanager::create_path(ufile::get_path_from_filename(fullOutputPath));
-		return filemanager::copy_file(path, fullOutputPath);
+		fs::create_path(ufile::get_path_from_filename(fullOutputPath));
+		return fs::copy_file(path, fullOutputPath);
 	}
 	auto dllHandle = load_module(nw);
 	if(dllHandle == nullptr)

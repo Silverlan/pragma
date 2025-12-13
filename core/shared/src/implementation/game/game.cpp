@@ -301,7 +301,7 @@ void pragma::Game::SetGravity(Vector3 &gravity) { m_gravity = gravity; }
 std::vector<std::string> *pragma::Game::GetLuaNetMessageIndices() { return &m_luaNetMessageIndex; }
 
 LuaDirectoryWatcherManager &pragma::Game::GetLuaScriptWatcher() { return *m_scriptWatcher; }
-ResourceWatcherManager &pragma::Game::GetResourceWatcher() { return GetNetworkState()->GetResourceWatcher(); }
+pragma::util::ResourceWatcherManager &pragma::Game::GetResourceWatcher() { return GetNetworkState()->GetResourceWatcher(); }
 
 const std::shared_ptr<pragma::nav::Mesh> &pragma::Game::GetNavMesh() const { return const_cast<pragma::Game *>(this)->GetNavMesh(); }
 std::shared_ptr<pragma::nav::Mesh> &pragma::Game::GetNavMesh() { return m_navMesh; }
@@ -320,7 +320,7 @@ bool pragma::Game::LoadNavMesh(bool bReload)
 
 	auto pathAscii = path + "." + std::string {pragma::nav::PNAV_EXTENSION_ASCII};
 	auto pathBinary = path + "." + std::string {pragma::nav::PNAV_EXTENSION_BINARY};
-	path = FileManager::Exists(pathBinary) ? pathBinary : pathAscii;
+	path = fs::exists(pathBinary) ? pathBinary : pathAscii;
 	Con::cout << "Loading navigation mesh..." << Con::endl;
 
 	m_navMesh = LoadNavMesh(path);
@@ -695,7 +695,7 @@ void pragma::Game::UpdatePackagePaths()
 	auto &addons = AddonSystem::GetMountedAddons();
 	packagePaths.reserve(2 + addons.size());
 
-	for(auto &path : filemanager::get_absolute_root_paths()) {
+	for(auto &path : fs::get_absolute_root_paths()) {
 		packagePaths.push_back(pragma::util::FilePath(path, "lua/?.lua").GetString());
 		packagePaths.push_back(pragma::util::FilePath(path, "lua/modules/?.lua").GetString());
 	}
@@ -749,7 +749,7 @@ bool pragma::Game::LoadMap(const std::string &map, const Vector3 &origin, std::v
 
 	auto error = [this, &map](const std::string_view &msg) { Con::cwar << "Unable to load map '" << map << "': " << msg << Con::endl; };
 
-	auto f = FileManager::OpenFile(m_mapInfo.fileName.c_str(), "rb");
+	auto f = pragma::fs::open_file(m_mapInfo.fileName.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(f == nullptr) {
 		error("Unable to open file '" + m_mapInfo.fileName + "'!");
 		return false;
@@ -757,7 +757,7 @@ bool pragma::Game::LoadMap(const std::string &map, const Vector3 &origin, std::v
 
 	auto worldData = pragma::asset::WorldData::Create(*GetNetworkState());
 	if(pragma::asset::matches_format(format, pragma::asset::FORMAT_MAP_BINARY) || pragma::asset::matches_format(format, pragma::asset::FORMAT_MAP_ASCII)) {
-		auto udmData = pragma::util::load_udm_asset(std::make_unique<fsys::File>(f));
+		auto udmData = pragma::util::load_udm_asset(std::make_unique<fs::File>(f));
 		std::string err;
 		if(udmData == nullptr || worldData->LoadFromAssetData(udmData->GetAssetData(), pragma::asset::EntityData::Flags::None, err) == false) {
 			error(err);

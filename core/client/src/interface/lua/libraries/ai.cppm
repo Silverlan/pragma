@@ -11,7 +11,7 @@ export import pragma.lua;
 export namespace Lua {
 	namespace ai {
 		namespace client {
-			DLLCLIENT void register_library(Lua::Interface &lua);
+			DLLCLIENT void register_library(Interface &lua);
 		};
 	};
 };

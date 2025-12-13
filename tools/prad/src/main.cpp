@@ -204,25 +204,25 @@ int main(int argc, char *argv[])
 	std::string mapPath = argv[argc - 1];
 	std::cout << "Map Path: " << mapPath << std::endl;
 	auto bspPath = mapPath + ".bsp";
-	if(filemanager::is_system_file(bspPath) == false) {
+	if(pragma::fs::is_system_file(bspPath) == false) {
 		std::cerr << "BSP File '" << bspPath << "' not found!" << std::endl;
 		return EXIT_FAILURE;
 	}
 
-	auto pragmaPath = pragma::util::Path::CreatePath(filemanager::get_program_write_path());
+	auto pragmaPath = pragma::util::Path::CreatePath(pragma::fs::get_program_write_path());
 	pragmaPath.PopBack();
 	std::cout << "Pragma installation path: " << pragmaPath.GetString() << std::endl;
 	auto rootPath = pragmaPath.GetString();
 	rootPath = rootPath.substr(0, rootPath.length() - 1);
 
 	auto importAddonPath = pragmaPath + "addons/imported/maps/";
-	if(filemanager::create_system_path(rootPath, "addons/imported/maps/") == false) {
+	if(pragma::fs::create_system_path(rootPath, "addons/imported/maps/") == false) {
 		std::cerr << "Failed to create addon path '" << importAddonPath.GetString() << "'!" << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	auto convertedAddonPath = pragmaPath + "addons/converted/maps/";
-	if(filemanager::create_system_path(rootPath, "addons/converted/maps/") == false) {
+	if(pragma::fs::create_system_path(rootPath, "addons/converted/maps/") == false) {
 		std::cerr << "Failed to create addon path '" << convertedAddonPath.GetString() << "'!" << std::endl;
 		return EXIT_FAILURE;
 	}
@@ -236,9 +236,9 @@ int main(int argc, char *argv[])
 
 	auto outputFileName = convertedAddonPath.GetString() + mapName + ".pmap_b";
 	std::cout << "Output file path: " << outputFileName << std::endl;
-	if(filemanager::exists_system(outputFileName)) {
+	if(pragma::fs::exists_system(outputFileName)) {
 		std::cout << "Map already exists at target location. Deleting existing file..." << std::endl;
-		if(filemanager::remove_system_file(outputFileName) == false) {
+		if(pragma::fs::remove_system_file(outputFileName) == false) {
 			std::cerr << "Failed to delete file '" << outputFileName << "'! Aborting..." << std::endl;
 			return EXIT_FAILURE;
 		}
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
 
 	auto importPath = importAddonPath.GetString() + mapName + ".bsp";
 	std::cout << "Copying BSP from '" << bspPath << "' to '" << importPath << "'..." << std::endl;
-	if(filemanager::copy_system_file(bspPath, importPath) == false) {
+	if(pragma::fs::copy_system_file(bspPath, importPath) == false) {
 		std::cerr << "Failed to copy BSP file! Aborting..." << std::endl;
 		return EXIT_FAILURE;
 	}

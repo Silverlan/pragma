@@ -13,14 +13,14 @@ export namespace pragma {
 	class ConstraintSpaceComponent;
 	class DLLNETWORK ConstraintCopyRotationComponent final : public BaseEntityComponent {
 	  public:
-		ConstraintCopyRotationComponent(pragma::ecs::BaseEntity &ent);
+		ConstraintCopyRotationComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		virtual void InitializeLuaObject(lua::State *lua) override;
 	  protected:
 		void ApplyConstraint();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-		pragma::ComponentHandle<ConstraintComponent> m_constraintC;
-		pragma::ComponentHandle<ConstraintSpaceComponent> m_constraintSpaceC;
+		ComponentHandle<ConstraintComponent> m_constraintC;
+		ComponentHandle<ConstraintSpaceComponent> m_constraintSpaceC;
 	};
 };

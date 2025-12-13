@@ -31,7 +31,7 @@ ComponentEventId cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES = INVALID_COM
 ComponentEventId cRenderComponent::EVENT_UPDATE_INSTANTIABILITY = INVALID_COMPONENT_ID;
 ComponentEventId cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED = INVALID_COMPONENT_ID;
-void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void CRenderComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	cRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT = registerEvent("ON_UPDATE_RENDER_DATA_MT", ComponentEventInfo::Type::Explicit);
 	cRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED = registerEvent("ON_RENDER_BUFFERS_INITIALIZED", ComponentEventInfo::Type::Broadcast);
@@ -45,7 +45,7 @@ void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 	cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED = registerEvent("ON_CLIP_PLANE_CHANGED", ComponentEventInfo::Type::Broadcast);
 	cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED = registerEvent("ON_DEPTH_BIAS_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
-void CRenderComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void CRenderComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = CRenderComponent;
 
@@ -55,14 +55,14 @@ void CRenderComponent::RegisterMembers(pragma::EntityComponentManager &component
 		registerMember(std::move(memberInfo));
 	}
 }
-CRenderComponent::CRenderComponent(pragma::ecs::BaseEntity &ent)
-    : BaseRenderComponent(ent), m_renderGroups {util::TEnumProperty<pragma::rendering::RenderGroup>::Create(pragma::rendering::RenderGroup::None)}, m_renderPass {util::TEnumProperty<pragma::rendering::SceneRenderPass>::Create(rendering::SceneRenderPass::World)}
+CRenderComponent::CRenderComponent(ecs::BaseEntity &ent)
+    : BaseRenderComponent(ent), m_renderGroups {util::TEnumProperty<rendering::RenderGroup>::Create(rendering::RenderGroup::None)}, m_renderPass {util::TEnumProperty<rendering::SceneRenderPass>::Create(rendering::SceneRenderPass::World)}
 {
 }
 void CRenderComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CRenderComponent::InitializeBuffers()
 {
-	auto instanceSize = sizeof(pragma::rendering::InstanceData);
+	auto instanceSize = sizeof(rendering::InstanceData);
 	auto instanceCount = 32'768u;
 	auto maxInstanceCount = instanceCount * 100u;
 	prosper::util::BufferCreateInfo createInfo {};
@@ -81,22 +81,22 @@ void CRenderComponent::InitializeBuffers()
 	createInfo.usageFlags = createInfo.usageFlags | prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit;
 #endif
 	constexpr prosper::DeviceSize alignment = 256; // See https://vulkan.gpuinfo.org/displaydevicelimit.php?name=minUniformBufferOffsetAlignment
-	auto internalAlignment = pragma::get_cengine()->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit);
+	auto internalAlignment = get_cengine()->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit);
 	if(internalAlignment > alignment)
 		throw std::runtime_error {"Unsupported minimum uniform buffer alignment (" + std::to_string(internalAlignment) + "!"};
-	s_instanceBuffer = pragma::get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.1f, nullptr, alignment);
+	s_instanceBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.1f, nullptr, alignment);
 	s_instanceBuffer->SetDebugName("entity_instance_data_buf");
 	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)
 		s_instanceBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
 
-	pragma::initialize_articulated_buffers();
-	pragma::initialize_vertex_animation_buffer();
+	initialize_articulated_buffers();
+	initialize_vertex_animation_buffer();
 }
 const prosper::IBuffer *CRenderComponent::GetRenderBuffer() const { return m_renderBuffer.get(); }
 std::optional<RenderBufferIndex> CRenderComponent::GetRenderBufferIndex() const { return m_renderBuffer ? m_renderBuffer->GetBaseIndex() : std::optional<RenderBufferIndex> {}; }
 prosper::IDescriptorSet *CRenderComponent::GetRenderDescriptorSet() const { return (m_renderDescSetGroup != nullptr) ? m_renderDescSetGroup->GetDescriptorSet() : nullptr; }
 CRenderComponent::StateFlags CRenderComponent::GetStateFlags() const { return m_stateFlags; }
-pragma::util::EventReply CRenderComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply CRenderComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
 	if(eventId == baseChildComponent::EVENT_ON_PARENT_CHANGED) {
 		UpdateAncestorHiddenState();
@@ -104,8 +104,8 @@ pragma::util::EventReply CRenderComponent::HandleEvent(ComponentEventId eventId,
 	}
 	return BaseRenderComponent::HandleEvent(eventId, evData);
 }
-void CRenderComponent::SetDepthPassEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::EnableDepthPass, enabled); }
-bool CRenderComponent::IsDepthPassEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableDepthPass); }
+void CRenderComponent::SetDepthPassEnabled(bool enabled) { math::set_flag(m_stateFlags, StateFlags::EnableDepthPass, enabled); }
+bool CRenderComponent::IsDepthPassEnabled() const { return math::is_flag_set(m_stateFlags, StateFlags::EnableDepthPass); }
 void CRenderComponent::SetRenderClipPlane(const Vector4 &plane)
 {
 	if(plane == m_renderClipPlane)
@@ -136,15 +136,15 @@ void CRenderComponent::ClearDepthBias()
 	BroadcastEvent(cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED);
 }
 const Vector2 *CRenderComponent::GetDepthBias() const { return m_depthBias.has_value() ? &*m_depthBias : nullptr; }
-void CRenderComponent::SetReceiveShadows(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::DisableShadows, !enabled); }
-bool CRenderComponent::IsReceivingShadows() const { return !pragma::math::is_flag_set(m_stateFlags, StateFlags::DisableShadows); }
+void CRenderComponent::SetReceiveShadows(bool enabled) { math::set_flag(m_stateFlags, StateFlags::DisableShadows, !enabled); }
+bool CRenderComponent::IsReceivingShadows() const { return !math::is_flag_set(m_stateFlags, StateFlags::DisableShadows); }
 void CRenderComponent::Initialize()
 {
 	BaseRenderComponent::Initialize();
 
-	BindEventUnhandled(cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBoneBuffer(); });
-	BindEventUnhandled(cColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { SetRenderBufferDirty(); });
-	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateBoneBuffer(); });
+	BindEventUnhandled(cColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { SetRenderBufferDirty(); });
+	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		m_localRenderBounds = {};
 		m_absoluteRenderBounds = {};
 		m_localRenderSphere = {};
@@ -181,9 +181,9 @@ CRenderComponent::~CRenderComponent()
 		s_ocExemptEntities.erase(it);
 
 	if(m_renderBuffer != nullptr)
-		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
+		get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
 	if(m_renderDescSetGroup != nullptr)
-		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
+		get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
 }
 void CRenderComponent::OnRemove()
 {
@@ -197,41 +197,41 @@ void CRenderComponent::OnEntitySpawn()
 	BaseRenderComponent::OnEntitySpawn();
 	UpdateRenderMeshes();
 
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame()};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
+	ecs::EntityIterator entIt {*get_cgame()};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<COcclusionCullerComponent>>();
 	for(auto *ent : entIt) {
-		auto occlusionCullerC = ent->GetComponent<pragma::COcclusionCullerComponent>();
-		occlusionCullerC->AddEntity(static_cast<pragma::ecs::CBaseEntity &>(GetEntity()));
+		auto occlusionCullerC = ent->GetComponent<COcclusionCullerComponent>();
+		occlusionCullerC->AddEntity(static_cast<ecs::CBaseEntity &>(GetEntity()));
 	}
 
 	InitializeRenderBuffers();
 }
 void CRenderComponent::UpdateAbsoluteRenderBounds()
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderBoundsDirty) == false)
+	if(math::is_flag_set(m_stateFlags, StateFlags::RenderBoundsDirty) == false)
 		return;
-	pragma::math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty, false);
+	math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty, false);
 	UpdateAbsoluteAABBRenderBounds();
 	UpdateAbsoluteSphereRenderBounds();
 }
 void CRenderComponent::UpdateAbsoluteSphereRenderBounds() { m_absoluteRenderSphere = CalcAbsoluteRenderSphere(); }
 void CRenderComponent::UpdateAbsoluteAABBRenderBounds() { m_absoluteRenderBounds = CalcAbsoluteRenderBounds(); }
 const bounding_volume::AABB &CRenderComponent::GetLocalRenderBounds() const { return m_localRenderBounds; }
-const pragma::math::Sphere &CRenderComponent::GetLocalRenderSphere() const { return m_localRenderSphere; }
+const math::Sphere &CRenderComponent::GetLocalRenderSphere() const { return m_localRenderSphere; }
 
 const bounding_volume::AABB &CRenderComponent::GetUpdatedAbsoluteRenderBounds() const
 {
 	const_cast<CRenderComponent *>(this)->UpdateAbsoluteRenderBounds();
 	return GetAbsoluteRenderBounds();
 }
-const pragma::math::Sphere &CRenderComponent::GetUpdatedAbsoluteRenderSphere() const
+const math::Sphere &CRenderComponent::GetUpdatedAbsoluteRenderSphere() const
 {
 	const_cast<CRenderComponent *>(this)->UpdateAbsoluteRenderBounds();
 	return GetAbsoluteRenderSphere();
 }
 
 const bounding_volume::AABB &CRenderComponent::GetAbsoluteRenderBounds() const { return m_absoluteRenderBounds; }
-const pragma::math::Sphere &CRenderComponent::GetAbsoluteRenderSphere() const { return m_absoluteRenderSphere; }
+const math::Sphere &CRenderComponent::GetAbsoluteRenderSphere() const { return m_absoluteRenderSphere; }
 
 bounding_volume::AABB CRenderComponent::CalcAbsoluteRenderBounds() const
 {
@@ -244,13 +244,13 @@ bounding_volume::AABB CRenderComponent::CalcAbsoluteRenderBounds() const
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent) {
 		auto physType = pPhysComponent->GetPhysicsType();
-		if(physType == pragma::physics::PhysicsType::Dynamic || physType == pragma::physics::PhysicsType::Static)
+		if(physType == physics::PhysicsType::Dynamic || physType == physics::PhysicsType::Static)
 			pose.SetOrigin(pose.GetOrigin() + pPhysComponent->GetLocalOrigin());
 	}
 	absBounds = absBounds.Transform(pose);
 	return absBounds;
 }
-pragma::math::Sphere CRenderComponent::CalcAbsoluteRenderSphere() const
+math::Sphere CRenderComponent::CalcAbsoluteRenderSphere() const
 {
 	auto r = m_localRenderSphere;
 
@@ -259,11 +259,11 @@ pragma::math::Sphere CRenderComponent::CalcAbsoluteRenderSphere() const
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent) {
 		auto physType = pPhysComponent->GetPhysicsType();
-		if(physType == pragma::physics::PhysicsType::Dynamic || physType == pragma::physics::PhysicsType::Static)
+		if(physType == physics::PhysicsType::Dynamic || physType == physics::PhysicsType::Static)
 			pose.SetOrigin(pose.GetOrigin() + pPhysComponent->GetLocalOrigin());
 	}
 	auto &scale = pose.GetScale();
-	r.radius *= pragma::math::abs_max(scale.x, scale.y, scale.z);
+	r.radius *= math::abs_max(scale.x, scale.y, scale.z);
 	r.pos = pose * r.pos;
 	return r;
 }
@@ -273,8 +273,8 @@ void CRenderComponent::SetLocalRenderBounds(Vector3 min, Vector3 max)
 
 	if(min == m_localRenderBounds.min && max == m_localRenderBounds.max)
 		return;
-	pragma::math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty);
-	GetEntity().SetStateFlag(pragma::ecs::BaseEntity::StateFlags::RenderBoundsChanged);
+	math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty);
+	GetEntity().SetStateFlag(ecs::BaseEntity::StateFlags::RenderBoundsChanged);
 
 	if(uvec::distance_sqr(min, max) > 0.001f) {
 		// If the render bounds form a plane, we'll add a slight width to it to
@@ -318,24 +318,24 @@ void CRenderComponent::UpdateRenderBounds()
 #endif
 
 Mat4 &CRenderComponent::GetTransformationMatrix() { return m_matTransformation; }
-const pragma::math::ScaledTransform &CRenderComponent::GetRenderPose() const { return m_renderPose; }
+const math::ScaledTransform &CRenderComponent::GetRenderPose() const { return m_renderPose; }
 void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseRenderComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(pragma::CTransformComponent)) {
-		FlagCallbackForRemoval(static_cast<pragma::CTransformComponent &>(component).AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
-		                         [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	if(typeid(component) == typeid(CTransformComponent)) {
+		FlagCallbackForRemoval(static_cast<CTransformComponent &>(component).AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED,
+		                         [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 			                         SetRenderBufferDirty();
 			                         SetRenderBoundsDirty();
-			                         return pragma::util::EventReply::Unhandled;
+			                         return util::EventReply::Unhandled;
 		                         }),
 		  CallbackType::Component, &component);
 	}
-	else if(typeid(component) == typeid(pragma::CAttachmentComponent))
+	else if(typeid(component) == typeid(CAttachmentComponent))
 		m_attachmentComponent = static_cast<CAttachmentComponent *>(&component);
-	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
+	else if(typeid(component) == typeid(CAnimatedComponent))
 		m_animComponent = static_cast<CAnimatedComponent *>(&component);
-	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent)) {
+	else if(typeid(component) == typeid(CLightMapReceiverComponent)) {
 		m_stateFlags = m_stateFlags | StateFlags::RenderBufferDirty;
 		m_lightMapReceiverComponent = static_cast<CLightMapReceiverComponent *>(&component);
 	}
@@ -343,35 +343,35 @@ void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
 	BaseRenderComponent::OnEntityComponentRemoved(component);
-	if(typeid(component) == typeid(pragma::CAttachmentComponent))
+	if(typeid(component) == typeid(CAttachmentComponent))
 		m_attachmentComponent = nullptr;
-	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
+	else if(typeid(component) == typeid(CAnimatedComponent))
 		m_animComponent = nullptr;
-	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent)) {
+	else if(typeid(component) == typeid(CLightMapReceiverComponent)) {
 		m_stateFlags = m_stateFlags & ~StateFlags::RenderBufferDirty;
 		m_lightMapReceiverComponent = nullptr;
 	}
 }
-bool CRenderComponent::IsInstantiable() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::IsInstantiable); }
+bool CRenderComponent::IsInstantiable() const { return math::is_flag_set(m_stateFlags, StateFlags::IsInstantiable); }
 void CRenderComponent::SetInstaniationEnabled(bool enabled)
 {
-	pragma::math::set_flag(m_stateFlags, StateFlags::InstantiationDisabled, !enabled);
+	math::set_flag(m_stateFlags, StateFlags::InstantiationDisabled, !enabled);
 	UpdateInstantiability();
 }
 void CRenderComponent::UpdateInstantiability()
 {
-	pragma::math::set_flag(m_stateFlags, StateFlags::IsInstantiable, false);
-	if(m_renderBuffer == nullptr || pragma::math::is_flag_set(m_stateFlags, StateFlags::InstantiationDisabled))
+	math::set_flag(m_stateFlags, StateFlags::IsInstantiable, false);
+	if(m_renderBuffer == nullptr || math::is_flag_set(m_stateFlags, StateFlags::InstantiationDisabled))
 		return;
 	auto instantiable = true;
 	BroadcastEvent(cRenderComponent::EVENT_UPDATE_INSTANTIABILITY, CEUpdateInstantiability {instantiable});
-	pragma::math::set_flag(m_stateFlags, StateFlags::IsInstantiable, instantiable);
+	math::set_flag(m_stateFlags, StateFlags::IsInstantiable, instantiable);
 }
 void CRenderComponent::UpdateShouldDrawState()
 {
 	auto shouldDraw = true;
 	BroadcastEvent(cRenderComponent::EVENT_SHOULD_DRAW, CEShouldDraw {shouldDraw});
-	pragma::math::set_flag(m_stateFlags, StateFlags::ShouldDraw, shouldDraw);
+	math::set_flag(m_stateFlags, StateFlags::ShouldDraw, shouldDraw);
 
 	UpdateShouldDrawShadowState();
 }
@@ -380,13 +380,13 @@ void CRenderComponent::UpdateShouldDrawShadowState()
 	auto shouldDraw = GetCastShadows();
 	if(shouldDraw)
 		BroadcastEvent(cRenderComponent::EVENT_SHOULD_DRAW_SHADOW, CEShouldDraw {shouldDraw});
-	pragma::math::set_flag(m_stateFlags, StateFlags::ShouldDrawShadow, shouldDraw);
+	math::set_flag(m_stateFlags, StateFlags::ShouldDrawShadow, shouldDraw);
 }
 CModelComponent *CRenderComponent::GetModelComponent() const { return static_cast<CModelComponent *>(GetEntity().GetModelComponent()); }
 CAttachmentComponent *CRenderComponent::GetAttachmentComponent() const { return m_attachmentComponent; }
 CAnimatedComponent *CRenderComponent::GetAnimatedComponent() const { return m_animComponent; }
 CLightMapReceiverComponent *CRenderComponent::GetLightMapReceiverComponent() const { return m_lightMapReceiverComponent; }
-void CRenderComponent::SetRenderOffsetTransform(const pragma::math::ScaledTransform &t)
+void CRenderComponent::SetRenderOffsetTransform(const math::ScaledTransform &t)
 {
 	m_renderOffset = t;
 	SetRenderBufferDirty();
@@ -396,10 +396,10 @@ void CRenderComponent::ClearRenderOffsetTransform()
 	m_renderOffset = {};
 	SetRenderBufferDirty();
 }
-const pragma::math::ScaledTransform *CRenderComponent::GetRenderOffsetTransform() const { return m_renderOffset.has_value() ? &*m_renderOffset : nullptr; }
+const math::ScaledTransform *CRenderComponent::GetRenderOffsetTransform() const { return m_renderOffset.has_value() ? &*m_renderOffset : nullptr; }
 bool CRenderComponent::IsInPvs(const Vector3 &camPos) const
 {
-	for(auto &c : pragma::get_cgame()->GetWorldComponents()) {
+	for(auto &c : get_cgame()->GetWorldComponents()) {
 		if(c.expired())
 			continue;
 		if(IsInPvs(camPos, static_cast<const CWorldComponent &>(*c)))
@@ -434,8 +434,8 @@ void CRenderComponent::UpdateMatrices()
 	auto pTrComponent = ent.GetTransformComponent();
 	auto orientation = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	pragma::math::ScaledTransform pose {};
-	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsType() != pragma::physics::PhysicsType::SoftBody) {
+	math::ScaledTransform pose {};
+	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsType() != physics::PhysicsType::SoftBody) {
 		pose.SetOrigin(pPhysComponent != nullptr ? pPhysComponent->GetOrigin() : pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {});
 		pose.SetRotation(orientation);
 	}
@@ -453,10 +453,10 @@ void CRenderComponent::SetLastRenderFrame(unsigned long long &t) { m_lastRender 
 
 void CRenderComponent::UpdateRenderMeshes()
 {
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
 	if(!ent.IsSpawned())
 		return;
-	pragma::get_cgame()->UpdateEntityModel(&ent);
+	get_cgame()->UpdateEntityModel(&ent);
 	auto *mdlComponent = GetModelComponent();
 	auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 #if 0
@@ -467,7 +467,7 @@ void CRenderComponent::UpdateRenderMeshes()
 #endif
 }
 void CRenderComponent::ReceiveData(NetPacket &packet) { m_renderFlags = packet->Read<decltype(m_renderFlags)>(); }
-std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise) const
+std::optional<math::intersection::LineMeshResult> CRenderComponent::CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise) const
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("render_component_calc_ray_intersection");
@@ -495,21 +495,21 @@ std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::Calc
 	auto d = uvec::length(n);
 	n /= d;
 	float dIntersect;
-	if(pragma::math::intersection::line_aabb(lstart, n, aabb.min, aabb.max, &dIntersect) == pragma::math::intersection::Result::NoIntersection || dIntersect > d)
+	if(math::intersection::line_aabb(lstart, n, aabb.min, aabb.max, &dIntersect) == math::intersection::Result::NoIntersection || dIntersect > d)
 		return {};
 
 	auto *mdlC = GetModelComponent();
 	auto *intersectionHandlerC = mdlC ? mdlC->GetIntersectionHandlerComponent() : nullptr;
 	if(intersectionHandlerC) {
-		auto res = intersectionHandlerC->IntersectionTest(lstart, n, pragma::math::CoordinateSpace::Object, 0.f, d);
+		auto res = intersectionHandlerC->IntersectionTest(lstart, n, math::CoordinateSpace::Object, 0.f, d);
 		if(!res.has_value())
 			return {};
-		pragma::math::intersection::LineMeshResult result {};
+		math::intersection::LineMeshResult result {};
 		result.hitPos = start + uvec::get_normal(dir) * res->distance;
 		result.hitValue = res->distance;
-		result.result = pragma::math::intersection::Result::Intersect;
+		result.result = math::intersection::Result::Intersect;
 		if(precise) {
-			result.precise = pragma::util::make_shared<pragma::math::intersection::LineMeshResult::Precise>();
+			result.precise = pragma::util::make_shared<math::intersection::LineMeshResult::Precise>();
 			result.precise->subMesh = res->mesh;
 			result.precise->triIdx = res->primitiveIndex;
 			result.precise->u = res->u;
@@ -524,7 +524,7 @@ std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::Calc
 		auto &hitboxes = mdl->GetHitboxes();
 		if(hitboxes.empty() == false) {
 			// We'll assume that there are enough hitboxes to cover the entire model
-			pragma::physics::Hitbox *closestHitbox = nullptr;
+			physics::Hitbox *closestHitbox = nullptr;
 			auto closestHitboxDistance = std::numeric_limits<float>::max();
 			uint32_t closestHitboxBoneId = std::numeric_limits<uint32_t>::max();
 			for(auto &hb : hitboxes) {
@@ -533,7 +533,7 @@ std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::Calc
 				if(mdlC->GetHitboxBounds(hb.first, min, max, origin, rot) == false || uvec::length_sqr(min) < 0.001f || uvec::length_sqr(max) < 0.001f)
 					continue;
 				float dist;
-				if(pragma::math::intersection::line_obb(start, dir, min, max, &dist, origin, rot) == false || dist >= closestHitboxDistance)
+				if(math::intersection::line_obb(start, dir, min, max, &dist, origin, rot) == false || dist >= closestHitboxDistance)
 					continue;
 				closestHitboxDistance = dist;
 				closestHitbox = &hb.second;
@@ -542,10 +542,10 @@ std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::Calc
 			if(closestHitbox == nullptr)
 				return {};
 			if(precise == false) {
-				pragma::math::intersection::LineMeshResult result {};
+				math::intersection::LineMeshResult result {};
 				result.hitPos = start + dir * closestHitboxDistance;
 				result.hitValue = closestHitboxDistance;
-				result.result = pragma::math::intersection::Result::Intersect;
+				result.result = math::intersection::Result::Intersect;
 				result.hitbox = closestHitbox;
 				result.boneId = closestHitboxBoneId;
 				return result;
@@ -553,17 +553,17 @@ std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::Calc
 		}
 	}
 
-	std::optional<pragma::math::intersection::LineMeshResult> bestResult = {};
+	std::optional<math::intersection::LineMeshResult> bestResult = {};
 	for(auto &mesh : lodMeshes) {
 		Vector3 min, max;
 		mesh->GetBounds(min, max);
-		if(pragma::math::intersection::line_aabb(lstart, n, min, max, &dIntersect) == pragma::math::intersection::Result::NoIntersection || dIntersect > d)
+		if(math::intersection::line_aabb(lstart, n, min, max, &dIntersect) == math::intersection::Result::NoIntersection || dIntersect > d)
 			continue;
 		for(auto &subMesh : mesh->GetSubMeshes()) {
 			subMesh->GetBounds(min, max);
-			if(pragma::math::intersection::line_aabb(lstart, n, min, max, &dIntersect) == pragma::math::intersection::Result::NoIntersection || dIntersect > d)
+			if(math::intersection::line_aabb(lstart, n, min, max, &dIntersect) == math::intersection::Result::NoIntersection || dIntersect > d)
 				continue;
-			pragma::math::intersection::LineMeshResult result;
+			math::intersection::LineMeshResult result;
 			if(pragma::math::intersection::line_with_mesh(lstart, ldir, *subMesh, result, true) == false)
 				continue;
 			// Confirm that this is the best result so far
@@ -582,7 +582,7 @@ std::optional<pragma::math::intersection::LineMeshResult> CRenderComponent::Calc
 }
 void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt)
 {
-	pragma::math::set_flag(m_stateFlags, StateFlags::ExemptFromOcclusionCulling, exempt);
+	math::set_flag(m_stateFlags, StateFlags::ExemptFromOcclusionCulling, exempt);
 	auto it = std::find(s_ocExemptEntities.begin(), s_ocExemptEntities.end(), this);
 	if(exempt) {
 		if(it == s_ocExemptEntities.end())
@@ -591,17 +591,17 @@ void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt)
 	else if(it != s_ocExemptEntities.end())
 		s_ocExemptEntities.erase(it);
 }
-bool CRenderComponent::IsExemptFromOcclusionCulling() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::ExemptFromOcclusionCulling); }
-void CRenderComponent::SetRenderBufferDirty() { pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty); }
-void CRenderComponent::SetRenderBoundsDirty() { pragma::math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty); }
+bool CRenderComponent::IsExemptFromOcclusionCulling() const { return math::is_flag_set(m_stateFlags, StateFlags::ExemptFromOcclusionCulling); }
+void CRenderComponent::SetRenderBufferDirty() { math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty); }
+void CRenderComponent::SetRenderBoundsDirty() { math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty); }
 void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, bool bForceBufferUpdate)
 {
 	// Commented because render buffers must not be initialized on a non-main thread
 	// InitializeRenderBuffers();
-	auto updateRenderBuffer = pragma::math::is_flag_set(m_stateFlags, StateFlags::RenderBufferDirty) || bForceBufferUpdate;
+	auto updateRenderBuffer = math::is_flag_set(m_stateFlags, StateFlags::RenderBufferDirty) || bForceBufferUpdate;
 	auto bufferDirty = false;
 	if(updateRenderBuffer) {
-		pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty, false);
+		math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty, false);
 		UpdateMatrices();
 
 		// Update Render Buffer
@@ -609,18 +609,18 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		auto pColorComponent = GetEntity().GetComponent<CColorComponent>();
 		if(pColorComponent.valid())
 			color = pColorComponent->GetColor();
-		color = Vector4 {uimg::linear_to_srgb(reinterpret_cast<Vector3 &>(color)), color.w};
+		color = Vector4 {image::linear_to_srgb(reinterpret_cast<Vector3 &>(color)), color.w};
 
-		auto renderFlags = pragma::rendering::InstanceData::RenderFlags::None;
+		auto renderFlags = rendering::InstanceData::RenderFlags::None;
 		auto *pMdlComponent = GetModelComponent();
-		auto bWeighted = pMdlComponent && static_cast<const pragma::CModelComponent &>(*pMdlComponent).IsWeighted();
+		auto bWeighted = pMdlComponent && static_cast<const CModelComponent &>(*pMdlComponent).IsWeighted();
 		auto *animC = GetAnimatedComponent();
 
 		// Note: If the RenderFlags::Weighted flag is set, 'GetShaderPipelineSpecialization' must not return
 		// something other than GameShaderSpecialization::Animated, otherwise there may be rendering artifacts.
 		// (Usually z-fighting because the prepass and lighting pass shaders will perform different calculations.)
 		if(bWeighted == true && animC && !m_lightMapReceiverComponent) // && animC->ShouldUpdateBones())
-			renderFlags = renderFlags | pragma::rendering::InstanceData::RenderFlags::Weighted;
+			renderFlags = renderFlags | rendering::InstanceData::RenderFlags::Weighted;
 		auto &m = GetTransformationMatrix();
 		m_instanceData.modelMatrix = m;
 		m_instanceData.color = color;
@@ -638,12 +638,12 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 	CEOnUpdateRenderBuffers evData {drawCmd};
 	InvokeEventCallbacks(cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS, evData);
 }
-const pragma::rendering::InstanceData &CRenderComponent::GetInstanceData() const { return m_instanceData; }
+const rendering::InstanceData &CRenderComponent::GetInstanceData() const { return m_instanceData; }
 void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CCameraComponent &cam, const Mat4 &vp)
 {
 	m_renderDataMutex.lock();
 	// Note: This is called from the render thread, which is why we can't update the render buffers here
-	auto frameId = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
+	auto frameId = get_cengine()->GetRenderContext().GetLastFrameId();
 	if(m_lastRender == frameId) {
 		m_renderDataMutex.unlock();
 		return; // Only update once per frame
@@ -653,7 +653,7 @@ void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CC
 
 	UpdateAbsoluteRenderBounds();
 
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
 	auto *mdlC = GetModelComponent();
 	if(mdlC)
 		mdlC->UpdateLOD(scene, cam, vp); // TODO: Don't update this every frame for every entity!
@@ -664,43 +664,43 @@ void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CC
 	auto pAttComponent = GetAttachmentComponent();
 	if(pAttComponent) {
 		auto *attInfo = pAttComponent->GetAttachmentData();
-		if(attInfo != nullptr && (attInfo->flags & pragma::FAttachmentMode::UpdateEachFrame) != pragma::FAttachmentMode::None && GetEntity().GetParent())
+		if(attInfo != nullptr && (attInfo->flags & FAttachmentMode::UpdateEachFrame) != FAttachmentMode::None && GetEntity().GetParent())
 			pAttComponent->UpdateAttachmentOffset(false);
 	}
 }
 
 bool CRenderComponent::AddToRenderGroup(const std::string &name)
 {
-	auto mask = static_cast<pragma::CGame *>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
+	auto mask = static_cast<CGame *>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
 	if(!mask.has_value())
 		return false;
 	AddToRenderGroup(*mask);
 	return true;
 }
-const pragma::util::PEnumProperty<pragma::rendering::SceneRenderPass> &CRenderComponent::GetSceneRenderPassProperty() const { return m_renderPass; }
-pragma::rendering::SceneRenderPass CRenderComponent::GetSceneRenderPass() const { return *m_renderPass; }
+const util::PEnumProperty<rendering::SceneRenderPass> &CRenderComponent::GetSceneRenderPassProperty() const { return m_renderPass; }
+rendering::SceneRenderPass CRenderComponent::GetSceneRenderPass() const { return *m_renderPass; }
 void CRenderComponent::SetHidden(bool hidden)
 {
 	if(hidden == IsHidden())
 		return;
-	pragma::math::set_flag(m_stateFlags, StateFlags::Hidden, hidden);
+	math::set_flag(m_stateFlags, StateFlags::Hidden, hidden);
 	PropagateHiddenState();
 	UpdateVisibility();
 }
 bool CRenderComponent::IsHidden() const
 {
 	if(ShouldIgnoreAncestorVisibility())
-		return pragma::math::is_flag_set(m_stateFlags, StateFlags::Hidden);
-	return pragma::math::is_flag_set(m_stateFlags, StateFlags::Hidden | StateFlags::AncestorHidden);
+		return math::is_flag_set(m_stateFlags, StateFlags::Hidden);
+	return math::is_flag_set(m_stateFlags, StateFlags::Hidden | StateFlags::AncestorHidden);
 }
-bool CRenderComponent::IsVisible() const { return !IsHidden() && *m_renderPass != pragma::rendering::SceneRenderPass::None; }
+bool CRenderComponent::IsVisible() const { return !IsHidden() && *m_renderPass != rendering::SceneRenderPass::None; }
 void CRenderComponent::SetIgnoreAncestorVisibility(bool ignoreVisibility)
 {
-	pragma::math::set_flag(m_stateFlags, StateFlags::IgnoreAncestorVisibility, ignoreVisibility);
+	math::set_flag(m_stateFlags, StateFlags::IgnoreAncestorVisibility, ignoreVisibility);
 	PropagateHiddenState();
 	UpdateVisibility();
 }
-bool CRenderComponent::ShouldIgnoreAncestorVisibility() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::IgnoreAncestorVisibility); }
+bool CRenderComponent::ShouldIgnoreAncestorVisibility() const { return math::is_flag_set(m_stateFlags, StateFlags::IgnoreAncestorVisibility); }
 void CRenderComponent::UpdateAncestorHiddenState()
 {
 	auto parentHidden = false;
@@ -719,16 +719,16 @@ void CRenderComponent::UpdateAncestorHiddenState()
 			entParent = entParent->GetParent();
 		}
 	}
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::AncestorHidden) == parentHidden)
+	if(math::is_flag_set(m_stateFlags, StateFlags::AncestorHidden) == parentHidden)
 		return;
-	pragma::math::set_flag(m_stateFlags, StateFlags::AncestorHidden, parentHidden);
+	math::set_flag(m_stateFlags, StateFlags::AncestorHidden, parentHidden);
 	UpdateVisibility();
 }
 void CRenderComponent::PropagateHiddenState()
 {
 	auto hidden = IsHidden();
-	std::function<void(pragma::ecs::BaseEntity &)> propagate = nullptr;
-	propagate = [&propagate, hidden](pragma::ecs::BaseEntity &ent) {
+	std::function<void(ecs::BaseEntity &)> propagate = nullptr;
+	propagate = [&propagate, hidden](ecs::BaseEntity &ent) {
 		auto parentC = ent.GetComponent<ParentComponent>();
 		if(parentC.expired())
 			return;
@@ -737,7 +737,7 @@ void CRenderComponent::PropagateHiddenState()
 				continue;
 			auto renderC = hChild->GetEntity().GetComponent<CRenderComponent>();
 			if(renderC.valid()) {
-				pragma::math::set_flag(renderC->m_stateFlags, StateFlags::AncestorHidden, hidden);
+				math::set_flag(renderC->m_stateFlags, StateFlags::AncestorHidden, hidden);
 				renderC->UpdateVisibility();
 			}
 			propagate(hChild->GetEntity());
@@ -752,7 +752,7 @@ void CRenderComponent::UpdateVisibility()
 	else if(GetEntity().IsSpawned())
 		InitializeRenderBuffers();
 }
-void CRenderComponent::SetSceneRenderPass(pragma::rendering::SceneRenderPass pass)
+void CRenderComponent::SetSceneRenderPass(rendering::SceneRenderPass pass)
 {
 	*m_renderPass = pass;
 
@@ -773,19 +773,19 @@ void CRenderComponent::SetSceneRenderPass(pragma::rendering::SceneRenderPass pas
 
 	UpdateVisibility();
 }
-bool CRenderComponent::IsInRenderGroup(pragma::rendering::RenderGroup group) const { return pragma::math::is_flag_set(GetRenderGroups(), group); }
-void CRenderComponent::AddToRenderGroup(pragma::rendering::RenderGroup group) { SetRenderGroups(GetRenderGroups() | group); }
+bool CRenderComponent::IsInRenderGroup(rendering::RenderGroup group) const { return math::is_flag_set(GetRenderGroups(), group); }
+void CRenderComponent::AddToRenderGroup(rendering::RenderGroup group) { SetRenderGroups(GetRenderGroups() | group); }
 bool CRenderComponent::RemoveFromRenderGroup(const std::string &name)
 {
-	auto mask = static_cast<pragma::CGame *>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
+	auto mask = static_cast<CGame *>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
 	if(!mask.has_value())
 		return false;
 	RemoveFromRenderGroup(*mask);
 	return true;
 }
-void CRenderComponent::RemoveFromRenderGroup(pragma::rendering::RenderGroup group) { SetRenderGroups(GetRenderGroups() & ~group); }
+void CRenderComponent::RemoveFromRenderGroup(rendering::RenderGroup group) { SetRenderGroups(GetRenderGroups() & ~group); }
 
-void CRenderComponent::SetRenderGroups(pragma::rendering::RenderGroup mode)
+void CRenderComponent::SetRenderGroups(rendering::RenderGroup mode)
 {
 	if(mode == *m_renderGroups)
 		return;
@@ -797,16 +797,16 @@ void CRenderComponent::SetRenderGroups(pragma::rendering::RenderGroup mode)
 void CRenderComponent::InitializeRenderBuffers()
 {
 	// Initialize render buffer if it doesn't exist
-	if(m_renderBuffer != nullptr || pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid() == false || *m_renderPass == rendering::SceneRenderPass::None)
+	if(m_renderBuffer != nullptr || ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid() == false || *m_renderPass == rendering::SceneRenderPass::None)
 		return;
 
-	pragma::get_cengine()->GetRenderContext().WaitIdle();
-	pragma::math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty);
+	get_cengine()->GetRenderContext().WaitIdle();
+	math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty);
 	m_renderBuffer = s_instanceBuffer->AllocateBuffer();
 	if(!m_renderBuffer)
 		return;
-	m_renderDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
-	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*m_renderBuffer, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::Instance));
+	m_renderDescSetGroup = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
+	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*m_renderBuffer, math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::Instance));
 	UpdateBoneBuffer();
 	m_renderDescSetGroup->GetDescriptorSet()->Update();
 	UpdateInstantiability();
@@ -821,61 +821,61 @@ void CRenderComponent::UpdateBoneBuffer()
 	auto pAnimComponent = ent.GetAnimatedComponent();
 	if(pAnimComponent.expired())
 		return;
-	auto *buf = static_cast<pragma::CAnimatedComponent &>(*pAnimComponent).GetBoneBuffer();
+	auto *buf = static_cast<CAnimatedComponent &>(*pAnimComponent).GetBoneBuffer();
 	if(!buf)
 		return;
-	pragma::get_cengine()->GetRenderContext().WaitIdle();
-	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*buf), pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
+	get_cengine()->GetRenderContext().WaitIdle();
+	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*buf), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
 	m_renderDescSetGroup->GetDescriptorSet()->Update();
 }
 void CRenderComponent::ClearRenderBuffers()
 {
 	if(m_renderBuffer)
-		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
+		get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
 	m_renderBuffer = nullptr;
 
 	if(m_renderDescSetGroup)
-		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
+		get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
 	m_renderDescSetGroup = nullptr;
 }
-pragma::rendering::RenderGroup CRenderComponent::GetRenderGroups() const { return *m_renderGroups; }
-const pragma::util::PEnumProperty<pragma::rendering::RenderGroup> &CRenderComponent::GetRenderGroupsProperty() const { return m_renderGroups; }
-bool CRenderComponent::ShouldDraw() const { return m_renderBuffer && pragma::math::is_flag_set(m_stateFlags, StateFlags::ShouldDraw); }
+rendering::RenderGroup CRenderComponent::GetRenderGroups() const { return *m_renderGroups; }
+const util::PEnumProperty<rendering::RenderGroup> &CRenderComponent::GetRenderGroupsProperty() const { return m_renderGroups; }
+bool CRenderComponent::ShouldDraw() const { return m_renderBuffer && math::is_flag_set(m_stateFlags, StateFlags::ShouldDraw); }
 bool CRenderComponent::ShouldDrawShadow() const
 {
 	// TODO: Streamline this! We only need one flag!
-	return m_renderBuffer && pragma::math::is_flag_set(m_stateFlags, StateFlags::ShouldDrawShadow) && !pragma::math::is_flag_set(m_stateFlags, StateFlags::DisableShadows) && GetCastShadows();
+	return m_renderBuffer && math::is_flag_set(m_stateFlags, StateFlags::ShouldDrawShadow) && !math::is_flag_set(m_stateFlags, StateFlags::DisableShadows) && GetCastShadows();
 }
 
-pragma::rendering::RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)
+rendering::RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)
 {
 	auto *pMdlComponent = GetModelComponent();
 	if(!pMdlComponent) {
 		static rendering::RenderMeshGroup meshes {};
 		return meshes;
 	}
-	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetLodRenderMeshGroup(lod);
+	return static_cast<CModelComponent &>(*pMdlComponent).GetLodRenderMeshGroup(lod);
 }
-const pragma::rendering::RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodRenderMeshGroup(lod); }
-pragma::rendering::RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod)
+const rendering::RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodRenderMeshGroup(lod); }
+rendering::RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod)
 {
 	auto *pMdlComponent = GetModelComponent();
 	if(!pMdlComponent) {
 		static rendering::RenderMeshGroup meshes {};
 		return meshes;
 	}
-	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetLodMeshGroup(lod);
+	return static_cast<CModelComponent &>(*pMdlComponent).GetLodMeshGroup(lod);
 }
-const pragma::rendering::RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodMeshGroup(lod); }
-const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CRenderComponent::GetRenderMeshes() const { return const_cast<CRenderComponent *>(this)->GetRenderMeshes(); }
-std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
+const rendering::RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod) const { return const_cast<CRenderComponent *>(this)->GetLodMeshGroup(lod); }
+const std::vector<std::shared_ptr<geometry::ModelSubMesh>> &CRenderComponent::GetRenderMeshes() const { return const_cast<CRenderComponent *>(this)->GetRenderMeshes(); }
+std::vector<std::shared_ptr<geometry::ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
 {
 	auto *pMdlComponent = GetModelComponent();
 	if(!pMdlComponent) {
-		static std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> meshes {};
+		static std::vector<std::shared_ptr<geometry::ModelSubMesh>> meshes {};
 		return meshes;
 	}
-	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetRenderMeshes();
+	return static_cast<CModelComponent &>(*pMdlComponent).GetRenderMeshes();
 }
 std::vector<rendering::RenderBufferData> &CRenderComponent::GetRenderBufferData()
 {
@@ -884,15 +884,15 @@ std::vector<rendering::RenderBufferData> &CRenderComponent::GetRenderBufferData(
 		static std::vector<rendering::RenderBufferData> renderBufferData {};
 		return renderBufferData;
 	}
-	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetRenderBufferData();
+	return static_cast<CModelComponent &>(*pMdlComponent).GetRenderBufferData();
 }
-const std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CRenderComponent::GetLODMeshes() const { return const_cast<CRenderComponent *>(this)->GetLODMeshes(); }
-std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CRenderComponent::GetLODMeshes()
+const std::vector<std::shared_ptr<geometry::ModelMesh>> &CRenderComponent::GetLODMeshes() const { return const_cast<CRenderComponent *>(this)->GetLODMeshes(); }
+std::vector<std::shared_ptr<geometry::ModelMesh>> &CRenderComponent::GetLODMeshes()
 {
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
-	auto pSoftBodyComponent = ent.GetComponent<pragma::CSoftBodyComponent>();
+	auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
+	auto pSoftBodyComponent = ent.GetComponent<CSoftBodyComponent>();
 	if(pSoftBodyComponent.valid()) {
-		static std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes {};
+		static std::vector<std::shared_ptr<geometry::ModelMesh>> meshes {};
 		return meshes;
 		// TODO
 		//auto *pSoftBodyData = pSoftBodyComponent->GetSoftBodyData();
@@ -901,21 +901,21 @@ std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &CRenderComponent::Get
 	}
 	auto *pMdlComponent = GetModelComponent();
 	if(!pMdlComponent) {
-		static std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshes {};
+		static std::vector<std::shared_ptr<geometry::ModelMesh>> meshes {};
 		return meshes;
 	}
-	return static_cast<pragma::CModelComponent &>(*pMdlComponent).GetLODMeshes();
+	return static_cast<CModelComponent &>(*pMdlComponent).GetLODMeshes();
 }
 const std::vector<CRenderComponent *> &CRenderComponent::GetEntitiesExemptFromOcclusionCulling() { return s_ocExemptEntities; }
 const std::shared_ptr<prosper::IUniformResizableBuffer> &CRenderComponent::GetInstanceBuffer() { return s_instanceBuffer; }
 void CRenderComponent::ClearBuffers()
 {
 	s_instanceBuffer = nullptr;
-	pragma::clear_articulated_buffers();
-	pragma::clear_vertex_animation_buffer();
+	clear_articulated_buffers();
+	clear_vertex_animation_buffer();
 	CRaytracingComponent::ClearBuffers();
 }
-void CRenderComponent::SetTranslucencyPassDistanceOverride(double distance) { m_translucencyPassDistanceOverrideSqr = pragma::math::pow2(distance); }
+void CRenderComponent::SetTranslucencyPassDistanceOverride(double distance) { m_translucencyPassDistanceOverrideSqr = math::pow2(distance); }
 void CRenderComponent::ClearTranslucencyPassDistanceOverride() { m_translucencyPassDistanceOverrideSqr = {}; }
 const std::optional<double> &CRenderComponent::GetTranslucencyPassDistanceOverrideSqr() const { return m_translucencyPassDistanceOverrideSqr; }
 
@@ -943,19 +943,19 @@ void CEShouldDraw::HandleReturnValues(lua::State *l)
 
 /////////////////
 
-CEOnUpdateRenderMatrices::CEOnUpdateRenderMatrices(pragma::math::ScaledTransform &pose, Mat4 &transformation) : pose {pose}, transformation {transformation} {}
+CEOnUpdateRenderMatrices::CEOnUpdateRenderMatrices(math::ScaledTransform &pose, Mat4 &transformation) : pose {pose}, transformation {transformation} {}
 void CEOnUpdateRenderMatrices::PushArguments(lua::State *l)
 {
-	Lua::Push<pragma::math::ScaledTransform>(l, pose);
+	Lua::Push<math::ScaledTransform>(l, pose);
 	Lua::Push<Mat4>(l, transformation);
 }
 uint32_t CEOnUpdateRenderMatrices::GetReturnCount() { return 3; }
 void CEOnUpdateRenderMatrices::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -2))
-		pose = Lua::Check<pragma::math::ScaledTransform>(l, -2);
+		pose = Lua::Check<math::ScaledTransform>(l, -2);
 	if(Lua::IsSet(l, -1))
-		transformation = Lua::Check<::Mat4>(l, -1);
+		transformation = Lua::Check<Mat4>(l, -1);
 }
 
 /////////////////
@@ -981,13 +981,13 @@ void CEOnRenderBoundsChanged::PushArguments(lua::State *l)
 
 /////////////////
 
-void pragma::rendering::RenderBufferData::SetDepthPrepassEnabled(bool enabled) { pragma::math::set_flag(stateFlags, StateFlags::EnableDepthPrepass, enabled); }
-bool pragma::rendering::RenderBufferData::IsDepthPrepassEnabled() const { return pragma::math::is_flag_set(stateFlags, StateFlags::EnableDepthPrepass); }
+void rendering::RenderBufferData::SetDepthPrepassEnabled(bool enabled) { math::set_flag(stateFlags, StateFlags::EnableDepthPrepass, enabled); }
+bool rendering::RenderBufferData::IsDepthPrepassEnabled() const { return math::is_flag_set(stateFlags, StateFlags::EnableDepthPrepass); }
 
-void pragma::rendering::RenderBufferData::SetGlowPassEnabled(bool enabled) { pragma::math::set_flag(stateFlags, StateFlags::EnableGlowPass, enabled); }
-bool pragma::rendering::RenderBufferData::IsGlowPassEnabled() const { return pragma::math::is_flag_set(stateFlags, StateFlags::EnableGlowPass); }
+void rendering::RenderBufferData::SetGlowPassEnabled(bool enabled) { math::set_flag(stateFlags, StateFlags::EnableGlowPass, enabled); }
+bool rendering::RenderBufferData::IsGlowPassEnabled() const { return math::is_flag_set(stateFlags, StateFlags::EnableGlowPass); }
 
-static void debug_entity_render_buffer(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_entity_render_buffer(NetworkState *state, BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
@@ -998,7 +998,7 @@ static void debug_entity_render_buffer(pragma::NetworkState *state, pragma::Base
 		return;
 	}
 	auto *ent = ents.front();
-	auto mdlC = ent->GetComponent<pragma::CModelComponent>();
+	auto mdlC = ent->GetComponent<CModelComponent>();
 	if(mdlC.expired()) {
 		Con::cwar << "Target entity has no model component!" << Con::endl;
 	}
@@ -1023,12 +1023,12 @@ static void debug_entity_render_buffer(pragma::NetworkState *state, pragma::Base
 		Con::cout << Con::endl;
 	}
 
-	auto renderC = ent->GetComponent<pragma::CRenderComponent>();
+	auto renderC = ent->GetComponent<CRenderComponent>();
 	if(renderC.expired()) {
 		Con::cwar << "Target entity has no render component!" << Con::endl;
 	}
 	else {
-		auto printInstanceData = [](const pragma::rendering::InstanceData &instanceData) {
+		auto printInstanceData = [](const rendering::InstanceData &instanceData) {
 			Con::cout << "modelMatrix: " << umat::to_string(instanceData.modelMatrix) << Con::endl;
 			Con::cout << "color: " << instanceData.color << Con::endl;
 			Con::cout << "renderFlags: " << magic_enum::enum_name(instanceData.renderFlags) << Con::endl;
@@ -1040,7 +1040,7 @@ static void debug_entity_render_buffer(pragma::NetworkState *state, pragma::Base
 		printInstanceData(instanceData);
 
 		auto *buf = renderC->GetRenderBuffer();
-		pragma::rendering::InstanceData bufData;
+		rendering::InstanceData bufData;
 		if(!buf || !buf->Read(0, sizeof(bufData), &bufData))
 			Con::cwar << "Failed to read buffer data!" << Con::endl;
 		else {
@@ -1053,78 +1053,78 @@ static void debug_entity_render_buffer(pragma::NetworkState *state, pragma::Base
 	}
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_entity_render_buffer", &debug_entity_render_buffer, pragma::console::ConVarFlags::None, "Prints debug information about an entity's render buffer.");
+	auto UVN = console::client::register_command("debug_entity_render_buffer", &debug_entity_render_buffer, console::ConVarFlags::None, "Prints debug information about an entity's render buffer.");
 }
 namespace Lua::Render {
-	void CalcRayIntersection(lua::State *l, pragma::CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir, bool precise)
+	void CalcRayIntersection(lua::State *l, CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir, bool precise)
 	{
 
 		auto result = hComponent.CalcRayIntersection(start, dir, precise);
 		if(result.has_value() == false) {
-			Lua::PushInt(l, pragma::math::to_integral(pragma::math::intersection::Result::NoIntersection));
+			PushInt(l, pragma::math::to_integral(pragma::math::intersection::Result::NoIntersection));
 			return;
 		}
-		Lua::Push(l, pragma::math::to_integral(result->result));
+		Push(l, pragma::math::to_integral(result->result));
 
-		auto t = Lua::CreateTable(l);
+		auto t = CreateTable(l);
 
-		Lua::PushString(l, "position");        /* 1 */
+		PushString(l, "position");        /* 1 */
 		Lua::Push<Vector3>(l, result->hitPos); /* 2 */
-		Lua::SetTableValue(l, t);              /* 0 */
+		SetTableValue(l, t);              /* 0 */
 
-		Lua::PushString(l, "distance");       /* 1 */
-		Lua::PushNumber(l, result->hitValue); /* 2 */
-		Lua::SetTableValue(l, t);             /* 0 */
+		PushString(l, "distance");       /* 1 */
+		PushNumber(l, result->hitValue); /* 2 */
+		SetTableValue(l, t);             /* 0 */
 
 		if(precise && result->precise) {
-			Lua::PushString(l, "uv");                                                    /* 1 */
+			PushString(l, "uv");                                                    /* 1 */
 			Lua::Push<::Vector2>(l, ::Vector2 {result->precise->u, result->precise->v}); /* 2 */
-			Lua::SetTableValue(l, t);                                                    /* 0 */
+			SetTableValue(l, t);                                                    /* 0 */
 			return;
 		}
 
-		Lua::PushString(l, "boneId");    /* 1 */
-		Lua::PushInt(l, result->boneId); /* 2 */
-		Lua::SetTableValue(l, t);        /* 0 */
+		PushString(l, "boneId");    /* 1 */
+		PushInt(l, result->boneId); /* 2 */
+		SetTableValue(l, t);        /* 0 */
 	}
-	void CalcRayIntersection(lua::State *l, pragma::CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir) { CalcRayIntersection(l, hComponent, start, dir, false); }
-	void GetTransformationMatrix(lua::State *l, pragma::CRenderComponent &hEnt)
+	void CalcRayIntersection(lua::State *l, CRenderComponent &hComponent, const Vector3 &start, const Vector3 &dir) { CalcRayIntersection(l, hComponent, start, dir, false); }
+	void GetTransformationMatrix(lua::State *l, CRenderComponent &hEnt)
 	{
 
 		::Mat4 mat = hEnt.GetTransformationMatrix();
 		luabind::object(l, mat).push(l);
 	}
 
-	void GetLocalRenderBounds(lua::State *l, pragma::CRenderComponent &hEnt)
+	void GetLocalRenderBounds(lua::State *l, CRenderComponent &hEnt)
 	{
 
 		auto &aabb = hEnt.GetLocalRenderBounds();
 		Lua::Push<Vector3>(l, aabb.min);
 		Lua::Push<Vector3>(l, aabb.max);
 	}
-	void GetLocalRenderSphereBounds(lua::State *l, pragma::CRenderComponent &hEnt)
+	void GetLocalRenderSphereBounds(lua::State *l, CRenderComponent &hEnt)
 	{
 
 		auto &sphere = hEnt.GetLocalRenderSphere();
 		Lua::Push<Vector3>(l, sphere.pos);
-		Lua::PushNumber(l, sphere.radius);
+		PushNumber(l, sphere.radius);
 	}
-	void GetAbsoluteRenderBounds(lua::State *l, pragma::CRenderComponent &hEnt)
+	void GetAbsoluteRenderBounds(lua::State *l, CRenderComponent &hEnt)
 	{
 
 		auto &aabb = hEnt.GetUpdatedAbsoluteRenderBounds();
 		Lua::Push<Vector3>(l, aabb.min);
 		Lua::Push<Vector3>(l, aabb.max);
 	}
-	void GetAbsoluteRenderSphereBounds(lua::State *l, pragma::CRenderComponent &hEnt)
+	void GetAbsoluteRenderSphereBounds(lua::State *l, CRenderComponent &hEnt)
 	{
 
 		auto &sphere = hEnt.GetUpdatedAbsoluteRenderSphere();
 		Lua::Push<Vector3>(l, sphere.pos);
-		Lua::PushNumber(l, sphere.radius);
+		PushNumber(l, sphere.radius);
 	}
 
-	void SetLocalRenderBounds(lua::State *l, pragma::CRenderComponent &hEnt, Vector3 &min, Vector3 &max) { hEnt.SetLocalRenderBounds(min, max); }
+	void SetLocalRenderBounds(lua::State *l, CRenderComponent &hEnt, Vector3 &min, Vector3 &max) { hEnt.SetLocalRenderBounds(min, max); }
 
 	/*void UpdateRenderBuffers(lua::State *l,pragma::CRenderComponent &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam,bool bForceBufferUpdate)
     {
@@ -1137,44 +1137,44 @@ namespace Lua::Render {
         hEnt.UpdateRenderData(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd),*hScene,*hCam,vp,bForceBufferUpdate);
     }
     void UpdateRenderBuffers(lua::State *l,pragma::CRenderComponent &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam) {UpdateRenderBuffers(l,hEnt,drawCmd,hScene,hCam,false);}*/
-	void GetRenderBuffer(lua::State *l, pragma::CRenderComponent &hEnt)
+	void GetRenderBuffer(lua::State *l, CRenderComponent &hEnt)
 	{
 		auto *buf = hEnt.GetRenderBuffer();
 		if(buf == nullptr)
 			return;
-		Lua::Push(l, buf->shared_from_this());
+		Push(l, buf->shared_from_this());
 	}
-	void GetBoneBuffer(lua::State *l, pragma::CRenderComponent &hEnt)
+	void GetBoneBuffer(lua::State *l, CRenderComponent &hEnt)
 	{
 
-		auto *pAnimComponent = static_cast<pragma::CAnimatedComponent *>(hEnt.GetEntity().GetAnimatedComponent().get());
+		auto *pAnimComponent = static_cast<CAnimatedComponent *>(hEnt.GetEntity().GetAnimatedComponent().get());
 		if(pAnimComponent == nullptr)
 			return;
 		auto *buf = pAnimComponent->GetBoneBuffer();
 		if(!buf)
 			return;
-		Lua::Push(l, buf->shared_from_this());
+		Push(l, buf->shared_from_this());
 	}
 };
 
 void CRenderComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseRenderComponent::RegisterLuaBindings(l, modEnts);
-	auto defCRender = pragma::LuaCore::create_entity_component_class<pragma::CRenderComponent, pragma::BaseRenderComponent>("RenderComponent");
+	auto defCRender = pragma::LuaCore::create_entity_component_class<CRenderComponent, BaseRenderComponent>("RenderComponent");
 	defCRender.def("GetTransformationMatrix", &Lua::Render::GetTransformationMatrix);
-	defCRender.def("IsInPvs", static_cast<bool (pragma::CRenderComponent::*)(const Vector3 &, const pragma::CWorldComponent &) const>(&pragma::CRenderComponent::IsInPvs));
-	defCRender.def("IsInPvs", static_cast<bool (pragma::CRenderComponent::*)(const Vector3 &) const>(&pragma::CRenderComponent::IsInPvs));
-	defCRender.def("IsInRenderGroup", &pragma::CRenderComponent::IsInRenderGroup);
-	defCRender.def("GetSceneRenderPass", &pragma::CRenderComponent::GetSceneRenderPass);
-	defCRender.def("SetSceneRenderPass", &pragma::CRenderComponent::SetSceneRenderPass);
-	defCRender.def("GetSceneRenderPassProperty", +[](lua::State *l, pragma::CRenderComponent &c) { Lua::Property::push(l, *c.GetSceneRenderPassProperty()); });
-	defCRender.def("AddToRenderGroup", static_cast<bool (pragma::CRenderComponent::*)(const std::string &)>(&pragma::CRenderComponent::AddToRenderGroup));
-	defCRender.def("AddToRenderGroup", static_cast<void (pragma::CRenderComponent::*)(pragma::rendering::RenderGroup)>(&pragma::CRenderComponent::AddToRenderGroup));
-	defCRender.def("RemoveFromRenderGroup", static_cast<bool (pragma::CRenderComponent::*)(const std::string &)>(&pragma::CRenderComponent::RemoveFromRenderGroup));
-	defCRender.def("RemoveFromRenderGroup", static_cast<void (pragma::CRenderComponent::*)(pragma::rendering::RenderGroup)>(&pragma::CRenderComponent::RemoveFromRenderGroup));
-	defCRender.def("SetRenderGroups", &pragma::CRenderComponent::SetRenderGroups);
-	defCRender.def("GetRenderGroups", &pragma::CRenderComponent::GetRenderGroups);
-	defCRender.def("GetRenderGroupsProperty", +[](lua::State *l, pragma::CRenderComponent &c) { Lua::Property::push(l, *c.GetRenderGroupsProperty()); });
+	defCRender.def("IsInPvs", static_cast<bool (CRenderComponent::*)(const Vector3 &, const CWorldComponent &) const>(&CRenderComponent::IsInPvs));
+	defCRender.def("IsInPvs", static_cast<bool (CRenderComponent::*)(const Vector3 &) const>(&CRenderComponent::IsInPvs));
+	defCRender.def("IsInRenderGroup", &CRenderComponent::IsInRenderGroup);
+	defCRender.def("GetSceneRenderPass", &CRenderComponent::GetSceneRenderPass);
+	defCRender.def("SetSceneRenderPass", &CRenderComponent::SetSceneRenderPass);
+	defCRender.def("GetSceneRenderPassProperty", +[](lua::State *l, CRenderComponent &c) { Lua::Property::push(l, *c.GetSceneRenderPassProperty()); });
+	defCRender.def("AddToRenderGroup", static_cast<bool (CRenderComponent::*)(const std::string &)>(&CRenderComponent::AddToRenderGroup));
+	defCRender.def("AddToRenderGroup", static_cast<void (CRenderComponent::*)(rendering::RenderGroup)>(&CRenderComponent::AddToRenderGroup));
+	defCRender.def("RemoveFromRenderGroup", static_cast<bool (CRenderComponent::*)(const std::string &)>(&CRenderComponent::RemoveFromRenderGroup));
+	defCRender.def("RemoveFromRenderGroup", static_cast<void (CRenderComponent::*)(rendering::RenderGroup)>(&CRenderComponent::RemoveFromRenderGroup));
+	defCRender.def("SetRenderGroups", &CRenderComponent::SetRenderGroups);
+	defCRender.def("GetRenderGroups", &CRenderComponent::GetRenderGroups);
+	defCRender.def("GetRenderGroupsProperty", +[](lua::State *l, CRenderComponent &c) { Lua::Property::push(l, *c.GetRenderGroupsProperty()); });
 	defCRender.def("GetLocalRenderBounds", &Lua::Render::GetLocalRenderBounds);
 	defCRender.def("GetLocalRenderSphereBounds", &Lua::Render::GetLocalRenderSphereBounds);
 	defCRender.def("GetAbsoluteRenderBounds", &Lua::Render::GetAbsoluteRenderBounds);
@@ -1184,7 +1184,7 @@ void CRenderComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modE
 	// defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua::State*,pragma::CRenderComponent&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,CCameraHandle&)>(&Lua::Render::UpdateRenderBuffers));
 	defCRender.def("GetRenderBuffer", &Lua::Render::GetRenderBuffer);
 	defCRender.def("GetBoneBuffer", &Lua::Render::GetBoneBuffer);
-	defCRender.def("GetLODMeshes", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) {
+	defCRender.def("GetLODMeshes", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) {
 		auto &lodMeshes = hComponent.GetLODMeshes();
 		auto t = Lua::CreateTable(l);
 		int32_t idx = 1;
@@ -1194,7 +1194,7 @@ void CRenderComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modE
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defCRender.def("GetRenderMeshes", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) {
+	defCRender.def("GetRenderMeshes", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) {
 		auto &renderMeshes = hComponent.GetRenderMeshes();
 		auto t = Lua::CreateTable(l);
 		int32_t idx = 1;
@@ -1204,7 +1204,7 @@ void CRenderComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modE
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defCRender.def("GetLodRenderMeshes", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, uint32_t)>([](lua::State *l, pragma::CRenderComponent &hComponent, uint32_t lod) {
+	defCRender.def("GetLodRenderMeshes", static_cast<void (*)(lua::State *, CRenderComponent &, uint32_t)>([](lua::State *l, CRenderComponent &hComponent, uint32_t lod) {
 		auto &renderMeshes = hComponent.GetRenderMeshes();
 		auto &renderMeshGroup = hComponent.GetLodRenderMeshGroup(lod);
 		auto t = Lua::CreateTable(l);
@@ -1215,13 +1215,13 @@ void CRenderComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modE
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defCRender.def("SetExemptFromOcclusionCulling", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, bool)>([](lua::State *l, pragma::CRenderComponent &hComponent, bool exempt) { hComponent.SetExemptFromOcclusionCulling(exempt); }));
-	defCRender.def("IsExemptFromOcclusionCulling", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { Lua::PushBool(l, hComponent.IsExemptFromOcclusionCulling()); }));
-	defCRender.def("SetReceiveShadows", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, bool)>([](lua::State *l, pragma::CRenderComponent &hComponent, bool enabled) { hComponent.SetReceiveShadows(enabled); }));
-	defCRender.def("IsReceivingShadows", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { Lua::PushBool(l, hComponent.IsReceivingShadows()); }));
-	defCRender.def("SetRenderBufferDirty", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { hComponent.SetRenderBufferDirty(); }));
+	defCRender.def("SetExemptFromOcclusionCulling", static_cast<void (*)(lua::State *, CRenderComponent &, bool)>([](lua::State *l, CRenderComponent &hComponent, bool exempt) { hComponent.SetExemptFromOcclusionCulling(exempt); }));
+	defCRender.def("IsExemptFromOcclusionCulling", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) { Lua::PushBool(l, hComponent.IsExemptFromOcclusionCulling()); }));
+	defCRender.def("SetReceiveShadows", static_cast<void (*)(lua::State *, CRenderComponent &, bool)>([](lua::State *l, CRenderComponent &hComponent, bool enabled) { hComponent.SetReceiveShadows(enabled); }));
+	defCRender.def("IsReceivingShadows", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) { Lua::PushBool(l, hComponent.IsReceivingShadows()); }));
+	defCRender.def("SetRenderBufferDirty", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) { hComponent.SetRenderBufferDirty(); }));
 	/*defCRender.def("GetDepthBias",static_cast<void(*)(lua::State*,pragma::CRenderComponent&)>([](lua::State *l,pragma::CRenderComponent &hComponent) {
-		
+
 		float constantFactor,biasClamp,slopeFactor;
 		hComponent.GetDepthBias(constantFactor,biasClamp,slopeFactor);
 		Lua::PushNumber(l,constantFactor);
@@ -1229,63 +1229,63 @@ void CRenderComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modE
 		Lua::PushNumber(l,slopeFactor);
 	}));
 	defCRender.def("SetDepthBias",static_cast<void(*)(lua::State*,pragma::CRenderComponent&,float,float,float)>([](lua::State *l,pragma::CRenderComponent &hComponent,float constantFactor,float biasClamp,float slopeFactor) {
-		
+
 		hComponent.SetDepthBias(constantFactor,biasClamp,slopeFactor);
 	}));*/
-	defCRender.def("CalcRayIntersection", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, const Vector3 &, const Vector3 &, bool)>(&Lua::Render::CalcRayIntersection));
-	defCRender.def("CalcRayIntersection", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, const Vector3 &, const Vector3 &)>(&Lua::Render::CalcRayIntersection));
-	defCRender.def("SetDepthPassEnabled", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, bool)>([](lua::State *l, pragma::CRenderComponent &hComponent, bool depthPassEnabled) { hComponent.SetDepthPassEnabled(depthPassEnabled); }));
-	defCRender.def("IsDepthPassEnabled", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { Lua::PushBool(l, hComponent.IsDepthPassEnabled()); }));
-	defCRender.def("GetRenderClipPlane", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) {
+	defCRender.def("CalcRayIntersection", static_cast<void (*)(lua::State *, CRenderComponent &, const Vector3 &, const Vector3 &, bool)>(&Lua::Render::CalcRayIntersection));
+	defCRender.def("CalcRayIntersection", static_cast<void (*)(lua::State *, CRenderComponent &, const Vector3 &, const Vector3 &)>(&Lua::Render::CalcRayIntersection));
+	defCRender.def("SetDepthPassEnabled", static_cast<void (*)(lua::State *, CRenderComponent &, bool)>([](lua::State *l, CRenderComponent &hComponent, bool depthPassEnabled) { hComponent.SetDepthPassEnabled(depthPassEnabled); }));
+	defCRender.def("IsDepthPassEnabled", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) { Lua::PushBool(l, hComponent.IsDepthPassEnabled()); }));
+	defCRender.def("GetRenderClipPlane", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) {
 		auto *clipPlane = hComponent.GetRenderClipPlane();
 		if(clipPlane == nullptr)
 			return;
 		Lua::Push(l, *clipPlane);
 	}));
-	defCRender.def("SetRenderClipPlane", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, const Vector4 &)>([](lua::State *l, pragma::CRenderComponent &hComponent, const Vector4 &clipPlane) { hComponent.SetRenderClipPlane(clipPlane); }));
-	defCRender.def("ClearRenderClipPlane", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearRenderClipPlane(); }));
-	defCRender.def("GetDepthBias", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) {
+	defCRender.def("SetRenderClipPlane", static_cast<void (*)(lua::State *, CRenderComponent &, const Vector4 &)>([](lua::State *l, CRenderComponent &hComponent, const Vector4 &clipPlane) { hComponent.SetRenderClipPlane(clipPlane); }));
+	defCRender.def("ClearRenderClipPlane", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) { hComponent.ClearRenderClipPlane(); }));
+	defCRender.def("GetDepthBias", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) {
 		auto *depthBias = hComponent.GetDepthBias();
 		if(depthBias == nullptr)
 			return;
 		Lua::PushNumber(l, depthBias->x);
 		Lua::PushNumber(l, depthBias->y);
 	}));
-	defCRender.def("SetDepthBias", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, float, float)>([](lua::State *l, pragma::CRenderComponent &hComponent, float d, float delta) { hComponent.SetDepthBias(d, delta); }));
-	defCRender.def("ClearDepthBias", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearDepthBias(); }));
-	defCRender.def("GetRenderPose", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { Lua::Push(l, hComponent.GetRenderPose()); }));
-	defCRender.def("SetRenderOffsetTransform", static_cast<void (*)(lua::State *, pragma::CRenderComponent &, const pragma::math::ScaledTransform &)>([](lua::State *l, pragma::CRenderComponent &hComponent, const pragma::math::ScaledTransform &pose) { hComponent.SetRenderOffsetTransform(pose); }));
-	defCRender.def("ClearRenderOffsetTransform", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearRenderOffsetTransform(); }));
-	defCRender.def("GetRenderOffsetTransform", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) {
+	defCRender.def("SetDepthBias", static_cast<void (*)(lua::State *, CRenderComponent &, float, float)>([](lua::State *l, CRenderComponent &hComponent, float d, float delta) { hComponent.SetDepthBias(d, delta); }));
+	defCRender.def("ClearDepthBias", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) { hComponent.ClearDepthBias(); }));
+	defCRender.def("GetRenderPose", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) { Lua::Push(l, hComponent.GetRenderPose()); }));
+	defCRender.def("SetRenderOffsetTransform", static_cast<void (*)(lua::State *, CRenderComponent &, const math::ScaledTransform &)>([](lua::State *l, CRenderComponent &hComponent, const math::ScaledTransform &pose) { hComponent.SetRenderOffsetTransform(pose); }));
+	defCRender.def("ClearRenderOffsetTransform", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) { hComponent.ClearRenderOffsetTransform(); }));
+	defCRender.def("GetRenderOffsetTransform", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) {
 		auto *t = hComponent.GetRenderOffsetTransform();
 		if(t == nullptr)
 			return;
 		Lua::Push(l, *t);
 	}));
-	defCRender.def("ShouldCastShadows", static_cast<bool (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) -> bool { return hComponent.GetCastShadows(); }));
-	defCRender.def("ShouldDraw", static_cast<bool (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) -> bool { return hComponent.ShouldDraw(); }));
-	defCRender.def("ShouldDrawShadow", static_cast<bool (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) -> bool { return hComponent.ShouldDrawShadow(); }));
-	defCRender.def("ClearBuffers", static_cast<void (*)(lua::State *, pragma::CRenderComponent &)>([](lua::State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearRenderBuffers(); }));
-	defCRender.def("SetTranslucencyPassDistanceOverride", &pragma::CRenderComponent::SetTranslucencyPassDistanceOverride);
-	defCRender.def("ClearTranslucencyPassDistanceOverride", &pragma::CRenderComponent::ClearTranslucencyPassDistanceOverride);
-	defCRender.def("GetTranslucencyPassDistanceOverrideSqr", &pragma::CRenderComponent::GetTranslucencyPassDistanceOverrideSqr);
+	defCRender.def("ShouldCastShadows", static_cast<bool (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) -> bool { return hComponent.GetCastShadows(); }));
+	defCRender.def("ShouldDraw", static_cast<bool (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) -> bool { return hComponent.ShouldDraw(); }));
+	defCRender.def("ShouldDrawShadow", static_cast<bool (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) -> bool { return hComponent.ShouldDrawShadow(); }));
+	defCRender.def("ClearBuffers", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) { hComponent.ClearRenderBuffers(); }));
+	defCRender.def("SetTranslucencyPassDistanceOverride", &CRenderComponent::SetTranslucencyPassDistanceOverride);
+	defCRender.def("ClearTranslucencyPassDistanceOverride", &CRenderComponent::ClearTranslucencyPassDistanceOverride);
+	defCRender.def("GetTranslucencyPassDistanceOverrideSqr", &CRenderComponent::GetTranslucencyPassDistanceOverrideSqr);
 
-	defCRender.def("SetHidden", &pragma::CRenderComponent::SetHidden);
-	defCRender.def("IsHidden", &pragma::CRenderComponent::IsHidden);
-	defCRender.def("SetVisible", +[](pragma::CRenderComponent &renderC, bool visible) { renderC.SetHidden(!visible); });
-	defCRender.def("IsVisible", &pragma::CRenderComponent::IsVisible);
-	defCRender.def("SetIgnoreAncestorVisibility", &pragma::CRenderComponent::SetIgnoreAncestorVisibility);
-	defCRender.def("ShouldIgnoreAncestorVisibility", &pragma::CRenderComponent::ShouldIgnoreAncestorVisibility);
+	defCRender.def("SetHidden", &CRenderComponent::SetHidden);
+	defCRender.def("IsHidden", &CRenderComponent::IsHidden);
+	defCRender.def("SetVisible", +[](CRenderComponent &renderC, bool visible) { renderC.SetHidden(!visible); });
+	defCRender.def("IsVisible", &CRenderComponent::IsVisible);
+	defCRender.def("SetIgnoreAncestorVisibility", &CRenderComponent::SetIgnoreAncestorVisibility);
+	defCRender.def("ShouldIgnoreAncestorVisibility", &CRenderComponent::ShouldIgnoreAncestorVisibility);
 
 	// defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_DATA",pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA);
-	defCRender.add_static_constant("EVENT_ON_RENDER_BOUNDS_CHANGED", pragma::cRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED);
-	defCRender.add_static_constant("EVENT_ON_RENDER_MODE_CHANGED", pragma::cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);
-	defCRender.add_static_constant("EVENT_ON_RENDER_BUFFERS_INITIALIZED", pragma::cRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED);
-	defCRender.add_static_constant("EVENT_SHOULD_DRAW", pragma::cRenderComponent::EVENT_SHOULD_DRAW);
-	defCRender.add_static_constant("EVENT_SHOULD_DRAW_SHADOW", pragma::cRenderComponent::EVENT_SHOULD_DRAW_SHADOW);
-	defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_MATRICES", pragma::cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES);
-	defCRender.add_static_constant("EVENT_UPDATE_INSTANTIABILITY", pragma::cRenderComponent::EVENT_UPDATE_INSTANTIABILITY);
-	defCRender.add_static_constant("EVENT_ON_CLIP_PLANE_CHANGED", pragma::cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED);
-	defCRender.add_static_constant("EVENT_ON_DEPTH_BIAS_CHANGED", pragma::cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED);
+	defCRender.add_static_constant("EVENT_ON_RENDER_BOUNDS_CHANGED", cRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED);
+	defCRender.add_static_constant("EVENT_ON_RENDER_MODE_CHANGED", cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);
+	defCRender.add_static_constant("EVENT_ON_RENDER_BUFFERS_INITIALIZED", cRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED);
+	defCRender.add_static_constant("EVENT_SHOULD_DRAW", cRenderComponent::EVENT_SHOULD_DRAW);
+	defCRender.add_static_constant("EVENT_SHOULD_DRAW_SHADOW", cRenderComponent::EVENT_SHOULD_DRAW_SHADOW);
+	defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_MATRICES", cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES);
+	defCRender.add_static_constant("EVENT_UPDATE_INSTANTIABILITY", cRenderComponent::EVENT_UPDATE_INSTANTIABILITY);
+	defCRender.add_static_constant("EVENT_ON_CLIP_PLANE_CHANGED", cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED);
+	defCRender.add_static_constant("EVENT_ON_DEPTH_BIAS_CHANGED", cRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED);
 	modEnts[defCRender];
 }

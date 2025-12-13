@@ -32,9 +32,9 @@ export namespace pragma::gui::types {
 		void SelectPrevious();
 		const Choice *GetSelectedChoice();
 	  private:
-		pragma::gui::WIHandle m_text;
-		pragma::gui::WIHandle m_buttonPrev;
-		pragma::gui::WIHandle m_buttonNext;
+		WIHandle m_text;
+		WIHandle m_buttonPrev;
+		WIHandle m_buttonNext;
 		std::vector<Choice> m_choices;
 		UInt m_selected;
 		void UpdateButtons();

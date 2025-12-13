@@ -19,7 +19,7 @@ export import :types;
 export import :util.resource_watcher;
 
 export namespace pragma {
-	class DLLNETWORK NetworkState : public pragma::util::CallbackHandler, public console::CVarHandler {
+	class DLLNETWORK NetworkState : public util::CallbackHandler, public console::CVarHandler {
 		// For internal use only! Not to be used directly!
 	  protected:
 		static console::ConVarHandle GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &ptrs, std::string scvar);
@@ -30,24 +30,24 @@ export namespace pragma {
 		std::vector<CallbackHandle> &GetLuaEnumRegisterCallbacks();
 		void TerminateLuaModules(lua::State *l);
 		void DeregisterLuaModules(void *l, const std::string &identifier);
-		virtual bool ShouldRemoveSound(pragma::audio::ALSound &snd);
+		virtual bool ShouldRemoveSound(audio::ALSound &snd);
 
-		virtual pragma::NwStateType GetType() const = 0;
+		virtual NwStateType GetType() const = 0;
 
 		// Assets
-		const pragma::asset::ModelManager &GetModelManager() const;
-		pragma::asset::ModelManager &GetModelManager();
+		const asset::ModelManager &GetModelManager() const;
+		asset::ModelManager &GetModelManager();
 
 		// Debug
-		pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
+		debug::ProfilingStageManager<debug::ProfilingStage> *GetProfilingStageManager();
 		bool StartProfilingStage(const char *stage);
 		bool StopProfilingStage();
 
-		ResourceWatcherManager &GetResourceWatcher();
+		util::ResourceWatcherManager &GetResourceWatcher();
 
 		// Textures
-		msys::Material *LoadMaterial(const std::string &path, bool bReload = false);
-		msys::Material *PrecacheMaterial(const std::string &path);
+		material::Material *LoadMaterial(const std::string &path, bool bReload = false);
+		material::Material *PrecacheMaterial(const std::string &path);
 		bool PortMaterial(const std::string &path);
 		MapInfo *GetMapInfo();
 		std::string GetMap();
@@ -71,17 +71,17 @@ export namespace pragma {
 		void AddTickCallback(CallbackHandle callback);
 
 		void InitializeLuaModules(lua::State *l);
-		virtual std::shared_ptr<pragma::util::Library> InitializeLibrary(std::string library, std::string *err = nullptr, lua::State *l = nullptr);
+		virtual std::shared_ptr<util::Library> InitializeLibrary(std::string library, std::string *err = nullptr, lua::State *l = nullptr);
 		bool UnloadLibrary(const std::string &library);
-		std::shared_ptr<pragma::util::Library> LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories = {}, std::string *err = nullptr);
-		std::shared_ptr<pragma::util::Library> GetLibraryModule(const std::string &lib) const;
+		std::shared_ptr<util::Library> LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories = {}, std::string *err = nullptr);
+		std::shared_ptr<util::Library> GetLibraryModule(const std::string &lib) const;
 
 		std::unordered_map<std::string, unsigned int> &GetConCommandIDs();
 
 		// Sound
-		std::vector<pragma::audio::ALSoundRef> m_sounds;
-		std::unordered_map<std::string, std::shared_ptr<pragma::audio::SoundCacheInfo>> m_soundsPrecached;
-		void UpdateSounds(std::vector<std::shared_ptr<pragma::audio::ALSound>> &sounds);
+		std::vector<audio::ALSoundRef> m_sounds;
+		std::unordered_map<std::string, std::shared_ptr<audio::SoundCacheInfo>> m_soundsPrecached;
+		void UpdateSounds(std::vector<std::shared_ptr<audio::ALSound>> &sounds);
 	  public:
 		NetworkState();
 		virtual ~NetworkState();
@@ -90,10 +90,10 @@ export namespace pragma {
 		virtual bool IsMultiPlayer() const = 0;
 		virtual bool IsSinglePlayer() const = 0;
 		bool CheatsEnabled() const;
-		virtual msys::MaterialManager &GetMaterialManager() = 0;
+		virtual material::MaterialManager &GetMaterialManager() = 0;
 		virtual geometry::ModelSubMesh *CreateSubMesh() const = 0;
 		virtual geometry::ModelMesh *CreateMesh() const = 0;
-		virtual pragma::util::FileAssetManager *GetAssetManager(pragma::asset::Type type);
+		virtual util::FileAssetManager *GetAssetManager(asset::Type type);
 
 		void TranslateConsoleCommand(std::string &cmd);
 		void SetConsoleCommandOverride(const std::string &src, const std::string &dst);
@@ -103,47 +103,47 @@ export namespace pragma {
 		// Game
 		virtual void StartGame(bool singlePlayer);
 		virtual void EndGame();
-		pragma::Game *GetGameState();
+		Game *GetGameState();
 		virtual bool IsGameActive();
 		virtual void StartNewGame(const std::string &map, bool singlePlayer);
 		virtual void ChangeLevel(const std::string &map);
 
 		// Sound
 		float GetSoundDuration(std::string snd);
-		virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) = 0;
+		virtual std::shared_ptr<audio::ALSound> CreateSound(std::string snd, audio::ALSoundType type, audio::ALCreateFlags flags = audio::ALCreateFlags::None) = 0;
 		virtual void UpdateSounds() = 0;
-		virtual bool PrecacheSound(std::string snd, pragma::audio::ALChannel mode = pragma::audio::ALChannel::Auto) = 0;
+		virtual bool PrecacheSound(std::string snd, audio::ALChannel mode = audio::ALChannel::Auto) = 0;
 		virtual void StopSounds() = 0;
-		virtual void StopSound(std::shared_ptr<pragma::audio::ALSound> pSnd) = 0;
-		virtual std::shared_ptr<pragma::audio::ALSound> GetSoundByIndex(unsigned int idx) = 0;
-		const std::vector<pragma::audio::ALSoundRef> &GetSounds() const;
-		std::vector<pragma::audio::ALSoundRef> &GetSounds();
+		virtual void StopSound(std::shared_ptr<audio::ALSound> pSnd) = 0;
+		virtual std::shared_ptr<audio::ALSound> GetSoundByIndex(unsigned int idx) = 0;
+		const std::vector<audio::ALSoundRef> &GetSounds() const;
+		std::vector<audio::ALSoundRef> &GetSounds();
 
-		pragma::audio::SoundScriptManager *GetSoundScriptManager();
-		pragma::audio::SoundScript *FindSoundScript(const char *name);
+		audio::SoundScriptManager *GetSoundScriptManager();
+		audio::SoundScript *FindSoundScript(const char *name);
 		virtual bool LoadSoundScripts(const char *file, bool bPrecache = false);
 		Bool IsSoundPrecached(const std::string &snd) const;
 
 		// ConVars
 		virtual console::ConVarMap *GetConVarMap() override;
-		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
+		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
 		virtual console::ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
 
 		void CallOnNextTick(const std::function<void()> &f);
 
-		console::ConVar *CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help = "");
+		console::ConVar *CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, console::ConVarFlags flags, const std::string &help = "");
 		console::ConVar *RegisterConVar(const std::string &scmd, const std::shared_ptr<console::ConVar> &cvar);
 		void UnregisterConVar(const std::string &scmd);
-		virtual console::ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags = pragma::console::ConVarFlags::None, const std::string &help = "");
+		virtual console::ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, console::ConVarFlags flags = console::ConVarFlags::None, const std::string &help = "");
 	  protected:
-		virtual msys::Material *LoadMaterial(const std::string &path, bool precache, bool bReload);
+		virtual material::Material *LoadMaterial(const std::string &path, bool precache, bool bReload);
 
 		static UInt8 STATE_COUNT;
 		std::unique_ptr<MapInfo> m_mapInfo;
 		bool m_bTCPOnly;
 		bool m_bTerminateSocket;
 		std::vector<CallbackHandle> m_luaEnumRegisterCallbacks;
-		std::unique_ptr<ResourceWatcherManager> m_resourceWatcher;
+		std::unique_ptr<util::ResourceWatcherManager> m_resourceWatcher;
 
 		std::unordered_map<std::string, std::string> m_conOverrides;
 		ChronoTime m_ctReal;
@@ -151,38 +151,38 @@ export namespace pragma {
 		double m_tDelta;
 		double m_tLast;
 
-		std::unique_ptr<pragma::Game, void (*)(pragma::Game *)> m_game = std::unique_ptr<pragma::Game, void (*)(pragma::Game *)> {nullptr, [](pragma::Game *) {}};
-		std::shared_ptr<pragma::asset::ModelManager> m_modelManager = nullptr;
-		std::unique_ptr<pragma::audio::SoundScriptManager> m_soundScriptManager;
+		std::unique_ptr<Game, void (*)(Game *)> m_game = std::unique_ptr<Game, void (*)(Game *)> {nullptr, [](Game *) {}};
+		std::shared_ptr<asset::ModelManager> m_modelManager = nullptr;
+		std::unique_ptr<audio::SoundScriptManager> m_soundScriptManager;
 		std::unordered_set<std::string> m_missingSoundCache;
 		std::vector<CallbackHandle> m_thinkCallbacks;
 		std::vector<CallbackHandle> m_tickCallbacks;
 		std::queue<std::function<void()>> m_tickCallQueue;
 		CallbackHandle m_cbProfilingHandle = {};
-		std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_profilingStageManager;
+		std::unique_ptr<debug::ProfilingStageManager<debug::ProfilingStage>> m_profilingStageManager;
 
 		// Library handles are stored as shared_ptrs of shared_ptr because we need the
 		// use count of each library in the network states to determine when to detach
 		// the library (use count = 0 => not used in any network state => detach),
 		// but this doesn't work if shared_ptr instances exist outside of the
 		// network states.
-		std::vector<std::shared_ptr<std::shared_ptr<pragma::util::Library>>> m_libHandles;
-		std::shared_ptr<pragma::util::Library> m_lastModuleHandle = nullptr;
+		std::vector<std::shared_ptr<std::shared_ptr<util::Library>>> m_libHandles;
+		std::shared_ptr<util::Library> m_lastModuleHandle = nullptr;
 		struct DLLNETWORK LibraryInfo {
-			std::shared_ptr<std::shared_ptr<pragma::util::Library>> library;
+			std::shared_ptr<std::shared_ptr<util::Library>> library;
 			bool loadedServerside = false;
 			bool loadedClientside = false;
 			bool WasLoadedInState(const NetworkState &nw) const { return (nw.IsClient() && loadedClientside) || (!nw.IsClient() && loadedServerside); }
 		};
 		static std::unordered_map<std::string, LibraryInfo> s_loadedLibraries;
-		std::unordered_map<lua::State *, std::vector<std::shared_ptr<pragma::util::Library>>> m_initializedLibraries;
+		std::unordered_map<lua::State *, std::vector<std::shared_ptr<util::Library>>> m_initializedLibraries;
 
-		void InitializeDLLModule(lua::State *l, std::shared_ptr<pragma::util::Library> module);
+		void InitializeDLLModule(lua::State *l, std::shared_ptr<util::Library> module);
 
 		virtual void InitializeResourceManager();
 		void ClearGameConVars();
 		virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const override;
 	};
 
-	DLLNETWORK bool check_cheats(const std::string &scmd, pragma::NetworkState *state);
+	DLLNETWORK bool check_cheats(const std::string &scmd, NetworkState *state);
 };

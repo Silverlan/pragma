@@ -8,13 +8,13 @@ import :entities.components.origin;
 
 using namespace pragma;
 
-ComponentEventId originComponent::EVENT_ON_ORIGIN_CHANGED = pragma::INVALID_COMPONENT_ID;
-void OriginComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { originComponent::EVENT_ON_ORIGIN_CHANGED = registerEvent("ON_ORIGIN_CHANGED", ComponentEventInfo::Type::Explicit); }
-void OriginComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+ComponentEventId originComponent::EVENT_ON_ORIGIN_CHANGED = INVALID_COMPONENT_ID;
+void OriginComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { originComponent::EVENT_ON_ORIGIN_CHANGED = registerEvent("ON_ORIGIN_CHANGED", ComponentEventInfo::Type::Explicit); }
+void OriginComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = OriginComponent;
 
-	using TPose = pragma::math::Transform;
+	using TPose = math::Transform;
 	using TPos = Vector3;
 	using TRot = Quat;
 
@@ -27,7 +27,7 @@ void OriginComponent::RegisterMembers(pragma::EntityComponentManager &componentM
 	poseMetaData->rotProperty = "rot";
 
 	auto memberInfoPose = create_component_member_info<T, TPose, static_cast<void (T::*)(const TPose &)>(&T::SetOriginPose), static_cast<const TPose &(T::*)() const>(&T::GetOriginPose)>(posePathName, TPose {});
-	memberInfoPose.SetFlag(pragma::ComponentMemberFlags::HideInInterface);
+	memberInfoPose.SetFlag(ComponentMemberFlags::HideInInterface);
 	memberInfoPose.AddTypeMetaData(poseMetaData);
 	registerMember(std::move(memberInfoPose));
 
@@ -39,11 +39,11 @@ void OriginComponent::RegisterMembers(pragma::EntityComponentManager &componentM
 	memberInfoRot.AddTypeMetaData(poseComponentMetaData);
 	registerMember(std::move(memberInfoRot));
 }
-OriginComponent::OriginComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+OriginComponent::OriginComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void OriginComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void OriginComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void OriginComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void OriginComponent::SetOriginPose(const pragma::math::Transform &pose)
+void OriginComponent::SetOriginPose(const math::Transform &pose)
 {
 	m_origin = pose;
 	BroadcastEvent(originComponent::EVENT_ON_ORIGIN_CHANGED);
@@ -59,6 +59,6 @@ void OriginComponent::SetOriginRot(const Quat &rot)
 	BroadcastEvent(originComponent::EVENT_ON_ORIGIN_CHANGED);
 }
 
-const pragma::math::Transform &OriginComponent::GetOriginPose() const { return m_origin; }
+const math::Transform &OriginComponent::GetOriginPose() const { return m_origin; }
 const Vector3 &OriginComponent::GetOriginPos() const { return m_origin.GetOrigin(); }
 const Quat &OriginComponent::GetOriginRot() const { return m_origin.GetRotation(); }

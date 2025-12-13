@@ -9,17 +9,17 @@ import :rendering.shader_graph.node_geometry;
 
 using namespace pragma::rendering::shader_graph;
 
-GeometryNode::GeometryNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_SCENE}
+GeometryNode::GeometryNode(const std::string_view &type) : Node {type, shadergraph::CATEGORY_SCENE}
 {
-	AddOutput(OUT_POSITION_WS, pragma::shadergraph::DataType::Vector);
-	AddOutput(OUT_NORMAL_WS, pragma::shadergraph::DataType::Vector);
-	AddOutput(OUT_NORMAL_CS, pragma::shadergraph::DataType::Vector);
-	AddOutput(OUT_TANGENT_WS, pragma::shadergraph::DataType::Vector);
+	AddOutput(OUT_POSITION_WS, shadergraph::DataType::Vector);
+	AddOutput(OUT_NORMAL_WS, shadergraph::DataType::Vector);
+	AddOutput(OUT_NORMAL_CS, shadergraph::DataType::Vector);
+	AddOutput(OUT_TANGENT_WS, shadergraph::DataType::Vector);
 
 	AddModuleDependency("vertex_data");
 }
 
-std::string GeometryNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
+std::string GeometryNode::DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &gn) const
 {
 	std::ostringstream code;
 	code << gn.GetGlslOutputDeclaration(OUT_POSITION_WS) << " = get_vertex_position_ws();\n";

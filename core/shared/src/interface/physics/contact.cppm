@@ -18,15 +18,15 @@ export {
 			Vector3 normal;
 			Vector3 position;
 			float distance;
-			pragma::util::WeakHandle<IMaterial> material0;
-			pragma::util::WeakHandle<IMaterial> material1;
+			util::WeakHandle<IMaterial> material0;
+			util::WeakHandle<IMaterial> material1;
 		};
 		struct DLLNETWORK ContactInfo {
 			enum class Flags : uint32_t { None = 0u, StartTouch = 1u, EndTouch = StartTouch << 1u };
-			pragma::util::WeakHandle<IShape> shape0;
-			pragma::util::WeakHandle<IShape> shape1;
-			pragma::util::TWeakSharedHandle<ICollisionObject> collisionObj0;
-			pragma::util::TWeakSharedHandle<ICollisionObject> collisionObj1;
+			util::WeakHandle<IShape> shape0;
+			util::WeakHandle<IShape> shape1;
+			util::TWeakSharedHandle<ICollisionObject> collisionObj0;
+			util::TWeakSharedHandle<ICollisionObject> collisionObj1;
 			std::vector<ContactPoint> contactPoints;
 			Flags flags;
 		};

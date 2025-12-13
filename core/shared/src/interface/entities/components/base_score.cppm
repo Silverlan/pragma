@@ -11,25 +11,25 @@ export import pragma.util;
 
 export namespace pragma {
 	namespace baseScoreComponent {
-		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_ON_SCORE_CHANGED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_SCORE_CHANGED;
 	}
 	class DLLNETWORK BaseScoreComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		using Score = int32_t;
 		virtual void Initialize() override;
 		virtual ~BaseScoreComponent() override;
 
 		Score GetScore() const;
-		const pragma::util::PInt32Property &GetScoreProperty() const;
+		const util::PInt32Property &GetScoreProperty() const;
 		void SetScore(Score score);
 		void AddScore(Score score);
 		void SubtractScore(Score score);
 	  protected:
-		BaseScoreComponent(pragma::ecs::BaseEntity &ent);
-		pragma::util::PInt32Property m_score;
-		pragma::NetEventId m_netEvSetScore = pragma::INVALID_NET_EVENT;
+		BaseScoreComponent(ecs::BaseEntity &ent);
+		util::PInt32Property m_score;
+		NetEventId m_netEvSetScore = INVALID_NET_EVENT;
 		CallbackHandle m_cbOnScoreChanged = {};
 	};
 	struct DLLNETWORK CEOnScoreChanged : public ComponentEvent {

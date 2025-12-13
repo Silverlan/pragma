@@ -10,9 +10,9 @@ import :entities.components.environment.base_camera;
 
 using namespace pragma;
 
-static float normalize_plane_z(float z) { return pragma::math::max(z, 0.1f); } // z value must never be 0; values close to zero can cause visual artifacts
+static float normalize_plane_z(float z) { return math::max(z, 0.1f); } // z value must never be 0; values close to zero can cause visual artifacts
 
-void BaseEnvCameraComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void BaseEnvCameraComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseEnvCameraComponent;
 	{
@@ -70,9 +70,9 @@ decltype(baseEnvCameraComponent::DEFAULT_FAR_Z) baseEnvCameraComponent::DEFAULT_
 decltype(baseEnvCameraComponent::DEFAULT_FOV) baseEnvCameraComponent::DEFAULT_FOV = 90.f;
 decltype(baseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV) baseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV = 70.f;
 decltype(baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE) baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE = 72.f;
-BaseEnvCameraComponent::BaseEnvCameraComponent(pragma::ecs::BaseEntity &ent)
-    : BaseEntityComponent {ent}, m_nearZ(pragma::util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_NEAR_Z)), m_farZ(pragma::util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_FAR_Z)), m_focalDistance(pragma::util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE)),
-      m_projectionMatrix(pragma::util::Matrix4Property::Create()), m_viewMatrix(pragma::util::Matrix4Property::Create()), m_aspectRatio(pragma::util::FloatProperty::Create(1.f))
+BaseEnvCameraComponent::BaseEnvCameraComponent(ecs::BaseEntity &ent)
+    : BaseEntityComponent {ent}, m_nearZ(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_NEAR_Z)), m_farZ(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_FAR_Z)), m_focalDistance(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE)),
+      m_projectionMatrix(util::Matrix4Property::Create()), m_viewMatrix(util::Matrix4Property::Create()), m_aspectRatio(util::FloatProperty::Create(1.f))
 {
 }
 void BaseEnvCameraComponent::Initialize()
@@ -137,14 +137,14 @@ void BaseEnvCameraComponent::UpdateViewMatrix()
 		return;
 	auto &pos = whTrComponent->GetPosition();
 	*m_viewMatrix = glm::gtc::lookAtRH(pos, pos + whTrComponent->GetForward(), whTrComponent->GetUp());
-	pragma::math::set_flag(m_stateFlags, StateFlags::ViewMatrixDirtyBit, false);
-	pragma::math::set_flag(m_stateFlags, StateFlags::CustomViewMatrix, false);
+	math::set_flag(m_stateFlags, StateFlags::ViewMatrixDirtyBit, false);
+	math::set_flag(m_stateFlags, StateFlags::CustomViewMatrix, false);
 }
 void BaseEnvCameraComponent::UpdateProjectionMatrix()
 {
 	*m_projectionMatrix = CalcProjectionMatrix(GetFOVRad(), *m_aspectRatio, normalize_plane_z(**m_nearZ), normalize_plane_z(**m_farZ));
-	pragma::math::set_flag(m_stateFlags, StateFlags::ProjectionMatrixDirtyBit, false);
-	pragma::math::set_flag(m_stateFlags, StateFlags::CustomProjectionMatrix, false);
+	math::set_flag(m_stateFlags, StateFlags::ProjectionMatrixDirtyBit, false);
+	math::set_flag(m_stateFlags, StateFlags::CustomProjectionMatrix, false);
 }
 void BaseEnvCameraComponent::SetViewMatrix(const Mat4 &mat)
 {
@@ -178,19 +178,19 @@ void BaseEnvCameraComponent::SetProjectionMatrix(const Mat4 &mat)
 	*m_projectionMatrix = mat;
 	m_stateFlags |= StateFlags::CustomProjectionMatrix;
 }
-void BaseEnvCameraComponent::GetFrustumPlanes(std::vector<pragma::math::Plane> &outPlanes) const
+void BaseEnvCameraComponent::GetFrustumPlanes(std::vector<math::Plane> &outPlanes) const
 {
 	std::vector<Vector3> points {};
 	GetFrustumPoints(points);
 	GetFrustumPlanes(points, outPlanes);
 }
-void BaseEnvCameraComponent::GetFrustumPlanes(std::vector<pragma::math::Plane> &outPlanes, float neard, float fard, float fov, float ratio, const Vector3 &center, const Vector3 &viewDir, const Vector3 &viewUp)
+void BaseEnvCameraComponent::GetFrustumPlanes(std::vector<math::Plane> &outPlanes, float neard, float fard, float fov, float ratio, const Vector3 &center, const Vector3 &viewDir, const Vector3 &viewUp)
 {
 	std::vector<Vector3> points;
 	GetFrustumPoints(points, neard, fard, fov, ratio, center, viewDir, viewUp);
 	return GetFrustumPlanes(points, outPlanes);
 }
-void BaseEnvCameraComponent::GetFrustumPlanes(const std::vector<Vector3> &points, std::vector<pragma::math::Plane> &outPlanes)
+void BaseEnvCameraComponent::GetFrustumPlanes(const std::vector<Vector3> &points, std::vector<math::Plane> &outPlanes)
 {
 	/*float wNear,hNear;
 	float wFar,hFar;
@@ -226,42 +226,42 @@ void BaseEnvCameraComponent::GetFrustumPlanes(const std::vector<Vector3> &points
 
 	outPlanes.reserve(outPlanes.size() + 6u);
 	// Left Plane
-	outPlanes.push_back(pragma::math::Plane {
+	outPlanes.push_back(math::Plane {
 	  points.at(pragma::math::to_integral(math::FrustumPoint::NearBottomLeft)),
 	  points.at(pragma::math::to_integral(math::FrustumPoint::NearTopLeft)),
 	  points.at(pragma::math::to_integral(math::FrustumPoint::FarBottomLeft)),
 	});
 
 	// Right Plane
-	outPlanes.push_back(pragma::math::Plane {
+	outPlanes.push_back(math::Plane {
 	  points.at(pragma::math::to_integral(math::FrustumPoint::NearBottomRight)),
 	  points.at(pragma::math::to_integral(math::FrustumPoint::FarBottomRight)),
 	  points.at(pragma::math::to_integral(math::FrustumPoint::NearTopRight)),
 	});
 
 	// Top Plane
-	outPlanes.push_back(pragma::math::Plane {
+	outPlanes.push_back(math::Plane {
 	  points.at(pragma::math::to_integral(math::FrustumPoint::NearBottomRight)),
 	  points.at(pragma::math::to_integral(math::FrustumPoint::NearBottomLeft)),
 	  points.at(pragma::math::to_integral(math::FrustumPoint::FarBottomLeft)),
 	});
 
 	// Bottom Plane
-	outPlanes.push_back(pragma::math::Plane {
+	outPlanes.push_back(math::Plane {
 	  points.at(pragma::math::to_integral(math::FrustumPoint::NearTopRight)),
 	  points.at(pragma::math::to_integral(math::FrustumPoint::FarTopLeft)),
 	  points.at(pragma::math::to_integral(math::FrustumPoint::NearTopLeft)),
 	});
 
 	// Near Plane
-	outPlanes.push_back(pragma::math::Plane {
+	outPlanes.push_back(math::Plane {
 	  points.at(pragma::math::to_integral(math::FrustumPoint::NearTopRight)),
 	  points.at(pragma::math::to_integral(math::FrustumPoint::NearTopLeft)),
 	  points.at(pragma::math::to_integral(math::FrustumPoint::NearBottomLeft)),
 	});
 
 	// Far Plane
-	outPlanes.push_back(pragma::math::Plane {
+	outPlanes.push_back(math::Plane {
 	  points.at(pragma::math::to_integral(math::FrustumPoint::FarTopRight)),
 	  points.at(pragma::math::to_integral(math::FrustumPoint::FarBottomLeft)),
 	  points.at(pragma::math::to_integral(math::FrustumPoint::FarTopLeft)),
@@ -282,11 +282,11 @@ Vector3 BaseEnvCameraComponent::GetPlaneCenter(float z) const
 	auto *trComponent = GetEntity().GetTransformComponent();
 	auto pos = trComponent ? trComponent->GetPosition() : Vector3 {};
 	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
-	return pragma::math::frustum::get_plane_center(pos, forward, z);
+	return math::frustum::get_plane_center(pos, forward, z);
 }
 void BaseEnvCameraComponent::GetNearPlaneBounds(float *wNear, float *hNear) const { GetPlaneBounds(*m_nearZ, *wNear, *hNear); }
 void BaseEnvCameraComponent::GetFarPlaneBounds(float *wFar, float *hFar) const { GetPlaneBounds(*m_farZ, *wFar, *hFar); }
-void BaseEnvCameraComponent::GetPlaneBounds(float z, float &outW, float &outH) const { pragma::math::frustum::get_plane_size(GetFOVRad(), z, *m_aspectRatio, outW, outH); }
+void BaseEnvCameraComponent::GetPlaneBounds(float z, float &outW, float &outH) const { math::frustum::get_plane_size(GetFOVRad(), z, *m_aspectRatio, outW, outH); }
 void BaseEnvCameraComponent::GetFarPlaneBoundaries(std::array<Vector3, 4> &outPoints, float *wFar, float *hFar) const { GetPlaneBoundaries(*m_farZ, outPoints, wFar, hFar); }
 void BaseEnvCameraComponent::GetNearPlaneBoundaries(std::array<Vector3, 4> &outPoints, float *wNear, float *hNear) const { GetPlaneBoundaries(*m_nearZ, outPoints, wNear, hNear); }
 void BaseEnvCameraComponent::GetPlaneBoundaries(std::array<Vector3, 8> &outPoints, float *wNear, float *hNear, float *wFar, float *hFar) const
@@ -306,7 +306,7 @@ void BaseEnvCameraComponent::GetPlaneBoundaries(float z, std::array<Vector3, 4> 
 	auto pos = trComponent ? trComponent->GetPosition() : Vector3 {};
 	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
 	auto up = trComponent ? trComponent->GetUp() : uvec::UP;
-	outPoints = pragma::math::frustum::get_plane_boundaries(pos, forward, up, GetFOVRad(), z, *m_aspectRatio, wNear, hNear);
+	outPoints = math::frustum::get_plane_boundaries(pos, forward, up, GetFOVRad(), z, *m_aspectRatio, wNear, hNear);
 }
 
 void BaseEnvCameraComponent::SetFOV(float fov)
@@ -333,21 +333,21 @@ void BaseEnvCameraComponent::SetFarZ(float farZ)
 void BaseEnvCameraComponent::SetFocalDistance(float focalDistance) { *m_focalDistance = focalDistance; }
 const Mat4 &BaseEnvCameraComponent::GetProjectionMatrix() const
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ProjectionMatrixDirtyBit)) {
-		if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::CustomProjectionMatrix))
+	if(math::is_flag_set(m_stateFlags, StateFlags::ProjectionMatrixDirtyBit)) {
+		if(!math::is_flag_set(m_stateFlags, StateFlags::CustomProjectionMatrix))
 			const_cast<BaseEnvCameraComponent *>(this)->UpdateProjectionMatrix();
-		pragma::math::set_flag(const_cast<BaseEnvCameraComponent *>(this)->m_stateFlags, StateFlags::ProjectionMatrixDirtyBit, false);
+		math::set_flag(const_cast<BaseEnvCameraComponent *>(this)->m_stateFlags, StateFlags::ProjectionMatrixDirtyBit, false);
 	}
 	return *m_projectionMatrix;
 }
-void BaseEnvCameraComponent::FlagViewMatrixAsDirty() { pragma::math::set_flag(const_cast<BaseEnvCameraComponent *>(this)->m_stateFlags, StateFlags::ViewMatrixDirtyBit, true); }
-void BaseEnvCameraComponent::FlagProjectionMatrixAsDirty() { pragma::math::set_flag(const_cast<BaseEnvCameraComponent *>(this)->m_stateFlags, StateFlags::ProjectionMatrixDirtyBit, true); }
+void BaseEnvCameraComponent::FlagViewMatrixAsDirty() { math::set_flag(const_cast<BaseEnvCameraComponent *>(this)->m_stateFlags, StateFlags::ViewMatrixDirtyBit, true); }
+void BaseEnvCameraComponent::FlagProjectionMatrixAsDirty() { math::set_flag(const_cast<BaseEnvCameraComponent *>(this)->m_stateFlags, StateFlags::ProjectionMatrixDirtyBit, true); }
 const Mat4 &BaseEnvCameraComponent::GetViewMatrix() const
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ViewMatrixDirtyBit)) {
-		if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::CustomViewMatrix))
+	if(math::is_flag_set(m_stateFlags, StateFlags::ViewMatrixDirtyBit)) {
+		if(!math::is_flag_set(m_stateFlags, StateFlags::CustomViewMatrix))
 			const_cast<BaseEnvCameraComponent *>(this)->UpdateViewMatrix();
-		pragma::math::set_flag(const_cast<BaseEnvCameraComponent *>(this)->m_stateFlags, StateFlags::ViewMatrixDirtyBit, false);
+		math::set_flag(const_cast<BaseEnvCameraComponent *>(this)->m_stateFlags, StateFlags::ViewMatrixDirtyBit, false);
 	}
 	return *m_viewMatrix;
 }
@@ -358,23 +358,23 @@ float BaseEnvCameraComponent::GetFOV() const
 		return 0.f;
 	return m_fieldAngleComponent->GetFieldAngle();
 }
-float BaseEnvCameraComponent::GetFOVRad() const { return pragma::math::deg_to_rad(GetFOV()); }
+float BaseEnvCameraComponent::GetFOVRad() const { return math::deg_to_rad(GetFOV()); }
 
-const pragma::util::PMatrix4Property &BaseEnvCameraComponent::GetProjectionMatrixProperty() const { return m_projectionMatrix; }
-const pragma::util::PMatrix4Property &BaseEnvCameraComponent::GetViewMatrixProperty() const { return m_viewMatrix; }
+const util::PMatrix4Property &BaseEnvCameraComponent::GetProjectionMatrixProperty() const { return m_projectionMatrix; }
+const util::PMatrix4Property &BaseEnvCameraComponent::GetViewMatrixProperty() const { return m_viewMatrix; }
 
-const pragma::util::PFloatProperty &BaseEnvCameraComponent::GetAspectRatioProperty() const { return m_aspectRatio; }
-const pragma::util::PFloatProperty &BaseEnvCameraComponent::GetNearZProperty() const { return m_nearZ; }
-const pragma::util::PFloatProperty &BaseEnvCameraComponent::GetFarZProperty() const { return m_farZ; }
-const pragma::util::PFloatProperty &BaseEnvCameraComponent::GetFOVProperty() const
+const util::PFloatProperty &BaseEnvCameraComponent::GetAspectRatioProperty() const { return m_aspectRatio; }
+const util::PFloatProperty &BaseEnvCameraComponent::GetNearZProperty() const { return m_nearZ; }
+const util::PFloatProperty &BaseEnvCameraComponent::GetFarZProperty() const { return m_farZ; }
+const util::PFloatProperty &BaseEnvCameraComponent::GetFOVProperty() const
 {
 	if(m_fieldAngleComponent.expired()) {
-		static pragma::util::PFloatProperty nptr = nullptr;
+		static util::PFloatProperty nptr = nullptr;
 		return nptr;
 	}
 	return m_fieldAngleComponent->GetFieldAngleProperty();
 }
-const pragma::util::PFloatProperty &BaseEnvCameraComponent::GetFocalDistanceProperty() const { return m_focalDistance; }
+const util::PFloatProperty &BaseEnvCameraComponent::GetFocalDistanceProperty() const { return m_focalDistance; }
 
 float BaseEnvCameraComponent::GetAspectRatio() const { return *m_aspectRatio; }
 float BaseEnvCameraComponent::GetNearZ() const { return *m_nearZ; }
@@ -385,7 +385,7 @@ void BaseEnvCameraComponent::UpdateFrustumPlanes()
 	m_frustumPlanes.clear();
 	GetFrustumPlanes(m_frustumPlanes);
 }
-const std::vector<pragma::math::Plane> &BaseEnvCameraComponent::GetFrustumPlanes() const { return m_frustumPlanes; }
+const std::vector<math::Plane> &BaseEnvCameraComponent::GetFrustumPlanes() const { return m_frustumPlanes; }
 Vector3 BaseEnvCameraComponent::GetNearPlanePoint(const Vector2 &uv) const { return GetPlanePoint(*m_nearZ, uv); }
 Vector3 BaseEnvCameraComponent::GetFarPlanePoint(const Vector2 &uv) const { return GetPlanePoint(*m_farZ, uv); }
 Vector3 BaseEnvCameraComponent::GetPlanePoint(float z, const Vector2 &uv) const
@@ -395,13 +395,13 @@ Vector3 BaseEnvCameraComponent::GetPlanePoint(float z, const Vector2 &uv) const
 	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
 	auto right = trComponent ? trComponent->GetRight() : uvec::RIGHT;
 	auto up = trComponent ? trComponent->GetUp() : uvec::UP;
-	return pragma::math::frustum::get_plane_point(pos, forward, right, up, GetFOVRad(), z, *m_aspectRatio, uv);
+	return math::frustum::get_plane_point(pos, forward, right, up, GetFOVRad(), z, *m_aspectRatio, uv);
 }
 
 void BaseEnvCameraComponent::CreateFrustumMesh(const Vector2 &uvStart, const Vector2 &uvEnd, std::vector<Vector3> &verts, std::vector<uint16_t> &indices) const
 {
-	auto uvTopLeft = Vector2(pragma::math::min(uvStart.x, uvEnd.x), pragma::math::min(uvStart.y, uvEnd.y));
-	auto uvBottomRight = Vector2(pragma::math::max(uvStart.x, uvEnd.x), pragma::math::max(uvStart.y, uvEnd.y));
+	auto uvTopLeft = Vector2(math::min(uvStart.x, uvEnd.x), math::min(uvStart.y, uvEnd.y));
+	auto uvBottomRight = Vector2(math::max(uvStart.x, uvEnd.x), math::max(uvStart.y, uvEnd.y));
 	auto uvTopRight = Vector2(uvBottomRight.x, uvTopLeft.y);
 	auto uvBottomLeft = Vector2(uvTopLeft.x, uvBottomRight.y);
 	verts = {GetNearPlanePoint(uvTopLeft), GetNearPlanePoint(uvTopRight), GetNearPlanePoint(uvBottomRight), GetNearPlanePoint(uvBottomLeft),
@@ -419,10 +419,10 @@ void BaseEnvCameraComponent::CreateFrustumMesh(const Vector2 &uvStart, const Vec
 
 	  4, 5, 6, 4, 6, 7};
 }
-void BaseEnvCameraComponent::CreateFrustumKDop(const Vector2 &uvStart, const Vector2 &uvEnd, std::vector<pragma::math::Plane> &kDop) const
+void BaseEnvCameraComponent::CreateFrustumKDop(const Vector2 &uvStart, const Vector2 &uvEnd, std::vector<math::Plane> &kDop) const
 {
-	auto uvTopLeft = Vector2(pragma::math::min(uvStart.x, uvEnd.x), pragma::math::min(uvStart.y, uvEnd.y));
-	auto uvBottomRight = Vector2(pragma::math::max(uvStart.x, uvEnd.x), pragma::math::max(uvStart.y, uvEnd.y));
+	auto uvTopLeft = Vector2(math::min(uvStart.x, uvEnd.x), math::min(uvStart.y, uvEnd.y));
+	auto uvBottomRight = Vector2(math::max(uvStart.x, uvEnd.x), math::max(uvStart.y, uvEnd.y));
 	auto uvTopRight = Vector2(uvBottomRight.x, uvTopLeft.y);
 	auto uvBottomLeft = Vector2(uvTopLeft.x, uvBottomRight.y);
 	std::array<Vector3, 8> verts = {GetNearPlanePoint(uvTopLeft), GetNearPlanePoint(uvTopRight), GetNearPlanePoint(uvBottomRight), GetNearPlanePoint(uvBottomLeft),
@@ -439,8 +439,8 @@ void BaseEnvCameraComponent::CreateFrustumKDop(const Vector2 &uvStart, const Vec
 		vFar += vNear;
 	}
 
-	kDop = {pragma::math::Plane(verts.at(2), verts.at(0), verts.at(1)), pragma::math::Plane(verts.at(0), verts.at(4), verts.at(1)), pragma::math::Plane(verts.at(1), verts.at(5), verts.at(2)), pragma::math::Plane(verts.at(7), verts.at(3), verts.at(2)), pragma::math::Plane(verts.at(4), verts.at(0), verts.at(3)),
-	  pragma::math::Plane(verts.at(4), verts.at(6), verts.at(5))};
+	kDop = {math::Plane(verts.at(2), verts.at(0), verts.at(1)), math::Plane(verts.at(0), verts.at(4), verts.at(1)), math::Plane(verts.at(1), verts.at(5), verts.at(2)), math::Plane(verts.at(7), verts.at(3), verts.at(2)), math::Plane(verts.at(4), verts.at(0), verts.at(3)),
+	  math::Plane(verts.at(4), verts.at(6), verts.at(5))};
 	kDop.back().MoveToPos(GetFarPlaneCenter()); // Move back plane back to its actual position. TODO: Can this also cause precision errors?
 }
 
@@ -594,11 +594,11 @@ void BaseEnvCameraComponent::GetFrustumPlaneCornerPoints(math::FrustumPlane plan
 	cornerPoints[0] = points[static_cast<int>(planeA)][static_cast<int>(planeB)][0];
 	cornerPoints[1] = points[static_cast<int>(planeA)][static_cast<int>(planeB)][1];
 }
-void BaseEnvCameraComponent::CreateFrustumKDop(const std::vector<pragma::math::Plane> &planes, const std::vector<Vector3> &points, const Vector3 &dir, std::vector<pragma::math::Plane> *kDop)
+void BaseEnvCameraComponent::CreateFrustumKDop(const std::vector<math::Plane> &planes, const std::vector<Vector3> &points, const Vector3 &dir, std::vector<math::Plane> *kDop)
 {
 	std::array<float, 6> fDir;
 	for(unsigned int i = 0; i < 6; i++) {
-		pragma::math::Plane &plane = const_cast<pragma::math::Plane &>(planes[i]);
+		math::Plane &plane = const_cast<math::Plane &>(planes[i]);
 		fDir[i] = uvec::dot(plane.GetNormal(), dir);
 		if(fDir[i] < EPSILON)
 			kDop->push_back(plane);
@@ -613,7 +613,7 @@ void BaseEnvCameraComponent::CreateFrustumKDop(const std::vector<pragma::math::P
 				if(fNDir > EPSILON) {
 					math::FrustumPoint corners[2];
 					GetFrustumPlaneCornerPoints(math::FrustumPlane(i), neighbors[j], &corners[0]);
-					pragma::math::Plane p(points[static_cast<int>(corners[0])], points[static_cast<int>(corners[1])], points[static_cast<int>(corners[0])] - dir);
+					math::Plane p(points[static_cast<int>(corners[0])], points[static_cast<int>(corners[1])], points[static_cast<int>(corners[0])] - dir);
 					kDop->push_back(p);
 				}
 			}
@@ -621,7 +621,7 @@ void BaseEnvCameraComponent::CreateFrustumKDop(const std::vector<pragma::math::P
 	}
 }
 
-Mat4 BaseEnvCameraComponent::CalcProjectionMatrix(pragma::math::Radian fovRad, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile)
+Mat4 BaseEnvCameraComponent::CalcProjectionMatrix(math::Radian fovRad, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile)
 {
 	auto mat = glm::gtc::perspectiveRH(fovRad, aspectRatio, normalize_plane_z(nearZ), normalize_plane_z(farZ));
 

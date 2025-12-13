@@ -8,7 +8,7 @@ export module pragma.server:core.resource_watcher;
 
 export import pragma.shared;
 
-export {
+export namespace pragma::util {
 	class DLLSERVER ESResourceWatcherCallbackType : public EResourceWatcherCallbackType {
 	  public:
 		using EResourceWatcherCallbackType::EResourceWatcherCallbackType;

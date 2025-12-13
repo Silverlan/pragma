@@ -16,13 +16,13 @@ export {
 			enum class Type : uint8_t { Point = 0, Spot, Directional };
 			Vector3 position;
 			Vector3 direction;
-			pragma::math::Degree innerConeAngle;
-			pragma::math::Degree outerConeAngle;
+			math::Degree innerConeAngle;
+			math::Degree outerConeAngle;
 			Candela intensity;
 			Vector3 color;
 			Type type;
 		};
-		DLLCLIENT pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
-		  uint32_t height, pragma::rendering::LightmapDataCache *optLightmapDataCache = nullptr);
+		DLLCLIENT ParallelJob<std::shared_ptr<image::ImageBuffer>> bake_directional_lightmap_atlas(const std::vector<CLightComponent *> &lights, const std::vector<geometry::ModelSubMesh *> meshes, const std::vector<ecs::BaseEntity *> &entities, uint32_t width,
+		  uint32_t height, rendering::LightmapDataCache *optLightmapDataCache = nullptr);
 	};
 };

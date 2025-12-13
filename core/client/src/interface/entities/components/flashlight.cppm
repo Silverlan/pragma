@@ -12,9 +12,9 @@ export {
 	namespace pragma {
 		class DLLCLIENT CFlashlightComponent final : public BaseFlashlightComponent {
 		  public:
-			CFlashlightComponent(pragma::ecs::BaseEntity &ent) : BaseFlashlightComponent(ent) {}
+			CFlashlightComponent(ecs::BaseEntity &ent) : BaseFlashlightComponent(ent) {}
 			virtual void Initialize() override;
-			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

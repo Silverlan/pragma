@@ -13,43 +13,43 @@ import :rendering.shaders;
 
 using namespace pragma;
 
-static auto cvAntiAliasing = pragma::console::get_client_con_var("cl_render_anti_aliasing");
-static auto cvFxaaSubPixelAliasingRemoval = pragma::console::get_client_con_var("cl_render_fxaa_sub_pixel_aliasing_removal_amount");
-static auto cvFxaaEdgeThreshold = pragma::console::get_client_con_var("cl_render_fxaa_edge_threshold");
-static auto cvFxaaMinEdgeThreshold = pragma::console::get_client_con_var("cl_render_fxaa_min_edge_threshold");
-CRendererPpFxaaComponent::CRendererPpFxaaComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
-void CRendererPpFxaaComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+static auto cvAntiAliasing = console::get_client_con_var("cl_render_anti_aliasing");
+static auto cvFxaaSubPixelAliasingRemoval = console::get_client_con_var("cl_render_fxaa_sub_pixel_aliasing_removal_amount");
+static auto cvFxaaEdgeThreshold = console::get_client_con_var("cl_render_fxaa_edge_threshold");
+static auto cvFxaaMinEdgeThreshold = console::get_client_con_var("cl_render_fxaa_min_edge_threshold");
+CRendererPpFxaaComponent::CRendererPpFxaaComponent(ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
+void CRendererPpFxaaComponent::DoRenderEffect(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuFxaa, *drawSceneInfo.commandBuffer);
 
-	pragma::util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
+	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuFxaa, *drawSceneInfo.commandBuffer);
 	}};
 
-	if(static_cast<pragma::rendering::AntiAliasing>(cvAntiAliasing->GetInt()) != pragma::rendering::AntiAliasing::FXAA || m_renderer.expired())
+	if(static_cast<rendering::AntiAliasing>(cvAntiAliasing->GetInt()) != rendering::AntiAliasing::FXAA || m_renderer.expired())
 		return;
-	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingFXAA");
+	get_cgame()->StartGPUProfilingStage("PostProcessingFXAA");
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &hdrInfo = m_renderer->GetHDRInfo();
-	auto whShaderPPFXAA = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPFXAA);
+	auto whShaderPPFXAA = get_cgame()->GetGameShader(CGame::GameShader::PPFXAA);
 	if(whShaderPPFXAA.valid() == true) {
-		auto &shaderFXAA = static_cast<pragma::ShaderPPFXAA &>(*whShaderPPFXAA.get());
+		auto &shaderFXAA = static_cast<ShaderPPFXAA &>(*whShaderPPFXAA.get());
 		auto &prepass = hdrInfo.prepass;
 
 		auto &toneMappedImg = hdrInfo.toneMappedRenderTarget->GetTexture().GetImage();
 		drawCmd->RecordImageBarrier(toneMappedImg, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 
-		auto *srcImg = hdrInfo.dsgTonemappedPostProcessing->GetDescriptorSet()->GetBoundImage(pragma::math::to_integral(pragma::ShaderPPFXAA::TextureBinding::SceneTextureHdr));
+		auto *srcImg = hdrInfo.dsgTonemappedPostProcessing->GetDescriptorSet()->GetBoundImage(math::to_integral(ShaderPPFXAA::TextureBinding::SceneTextureHdr));
 		if(srcImg)
 			drawCmd->RecordImageBarrier(*srcImg, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 
 		if(drawCmd->RecordBeginRenderPass(*hdrInfo.toneMappedPostProcessingRenderTarget) == true) {
 			prosper::ShaderBindState bindState {*drawCmd};
 			if(shaderFXAA.RecordBeginDraw(bindState) == true) {
-				pragma::ShaderPPFXAA::PushConstants pushConstants {};
+				ShaderPPFXAA::PushConstants pushConstants {};
 				pushConstants.subPixelAliasingRemoval = cvFxaaSubPixelAliasingRemoval->GetFloat();
 				pushConstants.edgeThreshold = cvFxaaEdgeThreshold->GetFloat();
 				pushConstants.minEdgeThreshold = cvFxaaMinEdgeThreshold->GetFloat();
@@ -76,6 +76,6 @@ void CRendererPpFxaaComponent::DoRenderEffect(const pragma::rendering::DrawScene
 		if(srcImg)
 			drawCmd->RecordImageBarrier(*srcImg, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	}
-	pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingFXAA
+	get_cgame()->StopGPUProfilingStage(); // PostProcessingFXAA
 }
 void CRendererPpFxaaComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

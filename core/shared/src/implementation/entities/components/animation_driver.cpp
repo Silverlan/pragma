@@ -9,21 +9,21 @@ module pragma.shared;
 import :entities.components.animation_driver;
 
 using namespace pragma;
-void pragma::AnimationDriverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
-static void set_parameters(const ComponentMemberInfo &memberInfo, AnimationDriverComponent &component, const pragma::ents::Element &value) { component.UpdateParameters(); }
+void AnimationDriverComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
+static void set_parameters(const ComponentMemberInfo &memberInfo, AnimationDriverComponent &component, const ents::Element &value) { component.UpdateParameters(); }
 
-static void get_parameters(const ComponentMemberInfo &memberInfo, AnimationDriverComponent &component, pragma::ents::Element &value) { value = component.GetParameters(); }
+static void get_parameters(const ComponentMemberInfo &memberInfo, AnimationDriverComponent &component, ents::Element &value) { value = component.GetParameters(); }
 
-void AnimationDriverComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void AnimationDriverComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = AnimationDriverComponent;
 	{
-		using TDrivenObject = pragma::EntityUComponentMemberRef;
+		using TDrivenObject = EntityUComponentMemberRef;
 		auto memberInfo = create_component_member_info<T, TDrivenObject, static_cast<void (T::*)(const TDrivenObject &)>(&T::SetDrivenObject), static_cast<const TDrivenObject &(T::*)() const>(&T::GetDrivenObject)>("drivenObject", TDrivenObject {});
 		registerMember(std::move(memberInfo));
 	}
 	{
-		using TParameters = pragma::ents::Element;
+		using TParameters = ents::Element;
 		auto memberInfo = create_component_member_info<T, TParameters,
 		  // For some reasons these don't work as lambdas (VS compiler bug?)
 		  &set_parameters, &get_parameters>("parameters");
@@ -36,7 +36,7 @@ void AnimationDriverComponent::RegisterMembers(pragma::EntityComponentManager &c
 	}
 }
 
-pragma::AnimationDriverComponent::AnimationDriverComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_parameters {udm::Property::Create<udm::Element>()}, m_descriptor {ent.GetLuaState()} {}
+AnimationDriverComponent::AnimationDriverComponent(ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_parameters {udm::Property::Create<udm::Element>()}, m_descriptor {ent.GetLuaState()} {}
 
 udm::PProperty &AnimationDriverComponent::GetParameters() { return m_parameters; }
 void AnimationDriverComponent::UpdateParameters()
@@ -68,11 +68,11 @@ void AnimationDriverComponent::UpdateParameters()
 	}
 }
 
-void AnimationDriverComponent::SetDrivenObject(const pragma::EntityUComponentMemberRef &drivenObject) { m_drivenObject = drivenObject; }
-const pragma::EntityUComponentMemberRef &AnimationDriverComponent::GetDrivenObject() const { return m_drivenObject; }
+void AnimationDriverComponent::SetDrivenObject(const EntityUComponentMemberRef &drivenObject) { m_drivenObject = drivenObject; }
+const EntityUComponentMemberRef &AnimationDriverComponent::GetDrivenObject() const { return m_drivenObject; }
 
-void pragma::AnimationDriverComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void pragma::AnimationDriverComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
+void AnimationDriverComponent::Initialize() { BaseEntityComponent::Initialize(); }
+void AnimationDriverComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 void AnimationDriverComponent::OnEntityComponentAdded(BaseEntityComponent &component) { BaseEntityComponent::OnEntityComponentAdded(component); }
 void AnimationDriverComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
@@ -83,7 +83,7 @@ void AnimationDriverComponent::OnEntityComponentRemoved(BaseEntityComponent &com
 			m_cbOnAnimationsUpdated.Remove();
 	}*/
 }
-std::optional<ComponentMemberIndex> pragma::AnimationDriverComponent::FindComponentMember(ComponentId componentId, const std::string &memberName)
+std::optional<ComponentMemberIndex> AnimationDriverComponent::FindComponentMember(ComponentId componentId, const std::string &memberName)
 {
 	auto *info = GetEntity().GetComponentManager()->GetComponentInfo(componentId);
 	if(info) {
@@ -96,27 +96,27 @@ std::optional<ComponentMemberIndex> pragma::AnimationDriverComponent::FindCompon
 		return {};
 	return hComponent->GetMemberIndex(memberName);
 }
-void pragma::AnimationDriverComponent::SetExpression(const std::string &expression)
+void AnimationDriverComponent::SetExpression(const std::string &expression)
 {
 	m_descriptor.SetExpression(expression);
 	m_driverDirty = true;
 }
-const std::string &pragma::AnimationDriverComponent::GetExpression() const { return m_descriptor.GetExpression(); }
+const std::string &AnimationDriverComponent::GetExpression() const { return m_descriptor.GetExpression(); }
 
-void pragma::AnimationDriverComponent::AddConstant(const std::string &name, const udm::PProperty &prop)
+void AnimationDriverComponent::AddConstant(const std::string &name, const udm::PProperty &prop)
 {
 	m_descriptor.AddConstant(name, prop);
 	m_driverDirty = true;
 }
-void pragma::AnimationDriverComponent::AddReference(const std::string &name, std::string path)
+void AnimationDriverComponent::AddReference(const std::string &name, std::string path)
 {
 	m_descriptor.AddReference(name, path);
 	m_driverDirty = true;
 }
 
-const std::unordered_map<std::string, udm::PProperty> &pragma::AnimationDriverComponent::GetConstants() const { return m_descriptor.GetConstants(); }
-const std::unordered_map<std::string, std::string> &pragma::AnimationDriverComponent::GetReferences() const { return m_descriptor.GetReferences(); }
-bool pragma::AnimationDriverComponent::ApplyDriver()
+const std::unordered_map<std::string, udm::PProperty> &AnimationDriverComponent::GetConstants() const { return m_descriptor.GetConstants(); }
+const std::unordered_map<std::string, std::string> &AnimationDriverComponent::GetReferences() const { return m_descriptor.GetReferences(); }
+bool AnimationDriverComponent::ApplyDriver()
 {
 	if(m_driverDirty) {
 		m_driverDirty = false;
@@ -136,12 +136,12 @@ bool pragma::AnimationDriverComponent::ApplyDriver()
 	}
 	auto *l = GetLuaState();
 	auto res = m_driver->Apply(*ent);
-	if(res != pragma::game::ValueDriver::Result::Success)
+	if(res != game::ValueDriver::Result::Success)
 		spdlog::trace("Execution of animation driver '{}' failed with result code {}!", GetEntity().ToString(), magic_enum::enum_name(res));
-	return res == pragma::game::ValueDriver::Result::Success;
+	return res == game::ValueDriver::Result::Success;
 }
 
-void pragma::AnimationDriverComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void pragma::AnimationDriverComponent::Save(udm::LinkedPropertyWrapperArg udm) { BaseEntityComponent::Save(udm); }
+void AnimationDriverComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void AnimationDriverComponent::Save(udm::LinkedPropertyWrapperArg udm) { BaseEntityComponent::Save(udm); }
 
-void pragma::AnimationDriverComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) { BaseEntityComponent::Load(udm, version); }
+void AnimationDriverComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) { BaseEntityComponent::Load(udm, version); }

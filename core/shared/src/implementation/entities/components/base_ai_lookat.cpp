@@ -11,7 +11,7 @@ using namespace pragma;
 void BaseAIComponent::LookAtStep(float tDelta)
 {
 	// TODO: Implement forward / inverse kinematics and do this properly
-	if((m_neckInfo.lookTargetType == BaseAIComponent::LookTargetType::None && m_neckInfo.neckTurned == false))
+	if((m_neckInfo.lookTargetType == LookTargetType::None && m_neckInfo.neckTurned == false))
 		return;
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -31,7 +31,7 @@ void BaseAIComponent::LookAtStep(float tDelta)
 	//ent.LocalToWorld(&pos,&rot);
 
 	EulerAngles ang {};
-	if(m_neckInfo.lookTargetType != BaseAIComponent::LookTargetType::None) {
+	if(m_neckInfo.lookTargetType != LookTargetType::None) {
 		auto tgtPos = GetLookTarget();
 		auto dir = tgtPos - pos;
 		uvec::normalize(&dir);
@@ -61,15 +61,15 @@ void BaseAIComponent::LookAtStep(float tDelta)
 		auto valTgt = ang[i];
 
 		if(blendController != nullptr)
-			valTgt = pragma::math::clamp_angle(valTgt, blendController->min, blendController->max);
+			valTgt = math::clamp_angle(valTgt, blendController->min, blendController->max);
 
-		auto angDiff = pragma::math::get_angle_difference(val, valTgt);
+		auto angDiff = math::get_angle_difference(val, valTgt);
 		auto &turnSpeed = m_neckInfo.turnSpeed[i];
-		if((pragma::math::abs(angDiff) / pragma::math::abs(turnSpeed)) < fadeTime) // We'll have reached the turn target soon, slow down (TODO: This might cause jittering)
-			turnSpeed = pragma::math::approach(m_neckInfo.turnSpeed[i], 0.f, turnAcceleration * tDelta);
+		if((math::abs(angDiff) / math::abs(turnSpeed)) < fadeTime) // We'll have reached the turn target soon, slow down (TODO: This might cause jittering)
+			turnSpeed = math::approach(m_neckInfo.turnSpeed[i], 0.f, turnAcceleration * tDelta);
 		else
-			turnSpeed = pragma::math::approach(m_neckInfo.turnSpeed[i], maxTurnSpeed * static_cast<float>(pragma::math::sign(valTgt)), turnAcceleration * tDelta);
-		val = pragma::math::approach_angle(val, valTgt, tDelta * pragma::math::abs(turnSpeed));
+			turnSpeed = math::approach(m_neckInfo.turnSpeed[i], maxTurnSpeed * static_cast<float>(math::sign(valTgt)), turnAcceleration * tDelta);
+		val = math::approach_angle(val, valTgt, tDelta * math::abs(turnSpeed));
 		animComponent->SetBlendController(blendControllers[i], val);
 		if(val != 0.f)
 			m_neckInfo.neckTurned = true;
@@ -77,9 +77,9 @@ void BaseAIComponent::LookAtStep(float tDelta)
 }
 void BaseAIComponent::ClearLookTarget()
 {
-	if(m_neckInfo.lookTargetType == BaseAIComponent::LookTargetType::None)
+	if(m_neckInfo.lookTargetType == LookTargetType::None)
 		return;
-	m_neckInfo.lookTargetType = BaseAIComponent::LookTargetType::None;
+	m_neckInfo.lookTargetType = LookTargetType::None;
 	m_neckInfo.lookTarget = {};
 	m_neckInfo.hEntityLookTarget = EntityHandle {};
 	m_neckInfo.lookTime = std::numeric_limits<float>::max();
@@ -88,21 +88,21 @@ void BaseAIComponent::ClearLookTarget()
 void BaseAIComponent::SetLookTarget(const Vector3 &pos, float t)
 {
 	m_neckInfo.lookTime = t;
-	if(m_neckInfo.lookTargetType == BaseAIComponent::LookTargetType::Position && uvec::cmp(pos, m_neckInfo.lookTarget) == true)
+	if(m_neckInfo.lookTargetType == LookTargetType::Position && uvec::cmp(pos, m_neckInfo.lookTarget) == true)
 		return;
-	m_neckInfo.lookTargetType = BaseAIComponent::LookTargetType::Position;
+	m_neckInfo.lookTargetType = LookTargetType::Position;
 	m_neckInfo.lookTarget = pos;
 	m_neckInfo.hEntityLookTarget = EntityHandle {};
 
 	OnLookTargetChanged();
 }
-void BaseAIComponent::SetLookTarget(const pragma::ecs::BaseEntity &ent, float t)
+void BaseAIComponent::SetLookTarget(const ecs::BaseEntity &ent, float t)
 {
 	m_neckInfo.lookTime = t;
-	if(m_neckInfo.lookTargetType == BaseAIComponent::LookTargetType::Entity && m_neckInfo.hEntityLookTarget.get() == &ent)
+	if(m_neckInfo.lookTargetType == LookTargetType::Entity && m_neckInfo.hEntityLookTarget.get() == &ent)
 		return;
 	auto pTrComponentEnt = ent.GetTransformComponent();
-	m_neckInfo.lookTargetType = BaseAIComponent::LookTargetType::Entity;
+	m_neckInfo.lookTargetType = LookTargetType::Entity;
 	m_neckInfo.lookTarget = pTrComponentEnt ? pTrComponentEnt->GetEyePosition() : Vector3 {};
 	m_neckInfo.hEntityLookTarget = ent.GetHandle();
 
@@ -111,9 +111,9 @@ void BaseAIComponent::SetLookTarget(const pragma::ecs::BaseEntity &ent, float t)
 Vector3 BaseAIComponent::GetLookTarget() const
 {
 	switch(m_neckInfo.lookTargetType) {
-	case BaseAIComponent::LookTargetType::Position:
+	case LookTargetType::Position:
 		return m_neckInfo.lookTarget;
-	case BaseAIComponent::LookTargetType::Entity:
+	case LookTargetType::Entity:
 		{
 			if(m_neckInfo.hEntityLookTarget.valid() == false)
 				return uvec::ORIGIN;

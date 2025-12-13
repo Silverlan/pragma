@@ -22,7 +22,7 @@ export namespace pragma {
 			AddonUpdateQuery(const std::shared_ptr<AddonInfo> &info);
 			std::shared_ptr<AddonInfo> addonInfo;
 			std::string addonPath;
-			VFilePtrReal updateFile;
+			fs::VFilePtrReal updateFile;
 			// Contains file ids for files which aren't downloaded yet
 			std::vector<uint32_t> fileIds;
 			std::vector<std::string> removeFiles;

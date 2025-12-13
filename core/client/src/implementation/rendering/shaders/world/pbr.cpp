@@ -36,7 +36,7 @@ void ShaderPBR::InitializeGfxPipelineDescriptorSets()
 	AddDescriptorSetGroup(DESCRIPTOR_SET_PBR);
 }
 
-void ShaderPBR::InitializeMaterialData(const msys::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
+void ShaderPBR::InitializeMaterialData(const material::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
 {
 	ShaderGameWorldLightingPass::InitializeMaterialData(mat, shaderMat, inOutMatData);
 	float specularFactor;
@@ -59,9 +59,9 @@ void ShaderPBR::InitializeMaterialData(const msys::CMaterial &mat, const renderi
 		}
 
 		if(hasGlowmap || emissionFactor) {
-			std::shared_ptr<msys::Texture> texture;
+			std::shared_ptr<material::Texture> texture;
 			if(hasGlowmap)
-				texture = std::static_pointer_cast<msys::Texture>(glowMap->texture);
+				texture = std::static_pointer_cast<material::Texture>(glowMap->texture);
 			if(emissionFactor) {
 				matFlags |= MaterialFlags::GlowSRGB;
 				if(!texture) {
@@ -105,7 +105,7 @@ void ShaderPBR::InitializeMaterialData(const msys::CMaterial &mat, const renderi
 #endif
 }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(msys::CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo) { return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat, descSetInfo); }
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(material::CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo) { return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat, descSetInfo); }
 void ShaderPBR::OnPipelinesInitialized()
 {
 	ShaderGameWorldLightingPass::OnPipelinesInitialized();

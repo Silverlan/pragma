@@ -22,7 +22,7 @@ export namespace pragma::rendering {
 		EntityMeshInfo(EntityMeshInfo &&) = default;
 		EntityMeshInfo &operator=(const EntityMeshInfo &other) = delete;
 		ecs::CBaseEntity *entity;
-		std::vector<pragma::geometry::CModelSubMesh *> meshes;
+		std::vector<geometry::CModelSubMesh *> meshes;
 	};
 }
 #pragma warning(pop)

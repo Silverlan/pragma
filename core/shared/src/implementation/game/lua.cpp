@@ -50,7 +50,7 @@ pragma::LuaCore::ClassManager &pragma::Game::GetLuaClassManager() { return *m_lu
 
 void pragma::Game::SetupLua() { GetNetworkState()->InitializeLuaModules(GetLuaState()); }
 
-Lua::StatusCode pragma::Game::LoadLuaFile(std::string &fInOut, fsys::SearchFlags includeFlags, fsys::SearchFlags excludeFlags)
+Lua::StatusCode pragma::Game::LoadLuaFile(std::string &fInOut, fs::SearchFlags includeFlags, fs::SearchFlags excludeFlags)
 {
 	auto *l = GetLuaState();
 	auto r = Lua::LoadFile(l, fInOut, includeFlags, excludeFlags);
@@ -92,7 +92,7 @@ void pragma::Game::LoadLuaComponents(const std::string &typePath)
 	path += typePath;
 	path += "\\components\\*";
 	std::vector<std::string> dirs;
-	FileManager::FindFiles(path.c_str(), nullptr, &dirs);
+	fs::find_files(path, nullptr, &dirs);
 	for(auto &dir : dirs)
 		LoadLuaComponent(typePath, dir);
 }
@@ -103,7 +103,7 @@ void pragma::Game::LoadLuaEntities(std::string subPath)
 	path += subPath;
 	path += "\\*";
 	std::vector<std::string> dirs;
-	FileManager::FindFiles(path.c_str(), nullptr, &dirs);
+	fs::find_files(path, nullptr, &dirs);
 	for(unsigned int i = 0; i < dirs.size(); i++)
 		LoadLuaEntity(subPath, dirs[1]);
 }
@@ -117,10 +117,10 @@ bool pragma::Game::LoadLuaComponent(const std::string &luaFilePath, const std::s
 bool pragma::Game::LoadLuaEntity(const std::string &mainPath, const std::string &className)
 {
 	auto fpath = mainPath + '\\' + className;
-	if(FileManager::Exists(Lua::SCRIPT_DIRECTORY_SLASH + fpath + Lua::DOT_FILE_EXTENSION) || FileManager::Exists(Lua::SCRIPT_DIRECTORY_SLASH + fpath + Lua::DOT_FILE_EXTENSION_PRECOMPILED))
+	if(fs::exists(Lua::SCRIPT_DIRECTORY_SLASH + fpath + Lua::DOT_FILE_EXTENSION) || fs::exists(Lua::SCRIPT_DIRECTORY_SLASH + fpath + Lua::DOT_FILE_EXTENSION_PRECOMPILED))
 		return LoadLuaEntity(fpath);
 	fpath = mainPath + '\\' + GetLuaNetworkDirectoryName() + '\\' + className;
-	if(FileManager::Exists(Lua::SCRIPT_DIRECTORY_SLASH + fpath + Lua::DOT_FILE_EXTENSION) || FileManager::Exists(Lua::SCRIPT_DIRECTORY_SLASH + fpath + Lua::DOT_FILE_EXTENSION_PRECOMPILED))
+	if(fs::exists(Lua::SCRIPT_DIRECTORY_SLASH + fpath + Lua::DOT_FILE_EXTENSION) || fs::exists(Lua::SCRIPT_DIRECTORY_SLASH + fpath + Lua::DOT_FILE_EXTENSION_PRECOMPILED))
 		return LoadLuaEntity(fpath);
 	return false;
 }
@@ -129,18 +129,18 @@ bool pragma::Game::LoadLuaComponent(const std::string &mainPath, const std::stri
 	auto nwStateDirName = GetLuaNetworkDirectoryName();
 	auto luaFileName = GetLuaNetworkFileName();
 	ufile::remove_extension_from_filename(luaFileName, std::array<std::string, 2> {Lua::FILE_EXTENSION, Lua::FILE_EXTENSION_PRECOMPILED});
-	auto nComponentName = FileManager::GetCanonicalizedPath(componentName);
+	auto nComponentName = fs::get_canonicalized_path(componentName);
 	auto filePath = Lua::SCRIPT_DIRECTORY_SLASH + mainPath + "\\components\\" + nComponentName + '\\';
 	auto filePathLuaFile = filePath + luaFileName;
-	if(FileManager::Exists(filePathLuaFile + Lua::DOT_FILE_EXTENSION))
+	if(fs::exists(filePathLuaFile + Lua::DOT_FILE_EXTENSION))
 		filePathLuaFile += Lua::DOT_FILE_EXTENSION;
-	else if(FileManager::Exists(filePathLuaFile + Lua::DOT_FILE_EXTENSION_PRECOMPILED))
+	else if(fs::exists(filePathLuaFile + Lua::DOT_FILE_EXTENSION_PRECOMPILED))
 		filePathLuaFile += Lua::DOT_FILE_EXTENSION_PRECOMPILED;
 	else {
 		auto filePathLuaFileNw = filePath + nwStateDirName + '\\' + luaFileName;
-		if(FileManager::Exists(filePathLuaFileNw + Lua::DOT_FILE_EXTENSION))
+		if(fs::exists(filePathLuaFileNw + Lua::DOT_FILE_EXTENSION))
 			filePathLuaFile = filePathLuaFileNw + Lua::DOT_FILE_EXTENSION;
-		else if(FileManager::Exists(filePathLuaFileNw + Lua::DOT_FILE_EXTENSION_PRECOMPILED))
+		else if(fs::exists(filePathLuaFileNw + Lua::DOT_FILE_EXTENSION_PRECOMPILED))
 			filePathLuaFile = filePathLuaFileNw + Lua::DOT_FILE_EXTENSION_PRECOMPILED;
 	}
 	return LoadLuaComponent(filePathLuaFile, mainPath, componentName);
@@ -159,7 +159,7 @@ bool pragma::Game::LoadLuaEntity(std::string path)
 	auto luaFileName = GetLuaNetworkFileName();
 
 	auto luaFilePath = path +'\\' +nwStateDirName;
-	if(FileManager::IsDir(luaFilePath))
+	if(fs::is_dir(luaFilePath))
 	{
 		luaFilePath += '\\' +luaFileName;
 		return ExecuteLuaFile(luaFilePath.substr(4));
@@ -178,14 +178,14 @@ bool pragma::Game::LoadLuaComponent(std::string path)
 	auto luaFileName = GetLuaNetworkFileName();
 
 	auto luaFilePath = path + '\\' + nwStateDirName;
-	if(FileManager::IsDir(luaFilePath)) {
+	if(fs::is_dir(luaFilePath)) {
 		luaFilePath += '\\' + luaFileName;
 		auto pathWithoutLuaDir = luaFilePath.substr(4);
 		return ExecuteLuaFile(pathWithoutLuaDir);
 	}
 
 	luaFilePath = path + '\\' + luaFileName;
-	if(FileManager::IsFile(luaFilePath)) {
+	if(fs::is_file(luaFilePath)) {
 		auto pathWithoutLuaDir = luaFilePath.substr(4);
 		return ExecuteLuaFile(pathWithoutLuaDir);
 	}
@@ -201,7 +201,7 @@ bool pragma::Game::LoadLuaEntityByClass(const std::string &className)
 		auto baseLuaFilePath = Lua::SCRIPT_DIRECTORY_SLASH + typePath + '\\';
 		auto luaFilePath = baseLuaFilePath + className;
 		auto nwLuaFilePath = baseLuaFilePath + nwStateSubPath + className;
-		if(FileManager::Exists(luaFilePath + Lua::DOT_FILE_EXTENSION) || FileManager::Exists(luaFilePath + Lua::DOT_FILE_EXTENSION_PRECOMPILED) || FileManager::Exists(nwLuaFilePath + Lua::DOT_FILE_EXTENSION) || FileManager::Exists(nwLuaFilePath + Lua::DOT_FILE_EXTENSION_PRECOMPILED))
+		if(fs::exists(luaFilePath + Lua::DOT_FILE_EXTENSION) || fs::exists(luaFilePath + Lua::DOT_FILE_EXTENSION_PRECOMPILED) || fs::exists(nwLuaFilePath + Lua::DOT_FILE_EXTENSION) || fs::exists(nwLuaFilePath + Lua::DOT_FILE_EXTENSION_PRECOMPILED))
 			return LoadLuaEntity(typePath, className);
 	}
 
@@ -212,12 +212,12 @@ bool pragma::Game::LoadLuaEntityByClass(const std::string &className)
 		auto baseLuaFilePath = Lua::SCRIPT_DIRECTORY_SLASH +typePath +'\\';
 		auto luaFilePath = baseLuaFilePath +className;
 		auto nwLuaFilePath = baseLuaFilePath +nwStateSubPath +className;
-		if(FileManager::IsDir(luaFilePath) || FileManager::IsDir(nwLuaFilePath))
+		if(fs::is_dir(luaFilePath) || fs::is_dir(nwLuaFilePath))
 			return LoadLuaEntity(typePath,className);
 
 		luaFilePath += Lua::DOT_FILE_EXTENSION;
 		nwLuaFilePath += Lua::DOT_FILE_EXTENSION;
-		if(FileManager::Exists(luaFilePath) || FileManager::Exists(nwLuaFilePath))
+		if(fs::exists(luaFilePath) || fs::exists(nwLuaFilePath))
 			return LoadLuaEntity(typePath,className);
 	}*/
 	return false;
@@ -226,9 +226,9 @@ bool pragma::Game::LoadLuaComponentByName(const std::string &componentName)
 {
 	for(auto &typePath : GetLuaEntityDirectories()) {
 		auto luaFilePath = Lua::SCRIPT_DIRECTORY_SLASH + typePath + "\\components\\" + componentName;
-		if(FileManager::IsDir(luaFilePath))
+		if(fs::is_dir(luaFilePath))
 			return LoadLuaComponent(typePath, componentName);
-		if(FileManager::Exists(luaFilePath + Lua::DOT_FILE_EXTENSION) || FileManager::Exists(luaFilePath + Lua::DOT_FILE_EXTENSION_PRECOMPILED))
+		if(fs::exists(luaFilePath + Lua::DOT_FILE_EXTENSION) || fs::exists(luaFilePath + Lua::DOT_FILE_EXTENSION_PRECOMPILED))
 			return LoadLuaComponent(typePath, componentName);
 	}
 	return false;

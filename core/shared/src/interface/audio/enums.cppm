@@ -11,7 +11,7 @@ export import pragma.math;
 
 export namespace pragma::audio {
 	class ALSound;
-	using ALSoundRef = std::reference_wrapper<pragma::audio::ALSound>;
+	using ALSoundRef = std::reference_wrapper<ALSound>;
 
 	CONSTEXPR_DLL_COMPAT float ALSOUND_DEFAULT_MAX_DISTANCE = std::numeric_limits<float>::max();
 

@@ -11,17 +11,17 @@ import :game;
 
 using namespace pragma::rendering;
 
-void pragma::CRasterizationRendererComponent::CullLightSources(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::CullLightSources(const DrawSceneInfo &drawSceneInfo)
 {
-	auto &shaderSettings = pragma::get_client_state()->GetGameWorldShaderSettings();
+	auto &shaderSettings = get_client_state()->GetGameWorldShaderSettings();
 	if(drawSceneInfo.scene.expired() || shaderSettings.dynamicLightingEnabled == false)
 		return;
 	auto &scene = *drawSceneInfo.scene;
 	auto &prepass = GetPrepass();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	{
-		pragma::get_cgame()->StartProfilingStage("CullLightSources");
-		pragma::get_cgame()->StartGPUProfilingStage("CullLightSources");
+		get_cgame()->StartProfilingStage("CullLightSources");
+		get_cgame()->StartGPUProfilingStage("CullLightSources");
 		auto depthTex = prepass.textureDepth;
 		auto bMultisampled = depthTex->IsMSAATexture();
 		if(depthTex->IsMSAATexture()) {
@@ -50,7 +50,7 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const pragma::ren
 			if(drawSceneInfo.renderStats)
 				t = std::chrono::steady_clock::now();
 
-			fp.Compute(*drawCmd, const_cast<pragma::CSceneComponent &>(scene), depthTex->GetImage(), *scene.GetCameraDescriptorSetCompute());
+			fp.Compute(*drawCmd, const_cast<CSceneComponent &>(scene), depthTex->GetImage(), *scene.GetCameraDescriptorSetCompute());
 			auto &lightBits = fp.GetShadowLightBits();
 			for(auto i = decltype(lightBits.size()) {0}; i < lightBits.size(); ++i) {
 				auto &intVal = lightBits.at(i);
@@ -59,8 +59,8 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const pragma::ren
 					if(!(intVal & (1 << j))) // If bit is set, this light is visible on screen
 						continue;
 					auto shadowIdx = i * numBits + j;
-					auto *l = pragma::CLightComponent::GetLightByShadowBufferIndex(shadowIdx);
-					if(l == nullptr || static_cast<pragma::ecs::CBaseEntity &>(l->GetEntity()).IsInScene(scene) == false)
+					auto *l = CLightComponent::GetLightByShadowBufferIndex(shadowIdx);
+					if(l == nullptr || static_cast<ecs::CBaseEntity &>(l->GetEntity()).IsInScene(scene) == false)
 						continue;
 					m_visLightSources.push_back(l);
 
@@ -74,8 +74,8 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const pragma::ren
 
 						// Determine light sources that should actually cast shadows
 						if(l->ShouldCastShadows()) {
-							auto *shadowC = l->GetShadowComponent<pragma::CShadowComponent>();
-							auto hSm = l->GetShadowMap<pragma::CShadowComponent>(pragma::rendering::ShadowMapType::Dynamic);
+							auto *shadowC = l->GetShadowComponent<CShadowComponent>();
+							auto hSm = l->GetShadowMap<CShadowComponent>(ShadowMapType::Dynamic);
 							if(hSm.valid() && hSm->HasRenderTarget()) {
 								// Request render target for light sources that already had one before.
 								// This will make sure the shadow map is the same as before, which increases the likelihood
@@ -90,13 +90,13 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const pragma::ren
 			}
 
 			if(drawSceneInfo.renderStats)
-				(*drawSceneInfo.renderStats)->SetTime(rendering::RenderStats::RenderStage::LightCullingCpu, std::chrono::steady_clock::now() - t);
+				(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::LightCullingCpu, std::chrono::steady_clock::now() - t);
 		}
 	}
 }
-void pragma::CRasterizationRendererComponent::RenderShadows(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RenderShadows(const DrawSceneInfo &drawSceneInfo)
 {
-	auto &shaderSettings = pragma::get_client_state()->GetGameWorldShaderSettings();
+	auto &shaderSettings = get_client_state()->GetGameWorldShaderSettings();
 	if(drawSceneInfo.scene.expired() || shaderSettings.dynamicLightingEnabled == false)
 		return;
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -111,20 +111,20 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const pragma::render
 	drawCmd->RecordImageBarrier(depthTex->GetImage(), {prosper::PipelineStageFlags::ComputeShaderBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::ShaderReadBit},
 	  {prosper::PipelineStageFlags::EarlyFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit});
 
-	pragma::get_cgame()->StopGPUProfilingStage(); // CullLightSources
-	pragma::get_cgame()->StopProfilingStage();    // CullLightSources
+	get_cgame()->StopGPUProfilingStage(); // CullLightSources
+	get_cgame()->StopProfilingStage();    // CullLightSources
 
-	pragma::get_cgame()->StartProfilingStage("Shadows");
-	pragma::get_cgame()->StartGPUProfilingStage("Shadows");
+	get_cgame()->StartProfilingStage("Shadows");
+	get_cgame()->StartGPUProfilingStage("Shadows");
 	// Update shadows
 	//pragma::get_cengine()->StartGPUTimer(GPUTimerEvent::Shadow); // TODO: Only for main scene // prosper TODO
 
 	// Entity instance buffer barrier
-	drawCmd->RecordBufferBarrier(*pragma::CRenderComponent::GetInstanceBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+	drawCmd->RecordBufferBarrier(*CRenderComponent::GetInstanceBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
 	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	// Entity bone buffer barrier
-	drawCmd->RecordBufferBarrier(*pragma::get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+	drawCmd->RecordBufferBarrier(*get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
 	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	auto *worldEnv = scene.GetWorldEnvironment();
@@ -133,7 +133,7 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const pragma::render
 		std::queue<uint32_t> lightSourcesWaitingForRenderQueues;
 		for(auto i = decltype(m_visShadowedLights.size()) {0u}; i < m_visShadowedLights.size(); ++i) {
 			auto *l = m_visShadowedLights[i].get();
-			auto hSm = l->GetShadowMap<pragma::CShadowComponent>(pragma::rendering::ShadowMapType::Dynamic);
+			auto hSm = l->GetShadowMap<CShadowComponent>(ShadowMapType::Dynamic);
 			if(hSm.valid() && hSm->HasRenderTarget() == false)
 				hSm->RequestRenderTarget();
 
@@ -147,7 +147,7 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const pragma::render
 			// In the meantime, any shadowed lights that don't have a render queue ready yet
 			// will start generating one now, which should be complete by the time the other
 			// light sources have completed rendering their shadow maps.
-			auto *shadowC = l->GetShadowComponent<pragma::CShadowComponent>();
+			auto *shadowC = l->GetShadowComponent<CShadowComponent>();
 			auto &renderer = shadowC->GetRenderer();
 			if(renderer.IsRenderQueueComplete())
 				lightSourcesReadyForShadowRendering.push(i);
@@ -158,7 +158,7 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const pragma::render
 					renderer.BuildRenderQueues(drawSceneInfo);
 			}
 		}
-		pragma::get_cgame()->GetRenderQueueBuilder().SetReadyForCompletion();
+		get_cgame()->GetRenderQueueBuilder().SetReadyForCompletion();
 
 		while(lightSourcesReadyForShadowRendering.empty() == false) {
 			auto idx = lightSourcesReadyForShadowRendering.front();
@@ -168,7 +168,7 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const pragma::render
 			// Note: Always have to re-render if render target has changed!!
 			// Also do the same below
 			auto &lightC = m_visShadowedLights.at(idx);
-			auto &renderer = lightC->GetShadowComponent<pragma::CShadowComponent>()->GetRenderer();
+			auto &renderer = lightC->GetShadowComponent<CShadowComponent>()->GetRenderer();
 			renderer.Render(drawSceneInfo);
 		}
 
@@ -179,7 +179,7 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const pragma::render
 			// Render remaining light sources. If their render queues are still not
 			// completed, we'll have no choice but to wait.
 			auto &lightC = m_visShadowedLights.at(idx);
-			auto &renderer = lightC->GetShadowComponent<pragma::CShadowComponent>()->GetRenderer();
+			auto &renderer = lightC->GetShadowComponent<CShadowComponent>()->GetRenderer();
 			renderer.Render(drawSceneInfo);
 		}
 
@@ -190,6 +190,6 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const pragma::render
 
 	//auto &imgDepth = textureDepth->GetImage(); // prosper TODO
 	//imgDepth->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal); // prosper TODO
-	pragma::get_cgame()->StopGPUProfilingStage(); // Shadows
-	pragma::get_cgame()->StopProfilingStage();    // Shadows
+	get_cgame()->StopGPUProfilingStage(); // Shadows
+	get_cgame()->StopProfilingStage();    // Shadows
 }

@@ -21,7 +21,7 @@ export namespace pragma {
 		Frustum();
 		FrustumSplit split = {};
 		std::vector<Vector3> points;
-		std::vector<pragma::math::Plane> planes;
+		std::vector<math::Plane> planes;
 		Vector3 bounds[2] = {{}, {}};
 		Mat4 projection = umat::identity();
 		Mat4 viewProjection = umat::identity();
@@ -36,7 +36,7 @@ export namespace pragma {
 	  public:
 		static constexpr uint32_t MAX_CASCADE_COUNT = 4;
 
-		CShadowCSMComponent(pragma::ecs::BaseEntity &ent);
+		CShadowCSMComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 
@@ -49,21 +49,21 @@ export namespace pragma {
 		void SetMaxDistance(float dist);
 		float GetMaxDistance();
 		unsigned int GetSplitCount();
-		void UpdateFrustum(uint32_t splitId, pragma::CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir);
-		void UpdateFrustum(pragma::CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir);
+		void UpdateFrustum(uint32_t splitId, CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir);
+		void UpdateFrustum(CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir);
 		float *GetSplitFarDistances();
 		Frustum *GetFrustumSplit(unsigned int splitId);
 
 		const Mat4 &GetStaticPendingViewProjectionMatrix(uint32_t layer) const;
 		const std::shared_ptr<prosper::RenderTarget> &GetStaticPendingRenderTarget() const;
-		void RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::BaseEnvLightDirectionalComponent &light);
+		void RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, BaseEnvLightDirectionalComponent &light);
 
-		std::shared_ptr<prosper::IFramebuffer> GetFramebuffer(pragma::rendering::ShadowMapType smType, uint32_t layer = 0) const;
-		prosper::IRenderPass *GetRenderPass(pragma::rendering::ShadowMapType smType) const;
-		const std::shared_ptr<prosper::RenderTarget> &GetRenderTarget(pragma::rendering::ShadowMapType smType) const;
+		std::shared_ptr<prosper::IFramebuffer> GetFramebuffer(rendering::ShadowMapType smType, uint32_t layer = 0) const;
+		prosper::IRenderPass *GetRenderPass(rendering::ShadowMapType smType) const;
+		const std::shared_ptr<prosper::RenderTarget> &GetRenderTarget(rendering::ShadowMapType smType) const;
 
 		prosper::Texture *GetDepthTexture() const;
-		prosper::Texture *GetDepthTexture(pragma::rendering::ShadowMapType smType) const;
+		prosper::Texture *GetDepthTexture(rendering::ShadowMapType smType) const;
 
 		void FreeRenderTarget();
 
@@ -82,12 +82,12 @@ export namespace pragma {
 			EntityInfo() = default;
 			EntityInfo(ecs::CBaseEntity *ent) : hEntity(ent->GetHandle()) {}
 			EntityHandle hEntity = {};
-			std::queue<std::weak_ptr<pragma::geometry::ModelMesh>> meshes;
+			std::queue<std::weak_ptr<geometry::ModelMesh>> meshes;
 			bool bAlreadyPassed = false;
 		};
 		struct TranslucentEntityInfo {
 			EntityHandle hEntity = {};
-			std::queue<std::weak_ptr<pragma::geometry::ModelSubMesh>> subMeshes;
+			std::queue<std::weak_ptr<geometry::ModelSubMesh>> subMeshes;
 			;
 		};
 		struct CascadeMeshInfo {
@@ -106,8 +106,8 @@ export namespace pragma {
 			std::array<CascadeMeshInfo, MAX_CASCADE_COUNT> meshes;
 		} m_pendingInfo;
 
-		pragma::util::WeakHandle<prosper::Shader> m_whShaderCsm = {};
-		pragma::util::WeakHandle<prosper::Shader> m_whShaderCsmTransparent = {};
+		util::WeakHandle<prosper::Shader> m_whShaderCsm = {};
+		util::WeakHandle<prosper::Shader> m_whShaderCsmTransparent = {};
 		std::vector<Frustum> m_frustums = {};
 		std::vector<float> m_fard = {};
 		std::function<void(void)> m_onFrustumUpdated;
@@ -117,7 +117,7 @@ export namespace pragma {
 		std::array<TextureSet, 2> m_textureSets; // 0 = Used for static geometry (Rarely moving and not animated); 1 = Used for dynamic geometry
 
 		void UpdateSplitDistances(float nd, float fd);
-		void InitializeTextureSet(TextureSet &set, pragma::rendering::ShadowMapType smType);
+		void InitializeTextureSet(TextureSet &set, rendering::ShadowMapType smType);
 		void InitializeDepthTextures(uint32_t size);
 	};
 };

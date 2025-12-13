@@ -78,13 +78,13 @@ template<typename T>
 static std::shared_ptr<udm::Data> load_udm_asset(T &&f, std::string *optOutErr)
 {
 	using TBase = pragma::util::base_type<T>;
-	VFilePtr fptr = nullptr;
+	pragma::fs::VFilePtr fptr = nullptr;
 	try {
 		if constexpr(std::is_same_v<TBase, std::string>)
 			return udm::Data::Load(f);
 		else {
-			if(typeid(*f) == typeid(fsys::File))
-				fptr = static_cast<fsys::File *>(f.get())->GetFile();
+			if(typeid(*f) == typeid(pragma::fs::File))
+				fptr = static_cast<pragma::fs::File *>(f.get())->GetFile();
 			return udm::Data::Load(std::move(f));
 		}
 	}
@@ -95,7 +95,7 @@ static std::shared_ptr<udm::Data> load_udm_asset(T &&f, std::string *optOutErr)
 		if constexpr(std::is_same_v<TBase, std::string>)
 			Con::cout << " '" << f << "'";
 		else {
-			auto *ptr = static_cast<VFilePtrInternalReal *>(fptr.get());
+			auto *ptr = static_cast<pragma::fs::VFilePtrInternalReal *>(fptr.get());
 			if(ptr) {
 				auto path = pragma::util::Path::CreateFile(ptr->GetPath());
 				path.MakeRelative(pragma::util::get_program_path());
@@ -104,15 +104,15 @@ static std::shared_ptr<udm::Data> load_udm_asset(T &&f, std::string *optOutErr)
 		}
 		Con::cwar << ": " << e.what() << ":\n";
 		if constexpr(std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, std::string>) {
-			auto fptr = FileManager::OpenFile(f.c_str(), "r");
+			auto fptr = pragma::fs::open_file(f.c_str(), pragma::fs::FileMode::Read);
 			if(fptr) {
-				fsys::File f {fptr};
+				pragma::fs::File f {fptr};
 				print_code_snippet(f, e.lineIndex, e.charIndex);
 			}
 		}
 		else {
 			if(fptr) {
-				fsys::File f {fptr};
+				pragma::fs::File f {fptr};
 				print_code_snippet(f, e.lineIndex, e.charIndex);
 			}
 		}
@@ -230,7 +230,7 @@ std::optional<std::string> pragma::util::convert_udm_file_to_ascii(const std::st
 		return {};
 	}
 	std::string rpath;
-	if(FileManager::FindAbsolutePath(fileName, rpath) == false) {
+	if(fs::find_absolute_path(fileName, rpath) == false) {
 		outErr = "Unable to locate UDM file on disk!";
 		return {};
 	}
@@ -256,7 +256,7 @@ std::optional<std::string> pragma::util::convert_udm_file_to_ascii(const std::st
 	}
 	if(!res)
 		return {};
-	filemanager::remove_file(fileName);
+	fs::remove_file(fileName);
 	return Lua::file::to_relative_path(outFileName);
 }
 std::optional<std::string> pragma::util::convert_udm_file_to_binary(const std::string &fileName, std::string &outErr)
@@ -274,7 +274,7 @@ std::optional<std::string> pragma::util::convert_udm_file_to_binary(const std::s
 		return {};
 	}
 	std::string rpath;
-	if(FileManager::FindAbsolutePath(fileName, rpath) == false) {
+	if(fs::find_absolute_path(fileName, rpath) == false) {
 		outErr = "Unable to locate UDM file on disk!";
 		return {};
 	}
@@ -298,7 +298,7 @@ std::optional<std::string> pragma::util::convert_udm_file_to_binary(const std::s
 	}
 	if(!res)
 		return {};
-	filemanager::remove_file(fileName);
+	fs::remove_file(fileName);
 	return Lua::file::to_relative_path(outFileName);
 }
 
@@ -404,7 +404,7 @@ bool pragma::util::show_notification(const std::string &summary, const std::stri
 
 	auto iconPath = pragma::engine_info::get_icon_path();
 	std::string absIconPath;
-	filemanager::find_absolute_path(iconPath.GetString(), absIconPath);
+	fs::find_absolute_path(iconPath.GetString(), absIconPath);
 
 	pragma::oskit::NotificationInfo info {};
 	info.appName = pragma::engine_info::get_name();

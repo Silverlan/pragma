@@ -11,7 +11,7 @@ using namespace pragma;
 
 bool pragma::game::savegame::save(pragma::Game &game, const std::string &fileName, std::string &outErr)
 {
-	auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(), "wb");
+	auto f = fs::open_file<fs::VFilePtrReal>(fileName, fs::FileMode::Write | fs::FileMode::Binary);
 	if(f == nullptr) {
 		outErr = "Unable to open file '" + fileName + "'!";
 		return false;

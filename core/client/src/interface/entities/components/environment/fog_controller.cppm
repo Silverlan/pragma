@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLCLIENT CFogControllerComponent final : public BaseEnvFogControllerComponent, public CBaseNetComponent {
 		  public:
-			CFogControllerComponent(pragma::ecs::BaseEntity &ent) : BaseEnvFogControllerComponent(ent) {}
+			CFogControllerComponent(ecs::BaseEntity &ent) : BaseEnvFogControllerComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void ReceiveData(NetPacket &packet) override;
 			virtual void OnRemove() override;
@@ -23,7 +23,7 @@ export {
 			virtual void SetFogStart(float start) override;
 			virtual void SetFogEnd(float end) override;
 			virtual void SetMaxDensity(float density) override;
-			virtual void SetFogType(pragma::util::FogType type) override;
+			virtual void SetFogType(util::FogType type) override;
 			virtual void InitializeLuaObject(lua::State *l) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void OnEntitySpawn() override;

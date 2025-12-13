@@ -22,7 +22,7 @@ export namespace pragma {
 			float heightAboveFloor = 50.f;
 		};
 		static const std::vector<ProbeInfo> &GetProbes();
-		CEnvSoundProbeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CEnvSoundProbeComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 		virtual void InitializeLuaObject(lua::State *l) override;

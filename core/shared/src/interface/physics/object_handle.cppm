@@ -8,5 +8,5 @@ export import :types;
 export import pragma.util;
 
 export namespace pragma::physics {
-	using PhysObjHandle = pragma::util::TWeakSharedHandle<pragma::physics::PhysObj>;
+	using PhysObjHandle = util::TWeakSharedHandle<PhysObj>;
 };

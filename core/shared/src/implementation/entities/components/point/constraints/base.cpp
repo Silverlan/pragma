@@ -11,9 +11,9 @@ using namespace pragma;
 void BasePointConstraintComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		return SetKeyValue(kvData.key, kvData.value) ? pragma::util::EventReply::Handled : pragma::util::EventReply::Unhandled;
+		return SetKeyValue(kvData.key, kvData.value) ? util::EventReply::Handled : util::EventReply::Unhandled;
 	});
 	auto &ent = GetEntity();
 	ent.AddComponent("toggle");
@@ -39,17 +39,17 @@ void BasePointConstraintComponent::OnRemove()
 		m_cbGameLoaded.Remove();
 }
 
-std::vector<pragma::util::TSharedHandle<physics::IConstraint>> &BasePointConstraintComponent::GetConstraints() { return m_constraints; }
+std::vector<util::TSharedHandle<physics::IConstraint>> &BasePointConstraintComponent::GetConstraints() { return m_constraints; }
 
-pragma::util::EventReply BasePointConstraintComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply BasePointConstraintComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == baseToggleComponent::EVENT_ON_TURN_ON)
 		OnTurnOn();
 	else if(eventId == baseToggleComponent::EVENT_ON_TURN_OFF)
 		OnTurnOff();
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 
 void BasePointConstraintComponent::OnTurnOn()
@@ -72,13 +72,13 @@ void BasePointConstraintComponent::OnTurnOff()
 void BasePointConstraintComponent::InitializeConstraint()
 {
 	ClearConstraint();
-	pragma::ecs::BaseEntity *entSrc = GetSourceEntity();
+	ecs::BaseEntity *entSrc = GetSourceEntity();
 	if(entSrc == nullptr)
 		return;
-	std::vector<pragma::ecs::BaseEntity *> entsTgt;
+	std::vector<ecs::BaseEntity *> entsTgt;
 	GetTargetEntities(entsTgt);
 	auto pPhysComponentSrc = entSrc->GetPhysicsComponent();
-	auto *physSrc = pPhysComponentSrc ? dynamic_cast<pragma::physics::RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	auto *physSrc = pPhysComponentSrc ? dynamic_cast<physics::RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	if(physSrc == nullptr)
 		return;
 	auto *bodySrc = physSrc->GetRigidBody();
@@ -86,10 +86,10 @@ void BasePointConstraintComponent::InitializeConstraint()
 		return;
 	for(unsigned int i = 0; i < entsTgt.size(); i++)
 		InitializeConstraint(entSrc, entsTgt[i]);
-	pragma::ecs::BaseEntity &entThis = GetEntity();
+	ecs::BaseEntity &entThis = GetEntity();
 	unsigned int flags = entThis.GetSpawnFlags();
 	if(flags & SF_CONSTRAINT_START_INACTIVE) {
-		auto *pToggleComponent = static_cast<pragma::BaseToggleComponent *>(GetEntity().FindComponent("toggle").get());
+		auto *pToggleComponent = static_cast<BaseToggleComponent *>(GetEntity().FindComponent("toggle").get());
 		if(pToggleComponent != nullptr)
 			pToggleComponent->TurnOff();
 	}
@@ -116,11 +116,11 @@ bool BasePointConstraintComponent::SetKeyValue(std::string key, std::string val)
 {
 	if(key == "source") {
 		m_kvSource = val;
-		pragma::string::to_lower(m_kvSource);
+		string::to_lower(m_kvSource);
 	}
 	else if(key == "target") {
 		m_kvTarget = val;
-		pragma::string::to_lower(m_kvTarget);
+		string::to_lower(m_kvTarget);
 	}
 	else if(key == "target_origin")
 		m_posTarget = uvec::create(val);
@@ -129,15 +129,15 @@ bool BasePointConstraintComponent::SetKeyValue(std::string key, std::string val)
 	return true;
 }
 
-void BasePointConstraintComponent::GetTargetEntities(std::vector<pragma::ecs::BaseEntity *> &entsTgt)
+void BasePointConstraintComponent::GetTargetEntities(std::vector<ecs::BaseEntity *> &entsTgt)
 {
-	pragma::ecs::BaseEntity &ent = GetEntity();
+	ecs::BaseEntity &ent = GetEntity();
 	auto *state = ent.GetNetworkState();
-	pragma::Game *game = state->GetGameState();
+	Game *game = state->GetGameState();
 	if(m_kvTarget.empty())
 		return;
 	else {
-		pragma::ecs::EntityIterator it {*game, pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
+		ecs::EntityIterator it {*game, ecs::EntityIterator::FilterFlags::Default | ecs::EntityIterator::FilterFlags::Pending};
 		it.AttachFilter<EntityIteratorFilterComponent>("physics");
 		it.AttachFilter<EntityIteratorFilterEntity>(m_kvTarget);
 		for(auto *ent : it)
@@ -145,21 +145,21 @@ void BasePointConstraintComponent::GetTargetEntities(std::vector<pragma::ecs::Ba
 	}
 }
 
-pragma::ecs::BaseEntity *BasePointConstraintComponent::GetSourceEntity()
+ecs::BaseEntity *BasePointConstraintComponent::GetSourceEntity()
 {
-	pragma::ecs::BaseEntity &entThis = GetEntity();
+	ecs::BaseEntity &entThis = GetEntity();
 	auto *state = entThis.GetNetworkState();
-	pragma::Game *game = state->GetGameState();
+	Game *game = state->GetGameState();
 	if(m_kvSource.empty()) {
 		auto *pWorld = game->GetWorld();
 		return (pWorld != nullptr) ? &pWorld->GetEntity() : nullptr;
 	}
 
-	pragma::ecs::EntityIterator entIt {*game, pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
+	ecs::EntityIterator entIt {*game, ecs::EntityIterator::FilterFlags::Default | ecs::EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<EntityIteratorFilterComponent>("physics");
 	entIt.AttachFilter<EntityIteratorFilterEntity>(m_kvSource);
 	auto it = entIt.begin();
 	return (it != entIt.end()) ? *it : nullptr;
 }
 
-void BasePointConstraintComponent::InitializeConstraint(pragma::ecs::BaseEntity *, pragma::ecs::BaseEntity *) {}
+void BasePointConstraintComponent::InitializeConstraint(ecs::BaseEntity *, ecs::BaseEntity *) {}

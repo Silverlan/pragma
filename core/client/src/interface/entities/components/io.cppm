@@ -14,7 +14,7 @@ export namespace pragma {
 	}
 	class DLLCLIENT CIOComponent final : public BaseIOComponent {
 	  public:
-		CIOComponent(pragma::ecs::BaseEntity &ent) : BaseIOComponent(ent) {}
+		CIOComponent(ecs::BaseEntity &ent) : BaseIOComponent(ent) {}
 		virtual void InitializeLuaObject(lua::State *l) override;
 	};
 };

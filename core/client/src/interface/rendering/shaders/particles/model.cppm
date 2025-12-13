@@ -12,18 +12,18 @@ export import :rendering.shaders.textured;
 export namespace pragma {
 	class DLLCLIENT ShaderParticleModel : public ShaderGameWorldLightingPass, public ShaderParticleBase {
 	  public:
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_PARTICLE;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RADIUS;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_PREVPOS;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_AGE;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_COLOR;
+		static ShaderGraphics::VertexBinding VERTEX_BINDING_PARTICLE;
+		static VertexAttribute VERTEX_ATTRIBUTE_POSITION;
+		static VertexAttribute VERTEX_ATTRIBUTE_RADIUS;
+		static VertexAttribute VERTEX_ATTRIBUTE_PREVPOS;
+		static VertexAttribute VERTEX_ATTRIBUTE_AGE;
+		static VertexAttribute VERTEX_ATTRIBUTE_COLOR;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_ROTATION;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ROTATION;
+		static ShaderGraphics::VertexBinding VERTEX_BINDING_ROTATION;
+		static VertexAttribute VERTEX_ATTRIBUTE_ROTATION;
 
-		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_ANIMATION_START;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ANIMATION_START;
+		static ShaderGraphics::VertexBinding VERTEX_BINDING_ANIMATION_START;
+		static VertexAttribute VERTEX_ATTRIBUTE_ANIMATION_START;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_ANIMATION;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_BONE_MATRICES;
@@ -37,11 +37,11 @@ export namespace pragma {
 
 		ShaderParticleModel(prosper::IPrContext &context, const std::string &identifier);
 		bool RecordParticleBuffers(prosper::ShaderBindState &bindState, prosper::IBuffer &particleBuffer, prosper::IBuffer &rotBuffer, prosper::IBuffer &animStartBuffer);
-		bool Draw(pragma::geometry::CModelSubMesh &mesh, uint32_t numInstances, uint32_t firstInstance = 0u);
-		bool RecordParticleSystem(prosper::ShaderBindState &bindState, pragma::ecs::CParticleSystemComponent &pSys) const;
+		bool Draw(geometry::CModelSubMesh &mesh, uint32_t numInstances, uint32_t firstInstance = 0u);
+		bool RecordParticleSystem(prosper::ShaderBindState &bindState, ecs::CParticleSystemComponent &pSys) const;
 
-		bool RecordBeginDraw(prosper::ShaderBindState &bindState, const Vector4 &clipPlane, pragma::ecs::CParticleSystemComponent &pSys, const Vector4 &drawOrigin = {0.f, 0.f, 0.f, 1.f},
-		  ShaderScene::RecordFlags recordFlags = ShaderScene::RecordFlags::RenderPassTargetAsViewportAndScissor) const;
+		bool RecordBeginDraw(prosper::ShaderBindState &bindState, const Vector4 &clipPlane, ecs::CParticleSystemComponent &pSys, const Vector4 &drawOrigin = {0.f, 0.f, 0.f, 1.f},
+		  RecordFlags recordFlags = RecordFlags::RenderPassTargetAsViewportAndScissor) const;
 	  protected:
 		virtual prosper::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;

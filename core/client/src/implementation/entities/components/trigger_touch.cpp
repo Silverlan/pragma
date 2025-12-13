@@ -14,15 +14,15 @@ void CTouchComponent::Initialize() { BaseTouchComponent::Initialize(); }
 void CTouchComponent::OnEntitySpawn()
 {
 	BaseTouchComponent::OnEntitySpawn();
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
 	if(ent.IsClientsideOnly() == true) {
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		if(pPhysComponent != nullptr)
-			pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Static);
+			pPhysComponent->InitializePhysics(physics::PhysicsType::Static);
 	}
-	auto pRenderComponent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
+	auto pRenderComponent = static_cast<ecs::CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
-		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
+		pRenderComponent->SetSceneRenderPass(rendering::SceneRenderPass::World);
 }
 void CTouchComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

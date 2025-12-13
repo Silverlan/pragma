@@ -19,48 +19,48 @@ export {
 			TransformChangeFlags changeFlags;
 		};
 		namespace baseTransformComponent {
-			CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_ON_POSE_CHANGED;
-			CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_ON_TELEPORT;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_POSE_CHANGED;
+			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_TELEPORT;
 		}
 		class DLLNETWORK BaseTransformComponent : public BaseEntityComponent {
 		  public:
-			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+			static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			virtual void Initialize() override;
 
-			void SetPosition(const Vector3 &pos, pragma::CoordinateSpace space);
+			void SetPosition(const Vector3 &pos, CoordinateSpace space);
 			void SetPosition(const Vector3 &pos);
 			const Vector3 &GetPosition() const;
-			Vector3 GetPosition(pragma::CoordinateSpace space) const;
-			void SetRotation(const Quat &q, pragma::CoordinateSpace space);
+			Vector3 GetPosition(CoordinateSpace space) const;
+			void SetRotation(const Quat &q, CoordinateSpace space);
 			void SetRotation(const Quat &q);
 			const Quat &GetRotation() const;
-			Quat GetRotation(pragma::CoordinateSpace space) const;
-			void SetPose(const pragma::math::ScaledTransform &pose, pragma::CoordinateSpace space);
-			void SetPose(const pragma::math::Transform &pose, pragma::CoordinateSpace space);
-			void SetPose(const pragma::math::ScaledTransform &pose);
-			void SetPose(const pragma::math::Transform &pose);
-			const pragma::math::ScaledTransform &GetPose() const;
-			pragma::math::ScaledTransform GetPose(pragma::CoordinateSpace space) const;
-			void SetAngles(const EulerAngles &ang, pragma::CoordinateSpace space);
+			Quat GetRotation(CoordinateSpace space) const;
+			void SetPose(const math::ScaledTransform &pose, CoordinateSpace space);
+			void SetPose(const math::Transform &pose, CoordinateSpace space);
+			void SetPose(const math::ScaledTransform &pose);
+			void SetPose(const math::Transform &pose);
+			const math::ScaledTransform &GetPose() const;
+			math::ScaledTransform GetPose(CoordinateSpace space) const;
+			void SetAngles(const EulerAngles &ang, CoordinateSpace space);
 			void SetAngles(const EulerAngles &ang);
-			void SetPitch(float pitch, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
-			void SetYaw(float yaw, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
-			void SetRoll(float roll, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
-			EulerAngles GetAngles(pragma::CoordinateSpace space) const;
+			void SetPitch(float pitch, CoordinateSpace space = CoordinateSpace::World);
+			void SetYaw(float yaw, CoordinateSpace space = CoordinateSpace::World);
+			void SetRoll(float roll, CoordinateSpace space = CoordinateSpace::World);
+			EulerAngles GetAngles(CoordinateSpace space) const;
 			EulerAngles GetAngles() const;
-			float GetPitch(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
-			float GetYaw(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
-			float GetRoll(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
-			Mat4 GetRotationMatrix(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
-			Vector3 GetForward(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
-			Vector3 GetUp(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
-			Vector3 GetRight(pragma::CoordinateSpace space = pragma::CoordinateSpace::World) const;
+			float GetPitch(CoordinateSpace space = CoordinateSpace::World) const;
+			float GetYaw(CoordinateSpace space = CoordinateSpace::World) const;
+			float GetRoll(CoordinateSpace space = CoordinateSpace::World) const;
+			Mat4 GetRotationMatrix(CoordinateSpace space = CoordinateSpace::World) const;
+			Vector3 GetForward(CoordinateSpace space = CoordinateSpace::World) const;
+			Vector3 GetUp(CoordinateSpace space = CoordinateSpace::World) const;
+			Vector3 GetRight(CoordinateSpace space = CoordinateSpace::World) const;
 			float GetDistance(const Vector3 &p) const;
-			float GetDistance(const pragma::ecs::BaseEntity &ent) const;
+			float GetDistance(const ecs::BaseEntity &ent) const;
 			void GetOrientation(Vector3 *forward, Vector3 *right, Vector3 *up = nullptr) const;
 
-			void Teleport(const pragma::math::Transform &targetPose);
+			void Teleport(const math::Transform &targetPose);
 
 			void LocalToWorld(Vector3 *origin) const;
 			void LocalToWorld(Quat *rot) const;
@@ -72,9 +72,9 @@ export {
 
 			Vector3 GetOrigin() const;
 
-			Vector3 GetDirection(const pragma::ecs::BaseEntity &ent, bool bIgnoreYAxis = false) const;
-			EulerAngles GetAngles(const pragma::ecs::BaseEntity &ent, bool bIgnoreYAxis = false) const;
-			float GetDotProduct(const pragma::ecs::BaseEntity &ent, bool bIgnoreYAxis = false) const;
+			Vector3 GetDirection(const ecs::BaseEntity &ent, bool bIgnoreYAxis = false) const;
+			EulerAngles GetAngles(const ecs::BaseEntity &ent, bool bIgnoreYAxis = false) const;
+			float GetDotProduct(const ecs::BaseEntity &ent, bool bIgnoreYAxis = false) const;
 			Vector3 GetDirection(const Vector3 &pos, bool bIgnoreYAxis = false) const;
 			EulerAngles GetAngles(const Vector3 &pos, bool bIgnoreYAxis = false) const;
 			float GetDotProduct(const Vector3 &pos, bool bIgnoreYAxis = false) const;
@@ -82,11 +82,11 @@ export {
 			float GetMaxAxisScale() const;
 			float GetAbsMaxAxisScale() const;
 			const Vector3 &GetScale() const;
-			Vector3 GetScale(pragma::CoordinateSpace space) const;
+			Vector3 GetScale(CoordinateSpace space) const;
 			void SetScale(float scale);
-			void SetScale(float scale, pragma::CoordinateSpace space);
+			void SetScale(float scale, CoordinateSpace space);
 			virtual void SetScale(const Vector3 &scale);
-			void SetScale(const Vector3 &scale, pragma::CoordinateSpace space);
+			void SetScale(const Vector3 &scale, CoordinateSpace space);
 
 			virtual Vector3 GetEyePosition() const;
 			Vector3 GetEyeOffset() const;
@@ -94,31 +94,31 @@ export {
 
 			double GetLastMoveTime() const;
 
-			void SetPosition(const Vector3 &pos, Bool bForceUpdate, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+			void SetPosition(const Vector3 &pos, Bool bForceUpdate, CoordinateSpace space = CoordinateSpace::World);
 
 			virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 			virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 
 			// Same as SetPosition / SetRotation / SetScale, but don't invoke callbacks
-			void SetRawPosition(const Vector3 &pos, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
-			void SetRawRotation(const Quat &rot, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
-			void SetRawScale(const Vector3 &scale, pragma::CoordinateSpace space = pragma::CoordinateSpace::World);
+			void SetRawPosition(const Vector3 &pos, CoordinateSpace space = CoordinateSpace::World);
+			void SetRawRotation(const Quat &rot, CoordinateSpace space = CoordinateSpace::World);
+			void SetRawScale(const Vector3 &scale, CoordinateSpace space = CoordinateSpace::World);
 
 			void UpdateLastMovedTime();
 			void OnPoseChanged(TransformChangeFlags changeFlags, bool updatePhysics = true);
 		  protected:
-			BaseTransformComponent(pragma::ecs::BaseEntity &ent);
-			pragma::NetEventId m_netEvSetScale = pragma::INVALID_NET_EVENT;
+			BaseTransformComponent(ecs::BaseEntity &ent);
+			NetEventId m_netEvSetScale = INVALID_NET_EVENT;
 			double m_tLastMoved = 0.0; // Last time the entity moved or changed rotation
 			Vector3 m_eyeOffset = {};
-			pragma::math::ScaledTransform m_pose {};
+			math::ScaledTransform m_pose {};
 		};
 		struct DLLNETWORK CETeleport : public ComponentEvent {
-			CETeleport(const pragma::math::Transform &originalPose, const pragma::math::Transform &targetPose, const pragma::math::Transform &deltaPose);
+			CETeleport(const math::Transform &originalPose, const math::Transform &targetPose, const math::Transform &deltaPose);
 			virtual void PushArguments(lua::State *l) override;
-			pragma::math::Transform originalPose;
-			pragma::math::Transform targetPose;
-			pragma::math::Transform deltaPose;
+			math::Transform originalPose;
+			math::Transform targetPose;
+			math::Transform deltaPose;
 		};
 		using namespace pragma::math::scoped_enum::bitwise;
 	};

@@ -56,7 +56,7 @@ export namespace Lua {
 		DLLCLIENT void CallCallbacks(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6);
 		DLLCLIENT void CallCallbacks(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7);
 		DLLCLIENT void CallCallbacks(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5, luabind::object o6, luabind::object o7, luabind::object o8);
-		DLLCLIENT CallbackHandle AddCallback(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string name, Lua::func<void> o);
+		DLLCLIENT CallbackHandle AddCallback(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string name, func<void> o);
 		DLLCLIENT void FadeIn(lua::State *l, pragma::gui::types::WIBase &hPanel, float tFadeIn);
 		DLLCLIENT void FadeIn(lua::State *l, pragma::gui::types::WIBase &hPanel, float tFadeIn, float alphaTarget);
 		DLLCLIENT void InjectMouseMoveInput(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos);

@@ -8,9 +8,9 @@ import :entities.components.liquid.base_surface;
 
 using namespace pragma;
 
-void BaseLiquidSurfaceComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
+void BaseLiquidSurfaceComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
 
-void BaseLiquidSurfaceComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
-BaseLiquidSurfaceComponent::BaseLiquidSurfaceComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+void BaseLiquidSurfaceComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
+BaseLiquidSurfaceComponent::BaseLiquidSurfaceComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseLiquidSurfaceComponent::Initialize() { BaseEntityComponent::Initialize(); }

@@ -14,7 +14,7 @@ export namespace pragma {
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_PBR;
 
 		enum class MaterialBinding : uint32_t {
-			MaterialSettings = pragma::math::to_integral(ShaderGameWorldLightingPass::MaterialBinding::MaterialSettings),
+			MaterialSettings = math::to_integral(ShaderGameWorldLightingPass::MaterialBinding::MaterialSettings),
 			AlbedoMap,
 			NormalMap,
 			RMAMap,
@@ -42,7 +42,7 @@ export namespace pragma {
 		void SetForceNonIBLMode(bool b);
 	  protected:
 		virtual void InitializeGfxPipelinePushConstantRanges() override;
-		virtual void UpdateRenderFlags(pragma::geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags) override;
+		virtual void UpdateRenderFlags(geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags) override;
 		virtual void InitializeGfxPipelineDescriptorSets() override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;

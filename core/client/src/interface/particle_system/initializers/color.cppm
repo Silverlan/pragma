@@ -13,14 +13,14 @@ export namespace pragma::pts {
 	class DLLCLIENT CParticleInitializerColor : public CParticleInitializer, public CParticleModifierComponentRandomColor {
 	public:
 		CParticleInitializerColor() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
 	};
 }
 
-void pragma::pts::CParticleInitializerColor::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleInitializerColor::Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	CParticleModifierComponentRandomColor::Initialize("", values);
 }
-void pragma::pts::CParticleInitializerColor::OnParticleCreated(pragma::pts::CParticle &particle) { particle.SetColor(GetValue(particle)); }
+void pragma::pts::CParticleInitializerColor::OnParticleCreated(CParticle &particle) { particle.SetColor(GetValue(particle)); }

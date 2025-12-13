@@ -73,6 +73,6 @@ export namespace choreography {
 		virtual ~Scene() override;
 	  protected:
 		Scene();
-		friend uts::TimelineScene;
+		friend TimelineScene;
 	};
 };

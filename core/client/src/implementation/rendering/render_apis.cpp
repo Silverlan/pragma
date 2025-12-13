@@ -9,8 +9,8 @@ import :rendering.render_apis;
 std::vector<std::string> pragma::rendering::get_available_graphics_apis()
 {
 	std::vector<std::string> dirs {};
-	FileManager::FindFiles("modules/graphics/*", nullptr, &dirs,
-	  fsys::SearchFlags::Local // Binary modules can only be loaded from actual files
+	fs::find_files("modules/graphics/*", nullptr, &dirs,
+	  fs::SearchFlags::Local // Binary modules can only be loaded from actual files
 	);
 	return dirs;
 }

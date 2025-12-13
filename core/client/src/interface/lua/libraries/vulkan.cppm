@@ -26,9 +26,9 @@ export namespace Lua {
 			PreparedCommandLuaDynamicArg(std::string argName) : argName {std::move(argName)} {}
 			std::string argName;
 		};
-		DLLCLIENT prosper::util::PreparedCommand::Argument make_pcb_arg(const Lua::Vulkan::PreparedCommandLuaArg &larg, ::udm::Type type);
+		DLLCLIENT prosper::util::PreparedCommand::Argument make_pcb_arg(const PreparedCommandLuaArg &larg, ::udm::Type type);
 		template<typename T>
-		prosper::util::PreparedCommand::Argument make_pcb_arg(const Lua::Vulkan::PreparedCommandLuaArg &larg)
+		prosper::util::PreparedCommand::Argument make_pcb_arg(const PreparedCommandLuaArg &larg)
 		{
 			if constexpr(std::is_enum_v<T>)
 				return make_pcb_arg(larg, ::udm::type_to_enum<std::underlying_type_t<T>>());
@@ -112,7 +112,7 @@ export {
 		template<typename U>
 		Lua::Vulkan::PreparedCommandLuaArg default_converter<Lua::Vulkan::PreparedCommandLuaArg>::to_cpp(lua::State *L, U u, int index)
 		{
-			return Lua::Vulkan::PreparedCommandLuaArg {luabind::object {luabind::from_stack(L, index)}};
+			return Lua::Vulkan::PreparedCommandLuaArg {object {from_stack(L, index)}};
 		}
 
 		template<class U>

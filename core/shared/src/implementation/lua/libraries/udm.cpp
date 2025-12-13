@@ -189,17 +189,17 @@ luabind::object Lua::udm::udm_to_value(lua::State *l, ::udm::LinkedPropertyWrapp
 	});
 }
 
-static void data_block_to_udm(ds::Block &dataBlock, udm::LinkedPropertyWrapperArg udm)
+static void data_block_to_udm(pragma::datasystem::Block &dataBlock, udm::LinkedPropertyWrapperArg udm)
 {
-	std::function<void(udm::LinkedPropertyWrapperArg, ds::Block &)> dataBlockToUdm = nullptr;
-	dataBlockToUdm = [&dataBlockToUdm, &udm](udm::LinkedPropertyWrapperArg prop, ds::Block &block) {
+	std::function<void(udm::LinkedPropertyWrapperArg, pragma::datasystem::Block &)> dataBlockToUdm = nullptr;
+	dataBlockToUdm = [&dataBlockToUdm, &udm](udm::LinkedPropertyWrapperArg prop, pragma::datasystem::Block &block) {
 		const_cast<udm::LinkedPropertyWrapper &>(prop).InitializeProperty();
 
 		for(auto &pair : *block.GetData()) {
 			auto &key = pair.first;
 			auto &val = pair.second;
 			if(val->IsBlock()) {
-				auto &block = static_cast<ds::Block &>(*pair.second);
+				auto &block = static_cast<pragma::datasystem::Block &>(*pair.second);
 
 				auto &children = *block.GetData();
 				auto n = children.size();
@@ -222,7 +222,7 @@ static void data_block_to_udm(ds::Block &dataBlock, udm::LinkedPropertyWrapperAr
 						auto &val = it->second;
 						if(val->IsBlock() || val->IsContainer())
 							throw std::runtime_error {"Unknown error"};
-						a[i] = static_cast<const ds::Value &>(*val).GetString();
+						a[i] = static_cast<const pragma::datasystem::Value &>(*val).GetString();
 					}
 					continue;
 				}
@@ -231,14 +231,14 @@ static void data_block_to_udm(ds::Block &dataBlock, udm::LinkedPropertyWrapperAr
 				continue;
 			}
 			if(val->IsContainer()) {
-				auto &container = static_cast<ds::Container &>(*pair.second);
+				auto &container = static_cast<pragma::datasystem::Container &>(*pair.second);
 				auto &children = container.GetBlocks();
 				auto udmChildren = prop.AddArray(key, children.size());
 				uint32_t idx = 0;
 				for(auto &child : children) {
 					if(child->IsContainer() || child->IsBlock())
 						continue;
-					auto *dsValue = dynamic_cast<ds::Value *>(pair.second.get());
+					auto *dsValue = dynamic_cast<pragma::datasystem::Value *>(pair.second.get());
 					if(dsValue == nullptr)
 						continue;
 					udmChildren[idx++] = dsValue->GetString();
@@ -246,34 +246,34 @@ static void data_block_to_udm(ds::Block &dataBlock, udm::LinkedPropertyWrapperAr
 				udmChildren.Resize(idx);
 				continue;
 			}
-			auto *dsValue = dynamic_cast<ds::Value *>(val.get());
+			auto *dsValue = dynamic_cast<pragma::datasystem::Value *>(val.get());
 			assert(dsValue);
 			if(dsValue) {
-				auto *dsStr = dynamic_cast<ds::String *>(dsValue);
+				auto *dsStr = dynamic_cast<pragma::datasystem::String *>(dsValue);
 				if(dsStr)
 					prop[key] = dsStr->GetString();
-				auto *dsInt = dynamic_cast<ds::Int *>(dsValue);
+				auto *dsInt = dynamic_cast<pragma::datasystem::Int *>(dsValue);
 				if(dsInt)
 					prop[key] = dsInt->GetInt();
-				auto *dsFloat = dynamic_cast<ds::Float *>(dsValue);
+				auto *dsFloat = dynamic_cast<pragma::datasystem::Float *>(dsValue);
 				if(dsFloat)
 					prop[key] = dsFloat->GetFloat();
-				auto *dsBool = dynamic_cast<ds::Bool *>(dsValue);
+				auto *dsBool = dynamic_cast<pragma::datasystem::Bool *>(dsValue);
 				if(dsBool)
 					prop[key] = dsBool->GetBool();
-				auto *dsVec = dynamic_cast<ds::Vector *>(dsValue);
+				auto *dsVec = dynamic_cast<pragma::datasystem::Vector *>(dsValue);
 				if(dsVec)
 					prop[key] = dsVec->GetVector();
-				auto *dsVec4 = dynamic_cast<ds::Vector4 *>(dsValue);
+				auto *dsVec4 = dynamic_cast<pragma::datasystem::Vector4 *>(dsValue);
 				if(dsVec4)
 					prop[key] = dsVec4->GetVector4();
-				auto *dsVec2 = dynamic_cast<ds::Vector2 *>(dsValue);
+				auto *dsVec2 = dynamic_cast<pragma::datasystem::Vector2 *>(dsValue);
 				if(dsVec2)
 					prop[key] = dsVec2->GetVector2();
-				auto *dsTex = dynamic_cast<ds::Texture *>(dsValue);
+				auto *dsTex = dynamic_cast<pragma::datasystem::Texture *>(dsValue);
 				if(dsTex)
 					udm["textures"][key] = dsTex->GetString();
-				auto *dsCol = dynamic_cast<ds::Color *>(dsValue);
+				auto *dsCol = dynamic_cast<pragma::datasystem::Color *>(dsValue);
 				if(dsCol) {
 					auto col = dsCol->GetColor();
 					auto max = std::numeric_limits<udm::Srgba::value_type>::max();
@@ -553,19 +553,19 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("data_block_to_udm",&data_block_to_udm),
 		luabind::def("data_file_to_udm",+[](const std::string &fileName) -> bool {
 			std::string rpath;
-			if(FileManager::FindAbsolutePath(fileName,rpath) == false)
+			if(pragma::fs::find_absolute_path(fileName,rpath) == false)
 				return false;
-			auto f = FileManager::OpenFile(fileName.c_str(),"r");
+			auto f = pragma::fs::open_file(fileName.c_str(), pragma::fs::FileMode::Read);
 			if(f == nullptr)
 				return false;
-			fsys::File fp {f};
-			auto root = ds::System::ReadData(fp);
+			pragma::fs::File fp {f};
+			auto root = pragma::datasystem::System::ReadData(fp);
 			if(root == nullptr)
 				return false;
 			ufile::remove_extension_from_filename(rpath);
 			rpath += ".udm";
-			filemanager::find_relative_path(rpath, rpath);
-			auto fout = FileManager::OpenFile<VFilePtrReal>(rpath.c_str(),"w");
+			pragma::fs::find_relative_path(rpath, rpath);
+			auto fout = pragma::fs::open_file<pragma::fs::VFilePtrReal>(rpath,pragma::fs::FileMode::Write);
 			if(fout == nullptr)
 				return false;
 			auto udmData = ::udm::Data::Create();

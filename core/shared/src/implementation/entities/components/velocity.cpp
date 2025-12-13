@@ -10,27 +10,27 @@ using namespace pragma;
 
 constexpr float VELOCITY_EPSILON_DELTA_FOR_SNAPSHOT = 0.05f;
 
-void VelocityComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void VelocityComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = VelocityComponent;
 
 	using TVelocity = Vector3;
 	registerMember(create_component_member_info<T, TVelocity, static_cast<void (T::*)(const TVelocity &)>(&T::SetVelocity), static_cast<const TVelocity &(T::*)() const>(&T::GetVelocity)>("velocity", TVelocity {}));
 }
-VelocityComponent::VelocityComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_velocity(pragma::util::Vector3Property::Create()), m_angVelocity(pragma::util::Vector3Property::Create()) {}
+VelocityComponent::VelocityComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_velocity(util::Vector3Property::Create()), m_angVelocity(util::Vector3Property::Create()) {}
 void VelocityComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent("transform");
 }
-void VelocityComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-const pragma::util::PVector3Property &VelocityComponent::GetVelocityProperty() const { return m_velocity; }
-const pragma::util::PVector3Property &VelocityComponent::GetAngularVelocityProperty() const { return m_angVelocity; }
+void VelocityComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+const util::PVector3Property &VelocityComponent::GetVelocityProperty() const { return m_velocity; }
+const util::PVector3Property &VelocityComponent::GetAngularVelocityProperty() const { return m_angVelocity; }
 
-pragma::util::EventReply VelocityComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply VelocityComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == damageableComponent::EVENT_ON_TAKE_DAMAGE) {
 		auto &force = static_cast<CEOnTakeDamage &>(evData).damageInfo.GetForce();
 		AddVelocity(force);
@@ -41,7 +41,7 @@ pragma::util::EventReply VelocityComponent::HandleEvent(ComponentEventId eventId
 		uvec::rotate(&vel, te.deltaPose.GetRotation());
 		SetVelocity(vel);
 	}
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 
 void VelocityComponent::SetVelocity(const Vector3 &vel)

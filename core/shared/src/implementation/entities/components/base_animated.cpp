@@ -10,36 +10,36 @@ import :entities.components.base_animated;
 
 using namespace pragma;
 
-ComponentEventId baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ACTIVITY = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_START = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_COMPLETE = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATION_START = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_TRANSLATE_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_TRANSLATE_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES = pragma::INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ACTIVITY = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_START = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_COMPLETE = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATION_START = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_TRANSLATE_LAYERED_ANIMATION = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_TRANSLATE_ANIMATION = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MT = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES = INVALID_COMPONENT_ID;
 
-ComponentEventId baseAnimatedComponent::EVENT_ON_PLAY_ACTIVITY = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_STOP_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED_MT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_UPDATE_BONE_POSES_MT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_BONE_POSES_FINALIZED_MT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATION_RESET = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_UPDATE_SKELETON = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_RESET_POSE = pragma::INVALID_COMPONENT_ID;
-void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+ComponentEventId baseAnimatedComponent::EVENT_ON_PLAY_ACTIVITY = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_STOP_LAYERED_ANIMATION = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED_MT = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_UPDATE_BONE_POSES_MT = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_BONE_POSES_FINALIZED_MT = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_PLAY_ANIMATION = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATION_RESET = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_UPDATE_SKELETON = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE = INVALID_COMPONENT_ID;
+ComponentEventId baseAnimatedComponent::EVENT_ON_RESET_POSE = INVALID_COMPONENT_ID;
+void BaseAnimatedComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = registerEvent("HANDLE_ANIMATION_EVENT", ComponentEventInfo::Type::Explicit);
 	baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION = registerEvent("ON_PLAY_ANIMATION", ComponentEventInfo::Type::Explicit);
@@ -72,15 +72,15 @@ void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &compo
 	baseAnimatedComponent::EVENT_ON_RESET_POSE = registerEvent("ON_RESET_POSE", ComponentEventInfo::Type::Broadcast);
 }
 
-BaseAnimatedComponent::BaseAnimatedComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_playbackRate(pragma::util::FloatProperty::Create(1.f)) {}
+BaseAnimatedComponent::BaseAnimatedComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_playbackRate(util::FloatProperty::Create(1.f)) {}
 
 void BaseAnimatedComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(static_cast<pragma::CEOnModelChanged &>(evData.get()).model); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { OnModelChanged(static_cast<CEOnModelChanged &>(evData.get()).model); });
 
-	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(basePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE, [this](std::reference_wrapper<ComponentEvent> evData) {
 		if(IsPlayingAnimation() == false)
 			return;
 		auto pPhysComponent = GetEntity().GetPhysicsComponent();
@@ -92,7 +92,7 @@ void BaseAnimatedComponent::Initialize()
 	});
 
 	auto &ent = GetEntity();
-	auto *mdlComponent = static_cast<pragma::BaseModelComponent *>(ent.AddComponent("model").get());
+	auto *mdlComponent = static_cast<BaseModelComponent *>(ent.AddComponent("model").get());
 	if(mdlComponent != nullptr) {
 		auto &mdl = mdlComponent->GetModel();
 		OnModelChanged(mdl);
@@ -113,7 +113,7 @@ void BaseAnimatedComponent::OnRemove()
 	GetNetworkState().GetGameState()->GetAnimationUpdateManager().UpdateEntityState(GetEntity());
 }
 
-bool BaseAnimatedComponent::IsAnimated() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::IsAnimated); }
+bool BaseAnimatedComponent::IsAnimated() const { return math::is_flag_set(m_stateFlags, StateFlags::IsAnimated); }
 void BaseAnimatedComponent::UpdateAnimations(double dt)
 {
 	if(ShouldUpdateBones() == false) {
@@ -126,7 +126,7 @@ void BaseAnimatedComponent::UpdateAnimations(double dt)
 	MaintainAnimations(dt * (pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f));
 }
 
-void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::asset::Model> &mdl)
+void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<asset::Model> &mdl)
 {
 	m_animSlots.clear();
 	m_baseAnim = {};
@@ -134,7 +134,7 @@ void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::asset::
 	m_bones.clear();
 	m_processedBones.clear();
 	m_bindPose = nullptr;
-	pragma::math::set_flag(m_stateFlags, StateFlags::AbsolutePosesDirty);
+	math::set_flag(m_stateFlags, StateFlags::AbsolutePosesDirty);
 	ApplyAnimationEventTemplates();
 	if(mdl == nullptr || mdl->HasVertexWeights() == false)
 		return;
@@ -161,7 +161,7 @@ void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::asset::
 	for(it = animations->begin(); it != animations->end(); it++) {
 		unsigned int animID = it->second;
 		auto anim = mdl->GetAnimation(animID);
-		if(anim->HasFlag(pragma::FAnim::Autoplay)) {
+		if(anim->HasFlag(FAnim::Autoplay)) {
 			PlayLayeredAnimation(autoplaySlot, animID);
 			autoplaySlot++;
 		}
@@ -169,7 +169,7 @@ void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::asset::
 
 	m_processedBones.resize(numBones);
 	for(auto i = decltype(numBones) {0u}; i < numBones; ++i) {
-		pragma::math::ScaledTransform pose {};
+		math::ScaledTransform pose {};
 		m_bindPose->GetBonePose(i, pose);
 		m_processedBones[i] = pose;
 	}
@@ -204,12 +204,12 @@ std::optional<ComponentMemberIndex> BaseAnimatedComponent::DoGetMemberIndex(cons
 	return std::optional<ComponentMemberIndex> {};
 }
 
-void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl)
+void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<asset::Model> &mdl)
 {
 	ResetAnimation(mdl);
 	BroadcastEvent(baseAnimatedComponent::EVENT_ON_ANIMATION_RESET);
 
-	pragma::util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
+	util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
 	ClearMembers();
 	if(!mdl)
 		return;
@@ -218,8 +218,8 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::asset::
 	relRef->Localize(skeleton);
 	auto &bones = skeleton.GetBones();
 	ReserveMembers(bones.size() * 3);
-	std::function<void(const pragma::animation::Bone &, const std::string &)> fAddBone = nullptr;
-	fAddBone = [&](const pragma::animation::Bone &bone, const std::string &parentPathName) {
+	std::function<void(const animation::Bone &, const std::string &)> fAddBone = nullptr;
+	fAddBone = [&](const animation::Bone &bone, const std::string &parentPathName) {
 		const auto &name = bone.name;
 		std::string lname = name;
 		// pragma::string::to_lower(lname);
@@ -230,7 +230,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::asset::
 			parentMetaData->parentProperty = parentPathName;
 		}
 
-		pragma::math::ScaledTransform defaultPose;
+		math::ScaledTransform defaultPose;
 		relRef->GetBonePose(bone.ID, defaultPose);
 
 		auto posePathName = "bone/" + lname + "/pose";
@@ -246,30 +246,30 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::asset::
 		poseComponentMetaData->poseProperty = posePathName;
 
 		auto coordMetaData = pragma::util::make_shared<ents::CoordinateTypeMetaData>();
-		coordMetaData->space = pragma::math::CoordinateSpace::Local;
+		coordMetaData->space = math::CoordinateSpace::Local;
 		coordMetaData->parentProperty = parentPathName;
 
-		auto memberInfoPose = pragma::ComponentMemberInfo::CreateDummy();
+		auto memberInfoPose = ComponentMemberInfo::CreateDummy();
 		memberInfoPose.SetName(posePathName);
 		memberInfoPose.AddTypeMetaData(poseMetaData);
 		if(parentMetaData)
 			memberInfoPose.AddTypeMetaData(parentMetaData);
 		memberInfoPose.type = ents::EntityMemberType::ScaledTransform;
 		memberInfoPose.userIndex = bone.ID;
-		memberInfoPose.SetFlag(pragma::ComponentMemberFlags::HideInInterface);
+		memberInfoPose.SetFlag(ComponentMemberFlags::HideInInterface);
 		memberInfoPose.AddTypeMetaData(coordMetaData);
-		memberInfoPose.SetGetterFunction<BaseAnimatedComponent, pragma::math::ScaledTransform,
-		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, pragma::math::ScaledTransform &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, pragma::math::ScaledTransform &outValue) {
+		memberInfoPose.SetGetterFunction<BaseAnimatedComponent, math::ScaledTransform,
+		  static_cast<void (*)(const ComponentMemberInfo &, BaseAnimatedComponent &, math::ScaledTransform &)>([](const ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, math::ScaledTransform &outValue) {
 			  if(!component.GetBonePose(memberInfo.userIndex, outValue)) {
 				  outValue = {};
 				  return;
 			  }
 		  })>();
-		memberInfoPose.SetSetterFunction<BaseAnimatedComponent, pragma::math::ScaledTransform,
-		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, const pragma::math::ScaledTransform &)>(
-		    [](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const pragma::math::ScaledTransform &value) { component.SetBonePose(memberInfo.userIndex, value); })>();
+		memberInfoPose.SetSetterFunction<BaseAnimatedComponent, math::ScaledTransform,
+		  static_cast<void (*)(const ComponentMemberInfo &, BaseAnimatedComponent &, const math::ScaledTransform &)>(
+		    [](const ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const math::ScaledTransform &value) { component.SetBonePose(memberInfo.userIndex, value); })>();
 
-		auto memberInfoPos = pragma::ComponentMemberInfo::CreateDummy();
+		auto memberInfoPos = ComponentMemberInfo::CreateDummy();
 		memberInfoPos.SetName("bone/" + lname + "/position");
 		memberInfoPos.type = ents::EntityMemberType::Vector3;
 		memberInfoPos.userIndex = bone.ID;
@@ -278,14 +278,14 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::asset::
 		memberInfoPos.AddTypeMetaData(poseComponentMetaData);
 		if(parentMetaData)
 			memberInfoPos.AddTypeMetaData(parentMetaData);
-		memberInfoPos.SetGetterFunction<BaseAnimatedComponent, Vector3, static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, Vector3 &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Vector3 &outValue) {
+		memberInfoPos.SetGetterFunction<BaseAnimatedComponent, Vector3, static_cast<void (*)(const ComponentMemberInfo &, BaseAnimatedComponent &, Vector3 &)>([](const ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Vector3 &outValue) {
 			if(!component.GetBonePos(memberInfo.userIndex, outValue)) {
 				outValue = {};
 				return;
 			}
 		})>();
 		memberInfoPos.SetSetterFunction<BaseAnimatedComponent, Vector3,
-		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, const Vector3 &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const Vector3 &value) { component.SetBonePos(memberInfo.userIndex, value); })>();
+		  static_cast<void (*)(const ComponentMemberInfo &, BaseAnimatedComponent &, const Vector3 &)>([](const ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const Vector3 &value) { component.SetBonePos(memberInfo.userIndex, value); })>();
 
 		auto memberInfoRot = memberInfoPos;
 		memberInfoRot.SetName("bone/" + lname + "/rotation");
@@ -296,14 +296,14 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::asset::
 		memberInfoRot.AddTypeMetaData(poseComponentMetaData);
 		if(parentMetaData)
 			memberInfoRot.AddTypeMetaData(parentMetaData);
-		memberInfoRot.SetGetterFunction<BaseAnimatedComponent, Quat, static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, Quat &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Quat &outValue) {
+		memberInfoRot.SetGetterFunction<BaseAnimatedComponent, Quat, static_cast<void (*)(const ComponentMemberInfo &, BaseAnimatedComponent &, Quat &)>([](const ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Quat &outValue) {
 			if(!component.GetBoneRot(memberInfo.userIndex, outValue)) {
 				outValue = uquat::identity();
 				return;
 			}
 		})>();
 		memberInfoRot.SetSetterFunction<BaseAnimatedComponent, Quat,
-		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, const Quat &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const Quat &value) { component.SetBoneRot(memberInfo.userIndex, value); })>();
+		  static_cast<void (*)(const ComponentMemberInfo &, BaseAnimatedComponent &, const Quat &)>([](const ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const Quat &value) { component.SetBoneRot(memberInfo.userIndex, value); })>();
 
 		auto memberInfoScale = memberInfoPos;
 		memberInfoScale.SetName("bone/" + lname + "/scale");
@@ -313,14 +313,14 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::asset::
 		memberInfoScale.AddTypeMetaData(poseMetaData);
 		if(parentMetaData)
 			memberInfoScale.AddTypeMetaData(parentMetaData);
-		memberInfoScale.SetGetterFunction<BaseAnimatedComponent, Vector3, static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, Vector3 &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Vector3 &outValue) {
+		memberInfoScale.SetGetterFunction<BaseAnimatedComponent, Vector3, static_cast<void (*)(const ComponentMemberInfo &, BaseAnimatedComponent &, Vector3 &)>([](const ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Vector3 &outValue) {
 			if(!component.GetBoneScale(memberInfo.userIndex, outValue)) {
 				outValue = Vector3 {1.f, 1.f, 1.f};
 				return;
 			}
 		})>();
 		memberInfoScale.SetSetterFunction<BaseAnimatedComponent, Vector3,
-		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, const Vector3 &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const Vector3 &value) { component.SetBoneScale(memberInfo.userIndex, value); })>();
+		  static_cast<void (*)(const ComponentMemberInfo &, BaseAnimatedComponent &, const Vector3 &)>([](const ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const Vector3 &value) { component.SetBoneScale(memberInfo.userIndex, value); })>();
 
 		RegisterMember(std::move(memberInfoPose));
 		RegisterMember(std::move(memberInfoPos));
@@ -430,15 +430,15 @@ float BaseAnimatedComponent::GetBlendController(unsigned int controller) const
 		return 0;
 	return it->second;
 }
-static Frame *get_frame_from_cycle(pragma::animation::Animation &anim, float cycle, uint32_t frameOffset = 0) { return anim.GetFrame(static_cast<uint32_t>((anim.GetFrameCount() - 1) * cycle) + frameOffset).get(); }
-bool BaseAnimatedComponent::GetBlendFramesFromCycle(pragma::animation::Animation &anim, float cycle, Frame **outFrameSrc, Frame **outFrameDst, float &outInterpFactor, int32_t frameOffset)
+static Frame *get_frame_from_cycle(animation::Animation &anim, float cycle, uint32_t frameOffset = 0) { return anim.GetFrame(static_cast<uint32_t>((anim.GetFrameCount() - 1) * cycle) + frameOffset).get(); }
+bool BaseAnimatedComponent::GetBlendFramesFromCycle(animation::Animation &anim, float cycle, Frame **outFrameSrc, Frame **outFrameDst, float &outInterpFactor, int32_t frameOffset)
 {
 	auto frameVal = (anim.GetFrameCount() - 1) * cycle;
-	outInterpFactor = frameVal - static_cast<float>(pragma::math::floor(frameVal));
-	*outFrameSrc = anim.GetFrame(pragma::math::max(static_cast<int32_t>(frameVal) + frameOffset, 0)).get();
+	outInterpFactor = frameVal - static_cast<float>(math::floor(frameVal));
+	*outFrameSrc = anim.GetFrame(math::max(static_cast<int32_t>(frameVal) + frameOffset, 0)).get();
 	if(*outFrameSrc == nullptr)
 		return false;
-	auto *f = anim.GetFrame(pragma::math::max(static_cast<int32_t>(frameVal) + 1 + frameOffset, 0)).get();
+	auto *f = anim.GetFrame(math::max(static_cast<int32_t>(frameVal) + 1 + frameOffset, 0)).get();
 	if(f == *outFrameSrc) // No need to blend if both frames are the same
 	{
 		outInterpFactor = 0.f;
@@ -448,7 +448,7 @@ bool BaseAnimatedComponent::GetBlendFramesFromCycle(pragma::animation::Animation
 		*outFrameDst = f;
 	return true;
 }
-void BaseAnimatedComponent::GetAnimationBlendController(pragma::animation::Animation *anim, float cycle, std::array<AnimationBlendInfo, 2> &bcFrames, float *blendScale) const
+void BaseAnimatedComponent::GetAnimationBlendController(animation::Animation *anim, float cycle, std::array<AnimationBlendInfo, 2> &bcFrames, float *blendScale) const
 {
 	// Obsolete; TODO: Remove this!
 }
@@ -482,7 +482,7 @@ Frame *BaseAnimatedComponent::GetPreviousAnimationBlendFrame(AnimationSlotInfo &
 		else {
 			auto anim = hModel->GetAnimation(lastAnim.animation);
 			if(anim != nullptr) {
-				auto frameLast = pragma::math::floor((anim->GetFrameCount() - 1) * lastAnim.cycle);
+				auto frameLast = math::floor((anim->GetFrameCount() - 1) * lastAnim.cycle);
 				frameLastAnim = anim->GetFrame(frameLast).get();
 			}
 		}
@@ -501,7 +501,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo, doubl
 	if(hModel == nullptr)
 		return false;
 	CEMaintainAnimation evData {animInfo, dt};
-	if(InvokeEventCallbacks(baseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MT, evData) == pragma::util::EventReply::Handled)
+	if(InvokeEventCallbacks(baseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MT, evData) == util::EventReply::Handled)
 		return false;
 	if(animInfo.animation == -1)
 		return false;
@@ -519,11 +519,11 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo, doubl
 	auto cycleLast = cycle;
 	auto cycleNew = cycle + static_cast<float>(dt) * animSpeed;
 	if(layeredSlot == -1) {
-		if(pragma::math::abs(cycleNew - cycleLast) < 0.00001f && pragma::math::is_flag_set(m_stateFlags, StateFlags::BaseAnimationDirty) == false)
+		if(math::abs(cycleNew - cycleLast) < 0.00001f && math::is_flag_set(m_stateFlags, StateFlags::BaseAnimationDirty) == false)
 			return false;
-		pragma::math::set_flag(m_stateFlags, StateFlags::BaseAnimationDirty, false);
+		math::set_flag(m_stateFlags, StateFlags::BaseAnimationDirty, false);
 	}
-	auto bLoop = anim->HasFlag(pragma::FAnim::Loop) || pragma::math::is_flag_set(animInfo.flags, FPlayAnim::Loop);
+	auto bLoop = anim->HasFlag(FAnim::Loop) || math::is_flag_set(animInfo.flags, FPlayAnim::Loop);
 	auto bComplete = (cycleNew >= 1.f) ? true : false;
 	if(bComplete == true) {
 		cycle = 1.f;
@@ -548,7 +548,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo, doubl
 			}
 			if(bLoop == true) {
 				cycleNew -= floor(cycleNew);
-				if(anim->HasFlag(pragma::FAnim::NoRepeat)) {
+				if(anim->HasFlag(FAnim::NoRepeat)) {
 					animId = SelectWeightedAnimation(act, animId);
 					cycle = cycleNew;
 					SetBaseAnimationDirty();
@@ -577,7 +577,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo, doubl
 	// Initialize buffer for blended/interpolated animation data
 	auto &animBoneList = anim->GetBoneList();
 	auto numBones = animBoneList.size();
-	std::vector<pragma::math::Transform> bonePoses {};
+	std::vector<math::Transform> bonePoses {};
 	std::vector<Vector3> boneScales {};
 
 	// Blend between the last frame and the current frame of this animation.
@@ -621,7 +621,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo, doubl
 				// Interpolated poses of source animation
 				Frame *srcFrame, *dstFrame;
 				float animInterpFactor;
-				std::vector<pragma::math::Transform> ppBonePosesSrc {};
+				std::vector<math::Transform> ppBonePosesSrc {};
 				std::vector<Vector3> ppBoneScalesSrc {};
 				if(GetBlendFramesFromCycle(*blendAnimSrc, cycle, &srcFrame, &dstFrame, animInterpFactor)) {
 					if(dstFrame) {
@@ -636,7 +636,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo, doubl
 				}
 
 				// Interpolated poses of destination animation
-				std::vector<pragma::math::Transform> ppBonePosesDst {};
+				std::vector<math::Transform> ppBonePosesDst {};
 				std::vector<Vector3> ppBoneScalesDst {};
 				if(GetBlendFramesFromCycle(*blendAnimDst, cycle, &srcFrame, &dstFrame, animInterpFactor)) {
 					if(dstFrame) {
@@ -708,7 +708,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo, doubl
 	// Animation events
 	auto frameLast = (cycleLast != 0.f) ? static_cast<int32_t>((numFrames - 1) * cycleLast) : -1;
 	auto frameCycle = (numFrames > 0) ? ((numFrames - 1) * cycle) : 0.f;
-	auto frameID = pragma::math::floor(frameCycle);
+	auto frameID = math::floor(frameCycle);
 
 	if(frameID < frameLast)
 		frameID = numFrames;
@@ -742,9 +742,9 @@ bool BaseAnimatedComponent::MaintainGestures(double dt)
 		if(MaintainAnimation(animInfo, dt, it->first) == true) {
 			auto anim = hModel->GetAnimation(animInfo.animation);
 			auto baseAnim = hModel->GetAnimation(baseAnimInfo.animation);
-			TransformBoneFrames(bonePoses, !boneScales.empty() ? &boneScales : nullptr, baseAnim, anim, animInfo.bonePoses, !animInfo.boneScales.empty() ? &animInfo.boneScales : nullptr, anim->HasFlag(pragma::FAnim::Gesture));
+			TransformBoneFrames(bonePoses, !boneScales.empty() ? &boneScales : nullptr, baseAnim, anim, animInfo.bonePoses, !animInfo.boneScales.empty() ? &animInfo.boneScales : nullptr, anim->HasFlag(FAnim::Gesture));
 			if(animInfo.cycle >= 1.f) {
-				if(anim->HasFlag(pragma::FAnim::Loop) == false) {
+				if(anim->HasFlag(FAnim::Loop) == false) {
 					it = m_animSlots.erase(it); // No need to keep the gesture information around anymore
 					continue;
 				}
@@ -757,7 +757,7 @@ bool BaseAnimatedComponent::MaintainGestures(double dt)
 bool BaseAnimatedComponent::PreMaintainAnimations(double dt)
 {
 	CEMaintainAnimations evData {dt};
-	if(InvokeEventCallbacks(baseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS, evData) == pragma::util::EventReply::Handled) {
+	if(InvokeEventCallbacks(baseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS, evData) == util::EventReply::Handled) {
 		InvokeEventCallbacks(baseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED_MT);
 		InvokeEventCallbacks(baseAnimatedComponent::EVENT_UPDATE_BONE_POSES_MT);
 		InvokeEventCallbacks(baseAnimatedComponent::EVENT_ON_BONE_POSES_FINALIZED_MT);
@@ -783,7 +783,7 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 	auto &bonePoses = baseAnimInfo.bonePoses;
 	auto &boneScales = baseAnimInfo.boneScales;
 	// Apply animation to skeleton
-	auto n = pragma::math::min(bones.size(), bonePoses.size());
+	auto n = math::min(bones.size(), bonePoses.size());
 	for(auto i = decltype(n) {0}; i < n; ++i) {
 		auto boneId = bones[i];
 		auto &pose = bonePoses.at(i);
@@ -804,7 +804,7 @@ void BaseAnimatedComponent::HandleAnimationEvents()
 		InvokeEventCallbacks(evData.id, *evData.eventData);
 		m_queuedEvents.pop();
 	}
-	const auto fHandleAnimationEvents = [this](uint32_t animId, const std::shared_ptr<pragma::animation::Animation> &anim, int32_t frameId) {
+	const auto fHandleAnimationEvents = [this](uint32_t animId, const std::shared_ptr<animation::Animation> &anim, int32_t frameId) {
 		auto *events = anim->GetEvents(frameId);
 		if(events) {
 			for(auto &ev : *events)
@@ -846,7 +846,7 @@ void BaseAnimatedComponent::HandleAnimationEvents()
 
 	InvokeEventCallbacks(baseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED);
 }
-pragma::Activity BaseAnimatedComponent::TranslateActivity(pragma::Activity act)
+Activity BaseAnimatedComponent::TranslateActivity(Activity act)
 {
 	CETranslateActivity evTranslateActivityData {act};
 	InvokeEventCallbacks(baseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY, evTranslateActivityData);
@@ -870,9 +870,9 @@ void BaseAnimatedComponent::ResetPose()
 	auto &skeleton = mdl->GetSkeleton();
 	auto &ref = mdl->GetReference();
 	auto numBones = skeleton.GetBoneCount();
-	std::function<void(const animation::Bone &, const pragma::math::ScaledTransform &)> resetBonePose = nullptr;
-	resetBonePose = [this, &resetBonePose, &ref](const animation::Bone &bone, const pragma::math::ScaledTransform &parentPose) {
-		pragma::math::ScaledTransform pose;
+	std::function<void(const animation::Bone &, const math::ScaledTransform &)> resetBonePose = nullptr;
+	resetBonePose = [this, &resetBonePose, &ref](const animation::Bone &bone, const math::ScaledTransform &parentPose) {
+		math::ScaledTransform pose;
 		ref.GetBonePose(bone.ID, pose);
 		for(auto &[childId, child] : bone.children)
 			resetBonePose(*child, pose);
@@ -885,7 +885,7 @@ void BaseAnimatedComponent::ResetPose()
 }
 
 int BaseAnimatedComponent::GetAnimation() const { return m_baseAnim.animation; }
-pragma::animation::Animation *BaseAnimatedComponent::GetAnimationObject() const
+animation::Animation *BaseAnimatedComponent::GetAnimationObject() const
 {
 	auto animId = GetAnimation();
 	if(animId == -1)
@@ -905,11 +905,11 @@ int32_t BaseAnimatedComponent::GetLayeredAnimation(uint32_t slot) const
 		return -1;
 	return it->second.animation;
 }
-pragma::Activity BaseAnimatedComponent::GetLayeredActivity(uint32_t slot) const
+Activity BaseAnimatedComponent::GetLayeredActivity(uint32_t slot) const
 {
 	auto it = m_animSlots.find(slot);
 	if(it == m_animSlots.end())
-		return pragma::Activity::Invalid;
+		return Activity::Invalid;
 	return it->second.activity;
 }
 
@@ -917,13 +917,13 @@ void BaseAnimatedComponent::PlayAnimation(int animation, FPlayAnim flags)
 {
 	auto bSkipAnim = false;
 	CEOnPlayAnimation evData {m_baseAnim.animation, animation, flags};
-	if(InvokeEventCallbacks(baseAnimatedComponent::EVENT_PLAY_ANIMATION, evData) == pragma::util::EventReply::Handled)
+	if(InvokeEventCallbacks(baseAnimatedComponent::EVENT_PLAY_ANIMATION, evData) == util::EventReply::Handled)
 		return;
 	if(m_baseAnim.animation == animation && (flags & FPlayAnim::Reset) == FPlayAnim::None) {
 		auto &hModel = GetEntity().GetModel();
 		if(hModel != nullptr) {
 			auto anim = hModel->GetAnimation(animation);
-			if(anim != nullptr && anim->HasFlag(pragma::FAnim::Loop))
+			if(anim != nullptr && anim->HasFlag(FAnim::Loop))
 				return;
 		}
 	}
@@ -976,7 +976,7 @@ void BaseAnimatedComponent::PlayAnimation(int animation, FPlayAnim flags)
 	m_baseAnim.animation = animation;
 	m_baseAnim.cycle = 0;
 	m_baseAnim.flags = flags;
-	m_baseAnim.activity = pragma::Activity::Invalid;
+	m_baseAnim.activity = Activity::Invalid;
 	SetBaseAnimationDirty();
 	auto &hModel = GetEntity().GetModel();
 	if(hModel != nullptr) {
@@ -996,13 +996,13 @@ void BaseAnimatedComponent::PlayAnimation(int animation, FPlayAnim flags)
 				if(it != boneMap.end() || bone.expired())
 					continue;
 				auto parent = bone.lock()->parent;
-				pragma::math::ScaledTransform poseParent {};
+				math::ScaledTransform poseParent {};
 				if(!parent.expired()) {
 					ref.GetBonePose(parent.lock()->ID, poseParent);
 					poseParent = poseParent.GetInverse();
 				}
 
-				pragma::math::ScaledTransform pose {};
+				math::ScaledTransform pose {};
 				auto *pos = ref.GetBonePosition(i);
 				if(pos)
 					pose.SetOrigin(*pos);
@@ -1023,16 +1023,16 @@ void BaseAnimatedComponent::PlayAnimation(int animation, FPlayAnim flags)
 	InvokeEventCallbacks(baseAnimatedComponent::EVENT_ON_ANIMATION_START, evAnimStartData);
 }
 
-void BaseAnimatedComponent::SetBaseAnimationDirty() { pragma::math::set_flag(m_stateFlags, StateFlags::BaseAnimationDirty, true); }
-void BaseAnimatedComponent::SetAbsolutePosesDirty() { pragma::math::set_flag(m_stateFlags, StateFlags::AbsolutePosesDirty, true); }
+void BaseAnimatedComponent::SetBaseAnimationDirty() { math::set_flag(m_stateFlags, StateFlags::BaseAnimationDirty, true); }
+void BaseAnimatedComponent::SetAbsolutePosesDirty() { math::set_flag(m_stateFlags, StateFlags::AbsolutePosesDirty, true); }
 
-int32_t BaseAnimatedComponent::SelectTranslatedAnimation(pragma::Activity &inOutActivity) const
+int32_t BaseAnimatedComponent::SelectTranslatedAnimation(Activity &inOutActivity) const
 {
 	inOutActivity = const_cast<BaseAnimatedComponent *>(this)->TranslateActivity(inOutActivity);
 	return SelectWeightedAnimation(inOutActivity, m_baseAnim.animation);
 }
 
-bool BaseAnimatedComponent::PlayActivity(pragma::Activity activity, FPlayAnim flags)
+bool BaseAnimatedComponent::PlayActivity(Activity activity, FPlayAnim flags)
 {
 	if(GetActivity() == activity && (flags & FPlayAnim::Reset) == FPlayAnim::None)
 		return true;
@@ -1046,45 +1046,45 @@ bool BaseAnimatedComponent::PlayActivity(pragma::Activity activity, FPlayAnim fl
 	return (seq == -1) ? false : true;
 }
 
-pragma::Activity BaseAnimatedComponent::GetActivity() const
+Activity BaseAnimatedComponent::GetActivity() const
 {
 	if(m_baseAnim.animation == -1)
-		return pragma::Activity::Invalid;
-	if(m_baseAnim.activity != pragma::Activity::Invalid)
+		return Activity::Invalid;
+	if(m_baseAnim.activity != Activity::Invalid)
 		return m_baseAnim.activity;
 	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
-		return pragma::Activity::Invalid;
+		return Activity::Invalid;
 	auto anim = hModel->GetAnimation(m_baseAnim.animation);
 	if(anim == nullptr)
-		return pragma::Activity::Invalid;
+		return Activity::Invalid;
 	return anim->GetActivity();
 }
 
 void BaseAnimatedComponent::SetPlaybackRate(float rate) { *m_playbackRate = rate; }
 float BaseAnimatedComponent::GetPlaybackRate() const { return *m_playbackRate; }
-const pragma::util::PFloatProperty &BaseAnimatedComponent::GetPlaybackRateProperty() const { return m_playbackRate; }
+const util::PFloatProperty &BaseAnimatedComponent::GetPlaybackRateProperty() const { return m_playbackRate; }
 
-void BaseAnimatedComponent::HandleAnimationEvent(const pragma::AnimationEvent &ev)
+void BaseAnimatedComponent::HandleAnimationEvent(const AnimationEvent &ev)
 {
 	auto bHandled = false;
 	CEHandleAnimationEvent evData {ev};
-	if(InvokeEventCallbacks(baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, evData) == pragma::util::EventReply::Handled)
+	if(InvokeEventCallbacks(baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, evData) == util::EventReply::Handled)
 		return;
 	auto it = m_boundAnimEvents.find(ev.eventID);
 	if(it != m_boundAnimEvents.end()) {
-		it->second.Call<void, std::reference_wrapper<const pragma::AnimationEvent>>(ev);
+		it->second.Call<void, std::reference_wrapper<const AnimationEvent>>(ev);
 		return;
 	}
 	switch(ev.eventID) {
-	case pragma::AnimationEvent::Type::EmitSound:
+	case AnimationEvent::Type::EmitSound:
 		{
 			if(ev.arguments.size() > 0) {
-				auto pSoundEmitterComponent = static_cast<pragma::BaseSoundEmitterComponent *>(GetEntity().FindComponent("sound_emitter").get());
+				auto pSoundEmitterComponent = static_cast<BaseSoundEmitterComponent *>(GetEntity().FindComponent("sound_emitter").get());
 				if(pSoundEmitterComponent != nullptr) {
-					pragma::BaseSoundEmitterComponent::SoundInfo sndInfo {};
+					BaseSoundEmitterComponent::SoundInfo sndInfo {};
 					sndInfo.transmit = false;
-					pSoundEmitterComponent->EmitSound(ev.arguments.front(), pragma::audio::ALSoundType::Generic, sndInfo);
+					pSoundEmitterComponent->EmitSound(ev.arguments.front(), audio::ALSoundType::Generic, sndInfo);
 				}
 			}
 			break;
@@ -1107,7 +1107,7 @@ bool BaseAnimatedComponent::PlayAnimation(const std::string &name, FPlayAnim fla
 	int anim = mdlComponent->LookupAnimation(name);
 
 	CEOnPlayAnimation evData {prevAnim, anim, flags};
-	if(InvokeEventCallbacks(baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION, evData) == pragma::util::EventReply::Handled)
+	if(InvokeEventCallbacks(baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION, evData) == util::EventReply::Handled)
 		return false;
 
 	PlayAnimation(anim, flags);
@@ -1144,7 +1144,7 @@ bool BaseAnimatedComponent::PlayLayeredAnimation(int slot, std::string animation
 	PlayLayeredAnimation(slot, anim, flags);
 	return true;
 }
-bool BaseAnimatedComponent::PlayLayeredActivity(int slot, pragma::Activity activity, FPlayAnim flags)
+bool BaseAnimatedComponent::PlayLayeredActivity(int slot, Activity activity, FPlayAnim flags)
 {
 	CEOnPlayLayeredActivity evData {slot, activity, flags};
 	InvokeEventCallbacks(baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ACTIVITY, evData);
@@ -1179,8 +1179,8 @@ void BaseAnimatedComponent::StopLayeredAnimation(int slot)
 	m_animSlots.erase(it);
 }
 
-const std::vector<pragma::math::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() const { return const_cast<BaseAnimatedComponent *>(this)->GetProcessedBones(); }
-std::vector<pragma::math::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() { return m_processedBones; }
+const std::vector<math::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() const { return const_cast<BaseAnimatedComponent *>(this)->GetProcessedBones(); }
+std::vector<math::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() { return m_processedBones; }
 
 bool BaseAnimatedComponent::CalcAnimationMovementSpeed(float *x, float *z, int32_t frameOffset) const
 {
@@ -1190,7 +1190,7 @@ bool BaseAnimatedComponent::CalcAnimationMovementSpeed(float *x, float *z, int32
 	if(hMdl == nullptr || animId == -1)
 		return false;
 	auto anim = hMdl->GetAnimation(animId);
-	if(anim == nullptr || (((x != nullptr && anim->HasFlag(pragma::FAnim::MoveX) == false) || x == nullptr) && ((z != nullptr && anim->HasFlag(pragma::FAnim::MoveZ) == false) || z == nullptr)))
+	if(anim == nullptr || (((x != nullptr && anim->HasFlag(FAnim::MoveX) == false) || x == nullptr) && ((z != nullptr && anim->HasFlag(FAnim::MoveZ) == false) || z == nullptr)))
 		return false;
 
 	std::array<Frame *, 2> frames = {nullptr, nullptr};
@@ -1342,7 +1342,7 @@ void BaseAnimatedComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t ver
 
 /////////////////
 
-CEHandleAnimationEvent::CEHandleAnimationEvent(const pragma::AnimationEvent &animationEvent) : animationEvent(animationEvent) {}
+CEHandleAnimationEvent::CEHandleAnimationEvent(const AnimationEvent &animationEvent) : animationEvent(animationEvent) {}
 void CEHandleAnimationEvent::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, static_cast<int32_t>(animationEvent.eventID));
@@ -1364,17 +1364,17 @@ void CEHandleAnimationEvent::PushArgumentVariadic(lua::State *l)
 
 /////////////////
 
-CEOnPlayAnimation::CEOnPlayAnimation(int32_t previousAnimation, int32_t animation, pragma::FPlayAnim flags) : previousAnimation(previousAnimation), animation(animation), flags(flags) {}
+CEOnPlayAnimation::CEOnPlayAnimation(int32_t previousAnimation, int32_t animation, FPlayAnim flags) : previousAnimation(previousAnimation), animation(animation), flags(flags) {}
 void CEOnPlayAnimation::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, previousAnimation);
 	Lua::PushInt(l, animation);
-	Lua::PushInt(l, pragma::math::to_integral(flags));
+	Lua::PushInt(l, math::to_integral(flags));
 }
 
 /////////////////
 
-CEOnPlayLayeredAnimation::CEOnPlayLayeredAnimation(int32_t slot, int32_t previousAnimation, int32_t animation, pragma::FPlayAnim flags) : CEOnPlayAnimation(previousAnimation, animation, flags), slot(slot) {}
+CEOnPlayLayeredAnimation::CEOnPlayLayeredAnimation(int32_t slot, int32_t previousAnimation, int32_t animation, FPlayAnim flags) : CEOnPlayAnimation(previousAnimation, animation, flags), slot(slot) {}
 void CEOnPlayLayeredAnimation::PushArguments(lua::State *l)
 {
 	CEOnPlayAnimation::PushArguments(l);
@@ -1383,12 +1383,12 @@ void CEOnPlayLayeredAnimation::PushArguments(lua::State *l)
 
 /////////////////
 
-CETranslateLayeredActivity::CETranslateLayeredActivity(int32_t &slot, pragma::Activity &activity, pragma::FPlayAnim &flags) : slot(slot), activity(activity), flags(flags) {}
+CETranslateLayeredActivity::CETranslateLayeredActivity(int32_t &slot, Activity &activity, FPlayAnim &flags) : slot(slot), activity(activity), flags(flags) {}
 void CETranslateLayeredActivity::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slot);
-	Lua::PushInt(l, pragma::math::to_integral(activity));
-	Lua::PushInt(l, pragma::math::to_integral(flags));
+	Lua::PushInt(l, math::to_integral(activity));
+	Lua::PushInt(l, math::to_integral(flags));
 }
 uint32_t CETranslateLayeredActivity::GetReturnCount() { return 3; }
 void CETranslateLayeredActivity::HandleReturnValues(lua::State *l)
@@ -1396,48 +1396,48 @@ void CETranslateLayeredActivity::HandleReturnValues(lua::State *l)
 	if(Lua::IsSet(l, -3))
 		slot = Lua::CheckInt(l, -3);
 	if(Lua::IsSet(l, -2))
-		activity = static_cast<pragma::Activity>(Lua::CheckInt(l, -2));
+		activity = static_cast<Activity>(Lua::CheckInt(l, -2));
 	if(Lua::IsSet(l, -1))
-		flags = static_cast<pragma::FPlayAnim>(Lua::CheckInt(l, -1));
+		flags = static_cast<FPlayAnim>(Lua::CheckInt(l, -1));
 }
 
 /////////////////
 
-CEOnAnimationComplete::CEOnAnimationComplete(int32_t animation, pragma::Activity activity) : animation(animation), activity(activity) {}
+CEOnAnimationComplete::CEOnAnimationComplete(int32_t animation, Activity activity) : animation(animation), activity(activity) {}
 void CEOnAnimationComplete::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, animation);
-	Lua::PushInt(l, pragma::math::to_integral(activity));
+	Lua::PushInt(l, math::to_integral(activity));
 }
 
 /////////////////
 
-CELayeredAnimationInfo::CELayeredAnimationInfo(int32_t slot, int32_t animation, pragma::Activity activity) : slot(slot), animation(animation), activity(activity) {}
+CELayeredAnimationInfo::CELayeredAnimationInfo(int32_t slot, int32_t animation, Activity activity) : slot(slot), animation(animation), activity(activity) {}
 void CELayeredAnimationInfo::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slot);
 	Lua::PushInt(l, animation);
-	Lua::PushInt(l, pragma::math::to_integral(activity));
+	Lua::PushInt(l, math::to_integral(activity));
 }
 
 /////////////////
 
-CEOnAnimationStart::CEOnAnimationStart(int32_t animation, pragma::Activity activity, pragma::FPlayAnim flags) : animation(animation), activity(activity), flags(flags) {}
+CEOnAnimationStart::CEOnAnimationStart(int32_t animation, Activity activity, FPlayAnim flags) : animation(animation), activity(activity), flags(flags) {}
 void CEOnAnimationStart::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, animation);
-	Lua::PushInt(l, pragma::math::to_integral(activity));
-	Lua::PushInt(l, pragma::math::to_integral(flags));
+	Lua::PushInt(l, math::to_integral(activity));
+	Lua::PushInt(l, math::to_integral(flags));
 }
 
 /////////////////
 
-CETranslateLayeredAnimation::CETranslateLayeredAnimation(int32_t &slot, int32_t &animation, pragma::FPlayAnim &flags) : slot(slot), animation(animation), flags(flags) {}
+CETranslateLayeredAnimation::CETranslateLayeredAnimation(int32_t &slot, int32_t &animation, FPlayAnim &flags) : slot(slot), animation(animation), flags(flags) {}
 void CETranslateLayeredAnimation::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slot);
 	Lua::PushInt(l, animation);
-	Lua::PushInt(l, pragma::math::to_integral(flags));
+	Lua::PushInt(l, math::to_integral(flags));
 }
 uint32_t CETranslateLayeredAnimation::GetReturnCount() { return 3; }
 void CETranslateLayeredAnimation::HandleReturnValues(lua::State *l)
@@ -1447,16 +1447,16 @@ void CETranslateLayeredAnimation::HandleReturnValues(lua::State *l)
 	if(Lua::IsSet(l, -2))
 		animation = Lua::CheckInt(l, -2);
 	if(Lua::IsSet(l, -1))
-		flags = static_cast<pragma::FPlayAnim>(Lua::CheckInt(l, -1));
+		flags = static_cast<FPlayAnim>(Lua::CheckInt(l, -1));
 }
 
 /////////////////
 
-CETranslateAnimation::CETranslateAnimation(int32_t &animation, pragma::FPlayAnim &flags) : animation(animation), flags(flags) {}
+CETranslateAnimation::CETranslateAnimation(int32_t &animation, FPlayAnim &flags) : animation(animation), flags(flags) {}
 void CETranslateAnimation::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, animation);
-	Lua::PushInt(l, pragma::math::to_integral(flags));
+	Lua::PushInt(l, math::to_integral(flags));
 }
 uint32_t CETranslateAnimation::GetReturnCount() { return 2; }
 void CETranslateAnimation::HandleReturnValues(lua::State *l)
@@ -1464,24 +1464,24 @@ void CETranslateAnimation::HandleReturnValues(lua::State *l)
 	if(Lua::IsSet(l, -2))
 		animation = Lua::CheckInt(l, -2);
 	if(Lua::IsSet(l, -1))
-		flags = static_cast<pragma::FPlayAnim>(Lua::CheckInt(l, -1));
+		flags = static_cast<FPlayAnim>(Lua::CheckInt(l, -1));
 }
 
 /////////////////
 
-CETranslateActivity::CETranslateActivity(pragma::Activity &activity) : activity(activity) {}
-void CETranslateActivity::PushArguments(lua::State *l) { Lua::PushInt(l, pragma::math::to_integral(activity)); }
+CETranslateActivity::CETranslateActivity(Activity &activity) : activity(activity) {}
+void CETranslateActivity::PushArguments(lua::State *l) { Lua::PushInt(l, math::to_integral(activity)); }
 uint32_t CETranslateActivity::GetReturnCount() { return 1; }
 void CETranslateActivity::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -1))
-		activity = static_cast<pragma::Activity>(Lua::CheckInt(l, -1));
+		activity = static_cast<Activity>(Lua::CheckInt(l, -1));
 }
 
 /////////////////
 
-pragma::CEOnBoneTransformChanged::CEOnBoneTransformChanged(UInt32 boneId, const Vector3 *pos, const Quat *rot, const Vector3 *scale) : boneId {boneId}, pos {pos}, rot {rot}, scale {scale} {}
-void pragma::CEOnBoneTransformChanged::PushArguments(lua::State *l)
+CEOnBoneTransformChanged::CEOnBoneTransformChanged(UInt32 boneId, const Vector3 *pos, const Quat *rot, const Vector3 *scale) : boneId {boneId}, pos {pos}, rot {rot}, scale {scale} {}
+void CEOnBoneTransformChanged::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, boneId);
 	if(pos != nullptr)
@@ -1502,76 +1502,76 @@ void pragma::CEOnBoneTransformChanged::PushArguments(lua::State *l)
 
 /////////////////
 
-pragma::CEOnPlayActivity::CEOnPlayActivity(pragma::Activity activity, FPlayAnim flags) : activity {activity}, flags {flags} {}
-void pragma::CEOnPlayActivity::PushArguments(lua::State *l)
+CEOnPlayActivity::CEOnPlayActivity(Activity activity, FPlayAnim flags) : activity {activity}, flags {flags} {}
+void CEOnPlayActivity::PushArguments(lua::State *l)
 {
-	Lua::PushInt(l, pragma::math::to_integral(activity));
-	Lua::PushInt(l, pragma::math::to_integral(flags));
+	Lua::PushInt(l, math::to_integral(activity));
+	Lua::PushInt(l, math::to_integral(flags));
 }
 
 /////////////////
 
-pragma::CEOnPlayLayeredActivity::CEOnPlayLayeredActivity(int slot, pragma::Activity activity, FPlayAnim flags) : slot {slot}, activity {activity}, flags {flags} {}
-void pragma::CEOnPlayLayeredActivity::PushArguments(lua::State *l)
+CEOnPlayLayeredActivity::CEOnPlayLayeredActivity(int slot, Activity activity, FPlayAnim flags) : slot {slot}, activity {activity}, flags {flags} {}
+void CEOnPlayLayeredActivity::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slot);
-	Lua::PushInt(l, pragma::math::to_integral(activity));
-	Lua::PushInt(l, pragma::math::to_integral(flags));
+	Lua::PushInt(l, math::to_integral(activity));
+	Lua::PushInt(l, math::to_integral(flags));
 }
 
 /////////////////
 
-pragma::CEOnStopLayeredAnimation::CEOnStopLayeredAnimation(int32_t slot, BaseAnimatedComponent::AnimationSlotInfo &slotInfo) : slot {slot}, slotInfo {slotInfo} {}
-void pragma::CEOnStopLayeredAnimation::PushArguments(lua::State *l)
+CEOnStopLayeredAnimation::CEOnStopLayeredAnimation(int32_t slot, BaseAnimatedComponent::AnimationSlotInfo &slotInfo) : slot {slot}, slotInfo {slotInfo} {}
+void CEOnStopLayeredAnimation::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slot);
 	Lua::PushInt(l, slotInfo.animation);
-	Lua::PushInt(l, pragma::math::to_integral(slotInfo.activity));
+	Lua::PushInt(l, math::to_integral(slotInfo.activity));
 }
 
 /////////////////
 
-pragma::CEOnBlendAnimation::CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, pragma::Activity activity, std::vector<pragma::math::Transform> &bonePoses, std::vector<Vector3> *boneScales)
+CEOnBlendAnimation::CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, Activity activity, std::vector<math::Transform> &bonePoses, std::vector<Vector3> *boneScales)
     : slotInfo {slotInfo}, activity {activity}, bonePoses {bonePoses}, boneScales {boneScales}
 {
 }
-void pragma::CEOnBlendAnimation::PushArguments(lua::State *l)
+void CEOnBlendAnimation::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slotInfo.animation);
-	Lua::PushInt(l, pragma::math::to_integral(activity));
+	Lua::PushInt(l, math::to_integral(activity));
 }
 
 /////////////////
 
-pragma::CEMaintainAnimations::CEMaintainAnimations(double deltaTime) : deltaTime {deltaTime} {}
-void pragma::CEMaintainAnimations::PushArguments(lua::State *l) { Lua::PushNumber(l, deltaTime); }
+CEMaintainAnimations::CEMaintainAnimations(double deltaTime) : deltaTime {deltaTime} {}
+void CEMaintainAnimations::PushArguments(lua::State *l) { Lua::PushNumber(l, deltaTime); }
 
 /////////////////
 
-pragma::CEMaintainAnimation::CEMaintainAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, double deltaTime) : slotInfo {slotInfo}, deltaTime {deltaTime} {}
-void pragma::CEMaintainAnimation::PushArguments(lua::State *l)
+CEMaintainAnimation::CEMaintainAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo, double deltaTime) : slotInfo {slotInfo}, deltaTime {deltaTime} {}
+void CEMaintainAnimation::PushArguments(lua::State *l)
 {
 	Lua::PushInt(l, slotInfo.animation);
-	Lua::PushInt(l, pragma::math::to_integral(slotInfo.activity));
+	Lua::PushInt(l, math::to_integral(slotInfo.activity));
 	Lua::PushNumber(l, deltaTime);
 }
 
 /////////////////
 
-pragma::CEMaintainAnimationMovement::CEMaintainAnimationMovement(const Vector3 &displacement) : displacement {displacement} {}
-void pragma::CEMaintainAnimationMovement::PushArguments(lua::State *l) { Lua::Push<Vector3>(l, displacement); }
+CEMaintainAnimationMovement::CEMaintainAnimationMovement(const Vector3 &displacement) : displacement {displacement} {}
+void CEMaintainAnimationMovement::PushArguments(lua::State *l) { Lua::Push<Vector3>(l, displacement); }
 
 /////////////////
 
-pragma::CEShouldUpdateBones::CEShouldUpdateBones() {}
-void pragma::CEShouldUpdateBones::PushArguments(lua::State *l) {}
+CEShouldUpdateBones::CEShouldUpdateBones() {}
+void CEShouldUpdateBones::PushArguments(lua::State *l) {}
 
 /////////////////
 
-pragma::CEOnUpdateSkeleton::CEOnUpdateSkeleton() {}
-void pragma::CEOnUpdateSkeleton::PushArguments(lua::State *l) { Lua::PushBool(l, bonePosesHaveChanged); }
-uint32_t pragma::CEOnUpdateSkeleton::GetReturnCount() { return 1; }
-void pragma::CEOnUpdateSkeleton::HandleReturnValues(lua::State *l)
+CEOnUpdateSkeleton::CEOnUpdateSkeleton() {}
+void CEOnUpdateSkeleton::PushArguments(lua::State *l) { Lua::PushBool(l, bonePosesHaveChanged); }
+uint32_t CEOnUpdateSkeleton::GetReturnCount() { return 1; }
+void CEOnUpdateSkeleton::HandleReturnValues(lua::State *l)
 {
 	if(Lua::IsSet(l, -1))
 		bonePosesHaveChanged = Lua::CheckBool(l, -1);

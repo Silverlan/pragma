@@ -165,7 +165,7 @@ static void register_gui(Lua::Interface &lua)
 	  luabind::def("get_cursor_input_mode", Lua::gui::get_cursor_input_mode), luabind::def("set_cursor_input_mode", Lua::gui::set_cursor_input_mode), luabind::def("get_window_size", Lua::gui::get_window_size),
 	  luabind::def("inject_mouse_input", static_cast<bool (*)(pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier, const Vector2i &)>(&Lua::gui::inject_mouse_input)),
 	  luabind::def("inject_mouse_input", static_cast<bool (*)(pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier)>(&Lua::gui::inject_mouse_input)), luabind::def("inject_keyboard_input", Lua::gui::inject_keyboard_input), luabind::def("inject_char_input", Lua::gui::inject_char_input),
-	  luabind::def("inject_scroll_input", static_cast<bool (*)(lua::State *, const Vector2 &, const ::Vector2i &)>(&Lua::gui::inject_scroll_input)), luabind::def("inject_scroll_input", static_cast<bool (*)(lua::State *, const Vector2 &)>(&Lua::gui::inject_scroll_input)),
+	  luabind::def("inject_scroll_input", static_cast<bool (*)(lua::State *, const Vector2 &, const Vector2i &)>(&Lua::gui::inject_scroll_input)), luabind::def("inject_scroll_input", static_cast<bool (*)(lua::State *, const Vector2 &)>(&Lua::gui::inject_scroll_input)),
 	  luabind::def("find_element_by_name", static_cast<pragma::gui::types::WIBase *(*)(const std::string &)>([](const std::string &name) -> pragma::gui::types::WIBase * {
 		  auto *p = pragma::gui::WGUI::GetInstance().GetBaseElement();
 		  if(p == nullptr)
@@ -493,7 +493,7 @@ static void register_gui(Lua::Interface &lua)
 
 	auto wiNineSliceRect = luabind::class_<pragma::gui::types::WI9SliceRect, pragma::gui::types::WIBase>("NineSliceRect");
 	wiNineSliceRect.def("SetMaterial", static_cast<void (pragma::gui::types::WI9SliceRect ::*)(const std::string &)>(&pragma::gui::types::WI9SliceRect::SetMaterial));
-	wiNineSliceRect.def("SetMaterial", static_cast<void (pragma::gui::types::WI9SliceRect ::*)(msys::Material &)>(&pragma::gui::types::WI9SliceRect::SetMaterial));
+	wiNineSliceRect.def("SetMaterial", static_cast<void (pragma::gui::types::WI9SliceRect ::*)(pragma::material::Material &)>(&pragma::gui::types::WI9SliceRect::SetMaterial));
 	wiNineSliceRect.def("GetMaterial", &pragma::gui::types::WI9SliceRect::GetMaterial);
 	guiMod[wiNineSliceRect];
 
@@ -549,36 +549,36 @@ void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool b
 
 	auto inputMod = luabind::module(lua.GetState(), "input");
 	inputMod[(luabind::def(
-	            "get_mouse_button_state", +[](pragma::platform::MouseButton mouseButton) -> pragma::platform::KeyState { return pragma::get_cengine()->GetWindow()->GetMouseButtonState(mouseButton); }),
+	            "get_mouse_button_state", +[](platform::MouseButton mouseButton) -> platform::KeyState { return get_cengine()->GetWindow()->GetMouseButtonState(mouseButton); }),
 	  luabind::def(
-	    "get_key_state", +[](pragma::platform::Key key) -> pragma::platform::KeyState { return pragma::get_cengine()->GetWindow()->GetKeyState(key); }),
+	    "get_key_state", +[](platform::Key key) -> platform::KeyState { return get_cengine()->GetWindow()->GetKeyState(key); }),
 	  luabind::def(
-	    "get_cursor_pos", +[]() -> Vector2 { return pragma::get_cengine()->GetWindow()->GetCursorPos(); }),
+	    "get_cursor_pos", +[]() -> Vector2 { return get_cengine()->GetWindow()->GetCursorPos(); }),
 	  luabind::def(
-	    "set_cursor_pos", +[](const Vector2 &pos) { pragma::get_cengine()->GetWindow()->SetCursorPos(pos); }),
+	    "set_cursor_pos", +[](const Vector2 &pos) { get_cengine()->GetWindow()->SetCursorPos(pos); }),
 	  luabind::def(
 	    "is_ctrl_key_down",
-	    +[]() -> bool { return pragma::get_cengine()->GetWindow()->GetKeyState(pragma::platform::Key::LeftControl) != pragma::platform::KeyState::Release || pragma::get_cengine()->GetWindow()->GetKeyState(pragma::platform::Key::RightControl) != pragma::platform::KeyState::Release; }),
+	    +[]() -> bool { return get_cengine()->GetWindow()->GetKeyState(platform::Key::LeftControl) != platform::KeyState::Release || get_cengine()->GetWindow()->GetKeyState(platform::Key::RightControl) != platform::KeyState::Release; }),
 	  luabind::def(
 	    "is_alt_key_down",
-	    +[]() -> bool { return pragma::get_cengine()->GetWindow()->GetKeyState(pragma::platform::Key::LeftAlt) != pragma::platform::KeyState::Release || pragma::get_cengine()->GetWindow()->GetKeyState(pragma::platform::Key::RightAlt) != pragma::platform::KeyState::Release; }),
+	    +[]() -> bool { return get_cengine()->GetWindow()->GetKeyState(platform::Key::LeftAlt) != platform::KeyState::Release || get_cengine()->GetWindow()->GetKeyState(platform::Key::RightAlt) != platform::KeyState::Release; }),
 	  luabind::def(
 	    "is_shift_key_down",
-	    +[]() -> bool { return pragma::get_cengine()->GetWindow()->GetKeyState(pragma::platform::Key::LeftShift) != pragma::platform::KeyState::Release || pragma::get_cengine()->GetWindow()->GetKeyState(pragma::platform::Key::RightShift) != pragma::platform::KeyState::Release; }),
+	    +[]() -> bool { return get_cengine()->GetWindow()->GetKeyState(platform::Key::LeftShift) != platform::KeyState::Release || get_cengine()->GetWindow()->GetKeyState(platform::Key::RightShift) != platform::KeyState::Release; }),
 	  luabind::def(
 	    "center_cursor",
 	    +[]() {
-		    auto *window = pragma::gui::WGUI::GetInstance().FindFocusedWindow();
+		    auto *window = gui::WGUI::GetInstance().FindFocusedWindow();
 		    if(!window)
-			    window = &pragma::get_cengine()->GetWindow();
+			    window = &get_cengine()->GetWindow();
 		    if(!window || !window->IsValid())
 			    return;
 		    auto windowSize = (*window)->GetSize();
 		    (*window)->SetCursorPos(windowSize / 2);
 	    }),
 	  luabind::def(
-	    "get_controller_count", +[]() -> uint32_t { return pragma::platform::get_joysticks().size(); }),
-	  luabind::def("get_controller_name", &pragma::platform::get_joystick_name), luabind::def("get_controller_axes", &pragma::platform::get_joystick_axes), luabind::def("get_controller_buttons", &pragma::platform::get_joystick_buttons),
+	    "get_controller_count", +[]() -> uint32_t { return platform::get_joysticks().size(); }),
+	  luabind::def("get_controller_name", &platform::get_joystick_name), luabind::def("get_controller_axes", &platform::get_joystick_axes), luabind::def("get_controller_buttons", &platform::get_joystick_buttons),
 	  luabind::def(
 	    "key_to_string",
 	    +[](short key) -> std::optional<std::string> {
@@ -607,13 +607,13 @@ void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool b
 	  luabind::def(
 	    "add_callback",
 	    +[](const std::string &identifier, const Lua::func<void> &f) -> CallbackHandle {
-		    auto &inputHandler = pragma::get_cgame()->GetInputCallbackHandler();
+		    auto &inputHandler = get_cgame()->GetInputCallbackHandler();
 		    return inputHandler.AddLuaCallback(identifier, f);
 	    }),
 	  luabind::def(
 	    "add_event_listener",
 	    +[](const std::string &identifier, const Lua::func<void> &f) -> CallbackHandle {
-		    auto &inputHandler = pragma::get_cgame()->GetInputCallbackHandler();
+		    auto &inputHandler = get_cgame()->GetInputCallbackHandler();
 		    return inputHandler.AddLuaCallback(identifier, f);
 	    }),
 	  luabind::def(
@@ -640,18 +640,18 @@ void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool b
 
 	auto soundMod = luabind::module(lua.GetState(), "sound");
 	Lua::sound::register_library(soundMod);
-	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect (*)(const std::string &, const al::EfxEaxReverbProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect (*)(const std::string &, const al::EfxChorusProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect (*)(const std::string &, const al::EfxDistortionProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect (*)(const std::string &, const al::EfxEchoProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect (*)(const std::string &, const al::EfxFlangerProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect (*)(const std::string &, const al::EfxFrequencyShifterProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect (*)(const std::string &, const al::EfxVocalMorpherProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect (*)(const std::string &, const al::EfxPitchShifterProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect (*)(const std::string &, const al::EfxRingModulatorProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect (*)(const std::string &, const al::EfxAutoWahProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect (*)(const std::string &, const al::EfxCompressor &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<al::PEffect (*)(const std::string &, const al::EfxEqualizer &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxEaxReverbProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxChorusProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxDistortionProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxEchoProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxFlangerProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxFrequencyShifterProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxVocalMorpherProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxPitchShifterProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxRingModulatorProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxAutoWahProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxCompressor &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxEqualizer &)>(&Lua::sound::register_aux_effect))];
 	soundMod[luabind::def("get_aux_effect", &Lua::sound::get_aux_effect)];
 	soundMod[luabind::def("set_distance_model", &Lua::sound::set_distance_model)];
 	soundMod[luabind::def("get_distance_model", &Lua::sound::get_distance_model)];
@@ -662,28 +662,28 @@ void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool b
 	soundMod[luabind::def("set_speed_of_sound", &Lua::sound::set_speed_of_sound)];
 	soundMod[luabind::def("get_device_name", &Lua::sound::get_device_name)];
 	soundMod[luabind::def("add_global_effect", static_cast<bool (*)(const std::string &)>(&Lua::sound::add_global_effect))];
-	soundMod[luabind::def("add_global_effect", static_cast<bool (*)(const std::string &, al::ISoundSystem::GlobalEffectFlag, const al::EffectParams &)>(&Lua::sound::add_global_effect))];
+	soundMod[luabind::def("add_global_effect", static_cast<bool (*)(const std::string &, pragma::audio::ISoundSystem::GlobalEffectFlag, const pragma::audio::EffectParams &)>(&Lua::sound::add_global_effect))];
 	soundMod[luabind::def("remove_global_effect", &Lua::sound::remove_global_effect)];
 	soundMod[luabind::def("set_global_effect_parameters", &Lua::sound::set_global_effect_parameters)];
 	soundMod[luabind::def(
 	  "get_duration", +[](const std::string &path) -> std::optional<float> {
-		  auto absPath = pragma::asset::find_file(path, pragma::asset::Type::Sound);
+		  auto absPath = pragma::asset::find_file(path, asset::Type::Sound);
 		  if(absPath.has_value() == false)
 			  return {};
 		  float duration;
-		  auto success = pragma::audio::util::get_duration(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Sound)} + "/" + *absPath, duration);
+		  auto success = audio::util::get_duration(std::string {pragma::asset::get_asset_root_directory(asset::Type::Sound)} + "/" + *absPath, duration);
 		  if(!success)
 			  return {};
 		  return duration;
 	  })];
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "sound",
-	  {{"GLOBAL_EFFECT_FLAG_NONE", pragma::math::to_integral(al::ISoundSystem::GlobalEffectFlag::None)}, {"GLOBAL_EFFECT_FLAG_BIT_RELATIVE", pragma::math::to_integral(al::ISoundSystem::GlobalEffectFlag::RelativeSounds)},
-	    {"GLOBAL_EFFECT_FLAG_BIT_WORLD", pragma::math::to_integral(al::ISoundSystem::GlobalEffectFlag::WorldSounds)}, {"GLOBAL_EFFECT_FLAG_ALL", pragma::math::to_integral(al::ISoundSystem::GlobalEffectFlag::All)},
+	  {{"GLOBAL_EFFECT_FLAG_NONE", math::to_integral(pragma::audio::ISoundSystem::GlobalEffectFlag::None)}, {"GLOBAL_EFFECT_FLAG_BIT_RELATIVE", math::to_integral(pragma::audio::ISoundSystem::GlobalEffectFlag::RelativeSounds)},
+	    {"GLOBAL_EFFECT_FLAG_BIT_WORLD", math::to_integral(pragma::audio::ISoundSystem::GlobalEffectFlag::WorldSounds)}, {"GLOBAL_EFFECT_FLAG_ALL", math::to_integral(pragma::audio::ISoundSystem::GlobalEffectFlag::All)},
 
-	    {"DISTANCE_MODEL_NONE", pragma::math::to_integral(al::DistanceModel::None)}, {"DISTANCE_MODEL_INVERSE_CLAMPED", pragma::math::to_integral(al::DistanceModel::InverseClamped)}, {"DISTANCE_MODEL_LINEAR_CLAMPED", pragma::math::to_integral(al::DistanceModel::LinearClamped)},
-	    {"DISTANCE_MODEL_EXPONENT_CLAMPED", pragma::math::to_integral(al::DistanceModel::ExponentClamped)}, {"DISTANCE_MODEL_INVERSE", pragma::math::to_integral(al::DistanceModel::Inverse)}, {"DISTANCE_MODEL_LINEAR", pragma::math::to_integral(al::DistanceModel::Linear)},
-	    {"DISTANCE_MODEL_EXPONENT", pragma::math::to_integral(al::DistanceModel::Exponent)}});
+	    {"DISTANCE_MODEL_NONE", math::to_integral(pragma::audio::DistanceModel::None)}, {"DISTANCE_MODEL_INVERSE_CLAMPED", math::to_integral(pragma::audio::DistanceModel::InverseClamped)}, {"DISTANCE_MODEL_LINEAR_CLAMPED", math::to_integral(pragma::audio::DistanceModel::LinearClamped)},
+	    {"DISTANCE_MODEL_EXPONENT_CLAMPED", math::to_integral(pragma::audio::DistanceModel::ExponentClamped)}, {"DISTANCE_MODEL_INVERSE", math::to_integral(pragma::audio::DistanceModel::Inverse)}, {"DISTANCE_MODEL_LINEAR", math::to_integral(pragma::audio::DistanceModel::Linear)},
+	    {"DISTANCE_MODEL_EXPONENT", math::to_integral(pragma::audio::DistanceModel::Exponent)}});
 	Lua::sound::register_enums(lua.GetState());
 
 	auto defInLay = luabind::class_<InputBindingLayer>("InputBindingLayer");
@@ -735,7 +735,7 @@ void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool b
 		  for(auto &pair : layer.GetKeyMappings()) {
 			  if(pair.second.GetType() != KeyBind::Type::Regular)
 				  continue;
-			  if(pragma::string::compare(pair.second.GetBind(), cmd) == false)
+			  if(string::compare(pair.second.GetBind(), cmd) == false)
 				  continue;
 			  std::string str;
 			  if(!KeyToString(pair.first, &str))
@@ -753,7 +753,7 @@ void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool b
 	  },
 	  const std::string &>(lua.GetState());
 
-	pragma::scripting::lua_core::bindings::register_audio(lua.GetState());
+	scripting::lua_core::bindings::register_audio(lua.GetState());
 
 	RegisterVulkanLuaInterface(lua);
 }

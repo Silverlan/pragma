@@ -8,14 +8,14 @@ import :entities.components.environment.lights.base_light;
 
 using namespace pragma;
 
-ComponentEventId baseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT = pragma::INVALID_COMPONENT_ID;
-void BaseEnvLightComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+ComponentEventId baseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT = INVALID_COMPONENT_ID;
+ComponentEventId baseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT = INVALID_COMPONENT_ID;
+void BaseEnvLightComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT = registerEvent("CALC_LIGHT_DIRECTION_TO_POINT", ComponentEventInfo::Type::Broadcast);
 	baseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT = registerEvent("CALC_LIGHT_INTENSITY_AT_POINT", ComponentEventInfo::Type::Broadcast);
 }
-void BaseEnvLightComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void BaseEnvLightComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseEnvLightComponent;
 
@@ -48,8 +48,8 @@ void BaseEnvLightComponent::RegisterMembers(pragma::EntityComponentManager &comp
 		registerMember(std::move(memberInfo));
 	}
 }
-bool BaseEnvLightComponent::IsBaked() const { return pragma::math::is_flag_set(m_lightFlags, LightFlags::BakedLightSource); }
-void BaseEnvLightComponent::SetBaked(bool baked) { pragma::math::set_flag(m_lightFlags, LightFlags::BakedLightSource, baked); }
+bool BaseEnvLightComponent::IsBaked() const { return math::is_flag_set(m_lightFlags, LightFlags::BakedLightSource); }
+void BaseEnvLightComponent::SetBaked(bool baked) { math::set_flag(m_lightFlags, LightFlags::BakedLightSource, baked); }
 std::string BaseEnvLightComponent::LightIntensityTypeToString(LightIntensityType type)
 {
 	switch(type) {
@@ -66,23 +66,23 @@ void BaseEnvLightComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "distance", false))
 			GetEntity().SetKeyValue("radius", kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "lightcolor", false))
 			GetEntity().SetKeyValue("color", kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "light_intensity", false))
-			SetLightIntensity(pragma::string::to_float(kvData.value));
+			SetLightIntensity(string::to_float(kvData.value));
 		else if(pragma::string::compare<std::string>(kvData.key, "light_intensity_type", false))
-			SetLightIntensityType(static_cast<LightIntensityType>(pragma::string::to_int(kvData.value)));
+			SetLightIntensityType(static_cast<LightIntensityType>(string::to_int(kvData.value)));
 		else if(pragma::string::compare<std::string>(kvData.key, "falloff_exponent", false))
-			SetFalloffExponent(pragma::util::to_float(kvData.value));
+			SetFalloffExponent(util::to_float(kvData.value));
 		else if(pragma::string::compare<std::string>(kvData.key, "light_flags", false))
-			m_lightFlags = static_cast<LightFlags>(pragma::util::to_int(kvData.value));
+			m_lightFlags = static_cast<LightFlags>(util::to_int(kvData.value));
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -115,31 +115,31 @@ void BaseEnvLightComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 	auto flags = GetEntity().GetSpawnFlags();
-	if(flags & pragma::math::to_integral(SpawnFlag::DontCastShadows))
+	if(flags & math::to_integral(SpawnFlag::DontCastShadows))
 		m_shadowType = ShadowType::None;
 }
 void BaseEnvLightComponent::SetLight(BaseEnvLightSpotComponent &light)
 {
-	m_lightType = pragma::LightType::Spot;
+	m_lightType = LightType::Spot;
 	if(m_lightIntensityType == LightIntensityType::Lux)
 		SetLightIntensity(0.f, LightIntensityType::Lumen);
 	InitializeLight(light);
 }
 void BaseEnvLightComponent::SetLight(BaseEnvLightPointComponent &light)
 {
-	m_lightType = pragma::LightType::Point;
+	m_lightType = LightType::Point;
 	if(m_lightIntensityType == LightIntensityType::Lux)
 		SetLightIntensity(0.f, LightIntensityType::Lumen);
 	InitializeLight(light);
 }
 void BaseEnvLightComponent::SetLight(BaseEnvLightDirectionalComponent &light)
 {
-	m_lightType = pragma::LightType::Directional;
+	m_lightType = LightType::Directional;
 	if(m_lightIntensityType != LightIntensityType::Lux)
 		SetLightIntensity(0.f, LightIntensityType::Lux);
 	InitializeLight(light);
 }
-BaseEntityComponent *BaseEnvLightComponent::GetLight(pragma::LightType &outType) const
+BaseEntityComponent *BaseEnvLightComponent::GetLight(LightType &outType) const
 {
 	outType = m_lightType;
 	return const_cast<BaseEntityComponent *>(m_hLight.get());
@@ -150,11 +150,11 @@ void BaseEnvLightComponent::SetLightIntensityType(LightIntensityType type) { m_l
 BaseEnvLightComponent::LightIntensityType BaseEnvLightComponent::GetLightIntensityType() const { return m_lightIntensityType; }
 void BaseEnvLightComponent::SetLightIntensity(float intensity, LightIntensityType type)
 {
-	if(m_lightType == pragma::LightType::Directional && type != LightIntensityType::Lux) {
+	if(m_lightType == LightType::Directional && type != LightIntensityType::Lux) {
 		Con::cwar << "Attempted to use intensity type " << LightIntensityTypeToString(type) << " for a directional light source. This is not allowed!" << Con::endl;
 		return;
 	}
-	if((m_lightType == pragma::LightType::Point || m_lightType == pragma::LightType::Spot) && type == LightIntensityType::Lux) {
+	if((m_lightType == LightType::Point || m_lightType == LightType::Spot) && type == LightIntensityType::Lux) {
 		Con::cwar << "Attempted to use intensity type " << LightIntensityTypeToString(type) << " for a point or spot light source. This is not allowed!" << Con::endl;
 		return;
 	}
@@ -171,7 +171,7 @@ Candela BaseEnvLightComponent::GetLightIntensityCandela(float intensity, LightIn
 	case LightIntensityType::Lumen:
 		{
 			auto angle = outerConeAngle.has_value() ? *outerConeAngle : 360.f;
-			return ulighting::lumens_to_candela(intensity, pragma::math::cos(pragma::math::deg_to_rad(angle / 2.f)));
+			return ulighting::lumens_to_candela(intensity, math::cos(math::deg_to_rad(angle / 2.f)));
 		}
 	case LightIntensityType::Lux:
 		// TODO
@@ -187,7 +187,7 @@ Lumen BaseEnvLightComponent::GetLightIntensityLumen(float intensity, LightIntens
 	case LightIntensityType::Candela:
 		{
 			auto angle = outerConeAngle.has_value() ? *outerConeAngle : 360.f;
-			return ulighting::candela_to_lumens(intensity, pragma::math::cos(pragma::math::deg_to_rad(angle / 2.f)));
+			return ulighting::candela_to_lumens(intensity, math::cos(math::deg_to_rad(angle / 2.f)));
 		}
 	case LightIntensityType::Lux:
 		// TODO
@@ -228,9 +228,9 @@ void BaseEnvLightComponent::SetFalloffExponent(float falloffExponent) { m_fallof
 float BaseEnvLightComponent::CalcDistanceFalloff(const Vector3 &lightPos, const Vector3 &point, std::optional<float> radius)
 {
 	auto dist = uvec::distance(point, lightPos);
-	dist = pragma::units_to_metres(dist);
+	dist = units_to_metres(dist);
 	if(radius.has_value())
-		return ulighting::calc_light_falloff(dist, pragma::units_to_metres(*radius));
+		return ulighting::calc_light_falloff(dist, units_to_metres(*radius));
 	return ulighting::calc_light_falloff(dist);
 }
 

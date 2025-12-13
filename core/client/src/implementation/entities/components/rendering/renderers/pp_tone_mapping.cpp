@@ -13,30 +13,30 @@ import :rendering.shaders;
 
 using namespace pragma;
 
-static auto cvToneMapping = pragma::console::get_client_con_var("cl_render_tone_mapping");
-CRendererPpToneMappingComponent::CRendererPpToneMappingComponent(pragma::ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
+static auto cvToneMapping = console::get_client_con_var("cl_render_tone_mapping");
+CRendererPpToneMappingComponent::CRendererPpToneMappingComponent(ecs::BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
 PostProcessingEffectData::Flags CRendererPpToneMappingComponent::GetFlags() const { return m_applyToHdrImage ? PostProcessingEffectData::Flags::None : PostProcessingEffectData::Flags::ToneMapped; }
 void CRendererPpToneMappingComponent::SetApplyToHdrImage(bool applyToHdrImage) { m_applyToHdrImage = applyToHdrImage; }
-void CRendererPpToneMappingComponent::DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void CRendererPpToneMappingComponent::DoRenderEffect(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuToneMapping, *drawSceneInfo.commandBuffer);
-	pragma::get_cgame()->StartGPUProfilingStage("PostProcessingHDR");
+	get_cgame()->StartGPUProfilingStage("PostProcessingHDR");
 
-	pragma::util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
-		pragma::get_cgame()->StopGPUProfilingStage(); // PostProcessingHDR
+	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
+		get_cgame()->StopGPUProfilingStage(); // PostProcessingHDR
 		if(drawSceneInfo.renderStats)
 			(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::PostProcessingGpuToneMapping, *drawSceneInfo.commandBuffer);
 	}};
 
-	auto hShaderTonemapping = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::PPTonemapping);
+	auto hShaderTonemapping = get_cgame()->GetGameShader(CGame::GameShader::PPTonemapping);
 	if(hShaderTonemapping.expired() || m_renderer.expired())
 		return;
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	auto &dsgBloomTonemapping = hdrInfo.dsgBloomTonemapping;
 	auto &descSetHdrResolve = *dsgBloomTonemapping->GetDescriptorSet();
-	auto *srcImg = descSetHdrResolve.GetBoundImage(pragma::math::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
-	auto *srcImgBloomBlur = descSetHdrResolve.GetBoundImage(pragma::math::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
+	auto *srcImg = descSetHdrResolve.GetBoundImage(math::to_integral(ShaderPPHDR::TextureBinding::Texture));
+	auto *srcImgBloomBlur = descSetHdrResolve.GetBoundImage(math::to_integral(ShaderPPHDR::TextureBinding::Bloom));
 	// auto *srcImgGlow = descSetHdrResolve.GetBoundImage(pragma::math::to_integral(pragma::ShaderPPHDR::TextureBinding::Glow));
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	if(m_renderer->IsMultiSampled() == false) // The resolved images already have the correct layout
@@ -49,12 +49,12 @@ void CRendererPpToneMappingComponent::DoRenderEffect(const pragma::rendering::Dr
 	auto &dstTexPostHdr = hdrInfo.toneMappedRenderTarget->GetTexture();
 	auto &dstImgPostHdr = dstTexPostHdr.GetImage();
 	auto rt = m_applyToHdrImage ? hdrInfo.hdrPostProcessingRenderTarget : hdrInfo.toneMappedRenderTarget;
-	auto pipeline = m_applyToHdrImage ? pragma::ShaderPPHDR::Pipeline::HDR : pragma::ShaderPPHDR::Pipeline::LDR;
+	auto pipeline = m_applyToHdrImage ? ShaderPPHDR::Pipeline::HDR : ShaderPPHDR::Pipeline::LDR;
 	if(drawCmd->RecordBeginRenderPass(*rt) == true) {
-		auto &shaderPPHdr = static_cast<pragma::ShaderPPHDR &>(*hShaderTonemapping);
+		auto &shaderPPHdr = static_cast<ShaderPPHDR &>(*hShaderTonemapping);
 
 		prosper::ShaderBindState bindState {*drawCmd};
-		if(shaderPPHdr.RecordBeginDraw(bindState, pragma::math::to_integral(pipeline)) == true) {
+		if(shaderPPHdr.RecordBeginDraw(bindState, math::to_integral(pipeline)) == true) {
 			const float bloomAdditiveScale = 0.5f;
 
 			rendering::ToneMapping toneMapping;
@@ -72,7 +72,7 @@ void CRendererPpToneMappingComponent::DoRenderEffect(const pragma::rendering::Dr
 				}
 			}
 
-			shaderPPHdr.RecordDraw(bindState, descSetHdrResolve, toneMapping, m_renderer->GetHDRExposure(), bloomAdditiveScale, pragma::math::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::FlipVertically));
+			shaderPPHdr.RecordDraw(bindState, descSetHdrResolve, toneMapping, m_renderer->GetHDRExposure(), bloomAdditiveScale, math::is_flag_set(drawSceneInfo.flags, rendering::DrawSceneInfo::Flags::FlipVertically));
 			shaderPPHdr.RecordEndDraw(bindState);
 		}
 		drawCmd->RecordEndRenderPass();

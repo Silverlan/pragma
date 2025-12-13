@@ -10,19 +10,23 @@ export import :util.type_manager;
 
 export import :physics.surface_type_manager;
 
+export namespace pragma::util {
+	template<class TType>
+	class TTypeManager;
+}
 export namespace pragma::physics {
-	class DLLNETWORK TireType : public BaseNamedType {
+	class DLLNETWORK TireType : public util::BaseNamedType {
 	  public:
 		void SetFrictionModifier(SurfaceType &surfType, float modifier);
 		std::optional<float> GetFrictionModifier(SurfaceType &surfType);
 		const std::unordered_map<SurfaceType *, float> &GetFrictionModifiers() const;
 	  protected:
 		template<class TType>
-		friend class pragma::TTypeManager; //this must be explicit for some reason.
-		TireType(TypeId id, const std::string &name);
+		friend class util::TTypeManager; //this must be explicit for some reason.
+		TireType(util::TypeId id, const std::string &name);
 	  private:
 		std::unordered_map<SurfaceType *, float> m_frictionModifiers = {};
 	};
 
-	using TireTypeManager = TTypeManager<TireType>;
+	using TireTypeManager = util::TTypeManager<TireType>;
 };

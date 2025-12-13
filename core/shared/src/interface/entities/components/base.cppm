@@ -24,9 +24,9 @@ export import :scripting.lua.base_lua_handle;
 export import pragma.util;
 
 export namespace pragma {
-	class DLLNETWORK EEntityComponentCallbackEvent : public pragma::util::ExtensibleEnum {
+	class DLLNETWORK EEntityComponentCallbackEvent : public util::ExtensibleEnum {
 	  public:
-		using pragma::util::ExtensibleEnum::ExtensibleEnum;
+		using ExtensibleEnum::ExtensibleEnum;
 
 		static const EEntityComponentCallbackEvent Count;
 	  protected:
@@ -77,13 +77,13 @@ export {
 			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ACTIVE_STATE_CHANGED;
 		}
 
-		class DLLNETWORK BaseEntityComponent : public pragma::BaseLuaHandle, public std::enable_shared_from_this<BaseEntityComponent> {
+		class DLLNETWORK BaseEntityComponent : public BaseLuaHandle, public std::enable_shared_from_this<BaseEntityComponent> {
 		  public:
 			// Note: Use BaseEntityComponent::OnEntityComponentAdded to initialize data for other components
 			// instead of using this event!
 
-			static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-			static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+			static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+			static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 			static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 			template<typename TClass>
 			static spdlog::logger &get_logger();
@@ -111,13 +111,13 @@ export {
 			BaseEntityComponent &operator=(BaseEntityComponent &&) = delete;
 
 			virtual ~BaseEntityComponent();
-			const pragma::ecs::BaseEntity &GetEntity() const;
-			pragma::ecs::BaseEntity &GetEntity();
-			const pragma::ecs::BaseEntity &operator->() const;
-			pragma::ecs::BaseEntity &operator->();
+			const ecs::BaseEntity &GetEntity() const;
+			ecs::BaseEntity &GetEntity();
+			const ecs::BaseEntity &operator->() const;
+			ecs::BaseEntity &operator->();
 
-			pragma::Game &GetGame();
-			const pragma::Game &GetGame() const { return const_cast<BaseEntityComponent *>(this)->GetGame(); }
+			Game &GetGame();
+			const Game &GetGame() const { return const_cast<BaseEntityComponent *>(this)->GetGame(); }
 			NetworkState &GetNetworkState();
 			const NetworkState &GetNetworkState() const { return const_cast<BaseEntityComponent *>(this)->GetNetworkState(); }
 			EntityComponentManager &GetComponentManager();
@@ -132,30 +132,30 @@ export {
 			void SetPropertyAnimated(const std::string &property, bool animated);
 			bool IsPropertyAnimated(const std::string &property);
 
-			bool GetTransformMemberPos(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &outPos) const;
-			bool GetTransformMemberRot(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Quat &outRot) const;
-			bool GetTransformMemberScale(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &outScale) const;
-			bool GetTransformMemberPose(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, pragma::math::ScaledTransform &outPose) const;
+			bool GetTransformMemberPos(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &outPos) const;
+			bool GetTransformMemberRot(ComponentMemberIndex idx, math::CoordinateSpace space, Quat &outRot) const;
+			bool GetTransformMemberScale(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &outScale) const;
+			bool GetTransformMemberPose(ComponentMemberIndex idx, math::CoordinateSpace space, math::ScaledTransform &outPose) const;
 
-			bool ConvertTransformMemberPosToTargetSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &inOutPos) const;
-			bool ConvertTransformMemberRotToTargetSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Quat &inOutRot) const;
-			bool ConvertTransformMemberScaleToTargetSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &inOutScale) const;
-			bool ConvertTransformMemberPoseToTargetSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, pragma::math::ScaledTransform &inOutPose) const;
+			bool ConvertTransformMemberPosToTargetSpace(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &inOutPos) const;
+			bool ConvertTransformMemberRotToTargetSpace(ComponentMemberIndex idx, math::CoordinateSpace space, Quat &inOutRot) const;
+			bool ConvertTransformMemberScaleToTargetSpace(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &inOutScale) const;
+			bool ConvertTransformMemberPoseToTargetSpace(ComponentMemberIndex idx, math::CoordinateSpace space, math::ScaledTransform &inOutPose) const;
 
-			bool GetTransformMemberParentPos(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &outPos) const;
-			bool GetTransformMemberParentRot(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Quat &outRot) const;
-			bool GetTransformMemberParentScale(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &outScale) const;
-			bool GetTransformMemberParentPose(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, pragma::math::ScaledTransform &outPose) const;
+			bool GetTransformMemberParentPos(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &outPos) const;
+			bool GetTransformMemberParentRot(ComponentMemberIndex idx, math::CoordinateSpace space, Quat &outRot) const;
+			bool GetTransformMemberParentScale(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &outScale) const;
+			bool GetTransformMemberParentPose(ComponentMemberIndex idx, math::CoordinateSpace space, math::ScaledTransform &outPose) const;
 
-			bool ConvertPosToMemberSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &inOutPos, pragma::math::CoordinateSpace *optOutMemberSpace = nullptr) const;
-			bool ConvertRotToMemberSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Quat &inOutRot, pragma::math::CoordinateSpace *optOutMemberSpace = nullptr) const;
-			bool ConvertScaleToMemberSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, Vector3 &inOutScale, pragma::math::CoordinateSpace *optOutMemberSpace = nullptr) const;
-			bool ConvertPoseToMemberSpace(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, pragma::math::ScaledTransform &inOutPose, pragma::math::CoordinateSpace *optOutMemberSpace = nullptr) const;
+			bool ConvertPosToMemberSpace(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &inOutPos, math::CoordinateSpace *optOutMemberSpace = nullptr) const;
+			bool ConvertRotToMemberSpace(ComponentMemberIndex idx, math::CoordinateSpace space, Quat &inOutRot, math::CoordinateSpace *optOutMemberSpace = nullptr) const;
+			bool ConvertScaleToMemberSpace(ComponentMemberIndex idx, math::CoordinateSpace space, Vector3 &inOutScale, math::CoordinateSpace *optOutMemberSpace = nullptr) const;
+			bool ConvertPoseToMemberSpace(ComponentMemberIndex idx, math::CoordinateSpace space, math::ScaledTransform &inOutPose, math::CoordinateSpace *optOutMemberSpace = nullptr) const;
 
-			bool SetTransformMemberPos(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, const Vector3 &pos);
-			bool SetTransformMemberRot(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, const Quat &rot);
-			bool SetTransformMemberScale(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, const Vector3 &scale);
-			bool SetTransformMemberPose(ComponentMemberIndex idx, pragma::math::CoordinateSpace space, const pragma::math::ScaledTransform &pose);
+			bool SetTransformMemberPos(ComponentMemberIndex idx, math::CoordinateSpace space, const Vector3 &pos);
+			bool SetTransformMemberRot(ComponentMemberIndex idx, math::CoordinateSpace space, const Quat &rot);
+			bool SetTransformMemberScale(ComponentMemberIndex idx, math::CoordinateSpace space, const Vector3 &scale);
+			bool SetTransformMemberPose(ComponentMemberIndex idx, math::CoordinateSpace space, const math::ScaledTransform &pose);
 
 			virtual uint32_t GetStaticMemberCount() const;
 
@@ -166,7 +166,7 @@ export {
 
 			// Binds the specified function to an event specifically for this component. The function will be called
 			// whenever THIS component has triggered that event.
-			CallbackHandle AddEventCallback(ComponentEventId eventId, const std::function<pragma::util::EventReply(std::reference_wrapper<ComponentEvent>)> &fCallback);
+			CallbackHandle AddEventCallback(ComponentEventId eventId, const std::function<util::EventReply(std::reference_wrapper<ComponentEvent>)> &fCallback);
 			CallbackHandle AddEventCallback(ComponentEventId eventId, const CallbackHandle &hCallback);
 			void RemoveEventCallback(ComponentEventId eventId, const CallbackHandle &hCallback);
 
@@ -174,29 +174,29 @@ export {
 			// Only call this method directly if the event has been registered
 			// with the component type! Otherwise callbacks bound through BindEvent
 			// will not be invoked for this event type!
-			pragma::util::EventReply InvokeEventCallbacks(ComponentEventId eventId, const ComponentEvent &evData) const;
-			pragma::util::EventReply InvokeEventCallbacks(ComponentEventId eventId, ComponentEvent &evData) const;
-			pragma::util::EventReply InvokeEventCallbacks(ComponentEventId eventId) const;
+			util::EventReply InvokeEventCallbacks(ComponentEventId eventId, const ComponentEvent &evData) const;
+			util::EventReply InvokeEventCallbacks(ComponentEventId eventId, ComponentEvent &evData) const;
+			util::EventReply InvokeEventCallbacks(ComponentEventId eventId) const;
 
 			// Broadcasts an event to ALL components of the attached entity.
 			// This will also invoke event callbacks for this component for the specified event.
-			pragma::util::EventReply BroadcastEvent(ComponentEventId eventId, const ComponentEvent &evData) const;
-			pragma::util::EventReply BroadcastEvent(ComponentEventId eventId, ComponentEvent &evData) const;
-			pragma::util::EventReply BroadcastEvent(ComponentEventId eventId) const;
+			util::EventReply BroadcastEvent(ComponentEventId eventId, const ComponentEvent &evData) const;
+			util::EventReply BroadcastEvent(ComponentEventId eventId, ComponentEvent &evData) const;
+			util::EventReply BroadcastEvent(ComponentEventId eventId) const;
 
 			// Triggers an event for this component only
-			pragma::util::EventReply InjectEvent(ComponentEventId eventId, const ComponentEvent &evData);
-			pragma::util::EventReply InjectEvent(ComponentEventId eventId, ComponentEvent &evData);
-			pragma::util::EventReply InjectEvent(ComponentEventId eventId);
+			util::EventReply InjectEvent(ComponentEventId eventId, const ComponentEvent &evData);
+			util::EventReply InjectEvent(ComponentEventId eventId, ComponentEvent &evData);
+			util::EventReply InjectEvent(ComponentEventId eventId);
 
 			// Binds the specified function to an event. The function will be called, whenever the event was broadcasted (or injected)
-			CallbackHandle BindEvent(ComponentEventId eventId, const std::function<pragma::util::EventReply(std::reference_wrapper<ComponentEvent>)> &fCallback);
+			CallbackHandle BindEvent(ComponentEventId eventId, const std::function<util::EventReply(std::reference_wrapper<ComponentEvent>)> &fCallback);
 
 			// Same as above, but assumes the callback never 'handles' the event. This is mostly to avoid cases where the return value is omitted by accident.
 			CallbackHandle BindEventUnhandled(ComponentEventId eventId, const std::function<void(std::reference_wrapper<ComponentEvent>)> &fCallback);
 
-			virtual void OnAttached(pragma::ecs::BaseEntity &ent);
-			virtual void OnDetached(pragma::ecs::BaseEntity &ent);
+			virtual void OnAttached(ecs::BaseEntity &ent);
+			virtual void OnDetached(ecs::BaseEntity &ent);
 
 			virtual void Save(udm::LinkedPropertyWrapperArg udm);
 			void Load(udm::LinkedPropertyWrapperArg udm);
@@ -217,7 +217,7 @@ export {
 			enum class CallbackType : uint8_t { Component = 0u, Entity };
 
 			// Helper functions
-			pragma::NetEventId SetupNetEvent(const std::string &name) const;
+			NetEventId SetupNetEvent(const std::string &name) const;
 			void FlagCallbackForRemoval(const CallbackHandle &hCallback, CallbackType cbType, BaseEntityComponent *component = nullptr);
 
 			// Do not overwrite these unless the component is a descendant of SBaseNetComponent/SBaseSnapshotComponent respectively!
@@ -267,15 +267,15 @@ export {
 			std::string GetUri() const;
 			std::string GetMemberUri(const std::string &memberName) const;
 			std::optional<std::string> GetMemberUri(ComponentMemberIndex memberIdx) const;
-			static std::optional<std::string> GetUri(pragma::Game *game, std::variant<pragma::util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier);
-			static std::optional<std::string> GetMemberUri(pragma::Game *game, std::variant<pragma::util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier, std::variant<ComponentMemberIndex, std::string> memberIdentifier);
+			static std::optional<std::string> GetUri(Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier);
+			static std::optional<std::string> GetMemberUri(Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier, std::variant<ComponentMemberIndex, std::string> memberIdentifier);
 		  protected:
 			friend EntityComponentManager;
 			friend BaseEntityComponentSystem;
-			BaseEntityComponent(pragma::ecs::BaseEntity &ent);
+			BaseEntityComponent(ecs::BaseEntity &ent);
 			void CleanUp();
 			void UpdateTickPolicy();
-			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData);
+			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData);
 			virtual void OnActiveStateChanged(bool active);
 			virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version);
 			virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const;
@@ -306,7 +306,7 @@ export {
 			std::unordered_map<ComponentEventId, std::vector<CallbackHandle>> &GetBoundEvents() const;
 		  protected:
 			void OnEntityComponentAdded(BaseEntityComponent &component, bool bSkipEventBinding);
-			pragma::ecs::BaseEntity &m_entity;
+			ecs::BaseEntity &m_entity;
 
 			StateFlags m_stateFlags = StateFlags::None;
 			TickData m_tickData {};
@@ -317,7 +317,7 @@ export {
 			mutable std::unique_ptr<std::unordered_map<ComponentEventId, std::vector<CallbackHandle>>> m_eventCallbacks;
 			mutable std::unique_ptr<std::unordered_map<ComponentEventId, std::vector<CallbackHandle>>> m_boundEvents;
 		};
-		DLLNETWORK std::ostream &operator<<(std::ostream &os, const pragma::BaseEntityComponent &component);
+		DLLNETWORK std::ostream &operator<<(std::ostream &os, const BaseEntityComponent &component);
 
 		using namespace pragma::math::scoped_enum::bitwise;
 	};

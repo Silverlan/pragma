@@ -35,7 +35,7 @@ export namespace pragma {
 	};
 
 	struct DLLCLIENT ResourceDownload {
-		ResourceDownload(VFilePtrReal file, std::string name, unsigned int size)
+		ResourceDownload(fs::VFilePtrReal file, std::string name, unsigned int size)
 		{
 			this->file = file;
 			this->name = name;
@@ -46,7 +46,7 @@ export namespace pragma {
 			if(file != nullptr)
 				file.reset();
 		}
-		VFilePtrReal file;
+		fs::VFilePtrReal file;
 		std::string name;
 		unsigned int size;
 	};
@@ -63,7 +63,7 @@ export namespace pragma {
 		static console::ConVarHandle GetConVarHandle(std::string scvar);
 		//
 	  private:
-		std::unique_ptr<pragma::networking::IClient> m_client;
+		std::unique_ptr<networking::IClient> m_client;
 		std::unique_ptr<ServerInfo> m_svInfo;
 		std::unique_ptr<ResourceDownload> m_resDownload; // Current resource file being downloaded
 
@@ -72,19 +72,19 @@ export namespace pragma {
 		bool GetServerConVarIdentifier(uint32_t id, std::string &cvar);
 
 		// Sound
-		void InitializeSound(pragma::audio::CALSound &snd);
-		std::vector<std::shared_ptr<pragma::audio::ALSound>> m_soundScripts; // 'Regular' sounds are already handled by sound engine, but we still have to take care of sound-scripts
+		void InitializeSound(audio::CALSound &snd);
+		std::vector<std::shared_ptr<audio::ALSound>> m_soundScripts; // 'Regular' sounds are already handled by sound engine, but we still have to take care of sound-scripts
 		float m_volMaster;
-		std::unordered_map<pragma::audio::ALSoundType, float> m_volTypes;
+		std::unordered_map<audio::ALSoundType, float> m_volTypes;
 
-		pragma::gui::WIHandle m_hMainMenu;
-		pragma::gui::WIHandle m_hFps;
-		pragma::rendering::GameWorldShaderSettings m_worldShaderSettings {};
+		gui::WIHandle m_hMainMenu;
+		gui::WIHandle m_hFps;
+		rendering::GameWorldShaderSettings m_worldShaderSettings {};
 		LastConnectionInfo m_lastConnection {};
 	  protected:
 		std::shared_ptr<Lua::Interface> m_luaGUI = nullptr;
 		void InitializeGUILua();
-		std::vector<std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)>> m_guiLuaWrapperFactories;
+		std::vector<std::function<luabind::object(lua::State *, gui::types::WIBase &)>> m_guiLuaWrapperFactories;
 
 		virtual void InitializeResourceManager() override;
 		void StartResourceTransfer();
@@ -93,37 +93,37 @@ export namespace pragma {
 		void DestroyClient();
 
 		virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const override;
-		virtual msys::Material *LoadMaterial(const std::string &path, bool precache, bool bReload) override;
+		virtual material::Material *LoadMaterial(const std::string &path, bool precache, bool bReload) override;
 	  public:
 		ClientState();
 		virtual ~ClientState() override;
 		virtual bool IsClient() const override;
 	  public:
-		virtual bool ShouldRemoveSound(pragma::audio::ALSound &snd) override;
-		msys::Material *LoadMaterial(const std::string &path, const std::function<void(msys::Material *)> &onLoaded, bool bReload, bool bLoadInstantly); // TODO
-		msys::MaterialHandle CreateMaterial(const std::string &path, const std::string &shader);
-		msys::MaterialHandle CreateMaterial(const std::string &shader);
+		virtual bool ShouldRemoveSound(audio::ALSound &snd) override;
+		material::Material *LoadMaterial(const std::string &path, const std::function<void(material::Material *)> &onLoaded, bool bReload, bool bLoadInstantly); // TODO
+		material::MaterialHandle CreateMaterial(const std::string &path, const std::string &shader);
+		material::MaterialHandle CreateMaterial(const std::string &shader);
 		bool LoadGUILuaFile(std::string f);
-		pragma::networking::IClient *GetClient();
-		virtual pragma::NwStateType GetType() const override;
+		networking::IClient *GetClient();
+		virtual NwStateType GetType() const override;
 		virtual void Think() override;
 		virtual void Tick() override;
-		void Draw(pragma::rendering::DrawSceneInfo &drawSceneInfo);
-		void Render(pragma::rendering::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt);
+		void Draw(rendering::DrawSceneInfo &drawSceneInfo);
+		void Render(rendering::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt);
 		virtual void Close() override;
 		virtual console::ConVarMap *GetConVarMap() override;
 		bool IsConnected() const;
-		void AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)> &f);
-		std::vector<std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)>> &GetGUILuaWrapperFactories();
-		virtual msys::MaterialManager &GetMaterialManager() override;
-		virtual pragma::geometry::ModelSubMesh *CreateSubMesh() const override;
-		virtual pragma::geometry::ModelMesh *CreateMesh() const override;
-		virtual pragma::util::FileAssetManager *GetAssetManager(pragma::asset::Type type) override;
+		void AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, gui::types::WIBase &)> &f);
+		std::vector<std::function<luabind::object(lua::State *, gui::types::WIBase &)>> &GetGUILuaWrapperFactories();
+		virtual material::MaterialManager &GetMaterialManager() override;
+		virtual geometry::ModelSubMesh *CreateSubMesh() const override;
+		virtual geometry::ModelMesh *CreateMesh() const override;
+		virtual util::FileAssetManager *GetAssetManager(asset::Type type) override;
 		virtual void Initialize() override;
 		virtual std::string GetMessagePrefix() const override;
 
-		pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() { return m_worldShaderSettings; }
-		const pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() const { return const_cast<ClientState *>(this)->GetGameWorldShaderSettings(); }
+		rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() { return m_worldShaderSettings; }
+		const rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() const { return const_cast<ClientState *>(this)->GetGameWorldShaderSettings(); }
 		void UpdateGameWorldShaderSettings();
 
 		gui::types::WIMainMenu *GetMainMenu();
@@ -141,42 +141,42 @@ export namespace pragma {
 		static void RegisterVulkanLuaInterface(Lua::Interface &lua);
 		// CVars
 		void RegisterServerConVar(std::string scmd, unsigned int id);
-		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr) override;
+		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr) override;
 		virtual console::ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
 		// Sockets
 		void Connect(std::string ip, std::string port = networking::DEFAULT_PORT_TCP);
 		// Peer-to-peer only!
 		void Connect(uint64_t steamId);
 		networking::CLNetMessage *GetNetMessage(unsigned int ID);
-		pragma::networking::ClientMessageMap *GetNetMessageMap();
+		networking::ClientMessageMap *GetNetMessageMap();
 		void SendUserInfo();
 
 		void InitializeGUIModule();
 
 		// Sound
 		virtual void StopSounds() override;
-		virtual void StopSound(std::shared_ptr<pragma::audio::ALSound> pSnd) override;
-		bool PrecacheSound(std::string snd, std::pair<al::ISoundBuffer *, al::ISoundBuffer *> *buffers, pragma::audio::ALChannel mode = pragma::audio::ALChannel::Auto, bool bLoadInstantly = false);
-		virtual bool PrecacheSound(std::string snd, pragma::audio::ALChannel mode = pragma::audio::ALChannel::Auto) override;
+		virtual void StopSound(std::shared_ptr<audio::ALSound> pSnd) override;
+		bool PrecacheSound(std::string snd, std::pair<pragma::audio::ISoundBuffer *, pragma::audio::ISoundBuffer *> *buffers, audio::ALChannel mode = audio::ALChannel::Auto, bool bLoadInstantly = false);
+		virtual bool PrecacheSound(std::string snd, audio::ALChannel mode = audio::ALChannel::Auto) override;
 		virtual bool LoadSoundScripts(const char *file, bool bPrecache = false) override;
-		virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None) override;
-		std::shared_ptr<pragma::audio::ALSound> CreateSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type);
-		std::shared_ptr<pragma::audio::ALSound> CreateSound(al::Decoder &decoder, pragma::audio::ALSoundType type);
-		void IndexSound(std::shared_ptr<pragma::audio::ALSound> snd, unsigned int idx);
-		std::shared_ptr<pragma::audio::ALSound> PlaySound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags = pragma::audio::ALCreateFlags::None);
-		std::shared_ptr<pragma::audio::ALSound> PlaySound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type);
-		std::shared_ptr<pragma::audio::ALSound> PlaySound(al::Decoder &buffer, pragma::audio::ALSoundType type);
-		std::shared_ptr<pragma::audio::ALSound> PlayWorldSound(al::ISoundBuffer &buffer, pragma::audio::ALSoundType type, const Vector3 &pos);
-		std::shared_ptr<pragma::audio::ALSound> PlayWorldSound(al::Decoder &buffer, pragma::audio::ALSoundType type, const Vector3 &pos);
-		std::shared_ptr<pragma::audio::ALSound> PlayWorldSound(std::string snd, pragma::audio::ALSoundType type, const Vector3 &pos);
-		virtual std::shared_ptr<pragma::audio::ALSound> GetSoundByIndex(unsigned int idx) override;
+		virtual std::shared_ptr<audio::ALSound> CreateSound(std::string snd, audio::ALSoundType type, audio::ALCreateFlags flags = audio::ALCreateFlags::None) override;
+		std::shared_ptr<audio::ALSound> CreateSound(pragma::audio::ISoundBuffer &buffer, audio::ALSoundType type);
+		std::shared_ptr<audio::ALSound> CreateSound(pragma::audio::Decoder &decoder, audio::ALSoundType type);
+		void IndexSound(std::shared_ptr<audio::ALSound> snd, unsigned int idx);
+		std::shared_ptr<audio::ALSound> PlaySound(std::string snd, audio::ALSoundType type, audio::ALCreateFlags flags = audio::ALCreateFlags::None);
+		std::shared_ptr<audio::ALSound> PlaySound(pragma::audio::ISoundBuffer &buffer, audio::ALSoundType type);
+		std::shared_ptr<audio::ALSound> PlaySound(pragma::audio::Decoder &buffer, audio::ALSoundType type);
+		std::shared_ptr<audio::ALSound> PlayWorldSound(pragma::audio::ISoundBuffer &buffer, audio::ALSoundType type, const Vector3 &pos);
+		std::shared_ptr<audio::ALSound> PlayWorldSound(pragma::audio::Decoder &buffer, audio::ALSoundType type, const Vector3 &pos);
+		std::shared_ptr<audio::ALSound> PlayWorldSound(std::string snd, audio::ALSoundType type, const Vector3 &pos);
+		virtual std::shared_ptr<audio::ALSound> GetSoundByIndex(unsigned int idx) override;
 		virtual void UpdateSounds() override;
 		void SetMasterSoundVolume(float vol);
 		float GetMasterSoundVolume();
-		void SetSoundVolume(pragma::audio::ALSoundType type, float vol);
-		float GetSoundVolume(pragma::audio::ALSoundType type);
+		void SetSoundVolume(audio::ALSoundType type, float vol);
+		float GetSoundVolume(audio::ALSoundType type);
 		void UpdateSoundVolume();
-		std::unordered_map<pragma::audio::ALSoundType, float> &GetSoundVolumes();
+		std::unordered_map<audio::ALSoundType, float> &GetSoundVolumes();
 
 		// Handles
 		void LoadLuaCache(std::string cache, unsigned int cacheSize);
@@ -193,9 +193,9 @@ export namespace pragma {
 
 		void HandleLuaNetPacket(NetPacket &packet);
 
-		void SendPacket(const std::string &name, NetPacket &packet, pragma::networking::Protocol protocol);
+		void SendPacket(const std::string &name, NetPacket &packet, networking::Protocol protocol);
 		void SendPacket(const std::string &name, NetPacket &packet);
-		void SendPacket(const std::string &name, pragma::networking::Protocol protocol);
+		void SendPacket(const std::string &name, networking::Protocol protocol);
 
 		LastConnectionInfo &GetLastConnectionInfo() { return m_lastConnection; }
 
@@ -212,24 +212,24 @@ export namespace pragma {
 		void ShowFPSCounter(bool b);
 
 		// Config
-		Bool RawMouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
-		Bool RawKeyboardInput(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude = 1.f);
+		Bool RawMouseInput(platform::MouseButton button, platform::KeyState state, platform::Modifier mods);
+		Bool RawKeyboardInput(platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods, float magnitude = 1.f);
 		Bool RawCharInput(unsigned int c);
 		Bool RawScrollInput(Vector2 offset);
 
-		Bool MouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
-		Bool KeyboardInput(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude = 1.f);
+		Bool MouseInput(platform::MouseButton button, platform::KeyState state, platform::Modifier mods);
+		Bool KeyboardInput(platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods, float magnitude = 1.f);
 		Bool CharInput(unsigned int c);
 		Bool ScrollInput(Vector2 offset);
 		void OnFilesDropped(std::vector<std::string> &files);
 		void OnDragEnter(prosper::Window &window);
 		void OnDragExit(prosper::Window &window);
 		bool OnWindowShouldClose(prosper::Window &window);
-		void OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
+		void OnPreedit(prosper::Window &window, const string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
 		void OnIMEStatusChanged(prosper::Window &window, bool imeEnabled);
 
-		msys::Material *LoadMaterial(const std::string &path, const std::function<void(msys::Material *)> &onLoaded, bool bReload = false);
-		msys::Material *LoadMaterial(const std::string &path);
+		material::Material *LoadMaterial(const std::string &path, const std::function<void(material::Material *)> &onLoaded, bool bReload = false);
+		material::Material *LoadMaterial(const std::string &path);
 
 		void ReadEntityData(NetPacket &packet);
 	};

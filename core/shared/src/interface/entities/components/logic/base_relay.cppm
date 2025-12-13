@@ -9,7 +9,7 @@ export module pragma.shared:entities.components.logic.base_relay;
 export import :entities.components.base;
 
 export namespace pragma {
-	class DLLNETWORK BaseLogicRelayComponent : public pragma::BaseEntityComponent {
+	class DLLNETWORK BaseLogicRelayComponent : public BaseEntityComponent {
 	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;

@@ -24,21 +24,21 @@ export namespace pragma::gui::types {
 		// using WITransformable::SetSize; // This causes a compiler error on MSVC on the latest version (25-08-29)
 		void SetSize(const Vector2i &size) { WITransformable::SetSize(size); }
 		void SetTitle(std::string title);
-		const pragma::string::Utf8String &GetTitle() const;
+		const string::Utf8String &GetTitle() const;
 		void SetCloseButtonEnabled(bool b);
 		void SetDetachButtonEnabled(bool b);
-		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual util::EventReply MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods) override;
 
 		void Detach();
 		void Reattach();
 		bool IsDetached() const;
 	  protected:
-		pragma::gui::WIHandle m_hBg;
-		pragma::gui::WIHandle m_hTitle;
-		pragma::gui::WIHandle m_hTitleBar;
-		pragma::gui::WIHandle m_hClose;
-		pragma::gui::WIHandle m_hDetachButton;
-		pragma::gui::WIHandle m_hContents;
+		WIHandle m_hBg;
+		WIHandle m_hTitle;
+		WIHandle m_hTitleBar;
+		WIHandle m_hClose;
+		WIHandle m_hDetachButton;
+		WIHandle m_hContents;
 		void OnDetachButtonPressed();
 	};
 };

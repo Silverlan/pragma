@@ -8,18 +8,18 @@ import :entities.components.base_networked;
 
 using namespace pragma;
 
-BaseNetworkedComponent::BaseNetworkedComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseNetworkedComponent::BaseNetworkedComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseNetworkedComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "networkflags", false))
-			m_networkFlags = static_cast<NetworkFlags>(pragma::util::to_int(kvData.value));
+			m_networkFlags = static_cast<NetworkFlags>(util::to_int(kvData.value));
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 
 #if NETWORKED_VARS_ENABLED != 0

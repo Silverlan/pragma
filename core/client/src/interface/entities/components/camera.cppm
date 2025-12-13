@@ -14,12 +14,12 @@ export namespace pragma {
 	}
 	class DLLCLIENT CCameraComponent final : public BaseEnvCameraComponent {
 	  public:
-		CCameraComponent(pragma::ecs::BaseEntity &ent) : BaseEnvCameraComponent(ent) {}
+		CCameraComponent(ecs::BaseEntity &ent) : BaseEnvCameraComponent(ent) {}
 		virtual ~CCameraComponent() override;
 		virtual void Initialize() override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
 	  protected:

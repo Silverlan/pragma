@@ -17,7 +17,7 @@ using namespace pragma;
 ComponentEventId cAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED = INVALID_COMPONENT_ID;
-void CAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void CAnimatedComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseAnimatedComponent::RegisterEvents(componentManager, registerEvent);
 	cAnimatedComponent::EVENT_ON_SKELETON_UPDATED = registerEvent("ON_SKELETON_UPDATED", ComponentEventInfo::Type::Explicit);
@@ -30,7 +30,7 @@ static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBoneBuffer = 
 const std::shared_ptr<prosper::IUniformResizableBuffer> &pragma::get_instance_bone_buffer() { return s_instanceBoneBuffer; }
 void pragma::initialize_articulated_buffers()
 {
-	auto instanceSize = pragma::math::to_integral(pragma::GameLimits::MaxBones) * sizeof(Mat4);
+	auto instanceSize = math::to_integral(GameLimits::MaxBones) * sizeof(Mat4);
 	auto instanceCount = 512u;
 	auto maxInstanceCount = instanceCount * 4u;
 	prosper::util::BufferCreateInfo createInfo {};
@@ -46,7 +46,7 @@ void pragma::initialize_articulated_buffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_instanceBoneBuffer = pragma::get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.05f);
+	s_instanceBoneBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.05f);
 	s_instanceBoneBuffer->SetDebugName("entity_anim_bone_buf");
 
 	if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
@@ -54,9 +54,9 @@ void pragma::initialize_articulated_buffers()
 }
 void pragma::clear_articulated_buffers() { s_instanceBoneBuffer = nullptr; }
 
-void CAnimatedComponent::SetBoneBufferDirty() { pragma::math::set_flag(m_stateFlags, StateFlags::BoneBufferDirty); }
-void CAnimatedComponent::SetSkeletonUpdateCallbacksEnabled(bool enabled) { pragma::math::set_flag(m_stateFlags, StateFlags::EnableSkeletonUpdateCallbacks, enabled); }
-bool CAnimatedComponent::AreSkeletonUpdateCallbacksEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::EnableSkeletonUpdateCallbacks); }
+void CAnimatedComponent::SetBoneBufferDirty() { math::set_flag(m_stateFlags, StateFlags::BoneBufferDirty); }
+void CAnimatedComponent::SetSkeletonUpdateCallbacksEnabled(bool enabled) { math::set_flag(m_stateFlags, StateFlags::EnableSkeletonUpdateCallbacks, enabled); }
+bool CAnimatedComponent::AreSkeletonUpdateCallbacksEnabled() const { return math::is_flag_set(m_stateFlags, StateFlags::EnableSkeletonUpdateCallbacks); }
 
 void CAnimatedComponent::Initialize()
 {
@@ -68,20 +68,20 @@ void CAnimatedComponent::Initialize()
 		if(pRenderComponent.valid())
 			pRenderComponent->UpdateRenderBounds();
 	});*/
-	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT, [this](std::reference_wrapper<ComponentEvent> evData) {
 		if(AreSkeletonUpdateCallbacksEnabled())
 			return; // Bone matrices will be updated from main thread
 		UpdateBoneMatricesMT();
 	});
-	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto isDirty = pragma::math::is_flag_set(m_stateFlags, StateFlags::BoneBufferDirty);
-		pragma::math::set_flag(m_stateFlags, StateFlags::BoneBufferDirty, false);
-		UpdateBoneBuffer(*static_cast<pragma::CEOnUpdateRenderBuffers &>(evData.get()).commandBuffer, isDirty);
+	BindEventUnhandled(cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS, [this](std::reference_wrapper<ComponentEvent> evData) {
+		auto isDirty = math::is_flag_set(m_stateFlags, StateFlags::BoneBufferDirty);
+		math::set_flag(m_stateFlags, StateFlags::BoneBufferDirty, false);
+		UpdateBoneBuffer(*static_cast<CEOnUpdateRenderBuffers &>(evData.get()).commandBuffer, isDirty);
 	});
-	BindEvent(cRenderComponent::EVENT_UPDATE_INSTANTIABILITY, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(cRenderComponent::EVENT_UPDATE_INSTANTIABILITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		// TODO: Allow instantiability for animated entities
 		static_cast<CEUpdateInstantiability &>(evData.get()).instantiable = false;
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	});
 	auto &ent = GetEntity();
 	auto pRenderComponent = ent.GetComponent<CRenderComponent>();
@@ -119,9 +119,9 @@ void CAnimatedComponent::ReceiveData(NetPacket &packet)
 	SetCycle(cycle);
 }
 
-bool CAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, pragma::math::ScaledTransform &outPose) const { return BaseAnimatedComponent::GetVertexTransformMatrix(subMesh, vertexId, outPose); }
-std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId) const { return GetVertexTransformMatrix(subMesh, vertexId, nullptr, nullptr); }
-std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const pragma::geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset, float *optOutDelta) const
+bool CAnimatedComponent::GetVertexTransformMatrix(const geometry::ModelSubMesh &subMesh, uint32_t vertexId, math::ScaledTransform &outPose) const { return BaseAnimatedComponent::GetVertexTransformMatrix(subMesh, vertexId, outPose); }
+std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const geometry::ModelSubMesh &subMesh, uint32_t vertexId) const { return GetVertexTransformMatrix(subMesh, vertexId, nullptr, nullptr); }
+std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset, float *optOutDelta) const
 {
 	if(optOutNormalOffset)
 		*optOutNormalOffset = {};
@@ -131,17 +131,17 @@ std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const pragma::g
 	if(t.has_value() == false)
 		return {};
 	Vector3 vertexOffset;
-	auto pVertexAnimatedComponent = GetEntity().GetComponent<pragma::CVertexAnimatedComponent>();
+	auto pVertexAnimatedComponent = GetEntity().GetComponent<CVertexAnimatedComponent>();
 	if(pVertexAnimatedComponent.expired() || pVertexAnimatedComponent->GetLocalVertexPosition(subMesh, vertexId, vertexOffset, optOutNormalOffset, optOutDelta) == false)
 		return t;
 	return *t * glm::gtc::translate(umat::identity(), vertexOffset); // TODO: Confirm order!
 }
 
-void CAnimatedComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &mdl) { BaseAnimatedComponent::OnModelChanged(mdl); }
+void CAnimatedComponent::OnModelChanged(const std::shared_ptr<asset::Model> &mdl) { BaseAnimatedComponent::OnModelChanged(mdl); }
 
 bool CAnimatedComponent::HasBones() const { return !m_boneMatrices.empty(); }
 
-void CAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::asset::Model> &mdl)
+void CAnimatedComponent::ResetAnimation(const std::shared_ptr<asset::Model> &mdl)
 {
 	BaseAnimatedComponent::ResetAnimation(mdl);
 	m_boneMatrices.clear();
@@ -161,7 +161,7 @@ void CAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::asset::Mod
 		case asset::ObjectAttachment::Type::ParticleSystem:
 			auto itParticleFile = objAttachment.keyValues.find("particle_file");
 			if(itParticleFile != objAttachment.keyValues.end())
-				pragma::ecs::CParticleSystemComponent::Precache(itParticleFile->second);
+				ecs::CParticleSystemComponent::Precache(itParticleFile->second);
 			auto itParticle = objAttachment.keyValues.find("particle");
 			if(itParticle != objAttachment.keyValues.end()) {
 				Vector3 translation {};
@@ -179,7 +179,7 @@ void CAnimatedComponent::ResetAnimation(const std::shared_ptr<pragma::asset::Mod
 				if(itAngles != objAttachment.keyValues.end())
 					rotation = uquat::create(EulerAngles(itAngles->second));
 
-				auto *pt = pragma::ecs::CParticleSystemComponent::Create(itParticle->second);
+				auto *pt = ecs::CParticleSystemComponent::Create(itParticle->second);
 				if(pt != nullptr) {
 					auto &entPt = pt->GetEntity();
 					auto pAttachableComponent = entPt.AddComponent<CAttachmentComponent>();
@@ -204,7 +204,7 @@ void CAnimatedComponent::InitializeBoneBuffer()
 {
 	if(m_boneBuffer != nullptr)
 		return;
-	m_boneBuffer = pragma::get_instance_bone_buffer()->AllocateBuffer();
+	m_boneBuffer = get_instance_bone_buffer()->AllocateBuffer();
 
 	CEOnBoneBufferInitialized evData {m_boneBuffer};
 	BroadcastEvent(cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED, evData);
@@ -276,9 +276,9 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 		if(posBind != nullptr && rotBind != nullptr) {
 			auto &mat = m_boneMatrices[i];
 			if(i != physRootBoneId) {
-				pragma::math::Transform tBindPose {*posBind, *rotBind};
+				math::Transform tBindPose {*posBind, *rotBind};
 				tBindPose = tBindPose.GetInverse();
-				pragma::math::ScaledTransform tBone {pos, orientation, scale};
+				math::ScaledTransform tBone {pos, orientation, scale};
 
 				mat = tBone.ToMatrix() * tBindPose.ToMatrix();
 				//mat = (tBone *tBindPose).ToMatrix();
@@ -314,44 +314,44 @@ void CEOnBoneBufferInitialized::PushArguments(lua::State *l) { Lua::Push<std::sh
 void CAnimatedComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseAnimatedComponent::RegisterLuaBindings(l, modEnts);
-	auto defCAnimated = pragma::LuaCore::create_entity_component_class<pragma::CAnimatedComponent, pragma::BaseAnimatedComponent>("AnimatedComponent");
+	auto defCAnimated = pragma::LuaCore::create_entity_component_class<CAnimatedComponent, BaseAnimatedComponent>("AnimatedComponent");
 	defCAnimated.def(
-	  "GetBoneBuffer", +[](lua::State *l, pragma::CAnimatedComponent &hAnim) -> std::optional<std::shared_ptr<prosper::IBuffer>> {
+	  "GetBoneBuffer", +[](lua::State *l, CAnimatedComponent &hAnim) -> std::optional<std::shared_ptr<prosper::IBuffer>> {
 		  auto *buf = hAnim.GetBoneBuffer();
 		  if(!buf)
 			  return {};
 		  return const_cast<prosper::IBuffer *>(buf)->shared_from_this();
 	  });
-	defCAnimated.def("GetBoneRenderMatrices", static_cast<const std::vector<Mat4> &(pragma::CAnimatedComponent::*)() const>(&pragma::CAnimatedComponent::GetBoneMatrices));
-	defCAnimated.def("GetBoneRenderMatrix", static_cast<std::optional<Mat4> (*)(lua::State *, pragma::CAnimatedComponent &, uint32_t)>([](lua::State *l, pragma::CAnimatedComponent &hAnim, uint32_t boneIndex) -> std::optional<Mat4> {
+	defCAnimated.def("GetBoneRenderMatrices", static_cast<const std::vector<Mat4> &(CAnimatedComponent::*)() const>(&CAnimatedComponent::GetBoneMatrices));
+	defCAnimated.def("GetBoneRenderMatrix", static_cast<std::optional<Mat4> (*)(lua::State *, CAnimatedComponent &, uint32_t)>([](lua::State *l, CAnimatedComponent &hAnim, uint32_t boneIndex) -> std::optional<Mat4> {
 		auto &mats = hAnim.GetBoneMatrices();
 		if(boneIndex >= mats.size())
 			return {};
 		return mats.at(boneIndex);
 	}));
-	defCAnimated.def("SetBoneRenderMatrix", static_cast<void (*)(lua::State *, pragma::CAnimatedComponent &, uint32_t, const Mat4 &)>([](lua::State *l, pragma::CAnimatedComponent &hAnim, uint32_t boneIndex, const Mat4 &m) {
+	defCAnimated.def("SetBoneRenderMatrix", static_cast<void (*)(lua::State *, CAnimatedComponent &, uint32_t, const Mat4 &)>([](lua::State *l, CAnimatedComponent &hAnim, uint32_t boneIndex, const Mat4 &m) {
 		auto &mats = hAnim.GetBoneMatrices();
 		if(boneIndex >= mats.size())
 			return;
 		mats.at(boneIndex) = m;
 	}));
 	defCAnimated.def("GetLocalVertexPosition",
-	  static_cast<std::optional<Vector3> (*)(lua::State *, pragma::CAnimatedComponent &, std::shared_ptr<pragma::geometry::ModelSubMesh> &, uint32_t)>([](lua::State *l, pragma::CAnimatedComponent &hAnim, std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
+	  static_cast<std::optional<Vector3> (*)(lua::State *, CAnimatedComponent &, std::shared_ptr<geometry::ModelSubMesh> &, uint32_t)>([](lua::State *l, CAnimatedComponent &hAnim, std::shared_ptr<geometry::ModelSubMesh> &subMesh, uint32_t vertexId) -> std::optional<Vector3> {
 		  Vector3 pos, n;
 		  if(vertexId >= subMesh->GetVertexCount())
 			  return {};
 		  auto &v = subMesh->GetVertices()[vertexId];
 		  pos = v.position;
 		  n = v.normal;
-		  auto b = hAnim.GetLocalVertexPosition(static_cast<pragma::geometry::CModelSubMesh &>(*subMesh), vertexId, pos, n);
+		  auto b = hAnim.GetLocalVertexPosition(static_cast<geometry::CModelSubMesh &>(*subMesh), vertexId, pos, n);
 		  if(b == false)
 			  return {};
 		  return pos;
 	  }));
-	defCAnimated.def("AreSkeletonUpdateCallbacksEnabled", &pragma::CAnimatedComponent::AreSkeletonUpdateCallbacksEnabled);
-	defCAnimated.def("SetSkeletonUpdateCallbacksEnabled", &pragma::CAnimatedComponent::SetSkeletonUpdateCallbacksEnabled);
-	defCAnimated.add_static_constant("EVENT_ON_SKELETON_UPDATED", pragma::cAnimatedComponent::EVENT_ON_SKELETON_UPDATED);
-	defCAnimated.add_static_constant("EVENT_ON_BONE_MATRICES_UPDATED", pragma::cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED);
-	defCAnimated.add_static_constant("EVENT_ON_BONE_BUFFER_INITIALIZED", pragma::cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED);
+	defCAnimated.def("AreSkeletonUpdateCallbacksEnabled", &CAnimatedComponent::AreSkeletonUpdateCallbacksEnabled);
+	defCAnimated.def("SetSkeletonUpdateCallbacksEnabled", &CAnimatedComponent::SetSkeletonUpdateCallbacksEnabled);
+	defCAnimated.add_static_constant("EVENT_ON_SKELETON_UPDATED", cAnimatedComponent::EVENT_ON_SKELETON_UPDATED);
+	defCAnimated.add_static_constant("EVENT_ON_BONE_MATRICES_UPDATED", cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED);
+	defCAnimated.add_static_constant("EVENT_ON_BONE_BUFFER_INITIALIZED", cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED);
 	modEnts[defCAnimated];
 }

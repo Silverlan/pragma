@@ -11,11 +11,11 @@ export import :entities.components.base;
 export namespace pragma {
 	class DLLNETWORK LifelineLinkComponent final : public BaseEntityComponent {
 	  public:
-		LifelineLinkComponent(pragma::ecs::BaseEntity &ent);
+		LifelineLinkComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 
-		void RemoveEntityOnRemoval(pragma::ecs::BaseEntity *ent, Bool bRemove = true);
+		void RemoveEntityOnRemoval(ecs::BaseEntity *ent, Bool bRemove = true);
 		void RemoveEntityOnRemoval(const EntityHandle &hEnt, Bool bRemove = true);
 
 		virtual void InitializeLuaObject(lua::State *lua) override;

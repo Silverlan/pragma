@@ -23,18 +23,18 @@ export {
 
 				enum class NetFlags : uint8_t { None = 0, StartTouch = 1, UseForce = StartTouch << 1 };
 
-				DLLNETWORK void apply_gravity(pragma::ecs::BaseEntity *ent, uint32_t flags, const Vector3 &gravityDir, const Vector3 &dirUp, bool bUseForce, float gravityForce, std::shared_ptr<Vector3> *upDir = nullptr);
+				DLLNETWORK void apply_gravity(ecs::BaseEntity *ent, uint32_t flags, const Vector3 &gravityDir, const Vector3 &dirUp, bool bUseForce, float gravityForce, std::shared_ptr<Vector3> *upDir = nullptr);
 			};
 		};
 		class DLLNETWORK BaseEntityTriggerGravityComponent : public BaseEntityComponent {
 		  public:
 			using BaseEntityComponent::BaseEntityComponent;
 			virtual void Initialize() override;
-			virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+			virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		  protected:
-			virtual void OnResetGravity(pragma::ecs::BaseEntity *ent, GravitySettings &settings);
-			virtual void OnStartTouch(pragma::ecs::BaseEntity *ent);
-			void OnEndTouch(pragma::ecs::BaseEntity *ent);
+			virtual void OnResetGravity(ecs::BaseEntity *ent, GravitySettings &settings);
+			virtual void OnStartTouch(ecs::BaseEntity *ent);
+			void OnEndTouch(ecs::BaseEntity *ent);
 
 			Vector3 m_kvGravityDir = {};
 			float m_kvGravityForce = 0.f;

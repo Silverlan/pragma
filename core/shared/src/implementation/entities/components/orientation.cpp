@@ -8,10 +8,10 @@ import :entities.components.orientation;
 
 using namespace pragma;
 
-OrientationComponent::OrientationComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_upDirection(pragma::util::Vector3Property::Create({0.f, 1.f, 0.f})) {}
+OrientationComponent::OrientationComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_upDirection(util::Vector3Property::Create({0.f, 1.f, 0.f})) {}
 void OrientationComponent::Initialize() { BaseEntityComponent::Initialize(); }
-void OrientationComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-const pragma::util::PVector3Property &OrientationComponent::GetUpDirectionProperty() const { return m_upDirection; }
+void OrientationComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+const util::PVector3Property &OrientationComponent::GetUpDirectionProperty() const { return m_upDirection; }
 
 const Vector3 &OrientationComponent::GetUpDirection() const { return *m_upDirection; }
 

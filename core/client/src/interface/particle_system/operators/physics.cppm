@@ -21,54 +21,54 @@ export namespace pragma::pts {
 		Vector3 m_angularFactor = {1.f, 1.f, 1.f};
 		Vector3 m_posOffset = {};
 		Quat m_rotOffset = uquat::identity();
-		std::vector<pragma::util::TSharedHandle<pragma::physics::IRigidBody>> m_physicsObjects;
-		virtual std::shared_ptr<pragma::physics::IShape> CreateShape() = 0;
+		std::vector<util::TSharedHandle<physics::IRigidBody>> m_physicsObjects;
+		virtual std::shared_ptr<physics::IShape> CreateShape() = 0;
 	  public:
 		CParticleOperatorPhysics() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
 		virtual void OnParticleSystemStarted() override;
-		virtual void OnParticleDestroyed(pragma::pts::CParticle &particle) override;
+		virtual void OnParticleDestroyed(CParticle &particle) override;
 		virtual void OnParticleSystemStopped() override;
-		virtual void PreSimulate(pragma::pts::CParticle &particle, double) override;
-		virtual void PostSimulate(pragma::pts::CParticle &particle, double) override;
+		virtual void PreSimulate(CParticle &particle, double) override;
+		virtual void PostSimulate(CParticle &particle, double) override;
 	};
 
 	class DLLCLIENT CParticleOperatorPhysicsSphere : public CParticleOperatorPhysics {
 	  protected:
 		float m_radius = 0.f;
-		virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
+		virtual std::shared_ptr<physics::IShape> CreateShape() override;
 	  public:
 		CParticleOperatorPhysicsSphere() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	};
 
 	class DLLCLIENT CParticleOperatorPhysicsBox : public CParticleOperatorPhysics {
 	  protected:
 		float m_extent = 0.f;
-		virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
+		virtual std::shared_ptr<physics::IShape> CreateShape() override;
 	  public:
 		CParticleOperatorPhysicsBox() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	};
 
 	class DLLCLIENT CParticleOperatorPhysicsCylinder : public CParticleOperatorPhysics {
 	  protected:
 		float m_radius = 0.f;
 		float m_height = 0.f;
-		virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
+		virtual std::shared_ptr<physics::IShape> CreateShape() override;
 	  public:
 		CParticleOperatorPhysicsCylinder() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	};
 
 	class DLLCLIENT CParticleOperatorPhysicsModel : public CParticleOperatorPhysics {
 	  public:
 		CParticleOperatorPhysicsModel() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
 	  protected:
-		std::shared_ptr<pragma::asset::Model> m_model = nullptr;
-		virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
+		std::shared_ptr<asset::Model> m_model = nullptr;
+		virtual std::shared_ptr<physics::IShape> CreateShape() override;
 	};
 };

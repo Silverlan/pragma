@@ -15,14 +15,14 @@ export namespace pragma {
 
 	class DLLCLIENT CRendererPpMotionBlurComponent final : public CRendererPpBaseComponent {
 	  public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		CRendererPpMotionBlurComponent(pragma::ecs::BaseEntity &ent);
+		CRendererPpMotionBlurComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnRemove() override;
 		virtual std::string GetIdentifier() const override { return "motion_blur"; }
-		virtual uint32_t GetPostProcessingWeight() const override { return pragma::math::to_integral(CRendererComponent::StandardPostProcessingWeight::MotionBlur); }
+		virtual uint32_t GetPostProcessingWeight() const override { return math::to_integral(CRendererComponent::StandardPostProcessingWeight::MotionBlur); }
 
 		void SetAutoUpdateMotionData(bool updateMotionPerFrame);
 		void UpdateMotionBlurData();
@@ -36,11 +36,11 @@ export namespace pragma {
 		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetSwapCommandBuffer() const;
 		const std::shared_ptr<prosper::RenderTarget> &GetRenderTarget() const;
 	  private:
-		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) override;
+		virtual void DoRenderEffect(const rendering::DrawSceneInfo &drawSceneInfo) override;
 		void DoUpdatePoses(const CMotionBlurDataComponent &motionBlurDataC, const MotionBlurTemporalData &motionBlurData, prosper::IPrimaryCommandBuffer &cmd);
-		void RecordVelocityPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
-		void ExecuteVelocityPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
-		void RenderPostProcessing(const pragma::rendering::DrawSceneInfo &drawSceneInfo);
+		void RecordVelocityPass(const rendering::DrawSceneInfo &drawSceneInfo);
+		void ExecuteVelocityPass(const rendering::DrawSceneInfo &drawSceneInfo);
+		void RenderPostProcessing(const rendering::DrawSceneInfo &drawSceneInfo);
 		void ReloadVelocityTexture();
 		std::shared_ptr<prosper::ISwapCommandBufferGroup> m_swapCmd = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_velocityTexDsg;

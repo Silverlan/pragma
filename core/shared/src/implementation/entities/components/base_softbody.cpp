@@ -14,7 +14,7 @@ void BaseSoftBodyComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("physics");
 	ent.AddComponent("model");
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { m_softBodyData = nullptr; });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { m_softBodyData = nullptr; });
 }
 bool BaseSoftBodyComponent::InitializeSoftBodyData()
 {
@@ -40,11 +40,11 @@ bool BaseSoftBodyComponent::InitializeSoftBodyData()
 		for(auto it = subMeshes.begin(); it != subMeshes.end();) {
 			auto &subMesh = *it;
 			auto matId = hMdl->GetMaterialIndex(*subMesh);
-			if(matId.has_value() == false || *matId >= materials.size() || pragma::string::compare<std::string>(materials.at(*matId)->GetShaderIdentifier(), "nodraw")) {
+			if(matId.has_value() == false || *matId >= materials.size() || string::compare<std::string>(materials.at(*matId)->GetShaderIdentifier(), "nodraw")) {
 				it = subMeshes.erase(it);
 				continue;
 			}
-			auto itTest = std::find_if(colMeshes.begin(), colMeshes.end(), [&subMesh](const std::shared_ptr<pragma::physics::CollisionMesh> &colMesh) { return (colMesh->GetSoftBodyMesh() == subMesh.get()); });
+			auto itTest = std::find_if(colMeshes.begin(), colMeshes.end(), [&subMesh](const std::shared_ptr<physics::CollisionMesh> &colMesh) { return (colMesh->GetSoftBodyMesh() == subMesh.get()); });
 			if(itTest == colMeshes.end()) {
 				it = subMeshes.erase(it);
 				continue;
@@ -65,11 +65,11 @@ bool BaseSoftBodyComponent::InitializeSoftBodyData()
 const BaseSoftBodyComponent::SoftBodyData *BaseSoftBodyComponent::GetSoftBodyData() const { return const_cast<BaseSoftBodyComponent *>(this)->GetSoftBodyData(); }
 BaseSoftBodyComponent::SoftBodyData *BaseSoftBodyComponent::GetSoftBodyData() { return m_softBodyData.get(); }
 void BaseSoftBodyComponent::ReleaseSoftBodyData() { m_softBodyData = nullptr; }
-pragma::util::EventReply BaseSoftBodyComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply BaseSoftBodyComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
-	if(eventId == pragma::basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED)
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
+	if(eventId == basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED)
 		ReleaseSoftBodyData();
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }

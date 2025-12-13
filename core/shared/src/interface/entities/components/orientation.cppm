@@ -12,10 +12,10 @@ export import pragma.util;
 export namespace pragma {
 	class DLLNETWORK OrientationComponent final : public BaseEntityComponent {
 	  public:
-		OrientationComponent(pragma::ecs::BaseEntity &ent);
+		OrientationComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
-		const pragma::util::PVector3Property &GetUpDirectionProperty() const;
+		const util::PVector3Property &GetUpDirectionProperty() const;
 		const Vector3 &GetUpDirection() const;
 		virtual void SetUpDirection(const Vector3 &direction);
 		// Returns the forward,right and up vectors, depending on the player's up direction
@@ -24,7 +24,7 @@ export namespace pragma {
 		const Quat &GetOrientationAxesRotation() const;
 	  protected:
 		virtual void InitializeLuaObject(lua::State *lua) override;
-		pragma::util::PVector3Property m_upDirection = nullptr;
+		util::PVector3Property m_upDirection = nullptr;
 		Vector3 m_axForward = {0.f, 0.f, 1.f};
 		Vector3 m_axRight = {-1.f, 0.f, 0.f};
 		Quat m_axRot = uquat::identity();

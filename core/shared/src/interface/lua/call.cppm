@@ -9,5 +9,5 @@ export module pragma.shared:scripting.lua.call;
 export import :scripting.lua.api;
 
 export namespace Lua {
-	DLLNETWORK Lua::StatusCode CallFunction(lua::State *l, const std::function<Lua::StatusCode(lua::State *)> &pushArgs, int32_t numReturnValues = 0);
+	DLLNETWORK StatusCode CallFunction(lua::State *l, const std::function<StatusCode(lua::State *)> &pushArgs, int32_t numReturnValues = 0);
 };

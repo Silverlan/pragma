@@ -18,7 +18,7 @@ ComponentEventId baseGamemodeComponent::EVENT_ON_PLAYER_JOINED = INVALID_COMPONE
 ComponentEventId baseGamemodeComponent::EVENT_ON_GAME_INITIALIZED = INVALID_COMPONENT_ID;
 ComponentEventId baseGamemodeComponent::EVENT_ON_MAP_INITIALIZED = INVALID_COMPONENT_ID;
 ComponentEventId baseGamemodeComponent::EVENT_ON_GAME_READY = INVALID_COMPONENT_ID;
-void BaseGamemodeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void BaseGamemodeComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseGamemodeComponent::EVENT_ON_PLAYER_DEATH = registerEvent("ON_PLAYER_DEATH", ComponentEventInfo::Type::Explicit);
 	baseGamemodeComponent::EVENT_ON_PLAYER_SPAWNED = registerEvent("ON_PLAYER_SPAWNED", ComponentEventInfo::Type::Explicit);
@@ -29,7 +29,7 @@ void BaseGamemodeComponent::RegisterEvents(pragma::EntityComponentManager &compo
 	baseGamemodeComponent::EVENT_ON_MAP_INITIALIZED = registerEvent("ON_MAP_INITIALIZED", ComponentEventInfo::Type::Explicit);
 	baseGamemodeComponent::EVENT_ON_GAME_READY = registerEvent("ON_GAME_READY", ComponentEventInfo::Type::Explicit);
 }
-BaseGamemodeComponent::BaseGamemodeComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) { ent.GetNetworkState()->GetGameState()->GetGamemodeComponents().push_back(this); }
+BaseGamemodeComponent::BaseGamemodeComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) { ent.GetNetworkState()->GetGameState()->GetGamemodeComponents().push_back(this); }
 
 void BaseGamemodeComponent::Initialize() { BaseEntityComponent::Initialize(); }
 
@@ -57,7 +57,7 @@ void BaseGamemodeComponent::OnPlayerSpawned(BasePlayerComponent &pl)
 	CEPlayerSpawned evData {pl};
 	BroadcastEvent(baseGamemodeComponent::EVENT_ON_PLAYER_SPAWNED, evData);
 }
-void BaseGamemodeComponent::OnPlayerDropped(BasePlayerComponent &pl, pragma::networking::DropReason reason)
+void BaseGamemodeComponent::OnPlayerDropped(BasePlayerComponent &pl, networking::DropReason reason)
 {
 	CEPlayerDropped evData {pl, reason};
 	BroadcastEvent(baseGamemodeComponent::EVENT_ON_PLAYER_DROPPED, evData);
@@ -76,7 +76,7 @@ void BaseGamemodeComponent::OnGameInitialized() { BroadcastEvent(baseGamemodeCom
 void BaseGamemodeComponent::OnMapInitialized() { BroadcastEvent(baseGamemodeComponent::EVENT_ON_MAP_INITIALIZED); }
 void BaseGamemodeComponent::OnGameReady() { BroadcastEvent(baseGamemodeComponent::EVENT_ON_GAME_READY); }
 
-pragma::game::GameModeInfo *BaseGamemodeComponent::GetGameModeInfo() { return GetEntity().GetNetworkState()->GetGameState()->GetGameMode(); }
+game::GameModeInfo *BaseGamemodeComponent::GetGameModeInfo() { return GetEntity().GetNetworkState()->GetGameState()->GetGameMode(); }
 static const std::string empty_string {};
 const std::string &BaseGamemodeComponent::GetName() const
 {
@@ -98,10 +98,10 @@ const std::string &BaseGamemodeComponent::GetAuthor() const
 	auto *gmInfo = GetGameModeInfo();
 	return gmInfo ? gmInfo->author : empty_string;
 }
-pragma::util::Version BaseGamemodeComponent::GetGamemodeVersion() const
+util::Version BaseGamemodeComponent::GetGamemodeVersion() const
 {
 	auto *gmInfo = GetGameModeInfo();
-	return gmInfo ? gmInfo->version : pragma::util::Version {};
+	return gmInfo ? gmInfo->version : util::Version {};
 }
 
 CEPlayerDeath::CEPlayerDeath(BasePlayerComponent &pl, game::DamageInfo *dmgInfo) : player {pl}, dmgInfo {dmgInfo} {}
@@ -112,11 +112,11 @@ void CEPlayerDeath::PushArguments(lua::State *l)
 		Lua::Push<game::DamageInfo *>(l, dmgInfo);
 }
 
-CEPlayerDropped::CEPlayerDropped(BasePlayerComponent &pl, pragma::networking::DropReason reason) : player {pl}, reason {reason} {}
+CEPlayerDropped::CEPlayerDropped(BasePlayerComponent &pl, networking::DropReason reason) : player {pl}, reason {reason} {}
 void CEPlayerDropped::PushArguments(lua::State *l)
 {
 	player.PushLuaObject(l);
-	Lua::PushInt(l, pragma::math::to_integral(reason));
+	Lua::PushInt(l, math::to_integral(reason));
 }
 
 CEPlayerSpawned::CEPlayerSpawned(BasePlayerComponent &pl) : player {pl} {}

@@ -279,7 +279,7 @@ void Lua::Model::register_class(lua::State *l, luabind::class_<pragma::asset::Mo
 		auto *mat = mdl.GetMaterial(idx);
 		if(mat == nullptr)
 			return;
-		Lua::Push<msys::Material *>(l, mat);
+		Lua::Push<pragma::material::Material *>(l, mat);
 	}));
 	classDef.def("GetMaterialIndex", static_cast<void (*)(lua::State *, pragma::asset::Model &, pragma::geometry::ModelSubMesh &, uint32_t)>([](lua::State *l, pragma::asset::Model &mdl, pragma::geometry::ModelSubMesh &mesh, uint32_t skinId) {
 		auto idx = mdl.GetMaterialIndex(mesh, skinId);
@@ -1992,7 +1992,7 @@ void Lua::Model::AddCollisionMesh(lua::State *, pragma::asset::Model &mdl, pragm
 	//Lua::CheckModel(l,1);
 	mdl.AddCollisionMesh(colMesh.shared_from_this());
 }
-void Lua::Model::AddMaterial(lua::State *l, pragma::asset::Model &mdl, uint32_t textureGroup, msys::Material *mat)
+void Lua::Model::AddMaterial(lua::State *l, pragma::asset::Model &mdl, uint32_t textureGroup, pragma::material::Material *mat)
 {
 	if(!mat)
 		return;
@@ -2003,7 +2003,7 @@ void Lua::Model::AddMaterial(lua::State *l, pragma::asset::Model &mdl, uint32_t 
 	if(skinTexIdx.has_value())
 		Lua::PushInt(l, *skinTexIdx);
 }
-void Lua::Model::SetMaterial(lua::State *l, pragma::asset::Model &mdl, uint32_t matId, msys::Material *mat)
+void Lua::Model::SetMaterial(lua::State *l, pragma::asset::Model &mdl, uint32_t matId, pragma::material::Material *mat)
 {
 	//Lua::CheckModel(l,1);
 	mdl.SetMaterial(matId, mat);
@@ -2021,7 +2021,7 @@ void Lua::Model::GetMaterials(lua::State *l, pragma::asset::Model &mdl)
 		if(pmat == nullptr)
 			pmat = matManager.GetErrorMaterial();
 		Lua::PushInt(l, idx++);
-		Lua::Push<msys::Material *>(l, pmat);
+		Lua::Push<pragma::material::Material *>(l, pmat);
 		Lua::SetTableValue(l, t);
 	}
 }

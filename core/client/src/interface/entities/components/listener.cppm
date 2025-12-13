@@ -13,7 +13,7 @@ export import pragma.soundsystem;
 export namespace pragma {
 	class DLLCLIENT CListenerComponent final : public BaseEntityComponent {
 	  public:
-		CListenerComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CListenerComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		CListenerComponent();
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
@@ -21,7 +21,7 @@ export namespace pragma {
 		void SetGain(float gain);
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  private:
-		al::IListener *m_listener = nullptr;
+		pragma::audio::IListener *m_listener = nullptr;
 	};
 };
 

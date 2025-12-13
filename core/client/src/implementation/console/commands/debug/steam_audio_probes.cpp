@@ -64,7 +64,7 @@ static void debug_steam_audio_dump_scene(pragma::NetworkState *state, pragma::Ba
 		mapName = game->GetMapName();
 
 	std::string path = "debug/maps/";
-	FileManager::CreatePath(path.c_str());
+	fs::create_path(path);
 	path += mapName + "_steam_audio_scene.obj";
 	auto r = iplScene->DumpScene(path);
 	if(r == false) {

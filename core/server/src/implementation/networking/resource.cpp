@@ -8,7 +8,7 @@ import :networking.resource;
 
 pragma::networking::Resource::Resource(std::string name, bool bStream) : offset(0), stream(bStream)
 {
-	this->name = FileManager::GetCanonicalizedPath(name);
+	this->name = fs::get_canonicalized_path(name);
 	file = nullptr;
 }
 pragma::networking::Resource::~Resource()
@@ -19,7 +19,7 @@ pragma::networking::Resource::~Resource()
 }
 bool pragma::networking::Resource::Construct()
 {
-	file = FileManager::OpenFile(name.c_str(), "rb");
+	file = pragma::fs::open_file(name.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(file == nullptr)
 		return false;
 	return true;

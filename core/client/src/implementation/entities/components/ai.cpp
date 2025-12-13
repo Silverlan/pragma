@@ -13,7 +13,7 @@ std::vector<CAIComponent *> CAIComponent::s_npcs;
 const std::vector<CAIComponent *> &CAIComponent::GetAll() { return s_npcs; }
 unsigned int CAIComponent::GetNPCCount() { return CUInt32(s_npcs.size()); }
 
-CAIComponent::CAIComponent(pragma::ecs::BaseEntity &ent) : BaseAIComponent(ent) { s_npcs.push_back(this); }
+CAIComponent::CAIComponent(ecs::BaseEntity &ent) : BaseAIComponent(ent) { s_npcs.push_back(this); }
 
 CAIComponent::~CAIComponent()
 {
@@ -37,7 +37,7 @@ void CAIComponent::ReceiveSnapshotData(NetPacket &packet)
 	}
 	else {
 		m_moveInfo.moving = true;
-		m_moveInfo.moveActivity = packet->Read<pragma::Activity>();
+		m_moveInfo.moveActivity = packet->Read<Activity>();
 		m_moveInfo.moveDir = packet->Read<Vector3>();
 		m_moveInfo.moveTarget = packet->Read<Vector3>();
 
@@ -77,20 +77,20 @@ void CAIComponent::ReceiveData(NetPacket &packet)
 	// Note: Change return value of ShouldTransmitNetData if data should be received
 }
 
-bool CAIComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
+bool CAIComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetLookTarget) {
-		auto type = packet->Read<BaseAIComponent::LookTargetType>();
+		auto type = packet->Read<LookTargetType>();
 		switch(type) {
-		case BaseAIComponent::LookTargetType::Position:
+		case LookTargetType::Position:
 			{
 				auto v = packet->Read<Vector3>();
 				SetLookTarget(v);
 				break;
 			}
-		case BaseAIComponent::LookTargetType::Entity:
+		case LookTargetType::Entity:
 			{
-				auto *ent = pragma::networking::read_entity(packet);
+				auto *ent = networking::read_entity(packet);
 				if(ent == nullptr)
 					ClearLookTarget();
 				else
@@ -108,7 +108,7 @@ bool CAIComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet
 
 Vector3 CAIComponent::OnCalcMovementDirection() const
 {
-	auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
+	auto pVelComponent = GetEntity().GetComponent<VelocityComponent>();
 	if(pVelComponent.expired())
 		return {};
 	auto vel = pVelComponent->GetVelocity(); // Client doesn't know the NPCs actual movement direction; Just assume it's the same as its velocity
@@ -128,16 +128,16 @@ void CAIComponent::UpdateMovementProperties(MovementComponent &movementC)
 
 void CAIComponent::OnEntityComponentAdded(BaseEntityComponent &component) { BaseAIComponent::OnEntityComponentAdded(component); }
 
-pragma::util::EventReply CAIComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply CAIComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseAIComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
-	return pragma::util::EventReply::Unhandled;
+	if(BaseAIComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
+	return util::EventReply::Unhandled;
 }
 
 void CAIComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseAIComponent::RegisterLuaBindings(l, modEnts);
-	auto def = pragma::LuaCore::create_entity_component_class<pragma::CAIComponent, pragma::BaseAIComponent>("AIComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<CAIComponent, BaseAIComponent>("AIComponent");
 	modEnts[def];
 }

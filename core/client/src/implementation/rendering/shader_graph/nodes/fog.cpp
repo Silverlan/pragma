@@ -9,17 +9,17 @@ import :rendering.shader_graph.node_fog;
 
 using namespace pragma::rendering::shader_graph;
 
-FogNode::FogNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_ENVIRONMENT}
+FogNode::FogNode(const std::string_view &type) : Node {type, shadergraph::CATEGORY_ENVIRONMENT}
 {
-	AddOutput(OUT_COLOR, pragma::shadergraph::DataType::Color);
-	AddOutput(OUT_START_DISTANCE, pragma::shadergraph::DataType::Float);
-	AddOutput(OUT_END_DISTANCE, pragma::shadergraph::DataType::Float);
-	AddOutput(OUT_DENSITY, pragma::shadergraph::DataType::Float);
+	AddOutput(OUT_COLOR, shadergraph::DataType::Color);
+	AddOutput(OUT_START_DISTANCE, shadergraph::DataType::Float);
+	AddOutput(OUT_END_DISTANCE, shadergraph::DataType::Float);
+	AddOutput(OUT_DENSITY, shadergraph::DataType::Float);
 
 	AddModuleDependency("fog");
 }
 
-std::string FogNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &instance) const
+std::string FogNode::DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const
 {
 	std::ostringstream code;
 	code << instance.GetGlslOutputDeclaration(OUT_COLOR) << " = u_fog.color.rgb;\n";

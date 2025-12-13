@@ -27,16 +27,16 @@ export namespace pragma {
 		float m_gravityScale = 1.f;
 		std::shared_ptr<Vector3> m_gravityDir = nullptr;
 		std::shared_ptr<float> m_gravity = nullptr;
-		Vector3 GetGravityForce(pragma::NetworkState *state) const;
-		Vector3 GetGravityDirection(pragma::NetworkState *state) const;
-		float GetGravity(pragma::NetworkState *state) const;
+		Vector3 GetGravityForce(NetworkState *state) const;
+		Vector3 GetGravityDirection(NetworkState *state) const;
+		float GetGravity(NetworkState *state) const;
 	};
 
 	class DLLNETWORK GravityComponent final : public BaseEntityComponent, public BaseGravity {
 	  public:
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
-		GravityComponent(pragma::ecs::BaseEntity &ent);
+		GravityComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		virtual void SetGravityScale(float scale) override;

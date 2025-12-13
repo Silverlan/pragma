@@ -11,7 +11,7 @@ export import :scripting.lua.api;
 
 export namespace Lua {
 	namespace asset {
-		DLLNETWORK void register_library(Lua::Interface &lua, bool extended);
+		DLLNETWORK void register_library(Interface &lua, bool extended);
 
 		DLLNETWORK bool exists(lua::State *l, const std::string &name, pragma::asset::Type type);
 		DLLNETWORK opt<std::string> find_file(lua::State *l, const std::string &name, pragma::asset::Type type);

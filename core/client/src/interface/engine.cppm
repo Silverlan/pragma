@@ -17,7 +17,7 @@ export import pragma.shared;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 export namespace pragma {
-	class DLLCLIENT CEngine : public pragma::Engine, public rendering::RenderContext {
+	class DLLCLIENT CEngine : public Engine, public rendering::RenderContext {
 	  public:
 		CEngine(int argc, char *argv[]);
 		virtual ~CEngine() override;
@@ -55,15 +55,15 @@ export namespace pragma {
 			std::string fileName;
 		};
 
-		using rendering::RenderContext::DrawFrame;
+		using RenderContext::DrawFrame;
 		virtual void SetAssetMultiThreadedLoadingEnabled(bool enabled) override;
 
 		virtual bool IsProgramInFocus() const override;
 
 		// Debug
 		virtual void DumpDebugInformation(uzip::ZIPFile &zip) const override;
-		pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage> *GetGPUProfilingStageManager();
-		pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
+		debug::ProfilingStageManager<debug::GPUProfilingStage> *GetGPUProfilingStageManager();
+		debug::ProfilingStageManager<debug::ProfilingStage> *GetProfilingStageManager();
 		bool StartProfilingStage(const char *stage);
 		bool StopProfilingStage();
 		bool StartGPUProfilingStage(const char *stage);
@@ -76,7 +76,7 @@ export namespace pragma {
 		bool IsClosed() const;
 
 		virtual bool Initialize(int argc, char *argv[]) override;
-		virtual StateInstance &GetStateInstance(pragma::NetworkState &nw) override;
+		virtual StateInstance &GetStateInstance(NetworkState &nw) override;
 		StateInstance &GetClientStateInstance();
 		const std::string &GetDefaultFontSetName() const;
 		const FontSet &GetDefaultFontSet() const;
@@ -99,10 +99,10 @@ export namespace pragma {
 		const std::vector<DroppedFile> &GetDroppedFiles() const;
 		bool IsWindowFocused() const;
 		bool IsValidAxisInput(float axisInput) const;
-		void GetMappedKeys(const std::string &cmd, std::vector<pragma::platform::Key> &keys, uint32_t maxKeys = 1);
+		void GetMappedKeys(const std::string &cmd, std::vector<platform::Key> &keys, uint32_t maxKeys = 1);
 		// Returns true if the input is a valid button input state (pressed or released)
 		// If the input is an axis input, inOutState may change to represent actual button state
-		bool GetInputButtonState(float axisInput, pragma::platform::Modifier mods, pragma::platform::KeyState &inOutState) const;
+		bool GetInputButtonState(float axisInput, platform::Modifier mods, platform::KeyState &inOutState) const;
 
 		virtual void HandleOpenGLFallback() override;
 
@@ -110,7 +110,7 @@ export namespace pragma {
 		Vector2i GetRenderResolution() const;
 
 		// Debug
-		pragma::debug::GPUProfiler &GetGPUProfiler() const;
+		debug::GPUProfiler &GetGPUProfiler() const;
 		bool IsGPUProfilingEnabled() const;
 
 		// Config
@@ -122,19 +122,19 @@ export namespace pragma {
 		// Sound
 		void SetAudioAPI(const std::string &audioAPI) { m_audioAPI = audioAPI; }
 		const std::string &GetAudioAPI() const { return m_audioAPI; }
-		const al::ISoundSystem *GetSoundSystem() const;
-		al::ISoundSystem *GetSoundSystem();
-		al::ISoundSystem *InitializeSoundEngine();
+		const pragma::audio::ISoundSystem *GetSoundSystem() const;
+		pragma::audio::ISoundSystem *GetSoundSystem();
+		pragma::audio::ISoundSystem *InitializeSoundEngine();
 		void CloseSoundEngine();
 		void SetHRTFEnabled(bool b);
 		unsigned int GetStereoSourceCount();
 		unsigned int GetMonoSourceCount();
 		unsigned int GetStereoSource(unsigned int idx);
 		template<class TEfxProperties>
-		std::shared_ptr<al::IEffect> CreateAuxEffect(const std::string &name, const TEfxProperties &props)
+		std::shared_ptr<pragma::audio::IEffect> CreateAuxEffect(const std::string &name, const TEfxProperties &props)
 		{
 			auto lname = name;
-			pragma::string::to_lower(lname);
+			string::to_lower(lname);
 			auto effect = GetAuxEffect(lname);
 			if(effect != nullptr)
 				return effect;
@@ -151,16 +151,16 @@ export namespace pragma {
 			m_auxEffects.insert(decltype(m_auxEffects)::value_type(name, effect));
 			return effect;
 		}
-		std::shared_ptr<al::IEffect> GetAuxEffect(const std::string &name);
+		std::shared_ptr<pragma::audio::IEffect> GetAuxEffect(const std::string &name);
 		// Lua
-		virtual pragma::NetworkState *GetNetworkState(lua::State *l) override;
+		virtual NetworkState *GetNetworkState(lua::State *l) override;
 		virtual Lua::Interface *GetLuaInterface(lua::State *l) override;
 
 		float GetNearZ();
 		float GetFarZ();
 		// Input
-		void MouseInput(prosper::Window &window, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods);
-		void KeyboardInput(prosper::Window &window, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude = 1.f);
+		void MouseInput(prosper::Window &window, platform::MouseButton button, platform::KeyState state, platform::Modifier mods);
+		void KeyboardInput(prosper::Window &window, platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods, float magnitude = 1.f);
 		void CharInput(prosper::Window &window, unsigned int c);
 		void ScrollInput(prosper::Window &window, Vector2 offset);
 		void OnWindowFocusChanged(prosper::Window &window, bool bFocus);
@@ -169,19 +169,19 @@ export namespace pragma {
 		void OnDragExit(prosper::Window &window);
 		void OnWindowResized(prosper::Window &window, Vector2i size);
 		bool OnWindowShouldClose(prosper::Window &window);
-		void JoystickButtonInput(prosper::Window &window, const pragma::platform::Joystick &joystick, uint32_t key, pragma::platform::KeyState state);
-		void JoystickAxisInput(prosper::Window &window, const pragma::platform::Joystick &joystick, uint32_t axis, pragma::platform::Modifier mods, float newVal, float deltaVal);
-		void OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
+		void JoystickButtonInput(prosper::Window &window, const platform::Joystick &joystick, uint32_t key, platform::KeyState state);
+		void JoystickAxisInput(prosper::Window &window, const platform::Joystick &joystick, uint32_t axis, platform::Modifier mods, float newVal, float deltaVal);
+		void OnPreedit(prosper::Window &window, const string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret);
 		void OnIMEStatusChanged(prosper::Window &window, bool imeEnabled);
 		float GetRawJoystickAxisMagnitude() const;
 		// Util
 		virtual bool IsServerOnly() override;
 		// Convars
-		virtual pragma::console::ConConf *GetConVar(const std::string &cv) override;
-		virtual bool RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(pragma::console::ConConf *, float &)> &callback = nullptr) override;
+		virtual console::ConConf *GetConVar(const std::string &cv) override;
+		virtual bool RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr) override;
 		// ClientState
-		virtual pragma::NetworkState *GetClientState() const override;
-		pragma::ClientState *OpenClientState();
+		virtual NetworkState *GetClientState() const override;
+		ClientState *OpenClientState();
 		void CloseClientState();
 		void Connect(const std::string &ip, const std::string &port = "29150");
 		// Peer-to-peer only
@@ -202,10 +202,10 @@ export namespace pragma {
 		const InputBindingLayer &GetEffectiveInputBindingLayer();
 
 		// Shaders
-		pragma::util::WeakHandle<prosper::Shader> ReloadShader(const std::string &name);
+		util::WeakHandle<prosper::Shader> ReloadShader(const std::string &name);
 		void ReloadShaderPipelines();
-		pragma::rendering::ShaderGraphManager &GetShaderGraphManager() { return *m_shaderGraphManager; }
-		const pragma::rendering::ShaderGraphManager &GetShaderGraphManager() const { return const_cast<CEngine *>(this)->GetShaderGraphManager(); }
+		rendering::ShaderGraphManager &GetShaderGraphManager() { return *m_shaderGraphManager; }
+		const rendering::ShaderGraphManager &GetShaderGraphManager() const { return const_cast<CEngine *>(this)->GetShaderGraphManager(); }
 		//
 
 		Double GetDeltaFrameTime() const;
@@ -228,18 +228,18 @@ export namespace pragma {
 		void SetGpuPerformanceTimersEnabled(bool enabled);
 		std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx, GPUTimer timer) const;
 
-		virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(pragma::NwStateType type) override;
+		virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NwStateType type) override;
 	  protected:
 		friend CoreInputBindingLayer;
 		void DrawScene(std::shared_ptr<prosper::RenderTarget> &rt);
-		void WriteClientConfig(VFilePtrReal f);
+		void WriteClientConfig(fs::VFilePtrReal f);
 		void OnRenderResolutionChanged(uint32_t width, uint32_t height);
 		void LoadFontSets();
 		void UpdateDirtyInputBindings();
 		void RegisterUiElementTypes();
 		uint32_t GetPerformanceTimerIndex(uint32_t swapchainIdx, GPUTimer timer) const;
 		uint32_t GetPerformanceTimerIndex(GPUTimer timer) const;
-		virtual uint32_t DoClearUnusedAssets(pragma::asset::Type type) const override;
+		virtual uint32_t DoClearUnusedAssets(asset::Type type) const override;
 		virtual void RunLaunchCommands() override;
 		virtual void DrawFrame() override;
 		virtual void OnResolutionChanged(uint32_t w, uint32_t h) override;
@@ -248,27 +248,27 @@ export namespace pragma {
 		virtual void OnWindowInitialized() override;
 		virtual void LoadConfig() override;
 		virtual void InitializeExternalArchiveManager() override;
-		virtual void PreloadConfig(pragma::NwStateType type, const std::string &configName) override;
+		virtual void PreloadConfig(NwStateType type, const std::string &configName) override;
 
 		virtual void RegisterConsoleCommands() override;
 	  private:
 		// Sound
-		std::shared_ptr<pragma::util::Library> m_audioAPILib = nullptr;
-		std::shared_ptr<al::ISoundSystem> m_soundSystem = nullptr;
+		std::shared_ptr<util::Library> m_audioAPILib = nullptr;
+		std::shared_ptr<pragma::audio::ISoundSystem> m_soundSystem = nullptr;
 		std::string m_audioAPI;
 
 		// FPS
 		double m_fps;
 		double m_tFPSTime;
-		pragma::util::Clock::time_point m_tLastFrame;
-		pragma::util::Clock::duration m_tDeltaFrameTime;
-		pragma::util::Clock::time_point m_tWindowResizeTime;
+		util::Clock::time_point m_tLastFrame;
+		util::Clock::duration m_tDeltaFrameTime;
+		util::Clock::time_point m_tWindowResizeTime;
 		std::optional<std::chrono::nanoseconds> m_fixedFrameDeltaTimeInterpretation = {};
 
-		std::unordered_map<std::string, std::shared_ptr<al::IEffect>> m_auxEffects;
+		std::unordered_map<std::string, std::shared_ptr<pragma::audio::IEffect>> m_auxEffects;
 
-		std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage>> m_gpuProfilingStageManager;
-		std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_cpuProfilingStageManager;
+		std::unique_ptr<debug::ProfilingStageManager<debug::GPUProfilingStage>> m_gpuProfilingStageManager;
+		std::unique_ptr<debug::ProfilingStageManager<debug::ProfilingStage>> m_cpuProfilingStageManager;
 
 		StateFlags m_stateFlags = StateFlags::FirstFrame;
 		float m_speedCam;
@@ -276,16 +276,16 @@ export namespace pragma {
 		float m_nearZ, m_farZ;
 		std::unique_ptr<StateInstance> m_clInstance;
 		std::unique_ptr<ConVarInfoList> m_clConfig;
-		std::unique_ptr<pragma::rendering::ShaderGraphManager> m_shaderGraphManager;
+		std::unique_ptr<rendering::ShaderGraphManager> m_shaderGraphManager;
 		std::optional<Vector2i> m_renderResolution = {};
 
-		std::shared_ptr<pragma::debug::GPUProfiler> m_gpuProfiler;
+		std::shared_ptr<debug::GPUProfiler> m_gpuProfiler;
 		std::vector<CallbackHandle> m_gpuProfileHandlers = {};
 
 		std::string m_defaultFontSet;
 		std::unordered_map<std::string, std::unique_ptr<FontSet>> m_fontSets;
 		float m_rawInputJoystickMagnitude = 0.f;
-		std::unordered_map<pragma::platform::Key, pragma::platform::KeyState> m_joystickKeyStates;
+		std::unordered_map<platform::Key, platform::KeyState> m_joystickKeyStates;
 
 		std::vector<std::shared_ptr<InputBindingLayer>> m_inputBindingLayers;
 		std::shared_ptr<InputBindingLayer> m_coreInputBindingLayer;
@@ -298,8 +298,8 @@ export namespace pragma {
 
 		virtual void Think() override;
 		virtual void Tick() override;
-		void Input(int key, pragma::platform::KeyState state, pragma::platform::Modifier mods = {}, float magnitude = 1.f);
-		void Input(int key, pragma::platform::KeyState inputState, pragma::platform::KeyState pressState, pragma::platform::Modifier mods, float magnitude = 1.f);
+		void Input(int key, platform::KeyState state, platform::Modifier mods = {}, float magnitude = 1.f);
+		void Input(int key, platform::KeyState inputState, platform::KeyState pressState, platform::Modifier mods, float magnitude = 1.f);
 		void UpdateFPS(float t);
 	};
 

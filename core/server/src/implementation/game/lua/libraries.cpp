@@ -48,7 +48,7 @@ void pragma::SGame::RegisterLuaLibraries()
 		            case pragma::asset::Type::Model:
 			            return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
 		            case pragma::asset::Type::Material:
-			            return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
+			            return luabind::object {l, std::static_pointer_cast<material::Material>(asset)};
 		            }
 		            return luabind::object {};
 	            }),
@@ -64,7 +64,7 @@ void pragma::SGame::RegisterLuaLibraries()
 		    case pragma::asset::Type::Model:
 			    return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
 		    case pragma::asset::Type::Material:
-			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<material::Material>(asset)};
 		    }
 		    return luabind::object {};
 	    }),
@@ -78,7 +78,7 @@ void pragma::SGame::RegisterLuaLibraries()
 		    case pragma::asset::Type::Model:
 			    return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
 		    case pragma::asset::Type::Material:
-			    return luabind::object {l, std::static_pointer_cast<msys::Material>(asset)};
+			    return luabind::object {l, std::static_pointer_cast<material::Material>(asset)};
 		    }
 		    return luabind::object {};
 	    }))];

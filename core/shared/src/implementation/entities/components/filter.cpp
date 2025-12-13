@@ -12,20 +12,20 @@ void BaseFilterComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "entfilter", false)) {
 			m_kvFilter = kvData.value;
-			return pragma::util::EventReply::Handled;
+			return util::EventReply::Handled;
 		}
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
 }
 
-bool BaseFilterNameComponent::ShouldPass(pragma::ecs::BaseEntity &ent) const
+bool BaseFilterNameComponent::ShouldPass(ecs::BaseEntity &ent) const
 {
-	auto pNameComponent = static_cast<pragma::BaseNameComponent *>(ent.FindComponent("name").get());
-	return pNameComponent != nullptr && pragma::string::match(pNameComponent->GetName(), m_kvFilter);
+	auto pNameComponent = static_cast<BaseNameComponent *>(ent.FindComponent("name").get());
+	return pNameComponent != nullptr && string::match(pNameComponent->GetName(), m_kvFilter);
 }
 
-bool BaseFilterClassComponent::ShouldPass(pragma::ecs::BaseEntity &ent) const { return pragma::string::match(ent.GetClass().c_str(), m_kvFilter.c_str()); }
+bool BaseFilterClassComponent::ShouldPass(ecs::BaseEntity &ent) const { return string::match(ent.GetClass().c_str(), m_kvFilter.c_str()); }

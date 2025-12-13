@@ -9,19 +9,19 @@ import :rendering.shader_graph.node_vector_transform;
 
 using namespace pragma::rendering::shader_graph;
 
-VectorTransformNode::VectorTransformNode(const std::string_view &type) : Node {type, pragma::shadergraph::CATEGORY_VECTOR_MATH}
+VectorTransformNode::VectorTransformNode(const std::string_view &type) : Node {type, shadergraph::CATEGORY_VECTOR_MATH}
 {
 	AddSocketEnum<Type>(IN_TRANSFORM_TYPE, Type::Vector);
 	AddSocketEnum<Space>(IN_CONVERT_FROM, Space::World);
 	AddSocketEnum<Space>(IN_CONVERT_TO, Space::Object);
-	AddInput(IN_VECTOR, pragma::shadergraph::DataType::Vector, Vector3 {0.f, 0.f, 0.f});
-	AddOutput(OUT_VECTOR, pragma::shadergraph::DataType::Vector);
+	AddInput(IN_VECTOR, shadergraph::DataType::Vector, Vector3 {0.f, 0.f, 0.f});
+	AddOutput(OUT_VECTOR, shadergraph::DataType::Vector);
 
 	AddModuleDependency("camera");
 	AddModuleDependency("entity");
 }
 
-std::string VectorTransformNode::DoEvaluate(const pragma::shadergraph::Graph &graph, const pragma::shadergraph::GraphNode &gn) const
+std::string VectorTransformNode::DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &gn) const
 {
 	std::ostringstream code;
 

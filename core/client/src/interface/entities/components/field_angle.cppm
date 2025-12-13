@@ -14,9 +14,9 @@ export namespace pragma {
 	}
 	class DLLCLIENT CFieldAngleComponent final : public BaseFieldAngleComponent, public CBaseNetComponent {
 	  public:
-		CFieldAngleComponent(pragma::ecs::BaseEntity &ent) : BaseFieldAngleComponent(ent) {}
+		CFieldAngleComponent(ecs::BaseEntity &ent) : BaseFieldAngleComponent(ent) {}
 
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

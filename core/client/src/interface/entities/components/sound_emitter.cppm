@@ -13,11 +13,11 @@ export namespace pragma {
 	  public:
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
-		CSoundEmitterComponent(pragma::ecs::BaseEntity &ent) : BaseSoundEmitterComponent(ent) {}
+		CSoundEmitterComponent(ecs::BaseEntity &ent) : BaseSoundEmitterComponent(ent) {}
 		// Sounds
-		virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {}) override;
-		virtual std::shared_ptr<pragma::audio::ALSound> EmitSound(std::string sndname, pragma::audio::ALSoundType type, const SoundInfo &sndInfo = {}) override;
-		void AddSound(std::shared_ptr<pragma::audio::ALSound> snd); // Only to be used from netmessage
+		virtual std::shared_ptr<audio::ALSound> CreateSound(std::string sndname, audio::ALSoundType type, const SoundInfo &sndInfo = {}) override;
+		virtual std::shared_ptr<audio::ALSound> EmitSound(std::string sndname, audio::ALSoundType type, const SoundInfo &sndInfo = {}) override;
+		void AddSound(std::shared_ptr<audio::ALSound> snd); // Only to be used from netmessage
 
 		virtual void PrecacheSounds() override;
 		virtual void ReceiveData(NetPacket &packet) override;

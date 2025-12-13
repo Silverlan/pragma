@@ -11,16 +11,16 @@ import :rendering.shaders;
 
 using namespace pragma::rendering;
 
-void pragma::CRasterizationRendererComponent::RenderSSAO(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RenderSSAO(const DrawSceneInfo &drawSceneInfo)
 {
 	auto &ssaoInfo = GetSSAOInfo();
-	auto *shaderSSAO = static_cast<pragma::ShaderSSAO *>(ssaoInfo.GetSSAOShader());
-	auto *shaderSSAOBlur = static_cast<pragma::ShaderSSAOBlur *>(ssaoInfo.GetSSAOBlurShader());
+	auto *shaderSSAO = static_cast<ShaderSSAO *>(ssaoInfo.GetSSAOShader());
+	auto *shaderSSAOBlur = static_cast<ShaderSSAOBlur *>(ssaoInfo.GetSSAOBlurShader());
 	if(IsSSAOEnabled() == false || shaderSSAO == nullptr || shaderSSAOBlur == nullptr || drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
-	pragma::get_cgame()->StartProfilingStage("SSAO");
-	pragma::get_cgame()->StartGPUProfilingStage("SSAO");
+	get_cgame()->StartProfilingStage("SSAO");
+	get_cgame()->StartGPUProfilingStage("SSAO");
 	// Pre-render depths, positions and normals (Required for SSAO)
 	//auto *renderInfo  = scene.GetSceneRenderDesc().GetRenderInfo(RenderMode::World);
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -78,6 +78,6 @@ void pragma::CRasterizationRendererComponent::RenderSSAO(const pragma::rendering
 
 		drawCmd->RecordImageBarrier(ssaoInfo.renderTarget->GetTexture().GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	}
-	pragma::get_cgame()->StopGPUProfilingStage(); // SSAO
-	pragma::get_cgame()->StopProfilingStage();    // SSAO
+	get_cgame()->StopGPUProfilingStage(); // SSAO
+	get_cgame()->StopProfilingStage();    // SSAO
 }

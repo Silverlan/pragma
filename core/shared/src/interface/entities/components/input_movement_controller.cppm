@@ -13,7 +13,7 @@ export namespace pragma {
 	class MovementComponent;
 	class DLLNETWORK InputMovementControllerComponent final : public BaseEntityComponent {
 	  public:
-		InputMovementControllerComponent(pragma::ecs::BaseEntity &ent);
+		InputMovementControllerComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 

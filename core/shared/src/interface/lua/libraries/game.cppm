@@ -22,7 +22,7 @@ export {
 
 			DLLNETWORK opt<type<CallbackHandle>> add_callback(lua::State *l, const std::string &identifier, const func<void> &function);
 			DLLNETWORK void clear_callbacks(lua::State *l, const std::string &identifier);
-			DLLNETWORK bool register_ammo_type(lua::State *l, const std::string &name, int32_t damage = 10, float force = 200.f, DamageType damageType = DamageType::Bullet);
+			DLLNETWORK bool register_ammo_type(lua::State *l, const std::string &name, int32_t damage = 10, float force = 200.f, DamageType damageType = Bullet);
 			DLLNETWORK opt<uint32_t> get_ammo_type_id(lua::State *l, const std::string &name);
 			DLLNETWORK opt<std::string> get_ammo_type_name(lua::State *l, uint32_t typeId);
 			DLLNETWORK opt<type<pragma::BaseGamemodeComponent>> get_game_mode(lua::State *l);

@@ -40,10 +40,10 @@ void CSoundDspEAXReverbComponent::ReceiveData(NetPacket &packet)
 void CSoundDspEAXReverbComponent::OnEntitySpawn()
 {
 	//BaseEnvSoundDspEAXReverb::OnEntitySpawn(); // Not calling BaseEnvSoundDspEAXReverb::OnEntitySpawn() to skip the dsp effect lookup
-	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
+	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	al::EfxEaxReverbProperties props {};
+	pragma::audio::EfxEaxReverbProperties props {};
 	props.flDensity = m_kvDensity;
 	props.flDiffusion = m_kvDiffusion;
 	props.flGain = m_kvGain;

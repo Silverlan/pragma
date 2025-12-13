@@ -76,6 +76,6 @@ export {
 		};
 
 		template<typename T>
-		concept is_valid_component_property_type_v = is_valid_component_property_type(pragma::ents::member_type_to_enum<T>());
+		concept is_valid_component_property_type_v = is_valid_component_property_type(ents::member_type_to_enum<T>());
 	};
 };

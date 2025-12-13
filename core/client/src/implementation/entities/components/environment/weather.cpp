@@ -23,14 +23,14 @@ CWeatherComponent::~CWeatherComponent()
 void CWeatherComponent::Initialize()
 {
 	BaseEnvWeatherComponent::Initialize();
-	pragma::ecs::CParticleSystemComponent::Precache("weather");
+	ecs::CParticleSystemComponent::Precache("weather");
 }
 void CWeatherComponent::OnEntitySpawn()
 {
 	BaseEnvWeatherComponent::OnEntitySpawn();
-	auto *pl = pragma::get_cgame()->GetLocalPlayer();
+	auto *pl = get_cgame()->GetLocalPlayer();
 	if(pl != nullptr) {
-		auto *pt = pragma::ecs::CParticleSystemComponent::Create({{"particle", "snow"}});
+		auto *pt = ecs::CParticleSystemComponent::Create({{"particle", "snow"}});
 		if(pt != nullptr) {
 			auto &plEnt = pl->GetEntity();
 			auto &ent = pt->GetEntity();
@@ -41,7 +41,7 @@ void CWeatherComponent::OnEntitySpawn()
 			auto pAttComponent = ent.AddComponent<CAttachmentComponent>();
 			if(pAttComponent.valid()) {
 				AttachmentInfo attInfo {};
-				attInfo.flags |= pragma::FAttachmentMode::PositionOnly;
+				attInfo.flags |= FAttachmentMode::PositionOnly;
 				pAttComponent->AttachToEntity(&plEnt, attInfo);
 			}
 			ent.Spawn();

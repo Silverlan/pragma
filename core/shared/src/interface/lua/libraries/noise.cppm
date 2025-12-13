@@ -17,9 +17,9 @@ export import pragma.lua;
 	};
 
 export {
-	class DLLNETWORK NoiseBaseModule : public std::shared_ptr<noise::module::Module> {
+	class DLLNETWORK NoiseBaseModule : public std::shared_ptr<module::Module> {
 	  public:
-		NoiseBaseModule(noise::module::Module *mod);
+		NoiseBaseModule(module::Module *mod);
 	};
 
 	DECLARE_NOISE_MODULE(Abs);
@@ -120,9 +120,9 @@ export {
 		};
 
 		namespace NoiseMap {
-			DLLNETWORK void GetValue(lua::State *l, ::noise::utils::NoiseMap &noiseMap, int x, int y);
-			DLLNETWORK void GetHeight(lua::State *l, ::noise::utils::NoiseMap &noiseMap);
-			DLLNETWORK void GetWidth(lua::State *l, ::noise::utils::NoiseMap &noiseMap);
+			DLLNETWORK void GetValue(lua::State *l, utils::NoiseMap &noiseMap, int x, int y);
+			DLLNETWORK void GetHeight(lua::State *l, utils::NoiseMap &noiseMap);
+			DLLNETWORK void GetWidth(lua::State *l, utils::NoiseMap &noiseMap);
 		};
 	};
 };

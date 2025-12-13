@@ -11,7 +11,7 @@ void pragma::game::GameModeManager::Initialize()
 {
 	std::vector<std::string> directories;
 	std::string dir = "lua/gamemodes/components/";
-	FileManager::FindFiles((dir + "*").c_str(), nullptr, &directories);
+	fs::find_files((dir + "*"), nullptr, &directories);
 	for(auto it = directories.begin(); it != directories.end(); ++it) {
 		auto path = dir;
 		path += *it;

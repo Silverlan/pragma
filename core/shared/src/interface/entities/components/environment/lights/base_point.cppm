@@ -17,6 +17,6 @@ export namespace pragma {
 		virtual void Initialize() override;
 		float CalcDistanceFalloff(const Vector3 &point) const;
 	  protected:
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 	};
 };

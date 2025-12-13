@@ -12,18 +12,18 @@ import :entities.components.ik;
 
 using namespace pragma;
 
-IKComponent::IKComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+IKComponent::IKComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void IKComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent("animated");
-	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateInverseKinematics(GetEntity().GetNetworkState()->GetGameState()->DeltaTime()); });
-	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(baseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateInverseKinematics(GetEntity().GetNetworkState()->GetGameState()->DeltaTime()); });
+	BindEventUnhandled(baseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		m_ikTrees.clear();
 		ClearIKControllers();
 	});
 }
-void IKComponent::InitializeLuaObject(lua::State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void IKComponent::InitializeLuaObject(lua::State *l) { BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 {
 	auto it = m_ikTrees.find(ikControllerId);
@@ -91,7 +91,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	auto &joints = hMdl->GetJoints();
 	for(auto &ikJoint : ikJoints) {
 		auto boneId = ikJoint.boneId;
-		auto itJoint = std::find_if(joints.begin(), joints.end(), [boneId](const pragma::physics::JointInfo &joint) { return joint.child == boneId && (joint.type == pragma::physics::JointType::DOF || joint.type == pragma::physics::JointType::ConeTwist); });
+		auto itJoint = std::find_if(joints.begin(), joints.end(), [boneId](const physics::JointInfo &joint) { return joint.child == boneId && (joint.type == physics::JointType::DOF || joint.type == physics::JointType::ConeTwist); });
 		if(itJoint == joints.end()) {
 			Con::cwar << "Unable to initialize ik controller for " << ikController->GetEffectorName() << ": Joint for bone " << ikJoint.boneId << " in chain does not have joint assigned to it!" << Con::endl;
 			return false; // All bones in chain need to have a valid joint assigned to them
@@ -102,7 +102,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	// Effector is always bottom-most element in tree (= first element in ikJoints)
 	auto &ikJointEffector = ikJoints.front();
 	auto &effectorPos = ikJointEffector.referenceTransform.pos;
-	ikJointEffector.nodes.at(0) = pragma::util::make_shared<Node>(VectorR3(effectorPos.x, effectorPos.y, effectorPos.z), VectorR3(0.f, 0.f, 0.f), 0.0, Purpose::EFFECTOR);
+	ikJointEffector.nodes.at(0) = pragma::util::make_shared<Node>(VectorR3(effectorPos.x, effectorPos.y, effectorPos.z), VectorR3(0.f, 0.f, 0.f), 0.0, EFFECTOR);
 
 	for(auto it = ikJoints.begin() + 1; it < ikJoints.end(); ++it) {
 		auto &ikJoint = *it;
@@ -112,7 +112,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		auto min = EulerAngles {};
 		auto max = EulerAngles {};
 		switch(joint.type) {
-		case pragma::physics::JointType::DOF:
+		case physics::JointType::DOF:
 			{
 				auto itMin = joint.args.find("ang_limit_l");
 				if(itMin != joint.args.end())
@@ -122,31 +122,31 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 					max = EulerAngles(itMax->second);
 				break;
 			}
-		case pragma::physics::JointType::ConeTwist:
+		case physics::JointType::ConeTwist:
 			{
 				auto itSp1l = joint.args.find("sp1l");
 				if(itSp1l != joint.args.end())
-					min.p = pragma::util::to_float(itSp1l->second);
+					min.p = util::to_float(itSp1l->second);
 
 				auto itSp1u = joint.args.find("sp1u");
 				if(itSp1u != joint.args.end())
-					max.p = pragma::util::to_float(itSp1u->second);
+					max.p = util::to_float(itSp1u->second);
 
 				auto itSp2l = joint.args.find("sp2l");
 				if(itSp2l != joint.args.end())
-					min.y = pragma::util::to_float(itSp2l->second);
+					min.y = util::to_float(itSp2l->second);
 
 				auto itSp2u = joint.args.find("sp2u");
 				if(itSp2u != joint.args.end())
-					max.y = pragma::util::to_float(itSp2u->second);
+					max.y = util::to_float(itSp2u->second);
 
 				auto itTsl = joint.args.find("tsl");
 				if(itTsl != joint.args.end())
-					min.r = pragma::util::to_float(itTsl->second);
+					min.r = util::to_float(itTsl->second);
 
 				auto itTsu = joint.args.find("tsu");
 				if(itTsu != joint.args.end())
-					max.r = pragma::util::to_float(itTsu->second);
+					max.r = util::to_float(itTsu->second);
 				break;
 			}
 		}
@@ -157,13 +157,13 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 
 		auto &rot = ikJoint.referenceTransform.rot;
 		auto rotAxis = uquat::up(rot);
-		ikJoint.nodes.at(2) = pragma::util::make_shared<Node>(VectorR3(pos.x, pos.y, pos.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, Purpose::JOINT, pragma::math::deg_to_rad(min.y), pragma::math::deg_to_rad(max.y), pragma::math::deg_to_rad(0.0));
+		ikJoint.nodes.at(2) = pragma::util::make_shared<Node>(VectorR3(pos.x, pos.y, pos.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, JOINT, math::deg_to_rad(min.y), math::deg_to_rad(max.y), math::deg_to_rad(0.0));
 
 		rotAxis = uquat::forward(rot); // TODO: Does this axis have to be negated?
-		ikJoint.nodes.at(1) = pragma::util::make_shared<Node>(VectorR3(pos.x, pos.y, pos.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, Purpose::JOINT, pragma::math::deg_to_rad(min.r), pragma::math::deg_to_rad(max.r), pragma::math::deg_to_rad(0.0));
+		ikJoint.nodes.at(1) = pragma::util::make_shared<Node>(VectorR3(pos.x, pos.y, pos.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, JOINT, math::deg_to_rad(min.r), math::deg_to_rad(max.r), math::deg_to_rad(0.0));
 
 		rotAxis = -uquat::right(rot);
-		ikJoint.nodes.at(0) = pragma::util::make_shared<Node>(VectorR3(pos.x, pos.y, pos.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, Purpose::JOINT, pragma::math::deg_to_rad(min.p), pragma::math::deg_to_rad(max.p), pragma::math::deg_to_rad(0.0));
+		ikJoint.nodes.at(0) = pragma::util::make_shared<Node>(VectorR3(pos.x, pos.y, pos.z), VectorR3(rotAxis.x, rotAxis.y, rotAxis.z), 0.0, JOINT, math::deg_to_rad(min.p), math::deg_to_rad(max.p), math::deg_to_rad(0.0));
 	}
 
 	// Initialize IK Tree
@@ -181,7 +181,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 
 	ikTreeInfo->jacobian = pragma::util::make_shared<Jacobian>(ikTree.get());
 
-	if(pragma::string::compare<std::string>(ikController->GetType(), "foot", false) == true) {
+	if(string::compare<std::string>(ikController->GetType(), "foot", false) == true) {
 		auto &ent = GetEntity();
 		auto mdlComponent = ent.GetModelComponent();
 		if(mdlComponent) {
@@ -192,11 +192,11 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 				auto &keyValues = ikController->GetKeyValues();
 				auto itOffset = keyValues.find("foot_height_offset");
 				if(itOffset != keyValues.end())
-					ikTreeInfo->footInfo->yOffset = pragma::util::to_float(itOffset->second);
+					ikTreeInfo->footInfo->yOffset = util::to_float(itOffset->second);
 
 				auto itThreshold = keyValues.find("foot_height_threshold");
 				if(itThreshold != keyValues.end())
-					ikTreeInfo->footInfo->yIkTreshold = pragma::util::to_float(itThreshold->second);
+					ikTreeInfo->footInfo->yIkTreshold = util::to_float(itThreshold->second);
 			}
 		}
 	}
@@ -219,7 +219,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		auto *rot = reference.GetBoneOrientation(ikJoint.boneId);
 		if(pos != nullptr && rot != nullptr) {
 			auto &node = ikJoint.nodes.at(0);
-			auto rotNode = pragma::util::ik::get_rotation(*node);
+			auto rotNode = util::ik::get_rotation(*node);
 			uquat::inverse(rotNode);
 			nodeInfo->deltaRotation = *rot * rotNode;
 		}
@@ -326,7 +326,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		auto boneId = footInfo.effectorBoneId;
 		Vector3 pos {};
 		auto rot = uquat::identity();
-		animComponent->GetBonePose(boneId, &pos, &rot, nullptr, pragma::math::CoordinateSpace::World);
+		animComponent->GetBonePose(boneId, &pos, &rot, nullptr, math::CoordinateSpace::World);
 
 		auto srcPos = pos + up * yExtent;
 		auto dstPos = pos - up * yExtent;
@@ -347,13 +347,13 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 
 		auto bIkPlaced = false;
 		if(pTrComponent) {
-			auto traceData = pragma::util::get_entity_trace_data(*pTrComponent);
+			auto traceData = util::get_entity_trace_data(*pTrComponent);
 			traceData.SetSource(srcPos);
 			traceData.SetTarget(dstPos);
 			auto *game = ent.GetNetworkState()->GetGameState();
 			auto rayResult = game->RayCast(traceData);
 
-			if(rayResult.hitType != pragma::physics::RayCastHitType::None) {
+			if(rayResult.hitType != physics::RayCastHitType::None) {
 				auto posRay = rayResult.position + rayResult.normal * footInfo.yOffset;
 				if(pTrComponent)
 					pTrComponent->WorldToLocal(&posRay);
@@ -379,14 +379,14 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 			continue;
 
 		auto &treeInfo = *pair.second;
-		std::vector<pragma::math::Transform> rootDeltaTransforms {};
+		std::vector<math::Transform> rootDeltaTransforms {};
 		rootDeltaTransforms.reserve(treeInfo.rootNodes.size());
 		for(auto &rootNodeInfo : treeInfo.rootNodes) {
 			rootDeltaTransforms.push_back({});
 			auto &t = rootDeltaTransforms.back();
 			Vector3 pos {};
 			auto rot = uquat::identity();
-			if(animComponent->GetBonePose(rootNodeInfo->boneId, &pos, &rot, nullptr, pragma::math::CoordinateSpace::Object) == true) {
+			if(animComponent->GetBonePose(rootNodeInfo->boneId, &pos, &rot, nullptr, math::CoordinateSpace::Object) == true) {
 				auto *posRef = reference.GetBonePosition(rootNodeInfo->boneId);
 				auto *rotRef = reference.GetBoneOrientation(rootNodeInfo->boneId);
 				if(posRef != nullptr && rotRef != nullptr) {
@@ -422,19 +422,19 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		jacobian.SetJtargetActive();
 		jacobian.ComputeJacobian(ikEffectorPositions.data());
 		switch(ikController->GetMethod()) {
-		case pragma::physics::ik::Method::SelectivelyDampedLeastSquare:
+		case physics::ik::Method::SelectivelyDampedLeastSquare:
 			jacobian.CalcDeltaThetasSDLS();
 			break;
-		case pragma::physics::ik::Method::DampedLeastSquares:
+		case physics::ik::Method::DampedLeastSquares:
 			jacobian.CalcDeltaThetasDLS();
 			break;
-		case pragma::physics::ik::Method::DampedLeastSquaresWithSingularValueDecomposition:
+		case physics::ik::Method::DampedLeastSquaresWithSingularValueDecomposition:
 			jacobian.CalcDeltaThetasDLSwithSVD();
 			break;
-		case pragma::physics::ik::Method::Pseudoinverse:
+		case physics::ik::Method::Pseudoinverse:
 			jacobian.CalcDeltaThetasPseudoinverse();
 			break;
-		case pragma::physics::ik::Method::JacobianTranspose:
+		case physics::ik::Method::JacobianTranspose:
 			jacobian.CalcDeltaThetasTranspose();
 			break;
 		default:
@@ -447,7 +447,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		static auto debugPrint = false;
 		if(debugPrint) {
 			auto *game = GetEntity().GetNetworkState()->GetGameState();
-			auto fGetLocalTransform = [](const Node *node, pragma::math::Transform &act) {
+			auto fGetLocalTransform = [](const Node *node, math::Transform &act) {
 				auto axis = Vector3(node->v.x, node->v.y, node->v.z);
 				auto rot = uquat::identity();
 				if(axis.length())
@@ -456,8 +456,8 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 				act.SetRotation(rot);
 				act.SetOrigin(Vector3(node->r.x, node->r.y, node->r.z));
 			};
-			std::function<void(Node *, const pragma::math::Transform &)> fDrawTree = nullptr;
-			fDrawTree = [&fGetLocalTransform, &fDrawTree, game](Node *node, const pragma::math::Transform &tr) {
+			std::function<void(Node *, const math::Transform &)> fDrawTree = nullptr;
+			fDrawTree = [&fGetLocalTransform, &fDrawTree, game](Node *node, const math::Transform &tr) {
 				Vector3 lineColor = Vector3(0, 0, 0);
 				int lineWidth = 2;
 				auto fUpdateLine = [game](int32_t tIdx, const Vector3 &start, const Vector3 &end, const Color &col) {
@@ -497,10 +497,10 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 
 					//node->DrawNode(node == root);	// Recursively draw node and update ModelView matrix
 					if(node->left) {
-						pragma::math::Transform act;
+						math::Transform act;
 						fGetLocalTransform(node->left, act);
 
-						pragma::math::Transform trl = tr * act;
+						math::Transform trl = tr * act;
 						auto trOrigin = tr.GetOrigin();
 						auto trlOrigin = trl.GetOrigin();
 						fUpdateLine(5, trOrigin, trlOrigin, colors::Maroon);
@@ -508,9 +508,9 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 					}
 					//	glPopMatrix();
 					if(node->right) {
-						pragma::math::Transform act;
+						math::Transform act;
 						fGetLocalTransform(node->right, act);
-						pragma::math::Transform trr = tr * act;
+						math::Transform trr = tr * act;
 						auto trOrigin = tr.GetOrigin();
 						auto trrOrigin = trr.GetOrigin();
 						fUpdateLine(6, trOrigin, trrOrigin, colors::Silver);
@@ -520,7 +520,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 			};
 			auto fRenderScene = [&fGetLocalTransform, &fDrawTree, &rootDeltaTransforms](Tree &tree) {
 				auto &tRoot = rootDeltaTransforms.front();
-				pragma::math::Transform act {};
+				math::Transform act {};
 				fGetLocalTransform(tree.GetRoot(), act);
 				act = tRoot * act;
 
@@ -530,8 +530,8 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		}
 
 		// Apply IK transforms to entity skeleton
-		std::function<void(const std::vector<std::shared_ptr<IKTreeInfo::NodeInfo>> &, pragma::math::Transform &, pragma::math::Transform *, bool)> fIterateIkTree = nullptr;
-		fIterateIkTree = [this, &fIterateIkTree, &rootDeltaTransforms, &animComponent](const std::vector<std::shared_ptr<IKTreeInfo::NodeInfo>> &nodes, pragma::math::Transform &tParent, pragma::math::Transform *rootDeltaTransform, bool root) {
+		std::function<void(const std::vector<std::shared_ptr<IKTreeInfo::NodeInfo>> &, math::Transform &, math::Transform *, bool)> fIterateIkTree = nullptr;
+		fIterateIkTree = [this, &fIterateIkTree, &rootDeltaTransforms, &animComponent](const std::vector<std::shared_ptr<IKTreeInfo::NodeInfo>> &nodes, math::Transform &tParent, math::Transform *rootDeltaTransform, bool root) {
 			auto nodeIdx = 0u;
 			for(auto &nodeInfo : nodes) {
 				if(root == true) {
@@ -540,15 +540,15 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 						continue;
 					rootDeltaTransform = &rootDeltaTransforms.at(nodeIdx);
 				}
-				pragma::math::Transform tNode {};
-				pragma::util::ik::get_local_transform(*nodeInfo->ikNodes.at(0u), tNode);
+				math::Transform tNode {};
+				util::ik::get_local_transform(*nodeInfo->ikNodes.at(0u), tNode);
 				tNode = tParent * tNode;
 
 				for(auto i = decltype(nodeInfo->ikNodes.size()) {1u}; i < nodeInfo->ikNodes.size(); ++i) {
-					pragma::math::Transform tNodeOther {};
+					math::Transform tNodeOther {};
 					auto &nodeOther = nodeInfo->ikNodes.at(i);
 					if(nodeOther != nullptr) {
-						pragma::util::ik::get_local_transform(*nodeOther, tNodeOther);
+						util::ik::get_local_transform(*nodeOther, tNodeOther);
 						tNode *= tNodeOther;
 					}
 				}
@@ -556,13 +556,13 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 				auto tLocal = *rootDeltaTransform * tNode;
 				auto pos = tLocal.GetOrigin();
 				auto rot = tLocal.GetRotation() * nodeInfo->deltaRotation;
-				animComponent->SetBonePose(nodeInfo->boneId, &pos, &rot, nullptr, pragma::math::CoordinateSpace::Object);
+				animComponent->SetBonePose(nodeInfo->boneId, &pos, &rot, nullptr, math::CoordinateSpace::Object);
 
 				fIterateIkTree(nodeInfo->children, tNode, rootDeltaTransform, false);
 				++nodeIdx;
 			}
 		};
-		pragma::math::Transform t {};
+		math::Transform t {};
 		fIterateIkTree(treeInfo.rootNodes, t, nullptr, true);
 	}
 
@@ -590,9 +590,9 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 
 		auto posBone = Vector3 {};
 		auto rotBone = uquat::identity();
-		animComponent->GetBonePose(footData.boneId, &posBone, &rotBone, nullptr, pragma::math::CoordinateSpace::Object);
+		animComponent->GetBonePose(footData.boneId, &posBone, &rotBone, nullptr, math::CoordinateSpace::Object);
 
 		rotBone = rotDelta * footData.rotation;
-		animComponent->GetBonePose(footData.boneId, &posBone, &rotBone, nullptr, pragma::math::CoordinateSpace::Object);
+		animComponent->GetBonePose(footData.boneId, &posBone, &rotBone, nullptr, math::CoordinateSpace::Object);
 	}
 }

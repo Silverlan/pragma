@@ -8,7 +8,7 @@ import :entities.components.func.base_surface_material;
 
 using namespace pragma;
 
-void BaseFuncSurfaceMaterialComponent::UpdateSurfaceMaterial(pragma::Game *game)
+void BaseFuncSurfaceMaterialComponent::UpdateSurfaceMaterial(Game *game)
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();

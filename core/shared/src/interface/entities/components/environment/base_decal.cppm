@@ -12,7 +12,7 @@ export namespace pragma {
 	class DLLNETWORK BaseEnvDecalComponent : public BaseEntityComponent {
 	  public:
 		using BaseEntityComponent::BaseEntityComponent;
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 
 		virtual void SetSize(float size);

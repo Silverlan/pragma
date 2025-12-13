@@ -103,7 +103,7 @@ void InputDataModule::InitializeGfxPipelineDescriptorSets()
 	//ds.SetBindingUniformBuffer(*buf, BINDING_IDX);
 
 	// Image texture nodes
-	auto &texManager = static_cast<msys::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
 	uint32_t bindingIdx = 1; // Binding 0 is global input data
 	for(auto *node : m_imageTextureNodes) {
 		std::string fileName;

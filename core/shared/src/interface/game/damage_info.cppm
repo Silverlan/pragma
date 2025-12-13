@@ -20,7 +20,7 @@ export namespace pragma::game {
 		Vector3 m_hitPosition = {};
 		EntityHandle m_attacker = {};
 		EntityHandle m_inflictor = {};
-		pragma::physics::HitGroup m_hitGroup = pragma::physics::HitGroup::Generic;
+		physics::HitGroup m_hitGroup = physics::HitGroup::Generic;
 	  public:
 		DamageInfo() = default;
 		~DamageInfo() = default;
@@ -28,11 +28,11 @@ export namespace pragma::game {
 		void AddDamage(unsigned short dmg);
 		void ScaleDamage(float scale);
 		unsigned short GetDamage();
-		pragma::ecs::BaseEntity *GetAttacker();
-		void SetAttacker(const pragma::ecs::BaseEntity *ent);
+		ecs::BaseEntity *GetAttacker();
+		void SetAttacker(const ecs::BaseEntity *ent);
 		void SetAttacker(const EntityHandle &hnd);
-		pragma::ecs::BaseEntity *GetInflictor();
-		void SetInflictor(const pragma::ecs::BaseEntity *ent);
+		ecs::BaseEntity *GetInflictor();
+		void SetInflictor(const ecs::BaseEntity *ent);
 		void SetInflictor(const EntityHandle &hnd);
 		unsigned int GetDamageTypes();
 		void SetDamageType(DamageType type);
@@ -45,8 +45,8 @@ export namespace pragma::game {
 		Vector3 &GetHitPosition();
 		void SetForce(const Vector3 &force);
 		Vector3 &GetForce();
-		pragma::physics::HitGroup GetHitGroup() const;
-		void SetHitGroup(pragma::physics::HitGroup hitGroup);
+		physics::HitGroup GetHitGroup() const;
+		void SetHitGroup(physics::HitGroup hitGroup);
 	};
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const DamageInfo &o);
 };

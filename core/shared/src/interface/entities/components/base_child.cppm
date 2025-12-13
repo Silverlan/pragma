@@ -15,26 +15,26 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseChildComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 
 		void ClearParent();
-		void SetParent(const pragma::EntityURef &parent);
-		const pragma::EntityURef &GetParent() const;
+		void SetParent(const EntityURef &parent);
+		const EntityURef &GetParent() const;
 
-		pragma::ecs::BaseEntity *GetParentEntity();
-		const pragma::ecs::BaseEntity *GetParentEntity() const { return const_cast<BaseChildComponent *>(this)->GetParentEntity(); }
+		ecs::BaseEntity *GetParentEntity();
+		const ecs::BaseEntity *GetParentEntity() const { return const_cast<BaseChildComponent *>(this)->GetParentEntity(); }
 		bool HasParent() const;
 	  protected:
-		BaseChildComponent(pragma::ecs::BaseEntity &ent);
+		BaseChildComponent(ecs::BaseEntity &ent);
 		virtual void OnEntitySpawn() override;
-		virtual void OnParentChanged(pragma::ecs::BaseEntity *parent) {};
+		virtual void OnParentChanged(ecs::BaseEntity *parent) {};
 
 		EntityURef m_parent;
 		bool m_parentValid = false;
-		pragma::NetEventId m_netEvSetParent = pragma::INVALID_NET_EVENT;
+		NetEventId m_netEvSetParent = INVALID_NET_EVENT;
 	};
 };

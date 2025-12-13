@@ -12,15 +12,15 @@ export namespace pragma {
 	class CRasterizationRendererComponent;
 	class DLLCLIENT CRendererPpToneMappingComponent final : public CRendererPpBaseComponent {
 	  public:
-		CRendererPpToneMappingComponent(pragma::ecs::BaseEntity &ent);
+		CRendererPpToneMappingComponent(ecs::BaseEntity &ent);
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual std::string GetIdentifier() const override { return "tone_mapping"; }
-		virtual uint32_t GetPostProcessingWeight() const override { return pragma::math::to_integral(CRendererComponent::StandardPostProcessingWeight::ToneMapping); }
+		virtual uint32_t GetPostProcessingWeight() const override { return math::to_integral(CRendererComponent::StandardPostProcessingWeight::ToneMapping); }
 		virtual PostProcessingEffectData::Flags GetFlags() const override;
 
 		void SetApplyToHdrImage(bool applyToHdrImage);
 	  private:
-		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) override;
+		virtual void DoRenderEffect(const rendering::DrawSceneInfo &drawSceneInfo) override;
 		bool m_applyToHdrImage = false;
 	};
 };

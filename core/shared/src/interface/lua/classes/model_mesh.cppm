@@ -56,9 +56,9 @@ export namespace Lua {
 		DLLNETWORK void SetVertex(lua::State *l, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const pragma::math::Vertex &v);
 		DLLNETWORK void SetVertexPosition(lua::State *l, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const Vector3 &pos);
 		DLLNETWORK void SetVertexNormal(lua::State *l, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const Vector3 &normal);
-		DLLNETWORK void SetVertexUV(lua::State *l, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const ::Vector2 &uv);
-		DLLNETWORK void SetVertexUV(lua::State *l, pragma::geometry::ModelSubMesh &mdl, const std::string &uvSetName, uint32_t idx, const ::Vector2 &uv);
-		DLLNETWORK void SetVertexAlpha(lua::State *l, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const ::Vector2 &alpha);
+		DLLNETWORK void SetVertexUV(lua::State *l, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const Vector2 &uv);
+		DLLNETWORK void SetVertexUV(lua::State *l, pragma::geometry::ModelSubMesh &mdl, const std::string &uvSetName, uint32_t idx, const Vector2 &uv);
+		DLLNETWORK void SetVertexAlpha(lua::State *l, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const Vector2 &alpha);
 		DLLNETWORK void SetVertexWeight(lua::State *l, pragma::geometry::ModelSubMesh &mdl, uint32_t idx, const pragma::math::VertexWeight &weight);
 		DLLNETWORK void GetVertex(lua::State *l, pragma::geometry::ModelSubMesh &mdl, uint32_t idx);
 		DLLNETWORK void GetVertexPosition(lua::State *l, pragma::geometry::ModelSubMesh &mdl, uint32_t idx);

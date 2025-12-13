@@ -6,14 +6,14 @@ module;
 module pragma.client;
 
 import :client_state;
-Bool pragma::ClientState::RawMouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+Bool pragma::ClientState::RawMouseInput(platform::MouseButton button, platform::KeyState state, platform::Modifier mods)
 {
 	auto *game = GetGameState();
 	if(game == nullptr)
 		return true;
 	return game->RawMouseInput(button, state, mods);
 }
-Bool pragma::ClientState::RawKeyboardInput(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods, float magnitude)
+Bool pragma::ClientState::RawKeyboardInput(platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods, float magnitude)
 {
 	auto *game = GetGameState();
 	if(game == nullptr)
@@ -35,14 +35,14 @@ Bool pragma::ClientState::RawScrollInput(Vector2 offset)
 	return game->RawScrollInput(offset);
 }
 
-Bool pragma::ClientState::MouseInput(pragma::platform::MouseButton button, pragma::platform::KeyState action, pragma::platform::Modifier mods)
+Bool pragma::ClientState::MouseInput(platform::MouseButton button, platform::KeyState action, platform::Modifier mods)
 {
 	auto *game = GetGameState();
 	if(game == nullptr)
 		return true;
 	return game->MouseInput(button, action, mods);
 }
-Bool pragma::ClientState::KeyboardInput(pragma::platform::Key key, int scancode, pragma::platform::KeyState action, pragma::platform::Modifier mods, float magnitude)
+Bool pragma::ClientState::KeyboardInput(platform::Key key, int scancode, platform::KeyState action, platform::Modifier mods, float magnitude)
 {
 	auto *game = GetGameState();
 	if(game == nullptr)
@@ -91,7 +91,7 @@ bool pragma::ClientState::OnWindowShouldClose(prosper::Window &window)
 		return false;
 	return game->OnWindowShouldClose(window);
 }
-void pragma::ClientState::OnPreedit(prosper::Window &window, const pragma::string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
+void pragma::ClientState::OnPreedit(prosper::Window &window, const string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
 {
 	auto *game = GetGameState();
 	if(game == nullptr)

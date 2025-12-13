@@ -26,18 +26,18 @@ export namespace pragma::gui::types {
 		void Expand(bool bAll = false);
 		void Clear();
 		WIText *GetTextElement() const;
-		const std::vector<pragma::gui::WIHandle> &GetItems() const;
+		const std::vector<WIHandle> &GetItems() const;
 		WITreeListElement *AddItem(const std::string &text, const std::function<void(WITreeListElement &)> &fPopulate = nullptr);
 	  protected:
-		std::vector<pragma::gui::WIHandle> m_items;
+		std::vector<WIHandle> m_items;
 		bool m_bCollapsed;
 		std::function<void(WITreeListElement &)> m_fPopulate = nullptr;
 		uint32_t m_xOffset;
 		uint32_t m_depth;
-		pragma::gui::WIHandle m_pTreeParent;
-		pragma::gui::WIHandle m_pArrow;
-		pragma::gui::WIHandle m_pList;
-		pragma::gui::WIHandle m_hText = {};
+		WIHandle m_pTreeParent;
+		WIHandle m_pArrow;
+		WIHandle m_pList;
+		WIHandle m_hText = {};
 		WITreeListElement *GetLastItem() const;
 		void SetTextElement(WIText *pText);
 	};
@@ -45,12 +45,12 @@ export namespace pragma::gui::types {
 	class DLLCLIENT WITreeList : public WITable {
 	  protected:
 		virtual void DoUpdate() override;
-		pragma::gui::WIHandle m_pRoot;
+		WIHandle m_pRoot;
 	  public:
 		WITreeList();
 		virtual void Initialize() override;
 		virtual void SetSize(int x, int y) override;
-		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
+		virtual util::EventReply MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods) override;
 		virtual WITableRow *AddRow() override;
 		WITreeListElement *AddItem(const std::string &text, const std::function<void(WITreeListElement &)> &fPopulate = nullptr);
 		WITreeListElement *GetRootItem() const;

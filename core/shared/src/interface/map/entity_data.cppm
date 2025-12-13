@@ -44,9 +44,9 @@ export {
 			std::vector<uint16_t> &GetLeaves();
 			void GetLeafData(uint32_t &outFirstLeaf, uint32_t &outNumLeaves) const;
 
-			const std::optional<pragma::math::ScaledTransform> &GetPose() const;
-			pragma::math::ScaledTransform GetEffectivePose() const;
-			void SetPose(const pragma::math::ScaledTransform &pose);
+			const std::optional<math::ScaledTransform> &GetPose() const;
+			math::ScaledTransform GetEffectivePose() const;
+			void SetPose(const math::ScaledTransform &pose);
 			void ClearPose();
 		  private:
 			friend WorldData;
@@ -56,7 +56,7 @@ export {
 			std::unordered_map<std::string, std::string> m_keyValues;
 			std::vector<Output> m_outputs;
 			uint32_t m_mapIndex = 0u;
-			std::optional<pragma::math::ScaledTransform> m_pose {};
+			std::optional<math::ScaledTransform> m_pose {};
 			std::vector<uint16_t> m_leaves = {};
 			Flags m_flags = Flags::None;
 

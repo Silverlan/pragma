@@ -9,20 +9,20 @@ import :entities.components.environment.lights.base_directional;
 using namespace pragma;
 
 Candela BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(Candela intensity, const Vector3 &point) { return intensity; }
-BaseEnvLightDirectionalComponent::BaseEnvLightDirectionalComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_ambientColor(pragma::util::ColorProperty::Create(Color(255, 255, 255, 200))) {}
+BaseEnvLightDirectionalComponent::BaseEnvLightDirectionalComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_ambientColor(util::ColorProperty::Create(Color(255, 255, 255, 200))) {}
 void BaseEnvLightDirectionalComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "color_ambient", false))
 			*m_ambientColor = Color(kvData.value);
 		else if(pragma::string::compare<std::string>(kvData.key, "max_exposure", false))
-			m_maxExposure = pragma::util::to_float(kvData.value);
+			m_maxExposure = util::to_float(kvData.value);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -50,24 +50,24 @@ void BaseEnvLightDirectionalComponent::Load(udm::LinkedPropertyWrapperArg udm, u
 	udm["ambientColor"](color);
 	*m_ambientColor = Color {color};
 }
-pragma::util::EventReply BaseEnvLightDirectionalComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply BaseEnvLightDirectionalComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
 	if(eventId == baseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT) {
 		static_cast<CECalcLightDirectionToPoint &>(evData).direction = GetEntity().GetForward();
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	}
 	else if(eventId == baseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT) {
-		auto *cLight = dynamic_cast<pragma::BaseEnvLightComponent *>(GetEntity().FindComponent("light").get());
+		auto *cLight = dynamic_cast<BaseEnvLightComponent *>(GetEntity().FindComponent("light").get());
 		if(cLight) {
 			auto intensity = cLight->GetLightIntensityCandela();
 			auto &levData = static_cast<CECalcLightIntensityAtPoint &>(evData);
-			static_cast<CECalcLightIntensityAtPoint &>(evData).intensity = BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(intensity, levData.pos);
+			static_cast<CECalcLightIntensityAtPoint &>(evData).intensity = CalcIntensityAtPoint(intensity, levData.pos);
 		}
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	}
 	return BaseEntityComponent::HandleEvent(eventId, evData);
 }
 
 void BaseEnvLightDirectionalComponent::SetAmbientColor(const Color &color) { *m_ambientColor = color; }
 const Color &BaseEnvLightDirectionalComponent::GetAmbientColor() const { return *m_ambientColor; }
-const pragma::util::PColorProperty &BaseEnvLightDirectionalComponent::GetAmbientColorProperty() const { return m_ambientColor; }
+const util::PColorProperty &BaseEnvLightDirectionalComponent::GetAmbientColorProperty() const { return m_ambientColor; }

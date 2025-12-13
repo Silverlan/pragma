@@ -16,7 +16,7 @@ export namespace pragma {
 	struct DLLCLIENT LightmapBakeSettings {
 		std::optional<uint32_t> width {};
 		std::optional<uint32_t> height {};
-		std::optional<pragma::rendering::cycles::SceneInfo::ColorTransform> colorTransform {};
+		std::optional<rendering::cycles::SceneInfo::ColorTransform> colorTransform {};
 		float exposure = 1.f;
 		float skyStrength = 0.3f;
 		float globalLightIntensityFactor = 1.f;
@@ -37,16 +37,16 @@ export namespace pragma {
 			Count
 		};
 		static spdlog::logger &LOGGER;
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 		static std::shared_ptr<prosper::IDynamicResizableBuffer> GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::IBuffer>> &outMeshLightMapUvBuffers);
-		static std::shared_ptr<prosper::Texture> CreateLightmapTexture(uimg::ImageBuffer &imgBuf);
+		static std::shared_ptr<prosper::Texture> CreateLightmapTexture(image::ImageBuffer &imgBuf);
 		static bool BakeLightmaps(const LightmapBakeSettings &bakeSettings);
-		static bool ImportLightmapAtlas(VFilePtr f);
+		static bool ImportLightmapAtlas(fs::VFilePtr f);
 		static bool ImportLightmapAtlas(const std::string &path);
-		static bool ImportLightmapAtlas(uimg::ImageBuffer &imgBuf);
+		static bool ImportLightmapAtlas(image::ImageBuffer &imgBuf);
 
-		CLightMapComponent(pragma::ecs::BaseEntity &ent);
+		CLightMapComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
@@ -69,7 +69,7 @@ export namespace pragma {
 		void SetLightMapExposure(float exp);
 		float GetLightMapExposure() const;
 		float CalcLightMapPowExposurePow() const;
-		const pragma::util::PFloatProperty &GetLightMapExposureProperty() const { return m_lightMapExposure; }
+		const util::PFloatProperty &GetLightMapExposureProperty() const { return m_lightMapExposure; }
 
 		void ConvertLightmapToBSPLuxelData() const;
 
@@ -86,10 +86,10 @@ export namespace pragma {
 		void InitializeFromMaterial();
 
 		std::string m_lightMapMaterialName;
-		msys::MaterialHandle m_lightMapMaterial;
-		std::array<std::shared_ptr<prosper::Texture>, pragma::math::to_integral(Texture::Count)> m_textures;
+		material::MaterialHandle m_lightMapMaterial;
+		std::array<std::shared_ptr<prosper::Texture>, math::to_integral(Texture::Count)> m_textures;
 
-		pragma::util::PFloatProperty m_lightMapExposure = nullptr;
+		util::PFloatProperty m_lightMapExposure = nullptr;
 		std::shared_ptr<rendering::LightmapDataCache> m_lightmapDataCache;
 
 		// Contains the light map uv-buffer for each mesh of the world in the same order

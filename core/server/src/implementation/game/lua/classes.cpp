@@ -185,7 +185,7 @@ void pragma::SGame::RegisterLuaClasses()
 			Con::cout<<"Last engine tick: "<<en.GetLastTick()<<Con::endl;
 		})),
 
-		luabind::def("test_file",static_cast<void(*)(VFilePtr)>([](VFilePtr f) {
+		luabind::def("test_file",static_cast<void(*)(fs::VFilePtr)>([](fs::VFilePtr f) {
 			Con::cout<<"File size: "<<f->GetSize()<<Con::endl;
 		})),
 
@@ -200,9 +200,9 @@ void pragma::SGame::RegisterLuaClasses()
 	];
 #endif
 
-	auto materialClassDef = luabind::class_<msys::Material>("Material");
+	auto materialClassDef = luabind::class_<material::Material>("Material");
 	Lua::Material::register_class(materialClassDef);
-	materialClassDef.def("SetShader", static_cast<void (*)(lua::State *, msys::Material &, const std::string &)>([](lua::State *l, msys::Material &mat, const std::string &shader) {
+	materialClassDef.def("SetShader", static_cast<void (*)(lua::State *, material::Material &, const std::string &)>([](lua::State *l, material::Material &mat, const std::string &shader) {
 		auto db = mat.GetPropertyDataBlock();
 		if(db == nullptr)
 			return;

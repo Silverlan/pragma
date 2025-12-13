@@ -13,7 +13,7 @@ import :physics;
 
 using namespace pragma;
 
-CLiquidComponent::CLiquidComponent(pragma::ecs::BaseEntity &ent) : BaseFuncLiquidComponent(ent) { pragma::ecs::CParticleSystemComponent::Precache("water"); }
+CLiquidComponent::CLiquidComponent(ecs::BaseEntity &ent) : BaseFuncLiquidComponent(ent) { ecs::CParticleSystemComponent::Precache("water"); }
 CLiquidComponent::~CLiquidComponent() {}
 void CLiquidComponent::Initialize()
 {
@@ -36,15 +36,15 @@ void CLiquidComponent::Initialize()
 		SetupWater();
 		ReloadSurfaceSimulator();
 	});*/
-	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		BaseFuncLiquidComponent::InitializeWaterSurface();
+	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
+		InitializeWaterSurface();
 		SetupWater();
 	});
 }
 void CLiquidComponent::OnEntitySpawn()
 {
 	BaseFuncLiquidComponent::OnEntitySpawn();
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
 	//auto pPhysComponent = ent.GetPhysicsComponent();
 	//if(pPhysComponent != nullptr)
 	//	pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Static);
@@ -73,7 +73,7 @@ void CLiquidComponent::SetupWater()
 		auto &hMat = *it;
 		if(hMat.IsValid() == false)
 			continue;
-		auto *mat = static_cast<msys::CMaterial*>(hMat.get());
+		auto *mat = static_cast<material::CMaterial*>(hMat.get());
 		auto hShader = mat->GetShader();
 		if(hShader.IsValid() == false || dynamic_cast<Shader::Water*>(hShader.get()) == nullptr)
 			continue;
@@ -111,9 +111,9 @@ void CLiquidComponent::SetupWater()
 	auto &mats = mdl->GetMaterials();
 	if(!mesh)
 		return;
-	auto *meshSurface = static_cast<pragma::geometry::CModelSubMesh *>(mesh);
+	auto *meshSurface = static_cast<geometry::CModelSubMesh *>(mesh);
 	auto matIdx = mdl->GetMaterialIndex(*meshSurface);
-	auto *mat = matIdx.has_value() ? static_cast<msys::CMaterial *>(mats.at(*matIdx).get()) : nullptr;
+	auto *mat = matIdx.has_value() ? static_cast<material::CMaterial *>(mats.at(*matIdx).get()) : nullptr;
 	Vector3 min, max;
 	mdl->GetCollisionBounds(min, max);
 	renderC->InitializeWaterScene(meshSurface->GetVertexPosition(0), meshSurface->GetVertexNormal(0), min, max);
@@ -129,14 +129,14 @@ void CFuncWater::Initialize()
 	AddComponent<CLiquidComponent>();
 }
 
-static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_water(NetworkState *state, BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	dbg = nullptr;
-	if(pragma::get_cgame() == nullptr || pl == nullptr)
+	if(get_cgame() == nullptr || pl == nullptr)
 		return;
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
-	auto ents = pragma::console::find_target_entity(state, *charComponent, argv, [](pragma::physics::TraceData &trData) { trData.SetCollisionFilterMask(trData.GetCollisionFilterGroup() | pragma::physics::CollisionMask::Water | pragma::physics::CollisionMask::WaterSurface); });
+	auto ents = pragma::console::find_target_entity(state, *charComponent, argv, [](physics::TraceData &trData) { trData.SetCollisionFilterMask(trData.GetCollisionFilterGroup() | physics::CollisionMask::Water | physics::CollisionMask::WaterSurface); });
 	auto bFoundWater = false;
 	if(ents.empty() == false) {
 		for(auto *ent : ents) {
@@ -152,11 +152,11 @@ static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent
 				const auto size = 256u;
 				r->SetSize(size * 4, size);
 
-				auto pWaterComponent = entWater->GetComponent<pragma::CLiquidSurfaceComponent>();
+				auto pWaterComponent = entWater->GetComponent<CLiquidSurfaceComponent>();
 				if(pWaterComponent.valid() == false || pWaterComponent->IsWaterSceneValid() == false)
 					return gui::WIHandle {};
 				auto &waterScene = pWaterComponent->GetWaterScene();
-				auto *renderer = waterScene.sceneReflection.valid() ? dynamic_cast<const pragma::CRasterizationRendererComponent *>(waterScene.sceneReflection->GetRenderer<pragma::CRendererComponent>()) : nullptr;
+				auto *renderer = waterScene.sceneReflection.valid() ? dynamic_cast<const CRasterizationRendererComponent *>(waterScene.sceneReflection->GetRenderer<CRendererComponent>()) : nullptr;
 				if(renderer == nullptr)
 					return gui::WIHandle {};
 				// Debug GUI
@@ -166,7 +166,7 @@ static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent
 				pReflection->SetTexture(hdrInfo.sceneRenderTarget->GetTexture());
 				pReflection->SetName("dbg_water_reflection");
 
-				auto *pRefractionDepth = wgui.Create<pragma::gui::types::WIDebugDepthTexture>(r);
+				auto *pRefractionDepth = wgui.Create<gui::types::WIDebugDepthTexture>(r);
 				pRefractionDepth->SetSize(size, size);
 				pRefractionDepth->SetX(size);
 				pRefractionDepth->SetTexture(*hdrInfo.prepass.textureDepth,
@@ -177,7 +177,7 @@ static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent
 				pRefractionDepth->SetName("dbg_water_refraction_depth");
 				hDepthTex = pRefractionDepth->GetHandle();
 
-				auto *pSceneNoWater = wgui.Create<pragma::gui::types::WIDebugMSAATexture>(r);
+				auto *pSceneNoWater = wgui.Create<gui::types::WIDebugMSAATexture>(r);
 				pSceneNoWater->SetSize(size, size);
 				pSceneNoWater->SetX(size * 2u);
 				pSceneNoWater->SetTexture(*waterScene.texScene);
@@ -189,25 +189,25 @@ static void debug_water(pragma::NetworkState *state, pragma::BasePlayerComponent
 				if(hWater.valid() == false)
 					return;
 				auto *entWater = static_cast<CFuncWater *>(hWater.get());
-				auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
+				auto *cam = get_cgame()->GetRenderCamera<CCameraComponent>();
 				// Update debug depth GUI element
 				if(hDepthTex.IsValid() && cam != nullptr) {
-					auto *pDepthTex = static_cast<pragma::gui::types::WIDebugDepthTexture *>(hDepthTex.get());
+					auto *pDepthTex = static_cast<gui::types::WIDebugDepthTexture *>(hDepthTex.get());
 					pDepthTex->Setup(cam->GetNearZ(), cam->GetFarZ());
 				}
 			}));
 
 			// Debug surface points
-			auto pWaterComponent = entWater->GetComponent<pragma::CLiquidSurfaceSimulationComponent>();
+			auto pWaterComponent = entWater->GetComponent<CLiquidSurfaceSimulationComponent>();
 			auto *entSurface = pWaterComponent.valid() ? pWaterComponent->GetSurfaceEntity() : nullptr;
 			if(entSurface != nullptr) {
-				auto pWaterSurfComponent = entSurface->GetComponent<pragma::CWaterSurfaceComponent>();
+				auto pWaterSurfComponent = entSurface->GetComponent<CWaterSurfaceComponent>();
 				auto *meshSurface = pWaterSurfComponent.valid() ? pWaterSurfComponent->GetWaterSurfaceMesh() : nullptr;
 				if(meshSurface != nullptr) {
 					auto &vkMesh = meshSurface->GetSceneMesh();
-					auto *sim = static_cast<const pragma::physics::CPhysWaterSurfaceSimulator *>(pWaterComponent->GetSurfaceSimulator());
+					auto *sim = static_cast<const physics::CPhysWaterSurfaceSimulator *>(pWaterComponent->GetSurfaceSimulator());
 					//auto &buf = sim->GetPositionBuffer();
-					auto dbgPoints = pragma::debug::DebugRenderer::DrawPoints(vkMesh->GetVertexBuffer(), meshSurface->GetVertexCount(), colors::Yellow);
+					auto dbgPoints = debug::DebugRenderer::DrawPoints(vkMesh->GetVertexBuffer(), meshSurface->GetVertexCount(), colors::Yellow);
 					if(dbgPoints != nullptr) {
 						dbg->CallOnRemove([dbgPoints]() mutable { dbgPoints = nullptr; });
 					}

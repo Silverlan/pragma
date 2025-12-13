@@ -24,7 +24,7 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseActorComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
 		virtual void Kill(game::DamageInfo *dmgInfo = nullptr);
@@ -34,10 +34,10 @@ export namespace pragma {
 		bool IsAlive() const;
 		bool IsDead() const;
 		void Ragdolize();
-		bool FindHitgroup(const physics::ICollisionObject &phys, pragma::physics::HitGroup &hitgroup) const;
+		bool FindHitgroup(const physics::ICollisionObject &phys, physics::HitGroup &hitgroup) const;
 		PhysObjHandle GetHitboxPhysicsObject() const;
 
-		const pragma::util::PBoolProperty &GetFrozenProperty() const;
+		const util::PBoolProperty &GetFrozenProperty() const;
 
 		void SetMoveController(const std::string &moveController);
 		void SetMoveController(const std::string &moveControllerX, const std::string &moveControllerY);
@@ -47,9 +47,9 @@ export namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	  protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
-		BaseActorComponent(pragma::ecs::BaseEntity &ent);
+		BaseActorComponent(ecs::BaseEntity &ent);
 		bool m_bAlive;
-		pragma::util::PBoolProperty m_bFrozen = nullptr;
+		util::PBoolProperty m_bFrozen = nullptr;
 		std::string m_moveControllerName = "move_yaw";
 		std::optional<std::string> m_moveControllerNameY;
 		int32_t m_moveController = -1;
@@ -60,9 +60,9 @@ export namespace pragma {
 			uint32_t boneId;
 			Vector3 offset;
 		};
-		pragma::NetEventId m_netEvSetFrozen = pragma::INVALID_NET_EVENT;
+		NetEventId m_netEvSetFrozen = INVALID_NET_EVENT;
 		std::vector<HitboxData> m_hitboxData;
-		std::unique_ptr<pragma::physics::PhysObj> m_physHitboxes;
+		std::unique_ptr<physics::PhysObj> m_physHitboxes;
 		virtual void OnPhysicsInitialized();
 		virtual void OnPhysicsDestroyed();
 		virtual void PhysicsUpdate(double tDelta);

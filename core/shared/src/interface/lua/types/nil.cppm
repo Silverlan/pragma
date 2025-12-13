@@ -29,7 +29,7 @@ export namespace luabind {
 	using adl::nil_type;
 
 	template<typename T>
-	struct lua_proxy_traits<adl::nil_type<T>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<nil_type<T>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return Lua::IsNil(L, idx); }
 	};
 };

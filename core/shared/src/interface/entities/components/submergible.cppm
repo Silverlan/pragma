@@ -17,23 +17,23 @@ export namespace pragma {
 	}
 	class DLLNETWORK SubmergibleComponent final : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		SubmergibleComponent(pragma::ecs::BaseEntity &ent);
+		SubmergibleComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		bool IsSubmerged() const;
 		bool IsFullySubmerged() const;
 		bool IsInWater() const;
 		float GetSubmergedFraction() const;
-		void SetSubmergedFraction(pragma::ecs::BaseEntity &waterEntity, float fraction);
+		void SetSubmergedFraction(ecs::BaseEntity &waterEntity, float fraction);
 
-		pragma::ecs::BaseEntity *GetWaterEntity();
-		const pragma::ecs::BaseEntity *GetWaterEntity() const;
-		const pragma::util::PFloatProperty &GetSubmergedFractionProperty() const;
+		ecs::BaseEntity *GetWaterEntity();
+		const ecs::BaseEntity *GetWaterEntity() const;
+		const util::PFloatProperty &GetSubmergedFractionProperty() const;
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
-		pragma::util::PFloatProperty m_submergedFraction;
+		util::PFloatProperty m_submergedFraction;
 		EntityHandle m_waterEntity = {};
 		virtual void OnWaterEntered();
 		virtual void OnWaterExited();

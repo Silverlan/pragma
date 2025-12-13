@@ -18,31 +18,31 @@ export {
 			Pose() = default;
 			Pose(const Pose &) = default;
 			Pose(Pose &&) = default;
-			Pose(const std::vector<pragma::math::ScaledTransform> &transforms);
-			Pose(std::vector<pragma::math::ScaledTransform> &&transforms);
+			Pose(const std::vector<math::ScaledTransform> &transforms);
+			Pose(std::vector<math::ScaledTransform> &&transforms);
 			Pose &operator=(const Pose &) = default;
 			Pose &operator=(Pose &&) = default;
 			bool operator==(const Pose &other) const { return m_transforms == other.m_transforms; }
 			bool operator!=(const Pose &other) const { return !operator==(other); }
-			const std::vector<pragma::math::ScaledTransform> &GetTransforms() const { return const_cast<Pose *>(this)->GetTransforms(); }
-			std::vector<pragma::math::ScaledTransform> &GetTransforms() { return m_transforms; }
+			const std::vector<math::ScaledTransform> &GetTransforms() const { return const_cast<Pose *>(this)->GetTransforms(); }
+			std::vector<math::ScaledTransform> &GetTransforms() { return m_transforms; }
 			void SetTransformCount(uint32_t c);
 			void SetBoneIndex(uint32_t channelId, BoneId boneId);
-			pragma::math::ScaledTransform *GetTransform(pragma::animation::BoneId idx);
-			const pragma::math::ScaledTransform *GetTransform(pragma::animation::BoneId idx) const { return const_cast<Pose *>(this)->GetTransform(idx); }
-			void SetTransform(pragma::animation::BoneId idx, const pragma::math::ScaledTransform &pose);
+			math::ScaledTransform *GetTransform(BoneId idx);
+			const math::ScaledTransform *GetTransform(BoneId idx) const { return const_cast<Pose *>(this)->GetTransform(idx); }
+			void SetTransform(BoneId idx, const math::ScaledTransform &pose);
 			void Clear();
 			void Lerp(const Pose &other, float f);
 			operator bool() const { return !m_transforms.empty(); }
 
-			void Localize(const pragma::animation::Skeleton &skeleton);
-			void Globalize(const pragma::animation::Skeleton &skeleton);
+			void Localize(const Skeleton &skeleton);
+			void Globalize(const Skeleton &skeleton);
 
 			std::vector<uint32_t> &GetBoneTranslationTable() { return m_boneIdToChannelId; }
 			const std::vector<uint32_t> &GetBoneTranslationTable() const { return const_cast<Pose *>(this)->GetBoneTranslationTable(); }
 		  private:
-			uint32_t GetChannelIdx(pragma::animation::BoneId boneId) const;
-			std::vector<pragma::math::ScaledTransform> m_transforms {};
+			uint32_t GetChannelIdx(BoneId boneId) const;
+			std::vector<math::ScaledTransform> m_transforms {};
 			std::vector<uint32_t> m_boneIdToChannelId;
 			Skeleton *m_skeleton;
 		};

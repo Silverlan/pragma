@@ -11,7 +11,7 @@ export import pragma.util;
 export {
 	namespace pragma::util {
 		template<typename T>
-		class TFunctionalParallelWorker : public pragma::util::ParallelWorker<T> {
+		class TFunctionalParallelWorker : public ParallelWorker<T> {
 		  public:
 			using Task = std::function<void(TFunctionalParallelWorker<T> &)>;
 			TFunctionalParallelWorker(bool continuousUntilCancelled);
@@ -22,7 +22,7 @@ export {
 			void CancelTask();
 			bool IsTaskCancelled() const;
 			void CallOnRemove(const std::function<void(void)> &callOnRemove);
-			void UpdateProgress(float progress) { pragma::util::ParallelWorker<T>::UpdateProgress(progress); }
+			void UpdateProgress(float progress) { ParallelWorker<T>::UpdateProgress(progress); }
 
 			virtual T GetResult() override
 			{
@@ -30,10 +30,10 @@ export {
 					return T {};
 			}
 
-			using pragma::util::ParallelWorker<T>::SetResultMessage;
-			using pragma::util::ParallelWorker<T>::UpdateProgress;
+			using ParallelWorker<T>::SetResultMessage;
+			using ParallelWorker<T>::UpdateProgress;
 		  private:
-			using pragma::util::ParallelWorker<T>::AddThread;
+			using ParallelWorker<T>::AddThread;
 			virtual void DoCancel(const std::string &resultMsg, std::optional<int32_t> resultCode) override;
 			bool IsFinished() const;
 			std::function<void(void)> m_callOnRemove = nullptr;
@@ -53,7 +53,7 @@ export {
 			bool m_continuousUntilCancelled = false;
 			std::mutex m_taskAvailableMutex;
 			template<typename TJob, typename... TARGS>
-			friend pragma::util::ParallelJob<typename TJob::RESULT_TYPE> pragma::util::create_parallel_job(TARGS &&...args);
+			friend ParallelJob<typename TJob::RESULT_TYPE> util::create_parallel_job(TARGS &&...args);
 		};
 		using FunctionalParallelWorker = TFunctionalParallelWorker<void>;
 

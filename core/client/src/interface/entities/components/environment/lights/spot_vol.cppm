@@ -14,10 +14,10 @@ import :model.mesh;
 export namespace pragma {
 	class DLLCLIENT CLightSpotVolComponent final : public BaseEnvLightSpotVolComponent, public CBaseNetComponent {
 	  public:
-		CLightSpotVolComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightSpotVolComponent(ent) {}
+		CLightSpotVolComponent(ecs::BaseEntity &ent) : BaseEnvLightSpotVolComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
@@ -26,10 +26,10 @@ export namespace pragma {
 		uint32_t CalcSegmentCount() const;
 		bool UpdateMeshData();
 		void InitializeVolumetricLight();
-		virtual bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
-		std::vector<std::shared_ptr<pragma::geometry::CModelSubMesh>> m_subMeshes;
-		std::shared_ptr<pragma::asset::Model> m_model;
-		msys::MaterialHandle m_material;
+		virtual bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
+		std::vector<std::shared_ptr<geometry::CModelSubMesh>> m_subMeshes;
+		std::shared_ptr<asset::Model> m_model;
+		material::MaterialHandle m_material;
 	};
 };
 

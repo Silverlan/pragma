@@ -21,13 +21,13 @@ void BaseCharacterComponent::UpdateOrientation()
 {
 	auto &ent = GetEntity();
 	auto physComponent = ent.GetPhysicsComponent();
-	auto physType = physComponent ? physComponent->GetPhysicsType() : pragma::physics::PhysicsType::None;
-	if(physType != pragma::physics::PhysicsType::BoxController && physType != pragma::physics::PhysicsType::CapsuleController)
+	auto physType = physComponent ? physComponent->GetPhysicsType() : physics::PhysicsType::None;
+	if(physType != physics::PhysicsType::BoxController && physType != physics::PhysicsType::CapsuleController)
 		return;
 	auto normal = uvec::UP;
 	if(m_orientationComponent)
 		normal = m_orientationComponent->GetUpDirection();
-	auto gravityComponent = ent.GetComponent<pragma::GravityComponent>();
+	auto gravityComponent = ent.GetComponent<GravityComponent>();
 	if(gravityComponent.valid())
 		gravityComponent->SetGravityOverride(-normal);
 

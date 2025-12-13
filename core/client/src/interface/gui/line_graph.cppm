@@ -11,9 +11,9 @@ export import pragma.gui;
 export namespace pragma::gui::types {
 	class DLLCLIENT WILineGraph : public WIBase {
 	  protected:
-		pragma::gui::WIHandle m_hOutline;
+		WIHandle m_hOutline;
 		std::vector<float> m_values;
-		std::vector<pragma::gui::WIHandle> m_lines;
+		std::vector<WIHandle> m_lines;
 		virtual void DoUpdate() override;
 		void UpdateGraph();
 		void UpdateLines();

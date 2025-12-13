@@ -13,12 +13,12 @@ export namespace pragma::util {
 		HSV(double h, double s, double v) : h {h}, s {s}, v {v} {}
 		HSV() = default;
 
-		bool operator==(const pragma::util::HSV &b) const
+		bool operator==(const HSV &b) const
 		{
 			constexpr auto EPSILON = 0.01f;
-			return pragma::math::abs(h - b.h) <= EPSILON && pragma::math::abs(s - b.s) <= EPSILON && pragma::math::abs(v - b.v) <= EPSILON;
+			return math::abs(h - b.h) <= EPSILON && math::abs(s - b.s) <= EPSILON && math::abs(v - b.v) <= EPSILON;
 		}
-		bool operator!=(const pragma::util::HSV &b) const { return operator==(b); }
+		bool operator!=(const HSV &b) const { return operator==(b); }
 
 		double h = 0.0;
 		double s = 0.0;

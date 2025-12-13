@@ -38,7 +38,7 @@ export namespace pragma {
 #pragma pack(pop)
 
 		ShaderPPHDR(prosper::IPrContext &context, const std::string &identifier);
-		bool RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, pragma::rendering::ToneMapping toneMapping, float exposure, float bloomScale, bool flipVertically = false) const;
+		bool RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, rendering::ToneMapping toneMapping, float exposure, float bloomScale, bool flipVertically = false) const;
 	  protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeShaderResources() override;

@@ -17,7 +17,7 @@ export namespace pragma::pts {
 	class DLLCLIENT CParticleRendererRotationalBuffer {
 	public:
 		CParticleRendererRotationalBuffer() = default;
-		void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem);
+		void Initialize(BaseEnvParticleSystemComponent &pSystem);
 		virtual bool Update();
 		const std::shared_ptr<prosper::IBuffer> &GetBuffer() const;
 		void SetRotationAlignVelocity(bool b);
@@ -26,7 +26,7 @@ export namespace pragma::pts {
 		uint64_t m_lastFrameUpdate = std::numeric_limits<uint64_t>::max();
 		std::shared_ptr<prosper::IBuffer> m_rotBuffer = nullptr;
 		std::vector<Quat> m_rotations;
-		pragma::ComponentHandle<pragma::ecs::CParticleSystemComponent> m_hParticleSystem = {};
+		ComponentHandle<ecs::CParticleSystemComponent> m_hParticleSystem = {};
 		bool m_bAlignVelocity = false;
 	};
 }

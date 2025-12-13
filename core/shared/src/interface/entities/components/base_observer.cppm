@@ -16,26 +16,26 @@ export namespace pragma {
 	}
 	class DLLNETWORK BaseObserverComponent : public BaseEntityComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		virtual ~BaseObserverComponent() override;
 
 		virtual void SetObserverMode(ObserverMode mode);
 		ObserverMode GetObserverMode() const;
-		const pragma::util::PEnumProperty<ObserverMode> &GetObserverModeProperty() const;
+		const util::PEnumProperty<ObserverMode> &GetObserverModeProperty() const;
 
 		virtual void SetObserverTarget(BaseObservableComponent *ent);
 		BaseObservableComponent *GetObserverTarget() const;
 	  protected:
-		BaseObserverComponent(pragma::ecs::BaseEntity &ent);
+		BaseObserverComponent(ecs::BaseEntity &ent);
 		void ClearObserverTarget();
 		virtual void OnRemove() override;
 		virtual void DoSetObserverMode(ObserverMode mode) {};
 
 		ComponentHandle<BaseObservableComponent> m_observerTarget = {};
 
-		pragma::NetEventId m_netEvSetObserverMode = pragma::INVALID_NET_EVENT;
-		pragma::NetEventId m_netEvSetObserverTarget = pragma::INVALID_NET_EVENT;
-		pragma::util::PEnumProperty<ObserverMode> m_obsMode = nullptr;
+		NetEventId m_netEvSetObserverMode = INVALID_NET_EVENT;
+		NetEventId m_netEvSetObserverTarget = INVALID_NET_EVENT;
+		util::PEnumProperty<ObserverMode> m_obsMode = nullptr;
 
 		virtual void Initialize() override;
 	};

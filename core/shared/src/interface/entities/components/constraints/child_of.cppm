@@ -13,43 +13,43 @@ export namespace pragma {
 	class ConstraintComponent;
 	class DLLNETWORK ConstraintChildOfComponent final : public BaseEntityComponent {
 	  public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		ConstraintChildOfComponent(pragma::ecs::BaseEntity &ent);
+		ConstraintChildOfComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
-		void SetLocationAxisEnabled(pragma::Axis axis, bool enabled);
-		bool IsLocationAxisEnabled(pragma::Axis axis) const;
+		void SetLocationAxisEnabled(Axis axis, bool enabled);
+		bool IsLocationAxisEnabled(Axis axis) const;
 
-		void SetRotationAxisEnabled(pragma::Axis axis, bool enabled);
-		bool IsRotationAxisEnabled(pragma::Axis axis) const;
+		void SetRotationAxisEnabled(Axis axis, bool enabled);
+		bool IsRotationAxisEnabled(Axis axis) const;
 
-		void SetScaleAxisEnabled(pragma::Axis axis, bool enabled);
-		bool IsScaleAxisEnabled(pragma::Axis axis) const;
+		void SetScaleAxisEnabled(Axis axis, bool enabled);
+		bool IsScaleAxisEnabled(Axis axis) const;
 
-		std::pair<std::optional<Vector3>, std::optional<Quat>> GetDriverPose(pragma::math::CoordinateSpace space) const;
-		std::pair<std::optional<Vector3>, std::optional<Quat>> GetDrivenPose(pragma::math::CoordinateSpace space) const;
+		std::pair<std::optional<Vector3>, std::optional<Quat>> GetDriverPose(math::CoordinateSpace space) const;
+		std::pair<std::optional<Vector3>, std::optional<Quat>> GetDrivenPose(math::CoordinateSpace space) const;
 
-		const pragma::ComponentHandle<ConstraintComponent> &GetConstraint() const;
+		const ComponentHandle<ConstraintComponent> &GetConstraint() const;
 
 		virtual void InitializeLuaObject(lua::State *lua) override;
-		std::optional<pragma::math::ScaledTransform> CalcInversePose(pragma::math::ScaledTransform &pose) const;
+		std::optional<math::ScaledTransform> CalcInversePose(math::ScaledTransform &pose) const;
 	  protected:
 		enum class Type : uint8_t { Pose = 0, Position, Rotation };
 		struct PropertyInfo {
-			pragma::EntityUComponentMemberRef propertyRef;
+			EntityUComponentMemberRef propertyRef;
 			Type type;
 		};
-		std::pair<std::optional<Vector3>, std::optional<Quat>> GetPropertyPose(const PropertyInfo &propInfo, const BaseEntityComponent &c, pragma::math::CoordinateSpace space) const;
+		std::pair<std::optional<Vector3>, std::optional<Quat>> GetPropertyPose(const PropertyInfo &propInfo, const BaseEntityComponent &c, math::CoordinateSpace space) const;
 
-		static std::optional<pragma::EntityUComponentMemberRef> FindPosePropertyReference(const pragma::BaseEntityComponent &c, pragma::ComponentMemberIndex basePropIdx);
+		static std::optional<EntityUComponentMemberRef> FindPosePropertyReference(const BaseEntityComponent &c, ComponentMemberIndex basePropIdx);
 		void SetPropertyInfosDirty();
 		bool UpdatePropertyInfos();
 		void ApplyConstraint();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
-		std::optional<pragma::math::ScaledTransform> CalcConstraintPose(pragma::math::ScaledTransform *optPose, bool inverse, pragma::ComponentMemberIndex &outDrivenPropertyIndex, ConstraintComponent::ConstraintParticipants &outConstraintParticipants) const;
-		pragma::ComponentHandle<ConstraintComponent> m_constraintC;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		std::optional<math::ScaledTransform> CalcConstraintPose(math::ScaledTransform *optPose, bool inverse, ComponentMemberIndex &outDrivenPropertyIndex, ConstraintComponent::ConstraintParticipants &outConstraintParticipants) const;
+		ComponentHandle<ConstraintComponent> m_constraintC;
 		void UpdateAxisState();
 		std::array<bool, 3> m_locationEnabled;
 		std::array<bool, 3> m_rotationEnabled;

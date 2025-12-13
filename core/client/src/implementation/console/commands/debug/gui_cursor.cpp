@@ -384,8 +384,8 @@ static void debug_dump_font_glyph_map(pragma::NetworkState *state, pragma::BaseP
 	auto &glyphImg = glyphMap->GetImage();
 	std::string fileName = "tmp/font_" + fontName + "_glyph_map";
 
-	uimg::TextureInfo texInfo {};
-	texInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
+	pragma::image::TextureInfo texInfo {};
+	texInfo.containerFormat = pragma::image::TextureInfo::ContainerFormat::DDS;
 	if(!prosper::util::save_texture(fileName, glyphImg, texInfo)) {
 		Con::cwar << "Failed to save glyph map as '" << fileName << "'!" << Con::endl;
 		return;

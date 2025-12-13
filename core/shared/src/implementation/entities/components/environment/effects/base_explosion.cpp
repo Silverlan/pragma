@@ -12,13 +12,13 @@ void BaseEnvExplosionComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(pragma::string::compare<std::string>(inputData.input, "explode", false))
 			Explode();
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 	GetEntity().AddComponent("io");
 }
@@ -31,12 +31,12 @@ void BaseEnvExplosionComponent::Explode()
 	float radius = 512.f;
 	unsigned short damage = 12;
 	Vector3 force(0.f, 0.f, 0.f);
-	pragma::ecs::EntityIterator entIt {*ent.GetNetworkState()->GetGameState()};
+	ecs::EntityIterator entIt {*ent.GetNetworkState()->GetGameState()};
 	entIt.AttachFilter<EntityIteratorFilterComponent>("transform");
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::DamageableComponent>>();
+	entIt.AttachFilter<TEntityIteratorFilterComponent<DamageableComponent>>();
 	for(auto *entOther : entIt) {
 		auto pTrComponentOther = entOther->GetTransformComponent();
-		auto pDamageableComponentOther = entOther->GetComponent<pragma::DamageableComponent>();
+		auto pDamageableComponentOther = entOther->GetComponent<DamageableComponent>();
 		auto pPhysComponentOther = entOther->GetPhysicsComponent();
 		auto &pos = pTrComponentOther->GetPosition();
 		Vector3 min {};
@@ -44,14 +44,14 @@ void BaseEnvExplosionComponent::Explode()
 		if(pPhysComponentOther)
 			pPhysComponentOther->GetCollisionBounds(&min, &max);
 		Vector3 r;
-		pragma::math::geometry::closest_point_on_aabb_to_point((min + pos), (max + pos), origin, &r);
+		math::geometry::closest_point_on_aabb_to_point((min + pos), (max + pos), origin, &r);
 		float d = glm::distance(origin, r);
 		if(d <= radius) {
 			// TODO: Raytrace
 			game::DamageInfo dmg;
 			dmg.SetAttacker(&ent);
 			dmg.SetDamage(damage);
-			dmg.SetDamageType(DamageType::Explosion);
+			dmg.SetDamageType(Explosion);
 			dmg.SetForce(force);
 			dmg.SetHitPosition(r);
 			dmg.SetInflictor(&ent);

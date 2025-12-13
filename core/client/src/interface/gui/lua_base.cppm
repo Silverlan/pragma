@@ -43,20 +43,20 @@ export namespace pragma::gui::types {
 		virtual void Initialize() override;
 		virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
 		virtual void OnFirstThink() override;
-		virtual pragma::util::EventReply MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
-		virtual pragma::util::EventReply KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) override;
-		virtual pragma::util::EventReply CharCallback(unsigned int c, pragma::platform::Modifier mods = pragma::platform::Modifier::None) override;
-		virtual pragma::util::EventReply ScrollCallback(Vector2 offset, bool offsetAsPixels = false) override;
+		virtual util::EventReply MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods) override;
+		virtual util::EventReply KeyboardCallback(platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods) override;
+		virtual util::EventReply CharCallback(unsigned int c, platform::Modifier mods = platform::Modifier::None) override;
+		virtual util::EventReply ScrollCallback(Vector2 offset, bool offsetAsPixels = false) override;
 		virtual void SetSize(int x, int y) override;
 		virtual void OnVisibilityChanged(bool bVisible) override;
 		virtual void SetColor(float r, float g, float b, float a = 1.f) override;
 		virtual void SetAlpha(float alpha) override;
-		virtual void Render(const pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const Mat4 &matDraw, const Vector2 &scale = {1.f, 1.f}, uint32_t testStencilLevel = 0u, StencilPipeline stencilPipeline = StencilPipeline::Test) override;
+		virtual void Render(const DrawInfo &drawInfo, DrawState &drawState, const Mat4 &matDraw, const Vector2 &scale = {1.f, 1.f}, uint32_t testStencilLevel = 0u, StencilPipeline stencilPipeline = StencilPipeline::Test) override;
 		virtual void OnCursorEntered() override;
 		virtual void OnCursorExited() override;
 		virtual void OnFileDragEntered() override;
 		virtual void OnFileDragExited() override;
-		virtual pragma::util::EventReply OnFilesDropped(const std::vector<std::string> &files) override;
+		virtual util::EventReply OnFilesDropped(const std::vector<std::string> &files) override;
 		virtual void OnFocusGained() override;
 		virtual void OnFocusKilled() override;
 		virtual void OnRemove() override;
@@ -103,8 +103,8 @@ export namespace pragma::gui::types {
 		bool Lua_CheckPosInBounds(const Vector2i &pos);
 		static bool default_CheckPosInBounds(lua::State *l, WILuaBase &hElement, const Vector2i &pos);
 
-		void Lua_Render(const pragma::gui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
-		static void default_Render(lua::State *l, WILuaBase &hElement, const pragma::gui::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
+		void Lua_Render(const DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
+		static void default_Render(lua::State *l, WILuaBase &hElement, const DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale);
 
 		void Lua_OnCursorEntered();
 		static void default_OnCursorEntered(lua::State *l, WILuaBase &hElement);
@@ -145,5 +145,5 @@ export namespace pragma::gui::types {
 };
 
 export namespace pragma::LuaCore {
-	using WILuaBaseHolder = HandleHolder<pragma::gui::types::WILuaBase>;
+	using WILuaBaseHolder = HandleHolder<gui::types::WILuaBase>;
 };

@@ -17,14 +17,14 @@ export namespace pragma::rendering {
 			None = 0u,
 			HideInEditor = 1u,
 		};
-		Property(const std::string &name, pragma::shadergraph::DataType type);
+		Property(const std::string &name, shadergraph::DataType type);
 		Property(const Property &other);
 		Property &operator=(const Property &other);
 
-		pragma::shadergraph::Parameter *operator->() { return &parameter; }
-		const pragma::shadergraph::Parameter *operator->() const { return &parameter; }
+		shadergraph::Parameter *operator->() { return &parameter; }
+		const shadergraph::Parameter *operator->() const { return &parameter; }
 
-		pragma::shadergraph::Parameter parameter;
+		shadergraph::Parameter parameter;
 
 		std::optional<GString> specializationType {};
 		Flags propertyFlags = Flags::None;
@@ -36,11 +36,11 @@ export namespace pragma::rendering {
 	};
 
 	struct DLLCLIENT ShaderInputDescriptor {
-		static std::optional<pragma::shadergraph::Value> parse_flags_expression(const std::string &strVal, const std::unordered_map<std::string, uint32_t> &flags, udm::Type propType);
+		static std::optional<shadergraph::Value> parse_flags_expression(const std::string &strVal, const std::unordered_map<std::string, uint32_t> &flags, udm::Type propType);
 
-		ShaderInputDescriptor(const pragma::GString &name);
+		ShaderInputDescriptor(const GString &name);
 		bool AddProperty(Property &&prop);
-		const pragma::GString name;
+		const GString name;
 		std::vector<Property> properties;
 
 		Property *FindProperty(const char *key)

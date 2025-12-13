@@ -8,14 +8,14 @@ import :entities.components.point.constraints.base_fixed;
 
 using namespace pragma;
 
-void BasePointConstraintFixedComponent::InitializeConstraint(pragma::ecs::BaseEntity *src, pragma::ecs::BaseEntity *tgt)
+void BasePointConstraintFixedComponent::InitializeConstraint(ecs::BaseEntity *src, ecs::BaseEntity *tgt)
 {
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
-	auto *physTgt = pPhysComponentTgt ? dynamic_cast<pragma::physics::RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
+	auto *physTgt = pPhysComponentTgt ? dynamic_cast<physics::RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
 	if(physTgt == nullptr)
 		return;
 	auto pPhysComponentSrc = src->GetPhysicsComponent();
-	auto *physSrc = pPhysComponentSrc ? dynamic_cast<pragma::physics::RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	auto *physSrc = pPhysComponentSrc ? dynamic_cast<physics::RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	if(physSrc == nullptr)
 		return;
 	auto *bodySrc = physSrc->GetRigidBody();
@@ -39,7 +39,7 @@ void BasePointConstraintFixedComponent::InitializeConstraint(pragma::ecs::BaseEn
 			auto fixed = physEnv->CreateFixedConstraint(*bodyTgt, posTgt, uquat::identity(), *bodySrc, posSrc, uquat::identity());
 			if(fixed != nullptr) {
 				fixed->SetEntity(GetEntity());
-				m_constraints.push_back(pragma::util::shared_handle_cast<pragma::physics::IFixedConstraint, pragma::physics::IConstraint>(fixed));
+				m_constraints.push_back(pragma::util::shared_handle_cast<physics::IFixedConstraint, physics::IConstraint>(fixed));
 			}
 		}
 	}

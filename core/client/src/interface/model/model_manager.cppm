@@ -13,7 +13,7 @@ export namespace pragma::asset {
 	  public:
 		using ModelManager::ModelManager;
 
-		virtual std::shared_ptr<pragma::asset::Model> CreateModel(uint32_t numBones, const std::string &mdlName) override;
+		virtual std::shared_ptr<Model> CreateModel(uint32_t numBones, const std::string &mdlName) override;
 	  private:
 	};
 };

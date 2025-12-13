@@ -8,19 +8,19 @@ import :entities.components.base_child;
 
 using namespace pragma;
 
-ComponentEventId baseChildComponent::EVENT_ON_PARENT_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseChildComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseChildComponent::EVENT_ON_PARENT_CHANGED = registerEvent("ON_PARENT_CHANGED", ComponentEventInfo::Type::Broadcast); }
-void BaseChildComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+ComponentEventId baseChildComponent::EVENT_ON_PARENT_CHANGED = INVALID_COMPONENT_ID;
+void BaseChildComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseChildComponent::EVENT_ON_PARENT_CHANGED = registerEvent("ON_PARENT_CHANGED", ComponentEventInfo::Type::Broadcast); }
+void BaseChildComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseChildComponent;
 
 	{
-		using TParent = pragma::EntityURef;
+		using TParent = EntityURef;
 		auto memberInfo = create_component_member_info<T, TParent, static_cast<void (T::*)(const TParent &)>(&T::SetParent), static_cast<const TParent &(T::*)() const>(&T::GetParent)>("parent", TParent {});
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseChildComponent::BaseChildComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+BaseChildComponent::BaseChildComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseChildComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -43,7 +43,7 @@ void BaseChildComponent::ClearParent()
 			parentC->RemoveChild(*this);
 	}
 }
-void BaseChildComponent::SetParent(const pragma::EntityURef &parent)
+void BaseChildComponent::SetParent(const EntityURef &parent)
 {
 	ClearParent();
 	m_parent = parent;
@@ -62,6 +62,6 @@ void BaseChildComponent::SetParent(const pragma::EntityURef &parent)
 	OnParentChanged(entParent);
 	BroadcastEvent(baseChildComponent::EVENT_ON_PARENT_CHANGED);
 }
-const pragma::EntityURef &BaseChildComponent::GetParent() const { return m_parent; }
-pragma::ecs::BaseEntity *BaseChildComponent::GetParentEntity() { return m_parent.GetEntity(GetGame()); }
+const EntityURef &BaseChildComponent::GetParent() const { return m_parent; }
+ecs::BaseEntity *BaseChildComponent::GetParentEntity() { return m_parent.GetEntity(GetGame()); }
 bool BaseChildComponent::HasParent() const { return GetParentEntity() != nullptr; }

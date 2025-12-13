@@ -12,11 +12,11 @@ export namespace pragma {
 	class CRasterizationRendererComponent;
 	class DLLCLIENT CRendererPpDoFComponent final : public CRendererPpBaseComponent {
 	  public:
-		CRendererPpDoFComponent(pragma::ecs::BaseEntity &ent);
+		CRendererPpDoFComponent(ecs::BaseEntity &ent);
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual std::string GetIdentifier() const override { return "dof"; }
-		virtual uint32_t GetPostProcessingWeight() const override { return pragma::math::to_integral(CRendererComponent::StandardPostProcessingWeight::DoF); }
+		virtual uint32_t GetPostProcessingWeight() const override { return math::to_integral(CRendererComponent::StandardPostProcessingWeight::DoF); }
 	  private:
-		virtual void DoRenderEffect(const pragma::rendering::DrawSceneInfo &drawSceneInfo) override;
+		virtual void DoRenderEffect(const rendering::DrawSceneInfo &drawSceneInfo) override;
 	};
 };

@@ -16,15 +16,15 @@ export namespace pragma::pts {
 		CParticleModifierComponentGradualFade() = default;
 		void Initialize(const std::unordered_map<std::string, std::string> &values);
 
-		float GetStartTime(pragma::pts::CParticle &p) const;
-		float GetEndTime(pragma::pts::CParticle &p) const;
+		float GetStartTime(CParticle &p) const;
+		float GetEndTime(CParticle &p) const;
 		// Returns a value in [0,1] representing the current fade position (0 = start, 1 = end)
-		float GetFadeFraction(pragma::pts::CParticle &p) const;
-		bool GetFadeFraction(pragma::pts::CParticle &p, float &outFraction) const;
+		float GetFadeFraction(CParticle &p) const;
+		bool GetFadeFraction(CParticle &p, float &outFraction) const;
 
 		// Returns the eased fade fraction
-		float GetEasedFadeFraction(pragma::pts::CParticle &p) const;
-		bool GetEasedFadeFraction(pragma::pts::CParticle &p, float &outFraction) const;
+		float GetEasedFadeFraction(CParticle &p) const;
+		bool GetEasedFadeFraction(CParticle &p, float &outFraction) const;
 	private:
 		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fStart;
 		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fEnd;
@@ -41,17 +41,17 @@ void pragma::pts::CParticleModifierComponentGradualFade::Initialize(const std::u
 	m_fEnd.Initialize("fade_end", values);
 }
 
-float pragma::pts::CParticleModifierComponentGradualFade::GetStartTime(pragma::pts::CParticle &p) const
+float pragma::pts::CParticleModifierComponentGradualFade::GetStartTime(CParticle &p) const
 {
 	auto tStart = m_fStart.GetValue(p);
 	return GetTime(tStart, p);
 }
-float pragma::pts::CParticleModifierComponentGradualFade::GetEndTime(pragma::pts::CParticle &p) const
+float pragma::pts::CParticleModifierComponentGradualFade::GetEndTime(CParticle &p) const
 {
 	auto tEnd = m_fEnd.GetValue(p);
 	return GetTime(tEnd, p);
 }
-bool pragma::pts::CParticleModifierComponentGradualFade::GetFadeFraction(pragma::pts::CParticle &p, float &outFraction) const
+bool pragma::pts::CParticleModifierComponentGradualFade::GetFadeFraction(CParticle &p, float &outFraction) const
 {
 	auto tStart = GetStartTime(p);
 	auto t = p.GetTimeAlive();
@@ -61,23 +61,23 @@ bool pragma::pts::CParticleModifierComponentGradualFade::GetFadeFraction(pragma:
 	}
 	auto tEnd = GetEndTime(p);
 	auto tDelta = tEnd - tStart;
-	outFraction = (tDelta != 0.f) ? pragma::math::clamp((t - tStart) / (tEnd - tStart), 0.f, 1.f) : 0.f;
+	outFraction = (tDelta != 0.f) ? math::clamp((t - tStart) / (tEnd - tStart), 0.f, 1.f) : 0.f;
 	return true;
 }
-float pragma::pts::CParticleModifierComponentGradualFade::GetFadeFraction(pragma::pts::CParticle &p) const
+float pragma::pts::CParticleModifierComponentGradualFade::GetFadeFraction(CParticle &p) const
 {
 	auto fraction = 0.f;
 	GetFadeFraction(p, fraction);
 	return fraction;
 }
-bool pragma::pts::CParticleModifierComponentGradualFade::GetEasedFadeFraction(pragma::pts::CParticle &p, float &outFraction) const
+bool pragma::pts::CParticleModifierComponentGradualFade::GetEasedFadeFraction(CParticle &p, float &outFraction) const
 {
 	if(GetFadeFraction(p, outFraction) == false)
 		return false;
 	outFraction = Ease(outFraction);
 	return true;
 }
-float pragma::pts::CParticleModifierComponentGradualFade::GetEasedFadeFraction(pragma::pts::CParticle &p) const
+float pragma::pts::CParticleModifierComponentGradualFade::GetEasedFadeFraction(CParticle &p) const
 {
 	auto fraction = 0.f;
 	GetEasedFadeFraction(p, fraction);

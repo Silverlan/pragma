@@ -30,7 +30,7 @@ void pragma::asset::WorldData::AddEntity(EntityData &ent, bool isWorld)
 void pragma::asset::WorldData::SetBSPTree(pragma::util::BSPTree &bspTree) { m_bspTree = bspTree.shared_from_this(); }
 pragma::util::BSPTree *pragma::asset::WorldData::GetBSPTree() { return m_bspTree.get(); }
 
-void pragma::asset::WorldData::SetLightMapAtlas(uimg::ImageBuffer &imgAtlas)
+void pragma::asset::WorldData::SetLightMapAtlas(image::ImageBuffer &imgAtlas)
 {
 	m_lightMapAtlas = imgAtlas.shared_from_this();
 	SetLightMapEnabled(true);
@@ -57,7 +57,7 @@ std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::Create(pragm
 
 std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::load(pragma::NetworkState &nw, const std::string &fileName, std::string &outErr, EntityData::Flags entMask)
 {
-	auto nFileName = filemanager::find_available_file(fileName, get_supported_extensions());
+	auto nFileName = fs::find_available_file(fileName, get_supported_extensions());
 	std::shared_ptr<udm::Data> udmData = nullptr;
 	try {
 		udmData = udm::Data::Load(nFileName ? *nFileName : fileName);

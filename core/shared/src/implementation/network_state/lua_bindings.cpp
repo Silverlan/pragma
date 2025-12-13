@@ -64,11 +64,11 @@ std::ostream &operator<<(std::ostream &out, const pragma::audio::ALSound &snd)
 
 static void RegisterLuaMatrices(Lua::Interface &lua);
 
-static void create_directory_change_listener(lua::State *l, const std::string &path, luabind::object callback, DirectoryWatcherCallback::WatchFlags flags)
+static void create_directory_change_listener(lua::State *l, const std::string &path, luabind::object callback, pragma::fs::DirectoryWatcherCallback::WatchFlags flags)
 {
 	Lua::CheckFunction(l, 2);
 	try {
-		auto listener = pragma::util::make_shared<DirectoryWatcherCallback>(path, [callback](const std::string &fileName) mutable { callback(fileName); }, flags);
+		auto listener = pragma::util::make_shared<pragma::fs::DirectoryWatcherCallback>(path, [callback](const std::string &fileName) mutable { callback(fileName); }, flags);
 		Lua::Push(l, listener);
 	}
 	catch(const std::runtime_error &err) {
@@ -109,21 +109,21 @@ static void register_utf8_string(lua::State *l, luabind::module_ &modStr)
 
 static void register_directory_watcher(lua::State *l, luabind::module_ &modUtil)
 {
-	auto defListener = pragma::LuaCore::register_class<"DirectoryChangeListener", DirectoryWatcherCallback>(l);
-	defListener->add_static_constant("LISTENER_FLAG_NONE", pragma::math::to_integral(DirectoryWatcherCallback::WatchFlags::None));
-	defListener->add_static_constant("LISTENER_FLAG_BIT_WATCH_SUB_DIRECTORIES", pragma::math::to_integral(DirectoryWatcherCallback::WatchFlags::WatchSubDirectories));
-	defListener->add_static_constant("LISTENER_FLAG_ABSOLUTE_PATH", pragma::math::to_integral(DirectoryWatcherCallback::WatchFlags::AbsolutePath));
-	defListener->add_static_constant("LISTENER_FLAG_START_DISABLED", pragma::math::to_integral(DirectoryWatcherCallback::WatchFlags::StartDisabled));
-	defListener->add_static_constant("LISTENER_FLAG_WATCH_DIRECTORY_CHANGES", pragma::math::to_integral(DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges));
-	static_assert(magic_enum::enum_count<DirectoryWatcherCallback::WatchFlags>() == 4);
+	auto defListener = pragma::LuaCore::register_class<"DirectoryChangeListener", pragma::fs::DirectoryWatcherCallback>(l);
+	defListener->add_static_constant("LISTENER_FLAG_NONE", pragma::math::to_integral(pragma::fs::DirectoryWatcherCallback::WatchFlags::None));
+	defListener->add_static_constant("LISTENER_FLAG_BIT_WATCH_SUB_DIRECTORIES", pragma::math::to_integral(pragma::fs::DirectoryWatcherCallback::WatchFlags::WatchSubDirectories));
+	defListener->add_static_constant("LISTENER_FLAG_ABSOLUTE_PATH", pragma::math::to_integral(pragma::fs::DirectoryWatcherCallback::WatchFlags::AbsolutePath));
+	defListener->add_static_constant("LISTENER_FLAG_START_DISABLED", pragma::math::to_integral(pragma::fs::DirectoryWatcherCallback::WatchFlags::StartDisabled));
+	defListener->add_static_constant("LISTENER_FLAG_WATCH_DIRECTORY_CHANGES", pragma::math::to_integral(pragma::fs::DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges));
+	static_assert(magic_enum::enum_count<pragma::fs::DirectoryWatcherCallback::WatchFlags>() == 4);
 	defListener
-	  ->scope[luabind::def("create", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &path, luabind::object callback) { create_directory_change_listener(l, path, callback, DirectoryWatcherCallback::WatchFlags::None); }))];
-	defListener->scope[luabind::def("create", static_cast<void (*)(lua::State *, const std::string &, luabind::object, DirectoryWatcherCallback::WatchFlags)>([](lua::State *l, const std::string &path, luabind::object callback, DirectoryWatcherCallback::WatchFlags flags) {
+	  ->scope[luabind::def("create", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &path, luabind::object callback) { create_directory_change_listener(l, path, callback, pragma::fs::DirectoryWatcherCallback::WatchFlags::None); }))];
+	defListener->scope[luabind::def("create", static_cast<void (*)(lua::State *, const std::string &, luabind::object, pragma::fs::DirectoryWatcherCallback::WatchFlags)>([](lua::State *l, const std::string &path, luabind::object callback, pragma::fs::DirectoryWatcherCallback::WatchFlags flags) {
 		create_directory_change_listener(l, path, callback, flags);
 	}))];
-	defListener->def("Poll", static_cast<uint32_t (*)(lua::State *, DirectoryWatcherCallback &)>([](lua::State *l, DirectoryWatcherCallback &listener) { return listener.Poll(); }));
-	defListener->def("SetEnabled", static_cast<void (*)(lua::State *, DirectoryWatcherCallback &, bool)>([](lua::State *l, DirectoryWatcherCallback &listener, bool enabled) { listener.SetEnabled(enabled); }));
-	defListener->def("IsEnabled", static_cast<bool (*)(lua::State *, DirectoryWatcherCallback &)>([](lua::State *l, DirectoryWatcherCallback &listener) { return listener.IsEnabled(); }));
+	defListener->def("Poll", static_cast<uint32_t (*)(lua::State *, pragma::fs::DirectoryWatcherCallback &)>([](lua::State *l, pragma::fs::DirectoryWatcherCallback &listener) { return listener.Poll(); }));
+	defListener->def("SetEnabled", static_cast<void (*)(lua::State *, pragma::fs::DirectoryWatcherCallback &, bool)>([](lua::State *l, pragma::fs::DirectoryWatcherCallback &listener, bool enabled) { listener.SetEnabled(enabled); }));
+	defListener->def("IsEnabled", static_cast<bool (*)(lua::State *, pragma::fs::DirectoryWatcherCallback &)>([](lua::State *l, pragma::fs::DirectoryWatcherCallback &listener) { return listener.IsEnabled(); }));
 	modUtil[*defListener];
 }
 
@@ -146,8 +146,8 @@ namespace pragma::math {
 		return out;
 	}
 }
-namespace uimg {
-	std::ostream &operator<<(std::ostream &out, const uimg::ImageLayerSet &layerSet)
+namespace pragma::image {
+	std::ostream &operator<<(std::ostream &out, const image::ImageLayerSet &layerSet)
 	{
 		out << "ImageLayerSet[" << layerSet.images.size() << "]";
 		return out;
@@ -172,7 +172,7 @@ static void register_string_to_vector_type_constructor(lua::State *l)
 
 #ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::util, BaseParallelJob);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg, ImageBuffer);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::image, ImageBuffer);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::util, Version);
 #endif
 // #ifdef __linux__
@@ -437,53 +437,53 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defParallelJob->def("Poll", &pragma::util::BaseParallelJob::Poll);
 	modUtil[*defParallelJob];
 
-	auto defImageBuffer = pragma::LuaCore::register_class<uimg::ImageBuffer>(lua.GetState(), "ImageBuffer");
-	defImageBuffer->add_static_constant("FORMAT_NONE", pragma::math::to_integral(uimg::Format::None));
-	defImageBuffer->add_static_constant("FORMAT_RGB8", pragma::math::to_integral(uimg::Format::RGB8));
-	defImageBuffer->add_static_constant("FORMAT_RGBA8", pragma::math::to_integral(uimg::Format::RGBA8));
-	defImageBuffer->add_static_constant("FORMAT_RGB16", pragma::math::to_integral(uimg::Format::RGB16));
-	defImageBuffer->add_static_constant("FORMAT_RGBA16", pragma::math::to_integral(uimg::Format::RGBA16));
-	defImageBuffer->add_static_constant("FORMAT_RGB32", pragma::math::to_integral(uimg::Format::RGB32));
-	defImageBuffer->add_static_constant("FORMAT_RGBA32", pragma::math::to_integral(uimg::Format::RGBA32));
-	defImageBuffer->add_static_constant("FORMAT_COUNT", pragma::math::to_integral(uimg::Format::Count));
+	auto defImageBuffer = pragma::LuaCore::register_class<image::ImageBuffer>(lua.GetState(), "ImageBuffer");
+	defImageBuffer->add_static_constant("FORMAT_NONE", pragma::math::to_integral(image::Format::None));
+	defImageBuffer->add_static_constant("FORMAT_RGB8", pragma::math::to_integral(image::Format::RGB8));
+	defImageBuffer->add_static_constant("FORMAT_RGBA8", pragma::math::to_integral(image::Format::RGBA8));
+	defImageBuffer->add_static_constant("FORMAT_RGB16", pragma::math::to_integral(image::Format::RGB16));
+	defImageBuffer->add_static_constant("FORMAT_RGBA16", pragma::math::to_integral(image::Format::RGBA16));
+	defImageBuffer->add_static_constant("FORMAT_RGB32", pragma::math::to_integral(image::Format::RGB32));
+	defImageBuffer->add_static_constant("FORMAT_RGBA32", pragma::math::to_integral(image::Format::RGBA32));
+	defImageBuffer->add_static_constant("FORMAT_COUNT", pragma::math::to_integral(image::Format::Count));
 
-	defImageBuffer->add_static_constant("FORMAT_RGB_LDR", pragma::math::to_integral(uimg::Format::RGB_LDR));
-	defImageBuffer->add_static_constant("FORMAT_RGBA_LDR", pragma::math::to_integral(uimg::Format::RGBA_LDR));
-	defImageBuffer->add_static_constant("FORMAT_RGB_HDR", pragma::math::to_integral(uimg::Format::RGB_HDR));
-	defImageBuffer->add_static_constant("FORMAT_RGBA_HDR", pragma::math::to_integral(uimg::Format::RGBA_HDR));
-	defImageBuffer->add_static_constant("FORMAT_RGB_FLOAT", pragma::math::to_integral(uimg::Format::RGB_FLOAT));
-	defImageBuffer->add_static_constant("FORMAT_RGBA_FLOAT", pragma::math::to_integral(uimg::Format::RGBA_FLOAT));
+	defImageBuffer->add_static_constant("FORMAT_RGB_LDR", pragma::math::to_integral(image::Format::RGB_LDR));
+	defImageBuffer->add_static_constant("FORMAT_RGBA_LDR", pragma::math::to_integral(image::Format::RGBA_LDR));
+	defImageBuffer->add_static_constant("FORMAT_RGB_HDR", pragma::math::to_integral(image::Format::RGB_HDR));
+	defImageBuffer->add_static_constant("FORMAT_RGBA_HDR", pragma::math::to_integral(image::Format::RGBA_HDR));
+	defImageBuffer->add_static_constant("FORMAT_RGB_FLOAT", pragma::math::to_integral(image::Format::RGB_FLOAT));
+	defImageBuffer->add_static_constant("FORMAT_RGBA_FLOAT", pragma::math::to_integral(image::Format::RGBA_FLOAT));
 
-	defImageBuffer->add_static_constant("CHANNEL_RED", pragma::math::to_integral(uimg::Channel::Red));
-	defImageBuffer->add_static_constant("CHANNEL_GREEN", pragma::math::to_integral(uimg::Channel::Green));
-	defImageBuffer->add_static_constant("CHANNEL_BLUE", pragma::math::to_integral(uimg::Channel::Blue));
-	defImageBuffer->add_static_constant("CHANNEL_ALPHA", pragma::math::to_integral(uimg::Channel::Alpha));
-	defImageBuffer->add_static_constant("CHANNEL_R", pragma::math::to_integral(uimg::Channel::R));
-	defImageBuffer->add_static_constant("CHANNEL_G", pragma::math::to_integral(uimg::Channel::G));
-	defImageBuffer->add_static_constant("CHANNEL_B", pragma::math::to_integral(uimg::Channel::B));
-	defImageBuffer->add_static_constant("CHANNEL_A", pragma::math::to_integral(uimg::Channel::A));
+	defImageBuffer->add_static_constant("CHANNEL_RED", pragma::math::to_integral(image::Channel::Red));
+	defImageBuffer->add_static_constant("CHANNEL_GREEN", pragma::math::to_integral(image::Channel::Green));
+	defImageBuffer->add_static_constant("CHANNEL_BLUE", pragma::math::to_integral(image::Channel::Blue));
+	defImageBuffer->add_static_constant("CHANNEL_ALPHA", pragma::math::to_integral(image::Channel::Alpha));
+	defImageBuffer->add_static_constant("CHANNEL_R", pragma::math::to_integral(image::Channel::R));
+	defImageBuffer->add_static_constant("CHANNEL_G", pragma::math::to_integral(image::Channel::G));
+	defImageBuffer->add_static_constant("CHANNEL_B", pragma::math::to_integral(image::Channel::B));
+	defImageBuffer->add_static_constant("CHANNEL_A", pragma::math::to_integral(image::Channel::A));
 
-	defImageBuffer->add_static_constant("TONE_MAPPING_GAMMA_CORRECTION", pragma::math::to_integral(uimg::ToneMapping::GammaCorrection));
-	defImageBuffer->add_static_constant("TONE_MAPPING_REINHARD", pragma::math::to_integral(uimg::ToneMapping::Reinhard));
-	defImageBuffer->add_static_constant("TONE_MAPPING_HEJIL_RICHARD", pragma::math::to_integral(uimg::ToneMapping::HejilRichard));
-	defImageBuffer->add_static_constant("TONE_MAPPING_UNCHARTED", pragma::math::to_integral(uimg::ToneMapping::Uncharted));
-	defImageBuffer->add_static_constant("TONE_MAPPING_ACES", pragma::math::to_integral(uimg::ToneMapping::Aces));
-	defImageBuffer->add_static_constant("TONE_MAPPING_GRAN_TURISMO", pragma::math::to_integral(uimg::ToneMapping::GranTurismo));
+	defImageBuffer->add_static_constant("TONE_MAPPING_GAMMA_CORRECTION", pragma::math::to_integral(image::ToneMapping::GammaCorrection));
+	defImageBuffer->add_static_constant("TONE_MAPPING_REINHARD", pragma::math::to_integral(image::ToneMapping::Reinhard));
+	defImageBuffer->add_static_constant("TONE_MAPPING_HEJIL_RICHARD", pragma::math::to_integral(image::ToneMapping::HejilRichard));
+	defImageBuffer->add_static_constant("TONE_MAPPING_UNCHARTED", pragma::math::to_integral(image::ToneMapping::Uncharted));
+	defImageBuffer->add_static_constant("TONE_MAPPING_ACES", pragma::math::to_integral(image::ToneMapping::Aces));
+	defImageBuffer->add_static_constant("TONE_MAPPING_GRAN_TURISMO", pragma::math::to_integral(image::ToneMapping::GranTurismo));
 
 	defImageBuffer->scope[luabind::def("Create", static_cast<void (*)(lua::State *, uint32_t, uint32_t, uint32_t, pragma::util::DataStream &)>([](lua::State *l, uint32_t width, uint32_t height, uint32_t format, pragma::util::DataStream &ds) {
-		auto imgBuffer = uimg::ImageBuffer::Create(ds->GetData(), width, height, static_cast<uimg::Format>(format));
+		auto imgBuffer = image::ImageBuffer::Create(ds->GetData(), width, height, static_cast<image::Format>(format));
 		if(imgBuffer == nullptr)
 			return;
 		Lua::Push(l, imgBuffer);
 	}))];
 	defImageBuffer->scope[luabind::def("Create", static_cast<void (*)(lua::State *, uint32_t, uint32_t, uint32_t)>([](lua::State *l, uint32_t width, uint32_t height, uint32_t format) {
-		auto imgBuffer = uimg::ImageBuffer::Create(width, height, static_cast<uimg::Format>(format));
+		auto imgBuffer = image::ImageBuffer::Create(width, height, static_cast<image::Format>(format));
 		if(imgBuffer == nullptr)
 			return;
 		Lua::Push(l, imgBuffer);
 	}))];
-	defImageBuffer->scope[luabind::def("Create", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t, uint32_t, uint32_t, uint32_t)>([](lua::State *l, uimg::ImageBuffer &parent, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
-		auto imgBuffer = uimg::ImageBuffer::Create(parent, x, y, w, h);
+	defImageBuffer->scope[luabind::def("Create", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t, uint32_t, uint32_t, uint32_t)>([](lua::State *l, image::ImageBuffer &parent, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+		auto imgBuffer = image::ImageBuffer::Create(parent, x, y, w, h);
 		if(imgBuffer == nullptr)
 			return;
 		Lua::Push(l, imgBuffer);
@@ -491,47 +491,47 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer->scope[luabind::def("CreateCubemap", static_cast<void (*)(lua::State *, luabind::object)>([](lua::State *l, luabind::object o) {
 		int32_t t = 1;
 		Lua::CheckTable(l, t);
-		std::array<std::shared_ptr<uimg::ImageBuffer>, 6> cubemapSides {};
+		std::array<std::shared_ptr<image::ImageBuffer>, 6> cubemapSides {};
 		for(uint8_t i = 0; i < 6; ++i) {
 			Lua::PushInt(l, i + 1);
 			Lua::GetTableValue(l, t);
-			auto &img = Lua::Check<uimg::ImageBuffer>(l, -1);
+			auto &img = Lua::Check<image::ImageBuffer>(l, -1);
 			cubemapSides.at(i) = img.shared_from_this();
 			Lua::Pop(l, 1);
 		}
-		auto imgBuffer = uimg::ImageBuffer::CreateCubemap(cubemapSides);
+		auto imgBuffer = image::ImageBuffer::CreateCubemap(cubemapSides);
 		if(imgBuffer == nullptr)
 			return;
 		Lua::Push(l, imgBuffer);
 	}))];
-	defImageBuffer->def("GetData", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) {
+	defImageBuffer->def("GetData", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) {
 		auto *data = imgBuffer.GetData();
 		auto dataSize = imgBuffer.GetSize();
 		pragma::util::DataStream ds {data, static_cast<uint32_t>(dataSize)};
 		ds->SetOffset(0);
 		Lua::Push(l, ds);
 	}));
-	defImageBuffer->def("GetFormat", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushInt(l, pragma::math::to_integral(imgBuffer.GetFormat())); }));
-	defImageBuffer->def("GetWidth", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetWidth()); }));
-	defImageBuffer->def("GetHeight", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetHeight()); }));
-	defImageBuffer->def("GetChannelCount", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetChannelCount()); }));
-	defImageBuffer->def("GetChannelSize", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetChannelSize()); }));
-	defImageBuffer->def("GetPixelSize", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetPixelSize()); }));
-	defImageBuffer->def("GetPixelCount", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetPixelCount()); }));
-	defImageBuffer->def("HasAlphaChannel", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushBool(l, imgBuffer.HasAlphaChannel()); }));
-	defImageBuffer->def("IsLDRFormat", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushBool(l, imgBuffer.IsLDRFormat()); }));
-	defImageBuffer->def("IsHDRFormat", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushBool(l, imgBuffer.IsHDRFormat()); }));
-	defImageBuffer->def("IsFloatFormat", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushBool(l, imgBuffer.IsFloatFormat()); }));
-	defImageBuffer->def("Insert", static_cast<void (uimg::ImageBuffer::*)(const uimg::ImageBuffer &, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)>(&uimg::ImageBuffer::Insert));
-	defImageBuffer->def("Insert", static_cast<void (uimg::ImageBuffer::*)(const uimg::ImageBuffer &, uint32_t, uint32_t)>(&uimg::ImageBuffer::Insert));
-	defImageBuffer->def("Copy", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::Push(l, imgBuffer.Copy()); }));
-	defImageBuffer->def("Copy", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t format) { Lua::Push(l, imgBuffer.Copy(static_cast<uimg::Format>(format))); }));
+	defImageBuffer->def("GetFormat", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushInt(l, pragma::math::to_integral(imgBuffer.GetFormat())); }));
+	defImageBuffer->def("GetWidth", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetWidth()); }));
+	defImageBuffer->def("GetHeight", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetHeight()); }));
+	defImageBuffer->def("GetChannelCount", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetChannelCount()); }));
+	defImageBuffer->def("GetChannelSize", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetChannelSize()); }));
+	defImageBuffer->def("GetPixelSize", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetPixelSize()); }));
+	defImageBuffer->def("GetPixelCount", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetPixelCount()); }));
+	defImageBuffer->def("HasAlphaChannel", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushBool(l, imgBuffer.HasAlphaChannel()); }));
+	defImageBuffer->def("IsLDRFormat", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushBool(l, imgBuffer.IsLDRFormat()); }));
+	defImageBuffer->def("IsHDRFormat", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushBool(l, imgBuffer.IsHDRFormat()); }));
+	defImageBuffer->def("IsFloatFormat", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushBool(l, imgBuffer.IsFloatFormat()); }));
+	defImageBuffer->def("Insert", static_cast<void (image::ImageBuffer::*)(const image::ImageBuffer &, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)>(&image::ImageBuffer::Insert));
+	defImageBuffer->def("Insert", static_cast<void (image::ImageBuffer::*)(const image::ImageBuffer &, uint32_t, uint32_t)>(&image::ImageBuffer::Insert));
+	defImageBuffer->def("Copy", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::Push(l, imgBuffer.Copy()); }));
+	defImageBuffer->def("Copy", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t format) { Lua::Push(l, imgBuffer.Copy(static_cast<image::Format>(format))); }));
 	defImageBuffer->def("Copy",
-	  static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uimg::ImageBuffer &, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)>(
-	    [](lua::State *l, uimg::ImageBuffer &imgBuffer, uimg::ImageBuffer &dst, uint32_t xSrc, uint32_t ySrc, uint32_t xDst, uint32_t yDst, uint32_t w, uint32_t h) { imgBuffer.Copy(dst, xSrc, ySrc, xDst, yDst, w, h); }));
-	defImageBuffer->def("Convert", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t format) { imgBuffer.Convert(static_cast<uimg::Format>(format)); }));
+	  static_cast<void (*)(lua::State *, image::ImageBuffer &, image::ImageBuffer &, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)>(
+	    [](lua::State *l, image::ImageBuffer &imgBuffer, image::ImageBuffer &dst, uint32_t xSrc, uint32_t ySrc, uint32_t xDst, uint32_t yDst, uint32_t w, uint32_t h) { imgBuffer.Copy(dst, xSrc, ySrc, xDst, yDst, w, h); }));
+	defImageBuffer->def("Convert", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t format) { imgBuffer.Convert(static_cast<image::Format>(format)); }));
 	defImageBuffer->def(
-	  "ToLDR", +[](lua::State *l, uimg::ImageBuffer &imgBuffer, const pragma::LuaCore::LuaThreadWrapper &tw) {
+	  "ToLDR", +[](lua::State *l, image::ImageBuffer &imgBuffer, const pragma::LuaCore::LuaThreadWrapper &tw) {
 		  auto pImgBuffer = imgBuffer.shared_from_this();
 		  auto task = [pImgBuffer]() -> pragma::LuaCore::LuaThreadPool::ResultHandler {
 			  pImgBuffer->ToLDR();
@@ -542,25 +542,25 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		  else
 			  tw.GetPool().AddTask(task);
 	  });
-	defImageBuffer->def("ToLDR", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { imgBuffer.ToLDR(); }));
-	defImageBuffer->def("ToHDR", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { imgBuffer.ToHDR(); }));
-	defImageBuffer->def("ToFloat", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { imgBuffer.ToFloat(); }));
-	defImageBuffer->def("GetSize", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetSize()); }));
-	defImageBuffer->def("Clear", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, const Color &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, const Color &color) { imgBuffer.Clear(color); }));
-	defImageBuffer->def("Clear", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, const Vector4 &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, const Vector4 &color) { imgBuffer.Clear(color); }));
-	defImageBuffer->def("ClearAlpha", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, float)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, float a) {
+	defImageBuffer->def("ToLDR", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { imgBuffer.ToLDR(); }));
+	defImageBuffer->def("ToHDR", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { imgBuffer.ToHDR(); }));
+	defImageBuffer->def("ToFloat", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { imgBuffer.ToFloat(); }));
+	defImageBuffer->def("GetSize", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetSize()); }));
+	defImageBuffer->def("Clear", static_cast<void (*)(lua::State *, image::ImageBuffer &, const Color &)>([](lua::State *l, image::ImageBuffer &imgBuffer, const Color &color) { imgBuffer.Clear(color); }));
+	defImageBuffer->def("Clear", static_cast<void (*)(lua::State *, image::ImageBuffer &, const Vector4 &)>([](lua::State *l, image::ImageBuffer &imgBuffer, const Vector4 &color) { imgBuffer.Clear(color); }));
+	defImageBuffer->def("ClearAlpha", static_cast<void (*)(lua::State *, image::ImageBuffer &, float)>([](lua::State *l, image::ImageBuffer &imgBuffer, float a) {
 		a = pragma::math::clamp(a, 0.f, 1.f);
 		imgBuffer.ClearAlpha(a * std::numeric_limits<uint8_t>::max());
 	}));
-	defImageBuffer->def("GetPixelIndex", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t, uint32_t)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t x, uint32_t y) { Lua::PushInt(l, imgBuffer.GetPixelIndex(x, y)); }));
-	defImageBuffer->def("GetPixelOffset", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t, uint32_t)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t x, uint32_t y) { Lua::PushInt(l, imgBuffer.GetPixelOffset(x, y)); }));
-	defImageBuffer->def("Resize", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t, uint32_t)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) { imgBuffer.Resize(w, h); }));
-	defImageBuffer->def("FlipHorizontally", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { imgBuffer.FlipHorizontally(); }));
-	defImageBuffer->def("FlipVertically", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { imgBuffer.FlipVertically(); }));
-	defImageBuffer->def("Flip", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, bool, bool)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, bool flipH, bool flipV) { imgBuffer.Flip(flipH, flipV); }));
-	defImageBuffer->def("SwapChannels", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uimg::Channel, uimg::Channel)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uimg::Channel channel0, uimg::Channel channel1) { imgBuffer.SwapChannels(channel0, channel1); }));
+	defImageBuffer->def("GetPixelIndex", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t, uint32_t)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t x, uint32_t y) { Lua::PushInt(l, imgBuffer.GetPixelIndex(x, y)); }));
+	defImageBuffer->def("GetPixelOffset", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t, uint32_t)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t x, uint32_t y) { Lua::PushInt(l, imgBuffer.GetPixelOffset(x, y)); }));
+	defImageBuffer->def("Resize", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t, uint32_t)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) { imgBuffer.Resize(w, h); }));
+	defImageBuffer->def("FlipHorizontally", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { imgBuffer.FlipHorizontally(); }));
+	defImageBuffer->def("FlipVertically", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { imgBuffer.FlipVertically(); }));
+	defImageBuffer->def("Flip", static_cast<void (*)(lua::State *, image::ImageBuffer &, bool, bool)>([](lua::State *l, image::ImageBuffer &imgBuffer, bool flipH, bool flipV) { imgBuffer.Flip(flipH, flipV); }));
+	defImageBuffer->def("SwapChannels", static_cast<void (*)(lua::State *, image::ImageBuffer &, image::Channel, image::Channel)>([](lua::State *l, image::ImageBuffer &imgBuffer, image::Channel channel0, image::Channel channel1) { imgBuffer.SwapChannels(channel0, channel1); }));
 	defImageBuffer->def(
-	  "SwapChannels", +[](lua::State *l, uimg::ImageBuffer &imgBuffer, uimg::Channel channel0, uimg::Channel channel1, const pragma::LuaCore::LuaThreadWrapper &tw) {
+	  "SwapChannels", +[](lua::State *l, image::ImageBuffer &imgBuffer, image::Channel channel0, image::Channel channel1, const pragma::LuaCore::LuaThreadWrapper &tw) {
 		  auto pImgBuffer = imgBuffer.shared_from_this();
 		  auto task = [pImgBuffer, channel0, channel1]() -> pragma::LuaCore::LuaThreadPool::ResultHandler {
 			  pImgBuffer->SwapChannels(channel0, channel1);
@@ -571,35 +571,35 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		  else
 			  tw.GetPool().AddTask(task);
 	  });
-	defImageBuffer->def("ApplyToneMapping", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t toneMapping) {
-		auto tonemappedImg = imgBuffer.ApplyToneMapping(static_cast<uimg::ToneMapping>(toneMapping));
+	defImageBuffer->def("ApplyToneMapping", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t toneMapping) {
+		auto tonemappedImg = imgBuffer.ApplyToneMapping(static_cast<image::ToneMapping>(toneMapping));
 		if(tonemappedImg == nullptr)
 			return;
 		Lua::Push(l, tonemappedImg);
 	}));
-	defImageBuffer->def("ApplyGammaCorrection", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) { imgBuffer.ApplyGammaCorrection(); }));
-	defImageBuffer->def("ApplyGammaCorrection", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, float)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, float gamma) { imgBuffer.ApplyGammaCorrection(gamma); }));
-	defImageBuffer->def("ApplyExposure", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, float)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, float exposure) { imgBuffer.ApplyExposure(exposure); }));
+	defImageBuffer->def("ApplyGammaCorrection", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { imgBuffer.ApplyGammaCorrection(); }));
+	defImageBuffer->def("ApplyGammaCorrection", static_cast<void (*)(lua::State *, image::ImageBuffer &, float)>([](lua::State *l, image::ImageBuffer &imgBuffer, float gamma) { imgBuffer.ApplyGammaCorrection(gamma); }));
+	defImageBuffer->def("ApplyExposure", static_cast<void (*)(lua::State *, image::ImageBuffer &, float)>([](lua::State *l, image::ImageBuffer &imgBuffer, float exposure) { imgBuffer.ApplyExposure(exposure); }));
 
-	defImageBuffer->def("GetPixelOffset", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t, uint32_t)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t x, uint32_t y) { Lua::PushInt(l, imgBuffer.GetPixelOffset(x, y)); }));
-	defImageBuffer->def("GetPixelIndex", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t, uint32_t)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t x, uint32_t y) { Lua::PushInt(l, imgBuffer.GetPixelIndex(x, y)); }));
-	defImageBuffer->def("GetPixelValue", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t, uint32_t, uint32_t)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t x, uint32_t y, uint32_t channel) {
-		Lua::PushNumber(l, imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x, y)).GetFloatValue(static_cast<uimg::Channel>(channel)));
+	defImageBuffer->def("GetPixelOffset", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t, uint32_t)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t x, uint32_t y) { Lua::PushInt(l, imgBuffer.GetPixelOffset(x, y)); }));
+	defImageBuffer->def("GetPixelIndex", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t, uint32_t)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t x, uint32_t y) { Lua::PushInt(l, imgBuffer.GetPixelIndex(x, y)); }));
+	defImageBuffer->def("GetPixelValue", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t, uint32_t, uint32_t)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t x, uint32_t y, uint32_t channel) {
+		Lua::PushNumber(l, imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x, y)).GetFloatValue(static_cast<image::Channel>(channel)));
 	}));
-	defImageBuffer->def("SetPixelValue", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t, uint32_t, uint32_t, float)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t x, uint32_t y, uint32_t channel, float value) {
-		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x, y)).SetValue(static_cast<uimg::Channel>(channel), value);
+	defImageBuffer->def("SetPixelValue", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t, uint32_t, uint32_t, float)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t x, uint32_t y, uint32_t channel, float value) {
+		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x, y)).SetValue(static_cast<image::Channel>(channel), value);
 	}));
-	defImageBuffer->def("SetPixelValueLDR", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t, uint32_t, uint32_t, uint8_t)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t x, uint32_t y, uint32_t channel, uint8_t value) {
-		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x, y)).SetValue(static_cast<uimg::Channel>(channel), value);
+	defImageBuffer->def("SetPixelValueLDR", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t, uint32_t, uint32_t, uint8_t)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t x, uint32_t y, uint32_t channel, uint8_t value) {
+		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x, y)).SetValue(static_cast<image::Channel>(channel), value);
 	}));
-	defImageBuffer->def("SetPixelValueHDR", static_cast<void (*)(lua::State *, uimg::ImageBuffer &, uint32_t, uint32_t, uint32_t, uint16_t)>([](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t x, uint32_t y, uint32_t channel, uint16_t value) {
-		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x, y)).SetValue(static_cast<uimg::Channel>(channel), value);
+	defImageBuffer->def("SetPixelValueHDR", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t, uint32_t, uint32_t, uint16_t)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t x, uint32_t y, uint32_t channel, uint16_t value) {
+		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x, y)).SetValue(static_cast<image::Channel>(channel), value);
 	}));
-	defImageBuffer->def("SetPixelColor", static_cast<void (uimg::ImageBuffer::*)(uint32_t, uint32_t, const Vector4 &)>(&uimg::ImageBuffer::SetPixelColor));
-	defImageBuffer->def("SetPixelColor", static_cast<void (uimg::ImageBuffer::*)(uimg::ImageBuffer::PixelIndex, const Vector4 &)>(&uimg::ImageBuffer::SetPixelColor));
-	defImageBuffer->def("SetPixelColor", +[](lua::State *l, uimg::ImageBuffer &imgBuffer, uint32_t x, uint32_t y, const Color &color) { imgBuffer.SetPixelColor(x, y, color.ToVector4()); });
-	defImageBuffer->def("SetPixelColor", +[](lua::State *l, uimg::ImageBuffer &imgBuffer, uimg::ImageBuffer::PixelIndex pixelIdx, const Color &color) { imgBuffer.SetPixelColor(pixelIdx, color.ToVector4()); });
-	defImageBuffer->def("CalcLuminance", static_cast<void (*)(lua::State *, uimg::ImageBuffer &)>([](lua::State *l, uimg::ImageBuffer &imgBuffer) {
+	defImageBuffer->def("SetPixelColor", static_cast<void (image::ImageBuffer::*)(uint32_t, uint32_t, const Vector4 &)>(&image::ImageBuffer::SetPixelColor));
+	defImageBuffer->def("SetPixelColor", static_cast<void (image::ImageBuffer::*)(image::ImageBuffer::PixelIndex, const Vector4 &)>(&image::ImageBuffer::SetPixelColor));
+	defImageBuffer->def("SetPixelColor", +[](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t x, uint32_t y, const Color &color) { imgBuffer.SetPixelColor(x, y, color.ToVector4()); });
+	defImageBuffer->def("SetPixelColor", +[](lua::State *l, image::ImageBuffer &imgBuffer, image::ImageBuffer::PixelIndex pixelIdx, const Color &color) { imgBuffer.SetPixelColor(pixelIdx, color.ToVector4()); });
+	defImageBuffer->def("CalcLuminance", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) {
 		float avgLuminance, minLuminance, maxLuminance, logAvgLuminance;
 		Vector3 avgIntensity;
 		imgBuffer.CalcLuminance(avgLuminance, minLuminance, maxLuminance, avgIntensity, &logAvgLuminance);
@@ -611,15 +611,15 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	modUtil[*defImageBuffer];
 
-	auto defImageLayerSet = pragma::LuaCore::register_class<uimg::ImageLayerSet>(lua.GetState(), "ImageLayerSet");
+	auto defImageLayerSet = pragma::LuaCore::register_class<image::ImageLayerSet>(lua.GetState(), "ImageLayerSet");
 	defImageLayerSet->def(
-	  "GetImage", +[](const uimg::ImageLayerSet &layerSet, const std::string &name) -> std::shared_ptr<uimg::ImageBuffer> {
+	  "GetImage", +[](const image::ImageLayerSet &layerSet, const std::string &name) -> std::shared_ptr<image::ImageBuffer> {
 		  auto it = layerSet.images.find(name);
 		  if(it == layerSet.images.end())
 			  return nullptr;
 		  return it->second;
 	  });
-	defImageLayerSet->def("GetImages", +[](const uimg::ImageLayerSet &layerSet) { return layerSet.images; });
+	defImageLayerSet->def("GetImages", +[](const image::ImageLayerSet &layerSet) { return layerSet.images; });
 	modUtil[*defImageLayerSet];
 
 	auto defWorker = luabind::class_<pragma::LuaCore::LuaWorker>("Worker");
@@ -662,14 +662,14 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	auto defGenericParallelJob = luabind::class_<pragma::util::ParallelJob<void>, pragma::util::BaseParallelJob>("ParallelJobGeneric");
 	modUtil[defGenericParallelJob];
 
-	auto defImgParallelJob = luabind::class_<pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>, pragma::util::BaseParallelJob>("ParallelJobImage");
-	defImgParallelJob.def("GetResult", static_cast<void (*)(lua::State *, pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &)>([](lua::State *l, pragma::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &job) { Lua::Push(l, job.GetResult()); }));
+	auto defImgParallelJob = luabind::class_<pragma::util::ParallelJob<std::shared_ptr<image::ImageBuffer>>, pragma::util::BaseParallelJob>("ParallelJobImage");
+	defImgParallelJob.def("GetResult", static_cast<void (*)(lua::State *, pragma::util::ParallelJob<std::shared_ptr<image::ImageBuffer>> &)>([](lua::State *l, pragma::util::ParallelJob<std::shared_ptr<image::ImageBuffer>> &job) { Lua::Push(l, job.GetResult()); }));
 	modUtil[defImgParallelJob];
 
-	auto defImgLayerSetParallelJob = luabind::class_<pragma::util::ParallelJob<uimg::ImageLayerSet>, pragma::util::BaseParallelJob>("ParallelJobImageLayerSet");
-	defImgLayerSetParallelJob.def("GetResult", +[](lua::State *l, pragma::util::ParallelJob<uimg::ImageLayerSet> &job) { Lua::Push(l, job.GetResult()); });
+	auto defImgLayerSetParallelJob = luabind::class_<pragma::util::ParallelJob<image::ImageLayerSet>, pragma::util::BaseParallelJob>("ParallelJobImageLayerSet");
+	defImgLayerSetParallelJob.def("GetResult", +[](lua::State *l, pragma::util::ParallelJob<image::ImageLayerSet> &job) { Lua::Push(l, job.GetResult()); });
 	defImgLayerSetParallelJob.def(
-	  "GetImage", +[](lua::State *l, pragma::util::ParallelJob<uimg::ImageLayerSet> &job) -> std::shared_ptr<uimg::ImageBuffer> {
+	  "GetImage", +[](lua::State *l, pragma::util::ParallelJob<image::ImageLayerSet> &job) -> std::shared_ptr<image::ImageBuffer> {
 		  if(job.GetResult().images.empty())
 			  return nullptr;
 		  return job.GetResult().images.begin()->second;
@@ -684,41 +684,41 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defDataStreamJob.def("GetResult", static_cast<void (*)(lua::State *, pragma::util::ParallelJob<const pragma::util::DataStream &> &)>([](lua::State *l, pragma::util::ParallelJob<const pragma::util::DataStream &> &job) { Lua::Push(l, job.GetResult()); }));
 	modUtil[defDataStreamJob];
 
-	auto defDataBlock = luabind::class_<ds::Block>("DataBlock");
+	auto defDataBlock = luabind::class_<datasystem::Block>("DataBlock");
 	defDataBlock.scope[luabind::def("load", static_cast<void (*)(lua::State *, const std::string &)>(Lua::DataBlock::load))];
 	defDataBlock.scope[luabind::def("load", static_cast<void (*)(lua::State *, LFile &)>(Lua::DataBlock::load))];
 	defDataBlock.scope[luabind::def("create", static_cast<void (*)(lua::State *)>(Lua::DataBlock::create))];
 
-	defDataBlock.def("GetInt", static_cast<void (*)(lua::State *, ds::Block &, const std::string &)>(&Lua::DataBlock::GetInt));
-	defDataBlock.def("GetFloat", static_cast<void (*)(lua::State *, ds::Block &, const std::string &)>(&Lua::DataBlock::GetFloat));
-	defDataBlock.def("GetBool", static_cast<void (*)(lua::State *, ds::Block &, const std::string &)>(&Lua::DataBlock::GetBool));
-	defDataBlock.def("GetString", static_cast<void (*)(lua::State *, ds::Block &, const std::string &)>(&Lua::DataBlock::GetString));
-	defDataBlock.def("GetColor", static_cast<void (*)(lua::State *, ds::Block &, const std::string &)>(&Lua::DataBlock::GetColor));
-	defDataBlock.def("GetVector", static_cast<void (*)(lua::State *, ds::Block &, const std::string &)>(&Lua::DataBlock::GetVector));
-	defDataBlock.def("GetVector2", static_cast<void (*)(lua::State *, ds::Block &, const std::string &)>(&Lua::DataBlock::GetVector2));
-	defDataBlock.def("GetVector4", static_cast<void (*)(lua::State *, ds::Block &, const std::string &)>(&Lua::DataBlock::GetVector4));
+	defDataBlock.def("GetInt", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &)>(&Lua::DataBlock::GetInt));
+	defDataBlock.def("GetFloat", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &)>(&Lua::DataBlock::GetFloat));
+	defDataBlock.def("GetBool", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &)>(&Lua::DataBlock::GetBool));
+	defDataBlock.def("GetString", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &)>(&Lua::DataBlock::GetString));
+	defDataBlock.def("GetColor", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &)>(&Lua::DataBlock::GetColor));
+	defDataBlock.def("GetVector", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &)>(&Lua::DataBlock::GetVector));
+	defDataBlock.def("GetVector2", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &)>(&Lua::DataBlock::GetVector2));
+	defDataBlock.def("GetVector4", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &)>(&Lua::DataBlock::GetVector4));
 	defDataBlock.def("GetValue", &Lua::DataBlock::GetValue);
 
-	defDataBlock.def("GetInt", static_cast<void (*)(lua::State *, ds::Block &, const std::string &, int32_t)>(&Lua::DataBlock::GetInt));
-	defDataBlock.def("GetFloat", static_cast<void (*)(lua::State *, ds::Block &, const std::string &, float)>(&Lua::DataBlock::GetFloat));
-	defDataBlock.def("GetBool", static_cast<void (*)(lua::State *, ds::Block &, const std::string &, bool)>(&Lua::DataBlock::GetBool));
-	defDataBlock.def("GetString", static_cast<void (*)(lua::State *, ds::Block &, const std::string &, const std::string &)>(&Lua::DataBlock::GetString));
-	defDataBlock.def("GetColor", static_cast<void (*)(lua::State *, ds::Block &, const std::string &, const Color &)>(&Lua::DataBlock::GetColor));
-	defDataBlock.def("GetVector", static_cast<void (*)(lua::State *, ds::Block &, const std::string &, const Vector3 &)>(&Lua::DataBlock::GetVector));
-	defDataBlock.def("GetVector2", static_cast<void (*)(lua::State *, ds::Block &, const std::string &, const ::Vector2 &)>(&Lua::DataBlock::GetVector2));
-	defDataBlock.def("GetVector4", static_cast<void (*)(lua::State *, ds::Block &, const std::string &, const Vector4 &)>(&Lua::DataBlock::GetVector4));
+	defDataBlock.def("GetInt", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, int32_t)>(&Lua::DataBlock::GetInt));
+	defDataBlock.def("GetFloat", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, float)>(&Lua::DataBlock::GetFloat));
+	defDataBlock.def("GetBool", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, bool)>(&Lua::DataBlock::GetBool));
+	defDataBlock.def("GetString", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, const std::string &)>(&Lua::DataBlock::GetString));
+	defDataBlock.def("GetColor", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, const Color &)>(&Lua::DataBlock::GetColor));
+	defDataBlock.def("GetVector", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, const Vector3 &)>(&Lua::DataBlock::GetVector));
+	defDataBlock.def("GetVector2", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, const ::Vector2 &)>(&Lua::DataBlock::GetVector2));
+	defDataBlock.def("GetVector4", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, const Vector4 &)>(&Lua::DataBlock::GetVector4));
 
 	defDataBlock.def("GetData", &Lua::DataBlock::GetData);
 	defDataBlock.def("GetChildBlocks", &Lua::DataBlock::GetChildBlocks);
 	defDataBlock.def("SetValue", &Lua::DataBlock::SetValue);
 	defDataBlock.def("Merge", &Lua::DataBlock::Merge);
-	defDataBlock.def("GetValueType", static_cast<void (*)(lua::State *, ds::Block &, const std::string &)>([](lua::State *l, ds::Block &dataBlock, const std::string &key) {
+	defDataBlock.def("GetValueType", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &)>([](lua::State *l, datasystem::Block &dataBlock, const std::string &key) {
 		auto val = dataBlock.GetDataValue(key);
 		if(val == nullptr)
 			return;
 		Lua::PushString(l, val->GetTypeString());
 	}));
-	defDataBlock.def("GetKeys", static_cast<void (*)(lua::State *, ds::Block &)>([](lua::State *l, ds::Block &dataBlock) {
+	defDataBlock.def("GetKeys", static_cast<void (*)(lua::State *, datasystem::Block &)>([](lua::State *l, datasystem::Block &dataBlock) {
 		auto t = Lua::CreateTable(l);
 		int32_t idx = 1;
 		for(auto &pair : *dataBlock.GetData()) {
@@ -739,12 +739,12 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defDataBlock.def("IsColor", &Lua::DataBlock::IsColor);
 	defDataBlock.def("IsVector", &Lua::DataBlock::IsVector);
 	defDataBlock.def("IsVector4", &Lua::DataBlock::IsVector4);
-	defDataBlock.def("ToString", static_cast<void (*)(lua::State *, ds::Block &, const std::string &, uint8_t)>(&Lua::DataBlock::ToString));
-	defDataBlock.def("ToString", static_cast<void (*)(lua::State *, ds::Block &, const std::string &)>(&Lua::DataBlock::ToString));
-	defDataBlock.def("ToString", static_cast<void (*)(lua::State *, ds::Block &, uint8_t)>(&Lua::DataBlock::ToString));
-	defDataBlock.def("ToString", static_cast<void (*)(lua::State *, ds::Block &)>(&Lua::DataBlock::ToString));
-	defDataBlock.def("FindBlock", static_cast<void (*)(lua::State *, ds::Block &, const std::string &)>(&Lua::DataBlock::FindBlock));
-	defDataBlock.def("FindBlock", static_cast<void (*)(lua::State *, ds::Block &, const std::string &, uint32_t)>(&Lua::DataBlock::FindBlock));
+	defDataBlock.def("ToString", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, uint8_t)>(&Lua::DataBlock::ToString));
+	defDataBlock.def("ToString", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &)>(&Lua::DataBlock::ToString));
+	defDataBlock.def("ToString", static_cast<void (*)(lua::State *, datasystem::Block &, uint8_t)>(&Lua::DataBlock::ToString));
+	defDataBlock.def("ToString", static_cast<void (*)(lua::State *, datasystem::Block &)>(&Lua::DataBlock::ToString));
+	defDataBlock.def("FindBlock", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &)>(&Lua::DataBlock::FindBlock));
+	defDataBlock.def("FindBlock", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, uint32_t)>(&Lua::DataBlock::FindBlock));
 	modUtil[defDataBlock];
 
 	// Version

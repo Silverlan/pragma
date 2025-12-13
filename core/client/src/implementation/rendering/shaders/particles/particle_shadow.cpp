@@ -22,7 +22,7 @@ ParticleShadow::ParticleShadow()
 void ParticleShadow::Draw(pragma::pts::CParticleSystem *particle,CLightBase *light,uint32_t layerId)
 {
 	auto *mat = particle->GetMaterial();
-	auto &descTexture = static_cast<msys::CMaterial*>(mat)->GetDescriptorSet();
+	auto &descTexture = static_cast<material::CMaterial*>(mat)->GetDescriptorSet();
 	if(!descTexture.IsValid())
 		return;
 	auto *shadow = light->GetShadowMap();

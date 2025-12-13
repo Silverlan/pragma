@@ -56,13 +56,13 @@ namespace Lua {
 		static std::shared_ptr<prosper::IDescriptorSetGroup> create_descriptor_set(const pragma::LuaDescriptorSetInfo &ldescSetInfo);
 		static std::shared_ptr<prosper::IImage> create_image(const prosper::util::ImageCreateInfo &imgCreateInfo, pragma::util::DataStream &ds);
 		static std::shared_ptr<prosper::IImage> create_image(const prosper::util::ImageCreateInfo &imgCreateInfo);
-		static std::shared_ptr<prosper::IImage> create_image(const std::array<std::shared_ptr<uimg::ImageBuffer>, 6> &imgBuffers);
-		static std::shared_ptr<prosper::IImage> create_image(const std::array<std::shared_ptr<uimg::ImageBuffer>, 6> &imgBuffers, const prosper::util::ImageCreateInfo &imgCreateInfo);
-		static std::shared_ptr<prosper::IImage> create_image(uimg::ImageBuffer &imgBuffer);
-		static std::shared_ptr<prosper::IImage> create_image(uimg::ImageBuffer &imgBuffer, const prosper::util::ImageCreateInfo &imgCreateInfo);
+		static std::shared_ptr<prosper::IImage> create_image(const std::array<std::shared_ptr<pragma::image::ImageBuffer>, 6> &imgBuffers);
+		static std::shared_ptr<prosper::IImage> create_image(const std::array<std::shared_ptr<pragma::image::ImageBuffer>, 6> &imgBuffers, const prosper::util::ImageCreateInfo &imgCreateInfo);
+		static std::shared_ptr<prosper::IImage> create_image(pragma::image::ImageBuffer &imgBuffer);
+		static std::shared_ptr<prosper::IImage> create_image(pragma::image::ImageBuffer &imgBuffer, const prosper::util::ImageCreateInfo &imgCreateInfo);
 		static std::shared_ptr<prosper::IImageView> create_image_view(prosper::IPrContext &context, const prosper::util::ImageViewCreateInfo &imgViewCreateInfo, prosper::IImage &img);
-		static prosper::util::ImageCreateInfo create_image_create_info(const uimg::ImageBuffer &imgBuf, bool cubemap);
-		static prosper::util::ImageCreateInfo create_image_create_info(const uimg::ImageBuffer &imgBuf);
+		static prosper::util::ImageCreateInfo create_image_create_info(const pragma::image::ImageBuffer &imgBuf, bool cubemap);
+		static prosper::util::ImageCreateInfo create_image_create_info(const pragma::image::ImageBuffer &imgBuf);
 		static std::shared_ptr<prosper::Texture> create_gradient_texture(lua::State *l, uint32_t width, uint32_t height, prosper::Format format, const ::Vector2 &dir, const luabind::tableT<void> &tNodes);
 		static Lua::var<prosper::Texture, Lua::mult<bool, std::string>> blur_texture(lua::State *l, prosper::Texture &srcTex, uint32_t blurStrength);
 		static std::shared_ptr<prosper::IFence> create_fence(bool createSignalled);
@@ -101,9 +101,9 @@ namespace Lua {
 			static void GetSubresourceRange(lua::State *l,Image &hImg);
 #endif
 			static std::pair<uint32_t, uint32_t> GetMipmapSize(lua::State *l, Image &hImg, uint32_t mipmap = 0u);
-			static void WriteMemory(lua::State *l, Image &hImg, uint32_t x, uint32_t y, uimg::ImageBuffer &imgBuf, uint32_t layerIndex, uint32_t mipLevel);
-			static void WriteMemory(lua::State *l, Image &hImg, uint32_t x, uint32_t y, uimg::ImageBuffer &imgBuf, uint32_t layerIndex);
-			static void WriteMemory(lua::State *l, Image &hImg, uint32_t x, uint32_t y, uimg::ImageBuffer &imgBuf);
+			static void WriteMemory(lua::State *l, Image &hImg, uint32_t x, uint32_t y, pragma::image::ImageBuffer &imgBuf, uint32_t layerIndex, uint32_t mipLevel);
+			static void WriteMemory(lua::State *l, Image &hImg, uint32_t x, uint32_t y, pragma::image::ImageBuffer &imgBuf, uint32_t layerIndex);
+			static void WriteMemory(lua::State *l, Image &hImg, uint32_t x, uint32_t y, pragma::image::ImageBuffer &imgBuf);
 		};
 		namespace VKImageView {
 			static bool IsValid(lua::State *l, ImageView &hImgView);
@@ -347,11 +347,11 @@ std::shared_ptr<prosper::IDescriptorSetGroup> Lua::Vulkan::create_descriptor_set
 
 std::shared_ptr<prosper::IImageView> Lua::Vulkan::create_image_view(prosper::IPrContext &context, const prosper::util::ImageViewCreateInfo &imgViewCreateInfo, prosper::IImage &img) { return context.CreateImageView(imgViewCreateInfo, img); }
 
-prosper::util::ImageCreateInfo Lua::Vulkan::create_image_create_info(const uimg::ImageBuffer &imgBuf, bool cubemap) { return prosper::util::get_image_create_info(imgBuf, cubemap); }
+prosper::util::ImageCreateInfo Lua::Vulkan::create_image_create_info(const pragma::image::ImageBuffer &imgBuf, bool cubemap) { return prosper::util::get_image_create_info(imgBuf, cubemap); }
 
-prosper::util::ImageCreateInfo Lua::Vulkan::create_image_create_info(const uimg::ImageBuffer &imgBuf) { return prosper::util::get_image_create_info(imgBuf, false); }
+prosper::util::ImageCreateInfo Lua::Vulkan::create_image_create_info(const pragma::image::ImageBuffer &imgBuf) { return prosper::util::get_image_create_info(imgBuf, false); }
 
-std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(uimg::ImageBuffer &imgBuffer, const prosper::util::ImageCreateInfo &imgCreateInfo)
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(pragma::image::ImageBuffer &imgBuffer, const prosper::util::ImageCreateInfo &imgCreateInfo)
 {
 	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(imgBuffer, imgCreateInfo);
 	if(img)
@@ -359,7 +359,7 @@ std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(uimg::ImageBuffer &im
 	return img;
 }
 
-std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(uimg::ImageBuffer &imgBuffer)
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(pragma::image::ImageBuffer &imgBuffer)
 {
 	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(imgBuffer);
 	if(img)
@@ -367,19 +367,19 @@ std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(uimg::ImageBuffer &im
 	return img;
 }
 
-std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const std::array<std::shared_ptr<uimg::ImageBuffer>, 6> &imgBuffers, const prosper::util::ImageCreateInfo &imgCreateInfo)
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const std::array<std::shared_ptr<pragma::image::ImageBuffer>, 6> &imgBuffers, const prosper::util::ImageCreateInfo &imgCreateInfo)
 {
 	// TODO: Parameter for CreateCubemap should be const
-	auto img = pragma::get_cengine()->GetRenderContext().CreateCubemap(const_cast<std::array<std::shared_ptr<uimg::ImageBuffer>, 6> &>(imgBuffers), imgCreateInfo);
+	auto img = pragma::get_cengine()->GetRenderContext().CreateCubemap(const_cast<std::array<std::shared_ptr<pragma::image::ImageBuffer>, 6> &>(imgBuffers), imgCreateInfo);
 	if(img)
 		img->SetDebugName("lua_img");
 	return img;
 }
 
-std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const std::array<std::shared_ptr<uimg::ImageBuffer>, 6> &imgBuffers)
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const std::array<std::shared_ptr<pragma::image::ImageBuffer>, 6> &imgBuffers)
 {
 	// TODO: Parameter for CreateCubemap should be const
-	auto img = pragma::get_cengine()->GetRenderContext().CreateCubemap(const_cast<std::array<std::shared_ptr<uimg::ImageBuffer>, 6> &>(imgBuffers));
+	auto img = pragma::get_cengine()->GetRenderContext().CreateCubemap(const_cast<std::array<std::shared_ptr<pragma::image::ImageBuffer>, 6> &>(imgBuffers));
 	if(img)
 		img->SetDebugName("lua_img");
 	return img;
@@ -582,7 +582,7 @@ std::shared_ptr<prosper::Texture> Lua::Vulkan::create_gradient_texture(lua::Stat
 	return texture;
 }
 
-static void push_image_buffers(lua::State *l, bool includeLayers, bool includeMipmaps, const std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &imgBuffers)
+static void push_image_buffers(lua::State *l, bool includeLayers, bool includeMipmaps, const std::vector<std::vector<std::shared_ptr<pragma::image::ImageBuffer>>> &imgBuffers)
 {
 	if(imgBuffers.empty())
 		return;
@@ -632,7 +632,7 @@ static void push_image_buffers(lua::State *l, bool includeLayers, bool includeMi
 
 static void to_image_buffer(lua::State *l, Lua::Vulkan::Image &img, bool includeLayers, bool includeMipmaps, const pragma::util::ToImageBufferInfo &info)
 {
-	std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
+	std::vector<std::vector<std::shared_ptr<pragma::image::ImageBuffer>>> imgBuffers;
 	auto result = pragma::util::to_image_buffer(img, info, imgBuffers);
 	if(result == false || imgBuffers.empty())
 		return;
@@ -694,12 +694,12 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	  luabind::def("create_buffer", static_cast<std::shared_ptr<prosper::IBuffer> (*)(prosper::IPrContext &, prosper::util::BufferCreateInfo &)>(&Lua::Vulkan::create_buffer), luabind::render_context_policy<1> {}), luabind::def("create_descriptor_set", Lua::Vulkan::create_descriptor_set),
 	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(const prosper::util::ImageCreateInfo &, pragma::util::DataStream &)>(&Lua::Vulkan::create_image)),
 	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(const prosper::util::ImageCreateInfo &)>(&Lua::Vulkan::create_image)),
-	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(const std::array<std::shared_ptr<uimg::ImageBuffer>, 6> &)>(&Lua::Vulkan::create_image)),
-	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(const std::array<std::shared_ptr<uimg::ImageBuffer>, 6> &, const prosper::util::ImageCreateInfo &)>(&Lua::Vulkan::create_image)),
-	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(uimg::ImageBuffer &)>(&Lua::Vulkan::create_image)),
-	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(uimg::ImageBuffer &, const prosper::util::ImageCreateInfo &)>(&Lua::Vulkan::create_image)), luabind::def("create_image_view", Lua::Vulkan::create_image_view),
-	  luabind::def("create_image_create_info", static_cast<prosper::util::ImageCreateInfo (*)(const uimg::ImageBuffer &, bool)>(&Lua::Vulkan::create_image_create_info)),
-	  luabind::def("create_image_create_info", static_cast<prosper::util::ImageCreateInfo (*)(const uimg::ImageBuffer &)>(&Lua::Vulkan::create_image_create_info)),
+	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(const std::array<std::shared_ptr<image::ImageBuffer>, 6> &)>(&Lua::Vulkan::create_image)),
+	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(const std::array<std::shared_ptr<image::ImageBuffer>, 6> &, const prosper::util::ImageCreateInfo &)>(&Lua::Vulkan::create_image)),
+	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(image::ImageBuffer &)>(&Lua::Vulkan::create_image)),
+	  luabind::def("create_image", static_cast<std::shared_ptr<prosper::IImage> (*)(image::ImageBuffer &, const prosper::util::ImageCreateInfo &)>(&Lua::Vulkan::create_image)), luabind::def("create_image_view", Lua::Vulkan::create_image_view),
+	  luabind::def("create_image_create_info", static_cast<prosper::util::ImageCreateInfo (*)(const image::ImageBuffer &, bool)>(&Lua::Vulkan::create_image_create_info)),
+	  luabind::def("create_image_create_info", static_cast<prosper::util::ImageCreateInfo (*)(const image::ImageBuffer &)>(&Lua::Vulkan::create_image_create_info)),
 	  luabind::def("create_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(prosper::IImage &, const prosper::util::TextureCreateInfo &, const prosper::util::ImageViewCreateInfo &, const prosper::util::SamplerCreateInfo &)>(&Lua::Vulkan::create_texture)),
 	  luabind::def("create_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(prosper::IImage &, const prosper::util::TextureCreateInfo &, const prosper::util::ImageViewCreateInfo &)>(&Lua::Vulkan::create_texture)),
 	  luabind::def("create_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(prosper::IImage &, const prosper::util::TextureCreateInfo &)>(&Lua::Vulkan::create_texture)),
@@ -1524,9 +1524,9 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def("GetWidth", &Lua::Vulkan::Image::GetWidth, luabind::default_parameter_policy<2, uint32_t {0}> {});
 	defVkImage.def("GetHeight", &Lua::Vulkan::Image::GetHeight);
 	defVkImage.def("GetHeight", &Lua::Vulkan::Image::GetHeight, luabind::default_parameter_policy<2, uint32_t {0}> {});
-	defVkImage.def("WriteMemory", static_cast<void (*)(lua::State *, Lua::Vulkan::Image &, uint32_t, uint32_t, uimg::ImageBuffer &, uint32_t, uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
-	defVkImage.def("WriteMemory", static_cast<void (*)(lua::State *, Lua::Vulkan::Image &, uint32_t, uint32_t, uimg::ImageBuffer &, uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
-	defVkImage.def("WriteMemory", static_cast<void (*)(lua::State *, Lua::Vulkan::Image &, uint32_t, uint32_t, uimg::ImageBuffer &)>(Lua::Vulkan::VKImage::WriteMemory));
+	defVkImage.def("WriteMemory", static_cast<void (*)(lua::State *, Lua::Vulkan::Image &, uint32_t, uint32_t, image::ImageBuffer &, uint32_t, uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
+	defVkImage.def("WriteMemory", static_cast<void (*)(lua::State *, Lua::Vulkan::Image &, uint32_t, uint32_t, image::ImageBuffer &, uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
+	defVkImage.def("WriteMemory", static_cast<void (*)(lua::State *, Lua::Vulkan::Image &, uint32_t, uint32_t, image::ImageBuffer &)>(Lua::Vulkan::VKImage::WriteMemory));
 	defVkImage.def("SetDebugName", +[](lua::State *l, Lua::Vulkan::Image &img, const std::string &name) { Lua::Vulkan::VKContextObject::SetDebugName(l, img, name); });
 	defVkImage.def("GetDebugName", +[](lua::State *l, Lua::Vulkan::Image &img) { return Lua::Vulkan::VKContextObject::GetDebugName(l, img); });
 	defVkImage.def("Convert",
@@ -1541,7 +1541,7 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def(
 	  "ToImageBuffer", +[](lua::State *l, Lua::Vulkan::Image &img, bool includeLayers, bool includeMipmaps, uint32_t targetFormat, prosper::ImageLayout inputImageLayout) {
 		  pragma::util::ToImageBufferInfo info {};
-		  info.targetFormat = static_cast<uimg::Format>(targetFormat);
+		  info.targetFormat = static_cast<image::Format>(targetFormat);
 		  info.includeLayers = includeLayers;
 		  info.includeMipmaps = includeMipmaps;
 		  info.inputImageLayout = inputImageLayout;
@@ -1550,7 +1550,7 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def(
 	  "ToImageBuffer", +[](lua::State *l, Lua::Vulkan::Image &img, bool includeLayers, bool includeMipmaps, uint32_t targetFormat) {
 		  pragma::util::ToImageBufferInfo info {};
-		  info.targetFormat = static_cast<uimg::Format>(targetFormat);
+		  info.targetFormat = static_cast<image::Format>(targetFormat);
 		  info.includeLayers = includeLayers;
 		  info.includeMipmaps = includeMipmaps;
 		  to_image_buffer(l, img, includeLayers, includeMipmaps, info);
@@ -1564,7 +1564,7 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	  });
 	defVkImage.def(
 	  "ToImageBuffer", +[](lua::State *l, Lua::Vulkan::Image &img, const pragma::util::ToImageBufferInfo &info) {
-		  std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
+		  std::vector<std::vector<std::shared_ptr<image::ImageBuffer>>> imgBuffers;
 		  auto result = pragma::util::to_image_buffer(img, info, imgBuffers);
 		  if(result == false || imgBuffers.empty())
 			  return;
@@ -1919,12 +1919,12 @@ std::pair<uint32_t, uint32_t> Lua::Vulkan::VKImage::GetMipmapSize(lua::State *l,
 	auto extents = hImg.GetExtents(mipmap);
 	return {extents.width, extents.height};
 }
-void Lua::Vulkan::VKImage::WriteMemory(lua::State *l, Image &hImg, uint32_t x, uint32_t y, uimg::ImageBuffer &imgBuf, uint32_t layerIndex, uint32_t mipLevel)
+void Lua::Vulkan::VKImage::WriteMemory(lua::State *l, Image &hImg, uint32_t x, uint32_t y, pragma::image::ImageBuffer &imgBuf, uint32_t layerIndex, uint32_t mipLevel)
 {
 	hImg.WriteImageData(x, y, imgBuf.GetWidth(), imgBuf.GetHeight(), layerIndex, mipLevel, imgBuf.GetSize(), static_cast<uint8_t *>(imgBuf.GetData()));
 }
-void Lua::Vulkan::VKImage::WriteMemory(lua::State *l, Image &hImg, uint32_t x, uint32_t y, uimg::ImageBuffer &imgBuf, uint32_t layerIndex) { WriteMemory(l, hImg, x, y, imgBuf, layerIndex, 0); }
-void Lua::Vulkan::VKImage::WriteMemory(lua::State *l, Image &hImg, uint32_t x, uint32_t y, uimg::ImageBuffer &imgBuf) { WriteMemory(l, hImg, x, y, imgBuf, 0u, 0); }
+void Lua::Vulkan::VKImage::WriteMemory(lua::State *l, Image &hImg, uint32_t x, uint32_t y, pragma::image::ImageBuffer &imgBuf, uint32_t layerIndex) { WriteMemory(l, hImg, x, y, imgBuf, layerIndex, 0); }
+void Lua::Vulkan::VKImage::WriteMemory(lua::State *l, Image &hImg, uint32_t x, uint32_t y, pragma::image::ImageBuffer &imgBuf) { WriteMemory(l, hImg, x, y, imgBuf, 0u, 0); }
 
 /////////////////////////////////
 

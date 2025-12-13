@@ -9,8 +9,8 @@ import :physics.environment;
 std::vector<std::string> pragma::physics::IEnvironment::GetAvailablePhysicsEngines()
 {
 	std::vector<std::string> dirs {};
-	FileManager::FindFiles("modules/physics_engines/*", nullptr, &dirs,
-	  fsys::SearchFlags::Local // Binary modules can only be loaded from actual files
+	fs::find_files("modules/physics_engines/*", nullptr, &dirs,
+	  fs::SearchFlags::Local // Binary modules can only be loaded from actual files
 	);
 	return dirs;
 }

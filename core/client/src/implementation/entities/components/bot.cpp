@@ -16,34 +16,34 @@ void CBotComponent::Initialize()
 {
 	BaseBotComponent::Initialize();
 
-	BindEvent(cAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(cAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		switch(static_cast<CEHandleAnimationEvent &>(evData.get()).animationEvent.eventID) {
 		case AnimationEvent::Type::FootstepLeft:
 			OnFootStep(BaseCharacterComponent::FootType::Left);
-			return pragma::util::EventReply::Handled;
+			return util::EventReply::Handled;
 		case AnimationEvent::Type::FootstepRight:
 			OnFootStep(BaseCharacterComponent::FootType::Right);
-			return pragma::util::EventReply::Handled;
+			return util::EventReply::Handled;
 		}
-		return pragma::util::EventReply::Unhandled;
+		return util::EventReply::Unhandled;
 	});
 }
-pragma::util::EventReply CBotComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply CBotComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseBotComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseBotComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == baseCharacterComponent::EVENT_ON_FOOT_STEP)
 		OnFootStep(static_cast<CEOnFootStep &>(evData).footType);
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 void CBotComponent::OnFootStep(BaseCharacterComponent::FootType footType)
 {
 	auto &ent = GetEntity();
-	auto pSoundEmitterComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();
+	auto pSoundEmitterComponent = ent.GetComponent<CSoundEmitterComponent>();
 	if(pSoundEmitterComponent.expired())
 		return;
 	auto aiComponent = ent.GetAIComponent();
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+	auto pVelComponent = ent.GetComponent<VelocityComponent>();
 	auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 	float speed = uvec::length(vel);
 	float scale = 0.f;
@@ -55,7 +55,7 @@ void CBotComponent::OnFootStep(BaseCharacterComponent::FootType footType)
 	}
 	if(scale == 0.f)
 		return;
-	pSoundEmitterComponent->EmitSound("fx.fst_concrete", pragma::audio::ALSoundType::Effect, scale);
+	pSoundEmitterComponent->EmitSound("fx.fst_concrete", audio::ALSoundType::Effect, scale);
 }
 void CBotComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 

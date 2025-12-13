@@ -27,7 +27,7 @@ export namespace Lua {
 
 		DLLNETWORK void GetFrame(lua::State *l, pragma::animation::Animation &anim, unsigned int ID);
 		DLLNETWORK luabind::tableT<uint16_t> GetBoneList(lua::State *l, pragma::animation::Animation &anim);
-		DLLNETWORK void AddFrame(lua::State *l, pragma::animation::Animation &anim, ::Frame &frame);
+		DLLNETWORK void AddFrame(lua::State *l, pragma::animation::Animation &anim, Frame &frame);
 		DLLNETWORK void GetFrames(lua::State *l, pragma::animation::Animation &anim);
 		DLLNETWORK void AddEvent(lua::State *l, pragma::animation::Animation &anim, uint32_t frameId, uint32_t eventId, luabind::object tArgs);
 		DLLNETWORK void GetEvents(lua::State *l, pragma::animation::Animation &anim, uint32_t frameId);

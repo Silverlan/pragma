@@ -22,9 +22,9 @@ export namespace pragma::asset {
 	CONSTEXPR_DLL_COMPAT auto FORMAT_PARTICLE_SYSTEM_ASCII = "pptsys";
 	CONSTEXPR_DLL_COMPAT auto FORMAT_PARTICLE_SYSTEM_LEGACY = "wpt";
 
-	CONSTEXPR_DLL_COMPAT auto FORMAT_MATERIAL_BINARY = msys::material::FORMAT_MATERIAL_BINARY;
-	CONSTEXPR_DLL_COMPAT auto FORMAT_MATERIAL_ASCII = msys::material::FORMAT_MATERIAL_ASCII;
-	CONSTEXPR_DLL_COMPAT auto FORMAT_MATERIAL_LEGACY = msys::material::FORMAT_MATERIAL_LEGACY;
+	CONSTEXPR_DLL_COMPAT auto FORMAT_MATERIAL_BINARY = material::ematerial::FORMAT_MATERIAL_BINARY;
+	CONSTEXPR_DLL_COMPAT auto FORMAT_MATERIAL_ASCII = material::ematerial::FORMAT_MATERIAL_ASCII;
+	CONSTEXPR_DLL_COMPAT auto FORMAT_MATERIAL_LEGACY = material::ematerial::FORMAT_MATERIAL_LEGACY;
 
 	CONSTEXPR_DLL_COMPAT auto FORMAT_SHADER_GRAPH_BINARY = "psg_b";
 	CONSTEXPR_DLL_COMPAT auto FORMAT_SHADER_GRAPH_ASCII = "psg";
@@ -47,7 +47,7 @@ export namespace pragma::asset {
 	DLLNETWORK std::string get_normalized_path(const std::string &name, Type type);
 	DLLNETWORK std::optional<std::string> find_file(const std::string &name, Type type, std::string *optOutFormat = nullptr);
 	DLLNETWORK bool remove_asset(const std::string &name, Type type);
-	DLLNETWORK bool is_loaded(pragma::NetworkState &nw, const std::string &name, Type type);
+	DLLNETWORK bool is_loaded(NetworkState &nw, const std::string &name, Type type);
 	DLLNETWORK const std::vector<std::string> &get_supported_extensions(Type type, FormatType formatType = FormatType::Native);
 	DLLNETWORK void update_extension_cache(Type type);
 	DLLNETWORK void update_extension_cache();
@@ -58,8 +58,8 @@ export namespace pragma::asset {
 	DLLNETWORK std::optional<std::string> determine_format_from_filename(const std::string_view &fileName, Type type);
 	DLLNETWORK std::optional<Type> determine_type_from_extension(const std::string_view &ext);
 	DLLNETWORK bool matches_format(const std::string_view &format0, const std::string_view &format1);
-	DLLNETWORK pragma::util::Path relative_path_to_absolute_path(const pragma::util::Path &relPath, Type type, const std::optional<std::string> &rootPath = {});
-	DLLNETWORK pragma::util::Path absolute_path_to_relative_path(const pragma::util::Path &absPath, Type type);
+	DLLNETWORK util::Path relative_path_to_absolute_path(const util::Path &relPath, Type type, const std::optional<std::string> &rootPath = {});
+	DLLNETWORK util::Path absolute_path_to_relative_path(const util::Path &absPath, Type type);
 	DLLNETWORK std::optional<std::string> get_udm_format_extension(Type type, bool binary);
 	constexpr const char *get_asset_root_directory(Type type)
 	{
@@ -78,7 +78,7 @@ export namespace pragma::asset {
 		case Type::ShaderGraph:
 			return "scripts/shader_data/graphs/object";
 		}
-		static_assert(pragma::math::to_integral(Type::Count) == 7, "New asset type added, please update get_asset_root_directory");
+		static_assert(math::to_integral(Type::Count) == 7, "New asset type added, please update get_asset_root_directory");
 		return "";
 	}
 
@@ -89,17 +89,17 @@ export namespace pragma::asset {
 
 	struct DLLNETWORK ModelAssetWrapper : public IAssetWrapper {
 		virtual Type GetType() const override { return Type::Model; }
-		void SetModel(pragma::asset::Model &model);
-		pragma::asset::Model *GetModel() const;
+		void SetModel(Model &model);
+		Model *GetModel() const;
 	  private:
-		std::shared_ptr<pragma::asset::Model> m_model = nullptr;
+		std::shared_ptr<Model> m_model = nullptr;
 	};
 
 	struct DLLNETWORK MaterialAssetWrapper : public IAssetWrapper {
 		virtual Type GetType() const override { return Type::Material; }
-		void SetMaterial(msys::Material &mat);
-		msys::Material *GetMaterial() const;
+		void SetMaterial(material::Material &mat);
+		material::Material *GetMaterial() const;
 	  private:
-		msys::MaterialHandle m_material = nullptr;
+		material::MaterialHandle m_material = nullptr;
 	};
 };

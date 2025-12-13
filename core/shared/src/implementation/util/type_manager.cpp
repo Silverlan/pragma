@@ -6,6 +6,6 @@ module pragma.shared;
 
 import :util.type_manager;
 
-pragma::BaseNamedType::BaseNamedType(TypeId id, const std::string &name) : m_id {id}, m_name {name} {}
-pragma::TypeId pragma::BaseNamedType::GetId() const { return m_id; }
-const std::string &pragma::BaseNamedType::GetName() const { return m_name; }
+pragma::util::BaseNamedType::BaseNamedType(TypeId id, const std::string &name) : m_id {id}, m_name {name} {}
+pragma::util::TypeId pragma::util::BaseNamedType::GetId() const { return m_id; }
+const std::string &pragma::util::BaseNamedType::GetName() const { return m_name; }

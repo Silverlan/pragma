@@ -147,7 +147,7 @@ void CMD_list_maps(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	std::vector<std::string> files;
 	auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map);
 	for(auto &ext : exts)
-		filemanager::find_files("maps/*." + ext, &files, nullptr);
+		pragma::fs::find_files("maps/*." + ext, &files, nullptr);
 	for(auto &f : files)
 		ufile::remove_extension_from_filename(f, exts);
 	std::sort(files.begin(), files.end());

@@ -18,13 +18,13 @@ ai::navigation::PathInfo::PathInfo(const std::shared_ptr<RcPathResult> &path) : 
 
 //////////////////
 
-BaseAIComponent::MoveInfo::MoveInfo(pragma::Activity act) : MoveInfo() { activity = act; }
-BaseAIComponent::MoveInfo::MoveInfo(pragma::Activity act, bool bMoveOnPath) : MoveInfo()
+BaseAIComponent::MoveInfo::MoveInfo(Activity act) : MoveInfo() { activity = act; }
+BaseAIComponent::MoveInfo::MoveInfo(Activity act, bool bMoveOnPath) : MoveInfo()
 {
 	activity = act;
 	moveOnPath = bMoveOnPath;
 }
-BaseAIComponent::MoveInfo::MoveInfo(pragma::Activity act, bool bMoveOnPath, const Vector3 &faceTarget, float moveSpeed, float turnSpeed) : MoveInfo()
+BaseAIComponent::MoveInfo::MoveInfo(Activity act, bool bMoveOnPath, const Vector3 &faceTarget, float moveSpeed, float turnSpeed) : MoveInfo()
 {
 	activity = act;
 	moveOnPath = bMoveOnPath;
@@ -90,7 +90,7 @@ void BaseAIComponent::ResetPath()
 	m_navInfo.bTargetReached = false;
 	m_navInfo.pathState = PathResult::Updating;
 	if(s_navThread != nullptr) {
-		m_navInfo.queuedPath = pragma::util::make_shared<ai::navigation::PathQuery>(pTrComponent->GetPosition(), GetMoveTarget());
+		m_navInfo.queuedPath = util::make_shared<ai::navigation::PathQuery>(pTrComponent->GetPosition(), GetMoveTarget());
 		s_navThread->pendingQueueMutex.lock();
 		s_navThread->pendingQueue.push(m_navInfo.queuedPath);
 		s_navThread->pendingQueueMutex.unlock();
@@ -108,18 +108,18 @@ bool BaseAIComponent::IsMoving() const
 BaseAIComponent::MoveResult BaseAIComponent::MoveTo(const Vector3 &pos, const MoveInfo &info)
 {
 	if(CanMove() == false)
-		return BaseAIComponent::MoveResult::TargetReached;
-	auto moveActivity = pragma::Activity::Invalid;
+		return MoveResult::TargetReached;
+	auto moveActivity = Activity::Invalid;
 	auto &ent = GetEntity();
 	auto animComponent = ent.GetAnimatedComponent();
 	if(animComponent.valid()) {
 		moveActivity = animComponent->TranslateActivity(info.activity);
 		if(moveActivity != m_moveInfo.moveActivity && animComponent->SelectWeightedAnimation(moveActivity) == -1) // Activity doesn't exist
 		{
-			if(moveActivity == pragma::Activity::Walk) // Attempt to select an alternative activity
-				moveActivity = pragma::Activity::Run;
+			if(moveActivity == Activity::Walk) // Attempt to select an alternative activity
+				moveActivity = Activity::Run;
 			else
-				moveActivity = pragma::Activity::Walk;
+				moveActivity = Activity::Walk;
 		}
 	}
 	m_moveInfo.moveActivity = moveActivity;
@@ -133,7 +133,7 @@ BaseAIComponent::MoveResult BaseAIComponent::MoveTo(const Vector3 &pos, const Mo
 	//auto &start = m_entity->GetPosition();
 	auto upDir = GetUpDirection();
 	auto d = uvec::planar_distance_sqr(m_moveInfo.moveTarget, m_navInfo.pathTarget, upDir);
-	if(d > pragma::math::pow2(pragma::ai::MAX_NODE_DISTANCE)) // If the new move target is too far away from our old one, we'll probably need a new path
+	if(d > math::pow2(ai::MAX_NODE_DISTANCE)) // If the new move target is too far away from our old one, we'll probably need a new path
 	{
 		if(info.moveOnPath == false) // TODO Check if obstructed
 			return MoveResult::MovingToTarget;
@@ -214,7 +214,7 @@ bool BaseAIComponent::GetMoveSpeed(int32_t animId, float &speed) const
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent) {
 		auto &scale = pTrComponent->GetScale();
-		speed *= pragma::math::abs_max(scale.x, scale.y, scale.z);
+		speed *= math::abs_max(scale.x, scale.y, scale.z);
 	}
 	return true;
 }
@@ -238,9 +238,9 @@ void BaseAIComponent::ClearMoveSpeed(const std::string &name)
 		return;
 	ClearMoveSpeed(animId);
 }
-pragma::Activity BaseAIComponent::GetMoveActivity() const { return m_moveInfo.moveActivity; }
+Activity BaseAIComponent::GetMoveActivity() const { return m_moveInfo.moveActivity; }
 
-void BaseAIComponent::BlendAnimationMovementMT(std::vector<pragma::math::Transform> &bonePoses, std::vector<Vector3> *boneScales)
+void BaseAIComponent::BlendAnimationMovementMT(std::vector<math::Transform> &bonePoses, std::vector<Vector3> *boneScales)
 {
 	if(m_seqIdle == -1)
 		return;
@@ -257,7 +257,7 @@ void BaseAIComponent::BlendAnimationMovementMT(std::vector<pragma::math::Transfo
 	// so we exclude all non-looping movement animations here. (Also see CCharacterComponent::Initialize).
 	// If the result isn't satisfactory, alternatively enable the check for the moveActivity above instead.
 	// However, this requires sending the moveActivity from the server to the clients (snapshots?)
-	if(anim == nullptr || anim->HasFlag(pragma::FAnim::Loop) == false)
+	if(anim == nullptr || anim->HasFlag(FAnim::Loop) == false)
 		return;
 	auto moveAnimId = animComponent->GetAnimation();
 	auto moveAnim = hMdl->GetAnimation(moveAnimId);
@@ -269,19 +269,19 @@ void BaseAIComponent::BlendAnimationMovementMT(std::vector<pragma::math::Transfo
 	auto frame = animIdle->GetFrame(0);
 	if(frame == nullptr)
 		return;
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+	auto pVelComponent = ent.GetComponent<VelocityComponent>();
 	auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 	float speed = uvec::length(vel);
 	if(m_lastMovementBlendScale == 0.f && speed < 0.5f) // Arbitrary limit; Don't blend animations if speed is below this value
 		return;
 	float scale = 0.f;
-	float speedMax = pragma::math::abs(GetMaxSpeed());
+	float speedMax = math::abs(GetMaxSpeed());
 	if(speedMax > 0.f) {
 		scale = 1.f - (speed / speedMax);
 		if(scale < 0.f)
 			scale = 0.f;
 	}
-	m_lastMovementBlendScale = scale = pragma::math::approach(m_lastMovementBlendScale, scale, 0.05f);
+	m_lastMovementBlendScale = scale = math::approach(m_lastMovementBlendScale, scale, 0.05f);
 	auto &dstBonePoses = frame->GetBoneTransforms();
 	auto &dstBoneScales = frame->GetBoneScales();
 	animComponent->BlendBonePoses(bonePoses, boneScales, dstBonePoses, &dstBoneScales, bonePoses, boneScales, *anim, scale);
@@ -309,7 +309,7 @@ void BaseAIComponent::StopMoving()
 	m_moveInfo.moveSpeed = nullptr;
 	auto pAnimComponent = GetEntity().GetAnimatedComponent();
 	if(pAnimComponent.valid())
-		static_cast<BaseAnimatedComponent *>(pAnimComponent.get())->PlayActivity(pragma::Activity::Idle, pragma::FPlayAnim::Default);
+		static_cast<BaseAnimatedComponent *>(pAnimComponent.get())->PlayActivity(Activity::Idle, FPlayAnim::Default);
 }
 
 void BaseAIComponent::SetPathNodeIndex(uint32_t nodeIdx, const Vector3 &prevPos)
@@ -340,8 +340,8 @@ void BaseAIComponent::PathStep(float)
 			bMoveOnPath = false;
 		else {
 			tgt.y = 0.f;
-			const auto pathNodeReachedDist = pragma::math::pow2(10.f);
-			while(uvec::planar_distance_sqr(pos, tgt, upDir) <= pragma::math::pow2(pathNodeReachedDist)) {
+			const auto pathNodeReachedDist = math::pow2(10.f);
+			while(uvec::planar_distance_sqr(pos, tgt, upDir) <= math::pow2(pathNodeReachedDist)) {
 				SetPathNodeIndex(m_navInfo.pathInfo->pathIdx + 1, tgt);
 				if(m_navInfo.pathInfo->pathIdx >= CUInt32(path.pathCount)) {
 					StopMoving();
@@ -408,7 +408,7 @@ void BaseAIComponent::PathStep(float)
 	if(bMoveOnPath == false) // No navigation info available; Try to move to target in a straight line
 	{
 		tgt = m_moveInfo.moveTarget;
-		if(uvec::planar_distance_sqr(pos, tgt, upDir) <= pragma::math::pow2(destReachDist)) {
+		if(uvec::planar_distance_sqr(pos, tgt, upDir) <= math::pow2(destReachDist)) {
 			StopMoving();
 			m_navInfo.bTargetReached = true;
 			OnPathDestinationReached();
@@ -444,8 +444,8 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 
 	auto dstPos = pos + dir * (pPhysComponent ? (pPhysComponent->GetCollisionRadius() * 1.1f) : 0.f);
 
-	const auto fCheckForObstruction = [this, &pTrComponent, &dir, t](pragma::physics::TraceResult &r) -> bool {
-		if(r.hitType != pragma::physics::RayCastHitType::None && (r.entity.valid() == false || IsObstruction(*r.entity.get()))) // Obstructed
+	const auto fCheckForObstruction = [this, &pTrComponent, &dir, t](physics::TraceResult &r) -> bool {
+		if(r.hitType != physics::RayCastHitType::None && (r.entity.valid() == false || IsObstruction(*r.entity.get()))) // Obstructed
 		{
 			m_obstruction.pathObstructed = true;
 			auto aimDir = pTrComponent->GetForward();
@@ -495,7 +495,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	auto *physObj = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(physObj == nullptr || physObj->IsController() == false)
 		return;
-	auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(physObj);
+	auto *physController = static_cast<physics::ControllerPhysObj *>(physObj);
 	auto *shape = physController->GetController()->GetShape();
 	if(shape == nullptr)
 		return;
@@ -503,7 +503,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	// so that the capsule sweep isn't inside the ground (since a capsule's origin is at its center, not near the feet, but the NPCs
 	// position is always at the feet).
 	if(physController->IsCapsule()) {
-		auto *capsuleController = static_cast<pragma::physics::CapsuleControllerPhysObj *>(physObj);
+		auto *capsuleController = static_cast<physics::CapsuleControllerPhysObj *>(physObj);
 		auto rot = physObj->GetOrientation();
 		auto offset = Vector3(0, capsuleController->GetHeight() * 0.5f, 0);
 		uvec::rotate(&offset, rot);
@@ -511,12 +511,12 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 		dstPos += offset;
 	}
 
-	pragma::physics::TraceData data {};
+	physics::TraceData data {};
 	data.SetSource(pos);
 	data.SetShape(*shape);
 	data.SetTarget(dstPos);
 	data.SetFilter(m_obstruction.sweepFilter);
-	data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
+	data.SetFlags(physics::RayCastFlags::Default | physics::RayCastFlags::InvertFilter);
 	if(pPhysComponent) {
 		data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 		data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());
@@ -527,7 +527,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 #endif
 }
 
-bool BaseAIComponent::IsObstruction(const pragma::ecs::BaseEntity &ent) const { return true; }
+bool BaseAIComponent::IsObstruction(const ecs::BaseEntity &ent) const { return true; }
 
 void BaseAIComponent::OnEntityComponentAdded(BaseEntityComponent &component) { BaseEntityComponent::OnEntityComponentAdded(component); }
 
@@ -535,8 +535,8 @@ Vector2 BaseAIComponent::CalcMovementSpeed() const
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	if(pPhysComponent && (pPhysComponent->GetMoveType() != pragma::physics::MoveType::Walk || pPhysComponent->IsOnGround() == false))
+	auto pVelComponent = ent.GetComponent<VelocityComponent>();
+	if(pPhysComponent && (pPhysComponent->GetMoveType() != physics::MoveType::Walk || pPhysComponent->IsOnGround() == false))
 		return {pVelComponent.valid() ? uvec::length(pVelComponent->GetVelocity()) : 0.f, 0.f};
 	auto speed = 0.f;
 	auto animComponent = ent.GetAnimatedComponent();
@@ -557,8 +557,8 @@ Vector3 BaseAIComponent::CalcMovementDirection() const
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	if(pPhysComponent && (pPhysComponent->GetMoveType() != pragma::physics::MoveType::Walk || pPhysComponent->IsOnGround() == false)) {
+	auto pVelComponent = ent.GetComponent<VelocityComponent>();
+	if(pPhysComponent && (pPhysComponent->GetMoveType() != physics::MoveType::Walk || pPhysComponent->IsOnGround() == false)) {
 		auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 		uvec::normalize(&vel);
 		return vel;

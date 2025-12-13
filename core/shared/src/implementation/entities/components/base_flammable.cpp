@@ -8,36 +8,36 @@ import :entities.components.base_flammable;
 
 using namespace pragma;
 
-ComponentEventId baseFlammableComponent::EVENT_ON_IGNITED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId baseFlammableComponent::EVENT_ON_EXTINGUISHED = pragma::INVALID_COMPONENT_ID;
-void BaseFlammableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+ComponentEventId baseFlammableComponent::EVENT_ON_IGNITED = INVALID_COMPONENT_ID;
+ComponentEventId baseFlammableComponent::EVENT_ON_EXTINGUISHED = INVALID_COMPONENT_ID;
+void BaseFlammableComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseFlammableComponent::EVENT_ON_IGNITED = registerEvent("ON_IGNITED", ComponentEventInfo::Type::Broadcast);
 	baseFlammableComponent::EVENT_ON_EXTINGUISHED = registerEvent("ON_EXTINGUISHED", ComponentEventInfo::Type::Broadcast);
 }
-BaseFlammableComponent::BaseFlammableComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bIsOnFire(pragma::util::BoolProperty::Create(false)), m_bIgnitable(pragma::util::BoolProperty::Create(true)) {}
+BaseFlammableComponent::BaseFlammableComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_bIsOnFire(util::BoolProperty::Create(false)), m_bIgnitable(util::BoolProperty::Create(true)) {}
 BaseFlammableComponent::~BaseFlammableComponent() { Extinguish(); }
 void BaseFlammableComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(pragma::string::compare<std::string>(kvData.key, "flammable", false))
-			*m_bIgnitable = pragma::util::to_boolean(kvData.value);
+			*m_bIgnitable = util::to_boolean(kvData.value);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(pragma::string::compare<std::string>(inputData.input, "setflammable", false))
-			*m_bIgnitable = pragma::util::to_boolean(inputData.data);
+			*m_bIgnitable = util::to_boolean(inputData.data);
 		else if(pragma::string::compare<std::string>(inputData.input, "ignite", false))
-			Ignite(pragma::util::to_float(inputData.data));
+			Ignite(util::to_float(inputData.data));
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -54,13 +54,13 @@ void BaseFlammableComponent::OnTick(double dt)
 			Extinguish();
 	}
 }
-pragma::util::EventReply BaseFlammableComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply BaseFlammableComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
-	if(eventId == pragma::submergibleComponent::EVENT_ON_WATER_SUBMERGED)
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
+	if(eventId == submergibleComponent::EVENT_ON_WATER_SUBMERGED)
 		Extinguish();
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 void BaseFlammableComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
@@ -89,16 +89,16 @@ void BaseFlammableComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t ve
 		Ignite(tExtinguish); // TODO: Attacker, inflictor?
 	}
 }
-const pragma::util::PBoolProperty &BaseFlammableComponent::GetOnFireProperty() const { return m_bIsOnFire; }
-const pragma::util::PBoolProperty &BaseFlammableComponent::GetIgnitableProperty() const { return m_bIgnitable; }
+const util::PBoolProperty &BaseFlammableComponent::GetOnFireProperty() const { return m_bIsOnFire; }
+const util::PBoolProperty &BaseFlammableComponent::GetIgnitableProperty() const { return m_bIgnitable; }
 bool BaseFlammableComponent::IsOnFire() const { return *m_bIsOnFire; }
 bool BaseFlammableComponent::IsIgnitable() const { return *m_bIgnitable; }
-pragma::util::EventReply BaseFlammableComponent::Ignite(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor)
+util::EventReply BaseFlammableComponent::Ignite(float duration, ecs::BaseEntity *attacker, ecs::BaseEntity *inflictor)
 {
 	auto &ent = GetEntity();
-	auto pSubmergibleComponent = ent.GetComponent<pragma::SubmergibleComponent>();
+	auto pSubmergibleComponent = ent.GetComponent<SubmergibleComponent>();
 	if(pSubmergibleComponent.valid() && pSubmergibleComponent->IsSubmerged() == true)
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	*m_bIsOnFire = true;
 	SetTickPolicy(TickPolicy::Always);
 	if(duration == 0.f)
@@ -129,7 +129,7 @@ void BaseFlammableComponent::SetIgnitable(bool b)
 
 ////////////
 
-CEOnIgnited::CEOnIgnited(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor) : duration {duration}, attacker {attacker ? attacker->GetHandle() : EntityHandle {}}, inflictor {inflictor ? inflictor->GetHandle() : EntityHandle {}} {}
+CEOnIgnited::CEOnIgnited(float duration, ecs::BaseEntity *attacker, ecs::BaseEntity *inflictor) : duration {duration}, attacker {attacker ? attacker->GetHandle() : EntityHandle {}}, inflictor {inflictor ? inflictor->GetHandle() : EntityHandle {}} {}
 void CEOnIgnited::PushArguments(lua::State *l)
 {
 	Lua::PushNumber(l, duration);

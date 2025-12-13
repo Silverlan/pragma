@@ -12,8 +12,8 @@ using namespace pragma;
 
 void CEyeComponent::Blink()
 {
-	m_tNextBlink = pragma::get_cgame()->CurTime() + pragma::math::random(1.5f, 4.f);
-	pragma::math::set_flag(m_stateFlags, StateFlags::BlinkToggle, !pragma::math::is_flag_set(m_stateFlags, StateFlags::BlinkToggle));
+	m_tNextBlink = get_cgame()->CurTime() + math::random(1.5f, 4.f);
+	math::set_flag(m_stateFlags, StateFlags::BlinkToggle, !math::is_flag_set(m_stateFlags, StateFlags::BlinkToggle));
 }
 void CEyeComponent::UpdateBlinkMT()
 {
@@ -21,28 +21,28 @@ void CEyeComponent::UpdateBlinkMT()
 		return;
 
 	// check for blinking
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::BlinkToggle) != pragma::math::is_flag_set(m_stateFlags, StateFlags::PrevBlinkToggle)) {
-		pragma::math::set_flag(m_stateFlags, StateFlags::PrevBlinkToggle, pragma::math::is_flag_set(m_stateFlags, StateFlags::BlinkToggle));
+	if(math::is_flag_set(m_stateFlags, StateFlags::BlinkToggle) != math::is_flag_set(m_stateFlags, StateFlags::PrevBlinkToggle)) {
+		math::set_flag(m_stateFlags, StateFlags::PrevBlinkToggle, math::is_flag_set(m_stateFlags, StateFlags::BlinkToggle));
 
-		m_curBlinkTime = pragma::get_cgame()->CurTime() + GetBlinkDuration();
+		m_curBlinkTime = get_cgame()->CurTime() + GetBlinkDuration();
 		// BroadcastEvent(EVENT_ON_BLINK);
 	}
 	auto blinkFlexControllerWeight = 0.f;
 
 	// blink the eyes
-	auto t = (m_curBlinkTime - pragma::get_cgame()->CurTime()) * pragma::math::pi * 0.5f * (1.0 / m_blinkDuration);
+	auto t = (m_curBlinkTime - get_cgame()->CurTime()) * math::pi * 0.5f * (1.0 / m_blinkDuration);
 	if(t > 0) {
 		// do eyeblink falloff curve
-		t = pragma::math::cos(t);
+		t = math::cos(t);
 		if(t > 0) {
-			blinkFlexControllerWeight = pragma::math::sqrt(t) * 2.f;
+			blinkFlexControllerWeight = math::sqrt(t) * 2.f;
 			if(blinkFlexControllerWeight > 1)
 				blinkFlexControllerWeight = 2.f - blinkFlexControllerWeight;
 		}
 	}
 	m_flexC->SetFlexController(m_blinkFlexController, blinkFlexControllerWeight);
 
-	auto tCur = pragma::get_cgame()->CurTime();
+	auto tCur = get_cgame()->CurTime();
 	if(tCur >= m_tNextBlink)
 		Blink();
 }

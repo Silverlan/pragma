@@ -31,7 +31,7 @@ export namespace pragma::audio {
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-	class DLLNETWORK ALSound : virtual public pragma::util::inheritable_enable_shared_from_this<pragma::audio::ALSound>, virtual public pragma::util::CallbackHandler, public LuaCallbackHandler {
+	class DLLNETWORK ALSound : virtual public util::inheritable_enable_shared_from_this<ALSound>, virtual public util::CallbackHandler, public LuaCallbackHandler {
 	  public:
 		enum class NetEvent : uint8_t {
 			Play = 0,
@@ -89,7 +89,7 @@ export namespace pragma::audio {
 		float m_tFadeIn = 0.f;
 		std::unique_ptr<std::pair<float, float>> m_range = nullptr;
 		EntityHandle m_hSourceEntity;
-		pragma::audio::ALSoundType m_type;
+		ALSoundType m_type;
 		unsigned int m_flags = 0;
 		mutable NetworkState *m_networkState = nullptr;
 		std::unique_ptr<SoundFade> m_fade = nullptr;
@@ -99,7 +99,7 @@ export namespace pragma::audio {
 		void UpdateOffset();
 		void InitRange();
 	  public:
-		ALSound(pragma::NetworkState *nw);
+		ALSound(NetworkState *nw);
 		virtual ~ALSound();
 		virtual void Initialize();
 		virtual void OnRelease();
@@ -112,8 +112,8 @@ export namespace pragma::audio {
 		NetworkState *GetNetworkState() const;
 		virtual float GetMaxAudibleDistance() const;
 		float GetSoundIntensity(const Vector3 &pos) const;
-		virtual void SetSource(pragma::ecs::BaseEntity *ent);
-		pragma::ecs::BaseEntity *GetSource() const;
+		virtual void SetSource(ecs::BaseEntity *ent);
+		ecs::BaseEntity *GetSource() const;
 		virtual void SetRange(float start, float end);
 		virtual void ClearRange();
 		bool HasRange() const;
@@ -209,9 +209,9 @@ export namespace pragma::audio {
 		std::pair<float, float> GetRolloffFactors() const;
 		void SetRolloffFactors(float factor, float roomFactor = 0.f);
 
-		virtual pragma::audio::ALSoundType GetType() const;
-		virtual void SetType(pragma::audio::ALSoundType type);
-		void AddType(pragma::audio::ALSoundType type);
+		virtual ALSoundType GetType() const;
+		virtual void SetType(ALSoundType type);
+		void AddType(ALSoundType type);
 		unsigned int GetFlags() const;
 		virtual void SetFlags(unsigned int flags);
 		void AddFlags(unsigned int flags);

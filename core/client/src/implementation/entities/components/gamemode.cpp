@@ -15,5 +15,5 @@ void CGamemodeComponent::InitializeLuaObject(lua::State *l) { return BaseEntityC
 void CGamemode::Initialize()
 {
 	CBaseEntity::Initialize();
-	AddComponent<pragma::CGamemodeComponent>();
+	AddComponent<CGamemodeComponent>();
 }

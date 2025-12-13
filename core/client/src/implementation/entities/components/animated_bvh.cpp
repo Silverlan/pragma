@@ -13,14 +13,14 @@ import :engine;
 
 using namespace pragma;
 
-static std::unique_ptr<pragma::ThreadPool> g_threadPool = nullptr;
+static std::unique_ptr<ThreadPool> g_threadPool = nullptr;
 static uint32_t g_instanceCount = 0;
 
-static pragma::ThreadPool &get_thread_pool() { return *g_threadPool; }
-static void init_thread_pool() { g_threadPool = std::make_unique<pragma::ThreadPool>(8, "bvh_animated"); }
+static ThreadPool &get_thread_pool() { return *g_threadPool; }
+static void init_thread_pool() { g_threadPool = std::make_unique<ThreadPool>(8, "bvh_animated"); }
 static void free_thread_pool() { g_threadPool = nullptr; }
 
-CAnimatedBvhComponent::CAnimatedBvhComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent)
+CAnimatedBvhComponent::CAnimatedBvhComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent)
 {
 	if(g_instanceCount++ == 0)
 		init_thread_pool();
@@ -44,7 +44,7 @@ void CAnimatedBvhComponent::UpdateDirtyBones()
 		return;
 	}
 
-	constexpr auto thresholdDistance = pragma::math::pow2(0.4f);
+	constexpr auto thresholdDistance = math::pow2(0.4f);
 	m_dirtyBones.clear();
 	m_dirtyBones.resize(processedPoses.size(), false);
 	auto hasDirtyBones = false;
@@ -72,31 +72,31 @@ void CAnimatedBvhComponent::Initialize()
 
 	auto animC = GetEntity().GetComponent<CAnimatedComponent>();
 	if(animC.valid()) {
-		m_cbOnMatricesUpdated = animC->AddEventCallback(cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+		m_cbOnMatricesUpdated = animC->AddEventCallback(cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 			UpdateDirtyBones();
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		});
 		animC->SetSkeletonUpdateCallbacksEnabled(true);
 	}
 
 	auto bvhC = GetEntity().GetComponent<CBvhComponent>();
 	if(bvhC.valid()) {
-		m_cbOnBvhCleared = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_CLEAR_BVH, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+		m_cbOnBvhCleared = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_CLEAR_BVH, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 			Clear();
 			m_tmpBvhData = nullptr;
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		});
-		m_cbOnBvhUpdateRequested = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+		m_cbOnBvhUpdateRequested = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 			/*if(m_updateLazily && m_rebuildScheduled)
 			{
 				RebuildAnimatedBvh(true);
 				WaitForCompletion();
 			}*/
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		});
-		m_cbOnBvhRebuilt = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_BVH_REBUILT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+		m_cbOnBvhRebuilt = bvhC->AddEventCallback(cBvhComponent::EVENT_ON_BVH_REBUILT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 			RebuildTemporaryBvhData();
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		});
 
 		if(bvhC->HasBvhData())
@@ -113,7 +113,7 @@ void CAnimatedBvhComponent::RebuildTemporaryBvhData()
 	Clear();
 
 	CBvhComponent::BvhBuildInfo buildInfo {};
-	buildInfo.shouldConsiderMesh = [mdlC](const pragma::geometry::ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return CBvhComponent::ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
+	buildInfo.shouldConsiderMesh = [mdlC](const geometry::ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return CBvhComponent::ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
 	m_tmpBvhData = BaseBvhComponent::RebuildBvh(renderMeshes, &buildInfo, nullptr, &GetEntity());
 }
 
@@ -202,7 +202,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 		m_rebuildScheduled = true;
 		if(m_cbRebuildScheduled.IsValid())
 			m_cbRebuildScheduled.Remove();
-		m_cbRebuildScheduled = pragma::get_cengine()->AddCallback("Think", FunctionCallback<void>::Create([this]() { RebuildAnimatedBvh(); }));
+		m_cbRebuildScheduled = get_cengine()->AddCallback("Think", FunctionCallback<void>::Create([this]() { RebuildAnimatedBvh(); }));
 		return;
 	}
 	if(m_cbRebuildScheduled.IsValid())
@@ -263,10 +263,10 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 		m_animatedBvhData.transformedTris.resize(triCount);
 	}
 
-	std::function<bool(uint32_t, const pragma::math::Vertex &, const pragma::math::VertexWeight &)> fShouldConsiderVertex = nullptr;
+	std::function<bool(uint32_t, const math::Vertex &, const math::VertexWeight &)> fShouldConsiderVertex = nullptr;
 	if(optDirtyBones) {
 		auto cpyDirtyBones = *optDirtyBones;
-		fShouldConsiderVertex = [cpyDirtyBones = std::move(cpyDirtyBones)](uint32_t vertIdx, const pragma::math::Vertex &v, const pragma::math::VertexWeight &vw) -> bool {
+		fShouldConsiderVertex = [cpyDirtyBones = std::move(cpyDirtyBones)](uint32_t vertIdx, const math::Vertex &v, const math::VertexWeight &vw) -> bool {
 			constexpr auto n = decltype(vw.boneIds)::length();
 			for(auto i = decltype(n) {0u}; i < n; ++i) {
 				assert(vw.boneIds[i] < cpyDirtyBones.size());
@@ -277,14 +277,14 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 		};
 	}
 
-	auto finalize = [this, bvhC, &animBvhData, &renderMeshes]() mutable -> pragma::ThreadPool::ResultHandler {
+	auto finalize = [this, bvhC, &animBvhData, &renderMeshes]() mutable -> ThreadPool::ResultHandler {
 		size_t indexOffset = 0;
 		uint32_t meshIdx = 0;
 		for(auto &renderMesh : renderMeshes) {
 			renderMesh->VisitIndices([this, meshIdx, &indexOffset](auto *indexDataSrc, uint32_t numIndicesSrc) {
 				auto &verts = m_animatedBvhData.meshData.at(meshIdx).transformedVerts;
 				for(auto i = decltype(numIndicesSrc) {0}; i < numIndicesSrc; i += 3)
-					m_animatedBvhData.transformedTris[(indexOffset + i) / 3] = {pragma::bvh::create_triangle(verts[indexDataSrc[i]], verts[indexDataSrc[i + 1]], verts[indexDataSrc[i + 2]])};
+					m_animatedBvhData.transformedTris[(indexOffset + i) / 3] = {bvh::create_triangle(verts[indexDataSrc[i]], verts[indexDataSrc[i + 1]], verts[indexDataSrc[i + 2]])};
 				indexOffset += numIndicesSrc;
 			});
 			++meshIdx;
@@ -308,7 +308,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 		auto &meshData = meshDatas[i];
 		meshData.transformedVerts.resize(numVerts);
 
-		pool.BatchProcess(numVerts, numVerticesPerBatch, [this, fShouldConsiderVertex, numJobs, &mesh, &meshData, &animBvhData, finalize](uint32_t start, uint32_t end) mutable -> pragma::ThreadPool::ResultHandler {
+		pool.BatchProcess(numVerts, numVerticesPerBatch, [this, fShouldConsiderVertex, numJobs, &mesh, &meshData, &animBvhData, finalize](uint32_t start, uint32_t end) mutable -> ThreadPool::ResultHandler {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 			::debug::get_domain().BeginTask("bvh_animated_compute");
 #endif

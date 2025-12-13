@@ -12,8 +12,8 @@ export namespace pragma::pts {
 	class DLLCLIENT CParticleInitializerPositionRandomBox : public CParticleInitializer {
 	  public:
 		CParticleInitializerPositionRandomBox() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
 	  private:
 		Vector3 m_min = {};
 		Vector3 m_max = {};
@@ -26,8 +26,8 @@ export namespace pragma::pts {
 	class DLLCLIENT CParticleInitializerPositionRandomSphere : public CParticleInitializer {
 	  public:
 		CParticleInitializerPositionRandomSphere() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
 	  private:
 		float m_distMin = 0.f;
 		float m_distMax = 0.f;
@@ -40,8 +40,8 @@ export namespace pragma::pts {
 	class DLLCLIENT CParticleInitializerPositionRandomCircle : public CParticleInitializer {
 	  public:
 		CParticleInitializerPositionRandomCircle() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
 	  private:
 		Vector3 m_vAxis = Vector3(0.f, 1.f, 0.f);
 		float m_fMinDist = 0.f;

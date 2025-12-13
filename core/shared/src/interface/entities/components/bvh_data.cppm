@@ -21,8 +21,8 @@ export namespace pragma::bvh {
 	constexpr bool should_permute = true;
 
 	struct DLLNETWORK MeshRange {
-		pragma::ecs::BaseEntity *entity = nullptr;
-		std::shared_ptr<pragma::geometry::ModelSubMesh> mesh;
+		ecs::BaseEntity *entity = nullptr;
+		std::shared_ptr<geometry::ModelSubMesh> mesh;
 		size_t start;
 		size_t end;
 		bool operator<(const MeshRange &other) const { return start < other.start; }
@@ -30,9 +30,9 @@ export namespace pragma::bvh {
 
 	struct DLLNETWORK MeshIntersectionRange {
 		MeshIntersectionRange(const MeshRange &range) : entity {range.entity}, mesh {range.mesh.get()}, start {range.start}, end {range.end} {}
-		MeshIntersectionRange(pragma::geometry::ModelSubMesh &mesh, size_t start, size_t end) : mesh {&mesh}, start {start}, end {end} {}
-		pragma::ecs::BaseEntity *entity = nullptr;
-		pragma::geometry::ModelSubMesh *mesh = nullptr;
+		MeshIntersectionRange(geometry::ModelSubMesh &mesh, size_t start, size_t end) : mesh {&mesh}, start {start}, end {end} {}
+		ecs::BaseEntity *entity = nullptr;
+		geometry::ModelSubMesh *mesh = nullptr;
 		size_t start;
 		size_t end;
 		bool operator<(const MeshRange &other) const { return start < other.start; }
@@ -79,7 +79,7 @@ export namespace pragma::bvh {
 		void Update();
 
 		const MeshRange *FindMeshRange(size_t primIdx) const;
-		void Deserialize(const std::vector<uint8_t> &data, std::vector<pragma::bvh::Primitive> &&primitives);
+		void Deserialize(const std::vector<uint8_t> &data, std::vector<Primitive> &&primitives);
 	  private:
 		virtual bool DoInitializeBvh(Executor &executor, ::bvh::v2::DefaultBuilder<Node>::Config &config) override;
 		void Refit();
@@ -89,33 +89,33 @@ export namespace pragma::bvh {
 	};
 
 	DLLNETWORK Primitive create_triangle(const Vector3 &a, const Vector3 &b, const Vector3 &c);
-	DLLNETWORK std::vector<bvh::MeshRange> &get_bvh_mesh_ranges(bvh::MeshBvhTree &bvhData);
+	DLLNETWORK std::vector<MeshRange> &get_bvh_mesh_ranges(MeshBvhTree &bvhData);
 
 	struct DLLNETWORK IntersectionCache {
-		std::vector<pragma::bvh::MeshIntersectionRange> meshRanges;
+		std::vector<MeshIntersectionRange> meshRanges;
 		std::unordered_set<size_t> meshes;
 	};
 
-	DLLNETWORK std::tuple<bool, bool, bool> test_node_aabb_intersection(const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const pragma::bvh::Node &left, const pragma::bvh::Node &right);
-	DLLNETWORK bool test_bvh_intersection(const pragma::bvh::MeshBvhTree &bvhData, const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const std::function<bool(const pragma::bvh::Primitive &)> &testTri, size_t nodeIdx = 0,
-	  pragma::IntersectionInfo *outIntersectionInfo = nullptr);
-	DLLNETWORK bool test_bvh_intersection_with_aabb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, pragma::IntersectionInfo *outIntersectionInfo = nullptr);
-	DLLNETWORK bool test_bvh_intersection_with_obb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, pragma::IntersectionInfo *outIntersectionInfo = nullptr);
-	DLLNETWORK bool test_bvh_intersection_with_kdop(const pragma::bvh::MeshBvhTree &bvhData, const std::vector<pragma::math::Plane> &kdop, size_t nodeIdx = 0, pragma::IntersectionInfo *outIntersectionInfo = nullptr);
+	DLLNETWORK std::tuple<bool, bool, bool> test_node_aabb_intersection(const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const Node &left, const Node &right);
+	DLLNETWORK bool test_bvh_intersection(const MeshBvhTree &bvhData, const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const std::function<bool(const Primitive &)> &testTri, size_t nodeIdx = 0,
+	  IntersectionInfo *outIntersectionInfo = nullptr);
+	DLLNETWORK bool test_bvh_intersection_with_aabb(const MeshBvhTree &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
+	DLLNETWORK bool test_bvh_intersection_with_obb(const MeshBvhTree &bvhData, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
+	DLLNETWORK bool test_bvh_intersection_with_kdop(const MeshBvhTree &bvhData, const std::vector<math::Plane> &kdop, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
 
 	DLLNETWORK Ray get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist);
-	DLLNETWORK const ::pragma::bvh::Vec &to_bvh_vector(const Vector3 &v);
-	DLLNETWORK const Vector3 &from_bvh_vector(const ::pragma::bvh::Vec &v);
-	DLLNETWORK bool is_mesh_bvh_compatible(const pragma::geometry::ModelSubMesh &mesh);
+	DLLNETWORK const Vec &to_bvh_vector(const Vector3 &v);
+	DLLNETWORK const Vector3 &from_bvh_vector(const Vec &v);
+	DLLNETWORK bool is_mesh_bvh_compatible(const geometry::ModelSubMesh &mesh);
 
-	DLLNETWORK std::unordered_map<std::string, std::shared_ptr<pragma::geometry::ModelSubMesh>> get_uuid_mesh_map(pragma::asset::Model &mdl);
+	DLLNETWORK std::unordered_map<std::string, std::shared_ptr<geometry::ModelSubMesh>> get_uuid_mesh_map(asset::Model &mdl);
 
 	namespace debug {
 		Color DEFAULT_NODE_COLOR = Color {0, 255, 0, 64};
-		DLLNETWORK void print_bvh_tree(pragma::bvh::Bvh &bvh);
-		DLLNETWORK void draw_bvh_tree(const pragma::Game &game, pragma::bvh::Bvh &bvh, const pragma::math::ScaledTransform &pose = {}, float duration = 20.f);
-		DLLNETWORK void draw_node(const pragma::Game &game, const pragma::bvh::Node &node, const pragma::math::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
-		DLLNETWORK void draw_node(const pragma::Game &game, const pragma::bvh::BBox &bbox, const pragma::math::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
+		DLLNETWORK void print_bvh_tree(Bvh &bvh);
+		DLLNETWORK void draw_bvh_tree(const Game &game, Bvh &bvh, const math::ScaledTransform &pose = {}, float duration = 20.f);
+		DLLNETWORK void draw_node(const Game &game, const Node &node, const math::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
+		DLLNETWORK void draw_node(const Game &game, const BBox &bbox, const math::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
 	};
 };
 

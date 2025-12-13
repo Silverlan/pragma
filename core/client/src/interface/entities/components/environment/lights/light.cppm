@@ -23,18 +23,18 @@ export namespace pragma {
 		bool shouldPass = true;
 	};
 	struct DLLCLIENT CEShouldPassEntityMesh : public ComponentEvent {
-		CEShouldPassEntityMesh(const ecs::CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags);
+		CEShouldPassEntityMesh(const ecs::CBaseEntity &ent, const geometry::CModelMesh &mesh, uint32_t &renderFlags);
 		virtual void PushArguments(lua::State *l) override;
 		const ecs::CBaseEntity &entity;
-		const pragma::geometry::CModelMesh &mesh;
+		const geometry::CModelMesh &mesh;
 		uint32_t &renderFlags;
 		bool shouldPass = true;
 	};
 	struct DLLCLIENT CEShouldPassMesh : public ComponentEvent {
-		CEShouldPassMesh(const pragma::asset::Model &model, const pragma::geometry::CModelSubMesh &mesh);
+		CEShouldPassMesh(const asset::Model &model, const geometry::CModelSubMesh &mesh);
 		virtual void PushArguments(lua::State *l) override;
-		const pragma::asset::Model &model;
-		const pragma::geometry::CModelSubMesh &mesh;
+		const asset::Model &model;
+		const geometry::CModelSubMesh &mesh;
 		bool shouldPass = true;
 	};
 	struct DLLCLIENT CEShouldUpdateRenderPass : public ComponentEvent {
@@ -60,13 +60,13 @@ export namespace pragma {
 	};
 	class DLLCLIENT CBaseLightComponent : public BaseEnvLightComponent, public CBaseNetComponent {
 	  public:
-		CBaseLightComponent(pragma::ecs::BaseEntity &ent);
+		CBaseLightComponent(ecs::BaseEntity &ent);
 		virtual ~CBaseLightComponent() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void Initialize() override;
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
@@ -79,17 +79,17 @@ export namespace pragma {
 	using LightBufferIndex = uint32_t;
 	using ShadowBufferIndex = uint32_t;
 	namespace cLightComponent {
-		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_SHOULD_PASS_ENTITY;
-		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_SHOULD_PASS_ENTITY_MESH;
-		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_SHOULD_PASS_MESH;
-		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_SHOULD_UPDATE_RENDER_PASS;
-		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_GET_TRANSFORMATION_MATRIX;
-		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_HANDLE_SHADOW_MAP;
-		CLASS_ENUM_COMPAT pragma::ComponentEventId EVENT_ON_SHADOW_BUFFER_INITIALIZED;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_SHOULD_PASS_ENTITY;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_SHOULD_PASS_ENTITY_MESH;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_SHOULD_PASS_MESH;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_SHOULD_UPDATE_RENDER_PASS;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_GET_TRANSFORMATION_MATRIX;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_HANDLE_SHADOW_MAP;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_SHADOW_BUFFER_INITIALIZED;
 	}
 	class DLLCLIENT CLightComponent final : public CBaseLightComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		static prosper::IUniformResizableBuffer &GetGlobalRenderBuffer();
 		static prosper::IUniformResizableBuffer &GetGlobalShadowBuffer();
@@ -106,7 +106,7 @@ export namespace pragma {
 
 		enum class StateFlags : uint32_t { None = 0u, StaticUpdateRequired = 1u, DynamicUpdateRequired = StaticUpdateRequired << 1u, FullUpdateRequired = StaticUpdateRequired << 1u, AddToGameScene = FullUpdateRequired << 1u, EnableMorphTargetsInShadows = AddToGameScene << 1u };
 
-		CLightComponent(pragma::ecs::BaseEntity &ent);
+		CLightComponent(ecs::BaseEntity &ent);
 		virtual ~CLightComponent() override;
 		template<typename TCPPM>
 		TCPPM *GetShadowComponent();
@@ -117,11 +117,11 @@ export namespace pragma {
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
 		bool ShouldUpdateRenderPass(rendering::ShadowMapType smType) const;
-		virtual bool ShouldPass(const pragma::ecs::CBaseEntity &ent, uint32_t &renderFlags);
-		virtual bool ShouldPass(const pragma::ecs::CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh, uint32_t &renderFlags);
-		virtual bool ShouldPass(const pragma::asset::Model &mdl, const pragma::geometry::CModelSubMesh &mesh);
+		virtual bool ShouldPass(const ecs::CBaseEntity &ent, uint32_t &renderFlags);
+		virtual bool ShouldPass(const ecs::CBaseEntity &ent, const geometry::CModelMesh &mesh, uint32_t &renderFlags);
+		virtual bool ShouldPass(const asset::Model &mdl, const geometry::CModelSubMesh &mesh);
 		template<typename TCPPM>
-		pragma::ComponentHandle<TCPPM> GetShadowMap(rendering::ShadowMapType type) const;
+		ComponentHandle<TCPPM> GetShadowMap(rendering::ShadowMapType type) const;
 		bool ShouldRender();
 		void UpdateTransformationMatrix(const Mat4 &biasMatrix, const Mat4 &viewMatrix, const Mat4 &projectionMatrix);
 		virtual void OnEntitySpawn() override;
@@ -134,9 +134,9 @@ export namespace pragma {
 		bool ShouldCastShadows() const;
 		bool ShouldCastDynamicShadows() const;
 		bool ShouldCastStaticShadows() const;
-		bool IsInRange(const pragma::ecs::CBaseEntity &ent) const;
-		bool IsInRange(const pragma::ecs::CBaseEntity &ent, const pragma::geometry::CModelMesh &mesh) const;
-		bool IsInCone(const pragma::ecs::CBaseEntity &ent, const Vector3 &dir, float angle) const;
+		bool IsInRange(const ecs::CBaseEntity &ent) const;
+		bool IsInRange(const ecs::CBaseEntity &ent, const geometry::CModelMesh &mesh) const;
+		bool IsInCone(const ecs::CBaseEntity &ent, const Vector3 &dir, float angle) const;
 
 		// A shadowed light source may only be assigned to one scene / one scene slot
 		CSceneComponent *FindShadowScene() const;

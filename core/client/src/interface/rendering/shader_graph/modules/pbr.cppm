@@ -10,7 +10,7 @@ export import :rendering.shader_graph.sg_module;
 export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_graph {
-	class DLLCLIENT PbrModule : public pragma::rendering::ShaderGraphModule {
+	class DLLCLIENT PbrModule : public ShaderGraphModule {
 	  public:
 		enum class PBRBinding : uint32_t {
 			IrradianceMap = 0u,
@@ -22,8 +22,8 @@ export namespace pragma::rendering::shader_graph {
 		PbrModule(ShaderGraph &shader);
 		virtual ~PbrModule() override;
 		virtual void InitializeGfxPipelineDescriptorSets() override;
-		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
-		prosper::IDescriptorSet *GetReflectionProbeDescriptorSet(const pragma::CSceneComponent &scene, float &outIblStrength, ShaderGameWorld::SceneFlags &inOutSceneFlags) const;
+		virtual void RecordBindScene(ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
+		prosper::IDescriptorSet *GetReflectionProbeDescriptorSet(const CSceneComponent &scene, float &outIblStrength, ShaderGameWorld::SceneFlags &inOutSceneFlags) const;
 		prosper::IDescriptorSet &GetDefaultPbrDescriptorSet() const;
 	  private:
 		prosper::DescriptorSetInfo m_pbrDescSetInfo;

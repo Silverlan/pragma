@@ -20,8 +20,8 @@ export namespace pragma::rendering {
 		std::shared_ptr<prosper::IDescriptorSetGroup> descSetGroupPrepass = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> descSetGroupOcclusion = nullptr;
 
-		pragma::util::WeakHandle<prosper::Shader> shader = {};
-		pragma::util::WeakHandle<prosper::Shader> shaderBlur = {};
+		util::WeakHandle<prosper::Shader> shader = {};
+		util::WeakHandle<prosper::Shader> shaderBlur = {};
 		prosper::Shader *GetSSAOShader() const;
 		prosper::Shader *GetSSAOBlurShader() const;
 	};

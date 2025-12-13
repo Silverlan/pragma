@@ -14,15 +14,15 @@ export namespace pragma {
 	class DLLCLIENT CMaterialPropertyOverrideComponent final : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		CMaterialPropertyOverrideComponent(pragma::ecs::BaseEntity &ent);
+		CMaterialPropertyOverrideComponent(ecs::BaseEntity &ent);
 		virtual ~CMaterialPropertyOverrideComponent() override;
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
 		virtual void OnRemove() override;
-		msys::CMaterial *GetRenderMaterial(uint32_t matIdx) const;
+		material::CMaterial *GetRenderMaterial(uint32_t matIdx) const;
 
 		template<typename T, bool TEXTURE = false>
 		void ApplyMaterialProperty(uint32_t matIdx, const char *key, const T &value);
@@ -38,13 +38,13 @@ export namespace pragma {
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 	  protected:
 		static std::string GetNormalizedMaterialName(std::string name);
-		static std::string GetNormalizedMaterialName(const msys::CMaterial &mat);
-		static const rendering::shader_material::ShaderMaterial *GetShaderMaterial(const msys::CMaterial &mat);
-		static std::string GetPropertyName(const msys::CMaterial &mat, const char *key, bool texture);
+		static std::string GetNormalizedMaterialName(const material::CMaterial &mat);
+		static const rendering::shader_material::ShaderMaterial *GetShaderMaterial(const material::CMaterial &mat);
+		static std::string GetPropertyName(const material::CMaterial &mat, const char *key, bool texture);
 		static std::string NormalizeTexturePath(const std::string &path);
 
-		void AddMaterialPropertyMember(const pragma::rendering::Property &prop, const std::string &propPath, const std::string &name, std::optional<uint32_t> matIdx = {});
-		void AddMaterialTexturePropertyMember(const std::string &propPath, const pragma::rendering::shader_material::Texture &tex, std::optional<uint32_t> matIdx = {});
+		void AddMaterialPropertyMember(const rendering::Property &prop, const std::string &propPath, const std::string &name, std::optional<uint32_t> matIdx = {});
+		void AddMaterialTexturePropertyMember(const std::string &propPath, const rendering::shader_material::Texture &tex, std::optional<uint32_t> matIdx = {});
 
 		struct PropertyInfo {
 			udm::PProperty property;
@@ -52,14 +52,14 @@ export namespace pragma {
 			bool texture = false;
 		};
 		struct MaterialData {
-			std::shared_ptr<msys::Material> material;
+			std::shared_ptr<material::Material> material;
 			std::unordered_map<std::string, PropertyInfo> properties;
 
 			std::string shaderOverride;
 			bool shaderOverrideEnabled = false;
 		};
 		void ReloadMaterialOverride(uint32_t idx);
-		void UpdateMaterialOverride(uint32_t idx, const msys::CMaterial &mat, bool forceInitialize = false);
+		void UpdateMaterialOverride(uint32_t idx, const material::CMaterial &mat, bool forceInitialize = false);
 		void UpdateRenderBuffers(prosper::IPrimaryCommandBuffer &drawCmd);
 
 		PropertyInfo *InitializeMaterialProperty(uint32_t matIdx, const char *key);
@@ -68,7 +68,7 @@ export namespace pragma {
 		PropertyInfo *FindMaterialPropertyInfo(uint32_t matIdx, const char *key);
 		const PropertyInfo *FindMaterialPropertyInfo(uint32_t matIdx, const char *key) const { return const_cast<CMaterialPropertyOverrideComponent *>(this)->FindMaterialPropertyInfo(matIdx, key); }
 		udm::Property *FindMaterialProperty(uint32_t matIdx, const char *key);
-		msys::Material *GetTargetMaterial(uint32_t matIdx);
+		material::Material *GetTargetMaterial(uint32_t matIdx);
 
 		static void SetPropertyEnabled(const ComponentMemberInfo &info, CMaterialPropertyOverrideComponent &component, bool enabled);
 		static void GetPropertyEnabled(const ComponentMemberInfo &info, CMaterialPropertyOverrideComponent &component, bool &outEnabled);
@@ -79,9 +79,9 @@ export namespace pragma {
 		void UpdateShaderOverride(uint32_t matIdx);
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		template<typename T>
-		void SetMaterialPropertyBufferValue(msys::Material &mat, const pragma::rendering::shader_material::ShaderMaterial &shaderMat, const char *keyName, const T &newVal);
+		void SetMaterialPropertyBufferValue(material::Material &mat, const rendering::shader_material::ShaderMaterial &shaderMat, const char *keyName, const T &newVal);
 		void PopulateProperties();
-		void PopulateProperties(std::string matName, msys::CMaterial &mat, uint32_t matIdx);
+		void PopulateProperties(std::string matName, material::CMaterial &mat, uint32_t matIdx);
 		void ClearProperties(uint32_t matIdx);
 		struct BufferUpdateInfo {
 			std::shared_ptr<prosper::IBuffer> buffer;
@@ -89,8 +89,8 @@ export namespace pragma {
 			size_t size;
 			std::unique_ptr<std::byte[]> data;
 		};
-		void ApplyMaterialPropertyOverride(msys::Material &mat, const pragma::rendering::MaterialPropertyBlock &matPropOverride);
-		void UpdateMaterialOverride(msys::Material &mat);
+		void ApplyMaterialPropertyOverride(material::Material &mat, const rendering::MaterialPropertyBlock &matPropOverride);
+		void UpdateMaterialOverride(material::Material &mat);
 
 		struct ShaderMaterialPropertyInfo {
 			ShaderMaterialPropertyInfo();

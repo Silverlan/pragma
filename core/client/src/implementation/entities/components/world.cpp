@@ -16,8 +16,8 @@ void CWorldComponent::Initialize()
 {
 	BaseWorldComponent::Initialize();
 
-	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		pragma::get_cgame()->UpdateEnvironmentLightSource();
+	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
+		get_cgame()->UpdateEnvironmentLightSource();
 
 		m_lodBaseMeshIds.clear();
 		auto &ent = GetEntity();
@@ -34,20 +34,20 @@ void CWorldComponent::Initialize()
 		ReloadMeshCache();
 		UpdateRenderMeshes();
 	});
-	BindEventUnhandled(cPhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(cPhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		Vector3 min {};
 		Vector3 max {};
 		auto &ent = GetEntity();
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		if(pPhysComponent != nullptr)
 			pPhysComponent->GetCollisionBounds(&min, &max);
-		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
+		auto pRenderComponent = ent.GetComponent<CRenderComponent>();
 		if(pRenderComponent.valid())
 			pRenderComponent->SetLocalRenderBounds(min, max);
 	});
-	BindEvent(cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(cModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		SetRenderQueuesDirty();
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	});
 #if 0
 	BindEventUnhandled(cColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
@@ -91,22 +91,22 @@ void CWorldComponent::ReloadCHCController()
 	m_chcController = pragma::util::make_shared<CHC>(*cam);
 	m_chcController->Reset(m_meshTree);*/ // prosper TODO
 }
-void CWorldComponent::SetBSPTree(const std::shared_ptr<pragma::util::BSPTree> &bspTree, const std::vector<std::vector<rendering::RenderMeshIndex>> &meshesPerCluster)
+void CWorldComponent::SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree, const std::vector<std::vector<rendering::RenderMeshIndex>> &meshesPerCluster)
 {
 	m_bspTree = bspTree;
 	m_meshesPerCluster = meshesPerCluster;
 	BuildOfflineRenderQueues(false);
 }
-const std::shared_ptr<pragma::util::BSPTree> &CWorldComponent::GetBSPTree() const { return m_bspTree; }
+const std::shared_ptr<util::BSPTree> &CWorldComponent::GetBSPTree() const { return m_bspTree; }
 void CWorldComponent::ReloadMeshCache()
 {
 	m_meshTree = nullptr;
 	m_chcController = nullptr;
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
 	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return;
-	m_meshTree = pragma::util::make_shared<OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>>(256.f, 1'073'741'824.f, 4096.f, [](const std::weak_ptr<pragma::geometry::ModelMesh> ptrSubMesh, Vector3 &min, Vector3 &max) {
+	m_meshTree = pragma::util::make_shared<OcclusionOctree<std::shared_ptr<geometry::ModelMesh>>>(256.f, 1'073'741'824.f, 4096.f, [](const std::weak_ptr<geometry::ModelMesh> ptrSubMesh, Vector3 &min, Vector3 &max) {
 		if(ptrSubMesh.expired() == true) {
 			min = {};
 			max = {};
@@ -117,7 +117,7 @@ void CWorldComponent::ReloadMeshCache()
 	});
 	m_meshTree->Initialize();
 	m_meshTree->SetSingleReferenceMode(true);
-	m_meshTree->SetToStringCallback([](std::weak_ptr<pragma::geometry::ModelMesh> ptrMesh) -> std::string {
+	m_meshTree->SetToStringCallback([](std::weak_ptr<geometry::ModelMesh> ptrMesh) -> std::string {
 		if(ptrMesh.expired() == true)
 			return "Expired";
 		auto subMesh = ptrMesh.lock();
@@ -140,10 +140,10 @@ void CWorldComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	if(typeid(component) == typeid(CModelComponent))
 		static_cast<CModelComponent &>(component).SetAutoLodEnabled(false);
 }
-std::shared_ptr<OcclusionOctree<std::shared_ptr<pragma::geometry::ModelMesh>>> CWorldComponent::GetMeshTree() const { return m_meshTree; };
+std::shared_ptr<OcclusionOctree<std::shared_ptr<geometry::ModelMesh>>> CWorldComponent::GetMeshTree() const { return m_meshTree; };
 std::shared_ptr<::CHC> CWorldComponent::GetCHCController() const { return m_chcController; }
 
-const pragma::rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(pragma::util::BSPTree::ClusterIndex clusterIndex, bool translucent) const
+const rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex, bool translucent) const
 {
 	auto &queue = translucent ? m_clusterRenderTranslucentQueues : m_clusterRenderQueues;
 	return (clusterIndex < queue.size()) ? queue.at(clusterIndex).get() : nullptr;
@@ -151,7 +151,7 @@ const pragma::rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(pra
 
 void CWorldComponent::RebuildRenderQueues()
 {
-	pragma::get_cgame()->UpdateEnvironmentLightSource();
+	get_cgame()->UpdateEnvironmentLightSource();
 
 	m_lodBaseMeshIds.clear();
 	auto &ent = GetEntity();
@@ -198,7 +198,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 	auto &renderMeshes = renderC->GetRenderMeshes();
 	auto numClusters = m_bspTree->GetClusterCount();
 
-	std::unordered_map<pragma::geometry::ModelSubMesh *, pragma::geometry::ModelMesh *> subMeshToMesh;
+	std::unordered_map<geometry::ModelSubMesh *, geometry::ModelMesh *> subMeshToMesh;
 	auto &mdl = mdlC->GetModel();
 	if(!mdl)
 		return;
@@ -212,7 +212,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 	auto &meshesPerClusters = m_meshesPerCluster;
 	if(meshesPerClusters.empty()) {
 		meshesPerClusters.resize(numClusters);
-		auto fAddClusterMesh = [&meshesPerClusters](pragma::util::BSPTree::ClusterIndex clusterIndex, RenderMeshIndex meshIdx) {
+		auto fAddClusterMesh = [&meshesPerClusters](util::BSPTree::ClusterIndex clusterIndex, RenderMeshIndex meshIdx) {
 			auto &clusterMeshes = meshesPerClusters.at(clusterIndex);
 			if(clusterMeshes.size() == clusterMeshes.capacity())
 				clusterMeshes.reserve(clusterMeshes.size() * 1.1 + 100);
@@ -231,10 +231,10 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 				Vector3 min, max;
 				mesh->GetBounds(min, max);
 				auto leafNodes = m_bspTree->FindLeafNodesInAabb(min, max);
-				std::unordered_set<pragma::util::BSPTree::ClusterIndex> clusters;
+				std::unordered_set<util::BSPTree::ClusterIndex> clusters;
 				for(auto *node : leafNodes) {
 					auto meshClusterIdx = node->cluster;
-					if(meshClusterIdx == std::numeric_limits<pragma::util::BSPTree::ClusterIndex>::max())
+					if(meshClusterIdx == std::numeric_limits<util::BSPTree::ClusterIndex>::max())
 						continue;
 					for(auto clusterIdx = decltype(numClusters) {0u}; clusterIdx < numClusters; ++clusterIdx) {
 						if(m_bspTree->IsClusterVisible(clusterIdx, meshClusterIdx) == false)
@@ -260,14 +260,14 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 	clusterRenderTranslucentQueues.resize(numClusters);
 	BS::light_thread_pool tp {std::thread::hardware_concurrency()};
 	std::atomic<bool> failure {false};
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	tp.submit_blocks<size_t>(0u, meshesPerClusters.size(), [&](size_t start, size_t end) {
 		for(auto clusterIdx = start; clusterIdx < end; ++clusterIdx) {
 			if(failure == true)
 				return;
-			auto clusterRenderQueue = pragma::rendering::RenderQueue::Create("world_cluster_" + std::to_string(clusterIdx));
+			auto clusterRenderQueue = rendering::RenderQueue::Create("world_cluster_" + std::to_string(clusterIdx));
 			clusterRenderQueues[clusterIdx] = clusterRenderQueue;
-			std::shared_ptr<pragma::rendering::RenderQueue> clusterRenderTranslucentQueue = nullptr;
+			std::shared_ptr<rendering::RenderQueue> clusterRenderTranslucentQueue = nullptr;
 			auto &meshes = meshesPerClusters.at(clusterIdx);
 			for(auto subMeshIdx : meshes) {
 				if(subMeshIdx >= renderMeshes.size()) {
@@ -281,22 +281,22 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 				auto hShader = mat->GetPrimaryShader();
 				if(!hShader)
 					continue;
-				auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(hShader);
+				auto *shader = dynamic_cast<ShaderGameWorldLightingPass *>(hShader);
 				if(shader == nullptr)
 					continue;
 				uint32_t pipelineIdx = 0;
-				auto t = shader->FindPipelineIndex(pragma::rendering::PassType::Generic, renderC->GetShaderPipelineSpecialization(), shader->GetMaterialPipelineSpecializationRequirements(*mat)); // | pragma::GameShaderSpecializationConstantFlag::Enable3dOriginBit);
+				auto t = shader->FindPipelineIndex(rendering::PassType::Generic, renderC->GetShaderPipelineSpecialization(), shader->GetMaterialPipelineSpecializationRequirements(*mat)); // | pragma::GameShaderSpecializationConstantFlag::Enable3dOriginBit);
 				if(t.has_value())
 					pipelineIdx = *t;
 				prosper::PipelineID pipelineId;
 				if(shader->GetPipelineId(pipelineId, pipelineIdx) == false || pipelineId == std::numeric_limits<decltype(pipelineId)>::max())
 					continue;
 				if(mat->GetAlphaMode() == AlphaMode::Blend || shader->IsTranslucentPipeline(pipelineIdx)) {
-					clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : pragma::rendering::RenderQueue::Create("world_translucent_cluster_" + std::to_string(clusterIdx));
-					clusterRenderTranslucentQueue->Add(static_cast<pragma::ecs::CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
+					clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : rendering::RenderQueue::Create("world_translucent_cluster_" + std::to_string(clusterIdx));
+					clusterRenderTranslucentQueue->Add(static_cast<ecs::CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
 					continue;
 				}
-				clusterRenderQueue->Add(static_cast<pragma::ecs::CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
+				clusterRenderQueue->Add(static_cast<ecs::CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
 			}
 			clusterRenderTranslucentQueues[clusterIdx] = clusterRenderTranslucentQueue;
 			clusterRenderQueue->Sort();
@@ -314,7 +314,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 
 void CWorldComponent::UpdateRenderMeshes()
 {
-	auto &ent = static_cast<pragma::ecs::CBaseEntity &>(GetEntity());
+	auto &ent = static_cast<ecs::CBaseEntity &>(GetEntity());
 	auto mdl = ent.GetModel();
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(mdl == nullptr || !pRenderComponent)

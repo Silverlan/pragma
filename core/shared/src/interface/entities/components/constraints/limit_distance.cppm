@@ -12,9 +12,9 @@ export namespace pragma {
 	class DLLNETWORK ConstraintLimitDistanceComponent final : public BaseEntityComponent {
 	  public:
 		enum class ClampRegion : uint32_t { Inside = 0, Outside, OnSurface };
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		ConstraintLimitDistanceComponent(pragma::ecs::BaseEntity &ent);
+		ConstraintLimitDistanceComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 
 		void SetClampRegion(ClampRegion clampRegion);
@@ -27,7 +27,7 @@ export namespace pragma {
 	  protected:
 		void ApplyConstraint();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-		pragma::ComponentHandle<ConstraintComponent> m_constraintC;
+		ComponentHandle<ConstraintComponent> m_constraintC;
 		ClampRegion m_clampRegion = ClampRegion::Inside;
 		float m_distSqr = 0.f;
 		float m_dist = 0.f;

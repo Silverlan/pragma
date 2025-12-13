@@ -75,14 +75,14 @@ export namespace pragma::console {
 		Reset = Overlined << 1,
 	};
 
-	DLLNETWORK bool set_console_color(pragma::console::ConsoleColorFlags flags);
+	DLLNETWORK bool set_console_color(ConsoleColorFlags flags);
 	DLLNETWORK bool reset_console_color();
-	DLLNETWORK pragma::console::ConsoleColorFlags get_active_console_color_flags();
-	DLLNETWORK std::optional<Color> console_color_flags_to_color(pragma::console::ConsoleColorFlags flags);
-	DLLNETWORK pragma::console::ConsoleColorFlags color_to_console_color_flags(const Color &color);
-	DLLNETWORK std::string get_ansi_color_code(pragma::console::ConsoleColorFlags flags);
+	DLLNETWORK ConsoleColorFlags get_active_console_color_flags();
+	DLLNETWORK std::optional<Color> console_color_flags_to_color(ConsoleColorFlags flags);
+	DLLNETWORK ConsoleColorFlags color_to_console_color_flags(const Color &color);
+	DLLNETWORK std::string get_ansi_color_code(ConsoleColorFlags flags);
 
-	DLLNETWORK std::string get_true_color_code(std::optional<Color> foregroundColor, std::optional<Color> backgroundColor = {}, pragma::console::ConsoleDecoratorFlags flags = pragma::console::ConsoleDecoratorFlags::None);
+	DLLNETWORK std::string get_true_color_code(std::optional<Color> foregroundColor, std::optional<Color> backgroundColor = {}, ConsoleDecoratorFlags flags = ConsoleDecoratorFlags::None);
 	DLLNETWORK std::string get_reset_color_code();
 
 	enum class MessageFlags : uint8_t {

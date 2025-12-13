@@ -13,7 +13,7 @@ export namespace pragma::physics {
 	class DLLCLIENT CPhysWaterSurfaceSimulator : public PhysWaterSurfaceSimulator {
 	public:
 		CPhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 aabbMax, float originY, uint32_t spacing, float stiffness = 0.1f, float propagation = 100.f);
-		void Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::geometry::CModelSubMesh &mesh);
+		void Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, geometry::CModelSubMesh &mesh);
 		const std::vector<uint16_t> &GetTriangleIndices() const;
 		virtual void Simulate(double dt) override;
 		const std::shared_ptr<prosper::IBuffer> &GetParticleBuffer() const;
@@ -32,11 +32,11 @@ export namespace pragma::physics {
 
 		std::shared_ptr<prosper::IPrimaryCommandBuffer> m_cmdBuffer = nullptr;
 		uint32_t m_universalQueueFamilyIndex = std::numeric_limits<uint32_t>::max();
-		pragma::util::WeakHandle<prosper::Shader> m_whShaderSurface = {};
-		pragma::util::WeakHandle<prosper::Shader> m_whShaderSurfaceIntegrate = {};
-		pragma::util::WeakHandle<prosper::Shader> m_whShaderSurfaceSolveEdges = {};
-		pragma::util::WeakHandle<prosper::Shader> m_whShaderSurfaceSumEdges = {};
-		pragma::util::WeakHandle<prosper::Shader> m_whShaderWaterSplash = {};
+		util::WeakHandle<prosper::Shader> m_whShaderSurface = {};
+		util::WeakHandle<prosper::Shader> m_whShaderSurfaceIntegrate = {};
+		util::WeakHandle<prosper::Shader> m_whShaderSurfaceSolveEdges = {};
+		util::WeakHandle<prosper::Shader> m_whShaderSurfaceSumEdges = {};
+		util::WeakHandle<prosper::Shader> m_whShaderWaterSplash = {};
 
 		std::shared_ptr<prosper::IBuffer> m_particleBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_positionBuffer = nullptr;

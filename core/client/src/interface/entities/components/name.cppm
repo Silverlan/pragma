@@ -11,7 +11,7 @@ export import :entities.components.entity;
 export namespace pragma {
 	class DLLCLIENT CNameComponent final : public BaseNameComponent, public CBaseNetComponent {
 	  public:
-		CNameComponent(pragma::ecs::BaseEntity &ent) : BaseNameComponent(ent) {}
+		CNameComponent(ecs::BaseEntity &ent) : BaseNameComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

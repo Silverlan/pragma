@@ -169,16 +169,16 @@ void pragma::gui::types::WIImageSlideShow::PreloadNextImage(Int32 img)
 	imgPreload.image = img;
 
 	auto &wgui = pragma::gui::WGUI::GetInstance();
-	auto &matManager = static_cast<msys::CMaterialManager &>(wgui.GetMaterialManager());
+	auto &matManager = static_cast<material::CMaterialManager &>(wgui.GetMaterialManager());
 	auto &textureManager = matManager.GetTextureManager();
 	auto hSlideShow = GetHandle();
 
-	auto loadInfo = std::make_unique<msys::TextureLoadInfo>();
+	auto loadInfo = std::make_unique<material::TextureLoadInfo>();
 	loadInfo->flags |= pragma::util::AssetLoadFlags::AbsolutePath;
 	loadInfo->onLoaded = [this, hSlideShow](pragma::util::Asset &asset) {
 		if(!hSlideShow.IsValid())
 			return;
-		m_imgPreload.texture = msys::TextureManager::GetAssetObject(asset);
+		m_imgPreload.texture = material::TextureManager::GetAssetObject(asset);
 		m_imgPreload.ready = true;
 		m_imgPreload.loading = false;
 	};

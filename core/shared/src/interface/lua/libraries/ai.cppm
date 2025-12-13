@@ -10,6 +10,6 @@ export import pragma.lua;
 
 export namespace Lua {
 	namespace ai {
-		DLLNETWORK void register_library(Lua::Interface &lua);
+		DLLNETWORK void register_library(Interface &lua);
 	};
 };

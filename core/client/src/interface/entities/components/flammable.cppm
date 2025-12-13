@@ -14,13 +14,13 @@ export namespace pragma::ecs {
 export namespace pragma {
 	class DLLCLIENT CFlammableComponent final : public BaseFlammableComponent, public CBaseNetComponent {
 	  public:
-		CFlammableComponent(pragma::ecs::BaseEntity &ent) : BaseFlammableComponent(ent) {}
+		CFlammableComponent(ecs::BaseEntity &ent) : BaseFlammableComponent(ent) {}
 		virtual void Initialize() override;
-		virtual pragma::util::EventReply Ignite(float duration, pragma::ecs::BaseEntity *attacker = nullptr, pragma::ecs::BaseEntity *inflictor = nullptr) override;
+		virtual util::EventReply Ignite(float duration, ecs::BaseEntity *attacker = nullptr, ecs::BaseEntity *inflictor = nullptr) override;
 		virtual void Extinguish() override;
 		virtual void OnTick(double dt) override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(NetEventId eventId, NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 	  protected:
@@ -29,14 +29,14 @@ export namespace pragma {
 			IgniteInfo();
 			~IgniteInfo();
 			struct Particle {
-				Particle(pragma::ecs::CParticleSystemComponent &pt, uint32_t boneId = 0);
-				Particle(pragma::ecs::CParticleSystemComponent &pt, const Vector3 &offset);
-				pragma::util::WeakHandle<pragma::ecs::CParticleSystemComponent> hParticle;
+				Particle(ecs::CParticleSystemComponent &pt, uint32_t boneId = 0);
+				Particle(ecs::CParticleSystemComponent &pt, const Vector3 &offset);
+				util::WeakHandle<ecs::CParticleSystemComponent> hParticle;
 				uint32_t boneId;
 				Vector3 offset;
 			};
 			void Clear();
-			std::shared_ptr<pragma::audio::ALSound> sound = nullptr;
+			std::shared_ptr<audio::ALSound> sound = nullptr;
 			std::vector<Particle> flameParticles;
 		} m_igniteInfo = {};
 	};

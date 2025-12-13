@@ -159,63 +159,63 @@ export namespace luabind {
 	using adl::variant;
 
 	template<typename T>
-	struct lua_proxy_traits<adl::optional<T>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<optional<T>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx)
 		{
 			if constexpr(std::is_fundamental_v<T>)
 				return lua_proxy_traits<object>::check(L, idx) && (!Lua::IsSet(L, idx) || Lua::IsNumber(L, idx));
 			else
-				return lua_proxy_traits<object>::check(L, idx) && (!Lua::IsSet(L, idx) || luabind::object_cast_nothrow<T *>(luabind::from_stack {L, idx}, static_cast<T *>(nullptr)) != nullptr);
+				return lua_proxy_traits<object>::check(L, idx) && (!Lua::IsSet(L, idx) || luabind::object_cast_nothrow<T *>(from_stack {L, idx}, static_cast<T *>(nullptr)) != nullptr);
 		}
 	};
 
 	template<typename T>
-	struct lua_proxy_traits<adl::userData<T>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<userData<T>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsUserData(L, idx); }
 	};
 
 	template<typename T>
-	struct lua_proxy_traits<adl::classObject<T>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<classObject<T>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsUserData(L, idx); }
 	};
 
 	template<typename T>
-	struct lua_proxy_traits<adl::tableT<T>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<tableT<T>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsTable(L, idx); }
 	};
 
 	template<typename TKey, typename TVal>
-	struct lua_proxy_traits<adl::map<TKey, TVal>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<map<TKey, TVal>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsTable(L, idx); }
 	};
 
 	template<typename T, typename T2>
-	struct lua_proxy_traits<adl::tableTT<T, T2>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<tableTT<T, T2>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsTable(L, idx); }
 	};
 
 	template<typename... T>
-	struct lua_proxy_traits<adl::variant<T...>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<variant<T...>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx); }
 	};
 
 	template<typename... T>
-	struct lua_proxy_traits<adl::variadic<T...>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<variadic<T...>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx); }
 	};
 
 	template<typename... T>
-	struct lua_proxy_traits<adl::mult<T...>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<mult<T...>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx); }
 	};
 
 	template<typename T>
-	struct lua_proxy_traits<adl::typehint<T>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<typehint<T>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsSet(L, idx); }
 	};
 
 	template<typename TRet, typename... T>
-	struct lua_proxy_traits<adl::functype<TRet, T...>> : lua_proxy_traits<object> {
+	struct lua_proxy_traits<functype<TRet, T...>> : lua_proxy_traits<object> {
 		static bool check(lua::State *L, int idx) { return lua_proxy_traits<object>::check(L, idx) && Lua::IsFunction(L, idx); }
 	};
 };
@@ -250,7 +250,7 @@ export namespace Lua {
 		Exception(const std::string &err) : std::runtime_error {err} {}
 	};
 
-	DLLNETWORK void initialize_lua_state(Lua::Interface &lua);
+	DLLNETWORK void initialize_lua_state(Interface &lua);
 	DLLNETWORK void set_extended_lua_modules_enabled(bool b);
 	DLLNETWORK bool get_extended_lua_modules_enabled();
 };

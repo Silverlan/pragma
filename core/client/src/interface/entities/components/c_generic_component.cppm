@@ -11,7 +11,7 @@ export import pragma.shared;
 export namespace pragma {
 	class DLLCLIENT CGenericComponent final : public BaseGenericComponent {
 	  public:
-		CGenericComponent(pragma::ecs::BaseEntity &ent) : BaseGenericComponent(ent) {}
+		CGenericComponent(ecs::BaseEntity &ent) : BaseGenericComponent(ent) {}
 		virtual void InitializeLuaObject(lua::State *l) override;
 	};
 };

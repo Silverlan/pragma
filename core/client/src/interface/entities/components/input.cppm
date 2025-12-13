@@ -12,7 +12,7 @@ export import pragma.shared;
 export namespace pragma {
 	class DLLCLIENT CInputComponent final : public BaseEntityComponent {
 	  public:
-		CInputComponent(pragma::ecs::BaseEntity &ent);
+		CInputComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual ~CInputComponent() override;
 
@@ -24,7 +24,7 @@ export namespace pragma {
 	  private:
 		float m_mouseDeltaX = 0.f;
 		float m_mouseDeltaY = 0.f;
-		pragma::gui::Element *m_lastFocusedElement = nullptr;
+		gui::Element *m_lastFocusedElement = nullptr;
 		bool m_initialFocus = true;
 	};
 };

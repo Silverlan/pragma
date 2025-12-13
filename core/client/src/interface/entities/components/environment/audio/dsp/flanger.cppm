@@ -11,7 +11,7 @@ export import :entities.components.audio.dsp.base;
 export namespace pragma {
 	class DLLCLIENT CSoundDspFlangerComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspFlanger {
 	  public:
-		CSoundDspFlangerComponent(pragma::ecs::BaseEntity &ent) : CBaseSoundDspComponent(ent) {}
+		CSoundDspFlangerComponent(ecs::BaseEntity &ent) : CBaseSoundDspComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void OnEntitySpawn() override;
 		virtual void InitializeLuaObject(lua::State *l) override;

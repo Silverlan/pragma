@@ -31,14 +31,14 @@ export {
 
 	namespace pragma {
 		class NetworkState;
-		class DLLNETWORK Engine : public console::CVarHandler, public pragma::util::CallbackHandler {
+		class DLLNETWORK Engine : public console::CVarHandler, public util::CallbackHandler {
 		  public:
 			static const uint32_t DEFAULT_TICK_RATE;
 			// For internal use only! Not to be used directly!
 		  private:
 			// Note: m_libServer needs to be the first member, to ensure it's destroyed last!
-			mutable std::shared_ptr<pragma::util::Library> m_libServer = nullptr;
-			mutable pragma::IServerState m_iServerState;
+			mutable std::shared_ptr<util::Library> m_libServer = nullptr;
+			mutable IServerState m_iServerState;
 		  public:
 			struct DLLNETWORK ConVarInfoList {
 				using ConVarArgs = std::vector<std::string>;
@@ -62,13 +62,13 @@ export {
 			class DLLNETWORK StateInstance {
 			  public:
 				~StateInstance();
-				StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager, msys::Material *matErr);
-				std::shared_ptr<msys::MaterialManager> materialManager;
+				StateInstance(const std::shared_ptr<material::MaterialManager> &matManager, material::Material *matErr);
+				std::shared_ptr<material::MaterialManager> materialManager;
 				std::unique_ptr<NetworkState> state;
 			};
 			struct DLLNETWORK ConsoleOutput {
 				std::string output;
-				pragma::console::MessageFlags messageFlags;
+				console::MessageFlags messageFlags;
 				std::shared_ptr<Color> color;
 			};
 			enum class ConsoleType : uint8_t { None = 0, Terminal, GUI, GUIDetached };
@@ -87,7 +87,7 @@ export {
 			std::atomic<bool> m_bRecordConsoleOutput = false;
 			std::mutex m_consoleOutputMutex = {};
 		  public:
-			static pragma::Engine *Get();
+			static Engine *Get();
 			Engine(int argc, char *argv[]);
 			virtual ~Engine();
 
@@ -130,20 +130,20 @@ export {
 			void SetRunUpdaterOnClose(bool run);
 			bool ShouldRunUpdaterOnClose() const;
 
-			uint32_t ClearUnusedAssets(pragma::asset::Type type, bool verbose = false) const;
-			uint32_t ClearUnusedAssets(const std::vector<pragma::asset::Type> &types, bool verbose = false) const;
+			uint32_t ClearUnusedAssets(asset::Type type, bool verbose = false) const;
+			uint32_t ClearUnusedAssets(const std::vector<asset::Type> &types, bool verbose = false) const;
 			virtual void SetAssetMultiThreadedLoadingEnabled(bool enabled);
 			void UpdateAssetMultiThreadedLoadingEnabled();
 
 			// Debug
-			pragma::debug::CPUProfiler &GetProfiler() const;
-			pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *GetProfilingStageManager();
+			debug::CPUProfiler &GetProfiler() const;
+			debug::ProfilingStageManager<debug::ProfilingStage> *GetProfilingStageManager();
 			CallbackHandle AddProfilingHandler(const std::function<void(bool)> &handler);
 			void SetProfilingEnabled(bool bEnabled);
 			bool StartProfilingStage(const char *stage);
 			bool StopProfilingStage();
 
-			pragma::pad::PackageManager *GetPADPackageManager() const;
+			pad::PackageManager *GetPADPackageManager() const;
 
 			void SetVerbose(bool bVerbose);
 			bool IsVerbose() const;
@@ -209,7 +209,7 @@ export {
 			// NetState
 			virtual NetworkState *GetActiveState();
 
-			virtual StateInstance &GetStateInstance(pragma::NetworkState &nw);
+			virtual StateInstance &GetStateInstance(NetworkState &nw);
 			StateInstance &GetServerStateInstance();
 
 			std::optional<ConsoleOutput> PollConsoleOutput();
@@ -219,7 +219,7 @@ export {
 
 			virtual bool IsMultiPlayer() const;
 			bool IsSinglePlayer() const;
-			bool IsActiveState(pragma::NetworkState *state);
+			bool IsActiveState(NetworkState *state);
 			bool IsServerRunning();
 			// Same as GetServerState, but returns base pointer
 			NetworkState *GetServerNetworkState() const;
@@ -232,7 +232,7 @@ export {
 			std::optional<uint64_t> GetServerSteamId() const;
 
 			std::thread::id GetMainThreadId() const;
-			void InitializeAssetManager(pragma::util::FileAssetManager &assetManager) const;
+			void InitializeAssetManager(util::FileAssetManager &assetManager) const;
 
 			virtual void StartNewGame(const std::string &map, bool singlePlayer);
 
@@ -240,7 +240,7 @@ export {
 			// When run in dedicated-server: Starts a new game, loads the specified map and automatically starts a listener server.
 			virtual void StartDefaultGame(const std::string &map);
 
-			const pragma::IServerState &GetServerStateInterface() const;
+			const IServerState &GetServerStateInterface() const;
 
 			// Config
 			bool ExecConfig(const std::string &cfg);
@@ -255,15 +255,15 @@ export {
 			int32_t GetRemoteDebugging() const;
 
 			void ShutDown();
-			void AddParallelJob(const pragma::util::ParallelJobWrapper &job, const std::string &jobName);
+			void AddParallelJob(const util::ParallelJobWrapper &job, const std::string &jobName);
 
 			void LockResourceWatchers();
 			void UnlockResourceWatchers();
-			pragma::util::ScopeGuard ScopeLockResourceWatchers();
+			util::ScopeGuard ScopeLockResourceWatchers();
 			void PollResourceWatchers();
 
-			pragma::asset::AssetManager &GetAssetManager();
-			const pragma::asset::AssetManager &GetAssetManager() const;
+			asset::AssetManager &GetAssetManager();
+			const asset::AssetManager &GetAssetManager() const;
 
 			void AddTickEvent(const std::function<void()> &ev);
 
@@ -272,12 +272,12 @@ export {
 		  protected:
 			void UpdateParallelJobs();
 			bool RunEngineConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
-			void WriteServerConfig(VFilePtrReal f);
-			void WriteEngineConfig(VFilePtrReal f);
-			void RestoreConVarsForUnknownCommands(VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<console::ConConf>> &stateConVars);
+			void WriteServerConfig(fs::VFilePtrReal f);
+			void WriteEngineConfig(fs::VFilePtrReal f);
+			void RestoreConVarsForUnknownCommands(fs::VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<console::ConConf>> &stateConVars);
 			void RegisterSharedConsoleCommands(console::ConVarMap &map);
 			void RunTickEvents();
-			virtual uint32_t DoClearUnusedAssets(pragma::asset::Type type) const;
+			virtual uint32_t DoClearUnusedAssets(asset::Type type) const;
 			virtual void RegisterConsoleCommands();
 			virtual void UpdateTickCount();
 			struct DLLNETWORK LaunchCommand {
@@ -314,11 +314,11 @@ export {
 			ChronoTime m_ctTick;
 			long long m_lastTick;
 			uint64_t m_tickCount = 0;
-			std::shared_ptr<VFilePtrInternalReal> m_logFile;
-			std::unique_ptr<pragma::asset::AssetManager> m_assetManager;
+			std::shared_ptr<fs::VFilePtrInternalReal> m_logFile;
+			std::unique_ptr<asset::AssetManager> m_assetManager;
 
 			struct JobInfo {
-				pragma::util::ParallelJobWrapper job = {};
+				util::ParallelJobWrapper job = {};
 				std::string name = "";
 				float lastProgress = 0.f;
 				std::optional<float> timeRemaining = {};
@@ -330,14 +330,14 @@ export {
 			std::vector<JobInfo> m_parallelJobs {};
 			std::mutex m_parallelJobMutex = {};
 
-			std::shared_ptr<pragma::debug::CPUProfiler> m_cpuProfiler;
+			std::shared_ptr<debug::CPUProfiler> m_cpuProfiler;
 			std::vector<CallbackHandle> m_profileHandlers = {};
 
 			std::queue<std::function<void()>> m_tickEventQueue;
 			std::mutex m_tickEventQueueMutex;
 			StateFlags m_stateFlags;
-			mutable pragma::pad::PackageManager *m_padPackageManager = nullptr;
-			std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>> m_profilingStageManager;
+			mutable pad::PackageManager *m_padPackageManager = nullptr;
+			std::unique_ptr<debug::ProfilingStageManager<debug::ProfilingStage>> m_profilingStageManager;
 
 			std::unordered_map<std::string, std::function<void(int, char *[])>> m_launchOptions;
 
@@ -350,7 +350,7 @@ export {
 	REGISTER_ENUM_FLAGS(pragma::Engine::StateFlags)
 
 	namespace pragma {
-		DLLNETWORK pragma::Engine *get_engine();
+		DLLNETWORK Engine *get_engine();
 		DLLNETWORK NetworkState *get_server_state();
 
 		template<class T>

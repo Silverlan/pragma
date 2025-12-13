@@ -42,11 +42,11 @@ void pragma::audio::CSSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	for(auto &type : al::get_aux_types()) {
+	for(auto &type : pragma::audio::get_aux_types()) {
 		auto dataBlock = prop[type];
 		if(!dataBlock)
 			continue;
-		auto effect = al::create_aux_effect(type, dataBlock);
+		auto effect = pragma::audio::create_aux_effect(type, dataBlock);
 		if(effect != nullptr)
 			effects.push_back(effect);
 	}

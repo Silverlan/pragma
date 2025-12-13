@@ -35,28 +35,28 @@ export namespace Lua {
 	template<class T, class TCast>
 	bool get_table_value(lua::State *l, const std::string &name, uint32_t t, TCast &ret, const std::function<T(lua::State *, int32_t)> &check)
 	{
-		Lua::PushString(l, name); /* 1 */
-		Lua::GetTableValue(l, t);
+		PushString(l, name); /* 1 */
+		GetTableValue(l, t);
 		auto r = false;
-		if(Lua::IsSet(l, -1) == true) {
+		if(IsSet(l, -1) == true) {
 			ret = static_cast<TCast>(check(l, -1));
 			r = true;
 		}
-		Lua::Pop(l, 1); /* 0 */
+		Pop(l, 1); /* 0 */
 		return r;
 	}
 	template<typename T>
 	void get_table_values(lua::State *l, uint32_t tIdx, std::vector<T> &values, const std::function<T(lua::State *, int32_t)> &tCheck)
 	{
-		Lua::CheckTable(l, tIdx);
-		auto numOffsets = Lua::GetObjectLength(l, tIdx);
+		CheckTable(l, tIdx);
+		auto numOffsets = GetObjectLength(l, tIdx);
 		values.reserve(numOffsets);
 		for(auto i = decltype(numOffsets) {0}; i < numOffsets; ++i) {
-			Lua::PushInt(l, i + 1);
-			Lua::GetTableValue(l, tIdx);
+			PushInt(l, i + 1);
+			GetTableValue(l, tIdx);
 
 			values.push_back(tCheck(l, -1));
-			Lua::Pop(l, 1);
+			Pop(l, 1);
 		}
 	}
 	template<typename T>

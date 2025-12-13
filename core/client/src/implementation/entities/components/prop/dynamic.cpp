@@ -16,13 +16,13 @@ void CPropDynamicComponent::Initialize() { BasePropDynamicComponent::Initialize(
 void CPropDynamicComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BasePropDynamicComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(pragma::CPhysicsComponent)) {
-		auto *pPhysComponent = static_cast<pragma::CPhysicsComponent *>(&component);
-		pPhysComponent->SetMoveType(pragma::physics::MoveType::None);
+	if(typeid(component) == typeid(CPhysicsComponent)) {
+		auto *pPhysComponent = static_cast<CPhysicsComponent *>(&component);
+		pPhysComponent->SetMoveType(physics::MoveType::None);
 		// m_propPhysType = pragma::physics::PhysicsType::Dynamic;
 	}
-	else if(typeid(component) == typeid(pragma::CRenderComponent)) {
-		auto *pRenderComponent = static_cast<pragma::CRenderComponent *>(&component);
+	else if(typeid(component) == typeid(CRenderComponent)) {
+		auto *pRenderComponent = static_cast<CRenderComponent *>(&component);
 		pRenderComponent->SetCastShadows(true);
 	}
 }

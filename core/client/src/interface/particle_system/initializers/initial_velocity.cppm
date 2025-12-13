@@ -13,8 +13,8 @@ export namespace pragma::pts {
 	class DLLCLIENT CParticleInitializerInitialVelocity : public CParticleInitializer {
 	public:
 		CParticleInitializerInitialVelocity() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override;
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+		virtual void OnParticleCreated(CParticle &particle) override;
 		float GetSpeed() const;
 	private:
 		Vector3 m_direction = {};

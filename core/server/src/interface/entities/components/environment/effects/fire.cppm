@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SFireComponent final : public BaseEnvFireComponent {
 		  public:
-			SFireComponent(pragma::ecs::BaseEntity &ent) : BaseEnvFireComponent(ent) {}
+			SFireComponent(ecs::BaseEntity &ent) : BaseEnvFireComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

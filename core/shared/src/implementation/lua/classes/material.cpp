@@ -15,9 +15,9 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::material, Material);
 void Lua::Material::register_class(luabind::class_<pragma::material::Material> &classDef)
 {
 	classDef.def(luabind::tostring(luabind::self));
-	classDef.add_static_constant("ALPHA_MODE_OPAQUE", pragma::math::to_integral(::AlphaMode::Opaque));
-	classDef.add_static_constant("ALPHA_MODE_MASK", pragma::math::to_integral(::AlphaMode::Mask));
-	classDef.add_static_constant("ALPHA_MODE_BLEND", pragma::math::to_integral(::AlphaMode::Blend));
+	classDef.add_static_constant("ALPHA_MODE_OPAQUE", pragma::math::to_integral(AlphaMode::Opaque));
+	classDef.add_static_constant("ALPHA_MODE_MASK", pragma::math::to_integral(AlphaMode::Mask));
+	classDef.add_static_constant("ALPHA_MODE_BLEND", pragma::math::to_integral(AlphaMode::Blend));
 	classDef.add_static_constant("DETAIL_BLEND_MODE_DECAL_MODULATE", pragma::math::to_integral(pragma::material::DetailMode::DecalModulate));
 	classDef.add_static_constant("DETAIL_BLEND_MODE_ADDITIVE", pragma::math::to_integral(pragma::material::DetailMode::Additive));
 	classDef.add_static_constant("DETAIL_BLEND_MODE_TRANSLUCENT_DETAIL", pragma::math::to_integral(pragma::material::DetailMode::TranslucentDetail));
@@ -32,7 +32,7 @@ void Lua::Material::register_class(luabind::class_<pragma::material::Material> &
 	classDef.add_static_constant("DETAIL_BLEND_MODE_SSBUMP_ALBEDO", pragma::math::to_integral(pragma::material::DetailMode::SSBumpAlbedo));
 	classDef.add_static_constant("DETAIL_BLEND_MODE_COUNT", pragma::math::to_integral(pragma::material::DetailMode::Count));
 	classDef.add_static_constant("DETAIL_BLEND_MODE_INVALID", pragma::math::to_integral(pragma::material::DetailMode::Invalid));
-	classDef.scope[luabind::def("detail_blend_mode_to_enum", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &name) { Lua::PushInt(l, pragma::math::to_integral(pragma::material::to_detail_mode(name))); }))];
+	classDef.scope[luabind::def("detail_blend_mode_to_enum", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &name) { PushInt(l, pragma::math::to_integral(pragma::material::to_detail_mode(name))); }))];
 	classDef.def("IsValid", &pragma::material::Material::IsValid);
 	classDef.def("GetShaderName", &pragma::material::Material::GetShaderIdentifier);
 	classDef.def("GetName", &pragma::material::Material::GetName);
@@ -44,7 +44,7 @@ void Lua::Material::register_class(luabind::class_<pragma::material::Material> &
 		auto matCopy = mat.Copy();
 		if(matCopy == nullptr)
 			return;
-		Lua::Push<::pragma::material::MaterialHandle>(l, matCopy->GetHandle());
+		Lua::Push<pragma::material::MaterialHandle>(l, matCopy->GetHandle());
 	}));
 	classDef.def("UpdateTextures", &pragma::material::Material::UpdateTextures);
 	classDef.def("UpdateTextures", &pragma::material::Material::UpdateTextures, luabind::default_parameter_policy<2, bool {false}> {});
@@ -81,22 +81,22 @@ void Lua::Material::register_class(luabind::class_<pragma::material::Material> &
 	classDef.def("ClearProperty", static_cast<void (pragma::material::Material::*)(const std::string_view &, bool)>(&pragma::material::Material::ClearProperty));
 	classDef.def("ClearProperty", static_cast<void (pragma::material::Material::*)(const std::string_view &, bool)>(&pragma::material::Material::ClearProperty), luabind::default_parameter_policy<3, bool {true}> {});
 	classDef.def(
-	  "SetProperty", +[](pragma::material::Material &mat, const std::string_view &key, ::udm::Type type, Lua::udm_type value) {
+	  "SetProperty", +[](pragma::material::Material &mat, const std::string_view &key, ::udm::Type type, udm_type value) {
 		  ::udm::visit(type, [&mat, &key, &value](auto tag) {
 			  using T = typename decltype(tag)::type;
 			  if constexpr(pragma::material::is_property_type<T>)
-				  mat.SetProperty(key, Lua::udm::cast_object<T>(value));
+				  mat.SetProperty(key, udm::cast_object<T>(value));
 		  });
 	  });
 	classDef.def(
-	  "SetProperty", +[](pragma::material::Material &mat, const std::string_view &key, Lua::udm_type value) {
-		  auto type = Lua::udm::determine_udm_type(value);
+	  "SetProperty", +[](pragma::material::Material &mat, const std::string_view &key, udm_type value) {
+		  auto type = udm::determine_udm_type(value);
 		  if(type == ::udm::Type::Invalid)
 			  return;
 		  ::udm::visit(type, [&mat, &key, &value](auto tag) {
 			  using T = typename decltype(tag)::type;
 			  if constexpr(pragma::material::is_property_type<T>)
-				  mat.SetProperty(key, Lua::udm::cast_object<T>(value));
+				  mat.SetProperty(key, udm::cast_object<T>(value));
 		  });
 	  });
 	classDef.def(
@@ -108,11 +108,11 @@ void Lua::Material::register_class(luabind::class_<pragma::material::Material> &
 				  if(mat.GetProperty<T>(key, &val))
 					  return luabind::object {l, val};
 			  }
-			  return Lua::nil;
+			  return nil;
 		  });
 	  });
 	classDef.def(
-	  "GetProperty", +[](lua::State *l, pragma::material::Material &mat, const std::string_view &key, ::udm::Type type, Lua::udm_type defVal) -> luabind::object {
+	  "GetProperty", +[](lua::State *l, pragma::material::Material &mat, const std::string_view &key, ::udm::Type type, udm_type defVal) -> luabind::object {
 		  return ::udm::visit(type, [l, &mat, &key, &defVal](auto tag) -> luabind::object {
 			  using T = typename decltype(tag)::type;
 			  if constexpr(pragma::material::is_property_type<T>) {
@@ -120,7 +120,7 @@ void Lua::Material::register_class(luabind::class_<pragma::material::Material> &
 				  val = mat.GetProperty<T>(key, val);
 				  return luabind::object {l, val};
 			  }
-			  return Lua::nil;
+			  return nil;
 		  });
 	  });
 	classDef.def("GetPropertyValueType", &pragma::material::Material::GetPropertyValueType);

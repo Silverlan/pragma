@@ -370,10 +370,10 @@ bool Lua::file::validate_write_operation(lua::State *l, std::string &path, std::
 			return true;
 		}
 	}
-	auto fpath = pragma::util::FilePath(pragma::fs::get_canonicalized_path(Lua::get_current_file(l)));
+	auto fpath = pragma::util::FilePath(pragma::fs::get_canonicalized_path(get_current_file(l)));
 	auto fname = fpath.GetString();
 	if(fname.length() < 8 || pragma::string::compare(fname.c_str(), "addons/", false, 7) == false) {
-		if(Lua::get_extended_lua_modules_enabled()) {
+		if(get_extended_lua_modules_enabled()) {
 			outRootPath = "";
 			return true;
 		}
@@ -432,7 +432,7 @@ bool Lua::file::Delete(lua::State *l, std::string ppath)
 	auto path = ppath;
 	if(validate_write_operation(l, path) == false)
 		return false;
-	if(Lua::get_extended_lua_modules_enabled() && pragma::fs::exists(path) == false && pragma::fs::exists(ppath))
+	if(get_extended_lua_modules_enabled() && pragma::fs::exists(path) == false && pragma::fs::exists(ppath))
 		return pragma::fs::remove_file(ppath);
 	return pragma::fs::remove_file(path);
 }
@@ -442,7 +442,7 @@ bool Lua::file::DeleteDir(lua::State *l, std::string ppath)
 	auto path = ppath;
 	if(validate_write_operation(l, path) == false)
 		return false;
-	if(Lua::get_extended_lua_modules_enabled() && pragma::fs::exists(path) == false && pragma::fs::exists(ppath))
+	if(get_extended_lua_modules_enabled() && pragma::fs::exists(path) == false && pragma::fs::exists(ppath))
 		return pragma::fs::remove_directory(ppath);
 	return pragma::fs::remove_directory(path);
 }
@@ -490,14 +490,14 @@ void Lua::file::find_external_game_resource_files(lua::State *l, const std::stri
 luabind::object Lua::file::FindLuaFiles(lua::State *l, const std::string &path, pragma::fs::SearchFlags searchFlag)
 {
 	std::vector<std::string> files;
-	pragma::fs::find_files((path + "/*." + Lua::FILE_EXTENSION), &files, nullptr, searchFlag);
-	pragma::fs::find_files((path + "/*." + Lua::FILE_EXTENSION_PRECOMPILED), &files, nullptr, searchFlag);
+	pragma::fs::find_files((path + "/*." + FILE_EXTENSION), &files, nullptr, searchFlag);
+	pragma::fs::find_files((path + "/*." + FILE_EXTENSION_PRECOMPILED), &files, nullptr, searchFlag);
 
 	auto t = luabind::newtable(l);
 	auto idx = 1;
 	for(auto &f : files) {
 		ufile::remove_extension_from_filename(f);
-		f += Lua::DOT_FILE_EXTENSION;
+		f += DOT_FILE_EXTENSION;
 		t[idx++] = f;
 	}
 	return t;

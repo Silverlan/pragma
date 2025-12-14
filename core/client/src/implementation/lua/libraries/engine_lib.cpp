@@ -32,11 +32,11 @@ std::shared_ptr<const pragma::gui::FontInfo> Lua::engine::get_font(lua::State *l
 void Lua::engine::register_library(lua::State *l)
 {
 	auto modEngine = luabind::module_(l, "engine");
-	modEngine[(luabind::def("create_font", static_cast<std::shared_ptr<const pragma::gui::FontInfo> (*)(lua::State *, const std::string &, const std::string &, pragma::FontSetFlag, uint32_t, bool)>(Lua::engine::create_font)),
-	  luabind::def("create_font", static_cast<std::shared_ptr<const pragma::gui::FontInfo> (*)(lua::State *, const std::string &, const std::string &, pragma::FontSetFlag, uint32_t)>(Lua::engine::create_font)), luabind::def("get_font", Lua::engine::get_font),
-	  luabind::def("set_fixed_frame_delta_time_interpretation", Lua::engine::set_fixed_frame_delta_time_interpretation), luabind::def("clear_fixed_frame_delta_time_interpretation", Lua::engine::clear_fixed_frame_delta_time_interpretation),
-	  luabind::def("set_tick_delta_time_tied_to_frame_rate", Lua::engine::set_tick_delta_time_tied_to_frame_rate), luabind::def("get_window_resolution", Lua::engine::get_window_resolution), luabind::def("get_render_resolution", Lua::engine::get_render_resolution),
-	  luabind::def("get_staging_render_target", Lua::engine::get_staging_render_target), luabind::def("get_current_frame_index", &Lua::engine::get_current_frame_index), luabind::def("get_default_font_set_name", &pragma::CEngine::GetDefaultFontSetName),
+	modEngine[(luabind::def("create_font", static_cast<std::shared_ptr<const pragma::gui::FontInfo> (*)(lua::State *, const std::string &, const std::string &, pragma::FontSetFlag, uint32_t, bool)>(create_font)),
+	  luabind::def("create_font", static_cast<std::shared_ptr<const pragma::gui::FontInfo> (*)(lua::State *, const std::string &, const std::string &, pragma::FontSetFlag, uint32_t)>(create_font)), luabind::def("get_font", get_font),
+	  luabind::def("set_fixed_frame_delta_time_interpretation", set_fixed_frame_delta_time_interpretation), luabind::def("clear_fixed_frame_delta_time_interpretation", clear_fixed_frame_delta_time_interpretation),
+	  luabind::def("set_tick_delta_time_tied_to_frame_rate", set_tick_delta_time_tied_to_frame_rate), luabind::def("get_window_resolution", get_window_resolution), luabind::def("get_render_resolution", get_render_resolution),
+	  luabind::def("get_staging_render_target", get_staging_render_target), luabind::def("get_current_frame_index", &get_current_frame_index), luabind::def("get_default_font_set_name", &pragma::CEngine::GetDefaultFontSetName),
 	  luabind::def(
 	    "get_font_sets", +[]() -> std::vector<std::string> {
 		    std::vector<std::string> fontSets;
@@ -58,9 +58,9 @@ void Lua::engine::register_library(lua::State *l)
 		  return zipFileName;
 	  })];
 
-	Lua::engine::register_shared_functions(l, modEngine);
+	register_shared_functions(l, modEngine);
 
-	Lua::RegisterLibraryEnums(l, "engine",
+	RegisterLibraryEnums(l, "engine",
 	  {{"FONT_FEATURE_FLAG_NONE", pragma::math::to_integral(pragma::FontSetFlag::None)}, {"FONT_FEATURE_FLAG_BOLD_BIT", pragma::math::to_integral(pragma::FontSetFlag::Bold)}, {"FONT_FEATURE_FLAG_ITALIC_BIT", pragma::math::to_integral(pragma::FontSetFlag::Italic)},
 	    {"FONT_FEATURE_FLAG_MONO_BIT", pragma::math::to_integral(pragma::FontSetFlag::Mono)}, {"FONT_FEATURE_FLAG_SERIF_BIT", pragma::math::to_integral(pragma::FontSetFlag::Serif)}, {"FONT_FEATURE_FLAG_SANS_BIT", pragma::math::to_integral(pragma::FontSetFlag::Sans)}});
 }
@@ -174,12 +174,12 @@ pragma::material::Material *Lua::engine::load_material(lua::State *l, const std:
 
 pragma::material::Material *Lua::asset_client::get_error_material() { return pragma::get_client_state()->GetMaterialManager().GetErrorMaterial(); }
 
-void Lua::asset_client::register_library(Lua::Interface &lua, luabind::module_ &modAsset)
+void Lua::asset_client::register_library(Interface &lua, luabind::module_ &modAsset)
 {
-	modAsset[(luabind::def("create_material", static_cast<std::shared_ptr<pragma::material::Material> (*)(const std::string &, const std::string &)>(Lua::asset_client::create_material)),
-	  luabind::def("create_material", static_cast<std::shared_ptr<pragma::material::Material> (*)(const std::string &)>(Lua::asset_client::create_material)), luabind::def("create_material", static_cast<std::shared_ptr<pragma::material::Material> (*)(const ::udm::AssetData &)>(Lua::asset_client::create_material)),
-	  luabind::def("get_material", static_cast<pragma::material::Material *(*)(const std::string &)>(Lua::asset_client::get_material)), luabind::def("precache_model", static_cast<void (*)(lua::State *, const std::string &)>(Lua::engine::precache_model)),
-	  luabind::def("precache_material", static_cast<void (*)(lua::State *, const std::string &)>(Lua::engine::precache_material)), luabind::def("get_error_material", Lua::asset_client::get_error_material))];
+	modAsset[(luabind::def("create_material", static_cast<std::shared_ptr<pragma::material::Material> (*)(const std::string &, const std::string &)>(create_material)),
+	  luabind::def("create_material", static_cast<std::shared_ptr<pragma::material::Material> (*)(const std::string &)>(create_material)), luabind::def("create_material", static_cast<std::shared_ptr<pragma::material::Material> (*)(const ::udm::AssetData &)>(create_material)),
+	  luabind::def("get_material", static_cast<pragma::material::Material *(*)(const std::string &)>(get_material)), luabind::def("precache_model", static_cast<void (*)(lua::State *, const std::string &)>(engine::precache_model)),
+	  luabind::def("precache_material", static_cast<void (*)(lua::State *, const std::string &)>(engine::precache_material)), luabind::def("get_error_material", get_error_material))];
 }
 
 std::shared_ptr<pragma::material::Material> Lua::asset_client::create_material(const std::string &identifier, const std::string &shader)
@@ -217,12 +217,12 @@ int Lua::engine::create_particle_system(lua::State *l)
 	std::vector<std::string> children;
 	pragma::ecs::CParticleSystemComponent *particle;
 	auto bRecordKeyvalues = false;
-	if(Lua::IsSet(l, 3))
-		bRecordKeyvalues = Lua::CheckBool(l, 3);
-	if(Lua::IsString(l, 1)) {
-		std::string name = Lua::CheckString(l, 1);
+	if(IsSet(l, 3))
+		bRecordKeyvalues = CheckBool(l, 3);
+	if(IsString(l, 1)) {
+		std::string name = CheckString(l, 1);
 		pragma::ecs::CParticleSystemComponent *parent = nullptr;
-		if(Lua::IsSet(l, 2)) {
+		if(IsSet(l, 2)) {
 			auto &hParent = Lua::Check<pragma::ecs::CParticleSystemComponent>(l, 2);
 			parent = &hParent;
 		}
@@ -238,30 +238,30 @@ int Lua::engine::create_particle_system(lua::State *l)
 		std::vector<std::unique_ptr<ParticleData>> operators;
 		std::vector<std::unique_ptr<ParticleData>> renderers;
 
-		Lua::CheckTable(l, 1);
-		Lua::PushNil(l);
-		while(Lua::GetNextPair(l, 1) != 0) {
-			Lua::PushValue(l, -2);
-			std::string key = Lua::ToString(l, -3);
-			if(!Lua::IsTable(l, -2)) {
-				std::string val = Lua::ToString(l, -2);
+		CheckTable(l, 1);
+		PushNil(l);
+		while(GetNextPair(l, 1) != 0) {
+			PushValue(l, -2);
+			std::string key = ToString(l, -3);
+			if(!IsTable(l, -2)) {
+				std::string val = ToString(l, -2);
 				pragma::string::to_lower(key);
 				values[key] = val;
-				Lua::RemoveValue(l, -3);
-				Lua::RemoveValue(l, -2);
+				RemoveValue(l, -3);
+				RemoveValue(l, -2);
 			}
 			else if(key == "initializers" || key == "operators" || key == "renderers") {
 				uint8_t type = (key == "initializers") ? 0 : ((key == "operators") ? 1 : 2);
-				Lua::CheckTable(l, -2);
-				auto t = Lua::GetStackTop(l) - 1;
-				Lua::PushNil(l);                   /* 1 */
-				while(Lua::GetNextPair(l, t) != 0) /* 2 */
+				CheckTable(l, -2);
+				auto t = GetStackTop(l) - 1;
+				PushNil(l);                   /* 1 */
+				while(GetNextPair(l, t) != 0) /* 2 */
 				{
-					Lua::PushValue(l, -2); /* 3 */
+					PushValue(l, -2); /* 3 */
 					const int8_t k = -3;
 					const int8_t v = -2;
-					auto *name = Lua::ToString(l, k);
-					Lua::CheckTable(l, v);
+					auto *name = ToString(l, k);
+					CheckTable(l, v);
 					auto tObj = luabind::object(luabind::from_stack(l, v));
 					if(type == 0)
 						initializers.push_back(std::make_unique<ParticleData>(name, tObj));
@@ -269,33 +269,33 @@ int Lua::engine::create_particle_system(lua::State *l)
 						operators.push_back(std::make_unique<ParticleData>(name, tObj));
 					else
 						renderers.push_back(std::make_unique<ParticleData>(name, tObj));
-					Lua::RemoveValue(l, k); /* 2 */
-					Lua::RemoveValue(l, v); /* 1 */
+					RemoveValue(l, k); /* 2 */
+					RemoveValue(l, v); /* 1 */
 				} /* 0 */
-				Lua::RemoveValue(l, -3);
-				Lua::RemoveValue(l, -2);
+				RemoveValue(l, -3);
+				RemoveValue(l, -2);
 			}
 			else if(key == "children") {
-				int tchildren = Lua::GetStackTop(l) - 1;
-				Lua::PushNil(l);
-				while(Lua::GetNextPair(l, tchildren) != 0) {
-					if(!Lua::IsTable(l, -1)) {
-						std::string child = Lua::ToString(l, -1);
+				int tchildren = GetStackTop(l) - 1;
+				PushNil(l);
+				while(GetNextPair(l, tchildren) != 0) {
+					if(!IsTable(l, -1)) {
+						std::string child = ToString(l, -1);
 						pragma::string::to_lower(child);
 						children.push_back(child);
-						Lua::RemoveValue(l, -1);
+						RemoveValue(l, -1);
 					}
 					else
-						Lua::Pop(l, 1);
+						Pop(l, 1);
 				}
-				Lua::RemoveValue(l, -3);
-				Lua::RemoveValue(l, -2);
+				RemoveValue(l, -3);
+				RemoveValue(l, -2);
 			}
 			else
-				Lua::Pop(l, 2);
+				Pop(l, 2);
 		}
 		pragma::ecs::CParticleSystemComponent *parent = nullptr;
-		if(Lua::IsSet(l, 2)) {
+		if(IsSet(l, 2)) {
 			auto &hParent = Lua::Check<pragma::ecs::CParticleSystemComponent>(l, 2);
 			parent = &hParent;
 		}
@@ -304,25 +304,25 @@ int Lua::engine::create_particle_system(lua::State *l)
 			particle->PushLuaObject(l); /* 1 */
 
 			for(auto &initializer : initializers) {
-				Lua::PushString(l, initializer->name); /* 2 */
+				PushString(l, initializer->name); /* 2 */
 				initializer->table.push(l);            /* 3 */
 				particle->AddInitializer(initializer->name, pragma::ecs::get_particle_key_values(l, initializer->table));
-				Lua::Pop(l, 2); /* 1 */
+				Pop(l, 2); /* 1 */
 			}
 			for(auto &op : operators) {
-				Lua::PushString(l, op->name); /* 2 */
+				PushString(l, op->name); /* 2 */
 				op->table.push(l);            /* 3 */
 				particle->AddOperator(op->name, pragma::ecs::get_particle_key_values(l, op->table));
-				Lua::Pop(l, 2); /* 1 */
+				Pop(l, 2); /* 1 */
 			}
 			for(auto &renderer : renderers) {
-				Lua::PushString(l, renderer->name); /* 2 */
+				PushString(l, renderer->name); /* 2 */
 				renderer->table.push(l);            /* 3 */
 				particle->AddRenderer(renderer->name, pragma::ecs::get_particle_key_values(l, renderer->table));
-				Lua::Pop(l, 2); /* 1 */
+				Pop(l, 2); /* 1 */
 			}
 
-			Lua::Pop(l, 1); /* 0 */
+			Pop(l, 1); /* 0 */
 		}
 	}
 	if(particle == nullptr)
@@ -338,25 +338,25 @@ bool Lua::engine::precache_particle_system(lua::State *l, const std::string &par
 
 int Lua::engine::save_particle_system(lua::State *l)
 {
-	std::string name = Lua::CheckString(l, 1);
-	Lua::CheckTable(l, 2);
+	std::string name = CheckString(l, 1);
+	CheckTable(l, 2);
 	name = pragma::asset::get_normalized_path(name, pragma::asset::Type::ParticleSystem);
 	name = "particles/" + name;
 	std::string rootPath;
-	if(Lua::file::validate_write_operation(l, name, rootPath) == false) {
-		Lua::PushBool(l, false);
+	if(file::validate_write_operation(l, name, rootPath) == false) {
+		PushBool(l, false);
 		return 1;
 	}
 
 	{
 		auto t = 2;
 
-		Lua::PushInt(l, 1);
-		Lua::GetTableValue(l, t);
+		PushInt(l, 1);
+		GetTableValue(l, t);
 		auto bParticleSystem = Lua::IsType<pragma::util::WeakHandle<pragma::ecs::CParticleSystemComponent>>(l, -1);
-		Lua::Pop(l, 1);
+		Pop(l, 1);
 		if(bParticleSystem) {
-			auto numParticleSystems = Lua::GetObjectLength(l, t);
+			auto numParticleSystems = GetObjectLength(l, t);
 			std::vector<pragma::ecs::CParticleSystemComponent *> particleSystems;
 			particleSystems.reserve(numParticleSystems);
 			std::function<void(const pragma::ecs::CParticleSystemComponent &)> fIncludeChildren = nullptr;
@@ -376,8 +376,8 @@ int Lua::engine::save_particle_system(lua::State *l)
 				}
 			};
 			for(auto i = decltype(numParticleSystems) {0u}; i < numParticleSystems; ++i) {
-				Lua::PushInt(l, i + 1u);
-				Lua::GetTableValue(l, t);
+				PushInt(l, i + 1u);
+				GetTableValue(l, t);
 				auto &ps = Lua::Check<pragma::ecs::CParticleSystemComponent>(l, -1);
 				if(ps.IsRecordingKeyValues() == false)
 					Con::cwar << "Cannot save particle system '" << ps.GetParticleSystemName() << "', which wasn't created with the \"record key-values\" flag set! Skipping..." << Con::endl;
@@ -385,74 +385,74 @@ int Lua::engine::save_particle_system(lua::State *l)
 					particleSystems.push_back(&ps);
 					fIncludeChildren(ps);
 				}
-				Lua::Pop(l, 1);
+				Pop(l, 1);
 			}
 			if(particleSystems.empty()) {
 				Con::cwar << "No particles to save. Particle file will not be generated!" << Con::endl;
-				Lua::PushBool(l, false);
+				PushBool(l, false);
 				return 1;
 			}
 
 			pragma::fs::create_path(ufile::get_path_from_filename(name));
 			auto f = pragma::fs::open_file<pragma::fs::VFilePtrReal>(name, pragma::fs::FileMode::Write | pragma::fs::FileMode::Binary);
 			if(f != nullptr)
-				Lua::PushBool(l, pragma::ecs::CParticleSystemComponent::Save(f, particleSystems));
+				PushBool(l, pragma::ecs::CParticleSystemComponent::Save(f, particleSystems));
 			else
-				Lua::PushBool(l, false);
+				PushBool(l, false);
 			return 1;
 		}
 	}
 
 	std::unordered_map<std::string, pragma::asset::ParticleSystemData> particles;
-	Lua::PushValue(l, 2);
+	PushValue(l, 2);
 	int tparticles = 2;
-	Lua::PushNil(l);
-	while(Lua::GetNextPair(l, tparticles) != 0) {
-		if(Lua::IsTable(l, -1)) {
-			Lua::PushValue(l, -2);
+	PushNil(l);
+	while(GetNextPair(l, tparticles) != 0) {
+		if(IsTable(l, -1)) {
+			PushValue(l, -2);
 			pragma::asset::ParticleSystemData data {};
-			std::string particle = Lua::ToString(l, -3);
-			Lua::RemoveValue(l, -3);
-			Lua::PushValue(l, -2);
-			int table = Lua::GetStackTop(l);
-			Lua::PushNil(l);
-			while(Lua::GetNextPair(l, table) != 0) {
-				Lua::PushValue(l, -2);
-				std::string key = Lua::ToString(l, -3);
-				Lua::RemoveValue(l, -3);
+			std::string particle = ToString(l, -3);
+			RemoveValue(l, -3);
+			PushValue(l, -2);
+			int table = GetStackTop(l);
+			PushNil(l);
+			while(GetNextPair(l, table) != 0) {
+				PushValue(l, -2);
+				std::string key = ToString(l, -3);
+				RemoveValue(l, -3);
 				pragma::string::to_lower(key);
 				if(key == "initializers" || key == "operators" || key == "renderers") {
-					if(Lua::IsTable(l, -2)) {
-						auto numOperators = Lua::GetObjectLength(l, -2);
-						Lua::PushValue(l, -2);
-						int tmod = Lua::GetStackTop(l);
+					if(IsTable(l, -2)) {
+						auto numOperators = GetObjectLength(l, -2);
+						PushValue(l, -2);
+						int tmod = GetStackTop(l);
 						for(auto i = decltype(numOperators) {0u}; i < numOperators; ++i) {
-							Lua::PushInt(l, i + 1);
-							Lua::GetTableValue(l, tmod);
-							auto tOp = Lua::GetStackTop(l);
-							Lua::CheckTable(l, tOp);
+							PushInt(l, i + 1);
+							GetTableValue(l, tmod);
+							auto tOp = GetStackTop(l);
+							CheckTable(l, tOp);
 
-							Lua::PushString(l, "operatorType");
-							Lua::GetTableValue(l, tOp);
-							std::string opType = Lua::CheckString(l, -1);
-							Lua::Pop(l, 1);
+							PushString(l, "operatorType");
+							GetTableValue(l, tOp);
+							std::string opType = CheckString(l, -1);
+							Pop(l, 1);
 
 							std::vector<pragma::asset::ParticleModifierData> modData;
 							modData.push_back(pragma::asset::ParticleModifierData {opType});
 							int dataIdx = 0;
 							char dataType = -1;
-							Lua::PushNil(l);
-							while(Lua::GetNextPair(l, tOp) != 0) {
-								if(!Lua::IsTable(l, -1)) {
+							PushNil(l);
+							while(GetNextPair(l, tOp) != 0) {
+								if(!IsTable(l, -1)) {
 									if(dataType == 0)
-										Lua::Pop(l, 1);
+										Pop(l, 1);
 									else {
 										dataType = 1;
-										Lua::PushValue(l, -2);
-										std::string modKey = Lua::ToString(l, -3);
-										std::string modVal = Lua::ToString(l, -2);
-										Lua::RemoveValue(l, -3);
-										Lua::RemoveValue(l, -2);
+										PushValue(l, -2);
+										std::string modKey = ToString(l, -3);
+										std::string modVal = ToString(l, -2);
+										RemoveValue(l, -3);
+										RemoveValue(l, -2);
 										modData[dataIdx].settings.insert(std::unordered_map<std::string, std::string>::value_type(modKey, modVal));
 									}
 								}
@@ -461,22 +461,22 @@ int Lua::engine::save_particle_system(lua::State *l)
 									if(dataIdx > 0)
 										modData.push_back(pragma::asset::ParticleModifierData {opType});
 									dataIdx++;
-									int tModSubSettings = Lua::GetStackTop(l);
-									Lua::PushNil(l);
-									while(Lua::GetNextPair(l, tModSubSettings) != 0) {
-										Lua::PushValue(l, -2);
-										std::string modKey = Lua::ToString(l, -3);
-										std::string modVal = Lua::ToString(l, -2);
-										Lua::RemoveValue(l, -3);
-										Lua::RemoveValue(l, -2);
+									int tModSubSettings = GetStackTop(l);
+									PushNil(l);
+									while(GetNextPair(l, tModSubSettings) != 0) {
+										PushValue(l, -2);
+										std::string modKey = ToString(l, -3);
+										std::string modVal = ToString(l, -2);
+										RemoveValue(l, -3);
+										RemoveValue(l, -2);
 										modData[dataIdx - 1].settings.insert(std::unordered_map<std::string, std::string>::value_type(modKey, modVal));
 									}
-									Lua::Pop(l, 1);
+									Pop(l, 1);
 								}
 								else
-									Lua::Pop(l, 1);
+									Pop(l, 1);
 							}
-							Lua::Pop(l, 1);
+							Pop(l, 1);
 							for(unsigned int i = 0; i < modData.size(); i++) {
 								if(modData[i].settings.empty() == false) {
 									if(key == "initializers")
@@ -488,60 +488,60 @@ int Lua::engine::save_particle_system(lua::State *l)
 								}
 							}
 						}
-						Lua::Pop(l, 1);
-						Lua::RemoveValue(l, -2);
+						Pop(l, 1);
+						RemoveValue(l, -2);
 					}
 					else
-						Lua::RemoveValue(l, -2);
+						RemoveValue(l, -2);
 				}
 				else if(key == "children") {
-					if(Lua::IsTable(l, -2)) {
-						Lua::PushValue(l, -2);
-						int tchildren = Lua::GetStackTop(l);
-						Lua::PushNil(l);
-						while(Lua::GetNextPair(l, tchildren) != 0) {
-							Lua::CheckTable(l, -1);
-							auto tChild = Lua::GetStackTop(l);
+					if(IsTable(l, -2)) {
+						PushValue(l, -2);
+						int tchildren = GetStackTop(l);
+						PushNil(l);
+						while(GetNextPair(l, tchildren) != 0) {
+							CheckTable(l, -1);
+							auto tChild = GetStackTop(l);
 
 							pragma::asset::ParticleChildData childData {};
 
-							Lua::PushString(l, "childName");
-							Lua::GetTableValue(l, tChild);
-							childData.childName = Lua::CheckString(l, -1);
-							Lua::Pop(l, 1);
+							PushString(l, "childName");
+							GetTableValue(l, tChild);
+							childData.childName = CheckString(l, -1);
+							Pop(l, 1);
 
-							Lua::PushString(l, "delay");
-							Lua::GetTableValue(l, tChild);
-							if(Lua::IsSet(l, -1))
-								childData.delay = Lua::CheckNumber(l, -1);
-							Lua::Pop(l, 1);
+							PushString(l, "delay");
+							GetTableValue(l, tChild);
+							if(IsSet(l, -1))
+								childData.delay = CheckNumber(l, -1);
+							Pop(l, 1);
 
 							data.children.push_back(childData);
 
-							Lua::Pop(l, 1);
+							Pop(l, 1);
 						}
-						Lua::Pop(l, 1);
-						Lua::RemoveValue(l, -2);
+						Pop(l, 1);
+						RemoveValue(l, -2);
 					}
 					else
-						Lua::RemoveValue(l, -2);
+						RemoveValue(l, -2);
 				}
-				else if(Lua::IsTable(l, -2))
-					Lua::RemoveValue(l, -2);
+				else if(IsTable(l, -2))
+					RemoveValue(l, -2);
 				else {
-					std::string val = Lua::ToString(l, -2);
-					Lua::RemoveValue(l, -2);
+					std::string val = ToString(l, -2);
+					RemoveValue(l, -2);
 					data.settings.insert(std::unordered_map<std::string, std::string>::value_type(key, val));
 				}
 			}
-			Lua::Pop(l, 1);
+			Pop(l, 1);
 			particles.insert(std::make_pair(particle, data));
 		}
 		else
-			Lua::Pop(l, 1);
+			Pop(l, 1);
 	}
-	Lua::Pop(l, 2);
-	Lua::PushBool(l, pragma::asset::save_particle_system(name, particles, rootPath));
+	Pop(l, 2);
+	PushBool(l, pragma::asset::save_particle_system(name, particles, rootPath));
 	return 1;
 }
 std::shared_ptr<prosper::RenderTarget> Lua::engine::get_staging_render_target() { return pragma::get_cengine()->GetRenderContext().GetWindow().GetStagingRenderTarget(); }

@@ -104,16 +104,16 @@ pragma::Engine::ConsoleInstance::ConsoleInstance()
 	auto useConsoleThread = true;
 #ifdef __linux__
 	auto useLinenoise = true;
-	if(pragma::Engine::Get()->IsNonInteractiveMode() || pragma::Engine::Get()->IsLinenoiseEnabled() == false)
+	if(Get()->IsNonInteractiveMode() || Get()->IsLinenoiseEnabled() == false)
 		useLinenoise = false;
 	if(useLinenoise) {
 		useConsoleThread = false;
-		pragma::console::impl::init_linenoise();
+		console::impl::init_linenoise();
 	}
 #endif
 	if(useConsoleThread) {
 		consoleThread = std::make_unique<std::thread>(std::bind(&KeyboardInput));
-		pragma::util::set_thread_name(*consoleThread, "pr_console_input_listener");
+		util::set_thread_name(*consoleThread, "pr_console_input_listener");
 	}
 }
 
@@ -164,8 +164,8 @@ pragma::console::DebugConsole *pragma::Engine::GetConsole() { return m_consoleIn
 void pragma::Engine::ProcessConsoleInput(KeyState pressState)
 {
 #ifdef __linux__
-	if(pragma::console::impl::is_linenoise_enabled())
-		pragma::console::impl::update_linenoise();
+	if(console::impl::is_linenoise_enabled())
+		console::impl::update_linenoise();
 #endif
 
 	m_consoleInputMutex.lock();
@@ -180,7 +180,7 @@ void pragma::Engine::ProcessConsoleInput(KeyState pressState)
 	while(consoleInput.empty() == false) {
 		auto &inputInfo = consoleInput.front();
 
-		console::set_console_color(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
+		console::set_console_color(console::ConsoleColorFlags::White | console::ConsoleColorFlags::Intensity);
 		if(inputInfo.printLine)
 			Con::cout << "> " << inputInfo.line << Con::endl;
 		console::reset_console_color();
@@ -192,19 +192,19 @@ void pragma::Engine::ProcessConsoleInput(KeyState pressState)
 
 void pragma::Engine::ProcessConsoleInput(const std::string_view &line, KeyState pressState, float magnitude)
 {
-	pragma::string::get_sequence_commands(std::string {line}, [pressState, magnitude](std::string cmd, std::vector<std::string> &argv) { pragma::Engine::Get()->RunConsoleCommand(cmd, argv, pressState, magnitude); });
+	string::get_sequence_commands(std::string {line}, [pressState, magnitude](std::string cmd, std::vector<std::string> &argv) { Get()->RunConsoleCommand(cmd, argv, pressState, magnitude); });
 }
 
 bool pragma::Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
 {
-	auto *cv = pragma::Engine::Get()->CVarHandler::GetConVar(scmd);
+	auto *cv = Get()->CVarHandler::GetConVar(scmd);
 	if(cv == nullptr)
 		return false;
 	if(callback != nullptr && callback(cv, magnitude) == false)
 		return true;
 
 	auto type = cv->GetType();
-	if(type == pragma::console::ConType::Var) {
+	if(type == console::ConType::Var) {
 		auto *cvar = static_cast<console::ConVar *>(cv);
 		if(argv.empty()) {
 			cvar->Print(scmd);
@@ -217,8 +217,8 @@ bool pragma::Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::
 		return true;
 	}
 	auto *cmd = static_cast<console::ConCommand *>(cv);
-	if(type == pragma::console::ConType::Cmd) {
-		std::function<void(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> func = nullptr;
+	if(type == console::ConType::Cmd) {
+		std::function<void(NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float)> func = nullptr;
 		cmd->GetFunction(func);
 		if(scmd.empty() == false && scmd.front() == '-')
 			magnitude = 0.f;
@@ -230,7 +230,7 @@ bool pragma::Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::
 
 bool pragma::Engine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
 {
-	pragma::string::to_lower(cmd);
+	string::to_lower(cmd);
 	auto *stateSv = GetServerNetworkState();
 	if(stateSv == nullptr)
 		return RunEngineConsoleCommand(cmd, argv, pressState, magnitude, callback);

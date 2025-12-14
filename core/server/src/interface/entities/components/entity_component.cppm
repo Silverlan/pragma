@@ -14,12 +14,12 @@ export namespace pragma {
 	class DLLSERVER SBaseNetComponent : public BaseNetComponent {
 	  public:
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) = 0;
-		virtual Bool ReceiveNetEvent(pragma::BasePlayerComponent &pl, pragma::NetEventId, NetPacket &packet) { return false; }
+		virtual Bool ReceiveNetEvent(BasePlayerComponent &pl, NetEventId, NetPacket &packet) { return false; }
 	};
 
 	class DLLSERVER SBaseSnapshotComponent : public SBaseNetComponent {
 	  public:
-		virtual void SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl) = 0;
+		virtual void SendSnapshotData(NetPacket &packet, BasePlayerComponent &pl) = 0;
 		virtual bool ShouldTransmitSnapshotData() const = 0;
 	};
 

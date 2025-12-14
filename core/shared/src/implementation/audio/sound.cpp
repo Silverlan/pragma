@@ -20,7 +20,7 @@ import :audio.sound;
 
 pragma::audio::SoundEffectParams::SoundEffectParams(float pgain, float pgainHF, float pgainLF) : gain(pgain), gainHF(pgainHF), gainLF(pgainLF) {}
 
-pragma::audio::ALSound::ALSound(pragma::NetworkState *nw) : pragma::util::inheritable_enable_shared_from_this<pragma::audio::ALSound>(), pragma::util::CallbackHandler(), LuaCallbackHandler(), m_type(pragma::audio::ALSoundType::Generic), m_networkState(nw)
+pragma::audio::ALSound::ALSound(NetworkState *nw) : inheritable_enable_shared_from_this<ALSound>(), CallbackHandler(), LuaCallbackHandler(), m_type(ALSoundType::Generic), m_networkState(nw)
 {
 	RegisterCallback<void>("OnDestroyed");
 	RegisterCallback<void, ALState, ALState>("OnStateChanged");
@@ -58,8 +58,8 @@ std::pair<float, float> pragma::audio::ALSound::GetRangeOffsets() const
 bool pragma::audio::ALSound::IsSoundScript() const { return false; }
 pragma::NetworkState *pragma::audio::ALSound::GetNetworkState() const { return m_networkState; }
 
-void pragma::audio::ALSound::SetSource(pragma::ecs::BaseEntity *ent) { m_hSourceEntity = (ent != nullptr) ? ent->GetHandle() : EntityHandle {}; }
-pragma::ecs::BaseEntity *pragma::audio::ALSound::GetSource() const { return const_cast<pragma::ecs::BaseEntity *>(m_hSourceEntity.get()); }
+void pragma::audio::ALSound::SetSource(ecs::BaseEntity *ent) { m_hSourceEntity = (ent != nullptr) ? ent->GetHandle() : EntityHandle {}; }
+pragma::ecs::BaseEntity *pragma::audio::ALSound::GetSource() const { return const_cast<ecs::BaseEntity *>(m_hSourceEntity.get()); }
 
 float pragma::audio::ALSound::GetSoundIntensity(const Vector3 &pos) const
 {
@@ -119,13 +119,13 @@ void pragma::audio::ALSound::CheckStateChange(ALState old)
 	auto state = GetState();
 	if(state != old) {
 		CallCallbacks<void, ALState, ALState>("OnStateChanged", old, state);
-		CallLuaCallbacks<void, int32_t, int32_t>("OnStateChanged", pragma::math::to_integral(old), pragma::math::to_integral(state));
+		CallLuaCallbacks<void, int32_t, int32_t>("OnStateChanged", math::to_integral(old), math::to_integral(state));
 		auto *nw = GetNetworkState();
 		if(nw != nullptr) {
 			auto *game = nw->GetGameState();
 			if(game != nullptr) {
 				game->CallCallbacks<void, ALSound *, ALState, ALState>("OnSoundStateChanged", this, old, state);
-				game->CallLuaCallbacks<void, std::shared_ptr<pragma::audio::ALSound>, int32_t, int32_t>("OnSoundStateChanged", shared_from_this(), pragma::math::to_integral(old), pragma::math::to_integral(state));
+				game->CallLuaCallbacks<void, std::shared_ptr<ALSound>, int32_t, int32_t>("OnSoundStateChanged", shared_from_this(), math::to_integral(old), math::to_integral(state));
 			}
 		}
 	}
@@ -174,10 +174,10 @@ void pragma::audio::ALSound::CancelFade()
 		Pause();
 }
 
-void pragma::audio::ALSound::SetType(pragma::audio::ALSoundType type) { m_type = type; }
-void pragma::audio::ALSound::AddType(pragma::audio::ALSoundType type)
+void pragma::audio::ALSound::SetType(ALSoundType type) { m_type = type; }
+void pragma::audio::ALSound::AddType(ALSoundType type)
 {
-	type = static_cast<pragma::audio::ALSoundType>(CUInt32(m_type) | CUInt32(type));
+	type = static_cast<ALSoundType>(CUInt32(m_type) | CUInt32(type));
 	SetType(type);
 }
 pragma::audio::ALSoundType pragma::audio::ALSound::GetType() const { return m_type; }

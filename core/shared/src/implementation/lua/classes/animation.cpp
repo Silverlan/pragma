@@ -29,7 +29,7 @@ void Lua::Animation::Load(lua::State *l, LFile &f)
 		auto anim = pragma::animation::Animation::Load(udmData->GetAssetData(), err);
 		if(anim == nullptr)
 			return;
-		Lua::Push(l, anim);
+		Push(l, anim);
 		return;
 	}
 
@@ -103,7 +103,7 @@ luabind::optional<uint32_t> Lua::Animation::FindEventId(lua::State *l, const std
 		return nil;
 	return luabind::object {l, id};
 }
-luabind::tableT<uint16_t> Lua::Animation::GetBoneList(lua::State *l, pragma::animation::Animation &anim) { return Lua::vector_to_table(l, anim.GetBoneList()); }
+luabind::tableT<uint16_t> Lua::Animation::GetBoneList(lua::State *l, pragma::animation::Animation &anim) { return vector_to_table(l, anim.GetBoneList()); }
 void Lua::Animation::GetFrame(lua::State *l, pragma::animation::Animation &anim, unsigned int ID)
 {
 	auto frame = anim.GetFrame(ID);
@@ -115,31 +115,31 @@ void Lua::Animation::AddFrame(lua::State *, pragma::animation::Animation &anim, 
 void Lua::Animation::GetFrames(lua::State *l, pragma::animation::Animation &anim)
 {
 	auto numFrames = anim.GetFrameCount();
-	auto t = Lua::CreateTable(l);
+	auto t = CreateTable(l);
 	for(auto i = decltype(numFrames) {0}; i < numFrames; ++i) {
 		auto frame = anim.GetFrame(i);
-		Lua::PushInt(l, i + 1);
+		PushInt(l, i + 1);
 		Lua::Push<std::shared_ptr<::Frame>>(l, frame);
-		Lua::SetTableValue(l, t);
+		SetTableValue(l, t);
 	}
 }
 void Lua::Animation::GetAnimationEventArguments(lua::State *l, int32_t tArgs, std::vector<std::string> &args)
 {
-	auto numArgs = Lua::GetObjectLength(l, tArgs);
+	auto numArgs = GetObjectLength(l, tArgs);
 	for(auto i = decltype(numArgs) {0}; i < numArgs; ++i) {
-		Lua::PushInt(l, i + 1); /* 1 */
-		Lua::GetTableValue(l, tArgs);
+		PushInt(l, i + 1); /* 1 */
+		GetTableValue(l, tArgs);
 
-		auto *arg = Lua::CheckString(l, -1);
+		auto *arg = CheckString(l, -1);
 		args.push_back(arg);
 
-		Lua::Pop(l, 1);
+		Pop(l, 1);
 	}
 }
 void Lua::Animation::AddEvent(lua::State *l, pragma::animation::Animation &anim, uint32_t frameId, uint32_t eventId, luabind::object args)
 {
 	int32_t tArgs = 4;
-	Lua::CheckTable(l, tArgs);
+	CheckTable(l, tArgs);
 	auto ev = std::make_unique<pragma::AnimationEvent>();
 	ev->eventID = static_cast<pragma::AnimationEvent::Type>(eventId);
 
@@ -151,59 +151,59 @@ void Lua::Animation::AddEvent(lua::State *l, pragma::animation::Animation &anim,
 }
 void Lua::Animation::PushAnimationEvent(lua::State *l, const pragma::AnimationEvent &ev)
 {
-	auto tEvent = Lua::CreateTable(l);
+	auto tEvent = CreateTable(l);
 
-	Lua::PushString(l, "type");
-	Lua::PushInt(l, ev.eventID);
-	Lua::SetTableValue(l, tEvent);
+	PushString(l, "type");
+	PushInt(l, ev.eventID);
+	SetTableValue(l, tEvent);
 
-	Lua::PushString(l, "arguments");
-	auto tArgs = Lua::CreateTable(l);
+	PushString(l, "arguments");
+	auto tArgs = CreateTable(l);
 	auto &args = ev.arguments;
 	for(auto j = decltype(args.size()) {0}; j < args.size(); ++j) {
-		Lua::PushInt(l, j + 1);
-		Lua::PushString(l, args[j]);
-		Lua::SetTableValue(l, tArgs);
+		PushInt(l, j + 1);
+		PushString(l, args[j]);
+		SetTableValue(l, tArgs);
 	}
-	Lua::SetTableValue(l, tEvent);
+	SetTableValue(l, tEvent);
 }
 void Lua::Animation::GetEvents(lua::State *l, pragma::animation::Animation &anim, uint32_t frameId)
 {
 	auto *events = anim.GetEvents(frameId);
 
-	auto t = Lua::CreateTable(l);
+	auto t = CreateTable(l);
 	if(events == nullptr)
 		return;
 	for(auto i = decltype(events->size()) {0}; i < events->size(); ++i) {
-		Lua::PushInt(l, i + 1);
+		PushInt(l, i + 1);
 		PushAnimationEvent(l, *(*events)[i]);
 
-		Lua::SetTableValue(l, t);
+		SetTableValue(l, t);
 	}
 }
 void Lua::Animation::GetEvents(lua::State *l, pragma::animation::Animation &anim)
 {
 	auto numFrames = anim.GetFrameCount();
-	auto t = Lua::CreateTable(l);
+	auto t = CreateTable(l);
 	for(auto i = decltype(numFrames) {0}; i < numFrames; ++i) {
 		auto *events = anim.GetEvents(i);
 		if(events == nullptr)
 			continue;
-		Lua::PushInt(l, i);
-		auto tEvent = Lua::CreateTable(l);
+		PushInt(l, i);
+		auto tEvent = CreateTable(l);
 		for(auto j = decltype(events->size()) {0}; j < events->size(); ++j) {
 			auto &ev = (*events)[j];
-			Lua::PushInt(l, j + 1);
+			PushInt(l, j + 1);
 			PushAnimationEvent(l, *ev);
-			Lua::SetTableValue(l, tEvent);
+			SetTableValue(l, tEvent);
 		}
-		Lua::SetTableValue(l, t);
+		SetTableValue(l, t);
 	}
 }
 void Lua::Animation::GetEventCount(lua::State *l, pragma::animation::Animation &anim, uint32_t frameId)
 {
 	auto *events = anim.GetEvents(frameId);
-	Lua::PushInt(l, (events != nullptr) ? events->size() : 0);
+	PushInt(l, (events != nullptr) ? events->size() : 0);
 }
 void Lua::Animation::GetEventCount(lua::State *l, pragma::animation::Animation &anim)
 {
@@ -215,7 +215,7 @@ void Lua::Animation::GetEventCount(lua::State *l, pragma::animation::Animation &
 			continue;
 		numEvents += static_cast<uint32_t>(events->size());
 	}
-	Lua::PushInt(l, numEvents);
+	PushInt(l, numEvents);
 }
 static void push_blend_controller(lua::State *l, AnimationBlendController &bc)
 {
@@ -288,7 +288,7 @@ void Lua::Animation::SetEventData(lua::State *l, pragma::animation::Animation &a
 	auto &ev = events->at(idx);
 
 	int32_t tArgs = 5;
-	Lua::CheckTable(l, tArgs);
+	CheckTable(l, tArgs);
 
 	ev->eventID = static_cast<pragma::AnimationEvent::Type>(type);
 	ev->arguments.clear();
@@ -311,7 +311,7 @@ void Lua::Animation::SetEventArgs(lua::State *l, pragma::animation::Animation &a
 	auto &ev = events->at(idx);
 
 	int32_t tArgs = 4;
-	Lua::CheckTable(l, tArgs);
+	CheckTable(l, tArgs);
 
 	ev->arguments.clear();
 	GetAnimationEventArguments(l, tArgs, ev->arguments);
@@ -322,31 +322,31 @@ void Lua::Animation::LookupBone(lua::State *l, pragma::animation::Animation &ani
 	auto it = std::find(list.begin(), list.end(), boneId);
 	if(it == list.end())
 		return;
-	Lua::PushInt(l, it - list.begin());
+	PushInt(l, it - list.begin());
 }
 void Lua::Animation::SetBoneList(lua::State *l, pragma::animation::Animation &anim, luabind::object o)
 {
 	int32_t t = 2;
-	auto numBones = Lua::GetObjectLength(l, t);
+	auto numBones = GetObjectLength(l, t);
 	std::vector<uint16_t> list;
 	list.reserve(numBones);
 	for(auto i = decltype(numBones) {0}; i < numBones; ++i) {
-		Lua::PushInt(l, i + 1);
-		Lua::GetTableValue(l, t);
-		list.push_back(Lua::CheckInt(l, -1));
+		PushInt(l, i + 1);
+		GetTableValue(l, t);
+		list.push_back(CheckInt(l, -1));
 
-		Lua::Pop(l, 1);
+		Pop(l, 1);
 	}
 	anim.SetBoneList(list);
 }
 void Lua::Animation::GetBoneWeights(lua::State *l, pragma::animation::Animation &anim)
 {
 	auto &weights = anim.GetBoneWeights();
-	auto t = Lua::CreateTable(l);
+	auto t = CreateTable(l);
 	for(auto i = decltype(weights.size()) {0}; i < weights.size(); ++i) {
-		Lua::PushInt(l, i + 1);
-		Lua::PushNumber(l, weights.at(i));
-		Lua::SetTableValue(l, t);
+		PushInt(l, i + 1);
+		PushNumber(l, weights.at(i));
+		SetTableValue(l, t);
 	}
 }
 
@@ -409,20 +409,20 @@ void Lua::Frame::GetMoveTranslation(lua::State *l, ::Frame &frame)
 {
 	::Vector2 translation;
 	frame.GetMoveOffset(&translation.x, &translation.y);
-	Lua::PushNumber(l, translation.x);
-	Lua::PushNumber(l, translation.y);
+	PushNumber(l, translation.x);
+	PushNumber(l, translation.y);
 }
 void Lua::Frame::GetMoveTranslationX(lua::State *l, ::Frame &frame)
 {
 	::Vector2 translation;
 	frame.GetMoveOffset(&translation.x, &translation.y);
-	Lua::PushNumber(l, translation.x);
+	PushNumber(l, translation.x);
 }
 void Lua::Frame::GetMoveTranslationZ(lua::State *l, ::Frame &frame)
 {
 	::Vector2 translation;
 	frame.GetMoveOffset(&translation.x, &translation.y);
-	Lua::PushNumber(l, translation.y);
+	PushNumber(l, translation.y);
 }
 void Lua::Frame::SetMoveTranslation(lua::State *l, ::Frame &frame, float x, float z) { frame.SetMoveOffset(x, z); }
 void Lua::Frame::SetMoveTranslationX(lua::State *l, ::Frame &frame, float x)
@@ -502,7 +502,7 @@ void Lua::Frame::GetLocalBoneTransform(lua::State *l, ::Frame &frame, pragma::an
 	Lua::Push<Quat>(l, rot);
 	Lua::Push<Vector3>(l, nscale);
 }
-void Lua::Frame::GetBoneCount(lua::State *l, ::Frame &frame) { Lua::PushInt(l, frame.GetBoneCount()); }
+void Lua::Frame::GetBoneCount(lua::State *l, ::Frame &frame) { PushInt(l, frame.GetBoneCount()); }
 void Lua::Frame::SetBoneCount(lua::State *l, ::Frame &frame, uint32_t boneCount) { frame.SetBoneCount(boneCount); }
 void Lua::Frame::SetBonePose(lua::State *, ::Frame &frame, uint32_t boneId, const pragma::math::ScaledTransform &pose) { frame.SetBonePose(boneId, pose); }
 void Lua::Frame::SetBonePose(lua::State *, ::Frame &frame, uint32_t boneId, const pragma::math::Transform &pose) { frame.SetBonePose(boneId, pose); }
@@ -511,31 +511,31 @@ void Lua::Frame::GetBonePose(lua::State *l, ::Frame &frame, uint32_t boneId)
 	pragma::math::ScaledTransform pose;
 	if(frame.GetBonePose(boneId, pose) == false)
 		return;
-	Lua::Push(l, pose);
+	Push(l, pose);
 }
 ///////////////////////////////////////
 void Lua::VertexAnimation::GetMeshAnimations(lua::State *l, pragma::animation::VertexAnimation &anim)
 {
 	auto &meshAnims = anim.GetMeshAnimations();
-	auto t = Lua::CreateTable(l);
+	auto t = CreateTable(l);
 	auto meshAnimIdx = 1u;
 	for(auto meshAnim : meshAnims) {
-		Lua::PushInt(l, meshAnimIdx++);
+		PushInt(l, meshAnimIdx++);
 		Lua::Push<std::shared_ptr<pragma::animation::MeshVertexAnimation>>(l, meshAnim);
-		Lua::SetTableValue(l, t);
+		SetTableValue(l, t);
 	}
 }
-void Lua::VertexAnimation::GetName(lua::State *l, pragma::animation::VertexAnimation &anim) { Lua::PushString(l, anim.GetName()); }
+void Lua::VertexAnimation::GetName(lua::State *l, pragma::animation::VertexAnimation &anim) { PushString(l, anim.GetName()); }
 ///////////////////////////////////////
 void Lua::MeshVertexAnimation::GetFrames(lua::State *l, pragma::animation::MeshVertexAnimation &anim)
 {
 	auto &frames = anim.GetFrames();
-	auto t = Lua::CreateTable(l);
+	auto t = CreateTable(l);
 	auto frameIdx = 1u;
 	for(auto &frame : frames) {
-		Lua::PushInt(l, frameIdx++);
+		PushInt(l, frameIdx++);
 		Lua::Push<std::shared_ptr<pragma::animation::MeshVertexFrame>>(l, frame);
-		Lua::SetTableValue(l, t);
+		SetTableValue(l, t);
 	}
 }
 void Lua::MeshVertexAnimation::GetMesh(lua::State *l, pragma::animation::MeshVertexAnimation &anim)
@@ -551,12 +551,12 @@ void Lua::MeshVertexAnimation::GetMesh(lua::State *l, pragma::animation::MeshVer
 void Lua::MeshVertexFrame::GetVertices(lua::State *l, pragma::animation::MeshVertexFrame &frame)
 {
 	auto &verts = frame.GetVertices();
-	auto t = Lua::CreateTable(l);
+	auto t = CreateTable(l);
 	auto vertIdx = 1u;
 	for(auto &v : verts) {
-		Lua::PushInt(l, vertIdx++);
+		PushInt(l, vertIdx++);
 		Lua::Push<Vector3>(l, {pragma::math::float16_to_float32(v.at(0)), pragma::math::float16_to_float32(v.at(1)), pragma::math::float16_to_float32(v.at(2))});
-		Lua::SetTableValue(l, t);
+		SetTableValue(l, t);
 	}
 }
 void Lua::MeshVertexFrame::SetVertexCount(lua::State *l, pragma::animation::MeshVertexFrame &frame, uint32_t numVerts) { frame.SetVertexCount(numVerts); }

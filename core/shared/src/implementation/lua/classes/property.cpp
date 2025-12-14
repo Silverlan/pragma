@@ -209,7 +209,7 @@ void register_property_class(luabind::module_ &mod, const char *name) // Note: M
 	mod[propClassDef];
 }
 
-void Lua::Property::register_classes(Lua::Interface &l)
+void Lua::Property::register_classes(Interface &l)
 {
 	auto &modUtil = l.RegisterLibrary("util");
 
@@ -341,7 +341,7 @@ void Lua::Property::register_classes(Lua::Interface &l)
 	add_generic_vector_methods<LVector3Property, Vector3, luabind::class_<LVector3Property, LBasePropertyWrapper>>(vec3Def);
 	vec3Def.def(luabind::constructor<float, float, float>());
 	vec3Def.def("Link", static_cast<void (*)(lua::State *, LVector3Property &, LVector3Property &)>(link<LVector3Property, Vector3>));
-	vec3Def.def("Link", static_cast<void (*)(lua::State *, LVector3Property &, LColorProperty &)>([](lua::State *l, LVector3Property &prop, LColorProperty &propOther) { prop->Link<pragma::util::ColorProperty, ::Color>(*propOther, [](const ::Color &v) -> ::Vector3 { return v.ToVector3(); }); }));
+	vec3Def.def("Link", static_cast<void (*)(lua::State *, LVector3Property &, LColorProperty &)>([](lua::State *l, LVector3Property &prop, LColorProperty &propOther) { prop->Link<pragma::util::ColorProperty, ::Color>(*propOther, [](const ::Color &v) -> Vector3 { return v.ToVector3(); }); }));
 	vec3Def.def("Link",
 	  static_cast<void (*)(lua::State *, LVector3Property &, LVector3iProperty &)>([](lua::State *l, LVector3Property &prop, LVector3iProperty &propOther) { prop->Link<pragma::util::Vector3iProperty, Vector3i>(*propOther, [](const Vector3i &v) -> Vector3 { return Vector3(v.x, v.y, v.z); }); }));
 	vec3Def.def("Link",

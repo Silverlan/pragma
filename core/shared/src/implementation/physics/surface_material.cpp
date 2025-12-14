@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :physics.surface_material;
 
-pragma::physics::SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &env) : m_physEnv {env}
+pragma::physics::SurfaceMaterialManager::SurfaceMaterialManager(IEnvironment &env) : m_physEnv {env}
 {
 	auto &genericPhysMat = env.GetGenericMaterial();
 	m_materials.push_back(SurfaceMaterial {m_physEnv, "generic", m_materials.size(), genericPhysMat});
@@ -22,7 +22,7 @@ pragma::physics::SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics:
 bool pragma::physics::SurfaceMaterialManager::Load(const std::string &path)
 {
 	std::string err;
-	auto udmData = pragma::util::load_udm_asset(path, &err);
+	auto udmData = util::load_udm_asset(path, &err);
 	if(udmData == nullptr)
 		return false;
 	auto &data = *udmData;
@@ -58,7 +58,7 @@ std::vector<pragma::physics::SurfaceMaterial> &pragma::physics::SurfaceMaterialM
 
 ////////////////////////////////////
 
-pragma::physics::SurfaceMaterial::SurfaceMaterial(const SurfaceMaterial &other) : m_physEnv {other.m_physEnv}, m_navigationFlags(pragma::nav::PolyFlags::Walk)
+pragma::physics::SurfaceMaterial::SurfaceMaterial(const SurfaceMaterial &other) : m_physEnv {other.m_physEnv}, m_navigationFlags(nav::PolyFlags::Walk)
 {
 	m_index = other.m_index;
 	m_identifier = other.m_identifier;
@@ -78,8 +78,8 @@ pragma::physics::SurfaceMaterial::SurfaceMaterial(const SurfaceMaterial &other) 
 	m_pbrInfo = other.m_pbrInfo;
 }
 
-pragma::physics::SurfaceMaterial::SurfaceMaterial(pragma::physics::IEnvironment &env, const std::string &identifier, UInt idx, pragma::physics::IMaterial &physMat)
-    : m_physEnv {env}, m_physMaterial {std::static_pointer_cast<pragma::physics::IMaterial>(physMat.shared_from_this())}, m_index(idx), m_identifier(identifier), m_footstepType("fx.fst_concrete")
+pragma::physics::SurfaceMaterial::SurfaceMaterial(IEnvironment &env, const std::string &identifier, UInt idx, IMaterial &physMat)
+    : m_physEnv {env}, m_physMaterial {std::static_pointer_cast<IMaterial>(physMat.shared_from_this())}, m_index(idx), m_identifier(identifier), m_footstepType("fx.fst_concrete")
 {
 	physMat.SetSurfaceMaterial(*this);
 }
@@ -158,13 +158,13 @@ float pragma::physics::SurfaceMaterial::GetAudioHighFrequencyTransmission() cons
 void pragma::physics::SurfaceMaterial::Load(udm::LinkedPropertyWrapper &prop)
 {
 	if(prop["navigation_flags"]) {
-		auto flags = pragma::nav::PolyFlags::None;
-		udm::read_flag(prop["navigation_flags"], flags, pragma::nav::PolyFlags::Walk, "walk");
-		udm::read_flag(prop["navigation_flags"], flags, pragma::nav::PolyFlags::Swim, "swim");
-		udm::read_flag(prop["navigation_flags"], flags, pragma::nav::PolyFlags::Door, "door");
-		udm::read_flag(prop["navigation_flags"], flags, pragma::nav::PolyFlags::Jump, "jump");
-		udm::read_flag(prop["navigation_flags"], flags, pragma::nav::PolyFlags::Disabled, "disabled");
-		udm::read_flag(prop["navigation_flags"], flags, pragma::nav::PolyFlags::All, "all");
+		auto flags = nav::PolyFlags::None;
+		udm::read_flag(prop["navigation_flags"], flags, nav::PolyFlags::Walk, "walk");
+		udm::read_flag(prop["navigation_flags"], flags, nav::PolyFlags::Swim, "swim");
+		udm::read_flag(prop["navigation_flags"], flags, nav::PolyFlags::Door, "door");
+		udm::read_flag(prop["navigation_flags"], flags, nav::PolyFlags::Jump, "jump");
+		udm::read_flag(prop["navigation_flags"], flags, nav::PolyFlags::Disabled, "disabled");
+		udm::read_flag(prop["navigation_flags"], flags, nav::PolyFlags::All, "all");
 		SetNavigationFlags(flags);
 	}
 	prop["footsteps"](m_footstepType);
@@ -248,7 +248,7 @@ void pragma::physics::SurfaceMaterial::Reset()
 	m_footstepType = "generic";
 
 	m_audioInfo = {};
-	m_navigationFlags = pragma::nav::PolyFlags::None;
+	m_navigationFlags = nav::PolyFlags::None;
 
 	m_physMaterial->SetFriction(0.5f);
 	m_physMaterial->SetRestitution(0.5f);
@@ -277,7 +277,7 @@ UInt pragma::physics::SurfaceMaterial::GetIndex() const { return m_index; }
 const std::string &pragma::physics::SurfaceMaterial::GetFootstepType() const { return m_footstepType; }
 void pragma::physics::SurfaceMaterial::SetFootstepType(const std::string &type) { m_footstepType = type; }
 
-void pragma::physics::SurfaceMaterial::SetNavigationFlags(pragma::nav::PolyFlags flags) { m_navigationFlags = flags; }
+void pragma::physics::SurfaceMaterial::SetNavigationFlags(nav::PolyFlags flags) { m_navigationFlags = flags; }
 pragma::nav::PolyFlags pragma::physics::SurfaceMaterial::GetNavigationFlags() const { return m_navigationFlags; }
 
 std::ostream &operator<<(std::ostream &out, const pragma::physics::SurfaceMaterial &surfaceMaterial)

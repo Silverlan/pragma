@@ -9,12 +9,12 @@ import :particle_system.initializer_initial_velocity;
 
 import :client_state;
 
-void pragma::pts::CParticleInitializerInitialVelocity::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleInitializerInitialVelocity::Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		pragma::string::to_lower(key);
+		string::to_lower(key);
 		if(key == "velocity") {
 			Vector3 velocity;
 			velocity = uvec::create(it->second);
@@ -34,7 +34,7 @@ void pragma::pts::CParticleInitializerInitialVelocity::Initialize(pragma::BaseEn
 			m_velocityMax = uvec::create(it->second);
 	}
 }
-void pragma::pts::CParticleInitializerInitialVelocity::OnParticleCreated(pragma::pts::CParticle &particle)
+void pragma::pts::CParticleInitializerInitialVelocity::OnParticleCreated(CParticle &particle)
 {
 	auto dir = m_direction;
 	if(uvec::length_sqr(m_spreadMax - m_spreadMin) > 0.001f) {

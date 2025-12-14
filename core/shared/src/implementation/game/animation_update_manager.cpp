@@ -9,7 +9,7 @@ module pragma.shared;
 
 import :game.animation_update_manager;
 
-pragma::AnimationUpdateManager::AnimationUpdateManager(pragma::Game &game) : game {game}
+pragma::AnimationUpdateManager::AnimationUpdateManager(Game &game) : game {game}
 {
 	auto &componentManager = game.GetEntityComponentManager();
 	auto r = componentManager.GetComponentTypeId("animated", m_animatedComponentId);
@@ -22,14 +22,14 @@ pragma::AnimationUpdateManager::AnimationUpdateManager(pragma::Game &game) : gam
 		exit(EXIT_FAILURE);
 	}
 }
-void pragma::AnimationUpdateManager::UpdateEntityState(pragma::ecs::BaseEntity &ent)
+void pragma::AnimationUpdateManager::UpdateEntityState(ecs::BaseEntity &ent)
 {
 	auto animC = ent.GetAnimatedComponent();
-	if(animC.valid() && pragma::math::is_flag_set(animC->GetStateFlags(), BaseEntityComponent::StateFlags::Removed))
+	if(animC.valid() && math::is_flag_set(animC->GetStateFlags(), BaseEntityComponent::StateFlags::Removed))
 		animC = pragma::ComponentHandle<BaseAnimatedComponent> {};
 
 	auto panimaC = ent.GetComponent<PanimaComponent>();
-	if(panimaC.valid() && pragma::math::is_flag_set(panimaC->GetStateFlags(), BaseEntityComponent::StateFlags::Removed))
+	if(panimaC.valid() && math::is_flag_set(panimaC->GetStateFlags(), BaseEntityComponent::StateFlags::Removed))
 		panimaC = pragma::ComponentHandle<PanimaComponent> {};
 
 	auto it = std::find_if(m_animatedEntities.begin(), m_animatedEntities.end(), [&ent](const AnimatedEntity &animEnt) { return animEnt.entity == &ent; });
@@ -49,10 +49,10 @@ void pragma::AnimationUpdateManager::UpdateEntityState(pragma::ecs::BaseEntity &
 const std::vector<pragma::AnimationUpdateManager::AnimatedEntity> &pragma::AnimationUpdateManager::GetAnimatedEntities() const { return m_animatedEntities; }
 void pragma::AnimationUpdateManager::UpdateEntityAnimationDrivers(double dt)
 {
-	for(auto *ent : pragma::ecs::EntityIterator {game, m_animationDriverComponentId})
-		ent->GetComponent<pragma::AnimationDriverComponent>()->ApplyDriver();
+	for(auto *ent : ecs::EntityIterator {game, m_animationDriverComponentId})
+		ent->GetComponent<AnimationDriverComponent>()->ApplyDriver();
 }
-void pragma::AnimationUpdateManager::UpdateConstraints(double dt) { pragma::ConstraintManagerComponent::ApplyConstraints(*game.GetNetworkState()); }
+void pragma::AnimationUpdateManager::UpdateConstraints(double dt) { ConstraintManagerComponent::ApplyConstraints(*game.GetNetworkState()); }
 
 static auto cvDisableAnimUpdates = pragma::console::get_con_var("debug_disable_animation_updates");
 void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
@@ -108,7 +108,7 @@ void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 
 	game.StartProfilingStage("HandleAnimationEvents");
 	{
-		pragma::ecs::EntityIterator entIt {game, m_animatedComponentId};
+		ecs::EntityIterator entIt {game, m_animatedComponentId};
 		for(auto *ent : entIt) {
 			auto animC = ent->GetAnimatedComponent();
 			animC->HandleAnimationEvents();

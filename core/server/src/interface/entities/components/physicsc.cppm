@@ -15,8 +15,8 @@ export namespace pragma {
 	}
 	class DLLSERVER SPhysicsComponent final : public BasePhysicsComponent, public SBaseNetComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
-		SPhysicsComponent(pragma::ecs::BaseEntity &ent) : BasePhysicsComponent(ent) {}
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		SPhysicsComponent(ecs::BaseEntity &ent) : BasePhysicsComponent(ent) {}
 
 		virtual void OnPhysicsInitialized() override;
 		virtual void OnPhysicsDestroyed() override;
@@ -29,10 +29,10 @@ export namespace pragma {
 		using BasePhysicsComponent::SetCollisionsEnabled;
 		virtual void SetKinematic(bool b) override;
 
-		virtual void SetCollisionFilter(pragma::physics::CollisionMask filterGroup, pragma::physics::CollisionMask filterMask) override;
+		virtual void SetCollisionFilter(physics::CollisionMask filterGroup, physics::CollisionMask filterMask) override;
 
-		virtual void SetMoveType(pragma::physics::MoveType movetype) override;
-		void SetCollisionType(pragma::physics::CollisionType collisiontype) override;
+		virtual void SetMoveType(physics::MoveType movetype) override;
+		void SetCollisionType(physics::CollisionType collisiontype) override;
 
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua::State *l) override;

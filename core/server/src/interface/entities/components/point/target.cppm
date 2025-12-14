@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SPointTargetComponent final : public BasePointTargetComponent {
 		  public:
-			SPointTargetComponent(pragma::ecs::BaseEntity &ent) : BasePointTargetComponent(ent) {}
+			SPointTargetComponent(ecs::BaseEntity &ent) : BasePointTargetComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

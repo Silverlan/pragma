@@ -14,7 +14,7 @@ bool pragma::networking::LocalClient::Connect(const std::string &ip, Port port, 
 {
 	if(ip != "127.0.0.1")
 		return false;
-	auto result = pragma::Engine::Get()->ConnectLocalHostPlayerClient();
+	auto result = Engine::Get()->ConnectLocalHostPlayerClient();
 	if(result == false)
 		return result;
 	OnConnected();
@@ -27,15 +27,15 @@ bool pragma::networking::LocalClient::Disconnect(Error &outErr)
 }
 bool pragma::networking::LocalClient::SendPacket(Protocol protocol, NetPacket &packet, Error &outErr)
 {
-	packet.SetTimeActivated(pragma::util::clock::to_int(pragma::util::clock::get_duration_since_start()));
+	packet.SetTimeActivated(util::clock::to_int(util::clock::get_duration_since_start()));
 	packet->SetOffset(0);
-	pragma::Engine::Get()->HandleLocalHostPlayerServerPacket(packet);
+	Engine::Get()->HandleLocalHostPlayerServerPacket(packet);
 	OnPacketSent(protocol, packet);
 	return true;
 }
 bool pragma::networking::LocalClient::IsRunning() const { return true; }
 bool pragma::networking::LocalClient::IsDisconnected() const { return false; }
-bool pragma::networking::LocalClient::PollEvents(pragma::networking::Error &outErr) { return true; }
+bool pragma::networking::LocalClient::PollEvents(Error &outErr) { return true; }
 uint16_t pragma::networking::LocalClient::GetLatency() const { return 0; }
 void pragma::networking::LocalClient::SetTimeoutDuration(float duration) {}
 std::optional<std::string> pragma::networking::LocalClient::GetIP() const { return {}; }

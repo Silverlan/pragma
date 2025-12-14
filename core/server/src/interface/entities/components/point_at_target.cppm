@@ -12,7 +12,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SPointAtTargetComponent final : public BasePointAtTargetComponent, public SBaseNetComponent {
 	  public:
-		SPointAtTargetComponent(pragma::ecs::BaseEntity &ent) : BasePointAtTargetComponent(ent) {}
+		SPointAtTargetComponent(ecs::BaseEntity &ent) : BasePointAtTargetComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
@@ -20,6 +20,6 @@ export namespace pragma {
 
 		using BasePointAtTargetComponent::SetPointAtTarget;
 	  protected:
-		virtual void SetPointAtTarget(pragma::ecs::BaseEntity *ent) override;
+		virtual void SetPointAtTarget(ecs::BaseEntity *ent) override;
 	};
 };

@@ -50,7 +50,7 @@ void pragma::gui::types::WIChromiumPage::SetTransparentBackground(bool b)
 		return;
 	fSetTransparentBackground(m_hWeb.get(), b);
 }
-void pragma::gui::types::WIChromiumPage::RegisterJavascriptFunction(const std::string &name, const std::function<std::unique_ptr<pragma::JSValue>(const std::vector<pragma::JSValue> &)> &callback)
+void pragma::gui::types::WIChromiumPage::RegisterJavascriptFunction(const std::string &name, const std::function<std::unique_ptr<JSValue>(const std::vector<JSValue> &)> &callback)
 {
 	if(fLoadUrl == nullptr)
 		return;
@@ -68,7 +68,7 @@ void pragma::gui::types::WIChromiumPage::OnFirstEntered()
 	InitializeChromium();
 	if(fLoadUrl == nullptr)
 		return;
-	m_hWeb = pragma::gui::WGUI::GetInstance().Create("WIWeb", m_parent)->GetHandle();
+	m_hWeb = WGUI::GetInstance().Create("WIWeb", m_parent)->GetHandle();
 	if(m_hWeb.IsValid() == true) {
 		if(fSetViewSize != nullptr)
 			fSetViewSize(m_hWeb.get(), Vector2i(1024, 768));
@@ -94,7 +94,7 @@ void pragma::gui::types::WIChromiumPage::InitializeChromium()
 	// Initialize chromium
 	std::string err;
 	const std::string chromiumPath = "chromium/wv_chromium";
-	auto *client = pragma::get_client_state();
+	auto *client = get_client_state();
 	if(client->InitializeLibrary(chromiumPath, &err) != nullptr) {
 		auto dllHandle = client->GetLibraryModule(chromiumPath);
 		assert(dllHandle != nullptr);

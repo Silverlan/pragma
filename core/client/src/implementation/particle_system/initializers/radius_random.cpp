@@ -8,28 +8,28 @@ module pragma.client;
 import :particle_system.initializer_radius_random;
 
 pragma::pts::CParticleInitializerRadiusRandomBase::CParticleInitializerRadiusRandomBase(const std::string &identifier) : m_identifier {identifier} {}
-void pragma::pts::CParticleInitializerRadiusRandomBase::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleInitializerRadiusRandomBase::Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleInitializer::Initialize(pSystem, values);
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		pragma::string::to_lower(key);
+		string::to_lower(key);
 		if(key == m_identifier + "_min")
-			m_radiusMin = pragma::util::to_float(it->second);
+			m_radiusMin = util::to_float(it->second);
 		else if(key == m_identifier + "_max")
-			m_radiusMax = pragma::util::to_float(it->second);
+			m_radiusMax = util::to_float(it->second);
 	}
 }
-void pragma::pts::CParticleInitializerRadiusRandomBase::OnParticleCreated(pragma::pts::CParticle &particle) { ApplyRadius(particle, pragma::math::random(m_radiusMin, m_radiusMax)); }
+void pragma::pts::CParticleInitializerRadiusRandomBase::OnParticleCreated(CParticle &particle) { ApplyRadius(particle, math::random(m_radiusMin, m_radiusMax)); }
 float pragma::pts::CParticleInitializerRadiusRandomBase::GetMinRadius() const { return m_radiusMin; }
 float pragma::pts::CParticleInitializerRadiusRandomBase::GetMaxRadius() const { return m_radiusMax; }
 
 ////////////////////////////
 
 pragma::pts::CParticleInitializerRadiusRandom::CParticleInitializerRadiusRandom() : CParticleInitializerRadiusRandomBase("radius") {}
-void pragma::pts::CParticleInitializerRadiusRandom::ApplyRadius(pragma::pts::CParticle &particle, float radius) { particle.SetRadius(radius); }
+void pragma::pts::CParticleInitializerRadiusRandom::ApplyRadius(CParticle &particle, float radius) { particle.SetRadius(radius); }
 
 ////////////////////////////
 
 pragma::pts::CParticleInitializerLengthRandom::CParticleInitializerLengthRandom() : CParticleInitializerRadiusRandomBase("length") {}
-void pragma::pts::CParticleInitializerLengthRandom::ApplyRadius(pragma::pts::CParticle &particle, float radius) { particle.SetLength(radius); }
+void pragma::pts::CParticleInitializerLengthRandom::ApplyRadius(CParticle &particle, float radius) { particle.SetLength(radius); }

@@ -25,7 +25,7 @@ void CSoundDspEchoComponent::OnEntitySpawn()
 	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	pragma::audio::EfxEchoProperties props {};
+	audio::EfxEchoProperties props {};
 	props.flDelay = m_kvDelay;
 	props.flLRDelay = m_kvLRDelay;
 	props.flDamping = m_kvDamping;

@@ -8,27 +8,27 @@ import :scripting.lua.libraries.print;
 
 bool Lua::lua_value_to_string(lua::State *L, int arg, int *r, std::string *val)
 {
-	if(Lua::IsUserData(L, arg) && !Lua::util::is_valid(L, luabind::object {luabind::from_stack(L, arg)})) {
+	if(IsUserData(L, arg) && !util::is_valid(L, luabind::object {luabind::from_stack(L, arg)})) {
 		*val = "NULL";
 		return true;
 	}
-	Lua::PushValue(L, arg);
-	arg = Lua::GetStackTop(L);
-	Lua::GetGlobal(L, "tostring");
+	PushValue(L, arg);
+	arg = GetStackTop(L);
+	GetGlobal(L, "tostring");
 	const char *s;
 	size_t l;
-	Lua::PushValue(L, -1);  /* function to be called */
-	Lua::PushValue(L, arg); /* value to print */
-	Lua::Call(L, 1, 1);
+	PushValue(L, -1);  /* function to be called */
+	PushValue(L, arg); /* value to print */
+	Call(L, 1, 1);
 	s = lua::to_string(L, -1, &l); /* get result */
 	if(s == nullptr) {
 		*r = lua::error(L, "'tostring' must return a string to 'print'");
 		return false;
 	}
 	*val = std::string(s, l);
-	Lua::Pop(L, 1); /* pop result */
-	Lua::Pop(L, 1); /* pop function */
-	Lua::Pop(L, 1); /* pop value */
+	Pop(L, 1); /* pop result */
+	Pop(L, 1); /* pop function */
+	Pop(L, 1); /* pop value */
 	*r = 0;
 	return true;
 }
@@ -44,7 +44,7 @@ int Lua::console::print(lua::State *L)
 	}
 	Con::cout<<Con::endl;
 	return 0;*/
-	int n = Lua::GetStackTop(L); /* number of arguments */
+	int n = GetStackTop(L); /* number of arguments */
 	int i;
 	for(i = 1; i <= n; i++) {
 		auto status = -1;
@@ -62,10 +62,10 @@ int Lua::console::print(lua::State *L)
 // TODO: Prevent infinite loops (e.g. printing _G)
 int Lua::console::print_table(lua::State *l, std::string tab, int idx)
 {
-	Lua::CheckTable(l, idx);
-	Lua::PushNil(l);
-	while(Lua::GetNextPair(l, idx) != 0) {
-		if(Lua::IsTable(l, -1)) {
+	CheckTable(l, idx);
+	PushNil(l);
+	while(GetNextPair(l, idx) != 0) {
+		if(IsTable(l, -1)) {
 			auto status = -1;
 			std::string key;
 			if(lua_value_to_string(l, -2, &status, &key) == false)
@@ -74,7 +74,7 @@ int Lua::console::print_table(lua::State *l, std::string tab, int idx)
 
 			std::string tabSub = tab;
 			tabSub += "\t";
-			print_table(l, tabSub, Lua::GetStackTop(l));
+			print_table(l, tabSub, GetStackTop(l));
 		}
 		else {
 			auto status = -1;
@@ -88,7 +88,7 @@ int Lua::console::print_table(lua::State *l, std::string tab, int idx)
 				return status;
 			Con::cout << tab << key << " = " << val << Con::endl;
 		}
-		Lua::Pop(l, 1);
+		Pop(l, 1);
 	}
 	return 0;
 }
@@ -97,15 +97,15 @@ int Lua::console::print_table(lua::State *l) { return print_table(l, ""); }
 
 int Lua::console::msg(lua::State *l, int st)
 {
-	int argc = Lua::GetStackTop(l);
+	int argc = GetStackTop(l);
 	if(argc > 0) {
 		auto *state = pragma::Engine::Get()->GetNetworkState(l);
 		if(state == nullptr)
-			pragma::console::set_console_color(::pragma::console::ConsoleColorFlags::White | ::pragma::console::ConsoleColorFlags::Intensity);
+			pragma::console::set_console_color(pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
 		else if(state->IsServer())
-			pragma::console::set_console_color(::pragma::console::ConsoleColorFlags::Cyan | ::pragma::console::ConsoleColorFlags::Intensity);
+			pragma::console::set_console_color(pragma::console::ConsoleColorFlags::Cyan | pragma::console::ConsoleColorFlags::Intensity);
 		else
-			pragma::console::set_console_color(::pragma::console::ConsoleColorFlags::Magenta | ::pragma::console::ConsoleColorFlags::Intensity);
+			pragma::console::set_console_color(pragma::console::ConsoleColorFlags::Magenta | pragma::console::ConsoleColorFlags::Intensity);
 	}
 	for(int i = st; i <= argc; i++) {
 		auto status = -1;
@@ -119,13 +119,13 @@ int Lua::console::msg(lua::State *l, int st)
 
 int Lua::debug::print(lua::State *l)
 {
-	auto flags = ::pragma::console::ConsoleColorFlags::None;
+	auto flags = pragma::console::ConsoleColorFlags::None;
 	if(pragma::Engine::Get()->GetNetworkState(l)->IsClient())
-		flags |= ::pragma::console::ConsoleColorFlags::BackgroundMagenta;
+		flags |= pragma::console::ConsoleColorFlags::BackgroundMagenta;
 	else
-		flags |= ::pragma::console::ConsoleColorFlags::BackgroundCyan;
-	pragma::console::set_console_color(flags | ::pragma::console::ConsoleColorFlags::BackgroundIntensity | ::pragma::console::ConsoleColorFlags::Black);
-	int n = Lua::GetStackTop(l); /* number of arguments */
+		flags |= pragma::console::ConsoleColorFlags::BackgroundCyan;
+	pragma::console::set_console_color(flags | pragma::console::ConsoleColorFlags::BackgroundIntensity | pragma::console::ConsoleColorFlags::Black);
+	int n = GetStackTop(l); /* number of arguments */
 	int i;
 	for(i = 1; i <= n; i++) {
 		auto status = -1;
@@ -155,7 +155,7 @@ int Lua::console::msgc(lua::State *l)
 	if(Lua::IsType<::Color>(l, 1)) {
 		auto &col = Lua::Check<::Color>(l, 1);
 
-		auto argc = Lua::GetStackTop(l);
+		auto argc = GetStackTop(l);
 		std::stringstream ss {};
 		for(int i = 2; i <= argc; i++) {
 			auto status = -1;
@@ -177,7 +177,7 @@ int Lua::console::msgc(lua::State *l)
 
 int Lua::console::msgw(lua::State *l)
 {
-	int argc = Lua::GetStackTop(l);
+	int argc = GetStackTop(l);
 	if(argc == 0)
 		return 0;
 	Con::cwar << "";
@@ -194,7 +194,7 @@ int Lua::console::msgw(lua::State *l)
 
 int Lua::console::msge(lua::State *l)
 {
-	int argc = Lua::GetStackTop(l);
+	int argc = GetStackTop(l);
 	if(argc == 0)
 		return 0;
 	Con::cerr << "";
@@ -259,14 +259,14 @@ int Lua::log::critical(lua::State *l) { return ::log(l, spdlog::level::critical)
 int Lua::log::debug(lua::State *l) { return ::log(l, spdlog::level::debug); }
 int Lua::log::register_logger(lua::State *l)
 {
-	std::string name = Lua::CheckString(l, 1);
+	std::string name = CheckString(l, 1);
 	auto &logger = pragma::register_logger(name);
 	Lua::Push<spdlog::logger *>(l, &logger);
 	return 1;
 }
 int Lua::log::color(lua::State *l)
 {
-	auto level = static_cast<pragma::util::LogSeverity>(Lua::CheckInt(l, 1));
+	auto level = static_cast<pragma::util::LogSeverity>(CheckInt(l, 1));
 	std::string c {};
 	switch(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level))) {
 	case spdlog::level::level_enum::warn:
@@ -279,6 +279,6 @@ int Lua::log::color(lua::State *l)
 		c = Con::COLOR_CRITICAL;
 		break;
 	}
-	Lua::PushString(l, c);
+	PushString(l, c);
 	return 1;
 }

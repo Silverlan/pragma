@@ -27,25 +27,25 @@ spdlog::details::console_mutex::mutex_t &pragma::console::get_mutex()
 static bool g_ansiColorCodesEnabled = true;
 void pragma::logging::set_ansi_color_codes_enabled(bool enabled) { g_ansiColorCodesEnabled = enabled; }
 
-int32_t pragma::logging::severity_to_spdlog_level(pragma::util::LogSeverity severity)
+int32_t pragma::logging::severity_to_spdlog_level(util::LogSeverity severity)
 {
 	switch(severity) {
-	case pragma::util::LogSeverity::Info:
+	case util::LogSeverity::Info:
 		return spdlog::level::info;
-	case pragma::util::LogSeverity::Warning:
+	case util::LogSeverity::Warning:
 		return spdlog::level::warn;
-	case pragma::util::LogSeverity::Error:
+	case util::LogSeverity::Error:
 		return spdlog::level::err;
-	case pragma::util::LogSeverity::Critical:
+	case util::LogSeverity::Critical:
 		return spdlog::level::critical;
-	case pragma::util::LogSeverity::Debug:
+	case util::LogSeverity::Debug:
 		return spdlog::level::debug;
-	case pragma::util::LogSeverity::Trace:
+	case util::LogSeverity::Trace:
 		return spdlog::level::trace;
-	case pragma::util::LogSeverity::Disabled:
+	case util::LogSeverity::Disabled:
 		return spdlog::level::off;
 	}
-	static_assert(pragma::math::to_integral(pragma::util::LogSeverity::Count) == 7, "Expand this list when more severity types are added!");
+	static_assert(math::to_integral(util::LogSeverity::Count) == 7, "Expand this list when more severity types are added!");
 	return spdlog::level::info;
 }
 
@@ -53,25 +53,25 @@ pragma::util::LogSeverity pragma::logging::spdlog_level_to_severity(int32_t spdl
 {
 	switch(spdlogLevel) {
 	case spdlog::level::info:
-		return pragma::util::LogSeverity::Info;
+		return util::LogSeverity::Info;
 	case spdlog::level::warn:
-		return pragma::util::LogSeverity::Warning;
+		return util::LogSeverity::Warning;
 	case spdlog::level::err:
-		return pragma::util::LogSeverity::Error;
+		return util::LogSeverity::Error;
 	case spdlog::level::critical:
-		return pragma::util::LogSeverity::Critical;
+		return util::LogSeverity::Critical;
 	case spdlog::level::debug:
-		return pragma::util::LogSeverity::Debug;
+		return util::LogSeverity::Debug;
 	case spdlog::level::trace:
-		return pragma::util::LogSeverity::Trace;
+		return util::LogSeverity::Trace;
 	}
-	static_assert(pragma::math::to_integral(pragma::util::LogSeverity::Count) == 7, "Expand this list when more severity types are added!");
-	return pragma::util::LogSeverity::Info;
+	static_assert(math::to_integral(util::LogSeverity::Count) == 7, "Expand this list when more severity types are added!");
+	return util::LogSeverity::Info;
 }
 
-void pragma::log(const std::string &msg, pragma::util::LogSeverity severity) { spdlog::log(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(severity)), msg); }
+void pragma::log(const std::string &msg, util::LogSeverity severity) { spdlog::log(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(severity)), msg); }
 
-bool pragma::is_log_level_enabled(pragma::util::LogSeverity severity) { return spdlog::should_log(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(severity))); }
+bool pragma::is_log_level_enabled(util::LogSeverity severity) { return spdlog::should_log(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(severity))); }
 
 static std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> g_customLoggers;
 void pragma::flush_loggers()
@@ -101,7 +101,7 @@ static void update_pragma_log_level()
 		level = pragma::math::min(level, (*it)->level());
 	logger->set_level(level);
 }
-void pragma::set_console_log_level(pragma::util::LogSeverity level)
+void pragma::set_console_log_level(util::LogSeverity level)
 {
 	auto logger = spdlog::get(PRAGMA_LOGGER_NAME);
 	if(!logger)
@@ -110,7 +110,7 @@ void pragma::set_console_log_level(pragma::util::LogSeverity level)
 	if(sinks.empty())
 		return;
 	auto &sink = sinks.front();
-	sink->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level)));
+	sink->set_level(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(level)));
 
 	update_pragma_log_level();
 }
@@ -118,26 +118,26 @@ pragma::util::LogSeverity pragma::get_console_log_level()
 {
 	auto logger = spdlog::get(PRAGMA_LOGGER_NAME);
 	if(!logger)
-		return pragma::util::LogSeverity::Disabled;
+		return util::LogSeverity::Disabled;
 	auto &sinks = logger->sinks();
 	if(sinks.empty())
-		return pragma::util::LogSeverity::Disabled;
+		return util::LogSeverity::Disabled;
 	return logging::spdlog_level_to_severity(sinks.front()->level());
 }
-void pragma::set_file_log_level(pragma::util::LogSeverity level)
+void pragma::set_file_log_level(util::LogSeverity level)
 {
 	auto logger = spdlog::get(PRAGMA_LOGGER_NAME);
 	if(logger) {
 		auto &sinks = logger->sinks();
 		if(sinks.size() >= 2) {
 			auto &sinkFile = sinks[1];
-			sinkFile->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level)));
+			sinkFile->set_level(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(level)));
 		}
 	}
 
 	auto loggerFile = spdlog::get(PRAGMA_FILE_LOGGER_NAME);
 	if(loggerFile)
-		loggerFile->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level)));
+		loggerFile->set_level(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(level)));
 
 	update_pragma_log_level();
 }
@@ -145,7 +145,7 @@ pragma::util::LogSeverity pragma::get_file_log_level()
 {
 	auto loggerFile = spdlog::get(PRAGMA_FILE_LOGGER_NAME);
 	if(!loggerFile)
-		return pragma::util::LogSeverity::Disabled;
+		return util::LogSeverity::Disabled;
 	return logging::spdlog_level_to_severity(loggerFile->level());
 }
 
@@ -233,8 +233,8 @@ void pragma::detail::close_logger()
 		return;
 	loggerClosed = true;
 
-	pragma::logging::detail::shouldLogOutput = false;
-	pragma::logging::detail::consoleOutputLogger = nullptr;
+	logging::detail::shouldLogOutput = false;
+	logging::detail::consoleOutputLogger = nullptr;
 
 	auto logger = spdlog::get(PRAGMA_FILE_LOGGER_NAME);
 	if(logger) {
@@ -387,7 +387,7 @@ static std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> &get_pre
 	return g_preRegisteredLoggers;
 }
 
-spdlog::logger &pragma::register_logger(const std::string &name, const std::optional<pragma::util::LogSeverity> &defaultLogLevel)
+spdlog::logger &pragma::register_logger(const std::string &name, const std::optional<util::LogSeverity> &defaultLogLevel)
 {
 	if(g_loggerInitialized)
 		return get_logger(name);
@@ -396,27 +396,27 @@ spdlog::logger &pragma::register_logger(const std::string &name, const std::opti
 		return *it->second;
 	auto logger = pragma::util::make_shared<spdlog::logger>(name);
 	if(defaultLogLevel)
-		logger->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(*defaultLogLevel)));
+		logger->set_level(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(*defaultLogLevel)));
 	get_pre_registered_loggers()[name] = logger;
 	return *logger;
 }
 
-void pragma::detail::initialize_logger(pragma::util::LogSeverity conLogLevel, pragma::util::LogSeverity fileLogLevel, const std::optional<std::string> &logFile)
+void pragma::detail::initialize_logger(util::LogSeverity conLogLevel, util::LogSeverity fileLogLevel, const std::optional<std::string> &logFile)
 {
 	if(g_loggerInitialized)
 		return;
 	g_logFileName = logFile;
 	auto consoleSink = pragma::util::make_shared<console::anycolor_color_sink_mt>();
 	if(g_ansiColorCodesEnabled) {
-		consoleSink->set_color(spdlog::level::trace, pragma::console::get_ansi_color_code(pragma::console::ConsoleColorFlags::Red | pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Blue));
-		consoleSink->set_color(spdlog::level::debug, pragma::console::get_ansi_color_code(pragma::console::ConsoleColorFlags::Green | pragma::console::ConsoleColorFlags::Blue));
-		consoleSink->set_color(spdlog::level::info, pragma::console::get_true_color_code(Color {138, 201, 38})); // Green
+		consoleSink->set_color(spdlog::level::trace, pragma::console::get_ansi_color_code(console::ConsoleColorFlags::Red | console::ConsoleColorFlags::Green | console::ConsoleColorFlags::Blue));
+		consoleSink->set_color(spdlog::level::debug, pragma::console::get_ansi_color_code(console::ConsoleColorFlags::Green | console::ConsoleColorFlags::Blue));
+		consoleSink->set_color(spdlog::level::info, console::get_true_color_code(Color {138, 201, 38})); // Green
 		consoleSink->set_color(spdlog::level::warn, Con::COLOR_WARNING);
 		consoleSink->set_color(spdlog::level::err, Con::COLOR_ERROR);
 		consoleSink->set_color(spdlog::level::critical, Con::COLOR_CRITICAL);
 		consoleSink->set_color(spdlog::level::off, Con::COLOR_RESET);
 	}
-	consoleSink->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(conLogLevel)));
+	consoleSink->set_level(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(conLogLevel)));
 
 	auto formatter = std::make_unique<spdlog::pattern_formatter>();
 	formatter->add_flag<SpdPragmaPrefixFormatter>('*');
@@ -429,9 +429,9 @@ void pragma::detail::initialize_logger(pragma::util::LogSeverity conLogLevel, pr
 	std::vector<spdlog::sink_ptr> sinks {};
 	sinks.push_back(consoleSink);
 	if(logFile.has_value()) {
-		auto fullLogFilePath = pragma::util::FilePath(fs::get_program_write_path(), *logFile);
+		auto fullLogFilePath = util::FilePath(fs::get_program_write_path(), *logFile);
 		auto fileSink = pragma::util::make_shared<spdlog::sinks::basic_file_sink_mt>(fullLogFilePath.GetString(), true);
-		fileSink->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(fileLogLevel)));
+		fileSink->set_level(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(fileLogLevel)));
 		auto formatter = std::make_unique<spdlog::pattern_formatter>();
 		formatter->add_flag<short_level_formatter_c>('q');
 		formatter->add_flag<color_reset_formatter>('Q');
@@ -445,19 +445,19 @@ void pragma::detail::initialize_logger(pragma::util::LogSeverity conLogLevel, pr
 		// We want to log all regular console output to file, so we'll create an additional logger to handle that
 		auto conFileLogger = pragma::util::make_shared<spdlog::logger>(PRAGMA_FILE_LOGGER_NAME, spdlog::sinks_init_list {fileSink});
 		conFileLogger->set_level(spdlog::level::trace); // Always log all regular console output to file
-		pragma::logging::detail::shouldLogOutput = true;
-		pragma::logging::detail::consoleOutputLogger = conFileLogger;
+		logging::detail::shouldLogOutput = true;
+		logging::detail::consoleOutputLogger = conFileLogger;
 	}
 
 	auto logger = pragma::util::make_shared<spdlog::logger>(PRAGMA_LOGGER_NAME, sinks.begin(), sinks.end());
-	logger->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(static_cast<pragma::util::LogSeverity>(pragma::math::min(pragma::math::to_integral(conLogLevel), pragma::math::to_integral(fileLogLevel))))));
+	logger->set_level(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(static_cast<util::LogSeverity>(math::min(math::to_integral(conLogLevel), math::to_integral(fileLogLevel))))));
 	spdlog::set_default_logger(logger);
 
 	spdlog::info("Logging has started with logging level {} (Console) / {} (File).", magic_enum::enum_name(conLogLevel), magic_enum::enum_name(fileLogLevel));
 	if(logFile.has_value()) {
 		spdlog::info("Log will be written to file '{}'.", *logFile);
-		if(pragma::logging::detail::consoleOutputLogger)
-			pragma::logging::detail::consoleOutputLogger->info("This log file contains ANSI color codes. To properly view the log, you need a text-editor with ANSI color support.");
+		if(logging::detail::consoleOutputLogger)
+			logging::detail::consoleOutputLogger->info("This log file contains ANSI color codes. To properly view the log, you need a text-editor with ANSI color support.");
 	}
 	else
 		spdlog::info("Log file has been disabled, log will not be written to disk.");

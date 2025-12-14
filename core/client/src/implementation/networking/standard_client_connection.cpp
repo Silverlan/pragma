@@ -11,30 +11,30 @@ import :networking.standard_client;
 
 void pragma::networking::NWMClientConnection::OnPacketSent(const NWMEndpoint &ep, const NetPacket &packet)
 {
-	nwm::Client::OnPacketSent(ep, packet);
+	Client::OnPacketSent(ep, packet);
 #if DEBUG_CLIENT_VERBOSE == 1
 	auto id = packet.GetMessageID();
 	auto *svMap = get_server_message_map();
-	pragma::util::StringMap<uint32_t> *svMsgs;
+	util::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 	auto it = std::find_if(svMsgs->begin(), svMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != svMsgs->end()) ? it->first : "Unknown";
 	Con::ccl << "OnPacketSent: " << msgName << " (" << id << ")" << Con::endl;
 #endif
-	MemorizeNetMessage(MessageTracker::MessageType::Outgoing, packet.GetMessageID(), ep, packet);
+	MemorizeNetMessage(MessageType::Outgoing, packet.GetMessageID(), ep, packet);
 }
 void pragma::networking::NWMClientConnection::OnPacketReceived(const NWMEndpoint &ep, unsigned int id, NetPacket &packet)
 {
-	nwm::Client::OnPacketReceived(ep, id, packet);
+	Client::OnPacketReceived(ep, id, packet);
 #if DEBUG_CLIENT_VERBOSE == 1
 	auto *clMap = get_client_message_map();
-	pragma::util::StringMap<uint32_t> *clMsgs;
+	util::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 	auto it = std::find_if(clMsgs->begin(), clMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != clMsgs->end()) ? it->first : "Unknown";
 	Con::ccl << "OnPacketReceived: " << msgName << " (" << id << ")" << Con::endl;
 #endif
-	MemorizeNetMessage(MessageTracker::MessageType::Incoming, id, ep, packet);
+	MemorizeNetMessage(MessageType::Incoming, id, ep, packet);
 }
 
 bool pragma::networking::NWMClientConnection::HandlePacket(const NWMEndpoint &ep, unsigned int id, NetPacket &packet)
@@ -42,7 +42,7 @@ bool pragma::networking::NWMClientConnection::HandlePacket(const NWMEndpoint &ep
 #if DEBUG_CLIENT_VERBOSE == 1
 	Con::ccl << "HandlePacket: " << id << Con::endl;
 #endif
-	if(nwm::Client::HandlePacket(ep, id, packet) == true)
+	if(Client::HandlePacket(ep, id, packet) == true)
 		return true;
 	m_client->HandlePacket(packet);
 	return true;
@@ -71,7 +71,7 @@ void pragma::networking::NWMClientConnection::OnDisconnected(nwm::ClientDropped 
 	m_client->OnDisconnected();
 }
 
-pragma::networking::NWMClientConnection::NWMClientConnection(const std::shared_ptr<CLNWMUDPConnection> &udp, std::shared_ptr<CLNWMTCPConnection> &tcp) : nwm::Client(udp, tcp) {}
+pragma::networking::NWMClientConnection::NWMClientConnection(const std::shared_ptr<CLNWMUDPConnection> &udp, std::shared_ptr<CLNWMTCPConnection> &tcp) : Client(udp, tcp) {}
 
 std::unique_ptr<pragma::networking::NWMClientConnection> pragma::networking::NWMClientConnection::Create(const std::string &serverIp, unsigned short serverPort)
 {
@@ -93,7 +93,7 @@ std::unique_ptr<pragma::networking::NWMClientConnection> pragma::networking::NWM
 #ifdef _DEBUG
 	cl->SetTimeoutDuration(0.f);
 #else
-	cl->SetTimeoutDuration(pragma::get_client_state()->GetConVarFloat("sv_timeout_duration"));
+	cl->SetTimeoutDuration(get_client_state()->GetConVarFloat("sv_timeout_duration"));
 #endif
 	//cl->SetPingEnabled(false);
 	cl->Start();

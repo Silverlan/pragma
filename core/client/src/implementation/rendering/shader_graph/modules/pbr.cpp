@@ -18,7 +18,7 @@ using namespace pragma::rendering::shader_graph;
 #pragma optimize("", off)
 std::shared_ptr<prosper::IDescriptorSetGroup> PbrModule::g_defaultPbrDsg = {};
 size_t PbrModule::g_instanceCount = 0;
-PbrModule::PbrModule(ShaderGraph &shader) : pragma::rendering::ShaderGraphModule {shader}
+PbrModule::PbrModule(ShaderGraph &shader) : ShaderGraphModule {shader}
 {
 	m_pbrDescSetInfo = {
 	  "PBR",
@@ -36,24 +36,24 @@ void PbrModule::InitializeGfxPipelineDescriptorSets()
 {
 	m_shader.AddDescriptorSetGroup(m_pbrDescSetInfo);
 	if(!g_defaultPbrDsg) {
-		auto &context = pragma::get_cengine()->GetRenderContext();
+		auto &context = get_cengine()->GetRenderContext();
 		g_defaultPbrDsg = context.CreateDescriptorSetGroup(m_pbrDescSetInfo);
 		auto &dummyTex = context.GetDummyTexture();
 		auto &dummyCubemapTex = context.GetDummyCubemapTexture();
 		auto &ds = *g_defaultPbrDsg->GetDescriptorSet(0);
-		ds.SetBindingTexture(*dummyCubemapTex, pragma::math::to_integral(PBRBinding::IrradianceMap));
-		ds.SetBindingTexture(*dummyCubemapTex, pragma::math::to_integral(PBRBinding::PrefilterMap));
-		ds.SetBindingTexture(*dummyTex, pragma::math::to_integral(PBRBinding::BRDFMap));
+		ds.SetBindingTexture(*dummyCubemapTex, math::to_integral(PBRBinding::IrradianceMap));
+		ds.SetBindingTexture(*dummyCubemapTex, math::to_integral(PBRBinding::PrefilterMap));
+		ds.SetBindingTexture(*dummyTex, math::to_integral(PBRBinding::BRDFMap));
 	}
 }
-void PbrModule::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+void PbrModule::RecordBindScene(ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
 	float iblStrength = 1.f;
 	auto *ds = GetReflectionProbeDescriptorSet(scene, iblStrength, inOutSceneFlags);
 
 	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), m_pbrDescSetInfo.setIndex, *ds);
 }
-prosper::IDescriptorSet *PbrModule::GetReflectionProbeDescriptorSet(const pragma::CSceneComponent &scene, float &outIblStrength, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+prosper::IDescriptorSet *PbrModule::GetReflectionProbeDescriptorSet(const CSceneComponent &scene, float &outIblStrength, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
 	auto &hCam = scene.GetActiveCamera();
 	assert(hCam.valid());

@@ -39,11 +39,11 @@ void pragma::locale::clear()
 }
 pragma::locale::LoadResult pragma::locale::load(const std::string &file, const std::string &lan, bool bReload)
 {
-	auto filePath = pragma::util::Path::CreateFile(file);
+	auto filePath = util::Path::CreateFile(file);
 	auto it = std::find(g_loadedFiles.begin(), g_loadedFiles.end(), filePath.GetString());
 	if(it != g_loadedFiles.end()) {
 		if(bReload == false)
-			return pragma::locale::LoadResult::AlreadyLoaded;
+			return LoadResult::AlreadyLoaded;
 		g_loadedFiles.erase(it);
 	}
 	return load_file(filePath.GetString(), lan);
@@ -51,18 +51,18 @@ pragma::locale::LoadResult pragma::locale::load(const std::string &file, const s
 
 std::string pragma::locale::get_file_location(const std::string &file, const std::string &lan) { return LOCALIZATION_ROOT_PATH + lan + "/texts/" + file; }
 
-pragma::locale::LoadResult pragma::locale::parse_file(const std::string &file, const std::string &lan, std::unordered_map<std::string, pragma::string::Utf8String> &outTexts)
+pragma::locale::LoadResult pragma::locale::parse_file(const std::string &file, const std::string &lan, std::unordered_map<std::string, string::Utf8String> &outTexts)
 {
 	auto filePath = get_file_location(file, lan);
-	auto f = pragma::fs::open_file(filePath.c_str(), pragma::fs::FileMode::Read);
+	auto f = pragma::fs::open_file(filePath.c_str(), fs::FileMode::Read);
 	if(f != nullptr) {
 		while(!f->Eof()) {
 			auto l = f->ReadLine();
 			std::string key;
 			std::string val;
-			if(pragma::string::get_key_value(l, key, val)) {
-				pragma::string::replace(val, "\\\"", "\"");
-				pragma::string::replace(val, "\\n", "\n");
+			if(string::get_key_value(l, key, val)) {
+				string::replace(val, "\\\"", "\"");
+				string::replace(val, "\\n", "\n");
 				outTexts[key] = val;
 			}
 		}
@@ -109,7 +109,7 @@ void pragma::locale::reload_files()
 void pragma::locale::set_language(std::string lan)
 {
 	LOGGER.debug("Changing global language to '{}'...", lan);
-	pragma::string::to_lower(lan);
+	string::to_lower(lan);
 	g_language = lan;
 
 	auto loadedFiles = g_loadedFiles;
@@ -119,7 +119,7 @@ void pragma::locale::set_language(std::string lan)
 
 	try {
 		g_locFileWatcher = std::make_unique<fs::DirectoryWatcherCallback>(LOCALIZATION_ROOT_PATH + lan + '/', [](const std::string &str) {
-			auto filePath = pragma::util::Path::CreateFile(str);
+			auto filePath = util::Path::CreateFile(str);
 			auto it = std::find(g_loadedFiles.begin(), g_loadedFiles.end(), filePath.GetString());
 			if(it == g_loadedFiles.end())
 				return;
@@ -166,14 +166,14 @@ const std::unordered_map<std::string, pragma::locale::LanguageInfo> &pragma::loc
 	}
 	return g_languages;
 }
-bool pragma::locale::set_localization(const std::string &id, const pragma::string::Utf8String &text, bool overwriteIfExists)
+bool pragma::locale::set_localization(const std::string &id, const string::Utf8String &text, bool overwriteIfExists)
 {
 	if(!overwriteIfExists && g_localization.texts.find(id) != g_localization.texts.end())
 		return false;
 	g_localization.texts[id] = text;
 	return true;
 }
-bool pragma::locale::get_text(const std::string &id, pragma::string::Utf8String &outText) { return get_text(id, {}, outText); }
+bool pragma::locale::get_text(const std::string &id, string::Utf8String &outText) { return get_text(id, {}, outText); }
 bool pragma::locale::get_text(const std::string &id, std::string &outText) { return get_text(id, {}, outText); }
 bool pragma::locale::get_raw_text(const std::string &id, std::string &outText)
 {
@@ -183,7 +183,7 @@ bool pragma::locale::get_raw_text(const std::string &id, std::string &outText)
 	outText = it->second.cpp_str();
 	return true;
 }
-bool pragma::locale::get_raw_text(const std::string &id, pragma::string::Utf8String &outText)
+bool pragma::locale::get_raw_text(const std::string &id, string::Utf8String &outText)
 {
 	auto it = g_localization.texts.find(id);
 	if(it == g_localization.texts.end())
@@ -256,13 +256,13 @@ static void insert_arguments(const std::vector<TString> &args, TString &inOutTex
 		startPos = inOutText.find('{', endPos);
 	}
 }
-bool pragma::locale::get_text(const std::string &id, const std::vector<pragma::string::Utf8String> &args, pragma::string::Utf8String &outText)
+bool pragma::locale::get_text(const std::string &id, const std::vector<string::Utf8String> &args, string::Utf8String &outText)
 {
 	auto it = g_localization.texts.find(id);
 	if(it == g_localization.texts.end())
 		return false;
 	outText = it->second;
-	insert_arguments<pragma::string::Utf8String>(args, outText);
+	insert_arguments<string::Utf8String>(args, outText);
 	return true;
 }
 bool pragma::locale::get_text(const std::string &id, const std::vector<std::string> &args, std::string &outText)
@@ -285,7 +285,7 @@ std::string pragma::locale::get_text(const std::string &id, const std::vector<st
 	insert_arguments<std::string>(args, r);
 	return r;
 }
-pragma::string::Utf8String pragma::locale::get_text_utf8(const std::string &id, const std::vector<pragma::string::Utf8String> &args)
+pragma::string::Utf8String pragma::locale::get_text_utf8(const std::string &id, const std::vector<string::Utf8String> &args)
 {
 	auto it = g_localization.texts.find(id);
 	if(it == g_localization.texts.end()) {
@@ -293,12 +293,12 @@ pragma::string::Utf8String pragma::locale::get_text_utf8(const std::string &id, 
 		return std::string("<MISSING LOCALIZATION: ") + id + std::string(">");
 	}
 	auto r = it->second;
-	insert_arguments<pragma::string::Utf8String>(args, r);
+	insert_arguments<string::Utf8String>(args, r);
 	return r;
 }
 std::string pragma::locale::determine_system_language()
 {
-	auto lan = pragma::util::get_system_language();
+	auto lan = util::get_system_language();
 	if(!lan)
 		lan = "en";
 	return *lan;
@@ -323,7 +323,7 @@ pragma::string::Utf8String pragma::locale::get_used_characters()
 	for(auto c : usedCharacters)
 		vUsedCharacters.push_back(c);
 	std::sort(vUsedCharacters.begin(), vUsedCharacters.end());
-	pragma::string::Utf8String usedCharsStr;
+	string::Utf8String usedCharsStr;
 	for(auto c : vUsedCharacters)
 		usedCharsStr += static_cast<char16_t>(c);
 	return usedCharsStr;
@@ -362,9 +362,9 @@ static bool save_localization(const pragma::locale::Localization &loc, const std
 bool pragma::locale::relocalize(const std::string &identifier, const std::string &newIdentifier, const std::string &oldCategory, const std::string &newCategory)
 {
 	auto fileName = oldCategory + ".txt";
-	for(auto &[lan, lanInfo] : pragma::locale::get_languages()) {
+	for(auto &[lan, lanInfo] : get_languages()) {
 		Localization loc {};
-		if(pragma::locale::load_file(fileName, lan, loc) == LoadResult::Failed)
+		if(load_file(fileName, lan, loc) == LoadResult::Failed)
 			continue;
 		auto it = loc.texts.find(identifier);
 		if(it == loc.texts.end())
@@ -378,22 +378,22 @@ bool pragma::locale::relocalize(const std::string &identifier, const std::string
 	}
 	return true;
 }
-bool pragma::locale::localize(const std::string &identifier, const std::string &lan, const std::string &category, const pragma::string::Utf8String &text)
+bool pragma::locale::localize(const std::string &identifier, const std::string &lan, const std::string &category, const string::Utf8String &text)
 {
 	auto fileName = category + ".txt";
 	Localization loc {};
-	if(pragma::locale::load_file(fileName, lan, loc) == LoadResult::Failed) {
+	if(load_file(fileName, lan, loc) == LoadResult::Failed) {
 		auto success = false;
 		auto filePath = get_file_location(fileName, lan);
 		if(!fs::exists(filePath) && lan != "en") {
 			auto filePathEn = get_file_location(fileName, "en");
 			std::string absPath;
 			if(fs::find_local_path(filePathEn, absPath)) {
-				pragma::string::replace(absPath, "\\", "/");
+				string::replace(absPath, "\\", "/");
 				auto newPath = absPath;
-				pragma::string::replace(newPath, "/en/", "/" + lan + "/");
+				string::replace(newPath, "/en/", "/" + lan + "/");
 				if(fs::create_path(ufile::get_path_from_filename(newPath)) && fs::write_file(newPath, ""))
-					success = (pragma::locale::load_file(fileName, lan, loc) != LoadResult::Failed); // Try again
+					success = (load_file(fileName, lan, loc) != LoadResult::Failed); // Try again
 			}
 		}
 		if(!success)

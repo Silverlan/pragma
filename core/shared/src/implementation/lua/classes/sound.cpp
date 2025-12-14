@@ -72,7 +72,7 @@ void Lua::ALSound::register_class(luabind::class_<pragma::audio::ALSound> &class
 	classDef.def("GetType", &pragma::audio::ALSound::GetType);
 	classDef.def("SetType", &pragma::audio::ALSound::SetType);
 	classDef.def("AddType", &pragma::audio::ALSound::AddType);
-	classDef.def("CallOnStateChanged", &Lua::ALSound::CallOnStateChanged);
+	classDef.def("CallOnStateChanged", &CallOnStateChanged);
 	classDef.def("SetPriority", &pragma::audio::ALSound::SetPriority);
 	classDef.def("GetPriority", &pragma::audio::ALSound::GetPriority);
 	classDef.def("FadeIn", &pragma::audio::ALSound::FadeIn);
@@ -81,7 +81,7 @@ void Lua::ALSound::register_class(luabind::class_<pragma::audio::ALSound> &class
 	classDef.def("GetIntensity", &pragma::audio::ALSound::GetSoundIntensity);
 	classDef.def("GetSource", &pragma::audio::ALSound::GetSource);
 	classDef.def("SetSource", static_cast<void (pragma::audio::ALSound::*)(pragma::ecs::BaseEntity *)>(&pragma::audio::ALSound::SetSource));
-	classDef.def("SetSource", static_cast<void (*)(lua::State *, pragma::audio::ALSound &)>(&Lua::ALSound::SetSource));
+	classDef.def("SetSource", static_cast<void (*)(lua::State *, pragma::audio::ALSound &)>(&SetSource));
 	classDef.def("SetRange", &pragma::audio::ALSound::SetRange);
 	classDef.def("ClearRange", &pragma::audio::ALSound::ClearRange);
 	classDef.def("HasRange", &pragma::audio::ALSound::HasRange);
@@ -104,14 +104,14 @@ void Lua::ALSound::register_class(luabind::class_<pragma::audio::ALSound> &class
 	classDef.def("GetAirAbsorptionFactor", &pragma::audio::ALSound::GetAirAbsorptionFactor);
 	classDef.def("SetGainAuto", &pragma::audio::ALSound::SetGainAuto);
 	classDef.def("GetGainAuto", &pragma::audio::ALSound::GetGainAuto);
-	classDef.def("SetDirectFilter", static_cast<void (*)(lua::State *, pragma::audio::ALSound &, float, float, float)>(&Lua::ALSound::SetDirectFilter));
-	classDef.def("SetDirectFilter", static_cast<void (*)(lua::State *, pragma::audio::ALSound &, float)>(&Lua::ALSound::SetDirectFilter));
-	classDef.def("GetDirectFilter", &Lua::ALSound::GetDirectFilter);
-	classDef.def("AddEffect", static_cast<bool (*)(lua::State *, pragma::audio::ALSound &, const std::string &, float, float, float)>(&Lua::ALSound::AddEffect));
-	classDef.def("AddEffect", static_cast<bool (*)(lua::State *, pragma::audio::ALSound &, const std::string &, float)>(&Lua::ALSound::AddEffect));
+	classDef.def("SetDirectFilter", static_cast<void (*)(lua::State *, pragma::audio::ALSound &, float, float, float)>(&SetDirectFilter));
+	classDef.def("SetDirectFilter", static_cast<void (*)(lua::State *, pragma::audio::ALSound &, float)>(&SetDirectFilter));
+	classDef.def("GetDirectFilter", &GetDirectFilter);
+	classDef.def("AddEffect", static_cast<bool (*)(lua::State *, pragma::audio::ALSound &, const std::string &, float, float, float)>(&AddEffect));
+	classDef.def("AddEffect", static_cast<bool (*)(lua::State *, pragma::audio::ALSound &, const std::string &, float)>(&AddEffect));
 	classDef.def("RemoveEffect", &pragma::audio::ALSound::RemoveEffect);
-	classDef.def("SetEffectParameters", static_cast<bool (*)(lua::State *, pragma::audio::ALSound &, const std::string &, float, float, float)>(&Lua::ALSound::AddEffect));
-	classDef.def("SetEffectParameters", static_cast<bool (*)(lua::State *, pragma::audio::ALSound &, const std::string &, float)>(&Lua::ALSound::AddEffect));
+	classDef.def("SetEffectParameters", static_cast<bool (*)(lua::State *, pragma::audio::ALSound &, const std::string &, float, float, float)>(&AddEffect));
+	classDef.def("SetEffectParameters", static_cast<bool (*)(lua::State *, pragma::audio::ALSound &, const std::string &, float)>(&AddEffect));
 
 	classDef.def("SetGainRange", &pragma::audio::ALSound::SetGainRange);
 	classDef.def("GetGainRange", &pragma::audio::ALSound::GetGainRange);

@@ -51,7 +51,7 @@ bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context, uint32
 	return true;
 }
 
-pragma::ShaderPrepassBase &pragma::rendering::Prepass::GetShader() const { return static_cast<pragma::ShaderPrepassBase &>(*m_shaderPrepass.get()); }
+pragma::ShaderPrepassBase &pragma::rendering::Prepass::GetShader() const { return static_cast<ShaderPrepassBase &>(*m_shaderPrepass.get()); }
 
 bool pragma::rendering::Prepass::IsExtended() const { return m_bExtended; }
 void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload)
@@ -60,7 +60,7 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload
 		return;
 	m_bExtended = b;
 
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	context.WaitIdle();
 
 	auto &imgDepth = textureDepth->GetImage();
@@ -68,11 +68,11 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload
 	auto width = extents.width;
 	auto height = extents.height;
 
-	auto whShaderPrepass = pragma::get_cengine()->GetShader("prepass");
+	auto whShaderPrepass = get_cengine()->GetShader("prepass");
 	if(whShaderPrepass.expired())
 		return;
 
-	auto *shaderPrepass = static_cast<pragma::ShaderPrepass *>(whShaderPrepass.get());
+	auto *shaderPrepass = static_cast<ShaderPrepass *>(whShaderPrepass.get());
 	auto sampleCount = imgDepth.GetSampleCount();
 	//auto pipelineType = pragma::ShaderPrepassBase::GetPipelineIndex(sampleCount);
 	//if(b == true)
@@ -112,19 +112,19 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload
 			prosper::ClearValue{prosper::ClearDepthStencilValue{1.f,0}} // Clear depth
 		};
 	}*/
-	prosper::util::RenderPassCreateInfo rpInfo {{pragma::ShaderPrepass::get_normal_render_pass_attachment_info(sampleCount), pragma::ShaderPrepass::get_depth_render_pass_attachment_info(sampleCount)}};
+	prosper::util::RenderPassCreateInfo rpInfo {{ShaderPrepass::get_normal_render_pass_attachment_info(sampleCount), ShaderPrepass::get_depth_render_pass_attachment_info(sampleCount)}};
 	for(auto &att : rpInfo.attachments)
 		att.loadOp = prosper::AttachmentLoadOp::Load;
-	subsequentRenderPass = pragma::get_cengine()->GetRenderContext().CreateRenderPass(rpInfo);
+	subsequentRenderPass = get_cengine()->GetRenderContext().CreateRenderPass(rpInfo);
 }
 
-prosper::RenderTarget &pragma::rendering::Prepass::BeginRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *optRenderPass, bool secondaryCommandBuffers)
+prosper::RenderTarget &pragma::rendering::Prepass::BeginRenderPass(const DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *optRenderPass, bool secondaryCommandBuffers)
 {
 	// prosper TODO: Barriers for imgDepth and imgNormals
 	drawSceneInfo.commandBuffer->RecordBeginRenderPass(*renderTarget, m_clearValues, secondaryCommandBuffers ? prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers : prosper::IPrimaryCommandBuffer::RenderPassFlags::None, optRenderPass);
 	return *renderTarget;
 }
-void pragma::rendering::Prepass::EndRenderPass(const pragma::rendering::DrawSceneInfo &drawSceneInfo) { drawSceneInfo.commandBuffer->RecordEndRenderPass(); }
+void pragma::rendering::Prepass::EndRenderPass(const DrawSceneInfo &drawSceneInfo) { drawSceneInfo.commandBuffer->RecordEndRenderPass(); }
 
 static void debug_prepass(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

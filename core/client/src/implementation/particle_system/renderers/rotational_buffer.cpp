@@ -9,18 +9,18 @@ import :particle_system.renderer_rotational_buffer;
 
 import :client_state;
 
-void pragma::pts::CParticleRendererRotationalBuffer::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem)
+void pragma::pts::CParticleRendererRotationalBuffer::Initialize(BaseEnvParticleSystemComponent &pSystem)
 {
-	m_hParticleSystem = pSystem.GetHandle<pragma::ecs::CParticleSystemComponent>();
+	m_hParticleSystem = pSystem.GetHandle<ecs::CParticleSystemComponent>();
 
-	auto maxParticles = static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount();
+	auto maxParticles = static_cast<ecs::CParticleSystemComponent &>(pSystem).GetMaxParticleCount();
 	m_rotations.resize(maxParticles);
 
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.size = m_rotations.size() * sizeof(m_rotations.front());
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-	m_rotBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, m_rotations.data());
+	m_rotBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, m_rotations.data());
 }
 
 void pragma::pts::CParticleRendererRotationalBuffer::SetRotationAlignVelocity(bool b) { m_bAlignVelocity = b; }
@@ -61,7 +61,7 @@ bool pragma::pts::CParticleRendererRotationalBuffer::Update()
 				m_rotations.at(i) = Quat {0.f, vel.x, vel.y, vel.z};
 			}
 		}
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_rotBuffer, 0ull, numParticles * sizeof(m_rotations.front()), m_rotations.data());
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_rotBuffer, 0ull, numParticles * sizeof(m_rotations.front()), m_rotations.data());
 	}
 	return true;
 }

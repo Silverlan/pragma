@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :model.model_manager;
 
-pragma::asset::SourceMdlFormatHandler::SourceMdlFormatHandler(pragma::util::IAssetManager &assetManager) : pragma::util::IImportAssetFormatHandler {assetManager} {}
+pragma::asset::SourceMdlFormatHandler::SourceMdlFormatHandler(util::IAssetManager &assetManager) : IImportAssetFormatHandler {assetManager} {}
 bool pragma::asset::SourceMdlFormatHandler::Import(const std::string &outputPath, std::string &outFilePath)
 {
 	auto &nw = static_cast<ModelManager &>(GetAssetManager()).GetNetworkState();
@@ -18,7 +18,7 @@ bool pragma::asset::SourceMdlFormatHandler::Import(const std::string &outputPath
 
 /////////
 
-pragma::asset::Source2VmdlFormatHandler::Source2VmdlFormatHandler(pragma::util::IAssetManager &assetManager) : pragma::util::IImportAssetFormatHandler {assetManager} {}
+pragma::asset::Source2VmdlFormatHandler::Source2VmdlFormatHandler(util::IAssetManager &assetManager) : IImportAssetFormatHandler {assetManager} {}
 bool pragma::asset::Source2VmdlFormatHandler::Import(const std::string &outputPath, std::string &outFilePath)
 {
 	auto &nw = static_cast<ModelManager &>(GetAssetManager()).GetNetworkState();
@@ -30,7 +30,7 @@ bool pragma::asset::Source2VmdlFormatHandler::Import(const std::string &outputPa
 
 /////////
 
-pragma::asset::NifFormatHandler::NifFormatHandler(pragma::util::IAssetManager &assetManager) : pragma::util::IImportAssetFormatHandler {assetManager} {}
+pragma::asset::NifFormatHandler::NifFormatHandler(util::IAssetManager &assetManager) : IImportAssetFormatHandler {assetManager} {}
 bool pragma::asset::NifFormatHandler::Import(const std::string &outputPath, std::string &outFilePath)
 {
 	auto &nw = static_cast<ModelManager &>(GetAssetManager()).GetNetworkState();
@@ -39,14 +39,14 @@ bool pragma::asset::NifFormatHandler::Import(const std::string &outputPath, std:
 
 /////////
 
-pragma::asset::AssetManagerFormatHandler::AssetManagerFormatHandler(pragma::util::IAssetManager &assetManager) : pragma::util::IImportAssetFormatHandler {assetManager} {}
+pragma::asset::AssetManagerFormatHandler::AssetManagerFormatHandler(util::IAssetManager &assetManager) : IImportAssetFormatHandler {assetManager} {}
 bool pragma::asset::AssetManagerFormatHandler::Import(const std::string &outputPath, std::string &outFilePath)
 {
 	auto *game = static_cast<ModelManager &>(GetAssetManager()).GetNetworkState().GetGameState();
 	if(!game)
 		return false;
 	std::string err;
-	if(!pragma::get_engine()->GetAssetManager().ImportAsset(*game, pragma::asset::Type::Model, m_file.get(), outputPath, &err)) {
+	if(!get_engine()->GetAssetManager().ImportAsset(*game, Type::Model, m_file.get(), outputPath, &err)) {
 		m_error = std::move(err);
 		return false;
 	}

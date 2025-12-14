@@ -36,7 +36,7 @@ export namespace pragma::debug {
 		void DrawPath(const std::vector<Vector3> &path, const Color &color, float duration = 0.f);
 		void DrawSpline(const std::vector<Vector3> &path, const Color &color, uint32_t segmentCount, float curvature = 1.f, float duration = 0.f);
 		void DrawPlane(const Vector3 &n, float dist, const Color &color, float duration = 0.f);
-		void DrawPlane(const pragma::math::Plane &plane, const Color &color, float duration = 0.f);
+		void DrawPlane(const math::Plane &plane, const Color &color, float duration = 0.f);
 		void DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration = 0.f);
 	};
 }

@@ -9,14 +9,14 @@ module pragma.shared;
 import :locale;
 import :util.resource_watcher;
 
-decltype(pragma::util::eResourceWatcherCallbackType::Model) pragma::util::eResourceWatcherCallbackType::Model = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::Model);
-decltype(pragma::util::eResourceWatcherCallbackType::Material) pragma::util::eResourceWatcherCallbackType::Material = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::Material);
-decltype(pragma::util::eResourceWatcherCallbackType::Texture) pragma::util::eResourceWatcherCallbackType::Texture = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::Texture);
-decltype(pragma::util::eResourceWatcherCallbackType::Map) pragma::util::eResourceWatcherCallbackType::Map = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::Map);
-decltype(pragma::util::eResourceWatcherCallbackType::SoundScript) pragma::util::eResourceWatcherCallbackType::SoundScript = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::SoundScript);
-decltype(pragma::util::eResourceWatcherCallbackType::Sound) pragma::util::eResourceWatcherCallbackType::Sound = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::Sound);
-decltype(pragma::util::eResourceWatcherCallbackType::Count) pragma::util::eResourceWatcherCallbackType::Count = pragma::util::EResourceWatcherCallbackType::createFromEnum(pragma::util::EResourceWatcherCallbackType::E::Count);
-pragma::util::ResourceWatcherManager::ResourceWatcherManager(pragma::NetworkState *nw) : m_networkState(nw), m_watcherManager {fs::create_directory_watcher_manager()} {}
+decltype(pragma::util::eResourceWatcherCallbackType::Model) pragma::util::eResourceWatcherCallbackType::Model = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Model);
+decltype(pragma::util::eResourceWatcherCallbackType::Material) pragma::util::eResourceWatcherCallbackType::Material = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Material);
+decltype(pragma::util::eResourceWatcherCallbackType::Texture) pragma::util::eResourceWatcherCallbackType::Texture = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Texture);
+decltype(pragma::util::eResourceWatcherCallbackType::Map) pragma::util::eResourceWatcherCallbackType::Map = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Map);
+decltype(pragma::util::eResourceWatcherCallbackType::SoundScript) pragma::util::eResourceWatcherCallbackType::SoundScript = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::SoundScript);
+decltype(pragma::util::eResourceWatcherCallbackType::Sound) pragma::util::eResourceWatcherCallbackType::Sound = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Sound);
+decltype(pragma::util::eResourceWatcherCallbackType::Count) pragma::util::eResourceWatcherCallbackType::Count = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Count);
+pragma::util::ResourceWatcherManager::ResourceWatcherManager(NetworkState *nw) : m_networkState(nw), m_watcherManager {fs::create_directory_watcher_manager()} {}
 
 void pragma::util::ResourceWatcherManager::Poll()
 {
@@ -47,7 +47,7 @@ void pragma::util::ResourceWatcherManager::Unlock()
 pragma::util::ScopeGuard pragma::util::ResourceWatcherManager::ScopeLock()
 {
 	Lock();
-	return pragma::util::ScopeGuard {[this]() { Unlock(); }};
+	return ScopeGuard {[this]() { Unlock(); }};
 }
 
 bool pragma::util::ResourceWatcherManager::IsLocked() const { return m_lockedCount > 0; }
@@ -71,16 +71,16 @@ void pragma::util::ResourceWatcherManager::ReloadMaterial(const std::string &pat
 			ufile::remove_extension_from_filename(fname);
 			auto &mdlManager = m_networkState->GetModelManager();
 			auto &models = mdlManager.GetCache();
-			std::unordered_set<pragma::asset::Model *> modelMap;
+			std::unordered_set<asset::Model *> modelMap;
 			for(auto &pair : models) {
 				auto asset = mdlManager.GetAsset(pair.second);
 				if(!asset)
 					continue;
-				auto mdl = pragma::asset::ModelManager::GetAssetObject(*asset);
+				auto mdl = asset::ModelManager::GetAssetObject(*asset);
 				auto &textures = mdl->GetTextures();
 				for(auto it = textures.begin(); it != textures.end(); ++it) {
 					auto tex = *it;
-					pragma::string::to_lower(tex);
+					string::to_lower(tex);
 					if(tex == fname) {
 						modelMap.insert(mdl.get());
 						mdl->PrecacheTexture(it - textures.begin());
@@ -129,7 +129,7 @@ static bool is_image_format(const std::string &ext)
 	auto &supportedFormats = MaterialManager::get_supported_image_formats();
 	return std::find_if(supportedFormats.begin(), supportedFormats.end(), [&ext](const MaterialManager::ImageFormat &format) { return pragma::string::compare(format.extension, ext, false); }) != supportedFormats.end();
 }
-void pragma::util::ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path, const std::string &ext)
+void pragma::util::ResourceWatcherManager::OnResourceChanged(const Path &rootPath, const Path &path, const std::string &ext)
 {
 	auto &strPath = path.GetString();
 	auto *nw = m_networkState;
@@ -139,9 +139,9 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const pragma::util:
 		it->second(path, ext);
 		return;
 	}
-	auto assetType = pragma::asset::determine_type_from_extension(ext);
+	auto assetType = asset::determine_type_from_extension(ext);
 	if(assetType.has_value()) {
-		if(*assetType == pragma::asset::Type::Model) {
+		if(*assetType == asset::Type::Model) {
 			if(game != nullptr) {
 				auto *asset = m_networkState->GetModelManager().FindCachedAsset(strPath);
 				if(asset != nullptr) {
@@ -154,7 +154,7 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const pragma::util:
 #if RESOURCE_WATCHER_VERBOSE > 0
 						Con::cout << "[ResourceWatcher] Model has been reloaded, reloading entities..." << Con::endl;
 #endif
-						pragma::ecs::EntityIterator entIt {*game, pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
+						ecs::EntityIterator entIt {*game, ecs::EntityIterator::FilterFlags::Default | ecs::EntityIterator::FilterFlags::Pending};
 						entIt.AttachFilter<EntityIteratorFilterComponent>("model");
 						for(auto *ent : entIt) {
 							auto mdlComponent = ent->GetModelComponent();
@@ -163,25 +163,25 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const pragma::util:
 #if RESOURCE_WATCHER_VERBOSE > 0
 							Con::cout << "[ResourceWatcher] Reloading model for entity " << ent->GetClass() << "..." << Con::endl;
 #endif
-							mdlComponent->SetModel(std::shared_ptr<pragma::asset::Model>(nullptr));
+							mdlComponent->SetModel(std::shared_ptr<asset::Model>(nullptr));
 							mdlComponent->SetModel(strPath);
 						}
 					}
 				}
 			}
-			CallChangeCallbacks(pragma::util::eResourceWatcherCallbackType::Model, strPath, ext);
+			CallChangeCallbacks(eResourceWatcherCallbackType::Model, strPath, ext);
 		}
-		else if(*assetType == pragma::asset::Type::Material) {
+		else if(*assetType == asset::Type::Material) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 			auto matPath = "materials\\" + strPath;
 			Con::cout << "[ResourceWatcher] Material has changed: " << matPath << ". Attempting to reload..." << Con::endl;
 #endif
 			ReloadMaterial(strPath);
-			CallChangeCallbacks(pragma::util::eResourceWatcherCallbackType::Material, strPath, ext);
+			CallChangeCallbacks(eResourceWatcherCallbackType::Material, strPath, ext);
 		}
-		else if(*assetType == pragma::asset::Type::Map)
-			CallChangeCallbacks(pragma::util::eResourceWatcherCallbackType::Map, strPath, ext);
-		else if(*assetType == pragma::asset::Type::Texture) {
+		else if(*assetType == asset::Type::Map)
+			CallChangeCallbacks(eResourceWatcherCallbackType::Map, strPath, ext);
+		else if(*assetType == asset::Type::Texture) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 			auto texPath = "materials\\" + strPath;
 			Con::cout << "[ResourceWatcher] Texture has changed: " << texPath << ". Attempting to reload..." << Con::endl;
@@ -199,26 +199,26 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const pragma::util:
 				auto *mat = hMat.get();
 
 				auto canonName = fs::get_canonicalized_path(strPath);
-				pragma::string::to_lower(canonName);
+				string::to_lower(canonName);
 				ufile::remove_extension_from_filename(canonName);
 
-				std::function<bool(const pragma::util::Path &path)> fHasTexture = nullptr;
-				fHasTexture = [mat, &canonName, &fHasTexture](const pragma::util::Path &path) -> bool {
+				std::function<bool(const Path &path)> fHasTexture = nullptr;
+				fHasTexture = [mat, &canonName, &fHasTexture](const Path &path) -> bool {
 					for(auto &name : material::MaterialPropertyBlockView {*mat, path}) {
 						auto propType = mat->GetPropertyType(name);
 						switch(propType) {
 						case material::PropertyType::Block:
 							{
-								if(fHasTexture(pragma::util::FilePath(path, name)))
+								if(fHasTexture(FilePath(path, name)))
 									return true;
 								break;
 							}
 						case material::PropertyType::Texture:
 							{
 								std::string texName;
-								if(mat->GetProperty(pragma::util::FilePath(path, name).GetString(), &texName)) {
+								if(mat->GetProperty(FilePath(path, name).GetString(), &texName)) {
 									texName = fs::get_canonicalized_path(texName);
-									pragma::string::to_lower(texName);
+									string::to_lower(texName);
 									ufile::remove_extension_from_filename(texName);
 									if(canonName == texName)
 										return true;
@@ -239,18 +239,18 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const pragma::util:
 					ReloadMaterial(matName);
 				}
 			}
-			CallChangeCallbacks(pragma::util::eResourceWatcherCallbackType::Texture, strPath, ext);
+			CallChangeCallbacks(eResourceWatcherCallbackType::Texture, strPath, ext);
 		}
-		else if(*assetType == pragma::asset::Type::Sound) {
+		else if(*assetType == asset::Type::Sound) {
 			if(game != nullptr) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 				auto sndPath = "sounds\\" + strPath;
 				Con::cout << "[ResourceWatcher] Sound has changed: " << sndPath << ". Attempting to reload..." << Con::endl;
 #endif
 				// TODO: Reload sounds if they had been loaded previously
-				game->GetNetworkState()->PrecacheSound(strPath, pragma::audio::ALChannel::Both); // TODO: Only precache whatever's been requested before?
+				game->GetNetworkState()->PrecacheSound(strPath, audio::ALChannel::Both); // TODO: Only precache whatever's been requested before?
 			}
-			CallChangeCallbacks(pragma::util::eResourceWatcherCallbackType::Sound, strPath, ext);
+			CallChangeCallbacks(eResourceWatcherCallbackType::Sound, strPath, ext);
 		}
 	}
 	else if(rootPath == "scripts/sounds/") {
@@ -263,14 +263,14 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const pragma::util:
 				// TODO: Reload sound-scripts if they had been loaded previously
 				game->LoadSoundScripts(strPath.c_str()); // TODO: Only reload if they have been requested before?
 			}
-			CallChangeCallbacks(pragma::util::eResourceWatcherCallbackType::SoundScript, strPath, ext);
+			CallChangeCallbacks(eResourceWatcherCallbackType::SoundScript, strPath, ext);
 		}
 	}
 	else if(rootPath == "scripts/localization/")
-		pragma::locale::reload_files();
+		locale::reload_files();
 }
 
-void pragma::util::ResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path)
+void pragma::util::ResourceWatcherManager::OnResourceChanged(const Path &rootPath, const Path &path)
 {
 	fs::update_file_index_cache((rootPath + path).GetString());
 	/*std::string absPath;
@@ -308,8 +308,8 @@ bool pragma::util::ResourceWatcherManager::MountDirectory(const std::string &pat
 		m_watcherMutex.lock();
 		m_watchers.reserve(m_watchers.size() + watchPaths.size());
 		for(auto &watchPath : watchPaths) {
-			auto pwatchPath = pragma::util::DirPath(watchPath);
-			m_watchers.push_back(pragma::util::make_shared<fs::DirectoryWatcherCallback>(pragma::util::DirPath(path, pwatchPath).GetString(), [this, pwatchPath = std::move(pwatchPath)](const std::string &fName) { OnResourceChanged(pwatchPath, fName); }, watchFlags, m_watcherManager.get()));
+			auto pwatchPath = DirPath(watchPath);
+			m_watchers.push_back(pragma::util::make_shared<fs::DirectoryWatcherCallback>(DirPath(path, pwatchPath).GetString(), [this, pwatchPath = std::move(pwatchPath)](const std::string &fName) { OnResourceChanged(pwatchPath, fName); }, watchFlags, m_watcherManager.get()));
 		}
 		m_watcherMutex.unlock();
 	}

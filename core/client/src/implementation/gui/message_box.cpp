@@ -15,7 +15,7 @@ const Int32 MARGIN_Y = 50;
 
 pragma::gui::types::WIMessageBox *pragma::gui::types::WIMessageBox::Create(const std::string &text, const std::string &title, Button buttons, const std::function<void(WIMessageBox *, Button)> &callback)
 {
-	auto *pMessageBox = pragma::gui::WGUI::GetInstance().Create<WIMessageBox>();
+	auto *pMessageBox = WGUI::GetInstance().Create<WIMessageBox>();
 	if(pMessageBox == nullptr)
 		return nullptr;
 	pMessageBox->SetTitle(title);
@@ -80,10 +80,10 @@ void pragma::gui::types::WIMessageBox::SetTitle(const std::string &title)
 {
 	if(!m_hMessage.IsValid())
 		return;
-	static_cast<pragma::gui::types::WIFrame *>(m_hMessage.get())->SetTitle(title);
+	static_cast<WIFrame *>(m_hMessage.get())->SetTitle(title);
 }
 
-void pragma::gui::types::WIMessageBox::__buttonCallback(WIHandle hMessageBox, pragma::gui::types::WIMessageBox::Button button)
+void pragma::gui::types::WIMessageBox::__buttonCallback(WIHandle hMessageBox, Button button)
 {
 	if(!hMessageBox.IsValid())
 		return;
@@ -99,7 +99,7 @@ pragma::gui::types::WIButton *pragma::gui::types::WIMessageBox::AddButton(const 
 
 void pragma::gui::types::WIMessageBox::EnableButtons(Button buttons)
 {
-	auto values = pragma::math::get_power_of_2_values(CUInt64(buttons));
+	auto values = math::get_power_of_2_values(CUInt64(buttons));
 	auto hMessageBox = GetHandle();
 
 	for(auto it = values.rbegin(); it != values.rend(); ++it) {
@@ -107,37 +107,37 @@ void pragma::gui::types::WIMessageBox::EnableButtons(Button buttons)
 		switch(button) {
 		case Button::APPLY:
 			{
-				AddButton(pragma::locale::get_text("apply"), button);
+				AddButton(locale::get_text("apply"), button);
 				break;
 			}
 		case Button::CANCEL:
 			{
-				AddButton(pragma::locale::get_text("cancel"), button);
+				AddButton(locale::get_text("cancel"), button);
 				break;
 			}
 		case Button::YES:
 			{
-				AddButton(pragma::locale::get_text("yes"), button);
+				AddButton(locale::get_text("yes"), button);
 				break;
 			}
 		case Button::NO:
 			{
-				AddButton(pragma::locale::get_text("no"), button);
+				AddButton(locale::get_text("no"), button);
 				break;
 			}
 		case Button::ACCEPT:
 			{
-				AddButton(pragma::locale::get_text("accept"), button);
+				AddButton(locale::get_text("accept"), button);
 				break;
 			}
 		case Button::DECLINE:
 			{
-				AddButton(pragma::locale::get_text("decline"), button);
+				AddButton(locale::get_text("decline"), button);
 				break;
 			}
 		case Button::OK:
 			{
-				AddButton(pragma::locale::get_text("ok"), button);
+				AddButton(locale::get_text("ok"), button);
 				break;
 			}
 		}
@@ -152,8 +152,8 @@ void pragma::gui::types::WIMessageBox::Initialize()
 	pRect->SetColor(0.f, 0.f, 0.f, 0.8f);
 	pRect->SetAutoAlignToParent(true);
 
-	m_hMessage = CreateChild<pragma::gui::types::WIFrame>();
-	auto *pMessage = m_hMessage.get<pragma::gui::types::WIFrame>();
+	m_hMessage = CreateChild<WIFrame>();
+	auto *pMessage = m_hMessage.get<WIFrame>();
 	pMessage->SetWidth(512);
 	pMessage->SetCloseButtonEnabled(false);
 	auto hMessageBox = GetHandle();
@@ -163,7 +163,7 @@ void pragma::gui::types::WIMessageBox::Initialize()
 		auto *pMessageBox = hMessageBox.get<WIMessageBox>();
 		if(!pMessageBox->m_hMessage.IsValid())
 			return;
-		auto *pMessage = pMessageBox->m_hMessage.get<pragma::gui::types::WIFrame>();
+		auto *pMessage = pMessageBox->m_hMessage.get<WIFrame>();
 		auto &buttons = pMessageBox->m_buttons;
 		Int32 xMargin = MARGIN_X;
 		auto wMessage = pMessage->GetWidth();
@@ -205,7 +205,7 @@ void pragma::gui::types::WIMessageBox::SetSize(int x, int y)
 	WIBase::SetSize(x, y);
 
 	if(m_hMessage.IsValid()) {
-		auto *pMessage = m_hMessage.get<pragma::gui::types::WIFrame>();
+		auto *pMessage = m_hMessage.get<WIFrame>();
 		pMessage->SetPos(CInt32(CFloat(x) * 0.5f - CFloat(pMessage->GetWidth()) * 0.5f), CInt32(CFloat(y) * 0.5f - CFloat(pMessage->GetHeight()) * 0.5f));
 	}
 }
@@ -219,7 +219,7 @@ void pragma::gui::types::WIMessageBox::SetText(const std::string &text)
 	if(!m_hMessage.IsValid())
 		return;
 	auto numButtons = m_buttons.size();
-	auto *pMessage = m_hMessage.get<pragma::gui::types::WIFrame>();
+	auto *pMessage = m_hMessage.get<WIFrame>();
 	pMessage->SetWidth(200 + CUInt32(numButtons) * 80);
 	auto h = pText->GetHeight();
 	pMessage->SetHeight(h + 120);

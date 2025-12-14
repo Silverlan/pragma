@@ -57,7 +57,7 @@ void Lua::util::register_std_vector_types(lua::State *l)
 	register_vector<::Mat4x3>(l, "Mat4x3Vector");
 	register_vector<::Mat4>(l, "Mat4Vector");
 	register_vector<::Vector2i>(l, "Vector2iVector");
-	register_vector<::Vector3i>(l, "Vector3iVector");
+	register_vector<Vector3i>(l, "Vector3iVector");
 	register_vector<::Vector4i>(l, "Vector4iVector");
 	register_vector<::Color>(l, "ColorVector");
 	register_vector<std::string>(l, "StringVector");

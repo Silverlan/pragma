@@ -37,7 +37,7 @@ export class DLLSERVER SBaseEntity : public pragma::ecs::BaseEntity {
 	virtual pragma::NetworkState *GetNetworkState() const override final;
 	// Returns the client-side representation of this entity (If the entity isn't serverside only)
 	// This only works for single-player / listen servers!
-	pragma::ecs::BaseEntity *GetClientsideEntity() const;
+	BaseEntity *GetClientsideEntity() const;
 	Bool IsSynchronized() const;
 	void SetSynchronized(Bool b);
 

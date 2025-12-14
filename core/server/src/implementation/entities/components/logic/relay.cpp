@@ -14,13 +14,13 @@ void SLogicRelayComponent::Initialize()
 {
 	BaseLogicRelayComponent::Initialize();
 
-	BindEvent(sIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(sIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(pragma::string::compare<std::string>(inputData.input, "trigger", false))
 			Trigger(inputData.activator);
 		else
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -28,7 +28,7 @@ void SLogicRelayComponent::Initialize()
 	ent.AddComponent("io");
 }
 
-void SLogicRelayComponent::Trigger(pragma::ecs::BaseEntity *activator)
+void SLogicRelayComponent::Trigger(ecs::BaseEntity *activator)
 {
 	auto &ent = GetEntity();
 	auto ptrToggleComponent = ent.GetComponent<SToggleComponent>();

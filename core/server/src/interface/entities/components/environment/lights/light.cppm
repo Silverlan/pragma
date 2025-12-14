@@ -13,7 +13,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SLightComponent final : public BaseEnvLightComponent, public SBaseNetComponent {
 	  public:
-		SLightComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightComponent(ent) {}
+		SLightComponent(ecs::BaseEntity &ent) : BaseEnvLightComponent(ent) {}
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void SetShadowType(ShadowType type) override;

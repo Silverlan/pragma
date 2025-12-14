@@ -10,45 +10,45 @@ import :entities.components;
 
 using namespace pragma;
 
-ai::BehaviorNode::Result ai::TaskPlaySound::Start(const Schedule *sched, pragma::BaseAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskPlaySound::Start(const Schedule *sched, BaseAIComponent &ent)
 {
 	auto *sndName = GetSoundName(sched);
 	if(sndName == nullptr)
 		return Result::Failed;
-	auto pSoundComponent = ent.GetEntity().GetComponent<pragma::SSoundEmitterComponent>();
+	auto pSoundComponent = ent.GetEntity().GetComponent<SSoundEmitterComponent>();
 	if(pSoundComponent.expired())
 		return Result::Failed;
-	pSoundComponent->EmitSound(*sndName, pragma::audio::ALSoundType::NPC, {GetGain(sched), GetPitch(sched)});
+	pSoundComponent->EmitSound(*sndName, audio::ALSoundType::NPC, {GetGain(sched), GetPitch(sched)});
 	return Result::Succeeded;
 }
 
 const std::string *ai::TaskPlaySound::GetSoundName(const Schedule *sched) const
 {
-	auto *target = GetParameter(sched, pragma::math::to_integral(Parameter::SoundName));
-	if(target == nullptr || target->GetType() != ai::Schedule::Parameter::Type::String)
+	auto *target = GetParameter(sched, math::to_integral(Parameter::SoundName));
+	if(target == nullptr || target->GetType() != Schedule::Parameter::Type::String)
 		return nullptr;
 	return target->GetString();
 }
 float ai::TaskPlaySound::GetGain(const Schedule *sched) const
 {
 	auto gain = 1.f;
-	auto *paramGain = GetParameter(sched, pragma::math::to_integral(Parameter::Gain));
-	if(paramGain != nullptr && paramGain->GetType() == ai::Schedule::Parameter::Type::Float)
+	auto *paramGain = GetParameter(sched, math::to_integral(Parameter::Gain));
+	if(paramGain != nullptr && paramGain->GetType() == Schedule::Parameter::Type::Float)
 		gain = paramGain->GetFloat();
 	return gain;
 }
 float ai::TaskPlaySound::GetPitch(const Schedule *sched) const
 {
 	auto pitch = 1.f;
-	auto *paramPitch = GetParameter(sched, pragma::math::to_integral(Parameter::Pitch));
-	if(paramPitch != nullptr && paramPitch->GetType() == ai::Schedule::Parameter::Type::Float)
+	auto *paramPitch = GetParameter(sched, math::to_integral(Parameter::Pitch));
+	if(paramPitch != nullptr && paramPitch->GetType() == Schedule::Parameter::Type::Float)
 		pitch = paramPitch->GetFloat();
 	return pitch;
 }
 
-void ai::TaskPlaySound::SetSoundName(const std::string &sndName) { SetParameter(pragma::math::to_integral(Parameter::SoundName), sndName); }
-void ai::TaskPlaySound::SetGain(float gain) { SetParameter(pragma::math::to_integral(Parameter::Gain), gain); }
-void ai::TaskPlaySound::SetPitch(float pitch) { SetParameter(pragma::math::to_integral(Parameter::Pitch), pitch); }
+void ai::TaskPlaySound::SetSoundName(const std::string &sndName) { SetParameter(math::to_integral(Parameter::SoundName), sndName); }
+void ai::TaskPlaySound::SetGain(float gain) { SetParameter(math::to_integral(Parameter::Gain), gain); }
+void ai::TaskPlaySound::SetPitch(float pitch) { SetParameter(math::to_integral(Parameter::Pitch), pitch); }
 
 void ai::TaskPlaySound::Print(const Schedule *sched, std::ostream &o) const
 {

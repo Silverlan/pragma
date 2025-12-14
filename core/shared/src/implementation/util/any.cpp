@@ -61,7 +61,7 @@ std::string pragma::util::variable_type_to_string(VarType type)
 	case VarType::Count:
 		return "Count";
 	}
-	static_assert(pragma::math::to_integral(VarType::Count) == 23);
+	static_assert(math::to_integral(VarType::Count) == 23);
 	return "Unknown";
 }
 
@@ -348,5 +348,5 @@ void Lua::PushAny(lua::State *l, pragma::util::VarType varType, const std::any &
 void Lua::PushNewAnyProperty(lua::State *l, pragma::util::VarType varType, const std::any &value) { get_any_handler(varType).PushNewProperty(l, value); }
 void Lua::WriteAny(pragma::util::DataStream &ds, pragma::util::VarType varType, const std::any &value, uint32_t *pos) { get_any_handler(varType).Write(ds, value, pos); }
 void Lua::WriteAny(::NetPacket &ds, pragma::util::VarType varType, const std::any &value, uint32_t *pos) { get_any_handler(varType).Write(ds, value, pos); }
-void Lua::ReadAny(::pragma::Game &game, pragma::util::DataStream &ds, pragma::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(game, ds, outValue); }
+void Lua::ReadAny(pragma::Game &game, pragma::util::DataStream &ds, pragma::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(game, ds, outValue); }
 void Lua::ReadAny(::NetPacket &ds, pragma::util::VarType varType, std::any &outValue) { get_any_handler(varType).Read(ds, outValue); }

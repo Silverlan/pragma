@@ -10,13 +10,13 @@ module pragma.shared;
 import :scripting.lua.classes.callback;
 
 namespace pragma::util {
-	static std::ostream &operator<<(std::ostream &out, const pragma::util::CallbackHandler &)
+	static std::ostream &operator<<(std::ostream &out, const CallbackHandler &)
 	{
 		out << "CallbackHandler";
 		return out;
 	}
 
-	static bool operator==(const pragma::util::CallbackHandler &a, const pragma::util::CallbackHandler &b) { return (&a == &b) ? true : false; }
+	static bool operator==(const CallbackHandler &a, const CallbackHandler &b) { return (&a == &b) ? true : false; }
 }
 void Lua::CallbackHandler::register_class(luabind::class_<pragma::util::CallbackHandler> &classDef)
 {
@@ -57,7 +57,7 @@ namespace Lua {
 			if(callbacks == nullptr)
 				return;
 			uint32_t argOffset = 3;
-			auto numArgs = Lua::GetStackTop(l) - argOffset + 1;
+			auto numArgs = GetStackTop(l) - argOffset + 1;
 			for(auto it = callbacks->begin(); it != callbacks->end();) {
 				auto &hCb = *it;
 				if(!hCb.IsValid())
@@ -71,9 +71,9 @@ namespace Lua {
 						  o.push(l);
 						  for(auto i = decltype(numArgs) {0}; i < numArgs; ++i) {
 							  auto arg = argOffset + i;
-							  Lua::PushValue(l, arg);
+							  PushValue(l, arg);
 						  }
-						  return Lua::StatusCode::Ok;
+						  return StatusCode::Ok;
 					  },
 					  0);
 					++it;
@@ -109,7 +109,7 @@ void Lua::CallbackHandler::CallCallbacks(lua::State *l, pragma::util::CallbackHa
 
 void Lua::CallbackHandler::AddCallback(lua::State *l, pragma::util::CallbackHandler &cbHandler, std::string name, luabind::object o)
 {
-	Lua::CheckFunction(l, 3);
+	CheckFunction(l, 3);
 
 	pragma::string::to_lower(name);
 	auto hCallback = cbHandler.AddCallback(name, CallbackHandle {std::shared_ptr<TCallback>(new LuaCallback(o))});

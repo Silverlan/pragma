@@ -99,29 +99,29 @@ void Lua::Mat4::Decompose(lua::State *l, const ::Mat4 &mat)
 	Lua::Push<::Vector4>(l, perspective);
 }
 
-::Mat4 Lua::matrix::create_orthogonal_matrix(float left, float right, float bottom, float top, float zNear, float zFar)
+Mat4 Lua::matrix::create_orthogonal_matrix(float left, float right, float bottom, float top, float zNear, float zFar)
 {
 	auto p = glm::gtc::ortho(left, right, bottom, top, zNear, zFar);
 	p = glm::gtc::scale(p, Vector3(1.f, -1.f, 1.f));
 	return p;
 }
 
-::Mat4 Lua::matrix::create_perspective_matrix(float fov, float aspectRatio, float zNear, float zFar)
+Mat4 Lua::matrix::create_perspective_matrix(float fov, float aspectRatio, float zNear, float zFar)
 {
 	auto p = glm::gtc::perspective(fov, aspectRatio, zNear, zFar);
 	p = glm::gtc::scale(p, Vector3(1.f, -1.f, 1.f));
 	return p;
 }
 
-::Mat3 Lua::matrix::calc_covariance_matrix(lua::State *l, luabind::table<> points)
+Mat3 Lua::matrix::calc_covariance_matrix(lua::State *l, luabind::table<> points)
 {
-	auto avg = Lua::vector::calc_average(points);
+	auto avg = vector::calc_average(points);
 	return calc_covariance_matrix(l, points, avg);
 }
 
-::Mat3 Lua::matrix::calc_covariance_matrix(lua::State *l, luabind::table<> points, const Vector3 &avg)
+Mat3 Lua::matrix::calc_covariance_matrix(lua::State *l, luabind::table<> points, const Vector3 &avg)
 {
-	auto numEls = Lua::GetObjectLength(l, 1);
+	auto numEls = GetObjectLength(l, 1);
 	auto C = ::Mat3(0.f);
 	for(auto it = luabind::iterator {points}; it != luabind::iterator {}; ++it) {
 		auto p = luabind::object_cast_nothrow<Vector3>(*it, Vector3 {});
@@ -142,18 +142,18 @@ void Lua::Mat3::CalcEigenValues(lua::State *l, const ::Mat3 &mat)
 	auto &eigenValues = es.eigenvalues();
 	auto eigenVectors = es.eigenvectors();
 
-	auto tEigenValues = Lua::CreateTable(l);
+	auto tEigenValues = CreateTable(l);
 	for(auto i = decltype(eigenValues.size()) {0}; i < eigenValues.size(); ++i) {
-		Lua::PushInt(l, i + 1);
-		Lua::PushNumber(l, eigenValues[i].real());
-		Lua::SetTableValue(l, tEigenValues);
+		PushInt(l, i + 1);
+		PushNumber(l, eigenValues[i].real());
+		SetTableValue(l, tEigenValues);
 	}
-	auto tEigenVectors = Lua::CreateTable(l);
+	auto tEigenVectors = CreateTable(l);
 	for(auto i = decltype(eigenVectors.size()) {0}; i < eigenVectors.size(); ++i) {
-		Lua::PushInt(l, i + 1);
+		PushInt(l, i + 1);
 		auto v = eigenVectors.col(i);
 		Lua::Push<Vector3>(l, Vector3(v[0].real(), v[1].real(), v[2].real()));
-		Lua::SetTableValue(l, tEigenVectors);
+		SetTableValue(l, tEigenVectors);
 	}
 }
 

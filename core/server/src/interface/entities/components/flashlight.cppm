@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SFlashlightComponent final : public BaseFlashlightComponent {
 		  public:
-			SFlashlightComponent(pragma::ecs::BaseEntity &ent) : BaseFlashlightComponent(ent) {}
+			SFlashlightComponent(ecs::BaseEntity &ent) : BaseFlashlightComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

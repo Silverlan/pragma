@@ -136,16 +136,16 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 	// For this reason all constraint classes are in the 'phys' library instead.
 
 	auto fixedClassDef = luabind::class_<pragma::physics::IFixedConstraint, pragma::physics::IConstraint>("FixedConstraint");
-	fixedClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IFixedConstraint *)>([](lua::State *l, pragma::physics::IFixedConstraint *constraint) { Lua::PushBool(l, constraint != nullptr); }));
+	fixedClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IFixedConstraint *)>([](lua::State *l, pragma::physics::IFixedConstraint *constraint) { PushBool(l, constraint != nullptr); }));
 
 	auto ballSocketClassDef = luabind::class_<pragma::physics::IBallSocketConstraint, pragma::physics::IConstraint>("BallSocketConstraint");
-	ballSocketClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IBallSocketConstraint *)>([](lua::State *l, pragma::physics::IBallSocketConstraint *constraint) { Lua::PushBool(l, constraint != nullptr); }));
+	ballSocketClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IBallSocketConstraint *)>([](lua::State *l, pragma::physics::IBallSocketConstraint *constraint) { PushBool(l, constraint != nullptr); }));
 
 	auto hingeClassDef = luabind::class_<pragma::physics::IHingeConstraint, pragma::physics::IConstraint>("HingeConstraint");
-	hingeClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IHingeConstraint *)>([](lua::State *l, pragma::physics::IHingeConstraint *constraint) { Lua::PushBool(l, constraint != nullptr); }));
+	hingeClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IHingeConstraint *)>([](lua::State *l, pragma::physics::IHingeConstraint *constraint) { PushBool(l, constraint != nullptr); }));
 
 	auto sliderClassDef = luabind::class_<pragma::physics::ISliderConstraint, pragma::physics::IConstraint>("SliderConstraint");
-	sliderClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::ISliderConstraint *)>([](lua::State *l, pragma::physics::ISliderConstraint *constraint) { Lua::PushBool(l, constraint != nullptr); }));
+	sliderClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::ISliderConstraint *)>([](lua::State *l, pragma::physics::ISliderConstraint *constraint) { PushBool(l, constraint != nullptr); }));
 	sliderClassDef.def("SetLimits", static_cast<void (*)(lua::State *, pragma::physics::ISliderConstraint *, float, float)>([](lua::State *l, pragma::physics::ISliderConstraint *constraint, float lower, float upper) {
 		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l, constraint) == false)
 			return;
@@ -175,32 +175,32 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l, constraint) == false)
 			return;
 		auto limit = constraint->GetLimit();
-		Lua::PushNumber(l, limit.first);
-		Lua::PushNumber(l, limit.second);
+		PushNumber(l, limit.first);
+		PushNumber(l, limit.second);
 	}));
 	sliderClassDef.def("GetSoftness", static_cast<void (*)(lua::State *, pragma::physics::ISliderConstraint *)>([](lua::State *l, pragma::physics::ISliderConstraint *constraint) {
 		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l, constraint) == false)
 			return;
-		Lua::PushNumber(l, constraint->GetSoftness());
+		PushNumber(l, constraint->GetSoftness());
 	}));
 	sliderClassDef.def("GetDamping", static_cast<void (*)(lua::State *, pragma::physics::ISliderConstraint *)>([](lua::State *l, pragma::physics::ISliderConstraint *constraint) {
 		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l, constraint) == false)
 			return;
-		Lua::PushNumber(l, constraint->GetDamping());
+		PushNumber(l, constraint->GetDamping());
 	}));
 	sliderClassDef.def("GetRestitution", static_cast<void (*)(lua::State *, pragma::physics::ISliderConstraint *)>([](lua::State *l, pragma::physics::ISliderConstraint *constraint) {
 		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l, constraint) == false)
 			return;
-		Lua::PushNumber(l, constraint->GetRestitution());
+		PushNumber(l, constraint->GetRestitution());
 	}));
 
 	auto coneTwistClassDef = luabind::class_<pragma::physics::IConeTwistConstraint, pragma::physics::IConstraint>("ConeTwistConstraint");
-	coneTwistClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IConeTwistConstraint *)>([](lua::State *l, pragma::physics::IConeTwistConstraint *constraint) { Lua::PushBool(l, constraint != nullptr); }));
+	coneTwistClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IConeTwistConstraint *)>([](lua::State *l, pragma::physics::IConeTwistConstraint *constraint) { PushBool(l, constraint != nullptr); }));
 	coneTwistClassDef.def("SetLimit", static_cast<void (*)(lua::State *, pragma::physics::IConeTwistConstraint *, float, float, float)>(&PhysConeTwistConstraint::SetLimit));
 	coneTwistClassDef.def("SetLimit", static_cast<void (*)(lua::State *, pragma::physics::IConeTwistConstraint *, const EulerAngles &)>(&PhysConeTwistConstraint::SetLimit));
 
 	auto DoFClassDef = luabind::class_<pragma::physics::IDoFConstraint, pragma::physics::IConstraint>("DoFConstraint");
-	DoFClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IDoFConstraint *)>([](lua::State *l, pragma::physics::IDoFConstraint *constraint) { Lua::PushBool(l, constraint != nullptr); }));
+	DoFClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IDoFConstraint *)>([](lua::State *l, pragma::physics::IDoFConstraint *constraint) { PushBool(l, constraint != nullptr); }));
 	DoFClassDef.def("SetLinearLowerLimit", &PhysDoFConstraint::SetLinearLowerLimit);
 	DoFClassDef.def("SetLinearUpperLimit", &PhysDoFConstraint::SetLinearUpperLimit);
 	DoFClassDef.def("SetLinearLimit", static_cast<void (*)(lua::State *, pragma::physics::IDoFConstraint *, const Vector3 &)>(&PhysDoFConstraint::SetLinearLimit));
@@ -275,7 +275,7 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 	}));
 
 	auto doFSprintClassDef = luabind::class_<pragma::physics::IDoFSpringConstraint, pragma::physics::IConstraint>("DoFSpringConstraint");
-	doFSprintClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint) { Lua::PushBool(l, constraint != nullptr); }));
+	doFSprintClassDef.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint) { PushBool(l, constraint != nullptr); }));
 	doFSprintClassDef.def("CalculateTransforms", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
@@ -333,12 +333,12 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 	doFSprintClassDef.def("GetAngle", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t axis) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
-		Lua::PushNumber(l, constraint->GetAngle(static_cast<pragma::Axis>(axis)));
+		PushNumber(l, constraint->GetAngle(static_cast<pragma::Axis>(axis)));
 	}));
 	doFSprintClassDef.def("GetRelativePivotPosition", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t axis) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
-		Lua::PushNumber(l, constraint->GetRelativePivotPosition(static_cast<pragma::Axis>(axis)));
+		PushNumber(l, constraint->GetRelativePivotPosition(static_cast<pragma::Axis>(axis)));
 	}));
 	doFSprintClassDef.def("SetFrames",
 	  static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, const pragma::math::Transform &, const pragma::math::Transform &)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, const pragma::math::Transform &transformA, const pragma::math::Transform &transformB) {
@@ -419,7 +419,7 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 	doFSprintClassDef.def("IsLimited", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t, uint32_t)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t axis, uint32_t type) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
-		Lua::PushBool(l, constraint->IsLimited(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type), static_cast<pragma::Axis>(axis)));
+		PushBool(l, constraint->IsLimited(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type), static_cast<pragma::Axis>(axis)));
 	}));
 	doFSprintClassDef.def("SetRotationOrder", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t rotationOrder) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
@@ -429,7 +429,7 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 	doFSprintClassDef.def("GetRotationOrder", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
-		Lua::PushInt(l, pragma::math::to_integral(constraint->GetRotationOrder()));
+		PushInt(l, pragma::math::to_integral(constraint->GetRotationOrder()));
 	}));
 	doFSprintClassDef.def("SetAxis", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, const Vector3 &, const Vector3 &)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, const Vector3 &axis1, const Vector3 &axis2) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
@@ -515,7 +515,7 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 	doFSprintClassDef.def("GetERP", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t, uint32_t)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t type, uint32_t axis) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
-		Lua::PushNumber(l, constraint->GetERP(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type), static_cast<pragma::Axis>(axis)));
+		PushNumber(l, constraint->GetERP(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type), static_cast<pragma::Axis>(axis)));
 	}));
 	doFSprintClassDef.def("SetStopERP", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t, uint32_t, double)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t type, uint32_t axis, double value) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
@@ -525,7 +525,7 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 	doFSprintClassDef.def("GetStopERP", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t, uint32_t)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t type, uint32_t axis) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
-		Lua::PushNumber(l, constraint->GetStopERP(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type), static_cast<pragma::Axis>(axis)));
+		PushNumber(l, constraint->GetStopERP(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type), static_cast<pragma::Axis>(axis)));
 	}));
 	doFSprintClassDef.def("SetCFM", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t, uint32_t, double)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t type, uint32_t axis, double value) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
@@ -535,7 +535,7 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 	doFSprintClassDef.def("GetCFM", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t, uint32_t)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t type, uint32_t axis) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
-		Lua::PushNumber(l, constraint->GetCFM(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type), static_cast<pragma::Axis>(axis)));
+		PushNumber(l, constraint->GetCFM(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type), static_cast<pragma::Axis>(axis)));
 	}));
 	doFSprintClassDef.def("SetStopCFM", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t, uint32_t, double)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t type, uint32_t axis, double value) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
@@ -545,7 +545,7 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 	doFSprintClassDef.def("GetStopCFM", static_cast<void (*)(lua::State *, pragma::physics::IDoFSpringConstraint *, uint32_t, uint32_t)>([](lua::State *l, pragma::physics::IDoFSpringConstraint *constraint, uint32_t type, uint32_t axis) {
 		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l, constraint) == false)
 			return;
-		Lua::PushNumber(l, constraint->GetStopCFM(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type), static_cast<pragma::Axis>(axis)));
+		PushNumber(l, constraint->GetStopCFM(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type), static_cast<pragma::Axis>(axis)));
 	}));
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
@@ -631,7 +631,7 @@ void Lua::PhysConstraint::register_class(lua::State *l, luabind::module_ &mod)
 	mod[hingeClassDef];
 }
 
-void Lua::PhysConstraint::IsValid(lua::State *l, pragma::physics::IConstraint *hConstraint) { Lua::PushBool(l, hConstraint != nullptr); }
+void Lua::PhysConstraint::IsValid(lua::State *l, pragma::physics::IConstraint *hConstraint) { PushBool(l, hConstraint != nullptr); }
 void Lua::PhysConstraint::GetSourceObject(lua::State *l, pragma::physics::IConstraint *hConstraint)
 {
 	if(Lua::CheckHandle<pragma::physics::IConstraint>(l, hConstraint) == false)
@@ -696,7 +696,7 @@ void Lua::PhysConstraint::GetBreakForce(lua::State *l, pragma::physics::IConstra
 {
 	if(Lua::CheckHandle<pragma::physics::IConstraint>(l, hConstraint) == false)
 		return;
-	Lua::PushNumber(l, hConstraint->GetBreakForce());
+	PushNumber(l, hConstraint->GetBreakForce());
 }
 void Lua::PhysConstraint::SetBreakForce(lua::State *l, pragma::physics::IConstraint *hConstraint, float threshold)
 {
@@ -708,7 +708,7 @@ void Lua::PhysConstraint::GetBreakTorque(lua::State *l, pragma::physics::IConstr
 {
 	if(Lua::CheckHandle<pragma::physics::IConstraint>(l, hConstraint) == false)
 		return;
-	Lua::PushNumber(l, hConstraint->GetBreakTorque());
+	PushNumber(l, hConstraint->GetBreakTorque());
 }
 void Lua::PhysConstraint::SetBreakTorque(lua::State *l, pragma::physics::IConstraint *hConstraint, float threshold)
 {
@@ -726,7 +726,7 @@ void Lua::PhysConstraint::IsEnabled(lua::State *l, pragma::physics::IConstraint 
 {
 	if(Lua::CheckHandle<pragma::physics::IConstraint>(l, hConstraint) == false)
 		return;
-	Lua::PushBool(l, hConstraint->IsEnabled());
+	PushBool(l, hConstraint->IsEnabled());
 }
 void Lua::PhysConstraint::SetCollisionsEnabled(lua::State *l, pragma::physics::IConstraint *hConstraint, bool b)
 {
@@ -738,7 +738,7 @@ void Lua::PhysConstraint::GetCollisionsEnabled(lua::State *l, pragma::physics::I
 {
 	if(Lua::CheckHandle<pragma::physics::IConstraint>(l, hConstraint) == false)
 		return;
-	Lua::PushBool(l, hConstraint->GetCollisionsEnabled());
+	PushBool(l, hConstraint->GetCollisionsEnabled());
 }
 void Lua::PhysConstraint::EnableCollisions(lua::State *l, pragma::physics::IConstraint *hConstraint)
 {
@@ -946,7 +946,7 @@ void Lua::PhysDoFConstraint::IsAngularMotorEnabled(lua::State *l, pragma::physic
 {
 	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l, constraint) == false)
 		return;
-	Lua::PushBool(l, constraint->IsAngularMotorEnabled(axis));
+	PushBool(l, constraint->IsAngularMotorEnabled(axis));
 }
 void Lua::PhysDoFConstraint::SetAngularMotorEnabled(lua::State *l, pragma::physics::IDoFConstraint *constraint, uint8_t axis, bool bEnabled)
 {
@@ -1007,7 +1007,7 @@ void Lua::PhysDoFConstraint::GetLinearDamping(lua::State *l, pragma::physics::ID
 {
 	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l, constraint) == false)
 		return;
-	Lua::PushNumber(l, constraint->GetLinearDamping());
+	PushNumber(l, constraint->GetLinearDamping());
 }
 void Lua::PhysDoFConstraint::SetLinearDamping(lua::State *l, pragma::physics::IDoFConstraint *constraint, float damping)
 {
@@ -1019,7 +1019,7 @@ void Lua::PhysDoFConstraint::GetLinearLimitSoftness(lua::State *l, pragma::physi
 {
 	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l, constraint) == false)
 		return;
-	Lua::PushNumber(l, constraint->GetLinearLimitSoftness());
+	PushNumber(l, constraint->GetLinearLimitSoftness());
 }
 void Lua::PhysDoFConstraint::SetLinearLimitSoftness(lua::State *l, pragma::physics::IDoFConstraint *constraint, float softness)
 {
@@ -1068,7 +1068,7 @@ void Lua::PhysDoFConstraint::GetLinearRestitutionFactor(lua::State *l, pragma::p
 {
 	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l, constraint) == false)
 		return;
-	Lua::PushNumber(l, constraint->GetLinearRestitutionFactor());
+	PushNumber(l, constraint->GetLinearRestitutionFactor());
 }
 void Lua::PhysDoFConstraint::SetLinearRestitutionFactor(lua::State *l, pragma::physics::IDoFConstraint *constraint, float factor)
 {
@@ -1080,7 +1080,7 @@ void Lua::PhysDoFConstraint::IsLinearMotorEnabled(lua::State *l, pragma::physics
 {
 	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l, constraint) == false)
 		return;
-	Lua::PushBool(l, constraint->IsLinearMotorEnabled(axis));
+	PushBool(l, constraint->IsLinearMotorEnabled(axis));
 }
 void Lua::PhysDoFConstraint::SetLinearMotorEnabled(lua::State *l, pragma::physics::IDoFConstraint *constraint, uint8_t axis, bool bEnabled)
 {

@@ -16,7 +16,7 @@ pragma::gui::types::WIMainMenuBase::WIMainMenuBase() : WIBase(), m_selected(-1) 
 
 void pragma::gui::types::WIMainMenuBase::OnGoBack(int button, int action, int)
 {
-	if(static_cast<pragma::platform::MouseButton>(button) != pragma::platform::MouseButton::Left || static_cast<pragma::platform::KeyState>(action) != pragma::platform::KeyState::Press)
+	if(static_cast<platform::MouseButton>(button) != platform::MouseButton::Left || static_cast<platform::KeyState>(action) != platform::KeyState::Press)
 		return;
 	WIMainMenu *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 	if(mainMenu == nullptr)
@@ -28,7 +28,7 @@ void pragma::gui::types::WIMainMenuBase::Initialize()
 {
 	WIBase::Initialize();
 	SetSize(1'024, 768);
-	m_menuElementsContainer = pragma::gui::WGUI::GetInstance().Create<WIBase>(this)->GetHandle();
+	m_menuElementsContainer = WGUI::GetInstance().Create<WIBase>(this)->GetHandle();
 	m_menuElementsContainer->SetAutoSizeToContents(true);
 	m_menuElementsContainer->SetX(168);
 	ScheduleUpdate();
@@ -38,29 +38,29 @@ void pragma::gui::types::WIMainMenuBase::DoUpdate()
 	WIBase::DoUpdate();
 	UpdateElements();
 }
-pragma::util::EventReply pragma::gui::types::WIMainMenuBase::MouseCallback(pragma::platform::MouseButton, pragma::platform::KeyState state, pragma::platform::Modifier)
+pragma::util::EventReply pragma::gui::types::WIMainMenuBase::MouseCallback(platform::MouseButton, platform::KeyState state, platform::Modifier)
 {
-	if(state != pragma::platform::KeyState::Press)
-		return pragma::util::EventReply::Handled;
-	return pragma::util::EventReply::Handled;
+	if(state != platform::KeyState::Press)
+		return util::EventReply::Handled;
+	return util::EventReply::Handled;
 }
-pragma::util::EventReply pragma::gui::types::WIMainMenuBase::KeyboardCallback(pragma::platform::Key key, int, pragma::platform::KeyState state, pragma::platform::Modifier)
+pragma::util::EventReply pragma::gui::types::WIMainMenuBase::KeyboardCallback(platform::Key key, int, platform::KeyState state, platform::Modifier)
 {
-	if(key == pragma::platform::Key::Enter) {
+	if(key == platform::Key::Enter) {
 		WIMainMenuElement *el = GetSelectedElement();
 		if(el == nullptr)
-			return pragma::util::EventReply::Handled;
-		if(state == pragma::platform::KeyState::Press)
+			return util::EventReply::Handled;
+		if(state == platform::KeyState::Press)
 			el->Activate();
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	}
-	if(state != pragma::platform::KeyState::Press)
-		return pragma::util::EventReply::Unhandled;
-	if(key == pragma::platform::Key::S || key == pragma::platform::Key::Down)
+	if(state != platform::KeyState::Press)
+		return util::EventReply::Unhandled;
+	if(key == platform::Key::S || key == platform::Key::Down)
 		SelectNextItem();
-	else if(key == pragma::platform::Key::W || key == pragma::platform::Key::Up)
+	else if(key == platform::Key::W || key == platform::Key::Up)
 		SelectPreviousItem();
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 void pragma::gui::types::WIMainMenuBase::SelectItem(int i)
 {
@@ -153,7 +153,7 @@ void pragma::gui::types::WIMainMenuBase::UpdateElements()
 }
 void pragma::gui::types::WIMainMenuBase::AddMenuItem(int pos, std::string name, const CallbackHandle &onActivated)
 {
-	auto *el = pragma::gui::WGUI::GetInstance().Create<WIMainMenuElement>(m_menuElementsContainer.get());
+	auto *el = WGUI::GetInstance().Create<WIMainMenuElement>(m_menuElementsContainer.get());
 	el->SetText(name);
 	el->onActivated = onActivated;
 	el->onSelected = FunctionCallback<void, WIMainMenuElement *>::Create([](WIMainMenuElement *el) {
@@ -249,7 +249,7 @@ void pragma::gui::types::WIMainMenuElement::Initialize()
 	WIBase::Initialize();
 
 	SetSize(350, 46);
-	auto *pBackground = pragma::gui::WGUI::GetInstance().Create<WIRect>(this);
+	auto *pBackground = WGUI::GetInstance().Create<WIRect>(this);
 	if(pBackground) {
 		m_hBackground = pBackground->GetHandle();
 		pBackground->SetColor(Color {76, 76, 76});
@@ -257,13 +257,13 @@ void pragma::gui::types::WIMainMenuElement::Initialize()
 		pBackground->SetSize(GetSize());
 		pBackground->SetAnchor(0.f, 0.f, 1.f, 1.f);
 
-		auto *pPrefix = pragma::gui::WGUI::GetInstance().Create<WIRect>(m_hBackground.get());
+		auto *pPrefix = WGUI::GetInstance().Create<WIRect>(m_hBackground.get());
 		pPrefix->SetColor(Color {255, 210, 0});
 		pPrefix->SetHeight(pBackground->GetHeight());
 		pPrefix->SetWidth(3);
 		pPrefix->SetAnchor(0.f, 0.f, 0.f, 1.f);
 	}
-	WIText *pText = pragma::gui::WGUI::GetInstance().Create<WIText>(this);
+	WIText *pText = WGUI::GetInstance().Create<WIText>(this);
 	if(pText != nullptr) {
 		m_hText = pText->GetHandle();
 		m_hText->SetX(21);
@@ -284,13 +284,13 @@ void pragma::gui::types::WIMainMenuElement::Activate()
 	onActivated(this);
 }
 
-pragma::util::EventReply pragma::gui::types::WIMainMenuElement::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WIMainMenuElement::MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods)
 {
 	WIBase::MouseCallback(button, state, mods);
-	if(state != pragma::platform::KeyState::Press)
-		return pragma::util::EventReply::Handled;
+	if(state != platform::KeyState::Press)
+		return util::EventReply::Handled;
 	Activate();
-	return pragma::util::EventReply::Handled;
+	return util::EventReply::Handled;
 }
 
 void pragma::gui::types::WIMainMenuElement::OnCursorEntered() { Select(); }
@@ -299,7 +299,7 @@ void pragma::gui::types::WIMainMenuElement::OnCursorExited() { Deselect(); }
 void pragma::gui::types::WIMainMenuElement::SetText(std::string &text)
 {
 	if(m_hText.IsValid()) {
-		pragma::string::Utf8String upperText {text};
+		string::Utf8String upperText {text};
 		upperText.toUpper();
 		WIText *pText = static_cast<WIText *>(m_hText.get());
 		pText->SetText(upperText);

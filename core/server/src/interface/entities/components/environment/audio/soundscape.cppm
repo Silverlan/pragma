@@ -14,7 +14,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SSoundScapeComponent final : public BaseEnvSoundScapeComponent, public SBaseNetComponent {
 		  public:
-			SSoundScapeComponent(pragma::ecs::BaseEntity &ent) : BaseEnvSoundScapeComponent(ent) {}
+			SSoundScapeComponent(ecs::BaseEntity &ent) : BaseEnvSoundScapeComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua::State *l) override;

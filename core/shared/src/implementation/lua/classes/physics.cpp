@@ -14,9 +14,9 @@ import :scripting.lua.classes.physics;
 
 namespace Lua {
 	namespace physenv {
-		static Lua::var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> raycast(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData);
-		static Lua::var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> sweep(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData);
-		static Lua::var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> overlap(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData);
+		static var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> raycast(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData);
+		static var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> sweep(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData);
+		static var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> overlap(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData);
 		static pragma::util::TSharedHandle<pragma::physics::IRigidBody> create_rigid_body(pragma::physics::IEnvironment *env, pragma::physics::IShape &shape, bool dynamic = true);
 		static std::shared_ptr<pragma::physics::IConvexHullShape> create_convex_hull_shape(pragma::physics::IEnvironment *env, pragma::physics::IMaterial &material);
 
@@ -63,10 +63,10 @@ static pragma::physics::VehicleCreateInfo create_standard_four_wheel_drive(lua::
 }
 
 namespace pragma::math {
-	extern std::ostream &operator<<(std::ostream &out, const pragma::math::Transform &t);
-	extern std::ostream &operator<<(std::ostream &out, const pragma::math::ScaledTransform &t);
+	extern std::ostream &operator<<(std::ostream &out, const Transform &t);
+	extern std::ostream &operator<<(std::ostream &out, const ScaledTransform &t);
 }
-void Lua::physenv::register_library(Lua::Interface &lua)
+void Lua::physenv::register_library(Interface &lua)
 {
 	auto *l = lua.GetState();
 
@@ -115,12 +115,12 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	  luabind::def("calc_torque_from_angular_velocity", calc_torque_from_angular_velocity), luabind::def("calc_angular_velocity_from_torque", calc_angular_velocity_from_torque), luabind::def("calc_force_from_linear_velocity", calc_force_from_linear_velocity),
 	  luabind::def("calc_linear_velocity_from_force", calc_linear_velocity_from_force))];
 
-	Lua::RegisterLibraryEnums(l, libName,
+	RegisterLibraryEnums(l, libName,
 	  {{"ACTIVATION_STATE_ACTIVE", pragma::math::to_integral(pragma::physics::ICollisionObject::ActivationState::Active)}, {"ACTIVATION_STATE_ALWAYS_ACTIVE", pragma::math::to_integral(pragma::physics::ICollisionObject::ActivationState::AlwaysActive)},
 	    {"ACTIVATION_STATE_ALWAYS_INACTIVE", pragma::math::to_integral(pragma::physics::ICollisionObject::ActivationState::AlwaysInactive)}, {"ACTIVATION_STATE_WAIT_FOR_DEACTIVATION", pragma::math::to_integral(pragma::physics::ICollisionObject::ActivationState::WaitForDeactivation)},
 	    {"ACTIVATION_STATE_COUNT", pragma::math::to_integral(pragma::physics::ICollisionObject::ActivationState::Count)}});
 
-	Lua::RegisterLibraryEnums(l, libName,
+	RegisterLibraryEnums(l, libName,
 	  {{"TYPE_NONE", pragma::math::to_integral(pragma::physics::PhysicsType::None)}, {"TYPE_DYNAMIC", pragma::math::to_integral(pragma::physics::PhysicsType::Dynamic)}, {"TYPE_STATIC", pragma::math::to_integral(pragma::physics::PhysicsType::Static)},
 	    {"TYPE_BOXCONTROLLER", pragma::math::to_integral(pragma::physics::PhysicsType::BoxController)}, {"TYPE_CAPSULECONTROLLER", pragma::math::to_integral(pragma::physics::PhysicsType::CapsuleController)}, {"TYPE_SOFTBODY", pragma::math::to_integral(pragma::physics::PhysicsType::SoftBody)},
 
@@ -278,7 +278,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		  ss << "[FilterMask:" << magic_enum::enum_name(data.GetCollisionFilterMask()) << "]";
 		  return ss.str();
 	  });
-	classDefRayCastData.def("SetShape", static_cast<void (*)(lua::State *, pragma::physics::TraceData &, const pragma::physics::IConvexShape &)>(&Lua::TraceData::SetSource));
+	classDefRayCastData.def("SetShape", static_cast<void (*)(lua::State *, pragma::physics::TraceData &, const pragma::physics::IConvexShape &)>(&TraceData::SetSource));
 	classDefRayCastData.def("SetSource", static_cast<void (pragma::physics::TraceData::*)(const Vector3 &)>(&pragma::physics::TraceData::SetSource));
 	classDefRayCastData.def("SetSourceRotation", &pragma::physics::TraceData::SetSourceRotation);
 	classDefRayCastData.def("SetSource", static_cast<void (pragma::physics::TraceData::*)(const pragma::math::Transform &)>(&pragma::physics::TraceData::SetSource));
@@ -286,18 +286,18 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefRayCastData.def("SetTargetRotation", &pragma::physics::TraceData::SetTargetRotation);
 	classDefRayCastData.def("SetTarget", static_cast<void (pragma::physics::TraceData::*)(const pragma::math::Transform &)>(&pragma::physics::TraceData::SetTarget));
 	classDefRayCastData.def("SetRotation", &pragma::physics::TraceData::SetRotation);
-	classDefRayCastData.def("SetFlags", &Lua::TraceData::SetFlags);
-	classDefRayCastData.def("SetFilter", &Lua::TraceData::SetFilter);
-	classDefRayCastData.def("SetCollisionFilterMask", &Lua::TraceData::SetCollisionFilterMask);
-	classDefRayCastData.def("SetCollisionFilterGroup", &Lua::TraceData::SetCollisionFilterGroup);
-	classDefRayCastData.def("GetSourceTransform", &Lua::TraceData::GetSourceTransform);
-	classDefRayCastData.def("GetTargetTransform", &Lua::TraceData::GetTargetTransform);
-	classDefRayCastData.def("GetSourceOrigin", &Lua::TraceData::GetSourceOrigin);
-	classDefRayCastData.def("GetTargetOrigin", &Lua::TraceData::GetTargetOrigin);
-	classDefRayCastData.def("GetSourceRotation", &Lua::TraceData::GetSourceRotation);
-	classDefRayCastData.def("GetTargetRotation", &Lua::TraceData::GetTargetRotation);
-	classDefRayCastData.def("GetDistance", &Lua::TraceData::GetDistance);
-	classDefRayCastData.def("GetDirection", &Lua::TraceData::GetDirection);
+	classDefRayCastData.def("SetFlags", &TraceData::SetFlags);
+	classDefRayCastData.def("SetFilter", &TraceData::SetFilter);
+	classDefRayCastData.def("SetCollisionFilterMask", &TraceData::SetCollisionFilterMask);
+	classDefRayCastData.def("SetCollisionFilterGroup", &TraceData::SetCollisionFilterGroup);
+	classDefRayCastData.def("GetSourceTransform", &TraceData::GetSourceTransform);
+	classDefRayCastData.def("GetTargetTransform", &TraceData::GetTargetTransform);
+	classDefRayCastData.def("GetSourceOrigin", &TraceData::GetSourceOrigin);
+	classDefRayCastData.def("GetTargetOrigin", &TraceData::GetTargetOrigin);
+	classDefRayCastData.def("GetSourceRotation", &TraceData::GetSourceRotation);
+	classDefRayCastData.def("GetTargetRotation", &TraceData::GetTargetRotation);
+	classDefRayCastData.def("GetDistance", &TraceData::GetDistance);
+	classDefRayCastData.def("GetDirection", &TraceData::GetDirection);
 	physMod[classDefRayCastData];
 
 	auto classDefRayCastResult = luabind::class_<pragma::physics::TraceResult>("RayCastResult");
@@ -645,7 +645,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	auto classIkJacobian = luabind::class_<Jacobian>("IKJacobian");
 	classIkJacobian.scope[luabind::def("Create", static_cast<std::shared_ptr<Jacobian> (*)(lua::State *, Tree &)>([](lua::State *l, Tree &tree) { return pragma::util::make_shared<Jacobian>(&tree); }))];
 	classIkJacobian.def("ComputeJacobian", static_cast<void (*)(lua::State *, Jacobian &, const luabind::tableT<Vector3> &)>([](lua::State *l, Jacobian &jacobian, const luabind::tableT<Vector3> &vTargets) {
-		auto numTargets = Lua::GetObjectLength(l, vTargets);
+		auto numTargets = GetObjectLength(l, vTargets);
 		std::vector<VectorR3> targets;
 		targets.reserve(numTargets);
 		for(luabind::iterator it {vTargets}, end; it != end; ++it) {
@@ -684,7 +684,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	//	jacobian.GetErrorArray();
 	//}));
 	classIkJacobian.def("UpdatedSClampValue", static_cast<void (*)(lua::State *, Jacobian &, const luabind::tableT<Vector3> &)>([](lua::State *l, Jacobian &jacobian, const luabind::tableT<Vector3> &vTargets) {
-		auto numTargets = Lua::GetObjectLength(l, vTargets);
+		auto numTargets = GetObjectLength(l, vTargets);
 		std::vector<VectorR3> targets;
 		targets.reserve(numTargets);
 		for(luabind::iterator it {vTargets}, end; it != end; ++it) {
@@ -747,14 +747,14 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	physMod[classIkController];
 
 	auto classDef = luabind::class_<pragma::physics::PhysSoftBodyInfo>("SoftBodyInfo");
-	Lua::PhysSoftBodyInfo::register_class(l, classDef);
+	PhysSoftBodyInfo::register_class(l, classDef);
 	physMod[classDef];
 
-	Lua::PhysConstraint::register_class(l, physMod);
-	Lua::PhysCollisionObj::register_class(l, physMod);
-	Lua::PhysObj::register_class(l, physMod);
-	Lua::PhysContact::register_class(l, physMod);
-	Lua::PhysShape::register_class(l, physMod);
+	PhysConstraint::register_class(l, physMod);
+	PhysCollisionObj::register_class(l, physMod);
+	PhysObj::register_class(l, physMod);
+	PhysContact::register_class(l, physMod);
+	PhysShape::register_class(l, physMod);
 }
 Lua::var<bool, luabind::tableT<pragma::physics::TraceResult>, pragma::physics::TraceResult> Lua::physenv::raycast(lua::State *l, pragma::Game &game, const pragma::physics::TraceData &traceData)
 {

@@ -25,7 +25,7 @@ std::optional<std::pair<std::string, int32_t>> pragma::scripting::lua_core::util
 		auto filename = err.substr(0, c0);
 		auto lineId = pragma::util::to_int(err.substr(c0 + 1, (c1 - c0) - 1));
 		if(optOutStartMsgPos)
-			*optOutStartMsgPos = err.find_first_not_of(pragma::string::WHITESPACE, c1);
+			*optOutStartMsgPos = err.find_first_not_of(string::WHITESPACE, c1);
 		return std::pair<std::string, int32_t> {filename, lineId};
 	}
 
@@ -39,7 +39,7 @@ std::optional<std::pair<std::string, int32_t>> pragma::scripting::lua_core::util
 	if(cSt == std::string::npos || cEn == std::string::npos)
 		return {};
 	if(optOutStartMsgPos)
-		*optOutStartMsgPos = err.find_first_not_of(pragma::string::WHITESPACE, cEn);
+		*optOutStartMsgPos = err.find_first_not_of(string::WHITESPACE, cEn);
 	auto lineId = pragma::util::to_int(err.substr(cSt + 1, cEn - cSt - 1));
 	return std::pair<std::string, int32_t> {filename, lineId};
 }
@@ -60,7 +60,7 @@ bool pragma::scripting::lua_core::util::get_code_snippet(std::stringstream &outM
 		//ssMsg<<"[PRECOMPILED - NO DEBUG INFORMATION AVAILABLE]";
 		return false;
 	}
-	fname = pragma::fs::get_normalized_path(fname);
+	fname = fs::get_normalized_path(fname);
 	auto br = fname.find_first_of(fs::get_directory_separator());
 	while(br != std::string::npos && fname.substr(0, br) != Lua::SCRIPT_DIRECTORY) {
 		fname = fname.substr(br + 1);
@@ -70,7 +70,7 @@ bool pragma::scripting::lua_core::util::get_code_snippet(std::stringstream &outM
 	if(f != nullptr) {
 		char c = 0;
 		uint32_t curLineId = 1;
-		auto linePrint = static_cast<uint32_t>(pragma::math::max(static_cast<int32_t>(lineId) - 2, static_cast<int32_t>(1)));
+		auto linePrint = static_cast<uint32_t>(math::max(static_cast<int32_t>(lineId) - 2, static_cast<int32_t>(1)));
 		auto lastLinePrint = lineId + 2;
 		while(!f->Eof() && curLineId < linePrint) {
 			f->Read(&c, 1);
@@ -107,18 +107,18 @@ void pragma::scripting::lua_core::util::get_lua_doc_info(std::stringstream &outM
 		auto posEnd = errMsg.find('(', posErrOverload + errMsgIdentifier.length());
 		auto pos = errMsg.rfind(' ', posEnd);
 		if(pos != std::string::npos && posEnd != std::string::npos)
-			cause = pragma::string::substr(errMsg, pos + 1, posEnd - pos - 1);
+			cause = string::substr(errMsg, pos + 1, posEnd - pos - 1);
 	}
 	else {
 		auto pos = errMsg.find('\'');
 		auto posEnd = errMsg.find('\'', pos + 1);
 		if(posEnd != std::string::npos)
-			cause = pragma::string::substr(errMsg, pos + 1, posEnd - pos - 1);
+			cause = string::substr(errMsg, pos + 1, posEnd - pos - 1);
 	}
 	if(cause.empty() == false)
 		Lua::doc::print_documentation(cause, outMsg);
 
-	outMsg << pragma::console::get_ansi_color_code(::pragma::console::ConsoleColorFlags::Reset);
+	outMsg << pragma::console::get_ansi_color_code(console::ConsoleColorFlags::Reset);
 	outMsg << "You can use the console command 'lua_help <name>' to get more information about a specific function/library/etc.\n";
 	outMsg << "\n";
 }
@@ -189,7 +189,7 @@ void pragma::scripting::lua_core::raise_error(lua::State *l) { Lua::Error(l); }
 
 void pragma::scripting::lua_core::submit_error(lua::State *l, const std::string &msg)
 {
-	auto *nw = pragma::get_engine()->GetNetworkState(l);
+	auto *nw = get_engine()->GetNetworkState(l);
 	auto *game = nw ? nw->GetGameState() : nullptr;
 	if(game)
 		game->CallLuaCallbacks<void, std::string>("OnLuaError", msg);

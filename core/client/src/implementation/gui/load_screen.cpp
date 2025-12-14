@@ -18,8 +18,8 @@ pragma::gui::types::WILoadScreen::~WILoadScreen() {}
 void pragma::gui::types::WILoadScreen::Initialize()
 {
 	WIMainMenuBase::Initialize();
-	AddMenuItem(pragma::locale::get_text("cancel"), FunctionCallback<void, pragma::gui::types::WIMainMenuElement *>::Create([this](pragma::gui::types::WIMainMenuElement *) {
-		auto *mainMenu = dynamic_cast<pragma::gui::types::WIMainMenu *>(GetParent());
+	AddMenuItem(locale::get_text("cancel"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;
 		mainMenu->OpenMainMenu();

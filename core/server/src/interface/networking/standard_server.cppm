@@ -26,7 +26,7 @@ export namespace pragma::networking {
 		nwm::ServerClient &GetNWMClient(StandardServerClient &cl) const;
 		StandardServerClient &GetPragmaClient(nwm::ServerClient &cl) const;
 
-		friend nwm::Server;
+		friend Server;
 	  protected:
 		virtual bool HandleAsyncPacket(const NWMEndpoint &ep, NWMSession *session, uint32_t id, NetPacket &packet) override;
 		virtual bool HandlePacket(const NWMEndpoint &ep, nwm::ServerClient *cl, unsigned int id, NetPacket &packet) override;
@@ -79,8 +79,8 @@ export namespace pragma::networking {
 		virtual std::optional<std::string> GetIP() const override;
 		virtual std::optional<Port> GetPort() const override;
 		virtual bool IsListenServerHost() const override;
-		virtual bool Drop(DropReason reason, pragma::networking::Error &outErr) override;
-		virtual bool SendPacket(pragma::networking::Protocol protocol, NetPacket &packet, pragma::networking::Error &outErr) override;
+		virtual bool Drop(DropReason reason, Error &outErr) override;
+		virtual bool SendPacket(Protocol protocol, NetPacket &packet, Error &outErr) override;
 
 		void SetNWMClient(nwm::ServerClient *cl);
 		nwm::ServerClient &GetNWMClient() const;

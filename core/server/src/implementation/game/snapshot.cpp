@@ -10,7 +10,7 @@ import :entities;
 import :entities.components;
 import :server_state;
 
-void pragma::SGame::SendSnapshot(pragma::SPlayerComponent *pl)
+void pragma::SGame::SendSnapshot(SPlayerComponent *pl)
 {
 	auto *session = pl ? pl->GetClientSession() : nullptr;
 	if(session == nullptr)
@@ -30,11 +30,11 @@ void pragma::SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 		if(ent != nullptr && ent->IsShared() && ent->IsSynchronized() && ent->IsMarkedForSnapshot()) {
 			numEntitiesValid++;
 			auto pTrComponent = ent->GetTransformComponent();
-			auto pVelComponent = ent->GetComponent<pragma::VelocityComponent>();
-			pragma::networking::write_entity(packet, ent);
-			pragma::networking::write_vector(packet, pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {});
-			pragma::networking::write_vector(packet, pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {});
-			pragma::networking::write_vector(packet, pVelComponent.valid() ? pVelComponent->GetAngularVelocity() : Vector3 {});
+			auto pVelComponent = ent->GetComponent<VelocityComponent>();
+			networking::write_entity(packet, ent);
+			networking::write_vector(packet, pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {});
+			networking::write_vector(packet, pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {});
+			networking::write_vector(packet, pVelComponent.valid() ? pVelComponent->GetAngularVelocity() : Vector3 {});
 			networking::write_quat(packet, pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity());
 
 			auto offsetEntData = packet->GetSize();
@@ -47,17 +47,17 @@ void pragma::SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 #endif
 			packet->Write<UInt8>(CUInt8(entDataSize), &offsetEntData);
 
-			auto flags = pragma::SnapshotFlags::None;
+			auto flags = SnapshotFlags::None;
 			auto offsetSnapshotFlags = packet->GetOffset();
 			packet->Write<decltype(flags)>(flags);
 
 			auto pPhysComponent = ent->GetPhysicsComponent();
-			pragma::physics::PhysObj *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
+			physics::PhysObj *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 			if(physObj != nullptr && !physObj->IsStatic()) {
-				flags |= pragma::SnapshotFlags::PhysicsData;
+				flags |= SnapshotFlags::PhysicsData;
 				if(physObj->IsController()) {
 					packet->Write<uint8_t>(1u);
-					auto *physController = static_cast<pragma::physics::ControllerPhysObj *>(physObj);
+					auto *physController = static_cast<physics::ControllerPhysObj *>(physObj);
 					packet->Write<Vector3>(physController->GetPosition());
 					packet->Write<Quat>(physController->GetOrientation());
 					packet->Write<Vector3>(physController->GetLinearVelocity());
@@ -96,16 +96,16 @@ void pragma::SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 			for(auto &pComponent : ent->GetComponents()) {
 				if(pComponent.expired() || pComponent->ShouldTransmitSnapshotData() == false)
 					continue;
-				auto *pSnapshotComponent = dynamic_cast<pragma::SBaseSnapshotComponent *>(pComponent.get());
+				auto *pSnapshotComponent = dynamic_cast<SBaseSnapshotComponent *>(pComponent.get());
 				if(pSnapshotComponent == nullptr)
 					throw std::logic_error("Component must be derived from SBaseSnapshotComponent if snapshot data is enabled!");
 				if(bFirst) {
 					bFirst = false;
-					flags |= pragma::SnapshotFlags::ComponentData;
+					flags |= SnapshotFlags::ComponentData;
 					offsetNumComponents = packet->GetOffset();
 					packet->Write<uint8_t>(static_cast<uint8_t>(0u));
 				}
-				packet->Write<pragma::ComponentId>(pComponent->GetComponentId());
+				packet->Write<ComponentId>(pComponent->GetComponentId());
 				auto offsetComponentSize = packet->GetOffset();
 				packet->Write<uint8_t>(static_cast<uint8_t>(0u));
 
@@ -122,7 +122,7 @@ void pragma::SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 				}
 			}
 			packet->Write<decltype(flags)>(flags, &offsetSnapshotFlags);
-			if((flags & pragma::SnapshotFlags::ComponentData) != pragma::SnapshotFlags::None)
+			if((flags & SnapshotFlags::ComponentData) != SnapshotFlags::None)
 				packet->Write<uint8_t>(numComponents, &offsetNumComponents);
 		}
 	}
@@ -131,7 +131,7 @@ void pragma::SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 	//unsigned int numPlayers = Player::GetPlayerCount();
 	auto posNumPls = packet->GetSize();
 	packet->Write<unsigned char>((unsigned char)(0));
-	auto &players = pragma::SPlayerComponent::GetAll();
+	auto &players = SPlayerComponent::GetAll();
 	unsigned char numPlayersValid = 0;
 	for(auto *plComponent : players) {
 		if(plComponent != nullptr && plComponent != pl) {
@@ -154,13 +154,13 @@ void pragma::SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 		}
 	}
 	packet->Write<unsigned char>(numPlayersValid, &posNumPls);
-	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SNAPSHOT, packet, pragma::networking::Protocol::FastUnreliable, *session);
+	ServerState::Get()->SendPacket(networking::net_messages::client::SNAPSHOT, packet, networking::Protocol::FastUnreliable, *session);
 }
 
 void pragma::SGame::SendSnapshot()
 {
 	//Con::csv<<"Sending snapshot.."<<Con::endl;
-	auto &players = pragma::SPlayerComponent::GetAll();
+	auto &players = SPlayerComponent::GetAll();
 	//unsigned char numPlayersValid = 0;
 	for(auto *plComponent : players) {
 		if(plComponent != nullptr && plComponent->IsGameReady())

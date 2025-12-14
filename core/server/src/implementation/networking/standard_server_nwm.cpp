@@ -22,18 +22,18 @@ import pragma.wms;
 #define GET_TIMEOUT_DURATION(f) f
 #endif
 
-pragma::networking::NWMActiveServer::NWMActiveServer(const std::shared_ptr<SVNWMUDPConnection> &udp, const std::shared_ptr<SVNWMTCPConnection> &tcp) : nwm::Server(udp, tcp), m_lastHeartBeat() { m_dispatcher = UDPMessageDispatcher::Create(); }
+pragma::networking::NWMActiveServer::NWMActiveServer(const std::shared_ptr<SVNWMUDPConnection> &udp, const std::shared_ptr<SVNWMTCPConnection> &tcp) : Server(udp, tcp), m_lastHeartBeat() { m_dispatcher = UDPMessageDispatcher::Create(); }
 nwm::ServerClient &pragma::networking::NWMActiveServer::GetNWMClient(StandardServerClient &cl) const { return cl.GetNWMClient(); }
 pragma::networking::StandardServerClient &pragma::networking::NWMActiveServer::GetPragmaClient(nwm::ServerClient &cl) const { return *m_nwmToPragmaClient.find(&cl)->second; }
 void pragma::networking::NWMActiveServer::SetServer(StandardServer &server) { m_server = &server; }
 
 void pragma::networking::NWMActiveServer::OnPacketSent(const NWMEndpoint &ep, const NetPacket &packet)
 {
-	nwm::Server::OnPacketSent(ep, packet);
+	Server::OnPacketSent(ep, packet);
 #if DEBUG_SERVER_VERBOSE == 1
 	auto id = packet.GetMessageID();
 	auto *clMap = get_client_message_map();
-	pragma::util::StringMap<uint32_t> *clMsgs;
+	util::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 	auto it = std::find_if(clMsgs->begin(), clMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != clMsgs->end()) ? it->first : "Unknown";
@@ -44,10 +44,10 @@ void pragma::networking::NWMActiveServer::OnPacketSent(const NWMEndpoint &ep, co
 
 void pragma::networking::NWMActiveServer::OnPacketReceived(const NWMEndpoint &ep, nwm::ServerClient *cl, unsigned int id, NetPacket &packet)
 {
-	nwm::Server::OnPacketReceived(ep, cl, id, packet);
+	Server::OnPacketReceived(ep, cl, id, packet);
 #if DEBUG_SERVER_VERBOSE == 1
 	auto *svMap = get_server_message_map();
-	pragma::util::StringMap<uint32_t> *svMsgs;
+	util::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 	auto it = std::find_if(svMsgs->begin(), svMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != svMsgs->end()) ? it->first : "Unknown";
@@ -66,11 +66,11 @@ bool pragma::networking::NWMActiveServer::HandleAsyncPacket(const NWMEndpoint &e
 			// Send response
 			if(ep->IsUDP() == true) {
 				NWMEndpoint ep = static_cast<NWMUDPEndpoint &>(*epPtr);
-				nwm::impl::ManagerBase::SendPacket(nwm::Protocol::UDP, pong, ep);
+				ManagerBase::SendPacket(nwm::Protocol::UDP, pong, ep);
 			}
 			else {
 				NWMEndpoint ep = static_cast<NWMTCPEndpoint &>(*epPtr);
-				nwm::impl::ManagerBase::SendPacket(nwm::Protocol::TCP, pong, ep);
+				ManagerBase::SendPacket(nwm::Protocol::TCP, pong, ep);
 			}
 			return true;
 		}
@@ -83,7 +83,7 @@ bool pragma::networking::NWMActiveServer::HandlePacket(const NWMEndpoint &ep, nw
 #if DEBUG_SERVER_VERBOSE == 1
 	std::cout << "HandlePacket: " << id << std::endl;
 #endif
-	if(nwm::Server::HandlePacket(ep, cl, id, packet) == true || cl == nullptr || !cl->IsFullyConnected())
+	if(Server::HandlePacket(ep, cl, id, packet) == true || cl == nullptr || !cl->IsFullyConnected())
 		return true;
 	auto it = m_nwmToPragmaClient.find(cl);
 	if(it == m_nwmToPragmaClient.end())
@@ -113,7 +113,7 @@ void pragma::networking::NWMActiveServer::OnClientDropped(nwm::ServerClient *cl,
 	if(it == m_nwmToPragmaClient.end())
 		return;
 	auto *prCl = it->second;
-	auto *pl = pragma::ServerState::Get()->GetPlayer(*prCl);
+	auto *pl = ServerState::Get()->GetPlayer(*prCl);
 	if(pl)
 		pl->GetEntity().RemoveSafely();
 #if DEBUG_SERVER_VERBOSE == 1
@@ -121,7 +121,7 @@ void pragma::networking::NWMActiveServer::OnClientDropped(nwm::ServerClient *cl,
 #endif
 	m_nwmToPragmaClient.erase(it);
 
-	pragma::networking::Error err;
+	Error err;
 	m_server->DropClient(*prCl, get_pragma_drop_reason(reason), err);
 	m_server->OnClientDropped(*prCl, get_pragma_drop_reason(reason));
 }
@@ -135,10 +135,10 @@ void pragma::networking::NWMActiveServer::OnClosed()
 
 void pragma::networking::NWMActiveServer::PollEvents()
 {
-	nwm::Server::PollEvents();
+	Server::PollEvents();
 	if(m_dispatcher != nullptr)
 		m_dispatcher->Poll();
-	auto t = pragma::util::Clock::now();
+	auto t = util::Clock::now();
 	auto tDelta = t - m_lastHeartBeat;
 	if(std::chrono::duration_cast<std::chrono::minutes>(tDelta).count() >= 5) {
 		m_lastHeartBeat = t;
@@ -149,13 +149,13 @@ void pragma::networking::NWMActiveServer::Heartbeat()
 {
 	if(m_dispatcher == nullptr || !ServerState::Get()->IsGameActive())
 		return;
-	auto &data = pragma::ServerState::Get()->GetServerData();
-	pragma::util::DataStream body;
+	auto &data = ServerState::Get()->GetServerData();
+	util::DataStream body;
 	data.Write(body);
 
 	auto msgHeader = WMSMessageHeader(CUInt32(WMSMessage::HEARTBEAT));
 	msgHeader.size = CUInt16(body->GetSize());
-	pragma::util::DataStream header;
+	util::DataStream header;
 	header->Write<WMSMessageHeader>(msgHeader);
 
 	m_dispatcher->Dispatch(header, GetMasterServerIP(), GetMasterServerPort(), [this, body](const nwm::ErrorCode err, UDPMessageDispatcher::Message *) mutable -> void {
@@ -169,11 +169,11 @@ void pragma::networking::NWMActiveServer::Heartbeat()
 			Con::cwar << "Unable to reach master server: " << err.Message() << ". The server will not show up in the server browser." << Con::endl;
 	});
 }
-std::shared_ptr<nwm::ServerClient> pragma::networking::NWMActiveServer::CreateClient() { return Server::CreateClient<pragma::networking::NWMActiveServerClient>(); }
+std::shared_ptr<nwm::ServerClient> pragma::networking::NWMActiveServer::CreateClient() { return nwm::Server::CreateClient<NWMActiveServerClient>(); }
 
 std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActiveServer::Create(uint16_t tcpPort, uint16_t udpPort, nwm::ConnectionType conType)
 {
-	auto r = nwm::Server::Create<pragma::networking::NWMActiveServer>(tcpPort, udpPort, conType);
+	auto r = nwm::Server::Create<NWMActiveServer>(tcpPort, udpPort, conType);
 	r->SetTimeoutDuration(GET_TIMEOUT_DURATION(ServerState::Get()->GetConVarFloat("sv_timeout_duration")));
 	r->Start();
 	return r;
@@ -181,7 +181,7 @@ std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActi
 
 std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActiveServer::Create(uint16_t port, nwm::ConnectionType conType)
 {
-	auto r = nwm::Server::Create<pragma::networking::NWMActiveServer>(port, conType);
+	auto r = nwm::Server::Create<NWMActiveServer>(port, conType);
 	r->SetTimeoutDuration(GET_TIMEOUT_DURATION(ServerState::Get()->GetConVarFloat("sv_timeout_duration")));
 	r->Start();
 	return r;
@@ -189,7 +189,7 @@ std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActi
 
 /////////////////
 
-pragma::networking::NWMActiveServerClient::NWMActiveServerClient(nwm::Server *manager) : nwm::ServerClient(manager) {}
+pragma::networking::NWMActiveServerClient::NWMActiveServerClient(nwm::Server *manager) : ServerClient(manager) {}
 
 pragma::networking::NWMActiveServerClient::~NWMActiveServerClient() {}
 
@@ -207,12 +207,12 @@ bool pragma::networking::StandardServerClient::IsListenServerHost() const
 {
 	return true; // TODO
 }
-bool pragma::networking::StandardServerClient::Drop(DropReason reason, pragma::networking::Error &outErr)
+bool pragma::networking::StandardServerClient::Drop(DropReason reason, Error &outErr)
 {
 	m_nwmClient->Drop(get_nwm_drop_reason(reason));
 	return true;
 }
-bool pragma::networking::StandardServerClient::SendPacket(pragma::networking::Protocol protocol, NetPacket &packet, pragma::networking::Error &outErr)
+bool pragma::networking::StandardServerClient::SendPacket(Protocol protocol, NetPacket &packet, Error &outErr)
 {
 	// TODO
 	return true;

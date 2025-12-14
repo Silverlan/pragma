@@ -8,13 +8,13 @@ import :scripting.lua.classes.parallel_job;
 
 using namespace pragma::LuaCore;
 
-LuaWorker::LuaWorker(pragma::Game &game, const std::string &name) : m_workerName {name}
+LuaWorker::LuaWorker(Game &game, const std::string &name) : m_workerName {name}
 {
 	m_cbThink = game.AddCallback("Think", FunctionCallback<void>::Create([this]() { Update(); }));
 	m_cbEndGame = game.AddCallback("EndGame", FunctionCallback<void>::Create([this]() { Clear(); }));
 	AddThread([this]() {
 		auto ul = std::unique_lock<std::mutex> {m_mutex};
-		m_cond.wait(ul, [this]() -> bool { return GetStatus() != pragma::util::JobStatus::Pending; });
+		m_cond.wait(ul, [this]() -> bool { return GetStatus() != util::JobStatus::Pending; });
 	});
 }
 LuaWorker::~LuaWorker() { Clear(); }
@@ -22,7 +22,7 @@ luabind::object LuaWorker::GetResult() { return m_result; }
 void LuaWorker::Wait()
 {
 	auto status = GetStatus();
-	while(status == pragma::util::JobStatus::Pending) {
+	while(status == util::JobStatus::Pending) {
 		Update();
 		status = GetStatus();
 	}
@@ -31,7 +31,7 @@ void LuaWorker::Wait()
 	m_cond.notify_one();
 	m_mutex.unlock();
 
-	pragma::util::ParallelWorker<luabind::object>::Wait();
+	ParallelWorker<luabind::object>::Wait();
 }
 void LuaWorker::SetResult(const luabind::object &result) { m_result = result; }
 void LuaWorker::UpdateTaskProgress(const Task &task, float taskProgress)
@@ -41,7 +41,7 @@ void LuaWorker::UpdateTaskProgress(const Task &task, float taskProgress)
 }
 void LuaWorker::AddTask(const luabind::object &subJob, const Lua::func<bool> &onCompleteTask, float taskProgress)
 {
-	auto *job = luabind::object_cast<pragma::util::BaseParallelJob *>(subJob);
+	auto *job = luabind::object_cast<util::BaseParallelJob *>(subJob);
 	auto cpySubJob = subJob; // We need to keep a reference to this job
 
 	Task task {};
@@ -66,7 +66,7 @@ void LuaWorker::AddTask(const luabind::object &subJob, const Lua::func<bool> &on
 		  },
 		  0);
 		if(r != Lua::StatusCode::Ok) {
-			SetStatus(pragma::util::JobStatus::Failed, "Lua Error");
+			SetStatus(util::JobStatus::Failed, "Lua Error");
 			cpySubJob = {};
 			return TaskStatus::Complete;
 		}
@@ -79,7 +79,7 @@ void LuaWorker::AddTask(const luabind::object &subJob, const Lua::func<bool> &on
 	};
 	m_updateFuncs.push(std::move(task));
 }
-void LuaWorker::AddLuaTask(const std::shared_ptr<pragma::util::ParallelJob<luabind::object>> &subJob, float taskProgress)
+void LuaWorker::AddLuaTask(const std::shared_ptr<util::ParallelJob<luabind::object>> &subJob, float taskProgress)
 {
 	Task task {};
 	task.progressAmount = taskProgress;
@@ -96,7 +96,7 @@ void LuaWorker::AddLuaTask(const std::shared_ptr<pragma::util::ParallelJob<luabi
 	};
 	m_updateFuncs.push(std::move(task));
 }
-void LuaWorker::AddLuaTask(const std::shared_ptr<pragma::util::ParallelJob<luabind::object>> &subJob, const Lua::func<bool> &onCompleteTask, float taskProgress)
+void LuaWorker::AddLuaTask(const std::shared_ptr<util::ParallelJob<luabind::object>> &subJob, const Lua::func<bool> &onCompleteTask, float taskProgress)
 {
 	Task task {};
 	task.progressAmount = taskProgress;
@@ -119,7 +119,7 @@ void LuaWorker::AddLuaTask(const std::shared_ptr<pragma::util::ParallelJob<luabi
 		  },
 		  0);
 		if(r != Lua::StatusCode::Ok) {
-			SetStatus(pragma::util::JobStatus::Failed, "Lua Error");
+			SetStatus(util::JobStatus::Failed, "Lua Error");
 			return TaskStatus::Complete;
 		}
 		return TaskStatus::Complete;
@@ -146,7 +146,7 @@ void LuaWorker::AddLuaTask(const Lua::func<TaskStatus> &luaFunc, const Lua::func
 		  },
 		  1);
 		if(r != Lua::StatusCode::Ok) {
-			SetStatus(pragma::util::JobStatus::Failed, "Lua Error");
+			SetStatus(util::JobStatus::Failed, "Lua Error");
 			UpdateTaskProgress(task, 1.f);
 			return TaskStatus::Complete;
 		}
@@ -186,12 +186,12 @@ void LuaWorker::AddLuaTask(const Lua::func<TaskStatus> &luaFunc, const Lua::func
 	};
 	m_updateFuncs.push(std::move(task));
 }
-void LuaWorker::AddCppTask(const std::shared_ptr<pragma::util::BaseParallelJob> &subJob, const std::function<void()> &onComplete, float taskProgress)
+void LuaWorker::AddCppTask(const std::shared_ptr<util::BaseParallelJob> &subJob, const std::function<void()> &onComplete, float taskProgress)
 {
 	Task task {};
 	task.progressAmount = taskProgress;
 	task.update = [this, subJob, onComplete](const Task &task) -> TaskStatus {
-		if(subJob->GetStatus() == pragma::util::JobStatus::Initial)
+		if(subJob->GetStatus() == util::JobStatus::Initial)
 			subJob->Start();
 		UpdateTaskProgress(task, subJob->GetProgress());
 		if(subJob->IsComplete() == false)
@@ -201,7 +201,7 @@ void LuaWorker::AddCppTask(const std::shared_ptr<pragma::util::BaseParallelJob> 
 			return TaskStatus::Complete;
 		}
 		onComplete();
-		SetStatus(pragma::util::JobStatus::Successful);
+		SetStatus(util::JobStatus::Successful);
 		return TaskStatus::Complete;
 	};
 	task.cancel = [subJob](const Task &task) {
@@ -212,7 +212,7 @@ void LuaWorker::AddCppTask(const std::shared_ptr<pragma::util::BaseParallelJob> 
 }
 void LuaWorker::CallOnComplete(const Lua::func<void> &func)
 {
-	m_onComplete = [this, func](pragma::util::ParallelWorker<luabind::object> &worker) {
+	m_onComplete = [this, func](ParallelWorker<luabind::object> &worker) {
 		auto *l = func.interpreter();
 		auto r = Lua::CallFunction(
 		  l,
@@ -226,17 +226,17 @@ void LuaWorker::CallOnComplete(const Lua::func<void> &func)
 	};
 }
 void LuaWorker::SetProgressCallback(const Lua::func<float> &func) { m_progressCallback = func; }
-void LuaWorker::UpdateProgress(float progress) { pragma::util::ParallelWorker<luabind::object>::UpdateProgress(progress); }
+void LuaWorker::UpdateProgress(float progress) { ParallelWorker<luabind::object>::UpdateProgress(progress); }
 void LuaWorker::DoCancel(const std::string &resultMsg, std::optional<int32_t> resultCode)
 {
-	if(std::this_thread::get_id() != pragma::get_engine()->GetMainThreadId())
+	if(std::this_thread::get_id() != get_engine()->GetMainThreadId())
 		throw std::logic_error {"Cannot cancel Lua-worker from non-main thread!"};
 	while(!m_updateFuncs.empty()) {
 		auto task = std::move(m_updateFuncs.front());
 		m_updateFuncs.pop();
 		auto res = task.cancel(task);
 		if(!res)
-			SetStatus(pragma::util::JobStatus::Failed, "Failed to cancel: Lua Error");
+			SetStatus(util::JobStatus::Failed, "Failed to cancel: Lua Error");
 	}
 	Finalize();
 }
@@ -263,7 +263,7 @@ void LuaWorker::Finalize()
 }
 void LuaWorker::Update()
 {
-	if(GetStatus() == pragma::util::JobStatus::Initial)
+	if(GetStatus() == util::JobStatus::Initial)
 		return; // Not yet started
 	if(m_updateFuncs.empty()) {
 		Finalize();
@@ -294,6 +294,6 @@ void LuaWorker::Update()
 		}
 	}
 
-	if(GetStatus() != pragma::util::JobStatus::Pending)
+	if(GetStatus() != util::JobStatus::Pending)
 		Finalize();
 }

@@ -54,20 +54,20 @@ void Lua::geometry::generate_truncated_cone_mesh(lua::State *l, const Vector3 &o
 	std::vector<Vector3> normals;
 	pragma::math::geometry::generate_truncated_cone_mesh(origin, static_cast<float>(startRadius), dir, static_cast<float>(dist), static_cast<float>(endRadius), verts, (generateTriangles == true) ? &triangles : nullptr, (generateNormals == true) ? &normals : nullptr, segmentCount, caps);
 
-	outVerts = Lua::vector_to_table(l, verts);
+	outVerts = vector_to_table(l, verts);
 	auto *outNext = &outTris;
 	if(generateTriangles == true) {
-		*outNext = Lua::vector_to_table(l, triangles);
+		*outNext = vector_to_table(l, triangles);
 		outNext = &outNormals;
 	}
 	if(generateNormals == true)
-		*outNext = Lua::vector_to_table(l, normals);
+		*outNext = vector_to_table(l, normals);
 }
 double Lua::geometry::calc_volume_of_polyhedron(lua::State *l, luabind::table<> tVerts, luabind::table<> tTriangles)
 {
 	auto verts = Lua::table_to_vector<Vector3>(l, tVerts, 1);
 	auto tris = Lua::table_to_vector<uint16_t>(l, tTriangles, 2);
-	auto numTris = Lua::GetObjectLength(l, 2);
+	auto numTris = GetObjectLength(l, 2);
 	uint32_t idx = 0;
 	return pragma::math::geometry::calc_volume_of_polyhedron([l, &verts, &tris, numTris, idx](const Vector3 **v0, const Vector3 **v1, const Vector3 **v2) mutable -> bool {
 		if(idx >= numTris)
@@ -87,7 +87,7 @@ void Lua::geometry::calc_center_of_mass(lua::State *l, luabind::table<> tVerts, 
 {
 	auto verts = Lua::table_to_vector<Vector3>(l, tVerts, 1);
 	auto tris = Lua::table_to_vector<uint16_t>(l, tTriangles, 2);
-	auto numTris = Lua::GetObjectLength(l, 2);
+	auto numTris = GetObjectLength(l, 2);
 	uint32_t idx = 0;
 	outVolume = pragma::math::geometry::calc_volume_of_polyhedron(
 	  [l, &verts, &tris, numTris, idx](const Vector3 **v0, const Vector3 **v1, const Vector3 **v2) mutable -> bool {
@@ -105,39 +105,39 @@ void Lua::geometry::calc_center_of_mass(lua::State *l, luabind::table<> tVerts, 
 	  },
 	  &outCom);
 }
-::Vector2 Lua::geometry::calc_barycentric_coordinates(const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &hitPoint)
+Vector2 Lua::geometry::calc_barycentric_coordinates(const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &hitPoint)
 {
 	float b1, b2;
-	auto r = ::pragma::math::geometry::calc_barycentric_coordinates(p0, p1, p2, hitPoint, b1, b2);
+	auto r = pragma::math::geometry::calc_barycentric_coordinates(p0, p1, p2, hitPoint, b1, b2);
 	return ::Vector2 {b1, b2};
 }
-::Vector2 Lua::geometry::calc_barycentric_coordinates(const Vector3 &p0, const ::Vector2 &uv0, const Vector3 &p1, const ::Vector2 &uv1, const Vector3 &p2, const ::Vector2 &uv2, const Vector3 &hitPoint)
+Vector2 Lua::geometry::calc_barycentric_coordinates(const Vector3 &p0, const ::Vector2 &uv0, const Vector3 &p1, const ::Vector2 &uv1, const Vector3 &p2, const ::Vector2 &uv2, const Vector3 &hitPoint)
 {
 	float b1, b2;
-	auto r = ::pragma::math::geometry::calc_barycentric_coordinates(p0, uv0, p1, uv1, p2, uv2, hitPoint, b1, b2);
+	auto r = pragma::math::geometry::calc_barycentric_coordinates(p0, uv0, p1, uv1, p2, uv2, hitPoint, b1, b2);
 	return ::Vector2 {b1, b2};
 }
 
 int Lua::geometry::get_outline_vertices(lua::State *l)
 {
 	std::vector<::Vector2> vertices {};
-	Lua::CheckTable(l, 1);
-	auto numVerts = Lua::GetObjectLength(l, 1);
+	CheckTable(l, 1);
+	auto numVerts = GetObjectLength(l, 1);
 	vertices.reserve(numVerts);
 	for(auto i = decltype(numVerts) {0u}; i < numVerts; ++i) {
-		Lua::PushInt(l, i + 1u);
-		Lua::GetTableValue(l, 1);
+		PushInt(l, i + 1u);
+		GetTableValue(l, 1);
 		vertices.push_back(Lua::Check<::Vector2>(l, -1));
 	}
-	auto indices = ::pragma::math::geometry::get_outline_vertices(vertices);
+	auto indices = pragma::math::geometry::get_outline_vertices(vertices);
 	if(indices.has_value() == false)
 		return 0;
-	auto t = Lua::CreateTable(l);
+	auto t = CreateTable(l);
 	auto tIdx = 1;
 	for(auto idx : *indices) {
-		Lua::PushInt(l, tIdx++);
-		Lua::PushInt(l, idx);
-		Lua::SetTableValue(l, t);
+		PushInt(l, tIdx++);
+		PushInt(l, idx);
+		SetTableValue(l, t);
 	}
 	return 1;
 }
@@ -160,12 +160,12 @@ int Lua::geometry::triangulate_point_cloud(lua::State *l)
 	c2t::clip2tri clip2tri;
 	clip2tri.triangulate(inputPolygons, outputTriangles, boundingPolygon);
 
-	auto t = Lua::CreateTable(l);
+	auto t = CreateTable(l);
 	for(auto i = decltype(outputTriangles.size()) {0}; i < outputTriangles.size(); ++i) {
 		auto &p = outputTriangles.at(i);
-		Lua::PushInt(l, i + 1);
+		PushInt(l, i + 1);
 		Lua::Push<::Vector2>(l, ::Vector2(p.x, p.y));
-		Lua::SetTableValue(l, t);
+		SetTableValue(l, t);
 	}
 	/*
    vector<vector<Point> > inputPolygons;
@@ -272,8 +272,8 @@ luabind::object Lua::geometry::triangulate(lua::State *l, luabind::table<> tCont
 {
 	auto contour = Lua::table_to_vector<::Vector2>(l, tContour, 1);
 	std::vector<uint16_t> result {};
-	auto r = ::Geometry::triangulate(contour, result);
+	auto r = Geometry::triangulate(contour, result);
 	if(r == false)
 		return {};
-	return Lua::vector_to_table(l, result);
+	return vector_to_table(l, result);
 }

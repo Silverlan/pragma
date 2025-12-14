@@ -13,7 +13,7 @@ import :game;
 template<typename TCPPM>
 TCPPM *pragma::CGame::GetScene()
 {
-	return static_cast<pragma::CSceneComponent *>(m_scene.get());
+	return static_cast<CSceneComponent *>(m_scene.get());
 }
 template DLLCLIENT pragma::CSceneComponent *pragma::CGame::GetScene<pragma::CSceneComponent>();
 template DLLCLIENT const pragma::CSceneComponent *pragma::CGame::GetScene<const pragma::CSceneComponent>();
@@ -21,7 +21,7 @@ template DLLCLIENT const pragma::CSceneComponent *pragma::CGame::GetScene<const 
 template<typename TCPPM>
 const TCPPM *pragma::CGame::GetScene() const
 {
-	return const_cast<pragma::CGame *>(this)->GetScene<TCPPM>();
+	return const_cast<CGame *>(this)->GetScene<TCPPM>();
 }
 template DLLCLIENT const pragma::CSceneComponent *pragma::CGame::GetScene<pragma::CSceneComponent>() const;
 template DLLCLIENT const pragma::CSceneComponent *pragma::CGame::GetScene<const pragma::CSceneComponent>() const;

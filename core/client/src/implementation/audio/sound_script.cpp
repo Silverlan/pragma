@@ -17,7 +17,7 @@ pragma::audio::CSoundScript::~CSoundScript() {}
 //////////////////////////////////////
 
 pragma::audio::CSSEPlaySound::CSSEPlaySound(SoundScriptManager *manager) : SSEPlaySound(manager), m_dspEffect(nullptr) {}
-pragma::audio::SSESound *pragma::audio::CSSEPlaySound::CreateSound(double tStart, const std::function<std::shared_ptr<pragma::audio::ALSound>(const std::string &, ALChannel, pragma::audio::ALCreateFlags)> &createSound)
+pragma::audio::SSESound *pragma::audio::CSSEPlaySound::CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, ALCreateFlags)> &createSound)
 {
 	auto *s = SSEPlaySound::CreateSound(tStart, createSound);
 	if(s == nullptr)
@@ -31,22 +31,22 @@ pragma::audio::SSESound *pragma::audio::CSSEPlaySound::CreateSound(double tStart
 		cs->AddEffect(*effect);
 	return s;
 }
-void pragma::audio::CSSEPlaySound::PrecacheSound(const char *name) { pragma::get_client_state()->PrecacheSound(name, GetChannel()); }
+void pragma::audio::CSSEPlaySound::PrecacheSound(const char *name) { get_client_state()->PrecacheSound(name, GetChannel()); }
 void pragma::audio::CSSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 {
 	SSEPlaySound::Initialize(prop);
 	std::string dsp;
 	prop["dsp"](dsp);
 	if(dsp.empty() == false)
-		m_dspEffect = pragma::get_cengine()->GetAuxEffect(dsp);
-	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
+		m_dspEffect = get_cengine()->GetAuxEffect(dsp);
+	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	for(auto &type : pragma::audio::get_aux_types()) {
+	for(auto &type : get_aux_types()) {
 		auto dataBlock = prop[type];
 		if(!dataBlock)
 			continue;
-		auto effect = pragma::audio::create_aux_effect(type, dataBlock);
+		auto effect = create_aux_effect(type, dataBlock);
 		if(effect != nullptr)
 			effects.push_back(effect);
 	}

@@ -16,7 +16,7 @@ void pragma::gui::types::WISnapArea::Initialize()
 {
 	WIBase::Initialize();
 	SetSize(50, 50);
-	auto *pTriggerArea = pragma::gui::WGUI::GetInstance().Create<WIBase>(this);
+	auto *pTriggerArea = WGUI::GetInstance().Create<WIBase>(this);
 	pTriggerArea->SetSize(GetSize());
 	pTriggerArea->SetAnchor(0.f, 0.f, 1.f, 1.f);
 	m_hTriggerArea = pTriggerArea->GetHandle();

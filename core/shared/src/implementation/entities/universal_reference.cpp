@@ -14,8 +14,8 @@ EntityURef::EntityURef(EntityIdentifier identifier)
 {
 	std::visit(
 	  [this](auto &v) {
-		  if constexpr(std::is_same_v<decltype(v), pragma::util::Uuid>)
-			  m_identifier = (v != pragma::util::Uuid {}) ? std::make_unique<EntityIdentifier>(v) : nullptr;
+		  if constexpr(std::is_same_v<decltype(v), util::Uuid>)
+			  m_identifier = (v != util::Uuid {}) ? std::make_unique<EntityIdentifier>(v) : nullptr;
 		  else
 			  m_identifier = std::make_unique<EntityIdentifier>(std::move(v));
 	  },
@@ -33,25 +33,25 @@ EntityURef &EntityURef::operator=(EntityURef &&other)
 	m_identifier = {other.m_identifier ? std::move(other.m_identifier) : nullptr};
 	return *this;
 }
-EntityURef::EntityURef(const pragma::ecs::BaseEntity &ent) : EntityURef {ent.GetUuid()} {}
-void EntityURef::AttachEntityFilter(pragma::ecs::EntityIterator &it, const EntityIdentifier &identifier)
+EntityURef::EntityURef(const ecs::BaseEntity &ent) : EntityURef {ent.GetUuid()} {}
+void EntityURef::AttachEntityFilter(ecs::EntityIterator &it, const EntityIdentifier &identifier)
 {
 	std::visit(
 	  [&it](auto &val) {
 		  using T = decltype(val);
-		  if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, pragma::util::Uuid>)
+		  if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, util::Uuid>)
 			  it.AttachFilter<EntityIteratorFilterUuid>(val);
 		  else
 			  it.AttachFilter<EntityIteratorFilterNameOrClass>(val);
 	  },
 	  identifier);
 }
-pragma::ecs::BaseEntity *EntityURef::GetEntity(pragma::Game &game)
+ecs::BaseEntity *EntityURef::GetEntity(Game &game)
 {
 	if(!m_hEntity.IsValid()) {
 		if(!m_identifier)
 			return nullptr;
-		pragma::ecs::EntityIterator entIt {game, pragma::ecs::EntityIterator::FilterFlags::Any};
+		ecs::EntityIterator entIt {game, ecs::EntityIterator::FilterFlags::Any};
 		AttachEntityFilter(entIt, *m_identifier);
 		auto it = entIt.begin();
 		if(it == entIt.end())
@@ -60,14 +60,14 @@ pragma::ecs::BaseEntity *EntityURef::GetEntity(pragma::Game &game)
 	}
 	return m_hEntity.get();
 }
-std::optional<pragma::util::Uuid> EntityURef::GetUuid() const
+std::optional<util::Uuid> EntityURef::GetUuid() const
 {
 	if(!m_identifier)
 		return {};
 	return std::visit(
-	  [](auto &val) -> std::optional<pragma::util::Uuid> {
+	  [](auto &val) -> std::optional<util::Uuid> {
 		  using T = decltype(val);
-		  if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, pragma::util::Uuid>)
+		  if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, util::Uuid>)
 			  return val;
 		  return {};
 	  },
@@ -80,7 +80,7 @@ std::optional<std::string> EntityURef::GetClassOrName() const
 	return std::visit(
 	  [](auto &val) -> std::optional<std::string> {
 		  using T = decltype(val);
-		  if constexpr(!std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, pragma::util::Uuid>)
+		  if constexpr(!std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, util::Uuid>)
 			  return val;
 		  return {};
 	  },
@@ -96,8 +96,8 @@ void EntityURef::ToStringArgs(std::stringstream &outSs) const
 		std::visit(
 		  [&outSs](auto &val) {
 			  using T = decltype(val);
-			  if constexpr(std::is_same_v<T, pragma::util::Uuid &>)
-				  outSs << pragma::util::uuid_to_string(val) << "]";
+			  if constexpr(std::is_same_v<T, util::Uuid &>)
+				  outSs << util::uuid_to_string(val) << "]";
 			  else
 				  outSs << val << "]";
 		  },
@@ -114,11 +114,11 @@ std::string EntityURef::ToString() const
 
 //////////
 
-EntityUComponentRef::EntityUComponentRef() : EntityUComponentRef {util::Uuid {}, pragma::INVALID_COMPONENT_ID} {}
+EntityUComponentRef::EntityUComponentRef() : EntityUComponentRef {util::Uuid {}, INVALID_COMPONENT_ID} {}
 EntityUComponentRef::EntityUComponentRef(EntityIdentifier identifier, ComponentId componentId) : EntityURef {std::move(identifier)}, m_componentId {componentId} {}
 EntityUComponentRef::EntityUComponentRef(EntityIdentifier identifier, const std::string &componentName) : EntityURef {std::move(identifier)}, m_componentName {componentName.empty() ? nullptr : std::make_unique<std::string>(componentName)} {}
-EntityUComponentRef::EntityUComponentRef(const pragma::ecs::BaseEntity &ent, ComponentId componentId) : EntityURef {ent}, m_componentId {componentId} {}
-EntityUComponentRef::EntityUComponentRef(const pragma::ecs::BaseEntity &ent, const std::string &componentName) : EntityURef {ent}, m_componentName {componentName.empty() ? nullptr : std::make_unique<std::string>(componentName)} {}
+EntityUComponentRef::EntityUComponentRef(const ecs::BaseEntity &ent, ComponentId componentId) : EntityURef {ent}, m_componentId {componentId} {}
+EntityUComponentRef::EntityUComponentRef(const ecs::BaseEntity &ent, const std::string &componentName) : EntityURef {ent}, m_componentName {componentName.empty() ? nullptr : std::make_unique<std::string>(componentName)} {}
 EntityUComponentRef::EntityUComponentRef(const EntityUComponentRef &other) { operator=(other); }
 EntityUComponentRef::EntityUComponentRef(EntityUComponentRef &&other) { operator=(std::move(other)); }
 EntityUComponentRef &EntityUComponentRef::operator=(const EntityUComponentRef &other)
@@ -140,7 +140,7 @@ EntityUComponentRef &EntityUComponentRef::operator=(EntityUComponentRef &&other)
 	return *this;
 }
 bool EntityUComponentRef::HasComponentReference() const { return m_componentName != nullptr || m_componentId != INVALID_COMPONENT_ID; }
-BaseEntityComponent *EntityUComponentRef::GetComponent(pragma::Game &game)
+BaseEntityComponent *EntityUComponentRef::GetComponent(Game &game)
 {
 	if(!m_hComponent.IsValid()) {
 		if(m_componentId == INVALID_COMPONENT_ID) {
@@ -178,24 +178,24 @@ std::string EntityUComponentRef::ToString() const
 
 //////////
 
-EntityUComponentMemberRef::EntityUComponentMemberRef() : EntityUComponentMemberRef {util::Uuid {}, pragma::INVALID_COMPONENT_ID, ""} {}
+EntityUComponentMemberRef::EntityUComponentMemberRef() : EntityUComponentMemberRef {util::Uuid {}, INVALID_COMPONENT_ID, ""} {}
 EntityUComponentMemberRef::EntityUComponentMemberRef(EntityIdentifier identifier, ComponentId componentId, const std::string &memberName) : EntityUComponentRef {std::move(identifier), componentId}, m_memberRef {memberName} {}
 EntityUComponentMemberRef::EntityUComponentMemberRef(EntityIdentifier identifier, const std::string &componentName, const std::string &memberName) : EntityUComponentRef {std::move(identifier), componentName}, m_memberRef {memberName} {}
-EntityUComponentMemberRef::EntityUComponentMemberRef(const pragma::ecs::BaseEntity &ent, ComponentId componentId, const std::string &memberName) : EntityUComponentRef {ent, componentId}, m_memberRef {memberName} {}
-EntityUComponentMemberRef::EntityUComponentMemberRef(const pragma::ecs::BaseEntity &ent, const std::string &componentName, const std::string &memberName) : EntityUComponentRef {ent, componentName}, m_memberRef {memberName} {}
-EntityUComponentMemberRef::EntityUComponentMemberRef(const std::string &path) : EntityUComponentMemberRef {} { pragma::ecs::BaseEntity::ParseUri(path, *this); }
-const ComponentMemberInfo *EntityUComponentMemberRef::GetMemberInfo(pragma::Game &game) const
+EntityUComponentMemberRef::EntityUComponentMemberRef(const ecs::BaseEntity &ent, ComponentId componentId, const std::string &memberName) : EntityUComponentRef {ent, componentId}, m_memberRef {memberName} {}
+EntityUComponentMemberRef::EntityUComponentMemberRef(const ecs::BaseEntity &ent, const std::string &componentName, const std::string &memberName) : EntityUComponentRef {ent, componentName}, m_memberRef {memberName} {}
+EntityUComponentMemberRef::EntityUComponentMemberRef(const std::string &path) : EntityUComponentMemberRef {} { ecs::BaseEntity::ParseUri(path, *this); }
+const ComponentMemberInfo *EntityUComponentMemberRef::GetMemberInfo(Game &game) const
 {
 	auto *c = GetComponent(game);
 	if(!c)
 		return nullptr;
 	return m_memberRef.GetMemberInfo(*c);
 }
-pragma::ComponentMemberIndex EntityUComponentMemberRef::GetMemberIndex() const { return m_memberRef.GetMemberIndex(); }
+ComponentMemberIndex EntityUComponentMemberRef::GetMemberIndex() const { return m_memberRef.GetMemberIndex(); }
 const std::string &EntityUComponentMemberRef::GetMemberName() const { return m_memberRef.GetMemberName(); }
-void EntityUComponentMemberRef::UpdateMemberIndex(pragma::Game &game) const
+void EntityUComponentMemberRef::UpdateMemberIndex(Game &game) const
 {
-	if(GetMemberIndex() == pragma::INVALID_COMPONENT_ID)
+	if(GetMemberIndex() == INVALID_COMPONENT_ID)
 		GetMemberInfo(game);
 }
 
@@ -227,8 +227,8 @@ MultiEntityURef::MultiEntityURef(EntityIdentifier identifier)
 {
 	std::visit(
 	  [this](auto &v) {
-		  if constexpr(std::is_same_v<decltype(v), pragma::util::Uuid>)
-			  m_identifier = (v != pragma::util::Uuid {}) ? std::make_unique<EntityIdentifier>(v) : nullptr;
+		  if constexpr(std::is_same_v<decltype(v), util::Uuid>)
+			  m_identifier = (v != util::Uuid {}) ? std::make_unique<EntityIdentifier>(v) : nullptr;
 		  else
 			  m_identifier = std::make_unique<EntityIdentifier>(std::move(v));
 	  },
@@ -246,16 +246,16 @@ MultiEntityURef &MultiEntityURef::operator=(MultiEntityURef &&other)
 	m_identifier = {other.m_identifier ? std::move(other.m_identifier) : nullptr};
 	return *this;
 }
-MultiEntityURef::MultiEntityURef(const pragma::ecs::BaseEntity &ent) : MultiEntityURef {ent.GetUuid()} {}
-void MultiEntityURef::FindEntities(pragma::Game &game, std::vector<pragma::ecs::BaseEntity *> &outEnts) const
+MultiEntityURef::MultiEntityURef(const ecs::BaseEntity &ent) : MultiEntityURef {ent.GetUuid()} {}
+void MultiEntityURef::FindEntities(Game &game, std::vector<ecs::BaseEntity *> &outEnts) const
 {
 	if(!m_identifier)
 		return;
-	pragma::ecs::EntityIterator entIt {game, pragma::ecs::EntityIterator::FilterFlags::Any};
+	ecs::EntityIterator entIt {game, ecs::EntityIterator::FilterFlags::Any};
 	std::visit(
 	  [&entIt](auto &val) {
 		  using T = decltype(val);
-		  if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, pragma::util::Uuid>)
+		  if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>, util::Uuid>)
 			  entIt.AttachFilter<EntityIteratorFilterUuid>(val);
 		  else
 			  entIt.AttachFilter<EntityIteratorFilterNameOrClass>(val);
@@ -277,8 +277,8 @@ void MultiEntityURef::ToStringArgs(std::stringstream &outSs) const
 		std::visit(
 		  [&outSs](auto &val) {
 			  using T = decltype(val);
-			  if constexpr(std::is_same_v<T, pragma::util::Uuid &>)
-				  outSs << pragma::util::uuid_to_string(val) << "]";
+			  if constexpr(std::is_same_v<T, util::Uuid &>)
+				  outSs << util::uuid_to_string(val) << "]";
 			  else
 				  outSs << val << "]";
 		  },
@@ -295,11 +295,11 @@ std::string MultiEntityURef::ToString() const
 
 //////////
 
-MultiEntityUComponentRef::MultiEntityUComponentRef() : MultiEntityUComponentRef {util::Uuid {}, pragma::INVALID_COMPONENT_ID} {}
+MultiEntityUComponentRef::MultiEntityUComponentRef() : MultiEntityUComponentRef {util::Uuid {}, INVALID_COMPONENT_ID} {}
 MultiEntityUComponentRef::MultiEntityUComponentRef(EntityIdentifier identifier, ComponentId componentId) : MultiEntityURef {std::move(identifier)}, m_componentId {componentId} {}
 MultiEntityUComponentRef::MultiEntityUComponentRef(EntityIdentifier identifier, const std::string &componentName) : MultiEntityURef {std::move(identifier)}, m_componentName {componentName.empty() ? nullptr : std::make_unique<std::string>(componentName)} {}
-MultiEntityUComponentRef::MultiEntityUComponentRef(const pragma::ecs::BaseEntity &ent, ComponentId componentId) : MultiEntityURef {ent}, m_componentId {componentId} {}
-MultiEntityUComponentRef::MultiEntityUComponentRef(const pragma::ecs::BaseEntity &ent, const std::string &componentName) : MultiEntityURef {ent}, m_componentName {componentName.empty() ? nullptr : std::make_unique<std::string>(componentName)} {}
+MultiEntityUComponentRef::MultiEntityUComponentRef(const ecs::BaseEntity &ent, ComponentId componentId) : MultiEntityURef {ent}, m_componentId {componentId} {}
+MultiEntityUComponentRef::MultiEntityUComponentRef(const ecs::BaseEntity &ent, const std::string &componentName) : MultiEntityURef {ent}, m_componentName {componentName.empty() ? nullptr : std::make_unique<std::string>(componentName)} {}
 MultiEntityUComponentRef::MultiEntityUComponentRef(const MultiEntityUComponentRef &other) : MultiEntityURef {other} { operator=(other); }
 MultiEntityUComponentRef::MultiEntityUComponentRef(MultiEntityUComponentRef &&other) { operator=(std::move(other)); }
 MultiEntityUComponentRef &MultiEntityUComponentRef::operator=(const MultiEntityUComponentRef &other)
@@ -321,11 +321,11 @@ MultiEntityUComponentRef &MultiEntityUComponentRef::operator=(MultiEntityUCompon
 	return *this;
 }
 bool MultiEntityUComponentRef::HasComponentReference() const { return m_componentName != nullptr || m_componentId != INVALID_COMPONENT_ID; }
-void MultiEntityUComponentRef::FindComponents(pragma::Game &game, std::vector<BaseEntityComponent *> &outComponents) const
+void MultiEntityUComponentRef::FindComponents(Game &game, std::vector<BaseEntityComponent *> &outComponents) const
 {
 	if(!m_identifier)
 		return;
-	pragma::ecs::EntityIterator entIt {game, pragma::ecs::EntityIterator::FilterFlags::Any};
+	ecs::EntityIterator entIt {game, ecs::EntityIterator::FilterFlags::Any};
 	if(m_componentId == INVALID_COMPONENT_ID) {
 		if(!m_componentName)
 			return; // Unreachable?
@@ -367,27 +367,27 @@ std::string MultiEntityUComponentRef::ToString() const
 
 //////////
 
-std::ostream &operator<<(std::ostream &out, const pragma::EntityURef &ref)
+std::ostream &operator<<(std::ostream &out, const EntityURef &ref)
 {
 	out << ref.ToString();
 	return out;
 }
-std::ostream &operator<<(std::ostream &out, const pragma::EntityUComponentRef &ref)
+std::ostream &operator<<(std::ostream &out, const EntityUComponentRef &ref)
 {
 	out << ref.ToString();
 	return out;
 }
-std::ostream &operator<<(std::ostream &out, const pragma::EntityUComponentMemberRef &ref)
+std::ostream &operator<<(std::ostream &out, const EntityUComponentMemberRef &ref)
 {
 	out << ref.ToString();
 	return out;
 }
-std::ostream &operator<<(std::ostream &out, const pragma::MultiEntityURef &ref)
+std::ostream &operator<<(std::ostream &out, const MultiEntityURef &ref)
 {
 	out << ref.ToString();
 	return out;
 }
-std::ostream &operator<<(std::ostream &out, const pragma::MultiEntityUComponentRef &ref)
+std::ostream &operator<<(std::ostream &out, const MultiEntityUComponentRef &ref)
 {
 	out << ref.ToString();
 	return out;

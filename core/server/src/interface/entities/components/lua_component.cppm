@@ -11,17 +11,17 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SLuaBaseEntityComponent final : public BaseLuaBaseEntityComponent, public SBaseSnapshotComponent {
 	  public:
-		SLuaBaseEntityComponent(pragma::ecs::BaseEntity &ent);
+		SLuaBaseEntityComponent(ecs::BaseEntity &ent);
 
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
-		virtual Bool ReceiveNetEvent(pragma::BasePlayerComponent &pl, pragma::NetEventId, NetPacket &packet) override;
-		virtual void SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl) override;
+		virtual Bool ReceiveNetEvent(BasePlayerComponent &pl, NetEventId, NetPacket &packet) override;
+		virtual void SendSnapshotData(NetPacket &packet, BasePlayerComponent &pl) override;
 		virtual bool ShouldTransmitNetData() const override;
 		virtual bool ShouldTransmitSnapshotData() const override;
 
 		virtual void OnMemberValueChanged(uint32_t memberIdx) override;
 	  protected:
-		virtual void InvokeNetEventHandle(const std::string &methodName, NetPacket &packet, pragma::BasePlayerComponent *pl) override;
+		virtual void InvokeNetEventHandle(const std::string &methodName, NetPacket &packet, BasePlayerComponent *pl) override;
 	};
 };
 

@@ -120,32 +120,32 @@ std::string Lua::debug::Server::npc_state_to_string(NPCSTATE npcState)
 	}
 }
 
-std::string Lua::debug::Server::task_to_string(::pragma::ai::Task task)
+std::string Lua::debug::Server::task_to_string(pragma::ai::Task task)
 {
 	switch(task) {
-	case ::pragma::ai::Task::MoveToTarget:
+	case pragma::ai::Task::MoveToTarget:
 		return "ai.TASK_MOVE_TO_TARGET";
-	case ::pragma::ai::Task::PlayAnimation:
+	case pragma::ai::Task::PlayAnimation:
 		return "ai.TASK_PLAY_ANIMATION";
-	case ::pragma::ai::Task::PlayActivity:
+	case pragma::ai::Task::PlayActivity:
 		return "ai.TASK_PLAY_ACTIVITY";
-	case ::pragma::ai::Task::PlayLayeredAnimation:
+	case pragma::ai::Task::PlayLayeredAnimation:
 		return "ai.TASK_PLAY_LAYERED_ANIMATION";
-	case ::pragma::ai::Task::PlayLayeredActivity:
+	case pragma::ai::Task::PlayLayeredActivity:
 		return "ai.TASK_PLAY_LAYERED_ACTIVITY";
-	case ::pragma::ai::Task::MoveRandom:
+	case pragma::ai::Task::MoveRandom:
 		return "ai.TASK_MOVE_RANDOM";
-	case ::pragma::ai::Task::PlaySound:
+	case pragma::ai::Task::PlaySound:
 		return "ai.TASK_PLAY_SOUND";
-	case ::pragma::ai::Task::DebugPrint:
+	case pragma::ai::Task::DebugPrint:
 		return "ai.TASK_DEBUG_PRINT";
-	case ::pragma::ai::Task::DebugDrawText:
+	case pragma::ai::Task::DebugDrawText:
 		return "ai.TASK_DEBUG_DRAW_TEXT";
-	case ::pragma::ai::Task::Decorator:
+	case pragma::ai::Task::Decorator:
 		return "ai.TASK_DECORATOR";
-	case ::pragma::ai::Task::Wait:
+	case pragma::ai::Task::Wait:
 		return "ai.TASK_WAIT";
-	case ::pragma::ai::Task::TurnToTarget:
+	case pragma::ai::Task::TurnToTarget:
 		return "ai.TASK_TURN_TO_TARGET";
 	default:
 		return "";

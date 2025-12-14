@@ -11,9 +11,9 @@ import :audio.sound;
 export namespace pragma::audio {
 	class DLLSERVER SALSoundScript : public ALSoundScript, virtual public SALSound {
 	  protected:
-		virtual std::shared_ptr<pragma::audio::ALSound> CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags) override;
+		virtual std::shared_ptr<ALSound> CreateSound(const std::string &name, ALChannel channel, ALCreateFlags createFlags) override;
 	  public:
-		SALSoundScript(pragma::NetworkState *nw, unsigned int idx, SoundScript *script, pragma::NetworkState *state, const std::string &soundName, pragma::audio::ALCreateFlags createFlags);
+		SALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, const std::string &soundName, ALCreateFlags createFlags);
 		virtual ALState GetState() const override;
 		virtual unsigned int GetIndex() const override;
 		virtual void FadeIn(float time) override;
@@ -82,9 +82,9 @@ export namespace pragma::audio {
 		virtual void RemoveEffect(const std::string &effectName) override;
 		virtual void SetEffectParameters(const std::string &effectName, const SoundEffectParams &params = {}) override;
 
-		virtual void SetType(pragma::audio::ALSoundType type) override;
+		virtual void SetType(ALSoundType type) override;
 		virtual void SetFlags(unsigned int flags) override;
-		virtual void SetSource(pragma::ecs::BaseEntity *ent) override;
+		virtual void SetSource(ecs::BaseEntity *ent) override;
 		virtual void Update() override;
 		virtual void PostUpdate() override;
 		virtual void SetRange(float start, float end) override;

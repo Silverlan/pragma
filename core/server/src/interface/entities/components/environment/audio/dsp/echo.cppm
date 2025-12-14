@@ -14,7 +14,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SSoundDspEchoComponent final : public SBaseSoundDspComponent, public BaseEnvSoundDspEcho {
 		  public:
-			SSoundDspEchoComponent(pragma::ecs::BaseEntity &ent) : SBaseSoundDspComponent(ent) {}
+			SSoundDspEchoComponent(ecs::BaseEntity &ent) : SBaseSoundDspComponent(ent) {}
 			virtual bool OnSetKeyValue(const std::string &key, const std::string &val) override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual void InitializeLuaObject(lua::State *l) override;

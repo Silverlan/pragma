@@ -18,18 +18,18 @@ void pragma::gui::types::WIDebugShadowMap::SetContrastFactor(float contrastFacto
 {
 	m_contrastFactor = contrastFactor;
 	for(auto &hEl : m_shadowMapImages) {
-		auto *el = dynamic_cast<pragma::gui::types::WIDebugDepthTexture *>(hEl.get());
+		auto *el = dynamic_cast<WIDebugDepthTexture *>(hEl.get());
 		if(el == nullptr)
 			continue;
 		el->SetContrastFactor(contrastFactor);
 	}
 }
-void pragma::gui::types::WIDebugShadowMap::SetShadowMapType(pragma::rendering::ShadowMapType type) { m_shadowMapType = type; }
+void pragma::gui::types::WIDebugShadowMap::SetShadowMapType(rendering::ShadowMapType type) { m_shadowMapType = type; }
 float pragma::gui::types::WIDebugShadowMap::GetContrastFactor() const { return m_contrastFactor; }
 
 void pragma::gui::types::WIDebugShadowMap::SetShadowMapSize(uint32_t w, uint32_t h) { m_shadowMapSize = {w, h}; }
 
-void pragma::gui::types::WIDebugShadowMap::SetLightSource(pragma::CLightComponent &lightSource) { m_lightHandle = lightSource.GetHandle<pragma::CLightComponent>(); }
+void pragma::gui::types::WIDebugShadowMap::SetLightSource(CLightComponent &lightSource) { m_lightHandle = lightSource.GetHandle<CLightComponent>(); }
 
 void pragma::gui::types::WIDebugShadowMap::DoUpdate()
 {
@@ -39,16 +39,16 @@ void pragma::gui::types::WIDebugShadowMap::DoUpdate()
 			continue;
 		hEl->Remove();
 	}
-	if(pragma::get_cgame() == nullptr || m_lightHandle.expired())
+	if(get_cgame() == nullptr || m_lightHandle.expired())
 		return;
 	auto &lightSource = *m_lightHandle;
-	auto type = pragma::LightType::Undefined;
+	auto type = LightType::Undefined;
 	auto *pLight = lightSource.GetLight(type);
 	if(pLight == nullptr)
 		return;
 	prosper::Texture *depthTexture = nullptr;
-	auto hShadow = lightSource.GetShadowMap<pragma::CShadowComponent>(m_shadowMapType);
-	auto hShadowCsm = lightSource.GetEntity().GetComponent<pragma::CShadowCSMComponent>();
+	auto hShadow = lightSource.GetShadowMap<CShadowComponent>(m_shadowMapType);
+	auto hShadowCsm = lightSource.GetEntity().GetComponent<CShadowCSMComponent>();
 	if(hShadow.valid())
 		depthTexture = hShadow->GetDepthTexture();
 	else if(hShadowCsm.valid())
@@ -61,13 +61,13 @@ void pragma::gui::types::WIDebugShadowMap::DoUpdate()
 	auto wLayer = m_shadowMapSize.x;
 	auto hLayer = m_shadowMapSize.y;
 	prosper::util::BarrierImageLayout barrierImageLayout {prosper::PipelineStageFlags::FragmentShaderBit, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::AccessFlags::ShaderReadBit};
-	auto pRadiusComponent = lightSource.GetEntity().GetComponent<pragma::CRadiusComponent>();
-	auto &wgui = pragma::gui::WGUI::GetInstance();
+	auto pRadiusComponent = lightSource.GetEntity().GetComponent<CRadiusComponent>();
+	auto &wgui = WGUI::GetInstance();
 	switch(type) {
-	case pragma::LightType::Point:
+	case LightType::Point:
 		{
 			for(auto i = decltype(numLayers) {0}; i < numLayers; ++i) {
-				auto *dt = wgui.Create<pragma::gui::types::WIDebugDepthTexture>(this);
+				auto *dt = wgui.Create<WIDebugDepthTexture>(this);
 				dt->SetTexture(*depthTexture, barrierImageLayout, barrierImageLayout, i);
 				dt->SetSize(wLayer, hLayer);
 				if(i == static_cast<uint32_t>(rendering::CubeMapSide::Left))
@@ -89,9 +89,9 @@ void pragma::gui::types::WIDebugShadowMap::DoUpdate()
 			}
 			break;
 		}
-	case pragma::LightType::Spot:
+	case LightType::Spot:
 		{
-			auto *dt = wgui.Create<pragma::gui::types::WIDebugDepthTexture>(this);
+			auto *dt = wgui.Create<WIDebugDepthTexture>(this);
 			dt->SetTexture(*depthTexture, barrierImageLayout, barrierImageLayout);
 			dt->SetSize(wLayer, hLayer);
 			dt->Setup(1.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
@@ -100,12 +100,12 @@ void pragma::gui::types::WIDebugShadowMap::DoUpdate()
 			m_shadowMapImages.push_back(dt->GetHandle());
 			break;
 		}
-	case pragma::LightType::Directional:
+	case LightType::Directional:
 		{
 			wLayer *= 0.5f;
 			hLayer *= 0.5f;
 			for(auto i = decltype(numLayers) {0}; i < numLayers; ++i) {
-				auto *dt = wgui.Create<pragma::gui::types::WIDebugDepthTexture>(this);
+				auto *dt = wgui.Create<WIDebugDepthTexture>(this);
 				dt->SetTexture(*depthTexture, barrierImageLayout, barrierImageLayout, i);
 				dt->SetSize(wLayer, hLayer);
 				dt->SetPos(i * wLayer, 0);
@@ -118,7 +118,7 @@ void pragma::gui::types::WIDebugShadowMap::DoUpdate()
 				auto &staticDepthTex = hShadowCsm->GetStaticPendingRenderTarget()->GetTexture();
 				auto &staticDepthImg = staticDepthTex.GetImage();
 				for(auto i = decltype(numLayers) {0}; i < numLayers; ++i) {
-					auto *dt = wgui.Create<pragma::gui::types::WIDebugDepthTexture>(this);
+					auto *dt = wgui.Create<WIDebugDepthTexture>(this);
 					dt->SetTexture(staticDepthTex, barrierImageLayout, barrierImageLayout, i);
 					dt->SetSize(wLayer, hLayer);
 					dt->SetPos(i * wLayer, hLayer);

@@ -128,7 +128,7 @@ static void register_directory_watcher(lua::State *l, luabind::module_ &modUtil)
 }
 
 namespace pragma::math {
-	std::ostream &operator<<(std::ostream &out, const pragma::math::Transform &t)
+	std::ostream &operator<<(std::ostream &out, const Transform &t)
 	{
 		auto &origin = t.GetOrigin();
 		auto &rot = t.GetRotation();
@@ -136,7 +136,7 @@ namespace pragma::math {
 		out << "Transform[" << origin.x << "," << origin.y << "," << origin.z << "][" << ang.p << "," << ang.y << "," << ang.r << "]";
 		return out;
 	}
-	std::ostream &operator<<(std::ostream &out, const pragma::math::ScaledTransform &t)
+	std::ostream &operator<<(std::ostream &out, const ScaledTransform &t)
 	{
 		auto &origin = t.GetOrigin();
 		auto &rot = t.GetRotation();
@@ -147,7 +147,7 @@ namespace pragma::math {
 	}
 }
 namespace pragma::image {
-	std::ostream &operator<<(std::ostream &out, const image::ImageLayerSet &layerSet)
+	std::ostream &operator<<(std::ostream &out, const ImageLayerSet &layerSet)
 	{
 		out << "ImageLayerSet[" << layerSet.images.size() << "]";
 		return out;
@@ -333,16 +333,16 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modString[(luabind::def("snake_case_to_camel_case", Lua::string::snake_case_to_camel_case), luabind::def("camel_case_to_snake_case", Lua::string::camel_case_to_snake_case), luabind::def("calc_levenshtein_distance", Lua::string::calc_levenshtein_distance),
 	  luabind::def("calc_levenshtein_similarity", Lua::string::calc_levenshtein_similarity),
 	  luabind::def("find_longest_common_substring", Lua::string::find_longest_common_substring, luabind::meta::join<luabind::pure_out_value<3>, luabind::pure_out_value<4>, luabind::pure_out_value<5>>::type {}),
-	  luabind::def("find_similar_elements", Lua::string::find_similar_elements, luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}), luabind::def("is_integer", pragma::string::is_integer), luabind::def("is_number", pragma::string::is_number),
+	  luabind::def("find_similar_elements", Lua::string::find_similar_elements, luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}), luabind::def("is_integer", string::is_integer), luabind::def("is_number", string::is_number),
 	  luabind::def("split", Lua::string::split), luabind::def("join", static_cast<std::string (*)(lua::State *, luabind::table<>, const std::string &)>(Lua::string::join)),
 	  luabind::def("join", static_cast<std::string (*)(lua::State *, luabind::table<>)>([](lua::State *l, luabind::table<> values) { return Lua::string::join(l, values); })), luabind::def("remove_whitespace", Lua::string::remove_whitespace),
 	  luabind::def("remove_quotes", Lua::string::remove_quotes), luabind::def("replace", static_cast<std::string (*)(const std::string &, const std::string &, const std::string &)>([](const std::string &subject, const std::string &from, const std::string &to) -> std::string {
 		  auto tmp = subject;
-		  pragma::string::replace(tmp, from, to);
+		  string::replace(tmp, from, to);
 		  return tmp;
 	  })),
-	  luabind::def("fill_zeroes", pragma::string::fill_zeroes), luabind::def("compare", static_cast<bool (*)(const char *, const char *, bool, size_t)>(pragma::string::compare)), luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &, bool)>(pragma::string::compare)),
-	  luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &)>([](const std::string &a, const std::string &b) -> bool { return pragma::string::compare(a, b, true); })),
+	  luabind::def("fill_zeroes", string::fill_zeroes), luabind::def("compare", static_cast<bool (*)(const char *, const char *, bool, size_t)>(string::compare)), luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &, bool)>(string::compare)),
+	  luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &)>([](const std::string &a, const std::string &b) -> bool { return string::compare(a, b, true); })),
 	  luabind::def("hash", static_cast<std::string (*)(const std::string &)>([](const std::string &str) -> std::string { return std::to_string(std::hash<std::string> {}(str)); })))];
 
 	auto modLight = luabind::module_(lua.GetState(), "light");
@@ -358,14 +358,14 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	  luabind::def("watts_to_lumens", static_cast<Watt (*)(Lumen)>([](Watt watt) -> Lumen { return ulighting::watts_to_lumens(watt); })), luabind::def("irradiance_to_lux", ulighting::irradiance_to_lux), luabind::def("lux_to_irradiance", ulighting::lux_to_irradiance),
 	  luabind::def(
 	    "convert_light_intensity",
-	    +[](float intensity, pragma::BaseEnvLightComponent::LightIntensityType srcType, pragma::BaseEnvLightComponent::LightIntensityType dstType, float coneAngle) -> float {
+	    +[](float intensity, BaseEnvLightComponent::LightIntensityType srcType, BaseEnvLightComponent::LightIntensityType dstType, float coneAngle) -> float {
 		    auto result = 0.f;
 		    switch(dstType) {
-		    case pragma::BaseEnvLightComponent::LightIntensityType::Candela:
-			    result = pragma::BaseEnvLightComponent::GetLightIntensityCandela(intensity, srcType, coneAngle);
+		    case BaseEnvLightComponent::LightIntensityType::Candela:
+			    result = BaseEnvLightComponent::GetLightIntensityCandela(intensity, srcType, coneAngle);
 			    break;
-		    case pragma::BaseEnvLightComponent::LightIntensityType::Lumen:
-			    result = pragma::BaseEnvLightComponent::GetLightIntensityLumen(intensity, srcType, coneAngle);
+		    case BaseEnvLightComponent::LightIntensityType::Lumen:
+			    result = BaseEnvLightComponent::GetLightIntensityLumen(intensity, srcType, coneAngle);
 			    break;
 		    default:
 			    break;
@@ -373,14 +373,14 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		    return result;
 	    }),
 	  luabind::def(
-	    "convert_light_intensity", +[](float intensity, pragma::BaseEnvLightComponent::LightIntensityType srcType, pragma::BaseEnvLightComponent::LightIntensityType dstType) -> float {
+	    "convert_light_intensity", +[](float intensity, BaseEnvLightComponent::LightIntensityType srcType, BaseEnvLightComponent::LightIntensityType dstType) -> float {
 		    auto result = 0.f;
 		    switch(dstType) {
-		    case pragma::BaseEnvLightComponent::LightIntensityType::Candela:
-			    result = pragma::BaseEnvLightComponent::GetLightIntensityCandela(intensity, srcType);
+		    case BaseEnvLightComponent::LightIntensityType::Candela:
+			    result = BaseEnvLightComponent::GetLightIntensityCandela(intensity, srcType);
 			    break;
-		    case pragma::BaseEnvLightComponent::LightIntensityType::Lumen:
-			    result = pragma::BaseEnvLightComponent::GetLightIntensityLumen(intensity, srcType);
+		    case BaseEnvLightComponent::LightIntensityType::Lumen:
+			    result = BaseEnvLightComponent::GetLightIntensityLumen(intensity, srcType);
 			    break;
 		    default:
 			    break;
@@ -389,88 +389,88 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	    }))];
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "light",
-	  {{"NATURAL_LIGHT_TYPE_MATCH_FLAME", pragma::math::to_integral(ulighting::NaturalLightType::MatchFlame)}, {"NATURAL_LIGHT_TYPE_CANDLE", pragma::math::to_integral(ulighting::NaturalLightType::Candle)}, {"NATURAL_LIGHT_TYPE_FLAME", pragma::math::to_integral(ulighting::NaturalLightType::Flame)},
-	    {"NATURAL_LIGHT_TYPE_SUNSET", pragma::math::to_integral(ulighting::NaturalLightType::Sunset)}, {"NATURAL_LIGHT_TYPE_SUNRISE", pragma::math::to_integral(ulighting::NaturalLightType::Sunrise)},
-	    {"NATURAL_LIGHT_TYPE_HOUSEHOLD_TUNGSTEN_BULB", pragma::math::to_integral(ulighting::NaturalLightType::HouseholdTungstenBulb)}, {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_500W_TO_1K", pragma::math::to_integral(ulighting::NaturalLightType::TungstenLamp500WTo1K)},
-	    {"NATURAL_LIGHT_TYPE_INCANDESCENT_LAMP", pragma::math::to_integral(ulighting::NaturalLightType::IncandescentLamp)}, {"NATURAL_LIGHT_TYPE_WARM_FLUORESCENT_LAMP", pragma::math::to_integral(ulighting::NaturalLightType::WarmFluorescentLamp)},
-	    {"NATURAL_LIGHT_TYPE_LED_LAMP", pragma::math::to_integral(ulighting::NaturalLightType::LEDLamp)}, {"NATURAL_LIGHT_TYPE_QUARTZ_LIGHT", pragma::math::to_integral(ulighting::NaturalLightType::QuartzLight)},
-	    {"NATURAL_LIGHT_TYPE_STUDIO_LAMP", pragma::math::to_integral(ulighting::NaturalLightType::StudioLamp)}, {"NATURAL_LIGHT_TYPE_FLOODLIGHT", pragma::math::to_integral(ulighting::NaturalLightType::Floodlight)},
-	    {"NATURAL_LIGHT_TYPE_FLUORESCENT_LIGHT", pragma::math::to_integral(ulighting::NaturalLightType::FluorescentLight)}, {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_2K", pragma::math::to_integral(ulighting::NaturalLightType::TungstenLamp2K)},
-	    {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_5K", pragma::math::to_integral(ulighting::NaturalLightType::TungstenLamp5K)}, {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_10K", pragma::math::to_integral(ulighting::NaturalLightType::TungstenLamp10K)},
-	    {"NATURAL_LIGHT_TYPE_MOONLIGHT", pragma::math::to_integral(ulighting::NaturalLightType::Moonlight)}, {"NATURAL_LIGHT_TYPE_HORIZON_DAYLIGHT", pragma::math::to_integral(ulighting::NaturalLightType::HorizonDaylight)},
-	    {"NATURAL_LIGHT_TYPE_TUBULAR_FLUORESCENT_LAMP", pragma::math::to_integral(ulighting::NaturalLightType::TubularFluorescentLamp)}, {"NATURAL_LIGHT_TYPE_VERTICAL_DAYLIGHT", pragma::math::to_integral(ulighting::NaturalLightType::VerticalDaylight)},
-	    {"NATURAL_LIGHT_TYPE_SUN_AT_NOON", pragma::math::to_integral(ulighting::NaturalLightType::SunAtNoon)}, {"NATURAL_LIGHT_TYPE_DAYLIGHT", pragma::math::to_integral(ulighting::NaturalLightType::Daylight)},
-	    {"NATURAL_LIGHT_TYPE_SUN_THROUGH_CLOUDS", pragma::math::to_integral(ulighting::NaturalLightType::SunThroughClouds)}, {"NATURAL_LIGHT_TYPE_OVERCAST", pragma::math::to_integral(ulighting::NaturalLightType::Overcast)},
-	    {"NATURAL_LIGHT_TYPE_RGB_MONITOR_WHITE_POINT", pragma::math::to_integral(ulighting::NaturalLightType::RGBMonitorWhitePoint)}, {"NATURAL_LIGHT_TYPE_OUTDOOR_SHADE", pragma::math::to_integral(ulighting::NaturalLightType::OutdoorShade)},
-	    {"NATURAL_LIGHT_TYPE_PARTLY_CLOUDY", pragma::math::to_integral(ulighting::NaturalLightType::PartlyCloudy)}, {"NATURAL_LIGHT_TYPE_CLEAR_BLUESKY", pragma::math::to_integral(ulighting::NaturalLightType::ClearBlueSky)},
-	    {"NATURAL_LIGHT_TYPE_CLEAR_COUNT", pragma::math::to_integral(ulighting::NaturalLightType::Count)},
+	  {{"NATURAL_LIGHT_TYPE_MATCH_FLAME", math::to_integral(ulighting::NaturalLightType::MatchFlame)}, {"NATURAL_LIGHT_TYPE_CANDLE", math::to_integral(ulighting::NaturalLightType::Candle)}, {"NATURAL_LIGHT_TYPE_FLAME", math::to_integral(ulighting::NaturalLightType::Flame)},
+	    {"NATURAL_LIGHT_TYPE_SUNSET", math::to_integral(ulighting::NaturalLightType::Sunset)}, {"NATURAL_LIGHT_TYPE_SUNRISE", math::to_integral(ulighting::NaturalLightType::Sunrise)},
+	    {"NATURAL_LIGHT_TYPE_HOUSEHOLD_TUNGSTEN_BULB", math::to_integral(ulighting::NaturalLightType::HouseholdTungstenBulb)}, {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_500W_TO_1K", math::to_integral(ulighting::NaturalLightType::TungstenLamp500WTo1K)},
+	    {"NATURAL_LIGHT_TYPE_INCANDESCENT_LAMP", math::to_integral(ulighting::NaturalLightType::IncandescentLamp)}, {"NATURAL_LIGHT_TYPE_WARM_FLUORESCENT_LAMP", math::to_integral(ulighting::NaturalLightType::WarmFluorescentLamp)},
+	    {"NATURAL_LIGHT_TYPE_LED_LAMP", math::to_integral(ulighting::NaturalLightType::LEDLamp)}, {"NATURAL_LIGHT_TYPE_QUARTZ_LIGHT", math::to_integral(ulighting::NaturalLightType::QuartzLight)},
+	    {"NATURAL_LIGHT_TYPE_STUDIO_LAMP", math::to_integral(ulighting::NaturalLightType::StudioLamp)}, {"NATURAL_LIGHT_TYPE_FLOODLIGHT", math::to_integral(ulighting::NaturalLightType::Floodlight)},
+	    {"NATURAL_LIGHT_TYPE_FLUORESCENT_LIGHT", math::to_integral(ulighting::NaturalLightType::FluorescentLight)}, {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_2K", math::to_integral(ulighting::NaturalLightType::TungstenLamp2K)},
+	    {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_5K", math::to_integral(ulighting::NaturalLightType::TungstenLamp5K)}, {"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_10K", math::to_integral(ulighting::NaturalLightType::TungstenLamp10K)},
+	    {"NATURAL_LIGHT_TYPE_MOONLIGHT", math::to_integral(ulighting::NaturalLightType::Moonlight)}, {"NATURAL_LIGHT_TYPE_HORIZON_DAYLIGHT", math::to_integral(ulighting::NaturalLightType::HorizonDaylight)},
+	    {"NATURAL_LIGHT_TYPE_TUBULAR_FLUORESCENT_LAMP", math::to_integral(ulighting::NaturalLightType::TubularFluorescentLamp)}, {"NATURAL_LIGHT_TYPE_VERTICAL_DAYLIGHT", math::to_integral(ulighting::NaturalLightType::VerticalDaylight)},
+	    {"NATURAL_LIGHT_TYPE_SUN_AT_NOON", math::to_integral(ulighting::NaturalLightType::SunAtNoon)}, {"NATURAL_LIGHT_TYPE_DAYLIGHT", math::to_integral(ulighting::NaturalLightType::Daylight)},
+	    {"NATURAL_LIGHT_TYPE_SUN_THROUGH_CLOUDS", math::to_integral(ulighting::NaturalLightType::SunThroughClouds)}, {"NATURAL_LIGHT_TYPE_OVERCAST", math::to_integral(ulighting::NaturalLightType::Overcast)},
+	    {"NATURAL_LIGHT_TYPE_RGB_MONITOR_WHITE_POINT", math::to_integral(ulighting::NaturalLightType::RGBMonitorWhitePoint)}, {"NATURAL_LIGHT_TYPE_OUTDOOR_SHADE", math::to_integral(ulighting::NaturalLightType::OutdoorShade)},
+	    {"NATURAL_LIGHT_TYPE_PARTLY_CLOUDY", math::to_integral(ulighting::NaturalLightType::PartlyCloudy)}, {"NATURAL_LIGHT_TYPE_CLEAR_BLUESKY", math::to_integral(ulighting::NaturalLightType::ClearBlueSky)},
+	    {"NATURAL_LIGHT_TYPE_CLEAR_COUNT", math::to_integral(ulighting::NaturalLightType::Count)},
 
-	    {"LIGHT_SOURCE_TYPE_TUNGSTEN_INCANDESCENT_LIGHT_BULB", pragma::math::to_integral(ulighting::LightSourceType::TungstenIncandescentLightBulb)}, {"LIGHT_SOURCE_TYPE_HALOGEN_LAMP", pragma::math::to_integral(ulighting::LightSourceType::HalogenLamp)},
-	    {"LIGHT_SOURCE_TYPE_FLUORESCENT_LAMP", pragma::math::to_integral(ulighting::LightSourceType::FluorescentLamp)}, {"LIGHT_SOURCE_TYPE_LED_LAMP", pragma::math::to_integral(ulighting::LightSourceType::LEDLamp)},
-	    {"LIGHT_SOURCE_TYPE_METAL_HALIDE_LAMP", pragma::math::to_integral(ulighting::LightSourceType::MetalHalideLamp)}, {"LIGHT_SOURCE_TYPE_HIGH_PRESSURE_SODIUM_VAPOR_LAMP", pragma::math::to_integral(ulighting::LightSourceType::HighPressureSodiumVaporLamp)},
-	    {"LIGHT_SOURCE_TYPE_LOW_PRESSURE_SODIUM_VAPOR_LAMP", pragma::math::to_integral(ulighting::LightSourceType::LowPressureSodiumVaporLamp)}, {"LIGHT_SOURCE_TYPE_MERCURY_VAPOR_LAMP", pragma::math::to_integral(ulighting::LightSourceType::MercuryVaporLamp)},
-	    {"LIGHT_SOURCE_TYPE_D65_STANDARD_ILLUMINANT", pragma::math::to_integral(ulighting::LightSourceType::D65StandardIlluminant)}});
+	    {"LIGHT_SOURCE_TYPE_TUNGSTEN_INCANDESCENT_LIGHT_BULB", math::to_integral(ulighting::LightSourceType::TungstenIncandescentLightBulb)}, {"LIGHT_SOURCE_TYPE_HALOGEN_LAMP", math::to_integral(ulighting::LightSourceType::HalogenLamp)},
+	    {"LIGHT_SOURCE_TYPE_FLUORESCENT_LAMP", math::to_integral(ulighting::LightSourceType::FluorescentLamp)}, {"LIGHT_SOURCE_TYPE_LED_LAMP", math::to_integral(ulighting::LightSourceType::LEDLamp)},
+	    {"LIGHT_SOURCE_TYPE_METAL_HALIDE_LAMP", math::to_integral(ulighting::LightSourceType::MetalHalideLamp)}, {"LIGHT_SOURCE_TYPE_HIGH_PRESSURE_SODIUM_VAPOR_LAMP", math::to_integral(ulighting::LightSourceType::HighPressureSodiumVaporLamp)},
+	    {"LIGHT_SOURCE_TYPE_LOW_PRESSURE_SODIUM_VAPOR_LAMP", math::to_integral(ulighting::LightSourceType::LowPressureSodiumVaporLamp)}, {"LIGHT_SOURCE_TYPE_MERCURY_VAPOR_LAMP", math::to_integral(ulighting::LightSourceType::MercuryVaporLamp)},
+	    {"LIGHT_SOURCE_TYPE_D65_STANDARD_ILLUMINANT", math::to_integral(ulighting::LightSourceType::D65StandardIlluminant)}});
 
 	auto &modUtil = lua.RegisterLibrary("util");
 	register_directory_watcher(lua.GetState(), modUtil);
 
-	auto defParallelJob = pragma::LuaCore::register_class<pragma::util::BaseParallelJob>(lua.GetState(), "ParallelJob");
-	defParallelJob->add_static_constant("JOB_STATUS_FAILED", pragma::math::to_integral(pragma::util::JobStatus::Failed));
-	defParallelJob->add_static_constant("JOB_STATUS_SUCCESSFUL", pragma::math::to_integral(pragma::util::JobStatus::Successful));
-	defParallelJob->add_static_constant("JOB_STATUS_INITIAL", pragma::math::to_integral(pragma::util::JobStatus::Initial));
-	defParallelJob->add_static_constant("JOB_STATUS_CANCELLED", pragma::math::to_integral(pragma::util::JobStatus::Cancelled));
-	defParallelJob->add_static_constant("JOB_STATUS_PENDING", pragma::math::to_integral(pragma::util::JobStatus::Pending));
-	defParallelJob->add_static_constant("JOB_STATUS_INVALID", pragma::math::to_integral(pragma::util::JobStatus::Invalid));
-	defParallelJob->def("Cancel", &pragma::util::BaseParallelJob::Cancel);
-	defParallelJob->def("Wait", &pragma::util::BaseParallelJob::Wait);
-	defParallelJob->def("Start", &pragma::util::BaseParallelJob::Start);
-	defParallelJob->def("IsComplete", &pragma::util::BaseParallelJob::IsComplete);
-	defParallelJob->def("IsPending", &pragma::util::BaseParallelJob::IsPending);
-	defParallelJob->def("IsCancelled", &pragma::util::BaseParallelJob::IsCancelled);
-	defParallelJob->def("IsSuccessful", &pragma::util::BaseParallelJob::IsSuccessful);
-	defParallelJob->def("IsThreadActive", &pragma::util::BaseParallelJob::IsThreadActive);
-	defParallelJob->def("GetProgress", &pragma::util::BaseParallelJob::GetProgress);
-	defParallelJob->def("GetStatus", &pragma::util::BaseParallelJob::GetStatus);
-	defParallelJob->def("GetResultMessage", &pragma::util::BaseParallelJob::GetResultMessage);
-	defParallelJob->def("GetResultCode", &pragma::util::BaseParallelJob::GetResultCode);
-	defParallelJob->def("IsValid", &pragma::util::BaseParallelJob::IsValid);
-	defParallelJob->def("Poll", &pragma::util::BaseParallelJob::Poll);
+	auto defParallelJob = pragma::LuaCore::register_class<util::BaseParallelJob>(lua.GetState(), "ParallelJob");
+	defParallelJob->add_static_constant("JOB_STATUS_FAILED", math::to_integral(util::JobStatus::Failed));
+	defParallelJob->add_static_constant("JOB_STATUS_SUCCESSFUL", math::to_integral(util::JobStatus::Successful));
+	defParallelJob->add_static_constant("JOB_STATUS_INITIAL", math::to_integral(util::JobStatus::Initial));
+	defParallelJob->add_static_constant("JOB_STATUS_CANCELLED", math::to_integral(util::JobStatus::Cancelled));
+	defParallelJob->add_static_constant("JOB_STATUS_PENDING", math::to_integral(util::JobStatus::Pending));
+	defParallelJob->add_static_constant("JOB_STATUS_INVALID", math::to_integral(util::JobStatus::Invalid));
+	defParallelJob->def("Cancel", &util::BaseParallelJob::Cancel);
+	defParallelJob->def("Wait", &util::BaseParallelJob::Wait);
+	defParallelJob->def("Start", &util::BaseParallelJob::Start);
+	defParallelJob->def("IsComplete", &util::BaseParallelJob::IsComplete);
+	defParallelJob->def("IsPending", &util::BaseParallelJob::IsPending);
+	defParallelJob->def("IsCancelled", &util::BaseParallelJob::IsCancelled);
+	defParallelJob->def("IsSuccessful", &util::BaseParallelJob::IsSuccessful);
+	defParallelJob->def("IsThreadActive", &util::BaseParallelJob::IsThreadActive);
+	defParallelJob->def("GetProgress", &util::BaseParallelJob::GetProgress);
+	defParallelJob->def("GetStatus", &util::BaseParallelJob::GetStatus);
+	defParallelJob->def("GetResultMessage", &util::BaseParallelJob::GetResultMessage);
+	defParallelJob->def("GetResultCode", &util::BaseParallelJob::GetResultCode);
+	defParallelJob->def("IsValid", &util::BaseParallelJob::IsValid);
+	defParallelJob->def("Poll", &util::BaseParallelJob::Poll);
 	modUtil[*defParallelJob];
 
 	auto defImageBuffer = pragma::LuaCore::register_class<image::ImageBuffer>(lua.GetState(), "ImageBuffer");
-	defImageBuffer->add_static_constant("FORMAT_NONE", pragma::math::to_integral(image::Format::None));
-	defImageBuffer->add_static_constant("FORMAT_RGB8", pragma::math::to_integral(image::Format::RGB8));
-	defImageBuffer->add_static_constant("FORMAT_RGBA8", pragma::math::to_integral(image::Format::RGBA8));
-	defImageBuffer->add_static_constant("FORMAT_RGB16", pragma::math::to_integral(image::Format::RGB16));
-	defImageBuffer->add_static_constant("FORMAT_RGBA16", pragma::math::to_integral(image::Format::RGBA16));
-	defImageBuffer->add_static_constant("FORMAT_RGB32", pragma::math::to_integral(image::Format::RGB32));
-	defImageBuffer->add_static_constant("FORMAT_RGBA32", pragma::math::to_integral(image::Format::RGBA32));
-	defImageBuffer->add_static_constant("FORMAT_COUNT", pragma::math::to_integral(image::Format::Count));
+	defImageBuffer->add_static_constant("FORMAT_NONE", math::to_integral(image::Format::None));
+	defImageBuffer->add_static_constant("FORMAT_RGB8", math::to_integral(image::Format::RGB8));
+	defImageBuffer->add_static_constant("FORMAT_RGBA8", math::to_integral(image::Format::RGBA8));
+	defImageBuffer->add_static_constant("FORMAT_RGB16", math::to_integral(image::Format::RGB16));
+	defImageBuffer->add_static_constant("FORMAT_RGBA16", math::to_integral(image::Format::RGBA16));
+	defImageBuffer->add_static_constant("FORMAT_RGB32", math::to_integral(image::Format::RGB32));
+	defImageBuffer->add_static_constant("FORMAT_RGBA32", math::to_integral(image::Format::RGBA32));
+	defImageBuffer->add_static_constant("FORMAT_COUNT", math::to_integral(image::Format::Count));
 
-	defImageBuffer->add_static_constant("FORMAT_RGB_LDR", pragma::math::to_integral(image::Format::RGB_LDR));
-	defImageBuffer->add_static_constant("FORMAT_RGBA_LDR", pragma::math::to_integral(image::Format::RGBA_LDR));
-	defImageBuffer->add_static_constant("FORMAT_RGB_HDR", pragma::math::to_integral(image::Format::RGB_HDR));
-	defImageBuffer->add_static_constant("FORMAT_RGBA_HDR", pragma::math::to_integral(image::Format::RGBA_HDR));
-	defImageBuffer->add_static_constant("FORMAT_RGB_FLOAT", pragma::math::to_integral(image::Format::RGB_FLOAT));
-	defImageBuffer->add_static_constant("FORMAT_RGBA_FLOAT", pragma::math::to_integral(image::Format::RGBA_FLOAT));
+	defImageBuffer->add_static_constant("FORMAT_RGB_LDR", math::to_integral(image::Format::RGB_LDR));
+	defImageBuffer->add_static_constant("FORMAT_RGBA_LDR", math::to_integral(image::Format::RGBA_LDR));
+	defImageBuffer->add_static_constant("FORMAT_RGB_HDR", math::to_integral(image::Format::RGB_HDR));
+	defImageBuffer->add_static_constant("FORMAT_RGBA_HDR", math::to_integral(image::Format::RGBA_HDR));
+	defImageBuffer->add_static_constant("FORMAT_RGB_FLOAT", math::to_integral(image::Format::RGB_FLOAT));
+	defImageBuffer->add_static_constant("FORMAT_RGBA_FLOAT", math::to_integral(image::Format::RGBA_FLOAT));
 
-	defImageBuffer->add_static_constant("CHANNEL_RED", pragma::math::to_integral(image::Channel::Red));
-	defImageBuffer->add_static_constant("CHANNEL_GREEN", pragma::math::to_integral(image::Channel::Green));
-	defImageBuffer->add_static_constant("CHANNEL_BLUE", pragma::math::to_integral(image::Channel::Blue));
-	defImageBuffer->add_static_constant("CHANNEL_ALPHA", pragma::math::to_integral(image::Channel::Alpha));
-	defImageBuffer->add_static_constant("CHANNEL_R", pragma::math::to_integral(image::Channel::R));
-	defImageBuffer->add_static_constant("CHANNEL_G", pragma::math::to_integral(image::Channel::G));
-	defImageBuffer->add_static_constant("CHANNEL_B", pragma::math::to_integral(image::Channel::B));
-	defImageBuffer->add_static_constant("CHANNEL_A", pragma::math::to_integral(image::Channel::A));
+	defImageBuffer->add_static_constant("CHANNEL_RED", math::to_integral(image::Channel::Red));
+	defImageBuffer->add_static_constant("CHANNEL_GREEN", math::to_integral(image::Channel::Green));
+	defImageBuffer->add_static_constant("CHANNEL_BLUE", math::to_integral(image::Channel::Blue));
+	defImageBuffer->add_static_constant("CHANNEL_ALPHA", math::to_integral(image::Channel::Alpha));
+	defImageBuffer->add_static_constant("CHANNEL_R", math::to_integral(image::Channel::R));
+	defImageBuffer->add_static_constant("CHANNEL_G", math::to_integral(image::Channel::G));
+	defImageBuffer->add_static_constant("CHANNEL_B", math::to_integral(image::Channel::B));
+	defImageBuffer->add_static_constant("CHANNEL_A", math::to_integral(image::Channel::A));
 
-	defImageBuffer->add_static_constant("TONE_MAPPING_GAMMA_CORRECTION", pragma::math::to_integral(image::ToneMapping::GammaCorrection));
-	defImageBuffer->add_static_constant("TONE_MAPPING_REINHARD", pragma::math::to_integral(image::ToneMapping::Reinhard));
-	defImageBuffer->add_static_constant("TONE_MAPPING_HEJIL_RICHARD", pragma::math::to_integral(image::ToneMapping::HejilRichard));
-	defImageBuffer->add_static_constant("TONE_MAPPING_UNCHARTED", pragma::math::to_integral(image::ToneMapping::Uncharted));
-	defImageBuffer->add_static_constant("TONE_MAPPING_ACES", pragma::math::to_integral(image::ToneMapping::Aces));
-	defImageBuffer->add_static_constant("TONE_MAPPING_GRAN_TURISMO", pragma::math::to_integral(image::ToneMapping::GranTurismo));
+	defImageBuffer->add_static_constant("TONE_MAPPING_GAMMA_CORRECTION", math::to_integral(image::ToneMapping::GammaCorrection));
+	defImageBuffer->add_static_constant("TONE_MAPPING_REINHARD", math::to_integral(image::ToneMapping::Reinhard));
+	defImageBuffer->add_static_constant("TONE_MAPPING_HEJIL_RICHARD", math::to_integral(image::ToneMapping::HejilRichard));
+	defImageBuffer->add_static_constant("TONE_MAPPING_UNCHARTED", math::to_integral(image::ToneMapping::Uncharted));
+	defImageBuffer->add_static_constant("TONE_MAPPING_ACES", math::to_integral(image::ToneMapping::Aces));
+	defImageBuffer->add_static_constant("TONE_MAPPING_GRAN_TURISMO", math::to_integral(image::ToneMapping::GranTurismo));
 
-	defImageBuffer->scope[luabind::def("Create", static_cast<void (*)(lua::State *, uint32_t, uint32_t, uint32_t, pragma::util::DataStream &)>([](lua::State *l, uint32_t width, uint32_t height, uint32_t format, pragma::util::DataStream &ds) {
+	defImageBuffer->scope[luabind::def("Create", static_cast<void (*)(lua::State *, uint32_t, uint32_t, uint32_t, util::DataStream &)>([](lua::State *l, uint32_t width, uint32_t height, uint32_t format, util::DataStream &ds) {
 		auto imgBuffer = image::ImageBuffer::Create(ds->GetData(), width, height, static_cast<image::Format>(format));
 		if(imgBuffer == nullptr)
 			return;
@@ -507,11 +507,11 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer->def("GetData", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) {
 		auto *data = imgBuffer.GetData();
 		auto dataSize = imgBuffer.GetSize();
-		pragma::util::DataStream ds {data, static_cast<uint32_t>(dataSize)};
+		util::DataStream ds {data, static_cast<uint32_t>(dataSize)};
 		ds->SetOffset(0);
 		Lua::Push(l, ds);
 	}));
-	defImageBuffer->def("GetFormat", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushInt(l, pragma::math::to_integral(imgBuffer.GetFormat())); }));
+	defImageBuffer->def("GetFormat", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushInt(l, math::to_integral(imgBuffer.GetFormat())); }));
 	defImageBuffer->def("GetWidth", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetWidth()); }));
 	defImageBuffer->def("GetHeight", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetHeight()); }));
 	defImageBuffer->def("GetChannelCount", static_cast<void (*)(lua::State *, image::ImageBuffer &)>([](lua::State *l, image::ImageBuffer &imgBuffer) { Lua::PushInt(l, imgBuffer.GetChannelCount()); }));
@@ -531,9 +531,9 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	    [](lua::State *l, image::ImageBuffer &imgBuffer, image::ImageBuffer &dst, uint32_t xSrc, uint32_t ySrc, uint32_t xDst, uint32_t yDst, uint32_t w, uint32_t h) { imgBuffer.Copy(dst, xSrc, ySrc, xDst, yDst, w, h); }));
 	defImageBuffer->def("Convert", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t format) { imgBuffer.Convert(static_cast<image::Format>(format)); }));
 	defImageBuffer->def(
-	  "ToLDR", +[](lua::State *l, image::ImageBuffer &imgBuffer, const pragma::LuaCore::LuaThreadWrapper &tw) {
+	  "ToLDR", +[](lua::State *l, image::ImageBuffer &imgBuffer, const LuaCore::LuaThreadWrapper &tw) {
 		  auto pImgBuffer = imgBuffer.shared_from_this();
-		  auto task = [pImgBuffer]() -> pragma::LuaCore::LuaThreadPool::ResultHandler {
+		  auto task = [pImgBuffer]() -> LuaCore::LuaThreadPool::ResultHandler {
 			  pImgBuffer->ToLDR();
 			  return {};
 		  };
@@ -549,7 +549,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer->def("Clear", static_cast<void (*)(lua::State *, image::ImageBuffer &, const Color &)>([](lua::State *l, image::ImageBuffer &imgBuffer, const Color &color) { imgBuffer.Clear(color); }));
 	defImageBuffer->def("Clear", static_cast<void (*)(lua::State *, image::ImageBuffer &, const Vector4 &)>([](lua::State *l, image::ImageBuffer &imgBuffer, const Vector4 &color) { imgBuffer.Clear(color); }));
 	defImageBuffer->def("ClearAlpha", static_cast<void (*)(lua::State *, image::ImageBuffer &, float)>([](lua::State *l, image::ImageBuffer &imgBuffer, float a) {
-		a = pragma::math::clamp(a, 0.f, 1.f);
+		a = math::clamp(a, 0.f, 1.f);
 		imgBuffer.ClearAlpha(a * std::numeric_limits<uint8_t>::max());
 	}));
 	defImageBuffer->def("GetPixelIndex", static_cast<void (*)(lua::State *, image::ImageBuffer &, uint32_t, uint32_t)>([](lua::State *l, image::ImageBuffer &imgBuffer, uint32_t x, uint32_t y) { Lua::PushInt(l, imgBuffer.GetPixelIndex(x, y)); }));
@@ -560,9 +560,9 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer->def("Flip", static_cast<void (*)(lua::State *, image::ImageBuffer &, bool, bool)>([](lua::State *l, image::ImageBuffer &imgBuffer, bool flipH, bool flipV) { imgBuffer.Flip(flipH, flipV); }));
 	defImageBuffer->def("SwapChannels", static_cast<void (*)(lua::State *, image::ImageBuffer &, image::Channel, image::Channel)>([](lua::State *l, image::ImageBuffer &imgBuffer, image::Channel channel0, image::Channel channel1) { imgBuffer.SwapChannels(channel0, channel1); }));
 	defImageBuffer->def(
-	  "SwapChannels", +[](lua::State *l, image::ImageBuffer &imgBuffer, image::Channel channel0, image::Channel channel1, const pragma::LuaCore::LuaThreadWrapper &tw) {
+	  "SwapChannels", +[](lua::State *l, image::ImageBuffer &imgBuffer, image::Channel channel0, image::Channel channel1, const LuaCore::LuaThreadWrapper &tw) {
 		  auto pImgBuffer = imgBuffer.shared_from_this();
-		  auto task = [pImgBuffer, channel0, channel1]() -> pragma::LuaCore::LuaThreadPool::ResultHandler {
+		  auto task = [pImgBuffer, channel0, channel1]() -> LuaCore::LuaThreadPool::ResultHandler {
 			  pImgBuffer->SwapChannels(channel0, channel1);
 			  return {};
 		  };
@@ -622,66 +622,66 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageLayerSet->def("GetImages", +[](const image::ImageLayerSet &layerSet) { return layerSet.images; });
 	modUtil[*defImageLayerSet];
 
-	auto defWorker = luabind::class_<pragma::LuaCore::LuaWorker>("Worker");
-	defWorker.add_static_constant("TASK_STATUS_PENDING", pragma::math::to_integral(pragma::LuaCore::LuaWorker::TaskStatus::Pending));
-	defWorker.add_static_constant("TASK_STATUS_COMPLETE", pragma::math::to_integral(pragma::LuaCore::LuaWorker::TaskStatus::Complete));
-	defWorker.def("GetResult", &pragma::LuaCore::LuaWorker::GetResult);
-	defWorker.def("SetResult", &pragma::LuaCore::LuaWorker::SetResult);
-	defWorker.def("SetStatus", &pragma::LuaCore::LuaWorker::SetStatus);
-	defWorker.def("SetStatus", +[](pragma::LuaCore::LuaWorker &worker, pragma::util::JobStatus jobStatus, const std::optional<std::string> &resultMsg) { worker.SetStatus(jobStatus, resultMsg); });
-	defWorker.def("SetStatus", +[](pragma::LuaCore::LuaWorker &worker, pragma::util::JobStatus jobStatus) { worker.SetStatus(jobStatus); });
-	defWorker.def("UpdateProgress", &pragma::LuaCore::LuaWorker::UpdateProgress);
-	defWorker.def("AddTask", static_cast<void (*)(pragma::LuaCore::LuaWorker &, const std::shared_ptr<pragma::util::ParallelJob<luabind::object>> &, float)>(&add_task));
-	defWorker.def("AddTask", static_cast<void (*)(lua::State *, pragma::LuaCore::LuaWorker &, const luabind::object &, const luabind::object &, float)>(&add_task));
-	defWorker.def("SetProgressCallback", &pragma::LuaCore::LuaWorker::SetProgressCallback);
-	defWorker.def("Cancel", +[](pragma::LuaCore::LuaWorker &worker) { worker.Cancel(); });
-	defWorker.def("IsComplete", +[](pragma::LuaCore::LuaWorker &worker) { return worker.IsComplete(); });
-	defWorker.def("IsPending", +[](pragma::LuaCore::LuaWorker &worker) { return worker.IsPending(); });
-	defWorker.def("IsCancelled", +[](pragma::LuaCore::LuaWorker &worker) { return worker.IsCancelled(); });
-	defWorker.def("IsSuccessful", +[](pragma::LuaCore::LuaWorker &worker) { return worker.IsSuccessful(); });
-	defWorker.def("IsThreadActive", +[](pragma::LuaCore::LuaWorker &worker) { return worker.IsThreadActive(); });
-	defWorker.def("GetProgress", +[](pragma::LuaCore::LuaWorker &worker) { return worker.GetProgress(); });
-	defWorker.def("GetStatus", +[](pragma::LuaCore::LuaWorker &worker) { return worker.GetStatus(); });
-	defWorker.def("GetResultMessage", +[](pragma::LuaCore::LuaWorker &worker) { return worker.GetResultMessage(); });
-	defWorker.def("GetResultCode", +[](pragma::LuaCore::LuaWorker &worker) { return worker.GetResultCode(); });
-	defWorker.def("IsValid", +[](pragma::LuaCore::LuaWorker &worker) { return worker.IsValid(); });
+	auto defWorker = luabind::class_<LuaCore::LuaWorker>("Worker");
+	defWorker.add_static_constant("TASK_STATUS_PENDING", math::to_integral(LuaCore::LuaWorker::TaskStatus::Pending));
+	defWorker.add_static_constant("TASK_STATUS_COMPLETE", math::to_integral(LuaCore::LuaWorker::TaskStatus::Complete));
+	defWorker.def("GetResult", &LuaCore::LuaWorker::GetResult);
+	defWorker.def("SetResult", &LuaCore::LuaWorker::SetResult);
+	defWorker.def("SetStatus", &LuaCore::LuaWorker::SetStatus);
+	defWorker.def("SetStatus", +[](LuaCore::LuaWorker &worker, util::JobStatus jobStatus, const std::optional<std::string> &resultMsg) { worker.SetStatus(jobStatus, resultMsg); });
+	defWorker.def("SetStatus", +[](LuaCore::LuaWorker &worker, util::JobStatus jobStatus) { worker.SetStatus(jobStatus); });
+	defWorker.def("UpdateProgress", &LuaCore::LuaWorker::UpdateProgress);
+	defWorker.def("AddTask", static_cast<void (*)(LuaCore::LuaWorker &, const std::shared_ptr<util::ParallelJob<luabind::object>> &, float)>(&add_task));
+	defWorker.def("AddTask", static_cast<void (*)(lua::State *, LuaCore::LuaWorker &, const luabind::object &, const luabind::object &, float)>(&add_task));
+	defWorker.def("SetProgressCallback", &LuaCore::LuaWorker::SetProgressCallback);
+	defWorker.def("Cancel", +[](LuaCore::LuaWorker &worker) { worker.Cancel(); });
+	defWorker.def("IsComplete", +[](LuaCore::LuaWorker &worker) { return worker.IsComplete(); });
+	defWorker.def("IsPending", +[](LuaCore::LuaWorker &worker) { return worker.IsPending(); });
+	defWorker.def("IsCancelled", +[](LuaCore::LuaWorker &worker) { return worker.IsCancelled(); });
+	defWorker.def("IsSuccessful", +[](LuaCore::LuaWorker &worker) { return worker.IsSuccessful(); });
+	defWorker.def("IsThreadActive", +[](LuaCore::LuaWorker &worker) { return worker.IsThreadActive(); });
+	defWorker.def("GetProgress", +[](LuaCore::LuaWorker &worker) { return worker.GetProgress(); });
+	defWorker.def("GetStatus", +[](LuaCore::LuaWorker &worker) { return worker.GetStatus(); });
+	defWorker.def("GetResultMessage", +[](LuaCore::LuaWorker &worker) { return worker.GetResultMessage(); });
+	defWorker.def("GetResultCode", +[](LuaCore::LuaWorker &worker) { return worker.GetResultCode(); });
+	defWorker.def("IsValid", +[](LuaCore::LuaWorker &worker) { return worker.IsValid(); });
 	modUtil[defWorker];
 
-	auto defLuaParallelJob = luabind::class_<pragma::util::ParallelJob<luabind::object>, pragma::util::BaseParallelJob>("ParallelJob");
-	defLuaParallelJob.def("GetResult", static_cast<luabind::object (*)(lua::State *, pragma::util::ParallelJob<luabind::object> &)>([](lua::State *l, pragma::util::ParallelJob<luabind::object> &job) -> luabind::object { return job.GetResult(); }));
-	defLuaParallelJob.def("CallOnComplete", +[](pragma::util::ParallelJob<luabind::object> &job, const Lua::func<void> &onComplete) { static_cast<pragma::LuaCore::LuaWorker &>(job.GetWorker()).CallOnComplete(onComplete); });
-	defLuaParallelJob.def("SetProgressCallback", +[](pragma::util::ParallelJob<luabind::object> &job, const Lua::func<float> &func) { static_cast<pragma::LuaCore::LuaWorker &>(job.GetWorker()).SetProgressCallback(func); });
+	auto defLuaParallelJob = luabind::class_<util::ParallelJob<luabind::object>, util::BaseParallelJob>("ParallelJob");
+	defLuaParallelJob.def("GetResult", static_cast<luabind::object (*)(lua::State *, util::ParallelJob<luabind::object> &)>([](lua::State *l, util::ParallelJob<luabind::object> &job) -> luabind::object { return job.GetResult(); }));
+	defLuaParallelJob.def("CallOnComplete", +[](util::ParallelJob<luabind::object> &job, const Lua::func<void> &onComplete) { static_cast<LuaCore::LuaWorker &>(job.GetWorker()).CallOnComplete(onComplete); });
+	defLuaParallelJob.def("SetProgressCallback", +[](util::ParallelJob<luabind::object> &job, const Lua::func<float> &func) { static_cast<LuaCore::LuaWorker &>(job.GetWorker()).SetProgressCallback(func); });
 	modUtil[defLuaParallelJob];
 	modUtil[luabind::def(
-	  "create_parallel_job", +[](pragma::Game &game, const std::string &name, const Lua::func<void> &func, const Lua::func<void> &cancelFunc) -> std::shared_ptr<pragma::util::ParallelJob<luabind::object>> {
-		  auto job = pragma::util::make_shared<pragma::util::ParallelJob<luabind::object>>(pragma::util::create_parallel_job<pragma::LuaCore::LuaWorker>(game, name));
-		  static_cast<pragma::LuaCore::LuaWorker &>(job->GetWorker()).AddLuaTask(func, cancelFunc, 0.f);
+	  "create_parallel_job", +[](Game &game, const std::string &name, const Lua::func<void> &func, const Lua::func<void> &cancelFunc) -> std::shared_ptr<util::ParallelJob<luabind::object>> {
+		  auto job = pragma::util::make_shared<util::ParallelJob<luabind::object>>(pragma::util::create_parallel_job<LuaCore::LuaWorker>(game, name));
+		  static_cast<LuaCore::LuaWorker &>(job->GetWorker()).AddLuaTask(func, cancelFunc, 0.f);
 		  return job;
 	  })];
 
-	auto defGenericParallelJob = luabind::class_<pragma::util::ParallelJob<void>, pragma::util::BaseParallelJob>("ParallelJobGeneric");
+	auto defGenericParallelJob = luabind::class_<util::ParallelJob<void>, util::BaseParallelJob>("ParallelJobGeneric");
 	modUtil[defGenericParallelJob];
 
-	auto defImgParallelJob = luabind::class_<pragma::util::ParallelJob<std::shared_ptr<image::ImageBuffer>>, pragma::util::BaseParallelJob>("ParallelJobImage");
-	defImgParallelJob.def("GetResult", static_cast<void (*)(lua::State *, pragma::util::ParallelJob<std::shared_ptr<image::ImageBuffer>> &)>([](lua::State *l, pragma::util::ParallelJob<std::shared_ptr<image::ImageBuffer>> &job) { Lua::Push(l, job.GetResult()); }));
+	auto defImgParallelJob = luabind::class_<util::ParallelJob<std::shared_ptr<image::ImageBuffer>>, util::BaseParallelJob>("ParallelJobImage");
+	defImgParallelJob.def("GetResult", static_cast<void (*)(lua::State *, util::ParallelJob<std::shared_ptr<image::ImageBuffer>> &)>([](lua::State *l, util::ParallelJob<std::shared_ptr<image::ImageBuffer>> &job) { Lua::Push(l, job.GetResult()); }));
 	modUtil[defImgParallelJob];
 
-	auto defImgLayerSetParallelJob = luabind::class_<pragma::util::ParallelJob<image::ImageLayerSet>, pragma::util::BaseParallelJob>("ParallelJobImageLayerSet");
-	defImgLayerSetParallelJob.def("GetResult", +[](lua::State *l, pragma::util::ParallelJob<image::ImageLayerSet> &job) { Lua::Push(l, job.GetResult()); });
+	auto defImgLayerSetParallelJob = luabind::class_<util::ParallelJob<image::ImageLayerSet>, util::BaseParallelJob>("ParallelJobImageLayerSet");
+	defImgLayerSetParallelJob.def("GetResult", +[](lua::State *l, util::ParallelJob<image::ImageLayerSet> &job) { Lua::Push(l, job.GetResult()); });
 	defImgLayerSetParallelJob.def(
-	  "GetImage", +[](lua::State *l, pragma::util::ParallelJob<image::ImageLayerSet> &job) -> std::shared_ptr<image::ImageBuffer> {
+	  "GetImage", +[](lua::State *l, util::ParallelJob<image::ImageLayerSet> &job) -> std::shared_ptr<image::ImageBuffer> {
 		  if(job.GetResult().images.empty())
 			  return nullptr;
 		  return job.GetResult().images.begin()->second;
 	  });
 	modUtil[defImgLayerSetParallelJob];
 
-	auto defStringParallelJob = luabind::class_<pragma::util::ParallelJob<const std::string &>, pragma::util::BaseParallelJob>("ParallelJobString");
-	defStringParallelJob.def("GetResult", static_cast<void (*)(lua::State *, pragma::util::ParallelJob<const std::string &> &)>([](lua::State *l, pragma::util::ParallelJob<const std::string &> &job) { Lua::Push(l, job.GetResult()); }));
+	auto defStringParallelJob = luabind::class_<util::ParallelJob<const std::string &>, util::BaseParallelJob>("ParallelJobString");
+	defStringParallelJob.def("GetResult", static_cast<void (*)(lua::State *, util::ParallelJob<const std::string &> &)>([](lua::State *l, util::ParallelJob<const std::string &> &job) { Lua::Push(l, job.GetResult()); }));
 	modUtil[defStringParallelJob];
 
-	auto defDataStreamJob = luabind::class_<pragma::util::ParallelJob<const pragma::util::DataStream &>, pragma::util::BaseParallelJob>("ParallelJobData");
-	defDataStreamJob.def("GetResult", static_cast<void (*)(lua::State *, pragma::util::ParallelJob<const pragma::util::DataStream &> &)>([](lua::State *l, pragma::util::ParallelJob<const pragma::util::DataStream &> &job) { Lua::Push(l, job.GetResult()); }));
+	auto defDataStreamJob = luabind::class_<util::ParallelJob<const util::DataStream &>, util::BaseParallelJob>("ParallelJobData");
+	defDataStreamJob.def("GetResult", static_cast<void (*)(lua::State *, util::ParallelJob<const util::DataStream &> &)>([](lua::State *l, util::ParallelJob<const util::DataStream &> &job) { Lua::Push(l, job.GetResult()); }));
 	modUtil[defDataStreamJob];
 
 	auto defDataBlock = luabind::class_<datasystem::Block>("DataBlock");
@@ -705,7 +705,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defDataBlock.def("GetString", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, const std::string &)>(&Lua::DataBlock::GetString));
 	defDataBlock.def("GetColor", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, const Color &)>(&Lua::DataBlock::GetColor));
 	defDataBlock.def("GetVector", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, const Vector3 &)>(&Lua::DataBlock::GetVector));
-	defDataBlock.def("GetVector2", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, const ::Vector2 &)>(&Lua::DataBlock::GetVector2));
+	defDataBlock.def("GetVector2", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, const Vector2 &)>(&Lua::DataBlock::GetVector2));
 	defDataBlock.def("GetVector4", static_cast<void (*)(lua::State *, datasystem::Block &, const std::string &, const Vector4 &)>(&Lua::DataBlock::GetVector4));
 
 	defDataBlock.def("GetData", &Lua::DataBlock::GetData);
@@ -748,7 +748,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modUtil[defDataBlock];
 
 	// Version
-	auto defVersion = pragma::LuaCore::register_class<pragma::util::Version>(lua.GetState(), "Version");
+	auto defVersion = pragma::LuaCore::register_class<util::Version>(lua.GetState(), "Version");
 	defVersion->def(luabind::constructor<>());
 	defVersion->def(luabind::constructor<uint32_t, uint32_t>());
 	defVersion->def(luabind::constructor<uint32_t, uint32_t, uint32_t>());
@@ -756,20 +756,20 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVersion->def(luabind::const_self == luabind::const_self);
 	defVersion->def(luabind::const_self < luabind::const_self);
 	defVersion->def(luabind::const_self <= luabind::const_self);
-	defVersion->def_readwrite("major", &pragma::util::Version::major);
-	defVersion->def_readwrite("minor", &pragma::util::Version::minor);
-	defVersion->def_readwrite("revision", &pragma::util::Version::revision);
-	defVersion->def("Reset", &pragma::util::Version::Reset);
-	defVersion->def("ToString", &pragma::util::Version::ToString);
+	defVersion->def_readwrite("major", &util::Version::major);
+	defVersion->def_readwrite("minor", &util::Version::minor);
+	defVersion->def_readwrite("revision", &util::Version::revision);
+	defVersion->def("Reset", &util::Version::Reset);
+	defVersion->def("ToString", &util::Version::ToString);
 	modUtil[*defVersion];
 	//
 
 	// Path
-	auto defPath = pragma::LuaCore::register_class<pragma::util::Path>(lua.GetState(), "Path");
-	defPath->scope[luabind::def("CreateFilePath", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) { Lua::Push<pragma::util::Path>(l, pragma::util::Path::CreateFile(path)); }))];
-	defPath->scope[luabind::def("CreateFilePath", static_cast<void (*)(lua::State *, const pragma::util::Path &)>([](lua::State *l, const pragma::util::Path &path) { Lua::Push<pragma::util::Path>(l, pragma::util::Path::CreateFile(path.GetString())); }))];
-	defPath->scope[luabind::def("CreatePath", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) { Lua::Push<pragma::util::Path>(l, pragma::util::Path::CreatePath(path)); }))];
-	defPath->scope[luabind::def("CreatePath", static_cast<void (*)(lua::State *, const pragma::util::Path &)>([](lua::State *l, const pragma::util::Path &path) { Lua::Push<pragma::util::Path>(l, pragma::util::Path::CreatePath(path.GetString())); }))];
+	auto defPath = pragma::LuaCore::register_class<util::Path>(lua.GetState(), "Path");
+	defPath->scope[luabind::def("CreateFilePath", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) { Lua::Push<util::Path>(l, util::Path::CreateFile(path)); }))];
+	defPath->scope[luabind::def("CreateFilePath", static_cast<void (*)(lua::State *, const util::Path &)>([](lua::State *l, const util::Path &path) { Lua::Push<util::Path>(l, util::Path::CreateFile(path.GetString())); }))];
+	defPath->scope[luabind::def("CreatePath", static_cast<void (*)(lua::State *, const std::string &)>([](lua::State *l, const std::string &path) { Lua::Push<util::Path>(l, util::Path::CreatePath(path)); }))];
+	defPath->scope[luabind::def("CreatePath", static_cast<void (*)(lua::State *, const util::Path &)>([](lua::State *l, const util::Path &path) { Lua::Push<util::Path>(l, util::Path::CreatePath(path.GetString())); }))];
 	defPath->scope[luabind::def("CreateFromComponents", static_cast<void (*)(lua::State *, luabind::object)>([](lua::State *l, luabind::object o) {
 		int32_t t = 1;
 		Lua::CheckTable(l, t);
@@ -783,10 +783,10 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 			Lua::Pop(l, 1);
 		}
-		Lua::Push<pragma::util::Path>(l, {components});
+		Lua::Push<util::Path>(l, {components});
 	}))];
 	defPath->def(luabind::constructor<>());
-	defPath->def(luabind::constructor<const pragma::util::Path &>());
+	defPath->def(luabind::constructor<const util::Path &>());
 	defPath->def(luabind::constructor<const std::string &>());
 
 	defPath->def(luabind::self + luabind::const_self);
@@ -795,8 +795,8 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defPath->def(luabind::const_self == luabind::const_self);
 	defPath->def(luabind::const_self == std::string {});
 
-	defPath->def("Copy", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::Push<pragma::util::Path>(l, p); }));
-	defPath->def("ToComponents", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) {
+	defPath->def("Copy", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::Push<util::Path>(l, p); }));
+	defPath->def("ToComponents", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) {
 		auto components = p.ToComponents();
 		auto t = Lua::CreateTable(l);
 		int32_t idx = 1;
@@ -806,37 +806,37 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 			Lua::SetTableValue(l, t);
 		}
 	}));
-	defPath->def("GetString", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushString(l, p.GetString()); }));
-	defPath->def("GetPath", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushString(l, std::string {p.GetPath()}); }));
-	defPath->def("GetFileName", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushString(l, std::string {p.GetFileName()}); }));
-	defPath->def("GetFront", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushString(l, std::string {p.GetFront()}); }));
-	defPath->def("GetBack", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushString(l, std::string {p.GetBack()}); }));
-	defPath->def("MoveUp", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { p.MoveUp(); }));
-	defPath->def("PopFront", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { p.PopFront(); }));
-	defPath->def("PopBack", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { p.PopBack(); }));
-	defPath->def("Canonicalize", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { p.Canonicalize(); }));
-	defPath->def("IsFile", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushBool(l, p.IsFile()); }));
-	defPath->def("IsPath", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { Lua::PushBool(l, !p.IsFile()); }));
-	defPath->def("GetFileExtension", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) {
+	defPath->def("GetString", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushString(l, p.GetString()); }));
+	defPath->def("GetPath", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushString(l, std::string {p.GetPath()}); }));
+	defPath->def("GetFileName", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushString(l, std::string {p.GetFileName()}); }));
+	defPath->def("GetFront", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushString(l, std::string {p.GetFront()}); }));
+	defPath->def("GetBack", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushString(l, std::string {p.GetBack()}); }));
+	defPath->def("MoveUp", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { p.MoveUp(); }));
+	defPath->def("PopFront", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { p.PopFront(); }));
+	defPath->def("PopBack", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { p.PopBack(); }));
+	defPath->def("Canonicalize", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { p.Canonicalize(); }));
+	defPath->def("IsFile", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushBool(l, p.IsFile()); }));
+	defPath->def("IsPath", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { Lua::PushBool(l, !p.IsFile()); }));
+	defPath->def("GetFileExtension", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) {
 		auto ext = p.GetFileExtension();
 		if(ext.has_value() == false)
 			return;
 		Lua::PushString(l, *ext);
 	}));
-	defPath->def("RemoveFileExtension", static_cast<void (*)(lua::State *, pragma::util::Path &)>([](lua::State *l, pragma::util::Path &p) { p.RemoveFileExtension(); }));
-	defPath->def("RemoveFileExtension", +[](lua::State *l, pragma::util::Path &p, const std::vector<std::string> &extensions) { p.RemoveFileExtension(extensions); });
-	defPath->def("MakeRelative", +[](lua::State *l, pragma::util::Path &p, pragma::util::Path &pOther) { return p.MakeRelative(pOther); });
-	defPath->def("MakeRelative", +[](lua::State *l, pragma::util::Path &p, const std::string &other) { return p.MakeRelative(other); });
-	defPath->def("GetComponentCount", &pragma::util::Path::GetComponentCount);
+	defPath->def("RemoveFileExtension", static_cast<void (*)(lua::State *, util::Path &)>([](lua::State *l, util::Path &p) { p.RemoveFileExtension(); }));
+	defPath->def("RemoveFileExtension", +[](lua::State *l, util::Path &p, const std::vector<std::string> &extensions) { p.RemoveFileExtension(extensions); });
+	defPath->def("MakeRelative", +[](lua::State *l, util::Path &p, util::Path &pOther) { return p.MakeRelative(pOther); });
+	defPath->def("MakeRelative", +[](lua::State *l, util::Path &p, const std::string &other) { return p.MakeRelative(other); });
+	defPath->def("GetComponentCount", &util::Path::GetComponentCount);
 	defPath->def(
-	  "GetComponent", +[](pragma::util::Path &p, size_t offset) -> std::optional<std::pair<std::string_view, size_t>> {
+	  "GetComponent", +[](util::Path &p, size_t offset) -> std::optional<std::pair<std::string_view, size_t>> {
 		  if(offset >= p.GetString().size())
 			  return {};
 		  size_t nextOffset;
 		  auto sv = p.GetComponent(offset, &nextOffset);
 		  return std::pair<std::string_view, size_t> {sv, nextOffset};
 	  });
-	defPath->def("IsEmpty", &pragma::util::Path::IsEmpty);
+	defPath->def("IsEmpty", &util::Path::IsEmpty);
 	modUtil[*defPath];
 
 	Lua::SetTableCFunction(lua.GetState(), "util", "FilePath", util_file_path);
@@ -848,51 +848,51 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	auto &modMath = lua.RegisterLibrary("math");
 
 	// Transform
-	auto classDefTransform = luabind::class_<pragma::math::Transform>("Transform");
+	auto classDefTransform = luabind::class_<math::Transform>("Transform");
 	classDefTransform.def(luabind::constructor<const Mat4 &>());
 	classDefTransform.def(luabind::constructor<const Vector3 &, const Quat &>());
 	classDefTransform.def(luabind::constructor<const Vector3 &>());
 	classDefTransform.def(luabind::constructor<const Quat &>());
-	classDefTransform.def(luabind::constructor<const pragma::math::ScaledTransform &>());
+	classDefTransform.def(luabind::constructor<const math::ScaledTransform &>());
 	classDefTransform.def(luabind::constructor<>());
 	classDefTransform.def(luabind::const_self == luabind::const_self);
 	classDefTransform.def(luabind::tostring(luabind::self));
-	classDefTransform.def("Copy", static_cast<pragma::math::Transform (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &t) -> pragma::math::Transform { return t; }));
-	classDefTransform.property("x", static_cast<float (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &pose) { return pose.GetOrigin().x; }),
-	  static_cast<void (*)(lua::State *, pragma::math::Transform &, float)>([](lua::State *l, pragma::math::Transform &pose, float x) { pose.GetOrigin().x = x; }));
-	classDefTransform.property("y", static_cast<float (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &pose) { return pose.GetOrigin().y; }),
-	  static_cast<void (*)(lua::State *, pragma::math::Transform &, float)>([](lua::State *l, pragma::math::Transform &pose, float y) { pose.GetOrigin().y = y; }));
-	classDefTransform.property("z", static_cast<float (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &pose) { return pose.GetOrigin().z; }),
-	  static_cast<void (*)(lua::State *, pragma::math::Transform &, float)>([](lua::State *l, pragma::math::Transform &pose, float z) { pose.GetOrigin().z = z; }));
-	classDefTransform.property("pitch", static_cast<float (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &pose) { return pose.GetAngles().p; }));
-	classDefTransform.property("yaw", static_cast<float (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &pose) { return pose.GetAngles().y; }));
-	classDefTransform.property("roll", static_cast<float (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &pose) { return pose.GetAngles().r; }));
-	classDefTransform.def("ToPlane", &pragma::math::Transform::ToPlane);
-	classDefTransform.def("GetAngles", &pragma::math::Transform::GetAngles);
-	classDefTransform.def("SetAngles", &pragma::math::Transform::SetAngles);
-	classDefTransform.def("GetForward", &pragma::math::Transform::GetForward);
-	classDefTransform.def("GetRight", &pragma::math::Transform::GetRight);
-	classDefTransform.def("GetUp", &pragma::math::Transform::GetUp);
-	classDefTransform.def("Set", static_cast<void (*)(lua::State *, pragma::math::Transform &, const pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &t, const pragma::math::Transform &tOther) { t = tOther; }));
-	classDefTransform.def("GetOrigin", static_cast<Vector3 &(pragma::math::Transform::*)()>(&pragma::math::Transform::GetOrigin), luabind::copy_policy<0> {});
-	classDefTransform.def("GetRotation", static_cast<Quat &(pragma::math::Transform::*)()>(&pragma::math::Transform::GetRotation), luabind::copy_policy<0> {});
-	classDefTransform.def("SetOrigin", &pragma::math::Transform::SetOrigin);
-	classDefTransform.def("SetRotation", &pragma::math::Transform::SetRotation);
-	classDefTransform.def("SetIdentity", &pragma::math::Transform::SetIdentity);
-	classDefTransform.def("IsIdentity", static_cast<bool (*)(lua::State *, pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &t) -> bool {
+	classDefTransform.def("Copy", static_cast<math::Transform (*)(lua::State *, math::Transform &)>([](lua::State *l, math::Transform &t) -> math::Transform { return t; }));
+	classDefTransform.property("x", static_cast<float (*)(lua::State *, math::Transform &)>([](lua::State *l, math::Transform &pose) { return pose.GetOrigin().x; }),
+	  static_cast<void (*)(lua::State *, math::Transform &, float)>([](lua::State *l, math::Transform &pose, float x) { pose.GetOrigin().x = x; }));
+	classDefTransform.property("y", static_cast<float (*)(lua::State *, math::Transform &)>([](lua::State *l, math::Transform &pose) { return pose.GetOrigin().y; }),
+	  static_cast<void (*)(lua::State *, math::Transform &, float)>([](lua::State *l, math::Transform &pose, float y) { pose.GetOrigin().y = y; }));
+	classDefTransform.property("z", static_cast<float (*)(lua::State *, math::Transform &)>([](lua::State *l, math::Transform &pose) { return pose.GetOrigin().z; }),
+	  static_cast<void (*)(lua::State *, math::Transform &, float)>([](lua::State *l, math::Transform &pose, float z) { pose.GetOrigin().z = z; }));
+	classDefTransform.property("pitch", static_cast<float (*)(lua::State *, math::Transform &)>([](lua::State *l, math::Transform &pose) { return pose.GetAngles().p; }));
+	classDefTransform.property("yaw", static_cast<float (*)(lua::State *, math::Transform &)>([](lua::State *l, math::Transform &pose) { return pose.GetAngles().y; }));
+	classDefTransform.property("roll", static_cast<float (*)(lua::State *, math::Transform &)>([](lua::State *l, math::Transform &pose) { return pose.GetAngles().r; }));
+	classDefTransform.def("ToPlane", &math::Transform::ToPlane);
+	classDefTransform.def("GetAngles", &math::Transform::GetAngles);
+	classDefTransform.def("SetAngles", &math::Transform::SetAngles);
+	classDefTransform.def("GetForward", &math::Transform::GetForward);
+	classDefTransform.def("GetRight", &math::Transform::GetRight);
+	classDefTransform.def("GetUp", &math::Transform::GetUp);
+	classDefTransform.def("Set", static_cast<void (*)(lua::State *, math::Transform &, const math::Transform &)>([](lua::State *l, math::Transform &t, const math::Transform &tOther) { t = tOther; }));
+	classDefTransform.def("GetOrigin", static_cast<Vector3 &(math::Transform::*)()>(&math::Transform::GetOrigin), luabind::copy_policy<0> {});
+	classDefTransform.def("GetRotation", static_cast<Quat &(math::Transform::*)()>(&math::Transform::GetRotation), luabind::copy_policy<0> {});
+	classDefTransform.def("SetOrigin", &math::Transform::SetOrigin);
+	classDefTransform.def("SetRotation", &math::Transform::SetRotation);
+	classDefTransform.def("SetIdentity", &math::Transform::SetIdentity);
+	classDefTransform.def("IsIdentity", static_cast<bool (*)(lua::State *, math::Transform &)>([](lua::State *l, math::Transform &t) -> bool {
 		auto &origin = t.GetOrigin();
 		auto &rotation = t.GetRotation();
-		return pragma::math::abs(origin.x) < 0.001f && pragma::math::abs(origin.y) < 0.001f && pragma::math::abs(origin.z) < 0.001f && pragma::math::abs(1.f - rotation.w) < 0.001f && pragma::math::abs(rotation.x) < 0.001f && pragma::math::abs(rotation.y) < 0.001f && pragma::math::abs(rotation.z) < 0.001f;
+		return math::abs(origin.x) < 0.001f && math::abs(origin.y) < 0.001f && math::abs(origin.z) < 0.001f && math::abs(1.f - rotation.w) < 0.001f && math::abs(rotation.x) < 0.001f && math::abs(rotation.y) < 0.001f && math::abs(rotation.z) < 0.001f;
 	}));
-	classDefTransform.def("TranslateGlobal", &pragma::math::Transform::TranslateGlobal);
-	classDefTransform.def("TranslateLocal", &pragma::math::Transform::TranslateLocal);
-	classDefTransform.def("RotateGlobal", &pragma::math::Transform::RotateGlobal);
-	classDefTransform.def("RotateLocal", &pragma::math::Transform::RotateLocal);
-	classDefTransform.def("TransformGlobal", static_cast<void (*)(lua::State *, pragma::math::Transform &, const pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &t, const pragma::math::Transform &t2) { t = t2 * t; }));
-	classDefTransform.def("TransformLocal", static_cast<void (*)(lua::State *, pragma::math::Transform &, const pragma::math::Transform &)>([](lua::State *l, pragma::math::Transform &t, const pragma::math::Transform &t2) { t *= t2; }));
-	classDefTransform.def("GetInverse", &pragma::math::Transform::GetInverse);
-	classDefTransform.def("ToMatrix", &pragma::math::Transform::ToMatrix);
-	classDefTransform.def("SetMatrix", static_cast<void (*)(lua::State *, pragma::math::Transform &, const Mat4 &)>([](lua::State *l, pragma::math::Transform &t, const Mat4 &m) {
+	classDefTransform.def("TranslateGlobal", &math::Transform::TranslateGlobal);
+	classDefTransform.def("TranslateLocal", &math::Transform::TranslateLocal);
+	classDefTransform.def("RotateGlobal", &math::Transform::RotateGlobal);
+	classDefTransform.def("RotateLocal", &math::Transform::RotateLocal);
+	classDefTransform.def("TransformGlobal", static_cast<void (*)(lua::State *, math::Transform &, const math::Transform &)>([](lua::State *l, math::Transform &t, const math::Transform &t2) { t = t2 * t; }));
+	classDefTransform.def("TransformLocal", static_cast<void (*)(lua::State *, math::Transform &, const math::Transform &)>([](lua::State *l, math::Transform &t, const math::Transform &t2) { t *= t2; }));
+	classDefTransform.def("GetInverse", &math::Transform::GetInverse);
+	classDefTransform.def("ToMatrix", &math::Transform::ToMatrix);
+	classDefTransform.def("SetMatrix", static_cast<void (*)(lua::State *, math::Transform &, const Mat4 &)>([](lua::State *l, math::Transform &t, const Mat4 &m) {
 		Mat4 transformation;
 		Vector3 scale;
 		Quat rotation;
@@ -903,56 +903,56 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		t.SetOrigin(translation);
 		t.SetRotation(rotation);
 	}));
-	classDefTransform.def("Interpolate", &pragma::math::Transform::Interpolate);
-	classDefTransform.def("InterpolateToIdentity", &pragma::math::Transform::InterpolateToIdentity);
-	classDefTransform.def("Reflect", &pragma::math::Transform::Reflect);
+	classDefTransform.def("Interpolate", &math::Transform::Interpolate);
+	classDefTransform.def("InterpolateToIdentity", &math::Transform::InterpolateToIdentity);
+	classDefTransform.def("Reflect", &math::Transform::Reflect);
 	classDefTransform.def(luabind::const_self * luabind::const_self);
-	classDefTransform.def(luabind::const_self * pragma::math::ScaledTransform());
+	classDefTransform.def(luabind::const_self * math::ScaledTransform());
 	classDefTransform.def(luabind::const_self * Vector3());
 	classDefTransform.def(luabind::const_self * Quat());
-	classDefTransform.def(luabind::const_self * pragma::math::Plane());
+	classDefTransform.def(luabind::const_self * math::Plane());
 
 	modMath[classDefTransform];
-	Lua::RegisterLibraryValues<pragma::math::Transform>(lua.GetState(), "math.Transform", {std::pair<std::string, pragma::math::Transform> {"IDENTITY", pragma::math::Transform {}}});
+	Lua::RegisterLibraryValues<math::Transform>(lua.GetState(), "math.Transform", {std::pair<std::string, math::Transform> {"IDENTITY", math::Transform {}}});
 
-	auto classDefScaledTransform = luabind::class_<pragma::math::ScaledTransform, pragma::math::Transform>("ScaledTransform");
+	auto classDefScaledTransform = luabind::class_<math::ScaledTransform, math::Transform>("ScaledTransform");
 	classDefScaledTransform.def(luabind::constructor<const Mat4 &>());
 	classDefScaledTransform.def(luabind::constructor<const Vector3 &, const Quat &>());
 	classDefScaledTransform.def(luabind::constructor<const Vector3 &, const Quat &, const Vector3 &>());
-	classDefScaledTransform.def(luabind::constructor<const pragma::math::Transform &, const Vector3 &>());
-	classDefScaledTransform.def(luabind::constructor<const pragma::math::Transform &>());
+	classDefScaledTransform.def(luabind::constructor<const math::Transform &, const Vector3 &>());
+	classDefScaledTransform.def(luabind::constructor<const math::Transform &>());
 	classDefScaledTransform.def(luabind::constructor<>());
 	classDefScaledTransform.def(luabind::const_self == luabind::const_self);
 	classDefScaledTransform.def(luabind::tostring(luabind::self));
-	classDefScaledTransform.def("Copy", static_cast<pragma::math::ScaledTransform (*)(lua::State *, pragma::math::ScaledTransform &)>([](lua::State *l, pragma::math::ScaledTransform &t) -> pragma::math::ScaledTransform { return t; }));
-	classDefScaledTransform.def("Set", static_cast<void (*)(lua::State *, pragma::math::ScaledTransform &, const pragma::math::ScaledTransform &)>([](lua::State *l, pragma::math::ScaledTransform &t, const pragma::math::ScaledTransform &tOther) { t = tOther; }));
-	classDefScaledTransform.def("GetScale", static_cast<Vector3 &(pragma::math::ScaledTransform::*)()>(&pragma::math::ScaledTransform::GetScale), luabind::copy_policy<0> {});
-	classDefScaledTransform.def("SetScale", &pragma::math::ScaledTransform::SetScale);
-	classDefScaledTransform.def("Scale", &pragma::math::ScaledTransform::Scale);
-	classDefScaledTransform.def("GetInverse", &pragma::math::ScaledTransform::GetInverse);
-	classDefScaledTransform.def("Interpolate", &pragma::math::ScaledTransform::Interpolate);
-	classDefScaledTransform.def("InterpolateToIdentity", &pragma::math::ScaledTransform::InterpolateToIdentity);
-	classDefScaledTransform.def(luabind::const_self * pragma::math::Transform());
-	classDefScaledTransform.def(luabind::const_self * pragma::math::ScaledTransform()); // Note: We use pragma::math::ScaledTransform instead of luabind::const_self, because otherwise the overload of the base class ("Transform") would be used if two ScaledTransforms are multiplied
+	classDefScaledTransform.def("Copy", static_cast<math::ScaledTransform (*)(lua::State *, math::ScaledTransform &)>([](lua::State *l, math::ScaledTransform &t) -> math::ScaledTransform { return t; }));
+	classDefScaledTransform.def("Set", static_cast<void (*)(lua::State *, math::ScaledTransform &, const math::ScaledTransform &)>([](lua::State *l, math::ScaledTransform &t, const math::ScaledTransform &tOther) { t = tOther; }));
+	classDefScaledTransform.def("GetScale", static_cast<Vector3 &(math::ScaledTransform::*)()>(&math::ScaledTransform::GetScale), luabind::copy_policy<0> {});
+	classDefScaledTransform.def("SetScale", &math::ScaledTransform::SetScale);
+	classDefScaledTransform.def("Scale", &math::ScaledTransform::Scale);
+	classDefScaledTransform.def("GetInverse", &math::ScaledTransform::GetInverse);
+	classDefScaledTransform.def("Interpolate", &math::ScaledTransform::Interpolate);
+	classDefScaledTransform.def("InterpolateToIdentity", &math::ScaledTransform::InterpolateToIdentity);
+	classDefScaledTransform.def(luabind::const_self * math::Transform());
+	classDefScaledTransform.def(luabind::const_self * math::ScaledTransform()); // Note: We use pragma::math::ScaledTransform instead of luabind::const_self, because otherwise the overload of the base class ("Transform") would be used if two ScaledTransforms are multiplied
 	classDefScaledTransform.def(luabind::const_self * Vector3());
 	classDefScaledTransform.def(luabind::const_self * Quat());
-	classDefScaledTransform.def(luabind::const_self * pragma::math::Plane());
+	classDefScaledTransform.def(luabind::const_self * math::Plane());
 	modMath[classDefScaledTransform];
-	Lua::RegisterLibraryValues<pragma::math::ScaledTransform>(lua.GetState(), "math.ScaledTransform", {std::pair<std::string, pragma::math::ScaledTransform> {"IDENTITY", pragma::math::ScaledTransform {}}});
+	Lua::RegisterLibraryValues<math::ScaledTransform>(lua.GetState(), "math.ScaledTransform", {std::pair<std::string, math::ScaledTransform> {"IDENTITY", math::ScaledTransform {}}});
 
 	// PID Controller
-	auto defPIDController = luabind::class_<pragma::math::PIDController>("PIDController");
+	auto defPIDController = luabind::class_<math::PIDController>("PIDController");
 	defPIDController.def(luabind::constructor<>());
 	defPIDController.def(luabind::constructor<float, float, float>());
 	defPIDController.def(luabind::constructor<float, float, float, float, float>());
-	defPIDController.def("SetProportionalTerm", &pragma::math::PIDController::SetProportionalTerm);
-	defPIDController.def("SetIntegralTerm", &pragma::math::PIDController::SetIntegralTerm);
-	defPIDController.def("SetDerivativeTerm", &pragma::math::PIDController::SetDerivativeTerm);
-	defPIDController.def("SetTerms", &pragma::math::PIDController::SetTerms);
-	defPIDController.def("GetProportionalTerm", &pragma::math::PIDController::GetProportionalTerm);
-	defPIDController.def("GetIntegralTerm", &pragma::math::PIDController::GetIntegralTerm);
-	defPIDController.def("GetDerivativeTerm", &pragma::math::PIDController::GetDerivativeTerm);
-	defPIDController.def("GetTerms", static_cast<void (*)(lua::State *, const pragma::math::PIDController &)>([](lua::State *l, const pragma::math::PIDController &pidController) {
+	defPIDController.def("SetProportionalTerm", &math::PIDController::SetProportionalTerm);
+	defPIDController.def("SetIntegralTerm", &math::PIDController::SetIntegralTerm);
+	defPIDController.def("SetDerivativeTerm", &math::PIDController::SetDerivativeTerm);
+	defPIDController.def("SetTerms", &math::PIDController::SetTerms);
+	defPIDController.def("GetProportionalTerm", &math::PIDController::GetProportionalTerm);
+	defPIDController.def("GetIntegralTerm", &math::PIDController::GetIntegralTerm);
+	defPIDController.def("GetDerivativeTerm", &math::PIDController::GetDerivativeTerm);
+	defPIDController.def("GetTerms", static_cast<void (*)(lua::State *, const math::PIDController &)>([](lua::State *l, const math::PIDController &pidController) {
 		auto p = 0.f;
 		auto i = 0.f;
 		auto d = 0.f;
@@ -961,17 +961,17 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushNumber(l, i);
 		Lua::PushNumber(l, d);
 	}));
-	defPIDController.def("SetRange", &pragma::math::PIDController::SetRange);
-	defPIDController.def("GetRange", static_cast<void (*)(lua::State *, const pragma::math::PIDController &)>([](lua::State *l, const pragma::math::PIDController &pidController) {
+	defPIDController.def("SetRange", &math::PIDController::SetRange);
+	defPIDController.def("GetRange", static_cast<void (*)(lua::State *, const math::PIDController &)>([](lua::State *l, const math::PIDController &pidController) {
 		auto range = pidController.GetRange();
 		Lua::PushNumber(l, range.first);
 		Lua::PushNumber(l, range.second);
 	}));
-	defPIDController.def("Calculate", &pragma::math::PIDController::Calculate);
-	defPIDController.def("Reset", &pragma::math::PIDController::Reset);
-	defPIDController.def("ClearRange", &pragma::math::PIDController::ClearRange);
-	defPIDController.def("SetMin", &pragma::math::PIDController::SetMin);
-	defPIDController.def("SetMax", &pragma::math::PIDController::SetMax);
+	defPIDController.def("Calculate", &math::PIDController::Calculate);
+	defPIDController.def("Reset", &math::PIDController::Reset);
+	defPIDController.def("ClearRange", &math::PIDController::ClearRange);
+	defPIDController.def("SetMin", &math::PIDController::SetMin);
+	defPIDController.def("SetMax", &math::PIDController::SetMax);
 	modMath[defPIDController];
 
 	// Noise
@@ -1102,7 +1102,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 	modMath[defNoiseModule];
 
-	auto noiseMap = luabind::class_<noise::utils::NoiseMap>("NoiseMap");
+	auto noiseMap = luabind::class_<utils::NoiseMap>("NoiseMap");
 	noiseMap.def("GetValue", &Lua::noise::NoiseMap::GetValue);
 	noiseMap.def("GetHeight", &Lua::noise::NoiseMap::GetHeight);
 	noiseMap.def("GetWidth", &Lua::noise::NoiseMap::GetWidth);
@@ -1187,8 +1187,8 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector->def(luabind::const_self * Quat());
 	//defVector->def(luabind::const_self *pragma::math::Transform());
 	//defVector->def(luabind::const_self *pragma::math::ScaledTransform());
-	defVector->def("Mul", static_cast<void (*)(lua::State *, const Vector3 &, const pragma::math::Transform &)>([](lua::State *l, const Vector3 &a, const pragma::math::Transform &b) { Lua::Push<Vector3>(l, a * b); }));
-	defVector->def("Mul", static_cast<void (*)(lua::State *, const Vector3 &, const pragma::math::ScaledTransform &)>([](lua::State *l, const Vector3 &a, const pragma::math::ScaledTransform &b) { Lua::Push<Vector3>(l, a * b); }));
+	defVector->def("Mul", static_cast<void (*)(lua::State *, const Vector3 &, const math::Transform &)>([](lua::State *l, const Vector3 &a, const math::Transform &b) { Lua::Push<Vector3>(l, a * b); }));
+	defVector->def("Mul", static_cast<void (*)(lua::State *, const Vector3 &, const math::ScaledTransform &)>([](lua::State *l, const Vector3 &a, const math::ScaledTransform &b) { Lua::Push<Vector3>(l, a * b); }));
 	defVector->def(float() / luabind::const_self);
 	defVector->def(float() * luabind::const_self);
 	defVector->def(Quat() * luabind::const_self);
@@ -1211,12 +1211,12 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector->def("Lerp", &Lua::Vector::Lerp);
 	defVector->def("Reflect", &uvec::reflect);
 	defVector->def("Equals",
-	  static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, float)>([](lua::State *l, const Vector3 &a, const Vector3 &b, float epsilon) { Lua::PushBool(l, pragma::math::abs(a.x - b.x) <= epsilon && pragma::math::abs(a.y - b.y) <= epsilon && pragma::math::abs(a.z - b.z) <= epsilon); }));
+	  static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, float)>([](lua::State *l, const Vector3 &a, const Vector3 &b, float epsilon) { Lua::PushBool(l, math::abs(a.x - b.x) <= epsilon && math::abs(a.y - b.y) <= epsilon && math::abs(a.z - b.z) <= epsilon); }));
 	defVector->def("Equals", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &)>([](lua::State *l, const Vector3 &a, const Vector3 &b) {
 		float epsilon = 0.001f;
-		Lua::PushBool(l, pragma::math::abs(a.x - b.x) <= epsilon && pragma::math::abs(a.y - b.y) <= epsilon && pragma::math::abs(a.z - b.z) <= epsilon);
+		Lua::PushBool(l, math::abs(a.x - b.x) <= epsilon && math::abs(a.y - b.y) <= epsilon && math::abs(a.z - b.z) <= epsilon);
 	}));
-	defVector->def("GetAngle", static_cast<float (*)(lua::State *, const Vector3 &, const Vector3 &)>([](lua::State *l, const Vector3 &a, const Vector3 &b) -> float { return pragma::math::deg_to_rad(uvec::get_angle(a, b)); }));
+	defVector->def("GetAngle", static_cast<float (*)(lua::State *, const Vector3 &, const Vector3 &)>([](lua::State *l, const Vector3 &a, const Vector3 &b) -> float { return math::deg_to_rad(uvec::get_angle(a, b)); }));
 	defVector->def("Slerp", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, float)>([](lua::State *l, const Vector3 &a, const Vector3 &b, float factor) {
 		auto result = glm::gtc::slerp(a, b, factor);
 		Lua::Push<Vector3>(l, result);
@@ -1265,7 +1265,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector2->def("RotateAround", &Lua::Vector2::RotateAround);
 	defVector2->def("Lerp", &Lua::Vector2::Lerp);
 	defVector2->def("Copy", &Lua::Vector2::Copy);
-	defVector2->def("GetAngle", static_cast<float (*)(lua::State *, const Vector2 &, const Vector2 &)>([](lua::State *l, const Vector2 &a, const Vector2 &b) -> float { return pragma::math::deg_to_rad(uvec::get_angle(Vector3 {a, 0.f}, Vector3 {b, 0.f})); }));
+	defVector2->def("GetAngle", static_cast<float (*)(lua::State *, const Vector2 &, const Vector2 &)>([](lua::State *l, const Vector2 &a, const Vector2 &b) -> float { return math::deg_to_rad(uvec::get_angle(Vector3 {a, 0.f}, Vector3 {b, 0.f})); }));
 	defVector2->def("Set", static_cast<void (*)(lua::State *, Vector2 &, const Vector2 &)>(&Lua::Vector2::Set));
 	defVector2->def("Set", static_cast<void (*)(lua::State *, Vector2 &, float, float)>(&Lua::Vector2::Set));
 	defVector2->def("Get", static_cast<void (*)(lua::State *, const Vector2 &, uint32_t)>([](lua::State *l, const Vector2 &v, uint32_t idx) { Lua::PushNumber(l, v[idx]); }));
@@ -1339,13 +1339,13 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defEulerAngles->def("ToMatrix", &EulerAngles::ToMatrix);
 	defEulerAngles->def("Copy", &Lua::Angle::Copy);
 	defEulerAngles->def("Equals",
-	  static_cast<bool (*)(lua::State *, const EulerAngles &, const EulerAngles &, float)>([](lua::State *l, const EulerAngles &a, const EulerAngles &b, float epsilon) { return pragma::math::abs(a.p - b.p) <= epsilon && pragma::math::abs(a.y - b.y) <= epsilon && pragma::math::abs(a.r - b.r) <= epsilon; }));
+	  static_cast<bool (*)(lua::State *, const EulerAngles &, const EulerAngles &, float)>([](lua::State *l, const EulerAngles &a, const EulerAngles &b, float epsilon) { return math::abs(a.p - b.p) <= epsilon && math::abs(a.y - b.y) <= epsilon && math::abs(a.r - b.r) <= epsilon; }));
 	defEulerAngles->def("Equals", static_cast<bool (*)(lua::State *, const EulerAngles &, const EulerAngles &)>([](lua::State *l, const EulerAngles &a, const EulerAngles &b) {
 		float epsilon = 0.001f;
-		return pragma::math::abs(a.p - b.p) <= epsilon && pragma::math::abs(a.y - b.y) <= epsilon && pragma::math::abs(a.r - b.r) <= epsilon;
+		return math::abs(a.p - b.p) <= epsilon && math::abs(a.y - b.y) <= epsilon && math::abs(a.r - b.r) <= epsilon;
 	}));
 	defEulerAngles->def("ToQuaternion", Lua::Angle::ToQuaternion);
-	defEulerAngles->def("ToQuaternion", static_cast<void (*)(lua::State *, const EulerAngles &)>([](lua::State *l, const EulerAngles &ang) { Lua::Angle::ToQuaternion(l, ang, pragma::math::to_integral(pragma::RotationOrder::YXZ)); }));
+	defEulerAngles->def("ToQuaternion", static_cast<void (*)(lua::State *, const EulerAngles &)>([](lua::State *l, const EulerAngles &ang) { Lua::Angle::ToQuaternion(l, ang, math::to_integral(RotationOrder::YXZ)); }));
 	defEulerAngles->def("Set", static_cast<void (EulerAngles::*)(const EulerAngles &)>(&EulerAngles::Set));
 	defEulerAngles->def("Set", &Lua::Angle::Set);
 	defEulerAngles->def("Set", static_cast<void (*)(lua::State *, EulerAngles &, uint32_t, float value)>([](lua::State *l, EulerAngles &ang, uint32_t idx, float value) { ang[idx] = value; }));
@@ -1367,8 +1367,8 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat->def(luabind::const_self == luabind::const_self);
 	//defQuat->def(luabind::const_self *pragma::math::Transform());
 	//defQuat->def(luabind::const_self *pragma::math::ScaledTransform());
-	defQuat->def("Mul", static_cast<Quat (*)(lua::State *, const Quat &, const pragma::math::Transform &)>([](lua::State *l, const Quat &a, const pragma::math::Transform &b) { return a * b; }));
-	defQuat->def("Mul", static_cast<Quat (*)(lua::State *, const Quat &, const pragma::math::ScaledTransform &)>([](lua::State *l, const Quat &a, const pragma::math::ScaledTransform &b) { return a * b; }));
+	defQuat->def("Mul", static_cast<Quat (*)(lua::State *, const Quat &, const math::Transform &)>([](lua::State *l, const Quat &a, const math::Transform &b) { return a * b; }));
+	defQuat->def("Mul", static_cast<Quat (*)(lua::State *, const Quat &, const math::ScaledTransform &)>([](lua::State *l, const Quat &a, const math::ScaledTransform &b) { return a * b; }));
 	defQuat->def(float() * luabind::const_self);
 	defQuat->def("MirrorAxis", &uquat::mirror_on_axis);
 	defQuat->def("GetForward", &uquat::forward);
@@ -1387,11 +1387,11 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat->def("Lerp", &uquat::lerp);
 	defQuat->def("Slerp", &uquat::slerp);
 	defQuat->def("ToEulerAngles", Lua::Quaternion::ToEulerAngles);
-	defQuat->def("ToEulerAngles", static_cast<EulerAngles (*)(lua::State *, Quat &)>([](lua::State *l, Quat &rot) { return Lua::Quaternion::ToEulerAngles(l, rot, pragma::math::to_integral(pragma::RotationOrder::YXZ)); }));
+	defQuat->def("ToEulerAngles", static_cast<EulerAngles (*)(lua::State *, Quat &)>([](lua::State *l, Quat &rot) { return Lua::Quaternion::ToEulerAngles(l, rot, math::to_integral(RotationOrder::YXZ)); }));
 	defQuat->def("ToAxisAngle", &Lua::Quaternion::ToAxisAngle);
 	defQuat->def(
-	  "GetAxisVector", +[](const Quat &rot, pragma::SignedAxis axis) {
-		  auto dir = pragma::axis_to_vector(axis);
+	  "GetAxisVector", +[](const Quat &rot, SignedAxis axis) {
+		  auto dir = axis_to_vector(axis);
 		  uvec::rotate(&dir, rot);
 		  return dir;
 	  });
@@ -1410,21 +1410,21 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat->def("RotateZ", static_cast<void (*)(Quat &, float)>(&uquat::rotate_z));
 	defQuat->def("Rotate", static_cast<void (*)(Quat &, const Vector3 &, float)>(&uquat::rotate));
 	defQuat->def("Rotate", static_cast<void (*)(Quat &, const EulerAngles &)>(&uquat::rotate));
-	defQuat->def("ApproachDirection", static_cast<luabind::mult<Quat, ::Vector2> (*)(lua::State *, const Quat &, const Vector3 &, const Vector3 &, const ::Vector2 &, const ::Vector2 *, const ::Vector2 *, const Quat *, const EulerAngles *)>(&Lua::Quaternion::ApproachDirection));
-	defQuat->def("ApproachDirection", static_cast<luabind::mult<Quat, ::Vector2> (*)(lua::State *, const Quat &, const Vector3 &, const Vector3 &, const ::Vector2 &, const ::Vector2 *, const ::Vector2 *, const Quat *)>(&Lua::Quaternion::ApproachDirection));
-	defQuat->def("ApproachDirection", static_cast<luabind::mult<Quat, ::Vector2> (*)(lua::State *, const Quat &, const Vector3 &, const Vector3 &, const ::Vector2 &, const ::Vector2 *, const ::Vector2 *)>(&Lua::Quaternion::ApproachDirection));
-	defQuat->def("ApproachDirection", static_cast<luabind::mult<Quat, ::Vector2> (*)(lua::State *, const Quat &, const Vector3 &, const Vector3 &, const ::Vector2 &, const ::Vector2 *)>(&Lua::Quaternion::ApproachDirection));
-	defQuat->def("ApproachDirection", static_cast<luabind::mult<Quat, ::Vector2> (*)(lua::State *, const Quat &, const Vector3 &, const Vector3 &, const ::Vector2 &)>(&Lua::Quaternion::ApproachDirection));
+	defQuat->def("ApproachDirection", static_cast<luabind::mult<Quat, Vector2> (*)(lua::State *, const Quat &, const Vector3 &, const Vector3 &, const Vector2 &, const Vector2 *, const Vector2 *, const Quat *, const EulerAngles *)>(&Lua::Quaternion::ApproachDirection));
+	defQuat->def("ApproachDirection", static_cast<luabind::mult<Quat, Vector2> (*)(lua::State *, const Quat &, const Vector3 &, const Vector3 &, const Vector2 &, const Vector2 *, const Vector2 *, const Quat *)>(&Lua::Quaternion::ApproachDirection));
+	defQuat->def("ApproachDirection", static_cast<luabind::mult<Quat, Vector2> (*)(lua::State *, const Quat &, const Vector3 &, const Vector3 &, const Vector2 &, const Vector2 *, const Vector2 *)>(&Lua::Quaternion::ApproachDirection));
+	defQuat->def("ApproachDirection", static_cast<luabind::mult<Quat, Vector2> (*)(lua::State *, const Quat &, const Vector3 &, const Vector3 &, const Vector2 &, const Vector2 *)>(&Lua::Quaternion::ApproachDirection));
+	defQuat->def("ApproachDirection", static_cast<luabind::mult<Quat, Vector2> (*)(lua::State *, const Quat &, const Vector3 &, const Vector3 &, const Vector2 &)>(&Lua::Quaternion::ApproachDirection));
 	defQuat->def("ClampRotation", static_cast<Quat (*)(lua::State *, Quat &, const EulerAngles &, const EulerAngles &)>([](lua::State *l, Quat &rot, const EulerAngles &minBounds, const EulerAngles &maxBounds) -> Quat { return uquat::clamp_rotation(rot, minBounds, maxBounds); }));
 	defQuat->def("ClampRotation", static_cast<Quat (*)(lua::State *, Quat &, const EulerAngles &)>([](lua::State *l, Quat &rot, const EulerAngles &bounds) -> Quat { return uquat::clamp_rotation(rot, -bounds, bounds); }));
 	defQuat->def("Distance", &uquat::distance);
 	defQuat->def("GetConjugate", static_cast<Quat (*)(const Quat &)>(&glm::gtc::conjugate));
 	defQuat->def("AlignToAxis", &uquat::align_rotation_to_axis);
-	defQuat->def("Equals", +[](const Quat &a, const Quat &b, float epsilon) { return pragma::math::abs(a.x - b.x) <= epsilon && pragma::math::abs(a.y - b.y) <= epsilon && pragma::math::abs(a.z - b.z) <= epsilon && pragma::math::abs(a.w - b.w) <= epsilon; });
+	defQuat->def("Equals", +[](const Quat &a, const Quat &b, float epsilon) { return math::abs(a.x - b.x) <= epsilon && math::abs(a.y - b.y) <= epsilon && math::abs(a.z - b.z) <= epsilon && math::abs(a.w - b.w) <= epsilon; });
 	defQuat->def(
 	  "Equals", +[](const Quat &a, const Quat &b) {
 		  float epsilon = 0.001f;
-		  return pragma::math::abs(a.x - b.x) <= epsilon && pragma::math::abs(a.y - b.y) <= epsilon && pragma::math::abs(a.z - b.z) <= epsilon && pragma::math::abs(a.w - b.w) <= epsilon;
+		  return math::abs(a.x - b.x) <= epsilon && math::abs(a.y - b.y) <= epsilon && math::abs(a.z - b.z) <= epsilon && math::abs(a.w - b.w) <= epsilon;
 	  });
 	modMath[*defQuat];
 	pragma::LuaCore::define_custom_constructor<Quat, &uquat::identity>(lua.GetState());
@@ -1465,11 +1465,11 @@ namespace pragma::LuaCore {
 
 void pragma::Game::RegisterLuaClasses()
 {
-	pragma::NetworkState::RegisterSharedLuaClasses(GetLuaInterface());
+	NetworkState::RegisterSharedLuaClasses(GetLuaInterface());
 
 	// Entity
 	auto &modUtil = GetLuaInterface().RegisterLibrary("util");
-	pragma::LuaCore::register_thread_pool(GetLuaState(), modUtil);
+	LuaCore::register_thread_pool(GetLuaState(), modUtil);
 	auto entDef = luabind::class_<LEntityProperty, LBasePropertyWrapper>("EntityProperty");
 	//Lua::Property::add_generic_methods<LEntityProperty,EntityHandle,luabind::class_<LEntityProperty,LBasePropertyWrapper>>(entDef);
 	entDef.def(luabind::constructor<>());
@@ -1478,16 +1478,16 @@ void pragma::Game::RegisterLuaClasses()
 	entDef.def("Link", static_cast<void (*)(lua::State *, LEntityProperty &, LEntityProperty &)>(&Lua::Property::link<LEntityProperty, EntityHandle>));
 	modUtil[entDef];
 
-	auto defSplashDamageInfo = luabind::class_<pragma::util::SplashDamageInfo>("SplashDamageInfo");
+	auto defSplashDamageInfo = luabind::class_<util::SplashDamageInfo>("SplashDamageInfo");
 	defSplashDamageInfo.def(luabind::constructor<>());
-	defSplashDamageInfo.def_readwrite("origin", &pragma::util::SplashDamageInfo::origin);
-	defSplashDamageInfo.def_readwrite("radius", &pragma::util::SplashDamageInfo::radius);
-	defSplashDamageInfo.def_readwrite("damageInfo", &pragma::util::SplashDamageInfo::damageInfo);
+	defSplashDamageInfo.def_readwrite("origin", &util::SplashDamageInfo::origin);
+	defSplashDamageInfo.def_readwrite("radius", &util::SplashDamageInfo::radius);
+	defSplashDamageInfo.def_readwrite("damageInfo", &util::SplashDamageInfo::damageInfo);
 	defSplashDamageInfo.def("SetCone",
-	  static_cast<void (*)(lua::State *, pragma::util::SplashDamageInfo &, const Vector3 &, float)>([](lua::State *l, pragma::util::SplashDamageInfo &splashDamageInfo, const Vector3 &coneDirection, float coneAngle) { splashDamageInfo.cone = {{coneDirection, coneAngle}}; }));
-	defSplashDamageInfo.def("SetCallback", static_cast<void (*)(lua::State *, pragma::util::SplashDamageInfo &, luabind::object)>([](lua::State *l, pragma::util::SplashDamageInfo &splashDamageInfo, luabind::object oCallback) {
+	  static_cast<void (*)(lua::State *, util::SplashDamageInfo &, const Vector3 &, float)>([](lua::State *l, util::SplashDamageInfo &splashDamageInfo, const Vector3 &coneDirection, float coneAngle) { splashDamageInfo.cone = {{coneDirection, coneAngle}}; }));
+	defSplashDamageInfo.def("SetCallback", static_cast<void (*)(lua::State *, util::SplashDamageInfo &, luabind::object)>([](lua::State *l, util::SplashDamageInfo &splashDamageInfo, luabind::object oCallback) {
 		Lua::CheckFunction(l, 2);
-		splashDamageInfo.callback = [l, oCallback](pragma::ecs::BaseEntity *ent, game::DamageInfo &dmgInfo) -> bool {
+		splashDamageInfo.callback = [l, oCallback](ecs::BaseEntity *ent, game::DamageInfo &dmgInfo) -> bool {
 			auto r = Lua::CallFunction(
 			  l,
 			  [ent, &dmgInfo, &oCallback](lua::State *l) -> Lua::StatusCode {
@@ -1514,36 +1514,36 @@ void pragma::Game::RegisterLuaClasses()
 
 	Lua::RegisterLibraryEnums(m_lua->GetState(), "math",
 	  {
-	    {"COORDINATE_SPACE_LOCAL", pragma::math::to_integral(pragma::math::CoordinateSpace::Local)},
-	    {"COORDINATE_SPACE_WORLD", pragma::math::to_integral(pragma::math::CoordinateSpace::World)},
-	    {"COORDINATE_SPACE_OBJECT", pragma::math::to_integral(pragma::math::CoordinateSpace::Object)},
-	    {"COORDINATE_SPACE_VIEW", pragma::math::to_integral(pragma::math::CoordinateSpace::View)},
-	    {"COORDINATE_SPACE_SCREEN", pragma::math::to_integral(pragma::math::CoordinateSpace::Screen)},
+	    {"COORDINATE_SPACE_LOCAL", pragma::math::to_integral(math::CoordinateSpace::Local)},
+	    {"COORDINATE_SPACE_WORLD", pragma::math::to_integral(math::CoordinateSpace::World)},
+	    {"COORDINATE_SPACE_OBJECT", pragma::math::to_integral(math::CoordinateSpace::Object)},
+	    {"COORDINATE_SPACE_VIEW", pragma::math::to_integral(math::CoordinateSpace::View)},
+	    {"COORDINATE_SPACE_SCREEN", pragma::math::to_integral(math::CoordinateSpace::Screen)},
 	  });
-	modMath[luabind::def("coordinate_space_to_string", +[](pragma::math::CoordinateSpace space) -> std::string { return std::string {magic_enum::enum_name(space)}; })];
-	modMath[luabind::def("string_to_coordinate_space", +[](const std::string &space) -> std::optional<pragma::math::CoordinateSpace> { return magic_enum::enum_cast<pragma::math::CoordinateSpace>(space); })];
+	modMath[luabind::def("coordinate_space_to_string", +[](math::CoordinateSpace space) -> std::string { return std::string {magic_enum::enum_name(space)}; })];
+	modMath[luabind::def("string_to_coordinate_space", +[](const std::string &space) -> std::optional<math::CoordinateSpace> { return magic_enum::enum_cast<math::CoordinateSpace>(space); })];
 
-	auto defPlane = luabind::class_<pragma::math::Plane>("Plane");
+	auto defPlane = luabind::class_<math::Plane>("Plane");
 	defPlane.def(luabind::constructor<Vector3, Vector3, Vector3>());
 	defPlane.def(luabind::constructor<Vector3, Vector3>());
 	defPlane.def(luabind::constructor<Vector3, double>());
 	defPlane.def(
-	  "__tostring", +[](pragma::math::Plane &plane) -> std::string {
+	  "__tostring", +[](math::Plane &plane) -> std::string {
 		  std::stringstream ss;
 		  ss << "Plane[" << plane.GetNormal() << "][" << plane.GetDistance() << "]";
 		  return ss.str();
 	  });
-	defPlane.def("Copy", static_cast<void (*)(lua::State *, pragma::math::Plane &)>([](lua::State *l, pragma::math::Plane &plane) { Lua::Push<pragma::math::Plane>(l, pragma::math::Plane {plane}); }));
-	defPlane.def("SetNormal", &pragma::math::Plane::SetNormal);
-	defPlane.def("SetDistance", &pragma::math::Plane::SetDistance);
-	defPlane.def("GetNormal", static_cast<const Vector3 &(pragma::math::Plane::*)() const>(&pragma::math::Plane::GetNormal), luabind::copy_policy<0> {});
-	defPlane.def("GetPos", static_cast<Vector3 (*)(const pragma::math::Plane &)>([](const pragma::math::Plane &plane) { return plane.GetPos(); }));
-	defPlane.def("GetDistance", static_cast<double (pragma::math::Plane::*)() const>(&pragma::math::Plane::GetDistance));
-	defPlane.def("GetDistance", static_cast<float (pragma::math::Plane::*)(const Vector3 &) const>(&pragma::math::Plane::GetDistance));
-	defPlane.def("MoveToPos", static_cast<void (*)(pragma::math::Plane &, const Vector3 &pos)>([](pragma::math::Plane &plane, const Vector3 &pos) { plane.MoveToPos(pos); }));
-	defPlane.def("Rotate", &pragma::math::Plane::Rotate);
-	defPlane.def("GetCenterPos", static_cast<Vector3 (*)(const pragma::math::Plane &)>([](const pragma::math::Plane &plane) { return plane.GetCenterPos(); }));
-	defPlane.def("Transform", static_cast<void (*)(lua::State *, pragma::math::Plane &, const Mat4 &)>([](lua::State *l, pragma::math::Plane &plane, const Mat4 &transform) {
+	defPlane.def("Copy", static_cast<void (*)(lua::State *, math::Plane &)>([](lua::State *l, math::Plane &plane) { Lua::Push<math::Plane>(l, math::Plane {plane}); }));
+	defPlane.def("SetNormal", &math::Plane::SetNormal);
+	defPlane.def("SetDistance", &math::Plane::SetDistance);
+	defPlane.def("GetNormal", static_cast<const Vector3 &(math::Plane::*)() const>(&math::Plane::GetNormal), luabind::copy_policy<0> {});
+	defPlane.def("GetPos", static_cast<Vector3 (*)(const math::Plane &)>([](const math::Plane &plane) { return plane.GetPos(); }));
+	defPlane.def("GetDistance", static_cast<double (math::Plane::*)() const>(&math::Plane::GetDistance));
+	defPlane.def("GetDistance", static_cast<float (math::Plane::*)(const Vector3 &) const>(&math::Plane::GetDistance));
+	defPlane.def("MoveToPos", static_cast<void (*)(math::Plane &, const Vector3 &pos)>([](math::Plane &plane, const Vector3 &pos) { plane.MoveToPos(pos); }));
+	defPlane.def("Rotate", &math::Plane::Rotate);
+	defPlane.def("GetCenterPos", static_cast<Vector3 (*)(const math::Plane &)>([](const math::Plane &plane) { return plane.GetCenterPos(); }));
+	defPlane.def("Transform", static_cast<void (*)(lua::State *, math::Plane &, const Mat4 &)>([](lua::State *l, math::Plane &plane, const Mat4 &transform) {
 		const auto &n = plane.GetNormal();
 		auto p = n * static_cast<float>(plane.GetDistance());
 		auto n0 = uvec::get_perpendicular(n);
@@ -1555,7 +1555,7 @@ void pragma::Game::RegisterLuaClasses()
 		auto p14 = transform * Vector4 {p1.x, p1.y, p1.z, 1.f};
 		auto p2 = p + n1 * 10.f;
 		auto p24 = transform * Vector4 {p2.x, p2.y, p2.z, 1.f};
-		plane = pragma::math::Plane {Vector3 {p04.x, p04.y, p04.z}, Vector3 {p14.x, p14.y, p14.z}, Vector3 {p24.x, p24.y, p24.z}};
+		plane = math::Plane {Vector3 {p04.x, p04.y, p04.z}, Vector3 {p14.x, p14.y, p14.z}, Vector3 {p24.x, p24.y, p24.z}};
 	}));
 	modMath[defPlane];
 }
@@ -1567,17 +1567,17 @@ LuaEntityIterator Lua::ents::create_lua_entity_iterator(lua::State *l, const tb<
 		filterTable.push(l);
 		luabind::detail::stack_pop sp {l, 1};
 
-		auto t = Lua::GetStackTop(l);
-		Lua::CheckTable(l, t);
-		auto numFilters = Lua::GetObjectLength(l, t);
+		auto t = GetStackTop(l);
+		CheckTable(l, t);
+		auto numFilters = GetObjectLength(l, t);
 		for(auto i = decltype(numFilters) {0u}; i < numFilters; ++i) {
-			Lua::PushInt(l, i + 1u);
-			Lua::GetTableValue(l, t);
+			PushInt(l, i + 1u);
+			GetTableValue(l, t);
 
 			auto &filter = Lua::Check<LuaEntityIteratorFilterBase>(l, -1);
 			r.AttachFilter(filter);
 
-			Lua::Pop(l, 1);
+			Pop(l, 1);
 		}
 	}
 	return r;
@@ -1590,17 +1590,17 @@ LuaEntityComponentIterator Lua::ents::create_lua_entity_component_iterator(lua::
 		filterTable.push(l);
 		luabind::detail::stack_pop sp {l, 1};
 
-		auto t = Lua::GetStackTop(l);
-		Lua::CheckTable(l, t);
-		auto numFilters = Lua::GetObjectLength(l, t);
+		auto t = GetStackTop(l);
+		CheckTable(l, t);
+		auto numFilters = GetObjectLength(l, t);
 		for(auto i = decltype(numFilters) {0u}; i < numFilters; ++i) {
-			Lua::PushInt(l, i + 1u);
-			Lua::GetTableValue(l, t);
+			PushInt(l, i + 1u);
+			GetTableValue(l, t);
 
 			auto &filter = Lua::Check<LuaEntityIteratorFilterBase>(l, -1);
 			r.AttachFilter(filter);
 
-			Lua::Pop(l, 1);
+			Pop(l, 1);
 		}
 	}
 	return r;
@@ -1679,11 +1679,11 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	  luabind::return_stl_iterator {})];
 	modEnts[luabind::def(
 	  "iterator",
-	  +[](lua::State *l, const Lua::var<pragma::ecs::EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityIterator & {
-		  auto filterFlags = pragma::ecs::EntityIterator::FilterFlags::Default;
+	  +[](lua::State *l, const Lua::var<ecs::EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityIterator & {
+		  auto filterFlags = ecs::EntityIterator::FilterFlags::Default;
 		  luabind::object filterTable {};
 		  if(Lua::IsNumber(l, 1))
-			  filterFlags = static_cast<pragma::ecs::EntityIterator::FilterFlags>(luabind::object_cast<uint32_t>(oFilterOrFlags));
+			  filterFlags = static_cast<ecs::EntityIterator::FilterFlags>(luabind::object_cast<uint32_t>(oFilterOrFlags));
 		  else
 			  filterTable = oFilterOrFlags;
 		  s_entIterator = Lua::ents::create_lua_entity_iterator(l, filterTable, filterFlags);
@@ -1692,20 +1692,20 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	  luabind::return_stl_iterator {})];
 	modEnts[luabind::def(
 	  "iterator",
-	  +[](lua::State *l, pragma::ecs::EntityIterator::FilterFlags filterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityIterator & {
+	  +[](lua::State *l, ecs::EntityIterator::FilterFlags filterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityIterator & {
 		  s_entIterator = Lua::ents::create_lua_entity_iterator(l, oFilter, filterFlags);
 		  return *s_entIterator;
 	  },
 	  luabind::return_stl_iterator {})];
-	modEnts[luabind::def("citerator", +[](lua::State *l, Lua::nil_type) -> LuaEntityComponentIterator & { return citerator(l, pragma::INVALID_COMPONENT_ID); }, luabind::return_stl_iterator {})];
-	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua::State *, pragma::ComponentId)>(&citerator), luabind::return_stl_iterator {})];
-	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua::State *, pragma::ComponentId, const Lua::var<pragma::ecs::EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &)>(&citerator), luabind::return_stl_iterator {})];
-	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua::State *, pragma::ComponentId, pragma::ecs::EntityIterator::FilterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &)>(&citerator), luabind::return_stl_iterator {})];
+	modEnts[luabind::def("citerator", +[](lua::State *l, Lua::nil_type) -> LuaEntityComponentIterator & { return citerator(l, INVALID_COMPONENT_ID); }, luabind::return_stl_iterator {})];
+	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua::State *, ComponentId)>(&citerator), luabind::return_stl_iterator {})];
+	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua::State *, ComponentId, const Lua::var<ecs::EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &)>(&citerator), luabind::return_stl_iterator {})];
+	modEnts[luabind::def("citerator", static_cast<LuaEntityComponentIterator &(*)(lua::State *, ComponentId, ecs::EntityIterator::FilterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &)>(&citerator), luabind::return_stl_iterator {})];
 
 	modEnts[luabind::def(
 	  "citerator",
-	  +[](lua::State *l, pragma::Game &game, const std::string &componentName) -> LuaEntityComponentIterator & {
-		  pragma::ComponentId componentId;
+	  +[](lua::State *l, Game &game, const std::string &componentName) -> LuaEntityComponentIterator & {
+		  ComponentId componentId;
 		  if(!game.GetEntityComponentManager().GetComponentTypeId(componentName, componentId))
 			  Lua::Error(l, "Unknown component type '" + componentName + "'!");
 		  return citerator(l, componentId);
@@ -1713,8 +1713,8 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	  luabind::return_stl_iterator {})];
 	modEnts[luabind::def(
 	  "citerator",
-	  +[](lua::State *l, pragma::Game &game, const std::string &componentName, const Lua::var<pragma::ecs::EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityComponentIterator & {
-		  pragma::ComponentId componentId;
+	  +[](lua::State *l, Game &game, const std::string &componentName, const Lua::var<ecs::EntityIterator::FilterFlags, Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityComponentIterator & {
+		  ComponentId componentId;
 		  if(!game.GetEntityComponentManager().GetComponentTypeId(componentName, componentId))
 			  Lua::Error(l, "Unknown component type '" + componentName + "'!");
 		  return citerator(l, componentId, oFilterOrFlags);
@@ -1722,8 +1722,8 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	  luabind::return_stl_iterator {})];
 	modEnts[luabind::def(
 	  "citerator",
-	  +[](lua::State *l, pragma::Game &game, const std::string &componentName, pragma::ecs::EntityIterator::FilterFlags filterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityComponentIterator & {
-		  pragma::ComponentId componentId;
+	  +[](lua::State *l, Game &game, const std::string &componentName, ecs::EntityIterator::FilterFlags filterFlags, const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityComponentIterator & {
+		  ComponentId componentId;
 		  if(!game.GetEntityComponentManager().GetComponentTypeId(componentName, componentId))
 			  Lua::Error(l, "Unknown component type '" + componentName + "'!");
 		  return citerator(l, componentId, filterFlags, oFilter);
@@ -1777,7 +1777,7 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 	auto defItFilterComponent = luabind::class_<LuaEntityIteratorFilterComponent, LuaEntityIteratorFilterBase>("IteratorFilterComponent");
 	defItFilterComponent.def(luabind::constructor<luabind::object>());
-	defItFilterComponent.def(luabind::constructor<pragma::ComponentId>());
+	defItFilterComponent.def(luabind::constructor<ComponentId>());
 	defItFilterComponent.def(luabind::constructor<lua::State *, const std::string &>());
 	modEnts[defItFilterComponent];
 
@@ -1787,94 +1787,94 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "ents",
 	  {
-	    {"ITERATOR_FILTER_BIT_NONE", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::None)},
-	    {"ITERATOR_FILTER_BIT_SPAWNED", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Spawned)},
-	    {"ITERATOR_FILTER_BIT_PENDING", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Pending)},
-	    {"ITERATOR_FILTER_BIT_INCLUDE_SHARED", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::IncludeShared)},
-	    {"ITERATOR_FILTER_BIT_INCLUDE_NETWORK_LOCAL", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::IncludeNetworkLocal)},
+	    {"ITERATOR_FILTER_BIT_NONE", math::to_integral(ecs::EntityIterator::FilterFlags::None)},
+	    {"ITERATOR_FILTER_BIT_SPAWNED", math::to_integral(ecs::EntityIterator::FilterFlags::Spawned)},
+	    {"ITERATOR_FILTER_BIT_PENDING", math::to_integral(ecs::EntityIterator::FilterFlags::Pending)},
+	    {"ITERATOR_FILTER_BIT_INCLUDE_SHARED", math::to_integral(ecs::EntityIterator::FilterFlags::IncludeShared)},
+	    {"ITERATOR_FILTER_BIT_INCLUDE_NETWORK_LOCAL", math::to_integral(ecs::EntityIterator::FilterFlags::IncludeNetworkLocal)},
 
-	    {"ITERATOR_FILTER_BIT_CHARACTER", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Character)},
-	    {"ITERATOR_FILTER_BIT_PLAYER", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Player)},
-	    {"ITERATOR_FILTER_BIT_WEAPON", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Weapon)},
-	    {"ITERATOR_FILTER_BIT_VEHICLE", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Vehicle)},
-	    {"ITERATOR_FILTER_BIT_NPC", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::NPC)},
-	    {"ITERATOR_FILTER_BIT_PHYSICAL", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Physical)},
-	    {"ITERATOR_FILTER_BIT_SCRIPTED", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Scripted)},
-	    {"ITERATOR_FILTER_BIT_MAP_ENTITY", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::MapEntity)},
+	    {"ITERATOR_FILTER_BIT_CHARACTER", math::to_integral(ecs::EntityIterator::FilterFlags::Character)},
+	    {"ITERATOR_FILTER_BIT_PLAYER", math::to_integral(ecs::EntityIterator::FilterFlags::Player)},
+	    {"ITERATOR_FILTER_BIT_WEAPON", math::to_integral(ecs::EntityIterator::FilterFlags::Weapon)},
+	    {"ITERATOR_FILTER_BIT_VEHICLE", math::to_integral(ecs::EntityIterator::FilterFlags::Vehicle)},
+	    {"ITERATOR_FILTER_BIT_NPC", math::to_integral(ecs::EntityIterator::FilterFlags::NPC)},
+	    {"ITERATOR_FILTER_BIT_PHYSICAL", math::to_integral(ecs::EntityIterator::FilterFlags::Physical)},
+	    {"ITERATOR_FILTER_BIT_SCRIPTED", math::to_integral(ecs::EntityIterator::FilterFlags::Scripted)},
+	    {"ITERATOR_FILTER_BIT_MAP_ENTITY", math::to_integral(ecs::EntityIterator::FilterFlags::MapEntity)},
 
-	    {"ITERATOR_FILTER_BIT_HAS_TRANSFORM", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::HasTransform)},
-	    {"ITERATOR_FILTER_BIT_HAS_MODEL", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::HasModel)},
+	    {"ITERATOR_FILTER_BIT_HAS_TRANSFORM", math::to_integral(ecs::EntityIterator::FilterFlags::HasTransform)},
+	    {"ITERATOR_FILTER_BIT_HAS_MODEL", math::to_integral(ecs::EntityIterator::FilterFlags::HasModel)},
 
-	    {"ITERATOR_FILTER_ANY_TYPE", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::AnyType)},
-	    {"ITERATOR_FILTER_ANY", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Any)},
-	    {"ITERATOR_FILTER_DEFAULT", pragma::math::to_integral(pragma::ecs::EntityIterator::FilterFlags::Default)},
+	    {"ITERATOR_FILTER_ANY_TYPE", math::to_integral(ecs::EntityIterator::FilterFlags::AnyType)},
+	    {"ITERATOR_FILTER_ANY", math::to_integral(ecs::EntityIterator::FilterFlags::Any)},
+	    {"ITERATOR_FILTER_DEFAULT", math::to_integral(ecs::EntityIterator::FilterFlags::Default)},
 
-	    {"TICK_POLICY_ALWAYS", pragma::math::to_integral(pragma::TickPolicy::Always)},
-	    {"TICK_POLICY_NEVER", pragma::math::to_integral(pragma::TickPolicy::Never)},
-	    {"TICK_POLICY_WHEN_VISIBLE", pragma::math::to_integral(pragma::TickPolicy::WhenVisible)},
+	    {"TICK_POLICY_ALWAYS", math::to_integral(TickPolicy::Always)},
+	    {"TICK_POLICY_NEVER", math::to_integral(TickPolicy::Never)},
+	    {"TICK_POLICY_WHEN_VISIBLE", math::to_integral(TickPolicy::WhenVisible)},
 	  });
 
-	auto surfaceMatDef = pragma::LuaCore::register_class<pragma::physics::SurfaceMaterial>(GetLuaState(), "SurfaceMaterial");
-	surfaceMatDef->def("GetName", &pragma::physics::SurfaceMaterial::GetIdentifier);
-	surfaceMatDef->def("GetIndex", &pragma::physics::SurfaceMaterial::GetIndex);
-	surfaceMatDef->def("SetFriction", &pragma::physics::SurfaceMaterial::SetFriction);
-	surfaceMatDef->def("SetStaticFriction", &pragma::physics::SurfaceMaterial::SetStaticFriction);
-	surfaceMatDef->def("SetDynamicFriction", &pragma::physics::SurfaceMaterial::SetDynamicFriction);
-	surfaceMatDef->def("GetStaticFriction", &pragma::physics::SurfaceMaterial::GetStaticFriction);
-	surfaceMatDef->def("GetDynamicFriction", &pragma::physics::SurfaceMaterial::GetDynamicFriction);
-	surfaceMatDef->def("GetRestitution", &pragma::physics::SurfaceMaterial::GetRestitution);
-	surfaceMatDef->def("SetRestitution", &pragma::physics::SurfaceMaterial::SetRestitution);
-	surfaceMatDef->def("GetFootstepSound", &pragma::physics::SurfaceMaterial::GetFootstepType);
-	surfaceMatDef->def("SetFootstepSound", &pragma::physics::SurfaceMaterial::SetFootstepType);
-	surfaceMatDef->def("SetImpactParticleEffect", &pragma::physics::SurfaceMaterial::SetImpactParticleEffect);
-	surfaceMatDef->def("GetImpactParticleEffect", &pragma::physics::SurfaceMaterial::GetImpactParticleEffect);
-	surfaceMatDef->def("GetBulletImpactSound", &pragma::physics::SurfaceMaterial::GetBulletImpactSound);
-	surfaceMatDef->def("SetBulletImpactSound", &pragma::physics::SurfaceMaterial::SetBulletImpactSound);
-	surfaceMatDef->def("SetHardImpactSound", &pragma::physics::SurfaceMaterial::SetHardImpactSound);
-	surfaceMatDef->def("GetHardImpactSound", &pragma::physics::SurfaceMaterial::GetHardImpactSound);
-	surfaceMatDef->def("SetSoftImpactSound", &pragma::physics::SurfaceMaterial::SetSoftImpactSound);
-	surfaceMatDef->def("GetSoftImpactSound", &pragma::physics::SurfaceMaterial::GetSoftImpactSound);
-	surfaceMatDef->def("GetIOR", &pragma::physics::SurfaceMaterial::GetIOR);
-	surfaceMatDef->def("SetIOR", &pragma::physics::SurfaceMaterial::SetIOR);
-	surfaceMatDef->def("ClearIOR", &pragma::physics::SurfaceMaterial::ClearIOR);
+	auto surfaceMatDef = pragma::LuaCore::register_class<physics::SurfaceMaterial>(GetLuaState(), "SurfaceMaterial");
+	surfaceMatDef->def("GetName", &physics::SurfaceMaterial::GetIdentifier);
+	surfaceMatDef->def("GetIndex", &physics::SurfaceMaterial::GetIndex);
+	surfaceMatDef->def("SetFriction", &physics::SurfaceMaterial::SetFriction);
+	surfaceMatDef->def("SetStaticFriction", &physics::SurfaceMaterial::SetStaticFriction);
+	surfaceMatDef->def("SetDynamicFriction", &physics::SurfaceMaterial::SetDynamicFriction);
+	surfaceMatDef->def("GetStaticFriction", &physics::SurfaceMaterial::GetStaticFriction);
+	surfaceMatDef->def("GetDynamicFriction", &physics::SurfaceMaterial::GetDynamicFriction);
+	surfaceMatDef->def("GetRestitution", &physics::SurfaceMaterial::GetRestitution);
+	surfaceMatDef->def("SetRestitution", &physics::SurfaceMaterial::SetRestitution);
+	surfaceMatDef->def("GetFootstepSound", &physics::SurfaceMaterial::GetFootstepType);
+	surfaceMatDef->def("SetFootstepSound", &physics::SurfaceMaterial::SetFootstepType);
+	surfaceMatDef->def("SetImpactParticleEffect", &physics::SurfaceMaterial::SetImpactParticleEffect);
+	surfaceMatDef->def("GetImpactParticleEffect", &physics::SurfaceMaterial::GetImpactParticleEffect);
+	surfaceMatDef->def("GetBulletImpactSound", &physics::SurfaceMaterial::GetBulletImpactSound);
+	surfaceMatDef->def("SetBulletImpactSound", &physics::SurfaceMaterial::SetBulletImpactSound);
+	surfaceMatDef->def("SetHardImpactSound", &physics::SurfaceMaterial::SetHardImpactSound);
+	surfaceMatDef->def("GetHardImpactSound", &physics::SurfaceMaterial::GetHardImpactSound);
+	surfaceMatDef->def("SetSoftImpactSound", &physics::SurfaceMaterial::SetSoftImpactSound);
+	surfaceMatDef->def("GetSoftImpactSound", &physics::SurfaceMaterial::GetSoftImpactSound);
+	surfaceMatDef->def("GetIOR", &physics::SurfaceMaterial::GetIOR);
+	surfaceMatDef->def("SetIOR", &physics::SurfaceMaterial::SetIOR);
+	surfaceMatDef->def("ClearIOR", &physics::SurfaceMaterial::ClearIOR);
 
-	surfaceMatDef->def("SetAudioLowFrequencyAbsorption", &pragma::physics::SurfaceMaterial::SetAudioLowFrequencyAbsorption);
-	surfaceMatDef->def("GetAudioLowFrequencyAbsorption", &pragma::physics::SurfaceMaterial::GetAudioLowFrequencyAbsorption);
-	surfaceMatDef->def("SetAudioMidFrequencyAbsorption", &pragma::physics::SurfaceMaterial::SetAudioMidFrequencyAbsorption);
-	surfaceMatDef->def("GetAudioMidFrequencyAbsorption", &pragma::physics::SurfaceMaterial::GetAudioMidFrequencyAbsorption);
-	surfaceMatDef->def("SetAudioHighFrequencyAbsorption", &pragma::physics::SurfaceMaterial::SetAudioHighFrequencyAbsorption);
-	surfaceMatDef->def("GetAudioHighFrequencyAbsorption", &pragma::physics::SurfaceMaterial::GetAudioHighFrequencyAbsorption);
-	surfaceMatDef->def("SetAudioScattering", &pragma::physics::SurfaceMaterial::SetAudioScattering);
-	surfaceMatDef->def("GetAudioScattering", &pragma::physics::SurfaceMaterial::GetAudioScattering);
-	surfaceMatDef->def("SetAudioLowFrequencyTransmission", &pragma::physics::SurfaceMaterial::SetAudioLowFrequencyTransmission);
-	surfaceMatDef->def("GetAudioLowFrequencyTransmission", &pragma::physics::SurfaceMaterial::GetAudioLowFrequencyTransmission);
-	surfaceMatDef->def("SetAudioMidFrequencyTransmission", &pragma::physics::SurfaceMaterial::SetAudioMidFrequencyTransmission);
-	surfaceMatDef->def("GetAudioMidFrequencyTransmission", &pragma::physics::SurfaceMaterial::GetAudioMidFrequencyTransmission);
-	surfaceMatDef->def("SetAudioHighFrequencyTransmission", &pragma::physics::SurfaceMaterial::SetAudioHighFrequencyTransmission);
-	surfaceMatDef->def("GetAudioHighFrequencyTransmission", &pragma::physics::SurfaceMaterial::GetAudioHighFrequencyTransmission);
+	surfaceMatDef->def("SetAudioLowFrequencyAbsorption", &physics::SurfaceMaterial::SetAudioLowFrequencyAbsorption);
+	surfaceMatDef->def("GetAudioLowFrequencyAbsorption", &physics::SurfaceMaterial::GetAudioLowFrequencyAbsorption);
+	surfaceMatDef->def("SetAudioMidFrequencyAbsorption", &physics::SurfaceMaterial::SetAudioMidFrequencyAbsorption);
+	surfaceMatDef->def("GetAudioMidFrequencyAbsorption", &physics::SurfaceMaterial::GetAudioMidFrequencyAbsorption);
+	surfaceMatDef->def("SetAudioHighFrequencyAbsorption", &physics::SurfaceMaterial::SetAudioHighFrequencyAbsorption);
+	surfaceMatDef->def("GetAudioHighFrequencyAbsorption", &physics::SurfaceMaterial::GetAudioHighFrequencyAbsorption);
+	surfaceMatDef->def("SetAudioScattering", &physics::SurfaceMaterial::SetAudioScattering);
+	surfaceMatDef->def("GetAudioScattering", &physics::SurfaceMaterial::GetAudioScattering);
+	surfaceMatDef->def("SetAudioLowFrequencyTransmission", &physics::SurfaceMaterial::SetAudioLowFrequencyTransmission);
+	surfaceMatDef->def("GetAudioLowFrequencyTransmission", &physics::SurfaceMaterial::GetAudioLowFrequencyTransmission);
+	surfaceMatDef->def("SetAudioMidFrequencyTransmission", &physics::SurfaceMaterial::SetAudioMidFrequencyTransmission);
+	surfaceMatDef->def("GetAudioMidFrequencyTransmission", &physics::SurfaceMaterial::GetAudioMidFrequencyTransmission);
+	surfaceMatDef->def("SetAudioHighFrequencyTransmission", &physics::SurfaceMaterial::SetAudioHighFrequencyTransmission);
+	surfaceMatDef->def("GetAudioHighFrequencyTransmission", &physics::SurfaceMaterial::GetAudioHighFrequencyTransmission);
 
-	surfaceMatDef->def("GetNavigationFlags", &pragma::physics::SurfaceMaterial::GetNavigationFlags);
-	surfaceMatDef->def("SetNavigationFlags", &pragma::physics::SurfaceMaterial::SetNavigationFlags);
-	surfaceMatDef->def("SetDensity", &pragma::physics::SurfaceMaterial::SetDensity);
-	surfaceMatDef->def("GetDensity", &pragma::physics::SurfaceMaterial::GetDensity);
-	surfaceMatDef->def("SetLinearDragCoefficient", &pragma::physics::SurfaceMaterial::SetLinearDragCoefficient);
-	surfaceMatDef->def("GetLinearDragCoefficient", &pragma::physics::SurfaceMaterial::GetLinearDragCoefficient);
-	surfaceMatDef->def("SetTorqueDragCoefficient", &pragma::physics::SurfaceMaterial::SetTorqueDragCoefficient);
-	surfaceMatDef->def("GetTorqueDragCoefficient", &pragma::physics::SurfaceMaterial::GetTorqueDragCoefficient);
-	surfaceMatDef->def("SetWaveStiffness", &pragma::physics::SurfaceMaterial::SetWaveStiffness);
-	surfaceMatDef->def("GetWaveStiffness", &pragma::physics::SurfaceMaterial::GetWaveStiffness);
-	surfaceMatDef->def("SetWavePropagation", &pragma::physics::SurfaceMaterial::SetWavePropagation);
-	surfaceMatDef->def("GetWavePropagation", &pragma::physics::SurfaceMaterial::GetWavePropagation);
-	surfaceMatDef->def("GetPBRMetalness", static_cast<float (*)(lua::State *, pragma::physics::SurfaceMaterial &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().metalness; }));
-	surfaceMatDef->def("GetPBRRoughness", static_cast<float (*)(lua::State *, pragma::physics::SurfaceMaterial &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().roughness; }));
-	surfaceMatDef->def("GetSubsurfaceFactor", static_cast<float (*)(lua::State *, pragma::physics::SurfaceMaterial &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.factor; }));
-	surfaceMatDef->def("SetSubsurfaceFactor", static_cast<void (*)(lua::State *, pragma::physics::SurfaceMaterial &, float)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat, float factor) { surfMat.GetPBRInfo().subsurface.factor = factor; }));
-	surfaceMatDef->def("GetSubsurfaceScatterColor", static_cast<Vector3 (*)(lua::State *, pragma::physics::SurfaceMaterial &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.scatterColor; }));
-	surfaceMatDef->def("SetSubsurfaceScatterColor", static_cast<void (*)(lua::State *, pragma::physics::SurfaceMaterial &, const Vector3 &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat, const Vector3 &radiusRGB) { surfMat.GetPBRInfo().subsurface.scatterColor = radiusRGB; }));
-	surfaceMatDef->def("GetSubsurfaceRadiusMM", static_cast<Vector3 (*)(lua::State *, pragma::physics::SurfaceMaterial &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.radiusMM; }));
-	surfaceMatDef->def("SetSubsurfaceRadiusMM", static_cast<void (*)(lua::State *, pragma::physics::SurfaceMaterial &, const Vector3 &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat, const Vector3 &radiusMM) { surfMat.GetPBRInfo().subsurface.radiusMM = radiusMM; }));
-	surfaceMatDef->def("GetSubsurfaceColor", static_cast<Color (*)(lua::State *, pragma::physics::SurfaceMaterial &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.color; }));
-	surfaceMatDef->def("SetSubsurfaceColor", static_cast<void (*)(lua::State *, pragma::physics::SurfaceMaterial &, const Color &)>([](lua::State *l, pragma::physics::SurfaceMaterial &surfMat, const Color &color) { surfMat.GetPBRInfo().subsurface.color = color; }));
+	surfaceMatDef->def("GetNavigationFlags", &physics::SurfaceMaterial::GetNavigationFlags);
+	surfaceMatDef->def("SetNavigationFlags", &physics::SurfaceMaterial::SetNavigationFlags);
+	surfaceMatDef->def("SetDensity", &physics::SurfaceMaterial::SetDensity);
+	surfaceMatDef->def("GetDensity", &physics::SurfaceMaterial::GetDensity);
+	surfaceMatDef->def("SetLinearDragCoefficient", &physics::SurfaceMaterial::SetLinearDragCoefficient);
+	surfaceMatDef->def("GetLinearDragCoefficient", &physics::SurfaceMaterial::GetLinearDragCoefficient);
+	surfaceMatDef->def("SetTorqueDragCoefficient", &physics::SurfaceMaterial::SetTorqueDragCoefficient);
+	surfaceMatDef->def("GetTorqueDragCoefficient", &physics::SurfaceMaterial::GetTorqueDragCoefficient);
+	surfaceMatDef->def("SetWaveStiffness", &physics::SurfaceMaterial::SetWaveStiffness);
+	surfaceMatDef->def("GetWaveStiffness", &physics::SurfaceMaterial::GetWaveStiffness);
+	surfaceMatDef->def("SetWavePropagation", &physics::SurfaceMaterial::SetWavePropagation);
+	surfaceMatDef->def("GetWavePropagation", &physics::SurfaceMaterial::GetWavePropagation);
+	surfaceMatDef->def("GetPBRMetalness", static_cast<float (*)(lua::State *, physics::SurfaceMaterial &)>([](lua::State *l, physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().metalness; }));
+	surfaceMatDef->def("GetPBRRoughness", static_cast<float (*)(lua::State *, physics::SurfaceMaterial &)>([](lua::State *l, physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().roughness; }));
+	surfaceMatDef->def("GetSubsurfaceFactor", static_cast<float (*)(lua::State *, physics::SurfaceMaterial &)>([](lua::State *l, physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.factor; }));
+	surfaceMatDef->def("SetSubsurfaceFactor", static_cast<void (*)(lua::State *, physics::SurfaceMaterial &, float)>([](lua::State *l, physics::SurfaceMaterial &surfMat, float factor) { surfMat.GetPBRInfo().subsurface.factor = factor; }));
+	surfaceMatDef->def("GetSubsurfaceScatterColor", static_cast<Vector3 (*)(lua::State *, physics::SurfaceMaterial &)>([](lua::State *l, physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.scatterColor; }));
+	surfaceMatDef->def("SetSubsurfaceScatterColor", static_cast<void (*)(lua::State *, physics::SurfaceMaterial &, const Vector3 &)>([](lua::State *l, physics::SurfaceMaterial &surfMat, const Vector3 &radiusRGB) { surfMat.GetPBRInfo().subsurface.scatterColor = radiusRGB; }));
+	surfaceMatDef->def("GetSubsurfaceRadiusMM", static_cast<Vector3 (*)(lua::State *, physics::SurfaceMaterial &)>([](lua::State *l, physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.radiusMM; }));
+	surfaceMatDef->def("SetSubsurfaceRadiusMM", static_cast<void (*)(lua::State *, physics::SurfaceMaterial &, const Vector3 &)>([](lua::State *l, physics::SurfaceMaterial &surfMat, const Vector3 &radiusMM) { surfMat.GetPBRInfo().subsurface.radiusMM = radiusMM; }));
+	surfaceMatDef->def("GetSubsurfaceColor", static_cast<Color (*)(lua::State *, physics::SurfaceMaterial &)>([](lua::State *l, physics::SurfaceMaterial &surfMat) { return surfMat.GetPBRInfo().subsurface.color; }));
+	surfaceMatDef->def("SetSubsurfaceColor", static_cast<void (*)(lua::State *, physics::SurfaceMaterial &, const Color &)>([](lua::State *l, physics::SurfaceMaterial &surfMat, const Color &color) { surfMat.GetPBRInfo().subsurface.color = color; }));
 	gameMod[*surfaceMatDef];
 
 	auto gibletCreateInfo = luabind::class_<GibletCreateInfo>("GibletCreateInfo");
@@ -1894,11 +1894,11 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	gibletCreateInfo.def_readwrite("physRadius", &GibletCreateInfo::physRadius);
 	gibletCreateInfo.def_readwrite("physHeight", &GibletCreateInfo::physHeight);
 	gibletCreateInfo.def_readwrite("physShape", reinterpret_cast<std::underlying_type_t<decltype(GibletCreateInfo::physShape)> GibletCreateInfo::*>(&GibletCreateInfo::physShape));
-	gibletCreateInfo.add_static_constant("PHYS_SHAPE_MODEL", pragma::math::to_integral(GibletCreateInfo::PhysShape::Model));
-	gibletCreateInfo.add_static_constant("PHYS_SHAPE_NONE", pragma::math::to_integral(GibletCreateInfo::PhysShape::None));
-	gibletCreateInfo.add_static_constant("PHYS_SHAPE_SPHERE", pragma::math::to_integral(GibletCreateInfo::PhysShape::Sphere));
-	gibletCreateInfo.add_static_constant("PHYS_SHAPE_BOX", pragma::math::to_integral(GibletCreateInfo::PhysShape::Box));
-	gibletCreateInfo.add_static_constant("PHYS_SHAPE_CYLINDER", pragma::math::to_integral(GibletCreateInfo::PhysShape::Cylinder));
+	gibletCreateInfo.add_static_constant("PHYS_SHAPE_MODEL", math::to_integral(GibletCreateInfo::PhysShape::Model));
+	gibletCreateInfo.add_static_constant("PHYS_SHAPE_NONE", math::to_integral(GibletCreateInfo::PhysShape::None));
+	gibletCreateInfo.add_static_constant("PHYS_SHAPE_SPHERE", math::to_integral(GibletCreateInfo::PhysShape::Sphere));
+	gibletCreateInfo.add_static_constant("PHYS_SHAPE_BOX", math::to_integral(GibletCreateInfo::PhysShape::Box));
+	gibletCreateInfo.add_static_constant("PHYS_SHAPE_CYLINDER", math::to_integral(GibletCreateInfo::PhysShape::Cylinder));
 	gameMod[gibletCreateInfo];
 
 	Lua::register_bullet_info(gameMod);
@@ -1911,9 +1911,9 @@ void pragma::Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	classDefDamageInfo.def("ScaleDamage", &game::DamageInfo::ScaleDamage);
 	classDefDamageInfo.def("GetDamage", &game::DamageInfo::GetDamage);
 	classDefDamageInfo.def("GetAttacker", &game::DamageInfo::GetAttacker);
-	classDefDamageInfo.def("SetAttacker", static_cast<void (game::DamageInfo::*)(const pragma::ecs::BaseEntity *)>(&game::DamageInfo::SetAttacker));
+	classDefDamageInfo.def("SetAttacker", static_cast<void (game::DamageInfo::*)(const ecs::BaseEntity *)>(&game::DamageInfo::SetAttacker));
 	classDefDamageInfo.def("GetInflictor", &game::DamageInfo::GetInflictor);
-	classDefDamageInfo.def("SetInflictor", static_cast<void (game::DamageInfo::*)(const pragma::ecs::BaseEntity *)>(&game::DamageInfo::SetInflictor));
+	classDefDamageInfo.def("SetInflictor", static_cast<void (game::DamageInfo::*)(const ecs::BaseEntity *)>(&game::DamageInfo::SetInflictor));
 	classDefDamageInfo.def("GetDamageTypes", &game::DamageInfo::GetDamageTypes);
 	classDefDamageInfo.def("SetDamageType", &game::DamageInfo::SetDamageType);
 	classDefDamageInfo.def("AddDamageType", &game::DamageInfo::AddDamageType);
@@ -1966,8 +1966,8 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat2.def(luabind::const_self * Vector2());
 	defMat2.def("Inverse", &Lua::Mat2::Inverse);
 	defMat2.def("GetInverse", &Lua::Mat2::GetInverse);
-	defMat2.def("Set", static_cast<void (*)(lua::State *, ::Mat2 &, float, float, float, float)>(&Lua::Mat2::Set));
-	defMat2.def("Set", static_cast<void (*)(lua::State *, ::Mat2 &, const ::Mat2 &)>(&Lua::Mat2::Set));
+	defMat2.def("Set", static_cast<void (*)(lua::State *, Mat2 &, float, float, float, float)>(&Lua::Mat2::Set));
+	defMat2.def("Set", static_cast<void (*)(lua::State *, Mat2 &, const Mat2 &)>(&Lua::Mat2::Set));
 	modMath[defMat2];
 	register_string_to_vector_type_constructor<Mat2>(lua.GetState());
 
@@ -1978,8 +1978,8 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat2x3.def(luabind::const_self + luabind::const_self);
 	defMat2x3.def(luabind::const_self - luabind::const_self);
 	defMat2x3.def(luabind::const_self * Vector2());
-	defMat2x3.def("Set", static_cast<void (*)(lua::State *, ::Mat2x3 &, float, float, float, float, float, float)>(&Lua::Mat2x3::Set));
-	defMat2x3.def("Set", static_cast<void (*)(lua::State *, ::Mat2x3 &, const ::Mat2x3 &)>(&Lua::Mat2x3::Set));
+	defMat2x3.def("Set", static_cast<void (*)(lua::State *, Mat2x3 &, float, float, float, float, float, float)>(&Lua::Mat2x3::Set));
+	defMat2x3.def("Set", static_cast<void (*)(lua::State *, Mat2x3 &, const Mat2x3 &)>(&Lua::Mat2x3::Set));
 	modMath[defMat2x3];
 	register_string_to_vector_type_constructor<Mat2x3>(lua.GetState());
 
@@ -1990,8 +1990,8 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat2x4.def(luabind::const_self + luabind::const_self);
 	defMat2x4.def(luabind::const_self - luabind::const_self);
 	defMat2x4.def(luabind::const_self * Vector2());
-	defMat2x4.def("Set", static_cast<void (*)(lua::State *, ::Mat2x4 &, float, float, float, float, float, float, float, float)>(&Lua::Mat2x4::Set));
-	defMat2x4.def("Set", static_cast<void (*)(lua::State *, ::Mat2x4 &, const ::Mat2x4 &)>(&Lua::Mat2x4::Set));
+	defMat2x4.def("Set", static_cast<void (*)(lua::State *, Mat2x4 &, float, float, float, float, float, float, float, float)>(&Lua::Mat2x4::Set));
+	defMat2x4.def("Set", static_cast<void (*)(lua::State *, Mat2x4 &, const Mat2x4 &)>(&Lua::Mat2x4::Set));
 	modMath[defMat2x4];
 	register_string_to_vector_type_constructor<Mat2x4>(lua.GetState());
 
@@ -2006,8 +2006,8 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat3.def(luabind::const_self * Vector3());
 	defMat3.def("Inverse", &Lua::Mat3::Inverse);
 	defMat3.def("GetInverse", &Lua::Mat3::GetInverse);
-	defMat3.def("Set", static_cast<void (*)(lua::State *, ::Mat3 &, float, float, float, float, float, float, float, float, float)>(&Lua::Mat3::Set));
-	defMat3.def("Set", static_cast<void (*)(lua::State *, ::Mat3 &, const ::Mat3 &)>(&Lua::Mat3::Set));
+	defMat3.def("Set", static_cast<void (*)(lua::State *, Mat3 &, float, float, float, float, float, float, float, float, float)>(&Lua::Mat3::Set));
+	defMat3.def("Set", static_cast<void (*)(lua::State *, Mat3 &, const Mat3 &)>(&Lua::Mat3::Set));
 	defMat3.def("CalcEigenValues", &Lua::Mat3::CalcEigenValues);
 	modMath[defMat3];
 	register_string_to_vector_type_constructor<Mat3>(lua.GetState());
@@ -2019,8 +2019,8 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat3x2.def(luabind::const_self + luabind::const_self);
 	defMat3x2.def(luabind::const_self - luabind::const_self);
 	defMat3x2.def(luabind::const_self * Vector3());
-	defMat3x2.def("Set", static_cast<void (*)(lua::State *, ::Mat3x2 &, float, float, float, float, float, float)>(&Lua::Mat3x2::Set));
-	defMat3x2.def("Set", static_cast<void (*)(lua::State *, ::Mat3x2 &, const ::Mat3x2 &)>(&Lua::Mat3x2::Set));
+	defMat3x2.def("Set", static_cast<void (*)(lua::State *, Mat3x2 &, float, float, float, float, float, float)>(&Lua::Mat3x2::Set));
+	defMat3x2.def("Set", static_cast<void (*)(lua::State *, Mat3x2 &, const Mat3x2 &)>(&Lua::Mat3x2::Set));
 	modMath[defMat3x2];
 	register_string_to_vector_type_constructor<Mat3x2>(lua.GetState());
 
@@ -2031,8 +2031,8 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat3x4.def(luabind::const_self + luabind::const_self);
 	defMat3x4.def(luabind::const_self - luabind::const_self);
 	defMat3x4.def(luabind::const_self * Vector3());
-	defMat3x4.def("Set", static_cast<void (*)(lua::State *, ::Mat3x4 &, float, float, float, float, float, float, float, float, float, float, float, float)>(&Lua::Mat3x4::Set));
-	defMat3x4.def("Set", static_cast<void (*)(lua::State *, ::Mat3x4 &, const ::Mat3x4 &)>(&Lua::Mat3x4::Set));
+	defMat3x4.def("Set", static_cast<void (*)(lua::State *, Mat3x4 &, float, float, float, float, float, float, float, float, float, float, float, float)>(&Lua::Mat3x4::Set));
+	defMat3x4.def("Set", static_cast<void (*)(lua::State *, Mat3x4 &, const Mat3x4 &)>(&Lua::Mat3x4::Set));
 	modMath[defMat3x4];
 	register_string_to_vector_type_constructor<Mat3x4>(lua.GetState());
 
@@ -2040,8 +2040,8 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat4.def(luabind::constructor<float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float>());
 	LUA_MATRIX_MEMBERS_CLASSDEF(defMat4, 4);
 	defMat4.def("Translate", &Lua::Mat4::Translate);
-	defMat4.def("Rotate", static_cast<void (*)(lua::State *, ::Mat4 &, const EulerAngles &)>(&Lua::Mat4::Rotate));
-	defMat4.def("Rotate", static_cast<void (*)(lua::State *, ::Mat4 &, const Vector3 &, float)>(&Lua::Mat4::Rotate));
+	defMat4.def("Rotate", static_cast<void (*)(lua::State *, Mat4 &, const EulerAngles &)>(&Lua::Mat4::Rotate));
+	defMat4.def("Rotate", static_cast<void (*)(lua::State *, Mat4 &, const Vector3 &, float)>(&Lua::Mat4::Rotate));
 	defMat4.def("Scale", &Lua::Mat4::Scale);
 	defMat4.def("ToEulerAngles", &Lua::Mat4::ToEulerAngles);
 	defMat4.def("ToQuaternion", &Lua::Mat4::ToQuaternion);
@@ -2076,8 +2076,8 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat4.def(luabind::const_self * Vector4());
 	defMat4.def("Inverse", &Lua::Mat4::Inverse);
 	defMat4.def("GetInverse", &Lua::Mat4::GetInverse);
-	defMat4.def("Set", static_cast<void (*)(lua::State *, ::Mat4 &, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float)>(&Lua::Mat4::Set));
-	defMat4.def("Set", static_cast<void (*)(lua::State *, ::Mat4 &, const ::Mat4 &)>(&Lua::Mat4::Set));
+	defMat4.def("Set", static_cast<void (*)(lua::State *, Mat4 &, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float)>(&Lua::Mat4::Set));
+	defMat4.def("Set", static_cast<void (*)(lua::State *, Mat4 &, const Mat4 &)>(&Lua::Mat4::Set));
 	modMath[defMat4];
 	register_string_to_vector_type_constructor<Mat4>(lua.GetState());
 	auto _G = luabind::globals(lua.GetState());
@@ -2090,8 +2090,8 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat4x2.def(luabind::const_self + luabind::const_self);
 	defMat4x2.def(luabind::const_self - luabind::const_self);
 	defMat4x2.def(luabind::const_self * Vector4());
-	defMat4x2.def("Set", static_cast<void (*)(lua::State *, ::Mat4x2 &, float, float, float, float, float, float, float, float)>(&Lua::Mat4x2::Set));
-	defMat4x2.def("Set", static_cast<void (*)(lua::State *, ::Mat4x2 &, const ::Mat4x2 &)>(&Lua::Mat4x2::Set));
+	defMat4x2.def("Set", static_cast<void (*)(lua::State *, Mat4x2 &, float, float, float, float, float, float, float, float)>(&Lua::Mat4x2::Set));
+	defMat4x2.def("Set", static_cast<void (*)(lua::State *, Mat4x2 &, const Mat4x2 &)>(&Lua::Mat4x2::Set));
 	modMath[defMat4x2];
 	register_string_to_vector_type_constructor<Mat4x2>(lua.GetState());
 
@@ -2102,8 +2102,8 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat4x3.def(luabind::const_self + luabind::const_self);
 	defMat4x3.def(luabind::const_self - luabind::const_self);
 	defMat4x3.def(luabind::const_self * Vector4());
-	defMat4x3.def("Set", static_cast<void (*)(lua::State *, ::Mat4x3 &, float, float, float, float, float, float, float, float, float, float, float, float)>(&Lua::Mat4x3::Set));
-	defMat4x3.def("Set", static_cast<void (*)(lua::State *, ::Mat4x3 &, const ::Mat4x3 &)>(&Lua::Mat4x3::Set));
+	defMat4x3.def("Set", static_cast<void (*)(lua::State *, Mat4x3 &, float, float, float, float, float, float, float, float, float, float, float, float)>(&Lua::Mat4x3::Set));
+	defMat4x3.def("Set", static_cast<void (*)(lua::State *, Mat4x3 &, const Mat4x3 &)>(&Lua::Mat4x3::Set));
 	modMath[defMat4x3];
 	register_string_to_vector_type_constructor<Mat4x3>(lua.GetState());
 }

@@ -16,7 +16,7 @@ void SFieldAngleComponent::Initialize()
 	FlagCallbackForRemoval(m_fieldAngle->AddCallback([this](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> val) {
 		NetPacket p {};
 		p->Write<float>(val.get());
-		static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetFieldAngle, p, pragma::networking::Protocol::SlowReliable);
+		static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetFieldAngle, p, networking::Protocol::SlowReliable);
 	}),
 	  CallbackType::Component, this);
 }

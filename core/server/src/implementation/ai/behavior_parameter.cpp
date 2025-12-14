@@ -15,7 +15,7 @@ ai::BehaviorParameter::BehaviorParameter(bool b) : m_type(Type::Bool), m_data(pr
 ai::BehaviorParameter::BehaviorParameter(int32_t i) : m_type(Type::Int), m_data(pragma::util::make_shared<decltype(i)>(i)) {}
 ai::BehaviorParameter::BehaviorParameter(float f) : m_type(Type::Float), m_data(pragma::util::make_shared<decltype(f)>(f)) {}
 ai::BehaviorParameter::BehaviorParameter(const std::string &s) : m_type(Type::String), m_data(pragma::util::make_shared<std::string>(s)) {}
-ai::BehaviorParameter::BehaviorParameter(const pragma::ecs::BaseEntity *ent) : m_type(Type::Entity), m_data(pragma::util::make_shared<EntityHandle>((ent != nullptr) ? const_cast<pragma::ecs::BaseEntity *>(ent)->GetHandle() : EntityHandle {})) {}
+ai::BehaviorParameter::BehaviorParameter(const ecs::BaseEntity *ent) : m_type(Type::Entity), m_data(pragma::util::make_shared<EntityHandle>((ent != nullptr) ? const_cast<ecs::BaseEntity *>(ent)->GetHandle() : EntityHandle {})) {}
 ai::BehaviorParameter::BehaviorParameter(const Vector3 &vec) : m_type(Type::Vector), m_data(pragma::util::make_shared<Vector3>(vec)) {}
 ai::BehaviorParameter::BehaviorParameter(const Quat &rot) : m_type(Type::Quaternion), m_data(pragma::util::make_shared<Quat>(rot)) {}
 ai::BehaviorParameter::BehaviorParameter(const EulerAngles &ang) : m_type(Type::EulerAngles), m_data(pragma::util::make_shared<EulerAngles>(ang)) {}
@@ -23,21 +23,21 @@ ai::BehaviorParameter *ai::BehaviorParameter::Copy() const
 {
 	switch(m_type) {
 	case Type::Bool:
-		return new ai::BehaviorParameter(GetBool());
+		return new BehaviorParameter(GetBool());
 	case Type::Int:
-		return new ai::BehaviorParameter(GetInt());
+		return new BehaviorParameter(GetInt());
 	case Type::Float:
-		return new ai::BehaviorParameter(GetFloat());
+		return new BehaviorParameter(GetFloat());
 	case Type::String:
-		return new ai::BehaviorParameter(*GetString());
+		return new BehaviorParameter(*GetString());
 	case Type::Entity:
-		return new ai::BehaviorParameter(GetEntity());
+		return new BehaviorParameter(GetEntity());
 	case Type::Vector:
-		return new ai::BehaviorParameter(*GetVector());
+		return new BehaviorParameter(*GetVector());
 	case Type::Quaternion:
-		return new ai::BehaviorParameter(*GetQuaternion());
+		return new BehaviorParameter(*GetQuaternion());
 	case Type::EulerAngles:
-		return new ai::BehaviorParameter(*GetEulerAngles());
+		return new BehaviorParameter(*GetEulerAngles());
 	default:
 		return nullptr;
 	}
@@ -46,7 +46,7 @@ bool ai::BehaviorParameter::GetBool() const { return (m_type == Type::Bool) ? *s
 int32_t ai::BehaviorParameter::GetInt() const { return (m_type == Type::Int) ? *static_cast<int32_t *>(m_data.get()) : int32_t(); }
 float ai::BehaviorParameter::GetFloat() const { return (m_type == Type::Float) ? *static_cast<float *>(m_data.get()) : float(); }
 const std::string *ai::BehaviorParameter::GetString() const { return (m_type == Type::String) ? static_cast<std::string *>(m_data.get()) : nullptr; }
-const pragma::ecs::BaseEntity *ai::BehaviorParameter::GetEntity() const { return (m_type == Type::Entity) ? static_cast<EntityHandle *>(m_data.get())->get() : nullptr; }
+const ecs::BaseEntity *ai::BehaviorParameter::GetEntity() const { return (m_type == Type::Entity) ? static_cast<EntityHandle *>(m_data.get())->get() : nullptr; }
 const Vector3 *ai::BehaviorParameter::GetVector() const { return (m_type == Type::Vector) ? static_cast<Vector3 *>(m_data.get()) : nullptr; }
 const Quat *ai::BehaviorParameter::GetQuaternion() const { return (m_type == Type::Quaternion) ? static_cast<Quat *>(m_data.get()) : nullptr; }
 const EulerAngles *ai::BehaviorParameter::GetEulerAngles() const { return (m_type == Type::EulerAngles) ? static_cast<EulerAngles *>(m_data.get()) : nullptr; }
@@ -136,7 +136,7 @@ void ai::ParameterBase::SetParameter(uint8_t idx, const std::string &s)
 	param.parameter = std::make_unique<BehaviorParameter>(s);
 	OnParameterChanged(idx);
 }
-void ai::ParameterBase::SetParameter(uint8_t idx, const pragma::ecs::BaseEntity *ent)
+void ai::ParameterBase::SetParameter(uint8_t idx, const ecs::BaseEntity *ent)
 {
 	if(idx >= m_params.size())
 		m_params.resize(idx + 1);

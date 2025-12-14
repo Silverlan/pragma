@@ -22,13 +22,13 @@ void pragma::SGame::RegisterLuaLibraries()
 	utilMod[(luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, const game::BulletInfo &, bool)>(Lua::util::Server::fire_bullets)), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, const game::BulletInfo &)>(Lua::util::Server::fire_bullets)),
 	  luabind::def("create_giblet", Lua::util::Server::create_giblet), luabind::def("create_explosion", Lua::util::Server::create_explosion), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates))];
 
-	pragma::Game::RegisterLuaLibraries();
+	Game::RegisterLuaLibraries();
 	auto modAsset = luabind::module_(GetLuaState(), "asset");
 	modAsset[(luabind::def(
 	            "load",
-	            +[](lua::State *l, LFile &f, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {
+	            +[](lua::State *l, LFile &f, asset::Type type) -> Lua::var<bool, luabind::object> {
 		            // See also core/client/src/lua/c_library.cpp
-		            auto *manager = pragma::get_engine()->GetNetworkState(l)->GetAssetManager(type);
+		            auto *manager = get_engine()->GetNetworkState(l)->GetAssetManager(type);
 		            if(!manager)
 			            return luabind::object {l, false};
 		            auto fh = f.GetHandle();
@@ -42,42 +42,42 @@ void pragma::SGame::RegisterLuaLibraries()
 		            if(ufile::get_extension(*fileName, &ext) == false)
 			            return luabind::object {l, false};
 		            auto loadInfo = manager->CreateDefaultLoadInfo();
-		            loadInfo->flags |= pragma::util::AssetLoadFlags::DontCache | pragma::util::AssetLoadFlags::IgnoreCache;
+		            loadInfo->flags |= util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache;
 		            auto asset = manager->LoadAsset(ufile::get_file_from_filename(*fileName), std::move(fp), ext, std::move(loadInfo));
 		            switch(type) {
-		            case pragma::asset::Type::Model:
-			            return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
-		            case pragma::asset::Type::Material:
+		            case asset::Type::Model:
+			            return luabind::object {l, std::static_pointer_cast<asset::Model>(asset)};
+		            case asset::Type::Material:
 			            return luabind::object {l, std::static_pointer_cast<material::Material>(asset)};
 		            }
 		            return luabind::object {};
 	            }),
 	  luabind::def(
 	    "load",
-	    +[](lua::State *l, const std::string &name, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {
+	    +[](lua::State *l, const std::string &name, asset::Type type) -> Lua::var<bool, luabind::object> {
 		    // See also core/client/src/lua/c_library.cpp
-		    auto *manager = pragma::get_engine()->GetNetworkState(l)->GetAssetManager(type);
+		    auto *manager = get_engine()->GetNetworkState(l)->GetAssetManager(type);
 		    if(!manager)
 			    return luabind::object {l, false};
 		    auto asset = manager->LoadAsset(name);
 		    switch(type) {
-		    case pragma::asset::Type::Model:
-			    return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
-		    case pragma::asset::Type::Material:
+		    case asset::Type::Model:
+			    return luabind::object {l, std::static_pointer_cast<asset::Model>(asset)};
+		    case asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<material::Material>(asset)};
 		    }
 		    return luabind::object {};
 	    }),
 	  luabind::def(
-	    "reload", +[](lua::State *l, const std::string &name, pragma::asset::Type type) -> Lua::var<bool, luabind::object> {
-		    auto *manager = pragma::get_engine()->GetNetworkState(l)->GetAssetManager(type);
+	    "reload", +[](lua::State *l, const std::string &name, asset::Type type) -> Lua::var<bool, luabind::object> {
+		    auto *manager = get_engine()->GetNetworkState(l)->GetAssetManager(type);
 		    if(!manager)
 			    return luabind::object {l, false};
 		    auto asset = manager->ReloadAsset(name);
 		    switch(type) {
-		    case pragma::asset::Type::Model:
-			    return luabind::object {l, std::static_pointer_cast<pragma::asset::Model>(asset)};
-		    case pragma::asset::Type::Material:
+		    case asset::Type::Model:
+			    return luabind::object {l, std::static_pointer_cast<asset::Model>(asset)};
+		    case asset::Type::Material:
 			    return luabind::object {l, std::static_pointer_cast<material::Material>(asset)};
 		    }
 		    return luabind::object {};
@@ -91,12 +91,12 @@ void pragma::SGame::RegisterLuaLibraries()
 
 	auto utilDebug = luabind::module(GetLuaState(), "debug");
 	utilDebug[(luabind::def("draw_point", Lua::DebugRenderer::Server::DrawPoint), luabind::def("draw_line", Lua::DebugRenderer::Server::DrawLine), luabind::def("draw_box", &Lua::DebugRenderer::Server::DrawBox),
-	  luabind::def("draw_sphere", static_cast<void (*)(float, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSphere)), luabind::def("draw_sphere", static_cast<void (*)(float, const pragma::debug::DebugRenderInfo &, uint32_t)>(Lua::DebugRenderer::Server::DrawSphere)),
+	  luabind::def("draw_sphere", static_cast<void (*)(float, const debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSphere)), luabind::def("draw_sphere", static_cast<void (*)(float, const debug::DebugRenderInfo &, uint32_t)>(Lua::DebugRenderer::Server::DrawSphere)),
 	  luabind::def("draw_cone", &Lua::DebugRenderer::Server::DrawCone), luabind::def("draw_truncated_cone", &Lua::DebugRenderer::Server::DrawTruncatedCone), luabind::def("draw_cylinder", &Lua::DebugRenderer::Server::DrawCylinder),
-	  luabind::def("draw_pose", &Lua::DebugRenderer::Server::DrawAxis), luabind::def("draw_text", static_cast<void (*)(const std::string &, const Vector2 &, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)),
-	  luabind::def("draw_text", static_cast<void (*)(const std::string &, float, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Server::DrawPath),
-	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, float, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)),
-	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, const pragma::debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane), luabind::def("draw_mesh", &pragma::SGame::DrawMesh))];
+	  luabind::def("draw_pose", &Lua::DebugRenderer::Server::DrawAxis), luabind::def("draw_text", static_cast<void (*)(const std::string &, const Vector2 &, const debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)),
+	  luabind::def("draw_text", static_cast<void (*)(const std::string &, float, const debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Server::DrawPath),
+	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, float, const debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)),
+	  luabind::def("draw_spline", static_cast<void (*)(lua::State *, luabind::table<>, uint32_t, const debug::DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane), luabind::def("draw_mesh", &SGame::DrawMesh))];
 
 	Lua::ai::server::register_library(GetLuaInterface());
 
@@ -105,7 +105,7 @@ void pragma::SGame::RegisterLuaLibraries()
 	Lua::sound::register_library(soundMod);
 	Lua::sound::register_enums(GetLuaState());
 
-	auto alSoundClassDef = luabind::class_<pragma::audio::ALSound>("Source");
+	auto alSoundClassDef = luabind::class_<audio::ALSound>("Source");
 	Lua::ALSound::register_class(alSoundClassDef);
 	soundMod[alSoundClassDef];
 

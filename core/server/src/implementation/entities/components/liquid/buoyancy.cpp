@@ -10,6 +10,6 @@ using namespace pragma;
 
 void SBuoyancyComponent::Initialize() { BaseBuoyancyComponent::Initialize(); }
 
-void SBuoyancyComponent::InitializeLuaObject(lua::State *l) { return BaseBuoyancyComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SBuoyancyComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SBuoyancyComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) {}

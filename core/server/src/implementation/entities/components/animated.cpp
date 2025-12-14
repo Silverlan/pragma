@@ -13,7 +13,7 @@ using namespace pragma;
 
 void SAnimatedComponent::Initialize() { BaseAnimatedComponent::Initialize(); }
 void SAnimatedComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void SAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BaseAnimatedComponent::RegisterEvents(componentManager, registerEvent); }
+void SAnimatedComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BaseAnimatedComponent::RegisterEvents(componentManager, registerEvent); }
 void SAnimatedComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseAnimatedComponent)); }
 void SAnimatedComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
@@ -28,11 +28,11 @@ void SAnimatedComponent::PlayAnimation(int animation, FPlayAnim flags)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared() == false)
 		return;
-	if((flags & pragma::FPlayAnim::Transmit) != pragma::FPlayAnim::None) {
+	if((flags & FPlayAnim::Transmit) != FPlayAnim::None) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		p->Write<int>(GetBaseAnimationInfo().animation);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_ANIM_PLAY, p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(networking::net_messages::client::ENT_ANIM_PLAY, p, networking::Protocol::FastUnreliable);
 	}
 }
 void SAnimatedComponent::StopLayeredAnimation(int slot)
@@ -45,11 +45,11 @@ void SAnimatedComponent::StopLayeredAnimation(int slot)
 	if(ent.IsShared() == false)
 		return;
 	auto &animInfo = it->second;
-	if((animInfo.flags & pragma::FPlayAnim::Transmit) != pragma::FPlayAnim::None) {
+	if((animInfo.flags & FPlayAnim::Transmit) != FPlayAnim::None) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		p->Write<int>(slot);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_ANIM_GESTURE_STOP, p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(networking::net_messages::client::ENT_ANIM_GESTURE_STOP, p, networking::Protocol::SlowReliable);
 	}
 }
 void SAnimatedComponent::PlayLayeredAnimation(int slot, int animation, FPlayAnim flags)
@@ -58,15 +58,15 @@ void SAnimatedComponent::PlayLayeredAnimation(int slot, int animation, FPlayAnim
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared() == false)
 		return;
-	if((flags & pragma::FPlayAnim::Transmit) != pragma::FPlayAnim::None) {
+	if((flags & FPlayAnim::Transmit) != FPlayAnim::None) {
 		auto it = m_animSlots.find(slot);
 		if(it == m_animSlots.end())
 			return;
 		auto &animInfo = it->second;
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		p->Write<int>(slot);
 		p->Write<int>(animInfo.animation);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_ANIM_GESTURE_PLAY, p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(networking::net_messages::client::ENT_ANIM_GESTURE_PLAY, p, networking::Protocol::SlowReliable);
 	}
 }

@@ -13,15 +13,15 @@ using namespace pragma;
 void SOwnableComponent::Initialize() { BaseOwnableComponent::Initialize(); }
 void SOwnableComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void SOwnableComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { pragma::networking::write_entity(packet, *m_owner); }
+void SOwnableComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { networking::write_entity(packet, *m_owner); }
 
-void SOwnableComponent::SetOwner(pragma::ecs::BaseEntity *owner)
+void SOwnableComponent::SetOwner(ecs::BaseEntity *owner)
 {
 	BaseOwnableComponent::SetOwner(owner);
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared() == false)
 		return;
 	NetPacket p {};
-	pragma::networking::write_entity(p, *m_owner);
-	ent.SendNetEvent(m_netEvSetOwner, p, pragma::networking::Protocol::SlowReliable);
+	networking::write_entity(p, *m_owner);
+	ent.SendNetEvent(m_netEvSetOwner, p, networking::Protocol::SlowReliable);
 }

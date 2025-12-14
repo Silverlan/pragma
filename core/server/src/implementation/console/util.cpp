@@ -8,4 +8,4 @@ import :console.util;
 
 import :server_state;
 
-pragma::console::ConVarHandle pragma::console::get_server_con_var(std::string scmd) { return pragma::ServerState::Get()->GetConVarHandle(scmd); }
+pragma::console::ConVarHandle pragma::console::get_server_con_var(std::string scmd) { return ServerState::Get()->GetConVarHandle(scmd); }

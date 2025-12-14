@@ -10,15 +10,15 @@ export import :ai.schedule;
 
 export namespace pragma {
 	namespace ai {
-		class DLLSERVER TaskWait : public ai::BehaviorNode {
+		class DLLSERVER TaskWait : public BehaviorNode {
 		  protected:
 			double m_tFinished = 0.0;
 		  public:
 			enum class Parameter : uint32_t { MinWaitTime = 0, MaxWaitTime };
 			using BehaviorNode::BehaviorNode;
-			virtual std::shared_ptr<BehaviorNode> Copy() const override { return ai::BehaviorNode::Copy<std::remove_const_t<std::remove_reference_t<decltype(*this)>>>(); }
-			virtual Result Think(const Schedule *sched, pragma::BaseAIComponent &ent) override;
-			virtual ai::BehaviorNode::Result Start(const Schedule *sched, pragma::BaseAIComponent &ent) override;
+			virtual std::shared_ptr<BehaviorNode> Copy() const override { return BehaviorNode::Copy<std::remove_const_t<std::remove_reference_t<decltype(*this)>>>(); }
+			virtual Result Think(const Schedule *sched, BaseAIComponent &ent) override;
+			virtual Result Start(const Schedule *sched, BaseAIComponent &ent) override;
 			virtual void Print(const Schedule *sched, std::ostream &o) const override;
 
 			void SetMinWaitTime(float t);

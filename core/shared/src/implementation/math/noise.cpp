@@ -36,27 +36,27 @@ namespace pragma::math {
 float pragma::math::noise::get_noise(float x)
 {
 	init();
-	int x0 = pragma::math::floor(x);
+	int x0 = floor(x);
 	x -= x0;
 	x0 &= PERMUTATION_MASK;
-	return pragma::math::lerp(grad(PERMUTATIONS[x0], x), grad(PERMUTATIONS[x0 + 1], x - 1.f), ease(x));
+	return lerp(grad(PERMUTATIONS[x0], x), grad(PERMUTATIONS[x0 + 1], x - 1.f), ease(x));
 }
 
 float pragma::math::noise::get_noise(float x, int y)
 {
 	init();
-	int x0 = pragma::math::floor(x);
+	int x0 = floor(x);
 	x -= x0;
 	x0 &= PERMUTATION_MASK;
 	y &= PERMUTATION_MASK;
-	return pragma::math::lerp(grad(PERMUTATIONS[PERMUTATIONS[x0] + y], x), grad(PERMUTATIONS[PERMUTATIONS[x0 + 1] + y], x - 1.f), ease(x));
+	return lerp(grad(PERMUTATIONS[PERMUTATIONS[x0] + y], x), grad(PERMUTATIONS[PERMUTATIONS[x0 + 1] + y], x - 1.f), ease(x));
 }
 
 float pragma::math::noise::get_noise(float x, float y)
 {
 	init();
-	int x0 = pragma::math::floor(x);
-	int y0 = pragma::math::floor(y);
+	int x0 = floor(x);
+	int y0 = floor(y);
 	x -= x0;
 	y -= y0;
 	x0 &= PERMUTATION_MASK;
@@ -66,14 +66,14 @@ float pragma::math::noise::get_noise(float x, float y)
 	int p1 = PERMUTATIONS[x0 + 1];
 	float xm1 = x - 1.f, ym1 = y - 1.f;
 	float s = ease(x);
-	return pragma::math::lerp(pragma::math::lerp(grad(PERMUTATIONS[p0 + y0], x, y), grad(PERMUTATIONS[p1 + y0], xm1, y), s), pragma::math::lerp(grad(PERMUTATIONS[p0 + y1], x, ym1), grad(PERMUTATIONS[p1 + y1], xm1, ym1), s), ease(y));
+	return lerp(lerp(grad(PERMUTATIONS[p0 + y0], x, y), grad(PERMUTATIONS[p1 + y0], xm1, y), s), lerp(grad(PERMUTATIONS[p0 + y1], x, ym1), grad(PERMUTATIONS[p1 + y1], xm1, ym1), s), ease(y));
 }
 
 float pragma::math::noise::get_noise(float x, float y, int z)
 {
 	init();
-	int x0 = pragma::math::floor(x);
-	int y0 = pragma::math::floor(y);
+	int x0 = floor(x);
+	int y0 = floor(y);
 	x -= x0;
 	y -= y0;
 	x0 &= PERMUTATION_MASK;
@@ -84,15 +84,15 @@ float pragma::math::noise::get_noise(float x, float y, int z)
 	int p1 = PERMUTATIONS[x0 + 1];
 	float xm1 = x - 1.f, ym1 = y - 1.f;
 	float s = ease(x);
-	return pragma::math::lerp(pragma::math::lerp(grad(PERMUTATIONS[PERMUTATIONS[p0 + y0] + z], x, y), grad(PERMUTATIONS[PERMUTATIONS[p1 + y0] + z], xm1, y), s), pragma::math::lerp(grad(PERMUTATIONS[PERMUTATIONS[p0 + y1] + z], x, ym1), grad(PERMUTATIONS[PERMUTATIONS[p1 + y1] + z], xm1, ym1), s), ease(y));
+	return lerp(lerp(grad(PERMUTATIONS[PERMUTATIONS[p0 + y0] + z], x, y), grad(PERMUTATIONS[PERMUTATIONS[p1 + y0] + z], xm1, y), s), lerp(grad(PERMUTATIONS[PERMUTATIONS[p0 + y1] + z], x, ym1), grad(PERMUTATIONS[PERMUTATIONS[p1 + y1] + z], xm1, ym1), s), ease(y));
 }
 
 float pragma::math::noise::get_noise(float x, float y, float z)
 {
 	init();
-	int x0 = pragma::math::floor(x);
-	int y0 = pragma::math::floor(y);
-	int z0 = pragma::math::floor(z);
+	int x0 = floor(x);
+	int y0 = floor(y);
+	int z0 = floor(z);
 	x -= x0;
 	y -= y0;
 	z -= z0;
@@ -108,8 +108,8 @@ float pragma::math::noise::get_noise(float x, float y, float z)
 	int p11 = PERMUTATIONS[p1 + y1];
 	float xm1 = x - 1.f, ym1 = y - 1.f, zm1 = z - 1.f;
 	float s = ease(x), t = ease(y);
-	return pragma::math::lerp(pragma::math::lerp(pragma::math::lerp(grad(PERMUTATIONS[p00 + z0], x, y, z), grad(PERMUTATIONS[p10 + z0], xm1, y, z), s), pragma::math::lerp(grad(PERMUTATIONS[p01 + z0], x, ym1, z), grad(PERMUTATIONS[p11 + z0], xm1, ym1, z), s), t),
-	  pragma::math::lerp(pragma::math::lerp(grad(PERMUTATIONS[p00 + z1], x, y, zm1), grad(PERMUTATIONS[p10 + z1], xm1, y, zm1), s), pragma::math::lerp(grad(PERMUTATIONS[p01 + z1], x, ym1, zm1), grad(PERMUTATIONS[p11 + z1], xm1, ym1, zm1), s), t), ease(z));
+	return lerp(lerp(lerp(grad(PERMUTATIONS[p00 + z0], x, y, z), grad(PERMUTATIONS[p10 + z0], xm1, y, z), s), lerp(grad(PERMUTATIONS[p01 + z0], x, ym1, z), grad(PERMUTATIONS[p11 + z0], xm1, ym1, z), s), t),
+	  lerp(lerp(grad(PERMUTATIONS[p00 + z1], x, y, zm1), grad(PERMUTATIONS[p10 + z1], xm1, y, zm1), s), lerp(grad(PERMUTATIONS[p01 + z1], x, ym1, zm1), grad(PERMUTATIONS[p11 + z1], xm1, ym1, zm1), s), t), ease(z));
 }
 
 float pragma::math::noise::grad(int hash, float x)

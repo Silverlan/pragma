@@ -13,38 +13,38 @@ import :console.enums;
 #undef max
 
 static pragma::console::ConsoleColorFlags s_activeConsoleColorFlags = pragma::console::ConsoleColorFlags::None;
-std::string pragma::console::get_ansi_color_code(pragma::console::ConsoleColorFlags flags)
+std::string pragma::console::get_ansi_color_code(ConsoleColorFlags flags)
 {
-	if(pragma::math::is_flag_set(flags, pragma::console::ConsoleColorFlags::Reset))
+	if(math::is_flag_set(flags, ConsoleColorFlags::Reset))
 		return "\u001b[0m";
 	auto colorCode = 0u;
-	auto colorFlags = flags & pragma::console::ConsoleColorFlags::White;
-	auto bIntensity = (flags & pragma::console::ConsoleColorFlags::Intensity) != pragma::console::ConsoleColorFlags::None;
+	auto colorFlags = flags & ConsoleColorFlags::White;
+	auto bIntensity = (flags & ConsoleColorFlags::Intensity) != ConsoleColorFlags::None;
 	std::string strColorCode;
-	if(colorFlags != pragma::console::ConsoleColorFlags::None) {
+	if(colorFlags != ConsoleColorFlags::None) {
 		switch(colorFlags) {
-		case pragma::console::ConsoleColorFlags::Red:
+		case ConsoleColorFlags::Red:
 			colorCode = bIntensity ? 91 : 31;
 			break;
-		case pragma::console::ConsoleColorFlags::Green:
+		case ConsoleColorFlags::Green:
 			colorCode = bIntensity ? 92 : 32;
 			break;
-		case pragma::console::ConsoleColorFlags::Blue:
+		case ConsoleColorFlags::Blue:
 			colorCode = bIntensity ? 94 : 34;
 			break;
-		case pragma::console::ConsoleColorFlags::Yellow:
+		case ConsoleColorFlags::Yellow:
 			colorCode = bIntensity ? 93 : 33;
 			break;
-		case pragma::console::ConsoleColorFlags::Magenta:
+		case ConsoleColorFlags::Magenta:
 			colorCode = bIntensity ? 95 : 35;
 			break;
-		case pragma::console::ConsoleColorFlags::Cyan:
+		case ConsoleColorFlags::Cyan:
 			colorCode = bIntensity ? 96 : 36;
 			break;
-		case pragma::console::ConsoleColorFlags::White:
+		case ConsoleColorFlags::White:
 			colorCode = bIntensity ? 97 : 37;
 			break;
-		case pragma::console::ConsoleColorFlags::Black:
+		case ConsoleColorFlags::Black:
 			colorCode = bIntensity ? 90 : 30;
 			break;
 		}
@@ -52,32 +52,32 @@ std::string pragma::console::get_ansi_color_code(pragma::console::ConsoleColorFl
 	}
 
 	colorCode = 0u;
-	colorFlags = flags & pragma::console::ConsoleColorFlags::BackgroundWhite;
-	bIntensity = (flags & pragma::console::ConsoleColorFlags::BackgroundIntensity) != pragma::console::ConsoleColorFlags::None;
-	if(colorFlags != pragma::console::ConsoleColorFlags::None) {
+	colorFlags = flags & ConsoleColorFlags::BackgroundWhite;
+	bIntensity = (flags & ConsoleColorFlags::BackgroundIntensity) != ConsoleColorFlags::None;
+	if(colorFlags != ConsoleColorFlags::None) {
 		switch(colorFlags) {
-		case pragma::console::ConsoleColorFlags::BackgroundRed:
+		case ConsoleColorFlags::BackgroundRed:
 			colorCode = bIntensity ? 101 : 41;
 			break;
-		case pragma::console::ConsoleColorFlags::BackgroundGreen:
+		case ConsoleColorFlags::BackgroundGreen:
 			colorCode = bIntensity ? 102 : 42;
 			break;
-		case pragma::console::ConsoleColorFlags::BackgroundBlue:
+		case ConsoleColorFlags::BackgroundBlue:
 			colorCode = bIntensity ? 104 : 44;
 			break;
-		case pragma::console::ConsoleColorFlags::BackgroundYellow:
+		case ConsoleColorFlags::BackgroundYellow:
 			colorCode = bIntensity ? 103 : 43;
 			break;
-		case pragma::console::ConsoleColorFlags::BackgroundMagenta:
+		case ConsoleColorFlags::BackgroundMagenta:
 			colorCode = bIntensity ? 105 : 45;
 			break;
-		case pragma::console::ConsoleColorFlags::BackgroundCyan:
+		case ConsoleColorFlags::BackgroundCyan:
 			colorCode = bIntensity ? 106 : 46;
 			break;
-		case pragma::console::ConsoleColorFlags::BackgroundWhite:
+		case ConsoleColorFlags::BackgroundWhite:
 			colorCode = bIntensity ? 107 : 47;
 			break;
-		case pragma::console::ConsoleColorFlags::BackgroundBlack:
+		case ConsoleColorFlags::BackgroundBlack:
 			colorCode = bIntensity ? 100 : 40;
 			break;
 		}
@@ -85,7 +85,7 @@ std::string pragma::console::get_ansi_color_code(pragma::console::ConsoleColorFl
 	}
 	return strColorCode;
 }
-bool pragma::console::set_console_color(pragma::console::ConsoleColorFlags flags)
+bool pragma::console::set_console_color(ConsoleColorFlags flags)
 {
 	reset_console_color();
 	s_activeConsoleColorFlags = flags;
@@ -120,7 +120,7 @@ bool pragma::console::set_console_color(pragma::console::ConsoleColorFlags flags
 bool pragma::console::reset_console_color()
 {
 	std::cout.flush();
-	s_activeConsoleColorFlags = pragma::console::ConsoleColorFlags::None;
+	s_activeConsoleColorFlags = ConsoleColorFlags::None;
 #ifdef _WIN32
 	auto hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if(!hOut)
@@ -143,9 +143,9 @@ const std::unordered_map<pragma::console::ConsoleColorFlags, Color> colorMap = {
   {pragma::console::ConsoleColorFlags::Red, Color {209 / 2, 17 / 2, 65 / 2}}, {pragma::console::ConsoleColorFlags::Green, Color {0 / 2, 177 / 2, 89 / 2}}, {pragma::console::ConsoleColorFlags::Blue, Color {0 / 2, 174 / 2, 219 / 2}},
   {pragma::console::ConsoleColorFlags::Yellow, Color {255 / 2, 196 / 2, 37 / 2}}, {pragma::console::ConsoleColorFlags::Cyan, Color {132 / 2, 193 / 2, 255 / 2}}, {pragma::console::ConsoleColorFlags::Magenta, Color {255 / 2, 51 / 2, 119 / 2}},
   {pragma::console::ConsoleColorFlags::White, Color {255 / 2, 255 / 2, 255 / 2}}};
-std::optional<Color> pragma::console::console_color_flags_to_color(pragma::console::ConsoleColorFlags flags)
+std::optional<Color> pragma::console::console_color_flags_to_color(ConsoleColorFlags flags)
 {
-	auto foregroundFlags = flags & (pragma::console::ConsoleColorFlags::White | pragma::console::ConsoleColorFlags::Intensity);
+	auto foregroundFlags = flags & (ConsoleColorFlags::White | ConsoleColorFlags::Intensity);
 	auto it = colorMap.find(foregroundFlags);
 	if(it != colorMap.end())
 		return it->second;
@@ -155,10 +155,10 @@ std::optional<Color> pragma::console::console_color_flags_to_color(pragma::conso
 pragma::console::ConsoleColorFlags pragma::console::color_to_console_color_flags(const Color &color)
 {
 	auto smallestDiff = std::numeric_limits<uint16_t>::max();
-	auto bestCandidate = pragma::console::ConsoleColorFlags::None;
+	auto bestCandidate = ConsoleColorFlags::None;
 	for(auto &pair : colorMap) {
 		auto &colOther = pair.second;
-		auto diff = static_cast<uint16_t>(pragma::math::abs(color.r - colOther.r) + pragma::math::abs(color.g - colOther.g) + pragma::math::abs(color.b - colOther.b));
+		auto diff = static_cast<uint16_t>(math::abs(color.r - colOther.r) + math::abs(color.g - colOther.g) + math::abs(color.b - colOther.b));
 		if(diff > smallestDiff)
 			continue;
 		smallestDiff = diff;
@@ -167,7 +167,7 @@ pragma::console::ConsoleColorFlags pragma::console::color_to_console_color_flags
 	return bestCandidate;
 }
 
-std::string pragma::console::get_true_color_code(std::optional<Color> foregroundColor, std::optional<Color> backgroundColor, pragma::console::ConsoleDecoratorFlags flags)
+std::string pragma::console::get_true_color_code(std::optional<Color> foregroundColor, std::optional<Color> backgroundColor, ConsoleDecoratorFlags flags)
 {
 	std::string colorCode;
 	if(foregroundColor)
@@ -175,21 +175,21 @@ std::string pragma::console::get_true_color_code(std::optional<Color> foreground
 	if(backgroundColor)
 		colorCode += "\033[48;2;" + std::to_string(backgroundColor->r) + ";" + std::to_string(backgroundColor->g) + ";" + std::to_string(backgroundColor->b) + "m";
 
-	if(flags != pragma::console::ConsoleDecoratorFlags::None) {
+	if(flags != ConsoleDecoratorFlags::None) {
 		std::string decoratorCode;
-		if((flags & pragma::console::ConsoleDecoratorFlags::Bold) != pragma::console::ConsoleDecoratorFlags::None)
+		if((flags & ConsoleDecoratorFlags::Bold) != ConsoleDecoratorFlags::None)
 			decoratorCode += ";1";
-		if((flags & pragma::console::ConsoleDecoratorFlags::Underline) != pragma::console::ConsoleDecoratorFlags::None)
+		if((flags & ConsoleDecoratorFlags::Underline) != ConsoleDecoratorFlags::None)
 			decoratorCode += ";4";
-		if((flags & pragma::console::ConsoleDecoratorFlags::SlowBlink) != pragma::console::ConsoleDecoratorFlags::None)
+		if((flags & ConsoleDecoratorFlags::SlowBlink) != ConsoleDecoratorFlags::None)
 			decoratorCode += ";5";
-		if((flags & pragma::console::ConsoleDecoratorFlags::Framed) != pragma::console::ConsoleDecoratorFlags::None)
+		if((flags & ConsoleDecoratorFlags::Framed) != ConsoleDecoratorFlags::None)
 			decoratorCode += ";51";
-		if((flags & pragma::console::ConsoleDecoratorFlags::Encircled) != pragma::console::ConsoleDecoratorFlags::None)
+		if((flags & ConsoleDecoratorFlags::Encircled) != ConsoleDecoratorFlags::None)
 			decoratorCode += ";52";
-		if((flags & pragma::console::ConsoleDecoratorFlags::Overlined) != pragma::console::ConsoleDecoratorFlags::None)
+		if((flags & ConsoleDecoratorFlags::Overlined) != ConsoleDecoratorFlags::None)
 			decoratorCode += ";53";
-		if((flags & pragma::console::ConsoleDecoratorFlags::Reset) != pragma::console::ConsoleDecoratorFlags::None)
+		if((flags & ConsoleDecoratorFlags::Reset) != ConsoleDecoratorFlags::None)
 			decoratorCode += ";0";
 		if(decoratorCode.empty() == false) {
 			decoratorCode = decoratorCode.substr(1);

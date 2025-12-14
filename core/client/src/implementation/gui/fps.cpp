@@ -40,14 +40,14 @@ void pragma::gui::types::WIFPS::Think(const std::shared_ptr<prosper::IPrimaryCom
 	WIBase::Think(drawCmd);
 	if(!m_text.IsValid())
 		return;
-	auto &tCur = pragma::get_client_state()->RealTime();
+	auto &tCur = get_client_state()->RealTime();
 	if(tCur - m_tLastUpdate > 0.75) {
 		m_tLastUpdate = tCur;
-		auto fps = pragma::get_cengine()->GetFPS();
+		auto fps = get_cengine()->GetFPS();
 		if(fps != m_fpsLast) {
-			auto frameTime = pragma::get_cengine()->GetFrameTime();
+			auto frameTime = get_cengine()->GetFrameTime();
 			m_fpsLast = fps;
-			auto strFps = pragma::util::round_string(fps, 0);
+			auto strFps = util::round_string(fps, 0);
 			auto l = strFps.length();
 			if(l < 3)
 				strFps += std::string(3 - l, ' ');
@@ -64,7 +64,7 @@ void pragma::gui::types::WIFPS::Think(const std::shared_ptr<prosper::IPrimaryCom
 				}
 			}
 			t->SetColor(col);
-			t->SetText("FPS " + strFps + " Frame Time: " + pragma::util::round_string(frameTime, 2) + "ms");
+			t->SetText("FPS " + strFps + " Frame Time: " + util::round_string(frameTime, 2) + "ms");
 		}
 	}
 }

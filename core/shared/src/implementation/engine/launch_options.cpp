@@ -31,7 +31,7 @@ void pragma::Engine::InitLaunchOptions(int argc, char *argv[])
 			launchCmdArgs.insert(launchCmdArgs.begin(), arg);
 			continue;
 		}
-		pragma::string::to_lower(arg);
+		string::to_lower(arg);
 		switch(token) {
 		case '-':
 			{
@@ -53,7 +53,7 @@ void pragma::Engine::InitLaunchOptions(int argc, char *argv[])
 		case '+':
 			{
 				std::vector<std::string> subArgs;
-				pragma::string::explode_whitespace(arg, subArgs);
+				string::explode_whitespace(arg, subArgs);
 				if(subArgs.empty() == false) {
 					arg = subArgs.front();
 					subArgs.erase(subArgs.begin());
@@ -77,12 +77,12 @@ void pragma::Engine::InitLaunchOptions(int argc, char *argv[])
 		f(lo.argv);
 	}
 
-	if(pragma::is_log_level_enabled(pragma::util::LogSeverity::Debug)) {
+	if(is_log_level_enabled(util::LogSeverity::Debug)) {
 		std::vector<std::string> gameCmds;
 		gameCmds.reserve(m_launchCommands.size());
 		for(auto &cmd : m_launchCommands)
 			gameCmds.push_back(cmd.command);
-		spdlog::debug("{} game commands have been queued: {}", m_launchCommands.size(), pragma::string::implode(gameCmds, ", "));
+		spdlog::debug("{} game commands have been queued: {}", m_launchCommands.size(), string::implode(gameCmds, ", "));
 	}
 }
 

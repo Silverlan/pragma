@@ -14,7 +14,7 @@ import pragma.shared;
 
 using namespace pragma;
 
-Bool ecs::SShooterComponent::ReceiveNetEvent(pragma::BasePlayerComponent &pl, pragma::NetEventId eventId, NetPacket &packet)
+Bool ecs::SShooterComponent::ReceiveNetEvent(BasePlayerComponent &pl, NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvFireBullets)
 		ReceiveBulletEvent(packet, &pl);
@@ -23,22 +23,22 @@ Bool ecs::SShooterComponent::ReceiveNetEvent(pragma::BasePlayerComponent &pl, pr
 	return true;
 }
 void ecs::SShooterComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, const std::function<bool(game::DamageInfo &, pragma::ecs::BaseEntity *)> &fCallback, std::vector<pragma::physics::TraceResult> &outHitTargets, bool bMaster)
+void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, const std::function<bool(game::DamageInfo &, BaseEntity *)> &fCallback, std::vector<physics::TraceResult> &outHitTargets, bool bMaster)
 {
 	game::DamageInfo dmg;
 	dmg.SetAttacker(bulletInfo.hAttacker.valid() ? bulletInfo.hAttacker.get() : &GetEntity());
 	dmg.SetInflictor(bulletInfo.hInflictor.valid() ? bulletInfo.hInflictor.get() : &GetEntity());
-	dmg.SetDamageType(DamageType::Bullet);
+	dmg.SetDamageType(Bullet);
 
 	auto bCustomForce = (isnan(bulletInfo.force) == false) ? true : false;
 	if(bCustomForce == true)
 		dmg.SetForce(Vector3(bulletInfo.force, 0, 0));
 
-	auto bCustomDamageType = (bulletInfo.damageType != pragma::util::declvalue(&game::BulletInfo::damageType)) ? true : false;
+	auto bCustomDamageType = (bulletInfo.damageType != util::declvalue(&game::BulletInfo::damageType)) ? true : false;
 	if(bCustomDamageType == true)
 		dmg.SetDamageType(bulletInfo.damageType);
 
-	auto bCustomDamage = (bulletInfo.damage != pragma::util::declvalue(&game::BulletInfo::damage)) ? true : false;
+	auto bCustomDamage = (bulletInfo.damage != util::declvalue(&game::BulletInfo::damage)) ? true : false;
 	if(bCustomDamage == true)
 		dmg.SetDamage(static_cast<uint16_t>(bulletInfo.damage));
 
@@ -55,11 +55,11 @@ void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, con
 	}
 	FireBullets(bulletInfo, dmg, outHitTargets, fCallback, bMaster);
 }
-void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, std::vector<pragma::physics::TraceResult> &results, bool bMaster) { FireBullets(bulletInfo, nullptr, results, bMaster); }
+void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, std::vector<physics::TraceResult> &results, bool bMaster) { FireBullets(bulletInfo, nullptr, results, bMaster); }
 
-void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, game::DamageInfo &dmgInfo, std::vector<pragma::physics::TraceResult> &outHitTargets, const std::function<bool(game::DamageInfo &, pragma::ecs::BaseEntity *)> &fCallback, bool bMaster)
+void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, game::DamageInfo &dmgInfo, std::vector<physics::TraceResult> &outHitTargets, const std::function<bool(game::DamageInfo &, BaseEntity *)> &fCallback, bool bMaster)
 {
-	pragma::BasePlayerComponent *pl = nullptr;
+	BasePlayerComponent *pl = nullptr;
 	if(bMaster == false) {
 		if(m_nextBullet == nullptr) // No bullet has been scheduled
 			return;
@@ -75,7 +75,7 @@ void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, gam
 		m_nextBullet = std::unique_ptr<NextBulletInfo>(new NextBulletInfo);
 		m_nextBullet->destinations = GetBulletDestinations(origin, dir, bulletInfo);
 	}
-	pragma::util::ScopeGuard sg([this]() {
+	util::ScopeGuard sg([this]() {
 		m_nextBullet = nullptr; // We're done with this
 	});
 
@@ -86,7 +86,7 @@ void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, gam
 	std::vector<Vector3> dstPositions;
 	dstPositions.reserve(bulletInfo.bulletCount);
 
-	pragma::physics::TraceData data;
+	physics::TraceData data;
 	GetBulletTraceData(bulletInfo, data);
 	outHitTargets.reserve(bulletInfo.bulletCount);
 	for(auto i = decltype(bulletInfo.bulletCount) {0}; i < bulletInfo.bulletCount; ++i) {
@@ -106,9 +106,9 @@ void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, gam
 				auto &result = outHitTargets.at(i);
 				if(result.entity.valid() == false)
 					continue;
-				auto pDamageableComponent = result.entity->GetComponent<pragma::DamageableComponent>();
+				auto pDamageableComponent = result.entity->GetComponent<DamageableComponent>();
 				if(pDamageableComponent.valid()) {
-					auto hitGroup = pragma::physics::HitGroup::Generic;
+					auto hitGroup = physics::HitGroup::Generic;
 					if(result.collisionObj.IsValid()) {
 						auto charComponent = result.entity.get()->GetCharacterComponent();
 						if(charComponent.valid())
@@ -131,13 +131,13 @@ void ecs::SShooterComponent::FireBullets(const game::BulletInfo &bulletInfo, gam
 		for(auto &hitPos : dstPositions)
 			p->Write<Vector3>(hitPos);
 		if(bMaster == false) {
-			auto *session = static_cast<pragma::SPlayerComponent *>(pl)->GetClientSession();
-			ent.SendNetEvent(m_netEvFireBullets, p, pragma::networking::Protocol::FastUnreliable, session ? pragma::networking::ClientRecipientFilter {*session, pragma::networking::ClientRecipientFilter::FilterType::Exclude} : pragma::networking::ClientRecipientFilter {});
+			auto *session = static_cast<SPlayerComponent *>(pl)->GetClientSession();
+			ent.SendNetEvent(m_netEvFireBullets, p, networking::Protocol::FastUnreliable, session ? networking::ClientRecipientFilter {*session, networking::ClientRecipientFilter::FilterType::Exclude} : networking::ClientRecipientFilter {});
 		}
 		else
-			ent.SendNetEvent(m_netEvFireBullets, p, pragma::networking::Protocol::FastUnreliable);
+			ent.SendNetEvent(m_netEvFireBullets, p, networking::Protocol::FastUnreliable);
 	}
 
-	ecs::events::CEOnBulletsFired evData {bulletInfo, outHitTargets};
+	events::CEOnBulletsFired evData {bulletInfo, outHitTargets};
 	BroadcastEvent(baseShooterComponent::EVENT_ON_BULLETS_FIRED, evData);
 }

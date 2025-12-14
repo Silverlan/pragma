@@ -11,9 +11,9 @@ pragma::audio::SoundScript *pragma::NetworkState::FindSoundScript(const char *na
 
 bool pragma::NetworkState::LoadSoundScripts(const char *file, bool bPrecache)
 {
-	std::string path = pragma::audio::SoundScriptManager::GetSoundScriptPath();
+	std::string path = audio::SoundScriptManager::GetSoundScriptPath();
 	path += file;
-	std::vector<std::shared_ptr<pragma::audio::SoundScript>> scripts;
+	std::vector<std::shared_ptr<audio::SoundScript>> scripts;
 	if(m_soundScriptManager->Load(path.c_str(), &scripts) == false) {
 		static auto bSkipPort = false;
 		if(bSkipPort == false) {

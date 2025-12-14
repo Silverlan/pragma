@@ -19,15 +19,15 @@ void SLightSpotVolComponent::Initialize()
 void SLightSpotVolComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_coneStartOffset);
-	pragma::networking::write_unique_entity(packet, m_hSpotlightTarget.get());
+	networking::write_unique_entity(packet, m_hSpotlightTarget.get());
 }
 
-void SLightSpotVolComponent::SetSpotlightTarget(pragma::ecs::BaseEntity &ent)
+void SLightSpotVolComponent::SetSpotlightTarget(ecs::BaseEntity &ent)
 {
 	BaseEnvLightSpotVolComponent::SetSpotlightTarget(ent);
 	NetPacket p {};
-	pragma::networking::write_entity(p, &ent);
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetSpotlightTarget, p, pragma::networking::Protocol::SlowReliable);
+	networking::write_entity(p, &ent);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetSpotlightTarget, p, networking::Protocol::SlowReliable);
 }
 
 void SLightSpotVolComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

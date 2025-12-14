@@ -116,51 +116,51 @@ void Lua::ai::push_task(lua::State *l, pragma::ai::BehaviorNode &task)
 
 //////////
 
-AILuaBehaviorNode::AILuaBehaviorNode(Type type, pragma::ai::SelectorType selectorType) : pragma::ai::BehaviorNode(type, selectorType), LuaObjectBase() {}
+AILuaBehaviorNode::AILuaBehaviorNode(Type type, pragma::ai::SelectorType selectorType) : BehaviorNode(type, selectorType), LuaObjectBase() {}
 AILuaBehaviorNode::~AILuaBehaviorNode() {}
 void AILuaBehaviorNode::Print(const pragma::ai::Schedule *sched, std::ostream &o) const { o << ToString(); }
 void AILuaBehaviorNode::Clear()
 {
 	ClearLuaObject();
-	pragma::ai::BehaviorNode::Clear();
+	BehaviorNode::Clear();
 }
 void AILuaBehaviorNode::OnTaskComplete(const pragma::ai::Schedule *sched, uint32_t taskId, Result result)
 {
-	pragma::ai::BehaviorNode::OnTaskComplete(sched, taskId, result);
+	BehaviorNode::OnTaskComplete(sched, taskId, result);
 	CallLuaMember<void, std::shared_ptr<pragma::ai::Schedule>, uint32_t, std::underlying_type_t<decltype(result)>>("OnTaskComplete", const_cast<pragma::ai::Schedule *>(sched)->shared_from_this(), taskId, pragma::math::to_integral(result));
 }
 void AILuaBehaviorNode::SetLuaClass(const luabind::object &o) { m_luaClass = o; }
 std::shared_ptr<pragma::ai::BehaviorNode> AILuaBehaviorNode::Copy() const { return Lua::ai::server::create_lua_task(m_luaClass.interpreter(), m_luaClass, m_type, m_selector->GetType()); }
 void AILuaBehaviorNode::Stop()
 {
-	pragma::ai::BehaviorNode::Stop();
+	BehaviorNode::Stop();
 	CallLuaMember<void>("Stop");
 }
 pragma::ai::BehaviorNode::Result AILuaBehaviorNode::Think(const pragma::ai::Schedule *sched, pragma::BaseAIComponent &ent)
 {
-	auto r = pragma::ai::BehaviorNode::Think(sched, ent);
+	auto r = BehaviorNode::Think(sched, ent);
 	if(r == Result::Pending)
 		return r;
-	auto luaResult = pragma::math::to_integral(pragma::ai::BehaviorNode::Result::Succeeded);
+	auto luaResult = pragma::math::to_integral(Result::Succeeded);
 	if(CallLuaMember<uint32_t, std::shared_ptr<pragma::ai::Schedule>, luabind::object, std::underlying_type_t<decltype(r)>>("Think", &luaResult, const_cast<pragma::ai::Schedule *>(sched)->shared_from_this(), ent.GetLuaObject(), pragma::math::to_integral(r)) == CallbackReturnType::HasReturnValue)
-		r = static_cast<pragma::ai::BehaviorNode::Result>(luaResult);
+		r = static_cast<Result>(luaResult);
 	return r;
 }
 pragma::ai::BehaviorNode::Result AILuaBehaviorNode::Start(const pragma::ai::Schedule *sched, pragma::BaseAIComponent &ent)
 {
-	auto r = pragma::ai::BehaviorNode::Start(sched, ent);
-	auto luaResult = pragma::math::to_integral(pragma::ai::BehaviorNode::Result::Succeeded);
+	auto r = BehaviorNode::Start(sched, ent);
+	auto luaResult = pragma::math::to_integral(Result::Succeeded);
 	if(CallLuaMember<uint32_t, std::shared_ptr<pragma::ai::Schedule>, luabind::object>("Start", &luaResult, const_cast<pragma::ai::Schedule *>(sched)->shared_from_this(), ent.GetLuaObject()) == CallbackReturnType::HasReturnValue)
-		r = static_cast<pragma::ai::BehaviorNode::Result>(luaResult);
+		r = static_cast<Result>(luaResult);
 	return r;
 }
 void AILuaBehaviorNode::SetScheduleParameter(uint8_t taskParamId, uint8_t scheduleParamId)
 {
-	pragma::ai::BehaviorNode::SetScheduleParameter(taskParamId, scheduleParamId);
+	BehaviorNode::SetScheduleParameter(taskParamId, scheduleParamId);
 	CallLuaMember<void, uint8_t, uint8_t>("OnSetScheduleParameter", taskParamId, scheduleParamId);
 }
 
-AILuaBehaviorNodeWrapper::AILuaBehaviorNodeWrapper(uint32_t nodeType, uint32_t selectorType) : BaseBehaviorTask(pragma::util::make_shared<AILuaBehaviorNode>(static_cast<pragma::ai::BehaviorNode::Type>(nodeType), static_cast<pragma::ai::SelectorType>(selectorType))), luabind::wrap_base() {}
+AILuaBehaviorNodeWrapper::AILuaBehaviorNodeWrapper(uint32_t nodeType, uint32_t selectorType) : BaseBehaviorTask(pragma::util::make_shared<AILuaBehaviorNode>(static_cast<pragma::ai::BehaviorNode::Type>(nodeType), static_cast<pragma::ai::SelectorType>(selectorType))), wrap_base() {}
 
 AILuaBehaviorNodeWrapper::AILuaBehaviorNodeWrapper(uint32_t nodeType) : AILuaBehaviorNodeWrapper(nodeType, pragma::math::to_integral(pragma::ai::SelectorType::Sequential)) {}
 
@@ -291,30 +291,30 @@ void Lua::AIBehaviorNode::register_class(lua::State *l, luabind::module_ &mod)
 	mod[classDefBehaviorNode];
 }
 
-void Lua::AIBehaviorNode::GetType(lua::State *l, ai::TaskWrapper &task) { Lua::PushInt(l, pragma::math::to_integral(task->GetType())); }
-void Lua::AIBehaviorNode::GetSelectorType(lua::State *l, ai::TaskWrapper &task) { Lua::PushInt(l, pragma::math::to_integral(task->GetSelectorType())); }
-void Lua::AIBehaviorNode::IsActive(lua::State *l, ai::TaskWrapper &task) { Lua::PushBool(l, task->IsActive()); }
+void Lua::AIBehaviorNode::GetType(lua::State *l, ai::TaskWrapper &task) { PushInt(l, pragma::math::to_integral(task->GetType())); }
+void Lua::AIBehaviorNode::GetSelectorType(lua::State *l, ai::TaskWrapper &task) { PushInt(l, pragma::math::to_integral(task->GetSelectorType())); }
+void Lua::AIBehaviorNode::IsActive(lua::State *l, ai::TaskWrapper &task) { PushBool(l, task->IsActive()); }
 void Lua::AIBehaviorNode::GetNode(lua::State *l, ai::TaskWrapper &task, uint32_t nodeId)
 {
 	auto &nodes = task->GetNodes();
 	if(nodeId >= nodes.size())
 		return;
 	auto &node = nodes.at(nodeId);
-	Lua::ai::push_task(l, *node);
+	ai::push_task(l, *node);
 }
 void Lua::AIBehaviorNode::GetNodes(lua::State *l, ai::TaskWrapper &task)
 {
 	auto &nodes = task->GetNodes();
-	auto t = Lua::CreateTable(l);
+	auto t = CreateTable(l);
 	for(auto i = decltype(nodes.size()) {0}; i < nodes.size(); ++i) {
 		auto &node = nodes[i];
-		Lua::PushInt(l, i + 1);
-		Lua::ai::push_task(l, *node);
-		Lua::SetTableValue(l, t);
+		PushInt(l, i + 1);
+		ai::push_task(l, *node);
+		SetTableValue(l, t);
 	}
 }
 void Lua::AIBehaviorNode::SetScheduleParameter(lua::State *, ai::TaskWrapper &task, uint8_t taskParamId, uint8_t scheduleParamId) { task->SetScheduleParameter(taskParamId, scheduleParamId); }
-void Lua::AIBehaviorNode::HasParameter(lua::State *l, ai::TaskWrapper &task, std::shared_ptr<pragma::ai::Schedule> &sched, uint8_t paramIdx) { Lua::PushBool(l, (task->GetParameter(sched.get(), paramIdx) != nullptr) ? true : false); }
+void Lua::AIBehaviorNode::HasParameter(lua::State *l, ai::TaskWrapper &task, std::shared_ptr<pragma::ai::Schedule> &sched, uint8_t paramIdx) { PushBool(l, (task->GetParameter(sched.get(), paramIdx) != nullptr) ? true : false); }
 void Lua::AIBehaviorNode::LinkParameter(lua::State *l, ai::TaskWrapper &task, uint8_t paramIdx, ai::TaskWrapper &taskOther) { task->LinkParameter(paramIdx, *taskOther); }
 void Lua::AIBehaviorNode::LinkParameter(lua::State *l, ai::TaskWrapper &task, uint8_t paramIdx, ai::TaskWrapper &taskOther, uint8_t paramIdxOther) { task->LinkParameter(paramIdx, *taskOther, paramIdxOther); }
 
@@ -329,25 +329,25 @@ T get_parameter(Lua::ai::TaskWrapper &task, std::shared_ptr<pragma::ai::Schedule
 void Lua::AIBehaviorNode::GetParameterBool(lua::State *l, ai::TaskWrapper &task, std::shared_ptr<pragma::ai::Schedule> &sched, uint8_t paramIdx, bool def)
 {
 	auto r = get_parameter<decltype(def)>(task, sched, paramIdx, pragma::ai::Schedule::Parameter::Type::Bool, &pragma::ai::BehaviorParameter::GetBool, def);
-	Lua::PushBool(l, r);
+	PushBool(l, r);
 }
 void Lua::AIBehaviorNode::GetParameterBool(lua::State *l, ai::TaskWrapper &task, std::shared_ptr<pragma::ai::Schedule> &sched, uint8_t paramIdx) { GetParameterBool(l, task, sched, paramIdx, false); }
 void Lua::AIBehaviorNode::GetParameterInt(lua::State *l, ai::TaskWrapper &task, std::shared_ptr<pragma::ai::Schedule> &sched, uint8_t paramIdx, int32_t def)
 {
 	auto r = get_parameter<decltype(def)>(task, sched, paramIdx, pragma::ai::Schedule::Parameter::Type::Int, &pragma::ai::BehaviorParameter::GetInt, def);
-	Lua::PushInt(l, r);
+	PushInt(l, r);
 }
 void Lua::AIBehaviorNode::GetParameterInt(lua::State *l, ai::TaskWrapper &task, std::shared_ptr<pragma::ai::Schedule> &sched, uint8_t paramIdx) { GetParameterInt(l, task, sched, paramIdx, 0); }
 void Lua::AIBehaviorNode::GetParameterFloat(lua::State *l, ai::TaskWrapper &task, std::shared_ptr<pragma::ai::Schedule> &sched, uint8_t paramIdx, float def)
 {
 	auto r = get_parameter<decltype(def)>(task, sched, paramIdx, pragma::ai::Schedule::Parameter::Type::Float, &pragma::ai::BehaviorParameter::GetFloat, def);
-	Lua::PushNumber(l, r);
+	PushNumber(l, r);
 }
 void Lua::AIBehaviorNode::GetParameterFloat(lua::State *l, ai::TaskWrapper &task, std::shared_ptr<pragma::ai::Schedule> &sched, uint8_t paramIdx) { GetParameterFloat(l, task, sched, paramIdx, 0.f); }
 void Lua::AIBehaviorNode::GetParameterString(lua::State *l, ai::TaskWrapper &task, std::shared_ptr<pragma::ai::Schedule> &sched, uint8_t paramIdx, const std::string &def)
 {
 	auto *r = get_parameter<decltype(&def)>(task, sched, paramIdx, pragma::ai::Schedule::Parameter::Type::String, &pragma::ai::BehaviorParameter::GetString, &def);
-	Lua::PushString(l, *r);
+	PushString(l, *r);
 }
 void Lua::AIBehaviorNode::GetParameterString(lua::State *l, ai::TaskWrapper &task, std::shared_ptr<pragma::ai::Schedule> &sched, uint8_t paramIdx) { GetParameterString(l, task, sched, paramIdx, ""); }
 void Lua::AIBehaviorNode::GetParameterEntity(lua::State *l, ai::TaskWrapper &task, std::shared_ptr<pragma::ai::Schedule> &sched, uint8_t paramIdx, pragma::ecs::BaseEntity *def)
@@ -380,12 +380,12 @@ void Lua::AIBehaviorNode::GetParameterType(lua::State *l, ai::TaskWrapper &task,
 {
 	auto *param = task->GetParameter(sched.get(), paramIdx);
 	if(param == nullptr)
-		Lua::PushInt(l, pragma::math::to_integral(pragma::ai::Schedule::Parameter::Type::None));
+		PushInt(l, pragma::math::to_integral(pragma::ai::Schedule::Parameter::Type::None));
 	else
-		Lua::PushInt(l, pragma::math::to_integral(param->GetType()));
+		PushInt(l, pragma::math::to_integral(param->GetType()));
 }
 void Lua::AIBehaviorNode::SetDebugName(lua::State *l, ai::TaskWrapper &task, const std::string &name) { task->SetDebugName(name); }
-void Lua::AIBehaviorNode::GetDebugName(lua::State *l, ai::TaskWrapper &task) { Lua::PushString(l, task->GetDebugInfo().debugName); }
+void Lua::AIBehaviorNode::GetDebugName(lua::State *l, ai::TaskWrapper &task) { PushString(l, task->GetDebugInfo().debugName); }
 void Lua::AIBehaviorNode::SetParameterBool(lua::State *, ai::TaskWrapper &task, uint8_t idx, bool b) { task->SetParameter(idx, b); }
 void Lua::AIBehaviorNode::SetParameterInt(lua::State *, ai::TaskWrapper &task, uint8_t idx, int32_t i) { task->SetParameter(idx, i); }
 void Lua::AIBehaviorNode::SetParameterFloat(lua::State *, ai::TaskWrapper &task, uint8_t idx, float f) { task->SetParameter(idx, f); }

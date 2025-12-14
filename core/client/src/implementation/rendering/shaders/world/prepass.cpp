@@ -26,7 +26,7 @@ decltype(ShaderPrepassBase::VERTEX_BINDING_BONE_WEIGHT_EXT) ShaderPrepassBase::V
 decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID) ShaderPrepassBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID, VERTEX_BINDING_BONE_WEIGHT_EXT};
 decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT) ShaderPrepassBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT, VERTEX_BINDING_BONE_WEIGHT_EXT};
 
-decltype(ShaderPrepassBase::VERTEX_BINDING_VERTEX) ShaderPrepassBase::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(pragma::rendering::VertexBufferData)};
+decltype(ShaderPrepassBase::VERTEX_BINDING_VERTEX) ShaderPrepassBase::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(rendering::VertexBufferData)};
 decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_POSITION) ShaderPrepassBase::VERTEX_ATTRIBUTE_POSITION = {ShaderEntity::VERTEX_ATTRIBUTE_POSITION, VERTEX_BINDING_VERTEX};
 decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_UV) ShaderPrepassBase::VERTEX_ATTRIBUTE_UV = {ShaderEntity::VERTEX_ATTRIBUTE_UV, VERTEX_BINDING_VERTEX};
 
@@ -40,7 +40,7 @@ decltype(ShaderPrepassBase::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderPrepassBase::D
 
 prosper::util::RenderPassCreateInfo::AttachmentInfo ShaderPrepassBase::get_depth_render_pass_attachment_info(prosper::SampleCountFlags sampleCount)
 {
-	return prosper::util::RenderPassCreateInfo::AttachmentInfo {ShaderGameWorldLightingPass::RENDER_PASS_DEPTH_FORMAT, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AttachmentLoadOp::Clear, prosper::AttachmentStoreOp::Store, sampleCount,
+	return prosper::util::RenderPassCreateInfo::AttachmentInfo {RENDER_PASS_DEPTH_FORMAT, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AttachmentLoadOp::Clear, prosper::AttachmentStoreOp::Store, sampleCount,
 	  prosper::ImageLayout::DepthStencilAttachmentOptimal};
 }
 
@@ -65,10 +65,10 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPrepassBase::InitializeMater
 	auto diffuseTexture = std::static_pointer_cast<material::Texture>(diffuseMap->texture);
 	if(diffuseTexture->HasValidVkTexture() == false)
 		return nullptr;
-	auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
+	auto descSetGroup = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 	mat.SetDescriptorSetGroup(*this, descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
-	descSet.SetBindingTexture(*diffuseTexture->GetVkTexture(), pragma::math::to_integral(MaterialBinding::AlbedoMap));
+	descSet.SetBindingTexture(*diffuseTexture->GetVkTexture(), math::to_integral(MaterialBinding::AlbedoMap));
 	descSet.Update();
 	return descSetGroup;
 }
@@ -116,12 +116,12 @@ void ShaderPrepassBase::GetVertexAnimationPushConstantInfo(uint32_t &offset) con
 
 //
 
-void ShaderPrepassBase::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
-  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+void ShaderPrepassBase::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
+  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const
 {
 	std::array<prosper::IDescriptorSet *, 2> descSets {&dsScene, &dsRenderSettings};
 
-	ShaderPrepass::PushConstants pushConstants {};
+	PushConstants pushConstants {};
 	pushConstants.Initialize();
 	pushConstants.drawOrigin = drawOrigin;
 	pushConstants.flags = inOutSceneFlags;
@@ -159,10 +159,10 @@ prosper::util::RenderPassCreateInfo::AttachmentInfo ShaderPrepass::get_normal_re
 ShaderPrepass::ShaderPrepass(prosper::IPrContext &context, const std::string &identifier) : ShaderPrepassBase(context, identifier, "programs/scene/prepass/prepass", "programs/scene/prepass/prepass")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
-	SetPipelineCount(pragma::math::to_integral(Pipeline::Count) * pragma::math::to_integral(rendering::PassType::Count));
+	SetPipelineCount(math::to_integral(Pipeline::Count) * math::to_integral(rendering::PassType::Count));
 }
 
-uint32_t ShaderPrepass::GetPassPipelineIndexStartOffset(rendering::PassType passType) const { return pragma::math::to_integral(passType) * pragma::math::to_integral(Pipeline::Count); }
+uint32_t ShaderPrepass::GetPassPipelineIndexStartOffset(rendering::PassType passType) const { return math::to_integral(passType) * math::to_integral(Pipeline::Count); }
 
 void ShaderPrepass::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {
@@ -180,7 +180,7 @@ void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 	auto enableAnimation = false;
 	auto enableMorphTargetAnimation = false;
 	auto extendedVertexWeights = false;
-	switch(static_cast<Pipeline>(pipelineIdx % pragma::math::to_integral(Pipeline::Count))) {
+	switch(static_cast<Pipeline>(pipelineIdx % math::to_integral(Pipeline::Count))) {
 	case Pipeline::Opaque:
 		enableAnimation = true;
 		enableMorphTargetAnimation = true;
@@ -202,17 +202,17 @@ void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 		break;
 	}
 
-	auto isReflection = (static_cast<rendering::PassType>(pipelineIdx / pragma::math::to_integral(Pipeline::Count)) == rendering::PassType::Reflection);
+	auto isReflection = (static_cast<rendering::PassType>(pipelineIdx / math::to_integral(Pipeline::Count)) == rendering::PassType::Reflection);
 	if(isReflection)
 		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo, prosper::CullModeFlags::FrontBit);
 
-	if(pragma::get_client_state()->GetGameWorldShaderSettings().ssaoEnabled)
+	if(get_client_state()->GetGameWorldShaderSettings().ssaoEnabled)
 		enableNormalOutput = true;
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, pragma::math::to_integral(SpecializationConstant::EnableAlphaTest), static_cast<uint32_t>(enableAlphaTest));
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, pragma::math::to_integral(SpecializationConstant::EnableNormalOutput), static_cast<uint32_t>(enableNormalOutput));
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, pragma::math::to_integral(SpecializationConstant::EnableAnimation), static_cast<uint32_t>(enableAnimation));
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, pragma::math::to_integral(SpecializationConstant::EnableMorphTargetAnimation), static_cast<uint32_t>(enableMorphTargetAnimation));
-	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, pragma::math::to_integral(SpecializationConstant::EnableExtendedVertexWeights), static_cast<uint32_t>(extendedVertexWeights));
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, math::to_integral(SpecializationConstant::EnableAlphaTest), static_cast<uint32_t>(enableAlphaTest));
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, math::to_integral(SpecializationConstant::EnableNormalOutput), static_cast<uint32_t>(enableNormalOutput));
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, math::to_integral(SpecializationConstant::EnableAnimation), static_cast<uint32_t>(enableAnimation));
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, math::to_integral(SpecializationConstant::EnableMorphTargetAnimation), static_cast<uint32_t>(enableMorphTargetAnimation));
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, math::to_integral(SpecializationConstant::EnableExtendedVertexWeights), static_cast<uint32_t>(extendedVertexWeights));
 }
 void ShaderPrepass::InitializeShaderResources()
 {

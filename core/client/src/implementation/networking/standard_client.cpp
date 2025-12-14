@@ -35,7 +35,7 @@ bool pragma::networking::StandardClient::SendPacket(Protocol protocol, NetPacket
 }
 bool pragma::networking::StandardClient::IsRunning() const { return m_clientConnection != nullptr; }
 bool pragma::networking::StandardClient::IsDisconnected() const { return m_clientConnection->IsDisconnected(); }
-bool pragma::networking::StandardClient::PollEvents(pragma::networking::Error &outErr)
+bool pragma::networking::StandardClient::PollEvents(Error &outErr)
 {
 	m_clientConnection->PollEvents();
 	return true;

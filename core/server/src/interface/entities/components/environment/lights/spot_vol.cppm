@@ -14,13 +14,13 @@ export {
 	namespace pragma {
 		class DLLSERVER SLightSpotVolComponent final : public BaseEnvLightSpotVolComponent, public SBaseNetComponent {
 		  public:
-			SLightSpotVolComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightSpotVolComponent(ent) {}
+			SLightSpotVolComponent(ecs::BaseEntity &ent) : BaseEnvLightSpotVolComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua::State *l) override;
 		  protected:
-			virtual void SetSpotlightTarget(pragma::ecs::BaseEntity &ent) override;
+			virtual void SetSpotlightTarget(ecs::BaseEntity &ent) override;
 		};
 	};
 

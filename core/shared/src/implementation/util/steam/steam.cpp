@@ -17,14 +17,14 @@ std::vector<pragma::util::Path> pragma::util::steam::find_steam_root_paths()
 	auto installationPath = find_steam_installation_path();
 	if(!installationPath)
 		return {};
-	std::vector<pragma::util::Path> paths;
-	paths.push_back(pragma::util::get_normalized_path(*installationPath));
+	std::vector<Path> paths;
+	paths.push_back(get_normalized_path(*installationPath));
 
 	std::vector<std::string> additionalSteamPaths {};
 	get_external_steam_locations(*installationPath, additionalSteamPaths);
 	paths.reserve(paths.size() + additionalSteamPaths.size());
 	for(auto &path : additionalSteamPaths)
-		paths.push_back(pragma::util::get_normalized_path(path));
+		paths.push_back(get_normalized_path(path));
 	return paths;
 }
 
@@ -47,7 +47,7 @@ std::optional<std::string> pragma::util::steam::find_steam_installation_path()
 		rootSteamPath = rootSteamPathLink;
 	}
 	else {
-		auto snapPath = pragma::util::DirPath(std::string {pHomePath}) + "/snap/steam/common/.local/share/Steam/";
+		auto snapPath = DirPath(std::string {pHomePath}) + "/snap/steam/common/.local/share/Steam/";
 		if(fs::is_system_dir(snapPath.GetString()) == true)
 			rootSteamPath = snapPath.GetString();
 		else
@@ -69,17 +69,17 @@ bool pragma::util::steam::get_external_steam_locations(const std::string &steamR
 	DataStream dsContents {static_cast<uint32_t>(lenContents)};
 	f->Read(dsContents->GetData(), lenContents);
 
-	pragma::util::MarkupFile mf {dsContents};
-	auto vdfData = pragma::util::make_shared<pragma::util::steam::vdf::Data>();
+	MarkupFile mf {dsContents};
+	auto vdfData = pragma::util::make_shared<vdf::Data>();
 	auto r = pragma::util::steam::vdf::read_vdf_block(mf, vdfData->dataBlock);
-	if(r != pragma::util::MarkupFile::ResultCode::Ok)
+	if(r != MarkupFile::ResultCode::Ok)
 		return false;
 	auto it = vdfData->dataBlock.children.find("libraryfolders");
 	if(it == vdfData->dataBlock.children.end())
 		return false;
 	auto &libraryFolders = it->second;
 	auto fAddPath = [&outExtLocations](std::string path) {
-		pragma::string::replace(path, "\\\\", "/");
+		string::replace(path, "\\\\", "/");
 		if(path.empty() == false && path.back() == '/')
 			path.pop_back();
 		outExtLocations.push_back(path);

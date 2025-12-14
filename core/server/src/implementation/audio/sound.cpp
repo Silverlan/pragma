@@ -15,8 +15,8 @@ void pragma::audio::SALSoundBase::SetShared(bool b) { m_bShared = b; }
 pragma::audio::SALSoundBase *pragma::audio::SALSound::GetBase(ALSound *snd) { return dynamic_cast<SALSoundBase *>(snd); } //(snd->IsSoundScript() == false) ? static_cast<SALSoundBase*>(static_cast<SALSound*>(snd)) : static_cast<SALSoundBase*>(static_cast<SALSoundScript*>(snd));}
 
 #pragma warning(disable : 4056)
-pragma::audio::SALSound::SALSound(pragma::NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, pragma::audio::ALCreateFlags createFlags)
-    : ALSound(nw), SALSoundBase(pragma::math::is_flag_set(createFlags, pragma::audio::ALCreateFlags::DontTransmit) == false), m_soundName {soundName}, m_createFlags {createFlags}
+pragma::audio::SALSound::SALSound(NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, ALCreateFlags createFlags)
+    : ALSound(nw), SALSoundBase(math::is_flag_set(createFlags, ALCreateFlags::DontTransmit) == false), m_soundName {soundName}, m_createFlags {createFlags}
 {
 	m_index = idx;
 	m_duration = duration;
@@ -26,7 +26,7 @@ pragma::audio::SALSound::SALSound(pragma::NetworkState *nw, unsigned int idx, fl
 pragma::audio::SALSound::~SALSound()
 {
 	SendEvent(NetEvent::SetIndex, [](NetPacket &p) { p->Write<uint32_t>(static_cast<uint32_t>(0)); });
-	pragma::Game *game = pragma::ServerState::Get()->GetGameState();
+	Game *game = ServerState::Get()->GetGameState();
 	if(game == nullptr)
 		return;
 	//for(int i=0;i<m_luaCallbacks.size();i++)
@@ -41,14 +41,14 @@ void pragma::audio::SALSound::SendEvent(NetEvent evId, const std::function<void(
 	if(IsShared() == false)
 		return;
 	NetPacket p;
-	p->Write<uint8_t>(pragma::math::to_integral(evId));
+	p->Write<uint8_t>(math::to_integral(evId));
 	p->Write<unsigned int>(this->GetIndex());
 	if(write != nullptr)
 		write(p);
 	if(bUDP == true)
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SND_EV, p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(networking::net_messages::client::SND_EV, p, networking::Protocol::FastUnreliable);
 	else
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::SND_EV, p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(networking::net_messages::client::SND_EV, p, networking::Protocol::SlowReliable);
 }
 
 void pragma::audio::SALSound::SetState(ALState state)
@@ -56,7 +56,7 @@ void pragma::audio::SALSound::SetState(ALState state)
 	auto old = GetState();
 	if(state != old) {
 		CallCallbacks<void, ALState, ALState>("OnStateChanged", old, state);
-		CallLuaCallbacks<void, int32_t, int32_t>("OnStateChanged", pragma::math::to_integral(old), pragma::math::to_integral(state));
+		CallLuaCallbacks<void, int32_t, int32_t>("OnStateChanged", math::to_integral(old), math::to_integral(state));
 	}
 	ALSoundBase::SetState(state);
 }
@@ -70,7 +70,7 @@ void pragma::audio::SALSound::FadeIn(float time)
 	CancelFade();
 	if(!IsPlaying())
 		Play();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true,pragma::ServerState::Get()->RealTime(), time, gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true,ServerState::Get()->RealTime(), time, gain));
 
 	SendEvent(NetEvent::FadeIn, [&time](NetPacket &p) { p->Write<float>(time); });
 }
@@ -81,7 +81,7 @@ void pragma::audio::SALSound::FadeOut(float time)
 		return;
 	float gain = GetGain();
 	CancelFade();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false,pragma::ServerState::Get()->RealTime(), time, gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false,ServerState::Get()->RealTime(), time, gain));
 
 	SendEvent(NetEvent::FadeOut, [&time](NetPacket &p) { p->Write<float>(time); });
 }
@@ -89,7 +89,7 @@ void pragma::audio::SALSound::FadeOut(float time)
 void pragma::audio::SALSound::Update()
 {
 	if(GetState() == ALState::Playing) {
-		double t = pragma::ServerState::Get()->RealTime();
+		double t = ServerState::Get()->RealTime();
 		double tDelta = t - m_tLastUpdate;
 		tDelta *= GetPitch() / 1.f;
 		float dur = GetDuration();
@@ -116,7 +116,7 @@ void pragma::audio::SALSound::Play()
 	}
 	SetState(ALState::Playing);
 	SendEvent(NetEvent::Play);
-	m_tLastUpdate = pragma::ServerState::Get()->RealTime();
+	m_tLastUpdate = ServerState::Get()->RealTime();
 	if(m_tFadeIn > 0.f)
 		FadeIn(m_tFadeIn);
 }
@@ -192,7 +192,7 @@ void pragma::audio::SALSound::SetPosition(const Vector3 &pos, bool bDontTransmit
 	ALSoundBase::SetPosition(pos);
 	if(bDontTransmit == true)
 		return;
-	SendEvent(NetEvent::SetPos, [&pos](NetPacket &p) { pragma::networking::write_vector(p, pos); });
+	SendEvent(NetEvent::SetPos, [&pos](NetPacket &p) { networking::write_vector(p, pos); });
 }
 void pragma::audio::SALSound::SetPosition(const Vector3 &pos) { SetPosition(pos, false); }
 
@@ -210,7 +210,7 @@ void pragma::audio::SALSound::SetVelocity(const Vector3 &vel, bool bDontTransmit
 	ALSoundBase::SetVelocity(vel);
 	if(bDontTransmit == true)
 		return;
-	SendEvent(NetEvent::SetVelocity, [&vel](NetPacket &p) { pragma::networking::write_vector(p, vel); });
+	SendEvent(NetEvent::SetVelocity, [&vel](NetPacket &p) { networking::write_vector(p, vel); });
 }
 void pragma::audio::SALSound::SetVelocity(const Vector3 &vel) { SetVelocity(vel, false); }
 
@@ -220,7 +220,7 @@ void pragma::audio::SALSound::SetDirection(const Vector3 &dir, bool bDontTransmi
 	ALSoundBase::SetDirection(dir);
 	if(bDontTransmit == true)
 		return;
-	SendEvent(NetEvent::SetDirection, [&dir](NetPacket &p) { pragma::networking::write_vector(p, dir); });
+	SendEvent(NetEvent::SetDirection, [&dir](NetPacket &p) { networking::write_vector(p, dir); });
 }
 void pragma::audio::SALSound::SetDirection(const Vector3 &dir) { SetDirection(dir, false); }
 
@@ -296,10 +296,10 @@ void pragma::audio::SALSound::SetOuterConeGainHF(float gain)
 	ALSoundBase::SetOuterConeGainHF(gain);
 	SendEvent(NetEvent::SetConeOuterGainHF, [&gain](NetPacket &p) { p->Write<float>(gain); });
 }
-void pragma::audio::SALSound::SetType(pragma::audio::ALSoundType type)
+void pragma::audio::SALSound::SetType(ALSoundType type)
 {
 	ALSound::SetType(type);
-	SendEvent(NetEvent::SetType, [&type](NetPacket &p) { p->Write<pragma::audio::ALSoundType>(type); });
+	SendEvent(NetEvent::SetType, [&type](NetPacket &p) { p->Write<ALSoundType>(type); });
 }
 
 void pragma::audio::SALSound::SetFlags(unsigned int flags)
@@ -308,10 +308,10 @@ void pragma::audio::SALSound::SetFlags(unsigned int flags)
 	SendEvent(NetEvent::SetFlags, [&flags](NetPacket &p) { p->Write<unsigned int>(flags); });
 }
 
-void pragma::audio::SALSound::SetSource(pragma::ecs::BaseEntity *ent)
+void pragma::audio::SALSound::SetSource(ecs::BaseEntity *ent)
 {
 	ALSound::SetSource(ent);
-	SendEvent(NetEvent::SetSource, [&ent](NetPacket &p) { pragma::networking::write_entity(p, ent); });
+	SendEvent(NetEvent::SetSource, [&ent](NetPacket &p) { networking::write_entity(p, ent); });
 }
 
 void pragma::audio::SALSound::SetFadeInDuration(float t)

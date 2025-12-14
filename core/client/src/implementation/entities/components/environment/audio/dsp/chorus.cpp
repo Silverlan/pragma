@@ -27,7 +27,7 @@ void CSoundDspChorusComponent::OnEntitySpawn()
 	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	pragma::audio::EfxChorusProperties props {};
+	audio::EfxChorusProperties props {};
 	props.iWaveform = m_kvWaveform;
 	props.iPhase = m_kvPhase;
 	props.flRate = m_kvRate;

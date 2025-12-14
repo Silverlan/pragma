@@ -13,18 +13,18 @@ using namespace pragma;
 
 DISPOSITION SAIComponent::GetDefaultDisposition()
 {
-	auto *charComponent = static_cast<pragma::SCharacterComponent *>(GetEntity().GetCharacterComponent().get());
+	auto *charComponent = static_cast<SCharacterComponent *>(GetEntity().GetCharacterComponent().get());
 	auto *faction = (charComponent != nullptr) ? charComponent->GetFaction() : nullptr;
 	if(faction == nullptr)
 		return DISPOSITION::NEUTRAL;
 	return faction->GetDefaultDisposition();
 }
-void SAIComponent::SetRelationship(pragma::ecs::BaseEntity *ent, DISPOSITION disp, bool revert, int priority)
+void SAIComponent::SetRelationship(ecs::BaseEntity *ent, DISPOSITION disp, bool revert, int priority)
 {
 	if(ent == nullptr)
 		return;
 	ClearRelationship(ent);
-	m_entityRelationships[pragma::math::to_integral(disp)].push_back(pragma::util::make_shared<NPCRelationship>(std::shared_ptr<EntityHandle>(new EntityHandle(ent->GetHandle())), priority));
+	m_entityRelationships[math::to_integral(disp)].push_back(pragma::util::make_shared<NPCRelationship>(std::shared_ptr<EntityHandle>(new EntityHandle(ent->GetHandle())), priority));
 	if(revert == true && ent->IsNPC()) {
 		auto sAiComponent = ent->GetComponent<SAIComponent>();
 		if(sAiComponent.expired() == false)
@@ -39,9 +39,9 @@ void SAIComponent::SetRelationship(EntityHandle &hEnt, DISPOSITION disp, bool re
 }
 void SAIComponent::SetRelationship(std::string className, DISPOSITION disp, int priority)
 {
-	pragma::string::to_lower(className);
+	string::to_lower(className);
 	ClearRelationship(className);
-	m_classRelationships[pragma::math::to_integral(disp)].push_back(pragma::util::make_shared<NPCRelationship>(pragma::util::make_shared<std::string>(className), priority));
+	m_classRelationships[math::to_integral(disp)].push_back(pragma::util::make_shared<NPCRelationship>(pragma::util::make_shared<std::string>(className), priority));
 }
 void SAIComponent::SetRelationship(Faction &faction, DISPOSITION disp, int priority)
 {
@@ -50,14 +50,14 @@ void SAIComponent::SetRelationship(Faction &faction, DISPOSITION disp, int prior
 }
 void SAIComponent::ClearRelationships()
 {
-	auto num = pragma::math::to_integral(DISPOSITION::COUNT);
+	auto num = math::to_integral(DISPOSITION::COUNT);
 	for(auto i = decltype(num) {0}; i < num; ++i) {
 		m_entityRelationships[i].clear();
 		m_classRelationships[i].clear();
 		m_factionRelationships[i].clear();
 	}
 }
-void SAIComponent::ClearRelationship(pragma::ecs::BaseEntity *ent)
+void SAIComponent::ClearRelationship(ecs::BaseEntity *ent)
 {
 	if(ent == nullptr)
 		return;
@@ -78,7 +78,7 @@ void SAIComponent::ClearRelationship(EntityHandle &hEnt)
 }
 void SAIComponent::ClearRelationship(std::string className)
 {
-	pragma::string::to_lower(className);
+	string::to_lower(className);
 	for(auto &rels : m_entityRelationships) {
 		auto it = std::find_if(rels.begin(), rels.end(), [&className](const std::shared_ptr<NPCRelationship> &rel) {
 			auto ptrClassName = std::static_pointer_cast<std::string>(rel->data);
@@ -105,7 +105,7 @@ DISPOSITION SAIComponent::GetDisposition(EntityHandle &hEnt, int *priority)
 		return GetDefaultDisposition();
 	return GetDisposition(hEnt.get(), priority);
 }
-DISPOSITION SAIComponent::GetDisposition(pragma::ecs::BaseEntity *ent, int *priority)
+DISPOSITION SAIComponent::GetDisposition(ecs::BaseEntity *ent, int *priority)
 {
 	if(ent == &GetEntity()) {
 		if(priority != nullptr)
@@ -117,7 +117,7 @@ DISPOSITION SAIComponent::GetDisposition(pragma::ecs::BaseEntity *ent, int *prio
 	int32_t prio = -1;
 	auto disp = GetDisposition(ent->GetClass(), &prio);
 	if(ent->IsNPC() || ent->IsPlayer()) {
-		auto *charComponent = static_cast<pragma::SCharacterComponent *>(ent->GetCharacterComponent().get());
+		auto *charComponent = static_cast<SCharacterComponent *>(ent->GetCharacterComponent().get());
 		auto *factionEnt = (charComponent != nullptr) ? charComponent->GetFaction() : nullptr;
 		if(factionEnt != nullptr) {
 			int32_t prioFaction;
@@ -151,8 +151,8 @@ DISPOSITION SAIComponent::GetDisposition(pragma::ecs::BaseEntity *ent, int *prio
 }
 DISPOSITION SAIComponent::GetDisposition(std::string className, int *priority)
 {
-	pragma::string::to_lower(className);
-	auto *charComponent = static_cast<pragma::SCharacterComponent *>(GetEntity().GetCharacterComponent().get());
+	string::to_lower(className);
+	auto *charComponent = static_cast<SCharacterComponent *>(GetEntity().GetCharacterComponent().get());
 	auto *factionThis = (charComponent != nullptr) ? charComponent->GetFaction() : nullptr;
 	auto bFoundFaction = false;
 	int32_t prio = -1;
@@ -184,7 +184,7 @@ DISPOSITION SAIComponent::GetDisposition(std::string className, int *priority)
 }
 DISPOSITION SAIComponent::GetDisposition(Faction &faction, int *priority)
 {
-	auto *charComponent = static_cast<pragma::SCharacterComponent *>(GetEntity().GetCharacterComponent().get());
+	auto *charComponent = static_cast<SCharacterComponent *>(GetEntity().GetCharacterComponent().get());
 	auto *factionThis = (charComponent != nullptr) ? charComponent->GetFaction() : nullptr;
 	auto bFoundFaction = false;
 	int32_t prio = -1;

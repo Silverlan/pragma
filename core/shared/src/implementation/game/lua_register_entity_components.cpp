@@ -11,10 +11,10 @@ import :entities.base_entity;
 import :game.game;
 
 namespace Lua {
-	bool get_bullet_master(::pragma::ecs::BaseEntity &ent);
-	::pragma::AnimationEvent get_animation_event(lua::State *l, int32_t tArgs, uint32_t eventId);
+	bool get_bullet_master(pragma::ecs::BaseEntity &ent);
+	pragma::AnimationEvent get_animation_event(lua::State *l, int32_t tArgs, uint32_t eventId);
 };
-bool Lua::get_bullet_master(::pragma::ecs::BaseEntity &ent)
+bool Lua::get_bullet_master(pragma::ecs::BaseEntity &ent)
 {
 	auto bMaster = true;
 	if(ent.IsWeapon()) {
@@ -31,18 +31,18 @@ bool Lua::get_bullet_master(::pragma::ecs::BaseEntity &ent)
 }
 pragma::AnimationEvent Lua::get_animation_event(lua::State *l, int32_t tArgs, uint32_t eventId)
 {
-	Lua::CheckTable(l, tArgs);
-	::pragma::AnimationEvent ev {};
-	ev.eventID = static_cast<::pragma::AnimationEvent::Type>(eventId);
-	auto numArgs = Lua::GetObjectLength(l, tArgs);
+	CheckTable(l, tArgs);
+	pragma::AnimationEvent ev {};
+	ev.eventID = static_cast<pragma::AnimationEvent::Type>(eventId);
+	auto numArgs = GetObjectLength(l, tArgs);
 	for(auto i = decltype(numArgs) {0}; i < numArgs; ++i) {
-		Lua::PushInt(l, i + 1); /* 1 */
-		Lua::GetTableValue(l, tArgs);
+		PushInt(l, i + 1); /* 1 */
+		GetTableValue(l, tArgs);
 
-		auto *arg = Lua::CheckString(l, -1);
+		auto *arg = CheckString(l, -1);
 		ev.arguments.push_back(arg);
 
-		Lua::Pop(l, 1);
+		Pop(l, 1);
 	}
 	return ev;
 }
@@ -118,67 +118,67 @@ std::optional<TResult> get_meta_bone_value_ls(const pragma::MetaRigComponent &me
 
 void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
-	pragma::LuaCore::register_entity_component_classes(GetLuaState(), entsMod);
+	LuaCore::register_entity_component_classes(GetLuaState(), entsMod);
 
-	auto classDefEntRef = luabind::class_<pragma::EntityURef>("UniversalEntityReference");
-	classDefEntRef.def(luabind::constructor<const pragma::ecs::BaseEntity &>());
+	auto classDefEntRef = luabind::class_<EntityURef>("UniversalEntityReference");
+	classDefEntRef.def(luabind::constructor<const ecs::BaseEntity &>());
 	classDefEntRef.def(luabind::constructor<const std::string &>());
 	classDefEntRef.def(luabind::tostring(luabind::self));
-	classDefEntRef.def("GetEntity", static_cast<pragma::ecs::BaseEntity *(pragma::EntityURef::*)(pragma::Game &)>(&pragma::EntityURef::GetEntity));
+	classDefEntRef.def("GetEntity", static_cast<ecs::BaseEntity *(EntityURef::*)(Game &)>(&EntityURef::GetEntity));
 	classDefEntRef.def(
-	  "GetUuid", +[](pragma::EntityURef &uref) -> std::optional<Lua::util::Uuid> {
+	  "GetUuid", +[](EntityURef &uref) -> std::optional<Lua::util::Uuid> {
 		  auto uuid = uref.GetUuid();
 		  return uuid.has_value() ? Lua::util::Uuid {*uuid} : std::optional<Lua::util::Uuid> {};
 	  });
-	classDefEntRef.def("GetClassOrName", static_cast<std::optional<std::string> (pragma::EntityURef::*)() const>(&pragma::EntityURef::GetClassOrName));
+	classDefEntRef.def("GetClassOrName", static_cast<std::optional<std::string> (EntityURef::*)() const>(&EntityURef::GetClassOrName));
 	entsMod[classDefEntRef];
-	pragma::LuaCore::define_custom_constructor<pragma::EntityURef, +[](const Lua::util::Uuid &uuid) -> pragma::EntityURef { return pragma::EntityURef {uuid.value}; }, const Lua::util::Uuid &>(GetLuaState());
+	pragma::LuaCore::define_custom_constructor<EntityURef, +[](const Lua::util::Uuid &uuid) -> EntityURef { return EntityURef {uuid.value}; }, const Lua::util::Uuid &>(GetLuaState());
 
-	auto classDefCompRef = luabind::class_<pragma::EntityUComponentRef, pragma::EntityURef>("UniversalComponentReference");
-	classDefCompRef.def(luabind::constructor<const std::string &, pragma::ComponentId>());
+	auto classDefCompRef = luabind::class_<EntityUComponentRef, EntityURef>("UniversalComponentReference");
+	classDefCompRef.def(luabind::constructor<const std::string &, ComponentId>());
 	classDefCompRef.def(luabind::constructor<const std::string &, const std::string &>());
-	classDefCompRef.def(luabind::constructor<const pragma::ecs::BaseEntity &, pragma::ComponentId>());
+	classDefCompRef.def(luabind::constructor<const ecs::BaseEntity &, ComponentId>());
 	classDefCompRef.def(luabind::tostring(luabind::self));
-	classDefCompRef.def("GetComponent", static_cast<pragma::BaseEntityComponent *(pragma::EntityUComponentRef::*)(pragma::Game &)>(&pragma::EntityUComponentRef::GetComponent));
-	classDefCompRef.def("GetComponentId", &pragma::EntityUComponentMemberRef::GetComponentId);
+	classDefCompRef.def("GetComponent", static_cast<BaseEntityComponent *(EntityUComponentRef::*)(Game &)>(&EntityUComponentRef::GetComponent));
+	classDefCompRef.def("GetComponentId", &EntityUComponentMemberRef::GetComponentId);
 	classDefCompRef.def(
-	  "GetComponentName", +[](const pragma::EntityUComponentRef &ref) -> std::optional<std::string> {
+	  "GetComponentName", +[](const EntityUComponentRef &ref) -> std::optional<std::string> {
 		  auto *name = ref.GetComponentName();
 		  if(!name)
 			  return {};
 		  return *name;
 	  });
 	entsMod[classDefCompRef];
-	pragma::LuaCore::define_custom_constructor<pragma::EntityUComponentRef, +[](const Lua::util::Uuid &uuid, pragma::ComponentId componentId) -> pragma::EntityUComponentRef { return pragma::EntityUComponentRef {uuid.value, componentId}; }, const Lua::util::Uuid &, pragma::ComponentId>(
+	pragma::LuaCore::define_custom_constructor<EntityUComponentRef, +[](const Lua::util::Uuid &uuid, ComponentId componentId) -> EntityUComponentRef { return EntityUComponentRef {uuid.value, componentId}; }, const Lua::util::Uuid &, ComponentId>(
 	  GetLuaState());
-	pragma::LuaCore::define_custom_constructor<pragma::EntityUComponentRef, +[](const Lua::util::Uuid &uuid, const std::string &componentType) -> pragma::EntityUComponentRef { return pragma::EntityUComponentRef {uuid.value, componentType}; }, const Lua::util::Uuid &, const std::string &>(
+	pragma::LuaCore::define_custom_constructor<EntityUComponentRef, +[](const Lua::util::Uuid &uuid, const std::string &componentType) -> EntityUComponentRef { return EntityUComponentRef {uuid.value, componentType}; }, const Lua::util::Uuid &, const std::string &>(
 	  GetLuaState());
 
-	auto classDefMemRef = luabind::class_<pragma::EntityUComponentMemberRef, luabind::bases<pragma::EntityUComponentRef, pragma::EntityURef>>("UniversalMemberReference");
-	classDefMemRef.def(luabind::constructor<const std::string &, pragma::ComponentId, const std::string &>());
+	auto classDefMemRef = luabind::class_<EntityUComponentMemberRef, luabind::bases<EntityUComponentRef, EntityURef>>("UniversalMemberReference");
+	classDefMemRef.def(luabind::constructor<const std::string &, ComponentId, const std::string &>());
 	classDefMemRef.def(luabind::constructor<const std::string &, const std::string &, const std::string &>());
-	classDefMemRef.def(luabind::constructor<const pragma::ecs::BaseEntity &, pragma::ComponentId, const std::string &>());
-	classDefMemRef.def(luabind::constructor<const pragma::ecs::BaseEntity &, const std::string &, const std::string &>());
+	classDefMemRef.def(luabind::constructor<const ecs::BaseEntity &, ComponentId, const std::string &>());
+	classDefMemRef.def(luabind::constructor<const ecs::BaseEntity &, const std::string &, const std::string &>());
 	classDefMemRef.def(luabind::constructor<const std::string &>());
 	classDefMemRef.def(luabind::constructor<>());
 	classDefMemRef.def(luabind::tostring(luabind::self));
-	classDefMemRef.def("GetMemberInfo", &pragma::EntityUComponentMemberRef::GetMemberInfo);
+	classDefMemRef.def("GetMemberInfo", &EntityUComponentMemberRef::GetMemberInfo);
 	classDefMemRef.def(
-	  "GetMemberIndex", +[](pragma::Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<pragma::ComponentMemberIndex> {
-		  if(ref.GetMemberIndex() == pragma::INVALID_COMPONENT_ID)
+	  "GetMemberIndex", +[](Game &game, const EntityUComponentMemberRef &ref) -> std::optional<ComponentMemberIndex> {
+		  if(ref.GetMemberIndex() == INVALID_COMPONENT_ID)
 			  ref.GetMemberInfo(game);
 		  auto idx = ref.GetMemberIndex();
-		  return (idx != pragma::INVALID_COMPONENT_ID) ? idx : std::optional<pragma::ComponentMemberIndex> {};
+		  return (idx != INVALID_COMPONENT_ID) ? idx : std::optional<ComponentMemberIndex> {};
 	  });
 	classDefMemRef.def(
-	  "GetMemberName", +[](pragma::Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<std::string> {
-		  if(ref.GetMemberIndex() == pragma::INVALID_COMPONENT_ID)
+	  "GetMemberName", +[](Game &game, const EntityUComponentMemberRef &ref) -> std::optional<std::string> {
+		  if(ref.GetMemberIndex() == INVALID_COMPONENT_ID)
 			  ref.GetMemberInfo(game);
 		  auto name = ref.GetMemberName();
 		  return !name.empty() ? name : std::optional<std::string> {};
 	  });
 	classDefMemRef.def(
-	  "GetPath", +[](pragma::Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<std::string> {
+	  "GetPath", +[](Game &game, const EntityUComponentMemberRef &ref) -> std::optional<std::string> {
 		  auto *c = ref.GetComponent(game);
 		  auto *cInfo = c ? c->GetComponentInfo() : nullptr;
 		  auto &memberName = ref.GetMemberName();
@@ -187,102 +187,102 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  std::string name = "pragma:game/entity/ec/" + std::string {*cInfo->name} + "/" + memberName;
 		  auto uuid = ref.GetUuid();
 		  if(uuid.has_value())
-			  name += "?entity_uuid=" + pragma::util::uuid_to_string(*uuid);
+			  name += "?entity_uuid=" + util::uuid_to_string(*uuid);
 		  return name;
 	  });
 	classDefMemRef.def(
-	  "GetValue", +[](lua::State *l, pragma::Game &game, const pragma::EntityUComponentMemberRef &ref) {
+	  "GetValue", +[](lua::State *l, Game &game, const EntityUComponentMemberRef &ref) {
 		  auto *c = ref.GetComponent(game);
 		  auto *memberInfo = ref.GetMemberInfo(game);
 		  if(!c || !memberInfo)
 			  return std::optional<Lua::udm_type> {};
-		  return pragma::LuaCore::get_member_value(l, const_cast<pragma::BaseEntityComponent &>(*c), *memberInfo);
+		  return LuaCore::get_member_value(l, const_cast<BaseEntityComponent &>(*c), *memberInfo);
 	  });
 	entsMod[classDefMemRef];
-	pragma::LuaCore::define_custom_constructor<pragma::EntityUComponentMemberRef,
-	  +[](const Lua::util::Uuid &uuid, pragma::ComponentId componentId, const std::string &memberName) -> pragma::EntityUComponentMemberRef { return pragma::EntityUComponentMemberRef {uuid.value, componentId, memberName}; }, const Lua::util::Uuid &, pragma::ComponentId,
+	pragma::LuaCore::define_custom_constructor<EntityUComponentMemberRef,
+	  +[](const Lua::util::Uuid &uuid, ComponentId componentId, const std::string &memberName) -> EntityUComponentMemberRef { return EntityUComponentMemberRef {uuid.value, componentId, memberName}; }, const Lua::util::Uuid &, ComponentId,
 	  const std::string &>(GetLuaState());
-	pragma::LuaCore::define_custom_constructor<pragma::EntityUComponentMemberRef,
-	  +[](const Lua::util::Uuid &uuid, const std::string &componentType, const std::string &memberName) -> pragma::EntityUComponentMemberRef { return pragma::EntityUComponentMemberRef {uuid.value, componentType, memberName}; }, const Lua::util::Uuid &, const std::string &,
+	pragma::LuaCore::define_custom_constructor<EntityUComponentMemberRef,
+	  +[](const Lua::util::Uuid &uuid, const std::string &componentType, const std::string &memberName) -> EntityUComponentMemberRef { return EntityUComponentMemberRef {uuid.value, componentType, memberName}; }, const Lua::util::Uuid &, const std::string &,
 	  const std::string &>(GetLuaState());
 
-	auto classDefMultiEntRef = luabind::class_<pragma::MultiEntityURef>("MultiUniversalEntityReference");
-	classDefMultiEntRef.def(luabind::constructor<const pragma::ecs::BaseEntity &>());
+	auto classDefMultiEntRef = luabind::class_<MultiEntityURef>("MultiUniversalEntityReference");
+	classDefMultiEntRef.def(luabind::constructor<const ecs::BaseEntity &>());
 	classDefMultiEntRef.def(luabind::constructor<const std::string &>());
-	classDefMultiEntRef.def("FindEntities", &pragma::MultiEntityURef::FindEntities);
+	classDefMultiEntRef.def("FindEntities", &MultiEntityURef::FindEntities);
 	entsMod[classDefMultiEntRef];
-	pragma::LuaCore::define_custom_constructor<pragma::MultiEntityURef, +[](const Lua::util::Uuid &uuid) -> pragma::MultiEntityURef { return pragma::MultiEntityURef {uuid.value}; }, const Lua::util::Uuid &>(GetLuaState());
+	pragma::LuaCore::define_custom_constructor<MultiEntityURef, +[](const Lua::util::Uuid &uuid) -> MultiEntityURef { return MultiEntityURef {uuid.value}; }, const Lua::util::Uuid &>(GetLuaState());
 
-	auto defVelocity = pragma::LuaCore::create_entity_component_class<pragma::VelocityComponent, pragma::BaseEntityComponent>("VelocityComponent");
-	defVelocity.def("GetVelocity", &pragma::VelocityComponent::GetVelocity, luabind::copy_policy<0> {});
-	defVelocity.def("SetVelocity", &pragma::VelocityComponent::SetVelocity);
-	defVelocity.def("AddVelocity", &pragma::VelocityComponent::AddVelocity);
-	defVelocity.def("GetAngularVelocity", &pragma::VelocityComponent::GetAngularVelocity, luabind::copy_policy<0> {});
-	defVelocity.def("SetAngularVelocity", &pragma::VelocityComponent::SetAngularVelocity);
-	defVelocity.def("AddAngularVelocity", &pragma::VelocityComponent::AddAngularVelocity);
-	defVelocity.def("GetLocalAngularVelocity", &pragma::VelocityComponent::GetLocalAngularVelocity);
-	defVelocity.def("SetLocalAngularVelocity", &pragma::VelocityComponent::SetLocalAngularVelocity);
-	defVelocity.def("AddLocalAngularVelocity", &pragma::VelocityComponent::AddLocalAngularVelocity);
-	defVelocity.def("GetLocalVelocity", &pragma::VelocityComponent::GetLocalVelocity);
-	defVelocity.def("SetLocalVelocity", &pragma::VelocityComponent::SetLocalVelocity);
-	defVelocity.def("AddLocalVelocity", &pragma::VelocityComponent::AddLocalVelocity);
-	defVelocity.def("GetVelocityProperty", &pragma::VelocityComponent::GetVelocityProperty);
-	defVelocity.def("GetAngularVelocityProperty", &pragma::VelocityComponent::GetAngularVelocityProperty);
+	auto defVelocity = pragma::LuaCore::create_entity_component_class<VelocityComponent, BaseEntityComponent>("VelocityComponent");
+	defVelocity.def("GetVelocity", &VelocityComponent::GetVelocity, luabind::copy_policy<0> {});
+	defVelocity.def("SetVelocity", &VelocityComponent::SetVelocity);
+	defVelocity.def("AddVelocity", &VelocityComponent::AddVelocity);
+	defVelocity.def("GetAngularVelocity", &VelocityComponent::GetAngularVelocity, luabind::copy_policy<0> {});
+	defVelocity.def("SetAngularVelocity", &VelocityComponent::SetAngularVelocity);
+	defVelocity.def("AddAngularVelocity", &VelocityComponent::AddAngularVelocity);
+	defVelocity.def("GetLocalAngularVelocity", &VelocityComponent::GetLocalAngularVelocity);
+	defVelocity.def("SetLocalAngularVelocity", &VelocityComponent::SetLocalAngularVelocity);
+	defVelocity.def("AddLocalAngularVelocity", &VelocityComponent::AddLocalAngularVelocity);
+	defVelocity.def("GetLocalVelocity", &VelocityComponent::GetLocalVelocity);
+	defVelocity.def("SetLocalVelocity", &VelocityComponent::SetLocalVelocity);
+	defVelocity.def("AddLocalVelocity", &VelocityComponent::AddLocalVelocity);
+	defVelocity.def("GetVelocityProperty", &VelocityComponent::GetVelocityProperty);
+	defVelocity.def("GetAngularVelocityProperty", &VelocityComponent::GetAngularVelocityProperty);
 	entsMod[defVelocity];
 
-	auto defActionC = pragma::LuaCore::create_entity_component_class<pragma::ActionInputControllerComponent, pragma::BaseEntityComponent>("ActionInputControllerComponent");
-	defActionC.def("GetActionInput", &pragma::ActionInputControllerComponent::GetActionInput);
-	defActionC.def("GetActionInputs", &pragma::ActionInputControllerComponent::GetActionInputs);
-	defActionC.def("GetActionInputAxisMagnitude", &pragma::ActionInputControllerComponent::GetActionInputAxisMagnitude);
-	defActionC.def("SetActionInputAxisMagnitude", &pragma::ActionInputControllerComponent::SetActionInputAxisMagnitude);
-	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(pragma::Action, bool, bool)>(&pragma::ActionInputControllerComponent::SetActionInput));
-	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(pragma::Action, bool, float)>(&pragma::ActionInputControllerComponent::SetActionInput));
-	defActionC.def("SetActionInput", static_cast<void (pragma::ActionInputControllerComponent ::*)(pragma::Action, bool, float)>(&pragma::ActionInputControllerComponent::SetActionInput), luabind::default_parameter_policy<4, 1.f> {});
-	defActionC.add_static_constant("EVENT_HANDLE_ACTION_INPUT", pragma::actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT);
+	auto defActionC = pragma::LuaCore::create_entity_component_class<ActionInputControllerComponent, BaseEntityComponent>("ActionInputControllerComponent");
+	defActionC.def("GetActionInput", &ActionInputControllerComponent::GetActionInput);
+	defActionC.def("GetActionInputs", &ActionInputControllerComponent::GetActionInputs);
+	defActionC.def("GetActionInputAxisMagnitude", &ActionInputControllerComponent::GetActionInputAxisMagnitude);
+	defActionC.def("SetActionInputAxisMagnitude", &ActionInputControllerComponent::SetActionInputAxisMagnitude);
+	defActionC.def("SetActionInput", static_cast<void (ActionInputControllerComponent ::*)(Action, bool, bool)>(&ActionInputControllerComponent::SetActionInput));
+	defActionC.def("SetActionInput", static_cast<void (ActionInputControllerComponent ::*)(Action, bool, float)>(&ActionInputControllerComponent::SetActionInput));
+	defActionC.def("SetActionInput", static_cast<void (ActionInputControllerComponent ::*)(Action, bool, float)>(&ActionInputControllerComponent::SetActionInput), luabind::default_parameter_policy<4, 1.f> {});
+	defActionC.add_static_constant("EVENT_HANDLE_ACTION_INPUT", actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT);
 	entsMod[defActionC];
 
-	auto defInputMovementC = pragma::LuaCore::create_entity_component_class<pragma::InputMovementControllerComponent, pragma::BaseEntityComponent>("InputMovementControllerComponent");
-	defInputMovementC.def("GetActionInputController", static_cast<pragma::ActionInputControllerComponent *(pragma::InputMovementControllerComponent ::*)()>(&pragma::InputMovementControllerComponent::GetActionInputController));
-	defInputMovementC.def("SetActionInputController", &pragma::InputMovementControllerComponent::SetActionInputController);
+	auto defInputMovementC = pragma::LuaCore::create_entity_component_class<InputMovementControllerComponent, BaseEntityComponent>("InputMovementControllerComponent");
+	defInputMovementC.def("GetActionInputController", static_cast<ActionInputControllerComponent *(InputMovementControllerComponent ::*)()>(&InputMovementControllerComponent::GetActionInputController));
+	defInputMovementC.def("SetActionInputController", &InputMovementControllerComponent::SetActionInputController);
 	entsMod[defInputMovementC];
 
-	auto defMetaRig = pragma::LuaCore::create_entity_component_class<pragma::MetaRigComponent, pragma::BaseEntityComponent>("MetaRigComponent");
-	defMetaRig.def("GetBonePose", &get_meta_bone_value<pragma::math::ScaledTransform, &pragma::MetaRigComponent::GetBonePose>);
-	defMetaRig.def("GetBonePos", &get_meta_bone_value<Vector3, &pragma::MetaRigComponent::GetBonePos>);
-	defMetaRig.def("GetBoneRot", &get_meta_bone_value<Quat, &pragma::MetaRigComponent::GetBoneRot>);
-	defMetaRig.def("GetBoneScale", &get_meta_bone_value<Vector3, &pragma::MetaRigComponent::GetBoneScale>);
+	auto defMetaRig = pragma::LuaCore::create_entity_component_class<MetaRigComponent, BaseEntityComponent>("MetaRigComponent");
+	defMetaRig.def("GetBonePose", &get_meta_bone_value<math::ScaledTransform, &MetaRigComponent::GetBonePose>);
+	defMetaRig.def("GetBonePos", &get_meta_bone_value<Vector3, &MetaRigComponent::GetBonePos>);
+	defMetaRig.def("GetBoneRot", &get_meta_bone_value<Quat, &MetaRigComponent::GetBoneRot>);
+	defMetaRig.def("GetBoneScale", &get_meta_bone_value<Vector3, &MetaRigComponent::GetBoneScale>);
 
-	defMetaRig.def("GetBonePose", &get_meta_bone_value_ls<pragma::math::ScaledTransform, &pragma::MetaRigComponent::GetBonePose>);
-	defMetaRig.def("GetBonePos", &get_meta_bone_value_ls<Vector3, &pragma::MetaRigComponent::GetBonePos>);
-	defMetaRig.def("GetBoneRot", &get_meta_bone_value_ls<Quat, &pragma::MetaRigComponent::GetBoneRot>);
-	defMetaRig.def("GetBoneScale", &get_meta_bone_value_ls<Vector3, &pragma::MetaRigComponent::GetBoneScale>);
+	defMetaRig.def("GetBonePose", &get_meta_bone_value_ls<math::ScaledTransform, &MetaRigComponent::GetBonePose>);
+	defMetaRig.def("GetBonePos", &get_meta_bone_value_ls<Vector3, &MetaRigComponent::GetBonePos>);
+	defMetaRig.def("GetBoneRot", &get_meta_bone_value_ls<Quat, &MetaRigComponent::GetBoneRot>);
+	defMetaRig.def("GetBoneScale", &get_meta_bone_value_ls<Vector3, &MetaRigComponent::GetBoneScale>);
 
-	defMetaRig.def("SetBonePose", &pragma::MetaRigComponent::SetBonePose, luabind::default_parameter_policy<4, pragma::math::CoordinateSpace::Local> {});
-	defMetaRig.def("SetBonePos", &pragma::MetaRigComponent::SetBonePos, luabind::default_parameter_policy<4, pragma::math::CoordinateSpace::Local> {});
-	defMetaRig.def("SetBoneRot", &pragma::MetaRigComponent::SetBoneRot, luabind::default_parameter_policy<4, pragma::math::CoordinateSpace::Local> {});
-	defMetaRig.def("SetBoneScale", &pragma::MetaRigComponent::SetBoneScale, luabind::default_parameter_policy<4, pragma::math::CoordinateSpace::Local> {});
+	defMetaRig.def("SetBonePose", &MetaRigComponent::SetBonePose, luabind::default_parameter_policy<4, math::CoordinateSpace::Local> {});
+	defMetaRig.def("SetBonePos", &MetaRigComponent::SetBonePos, luabind::default_parameter_policy<4, math::CoordinateSpace::Local> {});
+	defMetaRig.def("SetBoneRot", &MetaRigComponent::SetBoneRot, luabind::default_parameter_policy<4, math::CoordinateSpace::Local> {});
+	defMetaRig.def("SetBoneScale", &MetaRigComponent::SetBoneScale, luabind::default_parameter_policy<4, math::CoordinateSpace::Local> {});
 	entsMod[defMetaRig];
 
-	auto defBoneMerge = pragma::LuaCore::create_entity_component_class<pragma::BoneMergeComponent, pragma::BaseEntityComponent>("BoneMergeComponent");
-	defBoneMerge.scope[luabind::def("can_merge", &pragma::BoneMergeComponent::can_merge)];
-	defBoneMerge.scope[luabind::def("can_merge", &pragma::BoneMergeComponent::can_merge, luabind::default_parameter_policy<3, false> {})];
-	defBoneMerge.add_static_constant("EVENT_ON_TARGET_CHANGED", pragma::boneMergeComponent::EVENT_ON_TARGET_CHANGED);
-	defBoneMerge.def("SetTarget", &pragma::BoneMergeComponent::SetTarget);
-	defBoneMerge.def("GetTarget", &pragma::BoneMergeComponent::GetTarget);
+	auto defBoneMerge = pragma::LuaCore::create_entity_component_class<BoneMergeComponent, BaseEntityComponent>("BoneMergeComponent");
+	defBoneMerge.scope[luabind::def("can_merge", &BoneMergeComponent::can_merge)];
+	defBoneMerge.scope[luabind::def("can_merge", &BoneMergeComponent::can_merge, luabind::default_parameter_policy<3, false> {})];
+	defBoneMerge.add_static_constant("EVENT_ON_TARGET_CHANGED", boneMergeComponent::EVENT_ON_TARGET_CHANGED);
+	defBoneMerge.def("SetTarget", &BoneMergeComponent::SetTarget);
+	defBoneMerge.def("GetTarget", &BoneMergeComponent::GetTarget);
 	entsMod[defBoneMerge];
 
-	auto defFlexMerge = pragma::LuaCore::create_entity_component_class<pragma::FlexMergeComponent, pragma::BaseEntityComponent>("FlexMergeComponent");
-	defFlexMerge.scope[luabind::def("can_merge", &pragma::FlexMergeComponent::can_merge)];
-	defFlexMerge.add_static_constant("EVENT_ON_TARGET_CHANGED", pragma::flexMergeComponent::EVENT_ON_TARGET_CHANGED);
-	defFlexMerge.def("SetTarget", &pragma::FlexMergeComponent::SetTarget);
-	defFlexMerge.def("GetTarget", &pragma::FlexMergeComponent::GetTarget);
+	auto defFlexMerge = pragma::LuaCore::create_entity_component_class<FlexMergeComponent, BaseEntityComponent>("FlexMergeComponent");
+	defFlexMerge.scope[luabind::def("can_merge", &FlexMergeComponent::can_merge)];
+	defFlexMerge.add_static_constant("EVENT_ON_TARGET_CHANGED", flexMergeComponent::EVENT_ON_TARGET_CHANGED);
+	defFlexMerge.def("SetTarget", &FlexMergeComponent::SetTarget);
+	defFlexMerge.def("GetTarget", &FlexMergeComponent::GetTarget);
 	entsMod[defFlexMerge];
 
-	auto defIntersectionHandler = pragma::LuaCore::create_entity_component_class<pragma::IntersectionHandlerComponent, pragma::BaseEntityComponent>("IntersectionHandlerComponent");
+	auto defIntersectionHandler = pragma::LuaCore::create_entity_component_class<IntersectionHandlerComponent, BaseEntityComponent>("IntersectionHandlerComponent");
 	defIntersectionHandler.def(
-	  "IntersectionTest2", +[](pragma::IntersectionHandlerComponent &c, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) {
+	  "IntersectionTest2", +[](IntersectionHandlerComponent &c, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) {
 		  auto t = std::chrono::steady_clock::now();
-		  c.IntersectionTest(origin, dir, pragma::math::CoordinateSpace::Object, minDist, maxDist);
+		  c.IntersectionTest(origin, dir, math::CoordinateSpace::Object, minDist, maxDist);
 		  auto dt = std::chrono::steady_clock::now() - t;
 		  std::cout << "Internal2: " << (dt.count() / 1'000'000.0) << "ms" << std::endl;
 	  });
@@ -293,41 +293,41 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  std::cout << "Lua Overhead: " << (dt / 1'000'000.0) << "ms" << std::endl;
 	  });
 	defIntersectionHandler.def(
-	  "IntersectionTest", +[](pragma::IntersectionHandlerComponent &c, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) -> std::optional<pragma::HitInfo> { return c.IntersectionTest(origin, dir, pragma::math::CoordinateSpace::Object, minDist, maxDist); });
+	  "IntersectionTest", +[](IntersectionHandlerComponent &c, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) -> std::optional<HitInfo> { return c.IntersectionTest(origin, dir, math::CoordinateSpace::Object, minDist, maxDist); });
 	// defBvh.def("IntersectionTest", static_cast<std::optional<pragma::bvh::HitInfo> (pragma::IntersectionHandlerComponent::*)(const Vector3 &, const Vector3 &, float, float) const>(&pragma::IntersectionHandlerComponent::IntersectionTest));
-	defIntersectionHandler.def("IntersectionTestAabb", static_cast<bool (pragma::IntersectionHandlerComponent::*)(const Vector3 &, const Vector3 &) const>(&pragma::IntersectionHandlerComponent::IntersectionTestAabb));
+	defIntersectionHandler.def("IntersectionTestAabb", static_cast<bool (IntersectionHandlerComponent::*)(const Vector3 &, const Vector3 &) const>(&IntersectionHandlerComponent::IntersectionTestAabb));
 	defIntersectionHandler.def(
-	  "IntersectionTestAabb", +[](lua::State *l, const pragma::IntersectionHandlerComponent &bvhC, const Vector3 &min, const Vector3 &max, pragma::BvhIntersectionFlags flags) -> IntersectionTestResult {
-		  return bvh_intersection_test(l, [&bvhC, &min, &max](pragma::IntersectionInfo *info) { return info ? bvhC.IntersectionTestAabb(min, max, *info) : bvhC.IntersectionTestAabb(min, max); }, flags);
+	  "IntersectionTestAabb", +[](lua::State *l, const IntersectionHandlerComponent &bvhC, const Vector3 &min, const Vector3 &max, BvhIntersectionFlags flags) -> IntersectionTestResult {
+		  return bvh_intersection_test(l, [&bvhC, &min, &max](IntersectionInfo *info) { return info ? bvhC.IntersectionTestAabb(min, max, *info) : bvhC.IntersectionTestAabb(min, max); }, flags);
 	  });
-	defIntersectionHandler.def("IntersectionTestKDop", static_cast<bool (pragma::IntersectionHandlerComponent::*)(const std::vector<pragma::math::Plane> &) const>(&pragma::IntersectionHandlerComponent::IntersectionTestKDop));
+	defIntersectionHandler.def("IntersectionTestKDop", static_cast<bool (IntersectionHandlerComponent::*)(const std::vector<math::Plane> &) const>(&IntersectionHandlerComponent::IntersectionTestKDop));
 	defIntersectionHandler.def(
-	  "IntersectionTestKDop", +[](lua::State *l, const pragma::IntersectionHandlerComponent &bvhC, const std::vector<pragma::math::Plane> &planes, pragma::BvhIntersectionFlags flags) -> IntersectionTestResult {
-		  return bvh_intersection_test(l, [&bvhC, &planes](pragma::IntersectionInfo *info) { return info ? bvhC.IntersectionTestKDop(planes, *info) : bvhC.IntersectionTestKDop(planes); }, flags);
+	  "IntersectionTestKDop", +[](lua::State *l, const IntersectionHandlerComponent &bvhC, const std::vector<math::Plane> &planes, BvhIntersectionFlags flags) -> IntersectionTestResult {
+		  return bvh_intersection_test(l, [&bvhC, &planes](IntersectionInfo *info) { return info ? bvhC.IntersectionTestKDop(planes, *info) : bvhC.IntersectionTestKDop(planes); }, flags);
 	  });
-	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_NONE", pragma::math::to_integral(pragma::BvhIntersectionFlags::None));
-	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_PRIMITIVES", pragma::math::to_integral(pragma::BvhIntersectionFlags::ReturnPrimitives));
-	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_MESHES", pragma::math::to_integral(pragma::BvhIntersectionFlags::ReturnMeshes));
+	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_NONE", math::to_integral(BvhIntersectionFlags::None));
+	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_PRIMITIVES", math::to_integral(BvhIntersectionFlags::ReturnPrimitives));
+	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_MESHES", math::to_integral(BvhIntersectionFlags::ReturnMeshes));
 
-	auto defBvhHitInfo = luabind::class_<pragma::HitInfo>("HitInfo");
-	defBvhHitInfo.def_readonly("mesh", &pragma::HitInfo::mesh);
-	defBvhHitInfo.def_readonly("entity", &pragma::HitInfo::entity);
+	auto defBvhHitInfo = luabind::class_<HitInfo>("HitInfo");
+	defBvhHitInfo.def_readonly("mesh", &HitInfo::mesh);
+	defBvhHitInfo.def_readonly("entity", &HitInfo::entity);
 	defBvhHitInfo.property(
 	  "entity",
-	  +[](lua::State *l, pragma::HitInfo &info) {
+	  +[](lua::State *l, HitInfo &info) {
 		  if(info.entity.expired())
 			  Lua::PushNil(l);
 		  else
 			  info.entity->PushLuaObject(l);
 	  },
-	  +[](pragma::HitInfo &info, pragma::ecs::BaseEntity *ent) { info.entity = ent ? ent->GetHandle() : EntityHandle {}; });
-	defBvhHitInfo.def_readonly("primitiveIndex", &pragma::HitInfo::primitiveIndex);
-	defBvhHitInfo.def_readonly("distance", &pragma::HitInfo::distance);
-	defBvhHitInfo.def_readonly("t", &pragma::HitInfo::t);
-	defBvhHitInfo.def_readonly("u", &pragma::HitInfo::u);
-	defBvhHitInfo.def_readonly("v", &pragma::HitInfo::v);
+	  +[](HitInfo &info, ecs::BaseEntity *ent) { info.entity = ent ? ent->GetHandle() : EntityHandle {}; });
+	defBvhHitInfo.def_readonly("primitiveIndex", &HitInfo::primitiveIndex);
+	defBvhHitInfo.def_readonly("distance", &HitInfo::distance);
+	defBvhHitInfo.def_readonly("t", &HitInfo::t);
+	defBvhHitInfo.def_readonly("u", &HitInfo::u);
+	defBvhHitInfo.def_readonly("v", &HitInfo::v);
 	defBvhHitInfo.def(
-	  "CalcHitNormal", +[](const pragma::HitInfo &hitInfo) -> std::optional<Vector3> {
+	  "CalcHitNormal", +[](const HitInfo &hitInfo) -> std::optional<Vector3> {
 		  if(!hitInfo.mesh)
 			  return {};
 		  auto idx = hitInfo.primitiveIndex * 3;
@@ -344,7 +344,7 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  return n;
 	  });
 	defBvhHitInfo.def(
-	  "CalcHitUv", +[](const pragma::HitInfo &hitInfo) -> std::optional<Vector2> {
+	  "CalcHitUv", +[](const HitInfo &hitInfo) -> std::optional<Vector2> {
 		  if(!hitInfo.mesh)
 			  return {};
 		  auto idx = hitInfo.primitiveIndex * 3;
@@ -363,39 +363,39 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defIntersectionHandler.scope[defBvhHitInfo];
 	entsMod[defIntersectionHandler];
 
-	auto defGlobal = pragma::LuaCore::create_entity_component_class<pragma::GlobalNameComponent, pragma::BaseEntityComponent>("GlobalComponent");
-	defGlobal.def("GetGlobalName", &pragma::GlobalNameComponent::GetGlobalName);
-	defGlobal.def("SetGlobalName", &pragma::GlobalNameComponent::SetGlobalName);
+	auto defGlobal = pragma::LuaCore::create_entity_component_class<GlobalNameComponent, BaseEntityComponent>("GlobalComponent");
+	defGlobal.def("GetGlobalName", &GlobalNameComponent::GetGlobalName);
+	defGlobal.def("SetGlobalName", &GlobalNameComponent::SetGlobalName);
 	entsMod[defGlobal];
 
-	auto defMovement = pragma::LuaCore::create_entity_component_class<pragma::MovementComponent, pragma::BaseEntityComponent>("MovementComponent");
-	defMovement.def("GetMoveVelocity", &pragma::MovementComponent::GetMoveVelocity, luabind::copy_policy<0> {});
-	defMovement.def("GetRelativeVelocity", &pragma::MovementComponent::GetLocalVelocity);
-	defMovement.def("SetSpeed", &pragma::MovementComponent::SetSpeed);
-	defMovement.def("GetSpeed", &pragma::MovementComponent::GetSpeed);
-	defMovement.def("SetAirModifier", &pragma::MovementComponent::SetAirModifier);
-	defMovement.def("GetAirModifier", &pragma::MovementComponent::GetAirModifier);
-	defMovement.def("SetAcceleration", &pragma::MovementComponent::SetAcceleration);
-	defMovement.def("GetAcceleration", &pragma::MovementComponent::GetAcceleration);
-	defMovement.def("SetAccelerationRampUpTime", &pragma::MovementComponent::SetAccelerationRampUpTime);
-	defMovement.def("GetAccelerationRampUpTime", &pragma::MovementComponent::GetAccelerationRampUpTime);
-	defMovement.def("SetDirection", &pragma::MovementComponent::SetDirection);
-	defMovement.def("GetDirection", &pragma::MovementComponent::GetDirection);
-	defMovement.def("SetDirectionMagnitude", &pragma::MovementComponent::SetDirectionMagnitude);
-	defMovement.def("GetDirectionMagnitude", &pragma::MovementComponent::GetDirectionMagnitude);
-	defMovement.add_static_constant("EVENT_ON_UPDATE_MOVEMENT", pragma::movementComponent::EVENT_ON_UPDATE_MOVEMENT);
-	defMovement.add_static_constant("MOVE_DIRECTION_FORWARD", pragma::math::to_integral(pragma::MovementComponent::MoveDirection::Forward));
-	defMovement.add_static_constant("MOVE_DIRECTION_RIGHT", pragma::math::to_integral(pragma::MovementComponent::MoveDirection::Right));
-	defMovement.add_static_constant("MOVE_DIRECTION_BACKWARD", pragma::math::to_integral(pragma::MovementComponent::MoveDirection::Backward));
-	defMovement.add_static_constant("MOVE_DIRECTION_LEFT", pragma::math::to_integral(pragma::MovementComponent::MoveDirection::Left));
+	auto defMovement = pragma::LuaCore::create_entity_component_class<MovementComponent, BaseEntityComponent>("MovementComponent");
+	defMovement.def("GetMoveVelocity", &MovementComponent::GetMoveVelocity, luabind::copy_policy<0> {});
+	defMovement.def("GetRelativeVelocity", &MovementComponent::GetLocalVelocity);
+	defMovement.def("SetSpeed", &MovementComponent::SetSpeed);
+	defMovement.def("GetSpeed", &MovementComponent::GetSpeed);
+	defMovement.def("SetAirModifier", &MovementComponent::SetAirModifier);
+	defMovement.def("GetAirModifier", &MovementComponent::GetAirModifier);
+	defMovement.def("SetAcceleration", &MovementComponent::SetAcceleration);
+	defMovement.def("GetAcceleration", &MovementComponent::GetAcceleration);
+	defMovement.def("SetAccelerationRampUpTime", &MovementComponent::SetAccelerationRampUpTime);
+	defMovement.def("GetAccelerationRampUpTime", &MovementComponent::GetAccelerationRampUpTime);
+	defMovement.def("SetDirection", &MovementComponent::SetDirection);
+	defMovement.def("GetDirection", &MovementComponent::GetDirection);
+	defMovement.def("SetDirectionMagnitude", &MovementComponent::SetDirectionMagnitude);
+	defMovement.def("GetDirectionMagnitude", &MovementComponent::GetDirectionMagnitude);
+	defMovement.add_static_constant("EVENT_ON_UPDATE_MOVEMENT", movementComponent::EVENT_ON_UPDATE_MOVEMENT);
+	defMovement.add_static_constant("MOVE_DIRECTION_FORWARD", math::to_integral(MovementComponent::MoveDirection::Forward));
+	defMovement.add_static_constant("MOVE_DIRECTION_RIGHT", math::to_integral(MovementComponent::MoveDirection::Right));
+	defMovement.add_static_constant("MOVE_DIRECTION_BACKWARD", math::to_integral(MovementComponent::MoveDirection::Backward));
+	defMovement.add_static_constant("MOVE_DIRECTION_LEFT", math::to_integral(MovementComponent::MoveDirection::Left));
 	entsMod[defMovement];
 
-	auto defOrientation = pragma::LuaCore::create_entity_component_class<pragma::OrientationComponent, pragma::BaseEntityComponent>("OrientationComponent");
-	defOrientation.def("GetUpDirection", &pragma::OrientationComponent::GetUpDirection, luabind::copy_policy<0> {});
-	defOrientation.def("SetUpDirection", &pragma::OrientationComponent::SetUpDirection);
-	defOrientation.def("GetUpDirectionProperty", &pragma::OrientationComponent::GetUpDirectionProperty);
+	auto defOrientation = pragma::LuaCore::create_entity_component_class<OrientationComponent, BaseEntityComponent>("OrientationComponent");
+	defOrientation.def("GetUpDirection", &OrientationComponent::GetUpDirection, luabind::copy_policy<0> {});
+	defOrientation.def("SetUpDirection", &OrientationComponent::SetUpDirection);
+	defOrientation.def("GetUpDirectionProperty", &OrientationComponent::GetUpDirectionProperty);
 	defOrientation.def(
-	  "GetOrientationAxes", +[](lua::State *l, pragma::OrientationComponent &hEntity) {
+	  "GetOrientationAxes", +[](lua::State *l, OrientationComponent &hEntity) {
 		  Vector3 forward, right, up;
 		  hEntity.GetOrientationAxes(&forward, &right, &up);
 		  Lua::Push<Vector3>(l, forward);
@@ -404,23 +404,23 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	  });
 	entsMod[defOrientation];
 
-	auto defComposite = pragma::LuaCore::create_entity_component_class<pragma::ecs::CompositeComponent, pragma::BaseEntityComponent>("CompositeComponent");
-	defComposite.def("ClearEntities", &pragma::ecs::CompositeComponent::ClearEntities);
-	defComposite.def("ClearEntities", &pragma::ecs::CompositeComponent::ClearEntities, luabind::default_parameter_policy<2, true> {});
+	auto defComposite = pragma::LuaCore::create_entity_component_class<ecs::CompositeComponent, BaseEntityComponent>("CompositeComponent");
+	defComposite.def("ClearEntities", &ecs::CompositeComponent::ClearEntities);
+	defComposite.def("ClearEntities", &ecs::CompositeComponent::ClearEntities, luabind::default_parameter_policy<2, true> {});
 	defComposite.def(
-	  "ClearEntities", +[](lua::State *l, pragma::ecs::CompositeComponent &hComponent, const std::string &groupName) {
+	  "ClearEntities", +[](lua::State *l, ecs::CompositeComponent &hComponent, const std::string &groupName) {
 		  auto *group = hComponent.GetRootCompositeGroup().FindChildGroup(groupName);
 		  if(group)
 			  group->ClearEntities();
 	  });
 	defComposite.def(
-	  "ClearEntities", +[](lua::State *l, pragma::ecs::CompositeComponent &hComponent, const std::string &groupName, bool safely) {
+	  "ClearEntities", +[](lua::State *l, ecs::CompositeComponent &hComponent, const std::string &groupName, bool safely) {
 		  auto *group = hComponent.GetRootCompositeGroup().FindChildGroup(groupName);
 		  if(group)
 			  group->ClearEntities(safely);
 	  });
 	defComposite.def(
-	  "GetEntities", +[](lua::State *l, pragma::ecs::CompositeComponent &hComponent) -> luabind::tableT<pragma::ecs::BaseEntity> {
+	  "GetEntities", +[](lua::State *l, ecs::CompositeComponent &hComponent) -> luabind::tableT<ecs::BaseEntity> {
 		  auto &ents = hComponent.GetRootCompositeGroup().GetEntities();
 		  auto tEnts = luabind::newtable(l);
 		  int32_t idx = 1;
@@ -432,7 +432,7 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  return tEnts;
 	  });
 	defComposite.def(
-	  "GetEntities", +[](lua::State *l, pragma::ecs::CompositeComponent &hComponent, const std::string &groupName) -> luabind::tableT<pragma::ecs::BaseEntity> {
+	  "GetEntities", +[](lua::State *l, ecs::CompositeComponent &hComponent, const std::string &groupName) -> luabind::tableT<ecs::BaseEntity> {
 		  auto tEnts = luabind::newtable(l);
 		  auto *group = hComponent.GetRootCompositeGroup().FindChildGroup(groupName);
 		  if(!group)
@@ -446,29 +446,29 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  }
 		  return tEnts;
 	  });
-	defComposite.def("GetRootGroup", static_cast<pragma::ecs::CompositeGroup &(pragma::ecs::CompositeComponent::*)()>(&pragma::ecs::CompositeComponent::GetRootCompositeGroup));
-	defComposite.def("AddEntity", +[](lua::State *l, pragma::ecs::CompositeComponent &hComponent, pragma::ecs::BaseEntity &ent) { hComponent.GetRootCompositeGroup().AddEntity(ent); });
-	defComposite.def("AddEntity", +[](lua::State *l, pragma::ecs::CompositeComponent &hComponent, pragma::ecs::BaseEntity &ent, const std::string &groupName) { hComponent.GetRootCompositeGroup().AddChildGroup(groupName).AddEntity(ent); });
-	auto defCompositeGroup = luabind::class_<pragma::ecs::CompositeGroup>("CompositeGroup");
-	defCompositeGroup.def("AddEntity", &pragma::ecs::CompositeGroup::AddEntity);
-	defCompositeGroup.def("AddEntity", +[](lua::State *l, pragma::ecs::CompositeGroup &hComponent, pragma::ecs::BaseEntity &ent, const std::string &groupName) { hComponent.AddChildGroup(groupName).AddEntity(ent); });
-	defCompositeGroup.def("RemoveEntity", &pragma::ecs::CompositeGroup::RemoveEntity);
-	defCompositeGroup.def("ClearEntities", &pragma::ecs::CompositeGroup::ClearEntities);
-	defCompositeGroup.def("ClearEntities", &pragma::ecs::CompositeGroup::ClearEntities, luabind::default_parameter_policy<2, true> {});
+	defComposite.def("GetRootGroup", static_cast<ecs::CompositeGroup &(ecs::CompositeComponent::*)()>(&ecs::CompositeComponent::GetRootCompositeGroup));
+	defComposite.def("AddEntity", +[](lua::State *l, ecs::CompositeComponent &hComponent, ecs::BaseEntity &ent) { hComponent.GetRootCompositeGroup().AddEntity(ent); });
+	defComposite.def("AddEntity", +[](lua::State *l, ecs::CompositeComponent &hComponent, ecs::BaseEntity &ent, const std::string &groupName) { hComponent.GetRootCompositeGroup().AddChildGroup(groupName).AddEntity(ent); });
+	auto defCompositeGroup = luabind::class_<ecs::CompositeGroup>("CompositeGroup");
+	defCompositeGroup.def("AddEntity", &ecs::CompositeGroup::AddEntity);
+	defCompositeGroup.def("AddEntity", +[](lua::State *l, ecs::CompositeGroup &hComponent, ecs::BaseEntity &ent, const std::string &groupName) { hComponent.AddChildGroup(groupName).AddEntity(ent); });
+	defCompositeGroup.def("RemoveEntity", &ecs::CompositeGroup::RemoveEntity);
+	defCompositeGroup.def("ClearEntities", &ecs::CompositeGroup::ClearEntities);
+	defCompositeGroup.def("ClearEntities", &ecs::CompositeGroup::ClearEntities, luabind::default_parameter_policy<2, true> {});
 	defCompositeGroup.def(
-	  "ClearEntities", +[](lua::State *l, pragma::ecs::CompositeGroup &hComponent, const std::string &groupName) {
+	  "ClearEntities", +[](lua::State *l, ecs::CompositeGroup &hComponent, const std::string &groupName) {
 		  auto *group = hComponent.FindChildGroup(groupName);
 		  if(group)
 			  group->ClearEntities();
 	  });
 	defCompositeGroup.def(
-	  "ClearEntities", +[](lua::State *l, pragma::ecs::CompositeGroup &hComponent, const std::string &groupName, bool safely) {
+	  "ClearEntities", +[](lua::State *l, ecs::CompositeGroup &hComponent, const std::string &groupName, bool safely) {
 		  auto *group = hComponent.FindChildGroup(groupName);
 		  if(group)
 			  group->ClearEntities(safely);
 	  });
 	defCompositeGroup.def(
-	  "GetEntities", +[](lua::State *l, pragma::ecs::CompositeGroup &hComponent) -> luabind::tableT<pragma::ecs::BaseEntity> {
+	  "GetEntities", +[](lua::State *l, ecs::CompositeGroup &hComponent) -> luabind::tableT<ecs::BaseEntity> {
 		  auto &ents = hComponent.GetEntities();
 		  auto tEnts = luabind::newtable(l);
 		  int32_t idx = 1;
@@ -479,9 +479,9 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  }
 		  return tEnts;
 	  });
-	defCompositeGroup.def("AddChildGroup", &pragma::ecs::CompositeGroup::AddChildGroup);
+	defCompositeGroup.def("AddChildGroup", &ecs::CompositeGroup::AddChildGroup);
 	defCompositeGroup.def(
-	  "GetChildGroups", +[](lua::State *l, pragma::ecs::CompositeGroup &hComponent, const std::string &name) -> luabind::tableT<pragma::ecs::CompositeGroup> {
+	  "GetChildGroups", +[](lua::State *l, ecs::CompositeGroup &hComponent, const std::string &name) -> luabind::tableT<ecs::CompositeGroup> {
 		  auto t = luabind::newtable(l);
 		  int32_t idx = 1;
 		  for(auto &childGroup : hComponent.GetChildGroups())
@@ -491,40 +491,40 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defComposite.scope[defCompositeGroup];
 	entsMod[defComposite];
 
-	auto defAnimated2 = pragma::LuaCore::create_entity_component_class<pragma::PanimaComponent, pragma::BaseEntityComponent>("PanimaComponent");
-	defAnimated2.scope[luabind::def("parse_component_channel_path", &pragma::PanimaComponent::ParseComponentChannelPath)];
-	defAnimated2.def("ReloadAnimation", static_cast<void (pragma::PanimaComponent::*)()>(&pragma::PanimaComponent::ReloadAnimation));
-	defAnimated2.def("SetPlaybackRate", &pragma::PanimaComponent::SetPlaybackRate);
-	defAnimated2.def("GetPlaybackRate", &pragma::PanimaComponent::GetPlaybackRate);
-	defAnimated2.def("GetPlaybackRateProperty", &pragma::PanimaComponent::GetPlaybackRateProperty);
-	defAnimated2.def("GetCurrentTime", &pragma::PanimaComponent::GetCurrentTime);
-	defAnimated2.def("SetCurrentTime", &pragma::PanimaComponent::SetCurrentTime);
-	defAnimated2.def("GetCurrentTimeFraction", &pragma::PanimaComponent::GetCurrentTimeFraction);
-	defAnimated2.def("SetCurrentTimeFraction", &pragma::PanimaComponent::SetCurrentTimeFraction);
-	defAnimated2.def("SetPropertyEnabled", &pragma::PanimaComponent::SetPropertyEnabled);
-	defAnimated2.def("IsPropertyEnabled", &pragma::PanimaComponent::IsPropertyEnabled);
-	defAnimated2.def("IsPropertyAnimated", &pragma::PanimaComponent::IsPropertyAnimated);
-	defAnimated2.def("UpdateAnimationChannelSubmitters", &pragma::PanimaComponent::UpdateAnimationChannelSubmitters);
-	defAnimated2.def("ClearAnimationManagers", &pragma::PanimaComponent::ClearAnimationManagers);
-	defAnimated2.def("AddAnimationManager", &pragma::PanimaComponent::AddAnimationManager);
-	defAnimated2.def("AddAnimationManager", &pragma::PanimaComponent::AddAnimationManager, luabind::default_parameter_policy<3, int32_t {0}> {});
-	defAnimated2.def("RemoveAnimationManager", static_cast<void (pragma::PanimaComponent::*)(const panima::AnimationManager &)>(&pragma::PanimaComponent::RemoveAnimationManager));
-	defAnimated2.def("RemoveAnimationManager", static_cast<void (pragma::PanimaComponent::*)(const std::string_view &)>(&pragma::PanimaComponent::RemoveAnimationManager));
+	auto defAnimated2 = pragma::LuaCore::create_entity_component_class<PanimaComponent, BaseEntityComponent>("PanimaComponent");
+	defAnimated2.scope[luabind::def("parse_component_channel_path", &PanimaComponent::ParseComponentChannelPath)];
+	defAnimated2.def("ReloadAnimation", static_cast<void (PanimaComponent::*)()>(&PanimaComponent::ReloadAnimation));
+	defAnimated2.def("SetPlaybackRate", &PanimaComponent::SetPlaybackRate);
+	defAnimated2.def("GetPlaybackRate", &PanimaComponent::GetPlaybackRate);
+	defAnimated2.def("GetPlaybackRateProperty", &PanimaComponent::GetPlaybackRateProperty);
+	defAnimated2.def("GetCurrentTime", &PanimaComponent::GetCurrentTime);
+	defAnimated2.def("SetCurrentTime", &PanimaComponent::SetCurrentTime);
+	defAnimated2.def("GetCurrentTimeFraction", &PanimaComponent::GetCurrentTimeFraction);
+	defAnimated2.def("SetCurrentTimeFraction", &PanimaComponent::SetCurrentTimeFraction);
+	defAnimated2.def("SetPropertyEnabled", &PanimaComponent::SetPropertyEnabled);
+	defAnimated2.def("IsPropertyEnabled", &PanimaComponent::IsPropertyEnabled);
+	defAnimated2.def("IsPropertyAnimated", &PanimaComponent::IsPropertyAnimated);
+	defAnimated2.def("UpdateAnimationChannelSubmitters", &PanimaComponent::UpdateAnimationChannelSubmitters);
+	defAnimated2.def("ClearAnimationManagers", &PanimaComponent::ClearAnimationManagers);
+	defAnimated2.def("AddAnimationManager", &PanimaComponent::AddAnimationManager);
+	defAnimated2.def("AddAnimationManager", &PanimaComponent::AddAnimationManager, luabind::default_parameter_policy<3, int32_t {0}> {});
+	defAnimated2.def("RemoveAnimationManager", static_cast<void (PanimaComponent::*)(const panima::AnimationManager &)>(&PanimaComponent::RemoveAnimationManager));
+	defAnimated2.def("RemoveAnimationManager", static_cast<void (PanimaComponent::*)(const std::string_view &)>(&PanimaComponent::RemoveAnimationManager));
 	defAnimated2.def(
-	  "GetAnimationManagers", +[](lua::State *l, pragma::PanimaComponent &hComponent) -> luabind::tableT<panima::AnimationManager> {
+	  "GetAnimationManagers", +[](lua::State *l, PanimaComponent &hComponent) -> luabind::tableT<panima::AnimationManager> {
 		  auto t = luabind::newtable(l);
 		  auto &animManagers = hComponent.GetAnimationManagers();
 		  for(auto &amData : animManagers)
 			  t[amData->name] = amData->animationManager;
 		  return t;
 	  });
-	defAnimated2.def("GetAnimationManager", +[](lua::State *l, pragma::PanimaComponent &hComponent, const std::string &name) { return hComponent.GetAnimationManager(name); });
-	defAnimated2.def("PlayAnimation", &pragma::PanimaComponent::PlayAnimation);
-	defAnimated2.def("ReloadAnimation", static_cast<void (pragma::PanimaComponent::*)(panima::AnimationManager &)>(&pragma::PanimaComponent::ReloadAnimation));
-	defAnimated2.def("AdvanceAnimations", &pragma::PanimaComponent::AdvanceAnimations);
-	defAnimated2.def("DebugPrint", static_cast<void (pragma::PanimaComponent::*)()>(&pragma::PanimaComponent::DebugPrint));
+	defAnimated2.def("GetAnimationManager", +[](lua::State *l, PanimaComponent &hComponent, const std::string &name) { return hComponent.GetAnimationManager(name); });
+	defAnimated2.def("PlayAnimation", &PanimaComponent::PlayAnimation);
+	defAnimated2.def("ReloadAnimation", static_cast<void (PanimaComponent::*)(panima::AnimationManager &)>(&PanimaComponent::ReloadAnimation));
+	defAnimated2.def("AdvanceAnimations", &PanimaComponent::AdvanceAnimations);
+	defAnimated2.def("DebugPrint", static_cast<void (PanimaComponent::*)()>(&PanimaComponent::DebugPrint));
 	defAnimated2.def(
-	  "GetRawAnimatedPropertyValue", +[](lua::State *l, pragma::PanimaComponent &c, panima::AnimationManager &manager, const std::string &propName, udm::Type type) -> Lua::opt<Lua::udm_ng> {
+	  "GetRawAnimatedPropertyValue", +[](lua::State *l, PanimaComponent &c, panima::AnimationManager &manager, const std::string &propName, udm::Type type) -> Lua::opt<Lua::udm_ng> {
 		  luabind::object r = Lua::nil;
 		  udm::visit_ng(type, [l, &c, &manager, &propName, type, &r](auto tag) {
 			  using T = typename decltype(tag)::type;
@@ -537,7 +537,7 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  return r;
 	  });
 	defAnimated2.def(
-	  "GetRawPropertyValue", +[](lua::State *l, pragma::PanimaComponent &c, panima::AnimationManager &manager, const std::string &propName, udm::Type type) -> Lua::opt<Lua::udm_ng> {
+	  "GetRawPropertyValue", +[](lua::State *l, PanimaComponent &c, panima::AnimationManager &manager, const std::string &propName, udm::Type type) -> Lua::opt<Lua::udm_ng> {
 		  luabind::object r = Lua::nil;
 		  udm::visit_ng(type, [l, &c, &manager, &propName, type, &r](auto tag) {
 			  using T = typename decltype(tag)::type;
@@ -549,195 +549,195 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  });
 		  return r;
 	  });
-	defAnimated2.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT", pragma::panimaComponent::EVENT_HANDLE_ANIMATION_EVENT);
-	defAnimated2.add_static_constant("EVENT_ON_PLAY_ANIMATION", pragma::panimaComponent::EVENT_ON_PLAY_ANIMATION);
-	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_COMPLETE", pragma::panimaComponent::EVENT_ON_ANIMATION_COMPLETE);
-	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_START", pragma::panimaComponent::EVENT_ON_ANIMATION_START);
-	defAnimated2.add_static_constant("EVENT_MAINTAIN_ANIMATIONS", pragma::panimaComponent::EVENT_MAINTAIN_ANIMATIONS);
-	defAnimated2.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED", pragma::panimaComponent::EVENT_ON_ANIMATIONS_UPDATED);
-	defAnimated2.add_static_constant("EVENT_PLAY_ANIMATION", pragma::panimaComponent::EVENT_PLAY_ANIMATION);
-	defAnimated2.add_static_constant("EVENT_TRANSLATE_ANIMATION", pragma::panimaComponent::EVENT_TRANSLATE_ANIMATION);
-	defAnimated2.add_static_constant("EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER", pragma::panimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER);
+	defAnimated2.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT", panimaComponent::EVENT_HANDLE_ANIMATION_EVENT);
+	defAnimated2.add_static_constant("EVENT_ON_PLAY_ANIMATION", panimaComponent::EVENT_ON_PLAY_ANIMATION);
+	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_COMPLETE", panimaComponent::EVENT_ON_ANIMATION_COMPLETE);
+	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_START", panimaComponent::EVENT_ON_ANIMATION_START);
+	defAnimated2.add_static_constant("EVENT_MAINTAIN_ANIMATIONS", panimaComponent::EVENT_MAINTAIN_ANIMATIONS);
+	defAnimated2.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED", panimaComponent::EVENT_ON_ANIMATIONS_UPDATED);
+	defAnimated2.add_static_constant("EVENT_PLAY_ANIMATION", panimaComponent::EVENT_PLAY_ANIMATION);
+	defAnimated2.add_static_constant("EVENT_TRANSLATE_ANIMATION", panimaComponent::EVENT_TRANSLATE_ANIMATION);
+	defAnimated2.add_static_constant("EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER", panimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER);
 	entsMod[defAnimated2];
 
-	auto defDriverC = pragma::LuaCore::create_entity_component_class<pragma::AnimationDriverComponent, pragma::BaseEntityComponent>("AnimationDriverComponent");
-	defDriverC.def("SetExpression", &pragma::AnimationDriverComponent::SetExpression);
-	defDriverC.def("GetExpression", &pragma::AnimationDriverComponent::GetExpression);
-	defDriverC.def("AddReference", &pragma::AnimationDriverComponent::AddReference);
-	defDriverC.def("GetConstants", &pragma::AnimationDriverComponent::GetConstants);
-	defDriverC.def("GetReferences", &pragma::AnimationDriverComponent::GetReferences);
-	defDriverC.def("SetDrivenObject", &pragma::AnimationDriverComponent::SetDrivenObject);
-	defDriverC.def("GetDrivenObject", &pragma::AnimationDriverComponent::GetDrivenObject);
-	defDriverC.def("AddConstant", static_cast<void (pragma::AnimationDriverComponent::*)(const std::string &, const udm::PProperty &)>(&pragma::AnimationDriverComponent::AddConstant));
+	auto defDriverC = pragma::LuaCore::create_entity_component_class<AnimationDriverComponent, BaseEntityComponent>("AnimationDriverComponent");
+	defDriverC.def("SetExpression", &AnimationDriverComponent::SetExpression);
+	defDriverC.def("GetExpression", &AnimationDriverComponent::GetExpression);
+	defDriverC.def("AddReference", &AnimationDriverComponent::AddReference);
+	defDriverC.def("GetConstants", &AnimationDriverComponent::GetConstants);
+	defDriverC.def("GetReferences", &AnimationDriverComponent::GetReferences);
+	defDriverC.def("SetDrivenObject", &AnimationDriverComponent::SetDrivenObject);
+	defDriverC.def("GetDrivenObject", &AnimationDriverComponent::GetDrivenObject);
+	defDriverC.def("AddConstant", static_cast<void (AnimationDriverComponent::*)(const std::string &, const udm::PProperty &)>(&AnimationDriverComponent::AddConstant));
 
-	auto defDriver = luabind::class_<pragma::game::ValueDriver>("Driver");
+	auto defDriver = luabind::class_<game::ValueDriver>("Driver");
 	defDriver.def(luabind::tostring(luabind::self));
-	defDriver.def("GetMemberReference", &pragma::game::ValueDriver::GetMemberReference);
-	defDriver.def("GetDescriptor", &pragma::game::ValueDriver::GetDescriptor);
+	defDriver.def("GetMemberReference", &game::ValueDriver::GetMemberReference);
+	defDriver.def("GetDescriptor", &game::ValueDriver::GetDescriptor);
 	defDriverC.scope[defDriver];
 	entsMod[defDriverC];
-	pragma::LuaCore::define_custom_constructor<pragma::game::ValueDriver,
-	  +[](pragma::ComponentId componentId, const std::string &memberRef, pragma::game::ValueDriverDescriptor descriptor, const std::string &self) -> pragma::game::ValueDriver { return pragma::game::ValueDriver {componentId, memberRef, descriptor, pragma::util::uuid_string_to_bytes(self)}; }, pragma::ComponentId,
-	  const std::string &, pragma::game::ValueDriverDescriptor, const std::string &>(GetLuaState());
+	pragma::LuaCore::define_custom_constructor<game::ValueDriver,
+	  +[](ComponentId componentId, const std::string &memberRef, game::ValueDriverDescriptor descriptor, const std::string &self) -> game::ValueDriver { return game::ValueDriver {componentId, memberRef, descriptor, util::uuid_string_to_bytes(self)}; }, ComponentId,
+	  const std::string &, game::ValueDriverDescriptor, const std::string &>(GetLuaState());
 
-	auto defIK = pragma::LuaCore::create_entity_component_class<pragma::IKComponent, pragma::BaseEntityComponent>("IKComponent");
-	defIK.def("SetIKControllerEnabled", &pragma::IKComponent::SetIKControllerEnabled);
-	defIK.def("IsIKControllerEnabled", &pragma::IKComponent::IsIKControllerEnabled);
-	defIK.def("SetIKEffectorPos", &pragma::IKComponent::SetIKEffectorPos);
-	defIK.def("GetIKEffectorPos", &pragma::IKComponent::GetIKEffectorPos);
+	auto defIK = pragma::LuaCore::create_entity_component_class<IKComponent, BaseEntityComponent>("IKComponent");
+	defIK.def("SetIKControllerEnabled", &IKComponent::SetIKControllerEnabled);
+	defIK.def("IsIKControllerEnabled", &IKComponent::IsIKControllerEnabled);
+	defIK.def("SetIKEffectorPos", &IKComponent::SetIKEffectorPos);
+	defIK.def("GetIKEffectorPos", &IKComponent::GetIKEffectorPos);
 	entsMod[defIK];
 
-	auto defOrigin = pragma::LuaCore::create_entity_component_class<pragma::OriginComponent, pragma::BaseEntityComponent>("OriginComponent");
-	defOrigin.add_static_constant("EVENT_ON_ORIGIN_CHANGED", pragma::originComponent::EVENT_ON_ORIGIN_CHANGED);
-	defOrigin.def("GetOriginPose", &pragma::OriginComponent::GetOriginPose);
-	defOrigin.def("GetOriginPos", &pragma::OriginComponent::GetOriginPos);
-	defOrigin.def("GetOriginRot", &pragma::OriginComponent::GetOriginRot);
-	defOrigin.def("SetOriginPose", &pragma::OriginComponent::SetOriginPose);
-	defOrigin.def("SetOriginPos", &pragma::OriginComponent::SetOriginPos);
-	defOrigin.def("SetOriginRot", &pragma::OriginComponent::SetOriginRot);
+	auto defOrigin = pragma::LuaCore::create_entity_component_class<OriginComponent, BaseEntityComponent>("OriginComponent");
+	defOrigin.add_static_constant("EVENT_ON_ORIGIN_CHANGED", originComponent::EVENT_ON_ORIGIN_CHANGED);
+	defOrigin.def("GetOriginPose", &OriginComponent::GetOriginPose);
+	defOrigin.def("GetOriginPos", &OriginComponent::GetOriginPos);
+	defOrigin.def("GetOriginRot", &OriginComponent::GetOriginRot);
+	defOrigin.def("SetOriginPose", &OriginComponent::SetOriginPose);
+	defOrigin.def("SetOriginPos", &OriginComponent::SetOriginPos);
+	defOrigin.def("SetOriginRot", &OriginComponent::SetOriginRot);
 	entsMod[defOrigin];
 
-	auto defConstraint = pragma::LuaCore::create_entity_component_class<pragma::ConstraintComponent, pragma::BaseEntityComponent>("ConstraintComponent");
+	auto defConstraint = pragma::LuaCore::create_entity_component_class<ConstraintComponent, BaseEntityComponent>("ConstraintComponent");
 
-	auto defPart = luabind::class_<pragma::ConstraintComponent::ConstraintParticipants>("ConstraintParticipants");
-	defPart.def_readonly("driver", &pragma::ConstraintComponent::ConstraintParticipants::driverC);
-	defPart.def_readonly("drivenObject", &pragma::ConstraintComponent::ConstraintParticipants::drivenObjectC);
-	defPart.def_readonly("driverPropertyIndex", &pragma::ConstraintComponent::ConstraintParticipants::driverPropIdx);
-	defPart.def_readonly("drivenObjectPropertyIndex", &pragma::ConstraintComponent::ConstraintParticipants::drivenObjectPropIdx);
+	auto defPart = luabind::class_<ConstraintComponent::ConstraintParticipants>("ConstraintParticipants");
+	defPart.def_readonly("driver", &ConstraintComponent::ConstraintParticipants::driverC);
+	defPart.def_readonly("drivenObject", &ConstraintComponent::ConstraintParticipants::drivenObjectC);
+	defPart.def_readonly("driverPropertyIndex", &ConstraintComponent::ConstraintParticipants::driverPropIdx);
+	defPart.def_readonly("drivenObjectPropertyIndex", &ConstraintComponent::ConstraintParticipants::drivenObjectPropIdx);
 	defConstraint.scope[defPart];
 
-	defConstraint.add_static_constant("EVENT_ON_ORDER_INDEX_CHANGED", pragma::constraintComponent::EVENT_ON_ORDER_INDEX_CHANGED);
-	defConstraint.add_static_constant("EVENT_APPLY_CONSTRAINT", pragma::constraintComponent::EVENT_APPLY_CONSTRAINT);
-	defConstraint.def("SetInfluence", &pragma::ConstraintComponent::SetInfluence);
-	defConstraint.def("GetInfluence", &pragma::ConstraintComponent::GetInfluence);
-	defConstraint.def("SetDriver", &pragma::ConstraintComponent::SetDriver);
-	defConstraint.def("GetDriver", +[](pragma::ConstraintComponent &constraint) -> pragma::EntityUComponentMemberRef & { return const_cast<pragma::EntityUComponentMemberRef &>(constraint.GetDriver()); });
-	defConstraint.def("SetDrivenObject", &pragma::ConstraintComponent::SetDrivenObject);
-	defConstraint.def("GetDrivenObject", +[](pragma::ConstraintComponent &constraint) -> pragma::EntityUComponentMemberRef & { return const_cast<pragma::EntityUComponentMemberRef &>(constraint.GetDrivenObject()); });
-	defConstraint.def("SetDriverSpace", &pragma::ConstraintComponent::SetDriverSpace);
-	defConstraint.def("GetDriverSpace", &pragma::ConstraintComponent::GetDriverSpace);
-	defConstraint.def("SetDrivenObjectSpace", &pragma::ConstraintComponent::SetDrivenObjectSpace);
-	defConstraint.def("GetDrivenObjectSpace", &pragma::ConstraintComponent::GetDrivenObjectSpace);
-	defConstraint.def("SetOrderIndex", &pragma::ConstraintComponent::SetOrderIndex);
-	defConstraint.def("GetOrderIndex", &pragma::ConstraintComponent::GetOrderIndex);
-	defConstraint.def("GetConstraintParticipants", &pragma::ConstraintComponent::GetConstraintParticipants);
+	defConstraint.add_static_constant("EVENT_ON_ORDER_INDEX_CHANGED", constraintComponent::EVENT_ON_ORDER_INDEX_CHANGED);
+	defConstraint.add_static_constant("EVENT_APPLY_CONSTRAINT", constraintComponent::EVENT_APPLY_CONSTRAINT);
+	defConstraint.def("SetInfluence", &ConstraintComponent::SetInfluence);
+	defConstraint.def("GetInfluence", &ConstraintComponent::GetInfluence);
+	defConstraint.def("SetDriver", &ConstraintComponent::SetDriver);
+	defConstraint.def("GetDriver", +[](ConstraintComponent &constraint) -> EntityUComponentMemberRef & { return const_cast<EntityUComponentMemberRef &>(constraint.GetDriver()); });
+	defConstraint.def("SetDrivenObject", &ConstraintComponent::SetDrivenObject);
+	defConstraint.def("GetDrivenObject", +[](ConstraintComponent &constraint) -> EntityUComponentMemberRef & { return const_cast<EntityUComponentMemberRef &>(constraint.GetDrivenObject()); });
+	defConstraint.def("SetDriverSpace", &ConstraintComponent::SetDriverSpace);
+	defConstraint.def("GetDriverSpace", &ConstraintComponent::GetDriverSpace);
+	defConstraint.def("SetDrivenObjectSpace", &ConstraintComponent::SetDrivenObjectSpace);
+	defConstraint.def("GetDrivenObjectSpace", &ConstraintComponent::GetDrivenObjectSpace);
+	defConstraint.def("SetOrderIndex", &ConstraintComponent::SetOrderIndex);
+	defConstraint.def("GetOrderIndex", &ConstraintComponent::GetOrderIndex);
+	defConstraint.def("GetConstraintParticipants", &ConstraintComponent::GetConstraintParticipants);
 	entsMod[defConstraint];
 
-	auto defConstraintManager = pragma::LuaCore::create_entity_component_class<pragma::ConstraintManagerComponent, pragma::BaseEntityComponent>("ConstraintManagerComponent");
-	defConstraintManager.add_static_constant("COORDINATE_SPACE_WORLD", pragma::math::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::World));
-	defConstraintManager.add_static_constant("COORDINATE_SPACE_LOCAL", pragma::math::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::Local));
-	defConstraintManager.add_static_constant("COORDINATE_SPACE_OBJECT", pragma::math::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::Object));
-	defConstraintManager.add_static_constant("EVENT_APPLY_CONSTRAINT", pragma::constraintManagerComponent::EVENT_APPLY_CONSTRAINT);
+	auto defConstraintManager = pragma::LuaCore::create_entity_component_class<ConstraintManagerComponent, BaseEntityComponent>("ConstraintManagerComponent");
+	defConstraintManager.add_static_constant("COORDINATE_SPACE_WORLD", math::to_integral(ConstraintManagerComponent::CoordinateSpace::World));
+	defConstraintManager.add_static_constant("COORDINATE_SPACE_LOCAL", math::to_integral(ConstraintManagerComponent::CoordinateSpace::Local));
+	defConstraintManager.add_static_constant("COORDINATE_SPACE_OBJECT", math::to_integral(ConstraintManagerComponent::CoordinateSpace::Object));
+	defConstraintManager.add_static_constant("EVENT_APPLY_CONSTRAINT", constraintManagerComponent::EVENT_APPLY_CONSTRAINT);
 	entsMod[defConstraintManager];
 
-	auto defConstraintSpace = pragma::LuaCore::create_entity_component_class<pragma::ConstraintSpaceComponent, pragma::BaseEntityComponent>("ConstraintSpaceComponent");
-	defConstraintSpace.def("SetAxisEnabled", &pragma::ConstraintSpaceComponent::SetAxisEnabled);
-	defConstraintSpace.def("IsAxisEnabled", &pragma::ConstraintSpaceComponent::IsAxisEnabled);
-	defConstraintSpace.def("SetAxisInverted", &pragma::ConstraintSpaceComponent::SetAxisInverted);
-	defConstraintSpace.def("IsAxisInverted", &pragma::ConstraintSpaceComponent::IsAxisInverted);
+	auto defConstraintSpace = pragma::LuaCore::create_entity_component_class<ConstraintSpaceComponent, BaseEntityComponent>("ConstraintSpaceComponent");
+	defConstraintSpace.def("SetAxisEnabled", &ConstraintSpaceComponent::SetAxisEnabled);
+	defConstraintSpace.def("IsAxisEnabled", &ConstraintSpaceComponent::IsAxisEnabled);
+	defConstraintSpace.def("SetAxisInverted", &ConstraintSpaceComponent::SetAxisInverted);
+	defConstraintSpace.def("IsAxisInverted", &ConstraintSpaceComponent::IsAxisInverted);
 	defConstraintSpace.def(
-	  "ApplyFilter", +[](const pragma::ConstraintSpaceComponent &component, const Vector3 &posDriver, const Vector3 &posDriven) -> Vector3 {
+	  "ApplyFilter", +[](const ConstraintSpaceComponent &component, const Vector3 &posDriver, const Vector3 &posDriven) -> Vector3 {
 		  Vector3 result;
 		  component.ApplyFilter(posDriver, posDriven, result);
 		  return result;
 	  });
 	defConstraintSpace.def(
-	  "ApplyFilter", +[](const pragma::ConstraintSpaceComponent &component, const EulerAngles &angDriver, const EulerAngles &angDriven) -> EulerAngles {
+	  "ApplyFilter", +[](const ConstraintSpaceComponent &component, const EulerAngles &angDriver, const EulerAngles &angDriven) -> EulerAngles {
 		  EulerAngles result;
 		  component.ApplyFilter(angDriver, angDriven, result);
 		  return result;
 	  });
 	entsMod[defConstraintSpace];
 
-	auto defConstraintCopyLocation = pragma::LuaCore::create_entity_component_class<pragma::ConstraintCopyLocationComponent, pragma::BaseEntityComponent>("ConstraintCopyLocationComponent");
+	auto defConstraintCopyLocation = pragma::LuaCore::create_entity_component_class<ConstraintCopyLocationComponent, BaseEntityComponent>("ConstraintCopyLocationComponent");
 	entsMod[defConstraintCopyLocation];
 
-	auto defConstraintCopyRotation = pragma::LuaCore::create_entity_component_class<pragma::ConstraintCopyRotationComponent, pragma::BaseEntityComponent>("ConstraintCopyRotationComponent");
+	auto defConstraintCopyRotation = pragma::LuaCore::create_entity_component_class<ConstraintCopyRotationComponent, BaseEntityComponent>("ConstraintCopyRotationComponent");
 	entsMod[defConstraintCopyRotation];
 
-	auto defConstraintCopyScale = pragma::LuaCore::create_entity_component_class<pragma::ConstraintCopyScaleComponent, pragma::BaseEntityComponent>("ConstraintCopyScaleComponent");
+	auto defConstraintCopyScale = pragma::LuaCore::create_entity_component_class<ConstraintCopyScaleComponent, BaseEntityComponent>("ConstraintCopyScaleComponent");
 	entsMod[defConstraintCopyScale];
 
-	auto defConstraintLookAtComponent = pragma::LuaCore::create_entity_component_class<pragma::ConstraintLookAtComponent, pragma::BaseEntityComponent>("ConstraintLookAtComponent");
-	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_X", pragma::math::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::X));
-	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_Y", pragma::math::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::Y));
-	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_Z", pragma::math::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::Z));
-	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_X", pragma::math::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::NegX));
-	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_Y", pragma::math::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::NegY));
-	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_Z", pragma::math::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::NegZ));
-	defConstraintLookAtComponent.def("SetTrackAxis", &pragma::ConstraintLookAtComponent::SetTrackAxis);
-	defConstraintLookAtComponent.def("GetTrackAxis", &pragma::ConstraintLookAtComponent::GetTrackAxis);
-	defConstraintLookAtComponent.def("SetUpTarget", &pragma::ConstraintLookAtComponent::SetUpTarget);
-	defConstraintLookAtComponent.def("GetUpTarget", &pragma::ConstraintLookAtComponent::GetUpTarget);
+	auto defConstraintLookAtComponent = pragma::LuaCore::create_entity_component_class<ConstraintLookAtComponent, BaseEntityComponent>("ConstraintLookAtComponent");
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_X", math::to_integral(ConstraintLookAtComponent::TrackAxis::X));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_Y", math::to_integral(ConstraintLookAtComponent::TrackAxis::Y));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_Z", math::to_integral(ConstraintLookAtComponent::TrackAxis::Z));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_X", math::to_integral(ConstraintLookAtComponent::TrackAxis::NegX));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_Y", math::to_integral(ConstraintLookAtComponent::TrackAxis::NegY));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_Z", math::to_integral(ConstraintLookAtComponent::TrackAxis::NegZ));
+	defConstraintLookAtComponent.def("SetTrackAxis", &ConstraintLookAtComponent::SetTrackAxis);
+	defConstraintLookAtComponent.def("GetTrackAxis", &ConstraintLookAtComponent::GetTrackAxis);
+	defConstraintLookAtComponent.def("SetUpTarget", &ConstraintLookAtComponent::SetUpTarget);
+	defConstraintLookAtComponent.def("GetUpTarget", &ConstraintLookAtComponent::GetUpTarget);
 	entsMod[defConstraintLookAtComponent];
 
-	auto defConstraintChildOfComponent = pragma::LuaCore::create_entity_component_class<pragma::ConstraintChildOfComponent, pragma::BaseEntityComponent>("ConstraintChildOfComponent");
-	defConstraintChildOfComponent.def("SetLocationAxisEnabled", &pragma::ConstraintChildOfComponent::SetLocationAxisEnabled);
-	defConstraintChildOfComponent.def("IsLocationAxisEnabled", &pragma::ConstraintChildOfComponent::IsLocationAxisEnabled);
-	defConstraintChildOfComponent.def("SetRotationAxisEnabled", &pragma::ConstraintChildOfComponent::SetRotationAxisEnabled);
-	defConstraintChildOfComponent.def("IsRotationAxisEnabled", &pragma::ConstraintChildOfComponent::IsRotationAxisEnabled);
-	defConstraintChildOfComponent.def("SetScaleAxisEnabled", &pragma::ConstraintChildOfComponent::SetScaleAxisEnabled);
-	defConstraintChildOfComponent.def("IsScaleAxisEnabled", &pragma::ConstraintChildOfComponent::IsScaleAxisEnabled);
-	defConstraintChildOfComponent.def("CalcInversePose", &pragma::ConstraintChildOfComponent::CalcInversePose);
-	defConstraintChildOfComponent.def("GetConstraint", &pragma::ConstraintChildOfComponent::GetConstraint);
-	defConstraintChildOfComponent.def("GetDriverPose", &pragma::ConstraintChildOfComponent::GetDriverPose);
-	defConstraintChildOfComponent.def("GetDrivenPose", &pragma::ConstraintChildOfComponent::GetDrivenPose);
+	auto defConstraintChildOfComponent = pragma::LuaCore::create_entity_component_class<ConstraintChildOfComponent, BaseEntityComponent>("ConstraintChildOfComponent");
+	defConstraintChildOfComponent.def("SetLocationAxisEnabled", &ConstraintChildOfComponent::SetLocationAxisEnabled);
+	defConstraintChildOfComponent.def("IsLocationAxisEnabled", &ConstraintChildOfComponent::IsLocationAxisEnabled);
+	defConstraintChildOfComponent.def("SetRotationAxisEnabled", &ConstraintChildOfComponent::SetRotationAxisEnabled);
+	defConstraintChildOfComponent.def("IsRotationAxisEnabled", &ConstraintChildOfComponent::IsRotationAxisEnabled);
+	defConstraintChildOfComponent.def("SetScaleAxisEnabled", &ConstraintChildOfComponent::SetScaleAxisEnabled);
+	defConstraintChildOfComponent.def("IsScaleAxisEnabled", &ConstraintChildOfComponent::IsScaleAxisEnabled);
+	defConstraintChildOfComponent.def("CalcInversePose", &ConstraintChildOfComponent::CalcInversePose);
+	defConstraintChildOfComponent.def("GetConstraint", &ConstraintChildOfComponent::GetConstraint);
+	defConstraintChildOfComponent.def("GetDriverPose", &ConstraintChildOfComponent::GetDriverPose);
+	defConstraintChildOfComponent.def("GetDrivenPose", &ConstraintChildOfComponent::GetDrivenPose);
 	entsMod[defConstraintChildOfComponent];
 
-	auto defConstraintLimitDistance = pragma::LuaCore::create_entity_component_class<pragma::ConstraintLimitDistanceComponent, pragma::BaseEntityComponent>("ConstraintLimitDistanceComponent");
-	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_INSIDE", pragma::math::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::Inside));
-	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_OUTSIDE", pragma::math::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::Outside));
-	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_ON_SURFACE", pragma::math::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::OnSurface));
-	defConstraintLimitDistance.def("SetClampRegion", &pragma::ConstraintLimitDistanceComponent::SetClampRegion);
-	defConstraintLimitDistance.def("GetClampRegion", &pragma::ConstraintLimitDistanceComponent::GetClampRegion);
-	defConstraintLimitDistance.def("SetDistance", &pragma::ConstraintLimitDistanceComponent::SetDistance);
-	defConstraintLimitDistance.def("GetDistance", &pragma::ConstraintLimitDistanceComponent::GetDistance);
+	auto defConstraintLimitDistance = pragma::LuaCore::create_entity_component_class<ConstraintLimitDistanceComponent, BaseEntityComponent>("ConstraintLimitDistanceComponent");
+	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_INSIDE", math::to_integral(ConstraintLimitDistanceComponent::ClampRegion::Inside));
+	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_OUTSIDE", math::to_integral(ConstraintLimitDistanceComponent::ClampRegion::Outside));
+	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_ON_SURFACE", math::to_integral(ConstraintLimitDistanceComponent::ClampRegion::OnSurface));
+	defConstraintLimitDistance.def("SetClampRegion", &ConstraintLimitDistanceComponent::SetClampRegion);
+	defConstraintLimitDistance.def("GetClampRegion", &ConstraintLimitDistanceComponent::GetClampRegion);
+	defConstraintLimitDistance.def("SetDistance", &ConstraintLimitDistanceComponent::SetDistance);
+	defConstraintLimitDistance.def("GetDistance", &ConstraintLimitDistanceComponent::GetDistance);
 	entsMod[defConstraintLimitDistance];
 
-	auto defConstraintLimitLocation = pragma::LuaCore::create_entity_component_class<pragma::ConstraintLimitLocationComponent, pragma::BaseEntityComponent>("ConstraintLimitLocationComponent");
-	defConstraintLimitLocation.def("SetMinimum", &pragma::ConstraintLimitLocationComponent::SetMinimum);
-	defConstraintLimitLocation.def("SetMaximum", &pragma::ConstraintLimitLocationComponent::SetMaximum);
-	defConstraintLimitLocation.def("GetMinimum", &pragma::ConstraintLimitLocationComponent::GetMinimum);
-	defConstraintLimitLocation.def("GetMaximum", &pragma::ConstraintLimitLocationComponent::GetMaximum);
-	defConstraintLimitLocation.def("SetMinimumEnabled", &pragma::ConstraintLimitLocationComponent::SetMinimumEnabled);
-	defConstraintLimitLocation.def("IsMinimumEnabled", &pragma::ConstraintLimitLocationComponent::IsMinimumEnabled);
-	defConstraintLimitLocation.def("SetMaximumEnabled", &pragma::ConstraintLimitLocationComponent::SetMaximumEnabled);
-	defConstraintLimitLocation.def("IsMaximumEnabled", &pragma::ConstraintLimitLocationComponent::IsMaximumEnabled);
+	auto defConstraintLimitLocation = pragma::LuaCore::create_entity_component_class<ConstraintLimitLocationComponent, BaseEntityComponent>("ConstraintLimitLocationComponent");
+	defConstraintLimitLocation.def("SetMinimum", &ConstraintLimitLocationComponent::SetMinimum);
+	defConstraintLimitLocation.def("SetMaximum", &ConstraintLimitLocationComponent::SetMaximum);
+	defConstraintLimitLocation.def("GetMinimum", &ConstraintLimitLocationComponent::GetMinimum);
+	defConstraintLimitLocation.def("GetMaximum", &ConstraintLimitLocationComponent::GetMaximum);
+	defConstraintLimitLocation.def("SetMinimumEnabled", &ConstraintLimitLocationComponent::SetMinimumEnabled);
+	defConstraintLimitLocation.def("IsMinimumEnabled", &ConstraintLimitLocationComponent::IsMinimumEnabled);
+	defConstraintLimitLocation.def("SetMaximumEnabled", &ConstraintLimitLocationComponent::SetMaximumEnabled);
+	defConstraintLimitLocation.def("IsMaximumEnabled", &ConstraintLimitLocationComponent::IsMaximumEnabled);
 	entsMod[defConstraintLimitLocation];
 
-	auto defConstraintLimitRotation = pragma::LuaCore::create_entity_component_class<pragma::ConstraintLimitRotationComponent, pragma::BaseEntityComponent>("ConstraintLimitRotationComponent");
-	defConstraintLimitRotation.def("SetLimit", &pragma::ConstraintLimitRotationComponent::SetLimit);
-	defConstraintLimitRotation.def("GetLimit", &pragma::ConstraintLimitRotationComponent::GetLimit);
-	defConstraintLimitRotation.def("SetLimitEnabled", &pragma::ConstraintLimitRotationComponent::SetLimitEnabled);
-	defConstraintLimitRotation.def("IsLimitEnabled", &pragma::ConstraintLimitRotationComponent::IsLimitEnabled);
+	auto defConstraintLimitRotation = pragma::LuaCore::create_entity_component_class<ConstraintLimitRotationComponent, BaseEntityComponent>("ConstraintLimitRotationComponent");
+	defConstraintLimitRotation.def("SetLimit", &ConstraintLimitRotationComponent::SetLimit);
+	defConstraintLimitRotation.def("GetLimit", &ConstraintLimitRotationComponent::GetLimit);
+	defConstraintLimitRotation.def("SetLimitEnabled", &ConstraintLimitRotationComponent::SetLimitEnabled);
+	defConstraintLimitRotation.def("IsLimitEnabled", &ConstraintLimitRotationComponent::IsLimitEnabled);
 	entsMod[defConstraintLimitRotation];
 
-	auto defConstraintLimitScale = pragma::LuaCore::create_entity_component_class<pragma::ConstraintLimitScaleComponent, pragma::BaseEntityComponent>("ConstraintLimitScaleComponent");
-	defConstraintLimitScale.def("SetMinimum", &pragma::ConstraintLimitScaleComponent::SetMinimum);
-	defConstraintLimitScale.def("SetMaximum", &pragma::ConstraintLimitScaleComponent::SetMaximum);
-	defConstraintLimitScale.def("GetMinimum", &pragma::ConstraintLimitScaleComponent::GetMinimum);
-	defConstraintLimitScale.def("GetMaximum", &pragma::ConstraintLimitScaleComponent::GetMaximum);
-	defConstraintLimitScale.def("SetMinimumEnabled", &pragma::ConstraintLimitScaleComponent::SetMinimumEnabled);
-	defConstraintLimitScale.def("IsMinimumEnabled", &pragma::ConstraintLimitScaleComponent::IsMinimumEnabled);
-	defConstraintLimitScale.def("SetMaximumEnabled", &pragma::ConstraintLimitScaleComponent::SetMaximumEnabled);
-	defConstraintLimitScale.def("IsMaximumEnabled", &pragma::ConstraintLimitScaleComponent::IsMaximumEnabled);
+	auto defConstraintLimitScale = pragma::LuaCore::create_entity_component_class<ConstraintLimitScaleComponent, BaseEntityComponent>("ConstraintLimitScaleComponent");
+	defConstraintLimitScale.def("SetMinimum", &ConstraintLimitScaleComponent::SetMinimum);
+	defConstraintLimitScale.def("SetMaximum", &ConstraintLimitScaleComponent::SetMaximum);
+	defConstraintLimitScale.def("GetMinimum", &ConstraintLimitScaleComponent::GetMinimum);
+	defConstraintLimitScale.def("GetMaximum", &ConstraintLimitScaleComponent::GetMaximum);
+	defConstraintLimitScale.def("SetMinimumEnabled", &ConstraintLimitScaleComponent::SetMinimumEnabled);
+	defConstraintLimitScale.def("IsMinimumEnabled", &ConstraintLimitScaleComponent::IsMinimumEnabled);
+	defConstraintLimitScale.def("SetMaximumEnabled", &ConstraintLimitScaleComponent::SetMaximumEnabled);
+	defConstraintLimitScale.def("IsMaximumEnabled", &ConstraintLimitScaleComponent::IsMaximumEnabled);
 	entsMod[defConstraintLimitScale];
 
-	auto defLifelineLink = pragma::LuaCore::create_entity_component_class<pragma::LifelineLinkComponent, pragma::BaseEntityComponent>("LifelineLinkComponent");
+	auto defLifelineLink = pragma::LuaCore::create_entity_component_class<LifelineLinkComponent, BaseEntityComponent>("LifelineLinkComponent");
 	entsMod[defLifelineLink];
 
-	auto defLogic = pragma::LuaCore::create_entity_component_class<pragma::LogicComponent, pragma::BaseEntityComponent>("LogicComponent");
-	defLogic.add_static_constant("EVENT_ON_TICK", pragma::logicComponent::EVENT_ON_TICK);
+	auto defLogic = pragma::LuaCore::create_entity_component_class<LogicComponent, BaseEntityComponent>("LogicComponent");
+	defLogic.add_static_constant("EVENT_ON_TICK", logicComponent::EVENT_ON_TICK);
 	entsMod[defLogic];
 
-	auto defUsable = pragma::LuaCore::create_entity_component_class<pragma::UsableComponent, pragma::BaseEntityComponent>("UsableComponent");
-	defUsable.add_static_constant("EVENT_ON_USE", pragma::usableComponent::EVENT_ON_USE);
-	defUsable.add_static_constant("EVENT_CAN_USE", pragma::usableComponent::EVENT_CAN_USE);
+	auto defUsable = pragma::LuaCore::create_entity_component_class<UsableComponent, BaseEntityComponent>("UsableComponent");
+	defUsable.add_static_constant("EVENT_ON_USE", usableComponent::EVENT_ON_USE);
+	defUsable.add_static_constant("EVENT_CAN_USE", usableComponent::EVENT_CAN_USE);
 	entsMod[defUsable];
 
-	auto defParent = pragma::LuaCore::create_entity_component_class<pragma::ParentComponent, pragma::BaseEntityComponent>("ParentComponent");
+	auto defParent = pragma::LuaCore::create_entity_component_class<ParentComponent, BaseEntityComponent>("ParentComponent");
 	defParent.def(
-	  "GetChildren", +[](lua::State *l, pragma::ParentComponent &parentC) -> luabind::object {
+	  "GetChildren", +[](lua::State *l, ParentComponent &parentC) -> luabind::object {
 		  auto &children = parentC.GetChildren();
 		  auto tChildren = luabind::newtable(l);
 		  int32_t i = 1;
@@ -748,37 +748,37 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  }
 		  return tChildren;
 	  });
-	defParent.def("GetChildCount", +[](pragma::ParentComponent &parentC) -> size_t { return parentC.GetChildren().size(); });
+	defParent.def("GetChildCount", +[](ParentComponent &parentC) -> size_t { return parentC.GetChildren().size(); });
 	defParent.def(
-	  "GetChild", +[](pragma::ParentComponent &parentC, size_t index) -> luabind::object {
+	  "GetChild", +[](ParentComponent &parentC, size_t index) -> luabind::object {
 		  auto &children = parentC.GetChildren();
 		  if(index >= children.size() || children[index].expired())
 			  return Lua::nil;
 		  return children[index]->GetLuaObject();
 	  });
-	defParent.add_static_constant("EVENT_ON_CHILD_ADDED", pragma::parentComponent::EVENT_ON_CHILD_ADDED);
-	defParent.add_static_constant("EVENT_ON_CHILD_REMOVED", pragma::parentComponent::EVENT_ON_CHILD_REMOVED);
+	defParent.add_static_constant("EVENT_ON_CHILD_ADDED", parentComponent::EVENT_ON_CHILD_ADDED);
+	defParent.add_static_constant("EVENT_ON_CHILD_REMOVED", parentComponent::EVENT_ON_CHILD_REMOVED);
 	entsMod[defParent];
 
-	auto defMap = pragma::LuaCore::create_entity_component_class<pragma::MapComponent, pragma::BaseEntityComponent>("MapComponent");
-	defMap.def("GetMapIndex", &pragma::MapComponent::GetMapIndex);
+	auto defMap = pragma::LuaCore::create_entity_component_class<MapComponent, BaseEntityComponent>("MapComponent");
+	defMap.def("GetMapIndex", &MapComponent::GetMapIndex);
 	entsMod[defMap];
 
-	auto defSubmergible = pragma::LuaCore::create_entity_component_class<pragma::SubmergibleComponent, pragma::BaseEntityComponent>("SubmergibleComponent");
-	defSubmergible.def("IsSubmerged", &pragma::SubmergibleComponent::IsSubmerged);
-	defSubmergible.def("IsFullySubmerged", &pragma::SubmergibleComponent::IsFullySubmerged);
-	defSubmergible.def("GetSubmergedFraction", &pragma::SubmergibleComponent::GetSubmergedFraction);
-	defSubmergible.def("IsInWater", &pragma::SubmergibleComponent::IsInWater);
-	defSubmergible.def("GetSubmergedFractionProperty", &pragma::SubmergibleComponent::GetSubmergedFractionProperty);
-	defSubmergible.def("GetWaterEntity", static_cast<pragma::ecs::BaseEntity *(pragma::SubmergibleComponent::*)()>(&pragma::SubmergibleComponent::GetWaterEntity));
-	defSubmergible.add_static_constant("EVENT_ON_WATER_SUBMERGED", pragma::submergibleComponent::EVENT_ON_WATER_SUBMERGED);
-	defSubmergible.add_static_constant("EVENT_ON_WATER_EMERGED", pragma::submergibleComponent::EVENT_ON_WATER_EMERGED);
-	defSubmergible.add_static_constant("EVENT_ON_WATER_ENTERED", pragma::submergibleComponent::EVENT_ON_WATER_ENTERED);
-	defSubmergible.add_static_constant("EVENT_ON_WATER_EXITED", pragma::submergibleComponent::EVENT_ON_WATER_EXITED);
+	auto defSubmergible = pragma::LuaCore::create_entity_component_class<SubmergibleComponent, BaseEntityComponent>("SubmergibleComponent");
+	defSubmergible.def("IsSubmerged", &SubmergibleComponent::IsSubmerged);
+	defSubmergible.def("IsFullySubmerged", &SubmergibleComponent::IsFullySubmerged);
+	defSubmergible.def("GetSubmergedFraction", &SubmergibleComponent::GetSubmergedFraction);
+	defSubmergible.def("IsInWater", &SubmergibleComponent::IsInWater);
+	defSubmergible.def("GetSubmergedFractionProperty", &SubmergibleComponent::GetSubmergedFractionProperty);
+	defSubmergible.def("GetWaterEntity", static_cast<ecs::BaseEntity *(SubmergibleComponent::*)()>(&SubmergibleComponent::GetWaterEntity));
+	defSubmergible.add_static_constant("EVENT_ON_WATER_SUBMERGED", submergibleComponent::EVENT_ON_WATER_SUBMERGED);
+	defSubmergible.add_static_constant("EVENT_ON_WATER_EMERGED", submergibleComponent::EVENT_ON_WATER_EMERGED);
+	defSubmergible.add_static_constant("EVENT_ON_WATER_ENTERED", submergibleComponent::EVENT_ON_WATER_ENTERED);
+	defSubmergible.add_static_constant("EVENT_ON_WATER_EXITED", submergibleComponent::EVENT_ON_WATER_EXITED);
 	entsMod[defSubmergible];
 
-	auto defDamageable = pragma::LuaCore::create_entity_component_class<pragma::DamageableComponent, pragma::BaseEntityComponent>("DamageableComponent");
-	defDamageable.def("TakeDamage", &pragma::DamageableComponent::TakeDamage);
-	defDamageable.add_static_constant("EVENT_ON_TAKE_DAMAGE", pragma::damageableComponent::EVENT_ON_TAKE_DAMAGE);
+	auto defDamageable = pragma::LuaCore::create_entity_component_class<DamageableComponent, BaseEntityComponent>("DamageableComponent");
+	defDamageable.def("TakeDamage", &DamageableComponent::TakeDamage);
+	defDamageable.add_static_constant("EVENT_ON_TAKE_DAMAGE", damageableComponent::EVENT_ON_TAKE_DAMAGE);
 	entsMod[defDamageable];
 }

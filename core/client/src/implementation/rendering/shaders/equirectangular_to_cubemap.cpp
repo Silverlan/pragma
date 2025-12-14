@@ -32,7 +32,7 @@ void ShaderEquirectangularToCubemap::InitializeRenderPass(std::shared_ptr<prospe
 
 std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(const std::string &fileName, uint32_t resolution)
 {
-	auto f = pragma::fs::open_file(fileName.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
+	auto f = pragma::fs::open_file(fileName.c_str(), fs::FileMode::Read | fs::FileMode::Binary);
 	if(f == nullptr)
 		return nullptr;
 	return LoadEquirectangularImage(f, resolution);
@@ -51,7 +51,7 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectan
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 	createInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
 
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	auto img = context.CreateImage(createInfo, reinterpret_cast<uint8_t *>(imgBuffer->GetData()));
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
@@ -70,7 +70,7 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 	auto rt = CreateCubeMapRenderTarget(resolution, resolution, prosper::util::ImageCreateInfo::Flags::FullMipmapChain);
 
 	// Shader input
-	auto dsg = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
+	auto dsg = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
 	dsg->GetDescriptorSet()->SetBindingTexture(equirectangularTexture, 0u);
 
 	PushConstants pushConstants {};
@@ -81,7 +81,7 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 	auto vertexBuffer = CreateCubeMesh(numVerts);
 
 	// Shader execution
-	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
+	auto &setupCmd = get_cengine()->GetSetupCommandBuffer();
 	auto success = true;
 	for(uint8_t layerId = 0u; layerId < 6u; ++layerId) {
 		setupCmd->RecordImageBarrier(rt->GetTexture().GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal, prosper::util::ImageSubresourceRange {layerId});

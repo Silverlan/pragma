@@ -16,7 +16,7 @@ pragma::gui::types::WIMainMenuLoadGame::~WIMainMenuLoadGame() {}
 void pragma::gui::types::WIMainMenuLoadGame::Initialize()
 {
 	WIMainMenuBase::Initialize();
-	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+	AddMenuItem(locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
 		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;

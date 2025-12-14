@@ -60,7 +60,7 @@ void pragma::physics::IConvexShape::InitializeLuaObject(lua::State *lua) { IBase
 bool pragma::physics::IConvexShape::IsConvex() const { return true; }
 pragma::physics::IConvexShape *pragma::physics::IConvexShape::GetConvexShape() { return this; }
 
-void pragma::physics::IConvexShape::SetCollisionMesh(pragma::physics::CollisionMesh &collisionMesh) { m_collisionMesh = collisionMesh.shared_from_this(); }
+void pragma::physics::IConvexShape::SetCollisionMesh(CollisionMesh &collisionMesh) { m_collisionMesh = collisionMesh.shared_from_this(); }
 void pragma::physics::IConvexShape::SetCollisionMesh() { m_collisionMesh = nullptr; }
 const pragma::physics::CollisionMesh *pragma::physics::IConvexShape::GetCollisionMesh() const { return const_cast<IConvexShape *>(this)->GetCollisionMesh(); }
 pragma::physics::CollisionMesh *pragma::physics::IConvexShape::GetCollisionMesh() { return m_collisionMesh.get(); }
@@ -95,8 +95,8 @@ void pragma::physics::IConvexHullShape::InitializeLuaObject(lua::State *lua) { I
 /////////////
 
 pragma::physics::ICompoundShape::ICompoundShape(IEnvironment &env) : IShape {env} {}
-pragma::physics::ICompoundShape::ICompoundShape(IEnvironment &env, pragma::physics::IShape &shape, const Vector3 &origin) : IShape {env} {}
-void pragma::physics::ICompoundShape::AddShape(pragma::physics::IShape &shape, const pragma::math::Transform &localPose)
+pragma::physics::ICompoundShape::ICompoundShape(IEnvironment &env, IShape &shape, const Vector3 &origin) : IShape {env} {}
+void pragma::physics::ICompoundShape::AddShape(IShape &shape, const math::Transform &localPose)
 {
 	m_shapes.push_back({std::static_pointer_cast<IShape>(shape.shared_from_this()), localPose});
 	if(m_shapes.size() == 1) {

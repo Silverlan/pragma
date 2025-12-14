@@ -8,15 +8,15 @@ import :util.core;
 
 import pragma.oskit;
 
-pragma::util::ParallelJob<std::vector<Vector2> &> pragma::util::generate_lightmap_uvs(pragma::NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<pragma::math::Vertex> &verts, const std::vector<uint32_t> &tris)
+pragma::util::ParallelJob<std::vector<Vector2> &> pragma::util::generate_lightmap_uvs(NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<math::Vertex> &verts, const std::vector<uint32_t> &tris)
 {
 	auto lib = nwState.InitializeLibrary("pr_uvatlas");
 	if(lib == nullptr)
 		return {};
-	auto *fGenerateAtlasUvs = lib->FindSymbolAddress<void (*)(uint32_t, uint32_t, const std::vector<pragma::math::Vertex> &, const std::vector<uint32_t> &, pragma::util::ParallelJob<std::vector<Vector2> &> &)>("pr_uvatlas_generate_atlas_uvs");
+	auto *fGenerateAtlasUvs = lib->FindSymbolAddress<void (*)(uint32_t, uint32_t, const std::vector<math::Vertex> &, const std::vector<uint32_t> &, ParallelJob<std::vector<Vector2> &> &)>("pr_uvatlas_generate_atlas_uvs");
 	if(fGenerateAtlasUvs == nullptr)
 		return {};
-	pragma::util::ParallelJob<std::vector<Vector2> &> job {};
+	ParallelJob<std::vector<Vector2> &> job {};
 	fGenerateAtlasUvs(atlastWidth, atlasHeight, verts, tris, job);
 	if(job.IsValid() == false)
 		return {};
@@ -130,22 +130,22 @@ std::shared_ptr<udm::Data> pragma::util::load_udm_asset(std::unique_ptr<ufile::I
 void pragma::util::write_udm_entity(udm::LinkedPropertyWrapperArg udm, EntityHandle &hEnt)
 {
 	if(hEnt.valid())
-		udm = pragma::util::uuid_to_string(hEnt->GetUuid());
+		udm = uuid_to_string(hEnt->GetUuid());
 }
-EntityHandle pragma::util::read_udm_entity(pragma::Game &game, udm::LinkedPropertyWrapperArg udm)
+EntityHandle pragma::util::read_udm_entity(Game &game, udm::LinkedPropertyWrapperArg udm)
 {
 	std::string uuid;
 	udm(uuid);
-	if(pragma::util::is_uuid(uuid)) {
-		pragma::ecs::EntityIterator entIt {game, pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
-		entIt.AttachFilter<EntityIteratorFilterUuid>(pragma::util::uuid_string_to_bytes(uuid));
+	if(is_uuid(uuid)) {
+		ecs::EntityIterator entIt {game, ecs::EntityIterator::FilterFlags::Default | ecs::EntityIterator::FilterFlags::Pending};
+		entIt.AttachFilter<EntityIteratorFilterUuid>(uuid_string_to_bytes(uuid));
 		auto it = entIt.begin();
 		auto *ent = (it != entIt.end()) ? *it : nullptr;
 		return ent ? ent->GetHandle() : EntityHandle {};
 	}
 	return EntityHandle {};
 }
-EntityHandle pragma::util::read_udm_entity(::pragma::BaseEntityComponent &c, udm::LinkedPropertyWrapperArg udm) { return read_udm_entity(*c.GetEntity().GetNetworkState()->GetGameState(), udm); }
+EntityHandle pragma::util::read_udm_entity(BaseEntityComponent &c, udm::LinkedPropertyWrapperArg udm) { return read_udm_entity(*c.GetEntity().GetNetworkState()->GetGameState(), udm); }
 
 std::shared_ptr<pragma::util::HairFile> pragma::util::HairFile::Load(const udm::AssetData &data, std::string &outErr)
 {
@@ -224,7 +224,7 @@ std::optional<std::string> pragma::util::convert_udm_file_to_ascii(const std::st
 	}
 	if(*formatType == udm::FormatType::Ascii)
 		return fileName; // Already in ascii format
-	auto udmData = pragma::util::load_udm_asset(fileName, &outErr);
+	auto udmData = load_udm_asset(fileName, &outErr);
 	if(udmData == nullptr) {
 		outErr = "Unable to load UDM data: " + outErr;
 		return {};
@@ -234,8 +234,8 @@ std::optional<std::string> pragma::util::convert_udm_file_to_ascii(const std::st
 		outErr = "Unable to locate UDM file on disk!";
 		return {};
 	}
-	auto path = pragma::util::Path::CreateFile(rpath);
-	path.MakeRelative(pragma::util::get_program_path());
+	auto path = Path::CreateFile(rpath);
+	path.MakeRelative(get_program_path());
 	auto outFileName = path.GetString();
 	std::string ext;
 	ufile::get_extension(outFileName, &ext);
@@ -249,7 +249,7 @@ std::optional<std::string> pragma::util::convert_udm_file_to_ascii(const std::st
 	outFileName += '.' + ext;
 	auto res = true;
 	try {
-		res = udmData->SaveAscii(outFileName, ::udm::AsciiSaveFlags ::Default | udm::AsciiSaveFlags::IncludeHeader | udm::AsciiSaveFlags::DontCompressLz4Arrays);
+		res = udmData->SaveAscii(outFileName, udm::AsciiSaveFlags ::Default | udm::AsciiSaveFlags::IncludeHeader | udm::AsciiSaveFlags::DontCompressLz4Arrays);
 	}
 	catch(const udm::Exception &e) {
 		outErr = "Unable to save UDM data: " + std::string {e.what()};
@@ -268,7 +268,7 @@ std::optional<std::string> pragma::util::convert_udm_file_to_binary(const std::s
 	}
 	if(*formatType == udm::FormatType::Binary)
 		return fileName; // Already in binary format
-	auto udmData = pragma::util::load_udm_asset(fileName, &outErr);
+	auto udmData = load_udm_asset(fileName, &outErr);
 	if(udmData == nullptr) {
 		outErr = "Unable to load UDM data: " + outErr;
 		return {};
@@ -278,8 +278,8 @@ std::optional<std::string> pragma::util::convert_udm_file_to_binary(const std::s
 		outErr = "Unable to locate UDM file on disk!";
 		return {};
 	}
-	auto path = pragma::util::Path::CreateFile(rpath);
-	path.MakeRelative(pragma::util::get_program_path());
+	auto path = Path::CreateFile(rpath);
+	path.MakeRelative(get_program_path());
 	auto outFileName = path.GetString();
 	std::string ext;
 	ufile::get_extension(outFileName, &ext);
@@ -382,12 +382,12 @@ pragma::util::Path pragma::util::get_user_data_dir()
 {
 	if(!g_lpUserDataDir.empty())
 		return g_lpUserDataDir;
-	return pragma::util::get_program_path();
+	return get_program_path();
 }
 
 std::vector<pragma::util::Path> pragma::util::get_resource_dirs()
 {
-	std::vector<pragma::util::Path> paths;
+	std::vector<Path> paths;
 	paths.reserve(g_lpResourceDirs.size());
 	for(auto &path : g_lpResourceDirs)
 		paths.push_back(path);
@@ -396,20 +396,20 @@ std::vector<pragma::util::Path> pragma::util::get_resource_dirs()
 
 bool pragma::util::show_notification(const std::string &summary, const std::string &body)
 {
-	if(pragma::get_engine()->IsCLIOnly())
+	if(get_engine()->IsCLIOnly())
 		return false;
 	// Only show notification if program is not in focus
-	if(pragma::get_engine()->IsProgramInFocus())
+	if(get_engine()->IsProgramInFocus())
 		return false;
 
-	auto iconPath = pragma::engine_info::get_icon_path();
+	auto iconPath = engine_info::get_icon_path();
 	std::string absIconPath;
 	fs::find_absolute_path(iconPath.GetString(), absIconPath);
 
-	pragma::oskit::NotificationInfo info {};
-	info.appName = pragma::engine_info::get_name();
+	oskit::NotificationInfo info {};
+	info.appName = engine_info::get_name();
 	info.title = summary;
 	info.appIcon = absIconPath;
 	info.body = body;
-	return pragma::oskit::show_notification(info);
+	return oskit::show_notification(info);
 }

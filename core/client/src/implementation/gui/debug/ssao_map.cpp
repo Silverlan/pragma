@@ -20,10 +20,10 @@ void pragma::gui::types::WIDebugSSAO::SetUseBlurredSSAOImage(bool b) { m_bUseBlu
 void pragma::gui::types::WIDebugSSAO::DoUpdate()
 {
 	WITexturedRect::DoUpdate();
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
-	auto *scene = pragma::get_cgame()->GetScene<pragma::CSceneComponent>();
-	auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent *>(scene->GetRenderer<pragma::CRendererComponent>()) : nullptr;
+	auto *scene = get_cgame()->GetScene<CSceneComponent>();
+	auto *renderer = scene ? dynamic_cast<CRasterizationRendererComponent *>(scene->GetRenderer<CRendererComponent>()) : nullptr;
 	if(renderer == nullptr)
 		return;
 	auto &ssaoInfo = renderer->GetSSAOInfo();

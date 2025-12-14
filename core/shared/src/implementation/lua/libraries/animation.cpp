@@ -11,7 +11,7 @@ import :scripting.lua.libraries.animation;
 import panima;
 
 namespace Lua::animation {
-	void register_library(Lua::Interface &lua);
+	void register_library(Interface &lua);
 };
 
 // See https://stackoverflow.com/a/1267878/2482983
@@ -107,7 +107,7 @@ static Lua::opt<Lua::udm_ng> get_interpolated_value(lua::State *l, panima::Chann
 		auto &value0 = channel.GetValue<T>(indices.first);
 		auto &value1 = channel.GetValue<T>(indices.second);
 		T result;
-		::udm::lerp_value(value0, value1, factor, result, udm::type_to_enum<T>());
+		udm::lerp_value(value0, value1, factor, result, udm::type_to_enum<T>());
 		return luabind::object {l, result};
 	});
 }
@@ -170,7 +170,7 @@ static uint32_t insert_channel_values(lua::State *l, panima::Channel &channel, c
 	auto numValues = Lua::GetObjectLength(l, tValues);
 	if(numTimes != numValues)
 		throw std::runtime_error {"Number of elements in times array (" + std::to_string(numTimes) + ") doesn't match number of values in values array (" + std::to_string(numValues) + ")! This is not allowed."};
-	auto insertIndex = ::udm::visit(channel.GetValueType(), [l, &tValues, &channel, &times, numValues, offset, flags](auto tag) {
+	auto insertIndex = udm::visit(channel.GetValueType(), [l, &tValues, &channel, &times, numValues, offset, flags](auto tag) {
 		using T = typename decltype(tag)::type;
 		using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
 		if constexpr(pragma::is_animatable_type_v<TValue>) {
@@ -220,7 +220,7 @@ static uint32_t insert_channel_values(lua::State *l, panima::Channel &channel, c
 static uint32_t insert_channel_values(lua::State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues, float offset) { return insert_channel_values(l, channel, times, tValues, offset, panima::Channel::InsertFlags::ClearExistingDataInRange); }
 static uint32_t insert_channel_values(lua::State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues) { return insert_channel_values(l, channel, times, tValues, 0.f); }
 
-void Lua::animation::register_library(Lua::Interface &lua)
+void Lua::animation::register_library(Interface &lua)
 {
 	auto animMod = luabind::module(lua.GetState(), "panima");
 
@@ -249,7 +249,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 
 	auto cdChannel = luabind::class_<panima::Channel>("Channel");
 	cdChannel.scope[luabind::def(
-	  "merge_data_arrays", +[](lua::State *l, const std::vector<float> &times0, const luabind::object &oValues0, const std::vector<float> &times1, const luabind::object &oValues1, ::udm::Type valueType) -> Lua::mult<Lua::tb<float>, Lua::tb<void>> {
+	  "merge_data_arrays", +[](lua::State *l, const std::vector<float> &times0, const luabind::object &oValues0, const std::vector<float> &times1, const luabind::object &oValues1, ::udm::Type valueType) -> mult<tb<float>, tb<void>> {
 		  return ::udm::visit_ng(valueType, [l, &times0, &times1, &oValues0, &oValues1](auto tag) {
 			  using T = typename decltype(tag)::type;
 			  using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
@@ -293,10 +293,10 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("Resize", &panima::Channel::Resize);
 	cdChannel.def("GetSize", &panima::Channel::GetSize);
 	cdChannel.def(
-	  "AddValue", +[](lua::State *l, panima::Channel &channel, float t, Lua::udm_ng value) -> uint32_t {
+	  "AddValue", +[](lua::State *l, panima::Channel &channel, float t, udm_ng value) -> uint32_t {
 		  return ::udm::visit_ng(channel.GetValueType(), [&channel, t, &value](auto tag) {
 			  using T = typename decltype(tag)::type;
-			  auto v = Lua::udm::cast_object<T>(luabind::object {value});
+			  auto v = udm::cast_object<T>(luabind::object {value});
 			  return channel.AddValue(t, v);
 		  });
 	  });
@@ -336,7 +336,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("SetTime", &set_channel_time);
 	cdChannel.def(
 	  "SetValue", +[](lua::State *l, panima::Channel &channel, uint32_t idx, const luabind::object &value) -> bool {
-		  auto r = Lua::udm::set_array_value(l, channel.GetValueArray(), idx, value);
+		  auto r = udm::set_array_value(l, channel.GetValueArray(), idx, value);
 		  channel.Update();
 		  return r;
 	  });
@@ -389,12 +389,12 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	  });
 	cdChannel.def(
 	  "SetValues", +[](lua::State *l, panima::Channel &channel, luabind::tableT<float> times, luabind::tableT<void> values) {
-		  auto numTimes = Lua::GetObjectLength(l, times);
-		  auto numValues = Lua::GetObjectLength(l, values);
+		  auto numTimes = GetObjectLength(l, times);
+		  auto numValues = GetObjectLength(l, values);
 		  if(numTimes != numValues)
 			  throw std::runtime_error {"Number of elements in times array (" + std::to_string(numTimes) + ") doesn't match number of values in values array (" + std::to_string(numValues) + ")! This is not allowed."};
-		  Lua::udm::set_array_values(l, channel.GetTimesArray(), times, 2);
-		  Lua::udm::set_array_values(l, channel.GetValueArray(), values, 3);
+		  udm::set_array_values(l, channel.GetTimesArray(), times, 2);
+		  udm::set_array_values(l, channel.GetValueArray(), values, 3);
 		  channel.Update();
 	  });
 	cdChannel.def(
@@ -432,14 +432,14 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			  times[i] = tv.first;
 			  ::udm::visit_ng(type, [&tv, &values, i](auto tag) {
 				  using T = typename decltype(tag)::type;
-				  values[i] = Lua::udm::cast_object<T>(tv.second);
+				  values[i] = udm::cast_object<T>(tv.second);
 			  });
 			  ++i;
 		  }
 		  channel.Update();
 	  });
 	cdChannel.def(
-	  "SetValueExpression", +[](lua::State *l, panima::Channel &channel, std::string expression) -> Lua::var<bool, std::string> {
+	  "SetValueExpression", +[](lua::State *l, panima::Channel &channel, std::string expression) -> var<bool, std::string> {
 		  std::string err;
 		  auto res = channel.SetValueExpression(std::move(expression), err);
 		  if(res)
@@ -447,7 +447,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		  return luabind::object {l, err};
 	  });
 	cdChannel.def(
-	  "TestValueExpression", +[](lua::State *l, panima::Channel &channel, std::string expression) -> Lua::var<bool, std::string> {
+	  "TestValueExpression", +[](lua::State *l, panima::Channel &channel, std::string expression) -> var<bool, std::string> {
 		  std::string err;
 		  auto res = channel.TestValueExpression(std::move(expression), err);
 		  if(res)
@@ -462,8 +462,8 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	  });
 	cdChannel.def("GetValueCount", &panima::Channel::GetValueCount);
 	cdChannel.def("GetTime", &panima::Channel::GetTime);
-	cdChannel.def("GetInterpolatedValue", +[](lua::State *l, panima::Channel &channel, float t, bool clampToBounds) -> Lua::opt<Lua::udm_ng> { return get_interpolated_value(l, channel, t, clampToBounds); });
-	cdChannel.def("GetInterpolatedValue", +[](lua::State *l, panima::Channel &channel, float t) -> Lua::opt<Lua::udm_ng> { return get_interpolated_value(l, channel, t, true); });
+	cdChannel.def("GetInterpolatedValue", +[](lua::State *l, panima::Channel &channel, float t, bool clampToBounds) -> opt<udm_ng> { return get_interpolated_value(l, channel, t, clampToBounds); });
+	cdChannel.def("GetInterpolatedValue", +[](lua::State *l, panima::Channel &channel, float t) -> opt<udm_ng> { return get_interpolated_value(l, channel, t, true); });
 	// Default float argument not supported in clang (state: 23-09-12)
 	// cdChannel.def("Decimate", static_cast<void (panima::Channel::*)(float, float, float)>(&panima::Channel::Decimate), luabind::default_parameter_policy<4, 0.03f> {});
 	// cdChannel.def("Decimate", static_cast<void (panima::Channel::*)(float)>(&panima::Channel::Decimate), luabind::default_parameter_policy<2, 0.03f> {});
@@ -473,9 +473,9 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("Decimate", +[](panima::Channel &channel) { return channel.Decimate(); });
 
 	cdChannel.def(
-	  "GetValue", +[](lua::State *l, panima::Channel &channel, uint32_t idx) -> Lua::udm_ng {
+	  "GetValue", +[](lua::State *l, panima::Channel &channel, uint32_t idx) -> udm_ng {
 		  if(idx >= channel.GetValueCount())
-			  return Lua::nil;
+			  return nil;
 		  return ::udm::visit_ng(channel.GetValueType(), [l, &channel, idx](auto tag) {
 			  using T = typename decltype(tag)::type;
 			  auto value = channel.GetValue<T>(idx);
@@ -483,7 +483,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		  });
 	  });
 	cdChannel.def(
-	  "GetTimes", +[](lua::State *l, panima::Channel &channel) -> Lua::tb<float> {
+	  "GetTimes", +[](lua::State *l, panima::Channel &channel) -> tb<float> {
 		  auto &a = channel.GetTimesArray();
 		  auto t = luabind::newtable(l);
 		  auto c = a.GetSize();
@@ -492,7 +492,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		  return t;
 	  });
 	cdChannel.def(
-	  "GetValues", +[](lua::State *l, panima::Channel &channel) -> Lua::tb<void> {
+	  "GetValues", +[](lua::State *l, panima::Channel &channel) -> tb<void> {
 		  auto &a = channel.GetValueArray();
 		  auto t = luabind::newtable(l);
 		  auto c = a.GetSize();
@@ -537,7 +537,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("FindIndexRangeInTimeRange", &find_index_range_in_time_range);
 	cdChannel.def("FindIndexRangeInTimeRange", &find_index_range_in_time_range, luabind::default_parameter_policy<4, false> {});
 	cdChannel.def(
-	  "GetDataInRange", +[](lua::State *l, panima::Channel &channel, float tStart, float tEnd) -> Lua::mult<Lua::tb<float>, Lua::tb<void>> {
+	  "GetDataInRange", +[](lua::State *l, panima::Channel &channel, float tStart, float tEnd) -> mult<tb<float>, tb<void>> {
 		  return ::udm::visit_ng(channel.GetValueType(), [l, &channel, tStart, tEnd](auto tag) {
 			  using T = typename decltype(tag)::type;
 			  using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
@@ -573,8 +573,8 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	  });
 	animMod[cdChannel];
 
-	Lua::RegisterLibraryValue(lua.GetState(), "panima", "VALUE_EPSILON", panima::Channel::VALUE_EPSILON);
-	Lua::RegisterLibraryValue(lua.GetState(), "panima", "TIME_EPSILON", panima::Channel::TIME_EPSILON);
+	RegisterLibraryValue(lua.GetState(), "panima", "VALUE_EPSILON", panima::Channel::VALUE_EPSILON);
+	RegisterLibraryValue(lua.GetState(), "panima", "TIME_EPSILON", panima::Channel::TIME_EPSILON);
 
 	pragma::LuaCore::define_custom_constructor<panima::Channel, +[]() -> std::shared_ptr<panima::Channel> { return pragma::util::make_shared<panima::Channel>(); }>(lua.GetState());
 	pragma::LuaCore::define_custom_constructor<panima::Channel, +[](panima::Channel &channel) -> std::shared_ptr<panima::Channel> { return pragma::util::make_shared<panima::Channel>(channel); }, panima::Channel &>(lua.GetState());
@@ -665,7 +665,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdAnim2.def(luabind::const_self == luabind::const_self);
 	cdAnim2.scope[luabind::def("create", +[](lua::State *l) { return pragma::util::make_shared<panima::Animation>(); })];
 	cdAnim2.scope[luabind::def(
-	  "load", +[](lua::State *l, ::udm::LinkedPropertyWrapper &prop) -> Lua::var<bool, std::shared_ptr<panima::Animation>> {
+	  "load", +[](lua::State *l, ::udm::LinkedPropertyWrapper &prop) -> var<bool, std::shared_ptr<panima::Animation>> {
 		  auto anim = pragma::util::make_shared<panima::Animation>();
 		  if(anim->Load(prop) == false)
 			  return luabind::object {l, false};

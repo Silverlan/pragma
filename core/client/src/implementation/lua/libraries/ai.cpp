@@ -6,8 +6,8 @@ module;
 module pragma.client;
 
 import :scripting.lua.libraries.ai;
-void Lua::ai::client::register_library(Lua::Interface &lua)
+void Lua::ai::client::register_library(Interface &lua)
 {
 	auto &modAi = lua.RegisterLibrary("ai");
-	Lua::ai::register_library(lua);
+	ai::register_library(lua);
 }

@@ -9,8 +9,8 @@ import :rendering.shaders.base;
 
 using namespace pragma;
 
-ShaderPPBase::ShaderPPBase(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader) : prosper::ShaderBaseImageProcessing(context, identifier, vsShader, fsShader) {}
-ShaderPPBase::ShaderPPBase(prosper::IPrContext &context, const std::string &identifier, const std::string &fsShader) : prosper::ShaderBaseImageProcessing(context, identifier, fsShader) {}
+ShaderPPBase::ShaderPPBase(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader) : ShaderBaseImageProcessing(context, identifier, vsShader, fsShader) {}
+ShaderPPBase::ShaderPPBase(prosper::IPrContext &context, const std::string &identifier, const std::string &fsShader) : ShaderBaseImageProcessing(context, identifier, fsShader) {}
 
 void ShaderPPBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {

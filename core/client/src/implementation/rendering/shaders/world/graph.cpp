@@ -17,11 +17,11 @@ import pragma.shadergraph;
 
 using namespace pragma;
 
-ShaderGraph::ShaderGraph(prosper::IPrContext &context, const std::shared_ptr<pragma::shadergraph::Graph> &sg, const std::string &identifier, const std::string &fsShader) : ShaderGameWorldLightingPass {context, identifier, "programs/scene/textured", fsShader}, m_shaderGraph {sg} {}
+ShaderGraph::ShaderGraph(prosper::IPrContext &context, const std::shared_ptr<shadergraph::Graph> &sg, const std::string &identifier, const std::string &fsShader) : ShaderGameWorldLightingPass {context, identifier, "programs/scene/textured", fsShader}, m_shaderGraph {sg} {}
 
 ShaderGraph::~ShaderGraph() {}
 
-void ShaderGraph::UpdateRenderFlags(pragma::geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags)
+void ShaderGraph::UpdateRenderFlags(geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags)
 {
 	ShaderGameWorldLightingPass::UpdateRenderFlags(mesh, inOutFlags);
 	for(auto &mod : m_modules)
@@ -47,21 +47,21 @@ void ShaderGraph::ClearShaderResources()
 	ShaderGameWorldLightingPass::ClearShaderResources();
 }
 
-static const pragma::rendering::shader_material::ShaderMaterial *find_shader_material(const pragma::shadergraph::Graph &graph)
+static const rendering::shader_material::ShaderMaterial *find_shader_material(const shadergraph::Graph &graph)
 {
 	for(auto &node : graph.GetNodes()) {
-		auto *matNode = dynamic_cast<const pragma::rendering::shader_graph::ShaderMaterialNode *>(&node->node);
+		auto *matNode = dynamic_cast<const rendering::shader_graph::ShaderMaterialNode *>(&node->node);
 		if(matNode)
 			return &matNode->GetShaderMaterial();
 	}
 	return nullptr;
 }
 
-const pragma::shadergraph::Graph *ShaderGraph::GetGraph() const { return m_shaderGraph.get(); }
+const shadergraph::Graph *ShaderGraph::GetGraph() const { return m_shaderGraph.get(); }
 
 void ShaderGraph::InitializeShaderResources()
 {
-	auto &graphManager = pragma::get_cengine()->GetShaderGraphManager();
+	auto &graphManager = get_cengine()->GetShaderGraphManager();
 	auto *graph = GetGraph();
 	if(graph) {
 		auto *shaderMat = find_shader_material(*graph);
@@ -69,7 +69,7 @@ void ShaderGraph::InitializeShaderResources()
 			SetShaderMaterialName(shaderMat->name);
 
 		struct ModuleData {
-			std::vector<pragma::shadergraph::GraphNode *> nodes;
+			std::vector<shadergraph::GraphNode *> nodes;
 		};
 		std::unordered_map<std::string, ModuleData> moduleData;
 		for(auto &node : graph->GetNodes()) {
@@ -94,17 +94,17 @@ void ShaderGraph::InitializeShaderResources()
 	m_alphaMode = AlphaMode::Opaque;
 	if(graph) {
 		for(auto &node : graph->GetNodes()) {
-			auto *outputNode = dynamic_cast<const pragma::rendering::shader_graph::SceneOutputNode *>(&node->node);
+			auto *outputNode = dynamic_cast<const rendering::shader_graph::SceneOutputNode *>(&node->node);
 			if(!outputNode)
 				continue;
-			node->GetInputValue(pragma::rendering::shader_graph::SceneOutputNode::CONST_ALPHA_MODE, m_alphaMode);
+			node->GetInputValue(rendering::shader_graph::SceneOutputNode::CONST_ALPHA_MODE, m_alphaMode);
 		}
 	}
 
 	ShaderGameWorldLightingPass::InitializeShaderResources();
 }
 
-void ShaderGraph::InitializeMaterialData(const material::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
+void ShaderGraph::InitializeMaterialData(const material::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, rendering::ShaderInputData &inOutMatData)
 {
 	// If graph has "pbr" module, pbr descriptor set should be added
 	//prosper::DescriptorSetInfo
@@ -146,103 +146,103 @@ void ShaderGraph::InitializeShaderMaterial()
 		ShaderGameWorldLightingPass::InitializeShaderMaterial(); // Use default shader material
 }
 
-static size_t get_size(pragma::shadergraph::DataType type)
+static size_t get_size(shadergraph::DataType type)
 {
 	switch(type) {
-	case pragma::shadergraph::DataType::Boolean:
-	case pragma::shadergraph::DataType::Int:
-	case pragma::shadergraph::DataType::UInt:
-	case pragma::shadergraph::DataType::Float:
-	case pragma::shadergraph::DataType::UInt16:
+	case shadergraph::DataType::Boolean:
+	case shadergraph::DataType::Int:
+	case shadergraph::DataType::UInt:
+	case shadergraph::DataType::Float:
+	case shadergraph::DataType::UInt16:
 		return sizeof(float);
-	case pragma::shadergraph::DataType::Color:
-	case pragma::shadergraph::DataType::Vector:
-	case pragma::shadergraph::DataType::Point:
-	case pragma::shadergraph::DataType::Normal:
+	case shadergraph::DataType::Color:
+	case shadergraph::DataType::Vector:
+	case shadergraph::DataType::Point:
+	case shadergraph::DataType::Normal:
 		return sizeof(Vector3);
-	case pragma::shadergraph::DataType::Vector4:
+	case shadergraph::DataType::Vector4:
 		return sizeof(Vector4);
-	case pragma::shadergraph::DataType::Point2:
+	case shadergraph::DataType::Point2:
 		return sizeof(Vector2);
-	case pragma::shadergraph::DataType::Transform:
+	case shadergraph::DataType::Transform:
 		return sizeof(Mat4);
 	}
 	return 0;
 }
 
-static size_t get_alignment(pragma::shadergraph::DataType type)
+static size_t get_alignment(shadergraph::DataType type)
 {
 	switch(type) {
-	case pragma::shadergraph::DataType::Boolean:
-	case pragma::shadergraph::DataType::Int:
-	case pragma::shadergraph::DataType::UInt:
-	case pragma::shadergraph::DataType::Float:
-	case pragma::shadergraph::DataType::UInt16:
+	case shadergraph::DataType::Boolean:
+	case shadergraph::DataType::Int:
+	case shadergraph::DataType::UInt:
+	case shadergraph::DataType::Float:
+	case shadergraph::DataType::UInt16:
 		return sizeof(float);
-	case pragma::shadergraph::DataType::Color:
-	case pragma::shadergraph::DataType::Vector:
-	case pragma::shadergraph::DataType::Vector4:
-	case pragma::shadergraph::DataType::Point:
-	case pragma::shadergraph::DataType::Normal:
+	case shadergraph::DataType::Color:
+	case shadergraph::DataType::Vector:
+	case shadergraph::DataType::Vector4:
+	case shadergraph::DataType::Point:
+	case shadergraph::DataType::Normal:
 		return sizeof(Vector4);
-	case pragma::shadergraph::DataType::Point2:
+	case shadergraph::DataType::Point2:
 		return sizeof(Vector2);
-	case pragma::shadergraph::DataType::Transform:
+	case shadergraph::DataType::Transform:
 		return sizeof(Mat4);
 	}
 	return 0;
 }
 
-std::shared_ptr<pragma::rendering::shader_material::ShaderMaterial> ShaderGraph::GenerateShaderMaterial()
+std::shared_ptr<rendering::shader_material::ShaderMaterial> ShaderGraph::GenerateShaderMaterial()
 {
 	auto *graph = GetGraph();
 	if(!graph)
 		return nullptr;
-	auto sm = pragma::util::make_shared<pragma::rendering::shader_material::ShaderMaterial>(GetIdentifier());
+	auto sm = pragma::util::make_shared<rendering::shader_material::ShaderMaterial>(GetIdentifier());
 	struct ParamNodeInfo {
 		std::string name;
-		pragma::shadergraph::GraphNode *node;
+		shadergraph::GraphNode *node;
 		size_t alignment;
 		size_t size;
 	};
 	std::vector<ParamNodeInfo> globalParamNodes;
 	for(auto &node : graph->GetNodes()) {
-		auto *paramNode = dynamic_cast<const pragma::rendering::shader_graph::BaseInputParameterNode *>(&node->node);
+		auto *paramNode = dynamic_cast<const rendering::shader_graph::BaseInputParameterNode *>(&node->node);
 		if(!paramNode)
 			continue;
-		pragma::rendering::shader_graph::BaseInputParameterNode::Scope scope;
-		if(!node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_SCOPE, scope))
+		rendering::shader_graph::BaseInputParameterNode::Scope scope;
+		if(!node->GetInputValue(rendering::shader_graph::BaseInputParameterNode::CONST_SCOPE, scope))
 			continue;
-		if(scope != pragma::rendering::shader_graph::BaseInputParameterNode::Scope::Global)
+		if(scope != rendering::shader_graph::BaseInputParameterNode::Scope::Global)
 			continue;
 		std::string name;
-		if(!node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_NAME, name))
+		if(!node->GetInputValue(rendering::shader_graph::BaseInputParameterNode::CONST_NAME, name))
 			continue;
 		if(name.empty())
 			continue;
 
-		auto *texNode = dynamic_cast<const pragma::rendering::shader_graph::InputParameterTextureNode *>(paramNode);
+		auto *texNode = dynamic_cast<const rendering::shader_graph::InputParameterTextureNode *>(paramNode);
 		if(texNode) {
 			sm->textures.push_back({});
 			auto &tex = sm->textures.back();
 			tex.name = name;
 			tex.defaultTexturePath = "white";
-			node->GetInputValue(pragma::rendering::shader_graph::InputParameterTextureNode::CONST_DEFAULT_TEXTURE, *tex.defaultTexturePath);
+			node->GetInputValue(rendering::shader_graph::InputParameterTextureNode::CONST_DEFAULT_TEXTURE, *tex.defaultTexturePath);
 
-			auto colorSpace = node->GetConstantInputValue<pragma::rendering::shader_graph::InputParameterTextureNode::ColorSpace>(pragma::rendering::shader_graph::InputParameterTextureNode::CONST_COLOR_SPACE);
+			auto colorSpace = node->GetConstantInputValue<rendering::shader_graph::InputParameterTextureNode::ColorSpace>(rendering::shader_graph::InputParameterTextureNode::CONST_COLOR_SPACE);
 			if(!colorSpace)
-				colorSpace = pragma::rendering::shader_graph::InputParameterTextureNode::ColorSpace::Srgb;
+				colorSpace = rendering::shader_graph::InputParameterTextureNode::ColorSpace::Srgb;
 			switch(*colorSpace) {
-			case pragma::rendering::shader_graph::InputParameterTextureNode::ColorSpace::Srgb:
+			case rendering::shader_graph::InputParameterTextureNode::ColorSpace::Srgb:
 				tex.colorMap = true;
 				break;
 			}
 
-			auto imageType = node->GetConstantInputValue<pragma::rendering::shader_graph::InputParameterTextureNode::ImageType>(pragma::rendering::shader_graph::InputParameterTextureNode::CONST_IMAGE_TYPE);
+			auto imageType = node->GetConstantInputValue<rendering::shader_graph::InputParameterTextureNode::ImageType>(rendering::shader_graph::InputParameterTextureNode::CONST_IMAGE_TYPE);
 			if(!imageType)
-				imageType = pragma::rendering::shader_graph::InputParameterTextureNode::ImageType::e2D;
+				imageType = rendering::shader_graph::InputParameterTextureNode::ImageType::e2D;
 			switch(*imageType) {
-			case pragma::rendering::shader_graph::InputParameterTextureNode::ImageType::Cube:
+			case rendering::shader_graph::InputParameterTextureNode::ImageType::Cube:
 				tex.cubemap = true;
 				break;
 			}
@@ -286,22 +286,22 @@ std::shared_ptr<pragma::rendering::shader_material::ShaderMaterial> ShaderGraph:
 		++it;
 	}
 
-	std::vector<pragma::rendering::Property> params;
+	std::vector<rendering::Property> params;
 	params.reserve(globalParamNodes.size());
 	for(auto &info : globalParamNodes) {
-		auto type = pragma::shadergraph::DataType::Float;
+		auto type = shadergraph::DataType::Float;
 		if(info.node) {
-			auto &paramNode = *dynamic_cast<const pragma::rendering::shader_graph::BaseInputParameterNode *>(&info.node->node);
+			auto &paramNode = *dynamic_cast<const rendering::shader_graph::BaseInputParameterNode *>(&info.node->node);
 			type = paramNode.GetParameterType();
 		}
-		pragma::rendering::Property prop {info.name, type};
+		rendering::Property prop {info.name, type};
 		auto res = true;
 		if(info.node) {
 			res = pragma::shadergraph::visit(type, [this, &info, &prop](auto tag) -> bool {
 				using T = typename decltype(tag)::type;
 
 				T defaultVal;
-				if(!info.node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_DEFAULT, defaultVal))
+				if(!info.node->GetInputValue(rendering::shader_graph::BaseInputParameterNode::CONST_DEFAULT, defaultVal))
 					return false;
 				prop->defaultValue.Set(defaultVal);
 
@@ -309,11 +309,11 @@ std::shared_ptr<pragma::rendering::shader_material::ShaderMaterial> ShaderGraph:
 					float minVal;
 					float maxVal;
 					float stepSize;
-					if(!info.node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MIN, minVal))
+					if(!info.node->GetInputValue(rendering::shader_graph::InputParameterFloatNode::CONST_MIN, minVal))
 						return false;
-					if(!info.node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MAX, maxVal))
+					if(!info.node->GetInputValue(rendering::shader_graph::InputParameterFloatNode::CONST_MAX, maxVal))
 						return false;
-					if(!info.node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_STEP_SIZE, stepSize))
+					if(!info.node->GetInputValue(rendering::shader_graph::InputParameterFloatNode::CONST_STEP_SIZE, stepSize))
 						return false;
 					prop->min = minVal;
 					prop->max = maxVal;
@@ -339,8 +339,8 @@ std::shared_ptr<pragma::rendering::shader_material::ShaderMaterial> ShaderGraph:
 	return sm;
 }
 
-void ShaderGraph::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+void ShaderGraph::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
+  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const
 {
 	std::array<prosper::IDescriptorSet *, 4> descSets {&dsScene, &dsRenderer, &dsRenderSettings, &dsShadows};
 
@@ -348,7 +348,7 @@ void ShaderGraph::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, c
 	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), GetSceneDescriptorSetIndex(), descSets, dynamicOffsets);
 
 	ShaderGameWorldLightingPass::RecordBindScene(shaderProcessor, scene, renderer, dsScene, dsRenderer, dsRenderSettings, dsShadows, drawOrigin, inOutSceneFlags);
-	ShaderGameWorldLightingPass::PushConstants pushConstants {};
+	PushConstants pushConstants {};
 	pushConstants.Initialize();
 	pushConstants.debugMode = scene.GetDebugMode();
 	pushConstants.reflectionProbeIntensity = 1.f;

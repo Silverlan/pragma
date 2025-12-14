@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :model.model_manager;
 
-pragma::asset::AssimpFormatHandler::AssimpFormatHandler(pragma::util::IAssetManager &assetManager) : pragma::util::IImportAssetFormatHandler {assetManager} {}
+pragma::asset::AssimpFormatHandler::AssimpFormatHandler(util::IAssetManager &assetManager) : IImportAssetFormatHandler {assetManager} {}
 bool pragma::asset::AssimpFormatHandler::Import(const std::string &outputPath, std::string &outFilePath)
 {
 	std::string err;

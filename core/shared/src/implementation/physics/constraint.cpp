@@ -33,8 +33,8 @@ Vector3 pragma::physics::IConstraint::GetSourcePosition() { return m_srcTransfor
 Quat pragma::physics::IConstraint::GetSourceRotation() { return m_srcTransform.GetRotation(); }
 Vector3 pragma::physics::IConstraint::GetTargetPosition() { return m_tgtTransform.GetOrigin(); }
 Quat pragma::physics::IConstraint::GetTargetRotation() { return m_tgtTransform.GetRotation(); }
-pragma::ecs::BaseEntity *pragma::physics::IConstraint::GetEntity() const { return const_cast<pragma::ecs::BaseEntity *>(m_hEntity.get()); }
-void pragma::physics::IConstraint::SetEntity(pragma::ecs::BaseEntity &ent) { m_hEntity = ent.GetHandle(); }
+pragma::ecs::BaseEntity *pragma::physics::IConstraint::GetEntity() const { return const_cast<ecs::BaseEntity *>(m_hEntity.get()); }
+void pragma::physics::IConstraint::SetEntity(ecs::BaseEntity &ent) { m_hEntity = ent.GetHandle(); }
 
 void pragma::physics::IConstraint::OnBroken() { m_physEnv.OnConstraintBroken(*this); }
 void pragma::physics::IConstraint::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IConstraint>(lua); }

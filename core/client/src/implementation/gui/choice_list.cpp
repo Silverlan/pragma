@@ -20,11 +20,11 @@ void pragma::gui::types::WIChoiceList::Initialize()
 	m_text = CreateChild<WIText>();
 	m_text->SetAutoCenterToParent(true);
 	m_buttonPrev = CreateChild<WIButton>();
-	pragma::gui::WIHandle hChoiceList = GetHandle();
+	WIHandle hChoiceList = GetHandle();
 	auto *buttonPrev = static_cast<WIButton *>(m_buttonPrev.get());
 	buttonPrev->SetText("<");
-	buttonPrev->AddCallback("OnPressed", FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([hChoiceList](pragma::util::EventReply *reply) mutable -> CallbackReturnType {
-		*reply = pragma::util::EventReply::Handled;
+	buttonPrev->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hChoiceList](util::EventReply *reply) mutable -> CallbackReturnType {
+		*reply = util::EventReply::Handled;
 		if(!hChoiceList.IsValid())
 			return CallbackReturnType::HasReturnValue;
 		static_cast<WIChoiceList *>(hChoiceList.get())->SelectPrevious();
@@ -34,8 +34,8 @@ void pragma::gui::types::WIChoiceList::Initialize()
 	m_buttonNext = CreateChild<WIButton>();
 	auto *buttonNext = static_cast<WIButton *>(m_buttonNext.get());
 	buttonNext->SetText(">");
-	buttonNext->AddCallback("OnPressed", FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([hChoiceList](pragma::util::EventReply *reply) mutable -> CallbackReturnType {
-		*reply = pragma::util::EventReply::Handled;
+	buttonNext->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hChoiceList](util::EventReply *reply) mutable -> CallbackReturnType {
+		*reply = util::EventReply::Handled;
 		if(!hChoiceList.IsValid())
 			return CallbackReturnType::HasReturnValue;
 		static_cast<WIChoiceList *>(hChoiceList.get())->SelectNext();

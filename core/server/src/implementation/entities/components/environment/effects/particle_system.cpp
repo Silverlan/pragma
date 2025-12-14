@@ -21,9 +21,9 @@ void SParticleSystemComponent::SetContinuous(bool b)
 	BaseEnvParticleSystemComponent::SetContinuous(b);
 
 	NetPacket p;
-	pragma::networking::write_entity(p, &GetEntity());
+	networking::write_entity(p, &GetEntity());
 	p->Write<bool>(b);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENV_PRTSYS_SETCONTINUOUS, p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(networking::net_messages::client::ENV_PRTSYS_SETCONTINUOUS, p, networking::Protocol::SlowReliable);
 }
 
 void SParticleSystemComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

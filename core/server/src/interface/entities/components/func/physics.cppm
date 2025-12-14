@@ -15,13 +15,13 @@ export {
 	namespace pragma {
 		class DLLSERVER SFuncPhysicsComponent final : public BaseFuncPhysicsComponent, public SBaseNetComponent {
 		  public:
-			SFuncPhysicsComponent(pragma::ecs::BaseEntity &ent) : BaseFuncPhysicsComponent(ent) {}
+			SFuncPhysicsComponent(ecs::BaseEntity &ent) : BaseFuncPhysicsComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua::State *l) override;
 		  protected:
-			virtual pragma::physics::PhysObj *InitializePhysics() override;
+			virtual physics::PhysObj *InitializePhysics() override;
 		};
 	};
 

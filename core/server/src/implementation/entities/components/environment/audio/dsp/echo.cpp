@@ -13,15 +13,15 @@ bool SSoundDspEchoComponent::OnSetKeyValue(const std::string &key, const std::st
 	if(SBaseSoundDspComponent::OnSetKeyValue(key, val))
 		return true;
 	if(pragma::string::compare<std::string>(key, "delay", false))
-		m_kvDelay = pragma::util::to_float(val);
+		m_kvDelay = util::to_float(val);
 	else if(pragma::string::compare<std::string>(key, "lrdelay", false))
-		m_kvLRDelay = pragma::util::to_float(val);
+		m_kvLRDelay = util::to_float(val);
 	else if(pragma::string::compare<std::string>(key, "damping", false))
-		m_kvDamping = pragma::util::to_float(val);
+		m_kvDamping = util::to_float(val);
 	else if(pragma::string::compare<std::string>(key, "feedback", false))
-		m_kvFeedback = pragma::util::to_float(val);
+		m_kvFeedback = util::to_float(val);
 	else if(pragma::string::compare<std::string>(key, "spread", false))
-		m_kvSpread = pragma::util::to_float(val);
+		m_kvSpread = util::to_float(val);
 	else
 		return false;
 	return true;

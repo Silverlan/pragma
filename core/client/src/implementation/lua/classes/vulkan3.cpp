@@ -130,7 +130,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordCopyImage(lua::State *l, CommandBuffer 
 bool Lua::Vulkan::VKCommandBuffer::RecordCopyBufferToImage(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &bufSrc, Image &imgDst, const prosper::util::BufferImageCopyInfo &copyInfo) { return hCommandBuffer.RecordCopyBufferToImage(copyInfo, bufSrc, imgDst); }
 bool Lua::Vulkan::VKCommandBuffer::RecordCopyBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &bufSrc, Buffer &bufDst, const prosper::util::BufferCopy &copyInfo) { return hCommandBuffer.RecordCopyBuffer(copyInfo, bufSrc, bufDst); }
 bool Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, pragma::util::DataStream &ds) { return hCommandBuffer.RecordUpdateBuffer(buf, offset, ds->GetSize(), ds->GetData()); }
-bool Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, ::udm::Type type, Lua::udm_ng value)
+bool Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua::State *l, CommandBuffer &hCommandBuffer, Buffer &buf, uint32_t offset, ::udm::Type type, udm_ng value)
 {
 	return ::udm::visit_ng(type, [&buf, &value, &hCommandBuffer, offset](auto tag) {
 		using T = typename decltype(tag)::type;
@@ -162,11 +162,11 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBufferBarrier(lua::State *l, CommandBuf
 }
 bool Lua::Vulkan::VKCommandBuffer::RecordSetViewport(lua::State *l, CommandBuffer &hCommandBuffer, uint32_t width, uint32_t height, uint32_t x, uint32_t y) { return hCommandBuffer.RecordSetViewport(width, height, x, y); }
 bool Lua::Vulkan::VKCommandBuffer::RecordSetScissor(lua::State *l, CommandBuffer &hCommandBuffer, uint32_t width, uint32_t height, uint32_t x, uint32_t y) { return hCommandBuffer.RecordSetScissor(width, height, x, y); }
-bool Lua::Vulkan::VKCommandBuffer::RecordBeginRenderPass(lua::State *l, CommandBuffer &hCommandBuffer, Lua::Vulkan::RenderPassInfo &rpInfo)
+bool Lua::Vulkan::VKCommandBuffer::RecordBeginRenderPass(lua::State *l, CommandBuffer &hCommandBuffer, RenderPassInfo &rpInfo)
 {
 	if(hCommandBuffer.IsPrimary() == false)
 		return false;
-	static_assert(sizeof(Lua::Vulkan::ClearValue) == sizeof(prosper::ClearValue));
+	static_assert(sizeof(ClearValue) == sizeof(prosper::ClearValue));
 	auto &primaryCmdBuffer = dynamic_cast<prosper::IPrimaryCommandBuffer &>(hCommandBuffer);
 	if(rpInfo.layerId.has_value()) {
 		auto r = primaryCmdBuffer.RecordBeginRenderPass(*rpInfo.renderTarget, *rpInfo.layerId, reinterpret_cast<std::vector<prosper::ClearValue> &>(rpInfo.clearValues), rpInfo.renderPassFlags, rpInfo.renderPass.get());
@@ -276,7 +276,7 @@ std::string Lua::Vulkan::VKContextObject::GetDebugName(lua::State *l, const pros
 
 bool Lua::Vulkan::VKBuffer::IsValid(lua::State *l, Buffer &hBuffer) { return true; }
 bool Lua::Vulkan::VKBuffer::Write(lua::State *l, Buffer &hBuffer, uint32_t offset, pragma::util::DataStream &ds, uint32_t dsOffset, uint32_t dsSize) { return hBuffer.Write(offset, dsSize, ds->GetData() + dsOffset); }
-bool Lua::Vulkan::VKBuffer::Write(lua::State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, Lua::udm_ng value)
+bool Lua::Vulkan::VKBuffer::Write(lua::State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, udm_ng value)
 {
 	return ::udm::visit_ng(type, [&hBuffer, &value, offset](auto tag) {
 		using T = typename decltype(tag)::type;
@@ -288,10 +288,10 @@ Lua::opt<pragma::util::DataStream> Lua::Vulkan::VKBuffer::Read(lua::State *l, Bu
 	auto ds = pragma::util::DataStream(size);
 	auto r = hBuffer.Read(offset, size, ds->GetData());
 	if(r == false)
-		return Lua::nil;
+		return nil;
 	return {l, ds};
 }
-bool Lua::Vulkan::VKBuffer::Read(lua::State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, Lua::udm_ng value)
+bool Lua::Vulkan::VKBuffer::Read(lua::State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, udm_ng value)
 {
 	return ::udm::visit_ng(type, [&hBuffer, &value, offset](auto tag) {
 		using T = typename decltype(tag)::type;
@@ -359,19 +359,19 @@ prosper::Texture *Lua::Vulkan::VKDescriptorSet::GetBindingTexture(lua::State *l,
 		return nullptr;
 	return tex.lock().get();
 }
-bool Lua::Vulkan::VKDescriptorSet::SetBindingTexture(lua::State *l, Lua::Vulkan::DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture) { return hDescSet.GetDescriptorSet()->SetBindingTexture(texture, bindingIdx); }
-bool Lua::Vulkan::VKDescriptorSet::SetBindingTexture(lua::State *l, Lua::Vulkan::DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t layerId) { return hDescSet.GetDescriptorSet()->SetBindingTexture(texture, bindingIdx, layerId); }
-bool Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t arrayIdx, uint32_t layerId) { return hDescSet.GetDescriptorSet()->SetBindingArrayTexture(texture, bindingIdx, arrayIdx, layerId); }
-bool Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Texture &texture, uint32_t arrayIdx) { return hDescSet.GetDescriptorSet()->SetBindingArrayTexture(texture, bindingIdx, arrayIdx); }
-bool Lua::Vulkan::VKDescriptorSet::SetBindingStorageBuffer(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Buffer &buffer, uint32_t startOffset, uint32_t size)
+bool Lua::Vulkan::VKDescriptorSet::SetBindingTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Texture &texture) { return hDescSet.GetDescriptorSet()->SetBindingTexture(texture, bindingIdx); }
+bool Lua::Vulkan::VKDescriptorSet::SetBindingTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Texture &texture, uint32_t layerId) { return hDescSet.GetDescriptorSet()->SetBindingTexture(texture, bindingIdx, layerId); }
+bool Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Texture &texture, uint32_t arrayIdx, uint32_t layerId) { return hDescSet.GetDescriptorSet()->SetBindingArrayTexture(texture, bindingIdx, arrayIdx, layerId); }
+bool Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Texture &texture, uint32_t arrayIdx) { return hDescSet.GetDescriptorSet()->SetBindingArrayTexture(texture, bindingIdx, arrayIdx); }
+bool Lua::Vulkan::VKDescriptorSet::SetBindingStorageBuffer(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Buffer &buffer, uint32_t startOffset, uint32_t size)
 {
 	return hDescSet.GetDescriptorSet()->SetBindingStorageBuffer(buffer, bindingIdx, startOffset, (size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max());
 }
-bool Lua::Vulkan::VKDescriptorSet::SetBindingUniformBuffer(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Buffer &buffer, uint32_t startOffset, uint32_t size)
+bool Lua::Vulkan::VKDescriptorSet::SetBindingUniformBuffer(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Buffer &buffer, uint32_t startOffset, uint32_t size)
 {
 	return hDescSet.GetDescriptorSet()->SetBindingUniformBuffer(buffer, bindingIdx, startOffset, (size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max());
 }
-bool Lua::Vulkan::VKDescriptorSet::SetBindingUniformBufferDynamic(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Lua::Vulkan::Buffer &buffer, uint32_t startOffset, uint32_t size)
+bool Lua::Vulkan::VKDescriptorSet::SetBindingUniformBufferDynamic(lua::State *l, DescriptorSet &hDescSet, uint32_t bindingIdx, Buffer &buffer, uint32_t startOffset, uint32_t size)
 {
 	return hDescSet.GetDescriptorSet()->SetBindingDynamicUniformBuffer(buffer, bindingIdx, startOffset, (size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max());
 }

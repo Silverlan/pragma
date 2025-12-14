@@ -15,24 +15,24 @@ import :rendering.shaders;
 
 pragma::physics::CPhysVisualDebugger::CPhysVisualDebugger() { InitializeBuffers(); }
 
-void pragma::physics::CPhysVisualDebugger::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam)
+void pragma::physics::CPhysVisualDebugger::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, CCameraComponent &cam)
 {
 	auto vp = cam.GetProjectionMatrix() * cam.GetViewMatrix();
 	auto m = umat::identity();
-	auto &whDebugShader = pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::DebugVertex);
-	auto &shader = static_cast<pragma::ShaderDebugVertexColor &>(*whDebugShader.get());
+	auto &whDebugShader = get_cgame()->GetGameShader(CGame::GameShader::DebugVertex);
+	auto &shader = static_cast<ShaderDebugVertexColor &>(*whDebugShader.get());
 	prosper::ShaderBindState bindState {*drawCmd};
-	if(shader.RecordBeginDraw(bindState, pragma::ShaderDebugVertexColor::Pipeline::Line) == true) {
+	if(shader.RecordBeginDraw(bindState, ShaderDebugVertexColor::Pipeline::Line) == true) {
 		drawCmd->RecordSetLineWidth(2.f);
 		shader.RecordDraw(bindState, *m_lineBuffer.buffer, *m_lineBuffer.colorBuffer, m_lineBuffer.instanceCount * decltype(m_lineBuffer)::VERTS_PER_INSTANCE, vp * m);
 		shader.RecordEndDraw(bindState);
 	}
-	if(shader.RecordBeginDraw(bindState, pragma::ShaderDebugVertexColor::Pipeline::Point) == true) {
+	if(shader.RecordBeginDraw(bindState, ShaderDebugVertexColor::Pipeline::Point) == true) {
 		drawCmd->RecordSetLineWidth(2.f);
 		shader.RecordDraw(bindState, *m_pointBuffer.buffer, *m_lineBuffer.colorBuffer, m_pointBuffer.instanceCount * decltype(m_pointBuffer)::VERTS_PER_INSTANCE, vp * m);
 		shader.RecordEndDraw(bindState);
 	}
-	if(shader.RecordBeginDraw(bindState, pragma::ShaderDebugVertexColor::Pipeline::Triangle) == true) {
+	if(shader.RecordBeginDraw(bindState, ShaderDebugVertexColor::Pipeline::Triangle) == true) {
 		drawCmd->RecordSetLineWidth(2.f);
 		shader.RecordDraw(bindState, *m_triangleBuffer.buffer, *m_lineBuffer.colorBuffer, m_triangleBuffer.instanceCount * decltype(m_triangleBuffer)::VERTS_PER_INSTANCE, vp * m);
 		shader.RecordEndDraw(bindState);
@@ -47,13 +47,13 @@ void pragma::physics::CPhysVisualDebugger::Reset()
 }
 void pragma::physics::CPhysVisualDebugger::Flush()
 {
-	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_lineBuffer.buffer, 0, m_lineBuffer.GetDataSize(), m_lineBuffer.vertices.data());
-	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.buffer, 0, m_pointBuffer.GetDataSize(), m_pointBuffer.vertices.data());
-	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_triangleBuffer.buffer, 0, m_triangleBuffer.GetDataSize(), m_triangleBuffer.vertices.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_lineBuffer.buffer, 0, m_lineBuffer.GetDataSize(), m_lineBuffer.vertices.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.buffer, 0, m_pointBuffer.GetDataSize(), m_pointBuffer.vertices.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_triangleBuffer.buffer, 0, m_triangleBuffer.GetDataSize(), m_triangleBuffer.vertices.data());
 
-	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_lineBuffer.colorBuffer, 0, m_lineBuffer.GetColorDataSize(), m_lineBuffer.vertexColors.data());
-	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.colorBuffer, 0, m_pointBuffer.GetColorDataSize(), m_pointBuffer.vertexColors.data());
-	pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_triangleBuffer.colorBuffer, 0, m_triangleBuffer.GetColorDataSize(), m_triangleBuffer.vertexColors.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_lineBuffer.colorBuffer, 0, m_lineBuffer.GetColorDataSize(), m_lineBuffer.vertexColors.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.colorBuffer, 0, m_pointBuffer.GetColorDataSize(), m_pointBuffer.vertexColors.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_triangleBuffer.colorBuffer, 0, m_triangleBuffer.GetColorDataSize(), m_triangleBuffer.vertexColors.data());
 }
 void pragma::physics::CPhysVisualDebugger::InitializeBuffers()
 {
@@ -65,7 +65,7 @@ void pragma::physics::CPhysVisualDebugger::InitializeBuffers()
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
-	m_debugBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo);
+	m_debugBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo);
 	m_debugBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
 	constexpr auto colorBufferSize
@@ -74,7 +74,7 @@ void pragma::physics::CPhysVisualDebugger::InitializeBuffers()
 	constexpr auto colorBufferSizeMb = colorBufferSize / 1024 / 1024;
 	createInfo.size = colorBufferSize;
 
-	m_colorBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo);
+	m_colorBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo);
 	m_colorBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
 	prosper::DeviceSize offset = 0;

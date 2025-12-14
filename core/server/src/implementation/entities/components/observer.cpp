@@ -15,7 +15,7 @@ namespace pragma {
 	using ::operator<<;
 };
 
-SObserverComponent::SObserverComponent(pragma::ecs::BaseEntity &ent) : BaseObserverComponent(ent), SBaseNetComponent() {}
+SObserverComponent::SObserverComponent(ecs::BaseEntity &ent) : BaseObserverComponent(ent), SBaseNetComponent() {}
 
 SObserverComponent::~SObserverComponent() {}
 
@@ -28,7 +28,7 @@ void SObserverComponent::DoSetObserverMode(ObserverMode mode)
 	if(ent.IsShared()) {
 		NetPacket p;
 		p->Write<ObserverMode>(mode);
-		ent.SendNetEvent(m_netEvSetObserverMode, p, pragma::networking::Protocol::SlowReliable);
+		ent.SendNetEvent(m_netEvSetObserverMode, p, networking::Protocol::SlowReliable);
 	}
 }
 
@@ -39,13 +39,13 @@ void SObserverComponent::SetObserverTarget(BaseObservableComponent *ent)
 	if(entThis.IsShared() == false)
 		return;
 	NetPacket p {};
-	pragma::networking::write_entity(p, &ent->GetEntity());
-	entThis.SendNetEvent(m_netEvSetObserverTarget, p, pragma::networking::Protocol::SlowReliable);
+	networking::write_entity(p, &ent->GetEntity());
+	entThis.SendNetEvent(m_netEvSetObserverTarget, p, networking::Protocol::SlowReliable);
 }
 
 void SObserverComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	auto *target = GetObserverTarget();
-	pragma::networking::write_entity(packet, target ? &target->GetEntity() : nullptr);
+	networking::write_entity(packet, target ? &target->GetEntity() : nullptr);
 	packet->Write<ObserverMode>(GetObserverMode());
 }

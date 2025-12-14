@@ -23,7 +23,7 @@ void ai::Memory::Fragment::Clear()
 	lastHeared = 0.f;
 }
 
-float ai::Memory::Fragment::GetLastTimeSensed() const { return pragma::math::max(lastSeen, lastHeared); }
+float ai::Memory::Fragment::GetLastTimeSensed() const { return math::max(lastSeen, lastHeared); }
 
 void ai::Memory::Fragment::UpdateVisibility(float dist)
 {
@@ -34,7 +34,7 @@ void ai::Memory::Fragment::UpdateVisibility(float dist)
 	auto pTrComponent = ent->GetTransformComponent();
 	lastPosition = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
 
-	auto pVelComponent = ent->GetComponent<pragma::VelocityComponent>();
+	auto pVelComponent = ent->GetComponent<VelocityComponent>();
 	lastVelocity = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 
 	lastDistance = dist;
@@ -57,7 +57,7 @@ void ai::Memory::Update()
 	}
 }
 
-void ai::Memory::Memorize(const pragma::ecs::BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel, int idx, ai::Memory::Fragment **out)
+void ai::Memory::Memorize(const ecs::BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel, int idx, Fragment **out)
 {
 	auto &fragment = fragments[idx];
 	fragment.lastPosition = pos;
@@ -101,15 +101,15 @@ void ai::Memory::Clear()
 	occupiedFragmentCount = 0;
 }
 
-ai::Memory::Fragment *ai::Memory::FindFragment(const pragma::ecs::BaseEntity &ent)
+ai::Memory::Fragment *ai::Memory::FindFragment(const ecs::BaseEntity &ent)
 {
-	auto it = std::find_if(fragments.begin(), fragments.end(), [&ent](const ai::Memory::Fragment &fragment) { return (fragment.occupied == true && fragment.hEntity.get() == &ent) ? true : false; });
+	auto it = std::find_if(fragments.begin(), fragments.end(), [&ent](const Fragment &fragment) { return (fragment.occupied == true && fragment.hEntity.get() == &ent) ? true : false; });
 	if(it == fragments.end())
 		return nullptr;
 	return &(*it);
 }
 
-void ai::Memory::Forget(const pragma::ecs::BaseEntity &ent)
+void ai::Memory::Forget(const ecs::BaseEntity &ent)
 {
 	auto *fragment = FindFragment(ent);
 	if(fragment == nullptr)
@@ -118,7 +118,7 @@ void ai::Memory::Forget(const pragma::ecs::BaseEntity &ent)
 	--occupiedFragmentCount;
 }
 
-bool ai::Memory::Memorize(const pragma::ecs::BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel, ai::Memory::Fragment **out)
+bool ai::Memory::Memorize(const ecs::BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel, Fragment **out)
 {
 	int32_t freeIndex = -1;
 	for(auto i = decltype(fragments.size()) {0}; i < fragments.size(); ++i) {

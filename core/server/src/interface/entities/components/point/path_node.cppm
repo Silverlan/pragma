@@ -13,7 +13,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SPathNodeComponent final : public BasePointPathNodeComponent {
 		  public:
-			SPathNodeComponent(pragma::ecs::BaseEntity &ent) : BasePointPathNodeComponent(ent) {}
+			SPathNodeComponent(ecs::BaseEntity &ent) : BasePointPathNodeComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

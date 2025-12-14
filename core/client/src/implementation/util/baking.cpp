@@ -27,14 +27,14 @@ static double calc_light_luminance(const pragma::util::baking::LightSource &ligh
 #endif
 	switch(light.type) {
 	case pragma::util::baking::LightSource::Type::Spot:
-		intensity = ::pragma::BaseEnvLightSpotComponent::CalcIntensityAtPoint(light.position, lightIntensity, light.direction, light.outerConeAngle, light.innerConeAngle, pos);
+		intensity = pragma::BaseEnvLightSpotComponent::CalcIntensityAtPoint(light.position, lightIntensity, light.direction, light.outerConeAngle, light.innerConeAngle, pos);
 		break;
 	case pragma::util::baking::LightSource::Type::Point:
-		intensity = ::pragma::BaseEnvLightPointComponent::CalcIntensityAtPoint(light.position, lightIntensity, pos);
+		intensity = pragma::BaseEnvLightPointComponent::CalcIntensityAtPoint(light.position, lightIntensity, pos);
 		break;
 	case pragma::util::baking::LightSource::Type::Directional:
 		// TODO: Use as default direction
-		intensity = ::pragma::BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(lightIntensity, pos) * 0.025f;
+		intensity = pragma::BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(lightIntensity, pos) * 0.025f;
 		break;
 	default:
 		intensity = 0.f;
@@ -178,13 +178,13 @@ static std::shared_ptr<pragma::image::ImageBuffer> generate_sh_normal_map(const 
 	return imgBuf;
 }
 
-pragma::util::ParallelJob<std::shared_ptr<pragma::image::ImageBuffer>> pragma::util::baking::bake_directional_lightmap_atlas(const std::vector<::pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
-  uint32_t height, ::pragma::rendering::LightmapDataCache *optLightmapDataCache)
+pragma::util::ParallelJob<std::shared_ptr<pragma::image::ImageBuffer>> pragma::util::baking::bake_directional_lightmap_atlas(const std::vector<CLightComponent *> &lights, const std::vector<geometry::ModelSubMesh *> meshes, const std::vector<ecs::BaseEntity *> &entities, uint32_t width,
+  uint32_t height, rendering::LightmapDataCache *optLightmapDataCache)
 {
-	class LightmapBakeJob : public pragma::util::ParallelWorker<std::shared_ptr<image::ImageBuffer>> {
+	class LightmapBakeJob : public ParallelWorker<std::shared_ptr<image::ImageBuffer>> {
 	  public:
-		LightmapBakeJob(uint32_t width, uint32_t height, std::vector<LightSource> &&lights, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &&meshes, std::vector<std::string> &&meshEntityUuids, std::vector<pragma::math::ScaledTransform> &&meshEntityPoses,
-		  const std::shared_ptr<::pragma::rendering::LightmapDataCache> &lmdCache)
+		LightmapBakeJob(uint32_t width, uint32_t height, std::vector<LightSource> &&lights, std::vector<std::shared_ptr<geometry::ModelSubMesh>> &&meshes, std::vector<std::string> &&meshEntityUuids, std::vector<math::ScaledTransform> &&meshEntityPoses,
+		  const std::shared_ptr<rendering::LightmapDataCache> &lmdCache)
 		    : m_width {width}, m_height {height}, m_lightData {std::move(lights)}, m_meshes {std::move(meshes)}, m_meshEntityUuids {std::move(meshEntityUuids)}, m_lightmapDataCache {lmdCache}, m_meshEntityPoses {std::move(meshEntityPoses)}
 		{
 			AddThread([this]() {
@@ -210,10 +210,10 @@ pragma::util::ParallelJob<std::shared_ptr<pragma::image::ImageBuffer>> pragma::u
 				mesh->Transform(pose);
 			}
 
-			std::vector<pragma::util::baking::BakePixel> bps;
-			bps.resize(m_width * m_height, pragma::util::baking::BakePixel {});
+			std::vector<BakePixel> bps;
+			bps.resize(m_width * m_height, BakePixel {});
 
-			pragma::util::baking::BakeDataView bd;
+			BakeDataView bd;
 			bd.bakePixels = bps.data();
 
 			auto &zspan = bd.span;
@@ -224,29 +224,29 @@ pragma::util::ParallelJob<std::shared_ptr<pragma::image::ImageBuffer>> pragma::u
 			zspan.span2.resize(zspan.recty);
 
 			for(uint32_t idx = 0; auto &subMesh : m_meshes) {
-				if(subMesh->GetGeometryType() != pragma::geometry::ModelSubMesh::GeometryType::Triangles) {
+				if(subMesh->GetGeometryType() != geometry::ModelSubMesh::GeometryType::Triangles) {
 					++idx;
 					continue;
 				}
 				const std::vector<Vector2> *uvs = nullptr;
 				if(m_lightmapDataCache)
-					uvs = m_lightmapDataCache->FindLightmapUvs(pragma::util::uuid_string_to_bytes(m_meshEntityUuids[idx]), subMesh->GetUuid());
+					uvs = m_lightmapDataCache->FindLightmapUvs(uuid_string_to_bytes(m_meshEntityUuids[idx]), subMesh->GetUuid());
 				else
 					uvs = subMesh->GetUVSet("lightmap");
 				if(!uvs) {
 					++idx;
 					continue;
 				}
-				pragma::util::baking::MeshInterface meshInterface;
-				meshInterface.getUv = [uvs](uint32_t idx) -> pragma::util::baking::Uv {
+				MeshInterface meshInterface;
+				meshInterface.getUv = [uvs](uint32_t idx) -> Uv {
 					auto &uv = (*uvs)[idx];
 					return {uv.x, uv.y};
 				};
-				meshInterface.getTriangle = [subMesh](uint32_t idx) -> pragma::util::baking::Triangle {
+				meshInterface.getTriangle = [subMesh](uint32_t idx) -> Triangle {
 					idx *= 3;
 					return {*subMesh->GetIndex(idx), *subMesh->GetIndex(idx + 1), *subMesh->GetIndex(idx + 2)};
 				};
-				pragma::util::baking::prepare_bake_pixel_data(bd, idx, meshInterface, subMesh->GetTriangleCount(), m_width, m_height);
+				prepare_bake_pixel_data(bd, idx, meshInterface, subMesh->GetTriangleCount(), m_width, m_height);
 				++idx;
 			}
 			m_imgBuffer = generate_sh_normal_map(bps, m_lightData, m_meshes, m_width, m_height);
@@ -254,10 +254,10 @@ pragma::util::ParallelJob<std::shared_ptr<pragma::image::ImageBuffer>> pragma::u
 		uint32_t m_width;
 		uint32_t m_height;
 		std::vector<LightSource> m_lightData;
-		std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> m_meshes;
+		std::vector<std::shared_ptr<geometry::ModelSubMesh>> m_meshes;
 		std::vector<std::string> m_meshEntityUuids;
-		std::vector<pragma::math::ScaledTransform> m_meshEntityPoses;
-		std::shared_ptr<::pragma::rendering::LightmapDataCache> m_lightmapDataCache;
+		std::vector<math::ScaledTransform> m_meshEntityPoses;
+		std::shared_ptr<rendering::LightmapDataCache> m_lightmapDataCache;
 		std::shared_ptr<image::ImageBuffer> m_imgBuffer;
 	};
 
@@ -272,33 +272,33 @@ pragma::util::ParallelJob<std::shared_ptr<pragma::image::ImageBuffer>> pragma::u
 		ld.color = col.has_value() ? col->ToVector3() : colors::White.ToVector3();
 		ld.intensity = l->GetLightIntensityCandela();
 
-		auto spotC = l->GetEntity().GetComponent<::pragma::CLightSpotComponent>();
+		auto spotC = l->GetEntity().GetComponent<CLightSpotComponent>();
 		if(spotC.valid()) {
 			ld.type = LightSource::Type::Spot;
 			ld.innerConeAngle = spotC->GetInnerConeAngle();
 			ld.outerConeAngle = spotC->GetOuterConeAngle();
 		}
-		else if(l->GetEntity().HasComponent<::pragma::CLightPointComponent>())
+		else if(l->GetEntity().HasComponent<CLightPointComponent>())
 			ld.type = LightSource::Type::Point;
-		else if(l->GetEntity().HasComponent<::pragma::CLightDirectionalComponent>())
+		else if(l->GetEntity().HasComponent<CLightDirectionalComponent>())
 			ld.type = LightSource::Type::Directional;
 		else
 			lightData.erase(lightData.end() - 1); // Invalid light source or unknown type
 	}
 
 	auto pLmdc = optLightmapDataCache ? optLightmapDataCache->shared_from_this() : nullptr;
-	std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> meshCopies;
+	std::vector<std::shared_ptr<geometry::ModelSubMesh>> meshCopies;
 	meshCopies.reserve(meshes.size());
 	for(auto *mesh : meshes) {
 		meshCopies.push_back(mesh->Copy(true));
 		meshCopies.back()->SetUuid(mesh->GetUuid());
 	}
-	std::vector<pragma::math::ScaledTransform> entityPoses;
+	std::vector<math::ScaledTransform> entityPoses;
 	std::vector<std::string> entityUuids;
 	entityPoses.reserve(entities.size());
 	entityUuids.reserve(entities.size());
 	for(auto *ent : entities) {
-		entityUuids.push_back(pragma::util::uuid_to_string(ent->GetUuid()));
+		entityUuids.push_back(uuid_to_string(ent->GetUuid()));
 		entityPoses.push_back(ent->GetPose());
 	}
 	return pragma::util::create_parallel_job<LightmapBakeJob>(width, height, std::move(lightData), std::move(meshCopies), std::move(entityUuids), std::move(entityPoses), pLmdc);

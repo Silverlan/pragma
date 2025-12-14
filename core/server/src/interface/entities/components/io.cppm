@@ -14,7 +14,7 @@ export namespace pragma {
 	}
 	class DLLSERVER SIOComponent final : public BaseIOComponent {
 	  public:
-		SIOComponent(pragma::ecs::BaseEntity &ent) : BaseIOComponent(ent) {}
+		SIOComponent(ecs::BaseEntity &ent) : BaseIOComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 	};

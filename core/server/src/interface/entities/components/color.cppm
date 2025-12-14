@@ -12,7 +12,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SColorComponent final : public BaseColorComponent, public SBaseNetComponent {
 	  public:
-		SColorComponent(pragma::ecs::BaseEntity &ent) : BaseColorComponent(ent) {}
+		SColorComponent(ecs::BaseEntity &ent) : BaseColorComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 

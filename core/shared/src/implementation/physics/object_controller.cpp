@@ -33,9 +33,9 @@ bool pragma::physics::ControllerPhysObj::IsGroundWalkable() const
 	auto n = m_controller->GetGroundTouchNormal();
 	if(!n.has_value())
 		return false;
-	auto angle = pragma::math::acos(uvec::dot(*n, m_controller->GetUpDirection()));
+	auto angle = math::acos(uvec::dot(*n, m_controller->GetUpDirection()));
 	auto slopeLimit = GetSlopeLimit();
-	auto bGroundWalkable = (angle <= pragma::math::deg_to_rad(slopeLimit));
+	auto bGroundWalkable = (angle <= math::deg_to_rad(slopeLimit));
 	return bGroundWalkable;
 }
 pragma::ecs::BaseEntity *pragma::physics::ControllerPhysObj::GetGroundEntity() const
@@ -60,7 +60,7 @@ void pragma::physics::ControllerPhysObj::PostSimulate()
 	if(owner == nullptr)
 		return;
 	auto *state = owner->GetEntity().GetNetworkState();
-	pragma::Game *game = state->GetGameState();
+	Game *game = state->GetGameState();
 	//PhysTransform t = m_ghostObject->GetWorldTransform();
 	//auto shape = m_ghostObject->GetCollisionShape();
 
@@ -142,14 +142,14 @@ void pragma::physics::ControllerPhysObj::SetOrientation(const Quat &rot)
 {
 	//PhysObj::SetOrientation(rot);
 }
-pragma::BaseEntityComponent *pragma::physics::ControllerPhysObj::GetOwner() { return pragma::physics::PhysObj::GetOwner(); }
+pragma::BaseEntityComponent *pragma::physics::ControllerPhysObj::GetOwner() { return PhysObj::GetOwner(); }
 pragma::math::Degree pragma::physics::ControllerPhysObj::GetSlopeLimit() const
 {
 	if(m_controller == nullptr)
 		return 0.f;
 	return m_controller->GetSlopeLimit();
 }
-void pragma::physics::ControllerPhysObj::SetSlopeLimit(pragma::math::Degree limit)
+void pragma::physics::ControllerPhysObj::SetSlopeLimit(math::Degree limit)
 {
 	if(m_controller == nullptr)
 		return;
@@ -179,7 +179,7 @@ Vector3 pragma::physics::ControllerPhysObj::GetGroundVelocity() const
 		return {};
 	auto *rigidBody = physColGround->GetRigidBody();
 	auto v = rigidBody->GetLinearVelocity();
-	v += pragma::math::angular_velocity_to_linear(rigidBody->GetPos(), rigidBody->GetAngularVelocity(), const_cast<ControllerPhysObj *>(this)->GetPosition());
+	v += math::angular_velocity_to_linear(rigidBody->GetPos(), rigidBody->GetAngularVelocity(), const_cast<ControllerPhysObj *>(this)->GetPosition());
 	return v;
 }
 
@@ -231,7 +231,7 @@ void pragma::physics::ControllerPhysObj::UpdateVelocity()
 	if(m_owner.expired())
 		return;
 	auto *state = m_owner->GetEntity().GetNetworkState();
-	pragma::Game *game = state->GetGameState();
+	Game *game = state->GetGameState();
 	double delta = game->DeltaTickTime();
 	float scale;
 	if(delta == 0)
@@ -245,7 +245,7 @@ void pragma::physics::ControllerPhysObj::UpdateVelocity()
 
 bool pragma::physics::CapsuleControllerPhysObj::IsCapsule() const { return true; }
 
-pragma::physics::BoxControllerPhysObj::BoxControllerPhysObj(pragma::BaseEntityComponent *owner) : ControllerPhysObj(owner) {}
+pragma::physics::BoxControllerPhysObj::BoxControllerPhysObj(BaseEntityComponent *owner) : ControllerPhysObj(owner) {}
 
 bool pragma::physics::BoxControllerPhysObj::Initialize(const Vector3 &halfExtents, unsigned int stepHeight, float maxSlopeDeg)
 {
@@ -256,11 +256,11 @@ bool pragma::physics::BoxControllerPhysObj::Initialize(const Vector3 &halfExtent
 
 	auto pTrComponent = GetOwner()->GetEntity().GetTransformComponent();
 	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
-	pragma::math::Transform startTransform;
+	math::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
 	auto *state = m_networkState;
-	pragma::Game *game = state->GetGameState();
+	Game *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return false;
@@ -268,7 +268,7 @@ bool pragma::physics::BoxControllerPhysObj::Initialize(const Vector3 &halfExtent
 	auto *collisionObject = m_controller.IsValid() ? m_controller->GetCollisionObject() : nullptr;
 	if(collisionObject == nullptr)
 		return false;
-	m_collisionObject = pragma::util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ICollisionObject>(collisionObject->ClaimOwnership());
+	m_collisionObject = pragma::util::shared_handle_cast<IBase, ICollisionObject>(collisionObject->ClaimOwnership());
 	collisionObject->SetPhysObj(*this);
 	m_collisionObjects.push_back(m_collisionObject);
 
@@ -278,7 +278,7 @@ bool pragma::physics::BoxControllerPhysObj::Initialize(const Vector3 &halfExtent
 
 Vector3 &pragma::physics::BoxControllerPhysObj::GetHalfExtents() { return m_halfExtents; }
 
-pragma::physics::ControllerPhysObj::ControllerPhysObj(pragma::BaseEntityComponent *owner) : pragma::physics::PhysObj(owner) {}
+pragma::physics::ControllerPhysObj::ControllerPhysObj(BaseEntityComponent *owner) : PhysObj(owner) {}
 float pragma::physics::ControllerPhysObj::GetStepHeight() const { return m_stepHeight; }
 void pragma::physics::ControllerPhysObj::SetStepOffset(float) {}
 Vector3 pragma::physics::ControllerPhysObj::GetDimensions() const
@@ -296,7 +296,7 @@ void pragma::physics::ControllerPhysObj::SetDimensions(const Vector3 &dimensions
 void pragma::physics::ControllerPhysObj::SetPosition(const Vector3 &pos)
 {
 	if(m_controller == nullptr) {
-		pragma::physics::PhysObj::SetPosition(pos);
+		PhysObj::SetPosition(pos);
 		return;
 	}
 	auto posCur = m_controller->GetFootPos();
@@ -305,7 +305,7 @@ void pragma::physics::ControllerPhysObj::SetPosition(const Vector3 &pos)
 Vector3 pragma::physics::ControllerPhysObj::GetPosition() const
 {
 	if(m_controller == nullptr)
-		return pragma::physics::PhysObj::GetPosition();
+		return PhysObj::GetPosition();
 	return m_controller->GetFootPos();
 }
 unsigned int pragma::physics::ControllerPhysObj::Move(const Vector3 &, float, float) { return 0; }
@@ -315,7 +315,7 @@ void pragma::physics::BoxControllerPhysObj::GetCollisionBounds(Vector3 *min, Vec
 	*min = Vector3(0.f, 0.f, 0.f);
 	*max = Vector3(0.f, 0.f, 0.f);
 }
-pragma::physics::CapsuleControllerPhysObj::CapsuleControllerPhysObj(pragma::BaseEntityComponent *owner) : ControllerPhysObj(owner) {}
+pragma::physics::CapsuleControllerPhysObj::CapsuleControllerPhysObj(BaseEntityComponent *owner) : ControllerPhysObj(owner) {}
 bool pragma::physics::CapsuleControllerPhysObj::Initialize(unsigned int width, unsigned int height, unsigned int stepHeight, float maxSlopeDeg)
 {
 	if(ControllerPhysObj::Initialize() == false)
@@ -326,12 +326,12 @@ bool pragma::physics::CapsuleControllerPhysObj::Initialize(unsigned int width, u
 
 	auto pTrComponent = GetOwner()->GetEntity().GetTransformComponent();
 	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
-	pragma::math::Transform startTransform;
+	math::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
 
 	auto *state = m_networkState;
-	pragma::Game *game = state->GetGameState();
+	Game *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return false;
@@ -339,7 +339,7 @@ bool pragma::physics::CapsuleControllerPhysObj::Initialize(unsigned int width, u
 	auto *collisionObject = m_controller.IsValid() ? m_controller->GetCollisionObject() : nullptr;
 	if(collisionObject == nullptr)
 		return false;
-	m_collisionObject = pragma::util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ICollisionObject>(collisionObject->ClaimOwnership());
+	m_collisionObject = pragma::util::shared_handle_cast<IBase, ICollisionObject>(collisionObject->ClaimOwnership());
 	collisionObject->SetPhysObj(*this);
 	m_collisionObjects.push_back(m_collisionObject);
 

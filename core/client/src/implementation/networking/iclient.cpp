@@ -13,7 +13,7 @@ std::optional<pragma::networking::IPAddress> pragma::networking::IClient::GetIPA
 	auto port = GetLocalTCPPort();
 	if(ip.has_value() == false || port.has_value() == false)
 		return {};
-	return pragma::networking::IPAddress {*ip, *port};
+	return IPAddress {*ip, *port};
 }
 
 void pragma::networking::IClient::SetEventInterface(const ClientEventInterface &eventHandler) { m_eventInterface = eventHandler; }

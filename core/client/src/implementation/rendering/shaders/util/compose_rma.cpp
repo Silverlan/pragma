@@ -28,7 +28,7 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(prosper::I
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::SampledBit;
 
 	auto fGetWhiteTex = [&context]() -> prosper::Texture * {
-		auto tex = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("white");
+		auto tex = static_cast<material::CMaterialManager &>(get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("white");
 		if(tex == nullptr)
 			return nullptr;
 		return tex->GetVkTexture().get();
@@ -62,9 +62,9 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(prosper::I
 
 	auto dsg = CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE.setIndex);
 	auto &ds = *dsg->GetDescriptorSet();
-	ds.SetBindingTexture(*roughnessMap, pragma::math::to_integral(TextureBinding::RoughnessMap));
-	ds.SetBindingTexture(*metalnessMap, pragma::math::to_integral(TextureBinding::MetalnessMap));
-	ds.SetBindingTexture(*aoMap, pragma::math::to_integral(TextureBinding::AmbientOcclusionMap));
+	ds.SetBindingTexture(*roughnessMap, math::to_integral(TextureBinding::RoughnessMap));
+	ds.SetBindingTexture(*metalnessMap, math::to_integral(TextureBinding::MetalnessMap));
+	ds.SetBindingTexture(*aoMap, math::to_integral(TextureBinding::AmbientOcclusionMap));
 
 	auto &setupCmd = context.GetSetupCommandBuffer();
 	if(setupCmd->RecordBeginRenderPass(*rt)) {
@@ -84,7 +84,7 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(prosper::I
 }
 bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &context, const std::string &rmaInputPath, prosper::IImage &aoImg, const std::string *optRmaOutputPath)
 {
-	auto &texManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<material::CMaterialManager &>(get_client_state()->GetMaterialManager()).GetTextureManager();
 	auto rmaTexInfo = texManager.LoadAsset(rmaInputPath);
 	if(rmaTexInfo == nullptr || rmaTexInfo->HasValidVkTexture() == false)
 		return false;
@@ -112,7 +112,7 @@ bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &conte
 
 	Con::cout << "Writing RMA texture file '" << rmaOutputPath << "'..." << Con::endl;
 	// TODO: RMA should overwrite the existing one
-	return pragma::get_cgame()->SaveImage(*newRMA, "addons/converted/" + matName, imgWriteInfo);
+	return get_cgame()->SaveImage(*newRMA, "addons/converted/" + matName, imgWriteInfo);
 }
 bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &context, const std::string &rmaInputPath, image::ImageBuffer &imgBuffer, const std::string *optRmaOutputPath)
 {
@@ -138,7 +138,7 @@ void pragma::ShaderComposeRMA::InitializeShaderResources()
 
 void pragma::ShaderComposeRMA::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<pragma::ShaderComposeRMA>(
+	CreateCachedRenderPass<ShaderComposeRMA>(
 	  std::vector<prosper::util::RenderPassCreateInfo::AttachmentInfo> {
 	    {prosper::Format::R8G8B8A8_UNorm} // RMA
 	  },

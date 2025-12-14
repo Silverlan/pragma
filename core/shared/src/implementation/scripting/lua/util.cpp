@@ -62,7 +62,7 @@ Lua::StatusCode pragma::scripting::lua_core::run_string(lua::State *l, const std
 		if(!Lua::IsString(l, -1))
 			return;
 		auto *errorMessage = Lua::CheckString(l, -1);
-		auto formattedMsg = pragma::scripting::lua_core::format_error_message(l, errorMessage, statusCode, nullptr, pragma::scripting::lua_core::ErrorType::LoadError);
+		auto formattedMsg = format_error_message(l, errorMessage, statusCode, nullptr, ErrorType::LoadError);
 		Lua::Pop(l, 1); // Pop the original error message
 		Lua::PushString(l, formattedMsg);
 	});

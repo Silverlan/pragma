@@ -86,7 +86,7 @@ static std::shared_ptr<dtNavMesh> initialize_detour_mesh(rcPolyMesh &polyMesh, r
 	return dtNav;
 }
 
-std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Config &config, const pragma::ecs::BaseEntity &ent, std::string *err)
+std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game, const Config &config, const ecs::BaseEntity &ent, std::string *err)
 {
 	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
@@ -136,7 +136,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 
 	return generate(game, config, vertices, triangles, &areas, err);
 }
-std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Config &config, const std::vector<Vector3> &verts, const std::vector<int32_t> &indices, const std::vector<ConvexArea> *areas, std::string *err)
+std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game, const Config &config, const std::vector<Vector3> &verts, const std::vector<int32_t> &indices, const std::vector<ConvexArea> *areas, std::string *err)
 {
 	//
 	// Step 1. Initialize build config.
@@ -433,7 +433,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 				std::cout << "";
 			auto *surfMat = game.GetSurfaceMaterial(area);
 			if(surfMat != nullptr)
-				m_pmesh->flags[i] = pragma::math::to_integral(surfMat->GetNavigationFlags());
+				m_pmesh->flags[i] = math::to_integral(surfMat->GetNavigationFlags());
 		}
 
 		dtNavMeshCreateParams params;
@@ -472,7 +472,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 			return nullptr;
 		}
 
-		pragma::util::ScopeGuard sg([navData]() { dtFree(navData); });
+		util::ScopeGuard sg([navData]() { dtFree(navData); });
 
 		m_navMesh = std::unique_ptr<dtNavMesh, void (*)(dtNavMesh *)>(dtAllocNavMesh(), [](dtNavMesh *navMesh) { dtFreeNavMesh(navMesh); });
 		if(m_navMesh == nullptr) {
@@ -801,7 +801,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 #endif
 }
 
-std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Config &config, std::string *err)
+std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game, const Config &config, std::string *err)
 {
 	auto *pWorld = game.GetWorld();
 	if(pWorld == nullptr)
@@ -810,7 +810,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(pragma::Game &game, const Confi
 }
 
 std::shared_ptr<pragma::nav::Mesh> pragma::nav::Mesh::Create(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config) { return Create<Mesh>(rcMesh, config); }
-std::shared_ptr<pragma::nav::Mesh> pragma::nav::Mesh::Load(pragma::Game &game, const std::string &fname) { return Load<Mesh>(game, fname); }
+std::shared_ptr<pragma::nav::Mesh> pragma::nav::Mesh::Load(Game &game, const std::string &fname) { return Load<Mesh>(game, fname); }
 pragma::nav::Mesh::Mesh(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config) : m_rcMesh(rcMesh), m_config(config) {}
 const pragma::nav::Config &pragma::nav::Mesh::GetConfig() const { return m_config; }
 const std::shared_ptr<RcNavMesh> &pragma::nav::Mesh::GetRcNavMesh() const { return const_cast<Mesh *>(this)->GetRcNavMesh(); }
@@ -905,7 +905,7 @@ static void read_poly_mesh(const udm::LinkedPropertyWrapper &udmPolyMeshDetail, 
 	load_array_data(udmPolyMeshDetail["meshes"], polyMeshDetail.nmeshes, &polyMeshDetail.meshes);
 }
 
-bool pragma::nav::Mesh::Save(pragma::Game &game, const std::string &fileName, std::string &outErr)
+bool pragma::nav::Mesh::Save(Game &game, const std::string &fileName, std::string &outErr)
 {
 	auto udmData = udm::Data::Create();
 	std::string err;
@@ -914,7 +914,7 @@ bool pragma::nav::Mesh::Save(pragma::Game &game, const std::string &fileName, st
 		return false;
 	return udmData->Save(fileName);
 }
-bool pragma::nav::Mesh::Save(pragma::Game &game, udm::AssetDataArg outData, std::string &outErr)
+bool pragma::nav::Mesh::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 {
 	if(m_rcMesh == nullptr)
 		return false;
@@ -965,7 +965,7 @@ bool pragma::nav::Mesh::Save(pragma::Game &game, udm::AssetDataArg outData, std:
 	return true;
 }
 
-bool pragma::nav::Mesh::LoadFromAssetData(pragma::Game &game, const udm::AssetData &data, std::string &outErr)
+bool pragma::nav::Mesh::LoadFromAssetData(Game &game, const udm::AssetData &data, std::string &outErr)
 {
 	if(data.GetAssetType() != PNAV_IDENTIFIER) {
 		outErr = "Incorrect format!";
@@ -1034,10 +1034,10 @@ bool pragma::nav::Mesh::LoadFromAssetData(pragma::Game &game, const udm::AssetDa
 	return true;
 }
 
-std::shared_ptr<RcNavMesh> pragma::nav::load(pragma::Game &game, const std::string &fname, Config &outConfig)
+std::shared_ptr<RcNavMesh> pragma::nav::load(Game &game, const std::string &fname, Config &outConfig)
 {
 	std::string err;
-	auto udmData = pragma::util::load_udm_asset(fname, &err);
+	auto udmData = util::load_udm_asset(fname, &err);
 	if(udmData == nullptr)
 		return nullptr;
 	auto &data = *udmData;

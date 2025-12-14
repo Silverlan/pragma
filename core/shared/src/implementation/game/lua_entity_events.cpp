@@ -6,67 +6,67 @@ module pragma.shared;
 
 import :game.game;
 
-bool pragma::Game::InjectEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx) { return InvokeEntityEvent(component, eventId, argsIdx, true); }
-bool pragma::Game::BroadcastEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx) { return InvokeEntityEvent(component, eventId, argsIdx, false); }
-bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
+bool pragma::Game::InjectEntityEvent(BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx) { return InvokeEntityEvent(component, eventId, argsIdx, true); }
+bool pragma::Game::BroadcastEntityEvent(BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx) { return InvokeEntityEvent(component, eventId, argsIdx, false); }
+bool pragma::Game::InvokeEntityEvent(BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject)
 {
 	auto *l = GetLuaState();
-	if(eventId == pragma::baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) {
+	if(eventId == baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &componentHandle = Lua::Check<pragma::BaseEntityComponent>(l, -1);
+		auto &componentHandle = Lua::Check<BaseEntityComponent>(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CEOnEntityComponentAdded evData {componentHandle};
+		CEOnEntityComponentAdded evData {componentHandle};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED) {
+	else if(eventId == baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &componentHandle = Lua::Check<pragma::BaseEntityComponent>(l, -1);
+		auto &componentHandle = Lua::Check<BaseEntityComponent>(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CEOnEntityComponentRemoved evData {componentHandle};
+		CEOnEntityComponentRemoved evData {componentHandle};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::logicComponent::EVENT_ON_TICK) {
+	else if(eventId == logicComponent::EVENT_ON_TICK) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto dt = Lua::CheckNumber(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CEOnTick evData {dt};
+		CEOnTick evData {dt};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::usableComponent::EVENT_ON_USE) {
+	else if(eventId == usableComponent::EVENT_ON_USE) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &ent = Lua::Check<pragma::ecs::BaseEntity>(l, -1);
+		auto &ent = Lua::Check<ecs::BaseEntity>(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CEOnUseData evData {&ent};
+		CEOnUseData evData {&ent};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::usableComponent::EVENT_CAN_USE) {
+	else if(eventId == usableComponent::EVENT_CAN_USE) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &ent = Lua::Check<pragma::ecs::BaseEntity>(l, -1);
+		auto &ent = Lua::Check<ecs::BaseEntity>(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CECanUseData evData {&ent};
+		CECanUseData evData {&ent};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseIOComponent::EVENT_HANDLE_INPUT) {
+	else if(eventId == baseIOComponent::EVENT_HANDLE_INPUT) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		std::string input = Lua::CheckString(l, -1);
@@ -74,12 +74,12 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
-		auto &activator = Lua::Check<pragma::ecs::BaseEntity>(l, -1);
+		auto &activator = Lua::Check<ecs::BaseEntity>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 3);
 		Lua::GetTableValue(l, argsIdx);
-		auto &caller = Lua::Check<pragma::ecs::BaseEntity>(l, -1);
+		auto &caller = Lua::Check<ecs::BaseEntity>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 4);
@@ -87,13 +87,13 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 		std::string data = Lua::CheckString(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEInputData evData {input, &activator, &caller, data};
+		CEInputData evData {input, &activator, &caller, data};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseColorComponent::EVENT_ON_COLOR_CHANGED) {
+	else if(eventId == baseColorComponent::EVENT_ON_COLOR_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto &oldColor = Lua::Check<Vector4>(l, -1);
@@ -104,33 +104,33 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 		auto &color = Lua::Check<Vector4>(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEOnColorChanged evData {oldColor, color};
+		CEOnColorChanged evData {oldColor, color};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT) {
-		pragma::AnimationEvent ev {};
+	else if(eventId == baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT) {
+		AnimationEvent ev {};
 
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		ev.eventID = static_cast<pragma::AnimationEvent::Type>(Lua::CheckInt(l, -1));
+		ev.eventID = static_cast<AnimationEvent::Type>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
 		Lua::Animation::GetAnimationEventArguments(l, -1, ev.arguments);
-		ev.eventID = static_cast<pragma::AnimationEvent::Type>(Lua::CheckInt(l, -1));
+		ev.eventID = static_cast<AnimationEvent::Type>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
-		pragma::CEHandleAnimationEvent evData {ev};
+		CEHandleAnimationEvent evData {ev};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION) {
+	else if(eventId == baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto previousAnimation = Lua::CheckInt(l, -1);
@@ -143,16 +143,16 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 
 		Lua::PushInt(l, 3);
 		Lua::GetTableValue(l, argsIdx);
-		auto flags = static_cast<pragma::FPlayAnim>(Lua::CheckInt(l, -1));
+		auto flags = static_cast<FPlayAnim>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
-		pragma::CEOnPlayAnimation evData {static_cast<int32_t>(previousAnimation), static_cast<int32_t>(animation), flags};
+		CEOnPlayAnimation evData {static_cast<int32_t>(previousAnimation), static_cast<int32_t>(animation), flags};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION) {
+	else if(eventId == baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto slot = Lua::CheckInt(l, -1);
@@ -170,16 +170,16 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 
 		Lua::PushInt(l, 4);
 		Lua::GetTableValue(l, argsIdx);
-		auto flags = static_cast<pragma::FPlayAnim>(Lua::CheckInt(l, -1));
+		auto flags = static_cast<FPlayAnim>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
-		pragma::CEOnPlayLayeredAnimation evData {static_cast<int32_t>(slot), static_cast<int32_t>(previousAnimation), static_cast<int32_t>(animation), flags};
+		CEOnPlayLayeredAnimation evData {static_cast<int32_t>(slot), static_cast<int32_t>(previousAnimation), static_cast<int32_t>(animation), flags};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE) {
+	else if(eventId == baseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto animation = Lua::CheckInt(l, -1);
@@ -187,16 +187,16 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
-		auto activity = static_cast<pragma::Activity>(Lua::CheckInt(l, -1));
+		auto activity = static_cast<Activity>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
-		pragma::CEOnAnimationComplete evData {static_cast<int32_t>(animation), activity};
+		CEOnAnimationComplete evData {static_cast<int32_t>(animation), activity};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_START || eventId == pragma::baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_COMPLETE) {
+	else if(eventId == baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_START || eventId == baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_COMPLETE) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto slot = Lua::CheckInt(l, -1);
@@ -209,16 +209,16 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 
 		Lua::PushInt(l, 3);
 		Lua::GetTableValue(l, argsIdx);
-		auto activity = static_cast<pragma::Activity>(Lua::CheckInt(l, -1));
+		auto activity = static_cast<Activity>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
-		pragma::CELayeredAnimationInfo evData {static_cast<int32_t>(slot), static_cast<int32_t>(animation), activity};
+		CELayeredAnimationInfo evData {static_cast<int32_t>(slot), static_cast<int32_t>(animation), activity};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseAnimatedComponent::EVENT_ON_ANIMATION_START) {
+	else if(eventId == baseAnimatedComponent::EVENT_ON_ANIMATION_START) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto animation = Lua::CheckInt(l, -1);
@@ -226,21 +226,21 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
-		auto activity = static_cast<pragma::Activity>(Lua::CheckInt(l, -1));
+		auto activity = static_cast<Activity>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 3);
 		Lua::GetTableValue(l, argsIdx);
-		auto flags = static_cast<pragma::FPlayAnim>(Lua::CheckInt(l, -1));
+		auto flags = static_cast<FPlayAnim>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
-		pragma::CEOnAnimationStart evData {static_cast<int32_t>(animation), activity, flags};
+		CEOnAnimationStart evData {static_cast<int32_t>(animation), activity, flags};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED) {
+	else if(eventId == baseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto boneId = Lua::CheckInt(l, -1);
@@ -261,30 +261,30 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 		auto *scale = Lua::IsSet(l, -1) ? &Lua::Check<Vector3>(l, -1) : nullptr;
 		Lua::Pop(l, 1);
 
-		pragma::CEOnBoneTransformChanged evData {static_cast<uint32_t>(boneId), pos, rot, scale};
+		CEOnBoneTransformChanged evData {static_cast<uint32_t>(boneId), pos, rot, scale};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseAnimatedComponent::EVENT_ON_PLAY_ACTIVITY) {
+	else if(eventId == baseAnimatedComponent::EVENT_ON_PLAY_ACTIVITY) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto activity = static_cast<pragma::Activity>(Lua::CheckInt(l, -1));
+		auto activity = static_cast<Activity>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
-		auto flags = static_cast<pragma::FPlayAnim>(Lua::CheckInt(l, -1));
+		auto flags = static_cast<FPlayAnim>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
-		pragma::CEOnPlayActivity evData {activity, flags};
+		CEOnPlayActivity evData {activity, flags};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ACTIVITY) {
+	else if(eventId == baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ACTIVITY) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto slot = Lua::CheckInt(l, -1);
@@ -292,86 +292,45 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
-		auto activity = static_cast<pragma::Activity>(Lua::CheckInt(l, -1));
+		auto activity = static_cast<Activity>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 3);
 		Lua::GetTableValue(l, argsIdx);
-		auto flags = static_cast<pragma::FPlayAnim>(Lua::CheckInt(l, -1));
+		auto flags = static_cast<FPlayAnim>(Lua::CheckInt(l, -1));
 		Lua::Pop(l, 1);
 
-		pragma::CEOnPlayLayeredActivity evData {static_cast<int32_t>(slot), activity, flags};
+		CEOnPlayLayeredActivity evData {static_cast<int32_t>(slot), activity, flags};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS) {
+	else if(eventId == baseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto deltaTime = Lua::CheckNumber(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEMaintainAnimations evData {deltaTime};
+		CEMaintainAnimations evData {deltaTime};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED) {
+	else if(eventId == baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto snd = Lua::Check<std::shared_ptr<pragma::audio::ALSound>>(l, -1);
+		auto snd = Lua::Check<std::shared_ptr<audio::ALSound>>(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEOnSoundCreated evData {snd};
+		CEOnSoundCreated evData {snd};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseModelComponent::EVENT_ON_BODY_GROUP_CHANGED) {
-		Lua::PushInt(l, 1);
-		Lua::GetTableValue(l, argsIdx);
-		auto groupId = Lua::CheckInt(l, -1);
-		Lua::Pop(l, 1);
-
-		Lua::PushInt(l, 2);
-		Lua::GetTableValue(l, argsIdx);
-		auto typeId = Lua::CheckInt(l, -1);
-		Lua::Pop(l, 1);
-
-		pragma::CEOnBodyGroupChanged evData {static_cast<uint32_t>(groupId), static_cast<uint32_t>(typeId)};
-		if(bInject)
-			component.InjectEvent(eventId, evData);
-		else
-			component.BroadcastEvent(eventId, evData);
-	}
-	else if(eventId == pragma::baseModelComponent::EVENT_ON_SKIN_CHANGED) {
-		Lua::PushInt(l, 1);
-		Lua::GetTableValue(l, argsIdx);
-		auto skinId = Lua::CheckInt(l, -1);
-		Lua::Pop(l, 1);
-
-		pragma::CEOnSkinChanged evData {static_cast<uint32_t>(skinId)};
-		if(bInject)
-			component.InjectEvent(eventId, evData);
-		else
-			component.BroadcastEvent(eventId, evData);
-	}
-	else if(eventId == pragma::baseModelComponent::EVENT_ON_MODEL_CHANGED) {
-		Lua::PushInt(l, 1);
-		Lua::GetTableValue(l, argsIdx);
-		auto &model = Lua::Check<std::shared_ptr<pragma::asset::Model>>(l, -1);
-		Lua::Pop(l, 1);
-
-		pragma::CEOnModelChanged evData {model};
-		if(bInject)
-			component.InjectEvent(eventId, evData);
-		else
-			component.BroadcastEvent(eventId, evData);
-	}
-	else if(eventId == pragma::baseModelComponent::EVENT_ON_BODY_GROUP_CHANGED) {
+	else if(eventId == baseModelComponent::EVENT_ON_BODY_GROUP_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto groupId = Lua::CheckInt(l, -1);
@@ -382,81 +341,122 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 		auto typeId = Lua::CheckInt(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEOnBodyGroupChanged evData {static_cast<uint32_t>(groupId), static_cast<uint32_t>(typeId)};
+		CEOnBodyGroupChanged evData {static_cast<uint32_t>(groupId), static_cast<uint32_t>(typeId)};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseModelComponent::EVENT_ON_SKIN_CHANGED) {
+	else if(eventId == baseModelComponent::EVENT_ON_SKIN_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto skinId = Lua::CheckInt(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEOnSkinChanged evData {static_cast<uint32_t>(skinId)};
+		CEOnSkinChanged evData {static_cast<uint32_t>(skinId)};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseModelComponent::EVENT_ON_MODEL_CHANGED) {
+	else if(eventId == baseModelComponent::EVENT_ON_MODEL_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto model = Lua::Check<std::shared_ptr<pragma::asset::Model>>(l, -1);
+		auto &model = Lua::Check<std::shared_ptr<asset::Model>>(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEOnModelChanged evData {model};
+		CEOnModelChanged evData {model};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseActorComponent::EVENT_ON_KILLED) {
+	else if(eventId == baseModelComponent::EVENT_ON_BODY_GROUP_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &pDamageInfo = Lua::Check<pragma::game::DamageInfo>(l, -1);
+		auto groupId = Lua::CheckInt(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CEOnCharacterKilled evData {&pDamageInfo};
+
+		Lua::PushInt(l, 2);
+		Lua::GetTableValue(l, argsIdx);
+		auto typeId = Lua::CheckInt(l, -1);
+		Lua::Pop(l, 1);
+
+		CEOnBodyGroupChanged evData {static_cast<uint32_t>(groupId), static_cast<uint32_t>(typeId)};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED || eventId == pragma::basePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED) {
+	else if(eventId == baseModelComponent::EVENT_ON_SKIN_CHANGED) {
+		Lua::PushInt(l, 1);
+		Lua::GetTableValue(l, argsIdx);
+		auto skinId = Lua::CheckInt(l, -1);
+		Lua::Pop(l, 1);
+
+		CEOnSkinChanged evData {static_cast<uint32_t>(skinId)};
+		if(bInject)
+			component.InjectEvent(eventId, evData);
+		else
+			component.BroadcastEvent(eventId, evData);
+	}
+	else if(eventId == baseModelComponent::EVENT_ON_MODEL_CHANGED) {
+		Lua::PushInt(l, 1);
+		Lua::GetTableValue(l, argsIdx);
+		auto model = Lua::Check<std::shared_ptr<asset::Model>>(l, -1);
+		Lua::Pop(l, 1);
+
+		CEOnModelChanged evData {model};
+		if(bInject)
+			component.InjectEvent(eventId, evData);
+		else
+			component.BroadcastEvent(eventId, evData);
+	}
+	else if(eventId == baseActorComponent::EVENT_ON_KILLED) {
+		Lua::PushInt(l, 1);
+		Lua::GetTableValue(l, argsIdx);
+		auto &pDamageInfo = Lua::Check<game::DamageInfo>(l, -1);
+		Lua::Pop(l, 1);
+		CEOnCharacterKilled evData {&pDamageInfo};
+		if(bInject)
+			component.InjectEvent(eventId, evData);
+		else
+			component.BroadcastEvent(eventId, evData);
+	}
+	else if(eventId == basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED || eventId == basePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto dt = Lua::CheckNumber(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CEPhysicsUpdateData evData {dt};
+		CEPhysicsUpdateData evData {dt};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseCharacterComponent::EVENT_ON_FOOT_STEP) {
+	else if(eventId == baseCharacterComponent::EVENT_ON_FOOT_STEP) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto footType = Lua::CheckInt(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CEOnFootStep evData {static_cast<pragma::BaseCharacterComponent::FootType>(footType)};
+		CEOnFootStep evData {static_cast<BaseCharacterComponent::FootType>(footType)};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseCharacterComponent::EVENT_ON_JUMP) {
+	else if(eventId == baseCharacterComponent::EVENT_ON_JUMP) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto &velocity = Lua::Check<Vector3>(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CEOnJump evData {velocity};
+		CEOnJump evData {velocity};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND) {
+	else if(eventId == baseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto footType = Lua::CheckInt(l, -1);
@@ -464,7 +464,7 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
-		auto &surfMat = Lua::Check<pragma::physics::SurfaceMaterial>(l, -1);
+		auto &surfMat = Lua::Check<physics::SurfaceMaterial>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 3);
@@ -472,116 +472,116 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 		auto scale = Lua::CheckNumber(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEPlayFootstepSound evData {static_cast<pragma::BaseCharacterComponent::FootType>(footType), surfMat, static_cast<float>(scale)};
+		CEPlayFootstepSound evData {static_cast<BaseCharacterComponent::FootType>(footType), surfMat, static_cast<float>(scale)};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseCharacterComponent::EVENT_ON_DEPLOY_WEAPON) {
+	else if(eventId == baseCharacterComponent::EVENT_ON_DEPLOY_WEAPON) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &ent = Lua::Check<pragma::ecs::BaseEntity>(l, -1);
+		auto &ent = Lua::Check<ecs::BaseEntity>(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CEOnDeployWeapon evData {ent};
+		CEOnDeployWeapon evData {ent};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON) {
+	else if(eventId == baseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &ent = Lua::Check<pragma::ecs::BaseEntity>(l, -1);
+		auto &ent = Lua::Check<ecs::BaseEntity>(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CEOnSetActiveWeapon evData {&ent};
+		CEOnSetActiveWeapon evData {&ent};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED) {
+	else if(eventId == baseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto &vUp = Lua::Check<Vector3>(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CEOnSetCharacterOrientation evData {vUp};
+		CEOnSetCharacterOrientation evData {vUp};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseCharacterComponent::EVENT_IS_MOVING) {
-		pragma::CEIsMoving evData {};
+	else if(eventId == baseCharacterComponent::EVENT_IS_MOVING) {
+		CEIsMoving evData {};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION) {
+	else if(eventId == baseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto &rot = Lua::Check<Quat>(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEViewRotation evData {rot};
+		CEViewRotation evData {rot};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseTouchComponent::EVENT_CAN_TRIGGER) {
+	else if(eventId == baseTouchComponent::EVENT_CAN_TRIGGER) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &ent = Lua::Check<pragma::ecs::BaseEntity>(l, -1);
+		auto &ent = Lua::Check<ecs::BaseEntity>(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CECanTriggerData evData {&ent};
+		CECanTriggerData evData {&ent};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::damageableComponent::EVENT_ON_TAKE_DAMAGE) {
+	else if(eventId == damageableComponent::EVENT_ON_TAKE_DAMAGE) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &damageInfo = Lua::Check<pragma::game::DamageInfo>(l, -1);
+		auto &damageInfo = Lua::Check<game::DamageInfo>(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CEOnTakeDamage evData {damageInfo};
+		CEOnTakeDamage evData {damageInfo};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED) {
+	else if(eventId == baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &sound = Lua::Check<std::shared_ptr<pragma::audio::ALSound>>(l, -1);
+		auto &sound = Lua::Check<std::shared_ptr<audio::ALSound>>(l, -1);
 		Lua::Pop(l, 1);
-		pragma::CEOnSoundCreated evData {sound};
+		CEOnSoundCreated evData {sound};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseOwnableComponent::EVENT_ON_OWNER_CHANGED) {
+	else if(eventId == baseOwnableComponent::EVENT_ON_OWNER_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto *ent0 = Lua::IsSet(l, -1) ? &Lua::Check<pragma::ecs::BaseEntity>(l, -1) : nullptr;
+		auto *ent0 = Lua::IsSet(l, -1) ? &Lua::Check<ecs::BaseEntity>(l, -1) : nullptr;
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
-		auto *ent1 = Lua::IsSet(l, -1) ? &Lua::Check<pragma::ecs::BaseEntity>(l, -1) : nullptr;
+		auto *ent1 = Lua::IsSet(l, -1) ? &Lua::Check<ecs::BaseEntity>(l, -1) : nullptr;
 		Lua::Pop(l, 1);
 
-		pragma::CEOnOwnerChanged evData {ent0, ent1};
+		CEOnOwnerChanged evData {ent0, ent1};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseWeaponComponent::EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED || eventId == pragma::baseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED) {
+	else if(eventId == baseWeaponComponent::EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED || eventId == baseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto oldSize = Lua::CheckInt(l, -1);
@@ -592,16 +592,16 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 		auto newSize = Lua::CheckInt(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEOnClipSizeChanged evData {static_cast<uint16_t>(oldSize), static_cast<uint16_t>(newSize)};
+		CEOnClipSizeChanged evData {static_cast<uint16_t>(oldSize), static_cast<uint16_t>(newSize)};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseHealthComponent::EVENT_ON_TAKEN_DAMAGE) {
+	else if(eventId == baseHealthComponent::EVENT_ON_TAKEN_DAMAGE) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &damageInfo = Lua::Check<pragma::game::DamageInfo>(l, -1);
+		auto &damageInfo = Lua::Check<game::DamageInfo>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 2);
@@ -614,13 +614,13 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 		auto newHealth = Lua::CheckInt(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEOnTakenDamage evData {damageInfo, static_cast<uint16_t>(oldHealth), static_cast<uint16_t>(newHealth)};
+		CEOnTakenDamage evData {damageInfo, static_cast<uint16_t>(oldHealth), static_cast<uint16_t>(newHealth)};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseHealthComponent::EVENT_ON_HEALTH_CHANGED) {
+	else if(eventId == baseHealthComponent::EVENT_ON_HEALTH_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto oldHealth = Lua::CheckInt(l, -1);
@@ -631,13 +631,13 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 		auto newHealth = Lua::CheckInt(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEOnHealthChanged evData {static_cast<uint16_t>(oldHealth), static_cast<uint16_t>(newHealth)};
+		CEOnHealthChanged evData {static_cast<uint16_t>(oldHealth), static_cast<uint16_t>(newHealth)};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseRadiusComponent::EVENT_ON_RADIUS_CHANGED) {
+	else if(eventId == baseRadiusComponent::EVENT_ON_RADIUS_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
 		auto oldRadius = Lua::CheckNumber(l, -1);
@@ -648,27 +648,27 @@ bool pragma::Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uin
 		auto newRadius = Lua::CheckNumber(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CEOnRadiusChanged evData {static_cast<float>(oldRadius), static_cast<float>(newRadius)};
+		CEOnRadiusChanged evData {static_cast<float>(oldRadius), static_cast<float>(newRadius)};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::baseTouchComponent::EVENT_ON_START_TOUCH || eventId == pragma::baseTouchComponent::EVENT_ON_END_TOUCH || eventId == pragma::baseTouchComponent::EVENT_ON_TRIGGER) {
+	else if(eventId == baseTouchComponent::EVENT_ON_START_TOUCH || eventId == baseTouchComponent::EVENT_ON_END_TOUCH || eventId == baseTouchComponent::EVENT_ON_TRIGGER) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &ent = Lua::Check<pragma::ecs::BaseEntity>(l, -1);
+		auto &ent = Lua::Check<ecs::BaseEntity>(l, -1);
 		Lua::Pop(l, 1);
 
-		pragma::CETouchData evData {ent};
+		CETouchData evData {ent};
 		if(bInject)
 			component.InjectEvent(eventId, evData);
 		else
 			component.BroadcastEvent(eventId, evData);
 	}
-	else if(eventId == pragma::submergibleComponent::EVENT_ON_WATER_SUBMERGED || eventId == pragma::submergibleComponent::EVENT_ON_WATER_EMERGED || eventId == pragma::submergibleComponent::EVENT_ON_WATER_ENTERED || eventId == pragma::submergibleComponent::EVENT_ON_WATER_EXITED
-	  || eventId == pragma::baseModelComponent::EVENT_ON_MODEL_CHANGED || eventId == pragma::ecs::baseEntity::EVENT_ON_SPAWN || eventId == pragma::baseActorComponent::EVENT_ON_RESPAWN || eventId == pragma::basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED
-	  || eventId == pragma::basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED || eventId == pragma::baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED || eventId == pragma::baseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE) {
+	else if(eventId == submergibleComponent::EVENT_ON_WATER_SUBMERGED || eventId == submergibleComponent::EVENT_ON_WATER_EMERGED || eventId == submergibleComponent::EVENT_ON_WATER_ENTERED || eventId == submergibleComponent::EVENT_ON_WATER_EXITED
+	  || eventId == baseModelComponent::EVENT_ON_MODEL_CHANGED || eventId == ecs::baseEntity::EVENT_ON_SPAWN || eventId == baseActorComponent::EVENT_ON_RESPAWN || eventId == basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED
+	  || eventId == basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED || eventId == baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED || eventId == baseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE) {
 		if(bInject)
 			component.InjectEvent(eventId);
 		else

@@ -52,14 +52,14 @@ void Lua::net::client::send(nwm::Protocol protocol, const std::string &identifie
 	}
 }
 
-void Lua::net::client::receive(lua::State *l, const std::string &name, const Lua::func<void> &function)
+void Lua::net::client::receive(lua::State *l, const std::string &name, const func<void> &function)
 {
 	auto *client = pragma::get_client_state();
 	if(!client->IsGameActive())
 		return;
 	pragma::Game *game = client->GetGameState();
 	function.push(l);
-	int fc = Lua::create_reference(l, 2);
-	Lua::Pop(l, 1);
+	int fc = create_reference(l, 2);
+	Pop(l, 1);
 	game->RegisterLuaNetMessage(name, fc);
 }

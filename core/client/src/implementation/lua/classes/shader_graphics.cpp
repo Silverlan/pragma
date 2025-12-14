@@ -94,7 +94,7 @@ void Lua::GraphicsPipelineCreateInfo::SetViewportProperties(lua::State *l, prosp
 {
 	pipelineInfo.SetViewportProperties(iViewport, originX, originY, w, h, minDepth, maxDepth);
 }
-void Lua::GraphicsPipelineCreateInfo::AreDepthWritesEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushBool(l, pipelineInfo.AreDepthWritesEnabled()); }
+void Lua::GraphicsPipelineCreateInfo::AreDepthWritesEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushBool(l, pipelineInfo.AreDepthWritesEnabled()); }
 void Lua::GraphicsPipelineCreateInfo::GetBlendingProperties(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	const float *blendingProperties;
@@ -110,168 +110,168 @@ void Lua::GraphicsPipelineCreateInfo::GetColorBlendAttachmentProperties(lua::Sta
 	auto r = pipelineInfo.GetColorBlendAttachmentProperties(attId, &blendingEnabled, &blendOpColor, &blendOpAlpha, &srcColorBlendFactor, &dstColorBlendFactor, &srcAlphaBlendFactor, &dstAlphaBlendFactor, &channelWriteMask);
 	if(r == false)
 		return;
-	Lua::PushBool(l, blendingEnabled);
-	Lua::PushInt(l, static_cast<uint32_t>(blendOpColor));
-	Lua::PushInt(l, static_cast<uint32_t>(blendOpAlpha));
-	Lua::PushInt(l, static_cast<uint32_t>(srcColorBlendFactor));
-	Lua::PushInt(l, static_cast<uint32_t>(dstColorBlendFactor));
-	Lua::PushInt(l, static_cast<uint32_t>(srcAlphaBlendFactor));
-	Lua::PushInt(l, static_cast<uint32_t>(dstAlphaBlendFactor));
-	Lua::PushInt(l, static_cast<uint32_t>(channelWriteMask));
+	PushBool(l, blendingEnabled);
+	PushInt(l, static_cast<uint32_t>(blendOpColor));
+	PushInt(l, static_cast<uint32_t>(blendOpAlpha));
+	PushInt(l, static_cast<uint32_t>(srcColorBlendFactor));
+	PushInt(l, static_cast<uint32_t>(dstColorBlendFactor));
+	PushInt(l, static_cast<uint32_t>(srcAlphaBlendFactor));
+	PushInt(l, static_cast<uint32_t>(dstAlphaBlendFactor));
+	PushInt(l, static_cast<uint32_t>(channelWriteMask));
 }
 void Lua::GraphicsPipelineCreateInfo::GetDepthBiasState(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	bool bEnabled;
 	float depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor;
 	pipelineInfo.GetDepthBiasState(&bEnabled, &depthBiasConstantFactor, &depthBiasClamp, &depthBiasSlopeFactor);
-	Lua::PushBool(l, bEnabled);
+	PushBool(l, bEnabled);
 	if(bEnabled == false)
 		return;
-	Lua::PushNumber(l, depthBiasConstantFactor);
-	Lua::PushNumber(l, depthBiasClamp);
-	Lua::PushNumber(l, depthBiasSlopeFactor);
+	PushNumber(l, depthBiasConstantFactor);
+	PushNumber(l, depthBiasClamp);
+	PushNumber(l, depthBiasSlopeFactor);
 }
 void Lua::GraphicsPipelineCreateInfo::GetDepthBiasConstantFactor(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	float depthBiasConstantFactor;
 	pipelineInfo.GetDepthBiasState(nullptr, &depthBiasConstantFactor, nullptr, nullptr);
-	Lua::PushNumber(l, depthBiasConstantFactor);
+	PushNumber(l, depthBiasConstantFactor);
 }
 void Lua::GraphicsPipelineCreateInfo::GetDepthBiasClamp(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	float depthBiasClamp;
 	pipelineInfo.GetDepthBiasState(nullptr, nullptr, &depthBiasClamp, nullptr);
-	Lua::PushNumber(l, depthBiasClamp);
+	PushNumber(l, depthBiasClamp);
 }
 void Lua::GraphicsPipelineCreateInfo::GetDepthBiasSlopeFactor(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	float depthBiasSlopeFactor;
 	pipelineInfo.GetDepthBiasState(nullptr, nullptr, nullptr, &depthBiasSlopeFactor);
-	Lua::PushNumber(l, depthBiasSlopeFactor);
+	PushNumber(l, depthBiasSlopeFactor);
 }
 void Lua::GraphicsPipelineCreateInfo::GetDepthBoundsState(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	bool bEnabled;
 	float minDepthBounds, maxDepthBounds;
 	pipelineInfo.GetDepthBoundsState(&bEnabled, &minDepthBounds, &maxDepthBounds);
-	Lua::PushBool(l, bEnabled);
+	PushBool(l, bEnabled);
 	if(bEnabled == false)
 		return;
-	Lua::PushNumber(l, minDepthBounds);
-	Lua::PushNumber(l, maxDepthBounds);
+	PushNumber(l, minDepthBounds);
+	PushNumber(l, maxDepthBounds);
 }
 void Lua::GraphicsPipelineCreateInfo::GetMinDepthBounds(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	float minDepthBounds;
 	pipelineInfo.GetDepthBoundsState(nullptr, &minDepthBounds, nullptr);
-	Lua::PushNumber(l, minDepthBounds);
+	PushNumber(l, minDepthBounds);
 }
 void Lua::GraphicsPipelineCreateInfo::GetMaxDepthBounds(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	float maxDepthBounds;
 	pipelineInfo.GetDepthBoundsState(nullptr, nullptr, &maxDepthBounds);
-	Lua::PushNumber(l, maxDepthBounds);
+	PushNumber(l, maxDepthBounds);
 }
 void Lua::GraphicsPipelineCreateInfo::GetDepthClamp(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	float minDepthBounds, maxDepthBounds;
 	pipelineInfo.GetDepthBoundsState(nullptr, &minDepthBounds, &maxDepthBounds);
-	Lua::PushNumber(l, minDepthBounds);
-	Lua::PushNumber(l, maxDepthBounds);
+	PushNumber(l, minDepthBounds);
+	PushNumber(l, maxDepthBounds);
 }
 void Lua::GraphicsPipelineCreateInfo::GetDepthTestState(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	bool bEnabled;
 	prosper::CompareOp compareOp;
 	pipelineInfo.GetDepthTestState(&bEnabled, &compareOp);
-	Lua::PushBool(l, bEnabled);
+	PushBool(l, bEnabled);
 	if(bEnabled == false)
 		return;
-	Lua::PushInt(l, static_cast<uint32_t>(compareOp));
+	PushInt(l, static_cast<uint32_t>(compareOp));
 }
-void Lua::GraphicsPipelineCreateInfo::GetDynamicStates(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushInt(l, prosper::util::get_enabled_dynamic_states(pipelineInfo)); }
-void Lua::GraphicsPipelineCreateInfo::IsDynamicStateEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t dynamicState) { Lua::PushBool(l, prosper::util::are_dynamic_states_enabled(pipelineInfo, static_cast<prosper::util::DynamicStateFlags>(dynamicState))); }
+void Lua::GraphicsPipelineCreateInfo::GetDynamicStates(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushInt(l, prosper::util::get_enabled_dynamic_states(pipelineInfo)); }
+void Lua::GraphicsPipelineCreateInfo::IsDynamicStateEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t dynamicState) { PushBool(l, prosper::util::are_dynamic_states_enabled(pipelineInfo, static_cast<prosper::util::DynamicStateFlags>(dynamicState))); }
 void Lua::GraphicsPipelineCreateInfo::GetScissorCount(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	uint32_t scissorCount;
 	pipelineInfo.GetGraphicsPipelineProperties(&scissorCount, nullptr, nullptr, nullptr, nullptr);
-	Lua::PushInt(l, scissorCount);
+	PushInt(l, scissorCount);
 }
 void Lua::GraphicsPipelineCreateInfo::GetViewportCount(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	uint32_t viewportCount;
 	pipelineInfo.GetGraphicsPipelineProperties(nullptr, &viewportCount, nullptr, nullptr, nullptr);
-	Lua::PushInt(l, viewportCount);
+	PushInt(l, viewportCount);
 }
 void Lua::GraphicsPipelineCreateInfo::GetVertexAttributeCount(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	uint32_t vertexAttributeCount;
 	pipelineInfo.GetGraphicsPipelineProperties(nullptr, nullptr, &vertexAttributeCount, nullptr, nullptr);
-	Lua::PushInt(l, vertexAttributeCount);
+	PushInt(l, vertexAttributeCount);
 }
 void Lua::GraphicsPipelineCreateInfo::GetLogicOpState(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	bool bEnabled;
 	prosper::LogicOp logicOp;
 	pipelineInfo.GetLogicOpState(&bEnabled, &logicOp);
-	Lua::PushBool(l, bEnabled);
+	PushBool(l, bEnabled);
 	if(bEnabled == false)
 		return;
-	Lua::PushInt(l, static_cast<uint32_t>(logicOp));
+	PushInt(l, static_cast<uint32_t>(logicOp));
 }
 void Lua::GraphicsPipelineCreateInfo::GetMultisamplingProperties(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	prosper::SampleCountFlags samples;
 	const prosper::SampleMask *sampleMask;
 	pipelineInfo.GetMultisamplingProperties(&samples, &sampleMask);
-	Lua::PushInt(l, pragma::math::to_integral(samples));
-	Lua::PushInt(l, sampleMask ? static_cast<uint32_t>(*sampleMask) : 0u);
+	PushInt(l, pragma::math::to_integral(samples));
+	PushInt(l, sampleMask ? static_cast<uint32_t>(*sampleMask) : 0u);
 }
 void Lua::GraphicsPipelineCreateInfo::GetSampleCount(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	prosper::SampleCountFlags samples;
 	pipelineInfo.GetMultisamplingProperties(&samples, nullptr);
-	Lua::PushInt(l, pragma::math::to_integral(samples));
+	PushInt(l, pragma::math::to_integral(samples));
 }
 void Lua::GraphicsPipelineCreateInfo::GetMinSampleShading(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	const prosper::SampleMask *sampleMask;
 	pipelineInfo.GetMultisamplingProperties(nullptr, &sampleMask);
-	Lua::PushInt(l, sampleMask ? static_cast<uint32_t>(*sampleMask) : 0u);
+	PushInt(l, sampleMask ? static_cast<uint32_t>(*sampleMask) : 0u);
 }
 void Lua::GraphicsPipelineCreateInfo::GetSampleMask(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	float minSampleShading;
 	pipelineInfo.GetSampleShadingState(nullptr, &minSampleShading);
-	Lua::PushNumber(l, minSampleShading);
+	PushNumber(l, minSampleShading);
 }
-void Lua::GraphicsPipelineCreateInfo::GetDynamicScissorBoxesCount(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushInt(l, pipelineInfo.GetDynamicScissorBoxesCount()); }
-void Lua::GraphicsPipelineCreateInfo::GetDynamicViewportsCount(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushInt(l, pipelineInfo.GetDynamicViewportsCount()); }
-void Lua::GraphicsPipelineCreateInfo::GetScissorBoxesCount(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushInt(l, pipelineInfo.GetScissorBoxesCount()); }
-void Lua::GraphicsPipelineCreateInfo::GetViewportsCount(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushInt(l, pipelineInfo.GetViewportCount()); }
-void Lua::GraphicsPipelineCreateInfo::GetPrimitiveTopology(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushInt(l, static_cast<uint32_t>(pipelineInfo.GetPrimitiveTopology())); }
+void Lua::GraphicsPipelineCreateInfo::GetDynamicScissorBoxesCount(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushInt(l, pipelineInfo.GetDynamicScissorBoxesCount()); }
+void Lua::GraphicsPipelineCreateInfo::GetDynamicViewportsCount(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushInt(l, pipelineInfo.GetDynamicViewportsCount()); }
+void Lua::GraphicsPipelineCreateInfo::GetScissorBoxesCount(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushInt(l, pipelineInfo.GetScissorBoxesCount()); }
+void Lua::GraphicsPipelineCreateInfo::GetViewportsCount(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushInt(l, pipelineInfo.GetViewportCount()); }
+void Lua::GraphicsPipelineCreateInfo::GetPrimitiveTopology(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushInt(l, static_cast<uint32_t>(pipelineInfo.GetPrimitiveTopology())); }
 void Lua::GraphicsPipelineCreateInfo::GetPushConstantRanges(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	auto &ranges = pipelineInfo.GetPushConstantRanges();
-	auto t = Lua::CreateTable(l);
+	auto t = CreateTable(l);
 	auto idx = 1u;
 	for(auto &range : ranges) {
-		Lua::PushInt(l, idx++);
-		auto tRange = Lua::CreateTable(l);
+		PushInt(l, idx++);
+		auto tRange = CreateTable(l);
 
-		Lua::PushString(l, "offset");
-		Lua::PushInt(l, range.offset);
-		Lua::SetTableValue(l, tRange);
+		PushString(l, "offset");
+		PushInt(l, range.offset);
+		SetTableValue(l, tRange);
 
-		Lua::PushString(l, "size");
-		Lua::PushInt(l, range.size);
-		Lua::SetTableValue(l, tRange);
+		PushString(l, "size");
+		PushInt(l, range.size);
+		SetTableValue(l, tRange);
 
-		Lua::PushString(l, "stages");
-		Lua::PushInt(l, static_cast<uint32_t>(range.stages));
-		Lua::SetTableValue(l, tRange);
+		PushString(l, "stages");
+		PushInt(l, static_cast<uint32_t>(range.stages));
+		SetTableValue(l, tRange);
 
-		Lua::SetTableValue(l, t);
+		SetTableValue(l, t);
 	}
 }
 void Lua::GraphicsPipelineCreateInfo::GetRasterizationProperties(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
@@ -281,44 +281,44 @@ void Lua::GraphicsPipelineCreateInfo::GetRasterizationProperties(lua::State *l, 
 	prosper::FrontFace frontFace;
 	float lineWidth;
 	pipelineInfo.GetRasterizationProperties(&polygonMode, &cullMode, &frontFace, &lineWidth);
-	Lua::PushInt(l, static_cast<uint32_t>(polygonMode));
-	Lua::PushInt(l, static_cast<uint32_t>(cullMode));
-	Lua::PushInt(l, static_cast<uint32_t>(frontFace));
-	Lua::PushNumber(l, lineWidth);
+	PushInt(l, static_cast<uint32_t>(polygonMode));
+	PushInt(l, static_cast<uint32_t>(cullMode));
+	PushInt(l, static_cast<uint32_t>(frontFace));
+	PushNumber(l, lineWidth);
 }
 void Lua::GraphicsPipelineCreateInfo::GetPolygonMode(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	prosper::PolygonMode polygonMode;
 	pipelineInfo.GetRasterizationProperties(&polygonMode, nullptr, nullptr, nullptr);
-	Lua::PushInt(l, static_cast<uint32_t>(polygonMode));
+	PushInt(l, static_cast<uint32_t>(polygonMode));
 }
 void Lua::GraphicsPipelineCreateInfo::GetCullMode(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	prosper::CullModeFlags cullMode;
 	pipelineInfo.GetRasterizationProperties(nullptr, &cullMode, nullptr, nullptr);
-	Lua::PushInt(l, static_cast<uint32_t>(cullMode));
+	PushInt(l, static_cast<uint32_t>(cullMode));
 }
 void Lua::GraphicsPipelineCreateInfo::GetFrontFace(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	prosper::FrontFace frontFace;
 	pipelineInfo.GetRasterizationProperties(nullptr, nullptr, &frontFace, nullptr);
-	Lua::PushInt(l, static_cast<uint32_t>(frontFace));
+	PushInt(l, static_cast<uint32_t>(frontFace));
 }
 void Lua::GraphicsPipelineCreateInfo::GetLineWidth(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	float lineWidth;
 	pipelineInfo.GetRasterizationProperties(nullptr, nullptr, nullptr, &lineWidth);
-	Lua::PushNumber(l, lineWidth);
+	PushNumber(l, lineWidth);
 }
 void Lua::GraphicsPipelineCreateInfo::GetSampleShadingState(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	bool bEnabled;
 	float minSampleShading;
 	pipelineInfo.GetSampleShadingState(&bEnabled, &minSampleShading);
-	Lua::PushBool(l, bEnabled);
+	PushBool(l, bEnabled);
 	if(bEnabled == false)
 		return;
-	Lua::PushNumber(l, minSampleShading);
+	PushNumber(l, minSampleShading);
 }
 void Lua::GraphicsPipelineCreateInfo::GetScissorBoxProperties(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t iScissor)
 {
@@ -327,10 +327,10 @@ void Lua::GraphicsPipelineCreateInfo::GetScissorBoxProperties(lua::State *l, pro
 	auto r = pipelineInfo.GetScissorBoxProperties(iScissor, &x, &y, &w, &h);
 	if(r == false)
 		return;
-	Lua::PushInt(l, x);
-	Lua::PushInt(l, y);
-	Lua::PushInt(l, w);
-	Lua::PushInt(l, h);
+	PushInt(l, x);
+	PushInt(l, y);
+	PushInt(l, w);
+	PushInt(l, h);
 }
 void Lua::GraphicsPipelineCreateInfo::GetStencilTestProperties(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
@@ -342,25 +342,25 @@ void Lua::GraphicsPipelineCreateInfo::GetStencilTestProperties(lua::State *l, pr
 
 	pipelineInfo.GetStencilTestProperties(&bEnabled, &frontStencilFairOp, &frontStencilPassOp, &frontStencilDepthFailOp, &frontStencilCompareOp, &frontStencilCompareMask, &frontStencilWriteMask, &frontStencilReference, &backStencilFailOp, &backStencilPassOp, &backStencilDepthFailOp,
 	  &backStencilCompareOp, &backStencilCompareMask, &backStencilWriteMask, &backStencilReference);
-	Lua::PushBool(l, bEnabled);
+	PushBool(l, bEnabled);
 	if(bEnabled == false)
 		return;
-	Lua::PushInt(l, static_cast<uint32_t>(frontStencilFairOp));
-	Lua::PushInt(l, static_cast<uint32_t>(frontStencilPassOp));
-	Lua::PushInt(l, static_cast<uint32_t>(frontStencilDepthFailOp));
-	Lua::PushInt(l, static_cast<uint32_t>(frontStencilCompareOp));
-	Lua::PushInt(l, static_cast<uint32_t>(frontStencilCompareMask));
-	Lua::PushInt(l, static_cast<uint32_t>(frontStencilWriteMask));
-	Lua::PushInt(l, static_cast<uint32_t>(frontStencilReference));
-	Lua::PushInt(l, static_cast<uint32_t>(backStencilFailOp));
-	Lua::PushInt(l, static_cast<uint32_t>(backStencilPassOp));
-	Lua::PushInt(l, static_cast<uint32_t>(backStencilDepthFailOp));
-	Lua::PushInt(l, static_cast<uint32_t>(backStencilCompareOp));
-	Lua::PushInt(l, static_cast<uint32_t>(backStencilCompareMask));
-	Lua::PushInt(l, static_cast<uint32_t>(backStencilWriteMask));
-	Lua::PushInt(l, static_cast<uint32_t>(backStencilReference));
+	PushInt(l, static_cast<uint32_t>(frontStencilFairOp));
+	PushInt(l, static_cast<uint32_t>(frontStencilPassOp));
+	PushInt(l, static_cast<uint32_t>(frontStencilDepthFailOp));
+	PushInt(l, static_cast<uint32_t>(frontStencilCompareOp));
+	PushInt(l, static_cast<uint32_t>(frontStencilCompareMask));
+	PushInt(l, static_cast<uint32_t>(frontStencilWriteMask));
+	PushInt(l, static_cast<uint32_t>(frontStencilReference));
+	PushInt(l, static_cast<uint32_t>(backStencilFailOp));
+	PushInt(l, static_cast<uint32_t>(backStencilPassOp));
+	PushInt(l, static_cast<uint32_t>(backStencilDepthFailOp));
+	PushInt(l, static_cast<uint32_t>(backStencilCompareOp));
+	PushInt(l, static_cast<uint32_t>(backStencilCompareMask));
+	PushInt(l, static_cast<uint32_t>(backStencilWriteMask));
+	PushInt(l, static_cast<uint32_t>(backStencilReference));
 }
-void Lua::GraphicsPipelineCreateInfo::GetSubpassId(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushInt(l, pipelineInfo.GetSubpassId()); }
+void Lua::GraphicsPipelineCreateInfo::GetSubpassId(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushInt(l, pipelineInfo.GetSubpassId()); }
 void Lua::GraphicsPipelineCreateInfo::GetVertexAttributeProperties(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t iVerexInputAttribute)
 {
 	uint32_t location, offset, explicitVertexBindingIndex, stride;
@@ -377,10 +377,10 @@ void Lua::GraphicsPipelineCreateInfo::GetVertexAttributeProperties(lua::State *l
 	// TODO: Push all attributes as table?
 	location = attributes.front()->location;
 	format = attributes.front()->format;
-	Lua::PushInt(l, location);
-	Lua::PushInt(l, static_cast<uint32_t>(format));
-	Lua::PushInt(l, stride);
-	Lua::PushInt(l, static_cast<uint32_t>(rate));
+	PushInt(l, location);
+	PushInt(l, static_cast<uint32_t>(format));
+	PushInt(l, stride);
+	PushInt(l, static_cast<uint32_t>(rate));
 }
 void Lua::GraphicsPipelineCreateInfo::GetViewportProperties(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t iViewport)
 {
@@ -388,19 +388,19 @@ void Lua::GraphicsPipelineCreateInfo::GetViewportProperties(lua::State *l, prosp
 	auto r = pipelineInfo.GetViewportProperties(iViewport, &originX, &originY, &w, &h, &minDepth, &maxDepth);
 	if(r == false)
 		return;
-	Lua::PushNumber(l, originX);
-	Lua::PushNumber(l, originY);
-	Lua::PushNumber(l, w);
-	Lua::PushNumber(l, h);
-	Lua::PushNumber(l, minDepth);
-	Lua::PushNumber(l, maxDepth);
+	PushNumber(l, originX);
+	PushNumber(l, originY);
+	PushNumber(l, w);
+	PushNumber(l, h);
+	PushNumber(l, minDepth);
+	PushNumber(l, maxDepth);
 }
-void Lua::GraphicsPipelineCreateInfo::IsAlphaToCoverageEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushBool(l, pipelineInfo.IsAlphaToCoverageEnabled()); }
-void Lua::GraphicsPipelineCreateInfo::IsAlphaToOneEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushBool(l, pipelineInfo.IsAlphaToOneEnabled()); }
-void Lua::GraphicsPipelineCreateInfo::IsDepthClampEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushBool(l, pipelineInfo.IsDepthClampEnabled()); }
-void Lua::GraphicsPipelineCreateInfo::IsPrimitiveRestartEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushBool(l, pipelineInfo.IsPrimitiveRestartEnabled()); }
-void Lua::GraphicsPipelineCreateInfo::IsRasterizerDiscardEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushBool(l, pipelineInfo.IsRasterizerDiscardEnabled()); }
-void Lua::GraphicsPipelineCreateInfo::IsSampleMaskEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { Lua::PushBool(l, pipelineInfo.IsSampleMaskEnabled()); }
+void Lua::GraphicsPipelineCreateInfo::IsAlphaToCoverageEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushBool(l, pipelineInfo.IsAlphaToCoverageEnabled()); }
+void Lua::GraphicsPipelineCreateInfo::IsAlphaToOneEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushBool(l, pipelineInfo.IsAlphaToOneEnabled()); }
+void Lua::GraphicsPipelineCreateInfo::IsDepthClampEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushBool(l, pipelineInfo.IsDepthClampEnabled()); }
+void Lua::GraphicsPipelineCreateInfo::IsPrimitiveRestartEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushBool(l, pipelineInfo.IsPrimitiveRestartEnabled()); }
+void Lua::GraphicsPipelineCreateInfo::IsRasterizerDiscardEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushBool(l, pipelineInfo.IsRasterizerDiscardEnabled()); }
+void Lua::GraphicsPipelineCreateInfo::IsSampleMaskEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo) { PushBool(l, pipelineInfo.IsSampleMaskEnabled()); }
 void Lua::Shader::Graphics::AttachVertexAttribute(lua::State *l, pragma::LuaShaderWrapperGraphicsBase &shader, const pragma::LuaVertexBinding &binding, luabind::object attributes)
 {
 	auto vertexAttributes = Lua::get_table_values<pragma::LuaVertexAttribute>(l, 3u, [](lua::State *l, int32_t idx) { return Lua::Check<pragma::LuaVertexAttribute>(l, idx); });
@@ -408,7 +408,7 @@ void Lua::Shader::Graphics::AttachVertexAttribute(lua::State *l, pragma::LuaShad
 }
 void Lua::GraphicsPipelineCreateInfo::AddSpecializationConstant(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t shaderStage, uint32_t constantId, pragma::util::DataStream &ds)
 {
-	Lua::PushBool(l, pipelineInfo.AddSpecializationConstant(static_cast<prosper::ShaderStage>(shaderStage), constantId, ds->GetSize(), ds->GetData()));
+	PushBool(l, pipelineInfo.AddSpecializationConstant(static_cast<prosper::ShaderStage>(shaderStage), constantId, ds->GetSize(), ds->GetData()));
 }
 void Lua::GraphicsPipelineCreateInfo::SetAlphaToCoverageEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, bool bEnabled) { pipelineInfo.ToggleAlphaToCoverage(bEnabled); }
 void Lua::GraphicsPipelineCreateInfo::SetAlphaToOneEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, bool bEnabled) { pipelineInfo.ToggleAlphaToOne(bEnabled); }
@@ -492,47 +492,47 @@ void Lua::GraphicsPipelineCreateInfo::SetSampleMaskEnabled(lua::State *l, prospe
 void Lua::GraphicsPipelineCreateInfo::SetSampleShadingEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, bool bEnabled) { pipelineInfo.ToggleSampleShading(bEnabled); }
 void Lua::GraphicsPipelineCreateInfo::SetStencilTestEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, bool bEnabled) { pipelineInfo.ToggleStencilTest(bEnabled); }
 
-void Lua::Shader::Graphics::RecordBindVertexBuffer(lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::Buffer &buffer, uint32_t startBinding, uint32_t offset)
+void Lua::Shader::Graphics::RecordBindVertexBuffer(lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Vulkan::Buffer &buffer, uint32_t startBinding, uint32_t offset)
 {
-	Lua::PushBool(l, shader.RecordBindVertexBuffer(bindState, buffer, startBinding, offset));
+	PushBool(l, shader.RecordBindVertexBuffer(bindState, buffer, startBinding, offset));
 }
 void Lua::Shader::Graphics::RecordBindVertexBuffers(lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, luabind::object buffers, uint32_t startBinding, luabind::object offsets)
 {
-	auto vBuffers = Lua::get_table_values<prosper::IBuffer *>(l, 3, [](lua::State *l, int32_t idx) { return &Lua::Check<Lua::Vulkan::Buffer>(l, idx); });
+	auto vBuffers = Lua::get_table_values<prosper::IBuffer *>(l, 3, [](lua::State *l, int32_t idx) { return &Lua::Check<Vulkan::Buffer>(l, idx); });
 	std::vector<uint64_t> vOffsets;
-	if(Lua::IsSet(l, 4)) {
-		vOffsets = Lua::get_table_values<uint64_t>(l, 5, [](lua::State *l, int32_t idx) { return static_cast<ptrdiff_t>(Lua::CheckInt(l, idx)); });
+	if(IsSet(l, 4)) {
+		vOffsets = Lua::get_table_values<uint64_t>(l, 5, [](lua::State *l, int32_t idx) { return static_cast<ptrdiff_t>(CheckInt(l, idx)); });
 	}
 	auto *bindState = recordTarget.GetBindState();
 	if(bindState)
-		return Lua::PushBool(l, shader.RecordBindVertexBuffers(*bindState, vBuffers, startBinding, vOffsets));
+		return PushBool(l, shader.RecordBindVertexBuffers(*bindState, vBuffers, startBinding, vOffsets));
 
 	recordTarget.GetPcb()->PushCommand(
 	  [&shader, vBuffers = std::move(vBuffers), vOffsets = std::move(vOffsets), startBinding](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool { return shader.RecordBindVertexBuffers(*recordState.shaderBindState, vBuffers, startBinding, vOffsets); });
 }
-void Lua::Shader::Graphics::RecordBindIndexBuffer(lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::Buffer &indexBuffer, uint32_t indexType, uint32_t offset)
+void Lua::Shader::Graphics::RecordBindIndexBuffer(lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Vulkan::Buffer &indexBuffer, uint32_t indexType, uint32_t offset)
 {
-	Lua::PushBool(l, shader.RecordBindIndexBuffer(bindState, indexBuffer, static_cast<prosper::IndexType>(indexType), offset));
+	PushBool(l, shader.RecordBindIndexBuffer(bindState, indexBuffer, static_cast<prosper::IndexType>(indexType), offset));
 }
 void Lua::Shader::Graphics::RecordDraw(lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t vertCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
 {
 	auto *bindState = recordTarget.GetBindState();
 	if(bindState)
-		return Lua::PushBool(l, shader.RecordDraw(*bindState, vertCount, instanceCount, firstVertex, firstInstance));
+		return PushBool(l, shader.RecordDraw(*bindState, vertCount, instanceCount, firstVertex, firstInstance));
 	recordTarget.GetPcb()->PushCommand([=, &shader](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool { return shader.RecordDraw(*recordState.shaderBindState, vertCount, instanceCount, firstVertex, firstInstance); });
 }
 void Lua::Shader::Graphics::RecordDrawIndexed(lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t firstInstance)
 {
 	auto *bindState = recordTarget.GetBindState();
 	if(bindState)
-		return Lua::PushBool(l, shader.RecordDrawIndexed(*bindState, indexCount, instanceCount, firstIndex, firstInstance));
+		return PushBool(l, shader.RecordDrawIndexed(*bindState, indexCount, instanceCount, firstIndex, firstInstance));
 	recordTarget.GetPcb()->PushCommand([=, &shader](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool { return shader.RecordDrawIndexed(*recordState.shaderBindState, indexCount, instanceCount, firstIndex, firstInstance); });
 }
 void Lua::Shader::Graphics::RecordBeginDraw(lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, uint32_t pipelineIdx)
 {
 	auto *bindState = recordTarget.GetBindState();
 	if(bindState)
-		Lua::PushBool(l, shader.RecordBeginDraw(*bindState, pipelineIdx));
+		PushBool(l, shader.RecordBeginDraw(*bindState, pipelineIdx));
 	else {
 		auto hShader = shader.GetHandle();
 		recordTarget.GetPcb()->PushCommand([hShader, pipelineIdx](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
@@ -547,7 +547,7 @@ void Lua::Shader::Graphics::RecordDraw(lua::State *l, prosper::ShaderGraphics &s
 {
 	auto *bindState = recordTarget.GetBindState();
 	if(bindState)
-		return Lua::PushBool(l, shader.RecordDraw(*bindState));
+		return PushBool(l, shader.RecordDraw(*bindState));
 	recordTarget.GetPcb()->PushCommand([=, &shader](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool { return shader.RecordDraw(*recordState.shaderBindState); });
 }
 void Lua::Shader::Graphics::RecordEndDraw(lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget)
@@ -555,7 +555,7 @@ void Lua::Shader::Graphics::RecordEndDraw(lua::State *l, prosper::ShaderGraphics
 	auto *bindState = recordTarget.GetBindState();
 	if(bindState) {
 		shader.RecordEndDraw(*bindState);
-		Lua::PushBool(l, true);
+		PushBool(l, true);
 		return;
 	}
 	recordTarget.GetPcb()->PushCommand([&shader](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
@@ -568,12 +568,12 @@ void Lua::Shader::Graphics::GetRenderPass(lua::State *l, prosper::ShaderGraphics
 	auto &rp = shader.GetRenderPass(pipelineIdx);
 	if(rp == nullptr)
 		return;
-	Lua::Push(l, rp);
+	Push(l, rp);
 }
 void Lua::Shader::Scene3D::GetRenderPass(lua::State *l, uint32_t pipelineIdx)
 {
 	auto &rp = prosper::ShaderGraphics::GetRenderPass<pragma::ShaderScene>(pragma::get_cengine()->GetRenderContext(), pipelineIdx);
 	if(rp == nullptr)
 		return;
-	Lua::Push(l, rp);
+	Push(l, rp);
 }

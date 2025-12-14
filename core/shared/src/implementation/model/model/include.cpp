@@ -33,7 +33,7 @@ static void add_frame(Frame &frame, const Frame &frameToAdd)
 	}
 }
 
-void pragma::asset::Model::Merge(const pragma::asset::Model &other, MergeFlags flags)
+void pragma::asset::Model::Merge(const Model &other, MergeFlags flags)
 {
 	spdlog::info("Merging model '{}' into '{}'...", other.GetName(), GetName());
 	std::vector<std::size_t> boneTranslations; // 'other' bone Id to 'this' bone Id
@@ -54,9 +54,9 @@ void pragma::asset::Model::Merge(const pragma::asset::Model &other, MergeFlags f
 		uint32_t otherBoneIndex = 0u;
 		auto numOldBones = skeleton.GetBoneCount();
 		for(auto &boneOther : bonesOther) {
-			auto it = std::find_if(bones.begin(), bones.end(), [&boneOther](const std::shared_ptr<pragma::animation::Bone> &bone) { return (bone->name == boneOther->name) ? true : false; });
+			auto it = std::find_if(bones.begin(), bones.end(), [&boneOther](const std::shared_ptr<animation::Bone> &bone) { return (bone->name == boneOther->name) ? true : false; });
 			if(it == bones.end()) {
-				auto boneId = skeleton.AddBone(new pragma::animation::Bone());
+				auto boneId = skeleton.AddBone(new animation::Bone());
 				newBoneIndicesToOtherBoneIndices.push_back(otherBoneIndex);
 				auto bone = skeleton.GetBone(boneId).lock();
 				bone->name = boneOther->name;
@@ -87,14 +87,14 @@ void pragma::asset::Model::Merge(const pragma::asset::Model &other, MergeFlags f
 			for(auto i = decltype(newBoneIndicesToOtherBoneIndices.size()) {0u}; i < newBoneIndicesToOtherBoneIndices.size(); ++i) {
 				auto boneIdx = numOldBones + i;
 				auto otherBoneIdx = newBoneIndicesToOtherBoneIndices.at(i);
-				pragma::math::ScaledTransform t;
+				math::ScaledTransform t;
 				if(referenceOther.GetBonePose(otherBoneIdx, t))
 					reference.SetBonePose(boneIdx, t);
 			}
 
 			// Do the same for the reference animation
 			auto animReference = GetAnimation(LookupAnimation("reference"));
-			auto animReferenceOther = const_cast<pragma::asset::Model &>(other).GetAnimation(other.LookupAnimation("reference"));
+			auto animReferenceOther = const_cast<Model &>(other).GetAnimation(other.LookupAnimation("reference"));
 			if(animReference && animReference->GetFrameCount() == 1 && animReferenceOther && animReferenceOther->GetFrameCount() == 1) {
 				auto frameRef = animReference->GetFrame(0);
 				auto frameRefOther = animReferenceOther->GetFrame(0);
@@ -105,7 +105,7 @@ void pragma::asset::Model::Merge(const pragma::asset::Model &other, MergeFlags f
 				for(auto i = decltype(newBoneIndicesToOtherBoneIndices.size()) {0u}; i < newBoneIndicesToOtherBoneIndices.size(); ++i) {
 					auto boneIdx = numOldBones + i;
 					auto otherBoneIdx = newBoneIndicesToOtherBoneIndices.at(i);
-					pragma::math::ScaledTransform t;
+					math::ScaledTransform t;
 					if(frameRefOther->GetBonePose(otherBoneIdx, t))
 						frameRef->SetBonePose(boneIdx, t);
 				}
@@ -118,7 +118,7 @@ void pragma::asset::Model::Merge(const pragma::asset::Model &other, MergeFlags f
 		auto &blendControllers = GetBlendControllers();
 		blendControllers.reserve(blendControllers.size() + blendControllersOther.size());
 		for(auto &blendController : blendControllersOther) {
-			auto it = std::find_if(blendControllers.begin(), blendControllers.end(), [&blendController](const BlendController &bc) { return pragma::string::compare(bc.name, blendController.name, false); });
+			auto it = std::find_if(blendControllers.begin(), blendControllers.end(), [&blendController](const BlendController &bc) { return string::compare(bc.name, blendController.name, false); });
 			if(it != blendControllers.end())
 				continue;
 			blendControllers.push_back(blendController);
@@ -152,20 +152,20 @@ void pragma::asset::Model::Merge(const pragma::asset::Model &other, MergeFlags f
 			auto &animOther = animsOther.at(i);
 			auto animName = other.GetAnimationName(i);
 
-			auto shareMode = pragma::animation::Animation::ShareMode::Events;
+			auto shareMode = animation::Animation::ShareMode::Events;
 			if(other.GetSkeleton().GetBoneCount() >= skeleton.GetBoneCount()) // TODO: Check this properly! The included model has to have all bones of this model (it may also have more, but not fewer!)
 			{
 				// If the number of bones of the included model is less than this model, we have to make a copy of all animation frames and fill up the missing bones - Otherwise there may be animation issues!
 				// TODO: Make missing bones always use transformations of reference animation, then this won't be necessary anymore!
-				shareMode |= pragma::animation::Animation::ShareMode::Frames;
+				shareMode |= animation::Animation::ShareMode::Frames;
 			}
-			auto anim = pragma::animation::Animation::Create(*animOther, shareMode);
+			auto anim = animation::Animation::Create(*animOther, shareMode);
 			auto &boneList = anim->GetBoneList();
 			for(auto idx = decltype(boneList.size()) {0}; idx < boneList.size(); ++idx)
 				anim->SetBoneId(idx, boneTranslations.at(boneList.at(idx)));
 
-			if(anim->HasFlag(pragma::FAnim::Autoplay))
-				anim->SetFlags(anim->GetFlags() & ~pragma::FAnim::Autoplay); // TODO: Autoplay gesture animations cause issues in some cases (e.g. gman.wmd). Re-enable this once the issues have been taken care of!
+			if(anim->HasFlag(FAnim::Autoplay))
+				anim->SetFlags(anim->GetFlags() & ~FAnim::Autoplay); // TODO: Autoplay gesture animations cause issues in some cases (e.g. gman.wmd). Re-enable this once the issues have been taken care of!
 			auto it = m_animationIDs.find(animName);
 			if(it != m_animationIDs.end())
 				; //anims.at(it->second) = anim;
@@ -173,7 +173,7 @@ void pragma::asset::Model::Merge(const pragma::asset::Model &other, MergeFlags f
 				anims.push_back(anim);
 				m_animationIDs.insert(decltype(m_animationIDs)::value_type(animName, anims.size() - 1));
 
-				if(refFrame != nullptr && anim->HasFlag(pragma::FAnim::Gesture) == false) {
+				if(refFrame != nullptr && anim->HasFlag(FAnim::Gesture) == false) {
 					auto boneList = anim->GetBoneList();
 					auto numBones = skeleton.GetBoneCount();
 					boneList.reserve(numBones);
@@ -288,7 +288,7 @@ void pragma::asset::Model::Merge(const pragma::asset::Model &other, MergeFlags f
 		auto &collisionMeshes = GetCollisionMeshes();
 		collisionMeshes.reserve(collisionMeshes.size() + collisionMeshesOther.size());
 		for(auto &colMeshOther : collisionMeshesOther) {
-			auto colMesh = pragma::physics::CollisionMesh::Create(*colMeshOther);
+			auto colMesh = physics::CollisionMesh::Create(*colMeshOther);
 			auto boneParent = colMesh->GetBoneParent();
 			if(boneParent >= 0)
 				boneParent = boneTranslations.at(boneParent);
@@ -325,7 +325,7 @@ void pragma::asset::Model::Merge(const pragma::asset::Model &other, MergeFlags f
 		auto &baseMeshes = GetBaseMeshes();
 		for(auto i = decltype(meshGroupsOther.size()) {0}; i < meshGroupsOther.size(); ++i) {
 			auto &groupOther = meshGroupsOther.at(i);
-			std::shared_ptr<pragma::asset::ModelMeshGroup> group = nullptr;
+			std::shared_ptr<ModelMeshGroup> group = nullptr;
 			if(i >= meshGroups.size())
 				group = AddMeshGroup(groupOther->GetName());
 			else

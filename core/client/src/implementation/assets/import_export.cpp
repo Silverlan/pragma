@@ -264,10 +264,10 @@ pragma::image::TextureInfo pragma::asset::get_texture_info(bool isGreyScale, boo
 
 void pragma::asset::assign_texture(material::CMaterial &mat, const std::string &textureRootPath, const std::string &matIdentifier, const std::string &texName, prosper::IImage &img, bool greyScale, bool normalMap, AlphaMode alphaMode)
 {
-	auto texInfo = pragma::asset::get_texture_info(greyScale, normalMap, alphaMode);
-	pragma::get_cgame()->SaveImage(img, textureRootPath + texName, texInfo);
+	auto texInfo = get_texture_info(greyScale, normalMap, alphaMode);
+	get_cgame()->SaveImage(img, textureRootPath + texName, texInfo);
 
-	auto path = pragma::util::FilePath(texName);
+	auto path = util::FilePath(texName);
 	path.PopFront();
 	mat.SetTexture(matIdentifier, path.GetString());
 }
@@ -1316,21 +1316,21 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 	outputData.model = mdl;
 	return outputData;
 }
-std::shared_ptr<pragma::asset::Model> pragma::asset::import_model(ufile::IFile &f, std::string &outErrMsg, const pragma::util::Path &outputPath, bool importAsSingleModel)
+std::shared_ptr<pragma::asset::Model> pragma::asset::import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
 {
 	auto data = ::import_model(&f, "", outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
 		return nullptr;
 	return data->model;
 }
-std::shared_ptr<pragma::asset::Model> pragma::asset::import_model(const std::string &fileName, std::string &outErrMsg, const pragma::util::Path &outputPath, bool importAsSingleModel)
+std::shared_ptr<pragma::asset::Model> pragma::asset::import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
 {
 	auto data = ::import_model(nullptr, fileName, outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
 		return nullptr;
 	return data->model;
 }
-std::optional<pragma::asset::AssetImportResult> pragma::asset::import_gltf(ufile::IFile &f, std::string &outErrMsg, const pragma::util::Path &outputPath, bool importAsSingleModel)
+std::optional<pragma::asset::AssetImportResult> pragma::asset::import_gltf(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
 {
 	auto data = ::import_model(&f, "", outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
@@ -1340,7 +1340,7 @@ std::optional<pragma::asset::AssetImportResult> pragma::asset::import_gltf(ufile
 	importInfo.mapName = std::move(data->mapName);
 	return importInfo;
 }
-std::optional<pragma::asset::AssetImportResult> pragma::asset::import_gltf(const std::string &fileName, std::string &outErrMsg, const pragma::util::Path &outputPath, bool importAsSingleModel)
+std::optional<pragma::asset::AssetImportResult> pragma::asset::import_gltf(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
 {
 	auto data = ::import_model(nullptr, fileName, outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
@@ -1353,7 +1353,7 @@ std::optional<pragma::asset::AssetImportResult> pragma::asset::import_gltf(const
 
 bool pragma::asset::import_texture(const std::string &fileName, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg)
 {
-	auto tex = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset(fileName, pragma::util::AssetLoadFlags::DontCache);
+	auto tex = static_cast<material::CMaterialManager &>(get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset(fileName, util::AssetLoadFlags::DontCache);
 	if(tex == nullptr) {
 		outErrMsg = "Unable to load texture!";
 		return false;
@@ -1372,8 +1372,8 @@ bool pragma::asset::import_texture(std::unique_ptr<ufile::IFile> &&f, const Text
 	std::string ext;
 	if(ufile::get_extension(*path, &ext) == false)
 		return false;
-	auto &texManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
-	auto tex = texManager.LoadAsset("", std::move(f), ext, std::make_unique<material::TextureLoadInfo>(pragma::util::AssetLoadFlags::DontCache));
+	auto &texManager = static_cast<material::CMaterialManager &>(get_client_state()->GetMaterialManager()).GetTextureManager();
+	auto tex = texManager.LoadAsset("", std::move(f), ext, std::make_unique<material::TextureLoadInfo>(util::AssetLoadFlags::DontCache));
 	if(tex == nullptr) {
 		outErrMsg = "Unable to load texture!";
 		return false;
@@ -1387,7 +1387,7 @@ bool pragma::asset::import_texture(std::unique_ptr<ufile::IFile> &&f, const Text
 bool pragma::asset::import_texture(prosper::IImage &img, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg)
 {
 	std::string ext;
-	auto texWriteInfo = get_texture_write_info(pragma::asset::ModelExportInfo::ImageFormat::DDS, texInfo.normalMap, texInfo.srgb, image::TextureInfo::AlphaMode::Auto, ext);
+	auto texWriteInfo = get_texture_write_info(ModelExportInfo::ImageFormat::DDS, texInfo.normalMap, texInfo.srgb, image::TextureInfo::AlphaMode::Auto, ext);
 	if(texInfo.greyScaleMap)
 		texWriteInfo.outputFormat = image::TextureInfo::OutputFormat::GradientMap;
 	else // TODO: Use BC1 if no alpha!
@@ -1406,27 +1406,27 @@ bool pragma::asset::import_texture(prosper::IImage &img, const TextureImportInfo
 			break;
 		}
 	}
-	auto imgOutputPath = "materials/" + pragma::util::Path {outputPath};
+	auto imgOutputPath = "materials/" + util::Path {outputPath};
 	imgOutputPath.RemoveFileExtension();
-	return pragma::get_cgame()->SaveImage(img, imgOutputPath.GetString(), texWriteInfo);
+	return get_cgame()->SaveImage(img, imgOutputPath.GetString(), texWriteInfo);
 }
 
 bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<MapExportInfo> &mapExp)
 {
-	pragma::util::Path mapPath {mapName};
+	util::Path mapPath {mapName};
 	mapPath.RemoveFileExtension(get_supported_extensions(Type::Map));
 	fs::VFilePtr f = nullptr;
 	auto openLocalMap = [&mapPath, &f]() {
-		auto localMapPath = pragma::asset::find_file(mapPath.GetString(), pragma::asset::Type::Map);
+		auto localMapPath = find_file(mapPath.GetString(), Type::Map);
 		if(localMapPath.has_value()) {
-			auto filePath = pragma::util::Path::CreateFile(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Map)} + '/' + *localMapPath);
-			f = pragma::fs::open_file(filePath.GetString().c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
+			auto filePath = util::Path::CreateFile(std::string {get_asset_root_directory(Type::Map)} + '/' + *localMapPath);
+			f = pragma::fs::open_file(filePath.GetString().c_str(), fs::FileMode::Read | fs::FileMode::Binary);
 		}
 	};
 	openLocalMap();
 	if(f == nullptr) {
-		if(pragma::util::port_source2_map(pragma::get_client_state(), mapPath.GetString()) || pragma::util::port_hl2_map(pragma::get_client_state(), mapPath.GetString())) {
-			f = pragma::fs::open_file(mapPath.GetString().c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
+		if(pragma::util::port_source2_map(get_client_state(), mapPath.GetString()) || pragma::util::port_hl2_map(get_client_state(), mapPath.GetString())) {
+			f = pragma::fs::open_file(mapPath.GetString().c_str(), fs::FileMode::Read | fs::FileMode::Binary);
 			if(f == nullptr) {
 				// Sleep for a bit, then try again, in case the file hasn't been fully written yet
 				std::this_thread::sleep_for(std::chrono::seconds {1});
@@ -1441,17 +1441,17 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 	if(exportInfo.verbose)
 		Con::cout << "Loading map data..." << Con::endl;
 
-	auto worldData = pragma::asset::WorldData::Create(*pragma::get_client_state());
-	auto udmData = pragma::util::load_udm_asset(std::make_unique<fs::File>(f));
+	auto worldData = WorldData::Create(*get_client_state());
+	auto udmData = util::load_udm_asset(std::make_unique<fs::File>(f));
 	f = nullptr;
 	std::string err;
-	if(udmData == nullptr || worldData->LoadFromAssetData(udmData->GetAssetData(), pragma::asset::EntityData::Flags::None, err) == false)
+	if(udmData == nullptr || worldData->LoadFromAssetData(udmData->GetAssetData(), EntityData::Flags::None, err) == false)
 		return false;
 
 	if(exportInfo.verbose)
 		Con::cout << "Collecting world node models..." << Con::endl;
 
-	pragma::asset::GLTFWriter::SceneDesc sceneDesc {};
+	GLTFWriter::SceneDesc sceneDesc {};
 	if(mapExp.has_value()) {
 		auto &cameras = mapExp->GetCameras();
 		sceneDesc.cameras.reserve(cameras.size());
@@ -1464,7 +1464,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 
 			auto &camScene = sceneDesc.cameras.back();
 			camScene.name = ent.GetName();
-			camScene.type = pragma::asset::GLTFWriter::Camera::Type::Perspective;
+			camScene.type = GLTFWriter::Camera::Type::Perspective;
 			camScene.aspectRatio = camC.GetAspectRatio();
 			camScene.vFov = camC.GetFOV();
 			camScene.zNear = camC.GetNearZ();
@@ -1491,30 +1491,30 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 
 			auto radiusC = ent.GetComponent<CRadiusComponent>();
 			if(radiusC.valid())
-				lightScene.range = pragma::units_to_metres(radiusC->GetRadius());
+				lightScene.range = units_to_metres(radiusC->GetRadius());
 
 			auto spotC = ent.GetComponent<CLightSpotComponent>();
 			if(spotC.valid()) {
-				lightScene.type = pragma::asset::GLTFWriter::LightSource::Type::Spot;
+				lightScene.type = GLTFWriter::LightSource::Type::Spot;
 				lightScene.blendFraction = spotC->GetBlendFraction();
 				lightScene.outerConeAngle = spotC->GetOuterConeAngle();
 			}
 
 			auto pointC = ent.GetComponent<CLightPointComponent>();
 			if(pointC.valid())
-				lightScene.type = pragma::asset::GLTFWriter::LightSource::Type::Point;
+				lightScene.type = GLTFWriter::LightSource::Type::Point;
 
 			auto dirC = ent.GetComponent<CLightDirectionalComponent>();
 			if(dirC.valid())
-				lightScene.type = pragma::asset::GLTFWriter::LightSource::Type::Directional;
+				lightScene.type = GLTFWriter::LightSource::Type::Directional;
 
 			switch(lightScene.type) {
-			case pragma::asset::GLTFWriter::LightSource::Type::Spot:
-			case pragma::asset::GLTFWriter::LightSource::Type::Point:
+			case GLTFWriter::LightSource::Type::Spot:
+			case GLTFWriter::LightSource::Type::Point:
 				// TODO: This should be Candela, not Lumen, but Lumen produces closer results for Blender
 				lightScene.luminousIntensity = lightC.GetLightIntensityLumen();
 				break;
-			case pragma::asset::GLTFWriter::LightSource::Type::Directional:
+			case GLTFWriter::LightSource::Type::Directional:
 				lightScene.illuminance = lightC.GetLightIntensity();
 				break;
 			}
@@ -1528,7 +1528,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 				continue;
 			if(exportInfo.verbose)
 				Con::cout << "Loading world node model '" << *strMdl << "'..." << Con::endl;
-			auto mdl = pragma::get_cgame()->LoadModel(*strMdl);
+			auto mdl = get_cgame()->LoadModel(*strMdl);
 			if(mdl == nullptr) {
 				Con::cwar << "Unable to load model '" << *strMdl << "'! Model will not be included in level export!" << Con::endl;
 				continue;
@@ -1558,42 +1558,42 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 			if(radius.has_value() == false)
 				radius = ent->GetKeyValue("distance");
 			if(radius.has_value())
-				ls.range = pragma::util::to_float(*radius);
+				ls.range = util::to_float(*radius);
 
 			std::optional<float> outerCutoffAngle {};
 			if(ent->GetClassName() == "env_light_spot") {
-				ls.type = pragma::asset::GLTFWriter::LightSource::Type::Spot;
+				ls.type = GLTFWriter::LightSource::Type::Spot;
 
 				auto blendFraction = ent->GetKeyValue("blendfraction");
 				if(blendFraction.has_value())
-					ls.blendFraction = pragma::util::to_float(*blendFraction);
+					ls.blendFraction = util::to_float(*blendFraction);
 
 				auto outerCutoff = ent->GetKeyValue("outercutoff");
 				if(outerCutoff.has_value()) {
-					ls.outerConeAngle = pragma::util::to_float(*outerCutoff);
+					ls.outerConeAngle = util::to_float(*outerCutoff);
 					outerCutoffAngle = ls.outerConeAngle;
 				}
 			}
 			else if(ent->GetClassName() == "env_light_point")
-				ls.type = pragma::asset::GLTFWriter::LightSource::Type::Point;
+				ls.type = GLTFWriter::LightSource::Type::Point;
 			else if(ent->GetClassName() == "env_light_environment")
-				ls.type = pragma::asset::GLTFWriter::LightSource::Type::Directional;
+				ls.type = GLTFWriter::LightSource::Type::Directional;
 
 			auto intensity = ent->GetKeyValue("light_intensity");
 			if(intensity.has_value()) {
-				auto intensityType = pragma::BaseEnvLightComponent::LightIntensityType::Candela;
+				auto intensityType = BaseEnvLightComponent::LightIntensityType::Candela;
 				auto vIntensityType = ent->GetKeyValue("light_intensity_type");
 				if(vIntensityType.has_value())
-					intensityType = static_cast<pragma::BaseEnvLightComponent::LightIntensityType>(pragma::util::to_int(*vIntensityType));
+					intensityType = static_cast<BaseEnvLightComponent::LightIntensityType>(util::to_int(*vIntensityType));
 
-				auto flIntensity = pragma::util::to_float(*intensity);
+				auto flIntensity = util::to_float(*intensity);
 				switch(ls.type) {
-				case pragma::asset::GLTFWriter::LightSource::Type::Spot:
-				case pragma::asset::GLTFWriter::LightSource::Type::Point:
+				case GLTFWriter::LightSource::Type::Spot:
+				case GLTFWriter::LightSource::Type::Point:
 					// TODO: This should be Candela, not Lumen, but Lumen produces closer results for Blender
 					ls.luminousIntensity = BaseEnvLightComponent::GetLightIntensityLumen(flIntensity, intensityType, outerCutoffAngle);
 					break;
-				case pragma::asset::GLTFWriter::LightSource::Type::Directional:
+				case GLTFWriter::LightSource::Type::Directional:
 					ls.illuminance = flIntensity;
 					break;
 				}
@@ -1609,7 +1609,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 	// HACK: If the model was just ported, we need to make sure the material and textures are in order by invoking the
 	// resource watcher (in case they have been changed)
 	// TODO: This doesn't belong here!
-	pragma::get_client_state()->GetResourceWatcher().Poll();
+	get_client_state()->GetResourceWatcher().Poll();
 
 	if(exportInfo.verbose)
 		Con::cout << "Exporting scene with " << sceneDesc.modelCollection.size() << " models and " << sceneDesc.lightSources.size() << " light sources..." << Con::endl;
@@ -1633,8 +1633,8 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 	return true;
 }
 
-bool pragma::asset::export_model(pragma::asset::Model &mdl, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName, std::string *optOutPath) { return GLTFWriter::Export(mdl, exportInfo, outErrMsg, modelName, optOutPath); }
-bool pragma::asset::export_animation(pragma::asset::Model &mdl, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName) { return GLTFWriter::Export(mdl, animName, exportInfo, outErrMsg, modelName); }
+bool pragma::asset::export_model(Model &mdl, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName, std::string *optOutPath) { return GLTFWriter::Export(mdl, exportInfo, outErrMsg, modelName, optOutPath); }
+bool pragma::asset::export_animation(Model &mdl, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &modelName) { return GLTFWriter::Export(mdl, animName, exportInfo, outErrMsg, modelName); }
 bool pragma::asset::export_texture(image::ImageBuffer &imgBuf, ModelExportInfo::ImageFormat imageFormat, const std::string &outputPath, std::string &outErrMsg, bool normalMap, bool srgb, image::TextureInfo::AlphaMode alphaMode, std::string *optOutOutputPath)
 {
 	std::string inOutPath = std::string {EXPORT_PATH} + outputPath;
@@ -1646,7 +1646,7 @@ bool pragma::asset::export_texture(image::ImageBuffer &imgBuf, ModelExportInfo::
 bool pragma::asset::export_texture(const std::string &texturePath, ModelExportInfo::ImageFormat imageFormat, std::string &outErrMsg, image::TextureInfo::AlphaMode alphaMode, bool enableExtendedDDS, std::string *optExportPath, std::string *optOutOutputPath,
   const std::optional<std::string> &optFileNameOverride)
 {
-	auto &texManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<material::CMaterialManager &>(get_client_state()->GetMaterialManager()).GetTextureManager();
 	auto pTexture = texManager.LoadAsset(texturePath);
 	if(pTexture == nullptr || pTexture->HasValidVkTexture() == false) {
 		outErrMsg = "Unable to load texture '" + texturePath + "'!";
@@ -1658,7 +1658,7 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 	auto imgPath = optFileNameOverride.has_value() ? *optFileNameOverride : ufile::get_file_from_filename(texturePath);
 	ufile::remove_extension_from_filename(imgPath);
 	if(optExportPath)
-		imgPath = (pragma::util::Path::CreatePath(*optExportPath) + imgPath).GetString();
+		imgPath = (util::Path::CreatePath(*optExportPath) + imgPath).GetString();
 	auto imgOutputPath = std::string {EXPORT_PATH} + imgPath;
 
 	auto exportSuccess = false;
@@ -1679,11 +1679,11 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 				break;
 			}
 		}
-		exportSuccess = pragma::get_cgame()->SaveImage(vkImg, imgOutputPath, texWriteInfo);
+		exportSuccess = get_cgame()->SaveImage(vkImg, imgOutputPath, texWriteInfo);
 	}
 	else {
 		std::vector<std::vector<std::shared_ptr<image::ImageBuffer>>> imgBuffers;
-		if(pragma::util::to_image_buffer(vkImg, {}, imgBuffers) == false) {
+		if(util::to_image_buffer(vkImg, {}, imgBuffers) == false) {
 			outErrMsg = "Unable to convert texture '" + texturePath + "' to image buffer!";
 			return false;
 		}
@@ -1714,7 +1714,7 @@ std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_materia
 
 	auto alphaMode = mat.GetAlphaMode();
 
-	pragma::asset::MaterialTexturePaths texturePaths {};
+	MaterialTexturePaths texturePaths {};
 
 	std::string imgOutputPath;
 	if(fSaveTexture(mat.GetAlbedoMap(), false, alphaMode != AlphaMode::Opaque, imgOutputPath, name))
@@ -1771,9 +1771,9 @@ class ModelAOWorker : public pragma::util::ParallelWorker<pragma::asset::ModelAO
 	std::vector<pragma::util::ParallelJob<pragma::image::ImageLayerSet>> m_matAoJobs {};
 	pragma::asset::ModelAOWorkerResult m_result {};
 };
-std::optional<pragma::util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::asset::generate_ambient_occlusion(pragma::asset::Model &mdl, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples, pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
+std::optional<pragma::util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::asset::generate_ambient_occlusion(Model &mdl, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples, rendering::cycles::SceneInfo::DeviceType aoDevice)
 {
-	std::vector<pragma::util::ParallelJob<image::ImageLayerSet>> aoJobs {};
+	std::vector<util::ParallelJob<image::ImageLayerSet>> aoJobs {};
 	std::unordered_set<std::string> builtRMAs {};
 	auto &materials = mdl.GetMaterials();
 	aoJobs.reserve(materials.size());
@@ -1786,7 +1786,7 @@ std::optional<pragma::util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pra
 		if(builtRMAs.find(rmaMap->name) != builtRMAs.end())
 			continue; // AO has already been built (maybe by a different skin material)
 		builtRMAs.insert(rmaMap->name);
-		pragma::util::ParallelJob<image::ImageLayerSet> aoJob {};
+		util::ParallelJob<image::ImageLayerSet> aoJob {};
 		auto eResult = generate_ambient_occlusion(mdl, *mat.get(), aoJob, outErrMsg, forceRebuild, aoResolution, aoSamples, aoDevice);
 		if(eResult != AOResult::AOJobReady)
 			continue;
@@ -1794,7 +1794,7 @@ std::optional<pragma::util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pra
 	}
 	if(aoJobs.empty())
 		return {};
-	return pragma::util::create_parallel_job<ModelAOWorker>(aoJobs);
+	return util::create_parallel_job<ModelAOWorker>(aoJobs);
 }
 
 template<class T>
@@ -1833,8 +1833,8 @@ static bool save_ambient_occlusion(pragma::material::Material &mat, std::string 
 	return true;
 }
 
-pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset::Model &mdl, material::Material &mat, pragma::util::ParallelJob<image::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples,
-  pragma::rendering::cycles::SceneInfo::DeviceType aoDevice)
+pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(Model &mdl, material::Material &mat, util::ParallelJob<image::ImageLayerSet> &outJob, std::string &outErrMsg, bool forceRebuild, uint32_t aoResolution, uint32_t aoSamples,
+  rendering::cycles::SceneInfo::DeviceType aoDevice)
 {
 	// TODO: There really is no good way to determine whether the material has a ambient occlusion map or not.
 	// Use a compute shader to determine if it's all white or black?
@@ -1851,7 +1851,7 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset:
 	}
 	auto rmaTex = std::static_pointer_cast<material::Texture>(rmaTexInfo->texture);
 	auto rmaPath = rmaTex->GetName();
-	auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA *>(pragma::get_cengine()->GetShader("compose_rma").get());
+	auto *shaderComposeRMA = static_cast<ShaderComposeRMA *>(get_cengine()->GetShader("compose_rma").get());
 	if(shaderComposeRMA == nullptr) {
 		outErrMsg = "Unable to load RMA shader!";
 		return AOResult::FailedToCreateAOJob;
@@ -1864,7 +1864,7 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset:
 	}
 	auto matIdx = (it - materials.begin());
 
-	pragma::rendering::cycles::SceneInfo sceneInfo {};
+	rendering::cycles::SceneInfo sceneInfo {};
 	sceneInfo.denoise = true;
 	sceneInfo.hdrOutput = false;
 	sceneInfo.width = aoResolution;
@@ -1873,7 +1873,7 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset:
 	sceneInfo.device = aoDevice;
 
 	//std::shared_ptr<image::ImageBuffer> aoImg = nullptr;
-	outJob = pragma::rendering::cycles::bake_ambient_occlusion(*pragma::get_client_state(), sceneInfo, mdl, matIdx);
+	outJob = pragma::rendering::cycles::bake_ambient_occlusion(*get_client_state(), sceneInfo, mdl, matIdx);
 	if(outJob.IsValid() == false) {
 		outErrMsg = "Unable to create job for ao generation!";
 		return AOResult::FailedToCreateAOJob;
@@ -1891,23 +1891,23 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset:
 	}
 
 	auto hMat = mat.GetHandle();
-	outJob.SetCompletionHandler([rmaPath, hMat](pragma::util::ParallelWorker<image::ImageLayerSet> &worker) mutable {
-		auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA *>(pragma::get_cengine()->GetShader("compose_rma").get());
+	outJob.SetCompletionHandler([rmaPath, hMat](util::ParallelWorker<image::ImageLayerSet> &worker) mutable {
+		auto *shaderComposeRMA = static_cast<ShaderComposeRMA *>(get_cengine()->GetShader("compose_rma").get());
 		if(worker.IsSuccessful() == false)
 			return;
 		if(!hMat) {
-			worker.SetStatus(pragma::util::JobStatus::Failed, "Material is not valid!");
+			worker.SetStatus(util::JobStatus::Failed, "Material is not valid!");
 			return;
 		}
 		if(shaderComposeRMA == nullptr) {
-			worker.SetStatus(pragma::util::JobStatus::Failed, "Shader is not valid!");
+			worker.SetStatus(util::JobStatus::Failed, "Shader is not valid!");
 			return;
 		}
 		auto aoImg = worker.GetResult().images.begin()->second;
 		std::string errMsg;
 		auto result = save_ambient_occlusion<image::ImageBuffer>(*hMat.get(), rmaPath, *aoImg, errMsg);
 		if(result == false)
-			worker.SetStatus(pragma::util::JobStatus::Failed, errMsg);
+			worker.SetStatus(util::JobStatus::Failed, errMsg);
 	});
 	return AOResult::AOJobReady;
 }
@@ -1915,7 +1915,7 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(pragma::asset:
 bool pragma::asset::export_texture_as_vtf(const std::string &fileName, const std::function<const uint8_t *(uint32_t, uint32_t)> &fGetImgData, uint32_t width, uint32_t height, uint32_t szPerPixel, uint32_t numLayers, uint32_t numMipmaps, bool cubemap, const VtfInfo &texInfo,
   const std::function<void(const std::string &)> &errorHandler, bool absoluteFileName)
 {
-	auto dllHandle = pragma::util::initialize_external_archive_manager(pragma::get_client_state());
+	auto dllHandle = pragma::util::initialize_external_archive_manager(get_client_state());
 	if(!dllHandle)
 		return false;
 	auto *fExportVtf = dllHandle->FindSymbolAddress<bool (*)(const std::string &, const std::function<const uint8_t *(uint32_t, uint32_t)> &, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, bool, const VtfInfo &, const std::function<void(const std::string &)> &, bool)>("export_vtf");
@@ -1950,7 +1950,7 @@ std::optional<prosper::Format> pragma::asset::vtf_format_to_prosper(VtfInfo::For
 		// vkImgData.swizzle = {prosper::ComponentSwizzle::A,prosper::ComponentSwizzle::B,prosper::ComponentSwizzle::G,prosper::ComponentSwizzle::R};
 		return prosper::Format::A8B8G8R8_UNorm_Pack32;
 	}
-	static_assert(pragma::math::to_integral(pragma::asset::VtfInfo::Format::Count) == 10, "Update this implementation when new format types have been added!");
+	static_assert(math::to_integral(VtfInfo::Format::Count) == 10, "Update this implementation when new format types have been added!");
 	return {};
 }
 std::optional<pragma::asset::VtfInfo::Format> pragma::asset::prosper_format_to_vtf(prosper::Format format)
@@ -1979,7 +1979,7 @@ std::optional<pragma::asset::VtfInfo::Format> pragma::asset::prosper_format_to_v
 		// vkImgData.swizzle = {prosper::ComponentSwizzle::A,prosper::ComponentSwizzle::B,prosper::ComponentSwizzle::G,prosper::ComponentSwizzle::R};
 		return VtfInfo::Format::A8B8G8R8_UNorm_Pack32;
 	}
-	static_assert(pragma::math::to_integral(pragma::asset::VtfInfo::Format::Count) == 10, "Update this implementation when new format types have been added!");
+	static_assert(math::to_integral(VtfInfo::Format::Count) == 10, "Update this implementation when new format types have been added!");
 	return {};
 }
 

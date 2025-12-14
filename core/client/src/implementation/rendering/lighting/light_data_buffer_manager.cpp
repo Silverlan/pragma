@@ -41,7 +41,7 @@ ShadowDataBufferManager &ShadowDataBufferManager::GetInstance()
 }
 void ShadowDataBufferManager::DoInitialize()
 {
-	auto limits = pragma::get_cengine()->GetRenderContext().GetPhysicalDeviceLimits();
+	auto limits = get_cengine()->GetRenderContext().GetPhysicalDeviceLimits();
 
 	prosper::DeviceSize limit = 0;
 
@@ -51,20 +51,20 @@ void ShadowDataBufferManager::DoInitialize()
 #if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
 	createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit;
 	alignment = sizeof(Vector4);
-	limit = pragma::math::to_integral(pragma::GameLimits::MaxUniformBufferSize);
+	limit = math::to_integral(GameLimits::MaxUniformBufferSize);
 #else
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 	limit = limits.maxStorageBufferRange;
 #endif
 
 	auto shadowDataSize = sizeof(ShadowBufferData);
-	auto numShadows = static_cast<uint32_t>(pragma::math::min(static_cast<uint64_t>(limit / shadowDataSize), static_cast<uint64_t>(pragma::GameLimits::MaxAbsoluteShadowLights)));
+	auto numShadows = static_cast<uint32_t>(math::min(static_cast<uint64_t>(limit / shadowDataSize), static_cast<uint64_t>(GameLimits::MaxAbsoluteShadowLights)));
 	m_maxCount = numShadows;
 
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = m_maxCount * shadowDataSize;
 
-	m_masterBuffer = pragma::get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, shadowDataSize, createInfo.size, 0.05f, nullptr, alignment);
+	m_masterBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, shadowDataSize, createInfo.size, 0.05f, nullptr, alignment);
 	m_masterBuffer->SetDebugName("light_shadow_data_buf");
 
 	m_bufferIndexToLightSource.resize(m_maxCount, nullptr);
@@ -87,7 +87,7 @@ LightDataBufferManager &LightDataBufferManager::GetInstance()
 }
 void LightDataBufferManager::DoInitialize()
 {
-	auto limits = pragma::get_cengine()->GetRenderContext().GetPhysicalDeviceLimits();
+	auto limits = get_cengine()->GetRenderContext().GetPhysicalDeviceLimits();
 
 	auto lightDataSize = sizeof(LightBufferData);
 	prosper::DeviceSize maxBufferSize = 0;
@@ -97,13 +97,13 @@ void LightDataBufferManager::DoInitialize()
 	std::optional<uint64_t> alignment {};
 #if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
 	createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit;
-	maxBufferSize = pragma::math::to_integral(pragma::GameLimits::MaxUniformBufferSize);
+	maxBufferSize = math::to_integral(GameLimits::MaxUniformBufferSize);
 	alignment = sizeof(Vector4);
 #else
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 	maxBufferSize = limits.maxStorageBufferRange;
 #endif
-	auto numLights = static_cast<uint32_t>(pragma::math::min(static_cast<uint64_t>(maxBufferSize / lightDataSize), static_cast<uint64_t>(pragma::GameLimits::MaxAbsoluteLights)));
+	auto numLights = static_cast<uint32_t>(math::min(static_cast<uint64_t>(maxBufferSize / lightDataSize), static_cast<uint64_t>(GameLimits::MaxAbsoluteLights)));
 	m_maxCount = numLights;
 #ifdef ENABLE_LIGHT_BUFFER_DEBUGGING
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
@@ -124,7 +124,7 @@ void LightDataBufferManager::DoInitialize()
 		}
 	}
 
-	m_masterBuffer = pragma::get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, lightDataSize, createInfo.size, 0.05f, initialLightBufferData.data(), alignment);
+	m_masterBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, lightDataSize, createInfo.size, 0.05f, initialLightBufferData.data(), alignment);
 	m_masterBuffer->SetDebugName("light_data_buf");
 
 	m_bufferIndexToLightSource.resize(m_maxCount, nullptr);
@@ -172,7 +172,7 @@ void LightDataBufferManager::Free(const std::shared_ptr<prosper::IBuffer> &rende
 		if(pLight == nullptr)
 			throw std::logic_error("Expected valid light source at light buffer index " + std::to_string(m_highestBufferIndexInUse) + ", but none available!");
 		// TODO: We can just copy the buffer data on the GPU instead
-		pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, 0ull, pLight->GetBufferData());
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, 0ull, pLight->GetBufferData());
 		pLight->SetRenderBuffer(renderBuffer, false);
 
 		m_bufferIndexToLightSource.at(m_highestBufferIndexInUse--) = nullptr;

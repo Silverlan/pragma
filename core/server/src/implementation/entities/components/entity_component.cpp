@@ -12,10 +12,10 @@ using namespace pragma;
 
 void SEntityComponentManager::OnComponentTypeRegistered(const ComponentInfo &componentInfo)
 {
-	if((componentInfo.flags & pragma::ComponentFlags::Networked) == pragma::ComponentFlags::None)
+	if((componentInfo.flags & ComponentFlags::Networked) == ComponentFlags::None)
 		return;
 	NetPacket p {};
 	p->Write<ComponentId>(componentInfo.id);
 	p->WriteString(*componentInfo.name);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::REGISTER_ENTITY_COMPONENT, p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(networking::net_messages::client::REGISTER_ENTITY_COMPONENT, p, networking::Protocol::SlowReliable);
 }

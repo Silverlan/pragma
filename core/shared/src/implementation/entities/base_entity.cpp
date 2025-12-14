@@ -21,11 +21,11 @@ pragma::ecs::BaseEntity *pragma::ecs::BaseEntity::CreateChild(const std::string 
 }
 void pragma::ecs::BaseEntity::SetEnabled(bool enabled)
 {
-	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent *>(FindComponent("toggle").get());
+	auto *toggleC = dynamic_cast<BaseToggleComponent *>(FindComponent("toggle").get());
 	if(toggleC == nullptr && enabled == true)
 		return;
 	if(toggleC == nullptr)
-		toggleC = dynamic_cast<pragma::BaseToggleComponent *>(AddComponent("toggle").get());
+		toggleC = dynamic_cast<BaseToggleComponent *>(AddComponent("toggle").get());
 	if(toggleC == nullptr)
 		return;
 	toggleC->SetTurnedOn(enabled);
@@ -33,7 +33,7 @@ void pragma::ecs::BaseEntity::SetEnabled(bool enabled)
 bool pragma::ecs::BaseEntity::IsEnabled() const
 {
 	auto isEnabled = true;
-	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent *>(FindComponent("toggle").get());
+	auto *toggleC = dynamic_cast<BaseToggleComponent *>(FindComponent("toggle").get());
 	if(toggleC != nullptr)
 		isEnabled = toggleC->IsTurnedOn();
 	return isEnabled;
@@ -41,7 +41,7 @@ bool pragma::ecs::BaseEntity::IsEnabled() const
 bool pragma::ecs::BaseEntity::IsDisabled() const
 {
 	auto isEnabled = true;
-	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent *>(FindComponent("toggle").get());
+	auto *toggleC = dynamic_cast<BaseToggleComponent *>(FindComponent("toggle").get());
 	if(toggleC != nullptr)
 		isEnabled = toggleC->IsTurnedOn();
 	return !isEnabled;
@@ -49,14 +49,14 @@ bool pragma::ecs::BaseEntity::IsDisabled() const
 
 std::optional<Color> pragma::ecs::BaseEntity::GetColor() const
 {
-	auto *colorC = dynamic_cast<pragma::BaseColorComponent *>(FindComponent("color").get());
+	auto *colorC = dynamic_cast<BaseColorComponent *>(FindComponent("color").get());
 	if(colorC == nullptr)
 		return {};
 	return colorC->GetColor();
 }
 void pragma::ecs::BaseEntity::SetColor(const Color &color)
 {
-	auto *colorC = dynamic_cast<pragma::BaseColorComponent *>(AddComponent("color").get());
+	auto *colorC = dynamic_cast<BaseColorComponent *>(AddComponent("color").get());
 	if(colorC == nullptr)
 		return;
 	colorC->SetColor(color);
@@ -66,15 +66,15 @@ bool pragma::ecs::BaseEntity::IsStatic() const
 	if(GetAnimatedComponent().valid())
 		return false;
 	auto *physComponent = GetPhysicsComponent();
-	auto type = physComponent ? physComponent->GetPhysicsType() : pragma::physics::PhysicsType::None;
-	return (type == pragma::physics::PhysicsType::None || type == pragma::physics::PhysicsType::Static) ? true : false;
+	auto type = physComponent ? physComponent->GetPhysicsType() : physics::PhysicsType::None;
+	return (type == physics::PhysicsType::None || type == physics::PhysicsType::Static) ? true : false;
 }
 bool pragma::ecs::BaseEntity::IsDynamic() const { return !IsStatic(); }
 
 Con::c_cout &pragma::ecs::BaseEntity::print(Con::c_cout &os) const
 {
 	auto *componentManager = GetComponentManager();
-	auto pNameComponent = componentManager ? static_cast<pragma::BaseNameComponent *>(FindComponent("name").get()) : nullptr;
+	auto pNameComponent = componentManager ? static_cast<BaseNameComponent *>(FindComponent("name").get()) : nullptr;
 	os << "Entity[G:" << m_index << "][L:" << GetLocalIndex() << "][C:" << GetClass() << "][N:" << (pNameComponent != nullptr ? pNameComponent->GetName() : "") << "][";
 	auto mdlComponent = componentManager ? GetModelComponent() : nullptr;
 	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
@@ -88,7 +88,7 @@ Con::c_cout &pragma::ecs::BaseEntity::print(Con::c_cout &os) const
 
 std::ostream &pragma::ecs::BaseEntity::print(std::ostream &os) const
 {
-	auto pNameComponent = static_cast<pragma::BaseNameComponent *>(FindComponent("name").get());
+	auto pNameComponent = static_cast<BaseNameComponent *>(FindComponent("name").get());
 	os << "Entity[G:" << m_index << "][L:" << GetLocalIndex() << "][C:" << GetClass() << "][N:" << (pNameComponent != nullptr ? pNameComponent->GetName() : "") << "][";
 	auto mdlComponent = GetModelComponent();
 	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
@@ -103,22 +103,22 @@ std::ostream &pragma::ecs::BaseEntity::print(std::ostream &os) const
 std::string pragma::ecs::BaseEntity::ToString() const
 {
 	std::stringstream ss;
-	const_cast<pragma::ecs::BaseEntity *>(this)->print(ss);
+	const_cast<BaseEntity *>(this)->print(ss);
 	return ss.str();
 }
 
-pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE = pragma::INVALID_COMPONENT_ID;
-pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_ON_SPAWN = pragma::INVALID_COMPONENT_ID;
-pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_ON_POST_SPAWN = pragma::INVALID_COMPONENT_ID;
-pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_ON_REMOVE = pragma::INVALID_COMPONENT_ID;
-pragma::ecs::BaseEntity::BaseEntity() : pragma::BaseEntityComponentSystem {}, pragma::BaseLuaHandle {}, m_uuid {util::generate_uuid_v4()} {}
+pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE = INVALID_COMPONENT_ID;
+pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_ON_SPAWN = INVALID_COMPONENT_ID;
+pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_ON_POST_SPAWN = INVALID_COMPONENT_ID;
+pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_ON_REMOVE = INVALID_COMPONENT_ID;
+pragma::ecs::BaseEntity::BaseEntity() : BaseEntityComponentSystem {}, BaseLuaHandle {}, m_uuid {util::generate_uuid_v4()} {}
 pragma::NetEventId pragma::ecs::BaseEntity::FindNetEvent(const std::string &name) const { return GetNetworkState()->GetGameState()->FindNetEvent(name); }
 
 pragma::ecs::BaseEntity::StateFlags pragma::ecs::BaseEntity::GetStateFlags() const { return m_stateFlags; }
 void pragma::ecs::BaseEntity::ResetStateChangeFlags() { m_stateFlags &= ~(StateFlags::CollisionBoundsChanged | StateFlags::PositionChanged | StateFlags::RenderBoundsChanged | StateFlags::RotationChanged); }
 bool pragma::ecs::BaseEntity::HasStateFlag(StateFlags flag) const { return ((m_stateFlags & flag) == flag) ? true : false; }
 void pragma::ecs::BaseEntity::SetStateFlag(StateFlags flag) { m_stateFlags |= flag; }
-pragma::BaseEntityComponent *pragma::ecs::BaseEntity::FindComponentMemberIndex(const pragma::util::Path &path, pragma::ComponentMemberIndex &outMemberIdx)
+pragma::BaseEntityComponent *pragma::ecs::BaseEntity::FindComponentMemberIndex(const util::Path &path, ComponentMemberIndex &outMemberIdx)
 {
 	auto hComponent = FindComponent(std::string {path.GetFront()});
 	if(!hComponent.valid())
@@ -136,10 +136,10 @@ void pragma::ecs::BaseEntity::OnRemove()
 	BaseEntityComponentSystem::OnRemove();
 	BroadcastEvent(baseEntity::EVENT_ON_REMOVE);
 	ClearComponents();
-	pragma::BaseLuaHandle::InvalidateHandle();
+	InvalidateHandle();
 
 	auto &uuidMap = GetNetworkState()->GetGameState()->GetEntityUuidMap();
-	auto it = uuidMap.find(pragma::util::get_uuid_hash(m_uuid));
+	auto it = uuidMap.find(util::get_uuid_hash(m_uuid));
 	if(it != uuidMap.end())
 		uuidMap.erase(it);
 }
@@ -152,32 +152,32 @@ void pragma::ecs::BaseEntity::Construct(unsigned int idx)
 
 bool pragma::ecs::BaseEntity::IsMapEntity() const
 {
-	auto *mapComponent = static_cast<pragma::MapComponent *>(FindComponent("map").get());
+	auto *mapComponent = static_cast<MapComponent *>(FindComponent("map").get());
 	return mapComponent != nullptr && mapComponent->GetMapIndex() != 0;
 }
 
-EntityHandle pragma::ecs::BaseEntity::GetHandle() const { return pragma::BaseLuaHandle::GetHandle<pragma::ecs::BaseEntity>(); }
+EntityHandle pragma::ecs::BaseEntity::GetHandle() const { return BaseLuaHandle::GetHandle<BaseEntity>(); }
 
-void pragma::ecs::BaseEntity::RemoveEntityOnRemoval(pragma::ecs::BaseEntity *ent, Bool bRemove) { RemoveEntityOnRemoval(ent->GetHandle(), bRemove); }
+void pragma::ecs::BaseEntity::RemoveEntityOnRemoval(BaseEntity *ent, Bool bRemove) { RemoveEntityOnRemoval(ent->GetHandle(), bRemove); }
 void pragma::ecs::BaseEntity::RemoveEntityOnRemoval(const EntityHandle &hEnt, Bool bRemove)
 {
 	if(!hEnt.valid())
 		return;
-	auto lifelineLinkC = AddComponent<pragma::LifelineLinkComponent>();
+	auto lifelineLinkC = AddComponent<LifelineLinkComponent>();
 	if(lifelineLinkC.expired())
 		return;
 	lifelineLinkC->RemoveEntityOnRemoval(hEnt, bRemove);
 }
 void pragma::ecs::BaseEntity::SetKeyValue(std::string key, std::string val)
 {
-	pragma::string::to_lower(key);
-	pragma::CEKeyValueData inputData {key, val};
-	if(BroadcastEvent(baseEntity::EVENT_HANDLE_KEY_VALUE, inputData) == pragma::util::EventReply::Handled)
+	string::to_lower(key);
+	CEKeyValueData inputData {key, val};
+	if(BroadcastEvent(baseEntity::EVENT_HANDLE_KEY_VALUE, inputData) == util::EventReply::Handled)
 		return;
 	if(key == "spawnflags")
-		m_spawnFlags = pragma::util::to_int(val);
+		m_spawnFlags = util::to_int(val);
 	else if(key == "uuid")
-		SetUuid(pragma::util::uuid_string_to_bytes(val));
+		SetUuid(util::uuid_string_to_bytes(val));
 }
 void pragma::ecs::BaseEntity::SetSpawnFlags(uint32_t spawnFlags) { m_spawnFlags = spawnFlags; }
 unsigned int pragma::ecs::BaseEntity::GetSpawnFlags() const { return m_spawnFlags; }
@@ -200,19 +200,19 @@ lua::State *pragma::ecs::BaseEntity::GetLuaState() const
 
 pragma::NetEventId pragma::ecs::BaseEntity::SetupNetEvent(const std::string &name) const { return GetNetworkState()->GetGameState()->SetupNetEvent(name); }
 
-void pragma::ecs::BaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void pragma::ecs::BaseEntity::RegisterEvents(EntityComponentManager &componentManager)
 {
-	std::type_index typeIndex = typeid(pragma::ecs::BaseEntity);
+	std::type_index typeIndex = typeid(BaseEntity);
 	baseEntity::EVENT_HANDLE_KEY_VALUE = componentManager.RegisterEvent("HANDLE_KEY_VALUE", typeIndex);
 	baseEntity::EVENT_ON_SPAWN = componentManager.RegisterEvent("ON_SPAWN", typeIndex);
 	baseEntity::EVENT_ON_POST_SPAWN = componentManager.RegisterEvent("ON_POST_SPAWN", typeIndex);
 	baseEntity::EVENT_ON_REMOVE = componentManager.RegisterEvent("ON_REMOVE", typeIndex);
 }
 
-void pragma::ecs::BaseEntity::SetUuid(const pragma::util::Uuid &uuid)
+void pragma::ecs::BaseEntity::SetUuid(const util::Uuid &uuid)
 {
 	auto &uuidMap = GetNetworkState()->GetGameState()->GetEntityUuidMap();
-	auto it = uuidMap.find(pragma::util::get_uuid_hash(m_uuid));
+	auto it = uuidMap.find(util::get_uuid_hash(m_uuid));
 	if(it != uuidMap.end())
 		uuidMap.erase(it);
 	m_uuid = uuid;
@@ -232,7 +232,7 @@ void pragma::ecs::BaseEntity::Initialize()
 
 pragma::GString pragma::ecs::BaseEntity::GetClass() const { return m_className; }
 
-void pragma::ecs::BaseEntity::SetPose(const pragma::math::Transform &outTransform, pragma::CoordinateSpace space)
+void pragma::ecs::BaseEntity::SetPose(const math::Transform &outTransform, CoordinateSpace space)
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
@@ -240,16 +240,16 @@ void pragma::ecs::BaseEntity::SetPose(const pragma::math::Transform &outTransfor
 	SetPosition(outTransform.GetOrigin());
 	SetRotation(outTransform.GetRotation());
 }
-void pragma::ecs::BaseEntity::SetPose(const pragma::math::ScaledTransform &outTransform, pragma::CoordinateSpace space)
+void pragma::ecs::BaseEntity::SetPose(const math::ScaledTransform &outTransform, CoordinateSpace space)
 {
 	SetPosition(outTransform.GetOrigin());
 	SetRotation(outTransform.GetRotation());
 	SetScale(outTransform.GetScale());
 }
-pragma::math::ScaledTransform pragma::ecs::BaseEntity::GetPose(pragma::CoordinateSpace space) const
+pragma::math::ScaledTransform pragma::ecs::BaseEntity::GetPose(CoordinateSpace space) const
 {
 	switch(space) {
-	case pragma::CoordinateSpace::Local:
+	case CoordinateSpace::Local:
 		{
 			if(!m_childComponent)
 				return GetPose();
@@ -258,8 +258,8 @@ pragma::math::ScaledTransform pragma::ecs::BaseEntity::GetPose(pragma::Coordinat
 				return GetPose();
 			return parent->GetPose().GetInverse() * GetPose();
 		}
-	case pragma::CoordinateSpace::World:
-	case pragma::CoordinateSpace::Object:
+	case CoordinateSpace::World:
+	case CoordinateSpace::Object:
 	default:
 		return GetPose();
 	}
@@ -268,12 +268,12 @@ pragma::math::ScaledTransform pragma::ecs::BaseEntity::GetPose(pragma::Coordinat
 const pragma::math::ScaledTransform &pragma::ecs::BaseEntity::GetPose() const
 {
 	if(!m_transformComponent) {
-		static pragma::math::ScaledTransform defaultPose {};
+		static math::ScaledTransform defaultPose {};
 		return defaultPose;
 	}
 	return m_transformComponent->GetPose();
 }
-Vector3 pragma::ecs::BaseEntity::GetPosition(pragma::CoordinateSpace space) const
+Vector3 pragma::ecs::BaseEntity::GetPosition(CoordinateSpace space) const
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
@@ -287,7 +287,7 @@ const Vector3 &pragma::ecs::BaseEntity::GetPosition() const
 		return uvec::ORIGIN;
 	return trComponent->GetPosition();
 }
-void pragma::ecs::BaseEntity::SetPosition(const Vector3 &pos, pragma::CoordinateSpace space)
+void pragma::ecs::BaseEntity::SetPosition(const Vector3 &pos, CoordinateSpace space)
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
@@ -301,7 +301,7 @@ Vector3 pragma::ecs::BaseEntity::GetCenter() const
 		return GetPosition();
 	return physComponent->GetCenter();
 }
-Quat pragma::ecs::BaseEntity::GetRotation(pragma::CoordinateSpace space) const
+Quat pragma::ecs::BaseEntity::GetRotation(CoordinateSpace space) const
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
@@ -315,14 +315,14 @@ const Quat &pragma::ecs::BaseEntity::GetRotation() const
 		return uquat::UNIT;
 	return trComponent->GetRotation();
 }
-void pragma::ecs::BaseEntity::SetRotation(const Quat &rot, pragma::CoordinateSpace space)
+void pragma::ecs::BaseEntity::SetRotation(const Quat &rot, CoordinateSpace space)
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
 		return;
 	trComponent->SetRotation(rot, space);
 }
-Vector3 pragma::ecs::BaseEntity::GetScale(pragma::CoordinateSpace space) const
+Vector3 pragma::ecs::BaseEntity::GetScale(CoordinateSpace space) const
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent) {
@@ -340,7 +340,7 @@ const Vector3 &pragma::ecs::BaseEntity::GetScale() const
 	}
 	return trComponent->GetScale();
 }
-void pragma::ecs::BaseEntity::SetScale(const Vector3 &scale, pragma::CoordinateSpace space)
+void pragma::ecs::BaseEntity::SetScale(const Vector3 &scale, CoordinateSpace space)
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
@@ -360,9 +360,9 @@ void pragma::ecs::BaseEntity::Spawn()
 {
 	if(IsSpawned())
 		return;
-	pragma::math::set_flag(m_stateFlags, StateFlags::IsSpawning);
+	math::set_flag(m_stateFlags, StateFlags::IsSpawning);
 	DoSpawn();
-	pragma::math::set_flag(m_stateFlags, StateFlags::IsSpawning, false);
+	math::set_flag(m_stateFlags, StateFlags::IsSpawning, false);
 	OnPostSpawn();
 }
 
@@ -386,7 +386,7 @@ bool pragma::ecs::BaseEntity::IsInert() const
 unsigned int pragma::ecs::BaseEntity::GetIndex() const { return m_index; }
 uint32_t pragma::ecs::BaseEntity::GetLocalIndex() const { return GetIndex(); }
 
-bool pragma::ecs::BaseEntity::IsWorld() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::HasWorldComponent); }
+bool pragma::ecs::BaseEntity::IsWorld() const { return math::is_flag_set(m_stateFlags, StateFlags::HasWorldComponent); }
 bool pragma::ecs::BaseEntity::IsScripted() const { return false; }
 
 void pragma::ecs::BaseEntity::PrecacheModels() {}
@@ -397,15 +397,15 @@ pragma::BaseModelComponent *pragma::ecs::BaseEntity::GetModelComponent() const {
 pragma::BaseGenericComponent *pragma::ecs::BaseEntity::GetGenericComponent() const { return m_genericComponent; }
 pragma::BaseChildComponent *pragma::ecs::BaseEntity::GetChildComponent() const { return m_childComponent; }
 
-bool pragma::ecs::BaseEntity::IsRemoved() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::Removed); }
+bool pragma::ecs::BaseEntity::IsRemoved() const { return math::is_flag_set(m_stateFlags, StateFlags::Removed); }
 void pragma::ecs::BaseEntity::Remove() {}
 void pragma::ecs::BaseEntity::RemoveSafely() { GetNetworkState()->GetGameState()->ScheduleEntityForRemoval(*this); }
 
 CallbackHandle pragma::ecs::BaseEntity::CallOnRemove(const CallbackHandle &hCallback)
 {
-	auto *pComponent = static_cast<pragma::BaseGenericComponent *>(FindComponent("entity").get());
+	auto *pComponent = static_cast<BaseGenericComponent *>(FindComponent("entity").get());
 	if(pComponent != nullptr)
-		pComponent->BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_REMOVE, hCallback);
+		pComponent->BindEventUnhandled(baseEntity::EVENT_ON_REMOVE, hCallback);
 	return hCallback;
 }
 
@@ -429,4 +429,4 @@ std::ostream &operator<<(std::ostream &os, const EntityHandle ent)
 	return os;
 }
 
-const char *pragma::ents::register_class_name(const std::string &className) { return pragma::register_global_string(className); }
+const char *pragma::ents::register_class_name(const std::string &className) { return register_global_string(className); }

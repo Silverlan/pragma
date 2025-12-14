@@ -11,12 +11,12 @@ import :entities.components.particle_system;
 import :game;
 import pragma.shadergraph;
 
-decltype(pragma::util::ECResourceWatcherCallbackType::Shader) pragma::util::ECResourceWatcherCallbackType::Shader = ECResourceWatcherCallbackType {pragma::math::to_integral(E::Shader)};
-decltype(pragma::util::ECResourceWatcherCallbackType::ParticleSystem) pragma::util::ECResourceWatcherCallbackType::ParticleSystem = ECResourceWatcherCallbackType {pragma::math::to_integral(E::ParticleSystem)};
-decltype(pragma::util::ECResourceWatcherCallbackType::Count) pragma::util::ECResourceWatcherCallbackType::Count = ECResourceWatcherCallbackType {pragma::math::to_integral(E::Count)};
+decltype(pragma::util::ECResourceWatcherCallbackType::Shader) pragma::util::ECResourceWatcherCallbackType::Shader = ECResourceWatcherCallbackType {math::to_integral(E::Shader)};
+decltype(pragma::util::ECResourceWatcherCallbackType::ParticleSystem) pragma::util::ECResourceWatcherCallbackType::ParticleSystem = ECResourceWatcherCallbackType {math::to_integral(E::ParticleSystem)};
+decltype(pragma::util::ECResourceWatcherCallbackType::Count) pragma::util::ECResourceWatcherCallbackType::Count = ECResourceWatcherCallbackType {math::to_integral(E::Count)};
 static auto cvMatStreaming = pragma::console::get_client_con_var("cl_material_streaming_enabled");
 
-pragma::util::CResourceWatcherManager::CResourceWatcherManager(pragma::NetworkState *nw) : ResourceWatcherManager(nw) {}
+pragma::util::CResourceWatcherManager::CResourceWatcherManager(NetworkState *nw) : ResourceWatcherManager(nw) {}
 
 void pragma::util::CResourceWatcherManager::ReloadTexture(const std::string &path)
 {
@@ -28,7 +28,7 @@ void pragma::util::CResourceWatcherManager::ReloadTexture(const std::string &pat
 		return;
 	texManager.RemoveFromCache(path);
 	auto loadInfo = std::make_unique<material::TextureLoadInfo>();
-	loadInfo->onLoaded = [path, nw](pragma::util::Asset &asset) {
+	loadInfo->onLoaded = [path, nw](Asset &asset) {
 		if(nw == nullptr)
 			return;
 		auto &matManager = static_cast<material::CMaterialManager &>(nw->GetMaterialManager());
@@ -41,18 +41,18 @@ void pragma::util::CResourceWatcherManager::ReloadTexture(const std::string &pat
 			ext = '.' + ext;
 		ufile::remove_extension_from_filename(pathNoExt);
 
-		std::function<void(material::CMaterial &, const pragma::util::Path &path)> fLookForTextureAndUpdate = nullptr;
-		fLookForTextureAndUpdate = [&fLookForTextureAndUpdate, &pathNoExt](material::CMaterial &mat, const pragma::util::Path &path) {
+		std::function<void(material::CMaterial &, const Path &path)> fLookForTextureAndUpdate = nullptr;
+		fLookForTextureAndUpdate = [&fLookForTextureAndUpdate, &pathNoExt](material::CMaterial &mat, const Path &path) {
 			for(auto &name : material::MaterialPropertyBlockView {mat, path}) {
 				auto propType = mat.GetPropertyType(name);
 				switch(propType) {
 				case material::PropertyType::Block:
-					fLookForTextureAndUpdate(mat, pragma::util::FilePath(path, name));
+					fLookForTextureAndUpdate(mat, FilePath(path, name));
 					break;
 				case material::PropertyType::Texture:
 					{
 						std::string texName;
-						if(!mat.GetProperty(pragma::util::FilePath(path, name).GetString(), &texName))
+						if(!mat.GetProperty(FilePath(path, name).GetString(), &texName))
 							continue;
 						auto *texInfo = mat.GetTextureInfo(name);
 						if(!texInfo)
@@ -86,13 +86,13 @@ void pragma::util::CResourceWatcherManager::ReloadTexture(const std::string &pat
 	texManager.LoadAsset(path, std::move(loadInfo));
 }
 
-void pragma::util::CResourceWatcherManager::OnMaterialReloaded(const std::string &path, const std::unordered_set<pragma::asset::Model *> &modelMap)
+void pragma::util::CResourceWatcherManager::OnMaterialReloaded(const std::string &path, const std::unordered_set<asset::Model *> &modelMap)
 {
 	ResourceWatcherManager::OnMaterialReloaded(path, modelMap);
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
-	pragma::ecs::EntityIterator entIt {*pragma::get_cgame(), pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CModelComponent>>();
+	ecs::EntityIterator entIt {*get_cgame(), ecs::EntityIterator::FilterFlags::Default | ecs::EntityIterator::FilterFlags::Pending};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<CModelComponent>>();
 	for(auto *ent : entIt) {
 		auto &mdl = ent->GetModel();
 		if(mdl == nullptr)
@@ -100,7 +100,7 @@ void pragma::util::CResourceWatcherManager::OnMaterialReloaded(const std::string
 		auto it = modelMap.find(mdl.get());
 		if(it == modelMap.end())
 			continue;
-		auto mdlC = static_cast<pragma::CModelComponent *>(ent->GetModelComponent());
+		auto mdlC = static_cast<CModelComponent *>(ent->GetModelComponent());
 		mdlC->SetRenderMeshesDirty();
 		mdlC->UpdateRenderMeshes();
 	}
@@ -115,21 +115,21 @@ void pragma::util::CResourceWatcherManager::GetWatchPaths(std::vector<std::strin
 	paths.push_back("scripts/shader_data");
 }
 
-void pragma::util::CResourceWatcherManager::OnResourceChanged(const pragma::util::Path &rootPath, const pragma::util::Path &path, const std::string &ext)
+void pragma::util::CResourceWatcherManager::OnResourceChanged(const Path &rootPath, const Path &path, const std::string &ext)
 {
 	ResourceWatcherManager::OnResourceChanged(rootPath, path, ext);
 	auto &strPath = path.GetString();
-	auto assetType = pragma::asset::determine_type_from_extension(ext);
+	auto assetType = asset::determine_type_from_extension(ext);
 	if(assetType.has_value()) {
-		if(*assetType == pragma::asset::Type::ParticleSystem) {
-			if(pragma::ecs::CParticleSystemComponent::IsParticleFilePrecached(strPath) == false)
+		if(*assetType == asset::Type::ParticleSystem) {
+			if(ecs::CParticleSystemComponent::IsParticleFilePrecached(strPath) == false)
 				return;
 #if RESOURCE_WATCHER_VERBOSE > 0
 			auto ptPath = "particles\\" + strPath;
 			Con::cout << "[ResourceWatcher] Particle has changed: " << ptPath << ". Attempting to reload..." << Con::endl;
 #endif
-			pragma::ecs::CParticleSystemComponent::Precache(strPath, true);
-			CallChangeCallbacks(pragma::util::ECResourceWatcherCallbackType::ParticleSystem, strPath, ext);
+			ecs::CParticleSystemComponent::Precache(strPath, true);
+			CallChangeCallbacks(ECResourceWatcherCallbackType::ParticleSystem, strPath, ext);
 		}
 	}
 	else if(prosper::glsl::is_glsl_file_extension(ext) || ext == "hlsl") {
@@ -139,8 +139,8 @@ void pragma::util::CResourceWatcherManager::OnResourceChanged(const pragma::util
 #endif
 		auto canonShader = fs::get_canonicalized_path(strPath);
 		ufile::remove_extension_from_filename(canonShader);
-		pragma::string::to_lower(canonShader);
-		auto &shaderManager = pragma::get_cengine()->GetShaderManager();
+		string::to_lower(canonShader);
+		auto &shaderManager = get_cengine()->GetShaderManager();
 		std::vector<std::string> reloadShaders;
 		for(auto &pair : shaderManager.GetShaderNameToIndexTable()) {
 			auto *shader = shaderManager.GetShader(pair.second);
@@ -149,7 +149,7 @@ void pragma::util::CResourceWatcherManager::OnResourceChanged(const pragma::util
 			for(auto &src : shader->GetSourceFilePaths()) {
 				auto fname = fs::get_canonicalized_path(src);
 				ufile::remove_extension_from_filename(fname);
-				pragma::string::to_lower(fname);
+				string::to_lower(fname);
 				if(canonShader == fname)
 					reloadShaders.push_back(pair.first);
 			}
@@ -158,14 +158,14 @@ void pragma::util::CResourceWatcherManager::OnResourceChanged(const pragma::util
 #if RESOURCE_WATCHER_VERBOSE > 0
 			Con::cout << "[ResourceWatcher] Reloading shader '" << name << "'..." << Con::endl;
 #endif
-			pragma::get_cengine()->ReloadShader(name);
+			get_cengine()->ReloadShader(name);
 		}
-		CallChangeCallbacks(pragma::util::ECResourceWatcherCallbackType::Shader, strPath, ext);
+		CallChangeCallbacks(ECResourceWatcherCallbackType::Shader, strPath, ext);
 	}
-	else if(ext == pragma::shadergraph::Graph::EXTENSION_ASCII || ext == pragma::shadergraph::Graph::EXTENSION_BINARY) {
-		auto &graphManager = pragma::get_cengine()->GetShaderGraphManager();
+	else if(ext == shadergraph::Graph::EXTENSION_ASCII || ext == shadergraph::Graph::EXTENSION_BINARY) {
+		auto &graphManager = get_cengine()->GetShaderGraphManager();
 		std::string name {path.GetFileName()};
-		ufile::remove_extension_from_filename(name, std::array<std::string, 2> {pragma::shadergraph::Graph::EXTENSION_ASCII, pragma::shadergraph::Graph::EXTENSION_BINARY});
+		ufile::remove_extension_from_filename(name, std::array<std::string, 2> {shadergraph::Graph::EXTENSION_ASCII, shadergraph::Graph::EXTENSION_BINARY});
 		std::string err;
 		auto graph = graphManager.LoadShader(name, err, false /* reload */);
 		if(graph == nullptr) {

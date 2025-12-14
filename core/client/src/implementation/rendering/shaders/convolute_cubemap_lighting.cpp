@@ -39,7 +39,7 @@ std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubem
 	auto rt = CreateCubeMapRenderTarget(w, h);
 
 	// Shader input
-	auto dsg = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_CUBEMAP_TEXTURE);
+	auto dsg = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_CUBEMAP_TEXTURE);
 	dsg->GetDescriptorSet()->SetBindingTexture(cubemap, 0u);
 
 	PushConstants pushConstants {};
@@ -55,8 +55,8 @@ std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubem
 	// So, instead, we render each triangle of the cube separately for each individual layer.
 	for(uint8_t layerId = 0u; layerId < 6u; ++layerId) {
 		for(uint32_t i = 0u; i < numVerts; i += 3) {
-			auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
-			pragma::util::ScopeGuard sgCmd {[this]() { GetContext().FlushSetupCommandBuffer(); }};
+			auto &setupCmd = get_cengine()->GetSetupCommandBuffer();
+			util::ScopeGuard sgCmd {[this]() { GetContext().FlushSetupCommandBuffer(); }};
 			prosper::util::ImageSubresourceRange range {};
 			range.baseArrayLayer = layerId;
 			range.layerCount = 1u;

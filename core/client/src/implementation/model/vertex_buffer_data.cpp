@@ -12,4 +12,4 @@ pragma::rendering::VertexBufferData::VertexBufferData(const Vector3 &position, c
 pragma::rendering::VertexBufferData::VertexBufferData(const Vector3 &position, const Vector3 &normal) : VertexBufferData {position, Vector2 {}, normal} {}
 pragma::rendering::VertexBufferData::VertexBufferData() : VertexBufferData {Vector3 {}, Vector3 {}} {}
 pragma::rendering::VertexBufferData::VertexBufferData(const VertexBufferData &other) : VertexBufferData {other.position, other.uv, other.normal, other.tangent, other.biTangent} {}
-pragma::rendering::VertexBufferData::VertexBufferData(const pragma::math::Vertex &vertex) : VertexBufferData {vertex.position, vertex.uv, vertex.normal, Vector3 {vertex.tangent}, vertex.GetBiTangent()} {}
+pragma::rendering::VertexBufferData::VertexBufferData(const math::Vertex &vertex) : VertexBufferData {vertex.position, vertex.uv, vertex.normal, Vector3 {vertex.tangent}, vertex.GetBiTangent()} {}

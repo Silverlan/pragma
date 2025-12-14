@@ -282,7 +282,7 @@ bool CFlexComponent::UpdateFlexWeight(uint32_t flexId, float &val, bool storeInC
 }
 void CFlexComponent::UpdateSoundPhonemes(audio::CALSound &snd)
 {
-	pragma::audio::impl::BufferBase *buf = snd->GetBuffer();
+	audio::impl::BufferBase *buf = snd->GetBuffer();
 	if(buf == nullptr)
 		buf = snd->GetDecoder();
 	auto userData = (buf != nullptr) ? buf->GetUserData() : nullptr;

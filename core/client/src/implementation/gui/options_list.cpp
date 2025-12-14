@@ -54,7 +54,7 @@ void pragma::gui::types::WIOptionsList::SetSize(int x, int y)
 	WIBase::SetSize(x, y);
 	if(m_hTable.IsValid())
 		m_hTable->SetWidth(x);
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::IsBeingUpdated) == false)
+	if(math::is_flag_set(m_stateFlags, StateFlags::IsBeingUpdated) == false)
 		ScheduleUpdate();
 }
 
@@ -110,7 +110,7 @@ pragma::gui::types::WICheckbox *pragma::gui::types::WIOptionsList::AddToggleChoi
 	row->SetValue(0, name);
 	auto hCheckbox = CreateChild<WICheckbox>();
 	auto *pCheckbox = hCheckbox.get<WICheckbox>();
-	if((translator2 == nullptr) ? pragma::get_cengine()->GetConVarBool(cvarName) : translator2(pragma::get_cengine()->GetConVarString(cvarName)))
+	if((translator2 == nullptr) ? get_cengine()->GetConVarBool(cvarName) : translator2(get_cengine()->GetConVarString(cvarName)))
 		pCheckbox->SetChecked(true);
 	auto hOptions = GetHandle();
 	pCheckbox->AddCallback("OnChange", FunctionCallback<void, bool>::Create([hOptions, cvarName, translator](bool bChecked) mutable {
@@ -142,7 +142,7 @@ pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceLi
 		initializer(pChoiceList);
 	auto hOptions = GetHandle();
 	if(cvarName.empty() == false) {
-		pChoiceList->SelectChoice(pragma::get_client_state()->GetConVarString(cvarName));
+		pChoiceList->SelectChoice(get_client_state()->GetConVarString(cvarName));
 		pChoiceList->AddCallback("OnSelect", FunctionCallback<void, uint32_t, std::reference_wrapper<std::string>>::Create([hOptions, cvarName](uint32_t, std::reference_wrapper<std::string> value) mutable {
 			if(!hOptions.IsValid())
 				return;
@@ -177,7 +177,7 @@ pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDo
 		initializer(pDropDownMenu);
 	if(!cvarName.empty()) {
 		auto hOptions = GetHandle();
-		pDropDownMenu->SelectOption(pragma::get_client_state()->GetConVarString(cvarName));
+		pDropDownMenu->SelectOption(get_client_state()->GetConVarString(cvarName));
 		pDropDownMenu->AddCallback("OnOptionSelected", FunctionCallback<void, uint32_t>::Create([hOptions, pDropDownMenu, cvarName](uint32_t optionIdx) mutable {
 			if(!hOptions.IsValid())
 				return;
@@ -195,14 +195,14 @@ pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDo
 std::unordered_map<std::string, std::string> &pragma::gui::types::WIOptionsList::GetUpdateConVars() { return m_updateCvars; }
 void pragma::gui::types::WIOptionsList::RunUpdateConVars(bool bClear)
 {
-	auto *client = pragma::get_client_state();
+	auto *client = get_client_state();
 	for(auto it = m_updateCvars.begin(); it != m_updateCvars.end(); ++it) {
 		std::vector<std::string> argv = {it->second};
 		client->RunConsoleCommand(it->first, argv);
 	}
 	if(bClear == true)
 		m_updateCvars.clear();
-	auto coreLayer = pragma::get_cengine()->GetCoreInputBindingLayer();
+	auto coreLayer = get_cengine()->GetCoreInputBindingLayer();
 	for(char i = 0; i < 2; i++) {
 		for(auto it = m_keyBindingsErase[i].begin(); it != m_keyBindingsErase[i].end(); ++it) {
 			auto &cmd = it->first;
@@ -214,7 +214,7 @@ void pragma::gui::types::WIOptionsList::RunUpdateConVars(bool bClear)
 		for(auto it = m_keyBindingsAdd[i].begin(); it != m_keyBindingsAdd[i].end(); ++it) {
 			auto &cmd = it->first;
 			if(coreLayer)
-				coreLayer->AddKeyMapping(pragma::math::to_integral(it->second), cmd);
+				coreLayer->AddKeyMapping(math::to_integral(it->second), cmd);
 		}
 		m_keyBindingsAdd[i].clear();
 	}
@@ -232,8 +232,8 @@ pragma::gui::types::WITextEntry *pragma::gui::types::WIOptionsList::AddTextEntry
 	row->SetValue(0, name);
 	if(!cvarName.empty()) {
 		auto hOptions = GetHandle();
-		pTextEntry->SetText(pragma::get_client_state()->GetConVarString(cvarName));
-		pTextEntry->AddCallback("OnTextChanged", FunctionCallback<void, std::reference_wrapper<const pragma::string::Utf8String>, bool>::Create([hOptions, cvarName](std::reference_wrapper<const pragma::string::Utf8String> text, bool) mutable {
+		pTextEntry->SetText(get_client_state()->GetConVarString(cvarName));
+		pTextEntry->AddCallback("OnTextChanged", FunctionCallback<void, std::reference_wrapper<const string::Utf8String>, bool>::Create([hOptions, cvarName](std::reference_wrapper<const string::Utf8String> text, bool) mutable {
 			if(!hOptions.IsValid())
 				return;
 			hOptions.get<WIOptionsList>()->m_updateCvars[cvarName] = text.get().cpp_str();
@@ -257,7 +257,7 @@ pragma::gui::types::WISlider *pragma::gui::types::WIOptionsList::AddSlider(const
 		initializer(pSlider);
 	if(!cvarName.empty()) {
 		auto hOptions = GetHandle();
-		pSlider->SetValue(pragma::get_client_state()->GetConVarFloat(cvarName));
+		pSlider->SetValue(get_client_state()->GetConVarFloat(cvarName));
 		pSlider->AddCallback("OnChange", FunctionCallback<void, float, float>::Create([hOptions, cvarName](float, float value) mutable {
 			if(!hOptions.IsValid())
 				return;
@@ -272,31 +272,31 @@ void pragma::gui::types::WIOptionsList::AddKeyBinding(const std::string &keyName
 	auto *row = AddRow(cvarName);
 	if(row == nullptr)
 		return;
-	std::vector<pragma::platform::Key> mappedKeys {};
-	pragma::get_cengine()->GetMappedKeys(cvarName, mappedKeys, 2u);
-	auto key1 = (mappedKeys.size() > 0) ? mappedKeys.at(0) : static_cast<pragma::platform::Key>(-1);
-	auto key2 = (mappedKeys.size() > 1) ? mappedKeys.at(1) : static_cast<pragma::platform::Key>(-1);
+	std::vector<platform::Key> mappedKeys {};
+	get_cengine()->GetMappedKeys(cvarName, mappedKeys, 2u);
+	auto key1 = (mappedKeys.size() > 0) ? mappedKeys.at(0) : static_cast<platform::Key>(-1);
+	auto key2 = (mappedKeys.size() > 1) ? mappedKeys.at(1) : static_cast<platform::Key>(-1);
 	row->SetValue(0, keyName);
-	pragma::gui::WIHandle hOptionsList = GetHandle();
-	auto callback = [hOptionsList, cvarName](int entryId, pragma::gui::WIHandle hKeyOther, pragma::platform::Key oldKey, pragma::platform::Key newKey) mutable {
+	WIHandle hOptionsList = GetHandle();
+	auto callback = [hOptionsList, cvarName](int entryId, WIHandle hKeyOther, platform::Key oldKey, platform::Key newKey) mutable {
 		if(!hOptionsList.IsValid())
 			return;
 		auto *pOptionsList = hOptionsList.get<WIOptionsList>();
-		if(oldKey != static_cast<pragma::platform::Key>(-1) && (!hKeyOther.IsValid() || (hKeyOther.get<WIKeyEntry>()->GetKey() != oldKey)))
+		if(oldKey != static_cast<platform::Key>(-1) && (!hKeyOther.IsValid() || (hKeyOther.get<WIKeyEntry>()->GetKey() != oldKey)))
 			pOptionsList->m_keyBindingsErase[entryId][cvarName] = oldKey;
 		pOptionsList->m_keyBindingsAdd[entryId][cvarName] = newKey;
 	};
 
-	auto &gui = pragma::gui::WGUI::GetInstance();
+	auto &gui = WGUI::GetInstance();
 	auto *pKey1 = gui.Create<WIKeyEntry>();
 	auto *pKey2 = gui.Create<WIKeyEntry>();
 	pKey1->SetKey(key1);
 	pKey2->SetKey(key2);
 	row->InsertElement(1, pKey1);
 	pKey1->SetAutoAlignToParent(true);
-	pKey1->AddCallback("OnKeyChanged", FunctionCallback<void, pragma::platform::Key, pragma::platform::Key>::Create(std::bind(callback, 0, pKey2->GetHandle(), std::placeholders::_1, std::placeholders::_2)));
+	pKey1->AddCallback("OnKeyChanged", FunctionCallback<void, platform::Key, platform::Key>::Create(std::bind(callback, 0, pKey2->GetHandle(), std::placeholders::_1, std::placeholders::_2)));
 
 	row->InsertElement(2, pKey2);
 	pKey2->SetAutoAlignToParent(true);
-	pKey2->AddCallback("OnKeyChanged", FunctionCallback<void, pragma::platform::Key, pragma::platform::Key>::Create(std::bind(callback, 1, pKey1->GetHandle(), std::placeholders::_1, std::placeholders::_2)));
+	pKey2->AddCallback("OnKeyChanged", FunctionCallback<void, platform::Key, platform::Key>::Create(std::bind(callback, 1, pKey1->GetHandle(), std::placeholders::_1, std::placeholders::_2)));
 }

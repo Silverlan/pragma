@@ -16,12 +16,12 @@ DLLNETWORK std::ostream &operator<<(std::ostream &out, const std::match_results<
 
 int Lua::regex::match(lua::State *l)
 {
-	auto *s = Lua::CheckString(l, 1);
-	auto e = Lua::CheckString(l, 2);
+	auto *s = CheckString(l, 1);
+	auto e = CheckString(l, 2);
 	std::match_results<const char *> result;
 	std::regex_constants::match_flag_type regexFlags {};
-	if(Lua::IsSet(l, 3))
-		regexFlags = static_cast<std::regex_constants::match_flag_type>(Lua::CheckInt(l, 3));
+	if(IsSet(l, 3))
+		regexFlags = static_cast<std::regex_constants::match_flag_type>(CheckInt(l, 3));
 	auto r = std::regex_match(s, result, std::regex {e}, regexFlags);
 	Lua::PushBool(l, r);
 	if(r == true) {
@@ -33,15 +33,15 @@ int Lua::regex::match(lua::State *l)
 
 int Lua::regex::search(lua::State *l)
 {
-	auto *s = Lua::CheckString(l, 1);
-	auto e = Lua::CheckString(l, 2);
+	auto *s = CheckString(l, 1);
+	auto e = CheckString(l, 2);
 	std::match_results<const char *> result;
 	int32_t offset = 0;
-	if(Lua::IsSet(l, 3))
-		offset = static_cast<int32_t>(Lua::CheckInt(l, 3));
+	if(IsSet(l, 3))
+		offset = static_cast<int32_t>(CheckInt(l, 3));
 	std::regex_constants::match_flag_type regexFlags {};
-	if(Lua::IsSet(l, 4))
-		regexFlags = static_cast<std::regex_constants::match_flag_type>(Lua::CheckInt(l, 4));
+	if(IsSet(l, 4))
+		regexFlags = static_cast<std::regex_constants::match_flag_type>(CheckInt(l, 4));
 	auto r = std::regex_search(s + offset, s + strlen(s), result, std::regex {e}, regexFlags);
 	Lua::PushBool(l, r);
 	if(r == true) {

@@ -19,9 +19,9 @@ void pragma::gui::types::WICommandLineEntry::Initialize()
 	if(m_hBase.IsValid()) {
 		auto hThis = GetHandle();
 		m_hBase->AddCallback("OnKeyEvent",
-		  FunctionCallback<pragma::util::EventReply, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
-		    [hThis, this](pragma::util::EventReply *reply, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
-			    if((state != pragma::platform::KeyState::Press && state != pragma::platform::KeyState::Repeat) || hThis.IsValid() == false)
+		  FunctionCallback<util::EventReply, platform::Key, int, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
+		    [hThis, this](util::EventReply *reply, platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
+			    if((state != platform::KeyState::Press && state != platform::KeyState::Repeat) || hThis.IsValid() == false)
 				    return CallbackReturnType::NoReturnValue;
 			    const auto fApplyText = [this](WIMenuItem *pItem) {
 				    if(pItem == nullptr)
@@ -38,7 +38,7 @@ void pragma::gui::types::WICommandLineEntry::Initialize()
 				    m_bSkipAutoComplete = false;
 			    };
 			    switch(key) {
-			    case pragma::platform::Key::Up:
+			    case platform::Key::Up:
 				    {
 					    auto *pContextMenu = static_cast<WIContextMenu *>(m_hAutoCompleteList.get());
 					    if(pContextMenu != nullptr) {
@@ -51,7 +51,7 @@ void pragma::gui::types::WICommandLineEntry::Initialize()
 					    }
 					    break;
 				    }
-			    case pragma::platform::Key::Down:
+			    case platform::Key::Down:
 				    {
 					    auto *pContextMenu = static_cast<WIContextMenu *>(m_hAutoCompleteList.get());
 					    if(pContextMenu != nullptr) {
@@ -67,7 +67,7 @@ void pragma::gui::types::WICommandLineEntry::Initialize()
 			    default:
 				    return CallbackReturnType::NoReturnValue;
 			    }
-			    *reply = pragma::util::EventReply::Handled;
+			    *reply = util::EventReply::Handled;
 			    return CallbackReturnType::HasReturnValue;
 		    }));
 	}
@@ -106,7 +106,7 @@ void pragma::gui::types::WICommandLineEntry::InitializeAutoCompleteList()
 	std::vector<std::string> options {};
 	auto &text = pText->GetText();
 	if(text.empty()) {
-		auto numCmds = pragma::math::min(static_cast<int32_t>(m_commandHistoryCount), static_cast<int32_t>(GetAutoCompleteEntryLimit()));
+		auto numCmds = math::min(static_cast<int32_t>(m_commandHistoryCount), static_cast<int32_t>(GetAutoCompleteEntryLimit()));
 		options.resize(numCmds);
 		for(auto i = 0; i < numCmds; ++i) {
 			auto idx = static_cast<int32_t>(m_nextCommandHistoryInsertPos) - 1 - i;
@@ -122,7 +122,7 @@ void pragma::gui::types::WICommandLineEntry::InitializeAutoCompleteList()
 	auto pos = GetAbsolutePos();
 	auto size = GetSize();
 	if(m_hAutoCompleteList.IsValid() == false) {
-		auto *pContextMenu = pragma::gui::WGUI::GetInstance().Create<WIContextMenu>();
+		auto *pContextMenu = WGUI::GetInstance().Create<WIContextMenu>();
 		pContextMenu->SetParentAndUpdateWindow(GetRootElement());
 		pContextMenu->SetZPos(100'000);
 		m_hAutoCompleteList = pContextMenu->GetHandle();
@@ -151,7 +151,7 @@ void pragma::gui::types::WICommandLineEntry::InitializeAutoCompleteList()
 	}
 	pContextMenu->Update();
 	auto *p = pContextMenu->GetParent();
-	if(p && p->IsInBounds(pContextMenu->GetX(), pContextMenu->GetY(), pContextMenu->GetWidth(), pContextMenu->GetHeight()) != pragma::math::intersection::Intersect::Inside)
+	if(p && p->IsInBounds(pContextMenu->GetX(), pContextMenu->GetY(), pContextMenu->GetWidth(), pContextMenu->GetHeight()) != math::intersection::Intersect::Inside)
 		pContextMenu->SetY(pos.y - pContextMenu->GetHeight());
 	// pContextMenu->SetWidth(size.x);
 }
@@ -166,7 +166,7 @@ void pragma::gui::types::WICommandLineEntry::SetAutocompleteEnabled(bool enabled
 		m_hAutoCompleteList->Remove();
 }
 bool pragma::gui::types::WICommandLineEntry::IsAutocompleteEnabled() const { return m_bAutocompleteEnabled; }
-void pragma::gui::types::WICommandLineEntry::OnTextChanged(const pragma::string::Utf8String &text, bool changedByUser)
+void pragma::gui::types::WICommandLineEntry::OnTextChanged(const string::Utf8String &text, bool changedByUser)
 {
 	WITextEntry::OnTextChanged(text, changedByUser);
 	if(m_bSkipAutoComplete)
@@ -188,5 +188,5 @@ void pragma::gui::types::WICommandLineEntry::AddCommandHistoryEntry(const std::s
 {
 	m_commandHistory.at(m_nextCommandHistoryInsertPos) = std::string {entry};
 	m_nextCommandHistoryInsertPos = (m_nextCommandHistoryInsertPos + 1u) % m_commandHistory.size();
-	m_commandHistoryCount = pragma::math::min(m_commandHistoryCount + 1u, static_cast<uint32_t>(m_commandHistory.size()));
+	m_commandHistoryCount = math::min(m_commandHistoryCount + 1u, static_cast<uint32_t>(m_commandHistory.size()));
 }

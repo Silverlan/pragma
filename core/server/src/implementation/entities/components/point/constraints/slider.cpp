@@ -12,7 +12,7 @@ void SPointConstraintSliderComponent::SendData(NetPacket &packet, networking::Cl
 {
 	packet->WriteString(m_kvSource);
 	packet->WriteString(m_kvTarget);
-	pragma::networking::write_vector(packet, m_posTarget);
+	networking::write_vector(packet, m_posTarget);
 
 	packet->Write<float>(m_kvLimitLinLow);
 	packet->Write<float>(m_kvLimitLinHigh);

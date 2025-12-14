@@ -14,7 +14,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SLiquidComponent final : public BaseFuncLiquidComponent, public SBaseNetComponent {
 		  public:
-			SLiquidComponent(pragma::ecs::BaseEntity &ent);
+			SLiquidComponent(ecs::BaseEntity &ent);
 			virtual ~SLiquidComponent() override;
 			virtual void Initialize() override;
 			virtual void OnEntitySpawn() override;

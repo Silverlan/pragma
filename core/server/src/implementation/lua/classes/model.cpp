@@ -11,11 +11,11 @@ void Lua::Model::Server::AddMaterial(lua::State *l, pragma::asset::Model &mdl, u
 {
 	//Lua::CheckModel(l,1);
 	auto *mat = pragma::ServerState::Get()->LoadMaterial(name);
-	Lua::Model::AddMaterial(l, mdl, textureGroup, mat);
+	Model::AddMaterial(l, mdl, textureGroup, mat);
 }
 void Lua::Model::Server::SetMaterial(lua::State *l, pragma::asset::Model &mdl, uint32_t texIdx, const std::string &name)
 {
 	//Lua::CheckModel(l,1);
 	auto *mat = pragma::ServerState::Get()->LoadMaterial(name);
-	Lua::Model::SetMaterial(l, mdl, texIdx, mat);
+	Model::SetMaterial(l, mdl, texIdx, mat);
 }

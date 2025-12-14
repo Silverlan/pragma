@@ -418,7 +418,7 @@ void NET_sv_NOCLIP(pragma::networking::IServerClient &session, NetPacket packet)
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_TOGGLE_NOCLIP, p, pragma::networking::Protocol::SlowReliable);
 }
 
-void NET_sv_LUANET(pragma::networking::IServerClient &session, ::NetPacket packet) {pragma::ServerState::Get()->HandleLuaNetPacket(session, packet); }
+void NET_sv_LUANET(pragma::networking::IServerClient &session, NetPacket packet) {pragma::ServerState::Get()->HandleLuaNetPacket(session, packet); }
 
 void NET_sv_NOTARGET(pragma::networking::IServerClient &session, NetPacket packet)
 {
@@ -477,7 +477,7 @@ void NET_sv_HURTME(pragma::networking::IServerClient &session, NetPacket packet)
 	dmgInfo.SetDamage(dmg);
 	dmgInfo.SetAttacker(&ent);
 	dmgInfo.SetInflictor(&ent);
-	dmgInfo.SetDamageType(DamageType::Crush);
+	dmgInfo.SetDamageType(Crush);
 	pDamageableComponent->TakeDamage(dmgInfo);
 }
 

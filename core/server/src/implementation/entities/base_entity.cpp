@@ -16,18 +16,18 @@ import :server_state;
 
 #undef GetClassName
 
-SBaseEntity::SBaseEntity() : pragma::ecs::BaseEntity(), m_bShared(false), m_bSynchronized(true) {}
+SBaseEntity::SBaseEntity() : BaseEntity(), m_bShared(false), m_bSynchronized(true) {}
 
 void SBaseEntity::DoSpawn()
 {
-	pragma::ecs::BaseEntity::DoSpawn();
+	BaseEntity::DoSpawn();
 	pragma::Game *game = pragma::ServerState::Get()->GetGameState();
 	game->SpawnEntity(this);
 }
 
 void SBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {
-	pragma::ecs::BaseEntity::OnComponentAdded(component);
+	BaseEntity::OnComponentAdded(component);
 	if(typeid(component) == typeid(pragma::STransformComponent))
 		m_transformComponent = &static_cast<pragma::STransformComponent &>(component);
 	else if(typeid(component) == typeid(pragma::SPhysicsComponent))
@@ -43,7 +43,7 @@ void SBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 }
 void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 {
-	pragma::ecs::BaseEntity::OnComponentRemoved(component);
+	BaseEntity::OnComponentRemoved(component);
 	if(typeid(component) == typeid(pragma::SWorldComponent))
 		pragma::math::set_flag(m_stateFlags, StateFlags::HasWorldComponent, false);
 	else if(typeid(component) == typeid(pragma::STransformComponent))
@@ -76,7 +76,7 @@ void SBaseEntity::SetSynchronized(Bool b) { m_bSynchronized = b; }
 
 void SBaseEntity::Initialize()
 {
-	pragma::ecs::BaseEntity::Initialize();
+	BaseEntity::Initialize();
 
 	auto className = server_entities::ServerEntityRegistry::Instance().GetClassName(typeid(*this));
 	std::string strClassName = className ? std::string {*className} : std::string {};
@@ -88,7 +88,7 @@ void SBaseEntity::Initialize()
 	m_bShared = true;
 }
 
-void SBaseEntity::InitializeLuaObject(lua::State *lua) { pragma::BaseLuaHandle::InitializeLuaObject<SBaseEntity>(lua); }
+void SBaseEntity::InitializeLuaObject(lua::State *lua) { BaseEntity::InitializeLuaObject<SBaseEntity>(lua); }
 bool SBaseEntity::IsShared() const { return m_bShared; }
 void SBaseEntity::SetShared(bool b) { m_bShared = b; }
 Bool SBaseEntity::IsNetworked() { return (IsShared() && IsSpawned()) ? true : false; }
@@ -136,9 +136,9 @@ pragma::NetEventId SBaseEntity::RegisterNetEvent(const std::string &name) const 
 
 void SBaseEntity::Remove()
 {
-	if(pragma::math::is_flag_set(GetStateFlags(), pragma::ecs::BaseEntity::StateFlags::Removed))
+	if(pragma::math::is_flag_set(GetStateFlags(), StateFlags::Removed))
 		return;
-	pragma::ecs::BaseEntity::Remove();
+	BaseEntity::Remove();
 	pragma::Game *game = pragma::ServerState::Get()->GetGameState();
 	game->RemoveEntity(this);
 }

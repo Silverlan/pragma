@@ -7,7 +7,7 @@ module;
 module pragma.shared;
 
 import :model.model_manager;
-pragma::asset::IModelFormatHandler::IModelFormatHandler(pragma::util::IAssetManager &assetManager) : pragma::util::IAssetFormatHandler {assetManager} {}
+pragma::asset::IModelFormatHandler::IModelFormatHandler(util::IAssetManager &assetManager) : IAssetFormatHandler {assetManager} {}
 bool pragma::asset::IModelFormatHandler::LoadData(ModelProcessor &processor, ModelLoadInfo &info)
 {
 	if(model) {
@@ -20,13 +20,13 @@ bool pragma::asset::IModelFormatHandler::LoadData(ModelProcessor &processor, Mod
 	return model != nullptr;
 }
 ///////////
-pragma::asset::PmdlFormatHandler::PmdlFormatHandler(pragma::util::IAssetManager &assetManager) : IModelFormatHandler {assetManager} {}
+pragma::asset::PmdlFormatHandler::PmdlFormatHandler(util::IAssetManager &assetManager) : IModelFormatHandler {assetManager} {}
 bool pragma::asset::PmdlFormatHandler::LoadData(ModelProcessor &processor, ModelLoadInfo &info)
 {
 	auto &mdlManager = static_cast<ModelManager &>(GetAssetManager());
 	auto &nw = mdlManager.GetNetworkState();
 	auto &game = *nw.GetGameState();
-	auto udm = pragma::util::load_udm_asset(std::move(m_file));
+	auto udm = util::load_udm_asset(std::move(m_file));
 	if(udm == nullptr)
 		return false;
 	std::string err;
@@ -35,7 +35,7 @@ bool pragma::asset::PmdlFormatHandler::LoadData(ModelProcessor &processor, Model
 		m_error = err;
 		return false;
 	}
-	if(!pragma::asset::Model::Load(*mdl, nw, udm->GetAssetData(), err)) {
+	if(!Model::Load(*mdl, nw, udm->GetAssetData(), err)) {
 		m_error = err;
 		return false;
 	}
@@ -43,17 +43,17 @@ bool pragma::asset::PmdlFormatHandler::LoadData(ModelProcessor &processor, Model
 	return IModelFormatHandler::LoadData(processor, info);
 }
 ///////////
-std::unique_ptr<pragma::util::IAssetProcessor> pragma::asset::ModelLoader::CreateAssetProcessor(const std::string &identifier, const std::string &ext, std::unique_ptr<pragma::util::IAssetFormatHandler> &&formatHandler)
+std::unique_ptr<pragma::util::IAssetProcessor> pragma::asset::ModelLoader::CreateAssetProcessor(const std::string &identifier, const std::string &ext, std::unique_ptr<util::IAssetFormatHandler> &&formatHandler)
 {
-	auto processor = pragma::util::TAssetFormatLoader<ModelProcessor>::CreateAssetProcessor(identifier, ext, std::move(formatHandler));
+	auto processor = TAssetFormatLoader<ModelProcessor>::CreateAssetProcessor(identifier, ext, std::move(formatHandler));
 	auto &mdlProcessor = static_cast<ModelProcessor &>(*processor);
 	mdlProcessor.identifier = identifier;
 	mdlProcessor.formatExtension = ext;
 	return processor;
 }
 ///////////
-pragma::asset::ModelLoadInfo::ModelLoadInfo(pragma::util::AssetLoadFlags flags) : pragma::util::AssetLoadInfo {flags} {}
-pragma::asset::ModelProcessor::ModelProcessor(pragma::util::AssetFormatLoader &loader, std::unique_ptr<pragma::util::IAssetFormatHandler> &&handler) : pragma::util::FileAssetProcessor {loader, std::move(handler)} {}
+pragma::asset::ModelLoadInfo::ModelLoadInfo(util::AssetLoadFlags flags) : AssetLoadInfo {flags} {}
+pragma::asset::ModelProcessor::ModelProcessor(util::AssetFormatLoader &loader, std::unique_ptr<util::IAssetFormatHandler> &&handler) : FileAssetProcessor {loader, std::move(handler)} {}
 bool pragma::asset::ModelProcessor::Load()
 {
 	auto &mdlHandler = static_cast<IModelFormatHandler &>(*handler);
@@ -61,7 +61,7 @@ bool pragma::asset::ModelProcessor::Load()
 	if(!r)
 		return false;
 	model = mdlHandler.model;
-	model->Update(pragma::asset::ModelUpdateFlags::Initialize | pragma::asset::ModelUpdateFlags::UpdateChildren);
+	model->Update(ModelUpdateFlags::Initialize | ModelUpdateFlags::UpdateChildren);
 	return true;
 }
 bool pragma::asset::ModelProcessor::Finalize()
@@ -85,7 +85,7 @@ bool pragma::asset::ModelProcessor::Finalize()
 		}
 		model->Update(); // Need to update again
 	}
-	model->Update(pragma::asset::ModelUpdateFlags::UpdateBuffers | pragma::asset::ModelUpdateFlags::UpdateChildren);
+	model->Update(ModelUpdateFlags::UpdateBuffers | ModelUpdateFlags::UpdateChildren);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().EndTask();
 #endif
@@ -117,12 +117,12 @@ static const std::vector<std::string> &get_model_extensions()
 	auto processor = std::make_unique<ModelProcessor>(nw,*this,std::move(file));
 	return IAssetLoader::AddJob(identifier,std::move(processor),priority);
 }*/
-pragma::asset::ModelManager::ModelManager(pragma::NetworkState &nw) : m_nw {nw}
+pragma::asset::ModelManager::ModelManager(NetworkState &nw) : m_nw {nw}
 {
-	auto fileHandler = std::make_unique<pragma::util::AssetFileHandler>();
-	fileHandler->open = [](const std::string &path, pragma::util::AssetFormatType formatType) -> std::unique_ptr<ufile::IFile> {
+	auto fileHandler = std::make_unique<util::AssetFileHandler>();
+	fileHandler->open = [](const std::string &path, util::AssetFormatType formatType) -> std::unique_ptr<ufile::IFile> {
 		auto openMode = fs::FileMode::Read;
-		if(formatType == pragma::util::AssetFormatType::Binary)
+		if(formatType == util::AssetFormatType::Binary)
 			openMode |= fs::FileMode::Binary;
 		auto f = fs::open_file(path, openMode);
 		if(!f)
@@ -141,7 +141,7 @@ pragma::asset::ModelManager::ModelManager(pragma::NetworkState &nw) : m_nw {nw}
 	RegisterImportHandler<Source2VmdlFormatHandler>("vmdl_c");
 	RegisterImportHandler<NifFormatHandler>("nif");
 	RegisterImportHandler<PmxFormatHandler>("pmx");
-	auto addBlenderFormatHandler = [this](std::string ext) { return RegisterImportHandler(ext, [ext](pragma::util::IAssetManager &assetManager) -> std::unique_ptr<pragma::util::IImportAssetFormatHandler> { return std::make_unique<BlenderFormatHandler>(assetManager, ext); }); };
+	auto addBlenderFormatHandler = [this](std::string ext) { return RegisterImportHandler(ext, [ext](IAssetManager &assetManager) -> std::unique_ptr<util::IImportAssetFormatHandler> { return std::make_unique<BlenderFormatHandler>(assetManager, ext); }); };
 	addBlenderFormatHandler("blend");
 	addBlenderFormatHandler("fbx");
 	addBlenderFormatHandler("dae");
@@ -149,20 +149,20 @@ pragma::asset::ModelManager::ModelManager(pragma::NetworkState &nw) : m_nw {nw}
 	addBlenderFormatHandler("obj");
 	addBlenderFormatHandler("abc");
 	addBlenderFormatHandler("usd");
-	auto &assetManager = pragma::get_engine()->GetAssetManager();
-	auto numImporters = assetManager.GetImporterCount(pragma::asset::Type::Model);
+	auto &assetManager = get_engine()->GetAssetManager();
+	auto numImporters = assetManager.GetImporterCount(Type::Model);
 	for(auto i = decltype(numImporters) {0u}; i < numImporters; ++i) {
-		auto *importerInfo = assetManager.GetImporterInfo(pragma::asset::Type::Model, i);
+		auto *importerInfo = assetManager.GetImporterInfo(Type::Model, i);
 		if(!importerInfo)
 			continue;
 		for(auto &extInfo : importerInfo->fileExtensions) {
 			if(extInfo.first == "pmx")
 				continue;
-			RegisterImportHandler<AssetManagerFormatHandler>(extInfo.first, extInfo.second ? pragma::util::AssetFormatType::Binary : pragma::util::AssetFormatType::Text);
+			RegisterImportHandler<AssetManagerFormatHandler>(extInfo.first, extInfo.second ? util::AssetFormatType::Binary : util::AssetFormatType::Text);
 		}
 	}
 }
-std::shared_ptr<pragma::asset::Model> pragma::asset::ModelManager::CreateModel(uint32_t numBones, const std::string &mdlName) { return pragma::asset::Model::Create<pragma::asset::Model>(&m_nw, numBones, mdlName); }
+std::shared_ptr<pragma::asset::Model> pragma::asset::ModelManager::CreateModel(uint32_t numBones, const std::string &mdlName) { return Model::Create<Model>(&m_nw, numBones, mdlName); }
 std::shared_ptr<pragma::geometry::ModelMesh> pragma::asset::ModelManager::CreateMesh() { return m_nw.GetGameState()->CreateModelMesh(); }
 std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::asset::ModelManager::CreateSubMesh() { return m_nw.GetGameState()->CreateModelSubMesh(); }
 std::shared_ptr<pragma::asset::Model> pragma::asset::ModelManager::CreateModel(const std::string &name, bool bAddReference, bool addToCache)
@@ -170,10 +170,10 @@ std::shared_ptr<pragma::asset::Model> pragma::asset::ModelManager::CreateModel(c
 	uint32_t boneCount = (bAddReference == true) ? 1 : 0;
 	auto mdl = CreateModel(boneCount, name);
 	auto &skeleton = mdl->GetSkeleton();
-	auto reference = pragma::animation::Animation::Create();
+	auto reference = animation::Animation::Create();
 	if(bAddReference == true) {
 		auto frame = Frame::Create(1);
-		auto *root = new pragma::animation::Bone;
+		auto *root = new animation::Bone;
 		root->name = "root";
 		auto rootID = skeleton.AddBone(root);
 		mdl->SetBindPoseBoneMatrix(0, glm::inverse(umat::identity()));
@@ -193,14 +193,14 @@ std::shared_ptr<pragma::asset::Model> pragma::asset::ModelManager::CreateModel(c
 		mdl->CreateTextureGroup();
 	}
 	if(addToCache) {
-		auto asset = pragma::util::make_shared<pragma::util::Asset>();
+		auto asset = pragma::util::make_shared<util::Asset>();
 		asset->assetObject = mdl;
 		AddToCache(name, asset);
 	}
 	return mdl;
 }
-void pragma::asset::ModelManager::InitializeProcessor(pragma::util::IAssetProcessor &processor) {}
-pragma::util::AssetObject pragma::asset::ModelManager::InitializeAsset(const pragma::util::Asset &asset, const pragma::util::AssetLoadJob &job)
+void pragma::asset::ModelManager::InitializeProcessor(util::IAssetProcessor &processor) {}
+pragma::util::AssetObject pragma::asset::ModelManager::InitializeAsset(const util::Asset &asset, const util::AssetLoadJob &job)
 {
 	auto &mdlProcessor = *static_cast<ModelProcessor *>(job.processor.get());
 	return mdlProcessor.model;
@@ -274,7 +274,7 @@ std::shared_ptr<pragma::asset::Model> pragma::asset::ModelManager::LoadModel(con
 	return mdl;
 }
 #endif
-void pragma::asset::ModelManager::FlagForRemoval(const pragma::asset::Model &mdl, bool flag)
+void pragma::asset::ModelManager::FlagForRemoval(const Model &mdl, bool flag)
 {
 	auto *asset = FindCachedAsset(mdl.GetName());
 	if(asset) {
@@ -284,7 +284,7 @@ void pragma::asset::ModelManager::FlagForRemoval(const pragma::asset::Model &mdl
 			return;
 		}
 	}
-	auto it = std::find_if(m_cache.begin(), m_cache.end(), [this, &mdl](const std::pair<pragma::util::AssetIdentifierHash, pragma::util::AssetIndex> &pair) {
+	auto it = std::find_if(m_cache.begin(), m_cache.end(), [this, &mdl](const std::pair<util::AssetIdentifierHash, util::AssetIndex> &pair) {
 		auto mdlCache = GetAssetObject(*GetAsset(pair.second));
 		return mdlCache.get() == &mdl;
 	});

@@ -12,13 +12,13 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SOwnableComponent final : public BaseOwnableComponent, public SBaseNetComponent {
 	  public:
-		SOwnableComponent(pragma::ecs::BaseEntity &ent) : BaseOwnableComponent(ent) {}
+		SOwnableComponent(ecs::BaseEntity &ent) : BaseOwnableComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua::State *l) override;
 		using BaseOwnableComponent::SetOwner;
 	  protected:
-		virtual void SetOwner(pragma::ecs::BaseEntity *owner) override;
+		virtual void SetOwner(ecs::BaseEntity *owner) override;
 	};
 };

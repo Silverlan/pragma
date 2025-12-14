@@ -6,42 +6,42 @@ module pragma.shared;
 
 import :util.steam.vdf;
 
-pragma::util::MarkupFile::ResultCode pragma::util::steam::vdf::read_vdf_block(pragma::util::MarkupFile &mf, pragma::util::steam::vdf::DataBlock &block, uint32_t depth)
+pragma::util::MarkupFile::ResultCode pragma::util::steam::vdf::read_vdf_block(MarkupFile &mf, DataBlock &block, uint32_t depth)
 {
 	std::string key;
-	auto r = pragma::util::MarkupFile::ResultCode::Ok;
-	while(r == pragma::util::MarkupFile::ResultCode::Ok) {
+	auto r = MarkupFile::ResultCode::Ok;
+	while(r == MarkupFile::ResultCode::Ok) {
 		char token {};
-		if((r = mf.ReadNextToken(token)) != pragma::util::MarkupFile::ResultCode::Ok)
+		if((r = mf.ReadNextToken(token)) != MarkupFile::ResultCode::Ok)
 			return r;
 		if(token == '}') {
 			if(depth == 0)
-				return pragma::util::MarkupFile::ResultCode::Error;
+				return MarkupFile::ResultCode::Error;
 			return r;
 		}
 
-		if((r = mf.ReadNextString(key)) != pragma::util::MarkupFile::ResultCode::Ok)
+		if((r = mf.ReadNextString(key)) != MarkupFile::ResultCode::Ok)
 			return r;
-		if((r = mf.ReadNextToken(token)) != pragma::util::MarkupFile::ResultCode::Ok)
+		if((r = mf.ReadNextToken(token)) != MarkupFile::ResultCode::Ok)
 			return r;
-		pragma::string::to_lower(key);
+		string::to_lower(key);
 		if(token == '{') {
 			mf.IncrementFilePos();
-			auto it = block.children.insert(std::make_pair(key, pragma::util::steam::vdf::DataBlock {})).first;
+			auto it = block.children.insert(std::make_pair(key, DataBlock {})).first;
 			auto r = read_vdf_block(mf, it->second, depth + 1);
-			if(r != pragma::util::MarkupFile::ResultCode::Ok)
+			if(r != MarkupFile::ResultCode::Ok)
 				return r;
-			if((r = mf.ReadNextToken(token)) != pragma::util::MarkupFile::ResultCode::Ok)
+			if((r = mf.ReadNextToken(token)) != MarkupFile::ResultCode::Ok)
 				return r;
 			if(token != '}')
-				return pragma::util::MarkupFile::ResultCode::Error;
+				return MarkupFile::ResultCode::Error;
 			if(depth == 0)
 				return r;
 			mf.IncrementFilePos();
 			continue;
 		}
 		std::string value;
-		if((r = mf.ReadNextString(value)) != pragma::util::MarkupFile::ResultCode::Ok)
+		if((r = mf.ReadNextString(value)) != MarkupFile::ResultCode::Ok)
 			return r;
 		block.keyValues[key] = value;
 	}
@@ -58,17 +58,17 @@ bool pragma::util::steam::vdf::get_external_steam_locations(const std::string &s
 	DataStream dsContents {static_cast<uint32_t>(lenContents)};
 	f->Read(dsContents->GetData(), lenContents);
 
-	pragma::util::MarkupFile mf {dsContents};
+	MarkupFile mf {dsContents};
 	auto vdfData = pragma::util::make_shared<Data>();
 	auto r = read_vdf_block(mf, vdfData->dataBlock);
-	if(r != pragma::util::MarkupFile::ResultCode::Ok)
+	if(r != MarkupFile::ResultCode::Ok)
 		return false;
 	auto it = vdfData->dataBlock.children.find("libraryfolders");
 	if(it == vdfData->dataBlock.children.end())
 		return false;
 	auto &libraryFolders = it->second;
 	auto fAddPath = [&outExtLocations](std::string path) {
-		pragma::string::replace(path, "\\\\", "/");
+		string::replace(path, "\\\\", "/");
 		if(path.empty() == false && path.back() == '/')
 			path.pop_back();
 		outExtLocations.push_back(path);

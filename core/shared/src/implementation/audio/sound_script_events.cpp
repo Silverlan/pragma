@@ -47,7 +47,7 @@ void pragma::audio::SoundScriptEventContainer::PrecacheSounds()
 
 pragma::audio::SSEBase::SSEBase(SoundScriptEvent *ev, double tStart, float evOffset) : event(ev), timeCreated(tStart), eventOffset(evOffset) {}
 
-pragma::audio::SSESound::SSESound(std::shared_ptr<pragma::audio::ALSound> snd, SSEPlaySound *ev, double tStart, float eventOffset) : SSEBase(ev, tStart, eventOffset), sound(snd) {}
+pragma::audio::SSESound::SSESound(std::shared_ptr<ALSound> snd, SSEPlaySound *ev, double tStart, float eventOffset) : SSEBase(ev, tStart, eventOffset), sound(snd) {}
 
 pragma::audio::ALSound *pragma::audio::SSESound::operator->() { return sound.get(); }
 
@@ -69,20 +69,20 @@ pragma::audio::ALChannel pragma::audio::SSEPlaySound::GetChannel()
 {
 	auto channel = mode;
 	if(position != -1)
-		channel = pragma::audio::ALChannel::Mono;
+		channel = ALChannel::Mono;
 	return channel;
 }
 
-pragma::audio::SSESound *pragma::audio::SSEPlaySound::CreateSound(double tStart, const std::function<std::shared_ptr<pragma::audio::ALSound>(const std::string &, ALChannel, pragma::audio::ALCreateFlags)> &createSound)
+pragma::audio::SSESound *pragma::audio::SSEPlaySound::CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, ALCreateFlags)> &createSound)
 {
 	int numSounds = static_cast<int>(sources.size());
 	if(numSounds == 0)
 		return nullptr;
-	unsigned int r = pragma::math::random(0, numSounds - 1);
-	auto createFlags = pragma::audio::ALCreateFlags::None;
+	unsigned int r = math::random(0, numSounds - 1);
+	auto createFlags = ALCreateFlags::None;
 	if(stream == true)
-		createFlags |= pragma::audio::ALCreateFlags::Stream;
-	std::shared_ptr<pragma::audio::ALSound> snd = createSound(sources[r].c_str(), GetChannel(), createFlags);
+		createFlags |= ALCreateFlags::Stream;
+	std::shared_ptr<ALSound> snd = createSound(sources[r].c_str(), GetChannel(), createFlags);
 	if(snd.get() == nullptr)
 		return nullptr;
 	snd->SetMaxDistance(static_cast<float>(maxDistance));
@@ -102,7 +102,7 @@ pragma::audio::SSESound *pragma::audio::SSEPlaySound::CreateSound(double tStart,
 		snd->SetPosition({});
 	}
 	if(type.IsSet() == true)
-		snd->SetType(static_cast<pragma::audio::ALSoundType>(pragma::math::to_integral(snd->GetType()) | static_cast<uint32_t>(type.GetValue())));
+		snd->SetType(static_cast<ALSoundType>(math::to_integral(snd->GetType()) | static_cast<uint32_t>(type.GetValue())));
 
 	if(startTime.IsSet() || endTime.IsSet()) {
 		auto start = (startTime.IsSet()) ? startTime.GetValue() : 0.f;
@@ -118,15 +118,15 @@ pragma::audio::SSESound *pragma::audio::SSEPlaySound::CreateSound(double tStart,
 
 void pragma::audio::SSEPlaySound::Precache()
 {
-	pragma::audio::SoundScriptEvent::Precache();
+	SoundScriptEvent::Precache();
 	for(unsigned int i = 0; i < sources.size(); i++)
 		PrecacheSound(sources[i].c_str());
 }
 
-void pragma::audio::SSEPlaySound::PrecacheSound(const char *name) { pragma::Engine::Get()->GetServerNetworkState()->PrecacheSound(name, GetChannel()); }
+void pragma::audio::SSEPlaySound::PrecacheSound(const char *name) { Engine::Get()->GetServerNetworkState()->PrecacheSound(name, GetChannel()); }
 void pragma::audio::SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 {
-	pragma::audio::SoundScriptEvent::Initialize(prop);
+	SoundScriptEvent::Initialize(prop);
 	auto udmSources = prop["source"];
 	if(udmSources) {
 		udmSources.GetBlobData(sources);
@@ -140,30 +140,30 @@ void pragma::audio::SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 	prop["global"](global);
 	prop["stream"](stream);
 
-	mode = pragma::audio::ALChannel::Auto;
+	mode = ALChannel::Auto;
 	std::string strMode;
 	prop["mode"](strMode);
 	if(strMode == "mono")
-		mode = pragma::audio::ALChannel::Mono;
+		mode = ALChannel::Mono;
 	else if(strMode == "both")
-		mode = pragma::audio::ALChannel::Both;
+		mode = ALChannel::Both;
 
 	position = -1;
 	std::string strPos;
 	prop["position"](strPos);
 	if(strPos == "random") {
 		position = -2;
-		if(mode == pragma::audio::ALChannel::Auto)
-			mode = pragma::audio::ALChannel::Mono;
+		if(mode == ALChannel::Auto)
+			mode = ALChannel::Mono;
 	}
 	if(position == -1 && prop["position"]) {
-		if(mode == pragma::audio::ALChannel::Auto)
-			mode = pragma::audio::ALChannel::Mono;
+		if(mode == ALChannel::Auto)
+			mode = ALChannel::Mono;
 		prop["position"](position);
 		if(position < 0)
 			position = -1;
 	}
-	if(mode == pragma::audio::ALChannel::Mono) {
+	if(mode == ALChannel::Mono) {
 		maxDistance = 2'048.f;
 		referenceDistance = 64.f;
 	}
@@ -180,7 +180,7 @@ void pragma::audio::SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 	coneOuterGain.Load(prop["cone_outer_gain"]);
 	auto udmType = prop["sound_type"];
 	if(udmType.IsType(udm::Type::String)) {
-		type = pragma::math::to_integral(udm::string_to_flags<pragma::audio::ALSoundType>(udmType, pragma::audio::ALSoundType::Generic));
+		type = math::to_integral(udm::string_to_flags<ALSoundType>(udmType, ALSoundType::Generic));
 		type.SetSet(true);
 	}
 	else
@@ -237,5 +237,5 @@ void pragma::audio::SoundScriptValue::Initialize(float min, float max)
 	m_min = min;
 	m_max = max;
 }
-float pragma::audio::SoundScriptValue::GetValue() const { return pragma::math::random(m_min, m_max); }
+float pragma::audio::SoundScriptValue::GetValue() const { return math::random(m_min, m_max); }
 bool pragma::audio::SoundScriptValue::IsSet() const { return m_bIsSet; }

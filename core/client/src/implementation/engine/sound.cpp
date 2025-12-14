@@ -17,14 +17,14 @@ pragma::audio::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
 
 	auto &audioAPI = GetAudioAPI();
 	auto getAudioApiPath = [](const std::string &audioAPI, std::string &outLocation, std::string &outModulePath) {
-		outLocation = pragma::audio::get_audio_api_module_location(audioAPI);
-		outModulePath = pragma::util::get_normalized_module_path(outLocation);
+		outLocation = audio::get_audio_api_module_location(audioAPI);
+		outModulePath = util::get_normalized_module_path(outLocation);
 	};
 	auto loadAudioApiModule = [this, &getAudioApiPath](const std::string &renderAPI, std::string &outErr) -> bool {
 		std::string location;
 		std::string modulePath;
 		getAudioApiPath(renderAPI, location, modulePath);
-		m_audioAPILib = pragma::util::load_library_module(modulePath, pragma::util::get_default_additional_library_search_directories(modulePath), {}, &outErr);
+		m_audioAPILib = util::load_library_module(modulePath, util::get_default_additional_library_search_directories(modulePath), {}, &outErr);
 		return (m_audioAPILib != nullptr);
 	};
 	std::string err;
@@ -47,12 +47,12 @@ pragma::audio::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
 
 	if(lib != nullptr) {
 		spdlog::info("Loading audio module '{}'...", location);
-		auto fInitAudioAPI = lib->FindSymbolAddress<bool (*)(float, std::shared_ptr<pragma::audio::ISoundSystem> &, std::string &)>("initialize_audio_api");
+		auto fInitAudioAPI = lib->FindSymbolAddress<bool (*)(float, std::shared_ptr<audio::ISoundSystem> &, std::string &)>("initialize_audio_api");
 		if(fInitAudioAPI == nullptr)
 			err = "Symbol 'initialize_audio_api' not found in library '" + location + "'!";
 		else {
 			std::string errMsg;
-			auto success = fInitAudioAPI(pragma::units_to_metres(1.f), m_soundSystem, errMsg);
+			auto success = fInitAudioAPI(units_to_metres(1.f), m_soundSystem, errMsg);
 			if(success == false)
 				err = errMsg;
 		}
@@ -61,17 +61,17 @@ pragma::audio::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
 		err = "Module '" + modulePath + "' not found!";
 	if(m_soundSystem == nullptr)
 		throw std::runtime_error {"Unable to load audio implementation library: " + err + "!"};
-	m_soundSystem->SetSoundSourceFactory([](const pragma::audio::PSoundChannel &channel) -> pragma::audio::PSoundSource {
-		return pragma::audio::CALSound::Create(pragma::get_cengine()->GetClientState(), channel);
+	m_soundSystem->SetSoundSourceFactory([](const audio::PSoundChannel &channel) -> audio::PSoundSource {
+		return audio::CALSound::Create(get_cengine()->GetClientState(), channel);
 	});
-	pragma::audio::set_world_scale(pragma::units_to_metres(1.0));
+	audio::set_world_scale(units_to_metres(1.0));
 	return m_soundSystem.get();
 }
 
 pragma::audio::PEffect pragma::CEngine::GetAuxEffect(const std::string &name)
 {
 	auto lname = name;
-	pragma::string::to_lower(lname);
+	string::to_lower(lname);
 	auto it = m_auxEffects.find(lname);
 	if(it == m_auxEffects.end())
 		return nullptr;

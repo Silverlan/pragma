@@ -16,7 +16,7 @@ void SScoreComponent::Initialize()
 	FlagCallbackForRemoval(m_score->AddCallback([this](std::reference_wrapper<const Score> oldVal, std::reference_wrapper<const Score> val) {
 		NetPacket p {};
 		p->Write<Score>(val);
-		static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetScore, p, pragma::networking::Protocol::SlowReliable);
+		static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetScore, p, networking::Protocol::SlowReliable);
 	}),
 	  CallbackType::Component, this);
 }

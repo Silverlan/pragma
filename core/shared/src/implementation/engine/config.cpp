@@ -41,7 +41,7 @@ void pragma::Engine::ConVarInfoList::Add(const std::string &cmd, const ConVarArg
 
 bool pragma::Engine::ExecConfig(const std::string &cfg, ConVarInfoList &infoList)
 {
-	return pragma::Engine::ExecConfig(cfg, [&infoList](std::string &cmd, std::vector<std::string> &argv) { infoList.Add(cmd, argv); });
+	return ExecConfig(cfg, [&infoList](std::string &cmd, std::vector<std::string> &argv) { infoList.Add(cmd, argv); });
 }
 
 void pragma::Engine::ExecCommands(ConVarInfoList &cmds)
@@ -56,14 +56,14 @@ bool pragma::Engine::ExecConfig(const std::string &cfg, const std::function<void
 	if(path.substr(path.length() - 4) != ".cfg")
 		path += ".cfg";
 	path = "cfg\\" + fs::get_canonicalized_path(path);
-	auto f = pragma::fs::open_file(path.c_str(), pragma::fs::FileMode::Read);
+	auto f = pragma::fs::open_file(path.c_str(), fs::FileMode::Read);
 	if(f == nullptr) {
 		spdlog::warn("'{}' not present; not executing.", cfg);
 		return false;
 	}
 	while(!f->Eof()) {
 		auto line = f->ReadLine();
-		pragma::string::get_sequence_commands(line, [this, &callback](std::string cmd, std::vector<std::string> &argv) { callback(cmd, argv); });
+		string::get_sequence_commands(line, [this, &callback](std::string cmd, std::vector<std::string> &argv) { callback(cmd, argv); });
 	}
 	return true;
 }
@@ -132,9 +132,9 @@ void pragma::Engine::WriteEngineConfig(fs::VFilePtrReal f)
 	auto &cvars = GetConVars();
 	for(auto it = cvars.begin(); it != cvars.end(); it++) {
 		auto &cf = it->second;
-		if(cf->GetType() == pragma::console::ConType::Var) {
+		if(cf->GetType() == console::ConType::Var) {
 			auto *cv = static_cast<console::ConVar *>(cf.get());
-			if((cv->GetFlags() & pragma::console::ConVarFlags::Archive) == pragma::console::ConVarFlags::Archive && cv->GetString() != cv->GetDefault()) {
+			if((cv->GetFlags() & console::ConVarFlags::Archive) == console::ConVarFlags::Archive && cv->GetString() != cv->GetDefault()) {
 				std::string l = it->first + " \"" + cv->GetString() + "\"\n";
 				f->WriteString(l.c_str());
 			}
@@ -154,9 +154,9 @@ void pragma::Engine::WriteServerConfig(fs::VFilePtrReal f)
 
 		for(auto it = cvars.begin(); it != cvars.end(); it++) {
 			auto &cf = it->second;
-			if(cf->GetType() == pragma::console::ConType::Var) {
+			if(cf->GetType() == console::ConType::Var) {
 				auto *cv = static_cast<console::ConVar *>(cf.get());
-				if((cv->GetFlags() & pragma::console::ConVarFlags::Archive) == pragma::console::ConVarFlags::Archive && cv->GetString() != cv->GetDefault()) {
+				if((cv->GetFlags() & console::ConVarFlags::Archive) == console::ConVarFlags::Archive && cv->GetString() != cv->GetDefault()) {
 					std::string l = it->first + " \"" + cv->GetString() + "\"\n";
 					f->WriteString(l.c_str());
 				}

@@ -37,7 +37,7 @@ void GPUProfiler::Initialize()
 		return;
 	m_rootStage = GPUProfilingStage::Create(*this, {}, "root", prosper::PipelineStageFlags::None);
 }
-std::shared_ptr<pragma::debug::Timer> GPUProfiler::CreateTimer(prosper::PipelineStageFlags stage) { return pragma::debug::GPUSwapchainTimer::Create(*m_timerQueryPool, *m_statsQueryPool, stage); }
+std::shared_ptr<pragma::debug::Timer> GPUProfiler::CreateTimer(prosper::PipelineStageFlags stage) { return GPUSwapchainTimer::Create(*m_timerQueryPool, *m_statsQueryPool, stage); }
 void GPUProfiler::Reset()
 {
 	for(auto &wpStage : GetStages()) {
@@ -50,11 +50,11 @@ void GPUProfiler::InitializeQueries()
 {
 	if(m_timerQueryPool != nullptr || m_statsQueryPool != nullptr)
 		return;
-	auto swapchainImageCount = pragma::get_cengine()->GetRenderContext().GetPrimaryWindowSwapchainImageCount();
+	auto swapchainImageCount = get_cengine()->GetRenderContext().GetPrimaryWindowSwapchainImageCount();
 	const auto maxTimestampQueryCount = 200u; // Note: Every timer requires 2 timestamps
 	const auto maxStatisticsQueryCount = 100u;
-	m_timerQueryPool = pragma::get_cengine()->GetRenderContext().CreateQueryPool(prosper::QueryType::Timestamp, maxTimestampQueryCount);
-	m_statsQueryPool = pragma::get_cengine()->GetRenderContext().CreateQueryPool(prosper::QueryPipelineStatisticFlags::InputAssemblyVerticesBit | prosper::QueryPipelineStatisticFlags::InputAssemblyPrimitivesBit | prosper::QueryPipelineStatisticFlags::VertexShaderInvocationsBit
+	m_timerQueryPool = get_cengine()->GetRenderContext().CreateQueryPool(prosper::QueryType::Timestamp, maxTimestampQueryCount);
+	m_statsQueryPool = get_cengine()->GetRenderContext().CreateQueryPool(prosper::QueryPipelineStatisticFlags::InputAssemblyVerticesBit | prosper::QueryPipelineStatisticFlags::InputAssemblyPrimitivesBit | prosper::QueryPipelineStatisticFlags::VertexShaderInvocationsBit
 	    | prosper::QueryPipelineStatisticFlags::GeometryShaderInvocationsBit | prosper::QueryPipelineStatisticFlags::GeometryShaderPrimitivesBit | prosper::QueryPipelineStatisticFlags::ClippingInvocationsBit | prosper::QueryPipelineStatisticFlags::ClippingPrimitivesBit
 	    | prosper::QueryPipelineStatisticFlags::FragmentShaderInvocationsBit | prosper::QueryPipelineStatisticFlags::TessellationControlShaderPatchesBit | prosper::QueryPipelineStatisticFlags::TessellationEvaluationShaderInvocationsBit
 	    | prosper::QueryPipelineStatisticFlags::ComputeShaderInvocationsBit,
@@ -69,8 +69,8 @@ static void cl_gpu_timer_queries_dump(pragma::NetworkState *state, pragma::BaseP
 	if(argv.empty() == false)
 		extended = pragma::util::to_boolean(argv.at(0));
 	Con::cout << "-------- GPU-Profiler Query Results --------" << Con::endl;
-	std::function<void(pragma::debug::ProfilingStage &, const std::string &, bool)> fPrintResults = nullptr;
-	fPrintResults = [&fPrintResults, extended](pragma::debug::ProfilingStage &stage, const std::string &t, bool bRoot) {
+	std::function<void(ProfilingStage &, const std::string &, bool)> fPrintResults = nullptr;
+	fPrintResults = [&fPrintResults, extended](ProfilingStage &stage, const std::string &t, bool bRoot) {
 		if(bRoot == false) {
 			std::string sTime = "Pending";
 			auto result = stage.GetResult();
@@ -80,10 +80,10 @@ static void cl_gpu_timer_queries_dump(pragma::NetworkState *state, pragma::BaseP
 				sTime += " (" + std::to_string(result->duration->count()) + " ns)";
 			}
 			Con::cout << t << stage.GetName() << ": " << sTime;
-			Con::cout << " (" << prosper::util::to_string(static_cast<pragma::debug::GPUProfilingStage &>(stage).GetPipelineStage()) << ")" << Con::endl;
+			Con::cout << " (" << prosper::util::to_string(static_cast<GPUProfilingStage &>(stage).GetPipelineStage()) << ")" << Con::endl;
 
 			if(result && extended == true) {
-				auto &statistics = static_cast<pragma::debug::GPUProfilerResult &>(*result).statistics;
+				auto &statistics = static_cast<GPUProfilerResult &>(*result).statistics;
 				if(statistics.has_value()) {
 					auto &stats = *statistics;
 					Con::cout << t << "{" << Con::endl;

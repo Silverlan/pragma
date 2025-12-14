@@ -12,7 +12,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SLiquidControlComponent final : public BaseLiquidControlComponent, public SBaseNetComponent {
 	  public:
-		SLiquidControlComponent(pragma::ecs::BaseEntity &ent) : BaseLiquidControlComponent(ent) {}
+		SLiquidControlComponent(ecs::BaseEntity &ent) : BaseLiquidControlComponent(ent) {}
 		virtual void Initialize() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;

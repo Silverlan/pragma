@@ -57,7 +57,7 @@ void RenderQueueWorker::StartThread()
 			}
 		}
 	}};
-	pragma::util::set_thread_name(m_thread, "render_queue_worker");
+	util::set_thread_name(m_thread, "render_queue_worker");
 }
 
 RenderQueueWorker::~RenderQueueWorker()

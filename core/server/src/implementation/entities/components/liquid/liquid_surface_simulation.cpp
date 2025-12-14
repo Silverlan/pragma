@@ -15,13 +15,13 @@ using namespace pragma;
 static std::vector<SLiquidSurfaceSimulationComponent *> s_waterEntities = {};
 namespace {
 	auto _ = pragma::console::server::register_variable_listener<float>(
-	  "sv_water_surface_simulation_shared", +[](pragma::NetworkState *, const pragma::console::ConVar &, float, float val) {
+	  "sv_water_surface_simulation_shared", +[](NetworkState *, const console::ConVar &, float, float val) {
 		  for(auto *entWater : s_waterEntities)
 			  entWater->UpdateSurfaceSimulator();
 	  });
 };
 
-SLiquidSurfaceSimulationComponent::SLiquidSurfaceSimulationComponent(pragma::ecs::BaseEntity &ent) : BaseLiquidSurfaceSimulationComponent(ent) { s_waterEntities.push_back(this); }
+SLiquidSurfaceSimulationComponent::SLiquidSurfaceSimulationComponent(ecs::BaseEntity &ent) : BaseLiquidSurfaceSimulationComponent(ent) { s_waterEntities.push_back(this); }
 SLiquidSurfaceSimulationComponent::~SLiquidSurfaceSimulationComponent()
 {
 	if(m_cbClientSimulatorUpdate.IsValid())
@@ -35,14 +35,14 @@ SLiquidSurfaceSimulationComponent::~SLiquidSurfaceSimulationComponent()
 void SLiquidSurfaceSimulationComponent::Initialize()
 {
 	BaseLiquidSurfaceSimulationComponent::Initialize();
-	BindEventUnhandled(baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateSurfaceSimulator(); });
+	BindEventUnhandled(baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateSurfaceSimulator(); });
 }
 
-void SLiquidSurfaceSimulationComponent::InitializeLuaObject(lua::State *l) { return BaseLiquidSurfaceSimulationComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SLiquidSurfaceSimulationComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SLiquidSurfaceSimulationComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->Write<float>(m_kvMaxWaveHeight); }
 
-static auto cvSimShared = pragma::console::get_server_con_var("sv_water_surface_simulation_shared");
+static auto cvSimShared = console::get_server_con_var("sv_water_surface_simulation_shared");
 bool SLiquidSurfaceSimulationComponent::ShouldSimulateSurface() const { return (BaseLiquidSurfaceSimulationComponent::ShouldSimulateSurface() == true && (cvSimShared->GetBool() == true || static_cast<const SBaseEntity &>(GetEntity()).GetClientsideEntity() == nullptr)) ? true : false; }
 
 void SLiquidSurfaceSimulationComponent::OnTick(double dt)
@@ -67,7 +67,7 @@ void SLiquidSurfaceSimulationComponent::UpdateSurfaceSimulator()
 				m_bUsingClientsideSimulation = true;
 				m_physSurfaceSim = surfSim->shared_from_this();
 				auto hEnt = cent->GetHandle();
-				m_cbClientSimulatorUpdate = BindEventUnhandled(sLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED, [this, hEnt](std::reference_wrapper<pragma::ComponentEvent> evData) {
+				m_cbClientSimulatorUpdate = BindEventUnhandled(sLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED, [this, hEnt](std::reference_wrapper<ComponentEvent> evData) {
 					if(hEnt.valid() == false)
 						return;
 					auto *surfSim = GetSurfaceSimulator();

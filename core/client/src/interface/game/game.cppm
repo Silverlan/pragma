@@ -137,7 +137,7 @@ export namespace pragma {
 		bool StopGPUProfilingStage();
 		debug::ProfilingStageManager<debug::GPUProfilingStage> *GetGPUProfilingStageManager();
 
-		std::shared_ptr<pragma::audio::IEffect> GetAuxEffect(const std::string &name);
+		std::shared_ptr<audio::IEffect> GetAuxEffect(const std::string &name);
 
 		debug::ProfilingStageManager<debug::ProfilingStage> *GetProfilingStageManager();
 		bool StartProfilingStage(const char *stage);

@@ -14,10 +14,10 @@ export namespace pragma {
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		// Same as PlayActivity, but doesn't automatically transmit to clients if called serverside
-		virtual bool PlaySharedActivity(pragma::Activity activity) override;
+		virtual bool PlaySharedActivity(Activity activity) override;
 		static unsigned int GetPlayerCount();
 		static const std::vector<SPlayerComponent *> &GetAll();
-		virtual pragma::util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		// Same as SetViewOrientation, but doesn't transmit anything to the client
 		void UpdateViewOrientation(const Quat &rot);
 		void Kick(const std::string &reason);
@@ -45,7 +45,7 @@ export namespace pragma {
 		bool IsGameReady() const;
 		void SetGameReady(bool b);
 		bool SendResource(const std::string &fileName) const;
-		virtual void PrintMessage(std::string message, pragma::console::MESSAGE type) override;
+		virtual void PrintMessage(std::string message, console::MESSAGE type) override;
 
 		virtual void SetViewRotation(const Quat &rot) override;
 
@@ -54,7 +54,7 @@ export namespace pragma {
 		virtual bool ShouldTransmitNetData() const override { return true; };
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
-		mutable pragma::util::WeakHandle<networking::IServerClient> m_session = {};
+		mutable util::WeakHandle<networking::IServerClient> m_session = {};
 		bool m_bGameReady;
 		bool m_bAuthed;
 		std::vector<InputAction> m_keyStack;
@@ -72,7 +72,7 @@ export namespace pragma {
 	  private:
 		static std::vector<SPlayerComponent *> s_players;
 	  public:
-		SPlayerComponent(pragma::ecs::BaseEntity &ent);
+		SPlayerComponent(ecs::BaseEntity &ent);
 		virtual ~SPlayerComponent() override;
 	};
 };

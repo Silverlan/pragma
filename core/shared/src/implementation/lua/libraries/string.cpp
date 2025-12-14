@@ -40,7 +40,7 @@ double Lua::string::calc_levenshtein_similarity(const std::string &s0, const std
 void Lua::string::find_longest_common_substring(const std::string &s0, const std::string &s1, size_t &outStartIdx, size_t &outLen, size_t &outEndIdx) { outLen = pragma::string::longest_common_substring(s0, s1, outStartIdx, outEndIdx); }
 void Lua::string::find_similar_elements(lua::State *l, const std::string &baseElement, luabind::table<> inElements, uint32_t limit, luabind::object &outSimilarElements, luabind::object &outSimilarities)
 {
-	auto numElements = Lua::GetObjectLength(l, 2);
+	auto numElements = GetObjectLength(l, 2);
 	std::vector<std::string> elements {};
 	elements.reserve(numElements);
 	for(auto it = luabind::iterator {inElements}; it != luabind::iterator {}; ++it) {

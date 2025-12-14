@@ -14,7 +14,7 @@ import :model;
 
 using namespace pragma;
 
-static_assert(pragma::math::to_integral(ShaderTest::MaterialBinding::Count) == 9, "Number of bindings in material descriptor set does not match MaterialBinding enum count!");
+static_assert(math::to_integral(ShaderTest::MaterialBinding::Count) == 9, "Number of bindings in material descriptor set does not match MaterialBinding enum count!");
 
 decltype(ShaderTest::DESCRIPTOR_SET_PBR) ShaderTest::DESCRIPTOR_SET_PBR = {
   "PBR",
@@ -45,7 +45,7 @@ bool ShaderTest::BeginDraw(
 }
 #endif
 void ShaderTest::InitializeGfxPipelinePushConstantRanges() { AttachPushConstantRange(0u, sizeof(Mat4), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit); }
-void ShaderTest::UpdateRenderFlags(pragma::geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags)
+void ShaderTest::UpdateRenderFlags(geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags)
 {
 	ShaderGameWorldLightingPass::UpdateRenderFlags(mesh, inOutFlags);
 	inOutFlags |= m_extRenderFlags;
@@ -127,7 +127,7 @@ void ShaderTest::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 
 static bool bind_texture(material::Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, material::Texture *optDefaultTex = nullptr)
 {
-	auto &matManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
+	auto &matManager = static_cast<material::CMaterialManager &>(get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 
 	std::shared_ptr<material::Texture> tex = nullptr;
@@ -144,7 +144,7 @@ static bool bind_texture(material::Material &mat, prosper::IDescriptorSet &ds, T
 
 static bool bind_default_texture(prosper::IDescriptorSet &ds, const std::string &defaultTexName, uint32_t bindingIndex)
 {
-	auto &matManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
+	auto &matManager = static_cast<material::CMaterialManager &>(get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 	auto ptrTex = texManager.LoadAsset(defaultTexName);
 	if(ptrTex == nullptr)
@@ -156,7 +156,7 @@ static bool bind_default_texture(prosper::IDescriptorSet &ds, const std::string 
 
 static bool bind_texture(material::Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, const std::string &defaultTexName)
 {
-	auto &matManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager());
+	auto &matManager = static_cast<material::CMaterialManager &>(get_client_state()->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 
 	std::shared_ptr<material::Texture> tex = nullptr;

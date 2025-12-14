@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :entities.handle_wrapper;
 
-pragma::EntityHandleWrapper::EntityHandleWrapper(pragma::ecs::BaseEntity *ent) { handle = new EntityHandle {ent->GetHandle()}; }
+pragma::EntityHandleWrapper::EntityHandleWrapper(ecs::BaseEntity *ent) { handle = new EntityHandle {ent->GetHandle()}; }
 
 pragma::EntityHandleWrapper::~EntityHandleWrapper() { delete handle; }
 

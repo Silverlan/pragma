@@ -6,4 +6,4 @@ module pragma.shared;
 
 import :util.splash_damage_info;
 
-pragma::util::SplashDamageInfo::SplashDamageInfo() { damageInfo.SetDamageType(DamageType::Explosion); }
+pragma::util::SplashDamageInfo::SplashDamageInfo() { damageInfo.SetDamageType(Explosion); }

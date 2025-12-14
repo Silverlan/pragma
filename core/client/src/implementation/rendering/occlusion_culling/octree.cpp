@@ -11,7 +11,7 @@ import :rendering.occlusion_culling.octree;
 
 import :debug;
 
-BaseOcclusionOctree::Node::Node(BaseOcclusionOctree *tree, Node *parent) : m_tree(tree), m_parent((parent != nullptr) ? parent->shared_from_this() : std::weak_ptr<BaseOcclusionOctree::Node> {}) {}
+BaseOcclusionOctree::Node::Node(BaseOcclusionOctree *tree, Node *parent) : m_tree(tree), m_parent((parent != nullptr) ? parent->shared_from_this() : std::weak_ptr<Node> {}) {}
 BaseOcclusionOctree::Node::~Node() { m_tree->FreeNodeIndex(*this); }
 uint32_t BaseOcclusionOctree::Node::GetTotalObjectCount() const { return m_branchObjectCount + GetObjectCount(); }
 uint32_t BaseOcclusionOctree::Node::GetChildObjectCount() const { return m_branchObjectCount; }

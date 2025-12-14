@@ -15,10 +15,10 @@ void SButtonComponent::Initialize()
 {
 	BaseFuncButtonComponent::Initialize();
 
-	BindEvent(usableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(usableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &bCanUse = static_cast<CECanUseData &>(evData.get()).canUse;
 		bCanUse = (m_tNextUse - SGame::Get()->CurTime()) <= 0.f;
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();

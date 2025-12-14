@@ -11,30 +11,30 @@ import :engine;
 
 using namespace pragma;
 
-static spdlog::logger &LOGGER = pragma::register_logger("prosper");
-static spdlog::logger &LOGGER_VALIDATION = pragma::register_logger("prosper_validation");
+static spdlog::logger &LOGGER = register_logger("prosper");
+static spdlog::logger &LOGGER_VALIDATION = register_logger("prosper_validation");
 
-pragma::rendering::RenderContext::RenderContext() : m_monitor(nullptr), m_renderAPI {"vulkan"} {}
-pragma::rendering::RenderContext::~RenderContext() {}
+rendering::RenderContext::RenderContext() : m_monitor(nullptr), m_renderAPI {"vulkan"} {}
+rendering::RenderContext::~RenderContext() {}
 std::optional<std::string> g_customTitle;
 extern bool g_cpuRendering;
-void pragma::rendering::RenderContext::InitializeRenderAPI()
+void rendering::RenderContext::InitializeRenderAPI()
 {
 	auto &renderAPI = GetRenderAPI();
 	auto getRenderApiPath = [](const std::string &renderAPI, std::string &outLocation, std::string &outModulePath) {
-		outLocation = pragma::rendering::get_graphics_api_module_location(renderAPI);
-		outModulePath = pragma::util::get_normalized_module_path(outLocation);
+		outLocation = get_graphics_api_module_location(renderAPI);
+		outModulePath = util::get_normalized_module_path(outLocation);
 	};
 	auto loadRenderApiModule = [this, &getRenderApiPath](const std::string &renderAPI, std::string &outErr) -> bool {
 		std::string location;
 		std::string modulePath;
 		getRenderApiPath(renderAPI, location, modulePath);
 
-		auto additionalSearchDirectories = pragma::util::get_default_additional_library_search_directories(modulePath);
+		auto additionalSearchDirectories = util::get_default_additional_library_search_directories(modulePath);
 		if(g_cpuRendering) {
 			if(renderAPI == "vulkan") {
 				if(fs::exists("modules/swiftshader/")) {
-					auto p = pragma::util::Path::CreatePath(pragma::util::get_program_path());
+					auto p = util::Path::CreatePath(util::get_program_path());
 					p += "modules/swiftshader/";
 					additionalSearchDirectories.push_back(p.GetString());
 
@@ -53,7 +53,7 @@ void pragma::rendering::RenderContext::InitializeRenderAPI()
 			std::string relSwiftShaderPath = "modules/swiftshader/libvulkan.so.1";
 			if(fs::find_absolute_path(relSwiftShaderPath, absSwiftshaderPath)) {
 				std::string err;
-				auto libVulkan = pragma::util::Library::Load(absSwiftshaderPath, {}, &err);
+				auto libVulkan = util::Library::Load(absSwiftshaderPath, {}, &err);
 				if(libVulkan)
 					libVulkan->SetDontFreeLibraryOnDestruct();
 				else
@@ -63,7 +63,7 @@ void pragma::rendering::RenderContext::InitializeRenderAPI()
 				spdlog::error("Failed to locate swiftshader library {}! This will likely cause issues.", relSwiftShaderPath);
 #endif
 		}
-		m_graphicsAPILib = pragma::util::load_library_module(modulePath, additionalSearchDirectories, {}, &outErr);
+		m_graphicsAPILib = util::load_library_module(modulePath, additionalSearchDirectories, {}, &outErr);
 		return (m_graphicsAPILib != nullptr);
 	};
 	std::string err;
@@ -102,8 +102,8 @@ void pragma::rendering::RenderContext::InitializeRenderAPI()
 		throw std::runtime_error {msg};
 	}
 
-	m_renderContext->SetLogHandler(&pragma::log, &pragma::is_log_level_enabled);
-	m_renderContext->SetProfilingHandler([](const char *taskName) { pragma::debug::start_profiling_task(taskName); }, []() { pragma::debug::end_profiling_task(); });
+	m_renderContext->SetLogHandler(&log, &is_log_level_enabled);
+	m_renderContext->SetProfilingHandler([](const char *taskName) { debug::start_profiling_task(taskName); }, []() { debug::end_profiling_task(); });
 
 	prosper::Callbacks callbacks {};
 	callbacks.validationCallback = [this](prosper::DebugMessageSeverityFlags severityFlags, const std::string &message) { ValidationCallback(severityFlags, message); };
@@ -112,7 +112,7 @@ void pragma::rendering::RenderContext::InitializeRenderAPI()
 	callbacks.onResolutionChanged = [this](uint32_t w, uint32_t h) { OnResolutionChanged(w, h); };
 	callbacks.drawFrame = [this]() { DrawFrame(); };
 	m_renderContext->SetCallbacks(callbacks);
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::GfxAPIValidationEnabled))
+	if(math::is_flag_set(m_stateFlags, StateFlags::GfxAPIValidationEnabled))
 		m_renderContext->SetValidationEnabled(true);
 
 	material::CMaterialManager::SetFlipTexturesVerticallyOnLoad(m_renderContext->ShouldFlipTexturesOnLoad());
@@ -126,17 +126,17 @@ void pragma::rendering::RenderContext::InitializeRenderAPI()
 		if(filePath.has_value())
 			msg << "Shader Stage Filename: " << *filePath << spdlog::details::default_eol;
 		auto infoLogConv = infoLog;
-		pragma::string::replace(infoLogConv, "\n", spdlog::details::default_eol);
+		string::replace(infoLogConv, "\n", spdlog::details::default_eol);
 		msg << infoLogConv << spdlog::details::default_eol;
 		msg << spdlog::details::default_eol;
 		auto debugInfoLogConv = debugInfoLog;
-		pragma::string::replace(debugInfoLogConv, "\n", spdlog::details::default_eol);
+		string::replace(debugInfoLogConv, "\n", spdlog::details::default_eol);
 		msg << debugInfoLogConv;
 		LOGGER.warn(msg.str());
 	});
 	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType, const std::string &msg) { LOGGER_VALIDATION.error("{}", msg); });
 	err.clear();
-	if(!pragma::platform::initialize(err, pragma::get_cengine()->IsWindowless())) {
+	if(!platform::initialize(err, get_cengine()->IsWindowless())) {
 		LOGGER.critical("Failed to initialize GLFW: {}", err);
 		throw std::runtime_error {"Failed to initialize GLFW: " + err};
 	}
@@ -150,7 +150,7 @@ void pragma::rendering::RenderContext::InitializeRenderAPI()
 		SetValidationErrorDisabled("VUID-VkMappedMemoryRange-size-01390", true);
 	}
 }
-void pragma::rendering::RenderContext::Release()
+void rendering::RenderContext::Release()
 {
 	if(m_renderContext == nullptr)
 		return;
@@ -164,20 +164,20 @@ void pragma::rendering::RenderContext::Release()
 	}
 	m_graphicsAPILib = nullptr;
 }
-const prosper::IPrContext &pragma::rendering::RenderContext::GetRenderContext() const { return const_cast<RenderContext *>(this)->GetRenderContext(); }
-prosper::IPrContext &pragma::rendering::RenderContext::GetRenderContext() { return *m_renderContext; }
-prosper::ShaderManager &pragma::rendering::RenderContext::GetShaderManager() const { return GetRenderContext().GetShaderManager(); }
-void pragma::rendering::RenderContext::RegisterShader(const std::string &identifier, const std::function<prosper::Shader *(prosper::IPrContext &, const std::string &)> &fFactory) { GetRenderContext().RegisterShader(identifier, fFactory); }
-pragma::util::WeakHandle<prosper::Shader> pragma::rendering::RenderContext::GetShader(const std::string &identifier) const { return GetRenderContext().GetShader(identifier); }
+const prosper::IPrContext &rendering::RenderContext::GetRenderContext() const { return const_cast<RenderContext *>(this)->GetRenderContext(); }
+prosper::IPrContext &rendering::RenderContext::GetRenderContext() { return *m_renderContext; }
+prosper::ShaderManager &rendering::RenderContext::GetShaderManager() const { return GetRenderContext().GetShaderManager(); }
+void rendering::RenderContext::RegisterShader(const std::string &identifier, const std::function<prosper::Shader *(prosper::IPrContext &, const std::string &)> &fFactory) { GetRenderContext().RegisterShader(identifier, fFactory); }
+util::WeakHandle<prosper::Shader> rendering::RenderContext::GetShader(const std::string &identifier) const { return GetRenderContext().GetShader(identifier); }
 
-prosper::Window &pragma::rendering::RenderContext::GetWindow() { return GetRenderContext().GetWindow(); }
-pragma::platform::Window &pragma::rendering::RenderContext::GetGlfwWindow() { return *GetRenderContext().GetWindow(); }
-const std::shared_ptr<prosper::IPrimaryCommandBuffer> &pragma::rendering::RenderContext::GetSetupCommandBuffer() { return GetRenderContext().GetSetupCommandBuffer(); }
-const std::shared_ptr<prosper::IPrimaryCommandBuffer> &pragma::rendering::RenderContext::GetDrawCommandBuffer() const { return GetRenderContext().GetWindow().GetDrawCommandBuffer(); }
-const std::shared_ptr<prosper::IPrimaryCommandBuffer> &pragma::rendering::RenderContext::GetDrawCommandBuffer(uint32_t swapchainIdx) const { return GetRenderContext().GetWindow().GetDrawCommandBuffer(swapchainIdx); }
-void pragma::rendering::RenderContext::FlushSetupCommandBuffer() { GetRenderContext().FlushSetupCommandBuffer(); }
-prosper::WindowSettings &pragma::rendering::RenderContext::GetInitialWindowSettings() { return GetRenderContext().GetInitialWindowSettings(); }
-void pragma::rendering::RenderContext::SetValidationErrorDisabled(const std::string &id, bool disabled)
+prosper::Window &rendering::RenderContext::GetWindow() { return GetRenderContext().GetWindow(); }
+platform::Window &rendering::RenderContext::GetGlfwWindow() { return *GetRenderContext().GetWindow(); }
+const std::shared_ptr<prosper::IPrimaryCommandBuffer> &rendering::RenderContext::GetSetupCommandBuffer() { return GetRenderContext().GetSetupCommandBuffer(); }
+const std::shared_ptr<prosper::IPrimaryCommandBuffer> &rendering::RenderContext::GetDrawCommandBuffer() const { return GetRenderContext().GetWindow().GetDrawCommandBuffer(); }
+const std::shared_ptr<prosper::IPrimaryCommandBuffer> &rendering::RenderContext::GetDrawCommandBuffer(uint32_t swapchainIdx) const { return GetRenderContext().GetWindow().GetDrawCommandBuffer(swapchainIdx); }
+void rendering::RenderContext::FlushSetupCommandBuffer() { GetRenderContext().FlushSetupCommandBuffer(); }
+prosper::WindowSettings &rendering::RenderContext::GetInitialWindowSettings() { return GetRenderContext().GetInitialWindowSettings(); }
+void rendering::RenderContext::SetValidationErrorDisabled(const std::string &id, bool disabled)
 {
 	if(!disabled) {
 		auto it = m_disabledValidationErrors.find(id);
@@ -187,12 +187,12 @@ void pragma::rendering::RenderContext::SetValidationErrorDisabled(const std::str
 	}
 	m_disabledValidationErrors.insert(id);
 }
-bool pragma::rendering::RenderContext::IsValidationErrorDisabled(const std::string &id) const
+bool rendering::RenderContext::IsValidationErrorDisabled(const std::string &id) const
 {
 	auto it = m_disabledValidationErrors.find(id);
 	return (it != m_disabledValidationErrors.end());
 }
-void pragma::rendering::RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severityFlags, const std::string &message)
+void rendering::RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severityFlags, const std::string &message)
 {
 	std::string strMsg = message;
 
@@ -210,47 +210,47 @@ void pragma::rendering::RenderContext::ValidationCallback(prosper::DebugMessageS
 			return;
 	}
 
-	if(pragma::math::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::ErrorBit))
+	if(math::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::ErrorBit))
 		LOGGER_VALIDATION.error(strMsg);
-	else if(pragma::math::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::WarningBit))
+	else if(math::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::WarningBit))
 		LOGGER_VALIDATION.warn(strMsg);
-	else if(pragma::math::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::InfoBit))
+	else if(math::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::InfoBit))
 		LOGGER_VALIDATION.info(strMsg);
-	else if(pragma::math::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::VerboseBit))
+	else if(math::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::VerboseBit))
 		LOGGER_VALIDATION.debug(strMsg);
 	else
 		LOGGER_VALIDATION.trace(strMsg);
 
-	if(pragma::math::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::WarningBit | prosper::DebugMessageSeverityFlags::ErrorBit)) {
-		auto stackBacktraceString = pragma::debug::get_formatted_stack_backtrace_string();
+	if(math::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::WarningBit | prosper::DebugMessageSeverityFlags::ErrorBit)) {
+		auto stackBacktraceString = debug::get_formatted_stack_backtrace_string();
 		if(!stackBacktraceString.empty()) {
-			pragma::string::replace(stackBacktraceString, "\n", pragma::util::LOG_NL);
+			string::replace(stackBacktraceString, "\n", util::LOG_NL);
 			LOGGER_VALIDATION.debug("Backtrace: {}", stackBacktraceString);
 		}
 	}
-	pragma::flush_loggers();
+	flush_loggers();
 }
 
-void pragma::rendering::RenderContext::OnClose() {}
+void rendering::RenderContext::OnClose() {}
 
-void pragma::rendering::RenderContext::OnResolutionChanged(uint32_t w, uint32_t h) {}
-void pragma::rendering::RenderContext::DrawFrameCore() {}
-void pragma::rendering::RenderContext::OnWindowInitialized()
+void rendering::RenderContext::OnResolutionChanged(uint32_t w, uint32_t h) {}
+void rendering::RenderContext::DrawFrameCore() {}
+void rendering::RenderContext::OnWindowInitialized()
 {
 	// TODO: Remove this function
 }
 
-void pragma::rendering::RenderContext::DrawFrame() { GetRenderContext().DrawFrameCore(); }
+void rendering::RenderContext::DrawFrame() { GetRenderContext().DrawFrameCore(); }
 
-void pragma::rendering::RenderContext::SetGfxAPIValidationEnabled(bool b)
+void rendering::RenderContext::SetGfxAPIValidationEnabled(bool b)
 {
-	pragma::math::set_flag(m_stateFlags, StateFlags::GfxAPIValidationEnabled, b);
+	math::set_flag(m_stateFlags, StateFlags::GfxAPIValidationEnabled, b);
 	if(b)
 		spdlog::flush_on(spdlog::level::info); // Immediately flush all messages
 }
-void pragma::rendering::RenderContext::SetGfxDiagnosticsModeEnabled(bool b) { pragma::math::set_flag(m_stateFlags, StateFlags::GfxDiagnosticsModeEnabled, b); }
-bool pragma::rendering::RenderContext::IsGfxAPIValidationEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::GfxAPIValidationEnabled); }
-bool pragma::rendering::RenderContext::IsGfxDiagnosticsModeEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::GfxDiagnosticsModeEnabled); }
+void rendering::RenderContext::SetGfxDiagnosticsModeEnabled(bool b) { math::set_flag(m_stateFlags, StateFlags::GfxDiagnosticsModeEnabled, b); }
+bool rendering::RenderContext::IsGfxAPIValidationEnabled() const { return math::is_flag_set(m_stateFlags, StateFlags::GfxAPIValidationEnabled); }
+bool rendering::RenderContext::IsGfxDiagnosticsModeEnabled() const { return math::is_flag_set(m_stateFlags, StateFlags::GfxDiagnosticsModeEnabled); }
 
-void pragma::rendering::RenderContext::SetRenderAPI(const std::string &renderAPI) { m_renderAPI = renderAPI; }
-const std::string &pragma::rendering::RenderContext::GetRenderAPI() const { return m_renderAPI; }
+void rendering::RenderContext::SetRenderAPI(const std::string &renderAPI) { m_renderAPI = renderAPI; }
+const std::string &rendering::RenderContext::GetRenderAPI() const { return m_renderAPI; }

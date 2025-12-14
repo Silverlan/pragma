@@ -7,9 +7,9 @@ module pragma.shared;
 import :assets.conversion;
 import se_script;
 
-bool pragma::util::port_sound_script(pragma::NetworkState *nw, const std::string &path)
+bool pragma::util::port_sound_script(NetworkState *nw, const std::string &path)
 {
-	static auto *ptrOpenArchiveFile = reinterpret_cast<void (*)(const std::string &,fs::VFilePtr &, const std::optional<std::string> &)>(pragma::util::impl::get_module_func(nw, "open_archive_file"));
+	static auto *ptrOpenArchiveFile = reinterpret_cast<void (*)(const std::string &,fs::VFilePtr &, const std::optional<std::string> &)>(impl::get_module_func(nw, "open_archive_file"));
 	if(ptrOpenArchiveFile == nullptr)
 		return false;
 	fs::VFilePtr f = nullptr;
@@ -19,8 +19,8 @@ bool pragma::util::port_sound_script(pragma::NetworkState *nw, const std::string
 	source_engine::script::ScriptBlock root {};
 	if(source_engine::script::read_script(f, root) != source_engine::script::ResultCode::Ok)
 		return false;
-	auto outPath = pragma::util::IMPORT_PATH + fs::get_canonicalized_path(path);
-	if(pragma::string::substr(outPath, 0, 8) == std::string("scripts") + fs::get_directory_separator())
+	auto outPath = IMPORT_PATH + fs::get_canonicalized_path(path);
+	if(string::substr(outPath, 0, 8) == std::string("scripts") + fs::get_directory_separator())
 		outPath = "scripts/sounds/" + outPath.substr(8);
 	ufile::remove_extension_from_filename(outPath, std::array<std::string, 1> {"txt"});
 	outPath += ".udm";
@@ -67,7 +67,7 @@ bool pragma::util::port_sound_script(pragma::NetworkState *nw, const std::string
 				else if(outVal == "PITCH_HIGH")
 					outVal = "1.2";
 				else
-					outVal = std::to_string(pragma::util::to_float(outVal) / 100.f);
+					outVal = std::to_string(to_float(outVal) / 100.f);
 				udmEvent["pitch"] = outVal;
 			}
 			else if(val.identifier == "soundlevel") {
@@ -79,8 +79,8 @@ bool pragma::util::port_sound_script(pragma::NetworkState *nw, const std::string
 				}
 			}
 			else if(val.identifier == "channel") {
-				const std::unordered_map<std::string, pragma::audio::ALSoundType> channelToType = {{"CHAN_AUTO", pragma::audio::ALSoundType::Generic}, {"CHAN_WEAPON", pragma::audio::ALSoundType::Weapon}, {"CHAN_VOICE", pragma::audio::ALSoundType::Voice},
-				  {"CHAN_VOICE2", pragma::audio::ALSoundType::Voice}, {"CHAN_ITEM", pragma::audio::ALSoundType::Physics}, {"CHAN_BODY", pragma::audio::ALSoundType::Effect}, {"CHAN_VOICE_BASE", pragma::audio::ALSoundType::Voice}};
+				const std::unordered_map<std::string, audio::ALSoundType> channelToType = {{"CHAN_AUTO", audio::ALSoundType::Generic}, {"CHAN_WEAPON", audio::ALSoundType::Weapon}, {"CHAN_VOICE", audio::ALSoundType::Voice},
+				  {"CHAN_VOICE2", audio::ALSoundType::Voice}, {"CHAN_ITEM", audio::ALSoundType::Physics}, {"CHAN_BODY", audio::ALSoundType::Effect}, {"CHAN_VOICE_BASE", audio::ALSoundType::Voice}};
 				auto it = channelToType.find(val.value);
 				if(it != channelToType.end())
 					udmEvent["type"] = udm::enum_to_string(it->second);
@@ -93,7 +93,7 @@ bool pragma::util::port_sound_script(pragma::NetworkState *nw, const std::string
 		auto bStream = false;
 		if(sources.empty() == false) {
 			for(auto &src : sources) {
-				if(pragma::string::match(src, "*loop*") == true)
+				if(string::match(src, "*loop*") == true)
 					udmEvent["loop"] = true;
 
 				const std::string removePrefixes = "*#@><^()}$!?"; // Special prefixes that need to be removed

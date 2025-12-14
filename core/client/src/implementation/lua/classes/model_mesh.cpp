@@ -10,27 +10,27 @@ import :model;
 
 void Lua::ModelMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::geometry::ModelMesh>>(l, pragma::util::make_shared<pragma::geometry::CModelMesh>()); }
 void Lua::ModelSubMesh::Client::Create(lua::State *l) { Lua::Push<std::shared_ptr<pragma::geometry::ModelSubMesh>>(l, pragma::util::make_shared<pragma::geometry::CModelSubMesh>()); }
-void Lua::ModelSubMesh::Client::GetVkMesh(lua::State *l, pragma::geometry::ModelSubMesh &mesh) { Lua::Push<std::shared_ptr<::pragma::rendering::SceneMesh>>(l, static_cast<pragma::geometry::CModelSubMesh &>(mesh).GetSceneMesh()); }
+void Lua::ModelSubMesh::Client::GetVkMesh(lua::State *l, pragma::geometry::ModelSubMesh &mesh) { Lua::Push<std::shared_ptr<pragma::rendering::SceneMesh>>(l, static_cast<pragma::geometry::CModelSubMesh &>(mesh).GetSceneMesh()); }
 void Lua::ModelSubMesh::Client::GetTangents(lua::State *l, pragma::geometry::ModelSubMesh &mesh)
 {
 	auto &verts = mesh.GetVertices();
 
-	auto tTangents = Lua::CreateTable(l);
+	auto tTangents = CreateTable(l);
 	for(auto i = decltype(verts.size()) {0}; i < verts.size(); ++i) {
-		Lua::PushInt(l, i + 1);
+		PushInt(l, i + 1);
 		Lua::Push<Vector3>(l, verts[i].tangent);
-		Lua::SetTableValue(l, tTangents);
+		SetTableValue(l, tTangents);
 	}
 }
 void Lua::ModelSubMesh::Client::GetBiTangents(lua::State *l, pragma::geometry::ModelSubMesh &mesh)
 {
 	auto &verts = mesh.GetVertices();
 
-	auto tBiTangents = Lua::CreateTable(l);
+	auto tBiTangents = CreateTable(l);
 	for(auto i = decltype(verts.size()) {0}; i < verts.size(); ++i) {
-		Lua::PushInt(l, i + 1);
+		PushInt(l, i + 1);
 		Lua::Push<Vector3>(l, verts[i].GetBiTangent());
-		Lua::SetTableValue(l, tBiTangents);
+		SetTableValue(l, tBiTangents);
 	}
 }
 void Lua::ModelSubMesh::Client::GetVertexBuffer(lua::State *l, pragma::geometry::ModelSubMesh &mesh)
@@ -39,7 +39,7 @@ void Lua::ModelSubMesh::Client::GetVertexBuffer(lua::State *l, pragma::geometry:
 	auto &buf = vkMesh->GetVertexBuffer();
 	if(buf == nullptr)
 		return;
-	Lua::Push(l, buf);
+	Push(l, buf);
 }
 void Lua::ModelSubMesh::Client::GetVertexWeightBuffer(lua::State *l, pragma::geometry::ModelSubMesh &mesh)
 {
@@ -47,7 +47,7 @@ void Lua::ModelSubMesh::Client::GetVertexWeightBuffer(lua::State *l, pragma::geo
 	auto &buf = vkMesh->GetVertexWeightBuffer();
 	if(buf == nullptr)
 		return;
-	Lua::Push(l, buf);
+	Push(l, buf);
 }
 void Lua::ModelSubMesh::Client::GetAlphaBuffer(lua::State *l, pragma::geometry::ModelSubMesh &mesh)
 {
@@ -55,7 +55,7 @@ void Lua::ModelSubMesh::Client::GetAlphaBuffer(lua::State *l, pragma::geometry::
 	auto &buf = vkMesh->GetAlphaBuffer();
 	if(buf == nullptr)
 		return;
-	Lua::Push(l, buf);
+	Push(l, buf);
 }
 void Lua::ModelSubMesh::Client::GetIndexBuffer(lua::State *l, pragma::geometry::ModelSubMesh &mesh)
 {
@@ -63,5 +63,5 @@ void Lua::ModelSubMesh::Client::GetIndexBuffer(lua::State *l, pragma::geometry::
 	auto &buf = vkMesh->GetIndexBuffer();
 	if(buf == nullptr)
 		return;
-	Lua::Push(l, buf);
+	Push(l, buf);
 }

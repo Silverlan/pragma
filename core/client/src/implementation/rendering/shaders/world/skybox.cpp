@@ -13,7 +13,7 @@ import :model;
 
 using namespace pragma;
 
-decltype(ShaderSkybox::VERTEX_BINDING_VERTEX) ShaderSkybox::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(pragma::rendering::VertexBufferData)};
+decltype(ShaderSkybox::VERTEX_BINDING_VERTEX) ShaderSkybox::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(rendering::VertexBufferData)};
 decltype(ShaderSkybox::VERTEX_ATTRIBUTE_POSITION) ShaderSkybox::VERTEX_ATTRIBUTE_POSITION = {ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_POSITION, VERTEX_BINDING_VERTEX};
 decltype(ShaderSkybox::DESCRIPTOR_SET_INSTANCE) ShaderSkybox::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderSkybox::DESCRIPTOR_SET_SCENE) ShaderSkybox::DESCRIPTOR_SET_SCENE = {&ShaderEntity::DESCRIPTOR_SET_SCENE};
@@ -26,7 +26,7 @@ ShaderSkybox::ShaderSkybox(prosper::IPrContext &context, const std::string &iden
 	m_shaderMaterialName = "skybox";
 }
 
-bool ShaderSkybox::GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
+bool ShaderSkybox::GetRenderBufferTargets(geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
 {
 	auto &sceneMesh = mesh.GetSceneMesh();
 	if(sceneMesh == nullptr)
@@ -35,7 +35,7 @@ bool ShaderSkybox::GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh,
 	if(indexBuffer) {
 		outIndexBufferInfo = prosper::IndexBufferInfo {};
 		outIndexBufferInfo->buffer = indexBuffer;
-		outIndexBufferInfo->indexType = (mesh.GetIndexType() == pragma::geometry::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
+		outIndexBufferInfo->indexType = (mesh.GetIndexType() == geometry::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
 		outIndexBufferInfo->offset = 0;
 	}
 
@@ -79,8 +79,8 @@ uint32_t ShaderSkybox::GetRendererDescriptorSetIndex() const { return DESCRIPTOR
 uint32_t ShaderSkybox::GetCameraDescriptorSetIndex() const { return std::numeric_limits<uint32_t>::max(); }
 uint32_t ShaderSkybox::GetInstanceDescriptorSetIndex() const { return DESCRIPTOR_SET_INSTANCE.setIndex; }
 
-void ShaderSkybox::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+void ShaderSkybox::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
+  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const
 {
 	std::array<prosper::IDescriptorSet *, 2> descSets {&dsScene, &dsRenderer};
 

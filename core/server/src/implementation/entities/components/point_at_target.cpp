@@ -14,12 +14,12 @@ using namespace pragma;
 void SPointAtTargetComponent::Initialize() { BasePointAtTargetComponent::Initialize(); }
 void SPointAtTargetComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void SPointAtTargetComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { pragma::networking::write_unique_entity(packet, GetPointAtTarget()); }
+void SPointAtTargetComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { networking::write_unique_entity(packet, GetPointAtTarget()); }
 
-void SPointAtTargetComponent::SetPointAtTarget(pragma::ecs::BaseEntity *ent)
+void SPointAtTargetComponent::SetPointAtTarget(ecs::BaseEntity *ent)
 {
 	BasePointAtTargetComponent::SetPointAtTarget(ent);
 	NetPacket p {};
-	pragma::networking::write_entity(p, ent);
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetPointAtTarget, p, pragma::networking::Protocol::SlowReliable);
+	networking::write_entity(p, ent);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetPointAtTarget, p, networking::Protocol::SlowReliable);
 }

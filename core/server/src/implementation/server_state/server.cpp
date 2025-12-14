@@ -37,7 +37,7 @@ void pragma::ServerState::RegisterServerInfo()
 	m_serverData.players = SGame::Get()->GetPlayerCount();
 	m_serverData.tcpPort = port.has_value() ? *port : 0;
 	m_serverData.udpPort = port.has_value() ? *port : 0;
-	m_serverData.engineVersion = pragma::get_engine_version();
+	m_serverData.engineVersion = get_engine_version();
 	m_serverData.maxPlayers = GetConVarInt("sv_maxplayers");
 	m_serverData.password = password.empty() == false;
 	//m_serverData.bots
@@ -52,7 +52,7 @@ void pragma::ServerState::RegisterServerInfo()
 	}
 }
 
-void pragma::ServerState::SetServerInterface(std::unique_ptr<pragma::networking::IServer> iserver)
+void pragma::ServerState::SetServerInterface(std::unique_ptr<networking::IServer> iserver)
 {
 	// TODO: Remove this file
 	//CloseServer();
@@ -74,7 +74,7 @@ void pragma::ServerState::CloseServer()
 {
 	if(m_server == nullptr)
 		return;
-	pragma::networking::Error err;
+	networking::Error err;
 	if(m_server->Shutdown(err) == true)
 		return;
 	spdlog::error("Unable to shut down server: ", err.GetMessage());

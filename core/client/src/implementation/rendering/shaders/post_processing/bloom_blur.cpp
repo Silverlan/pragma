@@ -12,11 +12,11 @@ import :client_state;
 
 using namespace pragma;
 
-pragma::rendering::BloomPipelineInfo::BloomPipelineInfo(uint32_t radius, double sigma) : radius(radius), sigma(sigma) {}
+rendering::BloomPipelineInfo::BloomPipelineInfo(uint32_t radius, double sigma) : radius(radius), sigma(sigma) {}
 
-ShaderPPBloomBlurBase::ShaderPPBloomBlurBase(prosper::IPrContext &context, const std::string &identifier, const std::string &fsShader) : prosper::ShaderBlurBase(context, identifier, fsShader), m_defaultPipeline {AddPipeline(DEFAULT_RADIUS, DEFAULT_SIGMA)} {}
+ShaderPPBloomBlurBase::ShaderPPBloomBlurBase(prosper::IPrContext &context, const std::string &identifier, const std::string &fsShader) : ShaderBlurBase(context, identifier, fsShader), m_defaultPipeline {AddPipeline(DEFAULT_RADIUS, DEFAULT_SIGMA)} {}
 
-std::shared_ptr<pragma::rendering::BloomPipelineInfo> ShaderPPBloomBlurBase::AddPipeline(uint32_t radius, double sigma)
+std::shared_ptr<rendering::BloomPipelineInfo> ShaderPPBloomBlurBase::AddPipeline(uint32_t radius, double sigma)
 {
 	for(auto &info : m_pipelineInfos) {
 		if(info.expired())
@@ -25,14 +25,14 @@ std::shared_ptr<pragma::rendering::BloomPipelineInfo> ShaderPPBloomBlurBase::Add
 		if(pInfo->radius == radius && pInfo->sigma == sigma)
 			return pInfo;
 	}
-	auto info = pragma::util::make_shared<pragma::rendering::BloomPipelineInfo>(radius, sigma);
+	auto info = pragma::util::make_shared<rendering::BloomPipelineInfo>(radius, sigma);
 	m_pipelineInfos.push_back(info);
 	return info;
 }
 
 void ShaderPPBloomBlurBase::OnInitializePipelines()
 {
-	prosper::ShaderBlurBase::OnInitializePipelines();
+	ShaderBlurBase::OnInitializePipelines();
 	for(auto it = m_pipelineInfos.begin(); it != m_pipelineInfos.end();) {
 		auto &info = *it;
 		if(info.expired()) {
@@ -44,11 +44,11 @@ void ShaderPPBloomBlurBase::OnInitializePipelines()
 	SetPipelineCount(m_pipelineInfos.size(), false);
 }
 
-void ShaderPPBloomBlurBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { CreateCachedRenderPass<ShaderPPBloomBlurBase>({{{pragma::ShaderGameWorldLightingPass::RENDER_PASS_FORMAT}}}, outRenderPass, pipelineIdx); }
+void ShaderPPBloomBlurBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { CreateCachedRenderPass<ShaderPPBloomBlurBase>({{{ShaderGameWorldLightingPass::RENDER_PASS_FORMAT}}}, outRenderPass, pipelineIdx); }
 
 void ShaderPPBloomBlurBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	prosper::ShaderBlurBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+	ShaderBlurBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
 	assert(pipelineIdx < m_pipelineInfos.size());
 	auto &info = m_pipelineInfos[pipelineIdx];
@@ -57,7 +57,7 @@ void ShaderPPBloomBlurBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreat
 		return;
 	auto pInfo = info.lock();
 	pInfo->pipelineIdx = pipelineIdx;
-	auto coefficients = pragma::util::generate_two_pass_gaussian_blur_coefficients(pInfo->radius, pInfo->sigma);
+	auto coefficients = util::generate_two_pass_gaussian_blur_coefficients(pInfo->radius, pInfo->sigma);
 
 	auto numSamples = coefficients.first.size();
 	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, 0u /* constantId */, static_cast<int32_t>(numSamples));

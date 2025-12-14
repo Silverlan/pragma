@@ -9,7 +9,7 @@ import :core.choreographic_scene;
 import :client_state;
 import :entities.components;
 
-choreography::Scene::Scene() : uts::TimelineScene() {}
+choreography::Scene::Scene() : TimelineScene() {}
 choreography::Scene::~Scene() {}
 choreography::Channel::Channel(uts::TimelineScene &scene, const std::string &name) : uts::Channel(scene, name) {}
 choreography::Channel::~Channel() {}

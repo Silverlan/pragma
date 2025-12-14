@@ -8,7 +8,7 @@ import :util.data_file;
 
 pragma::util::DataFileBlock *pragma::util::DataFile::Read(const char *fName)
 {
-	auto f = pragma::fs::open_file(fName, pragma::fs::FileMode::Read);
+	auto f = pragma::fs::open_file(fName, fs::FileMode::Read);
 	DataFileBlock *block = ReadBlock(f);
 	return block;
 }
@@ -19,10 +19,10 @@ pragma::util::DataFileBlock *pragma::util::DataFile::ReadBlock(fs::VFilePtr f)
 	while(!f->Eof()) {
 		std::string sbuf = f->ReadLine();
 		if(sbuf.length() > 0 && sbuf[0] != '\0') {
-			pragma::string::remove_whitespace(sbuf);
+			string::remove_whitespace(sbuf);
 			if(sbuf.length() > 0) {
-				size_t cLast = sbuf.find_first_of(pragma::string::WHITESPACE);
-				size_t cNext = sbuf.find_first_not_of(pragma::string::WHITESPACE, cLast);
+				size_t cLast = sbuf.find_first_of(string::WHITESPACE);
+				size_t cNext = sbuf.find_first_not_of(string::WHITESPACE, cLast);
 				if(cNext != size_t(-1)) {
 					std::string key, val;
 					size_t stKey = sbuf.find('\"');
@@ -37,7 +37,7 @@ pragma::util::DataFileBlock *pragma::util::DataFile::ReadBlock(fs::VFilePtr f)
 					return block;
 				else // Sub-Block
 				{
-					pragma::string::remove_quotes(sbuf);
+					string::remove_quotes(sbuf);
 					char c;
 					do
 						c = static_cast<char>(f->ReadChar());

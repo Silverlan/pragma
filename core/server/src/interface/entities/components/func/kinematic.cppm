@@ -15,7 +15,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SKinematicComponent final : public BaseFuncKinematicComponent, public SBaseNetComponent {
 		  public:
-			SKinematicComponent(pragma::ecs::BaseEntity &ent) : BaseFuncKinematicComponent(ent) {}
+			SKinematicComponent(ecs::BaseEntity &ent) : BaseFuncKinematicComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual void StartForward() override;
 			virtual void StartBackward() override;

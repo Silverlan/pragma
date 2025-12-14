@@ -12,7 +12,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SObserverComponent final : public BaseObserverComponent, public SBaseNetComponent {
 	  public:
-		SObserverComponent(pragma::ecs::BaseEntity &ent);
+		SObserverComponent(ecs::BaseEntity &ent);
 		virtual ~SObserverComponent() override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 

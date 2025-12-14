@@ -76,14 +76,14 @@ void Con::WriteToLog(std::string str)
 	pragma::Engine::Get()->WriteToLog(str);
 }
 
-void Con::set_output_callback(const std::function<void(const std::string_view &, pragma::console::MessageFlags, const ::Color *)> &callback) { detail::outputCallback = callback; }
+void Con::set_output_callback(const std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> &callback) { detail::outputCallback = callback; }
 const std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> &Con::get_output_callback() { return detail::outputCallback; }
-void Con::print(const std::string_view &sv, const ::Color &color, pragma::console::MessageFlags flags)
+void Con::print(const std::string_view &sv, const Color &color, pragma::console::MessageFlags flags)
 {
 	pragma::console::set_console_color(pragma::console::color_to_console_color_flags(color));
 	std::cout << sv;
-	Con::flush();
-	auto &outputCallback = Con::get_output_callback();
+	flush();
+	auto &outputCallback = get_output_callback();
 	if(outputCallback == nullptr)
 		return;
 	outputCallback(sv, flags, &color);
@@ -91,8 +91,8 @@ void Con::print(const std::string_view &sv, const ::Color &color, pragma::consol
 void Con::print(const std::string_view &sv, pragma::console::MessageFlags flags)
 {
 	std::cout << sv;
-	Con::flush();
-	auto &outputCallback = Con::get_output_callback();
+	flush();
+	auto &outputCallback = get_output_callback();
 	if(outputCallback == nullptr)
 		return;
 	outputCallback(sv, flags, nullptr);
@@ -213,7 +213,7 @@ std::basic_ostream<char, std::char_traits<char>> &Con::endl(std::basic_ostream<c
 	os << "\n";
 	//os<<"\033[0m"<<"\n";
 #endif
-	switch(Con::detail::currentLevel) {
+	switch(detail::currentLevel) {
 	case pragma::util::LogSeverity::Warning:
 	case pragma::util::LogSeverity::Error:
 	case pragma::util::LogSeverity::Critical:
@@ -226,10 +226,10 @@ std::basic_ostream<char, std::char_traits<char>> &Con::endl(std::basic_ostream<c
 		break;
 	}
 	std::cout.flush();
-	Con::detail::currentLevel = pragma::util::LogSeverity::Disabled;
+	detail::currentLevel = pragma::util::LogSeverity::Disabled;
 	if(pragma::logging::detail::shouldLogOutput)
 		log_output();
-	switch(Con::detail::currentLevel) {
+	switch(detail::currentLevel) {
 	case pragma::util::LogSeverity::Error:
 	case pragma::util::LogSeverity::Critical:
 		pragma::flush_loggers(); // Flush loggers immediately in case this will lead to a crash
@@ -246,7 +246,7 @@ std::basic_ostream<char, std::char_traits<char>> &Con::prefix(std::basic_ostream
 {
 	// If the message has a prefix, the prefix may overwrite the color of the main message, so we
 	// have to reset the color here.
-	switch(Con::detail::currentLevel) {
+	switch(detail::currentLevel) {
 	case pragma::util::LogSeverity::Warning:
 		os << Con::COLOR_WARNING;
 		if(pragma::logging::detail::shouldLogOutput) {

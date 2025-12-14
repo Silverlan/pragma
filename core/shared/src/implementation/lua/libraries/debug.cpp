@@ -22,8 +22,8 @@ int Lua::debug::collectgarbage(lua::State *l)
 {
 	// Calling twice on purpose: https://stackoverflow.com/a/28320364/2482983
 	std::string err;
-	Lua::RunString(l, "collectgarbage()", "internal", err);
-	Lua::RunString(l, "collectgarbage()", "internal", err);
+	RunString(l, "collectgarbage()", "internal", err);
+	RunString(l, "collectgarbage()", "internal", err);
 	return 0;
 }
 void Lua::debug::stackdump(lua::State *l)
@@ -92,15 +92,15 @@ void Lua::debug::enable_remote_debugging(lua::State *l)
 		return;
 	}
 
-	Lua::GetGlobal(l, "require");
-	Lua::PushString(l, "modules/mobdebug"); // Note: This will disable jit!
+	GetGlobal(l, "require");
+	PushString(l, "modules/mobdebug"); // Note: This will disable jit!
 	std::string errMsg;
 	auto r = pragma::scripting::lua_core::protected_call(l, 1, 1, &errMsg);
-	if(r == Lua::StatusCode::Ok) {
-		Lua::GetField(l, -1, "start");
+	if(r == StatusCode::Ok) {
+		GetField(l, -1, "start");
 		r = pragma::scripting::lua_core::protected_call(l, 0, 0, &errMsg);
-		Lua::Pop(l, 1); // Pop return value of "require" from stack
+		Pop(l, 1); // Pop return value of "require" from stack
 	}
-	if(r != Lua::StatusCode::Ok)
+	if(r != StatusCode::Ok)
 		Con::cwar << "Unable to enable remote debugging:\n" << errMsg << Con::endl;
 }

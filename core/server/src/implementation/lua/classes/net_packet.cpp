@@ -10,7 +10,7 @@ import :networking.util;
 
 void Lua::NetPacket::Server::register_class(luabind::class_<::NetPacket> &classDef)
 {
-	Lua::NetPacket::register_class(classDef);
+	NetPacket::register_class(classDef);
 	classDef.def("WriteSoundSource", &WriteALSound);
 	classDef.def("WriteUniqueEntity", static_cast<void (*)(lua::State *, ::NetPacket &, pragma::ecs::BaseEntity *)>(&WriteUniqueEntity));
 	classDef.def("WriteUniqueEntity", static_cast<void (*)(lua::State *, ::NetPacket &)>(&WriteUniqueEntity));

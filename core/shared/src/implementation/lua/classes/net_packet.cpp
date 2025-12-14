@@ -11,11 +11,11 @@ import :scripting.lua.classes.net_packet;
 void Lua::NetPacket::register_class(luabind::class_<::NetPacket> &classDef)
 {
 	Lua::DataStream::register_class<::NetPacket>(classDef);
-	classDef.def("WriteEntity", static_cast<void (*)(lua::State *, ::NetPacket &, pragma::ecs::BaseEntity *)>(&Lua::NetPacket::WriteEntity));
-	classDef.def("WriteEntity", static_cast<void (*)(lua::State *, ::NetPacket &)>(&Lua::NetPacket::WriteEntity));
-	classDef.def("ReadEntity", &Lua::NetPacket::ReadEntity);
-	classDef.def("ReadSoundSource", &Lua::NetPacket::ReadALSound);
-	classDef.def("GetTimeSinceTransmission", &Lua::NetPacket::GetTimeSinceTransmission);
+	classDef.def("WriteEntity", static_cast<void (*)(lua::State *, ::NetPacket &, pragma::ecs::BaseEntity *)>(&WriteEntity));
+	classDef.def("WriteEntity", static_cast<void (*)(lua::State *, ::NetPacket &)>(&WriteEntity));
+	classDef.def("ReadEntity", &ReadEntity);
+	classDef.def("ReadSoundSource", &ReadALSound);
+	classDef.def("GetTimeSinceTransmission", &GetTimeSinceTransmission);
 }
 
 DLLNETWORK void Lua_NetPacket_GetSize(lua::State *l, NetPacket &packet)

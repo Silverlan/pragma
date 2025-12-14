@@ -40,7 +40,7 @@ void pragma::physics::PhysWaterSurfaceSimulator::SolveEdges(const SurfaceInfo &s
 void pragma::physics::PhysWaterSurfaceSimulator::SetParticleHeight(const SurfaceInfo &surfInfo, std::size_t ptIdx, float height)
 {
 	auto &pt = m_particleField.at(ptIdx);
-	pt.SetHeight(pragma::math::min(height, surfInfo.maxHeight));
+	pt.SetHeight(math::min(height, surfInfo.maxHeight));
 	m_threadParticleHeights.at(ptIdx) = height;
 }
 void pragma::physics::PhysWaterSurfaceSimulator::Integrate(const SurfaceInfo &surfInfo, double dt)

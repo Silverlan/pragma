@@ -16,12 +16,12 @@ import :rendering.shaders;
 
 pragma::physics::CPhysWaterSurfaceSimulator::CPhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 aabbMax, float originY, uint32_t spacing, float stiffness, float propagation) : PhysWaterSurfaceSimulator(aabbMin, aabbMax, originY, spacing, stiffness, propagation)
 {
-	m_cmdBuffer = pragma::get_cengine()->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute, m_universalQueueFamilyIndex);
-	m_whShaderSurface = pragma::get_cengine()->GetShader("watersurface");
-	m_whShaderSurfaceIntegrate = pragma::get_cengine()->GetShader("watersurfaceintegrate");
-	m_whShaderSurfaceSolveEdges = pragma::get_cengine()->GetShader("watersurfacesolveedges");
-	m_whShaderSurfaceSumEdges = pragma::get_cengine()->GetShader("watersurfacesumedges");
-	m_whShaderWaterSplash = pragma::get_cengine()->GetShader("watersplash");
+	m_cmdBuffer = get_cengine()->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute, m_universalQueueFamilyIndex);
+	m_whShaderSurface = get_cengine()->GetShader("watersurface");
+	m_whShaderSurfaceIntegrate = get_cengine()->GetShader("watersurfaceintegrate");
+	m_whShaderSurfaceSolveEdges = get_cengine()->GetShader("watersurfacesolveedges");
+	m_whShaderSurfaceSumEdges = get_cengine()->GetShader("watersurfacesumedges");
+	m_whShaderWaterSplash = get_cengine()->GetShader("watersplash");
 }
 
 static auto cvGPUAcceleration = pragma::console::get_client_con_var("cl_water_surface_simulation_enable_gpu_acceleration");
@@ -52,23 +52,23 @@ void pragma::physics::CPhysWaterSurfaceSimulator::InitializeSurface()
 	}
 	m_particlePositions.resize(m_particleField.size());
 
-	if(m_bUseComputeShaders == false || m_whShaderSurface.expired() || m_whShaderSurfaceIntegrate.expired() || m_whShaderSurfaceSolveEdges.expired() || m_whShaderSurfaceSumEdges.expired() || pragma::ShaderWaterSurface::DESCRIPTOR_SET_WATER_EFFECT.IsValid() == false
-	  || pragma::ShaderWaterSplash::DESCRIPTOR_SET_WATER_EFFECT.IsValid() == false || pragma::ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_WATER_PARTICLES.IsValid() == false || pragma::ShaderWaterSurface::DESCRIPTOR_SET_SURFACE_INFO.IsValid() == false
-	  || pragma::ShaderWaterSurfaceSolveEdges::DESCRIPTOR_SET_WATER.IsValid() == false)
+	if(m_bUseComputeShaders == false || m_whShaderSurface.expired() || m_whShaderSurfaceIntegrate.expired() || m_whShaderSurfaceSolveEdges.expired() || m_whShaderSurfaceSumEdges.expired() || ShaderWaterSurface::DESCRIPTOR_SET_WATER_EFFECT.IsValid() == false
+	  || ShaderWaterSplash::DESCRIPTOR_SET_WATER_EFFECT.IsValid() == false || ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_WATER_PARTICLES.IsValid() == false || ShaderWaterSurface::DESCRIPTOR_SET_SURFACE_INFO.IsValid() == false
+	  || ShaderWaterSurfaceSolveEdges::DESCRIPTOR_SET_WATER.IsValid() == false)
 		return;
-	auto &shaderWaterSurface = static_cast<pragma::ShaderWaterSurface &>(*m_whShaderSurface.get());
-	m_descSetGroupParticles = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderWaterSurface::DESCRIPTOR_SET_WATER_EFFECT);
-	m_descSetGroupSplash = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderWaterSplash::DESCRIPTOR_SET_WATER_EFFECT);
+	auto &shaderWaterSurface = static_cast<ShaderWaterSurface &>(*m_whShaderSurface.get());
+	m_descSetGroupParticles = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderWaterSurface::DESCRIPTOR_SET_WATER_EFFECT);
+	m_descSetGroupSplash = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderWaterSplash::DESCRIPTOR_SET_WATER_EFFECT);
 
-	auto &shaderWaterSurfaceIntegrate = static_cast<pragma::ShaderWaterSurfaceIntegrate &>(*m_whShaderSurfaceIntegrate.get());
-	m_descSetGroupIntegrate = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_WATER_PARTICLES);
+	auto &shaderWaterSurfaceIntegrate = static_cast<ShaderWaterSurfaceIntegrate &>(*m_whShaderSurfaceIntegrate.get());
+	m_descSetGroupIntegrate = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_WATER_PARTICLES);
 
 	auto size = sizeof(Particle) * m_particleField.size();
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit;
 	createInfo.size = size;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-	m_particleBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, m_particleField.data());
+	m_particleBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, m_particleField.data());
 
 	// TODO
 	///size = sizeof(Vector3) *m_particlePositions.size();
@@ -85,39 +85,39 @@ void pragma::physics::CPhysWaterSurfaceSimulator::InitializeSurface()
 
 	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::VertexBufferBit;
 	createInfo.size = size;
-	m_positionBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, verts.data());
+	m_positionBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, verts.data());
 
 	auto &descSetParticles = *m_descSetGroupParticles->GetDescriptorSet();
-	descSetParticles.SetBindingStorageBuffer(*m_particleBuffer, pragma::math::to_integral(pragma::ShaderWaterSurface::WaterEffectBinding::WaterParticles));
-	descSetParticles.SetBindingStorageBuffer(*m_positionBuffer, pragma::math::to_integral(pragma::ShaderWaterSurface::WaterEffectBinding::WaterPositions));
+	descSetParticles.SetBindingStorageBuffer(*m_particleBuffer, math::to_integral(ShaderWaterSurface::WaterEffectBinding::WaterParticles));
+	descSetParticles.SetBindingStorageBuffer(*m_positionBuffer, math::to_integral(ShaderWaterSurface::WaterEffectBinding::WaterPositions));
 
 	auto &descSetSplash = *m_descSetGroupSplash->GetDescriptorSet();
-	descSetSplash.SetBindingStorageBuffer(*m_particleBuffer, pragma::math::to_integral(pragma::ShaderWaterSplash::WaterEffectBinding::WaterParticles));
-	descSetSplash.SetBindingStorageBuffer(*m_positionBuffer, pragma::math::to_integral(pragma::ShaderWaterSplash::WaterEffectBinding::WaterPositions));
+	descSetSplash.SetBindingStorageBuffer(*m_particleBuffer, math::to_integral(ShaderWaterSplash::WaterEffectBinding::WaterParticles));
+	descSetSplash.SetBindingStorageBuffer(*m_positionBuffer, math::to_integral(ShaderWaterSplash::WaterEffectBinding::WaterPositions));
 
 	auto &descSetIntegrate = *m_descSetGroupIntegrate->GetDescriptorSet();
-	descSetIntegrate.SetBindingStorageBuffer(*m_particleBuffer, pragma::math::to_integral(pragma::ShaderWaterSurfaceIntegrate::WaterParticlesBinding::WaterParticles));
+	descSetIntegrate.SetBindingStorageBuffer(*m_particleBuffer, math::to_integral(ShaderWaterSurfaceIntegrate::WaterParticlesBinding::WaterParticles));
 
 	// Initialize surface info buffer
 	size = sizeof(m_surfaceInfo);
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 	createInfo.size = size;
-	m_surfaceInfoBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_surfaceInfo);
-	m_descSetGroupSurfaceInfo = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderWaterSurface::DESCRIPTOR_SET_SURFACE_INFO);
+	m_surfaceInfoBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_surfaceInfo);
+	m_descSetGroupSurfaceInfo = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderWaterSurface::DESCRIPTOR_SET_SURFACE_INFO);
 	auto &descSetSurfaceInfo = *m_descSetGroupSurfaceInfo->GetDescriptorSet();
-	descSetSurfaceInfo.SetBindingUniformBuffer(*m_surfaceInfoBuffer, pragma::math::to_integral(pragma::ShaderWaterSurface::SurfaceInfoBinding::SurfaceInfo));
+	descSetSurfaceInfo.SetBindingUniformBuffer(*m_surfaceInfoBuffer, math::to_integral(ShaderWaterSurface::SurfaceInfoBinding::SurfaceInfo));
 
 	// Initialize edge buffer
 	std::vector<ParticleEdgeInfo> particleEdgeInfo(m_particleField.size());
 	size = sizeof(particleEdgeInfo.front()) * particleEdgeInfo.size();
 	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit;
 	createInfo.size = size;
-	m_edgeBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, particleEdgeInfo.data());
-	auto &shaderWaterSurfaceSolveEdges = static_cast<pragma::ShaderWaterSurfaceSolveEdges &>(*m_whShaderSurfaceSolveEdges.get());
-	m_edgeDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderWaterSurfaceSolveEdges::DESCRIPTOR_SET_WATER);
+	m_edgeBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, particleEdgeInfo.data());
+	auto &shaderWaterSurfaceSolveEdges = static_cast<ShaderWaterSurfaceSolveEdges &>(*m_whShaderSurfaceSolveEdges.get());
+	m_edgeDescSetGroup = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderWaterSurfaceSolveEdges::DESCRIPTOR_SET_WATER);
 	auto &descSetEdge = *m_edgeDescSetGroup->GetDescriptorSet();
-	descSetEdge.SetBindingStorageBuffer(*m_particleBuffer, pragma::math::to_integral(pragma::ShaderWaterSurfaceSolveEdges::WaterBinding::WaterParticles));
-	descSetEdge.SetBindingStorageBuffer(*m_edgeBuffer, pragma::math::to_integral(pragma::ShaderWaterSurfaceSolveEdges::WaterBinding::WaterEdgeData));
+	descSetEdge.SetBindingStorageBuffer(*m_particleBuffer, math::to_integral(ShaderWaterSurfaceSolveEdges::WaterBinding::WaterParticles));
+	descSetEdge.SetBindingStorageBuffer(*m_edgeBuffer, math::to_integral(ShaderWaterSurfaceSolveEdges::WaterBinding::WaterEdgeData));
 }
 
 const std::shared_ptr<prosper::IBuffer> &pragma::physics::CPhysWaterSurfaceSimulator::GetParticleBuffer() const { return m_particleBuffer; }
@@ -150,7 +150,7 @@ void pragma::physics::CPhysWaterSurfaceSimulator::Simulate(double dt)
 	// Apply splashes
 	prosper::ShaderBindState bindState {*computeCmd};
 	if(m_splashQueue.empty() == false) {
-		auto &shaderWaterSplash = static_cast<pragma::ShaderWaterSplash &>(*m_whShaderWaterSplash.get());
+		auto &shaderWaterSplash = static_cast<ShaderWaterSplash &>(*m_whShaderWaterSplash.get());
 		if(shaderWaterSplash.RecordBeginCompute(bindState) == true) {
 			while(m_splashQueue.empty() == false) {
 				shaderWaterSplash.RecordCompute(bindState, *m_descSetGroupSplash->GetDescriptorSet(), m_splashQueue.front());
@@ -167,7 +167,7 @@ void pragma::physics::CPhysWaterSurfaceSimulator::Simulate(double dt)
 	auto length = GetLength();
 
 	// Integrate
-	auto &shaderWaterSurfaceIntegrate = static_cast<pragma::ShaderWaterSurfaceIntegrate &>(*m_whShaderSurfaceIntegrate.get());
+	auto &shaderWaterSurfaceIntegrate = static_cast<ShaderWaterSurfaceIntegrate &>(*m_whShaderSurfaceIntegrate.get());
 	if(shaderWaterSurfaceIntegrate.RecordBeginCompute(bindState) == true) {
 		shaderWaterSurfaceIntegrate.RecordCompute(bindState, *m_descSetGroupSurfaceInfo->GetDescriptorSet(), *m_descSetGroupIntegrate->GetDescriptorSet(), width, length);
 		shaderWaterSurfaceIntegrate.RecordEndCompute(bindState);
@@ -177,8 +177,8 @@ void pragma::physics::CPhysWaterSurfaceSimulator::Simulate(double dt)
 	//
 
 	// Solve edges
-	auto &shaderWaterSolveEdges = static_cast<pragma::ShaderWaterSurfaceSolveEdges &>(*m_whShaderSurfaceSolveEdges.get());
-	auto &shaderWaterSumEdges = static_cast<pragma::ShaderWaterSurfaceSumEdges &>(*m_whShaderSurfaceSumEdges.get());
+	auto &shaderWaterSolveEdges = static_cast<ShaderWaterSurfaceSolveEdges &>(*m_whShaderSurfaceSolveEdges.get());
+	auto &shaderWaterSumEdges = static_cast<ShaderWaterSurfaceSumEdges &>(*m_whShaderSurfaceSumEdges.get());
 	auto sovleEdgeCount = GetEdgeIterationCount();
 	for(auto i = decltype(sovleEdgeCount) {0}; i < sovleEdgeCount; ++i) {
 		if(shaderWaterSolveEdges.RecordBeginCompute(bindState) == true) {
@@ -199,19 +199,19 @@ void pragma::physics::CPhysWaterSurfaceSimulator::Simulate(double dt)
 	//
 
 	//pragma::get_cengine()->StartGPUTimer(GPUTimerEvent::WaterSurface); // prosper TODO
-	auto &shaderWaterSurface = static_cast<pragma::ShaderWaterSurface &>(*m_whShaderSurface.get());
+	auto &shaderWaterSurface = static_cast<ShaderWaterSurface &>(*m_whShaderSurface.get());
 	if(shaderWaterSurface.RecordBeginCompute(bindState) == true) {
 		shaderWaterSurface.RecordCompute(bindState, *m_descSetGroupSurfaceInfo->GetDescriptorSet(), *m_descSetGroupParticles->GetDescriptorSet(), width, length);
 		shaderWaterSurface.RecordEndCompute(bindState);
 	}
 	//pragma::get_cengine()->StopGPUTimer(GPUTimerEvent::WaterSurface); // prosper TODO
 	computeCmd->StopRecording();
-	pragma::get_cengine()->GetRenderContext().SubmitCommandBuffer(*computeCmd);
+	get_cengine()->GetRenderContext().SubmitCommandBuffer(*computeCmd);
 }
 
 const std::vector<uint16_t> &pragma::physics::CPhysWaterSurfaceSimulator::GetTriangleIndices() const { return m_triangleIndices; }
 
-void pragma::physics::CPhysWaterSurfaceSimulator::Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::geometry::CModelSubMesh &mesh)
+void pragma::physics::CPhysWaterSurfaceSimulator::Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, geometry::CModelSubMesh &mesh)
 {
 	// TODO
 	auto &verts = mesh.GetVertices();
@@ -222,7 +222,7 @@ void pragma::physics::CPhysWaterSurfaceSimulator::Draw(std::shared_ptr<prosper::
 	std::vector<Vector4> particlePositions(m_particleField.size());
 	m_positionBuffer->Read(0ull, particlePositions.size() * sizeof(particlePositions.front()), particlePositions.data());
 
-	auto numVerts = pragma::math::min(verts.size(), GetParticleCount());
+	auto numVerts = math::min(verts.size(), GetParticleCount());
 	for(auto i = decltype(numVerts) {0}; i < numVerts; ++i) {
 		auto pos = CalcParticlePosition(i); //m_particlePositions.at(i); // TODO: Remove m_particlePositions?
 

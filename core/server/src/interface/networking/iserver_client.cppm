@@ -23,19 +23,19 @@ export {
 			}
 			~IServerClient();
 			virtual void Initialize() {};
-			virtual bool Drop(DropReason reason, pragma::networking::Error &outErr) = 0;
+			virtual bool Drop(DropReason reason, Error &outErr) = 0;
 			virtual uint16_t GetLatency() const = 0;
 			virtual std::string GetIdentifier() const = 0;
 			std::optional<IPAddress> GetIPAddress() const;
 			virtual std::optional<std::string> GetIP() const = 0;
 			virtual std::optional<Port> GetPort() const = 0;
 			virtual bool IsListenServerHost() const = 0;
-			virtual bool SendPacket(pragma::networking::Protocol protocol, NetPacket &packet, pragma::networking::Error &outErr) = 0;
+			virtual bool SendPacket(Protocol protocol, NetPacket &packet, Error &outErr) = 0;
 
 			enum class TransferState : uint32_t { Initial = 0, Started, Complete };
 
-			pragma::BasePlayerComponent *GetPlayer() const;
-			void SetPlayer(pragma::BasePlayerComponent &pl);
+			BasePlayerComponent *GetPlayer() const;
+			void SetPlayer(BasePlayerComponent &pl);
 			const std::vector<std::shared_ptr<Resource>> &GetResourceTransfer() const;
 			bool AddResource(const std::string &fileName, bool stream = true);
 			void RemoveResource(uint32_t i);
@@ -57,7 +57,7 @@ export {
 		  protected:
 			IServerClient() = default;
 		  private:
-			mutable pragma::ComponentHandle<pragma::BasePlayerComponent> m_player = {};
+			mutable ComponentHandle<BasePlayerComponent> m_player = {};
 			bool m_bTransferring = false;
 			std::vector<std::shared_ptr<Resource>> m_resourceTransfer;
 			TransferState m_initialResourceTransferState = TransferState::Initial;

@@ -19,7 +19,7 @@ pragma::networking::Resource::~Resource()
 }
 bool pragma::networking::Resource::Construct()
 {
-	file = pragma::fs::open_file(name.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
+	file = pragma::fs::open_file(name.c_str(), fs::FileMode::Read | fs::FileMode::Binary);
 	if(file == nullptr)
 		return false;
 	return true;

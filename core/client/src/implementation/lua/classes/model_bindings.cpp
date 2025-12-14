@@ -34,36 +34,36 @@ void Lua::Model::Client::Export(lua::State *l, pragma::asset::Model &mdl, const 
 	std::string errMsg;
 	std::string outputPath;
 	auto result = pragma::asset::export_model(mdl, exportInfo, errMsg, {}, &outputPath);
-	Lua::PushBool(l, result);
+	PushBool(l, result);
 	if(result == false)
-		Lua::PushString(l, errMsg);
+		PushString(l, errMsg);
 	else
-		Lua::PushString(l, outputPath);
+		PushString(l, outputPath);
 }
 void Lua::Model::Client::ExportAnimation(lua::State *l, pragma::asset::Model &mdl, const std::string &animName, const pragma::asset::ModelExportInfo &exportInfo)
 {
 	std::string errMsg;
 	auto result = pragma::asset::export_animation(mdl, animName, exportInfo, errMsg);
-	Lua::PushBool(l, result);
+	PushBool(l, result);
 	if(result == false)
-		Lua::PushString(l, errMsg);
+		PushString(l, errMsg);
 }
 void Lua::Model::Client::AddMaterial(lua::State *l, pragma::asset::Model &mdl, uint32_t textureGroup, const std::string &name)
 {
 	//Lua::CheckModel(l,1);
 	auto *mat = pragma::get_client_state()->LoadMaterial(name);
-	Lua::Model::AddMaterial(l, mdl, textureGroup, mat);
+	Model::AddMaterial(l, mdl, textureGroup, mat);
 }
 void Lua::Model::Client::SetMaterial(lua::State *l, pragma::asset::Model &mdl, uint32_t texIdx, const std::string &name)
 {
 	//Lua::CheckModel(l,1);
 	auto *mat = pragma::get_client_state()->LoadMaterial(name);
-	Lua::Model::SetMaterial(l, mdl, texIdx, mat);
+	Model::SetMaterial(l, mdl, texIdx, mat);
 }
 void Lua::Model::Client::GetVertexAnimationBuffer(lua::State *l, pragma::asset::Model &mdl)
 {
 	auto &buf = static_cast<pragma::asset::CModel &>(mdl).GetVertexAnimationBuffer();
 	if(buf == nullptr)
 		return;
-	Lua::Push(l, buf);
+	Push(l, buf);
 }

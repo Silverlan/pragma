@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLSERVER STriggerRemoveComponent final : public BaseTriggerRemoveComponent {
 		  public:
-			STriggerRemoveComponent(pragma::ecs::BaseEntity &ent) : BaseTriggerRemoveComponent(ent) {}
+			STriggerRemoveComponent(ecs::BaseEntity &ent) : BaseTriggerRemoveComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

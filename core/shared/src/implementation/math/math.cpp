@@ -124,5 +124,5 @@ float pragma::math::calc_bezier_point(float f1, float f2, float f3, float f4, fl
 	auto c1 = 3.f * (f2 - f1);
 	auto c2 = 3.f * (f1 - 2.f * f2 + f3);
 	auto c3 = f4 - f1 + 3.f * (f2 - f3);
-	return c0 + t * c1 + pragma::math::pow2(t) * c2 + pragma::math::pow3(t) * c3;
+	return c0 + t * c1 + pow2(t) * c2 + pow3(t) * c3;
 }

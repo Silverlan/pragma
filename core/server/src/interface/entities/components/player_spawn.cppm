@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SPlayerSpawnComponent final : public BaseEntityComponent {
 		  public:
-			SPlayerSpawnComponent(pragma::ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
+			SPlayerSpawnComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

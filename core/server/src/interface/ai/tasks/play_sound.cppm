@@ -10,12 +10,12 @@ export import :ai.schedule;
 
 export namespace pragma {
 	namespace ai {
-		class DLLSERVER TaskPlaySound : public ai::BehaviorNode {
+		class DLLSERVER TaskPlaySound : public BehaviorNode {
 		  public:
 			enum class Parameter : uint32_t { SoundName = 0u, Gain, Pitch };
 			using BehaviorNode::BehaviorNode;
-			virtual std::shared_ptr<BehaviorNode> Copy() const override { return ai::BehaviorNode::Copy<std::remove_const_t<std::remove_reference_t<decltype(*this)>>>(); }
-			virtual ai::BehaviorNode::Result Start(const Schedule *sched, pragma::BaseAIComponent &ent) override;
+			virtual std::shared_ptr<BehaviorNode> Copy() const override { return BehaviorNode::Copy<std::remove_const_t<std::remove_reference_t<decltype(*this)>>>(); }
+			virtual Result Start(const Schedule *sched, BaseAIComponent &ent) override;
 			virtual void Print(const Schedule *sched, std::ostream &o) const override;
 			float GetGain(const Schedule *sched) const;
 			float GetPitch(const Schedule *sched) const;

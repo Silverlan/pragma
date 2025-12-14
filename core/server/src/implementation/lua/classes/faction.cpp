@@ -55,20 +55,20 @@ void Lua::Faction::GetDisposition(lua::State *l, ::Faction &faction, ::Faction &
 {
 	int32_t priority = 0;
 	auto disp = faction.GetDisposition(factionTgt, &priority);
-	Lua::PushInt(l, pragma::math::to_integral(disp));
-	Lua::PushInt(l, priority);
+	PushInt(l, pragma::math::to_integral(disp));
+	PushInt(l, priority);
 }
 void Lua::Faction::GetDisposition(lua::State *l, ::Faction &faction, const std::string &className)
 {
 	int32_t priority = 0;
 	auto disp = faction.GetDisposition(className, &priority);
-	Lua::PushInt(l, pragma::math::to_integral(disp));
-	Lua::PushInt(l, priority);
+	PushInt(l, pragma::math::to_integral(disp));
+	PushInt(l, priority);
 }
 void Lua::Faction::GetDisposition(lua::State *l, ::Faction &faction, pragma::ecs::BaseEntity &ent)
 {
 	int32_t priority = 0;
 	auto disp = faction.GetDisposition(&ent, &priority);
-	Lua::PushInt(l, pragma::math::to_integral(disp));
-	Lua::PushInt(l, priority);
+	PushInt(l, pragma::math::to_integral(disp));
+	PushInt(l, priority);
 }

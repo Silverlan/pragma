@@ -1219,7 +1219,7 @@ void NET_cl_MAP_LOAD(NetPacket packet)
 	auto bNewWorld = packet->Read<bool>();
 	auto r = false;
 	if(bNewWorld == false)
-		r = pragma::get_cgame()->pragma::Game::LoadMap(mapName.c_str(), origin);
+		r = pragma::get_cgame()->Game::LoadMap(mapName.c_str(), origin);
 	else
 		r = pragma::get_cgame()->LoadMap(mapName.c_str(), origin);
 	if(r == false)
@@ -1740,19 +1740,19 @@ void NET_cl_CREATE_EXPLOSION(NetPacket packet)
 void NET_cl_ENT_TRIGGER_GRAVITY_ONSTARTTOUCH(NetPacket packet)
 {
 	using namespace pragma;
-	auto *ent = pragma::networking::read_entity(packet);
+	auto *ent = networking::read_entity(packet);
 	if(ent == nullptr)
 		return;
-	auto netFlags = static_cast<pragma::Entity::TriggerGravity::NetFlags>(packet->Read<uint8_t>());
+	auto netFlags = static_cast<Entity::TriggerGravity::NetFlags>(packet->Read<uint8_t>());
 	auto flags = packet->Read<uint32_t>();
 	auto gravityDir = packet->Read<Vector3>();
 	auto gravityForce = packet->Read<float>();
-	auto bUseForce = (netFlags & pragma::Entity::TriggerGravity::NetFlags::UseForce) != pragma::Entity::TriggerGravity::NetFlags::None;
-	if((netFlags & pragma::Entity::TriggerGravity::NetFlags::StartTouch) != pragma::Entity::TriggerGravity::NetFlags::None)
-		pragma::Entity::TriggerGravity::apply_gravity(ent, flags, -gravityDir, gravityDir, bUseForce, gravityForce);
+	auto bUseForce = (netFlags & Entity::TriggerGravity::NetFlags::UseForce) != Entity::TriggerGravity::NetFlags::None;
+	if((netFlags & Entity::TriggerGravity::NetFlags::StartTouch) != Entity::TriggerGravity::NetFlags::None)
+		Entity::TriggerGravity::apply_gravity(ent, flags, -gravityDir, gravityDir, bUseForce, gravityForce);
 	else {
 		auto dirMove = packet->Read<Vector3>();
-		pragma::Entity::TriggerGravity::apply_gravity(ent, flags, gravityDir, dirMove, bUseForce, gravityForce);
+		Entity::TriggerGravity::apply_gravity(ent, flags, gravityDir, dirMove, bUseForce, gravityForce);
 	}
 }
 

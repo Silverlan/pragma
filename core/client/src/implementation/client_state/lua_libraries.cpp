@@ -640,18 +640,18 @@ void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool b
 
 	auto soundMod = luabind::module(lua.GetState(), "sound");
 	Lua::sound::register_library(soundMod);
-	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxEaxReverbProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxChorusProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxDistortionProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxEchoProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxFlangerProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxFrequencyShifterProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxVocalMorpherProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxPitchShifterProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxRingModulatorProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxAutoWahProperties &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxCompressor &)>(&Lua::sound::register_aux_effect))];
-	soundMod[luabind::def("register_aux_effect", static_cast<pragma::audio::PEffect (*)(const std::string &, const pragma::audio::EfxEqualizer &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<audio::PEffect (*)(const std::string &, const audio::EfxEaxReverbProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<audio::PEffect (*)(const std::string &, const audio::EfxChorusProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<audio::PEffect (*)(const std::string &, const audio::EfxDistortionProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<audio::PEffect (*)(const std::string &, const audio::EfxEchoProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<audio::PEffect (*)(const std::string &, const audio::EfxFlangerProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<audio::PEffect (*)(const std::string &, const audio::EfxFrequencyShifterProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<audio::PEffect (*)(const std::string &, const audio::EfxVocalMorpherProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<audio::PEffect (*)(const std::string &, const audio::EfxPitchShifterProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<audio::PEffect (*)(const std::string &, const audio::EfxRingModulatorProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<audio::PEffect (*)(const std::string &, const audio::EfxAutoWahProperties &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<audio::PEffect (*)(const std::string &, const audio::EfxCompressor &)>(&Lua::sound::register_aux_effect))];
+	soundMod[luabind::def("register_aux_effect", static_cast<audio::PEffect (*)(const std::string &, const audio::EfxEqualizer &)>(&Lua::sound::register_aux_effect))];
 	soundMod[luabind::def("get_aux_effect", &Lua::sound::get_aux_effect)];
 	soundMod[luabind::def("set_distance_model", &Lua::sound::set_distance_model)];
 	soundMod[luabind::def("get_distance_model", &Lua::sound::get_distance_model)];
@@ -662,7 +662,7 @@ void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool b
 	soundMod[luabind::def("set_speed_of_sound", &Lua::sound::set_speed_of_sound)];
 	soundMod[luabind::def("get_device_name", &Lua::sound::get_device_name)];
 	soundMod[luabind::def("add_global_effect", static_cast<bool (*)(const std::string &)>(&Lua::sound::add_global_effect))];
-	soundMod[luabind::def("add_global_effect", static_cast<bool (*)(const std::string &, pragma::audio::ISoundSystem::GlobalEffectFlag, const pragma::audio::EffectParams &)>(&Lua::sound::add_global_effect))];
+	soundMod[luabind::def("add_global_effect", static_cast<bool (*)(const std::string &, audio::ISoundSystem::GlobalEffectFlag, const audio::EffectParams &)>(&Lua::sound::add_global_effect))];
 	soundMod[luabind::def("remove_global_effect", &Lua::sound::remove_global_effect)];
 	soundMod[luabind::def("set_global_effect_parameters", &Lua::sound::set_global_effect_parameters)];
 	soundMod[luabind::def(
@@ -678,12 +678,12 @@ void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool b
 	  })];
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "sound",
-	  {{"GLOBAL_EFFECT_FLAG_NONE", math::to_integral(pragma::audio::ISoundSystem::GlobalEffectFlag::None)}, {"GLOBAL_EFFECT_FLAG_BIT_RELATIVE", math::to_integral(pragma::audio::ISoundSystem::GlobalEffectFlag::RelativeSounds)},
-	    {"GLOBAL_EFFECT_FLAG_BIT_WORLD", math::to_integral(pragma::audio::ISoundSystem::GlobalEffectFlag::WorldSounds)}, {"GLOBAL_EFFECT_FLAG_ALL", math::to_integral(pragma::audio::ISoundSystem::GlobalEffectFlag::All)},
+	  {{"GLOBAL_EFFECT_FLAG_NONE", math::to_integral(audio::ISoundSystem::GlobalEffectFlag::None)}, {"GLOBAL_EFFECT_FLAG_BIT_RELATIVE", math::to_integral(audio::ISoundSystem::GlobalEffectFlag::RelativeSounds)},
+	    {"GLOBAL_EFFECT_FLAG_BIT_WORLD", math::to_integral(audio::ISoundSystem::GlobalEffectFlag::WorldSounds)}, {"GLOBAL_EFFECT_FLAG_ALL", math::to_integral(audio::ISoundSystem::GlobalEffectFlag::All)},
 
-	    {"DISTANCE_MODEL_NONE", math::to_integral(pragma::audio::DistanceModel::None)}, {"DISTANCE_MODEL_INVERSE_CLAMPED", math::to_integral(pragma::audio::DistanceModel::InverseClamped)}, {"DISTANCE_MODEL_LINEAR_CLAMPED", math::to_integral(pragma::audio::DistanceModel::LinearClamped)},
-	    {"DISTANCE_MODEL_EXPONENT_CLAMPED", math::to_integral(pragma::audio::DistanceModel::ExponentClamped)}, {"DISTANCE_MODEL_INVERSE", math::to_integral(pragma::audio::DistanceModel::Inverse)}, {"DISTANCE_MODEL_LINEAR", math::to_integral(pragma::audio::DistanceModel::Linear)},
-	    {"DISTANCE_MODEL_EXPONENT", math::to_integral(pragma::audio::DistanceModel::Exponent)}});
+	    {"DISTANCE_MODEL_NONE", math::to_integral(audio::DistanceModel::None)}, {"DISTANCE_MODEL_INVERSE_CLAMPED", math::to_integral(audio::DistanceModel::InverseClamped)}, {"DISTANCE_MODEL_LINEAR_CLAMPED", math::to_integral(audio::DistanceModel::LinearClamped)},
+	    {"DISTANCE_MODEL_EXPONENT_CLAMPED", math::to_integral(audio::DistanceModel::ExponentClamped)}, {"DISTANCE_MODEL_INVERSE", math::to_integral(audio::DistanceModel::Inverse)}, {"DISTANCE_MODEL_LINEAR", math::to_integral(audio::DistanceModel::Linear)},
+	    {"DISTANCE_MODEL_EXPONENT", math::to_integral(audio::DistanceModel::Exponent)}});
 	Lua::sound::register_enums(lua.GetState());
 
 	auto defInLay = luabind::class_<InputBindingLayer>("InputBindingLayer");

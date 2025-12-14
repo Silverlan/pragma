@@ -18,23 +18,23 @@ import :client_state;
 		throw std::logic_error {"glTF assertion failed!"};                                                                                                                                                                                                                                       \
 	}
 
-bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc, const std::string &outputFileName, const pragma::asset::ModelExportInfo &exportInfo, std::string &outErrMsg, std::string *optOutPath)
+bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc, const std::string &outputFileName, const ModelExportInfo &exportInfo, std::string &outErrMsg, std::string *optOutPath)
 {
 	GLTFWriter writer {sceneDesc, exportInfo, std::optional<std::string> {}};
 	return writer.Export(outErrMsg, outputFileName, optOutPath);
 }
-bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc, const std::string &outputFileName, const std::string &animName, const pragma::asset::ModelExportInfo &exportInfo, std::string &outErrMsg, std::string *optOutPath)
+bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc, const std::string &outputFileName, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, std::string *optOutPath)
 {
 	GLTFWriter writer {sceneDesc, exportInfo, animName};
 	return writer.Export(outErrMsg, outputFileName, optOutPath);
 }
 
-bool pragma::asset::GLTFWriter::Export(pragma::asset::Model &model, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &outputFileName, std::string *optOutPath)
+bool pragma::asset::GLTFWriter::Export(Model &model, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &outputFileName, std::string *optOutPath)
 {
 	auto fileName = outputFileName.has_value() ? *outputFileName : model.GetName();
 	return Export({{model}}, fileName, exportInfo, outErrMsg, optOutPath);
 }
-bool pragma::asset::GLTFWriter::Export(pragma::asset::Model &model, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &outputFileName, std::string *optOutPath)
+bool pragma::asset::GLTFWriter::Export(Model &model, const std::string &animName, const ModelExportInfo &exportInfo, std::string &outErrMsg, const std::optional<std::string> &outputFileName, std::string *optOutPath)
 {
 	auto fileName = outputFileName.has_value() ? *outputFileName : model.GetName();
 	return Export({{model}}, fileName, animName, exportInfo, outErrMsg, optOutPath);
@@ -55,7 +55,7 @@ uint32_t pragma::asset::GLTFWriter::AddAccessor(const std::string &name, int com
 	return m_gltfMdl.accessors.size() - 1;
 };
 
-void pragma::asset::GLTFWriter::InitializeMorphSets(pragma::asset::Model &mdl)
+void pragma::asset::GLTFWriter::InitializeMorphSets(Model &mdl)
 {
 	auto &flexes = mdl.GetFlexes();
 	for(auto flexId = decltype(flexes.size()) {0u}; flexId < flexes.size(); ++flexId) {
@@ -91,21 +91,21 @@ void pragma::asset::GLTFWriter::InitializeMorphSets(pragma::asset::Model &mdl)
 	}
 }
 
-bool pragma::asset::GLTFWriter::IsSkinned(pragma::asset::Model &mdl) const
+bool pragma::asset::GLTFWriter::IsSkinned(Model &mdl) const
 {
 	if(ShouldExportMeshes() == false)
 		return false;
 	auto &skeleton = mdl.GetSkeleton();
 	return (skeleton.GetBoneCount() > 1 && m_exportInfo.exportSkinnedMeshData);
 }
-bool pragma::asset::GLTFWriter::IsAnimated(pragma::asset::Model &mdl) const
+bool pragma::asset::GLTFWriter::IsAnimated(Model &mdl) const
 {
 	auto &anims = mdl.GetAnimations();
 	auto &skeleton = mdl.GetSkeleton();
 	return (skeleton.GetBoneCount() > 1 && anims.empty() == false && (m_exportInfo.exportAnimations || m_animName.has_value()));
 }
 bool pragma::asset::GLTFWriter::ShouldExportMeshes() const { return m_animName.has_value() == false; }
-void pragma::asset::GLTFWriter::WriteMorphTargets(pragma::geometry::ModelSubMesh &mesh, tinygltf::Mesh &gltfMesh, tinygltf::Primitive &primitive, const std::vector<uint32_t> &nodeIndices)
+void pragma::asset::GLTFWriter::WriteMorphTargets(geometry::ModelSubMesh &mesh, tinygltf::Mesh &gltfMesh, tinygltf::Primitive &primitive, const std::vector<uint32_t> &nodeIndices)
 {
 	auto itMorphSets = m_meshMorphSets.find(&mesh);
 	if(itMorphSets != m_meshMorphSets.end()) {
@@ -117,7 +117,7 @@ void pragma::asset::GLTFWriter::WriteMorphTargets(pragma::geometry::ModelSubMesh
 
 			auto numVerts = morphSet.frame->GetVertexCount();
 
-			auto hasNormals = morphSet.frame->IsFlagEnabled(pragma::animation::MeshVertexFrame::Flags::HasNormals);
+			auto hasNormals = morphSet.frame->IsFlagEnabled(animation::MeshVertexFrame::Flags::HasNormals);
 			uint32_t numAttributes = 1;
 			if(hasNormals)
 				++numAttributes;
@@ -175,17 +175,17 @@ void pragma::asset::GLTFWriter::MergeSplitMeshes(ExportMeshList &meshList)
 {
 	if(m_exportInfo.verbose)
 		Con::cout << "Merging meshes by materials..." << Con::endl;
-	std::unordered_map<uint32_t, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>>> groupedMeshes {};
+	std::unordered_map<uint32_t, std::vector<std::shared_ptr<geometry::ModelSubMesh>>> groupedMeshes {};
 	for(auto &mesh : meshList) {
 		auto texIdx = mesh->GetSkinTextureIndex();
 		auto it = groupedMeshes.find(texIdx);
 		if(it == groupedMeshes.end())
-			it = groupedMeshes.insert(std::make_pair(texIdx, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> {})).first;
+			it = groupedMeshes.insert(std::make_pair(texIdx, std::vector<std::shared_ptr<geometry::ModelSubMesh>> {})).first;
 		it->second.push_back(mesh);
 	}
 
 	uint32_t numMerged = 0;
-	std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> mergedMeshes {};
+	std::vector<std::shared_ptr<geometry::ModelSubMesh>> mergedMeshes {};
 	mergedMeshes.reserve(groupedMeshes.size());
 	for(auto &pair : groupedMeshes) {
 		auto &meshes = pair.second;
@@ -218,7 +218,7 @@ void pragma::asset::GLTFWriter::GenerateUniqueModelExportList()
 			it = m_uniqueModelExportList.end() - 1;
 			auto &exportData = m_uniqueModelExportList.back();
 
-			std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> meshList {};
+			std::vector<std::shared_ptr<geometry::ModelMesh>> meshList {};
 			meshList.reserve(mdlDesc.model.GetMeshCount());
 
 			std::vector<uint32_t> bodyGroups {};
@@ -256,12 +256,12 @@ void pragma::asset::GLTFWriter::GenerateUniqueModelExportList()
 	uint64_t vertCount = 0;
 }
 
-void pragma::asset::GLTFWriter::ToGLTFPose(const pragma::math::Transform &pose, std::vector<double> &outPos, std::vector<double> &outRot) const
+void pragma::asset::GLTFWriter::ToGLTFPose(const math::Transform &pose, std::vector<double> &outPos, std::vector<double> &outRot) const
 {
 	auto pos = pose.GetOrigin() * m_exportInfo.scale;
 	auto rot = pose.GetRotation();
-	uquat::rotate_z(rot, pragma::math::deg_to_rad(180.f));
-	uquat::rotate_x(rot, pragma::math::deg_to_rad(180.f));
+	uquat::rotate_z(rot, math::deg_to_rad(180.f));
+	uquat::rotate_x(rot, math::deg_to_rad(180.f));
 	outPos = {pos.x, pos.y, pos.z};
 	outRot = {rot.x, rot.y, rot.z, rot.w};
 }
@@ -271,10 +271,10 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 	// HACK: If the model was just ported, we need to make sure the material and textures are in order by invoking the
 	// resource watcher (in case they have been changed)
 	// TODO: This doesn't belong here!
-	pragma::get_client_state()->GetResourceWatcher().Poll();
+	get_client_state()->GetResourceWatcher().Poll();
 
 	auto name = outputFileName;
-	pragma::util::Path exportPath {name};
+	util::Path exportPath {name};
 	exportPath.Canonicalize();
 	auto exportPathStr = exportPath.GetString();
 	auto outputPath = ufile::get_path_from_filename(exportPathStr) + ufile::get_file_from_filename(exportPathStr);
@@ -388,7 +388,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 		for(auto &exportData : m_uniqueModelExportList) {
 			uint32_t meshIdx = 0;
 			for(auto &mesh : exportData.exportMeshes) {
-				pragma::util::ScopeGuard sg {[&meshIdx]() { ++meshIdx; }};
+				util::ScopeGuard sg {[&meshIdx]() { ++meshIdx; }};
 				auto *gltfIndexData = indexData.data() + indexOffset * sizeof(uint32_t);
 				mesh->VisitIndices([gltfIndexData](auto *indexData, uint32_t numIndices) {
 					for(auto i = decltype(numIndices) {0u}; i < numIndices; ++i) {
@@ -540,8 +540,8 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 			mesh->VisitIndices([&minIndex, &maxIndex](auto *indexData, uint32_t numIndices) {
 				for(auto i = decltype(numIndices) {0u}; i < numIndices; ++i) {
 					auto idx = indexData[i];
-					minIndex = pragma::math::min(minIndex, static_cast<int64_t>(idx));
-					maxIndex = pragma::math::max(maxIndex, static_cast<int64_t>(idx));
+					minIndex = math::min(minIndex, static_cast<int64_t>(idx));
+					maxIndex = math::max(maxIndex, static_cast<int64_t>(idx));
 				}
 			});
 			gltfMdl.accessors.at(indicesAccessor).minValues = {static_cast<double>(minIndex)};
@@ -562,13 +562,13 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 
 			auto geometryType = mesh->GetGeometryType();
 			switch(geometryType) {
-			case pragma::geometry::ModelSubMesh::GeometryType::Triangles:
+			case geometry::ModelSubMesh::GeometryType::Triangles:
 				primitive.mode = TINYGLTF_MODE_TRIANGLES;
 				break;
-			case pragma::geometry::ModelSubMesh::GeometryType::Lines:
+			case geometry::ModelSubMesh::GeometryType::Lines:
 				primitive.mode = TINYGLTF_MODE_LINE;
 				break;
-			case pragma::geometry::ModelSubMesh::GeometryType::Points:
+			case geometry::ModelSubMesh::GeometryType::Points:
 				primitive.mode = TINYGLTF_MODE_POINTS;
 				break;
 			}
@@ -645,10 +645,10 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 				// However when importing the glTF into Blender, the FOV only matches ours if we're using horizontal FOV here.
 				// The reason for this is currently unknown, either Blender (v2.9) interprets the glTF FOV as horizontal by mistake,
 				// or something is wrong on this side. TODO: Compare the behavior with another application that supports glTF assets with camera data.
-				camData.perspective.yfov = pragma::math::deg_to_rad(cam.vFov);
+				camData.perspective.yfov = math::deg_to_rad(cam.vFov);
 
-				camData.perspective.znear = pragma::units_to_metres(cam.zNear);
-				camData.perspective.zfar = pragma::units_to_metres(cam.zFar);
+				camData.perspective.znear = units_to_metres(cam.zNear);
+				camData.perspective.zfar = units_to_metres(cam.zFar);
 			}
 		}
 	}
@@ -670,7 +670,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 					}
 					Con::cwar << "WARNING Spot light has outer cone angle of " << outerConeAngle << ", which is smaller or equal to inner cone angle of " << innerConeAngle << "! This is not allowed! Clamping..." << Con::endl;
 					outerConeAngle = innerConeAngle;
-					innerConeAngle = pragma::math::max(innerConeAngle - 10.f, 0.1f);
+					innerConeAngle = math::max(innerConeAngle - 10.f, 0.1f);
 					if(outerConeAngle <= innerConeAngle) {
 						Con::cwar << "WARNING Spot light has cone angle of near 0! Skipping..." << Con::endl;
 						continue;
@@ -706,14 +706,14 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 			// TODO: Add an option to change this via a parameter?
 			auto color = lightSource.color.ToVector3();
 			auto intensity = lightSource.luminousIntensity;
-			auto colMax = pragma::math::max(color.r, color.g, color.b);
+			auto colMax = math::max(color.r, color.g, color.b);
 			if(colMax > 1.f) {
 				color /= colMax;
 				intensity *= colMax;
 			}
-			auto lightType = (lightSource.type == LightSource::Type::Spot) ? pragma::LightType::Spot : (lightSource.type == LightSource::Type::Directional) ? pragma::LightType::Directional : pragma::LightType::Point;
-			intensity = (lightType == pragma::LightType::Spot) ? ulighting::cycles::lumen_to_watt_spot(intensity, color, outerConeAngle)
-			  : (lightType == pragma::LightType::Point)        ? ulighting::cycles::lumen_to_watt_point(intensity, color)
+			auto lightType = (lightSource.type == LightSource::Type::Spot) ? LightType::Spot : (lightSource.type == LightSource::Type::Directional) ? LightType::Directional : LightType::Point;
+			intensity = (lightType == LightType::Spot) ? ulighting::cycles::lumen_to_watt_spot(intensity, color, outerConeAngle)
+			  : (lightType == LightType::Point)        ? ulighting::cycles::lumen_to_watt_point(intensity, color)
 			                                                   : ulighting::cycles::lumen_to_watt_area(intensity, color);
 
 			auto lightName = lightSource.name;
@@ -725,7 +725,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 			if(lightSource.range.has_value() && (lightSource.type == LightSource::Type::Point || lightSource.type == LightSource::Type::Spot))
 				light["range"] = tinygltf::Value {*lightSource.range};
 			if(lightSource.type == LightSource::Type::Spot) {
-				light["spot"] = tinygltf::Value {tinygltf::Value::Object {{"innerConeAngle", tinygltf::Value {pragma::math::deg_to_rad(innerConeAngle)}}, {"outerConeAngle", tinygltf::Value {pragma::math::deg_to_rad(outerConeAngle)}}}};
+				light["spot"] = tinygltf::Value {tinygltf::Value::Object {{"innerConeAngle", tinygltf::Value {math::deg_to_rad(innerConeAngle)}}, {"outerConeAngle", tinygltf::Value {math::deg_to_rad(outerConeAngle)}}}};
 			}
 			lights.push_back(tinygltf::Value {light});
 		}
@@ -764,7 +764,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 
 	auto fileName = ufile::get_file_from_filename(name) + '.' + ext;
 
-	auto writePath = pragma::util::FilePath(fs::get_program_write_path(), outputPath, fileName).GetString();
+	auto writePath = util::FilePath(fs::get_program_write_path(), outputPath, fileName).GetString();
 	if(optOutPath)
 		*optOutPath = outputPath + fileName;
 	tinygltf::TinyGLTF writer {};
@@ -801,7 +801,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 			exportData.model.GetAnimations(&anims);
 			for(auto &pair : *anims) {
 				std::string errMsg;
-				if(pragma::asset::export_animation(exportData.model, pair.first, m_exportInfo, errMsg))
+				if(export_animation(exportData.model, pair.first, m_exportInfo, errMsg))
 					continue;
 				if(m_exportInfo.verbose)
 					Con::cwar << "Unable to export animation '" << pair.first << "': " << errMsg << Con::endl;
@@ -862,9 +862,9 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 		// Transform pose to relative
 		auto referenceRelative = Frame::Create(mdl.GetReference());
 		inverseBindPoseMatrices.resize(skeleton.GetBoneCount());
-		std::function<void(pragma::animation::Bone &, const pragma::math::Transform &)> fToRelativeTransforms = nullptr;
-		fToRelativeTransforms = [this, &fToRelativeTransforms, &referenceRelative, &inverseBindPoseMatrices](pragma::animation::Bone &bone, const pragma::math::Transform &parentPose) {
-			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : pragma::math::Transform {};
+		std::function<void(animation::Bone &, const math::Transform &)> fToRelativeTransforms = nullptr;
+		fToRelativeTransforms = [this, &fToRelativeTransforms, &referenceRelative, &inverseBindPoseMatrices](animation::Bone &bone, const math::Transform &parentPose) {
+			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : math::Transform {};
 
 			auto scaledPose = pose;
 			scaledPose.SetOrigin(TransformPos(scaledPose.GetOrigin()));
@@ -876,7 +876,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 				fToRelativeTransforms(*pair.second, pose);
 		};
 		for(auto &pair : skeleton.GetRootBones())
-			fToRelativeTransforms(*pair.second, pragma::math::Transform {});
+			fToRelativeTransforms(*pair.second, math::Transform {});
 
 		auto &bones = skeleton.GetBones();
 
@@ -894,14 +894,14 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 		}
 
 		std::unordered_set<uint32_t> traversedJoints {};
-		std::function<void(pragma::animation::Bone &, tinygltf::Node &)> fIterateSkeleton = nullptr;
-		fIterateSkeleton = [this, &fIterateSkeleton, &referenceRelative, &traversedJoints](pragma::animation::Bone &bone, tinygltf::Node &parentNode) {
+		std::function<void(animation::Bone &, tinygltf::Node &)> fIterateSkeleton = nullptr;
+		fIterateSkeleton = [this, &fIterateSkeleton, &referenceRelative, &traversedJoints](animation::Bone &bone, tinygltf::Node &parentNode) {
 			auto nodeIdx = m_boneIdxToNodeIdx[bone.ID];
 			parentNode.children.push_back(nodeIdx);
 			traversedJoints.insert(nodeIdx);
 			auto &node = m_gltfMdl.nodes.at(nodeIdx);
 
-			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : pragma::math::Transform {};
+			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : math::Transform {};
 			auto pos = TransformPos(pose.GetOrigin());
 			auto &rot = pose.GetRotation();
 			auto *scale = referenceRelative->GetBoneScale(bone.ID);
@@ -978,7 +978,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 			auto &vertWeights = mesh->GetVertexWeights();
 			auto numVerts = mesh->GetVertexCount();
 			for(auto i = decltype(numVerts) {0u}; i < numVerts; ++i) {
-				auto vw = (i < vertWeights.size()) ? vertWeights.at(i) : pragma::math::VertexWeight {};
+				auto vw = (i < vertWeights.size()) ? vertWeights.at(i) : math::VertexWeight {};
 				auto *gltfVwData = skinData.data() + vertWeightOffset * sizeof(GLTFVertexWeight);
 				GLTFVertexWeight gltfVw {};
 				auto weightSum = 0.f;
@@ -1016,7 +1016,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 	}
 }
 
-void pragma::asset::GLTFWriter::WriteAnimations(pragma::asset::Model &mdl)
+void pragma::asset::GLTFWriter::WriteAnimations(Model &mdl)
 {
 	if(m_exportInfo.verbose)
 		Con::cout << "Initializing GLTF animations..." << Con::endl;
@@ -1031,7 +1031,7 @@ void pragma::asset::GLTFWriter::WriteAnimations(pragma::asset::Model &mdl)
 		auto &anim = anims.at(i);
 		auto animName = mdl.GetAnimationName(i);
 
-		if(m_animName.has_value() && pragma::string::compare(animName, *m_animName, false) == false)
+		if(m_animName.has_value() && string::compare(animName, *m_animName, false) == false)
 			continue;
 		if(animList && std::find(animList->begin(), animList->end(), animName) == animList->end())
 			continue;
@@ -1066,7 +1066,7 @@ void pragma::asset::GLTFWriter::WriteAnimations(pragma::asset::Model &mdl)
 			// Check if there are any actual meaningful scales
 			auto it = std::find_if(scales.begin(), scales.end(), [](const Vector3 &scale) {
 				constexpr auto EPSILON = 0.001f;
-				return pragma::math::abs(1.f - scale.x) > EPSILON || pragma::math::abs(1.f - scale.y) > EPSILON || pragma::math::abs(1.f - scale.z) > EPSILON;
+				return math::abs(1.f - scale.x) > EPSILON || math::abs(1.f - scale.y) > EPSILON || math::abs(1.f - scale.z) > EPSILON;
 			});
 			if(it == scales.end())
 				continue;
@@ -1080,7 +1080,7 @@ void pragma::asset::GLTFWriter::WriteAnimations(pragma::asset::Model &mdl)
 		auto tMax = std::numeric_limits<float>::lowest();
 		for(auto i = decltype(frames.size()) {0u}; i < frames.size(); ++i) {
 			times.push_back((fps > 0) ? (i / static_cast<float>(fps)) : 0.f);
-			tMax = pragma::math::max(tMax, times.back());
+			tMax = math::max(tMax, times.back());
 		}
 
 		uint32_t animBufferIdx;
@@ -1100,8 +1100,8 @@ void pragma::asset::GLTFWriter::WriteAnimations(pragma::asset::Model &mdl)
 
 		// Setup frame buffers
 		uint64_t dataOffset = times.size() * sizeof(times.front());
-		gltfAnim.channels.reserve(numFrames * numBones * pragma::math::to_integral(Channel::Count));
-		gltfAnim.samplers.reserve(numFrames * pragma::math::to_integral(Channel::Count));
+		gltfAnim.channels.reserve(numFrames * numBones * math::to_integral(Channel::Count));
+		gltfAnim.samplers.reserve(numFrames * math::to_integral(Channel::Count));
 
 		for(auto i = decltype(numBones) {0u}; i < numBones; ++i) {
 			auto boneId = boneList.at(i);
@@ -1115,7 +1115,7 @@ void pragma::asset::GLTFWriter::WriteAnimations(pragma::asset::Model &mdl)
 				scales.reserve(numFrames);
 
 			for(auto &frame : frames) {
-				auto pose = frame->GetBoneTransform(i) ? *frame->GetBoneTransform(i) : pragma::math::Transform {};
+				auto pose = frame->GetBoneTransform(i) ? *frame->GetBoneTransform(i) : math::Transform {};
 
 				auto pos = TransformPos(pose.GetOrigin());
 				translations.push_back(pos);
@@ -1281,12 +1281,12 @@ void pragma::asset::GLTFWriter::WriteAnimations(pragma::asset::Model &mdl)
 	}
 }
 
-void pragma::asset::GLTFWriter::GenerateAO(pragma::asset::Model &mdl)
+void pragma::asset::GLTFWriter::GenerateAO(Model &mdl)
 {
 	if(m_exportInfo.verbose)
 		Con::cout << "Generating ambient occlusion maps..." << Con::endl;
 	std::string errMsg;
-	auto job = pragma::asset::generate_ambient_occlusion(mdl, errMsg, false, m_exportInfo.aoResolution, m_exportInfo.aoSamples, m_exportInfo.aoDevice);
+	auto job = generate_ambient_occlusion(mdl, errMsg, false, m_exportInfo.aoResolution, m_exportInfo.aoSamples, m_exportInfo.aoDevice);
 	if(job.has_value() == false) {
 		if(m_exportInfo.verbose)
 			Con::cwar << "Unable to create parallel jobs for ambient occlusion map generation! Ambient occlusion maps will not be available." << Con::endl;
@@ -1314,7 +1314,7 @@ void pragma::asset::GLTFWriter::GenerateAO(pragma::asset::Model &mdl)
 	}
 	// Ambient occlusion generator may have applied some changes to some of the materials and/or textures.
 	// Make sure we are up-to-date
-	pragma::get_client_state()->GetResourceWatcher().Poll();
+	get_client_state()->GetResourceWatcher().Poll();
 }
 
 void pragma::asset::GLTFWriter::WriteMaterials()
@@ -1358,7 +1358,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 	std::unordered_map<material::Material *, uint32_t> matTranslationTable {};
 	for(auto *mat : materials) {
 		std::string errMsg;
-		auto texturePaths = pragma::asset::export_material(*mat, m_exportInfo.imageFormat, errMsg, &m_exportPath, m_exportInfo.normalizeTextureNames);
+		auto texturePaths = export_material(*mat, m_exportInfo.imageFormat, errMsg, &m_exportPath, m_exportInfo.normalizeTextureNames);
 		if(texturePaths.has_value() == false)
 			continue;
 

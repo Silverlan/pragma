@@ -84,7 +84,7 @@ double pragma::physics::WaterBuoyancySimulator::CalcBuoyancy(const Quat &rorigin
 
 	if(force || torque) {
 		// Liquid density is specified in kg/m^3, we'll have to convert it to Pragma's scale
-		constexpr auto scale = pragma::math::pow3(pragma::units_to_metres(1.0));
+		constexpr auto scale = math::pow3(units_to_metres(1.0));
 		auto density = liquid.density * scale;
 		if(force != nullptr) {
 			*force = CalcBuoyancy(density, submergedVolume, gravity, waterPlane);
@@ -199,20 +199,20 @@ static void calc_surface_plane(const pragma::physics::PhysWaterSurfaceSimulator 
 	}
 }
 
-void pragma::physics::WaterBuoyancySimulator::Simulate(pragma::ecs::BaseEntity &entWater, const PhysLiquid &liquid, pragma::ecs::BaseEntity &ent, Vector3 waterPlane, double waterPlaneDist, const Vector3 &waterVelocity, const PhysWaterSurfaceSimulator *surfaceSim) const
+void pragma::physics::WaterBuoyancySimulator::Simulate(ecs::BaseEntity &entWater, const PhysLiquid &liquid, ecs::BaseEntity &ent, Vector3 waterPlane, double waterPlaneDist, const Vector3 &waterVelocity, const PhysWaterSurfaceSimulator *surfaceSim) const
 {
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto physType = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsType() : pragma::physics::PhysicsType::None;
+	auto physType = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsType() : PhysicsType::None;
 	auto *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(physObj == nullptr)
 		return;
-	auto pGravityComponent = ent.GetComponent<pragma::GravityComponent>();
+	auto pGravityComponent = ent.GetComponent<GravityComponent>();
 	auto gravity = pGravityComponent.valid() ? pGravityComponent->GetGravityForce() : Vector3 {};
 
 	auto totalVolume = 0.0;
 	auto totalSubmerged = 0.0;
-	if(physType == pragma::physics::PhysicsType::BoxController || physType == pragma::physics::PhysicsType::CapsuleController) {
-		if(pPhysComponent->GetMoveType() == pragma::physics::MoveType::Noclip)
+	if(physType == PhysicsType::BoxController || physType == PhysicsType::CapsuleController) {
+		if(pPhysComponent->GetMoveType() == MoveType::Noclip)
 			return;
 		const auto mass = 10.0;
 		const auto dragCoefficient = 2.0;
@@ -233,12 +233,12 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(pragma::ecs::BaseEntity &
 		// Move water plane to collision object coordinate system
 		auto pose = pTrComponent->GetPose();
 		pose.SetRotation(uquat::identity()); // No rotation; TODO: Why?
-		auto relPlane = pose.GetInverse() * pragma::math::Plane {waterPlane, waterPlaneDist};
+		auto relPlane = pose.GetInverse() * math::Plane {waterPlane, waterPlaneDist};
 		auto &waterPlaneRelObj = relPlane.GetNormal();
 		auto waterPlaneDistRelObj = relPlane.GetDistance();
 		calc_surface_plane(surfaceSim, pose.GetOrigin(), rot, verts.begin(), verts.end(), waterPlane, waterPlaneDist, waterPlaneRelObj, waterPlaneDistRelObj);
 
-		auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+		auto pVelComponent = ent.GetComponent<VelocityComponent>();
 		auto velEnt = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 		Vector3 bouyany;
 		totalSubmerged += CalcBuoyancy({}, liquid, waterPlane, waterPlaneDist, waterPlaneRelObj, waterPlaneDistRelObj, waterVelocity, -gravity.y, verts.begin(), triangles.begin(), triangles.end(), mass, volume, velEnt, {}, nullptr, nullptr);
@@ -315,7 +315,7 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(pragma::ecs::BaseEntity &
 					totalVolume += volume;
 
 					// Move water plane to collision object coordinate system
-					auto relPlane = pose.GetInverse() * pragma::math::Plane {waterPlane, waterPlaneDist};
+					auto relPlane = pose.GetInverse() * math::Plane {waterPlane, waterPlaneDist};
 					auto &waterPlaneRelObj = relPlane.GetNormal();
 					auto waterPlaneDistRelObj = relPlane.GetDistance();
 #if ENABLE_DEBUG_DRAW == 1
@@ -396,7 +396,7 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(pragma::ecs::BaseEntity &
 			}*/
 		}
 	}
-	auto pSubmergedComponent = ent.GetComponent<pragma::SubmergibleComponent>();
+	auto pSubmergedComponent = ent.GetComponent<SubmergibleComponent>();
 	if(pSubmergedComponent.expired())
 		return;
 	auto submergedPercent = (totalVolume > 0.0) ? (totalSubmerged / totalVolume) : 0.0;
@@ -561,5 +561,5 @@ Vector3 pragma::physics::WaterBuoyancySimulator::CalcCattoDragLinearForceApproxi
 
 Vector3 pragma::physics::WaterBuoyancySimulator::CalcCattoDragTorqueForceApproximation(double dragCoefficientHz, double mass, double submergedLiquidVolume, double volume, double lenPolyhedron, const Vector3 &bodyAngularVelocity) const
 {
-	return static_cast<float>(dragCoefficientHz * mass * (submergedLiquidVolume / volume) * pragma::math::pow2(lenPolyhedron)) * -bodyAngularVelocity;
+	return static_cast<float>(dragCoefficientHz * mass * (submergedLiquidVolume / volume) * math::pow2(lenPolyhedron)) * -bodyAngularVelocity;
 }

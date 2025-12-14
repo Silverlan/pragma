@@ -16,19 +16,19 @@ namespace pragma::pts {
 		float m_lifeMax = 0.f;
 	public:
 		CParticleInitializerLifetimeRandom() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
 		{
 			CParticleInitializer::Initialize(pSystem, values);
 			for(auto it = values.begin(); it != values.end(); it++) {
 				std::string key = it->first;
-				pragma::string::to_lower(key);
+				string::to_lower(key);
 				if(key == "lifetime_min")
-					m_lifeMin = pragma::util::to_float(it->second);
+					m_lifeMin = util::to_float(it->second);
 				else if(key == "lifetime_max")
-					m_lifeMax = pragma::util::to_float(it->second);
+					m_lifeMax = util::to_float(it->second);
 			}
 		}
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override { particle.SetLife(pragma::math::random(m_lifeMin, m_lifeMax)); }
+		virtual void OnParticleCreated(CParticle &particle) override { particle.SetLife(math::random(m_lifeMin, m_lifeMax)); }
 	};
 
 	class DLLCLIENT CParticleInitializerColorRandom : public CParticleInitializer {
@@ -38,12 +38,12 @@ namespace pragma::pts {
 		std::unique_ptr<Color> m_colorC = nullptr;
 	public:
 		CParticleInitializerColorRandom() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
 		{
 			CParticleInitializer::Initialize(pSystem, values);
 			for(auto it = values.begin(); it != values.end(); it++) {
 				std::string key = it->first;
-				pragma::string::to_lower(key);
+				string::to_lower(key);
 				if(key == "color1")
 					m_colorA = Color(it->second);
 				else if(key == "color2")
@@ -52,11 +52,11 @@ namespace pragma::pts {
 					m_colorC = std::make_unique<Color>(it->second);
 			}
 		}
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override
+		virtual void OnParticleCreated(CParticle &particle) override
 		{
-			auto col = m_colorA.Lerp(m_colorB, pragma::math::random(0.f, 1.f));
+			auto col = m_colorA.Lerp(m_colorB, math::random(0.f, 1.f));
 			if(m_colorC != nullptr)
-				col = col.Lerp(*m_colorC, pragma::math::random(0.f, 1.f));
+				col = col.Lerp(*m_colorC, math::random(0.f, 1.f));
 			particle.SetColor(col);
 		}
 	};
@@ -67,22 +67,22 @@ namespace pragma::pts {
 		float m_alphaMax = 255.f;
 	public:
 		CParticleInitializerAlphaRandom() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
 		{
 			CParticleInitializer::Initialize(pSystem, values);
 			for(auto it = values.begin(); it != values.end(); it++) {
 				std::string key = it->first;
-				pragma::string::to_lower(key);
+				string::to_lower(key);
 				if(key == "alpha_min")
-					m_alphaMin = pragma::util::to_float(it->second);
+					m_alphaMin = util::to_float(it->second);
 				else if(key == "alpha_max")
-					m_alphaMax = pragma::util::to_float(it->second);
+					m_alphaMax = util::to_float(it->second);
 			}
 		}
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override
+		virtual void OnParticleCreated(CParticle &particle) override
 		{
 			auto &col = particle.GetColor();
-			col.a = pragma::math::random(m_alphaMin, m_alphaMax) / 255.f;
+			col.a = math::random(m_alphaMin, m_alphaMax) / 255.f;
 		}
 	};
 
@@ -96,43 +96,43 @@ namespace pragma::pts {
 		bool m_bUseQuaternionRotation = false;
 	public:
 		CParticleInitializerRotationRandom() = default;
-		virtual void Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
+		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
 		{
 			CParticleInitializer::Initialize(pSystem, values);
 			for(auto it = values.begin(); it != values.end(); it++) {
 				std::string key = it->first;
-				pragma::string::to_lower(key);
+				string::to_lower(key);
 				if(key == "rotation_quat") {
 					m_rot = uquat::create(it->second);
 					m_bUseQuaternionRotation = true;
 				}
 				else if(key == "rotation_min") {
 					m_rotMin = EulerAngles(it->second);
-					m_planarRotMin = pragma::util::to_float(it->second);
+					m_planarRotMin = util::to_float(it->second);
 				}
 				else if(key == "rotation_max") {
 					m_rotMax = EulerAngles(it->second);
-					m_planarRotMax = pragma::util::to_float(it->second);
+					m_planarRotMax = util::to_float(it->second);
 				}
 			}
 		}
-		virtual void OnParticleCreated(pragma::pts::CParticle &particle) override
+		virtual void OnParticleCreated(CParticle &particle) override
 		{
 			if(m_bUseQuaternionRotation == true) {
 				particle.SetWorldRotation(m_rot);
 				return;
 			}
-			particle.SetWorldRotation(uquat::create(EulerAngles(pragma::math::random(m_rotMin.p, m_rotMax.p), pragma::math::random(m_rotMin.y, m_rotMax.y), pragma::math::random(m_rotMin.r, m_rotMax.r))));
-			particle.SetRotation(pragma::math::random(m_planarRotMin, m_planarRotMax));
+			particle.SetWorldRotation(uquat::create(EulerAngles(math::random(m_rotMin.p, m_rotMax.p), math::random(m_rotMin.y, m_rotMax.y), math::random(m_rotMin.r, m_rotMax.r))));
+			particle.SetRotation(math::random(m_planarRotMin, m_planarRotMax));
 		}
 	};
 }
 
 ///////////////////////
 
-void pragma::pts::CParticleModifier::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleModifier::Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	m_particleSystem = &static_cast<pragma::ecs::CParticleSystemComponent &>(pSystem);
+	m_particleSystem = &static_cast<ecs::CParticleSystemComponent &>(pSystem);
 	RecordKeyValues(values);
 }
 
@@ -141,9 +141,9 @@ void pragma::pts::CParticleModifier::SetPriority(int32_t priority) { m_priority 
 
 pragma::ecs::CParticleSystemComponent &pragma::pts::CParticleModifier::GetParticleSystem() const { return *m_particleSystem; }
 
-void pragma::pts::CParticleModifier::OnParticleCreated(pragma::pts::CParticle &) {}
+void pragma::pts::CParticleModifier::OnParticleCreated(CParticle &) {}
 void pragma::pts::CParticleModifier::OnParticleSystemStarted() {}
-void pragma::pts::CParticleModifier::OnParticleDestroyed(pragma::pts::CParticle &) {}
+void pragma::pts::CParticleModifier::OnParticleDestroyed(CParticle &) {}
 void pragma::pts::CParticleModifier::OnParticleSystemStopped() {}
 void pragma::pts::CParticleModifier::SetName(const std::string &name) { m_name = name; }
 const std::string &pragma::pts::CParticleModifier::GetType() const { return m_type; }
@@ -152,20 +152,20 @@ const std::string &pragma::pts::CParticleModifier::GetName() const { return m_na
 
 ///////////////////////
 
-void pragma::pts::CParticleOperator::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleOperator::Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	pragma::pts::CParticleModifier::Initialize(pSystem, values);
+	CParticleModifier::Initialize(pSystem, values);
 	for(auto &pair : values) {
 		if(pragma::string::compare<std::string>(pair.first, "op_start_fadein"))
-			m_opStartFadein = pragma::util::to_float(pair.second);
+			m_opStartFadein = util::to_float(pair.second);
 		else if(pragma::string::compare<std::string>(pair.first, "op_start_fadeout"))
-			m_opStartFadeout = pragma::util::to_float(pair.second);
+			m_opStartFadeout = util::to_float(pair.second);
 		else if(pragma::string::compare<std::string>(pair.first, "op_end_fadein"))
-			m_opEndFadein = pragma::util::to_float(pair.second);
+			m_opEndFadein = util::to_float(pair.second);
 		else if(pragma::string::compare<std::string>(pair.first, "op_end_fadeout"))
-			m_opEndFadeout = pragma::util::to_float(pair.second);
+			m_opEndFadeout = util::to_float(pair.second);
 		else if(pragma::string::compare<std::string>(pair.first, "op_fade_oscillate_period"))
-			m_opFadeOscillate = pragma::util::to_float(pair.second);
+			m_opFadeOscillate = util::to_float(pair.second);
 	}
 }
 float pragma::pts::CParticleOperator::CalcStrength(float curTime) const
@@ -173,23 +173,23 @@ float pragma::pts::CParticleOperator::CalcStrength(float curTime) const
 	auto flTime = curTime;
 	if(m_opFadeOscillate > 0.f)
 		flTime = fmodf(curTime * (1.0 / m_opFadeOscillate), 1.f);
-	return pragma::math::fade_in_out(m_opStartFadein, m_opEndFadein, m_opStartFadeout, m_opEndFadeout, flTime);
+	return math::fade_in_out(m_opStartFadein, m_opEndFadein, m_opStartFadeout, m_opEndFadeout, flTime);
 }
 void pragma::pts::CParticleOperator::Simulate(double) {}
 
-void pragma::pts::CParticleOperator::PreSimulate(pragma::pts::CParticle &particle, double tDelta) {}
+void pragma::pts::CParticleOperator::PreSimulate(CParticle &particle, double tDelta) {}
 
-void pragma::pts::CParticleOperator::Simulate(pragma::pts::CParticle &pt, double dt)
+void pragma::pts::CParticleOperator::Simulate(CParticle &pt, double dt)
 {
 	auto strength = CalcStrength(pt.GetTimeAlive());
 	Simulate(pt, dt, strength);
 }
 
-void pragma::pts::CParticleOperator::Simulate(pragma::pts::CParticle &particle, double tDelta, float strength) {}
+void pragma::pts::CParticleOperator::Simulate(CParticle &particle, double tDelta, float strength) {}
 
-void pragma::pts::CParticleOperator::PostSimulate(pragma::pts::CParticle &particle, double tDelta) {}
+void pragma::pts::CParticleOperator::PostSimulate(CParticle &particle, double tDelta) {}
 
-void pragma::pts::CParticleOperatorLifespanDecay::Simulate(pragma::pts::CParticle &, double, float strength) {}
+void pragma::pts::CParticleOperatorLifespanDecay::Simulate(CParticle &, double, float strength) {}
 
 ///////////////////////
 
@@ -202,15 +202,15 @@ std::pair<Vector3, Vector3> pragma::pts::CParticleRenderer::GetRenderBounds() co
 ///////////////////////
 
 DLLCLIENT pragma::pts::ParticleModifierMap g_ParticleModifierFactories;
-DLLCLIENT void pragma::pts::LinkParticleInitializerToFactory(std::string name, const pragma::pts::TParticleModifierFactory<pragma::pts::CParticleInitializer> &fc)
+DLLCLIENT void pragma::pts::LinkParticleInitializerToFactory(std::string name, const TParticleModifierFactory<CParticleInitializer> &fc)
 {
 	g_ParticleModifierFactories.AddInitializer(name, fc);
 }
-DLLCLIENT void pragma::pts::LinkParticleOperatorToFactory(std::string name, const pragma::pts::TParticleModifierFactory<pragma::pts::CParticleOperator> &fc)
+DLLCLIENT void pragma::pts::LinkParticleOperatorToFactory(std::string name, const TParticleModifierFactory<CParticleOperator> &fc)
 {
 	g_ParticleModifierFactories.AddOperator(name, fc);
 }
-DLLCLIENT void pragma::pts::LinkParticleRendererToFactory(std::string name, const pragma::pts::TParticleModifierFactory<pragma::pts::CParticleRenderer> &fc)
+DLLCLIENT void pragma::pts::LinkParticleRendererToFactory(std::string name, const TParticleModifierFactory<CParticleRenderer> &fc)
 {
 	g_ParticleModifierFactories.AddRenderer(name, fc);
 }
@@ -276,30 +276,30 @@ void pragma::pts::register_particle_operators()
 	map.AddRenderer("sprite", &create_modifier<CParticleRendererSprite, CParticleRenderer>);
 }
 
-void pragma::pts::ParticleModifierMap::AddInitializer(std::string name, const pragma::pts::TParticleModifierFactory<pragma::pts::CParticleInitializer> &fc)
+void pragma::pts::ParticleModifierMap::AddInitializer(std::string name, const TParticleModifierFactory<CParticleInitializer> &fc)
 {
-	pragma::string::to_lower(name);
-	m_initializers.insert(std::make_pair(name, pragma::pts::TParticleModifierFactory<pragma::pts::CParticleInitializer> {[fc, name](pragma::ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<pragma::pts::CParticleInitializer, void (*)(pragma::pts::CParticleInitializer *)> {
+	string::to_lower(name);
+	m_initializers.insert(std::make_pair(name, pragma::pts::TParticleModifierFactory<CParticleInitializer> {[fc, name](ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> {
 		auto initializer = fc(c, keyvalues);
 		if(initializer)
 			initializer->SetType(name);
 		return initializer;
 	}}));
 }
-void pragma::pts::ParticleModifierMap::AddOperator(std::string name, const pragma::pts::TParticleModifierFactory<pragma::pts::CParticleOperator> &fc)
+void pragma::pts::ParticleModifierMap::AddOperator(std::string name, const TParticleModifierFactory<CParticleOperator> &fc)
 {
-	pragma::string::to_lower(name);
-	m_operators.insert(std::make_pair(name, pragma::pts::TParticleModifierFactory<pragma::pts::CParticleOperator> {[fc, name](pragma::ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<pragma::pts::CParticleOperator, void (*)(pragma::pts::CParticleOperator *)> {
+	string::to_lower(name);
+	m_operators.insert(std::make_pair(name, pragma::pts::TParticleModifierFactory<CParticleOperator> {[fc, name](ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleOperator, void (*)(CParticleOperator *)> {
 		auto op = fc(c, keyvalues);
 		if(op)
 			op->SetType(name);
 		return op;
 	}}));
 }
-void pragma::pts::ParticleModifierMap::AddRenderer(std::string name, const pragma::pts::TParticleModifierFactory<pragma::pts::CParticleRenderer> &fc)
+void pragma::pts::ParticleModifierMap::AddRenderer(std::string name, const TParticleModifierFactory<CParticleRenderer> &fc)
 {
-	pragma::string::to_lower(name);
-	m_renderers.insert(std::make_pair(name, pragma::pts::TParticleModifierFactory<pragma::pts::CParticleRenderer> {[fc, name](pragma::ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<pragma::pts::CParticleRenderer, void (*)(pragma::pts::CParticleRenderer *)> {
+	string::to_lower(name);
+	m_renderers.insert(std::make_pair(name, pragma::pts::TParticleModifierFactory<CParticleRenderer> {[fc, name](ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleRenderer, void (*)(CParticleRenderer *)> {
 		auto renderer = fc(c, keyvalues);
 		if(renderer)
 			renderer->SetType(name);

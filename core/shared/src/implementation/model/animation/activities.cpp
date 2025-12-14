@@ -44,8 +44,8 @@ DLLNETWORK std::unordered_map<int32_t, std::string> ACTIVITY_NAMES = {{pragma::m
 
 void pragma::register_engine_activities()
 {
-	auto &reg = pragma::animation::Animation::GetActivityEnumRegister();
-	for(auto i = std::underlying_type_t<pragma::Activity> {0}; i < pragma::math::to_integral(pragma::Activity::Count); ++i) {
+	auto &reg = animation::Animation::GetActivityEnumRegister();
+	for(auto i = std::underlying_type_t<Activity> {0}; i < math::to_integral(Activity::Count); ++i) {
 		auto it = ACTIVITY_NAMES.find(i);
 		assert(it != ACTIVITY_NAMES.end());
 		auto id = reg.RegisterEnum(it->second);

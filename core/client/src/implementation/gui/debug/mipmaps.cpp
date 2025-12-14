@@ -22,7 +22,7 @@ void pragma::gui::types::WIDebugMipMaps::SetTexture(const std::shared_ptr<prospe
 	m_hTextures.clear();
 	m_textures.clear();
 
-	auto &wgui = pragma::gui::WGUI::GetInstance();
+	auto &wgui = WGUI::GetInstance();
 	auto &context = wgui.GetContext();
 
 	uint32_t width = 128;
@@ -101,7 +101,7 @@ void pragma::gui::types::WIDebugMipMaps::SetTexture(const std::shared_ptr<prospe
 		if(cb.IsValid())
 			cb.Remove();
 	});
-	pragma::get_cengine()->AddCallback("DrawFrame", cb);
+	get_cengine()->AddCallback("DrawFrame", cb);
 	if(!keepSize)
 		SetSize(wContext, hOffset + height);
 }

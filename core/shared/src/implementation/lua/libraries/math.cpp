@@ -19,7 +19,7 @@ double Lua::math::perlin_noise(const Vector3 &v, uint32_t seed)
 
 float Lua::math::lerp(float a, float b, float f) { return a + f * (b - a); }
 
-static float round_by_multiple(float f, float multiple) { return (multiple != 0.f) ? (::pragma::math::round(f / multiple) * multiple) : f; }
+static float round_by_multiple(float f, float multiple) { return (multiple != 0.f) ? (pragma::math::round(f / multiple) * multiple) : f; }
 
 float Lua::math::round(float f, float multiple) { return round_by_multiple(f, multiple); }
 
@@ -27,7 +27,7 @@ luabind::tableT<Vector3> Lua::math::calc_hermite_spline(lua::State *l, const Vec
 {
 	std::vector<Vector3> curvePoints {};
 	pragma::math::calc_hermite_spline(p0, p1, p2, p3, static_cast<uint32_t>(segmentCount), curvePoints, curvature);
-	return Lua::vector_to_table(l, curvePoints);
+	return vector_to_table(l, curvePoints);
 }
 
 Vector3 Lua::math::calc_hermite_spline_position(lua::State *l, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3, float s, float curvature) { return pragma::math::calc_hermite_spline_position(p0, p1, p2, p3, static_cast<float>(s), curvature); }
@@ -106,35 +106,35 @@ int Lua::math::abs_max(lua::State *l)
 {
 	auto v = 0.f;
 	int32_t argIdx = 1;
-	while(Lua::IsSet(l, argIdx)) {
-		auto n = Lua::CheckNumber(l, argIdx++);
+	while(IsSet(l, argIdx)) {
+		auto n = CheckNumber(l, argIdx++);
 		v = pragma::math::abs_max(static_cast<float>(v), static_cast<float>(n));
 	}
-	Lua::PushNumber(l, v);
+	PushNumber(l, v);
 	return 1;
 }
 float Lua::math::ease_in(float t, pragma::math::EaseType type) { return pragma::math::ease_in(t, type); }
 float Lua::math::ease_out(float t, pragma::math::EaseType type) { return pragma::math::ease_out(t, type); }
 float Lua::math::ease_in_out(float t, pragma::math::EaseType type) { return pragma::math::ease_in_out(t, type); }
 
-double Lua::math::calc_horizontal_fov(double focalLengthInMM, double width, double height) { return pragma::math::rad_to_deg(::pragma::math::calc_horizontal_fov(focalLengthInMM, width, height)); }
-double Lua::math::calc_vertical_fov(double focalLengthInMM, double width, double height) { return pragma::math::rad_to_deg(::pragma::math::calc_vertical_fov(focalLengthInMM, width, height)); }
-double Lua::math::calc_diagonal_fov(double focalLengthInMM, double width, double height) { return pragma::math::rad_to_deg(::pragma::math::calc_diagonal_fov(focalLengthInMM, width, height)); }
+double Lua::math::calc_horizontal_fov(double focalLengthInMM, double width, double height) { return pragma::math::rad_to_deg(pragma::math::calc_horizontal_fov(focalLengthInMM, width, height)); }
+double Lua::math::calc_vertical_fov(double focalLengthInMM, double width, double height) { return pragma::math::rad_to_deg(pragma::math::calc_vertical_fov(focalLengthInMM, width, height)); }
+double Lua::math::calc_diagonal_fov(double focalLengthInMM, double width, double height) { return pragma::math::rad_to_deg(pragma::math::calc_diagonal_fov(focalLengthInMM, width, height)); }
 
-double Lua::math::horizontal_fov_to_vertical_fov(float fovDeg, float widthOrAspectRatio, float height) { return pragma::math::rad_to_deg(::pragma::math::horizontal_fov_to_vertical_fov(fovDeg, widthOrAspectRatio, height)); }
-int Lua::math::vertical_fov_to_horizontal_fov(float fovDeg, float widthOrAspectRatio, float height) { return pragma::math::rad_to_deg(::pragma::math::vertical_fov_to_horizontal_fov(fovDeg, widthOrAspectRatio, height)); }
-double Lua::math::diagonal_fov_to_vertical_fov(float diagonalFov, float aspectRatio) { return pragma::math::rad_to_deg(::pragma::math::diagonal_fov_to_vertical_fov(pragma::math::deg_to_rad(diagonalFov), aspectRatio)); }
+double Lua::math::horizontal_fov_to_vertical_fov(float fovDeg, float widthOrAspectRatio, float height) { return pragma::math::rad_to_deg(pragma::math::horizontal_fov_to_vertical_fov(fovDeg, widthOrAspectRatio, height)); }
+int Lua::math::vertical_fov_to_horizontal_fov(float fovDeg, float widthOrAspectRatio, float height) { return pragma::math::rad_to_deg(pragma::math::vertical_fov_to_horizontal_fov(fovDeg, widthOrAspectRatio, height)); }
+double Lua::math::diagonal_fov_to_vertical_fov(float diagonalFov, float aspectRatio) { return pragma::math::rad_to_deg(pragma::math::diagonal_fov_to_vertical_fov(pragma::math::deg_to_rad(diagonalFov), aspectRatio)); }
 
 luabind::mult<float, float> Lua::math::get_frustum_plane_size(lua::State *l, float fovRad, float aspectRatio, float z)
 {
 	float w, h;
-	::pragma::math::frustum::get_plane_size(fovRad, z, aspectRatio, w, h);
+	pragma::math::frustum::get_plane_size(fovRad, z, aspectRatio, w, h);
 	return {l, w, h};
 }
 luabind::mult<luabind::tableT<Vector3>, float, float> Lua::math::get_frustum_plane_boundaries(lua::State *l, const Vector3 &pos, const Vector3 &forward, const Vector3 &up, float fovRad, float aspectRatio, float z)
 {
 	float w, h;
-	auto boundaries = ::pragma::math::frustum::get_plane_boundaries(pos, forward, up, fovRad, z, aspectRatio, &w, &h);
+	auto boundaries = pragma::math::frustum::get_plane_boundaries(pos, forward, up, fovRad, z, aspectRatio, &w, &h);
 	auto t = luabind::newtable(l);
 	for(auto i = decltype(boundaries.size()) {0u}; i < boundaries.size(); ++i)
 		t[i + 1] = boundaries[i];
@@ -142,5 +142,5 @@ luabind::mult<luabind::tableT<Vector3>, float, float> Lua::math::get_frustum_pla
 }
 Vector3 Lua::math::get_frustum_plane_point(lua::State *l, const Vector3 &pos, const Vector3 &forward, const Vector3 &right, const Vector3 &up, float fovRad, float aspectRatio, const ::Vector2 &uv, float z)
 {
-	return ::pragma::math::frustum::get_plane_point(pos, forward, right, up, fovRad, z, aspectRatio, uv);
+	return pragma::math::frustum::get_plane_point(pos, forward, right, up, fovRad, z, aspectRatio, uv);
 }

@@ -60,15 +60,15 @@ void Lua::WorldEnvironment::register_class(luabind::class_<pragma::rendering::Wo
 	classDef.def("GetFogType", &GetFogType);
 	classDef.def("GetFogFarDistance", &GetFogFarDistance);
 
-	classDef.def("GetShaderQualityProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Lua::Property::push(l, *pEnv->GetShaderQualityProperty()); }));
-	classDef.def("GetUnlitProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Lua::Property::push(l, *pEnv->GetUnlitProperty()); }));
-	classDef.def("GetShadowResolutionProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Lua::Property::push(l, *pEnv->GetShadowResolutionProperty()); }));
-	classDef.def("GetFogColorProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Lua::Property::push(l, *pEnv->GetFogSettings().GetColorProperty()); }));
-	classDef.def("GetFogStartProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Lua::Property::push(l, *pEnv->GetFogSettings().GetStartProperty()); }));
-	classDef.def("GetFogEndProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Lua::Property::push(l, *pEnv->GetFogSettings().GetEndProperty()); }));
-	classDef.def("GetFogMaxDensityProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Lua::Property::push(l, *pEnv->GetFogSettings().GetMaxDensityProperty()); }));
-	classDef.def("GetFogTypeProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Lua::Property::push(l, *pEnv->GetFogSettings().GetTypeProperty()); }));
-	classDef.def("GetFogEnabledProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Lua::Property::push(l, *pEnv->GetFogSettings().GetEnabledProperty()); }));
+	classDef.def("GetShaderQualityProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Property::push(l, *pEnv->GetShaderQualityProperty()); }));
+	classDef.def("GetUnlitProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Property::push(l, *pEnv->GetUnlitProperty()); }));
+	classDef.def("GetShadowResolutionProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Property::push(l, *pEnv->GetShadowResolutionProperty()); }));
+	classDef.def("GetFogColorProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Property::push(l, *pEnv->GetFogSettings().GetColorProperty()); }));
+	classDef.def("GetFogStartProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Property::push(l, *pEnv->GetFogSettings().GetStartProperty()); }));
+	classDef.def("GetFogEndProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Property::push(l, *pEnv->GetFogSettings().GetEndProperty()); }));
+	classDef.def("GetFogMaxDensityProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Property::push(l, *pEnv->GetFogSettings().GetMaxDensityProperty()); }));
+	classDef.def("GetFogTypeProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Property::push(l, *pEnv->GetFogSettings().GetTypeProperty()); }));
+	classDef.def("GetFogEnabledProperty", static_cast<void (*)(lua::State *, std::shared_ptr<pragma::rendering::WorldEnvironment> &)>([](lua::State *l, std::shared_ptr<pragma::rendering::WorldEnvironment> &pEnv) { Property::push(l, *pEnv->GetFogSettings().GetEnabledProperty()); }));
 
 	classDef.add_static_constant("FOG_TYPE_LINEAR", pragma::math::to_integral(pragma::util::FogType::Linear));
 	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL", pragma::math::to_integral(pragma::util::FogType::Exponential));
@@ -90,12 +90,12 @@ void Lua::WorldEnvironment::SetFogEnd(lua::State *l, pragma::rendering::WorldEnv
 void Lua::WorldEnvironment::GetFogStart(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv)
 {
 	auto &fog = worldEnv.GetFogSettings();
-	Lua::PushNumber(l, fog.GetStart());
+	PushNumber(l, fog.GetStart());
 }
 void Lua::WorldEnvironment::GetFogEnd(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv)
 {
 	auto &fog = worldEnv.GetFogSettings();
-	Lua::PushNumber(l, fog.GetEnd());
+	PushNumber(l, fog.GetEnd());
 }
 void Lua::WorldEnvironment::SetFogColor(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv, const ::Color &color)
 {
@@ -115,7 +115,7 @@ void Lua::WorldEnvironment::SetFogEnabled(lua::State *l, pragma::rendering::Worl
 void Lua::WorldEnvironment::IsFogEnabled(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv)
 {
 	auto &fog = worldEnv.GetFogSettings();
-	Lua::PushBool(l, fog.IsEnabled());
+	PushBool(l, fog.IsEnabled());
 }
 void Lua::WorldEnvironment::SetFogDensity(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv, float density)
 {
@@ -125,7 +125,7 @@ void Lua::WorldEnvironment::SetFogDensity(lua::State *l, pragma::rendering::Worl
 void Lua::WorldEnvironment::GetFogDensity(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv)
 {
 	auto &fog = worldEnv.GetFogSettings();
-	Lua::PushNumber(l, fog.GetMaxDensity());
+	PushNumber(l, fog.GetMaxDensity());
 }
 void Lua::WorldEnvironment::SetFogType(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv, pragma::util::FogType type)
 {
@@ -135,10 +135,10 @@ void Lua::WorldEnvironment::SetFogType(lua::State *l, pragma::rendering::WorldEn
 void Lua::WorldEnvironment::GetFogType(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv)
 {
 	auto &fog = worldEnv.GetFogSettings();
-	Lua::PushInt(l, pragma::math::to_integral(fog.GetType()));
+	PushInt(l, pragma::math::to_integral(fog.GetType()));
 }
 void Lua::WorldEnvironment::GetFogFarDistance(lua::State *l, pragma::rendering::WorldEnvironment &worldEnv)
 {
 	auto &fog = worldEnv.GetFogSettings();
-	Lua::PushNumber(l, fog.GetFarDistance());
+	PushNumber(l, fog.GetFarDistance());
 }

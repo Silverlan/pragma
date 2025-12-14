@@ -11,7 +11,7 @@ void pragma::physics::PhysObjKinematic::SetKinematic(bool b) { m_bKinematic = b;
 
 void pragma::physics::PhysObjDynamic::PreSimulate()
 {
-	auto *phys = dynamic_cast<pragma::physics::PhysObj *>(this);
+	auto *phys = dynamic_cast<PhysObj *>(this);
 	for(auto &hObj : phys->GetCollisionObjects()) {
 		if(hObj.IsValid() == false || hObj->IsRigid() == false)
 			continue;
@@ -20,7 +20,7 @@ void pragma::physics::PhysObjDynamic::PreSimulate()
 }
 void pragma::physics::PhysObjDynamic::PostSimulate()
 {
-	auto *phys = dynamic_cast<pragma::physics::PhysObj *>(this);
+	auto *phys = dynamic_cast<PhysObj *>(this);
 	for(auto &hObj : phys->GetCollisionObjects()) {
 		if(hObj.IsValid() == false || hObj->IsRigid() == false)
 			continue;

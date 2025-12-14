@@ -30,17 +30,17 @@ luabind::object Lua::game::Server::load_model(lua::State *l, const std::string &
 int Lua::game::Server::create_model(lua::State *l)
 {
 	std::shared_ptr<pragma::asset::Model> mdl = nullptr;
-	if(!Lua::IsSet(l, 1))
+	if(!IsSet(l, 1))
 		mdl = pragma::SGame::Get()->CreateModel();
 	else {
-		if(Lua::IsBool(l, 1)) {
+		if(IsBool(l, 1)) {
 			auto bAddReference = true;
-			if(Lua::IsSet(l, 1))
-				bAddReference = Lua::CheckBool(l, 1);
+			if(IsSet(l, 1))
+				bAddReference = CheckBool(l, 1);
 			mdl = pragma::SGame::Get()->CreateModel(bAddReference);
 		}
 		else {
-			std::string name = Lua::CheckString(l, 1);
+			std::string name = CheckString(l, 1);
 			mdl = pragma::SGame::Get()->CreateModel(name);
 		}
 	}
@@ -63,7 +63,7 @@ int Lua::game::Server::load_map(lua::State *l)
 	pragma::ecs::BaseEntity *entWorld = nullptr;
 	Vector3 origin {};
 	//auto startIdx = SGame::Get()->GetEntityMapIndexStart();
-	auto pair = Lua::game::load_map(l, mapName, &entWorld, origin);
+	auto pair = game::load_map(l, mapName, &entWorld, origin);
 	if(pair.first == false)
 		return pair.second;
 	::NetPacket packet {};

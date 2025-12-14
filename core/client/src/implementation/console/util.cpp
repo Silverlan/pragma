@@ -7,4 +7,4 @@ module pragma.client;
 
 import :console.util;
 
-pragma::console::ConVarHandle pragma::console::get_client_con_var(std::string scmd) { return pragma::get_client_state()->GetConVarHandle(scmd); }
+pragma::console::ConVarHandle pragma::console::get_client_con_var(std::string scmd) { return get_client_state()->GetConVarHandle(scmd); }

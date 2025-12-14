@@ -16,7 +16,7 @@ static const uint32_t DATA_RECORD_BACKLOG = 30;
 pragma::gui::types::WINetGraph::NetData::NetData() : lastUpdate(0) { Reset(); }
 void pragma::gui::types::WINetGraph::NetData::Reset()
 {
-	auto *client = pragma::get_client_state();
+	auto *client = get_client_state();
 	if(client != nullptr)
 		lastUpdate = client->RealTime();
 	dataOutUDP = 0;
@@ -66,7 +66,7 @@ pragma::gui::types::WIText *pragma::gui::types::WINetGraph::CreateText(const std
 	auto &colShadow = colors::Black;
 	Vector2i shadowOffset {2.f, 2.f};
 
-	auto *pText = pragma::gui::WGUI::GetInstance().Create<WIText>(this);
+	auto *pText = WGUI::GetInstance().Create<WIText>(this);
 	pText->SetColor(colText);
 	pText->EnableShadow(true);
 	pText->SetShadowColor(colShadow);
@@ -80,12 +80,12 @@ void pragma::gui::types::WINetGraph::Initialize()
 {
 	WIBase::Initialize();
 
-	auto *pPacketGraph = pragma::gui::WGUI::GetInstance().Create<WILineGraph>(this);
+	auto *pPacketGraph = WGUI::GetInstance().Create<WILineGraph>(this);
 	pPacketGraph->SetSize(256, 90);
 	pPacketGraph->SetSegmentCount(100);
 	m_hPacketGraph = pPacketGraph->GetHandle();
 
-	auto *pDataGraph = pragma::gui::WGUI::GetInstance().Create<WILineGraph>(this);
+	auto *pDataGraph = WGUI::GetInstance().Create<WILineGraph>(this);
 	pDataGraph->SetSize(pPacketGraph->GetSize());
 	pDataGraph->SetSegmentCount(DATA_RECORD_BACKLOG);
 	m_hDataGraph = pDataGraph->GetHandle();
@@ -96,7 +96,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 	auto *pTextOutgoing = CreateText("out:");
 	m_txtOutgoing = pTextOutgoing->GetHandle();
 
-	auto *client = pragma::get_client_state();
+	auto *client = get_client_state();
 	std::stringstream ssUpdateRate;
 	ssUpdateRate << "update rate: " << client->GetConVarInt("cl_updaterate");
 
@@ -123,7 +123,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 	}
 
 	m_cbThink = client->AddCallback("Think", FunctionCallback<void>::Create([this]() {
-		auto &t = pragma::get_client_state()->RealTime();
+		auto &t = get_client_state()->RealTime();
 		auto tDelta = t - m_netData.lastUpdate;
 		if(tDelta >= 1.0) {
 			m_dataSizes[m_dataSizeIdx++] = m_netData.dataIn;
@@ -131,7 +131,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 				m_dataSizeIdx = 0;
 			if(m_txtIncoming.IsValid()) {
 				std::stringstream ss;
-				ss << "in: " << pragma::util::get_pretty_bytes(m_netData.dataIn) << "/s (" << m_netData.countIn << " packets)";
+				ss << "in: " << util::get_pretty_bytes(m_netData.dataIn) << "/s (" << m_netData.countIn << " packets)";
 
 				auto *pText = m_txtIncoming.get<WIText>();
 				pText->SetText(ss.str());
@@ -139,7 +139,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 			}
 			if(m_txtOutgoing.IsValid()) {
 				std::stringstream ss;
-				ss << "out: " << pragma::util::get_pretty_bytes(m_netData.dataOutUDP + m_netData.dataOutTCP) << "/s (" << (m_netData.countOutUDP + m_netData.countOutTCP) << " packets)";
+				ss << "out: " << util::get_pretty_bytes(m_netData.dataOutUDP + m_netData.dataOutTCP) << "/s (" << (m_netData.countOutUDP + m_netData.countOutTCP) << " packets)";
 
 				auto *pText = m_txtOutgoing.get<WIText>();
 				pText->SetText(ss.str());
@@ -147,7 +147,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 			}
 			if(m_hLatency.IsValid()) {
 				std::stringstream ss;
-				ss << "latency: " << +pragma::get_cgame()->GetLatency() << "ms";
+				ss << "latency: " << +get_cgame()->GetLatency() << "ms";
 
 				auto *pText = m_hLatency.get<WIText>();
 				pText->SetText(ss.str());
@@ -155,7 +155,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 			}
 			if(m_hLostPackets.IsValid()) {
 				std::stringstream ss;
-				ss << "lost packets: " << pragma::get_cgame()->GetLostPacketCount();
+				ss << "lost packets: " << get_cgame()->GetLostPacketCount();
 
 				auto *pText = m_hLostPackets.get<WIText>();
 				pText->SetText(ss.str());
@@ -163,7 +163,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 			}
 			std::sort(m_netData.messages.begin(), m_netData.messages.end(), [](const std::pair<uint32_t, NetData::MessageInfo> &a, const std::pair<uint32_t, NetData::MessageInfo> &b) { return a.second.size > b.second.size; });
 			auto *map = networking::get_client_message_map();
-			pragma::util::StringMap<unsigned int> *netmessages;
+			util::StringMap<unsigned int> *netmessages;
 			map->GetNetMessages(&netmessages);
 			uint32_t idx = 0;
 			for(auto &p : m_netData.messages) {
@@ -176,7 +176,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 					auto *pText = hLine.get<WIText>();
 					pText->SetVisible(true);
 					std::stringstream ss;
-					ss << "#" << (idx + 1) << ": " << name << ": " << pragma::util::get_pretty_bytes(info.size) << " (x" << info.count << ")";
+					ss << "#" << (idx + 1) << ": " << name << ": " << util::get_pretty_bytes(info.size) << " (x" << info.count << ")";
 					pText->SetText(ss.str());
 					pText->SizeToContents();
 				}

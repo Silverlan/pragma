@@ -40,15 +40,15 @@ void GlobalAnimationChannelQueueProcessor::ApplyValues()
 				continue;
 			auto &component = *channelCacheData.component;
 			auto &memberInfo = *channelCacheData.memberInfo;
-			if(!pragma::math::is_flag_set(channelCacheData.changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty))
+			if(!math::is_flag_set(channelCacheData.changed, AnimationChannelCacheData::State::Dirty | AnimationChannelCacheData::State::AlwaysDirty))
 				continue;
 			memberInfo.setterFunction(memberInfo, component, channelCacheData.data.data());
-			pragma::math::set_flag(const_cast<pragma::AnimationChannelCacheData &>(channelCacheData).changed, pragma::AnimationChannelCacheData::State::Dirty, false);
+			math::set_flag(const_cast<AnimationChannelCacheData &>(channelCacheData).changed, AnimationChannelCacheData::State::Dirty, false);
 		}
 		m_itemCompleteCount += (range.indexAfterLast - range.start);
 	}
 }
-void GlobalAnimationChannelQueueProcessor::Submit(pragma::AnimationManagerData &amData)
+void GlobalAnimationChannelQueueProcessor::Submit(AnimationManagerData &amData)
 {
 	constexpr uint32_t numPerBatch = 50;
 
@@ -60,7 +60,7 @@ void GlobalAnimationChannelQueueProcessor::Submit(pragma::AnimationManagerData &
 	auto &channels = anim->GetChannels();
 	if(channels.size() != channelValueSubmitters.size())
 		throw std::runtime_error {"Number of channels does not match number of channel value submitters!"};
-	auto n = pragma::math::min(channelValueSubmitters.size(), channels.size());
+	auto n = math::min(channelValueSubmitters.size(), channels.size());
 	auto t = animManager->GetCurrentTime();
 
 	auto numItems = n;

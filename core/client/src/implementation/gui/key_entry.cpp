@@ -12,7 +12,7 @@ import :gui.key_entry;
 // Don't allow same key for 'key 1' and 'key 2'
 // Enable escape key (To undo binding)
 
-pragma::gui::types::WIKeyEntry::WIKeyEntry() : WITextEntryBase(), m_bKeyPressed(false), m_key(static_cast<pragma::platform::Key>(-1)) { RegisterCallback<void, pragma::platform::Key, pragma::platform::Key>("OnKeyChanged"); }
+pragma::gui::types::WIKeyEntry::WIKeyEntry() : WITextEntryBase(), m_bKeyPressed(false), m_key(static_cast<platform::Key>(-1)) { RegisterCallback<void, platform::Key, platform::Key>("OnKeyChanged"); }
 
 pragma::gui::types::WIKeyEntry::~WIKeyEntry()
 {
@@ -20,7 +20,7 @@ pragma::gui::types::WIKeyEntry::~WIKeyEntry()
 		m_hMouseTrap->Remove();
 }
 
-void pragma::gui::types::WIKeyEntry::OnTextChanged(const pragma::string::Utf8String &text, bool changedByUser)
+void pragma::gui::types::WIKeyEntry::OnTextChanged(const string::Utf8String &text, bool changedByUser)
 {
 	WITextEntryBase::OnTextChanged(text, changedByUser);
 	if(!m_hText.IsValid())
@@ -41,13 +41,13 @@ void pragma::gui::types::WIKeyEntry::Initialize()
 		m_hCaret->Remove();
 	if(m_hText.IsValid()) {
 		auto hThis = GetHandle();
-		m_hText->AddCallback("OnTextChanged", FunctionCallback<void, std::reference_wrapper<const pragma::string::Utf8String>>::Create([hThis](std::reference_wrapper<const pragma::string::Utf8String> newText) mutable {
+		m_hText->AddCallback("OnTextChanged", FunctionCallback<void, std::reference_wrapper<const string::Utf8String>>::Create([hThis](std::reference_wrapper<const string::Utf8String> newText) mutable {
 			if(!hThis.IsValid())
 				return;
 			static_cast<WIKeyEntry *>(hThis.get())->OnTextChanged(newText, false);
 		}));
 	}
-	ApplyKey(static_cast<pragma::platform::Key>(-1));
+	ApplyKey(static_cast<platform::Key>(-1));
 }
 
 void pragma::gui::types::WIKeyEntry::SetSize(int x, int y)
@@ -59,58 +59,58 @@ void pragma::gui::types::WIKeyEntry::SetSize(int x, int y)
 	OnTextChanged(t->GetText(), false);
 }
 
-pragma::util::EventReply pragma::gui::types::WIKeyEntry::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WIKeyEntry::KeyboardCallback(platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods)
 {
-	if(WIBase::KeyboardCallback(key, scanCode, state, mods) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
-	if(state != pragma::platform::KeyState::Press)
-		return pragma::util::EventReply::Handled;
+	if(WIBase::KeyboardCallback(key, scanCode, state, mods) == util::EventReply::Handled)
+		return util::EventReply::Handled;
+	if(state != platform::KeyState::Press)
+		return util::EventReply::Handled;
 	ApplyKey(key);
-	return pragma::util::EventReply::Handled;
+	return util::EventReply::Handled;
 }
 pragma::util::EventReply pragma::gui::types::WIKeyEntry::ScrollCallback(Vector2 offset, bool offsetAsPixels)
 {
-	if(WIBase::ScrollCallback(offset, offsetAsPixels) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(WIBase::ScrollCallback(offset, offsetAsPixels) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(offset.y >= 0.f)
-		ApplyKey(static_cast<pragma::platform::Key>(GLFW_CUSTOM_KEY_SCRL_UP));
+		ApplyKey(static_cast<platform::Key>(GLFW_CUSTOM_KEY_SCRL_UP));
 	else
-		ApplyKey(static_cast<pragma::platform::Key>(GLFW_CUSTOM_KEY_SCRL_DOWN));
-	return pragma::util::EventReply::Handled;
+		ApplyKey(static_cast<platform::Key>(GLFW_CUSTOM_KEY_SCRL_DOWN));
+	return util::EventReply::Handled;
 }
-void pragma::gui::types::WIKeyEntry::SetKey(pragma::platform::Key key)
+void pragma::gui::types::WIKeyEntry::SetKey(platform::Key key)
 {
 	if(key == m_key)
 		return;
 	ApplyKey(key);
 }
 pragma::platform::Key pragma::gui::types::WIKeyEntry::GetKey() const { return m_key; }
-void pragma::gui::types::WIKeyEntry::ApplyKey(pragma::platform::Key key)
+void pragma::gui::types::WIKeyEntry::ApplyKey(platform::Key key)
 {
 	auto prevKey = m_key;
-	if(pragma::math::to_integral(key) >= 'A' && pragma::math::to_integral(key) <= 'Z')
-		key = static_cast<pragma::platform::Key>(tolower(pragma::math::to_integral(key)));
+	if(math::to_integral(key) >= 'A' && math::to_integral(key) <= 'Z')
+		key = static_cast<platform::Key>(tolower(math::to_integral(key)));
 	m_key = key;
 	std::string skey;
-	if(key == static_cast<pragma::platform::Key>(-1))
-		skey = pragma::locale::get_text("not_assigned");
-	else if(key != pragma::platform::Key::Escape)
+	if(key == static_cast<platform::Key>(-1))
+		skey = locale::get_text("not_assigned");
+	else if(key != platform::Key::Escape)
 		KeyToText(CInt16(key), &skey);
 	//std::transform(skey.begin(),skey.end(),skey.begin(),::tolower);
 	SetText(skey);
 	m_bKeyPressed = true;
 	KillFocus();
-	CallCallbacks<void, pragma::platform::Key, pragma::platform::Key>("OnKeyChanged", prevKey, key);
+	CallCallbacks<void, platform::Key, platform::Key>("OnKeyChanged", prevKey, key);
 }
-pragma::util::EventReply pragma::gui::types::WIKeyEntry::CharCallback(unsigned int c, pragma::platform::Modifier mods) { return WIBase::CharCallback(c, mods); }
+pragma::util::EventReply pragma::gui::types::WIKeyEntry::CharCallback(unsigned int c, platform::Modifier mods) { return WIBase::CharCallback(c, mods); }
 void pragma::gui::types::WIKeyEntry::OnFocusGained()
 {
 	WITextEntryBase::OnFocusGained();
 	if(m_hMouseTrap.IsValid())
 		m_hMouseTrap->Remove();
 	m_previousKey = GetText().cpp_str();
-	SetText(pragma::locale::get_text("press_a_key"));
-	auto *pRect = pragma::gui::WGUI::GetInstance().Create<WIBase>();
+	SetText(locale::get_text("press_a_key"));
+	auto *pRect = WGUI::GetInstance().Create<WIBase>();
 	m_hMouseTrap = pRect->GetHandle();
 	pRect->SetAutoAlignToParent(true);
 	pRect->SetZPos(10'000);
@@ -119,29 +119,29 @@ void pragma::gui::types::WIKeyEntry::OnFocusGained()
 	auto hKeyEntry = GetHandle();
 	auto hRect = pRect->GetHandle();
 	pRect->AddCallback("OnMouseEvent",
-	  FunctionCallback<pragma::util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
-	    [hRect, hKeyEntry](pragma::util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier) mutable -> CallbackReturnType {
-		    if(state != pragma::platform::KeyState::Press || !hKeyEntry.IsValid()) {
-			    *reply = pragma::util::EventReply::Handled;
+	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
+	    [hRect, hKeyEntry](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier) mutable -> CallbackReturnType {
+		    if(state != platform::KeyState::Press || !hKeyEntry.IsValid()) {
+			    *reply = util::EventReply::Handled;
 			    return CallbackReturnType::HasReturnValue;
 		    }
 		    auto *pKeyEntry = static_cast<WIKeyEntry *>(hKeyEntry.get());
-		    pKeyEntry->ApplyKey(static_cast<pragma::platform::Key>(static_cast<uint32_t>(button) + static_cast<uint32_t>(pragma::platform::Key::Last)));
+		    pKeyEntry->ApplyKey(static_cast<platform::Key>(static_cast<uint32_t>(button) + static_cast<uint32_t>(platform::Key::Last)));
 		    if(hRect.IsValid())
 			    hRect.get()->RemoveSafely();
-		    *reply = pragma::util::EventReply::Handled;
+		    *reply = util::EventReply::Handled;
 		    return CallbackReturnType::HasReturnValue;
 	    }));
-	pRect->AddCallback("OnScroll", FunctionCallback<pragma::util::EventReply, Vector2, bool>::CreateWithOptionalReturn([hRect, hKeyEntry](pragma::util::EventReply *reply, Vector2 offset, bool offsetAsPixels) mutable -> CallbackReturnType {
+	pRect->AddCallback("OnScroll", FunctionCallback<util::EventReply, Vector2, bool>::CreateWithOptionalReturn([hRect, hKeyEntry](util::EventReply *reply, Vector2 offset, bool offsetAsPixels) mutable -> CallbackReturnType {
 		if(!hKeyEntry.IsValid()) {
-			*reply = pragma::util::EventReply::Handled;
+			*reply = util::EventReply::Handled;
 			return CallbackReturnType::HasReturnValue;
 		}
 		auto *pKeyEntry = static_cast<WIKeyEntry *>(hKeyEntry.get());
-		pKeyEntry->ApplyKey(static_cast<pragma::platform::Key>((offset.y >= 0.f) ? GLFW_CUSTOM_KEY_SCRL_UP : GLFW_CUSTOM_KEY_SCRL_DOWN));
+		pKeyEntry->ApplyKey(static_cast<platform::Key>((offset.y >= 0.f) ? GLFW_CUSTOM_KEY_SCRL_UP : GLFW_CUSTOM_KEY_SCRL_DOWN));
 		if(hRect.IsValid())
 			hRect.get()->RemoveSafely();
-		*reply = pragma::util::EventReply::Handled;
+		*reply = util::EventReply::Handled;
 		return CallbackReturnType::HasReturnValue;
 	}));
 	m_bKeyPressed = false;

@@ -30,7 +30,7 @@ static std::shared_ptr<pragma::util::Library> load_module(pragma::NetworkState *
 	}
 	return dllHandle;
 }
-std::shared_ptr<pragma::util::Library> pragma::util::initialize_external_archive_manager(pragma::NetworkState *nw) { return load_module(nw); }
+std::shared_ptr<pragma::util::Library> pragma::util::initialize_external_archive_manager(NetworkState *nw) { return load_module(nw); }
 void pragma::util::close_external_archive_manager()
 {
 	if(s_bModuleInitialized == false)
@@ -113,7 +113,7 @@ static bool port_model(pragma::NetworkState *nw, const std::string &path, std::s
 	return true;
 }
 
-void *pragma::util::impl::get_module_func(pragma::NetworkState *nw, const std::string &name)
+void *pragma::util::impl::get_module_func(NetworkState *nw, const std::string &name)
 {
 	static auto *dllHandle = load_module(nw).get();
 	if(dllHandle == nullptr)
@@ -121,83 +121,83 @@ void *pragma::util::impl::get_module_func(pragma::NetworkState *nw, const std::s
 	return dllHandle->FindSymbolAddress(name);
 }
 
-bool pragma::util::port_nif_model(pragma::NetworkState *nw, const std::string &path, std::string mdlName)
+bool pragma::util::port_nif_model(NetworkState *nw, const std::string &path, std::string mdlName)
 {
 	std::string ext;
 	if(ufile::get_extension(mdlName, &ext) == false || ext != "nif")
 		return false;
-	static auto *ptrConvertModel = reinterpret_cast<bool (*)(pragma::NetworkState *, const std::function<std::shared_ptr<pragma::asset::Model>()> &, const std::function<bool(const std::shared_ptr<pragma::asset::Model> &, const std::string &, const std::string &)> &, const std::string &, const std::string &)>(
+	static auto *ptrConvertModel = reinterpret_cast<bool (*)(NetworkState *, const std::function<std::shared_ptr<asset::Model>()> &, const std::function<bool(const std::shared_ptr<asset::Model> &, const std::string &, const std::string &)> &, const std::string &, const std::string &)>(
 	  impl::get_module_func(nw, "convert_nif_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
-	auto lockWatcher = pragma::Engine::Get()->ScopeLockResourceWatchers();
+	auto lockWatcher = Engine::Get()->ScopeLockResourceWatchers();
 	return port_model(nw, path, mdlName, "nif",
-	  [](pragma::NetworkState *nw, const std::function<std::shared_ptr<pragma::asset::Model>()> &fCreateModel, const std::function<bool(const std::shared_ptr<pragma::asset::Model> &, const std::string &, const std::string &)> &fCallback, const std::string &path, const std::string &mdlName,
+	  [](NetworkState *nw, const std::function<std::shared_ptr<asset::Model>()> &fCreateModel, const std::function<bool(const std::shared_ptr<asset::Model> &, const std::string &, const std::string &)> &fCallback, const std::string &path, const std::string &mdlName,
 	    std::ostream *optLog) -> bool { return ptrConvertModel(nw, fCreateModel, fCallback, path, mdlName); });
 }
 
-bool pragma::util::port_hl2_particle(pragma::NetworkState *nw, const std::string &path)
+bool pragma::util::port_hl2_particle(NetworkState *nw, const std::string &path)
 {
-	static auto *ptrLoadParticle = reinterpret_cast<bool (*)(pragma::NetworkState &, const std::string &)>(impl::get_module_func(nw, "load_source_particle"));
+	static auto *ptrLoadParticle = reinterpret_cast<bool (*)(NetworkState &, const std::string &)>(impl::get_module_func(nw, "load_source_particle"));
 	if(ptrLoadParticle == nullptr)
 		return false;
-	auto lockWatcher = pragma::Engine::Get()->ScopeLockResourceWatchers();
+	auto lockWatcher = Engine::Get()->ScopeLockResourceWatchers();
 	return ptrLoadParticle(*nw, path);
 }
 
-bool pragma::util::port_source2_model(pragma::NetworkState *nw, const std::string &path, std::string mdlName)
+bool pragma::util::port_source2_model(NetworkState *nw, const std::string &path, std::string mdlName)
 {
 	ufile::remove_extension_from_filename(mdlName, std::array<std::string, 2> {"vmdl", "vmdl_c"});
 	mdlName += ".vmdl_c";
 	static auto *ptrConvertModel
-	  = reinterpret_cast<bool (*)(pragma::NetworkState *nw, const std::function<std::shared_ptr<pragma::asset::Model>()> &, const std::function<bool(const std::shared_ptr<pragma::asset::Model> &, const std::string &, const std::string &)> &, const std::string &, const std::string &, std::ostream *)>(
+	  = reinterpret_cast<bool (*)(NetworkState *nw, const std::function<std::shared_ptr<asset::Model>()> &, const std::function<bool(const std::shared_ptr<asset::Model> &, const std::string &, const std::string &)> &, const std::string &, const std::string &, std::ostream *)>(
 	    impl::get_module_func(nw, "convert_source2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
-	auto lockWatcher = pragma::Engine::Get()->ScopeLockResourceWatchers();
+	auto lockWatcher = Engine::Get()->ScopeLockResourceWatchers();
 	return port_model(nw, path, mdlName, "source2", ptrConvertModel);
 }
 
-bool pragma::util::port_hl2_model(pragma::NetworkState *nw, const std::string &path, std::string mdlName)
+bool pragma::util::port_hl2_model(NetworkState *nw, const std::string &path, std::string mdlName)
 {
 	ufile::remove_extension_from_filename(mdlName, std::array<std::string, 1> {"mdl"});
 	mdlName += ".mdl";
 	static auto *ptrConvertModel
-	  = reinterpret_cast<bool (*)(pragma::NetworkState *nw, const std::function<std::shared_ptr<pragma::asset::Model>()> &, const std::function<bool(const std::shared_ptr<pragma::asset::Model> &, const std::string &, const std::string &)> &, const std::string &, const std::string &, std::ostream *)>(
+	  = reinterpret_cast<bool (*)(NetworkState *nw, const std::function<std::shared_ptr<asset::Model>()> &, const std::function<bool(const std::shared_ptr<asset::Model> &, const std::string &, const std::string &)> &, const std::string &, const std::string &, std::ostream *)>(
 	    impl::get_module_func(nw, "convert_hl2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
-	auto lockWatcher = pragma::Engine::Get()->ScopeLockResourceWatchers();
+	auto lockWatcher = Engine::Get()->ScopeLockResourceWatchers();
 	return port_model(nw, path, mdlName, "HL2", ptrConvertModel);
 }
 
-bool pragma::util::port_hl2_smd(pragma::NetworkState &nw, pragma::asset::Model &mdl,fs::VFilePtr &f, const std::string &animName, bool isCollisionMesh, std::vector<std::string> &outTextures)
+bool pragma::util::port_hl2_smd(NetworkState &nw, asset::Model &mdl,fs::VFilePtr &f, const std::string &animName, bool isCollisionMesh, std::vector<std::string> &outTextures)
 {
-	static auto *ptrConvertSmd = reinterpret_cast<bool (*)(pragma::NetworkState &, pragma::asset::Model &,fs::VFilePtr &, const std::string &, bool, std::vector<std::string> &)>(impl::get_module_func(&nw, "convert_smd"));
+	static auto *ptrConvertSmd = reinterpret_cast<bool (*)(NetworkState &, asset::Model &,fs::VFilePtr &, const std::string &, bool, std::vector<std::string> &)>(impl::get_module_func(&nw, "convert_smd"));
 	if(ptrConvertSmd == nullptr)
 		return false;
 	auto lockWatcher = nw.GetResourceWatcher().ScopeLock();
 	return ptrConvertSmd(nw, mdl, f, animName, isCollisionMesh, outTextures);
 }
 
-bool pragma::util::port_file(pragma::NetworkState *nw, const std::string &path, const std::optional<std::string> &optOutputPath)
+bool pragma::util::port_file(NetworkState *nw, const std::string &path, const std::optional<std::string> &optOutputPath)
 {
-	if(pragma::Engine::Get()->ShouldMountExternalGameResources() == false)
+	if(Engine::Get()->ShouldMountExternalGameResources() == false)
 		return false;
 	auto outputPath = optOutputPath.has_value() ? *optOutputPath : path;
 	if(fs::exists(outputPath))
 		return true;
 	if(outputPath != path && fs::exists(path)) {
-		auto fullOutputPath = pragma::util::IMPORT_PATH + outputPath;
+		auto fullOutputPath = IMPORT_PATH + outputPath;
 		fs::create_path(ufile::get_path_from_filename(fullOutputPath));
 		return fs::copy_file(path, fullOutputPath);
 	}
 	auto dllHandle = load_module(nw);
 	if(dllHandle == nullptr)
 		return false;
-	static auto *ptrExtractResource = dllHandle->FindSymbolAddress<bool (*)(pragma::NetworkState *, const std::string &, const std::string &)>("extract_resource");
+	static auto *ptrExtractResource = dllHandle->FindSymbolAddress<bool (*)(NetworkState *, const std::string &, const std::string &)>("extract_resource");
 	if(ptrExtractResource == nullptr)
 		return false;
-	auto lockWatcher = pragma::Engine::Get()->ScopeLockResourceWatchers();
-	return ptrExtractResource(nw, path, pragma::util::IMPORT_PATH + outputPath);
+	auto lockWatcher = Engine::Get()->ScopeLockResourceWatchers();
+	return ptrExtractResource(nw, path, IMPORT_PATH + outputPath);
 }

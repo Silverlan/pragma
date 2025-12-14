@@ -35,7 +35,7 @@ Lua::opt<Lua::tb<void>> Lua::engine::get_git_info(lua::State *l)
 {
 	auto gitInfo = pragma::engine_info::get_git_info();
 	if(!gitInfo.has_value())
-		return Lua::nil;
+		return nil;
 	auto t = luabind::newtable(l);
 	t["ref"] = gitInfo->ref;
 	t["commitSha"] = gitInfo->commitSha;
@@ -104,17 +104,17 @@ Lua::opt<Lua::mult<std::string, pragma::console::MessageFlags, Lua::opt<Color>>>
 	luabind::object color {};
 	if(output->color)
 		color = {l, *output->color};
-	return Lua::mult<std::string, pragma::console::MessageFlags, Lua::opt<::Color>> {l, output->output, output->messageFlags, opt<::Color> {color}};
+	return Lua::mult<std::string, pragma::console::MessageFlags, opt<::Color>> {l, output->output, output->messageFlags, opt<::Color> {color}};
 }
 
 void Lua::engine::register_shared_functions(lua::State *l, luabind::module_ &modEn)
 {
-	modEn[(luabind::def("set_record_console_output", Lua::engine::set_record_console_output), luabind::def("get_tick_count", &Lua::engine::GetTickCount), luabind::def("shutdown", &Lua::engine::exit), luabind::def("get_working_directory", Lua::engine::get_working_directory),
-	  luabind::def("get_git_info", Lua::engine::get_git_info), luabind::def("mount_addon", static_cast<bool (*)(const std::string &)>(&pragma::AddonSystem::MountAddon)),
+	modEn[(luabind::def("set_record_console_output", set_record_console_output), luabind::def("get_tick_count", &GetTickCount), luabind::def("shutdown", &exit), luabind::def("get_working_directory", get_working_directory),
+	  luabind::def("get_git_info", get_git_info), luabind::def("mount_addon", static_cast<bool (*)(const std::string &)>(&pragma::AddonSystem::MountAddon)),
 	  luabind::def(
 	    "mount_sub_addon",
 	    +[](lua::State *l, const std::string &subAddon) {
-		    auto path = pragma::util::Path::CreatePath(Lua::util::get_addon_path(l));
+		    auto path = pragma::util::Path::CreatePath(util::get_addon_path(l));
 		    path.PopFront();
 		    path = path + "addons/" + subAddon;
 		    return pragma::AddonSystem::MountAddon(path.GetString());

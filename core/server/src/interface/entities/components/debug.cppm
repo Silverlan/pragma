@@ -12,7 +12,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SDebugTextComponent final : public BaseDebugTextComponent, public SBaseNetComponent {
 	  public:
-		SDebugTextComponent(pragma::ecs::BaseEntity &ent) : BaseDebugTextComponent(ent) {}
+		SDebugTextComponent(ecs::BaseEntity &ent) : BaseDebugTextComponent(ent) {}
 		virtual void SetText(const std::string &text) override;
 		virtual void SetSize(float size) override;
 
@@ -35,7 +35,7 @@ export namespace pragma {
 
 	class DLLSERVER SDebugPointComponent final : public BaseDebugPointComponent, public SBaseNetComponent {
 	  public:
-		SDebugPointComponent(pragma::ecs::BaseEntity &ent) : BaseDebugPointComponent(ent) {}
+		SDebugPointComponent(ecs::BaseEntity &ent) : BaseDebugPointComponent(ent) {}
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
@@ -45,7 +45,7 @@ export namespace pragma {
 
 	class DLLSERVER SDebugLineComponent final : public BaseDebugLineComponent, public SBaseNetComponent {
 	  public:
-		SDebugLineComponent(pragma::ecs::BaseEntity &ent) : BaseDebugLineComponent(ent) {}
+		SDebugLineComponent(ecs::BaseEntity &ent) : BaseDebugLineComponent(ent) {}
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
@@ -55,7 +55,7 @@ export namespace pragma {
 
 	class DLLSERVER SDebugBoxComponent final : public BaseDebugBoxComponent, public SBaseDebugOutlineComponent {
 	  public:
-		SDebugBoxComponent(pragma::ecs::BaseEntity &ent) : BaseDebugBoxComponent(ent) {}
+		SDebugBoxComponent(ecs::BaseEntity &ent) : BaseDebugBoxComponent(ent) {}
 		virtual void SetBounds(const Vector3 &min, const Vector3 &max) override;
 
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
@@ -67,7 +67,7 @@ export namespace pragma {
 
 	class DLLSERVER SDebugSphereComponent final : public BaseDebugSphereComponent, public SBaseDebugOutlineComponent {
 	  public:
-		SDebugSphereComponent(pragma::ecs::BaseEntity &ent) : BaseDebugSphereComponent(ent) {}
+		SDebugSphereComponent(ecs::BaseEntity &ent) : BaseDebugSphereComponent(ent) {}
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
@@ -77,7 +77,7 @@ export namespace pragma {
 
 	class DLLSERVER SDebugConeComponent final : public BaseDebugConeComponent, public SBaseDebugOutlineComponent {
 	  public:
-		SDebugConeComponent(pragma::ecs::BaseEntity &ent) : BaseDebugConeComponent(ent) {}
+		SDebugConeComponent(ecs::BaseEntity &ent) : BaseDebugConeComponent(ent) {}
 		virtual void SetConeAngle(float angle) override;
 		virtual void SetStartRadius(float radius) override;
 
@@ -90,7 +90,7 @@ export namespace pragma {
 
 	class DLLSERVER SDebugCylinderComponent final : public BaseDebugCylinderComponent, public SBaseDebugOutlineComponent {
 	  public:
-		SDebugCylinderComponent(pragma::ecs::BaseEntity &ent) : BaseDebugCylinderComponent(ent) {}
+		SDebugCylinderComponent(ecs::BaseEntity &ent) : BaseDebugCylinderComponent(ent) {}
 		virtual void SetLength(float length) override;
 
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
@@ -102,7 +102,7 @@ export namespace pragma {
 
 	class DLLSERVER SDebugPlaneComponent final : public BaseDebugPlaneComponent {
 	  public:
-		SDebugPlaneComponent(pragma::ecs::BaseEntity &ent) : BaseDebugPlaneComponent(ent) {}
+		SDebugPlaneComponent(ecs::BaseEntity &ent) : BaseDebugPlaneComponent(ent) {}
 		virtual void InitializeLuaObject(lua::State *l) override;
 	};
 };

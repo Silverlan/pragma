@@ -18,7 +18,7 @@ import :debug;
 import :game;
 
 std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Create(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config) { return Mesh::Create<CMesh>(rcMesh, config); }
-std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Load(pragma::Game &game, const std::string &fname) { return Mesh::Load<CMesh>(game, fname); }
+std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Load(Game &game, const std::string &fname) { return Mesh::Load<CMesh>(game, fname); }
 void pragma::nav::CMesh::UpdateDebugPath(Vector3 &start, Vector3 &end)
 {
 	auto res = FindPath(start, end);

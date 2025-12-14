@@ -40,7 +40,7 @@ void ShaderParticlePolyboard::InitializeGfxPipeline(prosper::GraphicsPipelineCre
 	pipelineInfo.SetPrimitiveTopology(prosper::PrimitiveTopology::LineListWithAdjacency);
 }
 
-bool ShaderParticlePolyboard::Draw(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::ecs::CParticleSystemComponent &ps, prosper::IBuffer &vertexBuffer, prosper::IBuffer &indexBuffer, uint32_t numIndices, float radius, float curvature)
+bool ShaderParticlePolyboard::Draw(CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, prosper::IBuffer &vertexBuffer, prosper::IBuffer &indexBuffer, uint32_t numIndices, float radius, float curvature)
 {
 #if 0
 	if(BindParticleMaterial(renderer,ps) == false)

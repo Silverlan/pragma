@@ -21,26 +21,26 @@ decltype(pragma::pts::CParticleRendererBlob::s_activeBlobRendererCount) pragma::
 decltype(pragma::pts::CParticleRendererBlob::s_shader) pragma::pts::CParticleRendererBlob::s_shader = nullptr;
 decltype(pragma::pts::CParticleRendererBlob::s_shadowShader) pragma::pts::CParticleRendererBlob::s_shadowShader = nullptr;
 
-void pragma::pts::CParticleRendererBlob::Initialize(pragma::BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
+void pragma::pts::CParticleRendererBlob::Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
 	CParticleRenderer::Initialize(pSystem, values);
 	auto bHasShininess = false;
 	auto shininess = 0.f;
 	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		pragma::string::to_lower(key);
+		string::to_lower(key);
 		if(key == "specular_color")
 			m_specularColor = Color(it->second).ToVector4();
 		else if(key == "specular_shininess") {
-			shininess = pragma::util::to_float(it->second);
+			shininess = util::to_float(it->second);
 			bHasShininess = true;
 		}
 		else if(key == "reflection_intensity")
-			m_reflectionIntensity = pragma::util::to_float(it->second);
+			m_reflectionIntensity = util::to_float(it->second);
 		else if(key == "refraction_index_ratio")
-			m_refractionIndexRatio = pragma::util::to_float(it->second);
+			m_refractionIndexRatio = util::to_float(it->second);
 		else if(key == "debug_mode")
-			m_debugMode = static_cast<pragma::ShaderParticleBlob::DebugMode>(pragma::util::to_int(it->second));
+			m_debugMode = static_cast<ShaderParticleBlob::DebugMode>(util::to_int(it->second));
 	}
 	if(bHasShininess == true)
 		m_specularColor.w = shininess;
@@ -51,9 +51,9 @@ pragma::pts::CParticleRendererBlob::~CParticleRendererBlob() { ShowDebugNeighbor
 pragma::ShaderParticleBase *pragma::pts::CParticleRendererBlob::GetShader() const
 {
 	if(!s_shader) {
-		auto hShader = pragma::get_cengine()->GetShader("particle_blob");
+		auto hShader = get_cengine()->GetShader("particle_blob");
 		if(hShader.valid())
-			s_shader = static_cast<pragma::ShaderParticleBlob *>(hShader.get());
+			s_shader = static_cast<ShaderParticleBlob *>(hShader.get());
 	}
 	return s_shader;
 }
@@ -94,7 +94,7 @@ void pragma::pts::CParticleRendererBlob::UpdateDebugNeighborLinks()
 		dbgObjs0.hide = false;
 		for(auto i = decltype(cLinks0.links.size()) {1}; i < cLinks0.links.size(); ++i) {
 			auto particleIdx1 = cLinks0.links[i].targetParticleIdx;
-			auto &o = static_cast<pragma::debug::DebugRenderer::WorldObject &>(*dbgObjs0.renderObjects[i - 1].get());
+			auto &o = static_cast<debug::DebugRenderer::WorldObject &>(*dbgObjs0.renderObjects[i - 1].get());
 			auto &verts = o.GetVertices();
 			assert(verts.size() == 2);
 			std::pair<Vector3, Vector3> newVerts;
@@ -130,7 +130,7 @@ void pragma::pts::CParticleRendererBlob::UpdateDebugNeighborLinks()
 		if(info.hide == false)
 			continue;
 		for(auto &ptrO : info.renderObjects) {
-			auto &o = static_cast<pragma::debug::DebugRenderer::WorldObject &>(*ptrO.get());
+			auto &o = static_cast<debug::DebugRenderer::WorldObject &>(*ptrO.get());
 			auto &verts = o.GetVertices();
 			assert(verts.size() == 2);
 			if(uvec::cmp(verts.front(), uvec::ORIGIN) == false || uvec::cmp(verts.back(), uvec::ORIGIN) == false) {
@@ -146,14 +146,14 @@ void pragma::pts::CParticleRendererBlob::SetShowNeighborLinks(bool b) { s_bShowN
 
 void pragma::pts::CParticleRendererBlob::OnParticleSystemStarted()
 {
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	if(s_activeBlobRendererCount++ == 0) {
-		auto *shader = static_cast<pragma::ShaderParticleBlob *>(GetShader());
+		auto *shader = static_cast<ShaderParticleBlob *>(GetShader());
 		if(shader) {
 			// Generate a descriptor set for our particle storage buffer
-			s_dsParticles = shader->CreateDescriptorSetGroup(pragma::ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA.setIndex);
+			s_dsParticles = shader->CreateDescriptorSetGroup(ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA.setIndex);
 			if(s_dsParticles) {
-				s_dsParticles->GetDescriptorSet()->SetBindingDynamicStorageBuffer(*pragma::ecs::CParticleSystemComponent::GetGlobalParticleBuffer(), 0 /* bindingIndex */
+				s_dsParticles->GetDescriptorSet()->SetBindingDynamicStorageBuffer(*ecs::CParticleSystemComponent::GetGlobalParticleBuffer(), 0 /* bindingIndex */
 				);
 			}
 		}
@@ -167,7 +167,7 @@ void pragma::pts::CParticleRendererBlob::OnParticleSystemStarted()
 	assert(maxParticleCount < (INVALID_BLOB_INDEX + 1));
 	m_adjacentParticleIds.resize(maxParticleCount);
 	prosper::util::BufferCreateInfo bufCreateInfo {};
-	bufCreateInfo.size = pragma::util::size_of_container(m_adjacentParticleIds);
+	bufCreateInfo.size = util::size_of_container(m_adjacentParticleIds);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	m_adjacentBlobBuffer = context.CreateBuffer(bufCreateInfo, m_adjacentParticleIds.data());
@@ -266,7 +266,7 @@ void pragma::pts::CParticleRendererBlob::OnParticleSystemStopped()
 {
 	if(--s_activeBlobRendererCount == 0) // Release the descriptor set when it's not needed anymore
 	{
-		auto &context = pragma::get_cengine()->GetRenderContext();
+		auto &context = get_cengine()->GetRenderContext();
 		context.KeepResourceAliveUntilPresentationComplete(s_dsParticles); // Keep descriptor set alive until it's definitely not in use anymore
 		s_dsParticles = nullptr;
 	}
@@ -298,7 +298,7 @@ void pragma::pts::CParticleRendererBlob::SortParticleLinks()
 	}
 }
 
-void pragma::pts::CParticleRendererBlob::OnParticleDestroyed(pragma::pts::CParticle &particle)
+void pragma::pts::CParticleRendererBlob::OnParticleDestroyed(CParticle &particle)
 {
 	CParticleRenderer::OnParticleDestroyed(particle);
 	auto particleIdx = particle.GetIndex();
@@ -320,7 +320,7 @@ void pragma::pts::CParticleRendererBlob::OnParticleDestroyed(pragma::pts::CParti
 
 void pragma::pts::CParticleRendererBlob::UpdateAdjacentParticles(prosper::ICommandBuffer &cmd, prosper::IBuffer &blobIndexBuffer)
 {
-	auto frameId = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
+	auto frameId = get_cengine()->GetRenderContext().GetLastFrameId();
 	if(m_lastFrame == frameId)
 		return;
 	m_lastFrame = frameId;
@@ -360,7 +360,7 @@ void pragma::pts::CParticleRendererBlob::UpdateAdjacentParticles(prosper::IComma
 					auto &p1 = particles[renderIdx1];
 					auto &pos1 = *reinterpret_cast<const Vector3 *>(&p1.position);
 					auto radius1 = p1.radius;
-					auto maxDistSqr = pragma::math::pow2(radius0 + radius1);
+					auto maxDistSqr = math::pow2(radius0 + radius1);
 					auto distSqr = link.distSqr = uvec::length_sqr(pos1 - pos0);
 					bClearLink = (distSqr >= maxDistSqr) ? true : false;
 				}
@@ -418,7 +418,7 @@ void pragma::pts::CParticleRendererBlob::UpdateAdjacentParticles(prosper::IComma
 				auto &p1 = *it1;
 				auto &pos1 = *reinterpret_cast<const Vector3 *>(&p1.position);
 				auto radius1 = p1.radius;
-				auto maxDistSqr = pragma::math::pow2(radius0 + radius1);
+				auto maxDistSqr = math::pow2(radius0 + radius1);
 				auto distSqr = uvec::length_sqr(pos1 - pos0);
 				if(distSqr < maxDistSqr) {
 					// Check if link already exists
@@ -446,8 +446,8 @@ void pragma::pts::CParticleRendererBlob::UpdateAdjacentParticles(prosper::IComma
 	for(auto it = particles.begin(); it != itEnd; ++it) {
 		auto renderIdx = it - particles.begin();
 		auto &particleIds = m_adjacentParticleIds[renderIdx];
-		auto offset = renderIdx * pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS * sizeof(particleIds.front());
-		cmd.RecordUpdateBuffer(blobIndexBuffer, offset, pragma::util::size_of_container(particleIds), particleIds.data());
+		auto offset = renderIdx * ShaderParticleBlob::MAX_BLOB_NEIGHBORS * sizeof(particleIds.front());
+		cmd.RecordUpdateBuffer(blobIndexBuffer, offset, util::size_of_container(particleIds), particleIds.data());
 	}
 	//
 	UpdateDebugNeighborLinks();
@@ -459,9 +459,9 @@ void pragma::pts::CParticleRendererBlob::PreRender(prosper::ICommandBuffer &cmd)
 	auto &blobIndexBuffer = *m_adjacentBlobBuffer;
 	UpdateAdjacentParticles(cmd, blobIndexBuffer);
 }
-void pragma::pts::CParticleRendererBlob::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::pts::ParticleRenderFlags renderFlags)
+void pragma::pts::CParticleRendererBlob::RecordRender(prosper::ICommandBuffer &drawCmd, CSceneComponent &scene, const CRasterizationRendererComponent &renderer, ParticleRenderFlags renderFlags)
 {
-	auto *shader = static_cast<pragma::ShaderParticleBlob *>(GetShader());
+	auto *shader = static_cast<ShaderParticleBlob *>(GetShader());
 	prosper::ShaderBindState bindState {drawCmd};
 	if(!shader)
 		return;
@@ -470,18 +470,18 @@ void pragma::pts::CParticleRendererBlob::RecordRender(prosper::ICommandBuffer &d
 		return;
 	auto &blobIndexBuffer = *m_adjacentBlobBuffer;
 
-	auto layout = pragma::get_cengine()->GetRenderContext().GetShaderPipelineLayout(*shader, *pipelineIdx);
+	auto layout = get_cengine()->GetRenderContext().GetShaderPipelineLayout(*shader, *pipelineIdx);
 	assert(layout != nullptr);
 	auto *dsScene = scene.GetCameraDescriptorSetGraphics();
 	auto *dsRenderer = renderer.GetRendererDescriptorSet();
-	auto &dsRenderSettings = pragma::get_cgame()->GetGlobalRenderSettingsDescriptorSet();
-	auto *dsShadows = pragma::CShadowComponent::GetDescriptorSet();
+	auto &dsRenderSettings = get_cgame()->GetGlobalRenderSettingsDescriptorSet();
+	auto *dsShadows = CShadowComponent::GetDescriptorSet();
 	shader->RecordBindScene(bindState.commandBuffer, *layout, scene, renderer, *dsScene, *dsRenderer, dsRenderSettings, *dsShadows);
 	shader->RecordDraw(bindState, scene, renderer, *m_particleSystem, m_particleSystem->GetOrientationType(), renderFlags, blobIndexBuffer, *s_dsParticles->GetDescriptorSet(), m_particleSystem->GetParticleBuffer()->GetStartOffset());
 	shader->RecordEndDraw(bindState);
 }
 
-void pragma::pts::CParticleRendererBlob::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
+void pragma::pts::CParticleRendererBlob::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, CSceneComponent &scene, const CRasterizationRendererComponent &renderer, CLightComponent &light, uint32_t layerId)
 {
 	/*auto &shader = *s_shadowShader;
 	auto &context = pragma::get_cengine()->GetRenderContext();

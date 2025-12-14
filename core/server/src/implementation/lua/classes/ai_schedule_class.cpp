@@ -12,7 +12,7 @@ import :scripting.lua.classes.entity;
 
 namespace Lua {
 	namespace AISchedule {
-		static void AddTask(lua::State *l, pragma::ai::Schedule &schedule, ::pragma::ai::BehaviorNode &node);
+		static void AddTask(lua::State *l, pragma::ai::Schedule &schedule, pragma::ai::BehaviorNode &node);
 		static void GetRootNode(lua::State *l, pragma::ai::Schedule &schedule);
 		static void Cancel(lua::State *l, pragma::ai::Schedule &schedule);
 		static void Copy(lua::State *l, pragma::ai::Schedule &schedule);
@@ -96,19 +96,19 @@ void Lua::AISchedule::register_class(lua::State *l, luabind::module_ &mod)
 	mod[classDef];
 }
 
-void Lua::AISchedule::AddTask(lua::State *, pragma::ai::Schedule &schedule, ::pragma::ai::BehaviorNode &node) { schedule.GetRootNode().AddNode(node.shared_from_this()); }
+void Lua::AISchedule::AddTask(lua::State *, pragma::ai::Schedule &schedule, pragma::ai::BehaviorNode &node) { schedule.GetRootNode().AddNode(node.shared_from_this()); }
 void Lua::AISchedule::GetRootNode(lua::State *l, pragma::ai::Schedule &schedule)
 {
 	auto &rootNode = schedule.GetRootNode();
-	Lua::ai::push_task(l, rootNode);
+	ai::push_task(l, rootNode);
 }
 void Lua::AISchedule::Cancel(lua::State *, pragma::ai::Schedule &schedule) { schedule.Cancel(); }
 void Lua::AISchedule::Copy(lua::State *l, pragma::ai::Schedule &schedule)
 {
 	auto cpy = schedule.Copy();
-	Lua::Push<std::shared_ptr<::pragma::ai::Schedule>>(l, cpy);
+	Lua::Push<std::shared_ptr<pragma::ai::Schedule>>(l, cpy);
 }
-void Lua::AISchedule::HasParameter(lua::State *l, pragma::ai::Schedule &schedule, uint32_t parameterId) { Lua::PushBool(l, (schedule.GetParameter(parameterId) != nullptr) ? true : false); }
+void Lua::AISchedule::HasParameter(lua::State *l, pragma::ai::Schedule &schedule, uint32_t parameterId) { PushBool(l, (schedule.GetParameter(parameterId) != nullptr) ? true : false); }
 void Lua::AISchedule::SetParameterBool(lua::State *, pragma::ai::Schedule &schedule, uint8_t idx, bool b) { schedule.SetParameter(idx, b); }
 void Lua::AISchedule::SetParameterInt(lua::State *, pragma::ai::Schedule &schedule, uint8_t idx, int32_t i) { schedule.SetParameter(idx, i); }
 void Lua::AISchedule::SetParameterFloat(lua::State *, pragma::ai::Schedule &schedule, uint8_t idx, float f) { schedule.SetParameter(idx, f); }
@@ -119,7 +119,7 @@ void Lua::AISchedule::SetParameterQuaternion(lua::State *, pragma::ai::Schedule 
 void Lua::AISchedule::SetParameterEulerAngles(lua::State *, pragma::ai::Schedule &schedule, uint8_t idx, const EulerAngles &ang) { schedule.SetParameter(idx, ang); }
 
 template<typename T>
-T get_parameter(pragma::ai::Schedule &schedule, uint8_t paramIdx, ::pragma::ai::Schedule::Parameter::Type type, const std::function<T(const ::pragma::ai::BehaviorParameter *)> &f, const T &def)
+T get_parameter(pragma::ai::Schedule &schedule, uint8_t paramIdx, pragma::ai::Schedule::Parameter::Type type, const std::function<T(const pragma::ai::BehaviorParameter *)> &f, const T &def)
 {
 	auto *param = schedule.GetParameter(paramIdx);
 	if(param == nullptr || param->GetType() != type)
@@ -128,32 +128,32 @@ T get_parameter(pragma::ai::Schedule &schedule, uint8_t paramIdx, ::pragma::ai::
 };
 void Lua::AISchedule::GetParameterBool(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx, bool def)
 {
-	auto r = get_parameter<decltype(def)>(schedule, paramIdx, ::pragma::ai::Schedule::Parameter::Type::Bool, &::pragma::ai::BehaviorParameter::GetBool, def);
-	Lua::PushBool(l, r);
+	auto r = get_parameter<decltype(def)>(schedule, paramIdx, pragma::ai::Schedule::Parameter::Type::Bool, &pragma::ai::BehaviorParameter::GetBool, def);
+	PushBool(l, r);
 }
 void Lua::AISchedule::GetParameterBool(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx) { GetParameterBool(l, schedule, paramIdx, false); }
 void Lua::AISchedule::GetParameterInt(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx, int32_t def)
 {
-	auto r = get_parameter<decltype(def)>(schedule, paramIdx, ::pragma::ai::Schedule::Parameter::Type::Int, &::pragma::ai::BehaviorParameter::GetInt, def);
-	Lua::PushInt(l, r);
+	auto r = get_parameter<decltype(def)>(schedule, paramIdx, pragma::ai::Schedule::Parameter::Type::Int, &pragma::ai::BehaviorParameter::GetInt, def);
+	PushInt(l, r);
 }
 void Lua::AISchedule::GetParameterInt(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx) { GetParameterInt(l, schedule, paramIdx, 0); }
 void Lua::AISchedule::GetParameterFloat(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx, float def)
 {
-	auto r = get_parameter<decltype(def)>(schedule, paramIdx, ::pragma::ai::Schedule::Parameter::Type::Float, &::pragma::ai::BehaviorParameter::GetFloat, def);
-	Lua::PushNumber(l, r);
+	auto r = get_parameter<decltype(def)>(schedule, paramIdx, pragma::ai::Schedule::Parameter::Type::Float, &pragma::ai::BehaviorParameter::GetFloat, def);
+	PushNumber(l, r);
 }
 void Lua::AISchedule::GetParameterFloat(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx) { GetParameterFloat(l, schedule, paramIdx, 0.f); }
 void Lua::AISchedule::GetParameterString(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx, const std::string &def)
 {
-	auto *r = get_parameter<decltype(&def)>(schedule, paramIdx, ::pragma::ai::Schedule::Parameter::Type::String, &::pragma::ai::BehaviorParameter::GetString, &def);
-	Lua::PushString(l, *r);
+	auto *r = get_parameter<decltype(&def)>(schedule, paramIdx, pragma::ai::Schedule::Parameter::Type::String, &pragma::ai::BehaviorParameter::GetString, &def);
+	PushString(l, *r);
 }
 void Lua::AISchedule::GetParameterString(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx) { GetParameterString(l, schedule, paramIdx, ""); }
 void Lua::AISchedule::GetParameterEntity(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx, EntityHandle &def)
 {
 	//LUA_CHECK_ENTITY(l,def);
-	auto *r = get_parameter<const pragma::ecs::BaseEntity *>(schedule, paramIdx, ::pragma::ai::Schedule::Parameter::Type::Entity, &::pragma::ai::BehaviorParameter::GetEntity, def.get());
+	auto *r = get_parameter<const pragma::ecs::BaseEntity *>(schedule, paramIdx, pragma::ai::Schedule::Parameter::Type::Entity, &pragma::ai::BehaviorParameter::GetEntity, def.get());
 	if(r != nullptr)
 		const_cast<pragma::ecs::BaseEntity *>(r)->GetLuaObject().push(l);
 }
@@ -164,19 +164,19 @@ void Lua::AISchedule::GetParameterEntity(lua::State *l, pragma::ai::Schedule &sc
 }
 void Lua::AISchedule::GetParameterVector(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx, const Vector3 &def)
 {
-	auto *r = get_parameter<decltype(&def)>(schedule, paramIdx, ::pragma::ai::Schedule::Parameter::Type::Vector, &::pragma::ai::BehaviorParameter::GetVector, &def);
+	auto *r = get_parameter<decltype(&def)>(schedule, paramIdx, pragma::ai::Schedule::Parameter::Type::Vector, &pragma::ai::BehaviorParameter::GetVector, &def);
 	Lua::Push<Vector3>(l, *r);
 }
 void Lua::AISchedule::GetParameterVector(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx) { GetParameterVector(l, schedule, paramIdx, {}); }
 void Lua::AISchedule::GetParameterQuaternion(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx, const Quat &def)
 {
-	auto *r = get_parameter<decltype(&def)>(schedule, paramIdx, ::pragma::ai::Schedule::Parameter::Type::Quaternion, &::pragma::ai::BehaviorParameter::GetQuaternion, &def);
+	auto *r = get_parameter<decltype(&def)>(schedule, paramIdx, pragma::ai::Schedule::Parameter::Type::Quaternion, &pragma::ai::BehaviorParameter::GetQuaternion, &def);
 	Lua::Push<Quat>(l, *r);
 }
 void Lua::AISchedule::GetParameterQuaternion(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx) { GetParameterQuaternion(l, schedule, paramIdx, {}); }
 void Lua::AISchedule::GetParameterEulerAngles(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx, const EulerAngles &def)
 {
-	auto *r = get_parameter<decltype(&def)>(schedule, paramIdx, ::pragma::ai::Schedule::Parameter::Type::EulerAngles, &::pragma::ai::BehaviorParameter::GetEulerAngles, &def);
+	auto *r = get_parameter<decltype(&def)>(schedule, paramIdx, pragma::ai::Schedule::Parameter::Type::EulerAngles, &pragma::ai::BehaviorParameter::GetEulerAngles, &def);
 	Lua::Push<EulerAngles>(l, *r);
 }
 void Lua::AISchedule::GetParameterEulerAngles(lua::State *l, pragma::ai::Schedule &schedule, uint8_t paramIdx) { GetParameterEulerAngles(l, schedule, paramIdx, {}); }
@@ -184,9 +184,9 @@ void Lua::AISchedule::GetParameterType(lua::State *l, pragma::ai::Schedule &sche
 {
 	auto *p = schedule.GetParameter(paramIdx);
 	if(p == nullptr)
-		Lua::PushInt(l, pragma::math::to_integral(pragma::ai::Schedule::Parameter::Type::None));
+		PushInt(l, pragma::math::to_integral(pragma::ai::Schedule::Parameter::Type::None));
 	else
-		Lua::PushInt(l, pragma::math::to_integral(p->GetType()));
+		PushInt(l, pragma::math::to_integral(p->GetType()));
 }
 void Lua::AISchedule::DebugPrint(lua::State *l, pragma::ai::Schedule &schedule)
 {
@@ -196,4 +196,4 @@ void Lua::AISchedule::DebugPrint(lua::State *l, pragma::ai::Schedule &schedule)
 }
 void Lua::AISchedule::SetInterruptFlags(lua::State *l, pragma::ai::Schedule &schedule, uint8_t flags) { schedule.SetInterruptFlags(flags); }
 void Lua::AISchedule::AddInterruptFlags(lua::State *l, pragma::ai::Schedule &schedule, uint8_t flags) { schedule.AddInterruptFlags(flags); }
-void Lua::AISchedule::GetInterruptFlags(lua::State *l, pragma::ai::Schedule &schedule) { Lua::PushInt(l, schedule.GetInterruptFlags()); }
+void Lua::AISchedule::GetInterruptFlags(lua::State *l, pragma::ai::Schedule &schedule) { PushInt(l, schedule.GetInterruptFlags()); }

@@ -16,7 +16,7 @@ void SRadiusComponent::Initialize()
 	FlagCallbackForRemoval(m_radius->AddCallback([this](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> val) {
 		NetPacket p {};
 		p->Write<float>(val.get());
-		static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetRadius, p, pragma::networking::Protocol::SlowReliable);
+		static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetRadius, p, networking::Protocol::SlowReliable);
 	}),
 	  CallbackType::Component, this);
 }

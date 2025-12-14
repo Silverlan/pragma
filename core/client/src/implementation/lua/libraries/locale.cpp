@@ -15,51 +15,51 @@ void Lua::Locale::set_localization(const std::string &id, const std::string &tex
 
 int Lua::Locale::get_text(lua::State *l)
 {
-	auto id = Lua::CheckString(l, 1);
+	auto id = CheckString(l, 1);
 	std::vector<std::string> args {};
 	auto bReturnSuccess = false;
 	auto argIdx = 2;
-	if(Lua::IsSet(l, argIdx) && Lua::IsTable(l, argIdx)) {
-		auto numArgs = Lua::GetObjectLength(l, argIdx);
+	if(IsSet(l, argIdx) && IsTable(l, argIdx)) {
+		auto numArgs = GetObjectLength(l, argIdx);
 		args.reserve(numArgs);
 		for(auto i = decltype(numArgs) {0u}; i < numArgs; ++i) {
-			Lua::PushInt(l, i + 1);
-			Lua::GetTableValue(l, argIdx);
-			args.push_back(Lua::CheckString(l, -1));
+			PushInt(l, i + 1);
+			GetTableValue(l, argIdx);
+			args.push_back(CheckString(l, -1));
 
-			Lua::Pop(l, 1);
+			Pop(l, 1);
 		}
 		++argIdx;
 	}
-	else if(Lua::IsNil(l, argIdx))
+	else if(IsNil(l, argIdx))
 		++argIdx;
-	if(Lua::IsSet(l, argIdx))
-		bReturnSuccess = Lua::CheckBool(l, argIdx);
+	if(IsSet(l, argIdx))
+		bReturnSuccess = CheckBool(l, argIdx);
 	uint32_t numResults = 1;
 	if(bReturnSuccess == true) {
 		std::string r;
-		auto b = ::pragma::locale::get_text(id, args, r);
-		Lua::PushBool(l, b);
-		Lua::PushString(l, r);
+		auto b = pragma::locale::get_text(id, args, r);
+		PushBool(l, b);
+		PushString(l, r);
 		++numResults;
 		return numResults;
 	}
-	Lua::PushString(l, ::pragma::locale::get_text(id, args));
+	PushString(l, pragma::locale::get_text(id, args));
 	return numResults;
 }
 
-bool Lua::Locale::load(const std::string &fileName) { return ::pragma::locale::load(fileName) != ::pragma::locale::LoadResult::Failed; }
+bool Lua::Locale::load(const std::string &fileName) { return pragma::locale::load(fileName) != pragma::locale::LoadResult::Failed; }
 
-const std::string &Lua::Locale::get_language() { return ::pragma::locale::get_language(); }
+const std::string &Lua::Locale::get_language() { return pragma::locale::get_language(); }
 
 int Lua::Locale::get_languages(lua::State *l)
 {
 	auto languages = pragma::locale::get_languages();
-	auto t = Lua::CreateTable(l);
+	auto t = CreateTable(l);
 	for(auto &pair : languages) {
-		Lua::PushString(l, pair.first);
-		Lua::PushString(l, pair.second.displayName);
-		Lua::SetTableValue(l, t);
+		PushString(l, pair.first);
+		PushString(l, pair.second.displayName);
+		SetTableValue(l, t);
 	}
 	return 1;
 }
@@ -81,10 +81,10 @@ Lua::opt<Lua::map<std::string, std::string>> Lua::Locale::parse(lua::State *l, c
 	std::unordered_map<std::string, pragma::string::Utf8String> texts;
 	auto res = pragma::locale::parse_file(fileName, lan, texts);
 	if(res != pragma::locale::LoadResult::Success)
-		return Lua::nil;
+		return nil;
 	auto t = luabind::newtable(l);
 	for(auto &pair : texts)
 		t[pair.first] = pair.second.cpp_str();
 	return t;
 }
-Lua::opt<Lua::map<std::string, std::string>> Lua::Locale::parse(lua::State *l, const std::string &fileName) { return parse(l, fileName, ::pragma::locale::get_language()); }
+Lua::opt<Lua::map<std::string, std::string>> Lua::Locale::parse(lua::State *l, const std::string &fileName) { return parse(l, fileName, pragma::locale::get_language()); }

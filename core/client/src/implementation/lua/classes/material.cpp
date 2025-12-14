@@ -23,7 +23,7 @@ void Lua::Material::Client::SetTexture(lua::State *l, pragma::material::Material
 	cmat->UpdateTextures();
 	pragma::get_cgame()->ReloadMaterialShader(static_cast<pragma::material::CMaterial *>(mat));
 }
-void Lua::Material::Client::SetTexture(lua::State *l, pragma::material::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex, const std::string &name)
+void Lua::Material::Client::SetTexture(lua::State *l, pragma::material::Material *mat, const std::string &textureID, Vulkan::Texture &hTex, const std::string &name)
 {
 	auto *cmat = static_cast<pragma::material::CMaterial *>(mat);
 	cmat->SetTexture(textureID, hTex);
@@ -36,7 +36,7 @@ void Lua::Material::Client::SetTexture(lua::State *l, pragma::material::Material
 	cmat->UpdateTextures();
 	pragma::get_cgame()->ReloadMaterialShader(static_cast<pragma::material::CMaterial *>(mat));
 }
-void Lua::Material::Client::SetTexture(lua::State *l, pragma::material::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex) { SetTexture(l, mat, textureID, hTex, ""); }
+void Lua::Material::Client::SetTexture(lua::State *l, pragma::material::Material *mat, const std::string &textureID, Vulkan::Texture &hTex) { SetTexture(l, mat, textureID, hTex, ""); }
 
 void Lua::Material::Client::GetTexture(lua::State *l, pragma::material::Material *mat, const std::string &textureID)
 {
@@ -51,7 +51,7 @@ void Lua::Material::Client::InitializeShaderData(lua::State *l, pragma::material
 	auto shaderHandler = static_cast<pragma::material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetShaderHandler();
 	if(shaderHandler)
 		shaderHandler(mat);
-	auto *shader = static_cast<::pragma::ShaderTexturedBase *>(mat->GetUserData());
+	auto *shader = static_cast<pragma::ShaderTexturedBase *>(mat->GetUserData());
 	if(shader == nullptr)
 		return;
 	shader->InitializeMaterialDescriptorSet(static_cast<pragma::material::CMaterial &>(*mat), reload);

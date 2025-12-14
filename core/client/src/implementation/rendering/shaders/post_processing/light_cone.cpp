@@ -10,7 +10,7 @@ import :rendering.shaders.pp_light_cone;
 
 using namespace pragma;
 
-decltype(ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE) ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE = {pragma::shaderPPBase::DESCRIPTOR_SET_TEXTURE};
+decltype(ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE) ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE = {shaderPPBase::DESCRIPTOR_SET_TEXTURE};
 decltype(ShaderPPLightCone::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPLightCone::DESCRIPTOR_SET_DEPTH_BUFFER = {
   "DEPTH_BUFFER",
   {prosper::DescriptorSetInfo::Binding {"MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
@@ -18,7 +18,7 @@ decltype(ShaderPPLightCone::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPLightCone::DESC
 decltype(ShaderPPLightCone::DESCRIPTOR_SET_SCENE) ShaderPPLightCone::DESCRIPTOR_SET_SCENE = {&ShaderEntity::DESCRIPTOR_SET_SCENE};
 decltype(ShaderPPLightCone::DESCRIPTOR_SET_INSTANCE) ShaderPPLightCone::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
 
-decltype(ShaderPPLightCone::VERTEX_BINDING_VERTEX) ShaderPPLightCone::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(pragma::rendering::VertexBufferData)};
+decltype(ShaderPPLightCone::VERTEX_BINDING_VERTEX) ShaderPPLightCone::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(rendering::VertexBufferData)};
 decltype(ShaderPPLightCone::VERTEX_ATTRIBUTE_POSITION) ShaderPPLightCone::VERTEX_ATTRIBUTE_POSITION = {ShaderEntity::VERTEX_ATTRIBUTE_POSITION, VERTEX_BINDING_VERTEX};
 decltype(ShaderPPLightCone::VERTEX_ATTRIBUTE_NORMAL) ShaderPPLightCone::VERTEX_ATTRIBUTE_NORMAL = {ShaderEntity::VERTEX_ATTRIBUTE_NORMAL, VERTEX_BINDING_VERTEX};
 
@@ -66,7 +66,7 @@ void ShaderPPLightCone::InitializeRenderPass(std::shared_ptr<prosper::IRenderPas
 	rpCreateInfo.subPasses.push_back(prosper::util::RenderPassCreateInfo::SubPass {std::vector<std::size_t> {0ull, 1ull}, true});
 	CreateCachedRenderPass<ShaderPPLightCone>(rpCreateInfo, outRenderPass, pipelineIdx);
 }
-bool ShaderPPLightCone::RecordDraw(prosper::ShaderBindState &bindState, const pragma::geometry::CModelSubMesh &mesh, prosper::IDescriptorSet &descSetTex, prosper::IDescriptorSet &descSetDepth, prosper::IDescriptorSet &descSetInstance, prosper::IDescriptorSet &descSetCam) const
+bool ShaderPPLightCone::RecordDraw(prosper::ShaderBindState &bindState, const geometry::CModelSubMesh &mesh, prosper::IDescriptorSet &descSetTex, prosper::IDescriptorSet &descSetDepth, prosper::IDescriptorSet &descSetInstance, prosper::IDescriptorSet &descSetCam) const
 {
 	auto &vkMesh = mesh.GetSceneMesh();
 	if(!vkMesh)
@@ -75,9 +75,9 @@ bool ShaderPPLightCone::RecordDraw(prosper::ShaderBindState &bindState, const pr
 	auto &indexBuf = vkMesh->GetIndexBuffer();
 	if(!vertexBuf || !indexBuf)
 		return false;
-	auto indexType = (mesh.GetIndexType() == pragma::geometry::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
+	auto indexType = (mesh.GetIndexType() == geometry::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
 	return RecordBindVertexBuffer(bindState, *vertexBuf) && RecordBindIndexBuffer(bindState, *indexBuf, indexType) && RecordBindDescriptorSets(bindState, {&descSetDepth}, DESCRIPTOR_SET_DEPTH_BUFFER.setIndex)
 	  && RecordBindDescriptorSet(bindState, descSetTex, DESCRIPTOR_SET_TEXTURE.setIndex) && RecordBindDescriptorSet(bindState, descSetInstance, DESCRIPTOR_SET_INSTANCE.setIndex) && RecordBindDescriptorSet(bindState, descSetCam, DESCRIPTOR_SET_SCENE.setIndex)
-	  && ShaderGraphics::RecordDrawIndexed(bindState, mesh.GetIndexCount());
+	  && RecordDrawIndexed(bindState, mesh.GetIndexCount());
 }
 bool ShaderPPLightCone::RecordPushConstants(prosper::ShaderBindState &bindState, const PushConstants &pushConstants) const { return ShaderPPBase::RecordPushConstants(bindState, pushConstants); }

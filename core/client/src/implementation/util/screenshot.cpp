@@ -29,23 +29,23 @@ static std::string get_screenshot_name(pragma::Game *game, pragma::image::ImageF
 	return path;
 }
 
-void pragma::util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t height, const RtScreenshotSettings &settings, image::ImageFormat format)
+void pragma::util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, const RtScreenshotSettings &settings, image::ImageFormat format)
 {
 	fs::create_directory("screenshots");
 
-	auto *pCam = game.GetRenderCamera<pragma::CCameraComponent>();
+	auto *pCam = game.GetRenderCamera<CCameraComponent>();
 	Con::cout << "Taking raytraced screenshot..." << Con::endl;
 	Con::cout << "Preparing scene for raytracing..." << Con::endl;
 
 	// A raytracing screenshot has been requested; We'll have to re-render the scene with raytracing enabled
 
-	auto resolution = pragma::get_cengine()->GetRenderResolution();
-	::pragma::rendering::cycles::SceneInfo sceneInfo {};
+	auto resolution = get_cengine()->GetRenderResolution();
+	rendering::cycles::SceneInfo sceneInfo {};
 	sceneInfo.width = width;
 	sceneInfo.height = height;
 	sceneInfo.samples = settings.samples;
 	sceneInfo.hdrOutput = false; //;//(format == pragma::image::ImageOutputFormat::HDR);
-	::pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
+	rendering::cycles::RenderImageInfo renderImgInfo {};
 	if(pCam) {
 		renderImgInfo.camPose = pCam->GetEntity().GetPose();
 		renderImgInfo.farZ = pCam->GetFarZ();
@@ -63,15 +63,15 @@ void pragma::util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t h
 	sceneInfo.skyAngles = settings.skyAngles;
 
 	Con::cout << "Executing raytracer... This may take a few minutes!" << Con::endl;
-	auto job = ::pragma::rendering::cycles::render_image(*pragma::get_client_state(), sceneInfo, renderImgInfo);
+	auto job = ::pragma::rendering::cycles::render_image(*get_client_state(), sceneInfo, renderImgInfo);
 	if(job.IsValid()) {
-		job.SetCompletionHandler([format, quality, toneMapping](pragma::util::ParallelWorker<image::ImageLayerSet> &worker) {
+		job.SetCompletionHandler([format, quality, toneMapping](ParallelWorker<image::ImageLayerSet> &worker) {
 			if(worker.IsSuccessful() == false) {
 				Con::cwar << "Raytraced screenshot failed: " << worker.GetResultMessage() << Con::endl;
 				return;
 			}
 
-			auto *client = pragma::get_client_state();
+			auto *client = get_client_state();
 			auto path = get_screenshot_name(client ? client->GetGameState() : nullptr, format);
 			Con::cout << "Raytracing complete! Saving screenshot as '" << path << "'..." << Con::endl;
 			auto fp = fs::open_file<fs::VFilePtrReal>(path, fs::FileMode::Write | fs::FileMode::Binary);
@@ -91,25 +91,25 @@ void pragma::util::rt_screenshot(pragma::CGame &game, uint32_t width, uint32_t h
 			// pragma::util::tga::write_tga(f,imgBuffer->GetWidth(),imgBuffer->GetHeight(),static_cast<uint8_t*>(imgBuffer->GetData()));
 		});
 		job.Start();
-		pragma::get_cengine()->AddParallelJob(job, "Raytraced screenshot");
+		get_cengine()->AddParallelJob(job, "Raytraced screenshot");
 	}
 }
 
-std::optional<std::string> pragma::util::screenshot(pragma::CGame &game)
+std::optional<std::string> pragma::util::screenshot(CGame &game)
 {
 	fs::create_directory("screenshots");
 
-	auto scene = game.GetScene<pragma::CSceneComponent>();
+	auto scene = game.GetScene<CSceneComponent>();
 	std::shared_ptr<prosper::IImage> imgScreenshot = nullptr;
 	std::shared_ptr<prosper::IBuffer> bufScreenshot = nullptr;
 	{
 		// Just use the last rendered image
-		auto *renderer = scene ? dynamic_cast<::pragma::CRendererComponent *>(scene->GetRenderer<pragma::CRendererComponent>()) : nullptr;
+		auto *renderer = scene ? dynamic_cast<CRendererComponent *>(scene->GetRenderer<CRendererComponent>()) : nullptr;
 		if(renderer == nullptr) {
 			Con::cwar << "No scene renderer found!" << Con::endl;
 			return {};
 		}
-		auto rasterC = renderer->GetEntity().GetComponent<::pragma::CRasterizationRendererComponent>();
+		auto rasterC = renderer->GetEntity().GetComponent<CRasterizationRendererComponent>();
 		if(rasterC.expired()) {
 			Con::cwar << "No rasterization renderer found!" << Con::endl;
 			return {};
@@ -123,26 +123,26 @@ std::optional<std::string> pragma::util::screenshot(pragma::CGame &game)
 			rt = rasterC->GetHDRInfo().toneMappedRenderTarget;
 			break;
 		case ImageStage::ScreenOutput:
-			rt = pragma::get_cengine()->GetRenderContext().GetWindow().GetStagingRenderTarget();
+			rt = get_cengine()->GetRenderContext().GetWindow().GetStagingRenderTarget();
 			break;
 		}
 		if(rt == nullptr) {
 			Con::cwar << "Scene render target is invalid!" << Con::endl;
 			return {};
 		}
-		pragma::get_cengine()->GetRenderContext().WaitIdle(); // Make sure rendering is complete
+		get_cengine()->GetRenderContext().WaitIdle(); // Make sure rendering is complete
 
 		auto &img = rt->GetTexture().GetImage();
 		imgScreenshot = img.shared_from_this();
 
 		auto bufSize = img.GetWidth() * img.GetHeight() * prosper::util::get_byte_size(img.GetFormat());
 		auto extents = img.GetExtents();
-		bufScreenshot = pragma::get_cengine()->GetRenderContext().AllocateTemporaryBuffer(bufSize);
+		bufScreenshot = get_cengine()->GetRenderContext().AllocateTemporaryBuffer(bufSize);
 
 		// TODO: Check if image formats are compatible (https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#features-formats-compatibility)
 		// before issuing the copy command
 		uint32_t queueFamilyIndex;
-		auto cmdBuffer = pragma::get_cengine()->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal, queueFamilyIndex);
+		auto cmdBuffer = get_cengine()->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal, queueFamilyIndex);
 		cmdBuffer->StartRecording();
 		cmdBuffer->RecordImageBarrier(img, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
 		cmdBuffer->RecordCopyImageToBuffer({}, img, prosper::ImageLayout::TransferDstOptimal, *bufScreenshot);
@@ -150,7 +150,7 @@ std::optional<std::string> pragma::util::screenshot(pragma::CGame &game)
 		// Note: Blit can't be used because some Nvidia GPUs don't support blitting for images with linear tiling
 		//.RecordBlitImage(**cmdBuffer,{},**img,**imgDst);
 		cmdBuffer->StopRecording();
-		pragma::get_cengine()->GetRenderContext().SubmitCommandBuffer(*cmdBuffer, true);
+		get_cengine()->GetRenderContext().SubmitCommandBuffer(*cmdBuffer, true);
 	}
 	if(bufScreenshot == nullptr) {
 		Con::cwar << "Failed to create screenshot image buffer!" << Con::endl;

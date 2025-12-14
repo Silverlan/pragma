@@ -43,7 +43,7 @@ void CSoundDspEAXReverbComponent::OnEntitySpawn()
 	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	pragma::audio::EfxEaxReverbProperties props {};
+	audio::EfxEaxReverbProperties props {};
 	props.flDensity = m_kvDensity;
 	props.flDiffusion = m_kvDiffusion;
 	props.flGain = m_kvGain;

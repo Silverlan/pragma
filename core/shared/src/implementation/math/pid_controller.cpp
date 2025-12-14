@@ -50,10 +50,10 @@ float pragma::math::PIDController::Calculate(float processFeedback, float setPoi
 	auto prevErr = m_previousError;
 	auto prevIntegral = m_previousIntegral;
 	auto integral = prevIntegral + (err * dt);
-	integral = pragma::math::clamp(integral, m_range.first, m_range.second);
+	integral = clamp(integral, m_range.first, m_range.second);
 	auto derivative = (err - prevErr) / dt;
 	auto output = (kp * err) + (ki * integral) + (kd * derivative);
-	output = pragma::math::clamp(output, m_range.first, m_range.second);
+	output = clamp(output, m_range.first, m_range.second);
 
 	m_previousIntegral = integral;
 	m_previousError = err;

@@ -26,7 +26,7 @@ void pragma::gui::types::WIMainMenuCredits::AddCreditsElement(WIBase &el)
 pragma::gui::types::WITexturedRect &pragma::gui::types::WIMainMenuCredits::AddLogo(const std::string &material)
 {
 	AddGap(10);
-	auto *el = pragma::gui::WGUI::GetInstance().Create<WITexturedRect>(m_creditsContainer.get());
+	auto *el = WGUI::GetInstance().Create<WITexturedRect>(m_creditsContainer.get());
 	el->AddStyleClass("credits_logo");
 	el->SetMaterial(material);
 	el->SizeToTexture();
@@ -59,7 +59,7 @@ pragma::gui::types::WIText &pragma::gui::types::WIMainMenuCredits::AddText(const
 
 pragma::gui::types::WIBase &pragma::gui::types::WIMainMenuCredits::AddGap(uint32_t size)
 {
-	auto *p = pragma::gui::WGUI::GetInstance().Create<WIBase>(m_creditsContainer.get());
+	auto *p = WGUI::GetInstance().Create<WIBase>(m_creditsContainer.get());
 	p->SetSize(1, size);
 	AddCreditsElement(*p);
 	return *p;
@@ -68,7 +68,7 @@ pragma::gui::types::WIBase &pragma::gui::types::WIMainMenuCredits::AddGap(uint32
 void pragma::gui::types::WIMainMenuCredits::Initialize()
 {
 	WIMainMenuBase::Initialize();
-	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+	AddMenuItem(locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
 		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;
@@ -111,19 +111,19 @@ void pragma::gui::types::WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
 	m_creditsContainer->SetAutoAlignToParent(true);
 
 	AddGap(120);
-	AddHeader(pragma::locale::get_text("menu_credits"), "header");
+	AddHeader(locale::get_text("menu_credits"), "header");
 	/*AddHeader(pragma::locale::get_text("patrons"));
 
 	for(auto &patron : engine_info::get_patrons())
 		AddText(patron,"credits_text");*/
 
-	AddHeader(pragma::locale::get_text("localization"));
-	AddText("Shmeerz (" + pragma::locale::get_text("lan_portuguese") + ")", "credits_text");
+	AddHeader(locale::get_text("localization"));
+	AddText("Shmeerz (" + locale::get_text("lan_portuguese") + ")", "credits_text");
 
-	AddHeader(pragma::locale::get_text("tools_and_plugins"));
+	AddHeader(locale::get_text("tools_and_plugins"));
 	AddText("Ilya Getsman aka \"RED_EYE\" (Blender plugins)", "credits_text");
 
-	AddHeader(pragma::locale::get_text("powered_by"), "header2");
+	AddHeader(locale::get_text("powered_by"), "header2");
 	AddLogo("third_party/vulkan_logo");
 	AddLogo("third_party/fmod_logo");
 	AddLogo("third_party/physx_logo");

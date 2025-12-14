@@ -23,13 +23,13 @@ static void init_shaders()
 pragma::rendering::ControlledBlurSettings::ControlledBlurSettings() { init_shaders(); }
 void pragma::rendering::ControlledBlurSettings::SetRadius(uint32_t radius)
 {
-	radius = pragma::math::clamp(radius, 0u, MAX_BLUR_RADIUS);
+	radius = math::clamp(radius, 0u, MAX_BLUR_RADIUS);
 	m_radius = radius;
 	SetShaderPipelineDirty();
 }
 void pragma::rendering::ControlledBlurSettings::SetSigma(double sigma)
 {
-	sigma = pragma::math::clamp(sigma, 0.0, MAX_BLUR_SIGMA);
+	sigma = math::clamp(sigma, 0.0, MAX_BLUR_SIGMA);
 	m_sigma = sigma;
 	SetShaderPipelineDirty();
 }
@@ -55,7 +55,7 @@ void pragma::rendering::ControlledBlurSettings::SetShaderPipelineDirty()
 
 void pragma::rendering::ControlledBlurSettings::UpdateShaderPipelines()
 {
-	pragma::get_cengine()->GetRenderContext().WaitIdle(true);
+	get_cengine()->GetRenderContext().WaitIdle(true);
 	init_shaders();
 	if(g_bloomBlurH.valid()) {
 		m_bloomPipelineInfoH = static_cast<ShaderPPBloomBlurBase *>(g_bloomBlurH.get())->AddPipeline(m_radius, m_sigma);
@@ -72,7 +72,7 @@ void pragma::rendering::ControlledBlurSettings::RecordBlur(const std::shared_ptr
 {
 	static auto blurSize = 5.f;
 	static int32_t kernelSize = 9u;
-	uint32_t blurAmount = pragma::math::clamp(m_blurAmount >= 0 ? m_blurAmount : cvBloomAmount->GetInt(), 0, 20);
+	uint32_t blurAmount = math::clamp(m_blurAmount >= 0 ? m_blurAmount : cvBloomAmount->GetInt(), 0, 20);
 
 	prosper::util::ShaderInfo shaderInfo {};
 	shaderInfo.shaderH = static_cast<prosper::ShaderBlurBase *>(g_bloomBlurH.get());
@@ -81,6 +81,6 @@ void pragma::rendering::ControlledBlurSettings::RecordBlur(const std::shared_ptr
 	shaderInfo.shaderVPipeline = *m_bloomPipelineInfoV->pipelineIdx;
 
 	for(auto i = decltype(blurAmount) {0}; i < blurAmount; ++i) {
-		prosper::util::record_blur_image(pragma::get_cengine()->GetRenderContext(), cmd, blurSet, {Vector4(1.f, 1.f, 1.f, 1.f), blurSize, kernelSize}, 1u, &shaderInfo);
+		prosper::util::record_blur_image(get_cengine()->GetRenderContext(), cmd, blurSet, {Vector4(1.f, 1.f, 1.f, 1.f), blurSize, kernelSize}, 1u, &shaderInfo);
 	}
 }

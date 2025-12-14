@@ -10,7 +10,7 @@ import :entities;
 
 using namespace pragma;
 
-SLuaBaseEntityComponent::SLuaBaseEntityComponent(pragma::ecs::BaseEntity &ent) : BaseLuaBaseEntityComponent(ent), SBaseSnapshotComponent() {}
+SLuaBaseEntityComponent::SLuaBaseEntityComponent(ecs::BaseEntity &ent) : BaseLuaBaseEntityComponent(ent), SBaseSnapshotComponent() {}
 void SLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 {
 	BaseLuaBaseEntityComponent::OnMemberValueChanged(memberIdx);
@@ -42,7 +42,7 @@ void SLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 	NetPacket p {};
 	p->Write<uint8_t>(nwIndex);
 	Lua::WriteAny(p, detail::member_type_to_util_type(member.type), value);
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_networkedMemberInfo->netEvSetMember, p, pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_networkedMemberInfo->netEvSetMember, p, networking::Protocol::SlowReliable);
 }
 void SLuaBaseEntityComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
@@ -55,21 +55,21 @@ void SLuaBaseEntityComponent::SendData(NetPacket &packet, networking::ClientReci
 		}
 	}
 
-	CallLuaMethod<void, NetPacket, pragma::networking::ClientRecipientFilter>("SendData", packet, rp);
+	CallLuaMethod<void, NetPacket, networking::ClientRecipientFilter>("SendData", packet, rp);
 }
-Bool SLuaBaseEntityComponent::ReceiveNetEvent(pragma::BasePlayerComponent &pl, pragma::NetEventId evId, NetPacket &packet)
+Bool SLuaBaseEntityComponent::ReceiveNetEvent(BasePlayerComponent &pl, NetEventId evId, NetPacket &packet)
 {
 	auto it = m_boundNetEvents.find(evId);
 	if(it != m_boundNetEvents.end()) {
-		it->second.Call<void, std::reference_wrapper<NetPacket>, pragma::BasePlayerComponent *>(std::reference_wrapper<NetPacket> {packet}, &pl);
+		it->second.Call<void, std::reference_wrapper<NetPacket>, BasePlayerComponent *>(std::reference_wrapper<NetPacket> {packet}, &pl);
 		return true;
 	}
 
-	auto handled = static_cast<uint32_t>(pragma::util::EventReply::Unhandled);
+	auto handled = static_cast<uint32_t>(util::EventReply::Unhandled);
 	CallLuaMethod<uint32_t, luabind::object, uint32_t, NetPacket>("ReceiveNetEvent", &handled, pl.GetLuaObject(), evId, packet);
-	return static_cast<pragma::util::EventReply>(handled) == pragma::util::EventReply::Handled;
+	return static_cast<util::EventReply>(handled) == util::EventReply::Handled;
 }
-void SLuaBaseEntityComponent::SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl)
+void SLuaBaseEntityComponent::SendSnapshotData(NetPacket &packet, BasePlayerComponent &pl)
 {
 	auto &members = GetMembers();
 	if(m_networkedMemberInfo != nullptr) {
@@ -83,4 +83,4 @@ void SLuaBaseEntityComponent::SendSnapshotData(NetPacket &packet, pragma::BasePl
 }
 bool SLuaBaseEntityComponent::ShouldTransmitNetData() const { return IsNetworked(); }
 bool SLuaBaseEntityComponent::ShouldTransmitSnapshotData() const { return BaseLuaBaseEntityComponent::ShouldTransmitSnapshotData(); }
-void SLuaBaseEntityComponent::InvokeNetEventHandle(const std::string &methodName, NetPacket &packet, pragma::BasePlayerComponent *pl) { CallLuaMethod<void, luabind::object, NetPacket>(methodName, pl->GetLuaObject(), packet); }
+void SLuaBaseEntityComponent::InvokeNetEventHandle(const std::string &methodName, NetPacket &packet, BasePlayerComponent *pl) { CallLuaMethod<void, luabind::object, NetPacket>(methodName, pl->GetLuaObject(), packet); }

@@ -30,7 +30,7 @@ void CSoundDspEqualizerComponent::OnEntitySpawn()
 	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	pragma::audio::EfxEqualizer props {};
+	audio::EfxEqualizer props {};
 	props.flLowGain = m_lowGain;
 	props.flLowCutoff = m_lowCutoff;
 	props.flMid1Gain = m_mid1Gain;

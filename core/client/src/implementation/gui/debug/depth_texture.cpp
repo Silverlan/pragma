@@ -12,9 +12,9 @@ import :rendering.shaders;
 
 pragma::gui::types::WIDebugDepthTexture::WIDebugDepthTexture() : WIBase(), m_imageLayer(0)
 {
-	m_whDepthToRgbShader = pragma::get_cengine()->GetShader("debug_depth_to_rgb");
-	m_whCubeDepthToRgbShader = pragma::get_cengine()->GetShader("debug_cube_depth_to_rgb");
-	m_whCsmDepthToRgbShader = pragma::get_cengine()->GetShader("debug_csm_depth_to_rgb");
+	m_whDepthToRgbShader = get_cengine()->GetShader("debug_depth_to_rgb");
+	m_whCubeDepthToRgbShader = get_cengine()->GetShader("debug_cube_depth_to_rgb");
+	m_whCsmDepthToRgbShader = get_cengine()->GetShader("debug_csm_depth_to_rgb");
 }
 
 pragma::gui::types::WIDebugDepthTexture::~WIDebugDepthTexture()
@@ -33,12 +33,12 @@ void pragma::gui::types::WIDebugDepthTexture::SetTexture(prosper::Texture &textu
 {
 	m_srcDepthTex = nullptr;
 
-	if(m_whDepthToRgbShader.expired() || pragma::ShaderDepthToRGB::DESCRIPTOR_SET.IsValid() == false)
+	if(m_whDepthToRgbShader.expired() || ShaderDepthToRGB::DESCRIPTOR_SET.IsValid() == false)
 		return;
 	auto &shader = static_cast<prosper::ShaderGraphics &>(*m_whDepthToRgbShader.get());
 	auto &inputImg = texture.GetImage();
 	auto extents = inputImg.GetExtents();
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.format = prosper::Format::R8G8B8A8_UNorm;
 	imgCreateInfo.width = extents.width;
@@ -54,7 +54,7 @@ void pragma::gui::types::WIDebugDepthTexture::SetTexture(prosper::Texture &textu
 	m_renderTarget = context.CreateRenderTarget({tex}, shader.GetRenderPass());
 	m_renderTarget->SetDebugName("debug_depth_rt");
 
-	m_dsgSceneDepthTex = context.CreateDescriptorSetGroup(pragma::ShaderDepthToRGB::DESCRIPTOR_SET);
+	m_dsgSceneDepthTex = context.CreateDescriptorSetGroup(ShaderDepthToRGB::DESCRIPTOR_SET);
 
 	imgViewCreateInfo = {};
 	imgViewCreateInfo.baseLayer = layerId;
@@ -89,7 +89,7 @@ void pragma::gui::types::WIDebugDepthTexture::Setup(float nearZ, float farZ)
 {
 	if(m_depthToRgbCallback.IsValid())
 		m_depthToRgbCallback.Remove();
-	m_depthToRgbCallback = pragma::get_cengine()->AddCallback("DrawFrame", FunctionCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create([this, nearZ, farZ](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> refDrawCmd) {
+	m_depthToRgbCallback = get_cengine()->AddCallback("DrawFrame", FunctionCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create([this, nearZ, farZ](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> refDrawCmd) {
 		auto &drawCmd = refDrawCmd.get();
 		if(m_whDepthToRgbShader.expired() || m_srcDepthTex == nullptr || m_renderTarget == nullptr || m_dsgSceneDepthTex == nullptr)
 			return;
@@ -101,7 +101,7 @@ void pragma::gui::types::WIDebugDepthTexture::Setup(float nearZ, float farZ)
 		  std::numeric_limits<uint32_t>::max(), imgView.GetAspectMask());
 		if(drawCmd->RecordBeginRenderPass(*m_renderTarget) == true) {
 			if(depthImg.IsCubemap()) {
-				auto &shader = static_cast<pragma::ShaderCubeDepthToRGB &>(*m_whCubeDepthToRgbShader.get());
+				auto &shader = static_cast<ShaderCubeDepthToRGB &>(*m_whCubeDepthToRgbShader.get());
 				prosper::ShaderBindState bindState {*drawCmd};
 				if(shader.RecordBeginDraw(bindState) == true) {
 					shader.RecordDraw(bindState, *m_dsgSceneDepthTex->GetDescriptorSet(), nearZ, farZ, m_imageLayer, GetContrastFactor());
@@ -109,7 +109,7 @@ void pragma::gui::types::WIDebugDepthTexture::Setup(float nearZ, float farZ)
 				}
 			}
 			else if(img.GetLayerCount() > 1u) {
-				auto &shader = static_cast<pragma::ShaderCSMDepthToRGB &>(*m_whCsmDepthToRgbShader.get());
+				auto &shader = static_cast<ShaderCSMDepthToRGB &>(*m_whCsmDepthToRgbShader.get());
 				prosper::ShaderBindState bindState {*drawCmd};
 				if(shader.RecordBeginDraw(bindState) == true) {
 					shader.RecordDraw(bindState, *m_dsgSceneDepthTex->GetDescriptorSet(), nearZ, farZ, m_imageLayer, GetContrastFactor());
@@ -117,7 +117,7 @@ void pragma::gui::types::WIDebugDepthTexture::Setup(float nearZ, float farZ)
 				}
 			}
 			else {
-				auto &shader = static_cast<pragma::ShaderDepthToRGB &>(*m_whDepthToRgbShader.get());
+				auto &shader = static_cast<ShaderDepthToRGB &>(*m_whDepthToRgbShader.get());
 				prosper::ShaderBindState bindState {*drawCmd};
 				if(shader.RecordBeginDraw(bindState) == true) {
 					shader.RecordDraw(bindState, *m_dsgSceneDepthTex->GetDescriptorSet(), nearZ, farZ, GetContrastFactor());
@@ -136,10 +136,10 @@ float pragma::gui::types::WIDebugDepthTexture::GetContrastFactor() const { retur
 
 void pragma::gui::types::WIDebugDepthTexture::DoUpdate()
 {
-	auto nearZ = pragma::baseEnvCameraComponent::DEFAULT_NEAR_Z;
-	auto farZ = pragma::baseEnvCameraComponent::DEFAULT_FAR_Z;
-	if(pragma::get_cgame()) {
-		auto *cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
+	auto nearZ = baseEnvCameraComponent::DEFAULT_NEAR_Z;
+	auto farZ = baseEnvCameraComponent::DEFAULT_FAR_Z;
+	if(get_cgame()) {
+		auto *cam = get_cgame()->GetPrimaryCamera<CCameraComponent>();
 		if(cam) {
 			nearZ = cam->GetNearZ();
 			farZ = cam->GetFarZ();

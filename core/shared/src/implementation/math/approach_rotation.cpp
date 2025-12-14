@@ -36,13 +36,13 @@ Quat pragma::math::approach_direction(const Quat &rot, const Vector3 &up, const 
 			angTgt.y = yawLimit->y; // Max Yaw
 	}
 
-	angSrc.p = pragma::math::normalize_angle(pragma::math::approach_angle(angSrc.p, angTgt.p, rotAmount.x));
-	angSrc.y = pragma::math::normalize_angle(pragma::math::approach_angle(angSrc.y, angTgt.y, rotAmount.y));
+	angSrc.p = normalize_angle(approach_angle(angSrc.p, angTgt.p, rotAmount.x));
+	angSrc.y = normalize_angle(approach_angle(angSrc.y, angTgt.y, rotAmount.y));
 	angSrc.r = 0.0;
 
 	if(resRotAm != nullptr) {
-		resRotAm->x = pragma::math::get_angle_difference(angTgt.p, angSrc.p);
-		resRotAm->y = pragma::math::get_angle_difference(angTgt.y, angSrc.y);
+		resRotAm->x = get_angle_difference(angTgt.p, angSrc.p);
+		resRotAm->y = get_angle_difference(angTgt.y, angSrc.y);
 	}
 
 	rotTgt = *rotPiv * uquat::create(angSrc);

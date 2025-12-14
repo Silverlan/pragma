@@ -18,7 +18,7 @@ decltype(ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT) ShaderRayTracing::DESCRI
 decltype(ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE) ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE = {
   "SCENE",
   {
-    prosper::DescriptorSetInfo::Binding {"TEXTURES", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit, pragma::math::to_integral(pragma::GameLimits::MaxImageArrayLayers)},
+    prosper::DescriptorSetInfo::Binding {"TEXTURES", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit, math::to_integral(GameLimits::MaxImageArrayLayers)},
     prosper::DescriptorSetInfo::Binding {"MATERIALS", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
     prosper::DescriptorSetInfo::Binding {"SUB_MESH_INFOS", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
     prosper::DescriptorSetInfo::Binding {"ENTITY_INSTANCE_DATA", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
@@ -41,11 +41,11 @@ decltype(ShaderRayTracing::DESCRIPTOR_SET_IBL) ShaderRayTracing::DESCRIPTOR_SET_
     prosper::DescriptorSetInfo::Binding {"PREFILTER_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit, prosper::PrDescriptorSetBindingFlags::Cubemap},
     prosper::DescriptorSetInfo::Binding {"BRDF_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit}},
 };
-ShaderRayTracing::ShaderRayTracing(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderCompute(context, identifier, "world/raytracing/raytracing") {}
+ShaderRayTracing::ShaderRayTracing(prosper::IPrContext &context, const std::string &identifier) : ShaderCompute(context, identifier, "world/raytracing/raytracing") {}
 
 void ShaderRayTracing::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx);
+	ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx);
 
 	// Currently not supported on some GPUs?
 	// AddSpecializationConstant(pipelineInfo,0u /* constant id */,sizeof(TILE_SIZE),&TILE_SIZE);
@@ -53,7 +53,7 @@ void ShaderRayTracing::InitializeComputePipeline(prosper::ComputePipelineCreateI
 
 void ShaderRayTracing::InitializeShaderResources()
 {
-	prosper::ShaderCompute::InitializeShaderResources();
+	ShaderCompute::InitializeShaderResources();
 
 	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::ComputeBit);
 

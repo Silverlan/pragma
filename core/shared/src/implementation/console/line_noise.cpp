@@ -80,7 +80,7 @@ void pragma::console::impl::update_linenoise()
 		if(line != linenoiseEditMore) {
 			linenoiseEditStop(&ls);
 
-			pragma::get_engine()->ConsoleInput(line, false);
+			get_engine()->ConsoleInput(line, false);
 			linenoiseHistoryAdd(line);
 
 			linenoiseFree(const_cast<char *>(line));

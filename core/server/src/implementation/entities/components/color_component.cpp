@@ -16,7 +16,7 @@ void SColorComponent::Initialize()
 	FlagCallbackForRemoval(m_color->AddCallback([this](std::reference_wrapper<const Vector4> oldVal, std::reference_wrapper<const Vector4> val) {
 		NetPacket p {};
 		p->Write<Vector4>(val);
-		static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetColor, p, pragma::networking::Protocol::SlowReliable);
+		static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetColor, p, networking::Protocol::SlowReliable);
 	}),
 	  CallbackType::Component, this);
 }

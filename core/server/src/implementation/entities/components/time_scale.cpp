@@ -21,5 +21,5 @@ void STimeScaleComponent::SetTimeScale(float timeScale)
 		return;
 	NetPacket p;
 	p->Write<float>(timeScale);
-	ent.SendNetEvent(m_netEvSetTimeScale, p, pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netEvSetTimeScale, p, networking::Protocol::SlowReliable);
 }

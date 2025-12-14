@@ -45,9 +45,9 @@ void Lua::net::server::broadcast(pragma::networking::Protocol protocol, const st
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::LUANET, packetNew, protocol);
 }
 
-static void send(lua::State *l, pragma::networking::Protocol protocol, const std::string &identifier, ::NetPacket &packet, const pragma::networking::TargetRecipientFilter &rp)
+static void send(lua::State *l, pragma::networking::Protocol protocol, const std::string &identifier, NetPacket &packet, const pragma::networking::TargetRecipientFilter &rp)
 {
-	::NetPacket packetNew;
+	NetPacket packetNew;
 	if(!NetIncludePacketID(pragma::ServerState::Get(), identifier, packet, packetNew)) {
 		Con::cwar << Con::PREFIX_SERVER << "Attempted to send unindexed lua net message: " << identifier << Con::endl;
 		return;
@@ -69,13 +69,13 @@ void Lua::net::server::send(lua::State *l, pragma::networking::Protocol protocol
 	::send(l, protocol, identifier, packet, rp);
 }
 
-void Lua::net::server::receive(lua::State *l, const std::string &name, const Lua::func<void> &function)
+void Lua::net::server::receive(lua::State *l, const std::string &name, const func<void> &function)
 {
 	if(!pragma::ServerState::Get()->IsGameActive())
 		return;
 	pragma::Game *game = pragma::ServerState::Get()->GetGameState();
 	function.push(l);
-	int fc = Lua::create_reference(l, -1);
-	Lua::Pop(l, 1);
+	int fc = create_reference(l, -1);
+	Pop(l, 1);
 	game->RegisterLuaNetMessage(name, fc);
 }

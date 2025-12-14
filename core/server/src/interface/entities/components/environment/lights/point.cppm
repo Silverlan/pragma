@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SLightPointComponent final : public BaseEnvLightPointComponent {
 		  public:
-			SLightPointComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightPointComponent(ent) {}
+			SLightPointComponent(ecs::BaseEntity &ent) : BaseEnvLightPointComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		  protected:
 			virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;

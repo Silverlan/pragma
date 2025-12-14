@@ -45,7 +45,7 @@ void pragma::math::IcoSphere::Create(const Vector3 &origin, float radius, std::v
 	for(auto &v : verts)
 		uvec::normalize(&v);
 
-	auto numFacesTotal = static_cast<uint32_t>(20 * (pragma::math::pow(static_cast<uint32_t>(4), recursionLevel)) * 3);
+	auto numFacesTotal = static_cast<uint32_t>(20 * (pow(static_cast<uint32_t>(4), recursionLevel)) * 3);
 	auto &faces = indices;
 	std::vector<uint32_t> faces2;
 	faces.reserve(numFacesTotal);

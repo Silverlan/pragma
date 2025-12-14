@@ -66,11 +66,11 @@ std::shared_ptr<prosper::IBuffer> ShaderCubemap::CreateCubeMesh(uint32_t &outNum
 	bufCreateInfo.size = verts.size() * sizeof(verts.front());
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 	outNumVerts = verts.size();
-	return pragma::get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo, verts.data());
+	return get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo, verts.data());
 }
 std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width, uint32_t height, prosper::util::ImageCreateInfo::Flags flags) const
 {
-	flags = static_cast<prosper::util::ImageCreateInfo::Flags>(pragma::math::to_integral(flags) | pragma::math::to_integral(prosper::util::ImageCreateInfo::Flags::Cubemap));
+	flags = static_cast<prosper::util::ImageCreateInfo::Flags>(math::to_integral(flags) | math::to_integral(prosper::util::ImageCreateInfo::Flags::Cubemap));
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.format = prosper::Format::R16G16B16A16_SFloat;
 	createInfo.width = width;
@@ -81,7 +81,7 @@ std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width, ui
 	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
-	return pragma::get_cengine()->GetRenderContext().CreateImage(createInfo);
+	return get_cengine()->GetRenderContext().CreateImage(createInfo);
 }
 void ShaderCubemap::InitializeSamplerCreateInfo(prosper::util::ImageCreateInfo::Flags flags, prosper::util::SamplerCreateInfo &inOutSamplerCreateInfo)
 {
@@ -90,7 +90,7 @@ void ShaderCubemap::InitializeSamplerCreateInfo(prosper::util::ImageCreateInfo::
 	inOutSamplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
 	inOutSamplerCreateInfo.minFilter = prosper::Filter::Linear;
 	inOutSamplerCreateInfo.magFilter = prosper::Filter::Linear;
-	if(pragma::math::is_flag_set(flags, prosper::util::ImageCreateInfo::Flags::FullMipmapChain))
+	if(math::is_flag_set(flags, prosper::util::ImageCreateInfo::Flags::FullMipmapChain))
 		inOutSamplerCreateInfo.mipmapMode = prosper::SamplerMipmapMode::Linear;
 }
 void ShaderCubemap::InitializeTextureCreateInfo(prosper::util::TextureCreateInfo &inOutTextureCreateInfo) { inOutTextureCreateInfo.flags |= prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer; }
@@ -104,12 +104,12 @@ std::shared_ptr<prosper::RenderTarget> ShaderCubemap::CreateCubeMapRenderTarget(
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	InitializeTextureCreateInfo(texCreateInfo);
-	auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+	auto tex = get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
-	return pragma::get_cengine()->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass(), rtCreateInfo);
+	return get_cengine()->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass(), rtCreateInfo);
 }
 
-const Mat4 &ShaderCubemap::GetProjectionMatrix(float aspectRatio) const { return pragma::math::get_cubemap_projection_matrix(aspectRatio); }
-const Mat4 &ShaderCubemap::GetViewMatrix(uint8_t layerId) const { return pragma::math::get_cubemap_view_matrices().at(layerId); }
+const Mat4 &ShaderCubemap::GetProjectionMatrix(float aspectRatio) const { return math::get_cubemap_projection_matrix(aspectRatio); }
+const Mat4 &ShaderCubemap::GetViewMatrix(uint8_t layerId) const { return math::get_cubemap_view_matrices().at(layerId); }

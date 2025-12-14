@@ -14,26 +14,26 @@ import pragma.shadergraph;
 
 pragma::rendering::GlobalShaderInputDataManager::GlobalShaderInputDataManager() { ResetInputDescriptor(); }
 
-void pragma::rendering::GlobalShaderInputDataManager::ResetInputDescriptor() { m_inputDescriptor = std::make_unique<pragma::rendering::ShaderInputDescriptor>("GlobalInputData"); }
+void pragma::rendering::GlobalShaderInputDataManager::ResetInputDescriptor() { m_inputDescriptor = std::make_unique<ShaderInputDescriptor>("GlobalInputData"); }
 
-void pragma::rendering::GlobalShaderInputDataManager::AddProperty(pragma::rendering::Property &&prop)
+void pragma::rendering::GlobalShaderInputDataManager::AddProperty(Property &&prop)
 {
 	if(!m_inputDescriptor->AddProperty(std::move(prop)))
 		return;
 	m_inputDataDirty = true;
 }
 
-void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const pragma::shadergraph::Graph &graph)
+void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const shadergraph::Graph &graph)
 {
-	std::vector<pragma::shadergraph::GraphNode *> globalParamNodes;
+	std::vector<shadergraph::GraphNode *> globalParamNodes;
 	for(auto &node : graph.GetNodes()) {
-		auto *paramNode = dynamic_cast<const pragma::rendering::shader_graph::BaseInputParameterNode *>(&node->node);
+		auto *paramNode = dynamic_cast<const shader_graph::BaseInputParameterNode *>(&node->node);
 		if(!paramNode)
 			continue;
-		pragma::rendering::shader_graph::BaseInputParameterNode::Scope scope;
-		if(!node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_SCOPE, scope))
+		shader_graph::BaseInputParameterNode::Scope scope;
+		if(!node->GetInputValue(shader_graph::BaseInputParameterNode::CONST_SCOPE, scope))
 			continue;
-		if(scope != pragma::rendering::shader_graph::BaseInputParameterNode::Scope::Global)
+		if(scope != shader_graph::BaseInputParameterNode::Scope::Global)
 			continue;
 		if(globalParamNodes.size() == globalParamNodes.capacity())
 			globalParamNodes.reserve(globalParamNodes.size() * 2 + 10);
@@ -44,12 +44,12 @@ void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const p
 
 	std::sort(globalParamNodes.begin(), globalParamNodes.end(), [](auto *a, auto *b) { return a->GetName() < b->GetName(); });
 
-	std::vector<pragma::rendering::Property> params;
+	std::vector<Property> params;
 	params.reserve(globalParamNodes.size());
 	for(auto *node : globalParamNodes) {
-		auto &paramNode = *dynamic_cast<const pragma::rendering::shader_graph::BaseInputParameterNode *>(&node->node);
+		auto &paramNode = *dynamic_cast<const shader_graph::BaseInputParameterNode *>(&node->node);
 		std::string name;
-		if(!node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_NAME, name))
+		if(!node->GetInputValue(shader_graph::BaseInputParameterNode::CONST_NAME, name))
 			continue;
 
 		if(name.empty())
@@ -59,13 +59,13 @@ void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const p
 			continue; // TODO: What if a parameter is used in multiple shader graphs with different types?
 
 		auto type = paramNode.GetParameterType();
-		pragma::rendering::Property prop {name, type};
+		Property prop {name, type};
 
 		auto res = pragma::shadergraph::visit(type, [this, node, &prop](auto tag) -> bool {
 			using T = typename decltype(tag)::type;
 
 			T defaultVal;
-			if(!node->GetInputValue(pragma::rendering::shader_graph::BaseInputParameterNode::CONST_DEFAULT, defaultVal))
+			if(!node->GetInputValue(shader_graph::BaseInputParameterNode::CONST_DEFAULT, defaultVal))
 				return false;
 			prop->defaultValue.Set(defaultVal);
 
@@ -73,11 +73,11 @@ void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const p
 				float minVal;
 				float maxVal;
 				float stepSize;
-				if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MIN, minVal))
+				if(!node->GetInputValue(shader_graph::InputParameterFloatNode::CONST_MIN, minVal))
 					return false;
-				if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_MAX, maxVal))
+				if(!node->GetInputValue(shader_graph::InputParameterFloatNode::CONST_MAX, maxVal))
 					return false;
-				if(!node->GetInputValue(pragma::rendering::shader_graph::InputParameterFloatNode::CONST_STEP_SIZE, stepSize))
+				if(!node->GetInputValue(shader_graph::InputParameterFloatNode::CONST_STEP_SIZE, stepSize))
 					return false;
 				prop->min = minVal;
 				prop->max = maxVal;
@@ -105,7 +105,7 @@ void pragma::rendering::GlobalShaderInputDataManager::PopulateProperties(const p
 
 void pragma::rendering::GlobalShaderInputDataManager::ClearBuffer()
 {
-	pragma::get_cengine()->GetRenderContext().WaitIdle();
+	get_cengine()->GetRenderContext().WaitIdle();
 	m_inputDataBuffer = nullptr;
 	m_dirtyTracker.Clear();
 }
@@ -144,7 +144,7 @@ void pragma::rendering::GlobalShaderInputDataManager::AllocateInputData()
 	std::vector<uint8_t> oldData;
 	if(m_inputData)
 		oldData = m_inputData->data;
-	m_inputData = std::make_unique<pragma::rendering::ShaderInputData>(*m_inputDescriptor);
+	m_inputData = std::make_unique<ShaderInputData>(*m_inputDescriptor);
 	if(!m_inputDescriptor->properties.empty()) {
 		auto &lastProp = m_inputDescriptor->properties.back();
 		m_inputData->data.resize(lastProp.offset + udm::size_of(pragma::shadergraph::to_udm_type(lastProp.parameter.type)));
@@ -163,7 +163,7 @@ void pragma::rendering::GlobalShaderInputDataManager::ReallocateBuffer()
 	// TODO: Iterate all input parameter nodes of all shader graphs and add them to the input data
 	// TODO: What if a parameter is used in multiple shader graphs with different types?
 
-	auto bufferSize = pragma::math::get_aligned_offset(m_inputData->data.size(), BUFFER_BASE_SIZE);
+	auto bufferSize = math::get_aligned_offset(m_inputData->data.size(), BUFFER_BASE_SIZE);
 	if(bufferSize == 0)
 		return;
 	prosper::util::BufferCreateInfo bufCreateInfo {};
@@ -171,6 +171,6 @@ void pragma::rendering::GlobalShaderInputDataManager::ReallocateBuffer()
 	bufCreateInfo.size = bufferSize;
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::UniformBufferBit;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
-	m_inputDataBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo, m_inputData->data.data());
+	m_inputDataBuffer = get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo, m_inputData->data.data());
 	m_inputDataBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 }

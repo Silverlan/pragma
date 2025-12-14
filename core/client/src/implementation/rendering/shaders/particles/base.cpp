@@ -12,19 +12,19 @@ import :engine;
 using namespace pragma;
 
 // +1 for depth pass
-uint32_t ShaderParticleBase::PIPELINE_COUNT = pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Count) + 1;
+uint32_t ShaderParticleBase::PIPELINE_COUNT = math::to_integral(rendering::ParticleAlphaMode::Count) + 1;
 decltype(ShaderParticleBase::DESCRIPTOR_SET_ANIMATION) ShaderParticleBase::DESCRIPTOR_SET_ANIMATION = {
   "ANIMATION",
   {
     prosper::DescriptorSetInfo::Binding {"ANIMATION_DATA", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::FragmentBit},
   },
 };
-prosper::IDescriptorSet &ShaderParticleBase::GetAnimationDescriptorSet(const pragma::ecs::CParticleSystemComponent &ps)
+prosper::IDescriptorSet &ShaderParticleBase::GetAnimationDescriptorSet(const ecs::CParticleSystemComponent &ps)
 {
-	auto *animDescSet = const_cast<pragma::ecs::CParticleSystemComponent &>(ps).GetAnimationDescriptorSet();
+	auto *animDescSet = const_cast<ecs::CParticleSystemComponent &>(ps).GetAnimationDescriptorSet();
 	if(animDescSet == nullptr) {
 		if(m_dummyAnimDescSetGroup == nullptr)
-			m_dummyAnimDescSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(GetAnimationDescriptorSetInfo());
+			m_dummyAnimDescSetGroup = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(GetAnimationDescriptorSetInfo());
 		animDescSet = m_dummyAnimDescSetGroup->GetDescriptorSet();
 	}
 	return *animDescSet;
@@ -100,7 +100,7 @@ static prosper::BlendOp name_to_blend_op(const std::string &name)
 	return prosper::BlendOp::Add;
 }
 
-static void debug_particle_alpha_mode(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+static void debug_particle_alpha_mode(NetworkState *state, BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	g_customAlphaBlendMode = {};
 	if(argv.size() > 0)
@@ -116,7 +116,7 @@ static void debug_particle_alpha_mode(pragma::NetworkState *state, pragma::BaseP
 	if(argv.size() > 5)
 		g_customAlphaBlendMode.opAlpha = name_to_blend_op(argv.at(5));
 
-	for(auto &hShader : pragma::get_cengine()->GetShaderManager().GetShaders()) {
+	for(auto &hShader : get_cengine()->GetShaderManager().GetShaders()) {
 		auto *ptShader = dynamic_cast<ShaderParticleBase *>(hShader.get());
 		if(ptShader == nullptr)
 			continue;
@@ -124,7 +124,7 @@ static void debug_particle_alpha_mode(pragma::NetworkState *state, pragma::BaseP
 	}
 }
 namespace {
-	auto UVN = pragma::console::client::register_command("debug_particle_alpha_mode", &debug_particle_alpha_mode, pragma::console::ConVarFlags::None, "Specifies the blend mode arguments for particle systems that use the \
+	auto UVN = console::client::register_command("debug_particle_alpha_mode", &debug_particle_alpha_mode, console::ConVarFlags::None, "Specifies the blend mode arguments for particle systems that use the \
 	'custom' alpha mode. Argument order: <srcColorBlendFactor> <dstColorBlendFactor> <srcAlphaBlendFactor> <dstAlphaBlendFactor> <opColor> <opAlpha>.\n\
 	Blend factor options: zero, one, src_color, one_minus_src_color, dst_color, one_minus_dst_color, src_alpha, one_minus_src_alpha, dst_alpha, one_minus_dst_alpha, constant_color, \
 	one_minus_constant_color, constant_alpha, one_minus_constant_alpha, src_alpha_saturate, src1_color, one_minus_src1_color, src1_alpha, one_minus_src1_alpha\n\
@@ -145,7 +145,7 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 
 	auto alphaMode = GetAlphaMode(pipelineIdx);
 	switch(alphaMode) {
-	case pragma::rendering::ParticleAlphaMode::Additive:
+	case rendering::ParticleAlphaMode::Additive:
 		{
 #if 0
 			pipelineInfo.SetColorBlendAttachmentProperties(
@@ -160,45 +160,45 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 			  colorComponents);
 			break;
 		}
-	case pragma::rendering::ParticleAlphaMode::Opaque:
+	case rendering::ParticleAlphaMode::Opaque:
 		pipelineInfo.SetColorBlendAttachmentProperties(0u, true, blendOp, blendOp, prosper::BlendFactor::One, prosper::BlendFactor::Zero, // color
 		  prosper::BlendFactor::One, prosper::BlendFactor::Zero,                                                                          // alpha
 		  colorComponents);
 		break;
-	case pragma::rendering::ParticleAlphaMode::Masked:
+	case rendering::ParticleAlphaMode::Masked:
 		pipelineInfo.SetColorBlendAttachmentProperties(0u, true, blendOp, blendOp, prosper::BlendFactor::One, prosper::BlendFactor::Zero, // color
 		  prosper::BlendFactor::One, prosper::BlendFactor::Zero,                                                                          // alpha
 		  colorComponents);
 		break;
-	case pragma::rendering::ParticleAlphaMode::Translucent:
+	case rendering::ParticleAlphaMode::Translucent:
 		pipelineInfo.SetColorBlendAttachmentProperties(0u, true, blendOp, blendOp, prosper::BlendFactor::SrcAlpha, prosper::BlendFactor::OneMinusSrcAlpha, // color
 		  prosper::BlendFactor::SrcAlpha, prosper::BlendFactor::OneMinusSrcAlpha,                                                                          // alpha
 		  colorComponents);
 		break;
-	case pragma::rendering::ParticleAlphaMode::AdditiveByColor:
+	case rendering::ParticleAlphaMode::AdditiveByColor:
 		pipelineInfo.SetColorBlendAttachmentProperties(0u, true, blendOp, blendOp, prosper::BlendFactor::One, prosper::BlendFactor::One, // color
 		  prosper::BlendFactor::One, prosper::BlendFactor::OneMinusSrcColor,                                                             // alpha
 		  colorComponents);
 		break;
-	case pragma::rendering::ParticleAlphaMode::Premultiplied:
+	case rendering::ParticleAlphaMode::Premultiplied:
 		pipelineInfo.SetColorBlendAttachmentProperties(0u, true, blendOp, blendOp, prosper::BlendFactor::SrcAlpha, prosper::BlendFactor::OneMinusSrcAlpha, // color
 		  prosper::BlendFactor::SrcAlpha, prosper::BlendFactor::OneMinusSrcAlpha,                                                                          // alpha
 		  //static_cast<VkBlendFactor>(prosper::BlendFactor::ONE),static_cast<VkBlendFactor>(prosper::BlendFactor::ONE_MINUS_SRC_ALPHA), // color
 		  //static_cast<VkBlendFactor>(prosper::BlendFactor::ONE),static_cast<VkBlendFactor>(prosper::BlendFactor::ONE_MINUS_SRC_ALPHA), // alpha
 		  colorComponents);
 		break;
-	case pragma::rendering::ParticleAlphaMode::Custom:
+	case rendering::ParticleAlphaMode::Custom:
 		// For debug purposes only
 		pipelineInfo.SetColorBlendAttachmentProperties(0u, true, g_customAlphaBlendMode.opColor, g_customAlphaBlendMode.opAlpha, g_customAlphaBlendMode.srcColorBlendFactor, g_customAlphaBlendMode.dstColorBlendFactor, g_customAlphaBlendMode.srcAlphaBlendFactor,
 		  g_customAlphaBlendMode.dstAlphaBlendFactor, colorComponents);
 		break;
 	default:
-		throw std::invalid_argument("Unknown alpha mode " + std::to_string(pragma::math::to_integral(alphaMode)) + "!");
+		throw std::invalid_argument("Unknown alpha mode " + std::to_string(math::to_integral(alphaMode)) + "!");
 	}
 }
-static auto cvParticleQuality = pragma::console::get_client_con_var("cl_render_particle_quality");
+static auto cvParticleQuality = console::get_client_con_var("cl_render_particle_quality");
 uint32_t ShaderParticleBase::GetDepthPipelineIndex() { return GetParticlePipelineCount() - 1; }
-ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma::ecs::CParticleSystemComponent &particle, pragma::pts::ParticleRenderFlags ptRenderFlags) const
+ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const ecs::CParticleSystemComponent &particle, pts::ParticleRenderFlags ptRenderFlags) const
 {
 	auto renderFlags = (particle.IsAnimated() == true) ? RenderFlags::Animated : RenderFlags::None;
 	if(cvParticleQuality->GetInt() <= 1)
@@ -207,19 +207,19 @@ ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma:
 		renderFlags |= RenderFlags::SoftParticles;
 	if(particle.IsTextureScrollingEnabled())
 		renderFlags |= RenderFlags::TextureScrolling;
-	if(particle.GetEffectiveAlphaMode() == pragma::rendering::ParticleAlphaMode::AdditiveByColor)
+	if(particle.GetEffectiveAlphaMode() == rendering::ParticleAlphaMode::AdditiveByColor)
 		renderFlags |= RenderFlags::AdditiveBlendByColor;
 
-	if(pragma::math::is_flag_set(ptRenderFlags, pts::ParticleRenderFlags::DepthOnly))
+	if(math::is_flag_set(ptRenderFlags, pts::ParticleRenderFlags::DepthOnly))
 		renderFlags |= RenderFlags::DepthPass;
 	return renderFlags;
 }
-uint32_t ShaderParticleBase::GetBasePipelineIndex(uint32_t pipelineIdx) const { return pipelineIdx / pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Count); }
-pragma::rendering::ParticleAlphaMode ShaderParticleBase::GetAlphaMode(uint32_t pipelineIdx) const { return static_cast<pragma::rendering::ParticleAlphaMode>(pipelineIdx % pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Count)); }
-pragma::rendering::ParticleAlphaMode ShaderParticleBase::GetRenderAlphaMode(const pragma::ecs::CParticleSystemComponent &particle) const
+uint32_t ShaderParticleBase::GetBasePipelineIndex(uint32_t pipelineIdx) const { return pipelineIdx / math::to_integral(rendering::ParticleAlphaMode::Count); }
+rendering::ParticleAlphaMode ShaderParticleBase::GetAlphaMode(uint32_t pipelineIdx) const { return static_cast<rendering::ParticleAlphaMode>(pipelineIdx % math::to_integral(rendering::ParticleAlphaMode::Count)); }
+rendering::ParticleAlphaMode ShaderParticleBase::GetRenderAlphaMode(const ecs::CParticleSystemComponent &particle) const
 {
 	if(particle.IsAlphaPremultiplied())
-		return pragma::rendering::ParticleAlphaMode::Premultiplied;
+		return rendering::ParticleAlphaMode::Premultiplied;
 	return particle.GetEffectiveAlphaMode();
 }
 

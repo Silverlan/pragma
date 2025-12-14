@@ -47,16 +47,16 @@ const std::vector<std::string> &pragma::audio::get_aux_types()
 }
 
 namespace pragma::audio {
-	static std::shared_ptr<pragma::audio::IEffect> create_aux_effect(const std::string *name, const std::string &type, udm::LinkedPropertyWrapper &prop);
+	static std::shared_ptr<IEffect> create_aux_effect(const std::string *name, const std::string &type, udm::LinkedPropertyWrapper &prop);
 };
 
 std::shared_ptr<pragma::audio::IEffect> pragma::audio::create_aux_effect(const std::string *name, const std::string &type, udm::LinkedPropertyWrapper &prop)
 {
-	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
+	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return nullptr;
 	if(type == "reverb") {
-		pragma::audio::EfxEaxReverbProperties props {};
+		EfxEaxReverbProperties props {};
 		prop["density"](props.flDensity);
 		prop["diffusion"](props.flDiffusion);
 		prop["gain"](props.flGain);
@@ -71,10 +71,10 @@ std::shared_ptr<pragma::audio::IEffect> pragma::audio::create_aux_effect(const s
 		prop["air_absorption_gainhf"](props.flAirAbsorptionGainHF);
 		prop["room_rolloff_factor"](props.flRoomRolloffFactor);
 		prop["decay_hflimit"](props.iDecayHFLimit);
-		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "chorus") {
-		pragma::audio::EfxChorusProperties props {};
+		EfxChorusProperties props {};
 		prop["rate"](props.flRate);
 		prop["depth"](props.flDepth);
 		prop["feedback"](props.flFeedback);
@@ -82,28 +82,28 @@ std::shared_ptr<pragma::audio::IEffect> pragma::audio::create_aux_effect(const s
 
 		prop["waveform"](props.iWaveform);
 		prop["phase"](props.iPhase);
-		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "distortion") {
-		pragma::audio::EfxDistortionProperties props {};
+		EfxDistortionProperties props {};
 		prop["edge"](props.flEdge);
 		prop["gain"](props.flGain);
 		prop["lowpass_cutoff"](props.flLowpassCutoff);
 		prop["eqcenter"](props.flEQCenter);
 		prop["eqbandwidth"](props.flEQBandwidth);
-		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "echo") {
-		pragma::audio::EfxEchoProperties props {};
+		EfxEchoProperties props {};
 		prop["delay"](props.flDelay);
 		prop["lrdelay"](props.flLRDelay);
 		prop["damping"](props.flDamping);
 		prop["feedback"](props.flFeedback);
 		prop["spread"](props.flSpread);
-		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "flanger") {
-		pragma::audio::EfxFlangerProperties props {};
+		EfxFlangerProperties props {};
 		prop["rate"](props.flRate);
 		prop["depth"](props.flDepth);
 		prop["feedback"](props.flFeedback);
@@ -111,31 +111,31 @@ std::shared_ptr<pragma::audio::IEffect> pragma::audio::create_aux_effect(const s
 
 		prop["waveform"](props.iWaveform);
 		prop["phase"](props.iPhase);
-		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "frequency_shifter") {
-		pragma::audio::EfxFrequencyShifterProperties props {};
+		EfxFrequencyShifterProperties props {};
 		prop["frequency"](props.flFrequency);
 
 		prop["left_direction"](props.iLeftDirection);
 		prop["right_direction"](props.iRightDirection);
-		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "vocal_morpher") {
-		pragma::audio::EfxVocalMorpherProperties props {};
+		EfxVocalMorpherProperties props {};
 		prop["rate"](props.flRate);
 
 		prop["phonemea_coarse_tuning"](props.iPhonemeACoarseTuning);
 		prop["phonemeb_coarse_tuning"](props.iPhonemeBCoarseTuning);
 		prop["waveform"](props.iWaveform);
 
-		const std::unordered_map<std::string, int32_t> phonemes = {{"a", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::A)}, {"e", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::E)}, {"i", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::I)}, {"o", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::O)},
-		  {"u", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::U)}, {"aa", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::AA)}, {"ae", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::AE)}, {"ah", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::AH)},
-		  {"ao", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::AO)}, {"eh", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::EH)}, {"er", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::ER)}, {"ih", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::IH)},
-		  {"iy", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::IY)}, {"uh", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::UH)}, {"uw", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::UW)}, {"b", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::B)}, {"d", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::D)},
-		  {"f", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::F)}, {"g", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::G)}, {"j", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::J)}, {"k", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::K)}, {"l", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::L)},
-		  {"m", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::M)}, {"n", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::N)}, {"p", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::P)}, {"r", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::R)}, {"s", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::S)},
-		  {"t", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::T)}, {"v", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::V)}, {"z", pragma::math::to_integral(pragma::audio::VocalMorpherPhoneme::Z)}};
+		const std::unordered_map<std::string, int32_t> phonemes = {{"a", math::to_integral(VocalMorpherPhoneme::A)}, {"e", math::to_integral(VocalMorpherPhoneme::E)}, {"i", math::to_integral(VocalMorpherPhoneme::I)}, {"o", math::to_integral(VocalMorpherPhoneme::O)},
+		  {"u", math::to_integral(VocalMorpherPhoneme::U)}, {"aa", math::to_integral(VocalMorpherPhoneme::AA)}, {"ae", math::to_integral(VocalMorpherPhoneme::AE)}, {"ah", math::to_integral(VocalMorpherPhoneme::AH)},
+		  {"ao", math::to_integral(VocalMorpherPhoneme::AO)}, {"eh", math::to_integral(VocalMorpherPhoneme::EH)}, {"er", math::to_integral(VocalMorpherPhoneme::ER)}, {"ih", math::to_integral(VocalMorpherPhoneme::IH)},
+		  {"iy", math::to_integral(VocalMorpherPhoneme::IY)}, {"uh", math::to_integral(VocalMorpherPhoneme::UH)}, {"uw", math::to_integral(VocalMorpherPhoneme::UW)}, {"b", math::to_integral(VocalMorpherPhoneme::B)}, {"d", math::to_integral(VocalMorpherPhoneme::D)},
+		  {"f", math::to_integral(VocalMorpherPhoneme::F)}, {"g", math::to_integral(VocalMorpherPhoneme::G)}, {"j", math::to_integral(VocalMorpherPhoneme::J)}, {"k", math::to_integral(VocalMorpherPhoneme::K)}, {"l", math::to_integral(VocalMorpherPhoneme::L)},
+		  {"m", math::to_integral(VocalMorpherPhoneme::M)}, {"n", math::to_integral(VocalMorpherPhoneme::N)}, {"p", math::to_integral(VocalMorpherPhoneme::P)}, {"r", math::to_integral(VocalMorpherPhoneme::R)}, {"s", math::to_integral(VocalMorpherPhoneme::S)},
+		  {"t", math::to_integral(VocalMorpherPhoneme::T)}, {"v", math::to_integral(VocalMorpherPhoneme::V)}, {"z", math::to_integral(VocalMorpherPhoneme::Z)}};
 
 		const std::unordered_map<std::string, int32_t *> phonemeKeys = {{"phonemea", &props.iPhonemeA}, {"phonemeb", &props.iPhonemeB}};
 		for(auto &pair : phonemeKeys) {
@@ -143,7 +143,7 @@ std::shared_ptr<pragma::audio::IEffect> pragma::audio::create_aux_effect(const s
 			std::string val;
 			prop[key](val);
 			if(!val.empty()) {
-				pragma::string::to_lower(val);
+				string::to_lower(val);
 				auto itPhoneme = phonemes.find(val);
 				if(itPhoneme != phonemes.end())
 					*pair.second = itPhoneme->second;
@@ -151,37 +151,37 @@ std::shared_ptr<pragma::audio::IEffect> pragma::audio::create_aux_effect(const s
 			else
 				prop[key](*pair.second);
 		}
-		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "pitch_shifter") {
-		pragma::audio::EfxPitchShifterProperties props {};
+		EfxPitchShifterProperties props {};
 		prop["coarse_tune"](props.iCoarseTune);
 		prop["fine_tune"](props.iFineTune);
-		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "ring_modulator") {
-		pragma::audio::EfxRingModulatorProperties props {};
+		EfxRingModulatorProperties props {};
 		prop["frequency"](props.flFrequency);
 		prop["highpass_cutoff"](props.flHighpassCutoff);
 
 		prop["waveform"](props.iWaveform);
-		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "autowah") {
-		pragma::audio::EfxAutoWahProperties props {};
+		EfxAutoWahProperties props {};
 		prop["attack_time"](props.flAttackTime);
 		prop["release_time"](props.flReleaseTime);
 		prop["resonance"](props.flResonance);
 		prop["peak_gain"](props.flPeakGain);
-		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "compressor") {
-		pragma::audio::EfxCompressor props {};
+		EfxCompressor props {};
 		prop["onoff"](props.iOnOff);
-		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "equalizer") {
-		pragma::audio::EfxEqualizer props {};
+		EfxEqualizer props {};
 		prop["low_gain"](props.flLowGain);
 		prop["low_cutoff"](props.flLowCutoff);
 		prop["mid1_gain"](props.flMid1Gain);
@@ -192,10 +192,10 @@ std::shared_ptr<pragma::audio::IEffect> pragma::audio::create_aux_effect(const s
 		prop["mid2_width"](props.flMid2Width);
 		prop["high_gain"](props.flHighGain);
 		prop["high_cutoff"](props.flHighCutoff);
-		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "eaxreverb") {
-		pragma::audio::EfxEaxReverbProperties props {};
+		EfxEaxReverbProperties props {};
 		prop["density"](props.flDensity);
 		prop["diffusion"](props.flDiffusion);
 		prop["gain"](props.flGain);
@@ -226,7 +226,7 @@ std::shared_ptr<pragma::audio::IEffect> pragma::audio::create_aux_effect(const s
 			if(!val.empty())
 				pragma::string::string_to_array<float>(val, pair.second, pragma::string::cstring_to_number<float>, 3);
 		}
-		return (name != nullptr) ? pragma::get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
+		return (name != nullptr) ? get_cengine()->CreateAuxEffect(*name, props) : soundSys->CreateEffect(props);
 	}
 	return nullptr;
 }

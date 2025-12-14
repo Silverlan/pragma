@@ -14,18 +14,18 @@ using namespace pragma;
 void SChildComponent::Initialize() { BaseChildComponent::Initialize(); }
 void SChildComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void SChildComponent::OnParentChanged(pragma::ecs::BaseEntity *parent)
+void SChildComponent::OnParentChanged(ecs::BaseEntity *parent)
 {
 	NetPacket p;
-	pragma::networking::write_entity(p, parent);
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetParent, p, pragma::networking::Protocol::SlowReliable);
+	networking::write_entity(p, parent);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetParent, p, networking::Protocol::SlowReliable);
 }
 
 void SChildComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	auto *parent = GetParentEntity();
 	if(parent)
-		pragma::networking::write_unique_entity(packet, parent);
+		networking::write_unique_entity(packet, parent);
 	else
-		pragma::networking::write_unique_entity(packet, nullptr);
+		networking::write_unique_entity(packet, nullptr);
 }

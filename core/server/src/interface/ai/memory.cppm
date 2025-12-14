@@ -46,7 +46,7 @@ export namespace pragma {
 				Smell // Unused
 			};
 		  protected:
-			void Memorize(const pragma::ecs::BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel, int idx, Fragment **out = nullptr);
+			void Memorize(const ecs::BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel, int idx, Fragment **out = nullptr);
 		  public:
 			Memory();
 			Memory(const Memory &) = delete;
@@ -54,9 +54,9 @@ export namespace pragma {
 			Memory &operator=(const Memory &) = delete;
 			uint32_t occupiedFragmentCount;
 			std::array<Fragment, MAX_AIMEMORY_FRAGMENTS> fragments;
-			bool Memorize(const pragma::ecs::BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel = {}, Fragment **out = nullptr);
-			Fragment *FindFragment(const pragma::ecs::BaseEntity &ent);
-			void Forget(const pragma::ecs::BaseEntity &ent);
+			bool Memorize(const ecs::BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel = {}, Fragment **out = nullptr);
+			Fragment *FindFragment(const ecs::BaseEntity &ent);
+			void Forget(const ecs::BaseEntity &ent);
 			void Clear();
 			void Clear(Fragment &fragment);
 			void Update();

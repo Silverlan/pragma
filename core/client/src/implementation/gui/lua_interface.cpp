@@ -186,39 +186,39 @@ static std::optional<pragma::util::EventReply> GUI_Callback_OnScroll(pragma::gui
 	return reply;
 }
 
-void pragma::gui::WGUILuaInterface::OnGameStart() { m_cbLuaReleased = pragma::get_cgame()->AddCallback("OnLuaReleased", FunctionCallback<void, lua::State *>::Create(&pragma::gui::WGUILuaInterface::OnGameLuaReleased)); }
+void pragma::gui::WGUILuaInterface::OnGameStart() { m_cbLuaReleased = get_cgame()->AddCallback("OnLuaReleased", FunctionCallback<void, lua::State *>::Create(&WGUILuaInterface::OnGameLuaReleased)); }
 
 void pragma::gui::WGUILuaInterface::OnGameLuaReleased(lua::State *)
 {
-	auto *el = pragma::gui::WGUI::GetInstance().GetBaseElement();
+	auto *el = WGUI::GetInstance().GetBaseElement();
 	if(el == nullptr)
 		return;
 	ClearLuaObjects(el);
 }
 
-void pragma::gui::WGUILuaInterface::ClearGUILuaObjects(pragma::gui::types::WIBase &el)
+void pragma::gui::WGUILuaInterface::ClearGUILuaObjects(types::WIBase &el)
 {
 	el.SetUserData(nullptr);
-	std::vector<pragma::gui::WIHandle> *children = el.GetChildren();
+	std::vector<WIHandle> *children = el.GetChildren();
 	for(unsigned int i = 0; i < children->size(); i++) {
-		pragma::gui::WIHandle &hChild = (*children)[i];
+		WIHandle &hChild = (*children)[i];
 		if(hChild.IsValid())
 			ClearGUILuaObjects(*hChild.get());
 	}
 }
 
-void pragma::gui::WGUILuaInterface::ClearLuaObjects(pragma::gui::types::WIBase *el)
+void pragma::gui::WGUILuaInterface::ClearLuaObjects(types::WIBase *el)
 {
 	el->SetUserData2(nullptr);
-	std::vector<pragma::gui::WIHandle> *children = el->GetChildren();
+	std::vector<WIHandle> *children = el->GetChildren();
 	for(unsigned int i = 0; i < children->size(); i++) {
-		pragma::gui::WIHandle &hChild = (*children)[i];
+		WIHandle &hChild = (*children)[i];
 		if(hChild.IsValid())
 			ClearLuaObjects(hChild.get());
 	}
 }
 
-void pragma::gui::WGUILuaInterface::OnGUIDestroy(pragma::gui::types::WIBase &el)
+void pragma::gui::WGUILuaInterface::OnGUIDestroy(types::WIBase &el)
 {
 	auto userData = el.GetUserData();
 	if(userData != nullptr) {
@@ -236,10 +236,10 @@ void pragma::gui::WGUILuaInterface::OnGUIDestroy(pragma::gui::types::WIBase &el)
 
 void pragma::gui::WGUILuaInterface::Initialize()
 {
-	auto *client = pragma::get_client_state();
+	auto *client = get_client_state();
 	m_guiLuaState = client->GetGUILuaState();
 	WGUI::GetInstance().SetRemoveCallback(&OnGUIDestroy);
-	m_cbGameStart = client->AddCallback("OnGameStart", FunctionCallback<>::Create(&pragma::gui::WGUILuaInterface::OnGameStart));
+	m_cbGameStart = client->AddCallback("OnGameStart", FunctionCallback<>::Create(&WGUILuaInterface::OnGameStart));
 }
 
 void pragma::gui::WGUILuaInterface::Clear()
@@ -250,11 +250,11 @@ void pragma::gui::WGUILuaInterface::Clear()
 		m_cbLuaReleased.Remove();
 }
 
-void pragma::gui::WGUILuaInterface::InitializeGUIElement(pragma::gui::types::WIBase &p)
+void pragma::gui::WGUILuaInterface::InitializeGUIElement(types::WIBase &p)
 {
 	p.AddCallback("OnMouseEvent",
-	  FunctionCallback<pragma::util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
-	    [&p](pragma::util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
+	    [&p](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
 		    auto r = GUI_Callback_OnMouseEvent(p, button, state, mods);
 		    if(r.has_value()) {
 			    *reply = *r;
@@ -263,8 +263,8 @@ void pragma::gui::WGUILuaInterface::InitializeGUIElement(pragma::gui::types::WIB
 		    return CallbackReturnType::NoReturnValue;
 	    }));
 	p.AddCallback("OnKeyEvent",
-	  FunctionCallback<pragma::util::EventReply, pragma::platform::Key, int, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
-	    [&p](pragma::util::EventReply *reply, pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+	  FunctionCallback<util::EventReply, platform::Key, int, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
+	    [&p](util::EventReply *reply, platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
 		    auto r = GUI_Callback_OnKeyEvent(p, key, scanCode, state, mods);
 		    if(r.has_value()) {
 			    *reply = *r;
@@ -272,7 +272,7 @@ void pragma::gui::WGUILuaInterface::InitializeGUIElement(pragma::gui::types::WIB
 		    }
 		    return CallbackReturnType::NoReturnValue;
 	    }));
-	p.AddCallback("OnCharEvent", FunctionCallback<pragma::util::EventReply, int, pragma::platform::Modifier>::CreateWithOptionalReturn([&p](pragma::util::EventReply *reply, int c, pragma::platform::Modifier mods) -> CallbackReturnType {
+	p.AddCallback("OnCharEvent", FunctionCallback<util::EventReply, int, platform::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply, int c, platform::Modifier mods) -> CallbackReturnType {
 		auto r = GUI_Callback_OnCharEvent(p, c, mods);
 		if(r.has_value()) {
 			*reply = *r;
@@ -280,7 +280,7 @@ void pragma::gui::WGUILuaInterface::InitializeGUIElement(pragma::gui::types::WIB
 		}
 		return CallbackReturnType::NoReturnValue;
 	}));
-	p.AddCallback("OnScroll", FunctionCallback<pragma::util::EventReply, Vector2, bool>::CreateWithOptionalReturn([&p](pragma::util::EventReply *reply, Vector2 offset, bool offsetAsPixels) -> CallbackReturnType {
+	p.AddCallback("OnScroll", FunctionCallback<util::EventReply, Vector2, bool>::CreateWithOptionalReturn([&p](util::EventReply *reply, Vector2 offset, bool offsetAsPixels) -> CallbackReturnType {
 		auto r = GUI_Callback_OnScroll(p, offset, offsetAsPixels);
 		if(r.has_value()) {
 			*reply = *r;
@@ -296,100 +296,100 @@ luabind::object cast_to_type(lua::State *l, pragma::gui::types::WIBase &el)
 	return pragma::LuaCore::raw_object_to_luabind_object(l, pragma::util::weak_shared_handle_cast<pragma::gui::types::WIBase, T>(el.GetHandle()));
 }
 
-luabind::object pragma::gui::WGUILuaInterface::CreateLuaObject(lua::State *l, pragma::gui::types::WIBase &p)
+luabind::object pragma::gui::WGUILuaInterface::CreateLuaObject(lua::State *l, types::WIBase &p)
 {
-	for(auto &f : pragma::get_client_state()->GetGUILuaWrapperFactories()) {
+	for(auto &f : get_client_state()->GetGUILuaWrapperFactories()) {
 		auto r = f(l, p);
 		if(r)
 			return r;
 	}
-	if(dynamic_cast<pragma::gui::types::WITextEntry *>(&p) != nullptr) {
-		if(dynamic_cast<pragma::gui::types::WINumericEntry *>(&p) != nullptr)
-			return cast_to_type<pragma::gui::types::WINumericEntry>(l, p);
-		else if(dynamic_cast<pragma::gui::types::WIDropDownMenu *>(&p) != nullptr)
-			return cast_to_type<pragma::gui::types::WIDropDownMenu>(l, p);
-		else if(dynamic_cast<pragma::gui::types::WICommandLineEntry *>(&p) != nullptr)
-			return cast_to_type<pragma::gui::types::WICommandLineEntry>(l, p);
-		return cast_to_type<pragma::gui::types::WITextEntry>(l, p);
+	if(dynamic_cast<types::WITextEntry *>(&p) != nullptr) {
+		if(dynamic_cast<types::WINumericEntry *>(&p) != nullptr)
+			return cast_to_type<types::WINumericEntry>(l, p);
+		else if(dynamic_cast<types::WIDropDownMenu *>(&p) != nullptr)
+			return cast_to_type<types::WIDropDownMenu>(l, p);
+		else if(dynamic_cast<types::WICommandLineEntry *>(&p) != nullptr)
+			return cast_to_type<types::WICommandLineEntry>(l, p);
+		return cast_to_type<types::WITextEntry>(l, p);
 	}
-	else if(dynamic_cast<pragma::gui::types::WIText *>(&p) != nullptr)
-		return cast_to_type<pragma::gui::types::WIText>(l, p);
-	else if(dynamic_cast<pragma::gui::types::WIOutlinedRect *>(&p) != nullptr)
-		return cast_to_type<pragma::gui::types::WIOutlinedRect>(l, p);
-	else if(dynamic_cast<pragma::gui::types::WIShape *>(&p) != nullptr) {
-		if(dynamic_cast<pragma::gui::types::WITexturedShape *>(&p) != nullptr) {
-			if(dynamic_cast<pragma::gui::types::WIRoundedTexturedRect *>(&p) != nullptr)
-				return cast_to_type<pragma::gui::types::WIRoundedTexturedRect>(l, p);
-			else if(dynamic_cast<pragma::gui::types::WIIcon *>(&p) != nullptr) {
-				if(dynamic_cast<pragma::gui::types::WISilkIcon *>(&p) != nullptr)
-					return cast_to_type<pragma::gui::types::WISilkIcon>(l, p);
-				return cast_to_type<pragma::gui::types::WIIcon>(l, p);
+	else if(dynamic_cast<types::WIText *>(&p) != nullptr)
+		return cast_to_type<types::WIText>(l, p);
+	else if(dynamic_cast<types::WIOutlinedRect *>(&p) != nullptr)
+		return cast_to_type<types::WIOutlinedRect>(l, p);
+	else if(dynamic_cast<types::WIShape *>(&p) != nullptr) {
+		if(dynamic_cast<types::WITexturedShape *>(&p) != nullptr) {
+			if(dynamic_cast<types::WIRoundedTexturedRect *>(&p) != nullptr)
+				return cast_to_type<types::WIRoundedTexturedRect>(l, p);
+			else if(dynamic_cast<types::WIIcon *>(&p) != nullptr) {
+				if(dynamic_cast<types::WISilkIcon *>(&p) != nullptr)
+					return cast_to_type<types::WISilkIcon>(l, p);
+				return cast_to_type<types::WIIcon>(l, p);
 			}
-			else if(dynamic_cast<pragma::gui::types::WIDebugSSAO *>(&p) != nullptr)
-				return cast_to_type<pragma::gui::types::WIDebugSSAO>(l, p);
-			return cast_to_type<pragma::gui::types::WITexturedShape>(l, p);
+			else if(dynamic_cast<types::WIDebugSSAO *>(&p) != nullptr)
+				return cast_to_type<types::WIDebugSSAO>(l, p);
+			return cast_to_type<types::WITexturedShape>(l, p);
 		}
-		else if(dynamic_cast<pragma::gui::types::WIRoundedRect *>(&p) != nullptr)
-			return cast_to_type<pragma::gui::types::WIRoundedRect>(l, p);
-		else if(dynamic_cast<pragma::gui::types::WICheckbox *>(&p) != nullptr)
-			return cast_to_type<pragma::gui::types::WICheckbox>(l, p);
-		else if(dynamic_cast<pragma::gui::types::WIArrow *>(&p) != nullptr)
-			return cast_to_type<pragma::gui::types::WIArrow>(l, p);
-		return cast_to_type<pragma::gui::types::WIShape>(l, p);
+		else if(dynamic_cast<types::WIRoundedRect *>(&p) != nullptr)
+			return cast_to_type<types::WIRoundedRect>(l, p);
+		else if(dynamic_cast<types::WICheckbox *>(&p) != nullptr)
+			return cast_to_type<types::WICheckbox>(l, p);
+		else if(dynamic_cast<types::WIArrow *>(&p) != nullptr)
+			return cast_to_type<types::WIArrow>(l, p);
+		return cast_to_type<types::WIShape>(l, p);
 	}
-	else if(dynamic_cast<pragma::gui::types::WIContainer *>(&p) != nullptr) {
-		if(dynamic_cast<pragma::gui::types::WITable *>(&p) != nullptr) {
-			if(dynamic_cast<pragma::gui::types::WIGridPanel *>(&p) != nullptr)
-				return cast_to_type<pragma::gui::types::WIGridPanel>(l, p);
-			else if(dynamic_cast<pragma::gui::types::WITreeList *>(&p) != nullptr)
-				return cast_to_type<pragma::gui::types::WITreeList>(l, p);
-			return cast_to_type<pragma::gui::types::WITable>(l, p);
+	else if(dynamic_cast<types::WIContainer *>(&p) != nullptr) {
+		if(dynamic_cast<types::WITable *>(&p) != nullptr) {
+			if(dynamic_cast<types::WIGridPanel *>(&p) != nullptr)
+				return cast_to_type<types::WIGridPanel>(l, p);
+			else if(dynamic_cast<types::WITreeList *>(&p) != nullptr)
+				return cast_to_type<types::WITreeList>(l, p);
+			return cast_to_type<types::WITable>(l, p);
 		}
-		else if(dynamic_cast<pragma::gui::types::WITableRow *>(&p) != nullptr) {
-			if(dynamic_cast<pragma::gui::types::WITreeListElement *>(&p) != nullptr)
-				return cast_to_type<pragma::gui::types::WITreeListElement>(l, p);
-			return cast_to_type<pragma::gui::types::WITableRow>(l, p);
+		else if(dynamic_cast<types::WITableRow *>(&p) != nullptr) {
+			if(dynamic_cast<types::WITreeListElement *>(&p) != nullptr)
+				return cast_to_type<types::WITreeListElement>(l, p);
+			return cast_to_type<types::WITableRow>(l, p);
 		}
-		else if(dynamic_cast<pragma::gui::types::WITableCell *>(&p) != nullptr)
-			return cast_to_type<pragma::gui::types::WITableCell>(l, p);
-		return cast_to_type<pragma::gui::types::WIContainer>(l, p);
+		else if(dynamic_cast<types::WITableCell *>(&p) != nullptr)
+			return cast_to_type<types::WITableCell>(l, p);
+		return cast_to_type<types::WIContainer>(l, p);
 	}
-	else if(dynamic_cast<pragma::gui::types::WIScrollBar *>(&p) != nullptr)
-		return cast_to_type<pragma::gui::types::WIScrollBar>(l, p);
-	else if(dynamic_cast<pragma::gui::types::WISnapArea *>(&p) != nullptr)
-		return cast_to_type<pragma::gui::types::WISnapArea>(l, p);
-	else if(dynamic_cast<pragma::gui::types::WIButton *>(&p) != nullptr)
-		return cast_to_type<pragma::gui::types::WIButton>(l, p);
-	else if(dynamic_cast<pragma::gui::types::WILine *>(&p) != nullptr)
-		return cast_to_type<pragma::gui::types::WILine>(l, p);
-	else if(dynamic_cast<pragma::gui::types::WIScrollContainer *>(&p) != nullptr)
-		return cast_to_type<pragma::gui::types::WIScrollContainer>(l, p);
-	else if(dynamic_cast<pragma::gui::types::WIConsole *>(&p) != nullptr)
-		return cast_to_type<pragma::gui::types::WIConsole>(l, p);
-	else if(dynamic_cast<pragma::gui::types::WITransformable *>(&p) != nullptr) {
-		if(dynamic_cast<pragma::gui::types::WIFrame *>(&p) != nullptr)
-			return cast_to_type<pragma::gui::types::WIFrame>(l, p);
-		return cast_to_type<pragma::gui::types::WITransformable>(l, p);
+	else if(dynamic_cast<types::WIScrollBar *>(&p) != nullptr)
+		return cast_to_type<types::WIScrollBar>(l, p);
+	else if(dynamic_cast<types::WISnapArea *>(&p) != nullptr)
+		return cast_to_type<types::WISnapArea>(l, p);
+	else if(dynamic_cast<types::WIButton *>(&p) != nullptr)
+		return cast_to_type<types::WIButton>(l, p);
+	else if(dynamic_cast<types::WILine *>(&p) != nullptr)
+		return cast_to_type<types::WILine>(l, p);
+	else if(dynamic_cast<types::WIScrollContainer *>(&p) != nullptr)
+		return cast_to_type<types::WIScrollContainer>(l, p);
+	else if(dynamic_cast<types::WIConsole *>(&p) != nullptr)
+		return cast_to_type<types::WIConsole>(l, p);
+	else if(dynamic_cast<types::WITransformable *>(&p) != nullptr) {
+		if(dynamic_cast<types::WIFrame *>(&p) != nullptr)
+			return cast_to_type<types::WIFrame>(l, p);
+		return cast_to_type<types::WITransformable>(l, p);
 	}
-	else if(dynamic_cast<pragma::gui::types::WIDebugDepthTexture *>(&p) != nullptr)
-		return cast_to_type<pragma::gui::types::WIDebugDepthTexture>(l, p);
-	else if(dynamic_cast<pragma::gui::types::WIDebugShadowMap *>(&p) != nullptr)
-		return cast_to_type<pragma::gui::types::WIDebugShadowMap>(l, p);
-	else if(dynamic_cast<pragma::gui::types::WIProgressBar *>(&p) != nullptr) {
-		if(dynamic_cast<pragma::gui::types::WISlider *>(&p) != nullptr)
-			return cast_to_type<pragma::gui::types::WISlider>(l, p);
-		return cast_to_type<pragma::gui::types::WIProgressBar>(l, p);
+	else if(dynamic_cast<types::WIDebugDepthTexture *>(&p) != nullptr)
+		return cast_to_type<types::WIDebugDepthTexture>(l, p);
+	else if(dynamic_cast<types::WIDebugShadowMap *>(&p) != nullptr)
+		return cast_to_type<types::WIDebugShadowMap>(l, p);
+	else if(dynamic_cast<types::WIProgressBar *>(&p) != nullptr) {
+		if(dynamic_cast<types::WISlider *>(&p) != nullptr)
+			return cast_to_type<types::WISlider>(l, p);
+		return cast_to_type<types::WIProgressBar>(l, p);
 	}
-	else if(dynamic_cast<pragma::gui::types::WITooltip *>(&p) != nullptr)
-		return cast_to_type<pragma::gui::types::WITooltip>(l, p);
-	else if(dynamic_cast<pragma::gui::types::WIRoot *>(&p) != nullptr)
-		return cast_to_type<pragma::gui::types::WIRoot>(l, p);
-	else if(dynamic_cast<pragma::gui::types::WI9SliceRect *>(&p) != nullptr)
-		return cast_to_type<pragma::gui::types::WI9SliceRect>(l, p);
-	return pragma::LuaCore::raw_object_to_luabind_object(l, p.GetHandle());
+	else if(dynamic_cast<types::WITooltip *>(&p) != nullptr)
+		return cast_to_type<types::WITooltip>(l, p);
+	else if(dynamic_cast<types::WIRoot *>(&p) != nullptr)
+		return cast_to_type<types::WIRoot>(l, p);
+	else if(dynamic_cast<types::WI9SliceRect *>(&p) != nullptr)
+		return cast_to_type<types::WI9SliceRect>(l, p);
+	return LuaCore::raw_object_to_luabind_object(l, p.GetHandle());
 }
 
-luabind::object pragma::gui::WGUILuaInterface::GetLuaObject(lua::State *l, pragma::gui::types::WIBase &p)
+luabind::object pragma::gui::WGUILuaInterface::GetLuaObject(lua::State *l, types::WIBase &p)
 {
 	luabind::object o {};
 	if(l == m_guiLuaState) {

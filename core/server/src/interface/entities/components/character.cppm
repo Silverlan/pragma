@@ -15,15 +15,15 @@ export namespace pragma {
 	}
 	class DLLSERVER SCharacterComponent final : public BaseCharacterComponent {
 	  public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
-		SCharacterComponent(pragma::ecs::BaseEntity &ent);
+		SCharacterComponent(ecs::BaseEntity &ent);
 		virtual void Initialize() override;
-		virtual void SetActiveWeapon(pragma::ecs::BaseEntity *ent) override;
+		virtual void SetActiveWeapon(ecs::BaseEntity *ent) override;
 		void DropActiveWeapon();
 		void DropWeapon(std::string className);
-		void DropWeapon(pragma::ecs::BaseEntity *ent);
+		void DropWeapon(ecs::BaseEntity *ent);
 		void SelectNextWeapon();
 		void SelectPreviousWeapon();
 		virtual void OnTick(double tDelta) override;

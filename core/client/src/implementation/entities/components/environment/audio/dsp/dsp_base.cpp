@@ -35,7 +35,7 @@ void CBaseSoundDspComponent::OnTick(double dt)
 		auto &snd = rsnd.get();
 		if(snd.IsPlaying() == false)
 			continue;
-		auto &alSnd = *static_cast<pragma::audio::SoundSource *>(static_cast<audio::CALSound *>(&snd));
+		auto &alSnd = *static_cast<audio::SoundSource *>(static_cast<audio::CALSound *>(&snd));
 		if(m_bAllSounds == false && (m_bAllWorldSounds == false || snd.IsRelative() == true) && (snd.GetType() & m_types) == audio::ALSoundType::Generic) {
 			DetachSoundSource(alSnd);
 			continue;
@@ -133,11 +133,11 @@ Bool CBaseSoundDspComponent::ReceiveNetEvent(UInt32 eventId, NetPacket &p)
 		return CBaseNetComponent::ReceiveNetEvent(eventId, p);
 	return true;
 }
-std::vector<std::pair<pragma::audio::SoundSourceHandle, uint32_t>>::iterator CBaseSoundDspComponent::FindSoundSource(pragma::audio::SoundSource &src)
+std::vector<std::pair<audio::SoundSourceHandle, uint32_t>>::iterator CBaseSoundDspComponent::FindSoundSource(audio::SoundSource &src)
 {
-	return std::find_if(m_affectedSounds.begin(), m_affectedSounds.end(), [&src](const std::pair<pragma::audio::SoundSourceHandle, uint32_t> &pair) { return (pair.first.get() == &src) ? true : false; });
+	return std::find_if(m_affectedSounds.begin(), m_affectedSounds.end(), [&src](const std::pair<audio::SoundSourceHandle, uint32_t> &pair) { return (pair.first.get() == &src) ? true : false; });
 }
-void CBaseSoundDspComponent::UpdateSoundSource(pragma::audio::SoundSource &src, float gain)
+void CBaseSoundDspComponent::UpdateSoundSource(audio::SoundSource &src, float gain)
 {
 	if(m_dsp == nullptr)
 		return;
@@ -152,7 +152,7 @@ void CBaseSoundDspComponent::UpdateSoundSource(pragma::audio::SoundSource &src, 
 		return;
 	m_affectedSounds.push_back({src.GetHandle(), slotId});
 }
-void CBaseSoundDspComponent::DetachSoundSource(pragma::audio::SoundSource &src)
+void CBaseSoundDspComponent::DetachSoundSource(audio::SoundSource &src)
 {
 	auto it = FindSoundSource(src);
 	if(it == m_affectedSounds.end())
@@ -165,7 +165,7 @@ void CBaseSoundDspComponent::DetachAllSoundSources()
 	for(auto &pair : m_affectedSounds) {
 		if(pair.first.IsValid() == false)
 			continue;
-		auto &src = *static_cast<pragma::audio::SoundSource *>(static_cast<audio::CALSound *>(pair.first.get()));
+		auto &src = *static_cast<audio::SoundSource *>(static_cast<audio::CALSound *>(pair.first.get()));
 		src->RemoveEffect(pair.second);
 	}
 	m_affectedSounds.clear();

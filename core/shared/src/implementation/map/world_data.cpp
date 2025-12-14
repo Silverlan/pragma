@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :map.world_data;
 
-pragma::asset::WorldData::WorldData(pragma::NetworkState &nw) : m_nw {nw}
+pragma::asset::WorldData::WorldData(NetworkState &nw) : m_nw {nw}
 {
 	SetMessageLogger(nullptr); // Don't output anything by default
 }
@@ -27,7 +27,7 @@ void pragma::asset::WorldData::AddEntity(EntityData &ent, bool isWorld)
 		m_entities.push_back(ent.shared_from_this());
 	ent.m_mapIndex = m_entities.size();
 }
-void pragma::asset::WorldData::SetBSPTree(pragma::util::BSPTree &bspTree) { m_bspTree = bspTree.shared_from_this(); }
+void pragma::asset::WorldData::SetBSPTree(util::BSPTree &bspTree) { m_bspTree = bspTree.shared_from_this(); }
 pragma::util::BSPTree *pragma::asset::WorldData::GetBSPTree() { return m_bspTree.get(); }
 
 void pragma::asset::WorldData::SetLightMapAtlas(image::ImageBuffer &imgAtlas)
@@ -53,9 +53,9 @@ void pragma::asset::WorldData::SetMessageLogger(const std::function<void(const s
 {
 	m_messageLogger = msgLogger ? msgLogger : [](const std::string &) {};
 }
-std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::Create(pragma::NetworkState &nw) { return std::shared_ptr<WorldData> {new WorldData {nw}}; }
+std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::Create(NetworkState &nw) { return std::shared_ptr<WorldData> {new WorldData {nw}}; }
 
-std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::load(pragma::NetworkState &nw, const std::string &fileName, std::string &outErr, EntityData::Flags entMask)
+std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::load(NetworkState &nw, const std::string &fileName, std::string &outErr, EntityData::Flags entMask)
 {
 	auto nFileName = fs::find_available_file(fileName, get_supported_extensions());
 	std::shared_ptr<udm::Data> udmData = nullptr;
@@ -74,9 +74,9 @@ std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::load(pragma:
 	worldData->SetVersion(udmData->GetAssetVersion());
 	return worldData;
 }
-std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::load_from_udm_data(pragma::NetworkState &nw, udm::LinkedPropertyWrapper &prop, std::string &outErr, EntityData::Flags entMask)
+std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::load_from_udm_data(NetworkState &nw, udm::LinkedPropertyWrapper &prop, std::string &outErr, EntityData::Flags entMask)
 {
-	auto worldData = WorldData::Create(nw);
+	auto worldData = Create(nw);
 	if(!worldData->LoadFromAssetData(prop, entMask, outErr))
 		return nullptr;
 	return worldData;
@@ -100,11 +100,11 @@ void pragma::asset::ComponentData::SetFlags(Flags flags) { m_flags = flags; }
 std::shared_ptr<pragma::asset::EntityData> pragma::asset::EntityData::Create() { return std::shared_ptr<EntityData> {new EntityData {}}; }
 bool pragma::asset::EntityData::IsWorld() const { return m_className == "world"; }
 bool pragma::asset::EntityData::IsSkybox() const { return m_className == "skybox"; }
-bool pragma::asset::EntityData::IsClientSideOnly() const { return pragma::math::is_flag_set(m_flags, Flags::ClientsideOnly); }
+bool pragma::asset::EntityData::IsClientSideOnly() const { return math::is_flag_set(m_flags, Flags::ClientsideOnly); }
 void pragma::asset::EntityData::SetClassName(const std::string &className)
 {
 	m_className = className;
-	pragma::string::to_lower(m_className);
+	string::to_lower(m_className);
 }
 void pragma::asset::EntityData::SetKeyValue(const std::string &key, const std::string &value) { m_keyValues[key] = value; }
 void pragma::asset::EntityData::AddOutput(const Output &output)
@@ -153,7 +153,7 @@ std::string pragma::asset::EntityData::GetKeyValue(const std::string &key, const
 
 pragma::math::ScaledTransform pragma::asset::EntityData::GetEffectivePose() const
 {
-	pragma::math::ScaledTransform pose {};
+	math::ScaledTransform pose {};
 	if(m_pose)
 		pose = *m_pose;
 	auto kvOrigin = GetKeyValue("origin");
@@ -171,7 +171,7 @@ pragma::math::ScaledTransform pragma::asset::EntityData::GetEffectivePose() cons
 }
 
 const std::optional<pragma::math::ScaledTransform> &pragma::asset::EntityData::GetPose() const { return m_pose; }
-void pragma::asset::EntityData::SetPose(const pragma::math::ScaledTransform &pose) { m_pose = pose; }
+void pragma::asset::EntityData::SetPose(const math::ScaledTransform &pose) { m_pose = pose; }
 void pragma::asset::EntityData::ClearPose() { m_pose = {}; }
 
 void pragma::asset::EntityData::GetLeafData(uint32_t &outFirstLeaf, uint32_t &outNumLeaves) const

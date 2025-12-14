@@ -14,7 +14,7 @@ bool Lua::get_extended_lua_modules_enabled() { return s_bExtendedModules; }
 
 DLLNETWORK const Lua::object Lua::nil {};
 
-void Lua::initialize_lua_state(Lua::Interface &lua)
+void Lua::initialize_lua_state(Interface &lua)
 {
 	// See http://www.lua.org/source/5.3/linit.c.html
 	auto *l = lua.GetState();
@@ -44,7 +44,7 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 	}
 	for(auto &lib : loadedLibs) {
 #ifdef USE_LUAJIT
-		Lua::PushCFunction(l, lib.func);
+		PushCFunction(l, lib.func);
 		lua::push_string(l, lib.name, strlen(lib.name));
 		lua::call(l, 1, 0);
 #else
@@ -57,10 +57,10 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 		luabind::bind_class_info(l);
 		luabind::bind_function_introspection(l);
 	}
-	Lua::initialize_error_handler();
+	initialize_error_handler();
 	lua::at_panic(l, [](lua::State *l) -> int32_t {
 		spdlog::get("lua")->critical("Lua Panic!");
-		::pragma::debug::generate_crash_dump();
+		pragma::debug::generate_crash_dump();
 		return 0;
 	});
 }
@@ -85,8 +85,8 @@ static void dump_stack(bool cl)
 }
 namespace pragma::LuaCore::debug {
 	// These are mainly used in the immediate window for debugging purposes
-	DLLNETWORK void dump_traceback_cl() { ::dump_traceback(true); }
-	DLLNETWORK void dump_traceback_sv() { ::dump_traceback(false); }
-	DLLNETWORK void dump_stack_cl() { ::dump_stack(true); }
-	DLLNETWORK void dump_stack_sv() { ::dump_stack(false); }
+	DLLNETWORK void dump_traceback_cl() { dump_traceback(true); }
+	DLLNETWORK void dump_traceback_sv() { dump_traceback(false); }
+	DLLNETWORK void dump_stack_cl() { dump_stack(true); }
+	DLLNETWORK void dump_stack_sv() { dump_stack(false); }
 };

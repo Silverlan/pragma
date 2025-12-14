@@ -15,7 +15,7 @@ using namespace pragma::rendering::shader_graph;
 
 //std::shared_ptr<prosper::IDescriptorSetGroup> ToonModule::g_defaultPbrDsg = {};
 //size_t ToonModule::g_instanceCount = 0;
-ToonModule::ToonModule(ShaderGraph &shader) : pragma::rendering::ShaderGraphModule {shader}
+ToonModule::ToonModule(ShaderGraph &shader) : ShaderGraphModule {shader}
 {
 	/*m_pbrDescSetInfo = {
 	  "TOON",
@@ -43,7 +43,7 @@ void ToonModule::InitializeGfxPipelineDescriptorSets()
 		ds.SetBindingTexture(*dummyTex, pragma::math::to_integral(PBRBinding::BRDFMap));
 	}*/
 }
-void ToonModule::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+void ToonModule::RecordBindScene(ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
 	float iblStrength = 1.f;
 	//auto *ds = GetReflectionProbeDescriptorSet(scene, iblStrength, inOutSceneFlags);

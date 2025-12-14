@@ -44,12 +44,12 @@ void SAIComponent::OnPrePhysicsSimulate()
 	}
 	if(m_moveInfo.moving == false)
 		return;
-	pragma::SAIComponent::AIAnimationInfo info {};
+	AIAnimationInfo info {};
 	info.SetPlayAsSchedule(false);
 	PlayActivity(m_moveInfo.moveActivity, info);
 
 	auto pTrComponent = ent.GetTransformComponent();
-	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+	auto pVelComponent = ent.GetComponent<VelocityComponent>();
 	if(pTrComponent != nullptr && pVelComponent.valid()) {
 		auto &vel = pVelComponent->GetVelocity();
 		if(uvec::length_sqr(vel) > 1.f) {

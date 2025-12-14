@@ -42,20 +42,20 @@ pragma::gui::types::WIMainMenu::~WIMainMenu()
 		m_cbOnSteamworksShutdown.Remove();
 }
 
-pragma::util::EventReply pragma::gui::types::WIMainMenu::KeyboardCallback(pragma::platform::Key key, int scanCode, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WIMainMenu::KeyboardCallback(platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods)
 {
 	if(!m_hActive.IsValid())
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	return m_hActive->KeyboardCallback(key, scanCode, state, mods);
 }
 
 void pragma::gui::types::WIMainMenu::OnVisibilityChanged(bool bVisible)
 {
 	WIBase::OnVisibilityChanged(bVisible);
-	if(pragma::get_cgame() == nullptr)
+	if(get_cgame() == nullptr)
 		return;
 	if(bVisible == true) {
-		double tCur = pragma::get_cgame()->RealTime();
+		double tCur = get_cgame()->RealTime();
 		m_tOpen = tCur;
 		// Obsolete?
 		/*m_cbBlur = pragma::get_cgame()->AddCallback("RenderPostProcessing",FunctionCallback<void,unsigned int,unsigned int>::Create([this](unsigned int ppFBO,unsigned int) {
@@ -86,21 +86,21 @@ void pragma::gui::types::WIMainMenu::PlayNextMenuTrack(bool newRound)
 	}
 	if(m_menuTracks.empty())
 		return;
-	auto next = pragma::math::random(0, CUInt32(m_menuTracks.size() - 1));
+	auto next = math::random(0, CUInt32(m_menuTracks.size() - 1));
 	auto it = m_menuTracks.begin() + next;
 	auto sound = *it;
 	m_menuTracks.erase(it);
-	auto *client = pragma::get_client_state();
-	if(client->PrecacheSound(std::string("ui/") + sound) == false || (m_menuSound = client->PlaySound(std::string("ui/") + sound, pragma::audio::ALSoundType::GUI, pragma::audio::ALCreateFlags::None)) == nullptr) {
+	auto *client = get_client_state();
+	if(client->PrecacheSound(std::string("ui/") + sound) == false || (m_menuSound = client->PlaySound(std::string("ui/") + sound, audio::ALSoundType::GUI, audio::ALCreateFlags::None)) == nullptr) {
 		if(newRound == false)
 			PlayNextMenuTrack(newRound);
 	}
 	else {
-		m_menuSound->SetType(pragma::audio::ALSoundType::Music | pragma::audio::ALSoundType::GUI);
+		m_menuSound->SetType(audio::ALSoundType::Music | audio::ALSoundType::GUI);
 		// m_menuSound->SetPitch(0.4f);
 		// m_menuSound->SetGain(0.2f);
-		m_cbMenuTrack = FunctionCallback<void, pragma::audio::ALState, pragma::audio::ALState>::Create([this](pragma::audio::ALState, pragma::audio::ALState newstate) {
-			if(newstate != pragma::audio::ALState::Playing)
+		m_cbMenuTrack = FunctionCallback<void, audio::ALState, audio::ALState>::Create([this](audio::ALState, audio::ALState newstate) {
+			if(newstate != audio::ALState::Playing)
 				this->PlayNextMenuTrack();
 		});
 		m_menuSound->AddCallback("OnStateChanged", m_cbMenuTrack);
@@ -161,8 +161,8 @@ void pragma::gui::types::WIMainMenu::Initialize()
 	menu->SetVisible(false);
 	menu->SetSize(GetWidth(), GetHeight());
 	menu->SetAnchor(0.f, 0.f, 1.f, 1.f);
-	menu->AddMenuItem(pragma::locale::get_text("menu_newgame"), FunctionCallback<>::Create([this]() { SetActiveMenu(m_hNewGame); }));
-	menu->AddMenuItem(pragma::locale::get_text("menu_find_servers"), FunctionCallback<>::Create([this]() {
+	menu->AddMenuItem(locale::get_text("menu_newgame"), FunctionCallback<>::Create([this]() { SetActiveMenu(m_hNewGame); }));
+	menu->AddMenuItem(locale::get_text("menu_find_servers"), FunctionCallback<>::Create([this]() {
 		if(m_hServerBrowser.IsValid())
 			m_hServerBrowser->Remove();
 		m_hServerBrowser = CreateChild<WIServerBrowser>();
@@ -175,7 +175,7 @@ void pragma::gui::types::WIMainMenu::Initialize()
 #ifdef _DEBUG
 	menu->AddMenuItem(pragma::locale::get_text("menu_loadgame"), FunctionCallback<>::Create([this]() { SetActiveMenu(m_hLoad); }));
 #endif
-	menu->AddMenuItem(pragma::locale::get_text("menu_options"), FunctionCallback<>::Create([this]() { SetActiveMenu(m_hOptions); }));
+	menu->AddMenuItem(locale::get_text("menu_options"), FunctionCallback<>::Create([this]() { SetActiveMenu(m_hOptions); }));
 	/*menu->AddMenuItem(pragma::locale::get_text("menu_addons"), FunctionCallback<>::Create([this]() {
 		//SetActiveMenu(m_hMods);
 		//ShellExecute(0,0,engine_info::get_modding_hub_url().c_str(),0,0,SW_SHOW);
@@ -184,7 +184,7 @@ void pragma::gui::types::WIMainMenu::Initialize()
 #ifdef _DEBUG
 	menu->AddMenuItem("Loadscreen", FunctionCallback<>::Create([this]() { SetActiveMenu(m_hLoadScreen); }));
 #endif
-	menu->AddMenuItem(pragma::locale::get_text("menu_quit"), FunctionCallback<>::Create([]() { pragma::get_cengine()->ShutDown(); }));
+	menu->AddMenuItem(locale::get_text("menu_quit"), FunctionCallback<>::Create([]() { get_cengine()->ShutDown(); }));
 	menu->SetKeyboardInputEnabled(true);
 
 	m_hNewGame = CreateChild<WIMainMenuNewGame>();
@@ -224,10 +224,10 @@ void pragma::gui::types::WIMainMenu::Initialize()
 
 	m_hVersion = CreateChild<WIText>();
 
-	auto version = pragma::get_pretty_engine_version();
-	auto gitInfo = pragma::engine_info::get_git_info();
+	auto version = get_pretty_engine_version();
+	auto gitInfo = engine_info::get_git_info();
 	if(gitInfo.has_value())
-		version += " [" + pragma::string::substr(gitInfo->commitSha, 0, 7) + "]";
+		version += " [" + string::substr(gitInfo->commitSha, 0, 7) + "]";
 	auto *pVersion = static_cast<WIText *>(m_hVersion.get());
 	pVersion->AddStyleClass("game_version");
 	pVersion->SetColor(1.f, 1.f, 1.f, 1.f);
@@ -237,7 +237,7 @@ void pragma::gui::types::WIMainMenu::Initialize()
 	pVersion->SetPos(GetWidth() - pVersion->GetWidth() - 40, GetHeight() - pVersion->GetHeight() - 20);
 	pVersion->SetAnchor(1.f, 1.f, 1.f, 1.f);
 
-	auto *client = pragma::get_client_state();
+	auto *client = get_client_state();
 	m_cbOnSteamworksInit = client->AddCallback("OnSteamworksInitialized", FunctionCallback<void, std::reference_wrapper<struct ISteamworks>>::Create([this](std::reference_wrapper<struct ISteamworks> isteamworks) {
 		if(m_hVersion.IsValid() == false || isteamworks.get().get_build_id == nullptr)
 			return;
@@ -286,7 +286,7 @@ void pragma::gui::types::WIMainMenu::Initialize()
 	RequestFocus();
 	OpenMainMenu();
 
-	m_cbOnGameStart = client->AddCallback("OnGameStart", FunctionCallback<void, pragma::CGame *>::Create([this](pragma::CGame *) {
+	m_cbOnGameStart = client->AddCallback("OnGameStart", FunctionCallback<void, CGame *>::Create([this](CGame *) {
 		if(m_menuSound != nullptr) {
 			m_menuSound->FadeOut(5.f);
 			m_menuSound = nullptr;
@@ -297,7 +297,7 @@ void pragma::gui::types::WIMainMenu::Initialize()
 			return;
 		m_hBgSlideShow->SetVisible(false);
 	}));
-	m_cbOnGameEnd = client->AddCallback("EndGame", FunctionCallback<void, pragma::CGame *>::Create([this](pragma::CGame *) {
+	m_cbOnGameEnd = client->AddCallback("EndGame", FunctionCallback<void, CGame *>::Create([this](CGame *) {
 		PlayNextMenuTrack();
 		if(!m_hBgSlideShow.IsValid())
 			return;
@@ -356,8 +356,8 @@ void pragma::gui::types::WIMainMenu::SetContinueMenu()
 		return;
 	m_menuType = 1;
 	WIMainMenuBase *menu = static_cast<WIMainMenuBase *>(m_hMain.get());
-	menu->AddMenuItem(0, pragma::locale::get_text("menu_resumegame"), FunctionCallback<>::Create([]() { pragma::get_client_state()->CloseMainMenu(); }));
-	menu->AddMenuItem(1, pragma::locale::get_text("menu_disconnect"), FunctionCallback<>::Create([]() { pragma::get_cengine()->EndGame(); }));
+	menu->AddMenuItem(0, locale::get_text("menu_resumegame"), FunctionCallback<>::Create([]() { get_client_state()->CloseMainMenu(); }));
+	menu->AddMenuItem(1, locale::get_text("menu_disconnect"), FunctionCallback<>::Create([]() { get_cengine()->EndGame(); }));
 }
 
 void pragma::gui::types::WIMainMenu::SetNewGameMenu()

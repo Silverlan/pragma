@@ -114,7 +114,7 @@ const char *pragma::pts::CParticle::field_id_to_name(FieldId id)
 	case FieldId::Life:
 		return "life";
 	}
-	static_assert(pragma::math::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
+	static_assert(math::to_integral(FieldId::Count) == 13);
 	return "invalid";
 }
 pragma::pts::CParticle::FieldId pragma::pts::CParticle::name_to_field_id(const std::string &fieldName)
@@ -145,7 +145,7 @@ pragma::pts::CParticle::FieldId pragma::pts::CParticle::name_to_field_id(const s
 		return FieldId::Life;
 	else if(pragma::string::compare<std::string>(fieldName, "creation_time", false))
 		return FieldId::CreationTime;
-	static_assert(pragma::math::to_integral(FieldId::Count) == 13);
+	static_assert(math::to_integral(FieldId::Count) == 13);
 	return FieldId::Invalid;
 }
 void pragma::pts::CParticle::SetField(FieldId fieldId, float value)
@@ -176,7 +176,7 @@ void pragma::pts::CParticle::SetField(FieldId fieldId, float value)
 		m_color.a = value;
 		break;
 	}
-	static_assert(pragma::math::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
+	static_assert(math::to_integral(FieldId::Count) == 13);
 }
 void pragma::pts::CParticle::SetField(FieldId fieldId, const Vector4 &value)
 {
@@ -199,7 +199,7 @@ void pragma::pts::CParticle::SetField(FieldId fieldId, const Vector4 &value)
 		m_color.b = value.b;
 		break;
 	}
-	static_assert(pragma::math::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
+	static_assert(math::to_integral(FieldId::Count) == 13);
 }
 bool pragma::pts::CParticle::GetField(FieldId fieldId, float &outValue) const
 {
@@ -231,7 +231,7 @@ bool pragma::pts::CParticle::GetField(FieldId fieldId, float &outValue) const
 	default:
 		return false;
 	}
-	static_assert(pragma::math::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
+	static_assert(math::to_integral(FieldId::Count) == 13);
 	return true;
 }
 bool pragma::pts::CParticle::GetField(FieldId fieldId, Vector4 &outValue) const
@@ -255,7 +255,7 @@ bool pragma::pts::CParticle::GetField(FieldId fieldId, Vector4 &outValue) const
 	default:
 		return false;
 	}
-	static_assert(pragma::math::to_integral(pragma::pts::CParticle::FieldId::Count) == 13);
+	static_assert(math::to_integral(FieldId::Count) == 13);
 	return true;
 }
 
@@ -316,6 +316,6 @@ void pragma::pts::CParticle::SetLength(float length)
 }
 float pragma::pts::CParticle::GetRadius() const { return m_radius; }
 float pragma::pts::CParticle::GetLength() const { return m_bHasLength ? m_length : m_radius; }
-float pragma::pts::CParticle::GetExtent() const { return pragma::math::sqrt(pragma::math::pow2(m_radius) * 2.f); }
+float pragma::pts::CParticle::GetExtent() const { return math::sqrt(math::pow2(m_radius) * 2.f); }
 void pragma::pts::CParticle::SetCameraDistance(float dist) { m_camDist = dist; }
 float pragma::pts::CParticle::GetCameraDistance() const { return m_camDist; }

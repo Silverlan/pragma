@@ -25,7 +25,7 @@ decltype(ShaderPBR::DESCRIPTOR_SET_PBR) ShaderPBR::DESCRIPTOR_SET_PBR = {
 ShaderPBR::ShaderPBR(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGameWorldLightingPass {context, identifier, vsShader, fsShader, gsShader} {}
 ShaderPBR::ShaderPBR(prosper::IPrContext &context, const std::string &identifier) : ShaderPBR {context, identifier, "programs/scene/textured", "programs/scene/pbr/pbr"} {}
 
-void ShaderPBR::UpdateRenderFlags(pragma::geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags)
+void ShaderPBR::UpdateRenderFlags(geometry::CModelSubMesh &mesh, SceneFlags &inOutFlags)
 {
 	ShaderGameWorldLightingPass::UpdateRenderFlags(mesh, inOutFlags);
 	inOutFlags |= m_extRenderFlags;
@@ -36,7 +36,7 @@ void ShaderPBR::InitializeGfxPipelineDescriptorSets()
 	AddDescriptorSetGroup(DESCRIPTOR_SET_PBR);
 }
 
-void ShaderPBR::InitializeMaterialData(const material::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, pragma::rendering::ShaderInputData &inOutMatData)
+void ShaderPBR::InitializeMaterialData(const material::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, rendering::ShaderInputData &inOutMatData)
 {
 	ShaderGameWorldLightingPass::InitializeMaterialData(mat, shaderMat, inOutMatData);
 	float specularFactor;
@@ -109,22 +109,22 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescr
 void ShaderPBR::OnPipelinesInitialized()
 {
 	ShaderGameWorldLightingPass::OnPipelinesInitialized();
-	auto &context = pragma::get_cengine()->GetRenderContext();
-	m_defaultPbrDsg = context.CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
+	auto &context = get_cengine()->GetRenderContext();
+	m_defaultPbrDsg = context.CreateDescriptorSetGroup(DESCRIPTOR_SET_PBR);
 	auto &dummyTex = context.GetDummyTexture();
 	auto &dummyCubemapTex = context.GetDummyCubemapTexture();
 	auto &ds = *m_defaultPbrDsg->GetDescriptorSet(0);
-	ds.SetBindingTexture(*dummyCubemapTex, pragma::math::to_integral(PBRBinding::IrradianceMap));
-	ds.SetBindingTexture(*dummyCubemapTex, pragma::math::to_integral(PBRBinding::PrefilterMap));
-	ds.SetBindingTexture(*dummyTex, pragma::math::to_integral(PBRBinding::BRDFMap));
+	ds.SetBindingTexture(*dummyCubemapTex, math::to_integral(PBRBinding::IrradianceMap));
+	ds.SetBindingTexture(*dummyCubemapTex, math::to_integral(PBRBinding::PrefilterMap));
+	ds.SetBindingTexture(*dummyTex, math::to_integral(PBRBinding::BRDFMap));
 }
 prosper::IDescriptorSet &ShaderPBR::GetDefaultPbrDescriptorSet() const { return *m_defaultPbrDsg->GetDescriptorSet(); }
 void ShaderPBR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 
 //
 
-void ShaderPBR::RecordBindSceneDescriptorSets(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
-  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows, ShaderGameWorld::SceneFlags &inOutSceneFlags, float &outIblStrength) const
+void ShaderPBR::RecordBindSceneDescriptorSets(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
+  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows, SceneFlags &inOutSceneFlags, float &outIblStrength) const
 {
 	outIblStrength = 1.f;
 	std::array<prosper::IDescriptorSet *, 5> descSets {&dsScene, &dsRenderer, &dsRenderSettings, &dsShadows, GetReflectionProbeDescriptorSet(scene, outIblStrength, inOutSceneFlags)};
@@ -133,7 +133,7 @@ void ShaderPBR::RecordBindSceneDescriptorSets(rendering::ShaderProcessor &shader
 	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), GetSceneDescriptorSetIndex(), descSets, dynamicOffsets);
 }
 
-prosper::IDescriptorSet *ShaderPBR::GetReflectionProbeDescriptorSet(const pragma::CSceneComponent &scene, float &outIblStrength, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+prosper::IDescriptorSet *ShaderPBR::GetReflectionProbeDescriptorSet(const CSceneComponent &scene, float &outIblStrength, SceneFlags &inOutSceneFlags) const
 {
 	auto &hCam = scene.GetActiveCamera();
 	assert(hCam.valid());
@@ -141,18 +141,18 @@ prosper::IDescriptorSet *ShaderPBR::GetReflectionProbeDescriptorSet(const pragma
 	if(dsPbr == nullptr) // No reflection probe and therefore no IBL available. Fallback to non-IBL rendering.
 	{
 		dsPbr = &GetDefaultPbrDescriptorSet();
-		inOutSceneFlags |= ShaderGameWorld::SceneFlags::NoIBL;
+		inOutSceneFlags |= SceneFlags::NoIBL;
 	}
 	return dsPbr;
 }
 
-void ShaderPBR::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
-  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+void ShaderPBR::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
+  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const
 {
 	auto iblStrength = 1.f;
 	RecordBindSceneDescriptorSets(shaderProcessor, scene, renderer, dsScene, dsRenderer, dsRenderSettings, dsShadows, inOutSceneFlags, iblStrength);
 
-	ShaderGameWorldLightingPass::PushConstants pushConstants {};
+	PushConstants pushConstants {};
 	pushConstants.Initialize();
 	pushConstants.debugMode = scene.GetDebugMode();
 	pushConstants.reflectionProbeIntensity = iblStrength;

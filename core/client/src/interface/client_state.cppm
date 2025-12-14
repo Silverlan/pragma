@@ -156,18 +156,18 @@ export namespace pragma {
 		// Sound
 		virtual void StopSounds() override;
 		virtual void StopSound(std::shared_ptr<audio::ALSound> pSnd) override;
-		bool PrecacheSound(std::string snd, std::pair<pragma::audio::ISoundBuffer *, pragma::audio::ISoundBuffer *> *buffers, audio::ALChannel mode = audio::ALChannel::Auto, bool bLoadInstantly = false);
+		bool PrecacheSound(std::string snd, std::pair<audio::ISoundBuffer *, audio::ISoundBuffer *> *buffers, audio::ALChannel mode = audio::ALChannel::Auto, bool bLoadInstantly = false);
 		virtual bool PrecacheSound(std::string snd, audio::ALChannel mode = audio::ALChannel::Auto) override;
 		virtual bool LoadSoundScripts(const char *file, bool bPrecache = false) override;
 		virtual std::shared_ptr<audio::ALSound> CreateSound(std::string snd, audio::ALSoundType type, audio::ALCreateFlags flags = audio::ALCreateFlags::None) override;
-		std::shared_ptr<audio::ALSound> CreateSound(pragma::audio::ISoundBuffer &buffer, audio::ALSoundType type);
-		std::shared_ptr<audio::ALSound> CreateSound(pragma::audio::Decoder &decoder, audio::ALSoundType type);
+		std::shared_ptr<audio::ALSound> CreateSound(audio::ISoundBuffer &buffer, audio::ALSoundType type);
+		std::shared_ptr<audio::ALSound> CreateSound(audio::Decoder &decoder, audio::ALSoundType type);
 		void IndexSound(std::shared_ptr<audio::ALSound> snd, unsigned int idx);
 		std::shared_ptr<audio::ALSound> PlaySound(std::string snd, audio::ALSoundType type, audio::ALCreateFlags flags = audio::ALCreateFlags::None);
-		std::shared_ptr<audio::ALSound> PlaySound(pragma::audio::ISoundBuffer &buffer, audio::ALSoundType type);
-		std::shared_ptr<audio::ALSound> PlaySound(pragma::audio::Decoder &buffer, audio::ALSoundType type);
-		std::shared_ptr<audio::ALSound> PlayWorldSound(pragma::audio::ISoundBuffer &buffer, audio::ALSoundType type, const Vector3 &pos);
-		std::shared_ptr<audio::ALSound> PlayWorldSound(pragma::audio::Decoder &buffer, audio::ALSoundType type, const Vector3 &pos);
+		std::shared_ptr<audio::ALSound> PlaySound(audio::ISoundBuffer &buffer, audio::ALSoundType type);
+		std::shared_ptr<audio::ALSound> PlaySound(audio::Decoder &buffer, audio::ALSoundType type);
+		std::shared_ptr<audio::ALSound> PlayWorldSound(audio::ISoundBuffer &buffer, audio::ALSoundType type, const Vector3 &pos);
+		std::shared_ptr<audio::ALSound> PlayWorldSound(audio::Decoder &buffer, audio::ALSoundType type, const Vector3 &pos);
 		std::shared_ptr<audio::ALSound> PlayWorldSound(std::string snd, audio::ALSoundType type, const Vector3 &pos);
 		virtual std::shared_ptr<audio::ALSound> GetSoundByIndex(unsigned int idx) override;
 		virtual void UpdateSounds() override;

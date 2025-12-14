@@ -10,16 +10,16 @@ import :game.value_driver;
 
 using namespace pragma;
 
-pragma::game::ValueDriverDescriptor::ValueDriverDescriptor(lua::State *l, std::string expression, std::unordered_map<std::string, std::string> variables, std::unordered_map<std::string, udm::PProperty> constants)
+game::ValueDriverDescriptor::ValueDriverDescriptor(lua::State *l, std::string expression, std::unordered_map<std::string, std::string> variables, std::unordered_map<std::string, udm::PProperty> constants)
     : m_luaState {l}, m_expression {std::move(expression)}, m_variables {std::move(variables)}, m_constants {std::move(constants)}
 {
 }
-void pragma::game::ValueDriverDescriptor::SetExpression(const std::string &expression)
+void game::ValueDriverDescriptor::SetExpression(const std::string &expression)
 {
 	m_expression = expression;
 	m_expressionDirty = true;
 }
-void pragma::game::ValueDriverDescriptor::RebuildLuaExpression() const
+void game::ValueDriverDescriptor::RebuildLuaExpression() const
 {
 	if(!m_luaState)
 		return;
@@ -29,7 +29,7 @@ void pragma::game::ValueDriverDescriptor::RebuildLuaExpression() const
 
 	auto *l = m_luaState;
 	std::string luaStr = "return function(" + argList + ") " + m_expression + " end";
-	auto r = pragma::scripting::lua_core::run_string(l, luaStr, "value_driver", 1); /* 1 */
+	auto r = scripting::lua_core::run_string(l, luaStr, "value_driver", 1); /* 1 */
 	if(r == Lua::StatusCode::Ok) {
 		luabind::object oFunc {luabind::from_stack(l, -1)};
 		m_luaExpression = oFunc;
@@ -37,7 +37,7 @@ void pragma::game::ValueDriverDescriptor::RebuildLuaExpression() const
 	}
 	m_expressionDirty = false;
 }
-const luabind::object &pragma::game::ValueDriverDescriptor::GetLuaExpression() const
+const luabind::object &game::ValueDriverDescriptor::GetLuaExpression() const
 {
 	if(m_expressionDirty) {
 		RebuildLuaExpression();
@@ -45,33 +45,33 @@ const luabind::object &pragma::game::ValueDriverDescriptor::GetLuaExpression() c
 	}
 	return m_luaExpression;
 }
-void pragma::game::ValueDriverDescriptor::AddConstant(const std::string &name, const udm::PProperty &prop)
+void game::ValueDriverDescriptor::AddConstant(const std::string &name, const udm::PProperty &prop)
 {
 	m_constants[name] = prop;
 	m_expressionDirty = true;
 }
-void pragma::game::ValueDriverDescriptor::AddReference(const std::string &name, std::string path)
+void game::ValueDriverDescriptor::AddReference(const std::string &name, std::string path)
 {
 	m_variables[name] = std::move(path);
 	m_expressionDirty = true;
 }
-void pragma::game::ValueDriverDescriptor::ClearConstants()
+void game::ValueDriverDescriptor::ClearConstants()
 {
 	m_constants.clear();
 	m_expressionDirty = true;
 }
-void pragma::game::ValueDriverDescriptor::ClearReferences()
+void game::ValueDriverDescriptor::ClearReferences()
 {
 	m_variables.clear();
 	m_expressionDirty = true;
 }
 
-std::ostream &pragma::game::operator<<(std::ostream &out, const ValueDriverDescriptor &descriptor)
+std::ostream &game::operator<<(std::ostream &out, const ValueDriverDescriptor &descriptor)
 {
 	out << "ValueDriverDescriptor[Expr:" << descriptor.GetExpression() << "][Vars:" << descriptor.GetReferences().size() << "][Constants:" << descriptor.GetConstants().size() << "]";
 	return out;
 }
-std::ostream &pragma::game::operator<<(std::ostream &out, const ValueDriver &driver)
+std::ostream &game::operator<<(std::ostream &out, const ValueDriver &driver)
 {
 	out << "ValueDriver[Expr:" << driver.GetDescriptor() << "][State:" << ((driver.IsFailureFlagSet()) ? "failed" : "base") << "]";
 	return out;
@@ -79,7 +79,7 @@ std::ostream &pragma::game::operator<<(std::ostream &out, const ValueDriver &dri
 
 ////////////
 
-pragma::game::ValueDriver::ValueDriver(pragma::ComponentId componentId, ComponentMemberReference memberRef, ValueDriverDescriptor descriptor, const pragma::util::Uuid &self) : m_componentId {componentId}, m_memberReference {std::move(memberRef)}, m_descriptor {std::move(descriptor)}
+game::ValueDriver::ValueDriver(ComponentId componentId, ComponentMemberReference memberRef, ValueDriverDescriptor descriptor, const util::Uuid &self) : m_componentId {componentId}, m_memberReference {std::move(memberRef)}, m_descriptor {std::move(descriptor)}
 {
 	auto &references = m_descriptor.GetReferences();
 	m_variables.reserve(references.size());
@@ -90,9 +90,9 @@ pragma::game::ValueDriver::ValueDriver(pragma::ComponentId componentId, Componen
 		m_variables.insert(std::make_pair(pair.first, *var));
 	}
 }
-void pragma::game::ValueDriver::ResetFailureState() { pragma::math::set_flag(m_stateFlags, StateFlags::MemberRefFailed | StateFlags::ComponentRefFailed | StateFlags::EntityRefFailed, false); }
-bool pragma::game::ValueDriver::IsFailureFlagSet() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::MemberRefFailed | StateFlags::ComponentRefFailed | StateFlags::EntityRefFailed); }
-pragma::game::ValueDriver::Result pragma::game::ValueDriver::Apply(pragma::ecs::BaseEntity &ent)
+void game::ValueDriver::ResetFailureState() { math::set_flag(m_stateFlags, StateFlags::MemberRefFailed | StateFlags::ComponentRefFailed | StateFlags::EntityRefFailed, false); }
+bool game::ValueDriver::IsFailureFlagSet() const { return math::is_flag_set(m_stateFlags, StateFlags::MemberRefFailed | StateFlags::ComponentRefFailed | StateFlags::EntityRefFailed); }
+game::ValueDriver::Result game::ValueDriver::Apply(ecs::BaseEntity &ent)
 {
 	auto &luaExpression = m_descriptor.GetLuaExpression();
 	auto &expression = m_descriptor.GetExpression();
@@ -101,7 +101,7 @@ pragma::game::ValueDriver::Result pragma::game::ValueDriver::Apply(pragma::ecs::
 		return Result::ErrorNoExpression;
 	}
 	auto *l = luaExpression.interpreter();
-	auto &game = *pragma::get_engine()->GetNetworkState(l)->GetGameState();
+	auto &game = *get_engine()->GetNetworkState(l)->GetGameState();
 	auto component = ent.FindComponent(m_componentId);
 	if(component.expired()) {
 		spdlog::trace("Failed to execute value driver (Expr: '{}'): Component {} could not be found in driver entity '{}'!", expression, m_componentId, ent.ToString());
@@ -152,7 +152,7 @@ pragma::game::ValueDriver::Result pragma::game::ValueDriver::Apply(pragma::ecs::
 			// Is a member reference, but member is not valid
 			argsValid = false;
 
-			if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::MemberRefFailed)) {
+			if(!math::is_flag_set(m_stateFlags, StateFlags::MemberRefFailed)) {
 				ResetFailureState(); // Clear other failure flags
 				std::string type;
 				if(!var.memberRef.GetEntity(game))
@@ -163,7 +163,7 @@ pragma::game::ValueDriver::Result pragma::game::ValueDriver::Apply(pragma::ecs::
 					type = "member";
 				spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Variable '{}' is member reference, but is pointing to invalid {}!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString(), pair.first,
 				  type);
-				pragma::math::set_flag(m_stateFlags, StateFlags::MemberRefFailed);
+				math::set_flag(m_stateFlags, StateFlags::MemberRefFailed);
 			}
 			break;
 		}
@@ -179,7 +179,7 @@ pragma::game::ValueDriver::Result pragma::game::ValueDriver::Apply(pragma::ecs::
 			// Is a component reference, but component is not valid
 			argsValid = false;
 
-			if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::ComponentRefFailed)) {
+			if(!math::is_flag_set(m_stateFlags, StateFlags::ComponentRefFailed)) {
 				ResetFailureState(); // Clear other failure flags
 				std::string type;
 				if(!var.memberRef.GetEntity(game))
@@ -188,7 +188,7 @@ pragma::game::ValueDriver::Result pragma::game::ValueDriver::Apply(pragma::ecs::
 					type = "component";
 				spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Variable '{}' is component reference, but is pointing to invalid {}!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString(), pair.first,
 				  type);
-				pragma::math::set_flag(m_stateFlags, StateFlags::ComponentRefFailed);
+				math::set_flag(m_stateFlags, StateFlags::ComponentRefFailed);
 			}
 			break;
 		}
@@ -205,10 +205,10 @@ pragma::game::ValueDriver::Result pragma::game::ValueDriver::Apply(pragma::ecs::
 
 		spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Parameter '{}' is invalid!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString(), var.memberRef.ToString());
 
-		if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::EntityRefFailed)) {
+		if(!math::is_flag_set(m_stateFlags, StateFlags::EntityRefFailed)) {
 			ResetFailureState(); // Clear other failure flags
 			spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Variable '{}' is entity reference, but is pointing to invalid entity!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString(), pair.first);
-			pragma::math::set_flag(m_stateFlags, StateFlags::EntityRefFailed);
+			math::set_flag(m_stateFlags, StateFlags::EntityRefFailed);
 		}
 		break;
 	}
@@ -218,7 +218,7 @@ pragma::game::ValueDriver::Result pragma::game::ValueDriver::Apply(pragma::ecs::
 		Lua::Pop(l, numPushed);
 		return Result::ErrorInvalidParameterReference;
 	}
-	auto c = pragma::scripting::lua_core::protected_call(l, numPushed - 1, 1);
+	auto c = scripting::lua_core::protected_call(l, numPushed - 1, 1);
 	if(c != Lua::StatusCode::Ok) {
 		spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Failed to execute expression!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString());
 		return Result::ErrorExpressionExecutionFailed;
@@ -247,12 +247,12 @@ pragma::game::ValueDriver::Result pragma::game::ValueDriver::Apply(pragma::ecs::
 
 ////////////
 
-pragma::game::ValueDriverVariable::ValueDriverVariable(EntityUComponentMemberRef memberRef) : memberRef {std::move(memberRef)} {}
-pragma::game::ValueDriverVariable::ValueDriverVariable(pragma::util::Uuid entUuid, std::string var) { pragma::ecs::BaseEntity::CreateMemberReference(entUuid, std::move(var), memberRef); }
-std::optional<pragma::game::ValueDriverVariable> pragma::game::ValueDriverVariable::Create(std::string uriPath, const pragma::util::Uuid &self)
+game::ValueDriverVariable::ValueDriverVariable(EntityUComponentMemberRef memberRef) : memberRef {std::move(memberRef)} {}
+game::ValueDriverVariable::ValueDriverVariable(util::Uuid entUuid, std::string var) { ecs::BaseEntity::CreateMemberReference(entUuid, std::move(var), memberRef); }
+std::optional<game::ValueDriverVariable> game::ValueDriverVariable::Create(std::string uriPath, const util::Uuid &self)
 {
 	EntityUComponentMemberRef ref;
-	if(pragma::ecs::BaseEntity::ParseUri(std::move(uriPath), ref, &self) == false)
+	if(ecs::BaseEntity::ParseUri(std::move(uriPath), ref, &self) == false)
 		return {};
 	return ValueDriverVariable {std::move(ref)};
 }

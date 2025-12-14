@@ -51,9 +51,9 @@ void pragma::gui::types::WIDetachable::Detach()
 	prosper::WindowSettings settings {};
 	settings.width = w;
 	settings.height = h;
-	settings.title = pragma::locale::get_text("console");
+	settings.title = locale::get_text("console");
 	m_detachedWindow = std::unique_ptr<DetachedWindow> {new DetachedWindow {}};
-	m_detachedWindow->window = pragma::get_cengine()->CreateWindow(settings);
+	m_detachedWindow->window = get_cengine()->CreateWindow(settings);
 	if(!m_detachedWindow->window)
 		return;
 	CallCallbacks("OnDetaching");
@@ -66,12 +66,12 @@ void pragma::gui::types::WIDetachable::Detach()
 		GetAnchor(anchor[0], anchor[1], anchor[2], anchor[3]);
 	}
 	m_detachedWindow->window->AddCloseListener([this]() { Reattach(); });
-	auto *elBase = pragma::gui::WGUI::GetInstance().GetBaseElement(m_detachedWindow->window.get());
+	auto *elBase = WGUI::GetInstance().GetBaseElement(m_detachedWindow->window.get());
 	assert(elBase);
 	TrapFocus(false);
 	KillFocus();
 	if(elBase) {
-		auto *elBg = pragma::gui::WGUI::GetInstance().Create<WIRect>(elBase);
+		auto *elBg = WGUI::GetInstance().Create<WIRect>(elBase);
 		assert(elBg);
 		elBg->GetColorProperty()->Link(*frame->GetColorProperty());
 		elBg->SetSize(w, h);

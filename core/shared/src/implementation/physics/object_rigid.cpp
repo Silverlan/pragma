@@ -6,18 +6,18 @@ module pragma.shared;
 
 import :physics.object;
 
- pragma::physics::RigidPhysObj::RigidPhysObj(pragma::BaseEntityComponent *owner) : pragma::physics::PhysObj(owner), PhysObjKinematic(), PhysObjDynamic() {}
-bool  pragma::physics::RigidPhysObj::Initialize(pragma::physics::IRigidBody &body)
+ pragma::physics::RigidPhysObj::RigidPhysObj(BaseEntityComponent *owner) : PhysObj(owner), PhysObjKinematic(), PhysObjDynamic() {}
+bool  pragma::physics::RigidPhysObj::Initialize(IRigidBody &body)
 {
-	if(pragma::physics::PhysObj::Initialize() == false)
+	if(PhysObj::Initialize() == false)
 		return false;
 	AddCollisionObject(body);
 	m_mass = body.GetMass();
 	return true;
 }
-bool  pragma::physics::RigidPhysObj::Initialize(const std::vector<pragma::physics::IRigidBody *> &bodies)
+bool  pragma::physics::RigidPhysObj::Initialize(const std::vector<IRigidBody *> &bodies)
 {
-	if(pragma::physics::PhysObj::Initialize() == false)
+	if(PhysObj::Initialize() == false)
 		return false;
 	m_mass = 0.f;
 	auto first = true;
@@ -57,14 +57,14 @@ float  pragma::physics::RigidPhysObj::GetLinearDamping() const
 {
 	auto *body = GetRigidBody();
 	if(body == nullptr)
-		return pragma::physics::PhysObj::GetLinearDamping();
+		return PhysObj::GetLinearDamping();
 	return body->GetLinearDamping();
 }
 float  pragma::physics::RigidPhysObj::GetAngularDamping() const
 {
 	auto *body = GetRigidBody();
 	if(body == nullptr)
-		return pragma::physics::PhysObj::GetAngularDamping();
+		return PhysObj::GetAngularDamping();
 	return body->GetAngularDamping();
 }
 std::vector<pragma::util::TSharedHandle<pragma::physics::IRigidBody>> & pragma::physics::RigidPhysObj::GetRigidBodies() { return m_rigidBodies; }
@@ -104,7 +104,7 @@ void  pragma::physics::RigidPhysObj::SetKinematic(bool bKinematic)
 		hRigidBody->SetKinematic(bKinematic);
 	}
 }
-pragma::BaseEntityComponent * pragma::physics::RigidPhysObj::GetOwner() { return pragma::physics::PhysObj::GetOwner(); }
+pragma::BaseEntityComponent * pragma::physics::RigidPhysObj::GetOwner() { return PhysObj::GetOwner(); }
 pragma::physics::IRigidBody * pragma::physics::RigidPhysObj::GetRigidBody()
 {
 	if(m_rigidBodies.empty())
@@ -264,12 +264,12 @@ void  pragma::physics::RigidPhysObj::SetStatic(bool b)
 		ApplyMass(m_mass);*/
 }
 bool  pragma::physics::RigidPhysObj::IsRigid() const { return true; }
-void  pragma::physics::RigidPhysObj::AddCollisionObject(pragma::physics::ICollisionObject &o)
+void  pragma::physics::RigidPhysObj::AddCollisionObject(ICollisionObject &o)
 {
 	if(o.IsRigid() == false)
 		return;
-	pragma::physics::PhysObj::AddCollisionObject(o);
-	m_rigidBodies.push_back(pragma::util::shared_handle_cast<pragma::physics::IBase, pragma::physics::IRigidBody>(o.ClaimOwnership()));
+	PhysObj::AddCollisionObject(o);
+	m_rigidBodies.push_back(pragma::util::shared_handle_cast<IBase, IRigidBody>(o.ClaimOwnership()));
 }
 Vector3  pragma::physics::RigidPhysObj::GetLinearVelocity() const { return m_velocity; }
 void  pragma::physics::RigidPhysObj::SetLinearVelocity(const Vector3 &vel)
@@ -322,5 +322,5 @@ bool  pragma::physics::RigidPhysObj::IsSleeping() const
 		return true;
 	return body->IsAsleep();
 }
-void  pragma::physics::RigidPhysObj::OnSleep() { pragma::physics::PhysObj::OnSleep(); }
-void  pragma::physics::RigidPhysObj::OnWake() { pragma::physics::PhysObj::OnWake(); }
+void  pragma::physics::RigidPhysObj::OnSleep() { PhysObj::OnSleep(); }
+void  pragma::physics::RigidPhysObj::OnWake() { PhysObj::OnWake(); }

@@ -15,7 +15,7 @@ pragma::gui::types::WILineGraph::WILineGraph() : WIBase() {}
 void pragma::gui::types::WILineGraph::Initialize()
 {
 	WIBase::Initialize();
-	auto *pOutline = pragma::gui::WGUI::GetInstance().Create<WIRect>(this);
+	auto *pOutline = WGUI::GetInstance().Create<WIRect>(this);
 	m_hOutline = pOutline->GetHandle();
 	pOutline->SetColor(colors::White);
 	pOutline->SetHeight(1);
@@ -41,7 +41,7 @@ void pragma::gui::types::WILineGraph::UpdateLines()
 	auto numLinesNew = m_values.size();
 	m_lines.reserve(numLinesNew);
 	for(auto i = numLines; i < numLinesNew; ++i) {
-		auto *pLine = pragma::gui::WGUI::GetInstance().Create<WILine>(this);
+		auto *pLine = WGUI::GetInstance().Create<WILine>(this);
 		pLine->SetLineWidth(2);
 		m_lines.push_back(pLine->GetHandle());
 	}

@@ -7,13 +7,13 @@ import :rendering.shaders.particle_simulation;
 
 using namespace pragma;
 
-pragma::rendering::shaders::ShaderParticleSimulation::ShaderParticleSimulation(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderCompute(context, identifier, "programs/compute/particles/simulation") {}
+rendering::shaders::ShaderParticleSimulation::ShaderParticleSimulation(prosper::IPrContext &context, const std::string &identifier) : ShaderCompute(context, identifier, "programs/compute/particles/simulation") {}
 
-void pragma::rendering::shaders::ShaderParticleSimulation::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx); }
+void rendering::shaders::ShaderParticleSimulation::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx); }
 
-void pragma::rendering::shaders::ShaderParticleSimulation::InitializeShaderResources()
+void rendering::shaders::ShaderParticleSimulation::InitializeShaderResources()
 {
-	prosper::ShaderCompute::InitializeShaderResources();
+	ShaderCompute::InitializeShaderResources();
 }
 
 /*bool pragma::rendering::shaders::ShaderParticleSimulation::RecordCompute(prosper::ShaderBindState &bindState) const

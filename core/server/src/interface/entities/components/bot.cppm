@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SBotComponent final : public BaseBotComponent {
 		  public:
-			SBotComponent(pragma::ecs::BaseEntity &ent) : BaseBotComponent(ent) {}
+			SBotComponent(ecs::BaseEntity &ent) : BaseBotComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

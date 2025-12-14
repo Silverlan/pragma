@@ -70,7 +70,7 @@ bool pragma::python::exec(std::string fileName, uint32_t argc, const char **argv
 	auto *wrapper = get_py_wrapper();
 	if(!wrapper)
 		return false;
-	auto path = pragma::util::Path::CreateFile(fileName);
+	auto path = util::Path::CreateFile(fileName);
 	path.Canonicalize();
 	std::string absPath;
 	if(!fs::find_absolute_path(path.GetString(), absPath))

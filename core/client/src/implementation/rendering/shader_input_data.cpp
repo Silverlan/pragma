@@ -34,7 +34,7 @@ void ShaderInputData::ResetToDefault(size_t idx)
 	auto &prop = m_inputDescriptor.properties[idx];
 	udm::visit_ng(pragma::shadergraph::to_udm_type(prop.parameter.type), [this, &prop](auto tag) {
 		using T = typename decltype(tag)::type;
-		if constexpr(pragma::shadergraph::is_data_type<T>()) {
+		if constexpr(shadergraph::is_data_type<T>()) {
 			T val {};
 			prop.parameter.defaultValue.Get<T>(val);
 			SetValue<T>(prop.parameter.name.c_str(), val);
@@ -55,7 +55,7 @@ void ShaderInputData::DebugPrint()
 		ss << "$" << udm::enum_type_to_ascii(pragma::shadergraph::to_udm_type(prop.parameter.type)) << " " << prop.parameter.name << " ";
 		udm::visit_ng(pragma::shadergraph::to_udm_type(prop.parameter.type), [this, &prop, &ss](auto tag) {
 			using T = typename decltype(tag)::type;
-			if constexpr(pragma::shadergraph::is_data_type<T>()) {
+			if constexpr(shadergraph::is_data_type<T>()) {
 				auto val = GetValue<T>(prop.parameter.name.c_str());
 				if(!val)
 					ss << "NULL";
@@ -81,10 +81,10 @@ std::optional<pragma::shadergraph::Value> ShaderInputDescriptor::parse_flags_exp
 	parser.SetExpr(strVal);
 	try {
 		auto &mupVal = parser.Eval();
-		return udm::visit_ng(propType, [&mupVal](auto tag) -> std::optional<pragma::shadergraph::Value> {
+		return udm::visit_ng(propType, [&mupVal](auto tag) -> std::optional<shadergraph::Value> {
 			using T = typename decltype(tag)::type;
-			if constexpr(pragma::shadergraph::is_data_type<T>() && udm::is_numeric_type(udm::type_to_enum<T>()) && !std::is_same<T, udm::Half>())
-				return pragma::shadergraph::Value::Create<T>(static_cast<T>(mupVal.GetInteger()));
+			if constexpr(shadergraph::is_data_type<T>() && udm::is_numeric_type(udm::type_to_enum<T>()) && !std::is_same<T, udm::Half>())
+				return shadergraph::Value::Create<T>(static_cast<T>(mupVal.GetInteger()));
 			return {};
 		});
 	}
@@ -95,7 +95,7 @@ std::optional<pragma::shadergraph::Value> ShaderInputDescriptor::parse_flags_exp
 	return {};
 }
 
-ShaderInputDescriptor::ShaderInputDescriptor(const pragma::GString &name) : name {name} {}
+ShaderInputDescriptor::ShaderInputDescriptor(const GString &name) : name {name} {}
 
 bool ShaderInputDescriptor::AddProperty(Property &&prop)
 {
@@ -139,8 +139,8 @@ bool ShaderInputDescriptor::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, 
 		}
 		else {
 			auto udmType = udm::ascii_type_to_enum(type);
-			auto shType = pragma::shadergraph::to_data_type(udmType);
-			if(shType == pragma::shadergraph::DataType::Invalid) {
+			auto shType = shadergraph::to_data_type(udmType);
+			if(shType == shadergraph::DataType::Invalid) {
 				outErr = "Type '" + type + "' is not a valid shader input property type!";
 				return false;
 			}
@@ -157,7 +157,7 @@ bool ShaderInputDescriptor::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, 
 			}
 
 			std::unique_ptr<std::unordered_map<std::string, uint32_t>> flags {};
-			std::optional<pragma::shadergraph::Value> defVal {};
+			std::optional<shadergraph::Value> defVal {};
 			auto udmFlags = prop["flags"];
 			if(udmFlags) {
 				flags = std::make_unique<std::unordered_map<std::string, uint32_t>>();
@@ -177,13 +177,13 @@ bool ShaderInputDescriptor::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, 
 			}
 
 			if(!defVal) {
-				defVal = udm::visit_ng(udmType, [&udmDefault](auto tag) -> std::optional<pragma::shadergraph::Value> {
+				defVal = udm::visit_ng(udmType, [&udmDefault](auto tag) -> std::optional<shadergraph::Value> {
 					using T = typename decltype(tag)::type;
-					if constexpr(pragma::shadergraph::is_data_type<T>()) {
+					if constexpr(shadergraph::is_data_type<T>()) {
 						auto val = udmDefault.ToValue<T>();
 						if(!val)
 							return {};
-						return pragma::shadergraph::Value::Create(*val);
+						return shadergraph::Value::Create(*val);
 					}
 					return {};
 				});
@@ -216,7 +216,7 @@ bool ShaderInputDescriptor::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, 
 			if(udmType == udm::Type::Half)
 				wasPrevPropHalf = true;
 
-			Property matProp {std::move(name), pragma::shadergraph::to_data_type(udmType)};
+			Property matProp {std::move(name), shadergraph::to_data_type(udmType)};
 			matProp->defaultValue = std::move(*defVal);
 			matProp.flags = std::move(flags);
 			totalSize += udm::size_of(udmType);
@@ -239,7 +239,7 @@ bool ShaderInputDescriptor::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, 
 
 				auto range = udm::visit_ng(udmType, [&udmMin, &udmMax](auto tag) -> std::optional<std::pair<float, float>> {
 					using T = typename decltype(tag)::type;
-					if constexpr(pragma::shadergraph::is_data_type<T>() && std::is_same_v<T, float>) {
+					if constexpr(shadergraph::is_data_type<T>() && std::is_same_v<T, float>) {
 						auto min = udmMin.ToValue<T>();
 						auto max = udmMax.ToValue<T>();
 						if(!min || !max)
@@ -263,7 +263,7 @@ bool ShaderInputDescriptor::LoadFromUdmData(udm::LinkedPropertyWrapperArg prop, 
 					auto name = udmOpt.GetValue<std::string>();
 					udm::visit<true, false, false>(udmType, [&name, &options, i](auto tag) {
 						using T = typename decltype(tag)::type;
-						if constexpr(!std::is_same_v<T, udm::Half> && pragma::shadergraph::is_data_type<T>())
+						if constexpr(!std::is_same_v<T, udm::Half> && shadergraph::is_data_type<T>())
 							options[name] = static_cast<T>(i);
 					});
 					++i;

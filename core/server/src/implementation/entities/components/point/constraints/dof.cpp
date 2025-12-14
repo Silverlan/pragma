@@ -12,12 +12,12 @@ void SPointConstraintDoFComponent::SendData(NetPacket &packet, networking::Clien
 {
 	packet->WriteString(m_kvSource);
 	packet->WriteString(m_kvTarget);
-	pragma::networking::write_vector(packet, m_posTarget);
+	networking::write_vector(packet, m_posTarget);
 
-	pragma::networking::write_vector(packet, m_kvLimLinLower);
-	pragma::networking::write_vector(packet, m_kvLimLinUpper);
-	pragma::networking::write_vector(packet, m_kvLimAngLower);
-	pragma::networking::write_vector(packet, m_kvLimAngUpper);
+	networking::write_vector(packet, m_kvLimLinLower);
+	networking::write_vector(packet, m_kvLimLinUpper);
+	networking::write_vector(packet, m_kvLimAngLower);
+	networking::write_vector(packet, m_kvLimAngUpper);
 }
 
 void SPointConstraintDoFComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

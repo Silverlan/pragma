@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :model.model_manager;
 
-pragma::asset::PmxFormatHandler::PmxFormatHandler(pragma::util::IAssetManager &assetManager) : AssetManagerFormatHandler {assetManager} {}
+pragma::asset::PmxFormatHandler::PmxFormatHandler(util::IAssetManager &assetManager) : AssetManagerFormatHandler {assetManager} {}
 bool pragma::asset::PmxFormatHandler::Import(const std::string &outputPath, std::string &outFilePath)
 {
 	auto &state = static_cast<ModelManager &>(GetAssetManager()).GetNetworkState();

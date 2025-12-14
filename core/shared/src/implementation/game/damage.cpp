@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :game.game;
 
-void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, game::DamageInfo &dmg, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback)
+void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, game::DamageInfo &dmg, const std::function<bool(ecs::BaseEntity *, game::DamageInfo &)> &callback)
 {
 	auto &force = dmg.GetForce();
 	auto forceLen = uvec::length(force);
@@ -14,13 +14,13 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, game::Damag
 	if(radius <= 0.f)
 		return;
 	struct EntityCandidate {
-		EntityCandidate(pragma::ecs::BaseEntity *ent, Vector3 &pos, Float dist) : hEntity(ent->GetHandle()), position(pos), distance(dist) {}
+		EntityCandidate(ecs::BaseEntity *ent, Vector3 &pos, Float dist) : hEntity(ent->GetHandle()), position(pos), distance(dist) {}
 		EntityHandle hEntity;
 		Vector3 position;
 		Float distance;
 	};
 	std::vector<EntityCandidate> ents;
-	pragma::ecs::EntityIterator entIt {*this};
+	ecs::EntityIterator entIt {*this};
 	entIt.AttachFilter<EntityIteratorFilterSphere>(origin, radius);
 	for(auto *ent : entIt) {
 		auto pTrComponent = ent->GetTransformComponent();
@@ -30,7 +30,7 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, game::Damag
 		if(pPhysComponent != nullptr)
 			pPhysComponent->GetCollisionBounds(&min, &max);
 		Vector3 pos;
-		pragma::math::geometry::closest_point_on_aabb_to_point(min, max, origin - pTrComponent->GetPosition(), &pos);
+		math::geometry::closest_point_on_aabb_to_point(min, max, origin - pTrComponent->GetPosition(), &pos);
 		auto dist = uvec::length(pos);
 		ents.push_back(EntityCandidate(ent, pos, dist));
 	}
@@ -42,7 +42,7 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, game::Damag
 	auto *inflictor = dmg.GetInflictor();
 	if(inflictor != nullptr)
 		entsFilter.push_back(inflictor->GetHandle());
-	auto traceFilter = pragma::util::make_shared<::pragma::physics::MultiEntityRayCastFilterCallback>(std::move(entsFilter));
+	auto traceFilter = pragma::util::make_shared<physics::MultiEntityRayCastFilterCallback>(std::move(entsFilter));
 
 	auto *entOrigin = (attacker != nullptr) ? attacker : inflictor;
 	for(auto it = ents.begin(); it != ents.end(); ++it) {
@@ -76,17 +76,17 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, game::Damag
 			if(l != 0.f)
 				dir /= l;
 
-			pragma::physics::TraceData data;
+			physics::TraceData data;
 			data.SetSource(origin);
 			data.SetTarget(pos);
 			data.SetFilter(traceFilter);
-			data.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter);
+			data.SetFlags(physics::RayCastFlags::Default | physics::RayCastFlags::InvertFilter);
 			if(entOrigin != nullptr && pPhysComponent != nullptr) {
 				data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 				data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());
 			}
 			auto r = RayCast(data);
-			if(r.hitType != pragma::physics::RayCastHitType::None && r.entity.get() != ent) {
+			if(r.hitType != physics::RayCastHitType::None && r.entity.get() != ent) {
 				auto pPhysComponent = ent->GetPhysicsComponent();
 				auto &pos = pTrComponent->GetPosition();
 				auto center = (pPhysComponent != nullptr) ? pPhysComponent->GetCollisionCenter() : Vector3 {};
@@ -97,14 +97,14 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, game::Damag
 				min = pos + center + (min - center) * 0.5f;
 				data.SetTarget(min);
 				r = RayCast(data);
-				if(r.hitType != pragma::physics::RayCastHitType::None && r.entity.get() != ent) {
+				if(r.hitType != physics::RayCastHitType::None && r.entity.get() != ent) {
 					max = pos + center + (max - center) * 0.5f;
 					data.SetTarget(max);
 					r = RayCast(data);
 				}
 			}
-			if(r.hitType == pragma::physics::RayCastHitType::None || r.entity.get() == ent) {
-				auto pDamageableComponent = ent->GetComponent<pragma::DamageableComponent>();
+			if(r.hitType == physics::RayCastHitType::None || r.entity.get() == ent) {
+				auto pDamageableComponent = ent->GetComponent<DamageableComponent>();
 				if(pDamageableComponent.valid()) {
 					auto scale = (radius - c.distance) / radius;
 					game::DamageInfo dmgEnt;
@@ -121,17 +121,17 @@ void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, game::Damag
 		}
 	}
 }
-void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback)
+void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force, ecs::BaseEntity *attacker, ecs::BaseEntity *inflictor, const std::function<bool(ecs::BaseEntity *, game::DamageInfo &)> &callback)
 {
 	game::DamageInfo info;
 	info.SetForce(Vector3(force, 0.f, 0.f));
 	info.SetAttacker(attacker);
 	info.SetInflictor(inflictor);
 	info.SetDamage(CUInt16(damage));
-	info.SetDamageType(DamageType::Explosion);
+	info.SetDamageType(Explosion);
 	SplashDamage(origin, radius, info, callback);
 }
-void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force, const EntityHandle &attacker, const EntityHandle &inflictor, const std::function<bool(pragma::ecs::BaseEntity *, game::DamageInfo &)> &callback)
+void pragma::Game::SplashDamage(const Vector3 &origin, Float radius, UInt32 damage, Float force, const EntityHandle &attacker, const EntityHandle &inflictor, const std::function<bool(ecs::BaseEntity *, game::DamageInfo &)> &callback)
 {
-	SplashDamage(origin, radius, damage, force, const_cast<pragma::ecs::BaseEntity *>(attacker.get()), const_cast<pragma::ecs::BaseEntity *>(inflictor.get()), callback);
+	SplashDamage(origin, radius, damage, force, const_cast<ecs::BaseEntity *>(attacker.get()), const_cast<ecs::BaseEntity *>(inflictor.get()), callback);
 }

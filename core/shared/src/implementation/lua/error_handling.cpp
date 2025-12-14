@@ -47,7 +47,7 @@ void Lua::OpenFileInZeroBrane(const std::string &fname, uint32_t lineId)
 			tLastFileOpened = t;
 			auto fullLocalPath = GetLuaFilePath(fname);
 			if(fullLocalPath.has_value())
-				::pragma::debug::open_file_in_zerobrane(*fullLocalPath, lineId);
+				pragma::debug::open_file_in_zerobrane(*fullLocalPath, lineId);
 		}
 	}
 }
@@ -109,7 +109,7 @@ bool Lua::get_callstack(lua::State *l, std::stringstream &ss)
 				break;
 			}
 			else {
-				auto filename = ::pragma::scripting::lua_core::util::make_clickable_lua_script_link(get_source(d), d.currentline);
+				auto filename = pragma::scripting::lua_core::util::make_clickable_lua_script_link(get_source(d), d.currentline);
 				ss << "\n" << t << level << ": " << (d.name != nullptr ? d.name : "?") << "[" << d.linedefined << ":" << d.lastlinedefined << "] [" << d.what << ":" << d.namewhat << "] : " << filename;
 			}
 		}
@@ -142,7 +142,7 @@ bool Lua::PrintTraceback(lua::State *l, std::stringstream &ssOut, const std::str
 			auto br = shortSrc.find(c);
 			uint32_t offset = 0;
 			auto bFound = false;
-			auto luaPath = Lua::SCRIPT_DIRECTORY + c;
+			auto luaPath = SCRIPT_DIRECTORY + c;
 			while(br != std::string::npos && shortSrc.length() >= offset + luaPath.length() && (bFound = pragma::string::compare(shortSrc.data() + offset, luaPath.c_str(), false, luaPath.length())) == false) {
 				offset = br + 1;
 				br = shortSrc.find(c, br + 1);
@@ -155,13 +155,13 @@ bool Lua::PrintTraceback(lua::State *l, std::stringstream &ssOut, const std::str
 				//open_lua_file(fname,lineId);
 			}
 			std::stringstream ssErrMsg;
-			auto lineMsg = ::pragma::scripting::lua_core::util::make_clickable_lua_script_link(shortSrc, d.currentline);
+			auto lineMsg = pragma::scripting::lua_core::util::make_clickable_lua_script_link(shortSrc, d.currentline);
 			ssErrMsg << lineMsg << " " << errMsg;
 			errMsg = ssErrMsg.str();
 		}
 		transform_path(d, errMsg, d.currentline);
 		ssOut << errMsg;
-		bNl = ::pragma::scripting::lua_core::util::get_code_snippet(ssOut, get_source(d), d.currentline, ":");
+		bNl = pragma::scripting::lua_core::util::get_code_snippet(ssOut, get_source(d), d.currentline, ":");
 	}
 	else {
 		ssOut << errMsg;
@@ -190,17 +190,17 @@ void Lua::PrintTraceback(lua::State *l, const std::string *pOptErrMsg)
 	auto tbMsg = ssTbMsg.str();
 
 	std::stringstream ss;
-	::pragma::scripting::lua_core::util::get_lua_doc_info(ss, tbMsg);
+	pragma::scripting::lua_core::util::get_lua_doc_info(ss, tbMsg);
 	Con::cout << ss.str();
 	Con::flush();
 }
 
 int Lua::HandleTracebackError(lua::State *l)
 {
-	if(!Lua::IsString(l, -1))
+	if(!IsString(l, -1))
 		return 1;
-	std::string msg = Lua::ToString(l, -1);
-	auto *nw = ::pragma::get_engine()->GetNetworkState(l);
+	std::string msg = ToString(l, -1);
+	auto *nw = pragma::get_engine()->GetNetworkState(l);
 	auto *game = nw ? nw->GetGameState() : nullptr;
 	if(game)
 		game->CallLuaCallbacks<void, std::string>("OnLuaError", msg);
@@ -233,20 +233,20 @@ static void handle_syntax_error(lua::State *l, Lua::StatusCode r, const std::str
 	print_lua_error_message(l, *msg);
 }
 
-void Lua::HandleSyntaxError(lua::State *l, Lua::StatusCode r, const std::string &fileName) { handle_syntax_error(l, r, &fileName); }
+void Lua::HandleSyntaxError(lua::State *l, StatusCode r, const std::string &fileName) { handle_syntax_error(l, r, &fileName); }
 
-void Lua::HandleSyntaxError(lua::State *l, Lua::StatusCode r) { handle_syntax_error(l, r, nullptr); }
+void Lua::HandleSyntaxError(lua::State *l, StatusCode r) { handle_syntax_error(l, r, nullptr); }
 
 void Lua::initialize_error_handler()
 {
-	luabind::register_exception_handler<Lua::Exception>(+[](lua::State *L, const Lua::Exception &e) { Lua::PushString(L, e.what()); });
+	luabind::register_exception_handler<Exception>(+[](lua::State *L, const Exception &e) { PushString(L, e.what()); });
 	luabind::set_pcall_callback([](lua::State *l) -> void {
-		Lua::PushCFunction(l, [](lua::State *l) -> int32_t {
-			if(Lua::IsString(l, -1) == false)
+		PushCFunction(l, [](lua::State *l) -> int32_t {
+			if(IsString(l, -1) == false)
 				return 0; // This should never happen
-			std::string errMsg = Lua::CheckString(l, -1);
-			auto formattedMsg = ::pragma::scripting::lua_core::format_error_message(l, errMsg, Lua::StatusCode::ErrorRun, nullptr);
-			::pragma::scripting::lua_core::submit_error(l, formattedMsg);
+			std::string errMsg = CheckString(l, -1);
+			auto formattedMsg = pragma::scripting::lua_core::format_error_message(l, errMsg, StatusCode::ErrorRun, nullptr);
+			pragma::scripting::lua_core::submit_error(l, formattedMsg);
 			return 0;
 		});
 	});

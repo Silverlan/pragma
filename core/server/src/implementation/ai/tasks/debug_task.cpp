@@ -13,7 +13,7 @@ import :entities.components;
 
 using namespace pragma;
 
-ai::BehaviorNode::Result ai::TaskDebugPrint::Start(const Schedule *sched, pragma::BaseAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskDebugPrint::Start(const Schedule *sched, BaseAIComponent &ent)
 {
 	BehaviorNode::Start(sched, ent);
 	std::string msg;
@@ -24,13 +24,13 @@ ai::BehaviorNode::Result ai::TaskDebugPrint::Start(const Schedule *sched, pragma
 }
 bool ai::TaskDebugPrint::GetDebugMessage(const Schedule *sched, std::string &msg) const
 {
-	auto *param = GetParameter(sched, pragma::math::to_integral(Parameter::Message));
+	auto *param = GetParameter(sched, math::to_integral(Parameter::Message));
 	if(param == nullptr)
 		return false;
 	msg = param->ToString();
 	return true;
 }
-void ai::TaskDebugPrint::SetMessage(const std::string &msg) { SetParameter(pragma::math::to_integral(Parameter::Message), msg); }
+void ai::TaskDebugPrint::SetMessage(const std::string &msg) { SetParameter(math::to_integral(Parameter::Message), msg); }
 void ai::TaskDebugPrint::Print(const Schedule *sched, std::ostream &o) const
 {
 	std::string msg;
@@ -39,7 +39,7 @@ void ai::TaskDebugPrint::Print(const Schedule *sched, std::ostream &o) const
 
 ////////////////////
 
-ai::BehaviorNode::Result ai::TaskDebugDrawText::Start(const Schedule *sched, pragma::BaseAIComponent &aiComponent)
+ai::BehaviorNode::Result ai::TaskDebugDrawText::Start(const Schedule *sched, BaseAIComponent &aiComponent)
 {
 	BehaviorNode::Start(sched, aiComponent);
 	std::string msg;
@@ -59,10 +59,10 @@ ai::BehaviorNode::Result ai::TaskDebugDrawText::Start(const Schedule *sched, pra
 	debug::SDebugRenderer::DrawText(msg, pos, 0.5f, colors::White, 1.f);
 	return Result::Succeeded;
 }
-void ai::TaskDebugDrawText::SetMessage(const std::string &msg) { SetParameter(pragma::math::to_integral(Parameter::Message), msg); }
+void ai::TaskDebugDrawText::SetMessage(const std::string &msg) { SetParameter(math::to_integral(Parameter::Message), msg); }
 bool ai::TaskDebugDrawText::GetDebugMessage(const Schedule *sched, std::string &msg) const
 {
-	auto *param = GetParameter(sched, pragma::math::to_integral(Parameter::Message));
+	auto *param = GetParameter(sched, math::to_integral(Parameter::Message));
 	if(param == nullptr)
 		return false;
 	msg = param->ToString();

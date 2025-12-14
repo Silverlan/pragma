@@ -15,7 +15,7 @@ export namespace pragma {
 	}
 	class DLLSERVER SModelComponent final : public BaseModelComponent, public SBaseNetComponent {
 	  public:
-		SModelComponent(pragma::ecs::BaseEntity &ent) : BaseModelComponent(ent) {}
+		SModelComponent(ecs::BaseEntity &ent) : BaseModelComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
@@ -26,6 +26,6 @@ export namespace pragma {
 		virtual void SetSkin(unsigned int skin) override;
 		virtual void SetMaxDrawDistance(float maxDist) override;
 	  protected:
-		virtual void OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model) override;
+		virtual void OnModelChanged(const std::shared_ptr<asset::Model> &model) override;
 	};
 };

@@ -13,7 +13,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SFieldAngleComponent final : public BaseFieldAngleComponent, public SBaseNetComponent {
 		  public:
-			SFieldAngleComponent(pragma::ecs::BaseEntity &ent) : BaseFieldAngleComponent(ent) {}
+			SFieldAngleComponent(ecs::BaseEntity &ent) : BaseFieldAngleComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }

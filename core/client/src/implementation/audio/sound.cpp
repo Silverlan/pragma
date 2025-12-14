@@ -22,7 +22,7 @@ pragma::audio::ALSound *pragma::audio::CALSound::FindByServerIndex(uint32_t idx)
 	return it->second.lock().get();
 }
 
-std::shared_ptr<pragma::audio::CALSound> pragma::audio::CALSound::Create(pragma::NetworkState *nw, const pragma::audio::PSoundChannel &channel) {
+std::shared_ptr<pragma::audio::CALSound> pragma::audio::CALSound::Create(NetworkState *nw, const PSoundChannel &channel) {
 	auto als = std::shared_ptr<CALSound> {new CALSound {nw, channel}, [](CALSound *snd) {
 		snd->OnRelease();
 		delete snd;
@@ -30,7 +30,7 @@ std::shared_ptr<pragma::audio::CALSound> pragma::audio::CALSound::Create(pragma:
 	return als;
 }
 
-pragma::audio::CALSound::CALSound(pragma::NetworkState *nw, const pragma::audio::PSoundChannel &channel) : ALSound(nw), pragma::audio::SoundSource {channel}
+pragma::audio::CALSound::CALSound(NetworkState *nw, const PSoundChannel &channel) : ALSound(nw), SoundSource {channel}
 {
 	UpdateVolume();
 	RegisterCallback<void, std::reference_wrapper<float>>("UpdateGain");
@@ -40,7 +40,7 @@ pragma::audio::CALSound::~CALSound() {}
 
 void pragma::audio::CALSound::OnRelease()
 {
-	pragma::audio::SoundSource::OnRelease();
+	SoundSource::OnRelease();
 	ALSound::OnRelease();
 	auto it = s_svIndexedSounds.find(GetIndex());
 	if(it != s_svIndexedSounds.end())
@@ -62,11 +62,11 @@ void pragma::audio::CALSound::Terminate()
 }
 
 static_assert(sizeof(pragma::audio::EffectParams) == sizeof(pragma::audio::SoundEffectParams));
-bool pragma::audio::CALSound::AddEffect(pragma::audio::IEffect &effect, const SoundEffectParams &params) { return (*this)->AddEffect(effect, reinterpret_cast<const pragma::audio::EffectParams &>(params)); }
-bool pragma::audio::CALSound::AddEffect(pragma::audio::IEffect &effect, uint32_t &slotId, const SoundEffectParams &params) { return (*this)->AddEffect(effect, slotId, reinterpret_cast<const pragma::audio::EffectParams &>(params)); }
-bool pragma::audio::CALSound::AddEffect(pragma::audio::IEffect &effect, float gain) { return (*this)->AddEffect(effect, gain); }
-bool pragma::audio::CALSound::AddEffect(pragma::audio::IEffect &effect, uint32_t &slotId, float gain) { return (*this)->AddEffect(effect, slotId, gain); }
-void pragma::audio::CALSound::RemoveEffect(pragma::audio::IEffect &effect) { (*this)->RemoveEffect(effect); }
+bool pragma::audio::CALSound::AddEffect(IEffect &effect, const SoundEffectParams &params) { return (*this)->AddEffect(effect, reinterpret_cast<const EffectParams &>(params)); }
+bool pragma::audio::CALSound::AddEffect(IEffect &effect, uint32_t &slotId, const SoundEffectParams &params) { return (*this)->AddEffect(effect, slotId, reinterpret_cast<const EffectParams &>(params)); }
+bool pragma::audio::CALSound::AddEffect(IEffect &effect, float gain) { return (*this)->AddEffect(effect, gain); }
+bool pragma::audio::CALSound::AddEffect(IEffect &effect, uint32_t &slotId, float gain) { return (*this)->AddEffect(effect, slotId, gain); }
+void pragma::audio::CALSound::RemoveEffect(IEffect &effect) { (*this)->RemoveEffect(effect); }
 void pragma::audio::CALSound::RemoveEffect(uint32_t slotId) { (*this)->RemoveEffect(slotId); }
 
 void pragma::audio::CALSound::SetPitchModifier(float mod)
@@ -89,15 +89,15 @@ void pragma::audio::CALSound::UpdateVolume()
 	if(m_bTerminated == true)
 		return;
 	auto gain = m_gain;
-	if(pragma::get_cengine()->IsWindowFocused() == false && cvAlwaysPlay->GetBool() == false)
+	if(get_cengine()->IsWindowFocused() == false && cvAlwaysPlay->GetBool() == false)
 		gain = 0.f;
 	else {
 		gain *= GetVolumeModifier();
-		auto *client = pragma::get_client_state();
+		auto *client = get_client_state();
 		auto &volumes = client->GetSoundVolumes();
 		auto minGain = 1.f;
 		for(auto it = volumes.begin(); it != volumes.end(); ++it) {
-			if((pragma::math::to_integral(m_type) & pragma::math::to_integral(it->first)) != 0) {
+			if((math::to_integral(m_type) & math::to_integral(it->first)) != 0) {
 				if(it->second < minGain)
 					minGain = it->second;
 			}
@@ -138,7 +138,7 @@ void pragma::audio::CALSound::Update()
 {
 	if(m_bTerminated == true)
 		return;
-	pragma::audio::SoundSource::Update();
+	SoundSource::Update();
 	auto old = GetState();
 	UpdateState();
 	if(IsStopped() == true) {
@@ -146,7 +146,7 @@ void pragma::audio::CALSound::Update()
 		CheckStateChange(old);
 	}
 	else if(m_fade != nullptr) {
-		auto t = pragma::get_client_state()->RealTime() - m_fade->start;
+		auto t = get_client_state()->RealTime() - m_fade->start;
 		if(t >= m_fade->duration)
 			CancelFade();
 		else {
@@ -185,7 +185,7 @@ void pragma::audio::CALSound::FadeIn(float time)
 	CancelFade();
 	if(!IsPlaying())
 		Play();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true, pragma::get_client_state()->RealTime(), time, gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true, get_client_state()->RealTime(), time, gain));
 }
 
 void pragma::audio::CALSound::FadeOut(float time)
@@ -194,7 +194,7 @@ void pragma::audio::CALSound::FadeOut(float time)
 		return;
 	float gain = GetGain();
 	CancelFade();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false, pragma::get_client_state()->RealTime(), time, gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false, get_client_state()->RealTime(), time, gain));
 }
 
 void pragma::audio::CALSound::UpdateState()
@@ -296,7 +296,7 @@ bool pragma::audio::CALSound::IsIdle() const
 {
 	if(GetIndex() > 0)
 		return false; // This is a server-side sound, keep it around until server-side representation is removed
-	return pragma::audio::SoundSource::IsIdle();
+	return SoundSource::IsIdle();
 }
 bool pragma::audio::CALSound::IsLooping() const
 {
@@ -601,7 +601,7 @@ void pragma::audio::CALSound::SetDirectFilter(const SoundEffectParams &params)
 {
 	if(m_bTerminated == true)
 		return;
-	(*this)->SetDirectFilter(reinterpret_cast<const pragma::audio::EffectParams &>(params));
+	(*this)->SetDirectFilter(reinterpret_cast<const EffectParams &>(params));
 }
 const pragma::audio::SoundEffectParams &pragma::audio::CALSound::GetDirectFilter() const
 {
@@ -613,27 +613,27 @@ const pragma::audio::SoundEffectParams &pragma::audio::CALSound::GetDirectFilter
 }
 bool pragma::audio::CALSound::AddEffect(const std::string &effectName, const SoundEffectParams &params)
 {
-	auto effect = pragma::get_cengine()->GetAuxEffect(effectName);
+	auto effect = get_cengine()->GetAuxEffect(effectName);
 	if(effect == nullptr)
 		return false;
-	return (*this)->AddEffect(*effect, reinterpret_cast<const pragma::audio::EffectParams &>(params));
+	return (*this)->AddEffect(*effect, reinterpret_cast<const EffectParams &>(params));
 }
 void pragma::audio::CALSound::RemoveEffect(const std::string &effectName)
 {
-	auto effect = pragma::get_cengine()->GetAuxEffect(effectName);
+	auto effect = get_cengine()->GetAuxEffect(effectName);
 	if(effect == nullptr)
 		return;
 	(*this)->RemoveEffect(*effect);
 }
 void pragma::audio::CALSound::SetEffectParameters(const std::string &effectName, const SoundEffectParams &params)
 {
-	auto effect = pragma::get_cengine()->GetAuxEffect(effectName);
+	auto effect = get_cengine()->GetAuxEffect(effectName);
 	if(effect == nullptr)
 		return;
-	(*this)->SetEffectParameters(*effect, reinterpret_cast<const pragma::audio::EffectParams &>(params));
+	(*this)->SetEffectParameters(*effect, reinterpret_cast<const EffectParams &>(params));
 }
 
-void pragma::audio::CALSound::SetType(pragma::audio::ALSoundType type)
+void pragma::audio::CALSound::SetType(ALSoundType type)
 {
 	if(m_bTerminated == true)
 		return;

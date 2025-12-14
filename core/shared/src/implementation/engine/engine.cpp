@@ -25,7 +25,7 @@ import pragma.oskit;
 const pragma::IServerState &pragma::Engine::GetServerStateInterface() const
 {
 	if(m_libServer == nullptr) {
-		auto path = pragma::util::Path::CreatePath(pragma::util::get_program_path());
+		auto path = util::Path::CreatePath(util::get_program_path());
 #ifdef _WIN32
 		path += "bin/";
 		path += "server";
@@ -35,7 +35,7 @@ const pragma::IServerState &pragma::Engine::GetServerStateInterface() const
 #endif
 		auto modPath = path.GetString();
 		std::string err;
-		m_libServer = pragma::util::Library::Load(modPath, {}, &err);
+		m_libServer = util::Library::Load(modPath, {}, &err);
 		if(m_libServer == nullptr) {
 			throw std::logic_error {"Unable to load module '" + modPath + "': " + err};
 			exit(EXIT_FAILURE);
@@ -82,7 +82,7 @@ extern pragma::util::LogSeverity g_lpLogLevelFile;
 extern bool g_lpManagedByPackageManager;
 extern bool g_lpSandboxed;
 
-pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(pragma::Engine::DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
+pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
 {
 	g_engine = this;
 
@@ -91,22 +91,22 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 		registeredGlobals = true;
 		datasystem::register_base_types();
 		datasystem::Texture::register_type();
-		pragma::console::register_shared_convars(*pragma::console::server::get_convar_map());
+		pragma::console::register_shared_convars(*console::server::get_convar_map());
 		register_launch_parameters(*GetLaunchParaMap());
-		pragma::networking::register_net_messages();
+		networking::register_net_messages();
 	}
 
 #ifdef __linux__
 	// Enable linenoise by default
-	pragma::math::set_flag(m_stateFlags, StateFlags::UseLinenoise, true);
+	math::set_flag(m_stateFlags, StateFlags::UseLinenoise, true);
 
 	// -disable_linenoise launch option can be used to disable it.
 	// Since launch options are handled *after* the console is initialized, we have to
 	// check for -disable_linenoise early.
 	// We also don't want linenoise enabled if -non_interactive is set.
 	for(int i = 0; i < argc; ++i) {
-		if(pragma::string::compare(argv[i], "-disable_linenoise", false) || pragma::string::compare(argv[i], "-non_interactive", false)) {
-			pragma::math::set_flag(m_stateFlags, StateFlags::UseLinenoise, false);
+		if(string::compare(argv[i], "-disable_linenoise", false) || string::compare(argv[i], "-non_interactive", false)) {
+			math::set_flag(m_stateFlags, StateFlags::UseLinenoise, false);
 			break;
 		}
 	}
@@ -116,7 +116,7 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 	::debug::open_domain();
 #endif
 
-	pragma::debug::set_lua_backtrace_function([this]() -> std::string {
+	debug::set_lua_backtrace_function([this]() -> std::string {
 		// We can only get the Lua callstack from the main thread
 		if(std::this_thread::get_id() == GetMainThreadId()) {
 			for(auto *state : {GetClientState(), GetServerNetworkState()}) {
@@ -134,7 +134,7 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 		return {};
 	});
 
-	pragma::locale::init();
+	locale::init();
 	// OpenConsole();
 
 	m_mainThreadId = std::this_thread::get_id();
@@ -152,24 +152,24 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 #endif
 
 	// Link package system to file system
-	m_padPackageManager = pragma::pad::link_to_file_system();
-	m_assetManager = std::make_unique<pragma::asset::AssetManager>();
+	m_padPackageManager = pad::link_to_file_system();
+	m_assetManager = std::make_unique<asset::AssetManager>();
 
 	RegisterCallback<void>("Think");
 
-	m_cpuProfiler = pragma::debug::CPUProfiler::Create<pragma::debug::CPUProfiler>();
+	m_cpuProfiler = debug::CPUProfiler::Create<debug::CPUProfiler>();
 	AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false) {
 			m_profilingStageManager = nullptr;
 			return;
 		}
-		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
+		m_profilingStageManager = std::make_unique<debug::ProfilingStageManager<debug::ProfilingStage>>();
 		m_profilingStageManager->InitializeProfilingStageManager(*m_cpuProfiler);
 	});
 }
 
 pragma::asset::AssetManager &pragma::Engine::GetAssetManager() { return *m_assetManager; }
-const pragma::asset::AssetManager &pragma::Engine::GetAssetManager() const { return const_cast<pragma::Engine *>(this)->GetAssetManager(); }
+const pragma::asset::AssetManager &pragma::Engine::GetAssetManager() const { return const_cast<Engine *>(this)->GetAssetManager(); }
 
 bool pragma::Engine::IsProgramInFocus() const { return false; }
 
@@ -185,10 +185,10 @@ void pragma::Engine::SetReplicatedConVar(const std::string &cvar, const std::str
 	if(client == nullptr)
 		return;
 	auto flags = client->GetConVarFlags(cvar);
-	if((flags & pragma::console::ConVarFlags::Notify) == pragma::console::ConVarFlags::Notify)
+	if((flags & console::ConVarFlags::Notify) == console::ConVarFlags::Notify)
 		spdlog::info("ConVar '{}' has been changed to '{}'", cvar, val);
 	//Con::cout<<"ConVar '"<<cvar<<"' has been changed to '"<<val<<"'"<<Con::endl;
-	if((flags & pragma::console::ConVarFlags::Replicated) == pragma::console::ConVarFlags::None)
+	if((flags & console::ConVarFlags::Replicated) == console::ConVarFlags::None)
 		return;
 	client->SetConVar(cvar, val);
 }
@@ -275,7 +275,7 @@ pragma::util::ScopeGuard pragma::Engine::ScopeLockResourceWatchers()
 		sv->GetResourceWatcher().Lock();
 	if(cl)
 		cl->GetResourceWatcher().Lock();
-	return pragma::util::ScopeGuard {[this, sv, cl]() {
+	return util::ScopeGuard {[this, sv, cl]() {
 		if(sv && GetServerNetworkState() == sv)
 			sv->GetResourceWatcher().Unlock();
 		if(cl && GetClientState() == cl)
@@ -283,7 +283,7 @@ pragma::util::ScopeGuard pragma::Engine::ScopeLockResourceWatchers()
 	}};
 }
 
-void pragma::Engine::AddParallelJob(const pragma::util::ParallelJobWrapper &job, const std::string &jobName)
+void pragma::Engine::AddParallelJob(const util::ParallelJobWrapper &job, const std::string &jobName)
 {
 	m_parallelJobMutex.lock();
 	m_parallelJobs.push_back({});
@@ -296,9 +296,9 @@ void pragma::Engine::AddParallelJob(const pragma::util::ParallelJobWrapper &job,
 
 void pragma::Engine::Close()
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::Closed))
+	if(math::is_flag_set(m_stateFlags, StateFlags::Closed))
 		return;
-	pragma::math::set_flag(m_stateFlags, StateFlags::Closed);
+	math::set_flag(m_stateFlags, StateFlags::Closed);
 
 	if(ShouldRunUpdaterOnClose()) {
 		std::string processPath;
@@ -307,10 +307,10 @@ void pragma::Engine::Close()
 #else
 		processPath = "lib/updater";
 #endif
-		pragma::util::CommandInfo cmdInfo;
+		util::CommandInfo cmdInfo;
 		cmdInfo.command = processPath;
 		cmdInfo.absoluteCommandPath = false;
-		cmdInfo.args.push_back("-executable=" + pragma::util::get_program_name());
+		cmdInfo.args.push_back("-executable=" + util::get_program_name());
 		if(!pragma::util::start_process(cmdInfo))
 			Con::cwar << "Failed to launch updater '" << processPath << "'! Please execute manually to install update." << Con::endl;
 	}
@@ -323,24 +323,24 @@ void pragma::Engine::Close()
 		jobInfo.job->Wait();
 	m_parallelJobs.clear();
 
-	pragma::math::set_flag(m_stateFlags, StateFlags::Running, false);
-	pragma::util::close_external_archive_manager();
+	math::set_flag(m_stateFlags, StateFlags::Running, false);
+	util::close_external_archive_manager();
 	m_assetManager = nullptr;
-	pragma::util::close_mount_external_library();
+	util::close_mount_external_library();
 	CloseServerState();
 
 	ClearCommands();
 	CloseConsole();
 
 	Con::set_output_callback(nullptr);
-	pragma::locale::clear();
+	locale::clear();
 	fs::close_file_watcher();
-	pragma::oskit::shutdown();
+	oskit::shutdown();
 	fs::close();
 	datasystem::close();
 #ifdef __linux__
-	if(pragma::console::impl::is_linenoise_enabled())
-		pragma::console::impl::close_linenoise();
+	if(console::impl::is_linenoise_enabled())
+		console::impl::close_linenoise();
 #endif
 }
 
@@ -426,14 +426,14 @@ static uint32_t clear_assets(pragma::NetworkState *state, pragma::asset::Type ty
 	}
 	return n;
 }
-uint32_t pragma::Engine::DoClearUnusedAssets(pragma::asset::Type type) const
+uint32_t pragma::Engine::DoClearUnusedAssets(asset::Type type) const
 {
 	uint32_t n = 0;
 	n += clear_assets(GetServerNetworkState(), type, IsVerbose());
 	n += clear_assets(GetClientState(), type, IsVerbose());
 	return n;
 }
-uint32_t pragma::Engine::ClearUnusedAssets(pragma::asset::Type type, bool verbose) const
+uint32_t pragma::Engine::ClearUnusedAssets(asset::Type type, bool verbose) const
 {
 	auto n = DoClearUnusedAssets(type);
 	if(verbose)
@@ -449,8 +449,8 @@ void pragma::Engine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
 		matManager.GetLoader().SetMultiThreadingEnabled(enabled);
 	}
 }
-void pragma::Engine::UpdateAssetMultiThreadedLoadingEnabled() { SetAssetMultiThreadedLoadingEnabled(pragma::math::is_flag_set(m_stateFlags, StateFlags::MultiThreadedAssetLoadingEnabled)); }
-uint32_t pragma::Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type> &types, bool verbose) const
+void pragma::Engine::UpdateAssetMultiThreadedLoadingEnabled() { SetAssetMultiThreadedLoadingEnabled(math::is_flag_set(m_stateFlags, StateFlags::MultiThreadedAssetLoadingEnabled)); }
+uint32_t pragma::Engine::ClearUnusedAssets(const std::vector<asset::Type> &types, bool verbose) const
 {
 	uint32_t n = 0;
 	for(auto type : types)
@@ -460,8 +460,8 @@ uint32_t pragma::Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type
 	return n;
 }
 
-void pragma::Engine::SetRunUpdaterOnClose(bool run) { pragma::math::set_flag(m_stateFlags, StateFlags::RunUpdaterOnClose, run); }
-bool pragma::Engine::ShouldRunUpdaterOnClose() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::RunUpdaterOnClose); }
+void pragma::Engine::SetRunUpdaterOnClose(bool run) { math::set_flag(m_stateFlags, StateFlags::RunUpdaterOnClose, run); }
+bool pragma::Engine::ShouldRunUpdaterOnClose() const { return math::is_flag_set(m_stateFlags, StateFlags::RunUpdaterOnClose); }
 
 void pragma::Engine::ClearCache()
 {
@@ -469,7 +469,7 @@ void pragma::Engine::ClearCache()
 	spdlog::info("Clearing cached files...");
 	auto fRemoveDir = [](const std::string &name) {
 		spdlog::info("Removing '{}'", name);
-		auto result = pragma::fs::remove_directory(name);
+		auto result = fs::remove_directory(name);
 		if(result == false)
 			spdlog::warn("Failed to remove cache directory '{}'! Please remove it manually.", name);
 		return result;
@@ -483,7 +483,7 @@ void pragma::Engine::ClearCache()
 	spdlog::info("Removing addon cache directories...");
 	for(auto &addonInfo : AddonSystem::GetMountedAddons()) {
 		auto path = addonInfo.GetAbsolutePath() + "\\cache";
-		if(pragma::fs::exists_system(path) == false)
+		if(fs::exists_system(path) == false)
 			continue;
 		if(fs::remove_system_directory(path) == false)
 			spdlog::warn("Failed to remove cache directory '{}'! Please remove it manually.", path);
@@ -559,7 +559,7 @@ void pragma::Engine::AddTickEvent(const std::function<void()> &ev)
 
 void pragma::Engine::Tick()
 {
-	pragma::locale::poll();
+	locale::poll();
 	m_ctTick.Update();
 	ProcessConsoleInput();
 	RunTickEvents();
@@ -585,15 +585,15 @@ void pragma::Engine::UpdateParallelJobs()
 		auto t = std::chrono::steady_clock::now();
 		auto tDelta = t - jobInfo.lastProgressUpdate;
 		if(progress != jobInfo.lastProgress) {
-			jobInfo.timeRemaining = pragma::util::clock::to_seconds(tDelta) / (progress - jobInfo.lastProgress) * (1.f - progress);
+			jobInfo.timeRemaining = util::clock::to_seconds(tDelta) / (progress - jobInfo.lastProgress) * (1.f - progress);
 			jobInfo.lastProgress = progress;
 			jobInfo.lastProgressUpdate = t;
 		}
 		if((t - jobInfo.lastNotification) >= jobInfo.notificationFrequency) {
 			auto percent = progress * 100.f;
-			Con::cout << "Progress of worker '" << jobInfo.name << "' at " << pragma::math::floor(percent) << "%.";
+			Con::cout << "Progress of worker '" << jobInfo.name << "' at " << math::floor(percent) << "%.";
 			if(jobInfo.timeRemaining.has_value()) {
-				auto msgDur = pragma::util::get_pretty_duration(*jobInfo.timeRemaining * std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds {1}).count());
+				auto msgDur = util::get_pretty_duration(*jobInfo.timeRemaining * std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds {1}).count());
 				Con::cout << " Approximately " << msgDur << " remaining!";
 			}
 			Con::cout << Con::endl;
@@ -608,31 +608,31 @@ void pragma::Engine::UpdateParallelJobs()
 	}
 }
 
-pragma::console::ConVarMap *pragma::Engine::GetConVarMap() { return pragma::console::engine::get_convar_map(); }
+pragma::console::ConVarMap *pragma::Engine::GetConVarMap() { return console::engine::get_convar_map(); }
 
 std::unique_ptr<pragma::Engine::ConVarInfoList> &pragma::Engine::GetConVarConfig(NwStateType type)
 {
 	assert(type == NwStateType::Server);
 	return m_svConfig;
 }
-pragma::Engine::StateInstance &pragma::Engine::GetStateInstance(pragma::NetworkState &nw)
+pragma::Engine::StateInstance &pragma::Engine::GetStateInstance(NetworkState &nw)
 {
 	assert(m_svInstance != nullptr);
 	return *m_svInstance;
 }
 pragma::Engine::StateInstance &pragma::Engine::GetServerStateInstance() { return *m_svInstance; }
 
-void pragma::Engine::SetVerbose(bool bVerbose) { pragma::math::set_flag(m_stateFlags, StateFlags::Verbose, bVerbose); }
-bool pragma::Engine::IsVerbose() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::Verbose); }
+void pragma::Engine::SetVerbose(bool bVerbose) { math::set_flag(m_stateFlags, StateFlags::Verbose, bVerbose); }
+bool pragma::Engine::IsVerbose() const { return math::is_flag_set(m_stateFlags, StateFlags::Verbose); }
 
-void pragma::Engine::SetConsoleSubsystem(bool consoleSubsystem) { pragma::math::set_flag(m_stateFlags, StateFlags::ConsoleSubsystem, consoleSubsystem); }
-bool pragma::Engine::IsConsoleSubsystem() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::ConsoleSubsystem); }
+void pragma::Engine::SetConsoleSubsystem(bool consoleSubsystem) { math::set_flag(m_stateFlags, StateFlags::ConsoleSubsystem, consoleSubsystem); }
+bool pragma::Engine::IsConsoleSubsystem() const { return math::is_flag_set(m_stateFlags, StateFlags::ConsoleSubsystem); }
 
-void pragma::Engine::SetDeveloperMode(bool devMode) { pragma::math::set_flag(m_stateFlags, StateFlags::DeveloperMode, devMode); }
-bool pragma::Engine::IsDeveloperModeEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::DeveloperMode); }
+void pragma::Engine::SetDeveloperMode(bool devMode) { math::set_flag(m_stateFlags, StateFlags::DeveloperMode, devMode); }
+bool pragma::Engine::IsDeveloperModeEnabled() const { return math::is_flag_set(m_stateFlags, StateFlags::DeveloperMode); }
 
-void pragma::Engine::SetNonInteractiveMode(bool nonInteractiveMode) { pragma::math::set_flag(m_stateFlags, StateFlags::NonInteractiveMode, nonInteractiveMode); }
-bool pragma::Engine::IsNonInteractiveMode() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::NonInteractiveMode); }
+void pragma::Engine::SetNonInteractiveMode(bool nonInteractiveMode) { math::set_flag(m_stateFlags, StateFlags::NonInteractiveMode, nonInteractiveMode); }
+bool pragma::Engine::IsNonInteractiveMode() const { return math::is_flag_set(m_stateFlags, StateFlags::NonInteractiveMode); }
 
 void pragma::Engine::SetLinenoiseEnabled(bool enabled)
 {
@@ -640,18 +640,18 @@ void pragma::Engine::SetLinenoiseEnabled(bool enabled)
 	// Linenoise is Linux-only
 	enabled = false;
 #endif
-	pragma::math::set_flag(m_stateFlags, StateFlags::UseLinenoise, enabled);
+	math::set_flag(m_stateFlags, StateFlags::UseLinenoise, enabled);
 }
-bool pragma::Engine::IsLinenoiseEnabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::UseLinenoise); }
+bool pragma::Engine::IsLinenoiseEnabled() const { return math::is_flag_set(m_stateFlags, StateFlags::UseLinenoise); }
 
-void pragma::Engine::SetManagedByPackageManager(bool isPackageManagerInstallation) { pragma::math::set_flag(m_stateFlags, StateFlags::ManagedByPackageManager, isPackageManagerInstallation); }
-bool pragma::Engine::IsManagedByPackageManager() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::ManagedByPackageManager); }
+void pragma::Engine::SetManagedByPackageManager(bool isPackageManagerInstallation) { math::set_flag(m_stateFlags, StateFlags::ManagedByPackageManager, isPackageManagerInstallation); }
+bool pragma::Engine::IsManagedByPackageManager() const { return math::is_flag_set(m_stateFlags, StateFlags::ManagedByPackageManager); }
 
-void pragma::Engine::SetSandboxed(bool sandboxed) { pragma::math::set_flag(m_stateFlags, StateFlags::Sandboxed, sandboxed); }
-bool pragma::Engine::IsSandboxed() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::Sandboxed); }
+void pragma::Engine::SetSandboxed(bool sandboxed) { math::set_flag(m_stateFlags, StateFlags::Sandboxed, sandboxed); }
+bool pragma::Engine::IsSandboxed() const { return math::is_flag_set(m_stateFlags, StateFlags::Sandboxed); }
 
-void pragma::Engine::SetCLIOnly(bool cliOnly) { pragma::math::set_flag(m_stateFlags, StateFlags::CLIOnly, cliOnly); }
-bool pragma::Engine::IsCLIOnly() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::CLIOnly); }
+void pragma::Engine::SetCLIOnly(bool cliOnly) { math::set_flag(m_stateFlags, StateFlags::CLIOnly, cliOnly); }
+bool pragma::Engine::IsCLIOnly() const { return math::is_flag_set(m_stateFlags, StateFlags::CLIOnly); }
 
 void pragma::Engine::Release() { Close(); }
 
@@ -667,7 +667,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	if(g_lpSandboxed)
 		SetSandboxed(true);
 
-	pragma::detail::initialize_logger(g_lpLogLevelCon, g_lpLogLevelFile, g_lpLogFile);
+	detail::initialize_logger(g_lpLogLevelCon, g_lpLogLevelFile, g_lpLogFile);
 	spdlog::info("Engine Version: {}", get_pretty_engine_version());
 
 	// Initialize file system
@@ -677,7 +677,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 			fs::set_absolute_root_path(g_lpUserDataDir, 0 /* priority */);
 		}
 		else
-			fs::set_absolute_root_path(pragma::util::get_program_path());
+			fs::set_absolute_root_path(util::get_program_path());
 
 		// TODO: File cache doesn't work with absolute paths at the moment
 		// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
@@ -685,7 +685,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 
 		if(!g_lpUserDataDir.empty()) {
 			// If we're using a custom user-data directory, we have to add the program path as an additional mount directory
-			fs::add_secondary_absolute_read_only_root_path("core", pragma::util::get_program_path());
+			fs::add_secondary_absolute_read_only_root_path("core", util::get_program_path());
 		}
 		size_t resDirIdx = 1;
 		for(auto &resourceDir : g_lpResourceDirs) {
@@ -700,7 +700,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	if(f) {
 		spdlog::info("Git Info:");
 		auto str = f->ReadString();
-		pragma::string::replace(str, "\n", spdlog::details::default_eol);
+		string::replace(str, "\n", spdlog::details::default_eol);
 		spdlog::info(str);
 	}
 
@@ -712,7 +712,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	Con::crit<<"crit output"<<Con::endl;
 	Con::csv<<"csv output"<<Con::endl;
 	Con::ccl<<"ccl output"<<Con::endl;
-	
+
 	spdlog::trace("trace log");
 	spdlog::debug("debug log");
 	spdlog::info("info log");
@@ -729,10 +729,10 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	if(fs::exists("addons/converted") == false)
 		fs::create_path("addons/converted");
 
-	pragma::register_engine_animation_events();
-	pragma::register_engine_activities();
+	register_engine_animation_events();
+	register_engine_activities();
 
-	Con::set_output_callback([this](const std::string_view &output, pragma::console::MessageFlags flags, const Color *color) {
+	Con::set_output_callback([this](const std::string_view &output, console::MessageFlags flags, const Color *color) {
 		if(m_bRecordConsoleOutput == false)
 			return;
 		m_consoleOutputMutex.lock();
@@ -748,18 +748,18 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	matManager->SetImportDirectory("addons/converted/");
 	InitializeAssetManager(*matManager);
 
-	pragma::asset::update_extension_cache(pragma::asset::Type::Map);
-	pragma::asset::update_extension_cache(pragma::asset::Type::Sound);
-	pragma::asset::update_extension_cache(pragma::asset::Type::ParticleSystem);
-	pragma::asset::update_extension_cache(pragma::asset::Type::Texture);
-	pragma::asset::update_extension_cache(pragma::asset::Type::Material);
+	pragma::asset::update_extension_cache(asset::Type::Map);
+	pragma::asset::update_extension_cache(asset::Type::Sound);
+	pragma::asset::update_extension_cache(asset::Type::ParticleSystem);
+	pragma::asset::update_extension_cache(asset::Type::Texture);
+	pragma::asset::update_extension_cache(asset::Type::Material);
 
 	auto matErr = matManager->LoadAsset("error");
 	m_svInstance = std::unique_ptr<StateInstance>(new StateInstance {matManager, matErr.get()});
 	//
 
 	if(Lua::get_extended_lua_modules_enabled()) {
-		RegisterConCommand("l", [this](pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run", argv); });
+		RegisterConCommand("l", [this](NetworkState *, BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run", argv); });
 	}
 	if(!IsServerOnly())
 		LoadConfig();
@@ -782,9 +782,9 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	return true;
 }
 
-void pragma::Engine::InitializeAssetManager(pragma::util::FileAssetManager &assetManager) const
+void pragma::Engine::InitializeAssetManager(util::FileAssetManager &assetManager) const
 {
-	assetManager.SetLogHandler(&pragma::log);
+	assetManager.SetLogHandler(&log);
 	assetManager.SetExternalSourceFileImportHandler([this, &assetManager](const std::string &path, const std::string &outputPath) -> std::optional<std::string> {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 		::debug::get_domain().BeginTask("import_asset_file");
@@ -801,12 +801,12 @@ void pragma::Engine::InitializeAssetManager(pragma::util::FileAssetManager &asse
 		auto &rootDir = assetManager.GetRootDirectory();
 		auto &extensions = assetManager.GetSupportedFormatExtensions();
 		for(auto &extInfo : extensions) {
-			auto relPath = pragma::util::Path::CreateFile(path + '.' + extInfo.extension);
+			auto relPath = util::Path::CreateFile(path + '.' + extInfo.extension);
 			auto formatPath = rootDir;
 			formatPath += relPath;
 
 			auto p = rootDir;
-			p += pragma::util::Path::CreateFile(outputPath + '.' + extInfo.extension);
+			p += util::Path::CreateFile(outputPath + '.' + extInfo.extension);
 
 			auto portSuccess = false;
 			if(extInfo.extension == "bsp")
@@ -831,12 +831,12 @@ void pragma::Engine::RunLaunchCommands()
 		auto &cmd = *it;
 		spdlog::debug("Running launch command '{}'...", cmd.command);
 		RunConsoleCommand(cmd.command, cmd.args);
-		if(pragma::string::compare(cmd.command.c_str(), "map", false)) {
+		if(string::compare(cmd.command.c_str(), "map", false)) {
 			// We'll delay all remaining commands until after the map has been loaded
 			std::vector<LaunchCommand> remainingCommands;
 			++it;
 			for(auto it2 = it; it2 != m_launchCommands.rend(); ++it2) {
-				if(pragma::string::compare(it2->command.c_str(), "map", false))
+				if(string::compare(it2->command.c_str(), "map", false))
 					continue;
 				remainingCommands.push_back(*it2);
 			}
@@ -1030,8 +1030,8 @@ static void add_zip_file(uzip::ZIPFile &zip, const std::string &fileName, const 
 
 std::unique_ptr<uzip::ZIPFile> pragma::Engine::GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr)
 {
-	auto programPath = pragma::util::Path::CreatePath(fs::get_program_write_path());
-	outZipFileName = pragma::util::get_date_time(baseName + "_%Y-%m-%d_%H-%M-%S.zip");
+	auto programPath = util::Path::CreatePath(fs::get_program_write_path());
+	outZipFileName = util::get_date_time(baseName + "_%Y-%m-%d_%H-%M-%S.zip");
 	auto zipName = programPath + outZipFileName;
 	std::string err;
 	auto zipFile = uzip::ZIPFile::Open(zipName.GetString(), err, uzip::OpenMode::Write);
@@ -1041,21 +1041,21 @@ std::unique_ptr<uzip::ZIPFile> pragma::Engine::GenerateEngineDump(const std::str
 	}
 
 	// Write Exception
-	auto &exceptionMsg = pragma::debug::get_exception_message();
+	auto &exceptionMsg = debug::get_exception_message();
 	if(exceptionMsg.empty() == false)
 		zipFile->AddFile("exception.txt", exceptionMsg);
 
 	// Write Stack Backtrace
-	zipFile->AddFile("stack_backtrace.txt", pragma::debug::get_formatted_stack_backtrace_string());
+	zipFile->AddFile("stack_backtrace.txt", debug::get_formatted_stack_backtrace_string());
 
 	// Write Info
-	if(pragma::Engine::Get() != nullptr) {
-		pragma::Engine::Get()->DumpDebugInformation(*zipFile.get());
+	if(Get() != nullptr) {
+		Get()->DumpDebugInformation(*zipFile.get());
 
-		auto logFileName = pragma::detail::get_log_file_name();
+		auto logFileName = detail::get_log_file_name();
 		if(logFileName.has_value()) {
-			pragma::detail::close_logger();
-			pragma::flush_loggers();
+			detail::close_logger();
+			flush_loggers();
 
 			/* For some reason this will fail sometimes
 			auto logContents = fs::read_file(*logFileName);
@@ -1074,15 +1074,15 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 {
 	std::stringstream engineInfo;
 	engineInfo << "System: ";
-	if(pragma::util::is_windows_system())
+	if(util::is_windows_system())
 		engineInfo << "Windows";
 	else
 		engineInfo << "Linux";
-	if(pragma::util::is_x64_system())
+	if(util::is_x64_system())
 		engineInfo << " x64";
 	else
 		engineInfo << " x86";
-	if(pragma::Engine::Get() != nullptr)
+	if(Get() != nullptr)
 		engineInfo << "\nEngine Version: " << get_pretty_engine_version();
 
 	auto *nw = static_cast<NetworkState *>(GetServerNetworkState());
@@ -1099,13 +1099,13 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 
 	add_zip_file(zip, "git_info.txt", "git_info.txt");
 
-	auto fWriteConvars = [&zip](const std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &cvarMap, const std::string &fileName) {
+	auto fWriteConvars = [&zip](const std::map<std::string, std::shared_ptr<console::ConConf>> &cvarMap, const std::string &fileName) {
 		std::stringstream convars;
 		for(auto &pair : cvarMap) {
-			if(pair.second->GetType() != pragma::console::ConType::Variable)
+			if(pair.second->GetType() != console::ConType::Variable)
 				continue;
-			auto *cv = static_cast<pragma::console::ConVar *>(pair.second.get());
-			if(pragma::math::is_flag_set(cv->GetFlags(), pragma::console::ConVarFlags::Password))
+			auto *cv = static_cast<console::ConVar *>(pair.second.get());
+			if(math::is_flag_set(cv->GetFlags(), console::ConVarFlags::Password))
 				continue; // Don't store potentially personal passwords in the crashdump
 			convars << pair.first << " \"" << cv->GetString() << "\"\n";
 		}
@@ -1134,7 +1134,7 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 		fWriteLuaTraceback(GetServerNetworkState()->GetLuaState(), "sv");
 	}
 
-	const_cast<pragma::Engine *>(this)->CallCallbacks<void, std::reference_wrapper<uzip::ZIPFile>>("DumpDebugInformation", zip);
+	const_cast<Engine *>(this)->CallCallbacks<void, std::reference_wrapper<uzip::ZIPFile>>("DumpDebugInformation", zip);
 }
 
 const long long &pragma::Engine::GetLastTick() const { return m_lastTick; }
@@ -1177,11 +1177,11 @@ pragma::NetworkState *pragma::Engine::GetClientState() const { return nullptr; }
 
 pragma::NetworkState *pragma::Engine::GetActiveState() { return GetServerNetworkState(); }
 
-bool pragma::Engine::IsActiveState(pragma::NetworkState *state) { return state == GetActiveState(); }
+bool pragma::Engine::IsActiveState(NetworkState *state) { return state == GetActiveState(); }
 
 void pragma::Engine::AddLaunchConVar(std::string cvar, std::string val) { m_launchCommands.push_back({cvar, {val}}); }
 
-void pragma::Engine::ShutDown() { pragma::math::set_flag(m_stateFlags, StateFlags::Running, false); }
+void pragma::Engine::ShutDown() { math::set_flag(m_stateFlags, StateFlags::Running, false); }
 
 void pragma::Engine::HandleLocalHostPlayerClientPacket(NetPacket &p) {}
 void pragma::Engine::HandleLocalHostPlayerServerPacket(NetPacket &p) { return GetServerStateInterface().handle_local_host_player_server_packet(p); }
@@ -1193,17 +1193,17 @@ void pragma::Engine::WriteToLog(const std::string &str) { pragma::log(str); }
 pragma::Engine::~Engine()
 {
 	g_engine = nullptr;
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::Running))
+	if(math::is_flag_set(m_stateFlags, StateFlags::Running))
 		throw std::runtime_error("Engine has to be closed before it can be destroyed!");
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::close_domain();
 #endif
 
-	pragma::debug::set_lua_backtrace_function(nullptr);
+	debug::set_lua_backtrace_function(nullptr);
 
 	spdlog::info("Closing logger...");
-	pragma::detail::close_logger();
+	detail::close_logger();
 }
 
 pragma::Engine *pragma::get_engine() { return g_engine; }
-pragma::NetworkState *pragma::get_server_state() { return pragma::Engine::Get()->GetServerStateInterface().get_server_state(); }
+pragma::NetworkState *pragma::get_server_state() { return Engine::Get()->GetServerStateInterface().get_server_state(); }

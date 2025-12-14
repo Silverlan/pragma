@@ -13,7 +13,7 @@ using namespace pragma;
 
 void SLightComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
-	packet->Write<pragma::BaseEnvLightComponent::ShadowType>(GetShadowType());
+	packet->Write<ShadowType>(GetShadowType());
 	packet->Write<float>(m_falloffExponent);
 	packet->Write<LightFlags>(m_lightFlags);
 	packet->Write<float>(GetLightIntensity());
@@ -28,7 +28,7 @@ void SLightComponent::SetShadowType(ShadowType type)
 		return;
 	NetPacket p {};
 	p->Write(type);
-	ent.SendNetEvent(m_netEvSetShadowType, p, pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netEvSetShadowType, p, networking::Protocol::SlowReliable);
 }
 
 void SLightComponent::SetFalloffExponent(float falloffExponent)
@@ -39,7 +39,7 @@ void SLightComponent::SetFalloffExponent(float falloffExponent)
 		return;
 	NetPacket p {};
 	p->Write<float>(falloffExponent);
-	ent.SendNetEvent(m_netEvSetFalloffExponent, p, pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netEvSetFalloffExponent, p, networking::Protocol::SlowReliable);
 }
 
 void SLightComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

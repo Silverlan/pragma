@@ -17,10 +17,10 @@ rendering::EntityInstanceIndexBuffer::EntityInstanceIndexBuffer()
 	prosper::util::BufferCreateInfo bufCreateInfo = {};
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
-	bufCreateInfo.size = pragma::math::to_integral(pragma::GameLimits::MaxEntityInstanceCount) * sizeof(RenderBufferIndex);
+	bufCreateInfo.size = math::to_integral(GameLimits::MaxEntityInstanceCount) * sizeof(RenderBufferIndex);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 
-	m_buffer = pragma::get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo, bufCreateInfo.size);
+	m_buffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo, bufCreateInfo.size);
 	m_buffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
 	auto id = SINGLE_INSTANCE_RENDER_BUFFER_INDEX;
@@ -33,7 +33,7 @@ rendering::EntityInstanceIndexBuffer::~EntityInstanceIndexBuffer()
 	m_buffer = nullptr;
 }
 
-prosper::FrameIndex rendering::EntityInstanceIndexBuffer::GetCurrentFrameIndex() const { return pragma::get_cengine()->GetRenderContext().GetLastFrameId(); }
+prosper::FrameIndex rendering::EntityInstanceIndexBuffer::GetCurrentFrameIndex() const { return get_cengine()->GetRenderContext().GetLastFrameId(); }
 
 void rendering::EntityInstanceIndexBuffer::UpdateAndClearUnusedBuffers()
 {
@@ -75,7 +75,7 @@ void rendering::EntityInstanceIndexBuffer::UpdateBufferData(const RenderQueue &r
 	// TOOD: actually write data to buffers
 }
 
-std::shared_ptr<prosper::IBuffer> rendering::EntityInstanceIndexBuffer::AddInstanceList(const RenderQueue &renderQueue, std::vector<pragma::RenderBufferIndex> &&instanceList, pragma::util::Hash hash)
+std::shared_ptr<prosper::IBuffer> rendering::EntityInstanceIndexBuffer::AddInstanceList(const RenderQueue &renderQueue, std::vector<RenderBufferIndex> &&instanceList, util::Hash hash)
 {
 	auto itCache = m_cachedBuffers.find(hash);
 	if(itCache != m_cachedBuffers.end()) {

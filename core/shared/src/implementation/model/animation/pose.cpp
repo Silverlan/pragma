@@ -8,8 +8,8 @@ module pragma.shared;
 
 import :model.animation.pose;
 
-pragma::animation::Pose::Pose(const std::vector<pragma::math::ScaledTransform> &transforms) : m_transforms {transforms} {}
-pragma::animation::Pose::Pose(std::vector<pragma::math::ScaledTransform> &&transforms) : m_transforms {std::move(transforms)} {}
+pragma::animation::Pose::Pose(const std::vector<math::ScaledTransform> &transforms) : m_transforms {transforms} {}
+pragma::animation::Pose::Pose(std::vector<math::ScaledTransform> &&transforms) : m_transforms {std::move(transforms)} {}
 void pragma::animation::Pose::SetTransformCount(uint32_t c) { m_transforms.resize(c); }
 void pragma::animation::Pose::SetBoneIndex(uint32_t channelId, BoneId boneId)
 {
@@ -26,7 +26,7 @@ pragma::math::ScaledTransform *pragma::animation::Pose::GetTransform(BoneId idx)
 		return nullptr;
 	return &m_transforms[channelIdx];
 }
-void pragma::animation::Pose::SetTransform(BoneId idx, const pragma::math::ScaledTransform &pose)
+void pragma::animation::Pose::SetTransform(BoneId idx, const math::ScaledTransform &pose)
 {
 	if(idx >= m_boneIdToChannelId.size())
 		return;
@@ -102,8 +102,8 @@ static void get_local_bone_transforms(const pragma::animation::Skeleton &skeleto
 	};
 	fGetLocalBoneTransforms(frame, skeleton.GetRootBones());
 }
-void pragma::animation::Pose::Localize(const pragma::animation::Skeleton &skeleton) { get_local_bone_transforms(skeleton, *this); }
-void pragma::animation::Pose::Globalize(const pragma::animation::Skeleton &skeleton) { get_global_bone_transforms(skeleton, *this); }
+void pragma::animation::Pose::Localize(const Skeleton &skeleton) { get_local_bone_transforms(skeleton, *this); }
+void pragma::animation::Pose::Globalize(const Skeleton &skeleton) { get_global_bone_transforms(skeleton, *this); }
 
 std::ostream &operator<<(std::ostream &out, const pragma::animation::Pose &o)
 {

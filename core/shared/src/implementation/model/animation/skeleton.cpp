@@ -23,8 +23,8 @@ pragma::animation::Skeleton::Skeleton(const Skeleton &other)
 		pair.second = m_bones[pair.first];
 	m_referencePoses = other.m_referencePoses;
 
-	std::function<void(std::unordered_map<pragma::animation::BoneId, std::shared_ptr<Bone>> &, std::shared_ptr<Bone>)> fUpdateHierarchy;
-	fUpdateHierarchy = [this, &fUpdateHierarchy](std::unordered_map<pragma::animation::BoneId, std::shared_ptr<Bone>> &bones, std::shared_ptr<Bone> parent) {
+	std::function<void(std::unordered_map<BoneId, std::shared_ptr<Bone>> &, std::shared_ptr<Bone>)> fUpdateHierarchy;
+	fUpdateHierarchy = [this, &fUpdateHierarchy](std::unordered_map<BoneId, std::shared_ptr<Bone>> &bones, std::shared_ptr<Bone> parent) {
 		for(auto &pair : bones) {
 			for(auto &pair : pair.second->children)
 				pair.second = m_bones[pair.first];
@@ -38,9 +38,9 @@ pragma::animation::Skeleton::Skeleton(const Skeleton &other)
 #endif
 }
 
-bool pragma::animation::Skeleton::IsRootBone(pragma::animation::BoneId boneId) const { return m_rootBones.find(boneId) != m_rootBones.end(); }
+bool pragma::animation::Skeleton::IsRootBone(BoneId boneId) const { return m_rootBones.find(boneId) != m_rootBones.end(); }
 
-bool pragma::animation::Skeleton::TransformToParentSpace(const std::vector<pragma::math::ScaledTransform> &gsPoses, std::vector<pragma::math::ScaledTransform> &outPoses) const
+bool pragma::animation::Skeleton::TransformToParentSpace(const std::vector<math::ScaledTransform> &gsPoses, std::vector<math::ScaledTransform> &outPoses) const
 {
 	if(gsPoses.size() != outPoses.size() || gsPoses.size() != m_bones.size())
 		return false;
@@ -59,7 +59,7 @@ bool pragma::animation::Skeleton::TransformToParentSpace(const std::vector<pragm
 		transformToParentSpace(*pair.second);
 	return true;
 }
-bool pragma::animation::Skeleton::TransformToGlobalSpace(const std::vector<pragma::math::ScaledTransform> &psPoses, std::vector<pragma::math::ScaledTransform> &outPoses) const
+bool pragma::animation::Skeleton::TransformToGlobalSpace(const std::vector<math::ScaledTransform> &psPoses, std::vector<math::ScaledTransform> &outPoses) const
 {
 	if(psPoses.size() != outPoses.size() || psPoses.size() != m_bones.size())
 		return false;
@@ -107,7 +107,7 @@ uint32_t pragma::animation::Skeleton::GetBoneCount() const { return static_cast<
 std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::animation::Bone>> &pragma::animation::Skeleton::GetRootBones() { return m_rootBones; }
 const std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::animation::Bone>> &pragma::animation::Skeleton::GetRootBones() const { return m_rootBones; }
 
-std::weak_ptr<pragma::animation::Bone> pragma::animation::Skeleton::GetBone(pragma::animation::BoneId id) const
+std::weak_ptr<pragma::animation::Bone> pragma::animation::Skeleton::GetBone(BoneId id) const
 {
 	if(id >= m_bones.size())
 		return {};
@@ -149,12 +149,12 @@ bool pragma::animation::Skeleton::LoadFromAssetData(const udm::AssetData &data, 
 	struct BoneInfo {
 		udm::LinkedPropertyWrapper udmBone;
 		std::string_view name;
-		std::vector<pragma::animation::BoneId> childIds;
+		std::vector<BoneId> childIds;
 		BoneId index;
 	};
 
 	std::vector<BoneInfo> udmBoneList {};
-	std::function<pragma::animation::BoneId(udm::LinkedPropertyWrapper & prop, const std::string_view &name)> readBone = nullptr;
+	std::function<BoneId(udm::LinkedPropertyWrapper & prop, const std::string_view &name)> readBone = nullptr;
 	readBone = [this, &readBone, &udmBoneList](udm::LinkedPropertyWrapper &udmBone, const std::string_view &name) -> BoneId {
 		if(udmBoneList.size() == udmBoneList.capacity())
 			udmBoneList.reserve(udmBoneList.size() * 1.5 + 50);
@@ -177,7 +177,7 @@ bool pragma::animation::Skeleton::LoadFromAssetData(const udm::AssetData &data, 
 		return idx;
 	};
 	auto udmBones = udm["bones"];
-	std::vector<pragma::animation::BoneId> rootBoneIndices {};
+	std::vector<BoneId> rootBoneIndices {};
 	rootBoneIndices.reserve(udmBones.GetChildCount());
 	for(auto udmBone : udmBones.ElIt())
 		rootBoneIndices.push_back(readBone(udmBone.property, udmBone.key));
@@ -254,11 +254,11 @@ void pragma::animation::Skeleton::Merge(Skeleton &other)
 {
 	auto &bones = GetBones();
 	auto &rootBones = GetRootBones();
-	std::function<void(const std::unordered_map<pragma::animation::BoneId, std::shared_ptr<Bone>> &, std::shared_ptr<Bone>)> mergeHierarchy = nullptr;
-	mergeHierarchy = [this, &bones, &rootBones, &mergeHierarchy](const std::unordered_map<pragma::animation::BoneId, std::shared_ptr<Bone>> &otherBones, std::shared_ptr<Bone> parent) {
+	std::function<void(const std::unordered_map<BoneId, std::shared_ptr<Bone>> &, std::shared_ptr<Bone>)> mergeHierarchy = nullptr;
+	mergeHierarchy = [this, &bones, &rootBones, &mergeHierarchy](const std::unordered_map<BoneId, std::shared_ptr<Bone>> &otherBones, std::shared_ptr<Bone> parent) {
 		for(auto &pair : otherBones) {
 			auto &otherBone = pair.second;
-			auto it = std::find_if(bones.begin(), bones.end(), [&otherBone](const std::shared_ptr<Bone> &bone) { return pragma::string::compare(bone->name.c_str(), otherBone->name.c_str(), true); });
+			auto it = std::find_if(bones.begin(), bones.end(), [&otherBone](const std::shared_ptr<Bone> &bone) { return string::compare(bone->name.c_str(), otherBone->name.c_str(), true); });
 			if(it == bones.end()) {
 				// Bone doesn't exist yet; Add to hierarchy
 				bones.push_back(pragma::util::make_shared<Bone>());

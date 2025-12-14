@@ -82,14 +82,14 @@ static void clip_triangle(const std::function<void(uint32_t)> &fAddTriangleIndex
 	}
 }
 
-void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d, pragma::geometry::ModelSubMesh &clippedMesh, const std::vector<Mat4> *boneMatrices, pragma::geometry::ModelSubMesh *clippedCoverMesh)
+void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d, ModelSubMesh &clippedMesh, const std::vector<Mat4> *boneMatrices, ModelSubMesh *clippedCoverMesh)
 {
 	const auto &verts = GetVertices();
 	const auto &alphas = GetAlphas();
 	const auto &vertexWeights = GetVertexWeights();
 	auto bUseWeights = vertexWeights.size() >= verts.size();
 	auto fGetVertexPosition = std::function<const Vector3 &(uint32_t)>([&verts](uint32_t vertexIndex) -> const Vector3 & { return verts.at(vertexIndex).position; });
-	auto fApplyVertexBoneTransformations = [boneMatrices](const Vector3 &v, const pragma::math::VertexWeight &vw) -> Vector3 {
+	auto fApplyVertexBoneTransformations = [boneMatrices](const Vector3 &v, const math::VertexWeight &vw) -> Vector3 {
 		auto m = Mat4 {0.f};
 		for(auto i = 0u; i < 4u; ++i) {
 			auto boneId = vw.boneIds[i];
@@ -131,8 +131,8 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 		clippedMesh.AddIndex(originalVertexIndicesToClippedVertexIndices.at(idx));
 	};
 	struct PointData {
-		pragma::math::Vertex vertex;
-		pragma::math::VertexWeight weight;
+		math::Vertex vertex;
+		math::VertexWeight weight;
 	};
 	using BoneId = int32_t;
 	std::vector<PointData> newPoints {};
@@ -144,7 +144,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 			const auto &vw0 = vertexWeights.at(idx0);
 			const auto &vw1 = vertexWeights.at(idx1);
 
-			std::unordered_map<pragma::animation::BoneId, float> weightMap {};
+			std::unordered_map<animation::BoneId, float> weightMap {};
 			for(auto i = 0u; i < 4u; ++i) {
 				for(auto &vw : {vw0, vw1}) {
 					if(vw.boneIds[i] != -1) {
@@ -156,7 +156,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 					}
 				}
 			}
-			std::array<std::pair<pragma::animation::BoneId, float>, 4> weights {std::pair<pragma::animation::BoneId, float> {-1, 0.f}};
+			std::array<std::pair<animation::BoneId, float>, 4> weights {std::pair<animation::BoneId, float> {-1, 0.f}};
 			auto weightSum = 0.f;
 			auto weightIdx = 0u;
 			for(auto &pair : weightMap) {
@@ -183,7 +183,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 				fApplyVertexBoneTransformations(clipMeshVerts.back().position, vwClipped);
 		}
 
-		newPoints.push_back({clipMeshVerts.back(), bUseWeights ? clippedVertexWeights.back() : pragma::math::VertexWeight {}});
+		newPoints.push_back({clipMeshVerts.back(), bUseWeights ? clippedVertexWeights.back() : math::VertexWeight {}});
 
 		if(idx0 < alphas.size() && idx1 < alphas.size()) {
 			auto &a0 = alphas.at(idx0);
@@ -253,7 +253,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 
 		std::vector<Vector2> points2d;
 		points2d.reserve(newPoints.size());
-		auto rot = pragma::math::geometry::calc_rotation_between_planes(n, uvec::UP);
+		auto rot = math::geometry::calc_rotation_between_planes(n, uvec::UP);
 		for(auto &v : newPoints) {
 			auto p = v.vertex.position;
 			p = p * rot;
@@ -261,7 +261,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 		}
 
 		std::vector<uint16_t> newTriangles {};
-		auto outlineIndices = pragma::math::geometry::get_outline_vertices(points2d);
+		auto outlineIndices = math::geometry::get_outline_vertices(points2d);
 		if(outlineIndices.has_value()) {
 			newTriangles.reserve((outlineIndices->size() - 1) * 3);
 			for(auto i = decltype(outlineIndices->size()) {0u}; i < outlineIndices->size(); ++i) {
@@ -289,7 +289,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 		Con::cout << ss.str() << Con::endl;
 
 		if(/*b == true &&*/ newTriangles.empty() == false) {
-			auto fCalcVertexWeights = [&newPoints](const Vector3 &pos) -> pragma::math::VertexWeight {
+			auto fCalcVertexWeights = [&newPoints](const Vector3 &pos) -> math::VertexWeight {
 				std::vector<float> pointWeights {};
 				pointWeights.reserve(newPoints.size());
 				auto weightSum = 0.f;
@@ -302,7 +302,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 					w = 1.f - (w / weightSum);
 
 				using WeightCount = uint32_t;
-				std::unordered_map<pragma::animation::BoneId, std::pair<float, WeightCount>> weights {};
+				std::unordered_map<animation::BoneId, std::pair<float, WeightCount>> weights {};
 				weights.reserve(newPoints.size() * 4);
 				for(auto i = decltype(newPoints.size()) {0u}; i < newPoints.size(); ++i) {
 					auto &p = newPoints.at(i);
@@ -320,14 +320,14 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 					}
 				}
 				using Weight = float;
-				std::vector<std::pair<pragma::animation::BoneId, Weight>> sortedWeights {};
+				std::vector<std::pair<animation::BoneId, Weight>> sortedWeights {};
 				sortedWeights.reserve(weights.size());
 				for(auto &pair : weights)
 					sortedWeights.push_back({pair.first, pair.second.first / static_cast<float>(pair.second.second)});
-				std::sort(sortedWeights.begin(), sortedWeights.end(), [](const std::pair<pragma::animation::BoneId, Weight> &a, const std::pair<pragma::animation::BoneId, Weight> &b) { return a.second > b.second; });
+				std::sort(sortedWeights.begin(), sortedWeights.end(), [](const std::pair<animation::BoneId, Weight> &a, const std::pair<animation::BoneId, Weight> &b) { return a.second > b.second; });
 
-				pragma::math::VertexWeight r {};
-				auto num = pragma::math::min(sortedWeights.size(), static_cast<size_t>(4));
+				math::VertexWeight r {};
+				auto num = math::min(sortedWeights.size(), static_cast<size_t>(4));
 				weightSum = 0.f;
 				for(auto i = decltype(num) {0u}; i < num; ++i) {
 					auto &w = sortedWeights.at(i);
@@ -350,7 +350,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 			if(d < 0.0) // Wrong orientation; Triangles have to be flipped
 			{
 				for(auto i = decltype(newTriangles.size()) {0}; i < newTriangles.size(); i += 3)
-					pragma::math::swap(newTriangles.at(i), newTriangles.at(i + 2));
+					math::swap(newTriangles.at(i), newTriangles.at(i + 2));
 			}
 
 			auto *pCoverVerts = &clipMeshVerts;
@@ -379,7 +379,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 
 					v.vertex.normal = nTriangulated;
 					v.vertex.uv = {};
-					pragma::math::geometry::calc_barycentric_coordinates(p0.vertex.position, p1.vertex.position, p2.vertex.position, v.vertex.position, v.vertex.uv.x, v.vertex.uv.y);
+					math::geometry::calc_barycentric_coordinates(p0.vertex.position, p1.vertex.position, p2.vertex.position, v.vertex.position, v.vertex.uv.x, v.vertex.uv.y);
 
 					pCoverVerts->push_back(v.vertex);
 					coverMesh->AddIndex(pCoverVerts->size() - 1u);
@@ -399,7 +399,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 	//
 }
 
-void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d, pragma::geometry::ModelSubMesh &clippedMeshA, pragma::geometry::ModelSubMesh &clippedMeshB, const std::vector<Mat4> *boneMatrices, pragma::geometry::ModelSubMesh *clippedCoverMeshA, pragma::geometry::ModelSubMesh *clippedCoverMeshB)
+void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d, ModelSubMesh &clippedMeshA, ModelSubMesh &clippedMeshB, const std::vector<Mat4> *boneMatrices, ModelSubMesh *clippedCoverMeshA, ModelSubMesh *clippedCoverMeshB)
 {
 	ClipAgainstPlane(n, d, clippedMeshA, boneMatrices, clippedCoverMeshA);
 	ClipAgainstPlane(-n, -d, clippedMeshB, boneMatrices, clippedCoverMeshB);

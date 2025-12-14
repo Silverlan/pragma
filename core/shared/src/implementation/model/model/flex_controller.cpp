@@ -6,10 +6,10 @@ module pragma.shared;
 
 import :model.model;
 
-std::vector<pragma::animation::FlexController>::const_iterator pragma::asset::Model::FindFlexController(const std::string &name) const { return const_cast<pragma::asset::Model *>(this)->FindFlexController(name); }
+std::vector<pragma::animation::FlexController>::const_iterator pragma::asset::Model::FindFlexController(const std::string &name) const { return const_cast<Model *>(this)->FindFlexController(name); }
 std::vector<pragma::animation::FlexController>::iterator pragma::asset::Model::FindFlexController(const std::string &name)
 {
-	return std::find_if(m_flexControllers.begin(), m_flexControllers.end(), [&name](const pragma::animation::FlexController &fc) { return pragma::string::compare(fc.name, name, false); });
+	return std::find_if(m_flexControllers.begin(), m_flexControllers.end(), [&name](const animation::FlexController &fc) { return string::compare(fc.name, name, false); });
 }
 bool pragma::asset::Model::GetFlexControllerId(const std::string &name, uint32_t &id) const
 {
@@ -19,11 +19,11 @@ bool pragma::asset::Model::GetFlexControllerId(const std::string &name, uint32_t
 	id = it - m_flexControllers.begin();
 	return true;
 }
-const std::vector<pragma::animation::FlexController> &pragma::asset::Model::GetFlexControllers() const { return const_cast<pragma::asset::Model *>(this)->GetFlexControllers(); }
+const std::vector<pragma::animation::FlexController> &pragma::asset::Model::GetFlexControllers() const { return const_cast<Model *>(this)->GetFlexControllers(); }
 std::vector<pragma::animation::FlexController> &pragma::asset::Model::GetFlexControllers() { return m_flexControllers; }
-const pragma::animation::FlexController *pragma::asset::Model::GetFlexController(uint32_t id) const { return const_cast<pragma::asset::Model *>(this)->GetFlexController(id); }
+const pragma::animation::FlexController *pragma::asset::Model::GetFlexController(uint32_t id) const { return const_cast<Model *>(this)->GetFlexController(id); }
 pragma::animation::FlexController *pragma::asset::Model::GetFlexController(uint32_t id) { return (id < m_flexControllers.size()) ? &m_flexControllers.at(id) : nullptr; }
-const pragma::animation::FlexController *pragma::asset::Model::GetFlexController(const std::string &name) const { return const_cast<pragma::asset::Model *>(this)->GetFlexController(name); }
+const pragma::animation::FlexController *pragma::asset::Model::GetFlexController(const std::string &name) const { return const_cast<Model *>(this)->GetFlexController(name); }
 pragma::animation::FlexController *pragma::asset::Model::GetFlexController(const std::string &name)
 {
 	auto it = FindFlexController(name);
@@ -64,13 +64,13 @@ const std::string *pragma::asset::Model::GetFlexControllerName(uint32_t id) cons
 
 //////////////
 
-void pragma::asset::Model::SetMaxEyeDeflection(pragma::math::Degree eyeDeflection) { m_maxEyeDeflection = eyeDeflection; }
+void pragma::asset::Model::SetMaxEyeDeflection(math::Degree eyeDeflection) { m_maxEyeDeflection = eyeDeflection; }
 pragma::math::Degree pragma::asset::Model::GetMaxEyeDeflection() const { return m_maxEyeDeflection; }
 
-std::vector<pragma::animation::Flex>::const_iterator pragma::asset::Model::FindFlex(const std::string &name) const { return const_cast<pragma::asset::Model *>(this)->FindFlex(name); }
+std::vector<pragma::animation::Flex>::const_iterator pragma::asset::Model::FindFlex(const std::string &name) const { return const_cast<Model *>(this)->FindFlex(name); }
 std::vector<pragma::animation::Flex>::iterator pragma::asset::Model::FindFlex(const std::string &name)
 {
-	return std::find_if(m_flexes.begin(), m_flexes.end(), [&name](const pragma::animation::Flex &flex) { return pragma::string::compare(flex.GetName(), name, false); });
+	return std::find_if(m_flexes.begin(), m_flexes.end(), [&name](const animation::Flex &flex) { return string::compare(flex.GetName(), name, false); });
 }
 bool pragma::asset::Model::GetFlexId(const std::string &name, uint32_t &id) const
 {
@@ -80,11 +80,11 @@ bool pragma::asset::Model::GetFlexId(const std::string &name, uint32_t &id) cons
 	id = it - m_flexes.begin();
 	return true;
 }
-const std::vector<pragma::animation::Flex> &pragma::asset::Model::GetFlexes() const { return const_cast<pragma::asset::Model *>(this)->GetFlexes(); }
+const std::vector<pragma::animation::Flex> &pragma::asset::Model::GetFlexes() const { return const_cast<Model *>(this)->GetFlexes(); }
 std::vector<pragma::animation::Flex> &pragma::asset::Model::GetFlexes() { return m_flexes; }
-const pragma::animation::Flex *pragma::asset::Model::GetFlex(uint32_t id) const { return const_cast<pragma::asset::Model *>(this)->GetFlex(id); }
+const pragma::animation::Flex *pragma::asset::Model::GetFlex(uint32_t id) const { return const_cast<Model *>(this)->GetFlex(id); }
 pragma::animation::Flex *pragma::asset::Model::GetFlex(uint32_t id) { return (id < m_flexes.size()) ? &m_flexes.at(id) : nullptr; }
-const pragma::animation::Flex *pragma::asset::Model::GetFlex(const std::string &name) const { return const_cast<pragma::asset::Model *>(this)->GetFlex(name); }
+const pragma::animation::Flex *pragma::asset::Model::GetFlex(const std::string &name) const { return const_cast<Model *>(this)->GetFlex(name); }
 pragma::animation::Flex *pragma::asset::Model::GetFlex(const std::string &name)
 {
 	auto it = FindFlex(name);
@@ -134,24 +134,24 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 	std::stack<OpExpression> opStack {};
 	for(auto &op : flex->GetOperations()) {
 		switch(op.type) {
-		case pragma::animation::Flex::Operation::Type::None:
+		case animation::Flex::Operation::Type::None:
 			break;
-		case pragma::animation::Flex::Operation::Type::Const:
+		case animation::Flex::Operation::Type::Const:
 			opStack.push({std::to_string(op.d.value), 10u});
 			break;
-		case pragma::animation::Flex::Operation::Type::Fetch:
+		case animation::Flex::Operation::Type::Fetch:
 			{
 				auto *flexCon = GetFlexController(op.d.index);
 				opStack.push({(flexCon != nullptr) ? flexCon->name : "invalid_flex_controller", 10u});
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Fetch2:
+		case animation::Flex::Operation::Type::Fetch2:
 			{
 				auto *flex = GetFlex(op.d.index);
 				opStack.push({"%" + ((flex != nullptr) ? flex->GetName() : "invalid_flex"), 10u});
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Add:
+		case animation::Flex::Operation::Type::Add:
 			{
 				auto r = opStack.top();
 				opStack.pop();
@@ -161,7 +161,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				opStack.push({l.expression + " + " + r.expression, 1u});
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Sub:
+		case animation::Flex::Operation::Type::Sub:
 			{
 				auto r = opStack.top();
 				opStack.pop();
@@ -171,7 +171,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				opStack.push({l.expression + " - " + r.expression, 1u});
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Mul:
+		case animation::Flex::Operation::Type::Mul:
 			{
 				auto r = opStack.top();
 				opStack.pop();
@@ -192,7 +192,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				opStack.push({lExpr + " * " + rExpr, 2});
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Div:
+		case animation::Flex::Operation::Type::Div:
 			{
 				auto r = opStack.top();
 				opStack.pop();
@@ -213,22 +213,22 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				opStack.push({lExpr + " / " + rExpr, 2});
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Neg:
+		case animation::Flex::Operation::Type::Neg:
 			{
 				auto r = opStack.top();
 				opStack.pop();
 				opStack.push({"-" + r.expression, 10});
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Exp:
+		case animation::Flex::Operation::Type::Exp:
 			break;
-		case pragma::animation::Flex::Operation::Type::Open:
+		case animation::Flex::Operation::Type::Open:
 			break;
-		case pragma::animation::Flex::Operation::Type::Close:
+		case animation::Flex::Operation::Type::Close:
 			break;
-		case pragma::animation::Flex::Operation::Type::Comma:
+		case animation::Flex::Operation::Type::Comma:
 			break;
-		case pragma::animation::Flex::Operation::Type::Max:
+		case animation::Flex::Operation::Type::Max:
 			{
 				auto r = opStack.top();
 				opStack.pop();
@@ -249,7 +249,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				opStack.push({" max(" + lExpr + ", " + rExpr + ")", 5});
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Min:
+		case animation::Flex::Operation::Type::Min:
 			{
 				auto r = opStack.top();
 				opStack.pop();
@@ -270,26 +270,26 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				opStack.push({" min(" + lExpr + ", " + rExpr + ")", 5});
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::TwoWay0:
+		case animation::Flex::Operation::Type::TwoWay0:
 			{
 				auto *flexCon = GetFlexController(op.d.index);
 				opStack.push({" (1 - (min(max(" + ((flexCon != nullptr) ? flexCon->name : "invalid_flex_controller") + " + 1, 0), 1)))", 5});
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::TwoWay1:
+		case animation::Flex::Operation::Type::TwoWay1:
 			{
 				auto *flexCon = GetFlexController(op.d.index);
 				opStack.push({" (min(max(" + ((flexCon != nullptr) ? flexCon->name : "invalid_flex_controller") + ", 0), 1))", 5});
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::NWay:
+		case animation::Flex::Operation::Type::NWay:
 			{
 				auto *flexCon = GetFlexController(op.d.index);
 				auto v = (flexCon != nullptr) ? flexCon->name : "invalid_flex_controller";
 
 				auto &valueControllerIndex = opStack.top();
 				opStack.pop();
-				auto *flValueController = GetFlexController(pragma::string::to_int(valueControllerIndex.expression));
+				auto *flValueController = GetFlexController(string::to_int(valueControllerIndex.expression));
 				auto flValue = (flValueController != nullptr) ? flValueController->name : "invalid_flex_controller";
 
 				auto &filterRampW = opStack.top();
@@ -315,7 +315,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				opStack.push({"((" + expValue + ") * (" + v + "))", 5});
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Combo:
+		case animation::Flex::Operation::Type::Combo:
 			{
 				auto count = op.d.index;
 				auto newExpr = OpExpression {};
@@ -332,7 +332,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				opStack.push(newExpr);
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Dominate:
+		case animation::Flex::Operation::Type::Dominate:
 			{
 				auto count = op.d.index;
 				auto newExpr = OpExpression {};
@@ -352,7 +352,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				opStack.push(newExpr);
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::DMELowerEyelid:
+		case animation::Flex::Operation::Type::DMELowerEyelid:
 			{
 				auto *pCloseLidVController = GetFlexController(op.d.index);
 				auto pCloseLidV = (pCloseLidVController != nullptr) ? pCloseLidVController->name : "invalid_flex_controller";
@@ -363,7 +363,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				auto closeLidIndex = opStack.top();
 				opStack.pop();
 
-				auto *pCloseLidController = GetFlexController(pragma::string::to_int(closeLidIndex.expression));
+				auto *pCloseLidController = GetFlexController(string::to_int(closeLidIndex.expression));
 				auto pCloseLid = (pCloseLidController != nullptr) ? pCloseLidController->name : "invalid_flex_controller";
 				auto flCloseLidMin = std::to_string((pCloseLidController != nullptr) ? pCloseLidController->min : 0.f);
 				auto flCloseLidMax = std::to_string((pCloseLidController != nullptr) ? pCloseLidController->max : 0.f);
@@ -373,7 +373,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 
 				auto eyeUpDownIndex = opStack.top();
 				opStack.pop();
-				auto *pEyeUpDownController = GetFlexController(pragma::string::to_int(eyeUpDownIndex.expression));
+				auto *pEyeUpDownController = GetFlexController(string::to_int(eyeUpDownIndex.expression));
 				auto pEyeUpDown = (pEyeUpDownController != nullptr) ? pEyeUpDownController->name : "invalid_flex_controller";
 				auto flEyeUpDownMin = std::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->min : 0.f);
 				auto flEyeUpDownMax = std::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->max : 0.f);
@@ -382,7 +382,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				opStack.push({"(min(1, (1 - " + flEyeUpDown + ")) * (1 - " + flCloseLidV + ") * " + flCloseLid + ")", 5});
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::DMEUpperEyelid:
+		case animation::Flex::Operation::Type::DMEUpperEyelid:
 			{
 				auto *pCloseLidVController = GetFlexController(op.d.index);
 				auto pCloseLidV = (pCloseLidVController != nullptr) ? pCloseLidVController->name : "invalid_flex_controller";
@@ -392,7 +392,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 
 				auto closeLidIndex = opStack.top();
 				opStack.pop();
-				auto *pCloseLidController = GetFlexController(pragma::string::to_int(closeLidIndex.expression));
+				auto *pCloseLidController = GetFlexController(string::to_int(closeLidIndex.expression));
 				auto pCloseLid = (pCloseLidController != nullptr) ? pCloseLidController->name : "invalid_flex_controller";
 				auto flCloseLidMin = std::to_string((pCloseLidController != nullptr) ? pCloseLidController->min : 0.f);
 				auto flCloseLidMax = std::to_string((pCloseLidController != nullptr) ? pCloseLidController->max : 0.f);
@@ -402,7 +402,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 
 				auto eyeUpDownIndex = opStack.top();
 				opStack.pop();
-				auto *pEyeUpDownController = GetFlexController(pragma::string::to_int(eyeUpDownIndex.expression));
+				auto *pEyeUpDownController = GetFlexController(string::to_int(eyeUpDownIndex.expression));
 				auto pEyeUpDown = (pEyeUpDownController != nullptr) ? pEyeUpDownController->name : "invalid_flex_controller";
 				auto flEyeUpDownMin = std::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->min : 0.f);
 				auto flEyeUpDownMax = std::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->max : 0.f);

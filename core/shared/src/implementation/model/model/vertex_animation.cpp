@@ -6,14 +6,14 @@ module pragma.shared;
 
 import :model.model;
 
-const std::vector<std::shared_ptr<pragma::animation::VertexAnimation>> &pragma::asset::Model::GetVertexAnimations() const { return const_cast<pragma::asset::Model *>(this)->GetVertexAnimations(); }
+const std::vector<std::shared_ptr<pragma::animation::VertexAnimation>> &pragma::asset::Model::GetVertexAnimations() const { return const_cast<Model *>(this)->GetVertexAnimations(); }
 std::vector<std::shared_ptr<pragma::animation::VertexAnimation>> &pragma::asset::Model::GetVertexAnimations() { return m_vertexAnimations; }
-std::shared_ptr<pragma::animation::VertexAnimation> pragma::asset::Model::CreateVertexAnimation(const std::string &name) const { return pragma::animation::VertexAnimation::Create(name); }
+std::shared_ptr<pragma::animation::VertexAnimation> pragma::asset::Model::CreateVertexAnimation(const std::string &name) const { return animation::VertexAnimation::Create(name); }
 std::vector<std::shared_ptr<pragma::animation::VertexAnimation>>::iterator pragma::asset::Model::FindVertexAnimation(const std::string &name)
 {
-	return std::find_if(m_vertexAnimations.begin(), m_vertexAnimations.end(), [&name](const std::shared_ptr<pragma::animation::VertexAnimation> &anim) { return pragma::string::compare(name, anim->GetName(), false); });
+	return std::find_if(m_vertexAnimations.begin(), m_vertexAnimations.end(), [&name](const std::shared_ptr<animation::VertexAnimation> &anim) { return string::compare(name, anim->GetName(), false); });
 }
-std::vector<std::shared_ptr<pragma::animation::VertexAnimation>>::const_iterator pragma::asset::Model::FindVertexAnimation(const std::string &name) const { return const_cast<pragma::asset::Model *>(this)->FindVertexAnimation(name); }
+std::vector<std::shared_ptr<pragma::animation::VertexAnimation>>::const_iterator pragma::asset::Model::FindVertexAnimation(const std::string &name) const { return const_cast<Model *>(this)->FindVertexAnimation(name); }
 bool pragma::asset::Model::GetVertexAnimationId(const std::string &name, uint32_t &id) const
 {
 	auto it = FindVertexAnimation(name);
@@ -22,9 +22,9 @@ bool pragma::asset::Model::GetVertexAnimationId(const std::string &name, uint32_
 	id = it - m_vertexAnimations.begin();
 	return true;
 }
-const std::shared_ptr<pragma::animation::VertexAnimation> *pragma::asset::Model::GetVertexAnimation(uint32_t vaIdx) const { return const_cast<pragma::asset::Model *>(this)->GetVertexAnimation(vaIdx); }
+const std::shared_ptr<pragma::animation::VertexAnimation> *pragma::asset::Model::GetVertexAnimation(uint32_t vaIdx) const { return const_cast<Model *>(this)->GetVertexAnimation(vaIdx); }
 std::shared_ptr<pragma::animation::VertexAnimation> *pragma::asset::Model::GetVertexAnimation(uint32_t vaIdx) { return (vaIdx < m_vertexAnimations.size()) ? &m_vertexAnimations.at(vaIdx) : nullptr; }
-const std::shared_ptr<pragma::animation::VertexAnimation> *pragma::asset::Model::GetVertexAnimation(const std::string &name) const { return const_cast<pragma::asset::Model *>(this)->GetVertexAnimation(name); }
+const std::shared_ptr<pragma::animation::VertexAnimation> *pragma::asset::Model::GetVertexAnimation(const std::string &name) const { return const_cast<Model *>(this)->GetVertexAnimation(name); }
 std::shared_ptr<pragma::animation::VertexAnimation> *pragma::asset::Model::GetVertexAnimation(const std::string &name)
 {
 	auto it = FindVertexAnimation(name);

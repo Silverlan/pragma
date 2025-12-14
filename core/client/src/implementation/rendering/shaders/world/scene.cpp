@@ -35,10 +35,10 @@ decltype(ShaderScene::DESCRIPTOR_SET_SCENE) ShaderScene::DESCRIPTOR_SET_SCENE = 
 decltype(ShaderScene::DESCRIPTOR_SET_RENDERER) ShaderScene::DESCRIPTOR_SET_RENDERER = {
   "RENDERER",
   {prosper::DescriptorSetInfo::Binding {"RENDERER", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"SSAO_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"LIGHT_BUFFERS", pragma::LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::FragmentBit},
+    prosper::DescriptorSetInfo::Binding {"LIGHT_BUFFERS", LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::FragmentBit},
     prosper::DescriptorSetInfo::Binding {"VISIBLE_LIGHT_TILE_INDEX_BUFFER", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit},
-    prosper::DescriptorSetInfo::Binding {"SHADOW_BUFFERS", pragma::LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::FragmentBit},
-    prosper::DescriptorSetInfo::Binding {"CSM_MAPS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, pragma::math::to_integral(pragma::GameLimits::MaxCSMCascades)},
+    prosper::DescriptorSetInfo::Binding {"SHADOW_BUFFERS", LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::FragmentBit},
+    prosper::DescriptorSetInfo::Binding {"CSM_MAPS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, math::to_integral(GameLimits::MaxCSMCascades)},
     prosper::DescriptorSetInfo::Binding {"LIGHTMAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"INDIRECT_LIGHTMAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
     prosper::DescriptorSetInfo::Binding {"DIRECTIONAL_LIGHTMAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
 };
@@ -104,8 +104,8 @@ void ShaderScene::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &ou
 
 decltype(ShaderSceneLit::DESCRIPTOR_SET_SHADOWS) ShaderSceneLit::DESCRIPTOR_SET_SHADOWS = {
   "SHADOWS",
-  {prosper::DescriptorSetInfo::Binding {"MAPS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, pragma::math::to_integral(pragma::GameLimits::MaxActiveShadowMaps)},
-    prosper::DescriptorSetInfo::Binding {"CUBEMAPS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, pragma::math::to_integral(pragma::GameLimits::MaxActiveShadowCubeMaps), std::numeric_limits<uint32_t>::max(),
+  {prosper::DescriptorSetInfo::Binding {"MAPS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, math::to_integral(GameLimits::MaxActiveShadowMaps)},
+    prosper::DescriptorSetInfo::Binding {"CUBEMAPS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, math::to_integral(GameLimits::MaxActiveShadowCubeMaps), std::numeric_limits<uint32_t>::max(),
       prosper::PrDescriptorSetBindingFlags::Cubemap}},
 };
 ShaderSceneLit::ShaderSceneLit(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderScene(context, identifier, vsShader, fsShader, gsShader) {}
@@ -130,7 +130,7 @@ decltype(ShaderEntity::VERTEX_BINDING_BONE_WEIGHT_EXT) ShaderEntity::VERTEX_BIND
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID = {VERTEX_BINDING_BONE_WEIGHT_EXT, prosper::Format::R32G32B32A32_SInt};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT = {VERTEX_BINDING_BONE_WEIGHT_EXT, prosper::Format::R32G32B32A32_SFloat};
 
-decltype(ShaderEntity::VERTEX_BINDING_VERTEX) ShaderEntity::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(pragma::rendering::VertexBufferData)};
+decltype(ShaderEntity::VERTEX_BINDING_VERTEX) ShaderEntity::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(rendering::VertexBufferData)};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_POSITION) ShaderEntity::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32_SFloat};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_UV) ShaderEntity::VERTEX_ATTRIBUTE_UV = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32_SFloat, offsetof(pragma::rendering::VertexBufferData, uv)};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_NORMAL) ShaderEntity::VERTEX_ATTRIBUTE_NORMAL = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32_SFloat, offsetof(pragma::rendering::VertexBufferData, normal)};
@@ -148,7 +148,7 @@ decltype(ShaderEntity::DESCRIPTOR_SET_INSTANCE) ShaderEntity::DESCRIPTOR_SET_INS
 };
 ShaderEntity::ShaderEntity(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderSceneLit(context, identifier, vsShader, fsShader, gsShader) {}
 
-bool ShaderEntity::GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
+bool ShaderEntity::GetRenderBufferTargets(geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
 {
 	auto &sceneMesh = mesh.GetSceneMesh();
 	if(sceneMesh == nullptr)
@@ -157,7 +157,7 @@ bool ShaderEntity::GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh,
 	if(indexBuffer) {
 		outIndexBufferInfo = prosper::IndexBufferInfo {};
 		outIndexBufferInfo->buffer = indexBuffer;
-		outIndexBufferInfo->indexType = (mesh.GetIndexType() == pragma::geometry::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
+		outIndexBufferInfo->indexType = (mesh.GetIndexType() == geometry::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
 		outIndexBufferInfo->offset = 0;
 	}
 
@@ -170,7 +170,7 @@ bool ShaderEntity::GetRenderBufferTargets(pragma::geometry::CModelSubMesh &mesh,
 	outOffsets = {0ull, vertWeights.size() * sizeof(vertWeights.front()), 0ull};
 	return true;
 }
-std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(pragma::geometry::CModelSubMesh &mesh, uint32_t pipelineIdx) const
+std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(geometry::CModelSubMesh &mesh, uint32_t pipelineIdx) const
 {
 	std::vector<prosper::IBuffer *> buffers;
 	std::vector<prosper::DeviceSize> offsets;
@@ -179,7 +179,7 @@ std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(pragma:
 		return nullptr;
 	buffers.insert(buffers.begin(), CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer().get()); // Instance buffer
 	offsets.insert(offsets.begin(), 0);
-	auto *dummyBuffer = pragma::get_cengine()->GetRenderContext().GetDummyBuffer().get();
+	auto *dummyBuffer = get_cengine()->GetRenderContext().GetDummyBuffer().get();
 	for(auto it = buffers.begin(); it != buffers.end(); ++it) {
 		auto *buf = *it;
 		*it = buf ? buf : dummyBuffer;
@@ -189,19 +189,19 @@ std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(pragma:
 
 /////////////
 
-void pragma::ShaderGameWorld::RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor, SceneFlags sceneFlags) const
+void ShaderGameWorld::RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor, SceneFlags sceneFlags) const
 {
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, offsetof(ScenePushConstants, flags), sizeof(sceneFlags), &sceneFlags);
 }
 
-bool pragma::ShaderGameWorld::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const
+bool ShaderGameWorld::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const
 {
 	return shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, layout, entityInstanceDescriptorSetIndex, *renderC.GetRenderDescriptorSet());
 }
 
-bool pragma::ShaderGameWorld::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, material::CMaterial &mat) const
+bool ShaderGameWorld::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, material::CMaterial &mat) const
 {
-	auto descSetGroup = mat.GetDescriptorSetGroup(const_cast<pragma::ShaderGameWorld &>(*this));
+	auto descSetGroup = mat.GetDescriptorSetGroup(const_cast<ShaderGameWorld &>(*this));
 	// if(descSetGroup == nullptr)
 	// 	descSetGroup = const_cast<pragma::ShaderGameWorld*>(this)->InitializeMaterialDescriptorSet(mat,false); // Attempt to initialize on the fly (TODO: Is this thread safe?)
 	if(descSetGroup == nullptr)
@@ -213,22 +213,22 @@ bool pragma::ShaderGameWorld::RecordBindMaterial(rendering::ShaderProcessor &sha
 	return true;
 }
 
-void pragma::ShaderGameWorld::RecordClipPlane(rendering::ShaderProcessor &shaderProcessor, const Vector4 &clipPlane) const
+void ShaderGameWorld::RecordClipPlane(rendering::ShaderProcessor &shaderProcessor, const Vector4 &clipPlane) const
 {
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, offsetof(pragma::ShaderGameWorld::ScenePushConstants, clipPlane), sizeof(clipPlane), &clipPlane);
 }
 
-void pragma::ShaderGameWorld::RecordDrawOrigin(rendering::ShaderProcessor &shaderProcessor, const Vector4 &drawOrigin) const
+void ShaderGameWorld::RecordDrawOrigin(rendering::ShaderProcessor &shaderProcessor, const Vector4 &drawOrigin) const
 {
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, offsetof(pragma::ShaderGameWorld::ScenePushConstants, drawOrigin), sizeof(drawOrigin), &drawOrigin);
 }
 
-void pragma::ShaderGameWorld::RecordDepthBias(rendering::ShaderProcessor &shaderProcessor, const Vector2 &depthBias) const
+void ShaderGameWorld::RecordDepthBias(rendering::ShaderProcessor &shaderProcessor, const Vector2 &depthBias) const
 {
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, offsetof(pragma::ShaderGameWorld::ScenePushConstants, depthBias), sizeof(depthBias), &depthBias);
 }
 
-void pragma::ShaderGameWorld::RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor, uint32_t vertexAnimationOffset) const
+void ShaderGameWorld::RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor, uint32_t vertexAnimationOffset) const
 {
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, offsetof(pragma::ShaderGameWorld::ScenePushConstants, vertexAnimInfo), sizeof(vertexAnimationOffset),
 	  &vertexAnimationOffset);

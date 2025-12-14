@@ -10,9 +10,9 @@ std::shared_ptr<pragma::rendering::WorldEnvironment> pragma::rendering::WorldEnv
 
 pragma::rendering::WorldEnvironment::WorldEnvironment()
 {
-	m_shaderQuality = pragma::util::make_shared<pragma::util::Int32Property>(int32_t {0});
-	m_bUnlit = pragma::util::make_shared<pragma::util::BoolProperty>(bool {false});
-	m_shadowResolution = pragma::util::make_shared<pragma::util::UInt32Property>(uint32_t {0});
+	m_shaderQuality = pragma::util::make_shared<util::Int32Property>(int32_t {0});
+	m_bUnlit = pragma::util::make_shared<util::BoolProperty>(bool {false});
+	m_shadowResolution = pragma::util::make_shared<util::UInt32Property>(uint32_t {0});
 }
 int32_t pragma::rendering::WorldEnvironment::GetShaderQuality() const { return *m_shaderQuality; }
 void pragma::rendering::WorldEnvironment::SetShaderQuality(int32_t quality) { *m_shaderQuality = quality; }

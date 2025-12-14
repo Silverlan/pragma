@@ -52,7 +52,7 @@ void pragma::scripting::lua_core::execute_files_in_directory(lua::State *l, cons
 		std::sort(luaFiles.begin(), luaFiles.end());
 
 		for(auto &fileName : luaFiles) {
-			auto hash = pragma::string::string_switch_ci::hash(fileName.substr(0, fileName.length() - ext.length()));
+			auto hash = string::string_switch_ci::hash(fileName.substr(0, fileName.length() - ext.length()));
 			auto it = traversed.find(hash);
 			if(it != traversed.end())
 				continue; // Already loaded
@@ -161,14 +161,14 @@ pragma::scripting::lua_core::IncludeResult pragma::scripting::lua_core::include(
 	static Lua::IncludeCache tmpCache;
 	static uint32_t recursionDepth = 0;
 	Lua::IncludeCache *includeCache = nullptr;
-	if(pragma::math::is_flag_set(flags, IncludeFlags::IgnoreGlobalCache)) {
+	if(math::is_flag_set(flags, IncludeFlags::IgnoreGlobalCache)) {
 		flags |= IncludeFlags::AddToCache;
 		includeCache = &tmpCache;
 		++recursionDepth;
 	}
 
 	if(!includeCache) {
-		auto *lInterface = pragma::get_engine()->GetLuaInterface(l);
+		auto *lInterface = get_engine()->GetLuaInterface(l);
 		if(lInterface)
 			includeCache = &lInterface->GetIncludeCache();
 	}
@@ -186,7 +186,7 @@ pragma::scripting::lua_core::IncludeResult pragma::scripting::lua_core::include(
 	if(numResults < 0)
 		numResults = 0;
 
-	if(pragma::math::is_flag_set(flags, IncludeFlags::IgnoreGlobalCache) && --recursionDepth == 0)
+	if(math::is_flag_set(flags, IncludeFlags::IgnoreGlobalCache) && --recursionDepth == 0)
 		tmpCache.Clear();
 
 	result.numResults = numResults;

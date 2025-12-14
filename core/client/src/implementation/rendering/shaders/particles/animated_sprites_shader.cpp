@@ -11,11 +11,11 @@ import :engine;
 
 using namespace pragma;
 
-static Mat3x4 calc_rotation_matrix_around_axis(const Vector3 &axis, pragma::math::Degree ang)
+static Mat3x4 calc_rotation_matrix_around_axis(const Vector3 &axis, math::Degree ang)
 {
-	ang = pragma::math::deg_to_rad(ang);
-	auto sin = pragma::math::sin(ang);
-	auto cos = pragma::math::cos(ang);
+	ang = math::deg_to_rad(ang);
+	auto sin = math::sin(ang);
+	auto cos = math::cos(ang);
 	auto xSq = axis.x * axis.x;
 	auto ySq = axis.y * axis.y;
 	auto zSq = axis.z * axis.z;
@@ -47,10 +47,10 @@ static Vector3 rotate_vector(const Vector3 &v, const Mat4 &m) { return Vector3 {
 
 ShaderParticleAnimatedSprites::ShaderParticleAnimatedSprites(prosper::IPrContext &context, const std::string &identifier) : ShaderParticle2DBase(context, identifier, "programs/pfm/particles/particle_animated_sprites", "programs/particles/particle") {}
 
-Vector3 ShaderParticleAnimatedSprites::DoCalcVertexPosition(const pragma::ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
+Vector3 ShaderParticleAnimatedSprites::DoCalcVertexPosition(const ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
 {
 	// Note: This has to match the calculations performed in the vertex shader
-	auto *pt = const_cast<pragma::ecs::CParticleSystemComponent &>(ptc).GetParticle(ptIdx);
+	auto *pt = const_cast<ecs::CParticleSystemComponent &>(ptc).GetParticle(ptIdx);
 	auto ptWorldPos = pt->GetPosition();
 	// bool useCamBias = (u_instance.cameraBias != 0.0);
 	// TODO
@@ -80,8 +80,8 @@ Vector3 ShaderParticleAnimatedSprites::DoCalcVertexPosition(const pragma::ecs::C
 	camRight = camRight * radius;
 	auto camUp = camUpWs * radius;
 
-	auto ca = pragma::math::cos(-rot);
-	auto sa = pragma::math::sin(-rot);
+	auto ca = math::cos(-rot);
+	auto sa = math::sin(-rot);
 
 	if(localVertIdx == 0) {
 		float x = ca - sa;
@@ -129,7 +129,7 @@ void ShaderParticleAnimatedSprites::InitializeGfxPipeline(prosper::GraphicsPipel
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 }
 
-bool ShaderParticleAnimatedSprites::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, pts::ParticleOrientationType orientationType, pts::ParticleRenderFlags renderFlags)
+bool ShaderParticleAnimatedSprites::RecordDraw(prosper::ShaderBindState &bindState, CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, pts::ParticleOrientationType orientationType, pts::ParticleRenderFlags renderFlags)
 {
 	PushConstants pushConstants {};
 	pushConstants.camBias = 0.f;

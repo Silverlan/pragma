@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SGamemodeComponent final : public BaseGamemodeComponent {
 		  public:
-			SGamemodeComponent(pragma::ecs::BaseEntity &ent) : BaseGamemodeComponent(ent) {}
+			SGamemodeComponent(ecs::BaseEntity &ent) : BaseGamemodeComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

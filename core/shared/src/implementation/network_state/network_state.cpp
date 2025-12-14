@@ -10,15 +10,15 @@ module pragma.shared;
 
 import :network_state;
 
-pragma::console::ConVarHandle pragma::NetworkState::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &ptrs, std::string scvar) { return CVarHandler::GetConVarHandle(ptrs, scvar); }
+pragma::console::ConVarHandle pragma::NetworkState::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &ptrs, std::string scvar) { return CVarHandler::GetConVarHandle(ptrs, scvar); }
 
 UInt8 pragma::NetworkState::STATE_COUNT = 0;
 
 decltype(pragma::NetworkState::s_loadedLibraries) pragma::NetworkState::s_loadedLibraries = {};
 
-pragma::NetworkState::NetworkState() : pragma::util::CallbackHandler(), CVarHandler()
+pragma::NetworkState::NetworkState() : CallbackHandler(), CVarHandler()
 {
-	m_ctReal.Reset(static_cast<int64_t>(pragma::Engine::Get()->GetTickCount()));
+	m_ctReal.Reset(static_cast<int64_t>(Engine::Get()->GetTickCount()));
 	m_tReal = CDouble(m_ctReal());
 	m_tLast = m_tReal;
 	m_tDelta = 0;
@@ -35,14 +35,14 @@ pragma::NetworkState::NetworkState() : pragma::util::CallbackHandler(), CVarHand
 	RegisterCallback<void, std::reference_wrapper<struct ISteamworks>>("OnSteamworksInitialized");
 	RegisterCallback<void>("OnSteamworksShutdown");
 
-	m_cbProfilingHandle = pragma::Engine::Get()->AddProfilingHandler([this](bool profilingEnabled) {
+	m_cbProfilingHandle = Engine::Get()->AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false) {
 			m_profilingStageManager = nullptr;
 			return;
 		}
 		std::string postFix = IsClient() ? " (CL)" : " (SV)";
-		auto &cpuProfiler = pragma::Engine::Get()->GetProfiler();
-		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage>>();
+		auto &cpuProfiler = Engine::Get()->GetProfiler();
+		m_profilingStageManager = std::make_unique<debug::ProfilingStageManager<debug::ProfilingStage>>();
 		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler);
 	});
 }
@@ -91,9 +91,9 @@ std::vector<CallbackHandle> &pragma::NetworkState::GetLuaEnumRegisterCallbacks()
 
 pragma::util::ResourceWatcherManager &pragma::NetworkState::GetResourceWatcher() { return *m_resourceWatcher; }
 
-bool pragma::NetworkState::ShouldRemoveSound(pragma::audio::ALSound &snd) { return snd.IsPlaying() == false; }
+bool pragma::NetworkState::ShouldRemoveSound(audio::ALSound &snd) { return snd.IsPlaying() == false; }
 
-void pragma::NetworkState::UpdateSounds(std::vector<std::shared_ptr<pragma::audio::ALSound>> &sounds)
+void pragma::NetworkState::UpdateSounds(std::vector<std::shared_ptr<audio::ALSound>> &sounds)
 {
 	for(auto i = static_cast<int32_t>(sounds.size()) - 1; i >= 0; --i) {
 		auto psnd = sounds.at(i);
@@ -116,7 +116,7 @@ void pragma::NetworkState::UpdateSounds(std::vector<std::shared_ptr<pragma::audi
 bool pragma::NetworkState::PortMaterial(const std::string &path)
 {
 	auto pathWithoutExt = path;
-	auto extensions = pragma::asset::get_supported_extensions(pragma::asset::Type::Material);
+	auto extensions = pragma::asset::get_supported_extensions(asset::Type::Material);
 	extensions.push_back("vmt");
 	extensions.push_back("vmat_c");
 	ufile::remove_extension_from_filename(pathWithoutExt, extensions);
@@ -131,8 +131,8 @@ bool pragma::NetworkState::PortMaterial(const std::string &path)
 
 	auto *mat = LoadMaterial(matPath, true);
 	if(mat) {
-		std::function<void(const pragma::util::Path &path)> fPortTextures = nullptr;
-		fPortTextures = [this, mat, &fPortTextures](const pragma::util::Path &path) {
+		std::function<void(const util::Path &path)> fPortTextures = nullptr;
+		fPortTextures = [this, mat, &fPortTextures](const util::Path &path) {
 			for(auto &name : material::MaterialPropertyBlockView {*mat, path}) {
 				auto propType = mat->GetPropertyType(name);
 				switch(propType) {
@@ -143,7 +143,7 @@ bool pragma::NetworkState::PortMaterial(const std::string &path)
 					{
 						std::string texName;
 						if(mat->GetProperty(pragma::util::FilePath(path, name).GetString(), &texName)) {
-							auto path = pragma::util::FilePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material), texName).GetString();
+							auto path = util::FilePath(pragma::asset::get_asset_root_directory(asset::Type::Material), texName).GetString();
 							if(fs::exists(path) == false && pragma::util::port_file(this, path + ".vtf") == false && pragma::util::port_file(this, path + ".vtex_c") == false)
 								Con::cwar << "Unable to port texture '" << texName << "'!" << Con::endl;
 						}
@@ -157,12 +157,12 @@ bool pragma::NetworkState::PortMaterial(const std::string &path)
 	return (mat != nullptr) ? true : false;
 }
 
-pragma::util::FileAssetManager *pragma::NetworkState::GetAssetManager(pragma::asset::Type type)
+pragma::util::FileAssetManager *pragma::NetworkState::GetAssetManager(asset::Type type)
 {
 	switch(type) {
-	case pragma::asset::Type::Model:
+	case asset::Type::Model:
 		return &GetModelManager();
-	case pragma::asset::Type::Material:
+	case asset::Type::Material:
 		return &GetMaterialManager();
 	}
 	return nullptr;
@@ -172,7 +172,7 @@ void pragma::NetworkState::ClearGameConVars()
 {
 #pragma message("TODO: What about ConVars that have been created ingame?")
 	for(auto it = m_conVars.begin(); it != m_conVars.end();) {
-		if(it->second->GetType() == pragma::console::ConType::LuaCmd)
+		if(it->second->GetType() == console::ConType::LuaCmd)
 			it = m_conVars.erase(it);
 		else
 			++it;
@@ -183,7 +183,7 @@ bool pragma::NetworkState::CheatsEnabled() const
 {
 	if(!IsMultiPlayer())
 		return true;
-	return pragma::Engine::Get()->GetConVarBool("sv_cheats");
+	return Engine::Get()->GetConVarBool("sv_cheats");
 }
 
 pragma::material::Material *pragma::NetworkState::PrecacheMaterial(const std::string &path) { return LoadMaterial(path, true, false); }
@@ -268,7 +268,7 @@ void pragma::NetworkState::ChangeLevel(const std::string &map)
 	spdlog::info("Changing map to '{}'...", map);
 	m_mapInfo = std::make_unique<MapInfo>();
 	m_mapInfo->name = map;
-	pragma::Game *game = GetGameState();
+	Game *game = GetGameState();
 	if(IsServer()) // Hack: These are already called clientside in ClientState::HandleReceiveGameInfo
 	{
 		game->CallCallbacks("OnPreLoadMap");
@@ -309,11 +309,11 @@ void pragma::NetworkState::Initialize()
 		spdlog::info("Initializing client state...");
 	else {
 		spdlog::info("Initializing server state...");
-		if(pragma::Engine::Get()->IsServerOnly()) {
+		if(Engine::Get()->IsServerOnly()) {
 			Con::cout << "If you encounter problems, such as the server not showing up in the server browser, or clients not being able to connect to it, please make sure the following ports are forwarded:" << Con::endl;
-			Con::cout << pragma::engine_info::DEFAULT_SERVER_PORT << " (TCP): Required if the boost asio networking layer is used" << Con::endl;
-			Con::cout << pragma::engine_info::DEFAULT_SERVER_PORT << " (UDP): Required for clients to be able to connect to the server" << Con::endl;
-			Con::cout << pragma::engine_info::DEFAULT_QUERY_PORT << " (UDP): Required for the server to be registered with the master server and show up in the server browser" << Con::endl;
+			Con::cout << engine_info::DEFAULT_SERVER_PORT << " (TCP): Required if the boost asio networking layer is used" << Con::endl;
+			Con::cout << engine_info::DEFAULT_SERVER_PORT << " (UDP): Required for clients to be able to connect to the server" << Con::endl;
+			Con::cout << engine_info::DEFAULT_QUERY_PORT << " (UDP): Required for the server to be registered with the master server and show up in the server browser" << Con::endl;
 			Con::cout << Con::endl << "Here's a list of useful console commands:" << Con::endl;
 			Con::cout << "map <mapName>: Loads the specified map and starts the server." << Con::endl;
 			Con::cout << "sv_maxplayers <maxPlayers>: Specifies the maximum number of players that can play on the server at a time." << Con::endl;
@@ -333,20 +333,20 @@ void pragma::NetworkState::Initialize()
 bool pragma::NetworkState::IsClient() const { return false; }
 bool pragma::NetworkState::IsServer() const { return false; }
 
-void pragma::NetworkState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<pragma::util::ResourceWatcherManager>(this); }
+void pragma::NetworkState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<util::ResourceWatcherManager>(this); }
 
 pragma::console::ConVar *pragma::NetworkState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
 {
 	auto *cv = GetConVar(scmd);
 	if(cv == nullptr)
 		return nullptr;
-	if(cv->GetType() != pragma::console::ConType::Var)
+	if(cv->GetType() != console::ConType::Var)
 		return nullptr;
-	auto *cvar = static_cast<pragma::console::ConVar *>(cv);
+	auto *cvar = static_cast<console::ConVar *>(cv);
 	auto prev = cvar->GetString();
 	if(bApplyIfEqual == false && prev == value)
 		return nullptr;
-	std::array<const std::unordered_map<std::string, std::vector<pragma::console::CvarCallback>> *, 2> cvarCallbackList = {&m_cvarCallbacks, nullptr};
+	std::array<const std::unordered_map<std::string, std::vector<console::CvarCallback>> *, 2> cvarCallbackList = {&m_cvarCallbacks, nullptr};
 	auto *game = GetGameState();
 	if(game != nullptr)
 		cvarCallbackList.at(1) = &game->GetConVarCallbacks();
@@ -365,14 +365,14 @@ pragma::console::ConVar *pragma::NetworkState::SetConVar(std::string scmd, std::
 					continue;
 				auto it = cvList->find(scmd);
 				if(it != cvList->end()) {
-					auto &cvarCallbacks = const_cast<std::vector<pragma::console::CvarCallback> &>(it->second);
+					auto &cvarCallbacks = const_cast<std::vector<console::CvarCallback> &>(it->second);
 					for(auto itCb = cvarCallbacks.begin(); itCb != cvarCallbacks.end();) {
 						auto &ptrCb = *itCb;
-						auto &fc = const_cast<pragma::console::CvarCallback &>(ptrCb).GetFunction();
+						auto &fc = const_cast<console::CvarCallback &>(ptrCb).GetFunction();
 						if(!fc.IsValid())
 							itCb = cvarCallbacks.erase(itCb);
 						else {
-							fc.Call<void, pragma::NetworkState *, const pragma::console::ConVar &, const void *, const void *>(this, *cvar, &prevVal, &newVal);
+							fc.Call<void, NetworkState *, const console::ConVar &, const void *, const void *>(this, *cvar, &prevVal, &newVal);
 							++itCb;
 						}
 					}
@@ -385,7 +385,7 @@ pragma::console::ConVar *pragma::NetworkState::SetConVar(std::string scmd, std::
 
 void pragma::NetworkState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const
 {
-	pragma::Engine::Get()->implFindSimilarConVars(input, similarCmds);
+	Engine::Get()->implFindSimilarConVars(input, similarCmds);
 	CVarHandler::implFindSimilarConVars(input, similarCmds);
 }
 
@@ -406,7 +406,7 @@ void pragma::NetworkState::ClearConsoleCommandOverride(const std::string &src)
 }
 void pragma::NetworkState::ClearConsoleCommandOverrides() { m_conOverrides.clear(); }
 
-bool pragma::check_cheats(const std::string &scmd, pragma::NetworkState *state)
+bool pragma::check_cheats(const std::string &scmd, NetworkState *state)
 {
 	if(state->CheatsEnabled() == false) {
 		Con::cout << "Can't use cheat cvar " << scmd << " in multiplayer, unless the server has sv_cheats set to 1." << Con::endl;
@@ -415,44 +415,44 @@ bool pragma::check_cheats(const std::string &scmd, pragma::NetworkState *state)
 	return true;
 }
 
-bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, pragma::BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(pragma::console::ConConf *, float &)> &callback)
+bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
 {
 	TranslateConsoleCommand(scmd);
 	auto *cv = GetConVar(scmd);
 	auto bEngine = ((cv == nullptr) ? true : false);
 	if(bEngine == true)
-		cv = pragma::Engine::Get()->CVarHandler::GetConVar(scmd);
+		cv = Engine::Get()->CVarHandler::GetConVar(scmd);
 	if(cv == nullptr)
 		return false;
 	if(callback != nullptr && callback(cv, magnitude) == false)
 		return true;
 
 	auto type = cv->GetType();
-	if(type == pragma::console::ConType::Var) {
-		auto *cvar = static_cast<pragma::console::ConVar *>(cv);
+	if(type == console::ConType::Var) {
+		auto *cvar = static_cast<console::ConVar *>(cv);
 		if(argv.empty()) {
 			cvar->Print(scmd);
 			return true;
 		}
 		auto flags = cvar->GetFlags();
-		auto bReplicated = ((flags & pragma::console::ConVarFlags::Replicated) == pragma::console::ConVarFlags::Replicated) ? true : false;
+		auto bReplicated = ((flags & console::ConVarFlags::Replicated) == console::ConVarFlags::Replicated) ? true : false;
 		if(IsClient()) {
 			if(bReplicated) {
 				Con::cout << "Can't change replicated ConVar " << scmd << " from console of client, only server operator can change its value" << Con::endl;
 				return true;
 			}
 		}
-		if((flags & pragma::console::ConVarFlags::Cheat) == pragma::console::ConVarFlags::Cheat && !check_cheats(scmd, this))
+		if((flags & console::ConVarFlags::Cheat) == console::ConVarFlags::Cheat && !check_cheats(scmd, this))
 			return true;
 		if(bEngine)
-			pragma::Engine::Get()->CVarHandler::SetConVar(scmd, argv[0]);
+			Engine::Get()->CVarHandler::SetConVar(scmd, argv[0]);
 		else
 			SetConVar(scmd, argv[0]);
 		return true;
 	}
-	auto *cmd = static_cast<pragma::console::ConCommand *>(cv);
-	if(type == pragma::console::ConType::Cmd) {
-		std::function<void(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> func = nullptr;
+	auto *cmd = static_cast<console::ConCommand *>(cv);
+	if(type == console::ConType::Cmd) {
+		std::function<void(NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float)> func = nullptr;
 		cmd->GetFunction(func);
 		if(scmd.empty() == false && scmd.front() == '-')
 			magnitude = 0.f;
@@ -463,7 +463,7 @@ bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::
 	if(game == nullptr)
 		return false;
 	//auto *l = game->GetLuaState();
-	auto bJoystick = (cmd->GetFlags() & (pragma::console::ConVarFlags::JoystickAxisSingle | pragma::console::ConVarFlags::JoystickAxisContinuous)) != pragma::console::ConVarFlags::None;
+	auto bJoystick = (cmd->GetFlags() & (console::ConVarFlags::JoystickAxisSingle | console::ConVarFlags::JoystickAxisContinuous)) != console::ConVarFlags::None;
 	LuaFunction func = nullptr;
 	cmd->GetFunction(func);
 	game->ProtectedLuaCall(
@@ -488,13 +488,13 @@ bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::
 
 std::shared_ptr<pragma::util::Library> pragma::NetworkState::LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories, std::string *err)
 {
-	auto pathLib = pragma::util::Path::CreateFile(lib);
+	auto pathLib = util::Path::CreateFile(lib);
 	static std::unordered_set<std::string> cache;
 	auto it = cache.find(pathLib.GetString());
 	if(it != cache.end())
 		return nullptr;
 
-	auto libModule = pragma::util::load_library_module(lib, additionalSearchDirectories, {}, err);
+	auto libModule = util::load_library_module(lib, additionalSearchDirectories, {}, err);
 	if(!libModule)
 		cache.insert(pathLib.GetString()); // Cache libraries we weren't able to load to avoid continuous error messages
 	return libModule;
@@ -502,7 +502,7 @@ std::shared_ptr<pragma::util::Library> pragma::NetworkState::LoadLibraryModule(c
 
 std::shared_ptr<pragma::util::Library> pragma::NetworkState::GetLibraryModule(const std::string &library) const
 {
-	auto lib = pragma::util::get_normalized_module_path(library, IsClient());
+	auto lib = util::get_normalized_module_path(library, IsClient());
 	auto it = s_loadedLibraries.find(lib);
 	if(it == s_loadedLibraries.end())
 		return nullptr;
@@ -520,7 +520,7 @@ void pragma::NetworkState::InitializeLuaModules(lua::State *l)
 	}
 }
 
-void pragma::NetworkState::InitializeDLLModule(lua::State *l, std::shared_ptr<pragma::util::Library> module)
+void pragma::NetworkState::InitializeDLLModule(lua::State *l, std::shared_ptr<util::Library> module)
 {
 	auto it = m_initializedLibraries.find(l);
 	if(it != m_initializedLibraries.end()) {
@@ -529,10 +529,10 @@ void pragma::NetworkState::InitializeDLLModule(lua::State *l, std::shared_ptr<pr
 			return; // Module was already initialized for this lua state
 	}
 	else
-		it = m_initializedLibraries.insert(std::make_pair(l, std::vector<std::shared_ptr<pragma::util::Library>> {})).first;
+		it = m_initializedLibraries.insert(std::make_pair(l, std::vector<std::shared_ptr<util::Library>> {})).first;
 	it->second.push_back(module);
 
-	auto *luaInterface = pragma::Engine::Get()->GetLuaInterface(l);
+	auto *luaInterface = Engine::Get()->GetLuaInterface(l);
 	if(luaInterface != nullptr) {
 		auto *ptrInitLua = module->FindSymbolAddress<void (*)(Lua::Interface &)>("pragma_initialize_lua");
 		if(ptrInitLua != nullptr)
@@ -542,20 +542,20 @@ void pragma::NetworkState::InitializeDLLModule(lua::State *l, std::shared_ptr<pr
 
 bool pragma::NetworkState::UnloadLibrary(const std::string &library)
 {
-	auto libAbs = pragma::util::get_normalized_module_path(library, IsClient());
+	auto libAbs = util::get_normalized_module_path(library, IsClient());
 	auto it = s_loadedLibraries.find(libAbs);
 	if(it == s_loadedLibraries.end())
 		return true;
 	auto lib = it->second.library;
-	auto it2 = std::find_if(m_libHandles.begin(), m_libHandles.end(), [&lib](const std::shared_ptr<std::shared_ptr<pragma::util::Library>> &ptr) { return ptr->get() == lib->get(); });
+	auto it2 = std::find_if(m_libHandles.begin(), m_libHandles.end(), [&lib](const std::shared_ptr<std::shared_ptr<util::Library>> &ptr) { return ptr->get() == lib->get(); });
 	it = s_loadedLibraries.erase(it);
 
 	auto *ptrTerminateLua = (*lib)->FindSymbolAddress<void (*)(Lua::Interface &)>("pragma_terminate_lua");
 	for(auto &pair : m_initializedLibraries) {
-		auto it = std::find_if(pair.second.begin(), pair.second.end(), [&lib](const std::shared_ptr<pragma::util::Library> &ptr) { return ptr.get() == lib->get(); });
+		auto it = std::find_if(pair.second.begin(), pair.second.end(), [&lib](const std::shared_ptr<util::Library> &ptr) { return ptr.get() == lib->get(); });
 		if(it != pair.second.end()) {
 			if(ptrTerminateLua != nullptr)
-				ptrTerminateLua(*pragma::Engine::Get()->GetLuaInterface(pair.first));
+				ptrTerminateLua(*Engine::Get()->GetLuaInterface(pair.first));
 			pair.second.erase(it);
 		}
 	}
@@ -580,12 +580,12 @@ std::shared_ptr<pragma::util::Library> pragma::NetworkState::InitializeLibrary(s
 #endif
 	if(l == nullptr)
 		l = GetLuaState();
-	auto libAbs = pragma::util::get_normalized_module_path(library, IsClient());
+	auto libAbs = util::get_normalized_module_path(library, IsClient());
 
-	std::shared_ptr<pragma::util::Library> dllHandle = nullptr;
+	std::shared_ptr<util::Library> dllHandle = nullptr;
 	auto it = s_loadedLibraries.find(libAbs);
 	if(it == s_loadedLibraries.end()) {
-		auto additionalSearchDirectories = pragma::util::get_default_additional_library_search_directories(libAbs);
+		auto additionalSearchDirectories = util::get_default_additional_library_search_directories(libAbs);
 		dllHandle = LoadLibraryModule(libAbs.substr(8), additionalSearchDirectories, err);
 		m_lastModuleHandle = dllHandle;
 		if(dllHandle != nullptr) {
@@ -616,7 +616,7 @@ std::shared_ptr<pragma::util::Library> pragma::NetworkState::InitializeLibrary(s
 			if(ptrKeepAlive != nullptr && ptrKeepAlive())
 				dllHandle->SetDontFreeLibraryOnDestruct();
 
-			auto ptrDllHandle = pragma::util::make_shared<std::shared_ptr<pragma::util::Library>>(dllHandle);
+			auto ptrDllHandle = pragma::util::make_shared<std::shared_ptr<util::Library>>(dllHandle);
 			m_libHandles.push_back(ptrDllHandle);
 			s_loadedLibraries.insert(decltype(s_loadedLibraries)::value_type(libAbs, {ptrDllHandle, IsServer(), IsClient()}));
 		}
@@ -648,7 +648,7 @@ void pragma::NetworkState::TerminateLuaModules(lua::State *l)
 	auto it = m_initializedLibraries.find(l);
 	if(it == m_initializedLibraries.end())
 		return;
-	auto *luaInterface = pragma::Engine::Get()->GetLuaInterface(l);
+	auto *luaInterface = Engine::Get()->GetLuaInterface(l);
 	if(luaInterface != nullptr) {
 		for(auto &dllHandle : it->second) {
 			auto *ptrInitLua = dllHandle->FindSymbolAddress<void (*)(Lua::Interface &)>("pragma_terminate_lua");
@@ -675,26 +675,26 @@ pragma::console::ConVarMap *pragma::NetworkState::GetConVarMap() { return nullpt
 void pragma::NetworkState::UnregisterConVar(const std::string &scmd)
 {
 	auto lcmd = scmd;
-	pragma::string::to_lower(lcmd);
+	string::to_lower(lcmd);
 	auto it = m_conVars.find(scmd);
 	if(it != m_conVars.end())
 		m_conVars.erase(it);
 }
 
-pragma::console::ConVar *pragma::NetworkState::RegisterConVar(const std::string &scmd, const std::shared_ptr<pragma::console::ConVar> &cvar)
+pragma::console::ConVar *pragma::NetworkState::RegisterConVar(const std::string &scmd, const std::shared_ptr<console::ConVar> &cvar)
 {
 	auto lcmd = scmd;
-	pragma::string::to_lower(lcmd);
+	string::to_lower(lcmd);
 	auto it = m_conVars.find(scmd);
 	if(it != m_conVars.end()) {
 		auto &cf = it->second;
-		if(cf->GetType() != pragma::console::ConType::Var)
+		if(cf->GetType() != console::ConType::Var)
 			return nullptr;
-		return static_cast<pragma::console::ConVar *>(cf.get());
+		return static_cast<console::ConVar *>(cf.get());
 	}
 	auto itNew = m_conVars.insert(decltype(m_conVars)::value_type(scmd, cvar));
-	auto *cv = static_cast<pragma::console::ConVar *>(itNew.first->second.get());
-	auto &cfg = pragma::Engine::Get()->GetConVarConfig(GetType());
+	auto *cv = static_cast<console::ConVar *>(itNew.first->second.get());
+	auto &cfg = Engine::Get()->GetConVarConfig(GetType());
 	if(cfg) {
 		// Use value from loaded config
 		auto *args = cfg->Find(scmd);
@@ -703,26 +703,26 @@ pragma::console::ConVar *pragma::NetworkState::RegisterConVar(const std::string 
 	}
 	return cv;
 }
-pragma::console::ConVar *pragma::NetworkState::CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help)
+pragma::console::ConVar *pragma::NetworkState::CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, console::ConVarFlags flags, const std::string &help)
 {
-	return udm::visit(type, [this, &scmd, &value, flags, &help](auto tag) -> pragma::console::ConVar * {
+	return udm::visit(type, [this, &scmd, &value, flags, &help](auto tag) -> console::ConVar * {
 		using T = typename decltype(tag)::type;
 		if constexpr(pragma::console::is_valid_convar_type_v<T> && udm::is_convertible<std::string, T>())
-			return RegisterConVar(scmd, pragma::console::ConVar::Create<T>(udm::convert<std::string, T>(value), flags, help));
+			return RegisterConVar(scmd, console::ConVar::Create<T>(udm::convert<std::string, T>(value), flags, help));
 		return nullptr;
 	});
 }
 
 std::unordered_map<std::string, unsigned int> &pragma::NetworkState::GetConCommandIDs() { return m_conCommandIDs; }
 
-pragma::console::ConCommand *pragma::NetworkState::CreateConCommand(const std::string &scmd, LuaFunction fc, pragma::console::ConVarFlags flags, const std::string &help)
+pragma::console::ConCommand *pragma::NetworkState::CreateConCommand(const std::string &scmd, LuaFunction fc, console::ConVarFlags flags, const std::string &help)
 {
 	auto lcmd = scmd;
-	pragma::string::to_lower(lcmd);
+	string::to_lower(lcmd);
 	if(m_conVars.find(lcmd) != m_conVars.end())
 		return nullptr;
-	auto *cmd = new pragma::console::ConCommand(fc, flags, help);
-	m_conVars.insert(std::unordered_map<std::string, pragma::console::ConConf *>::value_type(scmd, static_cast<pragma::console::ConConf *>(cmd)));
+	auto *cmd = new console::ConCommand(fc, flags, help);
+	m_conVars.insert(std::unordered_map<std::string, console::ConConf *>::value_type(scmd, static_cast<console::ConConf *>(cmd)));
 	return cmd;
 }
 
@@ -744,7 +744,7 @@ void pragma::NetworkState::Think()
 	UpdateSounds();
 	StopProfilingStage(); // UpdateSounds
 	CallCallbacks<void>("Think");
-	pragma::Game *game = GetGameState();
+	Game *game = GetGameState();
 	if(game != nullptr)
 		game->Think();
 	m_resourceWatcher->Poll();
@@ -774,7 +774,7 @@ void pragma::NetworkState::Tick()
 #endif
 
 	CallCallbacks<void>("Tick");
-	pragma::Game *game = GetGameState();
+	Game *game = GetGameState();
 	if(game != nullptr)
 		game->Tick();
 	for(unsigned int i = 0; i < m_tickCallbacks.size(); i++)

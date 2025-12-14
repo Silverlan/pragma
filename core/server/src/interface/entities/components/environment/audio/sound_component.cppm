@@ -14,7 +14,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SSoundComponent final : public BaseEnvSoundComponent, public SBaseNetComponent {
 		  public:
-			SSoundComponent(pragma::ecs::BaseEntity &ent) : BaseEnvSoundComponent(ent) {}
+			SSoundComponent(ecs::BaseEntity &ent) : BaseEnvSoundComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }

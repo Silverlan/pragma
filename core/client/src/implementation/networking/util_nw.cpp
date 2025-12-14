@@ -38,7 +38,7 @@ static pragma::ecs::CBaseEntity *read_unique_entity(NetPacket &packet, const std
 	*hCallback = pragma::get_cgame()->AddCallback("OnEntitySpawned", cb); // Data is received after entity has been created, and before it has been spawned
 	return nullptr;
 }
-CallbackHandle pragma::networking::read_unique_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated)
+CallbackHandle pragma::networking::read_unique_entity(NetPacket &packet, const std::function<void(ecs::BaseEntity *)> &onCreated)
 {
 	CallbackHandle r;
 	::read_unique_entity(packet, onCreated, &r);

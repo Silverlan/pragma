@@ -15,7 +15,7 @@ void SAIComponent::OnTakenDamage(game::DamageInfo &info, unsigned short oldHealt
 	auto charComponent = GetEntity().GetCharacterComponent();
 	if(charComponent.valid() && charComponent->IsAlive() == false)
 		return;
-	std::array<pragma::ecs::BaseEntity *, 2> ents = {info.GetAttacker(), info.GetInflictor()};
+	std::array<ecs::BaseEntity *, 2> ents = {info.GetAttacker(), info.GetInflictor()};
 	//auto &t = SGame::Get()->CurTime();
 	for(auto *ent : ents) {
 		if(ent == nullptr || (!ent->IsPlayer() && !ent->IsNPC()) || HasCharacterNoTargetEnabled(*ent) == true)
@@ -41,7 +41,7 @@ void SAIComponent::OnKilled(game::DamageInfo *damageInfo)
 {
 	auto *nw = GetEntity().GetNetworkState();
 	auto *game = nw->GetGameState();
-	game->CallCallbacks<void, pragma::BaseAIComponent *, game::DamageInfo *>("OnNPCDeath", this, damageInfo);
+	game->CallCallbacks<void, BaseAIComponent *, game::DamageInfo *>("OnNPCDeath", this, damageInfo);
 	auto charComponent = GetEntity().GetCharacterComponent();
 	if(charComponent.valid())
 		charComponent->RemoveWeapons();
@@ -49,7 +49,7 @@ void SAIComponent::OnKilled(game::DamageInfo *damageInfo)
 
 void SAIComponent::OnTakeDamage(game::DamageInfo &info)
 {
-	auto *charComponent = static_cast<pragma::SCharacterComponent *>(GetEntity().GetCharacterComponent().get());
+	auto *charComponent = static_cast<SCharacterComponent *>(GetEntity().GetCharacterComponent().get());
 	if(charComponent != nullptr && charComponent->GetGodMode() == true)
 		info.SetDamage(0);
 }

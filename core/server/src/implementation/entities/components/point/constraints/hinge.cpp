@@ -12,7 +12,7 @@ void SPointConstraintHingeComponent::SendData(NetPacket &packet, networking::Cli
 {
 	packet->WriteString(m_kvSource);
 	packet->WriteString(m_kvTarget);
-	pragma::networking::write_vector(packet, m_posTarget);
+	networking::write_vector(packet, m_posTarget);
 
 	packet->Write<float>(m_kvLimitLow);
 	packet->Write<float>(m_kvLimitHigh);

@@ -26,7 +26,7 @@ BSPTree::Node &BSPTree::CreateNode()
 
 const BSPTree::Node *BSPTree::Node::GetChild(BSPTree &tree, uint8_t idx) { return &tree.m_nodes[children[idx]]; }
 
-static void preprocess_bsp_data(pragma::util::BSPTree &bspTree, std::vector<std::vector<size_t>> &outClusterNodes, std::vector<std::vector<uint16_t>> &outClusterToClusterVisibility)
+static void preprocess_bsp_data(BSPTree &bspTree, std::vector<std::vector<size_t>> &outClusterNodes, std::vector<std::vector<uint16_t>> &outClusterToClusterVisibility)
 {
 	auto numClusters = bspTree.GetClusterCount();
 	auto &bspNodes = bspTree.GetNodes();
@@ -91,7 +91,7 @@ bool BSPTree::Save(udm::AssetDataArg outData, std::string &outErr)
 	auto udm = *outData;
 	udm["numClusters"] = m_clusterCount;
 	udm["numNodes"] = m_nodes.size();
-	auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [this](const pragma::util::BSPTree::Node &node) { return node.index == m_rootNode; });
+	auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [this](const Node &node) { return node.index == m_rootNode; });
 	assert(it != m_nodes.end());
 	if(it == m_nodes.end()) {
 		outErr = "Root node missing from node list!";
@@ -121,7 +121,7 @@ void BSPTree::UpdateVisibilityBounds()
 		UpdateVisibilityBounds(node);
 	}
 }
-void BSPTree::UpdateVisibilityBounds(BSPTree::Node &node)
+void BSPTree::UpdateVisibilityBounds(Node &node)
 {
 	auto minInit = Vector3 {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
 	auto maxInit = Vector3 {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()};
@@ -146,7 +146,7 @@ std::vector<uint8_t> &BSPTree::GetClusterVisibility() { return m_clusterVisibili
 uint64_t BSPTree::GetClusterCount() const { return m_clusterCount; }
 void BSPTree::SetClusterCount(uint64_t numClusters) { m_clusterCount = numClusters; }
 
-BSPTree::Node *BSPTree::FindLeafNode(BSPTree::Node &node, const Vector3 &point)
+BSPTree::Node *BSPTree::FindLeafNode(Node &node, const Vector3 &point)
 {
 	if(node.leaf)
 		return &node;
@@ -160,7 +160,7 @@ BSPTree::Node *BSPTree::FindLeafNode(BSPTree::Node &node, const Vector3 &point)
 }
 BSPTree::Node *BSPTree::FindLeafNode(const Vector3 &pos) { return FindLeafNode(GetRootNode(), pos); }
 
-void BSPTree::FindLeafNodesInAabb(BSPTree::Node &node, const std::array<Vector3, 8> &aabbPoints, std::vector<BSPTree::Node *> &outNodes)
+void BSPTree::FindLeafNodesInAabb(Node &node, const std::array<Vector3, 8> &aabbPoints, std::vector<Node *> &outNodes)
 {
 	if(node.leaf) {
 		outNodes.push_back(&node);
@@ -190,12 +190,12 @@ void BSPTree::FindLeafNodesInAabb(BSPTree::Node &node, const std::array<Vector3,
 std::vector<BSPTree::Node *> BSPTree::FindLeafNodesInAabb(const Vector3 &min, const Vector3 &max)
 {
 	std::array<Vector3, 8> aabbPoints = {min, Vector3 {min.x, min.y, max.z}, Vector3 {min.x, max.y, min.z}, Vector3 {min.x, max.y, max.z}, Vector3 {max.x, min.y, min.z}, Vector3 {max.x, min.y, max.z}, Vector3 {max.x, max.y, min.z}, max};
-	std::vector<BSPTree::Node *> nodes {};
+	std::vector<Node *> nodes {};
 	FindLeafNodesInAabb(GetRootNode(), aabbPoints, nodes);
 	return nodes;
 }
 
-bool BSPTree::IsAabbVisibleInCluster(const BSPTree::Node &node, const std::array<Vector3, 8> &aabbPoints, BSPTree::ClusterIndex clusterIdx) const
+bool BSPTree::IsAabbVisibleInCluster(const Node &node, const std::array<Vector3, 8> &aabbPoints, ClusterIndex clusterIdx) const
 {
 	if(node.leaf)
 		return IsClusterVisible(clusterIdx, node.cluster);

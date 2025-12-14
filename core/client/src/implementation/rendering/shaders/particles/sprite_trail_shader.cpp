@@ -14,17 +14,17 @@ using namespace pragma;
 
 ShaderParticleSpriteTrail::ShaderParticleSpriteTrail(prosper::IPrContext &context, const std::string &identifier) : ShaderParticle2DBase(context, identifier, "programs/pfm/particles/particle_sprite_trail", "programs/particles/particle") {}
 
-Vector3 ShaderParticleSpriteTrail::DoCalcVertexPosition(const pragma::ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
+Vector3 ShaderParticleSpriteTrail::DoCalcVertexPosition(const ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
 {
 	// Note: This has to match the calculations performed in the vertex shader
 	auto &renderers = ptc.GetRenderers();
 	if(renderers.empty())
 		return camPos;
 	auto &renderer = renderers.front();
-	if(typeid(*renderer) != typeid(pragma::pts::CParticleRendererSpriteTrail))
+	if(typeid(*renderer) != typeid(pts::CParticleRendererSpriteTrail))
 		return camPos;
-	auto &rendererSt = *static_cast<pragma::pts::CParticleRendererSpriteTrail *>(renderer.get());
-	auto *pt = const_cast<pragma::ecs::CParticleSystemComponent &>(ptc).GetParticle(ptIdx);
+	auto &rendererSt = *static_cast<pts::CParticleRendererSpriteTrail *>(renderer.get());
+	auto *pt = const_cast<ecs::CParticleSystemComponent &>(ptc).GetParticle(ptIdx);
 	auto &ptWorldPos = pt->GetPosition();
 	auto &ptPrevWorldPos = pt->GetPrevPos();
 	auto dtPosWs = ptPrevWorldPos - ptWorldPos;
@@ -40,9 +40,9 @@ Vector3 ShaderParticleSpriteTrail::DoCalcVertexPosition(const pragma::ecs::CPart
 	l = logf(l + 2) * 12;        //GCC stl: It still smells.
 	if(l <= 0.0)
 		return camPos;
-	l = pragma::math::clamp(l, rendererSt.GetMinLength(), rendererSt.GetMaxLength());
+	l = math::clamp(l, rendererSt.GetMinLength(), rendererSt.GetMaxLength());
 
-	auto rad = pragma::math::min(pt->GetRadius(), l);
+	auto rad = math::min(pt->GetRadius(), l);
 	dtPosWs = dtPosWs * l;
 
 	auto dirToBeam = ptWorldPos - camPos;
@@ -76,15 +76,15 @@ void ShaderParticleSpriteTrail::InitializeGfxPipeline(prosper::GraphicsPipelineC
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 }
 
-bool ShaderParticleSpriteTrail::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &r, const ecs::CParticleSystemComponent &ps, pts::ParticleOrientationType orientationType, pts::ParticleRenderFlags renderFlags)
+bool ShaderParticleSpriteTrail::RecordDraw(prosper::ShaderBindState &bindState, CSceneComponent &scene, const CRasterizationRendererComponent &r, const ecs::CParticleSystemComponent &ps, pts::ParticleOrientationType orientationType, pts::ParticleRenderFlags renderFlags)
 {
 	auto &renderers = ps.GetRenderers();
 	if(renderers.empty())
 		return false;
 	auto &renderer = renderers.front();
-	if(typeid(*renderer) != typeid(pragma::pts::CParticleRendererSpriteTrail))
+	if(typeid(*renderer) != typeid(pts::CParticleRendererSpriteTrail))
 		return false;
-	auto &rendererSt = *static_cast<pragma::pts::CParticleRendererSpriteTrail *>(renderer.get());
+	auto &rendererSt = *static_cast<pts::CParticleRendererSpriteTrail *>(renderer.get());
 
 	PushConstants pushConstants {};
 	pushConstants.minLength = rendererSt.GetMinLength();

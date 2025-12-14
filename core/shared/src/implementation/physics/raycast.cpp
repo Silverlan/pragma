@@ -33,20 +33,20 @@ void pragma::physics::TraceResult::InitializeMeshes()
 	uvec::world_to_local(origin, rot, dir);
 	dir *= maxDist;
 
-	pragma::math::intersection::LineMeshResult res {};
+	math::intersection::LineMeshResult res {};
 	for(auto &mesh : meshInfo->meshes) {
 		Vector3 min, max;
 		mesh->GetBounds(min, max);
-		auto dist = pragma::math::min(maxDist, static_cast<float>(res.hitValue));
+		auto dist = math::min(maxDist, static_cast<float>(res.hitValue));
 		auto t = 0.f;
-		if(!pragma::math::intersection::point_in_aabb(startPosLocal, min, max) && (pragma::math::intersection::line_aabb(startPosLocal, dir, min, max, &t) != pragma::math::intersection::Result::Intersect || pragma::math::abs(t) > (dist / maxDist)))
+		if(!math::intersection::point_in_aabb(startPosLocal, min, max) && (math::intersection::line_aabb(startPosLocal, dir, min, max, &t) != math::intersection::Result::Intersect || math::abs(t) > (dist / maxDist)))
 			continue;
 		auto &subMeshes = mesh->GetSubMeshes();
 		for(auto &subMesh : subMeshes) {
 			subMesh->GetBounds(min, max);
-			if(!pragma::math::intersection::point_in_aabb(startPosLocal, min, max) && (pragma::math::intersection::line_aabb(startPosLocal, dir, min, max, &t) != pragma::math::intersection::Result::Intersect || pragma::math::abs(t) > (dist / maxDist)))
+			if(!math::intersection::point_in_aabb(startPosLocal, min, max) && (math::intersection::line_aabb(startPosLocal, dir, min, max, &t) != math::intersection::Result::Intersect || math::abs(t) > (dist / maxDist)))
 				continue;
-			if(pragma::math::intersection::line_with_mesh(startPosLocal, dir, *subMesh, res, true, nullptr, nullptr) == false || pragma::math::abs(res.hitValue) > (dist / maxDist))
+			if(pragma::math::intersection::line_with_mesh(startPosLocal, dir, *subMesh, res, true, nullptr, nullptr) == false || math::abs(res.hitValue) > (dist / maxDist))
 				continue;
 			meshInfo->mesh = mesh.get();
 			meshInfo->subMesh = subMesh.get();
@@ -54,7 +54,7 @@ void pragma::physics::TraceResult::InitializeMeshes()
 	}
 }
 
-void pragma::physics::TraceResult::GetMeshes(pragma::geometry::ModelMesh **outMesh, pragma::geometry::ModelSubMesh **outSubMesh)
+void pragma::physics::TraceResult::GetMeshes(geometry::ModelMesh **outMesh, geometry::ModelSubMesh **outSubMesh)
 {
 	InitializeMeshes();
 	*outMesh = meshInfo->mesh;
@@ -67,8 +67,8 @@ pragma::material::Material *pragma::physics::TraceResult::GetMaterial()
 	auto &hMdl = entity->GetModel();
 	if(hMdl == nullptr)
 		return nullptr;
-	pragma::geometry::ModelMesh *mesh = nullptr;
-	pragma::geometry::ModelSubMesh *subMesh = nullptr;
+	geometry::ModelMesh *mesh = nullptr;
+	geometry::ModelSubMesh *subMesh = nullptr;
 	GetMeshes(&mesh, &subMesh);
 	if(mesh == nullptr || subMesh == nullptr)
 		return nullptr;
@@ -85,8 +85,8 @@ bool pragma::physics::TraceResult::GetMaterial(std::string &mat)
 	auto &hMdl = entity->GetModel();
 	if(hMdl == nullptr)
 		return false;
-	pragma::geometry::ModelMesh *mesh = nullptr;
-	pragma::geometry::ModelSubMesh *subMesh = nullptr;
+	geometry::ModelMesh *mesh = nullptr;
+	geometry::ModelSubMesh *subMesh = nullptr;
 	GetMeshes(&mesh, &subMesh);
 	if(mesh == nullptr || subMesh == nullptr)
 		return false;
@@ -100,14 +100,14 @@ bool pragma::physics::TraceResult::GetMaterial(std::string &mat)
 
 /////////////////////////////////////////
 
-pragma::physics::TraceData::TraceData() : m_flags(pragma::physics::RayCastFlags::Default), m_filterMask(pragma::physics::CollisionMask::All), m_filterGroup(pragma::physics::CollisionMask::Default)
+pragma::physics::TraceData::TraceData() : m_flags(RayCastFlags::Default), m_filterMask(CollisionMask::All), m_filterGroup(CollisionMask::Default)
 {
 	m_tStart.SetIdentity();
 	m_tEnd.SetIdentity();
 }
 pragma::physics::TraceData::TraceData(const TraceData &other) : m_tStart(other.m_tStart), m_tEnd(other.m_tEnd), m_flags(other.m_flags), m_bHasTarget(other.m_bHasTarget), m_shape {other.m_shape}, m_filter {other.m_filter}, m_filterMask(other.m_filterMask), m_filterGroup(other.m_filterGroup) {}
 pragma::physics::TraceData::~TraceData() {}
-void pragma::physics::TraceData::SetShape(const pragma::physics::IConvexShape &shape) { m_shape = std::dynamic_pointer_cast<pragma::physics::IConvexShape>(const_cast<pragma::physics::IConvexShape &>(shape).shared_from_this()); }
+void pragma::physics::TraceData::SetShape(const IConvexShape &shape) { m_shape = std::dynamic_pointer_cast<IConvexShape>(const_cast<IConvexShape &>(shape).shared_from_this()); }
 const pragma::physics::IConvexShape *pragma::physics::TraceData::GetShape() const { return m_shape.get(); }
 Vector3 pragma::physics::TraceData::GetSourceOrigin() const
 {
@@ -128,7 +128,7 @@ pragma::physics::CollisionMask pragma::physics::TraceData::GetCollisionFilterMas
 pragma::physics::CollisionMask pragma::physics::TraceData::GetCollisionFilterGroup() const { return m_filterGroup; }
 void pragma::physics::TraceData::SetSource(const Vector3 &origin) { m_tStart.SetOrigin(origin); }
 void pragma::physics::TraceData::SetSourceRotation(const Quat &rot) { m_tStart.SetRotation(rot); }
-void pragma::physics::TraceData::SetSource(const pragma::math::Transform &t) { m_tStart = t; }
+void pragma::physics::TraceData::SetSource(const math::Transform &t) { m_tStart = t; }
 void pragma::physics::TraceData::SetTarget(const Vector3 &target)
 {
 	m_tEnd.SetOrigin(target);
@@ -139,7 +139,7 @@ void pragma::physics::TraceData::SetTargetRotation(const Quat &rot)
 	m_tEnd.SetRotation(rot);
 	m_bHasTarget = true;
 }
-void pragma::physics::TraceData::SetTarget(const pragma::math::Transform &t)
+void pragma::physics::TraceData::SetTarget(const math::Transform &t)
 {
 	m_tEnd = t;
 	m_bHasTarget = true;
@@ -149,18 +149,18 @@ void pragma::physics::TraceData::SetRotation(const Quat &rot)
 	SetSourceRotation(rot);
 	SetTargetRotation(rot);
 }
-void pragma::physics::TraceData::SetFlags(pragma::physics::RayCastFlags flags) { m_flags = flags; }
+void pragma::physics::TraceData::SetFlags(RayCastFlags flags) { m_flags = flags; }
 pragma::physics::RayCastFlags pragma::physics::TraceData::GetFlags() const { return m_flags; }
-void pragma::physics::TraceData::SetCollisionFilterMask(pragma::physics::CollisionMask mask) { m_filterMask = mask; }
-void pragma::physics::TraceData::SetCollisionFilterGroup(pragma::physics::CollisionMask group) { m_filterGroup = group; }
-void pragma::physics::TraceData::SetFilter(const std::shared_ptr<pragma::physics::IRayCastFilterCallback> &filter) { m_filter = filter; }
-void pragma::physics::TraceData::SetFilter(pragma::ecs::BaseEntity &ent) { SetFilter(std::make_unique<::pragma::physics::EntityRayCastFilterCallback>(ent)); }
-void pragma::physics::TraceData::SetFilter(std::vector<EntityHandle> &&ents) { SetFilter(std::make_unique<::pragma::physics::MultiEntityRayCastFilterCallback>(std::move(ents))); }
-void pragma::physics::TraceData::SetFilter(pragma::physics::PhysObj &phys) { SetFilter(std::make_unique<::pragma::physics::PhysObjRayCastFilterCallback>(phys)); }
-void pragma::physics::TraceData::SetFilter(pragma::physics::ICollisionObject &colObj) { SetFilter(std::make_unique<::pragma::physics::CollisionObjRayCastFilterCallback>(colObj)); }
-void pragma::physics::TraceData::SetFilter(const std::function<pragma::physics::RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &preFilter, const std::function<pragma::physics::RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &postFilter)
+void pragma::physics::TraceData::SetCollisionFilterMask(CollisionMask mask) { m_filterMask = mask; }
+void pragma::physics::TraceData::SetCollisionFilterGroup(CollisionMask group) { m_filterGroup = group; }
+void pragma::physics::TraceData::SetFilter(const std::shared_ptr<IRayCastFilterCallback> &filter) { m_filter = filter; }
+void pragma::physics::TraceData::SetFilter(ecs::BaseEntity &ent) { SetFilter(std::make_unique<EntityRayCastFilterCallback>(ent)); }
+void pragma::physics::TraceData::SetFilter(std::vector<EntityHandle> &&ents) { SetFilter(std::make_unique<MultiEntityRayCastFilterCallback>(std::move(ents))); }
+void pragma::physics::TraceData::SetFilter(PhysObj &phys) { SetFilter(std::make_unique<PhysObjRayCastFilterCallback>(phys)); }
+void pragma::physics::TraceData::SetFilter(ICollisionObject &colObj) { SetFilter(std::make_unique<CollisionObjRayCastFilterCallback>(colObj)); }
+void pragma::physics::TraceData::SetFilter(const std::function<RayCastHitType(IShape &, IRigidBody &)> &preFilter, const std::function<RayCastHitType(IShape &, IRigidBody &)> &postFilter)
 {
-	SetFilter(std::make_unique<::pragma::physics::CustomRayCastFilterCallback>(preFilter, postFilter));
+	SetFilter(std::make_unique<CustomRayCastFilterCallback>(preFilter, postFilter));
 }
 const std::shared_ptr<pragma::physics::IRayCastFilterCallback> &pragma::physics::TraceData::GetFilter() const { return m_filter; }
 Vector3 pragma::physics::TraceData::GetDirection() const
@@ -177,7 +177,7 @@ float pragma::physics::TraceData::GetDistance() const
 	auto tgt = GetTargetOrigin();
 	return uvec::distance(src, tgt);
 }
-bool pragma::physics::TraceData::HasFlag(pragma::physics::RayCastFlags flag) const { return ((UInt32(m_flags) & UInt32(flag)) != 0) ? true : false; }
+bool pragma::physics::TraceData::HasFlag(RayCastFlags flag) const { return ((UInt32(m_flags) & UInt32(flag)) != 0) ? true : false; }
 
-pragma::physics::TraceResult::TraceResult(const pragma::physics::TraceData &data) : fraction {1.f}, position {data.GetTargetOrigin()}, startPosition {data.GetSourceOrigin()} {}
+pragma::physics::TraceResult::TraceResult(const TraceData &data) : fraction {1.f}, position {data.GetTargetOrigin()}, startPosition {data.GetSourceOrigin()} {}
 pragma::physics::TraceResult::~TraceResult() {}

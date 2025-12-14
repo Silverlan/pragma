@@ -125,8 +125,8 @@ void Lua::ents::register_library(lua::State *l)
 		luabind::def("create_prop",+[](lua::State *l,const std::string &mdl) -> type<pragma::ecs::BaseEntity> {
 			return create_prop(l,mdl,nullptr,nullptr,false);
 		}),
-		luabind::def("register",static_cast<void(*)(lua::State*,const std::string&,const Lua::classObject&)>(Lua::ents::register_class)),
-		luabind::def("register",static_cast<void(*)(lua::State*,const std::string&,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>>&,LuaEntityType)>(Lua::ents::register_class)),
+		luabind::def("register",static_cast<void(*)(lua::State*,const std::string&,const classObject&)>(register_class)),
+		luabind::def("register",static_cast<void(*)(lua::State*,const std::string&,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>>&,LuaEntityType)>(register_class)),
 		luabind::def("register",+[](lua::State *l,const std::string &className,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>> &tComponents) {
 			register_class(l,className,tComponents,LuaEntityType::Default);
 		}),
@@ -139,7 +139,7 @@ void Lua::ents::register_library(lua::State *l)
 		luabind::def("get_component_name",get_component_name),
 		luabind::def("get_component_id",get_component_id),
 		luabind::def("register_component_net_event",register_component_net_event),
-		luabind::def("get_registered_component_types",+[](lua::State *l,pragma::Game &game) -> Lua::tb<pragma::ComponentId> {
+		luabind::def("get_registered_component_types",+[](lua::State *l,pragma::Game &game) -> tb<pragma::ComponentId> {
 			auto &manager = game.GetEntityComponentManager();
 			auto t = luabind::newtable(l);
 			for(uint32_t idx = 1;auto &componentInfo : manager.GetRegisteredComponentTypes())
@@ -162,9 +162,9 @@ void Lua::ents::register_library(lua::State *l)
 			return componentId;
 		}),
 		luabind::def("load_component",&pragma::Game::LoadLuaComponentByName),
-		luabind::def("find_installed_custom_components",+[](lua::State *l,pragma::Game &game) -> Lua::tb<std::string> {
+		luabind::def("find_installed_custom_components",+[](lua::State *l,pragma::Game &game) -> tb<std::string> {
 			std::vector<std::string> dirs;
-			std::string rootPath {Lua::SCRIPT_DIRECTORY +"/entities/components/"};
+			std::string rootPath {SCRIPT_DIRECTORY +"/entities/components/"};
 			pragma::fs::find_files(rootPath +'*',nullptr,&dirs);
 			auto customComponents = luabind::newtable(l);
 			auto nwStateDirName = game.GetLuaNetworkDirectoryName();
@@ -172,10 +172,10 @@ void Lua::ents::register_library(lua::State *l)
 
 			auto nwStateDirNameC = nwStateDirName;
 			auto luaFileNameC = luaFileName;
-			ufile::remove_extension_from_filename(nwStateDirNameC,std::vector<std::string>{Lua::FILE_EXTENSION});
-		    ufile::remove_extension_from_filename(luaFileNameC, std::vector<std::string> {Lua::FILE_EXTENSION});
-			nwStateDirNameC += Lua::DOT_FILE_EXTENSION_PRECOMPILED;
-		    luaFileNameC += Lua::DOT_FILE_EXTENSION_PRECOMPILED;
+			ufile::remove_extension_from_filename(nwStateDirNameC,std::vector<std::string>{FILE_EXTENSION});
+		    ufile::remove_extension_from_filename(luaFileNameC, std::vector<std::string> {FILE_EXTENSION});
+			nwStateDirNameC += DOT_FILE_EXTENSION_PRECOMPILED;
+		    luaFileNameC += DOT_FILE_EXTENSION_PRECOMPILED;
 			for(uint32_t idx=1;auto &dir : dirs)
 			{
 				auto cdir = rootPath +dir +'/';
@@ -192,7 +192,7 @@ void Lua::ents::register_library(lua::State *l)
 			game.GetRegisteredEntities(entities,entities);
 			return entities;
 		}),
-		luabind::def("add_component_creation_listener",+[](pragma::Game &game,pragma::ComponentId id,Lua::func<void,pragma::BaseEntityComponent> callback) {
+		luabind::def("add_component_creation_listener",+[](pragma::Game &game,pragma::ComponentId id,func<void,pragma::BaseEntityComponent> callback) {
 			pragma::ecs::EntityIterator it {game};
 			it.AttachFilter<EntityIteratorFilterComponent>(id);
 			auto entIt = it.begin();
@@ -206,7 +206,7 @@ void Lua::ents::register_library(lua::State *l)
 				callback(c.get().GetLuaObject());
 			});
 		}),
-		luabind::def("add_component_creation_listener",+[](pragma::Game &game,const std::string &componentName,Lua::func<void,pragma::BaseEntityComponent> callback) {
+		luabind::def("add_component_creation_listener",+[](pragma::Game &game,const std::string &componentName,func<void,pragma::BaseEntityComponent> callback) {
 			pragma::ecs::EntityIterator it {game};
 			it.AttachFilter<EntityIteratorFilterComponent>(componentName);
 			auto entIt = it.begin();
@@ -229,13 +229,13 @@ void Lua::ents::register_library(lua::State *l)
 				return {};
 			return ref;
 		}),
-		luabind::def("parse_uri",+[](const std::string &uriPath,const Lua::util::Uuid &uuid) -> std::optional<pragma::EntityUComponentMemberRef> {
+		luabind::def("parse_uri",+[](const std::string &uriPath,const util::Uuid &uuid) -> std::optional<pragma::EntityUComponentMemberRef> {
 			pragma::EntityUComponentMemberRef ref;
 			if(!pragma::ecs::BaseEntity::ParseUri(uriPath,ref,&uuid.value))
 				return {};
 			return ref;
 		}),
-		luabind::def("create_uri",+[](const Lua::util::Uuid &uuid,const std::string &propName) -> std::string {
+		luabind::def("create_uri",+[](const util::Uuid &uuid,const std::string &propName) -> std::string {
 			return "pragma:game/entity/" +propName +"?entity_uuid=" +pragma::util::uuid_to_string(uuid.value);
 		}),
 		luabind::def("create_uri",+[](const std::string &uuid,const std::string &propName) -> std::string {
@@ -244,10 +244,10 @@ void Lua::ents::register_library(lua::State *l)
 		luabind::def("create_uri",+[](const std::string &propName) -> std::string {
 			return "pragma:game/entity/" +propName;
 		}),
-		luabind::def("create_entity_uri",+[](const Lua::util::Uuid &uuid) -> std::string {
+		luabind::def("create_entity_uri",+[](const util::Uuid &uuid) -> std::string {
 			return "pragma:game/entity?entity_uuid=" +pragma::util::uuid_to_string(uuid.value);
 		}),
-		luabind::def("create_component_uri",+[](const Lua::util::Uuid &uuid,const std::string &component) -> std::string {
+		luabind::def("create_component_uri",+[](const util::Uuid &uuid,const std::string &component) -> std::string {
 			return "pragma:game/entity/ec/" +component +"?entity_uuid=" +pragma::util::uuid_to_string(uuid.value);
 		}),
 		luabind::def("is_member_type_animatable",static_cast<bool(*)(pragma::ents::EntityMemberType)>(&pragma::is_animatable_type)),
@@ -260,7 +260,7 @@ void Lua::ents::register_library(lua::State *l)
 			})
 	)];
 	static_assert(pragma::math::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
-	Lua::RegisterLibraryEnums(l, "ents",
+	RegisterLibraryEnums(l, "ents",
 	  {
 	    {"MEMBER_TYPE_STRING", pragma::math::to_integral(pragma::ents::EntityMemberType::String)},
 	    {"MEMBER_TYPE_INT8", pragma::math::to_integral(pragma::ents::EntityMemberType::Int8)},
@@ -378,34 +378,34 @@ void Lua::ents::register_library(lua::State *l)
 	auto coordinateTypeMetaDataDef = luabind::class_<pragma::ents::CoordinateTypeMetaData, pragma::ents::TypeMetaData>("CoordinateTypeMetaData");
 	coordinateTypeMetaDataDef.def_readwrite("space", &pragma::ents::CoordinateTypeMetaData::space);
 	coordinateTypeMetaDataDef.property(
-	  "parentProperty", +[](lua::State *l, const pragma::ents::CoordinateTypeMetaData &metaData) { Lua::PushString(l, metaData.parentProperty.c_str()); }, +[](lua::State *l, pragma::ents::CoordinateTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
+	  "parentProperty", +[](lua::State *l, const pragma::ents::CoordinateTypeMetaData &metaData) { PushString(l, metaData.parentProperty.c_str()); }, +[](lua::State *l, pragma::ents::CoordinateTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
 	memberInfoDef.scope[coordinateTypeMetaDataDef];
 
 	auto poseTypeMetaDataDef = luabind::class_<pragma::ents::PoseTypeMetaData, pragma::ents::TypeMetaData>("PoseTypeMetaData");
-	poseTypeMetaDataDef.property("posProperty", +[](lua::State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.posProperty.c_str()); }, +[](lua::State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.posProperty = prop; });
-	poseTypeMetaDataDef.property("rotProperty", +[](lua::State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.rotProperty.c_str()); }, +[](lua::State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.rotProperty = prop; });
+	poseTypeMetaDataDef.property("posProperty", +[](lua::State *l, const pragma::ents::PoseTypeMetaData &metaData) { PushString(l, metaData.posProperty.c_str()); }, +[](lua::State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.posProperty = prop; });
+	poseTypeMetaDataDef.property("rotProperty", +[](lua::State *l, const pragma::ents::PoseTypeMetaData &metaData) { PushString(l, metaData.rotProperty.c_str()); }, +[](lua::State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.rotProperty = prop; });
 	poseTypeMetaDataDef.property(
-	  "scaleProperty", +[](lua::State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.scaleProperty.c_str()); }, +[](lua::State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.scaleProperty = prop; });
+	  "scaleProperty", +[](lua::State *l, const pragma::ents::PoseTypeMetaData &metaData) { PushString(l, metaData.scaleProperty.c_str()); }, +[](lua::State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.scaleProperty = prop; });
 	memberInfoDef.scope[poseTypeMetaDataDef];
 
 	auto poseComponentTypeMetaDataDef = luabind::class_<pragma::ents::PoseComponentTypeMetaData, pragma::ents::TypeMetaData>("PoseComponentTypeMetaData");
 	poseComponentTypeMetaDataDef.property(
-	  "poseProperty", +[](lua::State *l, const pragma::ents::PoseComponentTypeMetaData &metaData) { Lua::PushString(l, metaData.poseProperty.c_str()); }, +[](lua::State *l, pragma::ents::PoseComponentTypeMetaData &metaData, const std::string &prop) { metaData.poseProperty = prop; });
+	  "poseProperty", +[](lua::State *l, const pragma::ents::PoseComponentTypeMetaData &metaData) { PushString(l, metaData.poseProperty.c_str()); }, +[](lua::State *l, pragma::ents::PoseComponentTypeMetaData &metaData, const std::string &prop) { metaData.poseProperty = prop; });
 	memberInfoDef.scope[poseComponentTypeMetaDataDef];
 
 	auto optionalTypeMetaDataDef = luabind::class_<pragma::ents::OptionalTypeMetaData, pragma::ents::TypeMetaData>("OptionalTypeMetaData");
 	optionalTypeMetaDataDef.property(
-	  "enabledProperty", +[](lua::State *l, const pragma::ents::OptionalTypeMetaData &metaData) { Lua::PushString(l, metaData.enabledProperty.c_str()); }, +[](lua::State *l, pragma::ents::OptionalTypeMetaData &metaData, const std::string &prop) { metaData.enabledProperty = prop; });
+	  "enabledProperty", +[](lua::State *l, const pragma::ents::OptionalTypeMetaData &metaData) { PushString(l, metaData.enabledProperty.c_str()); }, +[](lua::State *l, pragma::ents::OptionalTypeMetaData &metaData, const std::string &prop) { metaData.enabledProperty = prop; });
 	memberInfoDef.scope[optionalTypeMetaDataDef];
 
 	auto parentTypeMetaDataDef = luabind::class_<pragma::ents::ParentTypeMetaData, pragma::ents::TypeMetaData>("ParentTypeMetaData");
 	parentTypeMetaDataDef.property(
-	  "parentProperty", +[](lua::State *l, const pragma::ents::ParentTypeMetaData &metaData) { Lua::PushString(l, metaData.parentProperty.c_str()); }, +[](lua::State *l, pragma::ents::ParentTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
+	  "parentProperty", +[](lua::State *l, const pragma::ents::ParentTypeMetaData &metaData) { PushString(l, metaData.parentProperty.c_str()); }, +[](lua::State *l, pragma::ents::ParentTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
 	memberInfoDef.scope[parentTypeMetaDataDef];
 
 	auto enablerTypeMetaDataDef = luabind::class_<pragma::ents::EnablerTypeMetaData, pragma::ents::TypeMetaData>("EnablerTypeMetaData");
 	enablerTypeMetaDataDef.property(
-	  "targetProperty", +[](lua::State *l, const pragma::ents::EnablerTypeMetaData &metaData) { Lua::PushString(l, metaData.targetProperty.c_str()); }, +[](lua::State *l, pragma::ents::EnablerTypeMetaData &metaData, const std::string &prop) { metaData.targetProperty = prop; });
+	  "targetProperty", +[](lua::State *l, const pragma::ents::EnablerTypeMetaData &metaData) { PushString(l, metaData.targetProperty.c_str()); }, +[](lua::State *l, pragma::ents::EnablerTypeMetaData &metaData, const std::string &prop) { metaData.targetProperty = prop; });
 	memberInfoDef.scope[enablerTypeMetaDataDef];
 
 	static_assert(pragma::math::to_integral(TypeMetaData::Count) == 7, "Update these bindings when adding news types!");
@@ -451,10 +451,10 @@ void Lua::ents::register_library(lua::State *l)
 	  "FindTypeMetaData", +[](lua::State *l, const pragma::ComponentMemberInfo &info, TypeMetaData eType) -> luabind::object {
 		  auto idx = type_meta_data_to_type_index(eType);
 		  if(!idx)
-			  return Lua::nil;
+			  return nil;
 		  auto *metaData = info.FindTypeMetaData(*idx);
 		  if(!metaData)
-			  return Lua::nil;
+			  return nil;
 		  return meta_data_type_to_lua_object(l, *metaData, eType);
 	  });
 	memberInfoDef.def("IsEnum", &pragma::ComponentMemberInfo::IsEnum);
@@ -613,7 +613,7 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_prop(lua::State *l, const s
 }
 
 namespace Lua::ents {
-	Lua::type<pragma::ecs::BaseEntity> create_trigger(lua::State *l, const Vector3 &origin, const EulerAngles *angles, pragma::physics::IConvexShape *shape)
+	type<pragma::ecs::BaseEntity> create_trigger(lua::State *l, const Vector3 &origin, const EulerAngles *angles, pragma::physics::IConvexShape *shape)
 	{
 		auto *state = pragma::Engine::Get()->GetNetworkState(l);
 		auto *game = state->GetGameState();
@@ -642,7 +642,7 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua::State *l, cons
 	auto *game = state->GetGameState();
 	auto *phys = game->GetPhysicsEnvironment();
 	auto shape = phys->CreateSphereShape(radius, phys->GetGenericMaterial());
-	return Lua::ents::create_trigger(l, origin, nullptr, dynamic_cast<pragma::physics::IConvexShape *>(shape.get()));
+	return create_trigger(l, origin, nullptr, dynamic_cast<pragma::physics::IConvexShape *>(shape.get()));
 }
 Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua::State *l, const Vector3 &origin, pragma::physics::IShape &shape)
 {
@@ -651,7 +651,7 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua::State *l, cons
 		return nil;
 	}
 	auto cvShape = std::dynamic_pointer_cast<pragma::physics::IConvexShape>(shape.shared_from_this());
-	return Lua::ents::create_trigger(l, origin, nullptr, cvShape.get());
+	return create_trigger(l, origin, nullptr, cvShape.get());
 }
 
 Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua::State *l, const Vector3 &origin, const Vector3 &min, const Vector3 &max, const EulerAngles &angles)
@@ -664,7 +664,7 @@ Lua::type<pragma::ecs::BaseEntity> Lua::ents::create_trigger(lua::State *l, cons
 	auto center = (max + min) * 0.5f;
 	auto centerOrigin = origin + center;
 	auto shape = phys->CreateBoxShape(extents * 0.5f, phys->GetGenericMaterial());
-	return Lua::ents::create_trigger(l, centerOrigin, &angles, shape.get());
+	return create_trigger(l, centerOrigin, &angles, shape.get());
 }
 
 static Lua::tb<Lua::type<pragma::ecs::BaseEntity>> entities_to_table(lua::State *l, std::vector<pragma::ecs::BaseEntity *> &ents)
@@ -723,7 +723,7 @@ Lua::opt<Lua::mult<Lua::type<pragma::ecs::BaseEntity>, double>> Lua::ents::get_c
 	});
 	if(entClosest == nullptr)
 		return nil;
-	return Lua::mult<Lua::type<pragma::ecs::BaseEntity>, double> {l, entClosest->GetLuaObject(), dClosest};
+	return Lua::mult<type<pragma::ecs::BaseEntity>, double> {l, entClosest->GetLuaObject(), dClosest};
 }
 Lua::opt<Lua::mult<Lua::type<pragma::ecs::BaseEntity>, double>> Lua::ents::get_farthest(lua::State *l, const Vector3 &origin)
 {
@@ -741,7 +741,7 @@ Lua::opt<Lua::mult<Lua::type<pragma::ecs::BaseEntity>, double>> Lua::ents::get_f
 	});
 	if(entClosest == nullptr)
 		return nil;
-	return Lua::mult<Lua::type<pragma::ecs::BaseEntity>, double> {l, entClosest->GetLuaObject(), dFarthest};
+	return Lua::mult<type<pragma::ecs::BaseEntity>, double> {l, entClosest->GetLuaObject(), dFarthest};
 }
 Lua::tb<Lua::type<pragma::ecs::BaseEntity>> Lua::ents::get_sorted_by_distance(lua::State *l, const Vector3 &origin)
 {
@@ -965,7 +965,7 @@ namespace luabind::detail {
 	void make_null_value(lua::State *L, ValueType &&val)
 	{
 		// See luabind/detail/make_instance.hpp
-		detail::class_registry *registry = luabind::detail::class_registry::get_registry(L);
+		class_registry *registry = class_registry::get_registry(L);
 		auto typeId = type_id {typeid(BaseType)};
 		auto *cls = registry->find_class(typeId);
 		if(!cls) {
@@ -1003,7 +1003,7 @@ Lua::type<EntityHandle> Lua::ents::get_null(lua::State *l)
 {
 	luabind::detail::make_null_value<EntityHandle, pragma::ecs::BaseEntity>(l, EntityHandle {});
 	luabind::object o {luabind::from_stack(l, -1)};
-	Lua::Pop(l, 1);
+	Pop(l, 1);
 	return o;
 }
 
@@ -1090,7 +1090,7 @@ Lua::opt<pragma::ComponentEventId> Lua::ents::get_event_id(lua::State *l, const 
 	return {l, eventId};
 }
 
-void Lua::ents::register_class(lua::State *l, const std::string &className, const Lua::classObject &classObject)
+void Lua::ents::register_class(lua::State *l, const std::string &className, const classObject &classObject)
 {
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
@@ -1100,14 +1100,14 @@ void Lua::ents::register_class(lua::State *l, const std::string &className, cons
 void Lua::ents::register_class(lua::State *l, const std::string &className, const luabind::tableT<luabind::variant<std::string, pragma::ComponentId>> &tComponents, LuaEntityType type)
 {
 	std::vector<pragma::ComponentId> components;
-	auto numComponents = Lua::GetObjectLength(l, tComponents);
+	auto numComponents = GetObjectLength(l, tComponents);
 	components.reserve(numComponents);
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto &componentManager = game->GetEntityComponentManager();
 	for(auto i = decltype(numComponents) {0}; i < numComponents; ++i) {
 		auto o = tComponents[i + 1];
-		if(static_cast<Lua::Type>(luabind::type(o)) == Lua::Type::String) {
+		if(static_cast<Type>(luabind::type(o)) == Type::String) {
 			std::string name = luabind::object_cast<std::string>(o);
 			auto id = pragma::INVALID_COMPONENT_ID;
 			if(componentManager.GetComponentTypeId(name, id, false))
@@ -1137,7 +1137,7 @@ void Lua::ents::register_class(lua::State *l, const std::string &className, cons
 	ss << "end\n";
 
 	auto r = pragma::scripting::lua_core::run_string(l, ss.str(), "register_class");
-	if(r == Lua::StatusCode::Ok) {
+	if(r == StatusCode::Ok) {
 		auto o = luabind::object(luabind::globals(l)[cLuaClassName]);
 		if(o) {
 			o["Type"] = pragma::math::to_integral(type);
@@ -1147,8 +1147,8 @@ void Lua::ents::register_class(lua::State *l, const std::string &className, cons
 		}
 	}
 
-	Lua::PushNil(l);
-	Lua::SetGlobal(l, luaClassName);
+	PushNil(l);
+	SetGlobal(l, luaClassName);
 }
 
 Lua::opt<pragma::NetEventId> Lua::ents::register_component_net_event(lua::State *l, pragma::ComponentId componentId, const std::string &name)

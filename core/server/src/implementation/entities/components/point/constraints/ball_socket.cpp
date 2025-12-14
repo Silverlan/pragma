@@ -12,7 +12,7 @@ void SPointConstraintBallSocketComponent::SendData(NetPacket &packet, networking
 {
 	packet->WriteString(m_kvSource);
 	packet->WriteString(m_kvTarget);
-	pragma::networking::write_vector(packet, m_posTarget);
+	networking::write_vector(packet, m_posTarget);
 }
 
 void SPointConstraintBallSocketComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

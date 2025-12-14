@@ -25,7 +25,7 @@ namespace pragma {
 decltype(SAIComponent::s_npcs) SAIComponent::s_npcs {};
 decltype(SAIComponent::s_factionManager) SAIComponent::s_factionManager {};
 FactionManager &SAIComponent::GetFactionManager() { return s_factionManager; }
-const std::vector<pragma::SAIComponent *> &SAIComponent::GetAll() { return s_npcs; }
+const std::vector<SAIComponent *> &SAIComponent::GetAll() { return s_npcs; }
 unsigned int SAIComponent::GetNPCCount() { return CUInt32(s_npcs.size()); }
 
 ComponentEventId sAIComponent::EVENT_SELECT_SCHEDULE = INVALID_COMPONENT_ID;
@@ -46,7 +46,7 @@ ComponentEventId sAIComponent::EVENT_ON_END_CONTROL = INVALID_COMPONENT_ID;
 ComponentEventId sAIComponent::EVENT_ON_PATH_NODE_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId sAIComponent::EVENT_ON_LOOK_TARGET_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId sAIComponent::EVENT_ON_SCHEDULE_STARTED = INVALID_COMPONENT_ID;
-void SAIComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+void SAIComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseAIComponent::RegisterEvents(componentManager, registerEvent);
 	sAIComponent::EVENT_SELECT_SCHEDULE = registerEvent("SELECT_SCHEDULE", ComponentEventInfo::Type::Broadcast);
@@ -69,7 +69,7 @@ void SAIComponent::RegisterEvents(pragma::EntityComponentManager &componentManag
 	sAIComponent::EVENT_ON_SCHEDULE_STARTED = registerEvent("ON_SCHEDULE_STARTED", ComponentEventInfo::Type::Broadcast);
 }
 
-SAIComponent::SAIComponent(pragma::ecs::BaseEntity &ent) : BaseAIComponent(ent), m_npcState(NPCSTATE::NONE)
+SAIComponent::SAIComponent(ecs::BaseEntity &ent) : BaseAIComponent(ent), m_npcState(NPCSTATE::NONE)
 {
 	SetMaxViewAngle(70.f);
 	static_cast<SBaseEntity &>(ent).SetShared(true);
@@ -101,16 +101,16 @@ void SAIComponent::OnLookTargetChanged()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		p->Write<BaseAIComponent::LookTargetType>(m_neckInfo.lookTargetType);
+		p->Write<LookTargetType>(m_neckInfo.lookTargetType);
 		switch(m_neckInfo.lookTargetType) {
-		case BaseAIComponent::LookTargetType::Position:
+		case LookTargetType::Position:
 			p->Write<Vector3>(m_neckInfo.lookTarget);
 			break;
-		case BaseAIComponent::LookTargetType::Entity:
-			pragma::networking::write_entity(p, m_neckInfo.hEntityLookTarget);
+		case LookTargetType::Entity:
+			networking::write_entity(p, m_neckInfo.hEntityLookTarget);
 			break;
 		}
-		ent.SendNetEvent(m_netEvSetLookTarget, p, pragma::networking::Protocol::SlowReliable);
+		ent.SendNetEvent(m_netEvSetLookTarget, p, networking::Protocol::SlowReliable);
 	}
 	BroadcastEvent(sAIComponent::EVENT_ON_LOOK_TARGET_CHANGED);
 }
@@ -142,28 +142,28 @@ void SAIComponent::Initialize()
 {
 	BaseAIComponent::Initialize();
 
-	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
 		if(OnInput(inputData.input, inputData.activator, inputData.caller, inputData.data))
-			return pragma::util::EventReply::Handled;
-		return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Handled;
+		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(damageableComponent::EVENT_ON_TAKE_DAMAGE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnTakeDamage(static_cast<CEOnTakeDamage &>(evData.get()).damageInfo); });
-	BindEventUnhandled(sHealthComponent::EVENT_ON_TAKEN_DAMAGE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(damageableComponent::EVENT_ON_TAKE_DAMAGE, [this](std::reference_wrapper<ComponentEvent> evData) { OnTakeDamage(static_cast<CEOnTakeDamage &>(evData.get()).damageInfo); });
+	BindEventUnhandled(sHealthComponent::EVENT_ON_TAKEN_DAMAGE, [this](std::reference_wrapper<ComponentEvent> evData) {
 		auto &evDataDmg = static_cast<CEOnTakenDamage &>(evData.get());
 		OnTakenDamage(evDataDmg.damageInfo, evDataDmg.oldHealth, evDataDmg.newHealth);
 	});
-	BindEventUnhandled(sPhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPrePhysicsSimulate(); });
-	BindEventUnhandled(sModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		pragma::SAIComponent::AIAnimationInfo info {};
+	BindEventUnhandled(sPhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE, [this](std::reference_wrapper<ComponentEvent> evData) { OnPrePhysicsSimulate(); });
+	BindEventUnhandled(sModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
+		AIAnimationInfo info {};
 		info.SetPlayAsSchedule(false);
-		PlayActivity(pragma::Activity::Idle, info);
+		PlayActivity(Activity::Idle, info);
 	});
-	BindEventUnhandled(sAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(sAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE, [this](std::reference_wrapper<ComponentEvent> evData) {
 		if(m_schedule == nullptr && IsMoving() == false) {
-			pragma::SAIComponent::AIAnimationInfo info {};
+			AIAnimationInfo info {};
 			info.SetPlayAsSchedule(false);
-			PlayActivity(pragma::Activity::Idle, info);
+			PlayActivity(Activity::Idle, info);
 		}
 		/*auto *task = GetCurrentTask();
 		if(task == nullptr)
@@ -178,16 +178,16 @@ void SAIComponent::Initialize()
 			}
 		};*/ // TODO
 	});
-	BindEvent(baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION, [this](std::reference_wrapper<ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		if(m_bSkipHandling == true)
-			return pragma::util::EventReply::Unhandled;
+			return util::EventReply::Unhandled;
 		AIAnimationInfo info {};
 		auto &animData = static_cast<CEOnPlayAnimation &>(evData.get());
 		PlayAnimation(animData.animation, info);
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	});
 
-	BindEventUnhandled(sAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { MaintainAnimationMovement(static_cast<CEMaintainAnimationMovement &>(evData.get()).displacement); });
+	BindEventUnhandled(sAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT, [this](std::reference_wrapper<ComponentEvent> evData) { MaintainAnimationMovement(static_cast<CEMaintainAnimationMovement &>(evData.get()).displacement); });
 }
 
 void SAIComponent::UpdateMovementProperties(MovementComponent &movementC)
@@ -202,39 +202,39 @@ void SAIComponent::OnEntitySpawn()
 	BaseAIComponent::OnEntitySpawn();
 	auto &ent = GetEntity();
 
-	pragma::SAIComponent::AIAnimationInfo info {};
+	AIAnimationInfo info {};
 	info.SetPlayAsSchedule(false);
-	PlayActivity(pragma::Activity::Idle, info);
+	PlayActivity(Activity::Idle, info);
 
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
 		pPhysComponent->DropToFloor();
 }
 
-bool SAIComponent::OnInput(std::string input, pragma::ecs::BaseEntity *activator, pragma::ecs::BaseEntity *caller, const std::string &data)
+bool SAIComponent::OnInput(std::string input, ecs::BaseEntity *activator, ecs::BaseEntity *caller, const std::string &data)
 {
-	if constexpr(pragma::ai::DEBUG_AI_MOVEMENT) {
+	if constexpr(ai::DEBUG_AI_MOVEMENT) {
 		if(pragma::string::compare<std::string>(input, "dbg_move", false)) {
 			auto pTrComponentActivator = (activator != nullptr) ? activator->GetTransformComponent() : nullptr;
 			if(pTrComponentActivator) {
-				pragma::SAIComponent::AIAnimationInfo info {};
+				AIAnimationInfo info {};
 				info.SetPlayAsSchedule(false);
 				PlayActivity(m_moveInfo.moveActivity, info);
 
 				auto &ent = GetEntity();
-				BaseAIComponent::MoveInfo mvInfo {};
+				MoveInfo mvInfo {};
 				if(data == "1") {
 					auto pTrComponent = ent.GetTransformComponent();
 					if(pTrComponent != nullptr)
 						mvInfo.faceTarget = pTrComponent->GetPosition() + pTrComponent->GetForward() * 10'000.f;
 				}
 				auto r = MoveTo(pTrComponentActivator->GetPosition(), mvInfo);
-				if(r == BaseAIComponent::MoveResult::TargetUnreachable) {
+				if(r == MoveResult::TargetUnreachable) {
 					spdlog::info("Unable to move on path; Attempting to move by LoS...");
 					mvInfo.moveOnPath = false;
 					r = MoveTo(pTrComponentActivator->GetPosition(), mvInfo);
 				}
-				spdlog::info("MoveTo result: {}", BaseAIComponent::MoveResultToString(r));
+				spdlog::info("MoveTo result: {}", MoveResultToString(r));
 			}
 			return true;
 		}
@@ -242,7 +242,7 @@ bool SAIComponent::OnInput(std::string input, pragma::ecs::BaseEntity *activator
 	return false;
 }
 void SAIComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) {}
-void SAIComponent::SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl)
+void SAIComponent::SendSnapshotData(NetPacket &packet, BasePlayerComponent &pl)
 {
 	auto snapshotFlags = SnapshotFlags::None;
 	if(m_moveInfo.moving == false)
@@ -257,7 +257,7 @@ void SAIComponent::SendSnapshotData(NetPacket &packet, pragma::BasePlayerCompone
 			snapshotFlags |= SnapshotFlags::FaceTarget;
 		packet->Write<SnapshotFlags>(snapshotFlags);
 
-		packet->Write<pragma::Activity>(m_moveInfo.moveActivity);
+		packet->Write<Activity>(m_moveInfo.moveActivity);
 		packet->Write<Vector3>(m_moveInfo.moveDir);
 		packet->Write<Vector3>(m_moveInfo.moveTarget);
 		if((snapshotFlags & SnapshotFlags::MoveSpeed) != SnapshotFlags::None)
@@ -278,7 +278,7 @@ void SAIComponent::SetSquad(std::string squadName)
 		m_squad = nullptr;
 		return;
 	}
-	pragma::string::to_lower(squadName);
+	string::to_lower(squadName);
 	auto &squads = AISquad::GetAll();
 	auto it = std::find_if(squads.begin(), squads.end(), [&squadName](const std::shared_ptr<AISquad> &squad) { return (squad->name == squadName) ? true : false; });
 	if(it != squads.end()) {
@@ -380,7 +380,7 @@ bool SAIComponent::TriggerScheduleInterrupt(uint32_t interruptFlags)
 	return false;
 }
 
-bool SAIComponent::IsEnemy(pragma::ecs::BaseEntity *ent) const
+bool SAIComponent::IsEnemy(ecs::BaseEntity *ent) const
 {
 	auto disp = const_cast<SAIComponent *>(this)->GetDisposition(ent);
 	return (disp == DISPOSITION::LIKE || disp == DISPOSITION::NEUTRAL) ? false : true;
@@ -406,32 +406,32 @@ bool SAIComponent::TurnStep(const Vector3 &target, float &turnAngle, const float
 		return r;
 	auto &ent = GetEntity();
 	auto animComponent = ent.GetAnimatedComponent();
-	auto act = animComponent.valid() ? animComponent->GetActivity() : pragma::Activity::Invalid;
+	auto act = animComponent.valid() ? animComponent->GetActivity() : Activity::Invalid;
 
-	if(r == false && IsMoving() == false && (act == pragma::Activity::Idle || act == pragma::Activity::Invalid)) {
+	if(r == false && IsMoving() == false && (act == Activity::Idle || act == Activity::Invalid)) {
 		if(turnAngle < 0.f) {
-			pragma::SAIComponent::AIAnimationInfo info {};
+			AIAnimationInfo info {};
 			info.SetPlayAsSchedule(false);
-			if(PlayActivity(pragma::Activity::TurnLeft, info) == false) {
-				PlayActivity(pragma::Activity::Idle, info);
+			if(PlayActivity(Activity::TurnLeft, info) == false) {
+				PlayActivity(Activity::Idle, info);
 				if(animComponent.valid())
-					animComponent->PlayLayeredActivity(0, pragma::Activity::GestureTurnLeft);
+					animComponent->PlayLayeredActivity(0, Activity::GestureTurnLeft);
 			}
 		}
 		else {
-			pragma::SAIComponent::AIAnimationInfo info {};
+			AIAnimationInfo info {};
 			info.SetPlayAsSchedule(false);
-			if(PlayActivity(pragma::Activity::TurnRight, info) == false) {
-				PlayActivity(pragma::Activity::Idle, info);
+			if(PlayActivity(Activity::TurnRight, info) == false) {
+				PlayActivity(Activity::Idle, info);
 				if(animComponent.valid())
-					animComponent->PlayLayeredActivity(0, pragma::Activity::GestureTurnRight);
+					animComponent->PlayLayeredActivity(0, Activity::GestureTurnRight);
 			}
 		}
 	}
-	else if(act == pragma::Activity::TurnLeft || act == pragma::Activity::TurnRight) {
-		pragma::SAIComponent::AIAnimationInfo info {};
+	else if(act == Activity::TurnLeft || act == Activity::TurnRight) {
+		AIAnimationInfo info {};
 		info.SetPlayAsSchedule(false);
-		PlayActivity(pragma::Activity::Idle, info);
+		PlayActivity(Activity::Idle, info);
 	}
 	//if(r == true)
 	//	CompleteTask();
@@ -446,7 +446,7 @@ void SAIComponent::SetNPCState(NPCSTATE state)
 	OnNPCStateChanged(oldState, state);
 }
 
-void SAIComponent::OnTargetAcquired(pragma::ecs::BaseEntity *ent, float dist, bool isFirstNewTarget)
+void SAIComponent::OnTargetAcquired(ecs::BaseEntity *ent, float dist, bool isFirstNewTarget)
 {
 	CEOnTargetAcquired evData {ent, dist, isFirstNewTarget};
 	BroadcastEvent(sAIComponent::EVENT_ON_TARGET_ACQUIRED, evData);
@@ -461,7 +461,7 @@ void SAIComponent::SelectEnemies()
 		SAIComponent *npc = s_npcs[i];
 		auto &ent = npc->GetEntity();
 		if(npc != this) {
-			auto *charComponent = static_cast<pragma::SCharacterComponent *>(ent.GetCharacterComponent().get());
+			auto *charComponent = static_cast<SCharacterComponent *>(ent.GetCharacterComponent().get());
 			if(charComponent == nullptr || (charComponent->IsAlive() == true && charComponent->GetNoTarget() == false)) {
 				auto disp = GetDisposition(&ent);
 				float dist;
@@ -475,7 +475,7 @@ void SAIComponent::SelectEnemies()
 	auto &players = SPlayerComponent::GetAll();
 	for(auto *pl : players) {
 		auto &ent = pl->GetEntity();
-		auto *charComponent = static_cast<pragma::SCharacterComponent *>(ent.GetCharacterComponent().get());
+		auto *charComponent = static_cast<SCharacterComponent *>(ent.GetCharacterComponent().get());
 		if(charComponent != nullptr && charComponent->IsAlive() == false)
 			continue;
 		auto disp = GetDisposition(&ent);
@@ -499,35 +499,35 @@ void SAIComponent::OnNPCStateChanged(NPCSTATE oldState, NPCSTATE newState)
 	BroadcastEvent(sAIComponent::EVENT_ON_NPC_STATE_CHANGED, evData);
 }
 
-bool SAIComponent::IsObstruction(const pragma::ecs::BaseEntity &ent) const
+bool SAIComponent::IsObstruction(const ecs::BaseEntity &ent) const
 {
-	if(IsEnemy(&const_cast<pragma::ecs::BaseEntity &>(ent)) == true) // Don't count enemies as movement obstructions (We wouldn't want to move around them...)
+	if(IsEnemy(&const_cast<ecs::BaseEntity &>(ent)) == true) // Don't count enemies as movement obstructions (We wouldn't want to move around them...)
 		return false;
 	return BaseAIComponent::IsObstruction(ent);
 }
 
 void SAIComponent::OnEntityComponentAdded(BaseEntityComponent &component) { BaseAIComponent::OnEntityComponentAdded(component); }
 
-pragma::util::EventReply SAIComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
+util::EventReply SAIComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseAIComponent::HandleEvent(eventId, evData) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(BaseAIComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(eventId == sCharacterComponent::EVENT_ON_KILLED)
 		OnKilled(static_cast<const CEOnCharacterKilled &>(evData).damageInfo);
-	return pragma::util::EventReply::Unhandled;
+	return util::EventReply::Unhandled;
 }
 
-bool SAIComponent::HasCharacterNoTargetEnabled(const pragma::ecs::BaseEntity &ent) const
+bool SAIComponent::HasCharacterNoTargetEnabled(const ecs::BaseEntity &ent) const
 {
-	auto *charComponent = static_cast<pragma::SCharacterComponent *>(ent.GetCharacterComponent().get());
+	auto *charComponent = static_cast<SCharacterComponent *>(ent.GetCharacterComponent().get());
 	return (charComponent != nullptr) ? charComponent->GetNoTarget() : false;
 }
 
 namespace Lua {
 	namespace NPC {
 		namespace Server {
-			static Lua::mult<bool, Lua::opt<float>> IsInViewCone(lua::State *l, pragma::SAIComponent &hEnt, pragma::ecs::BaseEntity &entOther);
-			static bool HasPrimaryTarget(lua::State *l, pragma::SAIComponent &hEnt);
+			static mult<bool, opt<float>> IsInViewCone(lua::State *l, SAIComponent &hEnt, ecs::BaseEntity &entOther);
+			static bool HasPrimaryTarget(lua::State *l, SAIComponent &hEnt);
 		};
 	};
 };
@@ -536,126 +536,126 @@ void SAIComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 {
 	BaseAIComponent::RegisterLuaBindings(l, modEnts);
 
-	auto def = pragma::LuaCore::create_entity_component_class<pragma::SAIComponent, pragma::BaseAIComponent>("AIComponent");
-	def.def("StartSchedule", &pragma::SAIComponent::StartSchedule);
-	def.def("CancelSchedule", &pragma::SAIComponent::CancelSchedule);
-	def.def("SetSquad", &pragma::SAIComponent::SetSquad);
-	def.def("GetSquadName", &pragma::SAIComponent::GetSquadName);
-	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(std::string, DISPOSITION, int32_t)>(&pragma::SAIComponent::SetRelationship));
-	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(std::string, DISPOSITION, int32_t)>(&pragma::SAIComponent::SetRelationship), luabind::default_parameter_policy<4, int32_t {0}> {});
-	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&pragma::SAIComponent::SetRelationship));
-	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&pragma::SAIComponent::SetRelationship), luabind::default_parameter_policy<5, int32_t {0}> {});
-	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&pragma::SAIComponent::SetRelationship),
+	auto def = pragma::LuaCore::create_entity_component_class<SAIComponent, BaseAIComponent>("AIComponent");
+	def.def("StartSchedule", &SAIComponent::StartSchedule);
+	def.def("CancelSchedule", &SAIComponent::CancelSchedule);
+	def.def("SetSquad", &SAIComponent::SetSquad);
+	def.def("GetSquadName", &SAIComponent::GetSquadName);
+	def.def("SetRelationship", static_cast<void (SAIComponent::*)(std::string, DISPOSITION, int32_t)>(&SAIComponent::SetRelationship));
+	def.def("SetRelationship", static_cast<void (SAIComponent::*)(std::string, DISPOSITION, int32_t)>(&SAIComponent::SetRelationship), luabind::default_parameter_policy<4, int32_t {0}> {});
+	def.def("SetRelationship", static_cast<void (SAIComponent::*)(ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&SAIComponent::SetRelationship));
+	def.def("SetRelationship", static_cast<void (SAIComponent::*)(ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&SAIComponent::SetRelationship), luabind::default_parameter_policy<5, int32_t {0}> {});
+	def.def("SetRelationship", static_cast<void (SAIComponent::*)(ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&SAIComponent::SetRelationship),
 	  luabind::meta::join_t<luabind::default_parameter_policy<4, true>, luabind::default_parameter_policy<5, int32_t {0}>> {});
-	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(Faction &, DISPOSITION, int32_t)>(&pragma::SAIComponent::SetRelationship));
-	def.def("SetRelationship", static_cast<void (pragma::SAIComponent::*)(Faction &, DISPOSITION, int32_t)>(&pragma::SAIComponent::SetRelationship), luabind::default_parameter_policy<4, int32_t {0}> {});
-	def.def("GetMaxViewDistance", &pragma::SAIComponent::GetMaxViewDistance);
-	def.def("SetMaxViewDistance", &pragma::SAIComponent::SetMaxViewDistance);
-	def.def("GetMaxViewAngle", &pragma::SAIComponent::GetMaxViewAngle);
-	def.def("SetMaxViewAngle", &pragma::SAIComponent::SetMaxViewAngle);
-	def.def("GetSquad", &pragma::SAIComponent::GetSquad, luabind::copy_policy<0> {});
-	def.def("ClearRelationship", static_cast<void (pragma::SAIComponent::*)(pragma::ecs::BaseEntity *)>(&pragma::SAIComponent::ClearRelationship));
-	def.def("ClearRelationship", static_cast<void (pragma::SAIComponent::*)(std::string)>(&pragma::SAIComponent::ClearRelationship));
-	def.def("ClearRelationship", static_cast<void (pragma::SAIComponent::*)(Faction &)>(&pragma::SAIComponent::ClearRelationship));
+	def.def("SetRelationship", static_cast<void (SAIComponent::*)(Faction &, DISPOSITION, int32_t)>(&SAIComponent::SetRelationship));
+	def.def("SetRelationship", static_cast<void (SAIComponent::*)(Faction &, DISPOSITION, int32_t)>(&SAIComponent::SetRelationship), luabind::default_parameter_policy<4, int32_t {0}> {});
+	def.def("GetMaxViewDistance", &SAIComponent::GetMaxViewDistance);
+	def.def("SetMaxViewDistance", &SAIComponent::SetMaxViewDistance);
+	def.def("GetMaxViewAngle", &SAIComponent::GetMaxViewAngle);
+	def.def("SetMaxViewAngle", &SAIComponent::SetMaxViewAngle);
+	def.def("GetSquad", &SAIComponent::GetSquad, luabind::copy_policy<0> {});
+	def.def("ClearRelationship", static_cast<void (SAIComponent::*)(ecs::BaseEntity *)>(&SAIComponent::ClearRelationship));
+	def.def("ClearRelationship", static_cast<void (SAIComponent::*)(std::string)>(&SAIComponent::ClearRelationship));
+	def.def("ClearRelationship", static_cast<void (SAIComponent::*)(Faction &)>(&SAIComponent::ClearRelationship));
 	def.def(
-	  "GetDisposition", +[](pragma::SAIComponent &c, pragma::ecs::BaseEntity *ent) -> std::pair<DISPOSITION, int> {
+	  "GetDisposition", +[](SAIComponent &c, ecs::BaseEntity *ent) -> std::pair<DISPOSITION, int> {
 		  int priority;
 		  auto disp = c.GetDisposition(ent, &priority);
 		  return {disp, priority};
 	  });
 	def.def(
-	  "GetDisposition", +[](pragma::SAIComponent &c, const std::string &className) -> std::pair<DISPOSITION, int> {
+	  "GetDisposition", +[](SAIComponent &c, const std::string &className) -> std::pair<DISPOSITION, int> {
 		  int priority;
 		  auto disp = c.GetDisposition(className, &priority);
 		  return {disp, priority};
 	  });
 	def.def(
-	  "GetDisposition", +[](pragma::SAIComponent &c, Faction &faction) -> std::pair<DISPOSITION, int> {
+	  "GetDisposition", +[](SAIComponent &c, Faction &faction) -> std::pair<DISPOSITION, int> {
 		  int priority;
 		  auto disp = c.GetDisposition(faction, &priority);
 		  return {disp, priority};
 	  });
-	def.def("GetCurrentSchedule", &pragma::SAIComponent::GetCurrentSchedule);
-	def.def("GetMemory", static_cast<pragma::ai::Memory::Fragment *(pragma::SAIComponent::*)(pragma::ecs::BaseEntity *)>(&pragma::SAIComponent::GetMemory));
-	def.def("GetMemory", static_cast<pragma::ai::Memory &(pragma::SAIComponent::*)()>(&pragma::SAIComponent::GetMemory));
-	def.def("Memorize", static_cast<pragma::ai::Memory::Fragment *(pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, pragma::ai::Memory::MemoryType, const Vector3 &, const Vector3 &)>(&pragma::SAIComponent::Memorize));
-	def.def("Memorize", static_cast<pragma::ai::Memory::Fragment *(pragma::SAIComponent::*)(pragma::ecs::BaseEntity *, pragma::ai::Memory::MemoryType)>(&pragma::SAIComponent::Memorize));
-	def.def("Forget", &pragma::SAIComponent::Forget);
-	def.def("ClearMemory", &pragma::SAIComponent::ClearMemory);
-	def.def("IsInMemory", &pragma::SAIComponent::IsInMemory);
+	def.def("GetCurrentSchedule", &SAIComponent::GetCurrentSchedule);
+	def.def("GetMemory", static_cast<ai::Memory::Fragment *(SAIComponent::*)(ecs::BaseEntity *)>(&SAIComponent::GetMemory));
+	def.def("GetMemory", static_cast<ai::Memory &(SAIComponent::*)()>(&SAIComponent::GetMemory));
+	def.def("Memorize", static_cast<ai::Memory::Fragment *(SAIComponent::*)(ecs::BaseEntity *, ai::Memory::MemoryType, const Vector3 &, const Vector3 &)>(&SAIComponent::Memorize));
+	def.def("Memorize", static_cast<ai::Memory::Fragment *(SAIComponent::*)(ecs::BaseEntity *, ai::Memory::MemoryType)>(&SAIComponent::Memorize));
+	def.def("Forget", &SAIComponent::Forget);
+	def.def("ClearMemory", &SAIComponent::ClearMemory);
+	def.def("IsInMemory", &SAIComponent::IsInMemory);
 	def.def("IsInViewCone", &Lua::NPC::Server::IsInViewCone);
-	def.def("GetMemoryDuration", &pragma::SAIComponent::GetMemoryDuration);
-	def.def("SetMemoryDuration", &pragma::SAIComponent::SetMemoryDuration);
-	def.def("CanSee", &pragma::SAIComponent::CanSee);
-	def.def("SetHearingStrength", &pragma::SAIComponent::SetHearingStrength);
-	def.def("GetHearingStrength", &pragma::SAIComponent::GetHearingStrength);
-	def.def("CanHear", &pragma::SAIComponent::CanHear);
-	def.def("GetMemoryFragmentCount", &pragma::SAIComponent::GetMemoryFragmentCount);
-	def.def("GetPrimaryTarget", +[](pragma::SAIComponent &c) { return const_cast<pragma::ai::Memory::Fragment *>(c.GetPrimaryTarget()); });
+	def.def("GetMemoryDuration", &SAIComponent::GetMemoryDuration);
+	def.def("SetMemoryDuration", &SAIComponent::SetMemoryDuration);
+	def.def("CanSee", &SAIComponent::CanSee);
+	def.def("SetHearingStrength", &SAIComponent::SetHearingStrength);
+	def.def("GetHearingStrength", &SAIComponent::GetHearingStrength);
+	def.def("CanHear", &SAIComponent::CanHear);
+	def.def("GetMemoryFragmentCount", &SAIComponent::GetMemoryFragmentCount);
+	def.def("GetPrimaryTarget", +[](SAIComponent &c) { return const_cast<ai::Memory::Fragment *>(c.GetPrimaryTarget()); });
 	def.def("HasPrimaryTarget", &Lua::NPC::Server::HasPrimaryTarget);
-	def.def("GetNPCState", &pragma::SAIComponent::GetNPCState);
-	def.def("SetNPCState", &pragma::SAIComponent::SetNPCState);
-	def.def("IsMoving", &pragma::SAIComponent::IsMoving);
-	def.def("IsAIEnabled", &pragma::SAIComponent::IsAIEnabled);
-	def.def("SetAIEnabled", &pragma::SAIComponent::SetAIEnabled);
-	def.def("EnableAI", &pragma::SAIComponent::EnableAI);
-	def.def("DisableAI", &pragma::SAIComponent::DisableAI);
-	def.def("IsControllable", &pragma::SAIComponent::IsControllable);
-	def.def("SetControllable", &pragma::SAIComponent::SetControllable);
-	def.def("StartControl", &pragma::SAIComponent::StartControl);
-	def.def("EndControl", &pragma::SAIComponent::EndControl);
-	def.def("IsControlled", &pragma::SAIComponent::IsControlled);
-	def.def("GetController", &pragma::SAIComponent::GetController);
-	def.def("IsEnemy", &pragma::SAIComponent::IsEnemy);
-	def.def("LockAnimation", &pragma::SAIComponent::LockAnimation);
-	def.def("IsAnimationLocked", &pragma::SAIComponent::IsAnimationLocked);
-	def.def("TurnStep", static_cast<bool (*)(pragma::SAIComponent &, const Vector3 &, float)>([](pragma::SAIComponent &ai, const Vector3 &target, float turnSpeed) { return ai.TurnStep(target, &turnSpeed); }));
-	def.def("TurnStep", static_cast<bool (*)(pragma::SAIComponent &, const Vector3 &)>([](pragma::SAIComponent &ai, const Vector3 &target) { return ai.TurnStep(target); }));
-	def.def("GetDistanceToMoveTarget", &pragma::SAIComponent::GetDistanceToMoveTarget);
-	def.def("GetMoveTarget", &pragma::SAIComponent::GetMoveTarget, luabind::copy_policy<0> {});
-	def.def("MoveTo", &pragma::SAIComponent::MoveTo);
-	def.def("MoveTo", static_cast<pragma::BaseAIComponent::MoveResult (*)(pragma::SAIComponent &, const Vector3 &)>([](pragma::SAIComponent &aiComponent, const Vector3 &pos) -> pragma::BaseAIComponent::MoveResult { return aiComponent.MoveTo(pos); }));
-	def.def("StopMoving", &pragma::SAIComponent::StopMoving);
-	def.def("HasReachedDestination", &pragma::SAIComponent::HasReachedDestination);
-	def.def("GetMoveActivity", &pragma::SAIComponent::GetMoveActivity);
-	def.def("GetControllerActionInput", &pragma::SAIComponent::GetControllerActionInput);
-	def.def("TriggerScheduleInterrupt", &pragma::SAIComponent::TriggerScheduleInterrupt);
+	def.def("GetNPCState", &SAIComponent::GetNPCState);
+	def.def("SetNPCState", &SAIComponent::SetNPCState);
+	def.def("IsMoving", &SAIComponent::IsMoving);
+	def.def("IsAIEnabled", &SAIComponent::IsAIEnabled);
+	def.def("SetAIEnabled", &SAIComponent::SetAIEnabled);
+	def.def("EnableAI", &SAIComponent::EnableAI);
+	def.def("DisableAI", &SAIComponent::DisableAI);
+	def.def("IsControllable", &SAIComponent::IsControllable);
+	def.def("SetControllable", &SAIComponent::SetControllable);
+	def.def("StartControl", &SAIComponent::StartControl);
+	def.def("EndControl", &SAIComponent::EndControl);
+	def.def("IsControlled", &SAIComponent::IsControlled);
+	def.def("GetController", &SAIComponent::GetController);
+	def.def("IsEnemy", &SAIComponent::IsEnemy);
+	def.def("LockAnimation", &SAIComponent::LockAnimation);
+	def.def("IsAnimationLocked", &SAIComponent::IsAnimationLocked);
+	def.def("TurnStep", static_cast<bool (*)(SAIComponent &, const Vector3 &, float)>([](SAIComponent &ai, const Vector3 &target, float turnSpeed) { return ai.TurnStep(target, &turnSpeed); }));
+	def.def("TurnStep", static_cast<bool (*)(SAIComponent &, const Vector3 &)>([](SAIComponent &ai, const Vector3 &target) { return ai.TurnStep(target); }));
+	def.def("GetDistanceToMoveTarget", &SAIComponent::GetDistanceToMoveTarget);
+	def.def("GetMoveTarget", &SAIComponent::GetMoveTarget, luabind::copy_policy<0> {});
+	def.def("MoveTo", &SAIComponent::MoveTo);
+	def.def("MoveTo", static_cast<MoveResult (*)(SAIComponent &, const Vector3 &)>([](SAIComponent &aiComponent, const Vector3 &pos) -> MoveResult { return aiComponent.MoveTo(pos); }));
+	def.def("StopMoving", &SAIComponent::StopMoving);
+	def.def("HasReachedDestination", &SAIComponent::HasReachedDestination);
+	def.def("GetMoveActivity", &SAIComponent::GetMoveActivity);
+	def.def("GetControllerActionInput", &SAIComponent::GetControllerActionInput);
+	def.def("TriggerScheduleInterrupt", &SAIComponent::TriggerScheduleInterrupt);
 
-	def.def("PlayActivity", &pragma::SAIComponent::PlayActivity);
-	def.def("PlayAnimation", static_cast<bool (pragma::SAIComponent::*)(int32_t, const pragma::SAIComponent::AIAnimationInfo &)>(&pragma::SAIComponent::PlayAnimation));
+	def.def("PlayActivity", &SAIComponent::PlayActivity);
+	def.def("PlayAnimation", static_cast<bool (SAIComponent::*)(int32_t, const AIAnimationInfo &)>(&SAIComponent::PlayAnimation));
 
-	auto defAIAnimInfo = luabind::class_<pragma::SAIComponent::AIAnimationInfo>("AnimationInfo");
+	auto defAIAnimInfo = luabind::class_<AIAnimationInfo>("AnimationInfo");
 	defAIAnimInfo.def(luabind::constructor<>());
-	defAIAnimInfo.property("flags", &pragma::SAIComponent::AIAnimationInfo::GetPlayFlags, &pragma::SAIComponent::AIAnimationInfo::SetPlayFlags);
-	defAIAnimInfo.property("playAsSchedule", &pragma::SAIComponent::AIAnimationInfo::ShouldPlayAsSchedule, &pragma::SAIComponent::AIAnimationInfo::SetPlayAsSchedule);
-	defAIAnimInfo.def("SetFacePrimaryTarget", static_cast<void (*)(lua::State *, pragma::SAIComponent::AIAnimationInfo &)>([](lua::State *l, pragma::SAIComponent::AIAnimationInfo &info) { info.SetFaceTarget(true); }));
-	defAIAnimInfo.def("ClearFaceTarget", static_cast<void (*)(lua::State *, pragma::SAIComponent::AIAnimationInfo &)>([](lua::State *l, pragma::SAIComponent::AIAnimationInfo &info) { info.SetFaceTarget(false); }));
-	defAIAnimInfo.def("SetFaceTarget", static_cast<void (pragma::SAIComponent::AIAnimationInfo::*)(const Vector3 &)>(&pragma::SAIComponent::AIAnimationInfo::SetFaceTarget));
-	defAIAnimInfo.def("SetFaceTarget", static_cast<void (pragma::SAIComponent::AIAnimationInfo::*)(pragma::ecs::BaseEntity &)>(&pragma::SAIComponent::AIAnimationInfo::SetFaceTarget));
+	defAIAnimInfo.property("flags", &AIAnimationInfo::GetPlayFlags, &AIAnimationInfo::SetPlayFlags);
+	defAIAnimInfo.property("playAsSchedule", &AIAnimationInfo::ShouldPlayAsSchedule, &AIAnimationInfo::SetPlayAsSchedule);
+	defAIAnimInfo.def("SetFacePrimaryTarget", static_cast<void (*)(lua::State *, AIAnimationInfo &)>([](lua::State *l, AIAnimationInfo &info) { info.SetFaceTarget(true); }));
+	defAIAnimInfo.def("ClearFaceTarget", static_cast<void (*)(lua::State *, AIAnimationInfo &)>([](lua::State *l, AIAnimationInfo &info) { info.SetFaceTarget(false); }));
+	defAIAnimInfo.def("SetFaceTarget", static_cast<void (AIAnimationInfo::*)(const Vector3 &)>(&AIAnimationInfo::SetFaceTarget));
+	defAIAnimInfo.def("SetFaceTarget", static_cast<void (AIAnimationInfo::*)(ecs::BaseEntity &)>(&AIAnimationInfo::SetFaceTarget));
 	def.scope[defAIAnimInfo];
 
-	def.add_static_constant("EVENT_SELECT_SCHEDULE", pragma::sAIComponent::EVENT_SELECT_SCHEDULE);
-	def.add_static_constant("EVENT_SELECT_CONTROLLER_SCHEDULE", pragma::sAIComponent::EVENT_SELECT_CONTROLLER_SCHEDULE);
-	def.add_static_constant("EVENT_ON_SCHEDULE_COMPLETE", pragma::sAIComponent::EVENT_ON_SCHEDULE_COMPLETE);
-	def.add_static_constant("EVENT_ON_PRIMARY_TARGET_CHANGED", pragma::sAIComponent::EVENT_ON_PRIMARY_TARGET_CHANGED);
-	def.add_static_constant("EVENT_ON_PATH_CHANGED", pragma::sAIComponent::EVENT_ON_PATH_CHANGED);
-	def.add_static_constant("EVENT_ON_NPC_STATE_CHANGED", pragma::sAIComponent::EVENT_ON_NPC_STATE_CHANGED);
-	def.add_static_constant("EVENT_ON_TARGET_VISIBILITY_LOST", pragma::sAIComponent::EVENT_ON_TARGET_VISIBILITY_LOST);
-	def.add_static_constant("EVENT_ON_TARGET_VISIBILITY_REACQUIRED", pragma::sAIComponent::EVENT_ON_TARGET_VISIBILITY_REACQUIRED);
-	def.add_static_constant("EVENT_ON_MEMORY_GAINED", pragma::sAIComponent::EVENT_ON_MEMORY_GAINED);
-	def.add_static_constant("EVENT_ON_MEMORY_LOST", pragma::sAIComponent::EVENT_ON_MEMORY_LOST);
-	def.add_static_constant("EVENT_ON_TARGET_ACQUIRED", pragma::sAIComponent::EVENT_ON_TARGET_ACQUIRED);
-	def.add_static_constant("EVENT_ON_SUSPICIOUS_SOUND_HEARED", pragma::sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED);
-	def.add_static_constant("EVENT_ON_CONTROLLER_ACTION_INPUT", pragma::sAIComponent::EVENT_ON_CONTROLLER_ACTION_INPUT);
-	def.add_static_constant("EVENT_ON_START_CONTROL", pragma::sAIComponent::EVENT_ON_START_CONTROL);
-	def.add_static_constant("EVENT_ON_END_CONTROL", pragma::sAIComponent::EVENT_ON_END_CONTROL);
-	def.add_static_constant("EVENT_ON_PATH_NODE_CHANGED", pragma::sAIComponent::EVENT_ON_PATH_NODE_CHANGED);
-	def.add_static_constant("EVENT_ON_LOOK_TARGET_CHANGED", pragma::sAIComponent::EVENT_ON_LOOK_TARGET_CHANGED);
-	def.add_static_constant("EVENT_ON_SCHEDULE_STARTED", pragma::sAIComponent::EVENT_ON_SCHEDULE_STARTED);
+	def.add_static_constant("EVENT_SELECT_SCHEDULE", sAIComponent::EVENT_SELECT_SCHEDULE);
+	def.add_static_constant("EVENT_SELECT_CONTROLLER_SCHEDULE", sAIComponent::EVENT_SELECT_CONTROLLER_SCHEDULE);
+	def.add_static_constant("EVENT_ON_SCHEDULE_COMPLETE", sAIComponent::EVENT_ON_SCHEDULE_COMPLETE);
+	def.add_static_constant("EVENT_ON_PRIMARY_TARGET_CHANGED", sAIComponent::EVENT_ON_PRIMARY_TARGET_CHANGED);
+	def.add_static_constant("EVENT_ON_PATH_CHANGED", sAIComponent::EVENT_ON_PATH_CHANGED);
+	def.add_static_constant("EVENT_ON_NPC_STATE_CHANGED", sAIComponent::EVENT_ON_NPC_STATE_CHANGED);
+	def.add_static_constant("EVENT_ON_TARGET_VISIBILITY_LOST", sAIComponent::EVENT_ON_TARGET_VISIBILITY_LOST);
+	def.add_static_constant("EVENT_ON_TARGET_VISIBILITY_REACQUIRED", sAIComponent::EVENT_ON_TARGET_VISIBILITY_REACQUIRED);
+	def.add_static_constant("EVENT_ON_MEMORY_GAINED", sAIComponent::EVENT_ON_MEMORY_GAINED);
+	def.add_static_constant("EVENT_ON_MEMORY_LOST", sAIComponent::EVENT_ON_MEMORY_LOST);
+	def.add_static_constant("EVENT_ON_TARGET_ACQUIRED", sAIComponent::EVENT_ON_TARGET_ACQUIRED);
+	def.add_static_constant("EVENT_ON_SUSPICIOUS_SOUND_HEARED", sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED);
+	def.add_static_constant("EVENT_ON_CONTROLLER_ACTION_INPUT", sAIComponent::EVENT_ON_CONTROLLER_ACTION_INPUT);
+	def.add_static_constant("EVENT_ON_START_CONTROL", sAIComponent::EVENT_ON_START_CONTROL);
+	def.add_static_constant("EVENT_ON_END_CONTROL", sAIComponent::EVENT_ON_END_CONTROL);
+	def.add_static_constant("EVENT_ON_PATH_NODE_CHANGED", sAIComponent::EVENT_ON_PATH_NODE_CHANGED);
+	def.add_static_constant("EVENT_ON_LOOK_TARGET_CHANGED", sAIComponent::EVENT_ON_LOOK_TARGET_CHANGED);
+	def.add_static_constant("EVENT_ON_SCHEDULE_STARTED", sAIComponent::EVENT_ON_SCHEDULE_STARTED);
 	modEnts[def];
 }
 
-Lua::mult<bool, Lua::opt<float>> Lua::NPC::Server::IsInViewCone(lua::State *l, pragma::SAIComponent &hEnt, pragma::ecs::BaseEntity &entOther)
+Lua::mult<bool, Lua::opt<float>> Lua::NPC::Server::IsInViewCone(lua::State *l, SAIComponent &hEnt, ecs::BaseEntity &entOther)
 {
 	auto dist = 0.f;
 	auto r = hEnt.IsInViewCone(&entOther, &dist);
@@ -663,7 +663,7 @@ Lua::mult<bool, Lua::opt<float>> Lua::NPC::Server::IsInViewCone(lua::State *l, p
 		return luabind::object {l, r};
 	return {l, r, Lua::opt<float> {luabind::object {l, dist}}};
 }
-bool Lua::NPC::Server::HasPrimaryTarget(lua::State *l, pragma::SAIComponent &hEnt) { return hEnt.GetPrimaryTarget() != nullptr; }
+bool Lua::NPC::Server::HasPrimaryTarget(lua::State *l, SAIComponent &hEnt) { return hEnt.GetPrimaryTarget() != nullptr; }
 
 //////////////////
 
@@ -681,13 +681,13 @@ void CEMemoryData::PushArguments(lua::State *l)
 CEOnNPCStateChanged::CEOnNPCStateChanged(NPCSTATE oldState, NPCSTATE newState) : oldState {oldState}, newState {newState} {}
 void CEOnNPCStateChanged::PushArguments(lua::State *l)
 {
-	Lua::PushInt(l, pragma::math::to_integral(oldState));
-	Lua::PushInt(l, pragma::math::to_integral(newState));
+	Lua::PushInt(l, math::to_integral(oldState));
+	Lua::PushInt(l, math::to_integral(newState));
 }
 
 //////////////////
 
-CEOnTargetAcquired::CEOnTargetAcquired(pragma::ecs::BaseEntity *entity, float distance, bool isFirstNewTarget) : entity {entity}, distance {distance}, isFirstNewTarget {isFirstNewTarget} {}
+CEOnTargetAcquired::CEOnTargetAcquired(ecs::BaseEntity *entity, float distance, bool isFirstNewTarget) : entity {entity}, distance {distance}, isFirstNewTarget {isFirstNewTarget} {}
 void CEOnTargetAcquired::PushArguments(lua::State *l)
 {
 	if(entity != nullptr)
@@ -700,21 +700,21 @@ void CEOnTargetAcquired::PushArguments(lua::State *l)
 
 //////////////////
 
-CEOnControllerActionInput::CEOnControllerActionInput(pragma::Action action, bool pressed) : action {action}, pressed {pressed} {}
+CEOnControllerActionInput::CEOnControllerActionInput(Action action, bool pressed) : action {action}, pressed {pressed} {}
 void CEOnControllerActionInput::PushArguments(lua::State *l)
 {
-	Lua::PushInt(l, pragma::math::to_integral(action));
+	Lua::PushInt(l, math::to_integral(action));
 	Lua::PushBool(l, pressed);
 }
 
 //////////////////
 
-CEOnSuspiciousSoundHeared::CEOnSuspiciousSoundHeared(const std::shared_ptr<pragma::audio::ALSound> &sound) : sound {sound} {}
-void CEOnSuspiciousSoundHeared::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<pragma::audio::ALSound>>(l, sound); }
+CEOnSuspiciousSoundHeared::CEOnSuspiciousSoundHeared(const std::shared_ptr<audio::ALSound> &sound) : sound {sound} {}
+void CEOnSuspiciousSoundHeared::PushArguments(lua::State *l) { Lua::Push<std::shared_ptr<audio::ALSound>>(l, sound); }
 
 //////////////////
 
-CEOnStartControl::CEOnStartControl(pragma::SPlayerComponent &player) : player {player} {}
+CEOnStartControl::CEOnStartControl(SPlayerComponent &player) : player {player} {}
 void CEOnStartControl::PushArguments(lua::State *l) { player.PushLuaObject(l); }
 
 //////////////////
@@ -728,5 +728,5 @@ CEOnScheduleStateChanged::CEOnScheduleStateChanged(const std::shared_ptr<ai::Sch
 void CEOnScheduleStateChanged::PushArguments(lua::State *l)
 {
 	Lua::Push<std::shared_ptr<ai::Schedule>>(l, schedule);
-	Lua::PushInt(l, pragma::math::to_integral(result));
+	Lua::PushInt(l, math::to_integral(result));
 }

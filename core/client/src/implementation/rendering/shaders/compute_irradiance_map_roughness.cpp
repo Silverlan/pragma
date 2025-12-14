@@ -62,16 +62,16 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 			imgViewCreateInfo.levelCount = 1u;
 			imgViewCreateInfo.mipmapLevels = 1u;
 
-			mipLevelFramebuffer.imageView = pragma::get_cengine()->GetRenderContext().CreateImageView(imgViewCreateInfo, *img);
+			mipLevelFramebuffer.imageView = get_cengine()->GetRenderContext().CreateImageView(imgViewCreateInfo, *img);
 			uint32_t wMipmap, hMipmap;
 			prosper::util::calculate_mipmap_size(w, h, &wMipmap, &hMipmap, mipLevel);
 			std::vector<prosper::IImageView *> imgViewAttachments {mipLevelFramebuffer.imageView.get()};
-			mipLevelFramebuffer.framebuffer = pragma::get_cengine()->GetRenderContext().CreateFramebuffer(wMipmap, hMipmap, 1u, imgViewAttachments);
+			mipLevelFramebuffer.framebuffer = get_cengine()->GetRenderContext().CreateFramebuffer(wMipmap, hMipmap, 1u, imgViewAttachments);
 		}
 	}
 
 	// Shader input
-	auto dsg = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_IRRADIANCE);
+	auto dsg = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_IRRADIANCE);
 	dsg->GetDescriptorSet()->SetBindingTexture(cubemap, 0u);
 
 	PushConstants pushConstants {};
@@ -87,10 +87,10 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 	bufCreateInfo.size = sizeof(RoughnessData);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
-	auto buf = pragma::get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo);
+	auto buf = get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo);
 	buf->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
-	auto dsgRoughness = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_ROUGHNESS);
+	auto dsgRoughness = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_ROUGHNESS);
 	dsgRoughness->GetDescriptorSet()->SetBindingUniformBuffer(*buf, 0);
 
 	// Shader execution
@@ -104,8 +104,8 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 		roughnessData.roughness = static_cast<float>(mipLevel) / static_cast<float>(maxMipLevels - 1u);
 		for(uint8_t layerId = 0u; layerId < layerCount; ++layerId) {
 			for(uint32_t i = 0u; i < numVerts; i += 3) {
-				auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
-				pragma::util::ScopeGuard sgCmd {[this]() { GetContext().FlushSetupCommandBuffer(); }};
+				auto &setupCmd = get_cengine()->GetSetupCommandBuffer();
+				util::ScopeGuard sgCmd {[this]() { GetContext().FlushSetupCommandBuffer(); }};
 				setupCmd->RecordUpdateBuffer(*buf, 0, roughnessData);
 				setupCmd->RecordBufferBarrier(*buf, prosper::PipelineStageFlags::HostBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::HostWriteBit, prosper::AccessFlags::ShaderReadBit);
 
@@ -144,6 +144,6 @@ endLoop:
 	InitializeSamplerCreateInfo(flags, samplerCreateInfo);
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	InitializeTextureCreateInfo(texCreateInfo);
-	auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+	auto tex = get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 	return success ? tex : nullptr;
 }

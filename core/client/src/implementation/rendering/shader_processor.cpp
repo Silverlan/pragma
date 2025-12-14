@@ -14,7 +14,7 @@ import :entities.components;
 import :game;
 import :model.model_class;
 
-bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, const pragma::ShaderGameWorld &shader, bool view)
+bool pragma::rendering::ShaderProcessor::RecordBindScene(const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ShaderGameWorld &shader, bool view)
 {
 	auto &hCam = scene.GetActiveCamera();
 	if(hCam.expired()) {
@@ -23,8 +23,8 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 	}
 	auto *dsScene = view ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
 	auto *dsRenderer = renderer.GetRendererDescriptorSet();
-	auto &dsRenderSettings = pragma::get_cgame()->GetGlobalRenderSettingsDescriptorSet();
-	auto *dsShadows = pragma::CShadowComponent::GetDescriptorSet();
+	auto &dsRenderSettings = get_cgame()->GetGlobalRenderSettingsDescriptorSet();
+	auto *dsShadows = CShadowComponent::GetDescriptorSet();
 	assert(dsScene);
 	assert(dsRenderer);
 	assert(dsShadows);
@@ -35,9 +35,9 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 	return true;
 }
 void pragma::rendering::ShaderProcessor::SetDrawOrigin(const Vector4 &drawOrigin) { m_drawOrigin = drawOrigin; }
-bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, bool view, ShaderGameWorld::SceneFlags sceneFlags, pragma::ShaderGameWorld &shader, uint32_t pipelineIdx)
+bool pragma::rendering::ShaderProcessor::RecordBindShader(const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, bool view, ShaderGameWorld::SceneFlags sceneFlags, ShaderGameWorld &shader, uint32_t pipelineIdx)
 {
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	m_curShader = &shader;
 	auto matDsIdx = m_curShader->GetMaterialDescriptorSetIndex();
 	m_currentPipelineLayout = context.GetShaderPipelineLayout(shader, pipelineIdx);
@@ -87,7 +87,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindMaterial(material::CMaterial 
 	if(m_curShader->RecordBindMaterial(*this, mat) == false) {
 		if(!m_materialDescSetBound) {
 			m_materialDescSetBound = true;
-			auto *errMat = pragma::get_client_state()->GetMaterialManager().GetErrorMaterial();
+			auto *errMat = get_client_state()->GetMaterialManager().GetErrorMaterial();
 			if(!errMat)
 				return false;
 			// Bind a dummy material
@@ -121,7 +121,7 @@ void pragma::rendering::ShaderProcessor::UpdateClipPlane()
 		m_boundClipPlane = clipPlane;
 	}
 }
-bool pragma::rendering::ShaderProcessor::RecordBindEntity(pragma::ecs::CBaseEntity &ent)
+bool pragma::rendering::ShaderProcessor::RecordBindEntity(ecs::CBaseEntity &ent)
 {
 	auto *renderC = ent.GetRenderComponent();
 	assert(renderC);
@@ -159,9 +159,9 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(pragma::ecs::CBaseEnti
 	m_vertexAnimC = nullptr;
 	m_modelC = renderC->GetModelComponent();
 	if(m_modelC) {
-		auto &vertAnimBuffer = static_cast<pragma::asset::CModel &>(*m_modelC->GetModel()).GetVertexAnimationBuffer();
+		auto &vertAnimBuffer = static_cast<asset::CModel &>(*m_modelC->GetModel()).GetVertexAnimationBuffer();
 		if(vertAnimBuffer != nullptr)
-			m_vertexAnimC = ent.GetComponent<pragma::CVertexAnimatedComponent>().get();
+			m_vertexAnimC = ent.GetComponent<CVertexAnimatedComponent>().get();
 	}
 
 	if(m_curShader->IsUsingLightmaps()) {
@@ -174,7 +174,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(pragma::ecs::CBaseEnti
 					sceneFlags |= ShaderGameWorld::SceneFlags::DirectionalLightmapsEnabled;
 			}
 		}
-		pragma::math::set_flag(sceneFlags, ShaderGameWorld::SceneFlags::DisableShadows, !renderC->IsReceivingShadows());
+		math::set_flag(sceneFlags, ShaderGameWorld::SceneFlags::DisableShadows, !renderC->IsReceivingShadows());
 	}
 
 	UpdateSceneFlags(sceneFlags);
@@ -183,7 +183,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(pragma::ecs::CBaseEnti
 	// TODO: 3d sky
 	return true;
 }
-bool pragma::rendering::ShaderProcessor::RecordDraw(pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx, const pragma::rendering::RenderQueue::InstanceSet *instanceSet)
+bool pragma::rendering::ShaderProcessor::RecordDraw(geometry::CModelSubMesh &mesh, RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet)
 {
 	uint32_t vertexAnimationOffset = 0;
 	if(m_vertexAnimC) {
@@ -204,8 +204,8 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(pragma::geometry::CModelSubM
 	// pragma::math::set_flag(renderFlags,RenderFlags::UseExtendedVertexWeights,mesh.GetExtendedVertexWeights().empty() == false);
 
 	auto numIndices = mesh.GetIndexCount();
-	if(numIndices > pragma::math::to_integral(pragma::GameLimits::MaxMeshVertices)) {
-		Con::cerr << "Attempted to draw mesh with more than maximum (" << pragma::math::to_integral(pragma::GameLimits::MaxMeshVertices) << ") amount of vertices!" << Con::endl;
+	if(numIndices > math::to_integral(GameLimits::MaxMeshVertices)) {
+		Con::cerr << "Attempted to draw mesh with more than maximum (" << math::to_integral(GameLimits::MaxMeshVertices) << ") amount of vertices!" << Con::endl;
 		return false;
 	}
 	auto &vkMesh = mesh.GetSceneMesh();
@@ -231,22 +231,22 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(pragma::geometry::CModelSubM
 		instanceCount = instanceSet->instanceCount;
 		if(instanceSet != m_curInstanceSet) {
 			m_curInstanceSet = instanceSet;
-			m_cmdBuffer.RecordBindVertexBuffer(*m_curShader, *instanceSet->instanceBuffer, pragma::math::to_integral(ShaderEntity::VertexBinding::RenderBufferIndex));
+			m_cmdBuffer.RecordBindVertexBuffer(*m_curShader, *instanceSet->instanceBuffer, math::to_integral(ShaderEntity::VertexBinding::RenderBufferIndex));
 		}
 	}
 	else if(m_curInstanceSet) {
 		m_curInstanceSet = nullptr;
-		m_cmdBuffer.RecordBindVertexBuffer(*m_curShader, *CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer(), pragma::math::to_integral(ShaderEntity::VertexBinding::RenderBufferIndex));
+		m_cmdBuffer.RecordBindVertexBuffer(*m_curShader, *CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer(), math::to_integral(ShaderEntity::VertexBinding::RenderBufferIndex));
 	}
 	if(m_stats) {
 		(*m_stats)->Increment(RenderPassStats::Counter::DrawnMeshes, instanceCount);
 		(*m_stats)->Increment(RenderPassStats::Counter::DrawnVertices, mesh.GetVertexCount() * instanceCount);
 		(*m_stats)->Increment(RenderPassStats::Counter::DrawnTriangles, mesh.GetTriangleCount() * instanceCount);
-		m_stats->meshes.push_back(std::static_pointer_cast<pragma::geometry::CModelSubMesh>(mesh.shared_from_this()));
+		m_stats->meshes.push_back(std::static_pointer_cast<geometry::CModelSubMesh>(mesh.shared_from_this()));
 
 		(*m_stats)->Increment(RenderPassStats::Counter::DrawCalls);
 	}
 	return m_curShader->OnRecordDrawMesh(*this, mesh) && m_cmdBuffer.RecordDrawIndexed(mesh.GetIndexCount(), instanceCount);
 }
-pragma::ecs::CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const { return static_cast<pragma::ecs::CBaseEntity &>(m_modelC->GetEntity()); }
+pragma::ecs::CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const { return static_cast<ecs::CBaseEntity &>(m_modelC->GetEntity()); }
 const pragma::CSceneComponent &pragma::rendering::ShaderProcessor::GetCurrentScene() const { return *m_sceneC; }

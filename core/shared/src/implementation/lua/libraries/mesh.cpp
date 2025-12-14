@@ -8,41 +8,41 @@ import :scripting.lua.libraries.mesh;
 
 int Lua::mesh::generate_convex_hull(lua::State *l)
 {
-	Lua::CheckTable(l, 1);
+	CheckTable(l, 1);
 	int32_t t = 1;
-	Lua::PushNil(l);
+	PushNil(l);
 	std::vector<Vector3> verts;
-	auto numVerts = Lua::GetObjectLength(l, t);
+	auto numVerts = GetObjectLength(l, t);
 	verts.reserve(numVerts);
-	while(Lua::GetNextPair(l, t) != 0) {
+	while(GetNextPair(l, t) != 0) {
 		auto &v = Lua::Check<Vector3>(l, -1);
 		verts.push_back(v);
-		Lua::Pop(l, 1);
+		Pop(l, 1);
 	}
 
 	auto indices = umesh::generate_convex_hull(verts);
-	auto tOut = Lua::CreateTable(l);
+	auto tOut = CreateTable(l);
 	for(auto i = decltype(indices.size()) {0}; i < indices.size(); ++i) {
 		auto idx = indices[i];
-		Lua::PushInt(l, i + 1);
-		Lua::PushInt(l, idx);
-		Lua::SetTableValue(l, tOut);
+		PushInt(l, i + 1);
+		PushInt(l, idx);
+		SetTableValue(l, tOut);
 	}
 	return 1;
 }
 
 int Lua::mesh::calc_smallest_enclosing_bbox(lua::State *l)
 {
-	Lua::CheckTable(l, 1);
+	CheckTable(l, 1);
 	int32_t t = 1;
-	Lua::PushNil(l);
+	PushNil(l);
 	std::vector<Vector3> verts;
-	auto numVerts = Lua::GetObjectLength(l, t);
+	auto numVerts = GetObjectLength(l, t);
 	verts.reserve(numVerts);
-	while(Lua::GetNextPair(l, t) != 0) {
+	while(GetNextPair(l, t) != 0) {
 		auto &v = Lua::Check<Vector3>(l, -1);
 		verts.push_back(v);
-		Lua::Pop(l, 1);
+		Pop(l, 1);
 	}
 
 	Vector3 center = {};

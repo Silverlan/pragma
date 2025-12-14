@@ -19,7 +19,7 @@ void SBrushComponent::OnEntitySpawn()
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
-		pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Static);
+		pPhysComponent->InitializePhysics(physics::PhysicsType::Static);
 	UpdateSurfaceMaterial(SGame::Get());
 }
 void SBrushComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)

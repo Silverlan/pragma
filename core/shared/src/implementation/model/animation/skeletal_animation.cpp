@@ -15,10 +15,10 @@ pragma::Activity pragma::animation::skeletal::get_activity(const panima::Animati
 	const_cast<Animation &>(anim).GetProperties()["activity"](act);
 	return act;
 #else
-	return pragma::Activity::Invalid;
+	return Activity::Invalid;
 #endif
 }
-void pragma::animation::skeletal::set_activity(panima::Animation &anim, pragma::Activity act)
+void pragma::animation::skeletal::set_activity(panima::Animation &anim, Activity act)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	anim.GetProperties()["activity"] = act;
@@ -60,7 +60,7 @@ void pragma::animation::skeletal::set_render_bounds(panima::Animation &anim, con
 	udmRenderBounds["max"] = max;
 #endif
 }
-pragma::animation::skeletal::BoneChannelMap pragma::animation::skeletal::get_bone_channel_map(const panima::Animation &animation, const pragma::animation::Skeleton &skeleton)
+pragma::animation::skeletal::BoneChannelMap pragma::animation::skeletal::get_bone_channel_map(const panima::Animation &animation, const Skeleton &skeleton)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	BoneChannelMap boneChannelMap;
@@ -98,7 +98,7 @@ pragma::animation::skeletal::BoneChannelMap pragma::animation::skeletal::get_bon
 	return {};
 #endif
 }
-void pragma::animation::skeletal::animation_slice_to_animated_pose(const BoneChannelMap &boneChannelMap, const panima::Slice &slice, pragma::animation::Pose &pose)
+void pragma::animation::skeletal::animation_slice_to_animated_pose(const BoneChannelMap &boneChannelMap, const panima::Slice &slice, Pose &pose)
 {
 	auto &transforms = pose.GetTransforms();
 	pose.SetTransformCount(boneChannelMap.size());
@@ -120,7 +120,7 @@ void pragma::animation::skeletal::animation_slice_to_animated_pose(const BoneCha
 }
 pragma::util::EnumRegister &pragma::animation::skeletal::get_activity_enum_register()
 {
-	static pragma::util::EnumRegister g_reg {};
+	static util::EnumRegister g_reg {};
 	return g_reg;
 }
 bool pragma::animation::skeletal::is_bone_position_channel(const panima::Channel &channel)

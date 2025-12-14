@@ -29,14 +29,14 @@ export namespace pragma {
 		bool m_bApplyGlobal = false;
 		bool m_bAllWorldSounds = false;
 		bool m_bAllSounds = false;
-		std::shared_ptr<pragma::audio::IEffect> m_dsp = nullptr;
-		std::vector<std::pair<pragma::audio::SoundSourceHandle, uint32_t>> m_affectedSounds;
+		std::shared_ptr<audio::IEffect> m_dsp = nullptr;
+		std::vector<std::pair<audio::SoundSourceHandle, uint32_t>> m_affectedSounds;
 		audio::ALSoundType m_types = audio::ALSoundType::All & ~audio::ALSoundType::GUI;
 
 		audio::ALSoundType GetTargetSoundTypes() const;
-		std::vector<std::pair<pragma::audio::SoundSourceHandle, uint32_t>>::iterator FindSoundSource(pragma::audio::SoundSource &src);
-		void UpdateSoundSource(pragma::audio::SoundSource &src, float gain);
-		void DetachSoundSource(pragma::audio::SoundSource &src);
+		std::vector<std::pair<audio::SoundSourceHandle, uint32_t>>::iterator FindSoundSource(audio::SoundSource &src);
+		void UpdateSoundSource(audio::SoundSource &src, float gain);
+		void DetachSoundSource(audio::SoundSource &src);
 		void DetachAllSoundSources();
 	};
 

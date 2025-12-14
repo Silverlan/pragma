@@ -51,16 +51,16 @@ void pragma::CEngine::WriteClientConfig(fs::VFilePtrReal f)
 	if(stateCl != nullptr) {
 		auto &cvars = stateCl->GetConVars();
 
-		auto &cfg = GetConVarConfig(pragma::NwStateType::Client);
+		auto &cfg = GetConVarConfig(NwStateType::Client);
 		if(cfg)
 			RestoreConVarsForUnknownCommands(f, *cfg, cvars);
 
 		for(auto &pair : cvars) {
 			if(stateSv == nullptr || stateSv->GetConVar(pair.first) == nullptr) {
 				auto &cf = pair.second;
-				if(cf->GetType() == pragma::console::ConType::Var) {
-					auto *cv = static_cast<pragma::console::ConVar *>(cf.get());
-					if((cv->GetFlags() & pragma::console::ConVarFlags::Archive) == pragma::console::ConVarFlags::Archive && cv->GetString() != cv->GetDefault()) {
+				if(cf->GetType() == console::ConType::Var) {
+					auto *cv = static_cast<console::ConVar *>(cf.get());
+					if((cv->GetFlags() & console::ConVarFlags::Archive) == console::ConVarFlags::Archive && cv->GetString() != cv->GetDefault()) {
 						std::string l = pair.first + " \"" + cv->GetString() + "\"\n";
 						f->WriteString(l.c_str());
 					}
@@ -72,42 +72,42 @@ void pragma::CEngine::WriteClientConfig(fs::VFilePtrReal f)
 
 void pragma::CEngine::LoadConfig()
 {
-	pragma::Engine::LoadConfig();
-	PreloadConfig(pragma::NwStateType::Client, "client.cfg");
+	Engine::LoadConfig();
+	PreloadConfig(NwStateType::Client, "client.cfg");
 }
 
 void pragma::CEngine::LoadClientConfig()
 {
-	auto &cfg = GetConVarConfig(pragma::NwStateType::Client);
+	auto &cfg = GetConVarConfig(NwStateType::Client);
 	if(cfg)
 		ExecCommands(*cfg);
 }
 
-void pragma::CEngine::PreloadConfig(pragma::NwStateType type, const std::string &configName)
+void pragma::CEngine::PreloadConfig(NwStateType type, const std::string &configName)
 {
-	pragma::Engine::PreloadConfig(type, configName);
-	if(type != pragma::NwStateType::Client)
+	Engine::PreloadConfig(type, configName);
+	if(type != NwStateType::Client)
 		return;
-	auto &cfg = GetConVarConfig(pragma::NwStateType::Client);
+	auto &cfg = GetConVarConfig(NwStateType::Client);
 	if(!cfg)
 		return;
-	std::string lan = pragma::locale::determine_system_language();
+	std::string lan = locale::determine_system_language();
 	auto *args = cfg->Find("cl_language");
 	if(args && !args->empty())
 		lan = args->front();
-	pragma::locale::set_language(lan);
-	pragma::locale::load("inputs.txt");
-	pragma::locale::load("menu.txt");
-	pragma::locale::load("misc.txt");
-	pragma::locale::load("components.txt");
-	pragma::locale::load("prompts.txt");
-	pragma::locale::load("shader_materials.txt");
+	locale::set_language(lan);
+	locale::load("inputs.txt");
+	locale::load("menu.txt");
+	locale::load("misc.txt");
+	locale::load("components.txt");
+	locale::load("prompts.txt");
+	locale::load("shader_materials.txt");
 
-	constexpr auto numBts = pragma::math::to_integral(pragma::debug::MessageBoxButton::Count);
+	constexpr auto numBts = math::to_integral(debug::MessageBoxButton::Count);
 	std::array<std::string, numBts> labels;
 	for(size_t i = 0; i < numBts; ++i) {
-		auto identifier = pragma::string::to_snake_case(std::string {magic_enum::enum_name(static_cast<pragma::debug::MessageBoxButton>(i))});
-		labels[i] = pragma::locale::get_text("prompt_button_" + identifier);
+		auto identifier = string::to_snake_case(std::string {magic_enum::enum_name(static_cast<debug::MessageBoxButton>(i))});
+		labels[i] = locale::get_text("prompt_button_" + identifier);
 	}
-	pragma::debug::set_button_labels(labels);
+	debug::set_button_labels(labels);
 }

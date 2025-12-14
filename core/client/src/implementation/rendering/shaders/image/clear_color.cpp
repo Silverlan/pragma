@@ -27,7 +27,7 @@ void ShaderClearColor::InitializeShaderResources()
 
 bool ShaderClearColor::RecordDraw(prosper::ShaderBindState &bindState, const PushConstants &pushConstants) const
 {
-	if(RecordBindVertexBuffer(bindState, *GetContext().GetCommonBufferCache().GetSquareVertexBuffer()) == false || RecordPushConstants(bindState, pushConstants) == false || prosper::ShaderGraphics::RecordDraw(bindState, prosper::CommonBufferCache::GetSquareVertexCount()) == false)
+	if(RecordBindVertexBuffer(bindState, *GetContext().GetCommonBufferCache().GetSquareVertexBuffer()) == false || RecordPushConstants(bindState, pushConstants) == false || ShaderGraphics::RecordDraw(bindState, prosper::CommonBufferCache::GetSquareVertexCount()) == false)
 		return false;
 	return true;
 }

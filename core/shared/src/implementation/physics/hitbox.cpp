@@ -16,7 +16,7 @@ void pragma::asset::Model::AddHitbox(uint32_t boneId, const physics::Hitbox &hit
 		m_hitboxes.insert(decltype(m_hitboxes)::value_type(boneId, hitbox));
 }
 uint32_t pragma::asset::Model::GetHitboxCount() const { return static_cast<uint32_t>(m_hitboxes.size()); }
-const std::unordered_map<uint32_t, pragma::physics::Hitbox> &pragma::asset::Model::GetHitboxes() const { return const_cast<pragma::asset::Model *>(this)->GetHitboxes(); }
+const std::unordered_map<uint32_t, pragma::physics::Hitbox> &pragma::asset::Model::GetHitboxes() const { return const_cast<Model *>(this)->GetHitboxes(); }
 std::unordered_map<uint32_t, pragma::physics::Hitbox> &pragma::asset::Model::GetHitboxes() { return m_hitboxes; }
 const pragma::physics::Hitbox *pragma::asset::Model::GetHitbox(uint32_t boneId) const
 {
@@ -82,7 +82,7 @@ std::unordered_map<pragma::animation::BoneId, pragma::physics::Hitbox> pragma::a
 	boneBounds.resize(numBones);
 
 	auto &ref = GetReference();
-	std::vector<pragma::math::ScaledTransform> bonePoses;
+	std::vector<math::ScaledTransform> bonePoses;
 	bonePoses.resize(numBones);
 	for(auto i = decltype(numBones) {0u}; i < numBones; ++i) {
 		ref.GetBonePose(i, bonePoses[i]);
@@ -113,7 +113,7 @@ std::unordered_map<pragma::animation::BoneId, pragma::physics::Hitbox> pragma::a
 	}
 
 	auto hitboxesAdded = false;
-	std::unordered_map<pragma::animation::BoneId, physics::Hitbox> hitboxes;
+	std::unordered_map<animation::BoneId, physics::Hitbox> hitboxes;
 	hitboxes.reserve(boneBounds.size());
 	for(auto boneId = decltype(boneBounds.size()) {0u}; boneId < boneBounds.size(); ++boneId) {
 		auto &bounds = boneBounds[boneId];
@@ -128,9 +128,9 @@ std::unordered_map<pragma::animation::BoneId, pragma::physics::Hitbox> pragma::a
 }
 bool pragma::asset::Model::GenerateHitboxes()
 {
-	if(pragma::math::is_flag_set(m_metaInfo.flags, Flags::GeneratedHitboxes))
+	if(math::is_flag_set(m_metaInfo.flags, Flags::GeneratedHitboxes))
 		return false;
-	pragma::math::set_flag(m_metaInfo.flags, Flags::GeneratedHitboxes);
+	math::set_flag(m_metaInfo.flags, Flags::GeneratedHitboxes);
 	auto hitboxes = CalcHitboxes();
 	for(auto &[boneId, hb] : hitboxes)
 		AddHitbox(boneId, hb);

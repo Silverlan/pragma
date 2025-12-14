@@ -24,7 +24,7 @@ export {
 
 		class DLLSERVER SSoundDspComponent final : public SBaseSoundDspComponent {
 		  public:
-			SSoundDspComponent(pragma::ecs::BaseEntity &ent) : SBaseSoundDspComponent(ent) {}
+			SSoundDspComponent(ecs::BaseEntity &ent) : SBaseSoundDspComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

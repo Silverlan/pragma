@@ -10,7 +10,7 @@ import :entities.components;
 
 pragma::pts::CParticleModifierLua *pragma::pts::LuaParticleModifierManager::CreateModifier(std::string className) const
 {
-	pragma::string::to_lower(className);
+	string::to_lower(className);
 	auto it = m_modifiers.find(className);
 	if(it == m_modifiers.end())
 		return nullptr;
@@ -26,7 +26,7 @@ pragma::pts::CParticleModifierLua *pragma::pts::LuaParticleModifierManager::Crea
 #ifndef LUABIND_NO_EXCEPTIONS
 	}
 	catch(luabind::error &) {
-		::Lua::HandleLuaError(l);
+		Lua::HandleLuaError(l);
 		return nullptr;
 	}
 #endif
@@ -39,20 +39,20 @@ pragma::pts::CParticleModifierLua *pragma::pts::LuaParticleModifierManager::Crea
 	switch(modInfo.type) {
 	case Type::Initializer:
 		{
-			auto *oModifier = luabind::object_cast_nothrow<pragma::pts::CParticleInitializerLua *>(r, static_cast<pragma::pts::CParticleInitializerLua *>(nullptr));
-			modifier = dynamic_cast<pragma::pts::CParticleModifierLua *>(oModifier);
+			auto *oModifier = luabind::object_cast_nothrow<CParticleInitializerLua *>(r, static_cast<CParticleInitializerLua *>(nullptr));
+			modifier = dynamic_cast<CParticleModifierLua *>(oModifier);
 			break;
 		}
 	case Type::Operator:
 		{
-			auto *oModifier = luabind::object_cast_nothrow<pragma::pts::CParticleOperatorLua *>(r, static_cast<pragma::pts::CParticleOperatorLua *>(nullptr));
-			modifier = dynamic_cast<pragma::pts::CParticleModifierLua *>(oModifier);
+			auto *oModifier = luabind::object_cast_nothrow<CParticleOperatorLua *>(r, static_cast<CParticleOperatorLua *>(nullptr));
+			modifier = dynamic_cast<CParticleModifierLua *>(oModifier);
 			break;
 		}
 	case Type::Renderer:
 		{
-			auto *oModifier = luabind::object_cast_nothrow<pragma::pts::CParticleRendererLua *>(r, static_cast<pragma::pts::CParticleRendererLua *>(nullptr));
-			modifier = dynamic_cast<pragma::pts::CParticleModifierLua *>(oModifier);
+			auto *oModifier = luabind::object_cast_nothrow<CParticleRendererLua *>(r, static_cast<CParticleRendererLua *>(nullptr));
+			modifier = dynamic_cast<CParticleModifierLua *>(oModifier);
 			break;
 		}
 	case Type::Emitter:
@@ -64,18 +64,18 @@ pragma::pts::CParticleModifierLua *pragma::pts::LuaParticleModifierManager::Crea
 		return nullptr;
 	}
 	r.push(l); /* 1 */
-	auto idx = ::Lua::GetStackTop(l);
+	auto idx = Lua::GetStackTop(l);
 
 	modifier->Initialize(r);
 	modifier->SetIdentifier(className);
 
-	::Lua::Pop(l); /* 0 */
+	Lua::Pop(l); /* 0 */
 	return modifier;
 }
 
 bool pragma::pts::LuaParticleModifierManager::RegisterModifier(Type type, std::string className, luabind::object &o)
 {
-	pragma::string::to_lower(className);
+	string::to_lower(className);
 	auto itShader = m_modifiers.find(className);
 	if(itShader != m_modifiers.end()) {
 		Con::cwar << "Attempted to register particle modifier '" << className << "', which has already been registered previously! Ignoring..." << Con::endl;
@@ -90,7 +90,7 @@ bool pragma::pts::LuaParticleModifierManager::RegisterModifier(Type type, std::s
 
 luabind::object *pragma::pts::LuaParticleModifierManager::GetClassObject(std::string className)
 {
-	pragma::string::to_lower(className);
+	string::to_lower(className);
 	auto it = m_modifiers.find(className);
 	if(it == m_modifiers.end())
 		return nullptr;

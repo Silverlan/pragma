@@ -30,12 +30,12 @@ pragma::gui::types::WIConsole *pragma::gui::types::WIConsole::Open()
 		pConsole->RequestFocus();
 		return pConsole;
 	}
-	auto &wgui = pragma::gui::WGUI::GetInstance();
+	auto &wgui = WGUI::GetInstance();
 	auto *pFrame = wgui.Create<WIFrame>();
 	pFrame->SetSize(512, 256);
 	pFrame->SetMinSize(160, 100);
 	pFrame->SetZPos(10'000);
-	pFrame->SetTitle(pragma::locale::get_text("console"));
+	pFrame->SetTitle(locale::get_text("console"));
 	pFrame->SetPos(675, 86);
 	pFrame->SetSize(450, 876);
 	pFrame->SetAnchor(0, 0, 1, 1, 1'280, 1'024);
@@ -57,7 +57,7 @@ pragma::gui::types::WIConsole *pragma::gui::types::WIConsole::Open()
 	pConsole->RequestFocus();
 	s_hConsole = pConsole->GetHandle();
 
-	auto wikiUrl = pragma::engine_info::get_wiki_url();
+	auto wikiUrl = engine_info::get_wiki_url();
 	pConsole->SetText("{[c:c2003b]}"
 	                  "    _____ ____  _   _  _____  ____  _      ______ \n"
 	                  "   / ____/ __ \\| \\ | |/ ____|/ __ \\| |    |  ____|\n"
@@ -148,7 +148,7 @@ void pragma::gui::types::WIConsole::Initialize()
 	settings.fontSize = 12;
 	FontManager::LoadFont("console", "dejavu/DejaVuSansMono", settings);
 
-	auto &wgui = pragma::gui::WGUI::GetInstance();
+	auto &wgui = WGUI::GetInstance();
 	auto *pLogBg = wgui.Create<WIRect>(this);
 	pLogBg->SetColor(Color {20, 20, 20, 255});
 	m_hLogBg = pLogBg->GetHandle();
@@ -216,7 +216,7 @@ void pragma::gui::types::WIConsole::Initialize()
 			return;
 		}
 #endif
-		pragma::get_cengine()->ConsoleInput(cmd.cpp_str());
+		get_cengine()->ConsoleInput(cmd.cpp_str());
 		if(hLog.IsValid()) {
 			auto &log = *static_cast<WITextEntry *>(hLog.get());
 			auto *pText = log.GetTextElement();
@@ -227,11 +227,11 @@ void pragma::gui::types::WIConsole::Initialize()
 		if(hThis.IsValid() == false)
 			return;
 		std::vector<std::string> subStrings {};
-		pragma::string::explode_whitespace(cmd, subStrings);
+		string::explode_whitespace(cmd, subStrings);
 		if(subStrings.empty() == false) {
-			auto *cf = pragma::get_cengine()->GetConVar(subStrings.front());
-			if(cf && cf->GetType() == pragma::console::ConType::Command) {
-				auto &c = static_cast<pragma::console::ConCommand &>(*cf);
+			auto *cf = get_cengine()->GetConVar(subStrings.front());
+			if(cf && cf->GetType() == console::ConType::Command) {
+				auto &c = static_cast<console::ConCommand &>(*cf);
 				auto &fAutoComplete = c.GetAutoCompleteCallback();
 				if(fAutoComplete) {
 					auto arg = (subStrings.size() > 1) ? subStrings.at(1) : std::string {};
@@ -244,9 +244,9 @@ void pragma::gui::types::WIConsole::Initialize()
 		}
 
 		std::vector<std::pair<std::string_view, float>> bestCandidates(pEntry->GetAutoCompleteEntryLimit(), std::pair<std::string_view, float> {std::string_view {}, std::numeric_limits<float>::max()});
-		const auto fProcessConVars = [&cmd, &bestCandidates](const std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &conVars) {
+		const auto fProcessConVars = [&cmd, &bestCandidates](const std::map<std::string, std::shared_ptr<console::ConConf>> &conVars) {
 			for(auto &pair : conVars) {
-				auto percentage = pragma::string::calc_similarity(cmd, pair.first);
+				auto percentage = string::calc_similarity(cmd, pair.first);
 				auto it = std::find_if(bestCandidates.begin(), bestCandidates.end(), [percentage](const std::pair<std::string_view, float> &pair) { return percentage < pair.second; });
 				if(it == bestCandidates.end())
 					continue;
@@ -254,8 +254,8 @@ void pragma::gui::types::WIConsole::Initialize()
 				it->second = percentage;
 			}
 		};
-		fProcessConVars(pragma::get_cengine()->GetConVars());
-		auto *client = pragma::get_client_state();
+		fProcessConVars(get_cengine()->GetConVars());
+		auto *client = get_client_state();
 		if(client != nullptr)
 			fProcessConVars(client->GetConVars());
 		args.reserve(bestCandidates.size());
@@ -270,7 +270,7 @@ void pragma::gui::types::WIConsole::Initialize()
 	pText = pEntry->GetTextElement();
 	if(pText)
 		pText->SetFont("console");
-	pragma::get_cengine()->SetRecordConsoleOutput(true);
+	get_cengine()->SetRecordConsoleOutput(true);
 
 	pLog->SetColor(Color {220, 220, 220, 255});
 
@@ -289,22 +289,22 @@ void pragma::gui::types::WIConsole::Initialize()
 			hLog.get()->SetWidth(pLogBg->GetWidth());
 	}));
 
-	pLog->GetTextElement()->SetTagArgument("luafile", 0u, FunctionCallback<pragma::util::EventReply, std::reference_wrapper<const std::vector<std::string>>>::CreateWithOptionalReturn([](pragma::util::EventReply *result, std::reference_wrapper<const std::vector<std::string>> args) -> CallbackReturnType {
+	pLog->GetTextElement()->SetTagArgument("luafile", 0u, FunctionCallback<util::EventReply, std::reference_wrapper<const std::vector<std::string>>>::CreateWithOptionalReturn([](util::EventReply *result, std::reference_wrapper<const std::vector<std::string>> args) -> CallbackReturnType {
 		if(args.get().empty() == false) {
 			auto &f = args.get().front();
 			auto lineIdx = 0u;
 			if(args.get().size() > 1u)
-				lineIdx = pragma::util::to_int(args.get().at(1u));
+				lineIdx = util::to_int(args.get().at(1u));
 			Lua::OpenFileInZeroBrane("lua/" + f, lineIdx);
 		}
-		*result = pragma::util::EventReply::Handled;
+		*result = util::EventReply::Handled;
 		return CallbackReturnType::HasReturnValue;
 	}));
 
 	if(m_hCommandEntry.IsValid())
 		m_hCommandEntry->SetIgnoreParentAlpha(true);
 
-	auto *pMainMenu = pragma::get_client_state()->GetMainMenu();
+	auto *pMainMenu = get_client_state()->GetMainMenu();
 	if(pMainMenu) {
 		m_cbMainMenuVisibility = pMainMenu->GetVisibilityProperty()->AddCallback([this](std::reference_wrapper<const bool> oldValue, std::reference_wrapper<const bool> visible) { UpdateConsoleMode(); });
 	}
@@ -335,14 +335,14 @@ void pragma::gui::types::WIConsole::OnRemove()
 		m_cbMainMenuVisibility.Remove();
 	if(m_cbCommandEntryVisibility.IsValid())
 		m_cbCommandEntryVisibility.Remove();
-	pragma::get_cengine()->SetRecordConsoleOutput(false);
+	get_cengine()->SetRecordConsoleOutput(false);
 }
 void pragma::gui::types::WIConsole::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIBase::Think(drawCmd);
 	if(m_hLog.IsValid() == false)
 		return;
-	auto conOutput = pragma::get_cengine()->PollConsoleOutput();
+	auto conOutput = get_cengine()->PollConsoleOutput();
 	if(conOutput.has_value() == false)
 		return;
 	std::string text = "";
@@ -361,7 +361,7 @@ void pragma::gui::types::WIConsole::Think(const std::shared_ptr<prosper::IPrimar
 			currentColor = {};
 		}
 		text += conOutput->output;
-		conOutput = pragma::get_cengine()->PollConsoleOutput();
+		conOutput = get_cengine()->PollConsoleOutput();
 	}
 	if(currentColor.has_value()) {
 		text += "{[/c]}";
@@ -382,7 +382,7 @@ pragma::gui::types::WISnapArea *pragma::gui::types::WIConsole::CreateSnapTarget(
 	auto *pFrame = GetFrame();
 	if(pFrame == nullptr)
 		return nullptr;
-	auto *pSnapTarget = pragma::gui::WGUI::GetInstance().Create<WISnapArea>();
+	auto *pSnapTarget = WGUI::GetInstance().Create<WISnapArea>();
 	RemoveOnRemoval(pSnapTarget);
 	pSnapTarget->SetPos(x, y);
 	pSnapTarget->SetSize(w, h);
@@ -414,7 +414,7 @@ void pragma::gui::types::WIConsole::UpdateConsoleMode()
 {
 	if(m_mode == Mode::ExternalOwnership)
 		return;
-	SetSimpleConsoleMode(pragma::get_client_state()->IsMainMenuOpen() == false);
+	SetSimpleConsoleMode(get_client_state()->IsMainMenuOpen() == false);
 }
 void pragma::gui::types::WIConsole::InitializeSnapAreas()
 {
@@ -449,7 +449,7 @@ pragma::gui::types::WIFrame *pragma::gui::types::WIConsole::GetFrame() { return 
 
 const pragma::string::Utf8String &pragma::gui::types::WIConsole::GetText() const
 {
-	static pragma::string::Utf8String s {};
+	static string::Utf8String s {};
 	if(m_hLog.IsValid()) {
 		auto *pTextEntry = static_cast<const WITextEntry *>(m_hLog.get());
 		if(pTextEntry == nullptr)
@@ -480,7 +480,7 @@ void pragma::gui::types::WIConsole::SetText(const std::string &text)
 		auto pos = ltext.find('\n');
 		if(pos == std::string::npos)
 			break;
-		ltext = pragma::string::substr(ltext, pos + 1u);
+		ltext = string::substr(ltext, pos + 1u);
 		--numLinesRemove;
 	}
 	pLog->SetText(ltext);
@@ -515,7 +515,7 @@ std::string_view pragma::gui::types::WIConsole::AppendText(const std::string &te
 		remaining = std::string_view {text}.substr(lineStartOffset, numCharsInLine);
 	}
 	for(auto &line : lines) {
-		pragma::string::Utf8String str {std::string {line}};
+		string::Utf8String str {std::string {line}};
 		pText->AppendText(str);
 	}
 

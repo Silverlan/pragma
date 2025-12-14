@@ -32,7 +32,7 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.tiling = prosper::ImageTiling::Optimal;
 	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit;
-	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(createInfo);
+	auto img = get_cengine()->GetRenderContext().CreateImage(createInfo);
 
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
@@ -40,21 +40,21 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
 	samplerCreateInfo.minFilter = prosper::Filter::Linear;
 	samplerCreateInfo.magFilter = prosper::Filter::Linear;
-	auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
-	auto rt = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass());
+	auto tex = get_cengine()->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
+	auto rt = get_cengine()->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass());
 
-	auto vertBuffer = pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
-	auto uvBuffer = pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
-	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
+	auto vertBuffer = get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
+	auto uvBuffer = get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
+	auto &setupCmd = get_cengine()->GetSetupCommandBuffer();
 	auto success = false;
 	if(setupCmd->RecordBeginRenderPass(*rt)) {
 		prosper::ShaderBindState bindState {*setupCmd};
 		if(RecordBeginDraw(bindState)) {
-			if(RecordBindVertexBuffers(bindState, {vertBuffer.get(), uvBuffer.get()}) && prosper::ShaderGraphics::RecordDraw(bindState, prosper::CommonBufferCache::GetSquareVertexCount()))
+			if(RecordBindVertexBuffers(bindState, {vertBuffer.get(), uvBuffer.get()}) && ShaderGraphics::RecordDraw(bindState, prosper::CommonBufferCache::GetSquareVertexCount()))
 				success = true;
 		}
 		setupCmd->RecordEndRenderPass();
 	}
-	pragma::get_cengine()->FlushSetupCommandBuffer();
+	get_cengine()->FlushSetupCommandBuffer();
 	return success ? tex : nullptr;
 }

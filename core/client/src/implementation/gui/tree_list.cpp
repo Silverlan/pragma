@@ -115,7 +115,7 @@ void pragma::gui::types::WITreeListElement::SetTreeParent(WITreeListElement *pEl
 	m_pTreeParent = pEl->GetHandle();
 	m_depth = pEl->GetDepth() + 1;
 	if(m_pArrow.IsValid() == false) {
-		auto *pArrow = pragma::gui::WGUI::GetInstance().Create<WIArrow>(this);
+		auto *pArrow = WGUI::GetInstance().Create<WIArrow>(this);
 		m_pArrow = pArrow->GetHandle();
 		pArrow->SetName("arrow");
 		pArrow->SetSize(12, 12);
@@ -123,8 +123,8 @@ void pragma::gui::types::WITreeListElement::SetTreeParent(WITreeListElement *pEl
 		pArrow->SetPos(m_xOffset, 3);
 		pArrow->SetDirection(WIArrow::Direction::Down);
 		auto hThis = GetHandle();
-		pArrow->AddCallback("OnMousePressed", FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([hThis](pragma::util::EventReply *reply) mutable -> CallbackReturnType {
-			*reply = pragma::util::EventReply::Handled;
+		pArrow->AddCallback("OnMousePressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hThis](util::EventReply *reply) mutable -> CallbackReturnType {
+			*reply = util::EventReply::Handled;
 			if(hThis.IsValid() == false)
 				return CallbackReturnType::HasReturnValue;
 			static_cast<WITreeListElement *>(hThis.get())->Toggle();
@@ -153,7 +153,7 @@ pragma::gui::types::WITreeListElement *pragma::gui::types::WITreeListElement::Ge
 }
 void pragma::gui::types::WITreeListElement::SetTextElement(WIText *pText)
 {
-	(pText != nullptr) ? m_hText = pText->GetHandle() : pragma::gui::WIHandle {};
+	(pText != nullptr) ? m_hText = pText->GetHandle() : WIHandle {};
 	if(pText) {
 		pText->SetName("text");
 		pText->AddStyleClass("tree_list_element_text");
@@ -200,7 +200,7 @@ void pragma::gui::types::WITreeList::Initialize()
 {
 	WITable::Initialize();
 	SetRowHeight(18);
-	auto *pRoot = pragma::gui::WGUI::GetInstance().Create<WITreeListElement>(this);
+	auto *pRoot = WGUI::GetInstance().Create<WITreeListElement>(this);
 	m_pRoot = pRoot->GetHandle();
 	pRoot->SetList(this);
 	pRoot->SetAutoAlignToParent(true);
@@ -219,12 +219,12 @@ pragma::gui::types::WITreeListElement *pragma::gui::types::WITreeList::AddItem(c
 		return nullptr;
 	return static_cast<WITreeListElement *>(m_pRoot.get())->AddItem(text, fPopulate);
 }
-pragma::util::EventReply pragma::gui::types::WITreeList::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WITreeList::MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods)
 {
-	if(WITable::MouseCallback(button, state, mods) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(WITable::MouseCallback(button, state, mods) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	RequestFocus();
-	return pragma::util::EventReply::Handled;
+	return util::EventReply::Handled;
 }
 void pragma::gui::types::WITreeList::SetSize(int x, int y) { WITable::SetSize(x, y); }
 pragma::gui::types::WITableRow *pragma::gui::types::WITreeList::AddRow() { return WITable::AddRow<WITreeListElement>(); }

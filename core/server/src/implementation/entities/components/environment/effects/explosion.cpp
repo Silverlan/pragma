@@ -15,8 +15,8 @@ void SExplosionComponent::Explode()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENVEXPLOSION_EXPLODE, p, pragma::networking::Protocol::SlowReliable);
+		networking::write_entity(p, &ent);
+		ServerState::Get()->SendPacket(networking::net_messages::client::ENVEXPLOSION_EXPLODE, p, networking::Protocol::SlowReliable);
 	}
 	BaseEnvExplosionComponent::Explode();
 }

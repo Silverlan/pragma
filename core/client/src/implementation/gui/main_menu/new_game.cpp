@@ -22,15 +22,15 @@ pragma::gui::types::WIMainMenuNewGame::~WIMainMenuNewGame()
 		m_cbMapListReload.Remove();
 }
 
-void pragma::gui::types::WIMainMenuNewGame::OnStartGame(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier)
+void pragma::gui::types::WIMainMenuNewGame::OnStartGame(platform::MouseButton button, platform::KeyState state, platform::Modifier)
 {
-	if(button != pragma::platform::MouseButton::Left || state != pragma::platform::KeyState::Press)
+	if(button != platform::MouseButton::Left || state != platform::KeyState::Press)
 		return;
 	auto *pOptionsList = static_cast<WIOptionsList *>(m_hControlSettings.get());
 	std::string map;
-	pragma::string::Utf8String serverName;
+	string::Utf8String serverName;
 	std::string gameMode;
-	pragma::string::Utf8String rconPassword;
+	string::Utf8String rconPassword;
 	UInt32 maxPlayers = 1;
 	if(m_hMapList.IsValid()) {
 		auto *pMap = static_cast<WIDropDownMenu *>(m_hMapList.get());
@@ -54,15 +54,15 @@ void pragma::gui::types::WIMainMenuNewGame::OnStartGame(pragma::platform::MouseB
 	}
 	if(map.empty())
 		return;
-	pragma::get_cengine()->EndGame();
+	get_cengine()->EndGame();
 	pOptionsList->RunUpdateConVars(false);
-	pragma::get_cengine()->StartDefaultGame(map, maxPlayers <= 1);
+	get_cengine()->StartDefaultGame(map, maxPlayers <= 1);
 }
 
 void pragma::gui::types::WIMainMenuNewGame::Initialize()
 {
 	WIMainMenuBase::Initialize();
-	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+	AddMenuItem(locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
 		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;
@@ -89,15 +89,15 @@ void pragma::gui::types::WIMainMenuNewGame::InitializeOptionsList(WIOptionsList 
 	auto *pRow = pList->AddRow();
 	pRow->SetValue(0, "");
 
-	auto *buttonStart = pragma::gui::WGUI::GetInstance().Create<WIButton>();
-	buttonStart->SetText(pragma::locale::get_text("start_game"));
+	auto *buttonStart = WGUI::GetInstance().Create<WIButton>();
+	buttonStart->SetText(locale::get_text("start_game"));
 	buttonStart->SizeToContents();
 	buttonStart->SetAutoCenterToParent(true);
 	buttonStart->AddCallback("OnMouseEvent",
-	  FunctionCallback<pragma::util::EventReply, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
-	    [this](pragma::util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
+	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
+	    [this](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
 		    OnStartGame(button, state, mods);
-		    *reply = pragma::util::EventReply::Handled;
+		    *reply = util::EventReply::Handled;
 		    return CallbackReturnType::HasReturnValue;
 	    }));
 	pRow->InsertElement(1, buttonStart);
@@ -110,7 +110,7 @@ void pragma::gui::types::WIMainMenuNewGame::ReloadMapList()
 		return;
 	auto *pMap = static_cast<WIDropDownMenu *>(m_hMapList.get());
 	pMap->ClearOptions();
-	auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map, pragma::asset::FormatType::All);
+	auto exts = pragma::asset::get_supported_extensions(asset::Type::Map, asset::FormatType::All);
 	std::vector<std::string> files;
 	for(auto &ext : exts)
 		fs::find_files("maps/*." + ext, &files, nullptr);
@@ -124,8 +124,8 @@ void pragma::gui::types::WIMainMenuNewGame::ReloadMapList()
 		uniqueFiles.insert(std::move(f));
 	}
 
-	if(pragma::get_cengine()->GetConVarBool("sh_mount_external_game_resources")) {
-		auto dllHandle = pragma::util::initialize_external_archive_manager(pragma::get_client_state());
+	if(get_cengine()->GetConVarBool("sh_mount_external_game_resources")) {
+		auto dllHandle = pragma::util::initialize_external_archive_manager(get_client_state());
 		if(dllHandle) {
 			auto *fFindFiles = dllHandle->FindSymbolAddress<void (*)(const std::string &, std::vector<std::string> *, std::vector<std::string> *)>("find_files");
 			if(fFindFiles) {
@@ -150,7 +150,7 @@ void pragma::gui::types::WIMainMenuNewGame::ReloadMapList()
 	if(files.size() > 1) {
 		for(auto it = files.begin(); it != files.end() - 1;) {
 			auto itNext = it + 1;
-			if(pragma::string::compare(*it, *itNext, false) == false) {
+			if(string::compare(*it, *itNext, false) == false) {
 				++it;
 				continue;
 			}
@@ -177,7 +177,7 @@ void pragma::gui::types::WIMainMenuNewGame::ReloadMapList()
 		for(unsigned int i = 0; i < files.size(); i++) {
 			auto &fName = files[i];
 			auto displayName = fName;
-			auto f = pragma::fs::open_file((std::string("maps/") + fName + ".txt").c_str(), pragma::fs::FileMode::Read);
+			auto f = pragma::fs::open_file((std::string("maps/") + fName + ".txt").c_str(), fs::FileMode::Read);
 			if(f != nullptr) {
 				fs::File fp {f};
 				auto root = datasystem::System::ReadData(fp);
@@ -211,8 +211,8 @@ void pragma::gui::types::WIMainMenuNewGame::ReloadMapList()
 void pragma::gui::types::WIMainMenuNewGame::InitializeGameSettings()
 {
 	auto *pList = InitializeOptionsList();
-	auto title = pragma::locale::get_text("game_settings");
-	pragma::string::to_upper(title);
+	auto title = locale::get_text("game_settings");
+	string::to_upper(title);
 	pList->SetTitle(title);
 
 	// Game Mode
@@ -222,7 +222,7 @@ void pragma::gui::types::WIMainMenuNewGame::InitializeGameSettings()
 		auto &info = it->second;
 		gameModeOptions[info.name] = it->first;
 	}
-	auto *pGameMode = pList->AddDropDownMenu(pragma::locale::get_text("gamemode"), gameModeOptions, "sv_gamemode");
+	auto *pGameMode = pList->AddDropDownMenu(locale::get_text("gamemode"), gameModeOptions, "sv_gamemode");
 	pGameMode->AddCallback("OnValueChanged", FunctionCallback<void>::Create([pGameMode, this]() {
 		auto val = pGameMode->GetOptionValue(pGameMode->GetSelectedOption());
 		auto &gameModes = game::GameModeManager::GetGameModes();
@@ -240,27 +240,27 @@ void pragma::gui::types::WIMainMenuNewGame::InitializeGameSettings()
 	//
 
 	// Map
-	auto *pMap = pList->AddDropDownMenu(pragma::locale::get_text("map"));
+	auto *pMap = pList->AddDropDownMenu(locale::get_text("map"));
 	// pMap->SetEditable(true);
 	pMap->SetName("map");
 	m_hMapList = pMap->GetHandle();
 
-	auto &resourceWatcher = pragma::get_client_state()->GetResourceWatcher();
+	auto &resourceWatcher = get_client_state()->GetResourceWatcher();
 	if(m_cbMapListReload.IsValid())
 		m_cbMapListReload.Remove();
 	m_cbMapListReload = resourceWatcher.AddChangeCallback(util::eResourceWatcherCallbackType::Map, [this](std::reference_wrapper<const std::string> fileName, std::reference_wrapper<const std::string> ext) { ReloadMapList(); });
 
 	// Server Name
-	auto *pServerName = pList->AddTextEntry(pragma::locale::get_text("server_name"), "sv_servername");
+	auto *pServerName = pList->AddTextEntry(locale::get_text("server_name"), "sv_servername");
 	m_hServerName = pServerName->GetHandle();
 	//
 	// RCON Password
-	auto *pPassword = pList->AddTextEntry(pragma::locale::get_text("server_password"), "sv_password");
+	auto *pPassword = pList->AddTextEntry(locale::get_text("server_password"), "sv_password");
 	pPassword->SetInputHidden(true);
 	m_hRconPassword = pPassword->GetHandle();
 	//
 	// Player Count
-	auto *pMaxPlayers = pList->AddSlider(pragma::locale::get_text("max_players"), [](WISlider *pSlider) { pSlider->SetRange(1.f, 50.f, 1.f); }, "sv_maxplayers");
+	auto *pMaxPlayers = pList->AddSlider(locale::get_text("max_players"), [](WISlider *pSlider) { pSlider->SetRange(1.f, 50.f, 1.f); }, "sv_maxplayers");
 	m_hMaxPlayers = pMaxPlayers;
 	//
 	InitializeOptionsList(pList);

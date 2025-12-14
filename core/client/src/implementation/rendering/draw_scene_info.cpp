@@ -10,14 +10,14 @@ import :game;
 
 using namespace pragma::rendering;
 
-pragma::rendering::DrawSceneInfo::DrawSceneInfo() {}
-pragma::rendering::DrawSceneInfo::DrawSceneInfo(const DrawSceneInfo &other)
+DrawSceneInfo::DrawSceneInfo() {}
+DrawSceneInfo::DrawSceneInfo(const DrawSceneInfo &other)
     : scene {other.scene}, commandBuffer {other.commandBuffer}, renderTarget {other.renderTarget}, renderFlags {other.renderFlags}, clearColor {other.clearColor}, toneMapping {other.toneMapping}, prepassFilter {other.prepassFilter}, renderFilter {other.renderFilter},
       outputImage {other.outputImage}, clipPlane {other.clipPlane}, pvsOrigin {other.pvsOrigin}, outputLayerId {other.outputLayerId}, flags {other.flags}, renderStats {other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr}, exclusionMask {other.exclusionMask},
       inclusionMask {other.inclusionMask}, subPasses {other.subPasses ? std::make_unique<std::vector<DrawSceneInfo>>(*other.subPasses) : nullptr}
 {
 }
-pragma::rendering::DrawSceneInfo &pragma::rendering::DrawSceneInfo::operator=(const DrawSceneInfo &other)
+DrawSceneInfo &DrawSceneInfo::operator=(const DrawSceneInfo &other)
 {
 	scene = other.scene;
 	commandBuffer = other.commandBuffer;
@@ -43,15 +43,15 @@ pragma::rendering::DrawSceneInfo &pragma::rendering::DrawSceneInfo::operator=(co
 	return *this;
 }
 
-void pragma::rendering::DrawSceneInfo::AddSubPass(const DrawSceneInfo &drawSceneInfo)
+void DrawSceneInfo::AddSubPass(const DrawSceneInfo &drawSceneInfo)
 {
 	if(!subPasses)
 		subPasses = std::make_unique<std::vector<DrawSceneInfo>>();
 	subPasses->push_back(drawSceneInfo);
 }
-const std::vector<pragma::rendering::DrawSceneInfo> *pragma::rendering::DrawSceneInfo::GetSubPasses() const { return subPasses.get(); }
+const std::vector<DrawSceneInfo> *DrawSceneInfo::GetSubPasses() const { return subPasses.get(); }
 
-Vector3 pragma::rendering::DrawSceneInfo::GetPvsOrigin() const
+Vector3 DrawSceneInfo::GetPvsOrigin() const
 {
 	if(pvsOrigin)
 		return *pvsOrigin;
@@ -61,12 +61,12 @@ Vector3 pragma::rendering::DrawSceneInfo::GetPvsOrigin() const
 	return cam->GetEntity().GetPosition();
 }
 
-::pragma::rendering::RenderMask pragma::rendering::DrawSceneInfo::GetRenderMask(pragma::Game &game) const
+RenderMask DrawSceneInfo::GetRenderMask(Game &game) const
 {
-	auto mask = static_cast<pragma::CGame &>(game).GetInclusiveRenderMasks();
+	auto mask = static_cast<CGame &>(game).GetInclusiveRenderMasks();
 	mask |= inclusionMask;
 	mask &= ~exclusionMask;
 	return mask;
 }
 
-pragma::rendering::RenderPassDrawInfo::RenderPassDrawInfo(const DrawSceneInfo &drawSceneInfo, prosper::ICommandBuffer &cmdBuffer) : drawSceneInfo {drawSceneInfo}, commandBuffer {cmdBuffer.shared_from_this()} {}
+RenderPassDrawInfo::RenderPassDrawInfo(const DrawSceneInfo &drawSceneInfo, prosper::ICommandBuffer &cmdBuffer) : drawSceneInfo {drawSceneInfo}, commandBuffer {cmdBuffer.shared_from_this()} {}

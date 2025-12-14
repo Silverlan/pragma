@@ -19,7 +19,7 @@ void SObservableComponent::SetLocalCameraOrigin(CameraType type, const Vector3 &
 	NetPacket p;
 	p->Write<CameraType>(type);
 	p->Write<Vector3>(origin);
-	ent.SendNetEvent(m_netSetObserverOrigin, p, pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netSetObserverOrigin, p, networking::Protocol::SlowReliable);
 }
 void SObservableComponent::SetLocalCameraOffset(CameraType type, const Vector3 &offset)
 {
@@ -30,7 +30,7 @@ void SObservableComponent::SetLocalCameraOffset(CameraType type, const Vector3 &
 	NetPacket p;
 	p->Write<CameraType>(type);
 	p->Write<Vector3>(offset);
-	ent.SendNetEvent(m_netSetObserverOffset, p, pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netSetObserverOffset, p, networking::Protocol::SlowReliable);
 }
 void SObservableComponent::SetViewOffset(const Vector3 &offset)
 {
@@ -40,12 +40,12 @@ void SObservableComponent::SetViewOffset(const Vector3 &offset)
 		return;
 	NetPacket p;
 	p->Write<Vector3>(offset);
-	ent.SendNetEvent(m_netSetViewOffset, p, pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netSetViewOffset, p, networking::Protocol::SlowReliable);
 }
 void SObservableComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SObservableComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
-	constexpr auto numTypes = pragma::math::to_integral(CameraType::Count);
+	constexpr auto numTypes = math::to_integral(CameraType::Count);
 	for(auto i = 0u; i < numTypes; ++i) {
 		auto &data = GetCameraData(static_cast<CameraType>(i));
 		packet->Write<bool>(*data.enabled);

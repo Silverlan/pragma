@@ -16,7 +16,7 @@ void pragma::gui::types::WITexturedCubemap::Initialize()
 
 	auto w = GetWidth();
 	auto h = GetHeight();
-	auto &wgui = pragma::gui::WGUI::GetInstance();
+	auto &wgui = WGUI::GetInstance();
 	uint8_t faceIdx = 0u;
 	for(auto &hSide : m_hCubemapSides) {
 		auto *p = wgui.Create<WITexturedRect>(this);
@@ -65,4 +65,4 @@ void pragma::gui::types::WITexturedCubemap::SetTexture(prosper::Texture &tex)
 		pEl->SetTexture(tex, faceIdx);
 	}
 }
-pragma::gui::types::WITexturedRect *pragma::gui::types::WITexturedCubemap::GetSideElement(rendering::CubeMapSide side) { return static_cast<WITexturedRect *>(m_hCubemapSides.at(pragma::math::to_integral(side)).get()); }
+pragma::gui::types::WITexturedRect *pragma::gui::types::WITexturedCubemap::GetSideElement(rendering::CubeMapSide side) { return static_cast<WITexturedRect *>(m_hCubemapSides.at(math::to_integral(side)).get()); }

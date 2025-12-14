@@ -12,7 +12,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLSERVER SToggleComponent final : public BaseToggleComponent, public SBaseNetComponent {
 	  public:
-		SToggleComponent(pragma::ecs::BaseEntity &ent) : BaseToggleComponent(ent) {}
+		SToggleComponent(ecs::BaseEntity &ent) : BaseToggleComponent(ent) {}
 		virtual void TurnOn() override;
 		virtual void TurnOff() override;
 

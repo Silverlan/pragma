@@ -14,7 +14,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SDecalComponent final : public BaseEnvDecalComponent, public SBaseNetComponent {
 		  public:
-			SDecalComponent(pragma::ecs::BaseEntity &ent) : BaseEnvDecalComponent(ent) {}
+			SDecalComponent(ecs::BaseEntity &ent) : BaseEnvDecalComponent(ent) {}
 			virtual void Initialize() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }

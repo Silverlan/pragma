@@ -15,7 +15,7 @@ export namespace pragma {
 	}
 	class DLLSERVER SLiquidSurfaceSimulationComponent final : public BaseLiquidSurfaceSimulationComponent, public SBaseNetComponent {
 	  public:
-		SLiquidSurfaceSimulationComponent(pragma::ecs::BaseEntity &ent);
+		SLiquidSurfaceSimulationComponent(ecs::BaseEntity &ent);
 		virtual ~SLiquidSurfaceSimulationComponent() override;
 		virtual void Initialize() override;
 		virtual bool ShouldTransmitNetData() const override { return true; }

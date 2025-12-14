@@ -44,7 +44,7 @@ float pragma::gui::types::WIGridPanel::UpdateRowHeights(float yOffset, float def
 					for(auto &hChild : children) {
 						if(hChild.IsValid() == false)
 							continue;
-						hRow = pragma::math::max(hRow, static_cast<float>(hChild->GetHeight()));
+						hRow = math::max(hRow, static_cast<float>(hChild->GetHeight()));
 					}
 				}
 				row->SetSize(w, CInt32(hRow));
@@ -90,6 +90,6 @@ pragma::gui::types::WITableCell *pragma::gui::types::WIGridPanel::AddItem(WIBase
 		return nullptr;
 	}
 	auto *pCell = pRow->InsertElement(colId, el);
-	m_numColumns = pragma::math::max(m_numColumns, colId + 1);
+	m_numColumns = math::max(m_numColumns, colId + 1);
 	return pCell;
 }

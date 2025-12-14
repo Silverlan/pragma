@@ -42,7 +42,7 @@ void pragma::gui::types::WIDebugMSAATexture::UpdateResolvedTexture()
 	}
 	auto &msaaImg = m_msaaTexture->GetImage();
 	auto extents = msaaImg.GetExtents();
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	prosper::util::ImageCreateInfo resolvedImgCreateInfo {};
 	resolvedImgCreateInfo.width = extents.width;
 	resolvedImgCreateInfo.height = extents.height;
@@ -68,6 +68,6 @@ void pragma::gui::types::WIDebugMSAATexture::DoUpdate()
 	WIBase::DoUpdate();
 	if(!m_hTextureRect.IsValid())
 		return;
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	// TODO
 }

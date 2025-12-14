@@ -19,8 +19,8 @@ void SHealthComponent::SetHealth(unsigned short health)
 	if(!ent.IsShared())
 		return;
 	NetPacket p;
-	pragma::networking::write_entity(p, &ent);
+	networking::write_entity(p, &ent);
 	p->Write<unsigned short>(health);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SETHEALTH, p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(networking::net_messages::client::ENT_SETHEALTH, p, networking::Protocol::SlowReliable);
 }
 void SHealthComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

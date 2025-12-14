@@ -269,49 +269,49 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 	}));
 }
 
-pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const pragma::rendering::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin)
-    : m_drawSceneInfo {drawSceneInfo}, m_drawOrigin {drawOrigin}, m_shaderProcessor {*drawSceneInfo.commandBuffer, pragma::math::is_flag_set(drawSceneInfo.drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::Reflection) ? PassType::Reflection : PassType::Generic}
+pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin)
+    : m_drawSceneInfo {drawSceneInfo}, m_drawOrigin {drawOrigin}, m_shaderProcessor {*drawSceneInfo.commandBuffer, math::is_flag_set(drawSceneInfo.drawSceneInfo.flags, DrawSceneInfo::Flags::Reflection) ? PassType::Reflection : PassType::Generic}
 {
 	auto &scene = drawSceneInfo.drawSceneInfo.scene;
-	auto *renderer = scene->GetRenderer<pragma::CRendererComponent>();
-	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
+	auto *renderer = scene->GetRenderer<CRendererComponent>();
+	auto raster = renderer ? renderer->GetEntity().GetComponent<CRasterizationRendererComponent>() : pragma::ComponentHandle<CRasterizationRendererComponent> {};
 	m_renderer = raster.get();
 }
 pragma::rendering::BaseRenderProcessor::~BaseRenderProcessor() { UnbindShader(); }
 
-void pragma::rendering::BaseRenderProcessor::SetCountNonOpaqueMaterialsOnly(bool b) { pragma::math::set_flag(m_stateFlags, StateFlags::CountNonOpaqueMaterialsOnly, b); }
+void pragma::rendering::BaseRenderProcessor::SetCountNonOpaqueMaterialsOnly(bool b) { math::set_flag(m_stateFlags, StateFlags::CountNonOpaqueMaterialsOnly, b); }
 
 void pragma::rendering::BaseRenderProcessor::UnbindShader()
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false)
+	if(math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false)
 		return;
 	//m_shaderScene->EndDraw();
 	m_drawSceneInfo.commandBuffer->RecordUnbindShaderPipeline();
 	m_curShader = nullptr;
 	m_curPipeline = std::numeric_limits<decltype(m_curPipeline)>::max();
 	m_curInstanceSet = nullptr;
-	pragma::math::set_flag(m_stateFlags, StateFlags::ShaderBound, false);
+	math::set_flag(m_stateFlags, StateFlags::ShaderBound, false);
 }
 
 void pragma::rendering::BaseRenderProcessor::UnbindMaterial()
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::MaterialBound) == false)
+	if(math::is_flag_set(m_stateFlags, StateFlags::MaterialBound) == false)
 		return;
 	m_curMaterial = nullptr;
 	m_curMaterialIndex = std::numeric_limits<decltype(m_curMaterialIndex)>::max();
-	pragma::math::set_flag(m_stateFlags, StateFlags::MaterialBound, false);
+	math::set_flag(m_stateFlags, StateFlags::MaterialBound, false);
 }
 
 void pragma::rendering::BaseRenderProcessor::UnbindEntity()
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false)
+	if(math::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false)
 		return;
 	m_curEntity = nullptr;
 	m_curEntityIndex = std::numeric_limits<decltype(m_curEntityIndex)>::max();
-	pragma::math::set_flag(m_stateFlags, StateFlags::EntityBound, false);
+	math::set_flag(m_stateFlags, StateFlags::EntityBound, false);
 }
 
-bool pragma::rendering::BaseRenderProcessor::BindInstanceSet(pragma::ShaderGameWorld &shaderScene, const RenderQueue::InstanceSet *instanceSet)
+bool pragma::rendering::BaseRenderProcessor::BindInstanceSet(ShaderGameWorld &shaderScene, const RenderQueue::InstanceSet *instanceSet)
 {
 	if(instanceSet == m_curInstanceSet)
 		return true;
@@ -321,13 +321,13 @@ bool pragma::rendering::BaseRenderProcessor::BindInstanceSet(pragma::ShaderGameW
 
 uint32_t pragma::rendering::BaseRenderProcessor::TranslateBasePipelineIndexToPassPipelineIndex(prosper::Shader &shader, uint32_t pipelineIdx, PassType passType) const
 {
-	auto *shaderScene = static_cast<pragma::ShaderGameWorld *>(&shader);
+	auto *shaderScene = static_cast<ShaderGameWorld *>(&shader);
 	return shaderScene->GetPassPipelineIndexStartOffset(passType) + pipelineIdx;
 }
 
 bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::Shader &shader, uint32_t pipelineIdx)
 {
-	if(shader.GetBaseTypeHashCode() != pragma::ShaderGameWorld::HASH_TYPE || shader.IsValid() == false)
+	if(shader.GetBaseTypeHashCode() != ShaderGameWorld::HASH_TYPE || shader.IsValid() == false)
 		return false;
 	//pipelineIdx = TranslateBasePipelineIndexToPassPipelineIndex(shader,pipelineIdx,m_shaderProcessor.GetPassType());
 	prosper::PipelineID pipelineId;
@@ -337,9 +337,9 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::Shader &shader,
 bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipelineId)
 {
 	if(pipelineId == m_curPipeline)
-		return pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound);
+		return math::is_flag_set(m_stateFlags, StateFlags::ShaderBound);
 	uint32_t pipelineIdx;
-	auto *shader = pragma::get_cengine()->GetRenderContext().GetShaderPipeline(pipelineId, pipelineIdx);
+	auto *shader = get_cengine()->GetRenderContext().GetShaderPipeline(pipelineId, pipelineIdx);
 	assert(shader);
 	pipelineIdx = TranslateBasePipelineIndexToPassPipelineIndex(*shader, pipelineIdx, m_shaderProcessor.GetPassType());
 	UnbindShader();
@@ -351,12 +351,12 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 	m_curPipeline = pipelineId;
 
 	m_curShader = shader;
-	if(shader->GetBaseTypeHashCode() != pragma::ShaderGameWorld::HASH_TYPE || shader->IsValid() == false) {
+	if(shader->GetBaseTypeHashCode() != ShaderGameWorld::HASH_TYPE || shader->IsValid() == false) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
 			spdlog::warn("[Render] WARNING: Shader {} is not a valid game shader!", shader->GetIdentifier());
 		return false;
 	}
-	auto *shaderScene = static_cast<pragma::ShaderGameWorld *>(shader);
+	auto *shaderScene = static_cast<ShaderGameWorld *>(shader);
 	if((g_debugRenderFilter && g_debugRenderFilter->shaderFilter && g_debugRenderFilter->shaderFilter(*shaderScene) == false)) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
 			spdlog::warn("[Render] WARNING: Shader {} has been filtered out!", shaderScene->GetIdentifier());
@@ -365,8 +365,8 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
 	auto bView = (m_camType == CameraType::View) ? true : false;
-	auto *renderer = scene.GetRenderer<pragma::CRendererComponent>();
-	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : ComponentHandle<pragma::CRasterizationRendererComponent> {};
+	auto *renderer = scene.GetRenderer<CRendererComponent>();
+	auto raster = renderer ? renderer->GetEntity().GetComponent<CRasterizationRendererComponent>() : ComponentHandle<CRasterizationRendererComponent> {};
 	if(raster.expired()) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
 			spdlog::warn("[Render] WARNING: Scene '{}' has no valid rasterization renderer!", scene.GetEntity().GetName());
@@ -380,7 +380,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 		(*m_stats)->Increment(RenderPassStats::Counter::ShaderStateChanges);
 		m_stats->shaders.push_back(shader->GetHandle());
 	}
-	pragma::math::set_flag(m_stateFlags, StateFlags::ShaderBound);
+	math::set_flag(m_stateFlags, StateFlags::ShaderBound);
 
 	m_shaderScene = shaderScene;
 	return true;
@@ -388,19 +388,19 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 void pragma::rendering::BaseRenderProcessor::SetCameraType(CameraType camType)
 {
 	m_camType = camType;
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
+	if(math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene.get();
-	auto *renderer = scene.GetRenderer<pragma::CRendererComponent>();
+	auto *renderer = scene.GetRenderer<CRendererComponent>();
 	if(renderer == nullptr)
 		return;
 	//m_shaderScene->BindSceneCamera(scene,*static_cast<pragma::CRasterizationRendererComponent*>(renderer),camType == CameraType::View);
 }
 void pragma::rendering::BaseRenderProcessor::Set3DSky(bool enabled)
 {
-	pragma::math::set_flag(m_baseSceneFlags, ShaderGameWorld::SceneFlags::RenderAs3DSky, enabled);
+	math::set_flag(m_baseSceneFlags, ShaderGameWorld::SceneFlags::RenderAs3DSky, enabled);
 	// pragma::math::set_flag(m_renderFlags,RenderFlags::RenderAs3DSky,enabled);
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
+	if(math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
 	//m_shaderScene->Set3DSky(enabled);
 }
@@ -408,24 +408,24 @@ void pragma::rendering::BaseRenderProcessor::SetDrawOrigin(const Vector4 &drawOr
 {
 	m_drawOrigin = drawOrigin;
 	m_shaderProcessor.SetDrawOrigin(drawOrigin);
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
+	if(math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
 	//m_shaderScene->BindDrawOrigin(drawOrigin);
 }
 void pragma::rendering::BaseRenderProcessor::SetDepthBias(float d, float delta)
 {
 	m_depthBias = (d > 0.f && delta > 0.f) ? Vector2 {d, delta} : std::optional<Vector2> {};
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
+	if(math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
 	//m_shaderScene->SetDepthBias(m_depthBias.has_value() ? *m_depthBias : Vector2{});
 }
 bool pragma::rendering::BaseRenderProcessor::BindMaterial(material::CMaterial &mat)
 {
 	if(&mat == m_curMaterial)
-		return pragma::math::is_flag_set(m_stateFlags, StateFlags::MaterialBound);
+		return math::is_flag_set(m_stateFlags, StateFlags::MaterialBound);
 	UnbindMaterial();
 	m_curMaterial = &mat;
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false)
+	if(math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false)
 		return false;
 	if(mat.IsInitialized() == false) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
@@ -444,24 +444,24 @@ bool pragma::rendering::BaseRenderProcessor::BindMaterial(material::CMaterial &m
 	}
 
 	if(m_stats) {
-		if(pragma::math::is_flag_set(m_stateFlags, StateFlags::CountNonOpaqueMaterialsOnly) == false || mat.GetAlphaMode() != AlphaMode::Opaque) {
+		if(math::is_flag_set(m_stateFlags, StateFlags::CountNonOpaqueMaterialsOnly) == false || mat.GetAlphaMode() != AlphaMode::Opaque) {
 			(*m_stats)->Increment(RenderPassStats::Counter::MaterialStateChanges);
 			m_stats->materials.push_back(mat.GetHandle());
 		}
 	}
-	pragma::math::set_flag(m_stateFlags, StateFlags::MaterialBound);
+	math::set_flag(m_stateFlags, StateFlags::MaterialBound);
 
 	m_curMaterialIndex = mat.GetIndex();
 	return true;
 }
-bool pragma::rendering::BaseRenderProcessor::BindEntity(pragma::ecs::CBaseEntity &ent)
+bool pragma::rendering::BaseRenderProcessor::BindEntity(ecs::CBaseEntity &ent)
 {
 	if(&ent == m_curEntity)
-		return pragma::math::is_flag_set(m_stateFlags, StateFlags::EntityBound);
+		return math::is_flag_set(m_stateFlags, StateFlags::EntityBound);
 	UnbindEntity();
 	m_curEntity = &ent;
 	auto *renderC = ent.GetRenderComponent();
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::MaterialBound) == false)
+	if(math::is_flag_set(m_stateFlags, StateFlags::MaterialBound) == false)
 		return false;
 	if(renderC == nullptr) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
@@ -507,17 +507,17 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(pragma::ecs::CBaseEntity
 		(*m_stats)->Increment(RenderPassStats::Counter::EntityStateChanges);
 		m_stats->entities.push_back(ent.GetHandle());
 	}
-	pragma::math::set_flag(m_stateFlags, StateFlags::EntityBound);
+	math::set_flag(m_stateFlags, StateFlags::EntityBound);
 
 	m_curEntityIndex = ent.GetLocalIndex();
 	return true;
 }
 
-pragma::ShaderGameWorld *pragma::rendering::BaseRenderProcessor::GetCurrentShader() { return pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) ? m_shaderScene : nullptr; }
+pragma::ShaderGameWorld *pragma::rendering::BaseRenderProcessor::GetCurrentShader() { return math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) ? m_shaderScene : nullptr; }
 
-bool pragma::rendering::BaseRenderProcessor::Render(pragma::geometry::CModelSubMesh &mesh, pragma::rendering::RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet)
+bool pragma::rendering::BaseRenderProcessor::Render(geometry::CModelSubMesh &mesh, RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet)
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false || m_curRenderC == nullptr)
+	if(math::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false || m_curRenderC == nullptr)
 		return false;
 	if((g_debugRenderFilter && g_debugRenderFilter->meshFilter && g_debugRenderFilter->meshFilter(*m_curEntity, m_curMaterial, mesh, meshIdx) == false)) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
@@ -597,7 +597,7 @@ void pragma::rendering::BaseRenderProcessor::RecordViewport()
 	m_drawSceneInfo.commandBuffer->RecordSetScissor(extents.width, extents.height);
 }
 
-uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue, RenderPass pass, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)
+uint32_t pragma::rendering::BaseRenderProcessor::Render(const RenderQueue &renderQueue, RenderPass pass, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)
 {
 	std::chrono::steady_clock::time_point t;
 	if(optStats)
@@ -605,7 +605,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 
 	renderQueue.WaitForCompletion(optStats);
 	auto isDepthPass = (pass == RenderPass::Prepass || pass == RenderPass::Shadow);
-	if(m_renderer == nullptr || (isDepthPass && pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false))
+	if(m_renderer == nullptr || (isDepthPass && math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false))
 		return 0;
 	m_stats = optStats;
 	m_shaderProcessor.SetStats(m_stats);
@@ -617,15 +617,15 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	}
 
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
-	auto &referenceShader = isDepthPass ? pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Prepass) : pragma::get_cgame()->GetGameShader(pragma::CGame::GameShader::Pbr);
+	auto &referenceShader = isDepthPass ? get_cgame()->GetGameShader(CGame::GameShader::Prepass) : get_cgame()->GetGameShader(CGame::GameShader::Pbr);
 	auto view = (m_camType == CameraType::View) ? true : false;
 	if(referenceShader.expired())
 		return 0;
 	RecordViewport();
 
-	auto &shaderManager = pragma::get_cengine()->GetShaderManager();
-	auto &context = pragma::get_cengine()->GetRenderContext();
-	auto &matManager = pragma::get_client_state()->GetMaterialManager();
+	auto &shaderManager = get_cengine()->GetShaderManager();
+	auto &context = get_cengine()->GetRenderContext();
+	auto &matManager = get_client_state()->GetMaterialManager();
 	auto &sceneRenderDesc = m_drawSceneInfo.drawSceneInfo.scene->GetSceneRenderDesc();
 	uint32_t numShaderInvocations = 0;
 	const RenderQueue::InstanceSet *curInstanceSet = nullptr;
@@ -664,13 +664,13 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				if(optStats)
 					(*optStats)->AddTime(RenderPassStats::Timer::ShaderBind, std::chrono::steady_clock::now() - ttmp);
 			}
-			if(pragma::math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false)
+			if(math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false)
 				continue;
 		}
 		else {
 			if(item.pipelineId != m_prepassCurScenePipeline) {
 				uint32_t pipelineIdx;
-				auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(pragma::get_cengine()->GetRenderContext().GetShaderPipeline(item.pipelineId, pipelineIdx));
+				auto *shader = dynamic_cast<ShaderGameWorldLightingPass *>(get_cengine()->GetRenderContext().GetShaderPipeline(item.pipelineId, pipelineIdx));
 				if(pass == RenderPass::Prepass)
 					m_prepassIsCurScenePipelineTranslucent = shader && shader->IsTranslucentPipeline(pipelineIdx);
 				m_prepassCurScenePipeline = item.pipelineId;
@@ -696,14 +696,14 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				auto pipeline = enableAlphaTest ? ShaderPrepass::Pipeline::AlphaTest : ShaderPrepass::Pipeline::Opaque;
 
 				prosper::PipelineID pipelineId;
-				if(!static_cast<pragma::ShaderPrepass *>(m_shaderScene)->GetPipelineId(pipelineId, pragma::math::to_integral(pipeline)) || !BindShader(pipelineId))
+				if(!static_cast<ShaderPrepass *>(m_shaderScene)->GetPipelineId(pipelineId, math::to_integral(pipeline)) || !BindShader(pipelineId))
 					continue;
 			}
 			BindMaterial(static_cast<material::CMaterial &>(*mat));
 			if(optStats)
 				(*optStats)->AddTime(RenderPassStats::Timer::MaterialBind, std::chrono::steady_clock::now() - ttmp);
 		}
-		if(pragma::math::is_flag_set(m_stateFlags, StateFlags::MaterialBound) == false)
+		if(math::is_flag_set(m_stateFlags, StateFlags::MaterialBound) == false)
 			continue;
 		if(item.entity != m_curEntityIndex) {
 			if(optStats)
@@ -722,8 +722,8 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				}
 				// TODO: If we're instancing, there's technically no need to bind
 				// the entity (except for resetting the clip plane, etc.)
-				BindEntity(static_cast<pragma::ecs::CBaseEntity &>(*ent));
-				if(m_stats && pragma::math::is_flag_set(m_stateFlags, StateFlags::EntityBound)) {
+				BindEntity(static_cast<ecs::CBaseEntity &>(*ent));
+				if(m_stats && math::is_flag_set(m_stateFlags, StateFlags::EntityBound)) {
 					if(item.instanceSetIndex == RenderQueueItem::UNIQUE)
 						(*m_stats)->Increment(RenderPassStats::Counter::EntitiesWithoutInstancing);
 				}
@@ -733,7 +733,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 			if(optStats)
 				(*optStats)->AddTime(RenderPassStats::Timer::EntityBind, std::chrono::steady_clock::now() - ttmp);
 		}
-		if(pragma::math::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false || item.mesh >= m_curEntityMeshList->size())
+		if(math::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false || item.mesh >= m_curEntityMeshList->size())
 			continue;
 		if(m_stats && curInstanceSet) {
 			(*m_stats)->Increment(RenderPassStats::Counter::InstanceSets);
@@ -745,8 +745,8 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 		}
 		if(optStats)
 			ttmp = std::chrono::steady_clock::now();
-		auto &mesh = static_cast<pragma::geometry::CModelSubMesh &>(*m_curEntityMeshList->at(item.mesh));
-		if(BaseRenderProcessor::Render(mesh, item.mesh, curInstanceSet))
+		auto &mesh = static_cast<geometry::CModelSubMesh &>(*m_curEntityMeshList->at(item.mesh));
+		if(Render(mesh, item.mesh, curInstanceSet))
 			++numShaderInvocations;
 		if(optStats)
 			(*optStats)->AddTime(RenderPassStats::Timer::DrawCall, std::chrono::steady_clock::now() - ttmp);
@@ -763,13 +763,13 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	return numShaderInvocations;
 }
 
-uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)
+uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const RenderQueue &renderQueue, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)
 {
 	return BaseRenderProcessor::Render(renderQueue, RenderPass::Lighting, optStats, worldRenderQueueIndex);
 }
 
-pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const pragma::rendering::RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin) : BaseRenderProcessor {drawSceneInfo, drawOrigin} { SetCountNonOpaqueMaterialsOnly(true); }
-uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue, RenderPass renderPass, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)
+pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin) : BaseRenderProcessor {drawSceneInfo, drawOrigin} { SetCountNonOpaqueMaterialsOnly(true); }
+uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const RenderQueue &renderQueue, RenderPass renderPass, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)
 {
 	return BaseRenderProcessor::Render(renderQueue, renderPass, optStats, worldRenderQueueIndex);
 }

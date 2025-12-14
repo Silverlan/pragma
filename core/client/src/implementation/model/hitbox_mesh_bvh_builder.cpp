@@ -150,14 +150,14 @@ static bool generate_bvh_mesh(pragma::asset::Model &mdl, const std::string &bone
 
 static void serialize(pragma::asset::Model &mdl, const std::string &boneName, pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo)
 {
-	::bvh::v2::StdOutputStream outputStream {boneMeshInfo.serializedBvh};
+	bvh::v2::StdOutputStream outputStream {boneMeshInfo.serializedBvh};
 	auto &bvh = boneMeshInfo.meshBvhTree->bvh;
 	bvh.serialize(outputStream);
 }
 
 pragma::bvh::HitboxMeshBvhBuildTask::HitboxMeshBvhBuildTask(BS::light_thread_pool &threadPool) : m_threadPool {threadPool} {}
 
-bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::asset::Model &mdl)
+bool pragma::bvh::HitboxMeshBvhBuildTask::Build(asset::Model &mdl)
 {
 	auto &lods = mdl.GetLODs();
 	if(lods.empty())
@@ -177,19 +177,19 @@ bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::asset::Model &mdl)
 	return true;
 }
 
-bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::asset::Model &mdl, pragma::animation::BoneId boneId, const pragma::physics::Hitbox &hb, const asset::LODInfo &lodInfo)
+bool pragma::bvh::HitboxMeshBvhBuildTask::Build(asset::Model &mdl, animation::BoneId boneId, const physics::Hitbox &hb, const asset::LODInfo &lodInfo)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &ref = mdl.GetReference();
 	auto bone = skeleton.GetBone(boneId).lock();
 	if(!bone)
 		return false;
-	pragma::math::ScaledTransform pose;
+	math::ScaledTransform pose;
 	if(!ref.GetBonePose(boneId, pose))
 		return false;
 	auto &pos = pose.GetOrigin();
 	auto &rot = pose.GetRotation();
-	auto planes = pragma::math::geometry::get_obb_planes(pos, rot, hb.min, hb.max);
+	auto planes = math::geometry::get_obb_planes(pos, rot, hb.min, hb.max);
 	auto &hbMin = hb.min;
 	auto &hbMax = hb.max;
 	for(auto &pair : lodInfo.meshReplacements) {
@@ -198,16 +198,16 @@ bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::asset::Model &mdl, pragm
 			continue;
 		for(auto &mesh : mg->GetMeshes()) {
 			for(auto &subMesh : mesh->GetSubMeshes()) {
-				if(!bvh::is_mesh_bvh_compatible(*subMesh))
+				if(!is_mesh_bvh_compatible(*subMesh))
 					continue;
 				auto &uuid = subMesh->GetUuid();
-				if(uuid == pragma::util::Uuid {}) {
+				if(uuid == util::Uuid {}) {
 					LOGGER.warn("Mesh with invalid uuid in model '{}'! Skipping...", mdl.GetName());
 					continue;
 				}
 
 				std::string boneName = bone->name;
-				auto bm = pragma::util::make_shared<pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo>();
+				auto bm = pragma::util::make_shared<BoneMeshInfo>();
 				auto genResult = m_threadPool.submit_task([&mdl, subMesh, planes, hbMin, hbMax, pose, uuid, boneName, bm, boneId]() -> bool {
 					auto success = calc_bone_mesh_info(*bm, boneId, subMesh, planes, hbMin, hbMax, pose, uuid);
 					if(!success)
@@ -229,7 +229,7 @@ bool pragma::bvh::HitboxMeshBvhBuildTask::Build(pragma::asset::Model &mdl, pragm
 	return true;
 }
 
-void pragma::bvh::HitboxMeshBvhBuildTask::Serialize(pragma::asset::Model &mdl)
+void pragma::bvh::HitboxMeshBvhBuildTask::Serialize(asset::Model &mdl)
 {
 	auto extData = mdl.GetExtensionData();
 	auto ubmHitboxBvh = extData["hitboxBvh"];
@@ -258,7 +258,7 @@ void pragma::bvh::HitboxMeshBvhBuildTask::Serialize(pragma::asset::Model &mdl)
 			auto view = stream.view();
 			auto extData = boneMeshInfo->subMesh->GetExtensionData();
 			auto udmBvh = udmBoneMeshes[idx]["bvh"];
-			udmBvh["data"] = ::udm::compress_lz4_blob(view.data(), view.size());
+			udmBvh["data"] = udm::compress_lz4_blob(view.data(), view.size());
 			static_assert(sizeof(decltype(boneMeshInfo->meshBvhTree->primitives[0])) == sizeof(Vector3) * 3);
 			auto numVerts = boneMeshInfo->meshBvhTree->primitives.size() * 3;
 			auto *verts = reinterpret_cast<Vector3 *>(boneMeshInfo->meshBvhTree->primitives.data());
@@ -271,7 +271,7 @@ void pragma::bvh::HitboxMeshBvhBuildTask::Serialize(pragma::asset::Model &mdl)
 
 pragma::bvh::HitboxMeshBvhBuilder::HitboxMeshBvhBuilder() : m_threadPool {15} {}
 
-pragma::bvh::HitboxMeshBvhBuildTask pragma::bvh::HitboxMeshBvhBuilder::BuildModel(pragma::asset::Model &mdl)
+pragma::bvh::HitboxMeshBvhBuildTask pragma::bvh::HitboxMeshBvhBuilder::BuildModel(asset::Model &mdl)
 {
 	HitboxMeshBvhBuildTask task {m_threadPool};
 	task.Build(mdl);

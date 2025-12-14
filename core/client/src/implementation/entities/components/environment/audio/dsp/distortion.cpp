@@ -25,7 +25,7 @@ void CSoundDspDistortionComponent::OnEntitySpawn()
 	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	pragma::audio::EfxDistortionProperties props {};
+	audio::EfxDistortionProperties props {};
 	props.flEdge = m_kvEdge;
 	props.flGain = m_kvGain;
 	props.flLowpassCutoff = m_kvLowpassCutoff;

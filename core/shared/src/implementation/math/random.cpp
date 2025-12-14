@@ -35,11 +35,11 @@ void pragma::math::to_random_float(const std::string &s, float &outF0, float &ou
 	outF0 = dis.min();
 	outF1 = dis.max();
 }
-std::uniform_real_distribution<float> pragma::math::to_random_float(const std::string &s) { return to_random_number<std::uniform_real_distribution<float>, float>(s, static_cast<float (*)(const std::string_view &)>(pragma::util::to_float)); }
+std::uniform_real_distribution<float> pragma::math::to_random_float(const std::string &s) { return to_random_number<std::uniform_real_distribution<float>, float>(s, static_cast<float (*)(const std::string_view &)>(util::to_float)); }
 void pragma::math::to_random_int(const std::string &s, int32_t &outI0, int32_t &outI1)
 {
 	auto dis = to_random_int(s);
 	outI0 = dis.min();
 	outI1 = dis.max();
 }
-std::uniform_int_distribution<int32_t> pragma::math::to_random_int(const std::string &s) { return to_random_number<std::uniform_int_distribution<int32_t>, int32_t>(s, static_cast<int32_t (*)(const std::string_view &)>(pragma::util::to_int)); }
+std::uniform_int_distribution<int32_t> pragma::math::to_random_int(const std::string &s) { return to_random_number<std::uniform_int_distribution<int32_t>, int32_t>(s, static_cast<int32_t (*)(const std::string_view &)>(util::to_int)); }

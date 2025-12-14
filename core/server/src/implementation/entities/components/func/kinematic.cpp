@@ -21,13 +21,13 @@ void SKinematicComponent::SendData(NetPacket &packet, networking::ClientRecipien
 void SKinematicComponent::StartForward()
 {
 	BaseFuncKinematicComponent::StartForward();
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvStartForward, pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvStartForward, networking::Protocol::SlowReliable);
 }
 
 void SKinematicComponent::StartBackward()
 {
 	BaseFuncKinematicComponent::StartBackward();
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvStartBackward, pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvStartBackward, networking::Protocol::SlowReliable);
 }
 
 void SKinematicComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

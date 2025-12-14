@@ -14,15 +14,15 @@ import :model_manager;
 
 #define RESOURCE_TRANSFER_VERBOSE 0
 
-void pragma::ServerState::InitResourceTransfer(pragma::networking::IServerClient &session)
+void pragma::ServerState::InitResourceTransfer(networking::IServerClient &session)
 {
 	auto state = session.GetInitialResourceTransferState();
-	if(state == pragma::networking::IServerClient::TransferState::Initial || session.IsTransferring() == true)
+	if(state == networking::IServerClient::TransferState::Initial || session.IsTransferring() == true)
 		return;
 	HandleServerNextResource(session);
 }
 
-void pragma::ServerState::SendResourceFile(const std::string &f, const std::vector<pragma::networking::IServerClient *> &clients)
+void pragma::ServerState::SendResourceFile(const std::string &f, const std::vector<networking::IServerClient *> &clients)
 {
 	std::string ext;
 	auto bMdl = (ufile::get_extension(f, &ext) == true && ext == "wmd") ? true : false;
@@ -40,14 +40,14 @@ void pragma::ServerState::SendResourceFile(const std::string &f)
 	if(m_server == nullptr)
 		return;
 	auto clientHandles = m_server->GetClients();
-	std::vector<pragma::networking::IServerClient *> clients;
+	std::vector<networking::IServerClient *> clients;
 	clients.reserve(clientHandles.size());
 	for(auto &hClient : clientHandles)
 		clients.push_back(hClient.get());
 	SendResourceFile(f, clients);
 }
 
-void pragma::ServerState::SendRoughModel(const std::string &f, const std::vector<pragma::networking::IServerClient *> &clients)
+void pragma::ServerState::SendRoughModel(const std::string &f, const std::vector<networking::IServerClient *> &clients)
 {
 	if(m_server == nullptr)
 		return;
@@ -58,7 +58,7 @@ void pragma::ServerState::SendRoughModel(const std::string &f, const std::vector
 	auto *asset = GetModelManager().FindCachedAsset(mdlName);
 	if(asset == nullptr)
 		return;
-	auto mdl = pragma::asset::ModelManager::GetAssetObject(*asset);
+	auto mdl = asset::ModelManager::GetAssetObject(*asset);
 	NetPacket pOut;
 	pOut->WriteString(mdlName);
 
@@ -100,7 +100,7 @@ void pragma::ServerState::SendRoughModel(const std::string &f, const std::vector
 		}
 	}
 	for(auto *cl : clients) {
-		pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::RESOURCE_MDL_ROUGH, pOut, pragma::networking::Protocol::FastUnreliable, *cl);
+		Get()->SendPacket(networking::net_messages::client::RESOURCE_MDL_ROUGH, pOut, networking::Protocol::FastUnreliable, *cl);
 		//#if RESOURCE_TRANSFER_VERBOSE == 1
 		Con::csv << "[ResourceManager] Sent rough model to: " << cl->GetIdentifier() << "..." << Con::endl;
 		//#endif
@@ -111,14 +111,14 @@ void pragma::ServerState::SendRoughModel(const std::string &f)
 	if(m_server == nullptr)
 		return;
 	auto clientHandles = m_server->GetClients();
-	std::vector<pragma::networking::IServerClient *> clients;
+	std::vector<networking::IServerClient *> clients;
 	clients.reserve(clientHandles.size());
 	for(auto &hClient : clientHandles)
 		clients.push_back(hClient.get());
 	SendRoughModel(f, clients);
 }
 
-void pragma::ServerState::HandleServerNextResource(pragma::networking::IServerClient &session)
+void pragma::ServerState::HandleServerNextResource(networking::IServerClient &session)
 {
 	auto bRemoveCurrent = true;
 	if(session.IsTransferring() == false) {
@@ -155,10 +155,10 @@ void pragma::ServerState::HandleServerNextResource(pragma::networking::IServerCl
 	if(numResources == 0 || (resTransfer.front()->stream == true && bComplete == false) // All static resources are complete; Starting dynamic resources
 	) {
 		if(bComplete == false) {
-			session.SetInitialResourceTransferState(pragma::networking::IServerClient::TransferState::Complete);
+			session.SetInitialResourceTransferState(networking::IServerClient::TransferState::Complete);
 			Con::csv << "All resources have been sent to client '" << session.GetIdentifier() << "'!" << Con::endl;
 			NetPacket p;
-			SendPacket(pragma::networking::net_messages::client::RESOURCECOMPLETE, p, pragma::networking::Protocol::SlowReliable, session);
+			SendPacket(networking::net_messages::client::RESOURCECOMPLETE, p, networking::Protocol::SlowReliable, session);
 		}
 		if(numResources == 0) {
 			session.SetTransferComplete(true);
@@ -171,10 +171,10 @@ void pragma::ServerState::HandleServerNextResource(pragma::networking::IServerCl
 	NetPacket packetRes;
 	packetRes->WriteString(r->name);
 	packetRes->Write<UInt64>(size);
-	SendPacket(pragma::networking::net_messages::client::RESOURCEINFO, packetRes, pragma::networking::Protocol::SlowReliable, session);
+	SendPacket(networking::net_messages::client::RESOURCEINFO, packetRes, networking::Protocol::SlowReliable, session);
 }
 
-void pragma::ServerState::HandleServerResourceStart(pragma::networking::IServerClient &session, NetPacket &packet)
+void pragma::ServerState::HandleServerResourceStart(networking::IServerClient &session, NetPacket &packet)
 {
 	auto &resTransfer = session.GetResourceTransfer();
 	if(resTransfer.empty()) {
@@ -190,7 +190,7 @@ void pragma::ServerState::HandleServerResourceStart(pragma::networking::IServerC
 		HandleServerNextResource(session);
 }
 
-void pragma::ServerState::HandleServerResourceFragment(pragma::networking::IServerClient &session)
+void pragma::ServerState::HandleServerResourceFragment(networking::IServerClient &session)
 {
 	auto &resTransfer = session.GetResourceTransfer();
 	if(resTransfer.empty()) {
@@ -210,16 +210,16 @@ void pragma::ServerState::HandleServerResourceFragment(pragma::networking::IServ
 	fragment->Write<unsigned int>(read);
 	fragment->Write(buf.data(), read);
 	r->offset += read;
-	SendPacket(pragma::networking::net_messages::client::RESOURCE_FRAGMENT, fragment, pragma::networking::Protocol::SlowReliable, session);
+	SendPacket(networking::net_messages::client::RESOURCE_FRAGMENT, fragment, networking::Protocol::SlowReliable, session);
 }
 
-void pragma::ServerState::ReceiveUserInput(pragma::networking::IServerClient &client, NetPacket &packet)
+void pragma::ServerState::ReceiveUserInput(networking::IServerClient &client, NetPacket &packet)
 {
 	auto *pl = GetPlayer(client);
 	if(pl == nullptr)
 		return;
 	auto latency = client.GetLatency() / 2.f; // Latency is entire roundtrip; We need the time for one way
-	auto tActivated = (pragma::util::clock::to_int(pragma::util::clock::get_duration_since_start()) - packet.GetTimeActivated()) / 1'000'000.0;
+	auto tActivated = (util::clock::to_int(util::clock::get_duration_since_start()) - packet.GetTimeActivated()) / 1'000'000.0;
 	//Con::ccl<<"Snapshot delay: "<<+latency<<"+ "<<tActivated<<" = "<<(latency +tActivated)<<Con::endl;
 	auto tDelta = static_cast<float>((latency + tActivated) / 1'000.0);
 
@@ -231,35 +231,35 @@ void pragma::ServerState::ReceiveUserInput(pragma::networking::IServerClient &cl
 	//auto latency = packet->Read<uint8_t>();
 	//client->SetLatency(latency); // Deprecated: Let the networkmanager handle it
 
-	auto sPlComponent = pl->GetEntity().GetComponent<pragma::SPlayerComponent>();
-	auto orientation = pragma::networking::read_quat(packet);
+	auto sPlComponent = pl->GetEntity().GetComponent<SPlayerComponent>();
+	auto orientation = networking::read_quat(packet);
 	if(sPlComponent.expired() == false)
 		sPlComponent.get()->UpdateViewOrientation(orientation);
 	networking::write_quat(pOut, orientation);
 	pl->SetViewPos(packet->Read<Vector3>());
 
-	auto actions = packet->Read<pragma::Action>();
-	pOut->Write<pragma::Action>(actions);
+	auto actions = packet->Read<Action>();
+	pOut->Write<Action>(actions);
 
 	auto bController = packet->Read<bool>();
 	pOut->Write<bool>(bController);
 	auto *actionInputC = pl->GetActionInputController();
 	if(bController == true) {
-		auto actionValues = pragma::math::get_power_of_2_values(pragma::math::to_integral(actions));
+		auto actionValues = math::get_power_of_2_values(math::to_integral(actions));
 		for(auto v : actionValues) {
 			auto magnitude = packet->Read<float>();
 			pOut->Write<float>(magnitude);
 			if(actionInputC)
-				actionInputC->SetActionInputAxisMagnitude(static_cast<pragma::Action>(v), magnitude);
+				actionInputC->SetActionInputAxisMagnitude(static_cast<Action>(v), magnitude);
 		}
 	}
 	if(actionInputC)
 		actionInputC->SetActionInputs(actions, bController);
 	//Con::csv<<"Action inputs "<<actions<<" for player "<<pl<<" ("<<pl->GetClientSession()->GetIP()<<")"<<Con::endl;
 
-	SendPacket(pragma::networking::net_messages::client::PLAYERINPUT, pOut, pragma::networking::Protocol::FastUnreliable, {client, pragma::networking::ClientRecipientFilter::FilterType::Exclude});
+	SendPacket(networking::net_messages::client::PLAYERINPUT, pOut, networking::Protocol::FastUnreliable, {client, networking::ClientRecipientFilter::FilterType::Exclude});
 
 	NetPacket plPacket;
 	plPacket->Write<uint8_t>(userInputId);
-	SendPacket(pragma::networking::net_messages::client::PLAYERINPUT, plPacket, pragma::networking::Protocol::FastUnreliable, client);
+	SendPacket(networking::net_messages::client::PLAYERINPUT, plPacket, networking::Protocol::FastUnreliable, client);
 }

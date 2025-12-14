@@ -20,14 +20,14 @@ std::string pragma::networking::LocalServerClient::GetIdentifier() const { retur
 std::optional<std::string> pragma::networking::LocalServerClient::GetIP() const { return {}; }
 std::optional<pragma::networking::Port> pragma::networking::LocalServerClient::GetPort() const { return {}; }
 bool pragma::networking::LocalServerClient::IsListenServerHost() const { return true; }
-bool pragma::networking::LocalServerClient::SendPacket(pragma::networking::Protocol protocol, NetPacket &packet, pragma::networking::Error &outErr)
+bool pragma::networking::LocalServerClient::SendPacket(Protocol protocol, NetPacket &packet, Error &outErr)
 {
-	packet.SetTimeActivated(pragma::util::clock::to_int(pragma::util::clock::get_duration_since_start()));
+	packet.SetTimeActivated(util::clock::to_int(util::clock::get_duration_since_start()));
 	packet->SetOffset(0);
-	pragma::Engine::Get()->HandleLocalHostPlayerClientPacket(packet);
+	Engine::Get()->HandleLocalHostPlayerClientPacket(packet);
 	return true;
 }
-bool pragma::networking::LocalServerClient::Drop(DropReason reason, pragma::networking::Error &outErr)
+bool pragma::networking::LocalServerClient::Drop(DropReason reason, Error &outErr)
 {
 	// Local player can't actually be dropped from server; Just pretend that we did
 	return true;

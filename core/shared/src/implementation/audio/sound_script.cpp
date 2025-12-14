@@ -9,7 +9,7 @@ import :audio.sound_script;
 #undef CreateEvent
 
 #pragma warning(disable : 4056)
-pragma::audio::ALSoundScript::ALSoundScript(pragma::NetworkState *nw, unsigned int idx, SoundScript *script, pragma::NetworkState *state, bool bStream) : ALSound(nw), m_script(script), m_networkState(state), m_bStream(bStream) { m_index = idx; }
+pragma::audio::ALSoundScript::ALSoundScript(NetworkState *nw, unsigned int idx, SoundScript *script, NetworkState *state, bool bStream) : ALSound(nw), m_script(script), m_networkState(state), m_bStream(bStream) { m_index = idx; }
 #pragma warning(default : 4056)
 
 pragma::audio::ALSoundScript::~ALSoundScript()
@@ -31,7 +31,7 @@ void pragma::audio::ALSoundScript::SetTargetPosition(unsigned int id, Vector3 po
 		SSESound *snd = m_sounds[i];
 		SSEPlaySound *ev = static_cast<SSEPlaySound *>(snd->event);
 		if(ev->position == CInt32(id)) {
-			std::shared_ptr<pragma::audio::ALSound> sound = snd->sound;
+			std::shared_ptr<ALSound> sound = snd->sound;
 			sound->SetPosition(pos);
 		}
 	}
@@ -63,13 +63,13 @@ void pragma::audio::ALSoundScript::Initialize()
 	//ALSound::Initialize();
 }
 
-std::shared_ptr<pragma::audio::ALSound> pragma::audio::ALSoundScript::CreateSound(const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags)
+std::shared_ptr<pragma::audio::ALSound> pragma::audio::ALSoundScript::CreateSound(const std::string &name, ALChannel channel, ALCreateFlags createFlags)
 {
-	auto flags = pragma::audio::ALCreateFlags::None;
+	auto flags = ALCreateFlags::None;
 	if(channel == ALChannel::Mono)
-		flags |= pragma::audio::ALCreateFlags::Mono;
+		flags |= ALCreateFlags::Mono;
 	if(m_bStream == true)
-		flags |= pragma::audio::ALCreateFlags::Stream;
+		flags |= ALCreateFlags::Stream;
 	flags |= createFlags;
 	return m_networkState->CreateSound(name, GetType(), flags);
 }
@@ -78,7 +78,7 @@ void pragma::audio::ALSoundScript::InitializeEvent(SoundScriptEvent *ev)
 {
 	SSEPlaySound *ps = dynamic_cast<SSEPlaySound *>(ev);
 	if(ps != nullptr) {
-		SSESound *snd = ps->CreateSound(m_tPassed, [this](const std::string &name, ALChannel channel, pragma::audio::ALCreateFlags createFlags) { return CreateSound(name, channel, createFlags); });
+		SSESound *snd = ps->CreateSound(m_tPassed, [this](const std::string &name, ALChannel channel, ALCreateFlags createFlags) { return CreateSound(name, channel, createFlags); });
 		if(snd != nullptr) {
 			ALSound *als = snd->sound.get();
 			auto bSetPos = false;

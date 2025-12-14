@@ -10,7 +10,7 @@ import :physics.water_surface_simulator;
 
 // See http://www.randygaul.net/wp-content/uploads/2014/02/RigidBodies_WaterSurface.pdf for surface simulation algorithms
 
-pragma::physics::PhysWaterSurfaceSimulator::SplashInfo::SplashInfo(const Vector3 &_origin, float _radius, float _force, uint32_t _width, uint32_t _length) : origin(_origin.x, _origin.y, _origin.z), radius(_radius), radiusSqr(pragma::math::pow2(_radius)), force(_force), width(_width), length(_length) {}
+pragma::physics::PhysWaterSurfaceSimulator::SplashInfo::SplashInfo(const Vector3 &_origin, float _radius, float _force, uint32_t _width, uint32_t _length) : origin(_origin.x, _origin.y, _origin.z), radius(_radius), radiusSqr(math::pow2(_radius)), force(_force), width(_width), length(_length) {}
 
 float pragma::physics::PhysWaterSurfaceSimulator::Particle::GetHeight() const { return m_height; }
 void pragma::physics::PhysWaterSurfaceSimulator::Particle::SetHeight(float height) { m_height = height; }
@@ -40,7 +40,7 @@ pragma::physics::PhysWaterSurfaceSimulator::PhysWaterSurfaceSimulator(Vector2 aa
 
 	for(auto &v : m_bounds) {
 		for(uint8_t i = 0; i < 2; ++i) {
-			auto r = fmodf(pragma::math::abs(v[i]), spacing);
+			auto r = fmodf(math::abs(v[i]), spacing);
 			if(r > 0.f)
 				v[i] -= (spacing - r);
 		}
@@ -159,7 +159,7 @@ void pragma::physics::PhysWaterSurfaceSimulator::SimulateWaves(double dt)
 			auto pos = CalcParticlePosition(surfInfo, m_threadParticleHeights, i);
 			auto l = uvec::length_sqr(pos - info.origin);
 			if(l < r2) {
-				l = pragma::math::sqrt(l);
+				l = math::sqrt(l);
 				auto factor = (info.radius - l) / info.radius;
 				auto &pt = particleField.at(i);
 				pt.SetOldHeight(pt.GetHeight());
@@ -182,7 +182,7 @@ void pragma::physics::PhysWaterSurfaceSimulator::SimulateWaves(double dt)
 	std::copy(m_threadParticleHeights.begin(), m_threadParticleHeights.end(), m_particleHeights.begin());
 	m_heightMutex.unlock();
 }
-uint8_t pragma::physics::PhysWaterSurfaceSimulator::GetEdgeIterationCount() const { return pragma::Engine::Get()->GetServerNetworkState()->GetConVarInt("sv_water_surface_simulation_edge_iteration_count"); }
+uint8_t pragma::physics::PhysWaterSurfaceSimulator::GetEdgeIterationCount() const { return Engine::Get()->GetServerNetworkState()->GetConVarInt("sv_water_surface_simulation_edge_iteration_count"); }
 Vector3 pragma::physics::PhysWaterSurfaceSimulator::CalcParticlePosition(const SurfaceInfo &surfInfo, const std::vector<float> &heights, std::size_t ptIdx) const
 {
 	auto c = GetParticleCoordinates(surfInfo, ptIdx);
@@ -204,8 +204,8 @@ bool pragma::physics::PhysWaterSurfaceSimulator::CalcPointSurfaceIntersection(co
 	auto length = GetLength();
 
 	// Calculate local grid coordinates
-	auto x = pragma::math::floor((offset.z / bounds.z) * static_cast<float>(width - 1));
-	auto y = pragma::math::floor((offset.x / bounds.x) * static_cast<float>(length - 1));
+	auto x = math::floor((offset.z / bounds.z) * static_cast<float>(width - 1));
+	auto y = math::floor((offset.x / bounds.x) * static_cast<float>(length - 1));
 	if(x < 0 || x >= width || y < 0 || y >= length)
 		return false;
 	// Retrieve triangle indices for grid position (Always two triangles)
@@ -220,7 +220,7 @@ bool pragma::physics::PhysWaterSurfaceSimulator::CalcPointSurfaceIntersection(co
 	std::array<Vector3, 4> particlePositions = {CalcParticlePosition(ptIdx0), CalcParticlePosition(ptIdx1), CalcParticlePosition(ptIdx2), CalcParticlePosition(ptIdx3)};
 	const auto n = Vector3(0, 1, 0); // TODO
 	double t, u, v;
-	if(pragma::math::intersection::line_triangle(origin, n, particlePositions.at(0), particlePositions.at(1), particlePositions.at(2), t, u, v) == true || pragma::math::intersection::line_triangle(origin, n, particlePositions.at(3), particlePositions.at(2), particlePositions.at(1), t, u, v) == true) {
+	if(math::intersection::line_triangle(origin, n, particlePositions.at(0), particlePositions.at(1), particlePositions.at(2), t, u, v) == true || math::intersection::line_triangle(origin, n, particlePositions.at(3), particlePositions.at(2), particlePositions.at(1), t, u, v) == true) {
 		intersection = origin + n * static_cast<float>(t);
 		return true;
 	}

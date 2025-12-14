@@ -14,7 +14,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SSoundDspFlangerComponent final : public SBaseSoundDspComponent, public BaseEnvSoundDspFlanger {
 		  public:
-			SSoundDspFlangerComponent(pragma::ecs::BaseEntity &ent) : SBaseSoundDspComponent(ent) {}
+			SSoundDspFlangerComponent(ecs::BaseEntity &ent) : SBaseSoundDspComponent(ent) {}
 			virtual bool OnSetKeyValue(const std::string &key, const std::string &val) override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual void InitializeLuaObject(lua::State *l) override;

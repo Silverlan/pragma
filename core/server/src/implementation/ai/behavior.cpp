@@ -39,7 +39,7 @@ void ai::BehaviorNode::SetSelectorType(SelectorType selectorType)
 ai::SelectorType ai::BehaviorNode::GetSelectorType() const
 {
 	if(m_selector == nullptr)
-		ai::SelectorType::Sequential;
+		SelectorType::Sequential;
 	return m_selector->GetType();
 }
 bool ai::BehaviorNode::IsActive() const { return m_bActive; }
@@ -60,10 +60,10 @@ void ai::BehaviorNode::OnTaskComplete(const Schedule *sched, uint32_t taskId, Re
 void ai::BehaviorNode::AddNode(const std::shared_ptr<BehaviorNode> &node) { m_childNodes.push_back(node); }
 ai::BehaviorNode::BehaviorNode(const BehaviorNode &other) : ParameterBase(other)
 {
-	m_selector = std::shared_ptr<ai::TaskSelector>(other.m_selector->Copy());
+	m_selector = std::shared_ptr<TaskSelector>(other.m_selector->Copy());
 	m_childNodes.reserve(other.m_childNodes.size());
 	for(auto &child : other.m_childNodes)
-		m_childNodes.push_back(std::shared_ptr<ai::BehaviorNode>(child->Copy()));
+		m_childNodes.push_back(std::shared_ptr<BehaviorNode>(child->Copy()));
 	m_paramIds = other.m_paramIds;
 	m_bActive = false;
 	m_type = other.m_type;
@@ -81,19 +81,19 @@ void ai::BehaviorNode::SetScheduleParameter(uint8_t taskParamId, uint8_t schedul
 		m_paramIds.resize(taskParamId + 1, std::numeric_limits<uint8_t>::max());
 	m_paramIds[taskParamId] = scheduleParamId;
 }
-ai::BehaviorNode::Result ai::BehaviorNode::StartTask(uint32_t taskId, const Schedule *sched, pragma::BaseAIComponent &ent)
+ai::BehaviorNode::Result ai::BehaviorNode::StartTask(uint32_t taskId, const Schedule *sched, BaseAIComponent &ent)
 {
 	if(taskId >= m_childNodes.size())
-		return ai::BehaviorNode::Result::Succeeded;
+		return Result::Succeeded;
 	auto &taskChild = m_childNodes[taskId];
 	auto r = taskChild->Start(sched, ent);
 	taskChild->m_debugInfo.lastResult = r;
 	return r;
 }
-ai::BehaviorNode::Result ai::BehaviorNode::ThinkTask(uint32_t taskId, const Schedule *sched, pragma::BaseAIComponent &ent)
+ai::BehaviorNode::Result ai::BehaviorNode::ThinkTask(uint32_t taskId, const Schedule *sched, BaseAIComponent &ent)
 {
 	if(taskId >= m_childNodes.size())
-		return ai::BehaviorNode::Result::Succeeded;
+		return Result::Succeeded;
 	auto &taskChild = m_childNodes[taskId];
 	auto r = taskChild->Think(sched, ent);
 	taskChild->m_debugInfo.lastResult = r;
@@ -111,7 +111,7 @@ void ai::BehaviorNode::DebugPrint(const Schedule *sched, std::stringstream &ss, 
 		node->DebugPrint(sched, ss, t + "\t");
 }
 ai::BehaviorNode::Type ai::BehaviorNode::GetType() const { return m_type; }
-ai::BehaviorNode::Result ai::BehaviorNode::Start(const Schedule *sched, pragma::BaseAIComponent &ent)
+ai::BehaviorNode::Result ai::BehaviorNode::Start(const Schedule *sched, BaseAIComponent &ent)
 {
 	m_selector->Reset(static_cast<uint32_t>(m_childNodes.size()));
 	m_debugInfo.lastStartTime = SGame::Get()->CurTime();
@@ -123,7 +123,7 @@ ai::BehaviorNode::Result ai::BehaviorNode::Start(const Schedule *sched, pragma::
 
 	auto r = Result::Succeeded;
 	auto currentTask = m_selector->GetCurrentTask();
-	auto chk = (GetType() == ai::BehaviorNode::Type::Selector) ? Result::Failed : Result::Succeeded;
+	auto chk = (GetType() == Type::Selector) ? Result::Failed : Result::Succeeded;
 	auto numChildren = m_childNodes.size();
 	while(currentTask < numChildren && (r = StartTask(currentTask, sched, ent)) == chk) {
 		OnTaskComplete(sched, currentTask, r);
@@ -138,11 +138,11 @@ ai::BehaviorNode::Result ai::BehaviorNode::Start(const Schedule *sched, pragma::
 	return r;
 	//return StartTask(m_selector->GetCurrentTask(),sched,ent);
 }
-ai::BehaviorNode::Result ai::BehaviorNode::Think(const Schedule *sched, pragma::BaseAIComponent &ent)
+ai::BehaviorNode::Result ai::BehaviorNode::Think(const Schedule *sched, BaseAIComponent &ent)
 {
 	auto r = Result::Succeeded;
 	auto currentTask = m_selector->GetCurrentTask();
-	auto chk = (GetType() == ai::BehaviorNode::Type::Selector) ? Result::Failed : Result::Succeeded;
+	auto chk = (GetType() == Type::Selector) ? Result::Failed : Result::Succeeded;
 
 	// fEndTask ends the current task and starts the next one
 	const auto fStartNextTask = [this, sched, &ent](bool &bTaskStarted, uint32_t &currentTask, Result r) {

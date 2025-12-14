@@ -27,7 +27,7 @@ std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRou
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::SampledBit;
 
 	auto fGetWhiteTex = [&context]() -> prosper::Texture * {
-		auto tex = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("white");
+		auto tex = static_cast<material::CMaterialManager &>(get_client_state()->GetMaterialManager()).GetTextureManager().LoadAsset("white");
 		if(tex == nullptr)
 			return nullptr;
 		return tex->GetVkTexture().get();
@@ -65,9 +65,9 @@ std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRou
 
 	auto dsg = CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE.setIndex);
 	auto &ds = *dsg->GetDescriptorSet();
-	ds.SetBindingTexture(*diffuseMap, pragma::math::to_integral(TextureBinding::DiffuseMap));
-	ds.SetBindingTexture(*specularGlossinessMap, pragma::math::to_integral(TextureBinding::SpecularGlossinessMap));
-	ds.SetBindingTexture(*aoMap, pragma::math::to_integral(TextureBinding::AmbientOcclusionMap));
+	ds.SetBindingTexture(*diffuseMap, math::to_integral(TextureBinding::DiffuseMap));
+	ds.SetBindingTexture(*specularGlossinessMap, math::to_integral(TextureBinding::SpecularGlossinessMap));
+	ds.SetBindingTexture(*aoMap, math::to_integral(TextureBinding::AmbientOcclusionMap));
 
 	auto setupCmd = context.GetSetupCommandBuffer();
 	auto pushConstants = pushConstantData;
@@ -117,7 +117,7 @@ void pragma::ShaderSpecularGlossinessToMetalnessRoughness::InitializeShaderResou
 
 void pragma::ShaderSpecularGlossinessToMetalnessRoughness::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<pragma::ShaderSpecularGlossinessToMetalnessRoughness>(
+	CreateCachedRenderPass<ShaderSpecularGlossinessToMetalnessRoughness>(
 	  std::vector<prosper::util::RenderPassCreateInfo::AttachmentInfo> {
 	    {prosper::Format::R8G8B8A8_UNorm} // Albedo / RMA
 	  },

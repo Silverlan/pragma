@@ -16,13 +16,13 @@ import :rendering.shaders;
 
 bool pragma::rendering::SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags samples, const std::shared_ptr<prosper::Texture> &texNorm, const std::shared_ptr<prosper::Texture> &texDepth)
 {
-	if(pragma::ShaderSSAO::DESCRIPTOR_SET_PREPASS.IsValid() == false || pragma::shaderSSAOBlur::DESCRIPTOR_SET_TEXTURE.IsValid() == false)
+	if(ShaderSSAO::DESCRIPTOR_SET_PREPASS.IsValid() == false || shaderSSAOBlur::DESCRIPTOR_SET_TEXTURE.IsValid() == false)
 		return false;
-	shader = pragma::get_cengine()->GetShader("ssao");
-	shaderBlur = pragma::get_cengine()->GetShader("ssao_blur");
+	shader = get_cengine()->GetShader("ssao");
+	shaderBlur = get_cengine()->GetShader("ssao_blur");
 
 	prosper::util::ImageCreateInfo imgCreateInfo {};
-	imgCreateInfo.format = pragma::ShaderSSAO::RENDER_PASS_FORMAT;
+	imgCreateInfo.format = ShaderSSAO::RENDER_PASS_FORMAT;
 	imgCreateInfo.width = 512u;  // SSAO is very expensive depending on the resolution.
 	imgCreateInfo.height = 512u; // 512x512 is a good compromise between quality and performance.
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit;
@@ -32,7 +32,7 @@ bool pragma::rendering::SSAOInfo::Initialize(prosper::IPrContext &context, uint3
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	auto tex = context.CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
-	auto rp = prosper::ShaderGraphics::GetRenderPass<pragma::ShaderSSAO>(pragma::get_cengine()->GetRenderContext());
+	auto rp = prosper::ShaderGraphics::GetRenderPass<ShaderSSAO>(get_cengine()->GetRenderContext());
 	renderTarget = context.CreateRenderTarget({tex}, rp);
 	renderTarget->SetDebugName("ssao_rt");
 
@@ -41,12 +41,12 @@ bool pragma::rendering::SSAOInfo::Initialize(prosper::IPrContext &context, uint3
 	auto texBlur = context.CreateTexture({}, *imgBlur, imgViewCreateInfo, samplerCreateInfo);
 	renderTargetBlur = context.CreateRenderTarget({texBlur}, rp);
 	renderTargetBlur->SetDebugName("ssao_blur_rt");
-	descSetGroupPrepass = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderSSAO::DESCRIPTOR_SET_PREPASS);
+	descSetGroupPrepass = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderSSAO::DESCRIPTOR_SET_PREPASS);
 	auto &descSetPrepass = *descSetGroupPrepass->GetDescriptorSet();
-	descSetPrepass.SetBindingTexture(*texNorm, pragma::math::to_integral(pragma::ShaderSSAO::PrepassBinding::NormalBuffer));
-	descSetPrepass.SetBindingTexture(*texDepth, pragma::math::to_integral(pragma::ShaderSSAO::PrepassBinding::DepthBuffer));
+	descSetPrepass.SetBindingTexture(*texNorm, math::to_integral(ShaderSSAO::PrepassBinding::NormalBuffer));
+	descSetPrepass.SetBindingTexture(*texDepth, math::to_integral(ShaderSSAO::PrepassBinding::DepthBuffer));
 
-	descSetGroupOcclusion = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(pragma::shaderSSAOBlur::DESCRIPTOR_SET_TEXTURE);
+	descSetGroupOcclusion = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(shaderSSAOBlur::DESCRIPTOR_SET_TEXTURE);
 	descSetGroupOcclusion->GetDescriptorSet()->SetBindingTexture(renderTarget->GetTexture(), 0u);
 	return true;
 }

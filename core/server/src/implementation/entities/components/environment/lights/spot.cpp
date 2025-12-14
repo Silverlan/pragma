@@ -24,7 +24,7 @@ void SLightSpotComponent::SetConeStartOffset(float offset)
 	BaseEnvLightSpotComponent::SetConeStartOffset(offset);
 	NetPacket p {};
 	p->Write<float>(offset);
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetConeStartOffset, p, pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetConeStartOffset, p, networking::Protocol::SlowReliable);
 }
 
 void SLightSpotComponent::SetOuterConeAngle(float ang)
@@ -34,9 +34,9 @@ void SLightSpotComponent::SetOuterConeAngle(float ang)
 	if(!ent.IsSpawned())
 		return;
 	NetPacket p;
-	pragma::networking::write_entity(p, &ent);
+	networking::write_entity(p, &ent);
 	p->Write<float>(ang);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENV_LIGHT_SPOT_OUTERCUTOFF_ANGLE, p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(networking::net_messages::client::ENV_LIGHT_SPOT_OUTERCUTOFF_ANGLE, p, networking::Protocol::SlowReliable);
 }
 
 void SLightSpotComponent::SetBlendFraction(float ang)
@@ -46,9 +46,9 @@ void SLightSpotComponent::SetBlendFraction(float ang)
 	if(!ent.IsSpawned())
 		return;
 	NetPacket p;
-	pragma::networking::write_entity(p, &ent);
+	networking::write_entity(p, &ent);
 	p->Write<float>(ang);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENV_LIGHT_SPOT_INNERCUTOFF_ANGLE, p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(networking::net_messages::client::ENV_LIGHT_SPOT_INNERCUTOFF_ANGLE, p, networking::Protocol::SlowReliable);
 }
 
 void SLightSpotComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

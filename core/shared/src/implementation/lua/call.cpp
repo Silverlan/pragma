@@ -6,4 +6,4 @@ module pragma.shared;
 
 import :scripting.lua.call;
 
-Lua::StatusCode Lua::CallFunction(lua::State *l, const std::function<Lua::StatusCode(lua::State *)> &pushArgs, int32_t numReturnValues) { return ::pragma::scripting::lua_core::protected_call(l, pushArgs, numReturnValues); }
+Lua::StatusCode Lua::CallFunction(lua::State *l, const std::function<StatusCode(lua::State *)> &pushArgs, int32_t numReturnValues) { return pragma::scripting::lua_core::protected_call(l, pushArgs, numReturnValues); }

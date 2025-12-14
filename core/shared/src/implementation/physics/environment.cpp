@@ -15,13 +15,13 @@ std::vector<std::string> pragma::physics::IEnvironment::GetAvailablePhysicsEngin
 	return dirs;
 }
 std::string pragma::physics::IEnvironment::GetPhysicsEngineModuleLocation(const std::string &physEngine) { return "physics_engines/" + physEngine + "/pr_" + physEngine; }
-pragma::physics::IEnvironment::IEnvironment(pragma::NetworkState &state) : m_nwState {state}
+pragma::physics::IEnvironment::IEnvironment(NetworkState &state) : m_nwState {state}
 {
 	Con::cout << "Initializing physics environment..." << Con::endl;
-	for(auto i = 0; i < pragma::math::to_integral(Event::Count); i++)
+	for(auto i = 0; i < math::to_integral(Event::Count); i++)
 		m_callbacks.insert(std::unordered_map<Event, std::vector<CallbackHandle>>::value_type(static_cast<Event>(i), std::vector<CallbackHandle>()));
 
-	m_buoyancySim = pragma::util::make_shared<physics::WaterBuoyancySimulator>();
+	m_buoyancySim = pragma::util::make_shared<WaterBuoyancySimulator>();
 	m_surfTypeManager.RegisterType("generic");
 }
 void pragma::physics::IEnvironment::OnRemove()
@@ -47,7 +47,7 @@ double pragma::physics::IEnvironment::GetTimeScale() const
 }
 pragma::physics::IMaterial &pragma::physics::IEnvironment::GetGenericMaterial() const { return *m_genericMaterial; }
 float pragma::physics::IEnvironment::GetWorldScale() const { return 1.f; }
-void pragma::physics::IEnvironment::SetVisualDebugger(std::unique_ptr<pragma::physics::IVisualDebugger> debugger)
+void pragma::physics::IEnvironment::SetVisualDebugger(std::unique_ptr<IVisualDebugger> debugger)
 {
 	m_visualDebugger = std::move(debugger);
 	OnVisualDebuggerChanged(m_visualDebugger.get());
@@ -55,7 +55,7 @@ void pragma::physics::IEnvironment::SetVisualDebugger(std::unique_ptr<pragma::ph
 pragma::physics::IVisualDebugger *pragma::physics::IEnvironment::GetVisualDebugger() const { return m_visualDebugger.get(); }
 void pragma::physics::IEnvironment::AddEventCallback(Event eventid, const CallbackHandle &hCb)
 {
-	if(pragma::math::to_integral(eventid) < 0 || pragma::math::to_integral(eventid) >= pragma::math::to_integral(Event::Count))
+	if(math::to_integral(eventid) < 0 || math::to_integral(eventid) >= math::to_integral(Event::Count))
 		return;
 	m_callbacks[eventid].push_back(hCb);
 }
@@ -160,7 +160,7 @@ void pragma::physics::IEnvironment::OnConstraintBroken(IConstraint &constraint)
 }
 void pragma::physics::IEnvironment::RemoveConstraint(IConstraint &constraint)
 {
-	auto it = std::find_if(m_constraints.begin(), m_constraints.end(), [&constraint](const pragma::util::TSharedHandle<IConstraint> &hConstraint) { return hConstraint.GetRawPtr() == &constraint; });
+	auto it = std::find_if(m_constraints.begin(), m_constraints.end(), [&constraint](const util::TSharedHandle<IConstraint> &hConstraint) { return hConstraint.GetRawPtr() == &constraint; });
 	if(it == m_constraints.end())
 		return;
 	auto pConstraint = *it; // Keep a handle to make sure the reference is still valid
@@ -172,7 +172,7 @@ void pragma::physics::IEnvironment::RemoveConstraint(IConstraint &constraint)
 }
 void pragma::physics::IEnvironment::RemoveCollisionObject(ICollisionObject &obj)
 {
-	auto it = std::find_if(m_collisionObjects.begin(), m_collisionObjects.end(), [&obj](const pragma::util::TSharedHandle<ICollisionObject> &hColObj) { return hColObj.GetRawPtr() == &obj; });
+	auto it = std::find_if(m_collisionObjects.begin(), m_collisionObjects.end(), [&obj](const util::TSharedHandle<ICollisionObject> &hColObj) { return hColObj.GetRawPtr() == &obj; });
 	if(it == m_collisionObjects.end())
 		return;
 	auto pCollisionObject = *it; // Keep a handle to make sure the reference is still valid
@@ -184,7 +184,7 @@ void pragma::physics::IEnvironment::RemoveCollisionObject(ICollisionObject &obj)
 }
 void pragma::physics::IEnvironment::RemoveController(IController &controller)
 {
-	auto it = std::find_if(m_controllers.begin(), m_controllers.end(), [&controller](const pragma::util::TSharedHandle<IController> &hConstraint) { return hConstraint.GetRawPtr() == &controller; });
+	auto it = std::find_if(m_controllers.begin(), m_controllers.end(), [&controller](const util::TSharedHandle<IController> &hConstraint) { return hConstraint.GetRawPtr() == &controller; });
 	if(it == m_controllers.end())
 		return;
 	auto pController = *it; // Keep a handle to make sure the reference is still valid
@@ -196,7 +196,7 @@ void pragma::physics::IEnvironment::RemoveController(IController &controller)
 }
 void pragma::physics::IEnvironment::RemoveVehicle(IVehicle &vehicle)
 {
-	auto it = std::find_if(m_vehicles.begin(), m_vehicles.end(), [&vehicle](const pragma::util::TSharedHandle<IVehicle> &hVehicle) { return hVehicle.GetRawPtr() == &vehicle; });
+	auto it = std::find_if(m_vehicles.begin(), m_vehicles.end(), [&vehicle](const util::TSharedHandle<IVehicle> &hVehicle) { return hVehicle.GetRawPtr() == &vehicle; });
 	if(it == m_vehicles.end())
 		return;
 	auto pVehicle = *it; // Keep a handle to make sure the reference is still valid
@@ -232,12 +232,12 @@ pragma::physics::SurfaceTypeManager &pragma::physics::IEnvironment::GetSurfaceTy
 const pragma::physics::TireTypeManager &pragma::physics::IEnvironment::GetTireTypeManager() const { return const_cast<IEnvironment *>(this)->GetTireTypeManager(); }
 pragma::physics::TireTypeManager &pragma::physics::IEnvironment::GetTireTypeManager() { return m_tireTypeManager; }
 
-void pragma::physics::IEnvironment::SetSurfaceTypesDirty() { pragma::math::set_flag(m_stateFlags, StateFlags::SurfacesDirty, true); }
+void pragma::physics::IEnvironment::SetSurfaceTypesDirty() { math::set_flag(m_stateFlags, StateFlags::SurfacesDirty, true); }
 
 pragma::physics::IEnvironment::RemainingDeltaTime pragma::physics::IEnvironment::StepSimulation(float timeStep, int maxSubSteps, float fixedTimeStep)
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::SurfacesDirty)) {
-		pragma::math::set_flag(m_stateFlags, StateFlags::SurfacesDirty, false);
+	if(math::is_flag_set(m_stateFlags, StateFlags::SurfacesDirty)) {
+		math::set_flag(m_stateFlags, StateFlags::SurfacesDirty, false);
 		UpdateSurfaceTypes();
 	}
 	return DoStepSimulation(timeStep, maxSubSteps, fixedTimeStep);

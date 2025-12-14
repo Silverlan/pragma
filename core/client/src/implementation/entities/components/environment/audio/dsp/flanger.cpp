@@ -26,7 +26,7 @@ void CSoundDspFlangerComponent::OnEntitySpawn()
 	auto *soundSys = get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	pragma::audio::EfxFlangerProperties props {};
+	audio::EfxFlangerProperties props {};
 	props.iWaveform = m_kvWaveform;
 	props.iPhase = m_kvPhase;
 	props.flRate = m_kvRate;

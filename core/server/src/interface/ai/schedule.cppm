@@ -24,14 +24,14 @@ export namespace pragma {
 			static std::shared_ptr<Schedule> Create();
 			std::shared_ptr<Schedule> Copy() const;
 			BehaviorNode &GetRootNode() const;
-			ai::BehaviorNode::Result Start(pragma::BaseAIComponent &ent);
+			BehaviorNode::Result Start(BaseAIComponent &ent);
 			void DebugPrint(std::stringstream &ss) const;
 			void SetInterruptFlags(uint32_t f);
 			void AddInterruptFlags(uint32_t f);
 			uint32_t GetInterruptFlags() const;
 
 			void Cancel() const;
-			BehaviorNode::Result Think(pragma::BaseAIComponent &ent) const;
+			BehaviorNode::Result Think(BaseAIComponent &ent) const;
 		};
 	};
 };

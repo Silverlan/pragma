@@ -83,7 +83,7 @@ void pragma::NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 			return 1;
 		}
 		std::string v = Lua::CheckString(l, 1);
-		auto b = pragma::util::to_boolean(v);
+		auto b = util::to_boolean(v);
 		Lua::PushBool(l, b);
 		return 1;
 	}));
@@ -93,81 +93,81 @@ void pragma::NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 			return 1;
 		}
 		if(Lua::IsNumber(l, 1)) {
-			Lua::PushInt(l, pragma::math::round(Lua::CheckNumber(l, 1)));
+			Lua::PushInt(l, math::round(Lua::CheckNumber(l, 1)));
 			return 1;
 		}
 		std::string v = Lua::CheckString(l, 1);
-		auto i = pragma::util::to_int(v);
+		auto i = util::to_int(v);
 		Lua::PushInt(l, i);
 		return 1;
 	}));
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "console",
 	  {
-	    {"COLOR_FLAG_NONE", pragma::math::to_integral(pragma::console::ConsoleColorFlags::None)},
-	    {"COLOR_FLAG_RED_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Red)},
-	    {"COLOR_FLAG_GREEN_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Green)},
-	    {"COLOR_FLAG_BLUE_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Blue)},
-	    {"COLOR_FLAG_INTENSITY_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Intensity)},
-	    {"COLOR_FLAG_BACKGROUND_RED_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundRed)},
-	    {"COLOR_FLAG_BACKGROUND_GREEN_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundGreen)},
-	    {"COLOR_FLAG_BACKGROUND_BLUE_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundBlue)},
-	    {"COLOR_FLAG_BACKGROUND_INTENSITY_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundIntensity)},
-	    {"COLOR_FLAG_YELLOW", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Yellow)},
-	    {"COLOR_FLAG_MAGENTA", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Magenta)},
-	    {"COLOR_FLAG_CYAN", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Cyan)},
-	    {"COLOR_FLAG_WHITE", pragma::math::to_integral(pragma::console::ConsoleColorFlags::White)},
-	    {"COLOR_FLAG_BLACK", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Black)},
-	    {"COLOR_FLAG_BACKGROUND_YELLOW", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundYellow)},
-	    {"COLOR_FLAG_BACKGROUND_MAGENTA", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundMagenta)},
-	    {"COLOR_FLAG_BACKGROUND_CYAN", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundCyan)},
-	    {"COLOR_FLAG_BACKGROUND_WHITE", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundWhite)},
-	    {"COLOR_FLAG_BACKGROUND_BLACK", pragma::math::to_integral(pragma::console::ConsoleColorFlags::BackgroundBlack)},
-	    {"COLOR_FLAG_RESET_BIT", pragma::math::to_integral(pragma::console::ConsoleColorFlags::Reset)},
+	    {"COLOR_FLAG_NONE", math::to_integral(console::ConsoleColorFlags::None)},
+	    {"COLOR_FLAG_RED_BIT", math::to_integral(console::ConsoleColorFlags::Red)},
+	    {"COLOR_FLAG_GREEN_BIT", math::to_integral(console::ConsoleColorFlags::Green)},
+	    {"COLOR_FLAG_BLUE_BIT", math::to_integral(console::ConsoleColorFlags::Blue)},
+	    {"COLOR_FLAG_INTENSITY_BIT", math::to_integral(console::ConsoleColorFlags::Intensity)},
+	    {"COLOR_FLAG_BACKGROUND_RED_BIT", math::to_integral(console::ConsoleColorFlags::BackgroundRed)},
+	    {"COLOR_FLAG_BACKGROUND_GREEN_BIT", math::to_integral(console::ConsoleColorFlags::BackgroundGreen)},
+	    {"COLOR_FLAG_BACKGROUND_BLUE_BIT", math::to_integral(console::ConsoleColorFlags::BackgroundBlue)},
+	    {"COLOR_FLAG_BACKGROUND_INTENSITY_BIT", math::to_integral(console::ConsoleColorFlags::BackgroundIntensity)},
+	    {"COLOR_FLAG_YELLOW", math::to_integral(console::ConsoleColorFlags::Yellow)},
+	    {"COLOR_FLAG_MAGENTA", math::to_integral(console::ConsoleColorFlags::Magenta)},
+	    {"COLOR_FLAG_CYAN", math::to_integral(console::ConsoleColorFlags::Cyan)},
+	    {"COLOR_FLAG_WHITE", math::to_integral(console::ConsoleColorFlags::White)},
+	    {"COLOR_FLAG_BLACK", math::to_integral(console::ConsoleColorFlags::Black)},
+	    {"COLOR_FLAG_BACKGROUND_YELLOW", math::to_integral(console::ConsoleColorFlags::BackgroundYellow)},
+	    {"COLOR_FLAG_BACKGROUND_MAGENTA", math::to_integral(console::ConsoleColorFlags::BackgroundMagenta)},
+	    {"COLOR_FLAG_BACKGROUND_CYAN", math::to_integral(console::ConsoleColorFlags::BackgroundCyan)},
+	    {"COLOR_FLAG_BACKGROUND_WHITE", math::to_integral(console::ConsoleColorFlags::BackgroundWhite)},
+	    {"COLOR_FLAG_BACKGROUND_BLACK", math::to_integral(console::ConsoleColorFlags::BackgroundBlack)},
+	    {"COLOR_FLAG_RESET_BIT", math::to_integral(console::ConsoleColorFlags::Reset)},
 
-	    {"MESSAGE_FLAG_NONE", pragma::math::to_integral(pragma::console::MessageFlags::None)},
-	    {"MESSAGE_FLAG_BIT_GENERIC", pragma::math::to_integral(pragma::console::MessageFlags::Generic)},
-	    {"MESSAGE_FLAG_BIT_WARNING", pragma::math::to_integral(pragma::console::MessageFlags::Warning)},
-	    {"MESSAGE_FLAG_BIT_ERROR", pragma::math::to_integral(pragma::console::MessageFlags::Error)},
-	    {"MESSAGE_FLAG_BIT_CRITICAL", pragma::math::to_integral(pragma::console::MessageFlags::Critical)},
-	    {"MESSAGE_FLAG_BIT_SERVER_SIDE", pragma::math::to_integral(pragma::console::MessageFlags::ServerSide)},
-	    {"MESSAGE_FLAG_BIT_CLIENT_SIDE", pragma::math::to_integral(pragma::console::MessageFlags::ClientSide)},
+	    {"MESSAGE_FLAG_NONE", math::to_integral(console::MessageFlags::None)},
+	    {"MESSAGE_FLAG_BIT_GENERIC", math::to_integral(console::MessageFlags::Generic)},
+	    {"MESSAGE_FLAG_BIT_WARNING", math::to_integral(console::MessageFlags::Warning)},
+	    {"MESSAGE_FLAG_BIT_ERROR", math::to_integral(console::MessageFlags::Error)},
+	    {"MESSAGE_FLAG_BIT_CRITICAL", math::to_integral(console::MessageFlags::Critical)},
+	    {"MESSAGE_FLAG_BIT_SERVER_SIDE", math::to_integral(console::MessageFlags::ServerSide)},
+	    {"MESSAGE_FLAG_BIT_CLIENT_SIDE", math::to_integral(console::MessageFlags::ClientSide)},
 	  });
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "console",
 	  {
-	    {"FLAG_NONE", pragma::math::to_integral(pragma::console::ConVarFlags::None)},
-	    {"FLAG_BIT_CHEAT", pragma::math::to_integral(pragma::console::ConVarFlags::Cheat)},
-	    {"FLAG_BIT_SINGLEPLAYER", pragma::math::to_integral(pragma::console::ConVarFlags::Singleplayer)},
-	    {"FLAG_BIT_USERINFO", pragma::math::to_integral(pragma::console::ConVarFlags::Userinfo)},
-	    {"FLAG_BIT_REPLICATED", pragma::math::to_integral(pragma::console::ConVarFlags::Replicated)},
-	    {"FLAG_BIT_ARCHIVE", pragma::math::to_integral(pragma::console::ConVarFlags::Archive)},
-	    {"FLAG_BIT_NOTIFY", pragma::math::to_integral(pragma::console::ConVarFlags::Notify)},
-	    {"FLAG_BIT_JOYSTICK_AXIS_CONTINUOUS", pragma::math::to_integral(pragma::console::ConVarFlags::JoystickAxisContinuous)},
-	    {"FLAG_BIT_JOYSTICK_AXIS_SINGLE", pragma::math::to_integral(pragma::console::ConVarFlags::JoystickAxisSingle)},
-	    {"FLAG_BIT_HIDDEN", pragma::math::to_integral(pragma::console::ConVarFlags::Hidden)},
-	    {"FLAG_BIT_PASSWORD", pragma::math::to_integral(pragma::console::ConVarFlags::Password)},
+	    {"FLAG_NONE", math::to_integral(console::ConVarFlags::None)},
+	    {"FLAG_BIT_CHEAT", math::to_integral(console::ConVarFlags::Cheat)},
+	    {"FLAG_BIT_SINGLEPLAYER", math::to_integral(console::ConVarFlags::Singleplayer)},
+	    {"FLAG_BIT_USERINFO", math::to_integral(console::ConVarFlags::Userinfo)},
+	    {"FLAG_BIT_REPLICATED", math::to_integral(console::ConVarFlags::Replicated)},
+	    {"FLAG_BIT_ARCHIVE", math::to_integral(console::ConVarFlags::Archive)},
+	    {"FLAG_BIT_NOTIFY", math::to_integral(console::ConVarFlags::Notify)},
+	    {"FLAG_BIT_JOYSTICK_AXIS_CONTINUOUS", math::to_integral(console::ConVarFlags::JoystickAxisContinuous)},
+	    {"FLAG_BIT_JOYSTICK_AXIS_SINGLE", math::to_integral(console::ConVarFlags::JoystickAxisSingle)},
+	    {"FLAG_BIT_HIDDEN", math::to_integral(console::ConVarFlags::Hidden)},
+	    {"FLAG_BIT_PASSWORD", math::to_integral(console::ConVarFlags::Password)},
 	  });
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "sound",
 	  {
-	    {"TYPE_GENERIC", pragma::math::to_integral(pragma::audio::ALSoundType::Generic)},
-	    {"TYPE_EFFECT", pragma::math::to_integral(pragma::audio::ALSoundType::Effect)},
-	    {"TYPE_MUSIC", pragma::math::to_integral(pragma::audio::ALSoundType::Music)},
-	    {"TYPE_VOICE", pragma::math::to_integral(pragma::audio::ALSoundType::Voice)},
-	    {"TYPE_WEAPON", pragma::math::to_integral(pragma::audio::ALSoundType::Weapon)},
-	    {"TYPE_NPC", pragma::math::to_integral(pragma::audio::ALSoundType::NPC)},
-	    {"TYPE_PLAYER", pragma::math::to_integral(pragma::audio::ALSoundType::Player)},
-	    {"TYPE_VEHICLE", pragma::math::to_integral(pragma::audio::ALSoundType::Vehicle)},
-	    {"TYPE_PHYSICS", pragma::math::to_integral(pragma::audio::ALSoundType::Physics)},
-	    {"TYPE_ENVIRONMENT", pragma::math::to_integral(pragma::audio::ALSoundType::Environment)},
-	    {"TYPE_GUI", pragma::math::to_integral(pragma::audio::ALSoundType::GUI)},
+	    {"TYPE_GENERIC", math::to_integral(audio::ALSoundType::Generic)},
+	    {"TYPE_EFFECT", math::to_integral(audio::ALSoundType::Effect)},
+	    {"TYPE_MUSIC", math::to_integral(audio::ALSoundType::Music)},
+	    {"TYPE_VOICE", math::to_integral(audio::ALSoundType::Voice)},
+	    {"TYPE_WEAPON", math::to_integral(audio::ALSoundType::Weapon)},
+	    {"TYPE_NPC", math::to_integral(audio::ALSoundType::NPC)},
+	    {"TYPE_PLAYER", math::to_integral(audio::ALSoundType::Player)},
+	    {"TYPE_VEHICLE", math::to_integral(audio::ALSoundType::Vehicle)},
+	    {"TYPE_PHYSICS", math::to_integral(audio::ALSoundType::Physics)},
+	    {"TYPE_ENVIRONMENT", math::to_integral(audio::ALSoundType::Environment)},
+	    {"TYPE_GUI", math::to_integral(audio::ALSoundType::GUI)},
 
-	    {"STATE_NO_ERROR", pragma::math::to_integral(pragma::audio::ALState::NoError)},
-	    {"STATE_INITIAL", pragma::math::to_integral(pragma::audio::ALState::Initial)},
-	    {"STATE_PLAYING", pragma::math::to_integral(pragma::audio::ALState::Playing)},
-	    {"STATE_PAUSED", pragma::math::to_integral(pragma::audio::ALState::Paused)},
-	    {"STATE_STOPPED", pragma::math::to_integral(pragma::audio::ALState::Stopped)},
+	    {"STATE_NO_ERROR", math::to_integral(audio::ALState::NoError)},
+	    {"STATE_INITIAL", math::to_integral(audio::ALState::Initial)},
+	    {"STATE_PLAYING", math::to_integral(audio::ALState::Playing)},
+	    {"STATE_PAUSED", math::to_integral(audio::ALState::Paused)},
+	    {"STATE_STOPPED", math::to_integral(audio::ALState::Stopped)},
 	  });
 }
 
@@ -234,34 +234,34 @@ static pragma::ecs::BaseEntity *find_entity(lua::State *l, pragma::Game &game, l
 
 void pragma::Game::RegisterLuaGlobals()
 {
-	pragma::NetworkState::RegisterSharedLuaGlobals(GetLuaInterface());
+	NetworkState::RegisterSharedLuaGlobals(GetLuaInterface());
 
 	lua::register_function(GetLuaState(), "include_component", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
 		std::string componentName = Lua::CheckString(l, 1);
-		auto *nw = pragma::Engine::Get()->GetNetworkState(l);
+		auto *nw = Engine::Get()->GetNetworkState(l);
 		auto *game = nw->GetGameState();
 		Lua::PushBool(l, game->LoadLuaComponentByName(componentName));
 		return 1;
 	}));
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",
 	  {
-	    {"DAMAGETYPE_GENERIC", pragma::math::to_integral(DamageType::Generic)},
-	    {"DAMAGETYPE_BULLET", pragma::math::to_integral(DamageType::Bullet)},
-	    {"DAMAGETYPE_EXPLOSION", pragma::math::to_integral(DamageType::Explosion)},
-	    {"DAMAGETYPE_FIRE", pragma::math::to_integral(DamageType::Fire)},
-	    {"DAMAGETYPE_PLASMA", pragma::math::to_integral(DamageType::Plasma)},
-	    {"DAMAGETYPE_BASH", pragma::math::to_integral(DamageType::Bash)},
-	    {"DAMAGETYPE_CRUSH", pragma::math::to_integral(DamageType::Crush)},
-	    {"DAMAGETYPE_SLASH", pragma::math::to_integral(DamageType::Slash)},
-	    {"DAMAGETYPE_ELECTRICITY", pragma::math::to_integral(DamageType::Electricity)},
-	    {"DAMAGETYPE_ENERGY", pragma::math::to_integral(DamageType::Energy)},
+	    {"DAMAGETYPE_GENERIC", math::to_integral(Generic)},
+	    {"DAMAGETYPE_BULLET", math::to_integral(Bullet)},
+	    {"DAMAGETYPE_EXPLOSION", math::to_integral(Explosion)},
+	    {"DAMAGETYPE_FIRE", math::to_integral(Fire)},
+	    {"DAMAGETYPE_PLASMA", math::to_integral(Plasma)},
+	    {"DAMAGETYPE_BASH", math::to_integral(Bash)},
+	    {"DAMAGETYPE_CRUSH", math::to_integral(Crush)},
+	    {"DAMAGETYPE_SLASH", math::to_integral(Slash)},
+	    {"DAMAGETYPE_ELECTRICITY", math::to_integral(Electricity)},
+	    {"DAMAGETYPE_ENERGY", math::to_integral(Energy)},
 
-	    {"STATE_FLAG_NONE", pragma::math::to_integral(pragma::Game::GameFlags::None)},
-	    {"STATE_FLAG_BIT_MAP_INITIALIZED", pragma::math::to_integral(pragma::Game::GameFlags::MapInitialized)},
-	    {"STATE_FLAG_BIT_GAME_INITIALIZED", pragma::math::to_integral(pragma::Game::GameFlags::GameInitialized)},
-	    {"STATE_FLAG_BIT_MAP_LOADED", pragma::math::to_integral(pragma::Game::GameFlags::MapLoaded)},
-	    {"STATE_FLAG_BIT_INITIAL_TICK", pragma::math::to_integral(pragma::Game::GameFlags::InitialTick)},
-	    {"STATE_FLAG_BIT_LEVEL_TRANSITION", pragma::math::to_integral(pragma::Game::GameFlags::LevelTransition)},
+	    {"STATE_FLAG_NONE", math::to_integral(GameFlags::None)},
+	    {"STATE_FLAG_BIT_MAP_INITIALIZED", math::to_integral(GameFlags::MapInitialized)},
+	    {"STATE_FLAG_BIT_GAME_INITIALIZED", math::to_integral(GameFlags::GameInitialized)},
+	    {"STATE_FLAG_BIT_MAP_LOADED", math::to_integral(GameFlags::MapLoaded)},
+	    {"STATE_FLAG_BIT_INITIAL_TICK", math::to_integral(GameFlags::InitialTick)},
+	    {"STATE_FLAG_BIT_LEVEL_TRANSITION", math::to_integral(GameFlags::LevelTransition)},
 	  });
 
 	auto *l = GetLuaState();
@@ -274,112 +274,112 @@ void pragma::Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(l, "game.limits",
 	  {
-	    {"MAX_ABSOLUTE_LIGHTS", pragma::math::to_integral(pragma::GameLimits::MaxAbsoluteLights)},
-	    {"MAX_ABSOLUTE_SHADOW_LIGHTS", pragma::math::to_integral(pragma::GameLimits::MaxAbsoluteShadowLights)},
-	    {"MAX_CSM_CASCADES", pragma::math::to_integral(pragma::GameLimits::MaxCSMCascades)},
-	    {"MAX_DIRECTIONAL_LIGHT_SOURCES", pragma::math::to_integral(pragma::GameLimits::MaxDirectionalLightSources)},
-	    {"MAX_ACTIVE_SHADOW_MAPS", pragma::math::to_integral(pragma::GameLimits::MaxActiveShadowMaps)},
-	    {"MAX_ACTIVE_SHADOW_CUBE_MAPS", pragma::math::to_integral(pragma::GameLimits::MaxActiveShadowCubeMaps)},
-	    {"MAX_MESH_VERTICES", pragma::math::to_integral(pragma::GameLimits::MaxMeshVertices)},
-	    {"MAX_WORLD_DISTANCE", pragma::math::to_integral(pragma::GameLimits::MaxWorldDistance)},
-	    {"MAX_RAY_CAST_RANGE", pragma::math::to_integral(pragma::GameLimits::MaxRayCastRange)},
-	    {"MAX_BONES", pragma::math::to_integral(pragma::GameLimits::MaxBones)},
-	    {"MAX_IMAGE_ARRAY_LAYERS", pragma::math::to_integral(pragma::GameLimits::MaxImageArrayLayers)},
+	    {"MAX_ABSOLUTE_LIGHTS", math::to_integral(GameLimits::MaxAbsoluteLights)},
+	    {"MAX_ABSOLUTE_SHADOW_LIGHTS", math::to_integral(GameLimits::MaxAbsoluteShadowLights)},
+	    {"MAX_CSM_CASCADES", math::to_integral(GameLimits::MaxCSMCascades)},
+	    {"MAX_DIRECTIONAL_LIGHT_SOURCES", math::to_integral(GameLimits::MaxDirectionalLightSources)},
+	    {"MAX_ACTIVE_SHADOW_MAPS", math::to_integral(GameLimits::MaxActiveShadowMaps)},
+	    {"MAX_ACTIVE_SHADOW_CUBE_MAPS", math::to_integral(GameLimits::MaxActiveShadowCubeMaps)},
+	    {"MAX_MESH_VERTICES", math::to_integral(GameLimits::MaxMeshVertices)},
+	    {"MAX_WORLD_DISTANCE", math::to_integral(GameLimits::MaxWorldDistance)},
+	    {"MAX_RAY_CAST_RANGE", math::to_integral(GameLimits::MaxRayCastRange)},
+	    {"MAX_BONES", math::to_integral(GameLimits::MaxBones)},
+	    {"MAX_IMAGE_ARRAY_LAYERS", math::to_integral(GameLimits::MaxImageArrayLayers)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "sound",
 	  {
-	    {"CHANNEL_AUTO", pragma::math::to_integral(pragma::audio::ALChannel::Auto)},
-	    {"CHANNEL_MONO", pragma::math::to_integral(pragma::audio::ALChannel::Mono)},
-	    {"CHANNEL_BOTH", pragma::math::to_integral(pragma::audio::ALChannel::Both)},
+	    {"CHANNEL_AUTO", math::to_integral(audio::ALChannel::Auto)},
+	    {"CHANNEL_MONO", math::to_integral(audio::ALChannel::Mono)},
+	    {"CHANNEL_BOTH", math::to_integral(audio::ALChannel::Both)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "intersect",
 	  {
 	    // TODO: These should be obsolete?
-	    {"RESULT_OUTSIDE", pragma::math::to_integral(pragma::math::intersection::Intersect::Outside)},
-	    {"RESULT_INSIDE", pragma::math::to_integral(pragma::math::intersection::Intersect::Inside)},
-	    {"RESULT_OVERLAP", pragma::math::to_integral(pragma::math::intersection::Intersect::Overlap)},
+	    {"RESULT_OUTSIDE", math::to_integral(math::intersection::Intersect::Outside)},
+	    {"RESULT_INSIDE", math::to_integral(math::intersection::Intersect::Inside)},
+	    {"RESULT_OVERLAP", math::to_integral(math::intersection::Intersect::Overlap)},
 	    //
 
-	    {"RESULT_NO_INTERSECTION", pragma::math::to_integral(pragma::math::intersection::Result::NoIntersection)},
-	    {"RESULT_INTERSECT", pragma::math::to_integral(pragma::math::intersection::Result::Intersect)},
-	    {"RESULT_OUT_OF_RANGE", pragma::math::to_integral(pragma::math::intersection::Result::OutOfRange)},
+	    {"RESULT_NO_INTERSECTION", math::to_integral(math::intersection::Result::NoIntersection)},
+	    {"RESULT_INTERSECT", math::to_integral(math::intersection::Result::Intersect)},
+	    {"RESULT_OUT_OF_RANGE", math::to_integral(math::intersection::Result::OutOfRange)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "time",
 	  {
-	    {"TIMER_TYPE_CURTIME", pragma::math::to_integral(TimerType::CurTime)},
-	    {"TIMER_TYPE_REALTIME", pragma::math::to_integral(TimerType::RealTime)},
+	    {"TIMER_TYPE_CURTIME", math::to_integral(TimerType::CurTime)},
+	    {"TIMER_TYPE_REALTIME", math::to_integral(TimerType::RealTime)},
 
-	    {"DURATION_TYPE_NANO_SECONDS", pragma::math::to_integral(pragma::util::DurationType::NanoSeconds)},
-	    {"DURATION_TYPE_MICRO_SECONDS", pragma::math::to_integral(pragma::util::DurationType::MicroSeconds)},
-	    {"DURATION_TYPE_MILLI_SECONDS", pragma::math::to_integral(pragma::util::DurationType::MilliSeconds)},
-	    {"DURATION_TYPE_SECONDS", pragma::math::to_integral(pragma::util::DurationType::Seconds)},
-	    {"DURATION_TYPE_MINUTES", pragma::math::to_integral(pragma::util::DurationType::Minutes)},
-	    {"DURATION_TYPE_HOURS", pragma::math::to_integral(pragma::util::DurationType::Hours)},
+	    {"DURATION_TYPE_NANO_SECONDS", math::to_integral(util::DurationType::NanoSeconds)},
+	    {"DURATION_TYPE_MICRO_SECONDS", math::to_integral(util::DurationType::MicroSeconds)},
+	    {"DURATION_TYPE_MILLI_SECONDS", math::to_integral(util::DurationType::MilliSeconds)},
+	    {"DURATION_TYPE_SECONDS", math::to_integral(util::DurationType::Seconds)},
+	    {"DURATION_TYPE_MINUTES", math::to_integral(util::DurationType::Minutes)},
+	    {"DURATION_TYPE_HOURS", math::to_integral(util::DurationType::Hours)},
 	  });
 
-	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_WINDOWS", pragma::util::is_windows_system());
-	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_LINUX", pragma::util::is_linux_system());
-	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_X86", pragma::util::is_x86_system());
-	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_X64", pragma::util::is_x64_system());
+	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_WINDOWS", util::is_windows_system());
+	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_LINUX", util::is_linux_system());
+	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_X86", util::is_x86_system());
+	Lua::RegisterLibraryValue<bool>(GetLuaState(), "os", "SYSTEM_X64", util::is_x64_system());
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "input",
 	  {
-	    {"ACTION_MOVEFORWARD", pragma::math::to_integral(pragma::Action::MoveForward)},
-	    {"ACTION_MOVEBACKWARD", pragma::math::to_integral(pragma::Action::MoveBackward)},
-	    {"ACTION_MOVELEFT", pragma::math::to_integral(pragma::Action::MoveLeft)},
-	    {"ACTION_MOVERIGHT", pragma::math::to_integral(pragma::Action::MoveRight)},
-	    {"ACTION_SPRINT", pragma::math::to_integral(pragma::Action::Sprint)},
-	    {"ACTION_WALK", pragma::math::to_integral(pragma::Action::Walk)},
-	    {"ACTION_JUMP", pragma::math::to_integral(pragma::Action::Jump)},
-	    {"ACTION_CROUCH", pragma::math::to_integral(pragma::Action::Crouch)},
-	    {"ACTION_ATTACK", pragma::math::to_integral(pragma::Action::Attack)},
-	    {"ACTION_ATTACK2", pragma::math::to_integral(pragma::Action::Attack2)},
-	    {"ACTION_ATTACK3", pragma::math::to_integral(pragma::Action::Attack3)},
-	    {"ACTION_ATTACK4", pragma::math::to_integral(pragma::Action::Attack4)},
-	    {"ACTION_RELOAD", pragma::math::to_integral(pragma::Action::Reload)},
-	    {"ACTION_USE", pragma::math::to_integral(pragma::Action::Use)},
-	    {"ACTION_LAST", pragma::math::to_integral(pragma::Action::Last)},
+	    {"ACTION_MOVEFORWARD", math::to_integral(Action::MoveForward)},
+	    {"ACTION_MOVEBACKWARD", math::to_integral(Action::MoveBackward)},
+	    {"ACTION_MOVELEFT", math::to_integral(Action::MoveLeft)},
+	    {"ACTION_MOVERIGHT", math::to_integral(Action::MoveRight)},
+	    {"ACTION_SPRINT", math::to_integral(Action::Sprint)},
+	    {"ACTION_WALK", math::to_integral(Action::Walk)},
+	    {"ACTION_JUMP", math::to_integral(Action::Jump)},
+	    {"ACTION_CROUCH", math::to_integral(Action::Crouch)},
+	    {"ACTION_ATTACK", math::to_integral(Action::Attack)},
+	    {"ACTION_ATTACK2", math::to_integral(Action::Attack2)},
+	    {"ACTION_ATTACK3", math::to_integral(Action::Attack3)},
+	    {"ACTION_ATTACK4", math::to_integral(Action::Attack4)},
+	    {"ACTION_RELOAD", math::to_integral(Action::Reload)},
+	    {"ACTION_USE", math::to_integral(Action::Use)},
+	    {"ACTION_LAST", math::to_integral(Action::Last)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",
 	  {
-	    {"HITGROUP_INVALID", pragma::math::to_integral(physics::HitGroup::Invalid)},
-	    {"HITGROUP_GENERIC", pragma::math::to_integral(physics::HitGroup::Generic)},
-	    {"HITGROUP_HEAD", pragma::math::to_integral(physics::HitGroup::Head)},
-	    {"HITGROUP_CHEST", pragma::math::to_integral(physics::HitGroup::Chest)},
-	    {"HITGROUP_STOMACH", pragma::math::to_integral(physics::HitGroup::Stomach)},
-	    {"HITGROUP_LEFT_ARM", pragma::math::to_integral(physics::HitGroup::LeftArm)},
-	    {"HITGROUP_RIGHT_ARM", pragma::math::to_integral(physics::HitGroup::RightArm)},
-	    {"HITGROUP_LEFT_LEG", pragma::math::to_integral(physics::HitGroup::LeftLeg)},
-	    {"HITGROUP_RIGHT_LEG", pragma::math::to_integral(physics::HitGroup::RightLeg)},
-	    {"HITGROUP_GEAR", pragma::math::to_integral(physics::HitGroup::Gear)},
-	    {"HITGROUP_TAIL", pragma::math::to_integral(physics::HitGroup::Tail)},
+	    {"HITGROUP_INVALID", math::to_integral(physics::HitGroup::Invalid)},
+	    {"HITGROUP_GENERIC", math::to_integral(physics::HitGroup::Generic)},
+	    {"HITGROUP_HEAD", math::to_integral(physics::HitGroup::Head)},
+	    {"HITGROUP_CHEST", math::to_integral(physics::HitGroup::Chest)},
+	    {"HITGROUP_STOMACH", math::to_integral(physics::HitGroup::Stomach)},
+	    {"HITGROUP_LEFT_ARM", math::to_integral(physics::HitGroup::LeftArm)},
+	    {"HITGROUP_RIGHT_ARM", math::to_integral(physics::HitGroup::RightArm)},
+	    {"HITGROUP_LEFT_LEG", math::to_integral(physics::HitGroup::LeftLeg)},
+	    {"HITGROUP_RIGHT_LEG", math::to_integral(physics::HitGroup::RightLeg)},
+	    {"HITGROUP_GEAR", math::to_integral(physics::HitGroup::Gear)},
+	    {"HITGROUP_TAIL", math::to_integral(physics::HitGroup::Tail)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {
-	    {"FLAG_INVALID", pragma::math::to_integral(fs::FVFile::Invalid)},
-	    {"FLAG_PACKAGE", pragma::math::to_integral(fs::FVFile::Package)},
-	    {"FLAG_COMPRESSED", pragma::math::to_integral(fs::FVFile::Compressed)},
-	    {"FLAG_DIRECTORY", pragma::math::to_integral(fs::FVFile::Directory)},
-	    {"FLAG_ENCRYPTED", pragma::math::to_integral(fs::FVFile::Encrypted)},
-	    {"FLAG_VIRTUAL", pragma::math::to_integral(fs::FVFile::Virtual)},
-	    {"FLAG_READONLY", pragma::math::to_integral(fs::FVFile::ReadOnly)},
+	    {"FLAG_INVALID", math::to_integral(fs::FVFile::Invalid)},
+	    {"FLAG_PACKAGE", math::to_integral(fs::FVFile::Package)},
+	    {"FLAG_COMPRESSED", math::to_integral(fs::FVFile::Compressed)},
+	    {"FLAG_DIRECTORY", math::to_integral(fs::FVFile::Directory)},
+	    {"FLAG_ENCRYPTED", math::to_integral(fs::FVFile::Encrypted)},
+	    {"FLAG_VIRTUAL", math::to_integral(fs::FVFile::Virtual)},
+	    {"FLAG_READONLY", math::to_integral(fs::FVFile::ReadOnly)},
 
-	    {"OPEN_MODE_READ", pragma::math::to_integral(fs::FileMode::Read)},
-	    {"OPEN_MODE_WRITE", pragma::math::to_integral(fs::FileMode::Write)},
-	    {"OPEN_MODE_APPEND", pragma::math::to_integral(fs::FileMode::Append)},
-	    {"OPEN_MODE_BINARY", pragma::math::to_integral(fs::FileMode::Binary)},
+	    {"OPEN_MODE_READ", math::to_integral(fs::FileMode::Read)},
+	    {"OPEN_MODE_WRITE", math::to_integral(fs::FileMode::Write)},
+	    {"OPEN_MODE_APPEND", math::to_integral(fs::FileMode::Append)},
+	    {"OPEN_MODE_BINARY", math::to_integral(fs::FileMode::Binary)},
 	  });
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {
-	    {"TYPE_VIRTUAL", pragma::math::to_integral(EVFile::Virtual)},
-	    {"TYPE_LOCAL", pragma::math::to_integral(EVFile::Local)},
-	    {"TYPE_PACKAGE", pragma::math::to_integral(EVFile::Package)},
+	    {"TYPE_VIRTUAL", math::to_integral(EVFile::Virtual)},
+	    {"TYPE_LOCAL", math::to_integral(EVFile::Local)},
+	    {"TYPE_PACKAGE", math::to_integral(EVFile::Package)},
 	  });
 
 	/*Lua::RegisterLibraryEnums(GetLuaState(), "file",
@@ -404,20 +404,20 @@ void pragma::Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "file",
 	  {
-	    {"SEARCH_NONE", pragma::math::to_integral(fs::SearchFlags::None)},
-	    {"SEARCH_VIRTUAL", pragma::math::to_integral(fs::SearchFlags::Virtual)},
-	    {"SEARCH_PACKAGE", pragma::math::to_integral(fs::SearchFlags::Package)},
-	    {"SEARCH_LOCAL", pragma::math::to_integral(fs::SearchFlags::Local)},
-	    {"SEARCH_NO_MOUNTS", pragma::math::to_integral(fs::SearchFlags::NoMounts)},
-	    {"SEARCH_LOCAL_ROOT", pragma::math::to_integral(fs::SearchFlags::LocalRoot)},
-	    {"SEARCH_ALL", pragma::math::to_integral(fs::SearchFlags::All)},
+	    {"SEARCH_NONE", math::to_integral(fs::SearchFlags::None)},
+	    {"SEARCH_VIRTUAL", math::to_integral(fs::SearchFlags::Virtual)},
+	    {"SEARCH_PACKAGE", math::to_integral(fs::SearchFlags::Package)},
+	    {"SEARCH_LOCAL", math::to_integral(fs::SearchFlags::Local)},
+	    {"SEARCH_NO_MOUNTS", math::to_integral(fs::SearchFlags::NoMounts)},
+	    {"SEARCH_LOCAL_ROOT", math::to_integral(fs::SearchFlags::LocalRoot)},
+	    {"SEARCH_ALL", math::to_integral(fs::SearchFlags::All)},
 	    {"SEARCH_ADDON", FSYS_SEARCH_ADDON},
 	  });
 
 	auto enableShorthand = Lua::get_extended_lua_modules_enabled();
 	if(enableShorthand) {
 		luabind::globals(l)["ec"] = luabind::make_function(l, static_cast<luabind::object (*)(lua::State *, luabind::object, luabind::object)>([](lua::State *l, luabind::object o, luabind::object o2) -> luabind::object {
-			auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
+			auto &nw = *Engine::Get()->GetNetworkState(l);
 			auto *game = nw.GetGameState();
 			if(!game)
 				return {};
@@ -438,7 +438,7 @@ void pragma::Game::RegisterLuaGlobals()
 			}
 			std::vector<size_t> similarElements {};
 			std::vector<float> similarities {};
-			pragma::string::gather_similar_elements(name, componentNames, similarElements, 1, &similarities);
+			string::gather_similar_elements(name, componentNames, similarElements, 1, &similarities);
 			if(!similarElements.empty() && similarities.front() >= 0.3f) {
 				auto &componentName = componentNames[similarElements.front()];
 				auto c = ent->FindComponent(componentName);
@@ -450,7 +450,7 @@ void pragma::Game::RegisterLuaGlobals()
 				componentNames.push_back(c->name);
 			similarElements.clear();
 			similarities.clear();
-			pragma::string::gather_similar_elements(name, componentNames, similarElements, 1, &similarities);
+			string::gather_similar_elements(name, componentNames, similarElements, 1, &similarities);
 			if(!similarElements.empty()) {
 				auto &componentName = componentNames[similarElements.front()];
 				auto c = ent->AddComponent(componentName);
@@ -460,7 +460,7 @@ void pragma::Game::RegisterLuaGlobals()
 			return {};
 		}));
 		luabind::globals(l)["e"] = luabind::make_function(l, static_cast<luabind::object (*)(lua::State *, luabind::object)>([](lua::State *l, luabind::object o) -> luabind::object {
-			auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
+			auto &nw = *Engine::Get()->GetNetworkState(l);
 			auto *game = nw.GetGameState();
 			if(!game)
 				return {};

@@ -14,7 +14,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SLightSpotComponent final : public BaseEnvLightSpotComponent, public SBaseNetComponent {
 		  public:
-			SLightSpotComponent(pragma::ecs::BaseEntity &ent) : BaseEnvLightSpotComponent(ent) {}
+			SLightSpotComponent(ecs::BaseEntity &ent) : BaseEnvLightSpotComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual void SetOuterConeAngle(float ang) override;
 			virtual void SetBlendFraction(float fraction) override;

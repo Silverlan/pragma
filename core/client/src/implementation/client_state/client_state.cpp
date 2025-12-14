@@ -150,7 +150,7 @@ void pragma::ClientState::Initialize()
 	}*/
 	NetworkState::Initialize();
 
-	get_cengine()->GetSoundSystem()->SetOnReleaseSoundCallback([this](const pragma::audio::SoundSource &snd) {
+	get_cengine()->GetSoundSystem()->SetOnReleaseSoundCallback([this](const audio::SoundSource &snd) {
 		auto it = std::find_if(m_sounds.begin(), m_sounds.end(), [&snd](const audio::ALSoundRef &sndOther) { return (static_cast<audio::CALSound *>(&sndOther.get()) == &snd) ? true : false; });
 		if(it == m_sounds.end())
 			return;

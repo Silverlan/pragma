@@ -15,7 +15,7 @@ decltype(ShaderMergeImages::DESCRIPTOR_SET_TEXTURE_2D) ShaderMergeImages::DESCRI
   "TEXTURE2",
   {prosper::DescriptorSetInfo::Binding {"TEXTURE2", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
 };
-ShaderMergeImages::ShaderMergeImages(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/util/merge") { SetBaseShader<prosper::ShaderCopyImage>(); }
+ShaderMergeImages::ShaderMergeImages(prosper::IPrContext &context, const std::string &identifier) : ShaderBaseImageProcessing(context, identifier, "programs/util/merge") { SetBaseShader<prosper::ShaderCopyImage>(); }
 
 ShaderMergeImages::~ShaderMergeImages() {}
 
@@ -33,7 +33,7 @@ bool ShaderMergeImages::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescr
 	if(RecordBeginDraw(bindState) == false)
 		return false;
 
-	auto res = RecordBindDescriptorSet(bindState, descSetTexture2, DESCRIPTOR_SET_TEXTURE_2D.setIndex) && prosper::ShaderBaseImageProcessing::RecordDraw(bindState, descSetTexture);
+	auto res = RecordBindDescriptorSet(bindState, descSetTexture2, DESCRIPTOR_SET_TEXTURE_2D.setIndex) && ShaderBaseImageProcessing::RecordDraw(bindState, descSetTexture);
 	RecordEndDraw(bindState);
 	return res;
 }

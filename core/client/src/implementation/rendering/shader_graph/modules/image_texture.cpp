@@ -15,7 +15,7 @@ import :engine;
 using namespace pragma::rendering::shader_graph;
 
 #pragma optimize("", off)
-ImageTextureModule::ImageTextureModule(ShaderGraph &shader) : pragma::rendering::ShaderGraphModule {shader}
+ImageTextureModule::ImageTextureModule(ShaderGraph &shader) : ShaderGraphModule {shader}
 {
 	//Global settings +textures?
 	/* prosper::PrDescriptorSetBindingFlags::Cubemap */
@@ -60,7 +60,7 @@ void ImageTextureModule::InitializeGfxPipelineDescriptorSets()
 
 	m_dsg = dsg;*/
 }
-void ImageTextureModule::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+void ImageTextureModule::RecordBindScene(ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
 	//shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), m_descSetInfo.setIndex, *m_dsg->GetDescriptorSet());
 }

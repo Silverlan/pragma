@@ -41,9 +41,9 @@ pragma::ecs::EntityIterator &LuaEntityIterator::GetIterator() { return *m_iterat
 
 ////////////
 
-CEntityComponentIterator::CEntityComponentIterator(pragma::Game &game, FilterFlags filterFlags) : pragma::ecs::EntityIterator {game, filterFlags} {}
-CEntityComponentIterator::CEntityComponentIterator(pragma::Game &game, pragma::ComponentId componentId, FilterFlags filterFlags) : pragma::ecs::EntityIterator {game, componentId, filterFlags} {}
-CEntityComponentIterator::CEntityComponentIterator(pragma::Game &game, const std::string &componentName, FilterFlags filterFlags) : pragma::ecs::EntityIterator {game, componentName, filterFlags} {}
+CEntityComponentIterator::CEntityComponentIterator(pragma::Game &game, FilterFlags filterFlags) : EntityIterator {game, filterFlags} {}
+CEntityComponentIterator::CEntityComponentIterator(pragma::Game &game, pragma::ComponentId componentId, FilterFlags filterFlags) : EntityIterator {game, componentId, filterFlags} {}
+CEntityComponentIterator::CEntityComponentIterator(pragma::Game &game, const std::string &componentName, FilterFlags filterFlags) : EntityIterator {game, componentName, filterFlags} {}
 CEntityComponentIterator::CEntityComponentIterator(std::vector<pragma::ecs::BaseEntity *> &ents) : m_ents(&ents) {}
 CEntityComponentIterator &CEntityComponentIterator::operator++()
 {

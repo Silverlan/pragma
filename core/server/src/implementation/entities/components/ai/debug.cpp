@@ -13,7 +13,7 @@ import :server_state;
 
 using namespace pragma;
 
-void SAIComponent::_debugSendNavInfo(pragma::SPlayerComponent &pl)
+void SAIComponent::_debugSendNavInfo(SPlayerComponent &pl)
 {
 	if(m_navInfo.pathInfo == nullptr)
 		return;
@@ -25,7 +25,7 @@ void SAIComponent::_debugSendNavInfo(pragma::SPlayerComponent &pl)
 		return;
 	auto nodePrev = pTrComponent->GetPosition();
 	NetPacket p {};
-	pragma::networking::write_entity(p, &ent);
+	networking::write_entity(p, &ent);
 	p->Write<uint32_t>(path.pathCount);
 	p->Write<uint32_t>(m_navInfo.pathInfo->pathIdx);
 	for(auto i = decltype(path.pathCount) {0}; i < path.pathCount; ++i) {
@@ -36,10 +36,10 @@ void SAIComponent::_debugSendNavInfo(pragma::SPlayerComponent &pl)
 	}
 	auto *session = pl.GetClientSession();
 	if(session)
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::DEBUG_AI_NAVIGATION, p, pragma::networking::Protocol::SlowReliable, *session);
+		ServerState::Get()->SendPacket(networking::net_messages::client::DEBUG_AI_NAVIGATION, p, networking::Protocol::SlowReliable, *session);
 }
 
-void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::shared_ptr<debug::DebugBehaviorTreeNode> &dbgTree, std::shared_ptr<::ai::Schedule> &aiSchedule, float &tLastSchedUpdate)
+void SAIComponent::_debugSendScheduleInfo(SPlayerComponent &pl, std::shared_ptr<debug::DebugBehaviorTreeNode> &dbgTree, std::shared_ptr<ai::Schedule> &aiSchedule, float &tLastSchedUpdate)
 {
 	auto sched = GetCurrentSchedule();
 	if(sched == nullptr) {
@@ -51,7 +51,7 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 				p->Write<uint8_t>(static_cast<uint8_t>(0));
 				auto *session = pl.GetClientSession();
 				if(session)
-					ServerState::Get()->SendPacket(pragma::networking::net_messages::client::DEBUG_AI_SCHEDULE_TREE, p, pragma::networking::Protocol::SlowReliable, *session);
+					ServerState::Get()->SendPacket(networking::net_messages::client::DEBUG_AI_SCHEDULE_TREE, p, networking::Protocol::SlowReliable, *session);
 				aiSchedule = nullptr;
 			}
 		}
@@ -146,12 +146,12 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 
 		p->Write<uint8_t>(1);
 		*dbgTree = *dbgRootNode;
-		pragma::networking::write_entity(p, &GetEntity());
+		networking::write_entity(p, &GetEntity());
 		std::function<void(NetPacket &, const debug::DebugBehaviorTreeNode &)> fWriteTree = nullptr;
 		fWriteTree = [&fWriteTree](NetPacket &p, const debug::DebugBehaviorTreeNode &node) {
 			p->WriteString(node.name);
-			p->Write<uint32_t>(pragma::math::to_integral(node.nodeType));
-			p->Write<uint32_t>(pragma::math::to_integral(node.selectorType));
+			p->Write<uint32_t>(math::to_integral(node.nodeType));
+			p->Write<uint32_t>(math::to_integral(node.selectorType));
 			p->Write<float>(node.lastStartTime);
 			p->Write<float>(node.lastEndTime);
 			p->Write<uint64_t>(node.executionIndex);
@@ -167,5 +167,5 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl, std::sha
 	}
 	auto *session = pl.GetClientSession();
 	if(session)
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::DEBUG_AI_SCHEDULE_TREE, p, pragma::networking::Protocol::SlowReliable, *session);
+		ServerState::Get()->SendPacket(networking::net_messages::client::DEBUG_AI_SCHEDULE_TREE, p, networking::Protocol::SlowReliable, *session);
 }

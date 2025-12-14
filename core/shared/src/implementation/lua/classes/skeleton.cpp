@@ -20,13 +20,13 @@ bool Lua::Skeleton::IsRootBone(lua::State *l, pragma::animation::Skeleton &skele
 luabind::map<uint32_t, std::shared_ptr<pragma::animation::Bone>> Lua::Skeleton::GetRootBones(lua::State *l, pragma::animation::Skeleton &skeleton)
 {
 	auto &rootBones = skeleton.GetRootBones();
-	return Lua::map_to_table(l, rootBones);
+	return map_to_table(l, rootBones);
 }
 
 luabind::tableT<std::shared_ptr<pragma::animation::Bone>> Lua::Skeleton::GetBones(lua::State *l, pragma::animation::Skeleton &skeleton)
 {
 	auto &bones = skeleton.GetBones();
-	return Lua::vector_to_table(l, bones);
+	return vector_to_table(l, bones);
 }
 
 std::shared_ptr<pragma::animation::Bone> Lua::Skeleton::GetBone(lua::State *l, pragma::animation::Skeleton &skeleton, uint32_t boneId) { return skeleton.GetBone(boneId).lock(); }

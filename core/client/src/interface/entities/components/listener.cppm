@@ -21,7 +21,7 @@ export namespace pragma {
 		void SetGain(float gain);
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  private:
-		pragma::audio::IListener *m_listener = nullptr;
+		audio::IListener *m_listener = nullptr;
 	};
 };
 

@@ -13,7 +13,7 @@ import pragma.shared;
 
 #undef GetMessage
 
-bool pragma::ServerState::HandlePacket(pragma::networking::IServerClient &session, NetPacket &packet)
+bool pragma::ServerState::HandlePacket(networking::IServerClient &session, NetPacket &packet)
 {
 	unsigned int ID = packet.GetMessageID();
 	networking::SVNetMessage *msg = GetNetMessage(ID);
@@ -39,7 +39,7 @@ pragma::networking::SVNetMessage *pragma::ServerState::GetNetMessage(unsigned in
 	return map->GetNetMessage(ID);
 }
 
-void pragma::ServerState::UpdatePlayerScore(pragma::SPlayerComponent &pl, int32_t score)
+void pragma::ServerState::UpdatePlayerScore(SPlayerComponent &pl, int32_t score)
 {
 	auto *reg = GetMasterServerRegistration();
 	auto *session = pl.GetClientSession();
@@ -48,7 +48,7 @@ void pragma::ServerState::UpdatePlayerScore(pragma::SPlayerComponent &pl, int32_
 	reg->SetClientScore(session->GetSteamId(), score);
 }
 
-void pragma::ServerState::UpdatePlayerName(pragma::SPlayerComponent &pl, const std::string &name)
+void pragma::ServerState::UpdatePlayerName(SPlayerComponent &pl, const std::string &name)
 {
 	auto *reg = GetMasterServerRegistration();
 	auto *session = pl.GetClientSession();
@@ -57,7 +57,7 @@ void pragma::ServerState::UpdatePlayerName(pragma::SPlayerComponent &pl, const s
 	reg->SetClientName(session->GetSteamId(), name);
 }
 
-void pragma::ServerState::DropClient(pragma::networking::IServerClient &session, pragma::networking::DropReason reason)
+void pragma::ServerState::DropClient(networking::IServerClient &session, networking::DropReason reason)
 {
 	auto *pl = session.GetPlayer();
 	session.ClearResourceTransfer();
@@ -66,7 +66,7 @@ void pragma::ServerState::DropClient(pragma::networking::IServerClient &session,
 	if(reg)
 		reg->DropClient(session.GetSteamId());
 
-	pragma::networking::Error err;
+	networking::Error err;
 	if(session.Drop(reason, err) == false)
 		Con::cwar << "An error has occurred trying to drop client: '" << err.GetMessage() << "'!" << Con::endl;
 	if(pl == nullptr)
@@ -80,7 +80,7 @@ void pragma::ServerState::DropClient(pragma::networking::IServerClient &session,
 }
 pragma::networking::IServerClient *pragma::ServerState::GetLocalClient() { return m_localClient.get(); }
 
-void pragma::ServerState::HandleLuaNetPacket(pragma::networking::IServerClient &session, NetPacket &packet)
+void pragma::ServerState::HandleLuaNetPacket(networking::IServerClient &session, NetPacket &packet)
 {
 	if(!IsGameActive())
 		return;
@@ -98,21 +98,21 @@ static bool check_message_id(uint32_t id, const std::string &name)
 	return true;
 }
 
-void pragma::ServerState::SendPacket(const std::string &name, NetPacket &packet, pragma::networking::Protocol protocol, const pragma::networking::ClientRecipientFilter &rf)
+void pragma::ServerState::SendPacket(const std::string &name, NetPacket &packet, networking::Protocol protocol, const networking::ClientRecipientFilter &rf)
 {
 	auto ID = GetClientMessageID(name);
 	if(check_message_id(ID, name) == false || m_server == nullptr)
 		return;
 	packet.SetMessageID(ID);
 
-	pragma::networking::Error err;
+	networking::Error err;
 	if(m_server->SendPacket(protocol, packet, rf, err) == true)
 		return;
 	Con::cwar << "Unable to broadcast packet " << ID << ": " << err.GetMessage() << Con::endl;
 }
-void pragma::ServerState::SendPacket(const std::string &name, NetPacket &packet, pragma::networking::Protocol protocol) { SendPacket(name, packet, protocol, pragma::networking::ClientRecipientFilter {}); }
-void pragma::ServerState::SendPacket(const std::string &name, NetPacket &packet) { SendPacket(name, packet, pragma::networking::Protocol::FastUnreliable); }
-void pragma::ServerState::SendPacket(const std::string &name, pragma::networking::Protocol protocol)
+void pragma::ServerState::SendPacket(const std::string &name, NetPacket &packet, networking::Protocol protocol) { SendPacket(name, packet, protocol, networking::ClientRecipientFilter {}); }
+void pragma::ServerState::SendPacket(const std::string &name, NetPacket &packet) { SendPacket(name, packet, networking::Protocol::FastUnreliable); }
+void pragma::ServerState::SendPacket(const std::string &name, networking::Protocol protocol)
 {
 	NetPacket packet {};
 	SendPacket(name, packet, protocol);

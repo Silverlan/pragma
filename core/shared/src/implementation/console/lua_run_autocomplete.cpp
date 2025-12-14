@@ -151,7 +151,7 @@ void pragma::console::commands::lua_run_autocomplete(lua::State *l, const std::s
 			break;
 		auto type = static_cast<Lua::Type>(luabind::type(o));
 		if(type == Lua::Type::Function) {
-			luabind::detail::function_object *fobj = pragma::scripting::lua_core::util::get_function_object(o);
+			luabind::detail::function_object *fobj = scripting::lua_core::util::get_function_object(o);
 			if(fobj) {
 				auto *functionName = fobj->name.c_str();
 				for(luabind::detail::function_object const *f = fobj; f != 0; f = f->next) {

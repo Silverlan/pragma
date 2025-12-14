@@ -7,7 +7,7 @@ module pragma.shared;
 import :game.damage_info;
 
 pragma::physics::HitGroup pragma::game::DamageInfo::GetHitGroup() const { return m_hitGroup; }
-void pragma::game::DamageInfo::SetHitGroup(pragma::physics::HitGroup hitGroup) { m_hitGroup = hitGroup; }
+void pragma::game::DamageInfo::SetHitGroup(physics::HitGroup hitGroup) { m_hitGroup = hitGroup; }
 void pragma::game::DamageInfo::SetDamage(unsigned short dmg) { m_damage = dmg; }
 void pragma::game::DamageInfo::AddDamage(unsigned short dmg)
 {
@@ -30,7 +30,7 @@ pragma::ecs::BaseEntity *pragma::game::DamageInfo::GetInflictor()
 		return nullptr;
 	return m_inflictor.get();
 }
-void pragma::game::DamageInfo::SetAttacker(const pragma::ecs::BaseEntity *ent)
+void pragma::game::DamageInfo::SetAttacker(const ecs::BaseEntity *ent)
 {
 	if(m_attacker.valid())
 		m_attacker = EntityHandle();
@@ -39,7 +39,7 @@ void pragma::game::DamageInfo::SetAttacker(const pragma::ecs::BaseEntity *ent)
 	m_attacker = ent->GetHandle();
 }
 void pragma::game::DamageInfo::SetAttacker(const EntityHandle &hnd) { SetAttacker(hnd.get()); }
-void pragma::game::DamageInfo::SetInflictor(const pragma::ecs::BaseEntity *ent)
+void pragma::game::DamageInfo::SetInflictor(const ecs::BaseEntity *ent)
 {
 	if(m_inflictor.valid())
 		m_inflictor = EntityHandle();
@@ -60,9 +60,9 @@ Vector3 &pragma::game::DamageInfo::GetHitPosition() { return m_hitPosition; }
 void pragma::game::DamageInfo::SetForce(const Vector3 &force) { m_force = force; }
 Vector3 &pragma::game::DamageInfo::GetForce() { return m_force; }
 
-std::ostream &pragma::game::operator<<(std::ostream &out, const pragma::game::DamageInfo &po)
+std::ostream &pragma::game::operator<<(std::ostream &out, const DamageInfo &po)
 {
-	auto &o = const_cast<pragma::game::DamageInfo &>(po);
+	auto &o = const_cast<DamageInfo &>(po);
 	out << "DamageInfo";
 	out << "[Dmg:" << o.GetDamage() << "]";
 

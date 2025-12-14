@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLSERVER STouchComponent final : public BaseTouchComponent {
 		  public:
-			STouchComponent(pragma::ecs::BaseEntity &ent) : BaseTouchComponent(ent) {}
+			STouchComponent(ecs::BaseEntity &ent) : BaseTouchComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

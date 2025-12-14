@@ -13,9 +13,9 @@ export import pragma.soundsystem;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 export namespace pragma::audio {
-	class DLLCLIENT CALSound : public pragma::audio::SoundSource, public ALSound {
+	class DLLCLIENT CALSound : public SoundSource, public ALSound {
 	public:
-		static std::shared_ptr<CALSound> Create(NetworkState *nw, const pragma::audio::PSoundChannel &channel);
+		static std::shared_ptr<CALSound> Create(NetworkState *nw, const PSoundChannel &channel);
 		static ALSound *FindByServerIndex(uint32_t idx);
 		static void SetIndex(ALSound *snd, uint32_t idx);
 
@@ -101,16 +101,16 @@ export namespace pragma::audio {
 		virtual bool IsIdle() const override;
 		void Terminate();
 
-		bool AddEffect(pragma::audio::IEffect &effect, const SoundEffectParams &params = SoundEffectParams());
-		bool AddEffect(pragma::audio::IEffect &effect, uint32_t &slotId, const SoundEffectParams &params = SoundEffectParams());
-		bool AddEffect(pragma::audio::IEffect &effect, float gain);
-		bool AddEffect(pragma::audio::IEffect &effect, uint32_t &slotId, float gain);
-		void RemoveEffect(pragma::audio::IEffect &effect);
+		bool AddEffect(IEffect &effect, const SoundEffectParams &params = SoundEffectParams());
+		bool AddEffect(IEffect &effect, uint32_t &slotId, const SoundEffectParams &params = SoundEffectParams());
+		bool AddEffect(IEffect &effect, float gain);
+		bool AddEffect(IEffect &effect, uint32_t &slotId, float gain);
+		void RemoveEffect(IEffect &effect);
 		void RemoveEffect(uint32_t slotId);
 
 		void UpdateVolume();
 	protected:
-		CALSound(NetworkState *nw, const pragma::audio::PSoundChannel &channel);
+		CALSound(NetworkState *nw, const PSoundChannel &channel);
 		static std::unordered_map<uint32_t, std::weak_ptr<ALSound>> s_svIndexedSounds; // Sounds created by the server
 		float m_modPitch = 1.f;
 		float m_modVol = 1.f;

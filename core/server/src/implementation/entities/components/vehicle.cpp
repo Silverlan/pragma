@@ -16,7 +16,7 @@ std::vector<SVehicleComponent *> SVehicleComponent::s_vehicles;
 const std::vector<SVehicleComponent *> &SVehicleComponent::GetAll() { return s_vehicles; }
 unsigned int SVehicleComponent::GetVehicleCount() { return CUInt32(s_vehicles.size()); }
 
-SVehicleComponent::SVehicleComponent(pragma::ecs::BaseEntity &ent) : BaseVehicleComponent(ent), SBaseSnapshotComponent()
+SVehicleComponent::SVehicleComponent(ecs::BaseEntity &ent) : BaseVehicleComponent(ent), SBaseSnapshotComponent()
 {
 	static_cast<SBaseEntity &>(ent).SetShared(true);
 	s_vehicles.push_back(this);
@@ -30,7 +30,7 @@ SVehicleComponent::~SVehicleComponent()
 }
 void SVehicleComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SVehicleComponent::OnRemove() { ClearDriver(); }
-void SVehicleComponent::OnUse(pragma::ecs::BaseEntity *pl)
+void SVehicleComponent::OnUse(ecs::BaseEntity *pl)
 {
 	if(HasDriver())
 		return;
@@ -46,7 +46,7 @@ void SVehicleComponent::OnTick(double tDelta)
 
 void SVehicleComponent::ClearDriver()
 {
-	auto *driver = BaseVehicleComponent::GetDriver();
+	auto *driver = GetDriver();
 	if(driver && driver->IsCharacter())
 		driver->GetCharacterComponent()->SetFrozen(false);
 	BaseVehicleComponent::ClearDriver();
@@ -57,12 +57,12 @@ void SVehicleComponent::ClearDriver()
 	if(!entThis.IsShared() || !entThis.IsSpawned())
 		return;
 	NetPacket p;
-	pragma::networking::write_entity(p, nullptr);
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetDriver, p, pragma::networking::Protocol::SlowReliable);
+	networking::write_entity(p, nullptr);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetDriver, p, networking::Protocol::SlowReliable);
 }
-void SVehicleComponent::OnActionInput(pragma::Action action, bool b)
+void SVehicleComponent::OnActionInput(Action action, bool b)
 {
-	if(action == pragma::Action::Use) {
+	if(action == Action::Use) {
 		if(b == false)
 			return;
 		ClearDriver();
@@ -72,18 +72,18 @@ void SVehicleComponent::Initialize()
 {
 	BaseVehicleComponent::Initialize();
 
-	BindEvent(usableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(usableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &bCanUse = static_cast<CECanUseData &>(evData.get()).canUse;
 		bCanUse = !HasDriver();
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(usableComponent::EVENT_ON_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUse(static_cast<CEOnUseData &>(evData.get()).entity); });
-	BindEventUnhandled(pragma::ecs::baseEntity::EVENT_ON_POST_SPAWN, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPostSpawn(); });
+	BindEventUnhandled(usableComponent::EVENT_ON_USE, [this](std::reference_wrapper<ComponentEvent> evData) { OnUse(static_cast<CEOnUseData &>(evData.get()).entity); });
+	BindEventUnhandled(ecs::baseEntity::EVENT_ON_POST_SPAWN, [this](std::reference_wrapper<ComponentEvent> evData) { OnPostSpawn(); });
 
 	auto &ent = GetEntity();
 	ent.AddComponent<UsableComponent>();
 }
-void SVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
+void SVehicleComponent::SetDriver(ecs::BaseEntity *ent)
 {
 	if(ent == GetDriver())
 		return;
@@ -94,13 +94,13 @@ void SVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 		auto plComponent = ent->GetPlayerComponent();
 		auto *actionInputC = plComponent->GetActionInputController();
 		if(actionInputC) {
-			m_playerAction = actionInputC->BindEvent(actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+			m_playerAction = actionInputC->BindEvent(actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 				auto &actionData = static_cast<CEHandleActionInput &>(evData.get());
-				if(actionData.action == pragma::Action::Use) {
+				if(actionData.action == Action::Use) {
 					OnActionInput(actionData.action, actionData.pressed);
-					return pragma::util::EventReply::Handled;
+					return util::EventReply::Handled;
 				}
-				return pragma::util::EventReply::Unhandled;
+				return util::EventReply::Unhandled;
 			});
 		}
 	}
@@ -108,8 +108,8 @@ void SVehicleComponent::SetDriver(pragma::ecs::BaseEntity *ent)
 	if(!entThis.IsShared() || !entThis.IsSpawned())
 		return;
 	NetPacket p;
-	pragma::networking::write_entity(p, ent);
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetDriver, p, pragma::networking::Protocol::SlowReliable);
+	networking::write_entity(p, ent);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetDriver, p, networking::Protocol::SlowReliable);
 }
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
@@ -134,30 +134,30 @@ void SVehicleComponent::WriteWheelInfo(NetPacket &p, WheelData &data, btWheelInf
 
 void SVehicleComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
-	pragma::networking::write_entity(packet, m_steeringWheel);
-	pragma::networking::write_entity(packet, GetDriver());
+	networking::write_entity(packet, m_steeringWheel);
+	networking::write_entity(packet, GetDriver());
 }
 
-void SVehicleComponent::SetupSteeringWheel(const std::string &mdl, pragma::math::Degree maxSteeringAngle)
+void SVehicleComponent::SetupSteeringWheel(const std::string &mdl, math::Degree maxSteeringAngle)
 {
 	BaseVehicleComponent::SetupSteeringWheel(mdl, maxSteeringAngle);
 	if(m_steeringWheel.valid())
 		static_cast<SBaseEntity &>(*m_steeringWheel.get()).SetSynchronized(false);
 	NetPacket p;
-	pragma::networking::write_entity(p, m_steeringWheel);
+	networking::write_entity(p, m_steeringWheel);
 	p->Write<float>(maxSteeringAngle);
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSteeringWheelModel, p, pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSteeringWheelModel, p, networking::Protocol::SlowReliable);
 }
 
-void SVehicleComponent::SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl)
+void SVehicleComponent::SendSnapshotData(NetPacket &packet, BasePlayerComponent &pl)
 {
 	auto *physVehicle = GetPhysicsVehicle();
 	packet->Write<float>(physVehicle ? physVehicle->GetSteerFactor() : 0.f);
-	packet->Write<pragma::physics::IVehicle::Gear>(physVehicle ? physVehicle->GetCurrentGear() : pragma::physics::IVehicle::Gear::First);
+	packet->Write<physics::IVehicle::Gear>(physVehicle ? physVehicle->GetCurrentGear() : physics::IVehicle::Gear::First);
 	packet->Write<float>(physVehicle ? physVehicle->GetBrakeFactor() : 0.f);
 	packet->Write<float>(physVehicle ? physVehicle->GetHandbrakeFactor() : 0.f);
 	packet->Write<float>(physVehicle ? physVehicle->GetAccelerationFactor() : 0.f);
-	packet->Write<pragma::math::Radian>(physVehicle ? physVehicle->GetEngineRotationSpeed() : 0.f);
+	packet->Write<math::Radian>(physVehicle ? physVehicle->GetEngineRotationSpeed() : 0.f);
 	auto numWheels = GetWheelCount();
 	for(auto i = decltype(numWheels) {0u}; i < numWheels; ++i)
 		packet->Write<float>(physVehicle ? physVehicle->GetWheelRotationSpeed(i) : 0.f);
@@ -185,6 +185,6 @@ void SVehicleComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &mod
 {
 	BaseVehicleComponent::RegisterLuaBindings(l, modEnts);
 
-	auto def = pragma::LuaCore::create_entity_component_class<pragma::SVehicleComponent, pragma::BaseVehicleComponent>("VehicleComponent");
+	auto def = pragma::LuaCore::create_entity_component_class<SVehicleComponent, BaseVehicleComponent>("VehicleComponent");
 	modEnts[def];
 }

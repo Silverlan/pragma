@@ -8,7 +8,7 @@ module pragma.shared;
 
 import :physics.ik;
 
-void pragma::util::ik::get_local_transform(const Node &node, pragma::math::Transform &t)
+void pragma::util::ik::get_local_transform(const Node &node, math::Transform &t)
 {
 	auto rot = get_rotation(node);
 	t.SetRotation(rot);

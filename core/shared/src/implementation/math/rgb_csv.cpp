@@ -108,4 +108,4 @@ Color pragma::util::hsv_to_rgb(const HSV &in)
 	}
 	return out;
 }
-pragma::util::HSV pragma::util::lerp_hsv(const HSV &a, const HSV &b, float t) { return {pragma::math::lerp(a.h, b.h, t), pragma::math::lerp(a.s, b.s, t), pragma::math::lerp(a.v, b.v, t)}; }
+pragma::util::HSV pragma::util::lerp_hsv(const HSV &a, const HSV &b, float t) { return {math::lerp(a.h, b.h, t), math::lerp(a.s, b.s, t), math::lerp(a.v, b.v, t)}; }

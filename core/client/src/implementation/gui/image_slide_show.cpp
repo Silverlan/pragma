@@ -75,7 +75,7 @@ void pragma::gui::types::WIImageSlideShow::DisplayPreloadedImage()
 	auto &imgPreload = texPreload->GetImage();
 	auto lastTexture = (m_blurSet != nullptr) ? m_blurSet->GetFinalRenderTarget()->GetTexture().shared_from_this() : nullptr;
 
-	auto &context = pragma::gui::WGUI::GetInstance().GetContext();
+	auto &context = WGUI::GetInstance().GetContext();
 
 	auto extents = imgPreload.GetExtents();
 	prosper::util::ImageCreateInfo createInfo {};
@@ -145,13 +145,13 @@ void pragma::gui::types::WIImageSlideShow::SetImages(const std::vector<std::stri
 	createInfo.format = prosper::Format::R8G8B8A8_UNorm;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 	std::array<uint8_t, 4> px = {0u, 0u, 0u, std::numeric_limits<uint8_t>::max()};
-	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(createInfo, px.data());
+	auto img = get_cengine()->GetRenderContext().CreateImage(createInfo, px.data());
 	if(img != nullptr) {
 		prosper::util::TextureCreateInfo texCreateInfo {};
 		prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};
 		samplerCreateInfo.addressModeU = samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::Repeat;
-		auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+		auto tex = get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 		if(tex != nullptr) {
 			auto *pImgNext = static_cast<WITexturedRect *>(m_hImgNext.get());
 			pImgNext->SetTexture(*tex);
@@ -168,14 +168,14 @@ void pragma::gui::types::WIImageSlideShow::PreloadNextImage(Int32 img)
 	imgPreload.ready = false;
 	imgPreload.image = img;
 
-	auto &wgui = pragma::gui::WGUI::GetInstance();
+	auto &wgui = WGUI::GetInstance();
 	auto &matManager = static_cast<material::CMaterialManager &>(wgui.GetMaterialManager());
 	auto &textureManager = matManager.GetTextureManager();
 	auto hSlideShow = GetHandle();
 
 	auto loadInfo = std::make_unique<material::TextureLoadInfo>();
-	loadInfo->flags |= pragma::util::AssetLoadFlags::AbsolutePath;
-	loadInfo->onLoaded = [this, hSlideShow](pragma::util::Asset &asset) {
+	loadInfo->flags |= util::AssetLoadFlags::AbsolutePath;
+	loadInfo->onLoaded = [this, hSlideShow](util::Asset &asset) {
 		if(!hSlideShow.IsValid())
 			return;
 		m_imgPreload.texture = material::TextureManager::GetAssetObject(asset);
@@ -202,7 +202,7 @@ void pragma::gui::types::WIImageSlideShow::PreloadNextRandomShuffle()
 	}
 	if(m_randomShuffle.empty())
 		return;
-	auto r = pragma::math::random(0, CUInt32(m_randomShuffle.size() - 1));
+	auto r = math::random(0, CUInt32(m_randomShuffle.size() - 1));
 	auto img = m_randomShuffle[r];
 	m_randomShuffle.erase(m_randomShuffle.begin() + r);
 	if(!m_randomShuffle.empty() && img == m_currentImg) {

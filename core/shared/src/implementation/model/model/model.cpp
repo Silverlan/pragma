@@ -8,25 +8,25 @@ module pragma.shared;
 
 import :model.model;
 
-std::shared_ptr<pragma::asset::ModelMeshGroup> pragma::asset::ModelMeshGroup::Create(const std::string &name) { return std::shared_ptr<pragma::asset::ModelMeshGroup>(new pragma::asset::ModelMeshGroup {name}); }
-std::shared_ptr<pragma::asset::ModelMeshGroup> pragma::asset::ModelMeshGroup::Create(const pragma::asset::ModelMeshGroup &other)
+std::shared_ptr<pragma::asset::ModelMeshGroup> pragma::asset::ModelMeshGroup::Create(const std::string &name) { return std::shared_ptr<ModelMeshGroup>(new ModelMeshGroup {name}); }
+std::shared_ptr<pragma::asset::ModelMeshGroup> pragma::asset::ModelMeshGroup::Create(const ModelMeshGroup &other)
 {
-	auto r = std::shared_ptr<pragma::asset::ModelMeshGroup>(new pragma::asset::ModelMeshGroup {other.m_name});
+	auto r = std::shared_ptr<ModelMeshGroup>(new ModelMeshGroup {other.m_name});
 	r->m_meshes.reserve(other.m_meshes.size());
 	for(auto &mesh : other.m_meshes)
 		r->m_meshes.push_back(mesh->Copy());
 	return r;
 }
 pragma::asset::ModelMeshGroup::ModelMeshGroup(const std::string &name) : m_name(name) {}
-bool pragma::asset::ModelMeshGroup::operator==(const pragma::asset::ModelMeshGroup &other) const { return this == &other; }
-bool pragma::asset::ModelMeshGroup::operator!=(const pragma::asset::ModelMeshGroup &other) const { return !operator==(other); }
+bool pragma::asset::ModelMeshGroup::operator==(const ModelMeshGroup &other) const { return this == &other; }
+bool pragma::asset::ModelMeshGroup::operator!=(const ModelMeshGroup &other) const { return !operator==(other); }
 const std::string &pragma::asset::ModelMeshGroup::GetName() const { return m_name; }
 std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &pragma::asset::ModelMeshGroup::GetMeshes() { return m_meshes; }
-void pragma::asset::ModelMeshGroup::AddMesh(const std::shared_ptr<pragma::geometry::ModelMesh> &mesh) { m_meshes.push_back(mesh); }
+void pragma::asset::ModelMeshGroup::AddMesh(const std::shared_ptr<geometry::ModelMesh> &mesh) { m_meshes.push_back(mesh); }
 uint32_t pragma::asset::ModelMeshGroup::GetMeshCount() const { return static_cast<uint32_t>(m_meshes.size()); }
-bool pragma::asset::ModelMeshGroup::IsEqual(const pragma::asset::ModelMeshGroup &other) const
+bool pragma::asset::ModelMeshGroup::IsEqual(const ModelMeshGroup &other) const
 {
-	static_assert(pragma::asset::ModelMeshGroup::layout_version == 1, "Update this function when making changes to this class!");
+	static_assert(layout_version == 1, "Update this function when making changes to this class!");
 	if(!(m_name == other.m_name && m_meshes.size() == other.m_meshes.size()))
 		return false;
 	for(auto i = decltype(m_meshes.size()) {0u}; i < m_meshes.size(); ++i) {
@@ -40,16 +40,16 @@ bool pragma::asset::ModelMeshGroup::IsEqual(const pragma::asset::ModelMeshGroup 
 
 bool pragma::asset::Eyeball::LidFlexDesc::operator==(const LidFlexDesc &other) const
 {
-	static_assert(LidFlexDesc::layout_version == 1, "Update this function when making changes to this class!");
-	return lidFlexIndex == other.lidFlexIndex && raiserFlexIndex == other.raiserFlexIndex && neutralFlexIndex == other.neutralFlexIndex && lowererFlexIndex == other.lowererFlexIndex && pragma::math::abs(raiserValue - other.raiserValue) < 0.001f
-	  && pragma::math::abs(neutralValue - other.neutralValue) < 0.001f && pragma::math::abs(lowererValue - other.lowererValue) < 0.001f;
+	static_assert(layout_version == 1, "Update this function when making changes to this class!");
+	return lidFlexIndex == other.lidFlexIndex && raiserFlexIndex == other.raiserFlexIndex && neutralFlexIndex == other.neutralFlexIndex && lowererFlexIndex == other.lowererFlexIndex && math::abs(raiserValue - other.raiserValue) < 0.001f
+	  && math::abs(neutralValue - other.neutralValue) < 0.001f && math::abs(lowererValue - other.lowererValue) < 0.001f;
 }
 
 bool pragma::asset::Eyeball::operator==(const Eyeball &other) const
 {
-	static_assert(pragma::asset::Eyeball::layout_version == 1, "Update this function when making changes to this class!");
-	return name == other.name && boneIndex == other.boneIndex && uvec::cmp(origin, other.origin) && pragma::math::abs(zOffset - other.zOffset) < 0.001f && pragma::math::abs(radius - other.radius) < 0.001f && uvec::cmp(up, other.up) && uvec::cmp(forward, other.forward)
-	  && irisMaterialIndex == other.irisMaterialIndex && pragma::math::abs(maxDilationFactor - other.maxDilationFactor) < 0.001f && pragma::math::abs(irisUvRadius - other.irisUvRadius) < 0.001f && pragma::math::abs(irisScale - other.irisScale) < 0.001f && upperLid == other.upperLid
+	static_assert(layout_version == 1, "Update this function when making changes to this class!");
+	return name == other.name && boneIndex == other.boneIndex && uvec::cmp(origin, other.origin) && math::abs(zOffset - other.zOffset) < 0.001f && math::abs(radius - other.radius) < 0.001f && uvec::cmp(up, other.up) && uvec::cmp(forward, other.forward)
+	  && irisMaterialIndex == other.irisMaterialIndex && math::abs(maxDilationFactor - other.maxDilationFactor) < 0.001f && math::abs(irisUvRadius - other.irisUvRadius) < 0.001f && math::abs(irisScale - other.irisScale) < 0.001f && upperLid == other.upperLid
 	  && lowerLid == other.lowerLid;
 }
 
@@ -57,7 +57,7 @@ bool pragma::asset::Eyeball::operator==(const Eyeball &other) const
 
 bool pragma::asset::Model::MetaInfo::operator==(const MetaInfo &other) const
 {
-	static_assert(MetaInfo::layout_version == 1, "Update this function when making changes to this class!");
+	static_assert(layout_version == 1, "Update this function when making changes to this class!");
 	return includes == other.includes && texturePaths == other.texturePaths && textures == other.textures && flags == other.flags;
 }
 
@@ -67,7 +67,7 @@ pragma::asset::Model::MetaInfo::MetaInfo() {}
 
 pragma::asset::Model::Model() : m_reference(Frame::Create(0)) { Construct(); }
 
-pragma::asset::Model::Model(pragma::NetworkState *nw, uint32_t numBones, const std::string &name) : pragma::asset::Model()
+pragma::asset::Model::Model(NetworkState *nw, uint32_t numBones, const std::string &name) : Model()
 {
 	m_networkState = nw;
 	m_name = name;
@@ -75,19 +75,19 @@ pragma::asset::Model::Model(pragma::NetworkState *nw, uint32_t numBones, const s
 		m_bindPose.push_back(umat::identity());
 }
 
-pragma::asset::Model::Model(const pragma::asset::Model &other)
+pragma::asset::Model::Model(const Model &other)
     : m_networkState(other.m_networkState), m_metaInfo(other.m_metaInfo), m_stateFlags(other.m_stateFlags), m_mass(other.m_mass), m_blendControllers(other.m_blendControllers), m_bodyGroups(other.m_bodyGroups), m_hitboxes(other.m_hitboxes), m_name(other.m_name),
       m_animationIDs(other.m_animationIDs), m_bindPose(other.m_bindPose), m_collisionMin(other.m_collisionMin), m_collisionMax(other.m_collisionMax), m_renderMin(other.m_renderMin), m_renderMax(other.m_renderMax), m_joints(other.m_joints), m_baseMeshes(other.m_baseMeshes),
-      m_lods(other.m_lods), m_attachments(other.m_attachments), m_materials(other.m_materials), m_textureGroups(other.m_textureGroups), m_skeleton(std::make_unique<pragma::animation::Skeleton>(*other.m_skeleton)), m_reference(Frame::Create(*other.m_reference)),
+      m_lods(other.m_lods), m_attachments(other.m_attachments), m_materials(other.m_materials), m_textureGroups(other.m_textureGroups), m_skeleton(std::make_unique<animation::Skeleton>(*other.m_skeleton)), m_reference(Frame::Create(*other.m_reference)),
       m_vertexCount(other.m_vertexCount), m_triangleCount(other.m_triangleCount), m_flexControllers(other.m_flexControllers), m_flexes(other.m_flexes), m_phonemeMap(other.m_phonemeMap)
 {
 	m_stateFlags |= StateFlags::AllMaterialsLoaded;
 	m_meshGroups.reserve(other.m_meshGroups.size());
 	for(auto &meshGroup : other.m_meshGroups)
-		m_meshGroups.push_back(pragma::asset::ModelMeshGroup::Create(*meshGroup));
+		m_meshGroups.push_back(ModelMeshGroup::Create(*meshGroup));
 	m_animations.reserve(other.m_animations.size());
 	for(auto &anim : other.m_animations)
-		m_animations.push_back(pragma::animation::Animation::Create(*anim));
+		m_animations.push_back(animation::Animation::Create(*anim));
 
 	m_vertexAnimations.reserve(other.m_vertexAnimations.size());
 	for(auto &anim : other.m_vertexAnimations)
@@ -95,7 +95,7 @@ pragma::asset::Model::Model(const pragma::asset::Model &other)
 
 	m_collisionMeshes.reserve(other.m_collisionMeshes.size());
 	for(auto &mesh : other.m_collisionMeshes)
-		m_collisionMeshes.push_back(pragma::physics::CollisionMesh::Create(*mesh));
+		m_collisionMeshes.push_back(physics::CollisionMesh::Create(*mesh));
 
 	// Copy extension data
 	std::stringstream extStream {};
@@ -121,10 +121,10 @@ pragma::asset::Model::~Model()
 	m_joints.clear();
 }
 
-bool pragma::asset::Model::IsEqual(const pragma::asset::Model &other) const
+bool pragma::asset::Model::IsEqual(const Model &other) const
 {
 	if(!(m_metaInfo == other.m_metaInfo && m_mass == other.m_mass && m_meshCount == other.m_meshCount && m_subMeshCount == other.m_subMeshCount && m_vertexCount == other.m_vertexCount && m_triangleCount == other.m_triangleCount
-	     && pragma::math::abs(m_maxEyeDeflection - other.m_maxEyeDeflection) < 0.0001f))
+	     && math::abs(m_maxEyeDeflection - other.m_maxEyeDeflection) < 0.0001f))
 		return false;
 	if(!(m_phonemeMap == other.m_phonemeMap && m_blendControllers == other.m_blendControllers && m_bodyGroups == other.m_bodyGroups && m_hitboxes == other.m_hitboxes && m_eyeballs == other.m_eyeballs /* && m_name == other.m_name*/))
 		return false;
@@ -172,12 +172,12 @@ bool pragma::asset::Model::IsEqual(const pragma::asset::Model &other) const
 		return false;
 	if(m_skeleton && *m_skeleton != *other.m_skeleton)
 		return false;
-	static_assert(pragma::asset::Model::layout_version == 1, "Update this function when making changes to this class!");
+	static_assert(layout_version == 1, "Update this function when making changes to this class!");
 	return true;
 }
-bool pragma::asset::Model::operator==(const pragma::asset::Model &other) const { return this == &other; }
-bool pragma::asset::Model::operator!=(const pragma::asset::Model &other) const { return !operator==(other); }
-pragma::asset::Model &pragma::asset::Model::operator=(const pragma::asset::Model &other)
+bool pragma::asset::Model::operator==(const Model &other) const { return this == &other; }
+bool pragma::asset::Model::operator!=(const Model &other) const { return !operator==(other); }
+pragma::asset::Model &pragma::asset::Model::operator=(const Model &other)
 {
 	m_networkState = other.m_networkState;
 	m_metaInfo = other.m_metaInfo;
@@ -228,7 +228,7 @@ pragma::asset::Model &pragma::asset::Model::operator=(const pragma::asset::Model
 	return *this;
 }
 
-const PhonemeMap &pragma::asset::Model::GetPhonemeMap() const { return const_cast<pragma::asset::Model *>(this)->GetPhonemeMap(); }
+const PhonemeMap &pragma::asset::Model::GetPhonemeMap() const { return const_cast<Model *>(this)->GetPhonemeMap(); }
 PhonemeMap &pragma::asset::Model::GetPhonemeMap() { return m_phonemeMap; }
 udm::PropertyWrapper pragma::asset::Model::GetExtensionData() const { return udm::PropertyWrapper {*m_extensions}; }
 void pragma::asset::Model::Rotate(const Quat &rot)
@@ -241,7 +241,7 @@ void pragma::asset::Model::Rotate(const Quat &rot)
 	for(auto &colMesh : m_collisionMeshes)
 		colMesh->Rotate(rot);
 	for(auto &anim : m_animations) {
-		if(anim->HasFlag(pragma::FAnim::Gesture) == true)
+		if(anim->HasFlag(FAnim::Gesture) == true)
 			continue; // Don't rotate delta animations
 		anim->Rotate(skeleton, rot);
 	}
@@ -265,7 +265,7 @@ void pragma::asset::Model::Translate(const Vector3 &t)
 	for(auto &colMesh : m_collisionMeshes)
 		colMesh->Translate(t);
 	for(auto &anim : m_animations) {
-		if(anim->HasFlag(pragma::FAnim::Gesture) == true)
+		if(anim->HasFlag(FAnim::Gesture) == true)
 			continue; // Don't rotate delta animations
 		anim->Translate(skeleton, t);
 	}
@@ -297,7 +297,7 @@ void pragma::asset::Model::Scale(const Vector3 &scale)
 	GenerateBindPoseMatrices();
 }
 
-void pragma::asset::Model::Mirror(pragma::Axis axis)
+void pragma::asset::Model::Mirror(Axis axis)
 {
 	Vector3 transform {1.f, 1.f, 1.f};
 	m_collisionMin *= transform;
@@ -323,13 +323,13 @@ void pragma::asset::Model::Mirror(pragma::Axis axis)
 	for(auto &att : m_attachments) {
 		att.offset *= transform;
 		auto rot = uquat::create(att.angles);
-		uquat::mirror_on_axis(rot, pragma::math::to_integral(axis));
+		uquat::mirror_on_axis(rot, math::to_integral(axis));
 		att.angles = EulerAngles {rot};
 	}
 	for(auto &cmesh : m_collisionMeshes)
 		cmesh->Mirror(axis);
 	if(m_metaRig) {
-		uquat::mirror_on_axis(m_metaRig->forwardFacingRotationOffset, pragma::math::to_integral(axis));
+		uquat::mirror_on_axis(m_metaRig->forwardFacingRotationOffset, math::to_integral(axis));
 		m_metaRig->min *= transform;
 		m_metaRig->max *= transform;
 		uvec::to_min_max(m_metaRig->min, m_metaRig->max);
@@ -364,33 +364,33 @@ void pragma::asset::Model::GenerateBindPoseMatrices()
 uint32_t pragma::asset::Model::GetVertexCount() const { return m_vertexCount; }
 uint32_t pragma::asset::Model::GetTriangleCount() const { return m_triangleCount; }
 pragma::asset::Model::MetaInfo &pragma::asset::Model::GetMetaInfo() const { return m_metaInfo; }
-void pragma::asset::Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &outMeshes) const { return GetBodyGroupMeshes(bodyGroups, 0, outMeshes); }
-void pragma::asset::Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, uint32_t lod, std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &outMeshes) const
+void pragma::asset::Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, std::vector<std::shared_ptr<geometry::ModelMesh>> &outMeshes) const { return GetBodyGroupMeshes(bodyGroups, 0, outMeshes); }
+void pragma::asset::Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, uint32_t lod, std::vector<std::shared_ptr<geometry::ModelMesh>> &outMeshes) const
 {
-	auto meshIds = const_cast<pragma::asset::Model *>(this)->GetBaseMeshes();
+	auto meshIds = const_cast<Model *>(this)->GetBaseMeshes();
 	meshIds.reserve(meshIds.size() + m_bodyGroups.size());
 	for(auto i = decltype(bodyGroups.size()) {0}; i < bodyGroups.size(); ++i) {
 		auto bg = bodyGroups[i];
 		auto meshGroupId = std::numeric_limits<uint32_t>::max();
-		if(const_cast<pragma::asset::Model *>(this)->GetMesh(static_cast<uint32_t>(i), bg, meshGroupId) == true && meshGroupId != std::numeric_limits<uint32_t>::max())
+		if(const_cast<Model *>(this)->GetMesh(static_cast<uint32_t>(i), bg, meshGroupId) == true && meshGroupId != std::numeric_limits<uint32_t>::max())
 			meshIds.push_back(meshGroupId);
 	}
-	const_cast<pragma::asset::Model *>(this)->TranslateLODMeshes(lod, meshIds);
-	const_cast<pragma::asset::Model *>(this)->GetMeshes(meshIds, outMeshes);
+	const_cast<Model *>(this)->TranslateLODMeshes(lod, meshIds);
+	const_cast<Model *>(this)->GetMeshes(meshIds, outMeshes);
 }
-void pragma::asset::Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &outMeshes) const { return GetBodyGroupMeshes(bodyGroups, 0, outMeshes); }
-void pragma::asset::Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, uint32_t lod, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &outMeshes) const
+void pragma::asset::Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, std::vector<std::shared_ptr<geometry::ModelSubMesh>> &outMeshes) const { return GetBodyGroupMeshes(bodyGroups, 0, outMeshes); }
+void pragma::asset::Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups, uint32_t lod, std::vector<std::shared_ptr<geometry::ModelSubMesh>> &outMeshes) const
 {
-	auto meshIds = const_cast<pragma::asset::Model *>(this)->GetBaseMeshes();
+	auto meshIds = const_cast<Model *>(this)->GetBaseMeshes();
 	meshIds.reserve(meshIds.size() + m_bodyGroups.size());
 	for(auto i = decltype(bodyGroups.size()) {0}; i < bodyGroups.size(); ++i) {
 		auto bg = bodyGroups[i];
 		auto meshGroupId = std::numeric_limits<uint32_t>::max();
-		if(const_cast<pragma::asset::Model *>(this)->GetMesh(static_cast<uint32_t>(i), bg, meshGroupId) == true && meshGroupId != std::numeric_limits<uint32_t>::max())
+		if(const_cast<Model *>(this)->GetMesh(static_cast<uint32_t>(i), bg, meshGroupId) == true && meshGroupId != std::numeric_limits<uint32_t>::max())
 			meshIds.push_back(meshGroupId);
 	}
-	const_cast<pragma::asset::Model *>(this)->TranslateLODMeshes(lod, meshIds);
-	const_cast<pragma::asset::Model *>(this)->GetSubMeshes(meshIds, outMeshes);
+	const_cast<Model *>(this)->TranslateLODMeshes(lod, meshIds);
+	const_cast<Model *>(this)->GetSubMeshes(meshIds, outMeshes);
 }
 pragma::asset::BodyGroup &pragma::asset::Model::AddBodyGroup(const std::string &name)
 {
@@ -421,31 +421,31 @@ std::vector<pragma::asset::BodyGroup> &pragma::asset::Model::GetBodyGroups() { r
 void pragma::asset::Model::Remove() { delete this; }
 bool pragma::asset::Model::IsRootBone(uint32_t boneId) const { return m_skeleton->IsRootBone(boneId); }
 
-bool pragma::asset::Model::GetReferenceBonePose(pragma::animation::BoneId boneId, pragma::math::Transform &outPose, pragma::math::CoordinateSpace space) const
+bool pragma::asset::Model::GetReferenceBonePose(animation::BoneId boneId, math::Transform &outPose, math::CoordinateSpace space) const
 {
 	auto &ref = GetReference();
 	auto numBones = ref.GetBoneCount();
 	if(boneId >= numBones)
 		return false;
-	pragma::math::ScaledTransform scaledPose;
+	math::ScaledTransform scaledPose;
 	if(!GetReferenceBonePose(boneId, scaledPose, space))
 		return false;
 	outPose = scaledPose;
 	return true;
 }
-bool pragma::asset::Model::GetReferenceBonePose(pragma::animation::BoneId boneId, pragma::math::ScaledTransform &outPose, pragma::math::CoordinateSpace space) const { return GetReferenceBonePose(boneId, &outPose.GetOrigin(), &outPose.GetRotation(), &outPose.GetScale(), space); }
-bool pragma::asset::Model::GetReferenceBonePos(pragma::animation::BoneId boneId, Vector3 &outPos, pragma::math::CoordinateSpace space) const { return GetReferenceBonePose(boneId, &outPos, nullptr, nullptr, space); }
-bool pragma::asset::Model::GetReferenceBoneRot(pragma::animation::BoneId boneId, Quat &outRot, pragma::math::CoordinateSpace space) const { return GetReferenceBonePose(boneId, nullptr, &outRot, nullptr, space); }
-bool pragma::asset::Model::GetReferenceBoneScale(pragma::animation::BoneId boneId, Vector3 &outScale, pragma::math::CoordinateSpace space) const { return GetReferenceBonePose(boneId, nullptr, nullptr, &outScale, space); }
-bool pragma::asset::Model::GetReferenceBonePose(pragma::animation::BoneId boneId, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale, pragma::math::CoordinateSpace space) const
+bool pragma::asset::Model::GetReferenceBonePose(animation::BoneId boneId, math::ScaledTransform &outPose, math::CoordinateSpace space) const { return GetReferenceBonePose(boneId, &outPose.GetOrigin(), &outPose.GetRotation(), &outPose.GetScale(), space); }
+bool pragma::asset::Model::GetReferenceBonePos(animation::BoneId boneId, Vector3 &outPos, math::CoordinateSpace space) const { return GetReferenceBonePose(boneId, &outPos, nullptr, nullptr, space); }
+bool pragma::asset::Model::GetReferenceBoneRot(animation::BoneId boneId, Quat &outRot, math::CoordinateSpace space) const { return GetReferenceBonePose(boneId, nullptr, &outRot, nullptr, space); }
+bool pragma::asset::Model::GetReferenceBoneScale(animation::BoneId boneId, Vector3 &outScale, math::CoordinateSpace space) const { return GetReferenceBonePose(boneId, nullptr, nullptr, &outScale, space); }
+bool pragma::asset::Model::GetReferenceBonePose(animation::BoneId boneId, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale, math::CoordinateSpace space) const
 {
 	auto &ref = GetReference();
 	auto *t = ref.GetBoneTransform(boneId);
 	if(!t)
 		return false;
 	switch(space) {
-	case pragma::math::CoordinateSpace::Object:
-	case pragma::math::CoordinateSpace::World:
+	case math::CoordinateSpace::Object:
+	case math::CoordinateSpace::World:
 		{
 			if(optOutPos)
 				*optOutPos = t->GetOrigin();
@@ -457,18 +457,18 @@ bool pragma::asset::Model::GetReferenceBonePose(pragma::animation::BoneId boneId
 			}
 			return true;
 		}
-	case pragma::math::CoordinateSpace::Local:
+	case math::CoordinateSpace::Local:
 		{
 			auto &skel = GetSkeleton();
 			auto bone = skel.GetBone(boneId).lock();
 			if(!bone)
 				return false;
-			pragma::math::ScaledTransform parentPose;
-			pragma::math::ScaledTransform pose;
+			math::ScaledTransform parentPose;
+			math::ScaledTransform pose;
 			auto parent = bone->parent.lock();
 			if(parent)
-				GetReferenceBonePose(parent->ID, parentPose, pragma::math::CoordinateSpace::Object);
-			GetReferenceBonePose(boneId, pose, pragma::math::CoordinateSpace::Object);
+				GetReferenceBonePose(parent->ID, parentPose, math::CoordinateSpace::Object);
+			GetReferenceBonePose(boneId, pose, math::CoordinateSpace::Object);
 			pose = parentPose.GetInverse() * pose;
 			if(optOutPos)
 				*optOutPos = pose.GetOrigin();
@@ -520,25 +520,25 @@ bool pragma::asset::Model::GetLocalBonePosition(uint32_t animId, uint32_t frameI
 	}
 	return true;
 }
-pragma::util::WeakHandle<const pragma::asset::Model> pragma::asset::Model::GetHandle() const { return pragma::util::WeakHandle<const pragma::asset::Model>(std::static_pointer_cast<const pragma::asset::Model>(shared_from_this())); }
-pragma::util::WeakHandle<pragma::asset::Model> pragma::asset::Model::GetHandle() { return pragma::util::WeakHandle<pragma::asset::Model>(std::static_pointer_cast<pragma::asset::Model>(shared_from_this())); }
+pragma::util::WeakHandle<const pragma::asset::Model> pragma::asset::Model::GetHandle() const { return pragma::util::WeakHandle<const Model>(std::static_pointer_cast<const Model>(shared_from_this())); }
+pragma::util::WeakHandle<pragma::asset::Model> pragma::asset::Model::GetHandle() { return pragma::util::WeakHandle<Model>(std::static_pointer_cast<Model>(shared_from_this())); }
 
-bool pragma::asset::Model::SetReferencePoses(const std::vector<pragma::math::ScaledTransform> &poses, bool posesInParentSpace)
+bool pragma::asset::Model::SetReferencePoses(const std::vector<math::ScaledTransform> &poses, bool posesInParentSpace)
 {
 	auto &skeleton = GetSkeleton();
 	if(skeleton.GetBoneCount() != poses.size())
 		return false;
-	std::vector<pragma::math::ScaledTransform> *relPoses = nullptr;
-	std::vector<pragma::math::ScaledTransform> *absPoses = nullptr;
-	std::vector<pragma::math::ScaledTransform> t;
+	std::vector<math::ScaledTransform> *relPoses = nullptr;
+	std::vector<math::ScaledTransform> *absPoses = nullptr;
+	std::vector<math::ScaledTransform> t;
 	t.resize(poses.size());
 	if(posesInParentSpace) {
-		relPoses = const_cast<std::vector<pragma::math::ScaledTransform> *>(&poses);
+		relPoses = const_cast<std::vector<math::ScaledTransform> *>(&poses);
 		absPoses = &t;
 		skeleton.TransformToGlobalSpace(*relPoses, *absPoses);
 	}
 	else {
-		absPoses = const_cast<std::vector<pragma::math::ScaledTransform> *>(&poses);
+		absPoses = const_cast<std::vector<math::ScaledTransform> *>(&poses);
 		relPoses = &t;
 		skeleton.TransformToParentSpace(*absPoses, *relPoses);
 	}
@@ -550,7 +550,7 @@ bool pragma::asset::Model::SetReferencePoses(const std::vector<pragma::math::Sca
 
 	auto animId = LookupAnimation("reference");
 	if(LookupAnimation("reference") != -1) {
-		auto anim = pragma::animation::Animation::Create();
+		auto anim = animation::Animation::Create();
 		animId = AddAnimation("reference", anim);
 	}
 
@@ -569,18 +569,18 @@ bool pragma::asset::Model::SetReferencePoses(const std::vector<pragma::math::Sca
 Frame &pragma::asset::Model::GetReference() { return *m_reference; }
 const Frame &pragma::asset::Model::GetReference() const { return *m_reference; }
 void pragma::asset::Model::SetReference(std::shared_ptr<Frame> frame) { m_reference = frame; }
-const std::vector<pragma::physics::JointInfo> &pragma::asset::Model::GetJoints() const { return const_cast<pragma::asset::Model *>(this)->GetJoints(); }
+const std::vector<pragma::physics::JointInfo> &pragma::asset::Model::GetJoints() const { return const_cast<Model *>(this)->GetJoints(); }
 std::vector<pragma::physics::JointInfo> &pragma::asset::Model::GetJoints() { return m_joints; }
-pragma::physics::JointInfo &pragma::asset::Model::AddJoint(physics::JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent)
+pragma::physics::JointInfo &pragma::asset::Model::AddJoint(physics::JointType type, animation::BoneId child, animation::BoneId parent)
 {
-	m_joints.push_back(pragma::physics::JointInfo(type, child, parent));
+	m_joints.push_back(physics::JointInfo(type, child, parent));
 	return m_joints.back();
 }
 
-const std::vector<pragma::asset::Eyeball> &pragma::asset::Model::GetEyeballs() const { return const_cast<pragma::asset::Model *>(this)->GetEyeballs(); }
+const std::vector<pragma::asset::Eyeball> &pragma::asset::Model::GetEyeballs() const { return const_cast<Model *>(this)->GetEyeballs(); }
 std::vector<pragma::asset::Eyeball> &pragma::asset::Model::GetEyeballs() { return m_eyeballs; }
 uint32_t pragma::asset::Model::GetEyeballCount() const { return m_eyeballs.size(); }
-const pragma::asset::Eyeball *pragma::asset::Model::GetEyeball(uint32_t idx) const { return const_cast<pragma::asset::Model *>(this)->GetEyeball(idx); }
+const pragma::asset::Eyeball *pragma::asset::Model::GetEyeball(uint32_t idx) const { return const_cast<Model *>(this)->GetEyeball(idx); }
 pragma::asset::Eyeball *pragma::asset::Model::GetEyeball(uint32_t idx) { return (idx < m_eyeballs.size()) ? &m_eyeballs.at(idx) : nullptr; }
 void pragma::asset::Model::AddEyeball(const Eyeball &eyeball) { m_eyeballs.push_back(eyeball); }
 
@@ -588,7 +588,7 @@ void pragma::asset::Model::Construct()
 {
 	m_stateFlags |= StateFlags::Valid;
 	m_name = "";
-	m_skeleton = std::make_unique<pragma::animation::Skeleton>();
+	m_skeleton = std::make_unique<animation::Skeleton>();
 	m_mass = 0.f;
 	m_extensions = udm::Property::Create(udm::Type::Element);
 	uvec::zero(&m_collisionMin);
@@ -597,7 +597,7 @@ void pragma::asset::Model::Construct()
 	uvec::zero(&m_renderMax);
 }
 
-bool pragma::asset::Model::Load(pragma::asset::Model &mdl, pragma::NetworkState &nw, const udm::AssetData &data, std::string &outErr)
+bool pragma::asset::Model::Load(Model &mdl, NetworkState &nw, const udm::AssetData &data, std::string &outErr)
 {
 	assert(nw.GetGameState());
 	if(mdl.LoadFromAssetData(*nw.GetGameState(), data, outErr) == false)
@@ -620,7 +620,7 @@ void pragma::asset::Model::OnMaterialLoaded()
 		else
 			++it;
 	}
-	pragma::math::set_flag(m_stateFlags, StateFlags::AllMaterialsLoaded, bAllLoaded);
+	math::set_flag(m_stateFlags, StateFlags::AllMaterialsLoaded, bAllLoaded);
 	if(bAllLoaded == true) {
 		auto onAllMatsLoadedCallbacks = std::move(m_onAllMatsLoadedCallbacks);
 		m_onAllMatsLoadedCallbacks.clear();
@@ -632,7 +632,7 @@ void pragma::asset::Model::OnMaterialLoaded()
 }
 CallbackHandle pragma::asset::Model::CallOnMaterialsLoaded(const std::function<void(void)> &f)
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::AllMaterialsLoaded) == true) {
+	if(math::is_flag_set(m_stateFlags, StateFlags::AllMaterialsLoaded) == true) {
 		f();
 		return {};
 	}
@@ -641,7 +641,7 @@ CallbackHandle pragma::asset::Model::CallOnMaterialsLoaded(const std::function<v
 }
 void pragma::asset::Model::AddLoadingMaterial(material::Material &mat, std::optional<uint32_t> index)
 {
-	pragma::math::set_flag(m_stateFlags, StateFlags::AllMaterialsLoaded, false);
+	math::set_flag(m_stateFlags, StateFlags::AllMaterialsLoaded, false);
 	if(index.has_value())
 		m_materials.at(*index) = mat.GetHandle();
 	else
@@ -653,7 +653,7 @@ void pragma::asset::Model::AddLoadingMaterial(material::Material &mat, std::opti
 uint32_t pragma::asset::Model::AddTexture(const std::string &tex, material::Material *mat)
 {
 	auto &meta = GetMetaInfo();
-	auto ntex = pragma::asset::get_normalized_path(tex, pragma::asset::Type::Material);
+	auto ntex = get_normalized_path(tex, Type::Material);
 	auto it = std::find(meta.textures.begin(), meta.textures.end(), ntex);
 	if(it != meta.textures.end())
 		return it - meta.textures.begin();
@@ -669,7 +669,7 @@ bool pragma::asset::Model::SetTexture(uint32_t texIdx, const std::string &tex, m
 	auto &meta = GetMetaInfo();
 	if(texIdx < meta.textures.size()) {
 		auto ntex = tex;
-		ufile::remove_extension_from_filename(ntex, pragma::asset::get_supported_extensions(pragma::asset::Type::Material));
+		ufile::remove_extension_from_filename(ntex, get_supported_extensions(Type::Material));
 		meta.textures.at(texIdx) = ntex;
 	}
 	if(mat == nullptr)
@@ -683,7 +683,7 @@ bool pragma::asset::Model::SetTexture(uint32_t texIdx, const std::string &tex, m
 uint32_t pragma::asset::Model::AddMaterial(uint32_t skin, material::Material *mat, const std::optional<std::string> &matName, std::optional<uint32_t> *optOutSkinTexIdx)
 {
 	auto texName = matName.has_value() ? *matName : mat->GetName();
-	texName = pragma::asset::get_normalized_path(texName, pragma::asset::Type::Material);
+	texName = get_normalized_path(texName, Type::Material);
 	AddTexturePath(ufile::get_path_from_filename(texName));
 	texName = ufile::get_file_from_filename(texName);
 	auto r = AddTexture(texName, mat);
@@ -746,14 +746,14 @@ bool pragma::asset::Model::FindMaterial(const std::string &texture, std::string 
 	auto &texturePaths = meta.texturePaths;
 	for(auto &path : texturePaths) {
 		auto texPath = path + texture;
-		auto foundPath = pragma::asset::find_file(texPath, pragma::asset::Type::Material);
+		auto foundPath = find_file(texPath, Type::Material);
 		if(foundPath.has_value() || fs::exists("materials\\" + texPath + ".vmt") || fs::exists("materials\\" + texPath + ".vmat_c")) {
 			matPath = texPath;
 			return true;
 		}
 	}
 	static auto bSkipPort = false;
-	if(bSkipPort == true || pragma::Engine::Get()->ShouldMountExternalGameResources() == false)
+	if(bSkipPort == true || Engine::Get()->ShouldMountExternalGameResources() == false)
 		return false;
 	if(importIfNotFound) {
 		// Material not found; Attempt to port
@@ -795,54 +795,54 @@ void pragma::asset::Model::PrecacheTexture(uint32_t texId, bool bReload)
 
 void pragma::asset::Model::Validate()
 {
-	pragma::asset::validate_value(m_maxEyeDeflection);
+	validate_value(m_maxEyeDeflection);
 	for(auto &[name, info] : m_phonemeMap.phonemes) {
 		for(auto &[name, val] : info.flexControllers)
-			pragma::asset::validate_value(val);
+			validate_value(val);
 	}
 	for(auto &eb : m_eyeballs) {
-		pragma::asset::validate_value(eb.irisScale);
-		pragma::asset::validate_value(eb.forward);
-		pragma::asset::validate_value(eb.irisUvRadius);
-		pragma::asset::validate_value(eb.maxDilationFactor);
-		pragma::asset::validate_value(eb.origin);
-		pragma::asset::validate_value(eb.radius);
-		pragma::asset::validate_value(eb.up);
-		pragma::asset::validate_value(eb.zOffset);
+		validate_value(eb.irisScale);
+		validate_value(eb.forward);
+		validate_value(eb.irisUvRadius);
+		validate_value(eb.maxDilationFactor);
+		validate_value(eb.origin);
+		validate_value(eb.radius);
+		validate_value(eb.up);
+		validate_value(eb.zOffset);
 	}
 	for(auto &[id, hb] : m_hitboxes) {
-		pragma::asset::validate_value(hb.min);
-		pragma::asset::validate_value(hb.max);
+		validate_value(hb.min);
+		validate_value(hb.max);
 	}
 	for(auto &fc : m_flexControllers) {
-		pragma::asset::validate_value(fc.min);
-		pragma::asset::validate_value(fc.max);
+		validate_value(fc.min);
+		validate_value(fc.max);
 	}
-	pragma::asset::validate_value(m_eyeOffset);
-	pragma::asset::validate_value(m_collisionMin);
-	pragma::asset::validate_value(m_collisionMax);
-	pragma::asset::validate_value(m_renderMin);
-	pragma::asset::validate_value(m_renderMax);
+	validate_value(m_eyeOffset);
+	validate_value(m_collisionMin);
+	validate_value(m_collisionMax);
+	validate_value(m_renderMin);
+	validate_value(m_renderMax);
 	for(auto &pose : m_bindPose)
-		pragma::asset::validate_value(pose);
+		validate_value(pose);
 	for(auto &lod : m_lods)
-		pragma::asset::validate_value(lod.distance);
+		validate_value(lod.distance);
 	for(auto &att : m_attachments) {
-		pragma::asset::validate_value(att.offset);
-		pragma::asset::validate_value(att.angles);
+		validate_value(att.offset);
+		validate_value(att.angles);
 	}
 	for(auto &cmesh : m_collisionMeshes)
 		cmesh->Validate();
 	if(m_metaRig) {
-		pragma::asset::validate_value(m_metaRig->forwardFacingRotationOffset);
-		pragma::asset::validate_value(m_metaRig->min);
-		pragma::asset::validate_value(m_metaRig->max);
+		validate_value(m_metaRig->forwardFacingRotationOffset);
+		validate_value(m_metaRig->min);
+		validate_value(m_metaRig->max);
 	}
 	for(auto &flexAnim : m_flexAnimations) {
-		pragma::asset::validate_value(flexAnim->GetFps());
+		validate_value(flexAnim->GetFps());
 		for(auto &frame : flexAnim->GetFrames()) {
 			for(auto &v : frame->GetValues())
-				pragma::asset::validate_value(v);
+				validate_value(v);
 		}
 	}
 	for(auto &mg : m_meshGroups) {
@@ -858,13 +858,13 @@ void pragma::asset::Model::Validate()
 				for(size_t i = 0; i < n; ++i) {
 					float delta;
 					if(mf->GetDeltaValue(i, delta))
-						pragma::asset::validate_value(delta);
+						validate_value(delta);
 					Vector3 n;
 					if(mf->GetVertexNormal(i, n))
-						pragma::asset::validate_value(n);
+						validate_value(n);
 					Vector3 v;
 					if(mf->GetVertexPosition(i, v))
-						pragma::asset::validate_value(v);
+						validate_value(v);
 				}
 			}
 		}
@@ -879,7 +879,7 @@ void pragma::asset::Model::Optimize()
 	auto &meshGroups = GetMeshGroups();
 	for(auto &group : meshGroups) {
 		// Group all sub-meshes for this mesh group by material
-		std::unordered_map<uint32_t, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>>> groupedMeshes;
+		std::unordered_map<uint32_t, std::vector<std::shared_ptr<geometry::ModelSubMesh>>> groupedMeshes;
 		for(auto &mesh : group->GetMeshes()) {
 			for(auto &subMesh : mesh->GetSubMeshes()) {
 				auto texId = subMesh->GetSkinTextureIndex();
@@ -946,7 +946,7 @@ void pragma::asset::Model::RemoveUnusedMaterialReferences()
 	oldIndexToNewIndex.resize(m_metaInfo.textures.size(), std::numeric_limits<uint32_t>::max());
 	uint32_t oldIdx = 0;
 	for(auto it = m_metaInfo.textures.begin(); it != m_metaInfo.textures.end();) {
-		pragma::util::ScopeGuard sg {[&oldIdx]() { ++oldIdx; }};
+		util::ScopeGuard sg {[&oldIdx]() { ++oldIdx; }};
 		auto idx = it - m_metaInfo.textures.begin();
 		if(inUse[oldIdx] == false) {
 			it = m_metaInfo.textures.erase(it);
@@ -984,12 +984,12 @@ void pragma::asset::Model::RemoveUnusedMaterialReferences()
 
 void pragma::asset::Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds, bool precache, bool bReload)
 {
-	pragma::util::ScopeGuard resWatcherLock {};
+	util::ScopeGuard resWatcherLock {};
 	if(!precache) {
 		// Loading materials may require saving materials / textures, which can trigger the resource watcher,
 		// so we'll disable it temporarily. This is a bit of a messy solution...
 		// TODO: Remove this once the VMT/VMAT conversion code has been removed from the material system!
-		resWatcherLock = std::move(pragma::Engine::Get()->ScopeLockResourceWatchers());
+		resWatcherLock = std::move(Engine::Get()->ScopeLockResourceWatchers());
 	}
 
 	auto &meta = GetMetaInfo();
@@ -1032,7 +1032,7 @@ void pragma::asset::Model::LoadMaterials(bool precache, bool bReload)
 	if(!precache)
 		m_stateFlags |= StateFlags::MaterialsLoadInitiated;
 	auto &meta = GetMetaInfo();
-	auto bDontPrecacheTexGroups = pragma::math::is_flag_set(meta.flags, pragma::asset::Model::Flags::DontPrecacheTextureGroups);
+	auto bDontPrecacheTexGroups = math::is_flag_set(meta.flags, Flags::DontPrecacheTextureGroups);
 	std::vector<uint32_t> groupIds;
 	auto &texGroups = GetTextureGroups();
 	groupIds.reserve(texGroups.size());
@@ -1069,8 +1069,8 @@ void pragma::asset::Model::AddTexturePath(const std::string &path)
 	npath = fs::get_canonicalized_path(npath);
 	if(npath.empty() == false && npath.back() != '/' && npath.back() != '\\')
 		npath += '/';
-	npath = pragma::util::Path::CreatePath(npath).GetString();
-	auto it = std::find_if(m_metaInfo.texturePaths.begin(), m_metaInfo.texturePaths.end(), [&npath](const std::string &pathOther) { return pragma::string::compare(npath, pathOther, false); });
+	npath = util::Path::CreatePath(npath).GetString();
+	auto it = std::find_if(m_metaInfo.texturePaths.begin(), m_metaInfo.texturePaths.end(), [&npath](const std::string &pathOther) { return string::compare(npath, pathOther, false); });
 	if(it != m_metaInfo.texturePaths.end())
 		return;
 	m_metaInfo.texturePaths.push_back(npath);
@@ -1082,7 +1082,7 @@ void pragma::asset::Model::RemoveTexturePath(uint32_t idx)
 	m_metaInfo.texturePaths.erase(m_metaInfo.texturePaths.begin() + idx);
 }
 void pragma::asset::Model::SetTexturePaths(const std::vector<std::string> &paths) { m_metaInfo.texturePaths = paths; }
-std::optional<uint32_t> pragma::asset::Model::GetMaterialIndex(const pragma::geometry::ModelSubMesh &mesh, uint32_t skinId) const
+std::optional<uint32_t> pragma::asset::Model::GetMaterialIndex(const geometry::ModelSubMesh &mesh, uint32_t skinId) const
 {
 	auto idx = mesh.GetSkinTextureIndex();
 	auto *texGroup = GetTextureGroup(skinId);
@@ -1094,11 +1094,11 @@ std::optional<uint32_t> pragma::asset::Model::GetMaterialIndex(const pragma::geo
 }
 std::vector<pragma::material::MaterialHandle> &pragma::asset::Model::GetMaterials()
 {
-	if(!pragma::math::is_flag_set(m_stateFlags, StateFlags::MaterialsLoadInitiated))
+	if(!math::is_flag_set(m_stateFlags, StateFlags::MaterialsLoadInitiated))
 		LoadMaterials();
 	return m_materials;
 }
-const std::vector<pragma::material::MaterialHandle> &pragma::asset::Model::GetMaterials() const { return const_cast<pragma::asset::Model *>(this)->GetMaterials(); }
+const std::vector<pragma::material::MaterialHandle> &pragma::asset::Model::GetMaterials() const { return const_cast<Model *>(this)->GetMaterials(); }
 std::vector<std::string> &pragma::asset::Model::GetTextures() { return m_metaInfo.textures; }
 std::vector<pragma::asset::TextureGroup> &pragma::asset::Model::GetTextureGroups() { return m_textureGroups; }
 pragma::material::Material *pragma::asset::Model::GetMaterial(uint32_t texID)
@@ -1133,7 +1133,7 @@ pragma::asset::TextureGroup *pragma::asset::Model::GetTextureGroup(uint32_t i)
 	return &m_textureGroups[i];
 }
 
-const pragma::asset::TextureGroup *pragma::asset::Model::GetTextureGroup(uint32_t i) const { return const_cast<pragma::asset::Model *>(this)->GetTextureGroup(i); }
+const pragma::asset::TextureGroup *pragma::asset::Model::GetTextureGroup(uint32_t i) const { return const_cast<Model *>(this)->GetTextureGroup(i); }
 
 uint32_t pragma::asset::Model::GetLODCount() const { return static_cast<uint32_t>(m_lods.size()); }
 uint32_t pragma::asset::Model::GetLOD(uint32_t id) const
@@ -1223,7 +1223,7 @@ bool pragma::asset::Model::TranslateLODMeshes(uint32_t lod, std::vector<uint32_t
 	return (lodInfo != nullptr) ? true : false;
 }
 
-const std::vector<uint32_t> &pragma::asset::Model::GetBaseMeshes() const { return const_cast<pragma::asset::Model *>(this)->GetBaseMeshes(); }
+const std::vector<uint32_t> &pragma::asset::Model::GetBaseMeshes() const { return const_cast<Model *>(this)->GetBaseMeshes(); }
 std::vector<uint32_t> &pragma::asset::Model::GetBaseMeshes() { return m_baseMeshes; }
 uint32_t pragma::asset::Model::GetMeshGroupCount() const { return static_cast<uint32_t>(m_meshGroups.size()); }
 uint32_t pragma::asset::Model::GetMeshCount() const { return m_meshCount; }
@@ -1255,7 +1255,7 @@ Bool pragma::asset::Model::GetMesh(uint32_t bodyGroupId, uint32_t groupId, uint3
 	outMeshId = bodyGroup->meshGroups[groupId];
 	return true;
 }
-void pragma::asset::Model::GetMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::shared_ptr<pragma::geometry::ModelMesh>> &outMeshes)
+void pragma::asset::Model::GetMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::shared_ptr<geometry::ModelMesh>> &outMeshes)
 {
 	auto numGroups = m_meshGroups.size();
 	for(auto meshId : meshIds) {
@@ -1268,7 +1268,7 @@ void pragma::asset::Model::GetMeshes(const std::vector<uint32_t> &meshIds, std::
 		}
 	}
 }
-void pragma::asset::Model::GetSubMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &outMeshes)
+void pragma::asset::Model::GetSubMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::shared_ptr<geometry::ModelSubMesh>> &outMeshes)
 {
 	auto numGroups = m_meshGroups.size();
 	for(auto meshId : meshIds) {
@@ -1353,9 +1353,9 @@ void pragma::asset::Model::CalculateCollisionBounds()
 	m_collisionMax = max;
 }
 
-void pragma::asset::Model::Update(pragma::asset::ModelUpdateFlags flags)
+void pragma::asset::Model::Update(ModelUpdateFlags flags)
 {
-	if((flags & pragma::asset::ModelUpdateFlags::UpdateChildren) != pragma::asset::ModelUpdateFlags::None) {
+	if((flags & ModelUpdateFlags::UpdateChildren) != ModelUpdateFlags::None) {
 		for(auto &group : m_meshGroups) {
 			auto &meshes = group->GetMeshes();
 			for(auto &mesh : meshes)
@@ -1364,11 +1364,11 @@ void pragma::asset::Model::Update(pragma::asset::ModelUpdateFlags flags)
 		for(auto &colMesh : m_collisionMeshes)
 			colMesh->Update(flags);
 	}
-	if((flags & pragma::asset::ModelUpdateFlags::UpdateBounds) != pragma::asset::ModelUpdateFlags::None) {
+	if((flags & ModelUpdateFlags::UpdateBounds) != ModelUpdateFlags::None) {
 		CalculateCollisionBounds();
 		CalculateRenderBounds();
 	}
-	if((flags & pragma::asset::ModelUpdateFlags::UpdatePrimitiveCounts) != pragma::asset::ModelUpdateFlags::None) {
+	if((flags & ModelUpdateFlags::UpdatePrimitiveCounts) != ModelUpdateFlags::None) {
 		m_meshCount = 0;
 		m_subMeshCount = 0;
 		m_vertexCount = 0;
@@ -1399,7 +1399,7 @@ void pragma::asset::Model::GetRenderBounds(Vector3 &min, Vector3 &max) const
 
 bool pragma::asset::Model::IntersectAABB(Vector3 &min, Vector3 &max)
 {
-	if(pragma::math::intersection::aabb_aabb(m_collisionMin, m_collisionMax, min, max) == pragma::math::intersection::Intersect::Outside)
+	if(math::intersection::aabb_aabb(m_collisionMin, m_collisionMax, min, max) == math::intersection::Intersect::Outside)
 		return false;
 	for(int i = 0; i < m_collisionMeshes.size(); i++)
 		if(m_collisionMeshes[i]->IntersectAABB(&min, &max))
@@ -1411,9 +1411,9 @@ void pragma::asset::Model::ClearCache() { m_models.clear(); }
 
 const std::string &pragma::asset::Model::GetName() const { return m_name; }
 
-bool pragma::asset::Model::IsValid() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::Valid); }
+bool pragma::asset::Model::IsValid() const { return math::is_flag_set(m_stateFlags, StateFlags::Valid); }
 
-void pragma::asset::Model::AddMesh(const std::string &meshGroup, const std::shared_ptr<pragma::geometry::ModelMesh> &mesh)
+void pragma::asset::Model::AddMesh(const std::string &meshGroup, const std::shared_ptr<geometry::ModelMesh> &mesh)
 {
 	auto group = AddMeshGroup(meshGroup);
 	group->AddMesh(mesh);
@@ -1431,7 +1431,7 @@ std::vector<std::shared_ptr<pragma::asset::ModelMeshGroup>> &pragma::asset::Mode
 const std::vector<std::shared_ptr<pragma::asset::ModelMeshGroup>> &pragma::asset::Model::GetMeshGroups() const { return m_meshGroups; }
 std::shared_ptr<pragma::asset::ModelMeshGroup> pragma::asset::Model::GetMeshGroup(const std::string &meshGroup)
 {
-	auto it = std::find_if(m_meshGroups.begin(), m_meshGroups.end(), [&meshGroup](std::shared_ptr<pragma::asset::ModelMeshGroup> &group) { return pragma::string::compare(group->GetName(), meshGroup, false); });
+	auto it = std::find_if(m_meshGroups.begin(), m_meshGroups.end(), [&meshGroup](std::shared_ptr<ModelMeshGroup> &group) { return string::compare(group->GetName(), meshGroup, false); });
 	if(it == m_meshGroups.end())
 		return nullptr;
 	return *it;
@@ -1445,7 +1445,7 @@ std::shared_ptr<pragma::asset::ModelMeshGroup> pragma::asset::Model::GetMeshGrou
 
 bool pragma::asset::Model::GetMeshGroupId(const std::string &meshGroup, uint32_t &groupId) const
 {
-	auto it = std::find_if(m_meshGroups.begin(), m_meshGroups.end(), [&meshGroup](const std::shared_ptr<pragma::asset::ModelMeshGroup> &group) { return pragma::string::compare(group->GetName(), meshGroup, false); });
+	auto it = std::find_if(m_meshGroups.begin(), m_meshGroups.end(), [&meshGroup](const std::shared_ptr<ModelMeshGroup> &group) { return string::compare(group->GetName(), meshGroup, false); });
 	if(it == m_meshGroups.end())
 		return false;
 	groupId = it - m_meshGroups.begin();
@@ -1454,9 +1454,9 @@ bool pragma::asset::Model::GetMeshGroupId(const std::string &meshGroup, uint32_t
 
 std::shared_ptr<pragma::asset::ModelMeshGroup> pragma::asset::Model::AddMeshGroup(const std::string &meshGroup, uint32_t &meshGroupId)
 {
-	auto it = std::find_if(m_meshGroups.begin(), m_meshGroups.end(), [&meshGroup](const std::shared_ptr<pragma::asset::ModelMeshGroup> &group) { return pragma::string::compare(group->GetName(), meshGroup, false); });
+	auto it = std::find_if(m_meshGroups.begin(), m_meshGroups.end(), [&meshGroup](const std::shared_ptr<ModelMeshGroup> &group) { return string::compare(group->GetName(), meshGroup, false); });
 	if(it == m_meshGroups.end()) {
-		auto mg = pragma::asset::ModelMeshGroup::Create(meshGroup);
+		auto mg = ModelMeshGroup::Create(meshGroup);
 		AddMeshGroup(mg);
 		it = m_meshGroups.end() - 1;
 	}
@@ -1469,19 +1469,19 @@ std::shared_ptr<pragma::asset::ModelMeshGroup> pragma::asset::Model::AddMeshGrou
 	uint32_t meshGroupId = 0u;
 	return AddMeshGroup(meshGroup, meshGroupId);
 }
-void pragma::asset::Model::AddMeshGroup(std::shared_ptr<pragma::asset::ModelMeshGroup> &meshGroup) { m_meshGroups.push_back(meshGroup); }
+void pragma::asset::Model::AddMeshGroup(std::shared_ptr<ModelMeshGroup> &meshGroup) { m_meshGroups.push_back(meshGroup); }
 
 std::vector<std::shared_ptr<pragma::physics::CollisionMesh>> &pragma::asset::Model::GetCollisionMeshes() { return m_collisionMeshes; }
 const std::vector<std::shared_ptr<pragma::physics::CollisionMesh>> &pragma::asset::Model::GetCollisionMeshes() const { return m_collisionMeshes; }
 
-std::optional<uint32_t> pragma::asset::Model::AssignDistinctMaterial(const pragma::asset::ModelMeshGroup &group, const pragma::geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh)
+std::optional<uint32_t> pragma::asset::Model::AssignDistinctMaterial(const ModelMeshGroup &group, const geometry::ModelMesh &mesh, geometry::ModelSubMesh &subMesh)
 {
-	auto &meshes = const_cast<pragma::asset::ModelMeshGroup &>(group).GetMeshes();
-	auto itMesh = std::find_if(meshes.begin(), meshes.end(), [&mesh](const std::shared_ptr<pragma::geometry::ModelMesh> &meshOther) { return meshOther.get() == &mesh; });
+	auto &meshes = const_cast<ModelMeshGroup &>(group).GetMeshes();
+	auto itMesh = std::find_if(meshes.begin(), meshes.end(), [&mesh](const std::shared_ptr<geometry::ModelMesh> &meshOther) { return meshOther.get() == &mesh; });
 	if(itMesh == meshes.end())
 		return {};
-	auto &subMeshes = const_cast<pragma::geometry::ModelMesh &>(mesh).GetSubMeshes();
-	auto itSubMesh = std::find_if(subMeshes.begin(), subMeshes.end(), [&subMesh](const std::shared_ptr<pragma::geometry::ModelSubMesh> &subMeshOther) { return subMeshOther.get() == &subMesh; });
+	auto &subMeshes = const_cast<geometry::ModelMesh &>(mesh).GetSubMeshes();
+	auto itSubMesh = std::find_if(subMeshes.begin(), subMeshes.end(), [&subMesh](const std::shared_ptr<geometry::ModelSubMesh> &subMeshOther) { return subMeshOther.get() == &subMesh; });
 	if(itSubMesh == subMeshes.end())
 		return {};
 	auto meshIdx = itMesh - meshes.begin();
@@ -1497,18 +1497,18 @@ std::optional<uint32_t> pragma::asset::Model::AssignDistinctMaterial(const pragm
 	auto strPath = hMat->GetAbsolutePath();
 	if(strPath.has_value() == false)
 		return {};
-	pragma::util::Path path {*strPath};
+	util::Path path {*strPath};
 	auto ext = path.GetFileExtension();
 	path.RemoveFileExtension();
 	path += '_' + group.GetName();
 	path += '_' + std::to_string(meshIdx);
 	path += '_' + std::to_string(subMeshIdx);
 
-	pragma::util::Path rootPath {};
+	util::Path rootPath {};
 	while(path.GetFront() != "materials") // TODO: What if inside addon called "materials"?
 	{
 		auto front = path.GetFront();
-		rootPath += pragma::util::Path::CreatePath(std::string {front});
+		rootPath += util::Path::CreatePath(std::string {front});
 		path.PopFront();
 	}
 	auto mpath = path.GetString();
@@ -1517,7 +1517,7 @@ std::optional<uint32_t> pragma::asset::Model::AssignDistinctMaterial(const pragm
 	path.PopFront();
 
 	if(fs::exists(mpath) == false) {
-		auto savePath = pragma::asset::relative_path_to_absolute_path(path, pragma::asset::Type::Material, rootPath.GetString());
+		auto savePath = relative_path_to_absolute_path(path, Type::Material, rootPath.GetString());
 		std::string err;
 		if(hMat->Save(savePath.GetString(), err) == false)
 			return {};
@@ -1538,7 +1538,7 @@ std::optional<uint32_t> pragma::asset::Model::AssignDistinctMaterial(const pragm
 	return newSkinTexId;
 }
 
-void pragma::asset::Model::AddCollisionMesh(const std::shared_ptr<pragma::physics::CollisionMesh> &mesh) { m_collisionMeshes.push_back(mesh); }
+void pragma::asset::Model::AddCollisionMesh(const std::shared_ptr<physics::CollisionMesh> &mesh) { m_collisionMeshes.push_back(mesh); }
 
 std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const std::function<std::optional<float>(uint32_t)> &fFetchFlexControllerWeight, const std::function<std::optional<float>(uint32_t)> &fFetchFlexWeight) const
 {
@@ -1552,12 +1552,12 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 	std::stack<float> opStack {};
 	for(auto &op : ops) {
 		switch(op.type) {
-		case pragma::animation::Flex::Operation::Type::None:
+		case animation::Flex::Operation::Type::None:
 			break;
-		case pragma::animation::Flex::Operation::Type::Const:
+		case animation::Flex::Operation::Type::Const:
 			opStack.push(op.d.value);
 			break;
-		case pragma::animation::Flex::Operation::Type::Fetch:
+		case animation::Flex::Operation::Type::Fetch:
 			{
 				auto val = fFetchFlexControllerWeight(op.d.index);
 				if(val.has_value() == false)
@@ -1565,7 +1565,7 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 				opStack.push(*val);
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Fetch2:
+		case animation::Flex::Operation::Type::Fetch2:
 			{
 				auto val = CalcFlexWeight(op.d.index, fFetchFlexControllerWeight, fFetchFlexWeight);
 				if(val.has_value() == false)
@@ -1573,7 +1573,7 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 				opStack.push(*val);
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Add:
+		case animation::Flex::Operation::Type::Add:
 			{
 				if(opStack.size() < 2)
 					return {};
@@ -1583,7 +1583,7 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 				l += r;
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Sub:
+		case animation::Flex::Operation::Type::Sub:
 			{
 				if(opStack.size() < 2)
 					return {};
@@ -1593,7 +1593,7 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 				l -= r;
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Mul:
+		case animation::Flex::Operation::Type::Mul:
 			{
 				if(opStack.size() < 2)
 					return {};
@@ -1603,7 +1603,7 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 				l *= r;
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Div:
+		case animation::Flex::Operation::Type::Div:
 			{
 				if(opStack.size() < 2)
 					return {};
@@ -1614,7 +1614,7 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 					l /= r;
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Neg:
+		case animation::Flex::Operation::Type::Neg:
 			{
 				if(opStack.size() < 1)
 					return {};
@@ -1622,51 +1622,51 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 				r = -r;
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Exp:
+		case animation::Flex::Operation::Type::Exp:
 			break;
-		case pragma::animation::Flex::Operation::Type::Open:
+		case animation::Flex::Operation::Type::Open:
 			break;
-		case pragma::animation::Flex::Operation::Type::Close:
+		case animation::Flex::Operation::Type::Close:
 			break;
-		case pragma::animation::Flex::Operation::Type::Comma:
+		case animation::Flex::Operation::Type::Comma:
 			break;
-		case pragma::animation::Flex::Operation::Type::Max:
+		case animation::Flex::Operation::Type::Max:
 			{
 				if(opStack.size() < 2)
 					return {};
 				auto r = opStack.top();
 				opStack.pop();
 				auto &l = opStack.top();
-				l = pragma::math::max(l, r);
+				l = math::max(l, r);
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Min:
+		case animation::Flex::Operation::Type::Min:
 			{
 				if(opStack.size() < 2)
 					return false;
 				auto r = opStack.top();
 				opStack.pop();
 				auto &l = opStack.top();
-				l = pragma::math::min(l, r);
+				l = math::min(l, r);
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::TwoWay0:
+		case animation::Flex::Operation::Type::TwoWay0:
 			{
 				auto val = fFetchFlexControllerWeight(op.d.index);
 				if(val.has_value() == false)
 					return {};
-				opStack.push(1.f - (pragma::math::min(pragma::math::max(*val + 1.f, 0.f), 1.f)));
+				opStack.push(1.f - (math::min(math::max(*val + 1.f, 0.f), 1.f)));
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::TwoWay1:
+		case animation::Flex::Operation::Type::TwoWay1:
 			{
 				auto val = fFetchFlexControllerWeight(op.d.index);
 				if(val.has_value() == false)
 					return {};
-				opStack.push(pragma::math::min(pragma::math::max(*val, 0.f), 1.f));
+				opStack.push(math::min(math::max(*val, 0.f), 1.f));
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::NWay:
+		case animation::Flex::Operation::Type::NWay:
 			{
 				auto v = fFetchFlexControllerWeight(op.d.index);
 				if(v.has_value() == false)
@@ -1687,21 +1687,21 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 				auto filterRampX = opStack.top();
 				opStack.pop();
 
-				auto greaterThanX = pragma::math::min(1.f, (-pragma::math::min(0.f, (filterRampX - *flValue))));
-				auto lessThanY = pragma::math::min(1.f, (-pragma::math::min(0.f, (*flValue - filterRampY))));
-				auto remapX = pragma::math::min(pragma::math::max((*flValue - filterRampX) / (filterRampY - filterRampX), 0.f), 1.f);
-				auto greaterThanEqualY = -(pragma::math::min(1.f, (-pragma::math::min(0.f, (*flValue - filterRampY)))) - 1.f);
-				auto lessThanEqualZ = -(pragma::math::min(1.f, (-pragma::math::min(0.f, (filterRampZ - *flValue)))) - 1.f);
-				auto greaterThanZ = pragma::math::min(1.f, (-pragma::math::min(0.f, (filterRampZ - *flValue))));
-				auto lessThanW = pragma::math::min(1.f, (-pragma::math::min(0.f, (*flValue - filterRampW))));
-				auto remapZ = (1.f - (pragma::math::min(pragma::math::max((*flValue - filterRampZ) / (filterRampW - filterRampZ), 0.f), 1.f)));
+				auto greaterThanX = math::min(1.f, (-math::min(0.f, (filterRampX - *flValue))));
+				auto lessThanY = math::min(1.f, (-math::min(0.f, (*flValue - filterRampY))));
+				auto remapX = math::min(math::max((*flValue - filterRampX) / (filterRampY - filterRampX), 0.f), 1.f);
+				auto greaterThanEqualY = -(math::min(1.f, (-math::min(0.f, (*flValue - filterRampY)))) - 1.f);
+				auto lessThanEqualZ = -(math::min(1.f, (-math::min(0.f, (filterRampZ - *flValue)))) - 1.f);
+				auto greaterThanZ = math::min(1.f, (-math::min(0.f, (filterRampZ - *flValue))));
+				auto lessThanW = math::min(1.f, (-math::min(0.f, (*flValue - filterRampW))));
+				auto remapZ = (1.f - (math::min(math::max((*flValue - filterRampZ) / (filterRampW - filterRampZ), 0.f), 1.f)));
 
 				auto expValue = ((greaterThanX * lessThanY) * remapX) + (greaterThanEqualY * lessThanEqualZ) + ((greaterThanZ * lessThanW) * remapZ);
 
 				opStack.push(expValue * *v);
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Combo:
+		case animation::Flex::Operation::Type::Combo:
 			{
 				if(opStack.size() < op.d.index)
 					return {};
@@ -1714,7 +1714,7 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 				opStack.push(v);
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::Dominate:
+		case animation::Flex::Operation::Type::Dominate:
 			{
 				if(opStack.size() < op.d.index + 1)
 					return {};
@@ -1726,13 +1726,13 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 				opStack.top() *= 1.f - v;
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::DMELowerEyelid:
+		case animation::Flex::Operation::Type::DMELowerEyelid:
 			{
 				auto pCloseLidV = fFetchFlexControllerWeight(op.d.index);
 				if(pCloseLidV.has_value() == false)
 					return {};
 				auto &pCloseLidVController = *GetFlexController(op.d.index);
-				auto flCloseLidV = (pragma::math::min(pragma::math::max((*pCloseLidV - pCloseLidVController.min) / (pCloseLidVController.max - pCloseLidVController.min), 0.f), 1.f));
+				auto flCloseLidV = (math::min(math::max((*pCloseLidV - pCloseLidVController.min) / (pCloseLidVController.max - pCloseLidVController.min), 0.f), 1.f));
 
 				auto closeLidIndex = std::lroundf(opStack.top()); // Index is an integer stored as float, we'll round to make sure we get the right value
 				opStack.pop();
@@ -1741,7 +1741,7 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 				if(pCloseLid.has_value() == false)
 					return {};
 				auto &pCloseLidController = *GetFlexController(closeLidIndex);
-				auto flCloseLid = (pragma::math::min(pragma::math::max((*pCloseLid - pCloseLidController.min) / (pCloseLidController.max - pCloseLidController.min), 0.f), 1.f));
+				auto flCloseLid = (math::min(math::max((*pCloseLid - pCloseLidController.min) / (pCloseLidController.max - pCloseLidController.min), 0.f), 1.f));
 
 				opStack.pop();
 
@@ -1751,18 +1751,18 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 				if(pEyeUpDown.has_value() == false)
 					return {};
 				auto &pEyeUpDownController = *GetFlexController(eyeUpDownIndex);
-				auto flEyeUpDown = (-1.f + 2.f * (pragma::math::min(pragma::math::max((*pEyeUpDown - pEyeUpDownController.min) / (pEyeUpDownController.max - pEyeUpDownController.min), 0.f), 1.f)));
+				auto flEyeUpDown = (-1.f + 2.f * (math::min(math::max((*pEyeUpDown - pEyeUpDownController.min) / (pEyeUpDownController.max - pEyeUpDownController.min), 0.f), 1.f)));
 
-				opStack.push(pragma::math::min(1.f, (1.f - flEyeUpDown)) * (1 - flCloseLidV) * flCloseLid);
+				opStack.push(math::min(1.f, (1.f - flEyeUpDown)) * (1 - flCloseLidV) * flCloseLid);
 				break;
 			}
-		case pragma::animation::Flex::Operation::Type::DMEUpperEyelid:
+		case animation::Flex::Operation::Type::DMEUpperEyelid:
 			{
 				auto pCloseLidV = fFetchFlexControllerWeight(op.d.index);
 				if(pCloseLidV.has_value() == false)
 					return {};
 				auto &pCloseLidVController = *GetFlexController(op.d.index);
-				auto flCloseLidV = (pragma::math::min(pragma::math::max((*pCloseLidV - pCloseLidVController.min) / (pCloseLidVController.max - pCloseLidVController.min), 0.f), 1.f));
+				auto flCloseLidV = (math::min(math::max((*pCloseLidV - pCloseLidVController.min) / (pCloseLidVController.max - pCloseLidVController.min), 0.f), 1.f));
 
 				auto closeLidIndex = std::lroundf(opStack.top()); // Index is an integer stored as float, we'll round to make sure we get the right value
 				opStack.pop();
@@ -1771,7 +1771,7 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 				if(pCloseLid.has_value() == false)
 					return {};
 				auto &pCloseLidController = *GetFlexController(closeLidIndex);
-				auto flCloseLid = (pragma::math::min(pragma::math::max((*pCloseLid - pCloseLidController.min) / (pCloseLidController.max - pCloseLidController.min), 0.f), 1.f));
+				auto flCloseLid = (math::min(math::max((*pCloseLid - pCloseLidController.min) / (pCloseLidController.max - pCloseLidController.min), 0.f), 1.f));
 
 				opStack.pop();
 
@@ -1781,9 +1781,9 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 				if(pEyeUpDown.has_value() == false)
 					return {};
 				auto &pEyeUpDownController = *GetFlexController(eyeUpDownIndex);
-				auto flEyeUpDown = (-1.f + 2.f * (pragma::math::min(pragma::math::max((*pEyeUpDown - pEyeUpDownController.min) / (pEyeUpDownController.max - pEyeUpDownController.min), 0.f), 1.f)));
+				auto flEyeUpDown = (-1.f + 2.f * (math::min(math::max((*pEyeUpDown - pEyeUpDownController.min) / (pEyeUpDownController.max - pEyeUpDownController.min), 0.f), 1.f)));
 
-				opStack.push(pragma::math::min(1.f, (1.f + flEyeUpDown)) * flCloseLidV * flCloseLid);
+				opStack.push(math::min(1.f, (1.f + flEyeUpDown)) * flCloseLidV * flCloseLid);
 				break;
 			}
 		}
@@ -1793,10 +1793,10 @@ std::optional<float> pragma::asset::Model::CalcFlexWeight(uint32_t flexId, const
 	return opStack.top();
 }
 
-uint32_t pragma::asset::Model::AddAnimation(const std::string &name, const std::shared_ptr<pragma::animation::Animation> &anim)
+uint32_t pragma::asset::Model::AddAnimation(const std::string &name, const std::shared_ptr<animation::Animation> &anim)
 {
 	auto lname = name;
-	pragma::string::to_lower(lname);
+	string::to_lower(lname);
 	auto it = m_animationIDs.find(lname);
 	if(it != m_animationIDs.end()) {
 		m_animations.at(it->second) = anim;
@@ -1819,7 +1819,7 @@ void pragma::asset::Model::GetAnimations(std::unordered_map<std::string, uint32_
 const pragma::animation::Skeleton &pragma::asset::Model::GetSkeleton() const { return *m_skeleton; }
 pragma::animation::Skeleton &pragma::asset::Model::GetSkeleton() { return *m_skeleton; }
 
-void pragma::asset::Model::ClipAgainstPlane(const Vector3 &n, double d, pragma::asset::Model &mdlA, pragma::asset::Model &mdlB, const std::vector<Mat4> *boneMatrices)
+void pragma::asset::Model::ClipAgainstPlane(const Vector3 &n, double d, Model &mdlA, Model &mdlB, const std::vector<Mat4> *boneMatrices)
 {
 	//ClipAgainstPlane(n,d,mdlA);
 	//ClipAgainstPlane(-n,-d,mdlB);
@@ -1827,25 +1827,25 @@ void pragma::asset::Model::ClipAgainstPlane(const Vector3 &n, double d, pragma::
 
 const std::shared_ptr<pragma::animation::MetaRig> &pragma::asset::Model::GetMetaRig() const { return m_metaRig; }
 void pragma::asset::Model::ClearMetaRig() { m_metaRig = nullptr; }
-void pragma::asset::Model::GenerateStandardMetaRigReferenceBonePoses(const pragma::animation::MetaRig &metaRig, const pragma::animation::Skeleton &skeleton, const Frame &refFrame, std::vector<pragma::math::ScaledTransform> &outPoses)
+void pragma::asset::Model::GenerateStandardMetaRigReferenceBonePoses(const animation::MetaRig &metaRig, const animation::Skeleton &skeleton, const Frame &refFrame, std::vector<math::ScaledTransform> &outPoses)
 {
-	std::vector<pragma::math::ScaledTransform> relPoses;
+	std::vector<math::ScaledTransform> relPoses;
 	auto relRef = Frame::Create(refFrame);
 	relRef->Localize(skeleton);
 
-	std::unordered_map<pragma::animation::BoneId, pragma::animation::MetaRigBoneType> boneIdToMetaId;
+	std::unordered_map<animation::BoneId, animation::MetaRigBoneType> boneIdToMetaId;
 	for(size_t i = 0; i < metaRig.bones.size(); ++i) {
 		auto &metaBone = metaRig.bones[i];
-		if(metaBone.boneId == pragma::animation::INVALID_BONE_INDEX)
+		if(metaBone.boneId == animation::INVALID_BONE_INDEX)
 			continue;
-		boneIdToMetaId[metaBone.boneId] = static_cast<pragma::animation::MetaRigBoneType>(i);
+		boneIdToMetaId[metaBone.boneId] = static_cast<animation::MetaRigBoneType>(i);
 	}
 
 	auto numBones = skeleton.GetBoneCount();
 	outPoses.resize(numBones);
-	std::function<void(const pragma::animation::Bone &, const pragma::math::ScaledTransform &)> generateStandardBonePose = nullptr;
-	generateStandardBonePose = [&metaRig, &generateStandardBonePose, &relRef, &outPoses, &boneIdToMetaId](const pragma::animation::Bone &bone, const pragma::math::ScaledTransform &parentPose) {
-		pragma::math::ScaledTransform relRefPose;
+	std::function<void(const animation::Bone &, const math::ScaledTransform &)> generateStandardBonePose = nullptr;
+	generateStandardBonePose = [&metaRig, &generateStandardBonePose, &relRef, &outPoses, &boneIdToMetaId](const animation::Bone &bone, const math::ScaledTransform &parentPose) {
+		math::ScaledTransform relRefPose;
 		relRef->GetBonePose(bone.ID, relRefPose);
 		auto pose = parentPose * relRefPose;
 
@@ -1869,14 +1869,14 @@ void pragma::asset::Model::GenerateStandardMetaRigReferenceBonePoses(const pragm
 	for(auto &pose : outPoses)
 		pose.RotateGlobal(invBaseRot);
 }
-bool pragma::asset::Model::GenerateStandardMetaRigReferenceBonePoses(std::vector<pragma::math::ScaledTransform> &outPoses) const
+bool pragma::asset::Model::GenerateStandardMetaRigReferenceBonePoses(std::vector<math::ScaledTransform> &outPoses) const
 {
 	if(!m_metaRig)
 		return false;
 	GenerateStandardMetaRigReferenceBonePoses(*m_metaRig, *m_skeleton, *m_reference, outPoses);
 	return true;
 }
-Quat pragma::asset::Model::CalcNormalizedMetaBoneRotation(pragma::animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot) const
+Quat pragma::asset::Model::CalcNormalizedMetaBoneRotation(animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot) const
 {
 	if(!m_metaRig)
 		return uquat::identity();
@@ -1885,7 +1885,7 @@ Quat pragma::asset::Model::CalcNormalizedMetaBoneRotation(pragma::animation::Met
 		return uquat::identity();
 	return uquat::get_inverse(metaReferenceRot * metaBone->normalizedRotationOffset) * (posedRot * metaBone->normalizedRotationOffset);
 }
-Quat pragma::asset::Model::RetargetMetaBoneRotation(pragma::animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot, const pragma::animation::MetaRigBone &targetBone, const Quat &targetMetaReferenceRot) const
+Quat pragma::asset::Model::RetargetMetaBoneRotation(animation::MetaRigBoneType type, const Quat &metaReferenceRot, const Quat &posedRot, const animation::MetaRigBone &targetBone, const Quat &targetMetaReferenceRot) const
 {
 	auto normalizedRot = CalcNormalizedMetaBoneRotation(type, metaReferenceRot, posedRot);
 	auto rot = targetMetaReferenceRot;
@@ -1894,13 +1894,13 @@ Quat pragma::asset::Model::RetargetMetaBoneRotation(pragma::animation::MetaRigBo
 	rot *= uquat::get_inverse(targetBone.normalizedRotationOffset);
 	return rot;
 }
-std::optional<pragma::animation::MetaRigBoneType> pragma::asset::Model::GetMetaRigBoneParentId(pragma::animation::MetaRigBoneType type) const
+std::optional<pragma::animation::MetaRigBoneType> pragma::asset::Model::GetMetaRigBoneParentId(animation::MetaRigBoneType type) const
 {
 	if(!m_metaRig)
 		return {};
 	auto parentId = pragma::animation::get_meta_rig_bone_parent_type(type);
-	if(parentId && *parentId == pragma::animation::MetaRigBoneType::Spine3) {
-		for(auto candidate : {pragma::animation::MetaRigBoneType::Spine3, pragma::animation::MetaRigBoneType::Spine2, pragma::animation::MetaRigBoneType::Spine1, pragma::animation::MetaRigBoneType::Spine}) {
+	if(parentId && *parentId == animation::MetaRigBoneType::Spine3) {
+		for(auto candidate : {animation::MetaRigBoneType::Spine3, animation::MetaRigBoneType::Spine2, animation::MetaRigBoneType::Spine1, animation::MetaRigBoneType::Spine}) {
 			auto *bone = m_metaRig->GetBone(candidate);
 			if(!bone)
 				continue;
@@ -1912,16 +1912,16 @@ std::optional<pragma::animation::MetaRigBoneType> pragma::asset::Model::GetMetaR
 		return {};
 	return parentId;
 }
-std::optional<pragma::math::ScaledTransform> pragma::asset::Model::GetMetaRigReferencePose(pragma::animation::MetaRigBoneType type) const
+std::optional<pragma::math::ScaledTransform> pragma::asset::Model::GetMetaRigReferencePose(animation::MetaRigBoneType type) const
 {
 	auto &metaRig = GetMetaRig();
 	if(!metaRig)
 		return {};
 	auto &ref = GetReference();
 	auto *bone = metaRig->GetBone(type);
-	if(!bone || bone->boneId == pragma::animation::INVALID_BONE_INDEX)
+	if(!bone || bone->boneId == animation::INVALID_BONE_INDEX)
 		return {};
-	pragma::math::ScaledTransform pose;
+	math::ScaledTransform pose;
 	if(!ref.GetBonePose(bone->boneId, pose))
 		return {};
 	pose.SetRotation(pose.GetRotation() * bone->normalizedRotationOffset);
@@ -1929,16 +1929,16 @@ std::optional<pragma::math::ScaledTransform> pragma::asset::Model::GetMetaRigRef
 }
 bool pragma::asset::Model::GenerateMetaRig()
 {
-	if(pragma::math::is_flag_set(m_metaInfo.flags, Flags::GeneratedMetaRig))
+	if(math::is_flag_set(m_metaInfo.flags, Flags::GeneratedMetaRig))
 		return false;
-	pragma::math::set_flag(m_metaInfo.flags, Flags::GeneratedMetaRig);
+	math::set_flag(m_metaInfo.flags, Flags::GeneratedMetaRig);
 	auto libRig = m_networkState->InitializeLibrary("pr_rig");
 	if(!libRig)
 		return false;
-	auto *generateMetaRig = libRig->FindSymbolAddress<bool (*)(const pragma::asset::Model &, pragma::animation::MetaRig &)>("generate_meta_rig");
+	auto *generateMetaRig = libRig->FindSymbolAddress<bool (*)(const Model &, animation::MetaRig &)>("generate_meta_rig");
 	if(!generateMetaRig)
 		return false;
-	auto metaRig = pragma::util::make_shared<pragma::animation::MetaRig>();
+	auto metaRig = pragma::util::make_shared<animation::MetaRig>();
 	if(!generateMetaRig(*this, *metaRig))
 		return false;
 	m_metaRig = std::move(metaRig);
@@ -1947,13 +1947,13 @@ bool pragma::asset::Model::GenerateMetaRig()
 }
 bool pragma::asset::Model::GenerateMetaBlendShapes()
 {
-	if(pragma::math::is_flag_set(m_metaInfo.flags, Flags::GeneratedMetaBlendShapes))
+	if(math::is_flag_set(m_metaInfo.flags, Flags::GeneratedMetaBlendShapes))
 		return false;
-	pragma::math::set_flag(m_metaInfo.flags, Flags::GeneratedMetaBlendShapes);
+	math::set_flag(m_metaInfo.flags, Flags::GeneratedMetaBlendShapes);
 	auto libRig = m_networkState->InitializeLibrary("pr_rig");
 	if(!libRig)
 		return false;
-	auto *generateMetaBlendShapes = libRig->FindSymbolAddress<bool (*)(pragma::asset::Model &)>("generate_meta_blend_shapes");
+	auto *generateMetaBlendShapes = libRig->FindSymbolAddress<bool (*)(Model &)>("generate_meta_blend_shapes");
 	if(!generateMetaBlendShapes)
 		return false;
 	if(!generateMetaBlendShapes(*this))
@@ -1978,9 +1978,9 @@ std::shared_ptr<pragma::animation::Animation> pragma::asset::Model::GetAnimation
 	return m_animations[ID];
 }
 uint32_t pragma::asset::Model::GetAnimationCount() const { return static_cast<uint32_t>(m_animations.size()); }
-std::shared_ptr<pragma::geometry::ModelMesh> pragma::asset::Model::CreateMesh() const { return pragma::util::make_shared<pragma::geometry::ModelMesh>(); }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::asset::Model::CreateSubMesh() const { return pragma::util::make_shared<pragma::geometry::ModelSubMesh>(); }
-void pragma::asset::Model::RemoveBone(pragma::animation::BoneId boneId)
+std::shared_ptr<pragma::geometry::ModelMesh> pragma::asset::Model::CreateMesh() const { return pragma::util::make_shared<geometry::ModelMesh>(); }
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::asset::Model::CreateSubMesh() const { return pragma::util::make_shared<geometry::ModelSubMesh>(); }
+void pragma::asset::Model::RemoveBone(animation::BoneId boneId)
 {
 	auto &bones = m_skeleton->GetBones();
 	if(boneId >= bones.size())
@@ -2004,7 +2004,7 @@ void pragma::asset::Model::RemoveBone(pragma::animation::BoneId boneId)
 
 	bones.erase(bones.begin() + boneId);
 
-	auto removeFromFrame = [](Frame &frame, pragma::animation::BoneId boneId) {
+	auto removeFromFrame = [](Frame &frame, animation::BoneId boneId) {
 		auto &poses = frame.GetBoneTransforms();
 		if(boneId < poses.size())
 			poses.erase(poses.begin() + boneId);
@@ -2049,7 +2049,7 @@ void pragma::asset::Model::RemoveBone(pragma::animation::BoneId boneId)
 		boneMap = newBoneMap;
 	}
 
-	std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::animation::Bone>> newRootBones;
+	std::unordered_map<animation::BoneId, std::shared_ptr<animation::Bone>> newRootBones;
 	for(auto &[boneId, bone] : m_skeleton->GetRootBones()) {
 		auto newBoneId = boneId;
 		if(boneId >= newBoneId)
@@ -2059,7 +2059,7 @@ void pragma::asset::Model::RemoveBone(pragma::animation::BoneId boneId)
 	m_skeleton->GetRootBones() = newRootBones;
 
 	for(auto &bone : m_skeleton->GetBones()) {
-		std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::animation::Bone>> newChildren;
+		std::unordered_map<animation::BoneId, std::shared_ptr<animation::Bone>> newChildren;
 		for(auto &[boneId, bone] : bone->children) {
 			auto newBoneId = boneId;
 			if(boneId >= newBoneId)
@@ -2069,9 +2069,9 @@ void pragma::asset::Model::RemoveBone(pragma::animation::BoneId boneId)
 		bone->children = newChildren;
 	}
 }
-float pragma::asset::Model::CalcBoneLength(pragma::animation::BoneId boneId) const
+float pragma::asset::Model::CalcBoneLength(animation::BoneId boneId) const
 {
-	pragma::math::ScaledTransform pose;
+	math::ScaledTransform pose;
 	m_reference->GetBonePose(boneId, pose);
 
 	auto bone = m_skeleton->GetBone(boneId).lock();
@@ -2085,7 +2085,7 @@ float pragma::asset::Model::CalcBoneLength(pragma::animation::BoneId boneId) con
 	}
 	Vector3 avgChildPos {};
 	for(auto &[childId, child] : bone->children) {
-		pragma::math::ScaledTransform childPose;
+		math::ScaledTransform childPose;
 		m_reference->GetBonePose(childId, childPose);
 		avgChildPos += childPose.GetOrigin();
 	}
@@ -2104,7 +2104,7 @@ bool pragma::asset::Model::HasVertexWeights() const
 	}
 	return false;
 }
-const std::vector<std::shared_ptr<pragma::animation::Animation>> &pragma::asset::Model::GetAnimations() const { return const_cast<pragma::asset::Model *>(this)->GetAnimations(); }
+const std::vector<std::shared_ptr<pragma::animation::Animation>> &pragma::asset::Model::GetAnimations() const { return const_cast<Model *>(this)->GetAnimations(); }
 std::vector<std::shared_ptr<pragma::animation::Animation>> &pragma::asset::Model::GetAnimations() { return m_animations; }
 bool pragma::asset::Model::GetAnimationName(uint32_t animId, std::string &name) const
 {
@@ -2123,13 +2123,13 @@ std::string pragma::asset::Model::GetAnimationName(uint32_t animId) const
 	return r;
 }
 
-const std::vector<pragma::asset::Attachment> &pragma::asset::Model::GetAttachments() const { return const_cast<pragma::asset::Model *>(this)->GetAttachments(); }
+const std::vector<pragma::asset::Attachment> &pragma::asset::Model::GetAttachments() const { return const_cast<Model *>(this)->GetAttachments(); }
 std::vector<pragma::asset::Attachment> &pragma::asset::Model::GetAttachments() { return m_attachments; }
 
 void pragma::asset::Model::AddAttachment(const std::string &name, uint32_t boneID, Vector3 offset, EulerAngles angles)
 {
 	auto lname = name;
-	pragma::string::to_lower(lname);
+	string::to_lower(lname);
 	m_attachments.push_back(Attachment {});
 	auto &att = m_attachments.back();
 	att.name = lname;
@@ -2189,7 +2189,7 @@ const std::string *pragma::asset::Model::GetFlexAnimationName(uint32_t idx) cons
 int32_t pragma::asset::Model::LookupAttachment(const std::string &name)
 {
 	auto lname = name;
-	pragma::string::to_lower(lname);
+	string::to_lower(lname);
 	for(auto i = decltype(m_attachments.size()) {0}; i < m_attachments.size(); ++i) {
 		auto &att = m_attachments[i];
 		if(att.name == lname)
@@ -2200,15 +2200,15 @@ int32_t pragma::asset::Model::LookupAttachment(const std::string &name)
 
 std::optional<pragma::math::ScaledTransform> pragma::asset::Model::CalcReferenceAttachmentPose(int32_t attId) const
 {
-	auto *att = const_cast<pragma::asset::Model *>(this)->GetAttachment(attId);
+	auto *att = const_cast<Model *>(this)->GetAttachment(attId);
 	if(att == nullptr)
 		return {};
-	pragma::math::ScaledTransform t {att->offset, uquat::create(att->angles)};
+	math::ScaledTransform t {att->offset, uquat::create(att->angles)};
 	auto &reference = GetReference();
 	auto *bonePos = reference.GetBonePosition(att->bone);
 	auto *boneRot = reference.GetBoneOrientation(att->bone);
 	auto *boneScale = reference.GetBoneScale(att->bone);
-	t = pragma::math::ScaledTransform {bonePos ? *bonePos : Vector3 {}, boneRot ? *boneRot : uquat::identity(), boneScale ? *boneScale : Vector3 {1.f, 1.f, 1.f}} * t;
+	t = math::ScaledTransform {bonePos ? *bonePos : Vector3 {}, boneRot ? *boneRot : uquat::identity(), boneScale ? *boneScale : Vector3 {1.f, 1.f, 1.f}} * t;
 	return t;
 }
 
@@ -2218,7 +2218,7 @@ std::optional<pragma::math::ScaledTransform> pragma::asset::Model::CalcReference
 	auto *bonePos = reference.GetBonePosition(boneId);
 	auto *boneRot = reference.GetBoneOrientation(boneId);
 	auto *boneScale = reference.GetBoneScale(boneId);
-	return pragma::math::ScaledTransform {bonePos ? *bonePos : Vector3 {}, boneRot ? *boneRot : uquat::identity(), boneScale ? *boneScale : Vector3 {1.f, 1.f, 1.f}};
+	return math::ScaledTransform {bonePos ? *bonePos : Vector3 {}, boneRot ? *boneRot : uquat::identity(), boneScale ? *boneScale : Vector3 {1.f, 1.f, 1.f}};
 }
 
 uint32_t pragma::asset::Model::GetBoneCount() const { return m_skeleton->GetBoneCount(); }
@@ -2253,7 +2253,7 @@ uint8_t pragma::asset::Model::GetAnimationActivityWeight(uint32_t animation) con
 pragma::Activity pragma::asset::Model::GetAnimationActivity(uint32_t animation) const
 {
 	if(animation >= m_animations.size())
-		return pragma::Activity::Invalid;
+		return Activity::Invalid;
 	return m_animations[animation]->GetActivity();
 }
 float pragma::asset::Model::GetAnimationDuration(uint32_t animation)
@@ -2262,14 +2262,14 @@ float pragma::asset::Model::GetAnimationDuration(uint32_t animation)
 		return 0.f;
 	return m_animations[animation]->GetDuration();
 }
-int pragma::asset::Model::SelectFirstAnimation(pragma::Activity activity) const
+int pragma::asset::Model::SelectFirstAnimation(Activity activity) const
 {
-	auto it = std::find_if(m_animations.begin(), m_animations.end(), [activity](const std::shared_ptr<pragma::animation::Animation> &anim) { return anim->GetActivity() == activity; });
+	auto it = std::find_if(m_animations.begin(), m_animations.end(), [activity](const std::shared_ptr<animation::Animation> &anim) { return anim->GetActivity() == activity; });
 	if(it == m_animations.end())
 		return -1;
 	return it - m_animations.begin();
 }
-int32_t pragma::asset::Model::SelectWeightedAnimation(pragma::Activity activity, int32_t animIgnore)
+int32_t pragma::asset::Model::SelectWeightedAnimation(Activity activity, int32_t animIgnore)
 {
 	std::vector<int32_t> animations;
 	std::vector<uint8_t> weights;
@@ -2277,7 +2277,7 @@ int32_t pragma::asset::Model::SelectWeightedAnimation(pragma::Activity activity,
 	auto bIgnoreIsCandidate = false;
 	for(auto i = decltype(m_animations.size()) {0}; i < m_animations.size(); ++i) {
 		auto &anim = m_animations[i];
-		if(i != animIgnore || !anim->HasFlag(pragma::FAnim::NoRepeat)) {
+		if(i != animIgnore || !anim->HasFlag(FAnim::NoRepeat)) {
 			if(anim->GetActivity() == activity) {
 				weightSum += anim->GetActivityWeight();
 				animations.push_back(static_cast<int32_t>(i));
@@ -2294,7 +2294,7 @@ int32_t pragma::asset::Model::SelectWeightedAnimation(pragma::Activity activity,
 	}
 	if(animations.size() == 1 || weightSum == 0)
 		return animations.front();
-	int r = pragma::math::random(0, weightSum - 1);
+	int r = math::random(0, weightSum - 1);
 	for(auto animId : animations) {
 		auto &anim = m_animations[animId];
 		auto weight = anim->GetActivityWeight();
@@ -2304,7 +2304,7 @@ int32_t pragma::asset::Model::SelectWeightedAnimation(pragma::Activity activity,
 	}
 	return -1;
 }
-void pragma::asset::Model::GetAnimations(pragma::Activity activity, std::vector<uint32_t> &animations)
+void pragma::asset::Model::GetAnimations(Activity activity, std::vector<uint32_t> &animations)
 {
 	for(auto i = decltype(m_animations.size()) {0}; i < m_animations.size(); ++i) {
 		auto &anim = m_animations[i];
@@ -2315,7 +2315,7 @@ void pragma::asset::Model::GetAnimations(pragma::Activity activity, std::vector<
 void pragma::asset::Model::AddBlendController(const std::string &name, int32_t min, int32_t max, bool loop)
 {
 	auto lname = name;
-	pragma::string::to_lower(lname);
+	string::to_lower(lname);
 	m_blendControllers.push_back(BlendController {});
 	auto &blend = m_blendControllers.back();
 	blend.name = name;
@@ -2323,14 +2323,14 @@ void pragma::asset::Model::AddBlendController(const std::string &name, int32_t m
 	blend.max = max;
 	blend.loop = loop;
 }
-const pragma::asset::BlendController *pragma::asset::Model::GetBlendController(uint32_t id) const { return const_cast<pragma::asset::Model *>(this)->GetBlendController(id); }
+const pragma::asset::BlendController *pragma::asset::Model::GetBlendController(uint32_t id) const { return const_cast<Model *>(this)->GetBlendController(id); }
 pragma::asset::BlendController *pragma::asset::Model::GetBlendController(uint32_t id)
 {
 	if(id >= m_blendControllers.size())
 		return nullptr;
 	return &m_blendControllers[id];
 }
-const pragma::asset::BlendController *pragma::asset::Model::GetBlendController(const std::string &name) const { return const_cast<pragma::asset::Model *>(this)->GetBlendController(name); }
+const pragma::asset::BlendController *pragma::asset::Model::GetBlendController(const std::string &name) const { return const_cast<Model *>(this)->GetBlendController(name); }
 pragma::asset::BlendController *pragma::asset::Model::GetBlendController(const std::string &name)
 {
 	auto it = std::find_if(m_blendControllers.begin(), m_blendControllers.end(), [&name](BlendController &bc) { return (bc.name == name) ? true : false; });
@@ -2346,23 +2346,23 @@ int32_t pragma::asset::Model::LookupBlendController(const std::string &name)
 	}
 	return -1;
 }
-const std::vector<pragma::asset::BlendController> &pragma::asset::Model::GetBlendControllers() const { return const_cast<pragma::asset::Model *>(this)->GetBlendControllers(); }
+const std::vector<pragma::asset::BlendController> &pragma::asset::Model::GetBlendControllers() const { return const_cast<Model *>(this)->GetBlendControllers(); }
 std::vector<pragma::asset::BlendController> &pragma::asset::Model::GetBlendControllers() { return m_blendControllers; }
 
-void pragma::asset::Model::UpdateShape(const std::vector<pragma::physics::SurfaceMaterial> *)
+void pragma::asset::Model::UpdateShape(const std::vector<physics::SurfaceMaterial> *)
 {
 	for(auto &cmesh : m_collisionMeshes)
 		cmesh->UpdateShape();
 }
-std::optional<pragma::math::ScaledTransform> pragma::asset::Model::GetReferenceBonePose(pragma::animation::BoneId boneId) const
+std::optional<pragma::math::ScaledTransform> pragma::asset::Model::GetReferenceBonePose(animation::BoneId boneId) const
 {
 	auto &ref = GetReference();
-	pragma::math::ScaledTransform pose;
+	math::ScaledTransform pose;
 	if(!ref.GetBonePose(boneId, pose))
 		return {};
 	return pose;
 }
-std::optional<pragma::SignedAxis> pragma::asset::Model::FindBoneAxisForDirection(pragma::animation::BoneId boneId, const Vector3 &dir) const
+std::optional<pragma::SignedAxis> pragma::asset::Model::FindBoneAxisForDirection(animation::BoneId boneId, const Vector3 &dir) const
 {
 	auto refPose = GetReferenceBonePose(boneId);
 	if(!refPose)
@@ -2374,16 +2374,16 @@ std::optional<pragma::SignedAxis> pragma::asset::Model::FindBoneAxisForDirection
 	auto df = uvec::dot(dir, forward);
 	auto dr = uvec::dot(dir, right);
 	auto du = uvec::dot(dir, up);
-	auto dfa = pragma::math::abs(df);
-	auto dra = pragma::math::abs(dr);
-	auto dua = pragma::math::abs(du);
-	if(dfa >= pragma::math::max(dra, dua))
-		return (df < 0) ? pragma::SignedAxis::NegZ : pragma::SignedAxis::Z; // Forward
-	else if(dra >= pragma::math::max(dfa, dua))
-		return (dr < 0) ? pragma::SignedAxis::NegX : pragma::SignedAxis::X; // Right
-	return (du < 0) ? pragma::SignedAxis::NegY : pragma::SignedAxis::Y;     // Up
+	auto dfa = math::abs(df);
+	auto dra = math::abs(dr);
+	auto dua = math::abs(du);
+	if(dfa >= math::max(dra, dua))
+		return (df < 0) ? SignedAxis::NegZ : SignedAxis::Z; // Forward
+	else if(dra >= math::max(dfa, dua))
+		return (dr < 0) ? SignedAxis::NegX : SignedAxis::X; // Right
+	return (du < 0) ? SignedAxis::NegY : SignedAxis::Y;     // Up
 }
-std::optional<pragma::SignedAxis> pragma::asset::Model::FindBoneTwistAxis(pragma::animation::BoneId boneId) const
+std::optional<pragma::SignedAxis> pragma::asset::Model::FindBoneTwistAxis(animation::BoneId boneId) const
 {
 	auto refPose = GetReferenceBonePose(boneId);
 	if(!refPose)
@@ -2415,18 +2415,18 @@ std::optional<pragma::SignedAxis> pragma::asset::Model::FindBoneTwistAxis(pragma
 	uvec::normalize(&dirFromBone0ToBone1);
 	return FindBoneAxisForDirection(boneId, dirFromBone0ToBone1);
 }
-Quat pragma::asset::Model::GetTwistAxisRotationOffset(pragma::SignedAxis axis)
+Quat pragma::asset::Model::GetTwistAxisRotationOffset(SignedAxis axis)
 {
 	switch(axis) {
-	case pragma::SignedAxis::X:
-	case pragma::SignedAxis::NegX:
-		return uquat::create(EulerAngles(0.0, pragma::is_negative_axis(axis) ? -90.f : 90.f, 0.f));
-	case pragma::SignedAxis::Y:
-	case pragma::SignedAxis::NegY:
-		return uquat::create(EulerAngles(pragma::is_negative_axis(axis) ? -90.f : 90.0, 0.f, 0.f));
-	case pragma::SignedAxis::NegZ:
+	case SignedAxis::X:
+	case SignedAxis::NegX:
+		return uquat::create(EulerAngles(0.0, is_negative_axis(axis) ? -90.f : 90.f, 0.f));
+	case SignedAxis::Y:
+	case SignedAxis::NegY:
+		return uquat::create(EulerAngles(is_negative_axis(axis) ? -90.f : 90.0, 0.f, 0.f));
+	case SignedAxis::NegZ:
 		return uquat::create(EulerAngles(0.0, 0.f, 180.f));
-	case pragma::SignedAxis::Z:
+	case SignedAxis::Z:
 		break;
 	}
 	return uquat::identity();
@@ -2439,12 +2439,12 @@ bool pragma::asset::Model::GenerateCollisionMeshes(bool convex, float mass, cons
 	for(auto &mg : m_meshGroups) {
 		for(auto &mesh : mg->GetMeshes()) {
 			for(auto &sm : mesh->GetSubMeshes()) {
-				if(sm->GetGeometryType() != pragma::geometry::ModelSubMesh::GeometryType::Triangles)
+				if(sm->GetGeometryType() != geometry::ModelSubMesh::GeometryType::Triangles)
 					continue;
 				auto numVerts = sm->GetVertexCount() / 20;
 				numVerts = pragma::math::clamp<uint32_t>(numVerts, 8, 100);
 				auto simplified = sm->Simplify(numVerts);
-				auto cmesh = pragma::physics::CollisionMesh::Create(m_networkState->GetGameState());
+				auto cmesh = physics::CollisionMesh::Create(m_networkState->GetGameState());
 				auto &cverts = cmesh->GetVertices();
 				auto &verts = simplified->GetVertices();
 				cverts.reserve(verts.size());
@@ -2481,11 +2481,11 @@ bool pragma::asset::Model::GenerateCollisionMeshes(bool convex, float mass, cons
 	return true;
 }
 
-bool pragma::asset::Model::GenerateLowLevelLODs(pragma::Game &game)
+bool pragma::asset::Model::GenerateLowLevelLODs(Game &game)
 {
-	if(pragma::math::is_flag_set(m_metaInfo.flags, Flags::GeneratedLODs))
+	if(math::is_flag_set(m_metaInfo.flags, Flags::GeneratedLODs))
 		return false;
-	pragma::math::set_flag(m_metaInfo.flags, Flags::GeneratedLODs);
+	math::set_flag(m_metaInfo.flags, Flags::GeneratedLODs);
 	auto &lods = GetLODs();
 	std::string suffix = "_lod_gen";
 
@@ -2550,8 +2550,8 @@ bool pragma::asset::Model::GenerateLowLevelLODs(pragma::Game &game)
 			for(auto &subMesh : mesh->GetSubMeshes()) {
 				// Determine a suitable (subjective) target vertex count
 				auto targetVertexCount = subMesh->GetVertexCount() / 10;
-				auto min = pragma::math::min(subMesh->GetVertexCount(), static_cast<uint32_t>(12));
-				targetVertexCount = pragma::math::clamp(targetVertexCount, min, static_cast<uint32_t>(300));
+				auto min = math::min(subMesh->GetVertexCount(), static_cast<uint32_t>(12));
+				targetVertexCount = math::clamp(targetVertexCount, min, static_cast<uint32_t>(300));
 
 				auto lodSubMesh = subMesh->Simplify(targetVertexCount, aggressiveness);
 				if(lodSubMesh->GetVertexCount() == subMesh->GetVertexCount())
@@ -2580,26 +2580,26 @@ bool pragma::asset::Model::GenerateLowLevelLODs(pragma::Game &game)
 	return true;
 }
 
-void pragma::asset::Model::TransformBone(pragma::animation::BoneId boneId, const pragma::math::Transform &t, pragma::math::CoordinateSpace space)
+void pragma::asset::Model::TransformBone(animation::BoneId boneId, const math::Transform &t, math::CoordinateSpace space)
 {
 	auto bone = m_skeleton->GetBone(boneId).lock();
 	if(!bone)
 		return;
 	switch(space) {
-	case pragma::math::CoordinateSpace::View:
-	case pragma::math::CoordinateSpace::Screen:
+	case math::CoordinateSpace::View:
+	case math::CoordinateSpace::Screen:
 		return;
-	case pragma::math::CoordinateSpace::Object:
-	case pragma::math::CoordinateSpace::World:
+	case math::CoordinateSpace::Object:
+	case math::CoordinateSpace::World:
 		{
-			pragma::math::ScaledTransform parentInvPose {};
+			math::ScaledTransform parentInvPose {};
 			auto parent = bone->parent.lock();
 			if(parent) {
 				m_reference->GetBonePose(parent->ID, parentInvPose);
 				parentInvPose = parentInvPose.GetInverse();
 			}
 
-			pragma::math::ScaledTransform curPose;
+			math::ScaledTransform curPose;
 			GetReferenceBonePose(boneId, curPose);
 			auto oldRelPose = parentInvPose * curPose;
 			auto newPose = t * curPose;
@@ -2609,7 +2609,7 @@ void pragma::asset::Model::TransformBone(pragma::animation::BoneId boneId, const
 			auto oldPoseToNewPose = oldRelPose.GetInverse() * newRelPose;
 
 			for(auto &anim : m_animations) {
-				if(anim->HasFlag(pragma::FAnim::Gesture))
+				if(anim->HasFlag(FAnim::Gesture))
 					continue;
 				auto &boneMap = anim->GetBoneMap();
 				auto it = boneMap.find(bone->ID);
@@ -2617,7 +2617,7 @@ void pragma::asset::Model::TransformBone(pragma::animation::BoneId boneId, const
 					continue;
 				auto i = it->second;
 				for(auto &frame : anim->GetFrames()) {
-					pragma::math::ScaledTransform pose;
+					math::ScaledTransform pose;
 					if(!frame->GetBonePose(i, pose))
 						continue;
 					pose = pose * oldPoseToNewPose;
@@ -2626,24 +2626,24 @@ void pragma::asset::Model::TransformBone(pragma::animation::BoneId boneId, const
 			}
 			break;
 		}
-	case pragma::math::CoordinateSpace::Local:
+	case math::CoordinateSpace::Local:
 		if(bone->parent.expired())
-			return TransformBone(boneId, t, pragma::math::CoordinateSpace::World);
-		pragma::math::ScaledTransform parentPose;
+			return TransformBone(boneId, t, math::CoordinateSpace::World);
+		math::ScaledTransform parentPose;
 		m_reference->GetBonePose(bone->parent.lock()->ID, parentPose);
 
-		pragma::math::ScaledTransform curPose;
+		math::ScaledTransform curPose;
 		GetReferenceBonePose(boneId, curPose);
 
 		auto newPose = parentPose.GetInverse() * curPose;
 		newPose = t * newPose;
 		newPose = parentPose * newPose;
 
-		return TransformBone(boneId, newPose, pragma::math::CoordinateSpace::World);
+		return TransformBone(boneId, newPose, math::CoordinateSpace::World);
 	}
 }
 
-Vector3 pragma::asset::get_mirror_transform_vector(pragma::Axis axis)
+Vector3 pragma::asset::get_mirror_transform_vector(Axis axis)
 {
 	switch(axis) {
 	case Axis::X:

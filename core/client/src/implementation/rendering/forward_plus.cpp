@@ -66,14 +66,14 @@ static constexpr uint32_t get_shadow_integer_count()
 
 pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(CRasterizationRendererComponent &rasterizer) : m_rasterizer {rasterizer}
 {
-	m_cmdBuffer = pragma::get_cengine()->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute, m_cmdBufferQueueFamilyIndex);
+	m_cmdBuffer = get_cengine()->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute, m_cmdBufferQueueFamilyIndex);
 
-	m_shaderLightCulling = pragma::get_cengine()->GetShader("forwardp_light_culling");
+	m_shaderLightCulling = get_cengine()->GetShader("forwardp_light_culling");
 }
 
 bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::Texture &depthTexture)
 {
-	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDERER.IsValid() == false)
+	if(ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDERER.IsValid() == false)
 		return false;
 	auto workGroupCount = CalcWorkGroupCount(width, height);
 	m_workGroupCountX = workGroupCount.first;
@@ -81,7 +81,7 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 	m_tileCount = CalcTileCount(width, height);
 
 	using VisibleIndex = int32_t;
-	auto numLights = pragma::math::to_integral(pragma::GameLimits::MaxAbsoluteLights);
+	auto numLights = math::to_integral(GameLimits::MaxAbsoluteLights);
 	auto numTiles = m_tileCount * numLights;
 
 	std::vector<VisibleIndex> defaultIndices(numTiles, -1);
@@ -100,26 +100,26 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 	m_bufVisLightIndex->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::ReadBit);
 	m_bufVisLightIndex->SetDebugName("vis_light_index_buf");
 
-	m_rasterizer.GetRendererDescriptorSet()->SetBindingStorageBuffer(*m_bufTileVisLightIndex, pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::RendererBinding::TileVisLightIndexBuffer));
+	m_rasterizer.GetRendererDescriptorSet()->SetBindingStorageBuffer(*m_bufTileVisLightIndex, math::to_integral(ShaderGameWorldLightingPass::RendererBinding::TileVisLightIndexBuffer));
 
 	auto &descSetCompute = *m_rasterizer.GetLightSourceDescriptorSetCompute();
-	descSetCompute.SetBindingStorageBuffer(*m_bufTileVisLightIndex, pragma::math::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::TileVisLightIndexBuffer));
-	descSetCompute.SetBindingTexture(depthTexture, pragma::math::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::DepthMap));
-	descSetCompute.SetBindingStorageBuffer(*m_bufVisLightIndex, pragma::math::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::VisLightIndexBuffer));
+	descSetCompute.SetBindingStorageBuffer(*m_bufTileVisLightIndex, math::to_integral(ShaderForwardPLightCulling::LightBinding::TileVisLightIndexBuffer));
+	descSetCompute.SetBindingTexture(depthTexture, math::to_integral(ShaderForwardPLightCulling::LightBinding::DepthMap));
+	descSetCompute.SetBindingStorageBuffer(*m_bufVisLightIndex, math::to_integral(ShaderForwardPLightCulling::LightBinding::VisLightIndexBuffer));
 	return true;
 }
 
-void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuffer &cmdBuffer, pragma::CSceneComponent &scene, prosper::IImage &imgDepth, prosper::IDescriptorSet &descSetCam)
+void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuffer &cmdBuffer, CSceneComponent &scene, prosper::IImage &imgDepth, prosper::IDescriptorSet &descSetCam)
 {
 	if(m_shaderLightCulling.expired() || m_shadowLightBits.empty() == true)
 		return;
-	auto &shaderLightCulling = static_cast<pragma::ShaderForwardPLightCulling &>(*m_shaderLightCulling.get());
+	auto &shaderLightCulling = static_cast<ShaderForwardPLightCulling &>(*m_shaderLightCulling.get());
 	prosper::ShaderBindState bindState {cmdBuffer};
 	if(shaderLightCulling.RecordBeginCompute(bindState) == false)
 		return;
 
-	auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
-	auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
+	auto &bufLightSources = CLightComponent::GetGlobalRenderBuffer();
+	auto &bufShadowData = CLightComponent::GetGlobalShadowBuffer();
 	// Light source data barrier
 	cmdBuffer.RecordBufferBarrier(bufLightSources, prosper::PipelineStageFlags::ComputeShaderBit | prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit,
 	  prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);

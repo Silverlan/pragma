@@ -12,11 +12,11 @@ void SBaseSoundDspComponent::Initialize()
 {
 	BaseEnvSoundDspComponent::Initialize();
 
-	BindEvent(pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(ecs::baseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		if(OnSetKeyValue(kvData.key, kvData.value) == false)
-			return pragma::util::EventReply::Unhandled;
-		return pragma::util::EventReply::Handled;
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 }
 void SBaseSoundDspComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
@@ -35,7 +35,7 @@ void SBaseSoundDspComponent::SetGain(float gain)
 		return;
 	NetPacket p {};
 	p->Write<float>(gain);
-	ent.SendNetEvent(m_netEvSetGain, p, pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netEvSetGain, p, networking::Protocol::SlowReliable);
 }
 
 void SSoundDspComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

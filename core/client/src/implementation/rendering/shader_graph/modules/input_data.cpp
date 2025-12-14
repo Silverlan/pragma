@@ -14,7 +14,7 @@ import :rendering.shaders;
 
 using namespace pragma::rendering::shader_graph;
 
-InputDataModule::InputDataModule(ShaderGraph &shader) : pragma::rendering::ShaderGraphModule {shader} {}
+InputDataModule::InputDataModule(ShaderGraph &shader) : ShaderGraphModule {shader} {}
 InputDataModule::~InputDataModule() {}
 
 void InputDataModule::InitializeShaderResources()
@@ -27,15 +27,15 @@ void InputDataModule::InitializeShaderResources()
 	bindings.push_back({"GLOBAL_INPUT_DATA", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::GeometryBit});
 
 	// TODO
-	m_resolvedGraph = std::make_unique<pragma::shadergraph::Graph>(*graph);
+	m_resolvedGraph = std::make_unique<shadergraph::Graph>(*graph);
 	m_resolvedGraph->Resolve();
 	for(auto &graphNode : m_resolvedGraph->GetNodes()) {
 		auto *node = dynamic_cast<const ImageTextureNodeBase *>(&graphNode->node);
 		if(!node)
 			continue;
 		auto texVarName = node->GetTextureVariableName(*graphNode);
-		pragma::string::to_upper(texVarName);
-		bindings.push_back({pragma::register_global_string(texVarName), prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit});
+		string::to_upper(texVarName);
+		bindings.push_back({register_global_string(texVarName), prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit});
 		if(m_imageTextureNodes.size() == m_imageTextureNodes.capacity())
 			m_imageTextureNodes.reserve(m_imageTextureNodes.size() * 2 + 10);
 		m_imageTextureNodes.push_back(graphNode.get());
@@ -63,7 +63,7 @@ void InputDataModule::GetShaderPreprocessorDefinitions(std::unordered_map<std::s
 		auto *node = dynamic_cast<const ImageTextureNodeBase *>(&graphNode->node);
 		auto texVarName = node->GetTextureVariableName(*graphNode);
 		auto texVarNameUpper = texVarName;
-		pragma::string::to_upper(texVarNameUpper);
+		string::to_upper(texVarNameUpper);
 		code << "layout(LAYOUT_ID(SHADER_GRAPH, " << texVarNameUpper << ")) uniform sampler2D " << texVarName << ";\n";
 	}
 
@@ -75,7 +75,7 @@ void InputDataModule::InitializeGfxPipelineDescriptorSets()
 	//auto &inputDataManager = pragma::get_cgame()->GetGlobalShaderInputDataManager();
 
 	// TODO:
-	auto &graphManager = pragma::get_cengine()->GetShaderGraphManager();
+	auto &graphManager = get_cengine()->GetShaderGraphManager();
 	auto &typeManagers = graphManager.GetShaderGraphTypeManagers();
 	auto it = typeManagers.find("object");
 	if(it == typeManagers.end())
@@ -83,12 +83,12 @@ void InputDataModule::InitializeGfxPipelineDescriptorSets()
 	auto &typeManager = *it->second;
 	//for(auto &[name, graphData] : typeManager.GetGraphs())
 	//	inputDataManager.PopulateProperties(*graphData->GetGraph());
-	auto cmd = pragma::get_cengine()->GetRenderContext().GetSetupCommandBuffer();
+	auto cmd = get_cengine()->GetRenderContext().GetSetupCommandBuffer();
 	//inputDataManager.UpdateBufferData(*cmd);
-	pragma::get_cengine()->GetRenderContext().FlushSetupCommandBuffer();
+	get_cengine()->GetRenderContext().FlushSetupCommandBuffer();
 
 	m_shader.AddDescriptorSetGroup(m_globalInputDataDsInfo);
-	auto &context = pragma::get_cengine()->GetRenderContext();
+	auto &context = get_cengine()->GetRenderContext();
 	//
 
 	// TODO: One per shader
@@ -103,11 +103,11 @@ void InputDataModule::InitializeGfxPipelineDescriptorSets()
 	//ds.SetBindingUniformBuffer(*buf, BINDING_IDX);
 
 	// Image texture nodes
-	auto &texManager = static_cast<material::CMaterialManager &>(pragma::get_client_state()->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<material::CMaterialManager &>(get_client_state()->GetMaterialManager()).GetTextureManager();
 	uint32_t bindingIdx = 1; // Binding 0 is global input data
 	for(auto *node : m_imageTextureNodes) {
 		std::string fileName;
-		node->GetInputValue<std::string>(pragma::rendering::shader_graph::ImageTextureNode::IN_FILENAME, fileName);
+		node->GetInputValue<std::string>(ImageTextureNode::IN_FILENAME, fileName);
 		auto tex = texManager.LoadAsset(fileName);
 		std::shared_ptr<prosper::Texture> prosperTex;
 		if(tex)
@@ -117,7 +117,7 @@ void InputDataModule::InitializeGfxPipelineDescriptorSets()
 		ds.SetBindingTexture(*prosperTex, bindingIdx++);
 	}
 }
-void InputDataModule::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+void InputDataModule::RecordBindScene(ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
 	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), m_globalInputDataDsInfo.setIndex, *m_globalInputDsg->GetDescriptorSet());
 }

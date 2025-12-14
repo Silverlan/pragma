@@ -14,7 +14,7 @@ using namespace pragma;
 void STransformComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseTransformComponent)); }
 void STransformComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
-	pragma::networking::write_vector(packet, GetPosition());
+	networking::write_vector(packet, GetPosition());
 	networking::write_quat(packet, GetRotation());
 	packet->Write<Vector3>(GetEyeOffset());
 	packet->Write<Vector3>(GetScale());
@@ -27,7 +27,7 @@ void STransformComponent::SetScale(const Vector3 &scale)
 	NetPacket p;
 	p->Write<Vector3>(scale);
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
-	ent.SendNetEvent(m_netEvSetScale, p, pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netEvSetScale, p, networking::Protocol::SlowReliable);
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(pPhysComponent->GetPhysicsType());
@@ -40,7 +40,7 @@ void STransformComponent::SetEyeOffset(const Vector3 &offset)
 	if(!ent.IsShared())
 		return;
 	NetPacket p;
-	pragma::networking::write_entity(p, &ent);
-	pragma::networking::write_vector(p, offset);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_EYEOFFSET, p, pragma::networking::Protocol::SlowReliable);
+	networking::write_entity(p, &ent);
+	networking::write_vector(p, offset);
+	ServerState::Get()->SendPacket(networking::net_messages::client::ENT_EYEOFFSET, p, networking::Protocol::SlowReliable);
 }

@@ -25,7 +25,7 @@ void pragma::networking::write_quat(NetPacket &packet, const Quat &rot)
 	packet->Write<float>(rot.y);
 	packet->Write<float>(rot.z);
 }
-void pragma::networking::write_entity(NetPacket &packet, const pragma::ecs::BaseEntity *ent) { packet->Write<unsigned int>((ent != nullptr) ? ent->GetIndex() : (unsigned int)(-1)); }
+void pragma::networking::write_entity(NetPacket &packet, const ecs::BaseEntity *ent) { packet->Write<unsigned int>((ent != nullptr) ? ent->GetIndex() : (unsigned int)(-1)); }
 void pragma::networking::write_entity(NetPacket &packet, const EntityHandle &hEnt) { write_entity(packet, hEnt.get()); }
 Vector3 pragma::networking::read_vector(NetPacket &packet)
 {
@@ -87,7 +87,7 @@ static pragma::ecs::BaseEntity *read_entity(NetPacket &packet, const std::functi
 	*hCallback = game->AddCallback("OnEntityCreated", cb);
 	return nullptr;
 }
-CallbackHandle pragma::networking::read_entity(NetPacket &packet, const std::function<void(pragma::ecs::BaseEntity *)> &onCreated)
+CallbackHandle pragma::networking::read_entity(NetPacket &packet, const std::function<void(ecs::BaseEntity *)> &onCreated)
 {
 	CallbackHandle r;
 	::read_entity(packet, onCreated, &r);
@@ -95,8 +95,8 @@ CallbackHandle pragma::networking::read_entity(NetPacket &packet, const std::fun
 }
 pragma::ecs::BaseEntity *pragma::networking::read_entity(NetPacket &packet) { return ::read_entity(packet); }
 
-void pragma::networking::write_player(NetPacket &packet, const pragma::ecs::BaseEntity *pl) { write_entity(packet, pl); }
-void pragma::networking::write_player(NetPacket &packet, const pragma::BasePlayerComponent *plComponent) { write_entity(packet, (plComponent != nullptr) ? dynamic_cast<pragma::ecs::BaseEntity *>(plComponent->GetBasePlayer()) : nullptr); }
+void pragma::networking::write_player(NetPacket &packet, const ecs::BaseEntity *pl) { write_entity(packet, pl); }
+void pragma::networking::write_player(NetPacket &packet, const BasePlayerComponent *plComponent) { write_entity(packet, (plComponent != nullptr) ? dynamic_cast<ecs::BaseEntity *>(plComponent->GetBasePlayer()) : nullptr); }
 pragma::BasePlayerComponent *pragma::networking::read_player(NetPacket &packet)
 {
 	auto *ent = dynamic_cast<BasePlayer *>(::read_entity(packet));

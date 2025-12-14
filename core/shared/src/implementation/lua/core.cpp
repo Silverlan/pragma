@@ -11,10 +11,10 @@ void Lua::TypeError(const luabind::object &o, Type type)
 	// TODO
 	auto *l = o.interpreter();
 	o.push(l);
-	auto *typeName = Lua::GetTypeString(l, -1);
-	Lua::Pop(l, 1);
-	Lua::PushString(l, typeName);
-	Lua::Error(o.interpreter());
+	auto *typeName = GetTypeString(l, -1);
+	Pop(l, 1);
+	PushString(l, typeName);
+	Error(o.interpreter());
 }
 Lua::Type Lua::GetType(const luabind::object &o) { return static_cast<Type>(luabind::type(o)); }
 void Lua::CheckType(const luabind::object &o, Type type)
@@ -26,33 +26,33 @@ void Lua::CheckType(const luabind::object &o, Type type)
 
 void Lua::PushObject(lua::State *l, BaseLuaObj *o) { o->GetLuaObject()->push(l); }
 
-Lua::StatusCode Lua::Execute(lua::State *l, const std::function<Lua::StatusCode(int (*traceback)(lua::State *))> &target)
+Lua::StatusCode Lua::Execute(lua::State *l, const std::function<StatusCode(int (*traceback)(lua::State *))> &target)
 {
-	auto r = target(Lua::HandleTracebackError);
-	Lua::HandleSyntaxError(l, r);
+	auto r = target(HandleTracebackError);
+	HandleSyntaxError(l, r);
 	return r;
 }
 
-void Lua::Execute(lua::State *, const std::function<void(int (*traceback)(lua::State *), void (*syntaxHandle)(lua::State *, Lua::StatusCode))> &target) { target(Lua::HandleTracebackError, Lua::HandleSyntaxError); }
+void Lua::Execute(lua::State *, const std::function<void(int (*traceback)(lua::State *), void (*syntaxHandle)(lua::State *, StatusCode))> &target) { target(HandleTracebackError, HandleSyntaxError); }
 
 void Lua::HandleLuaError(lua::State *l)
 {
-	if(!Lua::IsString(l, -1))
+	if(!IsString(l, -1))
 		return;
-	std::string msg = Lua::ToString(l, -1);
-	msg = ::pragma::scripting::lua_core::format_error_message(l, msg, Lua::StatusCode::ErrorRun);
-	::pragma::scripting::lua_core::submit_error(l, msg);
+	std::string msg = ToString(l, -1);
+	msg = pragma::scripting::lua_core::format_error_message(l, msg, StatusCode::ErrorRun);
+	pragma::scripting::lua_core::submit_error(l, msg);
 }
 
-void Lua::HandleLuaError(lua::State *l, Lua::StatusCode s)
+void Lua::HandleLuaError(lua::State *l, StatusCode s)
 {
-	Lua::HandleTracebackError(l);
-	Lua::HandleSyntaxError(l, s);
+	HandleTracebackError(l);
+	HandleSyntaxError(l, s);
 }
 
 std::string Lua::GetErrorMessagePrefix(lua::State *l)
 {
-	auto *state = ::pragma::Engine::Get()->GetNetworkState(l);
+	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	if(state != nullptr)
 		return state->GetMessagePrefix();
 	return "";

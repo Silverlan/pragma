@@ -8,16 +8,16 @@ module pragma.shared;
 
 import :model.model_mesh;
 
-pragma::geometry::ModelMesh::ModelMesh() : std::enable_shared_from_this<pragma::geometry::ModelMesh>(), m_numVerts(0), m_numIndices(0) {}
-pragma::geometry::ModelMesh::ModelMesh(const pragma::geometry::ModelMesh &other) : m_min(other.m_min), m_max(other.m_max), m_numVerts(other.m_numVerts), m_numIndices(other.m_numIndices), m_center(other.m_center), m_subMeshes(other.m_subMeshes), m_referenceId {other.m_referenceId}
+pragma::geometry::ModelMesh::ModelMesh() : std::enable_shared_from_this<ModelMesh>(), m_numVerts(0), m_numIndices(0) {}
+pragma::geometry::ModelMesh::ModelMesh(const ModelMesh &other) : m_min(other.m_min), m_max(other.m_max), m_numVerts(other.m_numVerts), m_numIndices(other.m_numIndices), m_center(other.m_center), m_subMeshes(other.m_subMeshes), m_referenceId {other.m_referenceId}
 {
-	static_assert(pragma::geometry::ModelMesh::layout_version == 1, "Update this function when making changes to this class!");
+	static_assert(layout_version == 1, "Update this function when making changes to this class!");
 }
-bool pragma::geometry::ModelMesh::operator==(const pragma::geometry::ModelMesh &other) const { return this == &other; }
-bool pragma::geometry::ModelMesh::operator!=(const pragma::geometry::ModelMesh &other) const { return !operator==(other); }
-bool pragma::geometry::ModelMesh::IsEqual(const pragma::geometry::ModelMesh &other) const
+bool pragma::geometry::ModelMesh::operator==(const ModelMesh &other) const { return this == &other; }
+bool pragma::geometry::ModelMesh::operator!=(const ModelMesh &other) const { return !operator==(other); }
+bool pragma::geometry::ModelMesh::IsEqual(const ModelMesh &other) const
 {
-	static_assert(pragma::geometry::ModelMesh::layout_version == 1, "Update this function when making changes to this class!");
+	static_assert(layout_version == 1, "Update this function when making changes to this class!");
 	if(!(uvec::cmp(m_min, other.m_min) && uvec::cmp(m_max, other.m_max) && m_numVerts == other.m_numVerts && m_numIndices == other.m_numIndices && uvec::cmp(m_center, other.m_center) && m_referenceId == other.m_referenceId && m_subMeshes.size() == other.m_subMeshes.size()))
 		return false;
 	for(auto i = decltype(m_subMeshes.size()) {0u}; i < m_subMeshes.size(); ++i) {
@@ -26,7 +26,7 @@ bool pragma::geometry::ModelMesh::IsEqual(const pragma::geometry::ModelMesh &oth
 	}
 	return true;
 }
-std::shared_ptr<pragma::geometry::ModelMesh> pragma::geometry::ModelMesh::Copy() const { return pragma::util::make_shared<pragma::geometry::ModelMesh>(*this); }
+std::shared_ptr<pragma::geometry::ModelMesh> pragma::geometry::ModelMesh::Copy() const { return pragma::util::make_shared<ModelMesh>(*this); }
 void pragma::geometry::ModelMesh::Rotate(const Quat &rot)
 {
 	for(auto &subMesh : m_subMeshes)
@@ -58,13 +58,13 @@ void pragma::geometry::ModelMesh::Centralize()
 	m_max -= center;
 	m_center -= center;
 }
-void pragma::geometry::ModelMesh::Update(pragma::asset::ModelUpdateFlags flags)
+void pragma::geometry::ModelMesh::Update(asset::ModelUpdateFlags flags)
 {
-	if((flags & pragma::asset::ModelUpdateFlags::UpdatePrimitiveCounts) != pragma::asset::ModelUpdateFlags::None) {
+	if((flags & asset::ModelUpdateFlags::UpdatePrimitiveCounts) != asset::ModelUpdateFlags::None) {
 		m_numVerts = 0;
 		m_numIndices = 0;
 	}
-	if((flags & pragma::asset::ModelUpdateFlags::UpdateBounds) != pragma::asset::ModelUpdateFlags::None) {
+	if((flags & asset::ModelUpdateFlags::UpdateBounds) != asset::ModelUpdateFlags::None) {
 		if(m_subMeshes.empty()) {
 			m_min = {};
 			m_max = {};
@@ -78,9 +78,9 @@ void pragma::geometry::ModelMesh::Update(pragma::asset::ModelUpdateFlags flags)
 	uint32_t vertCount = 0;
 	for(auto i = decltype(m_subMeshes.size()) {0}; i < m_subMeshes.size(); ++i) {
 		auto &subMesh = m_subMeshes[i];
-		if((flags & pragma::asset::ModelUpdateFlags::UpdateChildren) != pragma::asset::ModelUpdateFlags::None)
+		if((flags & asset::ModelUpdateFlags::UpdateChildren) != asset::ModelUpdateFlags::None)
 			subMesh->Update(flags);
-		if((flags & pragma::asset::ModelUpdateFlags::UpdateBounds) != pragma::asset::ModelUpdateFlags::None) {
+		if((flags & asset::ModelUpdateFlags::UpdateBounds) != asset::ModelUpdateFlags::None) {
 			Vector3 min;
 			Vector3 max;
 			subMesh->GetBounds(min, max);
@@ -93,15 +93,15 @@ void pragma::geometry::ModelMesh::Update(pragma::asset::ModelUpdateFlags flags)
 				m_center += v.position;
 		}
 
-		if((flags & pragma::asset::ModelUpdateFlags::UpdatePrimitiveCounts) != pragma::asset::ModelUpdateFlags::None) {
+		if((flags & asset::ModelUpdateFlags::UpdatePrimitiveCounts) != asset::ModelUpdateFlags::None) {
 			m_numVerts += subMesh->GetVertexCount();
 			m_numIndices += subMesh->GetIndexCount();
 		}
 	}
-	if((flags & pragma::asset::ModelUpdateFlags::UpdateBounds) != pragma::asset::ModelUpdateFlags::None && vertCount > 0)
+	if((flags & asset::ModelUpdateFlags::UpdateBounds) != asset::ModelUpdateFlags::None && vertCount > 0)
 		m_center /= static_cast<float>(vertCount);
 }
-void pragma::geometry::ModelMesh::Merge(const pragma::geometry::ModelMesh &other)
+void pragma::geometry::ModelMesh::Merge(const ModelMesh &other)
 {
 	m_subMeshes.reserve(m_subMeshes.size() + other.m_subMeshes.size());
 	for(auto &subMesh : other.m_subMeshes)
@@ -109,7 +109,7 @@ void pragma::geometry::ModelMesh::Merge(const pragma::geometry::ModelMesh &other
 }
 uint32_t pragma::geometry::ModelMesh::GetReferenceId() const { return m_referenceId; }
 void pragma::geometry::ModelMesh::SetReferenceId(uint32_t refId) { m_referenceId = refId; }
-void pragma::geometry::ModelMesh::AddSubMesh(const std::shared_ptr<pragma::geometry::ModelSubMesh> &subMesh) { m_subMeshes.push_back(subMesh); }
+void pragma::geometry::ModelMesh::AddSubMesh(const std::shared_ptr<ModelSubMesh> &subMesh) { m_subMeshes.push_back(subMesh); }
 std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> &pragma::geometry::ModelMesh::GetSubMeshes() { return m_subMeshes; }
 void pragma::geometry::ModelMesh::GetBounds(Vector3 &min, Vector3 &max) const
 {
@@ -121,7 +121,7 @@ void pragma::geometry::ModelMesh::Scale(const Vector3 &scale)
 	for(auto &subMesh : m_subMeshes)
 		subMesh->Scale(scale);
 }
-void pragma::geometry::ModelMesh::Mirror(pragma::Axis axis)
+void pragma::geometry::ModelMesh::Mirror(Axis axis)
 {
 	for(auto &subMesh : m_subMeshes)
 		subMesh->Mirror(axis);
@@ -144,12 +144,12 @@ void pragma::math::normalize_uv_coordinates(Vector2 &uv)
 }
 
 pragma::geometry::ModelSubMesh::ModelSubMesh()
-    : std::enable_shared_from_this<pragma::geometry::ModelSubMesh>(), m_skinTextureIndex(0), m_numAlphas(0), m_alphas(pragma::util::make_shared<std::vector<Vector2>>()), m_indexData(pragma::util::make_shared<std::vector<uint8_t>>()), m_vertexWeights(pragma::util::make_shared<std::vector<pragma::math::VertexWeight>>()),
-      m_extendedVertexWeights(pragma::util::make_shared<std::vector<pragma::math::VertexWeight>>()), m_vertices(pragma::util::make_shared<std::vector<pragma::math::Vertex>>()), m_uvSets {pragma::util::make_shared<std::unordered_map<std::string, std::vector<Vector2>>>()},
+    : std::enable_shared_from_this<ModelSubMesh>(), m_skinTextureIndex(0), m_numAlphas(0), m_alphas(pragma::util::make_shared<std::vector<Vector2>>()), m_indexData(pragma::util::make_shared<std::vector<uint8_t>>()), m_vertexWeights(pragma::util::make_shared<std::vector<math::VertexWeight>>()),
+      m_extendedVertexWeights(pragma::util::make_shared<std::vector<math::VertexWeight>>()), m_vertices(pragma::util::make_shared<std::vector<math::Vertex>>()), m_uvSets {pragma::util::make_shared<std::unordered_map<std::string, std::vector<Vector2>>>()},
       m_extensions {udm::Property::Create(udm::Type::Element)}, m_uuid {util::generate_uuid_v4()}
 {
 }
-pragma::geometry::ModelSubMesh::ModelSubMesh(const pragma::geometry::ModelSubMesh &other)
+pragma::geometry::ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
     : m_uuid {util::generate_uuid_v4()}, m_skinTextureIndex(other.m_skinTextureIndex), m_center(other.m_center), m_vertices(other.m_vertices), m_alphas(other.m_alphas), m_numAlphas(other.m_numAlphas), m_indexData(other.m_indexData), m_vertexWeights(other.m_vertexWeights),
       m_extendedVertexWeights(other.m_extendedVertexWeights), m_min(other.m_min), m_max(other.m_max), m_pose {other.m_pose}, m_uvSets {other.m_uvSets}, m_geometryType {other.m_geometryType}, m_referenceId {other.m_referenceId}, m_indexType {other.m_indexType}, m_name {other.m_name}
 {
@@ -163,24 +163,24 @@ pragma::geometry::ModelSubMesh::ModelSubMesh(const pragma::geometry::ModelSubMes
 	m_extensions->Read(extStreamFileIn);
 	//
 
-	static_assert(pragma::geometry::ModelSubMesh::layout_version == 1, "Update this function when making changes to this class!");
+	static_assert(layout_version == 1, "Update this function when making changes to this class!");
 }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::ModelSubMesh::Load(pragma::Game &game, const udm::AssetData &data, std::string &outErr)
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::ModelSubMesh::Load(Game &game, const udm::AssetData &data, std::string &outErr)
 {
 	auto mesh = game.CreateModelSubMesh();
 	auto result = mesh->LoadFromAssetData(data, outErr);
 	return result ? mesh : nullptr;
 }
 const pragma::util::Uuid &pragma::geometry::ModelSubMesh::GetUuid() const { return m_uuid; }
-void pragma::geometry::ModelSubMesh::SetUuid(const pragma::util::Uuid &uuid) { m_uuid = uuid; }
+void pragma::geometry::ModelSubMesh::SetUuid(const util::Uuid &uuid) { m_uuid = uuid; }
 const std::string &pragma::geometry::ModelSubMesh::GetName() const { return m_name; }
 void pragma::geometry::ModelSubMesh::SetName(const std::string &name) { m_name = name; }
 udm::PropertyWrapper pragma::geometry::ModelSubMesh::GetExtensionData() const { return udm::PropertyWrapper {*m_extensions}; }
-bool pragma::geometry::ModelSubMesh::operator==(const pragma::geometry::ModelSubMesh &other) const { return this == &other; }
-bool pragma::geometry::ModelSubMesh::operator!=(const pragma::geometry::ModelSubMesh &other) const { return !operator==(other); }
-bool pragma::geometry::ModelSubMesh::IsEqual(const pragma::geometry::ModelSubMesh &other) const
+bool pragma::geometry::ModelSubMesh::operator==(const ModelSubMesh &other) const { return this == &other; }
+bool pragma::geometry::ModelSubMesh::operator!=(const ModelSubMesh &other) const { return !operator==(other); }
+bool pragma::geometry::ModelSubMesh::IsEqual(const ModelSubMesh &other) const
 {
-	static_assert(pragma::geometry::ModelSubMesh::layout_version == 1, "Update this function when making changes to this class!");
+	static_assert(layout_version == 1, "Update this function when making changes to this class!");
 	if(!(m_skinTextureIndex == other.m_skinTextureIndex && uvec::cmp(m_center, other.m_center) && m_numAlphas == other.m_numAlphas && uvec::cmp(m_min, other.m_min) && uvec::cmp(m_max, other.m_max) && m_geometryType == other.m_geometryType && m_referenceId == other.m_referenceId
 	     && static_cast<bool>(m_vertices) == static_cast<bool>(other.m_vertices) && static_cast<bool>(m_alphas) == static_cast<bool>(other.m_alphas) && static_cast<bool>(m_uvSets) == static_cast<bool>(other.m_uvSets) && static_cast<bool>(m_indexData) == static_cast<bool>(other.m_indexData)
 	     && static_cast<bool>(m_vertexWeights) == static_cast<bool>(other.m_vertexWeights) && static_cast<bool>(m_extendedVertexWeights) == static_cast<bool>(other.m_extendedVertexWeights)))
@@ -248,15 +248,15 @@ bool pragma::geometry::ModelSubMesh::IsEqual(const pragma::geometry::ModelSubMes
 	}
 	return true;
 }
-void pragma::geometry::ModelSubMesh::Copy(pragma::geometry::ModelSubMesh &cpy, bool fullCopy) const
+void pragma::geometry::ModelSubMesh::Copy(ModelSubMesh &cpy, bool fullCopy) const
 {
 	cpy.m_name = m_name;
 	if(fullCopy) {
-		cpy.m_vertices = pragma::util::make_shared<std::vector<pragma::math::Vertex>>(*cpy.m_vertices);
+		cpy.m_vertices = pragma::util::make_shared<std::vector<math::Vertex>>(*cpy.m_vertices);
 		cpy.m_alphas = pragma::util::make_shared<std::vector<Vector2>>(*cpy.m_alphas);
 		cpy.m_indexData = pragma::util::make_shared<std::vector<uint8_t>>(*cpy.m_indexData);
-		cpy.m_vertexWeights = pragma::util::make_shared<std::vector<pragma::math::VertexWeight>>(*cpy.m_vertexWeights);
-		cpy.m_extendedVertexWeights = pragma::util::make_shared<std::vector<pragma::math::VertexWeight>>(*cpy.m_extendedVertexWeights);
+		cpy.m_vertexWeights = pragma::util::make_shared<std::vector<math::VertexWeight>>(*cpy.m_vertexWeights);
+		cpy.m_extendedVertexWeights = pragma::util::make_shared<std::vector<math::VertexWeight>>(*cpy.m_extendedVertexWeights);
 		cpy.m_uvSets = pragma::util::make_shared<std::unordered_map<std::string, std::vector<Vector2>>>(*cpy.m_uvSets);
 
 		// Copy extension data
@@ -269,11 +269,11 @@ void pragma::geometry::ModelSubMesh::Copy(pragma::geometry::ModelSubMesh &cpy, b
 		cpy.m_extensions->Read(extStreamFileIn);
 		//
 	}
-	static_assert(pragma::geometry::ModelSubMesh::layout_version == 1, "Update this function when making changes to this class!");
+	static_assert(layout_version == 1, "Update this function when making changes to this class!");
 }
 std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::ModelSubMesh::Copy(bool fullCopy) const
 {
-	auto cpy = pragma::util::make_shared<pragma::geometry::ModelSubMesh>(*this);
+	auto cpy = pragma::util::make_shared<ModelSubMesh>(*this);
 	if(fullCopy == false)
 		return cpy;
 	Copy(*cpy, fullCopy);
@@ -281,18 +281,18 @@ std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::ModelSubMesh::
 }
 uint32_t pragma::geometry::ModelSubMesh::GetReferenceId() const { return m_referenceId; }
 void pragma::geometry::ModelSubMesh::SetReferenceId(uint32_t refId) { m_referenceId = refId; }
-const pragma::math::ScaledTransform &pragma::geometry::ModelSubMesh::GetPose() const { return const_cast<pragma::geometry::ModelSubMesh *>(this)->GetPose(); }
+const pragma::math::ScaledTransform &pragma::geometry::ModelSubMesh::GetPose() const { return const_cast<ModelSubMesh *>(this)->GetPose(); }
 pragma::math::ScaledTransform &pragma::geometry::ModelSubMesh::GetPose() { return m_pose; }
-void pragma::geometry::ModelSubMesh::SetPose(const pragma::math::ScaledTransform &pose) { m_pose = pose; }
+void pragma::geometry::ModelSubMesh::SetPose(const math::ScaledTransform &pose) { m_pose = pose; }
 void pragma::geometry::ModelSubMesh::Scale(const Vector3 &scale)
 {
 	m_pose.SetOrigin(m_pose.GetOrigin() * scale);
 	for(auto &v : *m_vertices)
 		v.position *= scale;
 }
-void pragma::geometry::ModelSubMesh::Mirror(pragma::Axis axis)
+void pragma::geometry::ModelSubMesh::Mirror(Axis axis)
 {
-	auto transform = pragma::asset::get_mirror_transform_vector(axis);
+	auto transform = asset::get_mirror_transform_vector(axis);
 	m_center *= transform;
 	for(auto &v : *m_vertices) {
 		v.position *= transform;
@@ -304,7 +304,7 @@ void pragma::geometry::ModelSubMesh::Mirror(pragma::Axis axis)
 	if(m_geometryType == GeometryType::Triangles) {
 		VisitIndices([](auto *indexData, uint32_t numIndices) {
 			for(auto i = decltype(numIndices) {0u}; i < numIndices; i += 3)
-				pragma::math::swap(indexData[i], indexData[i + 1]);
+				math::swap(indexData[i], indexData[i + 1]);
 		});
 	}
 
@@ -313,9 +313,9 @@ void pragma::geometry::ModelSubMesh::Mirror(pragma::Axis axis)
 	uvec::to_min_max(m_min, m_max);
 
 	m_pose.SetOrigin(m_pose.GetOrigin() * transform);
-	uquat::mirror_on_axis(m_pose.GetRotation(), pragma::math::to_integral(axis));
+	uquat::mirror_on_axis(m_pose.GetRotation(), math::to_integral(axis));
 }
-void pragma::geometry::ModelSubMesh::Merge(const pragma::geometry::ModelSubMesh &other)
+void pragma::geometry::ModelSubMesh::Merge(const ModelSubMesh &other)
 {
 	// TODO: Take poses into account!
 	m_center = (m_center + other.m_center) / 2.f;
@@ -324,7 +324,7 @@ void pragma::geometry::ModelSubMesh::Merge(const pragma::geometry::ModelSubMesh 
 	std::size_t newVertCount = 0;
 	if(other.m_vertices != nullptr) {
 		if(m_vertices == nullptr)
-			m_vertices = pragma::util::make_shared<std::vector<pragma::math::Vertex>>();
+			m_vertices = pragma::util::make_shared<std::vector<math::Vertex>>();
 		vertCount = m_vertices->size();
 		m_vertices->reserve(m_vertices->size() + other.m_vertices->size());
 		for(auto &v : *other.m_vertices)
@@ -335,15 +335,15 @@ void pragma::geometry::ModelSubMesh::Merge(const pragma::geometry::ModelSubMesh 
 	if(other.m_indexData != nullptr) {
 		if(m_indexData == nullptr)
 			m_indexData = pragma::util::make_shared<std::vector<uint8_t>>();
-		if(GetIndexType() == pragma::geometry::IndexType::UInt16) {
+		if(GetIndexType() == IndexType::UInt16) {
 			// Check if we need to increase our index size
 			uint32_t maxIndex = 0;
 			other.VisitIndices([&maxIndex](auto *indexData, uint32_t numIndices) {
 				for(auto i = decltype(numIndices) {0u}; i < numIndices; ++i)
-					maxIndex = pragma::math::max(maxIndex, static_cast<Index32>(indexData[i]));
+					maxIndex = math::max(maxIndex, static_cast<Index32>(indexData[i]));
 			});
 			if(vertCount + maxIndex >= MAX_INDEX16)
-				SetIndexType(pragma::geometry::IndexType::UInt32);
+				SetIndexType(IndexType::UInt32);
 		}
 		ReserveIndices(GetIndexCount() + other.GetIndexCount());
 		// TODO: Use memcpy if index type matches
@@ -364,7 +364,7 @@ void pragma::geometry::ModelSubMesh::Merge(const pragma::geometry::ModelSubMesh 
 
 	if(other.m_vertexWeights != nullptr && ((m_vertexWeights && !m_vertexWeights->empty()) || !other.m_vertexWeights->empty())) {
 		if(m_vertexWeights == nullptr)
-			m_vertexWeights = pragma::util::make_shared<std::vector<pragma::math::VertexWeight>>();
+			m_vertexWeights = pragma::util::make_shared<std::vector<math::VertexWeight>>();
 		m_vertexWeights->reserve(newVertCount);
 		m_vertexWeights->resize(vertCount);
 		for(auto &vw : *other.m_vertexWeights)
@@ -373,7 +373,7 @@ void pragma::geometry::ModelSubMesh::Merge(const pragma::geometry::ModelSubMesh 
 
 	if(other.m_extendedVertexWeights != nullptr && ((m_extendedVertexWeights && !m_extendedVertexWeights->empty()) || !other.m_extendedVertexWeights->empty())) {
 		if(m_extendedVertexWeights == nullptr)
-			m_extendedVertexWeights = pragma::util::make_shared<std::vector<pragma::math::VertexWeight>>();
+			m_extendedVertexWeights = pragma::util::make_shared<std::vector<math::VertexWeight>>();
 		m_extendedVertexWeights->reserve(newVertCount);
 		m_extendedVertexWeights->resize(vertCount);
 		for(auto &vw : *other.m_extendedVertexWeights)
@@ -390,7 +390,7 @@ void pragma::geometry::ModelSubMesh::Merge(const pragma::geometry::ModelSubMesh 
 		memcpy(it->second.data() + vertCount, pair.second.data(), pair.second.size() * sizeof(pair.second.front()));
 	}
 }
-void pragma::geometry::ModelSubMesh::SetShared(const pragma::geometry::ModelSubMesh &other, ShareMode mode)
+void pragma::geometry::ModelSubMesh::SetShared(const ModelSubMesh &other, ShareMode mode)
 {
 	if((mode & ShareMode::Vertices) != ShareMode::None)
 		m_vertices = other.m_vertices;
@@ -415,7 +415,7 @@ void pragma::geometry::ModelSubMesh::Centralize(const Vector3 &origin)
 void pragma::geometry::ModelSubMesh::NormalizeUVCoordinates()
 {
 	for(auto &v : *m_vertices)
-		pragma::math::normalize_uv_coordinates(v.uv);
+		math::normalize_uv_coordinates(v.uv);
 }
 void pragma::geometry::ModelSubMesh::GenerateNormals()
 {
@@ -494,7 +494,7 @@ void pragma::geometry::ModelSubMesh::Translate(const Vector3 &t)
 	m_min += t;
 	m_max += t;
 }
-void pragma::geometry::ModelSubMesh::Transform(const pragma::math::ScaledTransform &pose)
+void pragma::geometry::ModelSubMesh::Transform(const math::ScaledTransform &pose)
 {
 	Scale(pose.GetScale());
 	Rotate(pose.GetRotation());
@@ -511,16 +511,16 @@ void pragma::geometry::ModelSubMesh::SetTriangleCount(uint32_t numTris) { SetInd
 void pragma::geometry::ModelSubMesh::SetIndices(const std::vector<Index16> &indices)
 {
 	m_indexData->clear();
-	SetIndexType(pragma::geometry::IndexType::UInt16);
+	SetIndexType(IndexType::UInt16);
 	SetIndexCount(indices.size());
-	VisitIndices([this, &indices](auto *indexData, uint32_t numIndices) { memcpy(indexData, indices.data(), numIndices * size_of_index(pragma::geometry::IndexType::UInt16)); });
+	VisitIndices([this, &indices](auto *indexData, uint32_t numIndices) { memcpy(indexData, indices.data(), numIndices * size_of_index(IndexType::UInt16)); });
 }
 void pragma::geometry::ModelSubMesh::SetIndices(const std::vector<Index32> &indices)
 {
 	m_indexData->clear();
-	SetIndexType(pragma::geometry::IndexType::UInt32);
+	SetIndexType(IndexType::UInt32);
 	SetIndexCount(indices.size());
-	VisitIndices([this, &indices](auto *indexData, uint32_t numIndices) { memcpy(indexData, indices.data(), numIndices * size_of_index(pragma::geometry::IndexType::UInt32)); });
+	VisitIndices([this, &indices](auto *indexData, uint32_t numIndices) { memcpy(indexData, indices.data(), numIndices * size_of_index(IndexType::UInt32)); });
 }
 void pragma::geometry::ModelSubMesh::SetSkinTextureIndex(uint32_t texture) { m_skinTextureIndex = texture; }
 std::vector<pragma::math::Vertex> &pragma::geometry::ModelSubMesh::GetVertices() { return *m_vertices; }
@@ -530,7 +530,7 @@ std::optional<pragma::geometry::ModelSubMesh::Index32> pragma::geometry::ModelSu
 {
 	if(i >= GetIndexCount())
 		return {};
-	pragma::geometry::ModelSubMesh::Index32 idx;
+	Index32 idx;
 	VisitIndices([i, &idx](auto *indexData, uint32_t numIndices) { idx = indexData[i]; });
 	return idx;
 }
@@ -545,7 +545,7 @@ void pragma::geometry::ModelSubMesh::GetIndices(std::vector<Index32> &outIndices
 {
 	auto offset = outIndices.size();
 	outIndices.resize(outIndices.size() + GetIndexCount());
-	if(GetIndexType() == pragma::geometry::IndexType::UInt32) {
+	if(GetIndexType() == IndexType::UInt32) {
 		auto &indexData = GetIndexData();
 		memcpy(outIndices.data() + offset, indexData.data(), indexData.size());
 		return;
@@ -559,14 +559,14 @@ std::vector<pragma::math::VertexWeight> &pragma::geometry::ModelSubMesh::GetVert
 std::vector<pragma::math::VertexWeight> &pragma::geometry::ModelSubMesh::GetExtendedVertexWeights() { return *m_extendedVertexWeights; }
 uint8_t pragma::geometry::ModelSubMesh::GetAlphaCount() const { return m_numAlphas; }
 void pragma::geometry::ModelSubMesh::SetAlphaCount(uint8_t numAlpha) { m_numAlphas = numAlpha; }
-uint32_t pragma::geometry::ModelSubMesh::AddVertex(const pragma::math::Vertex &v)
+uint32_t pragma::geometry::ModelSubMesh::AddVertex(const math::Vertex &v)
 {
 	if(m_vertices->size() == m_vertices->capacity())
 		m_vertices->reserve(static_cast<uint32_t>(m_vertices->size() * 1.5f));
 	m_vertices->push_back(v);
 	return static_cast<uint32_t>(m_vertices->size() - 1);
 }
-void pragma::geometry::ModelSubMesh::AddTriangle(const pragma::math::Vertex &v1, const pragma::math::Vertex &v2, const pragma::math::Vertex &v3)
+void pragma::geometry::ModelSubMesh::AddTriangle(const math::Vertex &v1, const math::Vertex &v2, const math::Vertex &v3)
 {
 	if(m_vertices->size() == m_vertices->capacity())
 		m_vertices->reserve(static_cast<uint32_t>(m_vertices->size() * 1.5f));
@@ -582,8 +582,8 @@ void pragma::geometry::ModelSubMesh::AddIndex(Index32 index)
 {
 	if(m_indexData->size() == m_indexData->capacity())
 		m_indexData->reserve(static_cast<uint32_t>(m_indexData->size() * 1.5f));
-	if(m_indexType == pragma::geometry::IndexType::UInt16 && index >= std::numeric_limits<Index16>::max())
-		SetIndexType(pragma::geometry::IndexType::UInt32);
+	if(m_indexType == IndexType::UInt16 && index >= std::numeric_limits<Index16>::max())
+		SetIndexType(IndexType::UInt32);
 
 	auto offset = GetIndexCount();
 	m_indexData->resize(m_indexData->size() + size_of_index(m_indexType));
@@ -605,14 +605,14 @@ pragma::geometry::IndexType pragma::geometry::ModelSubMesh::GetIndexType() const
 udm::Type pragma::geometry::ModelSubMesh::GetUdmIndexType() const
 {
 	switch(m_indexType) {
-	case pragma::geometry::IndexType::UInt16:
+	case IndexType::UInt16:
 		return udm::Type::UInt16;
-	case pragma::geometry::IndexType::UInt32:
+	case IndexType::UInt32:
 		return udm::Type::UInt32;
 	}
 	return udm::Type::Invalid;
 }
-void pragma::geometry::ModelSubMesh::SetIndexType(pragma::geometry::IndexType type)
+void pragma::geometry::ModelSubMesh::SetIndexType(IndexType type)
 {
 	if(type == m_indexType)
 		return;
@@ -634,10 +634,10 @@ void pragma::geometry::ModelSubMesh::SetIndexType(pragma::geometry::IndexType ty
 		*m_indexData = std::move(newData);
 	};
 	switch(type) {
-	case pragma::geometry::IndexType::UInt16:
+	case IndexType::UInt16:
 		convertIndices.template operator()<Index32, Index16>();
 		break;
-	case pragma::geometry::IndexType::UInt32:
+	case IndexType::UInt32:
 		convertIndices.template operator()<Index16, Index32>();
 		break;
 	}
@@ -648,33 +648,33 @@ void pragma::geometry::ModelSubMesh::SetGeometryType(GeometryType type) { m_geom
 void pragma::geometry::ModelSubMesh::Validate()
 {
 	for(auto &a : GetAlphas())
-		pragma::asset::validate_value(a);
+		asset::validate_value(a);
 	Vector3 min, max;
 	GetBounds(min, max);
-	pragma::asset::validate_value(min);
-	pragma::asset::validate_value(max);
-	pragma::asset::validate_value(GetCenter());
+	asset::validate_value(min);
+	asset::validate_value(max);
+	asset::validate_value(GetCenter());
 	for(auto &vw : GetExtendedVertexWeights())
-		pragma::asset::validate_value(vw.weights);
+		asset::validate_value(vw.weights);
 	auto &pose = GetPose();
-	pragma::asset::validate_value(pose.GetOrigin());
-	pragma::asset::validate_value(pose.GetRotation());
+	asset::validate_value(pose.GetOrigin());
+	asset::validate_value(pose.GetRotation());
 	for(auto &[name, uvSet] : GetUVSets()) {
 		for(auto &uv : uvSet)
-			pragma::asset::validate_value(uv);
+			asset::validate_value(uv);
 	}
 	for(auto &vw : GetVertexWeights())
-		pragma::asset::validate_value(vw.weights);
+		asset::validate_value(vw.weights);
 	for(auto &v : GetVertices()) {
-		pragma::asset::validate_value(v.position);
-		pragma::asset::validate_value(v.normal);
-		pragma::asset::validate_value(v.uv);
-		pragma::asset::validate_value(v.tangent);
+		asset::validate_value(v.position);
+		asset::validate_value(v.normal);
+		asset::validate_value(v.uv);
+		asset::validate_value(v.tangent);
 	}
 }
-void pragma::geometry::ModelSubMesh::Update(pragma::asset::ModelUpdateFlags flags)
+void pragma::geometry::ModelSubMesh::Update(asset::ModelUpdateFlags flags)
 {
-	if((flags & pragma::asset::ModelUpdateFlags::UpdateBounds) == pragma::asset::ModelUpdateFlags::None)
+	if((flags & asset::ModelUpdateFlags::UpdateBounds) == asset::ModelUpdateFlags::None)
 		return;
 	m_min = Vector3(std::numeric_limits<Vector3::value_type>::max(), std::numeric_limits<Vector3::value_type>::max(), std::numeric_limits<Vector3::value_type>::max());
 	m_max = Vector3(std::numeric_limits<Vector3::value_type>::lowest(), std::numeric_limits<Vector3::value_type>::lowest(), std::numeric_limits<Vector3::value_type>::lowest());
@@ -694,7 +694,7 @@ void pragma::geometry::ModelSubMesh::Update(pragma::asset::ModelUpdateFlags flag
 		m_max = Vector3(0.f, 0.f, 0.f);
 	}
 }
-void pragma::geometry::ModelSubMesh::SetVertex(uint32_t idx, const pragma::math::Vertex &v)
+void pragma::geometry::ModelSubMesh::SetVertex(uint32_t idx, const math::Vertex &v)
 {
 	if(idx >= m_vertices->size())
 		return;
@@ -726,11 +726,11 @@ void pragma::geometry::ModelSubMesh::SetVertexAlpha(uint32_t idx, const Vector2 
 }
 void pragma::geometry::ModelSubMesh::ComputeTangentBasis()
 {
-	VisitIndices([this](auto *indexData, uint32_t numIndices) { pragma::math::compute_tangent_basis(*m_vertices, indexData, numIndices); });
+	VisitIndices([this](auto *indexData, uint32_t numIndices) { math::compute_tangent_basis(*m_vertices, indexData, numIndices); });
 }
-const std::vector<pragma::math::VertexWeight> &pragma::geometry::ModelSubMesh::GetVertexWeightSet(uint32_t idx) const { return const_cast<pragma::geometry::ModelSubMesh *>(this)->GetVertexWeightSet(idx); }
+const std::vector<pragma::math::VertexWeight> &pragma::geometry::ModelSubMesh::GetVertexWeightSet(uint32_t idx) const { return const_cast<ModelSubMesh *>(this)->GetVertexWeightSet(idx); }
 std::vector<pragma::math::VertexWeight> &pragma::geometry::ModelSubMesh::GetVertexWeightSet(uint32_t idx) { return (idx >= 4) ? *m_extendedVertexWeights : *m_vertexWeights; }
-void pragma::geometry::ModelSubMesh::SetVertexWeight(uint32_t idx, const pragma::math::VertexWeight &weight)
+void pragma::geometry::ModelSubMesh::SetVertexWeight(uint32_t idx, const math::VertexWeight &weight)
 {
 	auto &vertexWeights = GetVertexWeightSet(0);
 	if(idx >= vertexWeights.size()) {
@@ -740,13 +740,13 @@ void pragma::geometry::ModelSubMesh::SetVertexWeight(uint32_t idx, const pragma:
 	}
 	vertexWeights.at(idx) = weight;
 }
-const std::vector<Vector2> *pragma::geometry::ModelSubMesh::GetUVSet(const std::string &name) const { return const_cast<pragma::geometry::ModelSubMesh *>(this)->GetUVSet(name); }
+const std::vector<Vector2> *pragma::geometry::ModelSubMesh::GetUVSet(const std::string &name) const { return const_cast<ModelSubMesh *>(this)->GetUVSet(name); }
 std::vector<Vector2> *pragma::geometry::ModelSubMesh::GetUVSet(const std::string &name)
 {
 	auto it = m_uvSets->find(name);
 	return (it != m_uvSets->end()) ? &it->second : nullptr;
 }
-const std::unordered_map<std::string, std::vector<Vector2>> &pragma::geometry::ModelSubMesh::GetUVSets() const { return const_cast<pragma::geometry::ModelSubMesh *>(this)->GetUVSets(); }
+const std::unordered_map<std::string, std::vector<Vector2>> &pragma::geometry::ModelSubMesh::GetUVSets() const { return const_cast<ModelSubMesh *>(this)->GetUVSets(); }
 std::unordered_map<std::string, std::vector<Vector2>> &pragma::geometry::ModelSubMesh::GetUVSets() { return *m_uvSets; }
 std::vector<Vector2> &pragma::geometry::ModelSubMesh::AddUVSet(const std::string &name)
 {
@@ -797,7 +797,7 @@ void pragma::geometry::ModelSubMesh::GetBounds(Vector3 &min, Vector3 &max) const
 }
 void pragma::geometry::ModelSubMesh::Optimize(double epsilon)
 {
-	std::vector<pragma::math::Vertex> newVerts;
+	std::vector<math::Vertex> newVerts;
 	newVerts.reserve(m_vertices->size());
 
 	auto bCheckAlphas = (m_alphas->size() == m_vertices->size()) ? true : false;
@@ -806,7 +806,7 @@ void pragma::geometry::ModelSubMesh::Optimize(double epsilon)
 	std::vector<Vector2> newAlphas;
 	if(bCheckAlphas == true)
 		newAlphas.reserve(m_alphas->size());
-	std::vector<pragma::math::VertexWeight> newVertexWeights;
+	std::vector<math::VertexWeight> newVertexWeights;
 	if(bCheckWeights == true)
 		newVertexWeights.reserve(m_vertexWeights->size());
 
@@ -823,7 +823,7 @@ void pragma::geometry::ModelSubMesh::Optimize(double epsilon)
 			auto *weightOther = (j < newVertexWeights.size()) ? &newVertexWeights[j] : nullptr;
 			if((bCheckAlphas && alphaOther == nullptr) || (bCheckWeights && weightOther == nullptr))
 				break;
-			if(v.Equal(vOther, epsilon) && (bCheckAlphas == false || (pragma::math::abs(alpha->x - alphaOther->x) <= epsilon && pragma::math::abs(alpha->y - alphaOther->y) <= epsilon)) && (bCheckWeights == false || *weight == *weightOther)) {
+			if(v.Equal(vOther, epsilon) && (bCheckAlphas == false || (math::abs(alpha->x - alphaOther->x) <= epsilon && math::abs(alpha->y - alphaOther->y) <= epsilon)) && (bCheckWeights == false || *weight == *weightOther)) {
 				vertIdx = j;
 				break;
 			}
@@ -960,14 +960,14 @@ bool pragma::geometry::ModelSubMesh::Save(udm::AssetDataArg outData, std::string
 	outData.SetAssetVersion(PMESH_VERSION);
 
 	auto udm = *outData;
-	udm["uuid"] = pragma::util::uuid_to_string(m_uuid);
+	udm["uuid"] = util::uuid_to_string(m_uuid);
 	udm["name"] = m_name;
 	udm["referenceId"] = GetReferenceId();
 	udm["pose"] = GetPose();
 	udm["geometryType"] = udm::enum_to_string(GetGeometryType());
 
-	static_assert(sizeof(pragma::math::Vertex) == 48);
-	auto strctVertex = ::udm::StructDescription::Define<Vector3, Vector2, Vector3, Vector4>({"pos", "uv", "n", "t"});
+	static_assert(sizeof(math::Vertex) == 48);
+	auto strctVertex = udm::StructDescription::Define<Vector3, Vector2, Vector3, Vector4>({"pos", "uv", "n", "t"});
 	udm.AddArray("vertices", strctVertex, GetVertices(), udm::ArrayType::Compressed);
 	VisitIndices([&udm](auto *indexData, uint32_t numIndices) { udm.AddArray("indices", numIndices, indexData, udm::ArrayType::Compressed); });
 	udm["skinMaterialIndex"] = m_skinTextureIndex;
@@ -978,8 +978,8 @@ bool pragma::geometry::ModelSubMesh::Save(udm::AssetDataArg outData, std::string
 
 	auto &vertexWeights = GetVertexWeights();
 	if(!vertexWeights.empty()) {
-		static_assert(sizeof(pragma::math::VertexWeight) == 32);
-		auto strctVertexWeight = ::udm::StructDescription::Define<Vector4i, Vector4>({"id", "w"});
+		static_assert(sizeof(math::VertexWeight) == 32);
+		auto strctVertexWeight = udm::StructDescription::Define<Vector4i, Vector4>({"id", "w"});
 		udm.AddArray("vertexWeights", strctVertexWeight, vertexWeights, udm::ArrayType::Compressed);
 
 		auto &extBoneWeights = GetExtendedVertexWeights();
@@ -1011,7 +1011,7 @@ bool pragma::geometry::ModelSubMesh::LoadFromAssetData(const udm::AssetData &dat
 
 	std::string uuid;
 	if(udm["uuid"](uuid))
-		m_uuid = pragma::util::uuid_string_to_bytes(uuid);
+		m_uuid = util::uuid_string_to_bytes(uuid);
 
 	udm["name"](m_name);
 	udm["referenceId"](m_referenceId);
@@ -1047,7 +1047,7 @@ bool pragma::geometry::ModelSubMesh::LoadFromAssetData(const udm::AssetData &dat
 	auto *aIndices = udmIndices.GetValuePtr<udm::Array>();
 	if(aIndices) {
 		auto valueType = aIndices->GetValueType();
-		SetIndexType((valueType == udm::Type::UInt16) ? pragma::geometry::IndexType::UInt16 : pragma::geometry::IndexType::UInt32);
+		SetIndexType((valueType == udm::Type::UInt16) ? IndexType::UInt16 : IndexType::UInt32);
 		SetIndexCount(aIndices->GetSize());
 		auto &indexData = GetIndexData();
 		memcpy(indexData.data(), aIndices->GetValuePtr(0), indexData.size());
@@ -1076,7 +1076,7 @@ bool pragma::geometry::ModelSubMesh::LoadFromAssetData(const udm::AssetData &dat
 	return true;
 }
 
-std::ostream &pragma::geometry::operator<<(std::ostream &out, const pragma::geometry::ModelMesh &o)
+std::ostream &pragma::geometry::operator<<(std::ostream &out, const ModelMesh &o)
 {
 	out << "ModelMesh";
 	out << "[Verts:" << o.GetVertexCount() << "]";
@@ -1086,7 +1086,7 @@ std::ostream &pragma::geometry::operator<<(std::ostream &out, const pragma::geom
 	return out;
 }
 
-std::ostream &pragma::geometry::operator<<(std::ostream &out, const pragma::geometry::ModelSubMesh &o)
+std::ostream &pragma::geometry::operator<<(std::ostream &out, const ModelSubMesh &o)
 {
 	out << "ModelSubMesh";
 	out << "[Verts:" << o.GetVertexCount() << "]";
@@ -1105,15 +1105,15 @@ pragma::geometry::BoxCreateInfo::BoxCreateInfo(const Vector3 &min, const Vector3
 pragma::geometry::SphereCreateInfo::SphereCreateInfo(const Vector3 &origin, float radius) : origin {origin}, radius {radius} {}
 pragma::geometry::CylinderCreateInfo::CylinderCreateInfo(float radius, float length) : radius {radius}, length {length} {}
 
-pragma::geometry::ConeCreateInfo::ConeCreateInfo(pragma::math::Degree angle, float length) : length {length} { endRadius = length * pragma::math::tan(pragma::math::deg_to_rad(angle)); }
+pragma::geometry::ConeCreateInfo::ConeCreateInfo(math::Degree angle, float length) : length {length} { endRadius = length * math::tan(math::deg_to_rad(angle)); }
 pragma::geometry::ConeCreateInfo::ConeCreateInfo(float startRadius, float length, float endRadius) : startRadius {startRadius}, length {length}, endRadius {endRadius} {}
 
-pragma::geometry::EllipticConeCreateInfo::EllipticConeCreateInfo(pragma::math::Degree angleX, pragma::math::Degree angleY, float length) : ConeCreateInfo {angleX, length} { endRadiusY = length * pragma::math::tan(pragma::math::deg_to_rad(angleY)); }
+pragma::geometry::EllipticConeCreateInfo::EllipticConeCreateInfo(math::Degree angleX, math::Degree angleY, float length) : ConeCreateInfo {angleX, length} { endRadiusY = length * math::tan(math::deg_to_rad(angleY)); }
 pragma::geometry::EllipticConeCreateInfo::EllipticConeCreateInfo(float startRadiusX, float startRadiusY, float length, float endRadiusX, float endRadiusY) : ConeCreateInfo {startRadiusX, length, endRadiusX}, startRadiusY {startRadiusY}, endRadiusY {endRadiusY} {}
 
 pragma::geometry::CircleCreateInfo::CircleCreateInfo(float radius, bool doubleSided) : radius {radius}, doubleSided {doubleSided} {}
 pragma::geometry::RingCreateInfo::RingCreateInfo(float innerRadius, float outerRadius, bool doubleSided) : innerRadius {innerRadius}, outerRadius {outerRadius}, doubleSided {doubleSided} {}
-void pragma::geometry::create_quad(pragma::geometry::ModelSubMesh &mesh, const QuadCreateInfo &createInfo)
+void pragma::geometry::create_quad(ModelSubMesh &mesh, const QuadCreateInfo &createInfo)
 {
 	auto size = createInfo.size;
 	Vector3 min {-size, 0.f, -size};
@@ -1126,25 +1126,25 @@ void pragma::geometry::create_quad(pragma::geometry::ModelSubMesh &mesh, const Q
 	};
 	std::vector<Vector3> verts {uniqueVertices.at(0), uniqueVertices.at(2), uniqueVertices.at(1), uniqueVertices.at(2), uniqueVertices.at(0), uniqueVertices.at(3)};
 	std::vector<Vector3> faceNormals {uvec::UP, uvec::UP};
-	std::vector<::Vector2> uvs {::Vector2 {0.f, 0.f}, ::Vector2 {1.f, 1.f}, ::Vector2 {1.f, 0.f}, ::Vector2 {1.f, 1.f}, ::Vector2 {0.f, 0.f}, ::Vector2 {0.f, 1.f}};
+	std::vector<Vector2> uvs {Vector2 {0.f, 0.f}, Vector2 {1.f, 1.f}, Vector2 {1.f, 0.f}, Vector2 {1.f, 1.f}, Vector2 {0.f, 0.f}, Vector2 {0.f, 1.f}};
 	for(auto i = decltype(verts.size()) {0}; i < verts.size(); i += 3) {
 		auto &n = faceNormals[i / 3];
-		mesh.AddVertex(pragma::math::Vertex {verts[i], uvs[i], n});
-		mesh.AddVertex(pragma::math::Vertex {verts[i + 1], uvs[i + 1], n});
-		mesh.AddVertex(pragma::math::Vertex {verts[i + 2], uvs[i + 2], n});
+		mesh.AddVertex(math::Vertex {verts[i], uvs[i], n});
+		mesh.AddVertex(math::Vertex {verts[i + 1], uvs[i + 1], n});
+		mesh.AddVertex(math::Vertex {verts[i + 2], uvs[i + 2], n});
 
 		mesh.AddTriangle(static_cast<uint32_t>(i), static_cast<uint32_t>(i + 1), static_cast<uint32_t>(i + 2));
 	}
 	mesh.SetSkinTextureIndex(0);
 	mesh.Update();
 }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_quad(pragma::Game &game, const QuadCreateInfo &createInfo)
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_quad(Game &game, const QuadCreateInfo &createInfo)
 {
 	auto mesh = game.CreateModelSubMesh();
 	create_quad(*mesh, createInfo);
 	return mesh;
 }
-void pragma::geometry::create_box(pragma::geometry::ModelSubMesh &mesh, const BoxCreateInfo &createInfo)
+void pragma::geometry::create_box(ModelSubMesh &mesh, const BoxCreateInfo &createInfo)
 {
 	auto &cmin = createInfo.min;
 	auto &cmax = createInfo.max;
@@ -1201,40 +1201,40 @@ void pragma::geometry::create_box(pragma::geometry::ModelSubMesh &mesh, const Bo
 	  uniqueVertices[7], // 6
 	};
 	std::vector<Vector3> faceNormals {Vector3(-1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 0, -1), Vector3(0, 0, -1), Vector3(0, -1, 0), Vector3(0, -1, 0), Vector3(0, 0, 1), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 1, 0)};
-	std::vector<::Vector2> uvs {
-	  ::Vector2(0, 1), ::Vector2(1, 1), ::Vector2(1, 0), // 1
-	  ::Vector2(0, 1), ::Vector2(1, 0), ::Vector2(0, 0), // 1
-	  ::Vector2(0, 0), ::Vector2(1, 1), ::Vector2(1, 0), // 2
-	  ::Vector2(0, 0), ::Vector2(0, 1), ::Vector2(1, 1), // 2
-	  ::Vector2(0, 1), ::Vector2(1, 0), ::Vector2(0, 0), // 3
-	  ::Vector2(0, 1), ::Vector2(1, 1), ::Vector2(1, 0), // 3
-	  ::Vector2(0, 0), ::Vector2(0, 1), ::Vector2(1, 1), // 4
-	  ::Vector2(1, 0), ::Vector2(0, 0), ::Vector2(1, 1), // 4
-	  ::Vector2(0, 0), ::Vector2(1, 1), ::Vector2(1, 0), // 5
-	  ::Vector2(1, 1), ::Vector2(0, 0), ::Vector2(0, 1), // 5
-	  ::Vector2(1, 1), ::Vector2(1, 0), ::Vector2(0, 0), // 6
-	  ::Vector2(1, 1), ::Vector2(0, 0), ::Vector2(0, 1)  // 6
+	std::vector<Vector2> uvs {
+	  Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), // 1
+	  Vector2(0, 1), Vector2(1, 0), Vector2(0, 0), // 1
+	  Vector2(0, 0), Vector2(1, 1), Vector2(1, 0), // 2
+	  Vector2(0, 0), Vector2(0, 1), Vector2(1, 1), // 2
+	  Vector2(0, 1), Vector2(1, 0), Vector2(0, 0), // 3
+	  Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), // 3
+	  Vector2(0, 0), Vector2(0, 1), Vector2(1, 1), // 4
+	  Vector2(1, 0), Vector2(0, 0), Vector2(1, 1), // 4
+	  Vector2(0, 0), Vector2(1, 1), Vector2(1, 0), // 5
+	  Vector2(1, 1), Vector2(0, 0), Vector2(0, 1), // 5
+	  Vector2(1, 1), Vector2(1, 0), Vector2(0, 0), // 6
+	  Vector2(1, 1), Vector2(0, 0), Vector2(0, 1)  // 6
 	};
 	for(auto &uv : uvs)
 		uv.y = 1.f - uv.y;
 	for(auto i = decltype(verts.size()) {0}; i < verts.size(); i += 3) {
 		auto &n = faceNormals[i / 3];
-		mesh.AddVertex(pragma::math::Vertex {verts[i], uvs[i], n});
-		mesh.AddVertex(pragma::math::Vertex {verts[i + 1], uvs[i + 1], n});
-		mesh.AddVertex(pragma::math::Vertex {verts[i + 2], uvs[i + 2], n});
+		mesh.AddVertex(math::Vertex {verts[i], uvs[i], n});
+		mesh.AddVertex(math::Vertex {verts[i + 1], uvs[i + 1], n});
+		mesh.AddVertex(math::Vertex {verts[i + 2], uvs[i + 2], n});
 
 		mesh.AddTriangle(static_cast<uint32_t>(i), static_cast<uint32_t>(i + 1), static_cast<uint32_t>(i + 2));
 	}
 	mesh.SetSkinTextureIndex(0);
 	mesh.Update();
 }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_box(pragma::Game &game, const BoxCreateInfo &createInfo)
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_box(Game &game, const BoxCreateInfo &createInfo)
 {
 	auto mesh = game.CreateModelSubMesh();
 	create_box(*mesh, createInfo);
 	return mesh;
 }
-void pragma::geometry::create_sphere(pragma::geometry::ModelSubMesh &mesh, const SphereCreateInfo &createInfo)
+void pragma::geometry::create_sphere(ModelSubMesh &mesh, const SphereCreateInfo &createInfo)
 {
 	auto &origin = createInfo.origin;
 	auto radius = createInfo.radius;
@@ -1243,7 +1243,7 @@ void pragma::geometry::create_sphere(pragma::geometry::ModelSubMesh &mesh, const
 	auto &meshVerts = mesh.GetVertices();
 	std::vector<Vector3> verts;
 	std::vector<uint16_t> triangles;
-	pragma::math::IcoSphere::Create(origin, radius, verts, triangles, recursionLevel);
+	math::IcoSphere::Create(origin, radius, verts, triangles, recursionLevel);
 	mesh.SetIndices(triangles);
 	meshVerts.reserve(verts.size());
 	for(auto &v : verts) {
@@ -1251,19 +1251,19 @@ void pragma::geometry::create_sphere(pragma::geometry::ModelSubMesh &mesh, const
 		auto &meshVert = meshVerts.back();
 		meshVert.position = v;
 		auto &n = meshVert.normal = uvec::get_normal(v - origin);
-		meshVert.uv = {pragma::math::atan2(n.x, n.z) / (2.f * pragma::math::pi) + 0.5f, n.y * 0.5f + 0.5f};
+		meshVert.uv = {math::atan2(n.x, n.z) / (2.f * math::pi) + 0.5f, n.y * 0.5f + 0.5f};
 	}
 
 	mesh.SetSkinTextureIndex(0);
 	mesh.Update();
 }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_sphere(pragma::Game &game, const SphereCreateInfo &createInfo)
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_sphere(Game &game, const SphereCreateInfo &createInfo)
 {
 	auto mesh = game.CreateModelSubMesh();
 	create_sphere(*mesh, createInfo);
 	return mesh;
 }
-void pragma::geometry::create_cylinder(pragma::geometry::ModelSubMesh &mesh, const CylinderCreateInfo &createInfo)
+void pragma::geometry::create_cylinder(ModelSubMesh &mesh, const CylinderCreateInfo &createInfo)
 {
 	auto startRadius = createInfo.radius;
 	auto length = createInfo.length;
@@ -1274,7 +1274,7 @@ void pragma::geometry::create_cylinder(pragma::geometry::ModelSubMesh &mesh, con
 	auto &meshVerts = mesh.GetVertices();
 	std::vector<Vector3> verts;
 	std::vector<uint16_t> triangles;
-	pragma::math::geometry::generate_truncated_cone_mesh({}, startRadius, {0.f, 0.f, 1.f}, length, startRadius, verts, &triangles, nullptr, segmentCount);
+	math::geometry::generate_truncated_cone_mesh({}, startRadius, {0.f, 0.f, 1.f}, length, startRadius, verts, &triangles, nullptr, segmentCount);
 	mesh.SetIndices(triangles);
 	meshVerts.reserve(verts.size());
 	for(auto &v : verts) {
@@ -1284,7 +1284,7 @@ void pragma::geometry::create_cylinder(pragma::geometry::ModelSubMesh &mesh, con
 	}
 	mesh.GenerateNormals();
 }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_cylinder(pragma::Game &game, const CylinderCreateInfo &createInfo)
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_cylinder(Game &game, const CylinderCreateInfo &createInfo)
 {
 	auto mesh = game.CreateModelSubMesh();
 	create_cylinder(*mesh, createInfo);
@@ -1315,21 +1315,21 @@ static void create_cone(pragma::geometry::ModelSubMesh &mesh, const pragma::geom
 	}
 	mesh.GenerateNormals();
 }
-void pragma::geometry::create_cone(pragma::geometry::ModelSubMesh &mesh, const ConeCreateInfo &createInfo) { ::create_cone(mesh, createInfo, {}); }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_cone(pragma::Game &game, const ConeCreateInfo &createInfo)
+void pragma::geometry::create_cone(ModelSubMesh &mesh, const ConeCreateInfo &createInfo) { ::create_cone(mesh, createInfo, {}); }
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_cone(Game &game, const ConeCreateInfo &createInfo)
 {
 	auto mesh = game.CreateModelSubMesh();
 	create_cone(*mesh, createInfo);
 	return mesh;
 }
-void pragma::geometry::create_elliptic_cone(pragma::geometry::ModelSubMesh &mesh, const EllipticConeCreateInfo &createInfo) { ::create_cone(mesh, createInfo, std::pair<float, float> {createInfo.startRadiusY, createInfo.endRadiusY}); }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_elliptic_cone(pragma::Game &game, const EllipticConeCreateInfo &createInfo)
+void pragma::geometry::create_elliptic_cone(ModelSubMesh &mesh, const EllipticConeCreateInfo &createInfo) { ::create_cone(mesh, createInfo, std::pair<float, float> {createInfo.startRadiusY, createInfo.endRadiusY}); }
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_elliptic_cone(Game &game, const EllipticConeCreateInfo &createInfo)
 {
 	auto mesh = game.CreateModelSubMesh();
 	create_elliptic_cone(*mesh, createInfo);
 	return mesh;
 }
-void pragma::geometry::create_circle(pragma::geometry::ModelSubMesh &mesh, const CircleCreateInfo &createInfo)
+void pragma::geometry::create_circle(ModelSubMesh &mesh, const CircleCreateInfo &createInfo)
 {
 	RingCreateInfo ringCreateInfo {};
 	ringCreateInfo.doubleSided = createInfo.doubleSided;
@@ -1338,7 +1338,7 @@ void pragma::geometry::create_circle(pragma::geometry::ModelSubMesh &mesh, const
 	ringCreateInfo.outerRadius = createInfo.radius;
 	create_ring(mesh, ringCreateInfo);
 }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_circle(pragma::Game &game, const CircleCreateInfo &createInfo)
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_circle(Game &game, const CircleCreateInfo &createInfo)
 {
 	auto mesh = game.CreateModelSubMesh();
 	create_circle(*mesh, createInfo);
@@ -1353,7 +1353,7 @@ static void add_back_face(pragma::geometry::ModelSubMesh &mesh)
 		mesh.AddTriangle(idx0, idx2, idx1);
 	});
 }
-void pragma::geometry::create_ring(pragma::geometry::ModelSubMesh &mesh, const RingCreateInfo &createInfo)
+void pragma::geometry::create_ring(ModelSubMesh &mesh, const RingCreateInfo &createInfo)
 {
 	auto innerRadius = createInfo.innerRadius;
 	auto segmentCount = createInfo.segmentCount;
@@ -1363,7 +1363,7 @@ void pragma::geometry::create_ring(pragma::geometry::ModelSubMesh &mesh, const R
 
 	if(innerRadius.has_value() && *innerRadius == 0.f)
 		innerRadius = {};
-	auto stepSize = pragma::math::round(360.f / static_cast<float>(segmentCount));
+	auto stepSize = math::round(360.f / static_cast<float>(segmentCount));
 
 	auto &verts = mesh.GetVertices();
 	auto numVerts = segmentCount;
@@ -1390,13 +1390,13 @@ void pragma::geometry::create_ring(pragma::geometry::ModelSubMesh &mesh, const R
 			end = totalAngle;
 			endLoop = true;
 		}
-		auto rad = pragma::math::deg_to_rad(i);
+		auto rad = math::deg_to_rad(i);
 		if(innerRadius.has_value()) {
 			verts.push_back({});
-			verts.back().position = Vector3 {pragma::math::sin(rad), 0.f, pragma::math::cos(rad)} * *innerRadius;
+			verts.back().position = Vector3 {math::sin(rad), 0.f, math::cos(rad)} * *innerRadius;
 		}
 		verts.push_back({});
-		verts.back().position = Vector3 {pragma::math::sin(rad), 0.f, pragma::math::cos(rad)} * outerRadius;
+		verts.back().position = Vector3 {math::sin(rad), 0.f, math::cos(rad)} * outerRadius;
 		if(i == 0u) {
 			if(endLoop)
 				break;
@@ -1426,7 +1426,7 @@ void pragma::geometry::create_ring(pragma::geometry::ModelSubMesh &mesh, const R
 	}
 	mesh.GenerateNormals();
 }
-std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_ring(pragma::Game &game, const RingCreateInfo &createInfo)
+std::shared_ptr<pragma::geometry::ModelSubMesh> pragma::geometry::create_ring(Game &game, const RingCreateInfo &createInfo)
 {
 	auto mesh = game.CreateModelSubMesh();
 	create_ring(*mesh, createInfo);

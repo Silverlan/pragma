@@ -9,7 +9,7 @@ import :model.render_mesh;
 
 import :engine;
 
-pragma::rendering::SceneMesh::SceneMesh() : m_vertexBuffer(nullptr), m_vertexWeightBuffer(nullptr), m_alphaBuffer(nullptr), m_indexBuffer(nullptr), m_indexType {pragma::geometry::IndexType::UInt16} {}
+pragma::rendering::SceneMesh::SceneMesh() : m_vertexBuffer(nullptr), m_vertexWeightBuffer(nullptr), m_alphaBuffer(nullptr), m_indexBuffer(nullptr), m_indexType {geometry::IndexType::UInt16} {}
 pragma::rendering::SceneMesh::SceneMesh(const SceneMesh &other) : m_renderBuffers {other.m_renderBuffers}, m_vertexBuffer {other.m_vertexBuffer}, m_vertexWeightBuffer {other.m_vertexWeightBuffer}, m_alphaBuffer {other.m_alphaBuffer}, m_indexBuffer {other.m_indexBuffer}, m_indexType {other.m_indexType} {}
 pragma::rendering::SceneMesh::~SceneMesh() {}
 pragma::rendering::SceneMesh &pragma::rendering::SceneMesh::operator=(const SceneMesh &other)
@@ -41,7 +41,7 @@ void pragma::rendering::SceneMesh::SetAlphaBuffer(const std::shared_ptr<prosper:
 	m_alphaBuffer = buffer;
 	SetDirty();
 }
-void pragma::rendering::SceneMesh::SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer, pragma::geometry::IndexType indexType)
+void pragma::rendering::SceneMesh::SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer, geometry::IndexType indexType)
 {
 	m_indexBuffer = buffer;
 	SetDirty();
@@ -57,7 +57,7 @@ void pragma::rendering::SceneMesh::ClearBuffers()
 }
 
 void pragma::rendering::SceneMesh::SetDirty() { m_renderBuffers.clear(); }
-const std::shared_ptr<prosper::IRenderBuffer> &pragma::rendering::SceneMesh::GetRenderBuffer(pragma::geometry::CModelSubMesh &mesh, pragma::ShaderEntity &shader, uint32_t pipelineIdx)
+const std::shared_ptr<prosper::IRenderBuffer> &pragma::rendering::SceneMesh::GetRenderBuffer(geometry::CModelSubMesh &mesh, ShaderEntity &shader, uint32_t pipelineIdx)
 {
 	prosper::PipelineID pipelineId;
 	if(shader.GetPipelineId(pipelineId, pipelineIdx) == false) {

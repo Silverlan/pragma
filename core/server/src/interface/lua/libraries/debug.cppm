@@ -18,7 +18,7 @@ export namespace Lua {
 			DLLSERVER std::string disposition_to_string(DISPOSITION disposition);
 			DLLSERVER std::string memory_type_to_string(pragma::ai::Memory::MemoryType memoryType);
 			DLLSERVER std::string npc_state_to_string(NPCSTATE npcState);
-			DLLSERVER std::string task_to_string(::pragma::ai::Task task);
+			DLLSERVER std::string task_to_string(pragma::ai::Task task);
 		};
 	};
 };

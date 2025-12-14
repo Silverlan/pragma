@@ -16,7 +16,7 @@ void pragma::asset::CModel::UpdateVertexAnimationBuffer()
 	auto &vertexAnimations = GetVertexAnimations();
 	if(vertexAnimations.empty()) {
 		if(m_vertexAnimationBuffer)
-			pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexAnimationBuffer);
+			get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexAnimationBuffer);
 		m_vertexAnimationBuffer = nullptr;
 		return;
 	}
@@ -51,7 +51,7 @@ void pragma::asset::CModel::UpdateVertexAnimationBuffer()
 				meshFrameOffsets.at(frameIdx++) = offset;
 				auto &verts = meshFrame->GetVertices();
 				auto &normals = meshFrame->GetNormals();
-				auto hasNormals = meshFrame->IsFlagEnabled(pragma::animation::MeshVertexFrame::Flags::HasNormals);
+				auto hasNormals = meshFrame->IsFlagEnabled(animation::MeshVertexFrame::Flags::HasNormals);
 				std::vector<std::array<int32_t, 4>> vertexData {};
 				vertexData.reserve(verts.size());
 				uint32_t vertIdx = 0;
@@ -66,7 +66,7 @@ void pragma::asset::CModel::UpdateVertexAnimationBuffer()
 							n = normals.at(vertIdx);
 						else {
 							auto &dir = uvec::FORWARD;
-							n = {static_cast<uint16_t>(pragma::math::float32_to_float16_glm(dir.x)), static_cast<uint16_t>(pragma::math::float32_to_float16_glm(dir.y)), static_cast<uint16_t>(pragma::math::float32_to_float16_glm(dir.z)), 0};
+							n = {static_cast<uint16_t>(math::float32_to_float16_glm(dir.x)), static_cast<uint16_t>(math::float32_to_float16_glm(dir.y)), static_cast<uint16_t>(math::float32_to_float16_glm(dir.z)), 0};
 						}
 						vdata.at(2) = (n.at(0) << 16) | n.at(1);
 						vdata.at(3) = (n.at(2) << 16) | n.at(3);
@@ -85,11 +85,11 @@ void pragma::asset::CModel::UpdateVertexAnimationBuffer()
 	createInfo.size = vertexAnimData.size() * sizeof(vertexAnimData.front());
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	if(m_vertexAnimationBuffer)
-		pragma::get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexAnimationBuffer);
-	m_vertexAnimationBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, vertexAnimData.data());
+		get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexAnimationBuffer);
+	m_vertexAnimationBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, vertexAnimData.data());
 }
 const std::shared_ptr<prosper::IBuffer> &pragma::asset::CModel::GetVertexAnimationBuffer() const { return m_vertexAnimationBuffer; }
-bool pragma::asset::CModel::GetVertexAnimationBufferFrameOffset(uint32_t vaIdx, pragma::geometry::CModelSubMesh &subMesh, uint32_t frameId, uint64_t &offset) const
+bool pragma::asset::CModel::GetVertexAnimationBufferFrameOffset(uint32_t vaIdx, geometry::CModelSubMesh &subMesh, uint32_t frameId, uint64_t &offset) const
 {
 	if(vaIdx >= m_frameIndices.size())
 		return false;

@@ -27,16 +27,16 @@ void luabind::detail::AliasTypeConverter<std::string, pragma::util::Path>::conve
 
 namespace luabind {
 	// Instantiations
-	template struct DLLNETWORK luabind::default_converter<Vector2>;
-	template struct DLLNETWORK luabind::default_converter<Vector2i>;
-	template struct DLLNETWORK luabind::default_converter<Vector3>;
-	template struct DLLNETWORK luabind::default_converter<Vector3i>;
-	template struct DLLNETWORK luabind::default_converter<Vector4>;
-	template struct DLLNETWORK luabind::default_converter<Vector4i>;
-	template struct DLLNETWORK luabind::default_converter<EulerAngles>;
-	template struct DLLNETWORK luabind::default_converter<Quat>;
-	template struct DLLNETWORK luabind::default_converter<std::string>;
-	template struct DLLNETWORK luabind::default_converter<pragma::util::Path>;
+	template struct DLLNETWORK default_converter<Vector2>;
+	template struct DLLNETWORK default_converter<Vector2i>;
+	template struct DLLNETWORK default_converter<Vector3>;
+	template struct DLLNETWORK default_converter<Vector3i>;
+	template struct DLLNETWORK default_converter<Vector4>;
+	template struct DLLNETWORK default_converter<Vector4i>;
+	template struct DLLNETWORK default_converter<EulerAngles>;
+	template struct DLLNETWORK default_converter<Quat>;
+	template struct DLLNETWORK default_converter<std::string>;
+	template struct DLLNETWORK default_converter<pragma::util::Path>;
 
 	template struct DLLNETWORK alias_converter<Vector2, Vector2, Vector2i, Vector3, Vector3i, Vector4, Vector4i>;
 	template struct DLLNETWORK alias_converter<Vector2i, Vector2, Vector2i, Vector3, Vector3i, Vector4, Vector4i>;

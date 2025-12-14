@@ -17,10 +17,10 @@ decltype(pragma::AddonSystem::m_addonWatcher) pragma::AddonSystem::m_addonWatche
 
 pragma::pad::PADPackage *pragma::AddonSystem::LoadPADPackage(const std::string &path)
 {
-	auto it = std::find_if(m_addons.begin(), m_addons.end(), [&path](const AddonInfo &addon) { return pragma::fs::compare_path(addon.GetLocalPath(), path); });
+	auto it = std::find_if(m_addons.begin(), m_addons.end(), [&path](const AddonInfo &addon) { return fs::compare_path(addon.GetLocalPath(), path); });
 	if(it != m_addons.end())
 		return nullptr;
-	auto *package = dynamic_cast<pragma::pad::PADPackage *>(pragma::fs::load_package(path, static_cast<fs::SearchFlags>(FSYS_SEARCH_ADDON)));
+	auto *package = dynamic_cast<pad::PADPackage *>(pragma::fs::load_package(path, static_cast<fs::SearchFlags>(FSYS_SEARCH_ADDON)));
 	if(package != nullptr)
 		m_addons.push_back(AddonInfo(path, package->GetPackageVersion(), package->GetPackageId()));
 	return package;
@@ -101,8 +101,8 @@ bool pragma::AddonSystem::MountAddon(const std::string &paddonPath, std::vector<
 {
 	// Valid addon paths are: addons/addonName, addons/addonName/addons/subAddonName, etc.
 	auto addonPath = paddonPath;
-	pragma::string::replace(addonPath, "/", "\\"); // TODO: We should be using forward slashes, not backward slashes for the normalized paths!
-	auto path = pragma::util::Path::CreatePath(addonPath);
+	string::replace(addonPath, "/", "\\"); // TODO: We should be using forward slashes, not backward slashes for the normalized paths!
+	auto path = util::Path::CreatePath(addonPath);
 	auto n = path.GetComponentCount();
 	if((n % 2) == 0)
 		return false;
@@ -133,9 +133,9 @@ bool pragma::AddonSystem::MountAddon(const std::string &paddonPath, std::vector<
 	if(it != outAddons.end()) {
 		// Inform the game states about the newly mounted addons
 		auto &addonInfo = *it;
-		auto *sv = pragma::Engine::Get()->GetServerNetworkState();
-		auto *cl = pragma::Engine::Get()->GetClientState();
-		std::vector<pragma::Game *> gameStates = {sv ? sv->GetGameState() : nullptr, cl ? cl->GetGameState() : nullptr};
+		auto *sv = Engine::Get()->GetServerNetworkState();
+		auto *cl = Engine::Get()->GetClientState();
+		std::vector<Game *> gameStates = {sv ? sv->GetGameState() : nullptr, cl ? cl->GetGameState() : nullptr};
 		for(auto *game : gameStates) {
 			if(!game)
 				continue;
@@ -191,7 +191,7 @@ void pragma::AddonSystem::MountAddons()
 						  auto *archFile = pad->GetArchiveFile();
 						  if(archFile != nullptr) {
 							  load_autorun_scripts([archFile](const std::string &findTarget, std::vector<std::string> &outFiles) {
-								  std::vector<pragma::uva::FileInfo *> results;
+								  std::vector<uva::FileInfo *> results;
 								  archFile->SearchFiles(findTarget, results);
 								  // archFile->SearchFiles(Lua::SCRIPT_DIRECTORY + "\\autorun\\*." + Lua::FILE_EXTENSION_PRECOMPILED, results);
 								  outFiles.reserve(outFiles.size() + results.size());
@@ -240,13 +240,13 @@ const std::vector<pragma::AddonInfo> &pragma::AddonSystem::GetMountedAddons() { 
 
 /////////////////////////////
 
-pragma::AddonInfo::AddonInfo(const std::string &path, const pragma::util::Version &version, const std::string &uniqueId) : m_path(path), m_version(version), m_uniqueId(uniqueId) {}
+pragma::AddonInfo::AddonInfo(const std::string &path, const util::Version &version, const std::string &uniqueId) : m_path(path), m_version(version), m_uniqueId(uniqueId) {}
 const std::string &pragma::AddonInfo::GetLocalPath() const { return m_path; }
 std::string pragma::AddonInfo::GetAbsolutePath() const
 {
 	std::string absPath;
 	if(!fs::find_absolute_path(m_path, absPath))
-		return pragma::util::DirPath(fs::get_program_path(), m_path).GetString();
+		return util::DirPath(fs::get_program_path(), m_path).GetString();
 
 	std::string ext;
 	if(ufile::get_extension(absPath, &ext) == false)

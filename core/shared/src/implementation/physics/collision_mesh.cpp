@@ -8,9 +8,9 @@ module pragma.shared;
 
 import :physics.collision_mesh;
 
-std::shared_ptr<pragma::physics::CollisionMesh> pragma::physics::CollisionMesh::Create(pragma::Game *game) { return std::shared_ptr<pragma::physics::CollisionMesh>(new pragma::physics::CollisionMesh(game)); }
-std::shared_ptr<pragma::physics::CollisionMesh> pragma::physics::CollisionMesh::Create(const pragma::physics::CollisionMesh &other) { return std::shared_ptr<pragma::physics::CollisionMesh>(new pragma::physics::CollisionMesh(other)); }
-std::shared_ptr<pragma::physics::CollisionMesh> pragma::physics::CollisionMesh::Load(pragma::Game &game, pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr)
+std::shared_ptr<pragma::physics::CollisionMesh> pragma::physics::CollisionMesh::Create(Game *game) { return std::shared_ptr<CollisionMesh>(new CollisionMesh(game)); }
+std::shared_ptr<pragma::physics::CollisionMesh> pragma::physics::CollisionMesh::Create(const CollisionMesh &other) { return std::shared_ptr<CollisionMesh>(new CollisionMesh(other)); }
+std::shared_ptr<pragma::physics::CollisionMesh> pragma::physics::CollisionMesh::Load(Game &game, asset::Model &mdl, const udm::AssetData &data, std::string &outErr)
 {
 	auto mesh = Create(&game);
 	auto result = mesh->LoadFromAssetData(game, mdl, data, outErr);
@@ -31,8 +31,8 @@ bool pragma::physics::CollisionMesh::SoftBodyAnchor::operator==(const SoftBodyAn
 	static_assert(sizeof(SoftBodyAnchor) == 11, "Update this function when making changes to this class!");
 	return vertexIndex == other.vertexIndex && boneId == other.boneId && influence == other.influence && flags == other.flags;
 }
-pragma::physics::CollisionMesh::CollisionMesh(pragma::Game *game) : std::enable_shared_from_this<pragma::physics::CollisionMesh>(), m_game(game), m_uuid {util::generate_uuid_v4()} {}
-pragma::physics::CollisionMesh::CollisionMesh(const pragma::physics::CollisionMesh &other)
+pragma::physics::CollisionMesh::CollisionMesh(Game *game) : std::enable_shared_from_this<CollisionMesh>(), m_game(game), m_uuid {util::generate_uuid_v4()} {}
+pragma::physics::CollisionMesh::CollisionMesh(const CollisionMesh &other)
 {
 	m_game = other.m_game;
 	m_vertices = other.m_vertices;
@@ -49,9 +49,9 @@ pragma::physics::CollisionMesh::CollisionMesh(const pragma::physics::CollisionMe
 	m_volume = other.m_volume;
 	m_mass = other.m_mass;
 	m_softBodyInfo = (m_softBodyInfo != nullptr) ? pragma::util::make_shared<SoftBodyInfo>(*other.m_softBodyInfo) : nullptr;
-	static_assert(sizeof(pragma::physics::CollisionMesh) == 216, "Update this function when making changes to this class!");
+	static_assert(sizeof(CollisionMesh) == 216, "Update this function when making changes to this class!");
 }
-bool pragma::physics::CollisionMesh::operator==(const pragma::physics::CollisionMesh &other) const
+bool pragma::physics::CollisionMesh::operator==(const CollisionMesh &other) const
 {
 	if(m_vertices.size() != other.m_vertices.size())
 		return false;
@@ -64,7 +64,7 @@ bool pragma::physics::CollisionMesh::operator==(const pragma::physics::Collision
 		if(uvec::cmp(m_vertices[i], other.m_vertices[i]) == false)
 			return false;
 	}
-	static_assert(sizeof(pragma::physics::CollisionMesh) == 216, "Update this function when making changes to this class!");
+	static_assert(sizeof(CollisionMesh) == 216, "Update this function when making changes to this class!");
 	return true;
 }
 void pragma::physics::CollisionMesh::SetMass(float mass) { m_mass = mass; }
@@ -81,7 +81,7 @@ void pragma::physics::CollisionMesh::SetSurfaceMaterial(const std::string &surfM
 }
 std::vector<int> &pragma::physics::CollisionMesh::GetSurfaceMaterials() { return m_surfaceMaterials; }
 const pragma::util::Uuid &pragma::physics::CollisionMesh::GetUuid() const { return m_uuid; }
-void pragma::physics::CollisionMesh::SetUuid(const pragma::util::Uuid &uuid) { m_uuid = uuid; }
+void pragma::physics::CollisionMesh::SetUuid(const util::Uuid &uuid) { m_uuid = uuid; }
 void pragma::physics::CollisionMesh::SetConvex(bool bConvex) { m_bConvex = bConvex; }
 bool pragma::physics::CollisionMesh::IsConvex() const { return m_bConvex; }
 void pragma::physics::CollisionMesh::AddVertex(const Vector3 &v)
@@ -114,13 +114,13 @@ void pragma::physics::CollisionMesh::Scale(const Vector3 &scale)
 	m_min *= scale;
 	m_max *= scale;
 }
-void pragma::physics::CollisionMesh::Mirror(pragma::Axis axis)
+void pragma::physics::CollisionMesh::Mirror(Axis axis)
 {
-	auto transform = pragma::asset::get_mirror_transform_vector(axis);
+	auto transform = asset::get_mirror_transform_vector(axis);
 	for(auto &v : m_vertices)
 		v *= transform;
 	for(size_t i = 0; i < m_triangles.size(); i += 3)
-		pragma::math::swap(m_triangles[i], m_triangles[i + 1]);
+		math::swap(m_triangles[i], m_triangles[i + 1]);
 	m_min *= transform;
 	m_max *= transform;
 	uvec::to_min_max(m_min, m_max);
@@ -135,10 +135,10 @@ std::shared_ptr<pragma::physics::IShape> pragma::physics::CollisionMesh::CreateS
 		return nullptr;
 	auto &materials = *m_game->GetSurfaceMaterials();
 	auto bConvex = IsConvex();
-	std::shared_ptr<pragma::physics::IShape> shape = nullptr;
+	std::shared_ptr<IShape> shape = nullptr;
 	auto bScale = (scale != Vector3 {1.f, 1.f, 1.f}) ? true : false;
 
-	pragma::physics::IMaterial *mat = nullptr;
+	IMaterial *mat = nullptr;
 	if(materials.empty())
 		mat = &physEnv->GetGenericMaterial();
 	else
@@ -148,7 +148,7 @@ std::shared_ptr<pragma::physics::IShape> pragma::physics::CollisionMesh::CreateS
 		if(shape == nullptr)
 			return nullptr;
 		auto *ptrShape = shape->GetConvexHullShape();
-		ptrShape->SetCollisionMesh(*const_cast<pragma::physics::CollisionMesh *>(this));
+		ptrShape->SetCollisionMesh(*const_cast<CollisionMesh *>(this));
 		ptrShape->SetSurfaceMaterial(GetSurfaceMaterial());
 		ptrShape->SetLocalScaling(Vector3(1.f, 1.f, 1.f));
 		ptrShape->ReservePoints(m_vertices.size());
@@ -216,7 +216,7 @@ std::shared_ptr<pragma::physics::IShape> pragma::physics::CollisionMesh::CreateS
 	}
 	if(shape) {
 		shape->SetMass(GetMass());
-		shape->SetLocalPose(pragma::math::Transform {-GetOrigin(), uquat::identity()});
+		shape->SetLocalPose(math::Transform {-GetOrigin(), uquat::identity()});
 	}
 	return shape;
 }
@@ -231,21 +231,21 @@ void pragma::physics::CollisionMesh::UpdateShape()
 void pragma::physics::CollisionMesh::SetBoneParent(int boneID) { m_boneID = boneID; }
 int pragma::physics::CollisionMesh::GetBoneParent() const { return m_boneID; }
 void pragma::physics::CollisionMesh::SetOrigin(const Vector3 &origin) { m_origin = origin; }
-const Vector3 &pragma::physics::CollisionMesh::GetOrigin() const { return const_cast<pragma::physics::CollisionMesh *>(this)->GetOrigin(); }
+const Vector3 &pragma::physics::CollisionMesh::GetOrigin() const { return const_cast<CollisionMesh *>(this)->GetOrigin(); }
 Vector3 &pragma::physics::CollisionMesh::GetOrigin() { return m_origin; }
 std::vector<Vector3> &pragma::physics::CollisionMesh::GetVertices() { return m_vertices; }
 void pragma::physics::CollisionMesh::Validate()
 {
 	Vector3 min, max;
 	GetAABB(&min, &max);
-	pragma::asset::validate_value(min);
-	pragma::asset::validate_value(max);
-	pragma::asset::validate_value(GetCenterOfMass());
-	pragma::asset::validate_value(GetMass());
-	pragma::asset::validate_value(GetOrigin());
-	pragma::asset::validate_value(GetVolume());
+	asset::validate_value(min);
+	asset::validate_value(max);
+	asset::validate_value(GetCenterOfMass());
+	asset::validate_value(GetMass());
+	asset::validate_value(GetOrigin());
+	asset::validate_value(GetVolume());
 	for(auto &v : GetVertices())
-		pragma::asset::validate_value(v);
+		asset::validate_value(v);
 }
 void pragma::physics::CollisionMesh::CalculateBounds()
 {
@@ -259,11 +259,11 @@ void pragma::physics::CollisionMesh::CalculateBounds()
 		uvec::max(&m_max, m_vertices[i]);
 	}
 }
-void pragma::physics::CollisionMesh::Update(pragma::asset::ModelUpdateFlags flags)
+void pragma::physics::CollisionMesh::Update(asset::ModelUpdateFlags flags)
 {
-	if((flags & pragma::asset::ModelUpdateFlags::UpdateBounds) != pragma::asset::ModelUpdateFlags::None)
+	if((flags & asset::ModelUpdateFlags::UpdateBounds) != asset::ModelUpdateFlags::None)
 		CalculateBounds();
-	if((flags & pragma::asset::ModelUpdateFlags::InitializeCollisionShapes) != pragma::asset::ModelUpdateFlags::None)
+	if((flags & asset::ModelUpdateFlags::InitializeCollisionShapes) != asset::ModelUpdateFlags::None)
 		UpdateShape(); // TODO: Surface materials?
 }
 void pragma::physics::CollisionMesh::Centralize()
@@ -290,19 +290,19 @@ void pragma::physics::CollisionMesh::SetAABB(Vector3 &min, Vector3 &max)
 std::shared_ptr<pragma::physics::IShape> pragma::physics::CollisionMesh::GetShape() { return m_shape; }
 bool pragma::physics::CollisionMesh::IntersectAABB(Vector3 *min, Vector3 *max)
 {
-	if(pragma::math::intersection::aabb_aabb(m_min, m_max, *min, *max) == pragma::math::intersection::Intersect::Outside)
+	if(math::intersection::aabb_aabb(m_min, m_max, *min, *max) == math::intersection::Intersect::Outside)
 		return false;
 	for(int i = 0; i < m_vertices.size(); i += 3) {
-		if(pragma::math::intersection::aabb_triangle(m_min, m_max, m_vertices[i], m_vertices[i + 1], m_vertices[i + 2]))
+		if(math::intersection::aabb_triangle(m_min, m_max, m_vertices[i], m_vertices[i + 1], m_vertices[i + 2]))
 			return true;
 	}
 	// TODO: Check if bounds are WITHIN mesh (Before checking triangles?)
 	return false;
 }
 
-const std::vector<uint16_t> &pragma::physics::CollisionMesh::GetTriangles() const { return const_cast<pragma::physics::CollisionMesh *>(this)->GetTriangles(); }
+const std::vector<uint16_t> &pragma::physics::CollisionMesh::GetTriangles() const { return const_cast<CollisionMesh *>(this)->GetTriangles(); }
 std::vector<uint16_t> &pragma::physics::CollisionMesh::GetTriangles() { return m_triangles; }
-void pragma::physics::CollisionMesh::CalculateVolumeAndCom() { m_volume = pragma::math::geometry::calc_volume_of_polyhedron(m_vertices, m_triangles, &m_centerOfMass); }
+void pragma::physics::CollisionMesh::CalculateVolumeAndCom() { m_volume = math::geometry::calc_volume_of_polyhedron(m_vertices, m_triangles, &m_centerOfMass); }
 const Vector3 &pragma::physics::CollisionMesh::GetCenterOfMass() const { return m_centerOfMass; }
 void pragma::physics::CollisionMesh::SetCenterOfMass(const Vector3 &com) { m_centerOfMass = com; }
 double pragma::physics::CollisionMesh::GetVolume() const { return m_volume; }
@@ -323,13 +323,13 @@ pragma::geometry::ModelSubMesh *pragma::physics::CollisionMesh::GetSoftBodyMesh(
 		return nullptr;
 	return m_softBodyInfo->subMesh.lock().get();
 }
-void pragma::physics::CollisionMesh::SetSoftBodyMesh(pragma::geometry::ModelSubMesh &mesh)
+void pragma::physics::CollisionMesh::SetSoftBodyMesh(geometry::ModelSubMesh &mesh)
 {
 	if(m_softBodyInfo == nullptr)
 		return;
 	m_softBodyInfo->subMesh = mesh.shared_from_this();
 }
-const std::vector<uint32_t> *pragma::physics::CollisionMesh::GetSoftBodyTriangles() const { return const_cast<pragma::physics::CollisionMesh *>(this)->GetSoftBodyTriangles(); }
+const std::vector<uint32_t> *pragma::physics::CollisionMesh::GetSoftBodyTriangles() const { return const_cast<CollisionMesh *>(this)->GetSoftBodyTriangles(); }
 std::vector<uint32_t> *pragma::physics::CollisionMesh::GetSoftBodyTriangles() { return (m_softBodyInfo != nullptr) ? &m_softBodyInfo->triangles : nullptr; }
 pragma::physics::PhysSoftBodyInfo *pragma::physics::CollisionMesh::GetSoftBodyInfo() const { return (m_softBodyInfo != nullptr) ? m_softBodyInfo->info.get() : nullptr; }
 bool pragma::physics::CollisionMesh::AddSoftBodyAnchor(uint16_t vertIdx, uint32_t boneIdx, SoftBodyAnchor::Flags flags, float influence, uint32_t *anchorIdx)
@@ -361,14 +361,14 @@ void pragma::physics::CollisionMesh::ClearSoftBodyAnchors()
 		return;
 	m_softBodyInfo->anchors.clear();
 }
-const std::vector<pragma::physics::CollisionMesh::SoftBodyAnchor> *pragma::physics::CollisionMesh::GetSoftBodyAnchors() const { return const_cast<pragma::physics::CollisionMesh *>(this)->GetSoftBodyAnchors(); }
+const std::vector<pragma::physics::CollisionMesh::SoftBodyAnchor> *pragma::physics::CollisionMesh::GetSoftBodyAnchors() const { return const_cast<CollisionMesh *>(this)->GetSoftBodyAnchors(); }
 std::vector<pragma::physics::CollisionMesh::SoftBodyAnchor> *pragma::physics::CollisionMesh::GetSoftBodyAnchors()
 {
 	if(m_softBodyInfo == nullptr)
 		return nullptr;
 	return &m_softBodyInfo->anchors;
 }
-bool pragma::physics::CollisionMesh::Save(pragma::Game &game, pragma::asset::Model &mdl, udm::AssetDataArg outData, std::string &outErr)
+bool pragma::physics::CollisionMesh::Save(Game &game, asset::Model &mdl, udm::AssetDataArg outData, std::string &outErr)
 {
 	outData.SetAssetType(PCOL_IDENTIFIER);
 	outData.SetAssetVersion(PCOL_VERSION);
@@ -376,9 +376,9 @@ bool pragma::physics::CollisionMesh::Save(pragma::Game &game, pragma::asset::Mod
 	auto *surfaceMaterials = game.GetSurfaceMaterials();
 	auto surfMatIdx = GetSurfaceMaterial();
 	auto udm = *outData;
-	pragma::math::Transform pose {};
+	math::Transform pose {};
 	pose.SetOrigin(GetOrigin());
-	udm["uuid"] = pragma::util::uuid_to_string(m_uuid);
+	udm["uuid"] = util::uuid_to_string(m_uuid);
 	udm["bone"] = GetBoneParent();
 	udm["pose"] = pose;
 	if(surfMatIdx >= 0 && surfaceMaterials && surfMatIdx < surfaceMaterials->size())
@@ -406,7 +406,7 @@ bool pragma::physics::CollisionMesh::Save(pragma::Game &game, pragma::asset::Mod
 	auto meshGroupId = std::numeric_limits<uint32_t>::max();
 	auto meshId = std::numeric_limits<uint32_t>::max();
 	auto subMeshId = std::numeric_limits<uint32_t>::max();
-	pragma::geometry::ModelSubMesh *subMesh = nullptr;
+	geometry::ModelSubMesh *subMesh = nullptr;
 	auto foundSoftBodyMesh = false;
 	if(softBody)
 		softBody = mdl.FindSubMeshIndex(nullptr, nullptr, sbMesh, meshGroupId, meshId, subMeshId);
@@ -455,13 +455,13 @@ bool pragma::physics::CollisionMesh::Save(pragma::Game &game, pragma::asset::Mod
 			udmSettings.AddArray("triangles", *sbTriangles, udm::ArrayType::Compressed);
 		if(sbAnchors) {
 			static_assert(sizeof(SoftBodyAnchor) == 11);
-			auto strctAnchor = ::udm::StructDescription::Define<uint16_t, uint32_t, float, uint8_t>({"vert", "bone", "influence", "flags"});
+			auto strctAnchor = udm::StructDescription::Define<uint16_t, uint32_t, float, uint8_t>({"vert", "bone", "influence", "flags"});
 			udmSettings.AddArray("anchors", strctAnchor, *sbAnchors, udm::ArrayType::Compressed);
 		}
 	}
 	return true;
 }
-bool pragma::physics::CollisionMesh::LoadFromAssetData(pragma::Game &game, pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr)
+bool pragma::physics::CollisionMesh::LoadFromAssetData(Game &game, asset::Model &mdl, const udm::AssetData &data, std::string &outErr)
 {
 	if(data.GetAssetType() != PCOL_IDENTIFIER) {
 		outErr = "Incorrect format!";
@@ -477,9 +477,9 @@ bool pragma::physics::CollisionMesh::LoadFromAssetData(pragma::Game &game, pragm
 
 	std::string uuid;
 	if(udm["uuid"](uuid))
-		m_uuid = pragma::util::uuid_string_to_bytes(uuid);
+		m_uuid = util::uuid_string_to_bytes(uuid);
 
-	pragma::math::Transform pose {};
+	math::Transform pose {};
 	pose.SetOrigin(GetOrigin());
 	udm["bone"](m_boneID);
 	udm["pose"](pose);

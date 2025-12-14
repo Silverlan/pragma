@@ -6,14 +6,14 @@ module pragma.shared;
 
 import :model.animation.vertex_animation;
 
-pragma::animation::MeshVertexFrame::MeshVertexFrame(const pragma::animation::MeshVertexFrame &other) : std::enable_shared_from_this<pragma::animation::MeshVertexFrame>(), m_vertices(other.m_vertices), m_normals {other.m_normals}, m_flags {other.m_flags}
+pragma::animation::MeshVertexFrame::MeshVertexFrame(const MeshVertexFrame &other) : std::enable_shared_from_this<MeshVertexFrame>(), m_vertices(other.m_vertices), m_normals {other.m_normals}, m_flags {other.m_flags}
 {
-	static_assert(sizeof(pragma::animation::MeshVertexFrame) == 72, "Update this function when making changes to this class!");
+	static_assert(sizeof(MeshVertexFrame) == 72, "Update this function when making changes to this class!");
 }
 
-const std::vector<std::array<uint16_t, 4>> &pragma::animation::MeshVertexFrame::GetVertices() const { return const_cast<pragma::animation::MeshVertexFrame *>(this)->GetVertices(); }
+const std::vector<std::array<uint16_t, 4>> &pragma::animation::MeshVertexFrame::GetVertices() const { return const_cast<MeshVertexFrame *>(this)->GetVertices(); }
 std::vector<std::array<uint16_t, 4>> &pragma::animation::MeshVertexFrame::GetVertices() { return m_vertices; }
-const std::vector<std::array<uint16_t, 4>> &pragma::animation::MeshVertexFrame::GetNormals() const { return const_cast<pragma::animation::MeshVertexFrame *>(this)->GetNormals(); }
+const std::vector<std::array<uint16_t, 4>> &pragma::animation::MeshVertexFrame::GetNormals() const { return const_cast<MeshVertexFrame *>(this)->GetNormals(); }
 std::vector<std::array<uint16_t, 4>> &pragma::animation::MeshVertexFrame::GetNormals() { return m_normals; }
 void pragma::animation::MeshVertexFrame::SetVertexCount(uint32_t count)
 {
@@ -22,7 +22,7 @@ void pragma::animation::MeshVertexFrame::SetVertexCount(uint32_t count)
 		m_normals.resize(count);
 }
 uint32_t pragma::animation::MeshVertexFrame::GetVertexCount() const { return m_vertices.size(); }
-void pragma::animation::MeshVertexFrame::SetDeltaValue(uint32_t vertId, float deltaValue) { SetDeltaValue(vertId, static_cast<uint16_t>(pragma::math::float32_to_float16_glm(deltaValue))); }
+void pragma::animation::MeshVertexFrame::SetDeltaValue(uint32_t vertId, float deltaValue) { SetDeltaValue(vertId, static_cast<uint16_t>(math::float32_to_float16_glm(deltaValue))); }
 void pragma::animation::MeshVertexFrame::SetDeltaValue(uint32_t vertId, uint16_t deltaValue)
 {
 	if(vertId >= m_vertices.size())
@@ -33,13 +33,13 @@ bool pragma::animation::MeshVertexFrame::GetDeltaValue(uint32_t vertId, float &d
 {
 	if(vertId >= m_vertices.size())
 		return false;
-	deltaValue = pragma::math::float16_to_float32_glm(m_vertices.at(vertId).at(3));
+	deltaValue = math::float16_to_float32_glm(m_vertices.at(vertId).at(3));
 	return true;
 }
 
 void pragma::animation::MeshVertexFrame::SetVertexPosition(uint32_t vertId, const Vector3 &pos)
 {
-	SetVertexPosition(vertId, std::array<uint16_t, 3> {static_cast<uint16_t>(pragma::math::float32_to_float16_glm(pos.x)), static_cast<uint16_t>(pragma::math::float32_to_float16_glm(pos.y)), static_cast<uint16_t>(pragma::math::float32_to_float16_glm(pos.z))});
+	SetVertexPosition(vertId, std::array<uint16_t, 3> {static_cast<uint16_t>(math::float32_to_float16_glm(pos.x)), static_cast<uint16_t>(math::float32_to_float16_glm(pos.y)), static_cast<uint16_t>(math::float32_to_float16_glm(pos.z))});
 }
 void pragma::animation::MeshVertexFrame::SetVertexPosition(uint32_t vertId, const std::array<uint16_t, 3> &pos)
 {
@@ -59,13 +59,13 @@ bool pragma::animation::MeshVertexFrame::GetVertexPosition(uint32_t vertId, Vect
 	if(vertId >= m_vertices.size())
 		return false;
 	auto &v = m_vertices.at(vertId);
-	pos = {pragma::math::float16_to_float32_glm(v.at(0)), pragma::math::float16_to_float32_glm(v.at(1)), pragma::math::float16_to_float32_glm(v.at(2))};
+	pos = {math::float16_to_float32_glm(v.at(0)), math::float16_to_float32_glm(v.at(1)), math::float16_to_float32_glm(v.at(2))};
 	return true;
 }
 
 void pragma::animation::MeshVertexFrame::SetVertexNormal(uint32_t vertId, const Vector3 &n)
 {
-	SetVertexNormal(vertId, std::array<uint16_t, 3> {static_cast<uint16_t>(pragma::math::float32_to_float16_glm(n.x)), static_cast<uint16_t>(pragma::math::float32_to_float16_glm(n.y)), static_cast<uint16_t>(pragma::math::float32_to_float16_glm(n.z))});
+	SetVertexNormal(vertId, std::array<uint16_t, 3> {static_cast<uint16_t>(math::float32_to_float16_glm(n.x)), static_cast<uint16_t>(math::float32_to_float16_glm(n.y)), static_cast<uint16_t>(math::float32_to_float16_glm(n.z))});
 }
 void pragma::animation::MeshVertexFrame::SetVertexNormal(uint32_t vertId, const std::array<uint16_t, 3> &n)
 {
@@ -85,7 +85,7 @@ bool pragma::animation::MeshVertexFrame::GetVertexNormal(uint32_t vertId, Vector
 	if(vertId >= m_normals.size())
 		return false;
 	auto &v = m_normals.at(vertId);
-	n = {pragma::math::float16_to_float32_glm(v.at(0)), pragma::math::float16_to_float32_glm(v.at(1)), pragma::math::float16_to_float32_glm(v.at(2))};
+	n = {math::float16_to_float32_glm(v.at(0)), math::float16_to_float32_glm(v.at(1)), math::float16_to_float32_glm(v.at(2))};
 	return true;
 }
 
@@ -111,9 +111,9 @@ void pragma::animation::MeshVertexFrame::Scale(const Vector3 &scale)
 		SetVertexPosition(i, pos);
 	}
 }
-void pragma::animation::MeshVertexFrame::Mirror(pragma::Axis axis)
+void pragma::animation::MeshVertexFrame::Mirror(Axis axis)
 {
-	auto transform = pragma::asset::get_mirror_transform_vector(axis);
+	auto transform = asset::get_mirror_transform_vector(axis);
 	auto numVerts = GetVertexCount();
 	for(auto i = decltype(numVerts) {0u}; i < numVerts; ++i) {
 		Vector3 pos;
@@ -129,7 +129,7 @@ void pragma::animation::MeshVertexFrame::Mirror(pragma::Axis axis)
 		}
 	}
 }
-bool pragma::animation::MeshVertexFrame::operator==(const pragma::animation::MeshVertexFrame &other) const
+bool pragma::animation::MeshVertexFrame::operator==(const MeshVertexFrame &other) const
 {
 	if(m_vertices.size() != other.m_vertices.size() || m_normals.size() != other.m_normals.size())
 		return false;
@@ -143,7 +143,7 @@ bool pragma::animation::MeshVertexFrame::operator==(const pragma::animation::Mes
 		if(GetVertexNormal(i, p0) != GetVertexNormal(i, p1) || uvec::cmp(p0, p1) == false)
 			return false;
 	}
-	static_assert(sizeof(pragma::animation::MeshVertexFrame) == 72, "Update this function when making changes to this class!");
+	static_assert(sizeof(MeshVertexFrame) == 72, "Update this function when making changes to this class!");
 	return m_flags == other.m_flags;
 }
 void pragma::animation::MeshVertexFrame::SetFlags(Flags flags)
@@ -159,10 +159,10 @@ void pragma::animation::MeshVertexFrame::SetFlags(Flags flags)
 void pragma::animation::MeshVertexFrame::SetFlagEnabled(Flags flags, bool enabled)
 {
 	auto newFlags = m_flags;
-	pragma::math::set_flag(newFlags, flags, enabled);
+	math::set_flag(newFlags, flags, enabled);
 	SetFlags(newFlags);
 }
-bool pragma::animation::MeshVertexFrame::IsFlagEnabled(Flags flags) const { return pragma::math::is_flag_set(m_flags, flags); }
+bool pragma::animation::MeshVertexFrame::IsFlagEnabled(Flags flags) const { return math::is_flag_set(m_flags, flags); }
 pragma::animation::MeshVertexFrame::Flags pragma::animation::MeshVertexFrame::GetFlags() const { return m_flags; }
 
 /////////////////////
@@ -171,12 +171,12 @@ pragma::animation::MeshVertexAnimation::MeshVertexAnimation(const MeshVertexAnim
 {
 	m_frames.reserve(other.m_frames.size());
 	for(auto &frame : m_frames)
-		m_frames.push_back(pragma::util::make_shared<pragma::animation::MeshVertexFrame>(*frame));
+		m_frames.push_back(pragma::util::make_shared<MeshVertexFrame>(*frame));
 	static_assert(sizeof(MeshVertexAnimation) == 72, "Update this function when making changes to this class!");
 }
 pragma::geometry::ModelMesh *pragma::animation::MeshVertexAnimation::GetMesh() const { return m_wpMesh.lock().get(); }
 pragma::geometry::ModelSubMesh *pragma::animation::MeshVertexAnimation::GetSubMesh() const { return m_wpSubMesh.lock().get(); }
-void pragma::animation::MeshVertexAnimation::SetMesh(pragma::geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh)
+void pragma::animation::MeshVertexAnimation::SetMesh(geometry::ModelMesh &mesh, geometry::ModelSubMesh &subMesh)
 {
 	m_wpMesh = mesh.shared_from_this();
 	m_wpSubMesh = subMesh.shared_from_this();
@@ -189,7 +189,7 @@ std::shared_ptr<pragma::animation::MeshVertexFrame> pragma::animation::MeshVerte
 {
 	if(m_wpSubMesh.expired() == true)
 		return nullptr;
-	m_frames.push_back(pragma::util::make_shared<pragma::animation::MeshVertexFrame>());
+	m_frames.push_back(pragma::util::make_shared<MeshVertexFrame>());
 	m_frames.back()->SetVertexCount(m_wpSubMesh.lock()->GetVertexCount());
 	return m_frames.back();
 }
@@ -203,7 +203,7 @@ void pragma::animation::MeshVertexAnimation::Scale(const Vector3 &scale)
 	for(auto &frame : m_frames)
 		frame->Scale(scale);
 }
-void pragma::animation::MeshVertexAnimation::Mirror(pragma::Axis axis)
+void pragma::animation::MeshVertexAnimation::Mirror(Axis axis)
 {
 	for(auto &frame : m_frames)
 		frame->Mirror(axis);
@@ -222,9 +222,9 @@ bool pragma::animation::MeshVertexAnimation::operator==(const MeshVertexAnimatio
 
 /////////////////////
 
-std::shared_ptr<pragma::animation::VertexAnimation> pragma::animation::VertexAnimation::Create() { return std::shared_ptr<pragma::animation::VertexAnimation>(new VertexAnimation {}); }
-std::shared_ptr<pragma::animation::VertexAnimation> pragma::animation::VertexAnimation::Create(const VertexAnimation &other) { return std::shared_ptr<pragma::animation::VertexAnimation>(new VertexAnimation {other}); }
-std::shared_ptr<pragma::animation::VertexAnimation> pragma::animation::VertexAnimation::Create(const std::string &name) { return std::shared_ptr<pragma::animation::VertexAnimation>(new VertexAnimation {name}); }
+std::shared_ptr<pragma::animation::VertexAnimation> pragma::animation::VertexAnimation::Create() { return std::shared_ptr<VertexAnimation>(new VertexAnimation {}); }
+std::shared_ptr<pragma::animation::VertexAnimation> pragma::animation::VertexAnimation::Create(const VertexAnimation &other) { return std::shared_ptr<VertexAnimation>(new VertexAnimation {other}); }
+std::shared_ptr<pragma::animation::VertexAnimation> pragma::animation::VertexAnimation::Create(const std::string &name) { return std::shared_ptr<VertexAnimation>(new VertexAnimation {name}); }
 pragma::animation::VertexAnimation::VertexAnimation(const std::string &name) : m_name(name) {}
 
 pragma::animation::VertexAnimation::VertexAnimation(const VertexAnimation &other) : m_name(other.m_name)
@@ -232,7 +232,7 @@ pragma::animation::VertexAnimation::VertexAnimation(const VertexAnimation &other
 	m_meshAnims.reserve(other.m_meshAnims.size());
 	for(auto &anim : m_meshAnims)
 		m_meshAnims.push_back(pragma::util::make_shared<MeshVertexAnimation>(*anim));
-	static_assert(pragma::animation::VertexAnimation::layout_version == 1, "Update this function when making changes to this class!");
+	static_assert(layout_version == 1, "Update this function when making changes to this class!");
 }
 
 bool pragma::animation::VertexAnimation::operator==(const VertexAnimation &other) const
@@ -243,18 +243,18 @@ bool pragma::animation::VertexAnimation::operator==(const VertexAnimation &other
 		if(*m_meshAnims[i] != *other.m_meshAnims[i])
 			return false;
 	}
-	static_assert(pragma::animation::VertexAnimation::layout_version == 1, "Update this function when making changes to this class!");
+	static_assert(layout_version == 1, "Update this function when making changes to this class!");
 	return true;
 }
 
-std::shared_ptr<pragma::animation::VertexAnimation> pragma::animation::VertexAnimation::Load(pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr)
+std::shared_ptr<pragma::animation::VertexAnimation> pragma::animation::VertexAnimation::Load(asset::Model &mdl, const udm::AssetData &data, std::string &outErr)
 {
-	auto morphAnim = pragma::animation::VertexAnimation::Create();
+	auto morphAnim = Create();
 	if(morphAnim->LoadFromAssetData(mdl, data, outErr) == false)
 		return nullptr;
 	return morphAnim;
 }
-bool pragma::animation::VertexAnimation::Save(pragma::asset::Model &mdl, udm::AssetDataArg outData, std::string &outErr)
+bool pragma::animation::VertexAnimation::Save(asset::Model &mdl, udm::AssetDataArg outData, std::string &outErr)
 {
 	outData.SetAssetType(PMORPHANI_IDENTIFIER);
 	outData.SetAssetVersion(FORMAT_VERSION);
@@ -262,12 +262,12 @@ bool pragma::animation::VertexAnimation::Save(pragma::asset::Model &mdl, udm::As
 	udm["name"] = GetName();
 
 	auto writeFlag = [](auto udm, auto flag, const std::string &name, auto flags) {
-		if(pragma::math::is_flag_set(flags, flag) == false)
+		if(math::is_flag_set(flags, flag) == false)
 			return;
 		udm["flags"][name] = true;
 	};
 
-	auto strctHalfVector4 = ::udm::StructDescription::Define<udm::Half, udm::Half, udm::Half, udm::Half>({"x", "y", "z", "w"});
+	auto strctHalfVector4 = udm::StructDescription::Define<udm::Half, udm::Half, udm::Half, udm::Half>({"x", "y", "z", "w"});
 	auto &meshAnims = GetMeshAnimations();
 	auto udmMeshAnims = udm.AddArray("meshAnimations", meshAnims.size());
 	uint32_t meshAnimIdx = 0;
@@ -289,9 +289,9 @@ bool pragma::animation::VertexAnimation::Save(pragma::asset::Model &mdl, udm::As
 		uint32_t frameIdx = 0;
 		for(auto &frame : frames) {
 			auto udmFrame = udmFrames[frameIdx++];
-			writeFlag(udmFrame, pragma::animation::MeshVertexFrame::Flags::HasDeltaValues, "hasDeltaValues", frame->GetFlags());
-			writeFlag(udmFrame, pragma::animation::MeshVertexFrame::Flags::HasNormals, "hasNormals", frame->GetFlags());
-			static_assert(pragma::math::to_integral(pragma::animation::MeshVertexFrame::Flags::Count) == 2, "Update this list when new flags have been added!");
+			writeFlag(udmFrame, MeshVertexFrame::Flags::HasDeltaValues, "hasDeltaValues", frame->GetFlags());
+			writeFlag(udmFrame, MeshVertexFrame::Flags::HasNormals, "hasNormals", frame->GetFlags());
+			static_assert(math::to_integral(MeshVertexFrame::Flags::Count) == 2, "Update this list when new flags have been added!");
 
 			auto flags = frame->GetFlags();
 			struct Attribute {
@@ -301,7 +301,7 @@ bool pragma::animation::VertexAnimation::Save(pragma::asset::Model &mdl, udm::As
 			};
 			std::vector<Attribute> attributes {};
 			attributes.push_back(Attribute {"position", frame->GetVertices()});
-			if(pragma::math::is_flag_set(flags, pragma::animation::MeshVertexFrame::Flags::HasNormals))
+			if(math::is_flag_set(flags, MeshVertexFrame::Flags::HasNormals))
 				attributes.push_back(Attribute {"normal", frame->GetNormals()});
 			std::set<uint16_t> usedVertIndicesSet {};
 			std::vector<uint16_t> usedVertIndices {};
@@ -338,7 +338,7 @@ bool pragma::animation::VertexAnimation::Save(pragma::asset::Model &mdl, udm::As
 	}
 	return true;
 }
-bool pragma::animation::VertexAnimation::LoadFromAssetData(pragma::asset::Model &mdl, const udm::AssetData &data, std::string &outErr)
+bool pragma::animation::VertexAnimation::LoadFromAssetData(asset::Model &mdl, const udm::AssetData &data, std::string &outErr)
 {
 	if(data.GetAssetType() != PMORPHANI_IDENTIFIER) {
 		outErr = "Incorrect format!";
@@ -360,7 +360,7 @@ bool pragma::animation::VertexAnimation::LoadFromAssetData(pragma::asset::Model 
 		auto udmFlags = udm["flags"];
 		if(!udmFlags)
 			return;
-		pragma::math::set_flag(outFlags, flag, udmFlags[name](false));
+		math::set_flag(outFlags, flag, udmFlags[name](false));
 	};
 
 	auto &meshAnims = GetMeshAnimations();
@@ -389,12 +389,12 @@ bool pragma::animation::VertexAnimation::LoadFromAssetData(pragma::asset::Model 
 		frames.resize(numFrames);
 		for(auto frameIdx = decltype(numFrames) {0u}; frameIdx < numFrames; ++frameIdx) {
 			auto &meshFrame = frames[frameIdx];
-			meshFrame = pragma::util::make_shared<pragma::animation::MeshVertexFrame>();
+			meshFrame = pragma::util::make_shared<MeshVertexFrame>();
 			auto udmFrame = udmFrames[frameIdx];
 			auto flags = meshFrame->GetFlags();
-			readFlag(udmFrame, pragma::animation::MeshVertexFrame::Flags::HasDeltaValues, "hasDeltaValues", flags);
-			readFlag(udmFrame, pragma::animation::MeshVertexFrame::Flags::HasNormals, "hasNormals", flags);
-			static_assert(pragma::math::to_integral(pragma::animation::MeshVertexFrame::Flags::Count) == 2, "Update this list when new flags have been added!");
+			readFlag(udmFrame, MeshVertexFrame::Flags::HasDeltaValues, "hasDeltaValues", flags);
+			readFlag(udmFrame, MeshVertexFrame::Flags::HasNormals, "hasNormals", flags);
+			static_assert(math::to_integral(MeshVertexFrame::Flags::Count) == 2, "Update this list when new flags have been added!");
 			meshFrame->SetFlags(flags);
 			if(subMesh)
 				meshFrame->SetVertexCount(subMesh->GetVertexCount());
@@ -432,7 +432,7 @@ bool pragma::animation::VertexAnimation::LoadFromAssetData(pragma::asset::Model 
 	return true;
 }
 
-bool pragma::animation::VertexAnimation::GetMeshAnimationId(pragma::geometry::ModelSubMesh &subMesh, uint32_t &id) const
+bool pragma::animation::VertexAnimation::GetMeshAnimationId(geometry::ModelSubMesh &subMesh, uint32_t &id) const
 {
 	auto it = std::find_if(m_meshAnims.begin(), m_meshAnims.end(), [&subMesh](const std::shared_ptr<MeshVertexAnimation> &anim) { return (anim->GetSubMesh() == &subMesh) ? true : false; });
 	if(it == m_meshAnims.end())
@@ -440,8 +440,8 @@ bool pragma::animation::VertexAnimation::GetMeshAnimationId(pragma::geometry::Mo
 	id = it - m_meshAnims.begin();
 	return true;
 }
-const pragma::animation::MeshVertexAnimation *pragma::animation::VertexAnimation::GetMeshAnimation(pragma::geometry::ModelSubMesh &subMesh) const { return const_cast<pragma::animation::VertexAnimation *>(this)->GetMeshAnimation(subMesh); }
-pragma::animation::MeshVertexAnimation *pragma::animation::VertexAnimation::GetMeshAnimation(pragma::geometry::ModelSubMesh &subMesh)
+const pragma::animation::MeshVertexAnimation *pragma::animation::VertexAnimation::GetMeshAnimation(geometry::ModelSubMesh &subMesh) const { return const_cast<VertexAnimation *>(this)->GetMeshAnimation(subMesh); }
+pragma::animation::MeshVertexAnimation *pragma::animation::VertexAnimation::GetMeshAnimation(geometry::ModelSubMesh &subMesh)
 {
 	auto frameId = 0u;
 	if(GetMeshAnimationId(subMesh, frameId) == false)
@@ -449,7 +449,7 @@ pragma::animation::MeshVertexAnimation *pragma::animation::VertexAnimation::GetM
 	return m_meshAnims.at(frameId).get();
 }
 
-std::shared_ptr<pragma::animation::MeshVertexFrame> pragma::animation::VertexAnimation::AddMeshFrame(pragma::geometry::ModelMesh &mesh, pragma::geometry::ModelSubMesh &subMesh)
+std::shared_ptr<pragma::animation::MeshVertexFrame> pragma::animation::VertexAnimation::AddMeshFrame(geometry::ModelMesh &mesh, geometry::ModelSubMesh &subMesh)
 {
 	auto *anim = GetMeshAnimation(subMesh);
 	if(anim == nullptr) {
@@ -461,8 +461,8 @@ std::shared_ptr<pragma::animation::MeshVertexFrame> pragma::animation::VertexAni
 	return anim->AddFrame();
 }
 
-const pragma::animation::MeshVertexFrame *pragma::animation::VertexAnimation::GetMeshFrame(pragma::geometry::ModelSubMesh &subMesh, uint32_t frameId) const { return const_cast<pragma::animation::VertexAnimation *>(this)->GetMeshFrame(subMesh, frameId); }
-pragma::animation::MeshVertexFrame *pragma::animation::VertexAnimation::GetMeshFrame(pragma::geometry::ModelSubMesh &subMesh, uint32_t frameId)
+const pragma::animation::MeshVertexFrame *pragma::animation::VertexAnimation::GetMeshFrame(geometry::ModelSubMesh &subMesh, uint32_t frameId) const { return const_cast<VertexAnimation *>(this)->GetMeshFrame(subMesh, frameId); }
+pragma::animation::MeshVertexFrame *pragma::animation::VertexAnimation::GetMeshFrame(geometry::ModelSubMesh &subMesh, uint32_t frameId)
 {
 	auto animId = 0u;
 	if(GetMeshAnimationId(subMesh, animId) == false)
@@ -470,12 +470,12 @@ pragma::animation::MeshVertexFrame *pragma::animation::VertexAnimation::GetMeshF
 	return m_meshAnims.at(animId)->GetFrame(frameId);
 }
 
-std::shared_ptr<pragma::animation::VertexAnimation> pragma::animation::VertexAnimation::Copy() const { return pragma::animation::VertexAnimation::Create(*this); }
+std::shared_ptr<pragma::animation::VertexAnimation> pragma::animation::VertexAnimation::Copy() const { return Create(*this); }
 
 void pragma::animation::VertexAnimation::SetName(const std::string &name) { m_name = name; }
 const std::string &pragma::animation::VertexAnimation::GetName() const { return m_name; }
 
-const std::vector<std::shared_ptr<pragma::animation::MeshVertexAnimation>> &pragma::animation::VertexAnimation::GetMeshAnimations() const { return const_cast<pragma::animation::VertexAnimation *>(this)->GetMeshAnimations(); }
+const std::vector<std::shared_ptr<pragma::animation::MeshVertexAnimation>> &pragma::animation::VertexAnimation::GetMeshAnimations() const { return const_cast<VertexAnimation *>(this)->GetMeshAnimations(); }
 std::vector<std::shared_ptr<pragma::animation::MeshVertexAnimation>> &pragma::animation::VertexAnimation::GetMeshAnimations() { return m_meshAnims; }
 
 void pragma::animation::VertexAnimation::Rotate(const Quat &rot)
@@ -488,7 +488,7 @@ void pragma::animation::VertexAnimation::Scale(const Vector3 &scale)
 	for(auto &meshAnim : m_meshAnims)
 		meshAnim->Scale(scale);
 }
-void pragma::animation::VertexAnimation::Mirror(pragma::Axis axis)
+void pragma::animation::VertexAnimation::Mirror(Axis axis)
 {
 	for(auto &meshAnim : m_meshAnims)
 		meshAnim->Mirror(axis);

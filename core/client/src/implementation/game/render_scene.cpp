@@ -27,10 +27,10 @@ void pragma::CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandB
 
 std::shared_ptr<prosper::IPrimaryCommandBuffer> pragma::CGame::GetCurrentDrawCommandBuffer() const { return m_currentDrawCmd.lock(); }
 
-void pragma::CGame::RenderScene(const pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CGame::RenderScene(const rendering::DrawSceneInfo &drawSceneInfo)
 {
 	m_currentDrawCmd = drawSceneInfo.commandBuffer;
-	pragma::util::ScopeGuard sgCurrentDrawCmd {[this]() { m_currentDrawCmd = {}; }};
+	util::ScopeGuard sgCurrentDrawCmd {[this]() { m_currentDrawCmd = {}; }};
 
 	std::chrono::steady_clock::time_point t;
 	if(drawSceneInfo.renderStats) {
@@ -38,14 +38,14 @@ void pragma::CGame::RenderScene(const pragma::rendering::DrawSceneInfo &drawScen
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(rendering::RenderStats::RenderStage::RenderSceneGpu, *drawSceneInfo.commandBuffer);
 	}
 
-	CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("PreRenderScene", drawSceneInfo);
-	CallLuaCallbacks<void, const pragma::rendering::DrawSceneInfo *>("PreRenderScene", &drawSceneInfo);
+	CallCallbacks<void, std::reference_wrapper<const rendering::DrawSceneInfo>>("PreRenderScene", drawSceneInfo);
+	CallLuaCallbacks<void, const rendering::DrawSceneInfo *>("PreRenderScene", &drawSceneInfo);
 
 	auto &scene = drawSceneInfo.scene;
-	auto *renderer = const_cast<pragma::CSceneComponent *>(scene.get())->GetRenderer<pragma::CRendererComponent>();
+	auto *renderer = const_cast<CSceneComponent *>(scene.get())->GetRenderer<CRendererComponent>();
 	if(renderer) {
 		prosper::Texture *presentationTexture = nullptr;
-		if(pragma::math::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::HDR))
+		if(math::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::HDR))
 			presentationTexture = drawSceneInfo.renderTarget ? &drawSceneInfo.renderTarget->GetTexture() : renderer->GetHDRPresentationTexture();
 		else {
 			presentationTexture = renderer->GetPresentationTexture();
@@ -67,8 +67,8 @@ void pragma::CGame::RenderScene(const pragma::rendering::DrawSceneInfo &drawScen
 		StopProfilingStage();    // Present
 		StopGPUProfilingStage(); // Present
 	}
-	CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("PostRenderScene", drawSceneInfo);
-	CallLuaCallbacks<void, const pragma::rendering::DrawSceneInfo *>("PostRenderScene", &drawSceneInfo);
+	CallCallbacks<void, std::reference_wrapper<const rendering::DrawSceneInfo>>("PostRenderScene", drawSceneInfo);
+	CallLuaCallbacks<void, const rendering::DrawSceneInfo *>("PostRenderScene", &drawSceneInfo);
 
 	if(drawSceneInfo.renderStats) {
 		(*drawSceneInfo.renderStats)->EndGpuTimer(rendering::RenderStats::RenderStage::RenderSceneGpu, *drawSceneInfo.commandBuffer);

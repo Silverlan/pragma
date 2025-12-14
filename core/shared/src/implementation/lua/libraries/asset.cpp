@@ -47,7 +47,7 @@ static std::optional<std::string> get_asset_identifier_from_type(pragma::asset::
 		return {};
 	return it->second;
 }
-void Lua::asset::register_library(Lua::Interface &lua, bool extended)
+void Lua::asset::register_library(Interface &lua, bool extended)
 {
 	auto modAsset = luabind::module_(lua.GetState(), "asset");
 	modAsset[(
@@ -91,8 +91,8 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 		luabind::def("lock_asset_watchers",&pragma::Engine::LockResourceWatchers),
 		luabind::def("unlock_asset_watchers",&pragma::Engine::UnlockResourceWatchers),
 		luabind::def("poll_asset_watchers",&pragma::Engine::PollResourceWatchers),
-		luabind::def("get_supported_import_file_extensions",&Lua::asset::get_supported_import_file_extensions),
-		luabind::def("get_supported_export_file_extensions",&Lua::asset::get_supported_export_file_extensions),
+		luabind::def("get_supported_import_file_extensions",&get_supported_import_file_extensions),
+		luabind::def("get_supported_export_file_extensions",&get_supported_export_file_extensions),
 		luabind::def("matches",&pragma::asset::matches),
 		luabind::def("get_normalized_path",&pragma::asset::get_normalized_path),
 		luabind::def("is_supported_extension",+[](lua::State *l,const std::string &ext,pragma::asset::Type type) -> bool {
@@ -100,10 +100,10 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			return std::find(exts.begin(),exts.end(),ext) != exts.end();
 		}),
 		luabind::def("get_supported_extensions",+[](lua::State *l,pragma::asset::Type type) -> tb<std::string> {
-			return Lua::vector_to_table(l,pragma::asset::get_supported_extensions(type));
+			return vector_to_table(l,pragma::asset::get_supported_extensions(type));
 		}),
 		luabind::def("get_supported_extensions",+[](lua::State *l,pragma::asset::Type type,pragma::asset::FormatType formatType) -> tb<std::string> {
-			return Lua::vector_to_table(l,pragma::asset::get_supported_extensions(type,formatType));
+			return vector_to_table(l,pragma::asset::get_supported_extensions(type,formatType));
 		}),
 		luabind::def("get_legacy_extension",static_cast<opt<std::string>(*)(lua::State*,pragma::asset::Type)>([](lua::State *l,pragma::asset::Type type) -> opt<std::string> {
 			auto ext = pragma::asset::get_legacy_extension(type);
@@ -162,9 +162,9 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 		luabind::def("get_asset_root_directory",static_cast<std::string(*)(lua::State*,pragma::asset::Type)>([](lua::State *l,pragma::asset::Type type) -> std::string {
 			return pragma::asset::get_asset_root_directory(type);
 		})),
-		luabind::def("exists",Lua::asset::exists),
-		luabind::def("find_file",Lua::asset::find_file),
-		luabind::def("is_loaded",Lua::asset::is_loaded),
+		luabind::def("exists",exists),
+		luabind::def("find_file",find_file),
+		luabind::def("is_loaded",is_loaded),
 		luabind::def("wait_until_loaded",+[](lua::State *l,const std::string &name,pragma::asset::Type type) -> bool {
 			auto *manager = pragma::Engine::Get()->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
@@ -178,7 +178,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			manager->WaitForAllPendingCompleted();
 		}),
 		luabind::def("precache",+[](lua::State *l,const std::string &name,pragma::asset::Type type)
-			-> Lua::var<bool,std::pair<pragma::util::FileAssetManager::PreloadResult::Result,std::optional<pragma::util::AssetLoadJobId>>> {
+			-> var<bool,std::pair<pragma::util::FileAssetManager::PreloadResult::Result,std::optional<pragma::util::AssetLoadJobId>>> {
 			auto *manager = pragma::Engine::Get()->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
 				return luabind::object{l,false};
@@ -191,7 +191,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 			};
 		}),
 		luabind::def("get_asset_state",+[](lua::State *l,const std::string &name,pragma::asset::Type type)
-			-> Lua::opt<pragma::util::AssetState> {
+			-> opt<pragma::util::AssetState> {
 			auto *manager = pragma::Engine::Get()->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
 				return luabind::object{};
@@ -207,7 +207,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 		luabind::def("delete",static_cast<bool(*)(lua::State*,const std::string&,pragma::asset::Type)>([](lua::State *l,const std::string &name,pragma::asset::Type type) -> bool {
 			return pragma::asset::remove_asset(name,type);
 		})),
-		luabind::def("find",+[](lua::State *l,const std::string &path,pragma::asset::Type type) -> Lua::tb<std::string> {
+		luabind::def("find",+[](lua::State *l,const std::string &path,pragma::asset::Type type) -> tb<std::string> {
 			auto exts = pragma::asset::get_supported_extensions(type);
 			std::string rootPath = pragma::asset::get_asset_root_directory(type);
 			if(!rootPath.empty())
@@ -250,7 +250,7 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 		})
 	)];
 
-	Lua::RegisterLibraryEnums(lua.GetState(), "asset",
+	RegisterLibraryEnums(lua.GetState(), "asset",
 	  {
 	    {"TYPE_MODEL", pragma::math::to_integral(pragma::asset::Type::Model)},
 	    {"TYPE_MAP", pragma::math::to_integral(pragma::asset::Type::Map)},

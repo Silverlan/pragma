@@ -37,7 +37,7 @@ luabind::object Lua::util::Server::fire_bullets(lua::State *l, const pragma::gam
 	std::vector<int32_t> hitSurfaceMaterials;
 	Vector3 start;
 	uint32_t numTracer = 0;
-	auto r = Lua::util::fire_bullets(l, const_cast<pragma::game::BulletInfo &>(bulletInfo), hitReport, [&hitPositions, &hitNormals, &hitSurfaceMaterials, &start, &numTracer](pragma::game::DamageInfo &dmg, pragma::physics::TraceData &, pragma::physics::TraceResult &result, uint32_t &tracerCount) {
+	auto r = util::fire_bullets(l, const_cast<pragma::game::BulletInfo &>(bulletInfo), hitReport, [&hitPositions, &hitNormals, &hitSurfaceMaterials, &start, &numTracer](pragma::game::DamageInfo &dmg, pragma::physics::TraceData &, pragma::physics::TraceResult &result, uint32_t &tracerCount) {
 		if(result.hitType != pragma::physics::RayCastHitType::None) {
 			hitPositions.push_back(result.position);
 			hitNormals.push_back(result.normal);
@@ -84,4 +84,4 @@ luabind::object Lua::util::Server::fire_bullets(lua::State *l, const pragma::gam
 
 void Lua::util::Server::create_giblet(lua::State *l, const GibletCreateInfo &gibletInfo) { pragma::SGame::Get()->CreateGiblet(gibletInfo); }
 
-void Lua::util::Server::create_explosion(lua::State *l, const pragma::util::SplashDamageInfo &splashDamageInfo) { Lua::util::splash_damage(l, splashDamageInfo); }
+void Lua::util::Server::create_explosion(lua::State *l, const pragma::util::SplashDamageInfo &splashDamageInfo) { splash_damage(l, splashDamageInfo); }

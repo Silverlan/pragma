@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :scripting.lua.converters.utf8_string;
 
-void luabind::default_converter<pragma::string::Utf8String>::to_lua(lua::State *L, pragma::string::Utf8String const &x) { luabind::object {L, std::string {x}}.push(L); }
+void luabind::default_converter<pragma::string::Utf8String>::to_lua(lua::State *L, pragma::string::Utf8String const &x) { object {L, std::string {x}}.push(L); }
 
 void luabind::default_converter<pragma::string::Utf8String>::to_lua(lua::State *L, pragma::string::Utf8String *x)
 {

@@ -25,7 +25,7 @@ decltype(ShaderSSAO::DESCRIPTOR_SET_SAMPLE_BUFFER) ShaderSSAO::DESCRIPTOR_SET_SA
   {prosper::DescriptorSetInfo::Binding {"BUFFER", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit}},
 };
 decltype(ShaderSSAO::DESCRIPTOR_SET_SCENE) ShaderSSAO::DESCRIPTOR_SET_SCENE = {&ShaderScene::DESCRIPTOR_SET_SCENE};
-ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/post_processing/ssao")
+ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifier) : ShaderBaseImageProcessing(context, identifier, "programs/post_processing/ssao")
 {
 	// Generate random sample kernel
 	std::uniform_real_distribution<float> randomFloats(0.f, 1.f);
@@ -37,7 +37,7 @@ ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifi
 		sample = glm::normalize(sample);
 		sample *= randomFloats(generator);
 		auto scale = static_cast<float>(i) / 64.f;
-		scale = pragma::math::lerp(0.1f, 1.f, pragma::math::pow2(scale));
+		scale = math::lerp(0.1f, 1.f, math::pow2(scale));
 		sample *= scale;
 		ssaoKernel.push_back(sample);
 	}
@@ -46,7 +46,7 @@ ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifi
 	bufferCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 	bufferCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	bufferCreateInfo.size = size;
-	m_kernelBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(bufferCreateInfo, ssaoKernel.data());
+	m_kernelBuffer = get_cengine()->GetRenderContext().CreateBuffer(bufferCreateInfo, ssaoKernel.data());
 	m_kernelBuffer->SetDebugName("ssao_kernel_buf");
 
 	// Generate kernel rotations
@@ -56,9 +56,9 @@ ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifi
 	ssaoNoise.reserve(width * height);
 	for(auto i = decltype(ssaoNoise.capacity()) {0}; i < ssaoNoise.capacity(); ++i) {
 		ssaoNoise.push_back({
-		  pragma::math::float32_to_float16(randomFloats(generator) * 2.f - 1.f), pragma::math::float32_to_float16(randomFloats(generator) * 2.f - 1.f),
-		  pragma::math::float32_to_float16(0.f), // Rotation axis
-		  pragma::math::float32_to_float16(0.f)  // Alpha (Unused)
+		  math::float32_to_float16(randomFloats(generator) * 2.f - 1.f), math::float32_to_float16(randomFloats(generator) * 2.f - 1.f),
+		  math::float32_to_float16(0.f), // Rotation axis
+		  math::float32_to_float16(0.f)  // Alpha (Unused)
 		});
 	}
 	prosper::util::ImageCreateInfo imgCreateInfo {};
@@ -70,10 +70,10 @@ ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifi
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferSrcOptimal;
 	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 
-	pragma::math::set_flag(imgCreateInfo.flags, prosper::util::ImageCreateInfo::Flags::DontAllocateMemory);
+	math::set_flag(imgCreateInfo.flags, prosper::util::ImageCreateInfo::Flags::DontAllocateMemory);
 	auto stagingImage = context.CreateImage(imgCreateInfo, reinterpret_cast<uint8_t *>(ssaoNoise.data()));
 	context.AllocateTemporaryBuffer(*stagingImage);
-	pragma::math::set_flag(imgCreateInfo.flags, prosper::util::ImageCreateInfo::Flags::DontAllocateMemory, false);
+	math::set_flag(imgCreateInfo.flags, prosper::util::ImageCreateInfo::Flags::DontAllocateMemory, false);
 
 	imgCreateInfo.tiling = prosper::ImageTiling::Optimal;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
@@ -81,10 +81,10 @@ ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifi
 	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferDstBit;
 	auto noiseImage = context.CreateImage(imgCreateInfo);
 
-	auto &setupCmd = pragma::get_cengine()->GetSetupCommandBuffer();
+	auto &setupCmd = get_cengine()->GetSetupCommandBuffer();
 	setupCmd->RecordBlitImage({}, *stagingImage, *noiseImage);
 	setupCmd->RecordImageBarrier(*noiseImage, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
-	pragma::get_cengine()->FlushSetupCommandBuffer();
+	get_cengine()->FlushSetupCommandBuffer();
 
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	samplerCreateInfo.addressModeU = samplerCreateInfo.addressModeV = samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::Repeat;
@@ -101,11 +101,11 @@ void ShaderSSAO::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &out
 
 void ShaderSSAO::OnPipelineInitialized(uint32_t pipelineIdx)
 {
-	prosper::ShaderBaseImageProcessing::OnPipelineInitialized(pipelineIdx);
+	ShaderBaseImageProcessing::OnPipelineInitialized(pipelineIdx);
 	if(pipelineIdx != 0u)
 		return;
-	m_descSetGroupKernel = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_SAMPLE_BUFFER);
-	m_descSetGroupTexture = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_NOISE_TEXTURE);
+	m_descSetGroupKernel = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_SAMPLE_BUFFER);
+	m_descSetGroupTexture = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_NOISE_TEXTURE);
 
 	m_descSetGroupKernel->GetDescriptorSet()->SetBindingUniformBuffer(*m_kernelBuffer, 0u);
 	m_descSetGroupTexture->GetDescriptorSet()->SetBindingTexture(*m_noiseTexture, 0u);
@@ -126,9 +126,9 @@ void ShaderSSAO::InitializeShaderResources()
 
 void ShaderSSAO::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 
-bool ShaderSSAO::RecordDraw(prosper::ShaderBindState &bindState, const pragma::CSceneComponent &scene, prosper::IDescriptorSet &descSetPrepass, const std::array<uint32_t, 2> &renderTargetDimensions) const
+bool ShaderSSAO::RecordDraw(prosper::ShaderBindState &bindState, const CSceneComponent &scene, prosper::IDescriptorSet &descSetPrepass, const std::array<uint32_t, 2> &renderTargetDimensions) const
 {
 	auto *descSetCamera = scene.GetCameraDescriptorSetGraphics();
 	return RecordBindDescriptorSets(bindState, {&descSetPrepass, m_descSetGroupTexture->GetDescriptorSet(), m_descSetGroupKernel->GetDescriptorSet(), descSetCamera})
-	  && RecordPushConstants(bindState, renderTargetDimensions.size() * sizeof(renderTargetDimensions.front()), renderTargetDimensions.data()) && prosper::ShaderBaseImageProcessing::RecordDraw(bindState);
+	  && RecordPushConstants(bindState, renderTargetDimensions.size() * sizeof(renderTargetDimensions.front()), renderTargetDimensions.data()) && ShaderBaseImageProcessing::RecordDraw(bindState);
 }

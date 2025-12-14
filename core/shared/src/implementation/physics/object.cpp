@@ -8,15 +8,15 @@ module pragma.shared;
 
 import :physics.object;
 
-pragma::physics::PhysObj::PhysObj(pragma::BaseEntityComponent *owner) : pragma::BaseLuaHandle {}, m_collisionFilterGroup(pragma::physics::CollisionMask::None), m_collisionFilterMask(pragma::physics::CollisionMask::None)
+pragma::physics::PhysObj::PhysObj(BaseEntityComponent *owner) : BaseLuaHandle {}, m_collisionFilterGroup(CollisionMask::None), m_collisionFilterMask(CollisionMask::None)
 {
-	m_owner = owner->GetHandle<pragma::BaseEntityComponent>();
+	m_owner = owner->GetHandle<BaseEntityComponent>();
 	m_networkState = owner->GetEntity().GetNetworkState();
 }
 
-pragma::physics::PhysObj::PhysObj(pragma::BaseEntityComponent *owner, pragma::physics::ICollisionObject &object) : pragma::physics::PhysObj(owner) { AddCollisionObject(object); }
+pragma::physics::PhysObj::PhysObj(BaseEntityComponent *owner, ICollisionObject &object) : PhysObj(owner) { AddCollisionObject(object); }
 
-pragma::physics::PhysObj::PhysObj(pragma::BaseEntityComponent *owner, const std::vector<pragma::physics::ICollisionObject *> &objects) : pragma::physics::PhysObj(owner)
+pragma::physics::PhysObj::PhysObj(BaseEntityComponent *owner, const std::vector<ICollisionObject *> &objects) : PhysObj(owner)
 {
 	for(unsigned int i = 0; i < objects.size(); i++)
 		AddCollisionObject(*objects[i]);
@@ -26,8 +26,8 @@ bool pragma::physics::PhysObj::Initialize()
 	InitializeLuaObject(GetNetworkState()->GetLuaState());
 	return true;
 }
-void pragma::physics::PhysObj::InitializeLuaObject(lua::State *lua) { SetLuaObject(pragma::LuaCore::raw_object_to_luabind_object(lua, GetHandle())); }
-void pragma::physics::PhysObj::OnCollisionObjectWake(pragma::physics::ICollisionObject &o)
+void pragma::physics::PhysObj::InitializeLuaObject(lua::State *lua) { SetLuaObject(LuaCore::raw_object_to_luabind_object(lua, GetHandle())); }
+void pragma::physics::PhysObj::OnCollisionObjectWake(ICollisionObject &o)
 {
 	if(m_colObjAwakeCount++ == 0)
 		OnWake();
@@ -36,7 +36,7 @@ void pragma::physics::PhysObj::OnCollisionObjectWake(pragma::physics::ICollision
 	if(m_colObjAwakeCount > m_collisionObjects.size())
 		Con::cwar << "Collision object wake counter exceeds number of collision objects!" << Con::endl;
 }
-void pragma::physics::PhysObj::OnCollisionObjectSleep(pragma::physics::ICollisionObject &o)
+void pragma::physics::PhysObj::OnCollisionObjectSleep(ICollisionObject &o)
 {
 	if(m_colObjAwakeCount == 0) {
 		Con::cwar << "Collision object of physics object fell asleep, but previous information indicated all collision objects were already asleep!" << Con::endl;
@@ -45,11 +45,11 @@ void pragma::physics::PhysObj::OnCollisionObjectSleep(pragma::physics::ICollisio
 	if(--m_colObjAwakeCount == 0)
 		OnSleep();
 }
-void pragma::physics::PhysObj::OnCollisionObjectRemoved(pragma::physics::ICollisionObject &o)
+void pragma::physics::PhysObj::OnCollisionObjectRemoved(ICollisionObject &o)
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::Spawned) && o.IsAwake())
+	if(math::is_flag_set(m_stateFlags, StateFlags::Spawned) && o.IsAwake())
 		OnCollisionObjectSleep(o);
-	auto it = std::find_if(m_collisionObjects.begin(), m_collisionObjects.end(), [&o](const pragma::util::TSharedHandle<pragma::physics::ICollisionObject> &colObjOther) { return &o == colObjOther.Get(); });
+	auto it = std::find_if(m_collisionObjects.begin(), m_collisionObjects.end(), [&o](const util::TSharedHandle<ICollisionObject> &colObjOther) { return &o == colObjOther.Get(); });
 	if(it != m_collisionObjects.end())
 		m_collisionObjects.erase(it);
 }
@@ -80,7 +80,7 @@ void pragma::physics::PhysObj::UpdateVelocity() {}
 pragma::NetworkState *pragma::physics::PhysObj::GetNetworkState() { return m_networkState; }
 float pragma::physics::PhysObj::GetMass() const { return 0.f; }
 void pragma::physics::PhysObj::SetMass(float) {}
-bool pragma::physics::PhysObj::IsDisabled() const { return pragma::math::is_flag_set(m_stateFlags, StateFlags::Disabled); }
+bool pragma::physics::PhysObj::IsDisabled() const { return math::is_flag_set(m_stateFlags, StateFlags::Disabled); }
 bool pragma::physics::PhysObj::IsStatic() const { return false; }
 void pragma::physics::PhysObj::SetStatic(bool) {}
 bool pragma::physics::PhysObj::IsRigid() const { return false; }
@@ -95,26 +95,26 @@ void pragma::physics::PhysObj::SetCCDEnabled(bool b)
 	}
 }
 
-void pragma::physics::PhysObj::AddCollisionObject(pragma::physics::ICollisionObject &obj)
+void pragma::physics::PhysObj::AddCollisionObject(ICollisionObject &obj)
 {
-	m_collisionObjects.push_back(pragma::util::shared_handle_cast<pragma::physics::IBase, pragma::physics::ICollisionObject>(obj.ClaimOwnership()));
+	m_collisionObjects.push_back(pragma::util::shared_handle_cast<IBase, ICollisionObject>(obj.ClaimOwnership()));
 	obj.SetPhysObj(*this);
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::Spawned))
+	if(math::is_flag_set(m_stateFlags, StateFlags::Spawned))
 		obj.Spawn();
 }
 
 void pragma::physics::PhysObj::Spawn()
 {
-	if(pragma::math::is_flag_set(m_stateFlags, StateFlags::Spawned))
+	if(math::is_flag_set(m_stateFlags, StateFlags::Spawned))
 		return;
 	for(auto &hObj : m_collisionObjects) {
 		if(hObj.IsValid())
 			hObj->Spawn();
 	}
 }
-const pragma::physics::ICollisionObject *pragma::physics::PhysObj::GetCollisionObject() const { return const_cast<pragma::physics::PhysObj *>(this)->GetCollisionObject(); }
+const pragma::physics::ICollisionObject *pragma::physics::PhysObj::GetCollisionObject() const { return const_cast<PhysObj *>(this)->GetCollisionObject(); }
 std::vector<pragma::util::TSharedHandle<pragma::physics::ICollisionObject>> &pragma::physics::PhysObj::GetCollisionObjects() { return m_collisionObjects; }
-const std::vector<pragma::util::TSharedHandle<pragma::physics::ICollisionObject>> &pragma::physics::PhysObj::GetCollisionObjects() const { return const_cast<pragma::physics::PhysObj *>(this)->GetCollisionObjects(); }
+const std::vector<pragma::util::TSharedHandle<pragma::physics::ICollisionObject>> &pragma::physics::PhysObj::GetCollisionObjects() const { return const_cast<PhysObj *>(this)->GetCollisionObjects(); }
 pragma::physics::ICollisionObject *pragma::physics::PhysObj::GetCollisionObject()
 {
 	if(m_collisionObjects.empty())
@@ -127,7 +127,7 @@ pragma::physics::ICollisionObject *pragma::physics::PhysObj::GetCollisionObject(
 
 pragma::physics::PhysObj::~PhysObj()
 {
-	pragma::BaseLuaHandle::InvalidateHandle();
+	InvalidateHandle();
 	//auto *state = m_networkState;
 	for(unsigned int i = 0; i < m_collisionObjects.size(); i++) {
 		auto &o = m_collisionObjects[i];
@@ -151,8 +151,8 @@ void pragma::physics::PhysObj::OnWake()
 	if(pPhysComponent != nullptr)
 		pPhysComponent->OnPhysicsWake(this);
 }
-void pragma::physics::PhysObj::Enable() { pragma::math::set_flag(m_stateFlags, StateFlags::Disabled, false); }
-void pragma::physics::PhysObj::Disable() { pragma::math::set_flag(m_stateFlags, StateFlags::Disabled, true); }
+void pragma::physics::PhysObj::Enable() { math::set_flag(m_stateFlags, StateFlags::Disabled, false); }
+void pragma::physics::PhysObj::Disable() { math::set_flag(m_stateFlags, StateFlags::Disabled, true); }
 pragma::BaseEntityComponent *pragma::physics::PhysObj::GetOwner() { return m_owner.get(); }
 bool pragma::physics::PhysObj::IsController() const { return false; }
 
@@ -170,7 +170,7 @@ float pragma::physics::PhysObj::GetAngularSleepingThreshold() const { return 0.f
 
 void pragma::physics::PhysObj::Simulate(double, bool) {}
 
-PhysObjHandle pragma::physics::PhysObj::GetHandle() const { return pragma::BaseLuaHandle::GetHandle<pragma::physics::PhysObj>(); }
+PhysObjHandle pragma::physics::PhysObj::GetHandle() const { return BaseLuaHandle::GetHandle<PhysObj>(); }
 
 void pragma::physics::PhysObj::SetPosition(const Vector3 &pos)
 {
@@ -242,7 +242,7 @@ Vector3 pragma::physics::PhysObj::GetPosition() const
 }
 Vector3 pragma::physics::PhysObj::GetOrigin() const
 {
-	auto *o = const_cast<pragma::physics::PhysObj *>(this)->GetCollisionObject();
+	auto *o = const_cast<PhysObj *>(this)->GetCollisionObject();
 	if(o == nullptr)
 		return Vector3(0, 0, 0);
 	auto r = o->GetPos();
@@ -254,7 +254,7 @@ Vector3 pragma::physics::PhysObj::GetOrigin() const
 	return r;
 }
 uint32_t pragma::physics::PhysObj::GetNumberOfCollisionObjectsAwake() const { return m_colObjAwakeCount; }
-void pragma::physics::PhysObj::SetCollisionFilter(pragma::physics::CollisionMask filterGroup, pragma::physics::CollisionMask filterMask)
+void pragma::physics::PhysObj::SetCollisionFilter(CollisionMask filterGroup, CollisionMask filterMask)
 {
 	m_collisionFilterGroup = filterGroup;
 	m_collisionFilterMask = filterMask;
@@ -265,25 +265,25 @@ void pragma::physics::PhysObj::SetCollisionFilter(pragma::physics::CollisionMask
 		}
 	}
 }
-void pragma::physics::PhysObj::SetCollisionFilterMask(pragma::physics::CollisionMask filterMask) { SetCollisionFilter(m_collisionFilterGroup, filterMask); }
-void pragma::physics::PhysObj::AddCollisionFilter(pragma::physics::CollisionMask filter)
+void pragma::physics::PhysObj::SetCollisionFilterMask(CollisionMask filterMask) { SetCollisionFilter(m_collisionFilterGroup, filterMask); }
+void pragma::physics::PhysObj::AddCollisionFilter(CollisionMask filter)
 {
-	pragma::physics::CollisionMask filterGroup;
-	pragma::physics::CollisionMask filterMask;
+	CollisionMask filterGroup;
+	CollisionMask filterMask;
 	GetCollisionFilter(&filterGroup, &filterMask);
 	SetCollisionFilter(filterGroup | filter, filterMask | filter);
 }
-void pragma::physics::PhysObj::RemoveCollisionFilter(pragma::physics::CollisionMask filter)
+void pragma::physics::PhysObj::RemoveCollisionFilter(CollisionMask filter)
 {
-	pragma::physics::CollisionMask filterGroup;
-	pragma::physics::CollisionMask filterMask;
+	CollisionMask filterGroup;
+	CollisionMask filterMask;
 	GetCollisionFilter(&filterGroup, &filterMask);
 	SetCollisionFilter(filterGroup & ~filter, filterMask & ~filter);
 }
-void pragma::physics::PhysObj::SetCollisionFilter(pragma::physics::CollisionMask filterGroup) { SetCollisionFilter(filterGroup, filterGroup); }
+void pragma::physics::PhysObj::SetCollisionFilter(CollisionMask filterGroup) { SetCollisionFilter(filterGroup, filterGroup); }
 pragma::physics::CollisionMask pragma::physics::PhysObj::GetCollisionFilter() const { return m_collisionFilterGroup; }
 pragma::physics::CollisionMask pragma::physics::PhysObj::GetCollisionFilterMask() const { return m_collisionFilterMask; }
-void pragma::physics::PhysObj::GetCollisionFilter(pragma::physics::CollisionMask *filterGroup, pragma::physics::CollisionMask *filterMask) const
+void pragma::physics::PhysObj::GetCollisionFilter(CollisionMask *filterGroup, CollisionMask *filterMask) const
 {
 	*filterGroup = m_collisionFilterGroup;
 	*filterMask = m_collisionFilterMask;

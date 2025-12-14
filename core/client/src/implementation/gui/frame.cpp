@@ -17,7 +17,7 @@ pragma::gui::types::WIFrame::WIFrame() : WITransformable() {}
 pragma::gui::types::WIFrame::~WIFrame()
 {
 	if(m_resizeMode != ResizeMode::none)
-		WGUI::GetInstance().SetCursor(pragma::platform::Cursor::Shape::Arrow);
+		WGUI::GetInstance().SetCursor(platform::Cursor::Shape::Arrow);
 }
 
 pragma::gui::types::WIBase *pragma::gui::types::WIFrame::GetContents() { return m_hContents.get(); }
@@ -42,7 +42,7 @@ void pragma::gui::types::WIFrame::Initialize()
 
 	WITransformable::Initialize();
 	if(m_hMoveRect.IsValid()) {
-		auto &gui = pragma::gui::WGUI::GetInstance();
+		auto &gui = WGUI::GetInstance();
 		m_hTitleBar = gui.Create<WIBase>(m_hMoveRect.get())->GetHandle();
 		WIBase *pTitleBar = m_hTitleBar.get();
 		pTitleBar->AddStyleClass("frame_titlebar");
@@ -83,8 +83,8 @@ void pragma::gui::types::WIFrame::Initialize()
 			m_hDetachButton = gui.Create<WIButton>(pTitleBar)->GetHandle();
 			WIButton *pButton = static_cast<WIButton *>(m_hDetachButton.get());
 			pButton->SetText(".");
-			pButton->AddCallback("OnPressed", FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([this](pragma::util::EventReply *reply) -> CallbackReturnType {
-				*reply = pragma::util::EventReply::Handled;
+			pButton->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this](util::EventReply *reply) -> CallbackReturnType {
+				*reply = util::EventReply::Handled;
 				OnDetachButtonPressed();
 				return CallbackReturnType::HasReturnValue;
 			}));
@@ -95,8 +95,8 @@ void pragma::gui::types::WIFrame::Initialize()
 			m_hClose = gui.Create<WIButton>(pTitleBar)->GetHandle();
 			WIButton *pButton = static_cast<WIButton *>(m_hClose.get());
 			pButton->SetText("X");
-			pButton->AddCallback("OnPressed", FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([this](pragma::util::EventReply *reply) -> CallbackReturnType {
-				*reply = pragma::util::EventReply::Handled;
+			pButton->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this](util::EventReply *reply) -> CallbackReturnType {
+				*reply = util::EventReply::Handled;
 				OnCloseButtonPressed();
 				return CallbackReturnType::HasReturnValue;
 			}));
@@ -104,12 +104,12 @@ void pragma::gui::types::WIFrame::Initialize()
 		}
 	}
 }
-pragma::util::EventReply pragma::gui::types::WIFrame::MouseCallback(pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods)
+pragma::util::EventReply pragma::gui::types::WIFrame::MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods)
 {
-	if(WITransformable::MouseCallback(button, state, mods) == pragma::util::EventReply::Handled)
-		return pragma::util::EventReply::Handled;
+	if(WITransformable::MouseCallback(button, state, mods) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	RequestFocus();
-	return pragma::util::EventReply::Handled;
+	return util::EventReply::Handled;
 }
 void pragma::gui::types::WIFrame::SetCloseButtonEnabled(bool b)
 {
@@ -179,7 +179,7 @@ void pragma::gui::types::WIFrame::SetTitle(std::string title)
 const pragma::string::Utf8String &pragma::gui::types::WIFrame::GetTitle() const
 {
 	if(!m_hTitle.IsValid()) {
-		static pragma::string::Utf8String emptyString {};
+		static string::Utf8String emptyString {};
 		return emptyString;
 	}
 	return static_cast<const WIText *>(m_hTitle.get())->GetText();

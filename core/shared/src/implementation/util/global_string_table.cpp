@@ -72,8 +72,8 @@ const char *pragma::register_global_string(const char *str) { return g_stringTab
 
 pragma::GString::GString() {}
 pragma::GString::GString(const char *str) : str {str} {}
-pragma::GString::GString(const std::string &str) : str {pragma::register_global_string(str)} {}
-pragma::GString::GString(const std::string_view &str) : str {pragma::register_global_string(str)} {}
+pragma::GString::GString(const std::string &str) : str {register_global_string(str)} {}
+pragma::GString::GString(const std::string_view &str) : str {register_global_string(str)} {}
 pragma::GString::GString(const GString &other) : str {other.str} {}
 
 pragma::GString &pragma::GString::operator=(const char *str)
@@ -83,12 +83,12 @@ pragma::GString &pragma::GString::operator=(const char *str)
 }
 pragma::GString &pragma::GString::operator=(const std::string &str)
 {
-	this->str = pragma::register_global_string(str);
+	this->str = register_global_string(str);
 	return *this;
 }
 pragma::GString &pragma::GString::operator=(const std::string_view &str)
 {
-	this->str = pragma::register_global_string(str);
+	this->str = register_global_string(str);
 	return *this;
 }
 pragma::GString &pragma::GString::operator=(const GString &str)
@@ -124,7 +124,7 @@ bool pragma::GString::operator!=(const std::string_view &str) const { return !(*
 bool pragma::GString::operator==(const GString &other) const { return *this == other.str; }
 bool pragma::GString::operator!=(const GString &other) const { return !(*this == other); }
 
-std::ostream &pragma::operator<<(std::ostream &stream, const pragma::GString &str)
+std::ostream &pragma::operator<<(std::ostream &stream, const GString &str)
 {
 	if(!str)
 		stream << 0;

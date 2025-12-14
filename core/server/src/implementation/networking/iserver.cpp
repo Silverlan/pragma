@@ -41,7 +41,7 @@ bool pragma::networking::IServer::Start(Error &outErr, uint16_t port, bool useP2
 		m_bRunning = true;
 	return result;
 }
-bool pragma::networking::IServer::DropClient(const IServerClient &client, pragma::networking::DropReason reason, Error &outErr)
+bool pragma::networking::IServer::DropClient(const IServerClient &client, DropReason reason, Error &outErr)
 {
 	auto it = std::find_if(m_clients.begin(), m_clients.end(), [&client](const std::shared_ptr<IServerClient> &clientOther) { return clientOther.get() == &client; });
 	if(it == m_clients.end())

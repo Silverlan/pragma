@@ -14,7 +14,7 @@ import :entities.components;
 
 using namespace pragma;
 
-decltype(ShaderParticle2DBase::VERTEX_BINDING_PARTICLE) ShaderParticle2DBase::VERTEX_BINDING_PARTICLE = {prosper::VertexInputRate::Instance, sizeof(pragma::ecs::CParticleSystemComponent::ParticleData)};
+decltype(ShaderParticle2DBase::VERTEX_BINDING_PARTICLE) ShaderParticle2DBase::VERTEX_BINDING_PARTICLE = {prosper::VertexInputRate::Instance, sizeof(ecs::CParticleSystemComponent::ParticleData)};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSITION) ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_PARTICLE, prosper::Format::R32G32B32_SFloat};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_RADIUS) ShaderParticle2DBase::VERTEX_ATTRIBUTE_RADIUS = {VERTEX_BINDING_PARTICLE, prosper::Format::R32_SFloat};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_PREVPOS) ShaderParticle2DBase::VERTEX_ATTRIBUTE_PREVPOS = {VERTEX_BINDING_PARTICLE, prosper::Format::R32G32B32_SFloat};
@@ -23,7 +23,7 @@ decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_COLOR) ShaderParticle2DBase::VER
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ROTATION) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ROTATION = {VERTEX_BINDING_PARTICLE, prosper::Format::R32_SFloat};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_LENGTH_YAW) ShaderParticle2DBase::VERTEX_ATTRIBUTE_LENGTH_YAW = {VERTEX_BINDING_PARTICLE, prosper::Format::R32_UInt};
 
-decltype(ShaderParticle2DBase::VERTEX_BINDING_ANIMATION_START) ShaderParticle2DBase::VERTEX_BINDING_ANIMATION_START = {prosper::VertexInputRate::Instance, sizeof(pragma::ecs::CParticleSystemComponent::ParticleAnimationData)};
+decltype(ShaderParticle2DBase::VERTEX_BINDING_ANIMATION_START) ShaderParticle2DBase::VERTEX_BINDING_ANIMATION_START = {prosper::VertexInputRate::Instance, sizeof(ecs::CParticleSystemComponent::ParticleAnimationData)};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES = {VERTEX_BINDING_ANIMATION_START, prosper::Format::R32_UInt};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_INTERP_FACTOR) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_INTERP_FACTOR = {VERTEX_BINDING_ANIMATION_START, prosper::Format::R32_SFloat};
 
@@ -100,14 +100,14 @@ void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 }
 
-std::optional<uint32_t> ShaderParticle2DBase::RecordBeginDraw(prosper::ShaderBindState &bindState, pragma::ecs::CParticleSystemComponent &pSys, pts::ParticleRenderFlags renderFlags, RecordFlags recordFlags)
+std::optional<uint32_t> ShaderParticle2DBase::RecordBeginDraw(prosper::ShaderBindState &bindState, ecs::CParticleSystemComponent &pSys, pts::ParticleRenderFlags renderFlags, RecordFlags recordFlags)
 {
 	uint32_t pipelineIdx;
-	if(pragma::math::is_flag_set(renderFlags, pts::ParticleRenderFlags::DepthOnly))
+	if(math::is_flag_set(renderFlags, pts::ParticleRenderFlags::DepthOnly))
 		pipelineIdx = GetDepthPipelineIndex();
 	else {
 		auto alphaMode = GetRenderAlphaMode(pSys);
-		pipelineIdx = /*pragma::math::to_integral(pipeline) *pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Count) +*/ pragma::math::to_integral(alphaMode);
+		pipelineIdx = /*pragma::math::to_integral(pipeline) *pragma::math::to_integral(pragma::rendering::ParticleAlphaMode::Count) +*/ math::to_integral(alphaMode);
 	}
 	if(!ShaderSceneLit::RecordBeginDraw(bindState, pipelineIdx, recordFlags))
 		return {};
@@ -123,7 +123,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticle2DBase::InitializeMa
 	if(diffuseMap != nullptr && diffuseMap->texture != nullptr) {
 		auto texture = std::static_pointer_cast<material::Texture>(diffuseMap->texture);
 		if(texture->HasValidVkTexture()) {
-			auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+			auto descSetGroup = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
 			mat.SetDescriptorSetGroup(*this, descSetGroup);
 			auto &descSet = *descSetGroup->GetDescriptorSet();
 			descSet.SetBindingTexture(*texture->GetVkTexture(), 0u);
@@ -148,7 +148,7 @@ void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::IRender
 	else {
 		auto sampleCount = GetSampleCount(pipelineIdx);
 		prosper::util::RenderPassCreateInfo rpInfo {
-		  {pragma::ShaderPrepass::get_normal_render_pass_attachment_info(sampleCount), pragma::ShaderPrepass::get_depth_render_pass_attachment_info(sampleCount)},
+		  {ShaderPrepass::get_normal_render_pass_attachment_info(sampleCount), ShaderPrepass::get_depth_render_pass_attachment_info(sampleCount)},
 		};
 		CreateCachedRenderPass<ShaderPrepass>({rpInfo}, outRenderPass, pipelineIdx);
 		// Depth only
@@ -171,7 +171,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 
 	nearZ = camNearZ;
 	farZ = camFarZ;
-	if(orientationType != pragma::pts::ParticleOrientationType::World) {
+	if(orientationType != pts::ParticleOrientationType::World) {
 		right = Vector3(matrix[0][0], matrix[1][0], matrix[2][0]);
 		uvec::normalize(&right);
 	}
@@ -185,10 +185,10 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 	}
 
 	switch(orientationType) {
-	case pragma::pts::ParticleOrientationType::World:
+	case pts::ParticleOrientationType::World:
 		up = uquat::up(rot);
 		break;
-	case pragma::pts::ParticleOrientationType::Upright:
+	case pts::ParticleOrientationType::Upright:
 		up = uquat::forward(rot);
 		break;
 	default:
@@ -197,8 +197,8 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 	}
 }
 
-void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::ecs::CParticleSystemComponent &particle, pragma::pts::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const material::Material *material,
-  const pragma::BaseEnvCameraComponent *cam) const
+void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, pts::ParticleOrientationType orientationType, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const material::Material *material,
+  const BaseEnvCameraComponent *cam) const
 {
 	auto camNearZ = 0.f;
 	auto camFarZ = 0.f;
@@ -213,13 +213,13 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, 
 	GetParticleSystemOrientationInfo(matrix, particle, orientationType, up, right, nearZ, farZ, material, camNearZ, camFarZ);
 }
 
-void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const pragma::ecs::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const material::Material *material, const pragma::BaseEnvCameraComponent *cam) const
+void ShaderParticle2DBase::GetParticleSystemOrientationInfo(const Mat4 &matrix, const ecs::CParticleSystemComponent &particle, Vector3 &up, Vector3 &right, float &nearZ, float &farZ, const material::Material *material, const BaseEnvCameraComponent *cam) const
 {
 	return GetParticleSystemOrientationInfo(matrix, particle, particle.GetOrientationType(), up, right, nearZ, farZ, material, cam);
 }
 
 prosper::DescriptorSetInfo &ShaderParticle2DBase::GetAnimationDescriptorSetInfo() const { return DESCRIPTOR_SET_ANIMATION; }
-bool ShaderParticle2DBase::RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const pragma::ecs::CParticleSystemComponent &ps) const
+bool ShaderParticle2DBase::RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps) const
 {
 	auto *mat = static_cast<material::CMaterial *>(ps.GetMaterial());
 	if(mat == nullptr)
@@ -233,13 +233,13 @@ bool ShaderParticle2DBase::RecordParticleMaterial(prosper::ShaderBindState &bind
 	auto *descSetDepth = renderer.GetDepthDescriptorSet();
 	if(descSetDepth == nullptr)
 		return false;
-	auto &animDescSet = const_cast<ShaderParticle2DBase *>(this)->GetAnimationDescriptorSet(const_cast<pragma::ecs::CParticleSystemComponent &>(ps));
+	auto &animDescSet = const_cast<ShaderParticle2DBase *>(this)->GetAnimationDescriptorSet(const_cast<ecs::CParticleSystemComponent &>(ps));
 	return RecordBindDescriptorSets(bindState, {&descSetTexture, descSetDepth, &animDescSet}, DESCRIPTOR_SET_TEXTURE.setIndex);
 }
 
 uint32_t ShaderParticle2DBase::GetSceneDescriptorSetIndex() const { return DESCRIPTOR_SET_SCENE.setIndex; }
 
-bool ShaderParticle2DBase::RecordBindScene(prosper::ICommandBuffer &cmd, const prosper::IShaderPipelineLayout &layout, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
+bool ShaderParticle2DBase::RecordBindScene(prosper::ICommandBuffer &cmd, const prosper::IShaderPipelineLayout &layout, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
   prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows) const
 {
 	std::array<prosper::IDescriptorSet *, 4> descSets {&dsScene, &dsRenderer, &dsRenderSettings, &dsShadows};
@@ -248,7 +248,7 @@ bool ShaderParticle2DBase::RecordBindScene(prosper::ICommandBuffer &cmd, const p
 	return cmd.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, layout, GetSceneDescriptorSetIndex(), descSets, dynamicOffsets);
 }
 
-bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::ecs::CParticleSystemComponent &ps, pragma::pts::ParticleOrientationType orientationType,
+bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const ecs::CParticleSystemComponent &ps, pts::ParticleOrientationType orientationType,
   pts::ParticleRenderFlags ptRenderFlags)
 {
 	if(RecordParticleMaterial(bindState, renderer, ps) == false)
@@ -256,7 +256,7 @@ bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, pragm
 	auto &cam = scene.GetActiveCamera();
 
 	auto colorFactor = scene.GetParticleSystemColorFactor();
-	if(pragma::math::is_flag_set(ptRenderFlags, pts::ParticleRenderFlags::Bloom)) {
+	if(math::is_flag_set(ptRenderFlags, pts::ParticleRenderFlags::Bloom)) {
 		auto bloomColorFactor = ps.GetEffectiveBloomColorFactor();
 		if(bloomColorFactor.has_value())
 			colorFactor *= *bloomColorFactor;
@@ -273,18 +273,18 @@ bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, pragm
 	}
 
 	auto renderFlags = GetRenderFlags(ps, ptRenderFlags);
-	auto width = pragma::get_cengine()->GetRenderContext().GetWindowWidth();
-	auto height = pragma::get_cengine()->GetRenderContext().GetWindowHeight();
+	auto width = get_cengine()->GetRenderContext().GetWindowWidth();
+	auto height = get_cengine()->GetRenderContext().GetWindowHeight();
 	assert(width <= std::numeric_limits<uint16_t>::max() && height <= std::numeric_limits<uint16_t>::max());
 
 	auto viewportSize = static_cast<uint32_t>(width);
 	viewportSize <<= 16;
 	viewportSize |= height;
 	PushConstants pushConstants {colorFactor, Vector3 {},             /* camRightWs */
-	  pragma::math::to_integral(orientationType), Vector3 {},                /* camUpWs */
+	  math::to_integral(orientationType), Vector3 {},                /* camUpWs */
 	  0.f,                                                            /* nearZ */
 	  cam.valid() ? cam->GetEntity().GetPosition() : Vector3 {}, 0.f, /* farZ */
-	  viewportSize, pragma::math::to_integral(renderFlags), pragma::math::to_integral(ps.GetAlphaMode()), ps.GetSimulationTime()};
+	  viewportSize, math::to_integral(renderFlags), math::to_integral(ps.GetAlphaMode()), ps.GetSimulationTime()};
 	Mat4 vp;
 	if(cam.valid()) {
 		auto &v = cam->GetViewMatrix();
@@ -298,8 +298,8 @@ bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, pragm
 
 	auto ptAnimBuffer = ps.GetParticleAnimationBuffer();
 	if(ptAnimBuffer == nullptr)
-		ptAnimBuffer = pragma::get_cengine()->GetRenderContext().GetDummyBuffer();
-	return RecordBindVertexBuffers(bindState, {ps.GetParticleBuffer().get(), ptAnimBuffer.get()}) == true && ShaderSceneLit::RecordDraw(bindState, pragma::ecs::CParticleSystemComponent::VERTEX_COUNT, ps.GetRenderParticleCount()) == true;
+		ptAnimBuffer = get_cengine()->GetRenderContext().GetDummyBuffer();
+	return RecordBindVertexBuffers(bindState, {ps.GetParticleBuffer().get(), ptAnimBuffer.get()}) == true && ShaderSceneLit::RecordDraw(bindState, ecs::CParticleSystemComponent::VERTEX_COUNT, ps.GetRenderParticleCount()) == true;
 #if 0
 	if(BindParticleMaterial(renderer,ps) == false)
 		return false;
@@ -371,7 +371,7 @@ bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState, pragm
 	return false;
 }
 
-static float get_particle_extent(float radius) { return sqrt(pragma::math::pow2(radius) * 2.0); }
+static float get_particle_extent(float radius) { return sqrt(math::pow2(radius) * 2.0); }
 static Mat4 get_rotation_matrix(Vector3 axis, float angle)
 {
 	uvec::normalize(&axis);
@@ -384,8 +384,8 @@ static Mat4 get_rotation_matrix(Vector3 axis, float angle)
 
 static Mat3 get_rotation_matrix(Vector4 q)
 {
-	return Mat3(1.0 - 2.0 * pragma::math::pow2(q.y) - 2.0 * pragma::math::pow2(q.z), 2.0 * q.x * q.y + 2.0 * q.z * q.w, 2.0 * q.x * q.z - 2.0 * q.y * q.w, 2.0 * q.x * q.y - 2.0 * q.z * q.w, 1.0 - 2.0 * pragma::math::pow2(q.x) - 2.0 * pragma::math::pow2(q.z), 2.0 * q.y * q.z + 2.0 * q.x * q.w,
-	  2.0 * q.x * q.z + 2.0 * q.y * q.w, 2.0 * q.y * q.z - 2.0 * q.x * q.w, 1.0 - 2.0 * pragma::math::pow2(q.x) - 2.0 * pragma::math::pow2(q.y));
+	return Mat3(1.0 - 2.0 * math::pow2(q.y) - 2.0 * math::pow2(q.z), 2.0 * q.x * q.y + 2.0 * q.z * q.w, 2.0 * q.x * q.z - 2.0 * q.y * q.w, 2.0 * q.x * q.y - 2.0 * q.z * q.w, 1.0 - 2.0 * math::pow2(q.x) - 2.0 * math::pow2(q.z), 2.0 * q.y * q.z + 2.0 * q.x * q.w,
+	  2.0 * q.x * q.z + 2.0 * q.y * q.w, 2.0 * q.y * q.z - 2.0 * q.x * q.w, 1.0 - 2.0 * math::pow2(q.x) - 2.0 * math::pow2(q.y));
 }
 
 static Vector2 get_vertex_quad_pos(uint32_t localVertIdx)
@@ -394,7 +394,7 @@ static Vector2 get_vertex_quad_pos(uint32_t localVertIdx)
 	return squareVerts.at(localVertIdx);
 }
 
-Vector3 ShaderParticle2DBase::DoCalcVertexPosition(const pragma::ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
+Vector3 ShaderParticle2DBase::DoCalcVertexPosition(const ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t localVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
 {
 	auto orientation = ptc.GetOrientationType();
 	auto &pt = ptc.GetRenderParticleData().at(ptc.TranslateParticleIndex(ptIdx));
@@ -405,18 +405,18 @@ Vector3 ShaderParticle2DBase::DoCalcVertexPosition(const pragma::ecs::CParticleS
 	Vector3 right {};
 	Vector3 up {};
 	switch(orientation) {
-	case pragma::pts::ParticleOrientationType::Upright:
+	case pts::ParticleOrientationType::Upright:
 		{
 			auto dir = camUpWs; // 'camUp_ws' is the particle world-rotation if this orientation type is selected
 			right = uvec::cross(normalize(particleCenterWs - camPos), dir);
 			up = -dir;
 			break;
 		}
-	case pragma::pts::ParticleOrientationType::Static:
+	case pts::ParticleOrientationType::Static:
 		right = uvec::UP;
 		up = camUpWs;
 		break;
-	case pragma::pts::ParticleOrientationType::World:
+	case pts::ParticleOrientationType::World:
 		up = -uvec::get_normal(camUpWs);
 		right = -uvec::get_normal(camRightWs);
 		vsize = Vector2 {nearZ, farZ};
@@ -425,12 +425,12 @@ Vector3 ShaderParticle2DBase::DoCalcVertexPosition(const pragma::ecs::CParticleS
 		right = camRightWs;
 		up = camUpWs;
 	}
-	auto sv = get_rotation_matrix(Vector3 {0.f, 0.f, 1.f}, pragma::math::deg_to_rad(pt.rotation)) * Vector4 {squareVert.x, squareVert.y, squareVert.z, 1};
+	auto sv = get_rotation_matrix(Vector3 {0.f, 0.f, 1.f}, math::deg_to_rad(pt.rotation)) * Vector4 {squareVert.x, squareVert.y, squareVert.z, 1};
 	squareVert = {sv.x, sv.y, sv.z};
 	return right * squareVert.x * vsize.x + up * squareVert.y * vsize.y;
 }
 
-Vector3 ShaderParticle2DBase::CalcVertexPosition(const pragma::ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t absVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
+Vector3 ShaderParticle2DBase::CalcVertexPosition(const ecs::CParticleSystemComponent &ptc, uint32_t ptIdx, uint32_t absVertIdx, const Vector3 &camPos, const Vector3 &camUpWs, const Vector3 &camRightWs, float nearZ, float farZ) const
 {
 	return DoCalcVertexPosition(ptc, ptIdx, get_vertex_index(absVertIdx), camPos, camUpWs, camRightWs, nearZ, farZ);
 }

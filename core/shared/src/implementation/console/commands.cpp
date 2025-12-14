@@ -7,17 +7,17 @@ module pragma.shared;
 import :console.commands;
 import :console.output;
 
-void pragma::console::commands::lua_run(lua::State *l, const std::string &chunkName, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float)
+void pragma::console::commands::lua_run(lua::State *l, const std::string &chunkName, BasePlayerComponent *, std::vector<std::string> &argv, float)
 {
 	std::string lua = argv[0];
 	for(auto i = 1; i < argv.size(); i++) {
 		lua += " ";
 		lua += argv[i];
 	}
-	pragma::scripting::lua_core::run_string(l, lua, chunkName);
+	scripting::lua_core::run_string(l, lua, chunkName);
 }
 
-void pragma::console::commands::lua_run(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float)
+void pragma::console::commands::lua_run(NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float)
 {
 	if(argv.empty()) {
 		Con::cwar << "No argument given to execute!" << Con::endl;
@@ -36,7 +36,7 @@ void pragma::console::commands::lua_run(pragma::NetworkState *state, pragma::Bas
 	state->GetGameState()->RunLua(lua);
 }
 
-void pragma::console::commands::lua_exec(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float)
+void pragma::console::commands::lua_exec(NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float)
 {
 	if(argv.empty()) {
 		Con::cwar << "No argument given to execute!" << Con::endl;
@@ -48,10 +48,10 @@ void pragma::console::commands::lua_exec(pragma::NetworkState *state, pragma::Ba
 	}
 
 	auto fname = argv.at(0);
-	auto result = pragma::scripting::lua_core::include(state->GetLuaState(), fname, pragma::scripting::lua_core::IncludeFlags::AddToCache);
+	auto result = pragma::scripting::lua_core::include(state->GetLuaState(), fname, scripting::lua_core::IncludeFlags::AddToCache);
 	Lua::Pop(state->GetLuaState(), result.numResults);
 	if(result.statusCode != Lua::StatusCode::Ok)
-		pragma::scripting::lua_core::submit_error(state->GetLuaState(), result.errorMessage);
+		scripting::lua_core::submit_error(state->GetLuaState(), result.errorMessage);
 }
 void pragma::console::commands::lua_exec_autocomplete(const std::string &arg, std::vector<std::string> &autoCompleteOptions)
 {
@@ -63,7 +63,7 @@ void pragma::console::commands::lua_exec_autocomplete(const std::string &arg, st
 	path = ufile::get_path_from_filename(path.substr(4));
 	for(auto &mapName : resFiles) {
 		auto fullPath = path + mapName;
-		pragma::string::replace(fullPath, "\\", "/");
+		string::replace(fullPath, "\\", "/");
 		autoCompleteOptions.push_back(fullPath);
 	}
 }

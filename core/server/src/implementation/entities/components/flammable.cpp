@@ -29,7 +29,7 @@ void SFlammableComponent::ApplyIgnitionDamage()
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto pDamageableComponent = ent.GetComponent<pragma::DamageableComponent>();
+	auto pDamageableComponent = ent.GetComponent<DamageableComponent>();
 	if(pTrComponent == nullptr || pDamageableComponent.expired())
 		return;
 	auto pos = ent.GetCenter();
@@ -43,17 +43,17 @@ void SFlammableComponent::ApplyIgnitionDamage()
 	pDamageableComponent->TakeDamage(info);
 }
 void SFlammableComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-pragma::util::EventReply SFlammableComponent::Ignite(float duration, pragma::ecs::BaseEntity *attacker, pragma::ecs::BaseEntity *inflictor)
+util::EventReply SFlammableComponent::Ignite(float duration, ecs::BaseEntity *attacker, ecs::BaseEntity *inflictor)
 {
 	if(!IsIgnitable())
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	NetPacket p {};
 	p->Write<float>(duration);
-	pragma::networking::write_entity(p, attacker);
-	pragma::networking::write_entity(p, inflictor);
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvIgnite, p, pragma::networking::Protocol::SlowReliable);
+	networking::write_entity(p, attacker);
+	networking::write_entity(p, inflictor);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvIgnite, p, networking::Protocol::SlowReliable);
 
-	auto reps = static_cast<uint32_t>(pragma::math::floor(duration / 0.5f));
+	auto reps = static_cast<uint32_t>(math::floor(duration / 0.5f));
 	Timer *t = nullptr;
 	if(IsOnFire() && m_igniteInfo.damageTimer != nullptr && m_igniteInfo.damageTimer->IsValid())
 		t = m_igniteInfo.damageTimer->GetTimer();
@@ -75,7 +75,7 @@ void SFlammableComponent::Extinguish()
 	if(!IsOnFire())
 		return;
 	BaseFlammableComponent::Extinguish();
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvExtinguish, pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvExtinguish, networking::Protocol::SlowReliable);
 	m_igniteInfo.Clear();
 }
 void SFlammableComponent::SetIgnitable(bool b)
@@ -85,7 +85,7 @@ void SFlammableComponent::SetIgnitable(bool b)
 	BaseFlammableComponent::SetIgnitable(b);
 	NetPacket p {};
 	p->Write<bool>(b);
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetIgnitable, p, pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetIgnitable, p, networking::Protocol::SlowReliable);
 }
 void SFlammableComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
@@ -94,7 +94,7 @@ void SFlammableComponent::SendData(NetPacket &packet, networking::ClientRecipien
 	if(*m_bIsOnFire == true) {
 		auto dur = (m_igniteInfo.damageTimer->IsValid()) ? m_igniteInfo.damageTimer->GetTimer()->GetTimeLeft() : 0.f;
 		packet->Write<float>(dur);
-		pragma::networking::write_entity(packet, m_igniteInfo.hAttacker.get());
-		pragma::networking::write_entity(packet, m_igniteInfo.hInflictor.get());
+		networking::write_entity(packet, m_igniteInfo.hAttacker.get());
+		networking::write_entity(packet, m_igniteInfo.hInflictor.get());
 	}
 }

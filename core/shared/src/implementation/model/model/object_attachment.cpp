@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :model.model;
 
-const std::vector<pragma::asset::ObjectAttachment> &pragma::asset::Model::GetObjectAttachments() const { return const_cast<pragma::asset::Model *>(this)->GetObjectAttachments(); }
+const std::vector<pragma::asset::ObjectAttachment> &pragma::asset::Model::GetObjectAttachments() const { return const_cast<Model *>(this)->GetObjectAttachments(); }
 std::vector<pragma::asset::ObjectAttachment> &pragma::asset::Model::GetObjectAttachments() { return m_objectAttachments; }
 uint32_t pragma::asset::Model::AddObjectAttachment(ObjectAttachment::Type type, const std::string &name, const std::string &attachment, const std::unordered_map<std::string, std::string> &keyValues)
 {
@@ -16,7 +16,7 @@ uint32_t pragma::asset::Model::AddObjectAttachment(ObjectAttachment::Type type, 
 	objAtt.name = name;
 	objAtt.attachment = attachment;
 	objAtt.keyValues = keyValues;
-	pragma::string::to_lower(objAtt.name);
+	string::to_lower(objAtt.name);
 	return m_objectAttachments.size() - 1u;
 }
 uint32_t pragma::asset::Model::GetObjectAttachmentCount() const { return m_objectAttachments.size(); }
@@ -29,7 +29,7 @@ pragma::asset::ObjectAttachment *pragma::asset::Model::GetObjectAttachment(uint3
 bool pragma::asset::Model::LookupObjectAttachment(const std::string &name, uint32_t &attId) const
 {
 	auto lname = name;
-	pragma::string::to_lower(lname);
+	string::to_lower(lname);
 	auto it = std::find_if(m_objectAttachments.begin(), m_objectAttachments.end(), [&lname](const ObjectAttachment &att) { return att.name == lname; });
 	if(it == m_objectAttachments.end())
 		return false;

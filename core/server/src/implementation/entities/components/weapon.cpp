@@ -16,7 +16,7 @@ std::vector<SWeaponComponent *> SWeaponComponent::s_weapons;
 const std::vector<SWeaponComponent *> &SWeaponComponent::GetAll() { return s_weapons; }
 unsigned int SWeaponComponent::GetWeaponCount() { return static_cast<uint32_t>(s_weapons.size()); }
 
-SWeaponComponent::SWeaponComponent(pragma::ecs::BaseEntity &ent) : BaseWeaponComponent(ent) { s_weapons.push_back(this); }
+SWeaponComponent::SWeaponComponent(ecs::BaseEntity &ent) : BaseWeaponComponent(ent) { s_weapons.push_back(this); }
 
 SWeaponComponent::~SWeaponComponent()
 {
@@ -27,7 +27,7 @@ SWeaponComponent::~SWeaponComponent()
 
 void SWeaponComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void SWeaponComponent::OnUse(pragma::ecs::BaseEntity *pl)
+void SWeaponComponent::OnUse(ecs::BaseEntity *pl)
 {
 	auto &ent = GetEntity();
 	auto hEnt = ent.GetHandle();
@@ -40,7 +40,7 @@ void SWeaponComponent::OnUse(pragma::ecs::BaseEntity *pl)
 		return;
 	OnPickedUp(pl);
 }
-void SWeaponComponent::OnPickedUp(pragma::ecs::BaseEntity *ent) {}
+void SWeaponComponent::OnPickedUp(ecs::BaseEntity *ent) {}
 
 void SWeaponComponent::Drop()
 {
@@ -51,7 +51,7 @@ void SWeaponComponent::Drop()
 	pOwnerComponent->ClearOwner();
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent != nullptr ? pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Dynamic) : nullptr;
+	auto *phys = pPhysComponent != nullptr ? pPhysComponent->InitializePhysics(physics::PhysicsType::Dynamic) : nullptr;
 	if(owner != nullptr && owner->IsPlayer()) {
 		auto &ent = GetEntity();
 		auto hEnt = ent.GetHandle();
@@ -72,7 +72,7 @@ void SWeaponComponent::Drop()
 		pTrComponent->SetPosition(pos + dir * 10.f);
 		if(phys != nullptr) {
 			pTrComponent->SetAngles(uvec::to_angle(dir) + EulerAngles(0.f, 180.f, 0.f));
-			auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+			auto pVelComponent = ent.GetComponent<VelocityComponent>();
 			if(pVelComponent.valid()) {
 				pVelComponent->SetVelocity(dir * 200.f);
 				pVelComponent->SetLocalAngularVelocity(Vector3(0.f, 0.f, 0.f));
@@ -98,13 +98,13 @@ void SWeaponComponent::Initialize()
 {
 	BaseWeaponComponent::Initialize();
 
-	BindEvent(usableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> pragma::util::EventReply {
+	BindEvent(usableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &bCanUse = static_cast<CECanUseData &>(evData.get()).canUse;
 		auto *pOwnerComponent = GetOwnerComponent();
 		bCanUse = (pOwnerComponent == nullptr || pOwnerComponent->GetOwner() == nullptr);
-		return pragma::util::EventReply::Handled;
+		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(usableComponent::EVENT_ON_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUse(static_cast<CEOnUseData &>(evData.get()).entity); });
+	BindEventUnhandled(usableComponent::EVENT_ON_USE, [this](std::reference_wrapper<ComponentEvent> evData) { OnUse(static_cast<CEOnUseData &>(evData.get()).entity); });
 
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	ent.AddComponent<UsableComponent>();
@@ -118,7 +118,7 @@ void SWeaponComponent::OnEntitySpawn()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
-		pPhysComponent->InitializePhysics(pragma::physics::PhysicsType::Dynamic);
+		pPhysComponent->InitializePhysics(physics::PhysicsType::Dynamic);
 }
 
 void SWeaponComponent::OnPhysicsInitialized() { BaseWeaponComponent::OnPhysicsInitialized(); }
@@ -142,8 +142,8 @@ void SWeaponComponent::Deploy()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_DEPLOY, p, pragma::networking::Protocol::FastUnreliable);
+		networking::write_entity(p, &ent);
+		ServerState::Get()->SendPacket(networking::net_messages::client::WEP_DEPLOY, p, networking::Protocol::FastUnreliable);
 	}
 }
 
@@ -153,8 +153,8 @@ void SWeaponComponent::Holster()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_HOLSTER, p, pragma::networking::Protocol::FastUnreliable);
+		networking::write_entity(p, &ent);
+		ServerState::Get()->SendPacket(networking::net_messages::client::WEP_HOLSTER, p, networking::Protocol::FastUnreliable);
 	}
 }
 
@@ -169,10 +169,10 @@ void SWeaponComponent::PrimaryAttack()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_PRIMARYATTACK, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
+		ServerState::Get()->SendPacket(networking::net_messages::client::WEP_PRIMARYATTACK, p, networking::Protocol::FastUnreliable, rpFilter);
 	}
 }
 void SWeaponComponent::SecondaryAttack()
@@ -183,10 +183,10 @@ void SWeaponComponent::SecondaryAttack()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_SECONDARYATTACK, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
+		ServerState::Get()->SendPacket(networking::net_messages::client::WEP_SECONDARYATTACK, p, networking::Protocol::FastUnreliable, rpFilter);
 	}
 }
 void SWeaponComponent::TertiaryAttack()
@@ -195,10 +195,10 @@ void SWeaponComponent::TertiaryAttack()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_ATTACK3, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
+		ServerState::Get()->SendPacket(networking::net_messages::client::WEP_ATTACK3, p, networking::Protocol::FastUnreliable, rpFilter);
 	}
 }
 void SWeaponComponent::Attack4()
@@ -207,10 +207,10 @@ void SWeaponComponent::Attack4()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_ATTACK4, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
+		ServerState::Get()->SendPacket(networking::net_messages::client::WEP_ATTACK4, p, networking::Protocol::FastUnreliable, rpFilter);
 	}
 }
 void SWeaponComponent::Reload()
@@ -219,10 +219,10 @@ void SWeaponComponent::Reload()
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_RELOAD, p, pragma::networking::Protocol::FastUnreliable, rpFilter);
+		ServerState::Get()->SendPacket(networking::net_messages::client::WEP_RELOAD, p, networking::Protocol::FastUnreliable, rpFilter);
 	}
 }
 void SWeaponComponent::SetPrimaryClipSize(UInt16 size)
@@ -231,11 +231,11 @@ void SWeaponComponent::SetPrimaryClipSize(UInt16 size)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		p->Write<UInt16>(*m_clipPrimary);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_PRIM_CLIP_SIZE, p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(networking::net_messages::client::WEP_PRIM_CLIP_SIZE, p, networking::Protocol::FastUnreliable);
 	}
 }
 void SWeaponComponent::SetSecondaryClipSize(UInt16 size)
@@ -244,11 +244,11 @@ void SWeaponComponent::SetSecondaryClipSize(UInt16 size)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		p->Write<UInt16>(*m_clipSecondary);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_SEC_CLIP_SIZE, p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(networking::net_messages::client::WEP_SEC_CLIP_SIZE, p, networking::Protocol::FastUnreliable);
 	}
 }
 void SWeaponComponent::SetMaxPrimaryClipSize(UInt16 size)
@@ -257,11 +257,11 @@ void SWeaponComponent::SetMaxPrimaryClipSize(UInt16 size)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		p->Write<UInt16>(*m_maxPrimaryClipSize);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_PRIM_MAX_CLIP_SIZE, p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(networking::net_messages::client::WEP_PRIM_MAX_CLIP_SIZE, p, networking::Protocol::FastUnreliable);
 	}
 }
 void SWeaponComponent::SetMaxSecondaryClipSize(UInt16 size)
@@ -270,11 +270,11 @@ void SWeaponComponent::SetMaxSecondaryClipSize(UInt16 size)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		p->Write<UInt16>(*m_maxSecondaryClipSize);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_SEC_MAX_CLIP_SIZE, p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(networking::net_messages::client::WEP_SEC_MAX_CLIP_SIZE, p, networking::Protocol::FastUnreliable);
 	}
 }
 void SWeaponComponent::SetPrimaryAmmoType(UInt32 type)
@@ -283,11 +283,11 @@ void SWeaponComponent::SetPrimaryAmmoType(UInt32 type)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		p->Write<UInt32>(type);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_PRIM_AMMO_TYPE, p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(networking::net_messages::client::WEP_PRIM_AMMO_TYPE, p, networking::Protocol::FastUnreliable);
 	}
 }
 void SWeaponComponent::SetSecondaryAmmoType(UInt32 type)
@@ -296,11 +296,11 @@ void SWeaponComponent::SetSecondaryAmmoType(UInt32 type)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		p->Write<UInt32>(type);
 		networking::ClientRecipientFilter rpFilter;
 		GetTargetRecipients(rpFilter);
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::WEP_SEC_AMMO_TYPE, p, pragma::networking::Protocol::FastUnreliable);
+		ServerState::Get()->SendPacket(networking::net_messages::client::WEP_SEC_AMMO_TYPE, p, networking::Protocol::FastUnreliable);
 	}
 }
 void SWeaponComponent::AddPrimaryClip(UInt16 num) { SetPrimaryClipSize(pragma::math::limit<UInt16>(CUInt32(GetPrimaryClipSize()) + CUInt32(num))); }
@@ -394,24 +394,24 @@ void SWeaponComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modE
 {
 	BaseWeaponComponent::RegisterLuaBindings(l, modEnts);
 
-	auto def = pragma::LuaCore::create_entity_component_class<pragma::SWeaponComponent, pragma::BaseWeaponComponent>("WeaponComponent");
-	def.def("SetPrimaryClipSize", &pragma::SWeaponComponent::SetPrimaryClipSize);
-	def.def("SetSecondaryClipSize", &pragma::SWeaponComponent::SetSecondaryClipSize);
-	def.def("SetMaxPrimaryClipSize", &pragma::SWeaponComponent::SetMaxPrimaryClipSize);
-	def.def("SetMaxSecondaryClipSize", &pragma::SWeaponComponent::SetMaxSecondaryClipSize);
-	def.def("AddPrimaryClip", &pragma::SWeaponComponent::AddPrimaryClip);
-	def.def("AddSecondaryClip", &pragma::SWeaponComponent::AddSecondaryClip);
-	def.def("RefillPrimaryClip", static_cast<void (pragma::SWeaponComponent::*)(UInt16)>(&pragma::SWeaponComponent::RefillPrimaryClip));
-	def.def("RefillSecondaryClip", static_cast<void (pragma::SWeaponComponent::*)(UInt16)>(&pragma::SWeaponComponent::RefillSecondaryClip));
-	def.def("RefillPrimaryClip", static_cast<void (pragma::SWeaponComponent::*)()>(&pragma::SWeaponComponent::RefillPrimaryClip));
-	def.def("RefillSecondaryClip", static_cast<void (pragma::SWeaponComponent::*)()>(&pragma::SWeaponComponent::RefillSecondaryClip));
-	def.def("RemovePrimaryClip", static_cast<void (pragma::SWeaponComponent::*)(UInt16)>(&pragma::SWeaponComponent::RemovePrimaryClip));
-	def.def("RemoveSecondaryClip", static_cast<void (pragma::SWeaponComponent::*)(UInt16)>(&pragma::SWeaponComponent::RemoveSecondaryClip));
-	def.def("RemovePrimaryClip", static_cast<void (*)(pragma::SWeaponComponent &)>([](pragma::SWeaponComponent &wepComponent) { wepComponent.RemovePrimaryClip(); }));
-	def.def("RemoveSecondaryClip", static_cast<void (*)(pragma::SWeaponComponent &)>([](pragma::SWeaponComponent &wepComponent) { wepComponent.RemoveSecondaryClip(); }));
-	def.def("SetPrimaryAmmoType", static_cast<void (pragma::SWeaponComponent::*)(UInt32)>(&pragma::SWeaponComponent::SetPrimaryAmmoType));
-	def.def("SetPrimaryAmmoType", static_cast<void (pragma::SWeaponComponent::*)(const std::string &)>(&pragma::SWeaponComponent::SetPrimaryAmmoType));
-	def.def("SetSecondaryAmmoType", static_cast<void (pragma::SWeaponComponent::*)(UInt32)>(&pragma::SWeaponComponent::SetSecondaryAmmoType));
-	def.def("SetSecondaryAmmoType", static_cast<void (pragma::SWeaponComponent::*)(const std::string &)>(&pragma::SWeaponComponent::SetSecondaryAmmoType));
+	auto def = pragma::LuaCore::create_entity_component_class<SWeaponComponent, BaseWeaponComponent>("WeaponComponent");
+	def.def("SetPrimaryClipSize", &SWeaponComponent::SetPrimaryClipSize);
+	def.def("SetSecondaryClipSize", &SWeaponComponent::SetSecondaryClipSize);
+	def.def("SetMaxPrimaryClipSize", &SWeaponComponent::SetMaxPrimaryClipSize);
+	def.def("SetMaxSecondaryClipSize", &SWeaponComponent::SetMaxSecondaryClipSize);
+	def.def("AddPrimaryClip", &SWeaponComponent::AddPrimaryClip);
+	def.def("AddSecondaryClip", &SWeaponComponent::AddSecondaryClip);
+	def.def("RefillPrimaryClip", static_cast<void (SWeaponComponent::*)(UInt16)>(&SWeaponComponent::RefillPrimaryClip));
+	def.def("RefillSecondaryClip", static_cast<void (SWeaponComponent::*)(UInt16)>(&SWeaponComponent::RefillSecondaryClip));
+	def.def("RefillPrimaryClip", static_cast<void (SWeaponComponent::*)()>(&SWeaponComponent::RefillPrimaryClip));
+	def.def("RefillSecondaryClip", static_cast<void (SWeaponComponent::*)()>(&SWeaponComponent::RefillSecondaryClip));
+	def.def("RemovePrimaryClip", static_cast<void (SWeaponComponent::*)(UInt16)>(&SWeaponComponent::RemovePrimaryClip));
+	def.def("RemoveSecondaryClip", static_cast<void (SWeaponComponent::*)(UInt16)>(&SWeaponComponent::RemoveSecondaryClip));
+	def.def("RemovePrimaryClip", static_cast<void (*)(SWeaponComponent &)>([](SWeaponComponent &wepComponent) { wepComponent.RemovePrimaryClip(); }));
+	def.def("RemoveSecondaryClip", static_cast<void (*)(SWeaponComponent &)>([](SWeaponComponent &wepComponent) { wepComponent.RemoveSecondaryClip(); }));
+	def.def("SetPrimaryAmmoType", static_cast<void (SWeaponComponent::*)(UInt32)>(&SWeaponComponent::SetPrimaryAmmoType));
+	def.def("SetPrimaryAmmoType", static_cast<void (SWeaponComponent::*)(const std::string &)>(&SWeaponComponent::SetPrimaryAmmoType));
+	def.def("SetSecondaryAmmoType", static_cast<void (SWeaponComponent::*)(UInt32)>(&SWeaponComponent::SetSecondaryAmmoType));
+	def.def("SetSecondaryAmmoType", static_cast<void (SWeaponComponent::*)(const std::string &)>(&SWeaponComponent::SetSecondaryAmmoType));
 	modEnts[def];
 }

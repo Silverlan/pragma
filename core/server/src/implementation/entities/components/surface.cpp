@@ -12,7 +12,7 @@ import :server_state;
 using namespace pragma;
 
 void SSurfaceComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->Write<Vector4>(GetPlane().ToVector4()); }
-void SSurfaceComponent::SetPlane(const pragma::math::Plane &plane)
+void SSurfaceComponent::SetPlane(const math::Plane &plane)
 {
 	BaseSurfaceComponent::SetPlane(plane);
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
@@ -20,6 +20,6 @@ void SSurfaceComponent::SetPlane(const pragma::math::Plane &plane)
 		return;
 	NetPacket p {};
 	p->Write<Vector4>(plane.ToVector4());
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetPlane, p, pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetPlane, p, networking::Protocol::SlowReliable);
 }
 void SSurfaceComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

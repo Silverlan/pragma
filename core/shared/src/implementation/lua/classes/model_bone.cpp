@@ -16,13 +16,13 @@ void Lua::Bone::register_class(lua::State *l, luabind::class_<pragma::animation:
 {
 	auto classDefBone = luabind::class_<pragma::animation::Bone>("Bone");
 	classDefBone.def(luabind::tostring(luabind::self));
-	classDefBone.def("GetName", &Lua::Bone::GetName);
-	classDefBone.def("GetID", &Lua::Bone::GetID);
-	classDefBone.def("GetChildren", &Lua::Bone::GetChildren);
-	classDefBone.def("GetParent", &Lua::Bone::GetParent);
-	classDefBone.def("SetName", &Lua::Bone::SetName);
-	classDefBone.def("SetParent", &Lua::Bone::SetParent);
-	classDefBone.def("ClearParent", &Lua::Bone::ClearParent);
+	classDefBone.def("GetName", &GetName);
+	classDefBone.def("GetID", &GetID);
+	classDefBone.def("GetChildren", &GetChildren);
+	classDefBone.def("GetParent", &GetParent);
+	classDefBone.def("SetName", &SetName);
+	classDefBone.def("SetParent", &SetParent);
+	classDefBone.def("ClearParent", &ClearParent);
 	classDefBone.def("IsAncestorOf", &pragma::animation::Bone::IsAncestorOf);
 	classDefBone.def("IsDescendantOf", &pragma::animation::Bone::IsDescendantOf);
 	classDef.scope[classDefBone];

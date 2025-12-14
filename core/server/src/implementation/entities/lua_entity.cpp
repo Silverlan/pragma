@@ -15,7 +15,7 @@ SLuaEntity::SLuaEntity() : SBaseEntity {} {}
 void SLuaEntity::Initialize()
 {
 	// We're skipping SBaseEntity on purpose, because it would overwrite our Lua class name
-	pragma::ecs::BaseEntity::Initialize();
+	BaseEntity::Initialize();
 }
 void SLuaEntity::SetupLua(const luabind::object &o, const std::string &className)
 {
@@ -23,7 +23,7 @@ void SLuaEntity::SetupLua(const luabind::object &o, const std::string &className
 	SetLuaObject(o);
 }
 bool SLuaEntity::IsScripted() const { return true; }
-void SLuaEntity::InitializeLuaObject(lua::State *lua) { pragma::BaseLuaHandle::InitializeLuaObject<SLuaEntity>(lua); }
+void SLuaEntity::InitializeLuaObject(lua::State *lua) { BaseEntity::InitializeLuaObject<SLuaEntity>(lua); }
 
 void SLuaEntity::DoSpawn()
 {

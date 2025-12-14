@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SFuncPortalComponent final : public BaseFuncPortalComponent {
 		  public:
-			SFuncPortalComponent(pragma::ecs::BaseEntity &ent) : BaseFuncPortalComponent(ent) {}
+			SFuncPortalComponent(ecs::BaseEntity &ent) : BaseFuncPortalComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

@@ -17,11 +17,11 @@ export namespace pragma::networking {
 			std::function<void(SteamId, bool)> onAuthCompleted = nullptr;
 		};
 
-		static std::unique_ptr<MasterServerRegistration> Register(const pragma::util::Library &steamworksLibrary, const GameServerInfo &serverInfo);
+		static std::unique_ptr<MasterServerRegistration> Register(const util::Library &steamworksLibrary, const GameServerInfo &serverInfo);
 		~MasterServerRegistration();
 
 		void UpdateServerData() const;
-		pragma::networking::GameServerInfo &GetServerInfo();
+		GameServerInfo &GetServerInfo();
 
 		void SetCallbackEvents(const CallbackEvents &callbackEvents);
 
@@ -31,11 +31,11 @@ export namespace pragma::networking {
 		void SetClientScore(SteamId steamId, int32_t score);
 	  private:
 		MasterServerRegistration() = default;
-		bool Initialize(const pragma::util::Library &library);
-		bool (*m_register_server)(const pragma::networking::GameServerInfo &) = nullptr;
+		bool Initialize(const util::Library &library);
+		bool (*m_register_server)(const GameServerInfo &) = nullptr;
 		void (*m_unregister_server)() = nullptr;
 		void (*m_update_server_data)() = nullptr;
-		void (*m_steamworks_get_server_data)(pragma::networking::GameServerInfo **) = nullptr;
+		void (*m_steamworks_get_server_data)(GameServerInfo **) = nullptr;
 
 		void (*m_steamworks_authenticate_and_add_client)(uint64_t, std::vector<char> &, const std::string &) = nullptr;
 		void (*m_steamworks_drop_client)(uint64_t) = nullptr;

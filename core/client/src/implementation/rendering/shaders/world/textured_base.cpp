@@ -9,7 +9,7 @@ import :rendering.shaders.textured_base;
 
 using namespace pragma;
 
-std::shared_ptr<prosper::IDescriptorSetGroup> pragma::ShaderTexturedBase::InitializeMaterialDescriptorSet(material::CMaterial &mat, bool bReload)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTexturedBase::InitializeMaterialDescriptorSet(material::CMaterial &mat, bool bReload)
 {
 	auto &shader = *dynamic_cast<prosper::Shader *>(this);
 	auto descSetGroup = mat.GetDescriptorSetGroup(shader);
@@ -21,4 +21,4 @@ std::shared_ptr<prosper::IDescriptorSetGroup> pragma::ShaderTexturedBase::Initia
 	return InitializeMaterialDescriptorSet(mat);
 }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> pragma::ShaderTexturedBase::InitializeMaterialDescriptorSet(material::CMaterial &mat) { return nullptr; }
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTexturedBase::InitializeMaterialDescriptorSet(material::CMaterial &mat) { return nullptr; }

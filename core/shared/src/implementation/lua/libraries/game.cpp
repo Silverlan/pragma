@@ -147,7 +147,7 @@ Lua::opt<Vector3> Lua::game::get_light_color(lua::State *l, const Vector3 &pos)
 		if(dist >= lightDist)
 			continue;
 		auto pColComponent = static_cast<pragma::BaseColorComponent *>(ent->FindComponent("color").get());
-		auto &lightCol = (pColComponent != nullptr) ? pColComponent->GetColor() : ::colors::White;
+		auto &lightCol = (pColComponent != nullptr) ? pColComponent->GetColor() : colors::White;
 		auto brightness = lightCol.a / 255.f;
 		brightness *= dist / lightDist;
 		col += Vector3(lightCol.r / 255.f, lightCol.g / 255.f, lightCol.b / 255.f) * brightness;
@@ -187,13 +187,13 @@ bool Lua::game::is_game_mode_initialized(lua::State *l)
 }
 std::pair<bool, int> Lua::game::load_map(lua::State *l, std::string &mapName, pragma::ecs::BaseEntity **ptrEntWorld, Vector3 &origin)
 {
-	mapName = Lua::CheckString(l, 1);
+	mapName = CheckString(l, 1);
 
 	origin = {};
-	if(Lua::IsSet(l, 2))
+	if(IsSet(l, 2))
 		origin = Lua::Check<Vector3>(l, 2);
 	auto bNewWorld = false;
-	if(Lua::IsSet(l, 3))
+	if(IsSet(l, 3))
 		bNewWorld = true;
 	auto *nw = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = nw->GetGameState();
@@ -206,17 +206,17 @@ std::pair<bool, int> Lua::game::load_map(lua::State *l, std::string &mapName, pr
 	}
 	else
 		r = game->LoadMap(mapName.c_str(), origin, &entities);
-	Lua::PushBool(l, r);
+	PushBool(l, r);
 
 	if(r == true) {
-		auto t = Lua::CreateTable(l);
+		auto t = CreateTable(l);
 		uint32_t entIdx = 1;
 		for(auto &hEnt : entities) {
 			if(hEnt.valid() == false)
 				continue;
-			Lua::PushInt(l, entIdx++);
+			PushInt(l, entIdx++);
 			hEnt.get()->GetLuaObject().push(l);
-			Lua::SetTableValue(l, t);
+			SetTableValue(l, t);
 		}
 		return {r, 2};
 	}
@@ -333,40 +333,40 @@ bool Lua::game::raycast(lua::State *l, const pragma::physics::TraceData &data)
 
 void Lua::game::register_shared_functions(lua::State *l, luabind::module_ &modGame)
 {
-	modGame[(luabind::def("add_callback", Lua::game::add_callback),
-	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
-	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
-	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
-	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
-	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
-	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object)>(Lua::game::call_callbacks)),
-	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &)>(Lua::game::call_callbacks)), luabind::def("clear_callbacks", Lua::game::clear_callbacks),
+	modGame[(luabind::def("add_callback", add_callback),
+	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(call_callbacks)),
+	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(call_callbacks)),
+	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object)>(call_callbacks)),
+	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object)>(call_callbacks)),
+	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object)>(call_callbacks)),
+	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object)>(call_callbacks)),
+	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &)>(call_callbacks)), luabind::def("clear_callbacks", clear_callbacks),
 
 	  // Aliases
-	  luabind::def("add_event_listener", Lua::game::add_callback),
-	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
-	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
-	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
-	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
-	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
-	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object)>(Lua::game::call_callbacks)),
-	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &)>(Lua::game::call_callbacks)), luabind::def("clear_event_listeners", Lua::game::clear_callbacks),
+	  luabind::def("add_event_listener", add_callback),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(call_callbacks)),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(call_callbacks)),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object)>(call_callbacks)),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object, luabind::object)>(call_callbacks)),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object, luabind::object)>(call_callbacks)),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &, luabind::object)>(call_callbacks)),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua::State *, pragma::Game &, const std::string &)>(call_callbacks)), luabind::def("clear_event_listeners", clear_callbacks),
 
-	  luabind::def("register_ammo_type", Lua::game::register_ammo_type),
+	  luabind::def("register_ammo_type", register_ammo_type),
 	  luabind::def(
-	    "register_ammo_type", +[](lua::State *l, const std::string &name, int32_t damage, float force) { return Lua::game::register_ammo_type(l, name, damage, force); }),
+	    "register_ammo_type", +[](lua::State *l, const std::string &name, int32_t damage, float force) { return register_ammo_type(l, name, damage, force); }),
 	  luabind::def(
-	    "register_ammo_type", +[](lua::State *l, const std::string &name, int32_t damage) { return Lua::game::register_ammo_type(l, name, damage); }),
+	    "register_ammo_type", +[](lua::State *l, const std::string &name, int32_t damage) { return register_ammo_type(l, name, damage); }),
 	  luabind::def(
-	    "register_ammo_type", +[](lua::State *l, const std::string &name) { return Lua::game::register_ammo_type(l, name); }),
-	  luabind::def("get_ammo_type_id", Lua::game::get_ammo_type_id), luabind::def("get_ammo_type_name", Lua::game::get_ammo_type_name), luabind::def("get_game_mode", Lua::game::get_game_mode), luabind::def("get_light_color", Lua::game::get_light_color),
-	  luabind::def("get_sound_intensity", Lua::game::get_sound_intensity), luabind::def("get_time_scale", Lua::game::get_time_scale), luabind::def("is_game_mode_initialized", Lua::game::is_game_mode_initialized),
+	    "register_ammo_type", +[](lua::State *l, const std::string &name) { return register_ammo_type(l, name); }),
+	  luabind::def("get_ammo_type_id", get_ammo_type_id), luabind::def("get_ammo_type_name", get_ammo_type_name), luabind::def("get_game_mode", get_game_mode), luabind::def("get_light_color", get_light_color),
+	  luabind::def("get_sound_intensity", get_sound_intensity), luabind::def("get_time_scale", get_time_scale), luabind::def("is_game_mode_initialized", is_game_mode_initialized),
 	  // luabind::def("raycast",Lua::game::raycast),
-	  luabind::def("get_nav_mesh", Lua::game::get_nav_mesh), luabind::def("load_nav_mesh", Lua::game::load_nav_mesh),
+	  luabind::def("get_nav_mesh", get_nav_mesh), luabind::def("load_nav_mesh", load_nav_mesh),
 	  luabind::def(
-	    "load_nav_mesh", +[](lua::State *l) { return Lua::game::load_nav_mesh(l); }),
-	  luabind::def("is_map_loaded", Lua::game::is_map_loaded), luabind::def("get_map_name", Lua::game::get_map_name), luabind::def("is_game_initialized", &pragma::Game::IsGameInitialized), luabind::def("is_game_ready", &pragma::Game::IsGameReady),
-	  luabind::def("is_map_initialized", &pragma::Game::IsMapInitialized), luabind::def("get_game_state_flags", Lua::game::get_game_state_flags), luabind::def("update_animations", +[](pragma::Game &game, float dt) { game.UpdateAnimations(dt); }))];
+	    "load_nav_mesh", +[](lua::State *l) { return load_nav_mesh(l); }),
+	  luabind::def("is_map_loaded", is_map_loaded), luabind::def("get_map_name", get_map_name), luabind::def("is_game_initialized", &pragma::Game::IsGameInitialized), luabind::def("is_game_ready", &pragma::Game::IsGameReady),
+	  luabind::def("is_map_initialized", &pragma::Game::IsMapInitialized), luabind::def("get_game_state_flags", get_game_state_flags), luabind::def("update_animations", +[](pragma::Game &game, float dt) { game.UpdateAnimations(dt); }))];
 
 	auto classDefDescriptor = pragma::LuaCore::register_class<pragma::game::ValueDriverDescriptor>(l, "ValueDriverDescriptor");
 	classDefDescriptor->def(luabind::constructor<lua::State *, std::string, std::unordered_map<std::string, std::string>, std::unordered_map<std::string, ::udm::PProperty>>());
@@ -376,7 +376,7 @@ void Lua::game::register_shared_functions(lua::State *l, luabind::module_ &modGa
 	  static_cast<void (*)(lua::State *, pragma::game::ValueDriverDescriptor &, const std::string &)>([](lua::State *l, pragma::game::ValueDriverDescriptor &descriptor, const std::string &expr) { descriptor.SetExpression(expr); }));
 	classDefDescriptor->def("AddReference", &pragma::game::ValueDriverDescriptor::AddReference);
 	classDefDescriptor->def("AddConstant", static_cast<void (*)(pragma::game::ValueDriverDescriptor &, const std::string &, ::udm::PProperty)>([](pragma::game::ValueDriverDescriptor &descriptor, const std::string &name, ::udm::PProperty prop) { descriptor.AddConstant(name, prop); }));
-	classDefDescriptor->def("AddConstant", static_cast<void (*)(pragma::game::ValueDriverDescriptor &, const std::string &, const Lua::classObject &)>([](pragma::game::ValueDriverDescriptor &descriptor, const std::string &name, const Lua::classObject &udmType) {
+	classDefDescriptor->def("AddConstant", static_cast<void (*)(pragma::game::ValueDriverDescriptor &, const std::string &, const classObject &)>([](pragma::game::ValueDriverDescriptor &descriptor, const std::string &name, const classObject &udmType) {
 		for(auto type : ::udm::GENERIC_TYPES) {
 			auto r = ::udm::visit<false, true, false>(type, [&udmType, &descriptor, &name](auto tag) mutable -> bool {
 				using T = typename decltype(tag)::type;

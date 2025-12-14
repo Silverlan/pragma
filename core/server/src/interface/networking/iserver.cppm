@@ -15,13 +15,13 @@ export {
 		class DLLSERVER ServerEventInterface {
 		  public:
 			std::function<void(IServerClient &)> onClientConnected = nullptr;
-			std::function<void(IServerClient &, pragma::networking::DropReason)> onClientDropped = nullptr;
+			std::function<void(IServerClient &, DropReason)> onClientDropped = nullptr;
 			std::function<void(IServerClient &, NetPacket &)> handlePacket = nullptr;
 		};
 
 		class IServerClient;
 		class ClientRecipientFilter;
-		class DLLSERVER IServer : public pragma::networking::MessageTracker {
+		class DLLSERVER IServer : public MessageTracker {
 		  public:
 			template<class TServer, typename... TARGS>
 			static std::unique_ptr<TServer, void (*)(TServer *)> Create(TARGS &&...args)
@@ -55,7 +55,7 @@ export {
 					m_eventInterface.onClientConnected(*cl);
 				return cl;
 			}
-			bool DropClient(const IServerClient &client, pragma::networking::DropReason reason, Error &outErr);
+			bool DropClient(const IServerClient &client, DropReason reason, Error &outErr);
 
 			void SetEventInterface(const ServerEventInterface &eventHandler);
 

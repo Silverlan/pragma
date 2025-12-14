@@ -105,7 +105,7 @@ DLLNETWORK void Lua_Timer_SetCall(lua::State *l, TimerHandle &timer, LuaFunction
 
 std::shared_ptr<TimerHandle> Lua::time::create_timer(lua::State *l, float delay, int32_t repetitions, LuaFunctionObject fc, TimerType timerType)
 {
-	Lua::CheckType(fc, Lua::Type::Function);
+	CheckType(fc, Type::Function);
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *timer = game->CreateTimer(delay, repetitions, fc, timerType);
@@ -115,7 +115,7 @@ std::shared_ptr<TimerHandle> Lua::time::create_timer(lua::State *l, float delay,
 
 std::shared_ptr<TimerHandle> Lua::time::create_simple_timer(lua::State *l, float delay, LuaFunctionObject fc, TimerType timerType)
 {
-	Lua::CheckType(fc, Lua::Type::Function);
+	CheckType(fc, Type::Function);
 	auto *state = pragma::Engine::Get()->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *timer = game->CreateTimer(delay, 1, fc, timerType);

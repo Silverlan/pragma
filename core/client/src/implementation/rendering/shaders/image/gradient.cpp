@@ -26,7 +26,7 @@ static bool get_line_line_intersection(const Vector2 &p0, const Vector2 &p1, con
 }
 
 static ShaderGradient *s_shaderGradient = nullptr;
-ShaderGradient::ShaderGradient(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "programs/effects/gradient")
+ShaderGradient::ShaderGradient(prosper::IPrContext &context, const std::string &identifier) : ShaderBaseImageProcessing(context, identifier, "programs/effects/gradient")
 {
 	s_shaderGradient = this;
 	SetBaseShader<prosper::ShaderCopyImage>();
@@ -44,7 +44,7 @@ void ShaderGradient::InitializeShaderResources()
 	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 
-bool ShaderGradient::RecordDraw(prosper::ShaderBindState &bindState, const PushConstants &pushConstants) const { return RecordPushConstants(bindState, pushConstants) && prosper::ShaderBaseImageProcessing::RecordDraw(bindState); }
+bool ShaderGradient::RecordDraw(prosper::ShaderBindState &bindState, const PushConstants &pushConstants) const { return RecordPushConstants(bindState, pushConstants) && ShaderBaseImageProcessing::RecordDraw(bindState); }
 
 /////////////////////////
 

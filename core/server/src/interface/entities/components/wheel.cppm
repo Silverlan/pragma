@@ -14,11 +14,11 @@ export {
 	namespace pragma {
 		class DLLSERVER SWheelComponent final : public BaseWheelComponent, public SBaseSnapshotComponent {
 		  public:
-			SWheelComponent(pragma::ecs::BaseEntity &ent) : BaseWheelComponent(ent) {}
+			SWheelComponent(ecs::BaseEntity &ent) : BaseWheelComponent(ent) {}
 			virtual ~SWheelComponent() override;
 			virtual void Initialize() override;
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
-			virtual void SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl) override;
+			virtual void SendSnapshotData(NetPacket &packet, BasePlayerComponent &pl) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual bool ShouldTransmitSnapshotData() const override { return true; }
 			virtual void InitializeLuaObject(lua::State *l) override;

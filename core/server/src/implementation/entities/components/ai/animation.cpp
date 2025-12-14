@@ -8,54 +8,54 @@ import :entities.components.ai;
 
 using namespace pragma;
 
-void SAIComponent::AIAnimationInfo::SetPlayFlags(pragma::FPlayAnim flags) { m_flags = flags; }
-pragma::FPlayAnim SAIComponent::AIAnimationInfo::GetPlayFlags() const { return m_flags; }
+void SAIComponent::AIAnimationInfo::SetPlayFlags(FPlayAnim flags) { m_flags = flags; }
+FPlayAnim SAIComponent::AIAnimationInfo::GetPlayFlags() const { return m_flags; }
 SAIComponent::AIAnimationInfo::AIAnimFlags SAIComponent::AIAnimationInfo::GetAIAnimFlags() const { return m_aiAnimFlags; }
 
-void SAIComponent::AIAnimationInfo::SetActivity(pragma::Activity act) const
+void SAIComponent::AIAnimationInfo::SetActivity(Activity act) const
 {
-	pragma::math::set_flag(m_aiAnimFlags, AIAnimFlags::PlayAnimation, false);
-	pragma::math::set_flag(m_aiAnimFlags, AIAnimFlags::PlayActivity, true);
+	math::set_flag(m_aiAnimFlags, AIAnimFlags::PlayAnimation, false);
+	math::set_flag(m_aiAnimFlags, AIAnimFlags::PlayActivity, true);
 	m_animation.activity = act;
 }
 void SAIComponent::AIAnimationInfo::SetAnimation(int32_t anim) const
 {
-	pragma::math::set_flag(m_aiAnimFlags, AIAnimFlags::PlayAnimation, true);
-	pragma::math::set_flag(m_aiAnimFlags, AIAnimFlags::PlayActivity, false);
+	math::set_flag(m_aiAnimFlags, AIAnimFlags::PlayAnimation, true);
+	math::set_flag(m_aiAnimFlags, AIAnimFlags::PlayActivity, false);
 	m_animation.animation = anim;
 }
-void SAIComponent::AIAnimationInfo::SetPlayAsSchedule(bool playAsSchedule) { pragma::math::set_flag(m_aiAnimFlags, AIAnimFlags::PlayAsSchedule, playAsSchedule); }
-bool SAIComponent::AIAnimationInfo::ShouldPlayAsSchedule() const { return pragma::math::is_flag_set(m_aiAnimFlags, AIAnimFlags::PlayAsSchedule); }
+void SAIComponent::AIAnimationInfo::SetPlayAsSchedule(bool playAsSchedule) { math::set_flag(m_aiAnimFlags, AIAnimFlags::PlayAsSchedule, playAsSchedule); }
+bool SAIComponent::AIAnimationInfo::ShouldPlayAsSchedule() const { return math::is_flag_set(m_aiAnimFlags, AIAnimFlags::PlayAsSchedule); }
 
 void SAIComponent::AIAnimationInfo::SetFaceTarget(bool primaryTarget)
 {
-	pragma::math::set_flag(m_aiAnimFlags, AIAnimFlags::FaceEntity | AIAnimFlags::FacePosition, false);
-	pragma::math::set_flag(m_aiAnimFlags, AIAnimFlags::FacePrimaryTarget, primaryTarget);
+	math::set_flag(m_aiAnimFlags, AIAnimFlags::FaceEntity | AIAnimFlags::FacePosition, false);
+	math::set_flag(m_aiAnimFlags, AIAnimFlags::FacePrimaryTarget, primaryTarget);
 	m_faceTarget = nullptr;
 }
 void SAIComponent::AIAnimationInfo::SetFaceTarget(const Vector3 &position)
 {
-	pragma::math::set_flag(m_aiAnimFlags, AIAnimFlags::FaceEntity | AIAnimFlags::FacePrimaryTarget, false);
-	pragma::math::set_flag(m_aiAnimFlags, AIAnimFlags::FacePosition, true);
+	math::set_flag(m_aiAnimFlags, AIAnimFlags::FaceEntity | AIAnimFlags::FacePrimaryTarget, false);
+	math::set_flag(m_aiAnimFlags, AIAnimFlags::FacePosition, true);
 	m_faceTarget = pragma::util::make_shared<Vector3>(position);
 }
-void SAIComponent::AIAnimationInfo::SetFaceTarget(pragma::ecs::BaseEntity &target)
+void SAIComponent::AIAnimationInfo::SetFaceTarget(ecs::BaseEntity &target)
 {
-	pragma::math::set_flag(m_aiAnimFlags, AIAnimFlags::FacePosition | AIAnimFlags::FacePrimaryTarget, false);
-	pragma::math::set_flag(m_aiAnimFlags, AIAnimFlags::FaceEntity, true);
+	math::set_flag(m_aiAnimFlags, AIAnimFlags::FacePosition | AIAnimFlags::FacePrimaryTarget, false);
+	math::set_flag(m_aiAnimFlags, AIAnimFlags::FaceEntity, true);
 	m_faceTarget = pragma::util::make_shared<EntityHandle>(target.GetHandle());
 }
 int32_t SAIComponent::AIAnimationInfo::GetAnimation() const { return m_animation.animation; }
-pragma::Activity SAIComponent::AIAnimationInfo::GetActivity() const { return m_animation.activity; }
+Activity SAIComponent::AIAnimationInfo::GetActivity() const { return m_animation.activity; }
 const Vector3 *SAIComponent::AIAnimationInfo::GetFacePosition() const
 {
-	if(pragma::math::is_flag_set(m_aiAnimFlags, AIAnimFlags::FacePosition) == false)
+	if(math::is_flag_set(m_aiAnimFlags, AIAnimFlags::FacePosition) == false)
 		return nullptr;
 	return static_cast<Vector3 *>(m_faceTarget.get());
 }
-pragma::ecs::BaseEntity *SAIComponent::AIAnimationInfo::GetEntityFaceTarget() const
+ecs::BaseEntity *SAIComponent::AIAnimationInfo::GetEntityFaceTarget() const
 {
-	if(pragma::math::is_flag_set(m_aiAnimFlags, AIAnimFlags::FaceEntity) == false)
+	if(math::is_flag_set(m_aiAnimFlags, AIAnimFlags::FaceEntity) == false)
 		return nullptr;
 	auto *hEnt = static_cast<EntityHandle *>(m_faceTarget.get());
 	return (hEnt != nullptr && hEnt->valid()) ? hEnt->get() : nullptr;
@@ -68,8 +68,8 @@ bool SAIComponent::PlayAnimation(const AIAnimationInfo &info)
 	if(IsAnimationLocked())
 		return false;
 	auto flags = info.GetAIAnimFlags();
-	auto bPlayActivity = pragma::math::is_flag_set(flags, AIAnimationInfo::AIAnimFlags::PlayActivity);
-	if(pragma::math::is_flag_set(flags, AIAnimationInfo::AIAnimFlags::PlayAsSchedule)) {
+	auto bPlayActivity = math::is_flag_set(flags, AIAnimationInfo::AIAnimFlags::PlayActivity);
+	if(math::is_flag_set(flags, AIAnimationInfo::AIAnimFlags::PlayAsSchedule)) {
 		// TODO: Use info.GetPlayFlags()
 		auto sched = ai::Schedule::Create();
 		auto taskAnim = bPlayActivity ? pragma::util::make_shared<ai::TaskPlayActivity>() : pragma::util::make_shared<ai::TaskPlayAnimation>();
@@ -77,7 +77,7 @@ bool SAIComponent::PlayAnimation(const AIAnimationInfo &info)
 		taskAnim->SetScheduleParameter(1, 1);
 		sched->GetRootNode().AddNode(taskAnim);
 		if(bPlayActivity == true)
-			sched->SetParameter(0, pragma::math::to_integral(info.GetActivity()));
+			sched->SetParameter(0, math::to_integral(info.GetActivity()));
 		else
 			sched->SetParameter(0, info.GetAnimation());
 		auto *facePos = info.GetFacePosition();
@@ -86,7 +86,7 @@ bool SAIComponent::PlayAnimation(const AIAnimationInfo &info)
 			sched->SetParameter(1, *facePos);
 		else if(faceEnt != nullptr)
 			sched->SetParameter(1, faceEnt);
-		else if(pragma::math::is_flag_set(flags, AIAnimationInfo::AIAnimFlags::FacePrimaryTarget)) {
+		else if(math::is_flag_set(flags, AIAnimationInfo::AIAnimFlags::FacePrimaryTarget)) {
 			auto *pFragment = GetPrimaryTarget();
 			if(pFragment != nullptr && pFragment->hEntity.valid())
 				sched->SetParameter(1, pFragment->hEntity.get());
@@ -108,7 +108,7 @@ bool SAIComponent::PlayAnimation(const AIAnimationInfo &info)
 	m_bSkipHandling = false;
 	return r;
 }
-bool SAIComponent::PlayActivity(pragma::Activity act, const AIAnimationInfo &info)
+bool SAIComponent::PlayActivity(Activity act, const AIAnimationInfo &info)
 {
 	info.SetActivity(act);
 	return PlayAnimation(info);

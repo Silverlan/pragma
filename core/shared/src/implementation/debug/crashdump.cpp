@@ -269,19 +269,19 @@ bool CrashHandler::GenerateCrashDump() const
 {
 	std::cout << "Generating crashdump..." << std::endl;
 	LOGGER.info("Generating crashdump...");
-	pragma::flush_loggers();
+	flush_loggers();
 
 	LOGGER.debug("Loading localization files...");
 	std::string szResult;
-	pragma::locale::load("prompts.txt");
+	locale::load("prompts.txt");
 
 	LOGGER.debug("Creating 'crashdumps' directory...");
 	fs::create_directory("crashdumps");
 
 	// ask the user if they want to save a dump file
 	auto saveDump = false;
-	auto *engine = pragma::get_engine();
-	auto shouldShowMsBox = !pragma::Engine::Get()->IsNonInteractiveMode();
+	auto *engine = get_engine();
+	auto shouldShowMsBox = !Engine::Get()->IsNonInteractiveMode();
 #ifdef _WIN32
 	shouldShowMsBox = (shouldShowMsBox && pragma::util::get_subsystem() == pragma::util::SubSystem::GUI);
 #endif
@@ -289,11 +289,11 @@ bool CrashHandler::GenerateCrashDump() const
 		saveDump = true;
 	else {
 		LOGGER.debug("Displaying prompt message...");
-		auto msg = pragma::locale::get_text("prompt_crash");
-		auto res = pragma::debug::show_message_prompt(msg, pragma::debug::MessageBoxButtons::YesNo, m_appName);
+		auto msg = locale::get_text("prompt_crash");
+		auto res = show_message_prompt(msg, MessageBoxButtons::YesNo, m_appName);
 		// If res is nullopt, the message prompt most likely failed to show. In this case we'll assume yes as
 		// default answer.
-		saveDump = (res == std::nullopt || *res == pragma::debug::MessageBoxButton::Yes);
+		saveDump = (res == std::nullopt || *res == MessageBoxButton::Yes);
 	}
 
 #ifdef __linux__
@@ -325,9 +325,9 @@ bool CrashHandler::GenerateCrashDump() const
 	if(saveDump) {
 		std::string err;
 		std::string zipFileName;
-		auto zipFile = pragma::Engine::GenerateEngineDump("crashdumps/crashdump", zipFileName, err);
+		auto zipFile = Engine::GenerateEngineDump("crashdumps/crashdump", zipFileName, err);
 		// Logger should already be closed at this point, but to make sure...
-		pragma::detail::close_logger();
+		detail::close_logger();
 		if(zipFile) {
 #ifdef _WIN32
 			std::string dumpErr;
@@ -364,21 +364,21 @@ bool CrashHandler::GenerateCrashDump() const
 #endif
 			zipFile = nullptr;
 
-			szResult = pragma::locale::get_text("prompt_crash_dump_saved", std::vector<std::string> {zipFileName, "crashdumps@pragma-engine.com"});
+			szResult = locale::get_text("prompt_crash_dump_saved", std::vector<std::string> {zipFileName, "crashdumps@pragma-engine.com"});
 			std::string absPath;
 			if(fs::find_absolute_path(zipFileName, absPath)) {
-				auto path = pragma::util::FilePath(absPath);
-				pragma::util::open_path_in_explorer(std::string {path.GetPath()}, std::string {path.GetFileName()});
+				auto path = util::FilePath(absPath);
+				util::open_path_in_explorer(std::string {path.GetPath()}, std::string {path.GetFileName()});
 			}
 
 			success = true;
 		}
 		else
-			szResult = pragma::locale::get_text("prompt_crash_dump_archive_failed", {err});
+			szResult = locale::get_text("prompt_crash_dump_archive_failed", {err});
 	}
 
 	if(!szResult.empty() && shouldShowMsBox)
-		pragma::debug::show_message_prompt(szResult, pragma::debug::MessageBoxButtons::Ok, m_appName);
+		show_message_prompt(szResult, MessageBoxButtons::Ok, m_appName);
 
 	auto crashInProsperModule = false;
 #ifdef _WIN32
@@ -388,7 +388,7 @@ bool CrashHandler::GenerateCrashDump() const
 #endif
 	if(crashInProsperModule) {
 		// Probably a rendering related crash.
-		pragma::Engine::Get()->HandleOpenGLFallback();
+		Engine::Get()->HandleOpenGLFallback();
 	}
 
 	// We've done all we can, just force quit at this point

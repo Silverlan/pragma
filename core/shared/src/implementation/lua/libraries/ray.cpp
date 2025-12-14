@@ -16,7 +16,7 @@ void Lua::TraceData::GetSourceOrigin(lua::State *l, pragma::physics::TraceData &
 void Lua::TraceData::GetTargetOrigin(lua::State *l, pragma::physics::TraceData &data) { Lua::Push<Vector3>(l, data.GetTargetOrigin()); }
 void Lua::TraceData::GetSourceRotation(lua::State *l, pragma::physics::TraceData &data) { Lua::Push<Quat>(l, data.GetSourceRotation()); }
 void Lua::TraceData::GetTargetRotation(lua::State *l, pragma::physics::TraceData &data) { Lua::Push<Quat>(l, data.GetTargetRotation()); }
-void Lua::TraceData::GetDistance(lua::State *l, pragma::physics::TraceData &data) { Lua::PushNumber(l, data.GetDistance()); }
+void Lua::TraceData::GetDistance(lua::State *l, pragma::physics::TraceData &data) { PushNumber(l, data.GetDistance()); }
 void Lua::TraceData::GetDirection(lua::State *l, pragma::physics::TraceData &data) { Lua::Push<Vector3>(l, data.GetDirection()); }
 void Lua::TraceData::SetFilter(lua::State *l, pragma::physics::TraceData &data, luabind::object)
 {
@@ -30,38 +30,38 @@ void Lua::TraceData::SetFilter(lua::State *l, pragma::physics::TraceData &data, 
 		data.SetFilter(phys);
 		return;
 	}
-	else if(Lua::IsTable(l, 2)) {
-		Lua::CheckTable(l, 2);
-		Lua::PushValue(l, 2); /* 1 */
-		auto table = Lua::GetStackTop(l);
+	else if(IsTable(l, 2)) {
+		CheckTable(l, 2);
+		PushValue(l, 2); /* 1 */
+		auto table = GetStackTop(l);
 
-		Lua::PushNil(l); /* 2 */
+		PushNil(l); /* 2 */
 		std::vector<EntityHandle> ents;
-		while(Lua::GetNextPair(l, table) != 0) /* 3 */
+		while(GetNextPair(l, table) != 0) /* 3 */
 		{
 			pragma::ecs::BaseEntity &v = Lua::Check<pragma::ecs::BaseEntity>(l, -1); /* 3 */
 			ents.push_back(v.GetHandle());
 
-			Lua::Pop(l, 1); /* 2 */
+			Pop(l, 1); /* 2 */
 		} /* 1 */
-		Lua::Pop(l, 1); /* 0 */
+		Pop(l, 1); /* 0 */
 		data.SetFilter(std::move(ents));
 		return;
 	}
-	Lua::CheckFunction(l, 2);
+	CheckFunction(l, 2);
 	auto oFc = luabind::object(luabind::from_stack(l, 2));
 	data.SetFilter([l, oFc](pragma::physics::IShape &shape, pragma::physics::IRigidBody &body) -> pragma::physics::RayCastHitType {
-		auto c = Lua::CallFunction(
+		auto c = CallFunction(
 		  l,
-		  [oFc, &shape, &body](lua::State *l) -> Lua::StatusCode {
+		  [oFc, &shape, &body](lua::State *l) -> StatusCode {
 			  oFc.push(l);
 			  shape.Push(l);
 			  body.Push(l);
-			  return Lua::StatusCode::Ok;
+			  return StatusCode::Ok;
 		  },
 		  1);
-		if(c != Lua::StatusCode::Ok || Lua::IsSet(l, -1) == false || Lua::IsNumber(l, -1) == false)
+		if(c != StatusCode::Ok || IsSet(l, -1) == false || IsNumber(l, -1) == false)
 			return pragma::physics::RayCastHitType::Block;
-		return static_cast<pragma::physics::RayCastHitType>(Lua::CheckInt(l, -1));
+		return static_cast<pragma::physics::RayCastHitType>(CheckInt(l, -1));
 	});
 }

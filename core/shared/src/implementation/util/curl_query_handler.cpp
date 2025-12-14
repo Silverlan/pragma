@@ -101,9 +101,9 @@ void pragma::CurlQueryHandler::Initialize()
 #else
 	const std::string curlPath = "curl/libpr_curl.so";
 #endif
-	auto *nw = static_cast<NetworkState *>(pragma::get_engine()->GetServerNetworkState());
+	auto *nw = static_cast<NetworkState *>(get_engine()->GetServerNetworkState());
 	if(!nw)
-		nw = pragma::get_engine()->GetClientState();
+		nw = get_engine()->GetClientState();
 
 	if(!nw || nw->InitializeLibrary(curlPath, &err) == nullptr) {
 		Con::cerr << "Unable to load 'curl' library: " << err << Con::endl;

@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SMicrophoneComponent final : public BaseEnvMicrophoneComponent {
 		  public:
-			SMicrophoneComponent(pragma::ecs::BaseEntity &ent) : BaseEnvMicrophoneComponent(ent) {}
+			SMicrophoneComponent(ecs::BaseEntity &ent) : BaseEnvMicrophoneComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

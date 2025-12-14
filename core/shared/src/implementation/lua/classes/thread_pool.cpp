@@ -60,12 +60,12 @@ pragma::LuaCore::LuaThreadWrapper::LuaThreadWrapper(LuaThreadPool &luaThreadTask
 std::shared_ptr<pragma::LuaCore::LuaThreadTask> &pragma::LuaCore::LuaThreadWrapper::GetTask() const
 {
 	assert(!m_isPool);
-	return *static_cast<std::shared_ptr<pragma::LuaCore::LuaThreadTask> *>(m_ptr);
+	return *static_cast<std::shared_ptr<LuaThreadTask> *>(m_ptr);
 }
 pragma::LuaCore::LuaThreadPool &pragma::LuaCore::LuaThreadWrapper::GetPool() const
 {
 	assert(m_isPool);
-	return *static_cast<pragma::LuaCore::LuaThreadPool *>(m_ptr);
+	return *static_cast<LuaThreadPool *>(m_ptr);
 }
 bool pragma::LuaCore::LuaThreadWrapper::IsPool() const { return m_isPool; }
 bool pragma::LuaCore::LuaThreadWrapper::IsTask() const { return !m_isPool; }

@@ -8,7 +8,7 @@ module pragma.shared;
 
 import :util.server_state_interface;
 
-void pragma::IServerState::Initialize(pragma::util::Library &lib)
+void pragma::IServerState::Initialize(util::Library &lib)
 {
 	auto *register_server_entities = lib.FindSymbolAddress<void(*)()>("pr_sv_register_server_entities");
 	assert(register_server_entities != nullptr);

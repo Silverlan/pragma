@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :game.bullet_info;
 
-std::ostream &pragma::game::operator<<(std::ostream &out, const pragma::game::BulletInfo &o)
+std::ostream &pragma::game::operator<<(std::ostream &out, const BulletInfo &o)
 {
 	out << "BulletInfo";
 	out << "[Spread:" << o.spread << "]";
@@ -20,14 +20,14 @@ std::ostream &pragma::game::operator<<(std::ostream &out, const pragma::game::Bu
 
 	out << "[Attacker:";
 	if(o.hAttacker.valid())
-		const_cast<pragma::ecs::BaseEntity *>(o.hAttacker.get())->print(out);
+		const_cast<ecs::BaseEntity *>(o.hAttacker.get())->print(out);
 	else
 		out << "NULL";
 	out << "]";
 
 	out << "[Inflictor:";
 	if(o.hInflictor.valid())
-		const_cast<pragma::ecs::BaseEntity *>(o.hInflictor.get())->print(out);
+		const_cast<ecs::BaseEntity *>(o.hInflictor.get())->print(out);
 	else
 		out << "NULL";
 	out << "]";

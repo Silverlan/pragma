@@ -51,7 +51,7 @@ void pragma::gui::types::WIMainMenuMods::Think(const std::shared_ptr<prosper::IP
 	}
 }
 
-bool pragma::gui::types::WIMainMenuMods::SetAddonSubscription(const std::shared_ptr<pragma::AddonInfo> &addon, bool bSubscribe)
+bool pragma::gui::types::WIMainMenuMods::SetAddonSubscription(const std::shared_ptr<AddonInfo> &addon, bool bSubscribe)
 {
 	m_downloadMutex.lock();
 	auto &uniqueId = addon->GetUniqueId();
@@ -77,24 +77,24 @@ bool pragma::gui::types::WIMainMenuMods::SetAddonSubscription(const std::shared_
 	return true;
 }
 
-bool pragma::gui::types::WIMainMenuMods::SetAddonSubscription(const std::string &uniqueId, bool bSubscribe) { return SetAddonSubscription(pragma::util::make_shared<pragma::AddonInfo>("", pragma::util::Version(0, 0, 0), uniqueId), bSubscribe); }
+bool pragma::gui::types::WIMainMenuMods::SetAddonSubscription(const std::string &uniqueId, bool bSubscribe) { return SetAddonSubscription(pragma::util::make_shared<AddonInfo>("", util::Version(0, 0, 0), uniqueId), bSubscribe); }
 
 void pragma::gui::types::WIMainMenuMods::OnFirstEntered()
 {
-	auto lan = pragma::locale::get_language();
+	auto lan = locale::get_language();
 	if(lan != "de")
 		lan = "en";
 	// SetInitialURL(engine_info::get_modding_hub_url() + "index_game.php?lan=" + lan);
 
 	try {
-		auto &addons = pragma::AddonSystem::GetMountedAddons();
-		m_addonInstallManager = pragma::util::make_shared<pragma::AddonInstallManager>();
+		auto &addons = AddonSystem::GetMountedAddons();
+		m_addonInstallManager = pragma::util::make_shared<AddonInstallManager>();
 
 		for(auto &addon : addons) {
 			auto &uniqueId = addon.GetUniqueId();
 			if(uniqueId.empty() == true)
 				continue;
-			SetAddonSubscription(pragma::util::make_shared<pragma::AddonInfo>(addon), true);
+			SetAddonSubscription(pragma::util::make_shared<AddonInfo>(addon), true);
 		}
 	}
 	catch(const std::runtime_error &e) {
@@ -151,7 +151,7 @@ void pragma::gui::types::WIMainMenuMods::Initialize()
 {
 	WIMainMenuBase::Initialize();
 	EnableThinking();
-	AddMenuItem(pragma::locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+	AddMenuItem(locale::get_text("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
 		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;

@@ -23,7 +23,7 @@ int Lua::import::import_wad(lua::State *l)
 	std::array<uint8_t, 3> header;
 	f.Read(header.data(), header.size() * sizeof(header.front()));
 	if(header.at(0) != 'W' || header.at(1) != 'A' || header.at(2) != 'D') {
-		Lua::PushBool(l, false);
+		PushBool(l, false);
 		return 1;
 	}
 	auto anim = pragma::animation::Animation::Create();
@@ -60,7 +60,7 @@ int Lua::import::import_wrci(lua::State *l)
 	std::array<uint8_t, 4> header;
 	f.Read(header.data(), header.size() * sizeof(header.front()));
 	if(header.at(0) != 'W' || header.at(1) != 'R' || header.at(2) != 'C' || header.at(3) != 'I') {
-		Lua::PushBool(l, false);
+		PushBool(l, false);
 		return 1;
 	}
 	auto version = f.Read<uint16_t>();
@@ -112,7 +112,7 @@ int Lua::import::import_wrci(lua::State *l)
 		colMesh->Update(pragma::asset::ModelUpdateFlags::All);
 	}
 	mdl.Update();
-	Lua::PushBool(l, true);
+	PushBool(l, true);
 	return 1;
 }
 int Lua::import::import_wrmi(lua::State *l)
@@ -122,13 +122,13 @@ int Lua::import::import_wrmi(lua::State *l)
 	std::array<uint8_t, 4> header;
 	f.Read(header.data(), header.size() * sizeof(header.front()));
 	if(header.at(0) != 'W' || header.at(1) != 'R' || header.at(2) != 'M' || header.at(3) != 'I') {
-		Lua::PushBool(l, false);
+		PushBool(l, false);
 		return 1;
 	}
 	auto meshGroup = mdl.GetMeshGroup(0u);
 	if(meshGroup == nullptr) // TODO
 	{
-		Lua::PushBool(l, false);
+		PushBool(l, false);
 		return 1;
 	}
 	auto version = f.Read<uint16_t>();
@@ -260,14 +260,14 @@ int Lua::import::import_wrmi(lua::State *l)
 	}
 	mdl.Update(pragma::asset::ModelUpdateFlags::All);
 	mdl.GenerateBindPoseMatrices();
-	Lua::PushBool(l, true);
+	PushBool(l, true);
 	return 1;
 }
 
 int Lua::import::import_smd(lua::State *l)
 {
 	auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
-	std::string smdFileName = Lua::CheckString(l, 1);
+	std::string smdFileName = CheckString(l, 1);
 	/*if(Lua::file::validate_write_operation(l,smdFileName) == false)
 	{
 		Lua::PushBool(l,false);
@@ -275,24 +275,24 @@ int Lua::import::import_smd(lua::State *l)
 	}*/
 	auto f = pragma::fs::open_file(smdFileName.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(f == nullptr) {
-		Lua::PushBool(l, false);
+		PushBool(l, false);
 		return 1;
 	}
 	auto &mdl = Lua::Check<pragma::asset::Model>(l, 2);
-	std::string animName = Lua::CheckString(l, 3);
+	std::string animName = CheckString(l, 3);
 	auto isCollisionMesh = false;
-	if(Lua::IsSet(l, 4))
-		isCollisionMesh = Lua::CheckBool(l, 4);
+	if(IsSet(l, 4))
+		isCollisionMesh = CheckBool(l, 4);
 
 	std::vector<std::string> textures;
 	auto success = pragma::util::port_hl2_smd(nw, mdl, f, animName, isCollisionMesh, textures);
-	Lua::PushBool(l, success);
+	PushBool(l, success);
 	if(success) {
-		auto t = Lua::CreateTable(l);
+		auto t = CreateTable(l);
 		for(auto i = decltype(textures.size()) {0u}; i < textures.size(); ++i) {
-			Lua::PushInt(l, i + 1);
-			Lua::PushString(l, textures.at(i));
-			Lua::SetTableValue(l, t);
+			PushInt(l, i + 1);
+			PushString(l, textures.at(i));
+			SetTableValue(l, t);
 		}
 		return 2;
 	}

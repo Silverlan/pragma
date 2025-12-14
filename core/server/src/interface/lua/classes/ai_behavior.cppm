@@ -93,9 +93,9 @@ export {
 
 	namespace Lua {
 		namespace ai {
-			class BaseBehaviorTask : public ai::TaskWrapper {
+			class BaseBehaviorTask : public TaskWrapper {
 			  public:
-				using ai::TaskWrapper::TaskWrapper;
+				using TaskWrapper::TaskWrapper;
 			};
 		};
 	};

@@ -24,7 +24,7 @@ ShaderPPWater::ShaderPPWater(prosper::IPrContext &context, const std::string &id
 
 void ShaderPPWater::InitializeShaderResources()
 {
-	prosper::ShaderGraphics::InitializeShaderResources();
+	ShaderGraphics::InitializeShaderResources();
 	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_DEPTH_BUFFER);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_REFRACTION_MAP);
@@ -35,14 +35,14 @@ void ShaderPPWater::InitializeShaderResources()
 
 	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
-void ShaderPPWater::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
+void ShaderPPWater::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPPWater::InitializeMaterialDescriptorSet(material::CMaterial &mat)
 {
 	auto *dudvMap = mat.GetTextureInfo(material::ematerial::DUDV_MAP_IDENTIFIER);
 	if(dudvMap == nullptr || dudvMap->texture == nullptr)
 		return nullptr;
-	auto descSetGroup = pragma::get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_REFRACTION_MAP);
+	auto descSetGroup = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_REFRACTION_MAP);
 	mat.SetDescriptorSetGroup(*this, descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	auto texture = std::static_pointer_cast<material::Texture>(dudvMap->texture);

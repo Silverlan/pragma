@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :physics.touch;
 
-pragma::physics::PhysTouch::PhysTouch(pragma::ecs::BaseEntity *ent, CallbackHandle onRemove) : entity((ent != nullptr) ? ent->GetHandle() : EntityHandle()), onRemoveCallback(onRemove) {}
+pragma::physics::PhysTouch::PhysTouch(ecs::BaseEntity *ent, CallbackHandle onRemove) : entity((ent != nullptr) ? ent->GetHandle() : EntityHandle()), onRemoveCallback(onRemove) {}
 pragma::physics::PhysTouch::~PhysTouch()
 {
 	if(onRemoveCallback.IsValid())

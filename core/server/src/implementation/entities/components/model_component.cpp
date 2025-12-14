@@ -15,15 +15,15 @@ using namespace pragma;
 void SModelComponent::Initialize() { BaseModelComponent::Initialize(); }
 void SModelComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void SModelComponent::OnModelChanged(const std::shared_ptr<pragma::asset::Model> &model)
+void SModelComponent::OnModelChanged(const std::shared_ptr<asset::Model> &model)
 {
 	BaseModelComponent::OnModelChanged(model);
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared()) {
 		NetPacket p;
-		pragma::networking::write_entity(p, &ent);
+		networking::write_entity(p, &ent);
 		p->WriteString(GetModelName());
-		ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_MODEL, p, pragma::networking::Protocol::SlowReliable);
+		ServerState::Get()->SendPacket(networking::net_messages::client::ENT_MODEL, p, networking::Protocol::SlowReliable);
 	}
 }
 
@@ -40,7 +40,7 @@ bool SModelComponent::SetBodyGroup(UInt32 groupId, UInt32 id)
 	NetPacket p;
 	p->Write<UInt32>(groupId);
 	p->Write<UInt32>(id);
-	ent.SendNetEvent(m_netEvSetBodyGroup, p, pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netEvSetBodyGroup, p, networking::Protocol::SlowReliable);
 	return r;
 }
 
@@ -53,9 +53,9 @@ void SModelComponent::SetSkin(unsigned int skin)
 	if(ent.IsShared() == false)
 		return;
 	NetPacket p;
-	pragma::networking::write_entity(p, &ent);
+	networking::write_entity(p, &ent);
 	p->Write<unsigned int>(skin);
-	ServerState::Get()->SendPacket(pragma::networking::net_messages::client::ENT_SKIN, p, pragma::networking::Protocol::SlowReliable);
+	ServerState::Get()->SendPacket(networking::net_messages::client::ENT_SKIN, p, networking::Protocol::SlowReliable);
 }
 
 void SModelComponent::SetMaxDrawDistance(float maxDist)
@@ -65,7 +65,7 @@ void SModelComponent::SetMaxDrawDistance(float maxDist)
 	BaseModelComponent::SetMaxDrawDistance(maxDist);
 	NetPacket p {};
 	p->Write<float>(m_maxDrawDistance);
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvMaxDrawDist, p, pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvMaxDrawDist, p, networking::Protocol::SlowReliable);
 }
 
 void SModelComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)

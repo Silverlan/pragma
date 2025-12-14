@@ -33,9 +33,9 @@ static pragma::physics::IShape *get_shape_from_shape_index(const pragma::physics
 	auto &subShape = subShapes.at(shapeIndex);
 	return subShape.shape.get();
 }
-std::vector<const pragma::physics::IShape *> pragma::physics::ChassisCreateInfo::GetShapes(const pragma::physics::IRigidBody &body) const
+std::vector<const pragma::physics::IShape *> pragma::physics::ChassisCreateInfo::GetShapes(const IRigidBody &body) const
 {
-	std::vector<const pragma::physics::IShape *> shapes {};
+	std::vector<const IShape *> shapes {};
 	shapes.reserve(shapeIndices.size());
 	for(auto shapeIndex : shapeIndices) {
 		auto *shape = get_shape_from_shape_index(body, shapeIndex);
@@ -45,7 +45,7 @@ std::vector<const pragma::physics::IShape *> pragma::physics::ChassisCreateInfo:
 	}
 	return shapes;
 }
-float pragma::physics::ChassisCreateInfo::GetMass(const pragma::physics::IRigidBody &body) const
+float pragma::physics::ChassisCreateInfo::GetMass(const IRigidBody &body) const
 {
 	auto shapes = GetShapes(body);
 	auto mass = 0.f;
@@ -53,7 +53,7 @@ float pragma::physics::ChassisCreateInfo::GetMass(const pragma::physics::IRigidB
 		mass += pShape->GetMass();
 	return mass;
 }
-void pragma::physics::ChassisCreateInfo::GetAABB(const pragma::physics::IRigidBody &body, Vector3 &min, Vector3 &max) const
+void pragma::physics::ChassisCreateInfo::GetAABB(const IRigidBody &body, Vector3 &min, Vector3 &max) const
 {
 	auto shapes = GetShapes(body);
 	min = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
@@ -65,7 +65,7 @@ void pragma::physics::ChassisCreateInfo::GetAABB(const pragma::physics::IRigidBo
 		uvec::max(&max, shapeMax);
 	}
 }
-Vector3 pragma::physics::ChassisCreateInfo::GetCenterOfMass(const pragma::physics::IRigidBody &body) const
+Vector3 pragma::physics::ChassisCreateInfo::GetCenterOfMass(const IRigidBody &body) const
 {
 	if(centerOfMass.has_value())
 		return *centerOfMass;
@@ -78,7 +78,7 @@ Vector3 pragma::physics::ChassisCreateInfo::GetCenterOfMass(const pragma::physic
 	// results in good handling.
 	return (min + max) / 2.f + Vector3 {0.f, dim.y * -0.35f, dim.z * 0.1f};
 }
-Vector3 pragma::physics::ChassisCreateInfo::GetMomentOfInertia(const pragma::physics::IRigidBody &body) const
+Vector3 pragma::physics::ChassisCreateInfo::GetMomentOfInertia(const IRigidBody &body) const
 {
 	if(momentOfInertia.has_value())
 		return *momentOfInertia;
@@ -90,23 +90,23 @@ Vector3 pragma::physics::ChassisCreateInfo::GetMomentOfInertia(const pragma::phy
 	GetAABB(body, min, max);
 
 	auto dims = (max - min) * 0.5f;
-	return Vector3 {(pragma::math::pow2(dims.y) + pragma::math::pow2(dims.z)) * mass / 12.0, (pragma::math::pow2(dims.x) + pragma::math::pow2(dims.z)) * 0.8 * mass / 12.0, (pragma::math::pow2(dims.x) + pragma::math::pow2(dims.y)) * mass / 12.0};
+	return Vector3 {(math::pow2(dims.y) + math::pow2(dims.z)) * mass / 12.0, (math::pow2(dims.x) + math::pow2(dims.z)) * 0.8 * mass / 12.0, (math::pow2(dims.x) + math::pow2(dims.y)) * mass / 12.0};
 }
 
 ///////////////
 
 pragma::physics::VehicleCreateInfo::Wheel pragma::physics::VehicleCreateInfo::GetWheelType(const WheelCreateInfo &wheelDesc)
 {
-	if(pragma::math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Front)) {
-		if(pragma::math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Left))
+	if(math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Front)) {
+		if(math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Left))
 			return Wheel::FrontLeft;
-		if(pragma::math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Right))
+		if(math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Right))
 			return Wheel::FrontRight;
 	}
-	if(pragma::math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Rear)) {
-		if(pragma::math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Left))
+	if(math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Rear)) {
+		if(math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Left))
 			return Wheel::RearLeft;
-		if(pragma::math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Right))
+		if(math::is_flag_set(wheelDesc.flags, WheelCreateInfo::Flags::Right))
 			return Wheel::RearRight;
 	}
 	return Wheel::Dummy;
@@ -115,7 +115,7 @@ pragma::physics::VehicleCreateInfo pragma::physics::VehicleCreateInfo::CreateSta
 {
 	VehicleCreateInfo vhcCreateInfo {};
 	vhcCreateInfo.antiRollBars = {{Wheel::FrontLeft, Wheel::FrontRight}, {Wheel::RearLeft, Wheel::RearRight}};
-	vhcCreateInfo.wheelDrive = VehicleCreateInfo::WheelDrive::Four;
+	vhcCreateInfo.wheelDrive = WheelDrive::Four;
 
 	auto numWheels = WHEEL_COUNT_4W_DRIVE;
 	vhcCreateInfo.wheels.reserve(numWheels);
@@ -147,8 +147,8 @@ pragma::physics::VehicleCreateInfo pragma::physics::VehicleCreateInfo::CreateSta
 
 ///////////////
 
-const pragma::physics::IShape *pragma::physics::WheelCreateInfo::GetShape(const pragma::physics::IRigidBody &body) const { return get_shape_from_shape_index(body, shapeIndex); }
-void pragma::physics::WheelCreateInfo::GetAABB(const pragma::physics::IRigidBody &body, Vector3 &min, Vector3 &max) const
+const pragma::physics::IShape *pragma::physics::WheelCreateInfo::GetShape(const IRigidBody &body) const { return get_shape_from_shape_index(body, shapeIndex); }
+void pragma::physics::WheelCreateInfo::GetAABB(const IRigidBody &body, Vector3 &min, Vector3 &max) const
 {
 	auto *shape = GetShape(body);
 	if(shape == nullptr) {
@@ -158,7 +158,7 @@ void pragma::physics::WheelCreateInfo::GetAABB(const pragma::physics::IRigidBody
 	}
 	shape->GetAABB(min, max);
 }
-float pragma::physics::WheelCreateInfo::GetRadius(const pragma::physics::IRigidBody &body) const
+float pragma::physics::WheelCreateInfo::GetRadius(const IRigidBody &body) const
 {
 	if(radius.has_value())
 		return *radius;
@@ -167,7 +167,7 @@ float pragma::physics::WheelCreateInfo::GetRadius(const pragma::physics::IRigidB
 	auto dims = (max - min) * 0.5f;
 	return dims.z;
 }
-float pragma::physics::WheelCreateInfo::GetWidth(const pragma::physics::IRigidBody &body) const
+float pragma::physics::WheelCreateInfo::GetWidth(const IRigidBody &body) const
 {
 	if(width.has_value())
 		return *width;
@@ -176,7 +176,7 @@ float pragma::physics::WheelCreateInfo::GetWidth(const pragma::physics::IRigidBo
 	auto dims = (max - min) * 0.5f;
 	return dims.x;
 }
-float pragma::physics::WheelCreateInfo::GetMomentOfInertia(const pragma::physics::IRigidBody &body) const
+float pragma::physics::WheelCreateInfo::GetMomentOfInertia(const IRigidBody &body) const
 {
 	if(momentOfInertia.has_value())
 		return *momentOfInertia;
@@ -184,10 +184,10 @@ float pragma::physics::WheelCreateInfo::GetMomentOfInertia(const pragma::physics
 	if(pShape == nullptr)
 		return 0.f;
 	// MOI of a cylinder
-	return 0.5f * pShape->GetMass() * pragma::math::pow2(GetRadius(body));
+	return 0.5f * pShape->GetMass() * math::pow2(GetRadius(body));
 }
 
-pragma::physics::IVehicle::IVehicle(IEnvironment &env, const pragma::util::TSharedHandle<ICollisionObject> &collisionObject) : IBase {env}, m_collisionObject {collisionObject} {}
+pragma::physics::IVehicle::IVehicle(IEnvironment &env, const util::TSharedHandle<ICollisionObject> &collisionObject) : IBase {env}, m_collisionObject {collisionObject} {}
 
 pragma::physics::ICollisionObject *pragma::physics::IVehicle::GetCollisionObject() { return m_collisionObject.Get(); }
 const pragma::physics::ICollisionObject *pragma::physics::IVehicle::GetCollisionObject() const { return const_cast<IVehicle *>(this)->GetCollisionObject(); }

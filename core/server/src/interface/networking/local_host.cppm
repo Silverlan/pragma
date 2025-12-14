@@ -31,7 +31,7 @@ export namespace pragma::networking {
 		virtual std::optional<std::string> GetIP() const override;
 		virtual std::optional<Port> GetPort() const override;
 		virtual bool IsListenServerHost() const override;
-		virtual bool SendPacket(pragma::networking::Protocol protocol, NetPacket &packet, pragma::networking::Error &outErr) override;
-		virtual bool Drop(DropReason reason, pragma::networking::Error &outErr) override;
+		virtual bool SendPacket(Protocol protocol, NetPacket &packet, Error &outErr) override;
+		virtual bool Drop(DropReason reason, Error &outErr) override;
 	};
 };

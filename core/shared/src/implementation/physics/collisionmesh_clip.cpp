@@ -65,7 +65,7 @@ static uint8_t clip_triangle(const std::function<void(uint16_t)> &fAddTriangleIn
 	return 0;
 }
 
-void pragma::physics::CollisionMesh::ClipAgainstPlane(const Vector3 &n, double d, pragma::physics::CollisionMesh &clippedMesh)
+void pragma::physics::CollisionMesh::ClipAgainstPlane(const Vector3 &n, double d, CollisionMesh &clippedMesh)
 {
 	const auto &verts = GetVertices();
 	const auto &triangles = GetTriangles();
@@ -134,7 +134,7 @@ void pragma::physics::CollisionMesh::ClipAgainstPlane(const Vector3 &n, double d
 		clippedMesh.m_vertices = verts;
 		auto bAllProjected = true;
 		for(auto &v : clippedMesh.m_vertices) {
-			if(pragma::math::geometry::get_side_of_point_to_plane(n, d, v) != pragma::math::geometry::PlaneSide::Back)
+			if(math::geometry::get_side_of_point_to_plane(n, d, v) != math::geometry::PlaneSide::Back)
 				v = uvec::project_to_plane(v, n, d);
 			else
 				bAllProjected = false;
@@ -152,7 +152,7 @@ void pragma::physics::CollisionMesh::ClipAgainstPlane(const Vector3 &n, double d
 	clippedMesh.m_centerOfMass = m_centerOfMass;
 	clippedMesh.m_volume = m_volume;
 }
-void pragma::physics::CollisionMesh::ClipAgainstPlane(const Vector3 &n, double d, pragma::physics::CollisionMesh &clippedMeshA, pragma::physics::CollisionMesh &clippedMeshB)
+void pragma::physics::CollisionMesh::ClipAgainstPlane(const Vector3 &n, double d, CollisionMesh &clippedMeshA, CollisionMesh &clippedMeshB)
 {
 	ClipAgainstPlane(n, d, clippedMeshA);
 	ClipAgainstPlane(-n, -d, clippedMeshB);

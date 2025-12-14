@@ -122,16 +122,16 @@ export namespace pragma {
 		// Sound
 		void SetAudioAPI(const std::string &audioAPI) { m_audioAPI = audioAPI; }
 		const std::string &GetAudioAPI() const { return m_audioAPI; }
-		const pragma::audio::ISoundSystem *GetSoundSystem() const;
-		pragma::audio::ISoundSystem *GetSoundSystem();
-		pragma::audio::ISoundSystem *InitializeSoundEngine();
+		const audio::ISoundSystem *GetSoundSystem() const;
+		audio::ISoundSystem *GetSoundSystem();
+		audio::ISoundSystem *InitializeSoundEngine();
 		void CloseSoundEngine();
 		void SetHRTFEnabled(bool b);
 		unsigned int GetStereoSourceCount();
 		unsigned int GetMonoSourceCount();
 		unsigned int GetStereoSource(unsigned int idx);
 		template<class TEfxProperties>
-		std::shared_ptr<pragma::audio::IEffect> CreateAuxEffect(const std::string &name, const TEfxProperties &props)
+		std::shared_ptr<audio::IEffect> CreateAuxEffect(const std::string &name, const TEfxProperties &props)
 		{
 			auto lname = name;
 			string::to_lower(lname);
@@ -151,7 +151,7 @@ export namespace pragma {
 			m_auxEffects.insert(decltype(m_auxEffects)::value_type(name, effect));
 			return effect;
 		}
-		std::shared_ptr<pragma::audio::IEffect> GetAuxEffect(const std::string &name);
+		std::shared_ptr<audio::IEffect> GetAuxEffect(const std::string &name);
 		// Lua
 		virtual NetworkState *GetNetworkState(lua::State *l) override;
 		virtual Lua::Interface *GetLuaInterface(lua::State *l) override;
@@ -254,7 +254,7 @@ export namespace pragma {
 	  private:
 		// Sound
 		std::shared_ptr<util::Library> m_audioAPILib = nullptr;
-		std::shared_ptr<pragma::audio::ISoundSystem> m_soundSystem = nullptr;
+		std::shared_ptr<audio::ISoundSystem> m_soundSystem = nullptr;
 		std::string m_audioAPI;
 
 		// FPS
@@ -265,7 +265,7 @@ export namespace pragma {
 		util::Clock::time_point m_tWindowResizeTime;
 		std::optional<std::chrono::nanoseconds> m_fixedFrameDeltaTimeInterpretation = {};
 
-		std::unordered_map<std::string, std::shared_ptr<pragma::audio::IEffect>> m_auxEffects;
+		std::unordered_map<std::string, std::shared_ptr<audio::IEffect>> m_auxEffects;
 
 		std::unique_ptr<debug::ProfilingStageManager<debug::GPUProfilingStage>> m_gpuProfilingStageManager;
 		std::unique_ptr<debug::ProfilingStageManager<debug::ProfilingStage>> m_cpuProfilingStageManager;

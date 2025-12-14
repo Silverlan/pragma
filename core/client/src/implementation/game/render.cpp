@@ -304,7 +304,7 @@ static auto cvDrawTranslucent = pragma::console::get_client_con_var("render_draw
 static auto cvClearScene = pragma::console::get_client_con_var("render_clear_scene");
 static auto cvClearSceneColor = pragma::console::get_client_con_var("render_clear_scene_color");
 static auto cvParticleQuality = pragma::console::get_client_con_var("cl_render_particle_quality");
-void pragma::CGame::RenderScenes(pragma::rendering::DrawSceneInfo &drawSceneInfo)
+void pragma::CGame::RenderScenes(rendering::DrawSceneInfo &drawSceneInfo)
 {
 #ifdef PRAGMA_ENABLE_SHADER_DEBUG_PRINT
 	GetGlobalRenderSettingsBufferData().EvaluateDebugPrint();
@@ -313,10 +313,10 @@ void pragma::CGame::RenderScenes(pragma::rendering::DrawSceneInfo &drawSceneInfo
 	auto &inputDataManager = GetGlobalShaderInputDataManager();
 	inputDataManager.UpdateBufferData(*drawSceneInfo.commandBuffer);
 
-	CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("UpdateRenderBuffers", std::ref(drawSceneInfo));
+	CallCallbacks<void, std::reference_wrapper<const rendering::DrawSceneInfo>>("UpdateRenderBuffers", std::ref(drawSceneInfo));
 
 	StartProfilingStage("RenderScenes");
-	pragma::util::ScopeGuard sg {[this]() {
+	util::ScopeGuard sg {[this]() {
 		StopProfilingStage(); // RenderScenes
 	}};
 
@@ -324,11 +324,11 @@ void pragma::CGame::RenderScenes(pragma::rendering::DrawSceneInfo &drawSceneInfo
 	// TODO: This isn't a good place for this and particle systems should
 	// only be updated if visible (?)
 	auto &cmd = *drawSceneInfo.commandBuffer;
-	pragma::ecs::EntityIterator itParticles {*this};
-	itParticles.AttachFilter<TEntityIteratorFilterComponent<pragma::ecs::CParticleSystemComponent>>();
+	ecs::EntityIterator itParticles {*this};
+	itParticles.AttachFilter<TEntityIteratorFilterComponent<ecs::CParticleSystemComponent>>();
 	for(auto *ent : itParticles) {
 		auto &tDelta = DeltaTime();
-		auto pt = ent->GetComponent<pragma::ecs::CParticleSystemComponent>();
+		auto pt = ent->GetComponent<ecs::CParticleSystemComponent>();
 		if(pt.valid() && pt->GetParent() == nullptr && pt->ShouldAutoSimulate()) {
 			pt->Simulate(tDelta);
 
@@ -360,8 +360,8 @@ void pragma::CGame::RenderScenes(pragma::rendering::DrawSceneInfo &drawSceneInfo
 	}
 
 	if(drawSceneInfo.scene.expired()) {
-		auto *sceneC = GetRenderScene<pragma::CSceneComponent>();
-		drawSceneInfo.scene = sceneC ? sceneC->GetHandle<pragma::CSceneComponent>() : pragma::ComponentHandle<pragma::CSceneComponent> {};
+		auto *sceneC = GetRenderScene<CSceneComponent>();
+		drawSceneInfo.scene = sceneC ? sceneC->GetHandle<CSceneComponent>() : pragma::ComponentHandle<CSceneComponent> {};
 	}
 	auto &scene = drawSceneInfo.scene;
 	if(scene.expired()) {
@@ -373,12 +373,12 @@ void pragma::CGame::RenderScenes(pragma::rendering::DrawSceneInfo &drawSceneInfo
 		return;
 	}
 	StartProfilingStage("PreRenderScenesCallbacks");
-	CallCallbacks<void, std::reference_wrapper<const pragma::rendering::DrawSceneInfo>>("PreRenderScenes", std::ref(drawSceneInfo));
-	CallLuaCallbacks<void, pragma::rendering::DrawSceneInfo *>("PreRenderScenes", &drawSceneInfo);
+	CallCallbacks<void, std::reference_wrapper<const rendering::DrawSceneInfo>>("PreRenderScenes", std::ref(drawSceneInfo));
+	CallLuaCallbacks<void, rendering::DrawSceneInfo *>("PreRenderScenes", &drawSceneInfo);
 	StopProfilingStage(); // PreRenderScenesCallbacks
 
 	StartProfilingStage("RenderScenesCallbacks");
-	CallLuaCallbacks<void, pragma::rendering::DrawSceneInfo *>("RenderScenes", &drawSceneInfo);
+	CallLuaCallbacks<void, rendering::DrawSceneInfo *>("RenderScenes", &drawSceneInfo);
 	StopProfilingStage(); // RenderScenesCallbacks
 
 	if(IsDefaultGameRenderEnabled()) {
@@ -408,7 +408,7 @@ void pragma::CGame::RenderScenes(pragma::rendering::DrawSceneInfo &drawSceneInfo
 	m_sceneRenderQueue.clear();
 }
 
-void pragma::CGame::GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask, ::pragma::rendering::RenderMask &exclusionMask) const
+void pragma::CGame::GetPrimaryCameraRenderMask(rendering::RenderMask &inclusionMask, rendering::RenderMask &exclusionMask) const
 {
 	auto *lp = m_plLocal.get();
 	if(lp && lp->IsInFirstPersonMode()) {
@@ -524,16 +524,16 @@ static void debug_dump_render_queues(const std::vector<pragma::rendering::DrawSc
 }
 
 bool g_dumpRenderQueues = false;
-void pragma::CGame::RenderScenes(const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos)
+void pragma::CGame::RenderScenes(const std::vector<rendering::DrawSceneInfo> &drawSceneInfos)
 {
 	if(cvDrawScene->GetBool() == false)
 		return;
 	auto drawWorld = cvDrawWorld->GetInt();
 
-	std::function<void(const std::vector<pragma::rendering::DrawSceneInfo> &)> buildRenderQueues = nullptr;
-	buildRenderQueues = [&buildRenderQueues, drawWorld](const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos) {
+	std::function<void(const std::vector<rendering::DrawSceneInfo> &)> buildRenderQueues = nullptr;
+	buildRenderQueues = [&buildRenderQueues, drawWorld](const std::vector<rendering::DrawSceneInfo> &drawSceneInfos) {
 		for(auto &cdrawSceneInfo : drawSceneInfos) {
-			auto &drawSceneInfo = const_cast<pragma::rendering::DrawSceneInfo &>(cdrawSceneInfo);
+			auto &drawSceneInfo = const_cast<rendering::DrawSceneInfo &>(cdrawSceneInfo);
 			if(drawSceneInfo.scene.expired())
 				continue;
 
@@ -558,16 +558,16 @@ void pragma::CGame::RenderScenes(const std::vector<pragma::rendering::DrawSceneI
 				drawSceneInfo.renderFlags &= ~rendering::RenderFlags::Particles;
 
 			if(drawSceneInfo.commandBuffer == nullptr)
-				drawSceneInfo.commandBuffer = pragma::get_cengine()->GetRenderContext().GetWindow().GetDrawCommandBuffer();
+				drawSceneInfo.commandBuffer = get_cengine()->GetRenderContext().GetWindow().GetDrawCommandBuffer();
 			// Modify render flags depending on console variables
 			auto &renderFlags = drawSceneInfo.renderFlags;
 			auto drawWorld = cvDrawWorld->GetBool();
 			if(drawWorld == false)
-				pragma::math::set_flag(renderFlags, rendering::RenderFlags::World, false);
+				math::set_flag(renderFlags, rendering::RenderFlags::World, false);
 
-			auto *pl = pragma::get_cgame()->GetLocalPlayer();
+			auto *pl = get_cgame()->GetLocalPlayer();
 			if(pl == nullptr || pl->IsInFirstPersonMode() == false)
-				pragma::math::set_flag(renderFlags, rendering::RenderFlags::View, false);
+				math::set_flag(renderFlags, rendering::RenderFlags::View, false);
 
 			drawSceneInfo.scene->BuildRenderQueues(drawSceneInfo);
 		}
@@ -590,11 +590,11 @@ void pragma::CGame::RenderScenes(const std::vector<pragma::rendering::DrawSceneI
 	// Initiate the command buffer build threads for all queued scenes.
 	// If we have multiple scenes to render (e.g. left eye and right eye for VR),
 	// the command buffers can all be built in parallel.
-	std::function<void(const std::vector<pragma::rendering::DrawSceneInfo> &)> buildCommandBuffers = nullptr;
-	buildCommandBuffers = [&buildCommandBuffers, drawWorld](const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos) {
+	std::function<void(const std::vector<rendering::DrawSceneInfo> &)> buildCommandBuffers = nullptr;
+	buildCommandBuffers = [&buildCommandBuffers, drawWorld](const std::vector<rendering::DrawSceneInfo> &drawSceneInfos) {
 		for(auto &cdrawSceneInfo : drawSceneInfos) {
-			auto &drawSceneInfo = const_cast<pragma::rendering::DrawSceneInfo &>(cdrawSceneInfo);
-			if(drawSceneInfo.scene.expired() || pragma::math::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisableRender))
+			auto &drawSceneInfo = const_cast<rendering::DrawSceneInfo &>(cdrawSceneInfo);
+			if(drawSceneInfo.scene.expired() || math::is_flag_set(drawSceneInfo.flags, rendering::DrawSceneInfo::Flags::DisableRender))
 				continue;
 			if(drawSceneInfo.subPasses) {
 				// This scene has sub-scenes we have to consider first!
@@ -606,11 +606,11 @@ void pragma::CGame::RenderScenes(const std::vector<pragma::rendering::DrawSceneI
 	buildCommandBuffers(drawSceneInfos);
 
 	// Render the scenes
-	std::function<void(const std::vector<pragma::rendering::DrawSceneInfo> &)> renderScenes = nullptr;
-	renderScenes = [this, &renderScenes, drawWorld](const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos) {
+	std::function<void(const std::vector<rendering::DrawSceneInfo> &)> renderScenes = nullptr;
+	renderScenes = [this, &renderScenes, drawWorld](const std::vector<rendering::DrawSceneInfo> &drawSceneInfos) {
 		for(auto &cdrawSceneInfo : drawSceneInfos) {
-			auto &drawSceneInfo = const_cast<pragma::rendering::DrawSceneInfo &>(cdrawSceneInfo);
-			if(drawSceneInfo.scene.expired() || pragma::math::is_flag_set(drawSceneInfo.flags, pragma::rendering::DrawSceneInfo::Flags::DisableRender))
+			auto &drawSceneInfo = const_cast<rendering::DrawSceneInfo &>(cdrawSceneInfo);
+			if(drawSceneInfo.scene.expired() || math::is_flag_set(drawSceneInfo.flags, rendering::DrawSceneInfo::Flags::DisableRender))
 				continue;
 
 			if(drawSceneInfo.subPasses) {
@@ -628,18 +628,18 @@ void pragma::CGame::RenderScenes(const std::vector<pragma::rendering::DrawSceneI
 				static_cast<prosper::IPrimaryCommandBuffer *>(drawCmd.get())->StartRecording();
 			if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value()) {
 				auto clearCol = drawSceneInfo.clearColor.has_value() ? drawSceneInfo.clearColor->ToVector4() : Color(cvClearSceneColor->GetString()).ToVector4();
-				auto &hdrImg = scene->GetRenderer<pragma::CRendererComponent>()->GetSceneTexture()->GetImage();
+				auto &hdrImg = scene->GetRenderer<CRendererComponent>()->GetSceneTexture()->GetImage();
 				drawCmd->RecordImageBarrier(hdrImg, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferDstOptimal);
 				drawCmd->RecordClearImage(hdrImg, prosper::ImageLayout::TransferDstOptimal, {{clearCol.r, clearCol.g, clearCol.b, clearCol.a}});
 				drawCmd->RecordImageBarrier(hdrImg, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 			}
 
 			// Update Exposure
-			auto *renderer = scene->GetRenderer<pragma::CRendererComponent>();
-			auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
+			auto *renderer = scene->GetRenderer<CRendererComponent>();
+			auto raster = renderer ? renderer->GetEntity().GetComponent<CRasterizationRendererComponent>() : pragma::ComponentHandle<CRasterizationRendererComponent> {};
 			if(raster.valid()) {
 				//pragma::get_cengine()->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
-				auto frame = pragma::get_cengine()->GetRenderContext().GetLastFrameId();
+				auto frame = get_cengine()->GetRenderContext().GetLastFrameId();
 				if(frame > 0)
 					raster->GetHDRInfo().UpdateExposure();
 				//pragma::get_cengine()->StopGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO

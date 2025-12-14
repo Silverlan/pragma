@@ -42,7 +42,7 @@ void pragma::gui::WILuaSkin::Release(types::WIBase *el)
 
 				  m_vars->push(m_lua);
 				  //WISkinClass *cl = elClasses[i];
-				  auto o = pragma::gui::WGUILuaInterface::GetLuaObject(m_lua, *el);
+				  auto o = WGUILuaInterface::GetLuaObject(m_lua, *el);
 				  o.push(m_lua);
 				  return Lua::StatusCode::Ok;
 			  },
@@ -80,7 +80,7 @@ void pragma::gui::WILuaSkin::Initialize(types::WIBase *el)
 
 				  m_vars->push(m_lua);
 				  //WISkinClass *cl = elClasses[i];
-				  auto o = pragma::gui::WGUILuaInterface::GetLuaObject(m_lua, *el);
+				  auto o = WGUILuaInterface::GetLuaObject(m_lua, *el);
 				  o.push(m_lua);
 				  return Lua::StatusCode::Ok;
 			  },

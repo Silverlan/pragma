@@ -12,16 +12,16 @@ import pragma.audio.util;
 import :audio;
 import :game;
 
-void pragma::ServerState::SendSoundSourceToClient(pragma::audio::SALSound &sound, bool sendFullUpdate, const pragma::networking::ClientRecipientFilter *rf)
+void pragma::ServerState::SendSoundSourceToClient(audio::SALSound &sound, bool sendFullUpdate, const networking::ClientRecipientFilter *rf)
 {
 	NetPacket p;
 	p->WriteString(sound.GetSoundName());
-	p->Write<pragma::audio::ALSoundType>(sound.GetType());
+	p->Write<audio::ALSoundType>(sound.GetType());
 	p->Write<unsigned int>(sound.GetIndex());
-	p->Write<pragma::audio::ALCreateFlags>(sound.GetCreateFlags());
+	p->Write<audio::ALCreateFlags>(sound.GetCreateFlags());
 	p->Write<bool>(sendFullUpdate);
 	if(sendFullUpdate) {
-		p->Write<pragma::audio::ALState>(sound.GetState());
+		p->Write<audio::ALState>(sound.GetState());
 		p->Write<float>(sound.GetOffset());
 		p->Write<float>(sound.GetPitch());
 		p->Write<bool>(sound.IsLooping());
@@ -74,29 +74,29 @@ void pragma::ServerState::SendSoundSourceToClient(pragma::audio::SALSound &sound
 		p->Write<float>(directFilter.gainHF);
 		p->Write<float>(directFilter.gainLF);
 
-		pragma::networking::write_unique_entity(p, sound.GetSource());
+		networking::write_unique_entity(p, sound.GetSource());
 	}
 	if(rf != nullptr)
-		SendPacket(pragma::networking::net_messages::client::SND_CREATE, p, pragma::networking::Protocol::FastUnreliable, *rf);
+		SendPacket(networking::net_messages::client::SND_CREATE, p, networking::Protocol::FastUnreliable, *rf);
 	else
-		SendPacket(pragma::networking::net_messages::client::SND_CREATE, p, pragma::networking::Protocol::FastUnreliable);
+		SendPacket(networking::net_messages::client::SND_CREATE, p, networking::Protocol::FastUnreliable);
 }
-std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::CreateSound(std::string snd, pragma::audio::ALSoundType type, pragma::audio::ALCreateFlags flags)
+std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::CreateSound(std::string snd, audio::ALSoundType type, audio::ALCreateFlags flags)
 {
-	pragma::string::to_lower(snd);
-	snd = pragma::fs::get_normalized_path(snd);
+	string::to_lower(snd);
+	snd = fs::get_normalized_path(snd);
 	if(m_missingSoundCache.find(snd) != m_missingSoundCache.end())
 		return nullptr;
-	pragma::audio::SoundScript *script = m_soundScriptManager->FindScript(snd.c_str());
+	audio::SoundScript *script = m_soundScriptManager->FindScript(snd.c_str());
 	float duration = 0.f;
 	if(script == nullptr) {
-		pragma::audio::get_full_sound_path(snd, true);
+		audio::get_full_sound_path(snd, true);
 		auto it = m_soundsPrecached.find(snd);
 		if(it == m_soundsPrecached.end()) {
 			static auto bSkipPrecache = false;
 			if(bSkipPrecache == false) {
 				Con::cwar << "Attempted to create unprecached sound '" << snd << "'! Precaching now..." << Con::endl;
-				auto channel = ((flags & pragma::audio::ALCreateFlags::Mono) != pragma::audio::ALCreateFlags::None) ? pragma::audio::ALChannel::Mono : pragma::audio::ALChannel::Auto;
+				auto channel = ((flags & audio::ALCreateFlags::Mono) != audio::ALCreateFlags::None) ? audio::ALChannel::Mono : audio::ALChannel::Auto;
 				if(PrecacheSound(snd, channel) == true) {
 					bSkipPrecache = true;
 					auto r = CreateSound(snd, type, flags);
@@ -105,15 +105,15 @@ std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::CreateSound(std::st
 				}
 			}
 			m_missingSoundCache.insert(snd);
-			return std::shared_ptr<pragma::audio::ALSound>();
+			return std::shared_ptr<audio::ALSound>();
 		}
 		else {
 			auto &inf = it->second;
-			if((flags & pragma::audio::ALCreateFlags::Mono) != pragma::audio::ALCreateFlags::None && inf->mono == false) {
+			if((flags & audio::ALCreateFlags::Mono) != audio::ALCreateFlags::None && inf->mono == false) {
 				static auto bSkipPrecache = false;
 				if(bSkipPrecache == false) {
 					Con::cwar << "Attempted to create sound '" << snd << "' as unprecached mono! Precaching now..." << Con::endl;
-					auto channel = ((flags & pragma::audio::ALCreateFlags::Mono) != pragma::audio::ALCreateFlags::None) ? pragma::audio::ALChannel::Mono : pragma::audio::ALChannel::Auto;
+					auto channel = ((flags & audio::ALCreateFlags::Mono) != audio::ALCreateFlags::None) ? audio::ALChannel::Mono : audio::ALChannel::Auto;
 					if(PrecacheSound(snd, channel) == true) {
 						bSkipPrecache = true;
 						auto r = CreateSound(snd, type, flags);
@@ -122,7 +122,7 @@ std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::CreateSound(std::st
 					}
 				}
 				m_missingSoundCache.insert(snd);
-				return std::shared_ptr<pragma::audio::ALSound>();
+				return std::shared_ptr<audio::ALSound>();
 			}
 		}
 		duration = it->second->duration;
@@ -136,13 +136,13 @@ std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::CreateSound(std::st
 		idx = m_alsoundID;
 		m_alsoundID++;
 	}
-	pragma::audio::ALSound *as = nullptr;
-	std::shared_ptr<pragma::audio::ALSound> pAs;
+	audio::ALSound *as = nullptr;
+	std::shared_ptr<audio::ALSound> pAs;
 	if(script == nullptr)
-		as = new pragma::audio::SALSound(this, idx, duration, snd, flags);
+		as = new audio::SALSound(this, idx, duration, snd, flags);
 	else
-		as = new pragma::audio::SALSoundScript(this, idx, script, this, snd, flags);
-	pAs = std::shared_ptr<pragma::audio::ALSound>(as, [](pragma::audio::ALSound *snd) {
+		as = new audio::SALSoundScript(this, idx, script, this, snd, flags);
+	pAs = std::shared_ptr<audio::ALSound>(as, [](audio::ALSound *snd) {
 		snd->OnRelease();
 		delete snd;
 	});
@@ -150,7 +150,7 @@ std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::CreateSound(std::st
 	m_serverSounds.push_back(pAs);
 	as->SetType(type);
 	as->AddCallback("OnDestroyed", FunctionCallback<void>::Create([this, as]() {
-		auto it = std::find_if(m_sounds.begin(), m_sounds.end(), [as](const pragma::audio::ALSoundRef &sndOther) { return (&sndOther.get() == as) ? true : false; });
+		auto it = std::find_if(m_sounds.begin(), m_sounds.end(), [as](const audio::ALSoundRef &sndOther) { return (&sndOther.get() == as) ? true : false; });
 		if(it == m_sounds.end())
 			return;
 		auto idx = it - m_sounds.begin();
@@ -158,13 +158,13 @@ std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::CreateSound(std::st
 		m_serverSounds.erase(m_serverSounds.begin() + idx);
 	}));
 	as->Initialize();
-	pragma::Game *game = GetGameState();
+	Game *game = GetGameState();
 	if(game != nullptr) {
-		game->CallCallbacks<void, pragma::audio::ALSound *>("OnSoundCreated", as);
-		game->CallLuaCallbacks<void, std::shared_ptr<pragma::audio::ALSound>>("OnSoundCreated", pAs);
+		game->CallCallbacks<void, audio::ALSound *>("OnSoundCreated", as);
+		game->CallLuaCallbacks<void, std::shared_ptr<audio::ALSound>>("OnSoundCreated", pAs);
 	}
-	if(pragma::math::is_flag_set(flags, pragma::audio::ALCreateFlags::DontTransmit) == false)
-		SendSoundSourceToClient(dynamic_cast<pragma::audio::SALSound &>(*pAs), false);
+	if(math::is_flag_set(flags, audio::ALCreateFlags::DontTransmit) == false)
+		SendSoundSourceToClient(dynamic_cast<audio::SALSound &>(*pAs), false);
 	return pAs;
 }
 
@@ -176,27 +176,27 @@ void pragma::ServerState::UpdateSounds()
 
 void pragma::ServerState::StopSounds() {}
 
-void pragma::ServerState::StopSound(std::shared_ptr<pragma::audio::ALSound> pSnd) {}
+void pragma::ServerState::StopSound(std::shared_ptr<audio::ALSound> pSnd) {}
 
-bool pragma::ServerState::PrecacheSound(std::string snd, pragma::audio::ALChannel mode)
+bool pragma::ServerState::PrecacheSound(std::string snd, audio::ALChannel mode)
 {
-	pragma::string::to_lower(snd);
+	string::to_lower(snd);
 	snd = fs::get_canonicalized_path(snd);
-	pragma::audio::get_full_sound_path(snd, true);
+	audio::get_full_sound_path(snd, true);
 
-	pragma::audio::SoundCacheInfo *inf = nullptr;
+	audio::SoundCacheInfo *inf = nullptr;
 	auto it = m_soundsPrecached.find(snd);
 	if(it != m_soundsPrecached.end()) {
 		inf = it->second.get();
-		if(mode == pragma::audio::ALChannel::Mono) {
+		if(mode == audio::ALChannel::Mono) {
 			if(inf->mono == true)
 				return true;
 		}
-		else if(mode == pragma::audio::ALChannel::Both) {
+		else if(mode == audio::ALChannel::Both) {
 			if(inf->mono == true && inf->stereo == true)
 				return true;
 		}
-		else if(mode == pragma::audio::ALChannel::Auto && inf->stereo == true)
+		else if(mode == audio::ALChannel::Auto && inf->stereo == true)
 			return true;
 	}
 	auto subPath = fs::get_canonicalized_path("sounds\\" + snd);
@@ -206,7 +206,7 @@ bool pragma::ServerState::PrecacheSound(std::string snd, pragma::audio::ALChanne
 		if(ufile::get_extension(subPath, &ext) == true)
 			bPort = pragma::util::port_file(this, subPath);
 		else {
-			auto audioFormats = pragma::engine_info::get_supported_audio_formats();
+			auto audioFormats = engine_info::get_supported_audio_formats();
 			for(auto &extFormat : audioFormats) {
 				auto extPath = subPath + '.' + extFormat;
 				bPort = pragma::util::port_file(this, extPath);
@@ -220,23 +220,23 @@ bool pragma::ServerState::PrecacheSound(std::string snd, pragma::audio::ALChanne
 		}
 	}
 	auto duration = 0.f;
-	if(pragma::audio::util::get_duration(subPath, duration) == false || duration == 0.f) {
+	if(audio::util::get_duration(subPath, duration) == false || duration == 0.f) {
 		spdlog::warn("Unable to precache sound '{}': Invalid format!", snd);
 		return false;
 	}
 	if(inf == nullptr)
-		inf = new pragma::audio::SoundCacheInfo;
-	if(mode == pragma::audio::ALChannel::Mono || mode == pragma::audio::ALChannel::Both)
+		inf = new audio::SoundCacheInfo;
+	if(mode == audio::ALChannel::Mono || mode == audio::ALChannel::Both)
 		inf->mono = true;
-	if(mode == pragma::audio::ALChannel::Auto || mode == pragma::audio::ALChannel::Both)
+	if(mode == audio::ALChannel::Auto || mode == audio::ALChannel::Both)
 		inf->stereo = true;
 	inf->duration = duration;
-	m_soundsPrecached.insert(std::unordered_map<std::string, pragma::audio::SoundCacheInfo *>::value_type(snd, inf));
+	m_soundsPrecached.insert(std::unordered_map<std::string, audio::SoundCacheInfo *>::value_type(snd, inf));
 	if(m_game != nullptr)
 		GetGameState()->RegisterGameResource(subPath);
 	NetPacket p;
 	p->WriteString(snd);
-	p->Write<uint8_t>(pragma::math::to_integral(mode));
-	SendPacket(pragma::networking::net_messages::client::SND_PRECACHE, p, pragma::networking::Protocol::SlowReliable);
+	p->Write<uint8_t>(math::to_integral(mode));
+	SendPacket(networking::net_messages::client::SND_PRECACHE, p, networking::Protocol::SlowReliable);
 	return true;
 }

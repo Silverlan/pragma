@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :physics.controller;
 
-pragma::physics::IController::IController(IEnvironment &env, const pragma::util::TSharedHandle<ICollisionObject> &collisionObject, const Vector3 &halfExtents, ShapeType shapeType) : IBase {env}, m_collisionObject {collisionObject}, m_halfExtents {halfExtents}, m_shapeType {shapeType} {}
+pragma::physics::IController::IController(IEnvironment &env, const util::TSharedHandle<ICollisionObject> &collisionObject, const Vector3 &halfExtents, ShapeType shapeType) : IBase {env}, m_collisionObject {collisionObject}, m_halfExtents {halfExtents}, m_shapeType {shapeType} {}
 
 void pragma::physics::IController::OnRemove()
 {

@@ -20,7 +20,7 @@ decltype(ShaderLightCone::DESCRIPTOR_SET_DEPTH_MAP) ShaderLightCone::DESCRIPTOR_
 ShaderLightCone::ShaderLightCone(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass(context, identifier, "effects/vs_light_cone", "effects/fs_light_cone")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
-	pragma::math::set_flag(m_sceneFlags, SceneFlags::LightmapsEnabled, false);
+	math::set_flag(m_sceneFlags, SceneFlags::LightmapsEnabled, false);
 }
 
 bool ShaderLightCone::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const

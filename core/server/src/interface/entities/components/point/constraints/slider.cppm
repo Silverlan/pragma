@@ -14,7 +14,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SPointConstraintSliderComponent final : public BasePointConstraintSliderComponent, public SBaseNetComponent {
 		  public:
-			SPointConstraintSliderComponent(pragma::ecs::BaseEntity &ent) : BasePointConstraintSliderComponent(ent) {}
+			SPointConstraintSliderComponent(ecs::BaseEntity &ent) : BasePointConstraintSliderComponent(ent) {}
 			virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 			virtual bool ShouldTransmitNetData() const override { return true; }
 			virtual void InitializeLuaObject(lua::State *l) override;

@@ -228,7 +228,7 @@ void Lua::PhysCollisionObj::register_class(lua::State *l, luabind::module_ &mod)
 	classDef.def("IsAsleep", static_cast<void (*)(lua::State *, pragma::physics::ICollisionObject *)>([](lua::State *l, pragma::physics::ICollisionObject *hPhys) {
 		if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l, hPhys) == false)
 			return;
-		Lua::PushBool(l, hPhys->IsAsleep());
+		PushBool(l, hPhys->IsAsleep());
 	}));
 	classDef.def("SetAlwaysAwake", static_cast<void (*)(lua::State *, pragma::physics::ICollisionObject *, bool)>([](lua::State *l, pragma::physics::ICollisionObject *hPhys, bool alwaysAwake) {
 		if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l, hPhys) == false)
@@ -247,7 +247,7 @@ void Lua::PhysCollisionObj::register_class(lua::State *l, luabind::module_ &mod)
 	PhysSoftBody::register_class(l, mod);
 
 	auto classDefGhost = luabind::class_<pragma::physics::IGhostObject, pragma::physics::IBase>("GhostObj");
-	classDefGhost.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IGhostObject *)>([](lua::State *l, pragma::physics::IGhostObject *hPhys) { Lua::PushBool(l, hPhys != nullptr); }));
+	classDefGhost.def("IsValid", static_cast<void (*)(lua::State *, pragma::physics::IGhostObject *)>([](lua::State *l, pragma::physics::IGhostObject *hPhys) { PushBool(l, hPhys != nullptr); }));
 	mod[classDefGhost];
 }
 
@@ -307,7 +307,7 @@ void Lua::PhysRigidBody::register_class(lua::State *l, luabind::module_ &mod)
 	classDef.def("IsKinematic", static_cast<void (*)(lua::State *, pragma::physics::IRigidBody *)>([](lua::State *l, pragma::physics::IRigidBody *hPhys) {
 		if(Lua::CheckHandle<pragma::physics::IRigidBody>(l, hPhys) == false)
 			return;
-		Lua::PushBool(l, hPhys->IsKinematic());
+		PushBool(l, hPhys->IsKinematic());
 	}));
 	mod[classDef];
 }
@@ -406,7 +406,7 @@ void Lua::PhysSoftBody::register_class(lua::State *l, luabind::module_ &mod)
 
 /////////////////////////////////////////////
 
-void Lua::PhysCollisionObj::IsValid(lua::State *l, pragma::physics::ICollisionObject *hPhys) { Lua::PushBool(l, hPhys != nullptr); }
+void Lua::PhysCollisionObj::IsValid(lua::State *l, pragma::physics::ICollisionObject *hPhys) { PushBool(l, hPhys != nullptr); }
 void Lua::PhysCollisionObj::Remove(lua::State *l, pragma::physics::ICollisionObject *hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l, hPhys) == false)
@@ -437,25 +437,25 @@ void Lua::PhysCollisionObj::GetBoundingSphere(lua::State *l, pragma::physics::IC
 	shape->GetBoundingSphere(center, radius);
 	center += hPhys->GetPos();
 	Lua::Push<Vector3>(l, center);
-	Lua::PushNumber(l, radius);
+	PushNumber(l, radius);
 }
 void Lua::PhysCollisionObj::IsRigid(lua::State *l, pragma::physics::ICollisionObject *hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l, hPhys) == false)
 		return;
-	Lua::PushBool(l, hPhys->IsRigid());
+	PushBool(l, hPhys->IsRigid());
 }
 void Lua::PhysCollisionObj::IsGhost(lua::State *l, pragma::physics::ICollisionObject *hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l, hPhys) == false)
 		return;
-	Lua::PushBool(l, hPhys->IsGhost());
+	PushBool(l, hPhys->IsGhost());
 }
 void Lua::PhysCollisionObj::IsSoftBody(lua::State *l, pragma::physics::ICollisionObject *hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l, hPhys) == false)
 		return;
-	Lua::PushBool(l, hPhys->IsSoftBody());
+	PushBool(l, hPhys->IsSoftBody());
 }
 void Lua::PhysCollisionObj::SetAngles(lua::State *l, pragma::physics::ICollisionObject *hPhys, const EulerAngles &ang)
 {
@@ -491,7 +491,7 @@ void Lua::PhysCollisionObj::IsSimulationEnabled(lua::State *l, pragma::physics::
 {
 	if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l, hPhys) == false)
 		return;
-	Lua::PushBool(l, hPhys->IsSimulationEnabled());
+	PushBool(l, hPhys->IsSimulationEnabled());
 }
 void Lua::PhysCollisionObj::GetShape(lua::State *l, pragma::physics::ICollisionObject *hPhys)
 {
@@ -506,7 +506,7 @@ void Lua::PhysCollisionObj::GetActivationState(lua::State *l, pragma::physics::I
 {
 	if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l, hPhys) == false)
 		return;
-	Lua::PushInt(l, hPhys->GetActivationState());
+	PushInt(l, hPhys->GetActivationState());
 }
 void Lua::PhysCollisionObj::SetActivationState(lua::State *l, pragma::physics::ICollisionObject *hPhys, int32_t state)
 {
@@ -537,7 +537,7 @@ void Lua::PhysCollisionObj::GetCollisionFilterGroup(lua::State *l, pragma::physi
 {
 	if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l, hPhys) == false)
 		return;
-	Lua::PushInt(l, hPhys->GetCollisionFilterGroup());
+	PushInt(l, hPhys->GetCollisionFilterGroup());
 }
 void Lua::PhysCollisionObj::SetCollisionFilterMask(lua::State *l, pragma::physics::ICollisionObject *hPhys, uint32_t mask)
 {
@@ -549,7 +549,7 @@ void Lua::PhysCollisionObj::GetCollisionFilterMask(lua::State *l, pragma::physic
 {
 	if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l, hPhys) == false)
 		return;
-	Lua::PushInt(l, hPhys->GetCollisionFilterMask());
+	PushInt(l, hPhys->GetCollisionFilterMask());
 }
 void Lua::PhysCollisionObj::GetWorldTransform(lua::State *l, pragma::physics::ICollisionObject *hPhys)
 {
@@ -599,7 +599,7 @@ void Lua::PhysCollisionObj::SetOrigin(lua::State *l, pragma::physics::ICollision
 
 /////////////////////////////////////////////
 
-void Lua::PhysRigidBody::IsValid(lua::State *l, pragma::physics::IRigidBody *hPhys) { Lua::PushBool(l, hPhys != nullptr); }
+void Lua::PhysRigidBody::IsValid(lua::State *l, pragma::physics::IRigidBody *hPhys) { PushBool(l, hPhys != nullptr); }
 void Lua::PhysRigidBody::SetLinearVelocity(lua::State *l, pragma::physics::IRigidBody *hPhys, Vector3 &vel)
 {
 	if(Lua::CheckHandle<pragma::physics::IRigidBody>(l, hPhys) == false)
@@ -634,7 +634,7 @@ void Lua::PhysRigidBody::GetMass(lua::State *l, pragma::physics::IRigidBody *hPh
 {
 	if(Lua::CheckHandle<pragma::physics::IRigidBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetMass());
+	PushNumber(l, hPhys->GetMass());
 }
 void Lua::PhysRigidBody::GetInertia(lua::State *l, pragma::physics::IRigidBody *hPhys)
 {
@@ -724,19 +724,19 @@ void Lua::PhysRigidBody::GetLinearDamping(lua::State *l, pragma::physics::IRigid
 {
 	if(Lua::CheckHandle<pragma::physics::IRigidBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetLinearDamping());
+	PushNumber(l, hPhys->GetLinearDamping());
 }
 void Lua::PhysRigidBody::GetAngularDamping(lua::State *l, pragma::physics::IRigidBody *hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::IRigidBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetAngularDamping());
+	PushNumber(l, hPhys->GetAngularDamping());
 }
 void Lua::PhysRigidBody::GetBoneID(lua::State *l, pragma::physics::IRigidBody *hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::IRigidBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetBoneID());
+	PushNumber(l, hPhys->GetBoneID());
 }
 void Lua::PhysRigidBody::SetBoneID(lua::State *l, pragma::physics::IRigidBody *hPhys, UInt32 boneId)
 {
@@ -790,26 +790,26 @@ void Lua::PhysRigidBody::GetLinearSleepingThreshold(lua::State *l, pragma::physi
 {
 	if(Lua::CheckHandle<pragma::physics::IRigidBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetLinearSleepingThreshold());
+	PushNumber(l, hPhys->GetLinearSleepingThreshold());
 }
 void Lua::PhysRigidBody::GetAngularSleepingThreshold(lua::State *l, pragma::physics::IRigidBody *hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::IRigidBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetAngularSleepingThreshold());
+	PushNumber(l, hPhys->GetAngularSleepingThreshold());
 }
 void Lua::PhysRigidBody::GetSleepingThreshold(lua::State *l, pragma::physics::IRigidBody *hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::IRigidBody>(l, hPhys) == false)
 		return;
 	auto thresholds = hPhys->GetSleepingThreshold();
-	Lua::PushNumber(l, thresholds.first);
-	Lua::PushNumber(l, thresholds.second);
+	PushNumber(l, thresholds.first);
+	PushNumber(l, thresholds.second);
 }
 
 /////////////////////////////////////////////
 
-void Lua::PhysSoftBody::IsValid(lua::State *l, pragma::physics::ISoftBody *hPhys) { Lua::PushBool(l, hPhys != nullptr); }
+void Lua::PhysSoftBody::IsValid(lua::State *l, pragma::physics::ISoftBody *hPhys) { PushBool(l, hPhys != nullptr); }
 void Lua::PhysSoftBody::AddAeroForceToNode(lua::State *l, pragma::physics::ISoftBody *&hPhys, uint32_t node, const Vector3 &force)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
@@ -850,19 +850,19 @@ void Lua::PhysSoftBody::GetFriction(lua::State *l, pragma::physics::ISoftBody *&
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetFriction());
+	PushNumber(l, hPhys->GetFriction());
 }
 void Lua::PhysSoftBody::GetHitFraction(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetHitFraction());
+	PushNumber(l, hPhys->GetHitFraction());
 }
 void Lua::PhysSoftBody::GetRollingFriction(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetRollingFriction());
+	PushNumber(l, hPhys->GetRollingFriction());
 }
 void Lua::PhysSoftBody::GetAnisotropicFriction(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
@@ -898,25 +898,25 @@ void Lua::PhysSoftBody::GetMass(lua::State *l, pragma::physics::ISoftBody *&hPhy
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetMass(node));
+	PushNumber(l, hPhys->GetMass(node));
 }
 void Lua::PhysSoftBody::GetMass(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetMass());
+	PushNumber(l, hPhys->GetMass());
 }
 void Lua::PhysSoftBody::GetRestitution(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetRestitution());
+	PushNumber(l, hPhys->GetRestitution());
 }
 void Lua::PhysSoftBody::GetRestLengthScale(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetRestLengthScale());
+	PushNumber(l, hPhys->GetRestLengthScale());
 }
 void Lua::PhysSoftBody::GetWindVelocity(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
@@ -976,7 +976,7 @@ void Lua::PhysSoftBody::GetVolume(lua::State *l, pragma::physics::ISoftBody *&hP
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetVolume());
+	PushNumber(l, hPhys->GetVolume());
 }
 void Lua::PhysSoftBody::SetDensity(lua::State *l, pragma::physics::ISoftBody *&hPhys, float density)
 {
@@ -1098,109 +1098,109 @@ void Lua::PhysSoftBody::GetAnchorsHardness(lua::State *l, pragma::physics::ISoft
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetAnchorsHardness());
+	PushNumber(l, hPhys->GetAnchorsHardness());
 }
 void Lua::PhysSoftBody::GetRigidContactsHardness(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetRigidContactsHardness());
+	PushNumber(l, hPhys->GetRigidContactsHardness());
 }
 void Lua::PhysSoftBody::GetDynamicFrictionCoefficient(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetDynamicFrictionCoefficient());
+	PushNumber(l, hPhys->GetDynamicFrictionCoefficient());
 }
 void Lua::PhysSoftBody::GetDragCoefficient(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetDragCoefficient());
+	PushNumber(l, hPhys->GetDragCoefficient());
 }
 void Lua::PhysSoftBody::GetDampingCoefficient(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetDampingCoefficient());
+	PushNumber(l, hPhys->GetDampingCoefficient());
 }
 void Lua::PhysSoftBody::GetKineticContactsHardness(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetKineticContactsHardness());
+	PushNumber(l, hPhys->GetKineticContactsHardness());
 }
 void Lua::PhysSoftBody::GetLiftCoefficient(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetLiftCoefficient());
+	PushNumber(l, hPhys->GetLiftCoefficient());
 }
 void Lua::PhysSoftBody::GetPoseMatchingCoefficient(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetPoseMatchingCoefficient());
+	PushNumber(l, hPhys->GetPoseMatchingCoefficient());
 }
 void Lua::PhysSoftBody::GetPressureCoefficient(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetPressureCoefficient());
+	PushNumber(l, hPhys->GetPressureCoefficient());
 }
 void Lua::PhysSoftBody::GetSoftContactsHardness(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetSoftContactsHardness());
+	PushNumber(l, hPhys->GetSoftContactsHardness());
 }
 void Lua::PhysSoftBody::GetSoftVsKineticHardness(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetSoftVsKineticHardness());
+	PushNumber(l, hPhys->GetSoftVsKineticHardness());
 }
 void Lua::PhysSoftBody::GetSoftVsRigidImpulseSplitK(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetSoftVsRigidImpulseSplitK());
+	PushNumber(l, hPhys->GetSoftVsRigidImpulseSplitK());
 }
 void Lua::PhysSoftBody::GetSoftVsRigidHardness(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetSoftVsRigidHardness());
+	PushNumber(l, hPhys->GetSoftVsRigidHardness());
 }
 void Lua::PhysSoftBody::GetSoftVsRigidImpulseSplitR(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetSoftVsRigidImpulseSplitR());
+	PushNumber(l, hPhys->GetSoftVsRigidImpulseSplitR());
 }
 void Lua::PhysSoftBody::GetSoftVsSoftHardness(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetSoftVsSoftHardness());
+	PushNumber(l, hPhys->GetSoftVsSoftHardness());
 }
 void Lua::PhysSoftBody::GetSoftVsRigidImpulseSplitS(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetSoftVsRigidImpulseSplitS());
+	PushNumber(l, hPhys->GetSoftVsRigidImpulseSplitS());
 }
 void Lua::PhysSoftBody::GetVolumeConversationCoefficient(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetVolumeConversationCoefficient());
+	PushNumber(l, hPhys->GetVolumeConversationCoefficient());
 }
 void Lua::PhysSoftBody::GetVelocitiesCorrectionFactor(lua::State *l, pragma::physics::ISoftBody *&hPhys)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetVelocitiesCorrectionFactor());
+	PushNumber(l, hPhys->GetVelocitiesCorrectionFactor());
 }
 void Lua::PhysSoftBody::SetMaterialAngularStiffnessCoefficient(lua::State *l, pragma::physics::ISoftBody *&hPhys, uint32_t matId, float val)
 {
@@ -1224,19 +1224,19 @@ void Lua::PhysSoftBody::GetMaterialAngularStiffnessCoefficient(lua::State *l, pr
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetMaterialAngularStiffnessCoefficient(matId));
+	PushNumber(l, hPhys->GetMaterialAngularStiffnessCoefficient(matId));
 }
 void Lua::PhysSoftBody::GetMaterialLinearStiffnessCoefficient(lua::State *l, pragma::physics::ISoftBody *&hPhys, uint32_t matId)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetMaterialLinearStiffnessCoefficient(matId));
+	PushNumber(l, hPhys->GetMaterialLinearStiffnessCoefficient(matId));
 }
 void Lua::PhysSoftBody::GetMaterialVolumeStiffnessCoefficient(lua::State *l, pragma::physics::ISoftBody *&hPhys, uint32_t matId)
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushNumber(l, hPhys->GetMaterialVolumeStiffnessCoefficient(matId));
+	PushNumber(l, hPhys->GetMaterialVolumeStiffnessCoefficient(matId));
 }
 void Lua::PhysSoftBody::AppendAnchor(lua::State *l, pragma::physics::ISoftBody *hPhys, uint32_t nodeId, pragma::physics::IRigidBody *hRigidBody, const Vector3 &localPivot, bool bDisableCollision, float influence)
 {
@@ -1278,7 +1278,7 @@ void Lua::PhysSoftBody::GetNodeCount(lua::State *l, pragma::physics::ISoftBody *
 {
 	if(Lua::CheckHandle<pragma::physics::ISoftBody>(l, hPhys) == false)
 		return;
-	Lua::PushInt(l, hPhys->GetNodeCount());
+	PushInt(l, hPhys->GetNodeCount());
 }
 void Lua::PhysSoftBody::MeshVertexIndexToLocalVertexIndex(lua::State *l, pragma::physics::ISoftBody *&hPhys, uint32_t meshVertexIndex)
 {
@@ -1287,7 +1287,7 @@ void Lua::PhysSoftBody::MeshVertexIndexToLocalVertexIndex(lua::State *l, pragma:
 	uint16_t localIndex = 0u;
 	if(hPhys->MeshVertexIndexToLocalVertexIndex(meshVertexIndex, localIndex) == false)
 		return;
-	Lua::PushInt(l, localIndex);
+	PushInt(l, localIndex);
 }
 void Lua::PhysSoftBody::LocalVertexIndexToMeshVertexIndex(lua::State *l, pragma::physics::ISoftBody *&hPhys, uint32_t localIndex)
 {
@@ -1296,7 +1296,7 @@ void Lua::PhysSoftBody::LocalVertexIndexToMeshVertexIndex(lua::State *l, pragma:
 	uint16_t meshVertexIndex = 0u;
 	if(hPhys->LocalVertexIndexToMeshVertexIndex(localIndex, meshVertexIndex) == false)
 		return;
-	Lua::PushInt(l, meshVertexIndex);
+	PushInt(l, meshVertexIndex);
 }
 void Lua::PhysSoftBody::LocalVertexIndexToNodeIndex(lua::State *l, pragma::physics::ISoftBody *&hPhys, uint32_t localVertexIndex)
 {
@@ -1305,7 +1305,7 @@ void Lua::PhysSoftBody::LocalVertexIndexToNodeIndex(lua::State *l, pragma::physi
 	uint16_t nodeIndex = 0u;
 	if(hPhys->LocalVertexIndexToNodeIndex(localVertexIndex, nodeIndex) == false)
 		return;
-	Lua::PushInt(l, nodeIndex);
+	PushInt(l, nodeIndex);
 }
 void Lua::PhysSoftBody::NodeIndexToLocalVertexIndex(lua::State *l, pragma::physics::ISoftBody *&hPhys, uint32_t nodeIndex)
 {
@@ -1314,7 +1314,7 @@ void Lua::PhysSoftBody::NodeIndexToLocalVertexIndex(lua::State *l, pragma::physi
 	uint16_t localIndex = 0u;
 	if(hPhys->NodeIndexToLocalVertexIndex(nodeIndex, localIndex) == false)
 		return;
-	Lua::PushInt(l, localIndex);
+	PushInt(l, localIndex);
 }
 
 void Lua::PhysSoftBody::MeshVertexIndexToNodeIndex(lua::State *l, pragma::physics::ISoftBody *&hPhys, uint32_t meshVertexIndex)
@@ -1324,7 +1324,7 @@ void Lua::PhysSoftBody::MeshVertexIndexToNodeIndex(lua::State *l, pragma::physic
 	uint16_t nodeIndex = 0u;
 	if(hPhys->MeshVertexIndexToNodeIndex(meshVertexIndex, nodeIndex) == false)
 		return;
-	Lua::PushInt(l, nodeIndex);
+	PushInt(l, nodeIndex);
 }
 void Lua::PhysSoftBody::NodeIndexToMeshVertexIndex(lua::State *l, pragma::physics::ISoftBody *&hPhys, uint32_t nodeIndex)
 {
@@ -1333,5 +1333,5 @@ void Lua::PhysSoftBody::NodeIndexToMeshVertexIndex(lua::State *l, pragma::physic
 	uint16_t meshIndex = 0u;
 	if(hPhys->NodeIndexToMeshVertexIndex(nodeIndex, meshIndex) == false)
 		return;
-	Lua::PushInt(l, meshIndex);
+	PushInt(l, meshIndex);
 }

@@ -12,7 +12,7 @@ void SPointConstraintConeTwistComponent::SendData(NetPacket &packet, networking:
 {
 	packet->WriteString(m_kvSource);
 	packet->WriteString(m_kvTarget);
-	pragma::networking::write_vector(packet, m_posTarget);
+	networking::write_vector(packet, m_posTarget);
 
 	packet->Write<float>(m_kvSwingSpan1);
 	packet->Write<float>(m_kvSwingSpan2);

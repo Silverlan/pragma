@@ -6,20 +6,20 @@ module;
 module pragma.client;
 
 import :rendering.enums;
-bool pragma::rendering::premultiply_alpha(Vector4 &color, pragma::rendering::ParticleAlphaMode alphaMode)
+bool pragma::rendering::premultiply_alpha(Vector4 &color, ParticleAlphaMode alphaMode)
 {
 	switch(alphaMode) {
-	case pragma::rendering::ParticleAlphaMode::Opaque:
+	case ParticleAlphaMode::Opaque:
 		color = {color.r * color.a, color.g * color.a, color.b * color.a, 1.f};
 		break;
-	case pragma::rendering::ParticleAlphaMode::Translucent:
+	case ParticleAlphaMode::Translucent:
 		color = {color.r * color.a, color.g * color.a, color.b * color.a, color.a};
 		break;
-	case pragma::rendering::ParticleAlphaMode::Additive:
-	case pragma::rendering::ParticleAlphaMode::AdditiveByColor:
+	case ParticleAlphaMode::Additive:
+	case ParticleAlphaMode::AdditiveByColor:
 		color = {color.r * color.a, color.g * color.a, color.b * color.a, 0.f};
 		break;
-	case pragma::rendering::ParticleAlphaMode::Premultiplied:
+	case ParticleAlphaMode::Premultiplied:
 		// No change
 		break;
 	default:
@@ -30,13 +30,13 @@ bool pragma::rendering::premultiply_alpha(Vector4 &color, pragma::rendering::Par
 
 int pragma::rendering::GetMaxMSAASampleCount()
 {
-	auto props = pragma::get_cengine()->GetRenderContext().GetPhysicalDeviceImageFormatProperties(
+	auto props = get_cengine()->GetRenderContext().GetPhysicalDeviceImageFormatProperties(
 	  {prosper::ImageCreateFlags {}, prosper::Format::R16G16B16A16_SFloat, prosper::ImageType::e2D, prosper::ImageTiling::Optimal, prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit});
 	if(props.has_value() == false) {
 		Con::cwar << "Unable to retrieve max MSAA sample count! Setting sample count to 1..." << Con::endl;
 		return 1;
 	}
-	return pragma::math::get_highest_bit(pragma::math::to_integral(props->sampleCount));
+	return math::get_highest_bit(math::to_integral(props->sampleCount));
 }
 unsigned char pragma::rendering::ClampMSAASampleCount(unsigned int *samples)
 {

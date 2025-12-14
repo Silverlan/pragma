@@ -18,7 +18,7 @@ void SSkyboxComponent::SetSkyAngles(const EulerAngles &ang)
 
 	NetPacket p {};
 	p->Write<EulerAngles>(ang);
-	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetSkyAngles, p, pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetSkyAngles, p, networking::Protocol::SlowReliable);
 }
 
 void SSkyboxComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->Write<EulerAngles>(m_skyAngles); }

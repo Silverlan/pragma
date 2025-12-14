@@ -17,13 +17,13 @@ decltype(ShaderForwardPLightIndexing::DESCRIPTOR_SET_VISIBLE_LIGHT) ShaderForwar
     prosper::DescriptorSetInfo::Binding {"VISIBLE_LIGHT_INDEX_BUFFER", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit}},
 };
 
-ShaderForwardPLightIndexing::ShaderForwardPLightIndexing(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderCompute(context, identifier, "programs/compute/forwardp_light_indexing") {}
+ShaderForwardPLightIndexing::ShaderForwardPLightIndexing(prosper::IPrContext &context, const std::string &identifier) : ShaderCompute(context, identifier, "programs/compute/forwardp_light_indexing") {}
 
-void ShaderForwardPLightIndexing::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx); }
+void ShaderForwardPLightIndexing::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx); }
 
 void ShaderForwardPLightIndexing::InitializeShaderResources()
 {
-	prosper::ShaderCompute::InitializeShaderResources();
+	ShaderCompute::InitializeShaderResources();
 
 	AttachPushConstantRange(0u, sizeof(PushConstants), prosper::ShaderStageFlags::ComputeBit);
 	AddDescriptorSetGroup(DESCRIPTOR_SET_VISIBLE_LIGHT);

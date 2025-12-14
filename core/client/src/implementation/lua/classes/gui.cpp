@@ -56,9 +56,9 @@ static TStream &print_ui_element(TStream &os, const pragma::gui::types::WIBase &
 	return os;
 }
 namespace pragma::gui::types {
-	DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, const pragma::gui::types::WIBase &handle) { return print_ui_element<Con::c_cout>(os, handle); }
-	DLLCLIENT std::ostream &operator<<(std::ostream &os, const pragma::gui::types::WIBase &handle) { return print_ui_element<std::ostream>(os, handle); }
-	static bool operator==(pragma::gui::types::WIBase &a, pragma::gui::types::WIBase &b) { return &a == &b; }
+	DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, const WIBase &handle) { return print_ui_element<Con::c_cout>(os, handle); }
+	DLLCLIENT std::ostream &operator<<(std::ostream &os, const WIBase &handle) { return print_ui_element<std::ostream>(os, handle); }
+	static bool operator==(WIBase &a, WIBase &b) { return &a == &b; }
 }
 
 static void record_render_ui(pragma::gui::types::WIBase &el, prosper::IImage &img, const Lua::gui::DrawToTextureInfo &info, const std::shared_ptr<prosper::ICommandBuffer> &drawCmd)
@@ -161,11 +161,11 @@ static std::shared_ptr<prosper::Texture> draw_to_texture(pragma::gui::types::WIB
 	return context.CreateTexture({}, *imgDst, prosper::util::ImageViewCreateInfo {}, prosper::util::SamplerCreateInfo {});
 }
 
-static void clamp_to_parent_bounds(pragma::gui::types::WIBase &el, ::Vector2i &clampedPos, ::Vector2i &clamedSize)
+static void clamp_to_parent_bounds(pragma::gui::types::WIBase &el, Vector2i &clampedPos, Vector2i &clamedSize)
 {
 	auto parent = el.GetParent();
-	::Vector2i pos = el.GetPos();
-	::Vector2i size = el.GetSize();
+	Vector2i pos = el.GetPos();
+	Vector2i size = el.GetSize();
 }
 
 static void debug_print_hierarchy(const pragma::gui::types::WIBase &el, const std::string &t = "")
@@ -313,9 +313,9 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("IsPosInBounds", &PosInBounds);
 	classDef.def("IsCursorInBounds", &pragma::gui::types::WIBase::MouseInBounds);
 	classDef.def("GetCursorPos", &GetMousePos);
-	classDef.def("Draw", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, const ::pragma::gui::DrawInfo &, pragma::gui::DrawState &, const ::Vector2i &, const ::Vector2i &, const ::Vector2i &)>(&Draw));
-	classDef.def("Draw", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, const ::pragma::gui::DrawInfo &, pragma::gui::DrawState &, const ::Vector2i &, const ::Vector2i &)>(&Draw));
-	classDef.def("Draw", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, const ::pragma::gui::DrawInfo &, pragma::gui::DrawState &)>(&Draw));
+	classDef.def("Draw", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, const pragma::gui::DrawInfo &, pragma::gui::DrawState &, const ::Vector2i &, const ::Vector2i &, const ::Vector2i &)>(&Draw));
+	classDef.def("Draw", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, const pragma::gui::DrawInfo &, pragma::gui::DrawState &, const ::Vector2i &, const ::Vector2i &)>(&Draw));
+	classDef.def("Draw", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, const pragma::gui::DrawInfo &, pragma::gui::DrawState &)>(&Draw));
 	classDef.def("DrawToTexture", &render_ui);
 	classDef.def("DrawToTexture", +[](pragma::gui::types::WIBase &el, prosper::RenderTarget &rt) { return render_ui(el, rt, {}); });
 	classDef.def("DrawToTexture", &draw_to_texture);
@@ -520,27 +520,27 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetFileDropInputEnabled", &pragma::gui::types::WIBase::GetFileDropInputEnabled);
 	classDef.def("SetFileDropInputEnabled", &pragma::gui::types::WIBase::SetFileDropInputEnabled);
 
-	auto defDrawInfo = luabind::class_<::pragma::gui::DrawInfo>("DrawInfo");
-	defDrawInfo.add_static_constant("FLAG_NONE", pragma::math::to_integral(::pragma::gui::DrawInfo::Flags::None));
-	defDrawInfo.add_static_constant("FLAG_USE_SCISSOR_BIT", pragma::math::to_integral(::pragma::gui::DrawInfo::Flags::UseScissor));
-	defDrawInfo.add_static_constant("FLAG_USE_STENCIL_BIT", pragma::math::to_integral(::pragma::gui::DrawInfo::Flags::UseStencil));
-	defDrawInfo.add_static_constant("FLAG_MSAA_BIT", pragma::math::to_integral(::pragma::gui::DrawInfo::Flags::Msaa));
-	defDrawInfo.add_static_constant("FLAG_DONT_SKIP_IF_OUT_OF_BOUNDS_BIT", pragma::math::to_integral(::pragma::gui::DrawInfo::Flags::DontSkipIfOutOfBounds));
+	auto defDrawInfo = luabind::class_<pragma::gui::DrawInfo>("DrawInfo");
+	defDrawInfo.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::gui::DrawInfo::Flags::None));
+	defDrawInfo.add_static_constant("FLAG_USE_SCISSOR_BIT", pragma::math::to_integral(pragma::gui::DrawInfo::Flags::UseScissor));
+	defDrawInfo.add_static_constant("FLAG_USE_STENCIL_BIT", pragma::math::to_integral(pragma::gui::DrawInfo::Flags::UseStencil));
+	defDrawInfo.add_static_constant("FLAG_MSAA_BIT", pragma::math::to_integral(pragma::gui::DrawInfo::Flags::Msaa));
+	defDrawInfo.add_static_constant("FLAG_DONT_SKIP_IF_OUT_OF_BOUNDS_BIT", pragma::math::to_integral(pragma::gui::DrawInfo::Flags::DontSkipIfOutOfBounds));
 	defDrawInfo.def(luabind::constructor<const std::shared_ptr<prosper::ICommandBuffer> &>());
-	defDrawInfo.def_readwrite("offset", &::pragma::gui::DrawInfo::offset);
-	defDrawInfo.def_readwrite("size", &::pragma::gui::DrawInfo::size);
-	defDrawInfo.def_readwrite("transform", &::pragma::gui::DrawInfo::transform);
-	defDrawInfo.def_readwrite("flags", &::pragma::gui::DrawInfo::flags);
-	defDrawInfo.property("commandBuffer", static_cast<luabind::object (*)(lua::State *, ::pragma::gui::DrawInfo &)>([](lua::State *l, ::pragma::gui::DrawInfo &drawInfo) -> luabind::object { return drawInfo.commandBuffer ? luabind::object {l, drawInfo.commandBuffer} : luabind::object {}; }),
-	  static_cast<void (*)(lua::State *, ::pragma::gui::DrawInfo &, luabind::object)>([](lua::State *l, ::pragma::gui::DrawInfo &drawInfo, luabind::object o) {
-		  if(Lua::IsSet(l, 2) == false) {
+	defDrawInfo.def_readwrite("offset", &pragma::gui::DrawInfo::offset);
+	defDrawInfo.def_readwrite("size", &pragma::gui::DrawInfo::size);
+	defDrawInfo.def_readwrite("transform", &pragma::gui::DrawInfo::transform);
+	defDrawInfo.def_readwrite("flags", &pragma::gui::DrawInfo::flags);
+	defDrawInfo.property("commandBuffer", static_cast<luabind::object (*)(lua::State *, pragma::gui::DrawInfo &)>([](lua::State *l, pragma::gui::DrawInfo &drawInfo) -> luabind::object { return drawInfo.commandBuffer ? luabind::object {l, drawInfo.commandBuffer} : luabind::object {}; }),
+	  static_cast<void (*)(lua::State *, pragma::gui::DrawInfo &, luabind::object)>([](lua::State *l, pragma::gui::DrawInfo &drawInfo, luabind::object o) {
+		  if(IsSet(l, 2) == false) {
 			  drawInfo.commandBuffer = nullptr;
 			  return;
 		  }
-		  drawInfo.commandBuffer = Lua::Check<Lua::Vulkan::CommandBuffer>(l, 2).shared_from_this();
+		  drawInfo.commandBuffer = Lua::Check<Vulkan::CommandBuffer>(l, 2).shared_from_this();
 	  }));
-	defDrawInfo.def("SetColor", static_cast<void (*)(lua::State *, ::pragma::gui::DrawInfo &, const ::Color &)>([](lua::State *l, ::pragma::gui::DrawInfo &drawInfo, const ::Color &color) { drawInfo.color = color.ToVector4(); }));
-	defDrawInfo.def("SetPostTransform", static_cast<void (*)(lua::State *, ::pragma::gui::DrawInfo &, const ::Mat4 &)>([](lua::State *l, ::pragma::gui::DrawInfo &drawInfo, const ::Mat4 &t) { drawInfo.postTransform = t; }));
+	defDrawInfo.def("SetColor", static_cast<void (*)(lua::State *, pragma::gui::DrawInfo &, const ::Color &)>([](lua::State *l, pragma::gui::DrawInfo &drawInfo, const ::Color &color) { drawInfo.color = color.ToVector4(); }));
+	defDrawInfo.def("SetPostTransform", static_cast<void (*)(lua::State *, pragma::gui::DrawInfo &, const ::Mat4 &)>([](lua::State *l, pragma::gui::DrawInfo &drawInfo, const ::Mat4 &t) { drawInfo.postTransform = t; }));
 	classDef.scope[defDrawInfo];
 }
 
@@ -612,10 +612,10 @@ void Lua::WITexturedShape::register_class(luabind::class_<pragma::gui::types::WI
 	classDef.def("SetAlphaMode", &pragma::gui::types::WITexturedShape::SetAlphaMode);
 	classDef.def("SetAlphaCutoff", &pragma::gui::types::WITexturedShape::SetAlphaCutoff);
 	classDef.def("GetAlphaCutoff", &pragma::gui::types::WITexturedShape::GetAlphaCutoff);
-	classDef.add_static_constant("CHANNEL_RED", pragma::math::to_integral(::pragma::gui::shaders::ShaderTextured::Channel::Red));
-	classDef.add_static_constant("CHANNEL_GREEN", pragma::math::to_integral(::pragma::gui::shaders::ShaderTextured::Channel::Green));
-	classDef.add_static_constant("CHANNEL_BLUE", pragma::math::to_integral(::pragma::gui::shaders::ShaderTextured::Channel::Blue));
-	classDef.add_static_constant("CHANNEL_ALPHA", pragma::math::to_integral(::pragma::gui::shaders::ShaderTextured::Channel::Alpha));
+	classDef.add_static_constant("CHANNEL_RED", pragma::math::to_integral(pragma::gui::shaders::ShaderTextured::Channel::Red));
+	classDef.add_static_constant("CHANNEL_GREEN", pragma::math::to_integral(pragma::gui::shaders::ShaderTextured::Channel::Green));
+	classDef.add_static_constant("CHANNEL_BLUE", pragma::math::to_integral(pragma::gui::shaders::ShaderTextured::Channel::Blue));
+	classDef.add_static_constant("CHANNEL_ALPHA", pragma::math::to_integral(pragma::gui::shaders::ShaderTextured::Channel::Alpha));
 }
 
 void Lua::WIIcon::register_class(luabind::class_<pragma::gui::types::WIIcon, luabind::bases<pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>> &classDef) { classDef.def("SetClipping", &pragma::gui::types::WIIcon::SetClipping); }
@@ -647,13 +647,13 @@ void Lua::WIGridPanel::register_class(luabind::class_<pragma::gui::types::WIGrid
 void Lua::WITreeList::register_class(luabind::class_<pragma::gui::types::WITreeList, luabind::bases<pragma::gui::types::WITable, pragma::gui::types::WIBase>> &classDef)
 {
 	classDef.def("AddItem", static_cast<pragma::gui::types::WITreeListElement *(*)(lua::State *, pragma::gui::types::WITreeList &, const std::string &)>([](lua::State *l, pragma::gui::types::WITreeList &hPanel, const std::string &text) -> pragma::gui::types::WITreeListElement * { return hPanel.AddItem(text); }));
-	classDef.def("AddItem", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, pragma::gui::types::WITreeList &, const std::string &, Lua::func<void(pragma::gui::types::WIBase)>)>([](lua::State *l, pragma::gui::types::WITreeList &hPanel, const std::string &text, Lua::func<void(pragma::gui::types::WIBase)> populate) -> pragma::gui::types::WIBase * {
+	classDef.def("AddItem", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, pragma::gui::types::WITreeList &, const std::string &, func<void(pragma::gui::types::WIBase)>)>([](lua::State *l, pragma::gui::types::WITreeList &hPanel, const std::string &text, func<void(pragma::gui::types::WIBase)> populate) -> pragma::gui::types::WIBase * {
 		auto fPopulate = [l, populate](pragma::gui::types::WITreeListElement &el) {
-			Lua::CallFunction(l, [&populate, &el](lua::State *l) {
+			CallFunction(l, [&populate, &el](lua::State *l) {
 				populate.push(l);
 				auto o = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
 				o.push(l);
-				return Lua::StatusCode::Ok;
+				return StatusCode::Ok;
 			});
 		};
 		return hPanel.AddItem(text, fPopulate);
@@ -670,13 +670,13 @@ void Lua::WITreeListElement::register_class(luabind::class_<pragma::gui::types::
 	classDef.def("Collapse", static_cast<void (*)(pragma::gui::types::WITreeListElement &)>([](pragma::gui::types::WITreeListElement &el) { el.Collapse(); }));
 	classDef.def("GetItems", &pragma::gui::types::WITreeListElement::GetItems);
 	classDef.def("AddItem", static_cast<pragma::gui::types::WITreeListElement *(*)(lua::State *, pragma::gui::types::WITreeListElement &, const std::string &)>([](lua::State *l, pragma::gui::types::WITreeListElement &hPanel, const std::string &text) -> pragma::gui::types::WITreeListElement * { return hPanel.AddItem(text); }));
-	classDef.def("AddItem", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, pragma::gui::types::WITreeListElement &, const std::string &, Lua::func<void(pragma::gui::types::WIBase)>)>([](lua::State *l, pragma::gui::types::WITreeListElement &hPanel, const std::string &text, Lua::func<void(pragma::gui::types::WIBase)> populate) -> pragma::gui::types::WIBase * {
+	classDef.def("AddItem", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, pragma::gui::types::WITreeListElement &, const std::string &, func<void(pragma::gui::types::WIBase)>)>([](lua::State *l, pragma::gui::types::WITreeListElement &hPanel, const std::string &text, func<void(pragma::gui::types::WIBase)> populate) -> pragma::gui::types::WIBase * {
 		auto fPopulate = [l, populate](pragma::gui::types::WITreeListElement &el) {
-			Lua::CallFunction(l, [&populate, &el](lua::State *l) {
+			CallFunction(l, [&populate, &el](lua::State *l) {
 				populate.push(l);
 				auto o = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
 				o.push(l);
-				return Lua::StatusCode::Ok;
+				return StatusCode::Ok;
 			});
 		};
 		return hPanel.AddItem(text, fPopulate);
@@ -712,9 +712,9 @@ void Lua::WITable::register_class(luabind::class_<pragma::gui::types::WITable, l
 	classDef.def("IsSortable", &pragma::gui::types::WITable::IsSortable);
 	classDef.def("Sort", static_cast<void (pragma::gui::types::WITable::*)()>(&pragma::gui::types::WITable::Sort));
 	classDef.def(
-	  "SetSortFunction", +[](lua::State *l, pragma::gui::types::WITable &table, const Lua::func<bool, const pragma::gui::types::WITableRow &, const pragma::gui::types::WITableRow &> &lfunc) {
+	  "SetSortFunction", +[](lua::State *l, pragma::gui::types::WITable &table, const func<bool, const pragma::gui::types::WITableRow &, const pragma::gui::types::WITableRow &> &lfunc) {
 		  table.SetSortFunction([l, lfunc](const pragma::gui::types::WITableRow &rowA, const pragma::gui::types::WITableRow &rowB, uint32_t columnIndex, bool ascending) -> bool {
-			  auto r = Lua::CallFunction(
+			  auto r = CallFunction(
 			    l,
 			    [&lfunc, &rowA, &rowB, columnIndex, ascending](lua::State *l) {
 				    lfunc.push(l);
@@ -722,12 +722,12 @@ void Lua::WITable::register_class(luabind::class_<pragma::gui::types::WITable, l
 				    Lua::Push<pragma::gui::types::WIBase *>(l, const_cast<pragma::gui::types::WITableRow *>(&rowB));
 				    Lua::Push<uint32_t>(l, columnIndex);
 				    Lua::Push<bool>(l, ascending);
-				    return Lua::StatusCode::Ok;
+				    return StatusCode::Ok;
 			    },
 			    1);
-			  if(r == Lua::StatusCode::Ok) {
-				  auto res = Lua::CheckBool(l, -1);
-				  Lua::Pop(l, 1);
+			  if(r == StatusCode::Ok) {
+				  auto res = CheckBool(l, -1);
+				  Pop(l, 1);
 				  return res;
 			  }
 			  return false;
@@ -868,8 +868,8 @@ void Lua::WIText::register_class(luabind::class_<pragma::gui::types::WIText, pra
 	}));
 	classDef.def("GetTextLength", static_cast<uint32_t (*)(lua::State *, pragma::gui::types::WIText &)>([](lua::State *l, pragma::gui::types::WIText &hPanel) -> uint32_t { return hPanel.GetText().length(); }));
 	classDef.def("SetTagArgument", static_cast<void (*)(lua::State *, pragma::gui::types::WIText &, const std::string &, uint32_t, luabind::object)>([](lua::State *l, pragma::gui::types::WIText &hPanel, const std::string &label, uint32_t argIdx, luabind::object o) {
-		if(Lua::IsString(l, 4)) {
-			std::string arg = Lua::CheckString(l, 4);
+		if(IsString(l, 4)) {
+			std::string arg = CheckString(l, 4);
 			hPanel.SetTagArgument(label, argIdx, arg);
 		}
 		else if(Lua::IsType<::Vector4>(l, 4)) {
@@ -880,19 +880,19 @@ void Lua::WIText::register_class(luabind::class_<pragma::gui::types::WIText, pra
 			auto &arg = Lua::Check<::Color>(l, 4);
 			hPanel.SetTagArgument(label, argIdx, arg);
 		}
-		else if(Lua::IsFunction(l, 4)) {
+		else if(IsFunction(l, 4)) {
 			auto f = luabind::object(luabind::from_stack(l, 4));
 			auto arg = FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([f, l](pragma::util::EventReply *reply) -> CallbackReturnType {
-				auto r = Lua::CallFunction(
+				auto r = CallFunction(
 				  l,
 				  [&f](lua::State *l) {
 					  f.push(l);
-					  return Lua::StatusCode::Ok;
+					  return StatusCode::Ok;
 				  },
 				  1);
-				if(r == Lua::StatusCode::Ok) {
-					if(Lua::IsSet(l, -1))
-						*reply = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
+				if(r == StatusCode::Ok) {
+					if(IsSet(l, -1))
+						*reply = static_cast<pragma::util::EventReply>(CheckInt(l, -1));
 					else
 						*reply = pragma::util::EventReply::Unhandled;
 					return (*reply != pragma::util::EventReply::Unhandled) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
@@ -918,7 +918,7 @@ void Lua::WIText::register_class(luabind::class_<pragma::gui::types::WIText, pra
 	classDef.def("AppendText", +[](pragma::gui::types::WIText &el, const std::string &text) { return el.AppendText(text); });
 	classDef.def("AppendLine", static_cast<void (*)(lua::State *, pragma::gui::types::WIText &, const std::string &)>([](lua::State *l, pragma::gui::types::WIText &hPanel, const std::string &line) { hPanel.AppendLine(line); }));
 	classDef.def("MoveText", static_cast<void (*)(lua::State *, pragma::gui::types::WIText &, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)>([](lua::State *l, pragma::gui::types::WIText &hPanel, uint32_t lineIdx, uint32_t startOffset, uint32_t len, uint32_t targetLineIdx, uint32_t targetCharOffset) {
-		Lua::PushBool(l, hPanel.MoveText(lineIdx, startOffset, len, targetLineIdx, targetCharOffset));
+		PushBool(l, hPanel.MoveText(lineIdx, startOffset, len, targetLineIdx, targetCharOffset));
 	}));
 	classDef.def("Clear", &pragma::gui::types::WIText::Clear);
 	classDef.def("Substr", +[](pragma::gui::types::WIText &el, pragma::string::TextOffset startOffset, pragma::string::TextLength len) { return el.Substr(startOffset, len); });
@@ -1039,7 +1039,7 @@ void Lua::WIBase::SetPos(lua::State *l, pragma::gui::types::WIBase &hPanel, floa
 void Lua::WIBase::SetAbsolutePos(lua::State *l, pragma::gui::types::WIBase &hPanel, ::Vector2 pos) { hPanel.SetAbsolutePos(::Vector2i(pos.x, pos.y)); }
 void Lua::WIBase::SetAbsolutePos(lua::State *l, pragma::gui::types::WIBase &hPanel, float x, float y) { hPanel.SetAbsolutePos(::Vector2i(x, y)); }
 void Lua::WIBase::SetColor(lua::State *l, pragma::gui::types::WIBase &hPanel, ::Color col) { hPanel.SetColor(col.r / 255.f, col.g / 255.f, col.b / 255.f, col.a / 255.f); }
-void Lua::WIBase::GetAlpha(lua::State *l, pragma::gui::types::WIBase &hPanel) { Lua::PushNumber(l, hPanel.GetAlpha() * 255); }
+void Lua::WIBase::GetAlpha(lua::State *l, pragma::gui::types::WIBase &hPanel) { PushNumber(l, hPanel.GetAlpha() * 255); }
 void Lua::WIBase::SetAlpha(lua::State *l, pragma::gui::types::WIBase &hPanel, float alpha) { hPanel.SetAlpha(alpha / 255.f); }
 void Lua::WIBase::SetSize(lua::State *l, pragma::gui::types::WIBase &hPanel, ::Vector2 size) { hPanel.SetSize(CInt32(size.x), CInt32(size.y)); }
 void Lua::WIBase::SetSize(lua::State *l, pragma::gui::types::WIBase &hPanel, float x, float y) { hPanel.SetSize(CInt32(x), CInt32(y)); }
@@ -1061,7 +1061,7 @@ void Lua::WIBase::ResetParent(lua::State *l, pragma::gui::types::WIBase &hPanel)
 void Lua::WIBase::GetChildren(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string className)
 {
 	std::vector<pragma::gui::WIHandle> *children = hPanel.GetChildren();
-	int table = Lua::CreateTable(l);
+	int table = CreateTable(l);
 	unsigned int c = 1;
 	for(unsigned int i = 0; i < children->size(); i++) {
 		pragma::gui::WIHandle &hChild = (*children)[i];
@@ -1069,9 +1069,9 @@ void Lua::WIBase::GetChildren(lua::State *l, pragma::gui::types::WIBase &hPanel,
 			auto *pChild = hChild.get();
 			if(pChild->GetClass() == className) {
 				auto oChild = pragma::gui::WGUILuaInterface::GetLuaObject(l, *pChild);
-				Lua::PushInt(l, c);
+				PushInt(l, c);
 				oChild.push(l);
-				Lua::SetTableValue(l, table);
+				SetTableValue(l, table);
 				c++;
 			}
 		}
@@ -1100,25 +1100,25 @@ void Lua::WIBase::GetMousePos(lua::State *l, pragma::gui::types::WIBase &hPanel)
 	hPanel.GetMousePos(&x, &y);
 	luabind::object(l, ::Vector2(x, y)).push(l);
 }
-void Lua::WIBase::Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState) { hPanel.Draw(drawInfo, drawState); }
-void Lua::WIBase::Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize) { hPanel.Draw(drawInfo, drawState, ::Vector2i {}, scissorOffset, scissorSize, hPanel.GetScale()); }
-void Lua::WIBase::Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent)
+void Lua::WIBase::Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState) { hPanel.Draw(drawInfo, drawState); }
+void Lua::WIBase::Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize) { hPanel.Draw(drawInfo, drawState, ::Vector2i {}, scissorOffset, scissorSize, hPanel.GetScale()); }
+void Lua::WIBase::Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent)
 {
 	hPanel.Draw(drawInfo, drawState, offsetParent, scissorOffset, scissorSize, hPanel.GetScale());
 }
-void Lua::WIBase::Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent, const ::Vector2 &scale)
+void Lua::WIBase::Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent, const ::Vector2 &scale)
 {
 	hPanel.Draw(drawInfo, drawState, offsetParent, scissorOffset, scissorSize, scale);
 }
 void Lua::WIBase::GetX(lua::State *l, pragma::gui::types::WIBase &hPanel)
 {
 	::Vector2i pos = hPanel.GetPos();
-	Lua::PushInt(l, pos.x);
+	PushInt(l, pos.x);
 }
 void Lua::WIBase::GetY(lua::State *l, pragma::gui::types::WIBase &hPanel)
 {
 	::Vector2i pos = hPanel.GetPos();
-	Lua::PushInt(l, pos.y);
+	PushInt(l, pos.y);
 }
 void Lua::WIBase::SetX(lua::State *l, pragma::gui::types::WIBase &hPanel, float x)
 {
@@ -1220,7 +1220,7 @@ namespace Lua {
 			if(itCallbacks == callbackPtr->callbacks.end())
 				return;
 			uint32_t argOffset = 3;
-			auto numArgs = Lua::GetStackTop(l) - argOffset + 1;
+			auto numArgs = GetStackTop(l) - argOffset + 1;
 			auto &callbacks = itCallbacks->second;
 			std::vector<LuaCallbacks::CallbackInfo> tmp;
 			tmp = std::move(callbacks); // Move callbacks to tmp, in case new callbacks are added while we're executing the current callbacks (which would mess up our iterator)
@@ -1232,22 +1232,22 @@ namespace Lua {
 				else if(cbInfo.luaState == l) {
 					auto &o = cbInfo.luaFunction;
 					auto bReturn = false;
-					auto n = Lua::GetStackTop(l);
+					auto n = GetStackTop(l);
 					auto r = pragma::scripting::lua_core::protected_call(
 					  l,
-					  [&](lua::State *l) -> Lua::StatusCode {
+					  [&](lua::State *l) -> StatusCode {
 						  o.push(l);
 						  auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, hPanel);
 						  obj.push(l);
 						  for(auto i = decltype(numArgs) {0}; i < numArgs; ++i) {
 							  auto arg = argOffset + i;
-							  Lua::PushValue(l, arg);
+							  PushValue(l, arg);
 						  }
-						  return Lua::StatusCode::Ok;
+						  return StatusCode::Ok;
 					  },
 					  lua::MultiReturn);
-					if(r == Lua::StatusCode::Ok) {
-						auto numResults = Lua::GetStackTop(l) - n;
+					if(r == StatusCode::Ok) {
+						auto numResults = GetStackTop(l) - n;
 						if(numResults > 0)
 							bReturn = true;
 					}
@@ -1285,7 +1285,7 @@ void Lua::WIBase::CallCallbacks(lua::State *l, pragma::gui::types::WIBase &hPane
 {
 	CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object>(l, hPanel, name, o1, o2, o3, o4, o5, o6, o7, o8);
 }
-CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBase &panel, std::string name, Lua::func<void> o)
+CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBase &panel, std::string name, func<void> o)
 {
 	CallbackHandle hCallback {};
 	pragma::string::to_lower(name);
@@ -1299,7 +1299,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 	auto it = g_uiCallbacks.find(get_gui_callback_hash(panel.GetClass(), name));
 	if(it != g_uiCallbacks.end()) {
 		hCallback = it->second(panel, l, [l, o, &panel](const std::function<void()> &pushArgs) {
-			Lua::CallFunction(
+			CallFunction(
 			  l,
 			  [&pushArgs, &o, &panel](lua::State *l) mutable {
 				  o.push(l);
@@ -1308,7 +1308,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 				  obj.push(l);
 
 				  pushArgs();
-				  return Lua::StatusCode::Ok;
+				  return StatusCode::Ok;
 			  },
 			  0);
 		});
@@ -1318,15 +1318,15 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 			hCallback = FunctionCallback<void, std::reference_wrapper<const pragma::string::Utf8String>>::Create([l, hPanel, o](std::reference_wrapper<const pragma::string::Utf8String> text) mutable {
 				if(!hPanel.IsValid())
 					return;
-				Lua::CallFunction(
+				CallFunction(
 				  l,
 				  [&o, hPanel, text](lua::State *l) mutable {
 					  o.push(l);
 
 					  auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 					  obj.push(l);
-					  Lua::PushString(l, text.get().cpp_str());
-					  return Lua::StatusCode::Ok;
+					  PushString(l, text.get().cpp_str());
+					  return StatusCode::Ok;
 				  },
 				  0);
 			});
@@ -1335,16 +1335,16 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 			hCallback = FunctionCallback<void, std::reference_wrapper<const pragma::string::Utf8String>, bool>::Create([l, hPanel, o](std::reference_wrapper<const pragma::string::Utf8String> text, bool changedByUser) mutable {
 				if(!hPanel.IsValid())
 					return;
-				Lua::CallFunction(
+				CallFunction(
 				  l,
 				  [&o, hPanel, text, changedByUser](lua::State *l) mutable {
 					  o.push(l);
 
 					  auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 					  obj.push(l);
-					  Lua::PushString(l, text.get().cpp_str());
-					  Lua::PushBool(l, changedByUser);
-					  return Lua::StatusCode::Ok;
+					  PushString(l, text.get().cpp_str());
+					  PushBool(l, changedByUser);
+					  return StatusCode::Ok;
 				  },
 				  0);
 			});
@@ -1354,7 +1354,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<pragma::util::EventReply, std::string>::CreateWithOptionalReturn([l, hPanel, o](pragma::util::EventReply *reply, std::string arg) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
-			if(Lua::CallFunction(
+			if(CallFunction(
 			     l,
 			     [&o, hPanel, &arg](lua::State *l) mutable {
 				     o.push(l);
@@ -1362,18 +1362,18 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 				     auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				     obj.push(l);
 
-				     Lua::PushString(l, arg);
+				     PushString(l, arg);
 
-				     return Lua::StatusCode::Ok;
+				     return StatusCode::Ok;
 			     },
 			     1)
-			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false) {
-					Lua::Pop(l, 1);
+			  == StatusCode::Ok) {
+				if(IsSet(l, -1) == false) {
+					Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
 				}
-				auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
-				Lua::Pop(l, 1);
+				auto result = static_cast<pragma::util::EventReply>(CheckInt(l, -1));
+				Pop(l, 1);
 				*reply = result;
 				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
@@ -1384,15 +1384,15 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<void, uint32_t>::Create([l, hPanel, o](uint32_t offset) mutable {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(
+			CallFunction(
 			  l,
 			  [&o, hPanel, offset](lua::State *l) mutable {
 				  o.push(l);
 
 				  auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				  obj.push(l);
-				  Lua::PushInt(l, offset);
-				  return Lua::StatusCode::Ok;
+				  PushInt(l, offset);
+				  return StatusCode::Ok;
 			  },
 			  0);
 		});
@@ -1401,25 +1401,25 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<pragma::util::EventReply, int, pragma::platform::Modifier>::CreateWithOptionalReturn([l, hPanel, o](pragma::util::EventReply *reply, int c, pragma::platform::Modifier mods) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
-			if(Lua::CallFunction(
+			if(CallFunction(
 			     l,
 			     [&o, hPanel, c, mods](lua::State *l) mutable {
 				     o.push(l);
 
 				     auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				     obj.push(l);
-				     Lua::PushString(l, std::string(1, static_cast<char>(c)));
-				     Lua::PushInt(l, pragma::math::to_integral(mods));
-				     return Lua::StatusCode::Ok;
+				     PushString(l, std::string(1, static_cast<char>(c)));
+				     PushInt(l, pragma::math::to_integral(mods));
+				     return StatusCode::Ok;
 			     },
 			     1)
-			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false) {
-					Lua::Pop(l, 1);
+			  == StatusCode::Ok) {
+				if(IsSet(l, -1) == false) {
+					Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
 				}
-				auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
-				Lua::Pop(l, 1);
+				auto result = static_cast<pragma::util::EventReply>(CheckInt(l, -1));
+				Pop(l, 1);
 				*reply = result;
 				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
@@ -1431,26 +1431,26 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		  [l, hPanel, o](pragma::util::EventReply *reply, pragma::platform::Key key, int, pragma::platform::KeyState action, pragma::platform::Modifier mods) mutable -> CallbackReturnType {
 			  if(!hPanel.IsValid())
 				  return CallbackReturnType::NoReturnValue;
-			  if(Lua::CallFunction(
+			  if(CallFunction(
 			       l,
 			       [&o, hPanel, key, action, mods](lua::State *l) mutable {
 				       o.push(l);
 
 				       auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				       obj.push(l);
-				       Lua::PushInt(l, pragma::math::to_integral(key));
-				       Lua::PushInt(l, pragma::math::to_integral(action));
-				       Lua::PushInt(l, pragma::math::to_integral(mods));
-				       return Lua::StatusCode::Ok;
+				       PushInt(l, pragma::math::to_integral(key));
+				       PushInt(l, pragma::math::to_integral(action));
+				       PushInt(l, pragma::math::to_integral(mods));
+				       return StatusCode::Ok;
 			       },
 			       1)
-			    == Lua::StatusCode::Ok) {
-				  if(Lua::IsSet(l, -1) == false) {
-					  Lua::Pop(l, 1);
+			    == StatusCode::Ok) {
+				  if(IsSet(l, -1) == false) {
+					  Pop(l, 1);
 					  return CallbackReturnType::NoReturnValue;
 				  }
-				  auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
-				  Lua::Pop(l, 1);
+				  auto result = static_cast<pragma::util::EventReply>(CheckInt(l, -1));
+				  Pop(l, 1);
 				  *reply = result;
 				  return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			  }
@@ -1462,26 +1462,26 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		  [l, hPanel, o](pragma::util::EventReply *reply, pragma::platform::MouseButton button, pragma::platform::KeyState action, pragma::platform::Modifier mods) mutable -> CallbackReturnType {
 			  if(!hPanel.IsValid())
 				  return CallbackReturnType::NoReturnValue;
-			  if(Lua::CallFunction(
+			  if(CallFunction(
 			       l,
 			       [&o, hPanel, button, action, mods](lua::State *l) mutable {
 				       o.push(l);
 
 				       auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				       obj.push(l);
-				       Lua::PushInt(l, pragma::math::to_integral(button));
-				       Lua::PushInt(l, pragma::math::to_integral(action));
-				       Lua::PushInt(l, pragma::math::to_integral(mods));
-				       return Lua::StatusCode::Ok;
+				       PushInt(l, pragma::math::to_integral(button));
+				       PushInt(l, pragma::math::to_integral(action));
+				       PushInt(l, pragma::math::to_integral(mods));
+				       return StatusCode::Ok;
 			       },
 			       1)
-			    == Lua::StatusCode::Ok) {
-				  if(Lua::IsSet(l, -1) == false) {
-					  Lua::Pop(l, 1);
+			    == StatusCode::Ok) {
+				  if(IsSet(l, -1) == false) {
+					  Pop(l, 1);
 					  return CallbackReturnType::NoReturnValue;
 				  }
-				  auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
-				  Lua::Pop(l, 1);
+				  auto result = static_cast<pragma::util::EventReply>(CheckInt(l, -1));
+				  Pop(l, 1);
 				  *reply = result;
 				  return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			  }
@@ -1492,14 +1492,14 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<void, int32_t, int32_t>::Create([l, hPanel, o](int32_t x, int32_t y) mutable {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(l, [&o, hPanel, x, y](lua::State *l) mutable {
+			CallFunction(l, [&o, hPanel, x, y](lua::State *l) mutable {
 				o.push(l);
 
 				auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				obj.push(l);
-				Lua::PushInt(l, x);
-				Lua::PushInt(l, y);
-				return Lua::StatusCode::Ok;
+				PushInt(l, x);
+				PushInt(l, y);
+				return StatusCode::Ok;
 			});
 		});
 	}
@@ -1507,7 +1507,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<void, pragma::gui::types::WIBase *>::Create([l, hPanel, o](pragma::gui::types::WIBase *el) mutable {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(l, [&o, hPanel, el](lua::State *l) mutable {
+			CallFunction(l, [&o, hPanel, el](lua::State *l) mutable {
 				o.push(l);
 
 				auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1516,7 +1516,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 					auto objEl = pragma::gui::WGUILuaInterface::GetLuaObject(l, *el);
 					objEl.push(l);
 				}
-				return Lua::StatusCode::Ok;
+				return StatusCode::Ok;
 			});
 		});
 	}
@@ -1524,7 +1524,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<void, pragma::gui::types::WITooltip *>::Create([l, hPanel, o](pragma::gui::types::WITooltip *el) mutable {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(l, [&o, hPanel, el](lua::State *l) mutable {
+			CallFunction(l, [&o, hPanel, el](lua::State *l) mutable {
 				o.push(l);
 
 				auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1533,7 +1533,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 					auto objEl = pragma::gui::WGUILuaInterface::GetLuaObject(l, *el);
 					objEl.push(l);
 				}
-				return Lua::StatusCode::Ok;
+				return StatusCode::Ok;
 			});
 		});
 	}
@@ -1541,7 +1541,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<void, pragma::gui::types::WIBase *>::Create([l, hPanel, o](pragma::gui::types::WIBase *el) mutable {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(l, [&o, hPanel, el](lua::State *l) mutable {
+			CallFunction(l, [&o, hPanel, el](lua::State *l) mutable {
 				o.push(l);
 
 				auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
@@ -1550,7 +1550,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 					auto objEl = pragma::gui::WGUILuaInterface::GetLuaObject(l, *el);
 					objEl.push(l);
 				}
-				return Lua::StatusCode::Ok;
+				return StatusCode::Ok;
 			});
 		});
 	}
@@ -1558,23 +1558,23 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([l, hPanel, o](pragma::util::EventReply *reply) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
-			if(Lua::CallFunction(
+			if(CallFunction(
 			     l,
 			     [&o, hPanel](lua::State *l) mutable {
 				     o.push(l);
 
 				     auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				     obj.push(l);
-				     return Lua::StatusCode::Ok;
+				     return StatusCode::Ok;
 			     },
 			     1)
-			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false) {
-					Lua::Pop(l, 1);
+			  == StatusCode::Ok) {
+				if(IsSet(l, -1) == false) {
+					Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
 				}
-				auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
-				Lua::Pop(l, 1);
+				auto result = static_cast<pragma::util::EventReply>(CheckInt(l, -1));
+				Pop(l, 1);
 				*reply = result;
 				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
@@ -1585,23 +1585,23 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([l, hPanel, o](pragma::util::EventReply *reply) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
-			if(Lua::CallFunction(
+			if(CallFunction(
 			     l,
 			     [&o, hPanel](lua::State *l) mutable {
 				     o.push(l);
 
 				     auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				     obj.push(l);
-				     return Lua::StatusCode::Ok;
+				     return StatusCode::Ok;
 			     },
 			     1)
-			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false) {
-					Lua::Pop(l, 1);
+			  == StatusCode::Ok) {
+				if(IsSet(l, -1) == false) {
+					Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
 				}
-				auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
-				Lua::Pop(l, 1);
+				auto result = static_cast<pragma::util::EventReply>(CheckInt(l, -1));
+				Pop(l, 1);
 				*reply = result;
 				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
@@ -1612,23 +1612,23 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<pragma::util::EventReply>::CreateWithOptionalReturn([l, hPanel, o](pragma::util::EventReply *reply) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
-			if(Lua::CallFunction(
+			if(CallFunction(
 			     l,
 			     [&o, hPanel](lua::State *l) mutable {
 				     o.push(l);
 
 				     auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				     obj.push(l);
-				     return Lua::StatusCode::Ok;
+				     return StatusCode::Ok;
 			     },
 			     1)
-			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false) {
-					Lua::Pop(l, 1);
+			  == StatusCode::Ok) {
+				if(IsSet(l, -1) == false) {
+					Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
 				}
-				auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
-				Lua::Pop(l, 1);
+				auto result = static_cast<pragma::util::EventReply>(CheckInt(l, -1));
+				Pop(l, 1);
 				*reply = result;
 				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
@@ -1640,25 +1640,25 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		  [l, hPanel, o](pragma::util::EventReply *reply, std::reference_wrapper<const pragma::platform::Joystick> joystick, uint32_t key, pragma::platform::KeyState state) mutable -> CallbackReturnType {
 			  if(!hPanel.IsValid())
 				  return CallbackReturnType::NoReturnValue;
-			  if(Lua::CallFunction(
+			  if(CallFunction(
 			       l,
 			       [&o, hPanel, key, state](lua::State *l) mutable {
 				       o.push(l);
 
 				       auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				       obj.push(l);
-				       Lua::PushInt(l, key);
-				       Lua::PushInt(l, pragma::math::to_integral(state));
-				       return Lua::StatusCode::Ok;
+				       PushInt(l, key);
+				       PushInt(l, pragma::math::to_integral(state));
+				       return StatusCode::Ok;
 			       },
 			       1)
-			    == Lua::StatusCode::Ok) {
-				  if(Lua::IsSet(l, -1) == false) {
-					  Lua::Pop(l, 1);
+			    == StatusCode::Ok) {
+				  if(IsSet(l, -1) == false) {
+					  Pop(l, 1);
 					  return CallbackReturnType::NoReturnValue;
 				  }
-				  auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
-				  Lua::Pop(l, 1);
+				  auto result = static_cast<pragma::util::EventReply>(CheckInt(l, -1));
+				  Pop(l, 1);
 				  *reply = result;
 				  return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			  }
@@ -1669,26 +1669,26 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<pragma::util::EventReply, ::Vector2, bool>::CreateWithOptionalReturn([l, hPanel, o](pragma::util::EventReply *reply, ::Vector2 offset, bool offsetAsPixels) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
-			if(Lua::CallFunction(
+			if(CallFunction(
 			     l,
 			     [&o, hPanel, &offset, &offsetAsPixels](lua::State *l) mutable {
 				     o.push(l);
 
 				     auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				     obj.push(l);
-				     Lua::PushNumber(l, offset.x);
-				     Lua::PushNumber(l, offset.y);
-				     Lua::PushBool(l, offsetAsPixels);
-				     return Lua::StatusCode::Ok;
+				     PushNumber(l, offset.x);
+				     PushNumber(l, offset.y);
+				     PushBool(l, offsetAsPixels);
+				     return StatusCode::Ok;
 			     },
 			     1)
-			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false) {
-					Lua::Pop(l, 1);
+			  == StatusCode::Ok) {
+				if(IsSet(l, -1) == false) {
+					Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
 				}
-				auto result = static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1));
-				Lua::Pop(l, 1);
+				auto result = static_cast<pragma::util::EventReply>(CheckInt(l, -1));
+				Pop(l, 1);
 				*reply = result;
 				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
@@ -1699,20 +1699,20 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<void, bool>::Create([l, hPanel, o](bool bChecked) mutable {
 			if(!hPanel.IsValid())
 				return pragma::util::EventReply::Unhandled;
-			if(Lua::CallFunction(
+			if(CallFunction(
 			     l,
 			     [&o, hPanel, bChecked](lua::State *l) mutable {
 				     o.push(l);
 
 				     auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				     obj.push(l);
-				     Lua::PushBool(l, bChecked);
-				     return Lua::StatusCode::Ok;
+				     PushBool(l, bChecked);
+				     return StatusCode::Ok;
 			     },
 			     1)
-			  == Lua::StatusCode::Ok) {
-				auto result = Lua::IsSet(l, -1) ? static_cast<pragma::util::EventReply>(Lua::CheckInt(l, -1)) : pragma::util::EventReply::Unhandled;
-				Lua::Pop(l, 1);
+			  == StatusCode::Ok) {
+				auto result = IsSet(l, -1) ? static_cast<pragma::util::EventReply>(CheckInt(l, -1)) : pragma::util::EventReply::Unhandled;
+				Pop(l, 1);
 				return result;
 			}
 			return pragma::util::EventReply::Unhandled;
@@ -1722,7 +1722,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<void, uint32_t>::Create([l, hPanel, o](uint32_t idx) mutable {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(
+			CallFunction(
 			  l,
 			  [&o, hPanel, idx](lua::State *l) mutable {
 				  o.push(l);
@@ -1732,8 +1732,8 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 				  obj.push(l);
 
 				  auto optIdx = (idx == std::numeric_limits<uint32_t>::max()) ? -1 : static_cast<int32_t>(idx);
-				  Lua::PushInt(l, optIdx);
-				  return Lua::StatusCode::Ok;
+				  PushInt(l, optIdx);
+				  return StatusCode::Ok;
 			  },
 			  0);
 		});
@@ -1742,7 +1742,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<void, std::reference_wrapper<::Vector2i>, bool>::Create([l, hPanel, o](std::reference_wrapper<::Vector2i> pos, bool bDrag) mutable {
 			if(!hPanel.IsValid())
 				return;
-			auto r = Lua::CallFunction(
+			auto r = CallFunction(
 			  l,
 			  [&o, hPanel, pos, bDrag](lua::State *l) mutable {
 				  o.push(l);
@@ -1750,14 +1750,14 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 				  auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				  obj.push(l);
 				  Lua::Push<::Vector2i>(l, pos);
-				  Lua::PushBool(l, bDrag);
-				  return Lua::StatusCode::Ok;
+				  PushBool(l, bDrag);
+				  return StatusCode::Ok;
 			  },
 			  1);
-			if(r == Lua::StatusCode::Ok) {
+			if(r == StatusCode::Ok) {
 				if(Lua::IsType<::Vector2i>(l, -1))
 					pos.get() = Lua::Check<::Vector2i>(l, -1);
-				Lua::Pop(l, 1);
+				Pop(l, 1);
 			}
 		});
 	}
@@ -1765,7 +1765,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<void, float, float>::Create([l, hPanel, o](float progress, float value) mutable {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(
+			CallFunction(
 			  l,
 			  [&o, hPanel, progress, value](lua::State *l) mutable {
 				  o.push(l);
@@ -1774,9 +1774,9 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 				  auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *p);
 				  obj.push(l);
 
-				  Lua::PushNumber(l, progress);
-				  Lua::PushNumber(l, value);
-				  return Lua::StatusCode::Ok;
+				  PushNumber(l, progress);
+				  PushNumber(l, value);
+				  return StatusCode::Ok;
 			  },
 			  0);
 		});
@@ -1785,7 +1785,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<void, bool>::Create([l, hPanel, o](bool selected) mutable {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(
+			CallFunction(
 			  l,
 			  [&o, hPanel, selected](lua::State *l) mutable {
 				  o.push(l);
@@ -1794,8 +1794,8 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 				  auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *p);
 				  obj.push(l);
 
-				  Lua::PushBool(l, selected);
-				  return Lua::StatusCode::Ok;
+				  PushBool(l, selected);
+				  return StatusCode::Ok;
 			  },
 			  0);
 		});
@@ -1805,7 +1805,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 			if(!hPanel.IsValid())
 				return false;
 			auto retVal = false;
-			auto r = Lua::CallFunction(
+			auto r = CallFunction(
 			  l,
 			  [&o, hPanel, rawValue, value, &retVal](lua::State *l) mutable {
 				  o.push(l);
@@ -1814,12 +1814,12 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 				  auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *p);
 				  obj.push(l);
 
-				  Lua::PushNumber(l, rawValue);
-				  return Lua::StatusCode::Ok;
+				  PushNumber(l, rawValue);
+				  return StatusCode::Ok;
 			  },
 			  1);
-			if(r == Lua::StatusCode::Ok && Lua::IsSet(l, -1)) {
-				value.get() = Lua::CheckString(l, -1);
+			if(r == StatusCode::Ok && IsSet(l, -1)) {
+				value.get() = CheckString(l, -1);
 				retVal = true;
 			}
 			return retVal;
@@ -1829,14 +1829,14 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		hCallback = FunctionCallback<>::Create([l, hPanel, o]() mutable {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(
+			CallFunction(
 			  l,
 			  [&o, hPanel](lua::State *l) mutable {
 				  o.push(l);
 
 				  auto obj = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				  obj.push(l);
-				  return Lua::StatusCode::Ok;
+				  return StatusCode::Ok;
 			  },
 			  0);
 		});
@@ -1849,7 +1849,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 	return hCallbackRet;
 }
 void Lua::WIBase::FadeIn(lua::State *l, pragma::gui::types::WIBase &hPanel, float tFadeIn, float alphaTarget) { hPanel.FadeIn(tFadeIn, alphaTarget / 255.f); }
-void Lua::WIBase::FadeIn(lua::State *l, pragma::gui::types::WIBase &hPanel, float tFadeIn) { Lua::WIBase::FadeIn(l, hPanel, tFadeIn, 255.f); }
+void Lua::WIBase::FadeIn(lua::State *l, pragma::gui::types::WIBase &hPanel, float tFadeIn) { FadeIn(l, hPanel, tFadeIn, 255.f); }
 static std::optional<Vector2> get_cursor_pos_override(pragma::gui::types::WIRoot *elRoot)
 {
 	if(!elRoot)
@@ -1954,16 +1954,16 @@ void Lua::WIBase::FindChildrenByName(lua::State *l, pragma::gui::types::WIBase &
 {
 	std::vector<pragma::gui::WIHandle> children;
 	hPanel.FindChildrenByName(name, children);
-	int table = Lua::CreateTable(l);
+	int table = CreateTable(l);
 	unsigned int c = 1;
 	for(unsigned int i = 0; i < children.size(); i++) {
 		pragma::gui::WIHandle &hChild = children[i];
 		if(hChild.IsValid()) {
 			auto *pChild = hChild.get();
 			auto oChild = pragma::gui::WGUILuaInterface::GetLuaObject(l, *pChild);
-			Lua::PushInt(l, c);
+			PushInt(l, c);
 			oChild.push(l);
-			Lua::SetTableValue(l, table);
+			SetTableValue(l, table);
 			c++;
 		}
 	}
@@ -1993,7 +1993,7 @@ Color Lua::WIText::GetShadowColor(lua::State *l, pragma::gui::types::WIText &hPa
 	return ::Color(CInt16(col->r * 255), CInt16(col->g * 255), CInt16(col->b * 255), CInt16(col->a * 255));
 }
 
-::Vector2 Lua::WIText::GetShadowOffset(lua::State *l, pragma::gui::types::WIText &hPanel)
+Vector2 Lua::WIText::GetShadowOffset(lua::State *l, pragma::gui::types::WIText &hPanel)
 {
 	::Vector2i *offset = hPanel.GetShadowOffset();
 	return ::Vector2(offset->x, offset->y);

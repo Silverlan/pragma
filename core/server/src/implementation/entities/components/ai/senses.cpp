@@ -11,7 +11,7 @@ import :server_state;
 
 using namespace pragma;
 
-bool SAIComponent::IsInViewCone(pragma::ecs::BaseEntity *ent, float *dist)
+bool SAIComponent::IsInViewCone(ecs::BaseEntity *ent, float *dist)
 {
 	auto &entThis = GetEntity();
 	auto charComponent = entThis.GetCharacterComponent();
@@ -34,7 +34,7 @@ bool SAIComponent::IsInViewCone(pragma::ecs::BaseEntity *ent, float *dist)
 			auto data = charComponent->GetAimTraceData();
 			data.SetTarget(posEnt);
 			auto res = SGame::Get()->RayCast(data);
-			if(res.hitType == pragma::physics::RayCastHitType::None || res.entity.get() == ent)
+			if(res.hitType == physics::RayCastHitType::None || res.entity.get() == ent)
 				return true;
 		}
 	}
@@ -42,14 +42,14 @@ bool SAIComponent::IsInViewCone(pragma::ecs::BaseEntity *ent, float *dist)
 }
 
 bool SAIComponent::CanSee() const { return (GetMaxViewDistance() > 0 && GetMaxViewAngle() > 0) ? true : false; }
-void SAIComponent::SetHearingStrength(float strength) { m_hearingStrength = pragma::math::clamp(strength, 0.f, 1.f); }
+void SAIComponent::SetHearingStrength(float strength) { m_hearingStrength = math::clamp(strength, 0.f, 1.f); }
 float SAIComponent::GetHearingStrength() const { return m_hearingStrength; }
 bool SAIComponent::CanHear() const { return (m_hearingStrength == 0.f) ? false : true; }
 
-bool SAIComponent::OnSuspiciousSoundHeared(std::shared_ptr<pragma::audio::ALSound> &snd)
+bool SAIComponent::OnSuspiciousSoundHeared(std::shared_ptr<audio::ALSound> &snd)
 {
 	CEOnSuspiciousSoundHeared evData {snd};
-	return BroadcastEvent(sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED, evData) == pragma::util::EventReply::Handled;
+	return BroadcastEvent(sAIComponent::EVENT_ON_SUSPICIOUS_SOUND_HEARED, evData) == util::EventReply::Handled;
 }
 
 float SAIComponent::GetMaxViewDistance() const { return m_maxViewDist; }
@@ -70,9 +70,9 @@ void SAIComponent::Listen(std::vector<TargetInfo> &targets)
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent == nullptr)
 		return;
-	auto hearingIntensity = 1.f - pragma::math::clamp(GetHearingStrength(), 0.f, 1.f);
+	auto hearingIntensity = 1.f - math::clamp(GetHearingStrength(), 0.f, 1.f);
 	auto &pos = pTrComponent->GetPosition();
-	auto &sounds = pragma::ServerState::Get()->GetSounds();
+	auto &sounds = ServerState::Get()->GetSounds();
 	auto &t = SGame::Get()->CurTime();
 	for(auto &rsnd : sounds) {
 		auto &snd = rsnd.get();

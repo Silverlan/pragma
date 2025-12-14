@@ -15,7 +15,7 @@ export namespace pragma {
 	}
 	class DLLSERVER STransformComponent final : public BaseTransformComponent, public SBaseNetComponent {
 	  public:
-		STransformComponent(pragma::ecs::BaseEntity &ent) : BaseTransformComponent(ent) {}
+		STransformComponent(ecs::BaseEntity &ent) : BaseTransformComponent(ent) {}
 		virtual void SetEyeOffset(const Vector3 &offset) override;
 		virtual void SetScale(const Vector3 &scale) override;
 		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;

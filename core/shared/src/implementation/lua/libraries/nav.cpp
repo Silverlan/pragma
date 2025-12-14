@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :scripting.lua.libraries.nav;
 
-void Lua::nav::register_library(Lua::Interface &lua)
+void Lua::nav::register_library(Interface &lua)
 {
 	auto &modNav = lua.RegisterLibrary("nav");
 	modNav[(luabind::def("generate", static_cast<void (*)(lua::State *)>([](lua::State *l) {
@@ -15,7 +15,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		std::string err;
 		std::shared_ptr<RcNavMesh> mesh = nullptr;
 		auto &navConfig = Lua::Check<pragma::nav::Config>(l, 1);
-		if(Lua::IsSet(l, 2) == false)
+		if(IsSet(l, 2) == false)
 			mesh = pragma::nav::generate(game, navConfig, &err);
 		else {
 			if(Lua::IsType<pragma::ecs::BaseEntity>(l, 2)) {
@@ -26,63 +26,63 @@ void Lua::nav::register_library(Lua::Interface &lua)
 				auto tVerts = 2;
 				auto tIndices = 3;
 				auto tAreas = 4;
-				Lua::CheckTable(l, tVerts);
-				Lua::CheckTable(l, tIndices);
+				CheckTable(l, tVerts);
+				CheckTable(l, tIndices);
 				std::vector<Vector3> verts;
 				std::vector<int32_t> indices;
 				std::vector<pragma::nav::ConvexArea> areas;
-				auto numVerts = Lua::GetObjectLength(l, tVerts);
-				auto numIndices = Lua::GetObjectLength(l, tIndices);
+				auto numVerts = GetObjectLength(l, tVerts);
+				auto numIndices = GetObjectLength(l, tIndices);
 				verts.reserve(numVerts);
 				indices.reserve(numIndices);
 				for(auto i = decltype(numVerts) {0u}; i < numVerts; ++i) {
-					Lua::PushInt(l, i + 1u);
-					Lua::GetTableValue(l, tVerts);
+					PushInt(l, i + 1u);
+					GetTableValue(l, tVerts);
 					auto &v = Lua::Check<Vector3>(l, -1);
 					verts.push_back(v);
-					Lua::Pop(l, 1);
+					Pop(l, 1);
 				}
 
 				for(auto i = decltype(numIndices) {0u}; i < numIndices; ++i) {
-					Lua::PushInt(l, i + 1u);
-					Lua::GetTableValue(l, tIndices);
-					auto idx = Lua::CheckInt(l, -1);
+					PushInt(l, i + 1u);
+					GetTableValue(l, tIndices);
+					auto idx = CheckInt(l, -1);
 					indices.push_back(idx);
-					Lua::Pop(l, 1);
+					Pop(l, 1);
 				}
 
-				if(Lua::IsSet(l, tAreas)) {
-					Lua::CheckTable(l, tAreas);
-					auto numAreaValues = Lua::GetObjectLength(l, tAreas);
+				if(IsSet(l, tAreas)) {
+					CheckTable(l, tAreas);
+					auto numAreaValues = GetObjectLength(l, tAreas);
 					for(auto i = decltype(numAreaValues) {0u}; i < numAreaValues; ++i) {
-						Lua::PushInt(l, i + 1u);
-						Lua::GetTableValue(l, tAreas);
-						Lua::CheckTable(l, -1);
+						PushInt(l, i + 1u);
+						GetTableValue(l, tAreas);
+						CheckTable(l, -1);
 
 						areas.push_back({});
 						auto &area = areas.back();
-						auto tArea = Lua::GetStackTop(l);
+						auto tArea = GetStackTop(l);
 
-						Lua::PushString(l, "area");
-						Lua::GetTableValue(l, tArea);
-						area.area = Lua::CheckInt(l, -1);
-						Lua::Pop(l, 1);
+						PushString(l, "area");
+						GetTableValue(l, tArea);
+						area.area = CheckInt(l, -1);
+						Pop(l, 1);
 
-						Lua::PushString(l, "vertices");
-						Lua::GetTableValue(l, tArea);
-						Lua::CheckTable(l, -1);
-						auto tVerts = Lua::GetStackTop(l);
-						auto numVerts = Lua::GetObjectLength(l, tVerts);
+						PushString(l, "vertices");
+						GetTableValue(l, tArea);
+						CheckTable(l, -1);
+						auto tVerts = GetStackTop(l);
+						auto numVerts = GetObjectLength(l, tVerts);
 						area.verts.reserve(numVerts);
 						for(auto j = decltype(numVerts) {0u}; j < numVerts; ++j) {
-							Lua::PushInt(l, j + 1u);
-							Lua::GetTableValue(l, tVerts);
+							PushInt(l, j + 1u);
+							GetTableValue(l, tVerts);
 							area.verts.push_back(Lua::Check<Vector3>(l, -1));
-							Lua::Pop(l, 1);
+							Pop(l, 1);
 						}
-						Lua::Pop(l, 1);
+						Pop(l, 1);
 
-						Lua::Pop(l, 1);
+						Pop(l, 1);
 					}
 				}
 
@@ -90,24 +90,24 @@ void Lua::nav::register_library(Lua::Interface &lua)
 			}
 		}
 		if(mesh == nullptr) {
-			Lua::PushBool(l, false);
-			Lua::PushString(l, err);
+			PushBool(l, false);
+			PushString(l, err);
 			return;
 		}
 		auto navMesh = pragma::nav::Mesh::Create(mesh, navConfig);
-		Lua::Push(l, navMesh);
+		Push(l, navMesh);
 	})),
 	  luabind::def("load", static_cast<opt<std::shared_ptr<pragma::nav::Mesh>> (*)(lua::State *)>([](lua::State *l) -> opt<std::shared_ptr<pragma::nav::Mesh>> {
 		  auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
 		  auto &game = *nw.GetGameState();
-		  std::string fname = Lua::CheckString(l, 1);
+		  std::string fname = CheckString(l, 1);
 		  pragma::nav::Config config;
 		  auto mesh = pragma::nav::load(game, fname, config);
 		  if(mesh == nullptr)
 			  return nil;
 		  return {l, pragma::nav::Mesh::Create(mesh, config)};
 	  })))];
-	Lua::RegisterLibraryEnums(lua.GetState(), "nav",
+	RegisterLibraryEnums(lua.GetState(), "nav",
 	  {{"POLY_TYPE_BIT_NONE", pragma::math::to_integral(pragma::nav::PolyFlags::None)}, {"POLY_TYPE_BIT_WALK", pragma::math::to_integral(pragma::nav::PolyFlags::Walk)}, {"POLY_TYPE_BIT_SWIM", pragma::math::to_integral(pragma::nav::PolyFlags::Swim)},
 	    {"POLY_TYPE_BIT_DOOR", pragma::math::to_integral(pragma::nav::PolyFlags::Door)}, {"POLY_TYPE_BIT_JUMP", pragma::math::to_integral(pragma::nav::PolyFlags::Jump)}, {"POLY_TYPE_BIT_DISABLED", pragma::math::to_integral(pragma::nav::PolyFlags::Disabled)},
 	    {"POLY_TYPE_ALL", pragma::math::to_integral(pragma::nav::PolyFlags::All)}});
@@ -137,18 +137,18 @@ void Lua::nav::register_library(Lua::Interface &lua)
 	auto classDefMesh = luabind::class_<pragma::nav::Mesh>("Mesh");
 	classDefMesh.def("Save", static_cast<void (*)(lua::State *, pragma::nav::Mesh &, const std::string &)>([](lua::State *l, pragma::nav::Mesh &navMesh, const std::string &fname) {
 		auto outName = fname;
-		if(Lua::file::validate_write_operation(l, outName) == false) {
-			Lua::PushBool(l, false);
-			Lua::PushString(l, "This file operation is not allowed!");
+		if(file::validate_write_operation(l, outName) == false) {
+			PushBool(l, false);
+			PushString(l, "This file operation is not allowed!");
 			return;
 		}
 		auto &nw = *pragma::Engine::Get()->GetNetworkState(l);
 		auto &game = *nw.GetGameState();
 		std::string err;
 		auto r = navMesh.Save(game, outName, err);
-		Lua::PushBool(l, r);
+		PushBool(l, r);
 		if(r == false)
-			Lua::PushString(l, err);
+			PushString(l, err);
 	}));
 	/*classDefMesh.def("FindPath",static_cast<void(*)(lua::State*,pragma::nav::Mesh&,const Vector3&,const Vector3&)>([](lua::State *l,pragma::nav::Mesh &navMesh,const Vector3 &start,const Vector3 &end) {
 		auto r = navMesh->FindPath(start,end);
@@ -159,7 +159,7 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		Vector3 hit;
 		auto r = navMesh.RayCast(start, end, hit);
 		if(r == false)
-			Lua::PushBool(l, r);
+			PushBool(l, r);
 		else
 			Lua::Push<Vector3>(l, hit);
 	}));

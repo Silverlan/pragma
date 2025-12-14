@@ -16,7 +16,7 @@ decltype(ShaderMerge2dImageIntoEquirectangular::DESCRIPTOR_SET_TEXTURE_2D) Shade
   {prosper::DescriptorSetInfo::Binding {"TEXTURE_2D", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
 };
 ShaderMerge2dImageIntoEquirectangular::ShaderMerge2dImageIntoEquirectangular(prosper::IPrContext &context, const std::string &identifier)
-    : prosper::ShaderBaseImageProcessing {context, identifier, "programs/util/merge_2d_image_into_equirectangular", "programs/util/merge_2d_image_into_equirectangular"}
+    : ShaderBaseImageProcessing {context, identifier, "programs/util/merge_2d_image_into_equirectangular", "programs/util/merge_2d_image_into_equirectangular"}
 {
 }
 
@@ -29,21 +29,21 @@ void ShaderMerge2dImageIntoEquirectangular::InitializeShaderResources()
 	AddDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE_2D);
 }
 
-bool ShaderMerge2dImageIntoEquirectangular::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTextureEquirect, prosper::IDescriptorSet &descSetTexture2d, CubeFace cubeFace, pragma::math::Degree range)
+bool ShaderMerge2dImageIntoEquirectangular::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTextureEquirect, prosper::IDescriptorSet &descSetTexture2d, CubeFace cubeFace, math::Degree range)
 {
 	PushConstants pushConstants {};
 	pushConstants.xFactor = range / 360.f;
 	pushConstants.cubeFace = cubeFace;
 
-	auto vertBuffer = pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
-	auto uvBuffer = pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
+	auto vertBuffer = get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
+	auto uvBuffer = get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
 	auto numVerts = prosper::CommonBufferCache::GetSquareVertexCount();
 
 	auto success = false;
 	prosper::ShaderBindState bindState {cmd};
 	if(RecordBeginDraw(bindState) == true) {
 		success = RecordPushConstants(bindState, pushConstants) && RecordBindDescriptorSet(bindState, descSetTextureEquirect) && RecordBindDescriptorSet(bindState, descSetTexture2d, DESCRIPTOR_SET_TEXTURE_2D.setIndex)
-		  && RecordBindVertexBuffers(bindState, {vertBuffer.get(), uvBuffer.get()}) && prosper::ShaderGraphics::RecordDraw(bindState, numVerts);
+		  && RecordBindVertexBuffers(bindState, {vertBuffer.get(), uvBuffer.get()}) && ShaderGraphics::RecordDraw(bindState, numVerts);
 		RecordEndDraw(bindState);
 	}
 	return success;

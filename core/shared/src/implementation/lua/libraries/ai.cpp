@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :scripting.lua.libraries.ai;
 
-void Lua::ai::register_library(Lua::Interface &lua)
+void Lua::ai::register_library(Interface &lua)
 {
 	auto &modAi = lua.RegisterLibrary("ai");
 	auto classDefMoveInfo = luabind::class_<pragma::BaseAIComponent::MoveInfo>("MoveInfo");

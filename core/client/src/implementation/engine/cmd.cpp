@@ -20,59 +20,59 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 extern bool g_dumpRenderQueues;
 void pragma::CEngine::RegisterConsoleCommands()
 {
-	pragma::Engine::RegisterConsoleCommands();
-	auto &conVarMap = *pragma::console::client::get_convar_map();
+	Engine::RegisterConsoleCommands();
+	auto &conVarMap = *console::client::get_convar_map();
 	RegisterSharedConsoleCommands(conVarMap);
-	conVarMap.RegisterConCommand("lua_exec_cl", &pragma::console::commands::lua_exec, pragma::console::ConVarFlags::None, "Opens and executes a lua-file on the client.", &pragma::console::commands::lua_exec_autocomplete);
+	conVarMap.RegisterConCommand("lua_exec_cl", &console::commands::lua_exec, console::ConVarFlags::None, "Opens and executes a lua-file on the client.", &console::commands::lua_exec_autocomplete);
 
-	conVarMap.RegisterConCommand("lua_run_cl", static_cast<void (*)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(&pragma::console::commands::lua_run), pragma::console::ConVarFlags::None, "Runs a lua command on the client lua state.",
+	conVarMap.RegisterConCommand("lua_run_cl", static_cast<void (*)(NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float)>(&console::commands::lua_run), console::ConVarFlags::None, "Runs a lua command on the client lua state.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
-		  auto *game = pragma::get_client_game();
+		  auto *game = get_client_game();
 		  if(!game)
 			  return;
 		  auto *l = game->GetLuaState();
 		  if(!l)
 			  return;
-		  pragma::console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
+		  console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
 	  });
 
 	conVarMap.RegisterConCommand(
 	  "lua_run_gui",
-	  +[](pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv, float v) {
-		  auto *cl = pragma::get_client_state();
+	  +[](NetworkState *state, BasePlayerComponent *pl, std::vector<std::string> &argv, float v) {
+		  auto *cl = get_client_state();
 		  auto *l = cl ? cl->GetGUILuaState() : nullptr;
 		  if(!l) {
 			  Con::cwar << "GUI Lua state is not valid!" << Con::endl;
 			  return;
 		  }
-		  pragma::console::commands::lua_run(l, "lua_run_gui", pl, argv, v);
+		  console::commands::lua_run(l, "lua_run_gui", pl, argv, v);
 	  },
-	  pragma::console::ConVarFlags::None, "Runs a lua command on the GUI lua state.",
+	  console::ConVarFlags::None, "Runs a lua command on the GUI lua state.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
-		  auto *cl = pragma::get_client_state();
+		  auto *cl = get_client_state();
 		  if(!cl)
 			  return;
 		  auto *l = cl->GetGUILuaState();
 		  if(!l)
 			  return;
-		  pragma::console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
+		  console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
 	  });
 
-	conVarMap.RegisterConVar<bool>("cl_downscale_imported_high_resolution_rma_textures", true, pragma::console::ConVarFlags::Archive, "If enabled, imported high-resolution RMA textures will be downscaled to a more memory-friendly size.");
-	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures", std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> {[](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool oldVal, bool newVal) -> void {
+	conVarMap.RegisterConVar<bool>("cl_downscale_imported_high_resolution_rma_textures", true, console::ConVarFlags::Archive, "If enabled, imported high-resolution RMA textures will be downscaled to a more memory-friendly size.");
+	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures", std::function<void(NetworkState *, const console::ConVar &, bool, bool)> {[](NetworkState *nw, const console::ConVar &cv, bool oldVal, bool newVal) -> void {
 		//static_cast<material::CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);
 	}});
-	conVarMap.RegisterConVar<uint8_t>("render_debug_mode", 0, pragma::console::ConVarFlags::None,
+	conVarMap.RegisterConVar<uint8_t>("render_debug_mode", 0, console::ConVarFlags::None,
 	  "0 = Disabled, 1 = Ambient Occlusion, 2 = Albedo Colors, 3 = Metalness, 4 = Roughness, 5 = Diffuse Lighting, 6 = Normals, 7 = Normal Map, 8 = Reflectance, 9 = IBL Prefilter, 10 = IBL Irradiance, 11 = Emission, 12 = Lightmaps, 13 = Lightmap Uvs, 14 = Unlit, 15 = Show CSM cascades, 16 = Shadow Map Depth, 17 = Forward+ Heatmap, 18 = Specular, 19 = Indirect Lightmap, 20 = Dominant Lightmap.");
-	conVarMap.RegisterConVar<bool>("render_enable_verbose_output", false, pragma::console::ConVarFlags::None, "Enables or disables verbose rendering output.");
-	conVarMap.RegisterConVar<bool>("render_ibl_enabled", true, pragma::console::ConVarFlags::Archive, "Enables or disables image-based lighting.");
-	conVarMap.RegisterConVar<bool>("render_dynamic_lighting_enabled", true, pragma::console::ConVarFlags::Archive, "Enables or disables dynamic lighting.");
-	conVarMap.RegisterConVar<bool>("render_dynamic_shadows_enabled", true, pragma::console::ConVarFlags::Archive, "Enables or disables dynamic shadows.");
-	conVarMap.RegisterConVar<std::string>("render_api", "vulkan", pragma::console::ConVarFlags::Archive, "The underlying rendering API to use.", "<renderApi>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
-		auto renderAPIs = pragma::rendering::get_available_graphics_apis();
+	conVarMap.RegisterConVar<bool>("render_enable_verbose_output", false, console::ConVarFlags::None, "Enables or disables verbose rendering output.");
+	conVarMap.RegisterConVar<bool>("render_ibl_enabled", true, console::ConVarFlags::Archive, "Enables or disables image-based lighting.");
+	conVarMap.RegisterConVar<bool>("render_dynamic_lighting_enabled", true, console::ConVarFlags::Archive, "Enables or disables dynamic lighting.");
+	conVarMap.RegisterConVar<bool>("render_dynamic_shadows_enabled", true, console::ConVarFlags::Archive, "Enables or disables dynamic shadows.");
+	conVarMap.RegisterConVar<std::string>("render_api", "vulkan", console::ConVarFlags::Archive, "The underlying rendering API to use.", "<renderApi>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
+		auto renderAPIs = rendering::get_available_graphics_apis();
 		auto it = renderAPIs.begin();
 		std::vector<std::string_view> similarCandidates {};
-		pragma::string::gather_similar_elements(
+		string::gather_similar_elements(
 		  arg,
 		  [&it, &renderAPIs]() -> std::optional<std::string_view> {
 			  if(it == renderAPIs.end())
@@ -92,27 +92,27 @@ void pragma::CEngine::RegisterConsoleCommands()
 	});
 	conVarMap.RegisterConCommand(
 	  "render_api_info",
-	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto &renderAPI = GetRenderAPI();
 		  auto &context = GetRenderContext();
 		  Con::cout << "Active render API: " << renderAPI << " (" << context.GetAPIAbbreviation() << ")" << Con::endl;
 	  },
-	  pragma::console::ConVarFlags::None, "Prints information about the current render API to the console.");
+	  console::ConVarFlags::None, "Prints information about the current render API to the console.");
 	conVarMap.RegisterConCommand(
 	  "debug_render_stats",
-	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
-		  std::unordered_map<std::string, pragma::console::CommandOption> commandOptions {};
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  std::unordered_map<std::string, console::CommandOption> commandOptions {};
 		  pragma::console::parse_command_options(argv, commandOptions);
-		  auto full = pragma::util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions, "full", "0"));
+		  auto full = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions, "full", "0"));
 		  debug_render_stats(true, full, true, false);
 	  },
-	  pragma::console::ConVarFlags::None, "Prints information about the next frame.");
-	conVarMap.RegisterConVar<bool>("render_multithreaded_rendering_enabled", true, pragma::console::ConVarFlags::Archive, "Enables or disables multi-threaded rendering. Some renderers (like OpenGL) don't support multi-threaded rendering and will ignore this flag.");
-	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled", std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool, bool enabled) -> void { GetRenderContext().SetMultiThreadedRenderingEnabled(enabled); }});
-	conVarMap.RegisterConVarCallback("render_enable_verbose_output", std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool, bool enabled) -> void { pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED = enabled; }});
+	  console::ConVarFlags::None, "Prints information about the next frame.");
+	conVarMap.RegisterConVar<bool>("render_multithreaded_rendering_enabled", true, console::ConVarFlags::Archive, "Enables or disables multi-threaded rendering. Some renderers (like OpenGL) don't support multi-threaded rendering and will ignore this flag.");
+	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled", std::function<void(NetworkState *, const console::ConVar &, bool, bool)> {[this](NetworkState *nw, const console::ConVar &cv, bool, bool enabled) -> void { GetRenderContext().SetMultiThreadedRenderingEnabled(enabled); }});
+	conVarMap.RegisterConVarCallback("render_enable_verbose_output", std::function<void(NetworkState *, const console::ConVar &, bool, bool)> {[this](NetworkState *nw, const console::ConVar &cv, bool, bool enabled) -> void { rendering::VERBOSE_RENDER_OUTPUT_ENABLED = enabled; }});
 	conVarMap.RegisterConCommand(
 	  "crash",
-	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  Con::cwar << "Crash command has been invoked. Crashing intentionally..." << Con::endl;
 		  if(!argv.empty() && argv.front() == "exception") {
 			  throw std::runtime_error {"Crash!"};
@@ -120,17 +120,17 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  }
 		  std::abort();
 	  },
-	  pragma::console::ConVarFlags::None, "Forces the engine to crash.");
+	  console::ConVarFlags::None, "Forces the engine to crash.");
 	conVarMap.RegisterConCommand(
 	  "crash_gpu",
-	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  Con::cwar << "GPU Crash command has been invoked. Crashing intentionally..." << Con::endl;
 		  GetRenderContext().Crash();
 	  },
-	  pragma::console::ConVarFlags::None, "Forces a GPU crash.");
+	  console::ConVarFlags::None, "Forces a GPU crash.");
 	conVarMap.RegisterConCommand(
 	  "debug_render_memory_budget",
-	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto budget = GetRenderContext().DumpMemoryBudget();
 		  if(!budget.has_value()) {
 			  Con::cout << "No memory budget information available!" << Con::endl;
@@ -138,10 +138,10 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  }
 		  Con::cout << *budget << Con::endl;
 	  },
-	  pragma::console::ConVarFlags::None, "Prints information about the current GPU memory budget.");
+	  console::ConVarFlags::None, "Prints information about the current GPU memory budget.");
 	conVarMap.RegisterConCommand(
 	  "debug_render_memory_stats",
-	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto stats = GetRenderContext().DumpMemoryStats();
 		  if(!stats.has_value()) {
 			  Con::cout << "No memory stats information available!" << Con::endl;
@@ -149,10 +149,10 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  }
 		  Con::cout << *stats << Con::endl;
 	  },
-	  pragma::console::ConVarFlags::None, "Prints statistics about the current GPU memory usage.");
+	  console::ConVarFlags::None, "Prints statistics about the current GPU memory usage.");
 	conVarMap.RegisterConCommand(
 	  "debug_dump_shader_code",
-	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  Con::cwar << "No shader specified!" << Con::endl;
 			  return;
@@ -201,7 +201,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 				  stageName = "vertex";
 				  break;
 			  }
-			  static_assert(pragma::math::to_integral(prosper::ShaderStage::Count) == 6);
+			  static_assert(math::to_integral(prosper::ShaderStage::Count) == 6);
 			  auto stageFileName = path + stageName + ".gls";
 			  auto f = fs::open_file<fs::VFilePtrReal>(stageFileName, fs::FileMode::Write);
 			  if(f) {
@@ -213,18 +213,18 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  }
 		  Con::cout << "Done! Written shader files to '" << path << "'!" << Con::endl;
 	  },
-	  pragma::console::ConVarFlags::None, "Dumps the glsl code for the specified shader.");
-	conVarMap.RegisterConCommand("debug_dump_render_queues", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { g_dumpRenderQueues = true; }, pragma::console::ConVarFlags::None, "Prints all render queues for the next frame to the console.");
-	conVarMap.RegisterConVar<bool>("debug_hide_gui", false, pragma::console::ConVarFlags::None, "Disables GUI rendering.");
+	  console::ConVarFlags::None, "Dumps the glsl code for the specified shader.");
+	conVarMap.RegisterConCommand("debug_dump_render_queues", [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) { g_dumpRenderQueues = true; }, console::ConVarFlags::None, "Prints all render queues for the next frame to the console.");
+	conVarMap.RegisterConVar<bool>("debug_hide_gui", false, console::ConVarFlags::None, "Disables GUI rendering.");
 
-	conVarMap.RegisterConVar<bool>("render_vsync_enabled", true, pragma::console::ConVarFlags::Archive, "Enables or disables vsync. OpenGL only.");
-	conVarMap.RegisterConVarCallback("render_vsync_enabled", std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)> {[this](pragma::NetworkState *nw, const pragma::console::ConVar &cv, bool oldVal, bool newVal) -> void { GetRenderContext().GetWindow()->SetVSyncEnabled(newVal); }});
+	conVarMap.RegisterConVar<bool>("render_vsync_enabled", true, console::ConVarFlags::Archive, "Enables or disables vsync. OpenGL only.");
+	conVarMap.RegisterConVarCallback("render_vsync_enabled", std::function<void(NetworkState *, const console::ConVar &, bool, bool)> {[this](NetworkState *nw, const console::ConVar &cv, bool oldVal, bool newVal) -> void { GetRenderContext().GetWindow()->SetVSyncEnabled(newVal); }});
 
-	conVarMap.RegisterConVar<std::string>("audio_api", "fmod", pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Replicated, "The underlying audio API to use.", "<audioApi>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
-		auto audioAPIs = pragma::audio::get_available_audio_apis();
+	conVarMap.RegisterConVar<std::string>("audio_api", "fmod", console::ConVarFlags::Archive | console::ConVarFlags::Replicated, "The underlying audio API to use.", "<audioApi>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
+		auto audioAPIs = audio::get_available_audio_apis();
 		auto it = audioAPIs.begin();
 		std::vector<std::string_view> similarCandidates {};
-		pragma::string::gather_similar_elements(
+		string::gather_similar_elements(
 		  arg,
 		  [&it, &audioAPIs]() -> std::optional<std::string_view> {
 			  if(it == audioAPIs.end())
@@ -243,16 +243,16 @@ void pragma::CEngine::RegisterConsoleCommands()
 		}
 	});
 
-	conVarMap.RegisterConVar<uint32_t>("render_instancing_threshold", 2, pragma::console::ConVarFlags::Archive, "The threshold at which to start instancing entities if instanced rendering is enabled (render_instancing_threshold). Must not be lower than 2!", "[2,inf]");
-	conVarMap.RegisterConVar<bool>("render_instancing_enabled", false, pragma::console::ConVarFlags::Archive, "Enables or disables instanced rendering.");
-	conVarMap.RegisterConVar<uint32_t>("render_queue_worker_thread_count", 3, pragma::console::ConVarFlags::Archive, "Number of threads to use for generating render queues.", "[1,10]");
-	conVarMap.RegisterConVar<uint32_t>("render_queue_entities_per_worker_job", 5, pragma::console::ConVarFlags::Archive, "Number of entities for each job processed by a worker thread.", "[1,50]");
-	conVarMap.RegisterConVar<uint32_t>("render_queue_worker_jobs_per_batch", 2, pragma::console::ConVarFlags::Archive, "Number of worker jobs to accumulate in a batch before assigning a worker.", "[0,10]");
+	conVarMap.RegisterConVar<uint32_t>("render_instancing_threshold", 2, console::ConVarFlags::Archive, "The threshold at which to start instancing entities if instanced rendering is enabled (render_instancing_threshold). Must not be lower than 2!", "[2,inf]");
+	conVarMap.RegisterConVar<bool>("render_instancing_enabled", false, console::ConVarFlags::Archive, "Enables or disables instanced rendering.");
+	conVarMap.RegisterConVar<uint32_t>("render_queue_worker_thread_count", 3, console::ConVarFlags::Archive, "Number of threads to use for generating render queues.", "[1,10]");
+	conVarMap.RegisterConVar<uint32_t>("render_queue_entities_per_worker_job", 5, console::ConVarFlags::Archive, "Number of entities for each job processed by a worker thread.", "[1,50]");
+	conVarMap.RegisterConVar<uint32_t>("render_queue_worker_jobs_per_batch", 2, console::ConVarFlags::Archive, "Number of worker jobs to accumulate in a batch before assigning a worker.", "[0,10]");
 
 	conVarMap.RegisterConCommand(
 	  "debug_textures",
-	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
-		  auto &texManager = static_cast<material::CMaterialManager &>(static_cast<pragma::ClientState *>(GetClientState())->GetMaterialManager()).GetTextureManager();
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  auto &texManager = static_cast<material::CMaterialManager &>(static_cast<ClientState *>(GetClientState())->GetMaterialManager()).GetTextureManager();
 		  std::vector<std::shared_ptr<material::Texture>> textures;
 		  auto &cache = texManager.GetCache();
 		  textures.reserve(cache.size());
@@ -298,14 +298,14 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  auto &context = img.GetContext();
 			  auto useCount = img.shared_from_this().use_count() - 1;
 			  auto imgName = img.GetDebugName();
-			  pragma::string::truncate_string(imgName, 35);
+			  string::truncate_string(imgName, 35);
 			  Con::cout << std::left << std::setw(35) << imgName;
 
 			  if(useCount == 0)
-				  pragma::console::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
+				  pragma::console::set_console_color(console::ConsoleColorFlags::Intensity | console::ConsoleColorFlags::Red);
 			  Con::cout << std::setw(10) << useCount;
 			  if(useCount == 0)
-				  pragma::console::reset_console_color();
+				  console::reset_console_color();
 
 			  std::string res = std::to_string(img.GetWidth()) + "x" + std::to_string(img.GetHeight());
 			  Con::cout << std::setw(12) << res;
@@ -313,45 +313,45 @@ void pragma::CEngine::RegisterConsoleCommands()
 
 			  auto numMipmaps = img.GetMipmapCount();
 			  if(numMipmaps <= 1 && perfWarnings)
-				  pragma::console::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
+				  pragma::console::set_console_color(console::ConsoleColorFlags::Intensity | console::ConsoleColorFlags::Red);
 			  Con::cout << std::setw(10) << numMipmaps;
 			  if(numMipmaps <= 1 && perfWarnings)
-				  pragma::console::reset_console_color();
+				  console::reset_console_color();
 
 			  auto tiling = img.GetTiling();
 			  auto optimal = tiling == prosper::ImageTiling::Optimal;
 			  if(!optimal)
-				  pragma::console::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
+				  pragma::console::set_console_color(console::ConsoleColorFlags::Intensity | console::ConsoleColorFlags::Red);
 			  Con::cout << std::setw(10) << prosper::util::to_string(tiling);
 			  if(!optimal)
-				  pragma::console::reset_console_color();
+				  console::reset_console_color();
 
 			  auto format = img.GetFormat();
 			  auto isCompressed = prosper::util::is_compressed_format(format);
 			  if(!isCompressed && perfWarnings)
-				  pragma::console::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
+				  pragma::console::set_console_color(console::ConsoleColorFlags::Intensity | console::ConsoleColorFlags::Red);
 			  Con::cout << std::setw(22) << prosper::util::to_string(format);
 			  if(!isCompressed && perfWarnings)
-				  pragma::console::reset_console_color();
+				  console::reset_console_color();
 
-			  Con::cout << std::setw(12) << pragma::util::get_pretty_bytes(fGetImageSize(img));
+			  Con::cout << std::setw(12) << util::get_pretty_bytes(fGetImageSize(img));
 
 			  if(context.IsValidationEnabled() == false)
 				  Con::cout << std::setw(10) << "n/a";
 			  else {
 				  auto time = context.GetLastUsageTime(img);
 				  if(time.has_value() == false)
-					  pragma::console::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
+					  pragma::console::set_console_color(console::ConsoleColorFlags::Intensity | console::ConsoleColorFlags::Red);
 				  Con::cout << std::setw(10);
 				  if(time.has_value()) {
 					  auto t = std::chrono::steady_clock::now();
 					  auto dt = t - *time;
-					  Con::cout << pragma::util::get_pretty_duration(std::chrono::duration_cast<std::chrono::milliseconds>(dt).count()) << " ago";
+					  Con::cout << util::get_pretty_duration(std::chrono::duration_cast<std::chrono::milliseconds>(dt).count()) << " ago";
 				  }
 				  else
 					  Con::cout << "Never";
 				  if(time.has_value() == false)
-					  pragma::console::reset_console_color();
+					  console::reset_console_color();
 			  }
 
 			  Con::cout << std::setw(30) << fileName << Con::endl;
@@ -376,12 +376,12 @@ void pragma::CEngine::RegisterConsoleCommands()
 
 			  totalSize += textureSizes[idx];
 		  }
-		  Con::cout << "Total memory: " << pragma::util::get_pretty_bytes(totalSize) << Con::endl << Con::endl;
+		  Con::cout << "Total memory: " << util::get_pretty_bytes(totalSize) << Con::endl << Con::endl;
 
 		  auto *client = GetClientState();
-		  auto *game = client ? static_cast<pragma::CGame *>(client->GetGameState()) : nullptr;
+		  auto *game = client ? static_cast<CGame *>(client->GetGameState()) : nullptr;
 		  if(game) {
-			  auto cIt = EntityCIterator<pragma::CRasterizationRendererComponent> {*game};
+			  auto cIt = EntityCIterator<CRasterizationRendererComponent> {*game};
 			  Con::cout << "Number of scenes: " << cIt.GetCount() << Con::endl;
 			  for(auto &rast : cIt) {
 				  Con::cout << "Renderer " << rast.GetEntity().GetName() << ":" << Con::endl;
@@ -433,7 +433,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 					  fPrintImageInfo("<implementation>", *img, false);
 					  totalSceneSize += fGetImageSize(*img);
 				  }
-				  Con::cout << "Total scene image size: " << pragma::util::get_pretty_bytes(totalSceneSize) << Con::endl << Con::endl;
+				  Con::cout << "Total scene image size: " << util::get_pretty_bytes(totalSceneSize) << Con::endl << Con::endl;
 			  }
 		  }
 
@@ -441,9 +441,9 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  totalSize = 0;
 		  for(auto &imgBuf : imgBufs)
 			  totalSize += imgBuf->GetSize() - imgBuf->GetFreeSize();
-		  Con::cout << "Total device image memory: " << pragma::util::get_pretty_bytes(totalSize) << Con::endl;
+		  Con::cout << "Total device image memory: " << util::get_pretty_bytes(totalSize) << Con::endl;
 	  },
-	  pragma::console::ConVarFlags::None, "Prints information about the currently loaded textures.");
+	  console::ConVarFlags::None, "Prints information about the currently loaded textures.");
 #if LUA_ENABLE_RUN_GUI == 1
 	conVarMap.RegisterConCommand(
 	  "lua_exec_gui",
@@ -469,11 +469,11 @@ void pragma::CEngine::RegisterConsoleCommands()
 	  });
 #endif
 	conVarMap.RegisterConCommand(
-	  "asset_clear_unused_textures", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(pragma::asset::Type::Texture, true); }, pragma::console::ConVarFlags::None, "Clears all unused textures from memory.");
+	  "asset_clear_unused_textures", [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(asset::Type::Texture, true); }, console::ConVarFlags::None, "Clears all unused textures from memory.");
 	conVarMap.RegisterConCommand(
 	  "vr_preinitialize",
-	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
-		  auto *cl = static_cast<pragma::ClientState *>(GetClientState());
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  auto *cl = static_cast<ClientState *>(GetClientState());
 		  if(!cl)
 			  return;
 		  std::string err;
@@ -495,10 +495,10 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  }
 		  preInit();
 	  },
-	  pragma::console::ConVarFlags::None, "Pre-initializes openvr.");
+	  console::ConVarFlags::None, "Pre-initializes openvr.");
 	conVarMap.RegisterConCommand(
 	  "locale_localize",
-	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.size() < 4) {
 			  Con::cwar << "Insufficient arguments supplied!" << Con::endl;
 			  std::vector<std::string> files;
@@ -516,16 +516,16 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  auto identifier = argv[2];
 		  auto text = argv[3];
 		  Con::cout << "Localizing '" << identifier << "' in category '" << category << "' for language '" << lan << "' as '" << text << "'..." << Con::endl;
-		  auto res = pragma::locale::localize(identifier, lan, category, text);
+		  auto res = locale::localize(identifier, lan, category, text);
 		  if(res)
 			  Con::cout << "Done!" << Con::endl;
 		  else
 			  Con::cwar << "Localization failed!" << Con::endl;
 	  },
-	  pragma::console::ConVarFlags::None, "Adds the specified text to the localization files. Usage: locale_localize <group> <language> <textIdentifier> <localizedText>");
+	  console::ConVarFlags::None, "Adds the specified text to the localization files. Usage: locale_localize <group> <language> <textIdentifier> <localizedText>");
 	conVarMap.RegisterConCommand(
 	  "locale_relocalize",
-	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.size() < 4) {
 			  Con::cwar << "Insufficient arguments supplied!" << Con::endl;
 			  return;
@@ -535,16 +535,16 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  auto oldCategory = argv[2];
 		  auto newCategory = argv[3];
 		  Con::cout << "Re-localizing '" << identifier << "' in category '" << oldCategory << "' as '" << newIdentifier << "' in category '" << newCategory << "'..." << Con::endl;
-		  auto res = pragma::locale::relocalize(identifier, newIdentifier, oldCategory, newCategory);
+		  auto res = locale::relocalize(identifier, newIdentifier, oldCategory, newCategory);
 		  if(res)
 			  Con::cout << "Done!" << Con::endl;
 		  else
 			  Con::cwar << "Re-Localization failed!" << Con::endl;
 	  },
-	  pragma::console::ConVarFlags::None, "Moves the specified localized string to a different category with a different identifier. Usage: locale_localize <identifier> <newIdentifier> <category> <newCategory>");
+	  console::ConVarFlags::None, "Moves the specified localized string to a different category with a different identifier. Usage: locale_localize <identifier> <newIdentifier> <category> <newCategory>");
 	conVarMap.RegisterConCommand(
 	  "debug_start_lua_debugger_server_cl",
-	  [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto *l = state->GetLuaState();
 		  if(!l) {
 			  Con::cwar << "Unable to start debugger server: No active Lua state!" << Con::endl;
@@ -552,5 +552,5 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  }
 		  Lua::util::start_debugger_server(l);
 	  },
-	  pragma::console::ConVarFlags::None, "Starts the Lua debugger server for the clientside lua state.");
+	  console::ConVarFlags::None, "Starts the Lua debugger server for the clientside lua state.");
 }

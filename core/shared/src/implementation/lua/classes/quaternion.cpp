@@ -80,7 +80,7 @@ void Lua::Quaternion::Set(lua::State *, Quat &q, float w, float x, float y, floa
 	q.y = y;
 	q.z = z;
 }
-static luabind::mult<Quat, Vector2> approach_direction(lua::State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const ::Vector2 &rotAmount, const ::Vector2 *pitchLimit = nullptr, const ::Vector2 *yawLimit = nullptr, const Quat *rotPivot = nullptr,
+static luabind::mult<Quat, Vector2> approach_direction(lua::State *l, const Quat &rot, const Vector3 &up, const Vector3 &targetDir, const Vector2 &rotAmount, const Vector2 *pitchLimit = nullptr, const Vector2 *yawLimit = nullptr, const Quat *rotPivot = nullptr,
   const EulerAngles *angOffset = nullptr)
 {
 	Vector2 resAm;

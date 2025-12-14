@@ -11,7 +11,7 @@ import :entities.components.entity;
 export namespace pragma {
 	class DLLSERVER STimeScaleComponent final : public BaseTimeScaleComponent {
 	  public:
-		STimeScaleComponent(pragma::ecs::BaseEntity &ent) : BaseTimeScaleComponent(ent) {}
+		STimeScaleComponent(ecs::BaseEntity &ent) : BaseTimeScaleComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void SetTimeScale(float timeScale) override;
 

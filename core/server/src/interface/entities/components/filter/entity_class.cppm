@@ -12,7 +12,7 @@ export {
 	namespace pragma {
 		class DLLSERVER SFilterClassComponent final : public BaseFilterClassComponent {
 		  public:
-			SFilterClassComponent(pragma::ecs::BaseEntity &ent) : BaseFilterClassComponent(ent) {}
+			SFilterClassComponent(ecs::BaseEntity &ent) : BaseFilterClassComponent(ent) {}
 			virtual void InitializeLuaObject(lua::State *l) override;
 		};
 	};

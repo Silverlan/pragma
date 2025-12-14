@@ -15,15 +15,15 @@ void pragma::LuaInputBindingLayerRegister::Remove(InputBindingLayer &layer)
 	auto it = m_layers.find(&layer);
 	if(it == m_layers.end())
 		return;
-	pragma::get_cengine()->RemoveInputBindingLayer(layer.identifier);
+	get_cengine()->RemoveInputBindingLayer(layer.identifier);
 }
 void pragma::LuaInputBindingLayerRegister::Clear()
 {
-	for(auto &layer : pragma::get_cengine()->GetInputBindingLayers()) {
+	for(auto &layer : get_cengine()->GetInputBindingLayers()) {
 		auto it = m_layers.find(layer.get());
 		if(it == m_layers.end())
 			continue;
-		pragma::get_cengine()->RemoveInputBindingLayer(layer->identifier);
+		get_cengine()->RemoveInputBindingLayer(layer->identifier);
 	}
 	m_layers.clear();
 }

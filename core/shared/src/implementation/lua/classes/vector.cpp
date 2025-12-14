@@ -8,9 +8,9 @@ import :scripting.lua.classes.vector;
 
 pragma::math::Vertex Lua::Vertex::Copy(pragma::math::Vertex &v) { return v; }
 pragma::math::VertexWeight Lua::VertexWeight::Copy(pragma::math::VertexWeight &vw) { return vw; }
-::Vector3i Lua::Vectori::Copy(::Vector3i &v) { return v; }
-::Vector2i Lua::Vector2i::Copy(::Vector2i &v) { return v; }
-::Vector4i Lua::Vector4i::Copy(::Vector4i &v) { return v; }
+Vector3i Lua::Vectori::Copy(Vector3i &v) { return v; }
+Vector2i Lua::Vector2i::Copy(::Vector2i &v) { return v; }
+Vector4i Lua::Vector4i::Copy(::Vector4i &v) { return v; }
 
 void Lua::Vector::Normalize(Vector3 &vec) { uvec::normalize(&vec); }
 
@@ -21,8 +21,8 @@ void Lua::Vector::Rotate(lua::State *, Vector3 &vec, const EulerAngles &ang) { u
 void Lua::Vector::Rotate(lua::State *, Vector3 &vec, const Vector3 &normal, float angle) { vec = glm::gtc::rotate(vec, angle, normal); }
 void Lua::Vector::Rotate(lua::State *, Vector3 &vec, const Quat &orientation) { uvec::rotate(&vec, orientation); }
 void Lua::Vector::RotateAround(lua::State *, Vector3 &vec, const Vector3 &origin, const EulerAngles &ang) { uvec::rotate_around(&vec, ang, origin); }
-::Vector3 Lua::Vector::Copy(lua::State *l, const Vector3 &vec) { return vec; }
-::Vector3 Lua::Vector::Lerp(lua::State *l, const Vector3 &vec, const Vector3 &vecB, float factor) { return uvec::lerp(vec, vecB, factor); }
+Vector3 Lua::Vector::Copy(lua::State *l, const Vector3 &vec) { return vec; }
+Vector3 Lua::Vector::Lerp(lua::State *l, const Vector3 &vec, const Vector3 &vecB, float factor) { return uvec::lerp(vec, vecB, factor); }
 
 void Lua::Vector::Set(lua::State *, Vector3 &vec, const Vector3 &vecB)
 {
@@ -41,7 +41,7 @@ void Lua::Vector::Set(lua::State *, Vector3 &vec, float x, float y, float z)
 Mat4 Lua::Vector::ToMatrix(lua::State *l, const Vector3 &vec) { return glm::gtc::translate(umat::identity(), vec); }
 
 void Lua::Vector::SnapToGrid(lua::State *, Vector3 &vec, UInt32 gridSize) { uvec::snap_to_grid(vec, gridSize); }
-void Lua::Vector::SnapToGrid(lua::State *l, Vector3 &vec) { Lua::Vector::SnapToGrid(l, vec, 1); }
+void Lua::Vector::SnapToGrid(lua::State *l, Vector3 &vec) { SnapToGrid(l, vec, 1); }
 
 ////////////////////////
 
@@ -70,7 +70,7 @@ float Lua::Vector2::DistanceSqr(const ::Vector2 &a, const ::Vector2 &b)
 	Vector3 v = Vector3(b.x, b.y, 0) - Vector3(a.x, a.y, 0);
 	return uvec::length_sqr(v);
 }
-::Vector2 Lua::Vector2::Cross(lua::State *l, const ::Vector2 &a, const ::Vector2 &b)
+Vector2 Lua::Vector2::Cross(lua::State *l, const ::Vector2 &a, const ::Vector2 &b)
 {
 	Vector3 cross = glm::cross(Vector3(a.x, a.y, 0), Vector3(b.x, b.y, 0));
 	return ::Vector2(cross.x, cross.y);
@@ -91,8 +91,8 @@ void Lua::Vector2::RotateAround(lua::State *, ::Vector2 &vec, const ::Vector2 &o
 	vec.x = v.x;
 	vec.y = v.y;
 }
-::Vector2 Lua::Vector2::Copy(lua::State *l, const ::Vector2 &vec) { return ::Vector2(vec.x, vec.y); }
-::Vector2 Lua::Vector2::Lerp(lua::State *l, const ::Vector2 &vec, const ::Vector2 &vecB, float factor)
+Vector2 Lua::Vector2::Copy(lua::State *l, const ::Vector2 &vec) { return ::Vector2(vec.x, vec.y); }
+Vector2 Lua::Vector2::Lerp(lua::State *l, const ::Vector2 &vec, const ::Vector2 &vecB, float factor)
 {
 	Vector3 v = uvec::lerp(Vector3(vec.x, vec.y, 0), Vector3(vecB.x, vecB.y, 0), factor);
 	return ::Vector2 {v.x, v.y};
@@ -107,7 +107,7 @@ void Lua::Vector2::Set(lua::State *, ::Vector2 &vec, float x, float y)
 	vec.x = x;
 	vec.y = y;
 }
-::Vector2 Lua::Vector2::Project(lua::State *l, const ::Vector2 &vec, const ::Vector2 &n) { return glm::gtx::proj(vec, n); }
+Vector2 Lua::Vector2::Project(lua::State *l, const ::Vector2 &vec, const ::Vector2 &n) { return glm::gtx::proj(vec, n); }
 
 ////////////////////////
 
@@ -118,8 +118,8 @@ float Lua::Vector4::LengthSqr(const ::Vector4 &vec) { return glm::gtx::length2(v
 float Lua::Vector4::Distance(const ::Vector4 &a, const ::Vector4 &b) { return glm::distance(a, b); }
 float Lua::Vector4::DistanceSqr(const ::Vector4 &a, const ::Vector4 &b) { return glm::gtx::distance2(a, b); }
 float Lua::Vector4::DotProduct(lua::State *l, const ::Vector4 &a, const ::Vector4 &b) { return glm::dot(a, b); }
-::Vector4 Lua::Vector4::Copy(lua::State *l, const ::Vector4 &vec) { return ::Vector4(vec.x, vec.y, vec.z, vec.w); }
-::Vector4 Lua::Vector4::Lerp(lua::State *l, const ::Vector4 &vec, const ::Vector4 &vecB, float factor) { return vec + (vecB - vec) * factor; }
+Vector4 Lua::Vector4::Copy(lua::State *l, const ::Vector4 &vec) { return ::Vector4(vec.x, vec.y, vec.z, vec.w); }
+Vector4 Lua::Vector4::Lerp(lua::State *l, const ::Vector4 &vec, const ::Vector4 &vecB, float factor) { return vec + (vecB - vec) * factor; }
 void Lua::Vector4::Set(lua::State *, ::Vector4 &vec, const ::Vector4 &vecB)
 {
 	vec.w = vecB.w;
@@ -134,7 +134,7 @@ void Lua::Vector4::Set(lua::State *, ::Vector4 &vec, float x, float y, float z, 
 	vec.y = y;
 	vec.z = z;
 }
-::Vector4 Lua::Vector4::Project(lua::State *l, const ::Vector4 &vec, const ::Vector4 &n) { return glm::gtx::proj(vec, n); }
+Vector4 Lua::Vector4::Project(lua::State *l, const ::Vector4 &vec, const ::Vector4 &n) { return glm::gtx::proj(vec, n); }
 
 ////////////////////////
 
@@ -164,10 +164,10 @@ static void to_min_max(TVector &inOutA, TVector &inOutB, const TVector &c)
 }
 
 void Lua::vector::to_min_max(::Vector2 &inOutA, ::Vector2 &inOutB) { ::to_min_max(inOutA, inOutB); }
-void Lua::vector::to_min_max(::Vector3 &inOutA, ::Vector3 &inOutB) { ::to_min_max(inOutA, inOutB); }
+void Lua::vector::to_min_max(Vector3 &inOutA, Vector3 &inOutB) { ::to_min_max(inOutA, inOutB); }
 void Lua::vector::to_min_max(::Vector4 &inOutA, ::Vector4 &inOutB) { ::to_min_max(inOutA, inOutB); }
 void Lua::vector::to_min_max(::Vector2 &inOutA, ::Vector2 &inOutB, const ::Vector2 &c) { ::to_min_max(inOutA, inOutB, c); }
-void Lua::vector::to_min_max(::Vector3 &inOutA, ::Vector3 &inOutB, const ::Vector3 &c) { ::to_min_max(inOutA, inOutB, c); }
+void Lua::vector::to_min_max(Vector3 &inOutA, Vector3 &inOutB, const Vector3 &c) { ::to_min_max(inOutA, inOutB, c); }
 void Lua::vector::to_min_max(::Vector4 &inOutA, ::Vector4 &inOutB, const ::Vector4 &c) { ::to_min_max(inOutA, inOutB, c); }
 
 template<class TVector>
@@ -193,10 +193,10 @@ static void get_min_max(lua::State *l, luabind::table<> t, TVector &outMin, TVec
 }
 
 void Lua::vector::get_min_max(lua::State *l, luabind::table<> t, ::Vector2 &outMin, ::Vector2 &outMax) { return ::get_min_max<::Vector2>(l, t, outMin, outMax); }
-void Lua::vector::get_min_max(lua::State *l, luabind::table<> t, ::Vector3 &outMin, ::Vector3 &outMax) { return ::get_min_max<::Vector3>(l, t, outMin, outMax); }
+void Lua::vector::get_min_max(lua::State *l, luabind::table<> t, Vector3 &outMin, Vector3 &outMax) { return ::get_min_max<Vector3>(l, t, outMin, outMax); }
 void Lua::vector::get_min_max(lua::State *l, luabind::table<> t, ::Vector4 &outMin, ::Vector4 &outMax) { return ::get_min_max<::Vector4>(l, t, outMin, outMax); }
 
-::Vector2 Lua::vector::random_2d()
+Vector2 Lua::vector::random_2d()
 {
 	float azimuth = pragma::math::random(0.f, 2.f) * static_cast<float>(pragma::math::pi);
 	return ::Vector2(std::cos(azimuth), std::sin(azimuth));

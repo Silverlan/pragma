@@ -43,8 +43,8 @@ void ShaderDepthToRGB::InitializeShaderResources()
 template<class TPushConstants>
 bool ShaderDepthToRGB::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetDepthTex, const TPushConstants &pushConstants) const
 {
-	return RecordBindVertexBuffers(bindState, {pragma::get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareVertexUvBuffer().get()}) == true && RecordBindDescriptorSet(bindState, descSetDepthTex) == true && RecordPushConstants(bindState, pushConstants) == true
-	  && prosper::ShaderGraphics::RecordDraw(bindState, prosper::CommonBufferCache::GetSquareVertexCount()) == true;
+	return RecordBindVertexBuffers(bindState, {get_cengine()->GetRenderContext().GetCommonBufferCache().GetSquareVertexUvBuffer().get()}) == true && RecordBindDescriptorSet(bindState, descSetDepthTex) == true && RecordPushConstants(bindState, pushConstants) == true
+	  && ShaderGraphics::RecordDraw(bindState, prosper::CommonBufferCache::GetSquareVertexCount()) == true;
 }
 
 bool ShaderDepthToRGB::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetDepthTex, float nearZ, float farZ, float contrastFactor) const { return RecordDraw(bindState, descSetDepthTex, PushConstants {nearZ, farZ, contrastFactor}); }

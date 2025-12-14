@@ -170,46 +170,46 @@ pragma::gui::types::WIBase *Lua::gui::create_label(lua::State *l, const std::str
 	return pText;
 }
 
-void Lua::gui::register_element(const std::string &className, const Lua::classObject &classData)
+void Lua::gui::register_element(const std::string &className, const classObject &classData)
 {
 	auto &manager = pragma::get_cgame()->GetLuaGUIManager();
-	manager.RegisterGUIElement(className, const_cast<Lua::classObject &>(classData));
+	manager.RegisterGUIElement(className, const_cast<classObject &>(classData));
 }
 
 pragma::gui::types::WIBase *Lua::gui::get_base_element(const prosper::Window &window) { return pragma::gui::WGUI::GetInstance().GetBaseElement(&window); }
 pragma::gui::types::WIBase *Lua::gui::get_base_element() { return pragma::gui::WGUI::GetInstance().GetBaseElement(); }
 
-pragma::gui::types::WIBase *Lua::gui::get_element_under_cursor(lua::State *l, pragma::gui::types::WIBase &elRoot, const Lua::func<bool, pragma::gui::types::WIBase> &condition)
+pragma::gui::types::WIBase *Lua::gui::get_element_under_cursor(lua::State *l, pragma::gui::types::WIBase &elRoot, const func<bool, pragma::gui::types::WIBase> &condition)
 {
 	return pragma::gui::WGUI::GetInstance().GetCursorGUIElement(&elRoot, [l, condition](pragma::gui::types::WIBase *el) -> bool {
 		auto &oFunc = condition;
-		auto result = Lua::CallFunction(
+		auto result = CallFunction(
 		  l,
-		  [&oFunc, el](lua::State *l) -> Lua::StatusCode {
+		  [&oFunc, el](lua::State *l) -> StatusCode {
 			  oFunc.push(l);
 			  auto o = pragma::gui::WGUILuaInterface::GetLuaObject(l, *el);
 			  o.push(l);
-			  return Lua::StatusCode::Ok;
+			  return StatusCode::Ok;
 		  },
 		  1);
-		if(result != Lua::StatusCode::Ok)
+		if(result != StatusCode::Ok)
 			return true;
 		auto r = false;
-		if(Lua::IsSet(l, -1)) {
-			r = Lua::CheckBool(l, -1);
-			Lua::Pop(l, 1);
+		if(IsSet(l, -1)) {
+			r = CheckBool(l, -1);
+			Pop(l, 1);
 		}
 		return r;
 	});
 }
-pragma::gui::types::WIBase *Lua::gui::get_element_under_cursor(lua::State *l, const prosper::Window *window, const Lua::func<bool, pragma::gui::types::WIBase> &condition)
+pragma::gui::types::WIBase *Lua::gui::get_element_under_cursor(lua::State *l, const prosper::Window *window, const func<bool, pragma::gui::types::WIBase> &condition)
 {
 	auto *el = pragma::gui::WGUI::GetInstance().GetBaseElement(window);
 	if(!el)
 		return nullptr;
 	return get_element_under_cursor(l, *el, condition);
 }
-pragma::gui::types::WIBase *Lua::gui::get_element_under_cursor(lua::State *l, const Lua::func<bool, pragma::gui::types::WIBase> &condition) { return get_element_under_cursor(l, nullptr, condition); }
+pragma::gui::types::WIBase *Lua::gui::get_element_under_cursor(lua::State *l, const func<bool, pragma::gui::types::WIBase> &condition) { return get_element_under_cursor(l, nullptr, condition); }
 pragma::gui::types::WIBase *Lua::gui::get_element_under_cursor(lua::State *l, const prosper::Window *window)
 {
 	auto *el = pragma::gui::WGUI::GetInstance().GetBaseElement(window);
@@ -222,25 +222,25 @@ pragma::gui::types::WIBase *Lua::gui::get_element_under_cursor(lua::State *l, pr
 	return pragma::gui::WGUI::GetInstance().GetCursorGUIElement(&elRoot, [l](pragma::gui::types::WIBase *el) -> bool { return true; });
 }
 
-pragma::gui::types::WIBase *Lua::gui::get_element_at_position(lua::State *l, prosper::Window *window, pragma::gui::types::WIBase *baseElement, int32_t x, int32_t y, const Lua::func<bool, pragma::gui::types::WIBase> &condition)
+pragma::gui::types::WIBase *Lua::gui::get_element_at_position(lua::State *l, prosper::Window *window, pragma::gui::types::WIBase *baseElement, int32_t x, int32_t y, const func<bool, pragma::gui::types::WIBase> &condition)
 {
 	std::function<bool(pragma::gui::types::WIBase *)> fCondition = nullptr;
 
 	fCondition = [condition, l](pragma::gui::types::WIBase *el) -> bool {
-		auto result = Lua::CallFunction(
+		auto result = CallFunction(
 		  l,
-		  [condition, el](lua::State *l) -> Lua::StatusCode {
+		  [condition, el](lua::State *l) -> StatusCode {
 			  condition.push(l);
 			  auto o = pragma::gui::WGUILuaInterface::GetLuaObject(l, *el);
 			  o.push(l);
-			  return Lua::StatusCode::Ok;
+			  return StatusCode::Ok;
 		  },
 		  1);
-		if(result != Lua::StatusCode::Ok)
+		if(result != StatusCode::Ok)
 			return true;
-		if(Lua::IsSet(l, -1) == false)
+		if(IsSet(l, -1) == false)
 			return false;
-		return Lua::CheckBool(l, -1);
+		return CheckBool(l, -1);
 	};
 
 	return pragma::gui::WGUI::GetInstance().GetGUIElement(baseElement, x, y, fCondition, window);
@@ -297,21 +297,21 @@ void Lua::gui::register_default_skin(const std::string &vars, const std::string 
 	auto *l = pragma::get_client_state()->GetGUILuaState();
 	std::string errMsg;
 	auto resVars = pragma::scripting::lua_core::run_string(l, "return " + vars, "register_default_skin", 1, &errMsg);
-	Lua::CheckTable(l, -1);
-	if(resVars != Lua::StatusCode::Ok) {
+	CheckTable(l, -1);
+	if(resVars != StatusCode::Ok) {
 		pragma::scripting::lua_core::raise_error(l, errMsg);
 		return;
 	}
 	auto tVars = luabind::object {luabind::from_stack(l, -1)};
-	Lua::Pop(l);
+	Pop(l);
 	auto resSkinData = pragma::scripting::lua_core::run_string(l, "return " + skinData, "register_default_skin", 1, &errMsg);
-	if(resSkinData != Lua::StatusCode::Ok) {
+	if(resSkinData != StatusCode::Ok) {
 		pragma::scripting::lua_core::raise_error(l, errMsg);
 		return;
 	}
-	Lua::CheckTable(l, -1);
+	CheckTable(l, -1);
 	auto tSkinData = luabind::object {luabind::from_stack(l, -1)};
-	Lua::Pop(l);
+	Pop(l);
 
 	pragma::gui::WILuaSkin::Settings settings;
 	settings.vars = tVars;
@@ -333,7 +333,7 @@ pragma::platform::Cursor::Shape Lua::gui::get_cursor() { return pragma::gui::WGU
 void Lua::gui::set_cursor(pragma::platform::Cursor::Shape shape) { pragma::gui::WGUI::GetInstance().SetCursor(shape); }
 pragma::platform::CursorMode Lua::gui::get_cursor_input_mode() { return pragma::gui::WGUI::GetInstance().GetCursorInputMode(); }
 void Lua::gui::set_cursor_input_mode(pragma::platform::CursorMode mode) { pragma::gui::WGUI::GetInstance().SetCursorInputMode(mode); }
-::Vector2i Lua::gui::get_window_size(lua::State *l)
+Vector2i Lua::gui::get_window_size(lua::State *l)
 {
 	auto &context = pragma::gui::WGUI::GetInstance().GetContext();
 	auto &window = context.GetWindow();

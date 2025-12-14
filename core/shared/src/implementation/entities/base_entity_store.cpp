@@ -15,8 +15,8 @@ void pragma::ecs::BaseEntity::Load(udm::LinkedPropertyWrapper &udm)
 	SetSpawnFlags(spawnFlags);
 	std::string uuid;
 	udm["uuid"] >> uuid;
-	if(pragma::util::is_uuid(uuid))
-		SetUuid(pragma::util::uuid_string_to_bytes(uuid));
+	if(util::is_uuid(uuid))
+		SetUuid(util::uuid_string_to_bytes(uuid));
 
 	auto &componentManager = GetNetworkState()->GetGameState()->GetEntityComponentManager();
 	auto udmComponents = udm["components"];
@@ -25,7 +25,7 @@ void pragma::ecs::BaseEntity::Load(udm::LinkedPropertyWrapper &udm)
 		auto udmComponent = udmComponents[i];
 		std::string type;
 		udmComponent["type"] >> type;
-		auto componentId = pragma::INVALID_COMPONENT_ID;
+		auto componentId = INVALID_COMPONENT_ID;
 		if(componentManager.GetComponentTypeId(type, componentId)) {
 			auto hComponent = AddComponent(componentId);
 			if(hComponent.valid())
@@ -40,7 +40,7 @@ void pragma::ecs::BaseEntity::Save(udm::LinkedPropertyWrapper &udm)
 {
 	udm["entityDataVersion"] << ENTITY_DATA_VERSION;
 	udm["spawnFlags"] << m_spawnFlags;
-	udm["uuid"] << pragma::util::uuid_to_string(m_uuid);
+	udm["uuid"] << util::uuid_to_string(m_uuid);
 
 	auto &componentManager = GetNetworkState()->GetGameState()->GetEntityComponentManager();
 	auto &components = GetComponents();
@@ -73,34 +73,34 @@ pragma::ecs::BaseEntity *pragma::ecs::BaseEntity::Copy()
 	return ent;
 }
 
-bool pragma::ecs::BaseEntity::CreateMemberReference(pragma::EntityIdentifier identifier, std::string var, pragma::EntityUComponentMemberRef &outRef)
+bool pragma::ecs::BaseEntity::CreateMemberReference(EntityIdentifier identifier, std::string var, EntityUComponentMemberRef &outRef)
 {
 	if(var.empty()) {
-		outRef = pragma::EntityUComponentMemberRef {std::move(identifier), "", ""};
+		outRef = EntityUComponentMemberRef {std::move(identifier), "", ""};
 		return true;
 	}
-	auto path = pragma::util::RelFile(std::move(var));
+	auto path = util::RelFile(std::move(var));
 	size_t offset = 0;
 	if(path.GetComponent(offset, &offset) != "ec") {
-		outRef = pragma::EntityUComponentMemberRef {std::move(identifier), "", ""};
+		outRef = EntityUComponentMemberRef {std::move(identifier), "", ""};
 		return true;
 	}
 	auto componentName = path.GetComponent(offset, &offset);
 	if(offset == std::string::npos)
 		return false;
 	auto memberName = path.GetString().substr(offset);
-	outRef = pragma::EntityUComponentMemberRef {std::move(identifier), std::string {componentName}, std::string {memberName}};
+	outRef = EntityUComponentMemberRef {std::move(identifier), std::string {componentName}, std::string {memberName}};
 	return true;
 }
-bool pragma::ecs::BaseEntity::ParseUri(std::string uriPath, pragma::EntityUComponentMemberRef &outRef, const pragma::util::Uuid *optSelf)
+bool pragma::ecs::BaseEntity::ParseUri(std::string uriPath, EntityUComponentMemberRef &outRef, const util::Uuid *optSelf)
 {
 	uriparser::Uri uri {std::move(uriPath)};
 	auto scheme = uri.scheme();
 	if(!scheme.empty() && uri.scheme() != "pragma")
 		return false;
 	auto uriPathNorm = uri.path();
-	pragma::string::replace(uriPathNorm, "%20", " ");
-	auto path = pragma::util::RelFile(uriPathNorm);
+	string::replace(uriPathNorm, "%20", " ");
+	auto path = util::RelFile(uriPathNorm);
 	size_t offset = 0;
 	if(path.GetComponent(offset, &offset) != "game" || path.GetComponent(offset, &offset) != "entity")
 		return false;
@@ -111,10 +111,10 @@ bool pragma::ecs::BaseEntity::ParseUri(std::string uriPath, pragma::EntityUCompo
 	auto &str = path.GetString();
 	auto memberName = (offset < str.size()) ? str.substr(offset) : std::string {};
 
-	pragma::util::Uuid uuid {};
+	util::Uuid uuid {};
 	auto itUuid = query.find("entity_uuid");
 	if(itUuid != query.end())
-		return CreateMemberReference(pragma::util::uuid_string_to_bytes(std::string {itUuid->second}), std::move(memberName), outRef);
+		return CreateMemberReference(util::uuid_string_to_bytes(std::string {itUuid->second}), std::move(memberName), outRef);
 	auto itName = query.find("entity_name");
 	if(itName != query.end())
 		return CreateMemberReference(std::string {itName->second}, std::move(memberName), outRef);
@@ -123,5 +123,5 @@ bool pragma::ecs::BaseEntity::ParseUri(std::string uriPath, pragma::EntityUCompo
 	return false;
 }
 std::string pragma::ecs::BaseEntity::GetUri() const { return GetUri(GetUuid()); }
-std::string pragma::ecs::BaseEntity::GetUri(pragma::util::Uuid uuid) { return "pragma:game/entity?entity_uuid=" + pragma::util::uuid_to_string(uuid); }
+std::string pragma::ecs::BaseEntity::GetUri(util::Uuid uuid) { return "pragma:game/entity?entity_uuid=" + util::uuid_to_string(uuid); }
 std::string pragma::ecs::BaseEntity::GetUri(const std::string name) { return "pragma:game/entity?entity_name=" + name; }

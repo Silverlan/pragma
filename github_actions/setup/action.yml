@@ -11,6 +11,10 @@ inputs:
     description: 'Install CUDA?'
     required: true
     default: '0'
+  with_system_gcc:
+    description: 'Use system GCC?'
+    required: true
+    default: '0'
 runs:
   using: "composite"
   steps:
@@ -27,7 +31,7 @@ runs:
       uses: Silverlan/common_actions/clear_disk_space@main
 
     - name: Setup GCC
-      if: ${{ runner.os == 'Linux' }}
+      if: ${{ runner.os == 'Linux' && inputs.with_system_gcc == '0' }}
       uses: Silverlan/common_actions/setup_gcc@main
 
     - name: Download Pragma

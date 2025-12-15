@@ -15,11 +15,11 @@ def reset_to_commit(sha):
 	subprocess.run(["git","fetch"],check=True)
 	subprocess.run(["git","checkout",sha,"--recurse-submodules"],check=True)
 
-reset_to_commit("0bf6041")
+reset_to_commit("a83fa224d083ad5ee4d39367621ee8c8c8db379b")
 
 if platform == "win32":
-    subprocess.run([".\compile\install.bat", "msvc"])
+    subprocess.run([".\\compile\\install.bat", "notest"])
 else:
-    subprocess.run(["./compile/install.sh", "other"])
+    subprocess.run(["./compile/install.sh", "notest"])
 
 os.chdir("..")

@@ -1,0 +1,14 @@
+diff --git a/gumpp.hpp b/gumpp.hpp
+index bcebb88..c39ba9e 100644
+--- a/gumpp.hpp
++++ b/gumpp.hpp
+@@ -23,8 +23,9 @@
+ #include <memory>
+ #include <vector>
+ #include <string>
+ #include <optional>
++#include <cinttypes>
+ #if defined(_MSC_VER)
+ #include <BaseTsd.h>
+ typedef SSIZE_T ssize_t;
+ #ifdef ABSOLUTE

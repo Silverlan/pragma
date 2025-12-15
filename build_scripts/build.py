@@ -67,7 +67,7 @@ input_args = args
 
 if platform == "linux":
 	if args["generator"] == "Default":
-		args["generator"] = "Ninja Multi-Config"
+		args["generator"] = config.generator
 else:
 	# Note: CMake (v4.2.0) does not support the Visual Studio generator yet when using
 	# C++23 import std. Until CMake adds support, we fall back to the Ninja generator,
@@ -77,7 +77,7 @@ else:
 	# changed back to "Visual Studio 17 2022" for all cases.
 	if args["generator"] == "Default":
 		if args["deps_only"]:
-			args["generator"] = "Visual Studio 17 2022"
+			args["generator"] = config.generator
 		else:
 			args["generator"] = "Ninja Multi-Config"
 
@@ -151,7 +151,11 @@ prefer_git_https = args["prefer_git_https"]
 update = args["update"]
 modules_prebuilt = []
 
+config.generator = generator
 config.prefer_git_https = prefer_git_https
+config.build_swiftshader = build_swiftshader
+config.with_lua_debugger = with_lua_debugger
+config.with_swiftshader = with_swiftshader
 
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)
@@ -219,37 +223,29 @@ print("cmake_args: " +', '.join(additional_cmake_args))
 print("cmake_flags: " +', '.join(additional_cmake_flags))
 print("modules: " +', '.join(modules))
 
-toolsetArgs = None
-toolsetCFlags = None
-def cmake_configure_def_toolset(scriptPath,generator,additionalArgs=[],additionalCFlags=[]):
-	cflags = additionalCFlags
-	if toolsetCFlags is not None:
-		cflags += toolsetCFlags
-	cmake_configure(scriptPath,generator,toolsetArgs,additionalArgs,cflags)
-
 if platform == "win32":
 	if toolset == "msvc":
 		toolset = None # Let the compiler use the default toolset
 	elif toolset == "clang":
-		toolsetArgs = [
+		config.toolsetArgs = [
 			"-DCMAKE_C_COMPILER=clang.exe",
 			"-DCMAKE_CXX_COMPILER=clang++.exe",
 			"-DCMAKE_MAKE_PROGRAM=ninja.exe"
 		]
-		toolsetCFlags = ["-fexceptions", "-fcxx-exceptions", "--target=x86_64-pc-windows-msvc"]
+		config.toolsetCFlags = ["-fexceptions", "-fcxx-exceptions", "--target=x86_64-pc-windows-msvc"]
 		print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
 		sys.exit(1)
 	elif toolset == "clang-cl":
 		clang_dir = get_library_root_dir("clang") +"/bin"
 		
-		toolsetArgs = [
+		config.toolsetArgs = [
 			"-DCMAKE_C_COMPILER=" +clang_dir +"/clang-cl.exe",
 			"-DCMAKE_CXX_COMPILER=" +clang_dir +"/clang-cl.exe",
 			"-DCMAKE_CXX_COMPILER_AR=" +clang_dir +"/llvm-ar.exe",
 			"-DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS=" +clang_dir +"/clang-scan-deps.exe",
 			"-DCMAKE_CXX_COMPILER_RANLIB=" +clang_dir +"/llvm-ranlib.exe"
 		]
-		toolsetCFlags = ["-Wno-error", "-Wno-unused-command-line-argument", "-Wno-enum-constexpr-conversion", "-fexceptions", "-fcxx-exceptions"]
+		config.toolsetCFlags = ["-Wno-error", "-Wno-unused-command-line-argument", "-Wno-enum-constexpr-conversion", "-fexceptions", "-fcxx-exceptions"]
 		# print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
 		# sys.exit(1)
 	if generator != "Ninja Multi-Config":
@@ -258,7 +254,7 @@ if platform == "win32":
 			sys.exit(1)
 
 if platform == "linux" and with_debug:
-	toolsetCFlags = ["-D_GLIBCXX_ASSERTIONS"]
+	config.toolsetCFlags = ["-D_GLIBCXX_ASSERTIONS"]
 
 if update:
 	os.chdir(root)
@@ -369,8 +365,7 @@ if platform == "linux":
 
 def execscript(filepath):
 	global generator
-	global toolsetArgs
-	global toolsetCFlags
+	global config
 	global build_config
 	global build_directory
 	global deps_directory
@@ -391,8 +386,8 @@ def execscript(filepath):
 	g = {}
 	l = {
 		"generator": generator,
-		"toolsetArgs": toolsetArgs,
-		"toolsetCFlags": toolsetCFlags,
+		"toolsetArgs": config.toolsetArgs,
+		"toolsetCFlags": config.toolsetCFlags,
 		"build_config": build_config,
 		"build_directory": build_directory,
 		"deps_directory": deps_directory,
@@ -457,7 +452,8 @@ if platform == "linux":
 		if(prefer_pacman()):
 			commands = [
 				"pacman -S --needed cmake",
-				"pacman -S --needed ninja"
+				"pacman -S --needed ninja",
+				"pacman -Syu base-devel git curl zip unzip tar cmake ninja" # Required for vcpkg
 			]
 		else:
 			commands = [
@@ -536,7 +532,8 @@ execscript(scripts_dir +"/scripts/modules.py")
 ########## Third-Party Libraries ##########
 print_msg("Building third-party libraries...")
 if build_all:
-	execscript(scripts_dir +"/build_third_party_libs.py")
+	import build_third_party_libs
+	build_third_party_libs.main()
 
 # gcc
 os.chdir(deps_dir)
@@ -591,7 +588,7 @@ def execbuildscript(filepath):
 	global cmake_args
 	global additional_build_targets
 	global generator
-	global toolsetArgs
+	global config
 	global moduleUrl
 	global moduleDir
 	global build_config
@@ -628,8 +625,8 @@ def execbuildscript(filepath):
 	}
 	l = {
 		"generator": generator,
-		"toolsetArgs": toolsetArgs,
-		"toolsetCFlags": toolsetCFlags,
+		"toolsetArgs": config.toolsetArgs,
+		"toolsetCFlags": config.toolsetCFlags,
 		"moduleUrl": moduleUrl,
 		"moduleDir": moduleDir,
 		"build_config": build_config,

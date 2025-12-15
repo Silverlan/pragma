@@ -138,6 +138,12 @@ def cmake_build(buildConfig,targets=None):
 		print("Build command failed:\n\n", cmd_line)
 		raise
 
+def cmake_configure_def_toolset(scriptPath,generator,additionalArgs=[],additionalCFlags=[]):
+	cflags = additionalCFlags
+	if config.toolsetCFlags is not None:
+		cflags += config.toolsetCFlags
+	cmake_configure(scriptPath,generator,config.toolsetArgs,additionalArgs,cflags)
+
 def mkdir(dirName,cd=False):
 	if not Path(dirName).is_dir():
 		os.makedirs(dirName)
@@ -216,6 +222,7 @@ class ZipFileWithPermissions(ZipFile):
 		return targetpath
 
 def extract(zipName,removeZip=True,format="zip"):
+	print_msg("Extracting " +zipName +"...")
 	if format == "zip":
 		with ZipFileWithPermissions(zipName, 'r') as zip_ref:
 			zip_ref.extractall(".")
@@ -236,7 +243,7 @@ def extract(zipName,removeZip=True,format="zip"):
 
 def http_extract(url,removeZip=True,format="zip"):
 	from scripts.shared import print_msg
-	print_msg("Downloading and extracting " +url +"...")
+	print_msg("Downloading " +url +"...")
 	fileName = http_download(url)
 	extract(fileName,removeZip,format)
 
@@ -437,6 +444,11 @@ def get_gh_submodule(directory,ghRepoId,commitId=None,branch=None):
 
 def get_gl_submodule(directory,ghRepoId,commitId=None,branch=None):
 	get_submodule(directory,"https://gitlab.com/" +ghRepoId +".git",commitId,branch)
+
+def chdir_mkdir(path):
+	path = Path(path)
+	path.mkdir(parents=True, exist_ok=True)
+	os.chdir(path)
 
 def compile_lua_file(deps_dir, luaFile):
 	from scripts.shared import normalize_path
@@ -699,6 +711,11 @@ def get_library_include_dir(lib_name):
 def get_library_lib_dir(lib_name):
 	return get_library_root_dir(lib_name) +"lib/"
 
+def get_zlib_lib_path():
+	if platform == "linux":
+		return get_library_lib_dir("zlib") +"libz.a"
+	return get_library_lib_dir("zlib") +"zs.lib"
+
 def check_content_version(base_path: str, contents: str, filename: str) -> bool:
 	target_file = Path(base_path) / filename
 	if not target_file.exists():
@@ -723,3 +740,7 @@ def update_content_version(base_path: str, commit_id: str, filename: str) -> Non
 
 def prefer_pacman():
     return shutil.which("pacman") is not None
+
+def apply_patch(path_path: str):
+	print_msg("Applying patch '{path_path}'...")
+	subprocess.run(["git","apply",path_path],check=False)

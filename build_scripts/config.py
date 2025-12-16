@@ -8,9 +8,9 @@ deps_staging_dir = "staging"
 prebuilt_bin_dir = str(Path(deps_dir) / deps_staging_dir)
 prefer_git_https = False
 if platform == "win32":
-	generator = "Visual Studio 17 2022"
+	default_generator = "Visual Studio 17 2022"
 else:
-	generator = "Ninja Multi-Config"
+	default_generator = "Ninja Multi-Config"
 
 pragma_root = str(Path(__file__).parent.parent)
 

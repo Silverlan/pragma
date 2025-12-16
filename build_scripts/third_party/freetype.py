@@ -2,9 +2,12 @@ from scripts.shared import *
 
 def main():
 	if platform == "win32":
+		deps_dir = config.deps_dir
+		generator = config.generator
+		chdir_mkdir(deps_dir)
+
 		print_msg("Downloading freetype...")
 		commit_sha = "9a2d6d9"
-		os.chdir(deps_dir)
 		if not Path(os.getcwd()+"/freetype").is_dir():
 			git_clone("https://github.com/aseprite/freetype2.git", directory="freetype")
 		freetype_root = deps_dir+"/freetype"

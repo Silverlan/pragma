@@ -67,7 +67,7 @@ input_args = args
 
 if platform == "linux":
 	if args["generator"] == "Default":
-		args["generator"] = config.generator
+		args["generator"] = config.default_generator
 else:
 	# Note: CMake (v4.2.0) does not support the Visual Studio generator yet when using
 	# C++23 import std. Until CMake adds support, we fall back to the Ninja generator,
@@ -77,7 +77,7 @@ else:
 	# changed back to "Visual Studio 17 2022" for all cases.
 	if args["generator"] == "Default":
 		if args["deps_only"]:
-			args["generator"] = config.generator
+			args["generator"] = config.default_generator
 		else:
 			args["generator"] = "Ninja Multi-Config"
 
@@ -345,7 +345,7 @@ if platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-2
 		cxx_compiler = clang_staging_path +"/bin/clang++"
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
-elif platform == "win32":
+elif platform == "win32" and toolset == "clang":
 	clang_staging_path = get_library_root_dir("clang")
 
 	curDir = os.getcwd()

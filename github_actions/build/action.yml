@@ -73,7 +73,7 @@ runs:
 
     # Using the pragma build-script to build lua-debug results in errors, so we'll build it manually
     - name: Build lua-debug
-      uses: Silverlan/pragma/github_actions/build_luadebug@main
+      uses: Silverlan/pragma/github_actions/build_luadebug@develop
       if: ${{ inputs.with-lua-debugger == '1' }}
       with:
         root_dir: '${{ steps.set-output-vars.outputs.root-dir }}'

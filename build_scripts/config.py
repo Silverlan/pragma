@@ -12,6 +12,8 @@ if platform == "win32":
 	default_generator = "Visual Studio 17 2022"
 else:
 	default_generator = "Ninja Multi-Config"
+	no_sudo = False
+	no_confirm = False
 
 pragma_root = str(Path(__file__).parent.parent)
 

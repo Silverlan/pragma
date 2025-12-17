@@ -159,6 +159,9 @@ config.build_swiftshader = build_swiftshader
 config.clean_deps_build_files = clean_deps_build_files
 config.with_lua_debugger = with_lua_debugger
 config.with_swiftshader = with_swiftshader
+if platform == "linux":
+	config.no_sudo = no_sudo
+	config.no_confirm = no_confirm
 
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)

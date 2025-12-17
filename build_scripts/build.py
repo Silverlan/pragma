@@ -615,6 +615,7 @@ def execbuildscript(filepath):
 	global get_staging_dir
 	global get_library_root_dir
 	global get_library_lib_dir
+	global get_library_bin_dir
 
 	curDir = os.getcwd()
 
@@ -647,6 +648,7 @@ def execbuildscript(filepath):
 		"get_staging_dir": get_staging_dir,
 		"get_library_root_dir": get_library_root_dir,
 		"get_library_lib_dir": get_library_lib_dir,
+		"get_library_bin_dir": get_library_bin_dir,
 
 		"install_directory": install_directory,
 		"verbose": verbose,

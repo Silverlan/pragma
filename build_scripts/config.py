@@ -6,7 +6,7 @@ cmake_args = []
 deps_dir = str(Path.cwd() / "deps")
 deps_staging_dir = "staging"
 prebuilt_bin_dir = str(Path(deps_dir) / deps_staging_dir)
-prefer_git_https = False
+prefer_git_https = True
 if platform == "win32":
 	default_generator = "Visual Studio 17 2022"
 else:
@@ -20,3 +20,4 @@ toolsetCFlags = None
 with_lua_debugger = False
 build_swiftshader = False
 with_swiftshader = False
+generator = default_generator

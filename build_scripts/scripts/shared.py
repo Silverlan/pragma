@@ -88,7 +88,7 @@ def git_clone_commit(name, path, url, commitSha, branch=None):
 	reset_to_commit(commitSha)
 	return path
 
-def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cflags=[]):
+def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cflags=[],env=None):
 	args = ["cmake",scriptPath,"-G",generator]
 	if cflags:
 		additionalArgs.append("-DCMAKE_C_FLAGS=" + " ".join(cflags))
@@ -110,7 +110,7 @@ def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cfla
 	print("Running CMake configure command:", cmd, flush=True)
 
 	try:
-		subprocess.run(args,check=True)
+		subprocess.run(args,check=True,env=env)
 	except subprocess.CalledProcessError as e:
 		if platform == "win32":
 			cmd_line = subprocess.list2cmdline(e.cmd)
@@ -119,7 +119,7 @@ def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cfla
 		print("Configure command failed:\n\n", cmd_line, flush=True)
 		raise
 
-def cmake_build(buildConfig,targets=None):
+def cmake_build(buildConfig,targets=None,env=None):
 	args = ["cmake","--build",".","--config",buildConfig]
 	if targets:
 		args.append("--target")
@@ -129,7 +129,7 @@ def cmake_build(buildConfig,targets=None):
 	print("Running CMake build command...")
 	# print("Running CMake build command:", ' '.join(f'"{arg}"' for arg in args))
 	try:
-		subprocess.run(args,check=True)
+		subprocess.run(args,check=True,env=env)
 	except subprocess.CalledProcessError as e:
 		if platform == "win32":
 			cmd_line = subprocess.list2cmdline(e.cmd)
@@ -138,11 +138,11 @@ def cmake_build(buildConfig,targets=None):
 		print("Build command failed:\n\n", cmd_line)
 		raise
 
-def cmake_configure_def_toolset(scriptPath,generator,additionalArgs=[],additionalCFlags=[]):
+def cmake_configure_def_toolset(scriptPath,generator,additionalArgs=[],additionalCFlags=[],env=None):
 	cflags = additionalCFlags
 	if config.toolsetCFlags is not None:
 		cflags += config.toolsetCFlags
-	cmake_configure(scriptPath,generator,config.toolsetArgs,additionalArgs,cflags)
+	cmake_configure(scriptPath,generator,config.toolsetArgs,additionalArgs,cflags,env)
 
 def mkdir(dirName,cd=False):
 	if not Path(dirName).is_dir():
@@ -710,6 +710,9 @@ def get_library_include_dir(lib_name):
 
 def get_library_lib_dir(lib_name):
 	return get_library_root_dir(lib_name) +"lib/"
+
+def get_library_bin_dir(lib_name):
+	return get_library_root_dir(lib_name) +"bin/"
 
 def get_zlib_lib_path():
 	if platform == "linux":

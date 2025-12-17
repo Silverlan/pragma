@@ -19,9 +19,14 @@ def cleanup_build_files(resultData):
 				cleanup_build_files(info)
 
 def build_library(name, *args, **kwargs):
-	res = build_third_party_library(name, *args, **kwargs)
-	if config.clean_deps_build_files:
-		cleanup_build_files(res)
+	# If --clean-deps-build-files was specified, we'll skip the build if the binaries already exist in the staging
+	# target location. This prevents the rebuilding of libraries we have already built previously.
+	# If the flag wasn't specified, we always build. In this case the build cache should skip the build anyway unless
+	# something has changed.
+	if not config.clean_deps_build_files or not Path(get_library_root_dir(name)).is_dir():
+		res = build_third_party_library(name, *args, **kwargs)
+		if config.clean_deps_build_files:
+			cleanup_build_files(res)
 
 def main():
 	mkpath(config.prebuilt_bin_dir)

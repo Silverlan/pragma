@@ -30,5 +30,9 @@ def main():
 		copy_prebuilt_binaries(cpptrace_bin_dir, "cpptrace")
 		copy_prebuilt_headers(cpptrace_root +"/include/", "cpptrace")
 
+	return {
+		"buildDir": cpptrace_root
+	}
+
 if __name__ == "__main__":
 	main()

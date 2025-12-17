@@ -33,5 +33,9 @@ def main():
 		lib_dir = copy_prebuilt_binaries(freetype_root +"/build/Release", "freetype")
 		inc_dir = copy_prebuilt_headers(freetype_root +"/include", "freetype")
 
+		return {
+			"buildDir": freetype_root
+		}
+
 if __name__ == "__main__":
 	main()

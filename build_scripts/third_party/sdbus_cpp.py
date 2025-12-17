@@ -26,5 +26,9 @@ def main():
 			copy_prebuilt_binaries(sdbus_root +"/build/" +build_config_tp, "sdbus-cpp")
 			copy_prebuilt_headers(sdbus_root +"/include", "sdbus-cpp")
 
+		return {
+			"buildDir": sdbus_root
+		}
+
 if __name__ == "__main__":
 	main()

@@ -37,5 +37,9 @@ def main():
 		copy_prebuilt_binaries(bit7z_root +"/lib/x64/Release/", "bit7z")
 		copy_prebuilt_headers(bit7z_root +"/include/", "bit7z")
 
+	return {
+		"buildDir": bit7z_root
+	}
+
 if __name__ == "__main__":
 	main()

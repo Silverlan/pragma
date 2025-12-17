@@ -26,5 +26,9 @@ def main():
 		compressonator_targets.append("Image_EXR")
 	cmake_build("Release", compressonator_targets)
 
+	return {
+		"buildDir": compressonator_root
+	}
+
 if __name__ == "__main__":
 	main()

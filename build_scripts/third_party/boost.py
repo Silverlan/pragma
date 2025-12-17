@@ -3,8 +3,7 @@ import glob
 
 def main():
 	# Requires zlib
-	from third_party import zlib
-	zlib.main()
+	zlib_info = build_third_party_library("zlib")
 
 	build_config_tp = config.build_config_tp
 	deps_dir = config.deps_dir
@@ -79,3 +78,10 @@ def main():
 		shutil.copy2(boost_root +"/tools/cmake/config/BoostConfig.cmake", boost_cmake_dir +"/")
 	else:
 		print_msg("Boost is already up-to-date. Skipping...")
+
+	return {
+		"buildDir": boost_root,
+		"subLibs": {
+			"zlib": zlib_info
+		}
+	}

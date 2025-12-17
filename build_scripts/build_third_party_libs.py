@@ -8,90 +8,67 @@ import config
 
 from scripts.shared import *
 
+def cleanup_build_files(resultData):
+	if resultData is not None:
+		buildDir = resultData.get("buildDir")
+		if buildDir:
+			shutil.rmtree(buildDir, ignore_errors=True)
+		subLibs = resultData.get("subLibs")
+		if subLibs:
+			for name, info in subLibs.items():
+				cleanup_build_files(info)
+
+def build_library(name, *args, **kwargs):
+	res = build_third_party_library(name, *args, **kwargs)
+	if config.clean_deps_build_files:
+		cleanup_build_files(res)
+
 def main():
 	mkpath(config.prebuilt_bin_dir)
 	os.chdir(config.prebuilt_bin_dir)
 
-	from third_party import libdecor
-	libdecor.main()
-
-	from third_party import zlib
-	zlib.main()
-
-	from third_party import libzip
-	libzip.main()
-
-	from third_party import libpng
-	libpng.main()
-
-	from third_party import icu
-	icu.main()
-
-	from third_party import boost
-	boost.main()
-
-	from third_party import luajit
-	luajit.main()
-
-	from third_party import geometrictools
-	geometrictools.main()
-
-	from third_party import opencv
-	opencv.main()
-
-	from third_party import spirv_tools
-	spirv_tools.main()
-
-	from third_party import spirv_headers
-	spirv_headers.main()
+	build_library("libdecor")
+	build_library("zlib")
+	build_library("libzip")
+	build_library("libpng")
+	build_library("icu")
+	build_library("boost")
+	build_library("luajit")
+	build_library("geometrictools")
+	build_library("opencv")
+	build_library("spirv_tools")
+	build_library("spirv_headers")
 
 	if config.with_swiftshader:
-		from third_party import swiftshader
-		swiftshader.main(config.build_swiftshader)
+		build_library("swiftshader", config.build_swiftshader)
 
-	from third_party import vcpkg
-	vcpkg.main()
+	build_library("vcpkg")
 
 	if platform == "win32":
-		from third_party import sevenzip
-		sevenzip.main()
+		build_library("sevenzip")
 
-	from third_party import bit7z
-	bit7z.main()
+	
+	build_library("bit7z")
+	build_library("sevenzlib")
+	build_library("cpptrace")
 
-	from third_party import sevenzlib
-	sevenzlib.main()
+	# build_library("compressonator")
 
-	from third_party import cpptrace
-	cpptrace.main()
-
-	# from third_party import compressonator
-	# compressonator.main()
-
-	from third_party import ispctc
-	ispctc.main()
+	build_library("ispctc")
 
 	if platform == "linux":
-		from third_party import sdbus_cpp
-		sdbus_cpp.main()
+		build_library("sdbus_cpp")
 	else:
-		from third_party import wintoast
-		wintoast.main()
+		build_library("wintoast")
 
 	# We use system freetype on linux
 	if platform == "win32":
-		from third_party import freetype
-		freetype.main()
+		build_library("freetype")
 
 	if config.with_lua_debugger:
-		from third_party import modebug
-		modebug.main()
-
-		from third_party import luasocket
-		luasocket.main()
-
-		from third_party import lua_debug
-		lua_debug.main()
+		build_library("modebug")
+		build_library("luasocket")
+		build_library("lua_debug")
 
 if __name__ == "__main__":
 	main()

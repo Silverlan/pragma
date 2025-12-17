@@ -26,5 +26,9 @@ def main():
 			copy_prebuilt_binaries(wintoast_root +"/build/" +build_config_tp, "WinToast")
 			copy_prebuilt_headers(wintoast_root +"/include", "WinToast")
 
+		return {
+			"buildDir": wintoast_root
+		}
+
 if __name__ == "__main__":
 	main()

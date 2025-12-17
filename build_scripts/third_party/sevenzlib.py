@@ -28,5 +28,9 @@ def main():
 		subprocess.run(["make","-j","-f","../../cmpl_gcc.mak"],check=True)
 		copy_prebuilt_binaries(sevenz_so_path +"/b/g/", "7z")
 
+	return {
+		"buildDir": sevenz_root
+	}
+
 if __name__ == "__main__":
 	main()

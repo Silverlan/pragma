@@ -27,5 +27,9 @@ def main():
 		copy_prebuilt_binaries(icu_root +"/icu/usr/local/lib/", "icu")
 		copy_prebuilt_headers(icu_root +"/icu/usr/local/include", "icu")
 
+	return {
+		"buildDir": icu_root
+	}
+
 if __name__ == "__main__":
 	main()

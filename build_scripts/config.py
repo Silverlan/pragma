@@ -2,6 +2,7 @@ from pathlib import Path
 from sys import platform
 
 build_config_tp = "Release"
+cleanBuildFiles = False
 cmake_args = []
 deps_dir = str(Path.cwd() / "deps")
 deps_staging_dir = "staging"
@@ -17,7 +18,9 @@ pragma_root = str(Path(__file__).parent.parent)
 toolsetArgs = None
 toolsetCFlags = None
 
-with_lua_debugger = False
 build_swiftshader = False
+clean_deps_build_files = False
+generator = default_generator
+with_lua_debugger = False
 with_swiftshader = False
 generator = default_generator

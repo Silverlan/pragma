@@ -32,5 +32,9 @@ def main():
 		for module in opencv_modules:
 			copy_prebuilt_headers(opencv_root +"/modules/" +module +"/include", "opencv")
 
+	return {
+		"buildDir": opencv_root
+	}
+
 if __name__ == "__main__":
 	main()

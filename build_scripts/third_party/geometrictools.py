@@ -19,5 +19,9 @@ def main():
 
 		copy_prebuilt_headers(geometric_tools_root +"/GTE", "geometrictools")
 
+	return {
+		"buildDir": geometric_tools_root
+	}
+
 if __name__ == "__main__":
 	main()

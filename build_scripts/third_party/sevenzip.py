@@ -2,8 +2,7 @@ from scripts.shared import *
 
 def main():
 	if platform == "win32":
-		from third_party import vcpkg
-		vcpkg.main()
+		zlib_info = build_third_party_library("vcpkg")
 		
 		build_config_tp = config.build_config_tp
 		deps_dir = config.deps_dir

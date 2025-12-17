@@ -36,5 +36,9 @@ def main():
 		copy_prebuilt_headers(zlib_root, "zlib")
 		copy_prebuilt_headers(zlib_root +"/build", "zlib")
 
+	return {
+		"buildDir": zlib_root
+	}
+
 if __name__ == "__main__":
 	main()

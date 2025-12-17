@@ -11,6 +11,7 @@ import zipfile
 import shlex
 import fnmatch
 import filecmp
+import importlib
 import multiprocessing
 from pathlib import Path
 from urllib.parse import urlparse
@@ -747,3 +748,7 @@ def prefer_pacman():
 def apply_patch(path_path: str):
 	print_msg("Applying patch '{path_path}'...")
 	subprocess.run(["git","apply",path_path],check=False)
+
+def build_third_party_library(name, *args, **kwargs):
+	module = importlib.import_module(f"third_party.{name}")
+	return module.main(*args, **kwargs)

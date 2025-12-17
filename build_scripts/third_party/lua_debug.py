@@ -27,5 +27,16 @@ def main():
 	print("Running install_files.py...")
 	subprocess.run([python_exec_name, str(script_dir / "lua_debug/install_files.py"), deps_dir],check=True)
 
+	return {
+		"subLibs": {
+			"luamake": {
+				"buildDir": str(Path(deps_dir) / "luamake")
+			},
+			"luadebug": {
+				"buildDir": str(Path(deps_dir) / "lua-debug")
+			}
+		}
+	}
+
 if __name__ == "__main__":
 	main()

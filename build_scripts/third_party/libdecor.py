@@ -27,5 +27,9 @@ def main():
 			copy_prebuilt_binaries(libdecor_root +"/build/src/", "libdecor", ["libdecor-0.so.0.200.2.p"])
 			copy_prebuilt_headers(libdecor_root +"/src/", "libdecor")
 
+		return {
+			"buildDir": libdecor_root
+		}
+
 if __name__ == "__main__":
 	main()

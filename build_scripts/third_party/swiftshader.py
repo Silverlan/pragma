@@ -35,5 +35,9 @@ def main(build_swiftshader=False):
 				http_extract(base_url +"swiftshader.tar.gz",format="tar.gz")
 	copy_prebuilt_binaries(swiftshader_bin_dir, "swiftshader")
 
+	return {
+		"buildDir": swiftshader_root
+	}
+
 if __name__ == "__main__":
 	main()

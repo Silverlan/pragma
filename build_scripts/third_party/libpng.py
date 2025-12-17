@@ -2,8 +2,7 @@ from scripts.shared import *
 
 def main():
 	# Requires zlib
-	from third_party import zlib
-	zlib.main()
+	zlib_info = build_third_party_library("zlib")
 
 	build_config_tp = config.build_config_tp
 	deps_dir = config.deps_dir
@@ -34,6 +33,13 @@ def main():
 		copy_prebuilt_binaries(libpng_root +"/build/" +build_config_tp +"/", "libpng")
 		copy_prebuilt_headers(libpng_root, "libpng")
 		copy_prebuilt_headers(libpng_root +"/build/", "libpng")
+
+	return {
+		"buildDir": libpng_root,
+		"subLibs": {
+			"zlib": zlib_info
+		}
+	}
 
 if __name__ == "__main__":
 	main()

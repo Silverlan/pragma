@@ -45,6 +45,7 @@ parser.add_argument('--build-config', help='The build configuration to use.', de
 parser.add_argument('--build-directory', help='Directory to write the build files to. Can be relative or absolute.', default='build')
 parser.add_argument('--deps-directory', help='Directory to write the dependency files to. Can be relative or absolute.', default='deps')
 parser.add_argument("--deps-only", type=str2bool, nargs='?', const=True, default=False, help="Configuration, build and installation of Pragma will be skipped.")
+parser.add_argument("--clean-deps-build-files", type=str2bool, nargs='?', const=True, default=False, help="Automatically clean up build files of third-party dependencies to save disk space.")
 parser.add_argument('--install-directory', help='Installation directory. Can be relative (to build directory) or absolute.', default='install')
 parser.add_argument('--cmake-arg', help='Additional cmake argument for configuring Pragma. This parameter can be used multiple times.', action='append', default=[])
 parser.add_argument("--cmake-cxx-flag", action="append", help="Additional flags to add to CMAKE_CXX_FLAGS.", default=[])
@@ -138,6 +139,7 @@ build_config = args["build_config"]
 build_directory = args["build_directory"]
 deps_directory = args["deps_directory"]
 deps_only = args["deps_only"]
+clean_deps_build_files = args["clean_deps_build_files"]
 install_directory = args["install_directory"]
 additional_cmake_args = args["cmake_arg"]
 additional_cmake_flags = args["cmake_cxx_flag"]
@@ -154,6 +156,7 @@ modules_prebuilt = []
 config.generator = generator
 config.prefer_git_https = prefer_git_https
 config.build_swiftshader = build_swiftshader
+config.clean_deps_build_files = clean_deps_build_files
 config.with_lua_debugger = with_lua_debugger
 config.with_swiftshader = with_swiftshader
 
@@ -214,6 +217,7 @@ print("build_config: " +build_config)
 print("build_directory: " +build_directory)
 print("deps_directory: " +deps_directory)
 print("deps_only: " +str(deps_only))
+print("clean_deps_build_files: " +str(clean_deps_build_files))
 print("install_directory: " +install_directory)
 if platform == "linux":
 	print("no_sudo: " +str(no_sudo))
@@ -820,7 +824,7 @@ if with_vr:
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="90882054e09e2170348e2d1ff813e019d28fe373",
+		commitSha="ca0e16c34762ca482074d214c9afd7c0cf8619e1",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)

@@ -49,5 +49,14 @@ def main():
 		copy_prebuilt_binaries(ispctc_root +"/build/" +build_config_tp, "ispctc")
 		copy_prebuilt_headers(ispctc_root +"/ispc_texcomp", "ispctc")
 
+	return {
+		"buildDir": ispctc_root,
+		"subLibs": {
+			"ispc": {
+				"buildDir": ispc_root
+			}
+		}
+	}
+
 if __name__ == "__main__":
 	main()

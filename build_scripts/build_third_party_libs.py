@@ -3,16 +3,84 @@ from sys import platform
 from pathlib import Path
 import subprocess
 import shutil
+import stat
+import tempfile
+import time
+import uuid
 import glob
 import config
 
 from scripts.shared import *
 
+def on_rm_error(func, path, exc_info):
+	# Try to make writable and try removal once more
+	try:
+		os.chmod(path, stat.S_IWRITE)
+	except Exception:
+		pass
+	try:
+		func(path)
+	except Exception:
+		raise
+
+def safe_remove_tree(path, retries=5, delay=0.5):
+	p = Path(path)
+	if not p.exists():
+		return True
+
+	# .git dir is often problematic because it may still be in use by the system, so we'll try to delete it first
+	git_dir = p / '.git'
+	if git_dir.exists():
+		try:
+			shutil.rmtree(git_dir, onerror=on_rm_error)
+		except Exception:
+			pass
+
+	# Move the tree to temp trash
+	trash_parent = Path(tempfile.gettempdir())
+	trash_name = "build-trash-" + uuid.uuid4().hex
+	trash_path = trash_parent / trash_name
+
+	try:
+		os.rename(p, trash_path)
+		moved = True
+	except Exception:
+		# rename failed, try shutil.move
+		try:
+			shutil.move(str(p), str(trash_path))
+			moved = True
+		except Exception:
+			moved = False
+
+	target = trash_path if moved else p
+
+	# attempt deletion
+	for attempt in range(1, retries + 1):
+		try:
+			if target.exists():
+				shutil.rmtree(str(target), onerror=_on_rm_error)
+			if not target.exists():
+				return True
+		except Exception as exc:
+			# wait and retry
+			time.sleep(delay * attempt)
+
+	# last-resort fallback on Linux: use rm -rf
+	if platform == "linux" and target.exists():
+		try:
+			subprocess.run(['rm', '-rf', str(target)], check=True)
+			return not target.exists()
+		except Exception:
+			pass
+
+	# Deletion failed
+	return False
+
 def cleanup_build_files(resultData):
 	if resultData is not None:
 		buildDir = resultData.get("buildDir")
 		if buildDir:
-			shutil.rmtree(buildDir, ignore_errors=True)
+			safe_remove_tree(buildDir)
 		subLibs = resultData.get("subLibs")
 		if subLibs:
 			for name, info in subLibs.items():
@@ -25,6 +93,7 @@ def build_library(name, *args, **kwargs):
 	# something has changed.
 	if not config.clean_deps_build_files or not Path(get_library_root_dir(name)).is_dir():
 		res = build_third_party_library(name, *args, **kwargs)
+		os.chdir(config.deps_dir)
 		if config.clean_deps_build_files:
 			cleanup_build_files(res)
 

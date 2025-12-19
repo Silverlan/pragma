@@ -323,7 +323,7 @@ if platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-2
 		clang20_root = os.getcwd() +"/LLVM-22.git-Linux-X64"
 		if not Path(clang20_root).is_dir():
 			print_msg("Downloading clang-22...")
-			http_extract("https://github.com/Silverlan/clang_prebuilt/releases/download/2025-11-16/linux_x64.tar.xz",format="tar.xz")
+			http_extract("https://github.com/Silverlan/clang_prebuilt/releases/download/2025-12-19/linux_x64.tar.xz",format="tar.xz")
 		#clang20_root = os.getcwd() +"/LLVM-21.1.5-Linux-X64"
 		#if not Path(clang20_root).is_dir():
 		#	print_msg("Downloading clang-21...")
@@ -334,6 +334,8 @@ if platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-2
 		copy_preserving_symlink(Path(clang20_root +"/bin/clang++"), Path(clang_staging_path +"/bin"))
 		copy_preserving_symlink(Path(clang20_root +"/bin/clang-22"), Path(clang_staging_path +"/bin"))
 		copy_preserving_symlink(Path(clang20_root +"/bin/clang-scan-deps"), Path(clang_staging_path +"/bin"))
+		copy_preserving_symlink(Path(clang20_root +"/bin/llvm-ar"), Path(clang_staging_path +"/bin"))
+		copy_preserving_symlink(Path(clang20_root +"/bin/llvm-ranlib"), Path(clang_staging_path +"/bin"))
 
 		copytree(clang20_root +"/include/c++", clang_staging_path +"/include/c++")
 		copytree(clang20_root +"/include/clang", clang_staging_path +"/include/clang")
@@ -775,7 +777,7 @@ if with_pfm:
 	if with_core_pfm_modules or with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_curl",
-			commitSha="8006e97882b1dab5010b16b9602b0212cedaf5db",
+			commitSha="87f95a97551d473de6deed307a97d482429c90fd",
 			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
 		)
 		add_pragma_module(
@@ -827,7 +829,7 @@ if with_vr:
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="80d724862a3a40f8c7ee21168c4b4c8581394afc",
+		commitSha="ece0610bc3d2aa2bd3f30993beb1d06e7d3923f5",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)

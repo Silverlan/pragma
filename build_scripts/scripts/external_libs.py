@@ -21,7 +21,7 @@ get_gh_submodule("prosper",                 "Silverlan/prosper",                
 get_gh_submodule("sharedutils",             "Silverlan/sharedutils",            "8ae73761b233a1bff0aff656e7715a21a144ed3e")
 get_gh_submodule("util_bsp",                "Silverlan/util_bsp",               "d808b8ec3a9cf57c9b63a800d38304d4286925b8")
 get_gh_submodule("util_formatted_text",     "Silverlan/util_formatted_text",    "50bd69695d55a61d9ecab8c3453a88fd8bc17a99")
-get_gh_submodule("util_image",              "Silverlan/util_image",             "52de5e7180dcc9c7f92a851ec63fff6f0893c643")
+get_gh_submodule("util_image",              "Silverlan/util_image",             "1382b778b28565fa1462b8af04c80b70890dc2b0")
 get_gh_submodule("util_pad",                "Silverlan/util_pad",               "9f353dbad247e742a67f87b171dd30810f908b66")
 get_gh_submodule("util_pragma_doc",         "Silverlan/util_pragma_doc",        "e235cea9acf0e59eefabf7027aff3315753991db")
 get_gh_submodule("util_smdmodel",           "Silverlan/util_smdmodel",          "e6bb48d9b0f1b0f22a48cb3d0def1e8850a889ed")

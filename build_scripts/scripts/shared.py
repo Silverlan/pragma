@@ -335,6 +335,7 @@ def check_repository_commit(path, commitId, libName=None):
 		["git", "rev-parse", "HEAD"], cwd=path
 	).decode('utf-8').strip()
 	short_current = full_sha[: len(commitId)]
+	os.chdir(curDir)
 	if short_current == commitId:
 		if libName:
 			print_msg(f"{libName} is already up-to-date at commit '{commitId}', skipping...")

@@ -12,7 +12,7 @@ get_gh_submodule("alsoundsystem",           "Silverlan/alsoundsystem",          
 get_gh_submodule("datasystem",              "Silverlan/datasystem",             "a703f6ba410b882f76a2a7f3de566f95d25b924f")
 get_gh_submodule("iglfw",                   "Silverlan/iglfw",                  "acb72da92badbfd50375ae1fa245f389a3715920")
 get_gh_submodule("luasystem",               "Silverlan/luasystem",              "986bc641790708b3caa36a0fe6715759ae4c6220")
-get_gh_submodule("materialsystem",          "Silverlan/materialsystem",         "567a3863c5ba9f4a0bab846675390dd43596ebb1")
+get_gh_submodule("materialsystem",          "Silverlan/materialsystem",         "7059dceaf9b9fbbeeae6b910077f1e26d071e476")
 get_gh_submodule("mathutil",                "Silverlan/mathutil",               "f78974544eb716b00b8aecea86fe1c72a728d8b5")
 get_gh_submodule("networkmanager",          "Silverlan/networkmanager",         "307e83426280669624ee25f8e3058af96e4e0db3")
 get_gh_submodule("oskit",                   "Silverlan/oskit",                  "2c13e0963ef719d8c3a806f5c4ea0e151db58367")

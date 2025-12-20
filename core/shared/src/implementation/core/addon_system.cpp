@@ -73,7 +73,7 @@ static bool is_addon_mounted(const std::string &addonPath, const std::vector<pra
 }
 
 #ifdef _WIN32
-static bool mount_linked_addon(const std::string &pathLink, std::vector<AddonInfo> &outAddons, bool silent = true)
+static bool mount_linked_addon(const std::string &pathLink, std::vector<pragma::AddonInfo> &outAddons, bool silent = true)
 {
 	if(is_addon_mounted(pathLink, outAddons))
 		return true;
@@ -86,9 +86,9 @@ static bool mount_linked_addon(const std::string &pathLink, std::vector<AddonInf
 		Con::cwar << "Unable to resolve link path for '" << lnkPath << "'! This addon will not be mounted." << Con::endl;
 		return false;
 	}
-	pragma::fs::add_custom_mount_directory(resolvedPath, true, static_cast<fs::SearchFlags>(FSYS_SEARCH_ADDON));
-	outAddons.push_back(AddonInfo("addons\\" + pathLink));
-	load_autorun_scripts([&resolvedPath](const std::string &findTarget, std::vector<std::string> &outFiles) { fs::find_system_files((resolvedPath + '\\' + findTarget), &outFiles, nullptr); });
+	pragma::fs::add_custom_mount_directory(resolvedPath, true, static_cast<pragma::fs::SearchFlags>(pragma::FSYS_SEARCH_ADDON));
+	outAddons.push_back(pragma::AddonInfo("addons\\" + pathLink));
+	load_autorun_scripts([&resolvedPath](const std::string &findTarget, std::vector<std::string> &outFiles) { pragma::fs::find_system_files((resolvedPath + '\\' + findTarget), &outFiles, nullptr); });
 	if(silent == false)
 		Con::cout << "Mounting linked addon '" << pathLink << "'..." << Con::endl;
 	return true;

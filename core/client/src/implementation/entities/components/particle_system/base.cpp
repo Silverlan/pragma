@@ -141,7 +141,7 @@ std::optional<ecs::ParticleSystemFileHeader> ecs::CParticleSystemComponent::Read
 static void to_cache_name(std::string &fname)
 {
 	fname = fs::get_canonicalized_path(fname);
-	string::to_lower(fname);
+	pragma::string::to_lower(fname);
 	ufile::remove_extension_from_filename(fname, pragma::asset::get_supported_extensions(asset::Type::ParticleSystem));
 }
 static std::unordered_map<std::string, std::vector<std::string>> s_particleFileToSystems {};
@@ -439,7 +439,7 @@ util::EventReply ecs::CParticleSystemComponent::HandleKeyValue(const std::string
 	}
 	else if(pragma::string::compare<std::string>(key, "alpha_mode")) {
 		auto alphaMode = value;
-		string::to_lower(alphaMode);
+		pragma::string::to_lower(alphaMode);
 		if(alphaMode == "additive_by_color" || alphaMode == "additive_full")
 			m_alphaMode = rendering::ParticleAlphaMode::AdditiveByColor;
 		else if(alphaMode == "opaque")

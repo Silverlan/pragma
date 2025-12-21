@@ -12,6 +12,14 @@ import :core.logging;
 const std::string PRAGMA_LOGGER_NAME = "pragma_logger";
 const std::string PRAGMA_FILE_LOGGER_NAME = "pragma_logger_file";
 
+#ifdef MSVC_COMPILER_FIX
+// Workaround for unresolved external symbols when compiling with VS2022
+const char *spdlog::details::default_eol = "\r\n";
+namespace spdlog::details::os {
+	const char *default_eol = "\r\n";
+}
+#endif
+
 spdlog::details::console_mutex::mutex_t &pragma::console::get_mutex()
 {
 #ifdef _WIN32

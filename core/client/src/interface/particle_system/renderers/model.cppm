@@ -8,13 +8,11 @@ module;
 export module pragma.client:particle_system.renderer_model;
 
 import :entities.components.animated;
+import :particle_system.enums;
 export import :particle_system.modifier;
 import :particle_system.renderer_rotational_buffer;
 
 export namespace pragma {
-	namespace pts {
-		enum class ParticleRenderFlags : uint32_t;
-	}
 	namespace ecs {
 		class CParticleSystemComponent;
 	}

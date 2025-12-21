@@ -334,7 +334,7 @@ bool CrashHandler::GenerateCrashDump() const
 			auto minidumpPath = GenerateMiniDump(dumpErr);
 			if(minidumpPath) {
 				// Write Minidump
-				VFilePtrReal f = nullptr;
+				fs::VFilePtrReal f = nullptr;
 				auto t = pragma::util::Clock::now();
 				while(f == nullptr) // Wait until dump has been written
 				{
@@ -343,7 +343,7 @@ bool CrashHandler::GenerateCrashDump() const
 					if(tDelta >= 4) // Don't wait more than 4 seconds
 						break;
 					std::this_thread::sleep_for(std::chrono::milliseconds(250));
-					f = fs::open_system_file(minidumpPath, fs::FileMode::Read | fs::FileMode::Binary);
+					f = fs::open_system_file(*minidumpPath, fs::FileMode::Read | fs::FileMode::Binary);
 				}
 				if(f != nullptr) {
 					auto size = f->GetSize();

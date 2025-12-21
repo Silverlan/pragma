@@ -839,12 +839,15 @@ bool pragma::Game::PrecacheModel(const std::string &mdl)
 	if(asset)
 		return true;
 	auto loadInfo = std::make_unique<asset::ModelLoadInfo>();
-	loadInfo->onLoaded = [this](util::Asset &asset) {
-		auto mdl = asset::ModelManager::GetAssetObject(asset);
+	auto r = GetNetworkState()->GetModelManager().PreloadAsset(mdl, std::move(loadInfo));
+	r.assetRequest->AddCallback([this](util::Asset *asset, util::AssetLoadResult result) {
+		if (result != util::AssetLoadResult::Succeeded)
+			return;
+		assert(asset != nullptr);
+		auto mdl = asset::ModelManager::GetAssetObject(*asset);
 		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<asset::Model>>>("OnModelLoaded", mdl);
 		CallLuaCallbacks<void, std::shared_ptr<asset::Model>>("OnModelLoaded", mdl);
-	};
-	auto r = GetNetworkState()->GetModelManager().PreloadAsset(mdl, std::move(loadInfo));
+	});
 	return r;
 }
 std::shared_ptr<pragma::asset::Model> pragma::Game::LoadModel(const std::string &mdl, bool bReload)

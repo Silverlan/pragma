@@ -186,7 +186,7 @@ void Lua::asset::register_library(Interface &lua, bool extended)
 			return luabind::object{
 				l,
 				std::pair<pragma::util::FileAssetManager::PreloadResult::Result,std::optional<pragma::util::AssetLoadJobId>>{
-					result.result,result.jobId
+					result.result,result.assetRequest ? result.assetRequest->GetJobId() : std::optional<pragma::util::AssetLoadJobId>{}
 				}
 			};
 		}),

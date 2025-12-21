@@ -28,9 +28,8 @@ void pragma::util::CResourceWatcherManager::ReloadTexture(const std::string &pat
 		return;
 	texManager.RemoveFromCache(path);
 	auto loadInfo = std::make_unique<material::TextureLoadInfo>();
-	loadInfo->onLoaded = [path, nw](Asset &asset) {
-		if(nw == nullptr)
-			return;
+	auto tex = texManager.LoadAsset(path, std::move(loadInfo));
+	if (tex != nullptr && nw != nullptr) {
 		auto &matManager = static_cast<material::CMaterialManager &>(nw->GetMaterialManager());
 		auto &texManager = matManager.GetTextureManager();
 
@@ -83,7 +82,6 @@ void pragma::util::CResourceWatcherManager::ReloadTexture(const std::string &pat
 			fLookForTextureAndUpdate(static_cast<material::CMaterial &>(*hMat.get()), {});
 		}
 	};
-	texManager.LoadAsset(path, std::move(loadInfo));
 }
 
 void pragma::util::CResourceWatcherManager::OnMaterialReloaded(const std::string &path, const std::unordered_set<asset::Model *> &modelMap)

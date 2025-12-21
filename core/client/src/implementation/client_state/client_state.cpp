@@ -733,32 +733,6 @@ pragma::material::Material *pragma::ClientState::LoadMaterial(const std::string 
 
 	bool bFirstTimeError;
 	auto loadInfo = std::make_unique<material::MaterialLoadInfo>();
-	loadInfo->onLoaded = [this, bShaderInitialized, onLoaded](util::Asset &asset) mutable {
-		// TODO: bShaderInitialized should never be null, but for some reason is!
-		auto mat = material::CMaterialManager::GetAssetObject(asset);
-		if(!mat)
-			return;
-		if(bShaderInitialized == nullptr || bShaderInitialized.use_count() > 1) // Callback has been called immediately
-			init_shader(mat.get());
-		bShaderInitialized = nullptr;
-		CallCallbacks<void, material::CMaterial *>("OnMaterialLoaded", static_cast<material::CMaterial *>(mat.get()));
-		if(onLoaded != nullptr)
-			onLoaded(mat.get());
-		// Material has been fully loaded!
-
-		std::string ext;
-		if(pragma::string::compare<std::string>(mat->GetShaderIdentifier(), "eye", false) && ufile::get_extension(mat->GetName(), &ext) && pragma::string::compare<std::string>(ext, "vmt", false)) {
-			// Material was loaded from a VMT and uses the eye shader. In this case we have to save the material as WMI, otherwise
-			// we may run into a loop where the eye material would be loaded over and over again because it involves decomposing the eye
-			// textures, which triggers the resource watcher.
-			// This is a bit of a hack, but it'll do for now. TODO: Do this in a better way!
-			auto matName = mat->GetName();
-			ufile::remove_extension_from_filename(matName);
-			auto savePath = pragma::asset::relative_path_to_absolute_path(matName, asset::Type::Material, util::CONVERT_PATH);
-			std::string err;
-			mat->Save(savePath.GetString(), err);
-		}
-	};
 	auto pmat = static_cast<material::CMaterialManager &>(GetMaterialManager()).LoadAsset(path, std::move(loadInfo));
 	mat = pmat.get();
 	if(!mat) {
@@ -782,8 +756,34 @@ pragma::material::Material *pragma::ClientState::LoadMaterial(const std::string 
 			get_cgame()->RequestResource(path);
 		spdlog::warn("Unable to load material '{}': File not found!", path);
 	}
-	else if(bShaderInitialized.use_count() > 1)
-		init_shader(mat);
+	else {
+		{
+			// TODO: bShaderInitialized should never be null
+			if(bShaderInitialized == nullptr || bShaderInitialized.use_count() > 1) // Callback has been called immediately
+				init_shader(mat);
+			bShaderInitialized = nullptr;
+			CallCallbacks<void, material::CMaterial *>("OnMaterialLoaded", static_cast<material::CMaterial *>(mat));
+			if(onLoaded != nullptr)
+				onLoaded(mat);
+			// Material has been fully loaded!
+
+			std::string ext;
+			if(pragma::string::compare<std::string>(mat->GetShaderIdentifier(), "eye", false) && ufile::get_extension(mat->GetName(), &ext) && pragma::string::compare<std::string>(ext, "vmt", false)) {
+				// Material was loaded from a VMT and uses the eye shader. In this case we have to save the material as WMI, otherwise
+				// we may run into a loop where the eye material would be loaded over and over again because it involves decomposing the eye
+				// textures, which triggers the resource watcher.
+				// This is a bit of a hack, but it'll do for now. TODO: Do this in a better way!
+				auto matName = mat->GetName();
+				ufile::remove_extension_from_filename(matName);
+				auto savePath = pragma::asset::relative_path_to_absolute_path(matName, asset::Type::Material, util::CONVERT_PATH);
+				std::string err;
+				mat->Save(savePath.GetString(), err);
+			}
+		};
+
+		if(bShaderInitialized.use_count() > 1)
+			init_shader(mat);
+	}
 	return mat;
 }
 pragma::material::Material *pragma::ClientState::LoadMaterial(const std::string &path) { return LoadMaterial(path, nullptr, false); }

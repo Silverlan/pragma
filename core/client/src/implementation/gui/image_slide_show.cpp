@@ -175,14 +175,14 @@ void pragma::gui::types::WIImageSlideShow::PreloadNextImage(Int32 img)
 
 	auto loadInfo = std::make_unique<material::TextureLoadInfo>();
 	loadInfo->flags |= util::AssetLoadFlags::AbsolutePath;
-	loadInfo->onLoaded = [this, hSlideShow](util::Asset &asset) {
-		if(!hSlideShow.IsValid())
-			return;
-		m_imgPreload.texture = material::TextureManager::GetAssetObject(asset);
-		m_imgPreload.ready = true;
-		m_imgPreload.loading = false;
-	};
-	textureManager.PreloadAsset(f, std::move(loadInfo));
+	auto preloadResult = textureManager.PreloadAsset(f, std::move(loadInfo));
+    preloadResult.assetRequest->AddCallback([this, hSlideShow](util::Asset *asset, util::AssetLoadResult result) {
+        if(result != util::AssetLoadResult::Succeeded || !hSlideShow.IsValid())
+            return;
+        m_imgPreload.texture = material::TextureManager::GetAssetObject(*asset);
+        m_imgPreload.ready = true;
+        m_imgPreload.loading = false;
+    });
 }
 
 void pragma::gui::types::WIImageSlideShow::DisplayNextImage()

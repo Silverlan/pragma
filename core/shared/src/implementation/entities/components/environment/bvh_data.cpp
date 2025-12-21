@@ -312,6 +312,7 @@ bool pragma::bvh::MeshBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir
 				prim_id = j;
 				float d;
 				std::tie(d, u, v) = *hit;
+				ray.tmax = d;
 			}
 		}
 		return prim_id != invalid_id;

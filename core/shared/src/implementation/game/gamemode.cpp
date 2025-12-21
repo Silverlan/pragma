@@ -34,7 +34,7 @@ void pragma::Game::ReloadGameModeScripts()
 	auto fileName = GetGameModeScriptFilePath();
 	if(fileName.empty())
 		return;
-	ExecuteLuaFile(fileName);
+	ExecuteLuaFile(fileName, nullptr, true);
 }
 
 bool pragma::Game::InitializeGameMode()

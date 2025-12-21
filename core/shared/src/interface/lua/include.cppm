@@ -30,6 +30,6 @@ export namespace pragma::scripting::lua_core {
 
 	DLLNETWORK IncludeResult include(lua::State *l, const std::string &path, IncludeFlags flags = IncludeFlags::None);
 	DLLNETWORK void execute_files_in_directory(lua::State *l, const std::string &path);
-	DLLNETWORK Lua::StatusCode execute_file(lua::State *l, const std::string &path, std::string *optOutErrMsg = nullptr);
+	DLLNETWORK Lua::StatusCode execute_file(lua::State *l, const std::string &path, std::string *optOutErrMsg = nullptr, bool addToIncludeCache = false);
 };
 export {REGISTER_ENUM_FLAGS(pragma::scripting::lua_core::IncludeFlags)}

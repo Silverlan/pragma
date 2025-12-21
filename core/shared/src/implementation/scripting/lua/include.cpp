@@ -126,7 +126,21 @@ static Lua::StatusCode execute_file(lua::State *l, const std::string &path, std:
 	return statusCode;
 }
 
-Lua::StatusCode pragma::scripting::lua_core::execute_file(lua::State *l, const std::string &path, std::string *optOutErrMsg) { return ::execute_file<false>(l, path, optOutErrMsg); }
+Lua::StatusCode pragma::scripting::lua_core::execute_file(lua::State *l, const std::string &path, std::string *optOutErrMsg, bool addToIncludeCache)
+{
+	auto statusCode = ::execute_file<false>(l, path, optOutErrMsg);
+	if (statusCode == Lua::StatusCode::Ok && addToIncludeCache) {
+		// Adding to include cache will enable auto-reload for the file
+		// when the contents are changed.
+		auto *lInterface = get_engine()->GetLuaInterface(l);
+		if(lInterface) {
+			auto *includeCache = &lInterface->GetIncludeCache();
+			if (includeCache)
+				includeCache->Add(path);
+		}
+	}
+	return statusCode;
+}
 
 pragma::scripting::lua_core::IncludeResult include_file(lua::State *l, const pragma::util::Path &fileName, pragma::scripting::lua_core::IncludeFlags flags, Lua::IncludeCache *optIncludeCache)
 {

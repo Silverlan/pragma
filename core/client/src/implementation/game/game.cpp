@@ -847,7 +847,7 @@ pragma::gui::types::WIBase *pragma::CGame::CreateGUIElement(std::string classNam
 		string::to_lower(lclassName);
 		auto basePath = "gui/" + lclassName;
 		auto luaPath = Lua::find_script_file(basePath);
-		if(luaPath && ExecuteLuaFile(*luaPath)) {
+		if(luaPath && ExecuteLuaFile(*luaPath, nullptr, true)) {
 			o = m_luaGUIElements.GetClassObject(className);
 			if(o != nullptr) {
 				skipLuaFile = true;

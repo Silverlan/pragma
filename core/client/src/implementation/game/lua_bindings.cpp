@@ -544,7 +544,7 @@ void pragma::CGame::LoadLuaShader(std::string file)
 	string::to_lower(file);
 	std::string identifier = file.substr(0, file.length() - 4);
 	file = "shaders/" + file;
-	ExecuteLuaFile(file);
+	ExecuteLuaFile(file, nullptr, true);
 }
 
 std::string pragma::CGame::GetLuaNetworkDirectoryName() const { return "client"; }

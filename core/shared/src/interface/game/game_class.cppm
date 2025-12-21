@@ -220,7 +220,7 @@ export {
 			bool BroadcastEntityEvent(BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx);
 			bool InjectEntityEvent(BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx);
 			Lua::StatusCode LoadLuaFile(std::string &fInOut, fs::SearchFlags includeFlags = fs::SearchFlags::All, fs::SearchFlags excludeFlags = fs::SearchFlags::None);
-			virtual bool ExecuteLuaFile(std::string &fInOut, lua::State *optCustomLuaState = nullptr);
+			virtual bool ExecuteLuaFile(std::string &fInOut, lua::State *optCustomLuaState = nullptr, bool addToIncludeCache = false);
 			// Same as ExecuteLuaFile, but uses the last value from the include stack
 			//bool IncludeLuaFile(std::string &fInOut); // Deprecated
 

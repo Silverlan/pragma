@@ -82,7 +82,7 @@ void BaseBvhComponent::DebugPrint()
 void BaseBvhComponent::DebugDraw()
 {
 	auto &bvh = m_bvhData->bvh;
-	bvh::debug::draw_bvh_tree(GetGame(), bvh);
+	bvh::debug::draw_bvh_tree(GetGame(), bvh, GetEntity().GetPose());
 }
 void BaseBvhComponent::DebugDrawBvhTree(const Vector3 &origin, const Vector3 &dir, float maxDist, float duration) const
 {

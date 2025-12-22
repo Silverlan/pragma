@@ -21,9 +21,11 @@ function(pr_setup_default_project_settings TARGET_NAME)
         # TODO: These are just to shut up the compiler, but it would be better to fix the warnings
         target_compile_options(${TARGET_NAME} PUBLIC -Wno-macro-redefined -Wno-undefined-bool-conversion -Wno-instantiation-after-specialization)
 
-        # Required for "import std;" with clang
-        target_compile_options(${TARGET_NAME} PUBLIC -stdlib=libstdc++)
-        target_link_options(${TARGET_NAME} PUBLIC -stdlib=libstdc++)
+        if(NOT WIN32)
+            # Required for "import std;" with clang
+            target_compile_options(${TARGET_NAME} PUBLIC -stdlib=libstdc++)
+            target_link_options(${TARGET_NAME} PUBLIC -stdlib=libstdc++)
+        endif()
 
         if(PRAGMA_DEBUG)
             target_compile_options(${TARGET_NAME} PRIVATE
@@ -41,7 +43,7 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_compile_definitions(${TARGET_NAME} PRIVATE "_WIN32_WINNT=0x0A00") # Windows 10
     endif()
 
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if(NOT WIN32 AND (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
         target_link_options(${TARGET_NAME} PRIVATE "-Wl,--no-undefined")
     endif()
 
@@ -149,7 +151,12 @@ function(pr_add_executable TARGET_NAME)
         add_executable(${TARGET_NAME} WIN32 ${PA_APP_ICON_WIN})
 
         if(PA_CONSOLE)
-            set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+            if(MSVC)
+                set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+            else()
+                # clang
+                set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "-Wl,--subsystem,console")
+            endif()
         endif()
         if(DEFINED PA_DEBUGGER_LAUNCH_ARGS)
             set_target_properties(${TARGET_NAME} PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "${PA_DEBUGGER_LAUNCH_ARGS}")

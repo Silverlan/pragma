@@ -90,7 +90,7 @@ def git_clone_commit(name, path, url, commitSha, branch=None):
 	return path
 
 def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cflags=[],env=None):
-	args = ["cmake",scriptPath,"-G",generator]
+	args = [config.cmake_path,scriptPath,"-G",generator]
 	if cflags:
 		additionalArgs.append("-DCMAKE_C_FLAGS=" + " ".join(cflags))
 		additionalArgs.append("-DCMAKE_CXX_FLAGS=" + " ".join(cflags))
@@ -121,7 +121,7 @@ def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cfla
 		raise
 
 def cmake_build(buildConfig,targets=None,env=None):
-	args = ["cmake","--build",".","--config",buildConfig]
+	args = [config.cmake_path,"--build",".","--config",buildConfig]
 	if targets:
 		args.append("--target")
 		args += targets

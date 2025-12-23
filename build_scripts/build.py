@@ -234,14 +234,18 @@ if platform == "win32":
 	if toolset == "msvc":
 		toolset = None # Let the compiler use the default toolset
 	elif toolset == "clang":
+		# We need an up-to-date version of clang, so we'll use our shipped version for now.
+		clang_dir = str(Path(get_library_root_dir("clang")) / "bin/")
 		config.toolsetArgs = [
-			"-DCMAKE_C_COMPILER=clang.exe",
-			"-DCMAKE_CXX_COMPILER=clang++.exe",
+			"-DCMAKE_C_COMPILER=" +str(Path(clang_dir) / "clang.exe"),
+			"-DCMAKE_CXX_COMPILER=" +str(Path(clang_dir) / "clang++.exe"),
 			"-DCMAKE_MAKE_PROGRAM=ninja.exe"
 		]
 		config.toolsetCFlags = ["-fexceptions", "-fcxx-exceptions", "--target=x86_64-pc-windows-msvc"]
-		print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
-		sys.exit(1)
+
+		# Due to "import std;" support still being experimental in CMake, we have to use a custom, patched
+		# version of CMake to build Pragma with clang on Windows.
+		config.cmake_path = str(Path(get_library_root_dir("cmake")) / "bin/cmake.exe")
 	elif toolset == "clang-cl":
 		clang_dir = get_library_root_dir("clang") +"/bin"
 		
@@ -259,6 +263,18 @@ if platform == "win32":
 		if not deps_only:
 			print_warning(f"Generator {generator} for platform {platform} is currently not supported!")
 			sys.exit(1)
+elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-22"):
+	# Due to a compiler bug with C++20 Modules in clang, we need the
+	# very latest version of clang, which is not available in package managers yet.
+	# We'll use our own prebuilt version for now.
+	clang_staging_path = get_library_root_dir("clang")
+	if c_compiler == "clang-22":
+		c_compiler = clang_staging_path +"/bin/clang"
+	if cxx_compiler == "clang++-22":
+		cxx_compiler = clang_staging_path +"/bin/clang++"
+	print_msg("Setting c_compiler override to '" +c_compiler +"'")
+	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
+
 
 if platform == "linux" and with_debug:
 	config.toolsetCFlags = ["-D_GLIBCXX_ASSERTIONS"]
@@ -310,63 +326,6 @@ if build_all == False:
         http_extract("https://github.com/Silverlan/pragma-deps-lib/releases/download/" +prebuilt_tag +"/" +prebuilt_archive_name,format=prebuilt_archive_format)
     else:
         print(f"Directory '{base_path}' is already up-to-date.")
-
-########## clang-22 ##########
-# Due to a compiler bug with C++20 Modules in clang, we have to use clang-22 for now,
-# which is not available in package managers yet.
-if platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-22"):
-	clang_staging_path = get_library_root_dir("clang")
-	if build_all:
-		curDir = os.getcwd()
-		os.chdir(deps_dir)
-		# We need clang-22, which is not actually available as a release yet, so we use our own prebuilt binaries for now.
-		clang20_root = os.getcwd() +"/LLVM-22.git-Linux-X64"
-		if not Path(clang20_root).is_dir():
-			print_msg("Downloading clang-22...")
-			http_extract("https://github.com/Silverlan/clang_prebuilt/releases/download/2025-12-19/linux_x64.tar.xz",format="tar.xz")
-		#clang20_root = os.getcwd() +"/LLVM-21.1.5-Linux-X64"
-		#if not Path(clang20_root).is_dir():
-		#	print_msg("Downloading clang-21...")
-		#	http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.5/LLVM-21.1.5-Linux-X64.tar.xz",format="tar.xz")
-		os.chdir(curDir)
-
-		copy_preserving_symlink(Path(clang20_root +"/bin/clang"), Path(clang_staging_path +"/bin"))
-		copy_preserving_symlink(Path(clang20_root +"/bin/clang++"), Path(clang_staging_path +"/bin"))
-		copy_preserving_symlink(Path(clang20_root +"/bin/clang-22"), Path(clang_staging_path +"/bin"))
-		copy_preserving_symlink(Path(clang20_root +"/bin/clang-scan-deps"), Path(clang_staging_path +"/bin"))
-		copy_preserving_symlink(Path(clang20_root +"/bin/llvm-ar"), Path(clang_staging_path +"/bin"))
-		copy_preserving_symlink(Path(clang20_root +"/bin/llvm-ranlib"), Path(clang_staging_path +"/bin"))
-
-		copytree(clang20_root +"/include/c++", clang_staging_path +"/include/c++")
-		copytree(clang20_root +"/include/clang", clang_staging_path +"/include/clang")
-		copytree(clang20_root +"/include/clang-c", clang_staging_path +"/include/clang-c")
-		#copytree(clang20_root +"/include/x86_64-unknown-linux-gnu", clang_staging_path +"/include/x86_64-unknown-linux-gnu")
-
-		copytree(clang20_root +"/lib/clang", clang_staging_path +"/lib/clang")
-		#copytree(clang20_root +"/lib/x86_64-unknown-linux-gnu", clang_staging_path +"/lib/x86_64-unknown-linux-gnu")
-
-		copytree(clang20_root +"/libexec", clang_staging_path +"/libexec")
-		copytree(clang20_root +"/share", clang_staging_path +"/share")
-
-	if c_compiler == "clang-22":
-		c_compiler = clang_staging_path +"/bin/clang"
-	if cxx_compiler == "clang++-22":
-		cxx_compiler = clang_staging_path +"/bin/clang++"
-	print_msg("Setting c_compiler override to '" +c_compiler +"'")
-	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
-elif platform == "win32" and toolset == "clang":
-	clang_staging_path = get_library_root_dir("clang")
-
-	curDir = os.getcwd()
-	os.chdir(deps_dir)
-	# We need clang-22, which is not actually available as a release yet, so we use our own prebuilt binaries for now.
-	clang20_root = os.getcwd() +"/clang+llvm-21.1.6-x86_64-pc-windows-msvc"
-	if not Path(clang20_root).is_dir():
-		print_msg("Downloading clang-22...")
-		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.6/clang+llvm-21.1.6-x86_64-pc-windows-msvc.tar.xz",format="tar.xz")
-	os.chdir(curDir)
-	
-	mv(clang20_root, clang_staging_path)
 
 if platform == "linux":
 	os.environ["CC"] = c_compiler
@@ -754,7 +713,7 @@ if with_essential_client_modules:
 if with_common_modules:
 	add_pragma_module(
 		name="pr_bullet",
-		commitSha="3e69bdbc4b9234c242d850c929edc9a0e131c4c8",
+		commitSha="54f0ef98147f89e7f4119972f0b69ec372fe193d",
 		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
 	)
 	add_pragma_module(

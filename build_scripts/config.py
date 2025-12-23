@@ -4,6 +4,7 @@ from sys import platform
 build_config_tp = "Release"
 cleanBuildFiles = False
 cmake_args = []
+cmake_path = "cmake"
 deps_dir = str(Path.cwd() / "deps")
 deps_staging_dir = "staging"
 prebuilt_bin_dir = str(Path(deps_dir) / deps_staging_dir)

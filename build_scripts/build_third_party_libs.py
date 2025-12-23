@@ -101,6 +101,10 @@ def main():
 	mkpath(config.prebuilt_bin_dir)
 	os.chdir(config.prebuilt_bin_dir)
 
+	if platform == "win32":
+		build_library("cmake")
+		build_library("clang")
+
 	build_library("libdecor")
 	build_library("zlib")
 	build_library("libzip")

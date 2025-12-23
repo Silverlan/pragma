@@ -236,7 +236,9 @@ if platform == "win32":
 		print_warning(f"Visual Studio is not recommended and may not work. If you run into issues, try using the clang toolset instead.")
 	elif toolset == "clang":
 		# We need an up-to-date version of clang, so we'll use our shipped version for now.
-		import third_party.clang
+		from third_party import clang
+		clang.main()
+
 		clang_dir = str(Path(get_library_root_dir("clang")) / "bin/")
 		config.toolsetArgs = [
 			#"-DCMAKE_C_COMPILER=" +str(Path(clang_dir) / "clang.exe"),
@@ -249,7 +251,8 @@ if platform == "win32":
 
 		# Due to "import std;" support still being experimental in CMake, we have to use a custom, patched
 		# version of CMake to build Pragma with clang on Windows.
-		import third_party.cmake
+		from third_party import cmake
+		cmake.main()
 		config.cmake_path = str(Path(get_library_root_dir("cmake")) / "bin/cmake.exe")
 	elif toolset == "clang-cl":
 		clang_dir = get_library_root_dir("clang") +"/bin"
@@ -272,7 +275,8 @@ elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++
 	# Due to a compiler bug with C++20 Modules in clang, we need the
 	# very latest version of clang, which is not available in package managers yet.
 	# We'll use our own prebuilt version for now.
-	import third_party.clang
+	from third_party import clang
+	clang.main()
 	clang_staging_path = Path(get_library_root_dir("clang"))
 	if c_compiler == "clang-22":
 		c_compiler = str(clang_staging_path / "bin/clang")

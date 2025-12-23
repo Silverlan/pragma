@@ -39,7 +39,7 @@ function(pr_setup_default_project_settings TARGET_NAME)
         endif()
     endif()
 
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if (WIN32)
         target_compile_definitions(${TARGET_NAME} PRIVATE "_WIN32_WINNT=0x0A00") # Windows 10
     endif()
 
@@ -155,7 +155,7 @@ function(pr_add_executable TARGET_NAME)
                 set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
             else()
                 # clang
-                set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "-Wl,--subsystem,console")
+                set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "-Xlinker /SUBSYSTEM:CONSOLE")
             endif()
         endif()
         if(DEFINED PA_DEBUGGER_LAUNCH_ARGS)

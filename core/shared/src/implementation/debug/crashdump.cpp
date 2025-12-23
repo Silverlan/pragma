@@ -401,7 +401,7 @@ bool CrashHandler::GenerateCrashDump() const
 #ifdef _WIN32
 static auto g_crashDumpGenerated = false;
 static std::mutex g_crashMutex;
-LONG CrashHandler::TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo)
+LONG CrashHandler::TopLevelFilter(_EXCEPTION_POINTERS *pExceptionInfo)
 {
 	// When a crash occurs, there's a good chance that other threads will also crash.
 	// This can cause the entire application to die before the crash dump has been fully generated.

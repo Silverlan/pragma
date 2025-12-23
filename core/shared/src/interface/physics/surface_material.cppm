@@ -12,22 +12,8 @@ export import :physics.surface_type_manager;
 
 export {
 	namespace pragma::physics {
-		class SurfaceMaterial;
 		class IEnvironment;
 		class IMaterial;
-		class DLLNETWORK SurfaceMaterialManager {
-		public:
-			SurfaceMaterialManager(IEnvironment &env);
-			bool Load(const std::string &path);
-			SurfaceMaterial &Create(const std::string &identifier, Float staticFriction, Float dynamicFriction, Float restitution);
-			SurfaceMaterial &Create(const std::string &identifier, Float friction = 0.5f, Float restitution = 0.5f);
-			// The returned pointer is NOT guaranteed to stay alive; Don't store it.
-			SurfaceMaterial *GetMaterial(const std::string &id);
-			std::vector<SurfaceMaterial> &GetMaterials();
-		protected:
-			std::vector<SurfaceMaterial> m_materials; // These have to be objects (Not pointers) to uphold the requirements for the btTriangleIndexVertexMaterialArray constructor.
-			IEnvironment &m_physEnv;
-		};
 
 		class DLLNETWORK SurfaceMaterial {
 		public:
@@ -136,6 +122,20 @@ export {
 			AudioInfo m_audioInfo = {};
 			PBRInfo m_pbrInfo = {};
 			PhysLiquid &InitializeLiquid();
+		};
+
+		class DLLNETWORK SurfaceMaterialManager {
+		public:
+			SurfaceMaterialManager(IEnvironment &env);
+			bool Load(const std::string &path);
+			SurfaceMaterial &Create(const std::string &identifier, Float staticFriction, Float dynamicFriction, Float restitution);
+			SurfaceMaterial &Create(const std::string &identifier, Float friction = 0.5f, Float restitution = 0.5f);
+			// The returned pointer is NOT guaranteed to stay alive; Don't store it.
+			SurfaceMaterial *GetMaterial(const std::string &id);
+			std::vector<SurfaceMaterial> &GetMaterials();
+		protected:
+			std::vector<SurfaceMaterial> m_materials; // These have to be objects (Not pointers) to uphold the requirements for the btTriangleIndexVertexMaterialArray constructor.
+			IEnvironment &m_physEnv;
 		};
 	}
 	DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::physics::SurfaceMaterial &surfaceMaterial);

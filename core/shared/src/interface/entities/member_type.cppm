@@ -35,6 +35,7 @@ export {
 			case EntityMemberType::Element:
 				return tag<Element>;
 			}
+			std::unreachable();
 		}
 
 		template<bool ENABLE_DEFAULT_RETURN = true, typename T>

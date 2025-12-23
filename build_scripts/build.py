@@ -230,57 +230,56 @@ print("cmake_args: " +', '.join(additional_cmake_args))
 print("cmake_flags: " +', '.join(additional_cmake_flags))
 print("modules: " +', '.join(modules))
 
-if not deps_only:
-	if platform == "win32":
-		if toolset == "msvc":
-			toolset = None # Let the compiler use the default toolset
-			print_warning(f"Visual Studio is not recommended and may not work. If you run into issues, try using the clang toolset instead.")
-		elif toolset == "clang":
-			# We need an up-to-date version of clang, so we'll use our shipped version for now.
-			import third_party.clang
-			clang_dir = str(Path(get_library_root_dir("clang")) / "bin/")
-			config.toolsetArgs = [
-				#"-DCMAKE_C_COMPILER=" +str(Path(clang_dir) / "clang.exe"),
-				#"-DCMAKE_CXX_COMPILER=" +str(Path(clang_dir) / "clang++.exe"),
-				"-DCMAKE_C_COMPILER=clang.exe",
-				"-DCMAKE_CXX_COMPILER=clang++.exe",
-				"-DCMAKE_MAKE_PROGRAM=ninja.exe"
-			]
-			config.toolsetCFlags = ["-fexceptions", "-fcxx-exceptions", "--target=x86_64-pc-windows-msvc"]
-
-			# Due to "import std;" support still being experimental in CMake, we have to use a custom, patched
-			# version of CMake to build Pragma with clang on Windows.
-			import third_party.cmake
-			config.cmake_path = str(Path(get_library_root_dir("cmake")) / "bin/cmake.exe")
-		elif toolset == "clang-cl":
-			clang_dir = get_library_root_dir("clang") +"/bin"
-			
-			config.toolsetArgs = [
-				"-DCMAKE_C_COMPILER=" +clang_dir +"/clang-cl.exe",
-				"-DCMAKE_CXX_COMPILER=" +clang_dir +"/clang-cl.exe",
-				"-DCMAKE_CXX_COMPILER_AR=" +clang_dir +"/llvm-ar.exe",
-				"-DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS=" +clang_dir +"/clang-scan-deps.exe",
-				"-DCMAKE_CXX_COMPILER_RANLIB=" +clang_dir +"/llvm-ranlib.exe"
-			]
-			config.toolsetCFlags = ["-Wno-error", "-Wno-unused-command-line-argument", "-Wno-enum-constexpr-conversion", "-fexceptions", "-fcxx-exceptions"]
-			print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
-			sys.exit(1)
-		if generator != "Ninja Multi-Config":
-			if not deps_only:
-				print_warning(f"Generator {generator} for platform {platform} is currently not supported! Please use \"Ninja Multi-Config\".")
-				sys.exit(1)
-	elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-22"):
-		# Due to a compiler bug with C++20 Modules in clang, we need the
-		# very latest version of clang, which is not available in package managers yet.
-		# We'll use our own prebuilt version for now.
+if platform == "win32":
+	if toolset == "msvc":
+		toolset = None # Let the compiler use the default toolset
+		print_warning(f"Visual Studio is not recommended and may not work. If you run into issues, try using the clang toolset instead.")
+	elif toolset == "clang":
+		# We need an up-to-date version of clang, so we'll use our shipped version for now.
 		import third_party.clang
-		clang_staging_path = Path(get_library_root_dir("clang"))
-		if c_compiler == "clang-22":
-			c_compiler = str(clang_staging_path / "bin/clang")
-		if cxx_compiler == "clang++-22":
-			cxx_compiler = str(clang_staging_path / "bin/clang++")
-		print_msg("Setting c_compiler override to '" +c_compiler +"'")
-		print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
+		clang_dir = str(Path(get_library_root_dir("clang")) / "bin/")
+		config.toolsetArgs = [
+			#"-DCMAKE_C_COMPILER=" +str(Path(clang_dir) / "clang.exe"),
+			#"-DCMAKE_CXX_COMPILER=" +str(Path(clang_dir) / "clang++.exe"),
+			"-DCMAKE_C_COMPILER=clang.exe",
+			"-DCMAKE_CXX_COMPILER=clang++.exe",
+			"-DCMAKE_MAKE_PROGRAM=ninja.exe"
+		]
+		config.toolsetCFlags = ["-fexceptions", "-fcxx-exceptions", "--target=x86_64-pc-windows-msvc"]
+
+		# Due to "import std;" support still being experimental in CMake, we have to use a custom, patched
+		# version of CMake to build Pragma with clang on Windows.
+		import third_party.cmake
+		config.cmake_path = str(Path(get_library_root_dir("cmake")) / "bin/cmake.exe")
+	elif toolset == "clang-cl":
+		clang_dir = get_library_root_dir("clang") +"/bin"
+		
+		config.toolsetArgs = [
+			"-DCMAKE_C_COMPILER=" +clang_dir +"/clang-cl.exe",
+			"-DCMAKE_CXX_COMPILER=" +clang_dir +"/clang-cl.exe",
+			"-DCMAKE_CXX_COMPILER_AR=" +clang_dir +"/llvm-ar.exe",
+			"-DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS=" +clang_dir +"/clang-scan-deps.exe",
+			"-DCMAKE_CXX_COMPILER_RANLIB=" +clang_dir +"/llvm-ranlib.exe"
+		]
+		config.toolsetCFlags = ["-Wno-error", "-Wno-unused-command-line-argument", "-Wno-enum-constexpr-conversion", "-fexceptions", "-fcxx-exceptions"]
+		print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
+		sys.exit(1)
+	if generator != "Ninja Multi-Config":
+		if not deps_only:
+			print_warning(f"Generator {generator} for platform {platform} is currently not supported! Please use \"Ninja Multi-Config\".")
+			sys.exit(1)
+elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-22"):
+	# Due to a compiler bug with C++20 Modules in clang, we need the
+	# very latest version of clang, which is not available in package managers yet.
+	# We'll use our own prebuilt version for now.
+	import third_party.clang
+	clang_staging_path = Path(get_library_root_dir("clang"))
+	if c_compiler == "clang-22":
+		c_compiler = str(clang_staging_path / "bin/clang")
+	if cxx_compiler == "clang++-22":
+		cxx_compiler = str(clang_staging_path / "bin/clang++")
+	print_msg("Setting c_compiler override to '" +c_compiler +"'")
+	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
 
 if platform == "linux" and with_debug:
 	config.toolsetCFlags = ["-D_GLIBCXX_ASSERTIONS"]
@@ -894,6 +893,7 @@ if not deps_only:
 	cmake_args += additional_cmake_args
 	cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
 	cmake_args.append("-DCMAKE_CXX_SCAN_FOR_MODULES=1")
+	cmake_args.append("-DCMAKE_EXPORT_COMPILE_COMMANDS=1")
 	cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_staging_dir)
 	cmake_configure_def_toolset(root,generator,cmake_args,additional_cmake_flags)
 

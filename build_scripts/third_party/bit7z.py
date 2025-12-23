@@ -9,12 +9,12 @@ def main():
 	chdir_mkdir(deps_dir)
 	
 	os.chdir(deps_dir)
-	commit_sha = "0f03717"
+	commit_sha = "9c28332218c8e973825e422ff696d71615314a99"
 	bit7z_root = normalize_path(os.getcwd() +"/bit7z")
 	if not check_repository_commit(bit7z_root, commit_sha, "bit7z"):
 		if not Path(bit7z_root).is_dir():
 			print_msg("bit7z not found. Downloading...")
-			git_clone("https://github.com/rikyoz/bit7z.git")
+			git_clone("https://github.com/Silverlan/bit7z.git")
 		os.chdir("bit7z")
 		reset_to_commit(commit_sha) # v4.0.10
 

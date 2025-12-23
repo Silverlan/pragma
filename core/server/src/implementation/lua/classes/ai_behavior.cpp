@@ -192,7 +192,7 @@ inline std::ostream &operator<<(std::ostream &s, const Lua::ai::TaskWrapper &tas
 	return s << ss.str();
 }
 
-#ifdef __linux__
+#ifdef __clang__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(Lua::ai, TaskWrapper);
 #endif
 

@@ -13,7 +13,7 @@ import util_zip;
 // import pragma.scripting.lua;
 #undef RegisterClass
 
-#ifdef __linux__
+#ifdef __clang__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::rendering, pragma::rendering::Tile);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfig);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigBone);

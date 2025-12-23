@@ -89,5 +89,5 @@ class StackWalkerModuleFinder : public StackWalker {
 	std::string m_moduleName;
 	bool m_found = false;
 };
-bool pragma::debug::is_module_in_callstack(struct _EXCEPTION_POINTERS *exp, const std::string &moduleName) { return StackWalkerModuleFinder ::find_module_in_callstack(exp, moduleName); }
+bool pragma::debug::is_module_in_callstack(_EXCEPTION_POINTERS *exp, const std::string &moduleName) { return StackWalkerModuleFinder ::find_module_in_callstack(exp, moduleName); }
 #endif

@@ -153,7 +153,7 @@ static std::optional<std::pair<uint32_t, uint32_t>> find_index_range_in_time_ran
 	return std::pair<uint32_t, uint32_t> {startIndex, endIndex};
 }
 
-#ifdef __linux__
+#ifdef __clang__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, TimeFrame);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, ChannelPath);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, Channel);

@@ -47,7 +47,7 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_link_options(${TARGET_NAME} PRIVATE "-Wl,--no-undefined")
     endif()
 
-    # Due to msvc compiler bugs, we introduce a few macros as temporary workarounds.
+    # Due to compiler bugs, we introduce a few macros as temporary workarounds.
     # Once constexpr works with modules under msvc, the macro can be removed.
     # CLASS_ENUM_COMPAT is used for cases where enums had to be moved from a class to a namespace.
     # Once msvc issues have been fixed, these should be moved back to their respective classes.
@@ -58,6 +58,12 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_DLL_COMPAT=extern __declspec(dllexport)")
         target_compile_definitions(${TARGET_NAME} PRIVATE "CLASS_ENUM_COMPAT=extern __declspec(dllexport)")
         target_compile_definitions(${TARGET_NAME} PRIVATE "MSVC_COMPILER_FIX")
+    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_COMPAT=constexpr")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_DLL_COMPAT=__declspec(dllexport) const")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_CONST_COMPAT=static const")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_DLL_COMPAT=static")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CLASS_ENUM_COMPAT=extern __declspec(dllexport)")
     else()
         target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_COMPAT=constexpr")
         target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_DLL_COMPAT=constexpr")

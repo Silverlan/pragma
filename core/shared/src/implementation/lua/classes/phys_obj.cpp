@@ -27,7 +27,7 @@ static std::ostream &operator<<(std::ostream &out, const pragma::physics::PhysOb
 	return out;
 }
 
-#ifdef __linux__
+#ifdef __clang__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::physics, PhysObj);
 #endif
 

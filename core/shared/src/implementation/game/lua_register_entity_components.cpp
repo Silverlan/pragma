@@ -61,7 +61,7 @@ using ComponentMemberReferencePolicy = luabind::generic_policy<N, pragma::Compon
 	}>;
 */
 
-#ifdef __linux__
+#ifdef __clang__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, EntityURef);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, EntityUComponentRef);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, EntityUComponentMemberRef);

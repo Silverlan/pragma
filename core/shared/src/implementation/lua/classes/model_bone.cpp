@@ -8,7 +8,7 @@ module pragma.shared;
 
 import :scripting.lua.classes.model;
 
-#ifdef __linux__
+#ifdef __clang__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::animation, Bone);
 #endif
 

@@ -1,6 +1,17 @@
 cmake_minimum_required(VERSION 3.3)
 
 message(STATUS "CMake version: ${CMAKE_VERSION}")
+
+if(CMAKE_GENERATOR MATCHES "Visual Studio.*2026")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio 2026 is not supported).")
+endif()
+if(CMAKE_GENERATOR MATCHES "Visual Studio.*2022")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio 2022 is not supported).")
+endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (clang-cl is not supported).")
+endif()
+
 # Required for "import std;" as long as its experimental in CMake
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
 set(CMAKE_CXX_STANDARD 23)

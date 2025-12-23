@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 
 ###### Config section
 # When using prebuilt binaries this tag will be used for the download from https://github.com/Silverlan/pragma-deps-lib
-prebuilt_tag = "2025-12-20"
+prebuilt_tag = "2025-12-23"
 ######
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
@@ -241,10 +241,8 @@ if platform == "win32":
 
 		clang_dir = str(Path(get_library_root_dir("clang")) / "bin/")
 		config.toolsetArgs = [
-			#"-DCMAKE_C_COMPILER=" +str(Path(clang_dir) / "clang.exe"),
-			#"-DCMAKE_CXX_COMPILER=" +str(Path(clang_dir) / "clang++.exe"),
-			"-DCMAKE_C_COMPILER=clang.exe",
-			"-DCMAKE_CXX_COMPILER=clang++.exe",
+			"-DCMAKE_C_COMPILER=" +str(Path(clang_dir) / "clang.exe"),
+			"-DCMAKE_CXX_COMPILER=" +str(Path(clang_dir) / "clang++.exe"),
 			"-DCMAKE_MAKE_PROGRAM=ninja.exe"
 		]
 		config.toolsetCFlags = ["-fexceptions", "-fcxx-exceptions", "--target=x86_64-pc-windows-msvc"]

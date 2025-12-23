@@ -175,7 +175,7 @@ bool Lua::util::start_debugger_server(lua::State *l)
 
 static std::vector<bezierfit::VECTOR> reduce(std::vector<bezierfit::VECTOR> points) { return bezierfit::reduce(points); }
 
-#ifdef __linux__
+#ifdef __clang__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std, std::match_results<const char *>);
 #endif
 

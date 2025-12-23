@@ -103,7 +103,7 @@ def main():
 
 	if platform == "win32":
 		build_library("cmake")
-		build_library("clang")
+	build_library("clang")
 
 	build_library("libdecor")
 	build_library("zlib")

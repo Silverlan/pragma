@@ -267,11 +267,11 @@ elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++
 	# Due to a compiler bug with C++20 Modules in clang, we need the
 	# very latest version of clang, which is not available in package managers yet.
 	# We'll use our own prebuilt version for now.
-	clang_staging_path = get_library_root_dir("clang")
+	clang_staging_path = Path(get_library_root_dir("clang"))
 	if c_compiler == "clang-22":
-		c_compiler = clang_staging_path +"/bin/clang"
+		c_compiler = str(clang_staging_path / "bin/clang")
 	if cxx_compiler == "clang++-22":
-		cxx_compiler = clang_staging_path +"/bin/clang++"
+		cxx_compiler = str(clang_staging_path / "bin/clang++")
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
 

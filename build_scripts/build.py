@@ -230,6 +230,37 @@ print("cmake_args: " +', '.join(additional_cmake_args))
 print("cmake_flags: " +', '.join(additional_cmake_flags))
 print("modules: " +', '.join(modules))
 
+mkpath(build_dir)
+mkpath(deps_dir)
+mkpath(install_dir)
+mkpath(tools)
+
+# Use prebuilt binaries if --build-all is not set
+if build_all == False:
+    def is_commit_current(base_path: str, commit_id: str, filename: str = "commit_id.txt") -> bool:
+        return check_content_version(base_path, commit_id, filename)
+
+    def update_commit_directory(base_path: str, commit_id: str, filename: str = "commit_id.txt") -> None:
+        update_content_version(base_path, commit_id, filename)
+
+    base_path = get_staging_dir()
+    if not is_commit_current(base_path, prebuilt_tag, "tag_id.txt"):
+        update_commit_directory(base_path, prebuilt_tag, "tag_id.txt")
+        os.chdir(base_path)
+
+        print_msg("Downloading prebuilt third-party binaries...")
+
+        if platform == "linux":
+            prebuilt_archive_name = "lib-linux_x64.tar.gz"
+            prebuilt_archive_format = "tar.gz"
+        else:
+            prebuilt_archive_name = "lib-windows_x64.zip"
+            prebuilt_archive_format = "zip"
+
+        http_extract("https://github.com/Silverlan/pragma-deps-lib/releases/download/" +prebuilt_tag +"/" +prebuilt_archive_name,format=prebuilt_archive_format)
+    else:
+        print(f"Directory '{base_path}' is already up-to-date.")
+
 if platform == "win32":
 	if toolset == "msvc":
 		toolset = None # Let the compiler use the default toolset
@@ -300,39 +331,7 @@ if update:
 	os.execv(sys.executable, ['python'] +argv)
 	sys.exit(0)
 
-
-mkpath(build_dir)
-mkpath(deps_dir)
-mkpath(install_dir)
-mkpath(tools)
-
 config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
-
-# Use prebuilt binaries if --build-all is not set
-if build_all == False:
-    def is_commit_current(base_path: str, commit_id: str, filename: str = "commit_id.txt") -> bool:
-        return check_content_version(base_path, commit_id, filename)
-
-    def update_commit_directory(base_path: str, commit_id: str, filename: str = "commit_id.txt") -> None:
-        update_content_version(base_path, commit_id, filename)
-
-    base_path = get_staging_dir()
-    if not is_commit_current(base_path, prebuilt_tag, "tag_id.txt"):
-        update_commit_directory(base_path, prebuilt_tag, "tag_id.txt")
-        os.chdir(base_path)
-
-        print_msg("Downloading prebuilt third-party binaries...")
-
-        if platform == "linux":
-            prebuilt_archive_name = "lib-linux_x64.tar.gz"
-            prebuilt_archive_format = "tar.gz"
-        else:
-            prebuilt_archive_name = "lib-windows_x64.zip"
-            prebuilt_archive_format = "zip"
-
-        http_extract("https://github.com/Silverlan/pragma-deps-lib/releases/download/" +prebuilt_tag +"/" +prebuilt_archive_name,format=prebuilt_archive_format)
-    else:
-        print(f"Directory '{base_path}' is already up-to-date.")
 
 if platform == "linux":
 	os.environ["CC"] = c_compiler

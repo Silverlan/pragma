@@ -1305,7 +1305,7 @@ void pragma::asset::GLTFWriter::GenerateAO(Model &mdl)
 					Con::cout << "Ao progress: " << progress << Con::endl;
 			}
 			if(progress < 1.f)
-				std::this_thread::sleep_for(std::chrono::seconds(1));
+				util::sleep_for_seconds(1);
 		}
 		if(job->IsSuccessful() == false) {
 			if(m_exportInfo.verbose)

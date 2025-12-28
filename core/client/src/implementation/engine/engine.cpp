@@ -705,7 +705,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	}
 	catch(const std::runtime_error &err) {
 		spdlog::error("Unable to initialize graphics API: {}", err.what());
-		std::this_thread::sleep_for(std::chrono::seconds(5));
+		util::sleep_for_seconds(5);
 		Close();
 		return false;
 	}
@@ -987,7 +987,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		matManager = nullptr;
 		Close();
 		Release();
-		std::this_thread::sleep_for(std::chrono::seconds(5));
+		util::sleep_for_seconds(5);
 		return false;
 	};
 

@@ -1429,7 +1429,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 			f = pragma::fs::open_file(mapPath.GetString().c_str(), fs::FileMode::Read | fs::FileMode::Binary);
 			if(f == nullptr) {
 				// Sleep for a bit, then try again, in case the file hasn't been fully written yet
-				std::this_thread::sleep_for(std::chrono::seconds {1});
+				util::sleep_for_seconds(1);
 				openLocalMap();
 			}
 		}
@@ -1751,7 +1751,7 @@ class ModelAOWorker : public pragma::util::ParallelWorker<pragma::asset::ModelAO
 							UpdateProgress(totalProgress);
 						}
 						if(jobProgress < 1.f)
-							std::this_thread::sleep_for(std::chrono::seconds(1));
+							pragma::util::sleep_for_seconds(1);
 						if(IsCancelled())
 							t.Cancel();
 					}

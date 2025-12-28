@@ -222,7 +222,7 @@ std::optional<ComponentMemberInfo> LuaCore::get_component_member_info(lua::State
 							auto *posInfo = component.GetMemberInfo(info->transformCompositeInfo->posIdx);
 							auto *rotInfo = component.GetMemberInfo(info->transformCompositeInfo->rotIdx);
 							if(!posInfo || !rotInfo) {
-								spdlog::trace("Transform property '{}' points to invalid pos or rot property!", std::string {*memberInfo.GetName()});
+								spdlog::trace("Transform property '" +std::string {*memberInfo.GetName()} +"' points to invalid pos or rot property!");
 								return;
 							}
 
@@ -235,7 +235,7 @@ std::optional<ComponentMemberInfo> LuaCore::get_component_member_info(lua::State
 							if constexpr(std::is_same_v<T, udm::ScaledTransform>) {
 								auto *scaleInfo = component.GetMemberInfo(info->transformCompositeInfo->scaleIdx);
 								if(!scaleInfo) {
-									spdlog::trace("Transform property '{}' points to invalid scale property!", std::string {*memberInfo.GetName()});
+									spdlog::trace("Transform property '" +std::string {*memberInfo.GetName()} +"' points to invalid scale property!");
 									return;
 								}
 								auto &scale = value.GetScale();
@@ -255,7 +255,7 @@ std::optional<ComponentMemberInfo> LuaCore::get_component_member_info(lua::State
 							  auto *posInfo = component.GetMemberInfo(info->transformCompositeInfo->posIdx);
 							  auto *rotInfo = component.GetMemberInfo(info->transformCompositeInfo->rotIdx);
 							  if(!posInfo || !rotInfo) {
-								  spdlog::trace("Transform property '{}' points to invalid pos or rot property!", std::string {*memberInfo.GetName()});
+								  spdlog::trace("Transform property '" +std::string {*memberInfo.GetName()} +"' points to invalid pos or rot property!");
 								  return;
 							  }
 
@@ -265,7 +265,7 @@ std::optional<ComponentMemberInfo> LuaCore::get_component_member_info(lua::State
 							  if constexpr(std::is_same_v<T, udm::ScaledTransform>) {
 								  auto *scaleInfo = component.GetMemberInfo(info->transformCompositeInfo->scaleIdx);
 								  if(!scaleInfo) {
-									  spdlog::trace("Transform property '{}' points to invalid scale property!", std::string {*memberInfo.GetName()});
+									  spdlog::trace("Transform property '" +std::string {*memberInfo.GetName()} +"' points to invalid scale property!");
 									  return;
 								  }
 								  scaleInfo->setterFunction(*scaleInfo, component, &value.GetScale());

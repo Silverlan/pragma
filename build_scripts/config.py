@@ -26,4 +26,3 @@ clean_deps_build_files = False
 generator = default_generator
 with_lua_debugger = False
 with_swiftshader = False
-generator = default_generator

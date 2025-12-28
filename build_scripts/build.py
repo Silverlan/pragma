@@ -153,16 +153,6 @@ prefer_git_https = args["prefer_git_https"]
 update = args["update"]
 modules_prebuilt = []
 
-config.generator = generator
-config.prefer_git_https = prefer_git_https
-config.build_swiftshader = build_swiftshader
-config.clean_deps_build_files = clean_deps_build_files
-config.with_lua_debugger = with_lua_debugger
-config.with_swiftshader = with_swiftshader
-if platform == "linux":
-	config.no_sudo = no_sudo
-	config.no_confirm = no_confirm
-
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)
 deps_dir = normalize_path(deps_directory)
@@ -175,7 +165,6 @@ if not os.path.isabs(build_dir):
 if not os.path.isabs(deps_dir):
 	deps_dir = os.getcwd() +"/" +deps_dir
 deps_dir_fs = deps_dir.replace("\\", "/")
-config.deps_dir = deps_dir
 
 if not os.path.isabs(install_dir):
 	install_dir = build_dir +"/" +install_dir
@@ -201,6 +190,17 @@ else:
 	print("toolset: " +toolset)
 	if toolset == "clang":
 		generator = "Ninja Multi-Config"
+
+config.build_swiftshader = build_swiftshader
+config.clean_deps_build_files = clean_deps_build_files
+config.deps_dir = deps_dir
+config.prefer_git_https = prefer_git_https
+config.with_lua_debugger = with_lua_debugger
+config.with_swiftshader = with_swiftshader
+if platform == "linux":
+	config.no_sudo = no_sudo
+	config.no_confirm = no_confirm
+config.generator = generator
 
 print("generator: " +generator)
 print("with_essential_client_modules: " +str(with_essential_client_modules))

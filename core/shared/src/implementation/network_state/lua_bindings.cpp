@@ -789,6 +789,9 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 	defPath->def(luabind::self + luabind::const_self);
 	defPath->def(luabind::self + std::string {});
+	
+	defPath->def(luabind::self / luabind::const_self);
+	defPath->def(luabind::self / std::string {});
 
 	defPath->def(luabind::const_self == luabind::const_self);
 	defPath->def(luabind::const_self == std::string {});

@@ -19,9 +19,10 @@ def main():
 			reset_to_commit(commit_sha)
 
 			mkdir("build",cd=True)
-			sdbus_args = ["-DCMAKE_BUILD_TYPE=" +build_config_tp]
-			cmake_configure_def_toolset("..",generator,sdbus_args)
-			cmake_build(build_config_tp)
+			build_args = ["-DCMAKE_BUILD_TYPE=" +build_config_tp]
+			build_args = ["-DWINTOASTLIB_BUILD_EXAMPLES=OFF"]
+			cmake_configure_def_toolset("..",generator,build_args)
+			cmake_build(build_config_tp, ["WinToast"])
 
 			copy_prebuilt_binaries(wintoast_root +"/build/" +build_config_tp, "WinToast")
 			copy_prebuilt_headers(wintoast_root +"/include", "WinToast")

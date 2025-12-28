@@ -5,6 +5,8 @@ option(CONFIG_BUILD_WITH_VTUNE_SUPPORT "Build with VTune profiler support?" OFF)
 set(PROJ_NAME shared)
 pr_add_library(${PROJ_NAME} SHARED)
 
+pr_include_windows_clang_export_definitions_workaround(${PROJ_NAME})
+
 pr_add_dependency(${PROJ_NAME} panima TARGET PUBLIC)
 pr_add_dependency(${PROJ_NAME} materialsystem TARGET PUBLIC)
 pr_add_dependency(${PROJ_NAME} luasystem TARGET PUBLIC)

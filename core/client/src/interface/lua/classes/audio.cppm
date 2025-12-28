@@ -25,15 +25,15 @@ namespace Lua {
 namespace Lua {
 	namespace ALSound {
 		namespace Client {
-			static void GetWorldPosition(lua::State *l, pragma::audio::ALSound &snd);
+			void GetWorldPosition(lua::State *l, pragma::audio::ALSound &snd);
 
-			//static void GetChannelConfigName(lua::State *l,::ALSound &snd);
-			//static void GetSampleTypeName(lua::State *l,::ALSound &snd);
-			static void IsMono(lua::State *l, pragma::audio::ALSound &snd);
-			static void IsStereo(lua::State *l, pragma::audio::ALSound &snd);
+			//void GetChannelConfigName(lua::State *l,::ALSound &snd);
+			//void GetSampleTypeName(lua::State *l,::ALSound &snd);
+			void IsMono(lua::State *l, pragma::audio::ALSound &snd);
+			void IsStereo(lua::State *l, pragma::audio::ALSound &snd);
 		};
 	};
 	namespace ALBuffer {
-		static opt<luabind::tableT<void>> GetPhonemeData(lua::State *l, pragma::audio::ISoundBuffer &);
+		opt<luabind::tableT<void>> GetPhonemeData(lua::State *l, pragma::audio::ISoundBuffer &);
 	};
 };

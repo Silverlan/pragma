@@ -780,7 +780,7 @@ if with_pfm:
 if with_pfm:
 	add_pragma_module(
 		name="pr_git",
-		commitSha="a328a990da2db5e349594d8d90cd22ee8de0eac7",
+		commitSha="9101fb9b3721bec179b0425f87441306fdee27b1",
 		repositoryUrl="https://github.com/Silverlan/pr_git.git"
 	)
 

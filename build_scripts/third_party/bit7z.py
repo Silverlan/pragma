@@ -9,7 +9,7 @@ def main():
 	chdir_mkdir(deps_dir)
 	
 	os.chdir(deps_dir)
-	commit_sha = "9c28332218c8e973825e422ff696d71615314a99"
+	commit_sha = "730860a75d5dc37256e25cab12af8336ca5a6cc5"
 	bit7z_root = normalize_path(os.getcwd() +"/bit7z")
 	if not check_repository_commit(bit7z_root, commit_sha, "bit7z"):
 		if not Path(bit7z_root).is_dir():

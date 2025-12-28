@@ -712,7 +712,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="fbc8a82e704ae0a03afc8f8964621ec13e792e76",
+		commitSha="3748bb2b41a30028744dc48d66cb5e58e5c589fd",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -753,12 +753,12 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="2799792c360368fe79203dab73f1c79286ea4dce",
+			commitSha="816d499345667aa4544ea8c893b85c74866c6415",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="c6a2076644cd996abb3a9110bb746e9febd72ec4",
+			commitSha="ebdb8b8a3af78d614b75506230b1173d357f4b62",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -780,21 +780,21 @@ if with_pfm:
 if with_pfm:
 	add_pragma_module(
 		name="pr_git",
-		commitSha="fa34e6ea219f76baa0df9896633b2f1f62a4d765",
+		commitSha="a328a990da2db5e349594d8d90cd22ee8de0eac7",
 		repositoryUrl="https://github.com/Silverlan/pr_git.git"
 	)
 
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="a8e47b859d9cce6e4b158bceddf80ff0886f7f86",
+		commitSha="688876325c2526f93e813ed1516f043c580e765f",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="ece0610bc3d2aa2bd3f30993beb1d06e7d3923f5",
+		commitSha="b4232e3f84e8fd3f3b3a12b874bd794f5b06db69",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)

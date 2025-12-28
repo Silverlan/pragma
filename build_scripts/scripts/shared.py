@@ -94,7 +94,8 @@ def cmake_configure(scriptPath,generator,toolsetArgs=[],additionalArgs=[],cflags
 	if cflags:
 		additionalArgs.append("-DCMAKE_C_FLAGS=" + " ".join(cflags))
 		additionalArgs.append("-DCMAKE_CXX_FLAGS=" + " ".join(cflags))
-	args += toolsetArgs
+	if toolsetArgs:
+		args += toolsetArgs
 	args += additionalArgs
 	# print("Running CMake configure command...")
 

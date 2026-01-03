@@ -149,6 +149,7 @@ endfunction()
 
 function(pr_add_module TARGET_NAME LIB_TYPE MODULE_INSTALL_PATH)
     pr_add_library(${TARGET_NAME} ${LIB_TYPE})
+    pr_setup_default_project_settings(${TARGET_NAME})
     set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" PARENT_SCOPE)
 
     # Build rpath to main lib directory

@@ -23,8 +23,13 @@ namespace {
 	auto UVN = register_variable<udm::UInt32>("cl_updaterate", 20, pragma::console::ConVarFlags::Archive, "The amount of times per second user input is being transmitted to the server.");
 	auto UVN = register_variable<udm::Boolean>("net_graph", false, pragma::console::ConVarFlags::None, "Displays a graph about current network transmissions.");
 
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+	auto UVN = register_variable<udm::String>("cl_port_tcp", "29150", pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Userinfo, "Port used for TCP transmissions.");
+	auto UVN = register_variable<udm::String>("cl_port_udp", "29150", pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Userinfo, "Port used for UDP transmissions.");
+#else
 	auto UVN = register_variable<udm::String>("cl_port_tcp", pragma::networking::DEFAULT_PORT_TCP, pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Userinfo, "Port used for TCP transmissions.");
 	auto UVN = register_variable<udm::String>("cl_port_udp", pragma::networking::DEFAULT_PORT_UDP, pragma::console::ConVarFlags::Archive | pragma::console::ConVarFlags::Userinfo, "Port used for UDP transmissions.");
+#endif
 
 	auto UVN = register_variable<udm::Int32>("cl_max_fps", -1, pragma::console::ConVarFlags::Archive, "FPS will be clamped at this value. A value of < 0 deactivates the limit.");
 

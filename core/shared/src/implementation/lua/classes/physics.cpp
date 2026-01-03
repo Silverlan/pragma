@@ -82,7 +82,7 @@ void Lua::physenv::register_library(Interface &lua)
 	  luabind::def("create_ballsocket_constraint", create_ball_socket_constraint), luabind::def("create_hinge_constraint", create_hinge_constraint), luabind::def("create_slider_constraint", create_slider_constraint),
 	  luabind::def("create_conetwist_constraint", create_cone_twist_constraint), luabind::def("create_dof_constraint", create_DoF_constraint), luabind::def("create_dof_spring_constraint", create_dof_spring_constraint), luabind::def("create_surface_material", create_surface_material),
 	  luabind::def("create_material", create_material),
-#ifdef _WIN32
+#if defined(_MSC_VER) && !defined(__clang__)
 	  luabind::def("create_box_controller", create_box_controller, luabind::meta::join<luabind::default_parameter_policy<4, 45.f>, luabind::default_parameter_policy<5, pragma::math::Transform {}>>::type {}),
 	  luabind::def("create_capsule_controller", create_capsule_controller, luabind::meta::join<luabind::default_parameter_policy<5, 45.f>, luabind::default_parameter_policy<6, pragma::math::Transform {}>>::type {}),
 #else

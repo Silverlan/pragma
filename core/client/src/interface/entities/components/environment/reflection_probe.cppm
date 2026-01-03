@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:entities.components.env_reflection_probe;
@@ -61,8 +60,8 @@ export {
 			void InitializeDescriptorSet();
 			void ClearDescriptorSet();
 			void ClearIblData();
-			util::ParallelJob<image::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, math::Degree fov, float exposure,
-			  const std::vector<ecs::BaseEntity *> *optEntityList = nullptr, bool renderJob = false);
+			util::ParallelJob<image::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, math::Degree fov, float exposure, const std::vector<ecs::BaseEntity *> *optEntityList = nullptr,
+			  bool renderJob = false);
 			bool FinalizeCubemap(prosper::IImage &imgCubemap);
 			std::string GetCubemapIBLMaterialPath() const;
 			std::string GetCubemapIdentifier() const;

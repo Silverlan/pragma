@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 module pragma.client;
 
 import :rendering.occlusion_culling.chc;
@@ -454,22 +450,22 @@ void CHC::IssueMultiQueries()
 		switch(res)
 		{
 			case Vulkan::QueryResult::ErrorDeviceLost:
-				Con::cerr<<"Device Lost"<<Con::endl;
+				Con::CERR<<"Device Lost"<<Con::endl;
 				break;
 			case Vulkan::QueryResult::ErrorOutOfDeviceMemory:
-				Con::cerr<<"Out of device memory"<<Con::endl;
+				Con::CERR<<"Out of device memory"<<Con::endl;
 				break;
 			case Vulkan::QueryResult::ErrorOutOfHostMemory:
-				Con::cerr<<"Out of host memory"<<Con::endl;
+				Con::CERR<<"Out of host memory"<<Con::endl;
 				break;
 			case Vulkan::QueryResult::NotReady:
-				Con::cerr<<"Not ready"<<Con::endl;
+				Con::CERR<<"Not ready"<<Con::endl;
 				break;
 			case Vulkan::QueryResult::Success:
-				Con::cerr<<"Success"<<Con::endl;
+				Con::CERR<<"Success"<<Con::endl;
 				break;
 		}
-		Con::cwar<<"Query result: "<<queryStates.front()<<" (Available: "<<queryStates.at(1)<<")"<<Con::endl;*/
+		Con::CWAR<<"Query result: "<<queryStates.front()<<" (Available: "<<queryStates.at(1)<<")"<<Con::endl;*/
 	}
 		
 	//drawCmd->ResetQueryPool(pool,1);
@@ -729,13 +725,13 @@ void CHCNode::GetBounds(Vector3 &min, Vector3 &max) const
 const Vector3 &CHCNode::GetMin() const
 {
 	if(m_node.expired() == true)
-		return uvec::ORIGIN;
+		return uvec::PRM_ORIGIN;
 	return m_node.lock()->GetWorldBounds().first;
 }
 const Vector3 &CHCNode::GetMax() const
 {
 	if(m_node.expired() == true)
-		return uvec::ORIGIN;
+		return uvec::PRM_ORIGIN;
 	return m_node.lock()->GetWorldBounds().second;
 }
 void CHCNode::Render()

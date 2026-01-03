@@ -16,14 +16,6 @@ void BaseCharacterComponent::InitializeController()
 	//	return;
 }
 
-ComponentEventId baseCharacterComponent::EVENT_ON_FOOT_STEP = INVALID_COMPONENT_ID;
-ComponentEventId baseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId baseCharacterComponent::EVENT_ON_DEPLOY_WEAPON = INVALID_COMPONENT_ID;
-ComponentEventId baseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON = INVALID_COMPONENT_ID;
-ComponentEventId baseCharacterComponent::EVENT_PLAY_FOOTSTEP_SOUND = INVALID_COMPONENT_ID;
-ComponentEventId baseCharacterComponent::EVENT_IS_MOVING = INVALID_COMPONENT_ID;
-ComponentEventId baseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION = INVALID_COMPONENT_ID;
-ComponentEventId baseCharacterComponent::EVENT_ON_JUMP = INVALID_COMPONENT_ID;
 void BaseCharacterComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseActorComponent::RegisterEvents(componentManager, registerEvent);
@@ -526,7 +518,7 @@ bool BaseCharacterComponent::Jump()
 		return false;
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto upDir = m_orientationComponent ? m_orientationComponent->GetUpDirection() : uvec::UP;
+	auto upDir = m_orientationComponent ? m_orientationComponent->GetUpDirection() : uvec::PRM_UP;
 	auto vel = upDir * (m_jumpPower->GetValue() * (pTrComponent ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f}));
 	return Jump(vel);
 }

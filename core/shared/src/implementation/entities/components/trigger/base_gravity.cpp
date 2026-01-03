@@ -15,7 +15,7 @@ void Entity::TriggerGravity::apply_gravity(ecs::BaseEntity *ent, uint32_t flags,
 		if(charComponent.valid()) {
 			if(upDir != nullptr) {
 				auto *orientC = charComponent->GetOrientationComponent();
-				*upDir = std::make_unique<Vector3>(orientC ? orientC->GetUpDirection() : uvec::UP);
+				*upDir = std::make_unique<Vector3>(orientC ? orientC->GetUpDirection() : uvec::PRM_UP);
 			}
 			charComponent->SetCharacterOrientation(dirUp);
 		}

@@ -873,7 +873,7 @@ void pragma::LuaCore::register_entity_component_classes(lua::State *l, luabind::
 		  auto *game = nw->GetGameState();
 		  auto *componentInfo = game->GetEntityComponentManager().GetComponentInfo(hComponent.GetComponentId());
 		  if(componentInfo && math::is_flag_set(componentInfo->flags, ComponentFlags::Networked) == false)
-			  ::operator<<(::operator<<(::operator<<(::operator<<(Con::cwar, "WARNING: Component '"), componentInfo->name),
+			  ::operator<<(::operator<<(::operator<<(::operator<<(Con::CWAR, "WARNING: Component '"), componentInfo->name),
 			                 "' has uses net-events, but was not registered as networked, this means networking will be disabled for this component! Set the 'ents.EntityComponent.FREGISTER_BIT_NETWORKED' flag when registering the component to fix this!"),
 			    Con::endl);
 		  return id;

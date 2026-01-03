@@ -8,7 +8,6 @@ import :entities.components.base_io;
 
 using namespace pragma;
 
-ComponentEventId baseIOComponent::EVENT_HANDLE_INPUT = INVALID_COMPONENT_ID;
 void BaseIOComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseIOComponent::EVENT_HANDLE_INPUT = registerEvent("HANDLE_INPUT", ComponentEventInfo::Type::Broadcast); }
 
 BaseIOComponent::BaseIOComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
@@ -183,7 +182,7 @@ void BaseIOComponent::Input(std::string input, ecs::BaseEntity *activator, ecs::
 	else if(input == "fireuser4")
 		TriggerOutput("onuser4", activator);
 	else
-		Con::cout << "WARNING: Unhandled input '" << input << "' for entity '" << entThis.GetClass() << "'!" << Con::endl;
+		Con::COUT << "WARNING: Unhandled input '" << input << "' for entity '" << entThis.GetClass() << "'!" << Con::endl;
 }
 
 void BaseIOComponent::TriggerOutput(std::string name, ecs::BaseEntity *activator, IoFlags flags)

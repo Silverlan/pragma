@@ -20,7 +20,7 @@ DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const Quat &q)
 	return os;
 }
 
-void uvec::print(Vector3 *vec) { Con::cout << to_string(vec); }
+void uvec::print(Vector3 *vec) { Con::COUT << to_string(vec); }
 
 Con::c_cout &operator<<(Con::c_cout &os, const Vector4 &vec)
 {

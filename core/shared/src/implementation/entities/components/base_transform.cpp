@@ -8,8 +8,6 @@ import :entities.components.base_transform;
 
 using namespace pragma;
 
-ComponentEventId baseTransformComponent::EVENT_ON_POSE_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId baseTransformComponent::EVENT_ON_TELEPORT = INVALID_COMPONENT_ID;
 void BaseTransformComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseTransformComponent::EVENT_ON_POSE_CHANGED = registerEvent("ON_POSE_CHANGED", ComponentEventInfo::Type::Explicit);
@@ -230,11 +228,11 @@ void BaseTransformComponent::SetPosition(const Vector3 &pos, Bool bForceUpdate, 
 		return;
 	auto &ent = GetEntity();
 	if(std::isnan(pos.x) || std::isnan(pos.y) || std::isnan(pos.z)) {
-		Con::cwar << "NaN position (" << pos.x << "," << pos.y << "," << pos.z << ") for entity " << ent << "! Ignoring..." << Con::endl;
+		Con::CWAR << "NaN position (" << pos.x << "," << pos.y << "," << pos.z << ") for entity " << ent << "! Ignoring..." << Con::endl;
 		return;
 	}
 	if(std::isinf(pos.x) || std::isinf(pos.y) || std::isinf(pos.z)) {
-		Con::cwar << "inf position (" << pos.x << "," << pos.y << "," << pos.z << ") for entity " << ent << "! Ignoring..." << Con::endl;
+		Con::CWAR << "inf position (" << pos.x << "," << pos.y << "," << pos.z << ") for entity " << ent << "! Ignoring..." << Con::endl;
 		return;
 	}
 	m_pose.SetOrigin(pos);
@@ -265,7 +263,7 @@ void BaseTransformComponent::SetRotation(const Quat &q, CoordinateSpace space)
 		return;
 	auto &ent = GetEntity();
 	if(std::isnan(q.w) || std::isnan(q.x) || std::isnan(q.y) || std::isnan(q.z)) {
-		Con::cwar << "NaN rotation (" << q.w << "," << q.x << "," << q.y << "," << q.z << ") for entity " << ent << "! Ignoring..." << Con::endl;
+		Con::CWAR << "NaN rotation (" << q.w << "," << q.x << "," << q.y << "," << q.z << ") for entity " << ent << "! Ignoring..." << Con::endl;
 		return;
 	}
 	m_pose.SetRotation(q);

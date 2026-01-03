@@ -27,29 +27,29 @@ void pragma::console::ConConf::Print(const std::string &name)
 		auto flags = cvar->GetFlags();
 		if(math::is_flag_set(flags, ConVarFlags::Hidden) || math::is_flag_set(flags, ConVarFlags::Password))
 			return;
-		Con::cout << "\"" << name << "\" = \"" << cvar->GetString() << "\" (Type: " << magic_enum::enum_name(cvar->GetVarType()) << ") (Default: " << cvar->GetDefault() << ")" << Con::endl;
+		Con::COUT << "\"" << name << "\" = \"" << cvar->GetString() << "\" (Type: " << magic_enum::enum_name(cvar->GetVarType()) << ") (Default: " << cvar->GetDefault() << ")" << Con::endl;
 		if(flags > ConVarFlags::None) {
 			set_console_color(ConsoleColorFlags::White | ConsoleColorFlags::Intensity);
 			if((flags & ConVarFlags::Cheat) == ConVarFlags::Cheat)
-				Con::cout << " cheat";
+				Con::COUT << " cheat";
 			if((flags & ConVarFlags::Singleplayer) == ConVarFlags::Singleplayer)
-				Con::cout << " singleplayer";
+				Con::COUT << " singleplayer";
 			if((flags & ConVarFlags::Userinfo) == ConVarFlags::Userinfo)
-				Con::cout << " userinfo";
+				Con::COUT << " userinfo";
 			if((flags & ConVarFlags::Replicated) == ConVarFlags::Replicated)
-				Con::cout << " replicated";
+				Con::COUT << " replicated";
 			if((flags & ConVarFlags::Archive) == ConVarFlags::Archive)
-				Con::cout << " archive";
+				Con::COUT << " archive";
 			if((flags & ConVarFlags::Notify) == ConVarFlags::Notify)
-				Con::cout << " notify";
-			Con::cout << Con::endl;
+				Con::COUT << " notify";
+			Con::COUT << Con::endl;
 			static_assert(math::to_integral(ConVarFlags::Last) == 256);
 		}
 	}
 	else
-		Con::cout << "\"" << name << "\"" << Con::endl;
+		Con::COUT << "\"" << name << "\"" << Con::endl;
 	set_console_color(ConsoleColorFlags::White | ConsoleColorFlags::Intensity);
-	Con::cout << GetHelpText() << Con::endl;
+	Con::COUT << GetHelpText() << Con::endl;
 }
 
 //////////////////////////////////

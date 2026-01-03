@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:rendering.shaders.merge_images;
 
 export import pragma.prosper;

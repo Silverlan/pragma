@@ -8,8 +8,6 @@ import :entities.components.usable;
 
 using namespace pragma;
 
-ComponentEventId usableComponent::EVENT_ON_USE = INVALID_COMPONENT_ID;
-ComponentEventId usableComponent::EVENT_CAN_USE = INVALID_COMPONENT_ID;
 void UsableComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	usableComponent::EVENT_ON_USE = registerEvent("ON_USE", ComponentEventInfo::Type::Broadcast);

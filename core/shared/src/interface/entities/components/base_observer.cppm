@@ -12,7 +12,7 @@ export import pragma.util;
 export namespace pragma {
 	class BaseObservableComponent;
 	namespace baseObserverComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_OBSERVATION_MODE_CHANGED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_OBSERVATION_MODE_CHANGED)
 	}
 	class DLLNETWORK BaseObserverComponent : public BaseEntityComponent {
 	  public:

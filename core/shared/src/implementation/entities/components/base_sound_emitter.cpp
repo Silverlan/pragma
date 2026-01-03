@@ -8,7 +8,6 @@ import :entities.components.base_sound_emitter;
 
 using namespace pragma;
 
-ComponentEventId baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED = INVALID_COMPONENT_ID;
 void BaseSoundEmitterComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseSoundEmitterComponent::EVENT_ON_SOUND_CREATED = registerEvent("ON_SOUND_CREATED", ComponentEventInfo::Type::Broadcast); }
 BaseSoundEmitterComponent::BaseSoundEmitterComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 BaseSoundEmitterComponent::~BaseSoundEmitterComponent()

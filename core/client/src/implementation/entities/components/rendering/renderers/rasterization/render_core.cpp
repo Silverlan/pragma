@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :entities.components.rasterization_renderer;
@@ -14,8 +12,7 @@ import :rendering.shaders;
 
 using namespace pragma::rendering;
 
-void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const DrawSceneInfo &drawSceneInfo, const std::vector<ecs::CParticleSystemComponent *> &particles, SceneRenderPass renderMode, bool depthPass,
-  Bool bloom)
+void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const DrawSceneInfo &drawSceneInfo, const std::vector<ecs::CParticleSystemComponent *> &particles, SceneRenderPass renderMode, bool depthPass, Bool bloom)
 {
 	auto depthOnly = math::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::ParticleDepth);
 	if((depthOnly && bloom) || drawSceneInfo.scene.expired())

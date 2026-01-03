@@ -140,14 +140,14 @@ void CPBRConverterComponent::UpdateMetalness(asset::Model &mdl, material::CMater
 		return;
 	if(mat.GetProperty("rma_info/requires_roughness_update", false)) {
 		if(roughness.has_value()) {
-			Con::cout << "Assigning roughness value of " << *roughness << " to material '" << mat.GetName() << "', based on surface material properties of model '" << mdl.GetName() << "'!" << Con::endl;
+			Con::COUT << "Assigning roughness value of " << *roughness << " to material '" << mat.GetName() << "', based on surface material properties of model '" << mdl.GetName() << "'!" << Con::endl;
 			mat.SetProperty("roughness_factor", *roughness);
 		}
 		mat.ClearProperty("rma_info/requires_roughness_update");
 	}
 	if(mat.GetProperty("rma_info/requires_metalness_update", false)) {
 		if(metalness.has_value()) {
-			Con::cout << "Assigning metalness value of " << *metalness << " to material '" << mat.GetName() << "', based on surface material properties of model '" << mdl.GetName() << "'!" << Con::endl;
+			Con::COUT << "Assigning metalness value of " << *metalness << " to material '" << mat.GetName() << "', based on surface material properties of model '" << mdl.GetName() << "'!" << Con::endl;
 			mat.SetProperty("metalness_factor", *metalness);
 		}
 		mat.ClearProperty("rma_info/requires_metalness_update");

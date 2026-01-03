@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.operator_gravity;
 
 export import :particle_system.operator_world_base;
@@ -13,12 +10,12 @@ import :game;
 
 export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorGravity : public CParticleOperatorWorldBase {
-	public:
+	  public:
 		CParticleOperatorGravity() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 		virtual void Simulate(double tDelta) override;
-	protected:
+	  protected:
 		float m_gravityScale = 1.f;
 		Vector3 m_gravityForce = {0.f, -1.f, 0.f};
 		bool m_bUseCustomGravityForce = false;

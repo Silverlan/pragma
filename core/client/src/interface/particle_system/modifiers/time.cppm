@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.modifier_time;
 
 export import :particle_system.particle;
@@ -12,11 +8,11 @@ export import pragma.util;
 
 export namespace pragma::pts {
 	class DLLCLIENT CParticleModifierComponentTime {
-	protected:
+	  protected:
 		CParticleModifierComponentTime() = default;
 		void Initialize(const std::string &prefix, const std::unordered_map<std::string, std::string> &values);
 		float GetTime(float t, CParticle &p) const;
-	private:
+	  private:
 		bool m_bLifetimeFraction = false;
 	};
 }

@@ -3,8 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
-
 // #define ENABLE_DEPRECATED_PHYSICS
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
@@ -499,8 +497,8 @@ int Lua::game::Client::test(lua::State *l)
 		};
 
 		auto t = fGetBonePos();
-		Con::cout<<"Original Bone Pos: ("<<t.first.x<<","<<t.first.y<<","<<t.first.z<<")"<<Con::endl;
-		Con::cout<<"Original Bone Rot: ("<<t.second.w<<","<<t.second.x<<","<<t.second.y<<","<<t.second.z<<")"<<Con::endl;
+		Con::COUT<<"Original Bone Pos: ("<<t.first.x<<","<<t.first.y<<","<<t.first.z<<")"<<Con::endl;
+		Con::COUT<<"Original Bone Rot: ("<<t.second.w<<","<<t.second.x<<","<<t.second.y<<","<<t.second.z<<")"<<Con::endl;
 
 		{
 			auto npos = t.first;//*Lua::CheckVector(l,1);
@@ -511,8 +509,8 @@ int Lua::game::Client::test(lua::State *l)
 				return t;
 			},bone,{1.f,1.f,1.f},&npos,&nrot);
 
-			Con::cout<<"New Bone Pos: ("<<npos.x<<","<<npos.y<<","<<npos.z<<")"<<Con::endl;
-			Con::cout<<"New Bone Rot: ("<<nrot.w<<","<<nrot.x<<","<<nrot.y<<","<<nrot.z<<")"<<Con::endl;
+			Con::COUT<<"New Bone Pos: ("<<npos.x<<","<<npos.y<<","<<npos.z<<")"<<Con::endl;
+			Con::COUT<<"New Bone Rot: ("<<nrot.w<<","<<nrot.x<<","<<nrot.y<<","<<nrot.z<<")"<<Con::endl;
 		}
 	}
 	if(true)

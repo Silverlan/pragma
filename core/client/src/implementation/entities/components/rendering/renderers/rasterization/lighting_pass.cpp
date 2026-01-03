@@ -1,11 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
-#endif
-
 module pragma.client;
 
 import :entities.components.rasterization_renderer;
@@ -135,8 +130,8 @@ void pragma::CRasterizationRendererComponent::ExecutePrepass(const DrawSceneInfo
 	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	// Entity bone buffer barrier
-	drawCmd->RecordBufferBarrier(*get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
-	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+	drawCmd->RecordBufferBarrier(*get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit,
+	  prosper::AccessFlags::ShaderReadBit);
 
 	// Camera buffer barrier
 	drawCmd->RecordBufferBarrier(*scene.GetCameraBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit, prosper::AccessFlags::TransferWriteBit,
@@ -183,8 +178,8 @@ void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const DrawScen
 	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	// Entity bone buffer barrier
-	drawCmd->RecordBufferBarrier(*get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
-	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+	drawCmd->RecordBufferBarrier(*get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit,
+	  prosper::AccessFlags::ShaderReadBit);
 
 	auto &bufLightSources = CLightComponent::GetGlobalRenderBuffer();
 	auto &bufShadowData = CLightComponent::GetGlobalShadowBuffer();

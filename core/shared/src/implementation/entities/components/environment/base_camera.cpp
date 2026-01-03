@@ -65,11 +65,34 @@ void BaseEnvCameraComponent::RegisterMembers(EntityComponentManager &componentMa
 	}
 }
 
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+const float &baseEnvCameraComponent::DEFAULT_NEAR_Z {
+	static float val = 1.f;
+	return val;
+}
+const float &baseEnvCameraComponent::DEFAULT_FAR_Z {
+	static float val = 32'768.f;
+	return val;
+}
+const float &baseEnvCameraComponent::DEFAULT_FOV {
+	static float val = 90.f;
+	return val;
+}
+const float &baseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV {
+	static float val = 70.f;
+	return val;
+}
+const float &baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE {
+	static float val = 72.f;
+	return val;
+}
+#else
 decltype(baseEnvCameraComponent::DEFAULT_NEAR_Z) baseEnvCameraComponent::DEFAULT_NEAR_Z = 1.f;
 decltype(baseEnvCameraComponent::DEFAULT_FAR_Z) baseEnvCameraComponent::DEFAULT_FAR_Z = 32'768.f;
 decltype(baseEnvCameraComponent::DEFAULT_FOV) baseEnvCameraComponent::DEFAULT_FOV = 90.f;
 decltype(baseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV) baseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV = 70.f;
 decltype(baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE) baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE = 72.f;
+#endif
 BaseEnvCameraComponent::BaseEnvCameraComponent(ecs::BaseEntity &ent)
     : BaseEntityComponent {ent}, m_nearZ(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_NEAR_Z)), m_farZ(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_FAR_Z)), m_focalDistance(util::FloatProperty::Create(baseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE)),
       m_projectionMatrix(util::Matrix4Property::Create()), m_viewMatrix(util::Matrix4Property::Create()), m_aspectRatio(util::FloatProperty::Create(1.f))
@@ -271,8 +294,8 @@ void BaseEnvCameraComponent::GetFrustumPoints(std::vector<Vector3> &outPoints) c
 {
 	auto *trComponent = GetEntity().GetTransformComponent();
 	auto pos = trComponent ? trComponent->GetPosition() : Vector3 {};
-	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
-	auto up = trComponent ? trComponent->GetUp() : uvec::UP;
+	auto forward = trComponent ? trComponent->GetForward() : uvec::PRM_FORWARD;
+	auto up = trComponent ? trComponent->GetUp() : uvec::PRM_UP;
 	GetFrustumPoints(outPoints, GetNearZ(), GetFarZ(), GetFOVRad(), GetAspectRatio(), pos, forward, up);
 }
 Vector3 BaseEnvCameraComponent::GetFarPlaneCenter() const { return GetPlaneCenter(*m_farZ); }
@@ -281,7 +304,7 @@ Vector3 BaseEnvCameraComponent::GetPlaneCenter(float z) const
 {
 	auto *trComponent = GetEntity().GetTransformComponent();
 	auto pos = trComponent ? trComponent->GetPosition() : Vector3 {};
-	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
+	auto forward = trComponent ? trComponent->GetForward() : uvec::PRM_FORWARD;
 	return math::frustum::get_plane_center(pos, forward, z);
 }
 void BaseEnvCameraComponent::GetNearPlaneBounds(float *wNear, float *hNear) const { GetPlaneBounds(*m_nearZ, *wNear, *hNear); }
@@ -304,8 +327,8 @@ void BaseEnvCameraComponent::GetPlaneBoundaries(float z, std::array<Vector3, 4> 
 {
 	auto *trComponent = GetEntity().GetTransformComponent();
 	auto pos = trComponent ? trComponent->GetPosition() : Vector3 {};
-	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
-	auto up = trComponent ? trComponent->GetUp() : uvec::UP;
+	auto forward = trComponent ? trComponent->GetForward() : uvec::PRM_FORWARD;
+	auto up = trComponent ? trComponent->GetUp() : uvec::PRM_UP;
 	outPoints = math::frustum::get_plane_boundaries(pos, forward, up, GetFOVRad(), z, *m_aspectRatio, wNear, hNear);
 }
 
@@ -392,9 +415,9 @@ Vector3 BaseEnvCameraComponent::GetPlanePoint(float z, const Vector2 &uv) const
 {
 	auto *trComponent = GetEntity().GetTransformComponent();
 	auto pos = trComponent ? trComponent->GetPosition() : Vector3 {};
-	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
-	auto right = trComponent ? trComponent->GetRight() : uvec::RIGHT;
-	auto up = trComponent ? trComponent->GetUp() : uvec::UP;
+	auto forward = trComponent ? trComponent->GetForward() : uvec::PRM_FORWARD;
+	auto right = trComponent ? trComponent->GetRight() : uvec::PRM_RIGHT;
+	auto up = trComponent ? trComponent->GetUp() : uvec::PRM_UP;
 	return math::frustum::get_plane_point(pos, forward, right, up, GetFOVRad(), z, *m_aspectRatio, uv);
 }
 

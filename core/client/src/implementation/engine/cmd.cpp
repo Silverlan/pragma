@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 module pragma.client;
 
 import :engine;
@@ -42,7 +39,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  auto *cl = get_client_state();
 		  auto *l = cl ? cl->GetGUILuaState() : nullptr;
 		  if(!l) {
-			  Con::cwar << "GUI Lua state is not valid!" << Con::endl;
+			  Con::CWAR << "GUI Lua state is not valid!" << Con::endl;
 			  return;
 		  }
 		  console::commands::lua_run(l, "lua_run_gui", pl, argv, v);
@@ -95,7 +92,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto &renderAPI = GetRenderAPI();
 		  auto &context = GetRenderContext();
-		  Con::cout << "Active render API: " << renderAPI << " (" << context.GetAPIAbbreviation() << ")" << Con::endl;
+		  Con::COUT << "Active render API: " << renderAPI << " (" << context.GetAPIAbbreviation() << ")" << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Prints information about the current render API to the console.");
 	conVarMap.RegisterConCommand(
@@ -108,12 +105,13 @@ void pragma::CEngine::RegisterConsoleCommands()
 	  },
 	  console::ConVarFlags::None, "Prints information about the next frame.");
 	conVarMap.RegisterConVar<bool>("render_multithreaded_rendering_enabled", true, console::ConVarFlags::Archive, "Enables or disables multi-threaded rendering. Some renderers (like OpenGL) don't support multi-threaded rendering and will ignore this flag.");
-	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled", std::function<void(NetworkState *, const console::ConVar &, bool, bool)> {[this](NetworkState *nw, const console::ConVar &cv, bool, bool enabled) -> void { GetRenderContext().SetMultiThreadedRenderingEnabled(enabled); }});
+	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled",
+	  std::function<void(NetworkState *, const console::ConVar &, bool, bool)> {[this](NetworkState *nw, const console::ConVar &cv, bool, bool enabled) -> void { GetRenderContext().SetMultiThreadedRenderingEnabled(enabled); }});
 	conVarMap.RegisterConVarCallback("render_enable_verbose_output", std::function<void(NetworkState *, const console::ConVar &, bool, bool)> {[this](NetworkState *nw, const console::ConVar &cv, bool, bool enabled) -> void { rendering::VERBOSE_RENDER_OUTPUT_ENABLED = enabled; }});
 	conVarMap.RegisterConCommand(
 	  "crash",
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
-		  Con::cwar << "Crash command has been invoked. Crashing intentionally..." << Con::endl;
+		  Con::CWAR << "Crash command has been invoked. Crashing intentionally..." << Con::endl;
 		  if(!argv.empty() && argv.front() == "exception") {
 			  throw std::runtime_error {"Crash!"};
 			  return;
@@ -124,7 +122,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand(
 	  "crash_gpu",
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
-		  Con::cwar << "GPU Crash command has been invoked. Crashing intentionally..." << Con::endl;
+		  Con::CWAR << "GPU Crash command has been invoked. Crashing intentionally..." << Con::endl;
 		  GetRenderContext().Crash();
 	  },
 	  console::ConVarFlags::None, "Forces a GPU crash.");
@@ -133,10 +131,10 @@ void pragma::CEngine::RegisterConsoleCommands()
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto budget = GetRenderContext().DumpMemoryBudget();
 		  if(!budget.has_value()) {
-			  Con::cout << "No memory budget information available!" << Con::endl;
+			  Con::COUT << "No memory budget information available!" << Con::endl;
 			  return;
 		  }
-		  Con::cout << *budget << Con::endl;
+		  Con::COUT << *budget << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Prints information about the current GPU memory budget.");
 	conVarMap.RegisterConCommand(
@@ -144,23 +142,23 @@ void pragma::CEngine::RegisterConsoleCommands()
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto stats = GetRenderContext().DumpMemoryStats();
 		  if(!stats.has_value()) {
-			  Con::cout << "No memory stats information available!" << Con::endl;
+			  Con::COUT << "No memory stats information available!" << Con::endl;
 			  return;
 		  }
-		  Con::cout << *stats << Con::endl;
+		  Con::COUT << *stats << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Prints statistics about the current GPU memory usage.");
 	conVarMap.RegisterConCommand(
 	  "debug_dump_shader_code",
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
-			  Con::cwar << "No shader specified!" << Con::endl;
+			  Con::CWAR << "No shader specified!" << Con::endl;
 			  return;
 		  }
 		  auto &shaderName = argv.front();
 		  auto shader = GetShader(shaderName);
 		  if(shader.expired()) {
-			  Con::cwar << "WARNING:: Shader '" << shaderName << "' is invalid!" << Con::endl;
+			  Con::CWAR << "WARNING:: Shader '" << shaderName << "' is invalid!" << Con::endl;
 			  return;
 		  }
 		  std::vector<std::string> glslCodePerStage;
@@ -169,10 +167,10 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  prosper::ShaderStage errStage;
 		  auto result = GetRenderContext().GetParsedShaderSourceCode(*shader, glslCodePerStage, glslCodeStages, infoLog, debugInfoLog, errStage);
 		  if(result == false) {
-			  Con::cwar << "Parsing shader '" << shaderName << "' has failed:" << Con::endl;
-			  Con::cwar << "Info Log: " << infoLog << Con::endl;
-			  Con::cwar << "Debug info Log: " << debugInfoLog << Con::endl;
-			  Con::cwar << "Stage: " << prosper::util::to_string(errStage) << Con::endl;
+			  Con::CWAR << "Parsing shader '" << shaderName << "' has failed:" << Con::endl;
+			  Con::CWAR << "Info Log: " << infoLog << Con::endl;
+			  Con::CWAR << "Debug info Log: " << debugInfoLog << Con::endl;
+			  Con::CWAR << "Stage: " << prosper::util::to_string(errStage) << Con::endl;
 			  return;
 		  }
 		  std::string path = "shader_dump/" + shaderName + "/";
@@ -209,9 +207,9 @@ void pragma::CEngine::RegisterConsoleCommands()
 				  f = nullptr;
 			  }
 			  else
-				  Con::cwar << "Unable to write file '" << stageFileName << "'!" << Con::endl;
+				  Con::CWAR << "Unable to write file '" << stageFileName << "'!" << Con::endl;
 		  }
-		  Con::cout << "Done! Written shader files to '" << path << "'!" << Con::endl;
+		  Con::COUT << "Done! Written shader files to '" << path << "'!" << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Dumps the glsl code for the specified shader.");
 	conVarMap.RegisterConCommand("debug_dump_render_queues", [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) { g_dumpRenderQueues = true; }, console::ConVarFlags::None, "Prints all render queues for the next frame to the console.");
@@ -289,32 +287,32 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  }
 		  std::sort(sortedIndices.begin(), sortedIndices.end(), [&textureSizes](size_t idx0, size_t idx1) { return textureSizes[idx0] > textureSizes[idx1]; });
 
-		  Con::cout << textures.size() << " textures are currently loaded:" << Con::endl;
-		  Con::cout << std::left << std::setw(35) << "Name" << std::setw(10) << "Use Count" << std::setw(12) << "Resolution";
-		  Con::cout << std::setw(10) << "Layers" << std::setw(10) << "Mipmaps" << std::setw(10) << "Tiling" << std::setw(22) << "Format";
-		  Con::cout << std::setw(12) << "Size" << std::setw(10) << "Last Used" << std::setw(30) << "Filename" << Con::endl;
+		  Con::COUT << textures.size() << " textures are currently loaded:" << Con::endl;
+		  Con::COUT << std::left << std::setw(35) << "Name" << std::setw(10) << "Use Count" << std::setw(12) << "Resolution";
+		  Con::COUT << std::setw(10) << "Layers" << std::setw(10) << "Mipmaps" << std::setw(10) << "Tiling" << std::setw(22) << "Format";
+		  Con::COUT << std::setw(12) << "Size" << std::setw(10) << "Last Used" << std::setw(30) << "Filename" << Con::endl;
 
 		  auto fPrintImageInfo = [&fGetImageSize](const std::string &fileName, prosper::IImage &img, bool perfWarnings = true) {
 			  auto &context = img.GetContext();
 			  auto useCount = img.shared_from_this().use_count() - 1;
 			  auto imgName = img.GetDebugName();
 			  string::truncate_string(imgName, 35);
-			  Con::cout << std::left << std::setw(35) << imgName;
+			  Con::COUT << std::left << std::setw(35) << imgName;
 
 			  if(useCount == 0)
 				  pragma::console::set_console_color(console::ConsoleColorFlags::Intensity | console::ConsoleColorFlags::Red);
-			  Con::cout << std::setw(10) << useCount;
+			  Con::COUT << std::setw(10) << useCount;
 			  if(useCount == 0)
 				  console::reset_console_color();
 
 			  std::string res = std::to_string(img.GetWidth()) + "x" + std::to_string(img.GetHeight());
-			  Con::cout << std::setw(12) << res;
-			  Con::cout << std::setw(10) << img.GetLayerCount();
+			  Con::COUT << std::setw(12) << res;
+			  Con::COUT << std::setw(10) << img.GetLayerCount();
 
 			  auto numMipmaps = img.GetMipmapCount();
 			  if(numMipmaps <= 1 && perfWarnings)
 				  pragma::console::set_console_color(console::ConsoleColorFlags::Intensity | console::ConsoleColorFlags::Red);
-			  Con::cout << std::setw(10) << numMipmaps;
+			  Con::COUT << std::setw(10) << numMipmaps;
 			  if(numMipmaps <= 1 && perfWarnings)
 				  console::reset_console_color();
 
@@ -322,7 +320,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  auto optimal = tiling == prosper::ImageTiling::Optimal;
 			  if(!optimal)
 				  pragma::console::set_console_color(console::ConsoleColorFlags::Intensity | console::ConsoleColorFlags::Red);
-			  Con::cout << std::setw(10) << prosper::util::to_string(tiling);
+			  Con::COUT << std::setw(10) << prosper::util::to_string(tiling);
 			  if(!optimal)
 				  console::reset_console_color();
 
@@ -330,36 +328,36 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  auto isCompressed = prosper::util::is_compressed_format(format);
 			  if(!isCompressed && perfWarnings)
 				  pragma::console::set_console_color(console::ConsoleColorFlags::Intensity | console::ConsoleColorFlags::Red);
-			  Con::cout << std::setw(22) << prosper::util::to_string(format);
+			  Con::COUT << std::setw(22) << prosper::util::to_string(format);
 			  if(!isCompressed && perfWarnings)
 				  console::reset_console_color();
 
-			  Con::cout << std::setw(12) << util::get_pretty_bytes(fGetImageSize(img));
+			  Con::COUT << std::setw(12) << util::get_pretty_bytes(fGetImageSize(img));
 
 			  if(context.IsValidationEnabled() == false)
-				  Con::cout << std::setw(10) << "n/a";
+				  Con::COUT << std::setw(10) << "n/a";
 			  else {
 				  auto time = context.GetLastUsageTime(img);
 				  if(time.has_value() == false)
 					  pragma::console::set_console_color(console::ConsoleColorFlags::Intensity | console::ConsoleColorFlags::Red);
-				  Con::cout << std::setw(10);
+				  Con::COUT << std::setw(10);
 				  if(time.has_value()) {
 					  auto t = std::chrono::steady_clock::now();
 					  auto dt = t - *time;
-					  Con::cout << util::get_pretty_duration(std::chrono::duration_cast<std::chrono::milliseconds>(dt).count()) << " ago";
+					  Con::COUT << util::get_pretty_duration(std::chrono::duration_cast<std::chrono::milliseconds>(dt).count()) << " ago";
 				  }
 				  else
-					  Con::cout << "Never";
+					  Con::COUT << "Never";
 				  if(time.has_value() == false)
 					  console::reset_console_color();
 			  }
 
-			  Con::cout << std::setw(30) << fileName << Con::endl;
+			  Con::COUT << std::setw(30) << fileName << Con::endl;
 
 			  /*auto deviceLocal = pragma::math::is_flag_set(img.GetCreateInfo().memoryFeatures, prosper::MemoryFeatureFlags::DeviceLocal);
 			  if(!deviceLocal) {
 				  pragma::util::set_console_color(pragma::console::ConsoleColorFlags::Intensity | pragma::console::ConsoleColorFlags::Red);
-				  Con::cout << "\tPerformance Warning: Image memory is not device local!" << Con::endl;
+				  Con::COUT << "\tPerformance Warning: Image memory is not device local!" << Con::endl;
 				  pragma::util::reset_console_color();
 			  }*/
 		  };
@@ -372,19 +370,19 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  if(vkTex)
 				  fPrintImageInfo(filePath, vkTex->GetImage());
 			  // else
-			  //	  Con::cout << "\tNULL" << Con::endl;
+			  //	  Con::COUT << "\tNULL" << Con::endl;
 
 			  totalSize += textureSizes[idx];
 		  }
-		  Con::cout << "Total memory: " << util::get_pretty_bytes(totalSize) << Con::endl << Con::endl;
+		  Con::COUT << "Total memory: " << util::get_pretty_bytes(totalSize) << Con::endl << Con::endl;
 
 		  auto *client = GetClientState();
 		  auto *game = client ? static_cast<CGame *>(client->GetGameState()) : nullptr;
 		  if(game) {
 			  auto cIt = EntityCIterator<CRasterizationRendererComponent> {*game};
-			  Con::cout << "Number of scenes: " << cIt.GetCount() << Con::endl;
+			  Con::COUT << "Number of scenes: " << cIt.GetCount() << Con::endl;
 			  for(auto &rast : cIt) {
-				  Con::cout << "Renderer " << rast.GetEntity().GetName() << ":" << Con::endl;
+				  Con::COUT << "Renderer " << rast.GetEntity().GetName() << ":" << Con::endl;
 				  auto &hdrInfo = rast.GetHDRInfo();
 				  std::unordered_set<prosper::IImage *> images;
 				  auto fAddTex = [&images](const std::shared_ptr<prosper::Texture> &tex) {
@@ -427,13 +425,13 @@ void pragma::CEngine::RegisterConsoleCommands()
 					fAddRt(glowInfo.blurSet->GetFinalRenderTarget());
 				}*/
 
-				  Con::cout << images.size() << " images:" << Con::endl;
+				  Con::COUT << images.size() << " images:" << Con::endl;
 				  prosper::DeviceSize totalSceneSize = 0;
 				  for(auto &img : images) {
 					  fPrintImageInfo("<implementation>", *img, false);
 					  totalSceneSize += fGetImageSize(*img);
 				  }
-				  Con::cout << "Total scene image size: " << util::get_pretty_bytes(totalSceneSize) << Con::endl << Con::endl;
+				  Con::COUT << "Total scene image size: " << util::get_pretty_bytes(totalSceneSize) << Con::endl << Con::endl;
 			  }
 		  }
 
@@ -441,7 +439,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  totalSize = 0;
 		  for(auto &imgBuf : imgBufs)
 			  totalSize += imgBuf->GetSize() - imgBuf->GetFreeSize();
-		  Con::cout << "Total device image memory: " << util::get_pretty_bytes(totalSize) << Con::endl;
+		  Con::COUT << "Total device image memory: " << util::get_pretty_bytes(totalSize) << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Prints information about the currently loaded textures.");
 #if LUA_ENABLE_RUN_GUI == 1
@@ -468,8 +466,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  }
 	  });
 #endif
-	conVarMap.RegisterConCommand(
-	  "asset_clear_unused_textures", [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(asset::Type::Texture, true); }, console::ConVarFlags::None, "Clears all unused textures from memory.");
+	conVarMap.RegisterConCommand("asset_clear_unused_textures", [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(asset::Type::Texture, true); }, console::ConVarFlags::None, "Clears all unused textures from memory.");
 	conVarMap.RegisterConCommand(
 	  "vr_preinitialize",
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
@@ -479,17 +476,17 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  std::string err;
 		  auto lib = cl->InitializeLibrary("openvr/pr_openvr", &err, cl->GetLuaState());
 		  if(!lib) {
-			  Con::cwar << "Unable to preinitialize VR: " << err << Con::endl;
+			  Con::CWAR << "Unable to preinitialize VR: " << err << Con::endl;
 			  return;
 		  }
 		  auto *isHmdPresent = lib->FindSymbolAddress<bool (*)()>("is_hmd_present");
 		  auto *preInit = lib->FindSymbolAddress<void (*)()>("preinitialize_openvr");
 		  if(!isHmdPresent || !preInit) {
-			  Con::cwar << "Required VR functions not found in openvr module!" << Con::endl;
+			  Con::CWAR << "Required VR functions not found in openvr module!" << Con::endl;
 			  return;
 		  }
 		  if(!isHmdPresent()) {
-			  Con::cwar << "VR HMD could not be found!" << Con::endl;
+			  Con::CWAR << "VR HMD could not be found!" << Con::endl;
 			  if(argv.empty() || !util::to_boolean(argv.front()))
 				  return;
 		  }
@@ -500,14 +497,14 @@ void pragma::CEngine::RegisterConsoleCommands()
 	  "locale_localize",
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.size() < 4) {
-			  Con::cwar << "Insufficient arguments supplied!" << Con::endl;
+			  Con::CWAR << "Insufficient arguments supplied!" << Con::endl;
 			  std::vector<std::string> files;
 			  fs::find_files("scripts/localization/en/texts/*.txt", &files, nullptr);
 			  std::sort(files.begin(), files.end());
-			  Con::cout << "Available groups: " << Con::endl;
+			  Con::COUT << "Available groups: " << Con::endl;
 			  for(auto &f : files) {
 				  ufile::remove_extension_from_filename(f);
-				  Con::cout << f << Con::endl;
+				  Con::COUT << f << Con::endl;
 			  }
 			  return;
 		  }
@@ -515,31 +512,31 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  auto lan = argv[1];
 		  auto identifier = argv[2];
 		  auto text = argv[3];
-		  Con::cout << "Localizing '" << identifier << "' in category '" << category << "' for language '" << lan << "' as '" << text << "'..." << Con::endl;
+		  Con::COUT << "Localizing '" << identifier << "' in category '" << category << "' for language '" << lan << "' as '" << text << "'..." << Con::endl;
 		  auto res = locale::localize(identifier, lan, category, text);
 		  if(res)
-			  Con::cout << "Done!" << Con::endl;
+			  Con::COUT << "Done!" << Con::endl;
 		  else
-			  Con::cwar << "Localization failed!" << Con::endl;
+			  Con::CWAR << "Localization failed!" << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Adds the specified text to the localization files. Usage: locale_localize <group> <language> <textIdentifier> <localizedText>");
 	conVarMap.RegisterConCommand(
 	  "locale_relocalize",
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.size() < 4) {
-			  Con::cwar << "Insufficient arguments supplied!" << Con::endl;
+			  Con::CWAR << "Insufficient arguments supplied!" << Con::endl;
 			  return;
 		  }
 		  auto identifier = argv[0];
 		  auto newIdentifier = argv[1];
 		  auto oldCategory = argv[2];
 		  auto newCategory = argv[3];
-		  Con::cout << "Re-localizing '" << identifier << "' in category '" << oldCategory << "' as '" << newIdentifier << "' in category '" << newCategory << "'..." << Con::endl;
+		  Con::COUT << "Re-localizing '" << identifier << "' in category '" << oldCategory << "' as '" << newIdentifier << "' in category '" << newCategory << "'..." << Con::endl;
 		  auto res = locale::relocalize(identifier, newIdentifier, oldCategory, newCategory);
 		  if(res)
-			  Con::cout << "Done!" << Con::endl;
+			  Con::COUT << "Done!" << Con::endl;
 		  else
-			  Con::cwar << "Re-Localization failed!" << Con::endl;
+			  Con::CWAR << "Re-Localization failed!" << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Moves the specified localized string to a different category with a different identifier. Usage: locale_localize <identifier> <newIdentifier> <category> <newCategory>");
 	conVarMap.RegisterConCommand(
@@ -547,7 +544,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto *l = state->GetLuaState();
 		  if(!l) {
-			  Con::cwar << "Unable to start debugger server: No active Lua state!" << Con::endl;
+			  Con::CWAR << "Unable to start debugger server: No active Lua state!" << Con::endl;
 			  return;
 		  }
 		  Lua::util::start_debugger_server(l);

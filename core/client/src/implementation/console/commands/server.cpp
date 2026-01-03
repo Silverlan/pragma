@@ -55,7 +55,7 @@ void CMD_connect(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, s
 	if(argv.empty()) {
 		auto &lastConnection = static_cast<pragma::ClientState *>(state)->GetLastConnectionInfo();
 		if(lastConnection.address.has_value() == false && lastConnection.steamId.has_value() == false) {
-			Con::cout << "No previous connection attempt has been made! Please supply a destination address." << Con::endl;
+			Con::COUT << "No previous connection attempt has been made! Please supply a destination address." << Con::endl;
 			return;
 		}
 		if(lastConnection.address.has_value()) {
@@ -144,13 +144,13 @@ void CMD_cl_debug_netmessages(pragma::NetworkState *state, pragma::BasePlayerCom
 {
 	auto *cl = pragma::get_client_state()->GetClient();
 	if(cl == nullptr) {
-		Con::cwar << "No client is active!" << Con::endl;
+		Con::CWAR << "No client is active!" << Con::endl;
 		return;
 	}
 	if(argv.size() > 0) {
 		auto numBacklog = pragma::string::to_int(argv.front());
 		cl->SetMemoryCount(numBacklog);
-		Con::cout << "Debug backlog has been set to " << numBacklog << Con::endl;
+		Con::COUT << "Debug backlog has been set to " << numBacklog << Con::endl;
 		return;
 	}
 	auto *svMap = pragma::networking::get_server_message_map();

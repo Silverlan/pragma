@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:audio.sound;
 
 export import pragma.shared;
@@ -14,7 +10,7 @@ export import pragma.soundsystem;
 #pragma warning(disable : 4251)
 export namespace pragma::audio {
 	class DLLCLIENT CALSound : public SoundSource, public ALSound {
-	public:
+	  public:
 		static std::shared_ptr<CALSound> Create(NetworkState *nw, const PSoundChannel &channel);
 		static ALSound *FindByServerIndex(uint32_t idx);
 		static void SetIndex(ALSound *snd, uint32_t idx);
@@ -109,7 +105,7 @@ export namespace pragma::audio {
 		void RemoveEffect(uint32_t slotId);
 
 		void UpdateVolume();
-	protected:
+	  protected:
 		CALSound(NetworkState *nw, const PSoundChannel &channel);
 		static std::unordered_map<uint32_t, std::weak_ptr<ALSound>> s_svIndexedSounds; // Sounds created by the server
 		float m_modPitch = 1.f;

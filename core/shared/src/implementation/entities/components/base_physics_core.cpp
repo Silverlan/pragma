@@ -223,7 +223,7 @@ PhysObjHandle BasePhysicsComponent::InitializePhysics(const physics::PhysObjCrea
 				auto posTgt = posConstraint + bodyTgt->GetOrigin();
 
 				posConstraint = posConstraint + bodySrc->GetOrigin();
-				//Con::cerr<<"Constraint for bone "<<boneId<<": ("<<posConstraint.x<<","<<posConstraint.y<<","<<posConstraint.z<<") ("<<posTgt.x<<","<<posTgt.y<<","<<posTgt.z<<") "<<Con::endl;
+				//Con::CERR<<"Constraint for bone "<<boneId<<": ("<<posConstraint.x<<","<<posConstraint.y<<","<<posConstraint.z<<") ("<<posTgt.x<<","<<posTgt.y<<","<<posTgt.z<<") "<<Con::endl;
 				//
 				if(joint.type == physics::JointType::Fixed)
 					c = util::shared_handle_cast<physics::IFixedConstraint, physics::IConstraint>(physEnv->CreateFixedConstraint(*bodySrc, posConstraint, uquat::identity(), *bodyTgt, posTgt, uquat::identity()));
@@ -534,7 +534,7 @@ void BasePhysicsComponent::OnPhysicsWake(physics::PhysObj *)
 	auto &awakePhysC = game.GetAwakePhysicsComponents();
 	auto it = std::find_if(awakePhysC.begin(), awakePhysC.end(), [this](const ComponentHandle<BasePhysicsComponent> &hPhysC) { return this == hPhysC.get(); });
 	if(it != awakePhysC.end()) {
-		// Con::cwar<<"Physics component has woken up, but was already marked as awake previously!"<<Con::endl;
+		// Con::CWAR<<"Physics component has woken up, but was already marked as awake previously!"<<Con::endl;
 		return;
 	}
 	awakePhysC.push_back(GetHandle<BasePhysicsComponent>());
@@ -547,7 +547,7 @@ void BasePhysicsComponent::OnPhysicsSleep(physics::PhysObj *)
 	auto &awakePhysC = game.GetAwakePhysicsComponents();
 	auto it = std::find_if(awakePhysC.begin(), awakePhysC.end(), [this](const ComponentHandle<BasePhysicsComponent> &hPhysC) { return this == hPhysC.get(); });
 	if(it == awakePhysC.end())
-		Con::cwar << "Physics component has fallen asleep, but was already marked as asleep previously!" << Con::endl;
+		Con::CWAR << "Physics component has fallen asleep, but was already marked as asleep previously!" << Con::endl;
 	ClearAwakeStatus();
 }
 

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :networking.standard_client;
@@ -19,7 +17,7 @@ void pragma::networking::NWMClientConnection::OnPacketSent(const NWMEndpoint &ep
 	svMap->GetNetMessages(&svMsgs);
 	auto it = std::find_if(svMsgs->begin(), svMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != svMsgs->end()) ? it->first : "Unknown";
-	Con::ccl << "OnPacketSent: " << msgName << " (" << id << ")" << Con::endl;
+	Con::CCL << "OnPacketSent: " << msgName << " (" << id << ")" << Con::endl;
 #endif
 	MemorizeNetMessage(MessageType::Outgoing, packet.GetMessageID(), ep, packet);
 }
@@ -32,7 +30,7 @@ void pragma::networking::NWMClientConnection::OnPacketReceived(const NWMEndpoint
 	clMap->GetNetMessages(&clMsgs);
 	auto it = std::find_if(clMsgs->begin(), clMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != clMsgs->end()) ? it->first : "Unknown";
-	Con::ccl << "OnPacketReceived: " << msgName << " (" << id << ")" << Con::endl;
+	Con::CCL << "OnPacketReceived: " << msgName << " (" << id << ")" << Con::endl;
 #endif
 	MemorizeNetMessage(MessageType::Incoming, id, ep, packet);
 }
@@ -40,7 +38,7 @@ void pragma::networking::NWMClientConnection::OnPacketReceived(const NWMEndpoint
 bool pragma::networking::NWMClientConnection::HandlePacket(const NWMEndpoint &ep, unsigned int id, NetPacket &packet)
 {
 #if DEBUG_CLIENT_VERBOSE == 1
-	Con::ccl << "HandlePacket: " << id << Con::endl;
+	Con::CCL << "HandlePacket: " << id << Con::endl;
 #endif
 	if(Client::HandlePacket(ep, id, packet) == true)
 		return true;
@@ -50,7 +48,7 @@ bool pragma::networking::NWMClientConnection::HandlePacket(const NWMEndpoint &ep
 void pragma::networking::NWMClientConnection::OnConnected()
 {
 #if DEBUG_CLIENT_VERBOSE == 1
-	Con::ccl << "Connected to server..." << Con::endl;
+	Con::CCL << "Connected to server..." << Con::endl;
 #endif
 	m_client->OnConnected();
 }
@@ -58,14 +56,14 @@ void pragma::networking::NWMClientConnection::OnClosed()
 {
 	auto err = GetLastError();
 #if DEBUG_CLIENT_VERBOSE == 1
-	Con::ccl << "Connection to server has closed: " << err.Message() << Con::endl;
+	Con::CCL << "Connection to server has closed: " << err.Message() << Con::endl;
 #endif
 	m_client->OnConnectionClosed();
 }
 void pragma::networking::NWMClientConnection::OnDisconnected(nwm::ClientDropped reason)
 {
 #if DEBUG_CLIENT_VERBOSE == 1
-	Con::ccl << "Disconnected from server (" << nwm::client_dropped_enum_to_string(reason) << ")..." << Con::endl;
+	Con::CCL << "Disconnected from server (" << nwm::client_dropped_enum_to_string(reason) << ")..." << Con::endl;
 #endif
 	m_bDisconnected = true;
 	m_client->OnDisconnected();
@@ -87,7 +85,7 @@ std::unique_ptr<pragma::networking::NWMClientConnection> pragma::networking::NWM
 		}
 	}
 	if(cl == nullptr) {
-		Con::cwar << "Unable to connect to server '" << serverIp << ":" << serverPort << ": " << lastException.what() << Con::endl;
+		Con::CWAR << "Unable to connect to server '" << serverIp << ":" << serverPort << ": " << lastException.what() << Con::endl;
 		return nullptr;
 	}
 #ifdef _DEBUG

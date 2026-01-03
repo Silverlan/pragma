@@ -453,11 +453,11 @@ static void CVAR_CALLBACK_render_msaa_enabled(pragma::NetworkState *, const prag
 	case 1:
 		{
 			auto maxSamples = GetMaxMSAASampleCount();
-			Con::cwar << "Your hardware doesn't support a sample count above " << samples << "! Clamping to " << maxSamples << "..." << Con::endl;
+			Con::CWAR << "Your hardware doesn't support a sample count above " << samples << "! Clamping to " << maxSamples << "..." << Con::endl;
 			break;
 		}
 	case 2:
-		Con::cwar << "Sample count has to be a power of two! Clamping to " << samples << "..." << Con::endl;
+		Con::CWAR << "Sample count has to be a power of two! Clamping to " << samples << "..." << Con::endl;
 		break;
 	}
 	pragma::ShaderScene::SetRenderPassSampleCount(static_cast<prosper::SampleCountFlags>(samples));

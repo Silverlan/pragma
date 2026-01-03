@@ -10,11 +10,6 @@ import :entities.components.constraints.base;
 
 using namespace pragma;
 
-ComponentEventId constraintComponent::EVENT_APPLY_CONSTRAINT = INVALID_COMPONENT_ID;
-ComponentEventId constraintComponent::EVENT_ON_DRIVER_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId constraintComponent::EVENT_ON_DRIVEN_OBJECT_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId constraintComponent::EVENT_ON_ORDER_INDEX_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId constraintComponent::EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY = INVALID_COMPONENT_ID;
 void ConstraintComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	constraintComponent::EVENT_APPLY_CONSTRAINT = registerEvent("APPLY_CONSTRAINT", ComponentEventInfo::Type::Explicit);

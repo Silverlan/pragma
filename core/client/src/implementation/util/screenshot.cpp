@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :util.screenshot;
@@ -34,8 +32,8 @@ void pragma::util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, c
 	fs::create_directory("screenshots");
 
 	auto *pCam = game.GetRenderCamera<CCameraComponent>();
-	Con::cout << "Taking raytraced screenshot..." << Con::endl;
-	Con::cout << "Preparing scene for raytracing..." << Con::endl;
+	Con::COUT << "Taking raytraced screenshot..." << Con::endl;
+	Con::COUT << "Preparing scene for raytracing..." << Con::endl;
 
 	// A raytracing screenshot has been requested; We'll have to re-render the scene with raytracing enabled
 
@@ -62,21 +60,21 @@ void pragma::util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, c
 	sceneInfo.skyStrength = settings.skyStrength;
 	sceneInfo.skyAngles = settings.skyAngles;
 
-	Con::cout << "Executing raytracer... This may take a few minutes!" << Con::endl;
+	Con::COUT << "Executing raytracer... This may take a few minutes!" << Con::endl;
 	auto job = ::pragma::rendering::cycles::render_image(*get_client_state(), sceneInfo, renderImgInfo);
 	if(job.IsValid()) {
 		job.SetCompletionHandler([format, quality, toneMapping](ParallelWorker<image::ImageLayerSet> &worker) {
 			if(worker.IsSuccessful() == false) {
-				Con::cwar << "Raytraced screenshot failed: " << worker.GetResultMessage() << Con::endl;
+				Con::CWAR << "Raytraced screenshot failed: " << worker.GetResultMessage() << Con::endl;
 				return;
 			}
 
 			auto *client = get_client_state();
 			auto path = get_screenshot_name(client ? client->GetGameState() : nullptr, format);
-			Con::cout << "Raytracing complete! Saving screenshot as '" << path << "'..." << Con::endl;
+			Con::COUT << "Raytracing complete! Saving screenshot as '" << path << "'..." << Con::endl;
 			auto fp = fs::open_file<fs::VFilePtrReal>(path, fs::FileMode::Write | fs::FileMode::Binary);
 			if(fp == nullptr) {
-				Con::cwar << "Unable to open file '" << path << "' for writing!" << Con::endl;
+				Con::CWAR << "Unable to open file '" << path << "' for writing!" << Con::endl;
 				return;
 			}
 			auto imgBuffer = worker.GetResult().images.begin()->second;
@@ -84,7 +82,7 @@ void pragma::util::rt_screenshot(CGame &game, uint32_t width, uint32_t height, c
 				imgBuffer = imgBuffer->ApplyToneMapping(toneMapping);
 			fs::File f {fp};
 			if(image::save_image(f, *imgBuffer, format, quality) == false)
-				Con::cwar << "Unable to save screenshot as '" << path << "'!" << Con::endl;
+				Con::CWAR << "Unable to save screenshot as '" << path << "'!" << Con::endl;
 
 			// Obsolete
 			// imgBuffer->Convert(pragma::util::ImageBuffer::Format::RGB8);
@@ -106,12 +104,12 @@ std::optional<std::string> pragma::util::screenshot(CGame &game)
 		// Just use the last rendered image
 		auto *renderer = scene ? dynamic_cast<CRendererComponent *>(scene->GetRenderer<CRendererComponent>()) : nullptr;
 		if(renderer == nullptr) {
-			Con::cwar << "No scene renderer found!" << Con::endl;
+			Con::CWAR << "No scene renderer found!" << Con::endl;
 			return {};
 		}
 		auto rasterC = renderer->GetEntity().GetComponent<CRasterizationRendererComponent>();
 		if(rasterC.expired()) {
-			Con::cwar << "No rasterization renderer found!" << Con::endl;
+			Con::CWAR << "No rasterization renderer found!" << Con::endl;
 			return {};
 		}
 
@@ -127,7 +125,7 @@ std::optional<std::string> pragma::util::screenshot(CGame &game)
 			break;
 		}
 		if(rt == nullptr) {
-			Con::cwar << "Scene render target is invalid!" << Con::endl;
+			Con::CWAR << "Scene render target is invalid!" << Con::endl;
 			return {};
 		}
 		get_cengine()->GetRenderContext().WaitIdle(); // Make sure rendering is complete
@@ -153,14 +151,14 @@ std::optional<std::string> pragma::util::screenshot(CGame &game)
 		get_cengine()->GetRenderContext().SubmitCommandBuffer(*cmdBuffer, true);
 	}
 	if(bufScreenshot == nullptr) {
-		Con::cwar << "Failed to create screenshot image buffer!" << Con::endl;
+		Con::CWAR << "Failed to create screenshot image buffer!" << Con::endl;
 		return {};
 	}
 	auto imgFormat = image::ImageFormat::PNG;
 	auto path = get_screenshot_name(&game, imgFormat);
 	auto fp = fs::open_file<fs::VFilePtrReal>(path, fs::FileMode::Write | fs::FileMode::Binary);
 	if(fp == nullptr) {
-		Con::cwar << "Failed to open image output file '" << path << "' for writing!" << Con::endl;
+		Con::CWAR << "Failed to open image output file '" << path << "' for writing!" << Con::endl;
 		return {};
 	}
 	auto format = imgScreenshot->GetFormat();

@@ -413,7 +413,7 @@ export {
 					el = elLua;
 				}
 				else {
-					Con::csv << "WARNING: Unable to create lua entity '" << classname << "': Lua class is not derived from valid entity base!" << Con::endl;
+					Con::CSV << "WARNING: Unable to create lua entity '" << classname << "': Lua class is not derived from valid entity base!" << Con::endl;
 					return nullptr;
 				}
 #ifndef LUABIND_NO_EXCEPTIONS
@@ -424,7 +424,7 @@ export {
 			}
 #endif
 			if(!el) {
-				Con::cwar << "Unable to create lua entity '" << classname << "'!" << Con::endl;
+				Con::CWAR << "Unable to create lua entity '" << classname << "'!" << Con::endl;
 				return nullptr;
 			}
 			oClass = *o;
@@ -452,7 +452,7 @@ export {
 					el = elLua;
 				}
 				else {
-					Con::csv << "WARNING: Unable to create lua entity component '" << classname << "': Lua class is not derived from valid entity component base!" << Con::endl;
+					Con::CSV << "WARNING: Unable to create lua entity component '" << classname << "': Lua class is not derived from valid entity component base!" << Con::endl;
 					return nullptr;
 				}
 #ifndef LUABIND_NO_EXCEPTIONS
@@ -463,7 +463,7 @@ export {
 			}
 #endif
 			if(!r) {
-				Con::cwar << "Unable to create lua entity component '" << classname << "'!" << Con::endl;
+				Con::CWAR << "Unable to create lua entity component '" << classname << "'!" << Con::endl;
 				return nullptr;
 			}
 			return el;

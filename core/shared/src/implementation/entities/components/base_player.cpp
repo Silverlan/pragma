@@ -77,7 +77,7 @@ bool BasePlayerComponent::CanUnCrouch() const
 	auto *game = nw->GetGameState();
 	auto data = charComponent.GetAimTraceData();
 	data.SetSource(colPos);
-	data.SetTarget(colPos + (pTrComponent ? pTrComponent->GetUp() : uvec::UP) * 0.001f); // Target position musn't be the same as the source position, otherwise the trace will never detect a hit
+	data.SetTarget(colPos + (pTrComponent ? pTrComponent->GetUp() : uvec::PRM_UP) * 0.001f); // Target position musn't be the same as the source position, otherwise the trace will never detect a hit
 	data.SetShape(*m_shapeStand);
 	return game->Sweep(data).hitType == physics::RayCastHitType::None; // Overlap only works with collision objects, not with individual shapes, so we have to use Sweep instead
 }
@@ -601,7 +601,7 @@ Vector3 BasePlayerComponent::GetViewPos() const
 		return GetEntity().GetPosition();
 	auto viewOffset = m_observableComponent->GetViewOffset();
 	auto charComponent = GetEntity().GetCharacterComponent();
-	auto upDir = uvec::UP;
+	auto upDir = uvec::PRM_UP;
 	if(charComponent.valid()) {
 		auto *orientC = charComponent->GetOrientationComponent();
 		if(orientC)

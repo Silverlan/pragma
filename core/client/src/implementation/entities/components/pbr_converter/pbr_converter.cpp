@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :entities.components.util_pbr_converter;
@@ -169,7 +167,7 @@ bool CPBRConverterComponent::ConvertToPBR(material::CMaterial &matTraditional)
 	if(!matTraditional.HasPropertyBlock("rma_info"))
 		return false;
 	auto resWatcherLock = get_cengine()->ScopeLockResourceWatchers();
-	Con::cout << "Converting material '" << matTraditional.GetName() << "' to PBR..." << Con::endl;
+	Con::COUT << "Converting material '" << matTraditional.GetName() << "' to PBR..." << Con::endl;
 	m_convertedMaterials.insert(matTraditional.GetName());
 	auto &setupCmd = get_cengine()->GetSetupCommandBuffer();
 
@@ -283,7 +281,7 @@ bool CPBRConverterComponent::ConvertToPBR(material::CMaterial &matTraditional)
 	if(matTraditional.Save(savePath.GetString(), err, true))
 		client->LoadMaterial(matName, nullptr, true, true); // Reload material immediately
 	static_cast<material::CMaterialManager &>(client->GetMaterialManager()).GetTextureManager().ClearUnused();
-	// Con::cout<<"Conversion complete!"<<Con::endl;
+	// Con::COUT<<"Conversion complete!"<<Con::endl;
 	return true;
 }
 std::shared_ptr<prosper::Texture> CPBRConverterComponent::ConvertSpecularMapToRoughness(prosper::Texture &specularMap)
@@ -293,7 +291,7 @@ std::shared_ptr<prosper::Texture> CPBRConverterComponent::ConvertSpecularMapToRo
 		return nullptr;
 	auto &setupCmd = get_cengine()->GetSetupCommandBuffer();
 	// Specular descriptor set
-	auto dsgSpecular = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(shaderSpecularToRoughness::DESCRIPTOR_SET_TEXTURE);
+	auto dsgSpecular = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(shaderSpecularToRoughness::get_descriptor_set_texture());
 	dsgSpecular->GetDescriptorSet()->SetBindingTexture(specularMap, 0u);
 
 	// Initialize roughness image

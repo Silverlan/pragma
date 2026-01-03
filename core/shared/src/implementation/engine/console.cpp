@@ -182,7 +182,7 @@ void pragma::Engine::ProcessConsoleInput(KeyState pressState)
 
 		console::set_console_color(console::ConsoleColorFlags::White | console::ConsoleColorFlags::Intensity);
 		if(inputInfo.printLine)
-			Con::cout << "> " << inputInfo.line << Con::endl;
+			Con::COUT << "> " << inputInfo.line << Con::endl;
 		console::reset_console_color();
 		ProcessConsoleInput(inputInfo.line, pressState);
 
@@ -235,14 +235,14 @@ bool pragma::Engine::RunConsoleCommand(std::string cmd, std::vector<std::string>
 	if(stateSv == nullptr)
 		return RunEngineConsoleCommand(cmd, argv, pressState, magnitude, callback);
 	if(stateSv == nullptr || !stateSv->RunConsoleCommand(cmd, argv, nullptr, pressState, magnitude, callback)) {
-		Con::cwar << "Unknown console command '" << cmd << "'!" << Con::endl;
+		Con::CWAR << "Unknown console command '" << cmd << "'!" << Con::endl;
 		auto similar = (stateSv != nullptr) ? stateSv->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
 		if(similar.empty() == true)
-			Con::cout << "No similar matches found!" << Con::endl;
+			Con::COUT << "No similar matches found!" << Con::endl;
 		else {
-			Con::cout << "Were you looking for one of the following?" << Con::endl;
+			Con::COUT << "Were you looking for one of the following?" << Con::endl;
 			for(auto &sim : similar)
-				Con::cout << "- " << sim << Con::endl;
+				Con::COUT << "- " << sim << Con::endl;
 		}
 		return false;
 	}

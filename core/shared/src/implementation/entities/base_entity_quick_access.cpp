@@ -222,17 +222,17 @@ pragma::physics::CollisionMask pragma::ecs::BaseEntity::GetCollisionFilterMask()
 Vector3 pragma::ecs::BaseEntity::GetForward() const
 {
 	auto trC = GetTransformComponent();
-	return trC ? trC->GetForward() : uvec::FORWARD;
+	return trC ? trC->GetForward() : uvec::PRM_FORWARD;
 }
 Vector3 pragma::ecs::BaseEntity::GetUp() const
 {
 	auto trC = GetTransformComponent();
-	return trC ? trC->GetUp() : uvec::UP;
+	return trC ? trC->GetUp() : uvec::PRM_UP;
 }
 Vector3 pragma::ecs::BaseEntity::GetRight() const
 {
 	auto trC = GetTransformComponent();
-	return trC ? trC->GetRight() : uvec::RIGHT;
+	return trC ? trC->GetRight() : uvec::PRM_RIGHT;
 }
 
 void pragma::ecs::BaseEntity::Input(const std::string &input, BaseEntity *activator, BaseEntity *caller, const std::string &data)

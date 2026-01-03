@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.server;
 import :scripting.lua.libraries.ai;
 
@@ -48,8 +46,8 @@ void Lua::ai::server::register_library(Interface &lua)
 	    {"TASK_MOVE_TO_TARGET", pragma::math::to_integral(pragma::ai::Task::MoveToTarget)}, {"TASK_PLAY_ANIMATION", pragma::math::to_integral(pragma::ai::Task::PlayAnimation)}, {"TASK_PLAY_ACTIVITY", pragma::math::to_integral(pragma::ai::Task::PlayActivity)},
 	    {"TASK_PLAY_LAYERED_ANIMATION", pragma::math::to_integral(pragma::ai::Task::PlayLayeredAnimation)}, {"TASK_PLAY_LAYERED_ACTIVITY", pragma::math::to_integral(pragma::ai::Task::PlayLayeredActivity)}, {"TASK_MOVE_RANDOM", pragma::math::to_integral(pragma::ai::Task::MoveRandom)},
 	    {"TASK_PLAY_SOUND", pragma::math::to_integral(pragma::ai::Task::PlaySound)}, {"TASK_DEBUG_PRINT", pragma::math::to_integral(pragma::ai::Task::DebugPrint)}, {"TASK_DEBUG_DRAW_TEXT", pragma::math::to_integral(pragma::ai::Task::DebugDrawText)},
-	    {"TASK_DECORATOR", pragma::math::to_integral(pragma::ai::Task::Decorator)}, {"TASK_WAIT", pragma::math::to_integral(pragma::ai::Task::Wait)}, {"TASK_TURN_TO_TARGET", pragma::math::to_integral(pragma::ai::Task::TurnToTarget)}, {"TASK_RANDOM", pragma::math::to_integral(pragma::ai::Task::Random)},
-	    {"TASK_LOOK_AT_TARGET", pragma::math::to_integral(pragma::ai::Task::LookAtTarget)}, {"TASK_EVENT", pragma::math::to_integral(pragma::ai::Task::Event)},
+	    {"TASK_DECORATOR", pragma::math::to_integral(pragma::ai::Task::Decorator)}, {"TASK_WAIT", pragma::math::to_integral(pragma::ai::Task::Wait)}, {"TASK_TURN_TO_TARGET", pragma::math::to_integral(pragma::ai::Task::TurnToTarget)},
+	    {"TASK_RANDOM", pragma::math::to_integral(pragma::ai::Task::Random)}, {"TASK_LOOK_AT_TARGET", pragma::math::to_integral(pragma::ai::Task::LookAtTarget)}, {"TASK_EVENT", pragma::math::to_integral(pragma::ai::Task::Event)},
 
 	    {"MOVE_STATE_TARGET_UNREACHABLE", pragma::math::to_integral(pragma::SAIComponent::MoveResult::TargetUnreachable)}, {"MOVE_STATE_TARGET_REACHED", pragma::math::to_integral(pragma::SAIComponent::MoveResult::TargetReached)},
 	    {"MOVE_STATE_WAITING_FOR_PATH", pragma::math::to_integral(pragma::SAIComponent::MoveResult::WaitingForPath)}, {"MOVE_STATE_MOVING_TO_TARGET", pragma::math::to_integral(pragma::SAIComponent::MoveResult::MovingToTarget)}});
@@ -188,7 +186,7 @@ std::shared_ptr<pragma::ai::BehaviorNode> Lua::ai::server::create_lua_task(lua::
 	}
 #endif
 	if(!r) {
-		Con::cwar << Con::PREFIX_SERVER << "Unable to create lua AI Task!" << Con::endl;
+		Con::CWAR << Con::PREFIX_SERVER << "Unable to create lua AI Task!" << Con::endl;
 		return nullptr;
 	}
 	auto *ptr = luabind::object_cast_nothrow<AILuaBehaviorNodeWrapper *>(r, static_cast<AILuaBehaviorNodeWrapper *>(nullptr));
@@ -198,7 +196,7 @@ std::shared_ptr<pragma::ai::BehaviorNode> Lua::ai::server::create_lua_task(lua::
 		luaNode.SetLuaClass(oClass);
 		return std::static_pointer_cast<pragma::ai::BehaviorNode>(luaNode.shared_from_this());
 	}
-	Con::cwar << Con::PREFIX_SERVER << "Unable to create lua AI Task: Lua class is not derived from valid AI Task base!" << Con::endl;
+	Con::CWAR << Con::PREFIX_SERVER << "Unable to create lua AI Task: Lua class is not derived from valid AI Task base!" << Con::endl;
 	return nullptr;
 }
 

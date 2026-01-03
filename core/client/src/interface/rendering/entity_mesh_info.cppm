@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:rendering.entity_mesh_info;
 
 export import :model.mesh;
@@ -16,7 +12,7 @@ export namespace pragma::ecs {
 }
 export namespace pragma::rendering {
 	class DLLCLIENT EntityMeshInfo {
-	public:
+	  public:
 		EntityMeshInfo(ecs::CBaseEntity *ent) : entity(ent) {};
 		EntityMeshInfo(const EntityMeshInfo &) = delete;
 		EntityMeshInfo(EntityMeshInfo &&) = default;

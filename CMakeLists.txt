@@ -1,10 +1,38 @@
 cmake_minimum_required(VERSION 3.3)
 
 message(STATUS "CMake version: ${CMAKE_VERSION}")
+
+if(CMAKE_GENERATOR MATCHES "Visual Studio.*2026")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio 2026 is not supported).")
+endif()
+if(CMAKE_GENERATOR MATCHES "Visual Studio.*2022")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio 2022 is not supported).")
+endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (clang-cl is not supported).")
+endif()
+
 # Required for "import std;" as long as its experimental in CMake
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_MODULE_STD 1)
+
+# Use response files to avoid "The command line is too long." errors
+set(CMAKE_ASM_USE_RESPONSE_FILE_FOR_INCLUDES 1)
+set(CMAKE_C_USE_RESPONSE_FILE_FOR_INCLUDES 1)
+set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES 1)
+
+set(CMAKE_ASM_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+set(CMAKE_C_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+
+set(CMAKE_ASM_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
+set(CMAKE_C_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
+set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
+
+if ("${CMAKE_GENERATOR}" MATCHES "Ninja")
+    set(CMAKE_NINJA_FORCE_RESPONSE_FILE TRUE CACHE BOOL "Force Ninja to use response files for long command lines")
+endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/pr_legacy.cmake)

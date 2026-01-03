@@ -37,8 +37,8 @@ export {
 
 	namespace Con {
 		namespace detail {
-			extern DLLNETWORK std::atomic<pragma::util::LogSeverity> currentLevel;
-			extern DLLNETWORK std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> outputCallback;
+			DLLNETWORK std::atomic<pragma::util::LogSeverity> &get_current_level();
+			DLLNETWORK std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> &get_output_callback();
 		};
 		class DLLNETWORK c_cout {};
 		class DLLNETWORK c_cwar {};
@@ -53,12 +53,21 @@ export {
 		};
 		class DLLNETWORK c_csv {};
 		class DLLNETWORK c_ccl {};
-		extern DLLNETWORK c_cout cout;
-		extern DLLNETWORK c_cwar cwar;
-		extern DLLNETWORK c_cerr cerr;
-		extern DLLNETWORK c_crit crit;
-		extern DLLNETWORK c_csv csv;
-		extern DLLNETWORK c_ccl ccl;
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+		DLLNETWORK c_cout &COUT;
+		DLLNETWORK c_cwar &CWAR;
+		DLLNETWORK c_cerr &CERR;
+		DLLNETWORK c_crit &CRIT;
+		DLLNETWORK c_csv &CSV;
+		DLLNETWORK c_ccl &CCL;
+#else
+		extern DLLNETWORK c_cout COUT;
+		extern DLLNETWORK c_cwar CWAR;
+		extern DLLNETWORK c_cerr CERR;
+		extern DLLNETWORK c_crit CRIT;
+		extern DLLNETWORK c_csv CSV;
+		extern DLLNETWORK c_ccl CCL;
+#endif
 		DLLNETWORK std::basic_ostream<char, std::char_traits<char>> &endl(std::basic_ostream<char, std::char_traits<char>> &os);
 		DLLNETWORK std::basic_ostream<char, std::char_traits<char>> &prefix(std::basic_ostream<char, std::char_traits<char>> &os);
 		DLLNETWORK void flush();
@@ -84,6 +93,24 @@ export {
 			outputCallback(ss.str(), flags, color.has_value() ? &(*color) : nullptr);
 		}
 
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+		DLLNETWORK const std::string &GET_COLOR_WARNING();
+		DLLNETWORK const std::string &GET_COLOR_ERROR();
+		DLLNETWORK const std::string &GET_COLOR_CRITICAL();
+		DLLNETWORK const std::string &GET_COLOR_SERVER();
+		DLLNETWORK const std::string &GET_COLOR_CLIENT();
+		DLLNETWORK const std::string &GET_COLOR_LUA();
+		DLLNETWORK const std::string &GET_COLOR_GUI();
+		DLLNETWORK const std::string &GET_COLOR_RESET();
+
+		DLLNETWORK std::string &GET_PREFIX_WARNING();
+		DLLNETWORK std::string &GET_PREFIX_ERROR();
+		DLLNETWORK std::string &GET_PREFIX_CRITICAL();
+		DLLNETWORK std::string &GET_PREFIX_SERVER();
+		DLLNETWORK std::string &GET_PREFIX_CLIENT();
+		DLLNETWORK std::string &GET_PREFIX_LUA();
+		DLLNETWORK std::string &GET_PREFIX_GUI();
+#else
 		DLLNETWORK extern const std::string COLOR_WARNING;
 		DLLNETWORK extern const std::string COLOR_ERROR;
 		DLLNETWORK extern const std::string COLOR_CRITICAL;
@@ -100,35 +127,38 @@ export {
 		DLLNETWORK extern std::string PREFIX_CLIENT;
 		DLLNETWORK extern std::string PREFIX_LUA;
 		DLLNETWORK extern std::string PREFIX_GUI;
+#endif
 		using namespace pragma::math::scoped_enum::bitwise;
 	};
 	REGISTER_ENUM_FLAGS(pragma::console::MessageFlags)
 
 	namespace pragma::logging::detail {
 		enum class Type : uint8_t { None = 0, Info, Warn, Err, Crit };
-		extern DLLNETWORK std::atomic<bool> shouldLogOutput;
-		extern DLLNETWORK std::mutex logOutputMutex;
-		extern DLLNETWORK std::stringstream logOutput;
-		extern DLLNETWORK Type type;
+		DLLNETWORK bool should_log_output();
+		DLLNETWORK void set_should_log_output(bool shouldLogOutput);
+		DLLNETWORK std::mutex &get_log_output_mutex();
+		DLLNETWORK std::stringstream &get_log_output_stream();
+		DLLNETWORK Type get_log_output_type();
+		DLLNETWORK void set_log_output_type(Type type);
 	};
 
 #define PRAGMA_DETAIL_LOG_OUTPUT(v, etype)                                                                                                                                                                                                                                                       \
-	if(pragma::logging::detail::shouldLogOutput) {                                                                                                                                                                                                                                               \
-		pragma::logging::detail::logOutputMutex.lock();                                                                                                                                                                                                                                          \
-		pragma::logging::detail::type = etype;                                                                                                                                                                                                                                                   \
-		pragma::logging::detail::logOutput << v;                                                                                                                                                                                                                                                 \
-		pragma::logging::detail::logOutputMutex.unlock();                                                                                                                                                                                                                                        \
+	if(pragma::logging::detail::should_log_output()) {                                                                                                                                                                                                                                               \
+		pragma::logging::detail::get_log_output_mutex().lock();                                                                                                                                                                                                                                          \
+		pragma::logging::detail::set_log_output_type(etype);                                                                                                                                                                                                                                                   \
+		pragma::logging::detail::get_log_output_stream() << v;                                                                                                                                                                                                                                                 \
+		pragma::logging::detail::get_log_output_mutex().unlock();                                                                                                                                                                                                                                        \
 	}
 
 #define PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(v, type)                                                                                                                                                                                                                                    \
-	if(Con::detail::outputCallback != nullptr)                                                                                                                                                                                                                                                   \
+	if(Con::detail::get_output_callback() != nullptr)                                                                                                                                                                                                                                                   \
 		Con::invoke_output_callback(v, type);
 
 	// c_cout
 	template<class T>
 	inline Con::c_cout &operator<<(Con::c_cout &con, const T &t)
 	{
-		Con::detail::currentLevel = pragma::util::LogSeverity::Info;
+		Con::detail::get_current_level() = pragma::util::LogSeverity::Info;
 		std::cout << t;
 		PRAGMA_DETAIL_LOG_OUTPUT(t, pragma::logging::detail::Type::Info)
 		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, pragma::console::MessageFlags::Generic);
@@ -142,8 +172,8 @@ export {
 	template<class T>
 	Con::c_cwar &operator<<(Con::c_cwar &con, const T &t)
 	{
-		if(Con::detail::currentLevel == pragma::util::LogSeverity::Disabled) {
-			Con::detail::currentLevel = pragma::util::LogSeverity::Warning;
+		if(Con::detail::get_current_level() == pragma::util::LogSeverity::Disabled) {
+			Con::detail::get_current_level() = pragma::util::LogSeverity::Warning;
 			std::cout << Con::PREFIX_WARNING << Con::prefix;
 		}
 
@@ -160,8 +190,8 @@ export {
 	template<class T>
 	Con::c_cerr &operator<<(Con::c_cerr &con, const T &t)
 	{
-		if(Con::detail::currentLevel == pragma::util::LogSeverity::Disabled) {
-			Con::detail::currentLevel = pragma::util::LogSeverity::Error;
+		if(Con::detail::get_current_level() == pragma::util::LogSeverity::Disabled) {
+			Con::detail::get_current_level() = pragma::util::LogSeverity::Error;
 			std::cout << Con::PREFIX_ERROR << Con::prefix;
 		}
 
@@ -178,9 +208,9 @@ export {
 	template<class T>
 	Con::c_crit &operator<<(Con::c_crit &con, const T &t)
 	{
-		Con::crit.m_bActivated = true;
-		if(Con::detail::currentLevel == pragma::util::LogSeverity::Disabled) {
-			Con::detail::currentLevel = pragma::util::LogSeverity::Critical;
+		Con::CRIT.m_bActivated = true;
+		if(Con::detail::get_current_level() == pragma::util::LogSeverity::Disabled) {
+			Con::detail::get_current_level() = pragma::util::LogSeverity::Critical;
 			std::cout << Con::PREFIX_CRITICAL << Con::prefix;
 		}
 
@@ -197,18 +227,18 @@ export {
 	template<class T>
 	Con::c_csv &operator<<(Con::c_csv &con, const T &t)
 	{
-		if(Con::detail::currentLevel == pragma::util::LogSeverity::Disabled) {
-			Con::detail::currentLevel = pragma::util::LogSeverity::Info;
+		if(Con::detail::get_current_level() == pragma::util::LogSeverity::Disabled) {
+			Con::detail::get_current_level() = pragma::util::LogSeverity::Info;
 			std::cout << Con::PREFIX_SERVER << Con::prefix;
 		}
 		std::cout << t;
-		if(pragma::logging::detail::shouldLogOutput) {
-			pragma::logging::detail::logOutputMutex.lock();
-			if(pragma::logging::detail::type == pragma::logging::detail::Type::None)
-				pragma::logging::detail::logOutput << Con::PREFIX_SERVER << Con::prefix;
-			pragma::logging::detail::type = pragma::logging::detail::Type::Info;
-			pragma::logging::detail::logOutput << t;
-			pragma::logging::detail::logOutputMutex.unlock();
+		if(pragma::logging::detail::should_log_output()) {
+			pragma::logging::detail::get_log_output_mutex().lock();
+			if(pragma::logging::detail::get_log_output_type() == pragma::logging::detail::Type::None)
+				pragma::logging::detail::get_log_output_stream() << Con::PREFIX_SERVER << Con::prefix;
+			pragma::logging::detail::set_log_output_type(pragma::logging::detail::Type::Info);
+			pragma::logging::detail::get_log_output_stream() << t;
+			pragma::logging::detail::get_log_output_mutex().unlock();
 		}
 		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, pragma::console::MessageFlags::ServerSide);
 		return con;
@@ -221,18 +251,18 @@ export {
 	template<class T>
 	Con::c_ccl &operator<<(Con::c_ccl &con, const T &t)
 	{
-		if(Con::detail::currentLevel == pragma::util::LogSeverity::Disabled) {
-			Con::detail::currentLevel = pragma::util::LogSeverity::Info;
+		if(Con::detail::get_current_level() == pragma::util::LogSeverity::Disabled) {
+			Con::detail::get_current_level() = pragma::util::LogSeverity::Info;
 			std::cout << Con::PREFIX_CLIENT << Con::prefix;
 		}
 		std::cout << t;
-		if(pragma::logging::detail::shouldLogOutput) {
-			pragma::logging::detail::logOutputMutex.lock();
-			if(pragma::logging::detail::type == pragma::logging::detail::Type::None)
-				pragma::logging::detail::logOutput << Con::PREFIX_CLIENT << Con::prefix;
-			pragma::logging::detail::type = pragma::logging::detail::Type::Info;
-			pragma::logging::detail::logOutput << t;
-			pragma::logging::detail::logOutputMutex.unlock();
+		if(pragma::logging::detail::should_log_output()) {
+			pragma::logging::detail::get_log_output_mutex().lock();
+			if(pragma::logging::detail::get_log_output_type() == pragma::logging::detail::Type::None)
+				pragma::logging::detail::get_log_output_stream() << Con::PREFIX_CLIENT << Con::prefix;
+			pragma::logging::detail::set_log_output_type(pragma::logging::detail::Type::Info);
+			pragma::logging::detail::get_log_output_stream() << t;
+			pragma::logging::detail::get_log_output_mutex().unlock();
 		}
 		PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t, pragma::console::MessageFlags::ClientSide);
 		return con;

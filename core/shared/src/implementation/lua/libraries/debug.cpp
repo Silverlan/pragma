@@ -29,26 +29,26 @@ int Lua::debug::collectgarbage(lua::State *l)
 void Lua::debug::stackdump(lua::State *l)
 {
 	int top = lua::get_top(l);
-	Con::cout << "Total in stack: " << top << Con::endl;
+	Con::COUT << "Total in stack: " << top << Con::endl;
 	for(int i = 1; i <= top; i++) {
 		auto t = lua::type(l, i);
 		switch(t) {
 		case lua::Type::String:
-			Con::cout << "string: " << lua::to_string(l, i) << Con::endl;
+			Con::COUT << "string: " << lua::to_string(l, i) << Con::endl;
 			break;
 		case lua::Type::Boolean:
-			Con::cout << "boolean: " << (lua::to_boolean(l, i) ? "true" : "false") << Con::endl;
+			Con::COUT << "boolean: " << (lua::to_boolean(l, i) ? "true" : "false") << Con::endl;
 			break;
 		case lua::Type::Number:
-			Con::cout << "number: " << lua::to_number(l, i) << Con::endl;
+			Con::COUT << "number: " << lua::to_number(l, i) << Con::endl;
 			break;
 		default:
-			Con::cout << lua::type_name(l, t) << Con::endl;
+			Con::COUT << lua::type_name(l, t) << Con::endl;
 			break;
 		}
 	}
 	if(top > 0)
-		Con::cout << Con::endl;
+		Con::COUT << Con::endl;
 }
 
 void Lua::debug::beep(lua::State *l)
@@ -88,7 +88,7 @@ std::string Lua::debug::move_state_to_string(lua::State *l, pragma::BaseAICompon
 void Lua::debug::enable_remote_debugging(lua::State *l)
 {
 	if(get_extended_lua_modules_enabled() == false) {
-		Con::cwar << "Unable to enable remote debugging: Game has to be started with -luaext launch parameter!" << Con::endl;
+		Con::CWAR << "Unable to enable remote debugging: Game has to be started with -luaext launch parameter!" << Con::endl;
 		return;
 	}
 
@@ -102,5 +102,5 @@ void Lua::debug::enable_remote_debugging(lua::State *l)
 		Pop(l, 1); // Pop return value of "require" from stack
 	}
 	if(r != StatusCode::Ok)
-		Con::cwar << "Unable to enable remote debugging:\n" << errMsg << Con::endl;
+		Con::CWAR << "Unable to enable remote debugging:\n" << errMsg << Con::endl;
 }

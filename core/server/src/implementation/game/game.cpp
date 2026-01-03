@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include <cassert>
 
 module pragma.server;
@@ -141,7 +140,7 @@ void pragma::SGame::SetUp()
 	auto *entGame = CreateEntity("game");
 	assert(entGame != nullptr);
 	if(entGame == nullptr) {
-		Con::crit << "Unable to create game entity!" << Con::endl;
+		Con::CRIT << "Unable to create game entity!" << Con::endl;
 		// Unreachable
 	}
 	m_entGame = entGame->GetHandle();
@@ -212,7 +211,7 @@ void pragma::SGame::Tick()
 			auto &globalName = globalComponent->GetGlobalName();
 			auto it = worldState.find(globalName);
 			if(it != worldState.end()) {
-				Con::cwar << "More than one entity found with global name '" << globalName << "'! This may cause issues." << Con::endl;
+				Con::CWAR << "More than one entity found with global name '" << globalName << "'! This may cause issues." << Con::endl;
 				continue;
 			}
 			auto prop = udm::Property::Create<udm::Element>();
@@ -280,7 +279,7 @@ void pragma::SGame::InitializeLuaScriptWatcher() { m_scriptWatcher = std::make_u
 
 void pragma::SGame::RegisterGameResource(const std::string &fileName)
 {
-	//Con::csv<<"RegisterGameResource: "<<fileName<<Con::endl;
+	//Con::CSV<<"RegisterGameResource: "<<fileName<<Con::endl;
 	auto fName = fs::get_canonicalized_path(fileName);
 	if(IsValidGameResource(fileName) == true)
 		return;
@@ -337,7 +336,7 @@ void pragma::SGame::GenerateLuaCache()
 {
 	auto &resources = networking::ResourceManager::GetResources();
 	fs::create_path("cache/" + Lua::SCRIPT_DIRECTORY);
-	Con::csv << "Generating lua cache..." << Con::endl;
+	Con::CSV << "Generating lua cache..." << Con::endl;
 	for(auto &res : resources) {
 		auto &fName = res.fileName;
 		std::string ext;
@@ -472,19 +471,19 @@ void pragma::SGame::ReceiveUserInfo(networking::IServerClient &session, NetPacke
 	auto plVersion = packet->Read<util::Version>();
 	auto version = get_engine_version();
 	if(version != plVersion) {
-		Con::csv << "Client " << session.GetIdentifier() << " has a different engine version (" << plVersion.ToString() << ") from server's. Dropping client..." << Con::endl;
+		Con::CSV << "Client " << session.GetIdentifier() << " has a different engine version (" << plVersion.ToString() << ") from server's. Dropping client..." << Con::endl;
 		ServerState::Get()->DropClient(session, networking::DropReason::Kicked);
 		return;
 	}
 
 	auto *plEnt = CreateEntity<Player>();
 	if(plEnt == nullptr) {
-		Con::csv << "Unable to create player entity for client " << session.GetIdentifier() << ". Dropping client..." << Con::endl;
+		Con::CSV << "Unable to create player entity for client " << session.GetIdentifier() << ". Dropping client..." << Con::endl;
 		ServerState::Get()->DropClient(session, networking::DropReason::Kicked);
 		return;
 	}
 	if(plEnt->IsPlayer() == false) {
-		Con::csv << "Unable to create player component for client " << session.GetIdentifier() << ". Dropping client..." << Con::endl;
+		Con::CSV << "Unable to create player component for client " << session.GetIdentifier() << ". Dropping client..." << Con::endl;
 		plEnt->RemoveSafely();
 		ServerState::Get()->DropClient(session, networking::DropReason::Kicked);
 		return;
@@ -520,9 +519,9 @@ void pragma::SGame::ReceiveUserInfo(networking::IServerClient &session, NetPacke
 		OnClientConVarChanged(*pl, cmd, val);
 	}
 
-	Con::csv << "Player " << *plEnt << " authenticated." << Con::endl;
+	Con::CSV << "Player " << *plEnt << " authenticated." << Con::endl;
 	//unsigned char clPlIdx = pl->GetIndex();
-	Con::csv << "Sending Game Information..." << Con::endl;
+	Con::CSV << "Sending Game Information..." << Con::endl;
 
 	networking::ClientRecipientFilter rp {*pl->GetClientSession()};
 
@@ -692,7 +691,7 @@ void pragma::SGame::HandleLuaNetPacket(networking::IServerClient &session, NetPa
 		return;
 	std::unordered_map<std::string, int>::iterator i = m_luaNetMessages.find(*ident);
 	if(i == m_luaNetMessages.end()) {
-		Con::cwar << Con::PREFIX_SERVER << "Unhandled lua net message: " << *ident << Con::endl;
+		Con::CWAR << Con::PREFIX_SERVER << "Unhandled lua net message: " << *ident << Con::endl;
 		return;
 	}
 	ProtectedLuaCall(

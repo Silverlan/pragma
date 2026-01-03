@@ -153,7 +153,7 @@ static std::optional<std::pair<uint32_t, uint32_t>> find_index_range_in_time_ran
 	return std::pair<uint32_t, uint32_t> {startIndex, endIndex};
 }
 
-#ifdef __linux__
+#ifdef __clang__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, TimeFrame);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, ChannelPath);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, Channel);
@@ -348,7 +348,7 @@ void Lua::animation::register_library(Interface &lua)
 		  channel.Save(udmData);
 		  std::stringstream ss;
 		  data->ToAscii(ss, ::udm::AsciiSaveFlags::Default | ::udm::AsciiSaveFlags::DontCompressLz4Arrays);
-		  Con::cout << ss.str() << Con::endl;
+		  Con::COUT << ss.str() << Con::endl;
 	  });
 	cdChannel.def(
 	  "PopulateRandom", +[](panima::Channel &channel, uint32_t numValues, float minTime, float maxTime, float minVal, float maxVal) {

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 export module pragma.client:math.mvp_bias;
 
 export import pragma.math;
@@ -60,7 +58,7 @@ export namespace pragma::math {
 		virtual void UpdateTransformationMatrix(unsigned int j) override
 		{
 			MVPBase<i>::UpdateTransformationMatrix(j);
-			m_matBiasTransformation[j] = umat::BIAS * MVPBase<i>::m_matTransformation[j];
+			m_matBiasTransformation[j] = umat::PRM_BIAS * MVPBase<i>::m_matTransformation[j];
 		}
 	  public:
 		Mat4 &GetBiasTransformationMatrix() { return m_matBiasTransformation[0]; }

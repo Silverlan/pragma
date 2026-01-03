@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.server;
 import :entities.base;
 
@@ -181,7 +179,7 @@ Bool SBaseEntity::ReceiveNetEvent(pragma::BasePlayerComponent &pl, pragma::NetEv
 		if(pNetComponent->ReceiveNetEvent(pl, eventId, packet))
 			return true;
 	}
-	Con::cwar << Con::PREFIX_SERVER << "Unhandled net event '" << eventId << "' for entity " << GetClass() << Con::endl;
+	Con::CWAR << Con::PREFIX_SERVER << "Unhandled net event '" << eventId << "' for entity " << GetClass() << Con::endl;
 	return false;
 }
 

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :client_state;
@@ -17,7 +15,7 @@ void pragma::ClientState::SendPacket(const std::string &name, NetPacket &packet,
 	packet.SetMessageID(ID);
 	networking::Error err;
 	if(m_client->SendPacket(protocol, packet, err) == false)
-		Con::cwar << "Unable to send packet '" << name << "': " << err.GetMessage() << Con::endl;
+		Con::CWAR << "Unable to send packet '" << name << "': " << err.GetMessage() << Con::endl;
 }
 void pragma::ClientState::SendPacket(const std::string &name, NetPacket &packet) { SendPacket(name, packet, networking::Protocol::FastUnreliable); }
 void pragma::ClientState::SendPacket(const std::string &name, networking::Protocol protocol)

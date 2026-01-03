@@ -21,7 +21,6 @@ bool BoneMergeComponent::can_merge(const asset::Model &mdl, const asset::Model &
 	return false;
 }
 
-ComponentEventId boneMergeComponent::EVENT_ON_TARGET_CHANGED = INVALID_COMPONENT_ID;
 void BoneMergeComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { boneMergeComponent::EVENT_ON_TARGET_CHANGED = registerEvent("ON_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void BoneMergeComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {

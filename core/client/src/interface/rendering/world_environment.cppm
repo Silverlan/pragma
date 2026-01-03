@@ -1,21 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:rendering.world_environment;
 
 export import pragma.shared;
 
 export namespace pragma::rendering {
 	class DLLCLIENT WorldEnvironment : public std::enable_shared_from_this<WorldEnvironment> {
-	public:
+	  public:
 		static std::shared_ptr<WorldEnvironment> Create();
 
 		class DLLCLIENT Fog {
-		public:
+		  public:
 			Fog();
 
 			void SetColor(const Color &col);
@@ -46,7 +42,7 @@ export namespace pragma::rendering {
 			void SetRange(const Vector2 &range);
 			void SetRange(float start, float end);
 			float GetFarDistance() const;
-		private:
+		  private:
 			std::shared_ptr<util::ColorProperty> m_color;
 			std::shared_ptr<util::FloatProperty> m_start;
 			std::shared_ptr<util::FloatProperty> m_end;
@@ -68,7 +64,7 @@ export namespace pragma::rendering {
 		const std::shared_ptr<util::UInt32Property> &GetShadowResolutionProperty() const;
 
 		Fog &GetFogSettings();
-	protected:
+	  protected:
 		WorldEnvironment();
 		std::shared_ptr<util::Int32Property> m_shaderQuality;
 		std::shared_ptr<util::BoolProperty> m_bUnlit;

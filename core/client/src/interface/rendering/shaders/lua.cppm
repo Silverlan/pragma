@@ -1,12 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
-#undef DrawState
-
 export module pragma.client:rendering.shaders.lua;
 
 export import pragma.gui;
@@ -14,6 +8,8 @@ export import :rendering.shaders.base;
 export import :rendering.shaders.particle_2d_base;
 export import :rendering.shaders.pbr;
 export import :rendering.shaders.textured;
+
+#undef DrawState
 
 export namespace pragma {
 	class DLLCLIENT LuaShaderManager {

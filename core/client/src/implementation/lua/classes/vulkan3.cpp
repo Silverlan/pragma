@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :scripting.lua.classes.vulkan;
@@ -288,7 +286,11 @@ Lua::opt<pragma::util::DataStream> Lua::Vulkan::VKBuffer::Read(lua::State *l, Bu
 	auto ds = pragma::util::DataStream(size);
 	auto r = hBuffer.Read(offset, size, ds->GetData());
 	if(r == false)
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+		return luabind::object {};
+#else
 		return nil;
+#endif
 	return {l, ds};
 }
 bool Lua::Vulkan::VKBuffer::Read(lua::State *l, Buffer &hBuffer, uint32_t offset, ::udm::Type type, udm_ng value)

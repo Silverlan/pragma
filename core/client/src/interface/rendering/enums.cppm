@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:rendering.enums;

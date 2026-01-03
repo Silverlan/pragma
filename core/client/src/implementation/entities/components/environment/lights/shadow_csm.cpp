@@ -165,7 +165,7 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId, CCameraComponent &cam,
 	cam.SetNearZ(split.neard);
 	cam.SetFarZ(split.fard);
 	cam.GetFrustumPlanes(frustumSplit.planes);
-	cam.GetFrustumPoints(frustumSplit.points, split.neard, split.fard, cam.GetFOVRad(), cam.GetAspectRatio(), entCam.GetPosition(), trCam ? trCam->GetForward() : uvec::FORWARD, trCam ? trCam->GetUp() : uvec::UP);
+	cam.GetFrustumPoints(frustumSplit.points, split.neard, split.fard, cam.GetFOVRad(), cam.GetAspectRatio(), entCam.GetPosition(), trCam ? trCam->GetForward() : uvec::PRM_FORWARD, trCam ? trCam->GetUp() : uvec::PRM_UP);
 
 	cam.SetNearZ(zNear);
 	cam.SetFarZ(zFar);

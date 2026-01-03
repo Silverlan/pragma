@@ -100,8 +100,8 @@ int32_t pragma::math::solve_ballistic_arc(const Vector3 &projPos, float projSpee
 	assert(projPos != target && projSpeed > 0.f && gravity > 0.f);
 
 	// C# requires out variables be set
-	s[0] = uvec::ORIGIN;
-	s[1] = uvec::ORIGIN;
+	s[0] = uvec::PRM_ORIGIN;
+	s[1] = uvec::PRM_ORIGIN;
 
 	// Derivation
 	//   (1) x = v*t*cos O
@@ -142,9 +142,9 @@ int32_t pragma::math::solve_ballistic_arc(const Vector3 &projPos, float projSpee
 	int32_t numSolutions = (lowAng != highAng) ? 2 : 1;
 
 	auto groundDir = uvec::get_normal(diffXZ);
-	s[0] = groundDir * static_cast<float>(cos(lowAng) * projSpeed) + uvec::UP * static_cast<float>(sin(lowAng) * projSpeed);
+	s[0] = groundDir * static_cast<float>(cos(lowAng) * projSpeed) + uvec::PRM_UP * static_cast<float>(sin(lowAng) * projSpeed);
 	if(numSolutions > 1)
-		s[1] = groundDir * static_cast<float>(cos(highAng) * projSpeed) + uvec::UP * static_cast<float>(sin(highAng) * projSpeed);
+		s[1] = groundDir * static_cast<float>(cos(highAng) * projSpeed) + uvec::PRM_UP * static_cast<float>(sin(highAng) * projSpeed);
 	return numSolutions;
 }
 
@@ -165,8 +165,8 @@ int32_t pragma::math::solve_ballistic_arc(const Vector3 &projPos, float projSpee
 int32_t pragma::math::solve_ballistic_arc(const Vector3 &projPos, float projSpeed, const Vector3 &targetPos, const Vector3 &targetVelocity, float gravity, std::array<Vector3, 2> &s)
 {
 	// Initialize output parameters
-	s[0] = uvec::ORIGIN;
-	s[1] = uvec::ORIGIN;
+	s[0] = uvec::PRM_ORIGIN;
+	s[1] = uvec::PRM_ORIGIN;
 
 	// Derivation
 	//
@@ -262,7 +262,7 @@ bool pragma::math::solve_ballistic_arc_lateral(const Vector3 &projPos, float lat
 	// Handling these cases is up to your project's coding standards
 	assert(projPos != targetPos && lateralSpeed > 0.f && maxHeight > projPos.y);
 
-	fireVelocity = uvec::ORIGIN;
+	fireVelocity = uvec::PRM_ORIGIN;
 	gravity = std::numeric_limits<float>::quiet_NaN();
 
 	auto diff = targetPos - projPos;
@@ -309,9 +309,9 @@ bool pragma::math::solve_ballistic_arc_lateral(const Vector3 &projPos, float lat
 	assert(projPos != target && lateralSpeed > 0.f);
 
 	// Initialize output variables
-	fireVelocity = uvec::ORIGIN;
+	fireVelocity = uvec::PRM_ORIGIN;
 	gravity = 0.f;
-	impactPoint = uvec::ORIGIN;
+	impactPoint = uvec::PRM_ORIGIN;
 
 	// Ground plane terms
 	auto targetVelXZ = Vector3(targetVelocity.x, 0.f, targetVelocity.z);

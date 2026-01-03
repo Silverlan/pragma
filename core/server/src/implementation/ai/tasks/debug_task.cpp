@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.server;
 import :ai.tasks.debug;
 
@@ -19,7 +17,7 @@ ai::BehaviorNode::Result ai::TaskDebugPrint::Start(const Schedule *sched, BaseAI
 	std::string msg;
 	if(GetDebugMessage(sched, msg) == false)
 		return Result::Succeeded;
-	Con::csv << "[AITask] " << msg << Con::endl;
+	Con::CSV << "[AITask] " << msg << Con::endl;
 	return Result::Succeeded;
 }
 bool ai::TaskDebugPrint::GetDebugMessage(const Schedule *sched, std::string &msg) const

@@ -21,7 +21,7 @@ export {
 			const std::string &data;
 		};
 		namespace baseIOComponent {
-			CLASS_ENUM_COMPAT ComponentEventId EVENT_HANDLE_INPUT;
+			REGISTER_COMPONENT_EVENT(EVENT_HANDLE_INPUT)
 		}
 		class DLLNETWORK BaseIOComponent : public BaseEntityComponent {
 		  public:

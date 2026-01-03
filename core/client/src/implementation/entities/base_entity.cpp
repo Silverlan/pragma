@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#undef GetClassName
-
 module pragma.client;
 
 import :entities.base_entity;
@@ -16,6 +12,8 @@ import :model;
 import :game;
 import :util;
 import pragma.shared;
+
+#undef GetClassName
 
 void pragma::ecs::CBaseEntity::OnComponentAdded(BaseEntityComponent &component)
 {
@@ -161,7 +159,7 @@ Bool pragma::ecs::CBaseEntity::ReceiveNetEvent(UInt32 eventId, NetPacket &p)
 		if(pNetComponent->ReceiveNetEvent(eventId, p))
 			return true;
 	}
-	Con::cwar << Con::PREFIX_CLIENT << "Unhandled net event '" << eventId << "' for entity " << GetClass() << Con::endl;
+	Con::CWAR << Con::PREFIX_CLIENT << "Unhandled net event '" << eventId << "' for entity " << GetClass() << Con::endl;
 	return false;
 }
 
@@ -252,7 +250,7 @@ void pragma::ecs::CBaseEntity::SendNetEventTCP(UInt32 eventId, NetPacket &data) 
 		return;
 	eventId = get_cgame()->LocalNetEventIdToShared(eventId);
 	if(eventId == std::numeric_limits<NetEventId>::max()) {
-		Con::cwar << "Attempted to send net event " << eventId << " which has no known serverside id associated!" << Con::endl;
+		Con::CWAR << "Attempted to send net event " << eventId << " which has no known serverside id associated!" << Con::endl;
 		return;
 	}
 	networking::write_entity(data, this);
@@ -273,7 +271,7 @@ void pragma::ecs::CBaseEntity::SendNetEventUDP(UInt32 eventId, NetPacket &data) 
 	;
 	eventId = get_cgame()->LocalNetEventIdToShared(eventId);
 	if(eventId == std::numeric_limits<NetEventId>::max()) {
-		Con::cwar << "Attempted to send net event " << eventId << " which has no known serverside id associated!" << Con::endl;
+		Con::CWAR << "Attempted to send net event " << eventId << " which has no known serverside id associated!" << Con::endl;
 		return;
 	}
 	networking::write_entity(data, this);

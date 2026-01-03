@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:gui.scroll_container;
@@ -68,4 +67,6 @@ export namespace pragma::gui::types {
 	using namespace pragma::math::scoped_enum::bitwise;
 };
 
-export {REGISTER_ENUM_FLAGS(pragma::gui::types::WIScrollContainer::StateFlags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::gui::types::WIScrollContainer::StateFlags)
+}

@@ -1,23 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 export module pragma.client:gui.detachable;
 
 export import pragma.gui;
 
 export namespace pragma::gui::types {
 	class DLLCLIENT WIDetachable : public WIBase {
-	public:
+	  public:
 		WIDetachable();
 		virtual ~WIDetachable() override;
 		virtual void OnRemove() override;
 		void Detach();
 		void Reattach();
 		bool IsDetached() const;
-	protected:
+	  protected:
 		struct DetachedWindow {
 			~DetachedWindow();
 			void Clear();

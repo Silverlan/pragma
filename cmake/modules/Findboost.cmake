@@ -10,7 +10,7 @@ find_path(${PCK}_INCLUDE_DIR
     ${PRAGMA_DEPS_DIR}/boost/include
 )
 
-find_library(${PCK}_LIB_DATE_TIME     NAMES boost_date_time "boost_date_time-vc143-mt-x64-1_89"      HINTS ${PRAGMA_DEPS_DIR}/boost/lib)
+find_library(${PCK}_LIB_DATE_TIME     NAMES boost_date_time "boost_date_time-vc143-mt-x64-1_89" "libboost_date_time-clang21-mt-x64-1_89"      HINTS ${PRAGMA_DEPS_DIR}/boost/lib)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(${PCK} REQUIRED_VARS ${PCK}_LIB_DATE_TIME ${PCK}_INCLUDE_DIR)

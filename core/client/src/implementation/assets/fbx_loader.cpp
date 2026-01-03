@@ -264,7 +264,7 @@ std::optional<std::string> FbxImporter::Finalize(std::string &outErr)
 	std::string mdlPath = m_mdlName;
 	auto fullMdlPath = pragma::util::FilePath(util::CONVERT_PATH, get_asset_root_directory(Type::Model), m_outputPath, mdlPath);
 	if(!m_model->Save(*get_cgame(), fullMdlPath.GetString(), outErr)) {
-		Con::cerr << "Error saving model: " << outErr << Con::endl;
+		Con::CERR << "Error saving model: " << outErr << Con::endl;
 		return {};
 	}
 	return mdlPath;

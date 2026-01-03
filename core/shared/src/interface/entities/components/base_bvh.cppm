@@ -14,9 +14,9 @@ export import :model.model_mesh;
 export namespace pragma {
 	class BaseStaticBvhCacheComponent;
 	namespace baseBvhComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_CLEAR_BVH;
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BVH_UPDATE_REQUESTED;
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BVH_REBUILT;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_CLEAR_BVH)
+		REGISTER_COMPONENT_EVENT(EVENT_ON_BVH_UPDATE_REQUESTED)
+		REGISTER_COMPONENT_EVENT(EVENT_ON_BVH_REBUILT)
 	}
 	class DLLNETWORK BaseBvhComponent : public BaseEntityComponent {
 	  public:

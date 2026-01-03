@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.server;
 import :entities.components.lua;
 
@@ -34,7 +32,7 @@ void SLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 	auto nwIndex = itNwIndex->second;
 	const auto maxNwVars = std::numeric_limits<uint8_t>::max();
 	if(nwIndex > maxNwVars) {
-		Con::cwar << "Networked member index of '" << member.functionName << "' exceeds maximum allowed number of networked variables (" << maxNwVars << ")!" << Con::endl;
+		Con::CWAR << "Networked member index of '" << member.functionName << "' exceeds maximum allowed number of networked variables (" << maxNwVars << ")!" << Con::endl;
 		return;
 	}
 

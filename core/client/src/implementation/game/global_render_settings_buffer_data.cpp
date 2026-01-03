@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :game;
@@ -74,7 +72,7 @@ void pragma::rendering::GlobalRenderSettingsBufferData::EvaluateDebugPrint()
 	// or write access and should only be used for debugging purposes!
 	auto debugPrintStr = GetDebugPrintString();
 	if(debugPrintStr.has_value()) {
-		Con::cout << "Shader Debug Print: " << *debugPrintStr << Con::endl;
+		Con::COUT << "Shader Debug Print: " << *debugPrintStr << Con::endl;
 		ResetDebugPrintData();
 	}
 }

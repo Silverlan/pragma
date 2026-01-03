@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :entities.components.audio.sound_scape;
@@ -73,12 +71,12 @@ void CSoundScapeComponent::OnEntitySpawn()
 	if(pSoundEmitterComponent.valid()) {
 		std::shared_ptr<audio::ALSound> snd = pSoundEmitterComponent->CreateSound(m_kvSoundScape, audio::ALSoundType::Environment);
 		if(snd.get() == nullptr) {
-			Con::cwar << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
+			Con::CWAR << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
 			return;
 		}
 		audio::ALSoundScript *al = dynamic_cast<audio::ALSoundScript *>(snd.get());
 		if(al == nullptr) {
-			Con::cwar << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
+			Con::CWAR << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
 			return;
 		}
 		snd->SetRelative(true);

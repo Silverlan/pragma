@@ -91,12 +91,12 @@ bool Lua::doc::load_documentation_file(const std::string &fileName)
 	std::string err;
 	auto udmData = pragma::util::load_udm_asset(fileName, &err);
 	if(udmData == nullptr) {
-		Con::cwar << "Unable to load Lua documentation '" << fileName << "': " << err << Con::endl;
+		Con::CWAR << "Unable to load Lua documentation '" << fileName << "': " << err << Con::endl;
 		return false;
 	}
 	auto col = pragma::doc::Collection::Load(udmData->GetAssetData(), err);
 	if(!col) {
-		Con::cwar << "Unable to load Lua documentation '" << fileName << "': " << err << Con::endl;
+		Con::CWAR << "Unable to load Lua documentation '" << fileName << "': " << err << Con::endl;
 		return false;
 	}
 	s_docInfo.AddCollections(col->GetChildren());
@@ -123,11 +123,11 @@ bool Lua::doc::load_documentation_file(const std::string &fileName)
 		};
 		for(auto &col : s_docInfo.collections)
 			fCollectStats(*col);
-		Con::cout << "Functions: " << numFunctions << Con::endl;
-		Con::cout << "Libraries: " << numLibs << Con::endl;
-		Con::cout << "Classes: " << numClasses << Con::endl;
-		Con::cout << "Members: " << numMembers << Con::endl;
-		Con::cout << "Enums: " << numEnums << Con::endl;
+		Con::COUT << "Functions: " << numFunctions << Con::endl;
+		Con::COUT << "Libraries: " << numLibs << Con::endl;
+		Con::COUT << "Classes: " << numClasses << Con::endl;
+		Con::COUT << "Members: " << numMembers << Con::endl;
+		Con::COUT << "Enums: " << numEnums << Con::endl;
 	}
 	return true;
 }

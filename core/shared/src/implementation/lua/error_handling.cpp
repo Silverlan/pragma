@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :scripting.lua.error_handling;
 
-static void print_lua_error_message(lua::State *l, const std::string &msg) { Con::cerr << Lua::GetErrorMessagePrefix(l) << Con::prefix << Con::PREFIX_LUA << Con::prefix << msg << Con::endl; }
+static void print_lua_error_message(lua::State *l, const std::string &msg) { Con::CERR << Lua::GetErrorMessagePrefix(l) << Con::prefix << Con::PREFIX_LUA << Con::prefix << msg << Con::endl; }
 
 static auto cvOpenEditorOnError = pragma::console::get_con_var("lua_open_editor_on_error");
 std::optional<std::string> Lua::GetLuaFilePath(const std::string &fname)
@@ -191,7 +191,7 @@ void Lua::PrintTraceback(lua::State *l, const std::string *pOptErrMsg)
 
 	std::stringstream ss;
 	pragma::scripting::lua_core::util::get_lua_doc_info(ss, tbMsg);
-	Con::cout << ss.str();
+	Con::COUT << ss.str();
 	Con::flush();
 }
 

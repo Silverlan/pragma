@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :scripting.lua.libraries.util;
@@ -17,9 +15,9 @@ import :util;
 int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua::State *l, pragma::CCameraComponent &hCam, const ::Vector2 &uv)
 {
 	auto trComponent = hCam.GetEntity().GetTransformComponent();
-	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
-	auto right = trComponent ? trComponent->GetRight() : uvec::RIGHT;
-	auto up = trComponent ? trComponent->GetUp() : uvec::UP;
+	auto forward = trComponent ? trComponent->GetForward() : uvec::PRM_FORWARD;
+	auto right = trComponent ? trComponent->GetRight() : uvec::PRM_RIGHT;
+	auto up = trComponent ? trComponent->GetUp() : uvec::PRM_UP;
 	auto dir = uvec::calc_world_direction_from_2d_coordinates(forward, right, up, hCam.GetFOVRad(), hCam.GetNearZ(), hCam.GetFarZ(), hCam.GetAspectRatio(), 0.f, 0.f, uv);
 	Lua::Push<Vector3>(l, dir);
 	return 1;
@@ -286,8 +284,8 @@ int Lua::util::Client::export_material(lua::State *l)
 std::string Lua::util::Client::get_clipboard_string() { return pragma::get_cengine()->GetWindow()->GetClipboardString(); }
 void Lua::util::Client::set_clipboard_string(const std::string &str) { pragma::get_cengine()->GetWindow()->SetClipboardString(str); }
 
-pragma::util::ParallelJob<std::shared_ptr<pragma::image::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> &meshes, const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width,
-  uint32_t height, pragma::rendering::LightmapDataCache *optLightmapDataCache)
+pragma::util::ParallelJob<std::shared_ptr<pragma::image::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<pragma::geometry::ModelSubMesh *> &meshes,
+  const std::vector<pragma::ecs::BaseEntity *> &entities, uint32_t width, uint32_t height, pragma::rendering::LightmapDataCache *optLightmapDataCache)
 {
 	return pragma::util::baking::bake_directional_lightmap_atlas(lights, meshes, entities, width, height, optLightmapDataCache);
 }

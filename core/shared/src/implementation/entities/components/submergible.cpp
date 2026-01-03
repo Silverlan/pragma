@@ -8,10 +8,6 @@ import :entities.components.submergible;
 
 using namespace pragma;
 
-ComponentEventId submergibleComponent::EVENT_ON_WATER_SUBMERGED = INVALID_COMPONENT_ID;
-ComponentEventId submergibleComponent::EVENT_ON_WATER_EMERGED = INVALID_COMPONENT_ID;
-ComponentEventId submergibleComponent::EVENT_ON_WATER_ENTERED = INVALID_COMPONENT_ID;
-ComponentEventId submergibleComponent::EVENT_ON_WATER_EXITED = INVALID_COMPONENT_ID;
 void SubmergibleComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	submergibleComponent::EVENT_ON_WATER_SUBMERGED = registerEvent("ON_WATER_SUBMERGED", ComponentEventInfo::Type::Broadcast);

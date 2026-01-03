@@ -222,7 +222,7 @@ std::optional<ComponentMemberInfo> LuaCore::get_component_member_info(lua::State
 							auto *posInfo = component.GetMemberInfo(info->transformCompositeInfo->posIdx);
 							auto *rotInfo = component.GetMemberInfo(info->transformCompositeInfo->rotIdx);
 							if(!posInfo || !rotInfo) {
-								spdlog::trace("Transform property '{}' points to invalid pos or rot property!", std::string {*memberInfo.GetName()});
+								spdlog::trace("Transform property '" +std::string {*memberInfo.GetName()} +"' points to invalid pos or rot property!");
 								return;
 							}
 
@@ -235,7 +235,7 @@ std::optional<ComponentMemberInfo> LuaCore::get_component_member_info(lua::State
 							if constexpr(std::is_same_v<T, udm::ScaledTransform>) {
 								auto *scaleInfo = component.GetMemberInfo(info->transformCompositeInfo->scaleIdx);
 								if(!scaleInfo) {
-									spdlog::trace("Transform property '{}' points to invalid scale property!", std::string {*memberInfo.GetName()});
+									spdlog::trace("Transform property '" +std::string {*memberInfo.GetName()} +"' points to invalid scale property!");
 									return;
 								}
 								auto &scale = value.GetScale();
@@ -255,7 +255,7 @@ std::optional<ComponentMemberInfo> LuaCore::get_component_member_info(lua::State
 							  auto *posInfo = component.GetMemberInfo(info->transformCompositeInfo->posIdx);
 							  auto *rotInfo = component.GetMemberInfo(info->transformCompositeInfo->rotIdx);
 							  if(!posInfo || !rotInfo) {
-								  spdlog::trace("Transform property '{}' points to invalid pos or rot property!", std::string {*memberInfo.GetName()});
+								  spdlog::trace("Transform property '" +std::string {*memberInfo.GetName()} +"' points to invalid pos or rot property!");
 								  return;
 							  }
 
@@ -265,7 +265,7 @@ std::optional<ComponentMemberInfo> LuaCore::get_component_member_info(lua::State
 							  if constexpr(std::is_same_v<T, udm::ScaledTransform>) {
 								  auto *scaleInfo = component.GetMemberInfo(info->transformCompositeInfo->scaleIdx);
 								  if(!scaleInfo) {
-									  spdlog::trace("Transform property '{}' points to invalid scale property!", std::string {*memberInfo.GetName()});
+									  spdlog::trace("Transform property '" +std::string {*memberInfo.GetName()} +"' points to invalid scale property!");
 									  return;
 								  }
 								  scaleInfo->setterFunction(*scaleInfo, component, &value.GetScale());
@@ -530,7 +530,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 
 		std::string err;
 		if(Lua::PushLuaFunctionFromString(l, getter, "EntityComponentGetter", err) == false)
-			Con::cwar << "Unable to register getter-function for member '" << functionName << "' for entity component: " << err << Con::endl;
+			Con::CWAR << "Unable to register getter-function for member '" << functionName << "' for entity component: " << err << Con::endl;
 		else {
 			if((memberFlags & MemberFlags::UseHasGetterBit) != MemberFlags::None)
 				getterName = "Has";
@@ -550,7 +550,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 			std::string getterProperty = "function(self) return self." + memberVarName + " end";
 			std::string err;
 			if(Lua::PushLuaFunctionFromString(l, getterProperty, "EntityComponentGetterProperty", err) == false)
-				Con::cwar << "Unable to register property-get-function for member '" << functionName << "' for entity component: " << err << Con::endl;
+				Con::CWAR << "Unable to register property-get-function for member '" << functionName << "' for entity component: " << err << Con::endl;
 			else {
 				auto idxFunc = Lua::GetStackTop(l);
 				oClass.push(l); /* 2 */
@@ -606,7 +606,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 		std::string err;
 		if(Lua::PushLuaFunctionFromString(l, setter, "EntityComponentSetter", err) == false) {
 			bSetterValid = false;
-			Con::cwar << "Unable to register setter-function for member '" << functionName << "' for entity component: " << err << Con::endl;
+			Con::CWAR << "Unable to register setter-function for member '" << functionName << "' for entity component: " << err << Con::endl;
 		} /* else 1 */
 		if(bSetterValid) {
 			auto idxFunc = Lua::GetStackTop(l);
@@ -733,7 +733,7 @@ void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<MemberInfo>
 		else
 			Lua::PushAny(l, detail::member_type_to_util_type(member.type), member.initialValue); /* 3 */
 		if(Lua::IsNil(l, -1) && ents::is_udm_member_type(member.type))
-			Con::cwar << "Invalid member type '" << magic_enum::enum_name(member.type) << "' for member '" << member.functionName << "' of entity component '" << GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().GetComponentInfo(GetComponentId())->name
+			Con::CWAR << "Invalid member type '" << magic_enum::enum_name(member.type) << "' for member '" << member.functionName << "' of entity component '" << GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().GetComponentInfo(GetComponentId())->name
 			          << "'! Ignoring..." << Con::endl;
 		Lua::SetTableValue(l, t); /* 1 */
 

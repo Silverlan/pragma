@@ -107,10 +107,6 @@ std::string pragma::ecs::BaseEntity::ToString() const
 	return ss.str();
 }
 
-pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_HANDLE_KEY_VALUE = INVALID_COMPONENT_ID;
-pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_ON_SPAWN = INVALID_COMPONENT_ID;
-pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_ON_POST_SPAWN = INVALID_COMPONENT_ID;
-pragma::ComponentEventId pragma::ecs::baseEntity::EVENT_ON_REMOVE = INVALID_COMPONENT_ID;
 pragma::ecs::BaseEntity::BaseEntity() : BaseEntityComponentSystem {}, BaseLuaHandle {}, m_uuid {util::generate_uuid_v4()} {}
 pragma::NetEventId pragma::ecs::BaseEntity::FindNetEvent(const std::string &name) const { return GetNetworkState()->GetGameState()->FindNetEvent(name); }
 
@@ -277,14 +273,14 @@ Vector3 pragma::ecs::BaseEntity::GetPosition(CoordinateSpace space) const
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
-		return uvec::ORIGIN;
+		return uvec::PRM_ORIGIN;
 	return trComponent->GetPosition(space);
 }
 const Vector3 &pragma::ecs::BaseEntity::GetPosition() const
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
-		return uvec::ORIGIN;
+		return uvec::PRM_ORIGIN;
 	return trComponent->GetPosition();
 }
 void pragma::ecs::BaseEntity::SetPosition(const Vector3 &pos, CoordinateSpace space)
@@ -305,14 +301,14 @@ Quat pragma::ecs::BaseEntity::GetRotation(CoordinateSpace space) const
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
-		return uquat::UNIT;
+		return uquat::PRM_UNIT;
 	return trComponent->GetRotation(space);
 }
 const Quat &pragma::ecs::BaseEntity::GetRotation() const
 {
 	auto trComponent = GetTransformComponent();
 	if(!trComponent)
-		return uquat::UNIT;
+		return uquat::PRM_UNIT;
 	return trComponent->GetRotation();
 }
 void pragma::ecs::BaseEntity::SetRotation(const Quat &rot, CoordinateSpace space)

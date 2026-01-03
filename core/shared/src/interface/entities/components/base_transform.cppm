@@ -19,8 +19,8 @@ export {
 			TransformChangeFlags changeFlags;
 		};
 		namespace baseTransformComponent {
-			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_POSE_CHANGED;
-			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_TELEPORT;
+			REGISTER_COMPONENT_EVENT(EVENT_ON_POSE_CHANGED)
+			REGISTER_COMPONENT_EVENT(EVENT_ON_TELEPORT)
 		}
 		class DLLNETWORK BaseTransformComponent : public BaseEntityComponent {
 		  public:

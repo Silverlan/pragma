@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.initializer_speed;
 
 import :particle_system.modifier_random_variable;
@@ -14,11 +11,11 @@ export namespace pragma::ecs {
 }
 export namespace pragma::pts {
 	class DLLCLIENT CParticleInitializerSpeed : public CParticleInitializer {
-	public:
+	  public:
 		CParticleInitializerSpeed() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void OnParticleCreated(CParticle &particle) override;
-	private:
+	  private:
 		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fSpeed;
 	};
 }

@@ -363,7 +363,7 @@ void pragma::bvh::debug::print_bvh_tree(Bvh &bvh)
 		printStack(bvh.nodes[node.index.first_id() + 1], t + "\t");
 	};
 	printStack(bvh.get_root(), "");
-	Con::cout << "BVH Tree:" << ss.str() << Con::endl;
+	Con::COUT << "BVH Tree:" << ss.str() << Con::endl;
 }
 
 void pragma::bvh::debug::draw_bvh_tree(const Game &game, Bvh &bvh, const math::ScaledTransform &pose, float duration)

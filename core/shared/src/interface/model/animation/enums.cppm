@@ -89,7 +89,11 @@ export {
 	}
 	REGISTER_ENUM_FLAGS(pragma::Activity)
 
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+	DLLNETWORK std::unordered_map<int32_t, std::string> &GET_ACTIVITY_NAMES();
+#else
 	extern DLLNETWORK std::unordered_map<int32_t, std::string> ACTIVITY_NAMES;
+#endif
 
 	namespace pragma {
 		DLLNETWORK void register_engine_activities();

@@ -1,17 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:model.model_class;
 
 export import :model.mesh;
 
 export namespace pragma::asset {
 	class DLLCLIENT CModel : public Model {
-	public:
+	  public:
 		CModel(NetworkState *nw, uint32_t numBones, const std::string &name = "");
 		void AddMesh(const std::string &meshGroup, const std::shared_ptr<geometry::CModelMesh> &mesh);
 		virtual void PrecacheTextureGroup(uint32_t i) override;
@@ -23,7 +19,7 @@ export namespace pragma::asset {
 
 		const std::shared_ptr<prosper::IBuffer> &GetVertexAnimationBuffer() const;
 		bool GetVertexAnimationBufferFrameOffset(uint32_t vaIdx, geometry::CModelSubMesh &subMesh, uint32_t frameId, uint64_t &offset) const;
-	protected:
+	  protected:
 		virtual void AddMesh(const std::string &meshGroup, const std::shared_ptr<geometry::ModelMesh> &mesh) override;
 		virtual void OnMaterialMissing(const std::string &matName) override;
 

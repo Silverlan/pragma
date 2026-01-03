@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :gui.frame;
@@ -45,7 +43,7 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoPingServer(uint32
 					OnServerPingResponse(serverIdx, true);
 				else {
 #ifdef _DEBUG
-					Con::cwar << "Unable to add server '" << sv->ip << ":" << sv->tcpPort << "' to list: " << err.message() << " (" << err.value() << ")" << Con::endl;
+					Con::CWAR << "Unable to add server '" << sv->ip << ":" << sv->tcpPort << "' to list: " << err.message() << " (" << err.value() << ")" << Con::endl;
 #endif
 					OnServerPingResponse(serverIdx, false);
 				}

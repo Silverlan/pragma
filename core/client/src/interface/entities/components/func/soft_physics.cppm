@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 export module pragma.client:entities.components.func_soft_physics;
 
 export import :entities.base_entity;

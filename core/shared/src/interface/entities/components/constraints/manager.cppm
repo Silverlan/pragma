@@ -10,7 +10,7 @@ export import :entities.components.constraints.base;
 
 export namespace pragma {
 	namespace constraintManagerComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_APPLY_CONSTRAINT;
+		REGISTER_COMPONENT_EVENT(EVENT_APPLY_CONSTRAINT)
 	}
 	class DLLNETWORK ConstraintManagerComponent final : public BaseEntityComponent {
 	  public:

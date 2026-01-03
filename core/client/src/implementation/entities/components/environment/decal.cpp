@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :entities.components.env_decal;
@@ -47,14 +45,14 @@ void DecalProjector::GetOrthogonalBasis(Vector3 &forward, Vector3 &right, Vector
 }
 const std::array<Vector3, 8> &DecalProjector::GetProjectorCubePoints() const
 {
-	static const std::array<Vector3, 8> g_projectorCubePoints = {-uvec::FORWARD - uvec::RIGHT - uvec::UP, +uvec::FORWARD - uvec::RIGHT - uvec::UP, -uvec::FORWARD + uvec::RIGHT - uvec::UP, +uvec::FORWARD + uvec::RIGHT - uvec::UP, -uvec::FORWARD - uvec::RIGHT + uvec::UP,
-	  +uvec::FORWARD - uvec::RIGHT + uvec::UP, -uvec::FORWARD + uvec::RIGHT + uvec::UP, +uvec::FORWARD + uvec::RIGHT + uvec::UP};
+	static const std::array<Vector3, 8> g_projectorCubePoints = {-uvec::PRM_FORWARD - uvec::PRM_RIGHT - uvec::PRM_UP, +uvec::PRM_FORWARD - uvec::PRM_RIGHT - uvec::PRM_UP, -uvec::PRM_FORWARD + uvec::PRM_RIGHT - uvec::PRM_UP, +uvec::PRM_FORWARD + uvec::PRM_RIGHT - uvec::PRM_UP,
+	  -uvec::PRM_FORWARD - uvec::PRM_RIGHT + uvec::PRM_UP, +uvec::PRM_FORWARD - uvec::PRM_RIGHT + uvec::PRM_UP, -uvec::PRM_FORWARD + uvec::PRM_RIGHT + uvec::PRM_UP, +uvec::PRM_FORWARD + uvec::PRM_RIGHT + uvec::PRM_UP};
 	return g_projectorCubePoints;
 }
 std::pair<Vector3, Vector3> DecalProjector::GetProjectorCubeBounds() const
 {
 	auto prismSize = GetSize();
-	return {(-uvec::FORWARD + uvec::RIGHT - uvec::UP) * prismSize, (+uvec::FORWARD - uvec::RIGHT + uvec::UP) * prismSize};
+	return {(-uvec::PRM_FORWARD + uvec::PRM_RIGHT - uvec::PRM_UP) * prismSize, (+uvec::PRM_FORWARD - uvec::PRM_RIGHT + uvec::PRM_UP) * prismSize};
 }
 std::vector<DecalProjector::VertexInfo> DecalProjector::CropTriangleVertsByLine(const Vector3 &v0, const Vector3 &v1, const Vector3 &v2, const std::vector<VertexInfo> &verts, const Vector2 &lineStart, const Vector2 &lineEnd)
 {

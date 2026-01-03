@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "pragma/console/helper.hpp"
 
 //#include "shader_screen.h" // prosper TODO
@@ -692,7 +691,7 @@ void pragma::CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 
 void pragma::CGame::RequestResource(const std::string &fileName)
 {
-	Con::ccl << "[CGame] RequestResource '" << fileName << "'" << Con::endl;
+	Con::CCL << "[CGame] RequestResource '" << fileName << "'" << Con::endl;
 	auto fName = fs::get_canonicalized_path(fileName);
 	auto it = std::find(m_requestedResources.begin(), m_requestedResources.end(), fName);
 	if(it != m_requestedResources.end())
@@ -701,7 +700,7 @@ void pragma::CGame::RequestResource(const std::string &fileName)
 	NetPacket p;
 	p->WriteString(fName);
 	get_client_state()->SendPacket(networking::net_messages::server::QUERY_RESOURCE, p, networking::Protocol::SlowReliable);
-	Con::ccl << "[CGame] Request sent!" << Con::endl;
+	Con::CCL << "[CGame] Request sent!" << Con::endl;
 }
 
 void pragma::CGame::Resize(bool reloadRenderTarget)
@@ -821,7 +820,7 @@ pragma::gui::types::WIBase *pragma::CGame::CreateGUIElement(std::string classNam
 				el = elLua;
 			}
 			else {
-				Con::cwar << Con::PREFIX_CLIENT << "Unable to create lua GUI Element '" << className << "': Lua class is not derived from valid GUI base!" << Con::endl;
+				Con::CWAR << Con::PREFIX_CLIENT << "Unable to create lua GUI Element '" << className << "': Lua class is not derived from valid GUI base!" << Con::endl;
 				return nullptr;
 			}
 
@@ -833,7 +832,7 @@ pragma::gui::types::WIBase *pragma::CGame::CreateGUIElement(std::string classNam
 		}
 #endif
 		if(!r) {
-			Con::cwar << Con::PREFIX_CLIENT << "Unable to create lua GUI Element '" << className << "'!" << Con::endl;
+			Con::CWAR << Con::PREFIX_CLIENT << "Unable to create lua GUI Element '" << className << "'!" << Con::endl;
 			return nullptr;
 		}
 	}
@@ -1409,11 +1408,11 @@ uint32_t pragma::CGame::GetLostPacketCount()
 
 void pragma::CGame::ReceiveSnapshot(NetPacket &packet)
 {
-	//Con::ccl<<"Received snapshot.."<<Con::endl;
+	//Con::CCL<<"Received snapshot.."<<Con::endl;
 	//auto tOld = m_tServer;
 	auto latency = GetLatency() / 2.f; // Latency is entire roundtrip; We need the time for one way
 	auto tActivated = (util::clock::to_int(util::clock::get_duration_since_start()) - packet.GetTimeActivated()) / 1'000'000.0;
-	//Con::ccl<<"Snapshot delay: "<<+latency<<"+ "<<tActivated<<" = "<<(latency +tActivated)<<Con::endl;
+	//Con::CCL<<"Snapshot delay: "<<+latency<<"+ "<<tActivated<<" = "<<(latency +tActivated)<<Con::endl;
 	auto tDelta = static_cast<float>((latency + tActivated) / 1'000.0);
 
 	auto snapshotId = packet->Read<uint8_t>();
@@ -1693,7 +1692,7 @@ bool pragma::CGame::SaveImage(prosper::IImage &image, const std::string &fileNam
 {
 	auto path = ufile::get_path_from_filename(fileName);
 	fs::create_path(path);
-	return prosper::util::save_texture(fileName, image, imageWriteInfo, [fileName](const std::string &err) { Con::cwar << "Unable to save image '" << fileName << "': " << err << Con::endl; });
+	return prosper::util::save_texture(fileName, image, imageWriteInfo, [fileName](const std::string &err) { Con::CWAR << "Unable to save image '" << fileName << "': " << err << Con::endl; });
 }
 
 bool pragma::CGame::SaveImage(const std::vector<std::vector<const void *>> &imgLayerMipmapData, uint32_t width, uint32_t height, uint32_t szPerPixel, const std::string &fileName, const image::TextureInfo &imageWriteInfo, bool cubemap) const
@@ -1706,7 +1705,7 @@ bool pragma::CGame::SaveImage(const std::vector<std::vector<const void *>> &imgL
 	texSaveInfo.height = height;
 	texSaveInfo.szPerPixel = szPerPixel;
 	texSaveInfo.cubemap = cubemap;
-	return image::save_texture(fileName, imgLayerMipmapData, texSaveInfo, [fileName](const std::string &err) { Con::cwar << "Unable to save image '" << fileName << "': " << err << Con::endl; });
+	return image::save_texture(fileName, imgLayerMipmapData, texSaveInfo, [fileName](const std::string &err) { Con::CWAR << "Unable to save image '" << fileName << "': " << err << Con::endl; });
 }
 
 bool pragma::CGame::SaveImage(image::ImageBuffer &imgBuffer, const std::string &fileName, const image::TextureInfo &imageWriteInfo, bool cubemap) const
@@ -1716,7 +1715,7 @@ bool pragma::CGame::SaveImage(image::ImageBuffer &imgBuffer, const std::string &
 	image::TextureSaveInfo texSaveInfo;
 	texSaveInfo.texInfo = imageWriteInfo;
 	texSaveInfo.cubemap = cubemap;
-	return image::save_texture(fileName, imgBuffer, texSaveInfo, [fileName](const std::string &err) { Con::cwar << "Unable to save image '" << fileName << "': " << err << Con::endl; });
+	return image::save_texture(fileName, imgBuffer, texSaveInfo, [fileName](const std::string &err) { Con::CWAR << "Unable to save image '" << fileName << "': " << err << Con::endl; });
 }
 
 static auto cvFriction = pragma::console::get_client_con_var("sv_friction");

@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 export module pragma.client:rendering.shaders.pbr;
 
 export import :rendering.shaders.textured;
@@ -46,8 +43,8 @@ export namespace pragma {
 
 		prosper::IDescriptorSet *GetReflectionProbeDescriptorSet(const CSceneComponent &scene, float &outIblStrength, SceneFlags &inOutSceneFlags) const;
 	  protected:
-		void RecordBindSceneDescriptorSets(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
-		  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows, SceneFlags &inOutSceneFlags, float &outIblStrength) const;
+		void RecordBindSceneDescriptorSets(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
+		  prosper::IDescriptorSet &dsShadows, SceneFlags &inOutSceneFlags, float &outIblStrength) const;
 		virtual void OnPipelinesInitialized() override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeMaterialData(const material::CMaterial &mat, const rendering::shader_material::ShaderMaterial &shaderMat, rendering::ShaderInputData &inOutMatData) override;

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :entities.components.lua;
@@ -28,7 +26,7 @@ Bool CLuaBaseEntityComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &pac
 	if(m_networkedMemberInfo != nullptr && eventId == m_networkedMemberInfo->netEvSetMember) {
 		auto nwIdx = packet->Read<uint8_t>();
 		if(nwIdx >= m_networkedMemberInfo->networkedMembers.size()) {
-			Con::cwar << "Invalid networked variable index '" << nwIdx << "'!" << Con::endl;
+			Con::CWAR << "Invalid networked variable index '" << nwIdx << "'!" << Con::endl;
 			return true;
 		}
 		auto memberIdx = m_networkedMemberInfo->networkedMembers.at(nwIdx);

@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 module pragma.client;
 
 import :scripting.lua.classes.gui;
@@ -170,7 +166,7 @@ static void clamp_to_parent_bounds(pragma::gui::types::WIBase &el, Vector2i &cla
 
 static void debug_print_hierarchy(const pragma::gui::types::WIBase &el, const std::string &t = "")
 {
-	Con::cout << t << el << Con::endl;
+	Con::COUT << t << el << Con::endl;
 	auto subT = t + "\t";
 	for(auto &hChild : *const_cast<pragma::gui::types::WIBase &>(el).GetChildren()) {
 		if(hChild.IsValid() == false)
@@ -420,18 +416,19 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("IsBaseElement", &pragma::gui::types::WIBase::IsBaseElement);
 	classDef.def("FindDescendantByName", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, pragma::gui::types::WIBase &, const std::string &)>([](lua::State *l, pragma::gui::types::WIBase &hPanel, const std::string &name) { return hPanel.FindDescendantByName(name); }));
 	classDef.def("FindDescendantByPath", &find_descendant_by_path);
-	classDef.def("FindDescendantsByName", static_cast<luabind::tableT<pragma::gui::types::WIBase> (*)(lua::State *, pragma::gui::types::WIBase &, const std::string &)>([](lua::State *l, pragma::gui::types::WIBase &hPanel, const std::string &name) -> luabind::tableT<pragma::gui::types::WIBase> {
-		std::vector<pragma::gui::WIHandle> children {};
-		hPanel.FindDescendantsByName(name, children);
-		auto t = luabind::newtable(l);
-		auto idx = 1;
-		for(auto &hChild : children) {
-			if(hChild.IsValid() == false)
-				continue;
-			t[idx++] = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hChild.get());
-		}
-		return t;
-	}));
+	classDef.def("FindDescendantsByName",
+	  static_cast<luabind::tableT<pragma::gui::types::WIBase> (*)(lua::State *, pragma::gui::types::WIBase &, const std::string &)>([](lua::State *l, pragma::gui::types::WIBase &hPanel, const std::string &name) -> luabind::tableT<pragma::gui::types::WIBase> {
+		  std::vector<pragma::gui::WIHandle> children {};
+		  hPanel.FindDescendantsByName(name, children);
+		  auto t = luabind::newtable(l);
+		  auto idx = 1;
+		  for(auto &hChild : children) {
+			  if(hChild.IsValid() == false)
+				  continue;
+			  t[idx++] = pragma::gui::WGUILuaInterface::GetLuaObject(l, *hChild.get());
+		  }
+		  return t;
+	  }));
 	classDef.def("Update", &pragma::gui::types::WIBase::Update);
 	classDef.def("ApplySkin", &pragma::gui::types::WIBase::ApplySkin);
 	classDef.def("ApplySkin", &pragma::gui::types::WIBase::ApplySkin, luabind::default_parameter_policy<2, static_cast<pragma::gui::WISkin *>(nullptr)> {});
@@ -620,7 +617,10 @@ void Lua::WITexturedShape::register_class(luabind::class_<pragma::gui::types::WI
 
 void Lua::WIIcon::register_class(luabind::class_<pragma::gui::types::WIIcon, luabind::bases<pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>> &classDef) { classDef.def("SetClipping", &pragma::gui::types::WIIcon::SetClipping); }
 
-void Lua::WISilkIcon::register_class(luabind::class_<pragma::gui::types::WISilkIcon, luabind::bases<pragma::gui::types::WIIcon, pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>> &classDef) { classDef.def("SetIcon", &pragma::gui::types::WISilkIcon::SetIcon); }
+void Lua::WISilkIcon::register_class(luabind::class_<pragma::gui::types::WISilkIcon, luabind::bases<pragma::gui::types::WIIcon, pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>> &classDef)
+{
+	classDef.def("SetIcon", &pragma::gui::types::WISilkIcon::SetIcon);
+}
 
 void Lua::WIArrow::register_class(luabind::class_<pragma::gui::types::WIArrow, luabind::bases<pragma::gui::types::WIShape, pragma::gui::types::WIBase>> &classDef)
 {
@@ -646,18 +646,22 @@ void Lua::WIGridPanel::register_class(luabind::class_<pragma::gui::types::WIGrid
 
 void Lua::WITreeList::register_class(luabind::class_<pragma::gui::types::WITreeList, luabind::bases<pragma::gui::types::WITable, pragma::gui::types::WIBase>> &classDef)
 {
-	classDef.def("AddItem", static_cast<pragma::gui::types::WITreeListElement *(*)(lua::State *, pragma::gui::types::WITreeList &, const std::string &)>([](lua::State *l, pragma::gui::types::WITreeList &hPanel, const std::string &text) -> pragma::gui::types::WITreeListElement * { return hPanel.AddItem(text); }));
-	classDef.def("AddItem", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, pragma::gui::types::WITreeList &, const std::string &, func<void(pragma::gui::types::WIBase)>)>([](lua::State *l, pragma::gui::types::WITreeList &hPanel, const std::string &text, func<void(pragma::gui::types::WIBase)> populate) -> pragma::gui::types::WIBase * {
-		auto fPopulate = [l, populate](pragma::gui::types::WITreeListElement &el) {
-			CallFunction(l, [&populate, &el](lua::State *l) {
-				populate.push(l);
-				auto o = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
-				o.push(l);
-				return StatusCode::Ok;
-			});
-		};
-		return hPanel.AddItem(text, fPopulate);
+	classDef.def("AddItem", static_cast<pragma::gui::types::WITreeListElement *(*)(lua::State *, pragma::gui::types::WITreeList &, const std::string &)>([](lua::State *l, pragma::gui::types::WITreeList &hPanel, const std::string &text) -> pragma::gui::types::WITreeListElement * {
+		return hPanel.AddItem(text);
 	}));
+	classDef.def("AddItem",
+	  static_cast<pragma::gui::types::WIBase *(*)(lua::State *, pragma::gui::types::WITreeList &, const std::string &, func<void(pragma::gui::types::WIBase)>)>(
+	    [](lua::State *l, pragma::gui::types::WITreeList &hPanel, const std::string &text, func<void(pragma::gui::types::WIBase)> populate) -> pragma::gui::types::WIBase * {
+		    auto fPopulate = [l, populate](pragma::gui::types::WITreeListElement &el) {
+			    CallFunction(l, [&populate, &el](lua::State *l) {
+				    populate.push(l);
+				    auto o = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
+				    o.push(l);
+				    return StatusCode::Ok;
+			    });
+		    };
+		    return hPanel.AddItem(text, fPopulate);
+	    }));
 	classDef.def("ExpandAll", &pragma::gui::types::WITreeList::ExpandAll);
 	classDef.def("CollapseAll", &pragma::gui::types::WITreeList::CollapseAll);
 	classDef.def("GetRootItem", &pragma::gui::types::WITreeList::GetRootItem);
@@ -669,18 +673,22 @@ void Lua::WITreeListElement::register_class(luabind::class_<pragma::gui::types::
 	classDef.def("Collapse", static_cast<void (pragma::gui::types::WITreeListElement::*)(bool)>(&pragma::gui::types::WITreeListElement::Collapse));
 	classDef.def("Collapse", static_cast<void (*)(pragma::gui::types::WITreeListElement &)>([](pragma::gui::types::WITreeListElement &el) { el.Collapse(); }));
 	classDef.def("GetItems", &pragma::gui::types::WITreeListElement::GetItems);
-	classDef.def("AddItem", static_cast<pragma::gui::types::WITreeListElement *(*)(lua::State *, pragma::gui::types::WITreeListElement &, const std::string &)>([](lua::State *l, pragma::gui::types::WITreeListElement &hPanel, const std::string &text) -> pragma::gui::types::WITreeListElement * { return hPanel.AddItem(text); }));
-	classDef.def("AddItem", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, pragma::gui::types::WITreeListElement &, const std::string &, func<void(pragma::gui::types::WIBase)>)>([](lua::State *l, pragma::gui::types::WITreeListElement &hPanel, const std::string &text, func<void(pragma::gui::types::WIBase)> populate) -> pragma::gui::types::WIBase * {
-		auto fPopulate = [l, populate](pragma::gui::types::WITreeListElement &el) {
-			CallFunction(l, [&populate, &el](lua::State *l) {
-				populate.push(l);
-				auto o = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
-				o.push(l);
-				return StatusCode::Ok;
-			});
-		};
-		return hPanel.AddItem(text, fPopulate);
-	}));
+	classDef.def("AddItem",
+	  static_cast<pragma::gui::types::WITreeListElement *(*)(lua::State *, pragma::gui::types::WITreeListElement &, const std::string &)>(
+	    [](lua::State *l, pragma::gui::types::WITreeListElement &hPanel, const std::string &text) -> pragma::gui::types::WITreeListElement * { return hPanel.AddItem(text); }));
+	classDef.def("AddItem",
+	  static_cast<pragma::gui::types::WIBase *(*)(lua::State *, pragma::gui::types::WITreeListElement &, const std::string &, func<void(pragma::gui::types::WIBase)>)>(
+	    [](lua::State *l, pragma::gui::types::WITreeListElement &hPanel, const std::string &text, func<void(pragma::gui::types::WIBase)> populate) -> pragma::gui::types::WIBase * {
+		    auto fPopulate = [l, populate](pragma::gui::types::WITreeListElement &el) {
+			    CallFunction(l, [&populate, &el](lua::State *l) {
+				    populate.push(l);
+				    auto o = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
+				    o.push(l);
+				    return StatusCode::Ok;
+			    });
+		    };
+		    return hPanel.AddItem(text, fPopulate);
+	    }));
 }
 
 void Lua::WIContainer::register_class(luabind::class_<pragma::gui::types::WIContainer, pragma::gui::types::WIBase> &classDef)
@@ -912,14 +920,15 @@ void Lua::WIText::register_class(luabind::class_<pragma::gui::types::WIText, pra
 	classDef.def("RemoveLine", &pragma::gui::types::WIText::RemoveLine);
 	classDef.def("InsertText", static_cast<bool (*)(pragma::gui::types::WIText &, const std::string &, pragma::string::LineIndex)>([](pragma::gui::types::WIText &hPanel, const std::string &text, pragma::string::LineIndex lineIdx) { return hPanel.InsertText(text, lineIdx); }));
 	classDef.def("InsertText",
-	  static_cast<bool (*)(pragma::gui::types::WIText &, const std::string &, pragma::string::LineIndex, pragma::string::CharOffset)>([](pragma::gui::types::WIText &hPanel, const std::string &text, pragma::string::LineIndex lineIdx, pragma::string::CharOffset charOffset) { return hPanel.InsertText(text, lineIdx, charOffset); }));
+	  static_cast<bool (*)(pragma::gui::types::WIText &, const std::string &, pragma::string::LineIndex, pragma::string::CharOffset)>(
+	    [](pragma::gui::types::WIText &hPanel, const std::string &text, pragma::string::LineIndex lineIdx, pragma::string::CharOffset charOffset) { return hPanel.InsertText(text, lineIdx, charOffset); }));
 	classDef.def("SetMaxLineCount", +[](lua::State *l, pragma::gui::types::WIText &hPanel, uint32_t c) { hPanel.GetFormattedTextObject().SetMaxLineCount(c); });
 	classDef.def("GetMaxLineCount", +[](lua::State *l, pragma::gui::types::WIText &hPanel) { return hPanel.GetFormattedTextObject().GetMaxLineCount(); });
 	classDef.def("AppendText", +[](pragma::gui::types::WIText &el, const std::string &text) { return el.AppendText(text); });
 	classDef.def("AppendLine", static_cast<void (*)(lua::State *, pragma::gui::types::WIText &, const std::string &)>([](lua::State *l, pragma::gui::types::WIText &hPanel, const std::string &line) { hPanel.AppendLine(line); }));
-	classDef.def("MoveText", static_cast<void (*)(lua::State *, pragma::gui::types::WIText &, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)>([](lua::State *l, pragma::gui::types::WIText &hPanel, uint32_t lineIdx, uint32_t startOffset, uint32_t len, uint32_t targetLineIdx, uint32_t targetCharOffset) {
-		PushBool(l, hPanel.MoveText(lineIdx, startOffset, len, targetLineIdx, targetCharOffset));
-	}));
+	classDef.def("MoveText",
+	  static_cast<void (*)(lua::State *, pragma::gui::types::WIText &, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)>(
+	    [](lua::State *l, pragma::gui::types::WIText &hPanel, uint32_t lineIdx, uint32_t startOffset, uint32_t len, uint32_t targetLineIdx, uint32_t targetCharOffset) { PushBool(l, hPanel.MoveText(lineIdx, startOffset, len, targetLineIdx, targetCharOffset)); }));
 	classDef.def("Clear", &pragma::gui::types::WIText::Clear);
 	classDef.def("Substr", +[](pragma::gui::types::WIText &el, pragma::string::TextOffset startOffset, pragma::string::TextLength len) { return el.Substr(startOffset, len); });
 	classDef.add_static_constant("AUTO_BREAK_NONE", pragma::math::to_integral(pragma::gui::types::WIText::AutoBreak::NONE));
@@ -1101,7 +1110,10 @@ void Lua::WIBase::GetMousePos(lua::State *l, pragma::gui::types::WIBase &hPanel)
 	luabind::object(l, ::Vector2(x, y)).push(l);
 }
 void Lua::WIBase::Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState) { hPanel.Draw(drawInfo, drawState); }
-void Lua::WIBase::Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize) { hPanel.Draw(drawInfo, drawState, ::Vector2i {}, scissorOffset, scissorSize, hPanel.GetScale()); }
+void Lua::WIBase::Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize)
+{
+	hPanel.Draw(drawInfo, drawState, ::Vector2i {}, scissorOffset, scissorSize, hPanel.GetScale());
+}
 void Lua::WIBase::Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent)
 {
 	hPanel.Draw(drawInfo, drawState, offsetParent, scissorOffset, scissorSize, hPanel.GetScale());
@@ -1268,7 +1280,10 @@ void Lua::WIBase::CallCallbacks(lua::State *l, pragma::gui::types::WIBase &hPane
 void Lua::WIBase::CallCallbacks(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string name, luabind::object o1) { CallCallbacks<luabind::object>(l, hPanel, name, o1); }
 void Lua::WIBase::CallCallbacks(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2) { CallCallbacks<luabind::object, luabind::object>(l, hPanel, name, o1, o2); }
 void Lua::WIBase::CallCallbacks(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3) { CallCallbacks<luabind::object, luabind::object, luabind::object>(l, hPanel, name, o1, o2, o3); }
-void Lua::WIBase::CallCallbacks(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4) { CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object>(l, hPanel, name, o1, o2, o3, o4); }
+void Lua::WIBase::CallCallbacks(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4)
+{
+	CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object>(l, hPanel, name, o1, o2, o3, o4);
+}
 void Lua::WIBase::CallCallbacks(lua::State *l, pragma::gui::types::WIBase &hPanel, std::string name, luabind::object o1, luabind::object o2, luabind::object o3, luabind::object o4, luabind::object o5)
 {
 	CallCallbacks<luabind::object, luabind::object, luabind::object, luabind::object, luabind::object>(l, hPanel, name, o1, o2, o3, o4, o5);

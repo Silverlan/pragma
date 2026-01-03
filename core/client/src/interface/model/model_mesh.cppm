@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:model.mesh;
 
 export import :model.render_mesh;
@@ -14,7 +10,7 @@ export import pragma.shared;
 
 export namespace pragma::geometry {
 	class DLLCLIENT CModelSubMesh : public ModelSubMesh {
-	public:
+	  public:
 		CModelSubMesh();
 		CModelSubMesh(const CModelSubMesh &other);
 		const std::shared_ptr<rendering::SceneMesh> &GetSceneMesh() const;
@@ -33,15 +29,15 @@ export namespace pragma::geometry {
 		using VertexType = rendering::VertexBufferData;
 		using VertexWeightType = math::VertexWeight;
 		using AlphaType = Vector2;
-	private:
+	  private:
 		std::shared_ptr<rendering::SceneMesh> m_sceneMesh;
 		void UpdateVertexBuffer();
 	};
 
 	class DLLCLIENT CModelMesh : public ModelMesh {
-	private:
+	  private:
 		virtual void AddSubMesh(const std::shared_ptr<ModelSubMesh> &subMesh) override;
-	public:
+	  public:
 		CModelMesh();
 		void AddSubMesh(const std::shared_ptr<CModelSubMesh> &subMesh);
 		virtual std::shared_ptr<ModelMesh> Copy() const override;

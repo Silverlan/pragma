@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 export module pragma.client:rendering.bloom_pipeline_info;
 
 export import std.compat;

@@ -390,7 +390,7 @@ struct PositionChannel : public Channel {
 	std::vector<Vector3> values;
 	static const Vector3 &Cast(const void *v) { return *static_cast<const Vector3 *>(v); }
 	virtual bool CompareValues(const void *v0, const void *v1) const override { return uvec::distance_sqr(Cast(v0), Cast(v1)) < 0.001f; }
-	virtual bool CompareWithDefault(const void *v) const override { return uvec::distance_sqr(Cast(v), uvec::ORIGIN) < 0.001f; }
+	virtual bool CompareWithDefault(const void *v) const override { return uvec::distance_sqr(Cast(v), uvec::PRM_ORIGIN) < 0.001f; }
 	virtual const void *GetValue(size_t idx) const override { return &values[idx]; }
 	virtual size_t GetValueCount() const override { return values.size(); }
 	virtual void AddValue(const void *v) override { values.push_back(Cast(v)); }

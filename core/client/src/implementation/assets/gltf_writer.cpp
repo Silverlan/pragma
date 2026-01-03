@@ -14,7 +14,7 @@ import :client_state;
 // #define ENABLE_GLTF_VALIDATION
 #define GLTF_ASSERT(c, msg)                                                                                                                                                                                                                                                                      \
 	if(!(c)) {                                                                                                                                                                                                                                                                                   \
-		Con::cwar << "glTF assertion failure: " << msg << Con::endl;                                                                                                                                                                                                                             \
+		Con::CWAR << "glTF assertion failure: " << msg << Con::endl;                                                                                                                                                                                                                             \
 		throw std::logic_error {"glTF assertion failed!"};                                                                                                                                                                                                                                       \
 	}
 
@@ -174,7 +174,7 @@ void pragma::asset::GLTFWriter::WriteMorphTargets(geometry::ModelSubMesh &mesh, 
 void pragma::asset::GLTFWriter::MergeSplitMeshes(ExportMeshList &meshList)
 {
 	if(m_exportInfo.verbose)
-		Con::cout << "Merging meshes by materials..." << Con::endl;
+		Con::COUT << "Merging meshes by materials..." << Con::endl;
 	std::unordered_map<uint32_t, std::vector<std::shared_ptr<geometry::ModelSubMesh>>> groupedMeshes {};
 	for(auto &mesh : meshList) {
 		auto texIdx = mesh->GetSkinTextureIndex();
@@ -203,7 +203,7 @@ void pragma::asset::GLTFWriter::MergeSplitMeshes(ExportMeshList &meshList)
 	}
 	meshList = mergedMeshes;
 	if(m_exportInfo.verbose)
-		Con::cout << numMerged << " meshes have been merged!" << Con::endl;
+		Con::COUT << numMerged << " meshes have been merged!" << Con::endl;
 }
 
 void pragma::asset::GLTFWriter::GenerateUniqueModelExportList()
@@ -345,7 +345,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 
 	// Initialize buffers
 	if(m_exportInfo.verbose)
-		Con::cout << "Initializing GLTF buffers..." << Con::endl;
+		Con::COUT << "Initializing GLTF buffers..." << Con::endl;
 
 	gltfMdl.buffers.reserve(BufferIndices::Count + numAnims + numVertexAnims * 2);
 
@@ -435,7 +435,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 							uv[i] = 0.f;
 					}
 					if(isNormalValid == false)
-						n = uvec::UP;
+						n = uvec::PRM_UP;
 #endif
 
 					memcpy(gltfVertexData + i * szVertex, &pos, sizeof(pos));
@@ -610,7 +610,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 
 	if(m_sceneDesc.cameras.empty() == false) {
 		if(m_exportInfo.verbose)
-			Con::cout << "Initializing " << m_sceneDesc.cameras.size() << " light sources..." << Con::endl;
+			Con::COUT << "Initializing " << m_sceneDesc.cameras.size() << " light sources..." << Con::endl;
 
 		auto &cameras = gltfMdl.cameras;
 		cameras.reserve(m_sceneDesc.cameras.size());
@@ -655,7 +655,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 
 	if(m_sceneDesc.lightSources.empty() == false) {
 		if(m_exportInfo.verbose)
-			Con::cout << "Initializing " << m_sceneDesc.lightSources.size() << " light sources..." << Con::endl;
+			Con::COUT << "Initializing " << m_sceneDesc.lightSources.size() << " light sources..." << Con::endl;
 		tinygltf::Value::Array lights {};
 		for(auto i = decltype(m_sceneDesc.lightSources.size()) {0u}; i < m_sceneDesc.lightSources.size(); ++i) {
 			auto &lightSource = m_sceneDesc.lightSources.at(i);
@@ -665,14 +665,14 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 			if(lightSource.type == LightSource::Type::Spot) {
 				if(outerConeAngle <= innerConeAngle) {
 					if(innerConeAngle <= 0.f) {
-						Con::cwar << "WARNING Spot light has cone angle of 0! Skipping..." << Con::endl;
+						Con::CWAR << "WARNING Spot light has cone angle of 0! Skipping..." << Con::endl;
 						continue;
 					}
-					Con::cwar << "WARNING Spot light has outer cone angle of " << outerConeAngle << ", which is smaller or equal to inner cone angle of " << innerConeAngle << "! This is not allowed! Clamping..." << Con::endl;
+					Con::CWAR << "WARNING Spot light has outer cone angle of " << outerConeAngle << ", which is smaller or equal to inner cone angle of " << innerConeAngle << "! This is not allowed! Clamping..." << Con::endl;
 					outerConeAngle = innerConeAngle;
 					innerConeAngle = math::max(innerConeAngle - 10.f, 0.1f);
 					if(outerConeAngle <= innerConeAngle) {
-						Con::cwar << "WARNING Spot light has cone angle of near 0! Skipping..." << Con::endl;
+						Con::CWAR << "WARNING Spot light has cone angle of near 0! Skipping..." << Con::endl;
 						continue;
 					}
 				}
@@ -773,16 +773,16 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 	std::string output_filename(writePath);
 
 	if(m_exportInfo.verbose)
-		Con::cout << "Writing output file as '" << output_filename << "'..." << Con::endl;
+		Con::COUT << "Writing output file as '" << output_filename << "'..." << Con::endl;
 	fs::remove_system_file(output_filename); // The glTF writer doesn't write anything if the file already exists
 	auto result = writer.WriteGltfSceneToFile(&gltfMdl, output_filename, false, true, true, m_exportInfo.saveAsBinary);
 	if(m_exportInfo.verbose) {
 		if(result)
-			Con::cout << "Successfully exported model '" << name << "' as '" << output_filename << "'!" << Con::endl;
+			Con::COUT << "Successfully exported model '" << name << "' as '" << output_filename << "'!" << Con::endl;
 		else if(err.empty() == false)
-			Con::cwar << "Unable to export model '" << name << "' as '" << output_filename << "': " << err << Con::endl;
+			Con::CWAR << "Unable to export model '" << name << "' as '" << output_filename << "': " << err << Con::endl;
 		else
-			Con::cwar << "Unable to export model '" << name << "' as '" << output_filename << "': " << warn << Con::endl;
+			Con::CWAR << "Unable to export model '" << name << "' as '" << output_filename << "': " << warn << Con::endl;
 	}
 	if(result == false) {
 		if(err.empty() == false)
@@ -796,7 +796,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 			if(IsAnimated(exportData.model) == false)
 				continue;
 			if(m_exportInfo.verbose)
-				Con::cout << "Exporting animations..." << Con::endl;
+				Con::COUT << "Exporting animations..." << Con::endl;
 			std::unordered_map<std::string, uint32_t> *anims = nullptr;
 			exportData.model.GetAnimations(&anims);
 			for(auto &pair : *anims) {
@@ -804,7 +804,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 				if(export_animation(exportData.model, pair.first, m_exportInfo, errMsg))
 					continue;
 				if(m_exportInfo.verbose)
-					Con::cwar << "Unable to export animation '" << pair.first << "': " << errMsg << Con::endl;
+					Con::CWAR << "Unable to export animation '" << pair.first << "': " << errMsg << Con::endl;
 			}
 		}
 	}
@@ -856,7 +856,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 	std::vector<Mat4> inverseBindPoseMatrices {};
 	if(IsAnimated(mdl) || IsSkinned(mdl)) {
 		if(m_exportInfo.verbose)
-			Con::cout << "Initializing GLTF Skeleton..." << Con::endl;
+			Con::COUT << "Initializing GLTF Skeleton..." << Con::endl;
 		auto gltfRootNodeIdx = AddNode("skeleton_root", true);
 
 		// Transform pose to relative
@@ -921,7 +921,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 			if(it != traversedJoints.end())
 				continue;
 			if(m_exportInfo.verbose)
-				Con::cwar << "Bone '" << skeleton.GetBone(i).lock()->name << "' has no parent but is not in list of root bones! Forcing into root bone list manually..." << Con::endl;
+				Con::CWAR << "Bone '" << skeleton.GetBone(i).lock()->name << "' has no parent but is not in list of root bones! Forcing into root bone list manually..." << Con::endl;
 			fIterateSkeleton(*skeleton.GetBone(i).lock(), m_gltfMdl.nodes.at(gltfRootNodeIdx));
 		}
 
@@ -1019,7 +1019,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 void pragma::asset::GLTFWriter::WriteAnimations(Model &mdl)
 {
 	if(m_exportInfo.verbose)
-		Con::cout << "Initializing GLTF animations..." << Con::endl;
+		Con::COUT << "Initializing GLTF animations..." << Con::endl;
 
 	// Animations
 	auto &skeleton = mdl.GetSkeleton();
@@ -1043,7 +1043,7 @@ void pragma::asset::GLTFWriter::WriteAnimations(Model &mdl)
 		auto &gltfAnim = m_gltfMdl.animations.back();
 		gltfAnim.name = animName;
 		if(m_exportInfo.verbose)
-			Con::cout << "Initializing GLTF animation '" << gltfAnim.name << "'..." << Con::endl;
+			Con::COUT << "Initializing GLTF animation '" << gltfAnim.name << "'..." << Con::endl;
 
 		auto &boneList = anim->GetBoneList();
 		auto numBones = boneList.size();
@@ -1284,32 +1284,32 @@ void pragma::asset::GLTFWriter::WriteAnimations(Model &mdl)
 void pragma::asset::GLTFWriter::GenerateAO(Model &mdl)
 {
 	if(m_exportInfo.verbose)
-		Con::cout << "Generating ambient occlusion maps..." << Con::endl;
+		Con::COUT << "Generating ambient occlusion maps..." << Con::endl;
 	std::string errMsg;
 	auto job = generate_ambient_occlusion(mdl, errMsg, false, m_exportInfo.aoResolution, m_exportInfo.aoSamples, m_exportInfo.aoDevice);
 	if(job.has_value() == false) {
 		if(m_exportInfo.verbose)
-			Con::cwar << "Unable to create parallel jobs for ambient occlusion map generation! Ambient occlusion maps will not be available." << Con::endl;
+			Con::CWAR << "Unable to create parallel jobs for ambient occlusion map generation! Ambient occlusion maps will not be available." << Con::endl;
 	}
 	else {
 		job->Start();
 		auto lastProgress = -1.f;
 		if(m_exportInfo.verbose)
-			Con::cout << "Waiting for ao job completion. This may take a while..." << Con::endl;
+			Con::COUT << "Waiting for ao job completion. This may take a while..." << Con::endl;
 		while(job->IsComplete() == false) {
 			job->Poll();
 			auto progress = job->GetProgress();
 			if(progress != lastProgress) {
 				lastProgress = progress;
 				if(m_exportInfo.verbose)
-					Con::cout << "Ao progress: " << progress << Con::endl;
+					Con::COUT << "Ao progress: " << progress << Con::endl;
 			}
 			if(progress < 1.f)
-				std::this_thread::sleep_for(std::chrono::seconds(1));
+				util::sleep_for_seconds(1);
 		}
 		if(job->IsSuccessful() == false) {
 			if(m_exportInfo.verbose)
-				Con::cwar << "Ao job has failed: " << job->GetResultMessage() << ". Ambient occlusion maps will not be available." << Con::endl;
+				Con::CWAR << "Ao job has failed: " << job->GetResultMessage() << ". Ambient occlusion maps will not be available." << Con::endl;
 		}
 	}
 	// Ambient occlusion generator may have applied some changes to some of the materials and/or textures.
@@ -1323,7 +1323,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		return; // No point in exporting materials if we're not exporting meshes either
 
 	if(m_exportInfo.verbose)
-		Con::cout << "Collecting materials..." << Con::endl;
+		Con::COUT << "Collecting materials..." << Con::endl;
 	std::vector<material::Material *> materials {};
 	for(auto &mdlDesc : m_sceneDesc.modelCollection) {
 		for(auto &hMat : mdlDesc.model.GetMaterials()) {
@@ -1340,7 +1340,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 	}
 
 	if(m_exportInfo.verbose)
-		Con::cout << "Initializing " << materials.size() << " GLTF materials..." << Con::endl;
+		Con::COUT << "Initializing " << materials.size() << " GLTF materials..." << Con::endl;
 	auto fAddTexture = [this](const std::string &texPath) -> uint32_t {
 		m_gltfMdl.images.push_back({});
 		auto &img = m_gltfMdl.images.back();
@@ -1365,7 +1365,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		m_gltfMdl.materials.push_back({});
 		auto &gltfMat = m_gltfMdl.materials.back();
 		if(m_exportInfo.verbose)
-			Con::cout << "Initializing GLTF material '" << mat->GetName() << "'..." << Con::endl;
+			Con::COUT << "Initializing GLTF material '" << mat->GetName() << "'..." << Con::endl;
 		gltfMat.name = ufile::get_file_from_filename(mat->GetName());
 		ufile::remove_extension_from_filename(gltfMat.name);
 

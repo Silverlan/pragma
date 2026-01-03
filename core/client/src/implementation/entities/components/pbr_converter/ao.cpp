@@ -55,7 +55,7 @@ void CPBRConverterComponent::ProcessQueue()
 	auto hMdl = item.hModel;
 	item.job.SetCompletionHandler([this, hMat, hMdl](util::ParallelWorker<image::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false) {
-			Con::cwar << "Generating ambient occlusion map failed: " << worker.GetResultMessage() << Con::endl;
+			Con::CWAR << "Generating ambient occlusion map failed: " << worker.GetResultMessage() << Con::endl;
 			return;
 		}
 		if(hMat == nullptr || hMdl.expired())
@@ -96,7 +96,7 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(asset::Model &mdl, const Amb
 }
 void CPBRConverterComponent::WriteAOMap(asset::Model &mdl, material::CMaterial &mat, image::ImageBuffer &imgBuffer, uint32_t w, uint32_t h) const
 {
-	Con::cout << "Ambient occlusion map has been generated for material '" << mat.GetName() << "' of model '" << mdl.GetName() << "'! Combining with RMA map..." << Con::endl;
+	Con::COUT << "Ambient occlusion map has been generated for material '" << mat.GetName() << "' of model '" << mdl.GetName() << "'! Combining with RMA map..." << Con::endl;
 
 	auto *shader = static_cast<ShaderComposeRMA *>(get_cengine()->GetShader("compose_rma").get());
 	if(shader == nullptr)

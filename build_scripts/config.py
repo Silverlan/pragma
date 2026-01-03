@@ -4,6 +4,7 @@ from sys import platform
 build_config_tp = "Release"
 cleanBuildFiles = False
 cmake_args = []
+cmake_path = "cmake"
 deps_dir = str(Path.cwd() / "deps")
 deps_staging_dir = "staging"
 prebuilt_bin_dir = str(Path(deps_dir) / deps_staging_dir)
@@ -25,4 +26,3 @@ clean_deps_build_files = False
 generator = default_generator
 with_lua_debugger = False
 with_swiftshader = False
-generator = default_generator

@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.operator_wander;
 
 export import :entities.components.particle_system;
@@ -14,13 +10,13 @@ import :engine;
 
 export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorWander : public CParticleOperatorWorldBase {
-	public:
+	  public:
 		CParticleOperatorWander() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 		virtual void Simulate(double tDelta) override;
 		virtual void OnParticleCreated(CParticle &particle) override;
-	protected:
+	  protected:
 		std::vector<int32_t> m_hashCodes;
 		float m_fFrequency = 2.f;
 		float m_fStrength = 0.05f;

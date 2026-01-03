@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 module pragma.client;
 
 import :console.commands;
@@ -14,7 +10,7 @@ void LPARAM_enable_gfx_api_dump(const std::vector<std::string> &argv)
 #ifdef PR_DEBUG_API_DUMP
 	prosper::debug::set_api_dump_enabled(argv.empty() || pragma::util::to_boolean(argv.front()));
 #else
-	Con::cerr << "API dump launch parameter was set, but API dump is not enabled in this build. Build with -DENABLE_DEBUG_API_DUMP to enable it." << Con::endl;
+	Con::CERR << "API dump launch parameter was set, but API dump is not enabled in this build. Build with -DENABLE_DEBUG_API_DUMP to enable it." << Con::endl;
 #endif
 }
 
@@ -36,7 +32,7 @@ namespace pragma::debug {
 	{
 		std::stringstream ss;
 		dump_api_dump_recorder_ss(ss, addr);
-		Con::cout << ss.str() << Con::endl;
+		Con::COUT << ss.str() << Con::endl;
 	}
 	DLLCLIENT void dump_api_dump_recorder_f(uint64_t addr)
 	{
@@ -67,7 +63,7 @@ namespace pragma::debug {
 	{
 		std::stringstream ss;
 		dump_api_dump_recorder_calltrace_ss(ss, addr, cmdIdx);
-		Con::cout << ss.str() << Con::endl;
+		Con::COUT << ss.str() << Con::endl;
 	}
 	DLLCLIENT void dump_api_dump_recorder_calltrace_main(uint64_t cmdIdx, int32_t recordIdx)
 	{
@@ -75,7 +71,7 @@ namespace pragma::debug {
 
 		std::stringstream ss;
 		apiDumpRecorder.PrintCallTrace(cmdIdx, ss, recordIdx);
-		Con::cout << ss.str() << Con::endl;
+		Con::COUT << ss.str() << Con::endl;
 	}
 	DLLCLIENT void dump_api_dump_recorder_calltrace_main(uint64_t cmdIdx)
 	{
@@ -83,7 +79,7 @@ namespace pragma::debug {
 
 		std::stringstream ss;
 		apiDumpRecorder.PrintCallTrace(cmdIdx, ss);
-		Con::cout << ss.str() << Con::endl;
+		Con::COUT << ss.str() << Con::endl;
 	}
 	DLLCLIENT void dump_api_dump_recorder_calltrace_f(uint64_t addr, uint64_t cmdIdx)
 	{

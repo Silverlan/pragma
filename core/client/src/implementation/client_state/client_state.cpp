@@ -139,14 +139,14 @@ static auto cvSteamAudioEnabled = pragma::console::get_client_con_var("cl_steam_
 
 void pragma::ClientState::Initialize()
 {
-	/*Con::cwar<<"Client NetMessages:"<<Con::endl;
+	/*Con::CWAR<<"Client NetMessages:"<<Con::endl;
 	auto *mapMsgs = GetNetMessageMap();
 	std::unordered_map<std::string,unsigned int> *msgs;
 	mapMsgs->GetNetMessages(&msgs);
 	std::unordered_map<std::string,unsigned int>::iterator i;
 	for(i=msgs->begin();i!=msgs->end();i++)
 	{
-		Con::cout<<"Name: "<<i->first<<Con::endl;
+		Con::COUT<<"Name: "<<i->first<<Con::endl;
 	}*/
 	NetworkState::Initialize();
 
@@ -530,7 +530,7 @@ void pragma::ClientState::Disconnect()
 	if(m_client != nullptr) {
 		networking::Error err;
 		if(m_client->Disconnect(err) == false)
-			Con::cwar << "Unable to disconnect from server: " << err.GetMessage() << Con::endl;
+			Con::CWAR << "Unable to disconnect from server: " << err.GetMessage() << Con::endl;
 		DestroyClient();
 	}
 }
@@ -561,7 +561,7 @@ bool pragma::ClientState::LoadGUILuaFile(std::string f)
 
 void pragma::ClientState::SendUserInfo()
 {
-	Con::ccl << "Sending user info..." << Con::endl;
+	Con::CCL << "Sending user info..." << Con::endl;
 
 	NetPacket packet;
 	auto &version = get_engine_version();

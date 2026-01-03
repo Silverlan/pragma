@@ -43,11 +43,11 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_compile_definitions(${TARGET_NAME} PRIVATE "_WIN32_WINNT=0x0A00") # Windows 10
     endif()
 
-    if(NOT WIN32 AND (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         target_link_options(${TARGET_NAME} PRIVATE "-Wl,--no-undefined")
     endif()
 
-    # Due to msvc compiler bugs, we introduce a few macros as temporary workarounds.
+    # Due to compiler bugs, we introduce a few macros as temporary workarounds.
     # Once constexpr works with modules under msvc, the macro can be removed.
     # CLASS_ENUM_COMPAT is used for cases where enums had to be moved from a class to a namespace.
     # Once msvc issues have been fixed, these should be moved back to their respective classes.
@@ -58,6 +58,13 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_DLL_COMPAT=extern __declspec(dllexport)")
         target_compile_definitions(${TARGET_NAME} PRIVATE "CLASS_ENUM_COMPAT=extern __declspec(dllexport)")
         target_compile_definitions(${TARGET_NAME} PRIVATE "MSVC_COMPILER_FIX")
+    elseif (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_COMPAT=inline const")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_DLL_COMPAT=__declspec(dllexport) const")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_CONST_COMPAT=inline const")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "STATIC_DLL_COMPAT=extern __declspec(dllexport)")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "CLASS_ENUM_COMPAT=extern __declspec(dllexport)")
+        target_compile_definitions(${TARGET_NAME} PRIVATE "WINDOWS_CLANG_COMPILER_FIX")
     else()
         target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_COMPAT=constexpr")
         target_compile_definitions(${TARGET_NAME} PRIVATE "CONSTEXPR_DLL_COMPAT=constexpr")
@@ -83,6 +90,29 @@ function(pr_precompile_headers TARGET_NAME PRECOMPILED_HEADER)
     # Disable precompiled headers for c-files
     file(GLOB_RECURSE SRC_C_FILES "${CMAKE_CURRENT_LIST_DIR}/src/*.c")
     set_source_files_properties("${SRC_C_FILES}" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+endfunction()
+
+function(pr_add_export_macro targetName macroName)
+    set(options STATIC SHARED)
+    set(oneValueArgs)
+    set(multiValueArgs)
+    cmake_parse_arguments(PARSE_ARGV 2 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+    if(PA_STATIC)
+        target_compile_definitions(${targetName}
+            PRIVATE   "${macroName}="
+        )
+    else()
+        if (UNIX)
+            target_compile_definitions(${targetName}
+                PRIVATE   "${macroName}=__attribute__((visibility(\"default\")))"
+            )
+        else()
+            target_compile_definitions(${targetName}
+                PRIVATE   "${macroName}=__declspec(dllexport)"
+            )
+        endif()
+    endif()
 endfunction()
 
 function(pr_add_library TARGET_NAME LIB_TYPE)

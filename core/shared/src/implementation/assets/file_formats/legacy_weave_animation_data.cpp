@@ -20,7 +20,7 @@ std::shared_ptr<pragma::animation::Animation> FWAD::ReadData(unsigned short mdlV
 	}
 	auto anim = pragma::animation::Animation::Create();
 	//unsigned short ver = Read<unsigned short>();
-	//Con::cout<<"Animation Version: "<<ver<<Con::endl;
+	//Con::COUT<<"Animation Version: "<<ver<<Con::endl;
 
 	auto activity = pragma::Activity::Invalid;
 	if(mdlVersion >= 0x0013) {
@@ -171,7 +171,7 @@ std::shared_ptr<pragma::animation::Animation> FWAD::Load(unsigned short version,
 	const char *cPath = path.c_str();
 	auto f = pragma::fs::open_file(cPath, pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(f == nullptr) {
-		Con::cout << "WARNING: Unable to open animation '" << animation << "': File not found!" << Con::endl;
+		Con::COUT << "WARNING: Unable to open animation '" << animation << "': File not found!" << Con::endl;
 		return nullptr;
 	}
 	pragma::fs::File fp {f};

@@ -413,7 +413,7 @@ Vector3 ShaderParticle2DBase::DoCalcVertexPosition(const ecs::CParticleSystemCom
 			break;
 		}
 	case pts::ParticleOrientationType::Static:
-		right = uvec::UP;
+		right = uvec::PRM_UP;
 		up = camUpWs;
 		break;
 	case pts::ParticleOrientationType::World:

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :entities.components.weapon;
@@ -217,7 +215,7 @@ void CWeaponComponent::OnFireBullets(const game::BulletInfo &bulletInfo, Vector3
 		if(plComponent->IsLocalPlayer()) {
 			auto charComponent = owner->GetCharacterComponent();
 			auto pTrComponent = owner->GetTransformComponent();
-			bulletDir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD;
+			bulletDir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::PRM_FORWARD;
 			bulletOrigin = plComponent->GetViewPos();
 		}
 	}

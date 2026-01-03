@@ -253,7 +253,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 
 		std::vector<Vector2> points2d;
 		points2d.reserve(newPoints.size());
-		auto rot = math::geometry::calc_rotation_between_planes(n, uvec::UP);
+		auto rot = math::geometry::calc_rotation_between_planes(n, uvec::PRM_UP);
 		for(auto &v : newPoints) {
 			auto p = v.vertex.position;
 			p = p * rot;
@@ -286,7 +286,7 @@ void pragma::geometry::ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d
 		for(auto idx : newTriangles)
 			ss << "\t" << idx << "\n";
 		ss << "}\n";
-		Con::cout << ss.str() << Con::endl;
+		Con::COUT << ss.str() << Con::endl;
 
 		if(/*b == true &&*/ newTriangles.empty() == false) {
 			auto fCalcVertexWeights = [&newPoints](const Vector3 &pos) -> math::VertexWeight {

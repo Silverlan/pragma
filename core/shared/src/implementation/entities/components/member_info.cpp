@@ -232,7 +232,7 @@ util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent
 		if(it == m_preRegistered.end()) {
 			// Component has NOT been pre-registered? Then where did the component id come from?
 			// This should be unreachable!
-			Con::cerr << "Attempted to create unknown component '" << componentId << "'!" << Con::endl;
+			Con::CERR << "Attempted to create unknown component '" << componentId << "'!" << Con::endl;
 			return nullptr;
 		}
 		auto &preRegInfo = *it;

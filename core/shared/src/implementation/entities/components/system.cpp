@@ -91,7 +91,7 @@ ComponentHandle<BaseEntityComponent> BaseEntityComponentSystem::AddComponent(Com
 	}
 	auto ptrComponent = m_componentManager->CreateComponent(componentId, *m_entity);
 	if(ptrComponent == nullptr) {
-		Con::cwar << "Unable to create entity component of type " << componentId << "!" << this << Con::endl;
+		Con::CWAR << "Unable to create entity component of type " << componentId << "!" << this << Con::endl;
 		return {};
 	}
 	if(m_components.size() == m_components.capacity())
@@ -138,7 +138,7 @@ ComponentHandle<BaseEntityComponent> BaseEntityComponentSystem::AddComponent(con
 		if(
 		  // Component isn't registered, try to load it dynamically
 		  m_entity->GetNetworkState()->GetGameState()->LoadLuaComponentByName(name) == false || m_componentManager->GetComponentTypeId(name, componentId) == false) {
-			Con::cwar << "Attempted to add unknown component '" << name << "' to game object " << this << Con::endl;
+			Con::CWAR << "Attempted to add unknown component '" << name << "' to game object " << this << Con::endl;
 			return {};
 		}
 	}

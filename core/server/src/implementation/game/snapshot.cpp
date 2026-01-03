@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.server;
 import :game;
 
@@ -117,7 +115,7 @@ void pragma::SGame::SendSnapshot(SPlayerComponent *pl)
 				packet->Write<uint8_t>(szComponent, &offsetComponentSize);
 
 				if(++numComponents == std::numeric_limits<uint8_t>::max()) {
-					Con::cwar << Con::PREFIX_SERVER << "Attempted to send data for more than " << std::numeric_limits<uint8_t>::max() << " components for a single entity! This is not allowed!" << Con::endl;
+					Con::CWAR << Con::PREFIX_SERVER << "Attempted to send data for more than " << std::numeric_limits<uint8_t>::max() << " components for a single entity! This is not allowed!" << Con::endl;
 					break;
 				}
 			}
@@ -159,7 +157,7 @@ void pragma::SGame::SendSnapshot(SPlayerComponent *pl)
 
 void pragma::SGame::SendSnapshot()
 {
-	//Con::csv<<"Sending snapshot.."<<Con::endl;
+	//Con::CSV<<"Sending snapshot.."<<Con::endl;
 	auto &players = SPlayerComponent::GetAll();
 	//unsigned char numPlayersValid = 0;
 	for(auto *plComponent : players) {

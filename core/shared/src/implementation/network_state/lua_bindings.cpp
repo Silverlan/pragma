@@ -170,13 +170,11 @@ static void register_string_to_vector_type_constructor(lua::State *l)
 // DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, Transform);
 // DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, ScaledTransform);
 
-#ifdef __linux__
+#ifdef __clang__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::util, BaseParallelJob);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::image, ImageBuffer);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::util, Version);
 #endif
-// #ifdef __linux__
-// #endif
 
 // DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg, ImageLayerSet);
 
@@ -791,6 +789,9 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 	defPath->def(luabind::self + luabind::const_self);
 	defPath->def(luabind::self + std::string {});
+	
+	defPath->def(luabind::self / luabind::const_self);
+	defPath->def(luabind::self / std::string {});
 
 	defPath->def(luabind::const_self == luabind::const_self);
 	defPath->def(luabind::const_self == std::string {});

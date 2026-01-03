@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :gui.key_entry;
@@ -119,19 +117,18 @@ void pragma::gui::types::WIKeyEntry::OnFocusGained()
 	auto hKeyEntry = GetHandle();
 	auto hRect = pRect->GetHandle();
 	pRect->AddCallback("OnMouseEvent",
-	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
-	    [hRect, hKeyEntry](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier) mutable -> CallbackReturnType {
-		    if(state != platform::KeyState::Press || !hKeyEntry.IsValid()) {
-			    *reply = util::EventReply::Handled;
-			    return CallbackReturnType::HasReturnValue;
-		    }
-		    auto *pKeyEntry = static_cast<WIKeyEntry *>(hKeyEntry.get());
-		    pKeyEntry->ApplyKey(static_cast<platform::Key>(static_cast<uint32_t>(button) + static_cast<uint32_t>(platform::Key::Last)));
-		    if(hRect.IsValid())
-			    hRect.get()->RemoveSafely();
-		    *reply = util::EventReply::Handled;
-		    return CallbackReturnType::HasReturnValue;
-	    }));
+	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn([hRect, hKeyEntry](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier) mutable -> CallbackReturnType {
+		  if(state != platform::KeyState::Press || !hKeyEntry.IsValid()) {
+			  *reply = util::EventReply::Handled;
+			  return CallbackReturnType::HasReturnValue;
+		  }
+		  auto *pKeyEntry = static_cast<WIKeyEntry *>(hKeyEntry.get());
+		  pKeyEntry->ApplyKey(static_cast<platform::Key>(static_cast<uint32_t>(button) + static_cast<uint32_t>(platform::Key::Last)));
+		  if(hRect.IsValid())
+			  hRect.get()->RemoveSafely();
+		  *reply = util::EventReply::Handled;
+		  return CallbackReturnType::HasReturnValue;
+	  }));
 	pRect->AddCallback("OnScroll", FunctionCallback<util::EventReply, Vector2, bool>::CreateWithOptionalReturn([hRect, hKeyEntry](util::EventReply *reply, Vector2 offset, bool offsetAsPixels) mutable -> CallbackReturnType {
 		if(!hKeyEntry.IsValid()) {
 			*reply = util::EventReply::Handled;

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :gui.lua_interface;
@@ -253,25 +251,22 @@ void pragma::gui::WGUILuaInterface::Clear()
 void pragma::gui::WGUILuaInterface::InitializeGUIElement(types::WIBase &p)
 {
 	p.AddCallback("OnMouseEvent",
-	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
-	    [&p](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
-		    auto r = GUI_Callback_OnMouseEvent(p, button, state, mods);
-		    if(r.has_value()) {
-			    *reply = *r;
-			    return CallbackReturnType::HasReturnValue;
-		    }
-		    return CallbackReturnType::NoReturnValue;
-	    }));
-	p.AddCallback("OnKeyEvent",
-	  FunctionCallback<util::EventReply, platform::Key, int, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
-	    [&p](util::EventReply *reply, platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
-		    auto r = GUI_Callback_OnKeyEvent(p, key, scanCode, state, mods);
-		    if(r.has_value()) {
-			    *reply = *r;
-			    return CallbackReturnType::HasReturnValue;
-		    }
-		    return CallbackReturnType::NoReturnValue;
-	    }));
+	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
+		  auto r = GUI_Callback_OnMouseEvent(p, button, state, mods);
+		  if(r.has_value()) {
+			  *reply = *r;
+			  return CallbackReturnType::HasReturnValue;
+		  }
+		  return CallbackReturnType::NoReturnValue;
+	  }));
+	p.AddCallback("OnKeyEvent", FunctionCallback<util::EventReply, platform::Key, int, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply, platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
+		auto r = GUI_Callback_OnKeyEvent(p, key, scanCode, state, mods);
+		if(r.has_value()) {
+			*reply = *r;
+			return CallbackReturnType::HasReturnValue;
+		}
+		return CallbackReturnType::NoReturnValue;
+	}));
 	p.AddCallback("OnCharEvent", FunctionCallback<util::EventReply, int, platform::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply, int c, platform::Modifier mods) -> CallbackReturnType {
 		auto r = GUI_Callback_OnCharEvent(p, c, mods);
 		if(r.has_value()) {

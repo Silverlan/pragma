@@ -12,7 +12,7 @@ export import :physics.water_surface_simulator;
 
 export namespace pragma {
 	namespace baseLiquidSurfaceSimulationComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED)
 	}
 	class DLLNETWORK BaseLiquidSurfaceSimulationComponent : public BaseEntityComponent {
 	  public:

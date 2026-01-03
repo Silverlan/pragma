@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :entities.components.render;
@@ -55,8 +53,7 @@ void CRenderComponent::RegisterMembers(EntityComponentManager &componentManager,
 		registerMember(std::move(memberInfo));
 	}
 }
-CRenderComponent::CRenderComponent(ecs::BaseEntity &ent)
-    : BaseRenderComponent(ent), m_renderGroups {util::TEnumProperty<rendering::RenderGroup>::Create(rendering::RenderGroup::None)}, m_renderPass {util::TEnumProperty<rendering::SceneRenderPass>::Create(rendering::SceneRenderPass::World)}
+CRenderComponent::CRenderComponent(ecs::BaseEntity &ent) : BaseRenderComponent(ent), m_renderGroups {util::TEnumProperty<rendering::RenderGroup>::Create(rendering::RenderGroup::None)}, m_renderPass {util::TEnumProperty<rendering::SceneRenderPass>::Create(rendering::SceneRenderPass::World)}
 {
 }
 void CRenderComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
@@ -994,62 +991,62 @@ static void debug_entity_render_buffer(NetworkState *state, BasePlayerComponent 
 		return;
 	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	if(ents.empty()) {
-		Con::cwar << "No target entity found!" << Con::endl;
+		Con::CWAR << "No target entity found!" << Con::endl;
 		return;
 	}
 	auto *ent = ents.front();
 	auto mdlC = ent->GetComponent<CModelComponent>();
 	if(mdlC.expired()) {
-		Con::cwar << "Target entity has no model component!" << Con::endl;
+		Con::CWAR << "Target entity has no model component!" << Con::endl;
 	}
 	else {
 		auto vdata = mdlC->GetRenderBufferData();
 		if(vdata.empty()) {
-			Con::cwar << "No render buffer data found!" << Con::endl;
+			Con::CWAR << "No render buffer data found!" << Con::endl;
 			return;
 		}
 		size_t lod = 0;
 		for(auto &data : vdata) {
-			Con::cout << "Render buffer data for LOD " << lod << ": " << Con::endl;
-			Con::cout << "pipelineSpecializationFlags: " << magic_enum::enum_name(data.pipelineSpecializationFlags) << Con::endl;
-			Con::cout << "material: ";
+			Con::COUT << "Render buffer data for LOD " << lod << ": " << Con::endl;
+			Con::COUT << "pipelineSpecializationFlags: " << magic_enum::enum_name(data.pipelineSpecializationFlags) << Con::endl;
+			Con::COUT << "material: ";
 			if(data.material)
-				Con::cout << data.material->GetName();
+				Con::COUT << data.material->GetName();
 			else
-				Con::cout << "NULL";
-			Con::cout << Con::endl;
-			Con::cout << "stateFlags: " << magic_enum::enum_name(data.stateFlags) << Con::endl;
+				Con::COUT << "NULL";
+			Con::COUT << Con::endl;
+			Con::COUT << "stateFlags: " << magic_enum::enum_name(data.stateFlags) << Con::endl;
 		}
-		Con::cout << Con::endl;
+		Con::COUT << Con::endl;
 	}
 
 	auto renderC = ent->GetComponent<CRenderComponent>();
 	if(renderC.expired()) {
-		Con::cwar << "Target entity has no render component!" << Con::endl;
+		Con::CWAR << "Target entity has no render component!" << Con::endl;
 	}
 	else {
 		auto printInstanceData = [](const rendering::InstanceData &instanceData) {
-			Con::cout << "modelMatrix: " << umat::to_string(instanceData.modelMatrix) << Con::endl;
-			Con::cout << "color: " << instanceData.color << Con::endl;
-			Con::cout << "renderFlags: " << magic_enum::enum_name(instanceData.renderFlags) << Con::endl;
-			Con::cout << "entityIndex: " << instanceData.entityIndex << Con::endl;
-			Con::cout << "padding: " << instanceData.padding << Con::endl;
+			Con::COUT << "modelMatrix: " << umat::to_string(instanceData.modelMatrix) << Con::endl;
+			Con::COUT << "color: " << instanceData.color << Con::endl;
+			Con::COUT << "renderFlags: " << magic_enum::enum_name(instanceData.renderFlags) << Con::endl;
+			Con::COUT << "entityIndex: " << instanceData.entityIndex << Con::endl;
+			Con::COUT << "padding: " << instanceData.padding << Con::endl;
 		};
 		auto &instanceData = renderC->GetInstanceData();
-		Con::cout << "Instance data:" << Con::endl;
+		Con::COUT << "Instance data:" << Con::endl;
 		printInstanceData(instanceData);
 
 		auto *buf = renderC->GetRenderBuffer();
 		rendering::InstanceData bufData;
 		if(!buf || !buf->Read(0, sizeof(bufData), &bufData))
-			Con::cwar << "Failed to read buffer data!" << Con::endl;
+			Con::CWAR << "Failed to read buffer data!" << Con::endl;
 		else {
 			if(memcmp(&instanceData, &bufData, sizeof(bufData)) != 0) {
-				Con::cwar << "Instance data does not match data in buffer! Data in buffer:" << Con::endl;
+				Con::CWAR << "Instance data does not match data in buffer! Data in buffer:" << Con::endl;
 				printInstanceData(bufData);
 			}
 		}
-		Con::cout << Con::endl;
+		Con::COUT << Con::endl;
 	}
 }
 namespace {
@@ -1068,18 +1065,18 @@ namespace Lua::Render {
 
 		auto t = CreateTable(l);
 
-		PushString(l, "position");        /* 1 */
+		PushString(l, "position");             /* 1 */
 		Lua::Push<Vector3>(l, result->hitPos); /* 2 */
-		SetTableValue(l, t);              /* 0 */
+		SetTableValue(l, t);                   /* 0 */
 
 		PushString(l, "distance");       /* 1 */
 		PushNumber(l, result->hitValue); /* 2 */
 		SetTableValue(l, t);             /* 0 */
 
 		if(precise && result->precise) {
-			PushString(l, "uv");                                                    /* 1 */
+			PushString(l, "uv");                                                         /* 1 */
 			Lua::Push<::Vector2>(l, ::Vector2 {result->precise->u, result->precise->v}); /* 2 */
-			SetTableValue(l, t);                                                    /* 0 */
+			SetTableValue(l, t);                                                         /* 0 */
 			return;
 		}
 

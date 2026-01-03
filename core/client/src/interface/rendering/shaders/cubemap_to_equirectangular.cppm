@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:rendering.shaders.cubemap_to_equirectangular;
 
 export import :rendering.shaders.cubemap;

@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:particle_system.modifier_random_color;
@@ -28,7 +27,9 @@ export namespace pragma::pts {
 		CParticleModifierComponentRandomVariable<std::uniform_int_distribution<int16_t>, int16_t> m_alpha;
 	};
 };
-export {REGISTER_ENUM_FLAGS(pragma::pts::CParticleModifierComponentRandomColor::ComponentFlags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::pts::CParticleModifierComponentRandomColor::ComponentFlags)
+}
 
 pragma::pts::CParticleModifierComponentRandomColor::CParticleModifierComponentRandomColor(const std::string &suffix, const std::unordered_map<std::string, std::string> &values) { Initialize(suffix, values); }
 

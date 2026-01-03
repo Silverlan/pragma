@@ -10,8 +10,6 @@ import :entities.components.base_surface;
 
 using namespace pragma;
 
-ComponentEventId baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId baseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED = INVALID_COMPONENT_ID;
 void BaseSurfaceComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED = registerEvent("ON_SURFACE_PLANE_CHANGED", ComponentEventInfo::Type::Broadcast);
@@ -23,7 +21,7 @@ void BaseSurfaceComponent::RegisterMembers(EntityComponentManager &componentMana
 	using T = BaseSurfaceComponent;
 	{
 		auto memberInfo = create_component_member_info<T, Vector4, [](const ComponentMemberInfo &, T &component, const Vector4 &value) { component.SetPlane(value); }, [](const ComponentMemberInfo &, T &component, Vector4 &value) { value = component.GetPlane().ToVector4(); }>("plane",
-		  Vector4 {uvec::FORWARD, 0.0}, AttributeSpecializationType::Plane);
+		  Vector4 {uvec::PRM_FORWARD, 0.0}, AttributeSpecializationType::Plane);
 		registerMember(std::move(memberInfo));
 	}
 
@@ -34,7 +32,7 @@ void BaseSurfaceComponent::RegisterMembers(EntityComponentManager &componentMana
 			  plane.SetNormal(value);
 			  component.SetPlane(plane);
 		  },
-		  [](const ComponentMemberInfo &, T &component, Vector3 &value) { value = component.GetPlane().GetNormal(); }>("normal", uvec::FORWARD, AttributeSpecializationType::Normal);
+		  [](const ComponentMemberInfo &, T &component, Vector3 &value) { value = component.GetPlane().GetNormal(); }>("normal", uvec::PRM_FORWARD, AttributeSpecializationType::Normal);
 		registerMember(std::move(memberInfo));
 	}
 
@@ -200,10 +198,10 @@ bool BaseSurfaceComponent::IsPointBelowSurface(const Vector3 &p) const { return 
 Quat BaseSurfaceComponent::GetPlaneRotation() const
 {
 	auto plane = GetPlaneWs();
-	auto up = uvec::UP;
+	auto up = uvec::PRM_UP;
 	auto &n = plane.GetNormal();
 	if(math::abs(uvec::dot(n, up)) > 0.99f)
-		up = uvec::FORWARD;
+		up = uvec::PRM_FORWARD;
 	up = up - uvec::project(up, n);
 	uvec::normalize(&up);
 	return uquat::create_look_rotation(n, up);

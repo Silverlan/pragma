@@ -18,7 +18,7 @@ pragma::AnimationUpdateManager::AnimationUpdateManager(Game &game) : game {game}
 	r = r && componentManager.GetComponentTypeId("constraint_manager", m_constraintManagerComponentId);
 	assert(r);
 	if(!r) {
-		Con::crit << "Unable to determine animated component ids!" << Con::endl;
+		Con::CRIT << "Unable to determine animated component ids!" << Con::endl;
 		exit(EXIT_FAILURE);
 	}
 }

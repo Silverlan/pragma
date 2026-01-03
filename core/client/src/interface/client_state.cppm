@@ -1,18 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
-#undef PlaySound
-
 export module pragma.client:client_state;
 export import :audio;
 export import :game;
 export import :gui;
 export import :networking;
 export import pragma.string.unicode;
+
+#undef PlaySound
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :entities.components.animated;
@@ -262,7 +260,7 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 	auto &refFrame = *bindPose;
 	auto numBones = GetBoneCount();
 	if(numBones != m_processedBones.size()) {
-		Con::cwar << "Bone count mismatch between processed bones and actual bones for entity " << GetEntity() << Con::endl;
+		Con::CWAR << "Bone count mismatch between processed bones and actual bones for entity " << GetEntity() << Con::endl;
 		return;
 	}
 	for(unsigned int i = 0; i < GetBoneCount(); i++) {
@@ -287,7 +285,7 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 				mat = umat::identity();
 		}
 		else
-			Con::cwar << "Attempted to update bone " << i << " in " << mdl->GetName() << " which doesn't exist in the reference pose! Ignoring..." << Con::endl;
+			Con::CWAR << "Attempted to update bone " << i << " in " << mdl->GetName() << " which doesn't exist in the reference pose! Ignoring..." << Con::endl;
 	}
 	if(callbacksEnabled)
 		InvokeEventCallbacks(cAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED);

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :entities.components.attachment;
@@ -57,8 +55,8 @@ void CAttachmentComponent::UpdateViewAttachmentOffset(ecs::BaseEntity *ent, Base
 	if(cam.expired())
 		return;
 	auto trComponent = cam->GetEntity().GetTransformComponent();
-	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
-	auto up = trComponent ? trComponent->GetUp() : uvec::UP;
+	auto forward = trComponent ? trComponent->GetForward() : uvec::PRM_FORWARD;
+	auto up = trComponent ? trComponent->GetUp() : uvec::PRM_UP;
 	if(bYawOnly == false) {
 		pos = cam->GetEntity().GetPosition();
 		auto right = uvec::cross(forward, up);

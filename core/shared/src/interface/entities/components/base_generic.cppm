@@ -10,9 +10,9 @@ export import :entities.components.base;
 
 export namespace pragma {
 	namespace baseGenericComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ENTITY_COMPONENT_ADDED;
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ENTITY_COMPONENT_REMOVED;
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_MEMBERS_CHANGED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_ENTITY_COMPONENT_ADDED)
+		REGISTER_COMPONENT_EVENT(EVENT_ON_ENTITY_COMPONENT_REMOVED)
+		REGISTER_COMPONENT_EVENT(EVENT_ON_MEMBERS_CHANGED)
 	}
 	class DLLNETWORK BaseGenericComponent : public BaseEntityComponent {
 	  public:

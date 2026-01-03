@@ -8,7 +8,6 @@ import :entities.components.base_ownable;
 
 using namespace pragma;
 
-ComponentEventId baseOwnableComponent::EVENT_ON_OWNER_CHANGED = INVALID_COMPONENT_ID;
 void BaseOwnableComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseOwnableComponent::EVENT_ON_OWNER_CHANGED = registerEvent("ON_OWNER_CHANGED", ComponentEventInfo::Type::Broadcast); }
 BaseOwnableComponent::BaseOwnableComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_owner(EntityProperty::Create()) {}
 void BaseOwnableComponent::Initialize()

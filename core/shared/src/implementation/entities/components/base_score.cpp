@@ -8,7 +8,6 @@ import :entities.components.base_score;
 
 using namespace pragma;
 
-ComponentEventId baseScoreComponent::EVENT_ON_SCORE_CHANGED = INVALID_COMPONENT_ID;
 void BaseScoreComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseScoreComponent::EVENT_ON_SCORE_CHANGED = registerEvent("ON_SCORE_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void BaseScoreComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {

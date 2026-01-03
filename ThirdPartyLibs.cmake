@@ -252,8 +252,14 @@ set(RECASTNAVIGATION_STATIC
 set(RECASTNAVIGATION_TESTS
     OFF
     CACHE BOOL OFF FORCE)
+set(BUILD_SHARED_LIBS
+    OFF
+    CACHE BOOL OFF FORCE)
 pr_include_third_party_library(recastnavigation TARGET Recast INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/recastnavigation/Recast/Include")
 pr_include_third_party_library(TARGET Detour INC "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/recastnavigation/Detour/Include")
+set(BUILD_SHARED_LIBS
+    ON
+    CACHE BOOL ON FORCE)
 pr_set_target_folder(DebugUtils third_party_libs/recast)
 pr_set_target_folder(Detour third_party_libs/recast)
 pr_set_target_folder(DetourCrowd third_party_libs/recast)

@@ -115,7 +115,7 @@ static void calc_surface_plane(const pragma::physics::PhysWaterSurfaceSimulator 
 	if(game->IsClient())
 	{
 		game->DrawLine(Vector3(),waterPlaneRelObj *static_cast<float>(waterPlaneDistRelObj),colors::Red,0.1f);
-		Con::cout<<"Distance: "<<waterPlaneDistRelObj<<Con::endl;
+		Con::COUT<<"Distance: "<<waterPlaneDistRelObj<<Con::endl;
 	}*/
 
 	Vector3 min {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
@@ -404,7 +404,7 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(ecs::BaseEntity &entWater
 	static auto prev = submergedPercent;
 	if(submergedPercent != prev) {
 		prev = submergedPercent;
-		//Con::cout<<"Submerged: "<<submergedPercent<<Con::endl;
+		//Con::COUT<<"Submerged: "<<submergedPercent<<Con::endl;
 	}
 
 	pSubmergedComponent->SetSubmergedFraction(entWater, submergedPercent);

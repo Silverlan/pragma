@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.server;
 import :entities.components.player;
 
@@ -246,8 +244,8 @@ void SPlayerComponent::Initialize()
 	BasePlayerComponent::Initialize();
 
 	BindEventUnhandled(damageableComponent::EVENT_ON_TAKE_DAMAGE, [this](std::reference_wrapper<ComponentEvent> evData) { OnTakeDamage(static_cast<CEOnTakeDamage &>(evData.get()).damageInfo); });
-	BindEventUnhandled(baseScoreComponent::EVENT_ON_SCORE_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {ServerState::Get()->UpdatePlayerScore(*this, static_cast<CEOnScoreChanged &>(evData.get()).score); });
-	BindEventUnhandled(baseNameComponent::EVENT_ON_NAME_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {ServerState::Get()->UpdatePlayerName(*this, static_cast<CEOnNameChanged &>(evData.get()).name); });
+	BindEventUnhandled(baseScoreComponent::EVENT_ON_SCORE_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { ServerState::Get()->UpdatePlayerScore(*this, static_cast<CEOnScoreChanged &>(evData.get()).score); });
+	BindEventUnhandled(baseNameComponent::EVENT_ON_NAME_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { ServerState::Get()->UpdatePlayerName(*this, static_cast<CEOnNameChanged &>(evData.get()).name); });
 }
 
 void SPlayerComponent::OnSetSlopeLimit(float limit)

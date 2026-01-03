@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :util.resource_watcher;
@@ -29,7 +27,7 @@ void pragma::util::CResourceWatcherManager::ReloadTexture(const std::string &pat
 	texManager.RemoveFromCache(path);
 	auto loadInfo = std::make_unique<material::TextureLoadInfo>();
 	auto tex = texManager.LoadAsset(path, std::move(loadInfo));
-	if (tex != nullptr && nw != nullptr) {
+	if(tex != nullptr && nw != nullptr) {
 		auto &matManager = static_cast<material::CMaterialManager &>(nw->GetMaterialManager());
 		auto &texManager = matManager.GetTextureManager();
 
@@ -124,7 +122,7 @@ void pragma::util::CResourceWatcherManager::OnResourceChanged(const Path &rootPa
 				return;
 #if RESOURCE_WATCHER_VERBOSE > 0
 			auto ptPath = "particles\\" + strPath;
-			Con::cout << "[ResourceWatcher] Particle has changed: " << ptPath << ". Attempting to reload..." << Con::endl;
+			Con::COUT << "[ResourceWatcher] Particle has changed: " << ptPath << ". Attempting to reload..." << Con::endl;
 #endif
 			ecs::CParticleSystemComponent::Precache(strPath, true);
 			CallChangeCallbacks(ECResourceWatcherCallbackType::ParticleSystem, strPath, ext);
@@ -133,7 +131,7 @@ void pragma::util::CResourceWatcherManager::OnResourceChanged(const Path &rootPa
 	else if(prosper::glsl::is_glsl_file_extension(ext) || ext == "hlsl") {
 #if RESOURCE_WATCHER_VERBOSE > 0
 		auto shaderPath = "shaders\\" + strPath;
-		Con::cout << "[ResourceWatcher] Shader has changed: " << shaderPath << ". Attempting to reload..." << Con::endl;
+		Con::COUT << "[ResourceWatcher] Shader has changed: " << shaderPath << ". Attempting to reload..." << Con::endl;
 #endif
 		auto canonShader = fs::get_canonicalized_path(strPath);
 		ufile::remove_extension_from_filename(canonShader);
@@ -154,7 +152,7 @@ void pragma::util::CResourceWatcherManager::OnResourceChanged(const Path &rootPa
 		}
 		for(auto &name : reloadShaders) {
 #if RESOURCE_WATCHER_VERBOSE > 0
-			Con::cout << "[ResourceWatcher] Reloading shader '" << name << "'..." << Con::endl;
+			Con::COUT << "[ResourceWatcher] Reloading shader '" << name << "'..." << Con::endl;
 #endif
 			get_cengine()->ReloadShader(name);
 		}
@@ -168,7 +166,7 @@ void pragma::util::CResourceWatcherManager::OnResourceChanged(const Path &rootPa
 		auto graph = graphManager.LoadShader(name, err, false /* reload */);
 		if(graph == nullptr) {
 #if RESOURCE_WATCHER_VERBOSE > 0
-			Con::cwar << "[ResourceWatcher] Failed to reload shader graph '" << name << "': " << err << Con::endl;
+			Con::CWAR << "[ResourceWatcher] Failed to reload shader graph '" << name << "': " << err << Con::endl;
 #endif
 			return;
 		}

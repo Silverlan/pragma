@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :networking.model_load_manager;
@@ -47,7 +45,7 @@ ModelLoadManager::ModelLoadManager()
 					if(mdlName != query->fileName)
 						continue;
 #if RESOURCE_TRANSFER_VERBOSE == 1
-					Con::ccl << "[ResourceManager] Updating model..." << Con::endl;
+					Con::CCL << "[ResourceManager] Updating model..." << Con::endl;
 #endif
 					mdlComponent->SetModel(query->model);
 				}
@@ -76,16 +74,16 @@ class UVCalculator {
 	{
 		auto ret = Facing::Up;
 		auto maxDot = 0.f;
-		if(!FacesThisWay(v, uvec::RIGHT, Facing::Right, maxDot, ret)) {
-			if(FacesThisWay(v, -uvec::RIGHT, Facing::Right, maxDot, ret))
+		if(!FacesThisWay(v, uvec::PRM_RIGHT, Facing::Right, maxDot, ret)) {
+			if(FacesThisWay(v, -uvec::PRM_RIGHT, Facing::Right, maxDot, ret))
 				scale.x *= -1.f;
 		}
 
-		if(!FacesThisWay(v, uvec::FORWARD, Facing::Forward, maxDot, ret))
-			FacesThisWay(v, -uvec::FORWARD, Facing::Forward, maxDot, ret);
+		if(!FacesThisWay(v, uvec::PRM_FORWARD, Facing::Forward, maxDot, ret))
+			FacesThisWay(v, -uvec::PRM_FORWARD, Facing::Forward, maxDot, ret);
 
-		if(!FacesThisWay(v, uvec::UP, Facing::Up, maxDot, ret))
-			FacesThisWay(v, -uvec::UP, Facing::Up, maxDot, ret);
+		if(!FacesThisWay(v, uvec::PRM_UP, Facing::Up, maxDot, ret))
+			FacesThisWay(v, -uvec::PRM_UP, Facing::Up, maxDot, ret);
 		return ret;
 	}
 	static bool FacesThisWay(const Vector3 &v, const Vector3 &dir, Facing p, float &maxDot, Facing &ret)
@@ -161,7 +159,7 @@ void ModelLoadManager::Update()
 			std::string err;
 			dllHandle = pragma::get_client_state()->LoadLibraryModule("pcl/util_pcl", {}, &err);
 			if(dllHandle == nullptr) {
-				Con::cwar << "Unable to load PCL module. Rough models will not be generated!" << Con::endl;
+				Con::CWAR << "Unable to load PCL module. Rough models will not be generated!" << Con::endl;
 				return;
 			}
 		}
@@ -176,7 +174,7 @@ void ModelLoadManager::Update()
 		auto type = packet->Read<uint8_t>();
 		auto numMeshes = packet->Read<uint32_t>();
 		//#if RESOURCE_TRANSFER_VERBOSE == 1
-		Con::ccl << "[ResourceManager] Received " << numMeshes << " meshes" << Con::endl;
+		Con::CCL << "[ResourceManager] Received " << numMeshes << " meshes" << Con::endl;
 		//#endif
 		for(auto i = decltype(numMeshes) {0}; i < numMeshes; ++i) {
 			auto subMesh = pragma::util::make_shared<pragma::geometry::CModelSubMesh>();
@@ -193,7 +191,7 @@ void ModelLoadManager::Update()
 
 			auto numVerts = packet->Read<uint32_t>();
 			//#if RESOURCE_TRANSFER_VERBOSE == 1
-			Con::ccl << "[ResourceManager] Vertex Count: " << numVerts << Con::endl;
+			Con::CCL << "[ResourceManager] Vertex Count: " << numVerts << Con::endl;
 			//#endif
 			std::vector<Vector3> verts(numVerts);
 			packet->Read(verts.data(), sizeof(Vector3) * numVerts);

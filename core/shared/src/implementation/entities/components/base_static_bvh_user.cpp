@@ -8,8 +8,6 @@ import :entities.components.base_static_bvh_user;
 
 using namespace pragma;
 
-ComponentEventId baseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId baseStaticBvhUserComponent::EVENT_ON_STATIC_BVH_COMPONENT_CHANGED = INVALID_COMPONENT_ID;
 void BaseStaticBvhUserComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED = registerEvent("ON_ACTIVATION_STATE_CHANGED", ComponentEventInfo::Type::Broadcast);

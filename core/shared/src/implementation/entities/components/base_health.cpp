@@ -8,8 +8,6 @@ import :entities.components.base_health;
 
 using namespace pragma;
 
-ComponentEventId baseHealthComponent::EVENT_ON_TAKEN_DAMAGE = INVALID_COMPONENT_ID;
-ComponentEventId baseHealthComponent::EVENT_ON_HEALTH_CHANGED = INVALID_COMPONENT_ID;
 void BaseHealthComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseHealthComponent::EVENT_ON_TAKEN_DAMAGE = registerEvent("ON_TAKEN_DAMAGE", ComponentEventInfo::Type::Broadcast);

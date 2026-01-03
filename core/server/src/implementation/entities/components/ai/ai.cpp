@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.server;
 import :entities.components.ai;
 
@@ -545,8 +543,7 @@ void SAIComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
 	def.def("SetRelationship", static_cast<void (SAIComponent::*)(std::string, DISPOSITION, int32_t)>(&SAIComponent::SetRelationship), luabind::default_parameter_policy<4, int32_t {0}> {});
 	def.def("SetRelationship", static_cast<void (SAIComponent::*)(ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&SAIComponent::SetRelationship));
 	def.def("SetRelationship", static_cast<void (SAIComponent::*)(ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&SAIComponent::SetRelationship), luabind::default_parameter_policy<5, int32_t {0}> {});
-	def.def("SetRelationship", static_cast<void (SAIComponent::*)(ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&SAIComponent::SetRelationship),
-	  luabind::meta::join_t<luabind::default_parameter_policy<4, true>, luabind::default_parameter_policy<5, int32_t {0}>> {});
+	def.def("SetRelationship", static_cast<void (SAIComponent::*)(ecs::BaseEntity *, DISPOSITION, bool, int32_t)>(&SAIComponent::SetRelationship), luabind::meta::join_t<luabind::default_parameter_policy<4, true>, luabind::default_parameter_policy<5, int32_t {0}>> {});
 	def.def("SetRelationship", static_cast<void (SAIComponent::*)(Faction &, DISPOSITION, int32_t)>(&SAIComponent::SetRelationship));
 	def.def("SetRelationship", static_cast<void (SAIComponent::*)(Faction &, DISPOSITION, int32_t)>(&SAIComponent::SetRelationship), luabind::default_parameter_policy<4, int32_t {0}> {});
 	def.def("GetMaxViewDistance", &SAIComponent::GetMaxViewDistance);

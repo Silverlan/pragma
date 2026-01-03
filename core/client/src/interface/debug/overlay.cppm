@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:debug.overlay;
@@ -25,12 +24,12 @@ export namespace pragma::debug {
 			Count
 		};
 		enum class DLLCLIENT ObjectType : uint32_t { World, Text, Collection };
-	#pragma pack(push, 1)
+#pragma pack(push, 1)
 		struct DLLCLIENT InstanceData {
 			Vector4 color = {};
 			bool useVertexColor = false;
 		};
-	#pragma pack(pop)
+#pragma pack(pop)
 		class DLLCLIENT BaseObject {
 		  public:
 			enum class Flags : uint32_t {
@@ -160,4 +159,6 @@ export namespace pragma::debug {
 		using namespace pragma::math::scoped_enum::bitwise;
 	};
 }
-export {REGISTER_ENUM_FLAGS(pragma::debug::DebugRenderer::BaseObject::Flags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::debug::DebugRenderer::BaseObject::Flags)
+}

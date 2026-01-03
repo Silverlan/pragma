@@ -468,7 +468,7 @@ void pragma::geometry::ModelSubMesh::GenerateNormals()
 		for(auto &fn : faceNormals)
 			n += fn;
 		n /= static_cast<float>(faceNormals.size());
-		uvec::normalize(n, uvec::UP);
+		uvec::normalize(n, uvec::PRM_UP);
 		(*m_vertices)[vertIdx].normal = n;
 		++vertIdx;
 	}
@@ -1125,7 +1125,7 @@ void pragma::geometry::create_quad(ModelSubMesh &mesh, const QuadCreateInfo &cre
 	  Vector3 {min.x, min.y, max.z}  // 3
 	};
 	std::vector<Vector3> verts {uniqueVertices.at(0), uniqueVertices.at(2), uniqueVertices.at(1), uniqueVertices.at(2), uniqueVertices.at(0), uniqueVertices.at(3)};
-	std::vector<Vector3> faceNormals {uvec::UP, uvec::UP};
+	std::vector<Vector3> faceNormals {uvec::PRM_UP, uvec::PRM_UP};
 	std::vector<Vector2> uvs {Vector2 {0.f, 0.f}, Vector2 {1.f, 1.f}, Vector2 {1.f, 0.f}, Vector2 {1.f, 1.f}, Vector2 {0.f, 0.f}, Vector2 {0.f, 1.f}};
 	for(auto i = decltype(verts.size()) {0}; i < verts.size(); i += 3) {
 		auto &n = faceNormals[i / 3];
@@ -1269,7 +1269,7 @@ void pragma::geometry::create_cylinder(ModelSubMesh &mesh, const CylinderCreateI
 	auto length = createInfo.length;
 	auto segmentCount = createInfo.segmentCount;
 
-	auto rot = uquat::create_look_rotation(uvec::FORWARD, uvec::UP);
+	auto rot = uquat::create_look_rotation(uvec::PRM_FORWARD, uvec::PRM_UP);
 
 	auto &meshVerts = mesh.GetVertices();
 	std::vector<Vector3> verts;
@@ -1297,7 +1297,7 @@ static void create_cone(pragma::geometry::ModelSubMesh &mesh, const pragma::geom
 	auto endRadius = createInfo.endRadius;
 	auto segmentCount = createInfo.segmentCount;
 
-	auto rot = uquat::create_look_rotation(uvec::FORWARD, uvec::UP);
+	auto rot = uquat::create_look_rotation(uvec::PRM_FORWARD, uvec::PRM_UP);
 
 	auto &meshVerts = mesh.GetVertices();
 	std::vector<Vector3> verts;

@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 module pragma.client;
 
 import :game;
@@ -19,7 +16,7 @@ void pragma::CGame::HandleLuaNetPacket(NetPacket &packet)
 		return;
 	std::unordered_map<std::string, int>::iterator i = m_luaNetMessages.find(*ident);
 	if(i == m_luaNetMessages.end()) {
-		Con::cwar << Con::PREFIX_CLIENT << "Unhandled lua net message: " << *ident << Con::endl;
+		Con::CWAR << Con::PREFIX_CLIENT << "Unhandled lua net message: " << *ident << Con::endl;
 		return;
 	}
 	ProtectedLuaCall(
@@ -39,7 +36,7 @@ void Lua::net::client::send(nwm::Protocol protocol, const std::string &identifie
 	::NetPacket packetNew;
 	auto *client = pragma::get_client_state();
 	if(!NetIncludePacketID(client, identifier, packet, packetNew)) {
-		Con::cwar << Con::PREFIX_CLIENT << "Attempted to send unindexed lua net message: " << identifier << Con::endl;
+		Con::CWAR << Con::PREFIX_CLIENT << "Attempted to send unindexed lua net message: " << identifier << Con::endl;
 		return;
 	}
 	switch(protocol) {

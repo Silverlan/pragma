@@ -24,7 +24,7 @@ void BaseCharacterComponent::UpdateOrientation()
 	auto physType = physComponent ? physComponent->GetPhysicsType() : physics::PhysicsType::None;
 	if(physType != physics::PhysicsType::BoxController && physType != physics::PhysicsType::CapsuleController)
 		return;
-	auto normal = uvec::UP;
+	auto normal = uvec::PRM_UP;
 	if(m_orientationComponent)
 		normal = m_orientationComponent->GetUpDirection();
 	auto gravityComponent = ent.GetComponent<GravityComponent>();
@@ -32,7 +32,7 @@ void BaseCharacterComponent::UpdateOrientation()
 		gravityComponent->SetGravityOverride(-normal);
 
 	auto pTrComponent = ent.GetTransformComponent();
-	auto forward = pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD;
+	auto forward = pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::PRM_FORWARD;
 	forward = forward - uvec::project(forward, normal);
 	uvec::normalize(&forward);
 

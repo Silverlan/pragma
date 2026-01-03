@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :client_state;
@@ -557,14 +555,11 @@ void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool b
 	  luabind::def(
 	    "set_cursor_pos", +[](const Vector2 &pos) { get_cengine()->GetWindow()->SetCursorPos(pos); }),
 	  luabind::def(
-	    "is_ctrl_key_down",
-	    +[]() -> bool { return get_cengine()->GetWindow()->GetKeyState(platform::Key::LeftControl) != platform::KeyState::Release || get_cengine()->GetWindow()->GetKeyState(platform::Key::RightControl) != platform::KeyState::Release; }),
+	    "is_ctrl_key_down", +[]() -> bool { return get_cengine()->GetWindow()->GetKeyState(platform::Key::LeftControl) != platform::KeyState::Release || get_cengine()->GetWindow()->GetKeyState(platform::Key::RightControl) != platform::KeyState::Release; }),
 	  luabind::def(
-	    "is_alt_key_down",
-	    +[]() -> bool { return get_cengine()->GetWindow()->GetKeyState(platform::Key::LeftAlt) != platform::KeyState::Release || get_cengine()->GetWindow()->GetKeyState(platform::Key::RightAlt) != platform::KeyState::Release; }),
+	    "is_alt_key_down", +[]() -> bool { return get_cengine()->GetWindow()->GetKeyState(platform::Key::LeftAlt) != platform::KeyState::Release || get_cengine()->GetWindow()->GetKeyState(platform::Key::RightAlt) != platform::KeyState::Release; }),
 	  luabind::def(
-	    "is_shift_key_down",
-	    +[]() -> bool { return get_cengine()->GetWindow()->GetKeyState(platform::Key::LeftShift) != platform::KeyState::Release || get_cengine()->GetWindow()->GetKeyState(platform::Key::RightShift) != platform::KeyState::Release; }),
+	    "is_shift_key_down", +[]() -> bool { return get_cengine()->GetWindow()->GetKeyState(platform::Key::LeftShift) != platform::KeyState::Release || get_cengine()->GetWindow()->GetKeyState(platform::Key::RightShift) != platform::KeyState::Release; }),
 	  luabind::def(
 	    "center_cursor",
 	    +[]() {

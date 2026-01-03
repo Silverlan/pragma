@@ -67,7 +67,7 @@ export {
 				if constexpr(g_debugPrintPanima) {
 					TMember curVal;
 					memberInfo->getterFunction(*memberInfo, component, &curVal);
-					Con::cout << "Changing channel value '" << channel.targetPath.ToUri() << " from " << to_string(curVal) << " to " << to_string(value) << " (t: " << t << ")..." << Con::endl;
+					Con::COUT << "Changing channel value '" << channel.targetPath.ToUri() << " from " << to_string(curVal) << " to " << to_string(value) << " (t: " << t << ")..." << Con::endl;
 				}
 				auto &changed = const_cast<pragma::AnimationChannelCacheData &>(cacheData).changed;
 				if(!pragma::math::is_flag_set(changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty)) {
@@ -106,7 +106,7 @@ export {
 				if constexpr(g_debugPrintPanima) {
 					TMember curVal;
 					memberInfo->getterFunction(*memberInfo, component, &curVal);
-					Con::cout << "Changing " << TMapArray.size() << " components of channel value '" << channel.targetPath.ToUri() << " from " << to_string(curVal) << " to " << to_string(value) << " (t: " << t << ")..." << Con::endl;
+					Con::COUT << "Changing " << TMapArray.size() << " components of channel value '" << channel.targetPath.ToUri() << " from " << to_string(curVal) << " to " << to_string(value) << " (t: " << t << ")..." << Con::endl;
 				}
 				auto &changed = const_cast<pragma::AnimationChannelCacheData &>(cacheData).changed;
 				if(!pragma::math::is_flag_set(changed, pragma::AnimationChannelCacheData::State::Dirty | pragma::AnimationChannelCacheData::State::AlwaysDirty)) {

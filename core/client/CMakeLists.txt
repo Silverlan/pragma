@@ -2,6 +2,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 
 set(PROJ_NAME client)
 pr_add_library(${PROJ_NAME} SHARED)
+pr_add_export_macro(${PROJ_NAME} DLLCLIENT)
 
 pr_add_dependency(${PROJ_NAME} shared TARGET PUBLIC)
 pr_add_dependency(${PROJ_NAME} cmaterialsystem TARGET PUBLIC)

@@ -9,7 +9,6 @@ import :util.rgb_csv;
 
 using namespace pragma;
 
-ComponentEventId baseColorComponent::EVENT_ON_COLOR_CHANGED = INVALID_COMPONENT_ID;
 void BaseColorComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseColorComponent::EVENT_ON_COLOR_CHANGED = registerEvent("ON_COLOR_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void BaseColorComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {

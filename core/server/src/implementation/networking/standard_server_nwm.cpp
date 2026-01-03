@@ -37,7 +37,7 @@ void pragma::networking::NWMActiveServer::OnPacketSent(const NWMEndpoint &ep, co
 	clMap->GetNetMessages(&clMsgs);
 	auto it = std::find_if(clMsgs->begin(), clMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != clMsgs->end()) ? it->first : "Unknown";
-	Con::csv << "OnPacketSent: " << msgName << " (" << id << ")" << Con::endl;
+	Con::CSV << "OnPacketSent: " << msgName << " (" << id << ")" << Con::endl;
 #endif
 	m_server->MemorizeNetMessage(MessageTracker::MessageType::Outgoing, packet.GetMessageID(), ep, packet);
 }
@@ -51,7 +51,7 @@ void pragma::networking::NWMActiveServer::OnPacketReceived(const NWMEndpoint &ep
 	svMap->GetNetMessages(&svMsgs);
 	auto it = std::find_if(svMsgs->begin(), svMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != svMsgs->end()) ? it->first : "Unknown";
-	Con::csv << "OnPacketReceived: " << msgName << " (" << id << ")" << Con::endl;
+	Con::CSV << "OnPacketReceived: " << msgName << " (" << id << ")" << Con::endl;
 #endif
 	m_server->MemorizeNetMessage(MessageTracker::MessageType::Incoming, id, ep, packet);
 }
@@ -162,11 +162,11 @@ void pragma::networking::NWMActiveServer::Heartbeat()
 		if(!err) {
 			m_dispatcher->Dispatch(body, GetMasterServerIP(), GetMasterServerPort(), [](const nwm::ErrorCode err, UDPMessageDispatcher::Message *) -> void {
 				if(err)
-					Con::cwar << "Unable to reach master server: " << err.Message() << ". The server will not show up in the server browser." << Con::endl;
+					Con::CWAR << "Unable to reach master server: " << err.Message() << ". The server will not show up in the server browser." << Con::endl;
 			});
 		}
 		else
-			Con::cwar << "Unable to reach master server: " << err.Message() << ". The server will not show up in the server browser." << Con::endl;
+			Con::CWAR << "Unable to reach master server: " << err.Message() << ". The server will not show up in the server browser." << Con::endl;
 	});
 }
 std::shared_ptr<nwm::ServerClient> pragma::networking::NWMActiveServer::CreateClient() { return nwm::Server::CreateClient<NWMActiveServerClient>(); }

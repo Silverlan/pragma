@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.server;
 import :game;
 
@@ -19,8 +17,9 @@ void pragma::SGame::RegisterLuaLibraries()
 
 	auto utilMod = luabind::module(GetLuaState(), "util");
 	Lua::util::register_shared(GetLuaState(), utilMod);
-	utilMod[(luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, const game::BulletInfo &, bool)>(Lua::util::Server::fire_bullets)), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, const game::BulletInfo &)>(Lua::util::Server::fire_bullets)),
-	  luabind::def("create_giblet", Lua::util::Server::create_giblet), luabind::def("create_explosion", Lua::util::Server::create_explosion), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates))];
+	utilMod[(luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, const game::BulletInfo &, bool)>(Lua::util::Server::fire_bullets)),
+	  luabind::def("fire_bullets", static_cast<luabind::object (*)(lua::State *, const game::BulletInfo &)>(Lua::util::Server::fire_bullets)), luabind::def("create_giblet", Lua::util::Server::create_giblet), luabind::def("create_explosion", Lua::util::Server::create_explosion),
+	  luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates))];
 
 	Game::RegisterLuaLibraries();
 	auto modAsset = luabind::module_(GetLuaState(), "asset");

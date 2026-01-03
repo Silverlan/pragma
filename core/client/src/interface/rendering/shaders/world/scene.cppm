@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:rendering.shaders.scene;
@@ -241,6 +240,12 @@ export namespace pragma {
 	};
 	using namespace pragma::math::scoped_enum::bitwise;
 };
-export {REGISTER_ENUM_FLAGS(pragma::rendering::InstanceData::RenderFlags)}
-export {REGISTER_ENUM_FLAGS(pragma::ShaderScene::DebugFlags)}
-export {REGISTER_ENUM_FLAGS(pragma::ShaderGameWorld::SceneFlags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::rendering::InstanceData::RenderFlags)
+}
+export {
+	REGISTER_ENUM_FLAGS(pragma::ShaderScene::DebugFlags)
+}
+export {
+	REGISTER_ENUM_FLAGS(pragma::ShaderGameWorld::SceneFlags)
+}

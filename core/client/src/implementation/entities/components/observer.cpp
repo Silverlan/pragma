@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :entities.components.observer;
@@ -93,7 +91,7 @@ void CObserverComponent::UpdateCharacterViewOrientationFromMouseMovement()
 	uquat::inverse(m_curFrameRotationModifier);
 	orientation = m_curFrameRotationModifier * orientation;
 	m_curFrameRotationModifier = uquat::identity();
-	//Con::cerr<<"Actual ("<<pl->GetIndex()<<"): "<<&(*pl->GetViewOrientation())<<Con::endl;
+	//Con::CERR<<"Actual ("<<pl->GetIndex()<<"): "<<&(*pl->GetViewOrientation())<<Con::endl;
 
 	float speed = -cvSpeed->GetFloat();
 	float speedYaw = cvYaw->GetFloat();
@@ -251,7 +249,7 @@ void CObserverComponent::UpdateCameraPose()
 	Quat orientation = uquat::identity();
 	pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
 	Vector3 offset = static_cast<CObservableComponent *>(target)->GetViewOffset();
-	auto upDir = uvec::UP;
+	auto upDir = uvec::PRM_UP;
 	if(charComponent.valid()) {
 		auto *orientC = charComponent->GetOrientationComponent();
 		if(orientC)

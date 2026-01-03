@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :scripting.lua.classes.vulkan;
@@ -721,9 +719,9 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	  luabind::def("calculate_mipmap_size", static_cast<Vector2i (*)(uint32_t, uint32_t, uint32_t)>(&Lua::Vulkan::calculate_mipmap_size)), luabind::def("calculate_mipmap_size", static_cast<uint32_t (*)(uint32_t, uint32_t)>(&Lua::Vulkan::calculate_mipmap_size)),
 	  luabind::def("result_to_string", static_cast<std::string (*)(prosper::Result)>(&prosper::util::to_string)), luabind::def("format_to_string", static_cast<std::string (*)(prosper::Format)>(&prosper::util::to_string)),
 	  luabind::def("shader_stage_to_string", static_cast<std::string (*)(prosper::ShaderStage)>(&prosper::util::to_string)), luabind::def("image_layout_to_string", static_cast<std::string (*)(prosper::ImageLayout)>(&prosper::util::to_string)),
-	  luabind::def("is_depth_format", prosper::util::is_depth_format), luabind::def("is_compressed_format", prosper::util::is_compressed_format), luabind::def("is_uncompressed_format", prosper::util::is_uncompressed_format),
-	  luabind::def("get_bit_size", prosper::util::get_bit_size), luabind::def("get_byte_size", prosper::util::get_byte_size), luabind::def("is_8bit_format", prosper::util::is_8bit_format), luabind::def("is_16bit_format", prosper::util::is_16bit_format),
-	  luabind::def("is_32bit_format", prosper::util::is_32bit_format), luabind::def("is_64bit_format", prosper::util::is_64bit_format), luabind::def("is_packed_format", prosper::util::is_packed_format), luabind::def("is_srgb_format", prosper::util::is_srgb_format),
+	  luabind::def("is_depth_format", prosper::util::is_depth_format), luabind::def("is_compressed_format", prosper::util::is_compressed_format), luabind::def("is_uncompressed_format", prosper::util::is_uncompressed_format), luabind::def("get_bit_size", prosper::util::get_bit_size),
+	  luabind::def("get_byte_size", prosper::util::get_byte_size), luabind::def("is_8bit_format", prosper::util::is_8bit_format), luabind::def("is_16bit_format", prosper::util::is_16bit_format), luabind::def("is_32bit_format", prosper::util::is_32bit_format),
+	  luabind::def("is_64bit_format", prosper::util::is_64bit_format), luabind::def("is_packed_format", prosper::util::is_packed_format), luabind::def("is_srgb_format", prosper::util::is_srgb_format),
 	  luabind::def("wait_idle", &prosper::IPrContext::WaitIdle, luabind::render_context_policy<1> {}), luabind::def("flush", &prosper::IPrContext::Flush, luabind::render_context_policy<1> {}),
 	  luabind::def("get_api_identifier", &prosper::IPrContext::GetAPIIdentifier, luabind::render_context_policy<1> {}), luabind::def("get_api_abbreviation", &prosper::IPrContext::GetAPIAbbreviation, luabind::render_context_policy<1> {}),
 	  luabind::def("wait_for_current_swapchain_command_buffer_completion", static_cast<Lua::var<bool, std::string> (*)(lua::State *)>([](lua::State *l) -> Lua::var<bool, std::string> {
@@ -971,8 +969,7 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	    {"LOGIC_OP_COPY_INVERTED", math::to_integral(prosper::LogicOp::CopyInverted)}, {"LOGIC_OP_OR_INVERTED", math::to_integral(prosper::LogicOp::OrInverted)}, {"LOGIC_OP_NAND", math::to_integral(prosper::LogicOp::Nand)}, {"LOGIC_OP_SET", math::to_integral(prosper::LogicOp::Set)},
 
 	    {"PHYSICAL_DEVICE_TYPE_OTHER", math::to_integral(prosper::PhysicalDeviceType::Other)}, {"PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU", math::to_integral(prosper::PhysicalDeviceType::IntegratedGPU)},
-	    {"PHYSICAL_DEVICE_TYPE_DISCRETE_GPU", math::to_integral(prosper::PhysicalDeviceType::DiscreteGPU)}, {"PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU", math::to_integral(prosper::PhysicalDeviceType::VirtualGPU)},
-	    {"PHYSICAL_DEVICE_TYPE_CPU", math::to_integral(prosper::PhysicalDeviceType::CPU)},
+	    {"PHYSICAL_DEVICE_TYPE_DISCRETE_GPU", math::to_integral(prosper::PhysicalDeviceType::DiscreteGPU)}, {"PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU", math::to_integral(prosper::PhysicalDeviceType::VirtualGPU)}, {"PHYSICAL_DEVICE_TYPE_CPU", math::to_integral(prosper::PhysicalDeviceType::CPU)},
 
 	    {"VERTEX_INPUT_RATE_VERTEX", math::to_integral(prosper::VertexInputRate::Vertex)}, {"VERTEX_INPUT_RATE_INSTANCE", math::to_integral(prosper::VertexInputRate::Instance)},
 
@@ -1035,9 +1032,8 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	    {"QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_PRIMITIVES_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::InputAssemblyPrimitivesBit)},
 	    {"QUERY_PIPELINE_STATISTIC_VERTEX_SHADER_INVOCATIONS_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::VertexShaderInvocationsBit)},
 	    {"QUERY_PIPELINE_STATISTIC_GEOMETRY_SHADER_INVOCATIONS_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::GeometryShaderInvocationsBit)},
-	    {"QUERY_PIPELINE_STATISTIC_GEOMETRY_SHADER_PRIMITIVES_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::GeometryShaderPrimitivesBit)},
-	    {"QUERY_PIPELINE_STATISTIC_CLIPPING_INVOCATIONS_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::ClippingInvocationsBit)}, {"QUERY_PIPELINE_STATISTIC_CLIPPING_PRIMITIVES_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::ClippingPrimitivesBit)},
-	    {"QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::FragmentShaderInvocationsBit)},
+	    {"QUERY_PIPELINE_STATISTIC_GEOMETRY_SHADER_PRIMITIVES_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::GeometryShaderPrimitivesBit)}, {"QUERY_PIPELINE_STATISTIC_CLIPPING_INVOCATIONS_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::ClippingInvocationsBit)},
+	    {"QUERY_PIPELINE_STATISTIC_CLIPPING_PRIMITIVES_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::ClippingPrimitivesBit)}, {"QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::FragmentShaderInvocationsBit)},
 	    {"QUERY_PIPELINE_STATISTIC_TESSELLATION_CONTROL_SHADER_PATCHES_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::TessellationControlShaderPatchesBit)},
 	    {"QUERY_PIPELINE_STATISTIC_TESSELLATION_EVALUATION_SHADER_INVOCATIONS_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::TessellationEvaluationShaderInvocationsBit)},
 	    {"QUERY_PIPELINE_STATISTIC_COMPUTE_SHADER_INVOCATIONS_BIT", math::to_integral(prosper::QueryPipelineStatisticFlags::ComputeShaderInvocationsBit)},
@@ -1176,8 +1172,8 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 
 	    {"MEMORY_FEATURE_DEVICE_LOCAL_BIT", math::to_integral(prosper::MemoryFeatureFlags::DeviceLocal)}, {"MEMORY_FEATURE_HOST_CACHED_BIT", math::to_integral(prosper::MemoryFeatureFlags::HostCached)},
 	    {"MEMORY_FEATURE_HOST_COHERENT_BIT", math::to_integral(prosper::MemoryFeatureFlags::HostCoherent)}, {"MEMORY_FEATURE_LAZILY_ALLOCATED_BIT", math::to_integral(prosper::MemoryFeatureFlags::LazilyAllocated)},
-	    {"MEMORY_FEATURE_HOST_ACCESSABLE_BIT", math::to_integral(prosper::MemoryFeatureFlags::HostAccessable)}, {"MEMORY_FEATURE_GPU_BULK_BIT", math::to_integral(prosper::MemoryFeatureFlags::GPUBulk)},
-	    {"MEMORY_FEATURE_CPU_TO_GPU", math::to_integral(prosper::MemoryFeatureFlags::CPUToGPU)}, {"MEMORY_FEATURE_GPU_TO_CPU", math::to_integral(prosper::MemoryFeatureFlags::GPUToCPU)},
+	    {"MEMORY_FEATURE_HOST_ACCESSABLE_BIT", math::to_integral(prosper::MemoryFeatureFlags::HostAccessable)}, {"MEMORY_FEATURE_GPU_BULK_BIT", math::to_integral(prosper::MemoryFeatureFlags::GPUBulk)}, {"MEMORY_FEATURE_CPU_TO_GPU", math::to_integral(prosper::MemoryFeatureFlags::CPUToGPU)},
+	    {"MEMORY_FEATURE_GPU_TO_CPU", math::to_integral(prosper::MemoryFeatureFlags::GPUToCPU)},
 
 	    {"QUEUE_FAMILY_GRAPHICS_BIT", math::to_integral(prosper::QueueFamilyFlags::GraphicsBit)}, {"QUEUE_FAMILY_COMPUTE_BIT", math::to_integral(prosper::QueueFamilyFlags::ComputeBit)}, {"QUEUE_FAMILY_DMA_BIT", math::to_integral(prosper::QueueFamilyFlags::DMABit)}});
 
@@ -1835,8 +1831,7 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defWindow.def("SetTitleBarColor", +[](prosper::Window &window, const Color &color) { window->SetTitleBarColor(color); });
 	defWindow.def("GetTitleBarColor", +[](prosper::Window &window) -> std::optional<Color> { return window->GetTitleBarColor(); });
 	defWindow.def("GetKeyState", static_cast<platform::KeyState (*)(prosper::Window &, platform::Key)>([](prosper::Window &window, platform::Key key) -> platform::KeyState { return window->GetKeyState(key); }));
-	defWindow.def("GetMouseButtonState",
-	  static_cast<platform::KeyState (*)(prosper::Window &, platform::MouseButton)>([](prosper::Window &window, platform::MouseButton mouseButton) -> platform::KeyState { return window->GetMouseButtonState(mouseButton); }));
+	defWindow.def("GetMouseButtonState", static_cast<platform::KeyState (*)(prosper::Window &, platform::MouseButton)>([](prosper::Window &window, platform::MouseButton mouseButton) -> platform::KeyState { return window->GetMouseButtonState(mouseButton); }));
 	defWindow.def("SetCursorInputMode", static_cast<void (*)(prosper::Window &, platform::CursorMode)>([](prosper::Window &window, platform::CursorMode cursorMode) { window->SetCursorInputMode(cursorMode); }));
 	defWindow.def("GetCursorInputMode", static_cast<platform::CursorMode (*)(prosper::Window &)>([](prosper::Window &window) -> platform::CursorMode { return window->GetCursorInputMode(); }));
 	defWindow.def("SetCursorShape", static_cast<void (*)(prosper::Window &, platform::Cursor::Shape)>([](prosper::Window &window, platform::Cursor::Shape shape) { window->SetCursor(shape); }));

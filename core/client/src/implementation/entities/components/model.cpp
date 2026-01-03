@@ -199,7 +199,7 @@ void CModelComponent::AddRenderMesh(geometry::CModelSubMesh &mesh, material::CMa
 void CModelComponent::UpdateRenderBufferList()
 {
 	if(std::this_thread::get_id() != get_cengine()->GetMainThreadId()) {
-		Con::cwar << "Attempted to update render meshes from non-main thread, this is illegal!" << Con::endl;
+		Con::CWAR << "Attempted to update render meshes from non-main thread, this is illegal!" << Con::endl;
 		return;
 	}
 	math::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired, false);
@@ -261,7 +261,7 @@ void CModelComponent::UpdateRenderMeshes(bool requireBoundingVolumeUpdate)
 	if(math::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired | StateFlags::RenderBufferListUpdateRequired) == false)
 		return;
 	if(std::this_thread::get_id() != get_cengine()->GetMainThreadId()) {
-		Con::cwar << "Attempted to update render meshes from non-main thread, this is illegal!" << Con::endl;
+		Con::CWAR << "Attempted to update render meshes from non-main thread, this is illegal!" << Con::endl;
 		return;
 	}
 	auto renderMeshesUpdated = false;

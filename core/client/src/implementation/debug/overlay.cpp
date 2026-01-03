@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :debug.overlay;
@@ -24,8 +22,8 @@ namespace pragma::debug::DebugRenderer {
 static void init_debug_object(pragma::debug::DebugRenderer::BaseObject &o, const pragma::debug::DebugRenderInfo &renderInfo) { o.SetIgnoreDepth(renderInfo.ignoreDepthBuffer); }
 
 static constexpr uint32_t s_maxDebugObjectCount = 100'000;
-static std::unordered_map<pragma::debug::DebugRenderer::Type, std::vector<pragma::debug::DebugRenderer::RuntimeObject>> s_debugObjects {{pragma::debug::DebugRenderer::Type::Triangles, {}}, {pragma::debug::DebugRenderer::Type::Lines, {}}, {pragma::debug::DebugRenderer::Type::LinesStrip, {}}, {pragma::debug::DebugRenderer::Type::Points, {}},
-  {pragma::debug::DebugRenderer::Type::PointsVertex, {}}, {pragma::debug::DebugRenderer::Type::Other, {}}};
+static std::unordered_map<pragma::debug::DebugRenderer::Type, std::vector<pragma::debug::DebugRenderer::RuntimeObject>> s_debugObjects {{pragma::debug::DebugRenderer::Type::Triangles, {}}, {pragma::debug::DebugRenderer::Type::Lines, {}},
+  {pragma::debug::DebugRenderer::Type::LinesStrip, {}}, {pragma::debug::DebugRenderer::Type::Points, {}}, {pragma::debug::DebugRenderer::Type::PointsVertex, {}}, {pragma::debug::DebugRenderer::Type::Other, {}}};
 
 static bool is_obj_valid(pragma::debug::DebugRenderer::RuntimeObject &o, double t) { return o.obj != nullptr && o.obj->IsValid() && (t <= o.time || o.obj.use_count() != 1); }
 

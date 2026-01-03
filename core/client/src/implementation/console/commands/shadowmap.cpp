@@ -27,17 +27,17 @@ static bool get_shadow_map(pragma::NetworkState *nw, std::vector<std::string> &a
 	auto *ent = static_cast<pragma::ecs::CBaseEntity *>(ents.front());
 	auto *pLightComponent = static_cast<pragma::CLightComponent *>(ent->FindComponent("light").get());
 	if(pLightComponent == nullptr) {
-		Con::cwar << "Entity '" << ent->GetClass() << "'(" << argv.front() << ") is not a light!" << Con::endl;
+		Con::CWAR << "Entity '" << ent->GetClass() << "'(" << argv.front() << ") is not a light!" << Con::endl;
 		return false;
 	}
 	*light = pLightComponent;
 	if(pLightComponent->GetLight() == nullptr) {
-		Con::cwar << "Entity '" << ent->GetClass() << "'(" << argv.front() << ") has no light attached!" << Con::endl;
+		Con::CWAR << "Entity '" << ent->GetClass() << "'(" << argv.front() << ") has no light attached!" << Con::endl;
 		return false;
 	}
 	auto hShadowmap = (*light)->GetShadowMap<pragma::CShadowComponent>(smType);
 	if(hShadowmap.expired() && (*light)->GetEntity().HasComponent<pragma::CShadowCSMComponent>() == false) {
-		Con::cwar << "Invalid shadowmap for this entity!" << Con::endl;
+		Con::CWAR << "Invalid shadowmap for this entity!" << Con::endl;
 		return false;
 	}
 	return true;

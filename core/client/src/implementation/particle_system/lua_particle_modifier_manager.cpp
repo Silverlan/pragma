@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :particle_system.lua_particle_modifier_manager;
@@ -31,7 +29,7 @@ pragma::pts::CParticleModifierLua *pragma::pts::LuaParticleModifierManager::Crea
 	}
 #endif
 	if(!r) {
-		Con::cwar << Con::PREFIX_CLIENT << "Unable to create lua particle modifier '" << className << "'!" << Con::endl;
+		Con::CWAR << Con::PREFIX_CLIENT << "Unable to create lua particle modifier '" << className << "'!" << Con::endl;
 		return nullptr;
 	}
 
@@ -60,7 +58,7 @@ pragma::pts::CParticleModifierLua *pragma::pts::LuaParticleModifierManager::Crea
 	}
 	if(modifier == nullptr) {
 		// TODO: Can we check this when the particle modifier is being registered?
-		Con::cwar << Con::PREFIX_CLIENT << "Unable to create lua particle modifier '" << className << "': Lua class is not derived from valid particle modifier base!" << Con::endl;
+		Con::CWAR << Con::PREFIX_CLIENT << "Unable to create lua particle modifier '" << className << "': Lua class is not derived from valid particle modifier base!" << Con::endl;
 		return nullptr;
 	}
 	r.push(l); /* 1 */
@@ -78,9 +76,9 @@ bool pragma::pts::LuaParticleModifierManager::RegisterModifier(Type type, std::s
 	string::to_lower(className);
 	auto itShader = m_modifiers.find(className);
 	if(itShader != m_modifiers.end()) {
-		Con::cwar << "Attempted to register particle modifier '" << className << "', which has already been registered previously! Ignoring..." << Con::endl;
+		Con::CWAR << "Attempted to register particle modifier '" << className << "', which has already been registered previously! Ignoring..." << Con::endl;
 		return false;
-		//Con::cwar<<"Attempted to register particle modifier '"<<className<<"', which has already been registered previously! Overwriting previous definition..."<<Con::endl;
+		//Con::CWAR<<"Attempted to register particle modifier '"<<className<<"', which has already been registered previously! Overwriting previous definition..."<<Con::endl;
 	}
 	auto &pair = m_modifiers[className] = {};
 	pair.luaClassObject = o;

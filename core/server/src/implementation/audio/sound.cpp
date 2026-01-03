@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.server;
 import :audio.sound;
 
@@ -70,7 +68,7 @@ void pragma::audio::SALSound::FadeIn(float time)
 	CancelFade();
 	if(!IsPlaying())
 		Play();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true,ServerState::Get()->RealTime(), time, gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true, ServerState::Get()->RealTime(), time, gain));
 
 	SendEvent(NetEvent::FadeIn, [&time](NetPacket &p) { p->Write<float>(time); });
 }
@@ -81,7 +79,7 @@ void pragma::audio::SALSound::FadeOut(float time)
 		return;
 	float gain = GetGain();
 	CancelFade();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false,ServerState::Get()->RealTime(), time, gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false, ServerState::Get()->RealTime(), time, gain));
 
 	SendEvent(NetEvent::FadeOut, [&time](NetPacket &p) { p->Write<float>(time); });
 }

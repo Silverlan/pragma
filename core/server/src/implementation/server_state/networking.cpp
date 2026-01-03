@@ -68,7 +68,7 @@ void pragma::ServerState::DropClient(networking::IServerClient &session, network
 
 	networking::Error err;
 	if(session.Drop(reason, err) == false)
-		Con::cwar << "An error has occurred trying to drop client: '" << err.GetMessage() << "'!" << Con::endl;
+		Con::CWAR << "An error has occurred trying to drop client: '" << err.GetMessage() << "'!" << Con::endl;
 	if(pl == nullptr)
 		return;
 	auto *game = GetGameState();
@@ -92,7 +92,7 @@ static bool check_message_id(uint32_t id, const std::string &name)
 {
 	assert(id != 0);
 	if(id == 0) {
-		Con::cwar << Con::PREFIX_SERVER << "Attempted to send unregistered message '" << name << "'!" << Con::endl;
+		Con::CWAR << Con::PREFIX_SERVER << "Attempted to send unregistered message '" << name << "'!" << Con::endl;
 		return false;
 	}
 	return true;
@@ -108,7 +108,7 @@ void pragma::ServerState::SendPacket(const std::string &name, NetPacket &packet,
 	networking::Error err;
 	if(m_server->SendPacket(protocol, packet, rf, err) == true)
 		return;
-	Con::cwar << "Unable to broadcast packet " << ID << ": " << err.GetMessage() << Con::endl;
+	Con::CWAR << "Unable to broadcast packet " << ID << ": " << err.GetMessage() << Con::endl;
 }
 void pragma::ServerState::SendPacket(const std::string &name, NetPacket &packet, networking::Protocol protocol) { SendPacket(name, packet, protocol, networking::ClientRecipientFilter {}); }
 void pragma::ServerState::SendPacket(const std::string &name, NetPacket &packet) { SendPacket(name, packet, networking::Protocol::FastUnreliable); }

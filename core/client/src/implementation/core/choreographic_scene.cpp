@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :core.choreographic_scene;
@@ -93,7 +91,7 @@ choreography::FacialFlexEvent::State choreography::FacialFlexEvent::HandleTick(d
 			if(GetInterpolatedValue(t, pair.second.values, v) == true) {
 				if(pair.second.stereo == false) {
 					pFlexComponent->SetFlexController(pair.first, v, 0.1f);
-					Con::cout << "Flex Controller: " << pair.first << " (" << v << ")" << Con::endl;
+					Con::COUT << "Flex Controller: " << pair.first << " (" << v << ")" << Con::endl;
 				}
 				else {
 					auto vDistribution = 0.f;
@@ -102,8 +100,8 @@ choreography::FacialFlexEvent::State choreography::FacialFlexEvent::HandleTick(d
 						auto rightDistribution = pragma::math::clamp((1.f - vDistribution) / 0.5f, 0.f, 1.f);
 						pFlexComponent->SetFlexController("left_" + pair.first, v * leftDistribution, 0.1f);
 						pFlexComponent->SetFlexController("right_" + pair.first, v * rightDistribution, 0.1f);
-						Con::cout << "Flex Controller: " << ("left_" + pair.first) << " (" << (v * leftDistribution) << ")" << Con::endl;
-						//Con::cout<<"Flex Controller: "<<("right_" +pair.first)<<" ("<<(v *rightDistribution)<<")"<<Con::endl;
+						Con::COUT << "Flex Controller: " << ("left_" + pair.first) << " (" << (v * leftDistribution) << ")" << Con::endl;
+						//Con::COUT<<"Flex Controller: "<<("right_" +pair.first)<<" ("<<(v *rightDistribution)<<")"<<Con::endl;
 					}
 				}
 			}

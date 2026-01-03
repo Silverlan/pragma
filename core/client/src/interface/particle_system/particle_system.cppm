@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 export module pragma.client:particle_system;
 export import :particle_system.enums;
 
@@ -54,5 +52,5 @@ export import :particle_system.renderer_sprite;
 export import :particle_system.renderer_sprite_trail;
 
 export namespace pragma {
-    namespace particle_system = pts;
+	namespace particle_system = pts;
 }

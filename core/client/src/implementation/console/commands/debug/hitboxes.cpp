@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :console.commands;
@@ -28,7 +26,7 @@ static void debug_hitboxes(pragma::NetworkState *state, pragma::BasePlayerCompon
 		return;
 	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	if(ents.empty()) {
-		Con::cwar << "No entity targets found!" << Con::endl;
+		Con::CWAR << "No entity targets found!" << Con::endl;
 		return;
 	}
 	g_debugOverlayEnabled = true;

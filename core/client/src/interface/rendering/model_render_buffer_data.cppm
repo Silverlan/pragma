@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:rendering.model_render_buffer_data;
@@ -32,4 +31,6 @@ export namespace pragma::rendering {
 	};
 	using namespace pragma::math::scoped_enum::bitwise;
 };
-export {REGISTER_ENUM_FLAGS(pragma::rendering::RenderBufferData::StateFlags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::rendering::RenderBufferData::StateFlags)
+}

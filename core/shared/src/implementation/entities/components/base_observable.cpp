@@ -12,7 +12,6 @@ ObserverCameraData::ObserverCameraData() : enabled {util::BoolProperty::Create(f
 
 /////////
 
-ComponentEventId baseObservableComponent::EVENT_ON_OBSERVER_CHANGED = INVALID_COMPONENT_ID;
 void BaseObservableComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseObservableComponent::EVENT_ON_OBSERVER_CHANGED = registerEvent("ON_OBSERVER_CHANGED", ComponentEventInfo::Type::Broadcast); }
 BaseObservableComponent::BaseObservableComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_viewOffset(0, 0, 0) {}
 

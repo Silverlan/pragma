@@ -45,7 +45,7 @@ bool BaseAIComponent::CanMove() const
 }
 Vector3 BaseAIComponent::GetUpDirection() const
 {
-	auto upDir = uvec::UP;
+	auto upDir = uvec::PRM_UP;
 	auto &ent = GetEntity();
 	if(ent.IsCharacter()) {
 		auto charC = ent.GetCharacterComponent();

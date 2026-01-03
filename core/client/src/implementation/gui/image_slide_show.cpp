@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :gui.image_slide_show;
@@ -113,7 +111,7 @@ void pragma::gui::types::WIImageSlideShow::DisplayPreloadedImage()
 		  });
 	}
 	catch(const std::logic_error &e) {
-		Con::cwar << "Unable to blur menu background image: '" << e.what() << "'!" << Con::endl;
+		Con::CWAR << "Unable to blur menu background image: '" << e.what() << "'!" << Con::endl;
 	}
 	texPreload = m_blurSet->GetFinalRenderTarget()->GetTexture().shared_from_this();
 
@@ -176,13 +174,13 @@ void pragma::gui::types::WIImageSlideShow::PreloadNextImage(Int32 img)
 	auto loadInfo = std::make_unique<material::TextureLoadInfo>();
 	loadInfo->flags |= util::AssetLoadFlags::AbsolutePath;
 	auto preloadResult = textureManager.PreloadAsset(f, std::move(loadInfo));
-    preloadResult.assetRequest->AddCallback([this, hSlideShow](util::Asset *asset, util::AssetLoadResult result) {
-        if(result != util::AssetLoadResult::Succeeded || !hSlideShow.IsValid())
-            return;
-        m_imgPreload.texture = material::TextureManager::GetAssetObject(*asset);
-        m_imgPreload.ready = true;
-        m_imgPreload.loading = false;
-    });
+	preloadResult.assetRequest->AddCallback([this, hSlideShow](util::Asset *asset, util::AssetLoadResult result) {
+		if(result != util::AssetLoadResult::Succeeded || !hSlideShow.IsValid())
+			return;
+		m_imgPreload.texture = material::TextureManager::GetAssetObject(*asset);
+		m_imgPreload.ready = true;
+		m_imgPreload.loading = false;
+	});
 }
 
 void pragma::gui::types::WIImageSlideShow::DisplayNextImage()

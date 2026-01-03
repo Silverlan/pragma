@@ -993,7 +993,7 @@ static std::ostream &operator<<(std::ostream &os, const udm::HdrColor &hdr) { re
 namespace Lua::udm {
 	void register_types(Interface &lua, luabind::module_ &modUdm);
 };
-#ifdef __linux__
+#ifdef __clang__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, udm::Element);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, udm::Reference);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, udm::Data);
@@ -1051,16 +1051,12 @@ void Lua::udm::register_types(Interface &lua, luabind::module_ &modUdm)
 
 	auto cdSrgba = luabind::class_<::udm::Srgba>("Srgba");
 	cdSrgba.def(luabind::constructor<>());
-#ifdef _WIN32
-	cdSrgba.def(luabind::tostring(luabind::self));
-#else
 	cdSrgba.def(
 	  "__tostring", +[](const ::udm::Srgba &value) -> std::string {
 		  std::stringstream ss;
 		  ss << value;
 		  return ss.str();
 	  });
-#endif
 	cdSrgba.property("r", +[](lua::State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[0]; }, +[](lua::State *l, ::udm::Srgba &srgba, uint8_t r) { srgba[0] = r; });
 	cdSrgba.property("g", +[](lua::State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[1]; }, +[](lua::State *l, ::udm::Srgba &srgba, uint8_t g) { srgba[1] = g; });
 	cdSrgba.property("b", +[](lua::State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[2]; }, +[](lua::State *l, ::udm::Srgba &srgba, uint8_t b) { srgba[2] = b; });
@@ -1069,16 +1065,12 @@ void Lua::udm::register_types(Interface &lua, luabind::module_ &modUdm)
 
 	auto cdHdr = luabind::class_<::udm::HdrColor>("HdrColor");
 	cdHdr.def(luabind::constructor<>());
-#ifdef _WIN32
-	cdHdr.def(luabind::tostring(luabind::self));
-#else
 	cdHdr.def(
 	  "__tostring", +[](const ::udm::HdrColor &value) -> std::string {
 		  std::stringstream ss;
 		  ss << value;
 		  return ss.str();
 	  });
-#endif
 	cdHdr.property("r", +[](lua::State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[0]; }, +[](lua::State *l, ::udm::HdrColor &srgba, uint8_t r) { srgba[0] = r; });
 	cdHdr.property("g", +[](lua::State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[1]; }, +[](lua::State *l, ::udm::HdrColor &srgba, uint8_t g) { srgba[1] = g; });
 	cdHdr.property("b", +[](lua::State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[2]; }, +[](lua::State *l, ::udm::HdrColor &srgba, uint8_t b) { srgba[2] = b; });

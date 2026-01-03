@@ -107,7 +107,7 @@ util::TSharedHandle<physics::PhysObj> BasePhysicsComponent::InitializeSoftBodyPh
 		for(auto &anchor : *colMesh->GetSoftBodyAnchors()) {
 			uint16_t nodeIdx = 0u;
 			if(softBody->MeshVertexIndexToNodeIndex(anchor.vertexIndex, nodeIdx) == false) {
-				Con::cwar << "Invalid vertex index " << anchor.vertexIndex << " for soft-body anchor! Skipping..." << Con::endl;
+				Con::CWAR << "Invalid vertex index " << anchor.vertexIndex << " for soft-body anchor! Skipping..." << Con::endl;
 				continue;
 			}
 			if(pRigid == nullptr) {

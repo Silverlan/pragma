@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :entities.components.rasterization_renderer;
@@ -124,8 +122,8 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const DrawSceneInfo 
 	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	// Entity bone buffer barrier
-	drawCmd->RecordBufferBarrier(*get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
-	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+	drawCmd->RecordBufferBarrier(*get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit,
+	  prosper::AccessFlags::ShaderReadBit);
 
 	auto *worldEnv = scene.GetWorldEnvironment();
 	if(worldEnv && worldEnv->IsUnlit() == false && shaderSettings.dynamicShadowsEnabled) {

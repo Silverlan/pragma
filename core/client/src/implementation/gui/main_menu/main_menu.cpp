@@ -1,13 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
+module pragma.client;
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 
 #undef PlaySound
-
-module pragma.client;
 
 import :gui.main_menu;
 

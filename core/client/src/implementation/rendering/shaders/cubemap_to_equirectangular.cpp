@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :rendering.shaders.cubemap_to_equirectangular;
@@ -71,7 +69,7 @@ std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquir
 	auto format = cubemap.GetImage().GetFormat();
 
 	// Shader input
-	auto dsg = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(shaderCubemapToEquirectangular::DESCRIPTOR_SET_TEXTURE);
+	auto dsg = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(shaderCubemapToEquirectangular::get_descriptor_set_texture());
 	dsg->GetDescriptorSet()->SetBindingTexture(cubemap, 0u);
 
 	// Shader execution

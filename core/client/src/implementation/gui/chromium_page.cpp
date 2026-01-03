@@ -108,5 +108,5 @@ void pragma::gui::types::WIChromiumPage::InitializeChromium()
 		}
 	}
 	else
-		Con::cerr << "Unable to load 'chromium' libary: " << err << Con::endl;
+		Con::CERR << "Unable to load 'chromium' libary: " << err << Con::endl;
 }

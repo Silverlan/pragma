@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :entities.components.env_sky_camera;
@@ -90,10 +88,8 @@ void CSkyCameraComponent::BuildSkyMeshRenderQueues(const CSceneComponent &scene,
 		// Also take into account that world render queues are built offline, but don't include the flag for the constant -> How to handle?
 		SceneRenderDesc::CollectRenderMeshesFromOctree(
 		  optRasterizationRenderer, renderFlags, enableClipping, dynOctree, scene, *hCam, vp, renderMask,
-		  [&outRenderQueue, &outTranslucentRenderQueue](rendering::SceneRenderPass renderMode, bool translucent) -> rendering::RenderQueue * {
-			  return (renderMode != rendering::SceneRenderPass::World) ? nullptr : (translucent ? &outTranslucentRenderQueue : &outRenderQueue);
-		  },
-		  nullptr, &trees, &bspLeafNodes, 0, nullptr, GameShaderSpecializationConstantFlag::None //Enable3dOriginBit
+		  [&outRenderQueue, &outTranslucentRenderQueue](rendering::SceneRenderPass renderMode, bool translucent) -> rendering::RenderQueue * { return (renderMode != rendering::SceneRenderPass::World) ? nullptr : (translucent ? &outTranslucentRenderQueue : &outRenderQueue); }, nullptr,
+		  &trees, &bspLeafNodes, 0, nullptr, GameShaderSpecializationConstantFlag::None //Enable3dOriginBit
 		);
 		if(waitForRenderQueues)
 			get_cgame()->GetRenderQueueWorkerManager().WaitForCompletion();

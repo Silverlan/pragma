@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.server;
 import :entities.components.ai;
 
@@ -77,7 +75,8 @@ void SAIComponent::_debugSendScheduleInfo(SPlayerComponent &pl, std::shared_ptr<
 				if(rChild == 1)
 					r = 1;
 			}
-			if(dbgNode.state != static_cast<debug::DebugBehaviorTreeNode::State>(dbgInfo.lastResult) || dbgNode.active != taskNode.IsActive() || dbgNode.lastStartTime != dbgInfo.lastStartTime || dbgNode.lastEndTime != dbgInfo.lastEndTime || dbgNode.executionIndex != dbgInfo.executionIndex) {
+			if(dbgNode.state != static_cast<debug::DebugBehaviorTreeNode::State>(dbgInfo.lastResult) || dbgNode.active != taskNode.IsActive() || dbgNode.lastStartTime != dbgInfo.lastStartTime || dbgNode.lastEndTime != dbgInfo.lastEndTime
+			  || dbgNode.executionIndex != dbgInfo.executionIndex) {
 				dbgNode.state = static_cast<debug::DebugBehaviorTreeNode::State>(dbgInfo.lastResult);
 				dbgNode.active = taskNode.IsActive();
 				dbgNode.lastStartTime = dbgInfo.lastStartTime;

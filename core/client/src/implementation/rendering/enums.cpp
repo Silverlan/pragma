@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :rendering.enums;
@@ -33,7 +31,7 @@ int pragma::rendering::GetMaxMSAASampleCount()
 	auto props = get_cengine()->GetRenderContext().GetPhysicalDeviceImageFormatProperties(
 	  {prosper::ImageCreateFlags {}, prosper::Format::R16G16B16A16_SFloat, prosper::ImageType::e2D, prosper::ImageTiling::Optimal, prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit});
 	if(props.has_value() == false) {
-		Con::cwar << "Unable to retrieve max MSAA sample count! Setting sample count to 1..." << Con::endl;
+		Con::CWAR << "Unable to retrieve max MSAA sample count! Setting sample count to 1..." << Con::endl;
 		return 1;
 	}
 	return math::get_highest_bit(math::to_integral(props->sampleCount));

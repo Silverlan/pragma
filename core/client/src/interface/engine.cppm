@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:engine;
@@ -145,7 +144,7 @@ export namespace pragma {
 				effect = soundSys->CreateEffect(props);
 			}
 			catch(const std::runtime_error &e) {
-				Con::cwar << "Unable to create auxiliary effect '" << name << "': " << e.what() << Con::endl;
+				Con::CWAR << "Unable to create auxiliary effect '" << name << "': " << e.what() << Con::endl;
 				return nullptr;
 			}
 			m_auxEffects.insert(decltype(m_auxEffects)::value_type(name, effect));
@@ -307,7 +306,9 @@ export namespace pragma {
 };
 #pragma warning(pop)
 
-export {REGISTER_ENUM_FLAGS(pragma::CEngine::StateFlags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::CEngine::StateFlags)
+}
 
 namespace pragma {
 	void register_client_launch_parameters(LaunchParaMap &map);

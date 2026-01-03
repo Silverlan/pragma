@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 module;
-#include "definitions.hpp"
-
 #include "pragma/console/helper.hpp"
 
 module pragma.client;
@@ -156,12 +154,12 @@ DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState *, BasePlayerCo
 		return;
 	auto *entWorld = get_cgame()->GetWorld();
 	if(entWorld == nullptr) {
-		Con::cwar << "No world entity found!" << Con::endl;
+		Con::CWAR << "No world entity found!" << Con::endl;
 		return;
 	}
 	auto meshTree = static_cast<CWorldComponent *>(entWorld)->GetMeshTree();
 	if(meshTree == nullptr) {
-		Con::cwar << "World-entity has no octree!" << Con::endl;
+		Con::CWAR << "World-entity has no octree!" << Con::endl;
 		return;
 	}
 	meshTree->DebugPrint();
@@ -195,7 +193,7 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, BasePla
 	if(culler == nullptr)
 		return;
 	auto *entFind = ents.front();
-	Con::cout << "Searching for entity '" << *entFind << "'..." << Con::endl;
+	Con::COUT << "Searching for entity '" << *entFind << "'..." << Con::endl;
 
 	auto &octree = culler->GetOcclusionOctree();
 	std::function<const OcclusionOctree<ecs::CBaseEntity *>::Node *(const OcclusionOctree<ecs::CBaseEntity *>::Node &node)> iterateTree = nullptr;
@@ -217,10 +215,10 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, BasePla
 	};
 	auto *node = iterateTree(octree.GetRootNode());
 	if(node == nullptr) {
-		Con::cout << "Not found!" << Con::endl;
+		Con::COUT << "Not found!" << Con::endl;
 		return;
 	}
-	Con::cout << "Found in:" << Con::endl;
+	Con::COUT << "Found in:" << Con::endl;
 	node->DebugPrint();
 }
 namespace {
@@ -235,12 +233,12 @@ static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState *, const 
 		return;
 	auto *entWorld = get_cgame()->GetWorld();
 	if(entWorld == nullptr) {
-		Con::cwar << "No world entity found!" << Con::endl;
+		Con::CWAR << "No world entity found!" << Con::endl;
 		return;
 	}
 	auto meshTree = static_cast<CWorldComponent *>(entWorld)->GetMeshTree();
 	if(meshTree == nullptr) {
-		Con::cwar << "World-entity has no octree!" << Con::endl;
+		Con::CWAR << "World-entity has no octree!" << Con::endl;
 		return;
 	}
 	meshTree->SetDebugModeEnabled(val);

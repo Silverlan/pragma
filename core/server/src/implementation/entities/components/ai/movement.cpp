@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.server;
 import :entities.components.ai;
 
@@ -54,7 +52,7 @@ void SAIComponent::OnPrePhysicsSimulate()
 		auto &vel = pVelComponent->GetVelocity();
 		if(uvec::length_sqr(vel) > 1.f) {
 			auto faceTarget = (m_moveInfo.faceTarget != nullptr) ? *m_moveInfo.faceTarget : (pTrComponent->GetPosition() + m_moveInfo.moveDir * 1024.f);
-			if(uvec::cmp(faceTarget, uvec::ORIGIN) == false)
+			if(uvec::cmp(faceTarget, uvec::PRM_ORIGIN) == false)
 				TurnStep(faceTarget, m_moveInfo.turnSpeed.get());
 		}
 	}

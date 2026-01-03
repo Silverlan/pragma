@@ -38,7 +38,7 @@ SBaseEntity *pragma::SGame::CreateEntity(std::string classname)
 			skipSet.erase(classname);
 			return r;
 		}
-		Con::cwar << "Unable to create entity '" << classname << "': Factory not found!" << Con::endl;
+		Con::CWAR << "Unable to create entity '" << classname << "': Factory not found!" << Con::endl;
 		return nullptr;
 	}
 	return factory(ServerState::Get());

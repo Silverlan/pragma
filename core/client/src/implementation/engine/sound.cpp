@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :engine;
@@ -39,7 +37,7 @@ pragma::audio::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
 		}
 	}
 	if(!m_audioAPILib)
-		Con::crit << "No valid audio module found!" << Con::endl;
+		Con::CRIT << "No valid audio module found!" << Con::endl;
 	auto lib = m_audioAPILib;
 	std::string location;
 	std::string modulePath;
@@ -61,9 +59,7 @@ pragma::audio::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
 		err = "Module '" + modulePath + "' not found!";
 	if(m_soundSystem == nullptr)
 		throw std::runtime_error {"Unable to load audio implementation library: " + err + "!"};
-	m_soundSystem->SetSoundSourceFactory([](const audio::PSoundChannel &channel) -> audio::PSoundSource {
-		return audio::CALSound::Create(get_cengine()->GetClientState(), channel);
-	});
+	m_soundSystem->SetSoundSourceFactory([](const audio::PSoundChannel &channel) -> audio::PSoundSource { return audio::CALSound::Create(get_cengine()->GetClientState(), channel); });
 	audio::set_world_scale(units_to_metres(1.0));
 	return m_soundSystem.get();
 }
@@ -90,6 +86,6 @@ void pragma::CEngine::SetHRTFEnabled(bool b)
 	else {
 		soundSys->SetHRTF(0);
 		if(soundSys->IsHRTFEnabled() == false)
-			Con::cwar << "Unable to activate HRTF. Please make sure *.mhr-file is in correct directory!" << Con::endl;
+			Con::CWAR << "Unable to activate HRTF. Please make sure *.mhr-file is in correct directory!" << Con::endl;
 	}
 }

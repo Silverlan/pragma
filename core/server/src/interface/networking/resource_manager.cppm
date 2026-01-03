@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.server:networking.resource_manager;
 
 export import std;
@@ -13,14 +9,14 @@ export import std;
 
 export namespace pragma::networking {
 	class DLLSERVER ResourceManager {
-	private:
+	  private:
 		struct ResourceInfo {
 			ResourceInfo(const std::string &fileName, bool stream);
 			std::string fileName;
 			bool stream;
 		};
 		static std::vector<ResourceInfo> m_resources;
-	public:
+	  public:
 		static const std::vector<ResourceInfo> &GetResources();
 		static bool AddResource(std::string res, bool stream = false);
 		static unsigned int GetResourceCount();

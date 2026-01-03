@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :rendering.ssao;
@@ -16,7 +14,7 @@ import :rendering.shaders;
 
 bool pragma::rendering::SSAOInfo::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags samples, const std::shared_ptr<prosper::Texture> &texNorm, const std::shared_ptr<prosper::Texture> &texDepth)
 {
-	if(ShaderSSAO::DESCRIPTOR_SET_PREPASS.IsValid() == false || shaderSSAOBlur::DESCRIPTOR_SET_TEXTURE.IsValid() == false)
+	if(ShaderSSAO::DESCRIPTOR_SET_PREPASS.IsValid() == false || shaderSSAOBlur::get_descriptor_set_texture().IsValid() == false)
 		return false;
 	shader = get_cengine()->GetShader("ssao");
 	shaderBlur = get_cengine()->GetShader("ssao_blur");
@@ -46,7 +44,7 @@ bool pragma::rendering::SSAOInfo::Initialize(prosper::IPrContext &context, uint3
 	descSetPrepass.SetBindingTexture(*texNorm, math::to_integral(ShaderSSAO::PrepassBinding::NormalBuffer));
 	descSetPrepass.SetBindingTexture(*texDepth, math::to_integral(ShaderSSAO::PrepassBinding::DepthBuffer));
 
-	descSetGroupOcclusion = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(shaderSSAOBlur::DESCRIPTOR_SET_TEXTURE);
+	descSetGroupOcclusion = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(shaderSSAOBlur::get_descriptor_set_texture());
 	descSetGroupOcclusion->GetDescriptorSet()->SetBindingTexture(renderTarget->GetTexture(), 0u);
 	return true;
 }

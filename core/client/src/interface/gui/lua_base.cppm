@@ -1,21 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
-#undef DrawState
-
 export module pragma.client:gui.lua_base;
 
 import :gui.lua_interface;
 export import pragma.gui;
 export import pragma.shared;
 
+#undef DrawState
+
 #define LUAGUI_CALL_MEMBER(name, numargs, numret, args, ret)                                                                                                                                                                                                                                     \
 	{                                                                                                                                                                                                                                                                                            \
-		luabind::object *obj = pragma::gui::WGUILuaInterface::GetLuaObject(m_stateLua, this);                                                                                                                                                                                                                 \
+		luabind::object *obj = pragma::gui::WGUILuaInterface::GetLuaObject(m_stateLua, this);                                                                                                                                                                                                    \
 		obj->push(m_stateLua);                                                                                                                                                                                                                                                                   \
 		Lua::PushString(m_stateLua, name);                                                                                                                                                                                                                                                       \
 		Lua::GetTableValue(m_stateLua, -2);                                                                                                                                                                                                                                                      \

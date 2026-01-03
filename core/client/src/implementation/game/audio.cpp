@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :game;
@@ -40,7 +38,7 @@ static void steam_audio_message_callback(ipl::Scene::LoadStage stage, float prog
 		break;
 	};
 }
-static void steam_audio_error_callback(IPLerror err) { Con::cwar << "[STEAM AUDIO] Error trying to finalize scene: " << err << Con::endl; }
+static void steam_audio_error_callback(IPLerror err) { Con::CWAR << "[STEAM AUDIO] Error trying to finalize scene: " << err << Con::endl; }
 static void steam_audio_finalized_callback()
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
@@ -91,7 +89,7 @@ void pragma::CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cac
 					iplScene->Finalize(
 					  f, info, steam_audio_message_callback,
 					  [iplScene]() {
-						  Con::cout << "[STEAM AUDIO] Scene has been finalized!" << Con::endl;
+						  Con::COUT << "[STEAM AUDIO] Scene has been finalized!" << Con::endl;
 						  steam_audio_finalized_callback();
 					  },
 					  steam_audio_error_callback);
@@ -253,7 +251,7 @@ void pragma::CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cac
 						iplScene->AddProbeSphere(probe.min, probe.spacing);
 						break;
 					case pragma::CEnvSoundProbeComponent::Placement::Octree:
-						Con::cwar << "Octree sound probes currently not supported!" << Con::endl;
+						Con::CWAR << "Octree sound probes currently not supported!" << Con::endl;
 						break;
 					case pragma::CEnvSoundProbeComponent::Placement::UniformFloor:
 						iplScene->AddProbeBox(probe.min, probe.max, probe.spacing, probe.heightAboveFloor);
@@ -265,14 +263,14 @@ void pragma::CGame::ReloadSoundCache(bool bReloadBakedCache, SoundCacheFlags cac
 				iplScene->Finalize(
 				  info, steam_audio_message_callback,
 				  [iplScene, steamCachePath, bSaveProbeBoxes]() {
-					  Con::cout << "[STEAM AUDIO] Scene has been finalized!" << Con::endl;
+					  Con::COUT << "[STEAM AUDIO] Scene has been finalized!" << Con::endl;
 					  auto f = fs::open_file<fs::VFilePtrReal>(steamCachePath, fs::FileMode::Write | fs::FileMode::Binary);
 					  if(f != nullptr) {
 						  iplScene->Save(f, bSaveProbeBoxes);
-						  Con::cout << "[STEAM AUDIO] Scene has been saved as '" << steamCachePath << "'!" << Con::endl;
+						  Con::COUT << "[STEAM AUDIO] Scene has been saved as '" << steamCachePath << "'!" << Con::endl;
 					  }
 					  else
-						  Con::cwar << "[STEAM AUDIO] WARNING: Unable to save scene as '" << steamCachePath << "'!" << Con::endl;
+						  Con::CWAR << "[STEAM AUDIO] WARNING: Unable to save scene as '" << steamCachePath << "'!" << Con::endl;
 					  steam_audio_finalized_callback();
 				  },
 				  steam_audio_error_callback);

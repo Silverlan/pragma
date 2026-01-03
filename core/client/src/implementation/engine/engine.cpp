@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/console/helper.hpp"
-#include "definitions.hpp"
 #include <cassert>
 #ifdef _WIN32
 
@@ -59,7 +58,7 @@ pragma::CEngine::CEngine(int argc, char *argv[])
 	g_engine = this;
 
 	static auto registeredGlobals = false;
-	if (!registeredGlobals) {
+	if(!registeredGlobals) {
 		registeredGlobals = true;
 		pragma::console::register_shared_convars(*console::client::get_convar_map());
 		register_client_launch_parameters(*GetLaunchParaMap());
@@ -218,7 +217,7 @@ void pragma::CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 	zip.AddFile("engine_cl.txt", engineInfo.str());
 
 	auto &context = get_cengine()->GetRenderContext();
-	if (!context.IsClosed()) {
+	if(!context.IsClosed()) {
 		auto layers = context.DumpLayers();
 		if(layers)
 			zip.AddFile("prosper_layers.txt", *layers);
@@ -371,8 +370,7 @@ void pragma::CEngine::GetMappedKeys(const std::string &cvarName, std::vector<pla
 void pragma::CEngine::JoystickButtonInput(prosper::Window &window, const platform::Joystick &joystick, uint32_t key, platform::KeyState state)
 {
 	auto handled = false;
-	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, std::reference_wrapper<const platform::Joystick>, uint32_t, platform::KeyState>("OnJoystickButtonInput", handled, window, joystick, key, state) == CallbackReturnType::HasReturnValue
-	  && handled == true)
+	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, std::reference_wrapper<const platform::Joystick>, uint32_t, platform::KeyState>("OnJoystickButtonInput", handled, window, joystick, key, state) == CallbackReturnType::HasReturnValue && handled == true)
 		return;
 	KeyboardInput(window, static_cast<platform::Key>(key), -1, state, {});
 }
@@ -437,8 +435,7 @@ bool pragma::CEngine::GetInputButtonState(float axisInput, platform::Modifier mo
 void pragma::CEngine::KeyboardInput(prosper::Window &window, platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods, float magnitude)
 {
 	auto handled = false;
-	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, platform::Key, int, platform::KeyState, platform::Modifier, float>("OnKeyboardInput", handled, window, key, scanCode, state, mods, magnitude) == CallbackReturnType::HasReturnValue
-	  && handled == true)
+	if(CallCallbacksWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, platform::Key, int, platform::KeyState, platform::Modifier, float>("OnKeyboardInput", handled, window, key, scanCode, state, mods, magnitude) == CallbackReturnType::HasReturnValue && handled == true)
 		return;
 	auto *client = get_client_state();
 	if(client != nullptr && client->RawKeyboardInput(key, scanCode, state, mods, magnitude) == false)
@@ -675,8 +672,8 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 			g_waylandLibdecorPlugin = "gtk";
 		if(g_waylandLibdecorPlugin) {
 			// Note: Using cairo plugin with wayland will likely crash on startup
-			if (*g_waylandLibdecorPlugin == "cairo")
-				Con::cwar << "Using libdecor cairo plugin may crash on startup!" << Con::endl;
+			if(*g_waylandLibdecorPlugin == "cairo")
+				Con::CWAR << "Using libdecor cairo plugin may crash on startup!" << Con::endl;
 			util::set_env_variable("GDK_BACKEND", "wayland");
 
 			auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor/plugins", *g_waylandLibdecorPlugin);
@@ -705,7 +702,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	}
 	catch(const std::runtime_error &err) {
 		spdlog::error("Unable to initialize graphics API: {}", err.what());
-		std::this_thread::sleep_for(std::chrono::seconds(5));
+		util::sleep_for_seconds(5);
 		Close();
 		return false;
 	}
@@ -722,7 +719,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		renderApiData = udm::Data::Load("cfg/render_api.udm");
 	}
 	catch(const udm::Exception &e) {
-		Con::cwar << "Failed to load render API data: " << e.what() << Con::endl;
+		Con::CWAR << "Failed to load render API data: " << e.what() << Con::endl;
 	}
 	if(renderApiData) {
 		auto &renderAPI = GetRenderAPI();
@@ -987,7 +984,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		matManager = nullptr;
 		Close();
 		Release();
-		std::this_thread::sleep_for(std::chrono::seconds(5));
+		util::sleep_for_seconds(5);
 		return false;
 	};
 
@@ -1009,19 +1006,19 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	}
 	auto r = gui.Initialize(GetRenderResolution(), fontData->fileName, {"source-han-sans/SourceHanSans-VF.ttf"});
 	if(r != gui::WGUI::ResultCode::Ok) {
-		Con::cerr << "Unable to initialize GUI library: ";
+		Con::CERR << "Unable to initialize GUI library: ";
 		switch(r) {
 		case gui::WGUI::ResultCode::UnableToInitializeFontManager:
-			Con::cerr << "Error initializing font manager!";
+			Con::CERR << "Error initializing font manager!";
 			break;
 		case gui::WGUI::ResultCode::ErrorInitializingShaders:
-			Con::cerr << "Error initializing shaders!";
+			Con::CERR << "Error initializing shaders!";
 			break;
 		case gui::WGUI::ResultCode::FontNotFound:
-			Con::cerr << "Font not found!";
+			Con::CERR << "Font not found!";
 			break;
 		default:
-			Con::cout << "Unknown error!";
+			Con::COUT << "Unknown error!";
 			break;
 		}
 		fail();
@@ -1569,7 +1566,7 @@ pragma::util::WeakHandle<prosper::Shader> pragma::CEngine::ReloadShader(const st
 #ifdef _DEBUG
 	bReload = true;
 #endif
-	/*	Con::cerr<<"Loading shader "<<name<<"..."<<Con::endl;
+	/*	Con::CERR<<"Loading shader "<<name<<"..."<<Con::endl;
 #ifndef _DEBUG
 #error ""
 #endif*/
@@ -2022,7 +2019,7 @@ void pragma::CEngine::Think()
 
 	RenderContext::DrawFrame();
 	CallCallbacks("Draw");
-	StopProfilingStage();            // DrawFrame
+	StopProfilingStage();    // DrawFrame
 	platform::poll_events(); // Needs to be called AFTER rendering!
 	auto &windows = GetRenderContext().GetWindows();
 	for(auto it = windows.begin(); it != windows.end();) {

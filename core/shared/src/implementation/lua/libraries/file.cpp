@@ -377,7 +377,7 @@ bool Lua::file::validate_write_operation(lua::State *l, std::string &path, std::
 			outRootPath = "";
 			return true;
 		}
-		Con::cwar << "File write-operations can only be performed by Lua-scripts inside an addon!" << Con::endl;
+		Con::CWAR << "File write-operations can only be performed by Lua-scripts inside an addon!" << Con::endl;
 		return false;
 	}
 	auto br = fname.find('/', 8);

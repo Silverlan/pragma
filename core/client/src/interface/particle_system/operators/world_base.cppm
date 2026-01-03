@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.operator_world_base;
 
 export import :entities.components.particle_system;
@@ -12,12 +8,12 @@ export import :particle_system.modifier;
 
 export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorWorldBase : public CParticleOperator {
-	public:
+	  public:
 		bool ShouldRotateWithEmitter() const;
-	protected:
+	  protected:
 		CParticleOperatorWorldBase() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
-	private:
+	  private:
 		bool m_bRotateWithEmitter = false;
 	};
 }

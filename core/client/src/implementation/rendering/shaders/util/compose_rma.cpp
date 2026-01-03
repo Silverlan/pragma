@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :rendering.shaders.compose_rma;
@@ -110,7 +108,7 @@ bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &conte
 	auto matName = materialsRootDir + rmaOutputPath;
 	ufile::remove_extension_from_filename(matName);
 
-	Con::cout << "Writing RMA texture file '" << rmaOutputPath << "'..." << Con::endl;
+	Con::COUT << "Writing RMA texture file '" << rmaOutputPath << "'..." << Con::endl;
 	// TODO: RMA should overwrite the existing one
 	return get_cgame()->SaveImage(*newRMA, "addons/converted/" + matName, imgWriteInfo);
 }

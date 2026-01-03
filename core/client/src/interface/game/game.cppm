@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:game;
@@ -52,7 +51,7 @@ export namespace pragma {
 		class CBaseEntity;
 	}
 	class DLLCLIENT CGame : public Game {
-	public:
+	  public:
 		CGame(NetworkState *state);
 		virtual ~CGame() override;
 		virtual void OnRemove() override;
@@ -223,8 +222,8 @@ export namespace pragma {
 		virtual Float GetRestitutionScale() const override;
 
 		template<typename TCPPM>
-		TCPPM *CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius = game::bulletInfo::DEFAULT_TRACER_RADIUS, const Color &col = game::bulletInfo::DEFAULT_TRACER_COLOR, float length = game::bulletInfo::DEFAULT_TRACER_LENGTH, float speed = game::bulletInfo::DEFAULT_TRACER_SPEED,
-		  const std::string &material = std::string {game::bulletInfo::DEFAULT_TRACER_MATERIAL}, float bloomScale = game::bulletInfo::DEFAULT_TRACER_BLOOM);
+		TCPPM *CreateParticleTracer(const Vector3 &start, const Vector3 &end, float radius = game::bulletInfo::DEFAULT_TRACER_RADIUS, const Color &col = game::bulletInfo::DEFAULT_TRACER_COLOR, float length = game::bulletInfo::DEFAULT_TRACER_LENGTH,
+		  float speed = game::bulletInfo::DEFAULT_TRACER_SPEED, const std::string &material = std::string {game::bulletInfo::DEFAULT_TRACER_MATERIAL}, float bloomScale = game::bulletInfo::DEFAULT_TRACER_BLOOM);
 
 		virtual bool IsPhysicsSimulationEnabled() const override;
 
@@ -393,7 +392,7 @@ export namespace pragma {
 
 		// For internal use only!
 		const std::vector<rendering::DrawSceneInfo> &GetQueuedRenderScenes() const;
-	protected:
+	  protected:
 		virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod) override;
 		virtual void OnMapLoaded() override;
 		virtual void InitializeWorldData(asset::WorldData &worldData) override;
@@ -414,7 +413,7 @@ export namespace pragma {
 		virtual void SetupEntity(ecs::BaseEntity *ent, unsigned int idx) override;
 		virtual void InitializeLuaScriptWatcher() override;
 		virtual std::shared_ptr<EntityComponentManager> InitializeEntityComponentManager() override;
-	private:
+	  private:
 		std::queue<gui::WIHandle> m_luaGUIObjects = {};
 		double m_tLastClientUpdate = 0.0;
 		std::array<bool, math::to_integral(rendering::SceneRenderPass::Count)> m_renderModesEnabled;
@@ -527,9 +526,15 @@ export namespace pragma {
 		void InitializeWorldEnvironment();
 	};
 }
-export {REGISTER_ENUM_FLAGS(pragma::CGame::SoundCacheFlags)}
-export {REGISTER_ENUM_FLAGS(pragma::CGame::GameShader)}
-export {REGISTER_ENUM_FLAGS(pragma::CGame::StateFlags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::CGame::SoundCacheFlags)
+}
+export {
+	REGISTER_ENUM_FLAGS(pragma::CGame::GameShader)
+}
+export {
+	REGISTER_ENUM_FLAGS(pragma::CGame::StateFlags)
+}
 export {
 	namespace pragma {
 		DLLCLIENT CGame *get_cgame();

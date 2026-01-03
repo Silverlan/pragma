@@ -8,17 +8,6 @@ import :entities.components.base_physics;
 
 using namespace pragma;
 
-ComponentEventId basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED = INVALID_COMPONENT_ID;
-ComponentEventId basePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED = INVALID_COMPONENT_ID;
-ComponentEventId basePhysicsComponent::EVENT_ON_PHYSICS_UPDATED = INVALID_COMPONENT_ID;
-ComponentEventId basePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED = INVALID_COMPONENT_ID;
-ComponentEventId basePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE = INVALID_COMPONENT_ID;
-ComponentEventId basePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE = INVALID_COMPONENT_ID;
-ComponentEventId basePhysicsComponent::EVENT_ON_SLEEP = INVALID_COMPONENT_ID;
-ComponentEventId basePhysicsComponent::EVENT_ON_WAKE = INVALID_COMPONENT_ID;
-ComponentEventId basePhysicsComponent::EVENT_HANDLE_RAYCAST = INVALID_COMPONENT_ID;
-ComponentEventId basePhysicsComponent::EVENT_INITIALIZE_PHYSICS = INVALID_COMPONENT_ID;
-
 void BasePhysicsComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	basePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED = registerEvent("ON_PHYSICS_INITIALIZED", ComponentEventInfo::Type::Broadcast);
@@ -79,7 +68,7 @@ Vector3 BasePhysicsComponent::GetCenter() const
 {
 	auto trComponent = GetEntity().GetTransformComponent();
 	if(!trComponent)
-		return uvec::ORIGIN;
+		return uvec::PRM_ORIGIN;
 	auto &pos = trComponent->GetPosition();
 	auto colCenter = GetCollisionCenter();
 	uvec::rotate(&colCenter, trComponent->GetRotation());
@@ -409,10 +398,10 @@ const Vector3 &BasePhysicsComponent::GetLocalOrigin() const
 	auto physType = GetPhysicsType();
 	auto *phys = GetPhysicsObject();
 	if(phys == nullptr || (physType != physics::PhysicsType::Dynamic && physType != physics::PhysicsType::Static))
-		return uvec::ORIGIN;
+		return uvec::PRM_ORIGIN;
 	auto *o = phys->GetCollisionObject();
 	if(o == nullptr)
-		return uvec::ORIGIN;
+		return uvec::PRM_ORIGIN;
 	return o->GetOrigin();
 }
 
@@ -758,7 +747,7 @@ void BasePhysicsComponent::DropToFloor()
 		return;
 	auto shape = physEnv->CreateBoxShape(extents, physEnv->GetGenericMaterial()); // TODO: Cache this shape?
 	auto pGravity = ent.GetComponent<GravityComponent>();
-	auto dir = pGravity.valid() ? pGravity->GetGravityDirection() : -uvec::UP;
+	auto dir = pGravity.valid() ? pGravity->GetGravityDirection() : -uvec::PRM_UP;
 	auto dest = origin + dir * static_cast<float>(GameLimits::MaxRayCastRange);
 
 	physics::TraceData trace;
@@ -771,7 +760,7 @@ void BasePhysicsComponent::DropToFloor()
 	if(result.hitType == physics::RayCastHitType::None || result.distance == 0.f)
 		return;
 	auto pos = pTrComponent->GetPosition();
-	auto rot = uvec::get_rotation(uvec::UP, -dir);
+	auto rot = uvec::get_rotation(uvec::PRM_UP, -dir);
 	uquat::normalize(rot);
 
 	uvec::rotate(&pos, rot);

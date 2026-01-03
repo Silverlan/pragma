@@ -95,7 +95,7 @@ std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::CreateSound(std::st
 		if(it == m_soundsPrecached.end()) {
 			static auto bSkipPrecache = false;
 			if(bSkipPrecache == false) {
-				Con::cwar << "Attempted to create unprecached sound '" << snd << "'! Precaching now..." << Con::endl;
+				Con::CWAR << "Attempted to create unprecached sound '" << snd << "'! Precaching now..." << Con::endl;
 				auto channel = ((flags & audio::ALCreateFlags::Mono) != audio::ALCreateFlags::None) ? audio::ALChannel::Mono : audio::ALChannel::Auto;
 				if(PrecacheSound(snd, channel) == true) {
 					bSkipPrecache = true;
@@ -112,7 +112,7 @@ std::shared_ptr<pragma::audio::ALSound> pragma::ServerState::CreateSound(std::st
 			if((flags & audio::ALCreateFlags::Mono) != audio::ALCreateFlags::None && inf->mono == false) {
 				static auto bSkipPrecache = false;
 				if(bSkipPrecache == false) {
-					Con::cwar << "Attempted to create sound '" << snd << "' as unprecached mono! Precaching now..." << Con::endl;
+					Con::CWAR << "Attempted to create sound '" << snd << "' as unprecached mono! Precaching now..." << Con::endl;
 					auto channel = ((flags & audio::ALCreateFlags::Mono) != audio::ALCreateFlags::None) ? audio::ALChannel::Mono : audio::ALChannel::Auto;
 					if(PrecacheSound(snd, channel) == true) {
 						bSkipPrecache = true;

@@ -951,7 +951,7 @@ bool pragma::nav::Mesh::Save(Game &game, udm::AssetDataArg outData, std::string 
 		if(surfMat != nullptr)
 			surfaceMaterialNames.push_back(surfMat->GetIdentifier());
 		else {
-			Con::cwar << "Nav mesh poly with unknown surface material index " << +areaIdx << "! Setting to 0..." << Con::endl;
+			Con::CWAR << "Nav mesh poly with unknown surface material index " << +areaIdx << "! Setting to 0..." << Con::endl;
 			surfaceMaterialNames.push_back("");
 		}
 	}
@@ -1003,7 +1003,7 @@ bool pragma::nav::Mesh::LoadFromAssetData(Game &game, const udm::AssetData &data
 		auto *surfMat = game.GetSurfaceMaterial(name);
 		surfaceMaterialTable.push_back((surfMat != nullptr) ? surfMat->GetIndex() : 0u);
 		if(surfMat == nullptr)
-			Con::cwar << "Nav mesh poly with unknown surface material '" << name << "'! Setting to 0..." << Con::endl;
+			Con::CWAR << "Nav mesh poly with unknown surface material '" << name << "'! Setting to 0..." << Con::endl;
 	}
 
 	auto polyMesh = std::shared_ptr<rcPolyMesh>(rcAllocPolyMesh(), [](rcPolyMesh *polyMesh) { rcFreePolyMesh(polyMesh); });
@@ -1113,7 +1113,7 @@ std::shared_ptr<RcPathResult> pragma::nav::Mesh::FindPath(const Vector3 &start, 
 	auto navQuery = std::shared_ptr<dtNavMeshQuery>(dtAllocNavMeshQuery(), [](dtNavMeshQuery *navQuery) { dtFreeNavMeshQuery(navQuery); });
 	auto status = navQuery->init(&mesh.GetNavMesh(), 2048); // TODO
 	if(dtStatusFailed(status)) {
-		//Con::cerr<<"FAILED #1: "<<start.x<<","<<start.y<<","<<start.z<<" => "<<end.x<<","<<end.y<<","<<end.z<<Con::endl;
+		//Con::CERR<<"FAILED #1: "<<start.x<<","<<start.y<<","<<start.z<<" => "<<end.x<<","<<end.y<<","<<end.z<<Con::endl;
 		return nullptr;
 	}
 	const Vector3 extents(256.f, 256.f, 256.f); // TODO
@@ -1136,7 +1136,7 @@ std::shared_ptr<RcPathResult> pragma::nav::Mesh::FindPath(const Vector3 &start, 
 			return r;
 		}
 	}
-	//Con::cerr<<"FAILED #2: "<<start.x<<","<<start.y<<","<<start.z<<" => "<<end.x<<","<<end.y<<","<<end.z<<Con::endl;
+	//Con::CERR<<"FAILED #2: "<<start.x<<","<<start.y<<","<<start.z<<" => "<<end.x<<","<<end.y<<","<<end.z<<Con::endl;
 	return nullptr;
 }
 

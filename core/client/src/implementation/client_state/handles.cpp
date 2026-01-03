@@ -19,7 +19,7 @@ void pragma::ClientState::HandlePacket(NetPacket &packet)
 	unsigned int ID = packet.GetMessageID();
 	networking::CLNetMessage *msg = GetNetMessage(ID);
 	if(msg == nullptr) {
-		Con::cwar << "(CLIENT) Unhandled net message: " << ID << Con::endl;
+		Con::CWAR << "(CLIENT) Unhandled net message: " << ID << Con::endl;
 		return;
 	}
 	// packet->SetClient(true); // WVTODO
@@ -30,7 +30,7 @@ void pragma::ClientState::HandleConnect() { RequestServerInfo(); }
 
 void pragma::ClientState::RequestServerInfo()
 {
-	Con::ccl << "Sending serverinfo request..." << Con::endl;
+	Con::CCL << "Sending serverinfo request..." << Con::endl;
 	NetPacket packet;
 	packet->WriteString(GetConVarString("password"));
 	SendPacket(networking::net_messages::server::SERVERINFO_REQUEST, packet, networking::Protocol::SlowReliable);
@@ -60,7 +60,7 @@ void pragma::ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
 		auto libSteamworks = InitializeLibrary("steamworks/pr_steamworks", &err);
 		if(libSteamworks == nullptr) {
 			m_svInfo = nullptr;
-			Con::cerr << "Unable to authenticate client: Steamworks module could not be loaded: " << err << Con::endl;
+			Con::CERR << "Unable to authenticate client: Steamworks module could not be loaded: " << err << Con::endl;
 			Disconnect();
 			return;
 		}
@@ -70,7 +70,7 @@ void pragma::ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
 		std::shared_ptr<void> tokenHandle;
 		if(fRequestAuthTicket == nullptr || fRequestAuthTicket(token, steamId, tokenHandle) == false) {
 			m_svInfo = nullptr;
-			Con::cerr << "Authentication failed! Disconnecting from server..." << Con::endl;
+			Con::CERR << "Authentication failed! Disconnecting from server..." << Con::endl;
 			Disconnect();
 			return;
 		}
@@ -99,7 +99,7 @@ void pragma::ClientState::HandleClientStartResourceTransfer(NetPacket &packet)
 	fs::create_path(luaPath);
 
 	unsigned int numResources = packet->Read<unsigned int>();
-	Con::ccl << "Downloading " << numResources << " files from server..." << Con::endl;
+	Con::CCL << "Downloading " << numResources << " files from server..." << Con::endl;
 
 	StartResourceTransfer();
 }
@@ -111,7 +111,7 @@ void pragma::ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize
 	std::string path = "cache\\" + cache + ".cache";
 	auto f = pragma::fs::open_file(path.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(f == nullptr) {
-		Con::cwar << "Unable to open lua-cache '" << cache << "' file!" << Con::endl;
+		Con::CWAR << "Unable to open lua-cache '" << cache << "' file!" << Con::endl;
 		return;
 	}
 	unsigned int sourceLength = CUInt32(f->GetSize());
@@ -137,7 +137,7 @@ void pragma::ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize
 		}
 	}
 	else
-		Con::cwar << "Unable to decompress lua-cache (" << err << ")!" << Con::endl;
+		Con::CWAR << "Unable to decompress lua-cache (" << err << ")!" << Con::endl;
 	delete[] dest;
 	delete[] source;
 #endif
@@ -180,7 +180,7 @@ void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	if(IsGameActive())
 		EndGame();
 #ifdef DEBUG_SOCKET
-	Con::ccl << "Received Game Information!" << Con::endl;
+	Con::CCL << "Received Game Information!" << Con::endl;
 #endif
 	// Read replicated ConVars
 	auto numReplicated = packet->Read<uint32_t>();
@@ -206,7 +206,7 @@ void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 				}
 			}
 			else
-				Con::cwar << "Replicated ConVar " << cvar << " doesn't exist" << Con::endl;
+				Con::CWAR << "Replicated ConVar " << cvar << " doesn't exist" << Con::endl;
 		}
 	}
 	//

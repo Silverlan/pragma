@@ -16,7 +16,7 @@ export namespace pragma {
 	};
 
 	namespace baseNameComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_NAME_CHANGED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_NAME_CHANGED)
 	}
 	class DLLNETWORK BaseNameComponent : public BaseEntityComponent {
 	  public:

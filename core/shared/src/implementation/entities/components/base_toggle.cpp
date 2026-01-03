@@ -8,8 +8,6 @@ import :entities.components.base_toggle;
 
 using namespace pragma;
 
-ComponentEventId baseToggleComponent::EVENT_ON_TURN_ON = INVALID_COMPONENT_ID;
-ComponentEventId baseToggleComponent::EVENT_ON_TURN_OFF = INVALID_COMPONENT_ID;
 void BaseToggleComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseToggleComponent::EVENT_ON_TURN_ON = registerEvent("ON_TURN_ON", ComponentEventInfo::Type::Broadcast);

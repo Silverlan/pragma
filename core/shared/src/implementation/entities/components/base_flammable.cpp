@@ -8,8 +8,6 @@ import :entities.components.base_flammable;
 
 using namespace pragma;
 
-ComponentEventId baseFlammableComponent::EVENT_ON_IGNITED = INVALID_COMPONENT_ID;
-ComponentEventId baseFlammableComponent::EVENT_ON_EXTINGUISHED = INVALID_COMPONENT_ID;
 void BaseFlammableComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseFlammableComponent::EVENT_ON_IGNITED = registerEvent("ON_IGNITED", ComponentEventInfo::Type::Broadcast);

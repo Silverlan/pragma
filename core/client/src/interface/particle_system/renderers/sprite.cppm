@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.renderer_sprite;
 
 export import :entities.components.particle_system;
@@ -18,14 +14,14 @@ export namespace pragma {
 };
 export namespace pragma::pts {
 	class DLLCLIENT CParticleRendererSprite : public CParticleRenderer {
-	public:
+	  public:
 		CParticleRendererSprite() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void RecordRender(prosper::ICommandBuffer &drawCmd, CSceneComponent &scene, const CRasterizationRendererComponent &renderer, ParticleRenderFlags renderFlags) override;
 		virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, CSceneComponent &scene, const CRasterizationRendererComponent &renderer, CLightComponent &light, uint32_t layerId = 0) override;
 		virtual void PostSimulate(double tDelta) override;
 		virtual ShaderParticleBase *GetShader() const override;
-	private:
+	  private:
 		util::WeakHandle<prosper::Shader> m_shader = {};
 		std::unique_ptr<CParticleRendererRotationalBuffer> m_rotationalBuffer = nullptr;
 		bool m_bPlanarRotation = true;

@@ -40,5 +40,5 @@ pragma::physics::IConvexShape *pragma::physics::IController::GetShape()
 	auto *shape = m_collisionObject->GetCollisionShape();
 	return (shape && shape->IsConvex()) ? shape->GetConvexShape() : nullptr;
 }
-const Vector3 &pragma::physics::IController::GetLastMoveDisplacement() const { return uvec::ORIGIN; } //m_moveDisplacement;}
+const Vector3 &pragma::physics::IController::GetLastMoveDisplacement() const { return uvec::PRM_ORIGIN; } //m_moveDisplacement;}
 void pragma::physics::IController::InitializeLuaObject(lua::State *lua) { IBase::InitializeLuaObject<IController>(lua); }

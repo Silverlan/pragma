@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.server;
 import :server_state;
 
@@ -16,7 +14,7 @@ void pragma::ServerState::OnMasterServerRegistered(bool b, std::string reason)
 {
 	if(b == false) {
 		m_tNextWMSConnect = std::chrono::steady_clock::now();
-		Con::cwar << "Unable to connect to master server (" << reason << ")" << Con::endl;
+		Con::CWAR << "Unable to connect to master server (" << reason << ")" << Con::endl;
 	}
 }
 

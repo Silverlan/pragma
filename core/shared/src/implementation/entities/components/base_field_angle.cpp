@@ -8,7 +8,6 @@ import :entities.components.base_field_angle;
 
 using namespace pragma;
 
-ComponentEventId baseFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED = INVALID_COMPONENT_ID;
 void BaseFieldAngleComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED = registerEvent("ON_FIELD_ANGLE_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void BaseFieldAngleComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {

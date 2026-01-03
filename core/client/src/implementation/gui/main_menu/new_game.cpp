@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :gui.main_menu_new_game;
@@ -94,12 +92,11 @@ void pragma::gui::types::WIMainMenuNewGame::InitializeOptionsList(WIOptionsList 
 	buttonStart->SizeToContents();
 	buttonStart->SetAutoCenterToParent(true);
 	buttonStart->AddCallback("OnMouseEvent",
-	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
-	    [this](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
-		    OnStartGame(button, state, mods);
-		    *reply = util::EventReply::Handled;
-		    return CallbackReturnType::HasReturnValue;
-	    }));
+	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
+		  OnStartGame(button, state, mods);
+		  *reply = util::EventReply::Handled;
+		  return CallbackReturnType::HasReturnValue;
+	  }));
 	pRow->InsertElement(1, buttonStart);
 	WIMainMenuBase::InitializeOptionsList(pList);
 }
@@ -248,7 +245,11 @@ void pragma::gui::types::WIMainMenuNewGame::InitializeGameSettings()
 	auto &resourceWatcher = get_client_state()->GetResourceWatcher();
 	if(m_cbMapListReload.IsValid())
 		m_cbMapListReload.Remove();
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+	m_cbMapListReload = resourceWatcher.AddChangeCallback(util::EResourceWatcherCallbackType::createFromEnum(util::EResourceWatcherCallbackType::E::Map), [this](std::reference_wrapper<const std::string> fileName, std::reference_wrapper<const std::string> ext) { ReloadMapList(); });
+#else
 	m_cbMapListReload = resourceWatcher.AddChangeCallback(util::eResourceWatcherCallbackType::Map, [this](std::reference_wrapper<const std::string> fileName, std::reference_wrapper<const std::string> ext) { ReloadMapList(); });
+#endif
 
 	// Server Name
 	auto *pServerName = pList->AddTextEntry(locale::get_text("server_name"), "sv_servername");

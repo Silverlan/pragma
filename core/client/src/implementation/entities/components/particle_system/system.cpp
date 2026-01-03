@@ -197,8 +197,8 @@ std::shared_ptr<asset::Model> ecs::CParticleSystemComponent::GenerateModel(Game 
 				auto uv = ShaderParticle2DBase::GetVertexUV(vertIdx);
 				auto &v = verts.at(vertOffset + vertIdx);
 				v.position = vertPos;
-				v.normal = Vector4 {-uvec::RIGHT, 1.f};
-				// v.tangent = uvec::FORWARD;
+				v.normal = Vector4 {-uvec::PRM_RIGHT, 1.f};
+				// v.tangent = uvec::PRM_FORWARD;
 				v.uv = uvStart + uv * (uvEnd - uvStart);
 			}
 			static_assert(ShaderParticle2DBase::TRIANGLE_COUNT == 2 && ShaderParticle2DBase::VERTEX_COUNT == 6);

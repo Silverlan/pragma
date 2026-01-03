@@ -1,16 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#undef DrawState
-
 module pragma.client;
 
 import :client_state;
 import :scripting.lua.classes.shader;
 
 import pragma.shadergraph;
+
+#undef DrawState
 
 static spdlog::logger &LOGGER_SG = pragma::register_logger("shadergraph");
 
@@ -37,7 +35,11 @@ static luabind::object shader_mat_value_to_lua_object(lua::State *l, const pragm
 		using T = typename decltype(tag)::type;
 		T value;
 		if(!val.Get(value))
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+			return luabind::object {};
+#else
 			return Lua::nil;
+#endif
 		if constexpr(std::is_same_v<T, udm::Half>)
 			return luabind::object {l, static_cast<float>(value)};
 		else
@@ -225,7 +227,11 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 	  "defaultValue", +[](lua::State *l, const pragma::shadergraph::Socket &socket) -> luabind::object {
 		  auto udmType = pragma::shadergraph::to_udm_type(socket.defaultValue.GetType());
 		  if(udmType == udm::Type::Invalid)
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+			  return luabind::object {};
+#else
 			  return Lua::nil;
+#endif
 		  udm::Property prop {};
 		  prop.type = udmType;
 		  prop.value = socket.defaultValue.GetData();
@@ -273,20 +279,36 @@ static void register_shader_graph(lua::State *l, luabind::module_ &modShader)
 	  "GetInputValue", +[](lua::State *l, const pragma::shadergraph::GraphNode &graphNode, const std::string_view &inputName) -> Lua::udm_type {
 		  auto *input = graphNode.FindInput(inputName);
 		  if(!input)
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+			  return luabind::object {};
+#else
 			  return Lua::nil;
+#endif
 		  auto type = pragma::shadergraph::to_udm_type(input->GetSocket().type);
 		  if(type == udm::Type::Invalid)
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+			  return luabind::object {};
+#else
 			  return Lua::nil;
+#endif
 		  return ::udm::visit(type, [l, &graphNode, &inputName](auto tag) {
 			  using T = typename decltype(tag)::type;
 			  if constexpr(pragma::shadergraph::is_data_type<T>()) {
 				  T val;
 				  auto res = graphNode.GetInputValue(inputName, val);
 				  if(!res)
-					  return Lua::nil;
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+					  return luabind::object {};
+#else
+					return Lua::nil;
+#endif
 				  return luabind::object {l, val};
 			  }
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+			  return luabind::object {};
+#else
 			  return Lua::nil;
+#endif
 		  });
 	  });
 	defGraphNode.def("CanLink", static_cast<bool (pragma::shadergraph::GraphNode::*)(const std::string_view &, pragma::shadergraph::GraphNode &, const std::string_view &) const>(&pragma::shadergraph::GraphNode::CanLink));
@@ -405,29 +427,36 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 	sequenceDef.scope[frameDef];
 
 	sequenceDef.def("GetFrameCount", static_cast<uint32_t (*)(lua::State *, material::SpriteSheetAnimation::Sequence &)>([](lua::State *l, material::SpriteSheetAnimation::Sequence &sequence) -> uint32_t { return sequence.frames.size(); }));
-	sequenceDef.def("GetFrame", static_cast<material::SpriteSheetAnimation::Sequence::Frame *(*)(lua::State *, material::SpriteSheetAnimation::Sequence &, uint32_t)>([](lua::State *l, material::SpriteSheetAnimation::Sequence &sequence, uint32_t frameIdx) -> material::SpriteSheetAnimation::Sequence::Frame * {
-		if(frameIdx >= sequence.frames.size())
-			return nullptr;
-		auto &frame = sequence.frames.at(frameIdx);
-		return &frame;
-	}));
-	sequenceDef.def("GetFrames", static_cast<luabind::tableT<material::SpriteSheetAnimation::Sequence::Frame> (*)(lua::State *, material::SpriteSheetAnimation::Sequence &)>([](lua::State *l, material::SpriteSheetAnimation::Sequence &sequence) -> luabind::tableT<material::SpriteSheetAnimation::Sequence::Frame> {
-		auto &frames = sequence.frames;
-		auto t = luabind::newtable(l);
-		uint32_t frameIndex = 1;
-		for(auto &frame : frames)
-			t[frameIndex++] = &frame;
-		return t;
-	}));
+	sequenceDef.def("GetFrame",
+	  static_cast<material::SpriteSheetAnimation::Sequence::Frame *(*)(lua::State *, material::SpriteSheetAnimation::Sequence &, uint32_t)>([](lua::State *l, material::SpriteSheetAnimation::Sequence &sequence, uint32_t frameIdx) -> material::SpriteSheetAnimation::Sequence::Frame * {
+		  if(frameIdx >= sequence.frames.size())
+			  return nullptr;
+		  auto &frame = sequence.frames.at(frameIdx);
+		  return &frame;
+	  }));
+	sequenceDef.def("GetFrames",
+	  static_cast<luabind::tableT<material::SpriteSheetAnimation::Sequence::Frame> (*)(lua::State *, material::SpriteSheetAnimation::Sequence &)>([](lua::State *l, material::SpriteSheetAnimation::Sequence &sequence) -> luabind::tableT<material::SpriteSheetAnimation::Sequence::Frame> {
+		  auto &frames = sequence.frames;
+		  auto t = luabind::newtable(l);
+		  uint32_t frameIndex = 1;
+		  for(auto &frame : frames)
+			  t[frameIndex++] = &frame;
+		  return t;
+	  }));
 	sequenceDef.def("IsLooping", static_cast<bool (*)(lua::State *, material::SpriteSheetAnimation::Sequence &)>([](lua::State *l, material::SpriteSheetAnimation::Sequence &sequence) { return sequence.loop; }));
 	sequenceDef.def("GetInterpolatedFrameData",
-	  static_cast<luabind::optional<luabind::mult<uint32_t, uint32_t, float>> (*)(lua::State *, material::SpriteSheetAnimation::Sequence &, float)>([](lua::State *l, material::SpriteSheetAnimation::Sequence &sequence, float ptTime) -> luabind::optional<luabind::mult<uint32_t, uint32_t, float>> {
-		  uint32_t frameIndex0, frameIndex1;
-		  float interpFactor;
-		  if(sequence.GetInterpolatedFrameData(ptTime, frameIndex0, frameIndex1, interpFactor) == false)
-			  return Lua::nil;
-		  return luabind::mult<uint32_t, uint32_t, float> {l, frameIndex0, frameIndex1, interpFactor};
-	  }));
+	  static_cast<luabind::optional<luabind::mult<uint32_t, uint32_t, float>> (*)(lua::State *, material::SpriteSheetAnimation::Sequence &, float)>(
+	    [](lua::State *l, material::SpriteSheetAnimation::Sequence &sequence, float ptTime) -> luabind::optional<luabind::mult<uint32_t, uint32_t, float>> {
+		    uint32_t frameIndex0, frameIndex1;
+		    float interpFactor;
+		    if(sequence.GetInterpolatedFrameData(ptTime, frameIndex0, frameIndex1, interpFactor) == false)
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+			    return luabind::object {};
+#else
+			    return Lua::nil;
+#endif
+		    return luabind::mult<uint32_t, uint32_t, float> {l, frameIndex0, frameIndex1, interpFactor};
+	    }));
 
 	spriteSheetDef.scope[sequenceDef];
 
@@ -438,14 +467,15 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 		auto &seq = spriteSheetAnim.sequences.at(seqIdx);
 		return &seq;
 	}));
-	spriteSheetDef.def("GetSequences", static_cast<luabind::tableT<material::SpriteSheetAnimation::Sequence> (*)(lua::State *, material::SpriteSheetAnimation &)>([](lua::State *l, material::SpriteSheetAnimation &spriteSheetAnim) -> luabind::tableT<material::SpriteSheetAnimation::Sequence> {
-		auto &sequences = spriteSheetAnim.sequences;
-		auto t = luabind::newtable(l);
-		uint32_t seqIdx = 1;
-		for(auto &seq : sequences)
-			t[seqIdx++] = &seq;
-		return t;
-	}));
+	spriteSheetDef.def("GetSequences",
+	  static_cast<luabind::tableT<material::SpriteSheetAnimation::Sequence> (*)(lua::State *, material::SpriteSheetAnimation &)>([](lua::State *l, material::SpriteSheetAnimation &spriteSheetAnim) -> luabind::tableT<material::SpriteSheetAnimation::Sequence> {
+		  auto &sequences = spriteSheetAnim.sequences;
+		  auto t = luabind::newtable(l);
+		  uint32_t seqIdx = 1;
+		  for(auto &seq : sequences)
+			  t[seqIdx++] = &seq;
+		  return t;
+	  }));
 	materialClassDef.scope[spriteSheetDef];
 
 	Lua::Material::register_class(materialClassDef);
@@ -480,7 +510,11 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 	  "GetPrimaryShader", +[](lua::State *l, material::Material &mat) -> luabind::object {
 		  auto *shader = static_cast<material::CMaterial &>(mat).GetPrimaryShader();
 		  if(!shader)
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+			  return luabind::object {};
+#else
 			  return Lua::nil;
+#endif
 		  Lua::shader::push_shader(l, *shader);
 		  auto o = luabind::object {luabind::from_stack(l, -1)};
 		  Lua::Pop(l, 1);
@@ -816,13 +850,12 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 	defShaderComposeRMA.add_static_constant("FLAG_NONE", math::to_integral(ShaderComposeRMA::Flags::None));
 	defShaderComposeRMA.add_static_constant("FLAG_USE_SPECULAR_WORKFLOW_BIT", math::to_integral(ShaderComposeRMA::Flags::UseSpecularWorkflow));
 	defShaderComposeRMA.def("ComposeRMA",
-	  static_cast<void (*)(lua::State *, ShaderComposeRMA &, prosper::Texture *, prosper::Texture *, prosper::Texture *, uint32_t)>(
-	    [](lua::State *l, ShaderComposeRMA &shader, prosper::Texture *roughnessMap, prosper::Texture *metalnessMap, prosper::Texture *aoMap, uint32_t flags) {
-		    auto rma = shader.ComposeRMA(get_cengine()->GetRenderContext(), roughnessMap, metalnessMap, aoMap, static_cast<ShaderComposeRMA::Flags>(flags));
-		    if(rma == nullptr)
-			    return;
-		    Lua::Push(l, rma);
-	    }));
+	  static_cast<void (*)(lua::State *, ShaderComposeRMA &, prosper::Texture *, prosper::Texture *, prosper::Texture *, uint32_t)>([](lua::State *l, ShaderComposeRMA &shader, prosper::Texture *roughnessMap, prosper::Texture *metalnessMap, prosper::Texture *aoMap, uint32_t flags) {
+		  auto rma = shader.ComposeRMA(get_cengine()->GetRenderContext(), roughnessMap, metalnessMap, aoMap, static_cast<ShaderComposeRMA::Flags>(flags));
+		  if(rma == nullptr)
+			  return;
+		  Lua::Push(l, rma);
+	  }));
 	modShader[defShaderComposeRMA];
 
 	auto defShaderFlipImage = luabind::class_<prosper::ShaderFlipImage, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("FlipImage");
@@ -1242,9 +1275,11 @@ void pragma::CGame::RegisterLuaClasses()
 	defRenderPassStats.add_static_constant("TIMER_CPU_COUNT", math::to_integral(rendering::RenderPassStats::Timer::CpuCount));
 	static_assert(math::to_integral(rendering::RenderPassStats::Timer::Count) == 7);
 	defRenderPassStats.def("Copy", static_cast<rendering::RenderPassStats (*)(lua::State *, rendering::RenderPassStats &)>([](lua::State *l, rendering::RenderPassStats &renderStats) -> rendering::RenderPassStats { return renderStats; }));
-	defRenderPassStats.def("GetCount", static_cast<uint32_t (*)(lua::State *, rendering::RenderPassStats &, rendering::RenderPassStats::Counter)>([](lua::State *l, rendering::RenderPassStats &renderStats, rendering::RenderPassStats::Counter counter) -> uint32_t { return renderStats->GetCount(counter); }));
-	defRenderPassStats.def("GetTime",
-	  static_cast<long double (*)(lua::State *, rendering::RenderPassStats &, rendering::RenderPassStats::Timer)>([](lua::State *l, rendering::RenderPassStats &renderStats, rendering::RenderPassStats::Timer timer) -> long double { return renderStats->GetTime(timer).count() / static_cast<long double>(1'000'000.0); }));
+	defRenderPassStats.def("GetCount",
+	  static_cast<uint32_t (*)(lua::State *, rendering::RenderPassStats &, rendering::RenderPassStats::Counter)>([](lua::State *l, rendering::RenderPassStats &renderStats, rendering::RenderPassStats::Counter counter) -> uint32_t { return renderStats->GetCount(counter); }));
+	defRenderPassStats.def("GetTime", static_cast<long double (*)(lua::State *, rendering::RenderPassStats &, rendering::RenderPassStats::Timer)>([](lua::State *l, rendering::RenderPassStats &renderStats, rendering::RenderPassStats::Timer timer) -> long double {
+		return renderStats->GetTime(timer).count() / static_cast<long double>(1'000'000.0);
+	}));
 	modGame[defRenderPassStats];
 
 	auto defRenderStats = luabind::class_<rendering::RenderStats>("RenderStats");
@@ -1283,9 +1318,12 @@ void pragma::CGame::RegisterLuaClasses()
 	defRenderStats.add_static_constant("TIMER_COUNT", math::to_integral(rendering::RenderStats::RenderStage::Count));
 	static_assert(math::to_integral(rendering::RenderStats::RenderStage::Count) == 21);
 	defRenderStats.def("Copy", static_cast<rendering::RenderStats (*)(lua::State *, rendering::RenderStats &)>([](lua::State *l, rendering::RenderStats &renderStats) -> rendering::RenderStats { return renderStats; }));
-	defRenderStats.def("GetPassStats", static_cast<rendering::RenderPassStats *(*)(lua::State *, rendering::RenderStats &, rendering::RenderStats::RenderPass)>([](lua::State *l, rendering::RenderStats &renderStats, rendering::RenderStats::RenderPass pass) -> rendering::RenderPassStats * { return &renderStats.GetPassStats(pass); }));
-	defRenderStats.def("GetTime",
-	  static_cast<long double (*)(lua::State *, rendering::RenderStats &, rendering::RenderStats::RenderStage)>([](lua::State *l, rendering::RenderStats &renderStats, rendering::RenderStats::RenderStage timer) -> long double { return renderStats->GetTime(timer).count() / static_cast<long double>(1'000'000.0); }));
+	defRenderStats.def("GetPassStats", static_cast<rendering::RenderPassStats *(*)(lua::State *, rendering::RenderStats &, rendering::RenderStats::RenderPass)>([](lua::State *l, rendering::RenderStats &renderStats, rendering::RenderStats::RenderPass pass) -> rendering::RenderPassStats * {
+		return &renderStats.GetPassStats(pass);
+	}));
+	defRenderStats.def("GetTime", static_cast<long double (*)(lua::State *, rendering::RenderStats &, rendering::RenderStats::RenderStage)>([](lua::State *l, rendering::RenderStats &renderStats, rendering::RenderStats::RenderStage timer) -> long double {
+		return renderStats->GetTime(timer).count() / static_cast<long double>(1'000'000.0);
+	}));
 	modGame[defRenderStats];
 
 	auto defDrawSceneInfo = luabind::class_<rendering::DrawSceneInfo>("DrawSceneInfo");
@@ -1413,15 +1451,14 @@ void pragma::CGame::RegisterLuaClasses()
 	modGame[defBaseRenderProcessor];
 
 	auto defDepthStageRenderProcessor = luabind::class_<rendering::DepthStageRenderProcessor, luabind::bases<rendering::BaseRenderProcessor>>("DepthStageRenderProcessor");
-	defDepthStageRenderProcessor.def("Render",
-	  static_cast<void (*)(lua::State *, rendering::DepthStageRenderProcessor &, const rendering::RenderQueue &)>(
-	    [](lua::State *l, rendering::DepthStageRenderProcessor &processor, const rendering::RenderQueue &renderQueue) { processor.Render(renderQueue, rendering::RenderPass::Prepass); }));
+	defDepthStageRenderProcessor.def("Render", static_cast<void (*)(lua::State *, rendering::DepthStageRenderProcessor &, const rendering::RenderQueue &)>([](lua::State *l, rendering::DepthStageRenderProcessor &processor, const rendering::RenderQueue &renderQueue) {
+		processor.Render(renderQueue, rendering::RenderPass::Prepass);
+	}));
 	modGame[defDepthStageRenderProcessor];
 
 	auto defLightingStageRenderProcessor = luabind::class_<rendering::LightingStageRenderProcessor, luabind::bases<rendering::BaseRenderProcessor>>("LightingStageRenderProcessor");
 	defLightingStageRenderProcessor.def("Render",
-	  static_cast<void (*)(lua::State *, rendering::LightingStageRenderProcessor &, const rendering::RenderQueue &)>(
-	    [](lua::State *l, rendering::LightingStageRenderProcessor &processor, const rendering::RenderQueue &renderQueue) { processor.Render(renderQueue); }));
+	  static_cast<void (*)(lua::State *, rendering::LightingStageRenderProcessor &, const rendering::RenderQueue &)>([](lua::State *l, rendering::LightingStageRenderProcessor &processor, const rendering::RenderQueue &renderQueue) { processor.Render(renderQueue); }));
 	modGame[defLightingStageRenderProcessor];
 
 	auto modelMeshClassDef = luabind::class_<geometry::ModelMesh>("Mesh");

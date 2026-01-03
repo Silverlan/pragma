@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 #include <bvh/v2/default_builder.h>
 
@@ -123,4 +122,6 @@ export namespace pragma {
 		DLLCLIENT bool test_bvh_intersection_with_kdop(const ObbBvhTree &bvhData, const std::vector<math::ScaledTransform> &effectivePoses, const std::vector<math::Plane> &kdop, size_t nodeIdx = 0, IntersectionInfo *outIntersectionInfo = nullptr);
 	};
 };
-export {REGISTER_ENUM_FLAGS(pragma::bvh::DebugDrawInfo::Flags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::bvh::DebugDrawInfo::Flags)
+}

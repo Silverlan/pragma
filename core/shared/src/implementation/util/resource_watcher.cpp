@@ -64,7 +64,7 @@ void pragma::util::ResourceWatcherManager::ReloadMaterial(const std::string &pat
 	std::string internalPath;
 	if(nw->LoadMaterial(path, true) != nullptr) {
 #if RESOURCE_WATCHER_VERBOSE > 0
-		Con::cout << "[ResourceWatcher] Material 'materials\\" << path << "' has been reloaded!" << Con::endl;
+		Con::COUT << "[ResourceWatcher] Material 'materials\\" << path << "' has been reloaded!" << Con::endl;
 #endif
 		if(game != nullptr) {
 			auto fname = ufile::get_file_from_filename(path);
@@ -147,12 +147,12 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const Path &rootPat
 				if(asset != nullptr) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 					auto mdlPath = "models\\" + strPath;
-					Con::cout << "[ResourceWatcher] Model has changed: " << mdlPath << ". Attempting to reload..." << Con::endl;
+					Con::COUT << "[ResourceWatcher] Model has changed: " << mdlPath << ". Attempting to reload..." << Con::endl;
 #endif
 					auto mdl = game->LoadModel(strPath, true);
 					if(mdl != nullptr) {
 #if RESOURCE_WATCHER_VERBOSE > 0
-						Con::cout << "[ResourceWatcher] Model has been reloaded, reloading entities..." << Con::endl;
+						Con::COUT << "[ResourceWatcher] Model has been reloaded, reloading entities..." << Con::endl;
 #endif
 						ecs::EntityIterator entIt {*game, ecs::EntityIterator::FilterFlags::Default | ecs::EntityIterator::FilterFlags::Pending};
 						entIt.AttachFilter<EntityIteratorFilterComponent>("model");
@@ -161,7 +161,7 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const Path &rootPat
 							if(!mdlComponent || fs::compare_path(mdlComponent->GetModelName(), strPath) == false)
 								continue;
 #if RESOURCE_WATCHER_VERBOSE > 0
-							Con::cout << "[ResourceWatcher] Reloading model for entity " << ent->GetClass() << "..." << Con::endl;
+							Con::COUT << "[ResourceWatcher] Reloading model for entity " << ent->GetClass() << "..." << Con::endl;
 #endif
 							mdlComponent->SetModel(std::shared_ptr<asset::Model>(nullptr));
 							mdlComponent->SetModel(strPath);
@@ -174,7 +174,7 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const Path &rootPat
 		else if(*assetType == asset::Type::Material) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 			auto matPath = "materials\\" + strPath;
-			Con::cout << "[ResourceWatcher] Material has changed: " << matPath << ". Attempting to reload..." << Con::endl;
+			Con::COUT << "[ResourceWatcher] Material has changed: " << matPath << ". Attempting to reload..." << Con::endl;
 #endif
 			ReloadMaterial(strPath);
 			CallChangeCallbacks(eResourceWatcherCallbackType::Material, strPath, ext);
@@ -184,7 +184,7 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const Path &rootPat
 		else if(*assetType == asset::Type::Texture) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 			auto texPath = "materials\\" + strPath;
-			Con::cout << "[ResourceWatcher] Texture has changed: " << texPath << ". Attempting to reload..." << Con::endl;
+			Con::COUT << "[ResourceWatcher] Texture has changed: " << texPath << ". Attempting to reload..." << Con::endl;
 #endif
 			ReloadTexture(strPath);
 			auto &matManager = nw->GetMaterialManager();
@@ -245,7 +245,7 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const Path &rootPat
 			if(game != nullptr) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 				auto sndPath = "sounds\\" + strPath;
-				Con::cout << "[ResourceWatcher] Sound has changed: " << sndPath << ". Attempting to reload..." << Con::endl;
+				Con::COUT << "[ResourceWatcher] Sound has changed: " << sndPath << ". Attempting to reload..." << Con::endl;
 #endif
 				// TODO: Reload sounds if they had been loaded previously
 				game->GetNetworkState()->PrecacheSound(strPath, audio::ALChannel::Both); // TODO: Only precache whatever's been requested before?
@@ -258,7 +258,7 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const Path &rootPat
 			if(game != nullptr) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 				auto scriptPath = "scripts\\" + strPath;
-				Con::cout << "[ResourceWatcher] Sound-script has changed: " << scriptPath << ". Attempting to reload..." << Con::endl;
+				Con::COUT << "[ResourceWatcher] Sound-script has changed: " << scriptPath << ". Attempting to reload..." << Con::endl;
 #endif
 				// TODO: Reload sound-scripts if they had been loaded previously
 				game->LoadSoundScripts(strPath.c_str()); // TODO: Only reload if they have been requested before?
@@ -286,7 +286,7 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const Path &rootPat
 	if(!ext)
 		return;
 #if RESOURCE_WATCHER_VERBOSE > 0
-	Con::cout << "[ResourceWatcher] File changed: " << path << " (" << ext << ")" << Con::endl;
+	Con::COUT << "[ResourceWatcher] File changed: " << path << " (" << ext << ")" << Con::endl;
 #endif
 	OnResourceChanged(rootPath, path, *ext);
 }
@@ -315,7 +315,7 @@ bool pragma::util::ResourceWatcherManager::MountDirectory(const std::string &pat
 	}
 	catch(const fs::DirectoryWatcher::ConstructException &e) {
 #if RESOURCE_WATCHER_VERBOSE > 1
-		Con::cwar << "[ResourceWatcher] Unable to mount directory '" << path << "': " << e.what() << Con::endl;
+		Con::CWAR << "[ResourceWatcher] Unable to mount directory '" << path << "': " << e.what() << Con::endl;
 #endif
 	}
 	return true;

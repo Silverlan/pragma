@@ -571,7 +571,7 @@ bool pragma::asset::Model::LoadFromAssetData(Game &game, const udm::AssetData &d
 			if(idx >= flexes.size()) {
 				// outErr = "Flex index " + std::to_string(idx) + " out of range! (Number of flexes: " + std::to_string(flexes.size()) + ")";
 				// return false;
-				Con::cwar << "Flex index " << std::to_string(idx) << " out of range! (Number of flexes: " << std::to_string(flexes.size()) << ")" << Con::endl;
+				Con::CWAR << "Flex index " << std::to_string(idx) << " out of range! (Number of flexes: " << std::to_string(flexes.size()) << ")" << Con::endl;
 				flexes.resize(idx + 1);
 			}
 			auto &flex = flexes[idx];
@@ -1007,7 +1007,7 @@ bool pragma::asset::Model::Save(Game &game, udm::AssetDataArg outData, std::stri
 			std::string name = eyeball.name;
 			if(name.empty()) {
 				name = "eyeball" + std::to_string(eyeballIdx);
-				Con::cwar << "Eyeball with no name found, assigning name '" << name << "'" << Con::endl;
+				Con::CWAR << "Eyeball with no name found, assigning name '" << name << "'" << Con::endl;
 			}
 			auto udmEyeball = udmEyeballs[name];
 			udmEyeball["index"] = eyeballIdx++;
@@ -1552,7 +1552,7 @@ bool pragma::asset::Model::SaveLegacy(Game *game, const std::string &name, const
 					break;
 				}
 				if(subMeshId == std::numeric_limits<uint32_t>::max()) {
-					Con::cwar << "Invalid mesh reference in vertex animation '" << va->GetName() << "'! Skipping..." << Con::endl;
+					Con::CWAR << "Invalid mesh reference in vertex animation '" << va->GetName() << "'! Skipping..." << Con::endl;
 					continue;
 				}
 				++meshAnimCount;

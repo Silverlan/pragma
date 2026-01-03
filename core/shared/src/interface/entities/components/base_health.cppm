@@ -11,8 +11,8 @@ export import :game.damage_info;
 
 export namespace pragma {
 	namespace baseHealthComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_TAKEN_DAMAGE;
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_HEALTH_CHANGED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_TAKEN_DAMAGE)
+		REGISTER_COMPONENT_EVENT(EVENT_ON_HEALTH_CHANGED)
 	}
 	class DLLNETWORK BaseHealthComponent : public BaseEntityComponent {
 	  public:

@@ -10,8 +10,6 @@ import :entities.components.base_vehicle;
 
 using namespace pragma;
 
-ComponentEventId baseVehicleComponent::EVENT_ON_DRIVER_ENTERED = INVALID_COMPONENT_ID;
-ComponentEventId baseVehicleComponent::EVENT_ON_DRIVER_EXITED = INVALID_COMPONENT_ID;
 void BaseVehicleComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseVehicleComponent::EVENT_ON_DRIVER_ENTERED = registerEvent("ON_DRIVER_ENTERED", ComponentEventInfo::Type::Broadcast);

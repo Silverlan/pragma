@@ -112,7 +112,7 @@ namespace {
 static void debug_render_validation_error_enabled(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
-		Con::cwar << "No validation error id specified!" << Con::endl;
+		Con::CWAR << "No validation error id specified!" << Con::endl;
 		return;
 	}
 	auto &id = argv.front();
@@ -128,49 +128,49 @@ namespace {
 static void print_component_properties(const pragma::ComponentMemberInfo &memberInfo, pragma::BaseEntityComponent &component)
 {
 	auto name = static_cast<std::string>(memberInfo.GetName().str);
-	Con::cout << "Name: " << name << Con::endl;
-	Con::cout << "Specialization Type: " << magic_enum::enum_name(memberInfo.GetSpecializationType()) << Con::endl;
+	Con::COUT << "Name: " << name << Con::endl;
+	Con::COUT << "Specialization Type: " << magic_enum::enum_name(memberInfo.GetSpecializationType()) << Con::endl;
 	auto *customSpecType = memberInfo.GetCustomSpecializationType();
 	if(customSpecType)
-		Con::cout << "Custom Specialization Type: " << *customSpecType << Con::endl;
+		Con::COUT << "Custom Specialization Type: " << *customSpecType << Con::endl;
 
 	auto min = memberInfo.GetMin();
 	if(min)
-		Con::cout << "Min: " << *min << Con::endl;
+		Con::COUT << "Min: " << *min << Con::endl;
 
 	auto max = memberInfo.GetMin();
 	if(max)
-		Con::cout << "Max: " << *max << Con::endl;
+		Con::COUT << "Max: " << *max << Con::endl;
 
 	auto stepSize = memberInfo.GetStepSize();
 	if(stepSize)
-		Con::cout << "Step Size: " << *stepSize << Con::endl;
+		Con::COUT << "Step Size: " << *stepSize << Con::endl;
 
 	auto &metaData = memberInfo.GetMetaData();
 	if(metaData) {
 		std::stringstream ss;
 		metaData->ToAscii(udm::AsciiSaveFlags::Default | udm::AsciiSaveFlags::DontCompressLz4Arrays, ss, name);
-		Con::cout << "Meta Data:" << Con::endl;
-		Con::cout << ss.str() << Con::endl;
-		Con::cout << Con::endl;
+		Con::COUT << "Meta Data:" << Con::endl;
+		Con::COUT << ss.str() << Con::endl;
+		Con::COUT << Con::endl;
 	}
 
-	Con::cout << "Is Enum: " << (memberInfo.IsEnum() ? "Yes" : "No") << Con::endl;
+	Con::COUT << "Is Enum: " << (memberInfo.IsEnum() ? "Yes" : "No") << Con::endl;
 
 	if(memberInfo.IsEnum()) {
 		std::vector<int64_t> values;
 		if(memberInfo.GetEnumValues(values)) {
-			Con::cout << "Enum Values:" << Con::endl;
+			Con::COUT << "Enum Values:" << Con::endl;
 			for(auto v : values)
-				Con::cout << v << "," << Con::endl;
+				Con::COUT << v << "," << Con::endl;
 		}
 	}
 
-	Con::cout << "Flags: " << magic_enum::enum_flags_name(memberInfo.GetFlags()) << Con::endl;
-	Con::cout << "Type: " << magic_enum::enum_name(memberInfo.type) << Con::endl;
-	Con::cout << "User Index: " << memberInfo.userIndex << Con::endl;
+	Con::COUT << "Flags: " << magic_enum::enum_flags_name(memberInfo.GetFlags()) << Con::endl;
+	Con::COUT << "Type: " << magic_enum::enum_name(memberInfo.type) << Con::endl;
+	Con::COUT << "User Index: " << memberInfo.userIndex << Con::endl;
 
-	Con::cout << "Default Value: ";
+	Con::COUT << "Default Value: ";
 	pragma::ents::visit_member(memberInfo.type, [&memberInfo](auto tag) {
 		using T = typename decltype(tag)::type;
 		if(pragma::ents::is_udm_member_type(memberInfo.type)) {
@@ -178,15 +178,15 @@ static void print_component_properties(const pragma::ComponentMemberInfo &member
 				T defaultVal;
 				memberInfo.GetDefault<T>(defaultVal);
 				auto strDefaultVal = udm::convert<T, udm::String>(defaultVal);
-				Con::cout << strDefaultVal;
+				Con::COUT << strDefaultVal;
 				return;
 			}
 		}
-		Con::cout << "<Not convertible to string>";
+		Con::COUT << "<Not convertible to string>";
 	});
-	Con::cout << Con::endl;
+	Con::COUT << Con::endl;
 
-	Con::cout << "Value: ";
+	Con::COUT << "Value: ";
 	pragma::ents::visit_member(memberInfo.type, [&memberInfo, &component](auto tag) {
 		using T = typename decltype(tag)::type;
 		if(pragma::ents::is_udm_member_type(memberInfo.type)) {
@@ -194,13 +194,13 @@ static void print_component_properties(const pragma::ComponentMemberInfo &member
 				T value;
 				memberInfo.getterFunction(memberInfo, component, &value);
 				auto strVal = udm::convert<T, udm::String>(value);
-				Con::cout << strVal;
+				Con::COUT << strVal;
 				return;
 			}
 		}
-		Con::cout << "<Not convertible to string>";
+		Con::COUT << "<Not convertible to string>";
 	});
-	Con::cout << Con::endl << Con::endl;
+	Con::COUT << Con::endl << Con::endl;
 }
 static void debug_dump_component_properties(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
@@ -214,7 +214,7 @@ static void debug_dump_component_properties(pragma::NetworkState *state, pragma:
 	if(ents.empty())
 		return;
 	auto *entTgt = ents.front();
-	Con::cout << "Properties of target entity '" << *entTgt << "':" << Con::endl;
+	Con::COUT << "Properties of target entity '" << *entTgt << "':" << Con::endl;
 	for(auto &c : entTgt->GetComponents()) {
 		std::vector<const pragma::ComponentMemberInfo *> memberInfos;
 		uint32_t i = 0;
@@ -229,13 +229,13 @@ static void debug_dump_component_properties(pragma::NetworkState *state, pragma:
 		std::string cName = "Unknown";
 		if(cInfo)
 			cName = cInfo->name.str;
-		Con::cout << "Component '" << cName << "':" << Con::endl;
+		Con::COUT << "Component '" << cName << "':" << Con::endl;
 		uint32_t idx = 0;
 		for(auto &memberInfo : memberInfos) {
-			Con::cout << "Index " << (idx++) << ":" << Con::endl;
+			Con::COUT << "Index " << (idx++) << ":" << Con::endl;
 			print_component_properties(*memberInfo, *c);
 		}
-		Con::cout << Con::endl << Con::endl << Con::endl;
+		Con::COUT << Con::endl << Con::endl << Con::endl;
 	};
 }
 namespace {
@@ -263,7 +263,7 @@ static void debug_render_depth_buffer(pragma::NetworkState *state, pragma::BaseP
 		if(hEnt.valid()) {
 			auto sceneC = hEnt.get()->GetComponent<pragma::CSceneComponent>();
 			if(sceneC.expired()) {
-				Con::cwar << "Scene not found!" << Con::endl;
+				Con::CWAR << "Scene not found!" << Con::endl;
 				return pragma::gui::WIHandle {};
 			}
 			scene = sceneC.get();
@@ -365,11 +365,11 @@ void pragma::CGame::RenderScenes(rendering::DrawSceneInfo &drawSceneInfo)
 	}
 	auto &scene = drawSceneInfo.scene;
 	if(scene.expired()) {
-		Con::cwar << "No active render scene!" << Con::endl;
+		Con::CWAR << "No active render scene!" << Con::endl;
 		return;
 	}
 	if(scene->IsValid() == false) {
-		Con::cwar << "Attempted to render invalid scene!" << Con::endl;
+		Con::CWAR << "Attempted to render invalid scene!" << Con::endl;
 		return;
 	}
 	StartProfilingStage("PreRenderScenesCallbacks");
@@ -511,14 +511,14 @@ static void debug_dump_render_queues(const pragma::rendering::DrawSceneInfo &dra
 		}
 	}
 
-	Con::cout << ss.str() << Con::endl;
+	Con::COUT << ss.str() << Con::endl;
 }
 static void debug_dump_render_queues(const std::vector<pragma::rendering::DrawSceneInfo> &drawSceneInfos)
 {
-	Con::cout << "Dumping render queues..." << Con::endl;
+	Con::COUT << "Dumping render queues..." << Con::endl;
 	uint32_t i = 0;
 	for(auto &drawSceneInfo : drawSceneInfos) {
-		Con::cout << pragma::console::get_true_color_code(colors::Red) << "Scene #" << (i++) << pragma::console::get_reset_color_code() << Con::endl;
+		Con::COUT << pragma::console::get_true_color_code(colors::Red) << "Scene #" << (i++) << pragma::console::get_reset_color_code() << Con::endl;
 		debug_dump_render_queues(drawSceneInfo);
 	}
 }

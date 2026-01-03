@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :entities.components.liquid;
@@ -218,7 +216,7 @@ static void debug_water(NetworkState *state, BasePlayerComponent *pl, std::vecto
 		}
 	}
 	if(bFoundWater == false)
-		Con::cwar << "No water entity found!" << Con::endl;
+		Con::CWAR << "No water entity found!" << Con::endl;
 }
 namespace {
 	auto UVN = console::client::register_command("debug_water", &debug_water, console::ConVarFlags::None,

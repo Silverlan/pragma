@@ -102,7 +102,7 @@ export namespace Lua {
 				std::string luaStr = "function(self,ent) BaseEntityComponent.__init(self,ent) end";
 				std::string err;
 				if(PushLuaFunctionFromString(l, luaStr, "ComponentInit", err) == false)
-					Con::cwar << "Unable to register __init method for component class '" << name << "': " << err << Con::endl;
+					Con::CWAR << "Unable to register __init method for component class '" << name << "': " << err << Con::endl;
 				else {
 					CheckFunction(l, -1);
 					o["__init"] = luabind::object {luabind::from_stack {l, -1}};
@@ -152,7 +152,7 @@ export namespace Lua {
 							  // If this behavior should be changed in the future, a 'register_entity_component' net-message will have to be sent
 							  // to all clients, in addition to setting the networked-flag below! (See SEntityComponentManager::OnComponentTypeRegistered)
 							  // pragma::math::set_flag(componentInfo.flags,pragma::ComponentFlags::Networked);
-							  Con::cwar << "Component '" << name
+							  Con::CWAR << "Component '" << name
 							            << "' has networked methods or uses net-events, but was not registered as networked, this means networking will be disabled for this component! Set the 'ents.EntityComponent.FREGISTER_BIT_NETWORKED' flag when registering the component to fix this!"
 							            << Con::endl;
 						  }

@@ -89,8 +89,8 @@ def git_clone_commit(name, path, url, commitSha, branch=None):
 	reset_to_commit(commitSha)
 	return path
 
-def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cflags=[],env=None):
-	args = ["cmake",scriptPath,"-G",generator]
+def cmake_configure(scriptPath,generator,toolsetArgs=[],additionalArgs=[],cflags=[],env=None):
+	args = [config.cmake_path,scriptPath,"-G",generator]
 	if cflags:
 		additionalArgs.append("-DCMAKE_C_FLAGS=" + " ".join(cflags))
 		additionalArgs.append("-DCMAKE_CXX_FLAGS=" + " ".join(cflags))
@@ -121,7 +121,7 @@ def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cfla
 		raise
 
 def cmake_build(buildConfig,targets=None,env=None):
-	args = ["cmake","--build",".","--config",buildConfig]
+	args = [config.cmake_path,"--build",".","--config",buildConfig]
 	if targets:
 		args.append("--target")
 		args += targets
@@ -139,11 +139,12 @@ def cmake_build(buildConfig,targets=None,env=None):
 		print("Build command failed:\n\n", cmd_line)
 		raise
 
-def cmake_configure_def_toolset(scriptPath,generator,additionalArgs=[],additionalCFlags=[],env=None):
+def cmake_configure_def_toolset(scriptPath,generator,additionalArgs=[],additionalCFlags=[],env=None,additionalToolsetArgs=[]):
+	toolsetArgs = (config.toolsetArgs or []) +additionalToolsetArgs
 	cflags = additionalCFlags
 	if config.toolsetCFlags is not None:
 		cflags += config.toolsetCFlags
-	cmake_configure(scriptPath,generator,config.toolsetArgs,additionalArgs,cflags,env)
+	cmake_configure(scriptPath,generator,toolsetArgs,additionalArgs,cflags,env)
 
 def mkdir(dirName,cd=False):
 	if not Path(dirName).is_dir():

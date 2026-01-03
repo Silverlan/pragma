@@ -27,7 +27,7 @@ void BasePointConstraintFixedComponent::InitializeConstraint(ecs::BaseEntity *sr
 	auto *physEnv = game->GetPhysicsEnvironment();
 	auto pTrComponent = entThis.GetTransformComponent();
 	auto posThis = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
-	auto dir = pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD;
+	auto dir = pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::PRM_FORWARD;
 
 	auto &bodies = physTgt->GetRigidBodies();
 	m_constraints.reserve(bodies.size());

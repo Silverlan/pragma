@@ -1,16 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#undef GetClassName
-
 module pragma.server;
 import :entities.registration;
 
 import :entities;
 import :game;
 import :server_state;
+
+#undef GetClassName
 
 using namespace server_entities;
 

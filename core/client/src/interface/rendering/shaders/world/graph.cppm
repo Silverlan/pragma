@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:rendering.shaders.world_graph;
 
 export import :rendering.shader_graph.sg_module;

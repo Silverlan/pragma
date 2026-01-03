@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :rendering.shaders.world_water;
@@ -46,7 +44,7 @@ bool ShaderWater::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, 
 	// TODO: This is a bit messy, how can we do this a better way?
 	auto &scene = shaderProcessor.GetCurrentScene();
 	auto &cam = scene.GetActiveCamera();
-	auto posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
+	auto posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::PRM_ORIGIN;
 	PushConstants pushConstants {};
 	if(surfC->IsPointBelowSurface(posCam)) {
 		// Reflections aren't rendered if the camera is below the water surface, so we don't

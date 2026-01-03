@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :core.addon_install_manager;
@@ -79,7 +77,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 							  fi->sizeUncompressed = 0;
 						  }
 						  if(addon->updateFile->ReOpen("rb") == true) {
-							 fs::VFilePtr updateFile = addon->updateFile;
+							  fs::VFilePtr updateFile = addon->updateFile;
 							  updateFile->Seek(0);
 							  auto version = updateFile->Read<util::Version>();
 							  std::vector<uint32_t> newFileIds;
@@ -120,7 +118,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 									  ;
 							  }
 							  else
-								  Con::cwar << "Unable to finalize archive file '" << addon->addonPath << "'!" << Con::endl;
+								  Con::CWAR << "Unable to finalize archive file '" << addon->addonPath << "'!" << Con::endl;
 						  }
 
 						  // Re-open file handle for existing archives

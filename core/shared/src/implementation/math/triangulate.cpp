@@ -86,10 +86,10 @@ static bool snip(const std::vector<Vector2> &contour, int u, int v, int w, int n
 
 bool Geometry::triangulate(const std::vector<Vector2> &contour, std::vector<uint16_t> &result)
 {
-	//Con::cout<<"local contour = {"<<Con::endl;
+	//Con::COUT<<"local contour = {"<<Con::endl;
 	//for(auto &p : contour)
-	//	Con::cout<<"::Vector2("<<p.x<<","<<p.y<<"),"<<Con::endl;
-	//Con::cout<<"}"<<Con::endl;
+	//	Con::COUT<<"::Vector2("<<p.x<<","<<p.y<<"),"<<Con::endl;
+	//Con::COUT<<"}"<<Con::endl;
 	/* allocate and initialize list of Vertices in polygon */
 	auto n = contour.size();
 	if(n < 3)

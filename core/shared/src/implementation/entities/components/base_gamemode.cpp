@@ -10,14 +10,6 @@ import :entities.components.base_gamemode;
 
 using namespace pragma;
 
-ComponentEventId baseGamemodeComponent::EVENT_ON_PLAYER_DEATH = INVALID_COMPONENT_ID;
-ComponentEventId baseGamemodeComponent::EVENT_ON_PLAYER_SPAWNED = INVALID_COMPONENT_ID;
-ComponentEventId baseGamemodeComponent::EVENT_ON_PLAYER_DROPPED = INVALID_COMPONENT_ID;
-ComponentEventId baseGamemodeComponent::EVENT_ON_PLAYER_READY = INVALID_COMPONENT_ID;
-ComponentEventId baseGamemodeComponent::EVENT_ON_PLAYER_JOINED = INVALID_COMPONENT_ID;
-ComponentEventId baseGamemodeComponent::EVENT_ON_GAME_INITIALIZED = INVALID_COMPONENT_ID;
-ComponentEventId baseGamemodeComponent::EVENT_ON_MAP_INITIALIZED = INVALID_COMPONENT_ID;
-ComponentEventId baseGamemodeComponent::EVENT_ON_GAME_READY = INVALID_COMPONENT_ID;
 void BaseGamemodeComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseGamemodeComponent::EVENT_ON_PLAYER_DEATH = registerEvent("ON_PLAYER_DEATH", ComponentEventInfo::Type::Explicit);

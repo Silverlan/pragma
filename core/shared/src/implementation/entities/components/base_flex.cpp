@@ -8,7 +8,6 @@ import :entities.components.base_flex;
 
 using namespace pragma;
 
-ComponentEventId baseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED = INVALID_COMPONENT_ID;
 void BaseFlexComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseEntityComponent::RegisterEvents(componentManager, registerEvent);

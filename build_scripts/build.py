@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 
 ###### Config section
 # When using prebuilt binaries this tag will be used for the download from https://github.com/Silverlan/pragma-deps-lib
-prebuilt_tag = "2025-12-20"
+prebuilt_tag = "2025-12-28"
 ######
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
@@ -22,7 +22,7 @@ if platform == "linux":
 	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-22')
 	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-22')
 else:
-	defaultToolset = "msvc"
+	defaultToolset = "clang"
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
 parser.add_argument('--generator', help='The generator to use.', default="Default")
@@ -61,7 +61,7 @@ if platform == "linux":
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
 	parser.add_argument("--debug", type=str2bool, nargs='?', const=True, default=False, help="Enable debug assertions and disable code optimizations.")
 else:
-	parser.add_argument('--toolset', help='The toolset to use. Supported toolsets: msvc, clang, clang-cl', default=defaultToolset)
+	parser.add_argument('--toolset', help='The toolset to use. Supported toolsets: msvc, clang', default=defaultToolset) # clang-cl currently not supported
 args,unknown = parser.parse_known_args()
 args = vars(args)
 input_args = args
@@ -153,16 +153,6 @@ prefer_git_https = args["prefer_git_https"]
 update = args["update"]
 modules_prebuilt = []
 
-config.generator = generator
-config.prefer_git_https = prefer_git_https
-config.build_swiftshader = build_swiftshader
-config.clean_deps_build_files = clean_deps_build_files
-config.with_lua_debugger = with_lua_debugger
-config.with_swiftshader = with_swiftshader
-if platform == "linux":
-	config.no_sudo = no_sudo
-	config.no_confirm = no_confirm
-
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)
 deps_dir = normalize_path(deps_directory)
@@ -175,7 +165,6 @@ if not os.path.isabs(build_dir):
 if not os.path.isabs(deps_dir):
 	deps_dir = os.getcwd() +"/" +deps_dir
 deps_dir_fs = deps_dir.replace("\\", "/")
-config.deps_dir = deps_dir
 
 if not os.path.isabs(install_dir):
 	install_dir = build_dir +"/" +install_dir
@@ -201,6 +190,17 @@ else:
 	print("toolset: " +toolset)
 	if toolset == "clang":
 		generator = "Ninja Multi-Config"
+
+config.build_swiftshader = build_swiftshader
+config.clean_deps_build_files = clean_deps_build_files
+config.deps_dir = deps_dir
+config.prefer_git_https = prefer_git_https
+config.with_lua_debugger = with_lua_debugger
+config.with_swiftshader = with_swiftshader
+if platform == "linux":
+	config.no_sudo = no_sudo
+	config.no_confirm = no_confirm
+config.generator = generator
 
 print("generator: " +generator)
 print("with_essential_client_modules: " +str(with_essential_client_modules))
@@ -230,60 +230,10 @@ print("cmake_args: " +', '.join(additional_cmake_args))
 print("cmake_flags: " +', '.join(additional_cmake_flags))
 print("modules: " +', '.join(modules))
 
-if platform == "win32":
-	if toolset == "msvc":
-		toolset = None # Let the compiler use the default toolset
-	elif toolset == "clang":
-		config.toolsetArgs = [
-			"-DCMAKE_C_COMPILER=clang.exe",
-			"-DCMAKE_CXX_COMPILER=clang++.exe",
-			"-DCMAKE_MAKE_PROGRAM=ninja.exe"
-		]
-		config.toolsetCFlags = ["-fexceptions", "-fcxx-exceptions", "--target=x86_64-pc-windows-msvc"]
-		print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
-		sys.exit(1)
-	elif toolset == "clang-cl":
-		clang_dir = get_library_root_dir("clang") +"/bin"
-		
-		config.toolsetArgs = [
-			"-DCMAKE_C_COMPILER=" +clang_dir +"/clang-cl.exe",
-			"-DCMAKE_CXX_COMPILER=" +clang_dir +"/clang-cl.exe",
-			"-DCMAKE_CXX_COMPILER_AR=" +clang_dir +"/llvm-ar.exe",
-			"-DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS=" +clang_dir +"/clang-scan-deps.exe",
-			"-DCMAKE_CXX_COMPILER_RANLIB=" +clang_dir +"/llvm-ranlib.exe"
-		]
-		config.toolsetCFlags = ["-Wno-error", "-Wno-unused-command-line-argument", "-Wno-enum-constexpr-conversion", "-fexceptions", "-fcxx-exceptions"]
-		# print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
-		# sys.exit(1)
-	if generator != "Ninja Multi-Config":
-		if not deps_only:
-			print_warning(f"Generator {generator} for platform {platform} is currently not supported!")
-			sys.exit(1)
-
-if platform == "linux" and with_debug:
-	config.toolsetCFlags = ["-D_GLIBCXX_ASSERTIONS"]
-
-if update:
-	os.chdir(root)
-
-	print_msg("Updating Pragma repository...")
-	subprocess.run(["git","pull"],check=True)
-
-	argv = sys.argv
-	argv.remove("--update")
-	argv.append("--rerun")
-	print_msg("Build script may have changed, re-running...")
-	print("argv: ",argv)
-	os.execv(sys.executable, ['python'] +argv)
-	sys.exit(0)
-
-
 mkpath(build_dir)
 mkpath(deps_dir)
 mkpath(install_dir)
 mkpath(tools)
-
-config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
 
 # Use prebuilt binaries if --build-all is not set
 if build_all == False:
@@ -304,69 +254,84 @@ if build_all == False:
             prebuilt_archive_name = "lib-linux_x64.tar.gz"
             prebuilt_archive_format = "tar.gz"
         else:
-            prebuilt_archive_name = "lib-windows_x64.zip"
+            prebuilt_archive_name = "lib-windows_x64-clang.zip"
             prebuilt_archive_format = "zip"
 
         http_extract("https://github.com/Silverlan/pragma-deps-lib/releases/download/" +prebuilt_tag +"/" +prebuilt_archive_name,format=prebuilt_archive_format)
     else:
         print(f"Directory '{base_path}' is already up-to-date.")
 
-########## clang-22 ##########
-# Due to a compiler bug with C++20 Modules in clang, we have to use clang-22 for now,
-# which is not available in package managers yet.
-if platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-22"):
-	clang_staging_path = get_library_root_dir("clang")
-	if build_all:
-		curDir = os.getcwd()
-		os.chdir(deps_dir)
-		# We need clang-22, which is not actually available as a release yet, so we use our own prebuilt binaries for now.
-		clang20_root = os.getcwd() +"/LLVM-22.git-Linux-X64"
-		if not Path(clang20_root).is_dir():
-			print_msg("Downloading clang-22...")
-			http_extract("https://github.com/Silverlan/clang_prebuilt/releases/download/2025-12-19/linux_x64.tar.xz",format="tar.xz")
-		#clang20_root = os.getcwd() +"/LLVM-21.1.5-Linux-X64"
-		#if not Path(clang20_root).is_dir():
-		#	print_msg("Downloading clang-21...")
-		#	http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.5/LLVM-21.1.5-Linux-X64.tar.xz",format="tar.xz")
-		os.chdir(curDir)
+if platform == "win32":
+	if toolset == "msvc":
+		toolset = None # Let the compiler use the default toolset
+		print_warning(f"Visual Studio is not recommended and may not work. If you run into issues, try using the clang toolset instead.")
+	elif toolset == "clang":
+		# We need an up-to-date version of clang, so we'll use our shipped version for now.
+		from third_party import clang
+		clang.main()
 
-		copy_preserving_symlink(Path(clang20_root +"/bin/clang"), Path(clang_staging_path +"/bin"))
-		copy_preserving_symlink(Path(clang20_root +"/bin/clang++"), Path(clang_staging_path +"/bin"))
-		copy_preserving_symlink(Path(clang20_root +"/bin/clang-22"), Path(clang_staging_path +"/bin"))
-		copy_preserving_symlink(Path(clang20_root +"/bin/clang-scan-deps"), Path(clang_staging_path +"/bin"))
-		copy_preserving_symlink(Path(clang20_root +"/bin/llvm-ar"), Path(clang_staging_path +"/bin"))
-		copy_preserving_symlink(Path(clang20_root +"/bin/llvm-ranlib"), Path(clang_staging_path +"/bin"))
+		clang_dir = str(Path(get_library_root_dir("clang")) / "bin/")
+		config.toolsetArgs = [
+			"-DCMAKE_C_COMPILER=" +str(Path(clang_dir) / "clang.exe"),
+			"-DCMAKE_CXX_COMPILER=" +str(Path(clang_dir) / "clang++.exe"),
+			"-DCMAKE_MAKE_PROGRAM=ninja.exe"
+		]
+		config.toolsetCFlags = ["-fexceptions", "-fcxx-exceptions", "--target=x86_64-pc-windows-msvc"]
 
-		copytree(clang20_root +"/include/c++", clang_staging_path +"/include/c++")
-		copytree(clang20_root +"/include/clang", clang_staging_path +"/include/clang")
-		copytree(clang20_root +"/include/clang-c", clang_staging_path +"/include/clang-c")
-		#copytree(clang20_root +"/include/x86_64-unknown-linux-gnu", clang_staging_path +"/include/x86_64-unknown-linux-gnu")
-
-		copytree(clang20_root +"/lib/clang", clang_staging_path +"/lib/clang")
-		#copytree(clang20_root +"/lib/x86_64-unknown-linux-gnu", clang_staging_path +"/lib/x86_64-unknown-linux-gnu")
-
-		copytree(clang20_root +"/libexec", clang_staging_path +"/libexec")
-		copytree(clang20_root +"/share", clang_staging_path +"/share")
-
+		# Due to "import std;" support still being experimental in CMake, we have to use a custom, patched
+		# version of CMake to build Pragma with clang on Windows.
+		from third_party import cmake
+		cmake.main()
+		config.cmake_path = str(Path(get_library_root_dir("cmake")) / "bin/cmake.exe")
+	elif toolset == "clang-cl":
+		clang_dir = get_library_root_dir("clang") +"/bin"
+		
+		config.toolsetArgs = [
+			"-DCMAKE_C_COMPILER=" +clang_dir +"/clang-cl.exe",
+			"-DCMAKE_CXX_COMPILER=" +clang_dir +"/clang-cl.exe",
+			"-DCMAKE_CXX_COMPILER_AR=" +clang_dir +"/llvm-ar.exe",
+			"-DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS=" +clang_dir +"/clang-scan-deps.exe",
+			"-DCMAKE_CXX_COMPILER_RANLIB=" +clang_dir +"/llvm-ranlib.exe"
+		]
+		config.toolsetCFlags = ["-Wno-error", "-Wno-unused-command-line-argument", "-Wno-enum-constexpr-conversion", "-fexceptions", "-fcxx-exceptions"]
+		print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
+		sys.exit(1)
+	if generator != "Ninja Multi-Config":
+		if not deps_only:
+			print_warning(f"Generator {generator} for platform {platform} is currently not supported! Please use \"Ninja Multi-Config\".")
+			sys.exit(1)
+elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-22"):
+	# Due to a compiler bug with C++20 Modules in clang, we need the
+	# very latest version of clang, which is not available in package managers yet.
+	# We'll use our own prebuilt version for now.
+	from third_party import clang
+	clang.main()
+	clang_staging_path = Path(get_library_root_dir("clang"))
 	if c_compiler == "clang-22":
-		c_compiler = clang_staging_path +"/bin/clang"
+		c_compiler = str(clang_staging_path / "bin/clang")
 	if cxx_compiler == "clang++-22":
-		cxx_compiler = clang_staging_path +"/bin/clang++"
+		cxx_compiler = str(clang_staging_path / "bin/clang++")
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
-elif platform == "win32" and toolset == "clang":
-	clang_staging_path = get_library_root_dir("clang")
 
-	curDir = os.getcwd()
-	os.chdir(deps_dir)
-	# We need clang-22, which is not actually available as a release yet, so we use our own prebuilt binaries for now.
-	clang20_root = os.getcwd() +"/clang+llvm-21.1.6-x86_64-pc-windows-msvc"
-	if not Path(clang20_root).is_dir():
-		print_msg("Downloading clang-22...")
-		http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.6/clang+llvm-21.1.6-x86_64-pc-windows-msvc.tar.xz",format="tar.xz")
-	os.chdir(curDir)
-	
-	mv(clang20_root, clang_staging_path)
+if platform == "linux" and with_debug:
+	config.toolsetCFlags = ["-D_GLIBCXX_ASSERTIONS"]
+
+if update:
+	os.chdir(root)
+
+	print_msg("Updating Pragma repository...")
+	subprocess.run(["git","pull"],check=True)
+
+	argv = sys.argv
+	argv.remove("--update")
+	argv.append("--rerun")
+	print_msg("Build script may have changed, re-running...")
+	print("argv: ",argv)
+	os.execv(sys.executable, ['python'] +argv)
+	sys.exit(0)
+
+config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
 
 if platform == "linux":
 	os.environ["CC"] = c_compiler
@@ -747,14 +712,14 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="fbc8a82e704ae0a03afc8f8964621ec13e792e76",
+		commitSha="f39e9cf202d69626101bb07d6294bf455799b7c3",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
 if with_common_modules:
 	add_pragma_module(
 		name="pr_bullet",
-		commitSha="3e69bdbc4b9234c242d850c929edc9a0e131c4c8",
+		commitSha="094fe87b217a9985fdc3cdce29f614b2d469f293",
 		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
 	)
 	add_pragma_module(
@@ -788,12 +753,12 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="2799792c360368fe79203dab73f1c79286ea4dce",
+			commitSha="d9538f2a7a04c141e2256e6007b373bcc12e48cb",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="c6a2076644cd996abb3a9110bb746e9febd72ec4",
+			commitSha="4cb87ff452ff19e95bee8762c4d69d75bbb693ae",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -815,21 +780,21 @@ if with_pfm:
 if with_pfm:
 	add_pragma_module(
 		name="pr_git",
-		commitSha="fa34e6ea219f76baa0df9896633b2f1f62a4d765",
+		commitSha="9101fb9b3721bec179b0425f87441306fdee27b1",
 		repositoryUrl="https://github.com/Silverlan/pr_git.git"
 	)
 
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="a8e47b859d9cce6e4b158bceddf80ff0886f7f86",
+		commitSha="91c3d5175bb229c9afc0b02a91256d3673dfc221",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="ece0610bc3d2aa2bd3f30993beb1d06e7d3923f5",
+		commitSha="b4232e3f84e8fd3f3b3a12b874bd794f5b06db69",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)
@@ -929,6 +894,7 @@ if not deps_only:
 	cmake_args += additional_cmake_args
 	cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
 	cmake_args.append("-DCMAKE_CXX_SCAN_FOR_MODULES=1")
+	cmake_args.append("-DCMAKE_EXPORT_COMPILE_COMMANDS=1")
 	cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_staging_dir)
 	cmake_configure_def_toolset(root,generator,cmake_args,additional_cmake_flags)
 

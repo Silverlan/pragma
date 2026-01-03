@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 // #define PRAGMA_ENABLE_SHADER_DEBUG_PRINT
 
 export module pragma.client:rendering.global_render_settings_buffer_data;

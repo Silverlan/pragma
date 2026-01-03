@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :gui.options_list;
@@ -157,7 +155,10 @@ pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceLi
 	return AddChoiceList<const std::vector<std::pair<std::string, std::string>> &>(name, list, cvarName, nullptr, optRowIdent);
 }
 pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceList(const std::string &name, const std::vector<std::string> &list, const std::string &cvarName) { return AddChoiceList<const std::vector<std::string> &>(name, list, cvarName, nullptr); }
-pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceList(const std::string &name, const std::function<void(WIChoiceList *)> &initializer, const std::string &cvarName) { return AddChoiceList<const std::vector<std::string> &>(name, std::vector<std::string>({}), cvarName, initializer); }
+pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceList(const std::string &name, const std::function<void(WIChoiceList *)> &initializer, const std::string &cvarName)
+{
+	return AddChoiceList<const std::vector<std::string> &>(name, std::vector<std::string>({}), cvarName, initializer);
+}
 pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceList(const std::string &name, const std::string &cvarName) { return AddChoiceList(name, nullptr, cvarName); }
 
 template<class T>
@@ -187,9 +188,15 @@ pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDo
 	row->InsertElement(1, pDropDownMenu);
 	return pDropDownMenu;
 }
-pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDownMenu(const std::string &name, const std::unordered_map<std::string, std::string> &list, const std::string &cvarName) { return AddDropDownMenu<const std::unordered_map<std::string, std::string> &>(name, list, cvarName, nullptr); }
+pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDownMenu(const std::string &name, const std::unordered_map<std::string, std::string> &list, const std::string &cvarName)
+{
+	return AddDropDownMenu<const std::unordered_map<std::string, std::string> &>(name, list, cvarName, nullptr);
+}
 pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDownMenu(const std::string &name, const std::vector<std::string> &list, const std::string &cvarName) { return AddDropDownMenu<const std::vector<std::string> &>(name, list, cvarName, nullptr); }
-pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDownMenu(const std::string &name, const std::function<void(WIDropDownMenu *)> &initializer, const std::string &cvarName) { return AddDropDownMenu<const std::vector<std::string> &>(name, std::vector<std::string>({}), cvarName, initializer); }
+pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDownMenu(const std::string &name, const std::function<void(WIDropDownMenu *)> &initializer, const std::string &cvarName)
+{
+	return AddDropDownMenu<const std::vector<std::string> &>(name, std::vector<std::string>({}), cvarName, initializer);
+}
 pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDownMenu(const std::string &name, const std::string &cvarName) { return AddDropDownMenu(name, nullptr, cvarName); }
 
 std::unordered_map<std::string, std::string> &pragma::gui::types::WIOptionsList::GetUpdateConVars() { return m_updateCvars; }

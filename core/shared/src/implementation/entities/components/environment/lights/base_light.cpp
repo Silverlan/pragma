@@ -8,8 +8,6 @@ import :entities.components.environment.lights.base_light;
 
 using namespace pragma;
 
-ComponentEventId baseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT = INVALID_COMPONENT_ID;
-ComponentEventId baseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT = INVALID_COMPONENT_ID;
 void BaseEnvLightComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT = registerEvent("CALC_LIGHT_DIRECTION_TO_POINT", ComponentEventInfo::Type::Broadcast);
@@ -151,11 +149,11 @@ BaseEnvLightComponent::LightIntensityType BaseEnvLightComponent::GetLightIntensi
 void BaseEnvLightComponent::SetLightIntensity(float intensity, LightIntensityType type)
 {
 	if(m_lightType == LightType::Directional && type != LightIntensityType::Lux) {
-		Con::cwar << "Attempted to use intensity type " << LightIntensityTypeToString(type) << " for a directional light source. This is not allowed!" << Con::endl;
+		Con::CWAR << "Attempted to use intensity type " << LightIntensityTypeToString(type) << " for a directional light source. This is not allowed!" << Con::endl;
 		return;
 	}
 	if((m_lightType == LightType::Point || m_lightType == LightType::Spot) && type == LightIntensityType::Lux) {
-		Con::cwar << "Attempted to use intensity type " << LightIntensityTypeToString(type) << " for a point or spot light source. This is not allowed!" << Con::endl;
+		Con::CWAR << "Attempted to use intensity type " << LightIntensityTypeToString(type) << " for a point or spot light source. This is not allowed!" << Con::endl;
 		return;
 	}
 	m_lightIntensity = intensity;

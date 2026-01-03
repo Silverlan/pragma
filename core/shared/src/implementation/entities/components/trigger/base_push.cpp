@@ -106,7 +106,7 @@ util::EventReply BaseTriggerPushComponent::HandleEvent(ComponentEventId eventId,
 			auto &info = m_entityPushQueue.back();
 			info.hEntity = touchData.entity->GetHandle();
 			auto pVelComponentEnt = touchData.entity->GetComponent<VelocityComponent>();
-			info.rotation = uvec::get_rotation(pVelComponentEnt.valid() ? uvec::get_normal(pVelComponentEnt->GetVelocity()) : uvec::UP, m_kvPushDir);
+			info.rotation = uvec::get_rotation(pVelComponentEnt.valid() ? uvec::get_normal(pVelComponentEnt->GetVelocity()) : uvec::PRM_UP, m_kvPushDir);
 		}
 	}
 	return util::EventReply::Unhandled;

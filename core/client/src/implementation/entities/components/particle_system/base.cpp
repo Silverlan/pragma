@@ -311,7 +311,7 @@ bool ecs::CParticleSystemComponent::SetupParticleSystem(std::string fname, CPart
 		return true;
 	auto it = s_particleData.find(fname);
 	if(it == s_particleData.end()) {
-		Con::cwar << "Attempted to create unknown particle system '" << fname << "'!" << Con::endl;
+		Con::CWAR << "Attempted to create unknown particle system '" << fname << "'!" << Con::endl;
 		return false;
 	}
 	auto &data = it->second;
@@ -383,7 +383,7 @@ util::EventReply ecs::CParticleSystemComponent::HandleKeyValue(const std::string
 #pragma message("TODO: Calculate max particles automatically!")
 	if(pragma::string::compare<std::string>(key, "maxparticles", false)) {
 		if(m_state != State::Initial)
-			Con::cwar << "Attempted to change max particle count for particle system which has already been started! Ignoring..." << Con::endl;
+			Con::CWAR << "Attempted to change max particle count for particle system which has already been started! Ignoring..." << Con::endl;
 		else
 			m_maxParticles = util::to_int(value);
 	}
@@ -763,7 +763,7 @@ pts::CParticleInitializer *ecs::CParticleSystemComponent::AddInitializer(std::st
 	auto &map = pts::get_particle_modifier_map();
 	auto factory = map.FindInitializer(identifier);
 	if(factory == nullptr) {
-		Con::cwar << "Attempted to create unknown particle initializer '" << identifier << "'! Ignoring..." << Con::endl;
+		Con::CWAR << "Attempted to create unknown particle initializer '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
 	}
 	auto initializer = factory(*this, values);
@@ -781,7 +781,7 @@ pts::CParticleOperator *ecs::CParticleSystemComponent::AddOperator(std::string i
 	auto &map = pts::get_particle_modifier_map();
 	auto factory = map.FindOperator(identifier);
 	if(factory == nullptr) {
-		Con::cwar << "Attempted to create unknown particle operator '" << identifier << "'! Ignoring..." << Con::endl;
+		Con::CWAR << "Attempted to create unknown particle operator '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
 	}
 	auto op = factory(*this, values);
@@ -799,7 +799,7 @@ pts::CParticleRenderer *ecs::CParticleSystemComponent::AddRenderer(std::string i
 	auto &map = pts::get_particle_modifier_map();
 	auto factory = map.FindRenderer(identifier);
 	if(factory == nullptr) {
-		Con::cwar << "Attempted to create unknown particle renderer '" << identifier << "'! Ignoring..." << Con::endl;
+		Con::CWAR << "Attempted to create unknown particle renderer '" << identifier << "'! Ignoring..." << Con::endl;
 		return nullptr;
 	}
 	auto op = factory(*this, values);
@@ -1627,8 +1627,8 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 	auto bStatic = IsStatic();
 	auto bUpdateBounds = (enableDynamicBounds && (bStatic == true || m_tLastEmission == 0.0 || m_maxParticlesCur != m_prevMaxParticlesCur)) ? true : false;
 	if(bUpdateBounds == true) {
-		m_renderBounds.first = uvec::MAX;
-		m_renderBounds.second = uvec::MIN;
+		m_renderBounds.first = uvec::PRM_MAX;
+		m_renderBounds.second = uvec::PRM_MIN;
 	}
 	if(m_maxParticlesCur > 0) {
 		// Call render callbacks; Last chance to update particle transforms and such

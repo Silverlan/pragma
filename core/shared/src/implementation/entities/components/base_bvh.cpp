@@ -11,9 +11,6 @@ import :entities.components.base_bvh;
 
 using namespace pragma;
 
-ComponentEventId baseBvhComponent::EVENT_ON_CLEAR_BVH = INVALID_COMPONENT_ID;
-ComponentEventId baseBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED = INVALID_COMPONENT_ID;
-ComponentEventId baseBvhComponent::EVENT_ON_BVH_REBUILT = INVALID_COMPONENT_ID;
 void BaseBvhComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseBvhComponent::EVENT_ON_CLEAR_BVH = registerEvent("EVENT_ON_CLEAR_BVH", ComponentEventInfo::Type::Explicit);

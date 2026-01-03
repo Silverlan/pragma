@@ -38,19 +38,19 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		return false;
 	auto chainLen = ikController->GetChainLength();
 	if(chainLen <= 1) {
-		Con::cwar << "Unable to initialize ik controller for " << ikController->GetEffectorName() << ": Chain length has to be at least 1!" << Con::endl;
+		Con::CWAR << "Unable to initialize ik controller for " << ikController->GetEffectorName() << ": Chain length has to be at least 1!" << Con::endl;
 		return false;
 	}
 	auto &skeleton = hMdl->GetSkeleton();
 	auto &boneName = ikController->GetEffectorName();
 	auto boneId = skeleton.LookupBone(boneName);
 	if(boneId < 0) {
-		Con::cwar << "Unable to initialize ik controller for " << ikController->GetEffectorName() << ": Invalid bone '" << boneName << "'!" << Con::endl;
+		Con::CWAR << "Unable to initialize ik controller for " << ikController->GetEffectorName() << ": Invalid bone '" << boneName << "'!" << Con::endl;
 		return false;
 	}
 	auto wpBone = skeleton.GetBone(boneId);
 	if(wpBone.expired()) {
-		Con::cwar << "Unable to initialize ik controller for " << ikController->GetEffectorName() << ": Invalid bone '" << boneName << "'!" << Con::endl;
+		Con::CWAR << "Unable to initialize ik controller for " << ikController->GetEffectorName() << ": Invalid bone '" << boneName << "'!" << Con::endl;
 		return false;
 	}
 	auto &reference = hMdl->GetReference();
@@ -72,7 +72,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	for(auto i = decltype(chainLen) {0}; i < (chainLen - 1); ++i) {
 		auto parent = bone->parent;
 		if(parent.expired()) {
-			Con::cwar << "Unable to initialize ik controller for " << ikController->GetEffectorName() << ": Total chain length exceeds bone hierarchy!" << Con::endl;
+			Con::CWAR << "Unable to initialize ik controller for " << ikController->GetEffectorName() << ": Total chain length exceeds bone hierarchy!" << Con::endl;
 			return false;
 		}
 		bone = parent.lock();
@@ -93,7 +93,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		auto boneId = ikJoint.boneId;
 		auto itJoint = std::find_if(joints.begin(), joints.end(), [boneId](const physics::JointInfo &joint) { return joint.child == boneId && (joint.type == physics::JointType::DOF || joint.type == physics::JointType::ConeTwist); });
 		if(itJoint == joints.end()) {
-			Con::cwar << "Unable to initialize ik controller for " << ikController->GetEffectorName() << ": Joint for bone " << ikJoint.boneId << " in chain does not have joint assigned to it!" << Con::endl;
+			Con::CWAR << "Unable to initialize ik controller for " << ikController->GetEffectorName() << ": Joint for bone " << ikJoint.boneId << " in chain does not have joint assigned to it!" << Con::endl;
 			return false; // All bones in chain need to have a valid joint assigned to them
 		}
 		ikJoint.jointId = itJoint - joints.begin();
@@ -312,7 +312,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 	};
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	const auto up = pTrComponent ? pTrComponent->GetUp() : uvec::UP;
+	const auto up = pTrComponent ? pTrComponent->GetUp() : uvec::PRM_UP;
 	auto yExtent = pPhysComponent ? pPhysComponent->GetCollisionExtents().y : 0.f;
 	std::unordered_map<uint32_t, FootData> feetData {};
 	auto &reference = hMdl->GetReference();
@@ -567,8 +567,8 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 	}
 
 	// Update feet rotations (Has to be done AFTER inverse kinematics have been applied)
-	const auto forward = pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
-	const auto right = pTrComponent ? pTrComponent->GetRight() : uvec::RIGHT;
+	const auto forward = pTrComponent ? pTrComponent->GetForward() : uvec::PRM_FORWARD;
+	const auto right = pTrComponent ? pTrComponent->GetRight() : uvec::PRM_RIGHT;
 	const auto rot = uquat::create(forward, right, up);
 	for(auto &pair : feetData) {
 		auto &footData = pair.second;

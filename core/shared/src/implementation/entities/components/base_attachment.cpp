@@ -8,7 +8,6 @@ import :entities.components.base_attachment;
 
 using namespace pragma;
 
-ComponentEventId baseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE = INVALID_COMPONENT_ID;
 void BaseAttachmentComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseAttachmentComponent::EVENT_ON_ATTACHMENT_UPDATE = registerEvent("ON_ATTACHMENT_UPDATE", ComponentEventInfo::Type::Explicit); }
 BaseAttachmentComponent::BaseAttachmentComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseAttachmentComponent::Initialize()

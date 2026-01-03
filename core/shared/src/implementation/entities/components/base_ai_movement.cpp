@@ -50,7 +50,7 @@ void BaseAIComponent::UpdatePath()
 					m_navInfo.pathState = PathResult::Success;
 				}
 				else {
-					//Con::cerr<<"Failed to generate path!"<<Con::endl;
+					//Con::CERR<<"Failed to generate path!"<<Con::endl;
 					m_navInfo.pathState = PathResult::Failed;
 				}
 				m_navInfo.queuedPath = nullptr;
@@ -395,7 +395,7 @@ void BaseAIComponent::PathStep(float)
 
 		auto segDist = uvec::distance(*p1,*p2);
 		auto s = (segDist > 0.f) ? pragma::math::min(uvec::distance(*p1,moveTarget) /segDist,1.f) : 0.f;
-		//Con::cout<<"s: "<<s<<"; segDist: "<<segDist<<"; Distance to move target: "<<uvec::distance(*p1,moveTarget)<<Con::endl;
+		//Con::COUT<<"s: "<<s<<"; segDist: "<<segDist<<"; Distance to move target: "<<uvec::distance(*p1,moveTarget)<<Con::endl;
 		tgt = pragma::util::calc_hermite_spline_position(*p0,*p1,*p2,p3,s,1.f);//0.f);
 
 		game->DrawLine(*p0,*p1,colors::Yellow,0.1f);
@@ -471,7 +471,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 
 	auto numRays = 3u;
 	auto charComponent = ent.GetCharacterComponent();
-	auto upDir = charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP;
+	auto upDir = charComponent.valid() ? charComponent->GetUpDirection() : uvec::PRM_UP;
 	auto height = 0.f;
 	if(pPhysComponent != nullptr) {
 		Vector3 min, max;
@@ -577,7 +577,7 @@ Vector3 BaseAIComponent::CalcMovementDirection() const
 		}
 		if(bMoveForward == true) {
 			auto pTrComponent = ent.GetTransformComponent();
-			return pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
+			return pTrComponent ? pTrComponent->GetForward() : uvec::PRM_FORWARD;
 		}
 	}
 	return (m_moveInfo.moving == true) ? m_moveInfo.moveDir : Vector3 {};

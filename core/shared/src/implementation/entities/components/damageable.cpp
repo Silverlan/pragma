@@ -8,7 +8,6 @@ import :entities.components.damageable;
 
 using namespace pragma;
 
-ComponentEventId damageableComponent::EVENT_ON_TAKE_DAMAGE = INVALID_COMPONENT_ID;
 void DamageableComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { damageableComponent::EVENT_ON_TAKE_DAMAGE = registerEvent("ON_TAKE_DAMAGE", ComponentEventInfo::Type::Broadcast); }
 DamageableComponent::DamageableComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 void DamageableComponent::Initialize()

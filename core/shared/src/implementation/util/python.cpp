@@ -45,7 +45,7 @@ static IPythonWrapper *get_py_wrapper()
 	std::string err;
 	auto lib = nw->InitializeLibrary("python/pr_python", &err);
 	if(!lib) {
-		Con::cwar << "Failed to load python module: " << err << Con::endl;
+		Con::CWAR << "Failed to load python module: " << err << Con::endl;
 		return nullptr;
 	}
 	auto wrapper = std::make_unique<IPythonWrapper>(*lib);

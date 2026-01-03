@@ -288,14 +288,14 @@ void pragma::networking::register_client_net_messages()
 void NET_cl_RESOURCEINFO(NetPacket packet) { pragma::get_client_state()->HandleClientResource(packet); }
 void NET_cl_RESOURCECOMPLETE(NetPacket packet)
 {
-	Con::ccl << "All resources have been received!" << Con::endl;
+	Con::CCL << "All resources have been received!" << Con::endl;
 
 	auto *client = pragma::get_client_state();
 	auto *cl = client->GetClient();
 	if(cl != nullptr)
 		cl->SetTimeoutDuration(client->GetConVarFloat("sv_timeout_duration")); // Resource transfer complete; Reset timeout
 
-	Con::ccl << "Requesting Game Info..." << Con::endl;
+	Con::CCL << "Requesting Game Info..." << Con::endl;
 	client->SendUserInfo();
 }
 
@@ -314,7 +314,7 @@ void NET_cl_RESOURCE_MDL_ROUGH(NetPacket packet)
 
 	auto &manager = ModelLoadManager::Initialize();
 #if RESOURCE_TRANSFER_VERBOSE == 1
-	Con::ccl << "[ResourceManager] Adding query: " << fileName << Con::endl;
+	Con::CCL << "[ResourceManager] Adding query: " << fileName << Con::endl;
 #endif
 	manager.AddQuery(packet, mdl, fileName);
 }
@@ -727,7 +727,7 @@ pragma::ecs::CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool
 	unsigned int factoryID = packet->Read<unsigned int>();
 	auto *factory = client_entities::ClientEntityRegistry::Instance().GetNetworkedFactory(factoryID);
 	if(factory == nullptr) {
-		Con::cwar << "Unable to create entity with factory ID '" << factoryID << "': Factory not found!" << Con::endl;
+		Con::CWAR << "Unable to create entity with factory ID '" << factoryID << "': Factory not found!" << Con::endl;
 		return nullptr;
 	}
 	unsigned int idx = packet->Read<unsigned int>();
@@ -739,7 +739,7 @@ pragma::ecs::CBaseEntity *NET_cl_ENT_CREATE(NetPacket &packet, bool bSpawn, bool
 			ent->Spawn();
 	}
 	else if(bIgnoreMapInit == false && game->IsMapInitialized()) {
-		Con::cwar << "Map-entity created after map initialization. Removing..." << Con::endl;
+		Con::CWAR << "Map-entity created after map initialization. Removing..." << Con::endl;
 		ent->RemoveSafely();
 		return nullptr;
 	}
@@ -775,7 +775,7 @@ pragma::ecs::CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, 
 	unsigned int mapIdx = packet->Read<unsigned int>();
 	pragma::ecs::CBaseEntity *ent = game->CreateLuaEntity(classname, idx, true);
 	if(ent == nullptr) {
-		Con::cwar << "Attempted to create unregistered entity '" << classname << "'!" << Con::endl;
+		Con::CWAR << "Attempted to create unregistered entity '" << classname << "'!" << Con::endl;
 		return nullptr;
 	}
 	ent->ReceiveData(packet);
@@ -785,7 +785,7 @@ pragma::ecs::CBaseEntity *NET_cl_ENT_CREATE_LUA(NetPacket &packet, bool bSpawn, 
 			ent->Spawn();
 	}
 	else if(bIgnoreMapInit == false && game->IsMapInitialized()) {
-		Con::cwar << "Map-entity created after map initialization. Removing..." << Con::endl;
+		Con::CWAR << "Map-entity created after map initialization. Removing..." << Con::endl;
 		ent->RemoveSafely();
 		return nullptr;
 	}
@@ -1111,7 +1111,7 @@ void NET_cl_ENT_EVENT(NetPacket packet)
 	auto eventId = packet->Read<UInt32>();
 	auto localId = pragma::get_cgame()->SharedNetEventIdToLocal(eventId);
 	if(localId == std::numeric_limits<pragma::NetEventId>::max()) {
-		Con::cwar << "Unknown net event with shared id " << eventId << "!" << Con::endl;
+		Con::CWAR << "Unknown net event with shared id " << eventId << "!" << Con::endl;
 		return;
 	}
 	packet->SetOffset(0);
@@ -1223,7 +1223,7 @@ void NET_cl_MAP_LOAD(NetPacket packet)
 	else
 		r = pragma::get_cgame()->LoadMap(mapName.c_str(), origin);
 	if(r == false)
-		Con::cwar << "Unable to load map '" << mapName << "'! Ignoring..." << Con::endl;
+		Con::CWAR << "Unable to load map '" << mapName << "'! Ignoring..." << Con::endl;
 }
 
 void NET_cl_PL_LOCAL(NetPacket packet)
@@ -1538,7 +1538,7 @@ void NET_cl_GAMEINFO(NetPacket packet) { pragma::get_client_state()->HandleRecei
 void NET_cl_SV_SEND(NetPacket packet)
 {
 	std::string msg = packet->ReadString();
-	Con::ccl << "Received message from server: " << msg << Con::endl;
+	Con::CCL << "Received message from server: " << msg << Con::endl;
 }
 
 void NET_cl_ENV_LIGHT_SPOT_OUTERCUTOFF_ANGLE(NetPacket packet)
@@ -1775,16 +1775,16 @@ void NET_cl_DEBUG_AI_NAVIGATION(NetPacket packet)
 	auto currentNodeIdx = packet->Read<uint32_t>();
 	points.reserve(numNodes * 2 - 2);
 	std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> dbgNode = nullptr;
-	Con::ccl << "New path for " << npc->GetClass() << ":" << Con::endl;
+	Con::CCL << "New path for " << npc->GetClass() << ":" << Con::endl;
 	for(auto nodeId = decltype(numNodes) {0}; nodeId < numNodes; ++nodeId) {
 		auto pos = packet->Read<Vector3>() + Vector3(0.f, 20.f, 0.f);
 		points.push_back(pos);
-		Con::ccl << "#" << (nodeId + 1) << ": " << pos << Con::endl;
+		Con::CCL << "#" << (nodeId + 1) << ": " << pos << Con::endl;
 
 		if(nodeId == currentNodeIdx)
 			dbgNode = pragma::debug::DebugRenderer::DrawLine(pos, pos + Vector3 {0.f, 100.f, 0.f}, colors::Lime);
 	}
-	Con::ccl << Con::endl;
+	Con::CCL << Con::endl;
 
 	auto pGenericComponent = npc->GetComponent<pragma::CGenericComponent>();
 	if(pGenericComponent.valid()) {
@@ -1804,11 +1804,11 @@ void NET_cl_DEBUG_AI_SCHEDULE_PRINT(NetPacket packet)
 		return;
 	auto b = packet->Read<bool>();
 	if(b == false)
-		Con::cout << "> NPC has no active schedule!" << Con::endl;
+		Con::COUT << "> NPC has no active schedule!" << Con::endl;
 	else {
 		auto msg = packet->ReadString();
-		Con::cout << "> Active NPC Schedule:" << Con::endl;
-		Con::cout << msg << Con::endl;
+		Con::COUT << "> Active NPC Schedule:" << Con::endl;
+		Con::COUT << msg << Con::endl;
 	}
 }
 
@@ -1833,10 +1833,10 @@ void CMD_debug_ai_schedule(pragma::NetworkState *state, pragma::BasePlayerCompon
 		break;
 	}
 	if(npc == nullptr) {
-		Con::cwar << "No valid NPC target found!" << Con::endl;
+		Con::CWAR << "No valid NPC target found!" << Con::endl;
 		return;
 	}
-	Con::cout << "Querying schedule data for NPC " << *npc << "..." << Con::endl;
+	Con::COUT << "Querying schedule data for NPC " << *npc << "..." << Con::endl;
 	NetPacket p;
 	pragma::networking::write_entity(p, npc);
 	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::DEBUG_AI_SCHEDULE_TREE, p, pragma::networking::Protocol::SlowReliable);
@@ -1845,26 +1845,26 @@ void CMD_debug_ai_schedule(pragma::NetworkState *state, pragma::BasePlayerCompon
 void CMD_debug_draw_line(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
-		Con::cwar << "No position has been specified!" << Con::endl;
+		Con::CWAR << "No position has been specified!" << Con::endl;
 		return;
 	}
 	if(!pragma::get_cgame()) {
-		Con::cwar << "No active game!" << Con::endl;
+		Con::CWAR << "No active game!" << Con::endl;
 		return;
 	}
 	auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
 	if(!cam)
 		cam = pragma::get_cgame()->GetPrimaryCamera<pragma::CCameraComponent>();
 	if(!cam) {
-		Con::cwar << "No active camera found!" << Con::endl;
+		Con::CWAR << "No active camera found!" << Con::endl;
 		return;
 	}
 	auto srcPos = cam->GetEntity().GetPosition();
 	auto tgtPos = uvec::create(argv.front());
 	pragma::get_cgame()->DrawLine(srcPos, tgtPos, colors::White, 12.f);
-	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::RIGHT, colors::Red, 12.f);
-	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::UP, colors::Lime, 12.f);
-	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::FORWARD, colors::Blue, 12.f);
+	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::PRM_RIGHT, colors::Red, 12.f);
+	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::PRM_UP, colors::Lime, 12.f);
+	pragma::get_cgame()->DrawLine(tgtPos, tgtPos + uvec::PRM_FORWARD, colors::Blue, 12.f);
 }
 
 void CMD_debug_aim_info(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -1929,21 +1929,21 @@ void CMD_debug_aim_info(pragma::NetworkState *state, pragma::BasePlayerComponent
 		res = pragma::get_cgame()->RayCast(trData);
 
 	if(res.hitType == pragma::physics::RayCastHitType::None) {
-		Con::cout << "Nothing found in player aim direction!" << Con::endl;
+		Con::COUT << "Nothing found in player aim direction!" << Con::endl;
 		return;
 	}
-	Con::cout << "Hit Entity: ";
+	Con::COUT << "Hit Entity: ";
 	if(res.entity.valid() == false)
-		Con::cout << "NULL";
+		Con::COUT << "NULL";
 	else
-		res.entity->print(Con::cout);
-	Con::cout << Con::endl;
-	Con::cout << "Hit Position: (" << res.position.x << "," << res.position.y << "," << res.position.z << ")" << Con::endl;
-	Con::cout << "Hit Normal: (" << res.normal.x << "," << res.normal.y << "," << res.normal.z << ")" << Con::endl;
-	Con::cout << "Hit Distance: " << res.distance << Con::endl;
+		res.entity->print(Con::COUT);
+	Con::COUT << Con::endl;
+	Con::COUT << "Hit Position: (" << res.position.x << "," << res.position.y << "," << res.position.z << ")" << Con::endl;
+	Con::COUT << "Hit Normal: (" << res.normal.x << "," << res.normal.y << "," << res.normal.z << ")" << Con::endl;
+	Con::COUT << "Hit Distance: " << res.distance << Con::endl;
 	std::string mat;
 	auto b = res.GetMaterial(mat);
-	Con::cout << "Hit Material: " << (b ? mat : "Nothing") << Con::endl;
+	Con::COUT << "Hit Material: " << (b ? mat : "Nothing") << Con::endl;
 }
 namespace {
 	auto UVN = pragma::console::client::register_command("debug_ai_schedule", &CMD_debug_ai_schedule, pragma::console::ConVarFlags::None, "Prints the current schedule behavior tree for the specified NPC on screen.");
@@ -2252,13 +2252,13 @@ void NET_cl_CMD_CALL_RESPONSE(NetPacket packet)
 {
 	auto resultFlags = packet->Read<uint8_t>();
 	if(resultFlags == 0)
-		Con::cout << "> Serverside command execution has failed." << Con::endl;
+		Con::COUT << "> Serverside command execution has failed." << Con::endl;
 	else {
 		if(resultFlags == 1)
-			Con::cout << "> Serverside command has been executed successfully." << Con::endl;
+			Con::COUT << "> Serverside command has been executed successfully." << Con::endl;
 		else {
 			auto val = packet->ReadString();
-			Con::cout << "> Serverside command has been executed successfully. New value: " << val << Con::endl;
+			Con::COUT << "> Serverside command has been executed successfully. New value: " << val << Con::endl;
 		}
 	}
 }

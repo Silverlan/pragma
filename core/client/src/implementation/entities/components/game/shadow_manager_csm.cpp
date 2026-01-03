@@ -24,7 +24,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 	auto &shaderCsm = static_cast<pragma::ShaderShadowCSM&>(*m_shaderCSM);
 	auto *shaderCsmTransparent = static_cast<pragma::ShaderShadowCSMTransparent*>(m_shaderCSMTransparent.expired() == false ? m_shaderCSMTransparent.get() : nullptr);
 	auto *cam = pragma::get_cgame()->GetRenderCamera<pragma::CCameraComponent>();
-	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
+	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::PRM_ORIGIN;
 	auto &csm = *hShadowMap;
 
 	auto frameId = pragma::get_cengine()->GetRenderContext().GetLastFrameId();

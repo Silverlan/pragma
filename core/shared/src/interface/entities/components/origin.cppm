@@ -10,7 +10,7 @@ export import :entities.components.base;
 
 export namespace pragma {
 	namespace originComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ORIGIN_CHANGED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_ORIGIN_CHANGED)
 	}
 	class DLLNETWORK OriginComponent final : public BaseEntityComponent {
 	  public:

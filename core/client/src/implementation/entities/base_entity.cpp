@@ -161,7 +161,7 @@ Bool pragma::ecs::CBaseEntity::ReceiveNetEvent(UInt32 eventId, NetPacket &p)
 		if(pNetComponent->ReceiveNetEvent(eventId, p))
 			return true;
 	}
-	Con::cwar << Con::PREFIX_CLIENT << "Unhandled net event '" << eventId << "' for entity " << GetClass() << Con::endl;
+	Con::CWAR << Con::PREFIX_CLIENT << "Unhandled net event '" << eventId << "' for entity " << GetClass() << Con::endl;
 	return false;
 }
 
@@ -252,7 +252,7 @@ void pragma::ecs::CBaseEntity::SendNetEventTCP(UInt32 eventId, NetPacket &data) 
 		return;
 	eventId = get_cgame()->LocalNetEventIdToShared(eventId);
 	if(eventId == std::numeric_limits<NetEventId>::max()) {
-		Con::cwar << "Attempted to send net event " << eventId << " which has no known serverside id associated!" << Con::endl;
+		Con::CWAR << "Attempted to send net event " << eventId << " which has no known serverside id associated!" << Con::endl;
 		return;
 	}
 	networking::write_entity(data, this);
@@ -273,7 +273,7 @@ void pragma::ecs::CBaseEntity::SendNetEventUDP(UInt32 eventId, NetPacket &data) 
 	;
 	eventId = get_cgame()->LocalNetEventIdToShared(eventId);
 	if(eventId == std::numeric_limits<NetEventId>::max()) {
-		Con::cwar << "Attempted to send net event " << eventId << " which has no known serverside id associated!" << Con::endl;
+		Con::CWAR << "Attempted to send net event " << eventId << " which has no known serverside id associated!" << Con::endl;
 		return;
 	}
 	networking::write_entity(data, this);

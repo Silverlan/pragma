@@ -13,14 +13,14 @@ export import std;
 
 export namespace pragma::networking {
 	class DLLSERVER ResourceManager {
-	private:
+	  private:
 		struct ResourceInfo {
 			ResourceInfo(const std::string &fileName, bool stream);
 			std::string fileName;
 			bool stream;
 		};
 		static std::vector<ResourceInfo> m_resources;
-	public:
+	  public:
 		static const std::vector<ResourceInfo> &GetResources();
 		static bool AddResource(std::string res, bool stream = false);
 		static unsigned int GetResourceCount();

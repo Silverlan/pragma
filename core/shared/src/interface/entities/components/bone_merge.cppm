@@ -14,7 +14,7 @@ export import :types;
 export {
 	namespace pragma {
 		namespace boneMergeComponent {
-			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_TARGET_CHANGED;
+			REGISTER_COMPONENT_EVENT(EVENT_ON_TARGET_CHANGED)
 		}
 		class DLLNETWORK BoneMergeComponent final : public BaseEntityComponent {
 		  public:

@@ -99,15 +99,15 @@ void pragma::ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 					if(m_server->Start(err, port, usePeerToPeer) == false) {
 						m_server = nullptr;
 						m_serverReg = nullptr;
-						Con::cerr << "Unable to start " << netLibName << " server: " << err.GetMessage() << Con::endl;
+						Con::CERR << "Unable to start " << netLibName << " server: " << err.GetMessage() << Con::endl;
 					}
 				}
 			}
 			else
-				Con::cerr << "Unable to initialize networking system '" << netLibName << "': Function 'initialize_game_server' not found in module!" << Con::endl;
+				Con::CERR << "Unable to initialize networking system '" << netLibName << "': Function 'initialize_game_server' not found in module!" << Con::endl;
 		}
 		else
-			Con::cerr << "Unable to initialize networking system '" << netLibName << "': " << err << Con::endl;
+			Con::CERR << "Unable to initialize networking system '" << netLibName << "': " << err << Con::endl;
 
 		if(m_server) {
 			std::string err;
@@ -149,7 +149,7 @@ void pragma::ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 				}
 			}
 			else
-				Con::cerr << "Steamworks module could not be loaded! Server will not show up in steam server browser!" << Con::endl;
+				Con::CERR << "Steamworks module could not be loaded! Server will not show up in steam server browser!" << Con::endl;
 		}
 	}
 	else {
@@ -192,14 +192,14 @@ void pragma::ServerState::Initialize()
 {
 	ClearConCommands();
 
-	/*Con::cwar<<"Server NetMessages:"<<Con::endl;
+	/*Con::CWAR<<"Server NetMessages:"<<Con::endl;
 	ServerMessageMap *mapMsgs = GetNetMessageMap();
 	std::unordered_map<std::string,unsigned int> *msgs;
 	mapMsgs->GetNetMessages(&msgs);
 	std::unordered_map<std::string,unsigned int>::iterator i;
 	for(i=msgs->begin();i!=msgs->end();i++)
 	{
-		Con::cout<<"Name: "<<i->first<<Con::endl;
+		Con::COUT<<"Name: "<<i->first<<Con::endl;
 	}*/
 
 	//m_luaNetMessageIndex.clear();
@@ -234,7 +234,7 @@ void pragma::ServerState::Think()
 		if(m_server->IsRunning()) {
 			networking::Error err;
 			if(m_server->PollEvents(err) == false)
-				Con::cwar << "Server polling failed: " << err.GetMessage() << Con::endl;
+				Con::CWAR << "Server polling failed: " << err.GetMessage() << Con::endl;
 		}
 		if(m_serverReg)
 			m_serverReg->UpdateServerData();
@@ -428,7 +428,7 @@ pragma::material::Material *pragma::ServerState::LoadMaterial(const std::string 
 			if(b == true)
 				return mat;
 		}
-		Con::cwar << "Unable to load material '" << path << "': File not found!" << Con::endl;
+		Con::CWAR << "Unable to load material '" << path << "': File not found!" << Con::endl;
 	}
 	return mat;
 }

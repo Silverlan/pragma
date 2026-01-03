@@ -307,7 +307,7 @@ std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(imag
 
 static void generate_lightmap_uv_atlas(ecs::BaseEntity &ent, uint32_t width, uint32_t height, const std::function<void(bool)> &callback)
 {
-	Con::cout << "Generating lightmap uv atlas... This may take a few minutes!" << Con::endl;
+	Con::COUT << "Generating lightmap uv atlas... This may take a few minutes!" << Con::endl;
 	auto lightmapC = ent.GetComponent<CLightMapComponent>();
 	auto mdl = ent.GetModel();
 	auto meshGroup = mdl ? mdl->GetMeshGroup(0) : nullptr;
@@ -357,7 +357,7 @@ static void generate_lightmap_uv_atlas(ecs::BaseEntity &ent, uint32_t width, uin
 	auto hEnt = ent.GetHandle();
 	job.SetCompletionHandler([hEnt, callback](util::ParallelWorker<std::vector<Vector2> &> &worker) {
 		if(worker.IsSuccessful() == false) {
-			Con::cwar << "Atlas generation failed: " << worker.GetResultMessage() << Con::endl;
+			Con::CWAR << "Atlas generation failed: " << worker.GetResultMessage() << Con::endl;
 			callback(false);
 			return;
 		}
@@ -366,11 +366,11 @@ static void generate_lightmap_uv_atlas(ecs::BaseEntity &ent, uint32_t width, uin
 		auto meshGroup = mdl ? mdl->GetMeshGroup(0) : nullptr;
 		auto lightmapC = hEnt.valid() ? hEnt.get()->GetComponent<CLightMapComponent>() : pragma::ComponentHandle<CLightMapComponent> {};
 		if(meshGroup == nullptr || lightmapC.expired()) {
-			Con::cwar << "Resources used for atlas generation are no longer valid!" << Con::endl;
+			Con::CWAR << "Resources used for atlas generation are no longer valid!" << Con::endl;
 			callback(false);
 			return;
 		}
-		Con::cout << "Lightmap uvs generation successful!" << Con::endl;
+		Con::COUT << "Lightmap uvs generation successful!" << Con::endl;
 
 		// Apply new lightmap uvs
 
@@ -414,7 +414,7 @@ bool CLightMapComponent::ImportLightmapAtlas(image::ImageBuffer &imgBuffer)
 	texInfo.flags = image::TextureInfo::Flags::GenerateMipmaps;
 
 	auto mapName = get_cgame()->GetMapName();
-	Con::cout << "Lightmap atlas save result: " << image::save_texture("materials/maps/" + mapName + "/lightmap_atlas.dds", imgBuffer, texSaveInfo) << Con::endl;
+	Con::COUT << "Lightmap atlas save result: " << image::save_texture("materials/maps/" + mapName + "/lightmap_atlas.dds", imgBuffer, texSaveInfo) << Con::endl;
 
 	ecs::EntityIterator entIt {*get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CLightMapComponent>>();
@@ -435,7 +435,7 @@ bool CLightMapComponent::ImportLightmapAtlas(image::ImageBuffer &imgBuffer)
 static void generate_lightmaps(uint32_t width, uint32_t height, uint32_t sampleCount, bool denoise, bool renderJob, float exposure, float skyStrength, float globalLightIntensityFactor, const std::string &skyTex,
   const std::optional<rendering::cycles::SceneInfo::ColorTransform> &colorTransform)
 {
-	Con::cout << "Baking lightmaps... This may take a few minutes!" << Con::endl;
+	Con::COUT << "Baking lightmaps... This may take a few minutes!" << Con::endl;
 	auto hdrOutput = true;
 	rendering::cycles::SceneInfo sceneInfo {};
 	sceneInfo.width = width;
@@ -460,12 +460,12 @@ static void generate_lightmaps(uint32_t width, uint32_t height, uint32_t sampleC
 	if(sceneInfo.renderJob)
 		return;
 	if(job.IsValid() == false) {
-		Con::cwar << "Unable to initialize cycles scene for lightmap baking!" << Con::endl;
+		Con::CWAR << "Unable to initialize cycles scene for lightmap baking!" << Con::endl;
 		return;
 	}
 	job.SetCompletionHandler([hdrOutput](util::ParallelWorker<image::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false) {
-			Con::cwar << "Unable to bake lightmaps: " << worker.GetResultMessage() << Con::endl;
+			Con::CWAR << "Unable to bake lightmaps: " << worker.GetResultMessage() << Con::endl;
 			return;
 		}
 
@@ -503,7 +503,7 @@ bool CLightMapComponent::BakeLightmaps(const LightmapBakeSettings &bakeSettings)
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CLightMapComponent>>();
 	auto it = entIt.begin();
 	if(it == entIt.end()) {
-		Con::cwar << "No lightmap entity found!" << Con::endl;
+		Con::CWAR << "No lightmap entity found!" << Con::endl;
 		return false;
 	}
 	auto *ent = *it;

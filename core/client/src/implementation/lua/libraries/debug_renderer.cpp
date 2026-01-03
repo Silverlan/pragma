@@ -11,9 +11,15 @@ import :debug;
 #undef DrawText
 
 static std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> get_dbg_object(const std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> &obj, float duration) { return (duration > 0.f) ? nullptr : obj; }
-std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPoints(const std::vector<Vector3> &points, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(pragma::debug::DebugRenderer::DrawPoints(points, {renderInfo.color, renderInfo.duration}), renderInfo.duration); }
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPoints(const std::vector<Vector3> &points, const pragma::debug::DebugRenderInfo &renderInfo)
+{
+	return get_dbg_object(pragma::debug::DebugRenderer::DrawPoints(points, {renderInfo.color, renderInfo.duration}), renderInfo.duration);
+}
 
-std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLines(const std::vector<Vector3> &linePoints, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(pragma::debug::DebugRenderer::DrawLines(linePoints, {renderInfo.color, renderInfo.duration}), renderInfo.duration); }
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLines(const std::vector<Vector3> &linePoints, const pragma::debug::DebugRenderInfo &renderInfo)
+{
+	return get_dbg_object(pragma::debug::DebugRenderer::DrawLines(linePoints, {renderInfo.color, renderInfo.duration}), renderInfo.duration);
+}
 
 std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPoint(const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(pragma::debug::DebugRenderer::DrawPoint(renderInfo), renderInfo.duration); }
 
@@ -31,7 +37,10 @@ std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Cl
 		o->SetPose(renderInfo.pose);
 	return get_dbg_object(o, renderInfo.duration);
 }
-std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawBox(const Vector3 &start, const Vector3 &end, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(pragma::debug::DebugRenderer::DrawBox(start, end, renderInfo), renderInfo.duration); }
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawBox(const Vector3 &start, const Vector3 &end, const pragma::debug::DebugRenderInfo &renderInfo)
+{
+	return get_dbg_object(pragma::debug::DebugRenderer::DrawBox(start, end, renderInfo), renderInfo.duration);
+}
 std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawMeshes(const std::vector<Vector3> &verts, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(pragma::debug::DebugRenderer::DrawMesh(verts, renderInfo), renderInfo.duration); }
 std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawMesh(const pragma::geometry::ModelSubMesh &mesh, const pragma::debug::DebugRenderInfo &renderInfo)
 {
@@ -57,7 +66,10 @@ std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Cl
 {
 	return get_dbg_object(pragma::debug::DebugRenderer::DrawCone(renderInfo, dir, dist, angle, segmentCount), renderInfo.duration);
 }
-std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawSphere(float radius, const pragma::debug::DebugRenderInfo &renderInfo, uint32_t recursionLevel) { return get_dbg_object(pragma::debug::DebugRenderer::DrawSphere(renderInfo, radius, recursionLevel), renderInfo.duration); }
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawSphere(float radius, const pragma::debug::DebugRenderInfo &renderInfo, uint32_t recursionLevel)
+{
+	return get_dbg_object(pragma::debug::DebugRenderer::DrawSphere(renderInfo, radius, recursionLevel), renderInfo.duration);
+}
 std::array<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject>, 3> Lua::DebugRenderer::Client::DrawAxis(const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	auto objs = pragma::debug::DebugRenderer::DrawAxis(renderInfo);
@@ -65,16 +77,31 @@ std::array<std::shared_ptr<pragma::debug::DebugRenderer::BaseObject>, 3> Lua::De
 		return {};
 	return objs;
 }
-std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawText(const std::string &text, const ::Vector2 &size, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(pragma::debug::DebugRenderer::DrawText(renderInfo, text, size), renderInfo.duration); }
-std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawText(const std::string &text, float scale, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(pragma::debug::DebugRenderer::DrawText(renderInfo, text, scale), renderInfo.duration); }
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawText(const std::string &text, const ::Vector2 &size, const pragma::debug::DebugRenderInfo &renderInfo)
+{
+	return get_dbg_object(pragma::debug::DebugRenderer::DrawText(renderInfo, text, size), renderInfo.duration);
+}
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawText(const std::string &text, float scale, const pragma::debug::DebugRenderInfo &renderInfo)
+{
+	return get_dbg_object(pragma::debug::DebugRenderer::DrawText(renderInfo, text, scale), renderInfo.duration);
+}
 std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawText(const std::string &text, const pragma::debug::DebugRenderInfo &renderInfo) { return DrawText(text, 1.f, renderInfo); }
-std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPath(const std::vector<Vector3> &path, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(pragma::debug::DebugRenderer::DrawPath(path, {renderInfo.color, renderInfo.duration}), renderInfo.duration); }
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPath(const std::vector<Vector3> &path, const pragma::debug::DebugRenderInfo &renderInfo)
+{
+	return get_dbg_object(pragma::debug::DebugRenderer::DrawPath(path, {renderInfo.color, renderInfo.duration}), renderInfo.duration);
+}
 std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawSpline(const std::vector<Vector3> &path, uint32_t numSegments, const pragma::debug::DebugRenderInfo &renderInfo, float curvature)
 {
 	return get_dbg_object(pragma::debug::DebugRenderer::DrawSpline(path, numSegments, curvature, {renderInfo.color, renderInfo.duration}), renderInfo.duration);
 }
-std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPlane(const pragma::math::Plane &plane, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(pragma::debug::DebugRenderer::DrawPlane(plane, {renderInfo.color, renderInfo.duration}), renderInfo.duration); }
-std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPlane(const Vector3 &n, float d, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(pragma::debug::DebugRenderer::DrawPlane(n, d, {renderInfo.color, renderInfo.duration}), renderInfo.duration); }
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPlane(const pragma::math::Plane &plane, const pragma::debug::DebugRenderInfo &renderInfo)
+{
+	return get_dbg_object(pragma::debug::DebugRenderer::DrawPlane(plane, {renderInfo.color, renderInfo.duration}), renderInfo.duration);
+}
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPlane(const Vector3 &n, float d, const pragma::debug::DebugRenderInfo &renderInfo)
+{
+	return get_dbg_object(pragma::debug::DebugRenderer::DrawPlane(n, d, {renderInfo.color, renderInfo.duration}), renderInfo.duration);
+}
 std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawFrustum(pragma::CCameraComponent &cam, const pragma::debug::DebugRenderInfo &renderInfo)
 {
 	std::vector<Vector3> points {};
@@ -84,4 +111,7 @@ std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Cl
 	sub.SetDuration(renderInfo.duration);
 	return get_dbg_object(pragma::debug::DebugRenderer::DrawFrustum(points, sub), renderInfo.duration);
 }
-std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawFrustum(const std::vector<Vector3> &points, const pragma::debug::DebugRenderInfo &renderInfo) { return get_dbg_object(pragma::debug::DebugRenderer::DrawFrustum(points, renderInfo), renderInfo.duration); }
+std::shared_ptr<pragma::debug::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawFrustum(const std::vector<Vector3> &points, const pragma::debug::DebugRenderInfo &renderInfo)
+{
+	return get_dbg_object(pragma::debug::DebugRenderer::DrawFrustum(points, renderInfo), renderInfo.duration);
+}

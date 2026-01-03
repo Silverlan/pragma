@@ -83,7 +83,7 @@ void pragma::physics::ControllerPhysObj::PostSimulate()
 
 	/* // Obsolete; Now handled by simulation and pragma::physics::ControllerPhysObj::SetGroundContactPoint
 	auto pTrComponent = owner->GetEntity().GetTransformComponent();
-	auto up = pTrComponent != nullptr ? pTrComponent->GetUp() : uvec::UP;
+	auto up = pTrComponent != nullptr ? pTrComponent->GetUp() : uvec::PRM_UP;
 	auto origin = GetPosition();
 	//auto d = m_controller->GetCharacterController()->Get
 	const auto upDist = 20.f; // Ray starts slightly above ground position, in case we're stuck inside an object
@@ -204,15 +204,15 @@ void pragma::physics::ControllerPhysObj::Simulate(double tDelta, bool bIgnoreGra
 	//	physx::PxVec3 disp = physx::PxVec3(1,0,0) *tDelta;// *tDelta;;//physx::PxVec3(10 /60.f,0,0);// *tDelta;
 	//	physx::PxU32 collisionFlags = m_controller->move(disp,0.01f,0/*tCur -m_tLastMove*/,physx::PxControllerFilters());
 	//	physx::PxVec3 velNew = actor->getLinearVelocity();//(actor->getLinearVelocity() /60.f);// /tDelta;
-	//	Con::cwar<<"Disp: ("<<disp.x<<","<<disp.y<<","<<disp.z<<")"<<Con::endl;
-	//	Con::cwar<<"Old Velocity: ("<<velOld.x<<","<<velOld.y<<","<<velOld.z<<")"<<Con::endl;
-	//	Con::cwar<<"Velocity: ("<<velNew.x<<","<<velNew.y<<","<<velNew.z<<")"<<Con::endl;
-	//	Con::cwar<<"Time passed: "<<(tCur -m_tLastMove)<<Con::endl;
-	//	Con::cwar<<"-------------"<<Con::endl;
+	//	Con::CWAR<<"Disp: ("<<disp.x<<","<<disp.y<<","<<disp.z<<")"<<Con::endl;
+	//	Con::CWAR<<"Old Velocity: ("<<velOld.x<<","<<velOld.y<<","<<velOld.z<<")"<<Con::endl;
+	//	Con::CWAR<<"Velocity: ("<<velNew.x<<","<<velNew.y<<","<<velNew.z<<")"<<Con::endl;
+	//	Con::CWAR<<"Time passed: "<<(tCur -m_tLastMove)<<Con::endl;
+	//	Con::CWAR<<"-------------"<<Con::endl;
 	//	if(tCur -m_tLastMove >= 1.0f)
 	//	{
 	//		Vector3 posNew = GetPosition();
-	//		Con::crit<<"Move distance in 1 second: "<<glm::distance(posOld,posNew)<<Con::endl;
+	//		Con::CRIT<<"Move distance in 1 second: "<<glm::distance(posOld,posNew)<<Con::endl;
 	//		posOld = posNew;
 	//		m_tLastMove = tCur;
 	//	}

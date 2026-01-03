@@ -18,9 +18,9 @@ export namespace pragma {
 		game::DamageInfo *damageInfo;
 	};
 	namespace baseActorComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_KILLED;
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_RESPAWN;
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_DEATH;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_KILLED)
+		REGISTER_COMPONENT_EVENT(EVENT_ON_RESPAWN)
+		REGISTER_COMPONENT_EVENT(EVENT_ON_DEATH)
 	}
 	class DLLNETWORK BaseActorComponent : public BaseEntityComponent {
 	  public:

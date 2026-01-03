@@ -79,7 +79,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 							  fi->sizeUncompressed = 0;
 						  }
 						  if(addon->updateFile->ReOpen("rb") == true) {
-							 fs::VFilePtr updateFile = addon->updateFile;
+							  fs::VFilePtr updateFile = addon->updateFile;
 							  updateFile->Seek(0);
 							  auto version = updateFile->Read<util::Version>();
 							  std::vector<uint32_t> newFileIds;
@@ -120,7 +120,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 									  ;
 							  }
 							  else
-								  Con::cwar << "Unable to finalize archive file '" << addon->addonPath << "'!" << Con::endl;
+								  Con::CWAR << "Unable to finalize archive file '" << addon->addonPath << "'!" << Con::endl;
 						  }
 
 						  // Re-open file handle for existing archives

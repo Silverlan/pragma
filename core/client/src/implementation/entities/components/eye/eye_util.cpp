@@ -208,7 +208,7 @@ void pragma::CEyeComponent::UpdateEyeballMT(const asset::Eyeball &eyeball, uint3
 	if(eyeballIndex >= m_eyeballData.size() || m_animC.expired())
 		return;
 	if(g_debugPrint)
-		Con::cout << "Eyeball state " << eyeballIndex << Con::endl;
+		Con::COUT << "Eyeball state " << eyeballIndex << Con::endl;
 	auto &eyeballData = m_eyeballData.at(eyeballIndex);
 	auto &state = eyeballData.state;
 	auto &config = eyeballData.config;
@@ -269,19 +269,19 @@ void pragma::CEyeComponent::UpdateEyeballMT(const asset::Eyeball &eyeball, uint3
 	state.irisProjectionV.w = -uvec::dot(org, v);
 
 	if(g_debugPrint) {
-		Con::cout << "View target: " << viewTarget << Con::endl;
+		Con::COUT << "View target: " << viewTarget << Con::endl;
 
-		Con::cout << "Dilation: " << config.dilation << Con::endl;
-		Con::cout << "Eye move: " << config.eyeMove << Con::endl;
-		Con::cout << "Eye shift: " << config.eyeShift << Con::endl;
-		Con::cout << "Eye size: " << config.eyeSize << Con::endl;
-		Con::cout << "Jitter: " << config.jitter << Con::endl;
+		Con::COUT << "Dilation: " << config.dilation << Con::endl;
+		Con::COUT << "Eye move: " << config.eyeMove << Con::endl;
+		Con::COUT << "Eye shift: " << config.eyeShift << Con::endl;
+		Con::COUT << "Eye size: " << config.eyeSize << Con::endl;
+		Con::COUT << "Jitter: " << config.jitter << Con::endl;
 
-		Con::cout << "Forward: " << state.forward << Con::endl;
-		Con::cout << "Iris projection u: " << state.irisProjectionU << Con::endl;
-		Con::cout << "Iris projection v: " << state.irisProjectionV << Con::endl;
-		Con::cout << "Origin: " << state.origin << Con::endl;
-		Con::cout << "Right: " << state.right << Con::endl;
-		Con::cout << "Up: " << state.up << Con::endl;
+		Con::COUT << "Forward: " << state.forward << Con::endl;
+		Con::COUT << "Iris projection u: " << state.irisProjectionU << Con::endl;
+		Con::COUT << "Iris projection v: " << state.irisProjectionV << Con::endl;
+		Con::COUT << "Origin: " << state.origin << Con::endl;
+		Con::COUT << "Right: " << state.right << Con::endl;
+		Con::COUT << "Up: " << state.up << Con::endl;
 	}
 }

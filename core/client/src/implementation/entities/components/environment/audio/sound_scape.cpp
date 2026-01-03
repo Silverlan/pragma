@@ -73,12 +73,12 @@ void CSoundScapeComponent::OnEntitySpawn()
 	if(pSoundEmitterComponent.valid()) {
 		std::shared_ptr<audio::ALSound> snd = pSoundEmitterComponent->CreateSound(m_kvSoundScape, audio::ALSoundType::Environment);
 		if(snd.get() == nullptr) {
-			Con::cwar << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
+			Con::CWAR << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
 			return;
 		}
 		audio::ALSoundScript *al = dynamic_cast<audio::ALSoundScript *>(snd.get());
 		if(al == nullptr) {
-			Con::cwar << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
+			Con::CWAR << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
 			return;
 		}
 		snd->SetRelative(true);

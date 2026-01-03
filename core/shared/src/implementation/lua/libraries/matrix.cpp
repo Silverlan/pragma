@@ -63,9 +63,9 @@ void Lua::Mat4::Translate(lua::State *, ::Mat4 &mat, const Vector3 &pos) { mat =
 
 void Lua::Mat4::Rotate(lua::State *, ::Mat4 &mat, const EulerAngles &ang)
 {
-	mat = glm::gtc::rotate(mat, CFloat(pragma::math::deg_to_rad(ang.p)), uvec::FORWARD);
-	mat = glm::gtc::rotate(mat, CFloat(pragma::math::deg_to_rad(ang.y)), uvec::UP);
-	mat = glm::gtc::rotate(mat, CFloat(pragma::math::deg_to_rad(ang.r)), uvec::RIGHT);
+	mat = glm::gtc::rotate(mat, CFloat(pragma::math::deg_to_rad(ang.p)), uvec::PRM_FORWARD);
+	mat = glm::gtc::rotate(mat, CFloat(pragma::math::deg_to_rad(ang.y)), uvec::PRM_UP);
+	mat = glm::gtc::rotate(mat, CFloat(pragma::math::deg_to_rad(ang.r)), uvec::PRM_RIGHT);
 }
 void Lua::Mat4::Rotate(lua::State *, ::Mat4 &mat, const Vector3 &axis, float ang) { mat = glm::gtc::rotate(mat, ang, axis); }
 

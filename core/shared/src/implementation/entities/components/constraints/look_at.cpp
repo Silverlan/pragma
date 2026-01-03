@@ -190,7 +190,7 @@ void ConstraintLookAtComponent::ApplyConstraint()
 	auto dir = posDriver - posDriven;
 	auto l = uvec::length(dir);
 	if(l < 0.0001f)
-		dir = uvec::FORWARD;
+		dir = uvec::PRM_FORWARD;
 	else
 		dir /= l;
 
@@ -198,7 +198,7 @@ void ConstraintLookAtComponent::ApplyConstraint()
 	res = constraintInfo->drivenObjectC->GetTransformMemberRot(idxDrivenObjectRot, static_cast<math::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), curRot);
 
 	auto [upTargetC, upTargetPropIdx] = UpdateUpTarget();
-	auto upVec = uvec::UP;
+	auto upVec = uvec::PRM_UP;
 	if(upTargetC) {
 		Quat upTargetRot;
 		if(upTargetC->GetTransformMemberRot(upTargetPropIdx, math::CoordinateSpace::World, upTargetRot))

@@ -8,7 +8,6 @@ import :entities.components.base_radius;
 
 using namespace pragma;
 
-ComponentEventId baseRadiusComponent::EVENT_ON_RADIUS_CHANGED = INVALID_COMPONENT_ID;
 void BaseRadiusComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseRadiusComponent::EVENT_ON_RADIUS_CHANGED = registerEvent("ON_RADIUS_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void BaseRadiusComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {

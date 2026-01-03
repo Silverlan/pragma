@@ -54,11 +54,11 @@ bool pragma::networking::ResourceManager::AddResource(std::string res, bool stre
 	if(ext == Lua::FILE_EXTENSION_PRECOMPILED)
 		checkName = res.substr(0, res.length() - 4) + Lua::FILE_EXTENSION;
 	if(!IsValidResource(res)) {
-		Con::cwar << "Attempted to add invalid resource '" << res << "'! Skipping..." << Con::endl;
+		Con::CWAR << "Attempted to add invalid resource '" << res << "'! Skipping..." << Con::endl;
 		return false;
 	}
 	if(!fs::exists(checkName)) {
-		Con::cwar << "Unable to add resource file '" << res << "': File not found! Skipping..." << Con::endl;
+		Con::CWAR << "Unable to add resource file '" << res << "': File not found! Skipping..." << Con::endl;
 		return false;
 	}
 	auto it = std::find_if(m_resources.begin(), m_resources.end(), [&res](const ResourceInfo &info) { return (info.fileName == res) ? true : false; });

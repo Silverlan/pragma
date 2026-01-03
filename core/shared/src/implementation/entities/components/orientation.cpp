@@ -32,7 +32,7 @@ void OrientationComponent::SetUpDirection(const Vector3 &direction)
 	uvec::normalize(&ndirection);
 	*m_upDirection = ndirection;
 
-	//m_axRot = uquat::create(uvec::FORWARD,uvec::RIGHT,m_upDirection);//uvec::UP);
+	//m_axRot = uquat::create(uvec::PRM_FORWARD,uvec::PRM_RIGHT,m_upDirection);//uvec::PRM_UP);
 
 	m_axRot = uvec::get_rotation(Vector3(0.f, 1.f, 0.f), *m_upDirection);
 	uquat::normalize(m_axRot);

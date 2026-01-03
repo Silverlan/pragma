@@ -81,7 +81,11 @@ Lua::opt<Lua::map<std::string, std::string>> Lua::Locale::parse(lua::State *l, c
 	std::unordered_map<std::string, pragma::string::Utf8String> texts;
 	auto res = pragma::locale::parse_file(fileName, lan, texts);
 	if(res != pragma::locale::LoadResult::Success)
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+		return luabind::object {};
+#else
 		return nil;
+#endif
 	auto t = luabind::newtable(l);
 	for(auto &pair : texts)
 		t[pair.first] = pair.second.cpp_str();

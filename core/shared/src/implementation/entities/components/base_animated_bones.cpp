@@ -80,7 +80,7 @@ bool BaseAnimatedComponent::GetBonePose(animation::BoneId boneId, Vector3 *optOu
 			if(!GetBonePose(boneId, optOutPos, optOutRot, optOutScale, math::CoordinateSpace::Object))
 				return false;
 			auto &entPose = GetEntity().GetPose();
-			auto worldPose = entPose * math::ScaledTransform {optOutPos ? *optOutPos : uvec::ORIGIN, optOutRot ? *optOutRot : uquat::identity(), optOutScale ? *optOutScale : uvec::IDENTITY_SCALE};
+			auto worldPose = entPose * math::ScaledTransform {optOutPos ? *optOutPos : uvec::PRM_ORIGIN, optOutRot ? *optOutRot : uquat::identity(), optOutScale ? *optOutScale : uvec::IDENTITY_SCALE};
 			if(optOutPos)
 				*optOutPos = worldPose.GetOrigin();
 			if(optOutRot)
@@ -127,13 +127,13 @@ bool BaseAnimatedComponent::SetBonePose(animation::BoneId boneId, const Vector3 
 				parent = parent->parent.lock();
 			}
 
-			math::ScaledTransform relPose {optPos ? *optPos : uvec::ORIGIN, optRot ? *optRot : uquat::identity(), optScale ? *optScale : uvec::IDENTITY_SCALE};
+			math::ScaledTransform relPose {optPos ? *optPos : uvec::PRM_ORIGIN, optRot ? *optRot : uquat::identity(), optScale ? *optScale : uvec::IDENTITY_SCALE};
 			relPose = t.GetInverse() * relPose;
 			return SetBonePose(boneId, optPos ? &relPose.GetOrigin() : nullptr, optRot ? &relPose.GetRotation() : nullptr, optScale ? &relPose.GetScale() : nullptr, math::CoordinateSpace::Local);
 		}
 	case math::CoordinateSpace::World:
 		{
-			math::ScaledTransform relPose {optPos ? *optPos : uvec::ORIGIN, optRot ? *optRot : uquat::identity(), optScale ? *optScale : uvec::IDENTITY_SCALE};
+			math::ScaledTransform relPose {optPos ? *optPos : uvec::PRM_ORIGIN, optRot ? *optRot : uquat::identity(), optScale ? *optScale : uvec::IDENTITY_SCALE};
 			relPose = GetEntity().GetPose().GetInverse() * relPose;
 			return SetBonePose(boneId, optPos ? &relPose.GetOrigin() : nullptr, optRot ? &relPose.GetRotation() : nullptr, optScale ? &relPose.GetScale() : nullptr, math::CoordinateSpace::Object);
 		}

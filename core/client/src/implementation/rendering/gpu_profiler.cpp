@@ -68,7 +68,7 @@ static void cl_gpu_timer_queries_dump(pragma::NetworkState *state, pragma::BaseP
 	auto extended = false;
 	if(argv.empty() == false)
 		extended = pragma::util::to_boolean(argv.at(0));
-	Con::cout << "-------- GPU-Profiler Query Results --------" << Con::endl;
+	Con::COUT << "-------- GPU-Profiler Query Results --------" << Con::endl;
 	std::function<void(ProfilingStage &, const std::string &, bool)> fPrintResults = nullptr;
 	fPrintResults = [&fPrintResults, extended](ProfilingStage &stage, const std::string &t, bool bRoot) {
 		if(bRoot == false) {
@@ -79,27 +79,27 @@ static void cl_gpu_timer_queries_dump(pragma::NetworkState *state, pragma::BaseP
 				sTime = pragma::util::round_string(t, 2) + " ms";
 				sTime += " (" + std::to_string(result->duration->count()) + " ns)";
 			}
-			Con::cout << t << stage.GetName() << ": " << sTime;
-			Con::cout << " (" << prosper::util::to_string(static_cast<GPUProfilingStage &>(stage).GetPipelineStage()) << ")" << Con::endl;
+			Con::COUT << t << stage.GetName() << ": " << sTime;
+			Con::COUT << " (" << prosper::util::to_string(static_cast<GPUProfilingStage &>(stage).GetPipelineStage()) << ")" << Con::endl;
 
 			if(result && extended == true) {
 				auto &statistics = static_cast<GPUProfilerResult &>(*result).statistics;
 				if(statistics.has_value()) {
 					auto &stats = *statistics;
-					Con::cout << t << "{" << Con::endl;
-					Con::cout << t << "\tInput Assembly Vertices: " << stats.inputAssemblyVertices << Con::endl;
-					Con::cout << t << "\tInput Assembly Primitives: " << stats.inputAssemblyPrimitives << Con::endl;
-					Con::cout << t << "\tVertex Shader Invocations: " << stats.vertexShaderInvocations << Con::endl;
-					Con::cout << t << "\tGeometry Shader Invocations: " << stats.geometryShaderInvocations << Con::endl;
-					Con::cout << t << "\tGeometry Shader Primitives: " << stats.geometryShaderPrimitives << Con::endl;
-					Con::cout << t << "\tClipping Invocations: " << stats.clippingInvocations << Con::endl;
-					Con::cout << t << "\tClipping Primitives: " << stats.clippingPrimitives << Con::endl;
-					Con::cout << t << "\tFragment Shader Invocations: " << stats.fragmentShaderInvocations << Con::endl;
-					Con::cout << t << "\tTessellation Control Shader Patches: " << stats.tessellationControlShaderPatches << Con::endl;
-					Con::cout << t << "\tTessellation Evaluation Shader Invocations: " << stats.tessellationEvaluationShaderInvocations << Con::endl;
-					Con::cout << t << "\tCompute Shader Invocations: " << stats.computeShaderInvocations << Con::endl;
-					Con::cout << t << "}" << Con::endl;
-					Con::cout << Con::endl;
+					Con::COUT << t << "{" << Con::endl;
+					Con::COUT << t << "\tInput Assembly Vertices: " << stats.inputAssemblyVertices << Con::endl;
+					Con::COUT << t << "\tInput Assembly Primitives: " << stats.inputAssemblyPrimitives << Con::endl;
+					Con::COUT << t << "\tVertex Shader Invocations: " << stats.vertexShaderInvocations << Con::endl;
+					Con::COUT << t << "\tGeometry Shader Invocations: " << stats.geometryShaderInvocations << Con::endl;
+					Con::COUT << t << "\tGeometry Shader Primitives: " << stats.geometryShaderPrimitives << Con::endl;
+					Con::COUT << t << "\tClipping Invocations: " << stats.clippingInvocations << Con::endl;
+					Con::COUT << t << "\tClipping Primitives: " << stats.clippingPrimitives << Con::endl;
+					Con::COUT << t << "\tFragment Shader Invocations: " << stats.fragmentShaderInvocations << Con::endl;
+					Con::COUT << t << "\tTessellation Control Shader Patches: " << stats.tessellationControlShaderPatches << Con::endl;
+					Con::COUT << t << "\tTessellation Evaluation Shader Invocations: " << stats.tessellationEvaluationShaderInvocations << Con::endl;
+					Con::COUT << t << "\tCompute Shader Invocations: " << stats.computeShaderInvocations << Con::endl;
+					Con::COUT << t << "}" << Con::endl;
+					Con::COUT << Con::endl;
 				}
 			}
 		}
@@ -111,7 +111,7 @@ static void cl_gpu_timer_queries_dump(pragma::NetworkState *state, pragma::BaseP
 	};
 	auto &profiler = pragma::get_cengine()->GetGPUProfiler();
 	fPrintResults(profiler.GetRootStage(), "", true);
-	Con::cout << "--------------------------------------------" << Con::endl;
+	Con::COUT << "--------------------------------------------" << Con::endl;
 }
 namespace {
 	auto UVN = pragma::console::client::register_command("cl_gpu_timer_queries_dump", &cl_gpu_timer_queries_dump, pragma::console::ConVarFlags::None, "Prints all timer query results to the console.");

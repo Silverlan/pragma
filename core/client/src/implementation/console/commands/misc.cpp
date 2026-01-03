@@ -173,7 +173,7 @@ void CMD_entities_cl(pragma::NetworkState *state, pragma::BasePlayerComponent *p
 			continue;
 		if(modelName.has_value() && pragma::string::match(pair.first->GetModelName().c_str(), modelName->c_str()) == false)
 			continue;
-		Con::cout << *pair.first << Con::endl;
+		Con::COUT << *pair.first << Con::endl;
 	}
 }
 
@@ -226,17 +226,17 @@ void CMD_getpos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, st
 		return;
 	auto *game = static_cast<pragma::CGame *>(state->GetGameState());
 	if(pl == nullptr) {
-		Con::cout << "0 0 0" << Con::endl;
+		Con::COUT << "0 0 0" << Con::endl;
 		return;
 	}
 	auto *cPl = game->GetLocalPlayer();
 	auto pTrComponent = cPl->GetEntity().GetTransformComponent();
 	if(pTrComponent == nullptr) {
-		Con::cout << "0 0 0" << Con::endl;
+		Con::COUT << "0 0 0" << Con::endl;
 		return;
 	}
 	auto &pos = pTrComponent->GetPosition();
-	Con::cout << pos.x << " " << pos.y << " " << pos.z << Con::endl;
+	Con::COUT << pos.x << " " << pos.y << " " << pos.z << Con::endl;
 }
 
 void CMD_setcampos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -269,7 +269,7 @@ void CMD_getcampos(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	if(pCam == nullptr)
 		return;
 	auto &pos = pCam->GetEntity().GetPosition();
-	Con::cout << pos.x << " " << pos.y << " " << pos.z << Con::endl;
+	Con::COUT << pos.x << " " << pos.y << " " << pos.z << Con::endl;
 }
 
 void CMD_setang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -295,14 +295,14 @@ void CMD_getang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, st
 	if(!state->IsGameActive())
 		return;
 	if(pl == nullptr) {
-		Con::cout << "0 0 0" << Con::endl;
+		Con::COUT << "0 0 0" << Con::endl;
 		return;
 	}
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
 		return;
 	EulerAngles ang = charComponent->GetViewAngles();
-	Con::cout << ang.p << " " << ang.y << " " << ang.r << Con::endl;
+	Con::COUT << ang.p << " " << ang.y << " " << ang.r << Con::endl;
 }
 
 void CMD_setcamang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -331,7 +331,7 @@ void CMD_getcamang(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	if(pCam == nullptr)
 		return;
 	auto ang = EulerAngles {pCam->GetEntity().GetRotation()};
-	Con::cout << ang.p << " " << ang.y << " " << ang.r << Con::endl;
+	Con::COUT << ang.p << " " << ang.y << " " << ang.r << Con::endl;
 }
 
 void CMD_sound_play(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
@@ -351,28 +351,28 @@ void CMD_status_cl(pragma::NetworkState *, pragma::BasePlayerComponent *, std::v
 	auto &players = pragma::CPlayerComponent::GetAll();
 	auto *cl = pragma::get_client_state()->GetClient();
 	if(cl == nullptr) {
-		Con::cwar << "Not connected to a server!" << Con::endl;
+		Con::CWAR << "Not connected to a server!" << Con::endl;
 		return;
 	}
-	Con::cout << "hostname:\t"
+	Con::COUT << "hostname:\t"
 	          << "Unknown" << Con::endl;
-	Con::cout << "udp/ip:\t\t" << cl->GetIdentifier() << Con::endl;
-	Con::cout << "map:\t\t"
+	Con::COUT << "udp/ip:\t\t" << cl->GetIdentifier() << Con::endl;
+	Con::COUT << "map:\t\t"
 	          << "Unknown" << Con::endl;
-	Con::cout << "players:\t" << players.size() << " (" << 0 << " max)" << Con::endl << Con::endl;
-	Con::cout << "#  userid\tname    \tconnected\tping";
-	Con::cout << Con::endl;
+	Con::COUT << "players:\t" << players.size() << " (" << 0 << " max)" << Con::endl << Con::endl;
+	Con::COUT << "#  userid\tname    \tconnected\tping";
+	Con::COUT << Con::endl;
 	auto i = 0u;
 	for(auto *plComponent : players) {
 		auto nameC = plComponent->GetEntity().GetNameComponent();
-		Con::cout << "# \t" << i << "\t"
+		Con::COUT << "# \t" << i << "\t"
 		          << "\"" << (nameC.valid() ? nameC->GetName() : "") << "\""
 		          << "\t" << pragma::string::format_time(plComponent->TimeConnected()) << "     \t";
 		if(plComponent->IsLocalPlayer() == true)
-			Con::cout << cl->GetLatency();
+			Con::COUT << cl->GetLatency();
 		else
-			Con::cout << "?";
-		Con::cout << Con::endl;
+			Con::COUT << "?";
+		Con::COUT << Con::endl;
 		++i;
 	}
 }
@@ -384,41 +384,41 @@ void CMD_cl_dump_sounds(pragma::NetworkState *, pragma::BasePlayerComponent *, s
 	for(auto &sndInfo : sounds) {
 		auto &snd = sndInfo.sound;
 		if(sndInfo.container == false) {
-			Con::cout << sndInfo.index << ": ";
+			Con::COUT << sndInfo.index << ": ";
 			if(snd == nullptr)
-				Con::cout << "NULL";
+				Con::COUT << "NULL";
 			else {
 				auto *csnd = static_cast<CALSound *>(snd.get());
 				auto src = csnd->GetSource();
 				auto buf = csnd->GetBuffer();
-				Con::cout << "Buffer " << buf << " on source " << src << ";";
+				Con::COUT << "Buffer " << buf << " on source " << src << ";";
 				auto state = csnd->GetState();
-				Con::cout << " State: ";
+				Con::COUT << " State: ";
 				switch(state) {
 				case AL_INITIAL:
-					Con::cout << "Initial";
+					Con::COUT << "Initial";
 					break;
 				case AL_PLAYING:
-					Con::cout << "Playing";
+					Con::COUT << "Playing";
 					break;
 				case AL_PAUSED:
-					Con::cout << "Paused";
+					Con::COUT << "Paused";
 					break;
 				case AL_STOPPED:
-					Con::cout << "Stopped";
+					Con::COUT << "Stopped";
 					break;
 				default:
-					Con::cout << "Unknown";
+					Con::COUT << "Unknown";
 					break;
 				}
-				Con::cout << "; Source: ";
+				Con::COUT << "; Source: ";
 				std::string name;
 				if(pragma::get_client_state()->GetSoundName(buf, name) == true)
-					Con::cout << name;
+					Con::COUT << name;
 				else
-					Con::cout << "Unknown";
+					Con::COUT << "Unknown";
 			}
-			Con::cout << Con::endl;
+			Con::COUT << Con::endl;
 		}
 	}
 }
@@ -432,15 +432,15 @@ void CMD_cl_dump_netmessages(pragma::NetworkState *, pragma::BasePlayerComponent
 		auto id = pragma::string::to_int(argv.front());
 		for(auto it = netmessages->begin(); it != netmessages->end(); ++it) {
 			if(it->second == id) {
-				Con::cout << "Message Identifier: " << it->first << Con::endl;
+				Con::COUT << "Message Identifier: " << it->first << Con::endl;
 				return;
 			}
 		}
-		Con::cout << "No message with id " << id << " found!" << Con::endl;
+		Con::COUT << "No message with id " << id << " found!" << Con::endl;
 		return;
 	}
 	for(auto it = netmessages->begin(); it != netmessages->end(); ++it)
-		Con::cout << it->first << " = " << it->second << Con::endl;
+		Con::COUT << it->first << " = " << it->second << Con::endl;
 }
 #endif
 
@@ -469,7 +469,7 @@ void CMD_screenshot(pragma::NetworkState *, pragma::BasePlayerComponent *, std::
 			if(eCustomFormat.has_value())
 				format = *eCustomFormat;
 			else
-				Con::cwar << "Unsupported format '" << customFormat << "'! Using PNG instead..." << Con::endl;
+				Con::CWAR << "Unsupported format '" << customFormat << "'! Using PNG instead..." << Con::endl;
 		}
 
 		pragma::util::RtScreenshotSettings settings {};
@@ -490,7 +490,7 @@ void CMD_screenshot(pragma::NetworkState *, pragma::BasePlayerComponent *, std::
 		if(itToneMapping != commandOptions.end() && itToneMapping->second.parameters.empty() == false) {
 			auto customToneMapping = pragma::image::string_to_tone_mapping(itToneMapping->second.parameters.front());
 			if(customToneMapping.has_value() == false)
-				Con::cwar << "'" << itToneMapping->second.parameters.front() << "' is not a valid tone mapper!" << Con::endl;
+				Con::CWAR << "'" << itToneMapping->second.parameters.front() << "' is not a valid tone mapper!" << Con::endl;
 			else
 				toneMapping = *customToneMapping;
 		}
@@ -514,7 +514,7 @@ void CMD_screenshot(pragma::NetworkState *, pragma::BasePlayerComponent *, std::
 
 	auto path = pragma::util::screenshot(*game);
 	if(path)
-		Con::cout << "Saved screenshot as '" << *path << "'!" << Con::endl;
+		Con::COUT << "Saved screenshot as '" << *path << "'!" << Con::endl;
 }
 
 void CMD_shader_reload(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
@@ -522,10 +522,10 @@ void CMD_shader_reload(pragma::NetworkState *, pragma::BasePlayerComponent *, st
 	if(argv.empty()) {
 		auto &shaderManager = pragma::get_cengine()->GetShaderManager();
 		for(auto &pair : shaderManager.GetShaderNameToIndexTable()) {
-			Con::cout << "Reloading shader '" << pair.first << "'..." << Con::endl;
+			Con::COUT << "Reloading shader '" << pair.first << "'..." << Con::endl;
 			pragma::get_cengine()->ReloadShader(pair.first);
 		}
-		Con::cout << "All shaders have been reloaded!" << Con::endl;
+		Con::COUT << "All shaders have been reloaded!" << Con::endl;
 		return;
 	}
 	pragma::get_cengine()->ReloadShader(argv.front());
@@ -536,22 +536,22 @@ void CMD_shader_optimize(pragma::NetworkState *state, pragma::BasePlayerComponen
 	std::unordered_map<std::string, pragma::console::CommandOption> commandOptions {};
 	pragma::console::parse_command_options(argv, commandOptions);
 	if(argv.empty()) {
-		Con::cwar << "No shader specified!" << Con::endl;
+		Con::CWAR << "No shader specified!" << Con::endl;
 		return;
 	}
 	auto &shaderName = argv.front();
 	auto &renderContext = pragma::get_cengine()->GetRenderContext();
 	if(renderContext.GetAPIAbbreviation() != "VK") {
-		Con::cwar << "Shader optimization only supported for Vulkan!" << Con::endl;
+		Con::CWAR << "Shader optimization only supported for Vulkan!" << Con::endl;
 		return;
 	}
 	auto shader = renderContext.GetShader(shaderName);
 	if(shader.expired()) {
-		Con::cwar << "Shader '" << shaderName << "' not found!" << Con::endl;
+		Con::CWAR << "Shader '" << shaderName << "' not found!" << Con::endl;
 		return;
 	}
 	if(shader->IsValid() == false) {
-		Con::cwar << "Shader '" << shaderName << "' is invalid!" << Con::endl;
+		Con::CWAR << "Shader '" << shaderName << "' is invalid!" << Con::endl;
 		return;
 	}
 	std::unordered_map<prosper::ShaderStage, std::string> shaderStages;
@@ -563,15 +563,15 @@ void CMD_shader_optimize(pragma::NetworkState *state, pragma::BasePlayerComponen
 	std::string infoLog;
 	auto optimizedShaders = renderContext.OptimizeShader(shaderStages, infoLog);
 	if(optimizedShaders.has_value() == false) {
-		Con::cwar << "Unable to optimize shader: " << infoLog << Con::endl;
+		Con::CWAR << "Unable to optimize shader: " << infoLog << Con::endl;
 		return;
 	}
 	auto validate = pragma::console::get_command_option_parameter_value(commandOptions, "validate", "0");
 	if(pragma::util::to_boolean(validate)) {
-		Con::cout << "Optimization complete!" << Con::endl;
+		Con::COUT << "Optimization complete!" << Con::endl;
 		return; // Don't save shaders
 	}
-	Con::cout << "Optimization complete! Saving optimized shader files..." << Con::endl;
+	Con::COUT << "Optimization complete! Saving optimized shader files..." << Con::endl;
 	std::string outputPath = "addons/vulkan/";
 	auto reload = pragma::util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions, "reload", "0"));
 	for(auto &pair : *optimizedShaders) {
@@ -580,7 +580,7 @@ void CMD_shader_optimize(pragma::NetworkState *state, pragma::BasePlayerComponen
 			continue;
 		auto shaderFile = renderContext.FindShaderFile(pair.first, "shaders/" + itSrc->second);
 		if(shaderFile.has_value() == false) {
-			Con::cwar << "Unable to find shader file for '" << pair.second << "'!" << Con::endl;
+			Con::CWAR << "Unable to find shader file for '" << pair.second << "'!" << Con::endl;
 			return;
 		}
 		auto fileName = outputPath + *shaderFile;
@@ -591,7 +591,7 @@ void CMD_shader_optimize(pragma::NetworkState *state, pragma::BasePlayerComponen
 		pragma::fs::create_path(ufile::get_path_from_filename(fileName));
 		auto f = pragma::fs::open_file<pragma::fs::VFilePtrReal>(fileName, pragma::fs::FileMode::Write);
 		if(f == nullptr) {
-			Con::cwar << "Unable to open file '" << fileName << "' for writing!" << Con::endl;
+			Con::CWAR << "Unable to open file '" << fileName << "' for writing!" << Con::endl;
 			return;
 		}
 		f->WriteString(pair.second);
@@ -610,17 +610,17 @@ void CMD_shader_list(pragma::NetworkState *, pragma::BasePlayerComponent *, std:
 	std::sort(shaderList.begin(), shaderList.end(), [](const std::shared_ptr<prosper::Shader> &a, const std::shared_ptr<prosper::Shader> &b) { return (a->GetIdentifier() < b->GetIdentifier()) ? true : false; });
 	for(auto &shader : shaderList) {
 		auto &id = shader->GetIdentifier();
-		Con::cout << id;
+		Con::COUT << id;
 		if(shader->IsComputeShader())
-			Con::cout << " (Compute)";
+			Con::COUT << " (Compute)";
 		else if(shader->IsGraphicsShader())
-			Con::cout << " (Graphics)";
+			Con::COUT << " (Graphics)";
 		else
-			Con::cout << " (Unknown)";
+			Con::COUT << " (Unknown)";
 		auto shaderSources = shader->GetSourceFilePaths();
 		for(auto &src : shaderSources)
-			Con::cout << " (" << src << ")";
-		Con::cout << Con::endl;
+			Con::COUT << " (" << src << ")";
+		Con::COUT << Con::endl;
 	}
 }
 
@@ -652,10 +652,10 @@ void CMD_debug_ai_schedule_print(pragma::NetworkState *state, pragma::BasePlayer
 		break;
 	}
 	if(npc == nullptr) {
-		Con::cwar << "No valid NPC target found!" << Con::endl;
+		Con::CWAR << "No valid NPC target found!" << Con::endl;
 		return;
 	}
-	Con::cout << "Querying schedule data for NPC " << *npc << "..." << Con::endl;
+	Con::COUT << "Querying schedule data for NPC " << *npc << "..." << Con::endl;
 	NetPacket p;
 	pragma::networking::write_entity(p, npc);
 	pragma::get_client_state()->SendPacket(pragma::networking::net_messages::server::DEBUG_AI_SCHEDULE_PRINT, p, pragma::networking::Protocol::SlowReliable);
@@ -667,7 +667,7 @@ void CMD_reloadmaterial(pragma::NetworkState *state, pragma::BasePlayerComponent
 		return;
 	if(argv.empty())
 		return;
-	Con::cout << "Reloading '" << argv[0] << "'..." << Con::endl;
+	Con::COUT << "Reloading '" << argv[0] << "'..." << Con::endl;
 	pragma::get_client_state()->LoadMaterial(argv[0].c_str(), nullptr, true);
 }
 
@@ -689,38 +689,38 @@ void Console::commands::cl_list(pragma::NetworkState *state, pragma::BasePlayerC
 	std::sort(cvars.begin(), cvars.end());
 	std::vector<std::string>::iterator it;
 	for(it = cvars.begin(); it != cvars.end(); it++)
-		Con::cout << *it << Con::endl;
+		Con::COUT << *it << Con::endl;
 }
 
 void Console::commands::cl_find(pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
-		Con::cwar << "No argument given!" << Con::endl;
+		Con::CWAR << "No argument given!" << Con::endl;
 		return;
 	}
 	auto similar = state->FindSimilarConVars(argv.front());
 	if(similar.empty()) {
-		Con::cout << "No potential candidates found!" << Con::endl;
+		Con::COUT << "No potential candidates found!" << Con::endl;
 		return;
 	}
-	Con::cout << "Found " << similar.size() << " potential candidates:" << Con::endl;
+	Con::COUT << "Found " << similar.size() << " potential candidates:" << Con::endl;
 	for(auto &name : similar)
-		Con::cout << "- " << name << Con::endl;
+		Con::COUT << "- " << name << Con::endl;
 }
 
-void CMD_fps(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Con::cout << "FPS: " << pragma::util::round_string(pragma::get_cengine()->GetFPS(), 0) << Con::endl << "Frame Time: " << pragma::util::round_string(pragma::get_cengine()->GetFrameTime(), 2) << "ms" << Con::endl; }
+void CMD_fps(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Con::COUT << "FPS: " << pragma::util::round_string(pragma::get_cengine()->GetFPS(), 0) << Con::endl << "Frame Time: " << pragma::util::round_string(pragma::get_cengine()->GetFrameTime(), 2) << "ms" << Con::endl; }
 
 static void write_to_file(const std::string &fileName, const std::optional<std::string> &contents)
 {
 	if(!contents) {
-		Con::cwar << "Unable to dump '" << fileName << "': No contents available!" << Con::endl;
+		Con::CWAR << "Unable to dump '" << fileName << "': No contents available!" << Con::endl;
 		return;
 	}
 	if(!pragma::fs::write_file(fileName, *contents)) {
-		Con::cwar << "Unable to write '" << fileName << "'!" << Con::endl;
+		Con::CWAR << "Unable to write '" << fileName << "'!" << Con::endl;
 		return;
 	}
-	Con::cout << "Dumped contents to '" << fileName << "'!" << Con::endl;
+	Con::COUT << "Dumped contents to '" << fileName << "'!" << Con::endl;
 }
 void Console::commands::vk_dump_limits(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
@@ -805,7 +805,7 @@ void Console::commands::vk_print_memory_stats(pragma::NetworkState *state, pragm
 	auto r = prosper::util::get_memory_stats(pragma::get_cengine()->GetRenderContext(),prosper::MemoryPropertyFlags::DeviceLocalBit,availableSize,allocatedSize,&memIndices);
 	if(r == false)
 	{
-		Con::cwar<<"No device local memory types found!"<<Con::endl;
+		Con::CWAR<<"No device local memory types found!"<<Con::endl;
 		return;
 	}
 	std::stringstream ss;
@@ -931,17 +931,17 @@ void Console::commands::vk_print_memory_stats(pragma::NetworkState *state, pragm
 	auto stats = memoryMan.GetStatistics();
 	if(argv.empty())
 	{
-		Con::cout<<"Memory usage:"<<Con::endl;
+		Con::COUT<<"Memory usage:"<<Con::endl;
 		std::stringstream ss;
 		print_memory_stats(ss,stats.total);
-		Con::cout<<ss.str();
+		Con::COUT<<ss.str();
 		Con::flush();
 	}
 	else
 	{
 		if(argv.size() == 1)
 		{
-			Con::cwar<<"Not enough arguments given!"<<Con::endl;
+			Con::CWAR<<"Not enough arguments given!"<<Con::endl;
 			return;
 		}
 		auto id = pragma::util::to_int(argv.at(1));
@@ -949,26 +949,26 @@ void Console::commands::vk_print_memory_stats(pragma::NetworkState *state, pragm
 		{
 			if(id >= stats.memoryHeap.size())
 			{
-				Con::cwar<<"Second argument has to be in the range [0,"<<stats.memoryHeap.size()<<"]!"<<Con::endl;
+				Con::CWAR<<"Second argument has to be in the range [0,"<<stats.memoryHeap.size()<<"]!"<<Con::endl;
 				return;
 			}
-			Con::cout<<"Memory usage for heap "<<id<<":"<<Con::endl;
+			Con::COUT<<"Memory usage for heap "<<id<<":"<<Con::endl;
 			std::stringstream ss;
 			print_memory_stats(ss,stats.memoryHeap.at(id));
-			Con::cout<<ss.str();
+			Con::COUT<<ss.str();
 			Con::flush();
 		}
 		else if(argv.front() == "type")
 		{
 			if(id >= stats.memoryType.size())
 			{
-				Con::cwar<<"Second argument has to be in the range [0,"<<stats.memoryType.size()<<"]!"<<Con::endl;
+				Con::CWAR<<"Second argument has to be in the range [0,"<<stats.memoryType.size()<<"]!"<<Con::endl;
 				return;
 			}
-			Con::cout<<"Memory usage for type "<<id<<":"<<Con::endl;
+			Con::COUT<<"Memory usage for type "<<id<<":"<<Con::endl;
 			std::stringstream ss;
 			print_memory_stats(ss,stats.memoryType.at(id));
-			Con::cout<<ss.str();
+			Con::COUT<<ss.str();
 			Con::flush();
 		}
 	}*/ // prosper TODO

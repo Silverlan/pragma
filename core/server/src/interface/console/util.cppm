@@ -10,5 +10,5 @@ export module pragma.server:console.util;
 export import pragma.shared;
 
 export namespace pragma::console {
-    DLLSERVER ConVarHandle get_server_con_var(std::string scmd);
+	DLLSERVER ConVarHandle get_server_con_var(std::string scmd);
 }

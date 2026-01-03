@@ -10,35 +10,6 @@ import :entities.components.base_animated;
 
 using namespace pragma;
 
-ComponentEventId baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_PLAY_ANIMATION = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ACTIVITY = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_START = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_LAYERED_ANIMATION_COMPLETE = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATION_START = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_TRANSLATE_LAYERED_ANIMATION = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_TRANSLATE_ANIMATION = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MT = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES = INVALID_COMPONENT_ID;
-
-ComponentEventId baseAnimatedComponent::EVENT_ON_PLAY_ACTIVITY = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_STOP_LAYERED_ANIMATION = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED_MT = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_UPDATE_BONE_POSES_MT = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_BONE_POSES_FINALIZED_MT = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_PLAY_ANIMATION = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATION_RESET = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_UPDATE_SKELETON = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE = INVALID_COMPONENT_ID;
-ComponentEventId baseAnimatedComponent::EVENT_ON_RESET_POSE = INVALID_COMPONENT_ID;
 void BaseAnimatedComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = registerEvent("HANDLE_ANIMATION_EVENT", ComponentEventInfo::Type::Explicit);
@@ -567,7 +538,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo, doubl
 
 #if DEBUG_VERBOSE_ANIMATION == 1
 	if(&animInfo == &m_baseAnim) {
-		Con::cout << GetEntity().GetClass() << " is playing base animation '" << hModel->GetAnimationName(animId) << "'"
+		Con::COUT << GetEntity().GetClass() << " is playing base animation '" << hModel->GetAnimationName(animId) << "'"
 		          << ": Cycle " << cycle << " => " << cycleNew << "; Looping: " << (bLoop ? "true" : "false") << "; Frame Count: " << numFrames << "; Speed: " << animSpeed << Con::endl;
 	}
 #endif
@@ -1089,7 +1060,7 @@ void BaseAnimatedComponent::HandleAnimationEvent(const AnimationEvent &ev)
 			}
 			break;
 		}
-	default:; //Con::cout<<"WARNING: Unhandled animation event "<<ev->eventID<<Con::endl;
+	default:; //Con::COUT<<"WARNING: Unhandled animation event "<<ev->eventID<<Con::endl;
 	}
 }
 

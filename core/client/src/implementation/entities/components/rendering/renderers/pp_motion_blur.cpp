@@ -60,8 +60,7 @@ bool VelocityStageRenderProcessor::BindEntity(ecs::CBaseEntity &ent)
 		pushConstants.prevPose = it->second.matrix;
 	else
 		pushConstants.prevPose = umat::identity();
-	return m_shaderProcessor.GetCommandBuffer().RecordPushConstants(m_shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit, ShaderVelocityBuffer::MotionBlurPushConstants::Offset, sizeof(pushConstants),
-	  &pushConstants);
+	return m_shaderProcessor.GetCommandBuffer().RecordPushConstants(m_shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit, ShaderVelocityBuffer::MotionBlurPushConstants::Offset, sizeof(pushConstants), &pushConstants);
 }
 
 void CRendererPpMotionBlurComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)

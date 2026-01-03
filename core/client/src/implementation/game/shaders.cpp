@@ -119,7 +119,7 @@ void register_game_shaders()
 
 void pragma::CGame::InitShaders()
 {
-	Con::cout << "Loading shaders..." << Con::endl;
+	Con::COUT << "Loading shaders..." << Con::endl;
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("load_shaders");

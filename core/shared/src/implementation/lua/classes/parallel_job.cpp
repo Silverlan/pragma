@@ -164,7 +164,7 @@ void LuaWorker::AddLuaTask(const Lua::func<TaskStatus> &luaFunc, const Lua::func
 			std::stringstream ss;
 			ss << "Expected worker to return util.Worker.TASK_STATUS enum, got " + std::string {magic_enum::enum_name(t)} + " with error: " + std::string {err.what()};
 			ss << ", defined in " << ar.source << ":" << ar.linedefined;
-			Con::cerr << ss.str() << Con::endl;
+			Con::CERR << ss.str() << Con::endl;
 		}
 		Lua::Pop(l);
 		if(res == TaskStatus::Complete)

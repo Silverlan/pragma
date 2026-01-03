@@ -10,7 +10,6 @@ import :entities.components.liquid.base_surface_simulation;
 
 using namespace pragma;
 
-ComponentEventId baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = INVALID_COMPONENT_ID;
 void BaseLiquidSurfaceSimulationComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = registerEvent("ON_WATER_SURFACE_SIMULATOR_CHANGED", ComponentEventInfo::Type::Broadcast);

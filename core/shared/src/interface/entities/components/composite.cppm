@@ -40,8 +40,8 @@ export namespace pragma::ecs {
 	};
 
 	namespace compositeComponent {
-		extern DLLNETWORK ComponentEventId EVENT_ON_ENTITY_ADDED;
-		extern DLLNETWORK ComponentEventId EVENT_ON_ENTITY_REMOVED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_ENTITY_ADDED)
+		REGISTER_COMPONENT_EVENT(EVENT_ON_ENTITY_REMOVED)
 	};
 	class DLLNETWORK CompositeComponent final : public BaseEntityComponent {
 	  public:

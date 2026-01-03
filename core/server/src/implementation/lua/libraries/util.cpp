@@ -37,17 +37,18 @@ luabind::object Lua::util::Server::fire_bullets(lua::State *l, const pragma::gam
 	std::vector<int32_t> hitSurfaceMaterials;
 	Vector3 start;
 	uint32_t numTracer = 0;
-	auto r = util::fire_bullets(l, const_cast<pragma::game::BulletInfo &>(bulletInfo), hitReport, [&hitPositions, &hitNormals, &hitSurfaceMaterials, &start, &numTracer](pragma::game::DamageInfo &dmg, pragma::physics::TraceData &, pragma::physics::TraceResult &result, uint32_t &tracerCount) {
-		if(result.hitType != pragma::physics::RayCastHitType::None) {
-			hitPositions.push_back(result.position);
-			hitNormals.push_back(result.normal);
+	auto r
+	  = util::fire_bullets(l, const_cast<pragma::game::BulletInfo &>(bulletInfo), hitReport, [&hitPositions, &hitNormals, &hitSurfaceMaterials, &start, &numTracer](pragma::game::DamageInfo &dmg, pragma::physics::TraceData &, pragma::physics::TraceResult &result, uint32_t &tracerCount) {
+		    if(result.hitType != pragma::physics::RayCastHitType::None) {
+			    hitPositions.push_back(result.position);
+			    hitNormals.push_back(result.normal);
 
-			auto surfMatId = (result.collisionObj.IsValid()) ? result.collisionObj->GetSurfaceMaterial() : -1;
-			hitSurfaceMaterials.push_back(surfMatId);
-		}
-		start = dmg.GetSource();
-		numTracer = tracerCount;
-	});
+			    auto surfMatId = (result.collisionObj.IsValid()) ? result.collisionObj->GetSurfaceMaterial() : -1;
+			    hitSurfaceMaterials.push_back(surfMatId);
+		    }
+		    start = dmg.GetSource();
+		    numTracer = tracerCount;
+	    });
 	auto numHits = pragma::math::min(hitPositions.size(), static_cast<std::size_t>(255));
 	packet->Write<uint8_t>(static_cast<uint8_t>(numTracer));
 	packet->Write<uint8_t>(tracerSettings);

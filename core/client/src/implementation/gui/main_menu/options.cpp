@@ -1267,7 +1267,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeControlSettings()
 				}
 			}
 			catch(const rapidxml::parse_error &err) {
-				Con::cwar << "Unable to parse 'menu.xml' for addon '" << info.GetLocalPath() << "': " << err.what() << "!" << Con::endl;
+				Con::CWAR << "Unable to parse 'menu.xml' for addon '" << info.GetLocalPath() << "': " << err.what() << "!" << Con::endl;
 			}
 		}
 	}

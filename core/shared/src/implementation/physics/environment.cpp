@@ -17,7 +17,7 @@ std::vector<std::string> pragma::physics::IEnvironment::GetAvailablePhysicsEngin
 std::string pragma::physics::IEnvironment::GetPhysicsEngineModuleLocation(const std::string &physEngine) { return "physics_engines/" + physEngine + "/pr_" + physEngine; }
 pragma::physics::IEnvironment::IEnvironment(NetworkState &state) : m_nwState {state}
 {
-	Con::cout << "Initializing physics environment..." << Con::endl;
+	Con::COUT << "Initializing physics environment..." << Con::endl;
 	for(auto i = 0; i < math::to_integral(Event::Count); i++)
 		m_callbacks.insert(std::unordered_map<Event, std::vector<CallbackHandle>>::value_type(static_cast<Event>(i), std::vector<CallbackHandle>()));
 

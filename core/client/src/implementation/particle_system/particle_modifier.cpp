@@ -11,10 +11,10 @@ import :particle_system.lua_particle_modifier_manager;
 
 namespace pragma::pts {
 	class DLLCLIENT CParticleInitializerLifetimeRandom : public CParticleInitializer {
-	private:
+	  private:
 		float m_lifeMin = 0.f;
 		float m_lifeMax = 0.f;
-	public:
+	  public:
 		CParticleInitializerLifetimeRandom() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
 		{
@@ -32,11 +32,11 @@ namespace pragma::pts {
 	};
 
 	class DLLCLIENT CParticleInitializerColorRandom : public CParticleInitializer {
-	private:
+	  private:
 		Color m_colorA = colors::White;
 		Color m_colorB = colors::White;
 		std::unique_ptr<Color> m_colorC = nullptr;
-	public:
+	  public:
 		CParticleInitializerColorRandom() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
 		{
@@ -62,10 +62,10 @@ namespace pragma::pts {
 	};
 
 	class DLLCLIENT CParticleInitializerAlphaRandom : public CParticleInitializer {
-	private:
+	  private:
 		float m_alphaMin = 0.f;
 		float m_alphaMax = 255.f;
-	public:
+	  public:
 		CParticleInitializerAlphaRandom() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
 		{
@@ -87,14 +87,14 @@ namespace pragma::pts {
 	};
 
 	class DLLCLIENT CParticleInitializerRotationRandom : public CParticleInitializer {
-	private:
+	  private:
 		EulerAngles m_rotMin = EulerAngles(-180.f, -180.f, -180.f);
 		EulerAngles m_rotMax = EulerAngles(180.f, 180.f, 180.f);
 		Quat m_rot = {};
 		float m_planarRotMin = 0.f;
 		float m_planarRotMax = 0.f;
 		bool m_bUseQuaternionRotation = false;
-	public:
+	  public:
 		CParticleInitializerRotationRandom() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override
 		{
@@ -197,27 +197,19 @@ void pragma::pts::CParticleRenderer::PostSimulate(double tDelta) {}
 
 void pragma::pts::CParticleRenderer::PreRender(prosper::ICommandBuffer &cmd) {}
 
-std::pair<Vector3, Vector3> pragma::pts::CParticleRenderer::GetRenderBounds() const { return {uvec::ORIGIN, uvec::ORIGIN}; }
+std::pair<Vector3, Vector3> pragma::pts::CParticleRenderer::GetRenderBounds() const { return {uvec::PRM_ORIGIN, uvec::PRM_ORIGIN}; }
 
 ///////////////////////
 
 DLLCLIENT pragma::pts::ParticleModifierMap g_ParticleModifierFactories;
-DLLCLIENT void pragma::pts::LinkParticleInitializerToFactory(std::string name, const TParticleModifierFactory<CParticleInitializer> &fc)
-{
-	g_ParticleModifierFactories.AddInitializer(name, fc);
-}
-DLLCLIENT void pragma::pts::LinkParticleOperatorToFactory(std::string name, const TParticleModifierFactory<CParticleOperator> &fc)
-{
-	g_ParticleModifierFactories.AddOperator(name, fc);
-}
-DLLCLIENT void pragma::pts::LinkParticleRendererToFactory(std::string name, const TParticleModifierFactory<CParticleRenderer> &fc)
-{
-	g_ParticleModifierFactories.AddRenderer(name, fc);
-}
+DLLCLIENT void pragma::pts::LinkParticleInitializerToFactory(std::string name, const TParticleModifierFactory<CParticleInitializer> &fc) { g_ParticleModifierFactories.AddInitializer(name, fc); }
+DLLCLIENT void pragma::pts::LinkParticleOperatorToFactory(std::string name, const TParticleModifierFactory<CParticleOperator> &fc) { g_ParticleModifierFactories.AddOperator(name, fc); }
+DLLCLIENT void pragma::pts::LinkParticleRendererToFactory(std::string name, const TParticleModifierFactory<CParticleRenderer> &fc) { g_ParticleModifierFactories.AddRenderer(name, fc); }
 pragma::pts::ParticleModifierMap &pragma::pts::get_particle_modifier_map() { return g_ParticleModifierFactories; }
 
 template<class TModifier, class TBaseType>
-static std::unique_ptr<TBaseType, void (*)(TBaseType *)> create_modifier(pragma::ecs::CParticleSystemComponent &system, const std::unordered_map<std::string, std::string> &values) {
+static std::unique_ptr<TBaseType, void (*)(TBaseType *)> create_modifier(pragma::ecs::CParticleSystemComponent &system, const std::unordered_map<std::string, std::string> &values)
+{
 	auto r = std::unique_ptr<TBaseType, void (*)(TBaseType *)>(new TModifier {}, [](TBaseType *p) { delete p; });
 	r->Initialize(system, values);
 	return r;
@@ -279,12 +271,13 @@ void pragma::pts::register_particle_operators()
 void pragma::pts::ParticleModifierMap::AddInitializer(std::string name, const TParticleModifierFactory<CParticleInitializer> &fc)
 {
 	string::to_lower(name);
-	m_initializers.insert(std::make_pair(name, pragma::pts::TParticleModifierFactory<CParticleInitializer> {[fc, name](ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> {
-		auto initializer = fc(c, keyvalues);
-		if(initializer)
-			initializer->SetType(name);
-		return initializer;
-	}}));
+	m_initializers.insert(
+	  std::make_pair(name, pragma::pts::TParticleModifierFactory<CParticleInitializer> {[fc, name](ecs::CParticleSystemComponent &c, const std::unordered_map<std::string, std::string> &keyvalues) -> std::unique_ptr<CParticleInitializer, void (*)(CParticleInitializer *)> {
+		  auto initializer = fc(c, keyvalues);
+		  if(initializer)
+			  initializer->SetType(name);
+		  return initializer;
+	  }}));
 }
 void pragma::pts::ParticleModifierMap::AddOperator(std::string name, const TParticleModifierFactory<CParticleOperator> &fc)
 {

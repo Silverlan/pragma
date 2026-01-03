@@ -26,10 +26,6 @@ DLLNETWORK std::ostream &pragma::operator<<(std::ostream &os, const BaseEntityCo
 }
 
 decltype(EEntityComponentCallbackEvent::Count) EEntityComponentCallbackEvent::Count = EEntityComponentCallbackEvent {math::to_integral(E::Count)};
-decltype(baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED = INVALID_COMPONENT_ID;
-decltype(baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED) baseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED = INVALID_COMPONENT_ID;
-decltype(baseEntityComponent::EVENT_ON_MEMBERS_CHANGED) baseEntityComponent::EVENT_ON_MEMBERS_CHANGED = INVALID_COMPONENT_ID;
-decltype(baseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED) baseEntityComponent::EVENT_ON_ACTIVE_STATE_CHANGED = INVALID_COMPONENT_ID;
 BaseEntityComponent::BaseEntityComponent(ecs::BaseEntity &ent) : m_entity {ent} {}
 BaseEntityComponent::~BaseEntityComponent()
 {
@@ -45,7 +41,7 @@ BaseEntityComponent::~BaseEntityComponent()
 		auto *info = this->GetComponentInfo();
 		std::string typeName = info ? info->name : "UNKNOWN";
 		std::string msg = "Component of type '" + typeName + "' was not cleaned up properly! Was :CleanUp not called?";
-		Con::cerr << msg << Con::endl;
+		Con::CERR << msg << Con::endl;
 		throw std::runtime_error {msg};
 	}
 	GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().DeregisterComponent(*this);

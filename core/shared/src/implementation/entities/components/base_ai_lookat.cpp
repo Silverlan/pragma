@@ -116,10 +116,10 @@ Vector3 BaseAIComponent::GetLookTarget() const
 	case LookTargetType::Entity:
 		{
 			if(m_neckInfo.hEntityLookTarget.valid() == false)
-				return uvec::ORIGIN;
-			return m_neckInfo.hEntityLookTarget.get()->GetTransformComponent() ? m_neckInfo.hEntityLookTarget.get()->GetCenter() : uvec::ORIGIN;
+				return uvec::PRM_ORIGIN;
+			return m_neckInfo.hEntityLookTarget.get()->GetTransformComponent() ? m_neckInfo.hEntityLookTarget.get()->GetCenter() : uvec::PRM_ORIGIN;
 		}
 	default:
-		return uvec::ORIGIN;
+		return uvec::PRM_ORIGIN;
 	}
 }

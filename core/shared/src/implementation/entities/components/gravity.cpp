@@ -45,7 +45,7 @@ Vector3 BaseGravity::GetGravityDirection(NetworkState *state) const
 	if(m_gravityDir != nullptr)
 		return *m_gravityDir;
 	if(state == nullptr)
-		return uvec::ORIGIN;
+		return uvec::PRM_ORIGIN;
 	Game *game = state->GetGameState();
 	return glm::normalize(game->GetGravity());
 }
@@ -167,7 +167,7 @@ void GravityComponent::ApplyGravity(double dt)
 						disp += dir *speedDelta;
 					}
 				}
-				/*Con::cout<<"Ground Velocity: ("<<v.x<<","<<v.y<<","<<v.z<<") ("<<disp.x<<","<<disp.y<<","<<disp.z<<")"<<Con::endl;
+				/*Con::COUT<<"Ground Velocity: ("<<v.x<<","<<v.y<<","<<v.z<<") ("<<disp.x<<","<<disp.y<<","<<disp.z<<")"<<Con::endl;
 				disp += (v -oldVelocity);
 				oldVelocity = v;*/
 

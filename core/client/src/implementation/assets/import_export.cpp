@@ -685,7 +685,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 
 				uint32_t iWeightChannel = 1;
 				while(fGetVertexBufferData("JOINTS_" + std::to_string(iWeightChannel++)).has_value())
-					Con::cwar << "Model has more than 4 bone weights, this is not supported!" << Con::endl;
+					Con::CWAR << "Model has more than 4 bone weights, this is not supported!" << Con::endl;
 
 				auto &verts = subMesh->GetVertices();
 				auto numVerts = posBufData->accessor.count;
@@ -1120,7 +1120,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 	}
 
 	if(numBones > pragma::math::to_integral(pragma::GameLimits::MaxBones))
-		Con::cwar << "Model has " << numBones << ", but engine only supports " << pragma::math::to_integral(pragma::GameLimits::MaxBones) << ", this may cause rendering glitches!" << Con::endl;
+		Con::CWAR << "Model has " << numBones << ", but engine only supports " << pragma::math::to_integral(pragma::GameLimits::MaxBones) << ", this may cause rendering glitches!" << Con::endl;
 #if 0
 	for(auto &meshGroup : mdl->GetMeshGroups())
 	{
@@ -1135,7 +1135,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 					{
 						auto id = vw.boneIds[i];
 						if(id >= numBones)
-							Con::cwar<<"Bone weight id "<<id<<" out of range ("<<numBones<<")!"<<Con::endl;
+							Con::CWAR<<"Bone weight id "<<id<<" out of range ("<<numBones<<")!"<<Con::endl;
 					}
 				}
 			}
@@ -1439,7 +1439,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 		return false;
 	}
 	if(exportInfo.verbose)
-		Con::cout << "Loading map data..." << Con::endl;
+		Con::COUT << "Loading map data..." << Con::endl;
 
 	auto worldData = WorldData::Create(*get_client_state());
 	auto udmData = util::load_udm_asset(std::make_unique<fs::File>(f));
@@ -1449,7 +1449,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 		return false;
 
 	if(exportInfo.verbose)
-		Con::cout << "Collecting world node models..." << Con::endl;
+		Con::COUT << "Collecting world node models..." << Con::endl;
 
 	GLTFWriter::SceneDesc sceneDesc {};
 	if(mapExp.has_value()) {
@@ -1527,10 +1527,10 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 			if(strMdl.has_value() == false)
 				continue;
 			if(exportInfo.verbose)
-				Con::cout << "Loading world node model '" << *strMdl << "'..." << Con::endl;
+				Con::COUT << "Loading world node model '" << *strMdl << "'..." << Con::endl;
 			auto mdl = get_cgame()->LoadModel(*strMdl);
 			if(mdl == nullptr) {
-				Con::cwar << "Unable to load model '" << *strMdl << "'! Model will not be included in level export!" << Con::endl;
+				Con::CWAR << "Unable to load model '" << *strMdl << "'! Model will not be included in level export!" << Con::endl;
 				continue;
 			}
 			if(sceneDesc.modelCollection.size() == sceneDesc.modelCollection.capacity())
@@ -1612,7 +1612,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 	get_client_state()->GetResourceWatcher().Poll();
 
 	if(exportInfo.verbose)
-		Con::cout << "Exporting scene with " << sceneDesc.modelCollection.size() << " models and " << sceneDesc.lightSources.size() << " light sources..." << Con::endl;
+		Con::COUT << "Exporting scene with " << sceneDesc.modelCollection.size() << " models and " << sceneDesc.lightSources.size() << " light sources..." << Con::endl;
 
 	auto exportPath = "maps/" + mapName + '/';
 	auto mdlName = exportPath + mapName;
@@ -1624,11 +1624,11 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 	if(success == false)
 		return false;
 	if(exportInfo.verbose)
-		Con::cout << "Exporting lightmap atlas..." << Con::endl;
+		Con::COUT << "Exporting lightmap atlas..." << Con::endl;
 	success = export_texture("maps/" + mapName + "/lightmap_atlas", mapExportInfo.imageFormat, outErrMsg, image::TextureInfo::AlphaMode::None, true /* extended DDS */, &exportPath);
 	if(success == false) {
 		if(exportInfo.verbose)
-			Con::cwar << "Unable to export lightmap atlas: " << outErrMsg << Con::endl;
+			Con::CWAR << "Unable to export lightmap atlas: " << outErrMsg << Con::endl;
 	}
 	return true;
 }

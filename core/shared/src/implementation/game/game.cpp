@@ -41,7 +41,7 @@ void Lua::VarDump(lua::State *lua, int n)
 {
 	auto str = VarToString(lua, n);
 	if(str.has_value())
-		Con::cout << *str;
+		Con::COUT << *str;
 }
 
 std::optional<std::string> Lua::StackToString(lua::State *lua)
@@ -65,7 +65,7 @@ void Lua::StackDump(lua::State *lua)
 {
 	auto str = StackToString(lua);
 	if(str.has_value())
-		Con::cout << *str << Con::endl;
+		Con::COUT << *str << Con::endl;
 }
 
 std::optional<std::string> Lua::TableToString(lua::State *lua, int n)
@@ -107,27 +107,27 @@ void Lua::TableDump(lua::State *lua, int n)
 {
 	if(n < 0)
 		n = GetStackTop(lua) + n + 1;
-	Con::cout << "------------ LUA TABLEDUMP ------------" << Con::endl;
+	Con::COUT << "------------ LUA TABLEDUMP ------------" << Con::endl;
 	if(n <= 0) {
-		Con::cout << "INVALID STACK INDEX (" << n << ")" << Con::endl;
+		Con::COUT << "INVALID STACK INDEX (" << n << ")" << Con::endl;
 		return;
 	}
 	if(!IsTable(lua, n)) {
-		Con::cout << "VALUE " << n << " ON STACK IS A ";
+		Con::COUT << "VALUE " << n << " ON STACK IS A ";
 		VarDump(lua, n);
-		Con::cout << ", NOT A TABLE!" << Con::endl;
+		Con::COUT << ", NOT A TABLE!" << Con::endl;
 		return;
 	}
 	PushNil(lua);
 	while(GetNextPair(lua, n) != 0) {
-		Con::cout << "\t";
+		Con::COUT << "\t";
 		VarDump(lua, -2);
-		Con::cout << " = ";
+		Con::COUT << " = ";
 		VarDump(lua, -1);
-		Con::cout << Con::endl;
+		Con::COUT << Con::endl;
 		Pop(lua, 1); // We need the key at the top for the next iteration
 	}
-	Con::cout << "---------------------------------------" << Con::endl;
+	Con::COUT << "---------------------------------------" << Con::endl;
 }
 
 ////////////////
@@ -321,11 +321,11 @@ bool pragma::Game::LoadNavMesh(bool bReload)
 	auto pathAscii = path + "." + std::string {nav::PNAV_EXTENSION_ASCII};
 	auto pathBinary = path + "." + std::string {nav::PNAV_EXTENSION_BINARY};
 	path = fs::exists(pathBinary) ? pathBinary : pathAscii;
-	Con::cout << "Loading navigation mesh..." << Con::endl;
+	Con::COUT << "Loading navigation mesh..." << Con::endl;
 
 	m_navMesh = LoadNavMesh(path);
 	if(m_navMesh == nullptr)
-		Con::cwar << "Unable to load navigation mesh!" << Con::endl;
+		Con::CWAR << "Unable to load navigation mesh!" << Con::endl;
 	BaseAIComponent::ReloadNavThread(*this);
 	return m_navMesh != nullptr;
 }
@@ -453,10 +453,10 @@ void pragma::Game::InitializeGame()
 		if(fInitPhysicsEngine != nullptr)
 			fInitPhysicsEngine(*GetNetworkState(), m_physEnvironment);
 		else
-			Con::cerr << "Unable to initialize physics engine '" << physEngineName << "': Function 'initialize_physics_engine' not found!" << Con::endl;
+			Con::CERR << "Unable to initialize physics engine '" << physEngineName << "': Function 'initialize_physics_engine' not found!" << Con::endl;
 	}
 	else
-		Con::cerr << "Unable to initialize physics engine '" << physEngineName << "': " << err << Con::endl;
+		Con::CERR << "Unable to initialize physics engine '" << physEngineName << "': " << err << Con::endl;
 	if(m_physEnvironment) {
 		m_surfaceMaterialManager = std::make_unique<physics::SurfaceMaterialManager>(*m_physEnvironment);
 		m_physEnvironment->SetEventCallback(std::make_unique<PhysEventCallback>());
@@ -727,13 +727,13 @@ bool pragma::Game::LoadMap(const std::string &map, const Vector3 &origin, std::v
 	if(filePath.has_value() == false) {
 		static auto bPort = true;
 		if(bPort == true) {
-			Con::cwar << "Map '" << map << "' not found." << Con::endl;
+			Con::CWAR << "Map '" << map << "' not found." << Con::endl;
 			auto path = pragma::asset::relative_path_to_absolute_path(normPath, asset::Type::Map);
 			if(pragma::util::port_source2_map(GetNetworkState(), path.GetString()) == false && pragma::util::port_hl2_map(GetNetworkState(), path.GetString()) == false)
-				Con::cwar << " Loading empty map..." << Con::endl;
+				Con::CWAR << " Loading empty map..." << Con::endl;
 			else {
-				Con::cwar << Con::endl;
-				Con::cout << "Successfully ported HL2 map " << path.GetString() << "!" << Con::endl;
+				Con::CWAR << Con::endl;
+				Con::COUT << "Successfully ported HL2 map " << path.GetString() << "!" << Con::endl;
 				bPort = false;
 				auto r = LoadMap(map);
 				bPort = true;
@@ -747,7 +747,7 @@ bool pragma::Game::LoadMap(const std::string &map, const Vector3 &origin, std::v
 	m_mapInfo.fileName = pragma::asset::relative_path_to_absolute_path(*filePath, asset::Type::Map).GetString();
 	util::ScopeGuard sg {[this]() { m_flags |= GameFlags::MapInitialized; }};
 
-	auto error = [this, &map](const std::string_view &msg) { Con::cwar << "Unable to load map '" << map << "': " << msg << Con::endl; };
+	auto error = [this, &map](const std::string_view &msg) { Con::CWAR << "Unable to load map '" << map << "': " << msg << Con::endl; };
 
 	auto f = pragma::fs::open_file(m_mapInfo.fileName.c_str(), fs::FileMode::Read | fs::FileMode::Binary);
 	if(f == nullptr) {
@@ -784,7 +784,7 @@ bool pragma::Game::LoadMap(const std::string &map, const Vector3 &origin, std::v
 	LoadSoundScripts(soundScript.c_str());
 
 	// Load entities
-	Con::cout << "Loading entities..." << Con::endl;
+	Con::COUT << "Loading entities..." << Con::endl;
 
 	BaseStaticBvhCacheComponent *bvhC = nullptr;
 	if(IsClient()) {
@@ -871,7 +871,7 @@ std::shared_ptr<pragma::asset::Model> pragma::Game::LoadModel(const std::string 
 	}
 	else {
 		std::string errMsg = result.errorMessage ? *result.errorMessage : "Unknown error";
-		Con::cwar << "Failed to load model '" << mdl << "': " << errMsg << Con::endl;
+		Con::CWAR << "Failed to load model '" << mdl << "': " << errMsg << Con::endl;
 	}
 	return r;
 }
@@ -879,10 +879,10 @@ std::shared_ptr<pragma::asset::Model> pragma::Game::LoadModel(const std::string 
 void pragma::Game::OnGameReady()
 {
 	// All assets have been loaded, now clear the unused assets (if there was a previous map)
-	Con::cout << "Clearing unused assets..." << Con::endl;
+	Con::COUT << "Clearing unused assets..." << Con::endl;
 	auto numModelsCleared = GetNetworkState()->GetModelManager().ClearUnused();
 	auto numMaterialsCleared = GetNetworkState()->GetMaterialManager().ClearUnused();
-	Con::cout << numModelsCleared << " models and " << numMaterialsCleared << " materials have been cleared from cache!" << Con::endl;
+	Con::COUT << numModelsCleared << " models and " << numMaterialsCleared << " materials have been cleared from cache!" << Con::endl;
 
 	m_ctCur.Reset();
 	m_ctReal.Reset();

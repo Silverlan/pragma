@@ -8,7 +8,6 @@ import :entities.components.base_name;
 
 using namespace pragma;
 
-ComponentEventId baseNameComponent::EVENT_ON_NAME_CHANGED = INVALID_COMPONENT_ID;
 void BaseNameComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseNameComponent::EVENT_ON_NAME_CHANGED = registerEvent("ON_NAME_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void BaseNameComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember) { using T = BaseNameComponent; }
 BaseNameComponent::BaseNameComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_name(util::StringProperty::Create()) {}

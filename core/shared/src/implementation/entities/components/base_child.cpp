@@ -8,7 +8,6 @@ import :entities.components.base_child;
 
 using namespace pragma;
 
-ComponentEventId baseChildComponent::EVENT_ON_PARENT_CHANGED = INVALID_COMPONENT_ID;
 void BaseChildComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseChildComponent::EVENT_ON_PARENT_CHANGED = registerEvent("ON_PARENT_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void BaseChildComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {

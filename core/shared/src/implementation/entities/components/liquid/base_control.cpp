@@ -8,8 +8,6 @@ import :entities.components.liquid.base_control;
 
 using namespace pragma;
 
-ComponentEventId baseLiquidControlComponent::EVENT_ON_SPLASH = INVALID_COMPONENT_ID;
-ComponentEventId baseLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED = INVALID_COMPONENT_ID;
 void BaseLiquidControlComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseLiquidControlComponent::EVENT_ON_SPLASH = registerEvent("ON_SPLASH", ComponentEventInfo::Type::Broadcast);

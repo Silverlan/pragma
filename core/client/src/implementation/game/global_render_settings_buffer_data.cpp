@@ -74,7 +74,7 @@ void pragma::rendering::GlobalRenderSettingsBufferData::EvaluateDebugPrint()
 	// or write access and should only be used for debugging purposes!
 	auto debugPrintStr = GetDebugPrintString();
 	if(debugPrintStr.has_value()) {
-		Con::cout << "Shader Debug Print: " << *debugPrintStr << Con::endl;
+		Con::COUT << "Shader Debug Print: " << *debugPrintStr << Con::endl;
 		ResetDebugPrintData();
 	}
 }

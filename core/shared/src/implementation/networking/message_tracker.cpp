@@ -85,16 +85,16 @@ void pragma::networking::MessageTracker::DebugPrint(const util::StringMap<uint32
 	for(auto type : {MessageType::Incoming, MessageType::Outgoing}) {
 		auto pair = GetTrackedMessages(type);
 		auto &msgs = pair.first;
-		Con::cout << msgs.size() << " ";
+		Con::COUT << msgs.size() << " ";
 		switch(type) {
 		case MessageType::Incoming:
-			Con::cout << "incoming ";
+			Con::COUT << "incoming ";
 			break;
 		default:
-			Con::cout << "outgoing ";
+			Con::COUT << "outgoing ";
 			break;
 		}
-		Con::cout << "tracked messages found:" << Con::endl;
+		Con::COUT << "tracked messages found:" << Con::endl;
 		for(auto &msg : msgs) {
 			auto &regMsgs = (type == MessageType::Incoming) ? inMsgs : outMsgs;
 			auto it = std::find_if(regMsgs.begin(), regMsgs.end(), [&msg](const std::pair<std::string, uint32_t> &nm) { return (msg.id == nm.second) ? true : false; });
@@ -104,16 +104,16 @@ void pragma::networking::MessageTracker::DebugPrint(const util::StringMap<uint32
 			auto daypoint = date::floor<date::days>(time);
 			auto tod = date::make_time(time - daypoint);
 
-			Con::cout << msgName << " (" << msg.id << ") to " << msg.endpoint.GetIP() << " (Packet Size: " << msg.packet.get()->GetSize() << ").";
+			Con::COUT << msgName << " (" << msg.id << ") to " << msg.endpoint.GetIP() << " (Packet Size: " << msg.packet.get()->GetSize() << ").";
 			switch(type) {
 			case MessageType::Incoming:
-				Con::cout << " Received ";
+				Con::COUT << " Received ";
 				break;
 			default:
-				Con::cout << " Sent ";
+				Con::COUT << " Sent ";
 				break;
 			}
-			Con::cout << "at " << tod.hours().count() << ":" << tod.minutes().count() << ":" << tod.seconds().count() << "." << std::chrono::duration_cast<std::chrono::milliseconds>(tod.subseconds()).count() << "!" << Con::endl;
+			Con::COUT << "at " << tod.hours().count() << ":" << tod.minutes().count() << ":" << tod.seconds().count() << "." << std::chrono::duration_cast<std::chrono::milliseconds>(tod.subseconds()).count() << "!" << Con::endl;
 		}
 	}
 }

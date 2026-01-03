@@ -174,15 +174,15 @@ export {
 			// Debug
 			virtual void DebugPrintObjects(const std::string &t) const override
 			{
-				using ::operator<<; // Workaround for msvc compiler being unable to resolve Con::ccl<< operator (compiler bug?)
+				using ::operator<<; // Workaround for msvc compiler being unable to resolve Con::CCL<< operator (compiler bug?)
 				for(auto &o : m_objects) {
-					Con::ccl << t;
+					Con::CCL << t;
 					auto *tree = GetTree();
 					if(tree->m_objectToStringCallback != nullptr)
-						Con::ccl << tree->m_objectToStringCallback(o);
+						Con::CCL << tree->m_objectToStringCallback(o);
 					else
-						Con::ccl << &o;
-					Con::ccl << Con::endl;
+						Con::CCL << &o;
+					Con::CCL << Con::endl;
 				}
 			}
 		  private:
@@ -277,7 +277,7 @@ export {
 			if(recursiveCount == 0) {
 				recursiveCount = std::numeric_limits<uint32_t>::max();
 				InsertObject(o, &root); // Force object into root node
-				// Con::cwar<<"Object "<<o<<" outside of occlusion tree bounds! Forcing in root node..."<<Con::endl;
+				// Con::CWAR<<"Object "<<o<<" outside of occlusion tree bounds! Forcing in root node..."<<Con::endl;
 				return;
 			}
 			--recursiveCount;
@@ -297,7 +297,7 @@ export {
 			assert(pFurthest != nullptr);
 			if(pFurthest == nullptr) // Can happen if object bounds are NaN or similar
 			{
-				Con::cwar << "Object " << o << " has invalid bounds (" << min.x << "," << min.y << "," << min.z << ") (" << max.x << "," << max.y << "," << max.z << ")! Object will not be rendered!" << Con::endl;
+				Con::CWAR << "Object " << o << " has invalid bounds (" << min.x << "," << min.y << "," << min.z << ") (" << max.x << "," << max.y << "," << max.z << ")! Object will not be rendered!" << Con::endl;
 				return;
 			}
 			ExtendRoot(*pFurthest);
@@ -336,35 +336,35 @@ export {
 #if ENABLE_OCCLUSION_DEBUG_MODE == 1
 			const T *o = nullptr;
 			auto validErr = Validate(&o);
-			Con::cout << "Validation Result: ";
+			Con::COUT << "Validation Result: ";
 			switch(validErr) {
 			case ValidationError::Success:
-				Con::cout << "Success";
+				Con::COUT << "Success";
 				break;
 			case ValidationError::InvalidObjectReferenceCount:
-				Con::cout << "InvalidObjectReferenceCount";
+				Con::COUT << "InvalidObjectReferenceCount";
 				break;
 			case ValidationError::InvalidObjectReferenceToNode:
-				Con::cout << "InvalidObjectReferenceToNode";
+				Con::COUT << "InvalidObjectReferenceToNode";
 				break;
 			case ValidationError::MissingObject:
-				Con::cout << "MissingObject";
+				Con::COUT << "MissingObject";
 				break;
 			case ValidationError::DuplicateObject:
-				Con::cout << "DuplicateObject";
+				Con::COUT << "DuplicateObject";
 				break;
 			default:
-				Con::cout << "Unknown";
+				Con::COUT << "Unknown";
 				break;
 			}
 			if(o != nullptr) {
-				Con::cout << ": ";
+				Con::COUT << ": ";
 				if(m_objectToStringCallback == nullptr)
-					Con::cout << o;
+					Con::COUT << o;
 				else
-					Con::cout << m_objectToStringCallback(*o);
+					Con::COUT << m_objectToStringCallback(*o);
 			}
-			Con::cout << Con::endl;
+			Con::COUT << Con::endl;
 #endif
 		}
 #if ENABLE_OCCLUSION_DEBUG_MODE == 1

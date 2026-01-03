@@ -472,7 +472,7 @@ void pragma::ik::RigConfig::DebugPrint() const
 	ToUdmData(prop);
 	std::stringstream ss;
 	el->GetValue<udm::Element>().ToAscii(udm::AsciiSaveFlags::Default, ss);
-	Con::cout << ss.str() << Con::endl;
+	Con::COUT << ss.str() << Con::endl;
 }
 
 void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const

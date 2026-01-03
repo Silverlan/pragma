@@ -2400,7 +2400,7 @@ std::optional<pragma::SignedAxis> pragma::asset::Model::FindBoneTwistAxis(animat
 			normalList.push_back(normal);
 		}
 	}
-	Vector3 norm = uvec::FORWARD;
+	Vector3 norm = uvec::PRM_FORWARD;
 	if(!normalList.empty())
 		norm = uvec::calc_average(normalList);
 	else {

@@ -10,7 +10,7 @@ export import :entities.components.base;
 
 export namespace pragma {
 	namespace baseRadiusComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_RADIUS_CHANGED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_RADIUS_CHANGED)
 	}
 	class DLLNETWORK BaseRadiusComponent : public BaseEntityComponent {
 	  public:

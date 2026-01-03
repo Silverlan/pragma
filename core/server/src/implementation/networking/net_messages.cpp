@@ -100,13 +100,13 @@ void pragma::networking::register_server_net_messages()
 
 #define RESOURCE_TRANSFER_VERBOSE 0
 
-void NET_sv_RESOURCEINFO_RESPONSE(pragma::networking::IServerClient &session, NetPacket packet) {pragma::ServerState::Get()->HandleServerResourceStart(session, packet); }
+void NET_sv_RESOURCEINFO_RESPONSE(pragma::networking::IServerClient &session, NetPacket packet) { pragma::ServerState::Get()->HandleServerResourceStart(session, packet); }
 
 void NET_sv_RESOURCE_REQUEST(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	bool b = packet->Read<bool>();
 #if RESOURCE_TRANSFER_VERBOSE == 1
-	Con::csv << "[ResourceManager] Got resource request from client: " << session->GetIdentifier() << " (" << b << ")" << Con::endl;
+	Con::CSV << "[ResourceManager] Got resource request from client: " << session->GetIdentifier() << " (" << b << ")" << Con::endl;
 #endif
 	if(b)
 		pragma::ServerState::Get()->HandleServerNextResource(session);
@@ -117,16 +117,16 @@ void NET_sv_RESOURCE_REQUEST(pragma::networking::IServerClient &session, NetPack
 void NET_sv_RESOURCE_BEGIN(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	session.SetInitialResourceTransferState(pragma::networking::IServerClient::TransferState::Started);
-	bool bSend = packet->Read<bool>() &&pragma::ServerState::Get()->GetConVarBool("sv_allowdownload");
+	bool bSend = packet->Read<bool>() && pragma::ServerState::Get()->GetConVarBool("sv_allowdownload");
 	if(bSend) {
 #if RESOURCE_TRANSFER_VERBOSE == 1
-		Con::csv << "[ResourceManager] Sending next resource to client: " << session->GetIdentifier() << Con::endl;
+		Con::CSV << "[ResourceManager] Sending next resource to client: " << session->GetIdentifier() << Con::endl;
 #endif
 		pragma::ServerState::Get()->HandleServerNextResource(session);
 	}
 	else {
 #if RESOURCE_TRANSFER_VERBOSE == 1
-		Con::csv << "[ResourceManager] All resources have been sent to: " << session->GetIdentifier() << Con::endl;
+		Con::CSV << "[ResourceManager] All resources have been sent to: " << session->GetIdentifier() << Con::endl;
 #endif
 		NetPacket p;
 		pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::RESOURCECOMPLETE, p, pragma::networking::Protocol::SlowReliable, session);
@@ -139,7 +139,7 @@ void NET_sv_QUERY_RESOURCE(pragma::networking::IServerClient &session, NetPacket
 		return;
 	auto fileName = packet->ReadString();
 	//#if RESOURCE_TRANSFER_VERBOSE == 1
-	Con::csv << "[ResourceManager] Query Resource: " << fileName << Con::endl;
+	Con::CSV << "[ResourceManager] Query Resource: " << fileName << Con::endl;
 	//#endif
 	if(pragma::SGame::Get()->IsValidGameResource(fileName) == false) // Client isn't allowed to download this resource
 	{
@@ -198,12 +198,12 @@ void NET_sv_QUERY_MODEL_TEXTURE(pragma::networking::IServerClient &session, NetP
 void NET_sv_DISCONNECT(pragma::networking::IServerClient &session, NetPacket packet)
 {
 #ifdef DEBUG_SOCKET
-	Con::csv << "Client '" << session.GetIdentifier() << "' has disconnected." << Con::endl;
+	Con::CSV << "Client '" << session.GetIdentifier() << "' has disconnected." << Con::endl;
 #endif
 	pragma::ServerState::Get()->DropClient(session);
 }
 
-void NET_sv_USERINPUT(pragma::networking::IServerClient &session, NetPacket packet) {pragma::ServerState::Get()->ReceiveUserInput(session, packet); }
+void NET_sv_USERINPUT(pragma::networking::IServerClient &session, NetPacket packet) { pragma::ServerState::Get()->ReceiveUserInput(session, packet); }
 
 void NET_sv_ENT_EVENT(pragma::networking::IServerClient &session, NetPacket packet)
 {
@@ -306,10 +306,10 @@ void NET_sv_RCON(pragma::networking::IServerClient &session, NetPacket packet)
 		if(pl == nullptr)
 			return;
 		pl->PrintMessage("Bad RCON password",MESSAGE::PRINTCONSOLE);*/ // TODO
-		Con::cerr << "Incorrect RCON Password! (" << passCl << ")" << Con::endl;
+		Con::CERR << "Incorrect RCON Password! (" << passCl << ")" << Con::endl;
 		return;
 	}
-	Con::csv << "Remote console input from " << session.GetIdentifier() << ": '" << cvar << "'" << Con::endl;
+	Con::CSV << "Remote console input from " << session.GetIdentifier() << ": '" << cvar << "'" << Con::endl;
 	pragma::Engine::Get()->ConsoleInput(cvar.c_str());
 }
 
@@ -342,13 +342,13 @@ void NET_sv_AUTHENTICATE(pragma::networking::IServerClient &session, NetPacket p
 	auto hasAuth = packet->Read<bool>();
 	if(pragma::ServerState::Get()->IsClientAuthenticationRequired()) {
 		if(hasAuth == false) {
-			Con::cerr << "Unable to authenticate client '" << session.GetIdentifier() << "': Client did not transmit authentication information!" << Con::endl;
+			Con::CERR << "Unable to authenticate client '" << session.GetIdentifier() << "': Client did not transmit authentication information!" << Con::endl;
 			pragma::ServerState::Get()->DropClient(session, pragma::networking::DropReason::AuthenticationFailed);
 			return;
 		}
 		auto *reg = pragma::ServerState::Get()->GetMasterServerRegistration();
 		if(reg == nullptr) {
-			Con::cerr << "Unable to authenticate client '" << session.GetIdentifier() << "': Server is not connected to master server!" << Con::endl;
+			Con::CERR << "Unable to authenticate client '" << session.GetIdentifier() << "': Server is not connected to master server!" << Con::endl;
 			pragma::ServerState::Get()->DropClient(session, pragma::networking::DropReason::AuthenticationFailed);
 			return;
 		}
@@ -361,7 +361,7 @@ void NET_sv_AUTHENTICATE(pragma::networking::IServerClient &session, NetPacket p
 		std::string err;
 		auto libSteamworks = pragma::ServerState::Get()->InitializeLibrary("steamworks/pr_steamworks", &err);
 		if(libSteamworks == nullptr) {
-			Con::cerr << "Unable to authenticate client with steam id '" << steamId << "': Steamworks module could not be loaded: " << err << Con::endl;
+			Con::CERR << "Unable to authenticate client with steam id '" << steamId << "': Steamworks module could not be loaded: " << err << Con::endl;
 			pragma::ServerState::Get()->DropClient(session, pragma::networking::DropReason::AuthenticationFailed);
 			reg->DropClient(steamId);
 			return;
@@ -418,7 +418,7 @@ void NET_sv_NOCLIP(pragma::networking::IServerClient &session, NetPacket packet)
 	pragma::ServerState::Get()->SendPacket(pragma::networking::net_messages::client::PL_TOGGLE_NOCLIP, p, pragma::networking::Protocol::SlowReliable);
 }
 
-void NET_sv_LUANET(pragma::networking::IServerClient &session, NetPacket packet) {pragma::ServerState::Get()->HandleLuaNetPacket(session, packet); }
+void NET_sv_LUANET(pragma::networking::IServerClient &session, NetPacket packet) { pragma::ServerState::Get()->HandleLuaNetPacket(session, packet); }
 
 void NET_sv_NOTARGET(pragma::networking::IServerClient &session, NetPacket packet)
 {
@@ -635,5 +635,5 @@ void NET_sv_DEBUG_AI_NAVIGATION(pragma::networking::IServerClient &session, NetP
 void NET_sv_CL_SEND(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	std::string msg = packet->ReadString();
-	Con::csv << "Received cl_send message from client '" << session.GetIdentifier() << "': " << msg << Con::endl;
+	Con::CSV << "Received cl_send message from client '" << session.GetIdentifier() << "': " << msg << Con::endl;
 }

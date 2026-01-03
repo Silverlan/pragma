@@ -8,11 +8,6 @@ import :entities.components.triggers.base_touch;
 
 using namespace pragma;
 
-ComponentEventId baseTouchComponent::EVENT_CAN_TRIGGER = INVALID_COMPONENT_ID;
-ComponentEventId baseTouchComponent::EVENT_ON_START_TOUCH = INVALID_COMPONENT_ID;
-ComponentEventId baseTouchComponent::EVENT_ON_END_TOUCH = INVALID_COMPONENT_ID;
-ComponentEventId baseTouchComponent::EVENT_ON_TRIGGER = INVALID_COMPONENT_ID;
-ComponentEventId baseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED = INVALID_COMPONENT_ID;
 void BaseTouchComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseTouchComponent::EVENT_CAN_TRIGGER = registerEvent("CAN_TRIGGER", ComponentEventInfo::Type::Broadcast);
@@ -81,7 +76,7 @@ void BaseTouchComponent::OnPhysicsInitialized()
 			auto &colObjs = physObj->GetCollisionObjects();
 			auto it = std::find_if(colObjs.begin(), colObjs.end(), [](const util::TSharedHandle<physics::ICollisionObject> &hColObj) { return hColObj.IsValid() && !hColObj->IsTrigger(); });
 			if(it != colObjs.end())
-				Con::cwar << "Trigger entity has non-trigger physics shapes!" << Con::endl;
+				Con::CWAR << "Trigger entity has non-trigger physics shapes!" << Con::endl;
 		}
 	}
 	BroadcastEvent(baseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED);

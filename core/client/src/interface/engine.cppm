@@ -145,7 +145,7 @@ export namespace pragma {
 				effect = soundSys->CreateEffect(props);
 			}
 			catch(const std::runtime_error &e) {
-				Con::cwar << "Unable to create auxiliary effect '" << name << "': " << e.what() << Con::endl;
+				Con::CWAR << "Unable to create auxiliary effect '" << name << "': " << e.what() << Con::endl;
 				return nullptr;
 			}
 			m_auxEffects.insert(decltype(m_auxEffects)::value_type(name, effect));

@@ -3,16 +3,19 @@
 
 #pragma once
 
-#ifdef DLLNETWORK_EX
-#ifdef __linux__
-#define DLLNETWORK __attribute__((visibility("default")))
+// TODO: Remove this file once this workaround is no longer needed!
+
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+
+#define REGISTER_COMPONENT_EVENT(EVENT) \
+    DLLNETWORK ComponentEventId &GET_##EVENT() { \
+        static ComponentEventId eventId = INVALID_COMPONENT_ID; \
+        return eventId; \
+    }
+
 #else
-#define DLLNETWORK __declspec(dllexport) // export DLL information
-#endif
-#else
-#ifdef __linux__
-#define DLLNETWORK
-#else
-#define DLLNETWORK __declspec(dllimport) // import DLL information
-#endif
+
+#define REGISTER_COMPONENT_EVENT(EVENT) \
+    CLASS_ENUM_COMPAT ComponentEventIdDec EVENT = INVALID_COMPONENT_ID;
+
 #endif

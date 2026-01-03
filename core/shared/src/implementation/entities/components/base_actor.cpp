@@ -12,9 +12,6 @@ BaseActorComponent::HitboxData::HitboxData(uint32_t _boneId, const Vector3 &_off
 
 //////////////////
 
-ComponentEventId baseActorComponent::EVENT_ON_KILLED = INVALID_COMPONENT_ID;
-ComponentEventId baseActorComponent::EVENT_ON_RESPAWN = INVALID_COMPONENT_ID;
-ComponentEventId baseActorComponent::EVENT_ON_DEATH = INVALID_COMPONENT_ID;
 void BaseActorComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseActorComponent::EVENT_ON_KILLED = registerEvent("ON_KILLED", ComponentEventInfo::Type::Broadcast);
@@ -144,7 +141,7 @@ void BaseActorComponent::UpdateMoveController()
 	if(m_moveControllerY == -1) {
 		if(l > 0.f) {
 			auto dirMove = uvec::get_normal(vel);
-			auto dir = pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
+			auto dir = pTrComponent ? pTrComponent->GetForward() : uvec::PRM_FORWARD;
 			float yawMove = uvec::get_yaw(dirMove);
 			float yawDir = uvec::get_yaw(dir);
 			float yawOffset = math::get_angle_difference(yawDir, yawMove);
@@ -159,8 +156,8 @@ void BaseActorComponent::UpdateMoveController()
 	else {
 		if(l > 0.f) {
 			auto dirMove = uvec::get_normal(vel);
-			auto dir = pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
-			auto dirRight = pTrComponent ? pTrComponent->GetRight() : uvec::RIGHT;
+			auto dir = pTrComponent ? pTrComponent->GetForward() : uvec::PRM_FORWARD;
+			auto dirRight = pTrComponent ? pTrComponent->GetRight() : uvec::PRM_RIGHT;
 			auto rotInv = pTrComponent ? pTrComponent->GetRotation() : uquat::identity();
 			uquat::inverse(rotInv);
 			uvec::rotate(&dirMove, rotInv);

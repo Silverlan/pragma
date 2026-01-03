@@ -91,7 +91,7 @@ void CMD_kick(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector
 		}
 	}
 	if(kickTarget == nullptr) {
-		Con::cwar << "No player with id or name '" << identifier << "' found!" << Con::endl;
+		Con::CWAR << "No player with id or name '" << identifier << "' found!" << Con::endl;
 		return;
 	}
 	std::string reason;
@@ -110,15 +110,15 @@ void CMD_sv_dump_netmessages(pragma::NetworkState *, pragma::BasePlayerComponent
 		auto id = pragma::string::to_int(argv.front());
 		for(auto it = netmessages->begin(); it != netmessages->end(); ++it) {
 			if(it->second == id) {
-				Con::cout << "Message Identifier: " << it->first << Con::endl;
+				Con::COUT << "Message Identifier: " << it->first << Con::endl;
 				return;
 			}
 		}
-		Con::cout << "No message with id " << id << " found!" << Con::endl;
+		Con::COUT << "No message with id " << id << " found!" << Con::endl;
 		return;
 	}
 	for(auto it = netmessages->begin(); it != netmessages->end(); ++it)
-		Con::cout << it->first << " = " << it->second << Con::endl;
+		Con::COUT << it->first << " = " << it->second << Con::endl;
 }
 #endif
 
@@ -138,7 +138,7 @@ void CMD_entities_sv(pragma::NetworkState *state, pragma::BasePlayerComponent *p
 			continue;
 		if(modelName.has_value() && pragma::string::match(pair.first->GetModelName().c_str(), modelName->c_str()) == false)
 			continue;
-		Con::cout << *pair.first << Con::endl;
+		Con::COUT << *pair.first << Con::endl;
 	}
 }
 
@@ -151,12 +151,12 @@ void CMD_list_maps(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 	for(auto &f : files)
 		ufile::remove_extension_from_filename(f, exts);
 	std::sort(files.begin(), files.end());
-	Con::cout << "Available maps:" << Con::endl;
+	Con::COUT << "Available maps:" << Con::endl;
 	for(auto &f : files) {
 		ufile::remove_extension_from_filename(f);
-		Con::cout << f << Con::endl;
+		Con::COUT << f << Con::endl;
 	}
-	Con::cout << Con::endl;
+	Con::COUT << Con::endl;
 }
 
 void CMD_status_sv(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
@@ -174,30 +174,30 @@ void CMD_status_sv(pragma::NetworkState *, pragma::BasePlayerComponent *, std::v
 		ip = hostIp.has_value() ? *hostIp : "Unknown";
 	}
 	auto &serverData = pragma::ServerState::Get()->GetServerData();
-	Con::cout << "hostname:\t" << serverData.name << Con::endl;
-	Con::cout << "udp/ip:\t\t" << ip << Con::endl;
-	Con::cout << "map:\t\t" << serverData.map << Con::endl;
-	Con::cout << "players:\t" << players.size() << " (" << serverData.maxPlayers << " max)" << Con::endl << Con::endl;
-	Con::cout << "#  userid\tname    \tconnected\tping";
+	Con::COUT << "hostname:\t" << serverData.name << Con::endl;
+	Con::COUT << "udp/ip:\t\t" << ip << Con::endl;
+	Con::COUT << "map:\t\t" << serverData.map << Con::endl;
+	Con::COUT << "players:\t" << players.size() << " (" << serverData.maxPlayers << " max)" << Con::endl << Con::endl;
+	Con::COUT << "#  userid\tname    \tconnected\tping";
 	auto bServerRunning = pragma::ServerState::Get()->IsServerRunning();
 	if(bServerRunning == true)
-		Con::cout << "\tadr";
-	Con::cout << Con::endl;
+		Con::COUT << "\tadr";
+	Con::COUT << Con::endl;
 	auto numPlayers = players.size();
 	for(auto i = decltype(numPlayers) {0}; i < numPlayers; ++i) {
 		auto *pl = players.at(i);
 		auto *session = pl->GetClientSession();
 		auto nameC = pl->GetEntity().GetNameComponent();
-		Con::cout << "# \t" << i << "\t"
+		Con::COUT << "# \t" << i << "\t"
 		          << "\"" << (nameC.valid() ? nameC->GetName() : "") << "\""
 		          << "\t" << pragma::string::format_time(pl->TimeConnected()) << "     \t";
 		if(session != nullptr)
-			Con::cout << session->GetLatency();
+			Con::COUT << session->GetLatency();
 		else
-			Con::cout << "?";
+			Con::COUT << "?";
 		if(bServerRunning == true)
-			Con::cout << "\t" << pl->GetClientIP();
-		Con::cout << Con::endl;
+			Con::COUT << "\t" << pl->GetClientIP();
+		Con::COUT << Con::endl;
 	}
 }
 
@@ -214,7 +214,7 @@ void CMD_sv_send(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vec
 		ClientSession *cs = GetSessionByPlayerID(pragma::string::to_int(argv[0]));
 		if(!cs)
 		{
-			Con::cout<<"No player with ID "<<pragma::string::to_int(argv[0])<<" found!"<<Con::endl;
+			Con::COUT<<"No player with ID "<<pragma::string::to_int(argv[0])<<" found!"<<Con::endl;
 			return;
 		}
 		ServerState::Get()->SendTCPMessage(pragma::networking::net_messages::client::SV_SEND, &packet,cs);*/
@@ -233,7 +233,7 @@ void CMD_sv_send_udp(pragma::NetworkState *, pragma::BasePlayerComponent *, std:
 		/*ClientSession *cs = GetSessionByPlayerID(pragma::string::to_int(argv[0]));
 		if(!cs)
 		{
-			Con::cout<<"No player with ID "<<pragma::string::to_int(argv[0])<<" found!"<<Con::endl;
+			Con::COUT<<"No player with ID "<<pragma::string::to_int(argv[0])<<" found!"<<Con::endl;
 			return;
 		}
 		ServerState::Get()->SendUDPMessage(pragma::networking::net_messages::client::SV_SEND,&packet,cs);*/
@@ -258,7 +258,7 @@ void CMD_ent_input(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 			}
 		}
 		if(bFound == false)
-			Con::cwar << "No targets found by name '" << argv[0] << "'!" << Con::endl;
+			Con::CWAR << "No targets found by name '" << argv[0] << "'!" << Con::endl;
 		return;
 	}
 	if(argv.size() < 1 || activator == nullptr || activator->IsCharacter() == false)
@@ -280,7 +280,7 @@ void CMD_ent_input(pragma::NetworkState *state, pragma::BasePlayerComponent *pl,
 		}
 	}
 	if(bFound == false)
-		Con::cwar << "No raycast target found!" << Con::endl;
+		Con::CWAR << "No raycast target found!" << Con::endl;
 }
 
 void CMD_ent_scale(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -326,7 +326,7 @@ void CMD_ent_remove(pragma::NetworkState *state, pragma::BasePlayerComponent *pl
 	auto charComponent = ent.GetCharacterComponent();
 	auto ents = pragma::console::find_target_entity(state, *charComponent, argv);
 	if(ents.empty()) {
-		Con::cwar << "No entity found to remove!" << Con::endl;
+		Con::CWAR << "No entity found to remove!" << Con::endl;
 		return;
 	}
 	for(auto *ent : ents)
@@ -355,7 +355,7 @@ void CMD_ent_create(pragma::NetworkState *state, pragma::BasePlayerComponent *pl
 	trData.SetFlags(pragma::physics::RayCastFlags::Default | pragma::physics::RayCastFlags::InvertFilter | pragma::physics::RayCastFlags::IgnoreDynamic);
 	auto r = pragma::SGame::Get()->RayCast(trData);
 	if(r.hitType == pragma::physics::RayCastHitType::None) {
-		Con::cwar << "No place to spawn entity!" << Con::endl;
+		Con::CWAR << "No place to spawn entity!" << Con::endl;
 		return;
 	}
 	std::string className = argv[0];
@@ -395,7 +395,7 @@ void CMD_nav_generate(pragma::NetworkState *, pragma::BasePlayerComponent *, std
 	if(map.empty())
 		return;
 	std::string err;
-	Con::cout << "Generating navigation mesh..." << Con::endl;
+	Con::COUT << "Generating navigation mesh..." << Con::endl;
 	const pragma::nav::Config navCfg {
 	  32.f /* walkableRadius */, 64.f, /* characterHeight */
 	  20.f,                            /* maxClimbHeight */
@@ -403,15 +403,15 @@ void CMD_nav_generate(pragma::NetworkState *, pragma::BasePlayerComponent *, std
 	};
 	auto rcNavMesh = pragma::nav::generate(*pragma::SGame::Get(), navCfg, &err);
 	if(rcNavMesh == nullptr)
-		Con::cwar << "Unable to generate navigation mesh: " << err << Con::endl;
+		Con::CWAR << "Unable to generate navigation mesh: " << err << Con::endl;
 	else {
 		auto navMesh = pragma::nav::Mesh::Create(rcNavMesh, navCfg);
-		Con::cout << "Navigation mesh has been generated!" << Con::endl;
+		Con::COUT << "Navigation mesh has been generated!" << Con::endl;
 		std::string path = "maps\\" + map;
 		path += "." + std::string {pragma::nav::PNAV_EXTENSION_BINARY};
 		std::string err;
 		if(navMesh->Save(*pragma::SGame::Get(), path, err) == false)
-			Con::cwar << "Unable to save navigation mesh as '" << path << "': " << err << "!" << Con::endl;
+			Con::CWAR << "Unable to save navigation mesh as '" << path << "': " << err << "!" << Con::endl;
 	}
 }
 
@@ -429,13 +429,13 @@ void CMD_sv_debug_netmessages(pragma::NetworkState *state, pragma::BasePlayerCom
 {
 	auto *sv = pragma::ServerState::Get()->GetServer();
 	if(sv == nullptr) {
-		Con::cwar << "No server is active!" << Con::endl;
+		Con::CWAR << "No server is active!" << Con::endl;
 		return;
 	}
 	if(argv.size() > 0) {
 		auto numBacklog = pragma::string::to_int(argv.front());
 		sv->SetMemoryCount(numBacklog);
-		Con::cout << "Debug backlog has been set to " << numBacklog << Con::endl;
+		Con::COUT << "Debug backlog has been set to " << numBacklog << Con::endl;
 		return;
 	}
 	auto *svMap = pragma::networking::get_server_message_map();

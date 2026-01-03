@@ -8,7 +8,6 @@ import :entities.components.origin;
 
 using namespace pragma;
 
-ComponentEventId originComponent::EVENT_ON_ORIGIN_CHANGED = INVALID_COMPONENT_ID;
 void OriginComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { originComponent::EVENT_ON_ORIGIN_CHANGED = registerEvent("ON_ORIGIN_CHANGED", ComponentEventInfo::Type::Explicit); }
 void OriginComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {

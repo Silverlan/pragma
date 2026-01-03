@@ -8,7 +8,6 @@ import :entities.components.base_observer;
 
 using namespace pragma;
 
-ComponentEventId baseObserverComponent::EVENT_ON_OBSERVATION_MODE_CHANGED = INVALID_COMPONENT_ID;
 void BaseObserverComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { baseObserverComponent::EVENT_ON_OBSERVATION_MODE_CHANGED = registerEvent("ON_OBSERVATION_MODE_CHANGED", ComponentEventInfo::Type::Broadcast); }
 
 BaseObserverComponent::BaseObserverComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent), m_obsMode(util::TEnumProperty<ObserverMode>::Create(ObserverMode::FirstPerson)) {}

@@ -45,14 +45,14 @@ void pragma::ClientState::HandleClientResource(NetPacket &packet)
 
 	fs::create_path(fileDst.substr(0, fileDst.find_last_of('\\')));
 	auto size = packet->Read<UInt64>();
-	Con::ccl << "Downloading file '" << file << "' (" << util::get_pretty_bytes(size) << ")..." << Con::endl;
+	Con::CCL << "Downloading file '" << file << "' (" << util::get_pretty_bytes(size) << ")..." << Con::endl;
 	auto f = pragma::fs::open_file(file.c_str(), fs::FileMode::Read | fs::FileMode::Binary); //,fs::SearchFlags::Local);
 	NetPacket response;
 	bool bSkip = false;
 	if(f != nullptr) {
 		if(f->GetSize() == size) {
 			bSkip = true;
-			Con::ccl << "File '" << file << "' doesn't differ from server's. Skipping..." << Con::endl;
+			Con::CCL << "File '" << file << "' doesn't differ from server's. Skipping..." << Con::endl;
 			f.reset();
 			response->Write<bool>(false);
 		}
@@ -64,7 +64,7 @@ void pragma::ClientState::HandleClientResource(NetPacket &packet)
 	if(!bSkip) {
 		if(f == nullptr) {
 			response->Write<bool>(false);
-			Con::cwar << Con::PREFIX_CLIENT << "[ResourceManager] Unable to write file '" << fileDst << "'. Skipping..." << Con::endl;
+			Con::CWAR << Con::PREFIX_CLIENT << "[ResourceManager] Unable to write file '" << fileDst << "'. Skipping..." << Con::endl;
 		}
 		else {
 			response->Write<bool>(true);
@@ -86,7 +86,7 @@ void pragma::ClientState::HandleClientResourceFragment(NetPacket &packet)
 	f->Write(buf.data(), read);
 	NetPacket resourceReq;
 #if RESOURCE_TRANSFER_VERBOSE == 1
-	Con::ccl << "[ResourceManager] " << ((f->Tell() / float(res->size)) * 100) << "%" << Con::endl;
+	Con::CCL << "[ResourceManager] " << ((f->Tell() / float(res->size)) * 100) << "%" << Con::endl;
 #endif
 	if(read < RESOURCE_TRANSFER_FRAGMENT_SIZE) {
 		auto resName = res->name;
@@ -95,9 +95,9 @@ void pragma::ClientState::HandleClientResourceFragment(NetPacket &packet)
 		resourceReq->Write<bool>(true);
 
 		if((fs::exists(resName.c_str()) == true && fs::remove_file(resName) == false) || fs::rename_file((resName + ".part"), resName) == false)
-			Con::ccl << "File '" << (resName + ".part") << "' successfully received, but unable to rename to '" << resName << "'... Requesting next..." << Con::endl;
+			Con::CCL << "File '" << (resName + ".part") << "' successfully received, but unable to rename to '" << resName << "'... Requesting next..." << Con::endl;
 		else
-			Con::ccl << "File '" << resName << "' successfully received... Requesting next..." << Con::endl;
+			Con::CCL << "File '" << resName << "' successfully received... Requesting next..." << Con::endl;
 	}
 	else
 		resourceReq->Write<bool>(false);

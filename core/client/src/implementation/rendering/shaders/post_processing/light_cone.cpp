@@ -10,7 +10,7 @@ import :rendering.shaders.pp_light_cone;
 
 using namespace pragma;
 
-decltype(ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE) ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE = {shaderPPBase::DESCRIPTOR_SET_TEXTURE};
+decltype(ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE) ShaderPPLightCone::DESCRIPTOR_SET_TEXTURE = {shaderPPBase::get_descriptor_set_texture()};
 decltype(ShaderPPLightCone::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPLightCone::DESCRIPTOR_SET_DEPTH_BUFFER = {
   "DEPTH_BUFFER",
   {prosper::DescriptorSetInfo::Binding {"MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},

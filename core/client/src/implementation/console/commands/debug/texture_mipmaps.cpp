@@ -12,22 +12,22 @@ import :console.commands;
 static void debug_font(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
-		Con::cout << "Available fonts:" << Con::endl;
+		Con::COUT << "Available fonts:" << Con::endl;
 		auto &fonts = pragma::gui::FontManager::GetFonts();
 		for(auto &pair : fonts)
-			Con::cout << pair.first << Con::endl;
-		Con::cout << Con::endl;
+			Con::COUT << pair.first << Con::endl;
+		Con::COUT << Con::endl;
 		return;
 	}
 	auto &fontName = argv.front();
 	auto font = pragma::gui::FontManager::GetFont(fontName);
 	if(font == nullptr) {
-		Con::cout << "No font by that name found!" << Con::endl;
+		Con::COUT << "No font by that name found!" << Con::endl;
 		return;
 	}
 	auto glyphMap = font->GetGlyphMap();
 	if(glyphMap == nullptr) {
-		Con::cout << "Font has invalid glyph map!" << Con::endl;
+		Con::COUT << "Font has invalid glyph map!" << Con::endl;
 		return;
 	}
 	uint32_t width = glyphMap->GetImage().GetWidth();
@@ -39,7 +39,7 @@ static void debug_font(pragma::NetworkState *, pragma::BasePlayerComponent *, st
 			height = pragma::util::to_int(argv[2]);
 	}
 	if(width == 0 || height == 0) {
-		Con::cout << "Invalid resolution: " << width << "x" << height << Con::endl;
+		Con::COUT << "Invalid resolution: " << width << "x" << height << Con::endl;
 		return;
 	}
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
@@ -63,7 +63,7 @@ namespace {
 static void debug_texture_mipmaps(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
-		Con::cwar << "No texture given!" << Con::endl;
+		Con::CWAR << "No texture given!" << Con::endl;
 		return;
 	}
 	auto &texPath = argv.front();
@@ -78,12 +78,12 @@ static void debug_texture_mipmaps(pragma::NetworkState *, pragma::BasePlayerComp
 		auto *asset = materialManager.FindCachedAsset(texPath);
 		auto mat = asset ? pragma::material::CMaterialManager::GetAssetObject(*asset) : nullptr;
 		if(!mat) {
-			Con::cwar << "No material with name '" << texPath << "' found or loaded!" << Con::endl;
+			Con::CWAR << "No material with name '" << texPath << "' found or loaded!" << Con::endl;
 			return;
 		}
 		auto *diffuseMap = mat->GetDiffuseMap();
 		if(diffuseMap == nullptr || diffuseMap->texture == nullptr || static_cast<pragma::material::Texture *>(diffuseMap->texture.get())->HasValidVkTexture() == false) {
-			Con::cwar << "Material '" << texPath << "' has no valid albedo map!" << Con::endl;
+			Con::CWAR << "Material '" << texPath << "' has no valid albedo map!" << Con::endl;
 			return;
 		}
 		texture = std::static_pointer_cast<pragma::material::Texture>(diffuseMap->texture);
@@ -92,13 +92,13 @@ static void debug_texture_mipmaps(pragma::NetworkState *, pragma::BasePlayerComp
 	if(dbg == nullptr) {
 		auto &vkTexture = texture->GetVkTexture();
 		auto numMipmaps = vkTexture->GetImage().GetMipmapCount();
-		Con::cout << "Mipmap count for '" << texPath << "': " << numMipmaps << Con::endl;
+		Con::COUT << "Mipmap count for '" << texPath << "': " << numMipmaps << Con::endl;
 		auto &path = texture->GetFilePath();
 		if(path.has_value())
-			Con::cout << "File path: " << *path << Con::endl;
+			Con::COUT << "File path: " << *path << Con::endl;
 		auto type = texture->GetFileFormatType();
 		if(type != pragma::material::TextureType::Invalid)
-			Con::cout << "File image type: " << magic_enum::enum_name(type) << Con::endl;
+			Con::COUT << "File image type: " << magic_enum::enum_name(type) << Con::endl;
 		dbg = std::make_unique<DebugGameGUI>([vkTexture]() {
 			auto &wgui = pragma::gui::WGUI::GetInstance();
 			auto *r = wgui.Create<pragma::gui::types::WIDebugMipMaps>();

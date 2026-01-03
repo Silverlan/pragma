@@ -181,7 +181,7 @@ Bool SBaseEntity::ReceiveNetEvent(pragma::BasePlayerComponent &pl, pragma::NetEv
 		if(pNetComponent->ReceiveNetEvent(pl, eventId, packet))
 			return true;
 	}
-	Con::cwar << Con::PREFIX_SERVER << "Unhandled net event '" << eventId << "' for entity " << GetClass() << Con::endl;
+	Con::CWAR << Con::PREFIX_SERVER << "Unhandled net event '" << eventId << "' for entity " << GetClass() << Con::endl;
 	return false;
 }
 

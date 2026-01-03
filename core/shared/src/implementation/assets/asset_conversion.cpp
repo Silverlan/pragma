@@ -19,7 +19,7 @@ static std::shared_ptr<pragma::util::Library> load_module(pragma::NetworkState *
 			static auto bPrintError = true;
 			if(bPrintError == true) {
 				bPrintError = false;
-				Con::cwar << "Unable to load pr_mount_external module: " << err << Con::endl;
+				Con::CWAR << "Unable to load pr_mount_external module: " << err << Con::endl;
 			}
 			return nullptr;
 		}
@@ -70,7 +70,7 @@ static bool port_model(pragma::NetworkState *nw, const std::string &path, std::s
 		return false;
 	//if(fs::exists(path +mdlName) == false) // Could be in bsa archive
 	//	return false;
-	//Con::cout<<"Found "<<formatName<<" Model '"<<(path +mdlName)<<"', attempting to port..."<<Con::endl;
+	//Con::COUT<<"Found "<<formatName<<" Model '"<<(path +mdlName)<<"', attempting to port..."<<Con::endl;
 	ufile::remove_extension_from_filename(mdlName, pragma::asset::get_supported_extensions(pragma::asset::Type::Model, pragma::asset::FormatType::All));
 	auto *game = nw->GetGameState();
 	auto fcreateModel = static_cast<std::shared_ptr<pragma::asset::Model> (pragma::Game::*)(bool) const>(&pragma::Game::CreateModel);
@@ -89,14 +89,14 @@ static bool port_model(pragma::NetworkState *nw, const std::string &path, std::s
 			     return false;
 		     auto f = pragma::fs::open_file<pragma::fs::VFilePtrReal>((pragma::util::CONVERT_PATH + "models/" + outPath).c_str(), pragma::fs::FileMode::Write | pragma::fs::FileMode::Binary);
 		     if(f == nullptr) {
-			     Con::cwar << "Unable to save model '" << outPath << "': Unable to open file!" << Con::endl;
+			     Con::CWAR << "Unable to save model '" << outPath << "': Unable to open file!" << Con::endl;
 			     return false;
 		     }
 		     mdl->ApplyPostImportProcessing();
 		     auto udmData = udm::Data::Create();
 		     std::string err;
 		     if(mdl->Save(*game, udmData->GetAssetData(), err) == false) {
-			     Con::cwar << "Unable to save model '" << outPath << "': " << err << Con::endl;
+			     Con::CWAR << "Unable to save model '" << outPath << "': " << err << Con::endl;
 			     return false;
 		     }
 		     auto r = udmData->Save(f);
@@ -104,7 +104,7 @@ static bool port_model(pragma::NetworkState *nw, const std::string &path, std::s
 			     pragma::fs::update_file_index_cache("models/" + outPath);
 		     r = r ? pragma::fs::exists(pragma::util::CONVERT_PATH + "models/" + outPath) : false;
 		     if(r == true)
-			     Con::cout << "Successfully ported " << formatName << " Model '" << (path + mdlName) << "' and saved it as '" << outPath << "'!" << Con::endl;
+			     Con::COUT << "Successfully ported " << formatName << " Model '" << (path + mdlName) << "' and saved it as '" << outPath << "'!" << Con::endl;
 		     return r;
 	     },
 	     path, mdlName, &std::cout)

@@ -10,6 +10,7 @@ export import :entities.base_entity_handle;
 
 export import :types;
 export import pragma.udm;
+import util_zip;
 
 export {
 	namespace pragma::util {
@@ -43,5 +44,6 @@ export {
 		DLLNETWORK std::vector<Path> get_resource_dirs();
 
 		DLLNETWORK bool show_notification(const std::string &summary, const std::string &body);
+		DLLNETWORK bool add_file_to_zip_archive(uzip::ZIPFile &zipArchive, const std::string &fileName, const void *data, uint64_t size, bool bOverwrite = true);
 	};
 };

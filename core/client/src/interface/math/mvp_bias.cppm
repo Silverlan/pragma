@@ -60,7 +60,7 @@ export namespace pragma::math {
 		virtual void UpdateTransformationMatrix(unsigned int j) override
 		{
 			MVPBase<i>::UpdateTransformationMatrix(j);
-			m_matBiasTransformation[j] = umat::BIAS * MVPBase<i>::m_matTransformation[j];
+			m_matBiasTransformation[j] = umat::PRM_BIAS * MVPBase<i>::m_matTransformation[j];
 		}
 	  public:
 		Mat4 &GetBiasTransformationMatrix() { return m_matBiasTransformation[0]; }

@@ -19,7 +19,6 @@ bool FlexMergeComponent::can_merge(const asset::Model &mdl, const asset::Model &
 	return false;
 }
 
-ComponentEventId flexMergeComponent::EVENT_ON_TARGET_CHANGED = INVALID_COMPONENT_ID;
 void FlexMergeComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { flexMergeComponent::EVENT_ON_TARGET_CHANGED = registerEvent("ON_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void FlexMergeComponent::RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {

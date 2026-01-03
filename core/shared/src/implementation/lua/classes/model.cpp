@@ -1274,7 +1274,7 @@ void Lua::Model::register_class(lua::State *l, luabind::class_<pragma::asset::Mo
 		  };
 		  for(auto &[boneId, bone] : skeleton.GetRootBones())
 			  printBone("", *bone);
-		  Con::cout << ss.str() << Con::endl;
+		  Con::COUT << ss.str() << Con::endl;
 	  });
 	classDefSkeleton.def("GetBone", &Skeleton::GetBone);
 	classDefSkeleton.def("GetRootBones", &Skeleton::GetRootBones);

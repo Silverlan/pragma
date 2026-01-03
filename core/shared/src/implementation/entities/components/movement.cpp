@@ -7,7 +7,7 @@ module pragma.shared;
 import :entities.components.movement;
 
 using namespace pragma;
-ComponentEventId movementComponent::EVENT_ON_UPDATE_MOVEMENT = INVALID_COMPONENT_ID;
+
 void MovementComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseEntityComponent::RegisterEvents(componentManager, registerEvent);
@@ -137,9 +137,9 @@ bool MovementComponent::UpdateMovement()
 
 	auto pSubmergibleComponent = ent.GetComponent<SubmergibleComponent>();
 	auto bSubmerged = (pSubmergibleComponent.valid() && pSubmergibleComponent->GetSubmergedFraction() > 0.5f) ? true : false;
-	Vector3 axisForward = uvec::FORWARD;
-	Vector3 axisRight = uvec::RIGHT;
-	Vector3 axisUp = uvec::UP;
+	Vector3 axisForward = uvec::PRM_FORWARD;
+	Vector3 axisRight = uvec::PRM_RIGHT;
+	Vector3 axisUp = uvec::PRM_UP;
 	auto viewRot = uquat::identity();
 	if(m_orientationComponent) {
 		m_orientationComponent->GetOrientationAxes(&axisForward, &axisRight, &axisUp);
@@ -158,7 +158,7 @@ bool MovementComponent::UpdateMovement()
 	Vector3 right = uquat::right(rot);
 	if(mv == physics::MoveType::Walk && bSubmerged == false) {
 		// No movement on up-axis
-		auto upDir = uvec::UP;
+		auto upDir = uvec::PRM_UP;
 		if(m_orientationComponent)
 			upDir = m_orientationComponent->GetUpDirection();
 		auto angle = uvec::dot(forward, upDir);
@@ -245,9 +245,9 @@ bool MovementComponent::UpdateMovement()
 			frictionVel = uvec::project_to_plane(frictionVel, *contactNormal, 0.f);
 		auto frictionForce = -frictionVel * friction;
 		//if(ent.IsPlayer())
-		//	Con::cout<<"Player friction: "<<friction<<Con::endl;
+		//	Con::COUT<<"Player friction: "<<friction<<Con::endl;
 		//else
-		//	Con::cout<<"NPC friction: "<<friction<<Con::endl;
+		//	Con::COUT<<"NPC friction: "<<friction<<Con::endl;
 
 		vel += frictionForce * math::min(tDelta * acceleration, 1.f);
 	}
@@ -290,7 +290,7 @@ bool MovementComponent::UpdateMovement()
 
 	// Calculate sideways movement speed (NPC animation movement only)
 	if(speed.y != 0.f) {
-		auto dirRight = (uvec::length_sqr(dir) > 0.99f) ? uvec::cross(dir, pTrComponent ? pTrComponent->GetUp() : uvec::UP) : (pTrComponent ? pTrComponent->GetRight() : uvec::RIGHT);
+		auto dirRight = (uvec::length_sqr(dir) > 0.99f) ? uvec::cross(dir, pTrComponent ? pTrComponent->GetUp() : uvec::PRM_UP) : (pTrComponent ? pTrComponent->GetRight() : uvec::PRM_RIGHT);
 		auto speedDir = glm::dot(dirRight, vel);
 		if(speedDir < math::abs(speed.y)) {
 			auto speedDelta = speed.y - speedDir;

@@ -14,7 +14,7 @@ export import :entities.parent_info;
 export {
 	namespace pragma {
 		namespace baseAttachmentComponent {
-			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ATTACHMENT_UPDATE;
+			REGISTER_COMPONENT_EVENT(EVENT_ON_ATTACHMENT_UPDATE);
 		}
 		class DLLNETWORK BaseAttachmentComponent : public BaseEntityComponent {
 		  public:

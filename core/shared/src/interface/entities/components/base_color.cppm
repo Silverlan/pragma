@@ -17,7 +17,7 @@ export namespace pragma {
 		const Vector4 &color;
 	};
 	namespace baseColorComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_COLOR_CHANGED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_COLOR_CHANGED)
 	}
 	class DLLNETWORK BaseColorComponent : public BaseEntityComponent {
 	  public:

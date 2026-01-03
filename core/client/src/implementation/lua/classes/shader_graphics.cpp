@@ -492,10 +492,7 @@ void Lua::GraphicsPipelineCreateInfo::SetSampleMaskEnabled(lua::State *l, prospe
 void Lua::GraphicsPipelineCreateInfo::SetSampleShadingEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, bool bEnabled) { pipelineInfo.ToggleSampleShading(bEnabled); }
 void Lua::GraphicsPipelineCreateInfo::SetStencilTestEnabled(lua::State *l, prosper::GraphicsPipelineCreateInfo &pipelineInfo, bool bEnabled) { pipelineInfo.ToggleStencilTest(bEnabled); }
 
-void Lua::Shader::Graphics::RecordBindVertexBuffer(lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Vulkan::Buffer &buffer, uint32_t startBinding, uint32_t offset)
-{
-	PushBool(l, shader.RecordBindVertexBuffer(bindState, buffer, startBinding, offset));
-}
+void Lua::Shader::Graphics::RecordBindVertexBuffer(lua::State *l, prosper::ShaderGraphics &shader, prosper::ShaderBindState &bindState, Vulkan::Buffer &buffer, uint32_t startBinding, uint32_t offset) { PushBool(l, shader.RecordBindVertexBuffer(bindState, buffer, startBinding, offset)); }
 void Lua::Shader::Graphics::RecordBindVertexBuffers(lua::State *l, prosper::ShaderGraphics &shader, const LuaShaderRecordTarget &recordTarget, luabind::object buffers, uint32_t startBinding, luabind::object offsets)
 {
 	auto vBuffers = Lua::get_table_values<prosper::IBuffer *>(l, 3, [](lua::State *l, int32_t idx) { return &Lua::Check<Vulkan::Buffer>(l, idx); });

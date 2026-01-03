@@ -8,8 +8,6 @@ import :entities.components.parent;
 
 using namespace pragma;
 
-ComponentEventId parentComponent::EVENT_ON_CHILD_ADDED = INVALID_COMPONENT_ID;
-ComponentEventId parentComponent::EVENT_ON_CHILD_REMOVED = INVALID_COMPONENT_ID;
 void ParentComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	parentComponent::EVENT_ON_CHILD_ADDED = registerEvent("ON_CHILD_ADDED", ComponentEventInfo::Type::Broadcast);

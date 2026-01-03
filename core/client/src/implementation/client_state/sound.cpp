@@ -51,38 +51,38 @@ static void debug_audio_sounds(pragma::NetworkState *state, pragma::BasePlayerCo
 {
 	const auto fPrint = [](pragma::NetworkState *state) {
 		auto &sounds = state->GetSounds();
-		Con::cout << "Number of sounds: " << sounds.size() << Con::endl;
+		Con::COUT << "Number of sounds: " << sounds.size() << Con::endl;
 		for(auto &rsnd : sounds) {
 			auto &snd = rsnd.get();
-			Con::cout << " - " << &snd;
+			Con::COUT << " - " << &snd;
 			if(state->IsClient()) {
 				auto *buf = static_cast<pragma::audio::CALSound &>(snd)->GetBuffer();
-				Con::cout << " (File: " << ((buf != nullptr) ? buf->GetFilePath() : "Unknown") << ")";
+				Con::COUT << " (File: " << ((buf != nullptr) ? buf->GetFilePath() : "Unknown") << ")";
 			}
 			auto *src = snd.GetSource();
 			if(src != nullptr)
-				Con::cout << " (Source: " << *src << ")" << Con::endl;
-			Con::cout << " (State: ";
+				Con::COUT << " (Source: " << *src << ")" << Con::endl;
+			Con::COUT << " (State: ";
 			if(snd.IsPlaying() == true)
-				Con::cout << "Playing";
+				Con::COUT << "Playing";
 			else if(snd.IsPaused() == true)
-				Con::cout << "Paused";
+				Con::COUT << "Paused";
 			else if(snd.IsStopped() == true)
-				Con::cout << "Stopped";
+				Con::COUT << "Stopped";
 			else
-				Con::cout << "Unknown";
-			Con::cout << ") (Offset: " << snd.GetTimeOffset() << " / " << snd.GetDuration() << ") (Gain: " << snd.GetGain() << ") (Pitch: " << snd.GetPitch() << ") (Looping: " << snd.IsLooping() << ") (Relative: " << snd.IsRelative() << ") (Pos: " << snd.GetPosition()
+				Con::COUT << "Unknown";
+			Con::COUT << ") (Offset: " << snd.GetTimeOffset() << " / " << snd.GetDuration() << ") (Gain: " << snd.GetGain() << ") (Pitch: " << snd.GetPitch() << ") (Looping: " << snd.IsLooping() << ") (Relative: " << snd.IsRelative() << ") (Pos: " << snd.GetPosition()
 			          << ") (Vel: " << snd.GetVelocity() << ")" << Con::endl;
 		}
 	};
 	auto *server = pragma::get_cengine()->GetServerNetworkState();
 	if(server != nullptr) {
-		Con::cout << "Serverside sounds:" << Con::endl;
+		Con::COUT << "Serverside sounds:" << Con::endl;
 		fPrint(server);
 	}
 	auto *client = pragma::get_client_state();
 	if(client != nullptr) {
-		Con::cout << "Clientside sounds:" << Con::endl;
+		Con::COUT << "Clientside sounds:" << Con::endl;
 		fPrint(client);
 	}
 }

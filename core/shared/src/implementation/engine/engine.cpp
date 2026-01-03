@@ -187,7 +187,7 @@ void pragma::Engine::SetReplicatedConVar(const std::string &cvar, const std::str
 	auto flags = client->GetConVarFlags(cvar);
 	if((flags & console::ConVarFlags::Notify) == console::ConVarFlags::Notify)
 		spdlog::info("ConVar '{}' has been changed to '{}'", cvar, val);
-	//Con::cout<<"ConVar '"<<cvar<<"' has been changed to '"<<val<<"'"<<Con::endl;
+	//Con::COUT<<"ConVar '"<<cvar<<"' has been changed to '"<<val<<"'"<<Con::endl;
 	if((flags & console::ConVarFlags::Replicated) == console::ConVarFlags::None)
 		return;
 	client->SetConVar(cvar, val);
@@ -312,7 +312,7 @@ void pragma::Engine::Close()
 		cmdInfo.absoluteCommandPath = false;
 		cmdInfo.args.push_back("-executable=" + util::get_program_name());
 		if(!pragma::util::start_process(cmdInfo))
-			Con::cwar << "Failed to launch updater '" << processPath << "'! Please execute manually to install update." << Con::endl;
+			Con::CWAR << "Failed to launch updater '" << processPath << "'! Please execute manually to install update." << Con::endl;
 	}
 
 	// Cancel all running jobs, then wait until
@@ -503,7 +503,7 @@ void pragma::Engine::ClearCache()
 	std::this_thread::sleep_for(std::chrono::milliseconds {500});
 	// The addon system needs to be informed right away, to make sure the new directories are re-mounted
 	AddonSystem::Poll();
-	Con::cout << "Cache cleared successfully! Please restart the Engine." << Con::endl;
+	Con::COUT << "Cache cleared successfully! Please restart the Engine." << Con::endl;
 }
 
 pragma::NetworkState *pragma::Engine::GetServerNetworkState() const
@@ -591,12 +591,12 @@ void pragma::Engine::UpdateParallelJobs()
 		}
 		if((t - jobInfo.lastNotification) >= jobInfo.notificationFrequency) {
 			auto percent = progress * 100.f;
-			Con::cout << "Progress of worker '" << jobInfo.name << "' at " << math::floor(percent) << "%.";
+			Con::COUT << "Progress of worker '" << jobInfo.name << "' at " << math::floor(percent) << "%.";
 			if(jobInfo.timeRemaining.has_value()) {
 				auto msgDur = util::get_pretty_duration(*jobInfo.timeRemaining * std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds {1}).count());
-				Con::cout << " Approximately " << msgDur << " remaining!";
+				Con::COUT << " Approximately " << msgDur << " remaining!";
 			}
-			Con::cout << Con::endl;
+			Con::COUT << Con::endl;
 			jobInfo.lastNotification = t;
 		}
 
@@ -705,13 +705,13 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	}
 
 #if 0
-	Con::cout<<"----- Logger test -----"<<Con::endl;
-	Con::cout<<"cout output"<<Con::endl;
-	Con::cwar<<"cwar output"<<Con::endl;
-	Con::cerr<<"cerr output"<<Con::endl;
-	Con::crit<<"crit output"<<Con::endl;
-	Con::csv<<"csv output"<<Con::endl;
-	Con::ccl<<"ccl output"<<Con::endl;
+	Con::COUT<<"----- Logger test -----"<<Con::endl;
+	Con::COUT<<"cout output"<<Con::endl;
+	Con::CWAR<<"cwar output"<<Con::endl;
+	Con::CERR<<"cerr output"<<Con::endl;
+	Con::CRIT<<"crit output"<<Con::endl;
+	Con::CSV<<"csv output"<<Con::endl;
+	Con::CCL<<"ccl output"<<Con::endl;
 
 	spdlog::trace("trace log");
 	spdlog::debug("debug log");
@@ -719,7 +719,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	spdlog::warn("warn log");
 	spdlog::error("error log");
 	spdlog::critical("critical log");
-	Con::cout<<"----- Logger test -----"<<Con::endl;
+	Con::COUT<<"----- Logger test -----"<<Con::endl;
 	spdlog::default_logger()->flush();
 #endif
 

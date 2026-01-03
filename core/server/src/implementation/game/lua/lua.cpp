@@ -85,10 +85,9 @@ void pragma::SGame::RegisterLua()
 
 	}));
 	defEntCmp.def("SendNetEvent",
-	  static_cast<void (*)(lua::State *, SLuaBaseEntityComponent &, uint32_t, uint32_t, NetPacket &, networking::TargetRecipientFilter &)>(
-	    [](lua::State *l, SLuaBaseEntityComponent &hComponent, uint32_t protocol, uint32_t eventId, NetPacket &packet, networking::TargetRecipientFilter &rf) {
-		    static_cast<SBaseEntity &>(hComponent.GetEntity()).SendNetEvent(eventId, packet, static_cast<networking::Protocol>(protocol), rf);
-	    }));
+	  static_cast<void (*)(lua::State *, SLuaBaseEntityComponent &, uint32_t, uint32_t, NetPacket &, networking::TargetRecipientFilter &)>([](lua::State *l, SLuaBaseEntityComponent &hComponent, uint32_t protocol, uint32_t eventId, NetPacket &packet, networking::TargetRecipientFilter &rf) {
+		  static_cast<SBaseEntity &>(hComponent.GetEntity()).SendNetEvent(eventId, packet, static_cast<networking::Protocol>(protocol), rf);
+	  }));
 	defEntCmp.def("SendNetEvent", static_cast<void (*)(lua::State *, SLuaBaseEntityComponent &, uint32_t, uint32_t, NetPacket &)>([](lua::State *l, SLuaBaseEntityComponent &hComponent, uint32_t protocol, uint32_t eventId, NetPacket &packet) {
 		static_cast<SBaseEntity &>(hComponent.GetEntity()).SendNetEvent(eventId, packet, static_cast<networking::Protocol>(protocol));
 	}));
@@ -103,8 +102,8 @@ void pragma::SGame::RegisterLua()
 	auto modNet = luabind::module(GetLuaState(), "net");
 	modNet[(luabind::def("broadcast", &Lua::net::server::broadcast), luabind::def("send", static_cast<void (*)(lua::State *, networking::Protocol, const std::string &, NetPacket &, const luabind::tableT<SPlayerComponent> &)>(&Lua::net::server::send)),
 	  luabind::def("send", static_cast<void (*)(lua::State *, networking::Protocol, const std::string &, NetPacket &, networking::TargetRecipientFilter &)>(&Lua::net::server::send)),
-	  luabind::def("send", static_cast<void (*)(lua::State *, networking::Protocol, const std::string &, NetPacket &, SPlayerComponent &)>(&Lua::net::server::send)), luabind::def("receive", &Lua::net::server::receive),
-	  luabind::def("register", &Lua::net::server::register_net_message), luabind::def("register_event", &Lua::net::register_event))];
+	  luabind::def("send", static_cast<void (*)(lua::State *, networking::Protocol, const std::string &, NetPacket &, SPlayerComponent &)>(&Lua::net::server::send)), luabind::def("receive", &Lua::net::server::receive), luabind::def("register", &Lua::net::server::register_net_message),
+	  luabind::def("register_event", &Lua::net::register_event))];
 	auto netPacketClassDef = luabind::class_<NetPacket>("Packet");
 	Lua::NetPacket::Server::register_class(netPacketClassDef);
 	netPacketClassDef.def("WritePlayer", static_cast<void (*)(lua::State *, NetPacket &, util::WeakHandle<SPlayerComponent> &)>([](lua::State *l, NetPacket &packet, util::WeakHandle<SPlayerComponent> &pl) { networking::write_player(packet, pl.get()); }));
@@ -181,8 +180,8 @@ bool pragma::SGame::LoadLuaComponent(const std::string &luaFilePath, const std::
 	auto componentPath = Lua::SCRIPT_DIRECTORY_SLASH + mainPath + "\\components\\" + nComponentName;
 	auto filePathLuaFile = componentPath + "\\init" + Lua::DOT_FILE_EXTENSION;
 	if(fs::exists(filePathLuaFile))
-		return r;                                                                                               // init.lua is in main component directory, which means no network directories are used. In this case files that need to be transferred cannot be determined automatically.
-	std::vector<std::string> transferFiles;                                                                     // Files which need to be transferred to the client
+		return r;                                                                               // init.lua is in main component directory, which means no network directories are used. In this case files that need to be transferred cannot be determined automatically.
+	std::vector<std::string> transferFiles;                                                     // Files which need to be transferred to the client
 	fs::find_files((componentPath + "\\*" + Lua::DOT_FILE_EXTENSION), &transferFiles, nullptr); // Shared Files
 	if(Lua::are_precompiled_files_enabled())
 		fs::find_files((componentPath + "\\*" + Lua::DOT_FILE_EXTENSION_PRECOMPILED), &transferFiles, nullptr);

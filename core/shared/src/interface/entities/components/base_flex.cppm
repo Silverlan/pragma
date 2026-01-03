@@ -16,7 +16,7 @@ export {
 			class Model;
 		}
 		namespace baseFlexComponent {
-			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_FLEX_CONTROLLER_CHANGED;
+			REGISTER_COMPONENT_EVENT(EVENT_ON_FLEX_CONTROLLER_CHANGED)
 		}
 		class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicMemberRegister {
 		  public:

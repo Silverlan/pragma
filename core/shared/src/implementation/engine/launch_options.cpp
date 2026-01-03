@@ -192,7 +192,7 @@ DLLNETWORK void LPARAM_help(const std::vector<std::string> &argv)
 	auto *map = pragma::GetLaunchParaMap();
 	if(map == nullptr)
 		return;
-	Con::cout << "Available parameters:" << Con::endl << map->LAUNCHPARAMETERS_HELP.str() << Con::endl;
+	Con::COUT << "Available parameters:" << Con::endl << map->LAUNCHPARAMETERS_HELP.str() << Con::endl;
 }
 
 DLLNETWORK std::optional<std::string> g_customTitle {};

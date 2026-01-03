@@ -99,7 +99,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		largestWidth = math::max(largestWidth, extents.width);
 		largestHeight = math::max(largestHeight, extents.height);
 	}
-	Con::cout << "Found individual skybox textures for skybox '" << materialPath << "'! Generating cubemap texture..." << Con::endl;
+	Con::COUT << "Found individual skybox textures for skybox '" << materialPath << "'! Generating cubemap texture..." << Con::endl;
 
 	// Merge textures into cubemap image
 
@@ -211,21 +211,21 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	auto fullPath = "addons/converted/materials/" + matName;
 	auto szPerPixel = prosper::util::get_byte_size(prosper::Format::R8G8B8A8_UNorm);
 	if(get_cgame()->SaveImage(ptrCubemapBuffers, largestWidth, largestHeight, szPerPixel, fullPath, imgWriteInfo, true)) {
-		Con::cout << "Skybox cubemap texture saved as '" << fullPath << "'! Generating material..." << Con::endl;
+		Con::COUT << "Skybox cubemap texture saved as '" << fullPath << "'! Generating material..." << Con::endl;
 		auto mat = get_client_state()->CreateMaterial("skybox");
 		mat->SetTextureProperty("skybox", matName);
 		auto savePath = pragma::asset::relative_path_to_absolute_path(matName, asset::Type::Material, util::CONVERT_PATH);
 		std::string err;
 		if(mat->Save(savePath.GetString(), err, true)) {
 			get_client_state()->LoadMaterial(matName, nullptr, true, true);
-			Con::cout << "Skybox material saved as '" << (matName + ".wmi") << "'" << Con::endl;
+			Con::COUT << "Skybox material saved as '" << (matName + ".wmi") << "'" << Con::endl;
 			return true;
 		}
 		else
-			Con::cwar << "Unable to save skybox material as '" << (matName + ".wmi") << "': " << err << "!" << Con::endl;
+			Con::CWAR << "Unable to save skybox material as '" << (matName + ".wmi") << "': " << err << "!" << Con::endl;
 	}
 	else
-		Con::cwar << "Unable to save skybox cubemap texture as '" << fullPath << "'!" << Con::endl;
+		Con::CWAR << "Unable to save skybox cubemap texture as '" << fullPath << "'!" << Con::endl;
 	return false;
 }
 void CSkyboxComponent::ValidateMaterials()
@@ -320,26 +320,26 @@ enum class ConversionMode : uint8_t { CubemapToEquirectangular = 0, Equirectangu
 static void util_convert_cubemap_equirect(std::vector<std::string> &argv, ConversionMode conversionMode)
 {
 	if(argv.empty()) {
-		Con::cwar << "No image path has been specified!" << Con::endl;
+		Con::CWAR << "No image path has been specified!" << Con::endl;
 		return;
 	}
 	auto &fileName = argv.front();
 	auto assetFileName = pragma::asset::find_file(argv.front(), asset::Type::Texture);
 	if(!assetFileName.has_value()) {
-		Con::cwar << "Failed to locate texture file for '" << *assetFileName << "'!" << Con::endl;
+		Con::CWAR << "Failed to locate texture file for '" << *assetFileName << "'!" << Con::endl;
 		return;
 	}
 
 	std::string absPath;
 	if(!fs::find_local_path("materials/" + *assetFileName, absPath)) {
-		Con::cwar << "Failed to determine absolute path for texture file '" << *assetFileName << "'!" << Con::endl;
+		Con::CWAR << "Failed to determine absolute path for texture file '" << *assetFileName << "'!" << Con::endl;
 		return;
 	}
 
 	auto &matMan = static_cast<material::CMaterialManager &>(get_client_state()->GetMaterialManager());
 	auto tex = matMan.GetTextureManager().LoadAsset(fileName, util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache);
 	if(!tex) {
-		Con::cwar << "Texture '" << fileName << "' could not be loaded!" << Con::endl;
+		Con::CWAR << "Texture '" << fileName << "' could not be loaded!" << Con::endl;
 		return;
 	}
 
@@ -355,7 +355,7 @@ static void util_convert_cubemap_equirect(std::vector<std::string> &argv, Conver
 	}
 
 	if(!vkTex) {
-		Con::cwar << "Invalid texture!" << Con::endl;
+		Con::CWAR << "Invalid texture!" << Con::endl;
 		return;
 	}
 
@@ -364,12 +364,12 @@ static void util_convert_cubemap_equirect(std::vector<std::string> &argv, Conver
 	if(conversionMode == ConversionMode::EquirectangularToCubemap) {
 		auto *shader = static_cast<ShaderEquirectangularToCubemap *>(get_cengine()->GetShader("equirectangular_to_cubemap").get());
 		if(!shader) {
-			Con::cwar << "Invalid shader!" << Con::endl;
+			Con::CWAR << "Invalid shader!" << Con::endl;
 			return;
 		}
 		auto texCubemap = shader->EquirectangularTextureToCubemap(*vkTex, 1'024);
 		if(!texCubemap) {
-			Con::cwar << "Conversion failed!" << Con::endl;
+			Con::CWAR << "Conversion failed!" << Con::endl;
 			return;
 		}
 		image::TextureInfo texInfo {};
@@ -377,21 +377,21 @@ static void util_convert_cubemap_equirect(std::vector<std::string> &argv, Conver
 		outputFileName += "_cubemap.dds";
 		auto res = prosper::util::save_texture(outputFileName.GetString(), texCubemap->GetImage(), texInfo);
 		if(!res) {
-			Con::cwar << "Failed to save output texture '" << outputFileName.GetString() << "'!" << Con::endl;
+			Con::CWAR << "Failed to save output texture '" << outputFileName.GetString() << "'!" << Con::endl;
 			return;
 		}
-		Con::cout << "Successfully saved output file '" << outputFileName.GetString() << "'!" << Con::endl;
+		Con::COUT << "Successfully saved output file '" << outputFileName.GetString() << "'!" << Con::endl;
 		return;
 	}
 
 	auto *shader = static_cast<ShaderCubemapToEquirectangular *>(get_cengine()->GetShader("cubemap_to_equirectangular").get());
 	if(!shader) {
-		Con::cwar << "Invalid shader!" << Con::endl;
+		Con::CWAR << "Invalid shader!" << Con::endl;
 		return;
 	}
 	auto texEqui = shader->CubemapToEquirectangularTexture(*vkTex);
 	if(!texEqui) {
-		Con::cwar << "Conversion failed!" << Con::endl;
+		Con::CWAR << "Conversion failed!" << Con::endl;
 		return;
 	}
 
@@ -399,7 +399,7 @@ static void util_convert_cubemap_equirect(std::vector<std::string> &argv, Conver
 	auto saveAsHdr = false;
 	auto imgBuf = texEqui->GetImage().ToHostImageBuffer(image::Format::RGBA16, prosper::ImageLayout::ShaderReadOnlyOptimal);
 	if(!imgBuf) {
-		Con::cwar << "Failed to generate host image buffer!" << Con::endl;
+		Con::CWAR << "Failed to generate host image buffer!" << Con::endl;
 		return;
 	}
 	if(saveAsHdr)
@@ -408,16 +408,16 @@ static void util_convert_cubemap_equirect(std::vector<std::string> &argv, Conver
 		outputFileName += "_equirect.png";
 	auto f = fs::open_file(outputFileName.GetString(), fs::FileMode::Write | fs::FileMode::Binary);
 	if(!f) {
-		Con::cwar << "Failed to open output file '" << outputFileName.GetString() << "'!" << Con::endl;
+		Con::CWAR << "Failed to open output file '" << outputFileName.GetString() << "'!" << Con::endl;
 		return;
 	}
 	fs::File fp {f};
 	auto res = image::save_image(fp, *imgBuf, saveAsHdr ? image::ImageFormat::HDR : image::ImageFormat::PNG);
 	if(!res) {
-		Con::cwar << "Failed to save output file '" << outputFileName.GetString() << "'!" << Con::endl;
+		Con::CWAR << "Failed to save output file '" << outputFileName.GetString() << "'!" << Con::endl;
 		return;
 	}
-	Con::cout << "Successfully saved output file '" << outputFileName.GetString() << "'!" << Con::endl;
+	Con::COUT << "Successfully saved output file '" << outputFileName.GetString() << "'!" << Con::endl;
 }
 static void util_convert_cubemap_to_equirectangular_image(NetworkState *state, BasePlayerComponent *pl, std::vector<std::string> &argv) { util_convert_cubemap_equirect(argv, ConversionMode::CubemapToEquirectangular); }
 static void util_convert_equirectangular_image_to_cubemap(NetworkState *state, BasePlayerComponent *pl, std::vector<std::string> &argv) { util_convert_cubemap_equirect(argv, ConversionMode::EquirectangularToCubemap); }

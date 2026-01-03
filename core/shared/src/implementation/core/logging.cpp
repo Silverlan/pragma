@@ -227,7 +227,6 @@ class SpdPragmaPrefixFormatter : public spdlog::custom_flag_formatter {
 };
 
 namespace pragma::logging::detail {
-	extern std::atomic<bool> shouldLogOutput;
 	extern std::shared_ptr<spdlog::logger> consoleOutputLogger;
 };
 static std::optional<std::string> g_logFileName = "log.txt";
@@ -241,7 +240,7 @@ void pragma::detail::close_logger()
 		return;
 	loggerClosed = true;
 
-	logging::detail::shouldLogOutput = false;
+	logging::detail::set_should_log_output(false);
 	logging::detail::consoleOutputLogger = nullptr;
 
 	auto logger = spdlog::get(PRAGMA_FILE_LOGGER_NAME);
@@ -453,7 +452,7 @@ void pragma::detail::initialize_logger(util::LogSeverity conLogLevel, util::LogS
 		// We want to log all regular console output to file, so we'll create an additional logger to handle that
 		auto conFileLogger = pragma::util::make_shared<spdlog::logger>(PRAGMA_FILE_LOGGER_NAME, spdlog::sinks_init_list {fileSink});
 		conFileLogger->set_level(spdlog::level::trace); // Always log all regular console output to file
-		logging::detail::shouldLogOutput = true;
+		logging::detail::set_should_log_output(true);
 		logging::detail::consoleOutputLogger = conFileLogger;
 	}
 

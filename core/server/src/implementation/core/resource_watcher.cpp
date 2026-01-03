@@ -21,11 +21,11 @@ void pragma::util::SResourceWatcherManager::OnResourceChanged(const Path &rootPa
 		if(string::compare(mapName, fname, false) == true) {
 #if RESOURCE_WATCHER_VERBOSE > 0
 			auto navPath = "maps\\" + strPath;
-			Con::cout << "[ResourceWatcher] Navigation mesh has changed: " << navPath << ". Attempting to reload..." << Con::endl;
+			Con::COUT << "[ResourceWatcher] Navigation mesh has changed: " << navPath << ". Attempting to reload..." << Con::endl;
 #endif
 			if(SGame::Get()->LoadNavMesh(true) == false) {
 #if RESOURCE_WATCHER_VERBOSE > 0
-				Con::cwar << "[ResourceWatcher] Unable to reload navigation mesh!" << Con::endl;
+				Con::CWAR << "[ResourceWatcher] Unable to reload navigation mesh!" << Con::endl;
 #endif
 			}
 		}

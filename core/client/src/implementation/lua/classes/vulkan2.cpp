@@ -389,8 +389,9 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	devVkBuffer.def("WriteMemory",
 	  static_cast<bool (*)(lua::State *, Lua::Vulkan::Buffer &, uint32_t, pragma::util::DataStream &)>([](lua::State *l, Lua::Vulkan::Buffer &hBuffer, uint32_t offset, pragma::util::DataStream &ds) { return Lua::Vulkan::VKBuffer::Write(l, hBuffer, offset, ds, 0u, ds->GetSize()); }));
 	devVkBuffer.def("ReadMemory", static_cast<bool (*)(lua::State *, Lua::Vulkan::Buffer &, uint32_t, uint32_t, pragma::util::DataStream &, uint32_t)>(&Lua::Vulkan::VKBuffer::Read));
-	devVkBuffer.def("ReadMemory",
-	  static_cast<bool (*)(lua::State *, Lua::Vulkan::Buffer &, uint32_t, uint32_t, pragma::util::DataStream &)>([](lua::State *l, Lua::Vulkan::Buffer &hBuffer, uint32_t offset, uint32_t size, pragma::util::DataStream &ds) { return Lua::Vulkan::VKBuffer::Read(l, hBuffer, offset, size, ds, 0u); }));
+	devVkBuffer.def("ReadMemory", static_cast<bool (*)(lua::State *, Lua::Vulkan::Buffer &, uint32_t, uint32_t, pragma::util::DataStream &)>([](lua::State *l, Lua::Vulkan::Buffer &hBuffer, uint32_t offset, uint32_t size, pragma::util::DataStream &ds) {
+		return Lua::Vulkan::VKBuffer::Read(l, hBuffer, offset, size, ds, 0u);
+	}));
 	devVkBuffer.def("ReadMemory", static_cast<bool (*)(lua::State *, Lua::Vulkan::Buffer &, uint32_t, udm::Type, Lua::udm_ng)>(&Lua::Vulkan::VKBuffer::Read));
 	devVkBuffer.def("ReadMemory", static_cast<Lua::opt<pragma::util::DataStream> (*)(lua::State *, Lua::Vulkan::Buffer &, uint32_t, uint32_t)>(&Lua::Vulkan::VKBuffer::Read));
 	devVkBuffer.def("ReadMemory", static_cast<Lua::opt<pragma::util::DataStream> (*)(lua::State *, Lua::Vulkan::Buffer &)>([](lua::State *l, Lua::Vulkan::Buffer &hBuffer) { return Lua::Vulkan::VKBuffer::Read(l, hBuffer, 0u, hBuffer.GetSize()); }));

@@ -10,7 +10,7 @@ export import :entities.components.base;
 
 export namespace pragma {
 	namespace logicComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_TICK;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_TICK)
 	}
 	class DLLNETWORK LogicComponent final : public BaseEntityComponent {
 	  public:

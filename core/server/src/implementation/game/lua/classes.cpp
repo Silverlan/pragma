@@ -17,21 +17,21 @@ void pragma::SGame::RegisterLuaClasses()
 	auto &modTestConverters = GetLuaInterface().RegisterLibrary("test_converters");
 	modTestConverters[
 		luabind::def("test_pair_param",static_cast<void(*)(const std::pair<std::string,float>&)>([](const std::pair<std::string,float> &pair) {
-			Con::cout<<"Pair: "<<pair.first<<","<<pair.second<<Con::endl;
+			Con::COUT<<"Pair: "<<pair.first<<","<<pair.second<<Con::endl;
 		})),
 		luabind::def("test_pair_ret",static_cast<std::pair<std::string,float>(*)()>([]() -> std::pair<std::string,float> {
 			return {"TestString",1357.f};
 		})),
 
 		luabind::def("test_tuple_param",static_cast<void(*)(const std::tuple<std::string,float,Vector3>&)>([](const std::tuple<std::string,float,Vector3> &tuple) {
-			Con::cout<<"Tuple: "<<std::get<0>(tuple)<<","<<std::get<1>(tuple)<<","<<std::get<2>(tuple)<<Con::endl;
+			Con::COUT<<"Tuple: "<<std::get<0>(tuple)<<","<<std::get<1>(tuple)<<","<<std::get<2>(tuple)<<Con::endl;
 		})),
 		luabind::def("test_tuple_ret",static_cast<std::tuple<std::string,float,Vector3>(*)()>([]() -> std::tuple<std::string,float,Vector3> {
 			return {"TestString",1357.f,Vector3{5,87,99}};
 		})),
 
 		luabind::def("test_string_view_param",static_cast<void(*)(const std::string_view&)>([](const std::string_view &str) {
-			Con::cout<<"string_view: "<<str<<Con::endl;
+			Con::COUT<<"string_view: "<<str<<Con::endl;
 		})),
 		luabind::def("test_string_view_ret",static_cast<std::string_view(*)()>([]() -> std::string_view {
 			static std::string str = "TestStringView";
@@ -39,12 +39,12 @@ void pragma::SGame::RegisterLuaClasses()
 		})),
 
 		luabind::def("test_optional_param",static_cast<void(*)(const std::optional<Vector3>&)>([](const std::optional<Vector3> &val) {
-			Con::cout<<"optional: ";
+			Con::COUT<<"optional: ";
 			if(!val.has_value())
-				Con::cout<<"<no value>";
+				Con::COUT<<"<no value>";
 			else
-				Con::cout<<*val;
-			Con::cout<<Con::endl;
+				Con::COUT<<*val;
+			Con::COUT<<Con::endl;
 		})),
 		luabind::def("test_optional_ret",static_cast<std::optional<Vector3>(*)(int)>([](int i) -> std::optional<Vector3> {
 			if(i == 0)
@@ -53,18 +53,18 @@ void pragma::SGame::RegisterLuaClasses()
 		})),
 
 		luabind::def("test_vector_param",static_cast<void(*)(const std::vector<Vector3>&)>([](const std::vector<Vector3> &val) {
-			Con::cout<<"values: ";
+			Con::COUT<<"values: ";
 			for(auto &v : val)
-				Con::cout<<v<<Con::endl;
+				Con::COUT<<v<<Con::endl;
 		})),
 		luabind::def("test_vector_ret",static_cast<std::vector<Vector3>(*)()>([]() -> std::vector<Vector3> {
 			return {Vector3{1,2,3},Vector3{6,5,4},Vector3{8,7,8},Vector3{1,1,1}};
 		})),
 
 		luabind::def("test_map_param",static_cast<void(*)(const std::map<std::string,uint32_t>&)>([](const std::map<std::string,uint32_t> &val) {
-			Con::cout<<"values: ";
+			Con::COUT<<"values: ";
 			for(auto &pair : val)
-				Con::cout<<pair.first<<" = "<<pair.second<<Con::endl;
+				Con::COUT<<pair.first<<" = "<<pair.second<<Con::endl;
 		})),
 		luabind::def("test_map_ret",static_cast<std::map<std::string,uint32_t>(*)()>([]() -> std::map<std::string,uint32_t> {
 			return {
@@ -77,16 +77,16 @@ void pragma::SGame::RegisterLuaClasses()
 		})),
 
 		luabind::def("test_array_param",static_cast<void(*)(const std::array<Vector3,3>&)>([](const std::array<Vector3,3> &val) {
-			Con::cout<<"values: ";
+			Con::COUT<<"values: ";
 			for(auto &v : val)
-				Con::cout<<v<<Con::endl;
+				Con::COUT<<v<<Con::endl;
 		})),
 		luabind::def("test_array_ret",static_cast<std::array<Vector3,3>(*)()>([]() -> std::array<Vector3,3> {
 			return {Vector3{1,2,3},Vector3{6,5,4},Vector3{8,7,8}};
 		})),
 
 		luabind::def("test_entity_param",static_cast<void(*)(pragma::ecs::BaseEntity*)>([](pragma::ecs::BaseEntity *ent) {
-			Con::cout<<"Entity: "<<*ent<<Con::endl;
+			Con::COUT<<"Entity: "<<*ent<<Con::endl;
 		})),
 		luabind::def("test_entity_ret",static_cast<pragma::ecs::BaseEntity*(*)(pragma::Game&)>([](pragma::Game &game) -> pragma::ecs::BaseEntity* {
 			return &game.GetWorld()->GetEntity();
@@ -109,13 +109,13 @@ void pragma::SGame::RegisterLuaClasses()
 			//luabind::default_converter<EntityHandleT> x{};
 		//	x.to_cpp(nullptr,luabind::by_value<EntityHandleT>{},0);
 
-			Con::cout<<"Entity: "<<ent->GetClass()<<Con::endl;
+			Con::COUT<<"Entity: "<<ent->GetClass()<<Con::endl;
 		})),
 		luabind::def("test_entity_handle_const_param",static_cast<void(*)(const EntityHandleT&)>([](const EntityHandleT &ent) {
-			Con::cout<<"Entity: "<<ent->GetClass()<<Con::endl;
+			Con::COUT<<"Entity: "<<ent->GetClass()<<Con::endl;
 		})),
 		luabind::def("test_entity_handle_const_pointer_param",static_cast<void(*)(const EntityHandleT*)>([](const EntityHandleT *ent) {
-			Con::cout<<"Entity: "<<(*ent)->GetClass()<<Con::endl;
+			Con::COUT<<"Entity: "<<(*ent)->GetClass()<<Con::endl;
 		})),
 		luabind::def("test_entity_handle_ret",static_cast<EntityHandleT(*)(pragma::Game&)>([](pragma::Game &game) -> EntityHandleT {
 			return game.GetWorld()->GetEntity().GetHandle();
@@ -125,35 +125,35 @@ void pragma::SGame::RegisterLuaClasses()
 		})),
 
 		luabind::def("test_entity_const_param",static_cast<void(*)(const pragma::ecs::BaseEntity*)>([](const pragma::ecs::BaseEntity *ent) {
-			Con::cout<<"Entity: "<<const_cast<pragma::ecs::BaseEntity&>(*ent)<<Con::endl;
+			Con::COUT<<"Entity: "<<const_cast<pragma::ecs::BaseEntity&>(*ent)<<Con::endl;
 		})),
 		luabind::def("test_entity_const_ret",static_cast<const pragma::ecs::BaseEntity*(*)(pragma::Game&)>([](pragma::Game &game) -> const pragma::ecs::BaseEntity* {
 			return &game.GetWorld()->GetEntity();
 		})),
 
 		luabind::def("test_entity_null_param",static_cast<void(*)(pragma::ecs::BaseEntity*)>([](pragma::ecs::BaseEntity *ent) {
-			Con::cout<<"Entity: "<<ent<<Con::endl;
+			Con::COUT<<"Entity: "<<ent<<Con::endl;
 		})),
 		luabind::def("test_entity_null_ret",static_cast<pragma::ecs::BaseEntity*(*)(pragma::Game&)>([](pragma::Game &game) -> pragma::ecs::BaseEntity* {
 			return nullptr;
 		})),
 
 		luabind::def("test_entity_ref_param",static_cast<void(*)(pragma::ecs::BaseEntity&)>([](pragma::ecs::BaseEntity &ent) {
-			Con::cout<<"Entity: "<<ent<<Con::endl;
+			Con::COUT<<"Entity: "<<ent<<Con::endl;
 		})),
 		luabind::def("test_entity_ref_ret",static_cast<pragma::ecs::BaseEntity&(*)(pragma::Game&)>([](pragma::Game &game) -> pragma::ecs::BaseEntity& {
 			return game.GetWorld()->GetEntity();
 		})),
 
 		luabind::def("test_entity_ref_const_param",static_cast<void(*)(const pragma::ecs::BaseEntity&)>([](const pragma::ecs::BaseEntity &ent) {
-			Con::cout<<"Entity: "<<const_cast<pragma::ecs::BaseEntity&>(ent)<<Con::endl;
+			Con::COUT<<"Entity: "<<const_cast<pragma::ecs::BaseEntity&>(ent)<<Con::endl;
 		})),
 		luabind::def("test_entity_ref_const_ret",static_cast<const pragma::ecs::BaseEntity&(*)(pragma::Game&)>([](pragma::Game &game) -> const pragma::ecs::BaseEntity& {
 			return game.GetWorld()->GetEntity();
 		})),
 
 		luabind::def("test_component_param",static_cast<void(*)(pragma::VelocityComponent*)>([](pragma::VelocityComponent *c) {
-			Con::cout<<"Component: "<<c->GetVelocity()<<Con::endl;
+			Con::COUT<<"Component: "<<c->GetVelocity()<<Con::endl;
 		})),
 		luabind::def("test_component_ret",static_cast<pragma::VelocityComponent*(*)(pragma::Game&)>([](pragma::Game &game) -> pragma::VelocityComponent* {
 			pragma::ecs::EntityIterator entIt {game,pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
@@ -165,7 +165,7 @@ void pragma::SGame::RegisterLuaClasses()
 		})),
 
 		luabind::def("test_component_handle_param",static_cast<void(*)(pragma::ComponentHandle<pragma::VelocityComponent>&)>([](pragma::ComponentHandle<pragma::VelocityComponent> &c) {
-			Con::cout<<"Component: "<<c->GetVelocity()<<Con::endl;
+			Con::COUT<<"Component: "<<c->GetVelocity()<<Con::endl;
 		})),
 		luabind::def("test_component_handle_ret",static_cast<pragma::ComponentHandle<pragma::VelocityComponent>(*)(pragma::Game&)>([](pragma::Game &game) -> pragma::ComponentHandle<pragma::VelocityComponent> {
 			pragma::ecs::EntityIterator entIt {game,pragma::ecs::EntityIterator::FilterFlags::Default | pragma::ecs::EntityIterator::FilterFlags::Pending};
@@ -180,13 +180,13 @@ void pragma::SGame::RegisterLuaClasses()
 		})),
 
 		luabind::def("test_hidden_param",static_cast<void(*)(pragma::Game&,NetworkState&,pragma::Engine&)>([](pragma::Game &game,NetworkState &nw,pragma::Engine &en) {
-			Con::cout<<"Game Map: "<<game.GetMapName()<<Con::endl;
-			Con::cout<<"NetworkState material count: "<<nw.GetMaterialManager().GetMaterials().size()<<Con::endl;
-			Con::cout<<"Last engine tick: "<<en.GetLastTick()<<Con::endl;
+			Con::COUT<<"Game Map: "<<game.GetMapName()<<Con::endl;
+			Con::COUT<<"NetworkState material count: "<<nw.GetMaterialManager().GetMaterials().size()<<Con::endl;
+			Con::COUT<<"Last engine tick: "<<en.GetLastTick()<<Con::endl;
 		})),
 
 		luabind::def("test_file",static_cast<void(*)(fs::VFilePtr)>([](fs::VFilePtr f) {
-			Con::cout<<"File size: "<<f->GetSize()<<Con::endl;
+			Con::COUT<<"File size: "<<f->GetSize()<<Con::endl;
 		})),
 
 		luabind::def("test_property_ret",static_cast<pragma::util::PFloatProperty(*)()>([]() {

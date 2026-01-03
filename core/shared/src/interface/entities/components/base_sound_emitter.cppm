@@ -13,7 +13,7 @@ export import :audio.sound;
 
 export namespace pragma {
 	namespace baseSoundEmitterComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_SOUND_CREATED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_SOUND_CREATED)
 	}
 	class DLLNETWORK BaseSoundEmitterComponent : public BaseEntityComponent {
 	  public:

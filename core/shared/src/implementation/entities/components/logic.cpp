@@ -8,7 +8,6 @@ import :entities.components.logic_component;
 
 using namespace pragma;
 
-ComponentEventId logicComponent::EVENT_ON_TICK = INVALID_COMPONENT_ID;
 void LogicComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { logicComponent::EVENT_ON_TICK = registerEvent("ON_TICK", ComponentEventInfo::Type::Explicit); }
 
 LogicComponent::LogicComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}

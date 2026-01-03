@@ -77,7 +77,8 @@ void SAIComponent::_debugSendScheduleInfo(SPlayerComponent &pl, std::shared_ptr<
 				if(rChild == 1)
 					r = 1;
 			}
-			if(dbgNode.state != static_cast<debug::DebugBehaviorTreeNode::State>(dbgInfo.lastResult) || dbgNode.active != taskNode.IsActive() || dbgNode.lastStartTime != dbgInfo.lastStartTime || dbgNode.lastEndTime != dbgInfo.lastEndTime || dbgNode.executionIndex != dbgInfo.executionIndex) {
+			if(dbgNode.state != static_cast<debug::DebugBehaviorTreeNode::State>(dbgInfo.lastResult) || dbgNode.active != taskNode.IsActive() || dbgNode.lastStartTime != dbgInfo.lastStartTime || dbgNode.lastEndTime != dbgInfo.lastEndTime
+			  || dbgNode.executionIndex != dbgInfo.executionIndex) {
 				dbgNode.state = static_cast<debug::DebugBehaviorTreeNode::State>(dbgInfo.lastResult);
 				dbgNode.active = taskNode.IsActive();
 				dbgNode.lastStartTime = dbgInfo.lastStartTime;

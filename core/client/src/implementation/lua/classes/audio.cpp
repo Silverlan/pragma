@@ -36,7 +36,11 @@ Lua::opt<luabind::tableT<void>> Lua::ALBuffer::GetPhonemeData(lua::State *l, pra
 {
 	auto pUserData = buffer.GetUserData();
 	if(pUserData == nullptr)
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+		return luabind::object {};
+#else
 		return nil;
+#endif
 	auto &phonemeData = *static_cast<source_engine::script::SoundPhonemeData *>(pUserData.get());
 
 	auto t = luabind::newtable(l);

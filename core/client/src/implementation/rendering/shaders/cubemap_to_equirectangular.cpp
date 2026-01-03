@@ -71,7 +71,7 @@ std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquir
 	auto format = cubemap.GetImage().GetFormat();
 
 	// Shader input
-	auto dsg = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(shaderCubemapToEquirectangular::DESCRIPTOR_SET_TEXTURE);
+	auto dsg = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(shaderCubemapToEquirectangular::get_descriptor_set_texture());
 	dsg->GetDescriptorSet()->SetBindingTexture(cubemap, 0u);
 
 	// Shader execution

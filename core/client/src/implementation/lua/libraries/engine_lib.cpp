@@ -305,19 +305,19 @@ int Lua::engine::create_particle_system(lua::State *l)
 
 			for(auto &initializer : initializers) {
 				PushString(l, initializer->name); /* 2 */
-				initializer->table.push(l);            /* 3 */
+				initializer->table.push(l);       /* 3 */
 				particle->AddInitializer(initializer->name, pragma::ecs::get_particle_key_values(l, initializer->table));
 				Pop(l, 2); /* 1 */
 			}
 			for(auto &op : operators) {
 				PushString(l, op->name); /* 2 */
-				op->table.push(l);            /* 3 */
+				op->table.push(l);       /* 3 */
 				particle->AddOperator(op->name, pragma::ecs::get_particle_key_values(l, op->table));
 				Pop(l, 2); /* 1 */
 			}
 			for(auto &renderer : renderers) {
 				PushString(l, renderer->name); /* 2 */
-				renderer->table.push(l);            /* 3 */
+				renderer->table.push(l);       /* 3 */
 				particle->AddRenderer(renderer->name, pragma::ecs::get_particle_key_values(l, renderer->table));
 				Pop(l, 2); /* 1 */
 			}
@@ -368,7 +368,7 @@ int Lua::engine::save_particle_system(lua::State *l)
 						continue;
 					auto *ps = hChild.child.get();
 					if(ps->IsRecordingKeyValues() == false) {
-						Con::cwar << "Cannot save particle system '" << ps->GetParticleSystemName() << "', which wasn't created with the \"record key-values\" flag set! Skipping..." << Con::endl;
+						Con::CWAR << "Cannot save particle system '" << ps->GetParticleSystemName() << "', which wasn't created with the \"record key-values\" flag set! Skipping..." << Con::endl;
 						return;
 					}
 					particleSystems.push_back(hChild.child.get());
@@ -380,7 +380,7 @@ int Lua::engine::save_particle_system(lua::State *l)
 				GetTableValue(l, t);
 				auto &ps = Lua::Check<pragma::ecs::CParticleSystemComponent>(l, -1);
 				if(ps.IsRecordingKeyValues() == false)
-					Con::cwar << "Cannot save particle system '" << ps.GetParticleSystemName() << "', which wasn't created with the \"record key-values\" flag set! Skipping..." << Con::endl;
+					Con::CWAR << "Cannot save particle system '" << ps.GetParticleSystemName() << "', which wasn't created with the \"record key-values\" flag set! Skipping..." << Con::endl;
 				else {
 					particleSystems.push_back(&ps);
 					fIncludeChildren(ps);
@@ -388,7 +388,7 @@ int Lua::engine::save_particle_system(lua::State *l)
 				Pop(l, 1);
 			}
 			if(particleSystems.empty()) {
-				Con::cwar << "No particles to save. Particle file will not be generated!" << Con::endl;
+				Con::CWAR << "No particles to save. Particle file will not be generated!" << Con::endl;
 				PushBool(l, false);
 				return 1;
 			}

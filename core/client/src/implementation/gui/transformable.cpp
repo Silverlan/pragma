@@ -204,12 +204,11 @@ void pragma::gui::types::WITransformable::Initialize()
 	pMoveRect->AddStyleClass("move_rect");
 	pMoveRect->SetMouseInputEnabled(math::is_flag_set(m_stateFlags, StateFlags::Draggable));
 	pMoveRect->AddCallback("OnMouseEvent",
-	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
-	    [this](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
-		    OnTitleBarMouseEvent(button, state, mods);
-		    *reply = util::EventReply::Handled;
-		    return CallbackReturnType::HasReturnValue;
-	    }));
+	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
+		  OnTitleBarMouseEvent(button, state, mods);
+		  *reply = util::EventReply::Handled;
+		  return CallbackReturnType::HasReturnValue;
+	  }));
 }
 pragma::util::EventReply pragma::gui::types::WITransformable::MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods)
 {
@@ -594,15 +593,14 @@ void pragma::gui::types::WITransformable::SetResizable(bool b)
 	resizeRect->SetVisible(IsVisible());
 	resizeRect->SetZPos(GetZPos());
 	resizeRect->AddCallback("OnMouseEvent",
-	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
-	    [hThis](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) mutable -> CallbackReturnType {
-		    if(hThis.IsValid() == false) {
-			    *reply = util::EventReply::Handled;
-			    return CallbackReturnType::HasReturnValue;
-		    }
-		    *reply = hThis.get()->MouseCallback(button, state, mods);
-		    return CallbackReturnType::HasReturnValue;
-	    }));
+	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn([hThis](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) mutable -> CallbackReturnType {
+		  if(hThis.IsValid() == false) {
+			  *reply = util::EventReply::Handled;
+			  return CallbackReturnType::HasReturnValue;
+		  }
+		  *reply = hThis.get()->MouseCallback(button, state, mods);
+		  return CallbackReturnType::HasReturnValue;
+	  }));
 	RemoveOnRemoval(resizeRect);
 	m_hResizeRect = resizeRect->GetHandle();
 	SetParent(pParent);

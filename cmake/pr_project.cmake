@@ -43,7 +43,7 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_compile_definitions(${TARGET_NAME} PRIVATE "_WIN32_WINNT=0x0A00") # Windows 10
     endif()
 
-    if(NOT WIN32 AND (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         target_link_options(${TARGET_NAME} PRIVATE "-Wl,--no-undefined")
     endif()
 
@@ -81,13 +81,6 @@ endfunction()
 function(pr_project TARGET_NAME)
     project(${TARGET_NAME} CXX)
     message("[PR] ---------------------- Start Of Project \"${TARGET_NAME}\" ----------------------")
-endfunction()
-
-function(pr_include_windows_clang_export_definitions_workaround TARGET_NAME)
-    if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        set(EXPORTS_DEF "${CMAKE_CURRENT_SOURCE_DIR}/win_clang_exports.def")
-        target_link_options(${TARGET_NAME} PRIVATE "-Wl,/DEF:${EXPORTS_DEF}")
-    endif()
 endfunction()
 
 function(pr_precompile_headers TARGET_NAME PRECOMPILED_HEADER)

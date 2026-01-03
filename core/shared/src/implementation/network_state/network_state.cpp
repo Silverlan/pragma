@@ -145,7 +145,7 @@ bool pragma::NetworkState::PortMaterial(const std::string &path)
 						if(mat->GetProperty(pragma::util::FilePath(path, name).GetString(), &texName)) {
 							auto path = util::FilePath(pragma::asset::get_asset_root_directory(asset::Type::Material), texName).GetString();
 							if(fs::exists(path) == false && pragma::util::port_file(this, path + ".vtf") == false && pragma::util::port_file(this, path + ".vtex_c") == false)
-								Con::cwar << "Unable to port texture '" << texName << "'!" << Con::endl;
+								Con::CWAR << "Unable to port texture '" << texName << "'!" << Con::endl;
 						}
 						break;
 					}
@@ -233,7 +233,7 @@ pragma::material::Material *pragma::NetworkState::LoadMaterial(const std::string
 				return mat;
 			}
 		}
-		Con::cwar << "Unable to load material '" << path << "': File not found!" << Con::endl;
+		Con::CWAR << "Unable to load material '" << path << "': File not found!" << Con::endl;
 	}
 	return mat;
 }
@@ -310,16 +310,16 @@ void pragma::NetworkState::Initialize()
 	else {
 		spdlog::info("Initializing server state...");
 		if(Engine::Get()->IsServerOnly()) {
-			Con::cout << "If you encounter problems, such as the server not showing up in the server browser, or clients not being able to connect to it, please make sure the following ports are forwarded:" << Con::endl;
-			Con::cout << engine_info::DEFAULT_SERVER_PORT << " (TCP): Required if the boost asio networking layer is used" << Con::endl;
-			Con::cout << engine_info::DEFAULT_SERVER_PORT << " (UDP): Required for clients to be able to connect to the server" << Con::endl;
-			Con::cout << engine_info::DEFAULT_QUERY_PORT << " (UDP): Required for the server to be registered with the master server and show up in the server browser" << Con::endl;
-			Con::cout << Con::endl << "Here's a list of useful console commands:" << Con::endl;
-			Con::cout << "map <mapName>: Loads the specified map and starts the server." << Con::endl;
-			Con::cout << "sv_maxplayers <maxPlayers>: Specifies the maximum number of players that can play on the server at a time." << Con::endl;
-			Con::cout << "sv_gamemode <gameMode>: The gamemode to use. Has to be specified before a map is loaded." << Con::endl;
-			Con::cout << "net_library <netLib>: The networking library module to use. The name has to match one of the modules located in the 'pragma/modules/networking' directory." << Con::endl;
-			Con::cout << "sv_use_p2p_if_available <1/0>: Only has an effect if the steam networking module is used. Network communication will be relayed through the steam servers, clients and the server will NOT communicate directly." << Con::endl;
+			Con::COUT << "If you encounter problems, such as the server not showing up in the server browser, or clients not being able to connect to it, please make sure the following ports are forwarded:" << Con::endl;
+			Con::COUT << engine_info::DEFAULT_SERVER_PORT << " (TCP): Required if the boost asio networking layer is used" << Con::endl;
+			Con::COUT << engine_info::DEFAULT_SERVER_PORT << " (UDP): Required for clients to be able to connect to the server" << Con::endl;
+			Con::COUT << engine_info::DEFAULT_QUERY_PORT << " (UDP): Required for the server to be registered with the master server and show up in the server browser" << Con::endl;
+			Con::COUT << Con::endl << "Here's a list of useful console commands:" << Con::endl;
+			Con::COUT << "map <mapName>: Loads the specified map and starts the server." << Con::endl;
+			Con::COUT << "sv_maxplayers <maxPlayers>: Specifies the maximum number of players that can play on the server at a time." << Con::endl;
+			Con::COUT << "sv_gamemode <gameMode>: The gamemode to use. Has to be specified before a map is loaded." << Con::endl;
+			Con::COUT << "net_library <netLib>: The networking library module to use. The name has to match one of the modules located in the 'pragma/modules/networking' directory." << Con::endl;
+			Con::COUT << "sv_use_p2p_if_available <1/0>: Only has an effect if the steam networking module is used. Network communication will be relayed through the steam servers, clients and the server will NOT communicate directly." << Con::endl;
 		}
 	}
 
@@ -409,7 +409,7 @@ void pragma::NetworkState::ClearConsoleCommandOverrides() { m_conOverrides.clear
 bool pragma::check_cheats(const std::string &scmd, NetworkState *state)
 {
 	if(state->CheatsEnabled() == false) {
-		Con::cout << "Can't use cheat cvar " << scmd << " in multiplayer, unless the server has sv_cheats set to 1." << Con::endl;
+		Con::COUT << "Can't use cheat cvar " << scmd << " in multiplayer, unless the server has sv_cheats set to 1." << Con::endl;
 		return false;
 	}
 	return true;
@@ -438,7 +438,7 @@ bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::
 		auto bReplicated = ((flags & console::ConVarFlags::Replicated) == console::ConVarFlags::Replicated) ? true : false;
 		if(IsClient()) {
 			if(bReplicated) {
-				Con::cout << "Can't change replicated ConVar " << scmd << " from console of client, only server operator can change its value" << Con::endl;
+				Con::COUT << "Can't change replicated ConVar " << scmd << " from console of client, only server operator can change its value" << Con::endl;
 				return true;
 			}
 		}
@@ -737,7 +737,7 @@ void pragma::NetworkState::Think()
 	m_tReal = CDouble(m_ctReal());
 	m_tDelta = m_tReal - m_tLast;
 	if(m_tDelta > 1.0f) {
-		Con::cwar << "Delta time surpassed 0.5 seconds. Clamping..." << Con::endl;
+		Con::CWAR << "Delta time surpassed 0.5 seconds. Clamping..." << Con::endl;
 		m_tDelta = 0.5f;
 	}
 	StartProfilingStage("UpdateSounds");

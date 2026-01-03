@@ -450,32 +450,32 @@ void Lua::Entity::register_class(luabind::class_<pragma::ecs::BaseEntity> &class
 	classDef.def("TakeDamage", &pragma::ecs::BaseEntity::TakeDamage);
 	classDef.def(
 	  "DebugPrintComponentProperties", +[](pragma::ecs::BaseEntity &ent) {
-		  ent.print(Con::cout);
-		  Con::cout << Con::endl;
+		  ent.print(Con::COUT);
+		  Con::COUT << Con::endl;
 		  auto &components = ent.GetComponents();
 		  for(auto &c : components) {
 			  if(c.expired())
 				  continue;
-			  Con::cout << "\t" << c->GetComponentInfo()->name << Con::endl;
+			  Con::COUT << "\t" << c->GetComponentInfo()->name << Con::endl;
 			  pragma::ComponentMemberIndex memberIndex = 0;
 			  auto *info = c->GetMemberInfo(memberIndex++);
 			  if(!info)
 				  continue;
 			  while(info != nullptr) {
-				  Con::cout << "\t\t" << info->GetName() << " (";
-				  Con::cout << magic_enum::enum_name(info->type) << "): ";
+				  Con::COUT << "\t\t" << info->GetName() << " (";
+				  Con::COUT << magic_enum::enum_name(info->type) << "): ";
 				  pragma::ents::visit_member(info->type, [info, &c](auto tag) {
 					  using T = typename decltype(tag)::type;
 					  if constexpr(!::udm::is_convertible<T, ::udm::String>())
-						  Con::cout << "Unknown value";
+						  Con::COUT << "Unknown value";
 					  else {
 						  T value;
 						  info->getterFunction(*info, *c, &value);
 						  auto str = ::udm::convert<T, ::udm::String>(value);
-						  Con::cout << str;
+						  Con::COUT << str;
 					  }
 				  });
-				  Con::cout << Con::endl;
+				  Con::COUT << Con::endl;
 
 				  info = c->GetMemberInfo(memberIndex++);
 			  }

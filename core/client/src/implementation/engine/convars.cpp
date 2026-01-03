@@ -31,14 +31,14 @@ bool pragma::CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string
 	if(stateCl == nullptr)
 		return RunEngineConsoleCommand(cmd, argv, pressState, magnitude, callback);
 	if(stateCl == nullptr || !stateCl->RunConsoleCommand(cmd, argv, pl, pressState, magnitude, callback)) {
-		Con::cwar << "Unknown console command '" << cmd << "'!" << Con::endl;
+		Con::CWAR << "Unknown console command '" << cmd << "'!" << Con::endl;
 		auto similar = (stateCl != nullptr) ? stateCl->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
 		if(similar.empty() == true)
-			Con::cout << "No similar matches found!" << Con::endl;
+			Con::COUT << "No similar matches found!" << Con::endl;
 		else {
-			Con::cout << "Were you looking for one of the following?" << Con::endl;
+			Con::COUT << "Were you looking for one of the following?" << Con::endl;
 			for(auto &sim : similar)
-				Con::cout << "- " << sim << Con::endl;
+				Con::COUT << "- " << sim << Con::endl;
 		}
 		return false;
 	}

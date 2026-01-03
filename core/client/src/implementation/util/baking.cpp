@@ -57,13 +57,13 @@ static Vector3 calc_light_direction_to_point(const pragma::util::baking::LightSo
 			if(l > 0.001)
 				n /= l;
 			else
-				n = uvec::UP;
+				n = uvec::PRM_UP;
 			return n;
 		}
 	case pragma::util::baking::LightSource::Type::Directional:
 		return light.direction;
 	}
-	return uvec::UP;
+	return uvec::PRM_UP;
 }
 
 static std::vector<float> calc_light_weights(const std::vector<pragma::util::baking::LightSource> &lights, const Vector3 &pos, const Vector3 &p0, const Vector3 &p1, const Vector3 &p2)
@@ -93,7 +93,7 @@ static Vector3 calc_dominant_light_direction(const std::vector<pragma::util::bak
 #endif
 		++i;
 	}
-	uvec::normalize(n, uvec::UP);
+	uvec::normalize(n, uvec::PRM_UP);
 	return n;
 }
 
@@ -115,12 +115,12 @@ static void generate_sh_normals(const std::vector<pragma::util::baking::BakePixe
 		for(auto idx = start; idx < end; ++idx) {
 			auto &bp = bps[idx];
 			if(bp.objectId < 0 || bp.objectId >= meshes.size()) {
-				outNormals[idx] = uvec::UP;
+				outNormals[idx] = uvec::PRM_UP;
 				continue;
 			}
 			auto &mesh = meshes[bp.objectId];
 			if(bp.primitiveId < 0 || bp.primitiveId >= mesh->GetTriangleCount()) {
-				outNormals[idx] = uvec::UP;
+				outNormals[idx] = uvec::PRM_UP;
 				continue;
 			}
 			auto triOffset = bp.primitiveId * 3;
@@ -150,7 +150,8 @@ static void generate_sh_normals(const std::vector<pragma::util::baking::BakePixe
 	pool.WaitForCompletion();
 }
 
-static std::shared_ptr<pragma::image::ImageBuffer> generate_sh_normal_map(const std::vector<pragma::util::baking::BakePixel> &bps, const std::vector<pragma::util::baking::LightSource> &lights, const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> meshes, uint32_t width, uint32_t height)
+static std::shared_ptr<pragma::image::ImageBuffer> generate_sh_normal_map(const std::vector<pragma::util::baking::BakePixel> &bps, const std::vector<pragma::util::baking::LightSource> &lights, const std::vector<std::shared_ptr<pragma::geometry::ModelSubMesh>> meshes, uint32_t width,
+  uint32_t height)
 {
 	auto imgBuf = pragma::image::ImageBuffer::Create(width, height, pragma::image::Format::RGB32);
 	generate_sh_normals(bps, lights, meshes, static_cast<Vector3 *>(imgBuf->GetData()));

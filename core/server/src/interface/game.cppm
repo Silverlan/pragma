@@ -17,7 +17,7 @@ export namespace pragma {
 #pragma warning(push)
 #pragma warning(disable : 4251)
 	class DLLSERVER SGame : public Game {
-	private:
+	  private:
 		std::vector<SBaseEntity *> m_ents;
 		std::unique_ptr<CacheInfo> m_luaCache = nullptr;
 		struct ChangeLevelInfo {
@@ -30,7 +30,7 @@ export namespace pragma {
 		std::unordered_map<std::string, udm::PProperty> m_preTransitionWorldState {};
 		// Delta landmark offset between this level and the previous level (in case there was a level change)
 		Vector3 m_deltaTransitionLandmarkOffset {};
-	protected:
+	  protected:
 		template<class T>
 		void GetPlayers(std::vector<T *> *ents);
 		template<class T>
@@ -63,7 +63,7 @@ export namespace pragma {
 		NetEventManager m_entNetEventManager = {};
 		CallbackHandle m_cbProfilingHandle = {};
 		std::unique_ptr<debug::ProfilingStageManager<debug::ProfilingStage>> m_profilingStageManager;
-	public:
+	  public:
 		using Game::LoadLuaComponent;
 		virtual void InitializeLua() override;
 		virtual void SetupLua() override;

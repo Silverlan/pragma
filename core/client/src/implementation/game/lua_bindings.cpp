@@ -156,15 +156,15 @@ void pragma::CGame::RegisterLua()
 	      }}
 
 	    /*{"debug_vehicle",static_cast<int32_t(*)(lua::State*)>([](lua::State *l) -> int32_t {
-			Con::cout<<"Creating vehicle..."<<Con::endl;
+			Con::COUT<<"Creating vehicle..."<<Con::endl;
 			static auto vhc = pragma::util::make_shared<debug::Vehicle>();
 			return 0;
 		})}*/
 	  });
 	auto modGame = luabind::module_(GetLuaState(), "game");
 	Lua::game::register_shared_functions(GetLuaState(), modGame);
-	modGame[(luabind::def("load_material", static_cast<material::Material *(*)(lua::State *, const std::string &, bool, bool)>(Lua::engine::load_material)), luabind::def("load_material", static_cast<material::Material *(*)(lua::State *, const std::string &, bool)>(Lua::engine::load_material)),
-	  luabind::def("load_material", static_cast<material::Material *(*)(lua::State *, const std::string &)>(Lua::engine::load_material)),
+	modGame[(luabind::def("load_material", static_cast<material::Material *(*)(lua::State *, const std::string &, bool, bool)>(Lua::engine::load_material)),
+	  luabind::def("load_material", static_cast<material::Material *(*)(lua::State *, const std::string &, bool)>(Lua::engine::load_material)), luabind::def("load_material", static_cast<material::Material *(*)(lua::State *, const std::string &)>(Lua::engine::load_material)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua::State *, const std::string &, util::AssetLoadFlags)>(Lua::engine::load_texture)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua::State *, const std::string &)>(Lua::engine::load_texture)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua::State *, const LFile &, const std::string &, util::AssetLoadFlags loadFlags)>(Lua::engine::load_texture)),
@@ -175,8 +175,8 @@ void pragma::CGame::RegisterLua()
 	  luabind::def("load_sound_scripts", static_cast<void (*)(lua::State *, const std::string &)>(Lua::engine::LoadSoundScripts)), luabind::def("get_model", Lua::engine::get_model), luabind::def("get_number_of_scenes_queued_for_rendering", &CGame::GetNumberOfScenesQueuedForRendering),
 	  luabind::def("get_queued_scene_render_info", &CGame::GetQueuedSceneRenderInfo),
 
-	  luabind::def("set_gameplay_control_camera", &CGame::SetGameplayControlCamera<CCameraComponent>), luabind::def("reset_gameplay_control_camera", &CGame::ResetGameplayControlCamera),
-	  luabind::def("get_gameplay_control_camera", &CGame::GetGameplayControlCamera<CCameraComponent>), luabind::def("clear_gameplay_control_camera", &CGame::ClearGameplayControlCamera),
+	  luabind::def("set_gameplay_control_camera", &CGame::SetGameplayControlCamera<CCameraComponent>), luabind::def("reset_gameplay_control_camera", &CGame::ResetGameplayControlCamera), luabind::def("get_gameplay_control_camera", &CGame::GetGameplayControlCamera<CCameraComponent>),
+	  luabind::def("clear_gameplay_control_camera", &CGame::ClearGameplayControlCamera),
 	  luabind::def(
 	    "get_primary_camera_render_mask", +[]() -> std::pair<rendering::RenderMask, rendering::RenderMask> {
 		    auto inclusionMask = rendering::RenderMask::None;
@@ -189,16 +189,16 @@ void pragma::CGame::RegisterLua()
 	auto &modEnts = GetLuaInterface().RegisterLibrary("ents",
 	  {{"get_local_player", Lua::ents::Client::get_local_player}, {"get_listener", Lua::ents::Client::get_listener}, {"get_view_body", Lua::ents::Client::get_view_body}, {"get_view_model", Lua::ents::Client::get_view_model}, {"get_instance_buffer", Lua::ents::Client::get_instance_buffer},
 	    {"get_instance_bone_buffer", Lua::ents::Client::get_instance_bone_buffer}, {"register_component", Lua::ents::register_component<CLuaBaseEntityComponent>}, {"create_camera", static_cast<int32_t (*)(lua::State *)>([](lua::State *l) -> int32_t {
-		                                                                                                                                                                        auto aspectRatio = Lua::CheckNumber(l, 1);
-		                                                                                                                                                                        auto fov = Lua::CheckNumber(l, 2);
-		                                                                                                                                                                        auto nearZ = Lua::CheckNumber(l, 3);
-		                                                                                                                                                                        auto farZ = Lua::CheckNumber(l, 4);
-		                                                                                                                                                                        auto *cam = get_cgame()->CreateCamera<CCameraComponent>(aspectRatio, fov, nearZ, farZ);
-		                                                                                                                                                                        if(cam == nullptr)
-			                                                                                                                                                                        return 0;
-		                                                                                                                                                                        cam->PushLuaObject(l);
-		                                                                                                                                                                        return 1;
-	                                                                                                                                                                        })},
+		                                                                                                                                                                auto aspectRatio = Lua::CheckNumber(l, 1);
+		                                                                                                                                                                auto fov = Lua::CheckNumber(l, 2);
+		                                                                                                                                                                auto nearZ = Lua::CheckNumber(l, 3);
+		                                                                                                                                                                auto farZ = Lua::CheckNumber(l, 4);
+		                                                                                                                                                                auto *cam = get_cgame()->CreateCamera<CCameraComponent>(aspectRatio, fov, nearZ, farZ);
+		                                                                                                                                                                if(cam == nullptr)
+			                                                                                                                                                                return 0;
+		                                                                                                                                                                cam->PushLuaObject(l);
+		                                                                                                                                                                return 1;
+	                                                                                                                                                                })},
 	    {"create_scene", Lua::game::Client::create_scene}});
 	modEnts[luabind::def("register_component_event", &Lua::ents::register_component_event)];
 
@@ -256,8 +256,8 @@ void pragma::CGame::RegisterLua()
 	modTime[(luabind::def("server_time", Lua::ServerTime), luabind::def("frame_time", Lua::FrameTime))];
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "sound",
-	  {{"CHANNEL_CONFIG_MONO", math::to_integral(audio::ChannelConfig::Mono)}, {"CHANNEL_CONFIG_STEREO", math::to_integral(audio::ChannelConfig::Stereo)}, {"CHANNEL_CONFIG_REAR", math::to_integral(audio::ChannelConfig::Rear)}, {"CHANNEL_CONFIG_QUAD", math::to_integral(audio::ChannelConfig::Quad)},
-	    {"CHANNEL_CONFIG_X51", math::to_integral(audio::ChannelConfig::X51)}, {"CHANNEL_CONFIG_X61", math::to_integral(audio::ChannelConfig::X61)}, {"CHANNEL_CONFIG_X71", math::to_integral(audio::ChannelConfig::X71)},
+	  {{"CHANNEL_CONFIG_MONO", math::to_integral(audio::ChannelConfig::Mono)}, {"CHANNEL_CONFIG_STEREO", math::to_integral(audio::ChannelConfig::Stereo)}, {"CHANNEL_CONFIG_REAR", math::to_integral(audio::ChannelConfig::Rear)},
+	    {"CHANNEL_CONFIG_QUAD", math::to_integral(audio::ChannelConfig::Quad)}, {"CHANNEL_CONFIG_X51", math::to_integral(audio::ChannelConfig::X51)}, {"CHANNEL_CONFIG_X61", math::to_integral(audio::ChannelConfig::X61)}, {"CHANNEL_CONFIG_X71", math::to_integral(audio::ChannelConfig::X71)},
 	    {"CHANNEL_CONFIG_BFORMAT_2D", math::to_integral(audio::ChannelConfig::BFormat2D)}, {"CHANNEL_CONFIG_BFORMAT_3D", math::to_integral(audio::ChannelConfig::BFormat3D)},
 
 	    {"SAMPLE_TYPE_UINT8", math::to_integral(audio::SampleType::UInt8)}, {"SAMPLE_TYPE_INT16", math::to_integral(audio::SampleType::Int16)}, {"SAMPLE_TYPE_FLOAT32", math::to_integral(audio::SampleType::Float32)}, {"SAMPLE_TYPE_MULAW", math::to_integral(audio::SampleType::Mulaw)}});
@@ -267,12 +267,13 @@ void pragma::CGame::RegisterLua()
 	Lua::RegisterLibraryEnums(GetLuaState(), "file", {{"SEARCH_RESOURCES", networking::FSYS_SEARCH_RESOURCES}});
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "geometry",
-	  {{"FrustumPlane_LEFT", pragma::math::to_integral(math::FrustumPlane::Left)}, {"FrustumPlane_RIGHT", pragma::math::to_integral(math::FrustumPlane::Right)}, {"FrustumPlane_TOP", pragma::math::to_integral(math::FrustumPlane::Top)}, {"FrustumPlane_BOTTOM", pragma::math::to_integral(math::FrustumPlane::Bottom)},
-	    {"FrustumPlane_NEAR", pragma::math::to_integral(math::FrustumPlane::Near)}, {"FrustumPlane_FAR", pragma::math::to_integral(math::FrustumPlane::Far)}, {"FrustumPlane_COUNT", pragma::math::to_integral(math::FrustumPlane::Count)},
+	  {{"FrustumPlane_LEFT", pragma::math::to_integral(math::FrustumPlane::Left)}, {"FrustumPlane_RIGHT", pragma::math::to_integral(math::FrustumPlane::Right)}, {"FrustumPlane_TOP", pragma::math::to_integral(math::FrustumPlane::Top)},
+	    {"FrustumPlane_BOTTOM", pragma::math::to_integral(math::FrustumPlane::Bottom)}, {"FrustumPlane_NEAR", pragma::math::to_integral(math::FrustumPlane::Near)}, {"FrustumPlane_FAR", pragma::math::to_integral(math::FrustumPlane::Far)},
+	    {"FrustumPlane_COUNT", pragma::math::to_integral(math::FrustumPlane::Count)},
 
 	    {"FrustumPoint_FarBottomLeft", pragma::math::to_integral(math::FrustumPoint::FarBottomLeft)}, {"FrustumPoint_FAR_TOP_LEFT", pragma::math::to_integral(math::FrustumPoint::FarTopLeft)}, {"FrustumPoint_FAR_TOP_RIGHT", pragma::math::to_integral(math::FrustumPoint::FarTopRight)},
-	    {"FrustumPoint_FAR_BOTTOM_RIGHT", pragma::math::to_integral(math::FrustumPoint::FarBottomRight)}, {"FrustumPoint_NearBottomLeft", pragma::math::to_integral(math::FrustumPoint::NearBottomLeft)}, {"FrustumPoint_NearTopLeft", pragma::math::to_integral(math::FrustumPoint::NearTopLeft)},
-	    {"FrustumPoint_NearTopRight", pragma::math::to_integral(math::FrustumPoint::NearTopRight)}, {"FrustumPoint_NearBottomRight", pragma::math::to_integral(math::FrustumPoint::NearBottomRight)}});
+	    {"FrustumPoint_FAR_BOTTOM_RIGHT", pragma::math::to_integral(math::FrustumPoint::FarBottomRight)}, {"FrustumPoint_NearBottomLeft", pragma::math::to_integral(math::FrustumPoint::NearBottomLeft)},
+	    {"FrustumPoint_NearTopLeft", pragma::math::to_integral(math::FrustumPoint::NearTopLeft)}, {"FrustumPoint_NearTopRight", pragma::math::to_integral(math::FrustumPoint::NearTopRight)}, {"FrustumPoint_NearBottomRight", pragma::math::to_integral(math::FrustumPoint::NearBottomRight)}});
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "gui",
 	  {{"CURSOR_SHAPE_DEFAULT", math::to_integral(platform::Cursor::Shape::Default)}, {"CURSOR_SHAPE_HIDDEN", math::to_integral(platform::Cursor::Shape::Hidden)}, {"CURSOR_SHAPE_ARROW", math::to_integral(platform::Cursor::Shape::Arrow)},

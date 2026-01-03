@@ -10,8 +10,8 @@ export import :entities.components.base;
 
 export namespace pragma {
 	namespace baseToggleComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_TURN_ON;
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_TURN_OFF;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_TURN_ON)
+		REGISTER_COMPONENT_EVENT(EVENT_ON_TURN_OFF)
 	}
 	class DLLNETWORK BaseToggleComponent : public BaseEntityComponent {
 	  public:

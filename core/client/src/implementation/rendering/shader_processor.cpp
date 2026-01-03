@@ -58,7 +58,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindShader(const CSceneComponent 
 
 	if(m_cmdBuffer.RecordBindShaderPipeline(shader, pipelineIdx) == false) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-			Con::cwar << "[Render] WARNING: Failed to bind pipeline " << pipelineIdx << " of shader " << shader.GetIdentifier() << "!" << Con::endl;
+			Con::CWAR << "[Render] WARNING: Failed to bind pipeline " << pipelineIdx << " of shader " << shader.GetIdentifier() << "!" << Con::endl;
 		return false;
 	}
 
@@ -129,14 +129,14 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(ecs::CBaseEntity &ent)
 	assert(descSet);
 	if(descSet == nullptr) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED) {
-			Con::cwar << "[Render] WARNING: Entity " << ent << " has invalid render descriptor set!" << Con::endl;
+			Con::CWAR << "[Render] WARNING: Entity " << ent << " has invalid render descriptor set!" << Con::endl;
 		}
 		return false;
 	}
 	auto sceneFlags = m_sceneFlags;
 	if(m_curShader->RecordBindEntity(*this, *renderC, *m_currentPipelineLayout, m_entityInstanceDescriptorSetIndex) == false) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED) {
-			Con::cwar << "[Render] WARNING: Failed to bind entity " << ent << " to shader " << m_curShader->GetIdentifier() << "!" << Con::endl;
+			Con::CWAR << "[Render] WARNING: Failed to bind entity " << ent << " to shader " << m_curShader->GetIdentifier() << "!" << Con::endl;
 		}
 		return false;
 	}
@@ -205,14 +205,14 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(geometry::CModelSubMesh &mes
 
 	auto numIndices = mesh.GetIndexCount();
 	if(numIndices > math::to_integral(GameLimits::MaxMeshVertices)) {
-		Con::cerr << "Attempted to draw mesh with more than maximum (" << math::to_integral(GameLimits::MaxMeshVertices) << ") amount of vertices!" << Con::endl;
+		Con::CERR << "Attempted to draw mesh with more than maximum (" << math::to_integral(GameLimits::MaxMeshVertices) << ") amount of vertices!" << Con::endl;
 		return false;
 	}
 	auto &vkMesh = mesh.GetSceneMesh();
 	auto &bufferData = *static_cast<CModelComponent *>(m_modelC)->GetRenderBufferData(meshIdx);
 	if(bufferData.renderBuffer == nullptr) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED) {
-			Con::cwar << "[Render] WARNING: Render buffer data of entity " << m_modelC->GetEntity() << " has invalid render buffer!" << Con::endl;
+			Con::CWAR << "[Render] WARNING: Render buffer data of entity " << m_modelC->GetEntity() << " has invalid render buffer!" << Con::endl;
 		}
 		return false;
 	}
@@ -221,7 +221,7 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(geometry::CModelSubMesh &mes
 
 	if(m_cmdBuffer.RecordBindRenderBuffer(*bufferData.renderBuffer) == false) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED) {
-			Con::cwar << "[Render] WARNING: Failed to bind render buffer of entity " << m_modelC->GetEntity() << "!" << Con::endl;
+			Con::CWAR << "[Render] WARNING: Failed to bind render buffer of entity " << m_modelC->GetEntity() << "!" << Con::endl;
 		}
 		return false;
 	}

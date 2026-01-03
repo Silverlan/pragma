@@ -133,7 +133,7 @@ void pragma::pts::CParticleRendererBlob::UpdateDebugNeighborLinks()
 			auto &o = static_cast<debug::DebugRenderer::WorldObject &>(*ptrO.get());
 			auto &verts = o.GetVertices();
 			assert(verts.size() == 2);
-			if(uvec::cmp(verts.front(), uvec::ORIGIN) == false || uvec::cmp(verts.back(), uvec::ORIGIN) == false) {
+			if(uvec::cmp(verts.front(), uvec::PRM_ORIGIN) == false || uvec::cmp(verts.back(), uvec::PRM_ORIGIN) == false) {
 				verts.front() = {};
 				verts.back() = {};
 				o.UpdateVertexBuffer();

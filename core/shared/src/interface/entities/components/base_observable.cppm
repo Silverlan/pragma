@@ -23,7 +23,7 @@ export namespace pragma {
 		std::optional<std::pair<EulerAngles, EulerAngles>> angleLimits = {};
 	};
 	namespace baseObservableComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_OBSERVER_CHANGED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_OBSERVER_CHANGED)
 	}
 	class DLLNETWORK BaseObservableComponent : public BaseEntityComponent {
 	  public:

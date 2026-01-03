@@ -99,7 +99,7 @@ void pragma::physics::CPhysVisualDebugger::InitializeBuffers()
 void pragma::physics::CPhysVisualDebugger::DrawLine(const Vector3 &from, const Vector3 &to, const Color &fromColor, const Color &toColor) { m_lineBuffer.AddInstance({from, to}, {fromColor.ToVector4(), toColor.ToVector4()}); }
 void pragma::physics::CPhysVisualDebugger::DrawPoint(const Vector3 &pos, const Color &color) { m_pointBuffer.AddInstance({pos}, {color.ToVector4()}); }
 void pragma::physics::CPhysVisualDebugger::DrawTriangle(const Vector3 &v0, const Vector3 &v1, const Vector3 &v2, const Color &c0, const Color &c1, const Color &c2) { m_triangleBuffer.AddInstance({v0, v1, v2}, {c0.ToVector4(), c1.ToVector4(), c2.ToVector4()}); }
-void pragma::physics::CPhysVisualDebugger::ReportErrorWarning(const std::string &str) { Con::cwar << "[Phys] WARNING: " << str << Con::endl; }
+void pragma::physics::CPhysVisualDebugger::ReportErrorWarning(const std::string &str) { Con::CWAR << "[Phys] WARNING: " << str << Con::endl; }
 void pragma::physics::CPhysVisualDebugger::DrawText(const std::string &str, const Vector3 &location, const Color &color, float size)
 {
 	// TODO

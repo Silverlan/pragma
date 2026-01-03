@@ -80,7 +80,7 @@ static prosper::BlendFactor name_to_blend_factor(const std::string &name)
 		return prosper::BlendFactor::Src1Alpha;
 	else if(pragma::string::compare<std::string>(name, "one_minus_src1_alpha", false))
 		return prosper::BlendFactor::OneMinusSrc1Alpha;
-	Con::cwar << "Invalid blend factor type '" << name << "'!" << Con::endl;
+	Con::CWAR << "Invalid blend factor type '" << name << "'!" << Con::endl;
 	return prosper::BlendFactor::One;
 }
 
@@ -96,7 +96,7 @@ static prosper::BlendOp name_to_blend_op(const std::string &name)
 		return prosper::BlendOp::Min;
 	else if(pragma::string::compare<std::string>(name, "max", false))
 		return prosper::BlendOp::Max;
-	Con::cwar << "Invalid blend operation '" << name << "'!" << Con::endl;
+	Con::CWAR << "Invalid blend operation '" << name << "'!" << Con::endl;
 	return prosper::BlendOp::Add;
 }
 

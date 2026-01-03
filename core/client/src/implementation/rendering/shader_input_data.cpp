@@ -67,8 +67,8 @@ void ShaderInputData::DebugPrint()
 		});
 		ss << "\n";
 	}
-	Con::cout << "Material Data:" << Con::endl;
-	Con::cout << ss.str() << Con::endl;
+	Con::COUT << "Material Data:" << Con::endl;
+	Con::COUT << ss.str() << Con::endl;
 }
 
 // ShaderInputDescriptor

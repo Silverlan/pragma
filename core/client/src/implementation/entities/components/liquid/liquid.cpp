@@ -218,7 +218,7 @@ static void debug_water(NetworkState *state, BasePlayerComponent *pl, std::vecto
 		}
 	}
 	if(bFoundWater == false)
-		Con::cwar << "No water entity found!" << Con::endl;
+		Con::CWAR << "No water entity found!" << Con::endl;
 }
 namespace {
 	auto UVN = console::client::register_command("debug_water", &debug_water, console::ConVarFlags::None,

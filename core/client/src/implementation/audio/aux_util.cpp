@@ -13,7 +13,7 @@ static void debug_audio_aux_effect(pragma::NetworkState *state, pragma::BasePlay
 {
 	auto *soundSys = pragma::get_cengine()->GetSoundSystem();
 	if(soundSys == nullptr) {
-		Con::cwar << "Sound engine hasn't been initialized!" << Con::endl;
+		Con::CWAR << "Sound engine hasn't been initialized!" << Con::endl;
 		return;
 	}
 	if(argv.empty() == true) {
@@ -21,20 +21,20 @@ static void debug_audio_aux_effect(pragma::NetworkState *state, pragma::BasePlay
 			soundSys->RemoveGlobalEffect(s_globalEffectId);
 			return;
 		}
-		Con::cwar << "No effect has been specified!" << Con::endl;
+		Con::CWAR << "No effect has been specified!" << Con::endl;
 		return;
 	}
 	auto &dspName = argv.front();
 	auto effect = pragma::get_cengine()->GetAuxEffect(dspName);
 	if(effect == nullptr) {
-		Con::cwar << "No auxiliary effect found with name '" << dspName << "'!" << Con::endl;
+		Con::CWAR << "No auxiliary effect found with name '" << dspName << "'!" << Con::endl;
 		return;
 	}
 	s_globalEffectId = soundSys->AddGlobalEffect(*effect); // TODO: Gain
 	if(s_globalEffectId == std::numeric_limits<uint32_t>::max())
-		Con::cwar << "Unable to apply auxiliary effect '" << dspName << "'!" << Con::endl;
+		Con::CWAR << "Unable to apply auxiliary effect '" << dspName << "'!" << Con::endl;
 	else
-		Con::cout << "Auxiliary effect '" << dspName << "' has been applied!" << Con::endl;
+		Con::COUT << "Auxiliary effect '" << dspName << "' has been applied!" << Con::endl;
 }
 namespace {
 	auto UVN = pragma::console::client::register_command("debug_audio_aux_effect", &debug_audio_aux_effect, pragma::console::ConVarFlags::None, "Applies a global DSP effect. Usage: debug_audio_aux_effect <dspName> <gain>");
@@ -129,13 +129,13 @@ std::shared_ptr<pragma::audio::IEffect> pragma::audio::create_aux_effect(const s
 		prop["phonemeb_coarse_tuning"](props.iPhonemeBCoarseTuning);
 		prop["waveform"](props.iWaveform);
 
-		const std::unordered_map<std::string, int32_t> phonemes = {{"a", math::to_integral(VocalMorpherPhoneme::A)}, {"e", math::to_integral(VocalMorpherPhoneme::E)}, {"i", math::to_integral(VocalMorpherPhoneme::I)}, {"o", math::to_integral(VocalMorpherPhoneme::O)},
-		  {"u", math::to_integral(VocalMorpherPhoneme::U)}, {"aa", math::to_integral(VocalMorpherPhoneme::AA)}, {"ae", math::to_integral(VocalMorpherPhoneme::AE)}, {"ah", math::to_integral(VocalMorpherPhoneme::AH)},
-		  {"ao", math::to_integral(VocalMorpherPhoneme::AO)}, {"eh", math::to_integral(VocalMorpherPhoneme::EH)}, {"er", math::to_integral(VocalMorpherPhoneme::ER)}, {"ih", math::to_integral(VocalMorpherPhoneme::IH)},
-		  {"iy", math::to_integral(VocalMorpherPhoneme::IY)}, {"uh", math::to_integral(VocalMorpherPhoneme::UH)}, {"uw", math::to_integral(VocalMorpherPhoneme::UW)}, {"b", math::to_integral(VocalMorpherPhoneme::B)}, {"d", math::to_integral(VocalMorpherPhoneme::D)},
-		  {"f", math::to_integral(VocalMorpherPhoneme::F)}, {"g", math::to_integral(VocalMorpherPhoneme::G)}, {"j", math::to_integral(VocalMorpherPhoneme::J)}, {"k", math::to_integral(VocalMorpherPhoneme::K)}, {"l", math::to_integral(VocalMorpherPhoneme::L)},
-		  {"m", math::to_integral(VocalMorpherPhoneme::M)}, {"n", math::to_integral(VocalMorpherPhoneme::N)}, {"p", math::to_integral(VocalMorpherPhoneme::P)}, {"r", math::to_integral(VocalMorpherPhoneme::R)}, {"s", math::to_integral(VocalMorpherPhoneme::S)},
-		  {"t", math::to_integral(VocalMorpherPhoneme::T)}, {"v", math::to_integral(VocalMorpherPhoneme::V)}, {"z", math::to_integral(VocalMorpherPhoneme::Z)}};
+		const std::unordered_map<std::string, int32_t> phonemes
+		  = {{"a", math::to_integral(VocalMorpherPhoneme::A)}, {"e", math::to_integral(VocalMorpherPhoneme::E)}, {"i", math::to_integral(VocalMorpherPhoneme::I)}, {"o", math::to_integral(VocalMorpherPhoneme::O)}, {"u", math::to_integral(VocalMorpherPhoneme::U)},
+		    {"aa", math::to_integral(VocalMorpherPhoneme::AA)}, {"ae", math::to_integral(VocalMorpherPhoneme::AE)}, {"ah", math::to_integral(VocalMorpherPhoneme::AH)}, {"ao", math::to_integral(VocalMorpherPhoneme::AO)}, {"eh", math::to_integral(VocalMorpherPhoneme::EH)},
+		    {"er", math::to_integral(VocalMorpherPhoneme::ER)}, {"ih", math::to_integral(VocalMorpherPhoneme::IH)}, {"iy", math::to_integral(VocalMorpherPhoneme::IY)}, {"uh", math::to_integral(VocalMorpherPhoneme::UH)}, {"uw", math::to_integral(VocalMorpherPhoneme::UW)},
+		    {"b", math::to_integral(VocalMorpherPhoneme::B)}, {"d", math::to_integral(VocalMorpherPhoneme::D)}, {"f", math::to_integral(VocalMorpherPhoneme::F)}, {"g", math::to_integral(VocalMorpherPhoneme::G)}, {"j", math::to_integral(VocalMorpherPhoneme::J)},
+		    {"k", math::to_integral(VocalMorpherPhoneme::K)}, {"l", math::to_integral(VocalMorpherPhoneme::L)}, {"m", math::to_integral(VocalMorpherPhoneme::M)}, {"n", math::to_integral(VocalMorpherPhoneme::N)}, {"p", math::to_integral(VocalMorpherPhoneme::P)},
+		    {"r", math::to_integral(VocalMorpherPhoneme::R)}, {"s", math::to_integral(VocalMorpherPhoneme::S)}, {"t", math::to_integral(VocalMorpherPhoneme::T)}, {"v", math::to_integral(VocalMorpherPhoneme::V)}, {"z", math::to_integral(VocalMorpherPhoneme::Z)}};
 
 		const std::unordered_map<std::string, int32_t *> phonemeKeys = {{"phonemea", &props.iPhonemeA}, {"phonemeb", &props.iPhonemeB}};
 		for(auto &pair : phonemeKeys) {

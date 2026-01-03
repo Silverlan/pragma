@@ -121,7 +121,7 @@ bool GUIDebugCursorManager::Initialize()
 						    g["x"] = pragma::gui::WGUILuaInterface::GetLuaObject(l, *el);
 						    std::stringstream ss;
 						    el->Print(ss);
-						    Con::cout << "Assigned element '" << ss.str() << "' to global variable 'x'!" << Con::endl;
+						    Con::COUT << "Assigned element '" << ss.str() << "' to global variable 'x'!" << Con::endl;
 					    }
 				    }
 			    }
@@ -249,7 +249,7 @@ void GUIDebugCursorManager::SetTargetGUIElement(pragma::gui::types::WIBase *optE
 	auto *pText = static_cast<pragma::gui::types::WIText *>(m_hText.get());
 	if(pText) {
 		pText->SetText(GetElementInfo(el));
-		Con::cout << pText->GetText().cpp_str() << Con::endl;
+		Con::COUT << pText->GetText().cpp_str() << Con::endl;
 	}
 
 	auto *l = pragma::get_cgame()->GetLuaState();
@@ -259,7 +259,11 @@ void GUIDebugCursorManager::SetTargetGUIElement(pragma::gui::types::WIBase *optE
 		if(o)
 			luabind::globals(l)["debug_ui_element"] = o;
 		else
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+			luabind::globals(l)["debug_ui_element"] = luabind::object {};
+#else
 			luabind::globals(l)["debug_ui_element"] = Lua::nil;
+#endif
 	}
 
 	// Initialize border to highlight the element
@@ -309,7 +313,7 @@ void GUIDebugCursorManager::SetTargetGUIElement(pragma::gui::types::WIBase *optE
 	std::string t = "\t";
 	auto *pParent = el.GetParent();
 	while(pParent != nullptr) {
-		Con::cout << t << GetElementInfo(*pParent) << Con::endl;
+		Con::COUT << t << GetElementInfo(*pParent) << Con::endl;
 		pParent = pParent->GetParent();
 		t += "\t";
 	}
@@ -353,7 +357,7 @@ static void debug_gui_cursor(pragma::NetworkState *state, pragma::BasePlayerComp
 		auto &elName = argv.front();
 		auto *el = pragma::gui::WGUI::GetInstance().FindByFilter([&elName](pragma::gui::types::WIBase &el) -> bool { return pragma::string::compare(el.GetName(), elName, false); });
 		if(!el) {
-			Con::cwar << "Unable to find element by name '" << elName << "'!" << Con::endl;
+			Con::CWAR << "Unable to find element by name '" << elName << "'!" << Con::endl;
 			return;
 		}
 		s_dbgManager->SetTargetGUIElementOverride(el);
@@ -367,18 +371,18 @@ static void debug_dump_font_glyph_map(pragma::NetworkState *state, pragma::BaseP
 {
 	auto &wgui = pragma::gui::WGUI::GetInstance();
 	if(argv.empty()) {
-		Con::cwar << "No font specified!" << Con::endl;
+		Con::CWAR << "No font specified!" << Con::endl;
 		return;
 	}
 	auto &fontName = argv.front();
 	auto font = pragma::gui::FontManager::GetFont(fontName);
 	if(font == nullptr) {
-		Con::cwar << "No font by name '" << fontName << "' found!" << Con::endl;
+		Con::CWAR << "No font by name '" << fontName << "' found!" << Con::endl;
 		return;
 	}
 	auto glyphMap = font->GetGlyphMap();
 	if(glyphMap == nullptr) {
-		Con::cwar << "Font '" << fontName << "' has invalid glyph map!" << Con::endl;
+		Con::CWAR << "Font '" << fontName << "' has invalid glyph map!" << Con::endl;
 		return;
 	}
 	auto &glyphImg = glyphMap->GetImage();
@@ -387,7 +391,7 @@ static void debug_dump_font_glyph_map(pragma::NetworkState *state, pragma::BaseP
 	pragma::image::TextureInfo texInfo {};
 	texInfo.containerFormat = pragma::image::TextureInfo::ContainerFormat::DDS;
 	if(!prosper::util::save_texture(fileName, glyphImg, texInfo)) {
-		Con::cwar << "Failed to save glyph map as '" << fileName << "'!" << Con::endl;
+		Con::CWAR << "Failed to save glyph map as '" << fileName << "'!" << Con::endl;
 		return;
 	}
 }
@@ -404,18 +408,18 @@ static void debug_font_glyph_map(pragma::NetworkState *state, pragma::BasePlayer
 		return;
 	}
 	if(argv.empty()) {
-		Con::cwar << "No font specified!" << Con::endl;
+		Con::CWAR << "No font specified!" << Con::endl;
 		return;
 	}
 	auto &fontName = argv.front();
 	auto font = pragma::gui::FontManager::GetFont(fontName);
 	if(font == nullptr) {
-		Con::cwar << "No font by name '" << fontName << "' found!" << Con::endl;
+		Con::CWAR << "No font by name '" << fontName << "' found!" << Con::endl;
 		return;
 	}
 	auto glyphMap = font->GetGlyphMap();
 	if(glyphMap == nullptr) {
-		Con::cwar << "Font '" << fontName << "' has invalid glyph map!" << Con::endl;
+		Con::CWAR << "Font '" << fontName << "' has invalid glyph map!" << Con::endl;
 		return;
 	}
 	auto &glyphImg = glyphMap->GetImage();

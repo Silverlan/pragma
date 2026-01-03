@@ -68,8 +68,6 @@ void CompositeGroup::ClearEntities(bool safely)
 
 ////////////////
 
-pragma::ComponentEventId compositeComponent::EVENT_ON_ENTITY_ADDED = INVALID_COMPONENT_ID;
-pragma::ComponentEventId compositeComponent::EVENT_ON_ENTITY_REMOVED = INVALID_COMPONENT_ID;
 void CompositeComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	compositeComponent::EVENT_ON_ENTITY_ADDED = registerEvent("ON_COMPOSITE_ENTITY_ADDED", ComponentEventInfo::Type::Broadcast);

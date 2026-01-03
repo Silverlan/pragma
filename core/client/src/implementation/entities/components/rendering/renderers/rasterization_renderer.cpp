@@ -406,8 +406,8 @@ void CRasterizationRendererComponent::UpdateFrustumPlanes(CSceneComponent &scene
 	auto up = camera->GetUp();
 	auto rot = camera->GetRotation();
 	auto pos = camera->GetPos();
-	camera->SetForward(uvec::FORWARD);
-	camera->SetUp(uvec::UP);
+	camera->SetForward(uvec::PRM_FORWARD);
+	camera->SetUp(uvec::PRM_UP);
 	camera->SetPos(Vector3{});
 
 	std::vector<Vector3> frustumPoints {};

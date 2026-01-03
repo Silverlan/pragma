@@ -13,8 +13,8 @@ export namespace pragma {
 	class BaseStaticBvhCacheComponent;
 	class PanimaComponent;
 	namespace baseStaticBvhUserComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_STATIC_BVH_COMPONENT_CHANGED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_ACTIVATION_STATE_CHANGED)
+		REGISTER_COMPONENT_EVENT(EVENT_ON_STATIC_BVH_COMPONENT_CHANGED)
 	}
 	class DLLNETWORK BaseStaticBvhUserComponent : public BaseEntityComponent {
 	  public:

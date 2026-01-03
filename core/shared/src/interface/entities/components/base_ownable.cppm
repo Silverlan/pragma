@@ -17,7 +17,7 @@ export namespace pragma {
 		ecs::BaseEntity *newOwner;
 	};
 	namespace baseOwnableComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_OWNER_CHANGED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_OWNER_CHANGED)
 	}
 	class DLLNETWORK BaseOwnableComponent : public BaseEntityComponent {
 	  public:

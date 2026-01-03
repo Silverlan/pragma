@@ -12,7 +12,7 @@ export namespace pragma {
 	class OrientationComponent;
 	class BaseCharacterComponent;
 	namespace movementComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_UPDATE_MOVEMENT;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_UPDATE_MOVEMENT)
 	}
 	class DLLNETWORK MovementComponent final : public BaseEntityComponent {
 	  public:

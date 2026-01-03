@@ -640,10 +640,10 @@ static void debug_light_sources(NetworkState *state, BasePlayerComponent *pl, st
 	}
 
 	auto &lightBufManager = LightDataBufferManager::GetInstance();
-	Con::cout << "Light buffer count: " << lightBufManager.GetLightDataBufferCount() << Con::endl;
+	Con::COUT << "Light buffer count: " << lightBufManager.GetLightDataBufferCount() << Con::endl;
 	auto numTotal = lightBufManager.GetMaxCount();
-	Con::cout << "Max light count: " << numTotal << Con::endl;
-	Con::cout << "Allocated buffer instances: " << lightBufManager.GetGlobalRenderBuffer().GetTotalInstanceCount() << Con::endl;
+	Con::COUT << "Max light count: " << numTotal << Con::endl;
+	Con::COUT << "Allocated buffer instances: " << lightBufManager.GetGlobalRenderBuffer().GetTotalInstanceCount() << Con::endl;
 
 	auto getBufferData = [](prosper::IBuffer &buf) -> LightBufferData {
 		LightBufferData data;
@@ -658,24 +658,24 @@ static void debug_light_sources(NetworkState *state, BasePlayerComponent *pl, st
 			type = "Point";
 		else if((data.flags & LightBufferData::BufferFlags::TypeDirectional) != LightBufferData::BufferFlags::None)
 			type = "Directional";
-		Con::cout << "\t\tPosition: (" << data.position.x << "," << data.position.y << "," << data.position.z << ")" << Con::endl;
-		Con::cout << "\t\tShadow Index: " << data.shadowIndex << Con::endl;
-		Con::cout << "\t\tShadow Map Index (static): " << data.shadowMapIndexStatic << Con::endl;
-		Con::cout << "\t\tShadow Map Index (dynamic): " << data.shadowMapIndexDynamic << Con::endl;
-		Con::cout << "\t\tType: " << type << Con::endl;
-		Con::cout << "\t\tColor: (" << data.color.r << "," << data.color.g << "," << data.color.b << ")" << Con::endl;
-		Con::cout << "\t\tIntensity (candela): " << data.intensity << Con::endl;
-		Con::cout << "\t\tDirection: (" << data.direction.x << "," << data.direction.y << "," << data.direction.z << ")" << Con::endl;
-		Con::cout << "\t\tCone Start Offset: " << data.direction.w << Con::endl;
-		Con::cout << "\t\tDistance: " << data.position.w << Con::endl;
-		Con::cout << "\t\tOuter cone half-angle: " << math::rad_to_deg(data.outerConeHalfAngle) << Con::endl;
-		Con::cout << "\t\tInner cone half-angle: " << math::rad_to_deg(data.innerConeHalfAngle) << Con::endl;
-		Con::cout << "\t\tAttenuation: " << data.attenuation << Con::endl;
-		Con::cout << "\t\tFlags: " << math::to_integral(data.flags) << Con::endl;
-		Con::cout << "\t\tTurned On: " << (((data.flags & LightBufferData::BufferFlags::TurnedOn) == LightBufferData::BufferFlags::TurnedOn) ? "Yes" : "No") << Con::endl;
+		Con::COUT << "\t\tPosition: (" << data.position.x << "," << data.position.y << "," << data.position.z << ")" << Con::endl;
+		Con::COUT << "\t\tShadow Index: " << data.shadowIndex << Con::endl;
+		Con::COUT << "\t\tShadow Map Index (static): " << data.shadowMapIndexStatic << Con::endl;
+		Con::COUT << "\t\tShadow Map Index (dynamic): " << data.shadowMapIndexDynamic << Con::endl;
+		Con::COUT << "\t\tType: " << type << Con::endl;
+		Con::COUT << "\t\tColor: (" << data.color.r << "," << data.color.g << "," << data.color.b << ")" << Con::endl;
+		Con::COUT << "\t\tIntensity (candela): " << data.intensity << Con::endl;
+		Con::COUT << "\t\tDirection: (" << data.direction.x << "," << data.direction.y << "," << data.direction.z << ")" << Con::endl;
+		Con::COUT << "\t\tCone Start Offset: " << data.direction.w << Con::endl;
+		Con::COUT << "\t\tDistance: " << data.position.w << Con::endl;
+		Con::COUT << "\t\tOuter cone half-angle: " << math::rad_to_deg(data.outerConeHalfAngle) << Con::endl;
+		Con::COUT << "\t\tInner cone half-angle: " << math::rad_to_deg(data.innerConeHalfAngle) << Con::endl;
+		Con::COUT << "\t\tAttenuation: " << data.attenuation << Con::endl;
+		Con::COUT << "\t\tFlags: " << math::to_integral(data.flags) << Con::endl;
+		Con::COUT << "\t\tTurned On: " << (((data.flags & LightBufferData::BufferFlags::TurnedOn) == LightBufferData::BufferFlags::TurnedOn) ? "Yes" : "No") << Con::endl;
 	};
 
-	Con::cout << "Enabled light buffers:" << Con::endl;
+	Con::COUT << "Enabled light buffers:" << Con::endl;
 	auto &buf = lightBufManager.GetGlobalRenderBuffer();
 
 	auto createInfo = buf.GetCreateInfo();
@@ -698,49 +698,49 @@ static void debug_light_sources(NetworkState *state, BasePlayerComponent *pl, st
 		auto &data = *reinterpret_cast<LightBufferData *>(rawData);
 		if(!math::is_flag_set(data.flags, LightBufferData::BufferFlags::TurnedOn))
 			continue;
-		Con::cout << "Buffer Index: " << i << Con::endl;
+		Con::COUT << "Buffer Index: " << i << Con::endl;
 		printBufferData(data);
 	}
 
-	Con::cout << Con::endl;
-	Con::cout << "Light sources:" << Con::endl;
+	Con::COUT << Con::endl;
+	Con::COUT << "Light sources:" << Con::endl;
 	auto lightId = 0u;
 	for(auto *l : lights) {
-		Con::cout << "Light #" << lightId << ":" << Con::endl;
-		Con::cout << "\tType: ";
+		Con::COUT << "Light #" << lightId << ":" << Con::endl;
+		Con::COUT << "\tType: ";
 		auto type = LightType::Undefined;
 		auto *pLight = l->GetLight(type);
 		switch(type) {
 		case LightType::Directional:
-			Con::cout << "Directional";
+			Con::COUT << "Directional";
 			break;
 		case LightType::Point:
-			Con::cout << "Point";
+			Con::COUT << "Point";
 			break;
 		case LightType::Spot:
-			Con::cout << "Spot";
+			Con::COUT << "Spot";
 			break;
 		default:
-			Con::cout << "Unknown";
+			Con::COUT << "Unknown";
 			break;
 		}
-		Con::cout << Con::endl;
+		Con::COUT << Con::endl;
 
 		auto &buf = l->GetRenderBuffer();
 		if(buf == nullptr)
-			Con::cout << "\tBuffer: NULL" << Con::endl;
+			Con::COUT << "\tBuffer: NULL" << Con::endl;
 		else {
 			auto data = getBufferData(*buf);
 			printBufferData(data);
 		}
 		++lightId;
 	}
-	Con::cout << "Number of lights: " << numLights << Con::endl;
-	Con::cout << "Turned on: " << numTurnedOn << Con::endl;
+	Con::COUT << "Number of lights: " << numLights << Con::endl;
+	Con::COUT << "Turned on: " << numTurnedOn << Con::endl;
 	if(discrepancies.empty() == false) {
-		Con::cwar << "Discrepancies found in " << discrepancies.size() << " lights:" << Con::endl;
+		Con::CWAR << "Discrepancies found in " << discrepancies.size() << " lights:" << Con::endl;
 		for(auto idx : discrepancies)
-			Con::cout << "\t" << idx << Con::endl;
+			Con::COUT << "\t" << idx << Con::endl;
 	}
 }
 namespace {

@@ -83,14 +83,14 @@ static bool mount_linked_addon(const std::string &pathLink, std::vector<pragma::
 		return false;
 	ufile::remove_extension_from_filename(lnkPath);
 	if(pragma::util::resolve_link(lnkPath, resolvedPath) == false) {
-		Con::cwar << "Unable to resolve link path for '" << lnkPath << "'! This addon will not be mounted." << Con::endl;
+		Con::CWAR << "Unable to resolve link path for '" << lnkPath << "'! This addon will not be mounted." << Con::endl;
 		return false;
 	}
 	pragma::fs::add_custom_mount_directory(resolvedPath, true, static_cast<pragma::fs::SearchFlags>(pragma::FSYS_SEARCH_ADDON));
 	outAddons.push_back(pragma::AddonInfo("addons\\" + pathLink));
 	load_autorun_scripts([&resolvedPath](const std::string &findTarget, std::vector<std::string> &outFiles) { pragma::fs::find_system_files((resolvedPath + '\\' + findTarget), &outFiles, nullptr); });
 	if(silent == false)
-		Con::cout << "Mounting linked addon '" << pathLink << "'..." << Con::endl;
+		Con::COUT << "Mounting linked addon '" << pathLink << "'..." << Con::endl;
 	return true;
 }
 #endif
@@ -125,7 +125,7 @@ bool pragma::AddonSystem::MountAddon(const std::string &paddonPath, std::vector<
 	update_package_paths();
 	load_autorun_scripts([&fullPath](const std::string &findTarget, std::vector<std::string> &outFiles) { fs::find_files((fullPath + '\\' + findTarget), &outFiles, nullptr); });
 	if(silent == false)
-		Con::cout << "Mounting addon '" << addonPath << "'..." << Con::endl;
+		Con::COUT << "Mounting addon '" << addonPath << "'..." << Con::endl;
 	spdlog::info("Mounting addon '{}'...", addonPath);
 
 	// The function calls above may have added other addons, so we need to search for our addon again
@@ -217,7 +217,7 @@ void pragma::AddonSystem::MountAddons()
 		  fs::DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges);
 	}
 	catch(const fs::DirectoryWatcher::ConstructException &e) {
-		Con::cwar << "[AddonSystem] Unable to watch addons directory: " << e.what() << Con::endl;
+		Con::CWAR << "[AddonSystem] Unable to watch addons directory: " << e.what() << Con::endl;
 	}
 }
 

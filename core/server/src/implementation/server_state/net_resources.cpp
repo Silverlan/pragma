@@ -53,7 +53,7 @@ void pragma::ServerState::SendRoughModel(const std::string &f, const std::vector
 		return;
 	auto mdlName = f.substr(7, f.length()); // Path without "models\\"-prefix
 	                                        //#if RESOURCE_TRANSFER_VERBOSE == 1
-	Con::csv << "[ResourceManager] Got Request For: " << mdlName << Con::endl;
+	Con::CSV << "[ResourceManager] Got Request For: " << mdlName << Con::endl;
 	//#endif
 	auto *asset = GetModelManager().FindCachedAsset(mdlName);
 	if(asset == nullptr)
@@ -95,14 +95,14 @@ void pragma::ServerState::SendRoughModel(const std::string &f, const std::vector
 	endLoop:;
 		assert(numMeshes == 0);
 		if(numMeshes > 0) {
-			Con::cwar << "Model '" << mdlName << "' has invalid mesh count. Unable to generate rough mesh!" << Con::endl;
+			Con::CWAR << "Model '" << mdlName << "' has invalid mesh count. Unable to generate rough mesh!" << Con::endl;
 			return;
 		}
 	}
 	for(auto *cl : clients) {
 		Get()->SendPacket(networking::net_messages::client::RESOURCE_MDL_ROUGH, pOut, networking::Protocol::FastUnreliable, *cl);
 		//#if RESOURCE_TRANSFER_VERBOSE == 1
-		Con::csv << "[ResourceManager] Sent rough model to: " << cl->GetIdentifier() << "..." << Con::endl;
+		Con::CSV << "[ResourceManager] Sent rough model to: " << cl->GetIdentifier() << "..." << Con::endl;
 		//#endif
 	}
 }
@@ -134,7 +134,7 @@ void pragma::ServerState::HandleServerNextResource(networking::IServerClient &se
 		if(numResources > 0) {
 			for(auto &res : resources) {
 				if(session.AddResource(res.fileName, res.stream) == false)
-					Con::cwar << Con::PREFIX_SERVER << "[ResourceManager] Unable to open file '" << res.fileName << "'. Skipping..." << Con::endl;
+					Con::CWAR << Con::PREFIX_SERVER << "[ResourceManager] Unable to open file '" << res.fileName << "'. Skipping..." << Con::endl;
 			}
 		}
 		numResources = resTransfer.size();
@@ -144,7 +144,7 @@ void pragma::ServerState::HandleServerNextResource(networking::IServerClient &se
 		if(numResources > 0) {
 #if RESOURCE_TRANSFER_VERBOSE == 1
 			auto &r = resTransfer[0];
-			Con::csv << "[ResourceManager] File '" << r->name << "' transferred successfully to " << session->GetIP() << ". " << (numResources - 1) << " resources left!" << Con::endl;
+			Con::CSV << "[ResourceManager] File '" << r->name << "' transferred successfully to " << session->GetIP() << ". " << (numResources - 1) << " resources left!" << Con::endl;
 #endif
 			session.RemoveResource(0);
 			numResources--;
@@ -156,7 +156,7 @@ void pragma::ServerState::HandleServerNextResource(networking::IServerClient &se
 	) {
 		if(bComplete == false) {
 			session.SetInitialResourceTransferState(networking::IServerClient::TransferState::Complete);
-			Con::csv << "All resources have been sent to client '" << session.GetIdentifier() << "'!" << Con::endl;
+			Con::CSV << "All resources have been sent to client '" << session.GetIdentifier() << "'!" << Con::endl;
 			NetPacket p;
 			SendPacket(networking::net_messages::client::RESOURCECOMPLETE, p, networking::Protocol::SlowReliable, session);
 		}
@@ -178,12 +178,12 @@ void pragma::ServerState::HandleServerResourceStart(networking::IServerClient &s
 {
 	auto &resTransfer = session.GetResourceTransfer();
 	if(resTransfer.empty()) {
-		Con::cwar << "Attempted to send invalid resource fragment to client " << session.GetIdentifier() << Con::endl;
+		Con::CWAR << "Attempted to send invalid resource fragment to client " << session.GetIdentifier() << Con::endl;
 		return;
 	}
 	bool send = packet->Read<bool>();
 	if(send) {
-		Con::csv << "Sending file '" << resTransfer[0]->name << "' to client '" << session.GetIdentifier() << "'" << Con::endl;
+		Con::CSV << "Sending file '" << resTransfer[0]->name << "' to client '" << session.GetIdentifier() << "'" << Con::endl;
 		HandleServerResourceFragment(session);
 	}
 	else
@@ -194,7 +194,7 @@ void pragma::ServerState::HandleServerResourceFragment(networking::IServerClient
 {
 	auto &resTransfer = session.GetResourceTransfer();
 	if(resTransfer.empty()) {
-		Con::cwar << "Attempted to send invalid resource fragment to client " << session.GetIdentifier() << Con::endl;
+		Con::CWAR << "Attempted to send invalid resource fragment to client " << session.GetIdentifier() << Con::endl;
 		return;
 	}
 	auto &r = resTransfer[0];
@@ -220,7 +220,7 @@ void pragma::ServerState::ReceiveUserInput(networking::IServerClient &client, Ne
 		return;
 	auto latency = client.GetLatency() / 2.f; // Latency is entire roundtrip; We need the time for one way
 	auto tActivated = (util::clock::to_int(util::clock::get_duration_since_start()) - packet.GetTimeActivated()) / 1'000'000.0;
-	//Con::ccl<<"Snapshot delay: "<<+latency<<"+ "<<tActivated<<" = "<<(latency +tActivated)<<Con::endl;
+	//Con::CCL<<"Snapshot delay: "<<+latency<<"+ "<<tActivated<<" = "<<(latency +tActivated)<<Con::endl;
 	auto tDelta = static_cast<float>((latency + tActivated) / 1'000.0);
 
 	NetPacket pOut;
@@ -255,7 +255,7 @@ void pragma::ServerState::ReceiveUserInput(networking::IServerClient &client, Ne
 	}
 	if(actionInputC)
 		actionInputC->SetActionInputs(actions, bController);
-	//Con::csv<<"Action inputs "<<actions<<" for player "<<pl<<" ("<<pl->GetClientSession()->GetIP()<<")"<<Con::endl;
+	//Con::CSV<<"Action inputs "<<actions<<" for player "<<pl<<" ("<<pl->GetClientSession()->GetIP()<<")"<<Con::endl;
 
 	SendPacket(networking::net_messages::client::PLAYERINPUT, pOut, networking::Protocol::FastUnreliable, {client, networking::ClientRecipientFilter::FilterType::Exclude});
 

@@ -456,7 +456,7 @@ void Lua::util::register_shared_generic(lua::State *l, luabind::module_ &mod)
 		  auto zipFile = uzip::ZIPFile::Open(path.GetString(), err, openMode);
 		  if(!zipFile)
 			  return nullptr;
-		  Con::cwar << "Failed to open zip file '" << path.GetString() << "': " << err << Con::endl;
+		  Con::CWAR << "Failed to open zip file '" << path.GetString() << "': " << err << Con::endl;
 		  return zipFile;
 	  })];
 	defZip.scope[luabind::def(
@@ -471,7 +471,7 @@ void Lua::util::register_shared_generic(lua::State *l, luabind::module_ &mod)
 		  auto zipFile = uzip::ZIPFile::Open(*filePath, err, openMode);
 		  if(!zipFile)
 			  return nullptr;
-		  Con::cwar << "Failed to open zip file '" << *filePath << "': " << err << Con::endl;
+		  Con::CWAR << "Failed to open zip file '" << *filePath << "': " << err << Con::endl;
 		  return zipFile;
 	  })];
 	defZip.scope[luabind::def(
@@ -1419,7 +1419,7 @@ Lua::var<bool, pragma::util::ParallelJob<luabind::object>> Lua::util::pack_zip_a
 	std::string err;
 	auto zip = uzip::ZIPFile::Open(absFilePath, err, uzip::OpenMode::Write);
 	if(zip == nullptr) {
-		Con::cwar << "Failed to open zip file '" << absFilePath << ": " << err << Con::endl;
+		Con::CWAR << "Failed to open zip file '" << absFilePath << ": " << err << Con::endl;
 		return luabind::object {l, false};
 	}
 	auto pzip = std::shared_ptr<uzip::ZIPFile> {std::move(zip)};

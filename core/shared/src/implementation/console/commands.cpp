@@ -20,11 +20,11 @@ void pragma::console::commands::lua_run(lua::State *l, const std::string &chunkN
 void pragma::console::commands::lua_run(NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float)
 {
 	if(argv.empty()) {
-		Con::cwar << "No argument given to execute!" << Con::endl;
+		Con::CWAR << "No argument given to execute!" << Con::endl;
 		return;
 	}
 	if(!state->IsGameActive() || state->GetGameState() == nullptr) {
-		Con::cwar << "No game is active! Lua code cannot be executed without an active game!" << Con::endl;
+		Con::CWAR << "No game is active! Lua code cannot be executed without an active game!" << Con::endl;
 		return;
 	}
 
@@ -39,11 +39,11 @@ void pragma::console::commands::lua_run(NetworkState *state, BasePlayerComponent
 void pragma::console::commands::lua_exec(NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float)
 {
 	if(argv.empty()) {
-		Con::cwar << "No argument given to execute!" << Con::endl;
+		Con::CWAR << "No argument given to execute!" << Con::endl;
 		return;
 	}
 	if(!state->IsGameActive() || state->GetGameState() == nullptr) {
-		Con::cwar << "No game is active! Lua code cannot be executed without an active game!" << Con::endl;
+		Con::CWAR << "No game is active! Lua code cannot be executed without an active game!" << Con::endl;
 		return;
 	}
 

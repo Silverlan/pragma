@@ -28,7 +28,7 @@ namespace {
 void CMD_bind_keys(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	for(int i = 0; i < (sizeof(BIND_KEYS) / sizeof(BIND_KEYS[0])); i++)
-		Con::cout << BIND_KEYS[i] << Con::endl;
+		Con::COUT << BIND_KEYS[i] << Con::endl;
 }
 
 void CMD_bind(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
@@ -37,7 +37,7 @@ void CMD_bind(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector
 		return;
 	short c;
 	if(!StringToKey(argv[0], &c)) {
-		Con::cout << "\"" << argv[0] << "\" isn't a valid key. Use 'bind_keys' to get a list of all available keys" << Con::endl;
+		Con::COUT << "\"" << argv[0] << "\" isn't a valid key. Use 'bind_keys' to get a list of all available keys" << Con::endl;
 		return;
 	}
 	auto bindings = pragma::get_cengine()->GetCoreInputBindingLayer();
@@ -52,7 +52,7 @@ void CMD_unbind(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vect
 		return;
 	short c;
 	if(!StringToKey(argv[0], &c)) {
-		Con::cout << "\"" << argv[0] << "\" isn't a valid key. Use 'bind_keys' to get a list of all available keys" << Con::endl;
+		Con::COUT << "\"" << argv[0] << "\" isn't a valid key. Use 'bind_keys' to get a list of all available keys" << Con::endl;
 		return;
 	}
 	auto bindings = pragma::get_cengine()->GetCoreInputBindingLayer();
@@ -76,12 +76,12 @@ void CMD_keymappings(pragma::NetworkState *, pragma::BasePlayerComponent *, std:
 	std::string key;
 	for(auto &pair : mappings) {
 		if(KeyToString(pair.first, &key)) {
-			Con::cout << key << ": ";
+			Con::COUT << key << ": ";
 			if(pair.second.GetType() == KeyBind::Type::Regular)
-				Con::cout << "\"" << pair.second.GetBind() << "\"";
+				Con::COUT << "\"" << pair.second.GetBind() << "\"";
 			else
-				Con::cout << "function";
-			Con::cout << Con::endl;
+				Con::COUT << "function";
+			Con::COUT << Con::endl;
 		}
 	}
 }

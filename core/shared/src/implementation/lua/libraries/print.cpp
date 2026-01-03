@@ -38,11 +38,11 @@ int Lua::console::print(lua::State *L)
 	/*int argc = Lua::GetStackTop(l);
 	for(int i=1;i<=argc;i++)
 	{
-		if(i > 1) Con::cout<<"\t";
+		if(i > 1) Con::COUT<<"\t";
 		const char *arg = lua_gettype(l,i);
-		Con::cout<<arg;
+		Con::COUT<<arg;
 	}
-	Con::cout<<Con::endl;
+	Con::COUT<<Con::endl;
 	return 0;*/
 	int n = GetStackTop(L); /* number of arguments */
 	int i;
@@ -52,10 +52,10 @@ int Lua::console::print(lua::State *L)
 		if(lua_value_to_string(L, i, &status, &val) == false)
 			return status;
 		if(i > 1)
-			Con::cout << "\t";
-		Con::cout << val;
+			Con::COUT << "\t";
+		Con::COUT << val;
 	}
-	Con::cout << Con::endl;
+	Con::COUT << Con::endl;
 	return 0;
 }
 
@@ -70,7 +70,7 @@ int Lua::console::print_table(lua::State *l, std::string tab, int idx)
 			std::string key;
 			if(lua_value_to_string(l, -2, &status, &key) == false)
 				return status;
-			Con::cout << tab << key << ":" << Con::endl;
+			Con::COUT << tab << key << ":" << Con::endl;
 
 			std::string tabSub = tab;
 			tabSub += "\t";
@@ -86,7 +86,7 @@ int Lua::console::print_table(lua::State *l, std::string tab, int idx)
 			std::string val;
 			if(lua_value_to_string(l, -1, &status, &val) == false)
 				return status;
-			Con::cout << tab << key << " = " << val << Con::endl;
+			Con::COUT << tab << key << " = " << val << Con::endl;
 		}
 		Pop(l, 1);
 	}
@@ -112,7 +112,7 @@ int Lua::console::msg(lua::State *l, int st)
 		std::string val;
 		if(lua_value_to_string(l, i, &status, &val) == false)
 			return status;
-		Con::cout << val;
+		Con::COUT << val;
 	}
 	return 0;
 }
@@ -133,10 +133,10 @@ int Lua::debug::print(lua::State *l)
 		if(lua_value_to_string(l, i, &status, &val) == false)
 			return status;
 		if(i > 1)
-			Con::cout << "\t";
-		Con::cout << val;
+			Con::COUT << "\t";
+		Con::COUT << val;
 	}
-	Con::cout << Con::endl;
+	Con::COUT << Con::endl;
 	beep(l);
 	return 0;
 }
@@ -146,7 +146,7 @@ int Lua::console::msg(lua::State *l) { return msg(l, 1); }
 int Lua::console::msgn(lua::State *l)
 {
 	msg(l);
-	Con::cout << Con::endl;
+	Con::COUT << Con::endl;
 	return 0;
 }
 
@@ -171,7 +171,7 @@ int Lua::console::msgc(lua::State *l)
 	int flags = Lua::CheckInt<int>(l, 1);
 	Con::attr(flags);
 	msg(l, 2);
-	Con::cout << Con::endl;
+	Con::COUT << Con::endl;
 	return 0;
 }
 
@@ -180,15 +180,15 @@ int Lua::console::msgw(lua::State *l)
 	int argc = GetStackTop(l);
 	if(argc == 0)
 		return 0;
-	Con::cwar << "";
+	Con::CWAR << "";
 	for(int i = 1; i <= argc; i++) {
 		auto status = -1;
 		std::string val;
 		if(lua_value_to_string(l, i, &status, &val) == false)
 			return status;
-		Con::cwar << val;
+		Con::CWAR << val;
 	}
-	Con::cwar << Con::endl;
+	Con::CWAR << Con::endl;
 	return 0;
 }
 
@@ -197,15 +197,15 @@ int Lua::console::msge(lua::State *l)
 	int argc = GetStackTop(l);
 	if(argc == 0)
 		return 0;
-	Con::cerr << "";
+	Con::CERR << "";
 	for(int i = 1; i <= argc; i++) {
 		auto status = -1;
 		std::string val;
 		if(lua_value_to_string(l, i, &status, &val) == false)
 			return status;
-		Con::cerr << val;
+		Con::CERR << val;
 	}
-	Con::cerr << Con::endl;
+	Con::CERR << Con::endl;
 	return 0;
 }
 

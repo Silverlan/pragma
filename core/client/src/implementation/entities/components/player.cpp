@@ -260,7 +260,7 @@ void CPlayerComponent::OnUpdateMatrices(Mat4 &transformMatrix)
 {
 	if(IsLocalPlayer() && IsInFirstPersonMode()) {
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		auto t = (pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD) * VIEW_BODY_OFFSET;
+		auto t = (pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::PRM_FORWARD) * VIEW_BODY_OFFSET;
 		transformMatrix = glm::gtc::translate(umat::identity(), t) * transformMatrix; // Translate to align shadow with view body
 	}
 }
@@ -470,7 +470,7 @@ void CPlayerComponent::PrintMessage(std::string message, console::MESSAGE type)
 {
 	switch(type) {
 	case console::MESSAGE::PRINTCONSOLE:
-		Con::cout << message << Con::endl;
+		Con::COUT << message << Con::endl;
 		break;
 	case console::MESSAGE::PRINTCHAT:
 		{

@@ -16,8 +16,8 @@ export {
 			class ModelSubMesh;
 		}
 		namespace baseSurfaceComponent {
-			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_SURFACE_PLANE_CHANGED;
-			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_SURFACE_MESH_CHANGED;
+			REGISTER_COMPONENT_EVENT(EVENT_ON_SURFACE_PLANE_CHANGED)
+			REGISTER_COMPONENT_EVENT(EVENT_ON_SURFACE_MESH_CHANGED)
 		}
 		class DLLNETWORK BaseSurfaceComponent : public BaseEntityComponent {
 		  public:

@@ -67,8 +67,8 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 		return;
 	std::string errMsg;
 	if(convertLightmapDataToBspLuxelData(*get_client_state(), mapPath, *imgBuf, extents.width, extents.height, errMsg) == false) {
-		Con::cwar << "Unable to convert lightmap data to BSP luxel data: " << errMsg << Con::endl;
+		Con::CWAR << "Unable to convert lightmap data to BSP luxel data: " << errMsg << Con::endl;
 		return;
 	}
-	Con::cout << "Successfully written lightmap luxel data!" << Con::endl;
+	Con::COUT << "Successfully written lightmap luxel data!" << Con::endl;
 }

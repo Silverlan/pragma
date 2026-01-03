@@ -49,7 +49,7 @@ pragma::ecs::CBaseEntity *pragma::CGame::CreateEntity(std::string classname)
 			skipSet.erase(classname);
 			return r;
 		}
-		Con::cwar << "Unable to create entity '" << classname << "': Factory not found!" << Con::endl;
+		Con::CWAR << "Unable to create entity '" << classname << "': Factory not found!" << Con::endl;
 		return nullptr;
 	}
 	return factory(get_client_state());
@@ -146,7 +146,7 @@ void pragma::CGame::SetupEntity(ecs::BaseEntity *ent, unsigned int idx)
 {
 	if(idx < m_shEnts.size()) {
 		if(m_shEnts[idx] != nullptr) {
-			Con::cwar << "New entity " << ent << " shares server index " << idx << " with existing entity " << *m_shEnts[idx] << "! Removing existing..." << Con::endl;
+			Con::CWAR << "New entity " << ent << " shares server index " << idx << " with existing entity " << *m_shEnts[idx] << "! Removing existing..." << Con::endl;
 			auto *entOther = GetEntity(idx);
 			RemoveEntity(entOther);
 		}

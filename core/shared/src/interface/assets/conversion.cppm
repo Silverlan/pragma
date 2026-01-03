@@ -10,8 +10,19 @@ export import :types;
 export import pragma.filesystem;
 
 export namespace pragma::util {
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+	DLLNETWORK const std::string &IMPORT_PATH {
+		static std::string str = "addons/imported/";
+		return str;
+	}
+	DLLNETWORK const std::string &CONVERT_PATH {
+		static std::string str = "addons/converted/";
+		return str;
+	}
+#else
 	DLLNETWORK const std::string IMPORT_PATH = "addons/imported/";
 	DLLNETWORK const std::string CONVERT_PATH = "addons/converted/";
+#endif
 	namespace impl {
 		DLLNETWORK void *get_module_func(NetworkState *nw, const std::string &name);
 	};

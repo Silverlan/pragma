@@ -8,8 +8,6 @@ import :entities.components.shooter;
 
 using namespace pragma::ecs;
 
-pragma::ComponentEventId baseShooterComponent::EVENT_ON_FIRE_BULLETS = INVALID_COMPONENT_ID;
-pragma::ComponentEventId baseShooterComponent::EVENT_ON_BULLETS_FIRED = INVALID_COMPONENT_ID;
 using namespace baseShooterComponent;
 void BaseShooterComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {

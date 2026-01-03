@@ -348,7 +348,7 @@ void Lua::animation::register_library(Interface &lua)
 		  channel.Save(udmData);
 		  std::stringstream ss;
 		  data->ToAscii(ss, ::udm::AsciiSaveFlags::Default | ::udm::AsciiSaveFlags::DontCompressLz4Arrays);
-		  Con::cout << ss.str() << Con::endl;
+		  Con::COUT << ss.str() << Con::endl;
 	  });
 	cdChannel.def(
 	  "PopulateRandom", +[](panima::Channel &channel, uint32_t numValues, float minTime, float maxTime, float minVal, float maxVal) {

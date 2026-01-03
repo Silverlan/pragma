@@ -15,11 +15,19 @@ import :util.render_tile;
 export {
 	namespace pragma {
 		namespace baseEnvCameraComponent {
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+			DLLNETWORK const float &DEFAULT_NEAR_Z;
+			DLLNETWORK const float &DEFAULT_FAR_Z;
+			DLLNETWORK const float &DEFAULT_FOV;
+			DLLNETWORK const float &DEFAULT_VIEWMODEL_FOV;
+			DLLNETWORK const float &DEFAULT_FOCAL_DISTANCE;
+#else
 			CLASS_ENUM_COMPAT const float DEFAULT_NEAR_Z;
 			CLASS_ENUM_COMPAT const float DEFAULT_FAR_Z;
 			CLASS_ENUM_COMPAT const float DEFAULT_FOV;
 			CLASS_ENUM_COMPAT const float DEFAULT_VIEWMODEL_FOV;
 			CLASS_ENUM_COMPAT const float DEFAULT_FOCAL_DISTANCE;
+#endif
 		}
 		class DLLNETWORK BaseEnvCameraComponent : public BaseEntityComponent {
 		  public:

@@ -8,10 +8,6 @@ import :entities.components.base_model;
 
 using namespace pragma;
 
-ComponentEventId baseModelComponent::EVENT_ON_MODEL_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId baseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED = INVALID_COMPONENT_ID;
-ComponentEventId baseModelComponent::EVENT_ON_SKIN_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId baseModelComponent::EVENT_ON_BODY_GROUP_CHANGED = INVALID_COMPONENT_ID;
 void BaseModelComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseModelComponent::EVENT_ON_MODEL_CHANGED = registerEvent("ON_MODEL_CHANGED", ComponentEventInfo::Type::Broadcast);
@@ -424,7 +420,7 @@ bool BaseModelComponent::GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 
 	switch(space) {
 	case math::CoordinateSpace::Local:
 		{
-			origin = uvec::ORIGIN;
+			origin = uvec::PRM_ORIGIN;
 			rot = uquat::identity();
 			break;
 		}

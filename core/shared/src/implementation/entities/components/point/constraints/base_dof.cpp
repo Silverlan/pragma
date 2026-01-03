@@ -47,7 +47,7 @@ void BasePointConstraintDoFComponent::InitializeConstraint(ecs::BaseEntity *src,
 	auto *physEnv = game->GetPhysicsEnvironment();
 	//auto &posThis = entThis.GetPosition();
 	auto pTrComponent = entThis.GetTransformComponent();
-	auto dir = pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD;
+	auto dir = pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::PRM_FORWARD;
 
 	auto &bodies = physTgt->GetRigidBodies();
 	for(auto it = bodies.begin(); it != bodies.end(); ++it) {

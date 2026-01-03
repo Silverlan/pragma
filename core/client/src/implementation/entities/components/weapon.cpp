@@ -217,7 +217,7 @@ void CWeaponComponent::OnFireBullets(const game::BulletInfo &bulletInfo, Vector3
 		if(plComponent->IsLocalPlayer()) {
 			auto charComponent = owner->GetCharacterComponent();
 			auto pTrComponent = owner->GetTransformComponent();
-			bulletDir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD;
+			bulletDir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::PRM_FORWARD;
 			bulletOrigin = plComponent->GetViewPos();
 		}
 	}

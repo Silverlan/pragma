@@ -553,7 +553,7 @@ void pragma::asset::WorldData::WriteEntities(fs::VFilePtrReal &f)
 
 		f->WriteString(entData->GetClassName());
 		auto &pose = entData->GetPose();
-		f->Write<Vector3>(pose ? pose->GetOrigin() : uvec::ORIGIN);
+		f->Write<Vector3>(pose ? pose->GetOrigin() : uvec::PRM_ORIGIN);
 
 		// Keyvalues
 		auto &keyValues = entData->GetKeyValues();
@@ -613,7 +613,7 @@ bool pragma::asset::WorldData::SaveLightmapAtlas(const std::string &mapName)
 	auto matPath = "materials/maps/" + mapName;
 	fs::create_path(matPath);
 	auto filePath = matPath + "/lightmap_atlas.dds";
-	auto result = image::save_texture(filePath, *m_lightMapAtlas, saveInfo, [](const std::string &msg) { Con::cwar << "Unable to save lightmap atlas: " << msg << Con::endl; });
+	auto result = image::save_texture(filePath, *m_lightMapAtlas, saveInfo, [](const std::string &msg) { Con::CWAR << "Unable to save lightmap atlas: " << msg << Con::endl; });
 	if(result)
 		m_messageLogger("Lightmap atlas has been saved as '" + filePath + "'!");
 	else

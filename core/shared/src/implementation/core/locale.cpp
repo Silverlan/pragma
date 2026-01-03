@@ -123,7 +123,7 @@ void pragma::locale::set_language(std::string lan)
 			auto it = std::find(g_loadedFiles.begin(), g_loadedFiles.end(), filePath.GetString());
 			if(it == g_loadedFiles.end())
 				return;
-			Con::cout << "Reloading localization file '" << str << "'..." << Con::endl;
+			Con::COUT << "Reloading localization file '" << str << "'..." << Con::endl;
 			load(str, true);
 		});
 	}

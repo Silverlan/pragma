@@ -8,17 +8,6 @@ import :entities.components.base_weapon;
 
 using namespace pragma;
 
-ComponentEventId baseWeaponComponent::EVENT_ON_DEPLOY = INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_HOLSTER = INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_PRIMARY_ATTACK = INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_SECONDARY_ATTACK = INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_TERTIARY_ATTACK = INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_ATTACK4 = INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_END_PRIMARY_ATTACK = INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_END_SECONDARY_ATTACK = INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_RELOAD = INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED = INVALID_COMPONENT_ID;
-ComponentEventId baseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED = INVALID_COMPONENT_ID;
 void BaseWeaponComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	baseWeaponComponent::EVENT_ON_DEPLOY = registerEvent("ON_DEPLOY", ComponentEventInfo::Type::Broadcast);

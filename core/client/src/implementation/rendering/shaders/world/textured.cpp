@@ -558,22 +558,22 @@ static void print_shader_material_data(material::CMaterial &mat)
 {
 	auto *shader = dynamic_cast<ShaderGameWorldLightingPass *>(mat.GetPrimaryShader());
 	if(!shader) {
-		Con::cwar << "Material '" << mat.GetName() << "' has no primary shader!" << Con::endl;
+		Con::CWAR << "Material '" << mat.GetName() << "' has no primary shader!" << Con::endl;
 		return;
 	}
 	auto *shaderMat = shader->GetShaderMaterial();
 	if(!shaderMat) {
-		Con::cwar << "Shader '" << shader->GetIdentifier() << "' has no shader material!" << Con::endl;
+		Con::CWAR << "Shader '" << shader->GetIdentifier() << "' has no shader material!" << Con::endl;
 		return;
 	}
 	auto *buf = mat.GetSettingsBuffer();
 	if(!buf) {
-		Con::cwar << "Material '" << mat.GetName() << "' has no settings buffer!" << Con::endl;
+		Con::CWAR << "Material '" << mat.GetName() << "' has no settings buffer!" << Con::endl;
 		return;
 	}
 	rendering::ShaderInputData shaderMatData {*shaderMat};
 	if(!buf->Read(0, shaderMatData.data.size(), shaderMatData.data.data())) {
-		Con::cwar << "Failed to read settings buffer data of material '" << mat.GetName() << "'!" << Con::endl;
+		Con::CWAR << "Failed to read settings buffer data of material '" << mat.GetName() << "'!" << Con::endl;
 		return;
 	}
 	shaderMatData.DebugPrint();
@@ -582,13 +582,13 @@ static void print_shader_material_data(material::CMaterial &mat)
 static void debug_print_shader_material_data(NetworkState *state, BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.empty()) {
-		Con::cwar << "No material specified!" << Con::endl;
+		Con::CWAR << "No material specified!" << Con::endl;
 		return;
 	}
 	auto &matName = argv.front();
 	auto *mat = get_client_state()->LoadMaterial(matName);
 	if(!mat) {
-		Con::cwar << "Failed to load material '" << matName << "'!" << Con::endl;
+		Con::CWAR << "Failed to load material '" << matName << "'!" << Con::endl;
 		return;
 	}
 	print_shader_material_data(static_cast<material::CMaterial &>(*mat));

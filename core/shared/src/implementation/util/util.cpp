@@ -61,17 +61,17 @@ static bool print_code_snippet(ufile::IFile &f, uint32_t lineIdx, uint32_t charI
 			++pos;
 		}
 		if(it == lines.end() - 1)
-			Con::cwar << "  > ";
+			Con::CWAR << "  > ";
 		else
-			Con::cwar << "    ";
-		Con::cwar << line << '\n';
+			Con::CWAR << "    ";
+		Con::CWAR << line << '\n';
 
 		if(it == lines.end() - 1)
 			lineOffset = line.length() - len;
 	}
-	Con::cwar << std::string(static_cast<size_t>(charIdx) + 4 + lineOffset, ' ') << '^' << Con::endl;
+	Con::CWAR << std::string(static_cast<size_t>(charIdx) + 4 + lineOffset, ' ') << '^' << Con::endl;
 
-	Con::cwar << Con::endl;
+	Con::CWAR << Con::endl;
 	return true;
 }
 template<typename T>
@@ -91,18 +91,18 @@ static std::shared_ptr<udm::Data> load_udm_asset(T &&f, std::string *optOutErr)
 	catch(const udm::AsciiException &e) {
 		if(optOutErr)
 			*optOutErr = e.what();
-		Con::cwar << "[UDM] Failed to load UDM asset";
+		Con::CWAR << "[UDM] Failed to load UDM asset";
 		if constexpr(std::is_same_v<TBase, std::string>)
-			Con::cout << " '" << f << "'";
+			Con::COUT << " '" << f << "'";
 		else {
 			auto *ptr = static_cast<pragma::fs::VFilePtrInternalReal *>(fptr.get());
 			if(ptr) {
 				auto path = pragma::util::Path::CreateFile(ptr->GetPath());
 				path.MakeRelative(pragma::util::get_program_path());
-				Con::cwar << " '" << path.GetString() << "'";
+				Con::CWAR << " '" << path.GetString() << "'";
 			}
 		}
-		Con::cwar << ": " << e.what() << ":\n";
+		Con::CWAR << ": " << e.what() << ":\n";
 		if constexpr(std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, std::string>) {
 			auto fptr = pragma::fs::open_file(f.c_str(), pragma::fs::FileMode::Read);
 			if(fptr) {
@@ -412,4 +412,9 @@ bool pragma::util::show_notification(const std::string &summary, const std::stri
 	info.appIcon = absIconPath;
 	info.body = body;
 	return oskit::show_notification(info);
+}
+
+bool pragma::util::add_file_to_zip_archive(uzip::ZIPFile &zipArchive, const std::string &fileName, const void *data, uint64_t size, bool bOverwrite)
+{
+	return zipArchive.AddFile(fileName, data, size, bOverwrite);
 }

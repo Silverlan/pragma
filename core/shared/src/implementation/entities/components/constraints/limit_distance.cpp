@@ -89,7 +89,7 @@ void ConstraintLimitDistanceComponent::ApplyConstraint()
 	auto dir = posDriven - origin;
 	auto l = uvec::length(dir);
 	if(l < 0.0001f)
-		dir = uvec::FORWARD;
+		dir = uvec::PRM_FORWARD;
 	else
 		dir /= l;
 	posDriver = origin + dir * GetDistance();

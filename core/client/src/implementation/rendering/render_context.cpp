@@ -68,7 +68,7 @@ void rendering::RenderContext::InitializeRenderAPI()
 	};
 	std::string err;
 	if(loadRenderApiModule(renderAPI, err) == false) {
-		Con::cwar << "Failed to load default render API '" << renderAPI << "': " << err << ". Falling back to alternatives..." << Con::endl;
+		Con::CWAR << "Failed to load default render API '" << renderAPI << "': " << err << ". Falling back to alternatives..." << Con::endl;
 		// Fallback
 		SetRenderAPI("vulkan");
 		if(loadRenderApiModule(renderAPI, err) == false) {
@@ -224,7 +224,7 @@ void rendering::RenderContext::ValidationCallback(prosper::DebugMessageSeverityF
 	if(math::is_flag_set(severityFlags, prosper::DebugMessageSeverityFlags::WarningBit | prosper::DebugMessageSeverityFlags::ErrorBit)) {
 		auto stackBacktraceString = debug::get_formatted_stack_backtrace_string();
 		if(!stackBacktraceString.empty()) {
-			string::replace(stackBacktraceString, "\n", std::string{util::LOG_NL});
+			string::replace(stackBacktraceString, "\n", std::string {util::LOG_NL});
 			LOGGER_VALIDATION.debug("Backtrace: {}", stackBacktraceString);
 		}
 	}

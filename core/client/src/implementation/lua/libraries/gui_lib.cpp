@@ -26,7 +26,7 @@ static bool check_element(const std::string &name, pragma::gui::types::WIBase *e
 {
 	if(el)
 		return true;
-	Con::cwar << "Failed to create GUI element of type '" << name << "'!" << Con::endl;
+	Con::CWAR << "Failed to create GUI element of type '" << name << "'!" << Con::endl;
 	return false;
 }
 pragma::gui::types::WIBase *Lua::gui::create(pragma::CGame *game, const std::string &name, pragma::gui::types::WIBase &parent, int32_t x, int32_t y, uint32_t w, uint32_t h, float left, float top, float right, float bottom)
@@ -133,7 +133,8 @@ static Lua::opt<Lua::mult<Lua::type<pragma::gui::types::WIBase>, Lua::type<pragm
 
 	pContainer->SizeToContents();
 
-	return Lua::mult<Lua::type<pragma::gui::types::WIBase>, Lua::type<pragma::gui::types::WIBase>, Lua::type<pragma::gui::types::WIBase>> {l, pragma::gui::WGUILuaInterface::GetLuaObject(l, *pContainer), pragma::gui::WGUILuaInterface::GetLuaObject(l, *pCheckbox), pragma::gui::WGUILuaInterface::GetLuaObject(l, *pText)};
+	return Lua::mult<Lua::type<pragma::gui::types::WIBase>, Lua::type<pragma::gui::types::WIBase>, Lua::type<pragma::gui::types::WIBase>> {l, pragma::gui::WGUILuaInterface::GetLuaObject(l, *pContainer), pragma::gui::WGUILuaInterface::GetLuaObject(l, *pCheckbox),
+	  pragma::gui::WGUILuaInterface::GetLuaObject(l, *pText)};
 }
 Lua::opt<Lua::mult<Lua::type<pragma::gui::types::WIBase>, Lua::type<pragma::gui::types::WIBase>, Lua::type<pragma::gui::types::WIBase>>> Lua::gui::create_checkbox(lua::State *l, const std::string &label, pragma::gui::types::WIBase &parent) { return ::create_checkbox(l, label, &parent); }
 Lua::opt<Lua::mult<Lua::type<pragma::gui::types::WIBase>, Lua::type<pragma::gui::types::WIBase>, Lua::type<pragma::gui::types::WIBase>>> Lua::gui::create_checkbox(lua::State *l, const std::string &label) { return ::create_checkbox(l, label, nullptr); }

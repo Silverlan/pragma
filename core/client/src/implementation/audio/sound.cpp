@@ -22,11 +22,12 @@ pragma::audio::ALSound *pragma::audio::CALSound::FindByServerIndex(uint32_t idx)
 	return it->second.lock().get();
 }
 
-std::shared_ptr<pragma::audio::CALSound> pragma::audio::CALSound::Create(NetworkState *nw, const PSoundChannel &channel) {
+std::shared_ptr<pragma::audio::CALSound> pragma::audio::CALSound::Create(NetworkState *nw, const PSoundChannel &channel)
+{
 	auto als = std::shared_ptr<CALSound> {new CALSound {nw, channel}, [](CALSound *snd) {
-		snd->OnRelease();
-		delete snd;
-	}};
+		                                      snd->OnRelease();
+		                                      delete snd;
+	                                      }};
 	return als;
 }
 

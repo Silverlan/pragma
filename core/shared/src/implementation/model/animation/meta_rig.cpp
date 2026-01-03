@@ -190,7 +190,7 @@ void pragma::animation::MetaRig::DebugPrint(const asset::Model &mdl)
 		ss << "\n";
 	}
 
-	Con::cout << ss.str() << Con::endl;
+	Con::COUT << ss.str() << Con::endl;
 }
 std::optional<pragma::animation::MetaRigBoneType> pragma::animation::MetaRig::FindMetaBoneType(BoneId boneId) const
 {

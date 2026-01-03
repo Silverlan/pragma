@@ -242,12 +242,12 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		    return std::pair<Vector3, Vector3> {pr, dr};
 	    }))];
 
-	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "ORIGIN", uvec::ORIGIN);
-	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "FORWARD", uvec::FORWARD);
-	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "RIGHT", uvec::RIGHT);
-	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "UP", uvec::UP);
-	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "MIN", uvec::MIN);
-	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "MAX", uvec::MAX);
+	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "ORIGIN", uvec::PRM_ORIGIN);
+	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "FORWARD", uvec::PRM_FORWARD);
+	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "RIGHT", uvec::PRM_RIGHT);
+	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "UP", uvec::PRM_UP);
+	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "MIN", uvec::PRM_MIN);
+	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "MAX", uvec::PRM_MAX);
 
 	auto modAng = luabind::module_(lua.GetState(), "angle");
 	modAng[(luabind::def("random", Lua::global::angle_rand), luabind::def("create_from_string", Lua::global::create_from_string))];

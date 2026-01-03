@@ -12,12 +12,11 @@ void pragma::scripting::lua_core::bindings::register_renderers(lua::State *l, lu
 	auto defRenderer = pragma::LuaCore::create_entity_component_class<CRendererComponent, BaseEntityComponent>("RendererComponent");
 	defRenderer.def("GetWidth", &CRendererComponent::GetWidth);
 	defRenderer.def("GetHeight", &CRendererComponent::GetHeight);
-	defRenderer.def("InitializeRenderTarget",
-		static_cast<void (*)(lua::State *, CRendererComponent &, CSceneComponent &, uint32_t, uint32_t, bool)>([](lua::State *l, CRendererComponent &renderer, CSceneComponent &scene, uint32_t width, uint32_t height, bool reload) {
-			if(reload == false && width == renderer.GetWidth() && height == renderer.GetHeight())
-				return;
-			renderer.ReloadRenderTarget(scene, width, height);
-		}));
+	defRenderer.def("InitializeRenderTarget", static_cast<void (*)(lua::State *, CRendererComponent &, CSceneComponent &, uint32_t, uint32_t, bool)>([](lua::State *l, CRendererComponent &renderer, CSceneComponent &scene, uint32_t width, uint32_t height, bool reload) {
+		if(reload == false && width == renderer.GetWidth() && height == renderer.GetHeight())
+			return;
+		renderer.ReloadRenderTarget(scene, width, height);
+	}));
 	defRenderer.def("InitializeRenderTarget", static_cast<void (*)(lua::State *, CRendererComponent &, CSceneComponent &, uint32_t, uint32_t)>([](lua::State *l, CRendererComponent &renderer, CSceneComponent &scene, uint32_t width, uint32_t height) {
 		if(width == renderer.GetWidth() && height == renderer.GetHeight())
 			return;
@@ -52,21 +51,18 @@ void pragma::scripting::lua_core::bindings::register_renderers(lua::State *l, lu
 	defRaster.def("GetPrepassMode", &CRasterizationRendererComponent::GetPrepassMode);
 	defRaster.def("SetSSAOEnabled", &CRasterizationRendererComponent::SetSSAOEnabled);
 	defRaster.def("IsSSAOEnabled", &CRasterizationRendererComponent::IsSSAOEnabled);
-	defRaster.def("GetLightSourceDescriptorSet",
-		static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua::State *, CRasterizationRendererComponent &)>([](lua::State *l, CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> {
-			auto *ds = CShadowManagerComponent::GetShadowManager()->GetDescriptorSet();
-			if(ds == nullptr)
-				return nullptr;
-			return ds->GetDescriptorSetGroup().shared_from_this();
-		}));
+	defRaster.def("GetLightSourceDescriptorSet", static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua::State *, CRasterizationRendererComponent &)>([](lua::State *l, CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> {
+		auto *ds = CShadowManagerComponent::GetShadowManager()->GetDescriptorSet();
+		if(ds == nullptr)
+			return nullptr;
+		return ds->GetDescriptorSetGroup().shared_from_this();
+	}));
 	defRaster.def("GetPostPrepassDepthTexture",
-		static_cast<std::shared_ptr<prosper::Texture> (*)(lua::State *, CRasterizationRendererComponent &)>([](lua::State *l, CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> { return renderer.GetPrepass().textureDepth; }));
+	  static_cast<std::shared_ptr<prosper::Texture> (*)(lua::State *, CRasterizationRendererComponent &)>([](lua::State *l, CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> { return renderer.GetPrepass().textureDepth; }));
 	defRaster.def("GetPostProcessingDepthDescriptorSet",
-		static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua::State *, CRasterizationRendererComponent &)>(
-		[](lua::State *l, CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgDepthPostProcessing; }));
+	  static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua::State *, CRasterizationRendererComponent &)>([](lua::State *l, CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgDepthPostProcessing; }));
 	defRaster.def("GetPostProcessingHDRColorDescriptorSet",
-		static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua::State *, CRasterizationRendererComponent &)>(
-		[](lua::State *l, CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgHDRPostProcessing; }));
+	  static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua::State *, CRasterizationRendererComponent &)>([](lua::State *l, CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgHDRPostProcessing; }));
 #if 0
 	defRaster.def("GetStagingRenderTarget",static_cast<void(*)(lua::State*,pragma::CRasterizationRendererComponent&)>([](lua::State *l,pragma::CRasterizationRendererComponent &renderer) {
 
@@ -96,8 +92,7 @@ void pragma::scripting::lua_core::bindings::register_renderers(lua::State *l, lu
 	}));
 #endif
 	defRaster.def("GetRenderTargetTextureDescriptorSet",
-		static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua::State *, CRasterizationRendererComponent &)>(
-		[](lua::State *l, CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgHDRPostProcessing; }));
+	  static_cast<std::shared_ptr<prosper::IDescriptorSetGroup> (*)(lua::State *, CRasterizationRendererComponent &)>([](lua::State *l, CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> { return renderer.GetHDRInfo().dsgHDRPostProcessing; }));
 	defRaster.def("ReloadPresentationRenderTarget", &CRasterizationRendererComponent::ReloadPresentationRenderTarget);
 	defRaster.def("RecordPrepass", &CRasterizationRendererComponent::RecordPrepass);
 	defRaster.def("RecordLightingPass", &CRasterizationRendererComponent::RecordLightingPass);

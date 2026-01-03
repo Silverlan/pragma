@@ -42,7 +42,7 @@ static std::optional<CyclesModuleInterface> initialize_library(pragma::ClientSta
 	std::string err;
 	auto hLib = client.InitializeLibrary("unirender/pr_unirender", &err);
 	if(hLib == nullptr) {
-		Con::cwar << "Unable to create unirender scene for raytracing: Unable to load module: " << err << Con::endl;
+		Con::CWAR << "Unable to create unirender scene for raytracing: Unable to load module: " << err << Con::endl;
 		return {};
 	}
 	CyclesModuleInterface cyclesInterface {*hLib};

@@ -15,8 +15,8 @@ export {
 		class BaseEnvLightPointComponent;
 		class BaseEnvLightDirectionalComponent;
 		namespace baseEnvLightComponent {
-			CLASS_ENUM_COMPAT ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
-			CLASS_ENUM_COMPAT ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
+			REGISTER_COMPONENT_EVENT(EVENT_CALC_LIGHT_DIRECTION_TO_POINT)
+			REGISTER_COMPONENT_EVENT(EVENT_CALC_LIGHT_INTENSITY_AT_POINT)
 		}
 		class DLLNETWORK BaseEnvLightComponent : public BaseEntityComponent {
 		  public:
@@ -85,7 +85,7 @@ export {
 			CECalcLightDirectionToPoint(const Vector3 &pos);
 			virtual void PushArguments(lua::State *l) override;
 			const Vector3 &pos;
-			Vector3 direction = uvec::FORWARD;
+			Vector3 direction = uvec::PRM_FORWARD;
 		};
 		struct DLLNETWORK CECalcLightIntensityAtPoint : public ComponentEvent {
 			CECalcLightIntensityAtPoint(const Vector3 &pos);

@@ -12,7 +12,14 @@ import :game.enums;
 export namespace pragma::game {
 	namespace bulletInfo {
 		CONSTEXPR_DLL_COMPAT float DEFAULT_TRACER_RADIUS = 1.f;
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+		DLLNETWORK Color &DEFAULT_TRACER_COLOR {
+			static Color col = Color(510, 510, 180, 510);
+			return col;
+		}
+#else
 		CONSTEXPR_DLL_COMPAT Color DEFAULT_TRACER_COLOR = Color(510, 510, 180, 510);
+#endif
 		CONSTEXPR_DLL_COMPAT float DEFAULT_TRACER_LENGTH = 200.f;
 		CONSTEXPR_DLL_COMPAT float DEFAULT_TRACER_SPEED = 6'000.f;
 		CONSTEXPR_DLL_COMPAT std::string_view DEFAULT_TRACER_MATERIAL = "particles/beam_tracer";

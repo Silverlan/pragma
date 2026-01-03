@@ -36,8 +36,8 @@ export {
 		};
 
 		namespace baseShooterComponent {
-			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_FIRE_BULLETS;
-			CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BULLETS_FIRED;
+			REGISTER_COMPONENT_EVENT(EVENT_ON_FIRE_BULLETS)
+			REGISTER_COMPONENT_EVENT(EVENT_ON_BULLETS_FIRED)
 		};
 		class DLLNETWORK BaseShooterComponent : public BaseEntityComponent {
 		  public:

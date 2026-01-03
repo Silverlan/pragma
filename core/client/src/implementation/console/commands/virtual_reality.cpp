@@ -57,7 +57,7 @@ static void cl_render_vr_enabled(bool b)
 	auto *client = pragma::get_client_state();
 	if(client->InitializeLibrary(OPENVR_MODULE_PATH, &err) == nullptr) {
 		lastMessage = pragma::locale::get_text("vr_msg_error_load", std::vector<std::string> {err});
-		Con::cerr << lastMessage << Con::endl;
+		Con::CERR << lastMessage << Con::endl;
 		lastColor = colors::Red;
 		show_hmd_message();
 		return;
@@ -71,7 +71,7 @@ static void cl_render_vr_enabled(bool b)
 	auto *fInitialize = dllHandle->FindSymbolAddress<bool (*)(std::string &, std::vector<std::string> &, std::vector<std::string> &)>("openvr_initialize");
 	if(fInitialize(err, reqInstanceExtensions, reqDeviceExtensions) == false) {
 		lastMessage = pragma::locale::get_text("vr_msg_error_init", std::vector<std::string> {err});
-		Con::cerr << lastMessage << Con::endl;
+		Con::CERR << lastMessage << Con::endl;
 		lastColor = colors::Red;
 		show_hmd_message();
 	}
@@ -187,7 +187,7 @@ static void cl_vr_hmd_view_enabled(bool val)
 		if(val == true)
 		{
 			fSetControllerStateCallback([](uint32_t controllerId,uint32_t key,pragma::platform::KeyState state) {
-				//Con::cerr<<"Controller Key State: "<<controllerId<<","<<key<<","<<pragma::math::to_integral(state)<<Con::endl;
+				//Con::CERR<<"Controller Key State: "<<controllerId<<","<<key<<","<<pragma::math::to_integral(state)<<Con::endl;
 				auto joystick = pragma::platform::Joystick::Create(controllerId +GLFW_MAX_JOYSTICK_COUNT); // TODO
 				auto keyOffset = GLFW_CUSTOM_KEY_JOYSTICK_0_KEY_START +joystick->GetJoystickId() *GLFW_CUSTOM_KEY_JOYSTICK_CONTROL_COUNT;
 				pragma::get_cengine()->JoystickButtonInput(pragma::get_cengine()->GetWindow(),*joystick,key +keyOffset,state);

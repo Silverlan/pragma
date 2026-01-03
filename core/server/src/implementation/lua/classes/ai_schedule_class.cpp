@@ -192,7 +192,7 @@ void Lua::AISchedule::DebugPrint(lua::State *l, pragma::ai::Schedule &schedule)
 {
 	std::stringstream ss;
 	schedule.DebugPrint(ss);
-	Con::cout << ss.str() << Con::endl;
+	Con::COUT << ss.str() << Con::endl;
 }
 void Lua::AISchedule::SetInterruptFlags(lua::State *l, pragma::ai::Schedule &schedule, uint8_t flags) { schedule.SetInterruptFlags(flags); }
 void Lua::AISchedule::AddInterruptFlags(lua::State *l, pragma::ai::Schedule &schedule, uint8_t flags) { schedule.AddInterruptFlags(flags); }

@@ -20,7 +20,7 @@ static std::optional<std::string> udm_convert(const std::string &fileName)
 	std::string err;
 	auto formatType = udm::Data::GetFormatType(fileName, err);
 	if(formatType.has_value() == false) {
-		Con::cwar << "Unable to load UDM data: " << err << Con::endl;
+		Con::CWAR << "Unable to load UDM data: " << err << Con::endl;
 		return {};
 	}
 
@@ -35,13 +35,13 @@ static std::optional<std::string> udm_convert(const std::string &fileName)
 	}
 
 	if(!newFileName.has_value()) {
-		Con::cwar << "Failed to convert UDM file: " << err << Con::endl;
+		Con::CWAR << "Failed to convert UDM file: " << err << Con::endl;
 		return {};
 	}
 
 	std::string rpath;
 	if(pragma::fs::find_absolute_path(*newFileName, rpath) == false) {
-		Con::cwar << "Unable to locate converted UDM file on disk!" << Con::endl;
+		Con::CWAR << "Unable to locate converted UDM file on disk!" << Con::endl;
 		return {};
 	}
 	return rpath;
@@ -72,7 +72,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(console::ConVarMap &map)
 	  "udm_convert",
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
-			  Con::cwar << "No file specified to convert!" << Con::endl;
+			  Con::CWAR << "No file specified to convert!" << Con::endl;
 			  return;
 		  }
 		  auto &fileName = argv.front();
@@ -95,16 +95,16 @@ void pragma::Engine::RegisterSharedConsoleCommands(console::ConVarMap &map)
 	  "udm_validate",
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
-			  Con::cwar << "No file specified to convert!" << Con::endl;
+			  Con::CWAR << "No file specified to convert!" << Con::endl;
 			  return;
 		  }
 		  auto &fileName = argv.front();
 		  std::string err;
 		  auto udmData = util::load_udm_asset(fileName, &err);
 		  if(udmData)
-			  Con::cout << "No validation errors found, file is a valid UDM file!" << Con::endl;
+			  Con::COUT << "No validation errors found, file is a valid UDM file!" << Con::endl;
 		  else
-			  Con::cerr << "Validation failed: " << err << Con::endl;
+			  Con::CERR << "Validation failed: " << err << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Validates the specified UDM file.");
 	map.RegisterConVar<std::string>("phys_engine", "bullet", console::ConVarFlags::Archive | console::ConVarFlags::Replicated, "The underlying physics engine to use.", "<physEngie>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
@@ -181,7 +181,7 @@ void pragma::Engine::RegisterSharedConsoleCommands(console::ConVarMap &map)
 		  std::vector<std::string>::iterator it;
 		  for(it = cvars.begin(); it != cvars.end(); it++) {
 			  if(*it != "credits")
-				  Con::cout << *it << Con::endl;
+				  Con::COUT << *it << Con::endl;
 		  }
 	  },
 	  console::ConVarFlags::None, "Prints a list of all serverside console commands to the console.");
@@ -190,17 +190,17 @@ void pragma::Engine::RegisterSharedConsoleCommands(console::ConVarMap &map)
 	  "find",
 	  +[](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
-			  Con::cwar << "No argument given!" << Con::endl;
+			  Con::CWAR << "No argument given!" << Con::endl;
 			  return;
 		  }
 		  auto similar = state->FindSimilarConVars(argv.front());
 		  if(similar.empty()) {
-			  Con::cout << "No potential candidates found!" << Con::endl;
+			  Con::COUT << "No potential candidates found!" << Con::endl;
 			  return;
 		  }
-		  Con::cout << "Found " << similar.size() << " potential candidates:" << Con::endl;
+		  Con::COUT << "Found " << similar.size() << " potential candidates:" << Con::endl;
 		  for(auto &name : similar)
-			  Con::cout << "- " << name << Con::endl;
+			  Con::COUT << "- " << name << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Finds similar console commands to whatever was given as argument.");
 }
@@ -220,18 +220,18 @@ static void compile_lua_file(lua::State *l, pragma::Game &game, std::string f)
 	path += Lua::DOT_FILE_EXTENSION_PRECOMPILED;
 	auto r = Lua::compile_file(l, path);
 	if(r == false)
-		Con::cwar << "Unable to write file '" << path.c_str() << "'..." << Con::endl;
+		Con::CWAR << "Unable to write file '" << path.c_str() << "'..." << Con::endl;
 	else
-		Con::cout << "Successfully compiled as '" << path.c_str() << "'." << Con::endl;
+		Con::COUT << "Successfully compiled as '" << path.c_str() << "'." << Con::endl;
 }
 
 static void cmdExit(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float) { pragma::Engine::Get()->ShutDown(); }
 
 static void debug_profiling_print(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
 {
-	Con::cout << "-------- CPU-Profiler Query Results --------" << Con::endl;
-	Con::cout << std::left << std::setw(30) << "Stage Name" << std::setw(20) << "Time (ms)" << std::setw(20) << "Time (ns)" << std::setw(10) << "Count" << std::setw(10) << "Thread" << Con::endl;
-	Con::cout << "--------------------------------------------" << Con::endl;
+	Con::COUT << "-------- CPU-Profiler Query Results --------" << Con::endl;
+	Con::COUT << std::left << std::setw(30) << "Stage Name" << std::setw(20) << "Time (ms)" << std::setw(20) << "Time (ns)" << std::setw(10) << "Count" << std::setw(10) << "Thread" << Con::endl;
+	Con::COUT << "--------------------------------------------" << Con::endl;
 
 	std::function<void(pragma::debug::ProfilingStage &, const std::string &, bool)> fPrintResults = nullptr;
 	fPrintResults = [&fPrintResults](pragma::debug::ProfilingStage &stage, const std::string &indent, bool bRoot) {
@@ -264,7 +264,7 @@ static void debug_profiling_print(pragma::NetworkState *, pragma::BasePlayerComp
 				sThread = ss.str();
 			}
 
-			Con::cout << std::left << std::setw(30) << (indent + stage.GetName()) << std::setw(20) << sTimeMs << std::setw(20) << sTimeNs << std::setw(10) << sCount << std::setw(10) << sThread << Con::endl;
+			Con::COUT << std::left << std::setw(30) << (indent + stage.GetName()) << std::setw(20) << sTimeMs << std::setw(20) << sTimeNs << std::setw(10) << sCount << std::setw(10) << sThread << Con::endl;
 		}
 
 		// for(auto &wpChild : stage.GetChildren()) {
@@ -277,7 +277,7 @@ static void debug_profiling_print(pragma::NetworkState *, pragma::BasePlayerComp
 	auto &profiler = pragma::Engine::Get()->GetProfiler();
 	fPrintResults(profiler.GetRootStage(), "", true);
 
-	Con::cout << "--------------------------------------------" << Con::endl;
+	Con::COUT << "--------------------------------------------" << Con::endl;
 }
 
 static void debug_profiling_physics_start(pragma::NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
@@ -317,13 +317,13 @@ static void debug_dump_scene_graph(pragma::NetworkState *nw)
 
 	std::function<void(pragma::ecs::BaseEntity &, const std::string &, bool)> printGraph = nullptr;
 	printGraph = [&printGraph](pragma::ecs::BaseEntity &ent, const std::string &prefix, bool isLast) {
-		Con::cout << prefix;
+		Con::COUT << prefix;
 		if(isLast)
-			Con::cout << "\\-- ";
+			Con::COUT << "\\-- ";
 		else
-			Con::cout << "+-- ";
-		Con::cout << ent;
-		Con::cout << Con::endl;
+			Con::COUT << "+-- ";
+		Con::COUT << ent;
+		Con::COUT << Con::endl;
 
 		auto parentC = ent.GetComponent<pragma::ParentComponent>();
 		if(parentC.expired())
@@ -337,13 +337,13 @@ static void debug_dump_scene_graph(pragma::NetworkState *nw)
 		}
 	};
 
-	Con::cout << (game->IsClient() ? "Client " : "Server ");
-	Con::cout << "Scene Graph:" << Con::endl;
+	Con::COUT << (game->IsClient() ? "Client " : "Server ");
+	Con::COUT << "Scene Graph:" << Con::endl;
 	for(size_t i = 0; i < rootEnts.size(); ++i) {
 		bool isLastRoot = (i == rootEnts.size() - 1);
 		printGraph(*rootEnts[i], "", isLastRoot);
 	}
-	Con::cout << Con::endl;
+	Con::COUT << Con::endl;
 }
 
 static void debug_dump_scene_graph(pragma::NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &, float)
@@ -366,7 +366,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  "map",
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
-			  Con::cout << state->GetMap() << Con::endl;
+			  Con::COUT << state->GetMap() << Con::endl;
 			  return;
 		  }
 		  auto map = argv.front();
@@ -428,7 +428,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  [](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto *game = state ? state->GetGameState() : nullptr;
 		  if(game == nullptr) {
-			  Con::cwar << "Cannot create savegame: No active game!" << Con::endl;
+			  Con::CWAR << "Cannot create savegame: No active game!" << Con::endl;
 			  return;
 		  }
 		  auto path = "savegames/" + util::get_date_time("%Y-%m-%d_%H-%M-%S") + ".psav_b";
@@ -436,23 +436,23 @@ void pragma::Engine::RegisterConsoleCommands()
 		  std::string err;
 		  auto result = game::savegame::save(*game, path, err);
 		  if(result == false)
-			  Con::cwar << "Cannot create savegame: " << err << Con::endl;
+			  Con::CWAR << "Cannot create savegame: " << err << Con::endl;
 		  else
-			  Con::cout << "Created savegame as '" << path << "'!" << Con::endl;
+			  Con::COUT << "Created savegame as '" << path << "'!" << Con::endl;
 	  },
 	  console::ConVarFlags::None);
 	conVarMap.RegisterConCommand(
 	  "load",
 	  [](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
-			  Con::cwar << "Cannot load savegame: No savegame specified!" << Con::endl;
+			  Con::CWAR << "Cannot load savegame: No savegame specified!" << Con::endl;
 			  return;
 		  }
 		  state->EndGame();
 		  state->StartGame(true);
 		  auto *game = state ? state->GetGameState() : nullptr;
 		  if(game == nullptr) {
-			  Con::cwar << "Cannot load savegame: No active game!" << Con::endl;
+			  Con::CWAR << "Cannot load savegame: No active game!" << Con::endl;
 			  return;
 		  }
 		  auto path = "savegames/" + argv.front();
@@ -464,7 +464,7 @@ void pragma::Engine::RegisterConsoleCommands()
 		  std::string err;
 		  auto result = game::savegame::load(*game, path, err);
 		  if(result == false)
-			  Con::cwar << "Cannot load savegame: " << err << Con::endl;
+			  Con::CWAR << "Cannot load savegame: " << err << Con::endl;
 	  },
 	  console::ConVarFlags::None);
 
@@ -475,7 +475,7 @@ void pragma::Engine::RegisterConsoleCommands()
 			  return;
 		  std::stringstream ss;
 		  Lua::doc::print_documentation(argv.front(), ss);
-		  Con::cout << ss.str() << Con::endl;
+		  Con::COUT << ss.str() << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Prints information about the specified function, library or enum (or the closest candiate). Usage: lua_help <function/library/enum>.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
@@ -490,8 +490,8 @@ void pragma::Engine::RegisterConsoleCommands()
 	  "help",
 	  [](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
-			  Con::cout << "Usage: help <cvarname>" << Con::endl;
-			  Con::cout << "Run \"list\" to get a list of all available console commands and variables." << Con::endl;
+			  Con::COUT << "Usage: help <cvarname>" << Con::endl;
+			  Con::COUT << "Run \"list\" to get a list of all available console commands and variables." << Con::endl;
 			  return;
 		  }
 		  auto *en = get_engine();
@@ -501,7 +501,7 @@ void pragma::Engine::RegisterConsoleCommands()
 		  if(!cv)
 			  cv = sv->GetConVar(argv[0]);
 		  if(cv == nullptr) {
-			  Con::cout << "help: no cvar or command named " << argv[0] << Con::endl;
+			  Con::COUT << "help: no cvar or command named " << argv[0] << Con::endl;
 			  return;
 		  }
 		  cv->Print(argv[0]);
@@ -556,7 +556,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  "loc_find",
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
-			  Con::cwar << "No argument specified!" << Con::endl;
+			  Con::CWAR << "No argument specified!" << Con::endl;
 			  return;
 		  }
 		  auto &texts = locale::get_texts();
@@ -571,10 +571,10 @@ void pragma::Engine::RegisterConsoleCommands()
 		  std::vector<size_t> similarElements {};
 		  std::vector<float> similarities {};
 		  string::gather_similar_elements(argv.front(), baseTexts, similarElements, 6, &similarities);
-		  Con::cout << "Found " << similarElements.size() << " similar matches:" << Con::endl;
+		  Con::COUT << "Found " << similarElements.size() << " similar matches:" << Con::endl;
 		  for(auto idx : similarElements)
-			  Con::cout << ids[idx] << ": " << baseTexts[idx] << Con::endl;
-		  Con::cout << Con::endl;
+			  Con::COUT << ids[idx] << ": " << baseTexts[idx] << Con::endl;
+		  Con::COUT << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Searches for the specified text in all currently loaded text strings.");
 
@@ -597,7 +597,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  "install_module",
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
-			  Con::cwar << "No module specified!" << Con::endl;
+			  Con::CWAR << "No module specified!" << Con::endl;
 			  return;
 		  }
 		  std::optional<std::string> version {};
@@ -623,7 +623,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  auto logLevel = get_console_log_level();
-			  Con::cout << "Current console log level: " << magic_enum::enum_name(logLevel) << Con::endl;
+			  Con::COUT << "Current console log level: " << magic_enum::enum_name(logLevel) << Con::endl;
 			  return;
 		  }
 		  set_console_log_level(static_cast<util::LogSeverity>(util::to_int(argv[0])));
@@ -634,7 +634,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {
 			  auto logLevel = get_file_log_level();
-			  Con::cout << "Current file log level: " << magic_enum::enum_name(logLevel) << Con::endl;
+			  Con::COUT << "Current file log level: " << magic_enum::enum_name(logLevel) << Con::endl;
 			  return;
 		  }
 		  set_file_log_level(static_cast<util::LogSeverity>(util::to_int(argv[0])));
@@ -645,7 +645,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  auto *l = state->GetLuaState();
 		  if(!l) {
-			  Con::cwar << "Unable to start debugger server: No active Lua state!" << Con::endl;
+			  Con::CWAR << "Unable to start debugger server: No active Lua state!" << Con::endl;
 			  return;
 		  }
 		  Lua::util::start_debugger_server(l);
@@ -744,6 +744,11 @@ void pragma::Engine::RegisterConsoleCommands()
 	////////////////////////////////
 	////////////////////////////////
 
+	std::cout<<"MIN:: "<<uvec::IDENTITY_SCALE<<std::endl;
+	std::cout<<"&DOT_FILE_EXTENSION_PRECOMPILED: "<<&Lua::DOT_FILE_EXTENSION_PRECOMPILED<<std::endl;
+	std::cout<<"DOT_FILE_EXTENSION_PRECOMPILED: "<<Lua::DOT_FILE_EXTENSION_PRECOMPILED<<std::endl;
+	std::string s = "Opens the specified lua-file and outputs a precompiled file with the same name (And the extension '" + Lua::DOT_FILE_EXTENSION_PRECOMPILED + "').";
+	std::cout<<s<<std::endl;
 	conVarMapEn.RegisterConCommand(
 	  "lua_compile",
 	  +[](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
@@ -791,7 +796,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  [](NetworkState *, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty())
 			  return;
-		  Con::cout << argv[0] << Con::endl;
+		  Con::COUT << argv[0] << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Prints something to the console. Usage: echo <message>");
 
@@ -808,7 +813,7 @@ void pragma::Engine::RegisterConsoleCommands()
 		  for(auto &f : resFiles)
 			  ufile::remove_extension_from_filename(f, exts);
 		  for(auto &f : resFiles)
-			  Con::cout << f << Con::endl;
+			  Con::COUT << f << Con::endl;
 	  },
 	  console::ConVarFlags::None, "");
 
@@ -817,13 +822,13 @@ void pragma::Engine::RegisterConsoleCommands()
 	conVarMapEn.RegisterConCommand(
 	  "credits",
 	  [](NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float) {
-		  Con::cout << "Silverlan" << Con::endl;
-		  Con::cout << "Contact: " << engine_info::get_author_mail_address() << Con::endl;
-		  Con::cout << "Website: " << engine_info::get_website_url() << Con::endl;
+		  Con::COUT << "Silverlan" << Con::endl;
+		  Con::COUT << "Contact: " << engine_info::get_author_mail_address() << Con::endl;
+		  Con::COUT << "Website: " << engine_info::get_website_url() << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Prints a list of developers.");
 
-	conVarMapEn.RegisterConCommand("version", [](NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float) { Con::cout << get_pretty_engine_version() << Con::endl; }, console::ConVarFlags::None, "Prints the current engine version to the console.");
+	conVarMapEn.RegisterConCommand("version", [](NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float) { Con::COUT << get_pretty_engine_version() << Con::endl; }, console::ConVarFlags::None, "Prints the current engine version to the console.");
 	conVarMapEn.RegisterConCommand("debug_profiling_print", debug_profiling_print, console::ConVarFlags::None, "Prints the last profiled times.");
 	conVarMapEn.RegisterConCommand("debug_profiling_physics_start", debug_profiling_physics_start, console::ConVarFlags::None, "Prints physics profiling information for the last simulation step.");
 	conVarMapEn.RegisterConCommand("debug_profiling_physics_end", debug_profiling_physics_end, console::ConVarFlags::None, "Prints physics profiling information for the last simulation step.");
@@ -872,9 +877,9 @@ void ModuleInstallJob::Install()
 
 #ifdef __linux__
 	{
-		Con::cwar << "Automatic installation of binary modules using the 'install_module' console command is currently not supported on Linux! You will have to install the module manually." << Con::endl;
-		Con::cwar << "The download should automatically start through your browser. If not, you can download the module here: " << url << Con::endl;
-		Con::cwar << "Once downloaded, simply extract the archive over your Pragma installation." << Con::endl;
+		Con::CWAR << "Automatic installation of binary modules using the 'install_module' console command is currently not supported on Linux! You will have to install the module manually." << Con::endl;
+		Con::CWAR << "The download should automatically start through your browser. If not, you can download the module here: " << url << Con::endl;
+		Con::CWAR << "Once downloaded, simply extract the archive over your Pragma installation." << Con::endl;
 		pragma::util::open_url_in_browser(url);
 		UpdateProgress(1.f);
 		SetStatus(pragma::util::JobStatus::Successful);
@@ -885,7 +890,7 @@ void ModuleInstallJob::Install()
 	pragma::fs::create_directory("temp");
 	auto archivePath = "temp/" + archiveName;
 	m_lastProgressTime = std::chrono::steady_clock::now();
-	Con::cout << "Downloading module from '" << url << "'..." << Con::endl;
+	Con::COUT << "Downloading module from '" << url << "'..." << Con::endl;
 	m_curl.AddResource(
 	  url, archivePath,
 	  [this](int64_t dltotal, int64_t dlnow, int64_t ultotal, int64_t ulnow) {
@@ -898,7 +903,7 @@ void ModuleInstallJob::Install()
 		  m_lastProgressTime = t;
 		  auto fprogress = dlnow / static_cast<float>(dltotal);
 		  auto progress = pragma::util::round_string(fprogress * 100.f, 2);
-		  Con::cout << "Module download at " << progress << "%" << Con::endl;
+		  Con::COUT << "Module download at " << progress << "%" << Con::endl;
 		  UpdateProgress(fprogress * 0.9f);
 	  },
 	  [this, archivePath](int code) {
@@ -908,23 +913,23 @@ void ModuleInstallJob::Install()
 			  auto zip = uzip::ZIPFile::Open(archivePath, err, uzip::OpenMode::Read);
 			  if(!zip) {
 				  std::string msg = "Failed to open module archive '" + archivePath + "': " + err;
-				  Con::cwar << "" << msg << Con::endl;
+				  Con::CWAR << "" << msg << Con::endl;
 				  SetStatus(pragma::util::JobStatus::Failed, msg);
 				  return;
 			  }
 
-			  Con::cout << "Extracting module archive '" << archivePath << "'..." << Con::endl;
+			  Con::COUT << "Extracting module archive '" << archivePath << "'..." << Con::endl;
 			  err = {};
 			  if(!zip->ExtractFiles(pragma::fs::get_program_write_path(), err)) {
 				  std::string msg = "Failed to extract module archive '" + archivePath + "'!";
-				  Con::cwar << "" << msg << Con::endl;
+				  Con::CWAR << "" << msg << Con::endl;
 				  SetStatus(pragma::util::JobStatus::Failed, msg);
 				  return;
 			  }
 		  }
 		  else {
 			  std::string msg = "Failed to download module '" + m_module + "'!";
-			  Con::cwar << "" << msg << Con::endl;
+			  Con::CWAR << "" << msg << Con::endl;
 			  SetStatus(pragma::util::JobStatus::Failed, msg);
 			  return;
 		  }
@@ -932,7 +937,7 @@ void ModuleInstallJob::Install()
 
 		  UpdateProgress(1.f);
 		  SetStatus(pragma::util::JobStatus::Successful);
-		  Con::cout << "Binary module '" << archivePath << "' has been installed successfully!" << Con::endl;
+		  Con::COUT << "Binary module '" << archivePath << "' has been installed successfully!" << Con::endl;
 	  });
 	m_curl.StartDownload();
 	while(!m_curl.IsComplete())

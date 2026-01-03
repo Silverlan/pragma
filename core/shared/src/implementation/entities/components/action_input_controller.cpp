@@ -8,8 +8,6 @@ import :entities.components.action_input_controller;
 
 using namespace pragma;
 
-ComponentEventId actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT = INVALID_COMPONENT_ID;
-ComponentEventId actionInputControllerComponent::EVENT_ON_ACTION_INPUT_CHANGED = INVALID_COMPONENT_ID;
 void ActionInputControllerComponent::RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	actionInputControllerComponent::EVENT_HANDLE_ACTION_INPUT = registerEvent("HANDLE_ACTION_INPUT", ComponentEventInfo::Type::Explicit);

@@ -10,7 +10,7 @@ export import :entities.components.base;
 
 export namespace pragma {
 	namespace baseFieldAngleComponent {
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_FIELD_ANGLE_CHANGED;
+		REGISTER_COMPONENT_EVENT(EVENT_ON_FIELD_ANGLE_CHANGED)
 	}
 	class DLLNETWORK BaseFieldAngleComponent : public BaseEntityComponent {
 	  public:

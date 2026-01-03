@@ -106,7 +106,7 @@ void pragma::CurlQueryHandler::Initialize()
 		nw = get_engine()->GetClientState();
 
 	if(!nw || nw->InitializeLibrary(curlPath, &err) == nullptr) {
-		Con::cerr << "Unable to load 'curl' library: " << err << Con::endl;
+		Con::CERR << "Unable to load 'curl' library: " << err << Con::endl;
 		return;
 	}
 	auto dllHandle = nw->GetLibraryModule(curlPath);

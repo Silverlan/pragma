@@ -44,11 +44,11 @@ static void print_pass_stats(const pragma::rendering::RenderPassStats &stats, bo
 	}
 	std::sort(entities.begin(), entities.end(), [](const EntityData &entData0, const EntityData &entData1) { return entData0.distance < entData1.distance; });
 
-	Con::cout << "\nEntities:";
+	Con::COUT << "\nEntities:";
 	if(full == false)
-		Con::cout << " " << entities.size() << Con::endl;
+		Con::COUT << " " << entities.size() << Con::endl;
 	else {
-		Con::cout << Con::endl;
+		Con::COUT << Con::endl;
 		for(auto &entData : entities) {
 			auto &hEnt = entData.hEntity;
 			if(hEnt.valid() == false)
@@ -57,46 +57,46 @@ static void print_pass_stats(const pragma::rendering::RenderPassStats &stats, bo
 			auto mdlC = hEnt.get()->GetComponent<pragma::CModelComponent>();
 			if(mdlC.valid())
 				lod = mdlC->GetLOD();
-			hEnt.get()->print(Con::cout);
-			Con::cout << " (Distance: " << entData.distance << ") (Lod: " << lod << ")" << Con::endl;
+			hEnt.get()->print(Con::COUT);
+			Con::COUT << " (Distance: " << entData.distance << ") (Lod: " << lod << ")" << Con::endl;
 		}
 	}
 
-	Con::cout << "\nMaterials:";
+	Con::COUT << "\nMaterials:";
 	if(full == false)
-		Con::cout << " " << stats.materials.size() << Con::endl;
+		Con::COUT << " " << stats.materials.size() << Con::endl;
 	else {
-		Con::cout << Con::endl;
+		Con::COUT << Con::endl;
 		for(auto &hMat : stats.materials) {
 			if(!hMat)
 				continue;
 			auto *albedoMap = hMat.get()->GetAlbedoMap();
-			Con::cout << hMat.get()->GetName();
+			Con::COUT << hMat.get()->GetName();
 			if(albedoMap)
-				Con::cout << " [" << albedoMap->name << "]";
-			Con::cout << Con::endl;
+				Con::COUT << " [" << albedoMap->name << "]";
+			Con::COUT << Con::endl;
 		}
 	}
 
-	Con::cout << "\nShaders:" << Con::endl;
+	Con::COUT << "\nShaders:" << Con::endl;
 	for(auto &hShader : stats.shaders) {
 		if(hShader.expired())
 			continue;
-		Con::cout << hShader->GetIdentifier() << Con::endl;
+		Con::COUT << hShader->GetIdentifier() << Con::endl;
 	}
 
 	std::unordered_set<pragma::ecs::CBaseEntity *> uniqueEntities;
 	for(auto &entData : entities)
 		uniqueEntities.insert(static_cast<pragma::ecs::CBaseEntity *>(entData.hEntity.get()));
 
-	Con::cout << "\nUnique meshes: " << stats.meshes.size() << Con::endl;
+	Con::COUT << "\nUnique meshes: " << stats.meshes.size() << Con::endl;
 	auto n = pragma::math::to_integral(pragma::rendering::RenderPassStats::Counter::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i)
-		Con::cout << magic_enum::enum_name(static_cast<pragma::rendering::RenderPassStats::Counter>(i)) << ": " << stats->GetCount(static_cast<pragma::rendering::RenderPassStats::Counter>(i)) << Con::endl;
+		Con::COUT << magic_enum::enum_name(static_cast<pragma::rendering::RenderPassStats::Counter>(i)) << ": " << stats->GetCount(static_cast<pragma::rendering::RenderPassStats::Counter>(i)) << Con::endl;
 
 	n = pragma::math::to_integral(pragma::rendering::RenderPassStats::Timer::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i)
-		Con::cout << magic_enum::enum_name(static_cast<pragma::rendering::RenderPassStats::Timer>(i)) << ": " << nanoseconds_to_ms(stats->GetTime(static_cast<pragma::rendering::RenderPassStats::Timer>(i))) << Con::endl;
+		Con::COUT << magic_enum::enum_name(static_cast<pragma::rendering::RenderPassStats::Timer>(i)) << ": " << nanoseconds_to_ms(stats->GetTime(static_cast<pragma::rendering::RenderPassStats::Timer>(i))) << Con::endl;
 }
 DLLCLIENT void print_debug_render_stats(const pragma::rendering::RenderStats &renderStats, bool full)
 {
@@ -104,29 +104,29 @@ DLLCLIENT void print_debug_render_stats(const pragma::rendering::RenderStats &re
 
 	auto n = pragma::math::to_integral(pragma::rendering::RenderStats::RenderStage::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i)
-		Con::cout << magic_enum::enum_name(static_cast<pragma::rendering::RenderStats::RenderStage>(i)) << ": " << nanoseconds_to_ms(renderStats->GetTime(static_cast<pragma::rendering::RenderStats::RenderStage>(i))) << Con::endl;
+		Con::COUT << magic_enum::enum_name(static_cast<pragma::rendering::RenderStats::RenderStage>(i)) << ": " << nanoseconds_to_ms(renderStats->GetTime(static_cast<pragma::rendering::RenderStats::RenderStage>(i))) << Con::endl;
 
 	/*auto t = renderStats.lightingPass.cpuExecutionTime +renderStats.lightingPassTranslucent.cpuExecutionTime +renderStats.prepass.cpuExecutionTime +renderStats.shadowPass.cpuExecutionTime;
-	Con::cout<<"Total CPU Execution time: "<<nanoseconds_to_ms(t)<<Con::endl;
-	Con::cout<<"Light culling time: "<<nanoseconds_to_ms(renderStats.lightCullingTime)<<Con::endl;
-	Con::cout<<"Prepass execution time: "<<nanoseconds_to_ms(renderStats.prepassExecutionTime)<<Con::endl;
-	Con::cout<<"Lighting pass execution time: "<<nanoseconds_to_ms(renderStats.lightingPassExecutionTime)<<Con::endl;
-	Con::cout<<"Post processing execution time: "<<nanoseconds_to_ms(renderStats.postProcessingExecutionTime)<<Con::endl;
-	Con::cout<<"Render buffer update time: "<<nanoseconds_to_ms(renderStats.updateRenderBufferTime)<<Con::endl;*/
+	Con::COUT<<"Total CPU Execution time: "<<nanoseconds_to_ms(t)<<Con::endl;
+	Con::COUT<<"Light culling time: "<<nanoseconds_to_ms(renderStats.lightCullingTime)<<Con::endl;
+	Con::COUT<<"Prepass execution time: "<<nanoseconds_to_ms(renderStats.prepassExecutionTime)<<Con::endl;
+	Con::COUT<<"Lighting pass execution time: "<<nanoseconds_to_ms(renderStats.lightingPassExecutionTime)<<Con::endl;
+	Con::COUT<<"Post processing execution time: "<<nanoseconds_to_ms(renderStats.postProcessingExecutionTime)<<Con::endl;
+	Con::COUT<<"Render buffer update time: "<<nanoseconds_to_ms(renderStats.updateRenderBufferTime)<<Con::endl;*/
 
-	Con::cout << "\n----- Render queue builder stats: -----" << Con::endl;
+	Con::COUT << "\n----- Render queue builder stats: -----" << Con::endl;
 	n = pragma::math::to_integral(pragma::rendering::RenderQueueBuilderStats::Timer::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i)
-		Con::cout << magic_enum::enum_name(static_cast<pragma::rendering::RenderQueueBuilderStats::Timer>(i)) << ": " << nanoseconds_to_ms(renderStats.renderQueueBuilderStats->GetTime(static_cast<pragma::rendering::RenderQueueBuilderStats::Timer>(i))) << Con::endl;
+		Con::COUT << magic_enum::enum_name(static_cast<pragma::rendering::RenderQueueBuilderStats::Timer>(i)) << ": " << nanoseconds_to_ms(renderStats.renderQueueBuilderStats->GetTime(static_cast<pragma::rendering::RenderQueueBuilderStats::Timer>(i))) << Con::endl;
 
-	Con::cout << "Workers:" << Con::endl;
+	Con::COUT << "Workers:" << Con::endl;
 	uint32_t workerId = 0;
 	for(auto &workerStats : renderStats.renderQueueBuilderStats.workerStats)
-		Con::cout << "Worker #" << workerId++ << ": " << workerStats.numJobs << " jobs with total execution time of " << nanoseconds_to_ms(workerStats.totalExecutionTime) << Con::endl;
+		Con::COUT << "Worker #" << workerId++ << ": " << workerStats.numJobs << " jobs with total execution time of " << nanoseconds_to_ms(workerStats.totalExecutionTime) << Con::endl;
 
 	n = pragma::math::to_integral(pragma::rendering::RenderStats::RenderPass::Count);
 	for(auto i = decltype(n) {0u}; i < n; ++i) {
-		Con::cout << "\n----- " << magic_enum::enum_name(static_cast<pragma::rendering::RenderStats::RenderPass>(i)) << ": -----" << Con::endl;
+		Con::COUT << "\n----- " << magic_enum::enum_name(static_cast<pragma::rendering::RenderStats::RenderPass>(i)) << ": -----" << Con::endl;
 		print_pass_stats(renderStats.GetPassStats(static_cast<pragma::rendering::RenderStats::RenderPass>(i)), full);
 	}
 }
@@ -160,18 +160,18 @@ pragma::rendering::RenderStats FrameRenderStats::GetAccumulated() const
 }
 void FrameRenderStats::Print(bool full)
 {
-	Con::cout << stats.size() << " scenes have been rendered:" << Con::endl;
+	Con::COUT << stats.size() << " scenes have been rendered:" << Con::endl;
 	auto accumulated = GetAccumulated();
 	for(auto &renderStats : stats) {
 		pragma::console::set_console_color(pragma::console::ConsoleColorFlags::BackgroundGreen);
-		Con::cout << "########### " << renderStats.sceneName << ": ###########" << Con::endl;
+		Con::COUT << "########### " << renderStats.sceneName << ": ###########" << Con::endl;
 		pragma::console::reset_console_color();
 		print_debug_render_stats(*renderStats.stats, full);
 	}
 
 	if(stats.size() > 1) {
 		pragma::console::set_console_color(pragma::console::ConsoleColorFlags::BackgroundGreen);
-		Con::cout << "\n----- Accumulated: -----" << Con::endl;
+		Con::COUT << "\n----- Accumulated: -----" << Con::endl;
 		pragma::console::reset_console_color();
 		print_debug_render_stats(accumulated, full);
 	}
@@ -763,15 +763,9 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const RenderQueue &rende
 	return numShaderInvocations;
 }
 
-uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const RenderQueue &renderQueue, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)
-{
-	return BaseRenderProcessor::Render(renderQueue, RenderPass::Lighting, optStats, worldRenderQueueIndex);
-}
+uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const RenderQueue &renderQueue, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex) { return BaseRenderProcessor::Render(renderQueue, RenderPass::Lighting, optStats, worldRenderQueueIndex); }
 
 pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const RenderPassDrawInfo &drawSceneInfo, const Vector4 &drawOrigin) : BaseRenderProcessor {drawSceneInfo, drawOrigin} { SetCountNonOpaqueMaterialsOnly(true); }
-uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const RenderQueue &renderQueue, RenderPass renderPass, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex)
-{
-	return BaseRenderProcessor::Render(renderQueue, renderPass, optStats, worldRenderQueueIndex);
-}
+uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const RenderQueue &renderQueue, RenderPass renderPass, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex) { return BaseRenderProcessor::Render(renderQueue, renderPass, optStats, worldRenderQueueIndex); }
 
 void pragma::rendering::DepthStageRenderProcessor::BindLight(CLightComponent &light, uint32_t layerId) { m_shaderProcessor.RecordBindLight(light, layerId); }

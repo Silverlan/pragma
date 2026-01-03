@@ -15,16 +15,121 @@ module pragma.shared;
 import :console.output;
 
 #define PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(v, type)                                                                                                                                                                                                                                    \
-	if(Con::detail::outputCallback != nullptr)                                                                                                                                                                                                                                                   \
+	if(Con::detail::get_output_callback() != nullptr)                                                                                                                                                                                                                                                   \
 		Con::invoke_output_callback(v, type);
 
-DLLNETWORK Con::c_cout Con::cout;
-DLLNETWORK Con::c_cwar Con::cwar;
-DLLNETWORK Con::c_cerr Con::cerr;
-DLLNETWORK Con::c_crit Con::crit;
-DLLNETWORK Con::c_csv Con::csv;
-DLLNETWORK Con::c_ccl Con::ccl;
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+DLLNETWORK Con::c_cout &Con::COUT {
+	static Con::c_cout stream;
+	return stream;
+}
+DLLNETWORK Con::c_cwar &Con::CWAR {
+	static Con::c_cwar stream;
+	return stream;
+}
+DLLNETWORK Con::c_cerr &Con::CERR {
+	static Con::c_cerr stream;
+	return stream;
+}
+DLLNETWORK Con::c_crit &Con::CRIT {
+	static Con::c_crit stream;
+	return stream;
+}
+DLLNETWORK Con::c_csv &Con::CSV {
+	static Con::c_csv stream;
+	return stream;
+}
+DLLNETWORK Con::c_ccl &Con::CCL {
+	static Con::c_ccl stream;
+	return stream;
+}
+#else
+DLLNETWORK Con::c_cout Con::COUT;
+DLLNETWORK Con::c_cwar Con::CWAR;
+DLLNETWORK Con::c_cerr Con::CERR;
+DLLNETWORK Con::c_crit Con::CRIT;
+DLLNETWORK Con::c_csv Con::CSV;
+DLLNETWORK Con::c_ccl Con::CCL;
+#endif
 
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+const std::string &Con::GET_COLOR_WARNING()
+{
+	static std::string str {pragma::console::get_true_color_code(Color {254, 228, 64}, {}, pragma::console::ConsoleDecoratorFlags::Bold)};
+	return str;
+}
+const std::string &Con::GET_COLOR_ERROR()
+{
+	static std::string str {pragma::console::get_true_color_code(Color {233, 25, 15}, {}, pragma::console::ConsoleDecoratorFlags::Bold)};
+	return str;
+}
+const std::string &Con::GET_COLOR_CRITICAL()
+{
+	static std::string str {pragma::console::get_true_color_code(Color {233, 25, 15}, Color {254, 250, 224}, pragma::console::ConsoleDecoratorFlags::Bold)};
+	return str;
+}
+const std::string &Con::GET_COLOR_SERVER()
+{
+	static std::string str {pragma::console::get_true_color_code(Color {0, 245, 212})};
+	return str;
+}
+const std::string &Con::GET_COLOR_CLIENT()
+{
+	static std::string str {pragma::console::get_true_color_code(Color {255, 73, 158})};
+	return str;
+}
+const std::string &Con::GET_COLOR_LUA()
+{
+	static std::string str {pragma::console::get_true_color_code(Color {73, 182, 255})};
+	return str;
+}
+const std::string &Con::GET_COLOR_GUI()
+{
+	static std::string str {pragma::console::get_true_color_code(Color {181, 23, 158})};
+	return str;
+}
+const std::string &Con::GET_COLOR_RESET()
+{
+	static std::string str {pragma::console::get_reset_color_code()};
+	return str;
+}
+
+std::string &Con::GET_PREFIX_WARNING()
+{
+	static std::string str {Con::COLOR_RESET + "[" + Con::COLOR_WARNING + "warning" + Con::COLOR_RESET + "] "};
+	return str;
+}
+std::string &Con::GET_PREFIX_ERROR()
+{
+	static std::string str {Con::COLOR_RESET + "[" + Con::COLOR_ERROR + "error" + Con::COLOR_RESET + "] "};
+	return str;
+}
+std::string &Con::GET_PREFIX_CRITICAL()
+{
+	static std::string str {Con::COLOR_RESET + "[" + Con::COLOR_CRITICAL + "critical" + Con::COLOR_RESET + "] "};
+	return str;
+}
+std::string &Con::GET_PREFIX_SERVER()
+{
+	static std::string str {Con::COLOR_RESET + "[" + Con::COLOR_SERVER + "server" + Con::COLOR_RESET + "] "};
+	return str;
+}
+std::string &Con::GET_PREFIX_CLIENT()
+{
+	static std::string str {Con::COLOR_RESET + "[" + Con::COLOR_CLIENT + "client" + Con::COLOR_RESET + "] "};
+	return str;
+}
+std::string &Con::GET_PREFIX_LUA()
+{
+	static std::string str {Con::COLOR_RESET + "[" + Con::COLOR_LUA + "lua" + Con::COLOR_RESET + "] "};
+	return str;
+}
+std::string &Con::GET_PREFIX_GUI()
+{
+	static std::string str {Con::COLOR_RESET + "[" + Con::COLOR_GUI + "gui" + Con::COLOR_RESET + "] "};
+	return str;
+}
+#else
 const std::string Con::COLOR_WARNING = pragma::console::get_true_color_code(Color {254, 228, 64}, {}, pragma::console::ConsoleDecoratorFlags::Bold);
 const std::string Con::COLOR_ERROR = pragma::console::get_true_color_code(Color {233, 25, 15}, {}, pragma::console::ConsoleDecoratorFlags::Bold);
 const std::string Con::COLOR_CRITICAL = pragma::console::get_true_color_code(Color {233, 25, 15}, Color {254, 250, 224}, pragma::console::ConsoleDecoratorFlags::Bold);
@@ -41,6 +146,35 @@ std::string Con::PREFIX_SERVER = Con::COLOR_RESET + "[" + Con::COLOR_SERVER + "s
 std::string Con::PREFIX_CLIENT = Con::COLOR_RESET + "[" + Con::COLOR_CLIENT + "client" + Con::COLOR_RESET + "] ";
 std::string Con::PREFIX_LUA = Con::COLOR_RESET + "[" + Con::COLOR_LUA + "lua" + Con::COLOR_RESET + "] ";
 std::string Con::PREFIX_GUI = Con::COLOR_RESET + "[" + Con::COLOR_GUI + "gui" + Con::COLOR_RESET + "] ";
+#endif
+
+std::atomic<pragma::util::LogSeverity> &Con::detail::get_current_level()
+{
+	static std::atomic<pragma::util::LogSeverity> level;
+	return level;
+}
+std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> &Con::detail::get_output_callback()
+{
+	static std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> callback;
+	return callback;
+}
+
+static std::atomic<bool> g_shouldLogOutput {false};
+bool pragma::logging::detail::should_log_output() {return g_shouldLogOutput;}
+void pragma::logging::detail::set_should_log_output(bool shouldLogOutput) {g_shouldLogOutput = shouldLogOutput;}
+std::mutex &pragma::logging::detail::get_log_output_mutex()
+{
+	static std::mutex logOutputMutex;
+	return logOutputMutex;
+}
+std::stringstream &pragma::logging::detail::get_log_output_stream()
+{
+	static std::stringstream logOutput;
+	return logOutput;
+}
+static pragma::logging::detail::Type g_logOutputType;
+pragma::logging::detail::Type pragma::logging::detail::get_log_output_type() {return g_logOutputType;}
+void pragma::logging::detail::set_log_output_type(Type type) {g_logOutputType = type;}
 
 static auto cvLog = pragma::console::get_con_var("log_enabled");
 
@@ -76,8 +210,8 @@ void Con::WriteToLog(std::string str)
 	pragma::Engine::Get()->WriteToLog(str);
 }
 
-void Con::set_output_callback(const std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> &callback) { detail::outputCallback = callback; }
-const std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> &Con::get_output_callback() { return detail::outputCallback; }
+void Con::set_output_callback(const std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> &callback) { detail::get_output_callback() = callback; }
+const std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> &Con::get_output_callback() { return detail::get_output_callback(); }
 void Con::print(const std::string_view &sv, const Color &color, pragma::console::MessageFlags flags)
 {
 	pragma::console::set_console_color(pragma::console::color_to_console_color_flags(color));
@@ -117,46 +251,36 @@ void Con::flush()
 }
 
 namespace pragma::logging::detail {
-	DLLNETWORK std::atomic<bool> shouldLogOutput = false;
-	DLLNETWORK std::mutex logOutputMutex {};
-	DLLNETWORK std::stringstream logOutput {};
-	DLLNETWORK Type type = Type::None;
-
 	DLLNETWORK std::shared_ptr<spdlog::logger> consoleOutputLogger {};
-};
-
-namespace Con::detail {
-	DLLNETWORK std::atomic<pragma::util::LogSeverity> currentLevel = pragma::util::LogSeverity::Disabled;
-	DLLNETWORK std::function<void(const std::string_view &, pragma::console::MessageFlags, const Color *)> outputCallback = nullptr;
 };
 
 static void log_output()
 {
-	pragma::logging::detail::logOutputMutex.lock();
+	pragma::logging::detail::get_log_output_mutex().lock();
 	if(pragma::logging::detail::consoleOutputLogger) {
-		switch(pragma::logging::detail::type) {
+		switch(pragma::logging::detail::get_log_output_type()) {
 		case pragma::logging::detail::Type::Info:
 		case pragma::logging::detail::Type::None:
-			pragma::logging::detail::consoleOutputLogger->info(pragma::logging::detail::logOutput.str());
+			pragma::logging::detail::consoleOutputLogger->info(pragma::logging::detail::get_log_output_stream().str());
 			break;
 		case pragma::logging::detail::Type::Warn:
-			pragma::logging::detail::consoleOutputLogger->warn(pragma::logging::detail::logOutput.str());
+			pragma::logging::detail::consoleOutputLogger->warn(pragma::logging::detail::get_log_output_stream().str());
 			break;
 		case pragma::logging::detail::Type::Err:
-			pragma::logging::detail::consoleOutputLogger->error(pragma::logging::detail::logOutput.str());
+			pragma::logging::detail::consoleOutputLogger->error(pragma::logging::detail::get_log_output_stream().str());
 			break;
 		case pragma::logging::detail::Type::Crit:
-			pragma::logging::detail::consoleOutputLogger->critical(pragma::logging::detail::logOutput.str());
+			pragma::logging::detail::consoleOutputLogger->critical(pragma::logging::detail::get_log_output_stream().str());
 			break;
 		}
 	}
 
-	auto &ss = pragma::logging::detail::logOutput;
+	auto &ss = pragma::logging::detail::get_log_output_stream();
 	ss.clear();
 	ss.str("");
 
-	pragma::logging::detail::type = pragma::logging::detail::Type::None;
-	pragma::logging::detail::logOutputMutex.unlock();
+	pragma::logging::detail::set_log_output_type(pragma::logging::detail::Type::None);
+	pragma::logging::detail::get_log_output_mutex().unlock();
 }
 
 Con::c_cout &operator<<(Con::c_cout &con, conmanipulator manipulator)
@@ -203,7 +327,7 @@ Con::c_ccl &operator<<(Con::c_ccl &con, conmanipulator manipulator)
 
 std::basic_ostream<char, std::char_traits<char>> &Con::endl(std::basic_ostream<char, std::char_traits<char>> &os)
 {
-	auto &bCrit = Con::crit.m_bActivated;
+	auto &bCrit = Con::CRIT.m_bActivated;
 
 #ifdef _WIN32
 	os.put('\n');
@@ -213,23 +337,23 @@ std::basic_ostream<char, std::char_traits<char>> &Con::endl(std::basic_ostream<c
 	os << "\n";
 	//os<<"\033[0m"<<"\n";
 #endif
-	switch(detail::currentLevel) {
+	switch(detail::get_current_level()) {
 	case pragma::util::LogSeverity::Warning:
 	case pragma::util::LogSeverity::Error:
 	case pragma::util::LogSeverity::Critical:
 		os << Con::COLOR_RESET;
-		if(pragma::logging::detail::shouldLogOutput) {
-			pragma::logging::detail::logOutputMutex.lock();
-			pragma::logging::detail::logOutput << Con::COLOR_RESET;
-			pragma::logging::detail::logOutputMutex.unlock();
+		if(pragma::logging::detail::should_log_output()) {
+			pragma::logging::detail::get_log_output_mutex().lock();
+			pragma::logging::detail::get_log_output_stream() << Con::COLOR_RESET;
+			pragma::logging::detail::get_log_output_mutex().unlock();
 		}
 		break;
 	}
 	std::cout.flush();
-	detail::currentLevel = pragma::util::LogSeverity::Disabled;
-	if(pragma::logging::detail::shouldLogOutput)
+	detail::get_current_level() = pragma::util::LogSeverity::Disabled;
+	if(pragma::logging::detail::should_log_output())
 		log_output();
-	switch(detail::currentLevel) {
+	switch(detail::get_current_level()) {
 	case pragma::util::LogSeverity::Error:
 	case pragma::util::LogSeverity::Critical:
 		pragma::flush_loggers(); // Flush loggers immediately in case this will lead to a crash
@@ -246,29 +370,29 @@ std::basic_ostream<char, std::char_traits<char>> &Con::prefix(std::basic_ostream
 {
 	// If the message has a prefix, the prefix may overwrite the color of the main message, so we
 	// have to reset the color here.
-	switch(detail::currentLevel) {
+	switch(detail::get_current_level()) {
 	case pragma::util::LogSeverity::Warning:
 		os << Con::COLOR_WARNING;
-		if(pragma::logging::detail::shouldLogOutput) {
-			pragma::logging::detail::logOutputMutex.lock();
-			pragma::logging::detail::logOutput << Con::COLOR_WARNING;
-			pragma::logging::detail::logOutputMutex.unlock();
+		if(pragma::logging::detail::should_log_output()) {
+			pragma::logging::detail::get_log_output_mutex().lock();
+			pragma::logging::detail::get_log_output_stream() << Con::COLOR_WARNING;
+			pragma::logging::detail::get_log_output_mutex().unlock();
 		}
 		break;
 	case pragma::util::LogSeverity::Error:
 		os << Con::COLOR_ERROR;
-		if(pragma::logging::detail::shouldLogOutput) {
-			pragma::logging::detail::logOutputMutex.lock();
-			pragma::logging::detail::logOutput << Con::COLOR_ERROR;
-			pragma::logging::detail::logOutputMutex.unlock();
+		if(pragma::logging::detail::should_log_output()) {
+			pragma::logging::detail::get_log_output_mutex().lock();
+			pragma::logging::detail::get_log_output_stream() << Con::COLOR_ERROR;
+			pragma::logging::detail::get_log_output_mutex().unlock();
 		}
 		break;
 	case pragma::util::LogSeverity::Critical:
 		os << Con::COLOR_CRITICAL;
-		if(pragma::logging::detail::shouldLogOutput) {
-			pragma::logging::detail::logOutputMutex.lock();
-			pragma::logging::detail::logOutput << Con::COLOR_CRITICAL;
-			pragma::logging::detail::logOutputMutex.unlock();
+		if(pragma::logging::detail::should_log_output()) {
+			pragma::logging::detail::get_log_output_mutex().lock();
+			pragma::logging::detail::get_log_output_stream() << Con::COLOR_CRITICAL;
+			pragma::logging::detail::get_log_output_mutex().unlock();
 		}
 		break;
 	}

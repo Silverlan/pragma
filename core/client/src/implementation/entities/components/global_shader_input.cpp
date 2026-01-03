@@ -106,7 +106,7 @@ void CGlobalShaderInputComponent::RegisterMembers(EntityComponentManager &compon
 void CGlobalShaderInputComponent::DebugPrintProperties()
 {
 	if(!get_cgame()) {
-		Con::cwar << "No game instance available" << Con::endl;
+		Con::CWAR << "No game instance available" << Con::endl;
 		return;
 	}
 	auto &inputDataManager = get_cgame()->GetGlobalShaderInputDataManager();
@@ -116,14 +116,14 @@ void CGlobalShaderInputComponent::DebugPrintProperties()
 	auto &props = descriptor.properties;
 
 	if(props.empty()) {
-		Con::cwar << "No global shader input properties available" << Con::endl;
+		Con::CWAR << "No global shader input properties available" << Con::endl;
 		return;
 	}
 
 	rendering::ShaderInputData inputData {descriptor};
 	inputData.ResizeToDescriptor();
 	if(!buf->Read(0, inputData.data.size(), inputData.data.data())) {
-		Con::cwar << "Failed to read global shader input data" << Con::endl;
+		Con::CWAR << "Failed to read global shader input data" << Con::endl;
 		return;
 	}
 
@@ -150,8 +150,8 @@ void CGlobalShaderInputComponent::DebugPrintProperties()
 		ss << std::left << std::setw(20) << name << std::setw(10) << offset << std::setw(10) << size << (strVal ? *strVal : "N/A") // Handle optional value
 		   << "\n";
 	}
-	Con::cout << "Global shader input properties:\n";
-	Con::cout << ss.str() << Con::endl;
+	Con::COUT << "Global shader input properties:\n";
+	Con::COUT << ss.str() << Con::endl;
 }
 
 CGlobalShaderInputComponent::CGlobalShaderInputComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}

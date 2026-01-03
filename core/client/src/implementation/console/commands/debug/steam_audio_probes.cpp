@@ -22,7 +22,7 @@ static void debug_steam_audio_probe_boxes(pragma::NetworkState *state, ConVar *,
 	if(iplScene == nullptr)
 		return;
 	if(iplScene->IsComplete() == false) {
-		Con::cwar << "Steam audio is still initializing. Cannot display probe boxes at this time!" << Con::endl;
+		Con::CWAR << "Steam audio is still initializing. Cannot display probe boxes at this time!" << Con::endl;
 		return;
 	}
 	std::vector<ipl::Scene::ProbeSphere> spheres {};
@@ -33,9 +33,9 @@ static void debug_steam_audio_probe_boxes(pragma::NetworkState *state, ConVar *,
 	dbgSoundProbeBoxes = std::make_unique<DebugGameGUI>(nullptr);
 	std::vector<std::shared_ptr<DebugRenderer::BaseObject>> dbgSpheres;
 	dbgSpheres.reserve(spheres.size());
-	Con::cout << "Number of probe spheres: " << spheres.size() << Con::endl;
+	Con::COUT << "Number of probe spheres: " << spheres.size() << Con::endl;
 	for(auto &sphere : spheres) {
-		Con::cout << "Sphere: (" << sphere.origin.x << "," << sphere.origin.y << "," << sphere.origin.z << ") (" << sphere.radius << ")" << Con::endl;
+		Con::COUT << "Sphere: (" << sphere.origin.x << "," << sphere.origin.y << "," << sphere.origin.z << ") (" << sphere.radius << ")" << Con::endl;
 		auto o = DebugRenderer::DrawSphere(sphere.origin, sphere.radius, Color::AliceBlue, outlineColor);
 		dbgSpheres.push_back(o);
 	}
@@ -49,12 +49,12 @@ static void debug_steam_audio_dump_scene(pragma::NetworkState *state, pragma::Ba
 {
 	auto *sndSys = pragma::get_cengine()->GetSoundSystem();
 	if(sndSys == nullptr) {
-		Con::cwar << "Unable to dump steam audio scene: No sound system found!" << Con::endl;
+		Con::CWAR << "Unable to dump steam audio scene: No sound system found!" << Con::endl;
 		return;
 	}
 	auto *iplScene = sndSys->GetSteamAudioScene();
 	if(iplScene == nullptr) {
-		Con::cwar << "Unable to dump steam audio scene: Steam audio has not been initialized!" << Con::endl;
+		Con::CWAR << "Unable to dump steam audio scene: Steam audio has not been initialized!" << Con::endl;
 		return;
 	}
 	std::string mapName = "unknown";
@@ -68,14 +68,14 @@ static void debug_steam_audio_dump_scene(pragma::NetworkState *state, pragma::Ba
 	path += mapName + "_steam_audio_scene.obj";
 	auto r = iplScene->DumpScene(path);
 	if(r == false) {
-		Con::cwar << "Unable to dump steam audio scene: Has steam audio scene been finalized?" << Con::endl;
+		Con::CWAR << "Unable to dump steam audio scene: Has steam audio scene been finalized?" << Con::endl;
 		return;
 	}
-	Con::cout << "Steam audio scene successfully dumped as '" << path << "'!" << Con::endl;
+	Con::COUT << "Steam audio scene successfully dumped as '" << path << "'!" << Con::endl;
 }
 
 #else
-static void debug_steam_audio_dump_scene(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { Con::cwar << "Steam audio is disabled! Scene cannot be dumped." << Con::endl; }
+static void debug_steam_audio_dump_scene(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) { Con::CWAR << "Steam audio is disabled! Scene cannot be dumped." << Con::endl; }
 #endif
 
 namespace {

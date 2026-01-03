@@ -144,9 +144,9 @@ void BaseOcclusionOctree::Node::DebugPrint(const std::string &t) const
 	std::stringstream ss;
 	ss << t << "(" << GetTotalObjectCount() << ") (Dim: " << dim << ") (Min: " << m_worldBounds.first << ") (Max: " << m_worldBounds.second << ")";
 	if(IsEmpty() == true)
-		Con::cout << ss.str() << Con::endl;
+		Con::COUT << ss.str() << Con::endl;
 	else
-		Con::ccl << ss.str() << Con::endl;
+		Con::CCL << ss.str() << Con::endl;
 	DebugPrintObjects(t);
 	if(m_children == nullptr)
 		return;
@@ -289,7 +289,7 @@ void BaseOcclusionOctree::ExtendRoot(const Vector3 &origin)
 	assert(dClosest < 0.01f); // The node should have the exact same position; If not, something went wrong
 	if(closestNode == nullptr) {
 		auto &bounds = newNode->GetWorldBounds();
-		Con::cwar << "Unable to extend occlusion tree node. Invalid dimensions? (" << origin.x << "," << origin.y << "," << origin.z << ") (" << bounds.first.x << "," << bounds.first.y << "," << bounds.first.x << ") (" << bounds.second.x << "," << bounds.second.y << "," << bounds.second.z
+		Con::CWAR << "Unable to extend occlusion tree node. Invalid dimensions? (" << origin.x << "," << origin.y << "," << origin.z << ") (" << bounds.first.x << "," << bounds.first.y << "," << bounds.first.x << ") (" << bounds.second.x << "," << bounds.second.y << "," << bounds.second.z
 		          << ")" << Con::endl;
 		return;
 	}

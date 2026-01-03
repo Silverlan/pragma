@@ -744,11 +744,6 @@ void pragma::Engine::RegisterConsoleCommands()
 	////////////////////////////////
 	////////////////////////////////
 
-	std::cout<<"MIN:: "<<uvec::IDENTITY_SCALE<<std::endl;
-	std::cout<<"&DOT_FILE_EXTENSION_PRECOMPILED: "<<&Lua::DOT_FILE_EXTENSION_PRECOMPILED<<std::endl;
-	std::cout<<"DOT_FILE_EXTENSION_PRECOMPILED: "<<Lua::DOT_FILE_EXTENSION_PRECOMPILED<<std::endl;
-	std::string s = "Opens the specified lua-file and outputs a precompiled file with the same name (And the extension '" + Lua::DOT_FILE_EXTENSION_PRECOMPILED + "').";
-	std::cout<<s<<std::endl;
 	conVarMapEn.RegisterConCommand(
 	  "lua_compile",
 	  +[](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {

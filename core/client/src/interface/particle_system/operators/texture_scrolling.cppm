@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.operator_texture_scrolling;
 
 export import :entities.components.particle_system;
@@ -12,12 +8,12 @@ export import :particle_system.modifier;
 
 export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorTextureScrolling : public CParticleOperator {
-	public:
+	  public:
 		CParticleOperatorTextureScrolling() = default;
 		virtual void Simulate(CParticle &particle, double, float strength) override;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void OnParticleCreated(CParticle &particle) override;
-	private:
+	  private:
 		void SetFrameOffset(CParticle &particle, Vector2 uv);
 		float m_fHorizontalSpeed = 0.f;
 		float m_fVerticalSpeed = 0.f;

@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#undef GetClassName
-
 module pragma.client;
 
 import :entities.base_entity;
@@ -16,6 +12,8 @@ import :model;
 import :game;
 import :util;
 import pragma.shared;
+
+#undef GetClassName
 
 void pragma::ecs::CBaseEntity::OnComponentAdded(BaseEntityComponent &component)
 {

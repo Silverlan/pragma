@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:gui.console;
 
 export import :gui.command_line_entry;
@@ -12,7 +8,7 @@ export import :gui.frame;
 
 export namespace pragma::gui::types {
 	class DLLCLIENT WIConsole : public WIBase {
-	public:
+	  public:
 		static WIConsole *Open();
 		static void Close();
 		static WIConsole *GetConsole();
@@ -46,7 +42,7 @@ export namespace pragma::gui::types {
 
 		void SetMaxLogLineCount(uint32_t count);
 		uint32_t GetMaxLogLineCount() const;
-	private:
+	  private:
 		void InitializeSnapAreas();
 		void UpdateConsoleMode();
 		void SetSimpleConsoleMode(bool simple, bool force = false);

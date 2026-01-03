@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:rendering.lightmap_data_cache;
 
 export import pragma.udm;
@@ -45,7 +41,7 @@ export namespace pragma::rendering {
 			std::vector<Vector2> uvs;
 		};
 		struct InstanceCacheData {
-			std::string model;     // Needed for debugging purposes only
+			std::string model;    // Needed for debugging purposes only
 			math::Transform pose; // Needed for debugging purposes only
 			util::Uuid entityUuid;
 			std::unordered_map<LmUuid, MeshCacheData> meshData;

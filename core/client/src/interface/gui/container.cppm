@@ -1,17 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:gui.container;
 
 export import pragma.gui;
 
 export namespace pragma::gui::types {
 	class DLLCLIENT WIContainer : public WIBase {
-	public:
+	  public:
 		WIContainer();
 		enum class DLLCLIENT Padding : uint32_t { Top = 0, Right, Bottom, Left };
 		void SetPadding(int32_t padding);
@@ -31,7 +27,7 @@ export namespace pragma::gui::types {
 
 		virtual void OnChildAdded(WIBase *child) override;
 		virtual void OnChildRemoved(WIBase *child) override;
-	protected:
+	  protected:
 		virtual void DoUpdate() override;
 		std::array<int32_t, 4> m_padding;
 		std::unordered_map<WIBase *, std::array<CallbackHandle, 2>> m_childCallbacks = {};

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 import :gui.command_line_entry;
@@ -19,57 +17,56 @@ void pragma::gui::types::WICommandLineEntry::Initialize()
 	if(m_hBase.IsValid()) {
 		auto hThis = GetHandle();
 		m_hBase->AddCallback("OnKeyEvent",
-		  FunctionCallback<util::EventReply, platform::Key, int, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
-		    [hThis, this](util::EventReply *reply, platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
-			    if((state != platform::KeyState::Press && state != platform::KeyState::Repeat) || hThis.IsValid() == false)
-				    return CallbackReturnType::NoReturnValue;
-			    const auto fApplyText = [this](WIMenuItem *pItem) {
-				    if(pItem == nullptr)
-					    return;
-				    auto *pTextEl = pItem->GetTextElement();
-				    if(pTextEl == nullptr)
-					    return;
-				    m_bSkipAutoComplete = true;
-				    auto &text = pTextEl->GetText();
-				    auto insertText = text.cpp_str() + ' '; // Add a space to the end of the command so the user can add arguments immediately and can skip typing the space themselves
-				    SetText(insertText);
-				    if(text.empty() == false)
-					    SetCaretPos(insertText.length());
-				    m_bSkipAutoComplete = false;
-			    };
-			    switch(key) {
-			    case platform::Key::Up:
-				    {
-					    auto *pContextMenu = static_cast<WIContextMenu *>(m_hAutoCompleteList.get());
-					    if(pContextMenu != nullptr) {
-						    auto optIdx = pContextMenu->GetSelectedItemIndex();
-						    auto count = pContextMenu->GetItemCount();
-						    if(count > 0u) {
-							    auto idx = optIdx.has_value() ? ((*optIdx > 0u) ? (*optIdx - 1u) : (count - 1u)) : (count - 1u);
-							    fApplyText(pContextMenu->SelectItem(idx));
-						    }
-					    }
-					    break;
-				    }
-			    case platform::Key::Down:
-				    {
-					    auto *pContextMenu = static_cast<WIContextMenu *>(m_hAutoCompleteList.get());
-					    if(pContextMenu != nullptr) {
-						    auto optIdx = pContextMenu->GetSelectedItemIndex();
-						    auto count = pContextMenu->GetItemCount();
-						    if(count > 0u) {
-							    auto idx = optIdx.has_value() ? ((*optIdx + 1u) % count) : 0u;
-							    fApplyText(pContextMenu->SelectItem(idx));
-						    }
-					    }
-					    break;
-				    }
-			    default:
-				    return CallbackReturnType::NoReturnValue;
-			    }
-			    *reply = util::EventReply::Handled;
-			    return CallbackReturnType::HasReturnValue;
-		    }));
+		  FunctionCallback<util::EventReply, platform::Key, int, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn([hThis, this](util::EventReply *reply, platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
+			  if((state != platform::KeyState::Press && state != platform::KeyState::Repeat) || hThis.IsValid() == false)
+				  return CallbackReturnType::NoReturnValue;
+			  const auto fApplyText = [this](WIMenuItem *pItem) {
+				  if(pItem == nullptr)
+					  return;
+				  auto *pTextEl = pItem->GetTextElement();
+				  if(pTextEl == nullptr)
+					  return;
+				  m_bSkipAutoComplete = true;
+				  auto &text = pTextEl->GetText();
+				  auto insertText = text.cpp_str() + ' '; // Add a space to the end of the command so the user can add arguments immediately and can skip typing the space themselves
+				  SetText(insertText);
+				  if(text.empty() == false)
+					  SetCaretPos(insertText.length());
+				  m_bSkipAutoComplete = false;
+			  };
+			  switch(key) {
+			  case platform::Key::Up:
+				  {
+					  auto *pContextMenu = static_cast<WIContextMenu *>(m_hAutoCompleteList.get());
+					  if(pContextMenu != nullptr) {
+						  auto optIdx = pContextMenu->GetSelectedItemIndex();
+						  auto count = pContextMenu->GetItemCount();
+						  if(count > 0u) {
+							  auto idx = optIdx.has_value() ? ((*optIdx > 0u) ? (*optIdx - 1u) : (count - 1u)) : (count - 1u);
+							  fApplyText(pContextMenu->SelectItem(idx));
+						  }
+					  }
+					  break;
+				  }
+			  case platform::Key::Down:
+				  {
+					  auto *pContextMenu = static_cast<WIContextMenu *>(m_hAutoCompleteList.get());
+					  if(pContextMenu != nullptr) {
+						  auto optIdx = pContextMenu->GetSelectedItemIndex();
+						  auto count = pContextMenu->GetItemCount();
+						  if(count > 0u) {
+							  auto idx = optIdx.has_value() ? ((*optIdx + 1u) % count) : 0u;
+							  fApplyText(pContextMenu->SelectItem(idx));
+						  }
+					  }
+					  break;
+				  }
+			  default:
+				  return CallbackReturnType::NoReturnValue;
+			  }
+			  *reply = util::EventReply::Handled;
+			  return CallbackReturnType::HasReturnValue;
+		  }));
 	}
 }
 

@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.operator_animation_playback;
 
 export import :particle_system.modifier;
@@ -14,11 +10,11 @@ export namespace pragma::ecs {
 }
 export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorAnimationPlayback : public CParticleOperator {
-	public:
+	  public:
 		CParticleOperatorAnimationPlayback() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
-	private:
+	  private:
 		float m_playbackSpeed = 1.f;
 	};
 }

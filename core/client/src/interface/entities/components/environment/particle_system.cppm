@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:entities.components.particle_system;
@@ -406,8 +405,12 @@ export namespace pragma::ecs {
 		void OnComplete();
 	};
 };
-export {REGISTER_ENUM_FLAGS(pragma::ecs::CParticleSystemComponent::Flags)}
-export {REGISTER_ENUM_FLAGS(pragma::pts::ParticleRenderFlags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::ecs::CParticleSystemComponent::Flags)
+}
+export {
+	REGISTER_ENUM_FLAGS(pragma::pts::ParticleRenderFlags)
+}
 export {
 	namespace pragma::ecs {
 		class DLLCLIENT CEnvParticleSystem : public CBaseEntity {

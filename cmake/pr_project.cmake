@@ -92,6 +92,29 @@ function(pr_precompile_headers TARGET_NAME PRECOMPILED_HEADER)
     set_source_files_properties("${SRC_C_FILES}" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 endfunction()
 
+function(pr_add_export_macro targetName macroName)
+    set(options STATIC SHARED)
+    set(oneValueArgs)
+    set(multiValueArgs)
+    cmake_parse_arguments(PARSE_ARGV 2 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+    if(PA_STATIC)
+        target_compile_definitions(${targetName}
+            PRIVATE   "${macroName}="
+        )
+    else()
+        if (UNIX)
+            target_compile_definitions(${targetName}
+                PRIVATE   "${macroName}=__attribute__((visibility(\"default\")))"
+            )
+        else()
+            target_compile_definitions(${targetName}
+                PRIVATE   "${macroName}=__declspec(dllexport)"
+            )
+        endif()
+    endif()
+endfunction()
+
 function(pr_add_library TARGET_NAME LIB_TYPE)
     pr_project(${TARGET_NAME})
     add_library(${TARGET_NAME} ${LIB_TYPE})

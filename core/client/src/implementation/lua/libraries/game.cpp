@@ -3,8 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
-
 // #define ENABLE_DEPRECATED_PHYSICS
 
 #ifdef ENABLE_DEPRECATED_PHYSICS

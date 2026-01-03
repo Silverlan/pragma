@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.renderer_model;
 
 import :entities.components.animated;
@@ -19,7 +15,7 @@ export namespace pragma {
 };
 export namespace pragma::pts {
 	class DLLCLIENT CParticleRendererModel : public CParticleRenderer {
-	public:
+	  public:
 		CParticleRendererModel() = default;
 		virtual ~CParticleRendererModel() override;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
@@ -30,7 +26,7 @@ export namespace pragma::pts {
 		virtual ShaderParticleBase *GetShader() const override;
 
 		bool IsAnimated() const;
-	protected:
+	  protected:
 		static std::size_t s_rendererCount;
 
 		struct ParticleModelComponent {

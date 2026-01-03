@@ -1,14 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#undef GetClassName
-
 export module pragma.client:entities.registration;
 
 import :client_state;
 import :game;
+
+#undef GetClassName
 
 export namespace client_entities {
 	using Factory = std::function<pragma::ecs::CBaseEntity *(pragma::ClientState *)>;

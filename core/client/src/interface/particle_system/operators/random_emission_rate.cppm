@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.operator_random_emission_rate;
 
 export import :entities.components.particle_system;
@@ -12,12 +8,12 @@ export import :particle_system.modifier;
 
 export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorRandomEmissionRate : public CParticleOperator {
-	public:
+	  public:
 		CParticleOperatorRandomEmissionRate() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void Simulate(double tDelta) override;
 		virtual void OnParticleSystemStarted() override;
-	private:
+	  private:
 		float GetInterval() const;
 		void Reset();
 		float m_fMinimum = 0.07f;

@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:entities.components.weapon;
@@ -87,4 +86,6 @@ export namespace pragma {
 
 	using namespace pragma::math::scoped_enum::bitwise;
 };
-export {REGISTER_ENUM_FLAGS(pragma::CWeaponComponent::StateFlags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::CWeaponComponent::StateFlags)
+}

@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:entities.components.game_shadow_manager;
@@ -108,7 +107,9 @@ export namespace pragma {
 	};
 	using namespace pragma::math::scoped_enum::bitwise;
 };
-export {REGISTER_ENUM_FLAGS(pragma::ShadowRenderer::RenderResultFlags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::ShadowRenderer::RenderResultFlags)
+}
 
 export class DLLCLIENT CShadowManager : public pragma::ecs::CBaseEntity {
   public:

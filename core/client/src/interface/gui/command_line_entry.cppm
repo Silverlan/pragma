@@ -1,16 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 export module pragma.client:gui.command_line_entry;
 
 export import pragma.gui;
 
 export namespace pragma::gui::types {
 	class DLLCLIENT WICommandLineEntry : public WITextEntry {
-	public:
+	  public:
 		WICommandLineEntry();
 		virtual void Initialize() override;
 
@@ -24,7 +21,7 @@ export namespace pragma::gui::types {
 
 		void SetAutocompleteEnabled(bool enabled);
 		bool IsAutocompleteEnabled() const;
-	private:
+	  private:
 		virtual void OnFocusGained() override;
 		virtual void OnFocusKilled() override;
 		virtual void OnTextEntered() override;

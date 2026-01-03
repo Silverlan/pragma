@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.renderer_blob;
 
 export import :particle_system.modifier;
@@ -13,13 +10,13 @@ import :debug;
 
 export namespace pragma::pts {
 	class DLLCLIENT CParticleRendererBlob : public CParticleRenderer {
-	private:
+	  private:
 		static bool s_bShowNeighborLinks;
 		static std::shared_ptr<prosper::IDescriptorSetGroup> s_dsParticles;
 		static std::size_t s_activeBlobRendererCount;
 		static ShaderParticleBlob *s_shader;
 		static Shader::ParticleBlobShadow *s_shadowShader;
-	protected:
+	  protected:
 		static constexpr auto INVALID_BLOB_INDEX = std::numeric_limits<uint16_t>::max();
 		struct Link {
 			uint32_t targetParticleIdx = INVALID_BLOB_INDEX;
@@ -49,7 +46,7 @@ export namespace pragma::pts {
 		std::vector<DebugInfo> m_dbgNeighborLinks;
 		void ShowDebugNeighborLinks(bool b);
 		void UpdateDebugNeighborLinks();
-	public:
+	  public:
 		static void SetShowNeighborLinks(bool b);
 
 		CParticleRendererBlob() = default;

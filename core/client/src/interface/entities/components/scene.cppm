@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:entities.components.scene;
@@ -36,13 +35,15 @@ export class DLLCLIENT SceneRenderDesc {
 	};
 	using WorldMeshVisibility = std::vector<bool>;
 	// Note: All arguments have to be thread safe for the duration of the render (except vp)
-	static void AddRenderMeshesToRenderQueue(pragma::CRasterizationRendererComponent *optRasterizationRenderer, pragma::rendering::RenderFlags renderFlags, pragma::CRenderComponent &renderC, const std::function<pragma::rendering::RenderQueue *(pragma::rendering::SceneRenderPass, bool)> &getRenderQueue,
-	  const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam, const Mat4 &vp, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull, int32_t lodBias = 0,
-	  const std::function<void(pragma::rendering::RenderQueue &, const pragma::rendering::RenderQueueItem &)> &fOptInsertItemToQueue = nullptr, pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags = static_cast<pragma::GameShaderSpecializationConstantFlag>(0));
+	static void AddRenderMeshesToRenderQueue(pragma::CRasterizationRendererComponent *optRasterizationRenderer, pragma::rendering::RenderFlags renderFlags, pragma::CRenderComponent &renderC,
+	  const std::function<pragma::rendering::RenderQueue *(pragma::rendering::SceneRenderPass, bool)> &getRenderQueue, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam, const Mat4 &vp, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull,
+	  int32_t lodBias = 0, const std::function<void(pragma::rendering::RenderQueue &, const pragma::rendering::RenderQueueItem &)> &fOptInsertItemToQueue = nullptr,
+	  pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags = static_cast<pragma::GameShaderSpecializationConstantFlag>(0));
 	// Note: All arguments have to be thread safe for the duration of the render (except vp)
-	static void CollectRenderMeshesFromOctree(pragma::CRasterizationRendererComponent *optRasterizationRenderer, pragma::rendering::RenderFlags renderFlags, bool enableClipping, const OcclusionOctree<pragma::ecs::CBaseEntity *> &tree, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam,
-	  const Mat4 &vp, pragma::rendering::RenderMask renderMask, const std::function<pragma::rendering::RenderQueue *(pragma::rendering::SceneRenderPass, bool)> &getRenderQueue, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull,
-	  const std::vector<pragma::util::BSPTree *> *bspTrees = nullptr, const std::vector<pragma::util::BSPTree::Node *> *bspLeafNodes = nullptr, int32_t lodBias = 0, const std::function<bool(pragma::ecs::CBaseEntity &, const pragma::CSceneComponent &, pragma::rendering::RenderFlags)> &shouldConsiderEntity = nullptr,
+	static void CollectRenderMeshesFromOctree(pragma::CRasterizationRendererComponent *optRasterizationRenderer, pragma::rendering::RenderFlags renderFlags, bool enableClipping, const OcclusionOctree<pragma::ecs::CBaseEntity *> &tree, const pragma::CSceneComponent &scene,
+	  const pragma::CCameraComponent &cam, const Mat4 &vp, pragma::rendering::RenderMask renderMask, const std::function<pragma::rendering::RenderQueue *(pragma::rendering::SceneRenderPass, bool)> &getRenderQueue, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull,
+	  const std::vector<pragma::util::BSPTree *> *bspTrees = nullptr, const std::vector<pragma::util::BSPTree::Node *> *bspLeafNodes = nullptr, int32_t lodBias = 0,
+	  const std::function<bool(pragma::ecs::CBaseEntity &, const pragma::CSceneComponent &, pragma::rendering::RenderFlags)> &shouldConsiderEntity = nullptr,
 	  pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags = static_cast<pragma::GameShaderSpecializationConstantFlag>(0));
 	static bool ShouldConsiderEntity(pragma::ecs::CBaseEntity &ent, const pragma::CSceneComponent &scene, pragma::rendering::RenderFlags renderFlags, pragma::rendering::RenderMask renderMask);
 	static bool ShouldCull(pragma::ecs::CBaseEntity &ent, const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull);
@@ -69,8 +70,9 @@ export class DLLCLIENT SceneRenderDesc {
   private:
 	void AddRenderMeshesToRenderQueue(pragma::CRasterizationRendererComponent *optRasterizationRenderer, pragma::rendering::RenderFlags renderFlags, pragma::CRenderComponent &renderC, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam, const Mat4 &vp,
 	  const std::function<bool(const Vector3 &, const Vector3 &)> &fShouldCull, pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags = static_cast<pragma::GameShaderSpecializationConstantFlag>(0));
-	void CollectRenderMeshesFromOctree(pragma::CRasterizationRendererComponent *optRasterizationRenderer, pragma::rendering::RenderFlags renderFlags, bool enableClipping, const OcclusionOctree<pragma::ecs::CBaseEntity *> &tree, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam, const Mat4 &vp,
-	  pragma::rendering::RenderMask renderMask, const std::vector<pragma::math::Plane> &frustumPlanes, const std::vector<pragma::util::BSPTree *> *bspTrees = nullptr, const std::vector<pragma::util::BSPTree::Node *> *bspLeafNodes = nullptr);
+	void CollectRenderMeshesFromOctree(pragma::CRasterizationRendererComponent *optRasterizationRenderer, pragma::rendering::RenderFlags renderFlags, bool enableClipping, const OcclusionOctree<pragma::ecs::CBaseEntity *> &tree, const pragma::CSceneComponent &scene,
+	  const pragma::CCameraComponent &cam, const Mat4 &vp, pragma::rendering::RenderMask renderMask, const std::vector<pragma::math::Plane> &frustumPlanes, const std::vector<pragma::util::BSPTree *> *bspTrees = nullptr,
+	  const std::vector<pragma::util::BSPTree::Node *> *bspLeafNodes = nullptr);
 
 	std::vector<WorldMeshVisibility> m_worldMeshVisibility;
 	std::array<std::shared_ptr<pragma::rendering::RenderQueue>, pragma::math::to_integral(RenderQueueId::Count)> m_renderQueues;
@@ -256,8 +258,12 @@ export namespace pragma {
 	};
 	using namespace pragma::math::scoped_enum::bitwise;
 };
-export {REGISTER_ENUM_FLAGS(pragma::CSceneComponent::FRenderSetting)}
-export {REGISTER_ENUM_FLAGS(pragma::CSceneComponent::StateFlags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::CSceneComponent::FRenderSetting)
+}
+export {
+	REGISTER_ENUM_FLAGS(pragma::CSceneComponent::StateFlags)
+}
 
 export class DLLCLIENT CScene : public pragma::ecs::CBaseEntity {
   public:

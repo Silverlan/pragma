@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:rendering.shaders.world_noop;
 
 export import :rendering.shaders.world_unlit;

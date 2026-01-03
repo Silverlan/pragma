@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 export module pragma.client:rendering.shaders.particle_animated_sprites;
 
 export import :rendering.shaders.particle_2d_base;

@@ -4,7 +4,6 @@
 module;
 
 #include "pragma/console/helper.hpp"
-#include "definitions.hpp"
 #include <cassert>
 #ifdef _WIN32
 

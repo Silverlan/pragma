@@ -1,15 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#define RESOURCE_TRANSFER_VERBOSE 0
-
 module pragma.client;
 
 import :client_state;
 import :game;
 import :model;
+
+#define RESOURCE_TRANSFER_VERBOSE 0
 
 void pragma::ClientState::StartResourceTransfer()
 {

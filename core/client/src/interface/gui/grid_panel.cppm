@@ -1,26 +1,23 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 export module pragma.client:gui.grid_panel;
 
 export import :gui.table;
 
 export namespace pragma::gui::types {
 	class DLLCLIENT WIGridPanel : public WITable {
-	public:
+	  public:
 		enum class DLLCLIENT ResizeMode { FitToChildren = 0, Uniform };
-	private:
+	  private:
 		using WITable::AddHeaderRow;
-	protected:
+	  protected:
 		ResizeMode m_resizeMode;
 		uint32_t m_numColumns;
 		void FillRows(uint32_t count);
 		virtual float UpdateRowHeights(float yOffset, float defHeight) override;
 		virtual void DoUpdate() override;
-	public:
+	  public:
 		WIGridPanel();
 		virtual WITableRow *AddRow() override;
 		virtual void SetSize(int x, int y) override;

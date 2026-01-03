@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.renderer_beam;
 
 export import :particle_system.modifier;
@@ -14,7 +10,7 @@ export namespace pragma::ecs {
 }
 export namespace pragma::pts {
 	class DLLCLIENT CParticleRendererBeam : public CParticleRenderer {
-	public:
+	  public:
 		CParticleRendererBeam() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void RecordRender(prosper::ICommandBuffer &drawCmd, CSceneComponent &scene, const CRasterizationRendererComponent &renderer, ParticleRenderFlags renderFlags) override;
@@ -23,7 +19,7 @@ export namespace pragma::pts {
 		virtual void PostSimulate(double tDelta) override;
 		virtual std::pair<Vector3, Vector3> GetRenderBounds() const override;
 		virtual ShaderParticleBase *GetShader() const override;
-	private:
+	  private:
 #pragma pack(push, 1)
 		struct DLLCLIENT Node {
 			Node(const Vector3 &o, const Color &c);

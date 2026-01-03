@@ -1,22 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.operator_cylindrical_vortex;
 
 export import :particle_system.operator_world_base;
 
 export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorCylindricalVortex : public CParticleOperatorWorldBase {
-	public:
+	  public:
 		CParticleOperatorCylindricalVortex() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 		virtual void Simulate(double tDelta) override;
-	private:
+	  private:
 		Vector3 m_vAxis = {0.f, 1.f, 0.f};
 		float m_fStrength = 2.f;
 		float m_fDivergence = 0.f;

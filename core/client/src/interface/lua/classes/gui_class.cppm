@@ -1,15 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
-#undef DrawState
-
 export module pragma.client:scripting.lua.classes.gui;
 export import :gui;
 export import pragma.gui;
+
+#undef DrawState
 
 export namespace Lua {
 	namespace gui {

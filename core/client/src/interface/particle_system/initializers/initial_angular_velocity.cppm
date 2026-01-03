@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.initializer_initial_angular_velocity;
 
 export import :particle_system.modifier;
@@ -13,7 +10,7 @@ export namespace pragma::ecs {
 }
 export namespace pragma::pts {
 	class DLLCLIENT CParticleInitializerInitialAngularVelocity : public CParticleInitializer {
-	private:
+	  private:
 		Vector3 m_direction = {};
 		float m_speed = 0.f;
 		Vector3 m_spreadMin = {};
@@ -24,7 +21,7 @@ export namespace pragma::pts {
 			Vector3 maxVelocity = {};
 		};
 		std::unique_ptr<RandomVelocity> m_randomVelocity = nullptr;
-	public:
+	  public:
 		CParticleInitializerInitialAngularVelocity() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void OnParticleCreated(CParticle &particle) override;

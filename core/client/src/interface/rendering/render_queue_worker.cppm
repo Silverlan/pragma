@@ -1,13 +1,11 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#undef AddJob
-
 export module pragma.client:rendering.render_queue_worker;
 
 export import :rendering.render_stats;
+
+#undef AddJob
 
 export namespace pragma::rendering {
 	class RenderQueueWorker;

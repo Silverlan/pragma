@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.operator_toroidal_vortex;
 
 export import :particle_system.operator_world_base;
@@ -14,12 +10,12 @@ export namespace pragma::ecs {
 }
 export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorToroidalVortex : public CParticleOperatorWorldBase {
-	public:
+	  public:
 		CParticleOperatorToroidalVortex() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 		virtual void Simulate(double tDelta) override;
-	private:
+	  private:
 		Vector3 m_vAxis = {0.f, 1.f, 0.f};
 		float m_fHeight = 1.f;
 		float m_fRadius = 1.f;

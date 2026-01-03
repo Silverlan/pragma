@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:rendering.prepass;
 // Not yet fully implemented.
 // See https://aras-p.info/blog/2012/03/02/2012-theory-for-forward-rendering/ for implementation details

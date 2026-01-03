@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include <cassert>
 
 #if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1

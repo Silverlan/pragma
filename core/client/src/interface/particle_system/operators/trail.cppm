@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.operator_trail;
 
 export import :entities.components.particle_system;
@@ -11,10 +8,10 @@ export import :particle_system.modifier;
 
 export namespace pragma::pts {
 	class DLLCLIENT CParticleOperatorTrail : public CParticleOperator {
-	protected:
+	  protected:
 		float m_travelTime = 1.f;
 		std::vector<uint32_t> m_particleNodes;
-	public:
+	  public:
 		CParticleOperatorTrail() = default;
 		virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 		virtual void Simulate(CParticle &particle, double tDelta, float strength) override;

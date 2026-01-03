@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include <cassert>
 
 export module pragma.client:rendering.occlusion_culling.octree;

@@ -1,16 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#undef DrawState
-
 module pragma.client;
 
 import :client_state;
 import :scripting.lua.classes.shader;
 
 import pragma.shadergraph;
+
+#undef DrawState
 
 static spdlog::logger &LOGGER_SG = pragma::register_logger("shadergraph");
 

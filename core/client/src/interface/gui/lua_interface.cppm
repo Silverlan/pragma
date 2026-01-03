@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:gui.lua_interface;
 
 export import pragma.lua;
@@ -12,7 +8,7 @@ export import pragma.gui;
 
 export namespace pragma::gui {
 	class DLLCLIENT WGUILuaInterface {
-	private:
+	  private:
 		static lua::State *m_guiLuaState;
 		static CallbackHandle m_cbGameStart;
 		static CallbackHandle m_cbLuaReleased;
@@ -21,7 +17,7 @@ export namespace pragma::gui {
 		static void OnGameStart();
 		static void OnGameLuaReleased(lua::State *lua);
 		static void ClearLuaObjects(Element *el);
-	public:
+	  public:
 		static void Initialize();
 		static luabind::object GetLuaObject(lua::State *l, Element &p);
 		static void InitializeGUIElement(Element &p);

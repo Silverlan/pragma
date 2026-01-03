@@ -1,15 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#undef LEFT
-#undef RIGHT
-#undef TOP
-#undef BOTTOM
-#undef NEAR
-#undef FAR
-
 module pragma.client;
 
 import :scripting.lua.libraries.net_messages;
@@ -17,6 +8,12 @@ import pragma.shared;
 import pragma.string.unicode;
 
 #undef LoadLibrary
+#undef LEFT
+#undef RIGHT
+#undef TOP
+#undef BOTTOM
+#undef NEAR
+#undef FAR
 
 void Lua::register_shared_client_state(lua::State *l)
 {

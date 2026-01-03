@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "pragma/console/helper.hpp"
 
 module pragma.client;

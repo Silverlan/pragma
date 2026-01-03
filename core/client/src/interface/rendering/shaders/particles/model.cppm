@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 export module pragma.client:rendering.shaders.particle_model;
 
 export import :rendering.shaders.particle_base;
@@ -40,8 +37,7 @@ export namespace pragma {
 		bool Draw(geometry::CModelSubMesh &mesh, uint32_t numInstances, uint32_t firstInstance = 0u);
 		bool RecordParticleSystem(prosper::ShaderBindState &bindState, ecs::CParticleSystemComponent &pSys) const;
 
-		bool RecordBeginDraw(prosper::ShaderBindState &bindState, const Vector4 &clipPlane, ecs::CParticleSystemComponent &pSys, const Vector4 &drawOrigin = {0.f, 0.f, 0.f, 1.f},
-		  RecordFlags recordFlags = RecordFlags::RenderPassTargetAsViewportAndScissor) const;
+		bool RecordBeginDraw(prosper::ShaderBindState &bindState, const Vector4 &clipPlane, ecs::CParticleSystemComponent &pSys, const Vector4 &drawOrigin = {0.f, 0.f, 0.f, 1.f}, RecordFlags recordFlags = RecordFlags::RenderPassTargetAsViewportAndScissor) const;
 	  protected:
 		virtual prosper::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;

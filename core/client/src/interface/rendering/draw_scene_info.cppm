@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:rendering.draw_scene_info;
@@ -66,4 +65,6 @@ export namespace pragma::rendering {
 	};
 	using namespace pragma::math::scoped_enum::bitwise;
 };
-export {REGISTER_ENUM_FLAGS(pragma::rendering::DrawSceneInfo::Flags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::rendering::DrawSceneInfo::Flags)
+}

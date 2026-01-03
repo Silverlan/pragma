@@ -7,6 +7,9 @@ pr_add_library(${PROJ_NAME} SHARED)
 pr_add_export_macro(${PROJ_NAME} DLLNETWORK)
 
 if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	# This is a temporary workaround for a compiler bug with clang on Windows.
+	# See https://github.com/llvm/llvm-project/issues/173997
+	# Once the issue is fixed, all instances of WINDOWS_CLANG_COMPILER_FIX should be removed.
 	# WINDOWS_CLANG_COMPILER_FIX
 	target_compile_definitions(${PROJ_NAME} PUBLIC
 		"PREFIX_WARNING=GET_PREFIX_WARNING()"

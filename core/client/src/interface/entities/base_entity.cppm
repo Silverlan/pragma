@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include <format>
 
 export module pragma.client:entities.base_entity;
@@ -20,7 +19,7 @@ namespace cBaseEntity {
 }
 export namespace pragma::ecs {
 	class DLLCLIENT CBaseEntity : public BaseEntity {
-	public:
+	  public:
 		static void RegisterEvents(EntityComponentManager &componentManager);
 
 		CBaseEntity();
@@ -82,7 +81,7 @@ export namespace pragma::ecs {
 		void SendNetEventUDP(UInt32 eventId) const;
 
 		virtual NetworkState *GetNetworkState() const override final;
-	protected:
+	  protected:
 		virtual void DoSpawn() override;
 		virtual void OnComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnComponentRemoved(BaseEntityComponent &component) override;

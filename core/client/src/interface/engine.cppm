@@ -3,7 +3,6 @@
 
 module;
 
-#include "definitions.hpp"
 #include "util_enum_flags.hpp"
 
 export module pragma.client:engine;
@@ -307,7 +306,9 @@ export namespace pragma {
 };
 #pragma warning(pop)
 
-export {REGISTER_ENUM_FLAGS(pragma::CEngine::StateFlags)}
+export {
+	REGISTER_ENUM_FLAGS(pragma::CEngine::StateFlags)
+}
 
 namespace pragma {
 	void register_client_launch_parameters(LaunchParaMap &map);

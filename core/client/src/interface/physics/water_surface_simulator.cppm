@@ -1,17 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:physics.water_surface_simulator;
 
 export import :model.mesh;
 
 export namespace pragma::physics {
 	class DLLCLIENT CPhysWaterSurfaceSimulator : public PhysWaterSurfaceSimulator {
-	public:
+	  public:
 		CPhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 aabbMax, float originY, uint32_t spacing, float stiffness = 0.1f, float propagation = 100.f);
 		void Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, geometry::CModelSubMesh &mesh);
 		const std::vector<uint16_t> &GetTriangleIndices() const;
@@ -25,7 +21,7 @@ export namespace pragma::physics {
 			Vector4 nbToThis = {};
 		};
 #pragma pack(pop)
-	protected:
+	  protected:
 		virtual uint8_t GetEdgeIterationCount() const override;
 		virtual void InitializeSurface() override;
 		std::vector<uint16_t> m_triangleIndices;

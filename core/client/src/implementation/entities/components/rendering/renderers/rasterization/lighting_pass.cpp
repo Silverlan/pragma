@@ -1,11 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
-#endif
-
 module pragma.client;
 
 import :entities.components.rasterization_renderer;

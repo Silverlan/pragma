@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:gui.lua_handle_wrapper;
 
 export import pragma.lua;
@@ -12,9 +8,9 @@ export import pragma.gui;
 
 export namespace pragma::gui {
 	class DLLCLIENT WILuaHandleWrapper {
-	private:
+	  private:
 		WILuaHandleWrapper() {}
-	public:
+	  public:
 		template<class THandle>
 		static WILuaHandleWrapper *Create(lua::State *l, THandle handle)
 		{

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.client;
 
 static std::optional<std::string> find_asset_file(const std::string &name, pragma::asset::Type type)
@@ -259,8 +257,7 @@ void pragma::CGame::RegisterLuaLibraries()
 	  luabind::def(
 	    "save_image", +[](lua::State *l, image::ImageBuffer &imgBuffer, std::string fileName, image::ImageFormat format, float quality) { return save_image(l, imgBuffer, fileName, format, quality); }),
 	  luabind::def(
-	    "save_image",
-	    +[](lua::State *l, image::ImageBuffer &imgBuffer, std::string fileName, image::ImageFormat format, float quality, const LuaCore::LuaThreadWrapper &tw) { return save_image(l, imgBuffer, fileName, format, quality, const_cast<LuaCore::LuaThreadWrapper *>(&tw)); }),
+	    "save_image", +[](lua::State *l, image::ImageBuffer &imgBuffer, std::string fileName, image::ImageFormat format, float quality, const LuaCore::LuaThreadWrapper &tw) { return save_image(l, imgBuffer, fileName, format, quality, const_cast<LuaCore::LuaThreadWrapper *>(&tw)); }),
 	  luabind::def("save_image", static_cast<std::pair<bool, std::optional<std::string>> (*)(lua::State *, image::ImageBuffer &, std::string, image::ImageFormat)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua::State *, luabind::table<>, std::string, image::TextureInfo &, bool)>(save_image)), luabind::def("save_image", static_cast<bool (*)(lua::State *, luabind::table<>, std::string, image::TextureInfo &)>(save_image)),
 	  luabind::def("save_image", static_cast<bool (*)(lua::State *, prosper::IImage &, std::string, image::TextureInfo &)>(save_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua::State *, const std::string &, bool, image::Format)>(load_image)),

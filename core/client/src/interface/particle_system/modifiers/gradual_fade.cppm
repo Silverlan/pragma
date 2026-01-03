@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.modifier_gradual_fade;
 
 export import :particle_system.modifier_ease;
@@ -12,7 +9,7 @@ export import :particle_system.modifier_time;
 
 export namespace pragma::pts {
 	class DLLCLIENT CParticleModifierComponentGradualFade : public CParticleModifierComponentEase, public CParticleModifierComponentTime {
-	protected:
+	  protected:
 		CParticleModifierComponentGradualFade() = default;
 		void Initialize(const std::unordered_map<std::string, std::string> &values);
 
@@ -25,7 +22,7 @@ export namespace pragma::pts {
 		// Returns the eased fade fraction
 		float GetEasedFadeFraction(CParticle &p) const;
 		bool GetEasedFadeFraction(CParticle &p, float &outFraction) const;
-	private:
+	  private:
 		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fStart;
 		CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fEnd;
 		// If false, the start and end time will be in seconds (starting at the particle creation time)

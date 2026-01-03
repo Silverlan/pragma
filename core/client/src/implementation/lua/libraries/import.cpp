@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 //#include <assimp/Importer.hpp>
 //#include <assimp/Exporter.hpp>
 //#include <assimp/scene.h>

@@ -1,17 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.modifier_ease;
 
 export import pragma.shared;
 
 export namespace pragma::pts {
 	class DLLCLIENT CParticleModifierComponentEase {
-	protected:
+	  protected:
 		CParticleModifierComponentEase();
 		void Initialize(const std::unordered_map<std::string, std::string> &values);
 
@@ -19,7 +15,7 @@ export namespace pragma::pts {
 		float EaseIn(float t) const;
 		float EaseOut(float t) const;
 		float EaseInOut(float t) const;
-	private:
+	  private:
 		enum class EaseFunc : uint32_t { None = 0u, In, Out, InOut };
 		math::EaseType m_type;
 		EaseFunc m_easeFunc = EaseFunc::InOut;

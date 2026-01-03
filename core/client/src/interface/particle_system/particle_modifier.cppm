@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include "definitions.hpp"
-
 export module pragma.client:particle_system.modifier;
 
 export import :particle_system.enums;
@@ -26,7 +22,7 @@ export {
 	};
 	namespace pragma::pts {
 		class DLLCLIENT CParticleModifier : public CParticleSystemBaseKeyValues {
-		public:
+		  public:
 			const std::string &GetName() const;
 			void SetName(const std::string &name);
 			const std::string &GetType() const;
@@ -44,11 +40,11 @@ export {
 
 			int32_t GetPriority() const;
 			void SetPriority(int32_t priority);
-		protected:
+		  protected:
 			virtual ~CParticleModifier() = default;
 			mutable ecs::CParticleSystemComponent *m_particleSystem = nullptr;
 			CParticleModifier() = default;
-		private:
+		  private:
 			std::string m_name;
 			std::string m_type;
 			int32_t m_priority = 0;
@@ -57,14 +53,14 @@ export {
 		///////////////////////
 
 		class DLLCLIENT CParticleInitializer : public CParticleModifier {
-		public:
+		  public:
 			CParticleInitializer() = default;
 		};
 
 		///////////////////////
 
 		class DLLCLIENT CParticleOperator : public CParticleModifier {
-		public:
+		  public:
 			CParticleOperator() = default;
 			virtual void PreSimulate(CParticle &particle, double tDelta);
 			void Simulate(CParticle &particle, double tDelta);
@@ -73,7 +69,7 @@ export {
 			virtual void Simulate(CParticle &particle, double tDelta, float strength);
 			virtual void Initialize(BaseEnvParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 			float CalcStrength(float curTime) const;
-		private:
+		  private:
 			float m_opStartFadein = 0.f;
 			float m_opEndFadein = 0.f;
 			float m_opStartFadeout = 0.f;
@@ -82,7 +78,7 @@ export {
 		};
 
 		class DLLCLIENT CParticleOperatorLifespanDecay : public CParticleOperator {
-		public:
+		  public:
 			CParticleOperatorLifespanDecay() = default;
 			virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 		};
@@ -90,7 +86,7 @@ export {
 		///////////////////////
 
 		class DLLCLIENT CParticleRenderer : public CParticleModifier {
-		public:
+		  public:
 			CParticleRenderer() = default;
 			virtual void RecordRender(prosper::ICommandBuffer &drawCmd, CSceneComponent &scene, const CRasterizationRendererComponent &renderer, ParticleRenderFlags renderFlags) = 0;
 			virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, CSceneComponent &scene, const CRasterizationRendererComponent &renderer, CLightComponent &light, uint32_t layerId = 0) = 0;

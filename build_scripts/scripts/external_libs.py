@@ -30,7 +30,7 @@ get_gh_submodule("util_source2",            "Silverlan/util_source2",           
 get_gh_submodule("util_string",             "Silverlan/util_string",            "bd9d2f22e01ae68bef47d8efd8dc719a089f3a60")
 get_gh_submodule("util_source_script",      "Silverlan/util_source_script",     "82e7537a2b562d036492568bc61be3e93507c380")
 get_gh_submodule("util_timeline_scene",     "Silverlan/util_timeline_scene",    "6092f5ebeef6be95dc9553fe32dd424cc9af92b6")
-get_gh_submodule("util_udm",                "Silverlan/util_udm",               "5c891adf1620ad8b351fe242f95d9403a188fc4f")
+get_gh_submodule("util_udm",                "Silverlan/util_udm",               "c5c6ed3d258d074a076ae1e0d2cf97c6ead02929")
 get_gh_submodule("util_versioned_archive",  "Silverlan/util_versioned_archive", "0b0e419a112f654c2fdc27e0660309afc4c581b8")
 get_gh_submodule("util_vmf",                "Silverlan/util_vmf",               "346aaeb9446349371010423e9a39a31c7cd35afc")
 get_gh_submodule("util_zip",                "Silverlan/util_zip",               "a8b0b3e1e126849b929ea04f4fe9afeb2b40cdc7")

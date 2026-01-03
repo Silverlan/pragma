@@ -173,14 +173,24 @@ void pragma::gui::types::WIImageSlideShow::PreloadNextImage(Int32 img)
 
 	auto loadInfo = std::make_unique<material::TextureLoadInfo>();
 	loadInfo->flags |= util::AssetLoadFlags::AbsolutePath;
-	auto preloadResult = textureManager.PreloadAsset(f, std::move(loadInfo));
-	preloadResult.assetRequest->AddCallback([this, hSlideShow](util::Asset *asset, util::AssetLoadResult result) {
-		if(result != util::AssetLoadResult::Succeeded || !hSlideShow.IsValid())
+
+	auto hThis = GetHandle();
+	auto onLoaded = [this, hThis, hSlideShow](util::Asset *asset, util::AssetLoadResult result) {
+		if(result != util::AssetLoadResult::Succeeded || !hThis.IsValid() || !hSlideShow.IsValid())
 			return;
 		m_imgPreload.texture = material::TextureManager::GetAssetObject(*asset);
 		m_imgPreload.ready = true;
 		m_imgPreload.loading = false;
-	});
+	};
+
+	auto preloadResult = textureManager.PreloadAsset(f, std::move(loadInfo));
+	if(preloadResult.result == util::FileAssetManager::PreloadResult::Result::AlreadyLoaded) {
+		auto *asset = textureManager.FindCachedAsset(f);
+		if(asset)
+			onLoaded(asset, util::AssetLoadResult::Succeeded);
+	}
+	else if(preloadResult.assetRequest != nullptr)
+		preloadResult.assetRequest->AddCallback(onLoaded);
 }
 
 void pragma::gui::types::WIImageSlideShow::DisplayNextImage()

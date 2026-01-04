@@ -91,7 +91,7 @@ ComponentHandle<BaseEntityComponent> BaseEntityComponentSystem::AddComponent(Com
 	}
 	auto ptrComponent = m_componentManager->CreateComponent(componentId, *m_entity);
 	if(ptrComponent == nullptr) {
-		Con::CWAR << "Unable to create entity component of type " << componentId << "!" << this << Con::endl;
+		Con::CWAR << "Unable to create entity component of type " << componentId << " for system " << this << "!" << Con::endl;
 		return {};
 	}
 	if(m_components.size() == m_components.capacity())

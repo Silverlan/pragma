@@ -272,8 +272,6 @@ pr_install_create_directory(modules)
 pr_install_targets(
     luabind
     ogg
-    Detour
-    Recast
     vorbis
     vorbisfile
     VTFLib13

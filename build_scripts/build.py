@@ -254,7 +254,10 @@ if build_all == False:
             prebuilt_archive_name = "lib-linux_x64.tar.gz"
             prebuilt_archive_format = "tar.gz"
         else:
-            prebuilt_archive_name = "lib-windows_x64-clang.zip"
+			if toolset == "clang":
+            	prebuilt_archive_name = "lib-windows_x64-clang.zip"
+			else:
+            	prebuilt_archive_name = "lib-windows_x64.zip"
             prebuilt_archive_format = "zip"
 
         http_extract("https://github.com/Silverlan/pragma-deps-lib/releases/download/" +prebuilt_tag +"/" +prebuilt_archive_name,format=prebuilt_archive_format)

@@ -3,6 +3,7 @@ import pathlib
 import datetime
 import time
 import sys
+import json
 import subprocess
 import shutil
 import tarfile
@@ -223,41 +224,71 @@ class ZipFileWithPermissions(ZipFile):
 			os.chmod(targetpath, attr)
 		return targetpath
 
-def extract(zipName,removeZip=True,format="zip"):
-	print_msg("Extracting " +zipName +"...")
+def extract(zipName, removeZip=True, format="zip"):
+	print_msg("Extracting " + zipName + "...")
 	if format == "zip":
 		with ZipFileWithPermissions(zipName, 'r') as zip_ref:
+			names = zip_ref.namelist()
 			zip_ref.extractall(".")
 	elif format == "tar.bz2":
-		tar = tarfile.open(zipName, "r:bz2")  
+		import tarfile
+		tar = tarfile.open(zipName, "r:bz2")
+		names = tar.getnames()
 		tar.extractall()
 		tar.close()
 	elif format == "tar.gz":
-		tar = tarfile.open(zipName, "r:gz")  
+		import tarfile
+		tar = tarfile.open(zipName, "r:gz")
+		names = tar.getnames()
 		tar.extractall()
 		tar.close()
 	elif format == "tar.xz":
+		import tarfile
 		tar = tarfile.open(zipName, "r:xz")
+		names = tar.getnames()
 		tar.extractall()
 		tar.close()
+
+	from pathlib import Path
+	tops = {n.lstrip("./").split("/", 1)[0] for n in names if n.lstrip("./")}
+	dirs = [t for t in tops if Path(t).is_dir()]
+
 	if removeZip:
 		os.remove(zipName)
+
+	return dirs
 
 def http_extract(url,removeZip=True,format="zip"):
 	from scripts.shared import print_msg
 	print_msg("Downloading " +url +"...")
 	fileName = http_download(url)
-	extract(fileName,removeZip,format)
+	return extract(fileName,removeZip,format)
 
-def install_prebuilt_binaries(baseUrl, fileName = None):
+def install_prebuilt_binaries(baseUrl, fileName = None, version = None, cacheDir = None, filepaths = None):
+	cacheFileName = "prebuilt_binary_version.json"
+	if version is not None:
+		curDir = os.getcwd()
+		if cacheDir is None:
+			cacheDir = curDir
+			os.chdir(Path(cacheDir).parent)
+		if not check_content_version(cacheDir, version, cacheFileName):
+			update_content_version(cacheDir, version, cacheFileName)
+			os.chdir(curDir)
+		else:
+			os.chdir(curDir)
+			return
 	if platform == "linux":
 		if not fileName:
 			fileName = "binaries_linux64.tar.gz"
-		http_extract(baseUrl +fileName,format="tar.gz")
+		extractedDirs = http_extract(baseUrl +fileName,format="tar.gz")
+		if version is not None:
+			add_filepaths_to_content_version(cacheDir, cacheFileName, extractedDirs)
 	else:
 		if not fileName:
 			fileName = "binaries_windows64.zip"
-		http_extract(baseUrl +fileName)
+		extractedDirs = http_extract(baseUrl +fileName)
+		if version is not None:
+			add_filepaths_to_content_version(cacheDir, cacheFileName, extractedDirs)
 
 
 def cp(src,dst):
@@ -727,7 +758,16 @@ def check_content_version(base_path: str, contents: str, filename: str) -> bool:
 	if not target_file.exists():
 		return False
 	try:
-		return target_file.read_text(encoding="utf-8").strip() == contents
+		with target_file.open("r", encoding="utf-8") as f:
+			data = json.load(f)
+			if data.get("version") != contents:
+				filepaths: List[str] = data.get("filepaths", [])
+				for p in filepaths:
+					print(f"Removing directory '{p}'...")
+					shutil.rmtree(p)
+				return False
+			return True
+		return False
 	except Exception:
 		return False
 
@@ -742,7 +782,30 @@ def update_content_version(base_path: str, commit_id: str, filename: str) -> Non
 
 	target_file = base / filename
 	print(f"Writing content version to '{target_file}'...")
-	target_file.write_text(commit_id, encoding="utf-8")
+
+	payload = {"version": commit_id}
+	json_text = json.dumps(payload, ensure_ascii=False, indent=2)
+	target_file.write_text(json_text, encoding="utf-8")
+
+def add_filepaths_to_content_version(base_path: str, filename: str, filepaths) -> None:
+	target_file = Path(base_path) / filename
+	if not target_file.exists():
+		raise FileNotFoundError(f"File not found: {target_file}")
+
+	with target_file.open("r", encoding="utf-8") as f:
+		data = json.load(f)
+
+	if not isinstance(data, dict):
+		raise ValueError("JSON root must be an object")
+
+	existing = data.get("filepaths") or []
+	if not isinstance(existing, list):
+		raise ValueError("Existing 'filepaths' must be a list")
+
+	existing.extend(str(p) for p in filepaths)
+	data["filepaths"] = existing
+
+	target_file.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 def prefer_pacman():
     return shutil.which("pacman") is not None

@@ -237,15 +237,15 @@ mkpath(tools)
 
 # Use prebuilt binaries if --build-all is not set
 if build_all == False:
-    def is_commit_current(base_path: str, commit_id: str, filename: str = "commit_id.txt") -> bool:
+    def is_commit_current(base_path: str, commit_id: str, filename: str = "commit_id.json") -> bool:
         return check_content_version(base_path, commit_id, filename)
 
-    def update_commit_directory(base_path: str, commit_id: str, filename: str = "commit_id.txt") -> None:
+    def update_commit_directory(base_path: str, commit_id: str, filename: str = "commit_id.json") -> None:
         update_content_version(base_path, commit_id, filename)
 
     base_path = get_staging_dir()
-    if not is_commit_current(base_path, prebuilt_tag, "tag_id.txt"):
-        update_commit_directory(base_path, prebuilt_tag, "tag_id.txt")
+    if not is_commit_current(base_path, prebuilt_tag, "tag_id.json"):
+        update_commit_directory(base_path, prebuilt_tag, "tag_id.json")
         os.chdir(base_path)
 
         print_msg("Downloading prebuilt third-party binaries...")

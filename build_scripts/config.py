@@ -10,7 +10,8 @@ deps_staging_dir = "staging"
 prebuilt_bin_dir = str(Path(deps_dir) / deps_staging_dir)
 prefer_git_https = True
 if platform == "win32":
-	default_generator = "Visual Studio 17 2022"
+	generator_msvc = "Visual Studio 17 2022"
+	default_generator = generator_msvc
 else:
 	default_generator = "Ninja Multi-Config"
 	no_sudo = False

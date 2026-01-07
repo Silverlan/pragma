@@ -750,18 +750,18 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_dmx",
-			commitSha="6c55102a658dd941abc484606fbd92e247ae1174",
+			commitSha="d4ae5defaf03cf3d1b8337818be1ccedbdbaebcd",
 			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
 		)
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="5efbb2ae19c8005b45f6a8d062cd7a2f845a3592",
+			commitSha="6321e623f025a33648eb27cd5c53f82b54b64836",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="9520a7aa5c9517e629373ac96a993b1dd46fbd11",
+			commitSha="a9f5de71ab98edd4166eeebe2914c9071b9ab947",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -797,7 +797,7 @@ if with_vr:
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="b4232e3f84e8fd3f3b3a12b874bd794f5b06db69",
+		commitSha="39a1be41903b131696dcc6f4a1aa6b7db9a1678a",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)

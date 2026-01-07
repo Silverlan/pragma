@@ -94,6 +94,15 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 		pragma::console::register_shared_convars(*console::server::get_convar_map());
 		register_launch_parameters(*GetLaunchParaMap());
 		networking::register_net_messages();
+
+		// Note: This is a temporary workaround and should be undone
+		// once this clang compiler issue has been fixed:
+		// https://github.com/llvm/llvm-project/issues/173997
+		luabind::detail::set_property_tag(+[](lua::State *L) -> int {
+			lua::push_string(L, "luabind: property_tag function can't be called");
+			lua::error(L);
+			return 0;
+		});
 	}
 
 #ifdef __linux__

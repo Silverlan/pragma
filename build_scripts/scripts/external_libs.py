@@ -18,7 +18,7 @@ get_gh_submodule("networkmanager",          "Silverlan/networkmanager",         
 get_gh_submodule("oskit",                   "Silverlan/oskit",                  "2c13e0963ef719d8c3a806f5c4ea0e151db58367")
 get_gh_submodule("panima",                  "Silverlan/panima",                 "8faebe12b47542657adaec8afc95baff327f452f")
 get_gh_submodule("prosper",                 "Silverlan/prosper",                "d9e4fe85af77ef9967540e44d9ba6fa540bb6cf2")
-get_gh_submodule("sharedutils",             "Silverlan/sharedutils",            "65bea73b117eeefecd461b2190fb80b8f98a9cda")
+get_gh_submodule("sharedutils",             "Silverlan/sharedutils",            "598fbf3bf920685c3e605092454525b336247d68")
 get_gh_submodule("util_bsp",                "Silverlan/util_bsp",               "d808b8ec3a9cf57c9b63a800d38304d4286925b8")
 get_gh_submodule("util_formatted_text",     "Silverlan/util_formatted_text",    "50bd69695d55a61d9ecab8c3453a88fd8bc17a99")
 get_gh_submodule("util_image",              "Silverlan/util_image",             "2d556b6391979e6774409a0488415312c612f745")

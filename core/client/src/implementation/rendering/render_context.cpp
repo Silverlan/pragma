@@ -118,17 +118,23 @@ void rendering::RenderContext::InitializeRenderAPI()
 	GetRenderContext().GetInitialWindowSettings().resizable = false;
 	prosper::Shader::SetLogCallback([](prosper::Shader &shader, prosper::ShaderStage stage, const std::string &infoLog, const std::string &debugInfoLog) {
 		std::stringstream msg;
-		msg << "Unable to load shader '" << shader.GetIdentifier() << "':" << spdlog::details::default_eol;
-		msg << "Shader Stage: " << prosper::util::to_string(stage) << spdlog::details::default_eol;
+		std::string eol;
+#ifdef MSVC_COMPILER_FIX
+		eol = "\r\n";
+#else
+		eol = spdlog::details::default_eol;
+#endif
+		msg << "Unable to load shader '" << shader.GetIdentifier() << "':" << eol;
+		msg << "Shader Stage: " << prosper::util::to_string(stage) << eol;
 		auto filePath = (stage != prosper::ShaderStage::Unknown) ? shader.GetStageSourceFilePath(stage) : std::optional<std::string> {};
 		if(filePath.has_value())
-			msg << "Shader Stage Filename: " << *filePath << spdlog::details::default_eol;
+			msg << "Shader Stage Filename: " << *filePath << eol;
 		auto infoLogConv = infoLog;
-		string::replace(infoLogConv, "\n", spdlog::details::default_eol);
-		msg << infoLogConv << spdlog::details::default_eol;
-		msg << spdlog::details::default_eol;
+		string::replace(infoLogConv, "\n", eol);
+		msg << infoLogConv << eol;
+		msg << eol;
 		auto debugInfoLogConv = debugInfoLog;
-		string::replace(debugInfoLogConv, "\n", spdlog::details::default_eol);
+		string::replace(debugInfoLogConv, "\n", eol);
 		msg << debugInfoLogConv;
 		LOGGER.warn(msg.str());
 	});

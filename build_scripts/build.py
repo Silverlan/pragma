@@ -194,6 +194,7 @@ config.build_swiftshader = build_swiftshader
 config.clean_deps_build_files = clean_deps_build_files
 config.deps_dir = deps_dir
 config.prefer_git_https = prefer_git_https
+config.toolset = toolset
 config.with_lua_debugger = with_lua_debugger
 config.with_swiftshader = with_swiftshader
 if platform == "linux":
@@ -759,7 +760,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="7f0addf2c7bed46ea12b084399f94b37dfa12b40",
+			commitSha="60d97df3bed19ae00f471fa6630c97b530b71fb3",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(

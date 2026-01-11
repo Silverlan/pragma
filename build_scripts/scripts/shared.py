@@ -265,6 +265,7 @@ def http_extract(url,removeZip=True,format="zip"):
 	return extract(fileName,removeZip,format)
 
 def install_prebuilt_binaries(baseUrl, fileName = None, version = None, cacheDir = None, filepaths = None):
+	global config
 	cacheFileName = "prebuilt_binary_version.json"
 	if version is not None:
 		curDir = os.getcwd()
@@ -277,15 +278,16 @@ def install_prebuilt_binaries(baseUrl, fileName = None, version = None, cacheDir
 		else:
 			os.chdir(curDir)
 			return
+	toolset = config.toolset
 	if platform == "linux":
 		if not fileName:
-			fileName = "binaries_linux64.tar.gz"
+			fileName = "binaries-linux-x64-" +toolset +".tar.gz"
 		extractedDirs = http_extract(baseUrl +fileName,format="tar.gz")
 		if version is not None:
 			add_filepaths_to_content_version(cacheDir, cacheFileName, extractedDirs)
 	else:
 		if not fileName:
-			fileName = "binaries_windows64.zip"
+			fileName = "binaries-windows-x64-" +toolset +".zip"
 		extractedDirs = http_extract(baseUrl +fileName)
 		if version is not None:
 			add_filepaths_to_content_version(cacheDir, cacheFileName, extractedDirs)

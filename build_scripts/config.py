@@ -19,6 +19,7 @@ else:
 
 pragma_root = str(Path(__file__).parent.parent)
 
+toolset = None
 toolsetArgs = None
 toolsetCFlags = None
 

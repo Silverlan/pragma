@@ -28,10 +28,22 @@ endfunction()
 
 function(pr_install_git_release IDENTIFIER BASE_URL BASE_DIR TAG_NAME)
     if(UNIX)
-        set(ARCH_FILE_NAME "binaries_linux64.tar.gz")
+        set(ARCH_OS "linux")
+        set(ARCH_EXT "tar.gz")
     else()
-        set(ARCH_FILE_NAME "binaries_windows64.zip")
+        set(ARCH_OS "windows")
+        set(ARCH_EXT "zip")
     endif()
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set(COMPILER_NAME "clang")
+    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(COMPILER_NAME "gcc")
+    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        set(COMPILER_NAME "msvc")
+    endif()
+
+    set(ARCH_FILE_NAME "binaries-linux-x64-${COMPILER_NAME}.${ARCH_EXT}")
 
     set(ARCHIVE_URL "https://github.com/${BASE_URL}/releases/download/${TAG_NAME}/${ARCH_FILE_NAME}")
 

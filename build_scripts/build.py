@@ -21,8 +21,7 @@ prebuilt_tag = "2026-01-10"
 if platform == "linux":
 	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-22')
 	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-22')
-else:
-	defaultToolset = "clang"
+defaultToolset = "clang"
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
 parser.add_argument('--generator', help='The generator to use.', default="Default")
@@ -60,6 +59,7 @@ if platform == "linux":
 	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
 	parser.add_argument("--debug", type=str2bool, nargs='?', const=True, default=False, help="Enable debug assertions and disable code optimizations.")
+	parser.add_argument('--toolset', help='The toolset to use. Supported toolsets: clang', default=defaultToolset) # gcc currently not supported
 else:
 	parser.add_argument('--toolset', help='The toolset to use. Supported toolsets: msvc, clang', default=defaultToolset) # clang-cl currently not supported
 args,unknown = parser.parse_known_args()
@@ -117,8 +117,7 @@ if platform == "linux":
 	no_sudo = args["no_sudo"]
 	no_confirm = args["no_confirm"]
 	with_debug = args["debug"]
-else:
-	toolset = args["toolset"]
+toolset = args["toolset"]
 generator = args["generator"]
 with_essential_client_modules = args["with_essential_client_modules"]
 with_common_modules = args["with_common_modules"]
@@ -187,9 +186,9 @@ if platform == "linux":
 	print("cxx_compiler: " +cxx_compiler)
 	print("c_compiler: " +c_compiler)
 else:
-	print("toolset: " +toolset)
 	if toolset == "clang":
 		generator = "Ninja Multi-Config"
+print("toolset: " +toolset)
 
 config.build_swiftshader = build_swiftshader
 config.clean_deps_build_files = clean_deps_build_files
@@ -250,15 +249,12 @@ if build_all == False:
 
         print_msg("Downloading prebuilt third-party binaries...")
 
+        prebuilt_archive_name = "lib-" +platform +"-x64-" +toolset
         if platform == "linux":
-            prebuilt_archive_name = "lib-linux_x64.tar.gz"
             prebuilt_archive_format = "tar.gz"
         else:
-            if toolset == "clang":
-                prebuilt_archive_name = "lib-windows_x64-clang.zip"
-            else:
-                prebuilt_archive_name = "lib-windows_x64.zip"
             prebuilt_archive_format = "zip"
+		prebuilt_archive_name += "." +prebuilt_archive_format
 
         http_extract("https://github.com/Silverlan/pragma-deps-lib/releases/download/" +prebuilt_tag +"/" +prebuilt_archive_name,format=prebuilt_archive_format)
     else:
@@ -267,7 +263,7 @@ if build_all == False:
 if platform == "win32":
 	if toolset == "msvc":
 		toolset = None # Let the compiler use the default toolset
-		print_warning(f"Visual Studio is not recommended and may not work. If you run into issues, try using the clang toolset instead.")
+		print_warning(f"Visual Studio toolset is currently not recommended and may not work. If you run into issues, try using the clang toolset instead.")
 	elif toolset == "clang":
 		# We need an up-to-date version of clang, so we'll use our shipped version for now.
 		from third_party import clang

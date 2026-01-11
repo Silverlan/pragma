@@ -249,11 +249,13 @@ if build_all == False:
 
 		print_msg("Downloading prebuilt third-party binaries...")
 
-		prebuilt_archive_name = "lib-" +platform +"-x64-" +toolset
 		if platform == "linux":
+			platform_name = platform
 			prebuilt_archive_format = "tar.gz"
 		else:
+			platform_name = "windows"
 			prebuilt_archive_format = "zip"
+		prebuilt_archive_name = "lib-" +platform_name +"-x64-" +toolset
 		prebuilt_archive_name += "." +prebuilt_archive_format
 
 		http_extract("https://github.com/Silverlan/pragma-deps-lib/releases/download/" +prebuilt_tag +"/" +prebuilt_archive_name,format=prebuilt_archive_format)

@@ -26,7 +26,7 @@ get_gh_submodule("luabind",             "Silverlan/luabind-deboostified",   "38b
 get_gh_submodule("luajit",              "Silverlan/LuaJIT",                 "cb42653","v2.1")
 get_gh_submodule("lunasvg",             "sammycage/lunasvg",                "7b6970f") # v3.4.0
 get_gh_submodule("miniball",            "Silverlan/miniball",               "609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")
-get_gh_submodule("mpaheader",           "Silverlan/mpaheader",              "fab7aeeeae4034e42fdb975b580d014514f460d5")
+get_gh_submodule("mpaheader",           "Silverlan/mpaheader",              "ebb53b9ae31c99dad8da2ce9024c37d4c26ce685")
 get_gh_submodule("muparserx",           "Silverlan/muparserx",              "910f6128494e174c3de81bd34c3d938b47873c08")
 if platform == "win32":
     get_gh_submodule("nvtt",            "castano/nvidia-texture-tools",     "aeddd65f81d36d8cb7b169b469ef25156666077e")

@@ -34,21 +34,20 @@ permissions:
   contents: write
 
 concurrency:
-  group: environment-${{ inputs.os }}-${{ matrix.toolset }}-${{ github.ref }}
+  group: environment-${{ inputs.os }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    name: Build - ${{ matrix.config.os }} (${{ matrix.toolset }})
+    name: Build - ${{ matrix.config.os }}
     if: github.repository != 'Silverlan/pr_module_template'
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(
-        inputs.os == 'windows'
-          ? '[{"os":"windows-latest","toolset":"clang"},{"os":"windows-latest","toolset":"msvc"}]'
-          : '[{"os":"ubuntu-latest","toolset":"clang"}]'
-      ) }}
+      matrix:
+        config:
+          - os: ${{ inputs.os == 'windows' && 'windows-latest' || 'ubuntu-24.04' }}
+            toolset: "clang"
     steps:
       - name: Build Tag Name
         id: build_tag_name

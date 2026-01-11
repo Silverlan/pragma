@@ -88,7 +88,7 @@ jobs:
           branch: '${{ inputs.pragma-branch }}'
           debug-artifact-token: '${{ secrets.GITHUB_TOKEN }}'
           build-args: '${{ steps.parse-args.outputs.build-args }}'
-          toolset: '${{ matrix.toolset }}'
+          toolset: '${{ matrix.config.toolset }}'
 
       - name: Create Release Files
         shell: bash
@@ -112,7 +112,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit: ${{ github.ref_name }}
           tag: '${{ steps.build_tag_name.outputs.tag_name }}'
-          release_suffix: '-${{ matrix.toolset }}'
+          release_suffix: '-${{ matrix.config.toolset }}'
 
       - name: Check for PDB File
         id: check-pdb
@@ -136,7 +136,7 @@ jobs:
         run: |
           moduleName="${{ steps.module-info.outputs.module_name }}"
           pdbFilePath="${{ steps.build-module.outputs.build-dir }}/modules/$moduleName/RelWithDebInfo/$moduleName.pdb"
-          7z a debug-pdb-windows-x64-${{ matrix.toolset }}.zip "$pdbFilePath"
+          7z a debug-pdb-windows-x64-${{ matrix.config.toolset }}.zip "$pdbFilePath"
 
       - name: Update PDB release
         if: runner.os == 'Windows' && steps.check-pdb.outputs.exists == 'true'
@@ -144,5 +144,5 @@ jobs:
         with:
           tag: '${{ steps.build_tag_name.outputs.tag_name }}'
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: "debug-pdb-windows-x64-${{ matrix.toolset }}.zip"
+          files: "debug-pdb-windows-x64-${{ matrix.config.toolset }}.zip"
 

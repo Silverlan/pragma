@@ -755,7 +755,7 @@ if with_pfm:
 	if with_all_pfm_modules:
 		add_pragma_module(
 			name="pr_chromium",
-			commitSha="365198811bcb356f2399e6215dc312f31d41cf01",
+			commitSha="1477b93859c9ae5058c66a6b436ac24dd03ebff7",
 			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
 		)
 		add_pragma_module(
@@ -796,7 +796,7 @@ if with_vr:
 if with_networking:
 	add_pragma_module(
 		name="pr_steam_networking_sockets",
-		commitSha="39a1be41903b131696dcc6f4a1aa6b7db9a1678a",
+		commitSha="a1a3fda9bbe6987aba23559f8bc58301c17b7a15",
 		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
 	)

@@ -264,7 +264,7 @@ def http_extract(url,removeZip=True,format="zip"):
 	fileName = http_download(url)
 	return extract(fileName,removeZip,format)
 
-def install_prebuilt_binaries(baseUrl, fileName = None, version = None, cacheDir = None, filepaths = None):
+def install_prebuilt_binaries(baseUrl, fileName = None, version = None, cacheDir = None, filepaths = None, toolset = None):
 	global config
 	cacheFileName = "prebuilt_binary_version.json"
 	if version is not None:
@@ -278,7 +278,8 @@ def install_prebuilt_binaries(baseUrl, fileName = None, version = None, cacheDir
 		else:
 			os.chdir(curDir)
 			return
-	toolset = config.toolset
+	if toolset is None:
+		toolset = config.toolset
 	if platform == "linux":
 		if not fileName:
 			fileName = "binaries-linux-x64-" +toolset +".tar.gz"

@@ -35,7 +35,7 @@ jobs:
             name: "Linux (Clang)"
     steps:
       - name: Setup Pragma
-        uses: Silverlan/pragma/github_actions/setup@main
+        uses: Silverlan/pragma/github_actions/setup@develop
         with:
           clone_url: "https://github.com/${{ github.repository }}.git"
 

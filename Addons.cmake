@@ -43,7 +43,7 @@ function(pr_install_git_release IDENTIFIER BASE_URL BASE_DIR TAG_NAME)
         set(COMPILER_NAME "msvc")
     endif()
 
-    set(ARCH_FILE_NAME "binaries-linux-x64-${COMPILER_NAME}.${ARCH_EXT}")
+    set(ARCH_FILE_NAME "binaries-${ARCH_OS}-x64-${COMPILER_NAME}.${ARCH_EXT}")
 
     set(ARCHIVE_URL "https://github.com/${BASE_URL}/releases/download/${TAG_NAME}/${ARCH_FILE_NAME}")
 

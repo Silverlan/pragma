@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build and Release Windows (Clang)
 on:
   push:
     branches: [ main ]
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: environment-win-${{ github.ref }}
+  group: build-and-release-win-clang-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -25,14 +25,14 @@ jobs:
       issues: read
       pull-requests: read
 
-    name: Build - ${{ matrix.config.os }}
+    name: Build and Release - ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
         config:
           - os: windows-latest
-            name: "Windows x64 MSVC"
+            name: "Windows (Clang)"
     steps:
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@main
@@ -48,7 +48,7 @@ jobs:
         uses: ./pragma/github_actions/build
         id: build-pragma
         with:
-          build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0 --with-swiftshader"
+          build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0 --with-swiftshader --toolset=clang"
 
       - name: Create Release Archive
         shell: bash
@@ -68,13 +68,13 @@ jobs:
 
           cd "$curDir"
 
-          7z a pragma-win64.zip "${{ steps.build-pragma.outputs.install-dir }}/**"
+          7z a pragma-windows-x64-clang.zip "${{ steps.build-pragma.outputs.install-dir }}/**"
           
       - name: Generate nightly tag description
         shell: bash
         run:   |
           curDate=$(date -u '+%Y-%m-%d %H:%M:%S %Z')
-          printf "This is an auto-generated pre-release, built from the latest version of the source code.\nIt includes all files necessary to run Pragma, as well as the latest version of the Pragma Filmmaker, however functionality and stability are **not** guaranteed.\n\nFor Windows, you can either download `pragma_setup.exe` to install Pragma on your system, or `pragma-win64.zip` if you prefer a portable version.\n\nLatest release date: $curDate" > tag_text.txt
+          printf "This is an auto-generated pre-release, built from the latest version of the source code.\nIt includes all files necessary to run Pragma, as well as the latest version of the Pragma Filmmaker, however functionality and stability are **not** guaranteed.\n\nFor Windows, you can either download `pragma_setup.exe` to install Pragma on your system, or `pragma-windows-x64-clang.zip` if you prefer a portable version.\n\nLatest release date: $curDate" > tag_text.txt
 
       - name: Update nightly tag description
         uses: softprops/action-gh-release@v0.1.15
@@ -88,7 +88,7 @@ jobs:
         with:
           tag: nightly
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: "pragma-win64.zip"
+          files: "pragma-windows-x64-clang.zip"
           
       - name: Collect PDB files
         uses: ./pragma/github_actions/collect_pdb_files
@@ -102,14 +102,14 @@ jobs:
           curDir="$PWD"
           # 7z expects a standard windows path
           winPath=$(echo "$curDir" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
-          7z a debug_pdb.zip "$winPath/pdb/**"
+          7z a debug-pdb-windows-x64-clang.zip "$winPath/pdb/**"
 
       - name: Update PDB release
         uses: pyTooling/Actions/releaser/composite@v4.2.2
         with:
           tag: nightly
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: "debug_pdb.zip"
+          files: "debug-pdb-windows-x64-clang.zip"
 
       - name: Generate Installer
         uses: ./pragma/github_actions/generate_installer
@@ -128,7 +128,7 @@ jobs:
       - name: Run Tests
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: pragma-tests-ci.yml
+          workflow: run-tests.yml
           inputs: '{ "os": "windows" }'
 
       - name: Generate File Lists

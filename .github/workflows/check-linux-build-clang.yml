@@ -5,7 +5,7 @@ on:
       - main
 
 concurrency:
-  group: check-build-lin-${{ github.ref }}
+  group: check-build-lin-clang-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -14,14 +14,14 @@ env:
 
 jobs:
   build:
-    name: Build - ${{ matrix.config.os }}
+    name: Build - ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
         config:
           - os: ubuntu-latest
-            name: "Ubuntu Latest"
+            name: "Linux (Clang)"
     steps:
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@develop

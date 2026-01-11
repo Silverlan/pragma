@@ -1,4 +1,5 @@
 name: Check Linux Build (GCC)
+# Note: Due to ongoing GCC compiler errors with C++20 modules, this workflow will likely fail. Once the compiler errors have been resolved, this should be changed to on: push.
 on:
   workflow_dispatch:
 
@@ -12,14 +13,14 @@ env:
 
 jobs:
   build:
-    name: Build - ${{ matrix.config.os }}
+    name: Build - ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
         config:
           - os: ubuntu-latest
-            name: "Ubuntu Latest"
+            name: "Linux (GCC)"
     steps:
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@develop

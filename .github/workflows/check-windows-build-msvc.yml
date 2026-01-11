@@ -1,11 +1,11 @@
-name: Check Windows Build
+name: Check Windows Build (MSVC)
+# Note: Building with MSVC will hit the GitHub runner time limit for workflow jobs, due to long build times. This is likely due to MSVC compiler bugs with C++20 modules.
+# Once these issues have been resolved, this should be changed to on: push.
 on:
-  push:
-    branches-ignore:
-      - main
+  workflow_dispatch:
 
 concurrency:
-  group: check-build-win-${{ github.ref }}
+  group: check-build-win-msvc-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -14,22 +14,14 @@ env:
 
 jobs:
   build:
-    name: Build - ${{ matrix.config.os }}
+    name: Build - ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
         config:
           - os: windows-latest
-            name: "Windows x64 MSVC"
-            artifact: "Windows-MSVC.tar.xz"
-            build_type: "RelWithDebInfo"
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-            cc: "cl"
-            cxx: "cl"
-            archiver: "7z a"
-            generators: "Visual Studio 17 2022"
-            build_dir: 'build'
+            name: "Windows (MSVC)"
     steps:
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@develop

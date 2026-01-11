@@ -24,7 +24,7 @@ jobs:
             name: "Windows (Clang)"
     steps:
       - name: Setup Pragma
-        uses: Silverlan/pragma/github_actions/setup@main
+        uses: Silverlan/pragma/github_actions/setup@develop
         with:
           branch: ${{ github.ref_name }}
           clone_url: "https://github.com/${{ github.repository }}.git"
